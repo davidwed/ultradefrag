@@ -1,0 +1,31 @@
+HISTORY
+
+[version number (x86 driver size in Kbytes) - changes description]
+
+1.0.5 (21.0) - 120 DPI bug fixed; small console bug fixed;
+               drive letters assigned by subst command excluded;
+               this is most stable 1.0.x release
+1.0.4 (21.0) - fatal buffer overflow bug fixed; small gui bug fixed
+1.0.3 (21.5) - progress bar in gui; more settings; small bug fixes
+1.0.2 (20.5) - FULL x64 SUPPORT; significant bug fixes; Windows DDK support
+1.0.1 (22.8) - fix 'stop' function and some other significant bugs
+1.0.0 (22.7) - initial public release; add full docs; clear source code;
+               create build.cmd tool and makefiles
+
+0.6.0 (21.1) - add include & exclude filters; UTF-16/ASCII report format option
+0.5.0 (19.0) - add fragmented files list generation (HTML);
+               display cluster map in progress; significant bug fixes
+0.4.3 (16.3) - optimization and bug fixes
+0.4.2 (16.5) - very significant optimization; clear source code
+0.4.1 (17.9) - some optimization and small bug fixes
+0.4.0 (17.9) - add free space optimization command for NTFS-volumes;
+               some fatal bug fixes
+0.3.0 (17.0) - add NT 4.x [in theory] & 5.0 [practically] support; 
+               processing for compressed files;
+               new gui design - better results display; add accelerators;
+               some bug fixes
+0.2.0 (12.6) - exclude defragmentation of fat directories (because not possible);
+               new design of gui interface - better cluster map visualization
+0.1.0 (12.6) - add defragmentation of ntfs directories; some bug fixes;
+               add displaying of mft and directories in cluster map
+0.0.1 (11.3) - first stable release for NT 5.1 & 5.2

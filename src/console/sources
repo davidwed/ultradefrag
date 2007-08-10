@@ -1,0 +1,14 @@
+TARGETNAME=defrag
+TARGETPATH=obj
+TARGETTYPE=PROGRAM
+
+CFLAGS=$(CFLAGS) /MT
+
+SOURCES=defrag.c misc.c defrag.rc
+USE_MSVCRT=1
+
+LINKLIBS=$(DDK_LIB_PATH)\ntdll.lib
+
+UMTYPE=console
+UMENTRY=wmain
+UMBASE=0x0400000

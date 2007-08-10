@@ -1,0 +1,13 @@
+TARGETNAME=defrag_native
+TARGETPATH=obj
+TARGETTYPE=PROGRAM
+
+USER_C_FLAGS=/DUSE_WINDDK
+
+SOURCES=defrag_native.c misc.c keytrans.c defrag_native.rc
+
+USE_NTDLL=1
+
+UMTYPE=nt
+UMBASE=0x0400000
+UMENTRYABS=NtProcessStartup

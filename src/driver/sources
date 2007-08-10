@@ -1,0 +1,8 @@
+TARGETNAME=ultradfg
+TARGETPATH=obj
+TARGETTYPE=DRIVER
+
+USER_C_FLAGS=/DUSE_WINDDK
+
+SOURCES=analyse.c defrag.c int64.c io.c list.c log.c \
+	globals.c ultradfg.c ultradfg.rc

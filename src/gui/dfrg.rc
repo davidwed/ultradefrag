@@ -1,0 +1,208 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/*
+ *  Graphical interface resources description.
+ */
+
+#include "../include/version.h"
+#include "resource.h"
+
+IDI_ICON1               ICON    DISCARDABLE     "res/ICON1.ICO"
+IDI_ICON2               ICON    DISCARDABLE     "res/icon2.ico"
+IDI_ICON3               ICON    DISCARDABLE     "res/icon3.ico"
+IDI_ICON4               ICON    DISCARDABLE     "res/icon4.ico"
+IDI_ICON5               ICON    DISCARDABLE     "res/icon5.ico"
+IDI_ICON6               ICON    DISCARDABLE     "res/icon6.ico"
+
+IDB_BITMAP1             BITMAP  DISCARDABLE     "res/bitmap1.bmp"
+IDB_BITMAP2             BITMAP  DISCARDABLE     "res/bitmap2.bmp"
+IDB_BITMAP3             BITMAP  DISCARDABLE     "res/bitmap3.bmp"
+IDB_BITMAP4             BITMAP  DISCARDABLE     "res/bitmap4.bmp"
+IDB_BITMAP5             BITMAP  DISCARDABLE     "res/bitmap5.bmp"
+IDB_BITMAP6             BITMAP  DISCARDABLE     "res/bitmap6.bmp"
+IDB_BITMAP7             BITMAP  DISCARDABLE     "res/bitmap7.bmp"
+
+IDD_DIALOG1 DIALOGEX 0, 0, 315, 218
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION VERSIONINTITLE
+FONT 9, "Courier New", 0, 0, 0x1
+BEGIN
+    LISTBOX         IDC_LIST1,7,7,300,66,NOT LBS_NOTIFY | LBS_USETABSTOPS | 
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | 
+                    WS_GROUP | WS_TABSTOP
+    PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,76,61,10,WS_GROUP
+    CONTROL         "Skip removable media",IDC_SKIPREMOVABLE,"Button",
+                    BS_AUTOCHECKBOX,123,76,98,10
+    LTEXT           "Cluster map:",IDC_STATIC,7,78,67,9
+    CONTROL         "",IDC_MAP,"Static",SS_GRAYRECT,7,89,300,77,
+                    WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Analyse",IDC_ANALYSE,7,174,59,11,WS_GROUP
+    PUSHBUTTON      "Defragment",IDC_DEFRAGM,71,174,58,11,NOT WS_TABSTOP
+    PUSHBUTTON      "Compact",IDC_COMPACT,133,174,57,11,NOT WS_TABSTOP
+    PUSHBUTTON      "Pause",IDC_PAUSE,194,174,54,11,WS_DISABLED | NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Stop",IDC_STOP,253,174,54,11,WS_DISABLED | NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Fragmented",IDC_SHOWFRAGMENTED,133,189,57,10,NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Settings",IDC_SETTINGS,194,189,54,10,NOT WS_TABSTOP
+    PUSHBUTTON      "About",IDC_ABOUT,253,189,54,10,NOT WS_TABSTOP
+    CTEXT           "0 %",IDC_PROGRESSMSG,0,200,29,8
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
+                    WS_BORDER,30,202,277,5
+END
+
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 193, 139
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About UltraDefrag"
+FONT 9, "Courier New"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,158,121,29,12
+    CONTROL         103,IDC_STATIC,"Static",SS_BITMAP,12,15,7,6
+    CONTROL         104,IDC_STATIC,"Static",SS_BITMAP,74,15,7,6
+    CONTROL         105,IDC_STATIC,"Static",SS_BITMAP,74,25,7,6
+    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP,144,15,7,6
+    CONTROL         108,IDC_STATIC,"Static",SS_BITMAP,144,25,7,6
+    CONTROL         109,IDC_STATIC,"Static",SS_BITMAP,12,25,7,6
+    LTEXT           "Fragmented",IDC_STATIC,23,12,48,12,SS_CENTERIMAGE
+    LTEXT           "Unfragmented",IDC_STATIC,86,12,55,12,SS_CENTERIMAGE
+    LTEXT           "System",IDC_STATIC,86,22,38,12,SS_CENTERIMAGE
+    LTEXT           "Free",IDC_STATIC,156,12,24,12,SS_CENTERIMAGE
+    LTEXT           "MFT",IDC_STATIC,156,22,28,12,SS_CENTERIMAGE
+    LTEXT           "Directory",IDC_STATIC,24,22,48,12,SS_CENTERIMAGE
+    GROUPBOX        "Legend",IDC_STATIC,7,3,180,44
+    CTEXT           "http://ultradefrag.sourceforge.net",IDC_STATIC,7,121,
+                    147,12,SS_CENTERIMAGE | WS_BORDER
+    LTEXT           "1. Deactivate your virus scanner\n   to increase productivity.\n2. Directories on FAT && system files\n   will not be moved!",
+                    IDC_STATIC,20,62,156,37
+    CONTROL         116,IDC_STATIC,"Static",SS_BITMAP,12,36,7,6
+    LTEXT           "Compressed",IDC_STATIC,22,35,47,8
+    PUSHBUTTON      "Credits",IDC_CREDITS,7,106,87,10
+    PUSHBUTTON      "License",IDC_LICENSE,101,106,86,10
+    GROUPBOX        "Notes",IDC_STATIC,7,50,180,51
+END
+
+IDD_SETTINGS DIALOG DISCARDABLE  0, 0, 182, 148
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,29,132,55,12,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,98,132,55,12,NOT WS_TABSTOP
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32", 
+                    WS_GROUP | WS_TABSTOP,5,4,172,123
+END
+
+IDD_FILTER DIALOG DISCARDABLE  2, 15, 165, 105
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT           "Enter multiple filter match strings separated by the ';' character.",
+                    IDC_STATIC,7,5,137,20
+    LTEXT           "Include:",IDC_STATIC,8,28,32,10
+    LTEXT           "Exclude:",IDC_STATIC,7,45,32,10
+    EDITTEXT        IDC_INCLUDE,41,27,119,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EXCLUDE,41,43,119,12,ES_AUTOHSCROLL
+    GROUPBOX        "Size limit",IDC_STATIC,6,62,155,32
+    LTEXT           "Ignore files greater than",IDC_STATIC,11,75,79,10
+    EDITTEXT        IDC_SIZELIMIT,92,73,63,12,ES_AUTOHSCROLL
+END
+
+IDD_GUI DIALOG DISCARDABLE  2, 15, 165, 105
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Map",IDC_STATIC,7,4,152,27
+    LTEXT           "Map update interval (ms)",IDC_STATIC,11,16,84,9,
+                    SS_CENTERIMAGE
+    EDITTEXT        IDC_UPDATE_INTERVAL,96,13,57,12,ES_AUTOHSCROLL | 
+                    ES_NUMBER
+    GROUPBOX        "Progress",IDC_STATIC,7,34,152,31
+    CONTROL         "Show progress bar",IDC_SHOWPROGRESS,"Button",
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,11,47,93,10
+END
+
+IDD_REPORT DIALOG DISCARDABLE  2, 15, 165, 105
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Report type",IDC_STATIC,7,5,152,28
+    CONTROL         "html",IDC_HTML,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
+                    WS_TABSTOP,46,16,42,10
+    CONTROL         "none",IDC_NONE,"Button",BS_AUTORADIOBUTTON,100,16,35,10
+    GROUPBOX        "Encoding",IDC_STATIC,7,36,152,30
+    CONTROL         "UTF-16",IDC_UTF16,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,46,48,45,9
+    CONTROL         "ASCII",IDC_ASCII,"Button",BS_AUTORADIOBUTTON,100,48,38,
+                    9
+    GROUPBOX        "Debug Print",IDC_STATIC,7,70,152,27
+    CONTROL         "Normal",IDC_DBG_NORMAL,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP | WS_TABSTOP,46,81,42,9
+    CONTROL         "Detailed",IDC_DBG_DETAILED,"Button",BS_AUTORADIOBUTTON,
+                    100,81,49,9
+END
+
+IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
+BEGIN
+    "A",            IDC_ANALYSE,            VIRTKEY, CONTROL, NOINVERT
+    "C",            IDC_COMPACT,            VIRTKEY, CONTROL, NOINVERT
+    "D",            IDC_DEFRAGM,            VIRTKEY, CONTROL, NOINVERT
+    "F",            IDC_SHOWFRAGMENTED,     VIRTKEY, CONTROL, NOINVERT
+    "P",            IDC_PAUSE,              VIRTKEY, CONTROL, NOINVERT
+    "R",            IDC_RESCAN,             VIRTKEY, CONTROL, NOINVERT
+    "S",            IDC_STOP,               VIRTKEY, CONTROL, NOINVERT
+    "T",            IDC_SETTINGS,           VIRTKEY, CONTROL, NOINVERT
+    VK_F1,          IDC_ABOUT,              VIRTKEY, NOINVERT
+    VK_PAUSE,       IDC_PAUSE,              VIRTKEY, NOINVERT
+END
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION VERSION
+ PRODUCTVERSION VERSION
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "DASoft Development Team\0"
+            VALUE "FileDescription", "UltraDefrag GUI interface\0"
+            VALUE "FileVersion", VERSION2
+            VALUE "InternalName", "Dfrg\0"
+            VALUE "LegalCopyright", "Copyright © 2007 Dmitri Arkhangelski\0"
+            VALUE "OriginalFilename", "Dfrg.exe\0"
+            VALUE "ProductName", "UltraDefrag\0"
+            VALUE "ProductVersion", VERSION2
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END

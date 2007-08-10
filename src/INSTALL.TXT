@@ -1,0 +1,49 @@
+1. Installation from binary package
+
+1.1 System requirements
+
+You need Windows 2000, Windows XP, Windows Server 2003 or Windows Vista.
+Also Windows XP x64, Server 2003 x64 and Vista x64 editions supported.
+
+1.2 Installation
+
+To install UltraDefrag you can download ultradefrag-x.y.z.bin.xxxx.exe
+from project site. In common cases xxxx must be 'i386'. If you have AMD x64
+or Intel Core Duo processor and 64-bit Edition of Windows installed, xxxx 
+must be 'amd64'. If you use PC with IA-64 architecture than try to download
+IA64 version. It was never tested, because I don't have such kind of CPU.
+Installation process is very simple. Enjoy it!
+
+2. Installation from sources
+
+2.1 Software requirements
+
+You need:
+a). either Microsoft C Compiler for Windows or gcc installed
+    (p.a. Microsoft Visual C++ 6.0 or Bloodshed Dev-C++ -
+    you can find it at http://www.bloodshed.net)
+    NOTE: GCC is currently unsupported!
+b). Microsoft Windows DDK (I use Windows Server 2003 DDK) or ReactOS DDK
+    (http://www.reactos.org)
+c). NSIS compiler (http://nsis.sourceforge.net)
+d). Ultimate Packer for eXecutables (upx) (http://upx.sf.net)
+e). zip compressor (http://www.info-zip.org)
+
+2.2 Building and installation
+
+a). Download sources archive and unpack it somewhere.
+b). Edit SETVARS.CMD. Environment variable NSISDIR must contain path
+    to NSIS compiler, ULTRADFGVER - version of UltraDefrag program,
+    etc.
+c). To build UltraDefrag use BUILD.CMD. Synopsis is:
+
+    build               in .\bin directory you find installer;
+                        in .\src - sources zip-archive.
+
+    build --install     it will install x86 program to default location
+                        after build
+
+    build {--use-winddk | --use-rosddk} {--use-msvc | --use-gcc} [--install]
+			you can specify ddk and compiler
+
+    build --clean       use it to delete all intermediate files
