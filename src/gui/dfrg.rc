@@ -160,6 +160,20 @@ BEGIN
                     100,81,49,9
 END
 
+IDD_SCHEDULER DIALOG DISCARDABLE  2, 15, 165, 105
+STYLE WS_CHILD
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "General",IDC_STATIC,6,5,153,41
+    LTEXT           "Volume letters",IDC_STATIC,11,23,47,10
+    EDITTEXT        IDC_LETTERS,68,21,85,12,ES_AUTOHSCROLL
+    GROUPBOX        "Boot time",IDC_STATIC,6,51,153,46
+    CONTROL         "Defragment at next boot",IDC_NEXTBOOT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,66,138,9
+    CONTROL         "Defragment every boot",IDC_EVERYBOOT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,80,141,8
+END
+
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
     "A",            IDC_ANALYSE,            VIRTKEY, CONTROL, NOINVERT

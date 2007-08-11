@@ -73,7 +73,7 @@ HWND hBtnCompact,hBtnFragm,hBtnSettings;
 HWND hCheckSkipRem;
 HWND hProgressMsg,hProgressBar;
 HWND hTabCtrl;
-HWND hFilterDlg,hGuiDlg,hReportDlg;
+HWND hFilterDlg,hGuiDlg,hReportDlg,hSchedDlg;
 HWND hMap;
 
 HANDLE hUltraDefragDevice = INVALID_HANDLE_VALUE;
@@ -117,6 +117,10 @@ HANDLE hEventComplete = 0,hEvt = 0,hEvtStop = 0;
 char current_operation;
 BOOL stop_pressed;
 BOOL show_progress = TRUE;
+
+char sched_letters[64] = "";
+DWORD every_boot = FALSE;
+DWORD next_boot = FALSE;
 
 signed int delta_h = 0;
 
@@ -197,11 +201,54 @@ BOOL is_virtual(char vol_letter)
 	return (strstr(target_path,"\\??\\") == target_path);
 }
 
+void SaveSettings(HKEY hRootKey)
+{
+	HKEY hKey, hKey1, hKey2;
+
+	if(RegOpenKeyEx(hRootKey,"Software\\DASoft\\NTDefrag",0,KEY_SET_VALUE,&hKey) != \
+		ERROR_SUCCESS)
+	{
+		RegCreateKeyEx(hRootKey,"Software",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey1,NULL);
+		RegCreateKeyEx(hKey1,"DASoft",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey2,NULL);
+		if(RegCreateKeyEx(hKey2,"NTDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
+			ERROR_SUCCESS)
+		{
+			RegCloseKey(hKey1); RegCloseKey(hKey2);
+			return;
+		}
+		RegCloseKey(hKey1); RegCloseKey(hKey2);
+	}
+	RegSetValueEx(hKey,"position",0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
+	RegSetValueEx(hKey,"skip removable",0,REG_DWORD,(BYTE*)&skip_rem,sizeof(DWORD));
+	RegSetValueEx(hKey,"update interval",0,REG_DWORD,
+		(BYTE*)&update_interval,sizeof(DWORD));
+	RegSetValueEx(hKey,"show progress",0,REG_BINARY,(BYTE*)&show_progress,sizeof(BOOL));
+	RegSetValueEx(hKey,"sizelimit",0,REG_BINARY,(BYTE*)&sizelimit,sizeof(ULONGLONG));
+	if(in_filter)
+		RegSetValueExW(hKey,L"include filter",0,REG_SZ,
+					(BYTE*)in_filter,(wcslen(in_filter) + 1) << 1);
+	else
+		RegDeleteValue(hKey,"include filter");
+	if(ex_filter)
+		RegSetValueExW(hKey,L"exclude filter",0,REG_SZ,
+					(BYTE*)ex_filter,(wcslen(ex_filter) + 1) << 1);
+	else
+		RegDeleteValue(hKey,"exclude filter");
+	RegSetValueEx(hKey,"report format",0,REG_BINARY,(BYTE*)&report_format,sizeof(UCHAR));
+	RegSetValueEx(hKey,"report type",0,REG_BINARY,(BYTE*)&report_type,sizeof(UCHAR));
+	RegSetValueEx(hKey,"dbgprint level",0,REG_DWORD,(BYTE*)&dbgprint_level,sizeof(DWORD));
+	RegSetValueExA(hKey,"scheduled letters",0,REG_SZ,
+		(BYTE*)sched_letters,strlen(sched_letters) + 1);
+	RegSetValueEx(hKey,"next boot",0,REG_DWORD,(BYTE*)&next_boot,sizeof(DWORD));
+	RegSetValueEx(hKey,"every boot",0,REG_DWORD,(BYTE*)&every_boot,sizeof(DWORD));
+	RegCloseKey(hKey);
+}
+
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	HANDLE hEventIsRunning = 0;
-	HKEY hKey, hKey1, hKey2;
+	HKEY hKey;
 	DWORD _len,length;
 	int i;
 	int err_code = 0;
@@ -212,6 +259,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tp;
 	REPORT_TYPE rt;
+	char boot_exec[512] = "";
+	DWORD type;
 
 	/* can't run more than 1 ex. of program */
 	hEventIsRunning = OpenEvent(EVENT_MODIFY_STATE,FALSE,
@@ -328,6 +377,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		{
 			WaitForSingleObject(hEvt,INFINITE);
 		}
+		_len = 40;
+		RegQueryValueExA(hKey,"scheduled letters",NULL,NULL,(BYTE*)sched_letters,&_len);
+		_len = sizeof(DWORD);
+		RegQueryValueEx(hKey,"next boot",NULL,NULL,
+			(unsigned char*)&next_boot,&_len);
+		_len = sizeof(DWORD);
+		RegQueryValueEx(hKey,"every boot",NULL,NULL,
+			(unsigned char*)&every_boot,&_len);
 		RegCloseKey(hKey);
 	}
 	hInstance = GetModuleHandle(NULL);
@@ -349,39 +406,32 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(bit_map_grid_dc)
 		DeleteDC(bit_map_grid_dc);
 	/* save window coordinates and other settings to registry */
-	if(RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\DASoft\\NTDefrag",0,KEY_SET_VALUE,&hKey) != \
-		ERROR_SUCCESS)
+	SaveSettings(HKEY_CURRENT_USER); /* for compatibility with 1.0.x versions */
+	SaveSettings(HKEY_LOCAL_MACHINE);
+	if(next_boot || every_boot)
 	{
-		RegCreateKeyEx(HKEY_CURRENT_USER,"Software",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey1,NULL);
-		RegCreateKeyEx(hKey1,"DASoft",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey2,NULL);
-		if(RegCreateKeyEx(hKey2,"NTDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
+		/* add native program name to BootExecute registry parameter */
+		if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+			"SYSTEM\\CurrentControlSet\\Control\\Session Manager",
+			0,KEY_QUERY_VALUE | KEY_SET_VALUE,&hKey) == \
 			ERROR_SUCCESS)
 		{
-			RegCloseKey(hKey1); RegCloseKey(hKey2);
-			goto cleanup;
+			_len = 510;
+			type = REG_MULTI_SZ;
+			RegQueryValueEx(hKey,"BootExecute",NULL,&type,boot_exec,&_len);
+			for(length = 0;strlen(boot_exec + length);)
+			{
+				if(!strcmp(boot_exec + length,"defrag_native"))
+					goto already_existed;
+				length += strlen(boot_exec + length) + 1;
+			}
+			strcpy(boot_exec + _len - 1, "defrag_native");
+			_len += strlen("defrag_native") + 1;
+			boot_exec[_len - 1] = 0;
+			RegSetValueEx(hKey,"BootExecute",0,REG_MULTI_SZ,boot_exec,_len);
+already_existed: {}
 		}
-		RegCloseKey(hKey1); RegCloseKey(hKey2);
 	}
-	RegSetValueEx(hKey,"position",0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
-	RegSetValueEx(hKey,"skip removable",0,REG_DWORD,(BYTE*)&skip_rem,sizeof(DWORD));
-	RegSetValueEx(hKey,"update interval",0,REG_DWORD,
-		(BYTE*)&update_interval,sizeof(DWORD));
-	RegSetValueEx(hKey,"show progress",0,REG_BINARY,(BYTE*)&show_progress,sizeof(BOOL));
-	RegSetValueEx(hKey,"sizelimit",0,REG_BINARY,(BYTE*)&sizelimit,sizeof(ULONGLONG));
-	if(in_filter)
-		RegSetValueExW(hKey,L"include filter",0,REG_SZ,
-					(BYTE*)in_filter,(wcslen(in_filter) + 1) << 1);
-	else
-		RegDeleteValue(hKey,"include filter");
-	if(ex_filter)
-		RegSetValueExW(hKey,L"exclude filter",0,REG_SZ,
-					(BYTE*)ex_filter,(wcslen(ex_filter) + 1) << 1);
-	else
-		RegDeleteValue(hKey,"exclude filter");
-	RegSetValueEx(hKey,"report format",0,REG_BINARY,(BYTE*)&report_format,sizeof(UCHAR));
-	RegSetValueEx(hKey,"report type",0,REG_BINARY,(BYTE*)&report_type,sizeof(UCHAR));
-	RegSetValueEx(hKey,"dbgprint level",0,REG_DWORD,(BYTE*)&dbgprint_level,sizeof(DWORD));
-	RegCloseKey(hKey);
 cleanup:
 	if(in_filter) free((void *)in_filter);
 	if(ex_filter) free((void *)ex_filter);
@@ -1133,6 +1183,8 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		SendMessage(hTabCtrl,TCM_INSERTITEM,1,(LPARAM)&tci);
 		tci.pszText = "Report";
 		SendMessage(hTabCtrl,TCM_INSERTITEM,2,(LPARAM)&tci);
+		tci.pszText = "Scheduler";
+		SendMessage(hTabCtrl,TCM_INSERTITEM,3,(LPARAM)&tci);
 		hFilterDlg = CreateDialogParam(hInstance,MAKEINTRESOURCE(IDD_FILTER),hTabCtrl,
 			(DLGPROC)FilterDlgProc,0);
 		ShowWindow(hFilterDlg,SW_SHOWNORMAL);
@@ -1142,6 +1194,9 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hReportDlg = CreateDialogParam(hInstance,MAKEINTRESOURCE(IDD_REPORT),hTabCtrl,
 			(DLGPROC)EmptyDlgProc,0);
 		ShowWindow(hReportDlg,SW_HIDE);
+		hSchedDlg = CreateDialogParam(hInstance,MAKEINTRESOURCE(IDD_SCHEDULER),hTabCtrl,
+			(DLGPROC)EmptyDlgProc,0);
+		ShowWindow(hSchedDlg,SW_HIDE);
 
 		format_number(sizelimit,buf);
 		SetWindowText(GetDlgItem(hFilterDlg,IDC_SIZELIMIT),buf);
@@ -1165,6 +1220,11 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			SendMessage(GetDlgItem(hReportDlg,IDC_DBG_DETAILED),BM_SETCHECK,BST_CHECKED,0);
 		if(show_progress)
 			SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_SETCHECK,BST_CHECKED,0);
+		SetWindowText(GetDlgItem(hSchedDlg,IDC_LETTERS),sched_letters);
+		if(next_boot)
+			SendMessage(GetDlgItem(hSchedDlg,IDC_NEXTBOOT),BM_SETCHECK,BST_CHECKED,0);
+		if(every_boot)
+			SendMessage(GetDlgItem(hSchedDlg,IDC_EVERYBOOT),BM_SETCHECK,BST_CHECKED,0);
 		in_edit_flag = ex_edit_flag = FALSE;
 		return TRUE;
 /*	case WM_LBUTTONDOWN:
@@ -1181,16 +1241,25 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				ShowWindow(hFilterDlg,SW_SHOW);
 				ShowWindow(hGuiDlg,SW_HIDE);
 				ShowWindow(hReportDlg,SW_HIDE);
+				ShowWindow(hSchedDlg,SW_HIDE);
 				break;
 			case 1:
 				ShowWindow(hFilterDlg,SW_HIDE);
 				ShowWindow(hGuiDlg,SW_SHOW);
 				ShowWindow(hReportDlg,SW_HIDE);
+				ShowWindow(hSchedDlg,SW_HIDE);
 				break;
 			case 2:
 				ShowWindow(hFilterDlg,SW_HIDE);
 				ShowWindow(hGuiDlg,SW_HIDE);
 				ShowWindow(hReportDlg,SW_SHOW);
+				ShowWindow(hSchedDlg,SW_HIDE);
+				break;
+			case 3:
+				ShowWindow(hFilterDlg,SW_HIDE);
+				ShowWindow(hGuiDlg,SW_HIDE);
+				ShowWindow(hReportDlg,SW_HIDE);
+				ShowWindow(hSchedDlg,SW_SHOW);
 			}
 		}
 		return TRUE;
@@ -1242,6 +1311,13 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				BST_CHECKED) ? TRUE : FALSE;
 			if(!show_progress)
 				HideProgress();
+			GetWindowText(GetDlgItem(hSchedDlg,IDC_LETTERS),sched_letters,40);
+			next_boot = \
+				(SendMessage(GetDlgItem(hSchedDlg,IDC_NEXTBOOT),BM_GETCHECK,0,0) == \
+				BST_CHECKED) ? TRUE : FALSE;
+			every_boot = \
+				(SendMessage(GetDlgItem(hSchedDlg,IDC_EVERYBOOT),BM_GETCHECK,0,0) == \
+				BST_CHECKED) ? TRUE : FALSE;
 			EndDialog(hWnd,1);
 			return TRUE;
 		case IDCANCEL:

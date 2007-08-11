@@ -71,6 +71,10 @@
 #define IDC_SHOWPROGRESS                1028
 #define IDC_HTML                        1029
 #define IDC_NONE                        1030
+#define IDD_SCHEDULER                   1031
+#define IDC_LETTERS                     1032
+#define IDC_NEXTBOOT                    1033
+#define IDC_EVERYBOOT                   1034
 
 // Next default values for new objects
 // 
@@ -78,7 +82,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        122
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1031
+#define _APS_NEXT_CONTROL_VALUE         1035
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

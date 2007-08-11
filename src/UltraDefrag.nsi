@@ -144,9 +144,13 @@ Section "Ultra Defrag core files (required)" SecCore
   File "INSTALL.TXT"
   File "README.TXT"
   File "FAQ.TXT"
+  Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
   DetailPrint "Install driver..."
   SetOutPath "$WINDIR\System32\Drivers"
   File "ultradfg.sys"
+  DetailPrint "Install boot time defragger..."
+  SetOutPath "$WINDIR\System32"
+  File "defrag_native.exe"
 !if ${ULTRADFGARCH} != "i386"
   SetOutPath "$TEMP"
   File "x64_inst.exe"
@@ -176,14 +180,6 @@ Section "Console interface" SecConsole
   DetailPrint "Install console interface..."
   SetOutPath $INSTDIR
   File "defrag.exe"
-
-SectionEnd
-
-Section "Native interface" SecNative
-
-  DetailPrint "Install native interface..."
-  SetOutPath $INSTDIR
-  File "defrag_native.exe"
 
 SectionEnd
 
@@ -221,16 +217,24 @@ Section "Uninstall"
   DetailPrint "Remove program files..."
   Delete "$INSTDIR\Dfrg.exe"
   Delete "$INSTDIR\defrag.exe"
-  Delete "$INSTDIR\defrag_native.exe"
   Delete "$INSTDIR\LICENSE.TXT"
   Delete "$INSTDIR\CREDITS.TXT"
   Delete "$INSTDIR\HISTORY.TXT"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
+  Delete "$INSTDIR\FAQ.TXT"
   Delete "$INSTDIR\uninstall.exe"
   RMDir $INSTDIR
-  DetailPrint "Uninstall driver..."
+  DetailPrint "Uninstall driver and boot time defragger..."
+!if ${ULTRADFGARCH} != "i386"
+  SetOutPath "$TEMP"
+  File "x64_inst.exe"
+  ExecWait '"$TEMP\x64_inst.exe" -u'
+  Delete "$TEMP\x64_inst.exe"
+!else
   Delete "$SYSDIR\Drivers\ultradfg.sys"
+  Delete "$SYSDIR\defrag_native.exe"
+!endif
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
@@ -247,8 +251,7 @@ SectionEnd
 !ifdef MODERN_UI
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecConsole} "Useful for scripts and sheduling."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecNative} "Useful for advanced users and developers."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecConsole} "Useful for scripts and scheduling."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 !endif

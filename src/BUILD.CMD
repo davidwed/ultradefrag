@@ -167,19 +167,19 @@ cd..
 :build_source_package
 echo Build source code package...
 cd ..
-rmdir /s /q .\src
-mkdir .\src
-xcopy /I /Y .\driver .\src\driver
-xcopy /I /Y .\console .\src\console
-xcopy /I /Y .\gui .\src\gui
-xcopy /I /Y .\gui\res .\src\gui\res
-xcopy /I /Y .\native .\src\native
-xcopy /I /Y .\x64_inst .\src\x64_inst
-xcopy /I /Y .\include .\src\include
-xcopy /I /Y .\shared .\src\shared
+rmdir /s /q .\rel_src
+mkdir .\rel_src
+xcopy /I /Y .\driver .\rel_src\driver
+xcopy /I /Y .\console .\rel_src\console
+xcopy /I /Y .\gui .\rel_src\gui
+xcopy /I /Y .\gui\res .\rel_src\gui\res
+xcopy /I /Y .\native .\rel_src\native
+xcopy /I /Y .\x64_inst .\rel_src\x64_inst
+xcopy /I /Y .\include .\rel_src\include
+xcopy /I /Y .\shared .\rel_src\shared
 
-copy .\*.* .\src\
-cd .\src
+copy .\*.* .\rel_src\
+cd .\rel_src
 del /s /q *.ncb,*.opt,*.plg,*.aps
 zip -r -m ultradefrag-%ULTRADFGVER%.src.zip .
 cd ..

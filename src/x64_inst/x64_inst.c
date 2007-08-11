@@ -27,6 +27,10 @@ char path[MAX_PATH+20];
 
 char command[] = "cmd.exe /C move /Y %WINDIR%\\SysWOW64\\Drivers\\ultradfg.sys "
 		 "%WINDIR%\\system32\\Drivers\\";
+char command2[] = "cmd.exe /C move /Y %WINDIR%\\SysWOW64\\defrag_native.exe "
+		 "%WINDIR%\\system32\\";
+char command3[] = "cmd.exe /C del /F /Q %WINDIR%\\System32\\defrag_native.exe";
+char command4[] = "cmd.exe /C del /F /Q %WINDIR%\\System32\\Drivers\\ultradfg.sys";
 
 void EntryPoint(void)
 {
@@ -39,10 +43,31 @@ void EntryPoint(void)
 	si.cb = sizeof(STARTUPINFO);
 	si.dwFlags = STARTF_USESHOWWINDOW;
 	si.wShowWindow = SW_HIDE;
-	if(CreateProcess(path,command,NULL,NULL,1,0,NULL,NULL,&si,&pinfo))
+	if(!strstr(GetCommandLine(),"-u"))
 	{
-		CloseHandle(pinfo.hProcess);
-		CloseHandle(pinfo.hThread);
+		if(CreateProcess(path,command,NULL,NULL,1,0,NULL,NULL,&si,&pinfo))
+		{
+			CloseHandle(pinfo.hProcess);
+			CloseHandle(pinfo.hThread);
+		}
+		if(CreateProcess(path,command2,NULL,NULL,1,0,NULL,NULL,&si,&pinfo))
+		{
+			CloseHandle(pinfo.hProcess);
+			CloseHandle(pinfo.hThread);
+		}
+	}
+	else
+	{
+		if(CreateProcess(path,command3,NULL,NULL,1,0,NULL,NULL,&si,&pinfo))
+		{
+			CloseHandle(pinfo.hProcess);
+			CloseHandle(pinfo.hThread);
+		}
+		if(CreateProcess(path,command4,NULL,NULL,1,0,NULL,NULL,&si,&pinfo))
+		{
+			CloseHandle(pinfo.hProcess);
+			CloseHandle(pinfo.hThread);
+		}
 	}
 	ExitProcess(0);
 }

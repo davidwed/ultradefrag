@@ -22,7 +22,7 @@
  */
 
 #include "driver.h"
-#if 1
+#if 0
 ULONGLONG _rdtsc(void)
 {
 	ULONGLONG retval;
@@ -74,7 +74,7 @@ BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
 	UNICODE_STRING pathU;
-	ULONGLONG tm;
+	//ULONGLONG tm;
 
 	/* TODO: optimize FindFiles() */
 	/* data initialization */
@@ -109,9 +109,9 @@ BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	Status = __NtFlushBuffersFile(dx->hVol);
 	if(Status)
 		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",Status);
-tm = _rdtsc();
+///tm = _rdtsc();
 	if(!FillFreeClusterMap(dx)) goto fail;
-DebugPrint("%I64u\n", _rdtsc() - tm);
+///DebugPrint("%I64u\n", _rdtsc() - tm);
 	/* 2. initialize file list and put their clusters to map */
 	//tm = _rdtsc();
 	wcscat(path,L"\\");
