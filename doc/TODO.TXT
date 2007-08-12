@@ -1,9 +1,9 @@
 Items to describe:
 
-1.  compact command move all files AND defrag fragmented if possible
-2.  currently compact don't applied to FAT volumes because directories on them
-    isn't moveable.
-3.  gui app hot keys:
+1.  (DONE) compact command move all files AND defrag fragmented if possible.
+2.  (DONE) currently compact don't applied to FAT volumes because directories on them
+    isn't moveable. 
+3.  (DONE) gui app hot keys:
 
     Ctrl + A - analyse
     Ctrl + C - compact
@@ -16,7 +16,7 @@ Items to describe:
     F1       - about
     Pause    - pause
 
-4.  Pause and Stop actions are equal. You can analyse volume once and then
+4.  (DONE) Pause and Stop actions are equal. You can analyse volume once and then
     defrag and/or compact them few times.
 5.  FAQ must be rewritten in good style
 6.  Readme.txt must be rewritten in good style
@@ -39,7 +39,7 @@ Items to describe:
     [CMP] - compressed file
 18. about report - small size but very useful [should be in future] - generated 
     by driver very fast.
-19. filter: ignore files greater than: n [Kb | Mb | Gb | Tb]
+19. (DONE) filter: ignore files greater than: n [Kb | Mb | Gb | Tb]
 20. Debug print: normal to view useful messages about analyse / defrag progress;
     detailed to send to an author when error encountered.
-21. Virus scanner must be stopped.
+21. (DONE) Virus scanner must be stopped.
