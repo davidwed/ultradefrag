@@ -1,3 +1,5 @@
+The following is Justin Dearing's TODO list for the manual and other technical 
+documents included in the upcoming version 1.1.0.
 Items to describe:
 
 1.  (DONE) compact command move all files AND defrag fragmented if possible.
@@ -22,16 +24,16 @@ Items to describe:
 6.  Readme.txt must be rewritten in good style
 7.  To developers: program has clear and easy to understand code.
 8.  Full support for compressed files
-9.  Console command line options description. And nice appearance description.
+9.  (DONE) Console command line options description. And nice appearance description.
 10. files with size over limit are shown with dark color
 11. full description of filter using. patterns are applied to full path. So \temp
     include either temporary files or internet explorer cache.
 12. in report - all excluded files are marked with black color
-13. settings - report encoding - ASCII is useful for Internet explorer and 
+13. (DONE) settings - report encoding - ASCII is useful for Internet explorer and 
     utf-16 for mozilla firefox (better for chinese and japanese)
 14. They are versions for all of the supported processor architectures for x64 
     Windows.
-15. progress bar disappears when you select other drive: it's normal behaviour
+15. (DONE) progress bar disappears when you select other drive: it's normal behaviour
 16. can analyse and defrag floppies (isn't useful but ...)
 17. report - comment column:
     [OVR] - file is over limit
