@@ -1,45 +1,51 @@
 =========================
-UltraDefrag Version 1.0.5
-Updated Aug 2th, 2007
+UltraDefrag Version 1.1.0
+Updated Aug 16th, 2007
 =========================
 
 1. What is UltraDefrag?
 
-   UltraDefrag is powerful Open Source defragmentation tool for Windows NT.
-It's engine is very fast, because it is created as kernel-mode driver. 
-They are three interfaces to them: graphical, console and native. First 
-is very useful, because it use cluster map visualization. Console is good 
-for task scheduler, and native tool - for advanced users and programmers.
+   UltraDefrag is powerful Open Source defragmentation tool for Windows 2000 
+and later operating systems.  It is very fast, because the defragmenting is 
+done by kernel-mode driver.  They are three interfaces to them: graphical,
+console and native. The GUI is very useful, because visually represents your
+filesystem as a color coded cluster map. The console is another option for 
+those that prefer the command line. It is also benificial in that it can be run
+in the task scheduler. 
+Finally, the native executable will run at boot time in a manner similar to 
+chkdsk.
 
-   Design of the UltraDefrag is very ergonomic: no skins, no localization, 
-no animation and so on. It's true small and powerful program!
+   The design of UltraDefrag is very simple. There are no skins, localization, 
+or animations. It is a small and powerful program!
 
    It can be used on Windows 2000, Windows XP, Windows Server 2003,
 Windows Vista and all of the 64-bit editions of Windows.
-NT 4.0 support is currently unavailable.
+Windows NT 4.0 is currently unsupported.
 
-   Note that you must have administrative rights to run defragmenter!
+   You must have administrative rights to install and use UltraDefrag.
 
    More information is available at http://ultradefrag.sourceforge.net
 
 
-2. Features and restrictions
+2. Features and Limitations
 
+2.1 Features
 + optimal algorithm
-+ support basic include/exclude filters
++ ability to include/exclude files based on simple filters
 + exclude zero-length files and files that are placed in MFT
 + full support of compressed files processing
-+ 'Compact' command optimize free space disposition
-+ generate useful html report
++ 'Compact' command to optimize free space disposition (faster than a full 
+  defrag)
++ ability to generate a html fragmentation report
 + nice graphical interface
 + full x64 support
 
-* don't support volumes with more than 4.294.967.295 clusters
+2.2 Limitations
+- does not support volumes with more than 4.294.967.295 clusters
+- does not work on NT 4.0
+- gui does not work if screen color depth is less than 16 bits per pixel
 
-- don't work on NT 4.0
-- gui don't work if screen color depth is less than 16 bits per pixel
-
-3. Bug Tracker
+3. Reporting Bugs
 
    Please report all problems and bugs in our bug tracker:
                  http://sourceforge.net/tracker/?group_id=199532
@@ -74,7 +80,7 @@ See the INSTALL.TXT file.
 See the HISTORY.TXT file.
 
 
-7. Who is responsible
+7. Authors.
 
 See the CREDITS file.
 
