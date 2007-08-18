@@ -144,6 +144,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "INSTALL.TXT"
   File "README.TXT"
   File "FAQ.TXT"
+  Delete "$INSTDIR\defrag.exe"
   Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
   DetailPrint "Install driver..."
   SetOutPath "$WINDIR\System32\Drivers"
@@ -178,8 +179,8 @@ SectionEnd
 Section "Console interface" SecConsole
 
   DetailPrint "Install console interface..."
-  SetOutPath $INSTDIR
-  File "defrag.exe"
+  SetOutPath "$WINDIR\System32"
+  File "udefrag.exe"
 
 SectionEnd
 
@@ -216,7 +217,6 @@ Section "Uninstall"
   Delete "$DESKTOP\UltraDefrag.lnk"
   DetailPrint "Remove program files..."
   Delete "$INSTDIR\Dfrg.exe"
-  Delete "$INSTDIR\defrag.exe"
   Delete "$INSTDIR\LICENSE.TXT"
   Delete "$INSTDIR\CREDITS.TXT"
   Delete "$INSTDIR\HISTORY.TXT"
@@ -234,6 +234,7 @@ Section "Uninstall"
 !else
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   Delete "$SYSDIR\defrag_native.exe"
+  Delete "$SYSDIR\udefrag.exe"
 !endif
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"

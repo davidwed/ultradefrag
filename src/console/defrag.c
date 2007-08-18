@@ -104,6 +104,15 @@ BOOL is_virtual(char vol_letter)
 	return (strstr(target_path,"\\??\\") == target_path);
 }
 
+BOOL is_mounted(char vol_letter)
+{
+	char rootpath[] = "A:\\";
+	ULARGE_INTEGER total, free, BytesAvailable;
+
+	rootpath[0] = vol_letter;
+	return (BOOL)GetDiskFreeSpaceEx(rootpath,&BytesAvailable,&total,&free);
+}
+
 int __cdecl wmain(int argc, short **argv)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -134,13 +143,12 @@ int __cdecl wmain(int argc, short **argv)
 	SetConsoleTextAttribute(hOut, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	print(VERSIONINTITLE " console interface\n"
 	      "Copyright (c) Dmitri Arkhangelski, 2007.\n\n");
-	/* no more than 1 ex. of program ! */
+	/* only one instance of program ! */
 	hEventIsRunning = OpenEvent(EVENT_MODIFY_STATE,FALSE, \
 	                            "UltraDefragIsRunning");
 	if(hEventIsRunning)
 	{
-		display_error("Can't run more than 1 exemplar "
-		              "of this program!\n");
+		display_error("You can run only one instance of UltraDefrag!\n");
 		err_code = 1; goto cleanup;
 	}
 	hEventIsRunning = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIsRunning");
@@ -201,18 +209,21 @@ int __cdecl wmain(int argc, short **argv)
 		display_error("Incorrect or not specified drive letter\n");
 		err_code = 2; goto cleanup;
 	}
+	SetErrorMode(SEM_FAILCRITICALERRORS);
 	rootdir[0] = letter;
 	switch(GetDriveType(rootdir))
 	{
 	case DRIVE_FIXED:
 	case DRIVE_REMOVABLE:
 	case DRIVE_RAMDISK:
-		if(!is_virtual(letter))
+		if(!is_virtual(letter) && is_mounted(letter))
 			break; /* OK */
 	default:
+		SetErrorMode(0);
 		display_error("Volume must be on non-cdrom local drive\n");
 		err_code = 2; goto cleanup;
 	}
+	SetErrorMode(0);
 	hEvt = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIoComplete");
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* to do our job */

@@ -17,7 +17,7 @@ NULL=nul
 OUTDIR=../bin
 INTDIR=../obj/console
 
-ALL : "$(OUTDIR)\Defrag.exe"
+ALL : "$(OUTDIR)\udefrag.exe"
 
 
 CLEAN :
@@ -25,11 +25,11 @@ CLEAN :
 	-@erase "$(INTDIR)\defrag.res"
 	-@erase "$(INTDIR)\misc.obj"
 	-@erase "$(INTDIR)\vc60.idb"
-	-@erase "$(OUTDIR)\Defrag.exe"
+	-@erase "$(OUTDIR)\udefrag.exe"
 !IF  "$(CFG)" != "Defrag - Win32 Release"
 	-@erase "$(INTDIR)\vc60.pdb"
-	-@erase "$(OUTDIR)\Defrag.ilk"
-	-@erase "$(OUTDIR)\Defrag.pdb"
+	-@erase "$(OUTDIR)\udefrag.ilk"
+	-@erase "$(OUTDIR)\udefrag.pdb"
 !ENDIF
 
 "$(INTDIR)" :
@@ -41,11 +41,11 @@ CLEAN :
 !IF  "$(CFG)" == "Defrag - Win32 Release"
 CPP_PROJ=/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\defrag.res" /d "NDEBUG" 
-LINK32_FLAGS=kernel32.lib advapi32.lib msvcrt.lib ntdll.lib /nologo /subsystem:console /incremental:no /pdb:"$(OUTDIR)\Defrag.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\Defrag.exe" 
+LINK32_FLAGS=kernel32.lib advapi32.lib msvcrt.lib ntdll.lib /nologo /subsystem:console /incremental:no /pdb:"$(OUTDIR)\Defrag.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\udefrag.exe" 
 !ELSE
 CPP_PROJ=/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\defrag.res" /d "_DEBUG" 
-LINK32_FLAGS=kernel32.lib advapi32.lib msvcrt.lib ntdll.lib /nologo /subsystem:console /incremental:yes /pdb:"$(OUTDIR)\Defrag.pdb" /debug /machine:I386 /nodefaultlib /out:"$(OUTDIR)\Defrag.exe" /pdbtype:sept 
+LINK32_FLAGS=kernel32.lib advapi32.lib msvcrt.lib ntdll.lib /nologo /subsystem:console /incremental:yes /pdb:"$(OUTDIR)\Defrag.pdb" /debug /machine:I386 /nodefaultlib /out:"$(OUTDIR)\udefrag.exe" /pdbtype:sept 
 !ENDIF
 
 CPP=cl.exe
@@ -63,7 +63,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\defrag.res" \
 	"$(INTDIR)\misc.obj"
 
-"$(OUTDIR)\Defrag.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
+"$(OUTDIR)\udefrag.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<

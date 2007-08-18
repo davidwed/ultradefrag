@@ -104,7 +104,7 @@ if %errorlevel% neq 0 goto fail
 cd ..
 mkdir ..\bin
 copy .\driver\objfre_wnet_x86\i386\ultradfg.sys ..\bin\
-REM copy .\console\objfre_wnet_x86\i386\defrag.exe ..\bin\
+REM copy .\console\objfre_wnet_x86\i386\udefrag.exe ..\bin\
 REM copy .\gui\objfre_wnet_x86\i386\dfrg.exe ..\bin\
 REM copy .\native\objfre_wnet_x86\i386\defrag_native.exe ..\bin\
 echo --------- Target is x64 ---------
@@ -114,7 +114,7 @@ if %errorlevel% neq 0 goto fail
 cd ..
 mkdir ..\bin\amd64
 copy .\driver\objfre_wnet_amd64\amd64\ultradfg.sys ..\bin\amd64\
-copy .\console\objfre_wnet_amd64\amd64\defrag.exe ..\bin\amd64\
+copy .\console\objfre_wnet_amd64\amd64\udefrag.exe ..\bin\amd64\
 copy .\gui\objfre_wnet_amd64\amd64\dfrg.exe ..\bin\amd64\
 copy .\native\objfre_wnet_amd64\amd64\defrag_native.exe ..\bin\amd64\
 copy .\x64_inst\objfre_wnet_amd64\amd64\x64_inst.exe ..\bin\amd64\
@@ -125,7 +125,7 @@ if %errorlevel% neq 0 goto fail
 cd ..
 mkdir ..\bin\ia64
 copy .\driver\objfre_wnet_ia64\ia64\ultradfg.sys ..\bin\ia64\
-copy .\console\objfre_wnet_ia64\ia64\defrag.exe ..\bin\ia64\
+copy .\console\objfre_wnet_ia64\ia64\udefrag.exe ..\bin\ia64\
 copy .\gui\objfre_wnet_ia64\ia64\dfrg.exe ..\bin\ia64\
 copy .\native\objfre_wnet_ia64\ia64\defrag_native.exe ..\bin\ia64\
 copy .\x64_inst\objfre_wnet_ia64\ia64\x64_inst.exe ..\bin\ia64\
@@ -135,7 +135,7 @@ echo Build installer...
 cd ..\bin
 copy /Y ..\UltraDefrag.nsi .\
 copy /Y ..\*.TXT .\
-upx defrag.exe
+upx udefrag.exe
 if %errorlevel% neq 0 goto fail
 upx dfrg.exe
 if %errorlevel% neq 0 goto fail
