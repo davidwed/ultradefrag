@@ -22,80 +22,49 @@
  */
 
 #include <windows.h>
-#include <winreg.h>
 #include <winioctl.h>
 #include <commctrl.h>
 #include <memory.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <shellapi.h>
+#include <math.h>
 
+#include "main.h"
 #include "../include/misc.h"
 #include "../include/ultradfg.h"
 
 #include "resource.h"
 
-typedef LONG NTSTATUS;
-
-typedef struct _UNICODE_STRING
-{
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
-
-NTSYSAPI VOID NTAPI RtlInitUnicodeString(
-  IN OUT PUNICODE_STRING DestinationString,
-  IN PCWSTR SourceString);
-
-NTSTATUS NTAPI
-NtLoadDriver(IN PUNICODE_STRING DriverServiceName);
-
-NTSTATUS NTAPI
-NtUnloadDriver(IN PUNICODE_STRING DriverServiceName);
-
-#ifndef USE_WINDDK
-#define SetWindowLongPtr SetWindowLong
-#define LONG_PTR LONG
-#define GWLP_WNDPROC GWL_WNDPROC
-#endif
-
 /* Global variables */
 HINSTANCE hInstance;
-RECT win_rc = {0,0,0x22d,0x1b3}; /* coordinates of main window */
 HACCEL hAccel;
-DWORD skip_rem = 1;	/* check box state */
 HWND hWindow, hList, hStatus;
 HWND hBtnAnalyse,hBtnDfrg,hBtnPause,hBtnStop,hBtnRescan;
 HWND hBtnCompact,hBtnFragm,hBtnSettings;
 HWND hCheckSkipRem;
 HWND hProgressMsg,hProgressBar;
-HWND hTabCtrl;
-HWND hFilterDlg,hGuiDlg,hReportDlg,hSchedDlg;
 HWND hMap;
 
 HANDLE hUltraDefragDevice = INVALID_HANDLE_VALUE;
-ULONGLONG sizelimit = 0;
-int update_interval = 500;
+
+extern RECT win_rc; /* coordinates of main window */
+extern DWORD skip_rem;
+extern ULONGLONG sizelimit;
+extern int update_interval;
+extern BOOL show_progress;
+
+signed int delta_h = 0;
 
 //#define MAP_WIDTH         0x209
 //#define MAP_HEIGHT        0x8c
 //#define BLOCK_SIZE        0x9   /* in pixels */
 
-int iMAP_WIDTH = 0x209;
-int iMAP_HEIGHT = 0x8c;
-int iBLOCK_SIZE = 0x9;   /* in pixels */
-
-#define BLOCKS_PER_HLINE  52
-#define BLOCKS_PER_VLINE  14
-#define N_BLOCKS          BLOCKS_PER_HLINE * BLOCKS_PER_VLINE
-
 char letter_numbers['Z' - 'A' + 1];
-char map['Z' - 'A' + 1][N_BLOCKS];
 STATISTIC stat['Z' - 'A' + 1];
 int work_status['Z' - 'A' + 1] = {0};
+extern char map['Z' - 'A' + 1][N_BLOCKS];
 
 #define STAT_CLEAR	0
 #define STAT_WORK	1
@@ -116,53 +85,17 @@ HANDLE hEventComplete = 0,hEvt = 0,hEvtStop = 0;
 
 char current_operation;
 BOOL stop_pressed;
-BOOL show_progress = TRUE;
-
-char sched_letters[64] = "";
-DWORD every_boot = FALSE;
-DWORD next_boot = FALSE;
-
-signed int delta_h = 0;
-
-/* #define GRID_COLOR                  RGB(106,106,106) */
-#define GRID_COLOR                  RGB(0,0,0)
-#define SYSTEM_COLOR                RGB(0,180,60)
-#define SYSTEM_OVERLIMIT_COLOR      RGB(0,90,30)
-#define FRAGM_COLOR                 RGB(255,0,0)
-#define FRAGM_OVERLIMIT_COLOR       RGB(128,0,0)
-#define UNFRAGM_COLOR               RGB(0,0,255)
-#define UNFRAGM_OVERLIMIT_COLOR     RGB(0,0,128)
-#define MFT_COLOR                   RGB(128,0,128)
-#define DIR_COLOR                   RGB(255,255,0)
-#define DIR_OVERLIMIT_COLOR         RGB(128,128,0)
-#define COMPRESSED_COLOR            RGB(185,185,0)
-#define COMPRESSED_OVERLIMIT_COLOR  RGB(93,93,0)
-#define NO_CHECKED_COLOR            RGB(0,255,255)
-
-HDC bit_map_dc['Z' - 'A' + 1] = {0};
-HDC bit_map_grid_dc = 0;
-HBITMAP bit_map['Z' - 'A' + 1] = {0};
-HBITMAP bit_map_grid = 0;
 
 #define N_OF_STATUSBAR_PARTS  5
 #define IDM_STATUSBAR         500
 
-short *in_filter = NULL, *ex_filter = NULL;
-BOOL in_edit_flag,ex_edit_flag;
-UCHAR report_format = ASCII_FORMAT;
-UCHAR report_type = HTML_REPORT;
-
 short driver_key[] = \
 	L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
-
-DWORD dbgprint_level = 0;
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK SettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK FilterDlgProc(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK EmptyDlgProc(HWND, UINT, WPARAM, LPARAM);
+extern BOOL CALLBACK SettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
 void RescanDrives();
 void ClearMap();
 void RedrawMap();
@@ -171,10 +104,16 @@ void ShowFragmented();
 void ShowProgress();
 void HideProgress();
 
-BOOL CreateBitMap(int);
-void DrawBlock(HDC,char *,int,COLORREF);
-BOOL FillBitMap(int);
-BOOL CreateBitMapGrid();
+extern void CalculateBlockSize();
+extern BOOL RequestMap(HANDLE hDev,char *map,DWORD *txd,LPOVERLAPPED lpovrl);
+extern BOOL FillBitMap(int);
+extern BOOL CreateBitMapGrid();
+extern void DeleteMaps();
+
+extern void LoadSettings();
+extern void SaveSettings(HKEY hRootKey);
+extern void SaveBootTimeSettings();
+extern void DestroyFilters();
 
 BOOL CreateStatusBar();
 void UpdateStatusBar(int index);
@@ -201,74 +140,23 @@ BOOL is_virtual(char vol_letter)
 	return (strstr(target_path,"\\??\\") == target_path);
 }
 
-void SaveSettings(HKEY hRootKey)
-{
-	HKEY hKey, hKey1, hKey2;
-
-	if(RegOpenKeyEx(hRootKey,"Software\\DASoft\\NTDefrag",0,KEY_SET_VALUE,&hKey) != \
-		ERROR_SUCCESS)
-	{
-		RegCreateKeyEx(hRootKey,"Software",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey1,NULL);
-		RegCreateKeyEx(hKey1,"DASoft",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey2,NULL);
-		if(RegCreateKeyEx(hKey2,"NTDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
-			ERROR_SUCCESS)
-		{
-			RegCloseKey(hKey1); RegCloseKey(hKey2);
-			return;
-		}
-		RegCloseKey(hKey1); RegCloseKey(hKey2);
-	}
-	RegSetValueEx(hKey,"position",0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
-	RegSetValueEx(hKey,"skip removable",0,REG_DWORD,(BYTE*)&skip_rem,sizeof(DWORD));
-	RegSetValueEx(hKey,"update interval",0,REG_DWORD,
-		(BYTE*)&update_interval,sizeof(DWORD));
-	RegSetValueEx(hKey,"show progress",0,REG_BINARY,(BYTE*)&show_progress,sizeof(BOOL));
-	RegSetValueEx(hKey,"sizelimit",0,REG_BINARY,(BYTE*)&sizelimit,sizeof(ULONGLONG));
-	if(in_filter)
-		RegSetValueExW(hKey,L"include filter",0,REG_SZ,
-					(BYTE*)in_filter,(wcslen(in_filter) + 1) << 1);
-	else
-		RegDeleteValue(hKey,"include filter");
-	if(ex_filter)
-		RegSetValueExW(hKey,L"exclude filter",0,REG_SZ,
-					(BYTE*)ex_filter,(wcslen(ex_filter) + 1) << 1);
-	else
-		RegDeleteValue(hKey,"exclude filter");
-	RegSetValueEx(hKey,"report format",0,REG_BINARY,(BYTE*)&report_format,sizeof(UCHAR));
-	RegSetValueEx(hKey,"report type",0,REG_BINARY,(BYTE*)&report_type,sizeof(UCHAR));
-	RegSetValueEx(hKey,"dbgprint level",0,REG_DWORD,(BYTE*)&dbgprint_level,sizeof(DWORD));
-	RegSetValueExA(hKey,"scheduled letters",0,REG_SZ,
-		(BYTE*)sched_letters,strlen(sched_letters) + 1);
-	RegSetValueEx(hKey,"next boot",0,REG_DWORD,(BYTE*)&next_boot,sizeof(DWORD));
-	RegSetValueEx(hKey,"every boot",0,REG_DWORD,(BYTE*)&every_boot,sizeof(DWORD));
-	RegCloseKey(hKey);
-}
-
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	HANDLE hEventIsRunning = 0;
-	HKEY hKey;
-	DWORD _len,length;
-	int i;
 	int err_code = 0;
-	DWORD txd;
-	OVERLAPPED ovrl;
 	UNICODE_STRING uStr;
 	NTSTATUS status;
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tp;
-	REPORT_TYPE rt;
-	char boot_exec[512] = "";
-	DWORD type;
 
-	/* can't run more than 1 ex. of program */
+	/* only one instance of program! */
 	hEventIsRunning = OpenEvent(EVENT_MODIFY_STATE,FALSE,
 				    "UltraDefragIsRunning");
 	if(hEventIsRunning)
 	{
 		CloseHandle(hEventIsRunning);
-		MessageBox(0,"Can't run more than 1 exemplar of this program!", \
+		MessageBox(0,"You can run only one instance of UltraDefrag!", \
 			"Warning!",MB_OK | MB_ICONHAND);
 		ExitProcess(1);
 	}
@@ -292,7 +180,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	}
 	RtlInitUnicodeString(&uStr,driver_key);
 	status = NtLoadDriver(&uStr);
-	if(status != 0x0)
+	if(status != STATUS_SUCCESS && status != STATUS_IMAGE_ALREADY_LOADED)
 	{
 		MessageBox(0,"Can't load ultradfg driver!","Error!",MB_OK | MB_ICONHAND);
 		err_code = 3; goto cleanup;
@@ -306,87 +194,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		err_code = 3; goto cleanup;
 	}
 	/* get window coordinates and other settings from registry */
-	if(RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\DASoft\\NTDefrag",0,KEY_QUERY_VALUE,&hKey) == \
-		ERROR_SUCCESS)
-	{
-		_len = sizeof(RECT);
-		RegQueryValueEx(hKey,"position",NULL,NULL,(BYTE*)&win_rc,&_len);
-		_len = sizeof(DWORD);
-		RegQueryValueEx(hKey,"skip removable",NULL,NULL,(BYTE*)&skip_rem,&_len);
-		_len = sizeof(DWORD);
-		RegQueryValueEx(hKey,"update interval",NULL,NULL,
-			(unsigned char*)&update_interval,&_len);
-		_len = sizeof(BOOL);
-		RegQueryValueEx(hKey,"show progress",NULL,NULL,(BYTE*)&show_progress,&_len);
-		_len = sizeof(ULONGLONG);
-		RegQueryValueEx(hKey,"sizelimit",NULL,NULL,(BYTE*)&sizelimit,&_len);
-		_len = sizeof(UCHAR);
-		RegQueryValueEx(hKey,"report format",NULL,NULL,(BYTE*)&report_format,&_len);
-		length = 0;
-		if(RegQueryValueExW(hKey,L"include filter",NULL,NULL,NULL,&_len) ==
-			ERROR_SUCCESS)
-		{
-			in_filter = malloc(_len);
-			if(in_filter)
-			{
-				RegQueryValueExW(hKey,L"include filter",NULL,NULL,(BYTE*)in_filter,&_len);
-				length = _len;
-			}
-		}
-		ovrl.hEvent = hEvt;
-		ovrl.Offset = ovrl.OffsetHigh = 0;
-		if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_INCLUDE_FILTER,
-			in_filter,length,NULL,0,&txd,&ovrl))
-		{
-			WaitForSingleObject(hEvt,INFINITE);
-		}
-		length = 0;
-		if(RegQueryValueExW(hKey,L"exclude filter",NULL,NULL,NULL,&_len) ==
-			ERROR_SUCCESS)
-		{
-			ex_filter = malloc(_len);
-			if(ex_filter)
-			{
-				RegQueryValueExW(hKey,L"exclude filter",NULL,NULL,(BYTE*)ex_filter,&_len);
-				length = _len;
-			}
-		}
-		ovrl.Offset = ovrl.OffsetHigh = 0;
-		if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_EXCLUDE_FILTER,
-			ex_filter,length,NULL,0,&txd,&ovrl))
-		{
-			WaitForSingleObject(hEvt,INFINITE);
-		}
-		_len = sizeof(DWORD);
-		RegQueryValueEx(hKey,"dbgprint level",NULL,NULL,
-			(unsigned char*)&dbgprint_level,&_len);
-		ovrl.Offset = ovrl.OffsetHigh = 0;
-		if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_DBGPRINT_LEVEL,
-			&dbgprint_level,sizeof(DWORD),NULL,0,&txd,&ovrl))
-		{
-			WaitForSingleObject(hEvt,INFINITE);
-		}
-		_len = sizeof(UCHAR);
-		RegQueryValueEx(hKey,"report type",NULL,NULL,
-			(unsigned char*)&report_type,&_len);
-		rt.format = report_format;
-		rt.type = report_type;
-		ovrl.Offset = ovrl.OffsetHigh = 0;
-		if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_REPORT_TYPE,
-			&rt,sizeof(REPORT_TYPE),NULL,0,&txd,&ovrl))
-		{
-			WaitForSingleObject(hEvt,INFINITE);
-		}
-		_len = 40;
-		RegQueryValueExA(hKey,"scheduled letters",NULL,NULL,(BYTE*)sched_letters,&_len);
-		_len = sizeof(DWORD);
-		RegQueryValueEx(hKey,"next boot",NULL,NULL,
-			(unsigned char*)&next_boot,&_len);
-		_len = sizeof(DWORD);
-		RegQueryValueEx(hKey,"every boot",NULL,NULL,
-			(unsigned char*)&every_boot,&_len);
-		RegCloseKey(hKey);
-	}
+	LoadSettings();
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
 	InitCommonControls();
@@ -394,47 +202,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(delta_h < 0) delta_h = 0;
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1),NULL,(DLGPROC)DlgProc);
 	/* delete all created gdi objects */
-	for(i = 0; i < 'Z' - 'A'; i++)
-	{
-		if(bit_map[i])
-			DeleteObject(bit_map[i]);
-		if(bit_map_dc[i])
-			DeleteDC(bit_map_dc[i]);
-	}
-	if(bit_map_grid)
-		DeleteObject(bit_map_grid);
-	if(bit_map_grid_dc)
-		DeleteDC(bit_map_grid_dc);
+	DeleteMaps();
 	/* save window coordinates and other settings to registry */
 	SaveSettings(HKEY_CURRENT_USER); /* for compatibility with 1.0.x versions */
 	SaveSettings(HKEY_LOCAL_MACHINE);
-	if(next_boot || every_boot)
-	{
-		/* add native program name to BootExecute registry parameter */
-		if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-			"SYSTEM\\CurrentControlSet\\Control\\Session Manager",
-			0,KEY_QUERY_VALUE | KEY_SET_VALUE,&hKey) == \
-			ERROR_SUCCESS)
-		{
-			_len = 510;
-			type = REG_MULTI_SZ;
-			RegQueryValueEx(hKey,"BootExecute",NULL,&type,boot_exec,&_len);
-			for(length = 0;strlen(boot_exec + length);)
-			{
-				if(!strcmp(boot_exec + length,"defrag_native"))
-					goto already_existed;
-				length += strlen(boot_exec + length) + 1;
-			}
-			strcpy(boot_exec + _len - 1, "defrag_native");
-			_len += strlen("defrag_native") + 1;
-			boot_exec[_len - 1] = 0;
-			RegSetValueEx(hKey,"BootExecute",0,REG_MULTI_SZ,boot_exec,_len);
-already_existed: {}
-		}
-	}
+	SaveBootTimeSettings();
 cleanup:
-	if(in_filter) free((void *)in_filter);
-	if(ex_filter) free((void *)ex_filter);
+	DestroyFilters();
 	if(hEventIsRunning) CloseHandle(hEventIsRunning);
 	if(hEventComplete) CloseHandle(hEventComplete);
 	if(hEvt) CloseHandle(hEvt);
@@ -580,7 +354,6 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	int cx,cy;
 	int dx,dy;
 	RECT _rc;
-	double n;
 
 	switch(msg)
 	{
@@ -608,12 +381,10 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			HideProgress();
 			hMap = GetDlgItem(hWnd,IDC_MAP);
 			GetWindowRect(hMap,&_rc);
-			iMAP_WIDTH = _rc.right - _rc.left - 2 * 2;
-			iMAP_HEIGHT = _rc.bottom - _rc.top - 2 * 2;
-			n = (double)(iMAP_WIDTH * iMAP_HEIGHT);
-			n /= (double)N_BLOCKS;
-			iBLOCK_SIZE = (int)floor(sqrt(n));
-			if(iBLOCK_SIZE == 10) iBLOCK_SIZE --;
+			_rc.bottom ++;
+			SetWindowPos(hMap,0,_rc.left,_rc.top,_rc.right - _rc.left,
+				_rc.bottom - _rc.top,SWP_NOMOVE);
+			CalculateBlockSize();
 			cx = GetSystemMetrics(SM_CXSCREEN);
 			cy = GetSystemMetrics(SM_CYSCREEN);
 			if(win_rc.left < 0) win_rc.left = 0; if(win_rc.top < 0) win_rc.top = 0;
@@ -691,10 +462,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 			return FALSE;
 		}
-/*	case WM_LBUTTONDOWN:
-		SetWindowPos(hWnd,0,0,0,0x22d,0x1b3,0);
-		return FALSE;
-*/	case WM_CLOSE:
+	case WM_CLOSE:
 		{
 			Stop();
 			GetWindowRect(hWnd,&_rc);
@@ -715,7 +483,7 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	MSG message;
 	LRESULT i, retval = 0;
 
-	if((iMsg == WM_KEYDOWN || iMsg == WM_LBUTTONDOWN) && busy_flag)
+	if((iMsg == WM_KEYDOWN || iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP) && busy_flag)
 		return 0;
 	if(iMsg == WM_KEYDOWN)
 	{
@@ -929,18 +697,9 @@ DWORD WINAPI UpdateMapThreadProc(LPVOID lpParameter)
 		SetWindowText(hProgressMsg,progress_msg);
 		SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 get_map:
-		if(!DeviceIoControl(hUltraDefragDevice,IOCTL_GET_CLUSTER_MAP,
-			NULL,0,_map,N_BLOCKS,&txd,&ovrl))
+		if(!RequestMap(hUltraDefragDevice,_map,&txd,&ovrl))
 				goto wait;
 		WaitForSingleObject(hEvt,INFINITE);
-		if(!(bit_map_dc[index]))
-		{
-			if(!CreateBitMap(index))
-			{
-				MessageBox(hWindow,"Fatal GDI error #1!","Error",MB_OK | MB_ICONEXCLAMATION);
-				return 0;
-			}
-		}
 		FillBitMap(index);
 		RedrawMap();
 wait: 
@@ -981,7 +740,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	cmd.command = (char)lpParameter;
 	cmd.letter = index + 'A';
 	cmd.sizelimit = sizelimit;
-	///cmd.report_format = report_format;
 
 	if(cmd.command == 'a')
 		ShowStatus(STAT_AN,linenumber);
@@ -1053,10 +811,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		dy = _rc.bottom - _rc.top;
 		SetWindowPos(hWnd,0,win_rc.left + 106,win_rc.top + 84,dx,dy,0);
 		return FALSE;
-/*	case WM_LBUTTONDOWN:
-		SetWindowPos(hWnd,0,0,0,344,286,0);
-		return FALSE;
-*/	case WM_COMMAND:
+	case WM_COMMAND:
 		switch(LOWORD(wParam))
 		{
 		case IDC_CREDITS:
@@ -1064,6 +819,10 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_LICENSE:
 			ShellExecute(hWindow,"open",".\\LICENSE.TXT",NULL,NULL,SW_SHOW);
+			break;
+		case IDC_HOMEPAGE:
+			SetFocus(GetDlgItem(hWnd,IDOK));
+			ShellExecute(hWindow,"open","http://ultradefrag.sourceforge.net",NULL,NULL,SW_SHOW);
 		}
 		if(LOWORD(wParam) != IDOK)
 			return FALSE;
@@ -1072,494 +831,4 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		return TRUE;
 	}
 	return FALSE;
-}
-
-ULONGLONG get_formatted_number(char *buf)
-{
-	char *ext = buf;
-	char c;
-	ULONGLONG m = 1;
-
-	while(*ext)
-	{
-		c = *ext;
-		switch(c)
-		{
-		case 'k':
-		case 'K':
-			m = 1024;
-			*ext = 0;
-			goto done;
-		case 'm':
-		case 'M':
-			m = 1024 * 1024;
-			*ext = 0;
-			goto done;
-		case 'g':
-		case 'G':
-			m = 1024 * 1024 * 1024;
-			*ext = 0;
-			goto done;
-		case 't':
-		case 'T':
-			m = (ULONGLONG)1024 * 1024 * 1024 * 1024;
-			*ext = 0;
-			goto done;
-		}
-		ext++;
-	}
-done:
-	return m * _atoi64(buf);
-}
-
-void format_number(ULONGLONG number,char *buf)
-{
-	char *ext[] = {""," Kb"," Mb"," Gb"," Tb"};
-	int i = 0;
-
-	while(number >= 1024)
-	{
-		i ++;
-		number /= 1024;
-	}
-	_i64toa(number,buf,10);
-	strcat(buf,ext[i]);
-}
-
-void UpdateFilter(HWND hWnd,short **buffer,DWORD ioctl_code)
-{
-	int length;
-	DWORD txd;
-	OVERLAPPED ovrl;
-
-	length = GetWindowTextLength(hWnd);
-	if(*buffer)
-	{
-		free((void *)*buffer);
-		*buffer = NULL;
-	}
-	if(length)
-	{
-		length ++; /* for term. zero */
-		*buffer = malloc(length * sizeof(short));
-		if(*buffer) GetWindowTextW(hWnd,*buffer,length);
-	}
-	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(DeviceIoControl(hUltraDefragDevice,ioctl_code,
-		*buffer,length * sizeof(short),NULL,0,&txd,&ovrl))
-	{
-		WaitForSingleObject(hEvt,INFINITE);
-	}
-}
-
-BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
-{
-	char buf[24];
-	DWORD new_dbgprint_level;
-	OVERLAPPED ovrl;
-	DWORD txd;
-	TC_ITEM tci;
-	LPNMHDR lpn;
-	LRESULT i;
-	REPORT_TYPE rt;
-	RECT _rc;
-	int dx, dy;
-
-	switch(msg)
-	{
-	case WM_INITDIALOG:
-		/* Window Initialization */
-		GetWindowRect(hWnd,&_rc);
-		dx = _rc.right - _rc.left;
-		dy = _rc.bottom - _rc.top;
-		SetWindowPos(hWnd,0,win_rc.left + 138,win_rc.top + 81,dx,dy,0);
-		hTabCtrl = GetDlgItem(hWnd,IDC_TAB1);
-		tci.mask = TCIF_TEXT;
-		tci.iImage = -1;
-		tci.pszText = "Filter";
-		SendMessage(hTabCtrl,TCM_INSERTITEM,0,(LPARAM)&tci);
-		tci.pszText = "  GUI";
-		SendMessage(hTabCtrl,TCM_INSERTITEM,1,(LPARAM)&tci);
-		tci.pszText = "Report";
-		SendMessage(hTabCtrl,TCM_INSERTITEM,2,(LPARAM)&tci);
-		tci.pszText = "Scheduler";
-		SendMessage(hTabCtrl,TCM_INSERTITEM,3,(LPARAM)&tci);
-		hFilterDlg = CreateDialogParam(hInstance,MAKEINTRESOURCE(IDD_FILTER),hTabCtrl,
-			(DLGPROC)FilterDlgProc,0);
-		ShowWindow(hFilterDlg,SW_SHOWNORMAL);
-		hGuiDlg = CreateDialogParam(hInstance,MAKEINTRESOURCE(IDD_GUI),hTabCtrl,
-			(DLGPROC)EmptyDlgProc,0);
-		ShowWindow(hGuiDlg,SW_HIDE);
-		hReportDlg = CreateDialogParam(hInstance,MAKEINTRESOURCE(IDD_REPORT),hTabCtrl,
-			(DLGPROC)EmptyDlgProc,0);
-		ShowWindow(hReportDlg,SW_HIDE);
-		hSchedDlg = CreateDialogParam(hInstance,MAKEINTRESOURCE(IDD_SCHEDULER),hTabCtrl,
-			(DLGPROC)EmptyDlgProc,0);
-		ShowWindow(hSchedDlg,SW_HIDE);
-
-		format_number(sizelimit,buf);
-		SetWindowText(GetDlgItem(hFilterDlg,IDC_SIZELIMIT),buf);
-		_itoa(update_interval,buf,10);
-		SetWindowText(GetDlgItem(hGuiDlg,IDC_UPDATE_INTERVAL),buf);
-		if(in_filter)
-			SetWindowTextW(GetDlgItem(hFilterDlg,IDC_INCLUDE),in_filter);
-		if(ex_filter)
-			SetWindowTextW(GetDlgItem(hFilterDlg,IDC_EXCLUDE),ex_filter);
-		if(report_format == UTF_FORMAT)
-			SendMessage(GetDlgItem(hReportDlg,IDC_UTF16),BM_SETCHECK,BST_CHECKED,0);
-		else
-			SendMessage(GetDlgItem(hReportDlg,IDC_ASCII),BM_SETCHECK,BST_CHECKED,0);
-		if(report_type == HTML_REPORT)
-			SendMessage(GetDlgItem(hReportDlg,IDC_HTML),BM_SETCHECK,BST_CHECKED,0);
-		else
-			SendMessage(GetDlgItem(hReportDlg,IDC_NONE),BM_SETCHECK,BST_CHECKED,0);
-		if(dbgprint_level == 0)
-			SendMessage(GetDlgItem(hReportDlg,IDC_DBG_NORMAL),BM_SETCHECK,BST_CHECKED,0);
-		else
-			SendMessage(GetDlgItem(hReportDlg,IDC_DBG_DETAILED),BM_SETCHECK,BST_CHECKED,0);
-		if(show_progress)
-			SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_SETCHECK,BST_CHECKED,0);
-		SetWindowText(GetDlgItem(hSchedDlg,IDC_LETTERS),sched_letters);
-		if(next_boot)
-			SendMessage(GetDlgItem(hSchedDlg,IDC_NEXTBOOT),BM_SETCHECK,BST_CHECKED,0);
-		if(every_boot)
-			SendMessage(GetDlgItem(hSchedDlg,IDC_EVERYBOOT),BM_SETCHECK,BST_CHECKED,0);
-		in_edit_flag = ex_edit_flag = FALSE;
-		return TRUE;
-/*	case WM_LBUTTONDOWN:
-		SetWindowPos(hWnd,0,0,0,279,266,0);
-		return FALSE;
-*/	case WM_NOTIFY:
-		lpn = (LPNMHDR)lParam;
-		if(lpn->code == TCN_SELCHANGE)
-		{
-			i = SendMessage(hTabCtrl,TCM_GETCURSEL,(WPARAM)lpn->hwndFrom,0);
-			switch(i)
-			{
-			case 0:
-				ShowWindow(hFilterDlg,SW_SHOW);
-				ShowWindow(hGuiDlg,SW_HIDE);
-				ShowWindow(hReportDlg,SW_HIDE);
-				ShowWindow(hSchedDlg,SW_HIDE);
-				break;
-			case 1:
-				ShowWindow(hFilterDlg,SW_HIDE);
-				ShowWindow(hGuiDlg,SW_SHOW);
-				ShowWindow(hReportDlg,SW_HIDE);
-				ShowWindow(hSchedDlg,SW_HIDE);
-				break;
-			case 2:
-				ShowWindow(hFilterDlg,SW_HIDE);
-				ShowWindow(hGuiDlg,SW_HIDE);
-				ShowWindow(hReportDlg,SW_SHOW);
-				ShowWindow(hSchedDlg,SW_HIDE);
-				break;
-			case 3:
-				ShowWindow(hFilterDlg,SW_HIDE);
-				ShowWindow(hGuiDlg,SW_HIDE);
-				ShowWindow(hReportDlg,SW_HIDE);
-				ShowWindow(hSchedDlg,SW_SHOW);
-			}
-		}
-		return TRUE;
-	case WM_COMMAND:
-		switch(LOWORD(wParam))
-		{
-		case IDOK:
-			GetWindowText(GetDlgItem(hFilterDlg,IDC_SIZELIMIT),buf,22);
-			sizelimit = get_formatted_number(buf);
-			GetWindowText(GetDlgItem(hGuiDlg,IDC_UPDATE_INTERVAL),buf,22);
-			update_interval = atoi(buf);
-			if(in_edit_flag)
-				UpdateFilter(GetDlgItem(hFilterDlg,IDC_INCLUDE),&in_filter,
-												IOCTL_SET_INCLUDE_FILTER);
-			if(ex_edit_flag)
-				UpdateFilter(GetDlgItem(hFilterDlg,IDC_EXCLUDE),&ex_filter,
-												IOCTL_SET_EXCLUDE_FILTER);
-			report_format = \
-				(SendMessage(GetDlgItem(hReportDlg,IDC_UTF16),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? UTF_FORMAT : ASCII_FORMAT;
-			report_type = \
-				(SendMessage(GetDlgItem(hReportDlg,IDC_HTML),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? HTML_REPORT : NO_REPORT;
-			rt.format = report_format;
-			rt.type = report_type;
-			ovrl.hEvent = hEvt;
-			ovrl.Offset = ovrl.OffsetHigh = 0;
-			if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_REPORT_TYPE,
-				&rt,sizeof(REPORT_TYPE),NULL,0,&txd,&ovrl))
-			{
-				WaitForSingleObject(hEvt,INFINITE);
-			}
-			new_dbgprint_level = \
-				(SendMessage(GetDlgItem(hReportDlg,IDC_DBG_NORMAL),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? 0 : 1;
-			if(new_dbgprint_level != dbgprint_level)
-			{
-				dbgprint_level = new_dbgprint_level;
-				ovrl.hEvent = hEvt;
-				ovrl.Offset = ovrl.OffsetHigh = 0;
-				if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_DBGPRINT_LEVEL,
-					&dbgprint_level,sizeof(DWORD),NULL,0,&txd,&ovrl))
-				{
-					WaitForSingleObject(hEvt,INFINITE);
-				}
-			}
-			show_progress = \
-				(SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? TRUE : FALSE;
-			if(!show_progress)
-				HideProgress();
-			GetWindowText(GetDlgItem(hSchedDlg,IDC_LETTERS),sched_letters,40);
-			next_boot = \
-				(SendMessage(GetDlgItem(hSchedDlg,IDC_NEXTBOOT),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? TRUE : FALSE;
-			every_boot = \
-				(SendMessage(GetDlgItem(hSchedDlg,IDC_EVERYBOOT),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? TRUE : FALSE;
-			EndDialog(hWnd,1);
-			return TRUE;
-		case IDCANCEL:
-			EndDialog(hWnd,0);
-			return TRUE;
-		}
-		return FALSE;
-	case WM_CLOSE:
-		EndDialog(hWnd,0);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-BOOL CALLBACK FilterDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
-{
-	switch(msg)
-	{
-	case WM_INITDIALOG:
-		return TRUE;
-	case WM_COMMAND:
-		switch(LOWORD(wParam))
-		{
-		case IDC_INCLUDE:
-			if(HIWORD(wParam) == EN_CHANGE)
-				in_edit_flag = TRUE;
-			break;
-		case IDC_EXCLUDE:
-			if(HIWORD(wParam) == EN_CHANGE)
-				ex_edit_flag = TRUE;
-			break;
-		}
-		return FALSE;
-	case WM_CLOSE:
-		EndDialog(hWnd,0);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
-{
-	switch(msg)
-	{
-	case WM_INITDIALOG:
-		return TRUE;
-	case WM_CLOSE:
-		EndDialog(hWnd,0);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-BOOL CreateBitMap(signed int index)
-{
-	BYTE *ppvBits;
-	BYTE *data;
-	BITMAPINFOHEADER *bh;
-	HDC hDC;
-	unsigned short res;
-	HBITMAP hBmp;
-
-	data = (BYTE *)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY, \
-		iMAP_WIDTH * iMAP_HEIGHT * sizeof(RGBQUAD) + sizeof(BITMAPINFOHEADER));
-	if(!data) return FALSE;
-	bh = (BITMAPINFOHEADER*)data;
-	hDC    = GetDC(hWindow);
-	res = (unsigned short)GetDeviceCaps(hDC, BITSPIXEL);
-	ReleaseDC(hWindow, hDC);
-
-	bh->biWidth       = iMAP_WIDTH;
-	bh->biHeight      = iMAP_HEIGHT;
-	bh->biPlanes      = 1;
-	bh->biBitCount    = res;
-	bh->biClrUsed     = bh->biClrImportant = 32;
-	bh->biSizeImage   = 0;
-	bh->biCompression = BI_RGB;
-	bh->biSize        = sizeof(BITMAPINFOHEADER);
-
-	/* create the bitmap */
-	hBmp = CreateDIBSection(0, (BITMAPINFO*)bh, \
-		DIB_RGB_COLORS, &ppvBits, NULL, 0);
-	if(!hBmp)
-	{
-		HeapFree(GetProcessHeap(),0,data);
-		return FALSE;
-	}
-
-	hDC = CreateCompatibleDC(0);
-	SelectObject(hDC,hBmp);
-	SetBkMode(hDC,TRANSPARENT);
-
-	if(index >= 0)
-	{
-		bit_map[index] = hBmp;
-		bit_map_dc[index] = hDC;
-	}
-	else
-	{
-		bit_map_grid = hBmp;
-		bit_map_grid_dc = hDC;
-	}
-	return TRUE;
-}
-
-BOOL CreateBitMapGrid()
-{
-	HBRUSH hBrush, hOldBrush;
-	HPEN hPen, hOldPen;
-	int i;
-	RECT rc;
-
-	if(!CreateBitMap(-1))
-		return FALSE;
-	/* draw grid */
-	rc.top = rc.left = 0;
-	rc.bottom = iMAP_HEIGHT;
-	rc.right = iMAP_WIDTH;
-	hBrush = GetStockObject(WHITE_BRUSH);
-	hOldBrush = SelectObject(bit_map_grid_dc,hBrush);
-	FillRect(bit_map_grid_dc,&rc,hBrush);
-	SelectObject(bit_map_grid_dc,hOldBrush);
-	DeleteObject(hBrush);
-
-	hPen = CreatePen(PS_SOLID,1,GRID_COLOR);
-	hOldPen = SelectObject(bit_map_grid_dc,hPen);
-	for(i = 0; i < BLOCKS_PER_HLINE + 1; i++)
-	{
-		MoveToEx(bit_map_grid_dc,(iBLOCK_SIZE + 1) * i,0,NULL);
-		LineTo(bit_map_grid_dc,(iBLOCK_SIZE + 1) * i,iMAP_HEIGHT);
-	}
-	for(i = 0; i < BLOCKS_PER_VLINE + 1; i++)
-	{
-		MoveToEx(bit_map_grid_dc,0,(iBLOCK_SIZE + 1) * i,NULL);
-		LineTo(bit_map_grid_dc,iMAP_WIDTH,(iBLOCK_SIZE + 1) * i);
-	}
-	SelectObject(bit_map_grid_dc,hOldPen);
-	DeleteObject(hPen);
-	return TRUE;
-}
-
-void DrawBlock(HDC hdc,char *__map,int space_state,COLORREF color)
-{
-	HBRUSH hBrush, hOldBrush;
-	int k,col,row;
-	RECT block_rc;
-
-	hBrush = CreateSolidBrush(color);
-	hOldBrush = SelectObject(hdc,hBrush);
-
-	for(k = 0; k < N_BLOCKS; k++)
-	{
-		if(__map[k] == space_state)
-		{
-			col = k % BLOCKS_PER_HLINE;
-			row = k / BLOCKS_PER_HLINE;
-			block_rc.top = (iBLOCK_SIZE + 1) * row + 1;
-			block_rc.left = (iBLOCK_SIZE + 1) * col + 1;
-			block_rc.right = block_rc.left + iBLOCK_SIZE;
-			block_rc.bottom = block_rc.top + iBLOCK_SIZE;
-			FillRect(hdc,&block_rc,hBrush);
-		}
-	}
-	SelectObject(hdc,hOldBrush);
-	DeleteObject(hBrush);
-}
-
-BOOL FillBitMap(int index)
-{
-	HDC hdc;
-	HBRUSH hBrush, hOldBrush;
-	char *_map;
-	RECT rc;
-
-	rc.top = rc.left = 0;
-	rc.bottom = iMAP_HEIGHT;
-	rc.right = iMAP_WIDTH;
-	_map = map[index];
-	hdc = bit_map_dc[index];
-	if(!hdc)
-		return FALSE;
-	hBrush = CreateSolidBrush(GRID_COLOR);
-	hOldBrush = SelectObject(hdc,hBrush);
-	FillRect(hdc,&rc,hBrush);
-	SelectObject(hdc,hOldBrush);
-	DeleteObject(hBrush);
-	/* Show free space */
-	DrawBlock(hdc,_map,FREE_SPACE,RGB(255,255,255));
-	/* Show unfragmented space */
-	DrawBlock(hdc,_map,UNFRAGM_SPACE,UNFRAGM_COLOR);
-	/* Show fragmented space */
-	DrawBlock(hdc,_map,FRAGM_SPACE,FRAGM_COLOR);
-	/* Show system space */
-	DrawBlock(hdc,_map,SYSTEM_SPACE,SYSTEM_COLOR);
-	/* Show MFT space */
-	DrawBlock(hdc,_map,MFT_SPACE,MFT_COLOR);
-	/* Show directory space */
-	DrawBlock(hdc,_map,DIR_SPACE,DIR_COLOR);
-	/* Show compressed space */
-	DrawBlock(hdc,_map,COMPRESSED_SPACE,COMPRESSED_COLOR);
-	/* Show no checked space */
-	DrawBlock(hdc,_map,NO_CHECKED_SPACE,NO_CHECKED_COLOR);
-	/* Show space of big files */
-	DrawBlock(hdc,_map,SYSTEM_OVERLIMIT_SPACE,SYSTEM_OVERLIMIT_COLOR);
-	DrawBlock(hdc,_map,FRAGM_OVERLIMIT_SPACE,FRAGM_OVERLIMIT_COLOR);
-	DrawBlock(hdc,_map,UNFRAGM_OVERLIMIT_SPACE,UNFRAGM_OVERLIMIT_COLOR);
-	DrawBlock(hdc,_map,DIR_OVERLIMIT_SPACE,DIR_OVERLIMIT_COLOR);
-	DrawBlock(hdc,_map,COMPRESSED_OVERLIMIT_SPACE,COMPRESSED_OVERLIMIT_COLOR);
-	return TRUE;
-}
-
-void ClearMap()
-{
-	HDC hdc;
-
-	hdc = GetDC(hMap);
-	BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_grid_dc,0,0,SRCCOPY);
-	ReleaseDC(hMap,hdc);
-}
-
-void RedrawMap()
-{
-	HDC hdc;
-	LRESULT index;
-
-	hdc = GetDC(hMap);
-	index = SendMessage(hList,LB_GETCURSEL,0,0);
-	if(index != LB_ERR)
-	{
-		index = letter_numbers[index - 2];
-	}
-	else
-	{
-		BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_grid_dc,0,0,SRCCOPY);
-		goto exit_redraw;
-	}
-	if(work_status[index] <= 1 || !bit_map_dc[index])
-	{
-		BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_grid_dc,0,0,SRCCOPY);
-		goto exit_redraw;
-	}
-	BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_dc[index],0,0,MERGECOPY);
-exit_redraw:
-	ReleaseDC(hMap,hdc);
 }

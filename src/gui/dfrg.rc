@@ -89,8 +89,8 @@ BEGIN
     LTEXT           "MFT",IDC_STATIC,156,22,28,12,SS_CENTERIMAGE
     LTEXT           "Directory",IDC_STATIC,24,22,48,12,SS_CENTERIMAGE
     GROUPBOX        "Legend",IDC_STATIC,7,3,180,44
-    CTEXT           "http://ultradefrag.sourceforge.net",IDC_STATIC,7,121,
-                    147,12,SS_CENTERIMAGE | WS_BORDER
+    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,7,121,
+                    147,12,BS_FLAT
     LTEXT           "1. Deactivate your virus scanner\n   to increase productivity.\n2. Directories on FAT && system files\n   will not be moved!",
                     IDC_STATIC,20,62,156,37
     CONTROL         116,IDC_STATIC,"Static",SS_BITMAP,12,36,7,6
@@ -100,78 +100,94 @@ BEGIN
     GROUPBOX        "Notes",IDC_STATIC,7,50,180,51
 END
 
-IDD_SETTINGS DIALOG DISCARDABLE  0, 0, 182, 148
+IDD_SETTINGS DIALOG DISCARDABLE  0, 0, 278, 165
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,29,132,55,12,WS_GROUP
-    PUSHBUTTON      "Cancel",IDCANCEL,98,132,55,12,NOT WS_TABSTOP
-    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32", 
-                    WS_GROUP | WS_TABSTOP,5,4,172,123
+    DEFPUSHBUTTON   "OK",IDOK,96,147,55,12,WS_GROUP
+    PUSHBUTTON      "Cancel",IDCANCEL,157,147,55,12,NOT WS_TABSTOP
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",WS_GROUP | WS_TABSTOP,
+                    5,4,266,138
+    PUSHBUTTON      "Help",IDC_SETTINGS_HELP,219,147,51,12
 END
 
-IDD_FILTER DIALOG DISCARDABLE  2, 15, 165, 105
+IDD_FILTER DIALOG DISCARDABLE  2, 15, 260, 116
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
+    GROUPBOX        "Files",IDC_STATIC,6,5,248,63
     LTEXT           "Enter multiple filter match strings separated by the ';' character.",
-                    IDC_STATIC,7,5,137,20
-    LTEXT           "Include:",IDC_STATIC,8,28,32,10
-    LTEXT           "Exclude:",IDC_STATIC,7,45,32,10
-    EDITTEXT        IDC_INCLUDE,41,27,119,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EXCLUDE,41,43,119,12,ES_AUTOHSCROLL
-    GROUPBOX        "Size limit",IDC_STATIC,6,62,155,32
-    LTEXT           "Ignore files greater than",IDC_STATIC,11,75,79,10
-    EDITTEXT        IDC_SIZELIMIT,92,73,63,12,ES_AUTOHSCROLL
+                    IDC_STATIC,10,17,236,12
+    LTEXT           "Include:",IDC_STATIC,11,34,30,10
+    LTEXT           "Exclude:",IDC_STATIC,10,50,31,10
+    EDITTEXT        IDC_INCLUDE,44,32,149,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EXCLUDE,44,48,149,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Load",IDC_LOAD1,198,32,50,12
+    PUSHBUTTON      "Save",IDC_SAVE1,198,48,50,12
+    GROUPBOX        "Size limit",IDC_STATIC,6,70,248,32
+    LTEXT           "Ignore files greater than",IDC_STATIC,11,83,77,10
+    EDITTEXT        IDC_SIZELIMIT,93,81,99,12,ES_AUTOHSCROLL
 END
 
-IDD_GUI DIALOG DISCARDABLE  2, 15, 165, 105
+IDD_GUI DIALOG DISCARDABLE  2, 15, 260, 119
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Map",IDC_STATIC,7,4,152,27
     LTEXT           "Map update interval (ms)",IDC_STATIC,11,16,84,9,
                     SS_CENTERIMAGE
-    EDITTEXT        IDC_UPDATE_INTERVAL,96,13,57,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_UPDATE_INTERVAL,96,15,57,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    GROUPBOX        "Progress",IDC_STATIC,7,34,152,31
     CONTROL         "Show progress bar",IDC_SHOWPROGRESS,"Button",
-                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,11,47,93,10
+                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP,9,33,95,10
 END
 
-IDD_REPORT DIALOG DISCARDABLE  2, 15, 165, 105
+IDD_REPORT DIALOG DISCARDABLE  2, 15, 259, 119
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Report type",IDC_STATIC,7,5,152,28
+    GROUPBOX        "Report type",IDC_STATIC,7,5,244,28
     CONTROL         "html",IDC_HTML,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
                     WS_TABSTOP,46,16,42,10
     CONTROL         "none",IDC_NONE,"Button",BS_AUTORADIOBUTTON,100,16,35,10
-    GROUPBOX        "Encoding",IDC_STATIC,7,36,152,30
+    GROUPBOX        "Encoding",IDC_STATIC,7,36,244,30
     CONTROL         "UTF-16",IDC_UTF16,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,46,48,45,9
     CONTROL         "ASCII",IDC_ASCII,"Button",BS_AUTORADIOBUTTON,100,48,38,
                     9
-    GROUPBOX        "Debug Print",IDC_STATIC,7,70,152,27
+    GROUPBOX        "Debug Print",IDC_STATIC,7,70,244,27
     CONTROL         "Normal",IDC_DBG_NORMAL,"Button",BS_AUTORADIOBUTTON | 
                     WS_GROUP | WS_TABSTOP,46,81,42,9
     CONTROL         "Detailed",IDC_DBG_DETAILED,"Button",BS_AUTORADIOBUTTON,
                     100,81,49,9
+    CONTROL         "Paranoid",IDC_DBG_PARANOID,"Button",BS_AUTORADIOBUTTON,153,
+                    81,58,10
 END
 
-IDD_SCHEDULER DIALOG DISCARDABLE  2, 15, 165, 105
+IDD_BOOT_SCHEDULER DIALOGEX 2, 15, 262, 119
 STYLE WS_CHILD
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "General",IDC_STATIC,6,5,153,41
-    LTEXT           "Volume letters",IDC_STATIC,11,23,47,10
-    EDITTEXT        IDC_LETTERS,68,21,85,12,ES_AUTOHSCROLL
-    GROUPBOX        "Boot time",IDC_STATIC,6,51,153,46
+    GROUPBOX        "General",IDC_STATIC,6,5,143,42
+    LTEXT           "Volume letters",IDC_STATIC,11,17,47,10
+    EDITTEXT        IDC_LETTERS,59,15,84,12,ES_AUTOHSCROLL
+    CONTROL         "Defragment only registry and pagefile  ",
+                    IDC_REGANDPAGEFILE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    7,30,136,12,WS_EX_RIGHT
+    GROUPBOX        "Files",IDC_STATIC,6,49,250,62
+    LTEXT           "Enter multiple filter match strings separated by the ';' character.",
+                    IDC_STATIC,10,60,240,12
+    LTEXT           "Include:",IDC_STATIC,11,76,30,10
+    LTEXT           "Exclude:",IDC_STATIC,10,93,31,10
+    EDITTEXT        IDC_INCLUDE2,44,75,150,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EXCLUDE2,44,91,150,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "Load",IDC_LOAD2,200,75,50,12
+    PUSHBUTTON      "Save",IDC_SAVE2,200,91,50,12
+    GROUPBOX        "Boot time",IDC_STATIC,154,5,102,42
     CONTROL         "Defragment at next boot",IDC_NEXTBOOT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,66,138,9
+                    BS_AUTOCHECKBOX | WS_TABSTOP,159,16,92,9
     CONTROL         "Defragment every boot",IDC_EVERYBOOT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,13,80,141,8
+                    BS_AUTOCHECKBOX | WS_TABSTOP,159,32,91,8
 END
 
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 

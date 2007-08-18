@@ -23,6 +23,8 @@ ALL : "$(OUTDIR)\Dfrg.exe"
 CLEAN :
 	-@erase "$(INTDIR)\dfrg.res"
 	-@erase "$(INTDIR)\main.obj"
+	-@erase "$(INTDIR)\map.obj"
+	-@erase "$(INTDIR)\settings.obj"
 	-@erase "$(INTDIR)\misc.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(OUTDIR)\Dfrg.exe"
@@ -41,11 +43,11 @@ CLEAN :
 !IF  "$(CFG)" == "Dfrg - Win32 Release"
 CPP_PROJ=/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\Dfrg.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\dfrg.res" /d "NDEBUG" 
-LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib advapi32.lib comctl32.lib shell32.lib msvcrt.lib ntdll.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\Dfrg.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\Dfrg.exe" 
+LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib advapi32.lib comctl32.lib shell32.lib msvcrt.lib ntdll.lib comdlg32.lib /nologo /subsystem:windows /incremental:no /pdb:"$(OUTDIR)\Dfrg.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\Dfrg.exe" 
 !ELSE
 CPP_PROJ=/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\Dfrg.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\dfrg.res" /d "_DEBUG" 
-LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib advapi32.lib comctl32.lib shell32.lib msvcrt.lib ntdll.lib /nologo /subsystem:windows /incremental:yes /pdb:"$(OUTDIR)\Dfrg.pdb" /debug /machine:I386 /nodefaultlib /out:"$(OUTDIR)\Dfrg.exe" /pdbtype:sept 
+LINK32_FLAGS=kernel32.lib user32.lib gdi32.lib advapi32.lib comctl32.lib shell32.lib msvcrt.lib ntdll.lib comdlg32.lib /nologo /subsystem:windows /incremental:yes /pdb:"$(OUTDIR)\Dfrg.pdb" /debug /machine:I386 /nodefaultlib /out:"$(OUTDIR)\Dfrg.exe" /pdbtype:sept 
 !ENDIF
 
 CPP=cl.exe
@@ -61,6 +63,8 @@ LINK32=link.exe
 LINK32_OBJS= \
 	"$(INTDIR)\dfrg.res" \
 	"$(INTDIR)\main.obj" \
+	"$(INTDIR)\map.obj" \
+	"$(INTDIR)\settings.obj" \
 	"$(INTDIR)\misc.obj"
 
 "$(OUTDIR)\Dfrg.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
