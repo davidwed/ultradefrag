@@ -146,6 +146,10 @@ Section "Ultra Defrag core files (required)" SecCore
   File "FAQ.TXT"
   Delete "$INSTDIR\defrag.exe"
   Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
+  SetOutPath "$INSTDIR\presets"
+  File "presets\standard"
+  File "presets\system"
+  /* create custom preset and correct program settings */
   DetailPrint "Install driver..."
   SetOutPath "$WINDIR\System32\Drivers"
   File "ultradfg.sys"
@@ -190,6 +194,7 @@ Section "Shortcuts" SecShortcuts
   AddSize 3
   DetailPrint "Install shortcuts..."
   SetShellVarContext all
+  SetOutPath $INSTDIR
   StrCpy $R0 "$SMPROGRAMS\DASoft\UltraDefrag"
   CreateDirectory $R0
   CreateShortCut "$R0\UltraDefrag.lnk" \
@@ -204,6 +209,7 @@ Section "Shortcuts" SecShortcuts
    "$INSTDIR\uninstall.exe"
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
    "$INSTDIR\Dfrg.exe"
+  WriteINIStr "$R0\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
   pop $R0
   
 SectionEnd
@@ -224,6 +230,9 @@ Section "Uninstall"
   Delete "$INSTDIR\README.TXT"
   Delete "$INSTDIR\FAQ.TXT"
   Delete "$INSTDIR\uninstall.exe"
+  Delete "$INSTDIR\presets\standard"
+  Delete "$INSTDIR\presets\system"
+  RMDir "$INSTDIR\presets"
   RMDir $INSTDIR
   DetailPrint "Uninstall driver and boot time defragger..."
 !if ${ULTRADFGARCH} != "i386"

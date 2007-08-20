@@ -35,6 +35,7 @@ echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE_U L"UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
+echo #define ABOUT_VERSION "About UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 
 if "%DDK_TYPE%" equ "Windows_Server2003_DDK" goto build_with_winddk
 :build_with_rosddk
@@ -135,6 +136,7 @@ echo Build installer...
 cd ..\bin
 copy /Y ..\UltraDefrag.nsi .\
 copy /Y ..\*.TXT .\
+xcopy /I /Y ..\presets .\presets
 upx udefrag.exe
 if %errorlevel% neq 0 goto fail
 upx dfrg.exe
@@ -148,6 +150,7 @@ REM ren ultradefrag-1.0.0.bin.i386.exe ultradefrag-%ULTRADFGVER%.bin.i386.exe
 if "%DDK_TYPE%" equ "ReactOS_DDK" goto build_source_package
 copy /Y .\UltraDefrag.nsi .\amd64\
 copy /Y .\*.TXT .\amd64\
+xcopy /I /Y .\presets .\amd64\presets
 cd amd64
 echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
 echo !define ULTRADFGARCH amd64 >> ultradefrag_globals.nsh
@@ -157,6 +160,7 @@ if %errorlevel% neq 0 goto fail
 cd..
 copy /Y .\UltraDefrag.nsi .\ia64\
 copy /Y .\*.TXT .\ia64\
+xcopy /I /Y .\presets .\ia64\presets
 cd ia64
 echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
 echo !define ULTRADFGARCH ia64 >> ultradefrag_globals.nsh
@@ -177,6 +181,7 @@ xcopy /I /Y .\native .\rel_src\native
 xcopy /I /Y .\x64_inst .\rel_src\x64_inst
 xcopy /I /Y .\include .\rel_src\include
 xcopy /I /Y .\shared .\rel_src\shared
+xcopy /I /Y .\presets .\rel_src\presets
 
 copy .\*.* .\rel_src\
 cd .\rel_src
