@@ -74,7 +74,7 @@ BEGIN
                     WS_BORDER,30,202,277,5
 END
 
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 194, 153
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 194, 173
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION ABOUT_VERSION
 FONT 9, "Courier New"
@@ -91,7 +91,7 @@ BEGIN
     CONTROL         122,IDC_STATIC,"Static",SS_BITMAP,80,15,7,6
     CONTROL         123,IDC_STATIC,"Static",SS_BITMAP,18,25,7,6
     CONTROL         124,IDC_STATIC,"Static",SS_BITMAP,80,25,7,6
-    LTEXT           "darker colors represent files above the size threshold",
+    LTEXT           "The darker colors represent files above the size threshold.",
                     IDC_STATIC,12,36,127,18
     LTEXT           "Fragmented",IDC_STATIC,28,12,42,12,SS_CENTERIMAGE
     LTEXT           "Unfragmented",IDC_STATIC,90,12,52,12,SS_CENTERIMAGE
@@ -100,13 +100,13 @@ BEGIN
     LTEXT           "MFT",IDC_STATIC,156,33,28,12,SS_CENTERIMAGE
     LTEXT           "Directory",IDC_STATIC,28,22,40,12,SS_CENTERIMAGE
     LTEXT           "Compressed",IDC_STATIC,96,24,47,8
-    GROUPBOX        "Notes",IDC_STATIC,7,63,180,51
-    LTEXT           "1. Deactivate your virus scanner\n   to increase productivity.\n2. Directories on FAT && system files\n   will not be moved!",
-                    IDC_STATIC,20,75,156,37
-    PUSHBUTTON      "Credits",IDC_CREDITS,7,119,87,10
-    PUSHBUTTON      "License",IDC_LICENSE,101,119,86,10
-    DEFPUSHBUTTON   "OK",IDOK,158,134,29,12
-    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,7,134,
+    GROUPBOX        "Notes",IDC_STATIC,7,63,180,71
+    LTEXT           "1. Deactivate your virus scanner\n   for better performance.\n2. Directories on FAT volumes cannot be\n   moved.\n3. System files will not be moved. Run\n   the boot time scan to scan system\n   files.",
+                    IDC_STATIC,20,75,156,57
+    PUSHBUTTON      "Credits",IDC_CREDITS,7,139,87,10
+    PUSHBUTTON      "License",IDC_LICENSE,101,139,86,10
+    DEFPUSHBUTTON   "OK",IDOK,158,154,29,12
+    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,7,154,
                     147,12,BS_FLAT
 END
 
