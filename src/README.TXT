@@ -5,13 +5,13 @@ Updated Aug 16th, 2007
 
 1. What is UltraDefrag?
 
-   UltraDefrag is powerful Open Source defragmentation tool for Windows 2000 
-and later operating systems.  It is very fast, because the defragmenting is 
-done by kernel-mode driver.  They are three interfaces to them: graphical,
-console and native. The GUI is very useful, because visually represents your
-filesystem as a color coded cluster map. The console is another option for 
-those that prefer the command line. It is also benificial in that it can be run
-in the task scheduler. 
+   UltraDefrag is a powerful Open Source defragmentation utility for Windows
+2000 and later operating systems.  It is very fast, because the defragmenting
+is done by kernel-mode driver. They are three interfaces to them: graphical,
+console and native.  The GUI is very useful, because visually represents your
+filesystem as a color coded cluster  map. The console is another option for 
+those that prefer the command line.  It is also benificial in that it can be 
+run in the task scheduler. 
 Finally, the native executable will run at boot time in a manner similar to 
 chkdsk.
 

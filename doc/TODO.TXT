@@ -20,10 +20,10 @@ Items to describe:
 
 4.  (DONE) Pause and Stop actions are equal. You can analyse volume once and then
     defrag and/or compact them few times.
-5.  FAQ must be rewritten in good style
-6.  Readme.txt must be rewritten in good style
+5.  (DONE) FAQ must be rewritten in good style
+6.  (DONE) Readme.txt must be rewritten in good style
 7.  To developers: program has clear and easy to understand code.
-8.  Full support for compressed files
+8.  Full support for NTFS compressed files.
 9.  (DONE) Console command line options description. And nice appearance description.
 10. files with size over limit are shown with dark color
 11. full description of filter using. patterns are applied to full path. So \temp

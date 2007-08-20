@@ -1,21 +1,23 @@
 Frequently Asked Questions
 
-Q.: I have 3 Gb of RAM, but in Debug Output I find message 'No enough memory'.
-    I have 150 millions clusters on volume.
+Q.: I have 3 Gb of RAM, but the Debug Output includes the message 'No enough memory'.
+    I have 150 millions clusters on the volume I am trying to defrag.
 
-A.: You have too much clusters on specified volume. Par example, you have 
-    150 millions of clusters. Therefore, you must have more than 150 Mb of 
-    nonpaged memory. But all of the supported versions of Windows 
-    (at least 2000, XP, 2003) give you maximum 256 Mb of this kind of memory.
+A.: You have too many clusters on the specified volume.  Since you have 
+    150 millions of clusters, you must have more than 150 Mb of 
+    nonpaged memory. All versions of Windows that UltraDefrag run on (at least 
+    Windows 2000, XP, and 2003) allow a maximum of 256 Mb of nonpaged memory.
     In addition, if you use boot parameter /3GB limit is 128 Mb.
-    Note that many drivers use nonpaged memory, not only ultradfg.sys!
+    Note that many drivers besides ultradfg.sys use nonpaged memory!
  
-    There are few ways how YOU can fix this problem:
-    1. increase cluster size of volume – it’s the best thing.
-    2. buy new PC with x64 architecture, setup Windows x64 edition and enjoy.
-       Because on x64 you can have 128 Gb of nonpaged memory.
-    3. split your big volume into several small volumes
-       and therefore process parts separately.
+    There are few ways how YOU, the user, can fix this problem:
+    1. Increase cluster size of volume. This is probably a good idea for
+       performance reasons.
+    2. Buy new PC with a 64 bit processor, and install a 64 bit version of
+       Windows. 64 bit versions of WIndows support up to 128 Gb of nonpaged
+       memory.
+    3. Split your big volume into several smaller partitions. Each partition 
+       will have less clusters.
 
 
 Q.: How can I use filters?
@@ -24,24 +26,24 @@ A.: The include field is where you enter substring expressions that match
     file names (incl. path) that you want to defragment. And the exclude field
     expressions disable defragmentation of matching files. You can enter 
     multiple expressions, separating each with a semicolon (;).
-    In next field named 'Ignore files greater than' you can specify size limit
-    of files. P.a.: 12 Mb.
-
+    The next field in the form is captioned 'Ignore files greater than.' Files
+    over this size are not dedragmented. You may specify sizes with the following 
+    suffixes: (Kb | Mb | Gb | Tb),
 
 Q.: I've seen message "Can't load ultradfg driver!" on Windows Vista. I think 
-    that Vista prevents loading because driver signature check is enabled.
-    How can I disable it?
+    that Vista is preventing this driver from loading because the signature
+    check is enabled.  How can I disable it?
 
-A.: Christopher Naegel give you following instructions:
+A.: Thanks to Christopher Naegel for providing the following instructions:
     1. Open a command line with admin-rights:
           Start -> execute -> CMD (with admin rights).
     2. Type:
           bcdedit /set loadoptions ”DDISABLE_INTEGRITY_CHECKS”
           bcdedit /set nointegritychecks ON
-    3. Close command line and start group policy editor:
+    3. Close the command prompt and start group policy editor:
           Start -> execute -> gpedit.msc
-    4. go to:
-          user configuration -> administrative templates -> System ->
-          driver installation -> Code signing for device drivers
-    5. enable this policy and set it to Ignore state.
+    4. Go to:
+          User Configuration -> Administrative Templates -> System ->
+          Driver Installation -> Code Signing for device drivers
+    5. Enable this policy and set it to Ignore state.
 
