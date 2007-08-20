@@ -200,7 +200,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	InitCommonControls();
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
-	DialogBox(hInstance, MAKEINTRESOURCE(IDD_DIALOG1),NULL,(DLGPROC)DlgProc);
+	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
 	/* delete all created gdi objects */
 	DeleteMaps();
 	/* save window coordinates and other settings to registry */
@@ -362,7 +362,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			/* Window Initialization */
 			hWindow = hWnd;
 			hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
-			hList = GetDlgItem(hWnd,IDC_LIST1);
+			hList = GetDlgItem(hWnd,IDC_VOLUMES);
 			hBtnAnalyse = GetDlgItem(hWnd,IDC_ANALYSE);
 			hBtnDfrg = GetDlgItem(hWnd,IDC_DEFRAGM);
 			hBtnCompact = GetDlgItem(hWnd,IDC_COMPACT);
@@ -393,11 +393,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			dx = _rc.right - _rc.left;
 			dy = _rc.bottom - _rc.top + delta_h;
 			SetWindowPos(hWnd,0,win_rc.left,win_rc.top,dx,dy,0);
-			hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_ICON1));
+			hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
 			SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
 			if(hIcon) DeleteObject(hIcon);
 			/* set window procs */
-			OldListProc = (WNDPROC)SetWindowLongPtr(GetDlgItem(hWnd,IDC_LIST1),GWLP_WNDPROC,(LONG_PTR)ListWndProc);
+			OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
 			OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
 			OldBtnWndProc = (WNDPROC)SetWindowLongPtr(hBtnAnalyse,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
 			SetWindowLongPtr(hBtnDfrg,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
@@ -591,9 +591,9 @@ BOOL CreateStatusBar()
 		a[2] = (int)floor(320 * x); a[3] = (int)floor(440 * x);
 		a[4] = rc.right - rc.left;
 		SendMessage(hStatus,SB_SETPARTS,N_OF_STATUSBAR_PARTS + 1,(LPARAM)a);
-		SetIcon(0,IDI_ICON2); SetIcon(1,IDI_ICON3);
-		SetIcon(2,IDI_ICON4); SetIcon(3,IDI_ICON5);
-		SetIcon(4,IDI_ICON6);
+		SetIcon(0,IDI_DIR); SetIcon(1,IDI_UNFRAGM);
+		SetIcon(2,IDI_FRAGM); SetIcon(3,IDI_CMP);
+		SetIcon(4,IDI_MFT);
 		return TRUE;
 	}
 	return FALSE;

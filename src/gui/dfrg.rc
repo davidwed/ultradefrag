@@ -24,28 +24,32 @@
 #include "../include/version.h"
 #include "resource.h"
 
-IDI_ICON1               ICON    DISCARDABLE     "res/ICON1.ICO"
-IDI_ICON2               ICON    DISCARDABLE     "res/icon2.ico"
-IDI_ICON3               ICON    DISCARDABLE     "res/icon3.ico"
-IDI_ICON4               ICON    DISCARDABLE     "res/icon4.ico"
-IDI_ICON5               ICON    DISCARDABLE     "res/icon5.ico"
-IDI_ICON6               ICON    DISCARDABLE     "res/icon6.ico"
+IDI_APP                 ICON    DISCARDABLE     "res/app.ico"
+IDI_DIR                 ICON    DISCARDABLE     "res/dir.ico"
+IDI_UNFRAGM             ICON    DISCARDABLE     "res/unfragm.ico"
+IDI_FRAGM               ICON    DISCARDABLE     "res/fragm.ico"
+IDI_CMP                 ICON    DISCARDABLE     "res/cmp.ico"
+IDI_MFT                 ICON    DISCARDABLE     "res/mft.ico"
 
-IDB_BITMAP1             BITMAP  DISCARDABLE     "res/bitmap1.bmp"
-IDB_BITMAP2             BITMAP  DISCARDABLE     "res/bitmap2.bmp"
-IDB_BITMAP3             BITMAP  DISCARDABLE     "res/bitmap3.bmp"
-IDB_BITMAP4             BITMAP  DISCARDABLE     "res/bitmap4.bmp"
-IDB_BITMAP5             BITMAP  DISCARDABLE     "res/bitmap5.bmp"
-IDB_BITMAP6             BITMAP  DISCARDABLE     "res/bitmap6.bmp"
-IDB_BITMAP7             BITMAP  DISCARDABLE     "res/bitmap7.bmp"
+IDB_FRAGM               BITMAP  DISCARDABLE     "res/fragm.bmp"
+IDB_UNFRAGM             BITMAP  DISCARDABLE     "res/unfragm.bmp"
+IDB_SYS                 BITMAP  DISCARDABLE     "res/sys.bmp"
+IDB_FREE                BITMAP  DISCARDABLE     "res/free.bmp"
+IDB_MFT                 BITMAP  DISCARDABLE     "res/mft.bmp"
+IDB_DIR                 BITMAP  DISCARDABLE     "res/dir.bmp"
+IDB_CMP                 BITMAP  DISCARDABLE     "res/cmp.bmp"
+IDB_FRAGM_A             BITMAP  DISCARDABLE     "res/fragm_a.bmp"
+IDB_UNFRAGM_A           BITMAP  DISCARDABLE     "res/unfragm_a.bmp"
+IDB_DIR_A               BITMAP  DISCARDABLE     "res/dir_a.bmp"
+IDB_CMP_A               BITMAP  DISCARDABLE     "res/cmp_a.bmp"
 
-IDD_DIALOG1 DIALOGEX 0, 0, 315, 218
+IDD_MAIN DIALOGEX 0, 0, 315, 218
 STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION VERSIONINTITLE
 FONT 9, "Courier New", 0, 0, 0x1
 BEGIN
-    LISTBOX         IDC_LIST1,7,7,300,66,NOT LBS_NOTIFY | LBS_USETABSTOPS | 
+    LISTBOX         IDC_VOLUMES,7,7,300,66,NOT LBS_NOTIFY | LBS_USETABSTOPS | 
                     LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | 
                     WS_GROUP | WS_TABSTOP
     PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,76,61,10,WS_GROUP
@@ -70,34 +74,40 @@ BEGIN
                     WS_BORDER,30,202,277,5
 END
 
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 193, 139
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 194, 153
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About UltraDefrag"
+CAPTION ABOUT_VERSION
 FONT 9, "Courier New"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,158,121,29,12
-    CONTROL         103,IDC_STATIC,"Static",SS_BITMAP,12,15,7,6
-    CONTROL         104,IDC_STATIC,"Static",SS_BITMAP,74,15,7,6
-    CONTROL         105,IDC_STATIC,"Static",SS_BITMAP,74,25,7,6
-    CONTROL         106,IDC_STATIC,"Static",SS_BITMAP,144,15,7,6
-    CONTROL         108,IDC_STATIC,"Static",SS_BITMAP,144,25,7,6
-    CONTROL         109,IDC_STATIC,"Static",SS_BITMAP,12,25,7,6
-    LTEXT           "Fragmented",IDC_STATIC,23,12,48,12,SS_CENTERIMAGE
-    LTEXT           "Unfragmented",IDC_STATIC,86,12,55,12,SS_CENTERIMAGE
-    LTEXT           "System",IDC_STATIC,86,22,38,12,SS_CENTERIMAGE
+    GROUPBOX        "Legend",IDC_STATIC,7,3,180,55
+    CONTROL         114,IDC_STATIC,"Static",SS_BITMAP,12,15,7,6
+    CONTROL         115,IDC_STATIC,"Static",SS_BITMAP,74,15,7,6
+    CONTROL         116,IDC_STATIC,"Static",SS_BITMAP,144,25,7,6
+    CONTROL         117,IDC_STATIC,"Static",SS_BITMAP,144,15,7,6
+    CONTROL         118,IDC_STATIC,"Static",SS_BITMAP,144,36,7,6
+    CONTROL         119,IDC_STATIC,"Static",SS_BITMAP,12,25,7,6
+    CONTROL         120,IDC_STATIC,"Static",SS_BITMAP,74,25,7,6
+    CONTROL         121,IDC_STATIC,"Static",SS_BITMAP,18,15,7,6
+    CONTROL         122,IDC_STATIC,"Static",SS_BITMAP,80,15,7,6
+    CONTROL         123,IDC_STATIC,"Static",SS_BITMAP,18,25,7,6
+    CONTROL         124,IDC_STATIC,"Static",SS_BITMAP,80,25,7,6
+    LTEXT           "darker colors represent files above the size threshold",
+                    IDC_STATIC,12,36,127,18
+    LTEXT           "Fragmented",IDC_STATIC,28,12,42,12,SS_CENTERIMAGE
+    LTEXT           "Unfragmented",IDC_STATIC,90,12,52,12,SS_CENTERIMAGE
+    LTEXT           "System",IDC_STATIC,156,22,28,12,SS_CENTERIMAGE
     LTEXT           "Free",IDC_STATIC,156,12,24,12,SS_CENTERIMAGE
-    LTEXT           "MFT",IDC_STATIC,156,22,28,12,SS_CENTERIMAGE
-    LTEXT           "Directory",IDC_STATIC,24,22,48,12,SS_CENTERIMAGE
-    GROUPBOX        "Legend",IDC_STATIC,7,3,180,44
-    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,7,121,
-                    147,12,BS_FLAT
+    LTEXT           "MFT",IDC_STATIC,156,33,28,12,SS_CENTERIMAGE
+    LTEXT           "Directory",IDC_STATIC,28,22,40,12,SS_CENTERIMAGE
+    LTEXT           "Compressed",IDC_STATIC,96,24,47,8
+    GROUPBOX        "Notes",IDC_STATIC,7,63,180,51
     LTEXT           "1. Deactivate your virus scanner\n   to increase productivity.\n2. Directories on FAT && system files\n   will not be moved!",
-                    IDC_STATIC,20,62,156,37
-    CONTROL         116,IDC_STATIC,"Static",SS_BITMAP,12,36,7,6
-    LTEXT           "Compressed",IDC_STATIC,22,35,47,8
-    PUSHBUTTON      "Credits",IDC_CREDITS,7,106,87,10
-    PUSHBUTTON      "License",IDC_LICENSE,101,106,86,10
-    GROUPBOX        "Notes",IDC_STATIC,7,50,180,51
+                    IDC_STATIC,20,75,156,37
+    PUSHBUTTON      "Credits",IDC_CREDITS,7,119,87,10
+    PUSHBUTTON      "License",IDC_LICENSE,101,119,86,10
+    DEFPUSHBUTTON   "OK",IDOK,158,134,29,12
+    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,7,134,
+                    147,12,BS_FLAT
 END
 
 IDD_SETTINGS DIALOG DISCARDABLE  0, 0, 278, 165

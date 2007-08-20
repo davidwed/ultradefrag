@@ -128,55 +128,27 @@ SOURCE=.\resource.h
 # PROP Default_Filter "ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
 # Begin Source File
 
-SOURCE=.\res\bitmap1.bmp
+SOURCE=.\res\app.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\bitmap2.bmp
+SOURCE=.\res\cmp.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\bitmap3.bmp
+SOURCE=.\res\dir.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\bitmap4.bmp
+SOURCE=.\res\fragm.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\bitmap5.bmp
+SOURCE=.\res\mft.ico
 # End Source File
 # Begin Source File
 
-SOURCE=.\res\bitmap6.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\bitmap7.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\ICON1.ICO
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\icon2.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\icon3.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\icon4.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\icon5.ico
-# End Source File
-# Begin Source File
-
-SOURCE=.\res\icon6.ico
+SOURCE=.\res\unfragm.ico
 # End Source File
 # End Group
 # End Target

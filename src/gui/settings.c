@@ -623,6 +623,7 @@ void LoadFilter(HWND hWnd,HWND hIncl,HWND hExcl,BOOL is_boot_time_filter)
 	ofn.nMaxFile = MAX_PATH;
 	ofn.lpstrFileTitle = szFileTitle;
 	ofn.nMaxFileTitle = MAX_PATH;
+	ofn.lpstrInitialDir = ".\\presets";
 	ofn.Flags = OFN_FILEMUSTEXIST;
 	if(GetOpenFileName(&ofn))
 	{
@@ -671,6 +672,7 @@ void SaveFilter(HWND hWnd,HWND hIncl,HWND hExcl)
 	ofn.nMaxFile = MAX_PATH;
 	ofn.lpstrFileTitle = szFileTitle;
 	ofn.nMaxFileTitle = MAX_PATH;
+	ofn.lpstrInitialDir = ".\\presets";
 	ofn.Flags = OFN_PATHMUSTEXIST;
 	if(GetSaveFileName(&ofn))
 	{

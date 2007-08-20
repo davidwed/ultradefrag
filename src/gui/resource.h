@@ -21,28 +21,37 @@
  *  Resource header for graphical interface.
  */
 
-#define IDI_ICON1                       101
-#define IDD_DIALOG1                     102
-#define IDB_BITMAP1                     103
-#define IDB_BITMAP2                     104
-#define IDB_BITMAP3                     105
-#define IDB_BITMAP4                     106
-#define IDD_DIALOG2                     107
-#define IDB_BITMAP5                     108
-#define IDB_BITMAP6                     109
-#define IDD_ABOUT                       110
-#define IDI_ICON2                       111
-#define IDI_ICON3                       112
-#define IDI_ICON4                       113
-#define IDI_ICON5                       114
-#define IDI_ICON6                       115
-#define IDB_BITMAP7                     116
-#define IDR_ACCELERATOR1                117
-#define IDD_SETTINGS                    118
-#define IDD_FILTER                      119
-#define IDD_GUI                         120
-#define IDD_REPORT                      121
-#define IDC_LIST1                       1002
+#define IDD_MAIN                        101
+#define IDD_ABOUT                       102
+#define IDD_SETTINGS                    103
+#define IDD_FILTER                      104
+#define IDD_GUI                         105
+#define IDD_REPORT                      106
+#define IDD_BOOT_SCHEDULER              107
+
+#define IDI_APP                         108
+#define IDI_DIR                         109
+#define IDI_UNFRAGM                     110
+#define IDI_FRAGM                       111
+#define IDI_CMP                         112
+#define IDI_MFT                         113
+
+#define IDB_FRAGM                       114
+#define IDB_UNFRAGM                     115
+#define IDB_SYS                         116
+#define IDB_FREE                        117
+#define IDB_MFT                         118
+#define IDB_DIR                         119
+#define IDB_CMP                         120
+
+#define IDB_FRAGM_A                     121
+#define IDB_UNFRAGM_A                   122
+#define IDB_DIR_A                       123
+#define IDB_CMP_A                       124
+
+#define IDR_ACCELERATOR1                125
+
+#define IDC_VOLUMES                     1002
 #define IDC_ANALYSE                     1003
 #define IDC_DEFRAGM                     1004
 #define IDC_PAUSE                       1005
@@ -71,7 +80,6 @@
 #define IDC_SHOWPROGRESS                1028
 #define IDC_HTML                        1029
 #define IDC_NONE                        1030
-#define IDD_BOOT_SCHEDULER              1031
 #define IDC_LETTERS                     1032
 #define IDC_NEXTBOOT                    1033
 #define IDC_EVERYBOOT                   1034
@@ -89,7 +97,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        122
+#define _APS_NEXT_RESOURCE_VALUE        126
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1044
 #define _APS_NEXT_SYMED_VALUE           101
