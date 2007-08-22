@@ -22,7 +22,7 @@ Items to describe:
     defrag and/or compact them few times.
 5.  (DONE) FAQ must be rewritten in good style
 6.  (DONE) Readme.txt must be rewritten in good style
-7.  To developers: program has clear and easy to understand code.
+7.  (DONE) To developers: program has clear and easy to understand code.
 8.  (DONE) Full support for NTFS compressed files.
 9.  (DONE) Console command line options description. And nice appearance description.
 10. (DONE) files with size over limit are shown with dark color
@@ -34,14 +34,14 @@ Items to describe:
 14. (DONE) They are versions for all of the supported processor architectures for x64 
     Windows.
 15. (DONE) progress bar disappears when you select other drive: it's normal behaviour
-16. can analyse and defrag floppies (isn't useful but ...)
-17. report - comment column:
+16. (DONE) can analyse and defrag floppies (isn't useful but ...)
+17. (DONE) report - comment column:
     [OVR] - file is over limit
     [DIR] - is directory
     [CMP] - compressed file
-18. about report - small size but very useful [should be in future] - generated 
+18. (DONE) about report - small size but very useful [should be in future] - generated 
     by driver very fast.
 19. (DONE) filter: ignore files greater than: n [Kb | Mb | Gb | Tb]
-20. Debug print: normal to view useful messages about analyse / defrag progress;
+20. (DONE) Debug print: normal to view useful messages about analyse / defrag progress;
     detailed to send to an author when error encountered.
 21. (DONE) Virus scanner must be stopped.
