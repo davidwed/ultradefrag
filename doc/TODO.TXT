@@ -23,15 +23,15 @@ Items to describe:
 5.  (DONE) FAQ must be rewritten in good style
 6.  (DONE) Readme.txt must be rewritten in good style
 7.  To developers: program has clear and easy to understand code.
-8.  Full support for NTFS compressed files.
+8.  (DONE) Full support for NTFS compressed files.
 9.  (DONE) Console command line options description. And nice appearance description.
-10. files with size over limit are shown with dark color
-11. full description of filter using. patterns are applied to full path. So \temp
+10. (DONE) files with size over limit are shown with dark color
+11. (DONE) full description of filter using. patterns are applied to full path. So \temp
     include either temporary files or internet explorer cache.
 12. in report - all excluded files are marked with black color
 13. (DONE) settings - report encoding - ASCII is useful for Internet explorer and 
     utf-16 for mozilla firefox (better for chinese and japanese)
-14. They are versions for all of the supported processor architectures for x64 
+14. (DONE) They are versions for all of the supported processor architectures for x64 
     Windows.
 15. (DONE) progress bar disappears when you select other drive: it's normal behaviour
 16. can analyse and defrag floppies (isn't useful but ...)
