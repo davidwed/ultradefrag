@@ -452,4 +452,76 @@ NtLoadDriver(IN PUNICODE_STRING DriverServiceName);
 NTSTATUS NTAPI
 NtUnloadDriver(IN PUNICODE_STRING DriverServiceName);
 
+typedef struct _KEY_VALUE_PARTIAL_INFORMATION
+{
+    ULONG TitleIndex;
+    ULONG Type;
+    ULONG DataLength;
+    UCHAR Data[1];
+} KEY_VALUE_PARTIAL_INFORMATION, *PKEY_VALUE_PARTIAL_INFORMATION;
+
+typedef enum _KEY_VALUE_INFORMATION_CLASS
+{
+    KeyValueBasicInformation,
+    KeyValueFullInformation,
+    KeyValuePartialInformation,
+    KeyValueFullInformationAlign64,
+    KeyValuePartialInformationAlign64
+} KEY_VALUE_INFORMATION_CLASS;
+
+NTSTATUS NTAPI ZwOpenKey(
+    OUT PHANDLE KeyHandle,
+    IN ACCESS_MASK DesiredAccess,
+    IN POBJECT_ATTRIBUTES ObjectAttributes
+);
+
+NTSTATUS
+NTAPI
+ZwQueryValueKey(
+    IN HANDLE KeyHandle,
+    IN PUNICODE_STRING ValueName,
+    IN KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
+    OUT PVOID KeyValueInformation,
+    IN ULONG Length,
+    OUT PULONG ResultLength
+);
+
+NTSTATUS
+NTAPI
+ZwSetValueKey(
+    IN HANDLE  KeyHandle,
+    IN PUNICODE_STRING  ValueName,
+    IN ULONG  TitleIndex  OPTIONAL,
+    IN ULONG  Type,
+    IN PVOID  Data,
+    IN ULONG  DataSize
+);
+
+NTSTATUS
+NTAPI
+ZwClose(
+    IN HANDLE Handle
+);
+
+typedef struct _CLIENT_ID
+{
+    HANDLE UniqueProcess;
+    HANDLE UniqueThread;
+} CLIENT_ID, *PCLIENT_ID;
+
+NTSTATUS
+NTAPI
+RtlCreateUserThread(
+    IN HANDLE ProcessHandle,
+    IN PSECURITY_DESCRIPTOR SecurityDescriptor,
+    IN BOOLEAN CreateSuspended,
+    IN LONG StackZeroBits,
+    IN ULONG StackReserve,
+    IN ULONG StackCommit,
+    IN PTHREAD_START_ROUTINE StartAddress,
+    IN PVOID Parameter,
+    IN OUT PHANDLE ThreadHandle,
+    IN OUT PCLIENT_ID ClientId
+);
+
 #endif /* _NTNDK_H_ */

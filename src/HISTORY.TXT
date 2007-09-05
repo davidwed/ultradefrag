@@ -2,6 +2,11 @@ HISTORY
 
 [version number (x86 driver size in Kbytes) - changes description]
 
+1.1.0 (22.5) - BOOT TIME DEFRAG ADDED; filter presets added;
+               'progress bar disappears' bug fixed; installer improved;
+               'paranoid debug print' option added;
+               DOCUMENTATION AND WEB SITE IMPROVED
+
 1.0.5 (21.0) - 120 DPI bug fixed; small console bug fixed;
                drive letters assigned by subst command excluded;
                this is most stable 1.0.x release

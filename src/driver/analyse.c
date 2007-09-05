@@ -217,20 +217,20 @@ void ProcessMFT(PEXAMPLE_DEVICE_EXTENSION dx)
 			/* $MFT */
 			start = ntfs_data.MftStartLcn.QuadPart;
 			len = ntfs_data.MftValidDataLength.QuadPart / ntfs_data.BytesPerCluster;
-			DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u",start,len);
+			DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
 			///dx->processed_clusters += len;
 			_int64_memset(dx->cluster_map + start,MFT_SPACE,len);
 			mft_len += len;
 			/* $MFT2 */
 			start = ntfs_data.MftZoneStart.QuadPart;
 			len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
-			DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u",start,len);
+			DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",start,len);
 			///dx->processed_clusters += len;
 			_int64_memset(dx->cluster_map + start,MFT_SPACE,len);
 			mft_len += len;
 			/* $MFTMirror */
 			start = ntfs_data.Mft2StartLcn.QuadPart;
-			DebugPrint("-Ultradfg- $MFTMirror :%I64u :1",start);
+			DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",start);
 			dx->cluster_map[start] = MFT_SPACE;
 			///dx->processed_clusters ++;
 			mft_len ++;
@@ -316,7 +316,7 @@ BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
 				{
 					len = startLcn + i - cluster;
 					if(dbg_level > 1)
-						DebugPrint("-Ultradfg- start: %I64u len: %I64u",cluster,len);
+						DebugPrint("-Ultradfg- start: %I64u len: %I64u\n",cluster,len);
 					if(!InsertNewFreeBlock(dx,cluster,len))
 						goto fail;
 					dx->processed_clusters += len;
@@ -332,7 +332,7 @@ BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
 	{
 		len = startLcn + i - cluster;
 		if(dbg_level > 1)
-			DebugPrint("-Ultradfg- start: %I64u len: %I64u",cluster,len);
+			DebugPrint("-Ultradfg- start: %I64u len: %I64u\n",cluster,len);
 		if(!InsertNewFreeBlock(dx,cluster,len))
 			goto fail;
 		dx->processed_clusters += len;

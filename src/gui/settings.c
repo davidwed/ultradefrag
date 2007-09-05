@@ -170,9 +170,6 @@ void LoadSettings()
 		_len = 40;
 		RegQueryValueExA(hKey,SCHED_LETTERS,NULL,NULL,(BYTE*)sched_letters,&_len);
 		_len = sizeof(DWORD);
-		RegQueryValueEx(hKey,NEXT_BOOT,NULL,NULL,
-			(unsigned char*)&next_boot,&_len);
-		_len = sizeof(DWORD);
 		RegQueryValueEx(hKey,EVERY_BOOT,NULL,NULL,
 			(unsigned char*)&every_boot,&_len);
 		if(RegQueryValueExW(hKey,BOOT_INCL_FILTER,NULL,NULL,NULL,&_len) ==
@@ -194,24 +191,54 @@ void LoadSettings()
 			(unsigned char*)&only_reg_and_pagefile,&_len);
 		RegCloseKey(hKey);
 	}
+	/* load next_boot parameter from system key */
+	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+		"SYSTEM\\CurrentControlSet\\Control\\UltraDefrag",0,KEY_QUERY_VALUE,&hKey) == \
+		ERROR_SUCCESS)
+	{
+		_len = sizeof(DWORD);
+		RegQueryValueEx(hKey,NEXT_BOOT,NULL,NULL,
+			(unsigned char*)&next_boot,&_len);
+		RegCloseKey(hKey);
+	}
 }
 
-void SaveSettings(HKEY hRootKey)
+void SaveSettings(HKEY hRootKey,BOOL system_hive)
 {
 	HKEY hKey, hKey1, hKey2;
 
-	if(RegOpenKeyEx(hRootKey,UDEFRAG_REG_HOME,0,KEY_SET_VALUE,&hKey) != \
-		ERROR_SUCCESS)
+	if(system_hive)
 	{
-		RegCreateKeyEx(hRootKey,"Software",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey1,NULL);
-		RegCreateKeyEx(hKey1,"DASoft",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey2,NULL);
-		if(RegCreateKeyEx(hKey2,"NTDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
+		if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+			"SYSTEM\\CurrentControlSet\\Control\\UltraDefrag",0,KEY_SET_VALUE,&hKey) != \
 			ERROR_SUCCESS)
 		{
-			RegCloseKey(hKey1); RegCloseKey(hKey2);
-			return;
+			RegOpenKeyEx(HKEY_LOCAL_MACHINE,"SYSTEM\\CurrentControlSet\\Control",
+				0,KEY_CREATE_SUB_KEY,&hKey1);
+			if(RegCreateKeyEx(hKey1,"UltraDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
+				ERROR_SUCCESS)
+			{
+				RegCloseKey(hKey1);
+				return;
+			}
+			RegCloseKey(hKey1);
 		}
-		RegCloseKey(hKey1); RegCloseKey(hKey2);
+	}
+	else
+	{
+		if(RegOpenKeyEx(hRootKey,UDEFRAG_REG_HOME,0,KEY_SET_VALUE,&hKey) != \
+			ERROR_SUCCESS)
+		{
+			RegCreateKeyEx(hRootKey,"Software",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey1,NULL);
+			RegCreateKeyEx(hKey1,"DASoft",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey2,NULL);
+			if(RegCreateKeyEx(hKey2,"NTDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
+				ERROR_SUCCESS)
+			{
+				RegCloseKey(hKey1); RegCloseKey(hKey2);
+				return;
+			}
+			RegCloseKey(hKey1); RegCloseKey(hKey2);
+		}
 	}
 	RegSetValueEx(hKey,POSITION,0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
 	RegSetValueEx(hKey,SKIP_REM,0,REG_DWORD,(BYTE*)&skip_rem,sizeof(DWORD));
@@ -234,7 +261,8 @@ void SaveSettings(HKEY hRootKey)
 	RegSetValueEx(hKey,DBGPRINT_LEVEL,0,REG_DWORD,(BYTE*)&dbgprint_level,sizeof(DWORD));
 	RegSetValueExA(hKey,SCHED_LETTERS,0,REG_SZ,
 		(BYTE*)sched_letters,strlen(sched_letters) + 1);
-	RegSetValueEx(hKey,NEXT_BOOT,0,REG_DWORD,(BYTE*)&next_boot,sizeof(DWORD));
+	if(system_hive)
+		RegSetValueEx(hKey,NEXT_BOOT,0,REG_DWORD,(BYTE*)&next_boot,sizeof(DWORD));
 	RegSetValueEx(hKey,EVERY_BOOT,0,REG_DWORD,(BYTE*)&every_boot,sizeof(DWORD));
 	if(boot_in_filter)
 		RegSetValueExW(hKey,BOOT_INCL_FILTER,0,REG_SZ,
@@ -415,18 +443,18 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	LPNMHDR lpn;
 	LRESULT i;
 	REPORT_TYPE rt;
-	RECT _rc;
-	int dx, dy;
+	//RECT _rc;
+	//int dx, dy;
 	int check_id;
 
 	switch(msg)
 	{
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		GetWindowRect(hWnd,&_rc);
-		dx = _rc.right - _rc.left;
-		dy = _rc.bottom - _rc.top;
-		SetWindowPos(hWnd,0,win_rc.left + 70,win_rc.top + 55,dx,dy,0);
+		//GetWindowRect(hWnd,&_rc);
+		//dx = _rc.right - _rc.left;
+		//dy = _rc.bottom - _rc.top;
+		SetWindowPos(hWnd,0,win_rc.left + 70,win_rc.top + 55,0,0,SWP_NOSIZE);
 		hTabCtrl = GetDlgItem(hWnd,IDC_TAB1);
 		tci.mask = TCIF_TEXT;
 		tci.iImage = -1;
@@ -606,16 +634,16 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 void LoadFilter(HWND hWnd,HWND hIncl,HWND hExcl,BOOL is_boot_time_filter)
 {
-	OPENFILENAME ofn;
-	char szFileTitle[MAX_PATH + 2];
-	char szFilter[256] = "All Files\0*.*\0";
+	OPENFILENAMEW ofn;
+	short szFileTitle[MAX_PATH + 2];
+	short szFilter[256] = L"All Files\0*.*\0";
 	FILE *pf;
-	char filename[MAX_PATH + 2] = "";
-	short buffer[1024 + 4];
-	short CRLF[] = L"\r\n";
+	short filename[MAX_PATH + 2] = L"";
+	short buffer[2048 + 8];
+	int len;
 
-	memset(&ofn,0,sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
+	memset(&ofn,0,sizeof(OPENFILENAMEW));
+	ofn.lStructSize = sizeof(OPENFILENAMEW);
 	ofn.hwndOwner = hWnd;
 	ofn.lpstrFilter = szFilter;
 	ofn.nFilterIndex = 1;
@@ -623,26 +651,19 @@ void LoadFilter(HWND hWnd,HWND hIncl,HWND hExcl,BOOL is_boot_time_filter)
 	ofn.nMaxFile = MAX_PATH;
 	ofn.lpstrFileTitle = szFileTitle;
 	ofn.nMaxFileTitle = MAX_PATH;
-	ofn.lpstrInitialDir = ".\\presets";
+	ofn.lpstrInitialDir = L".\\presets";
 	ofn.Flags = OFN_FILEMUSTEXIST;
-	if(GetOpenFileName(&ofn))
+	if(GetOpenFileNameW(&ofn))
 	{
-		pf = fopen(ofn.lpstrFile,"rt");
+		pf = _wfopen(ofn.lpstrFile,L"rb");
 		if(!pf) MessageBox(hWnd,"Can't open file!","Error!",MB_OK | MB_ICONHAND);
 		else
 		{
-			fgetws(buffer,1024,pf);
-			if(wcslen(buffer) >= wcslen(CRLF))
-				buffer[wcslen(buffer) - wcslen(CRLF)] = 0;
-			else
-				buffer[0] = 0;
+			fread(buffer,sizeof(short),2048,pf);
+			buffer[2048] = buffer[2049] = 0;
 			SetWindowTextW(hIncl,buffer);
-			fgetws(buffer,1024,pf);
-			if(wcslen(buffer) >= wcslen(CRLF))
-				buffer[wcslen(buffer) - wcslen(CRLF)] = 0;
-			else
-				buffer[0] = 0;
-			SetWindowTextW(hExcl,buffer);
+			len = wcslen(buffer) + 1;
+			SetWindowTextW(hExcl,buffer + len);
 			if(!is_boot_time_filter)
 			{
 				in_edit_flag = TRUE;
@@ -655,16 +676,15 @@ void LoadFilter(HWND hWnd,HWND hIncl,HWND hExcl,BOOL is_boot_time_filter)
 
 void SaveFilter(HWND hWnd,HWND hIncl,HWND hExcl)
 {
-	OPENFILENAME ofn;
-	char szFileTitle[MAX_PATH + 2];
-	char szFilter[256] = "All Files\0*.*\0";
+	OPENFILENAMEW ofn;
+	short szFileTitle[MAX_PATH + 2];
+	short szFilter[256] = L"All Files\0*.*\0";
 	FILE *pf;
-	char filename[MAX_PATH + 2] = "";
+	short filename[MAX_PATH + 2] = L"";
 	short buffer[1024 + 4];
-	short CRLF[] = L"\r\n";
 
-	memset(&ofn,0,sizeof(OPENFILENAME));
-	ofn.lStructSize = sizeof(OPENFILENAME);
+	memset(&ofn,0,sizeof(OPENFILENAMEW));
+	ofn.lStructSize = sizeof(OPENFILENAMEW);
 	ofn.hwndOwner = hWnd;
 	ofn.lpstrFilter = szFilter;
 	ofn.nFilterIndex = 1;
@@ -672,18 +692,18 @@ void SaveFilter(HWND hWnd,HWND hIncl,HWND hExcl)
 	ofn.nMaxFile = MAX_PATH;
 	ofn.lpstrFileTitle = szFileTitle;
 	ofn.nMaxFileTitle = MAX_PATH;
-	ofn.lpstrInitialDir = ".\\presets";
+	ofn.lpstrInitialDir = L".\\presets";
 	ofn.Flags = OFN_PATHMUSTEXIST;
-	if(GetSaveFileName(&ofn))
+	if(GetSaveFileNameW(&ofn))
 	{
-		pf = fopen(ofn.lpstrFile,"wt");
+		pf = _wfopen(ofn.lpstrFile,L"wb");
 		if(!pf) MessageBox(hWnd,"Can't open file!","Error!",MB_OK | MB_ICONHAND);
 		else
 		{
 			GetWindowTextW(hIncl,buffer,1024);
-			fputws(buffer,pf); fputws(CRLF,pf);
+			fwrite(buffer,sizeof(short),wcslen(buffer) + 1,pf);
 			GetWindowTextW(hExcl,buffer,1024);
-			fputws(buffer,pf); fputws(CRLF,pf);
+			fwrite(buffer,sizeof(short),wcslen(buffer) + 1,pf);
 			fclose(pf);
 		}
 	}

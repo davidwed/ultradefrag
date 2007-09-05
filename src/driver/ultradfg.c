@@ -68,6 +68,8 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	PrepareDataFields(dx);
 	KeInitializeEvent(&(dx->sync_event),NotificationEvent,FALSE);
 	KeInitializeEvent(&(dx->stop_event),NotificationEvent,FALSE);
+	KeInitializeEvent(&(dx->unload_event),NotificationEvent,FALSE);
+	KeInitializeEvent(&(dx->wait_event),NotificationEvent,FALSE);
 	KeInitializeEvent(&(dx->lock_map_event),SynchronizationEvent,TRUE);
 	KeInitializeSpinLock(&(dx->spin_lock));
 	dx->BitMap = NULL; dx->FileMap = NULL; dx->tmp_buf = NULL;
@@ -76,8 +78,17 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	dx->report_type.format = ASCII_FORMAT;
 	dx->report_type.type = HTML_REPORT;
 	dbg_level = 0;
+	dx->command = 0;
 
 	DebugPrint("=Ultradfg= FDO %X, DevExt=%X\n",fdo,dx);
+
+	status = PsCreateSystemThread(&dx->hThread,0,NULL,NULL,NULL,WorkSystemThread,(PVOID)dx);
+	if(!NT_SUCCESS(status))
+	{
+		DebugPrint("=Ultradfg= PsCreateSystemThread %x\n",status);
+		IoDeleteDevice(fdo);
+		return status;
+	}
 
 	/* For NT-drivers it can be L"\\??\\ultradfg" */
 	RtlInitUnicodeString(&symLinkName,link_name);
@@ -87,8 +98,8 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	if(!NT_SUCCESS(status))
 	{
 		DebugPrint("=Ultradfg= IoCreateSymbolicLink %x\n",status);
-		////ExFreePool(dx->FileMap);
-		////ExFreePool(dx->BitMap);
+		KeSetEvent(&(dx->unload_event),IO_NO_INCREMENT,FALSE);
+		WaitForThreadComplete(dx);
 		IoDeleteDevice(fdo);
 		return status;
 	}
@@ -146,6 +157,78 @@ __inline BOOLEAN validate_letter(char letter)
 	return ((letter >= 'A' && letter <= 'Z') || (letter >= 'a' && letter <= 'z'));
 }
 
+VOID NTAPI WorkSystemThread(PVOID pContext)
+{
+	PEXAMPLE_DEVICE_EXTENSION dx = \
+			(PEXAMPLE_DEVICE_EXTENSION)pContext;
+	LARGE_INTEGER interval;
+	NTSTATUS Status;
+
+	interval.QuadPart = WAIT_CMD_INTERVAL;
+	do
+	{
+		if(dx->command)
+		{
+			dx->request_is_successful = TRUE;
+			switch(dx->command)
+			{
+			case 'a':
+			case 'A':
+				dx->letter = dx->new_letter;
+				if(Analyse(dx)) break;
+				if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
+					dx->request_is_successful = FALSE;
+				break;
+			case 'c':
+			case 'C':
+			case 'd':
+			case 'D':
+				if(dx->status == STATUS_BEFORE_PROCESSING || \
+					dx->letter != dx->new_letter)
+				{
+					dx->letter = dx->new_letter;
+					if(!Analyse(dx))
+					{
+						if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
+							dx->request_is_successful = FALSE;
+						break;
+					}
+					if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+						break;
+				}
+				Defragment(dx);
+				break;
+			//default:
+			//	goto invalid_request;
+			}
+			/* request completed */
+			KeClearEvent(&(dx->sync_event));
+			dx->command = 0;
+		}
+		Status = KeWaitForSingleObject(&(dx->unload_event),
+				Executive,KernelMode,FALSE,&interval);
+	} while (Status == STATUS_TIMEOUT);
+
+	DebugPrint("-Ultradfg- System thread said good bye ...\n");
+	PsTerminateSystemThread(0);
+}
+
+VOID WaitForThreadComplete(PEXAMPLE_DEVICE_EXTENSION dx)
+{
+	PKTHREAD pThreadObject;
+	NTSTATUS Status;
+
+	Status = ObReferenceObjectByHandle(dx->hThread,0,NULL,
+		KernelMode,(PVOID *)&pThreadObject,NULL);
+	if(NT_SUCCESS(Status))
+	{
+		KeWaitForSingleObject(pThreadObject,Executive,
+			KernelMode,FALSE,NULL);
+		ObDereferenceObject(pThreadObject);
+	}
+	ZwClose(dx->hThread);
+}
+
 /*
  * Write request: analyse / defrag / compact.
  */
@@ -158,6 +241,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	PEXAMPLE_DEVICE_EXTENSION dx = \
 			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	PVOID addr;
+	LARGE_INTEGER interval;
 
 	/* If previous request isn't complete, return STATUS_DEVICE_BUSY. */
 	/* Because new request change global variables. */
@@ -184,52 +268,64 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 
 	if(!validate_letter(cmd.letter)) goto invalid_request;
 
-	dx->sizelimit = 0;
-	dx->compact_flag = FALSE;
-	///dx->report_format = cmd.report_format;
+	dx->compact_flag = (cmd.command == 'c' || cmd.command == 'C') ? TRUE : FALSE;
+	dx->sizelimit = cmd.sizelimit;
 
-	switch(cmd.command)
-	{
-	case 'a':
-	case 'A':
-		dx->letter = cmd.letter;
-		dx->sizelimit = cmd.sizelimit;
-		if(Analyse(dx)) goto success;
-		if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
-			goto success;
-		break;
-	case 'c':
-	case 'C':
-		dx->compact_flag = TRUE;
-	case 'd':
-	case 'D':
-		if(dx->status == STATUS_BEFORE_PROCESSING || \
-			dx->letter != cmd.letter)
-		{
-			dx->letter = cmd.letter;
-			dx->sizelimit = cmd.sizelimit;
-			if(!Analyse(dx))
-			{
-				if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
-					goto success;
-				else
-					goto fail;
-			}
-			if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
-				goto success;
-		}
-		Defragment(dx); goto success;
-	default:
-		goto invalid_request;
+	if(cmd.mode == __KernelMode)
+	{ /* native app defrag system files */
+		dx->command = cmd.command;
+		dx->new_letter = cmd.letter;
+
+		/* wait for request completion */
+		interval.QuadPart = WAIT_CMD_INTERVAL;
+		while(KeReadStateEvent(&(dx->sync_event)))
+			KeWaitForSingleObject(&(dx->wait_event),
+					Executive,KernelMode,FALSE,&interval);
 	}
-fail:
+	else
+	{ /* gui or console must have permission to access encrypted files */
+		dx->request_is_successful = TRUE;
+		switch(cmd.command)
+		{
+		case 'a':
+		case 'A':
+			dx->letter = cmd.letter;
+			if(Analyse(dx)) break;
+			if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
+				dx->request_is_successful = FALSE;
+			break;
+		case 'c':
+		case 'C':
+		case 'd':
+		case 'D':
+			if(dx->status == STATUS_BEFORE_PROCESSING || \
+				dx->letter != cmd.letter)
+			{
+				dx->letter = cmd.letter;
+				if(!Analyse(dx))
+				{
+					if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
+						dx->request_is_successful = FALSE;
+					break;
+				}
+				if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+					break;
+			}
+			Defragment(dx);
+			break;
+		//default:
+		//	goto invalid_request;
+		}
+		/* request completed */
+		KeClearEvent(&(dx->sync_event));
+	}
+	if(dx->request_is_successful)
+		return CompleteIrp(Irp,STATUS_SUCCESS,sizeof(ULTRADFG_COMMAND));
 	dx->status = STATUS_BEFORE_PROCESSING;
+	return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
 invalid_request:
 	KeClearEvent(&(dx->sync_event));
 	return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
-success:
-	KeClearEvent(&(dx->sync_event));
-	return CompleteIrp(Irp,STATUS_SUCCESS,sizeof(ULTRADFG_COMMAND));
 }
 
 void DbgPrintNoMem()
@@ -472,9 +568,15 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			length = IrpStack->Parameters.DeviceIoControl.InputBufferLength;
 			filter = (short *)Irp->AssociatedIrp.SystemBuffer;
 			if(IoControlCode == IOCTL_SET_INCLUDE_FILTER)
+			{
+				DebugPrint("Include: %ws\n",filter);
 				UpdateFilter(&dx->in_filter,filter,length);
+			}
 			else
+			{
+				DebugPrint("Exclude: %ws\n",filter);
 				UpdateFilter(&dx->ex_filter,filter,length);
+			}
 			UpdateInformation(dx);
 			BytesTxd = length;
 			break;
@@ -536,11 +638,13 @@ VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 	DebugPrint("-Ultradfg- Deleted device: pointer to FDO = %X\n",dx->fdo);
 	DebugPrint("-Ultradfg- Deleted symlink = %ws\n", pLinkName->Buffer);
 
+	KeSetEvent(&(dx->unload_event),IO_NO_INCREMENT,FALSE);
 	FreeAllBuffers(dx);
 	if(dx->FileMap) ExFreePool(dx->FileMap);
 	if(dx->BitMap) ExFreePool(dx->BitMap);
 	if(dx->tmp_buf) ExFreePool(dx->tmp_buf);
 	DestroyFilter(dx);
+	WaitForThreadComplete(dx);
 	/* Delete symbolic link and FDO: */
 	IoDeleteSymbolicLink(pLinkName);
 	IoDeleteDevice(dx->fdo);

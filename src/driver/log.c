@@ -148,7 +148,7 @@ BOOLEAN SaveFragmFilesListToDisk(PEXAMPLE_DEVICE_EXTENSION dx)
 			  0,NULL,0);
 	if(Status)
 	{
-		DebugPrint("-Ultradfg- Can't create %ws",p);
+		DebugPrint("-Ultradfg- Can't create %ws\n",p);
 		return FALSE;
 	}
 	offset.QuadPart = 0;

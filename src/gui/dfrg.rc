@@ -99,10 +99,10 @@ BEGIN
     LTEXT           "Free",IDC_STATIC,156,12,24,12,SS_CENTERIMAGE
     LTEXT           "MFT",IDC_STATIC,156,33,28,12,SS_CENTERIMAGE
     LTEXT           "Directory",IDC_STATIC,28,22,40,12,SS_CENTERIMAGE
-    LTEXT           "Compressed",IDC_STATIC,96,24,47,8
+    LTEXT           "Compressed",IDC_STATIC,90,24,47,8,SS_CENTERIMAGE
     GROUPBOX        "Notes",IDC_STATIC,7,63,180,71
-    LTEXT           "1. Deactivate your virus scanner\n   for better performance.\n2. Directories on FAT volumes cannot be\n   moved.\n3. System files will not be moved. Run\n   the boot time scan to scan system\n   files.",
-                    IDC_STATIC,20,75,156,57
+    LTEXT           "1. Deactivate your virus scanner\n   for better performance.\n2. Directories on FAT volumes\n   cannot be moved.\n3. System files will not be moved. \n   Run the boot time scan to\n   defragment system files.",
+                    IDC_STATIC,30,73,140,57
     PUSHBUTTON      "Credits",IDC_CREDITS,7,139,87,10
     PUSHBUTTON      "License",IDC_LICENSE,101,139,86,10
     DEFPUSHBUTTON   "OK",IDOK,158,154,29,12
@@ -182,7 +182,7 @@ BEGIN
     LTEXT           "Volume letters",IDC_STATIC,11,17,47,10
     EDITTEXT        IDC_LETTERS,59,15,84,12,ES_AUTOHSCROLL
     CONTROL         "Defragment only registry and pagefile  ",
-                    IDC_REGANDPAGEFILE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
+                    IDC_REGANDPAGEFILE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP | WS_DISABLED,
                     7,30,136,12,WS_EX_RIGHT
     GROUPBOX        "Files",IDC_STATIC,6,49,250,62
     LTEXT           "Enter multiple filter match strings separated by the ';' character.",

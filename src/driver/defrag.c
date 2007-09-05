@@ -90,7 +90,7 @@ void CheckPendingBlocks(PEXAMPLE_DEVICE_EXTENSION dx)
 						if(cluster != LLINVALID)
 						{
 							if(dbg_level > 1)
-								DebugPrint("-Ultradfg- X start: %I64u len: %I64u",cluster,
+								DebugPrint("-Ultradfg- X start: %I64u len: %I64u\n",cluster,
 									startLcn + i - cluster);
 							InsertNewFreeBlock(dx,cluster,startLcn + i - cluster);
 							cluster = LLINVALID;
@@ -113,7 +113,7 @@ fail:
 			if(cluster != LLINVALID)
 			{
 				if(dbg_level > 1)
-					DebugPrint("-Ultradfg- X start: %I64u len: %I64u",cluster,
+					DebugPrint("-Ultradfg- X start: %I64u len: %I64u\n",cluster,
 							startLcn + i - cluster);
 				InsertNewFreeBlock(dx,cluster,startLcn + i - cluster);
 			}
@@ -302,7 +302,7 @@ NTSTATUS __MoveFile(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
 	IO_STATUS_BLOCK ioStatus;
 	MOVEFILE_DESCRIPTOR moveFile;
 	
-	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u",
+	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",
 		 startVcn,targetLcn,n_clusters);
 
 	if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
@@ -606,12 +606,18 @@ BOOLEAN DefragmentFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,
 			  NULL,0);
 	if(Status)
+	{
+		if(dbg_level > 0)
+			DebugPrint("-Ultradfg- %ws open: %x\n", pfn->name.Buffer, Status);
 		return FALSE;
+	}
 	/* Find free space */
 	clusters_per_block = _256K / dx->bytes_per_cluster;
 	target = FindTarget(dx,pfn);
 	if(target == LLINVALID)
 	{
+		if(dbg_level > 1)
+			DebugPrint("-Ultradfg- no enough continuous free space on volume\n");
 		ZwClose(hFile);
 		return FALSE;
 	}

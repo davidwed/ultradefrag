@@ -144,30 +144,55 @@ Section "Ultra Defrag core files (required)" SecCore
   File "INSTALL.TXT"
   File "README.TXT"
   File "FAQ.TXT"
+
   Delete "$INSTDIR\defrag.exe"
   Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
+
   SetOutPath "$INSTDIR\presets"
   File "presets\standard"
   File "presets\system"
-  /* create custom preset and correct program settings */
+
   DetailPrint "Install driver..."
   SetOutPath "$WINDIR\System32\Drivers"
   File "ultradfg.sys"
+
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"
   File "defrag_native.exe"
-!if ${ULTRADFGARCH} != "i386"
+
+  /* create custom preset and correct program settings */
   SetOutPath "$TEMP"
+  File "inst_helper.exe"
+  ClearErrors
+  ExecWait '"$TEMP\inst_helper.exe" $INSTDIR\presets\custom'
+  IfErrors 0 custom_created
+  DetailPrint "Write filter settings..."
+  StrCpy $R0 "Software\DASoft\NTDefrag"
+  DeleteRegValue HKCU $R0 "include filter"
+  WriteRegStr HKCU $R0 "exclude filter" "system volume information;temp;recycler"
+custom_created:
+  Delete "$TEMP\inst_helper.exe"
+
+!if ${ULTRADFGARCH} != "i386"
   File "x64_inst.exe"
   ExecWait "$TEMP\x64_inst.exe"
   Delete "$TEMP\x64_inst.exe"
 !endif
+
+  DetailPrint "Write driver settings..."
+  SetOutPath "$INSTDIR"
   StrCpy $R0 "SYSTEM\CurrentControlSet\Services\ultradfg"
   call WriteDriverSettings
   StrCpy $R0 "SYSTEM\ControlSet001\Services\ultradfg"
   call WriteDriverSettings
   StrCpy $R0 "SYSTEM\ControlSet002\Services\ultradfg"
   call WriteDriverSettings
+
+  DetailPrint "Write filter settings..."
+  StrCpy $R0 "Software\DASoft\NTDefrag"
+  WriteRegStr HKCU $R0 "boot time include filter" "windows;ntuser;pagefile"
+  WriteRegStr HKCU $R0 "boot time exclude filter" "temp"
+
   DetailPrint "Write the uninstall keys..."
   StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
   WriteRegStr HKLM  $R0 "DisplayName" "DASoft Ultra Defragmenter"
@@ -221,6 +246,7 @@ Section "Uninstall"
   RMDir /r "$SMPROGRAMS\DASoft\UltraDefrag"
   RMDir "$SMPROGRAMS\DASoft"
   Delete "$DESKTOP\UltraDefrag.lnk"
+
   DetailPrint "Remove program files..."
   Delete "$INSTDIR\Dfrg.exe"
   Delete "$INSTDIR\LICENSE.TXT"
@@ -234,6 +260,7 @@ Section "Uninstall"
   Delete "$INSTDIR\presets\system"
   RMDir "$INSTDIR\presets"
   RMDir $INSTDIR
+
   DetailPrint "Uninstall driver and boot time defragger..."
 !if ${ULTRADFGARCH} != "i386"
   SetOutPath "$TEMP"
@@ -245,9 +272,11 @@ Section "Uninstall"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\udefrag.exe"
 !endif
+
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
+
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
   ;;;;DeleteRegKey HKCU "SOFTWARE\DASoft\NTDefrag"

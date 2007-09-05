@@ -264,6 +264,7 @@ int __cdecl wmain(int argc, short **argv)
 	if(c_flag) cmd.command = 'c';
 	cmd.letter = letter;
 	cmd.sizelimit = sizelimit;
+	cmd.mode = __UserMode;
 
 	ovrl.hEvent = hEvt;
 	ovrl.Offset = ovrl.OffsetHigh = 0;

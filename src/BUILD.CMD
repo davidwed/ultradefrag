@@ -59,6 +59,11 @@ cd ..\native
 nmake /NOLOGO /A /f defrag_native.mak CFG="RosDDK"
 if %errorlevel% neq 0 goto fail
 
+echo Build the installation helper...
+cd ..\inst_helper
+nmake /NOLOGO /A /f inst_helper.mak
+if %errorlevel% neq 0 goto fail
+
 goto build_installer
 
 :build_with_winddk
@@ -70,6 +75,7 @@ xcopy /I /Y .\gui .\obj\gui
 xcopy /I /Y .\gui\res .\obj\gui\res
 xcopy /I /Y .\native .\obj\native
 xcopy /I /Y .\include .\obj\include
+xcopy /I /Y .\inst_helper .\obj\inst_helper
 xcopy /I /Y .\x64_inst .\obj\x64_inst
 copy /Y .\shared\misc.c .\obj\console\
 copy /Y .\shared\misc.c .\obj\gui\
@@ -78,7 +84,7 @@ copy /Y .\blditems.cmd .\obj\
 cd .\obj
 echo --------- Target is x86 ---------
 echo Because GUI produced by WINDDK has runtime errors,
-echo we must build user interfaces with MSVC.
+echo we must build user interfaces using MSVC.
 call "%MSVSBIN%\vcvars32.bat"
 
 echo Build the console interface...
@@ -97,6 +103,11 @@ set DDKINCDIR=%WINDDKBASE%\inc\ddk\wnet
 nmake /NOLOGO /A /f defrag_native.mak CFG="WinDDK"
 if %errorlevel% neq 0 goto fail
 
+echo Build the installation helper...
+cd ..\inst_helper
+nmake /NOLOGO /A /f inst_helper.mak
+if %errorlevel% neq 0 goto fail
+
 cd ..\obj
 set AMD64=
 set IA64=
@@ -108,6 +119,7 @@ copy .\driver\objfre_wnet_x86\i386\ultradfg.sys ..\bin\
 REM copy .\console\objfre_wnet_x86\i386\udefrag.exe ..\bin\
 REM copy .\gui\objfre_wnet_x86\i386\dfrg.exe ..\bin\
 REM copy .\native\objfre_wnet_x86\i386\defrag_native.exe ..\bin\
+REM copy .\inst_helper\objfre_wnet_x86\i386\inst_helper.exe ..\bin\
 echo --------- Target is x64 ---------
 set IA64=
 call blditems.cmd AMD64
@@ -118,6 +130,7 @@ copy .\driver\objfre_wnet_amd64\amd64\ultradfg.sys ..\bin\amd64\
 copy .\console\objfre_wnet_amd64\amd64\udefrag.exe ..\bin\amd64\
 copy .\gui\objfre_wnet_amd64\amd64\dfrg.exe ..\bin\amd64\
 copy .\native\objfre_wnet_amd64\amd64\defrag_native.exe ..\bin\amd64\
+copy .\inst_helper\objfre_wnet_amd64\amd64\inst_helper.exe ..\bin\amd64\
 copy .\x64_inst\objfre_wnet_amd64\amd64\x64_inst.exe ..\bin\amd64\
 echo --------- Target is ia64 ---------
 set AMD64=
@@ -129,6 +142,7 @@ copy .\driver\objfre_wnet_ia64\ia64\ultradfg.sys ..\bin\ia64\
 copy .\console\objfre_wnet_ia64\ia64\udefrag.exe ..\bin\ia64\
 copy .\gui\objfre_wnet_ia64\ia64\dfrg.exe ..\bin\ia64\
 copy .\native\objfre_wnet_ia64\ia64\defrag_native.exe ..\bin\ia64\
+copy .\inst_helper\objfre_wnet_ia64\ia64\inst_helper.exe ..\bin\ia64\
 copy .\x64_inst\objfre_wnet_ia64\ia64\x64_inst.exe ..\bin\ia64\
 
 :build_installer
@@ -178,6 +192,7 @@ xcopy /I /Y .\console .\rel_src\console
 xcopy /I /Y .\gui .\rel_src\gui
 xcopy /I /Y .\gui\res .\rel_src\gui\res
 xcopy /I /Y .\native .\rel_src\native
+xcopy /I /Y .\inst_helper .\rel_src\inst_helper
 xcopy /I /Y .\x64_inst .\rel_src\x64_inst
 xcopy /I /Y .\include .\rel_src\include
 xcopy /I /Y .\shared .\rel_src\shared

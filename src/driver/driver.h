@@ -150,6 +150,7 @@ typedef struct _FRAGMENTED {
 
 #define QUEUE_WAIT_INTERVAL -1 * 10000 /* in 100 ns intervals */
 #define CHECKPOINT_WAIT_INTERVAL 30 /* sec */ //-300 * 10000 /* in 100 ns intervals */
+#define WAIT_CMD_INTERVAL -200 * 10000 /* 200 ms */
 
 #define _256K    256 * 1024
 
@@ -179,6 +180,10 @@ typedef struct _FILTER
 typedef struct _EXAMPLE_DEVICE_EXTENSION
 {
 	PDEVICE_OBJECT fdo;
+	HANDLE hThread;
+	UCHAR command;
+	UCHAR new_letter;
+	BOOLEAN request_is_successful;
 	UNICODE_STRING ustrSymLinkName; /* L"\\DosDevices\\Ultradfg" */
 	UNICODE_STRING log_path;
 	PFREEBLOCKMAP free_space_map;
@@ -212,6 +217,8 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 	KEVENT sync_event;
 	KEVENT stop_event;
 	KEVENT lock_map_event;
+	KEVENT unload_event;
+	KEVENT wait_event;
 	KSPIN_LOCK spin_lock;
 	unsigned char partition_type;
 	ULONG mft_size;
@@ -421,15 +428,13 @@ typedef struct _NTFS_DATA {
 /* Function prototypes
  */
 NTSTATUS NTAPI DeviceControlRoutine(PDEVICE_OBJECT fdo,PIRP Irp);
-
 VOID     NTAPI UnloadRoutine(PDRIVER_OBJECT DriverObject);
-
 NTSTATUS NTAPI Read_IRPhandler(PDEVICE_OBJECT fdo,PIRP Irp);
-
 NTSTATUS NTAPI Write_IRPhandler(PDEVICE_OBJECT fdo,PIRP Irp);
-
 NTSTATUS NTAPI Create_File_IRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
-
 NTSTATUS NTAPI Close_HandleIRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
+
+VOID NTAPI WorkSystemThread(PVOID pContext);
+VOID WaitForThreadComplete(PEXAMPLE_DEVICE_EXTENSION dx);
 
 #endif /* _DRIVER_H_ */

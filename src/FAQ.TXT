@@ -38,7 +38,7 @@ A.: Thanks to Christopher Naegel for providing the following instructions:
     1. Open a command line with admin-rights:
           Start -> execute -> CMD (with admin rights).
     2. Type:
-          bcdedit /set loadoptions ”DDISABLE_INTEGRITY_CHECKS”
+          bcdedit /set loadoptions "DDISABLE_INTEGRITY_CHECKS"
           bcdedit /set nointegritychecks ON
     3. Close the command prompt and start group policy editor:
           Start -> execute -> gpedit.msc

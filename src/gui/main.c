@@ -111,7 +111,7 @@ extern BOOL CreateBitMapGrid();
 extern void DeleteMaps();
 
 extern void LoadSettings();
-extern void SaveSettings(HKEY hRootKey);
+extern void SaveSettings(HKEY hRootKey,BOOL system_hive);
 extern void SaveBootTimeSettings();
 extern void DestroyFilters();
 
@@ -204,8 +204,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* delete all created gdi objects */
 	DeleteMaps();
 	/* save window coordinates and other settings to registry */
-	SaveSettings(HKEY_CURRENT_USER); /* for compatibility with 1.0.x versions */
-	SaveSettings(HKEY_LOCAL_MACHINE);
+	SaveSettings(HKEY_CURRENT_USER,FALSE); /* for compatibility with 1.0.x versions */
+	SaveSettings(0,TRUE);
+	///SaveSettings(HKEY_LOCAL_MACHINE);
 	SaveBootTimeSettings();
 cleanup:
 	DestroyFilters();
@@ -740,6 +741,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	cmd.command = (char)lpParameter;
 	cmd.letter = index + 'A';
 	cmd.sizelimit = sizelimit;
+	cmd.mode = __UserMode;
 
 	if(cmd.command == 'a')
 		ShowStatus(STAT_AN,linenumber);
@@ -799,17 +801,17 @@ void ShowFragmented()
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	RECT _rc;
-	int dx, dy;
+	//RECT _rc;
+	//int dx, dy;
 
 	switch(msg)
 	{
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		GetWindowRect(hWnd,&_rc);
-		dx = _rc.right - _rc.left;
-		dy = _rc.bottom - _rc.top;
-		SetWindowPos(hWnd,0,win_rc.left + 106,win_rc.top + 84,dx,dy,0);
+		//GetWindowRect(hWnd,&_rc);
+		//dx = _rc.right - _rc.left;
+		//dy = _rc.bottom - _rc.top;
+		SetWindowPos(hWnd,0,win_rc.left + 106,win_rc.top + 59,0,0,SWP_NOSIZE);
 		return FALSE;
 	case WM_COMMAND:
 		switch(LOWORD(wParam))
