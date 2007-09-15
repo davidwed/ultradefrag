@@ -1,8 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 9.00
 # Visual Studio 2005
-# SharpDevelop 2.2.1.2622
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskScheduler", "TaskScheduler.csproj", "{BC28120F-A993-46A7-B10F-370DB4C1977A}"
+# SharpDevelop 2.1.0.2520
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltraDefragScheduler.NET", "UltraDefragScheduler.NET.csproj", "{BC28120F-A993-46A7-B10F-370DB4C1977A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
