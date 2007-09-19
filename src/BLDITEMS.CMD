@@ -6,8 +6,26 @@ set BUILD_DEFAULT=-nmake -i -g -P
 
 echo Build the driver...
 cd .\driver
-build.exe
+
+echo NT 5.0+ version...
+set NT4_TARGET=false
+build.exe -c
 if %errorlevel% neq 0 goto fail
+
+if "%1" neq "" goto L1
+rem save modern version
+copy .\objfre_wnet_x86\i386\ultradfg.sys ..\..\bin\
+:L1
+
+if "%1" neq "" goto _64bit
+echo NT 4.0 version...
+set NT4_TARGET=true
+rem -c option is neccessary to rebuild driver
+build.exe -c
+if %errorlevel% neq 0 goto fail
+rem save nt4 version
+copy .\objfre_wnet_x86\i386\ultradfg_nt4.sys ..\..\bin\
+:_64bit
 
 if "%1" equ "" goto x86
 

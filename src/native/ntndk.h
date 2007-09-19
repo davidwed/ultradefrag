@@ -272,6 +272,16 @@ NTSTATUS	WINAPI	NtDeviceIoControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_ST
 
 #define FILE_OPEN	1
 
+#define OBJ_INHERIT          0x00000002
+#define OBJ_PERMANENT        0x00000010
+#define OBJ_EXCLUSIVE        0x00000020
+#define OBJ_CASE_INSENSITIVE 0x00000040
+#define OBJ_OPENIF           0x00000080
+#define OBJ_OPENLINK         0x00000100
+#define OBJ_KERNEL_HANDLE    0x00000200
+#define OBJ_VALID_ATTRIBUTES (OBJ_KERNEL_HANDLE | OBJ_OPENLINK | \
+		OBJ_OPENIF | OBJ_CASE_INSENSITIVE | OBJ_EXCLUSIVE | \
+		OBJ_PERMANENT | OBJ_INHERIT)
 #define InitializeObjectAttributes(p,n,a,r,s) \
     do { \
         (p)->Length = sizeof(OBJECT_ATTRIBUTES); \
@@ -469,7 +479,7 @@ typedef enum _KEY_VALUE_INFORMATION_CLASS
     KeyValuePartialInformationAlign64
 } KEY_VALUE_INFORMATION_CLASS;
 
-NTSTATUS NTAPI ZwOpenKey(
+NTSTATUS NTAPI NtOpenKey(
     OUT PHANDLE KeyHandle,
     IN ACCESS_MASK DesiredAccess,
     IN POBJECT_ATTRIBUTES ObjectAttributes
@@ -477,7 +487,7 @@ NTSTATUS NTAPI ZwOpenKey(
 
 NTSTATUS
 NTAPI
-ZwQueryValueKey(
+NtQueryValueKey(
     IN HANDLE KeyHandle,
     IN PUNICODE_STRING ValueName,
     IN KEY_VALUE_INFORMATION_CLASS KeyValueInformationClass,
@@ -488,7 +498,7 @@ ZwQueryValueKey(
 
 NTSTATUS
 NTAPI
-ZwSetValueKey(
+NtSetValueKey(
     IN HANDLE  KeyHandle,
     IN PUNICODE_STRING  ValueName,
     IN ULONG  TitleIndex  OPTIONAL,
@@ -499,7 +509,7 @@ ZwSetValueKey(
 
 NTSTATUS
 NTAPI
-ZwClose(
+NtClose(
     IN HANDLE Handle
 );
 

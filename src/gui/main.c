@@ -92,6 +92,8 @@ BOOL stop_pressed;
 short driver_key[] = \
 	L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 
+char user_mode_buffer[65536]; /* for nt 4.0 support */
+
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -149,6 +151,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	NTSTATUS status;
 	HANDLE hToken;
 	TOKEN_PRIVILEGES tp;
+	OVERLAPPED ovrl;
+	DWORD txd;
 
 	/* only one instance of program! */
 	hEventIsRunning = OpenEvent(EVENT_MODIFY_STATE,FALSE,
@@ -192,6 +196,19 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	{
 		MessageBox(0,"Can't access ultradfg driver!","Error!",MB_OK | MB_ICONHAND);
 		err_code = 3; goto cleanup;
+	}
+	/* nt 4.0 specific code */
+	ovrl.hEvent = hEvt;
+	ovrl.Offset = ovrl.OffsetHigh = 0;
+	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_USER_MODE_BUFFER,
+		user_mode_buffer,0,NULL,0,&txd,&ovrl))
+	{
+		WaitForSingleObject(hEvt,INFINITE);
+	}
+	else
+	{
+		MessageBox(0,"Can't setup user mode buffer!","Error!",MB_OK | MB_ICONHAND);
+		err_code = 4; goto cleanup;
 	}
 	/* get window coordinates and other settings from registry */
 	LoadSettings();

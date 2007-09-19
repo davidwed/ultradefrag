@@ -39,7 +39,11 @@ int abort_flag = 0,done_flag = 0,wait_flag = 0;
 char last_op = 0;
 int i = 0,j = 0,k; /* number of '-' */
 
+short ultradefrag_key[] = L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag";
+
 char buffer[65536]; /* instead malloc calls */
+
+char user_mode_buffer[65536]; /* for nt 4.0 support */
 
 #define USAGE  "Supported commands:\n" \
 		"  analyse X:\n" \
@@ -83,8 +87,9 @@ BOOL EnablePrivilege(DWORD dwLowPartOfLUID)
 	LUID luid;
 	NTSTATUS status;
 	HANDLE UserToken;
+	//char b[32];
 
-	NtOpenProcessToken((HANDLE)(size_t)0x0FFFFFFFF,0x2000000,&UserToken);
+	NtOpenProcessToken(NtCurrentProcess(),0x2000000,&UserToken);
 
 	luid.HighPart = 0x0;
 	luid.LowPart = dwLowPartOfLUID;
@@ -93,6 +98,12 @@ BOOL EnablePrivilege(DWORD dwLowPartOfLUID)
 	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 	status = NtAdjustPrivilegesToken(UserToken,FALSE,&tp,sizeof(TOKEN_PRIVILEGES),
 									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
+	/*if(status)
+	{
+		_itoa(status,b,16);
+		print(b);
+		print("\n");
+	}*/
 	return NT_SUCCESS(status);
 }
 
@@ -306,9 +317,10 @@ DWORD ReadRegDword(short *value_name)
 	DWORD value = 0;
 	char st[32];
 
-	RtlInitUnicodeString(&__uStr,L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag");
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,0,NULL,NULL);
-	Status = ZwOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
+	RtlInitUnicodeString(&__uStr,ultradefrag_key);
+	/* OBJ_CASE_INSENSITIVE must be specified on NT 4.0 !!! */
+	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
+	Status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
 	if(!NT_SUCCESS(Status))
 	{
 		_itoa(Status,st,16);
@@ -318,14 +330,14 @@ DWORD ReadRegDword(short *value_name)
 		return 0;
 	}
 	RtlInitUnicodeString(&__uStr,value_name);
-	Status = ZwQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
+	Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
 		&pInfo[0],size,&size);
 	if(NT_SUCCESS(Status))
 	{
 		if(pInfo[0].Type == REG_DWORD && pInfo[0].DataLength == sizeof(DWORD))
 			RtlCopyMemory(&value,pInfo[0].Data,sizeof(DWORD));
 	}
-	ZwClose(hKey);
+	NtClose(hKey);
 	return value;
 }
 
@@ -337,9 +349,9 @@ void WriteRegDword(short *value_name,DWORD value)
 	HANDLE hKey;
 	char st[32];
 
-	RtlInitUnicodeString(&__uStr,L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag");
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,0,NULL,NULL);
-	Status = ZwOpenKey(&hKey,KEY_SET_VALUE,&ObjectAttributes);
+	RtlInitUnicodeString(&__uStr,ultradefrag_key);
+	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
+	Status = NtOpenKey(&hKey,KEY_SET_VALUE,&ObjectAttributes);
 	if(!NT_SUCCESS(Status))
 	{
 		_itoa(Status,st,16);
@@ -349,8 +361,8 @@ void WriteRegDword(short *value_name,DWORD value)
 		return;
 	}
 	RtlInitUnicodeString(&__uStr,value_name);
-	ZwSetValueKey(hKey,&__uStr,0,REG_DWORD,&value,sizeof(DWORD));
-	ZwClose(hKey);
+	NtSetValueKey(hKey,&__uStr,0,REG_DWORD,&value,sizeof(DWORD));
+	NtClose(hKey);
 }
 
 void SetFilter(short *value_name,DWORD ioctl_code)
@@ -364,9 +376,9 @@ void SetFilter(short *value_name,DWORD ioctl_code)
 	char st[32];
 	IO_STATUS_BLOCK IoStatusBlock;
 
-	RtlInitUnicodeString(&__uStr,L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag");
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,0,NULL,NULL);
-	Status = ZwOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
+	RtlInitUnicodeString(&__uStr,ultradefrag_key);
+	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
+	Status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
 	if(!NT_SUCCESS(Status))
 	{
 		_itoa(Status,st,16);
@@ -376,14 +388,14 @@ void SetFilter(short *value_name,DWORD ioctl_code)
 		return;
 	}
 	RtlInitUnicodeString(&__uStr,value_name);
-	Status = ZwQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
+	Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
 		pInfo,size,&size);
 	if(NT_SUCCESS(Status))
 	{
 		Status = NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
 			ioctl_code,&pInfo->Data,pInfo->DataLength,NULL,0);
 	}
-	ZwClose(hKey);
+	NtClose(hKey);
 	return;
 }
 
@@ -397,9 +409,9 @@ short *ReadLetters()
 	DWORD size = 65536;
 	char st[32];
 
-	RtlInitUnicodeString(&__uStr,L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag");
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,0,NULL,NULL);
-	Status = ZwOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
+	RtlInitUnicodeString(&__uStr,ultradefrag_key);
+	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
+	Status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
 	if(!NT_SUCCESS(Status))
 	{
 		_itoa(Status,st,16);
@@ -409,14 +421,14 @@ short *ReadLetters()
 		return NULL;
 	}
 	RtlInitUnicodeString(&__uStr,L"scheduled letters");
-	Status = ZwQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
+	Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
 		pInfo,size,&size);
 	if(NT_SUCCESS(Status))
 	{
-		ZwClose(hKey);
+		NtClose(hKey);
 		return (short *)&pInfo->Data;
 	}
-	ZwClose(hKey);
+	NtClose(hKey);
 	return NULL;
 }
 
@@ -452,15 +464,15 @@ void Cleanup()
 		/* remove native program name from BootExecute registry parameter */
 		RtlInitUnicodeString(&__uStr,
 			L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager");
-		InitializeObjectAttributes(&ObjectAttributes,&__uStr,0,NULL,NULL);
-		Status = ZwOpenKey(&hKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&ObjectAttributes);
+		InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
+		Status = NtOpenKey(&hKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&ObjectAttributes);
 		if(NT_SUCCESS(Status))
 		{
 			///print("opened\n");
 			_len = 510;
 			pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)buffer;
 			RtlInitUnicodeString(&__uStr,L"BootExecute");
-			Status = ZwQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
+			Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
 				pInfo,_len,&_len);
 			if(NT_SUCCESS(Status) && pInfo->Type == REG_MULTI_SZ)
 			{
@@ -482,9 +494,9 @@ void Cleanup()
 				}
 				new_boot_exec[len2] = new_boot_exec[len2 + 1] = 0;
 				RtlInitUnicodeString(&__uStr,L"BootExecute");
-				ZwSetValueKey(hKey,&__uStr,0,REG_MULTI_SZ,new_boot_exec,len2 + 2);
+				NtSetValueKey(hKey,&__uStr,0,REG_MULTI_SZ,new_boot_exec,len2 + 2);
 			}
-			ZwClose(hKey);
+			NtClose(hKey);
 		}
 	}
 }
@@ -546,6 +558,9 @@ void ProcessVolume(char letter,char command)
 	if(Status)
 	{
 		print("\nIncorrect drive letter or internal driver error!\n");
+		done_flag = 1;
+		while(wait_flag)
+			IntSleep(10);
 		return;
 	}
 	done_flag = 1;
@@ -614,6 +629,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 #endif
 	offset.QuadPart = 0;
 	/* 4. Display Copyright */
+	//if(nt_4)
+	//	print("\n\n");
 	RtlInitUnicodeString(&strU,
 		VERSIONINTITLE_U L" native interface\n"
 		L"Copyright (c) Dmitri Arkhangelski, 2007.\n\n"
@@ -707,6 +724,20 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	if(Status)
 	{
 		print("\nERROR: Can't create \\UltraDefragIoEvent! Wait 5 seconds.\n");
+		IntSleep(5000);
+		goto continue_boot;///abort;
+	}
+	/* nt 4.0 specific code */
+	Status = NtDeviceIoControlFile(hUltraDefragDevice,hDeviceIoEvent,NULL,NULL,&IoStatusBlock, \
+		IOCTL_SET_USER_MODE_BUFFER,user_mode_buffer,0,NULL,0);
+	if(Status == STATUS_PENDING)
+	{
+		Status = NtWaitForSingleObject(hDeviceIoEvent,FALSE,NULL);
+		if(!Status)	Status = IoStatusBlock.Status;
+	}
+	if(Status != STATUS_SUCCESS)
+	{
+		print("\nERROR: Can't setup user mode buffer! Wait 5 seconds.\n");
 		IntSleep(5000);
 		goto continue_boot;///abort;
 	}

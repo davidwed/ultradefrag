@@ -29,23 +29,35 @@ void CheckPendingBlocks(PEXAMPLE_DEVICE_EXTENSION dx)
 	NTSTATUS status;
 	IO_STATUS_BLOCK ioStatus;
 	ULONGLONG startLcn,nextLcn,cluster,data_cluster;
+	ULONGLONG *pnextLcn;
 	PBITMAP_DESCRIPTOR bitMappings;
 	ULONGLONG i;
 
 	if(!dx->unprocessed_blocks)
 		goto done;
 	bitMappings = (PBITMAP_DESCRIPTOR)dx->BitMap;
+#ifndef NT4_TARGET
+	pnextLcn = &nextLcn;
+#else
+	if(dx->FileMap)
+		pnextLcn = (ULONGLONG *)(dx->FileMap + FILEMAPSIZE * sizeof(ULONGLONG) + 2 * sizeof(ULONGLONG));
+	else
+	{
+		DebugPrint("-Ultradfg- user mode buffer inaccessible!\n");
+		pnextLcn = &nextLcn;
+	}
+#endif
 	ppbs = dx->no_checked_blocks;
 	while(ppbs)
 	{
 		if(ppbs->len)
 		{
-			nextLcn = ppbs->start; cluster = data_cluster = LLINVALID;
+			*pnextLcn = ppbs->start; cluster = data_cluster = LLINVALID;
 			do
 			{
 				status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
 					FSCTL_GET_VOLUME_BITMAP,
-					&nextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
+					pnextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
 				if(status == STATUS_PENDING)
 				{
 					NtWaitForSingleObject(dx->hVol,FALSE,NULL);
@@ -100,7 +112,7 @@ void CheckPendingBlocks(PEXAMPLE_DEVICE_EXTENSION dx)
 					}
 				}
 				/* Move to the next block */
-				nextLcn = bitMappings->StartLcn + i;
+				*pnextLcn = bitMappings->StartLcn + i;
 			} while(status != STATUS_SUCCESS);
 end_of_scan:
 			/* mark current as free */
@@ -234,12 +246,18 @@ void Defragment(PEXAMPLE_DEVICE_EXTENSION dx)
 	PFILENAME curr_file;
 	ULONG prev_fragmfilecounter;
 	BOOLEAN result;
+///PFREEBLOCKMAP block = dx->free_space_map;
 
 	/* Clear the 'Stop' event. */
 	KeClearEvent(&(dx->stop_event));
 	/* Delete temporary file. */
 	DeleteLogFile(dx);
 
+	/*while(block)
+	{
+		DebugPrint("%I64u - %I64u\n",block->lcn,block->length);
+		block = block->next_ptr;
+	}*/
 	if(dx->compact_flag)
 	{
 		DefragmentFreeSpace(dx);
@@ -301,25 +319,38 @@ NTSTATUS __MoveFile(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
 	ULONG status;
 	IO_STATUS_BLOCK ioStatus;
 	MOVEFILE_DESCRIPTOR moveFile;
-	
+	MOVEFILE_DESCRIPTOR *pmoveFile;
+
 	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",
 		 startVcn,targetLcn,n_clusters);
 
 	if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
 		return STATUS_UNSUCCESSFUL;
-	
-	/* Setup movefile descriptor and make the call */
-	moveFile.FileHandle = hFile;
-	moveFile.StartVcn.QuadPart = startVcn;
-	moveFile.TargetLcn.QuadPart = targetLcn;
-#ifdef _WIN64
-	moveFile.NumVcns = n_clusters;
+
+#ifndef NT4_TARGET
+	pmoveFile = &moveFile;
 #else
-	moveFile.NumVcns = (ULONG)n_clusters;
+	if(dx->FileMap)
+		pmoveFile = \
+		 (MOVEFILE_DESCRIPTOR *)(dx->FileMap + FILEMAPSIZE * sizeof(ULONGLONG) + 3 * sizeof(ULONGLONG));
+	else
+	{
+		DebugPrint("-Ultradfg- user mode buffer inaccessible!\n");
+		pmoveFile = &moveFile;
+	}
+#endif
+	/* Setup movefile descriptor and make the call */
+	pmoveFile->FileHandle = hFile;
+	pmoveFile->StartVcn.QuadPart = startVcn;
+	pmoveFile->TargetLcn.QuadPart = targetLcn;
+#ifdef _WIN64
+	pmoveFile->NumVcns = n_clusters;
+#else
+	pmoveFile->NumVcns = (ULONG)n_clusters;
 #endif
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
 						FSCTL_MOVE_FILE,
-						&moveFile,sizeof(moveFile),
+						pmoveFile,sizeof(MOVEFILE_DESCRIPTOR),
 						NULL,0);
 
 	/* If the operation is pending, wait for it to finish */
@@ -455,7 +486,6 @@ void RemoveFreeSpaceBlocks(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 					goto next;
 				}
 				/* If we are in the middle of the free block: */
-				block->length = file_block->lcn - block->lcn;
 				//InsertBlock(dx,block,block->next_ptr,
 				//	file_block->lcn + file_block->length,
 				//	block->lcn + block->length - file_block->lcn - file_block->length);
@@ -467,6 +497,7 @@ void RemoveFreeSpaceBlocks(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 					new_block->length = block->lcn + block->length - \
 						file_block->lcn - file_block->length;
 				}
+				block->length = file_block->lcn - block->lcn;
 			}
 next:
 			file_block = file_block->next_ptr;

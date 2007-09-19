@@ -73,6 +73,7 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	KeInitializeEvent(&(dx->lock_map_event),SynchronizationEvent,TRUE);
 	KeInitializeSpinLock(&(dx->spin_lock));
 	dx->BitMap = NULL; dx->FileMap = NULL; dx->tmp_buf = NULL;
+	dx->user_mode_buffer = NULL;
 	dx->in_filter.buffer = dx->ex_filter.buffer = NULL;
 	dx->in_filter.offsets = dx->ex_filter.offsets = NULL;
 	dx->report_type.format = ASCII_FORMAT;
@@ -259,17 +260,28 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	
 	if(IrpStack->Parameters.Write.Length != sizeof(ULTRADFG_COMMAND))
 		goto invalid_request;
+#ifdef NT4_TARGET
+	addr = MmGetSystemAddressForMdl(Irp->MdlAddress);
+#else
 	addr = MmGetSystemAddressForMdlSafe(Irp->MdlAddress,NormalPagePriority);
+#endif
 	if(!addr) goto invalid_request;
 	RtlCopyMemory(&cmd,addr,sizeof(ULTRADFG_COMMAND));
 
 	DebugPrint("-Ultradfg- Command = %c%c\n",cmd.command,cmd.letter);
 	DebugPrint("-Ultradfg- Sizelimit = %I64u\n",cmd.sizelimit);
 
+	cmd.letter = (UCHAR)toupper((int)cmd.letter); /* important for nt 4.0 and w2k - bug #1771887 solution */
+
 	if(!validate_letter(cmd.letter)) goto invalid_request;
 
 	dx->compact_flag = (cmd.command == 'c' || cmd.command == 'C') ? TRUE : FALSE;
 	dx->sizelimit = cmd.sizelimit;
+
+#ifdef NT4_TARGET
+	//////////cmd.mode = __KernelMode;
+	///DebugPrint("hDbgLog address %x\n",&hDbgLog);
+#endif
 
 	if(cmd.mode == __KernelMode)
 	{ /* native app defrag system files */
@@ -339,33 +351,41 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	PEXAMPLE_DEVICE_EXTENSION dx = \
 			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
+#ifdef NT4_DBG
+	OpenLogFile();
+#endif
 	DebugPrint("-Ultradfg- Create File\n");
 	/* allocate memory for maps processing */
+#ifndef NT4_TARGET
 	dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
-	if(!dx->FileMap)
-	{
-		DbgPrintNoMem();
-		return CompleteIrp(Irp,STATUS_NO_MEMORY,0);
-	}
+	if(!dx->FileMap) goto no_mem;
 	dx->BitMap = AllocatePool(NonPagedPool,BITMAPSIZE * sizeof(UCHAR));
 	if(!dx->BitMap)
 	{
-		DbgPrintNoMem();
 		ExFreePool(dx->FileMap);
 		dx->FileMap = NULL;
-		return CompleteIrp(Irp,STATUS_NO_MEMORY,0);
+		goto no_mem;
 	}
+#endif
 	dx->tmp_buf = AllocatePool(NonPagedPool,32768 + 5);
 	if(!dx->tmp_buf)
 	{
-		DbgPrintNoMem();
+#ifndef NT4_TARGET
 		ExFreePool(dx->FileMap);
+		dx->FileMap = NULL;
 		ExFreePool(dx->BitMap);
-		dx->FileMap = NULL; dx->BitMap = NULL;
-		return CompleteIrp(Irp,STATUS_NO_MEMORY,0);
+		dx->BitMap = NULL;
+#endif
+		goto no_mem;
 	}
 	dx->status = STATUS_BEFORE_PROCESSING;
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
+no_mem:
+	DbgPrintNoMem();
+#ifdef NT4_DBG
+	CloseLogFile();
+#endif
+	return CompleteIrp(Irp,STATUS_NO_MEMORY,0);
 }
 
 /* CloseHandle() request processing. */
@@ -376,6 +396,7 @@ NTSTATUS NTAPI Close_HandleIRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 
 	DebugPrint("-Ultradfg- In Close handler\n"); 
 	FreeAllBuffers(dx);
+#ifndef NT4_TARGET
 	if(dx->FileMap)
 	{
 		ExFreePool(dx->FileMap);
@@ -386,11 +407,15 @@ NTSTATUS NTAPI Close_HandleIRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		ExFreePool(dx->BitMap);
 		dx->BitMap = NULL;
 	}
+#endif
 	if(dx->tmp_buf)
 	{
 		ExFreePool(dx->tmp_buf);
 		dx->tmp_buf = NULL;
 	}
+#ifdef NT4_DBG
+	CloseLogFile();
+#endif
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
 }
 
@@ -569,12 +594,12 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			filter = (short *)Irp->AssociatedIrp.SystemBuffer;
 			if(IoControlCode == IOCTL_SET_INCLUDE_FILTER)
 			{
-				DebugPrint("Include: %ws\n",filter);
+				DebugPrint("-Ultradfg- Include: %ws\n",filter);
 				UpdateFilter(&dx->in_filter,filter,length);
 			}
 			else
 			{
-				DebugPrint("Exclude: %ws\n",filter);
+				DebugPrint("-Ultradfg- Exclude: %ws\n",filter);
 				UpdateFilter(&dx->ex_filter,filter,length);
 			}
 			UpdateInformation(dx);
@@ -610,6 +635,21 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			BytesTxd = length;
 			break;
 		}
+		case IOCTL_SET_USER_MODE_BUFFER:
+		{
+			DebugPrint("-Ultradfg- IOCTL_SET_USER_MODE_BUFFER\n");
+			DebugPrint("-Ultradfg- Address = %x\n",
+				IrpStack->Parameters.DeviceIoControl.Type3InputBuffer);
+			dx->user_mode_buffer = IrpStack->Parameters.DeviceIoControl.Type3InputBuffer;
+		#ifdef NT4_TARGET
+			if(dx->user_mode_buffer)
+			{
+				dx->BitMap = dx->user_mode_buffer;
+				dx->FileMap = (ULONGLONG *)(dx->user_mode_buffer + BITMAPSIZE * sizeof(UCHAR));
+			}
+		#endif
+			break;
+		}
 		/* Invalid request */
 		default: status = STATUS_INVALID_DEVICE_REQUEST;
 	}
@@ -640,8 +680,10 @@ VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 
 	KeSetEvent(&(dx->unload_event),IO_NO_INCREMENT,FALSE);
 	FreeAllBuffers(dx);
+#ifndef NT4_TARGET
 	if(dx->FileMap) ExFreePool(dx->FileMap);
 	if(dx->BitMap) ExFreePool(dx->BitMap);
+#endif
 	if(dx->tmp_buf) ExFreePool(dx->tmp_buf);
 	DestroyFilter(dx);
 	WaitForThreadComplete(dx);

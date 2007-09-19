@@ -80,11 +80,14 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 
 ;-----------------------------------------
 
+Var NT4_TARGET
+
 Function .onInit
 
   push $R0
   push $R1
 
+  StrCpy $NT4_TARGET 0
   ClearErrors
   ReadRegStr $R0 HKLM \
    "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "CurrentVersion"
@@ -105,10 +108,11 @@ winnt:
   goto abort_inst
 winnt_456:
   StrCmp $R1 '4' 0 winnt_56
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "Windows NT 4.x is not supported yet!" \
-   /SD IDOK
-  goto abort_inst
+  ;;;MessageBox MB_OK|MB_ICONEXCLAMATION \
+  ;;; "Windows NT 4.x is not supported yet!" \
+  ;;; /SD IDOK
+  ;;;goto abort_inst
+  StrCpy $NT4_TARGET 1
 
 winnt_56:
   pop $R1
@@ -154,7 +158,15 @@ Section "Ultra Defrag core files (required)" SecCore
 
   DetailPrint "Install driver..."
   SetOutPath "$WINDIR\System32\Drivers"
+  StrCmp $NT4_TARGET '1' 0 modern_win
+  DetailPrint "NT 4.0 version"
+  File /nonfatal "ultradfg_nt4.sys"
+  Delete "$WINDIR\System32\Drivers\ultradfg.sys"
+  Rename "ultradfg_nt4.sys" "ultradfg.sys"
+  goto driver_installed
+modern_win:
   File "ultradfg.sys"
+driver_installed:
 
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"

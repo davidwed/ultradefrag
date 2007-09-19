@@ -41,6 +41,12 @@ if "%DDK_TYPE%" equ "Windows_Server2003_DDK" goto build_with_winddk
 :build_with_rosddk
 echo Build the driver...
 cd .\driver
+echo NT 5.0+ version...
+set NT4_TARGET=false
+nmake /NOLOGO /A /f ultradfg.mak
+if %errorlevel% neq 0 goto fail
+echo NT 4.0 version...
+set NT4_TARGET=true
 nmake /NOLOGO /A /f ultradfg.mak
 if %errorlevel% neq 0 goto fail
 
@@ -115,7 +121,7 @@ call blditems.cmd
 if %errorlevel% neq 0 goto fail
 cd ..
 mkdir ..\bin
-copy .\driver\objfre_wnet_x86\i386\ultradfg.sys ..\bin\
+rem blditems save driver versions to bin directory
 REM copy .\console\objfre_wnet_x86\i386\udefrag.exe ..\bin\
 REM copy .\gui\objfre_wnet_x86\i386\dfrg.exe ..\bin\
 REM copy .\native\objfre_wnet_x86\i386\defrag_native.exe ..\bin\

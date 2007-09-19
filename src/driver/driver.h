@@ -31,7 +31,22 @@
 
 #define DBG 1 /* it's very useful! */
 
+#ifdef NT4_TARGET
+#define NT4_DBG
+#else
+#undef NT4_DBG
+#endif
+
+////#define NT4_DBG
+
+#ifdef NT4_DBG
+void __stdcall OpenLogFile();
+void __stdcall CloseLogFile();
+void __cdecl WriteLogMessage(char *format, ...);
+#define DebugPrint WriteLogMessage
+#else
 #define DebugPrint DbgPrint
+#endif
 
 #include <ntddk.h>
 #include <ntdddisk.h>
@@ -85,6 +100,16 @@ ULONGLONG _rdtsc(void);
 #else
 #define AllocatePool(type,size) ExAllocatePool((type),(size))
 #endif
+
+#ifdef NT4_TARGET
+#undef ExFreePool
+
+DECLSPEC_IMPORT
+VOID
+NTAPI
+ExFreePool(
+  IN PVOID  P);
+#endif /* NT4_TARGET */
 
 BOOLEAN  NTAPI RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);
 NTSTATUS NTAPI ZwQueryDirectoryFile(HANDLE,HANDLE,PIO_APC_ROUTINE,
@@ -236,6 +261,7 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 	REPORT_TYPE report_type;
 	ULONGLONG processed_clusters;
 	short *tmp_buf;
+	UCHAR *user_mode_buffer; /* for nt 4.0 */
 } EXAMPLE_DEVICE_EXTENSION, *PEXAMPLE_DEVICE_EXTENSION;
 
 /* Function Prototypes */

@@ -57,6 +57,8 @@ OVERLAPPED ovrl;
 short driver_key[] = \
 	L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 
+char user_mode_buffer[65536]; /* for nt 4.0 support */
+
 void __cdecl print(const char *str)
 {
 	DWORD txd;
@@ -259,6 +261,19 @@ int __cdecl wmain(int argc, short **argv)
 	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_EXCLUDE_FILTER,
 		ex_filter,length,NULL,0,&txd,&ovrl))
 		WaitForSingleObject(hEvt,INFINITE);
+	/* nt 4.0 specific code */
+	ovrl.hEvent = hEvt;
+	ovrl.Offset = ovrl.OffsetHigh = 0;
+	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_USER_MODE_BUFFER,
+		user_mode_buffer,0,NULL,0,&txd,&ovrl))
+	{
+		WaitForSingleObject(hEvt,INFINITE);
+	}
+	else
+	{
+		display_error("Can't setup user mode buffer!\n");
+		err_code = 5; goto cleanup;
+	}
 
 	cmd.command = a_flag ? 'a' : 'd';
 	if(c_flag) cmd.command = 'c';

@@ -25,3 +25,8 @@ extern ULONG dbg_level;
 extern UCHAR BitShift[];
 extern short device_name[];
 extern short link_name[];
+
+#ifdef NT4_DBG
+extern HANDLE hDbgLog;
+extern LARGE_INTEGER dbg_log_offset;
+#endif

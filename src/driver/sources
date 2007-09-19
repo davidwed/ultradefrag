@@ -1,8 +1,17 @@
+!IF "$(NT4_TARGET)" == "true"
+TARGETNAME=ultradfg_nt4
+!ELSE
 TARGETNAME=ultradfg
+!ENDIF
 TARGETPATH=obj
 TARGETTYPE=DRIVER
 
+!IF "$(NT4_TARGET)" == "true"
+USER_C_FLAGS=/DUSE_WINDDK /DNT4_TARGET
+RCOPTIONS=/d NT4_TARGET
+!ELSE
 USER_C_FLAGS=/DUSE_WINDDK
+!ENDIF
 
 SOURCES=analyse.c defrag.c int64.c io.c list.c log.c \
 	globals.c ultradfg.c ultradfg.rc

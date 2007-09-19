@@ -21,6 +21,8 @@
 
 #include "driver.h"
 
+#ifndef NT4_TARGET
+
 NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
 {
 	PFILE_OBJECT FileObject = NULL;
@@ -75,3 +77,12 @@ NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
 	/* NO DEREFERENCE FileObject HERE! */
 	return Status;
 }
+
+#else /* NT4_TARGET */
+
+NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
+{
+	return 0;
+}
+
+#endif

@@ -29,3 +29,8 @@ UCHAR BitShift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
 short device_name[] = L"\\Device\\UltraDefrag";
 short link_name[] = L"\\DosDevices\\ultradfg";
+
+#ifdef NT4_DBG
+HANDLE hDbgLog = 0;
+LARGE_INTEGER dbg_log_offset;
+#endif

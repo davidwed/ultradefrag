@@ -106,9 +106,11 @@ BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	 *
 	 * On NT 4.0 (at least under MS Virtual PC) it will crash system:
 	 */
+#ifndef NT4_TARGET 
 	Status = __NtFlushBuffersFile(dx->hVol);
 	if(Status)
 		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",Status);
+#endif
 ///tm = _rdtsc();
 	if(!FillFreeClusterMap(dx)) goto fail;
 ///DebugPrint("%I64u\n", _rdtsc() - tm);
@@ -271,6 +273,7 @@ BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
 	/* Bit shifting array for efficient processing of the bitmap */
 	UCHAR BitShift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 //ULONGLONG t;
+	ULONGLONG *pnextLcn;
 	/* Allocate memory */
 	dx->cluster_map = (UCHAR *)_int64_malloc(dx->clusters_total);
 	if(!dx->cluster_map)
@@ -282,12 +285,23 @@ BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
 //	t = _rdtsc();
 	/* Start scanning */
 	bitMappings = (PBITMAP_DESCRIPTOR)(dx->BitMap);
-	nextLcn = 0; cluster = LLINVALID;
+#ifndef NT4_TARGET
+	pnextLcn = &nextLcn;
+#else
+	if(dx->FileMap)
+		pnextLcn = (ULONGLONG *)(dx->FileMap + FILEMAPSIZE * sizeof(ULONGLONG));
+	else
+	{
+		DebugPrint("-Ultradfg- user mode buffer inaccessible!\n");
+		pnextLcn = &nextLcn;
+	}
+#endif
+	*pnextLcn = 0; cluster = LLINVALID;
 	do
 	{
 		status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
 			FSCTL_GET_VOLUME_BITMAP,
-			&nextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
+			pnextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
 		if(status == STATUS_PENDING)
 		{
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
@@ -325,7 +339,7 @@ BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
 			}
 		}
 		/* Move to the next block */
-		nextLcn = bitMappings->StartLcn + i;
+		*pnextLcn = bitMappings->StartLcn + i;
 	} while(status != STATUS_SUCCESS);
 
 	if(cluster != LLINVALID)
@@ -644,6 +658,7 @@ BOOLEAN DumpFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 	PGET_RETRIEVAL_DESCRIPTOR fileMappings;
 
 	ULONGLONG startVcn,startLcn,length;
+	ULONGLONG *pstartVcn;
 	int i,cnt = 0;
 
 	/* Data initialization */
@@ -665,13 +680,24 @@ BOOLEAN DumpFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 	}
 
 	/* Start dumping the mapping information. Go until we hit the end of the file. */
-	startVcn = 0;
+#ifndef NT4_TARGET
+	pstartVcn = &startVcn;
+#else
+	if(dx->FileMap)
+		pstartVcn = (ULONGLONG *)(dx->FileMap + FILEMAPSIZE * sizeof(ULONGLONG) + sizeof(ULONGLONG));
+	else
+	{
+		DebugPrint("-Ultradfg- user mode buffer inaccessible!\n");
+		pstartVcn = &startVcn;
+	}
+#endif
+	*pstartVcn = 0;
 	fileMappings = (PGET_RETRIEVAL_DESCRIPTOR)(dx->FileMap);
 	do
 	{
 		Status = ZwFsControlFile(hFile, NULL, NULL, 0, &ioStatus, \
 						FSCTL_GET_RETRIEVAL_POINTERS, \
-						&startVcn, sizeof(startVcn), \
+						pstartVcn, sizeof(ULONGLONG), \
 						fileMappings, FILEMAPSIZE * sizeof(LARGE_INTEGER));
 		if(Status == STATUS_PENDING)
 		{
@@ -691,7 +717,7 @@ dump_fail:
 			return FALSE;
 		}
 		/* Loop through the buffer of number/cluster pairs. */
-		startVcn = fileMappings->StartVcn;
+		*pstartVcn = fileMappings->StartVcn;
 		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs; i++)
 		{
 			/* On NT 4.0, a compressed virtual run (0-filled) is  */
@@ -701,13 +727,13 @@ dump_fail:
 			if(fileMappings->Pair[i].Vcn == 0)
 				goto next_run; /* only for some 3.99 Gb files on FAT32 */
 			startLcn = fileMappings->Pair[i].Lcn;
-			length = fileMappings->Pair[i].Vcn - startVcn;
+			length = fileMappings->Pair[i].Vcn - *pstartVcn;
 			dx->processed_clusters += length;
-			if(!InsertNewBlock(dx,pfn,startVcn,startLcn,length))
+			if(!InsertNewBlock(dx,pfn,*pstartVcn,startLcn,length))
 				goto dump_fail;
 			cnt ++;	/* block counter */
 next_run:
-			startVcn = fileMappings->Pair[i].Vcn;
+			*pstartVcn = fileMappings->Pair[i].Vcn;
 		}
 	} while(Status != STATUS_SUCCESS);
 

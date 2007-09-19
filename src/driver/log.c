@@ -21,6 +21,9 @@
  *  Save to logfile procedure.
  */
 
+#include <stdarg.h>
+#include <stdio.h>
+
 #include "driver.h"
 
 void DeleteLogFile(PEXAMPLE_DEVICE_EXTENSION dx)
@@ -161,3 +164,70 @@ BOOLEAN SaveFragmFilesListToDisk(PEXAMPLE_DEVICE_EXTENSION dx)
 done:
 	return TRUE;
 }
+
+/*************************************************************************************************/
+
+/* special code for debug messages saving on nt 4.0 */
+
+#ifdef NT4_DBG
+
+void __stdcall OpenLogFile()
+{
+	UNICODE_STRING log_path;
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	NTSTATUS Status;
+	IO_STATUS_BLOCK ioStatus;
+
+	/* Create the file */
+	RtlInitUnicodeString(&log_path,L"\\??\\A:\\DBGPRINT.LOG");
+	InitializeObjectAttributes(&ObjectAttributes,&log_path,0,NULL,NULL);
+	ZwDeleteFile(&ObjectAttributes);
+	Status = ZwCreateFile(&hDbgLog,FILE_GENERIC_WRITE,&ObjectAttributes,&ioStatus,
+			  NULL,0,FILE_SHARE_READ,FILE_OVERWRITE_IF,
+			  0,NULL,0);
+	if(Status)
+	{
+		DbgPrint("-Ultradfg- Can't create A:\\DBGPRINT.LOG!\n");
+		hDbgLog = 0;
+	}
+	dbg_log_offset.QuadPart = 0;
+}
+
+void __stdcall CloseLogFile()
+{
+	if(hDbgLog) ZwClose(hDbgLog);
+}
+
+void __cdecl WriteLogMessage(char *format, ...)
+{
+	char buffer[1024]; /* 512 */
+	va_list ap;
+	ULONG length;
+	IO_STATUS_BLOCK ioStatus;
+	char crlf[] = "\r\n";
+
+	va_start(ap,format);
+	length = _vsnprintf(buffer,sizeof(buffer),format,ap);
+	if(length == -1)
+	{
+		buffer[sizeof(buffer) - 2] = '\n';
+		length = sizeof(buffer) - 1;
+	}
+	buffer[sizeof(buffer) - 1] = 0;
+	if(KeGetCurrentIrql() == PASSIVE_LEVEL)
+	{
+		if(length != 0)
+			length --; /* remove last new line character */
+		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+			buffer,length,&dbg_log_offset,NULL);
+		dbg_log_offset.QuadPart += length;
+		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+			crlf,2,&dbg_log_offset,NULL);
+		dbg_log_offset.QuadPart += 2;
+	}
+	/* and send message to debugger */
+	DbgPrint(buffer);
+	va_end(ap);
+}
+
+#endif /* NT4_DBG */
