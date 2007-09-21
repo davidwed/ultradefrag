@@ -1,6 +1,28 @@
 The following is Justin Dearing's TODO list for the manual and other technical 
-documents included in the upcoming version 1.1.0.
+documents included in the upcoming version 1.2.0.
 Items to describe:
+
+/* maybe we need to use this file as stack */
+
+1. add to manual information about bug reporting:
+   NOTE: include please in your bug report following data:
+   1. If you see 'Blue Screen Of Death' as result of UltraDefrag working 
+   then include important parts of messages on them.
+   2. In other cases run Sysinternals DebugView before you start UltraDefrag 
+   and include in your report last 200 significant messages (or less). 
+   You can free download DebugView here:
+                 http://www.sysinternals.com
+   3. For gui bugs attach screenshot
+
+2. Scheduler.NET requires NET Framework 2.0. And provide [small] description 
+   about the scheduler and useful features of them.
+
+3. UltraDefrag has now full NT 4.0 support.
+
+4. Volumes with UDF filesystem (on Vista only) are supported too. User can create 
+   UDF volume using 'format volume_letter: /FS:UDF'.
+
+				***
 
 1.  (DONE) compact command move all files AND defrag fragmented if possible.
 2.  (DONE) currently compact don't applied to FAT volumes because directories on them
