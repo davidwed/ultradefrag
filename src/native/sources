@@ -4,7 +4,7 @@ TARGETTYPE=PROGRAM
 
 USER_C_FLAGS=/DUSE_WINDDK
 
-SOURCES=defrag_native.c misc.c keytrans.c defrag_native.rc
+SOURCES=defrag_native.c misc.c keytrans.c registry.c stdio.c sys.c defrag_native.rc
 
 USE_NTDLL=1
 

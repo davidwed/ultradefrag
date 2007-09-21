@@ -29,6 +29,18 @@ typedef LONG NTSTATUS;
 #define NT_SUCCESS(x) ((x)>=0)
 #endif
 
+typedef struct _STRING
+{
+    USHORT Length;
+    USHORT MaximumLength;
+    PCHAR Buffer;
+} STRING, *PSTRING;
+
+typedef STRING ANSI_STRING;
+typedef PSTRING PANSI_STRING;
+typedef int BOOL;
+typedef CONST char *PCSZ;
+
 typedef struct _UNICODE_STRING {
   USHORT Length;
   USHORT MaximumLength;
@@ -53,7 +65,6 @@ typedef struct _CURDIR
 
 typedef struct _RTL_HEAP_DEFINITION {
     ULONG Length; /* = sizeof(RTL_HEAP_DEFINITION) */
-
     ULONG Unknown[11];
 } RTL_HEAP_DEFINITION, *PRTL_HEAP_DEFINITION;
 
@@ -533,5 +544,21 @@ RtlCreateUserThread(
     IN OUT PHANDLE ThreadHandle,
     IN OUT PCLIENT_ID ClientId
 );
+
+VOID 
+NTAPI 
+RtlExitUserThread(NTSTATUS Status);
+
+typedef enum _EVENT_TYPE {
+  NotificationEvent,
+  SynchronizationEvent
+} EVENT_TYPE, *PEVENT_TYPE;
+
+#define FILE_DIRECTORY_FILE		0x00000001
+#define FILE_RESERVE_OPFILTER	0x00100000
+
+void      WINAPI RtlInitAnsiString(PANSI_STRING,PCSZ);
+NTSTATUS  WINAPI RtlAnsiStringToUnicodeString(PUNICODE_STRING,PANSI_STRING,BOOL);
+void      WINAPI RtlFreeUnicodeString(PUNICODE_STRING);
 
 #endif /* _NTNDK_H_ */

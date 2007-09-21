@@ -14,6 +14,9 @@ CLEAN :
 	-@erase "$(INTDIR)\defrag_native.obj"
 	-@erase "$(INTDIR)\defrag_native.res"
 	-@erase "$(INTDIR)\keytrans.obj"
+	-@erase "$(INTDIR)\registry.obj"
+	-@erase "$(INTDIR)\stdio.obj"
+	-@erase "$(INTDIR)\sys.obj"
 	-@erase "$(INTDIR)\misc.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(OUTDIR)\defrag_native.exe"
@@ -46,6 +49,9 @@ LINK32_OBJS= \
 	"$(INTDIR)\defrag_native.obj" \
 	"$(INTDIR)\defrag_native.res" \
 	"$(INTDIR)\keytrans.obj" \
+	"$(INTDIR)\registry.obj" \
+	"$(INTDIR)\stdio.obj" \
+	"$(INTDIR)\sys.obj" \
 	"$(INTDIR)\misc.obj"
 
 "$(OUTDIR)\defrag_native.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)

@@ -25,21 +25,20 @@
 #include "../include/ultradfgver.h"
 
 HANDLE hUltraDefragDevice = NULL;
-HANDLE hStdInput = NULL;
-HANDLE hKbEvent = NULL;
 HANDLE hStopEvent = NULL;
 HANDLE hDeviceIoEvent;
 UNICODE_STRING uStr;
 char letter;
 
 DWORD next_boot, every_boot;
+short *letters;
 ULONGLONG sizelimit = 0;
 
 int abort_flag = 0,done_flag = 0,wait_flag = 0;
 char last_op = 0;
 int i = 0,j = 0,k; /* number of '-' */
 
-short ultradefrag_key[] = L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag";
+extern char kb_buffer[];
 
 char buffer[65536]; /* instead malloc calls */
 
@@ -56,114 +55,16 @@ char user_mode_buffer[65536]; /* for nt 4.0 support */
 		"  shutdown\n" \
 		"  help\n"
 
-int __cdecl putch(int ch)
-{
-	short str[2];
-	UNICODE_STRING strU;
-
-	str[0] = (short)ch;
-	str[1] = 0;
-
-	RtlInitUnicodeString(&strU,str);
-	NtDisplayString(&strU);
-
-	return 0;
-}
-int __cdecl print(const char *str)
-{
-	int i,len;
-
-	len = strlen(str);
-	for(i = 0; i < len; i ++)
-	{
-		putch(str[i]);
-	}
-	return 0;
-}
-
-BOOL EnablePrivilege(DWORD dwLowPartOfLUID)
-{
-	TOKEN_PRIVILEGES tp;
-	LUID luid;
-	NTSTATUS status;
-	HANDLE UserToken;
-	//char b[32];
-
-	NtOpenProcessToken(NtCurrentProcess(),0x2000000,&UserToken);
-
-	luid.HighPart = 0x0;
-	luid.LowPart = dwLowPartOfLUID;
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	status = NtAdjustPrivilegesToken(UserToken,FALSE,&tp,sizeof(TOKEN_PRIVILEGES),
-									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
-	/*if(status)
-	{
-		_itoa(status,b,16);
-		print(b);
-		print("\n");
-	}*/
-	return NT_SUCCESS(status);
-}
-
-void IntSleep(DWORD dwMilliseconds)
-{
-	LARGE_INTEGER Interval;
-
-	if (dwMilliseconds != INFINITE)
-	{
-		/* System time units are 100 nanoseconds. */
-		Interval.QuadPart = -((signed long)dwMilliseconds * 10000);
-	}
-	else
-	{
-		/* Approximately 292000 years hence */
-		Interval.QuadPart = -0x7FFFFFFFFFFFFFFF;
-	}
-	NtDelayExecution (FALSE, &Interval);
-}
-
-NTSTATUS ConReadConsoleInput(PKEYBOARD_INPUT_DATA InputData)
-{
-	IO_STATUS_BLOCK Iosb;
-	NTSTATUS Status;
-	LARGE_INTEGER ByteOffset;
-
-	ByteOffset.QuadPart = 0;
-	Status = NtReadFile(hStdInput,hKbEvent,NULL,NULL,
-			&Iosb,InputData,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
-	/* wait in case operation is pending */
-	if(Status == STATUS_PENDING)
-	{
-		Status = NtWaitForSingleObject(hKbEvent,FALSE,NULL);
-		if(!Status) Status = Iosb.Status;
-	}
-	return Status;
-}
-
-NTSTATUS WaitKbHit(DWORD msec,KEYBOARD_INPUT_DATA *pkbd)
-{
-	IO_STATUS_BLOCK Iosb;
-	NTSTATUS Status;
-	LARGE_INTEGER ByteOffset;
-	LARGE_INTEGER interval;
-
-	ByteOffset.QuadPart = 0;
-	if (msec != INFINITE)
-		interval.QuadPart = -((signed long)msec * 10000);
-	else
-		interval.QuadPart = -0x7FFFFFFFFFFFFFFF;
-	Status = NtReadFile(hStdInput,hKbEvent,NULL,NULL,
-			&Iosb,pkbd,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
-	/* wait in case operation is pending */
-	if(Status == STATUS_PENDING)
-	{
-		Status = NtWaitForSingleObject(hKbEvent,FALSE,&interval);
-		if(!Status) Status = Iosb.Status;
-	}
-	return Status;
-}
+void ReadSettings();
+void CleanRegistry();
+int __cdecl putch(int ch);
+int __cdecl print(const char *str);
+BOOL kb_open();
+BOOL kb_scan();
+void kb_close();
+NTSTATUS WaitKbHit(DWORD msec,KEYBOARD_INPUT_DATA *pkbd);
+BOOL EnablePrivilege(DWORD dwLowPartOfLUID);
+void IntSleep(DWORD dwMilliseconds);
 
 DWORD WINAPI wait_kb_proc(LPVOID unused)
 {
@@ -171,6 +72,9 @@ DWORD WINAPI wait_kb_proc(LPVOID unused)
 
 	if(WaitKbHit(3000,&kbd) == STATUS_SUCCESS)
 		abort_flag = 1;
+
+	/* Exit the thread */
+	//RtlExitUserThread(STATUS_SUCCESS);
 	return 0;
 }
 
@@ -269,236 +173,29 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 	///UpdateProgress();
 
 	wait_flag = 0;
+
+	/* Exit the thread */
+	//RtlExitUserThread(STATUS_SUCCESS);
 	return 0;
-}
-
-BOOL con_scanf(char *buffer)
-{
-	int max_chars = 60;
-	int index = 0;
-	KEYBOARD_INPUT_DATA kbd;
-	NTSTATUS status;
-	KBD_RECORD kbd_rec;
-	char ch;
-
-	while(index <= max_chars)
-	{
-		status = ConReadConsoleInput(&kbd);
-		if(!status)
-		{
-			IntTranslateKey(&kbd, &kbd_rec);
-			if(!kbd_rec.bKeyDown) continue;
-			ch = kbd_rec.AsciiChar;
-			if(!ch) continue; /* for control keys */
-			if(ch == 13)
-			{
-				putch('\r');
-				putch('\n');
-				break;
-			}
-			putch(ch);
-			buffer[index] = ch;
-			index ++;
-		}
-		else return FALSE;
-	}
-	buffer[index] = 0;
-	return TRUE;
-}
-
-DWORD ReadRegDword(short *value_name)
-{
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	UNICODE_STRING __uStr;
-	HANDLE hKey;
-	KEY_VALUE_PARTIAL_INFORMATION pInfo[2]; /* second for dword value placing */
-	DWORD size = sizeof(KEY_VALUE_PARTIAL_INFORMATION) + sizeof(DWORD);
-	DWORD value = 0;
-	char st[32];
-
-	RtlInitUnicodeString(&__uStr,ultradefrag_key);
-	/* OBJ_CASE_INSENSITIVE must be specified on NT 4.0 !!! */
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
-	Status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
-	if(!NT_SUCCESS(Status))
-	{
-		_itoa(Status,st,16);
-		print("\nCan't open registry key! ");
-		print(st);
-		print("\n");
-		return 0;
-	}
-	RtlInitUnicodeString(&__uStr,value_name);
-	Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
-		&pInfo[0],size,&size);
-	if(NT_SUCCESS(Status))
-	{
-		if(pInfo[0].Type == REG_DWORD && pInfo[0].DataLength == sizeof(DWORD))
-			RtlCopyMemory(&value,pInfo[0].Data,sizeof(DWORD));
-	}
-	NtClose(hKey);
-	return value;
-}
-
-void WriteRegDword(short *value_name,DWORD value)
-{
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	UNICODE_STRING __uStr;
-	HANDLE hKey;
-	char st[32];
-
-	RtlInitUnicodeString(&__uStr,ultradefrag_key);
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
-	Status = NtOpenKey(&hKey,KEY_SET_VALUE,&ObjectAttributes);
-	if(!NT_SUCCESS(Status))
-	{
-		_itoa(Status,st,16);
-		print("\nCan't open registry key! ");
-		print(st);
-		print("\n");
-		return;
-	}
-	RtlInitUnicodeString(&__uStr,value_name);
-	NtSetValueKey(hKey,&__uStr,0,REG_DWORD,&value,sizeof(DWORD));
-	NtClose(hKey);
-}
-
-void SetFilter(short *value_name,DWORD ioctl_code)
-{
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	UNICODE_STRING __uStr;
-	HANDLE hKey;
-	KEY_VALUE_PARTIAL_INFORMATION *pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)buffer;
-	DWORD size = 65536;
-	char st[32];
-	IO_STATUS_BLOCK IoStatusBlock;
-
-	RtlInitUnicodeString(&__uStr,ultradefrag_key);
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
-	Status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
-	if(!NT_SUCCESS(Status))
-	{
-		_itoa(Status,st,16);
-		print("\nCan't open registry key! ");
-		print(st);
-		print("\n");
-		return;
-	}
-	RtlInitUnicodeString(&__uStr,value_name);
-	Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
-		pInfo,size,&size);
-	if(NT_SUCCESS(Status))
-	{
-		Status = NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
-			ioctl_code,&pInfo->Data,pInfo->DataLength,NULL,0);
-	}
-	NtClose(hKey);
-	return;
-}
-
-short *ReadLetters()
-{
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	UNICODE_STRING __uStr;
-	HANDLE hKey;
-	KEY_VALUE_PARTIAL_INFORMATION *pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)buffer;
-	DWORD size = 65536;
-	char st[32];
-
-	RtlInitUnicodeString(&__uStr,ultradefrag_key);
-	InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
-	Status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&ObjectAttributes);
-	if(!NT_SUCCESS(Status))
-	{
-		_itoa(Status,st,16);
-		print("\nCan't open registry key! ");
-		print(st);
-		print("\n");
-		return NULL;
-	}
-	RtlInitUnicodeString(&__uStr,L"scheduled letters");
-	Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
-		pInfo,size,&size);
-	if(NT_SUCCESS(Status))
-	{
-		NtClose(hKey);
-		return (short *)&pInfo->Data;
-	}
-	NtClose(hKey);
-	return NULL;
 }
 
 void Cleanup()
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-	UNICODE_STRING __uStr;
-	HANDLE hKey;
-	DWORD _len,length,len2;
-	char *boot_exec;
-	char new_boot_exec[512] = "";
-	KEY_VALUE_PARTIAL_INFORMATION *pInfo;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	NTSTATUS Status;
 
 	/* stop device */
 	NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
 				IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
 	/* close handles */
 	if(hUltraDefragDevice) NtClose(hUltraDefragDevice);
-	if(hKbEvent) NtClose(hKbEvent);
 	if(hStopEvent) NtClose(hStopEvent);
 	if(hDeviceIoEvent) NtClose(hDeviceIoEvent);
-	if(hStdInput) NtClose(hStdInput);
+	kb_close();
 	/* unload driver */
 	NtUnloadDriver(&uStr);
 
 	/* registry cleanup */
-	WriteRegDword(L"next boot",0);
-	if(!every_boot)
-	{
-		///print("preparing...\n");
-		/* remove native program name from BootExecute registry parameter */
-		RtlInitUnicodeString(&__uStr,
-			L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager");
-		InitializeObjectAttributes(&ObjectAttributes,&__uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
-		Status = NtOpenKey(&hKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&ObjectAttributes);
-		if(NT_SUCCESS(Status))
-		{
-			///print("opened\n");
-			_len = 510;
-			pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)buffer;
-			RtlInitUnicodeString(&__uStr,L"BootExecute");
-			Status = NtQueryValueKey(hKey,&__uStr,KeyValuePartialInformation,
-				pInfo,_len,&_len);
-			if(NT_SUCCESS(Status) && pInfo->Type == REG_MULTI_SZ)
-			{
-				///print("query ok\n");
-				boot_exec = pInfo->Data;
-				_len = pInfo->DataLength;
-				len2 = 0;
-				memset((void *)new_boot_exec,0,512);
-				for(length = 0;length < _len - 2;)
-				{
-					if(wcscmp((short *)(boot_exec + length),L"defrag_native"))
-					{ /* if strings are not equal */
-						///print(boot_exec + length);
-						///print("\n");
-						wcscpy((short *)(new_boot_exec + len2),(short *)(boot_exec + length));
-						len2 += (wcslen((short *)(boot_exec + length)) + 1) << 1;
-					}
-					length += (wcslen((short *)(boot_exec + length)) + 1) << 1;
-				}
-				new_boot_exec[len2] = new_boot_exec[len2 + 1] = 0;
-				RtlInitUnicodeString(&__uStr,L"BootExecute");
-				NtSetValueKey(hKey,&__uStr,0,REG_MULTI_SZ,new_boot_exec,len2 + 2);
-			}
-			NtClose(hKey);
-		}
-	}
+	CleanRegistry();
 }
 
 void ProcessVolume(char letter,char command)
@@ -547,11 +244,11 @@ void ProcessVolume(char letter,char command)
 	cmd.mode = __UserMode;///__KernelMode;
 	offset.QuadPart = 0;
 
-	Status = NtWriteFile(hUltraDefragDevice,hKbEvent,NULL,NULL,&IoStatusBlock, \
+	Status = NtWriteFile(hUltraDefragDevice,hDeviceIoEvent,NULL,NULL,&IoStatusBlock, \
 		&cmd,sizeof(ULTRADFG_COMMAND),&offset,0);
 	if(Status == STATUS_PENDING)
 	{
-		Status = NtWaitForSingleObject(hKbEvent,FALSE,NULL);
+		Status = NtWaitForSingleObject(hDeviceIoEvent,FALSE,NULL);
 		if(!Status)
 			Status = IoStatusBlock.Status;
 	}
@@ -601,7 +298,6 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
-	char buf[64];
 	DWORD Action = ShutdownReboot;
 	char *pos;
 	unsigned short path[] = L"\\??\\A:\\";
@@ -612,9 +308,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	  L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 	char command;
 	LARGE_INTEGER offset;
-	short *letters;
 	HANDLE hThread = NULL;
-	DWORD dbg_level = 0;
 	DWORD i,length;
 
 	/* 1. Normalize and get the Process Parameters */
@@ -647,27 +341,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	if(!EnablePrivilege(SE_LOAD_DRIVER_PRIVILEGE))
 		print("Can't enable SE_LOAD_DRIVER\n");
 	/* 6. Open the keyboard */
-	RtlInitUnicodeString(&strU,L"\\Device\\KeyboardClass0");
-	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
-	Status = NtCreateFile(&hStdInput,0x80100080,
-			    &ObjectAttributes,&IoStatusBlock,NULL,0x80,
-			    0,1,1,NULL,0);
-	if(Status)
-	{
-		print("\nERROR: No keyboard available! Wait 5 seconds.\n");
-		IntSleep(5000);
+	if(!kb_open())
 		goto continue_boot;
-		///NtShutdownSystem(ShutdownReboot);
-	}
-	RtlInitUnicodeString(&strU,L"\\KbEvent");
-	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
-	Status = NtCreateEvent(&hKbEvent,0x1f01ff,&ObjectAttributes,1,0);
-	if(Status)
-	{
-		print("\nERROR: Can't create \\KbEvent! Wait 5 seconds.\n");
-		IntSleep(5000);
-		goto continue_boot;///abort;
-	}
 	RtlInitUnicodeString(&strU,L"\\UDefragStopEvent");
 	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
 	Status = NtCreateEvent(&hStopEvent,0x1f01ff,&ObjectAttributes,1,0);
@@ -677,12 +352,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		IntSleep(5000);
 		goto continue_boot;///abort;
 	}
-	/* read parameters from registry */
-	next_boot = ReadRegDword(L"next boot");
-	every_boot = ReadRegDword(L"every boot");
 	/* 6b. Prompt to exit */
-	RtlInitUnicodeString(&uStr,L"Press any key to exit...  ");
-	NtDisplayString(&uStr);
+	print("Press any key to exit...  ");
 	Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
 		0,0,0,wait_kb_proc,NULL,&hThread,NULL);
 	if(Status)
@@ -690,6 +361,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		print("\nCan't create thread: "); 
 		_itoa(Status,buffer,16);
 		print(buffer);
+		print("\n");
 	}
 	for(i = 0; i < 3; i++)
 	{
@@ -741,20 +413,15 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		IntSleep(5000);
 		goto continue_boot;///abort;
 	}
+	/* read parameters from registry */
+	ReadSettings();
 
 	/* 8a. Batch mode */
-	dbg_level = ReadRegDword(L"dbgprint level");
-	NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
-		IOCTL_SET_DBGPRINT_LEVEL,&dbg_level,sizeof(DWORD),NULL,0);
 #if USE_INSTEAD_SMSS
 #else
 	if(!next_boot && !every_boot)
 		goto cmd_loop;
-	/* set filters */
-	SetFilter(L"boot time include filter",IOCTL_SET_INCLUDE_FILTER);
-	SetFilter(L"boot time exclude filter",IOCTL_SET_EXCLUDE_FILTER);
 	/* do job */
-	letters = ReadLetters();
 	if(!letters)
 	{
 		print("\nNo letters specified!\n");
@@ -775,29 +442,29 @@ cmd_loop:
 	while(1)
 	{
 		print("# ");
-		if(!con_scanf(buf))
+		if(!kb_scan())
 		{
 			print("\nERROR: Can't read \\Device\\KeyboardClass0! Wait 10 seconds.\n");
 			Action = ShutdownReboot;
 			goto abort;
 		}
-		if(strstr(buf,"shutdown"))
+		if(strstr(kb_buffer,"shutdown"))
 		{
 			print("Shutdown ...");
 			Action = ShutdownNoReboot;
 			goto exit;
 		}
-		if(strstr(buf,"reboot"))
+		if(strstr(kb_buffer,"reboot"))
 		{
 			print("Reboot ...");
 			goto exit;
 		}
-		if(strstr(buf,"batch"))
+		if(strstr(kb_buffer,"batch"))
 		{
 			print("Prepare to batch processing ...\n");
 			continue;
 		}
-		if(strstr(buf,"exit"))
+		if(strstr(kb_buffer,"exit"))
 		{
 continue_boot:
 			print("Good bye ...\n");
@@ -807,19 +474,19 @@ continue_boot:
 			return;
 		}
 
-		if(strstr(buf,"analyse")) a_flag = 1;
+		if(strstr(kb_buffer,"analyse")) a_flag = 1;
 		else a_flag = 0;
 
-		if(strstr(buf,"defrag")) d_flag = 1;
+		if(strstr(kb_buffer,"defrag")) d_flag = 1;
 		else d_flag = 0;
 
-		if(strstr(buf,"compact")) c_flag = 1;
+		if(strstr(kb_buffer,"compact")) c_flag = 1;
 		else c_flag = 0;
 
 		if(a_flag || d_flag || c_flag)
 		{
-			pos = strchr(buf,':');
-			if(!pos || pos == buf)
+			pos = strchr(kb_buffer,':');
+			if(!pos || pos == kb_buffer)
 				continue;
 			if(a_flag) command = 'a';
 			else if(d_flag)	command = 'd';
@@ -827,7 +494,7 @@ continue_boot:
 			ProcessVolume(pos[-1],command);
 			continue;
 		}
-		if(strstr(buf,"drives"))
+		if(strstr(kb_buffer,"drives"))
 		{
 			print("Available drive letters:   ");
 			for(letter = 'A'; letter <= 'Z'; letter ++)
@@ -860,7 +527,7 @@ continue_boot:
 			print("\r\n");
 			continue;
 		}
-		if(strstr(buf,"help"))
+		if(strstr(kb_buffer,"help"))
 		{
 			print(USAGE);
 			continue;

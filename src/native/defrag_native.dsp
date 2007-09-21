@@ -74,6 +74,18 @@ SOURCE=.\keytrans.c
 
 SOURCE=..\Shared\misc.c
 # End Source File
+# Begin Source File
+
+SOURCE=.\registry.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\stdio.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\sys.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 
