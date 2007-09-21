@@ -170,7 +170,15 @@ driver_installed:
 
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"
+  StrCmp $NT4_TARGET '1' 0 native_modern_win
+  DetailPrint "NT 4.0 version"
+  File /nonfatal "defrag_native_nt4.exe"
+  Delete "$WINDIR\System32\defrag_native.exe"
+  Rename "defrag_native_nt4.exe" "defrag_native.exe"
+  goto native_installed
+native_modern_win:
   File "defrag_native.exe"
+native_installed:
 
   /* create custom preset and correct program settings */
   SetOutPath "$TEMP"

@@ -1,8 +1,17 @@
+!IF "$(NT4_TARGET)" == "true"
+TARGETNAME=defrag_native_nt4
+!ELSE
 TARGETNAME=defrag_native
+!ENDIF
 TARGETPATH=obj
 TARGETTYPE=PROGRAM
 
+!IF "$(NT4_TARGET)" == "true"
+USER_C_FLAGS=/DUSE_WINDDK /DNT4_TARGET
+RCOPTIONS=/d NT4_TARGET
+!ELSE
 USER_C_FLAGS=/DUSE_WINDDK
+!ENDIF
 
 SOURCES=defrag_native.c misc.c keytrans.c registry.c stdio.c sys.c defrag_native.rc
 

@@ -30,7 +30,7 @@ HANDLE hDeviceIoEvent;
 UNICODE_STRING uStr;
 char letter;
 
-DWORD next_boot, every_boot;
+DWORD next_boot, every_boot = 1; /* to prevent reg. cleanup */
 short *letters;
 ULONGLONG sizelimit = 0;
 
@@ -66,17 +66,17 @@ NTSTATUS WaitKbHit(DWORD msec,KEYBOARD_INPUT_DATA *pkbd);
 BOOL EnablePrivilege(DWORD dwLowPartOfLUID);
 void IntSleep(DWORD dwMilliseconds);
 
-DWORD WINAPI wait_kb_proc(LPVOID unused)
+/*DWORD WINAPI wait_kb_proc(LPVOID unused)
 {
 	KEYBOARD_INPUT_DATA kbd;
 
 	if(WaitKbHit(3000,&kbd) == STATUS_SUCCESS)
 		abort_flag = 1;
 
-	/* Exit the thread */
-	//RtlExitUserThread(STATUS_SUCCESS);
+	// Exit the thread
+	RtlExitUserThread(STATUS_SUCCESS);
 	return 0;
-}
+}*/
 
 void UpdateProgress()
 {
@@ -119,8 +119,21 @@ void UpdateProgress()
 		if(stat.current_operation != last_op)
 		{
 			if(last_op)
+			{
 				for(k = i; k < 50; k++)
 					putch('-'); /* 100 % of previous operation */
+			}
+			else
+			{
+				if(stat.current_operation != 'A')
+				{
+					print("\nA: ");
+					for(k = 0; k < 50; k++)
+					{
+						putch('-');
+					}
+				}
+			}
 			i = 0; /* new operation */
 			print("\n");
 			putch(stat.current_operation);
@@ -175,7 +188,11 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 	wait_flag = 0;
 
 	/* Exit the thread */
-	//RtlExitUserThread(STATUS_SUCCESS);
+	/* On NT 4.0 we should do nothing, on XP SP1 both variants are acceptable,
+	   on XP x64 RtlExitUserThread() MUST be called. */
+#ifndef NT4_TARGET
+	RtlExitUserThread(STATUS_SUCCESS);
+#endif
 	return 0;
 }
 
@@ -310,6 +327,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	LARGE_INTEGER offset;
 	HANDLE hThread = NULL;
 	DWORD i,length;
+	KEYBOARD_INPUT_DATA kbd;
 
 	/* 1. Normalize and get the Process Parameters */
 	ProcessParameters = RtlNormalizeProcessParams(Peb->ProcessParameters);
@@ -323,8 +341,9 @@ void __stdcall NtProcessStartup(PPEB Peb)
 #endif
 	offset.QuadPart = 0;
 	/* 4. Display Copyright */
-	//if(nt_4)
-	//	print("\n\n");
+#ifdef NT4_TARGET
+	print("\n\n");
+#endif
 	RtlInitUnicodeString(&strU,
 		VERSIONINTITLE_U L" native interface\n"
 		L"Copyright (c) Dmitri Arkhangelski, 2007.\n\n"
@@ -354,7 +373,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	/* 6b. Prompt to exit */
 	print("Press any key to exit...  ");
-	Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
+	/*Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
 		0,0,0,wait_kb_proc,NULL,&hThread,NULL);
 	if(Status)
 	{
@@ -363,10 +382,14 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		print(buffer);
 		print("\n");
 	}
+	*/
 	for(i = 0; i < 3; i++)
 	{
-		IntSleep(1000);
-		if(abort_flag)
+		///IntSleep(1000);
+		if(WaitKbHit(1000,&kbd) == STATUS_SUCCESS)
+			//abort_flag = 1;
+
+		//if(abort_flag)
 		{
 			print("\n\n");
 			goto continue_boot;

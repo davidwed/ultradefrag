@@ -7,11 +7,10 @@ NULL=nul
 OUTDIR=..\bin
 INTDIR=..\obj\driver
 
-ALL :
 !IF "$(NT4_TARGET)" == "true"
-	"$(OUTDIR)\ultradfg_nt4.sys"
+ALL: "$(OUTDIR)\ultradfg_nt4.sys"
 !ELSE
-	"$(OUTDIR)\ultradfg.sys"
+ALL: "$(OUTDIR)\ultradfg.sys"
 !ENDIF
 
 CLEAN :
@@ -48,9 +47,9 @@ CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /I "$(D
 
 RSC=rc.exe
 !IF "$(NT4_TARGET)" == "true"
-RSC_PROJ=/l 0x409 /fo"$(INTDIR)\ultradfg.res" /d "NDEBUG" 
-!ELSE
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\ultradfg.res" /d "NDEBUG" /d "NT4_TARGET"
+!ELSE
+RSC_PROJ=/l 0x409 /fo"$(INTDIR)\ultradfg.res" /d "NDEBUG" 
 !ENDIF
 	
 LINK32=link.exe

@@ -15,9 +15,7 @@ if %errorlevel% neq 0 goto fail
 if "%1" neq "" goto L1
 rem save modern version
 copy .\objfre_wnet_x86\i386\ultradfg.sys ..\..\bin\
-:L1
 
-if "%1" neq "" goto _64bit
 echo NT 4.0 version...
 set NT4_TARGET=true
 rem -c option is neccessary to rebuild driver
@@ -25,7 +23,7 @@ build.exe -c
 if %errorlevel% neq 0 goto fail
 rem save nt4 version
 copy .\objfre_wnet_x86\i386\ultradfg_nt4.sys ..\..\bin\
-:_64bit
+:L1
 
 if "%1" equ "" goto x86
 
@@ -41,8 +39,24 @@ if %errorlevel% neq 0 goto fail
 
 echo Build the native interface...
 cd ..\native
-build.exe
+
+echo NT 5.0+ version...
+set NT4_TARGET=false
+build.exe -c
 if %errorlevel% neq 0 goto fail
+
+if "%1" neq "" goto L2
+rem save modern version
+copy .\objfre_wnet_x86\i386\defrag_native.exe ..\..\bin\
+
+echo NT 4.0 version...
+set NT4_TARGET=true
+rem -c option is neccessary to rebuild program
+build.exe -c
+if %errorlevel% neq 0 goto fail
+rem save nt4 version
+copy .\objfre_wnet_x86\i386\defrag_native_nt4.exe ..\..\bin\
+:L2
 
 echo Build the installation helper...
 cd ..\inst_helper
