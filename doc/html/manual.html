@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd"><HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=us-ascii">
+	<TITLE></TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 2.1  (Win32)">
+	<META NAME="CREATED" CONTENT="20070808;19191900">
+	<META NAME="CHANGEDBY" CONTENT="Dmitri Arkhangelski">
+	<META NAME="CHANGED" CONTENT="20070905;22040900">
+	<STYLE type="text/css">
+	<!--
+		@page { size: 21.59cm 27.94cm; margin: 2cm }
+		P { margin-bottom: 0.21cm }
+		H1 { margin-bottom: 0.21cm }
+		H1.western { font-family: "Arial", sans-serif; font-size: 16pt }
+		H1.cjk { font-family: "Arial Unicode MS"; font-size: 16pt }
+		H1.ctl { font-family: "Tahoma"; font-size: 16pt }
+		H2 { margin-bottom: 0.21cm }
+		H2.western { font-family: "Arial", sans-serif; font-size: 14pt; font-style: italic }
+		H2.cjk { font-size: 14pt; font-style: italic }
+		H2.ctl { font-size: 14pt; font-style: italic }
+		H3 { margin-bottom: 0.21cm }
+		H3.western { font-family: "Arial", sans-serif }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" DIR="LTR"  
+ STYLE="color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt"
+ ALINK="#ff0000" VLINK="#660099">
+<H1 CLASS="western" ALIGN=CENTER STYLE="font-weight: medium"><FONT SIZE=5 STYLE="font-size: 20pt">UltraDefrag
+User Manual</FONT></H1>
+<H1 CLASS="western" ALIGN=RIGHT STYLE="font-weight: medium"><I>Written
+by <A HREF="mailto:zippy1981@gmail.com">Justin Dearing</A></I></H1>
+<H1 CLASS="western">What is UltraDefrag?</H1>
+<P>UltraDefrag is an open source disk defragmenter for Windows 2000
+and later operating systems. It makes use of the same defragmenting
+API used by many other windows defrag utilities, both open and closed
+source. However, UltraDefrag has two features that make it unique.
+The first is that it has a kernel mode driver that does most of the
+work. The second is the ability to run the application at boot up
+time in a manner similar to chkdsk. This allows for faster
+defragmentation time and the ability to defragment all files
+including system files.</P>
+<P>UltraDefrag can defragment volumes with FAT12/16/32 and NTFS file
+systems. It has also the ability to defragment volumes at boot time
+allowing you to move many system files that are always locked by the
+operating system. Currently all files besides the registry hives and
+the pagefile can be scanned at boot time. UltraDefrag can also
+defragment files and folders compressed by NTFS file system
+compression. And can even defragment floppies, although doing so is
+not particularly useful. 
+</P>
+<P>UltraDefrag binaries are available for the 32 bit and all 64 bit
+versions of Windows.</P>
+<H1 CLASS="western">Installing UltraDefrag</H1>
+<P>You can download the latest installer for UltraDefrag at the
+project homepage (<A HREF="http://ultradefrag.sourceforge.net/">http://ultradefrag.sourceforge.net/</A>).
+Simply download and run the installer. No reboot is required.</P>
+<P>Note that you must be an administrator to install and run
+UltraDefrag.</P>
+<H1 CLASS="western">Using UltraDefrag</H1>
+<P><B>IMPORTANT</B><SPAN STYLE="font-weight: medium"> You must
+disable your virus detection software before using UltraDefrag.</SPAN></P>
+<H2 CLASS="western">Console Application</H2>
+<P>The console application is called defrag.exe. Since this is also
+the name of the windows defrag utility, you will probably have to
+call it by its full name or be in the same directory as it. By
+default that directory is <A HREF="file://C:/Program Files/UltraDefrag">C:\Program
+Files\UltraDefrag</A>. Note that beginning with v1.1.0 console
+program has name udefrag.exe and is placed in system32 directory.</P>
+<H3 CLASS="western">Usage</H3>
+<H3 CLASS="western"><IMG SRC="images/console.png" NAME="Frame1" ALT="Console application" ALIGN=BOTTOM></H3>
+<I>Console Application after a successful analyze run.</I>
+<P>The command line version takes one of three switches and a drive
+letter. The switches are -? which displays the usage message, -a
+which analyzes the drive in question, and -c which compacts the drive
+in question. Specifying just the drive letter will cause UltraDefrag
+to defragment the drive. When the operation finishes or you stop the
+program with a Ctrl+C, the program will display the results to the
+console. If you about the operation with Ctrl+C or close the shell
+window,  UltraDefrag will exit safely without destroying any data.</P>
+<H3 CLASS="western">Windows Application</H3>
+<P>The windows application is a simple application with one main form
+of fixed size and an about box. An illustration of the window as well
+as an explanation of their functionality is below:</P>
+<P><IMG SRC="images/main_screen110.png" NAME="graphics1" ALT="Main window" ALIGN=BOTTOM BORDER=0></P>
+<OL>
+	<LI><P><B>List of volumes.</B> This list all drives on the machine
+	that you can scan.  It has the following fields:</P>
+	<OL>
+		<LI><P><B>Volume</B> (Drive Letter)</P>
+		<LI><P><B>Status</B> A description of the action being performed
+		(Analyze, defrag, etc).</P>
+		<LI><P><B>File Sytem</B> type of file system contained on the
+		<SPAN STYLE="font-weight: medium">volume.</SPAN></P>
+		<LI><P><B>Total Size</B></P>
+		<LI><P><B>Free </B><SPAN STYLE="font-weight: medium">Free space</SPAN></P>
+		<LI><P><B>Percent</B> Percent Free.</P>
+	</OL>
+	<LI><P><B>Skip Removeable Media Checkbox</B></P>
+	<LI><P><B>Cluster Map</B><SPAN STYLE="font-weight: medium"> This is
+	a color coded representation of all drives. The </SPAN><A HREF="#AboutBox|graphic"><SPAN STYLE="font-weight: medium">about
+	box</SPAN></A><SPAN STYLE="font-weight: medium"> explains what the
+	colors represent.</SPAN></P>
+	<LI><P><B>Rescan <SPAN STYLE="font-style: normal">Drives (Ctrl+R)
+	</SPAN></B><SPAN STYLE="font-weight: medium">This button will
+	recheck all volumes in the system to see if some were added or
+	removed.</SPAN></P>
+	<LI><P><B>Buttons</B><SPAN STYLE="font-weight: medium"><BR>The
+	following section explains the buttons along with listing their
+	shortcut keys.</SPAN></P>
+	<OL>
+		<LI><P><B>Analyze (Ctrl+A)</B><SPAN STYLE="font-weight: medium">
+		Scans the currently selected drive to determine how fragmented it
+		is.</SPAN></P>
+		<LI><P><B>Defrag (Ctrl+D)</B><SPAN STYLE="font-weight: medium">
+		Exactly what it says.</SPAN></P>
+		<LI><P><B>Compact</B><SPAN STYLE="font-weight: medium"> </SPAN><B>(Ctrl+C)
+		</B><SPAN STYLE="font-weight: medium">Moves all files to the
+		beginning of the partition, defragmenting them if possible. The
+		compact command does not work on volumes with the FAT filesystem
+		because you cannot move directories on them.</SPAN></P>
+		<LI><P><B>Pause</B><SPAN STYLE="font-weight: medium"> </SPAN><B>(Ctrl+P)
+		</B><SPAN STYLE="font-weight: medium">Stops the currently running
+		analyze or defrag operation. This behavior is the same as stop.</SPAN></P>
+		<LI><P><B>Stop</B><SPAN STYLE="font-weight: medium"> </SPAN><B>(Ctrl+S)
+		</B><SPAN STYLE="font-weight: medium">Stop the currently running
+		analyze or defrag operation.</SPAN></P>
+		<LI><P><B>Fragmented</B><SPAN STYLE="font-weight: medium"> </SPAN><B>(Ctrl+F)
+		</B><SPAN STYLE="font-weight: medium">Display a report of all
+		fragmented files on the system. This report is very small but
+		useful. It is generated by the driver, so all versions of
+		UltraDefrag generate it.</SPAN></P>
+		<LI><P><B>Settings</B><SPAN STYLE="font-weight: medium"> </SPAN><B>(Ctrl+T)
+		</B><SPAN STYLE="font-weight: medium">Displays the Settings Dialog.
+		The settings dialog has three tabs.</SPAN></P>
+		<OL>
+			<LI><P><B>Filter</B><SPAN STYLE="font-weight: medium"> You can
+			specify file to include and exclude from the scan as well as
+			ignore files over a given size. <BR>The patterns you supply for
+			the include and exclude functionality applies to the whole path.
+			For example, if you specify temp\ in the exclude path you would
+			exclude both the temp folder (%WINDIR%\temp) and the internet
+			explorer temporary files folder.<BR>You can specify maximum file
+			size with the following suffixes (Kb | Mb | Gb | Tb)</SPAN></P>
+			<LI><P><B>GUI</B><SPAN STYLE="font-weight: medium"> You can toggle
+			the progress bar and specify the interval to update the map.</SPAN></P>
+			<LI><P><B>Report</B><SPAN STYLE="font-weight: medium"> Specify the
+			following settings for the report.</SPAN></P>
+			<OL>
+				<LI><P><B>Type</B><SPAN STYLE="font-weight: medium"> html or
+				none.</SPAN></P>
+				<LI><P><B>Encoding</B><SPAN STYLE="font-weight: medium"> UTF-18
+				or ASCII. Generally ASCII renders better in Internet Explorer and
+				UTF-16 renders better in FireFox. UTF-16 is of course required to
+				properly render Asian characters such as Japanese and Chinese.</SPAN></P>
+				<LI><P><B>Debug Print</B><SPAN STYLE="font-weight: medium">
+				Normal or Detailed. Select normal to view useful messages about
+				the analyse or defrag progress. Select detailed to create a bug
+				report to send to the author when an error is encountered.</SPAN></P>
+			</OL>
+			<LI><P><B>Boot time</B><SPAN STYLE="font-weight: medium"> Settings
+			releated to the boot time scan  with the native executable.</SPAN></P>
+			<OL>
+				<LI><P><B>Drive letters</B><SPAN STYLE="font-weight: medium"> The
+				drives to scan.</SPAN></P>
+				<LI><P><B>Defragment at next boot </B><SPAN STYLE="font-weight: medium">and</SPAN><B>
+				Defragment every boot</B><SPAN STYLE="font-weight: medium"> Check
+				these boxes to chose when to defragment.</SPAN></P>
+				<LI><P><B>Include</B><SPAN STYLE="font-weight: medium"> and
+				</SPAN><B>Exclude</B><SPAN STYLE="font-weight: medium"> file
+				filters. These operate the same as the ones in the filter dialog.</SPAN></P>
+			</OL>
+		</OL>
+		<LI><P><B>About (F1)</B><SPAN STYLE="font-weight: medium"> Displays
+		the about box shown below. <BR>Included in the about box is a
+		legend of the color codes found on the cluster map. Some of the
+		categories on the legend have a lighter and darker color on them.
+		The lighter colors represent files below the file size threshold,
+		and the darker colors represent files above the threshold if one is
+		set.<BR><A NAME="AboutBox|graphic"></A><IMG SRC="images/about.png" NAME="AboutBox" ALT="About box" BORDER=0></SPAN></P>
+	</OL>
+	<LI><P><B>Progress bar</B><SPAN STYLE="font-weight: medium"> This
+	displays the progress of the currently running analyze, compact or
+	defrag task. Note that selecting a different volume will cause this
+	bar to disappear.</SPAN></P>
+</OL>
+<H2 CLASS="western" STYLE="font-weight: medium">Boot time scan</H2>
+<P STYLE="font-weight: medium">UltraDefrag also includes a new mode
+that allows you to run it at boot time in a manner similar to chkdsk.
+This is known as a native application.</P>
+<P STYLE="font-weight: medium">[TODO: Write this section]</P>
+<H1 CLASS="western">The Report</H1>
+<P>Everytime you run analyze, compact or disparagement, a report of
+all files on the file system is created. This report has the
+following fields.</P>
+<OL>
+	<LI><P><B>Number of fragments.</B></P>
+	<LI><P><B>Filename</B></P>
+	<LI><P><B>Comment</B><SPAN STYLE="font-weight: medium"> This can be
+	blank or contain one of three values:</SPAN></P>
+	<OL>
+		<LI><P><B>[OVR]</B><SPAN STYLE="font-weight: medium">  File is over
+		limit.</SPAN></P>
+		<LI><P><B>[DIR]</B><SPAN STYLE="font-weight: medium">  Object is a
+		directory.</SPAN></P>
+		<LI><P><B>[CMP]</B><SPAN STYLE="font-weight: medium"> Compressed
+		file.</SPAN></P>
+	</OL>
+</OL>
+<H1 CLASS="western">How it works</H1>
+<P>The actual work of moving files to different clusters is performed
+through the windows API. What makes UltraDefrag superior to the
+standard windows defrag utility is that it uses its own algorithm to
+determine where to place files. Also, the actual work is done by the
+kernel driver ultradfg.sys. This enhances performance because there
+is no constant switching between user mode and kernel mode.</P>
+<H1 CLASS="western">Getting the Source</H1>
+<P>Source for UltraDefrag is available via subversion. The url is
+<A HREF="https://ultradefrag.svn.sourceforge.net/svnroot/">https://ultradefrag.svn.sourceforge.net/svnroot/</A>.
+The program is written in C. The code is very clear and
+understandable.  To build it you will need a C compiler and the
+Windows Driver Development Kit(DDK).</P>
+<H1 CLASS="western">See Also</H1>
+<UL>
+	<LI><P><A HREF="http://ultradefrag.sourceforge.net/">UltraDefrag
+	Homepage</A></P>
+	<LI><P><A HREF="http://en.wikipedia.org/wiki/Defragmentation">Wikipedia
+	article on Defragmentation</A></P>
+	<LI><P><A HREF="http://www.softpedia.com/reviews/windows/UltraDefrag-Review-62694.shtml">Softpedia
+	entry on UltraDefrag</A></P>
+	<LI><P><A HREF="http://www.microsoft.com/whdc/DevTools/ddk/default.mspx">Windows
+	Driver Development Kit (DDK)</A></P>
+	<LI><P><A HREF="http://www.microsoft.com/technet/sysinternals/information/NativeApplications.mspx">Sysinternals
+	Article on Native Executables</A></P>
+</UL>
+<HR>
+<div align="right"><table align="right">
+<tbody><tr align="right">
+<td><a href="http://validator.w3.org/check?uri=referer"><img src="images/valid-html401.png" alt="Valid HTML 4.01 Transitional" border="0" height="31" width="88"></a></td>
+<td><a href="http://sourceforge.net"> <img src="http://sourceforge.net/sflogo.php?group_id=199532&amp;type=1" alt="SourceForge.net Logo" border="0" height="31" width="88" /></a> </td>
+</tr>
+</tbody></table>
+</div><br /><br />
+</BODY>
+</HTML>

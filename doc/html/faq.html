@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+ <link rev="made" href="mailto:dmitriar@gmail.com" />
+ <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+ <meta name="description" content="UltraDefrag FAQ" />
+ <meta name="keywords" content="UltraDefrag, Ultra Defragmenter, defragmentation,Open Source disk defragmenter, defragger, boot time defragmentation, boot time defragger, FAQ, Frequently Asked Questions" />
+ <meta name="revisit-after" content="30 days" />
+ <meta name="robots" content="index, follow, noarchive" />
+ <title>UltraDefrag - powerful Open Source disk defragmenter - FAQ</title>
+ <style type="text/css">
+  <!--
+  P {text-indent:10pt; padding-left:10pt}
+  TD {text-align:left}
+  .p10 {text-indent: 0pt; padding-left: 10pt}
+  -->
+ </style>
+</head>
+<body 
+ style="color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt"
+ alink="#ff0000" vlink="#660099">
+<center><hr />
+<font size="+1">U</font>ltra <font size="+1">D</font>efragmenter <font size="+1">V</font>ersion <font size="+1">1.1.0</font><br />
+<br />Copyright (C) 2007 <a href="mailto:dmitriar@gmail.com">Dmitri Arkhangelski</a>.<br />
+<hr />
+<p align="center" style="text-indent:0pt; padding-left:0pt"><a href="#news">[News]</a> <a href="#abstract">[Abstract]</a> 
+<a href="http://sourceforge.net/project/platformdownload.php?group_id=199532&amp;sel_platform=4248">[Download]</a> 
+<a href="#overview">[Overview]</a> <a href="http://ultradefrag.sourceforge.net/manual.html">[User Manual]</a><br />
+<a href="http://ultradefrag.sourceforge.net/faq.html">[FAQ]</a> <a href="#bugtracker">[Bug tracker]</a> 
+<a href="#disclaimer">[Disclaimer]</a> <a href="#copyright">[Copyright]</a>
+</p>
+<hr />
+</center>
+<h3>Frequently Asked Questions</h3>
+<div class="p10" style="font-family:monospace; font-size:11pt">
+<table width="100%" border="0px"><tbody>
+ <tr>
+  <td valign="top"><b>Q.:</b></td>
+  <td valign="top">I have 3 Gb of RAM, but the Debug Output includes the message 'No enough memory'.
+  I have 150 millions clusters on the volume I am trying to defrag.</td>
+ </tr>
+ <tr style="height:10pt"><td /><td /></tr>
+ <tr>
+  <td valign="top"><b>A.:</b></td>
+  <td valign="top">You have too many clusters on the specified volume. Since you have 
+    150 millions of clusters, you must have more than 150 Mb of 
+    nonpaged memory. All versions of Windows that UltraDefrag run on (at least 
+    Windows 2000, XP, and 2003) allow a maximum of 256 Mb of nonpaged memory.
+    In addition, if you use boot parameter /3GB limit is 128 Mb.
+    Note that many drivers besides ultradfg.sys use nonpaged memory!<br /><br />
+ 
+    There are few ways how YOU, the user, can fix this problem:<br />
+	<div style="padding-left:20pt">
+    1. Increase cluster size of volume. This is probably a good idea for
+       performance reasons.<br />
+    2. Buy new PC with a 64 bit processor, and install a 64 bit version of
+       Windows. 64 bit versions of WIndows support up to 128 Gb of nonpaged
+       memory.<br />
+    3. Split your big volume into several smaller partitions. Each partition 
+       will have less clusters.
+	</div>
+  </td>
+ </tr>
+ <tr style="height:20pt"><td /><td /></tr>
+ <tr>
+  <td valign="top"><b>Q.:</b></td>
+  <td valign="top">How can I use filters?</td>
+ </tr>
+ <tr style="height:10pt"><td /><td /></tr>
+ <tr>
+  <td valign="top"><b>A.:</b></td>
+  <td valign="top">The include field is where you enter substring expressions that match
+    file names (incl. path) that you want to defragment. And the exclude field
+    expressions disable defragmentation of matching files. You can enter 
+    multiple expressions, separating each with a semicolon (;).
+    The next field in the form is captioned 'Ignore files greater than.' Files
+    over this size are not dedragmented. You may specify sizes with the following 
+    suffixes: (Kb | Mb | Gb | Tb).
+  </td>
+ </tr>
+ <tr style="height:20pt"><td /><td /></tr>
+ <tr>
+  <td valign="top"><b>Q.:</b></td>
+  <td valign="top">I've seen message "Can't load ultradfg driver!" on Windows Vista. I think 
+    that Vista is preventing this driver from loading because the signature
+    check is enabled.  How can I disable it?
+  </td>
+ </tr>
+ <tr style="height:10pt"><td /><td /></tr>
+ <tr>
+  <td valign="top"><b>A.:</b></td>
+  <td valign="top">Thanks to <b>Christopher Naegel</b> for providing the following instructions:<br />
+    <div style="padding-left:20pt">
+	<ol>
+	 <li>Open a command line with admin-rights:<br />
+         Start -&gt; execute -&gt; CMD (with admin rights).<br />
+	 </li>
+     <li>Type:<br />
+         bcdedit /set loadoptions "DDISABLE_INTEGRITY_CHECKS"<br />
+         bcdedit /set nointegritychecks ON<br />
+	 </li>
+	 <li>Close the command prompt and start group policy editor:<br />
+         Start -&gt; execute -&gt; gpedit.msc<br />
+	 </li>
+	 <li>Go to:<br />
+         User Configuration -&gt; Administrative Templates -&gt; System -&gt;<br />
+         Driver Installation -&gt; Code Signing for device drivers<br />
+	 </li>
+	 <li>Enable this policy and set it to Ignore state.
+	 </li>
+	</ol>
+	</div>
+  </td>
+ </tr>
+</tbody></table>
+</div>
+<hr />
+<div align="right"><table align="right">
+<tbody><tr align="right">
+<td><a href="http://validator.w3.org/check/referer"><img src="images/valid-xhtml10.png" alt="Valid XHTML 1.0!" border="0" height="31" width="88" /></a></td>
+<td><a href="http://sourceforge.net"> <img src="http://sourceforge.net/sflogo.php?group_id=199532&amp;type=1" alt="SourceForge.net Logo" border="0" height="31" width="88" /></a> </td></tr>
+</tbody></table>
+</div>
+<br /><br />
+</body>
+</html>

@@ -76,7 +76,7 @@ cd ..\inst_helper
 nmake /NOLOGO /A /f inst_helper.mak
 if %errorlevel% neq 0 goto fail
 
-goto build_installer
+goto build_scheduler
 
 :build_with_winddk
 echo Copy sources to obj directory...
@@ -163,9 +163,12 @@ copy .\native\objfre_wnet_ia64\ia64\defrag_native.exe ..\bin\ia64\
 copy .\inst_helper\objfre_wnet_ia64\ia64\inst_helper.exe ..\bin\ia64\
 copy .\x64_inst\objfre_wnet_ia64\ia64\x64_inst.exe ..\bin\ia64\
 
+:build_scheduler
+cd ..
+call BLDSCHED.CMD
 :build_installer
 echo Build installer...
-cd ..\bin
+cd .\bin
 copy /Y ..\UltraDefrag.nsi .\
 copy /Y ..\*.TXT .\
 xcopy /I /Y ..\presets .\presets
@@ -181,6 +184,7 @@ REM ren ultradefrag-1.0.0.bin.i386.exe ultradefrag-%ULTRADFGVER%.bin.i386.exe
 
 if "%DDK_TYPE%" equ "ReactOS_DDK" goto build_source_package
 copy /Y .\UltraDefrag.nsi .\amd64\
+copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y .\*.TXT .\amd64\
 xcopy /I /Y .\presets .\amd64\presets
 cd amd64
@@ -191,6 +195,7 @@ if %errorlevel% neq 0 goto fail
 
 cd..
 copy /Y .\UltraDefrag.nsi .\ia64\
+copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y .\*.TXT .\ia64\
 xcopy /I /Y .\presets .\ia64\presets
 cd ia64
@@ -215,6 +220,9 @@ xcopy /I /Y .\x64_inst .\rel_src\x64_inst
 xcopy /I /Y .\include .\rel_src\include
 xcopy /I /Y .\shared .\rel_src\shared
 xcopy /I /Y .\presets .\rel_src\presets
+mkdir .\rel_src\scheduler
+xcopy /I /Y .\scheduler\DotNET .\rel_src\scheduler\DotNET
+xcopy /I /Y .\scheduler\DotNET\Properties .\rel_src\scheduler\DotNET\Properties
 
 copy .\*.* .\rel_src\
 cd .\rel_src
@@ -256,4 +264,5 @@ rd /s /q native
 rd /s /q x64_inst
 del /s /q *.*
 cd ..
+call BLDSCHED.CMD --clean
 echo Done.

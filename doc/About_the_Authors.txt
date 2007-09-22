@@ -4,26 +4,26 @@ Justin Dearing proposed the idea for the boot time scanning (native executable)
 and wrote the original manual. He now maintains all the documentation for 
 UltraDefrag.
 
-About Dimitri 
+About Dmitri 
 
 Experience:
 
 Programming Languages
 
-C -- 3 years;
-i386 Assembler (including MMX and SSE instructions.) -- 2 years;
-Perl -- 1.5 years;
-JavaSript + HTML + CSS -- 2 years;
-Matlab scripting language -- 1.5 years;
-Atmel AT90* Assembler -- 2 months;
+C;
+i386 Assembler (including MMX and SSE instructions);
+Perl;
+JavaSript + HTML + CSS;
+Matlab scripting language;
+Atmel AT90* Assembler;
 
 Operating Systems
 
-Windows NT -- 3 years;
-Windows 9.x -- 1.5 years;
-DOS -- 2 years;
-CP/M -- 1 year;
-Linux -- 1 year;
+Windows NT;
+Windows 9.x;
+DOS;
+CP/M;
+Linux;
 
 Biography:
 
@@ -33,13 +33,15 @@ random numbers. This work will not be published.
 Later Dmitri attempted to write a gui shell for MS DOS similar to Windows
 3.11, but written entirely in assembler called FSHELL! After six months of 
 hard work he wrote about 50 % of the code to get this working; including  some
-base libraries and startup code. The code is not portable to other CPUs (eg: PPC), and he believes FShell is not particularly useful, However, Dmitri has not ruled out the posibility of publishing the code.
+base libraries and startup code. The code is not portable to other CPUs (eg: PPC), 
+and he believes FShell is not particularly useful, However, Dmitri has not ruled 
+out the posibility of publishing the code.
 
 Dmitri then decided to leave windows and learn more about open source
 operating systems. He briefly experimented with the Amiga Research Operating
 System (AROS). His conclusion was it was nice but not useful.
 
-Then Dmitri encountered a practical probmem that was of great interest to 
+Then Dmitri encountered a practical problem that was of great interest to 
 him . . . Disk Defragmentation. Thus UltraDefrag was born.
 
 About Justin
@@ -63,7 +65,7 @@ Windows 9x/ME
 Windows NT/2k/XP/2k3
 Linux (Kernels 2.2.x to 2.6.x various distributions)
 FreeBSD 3.x to present.
-Max OSX
+Mac OSX
 
 Biography:
 
@@ -86,5 +88,8 @@ capacities. He currently is a .NET programmer for a small company with the
 title of Senior Developer.
 
 In addition to maintaining the documentation for UltraDefrag, Justin is the 
-author of PlaneDisaster.NET (http://plane-disaster.sf.net) a SQL front end to\JetSQL (MSACCESS) and SQLite databases. He has also contributed to the following
-projects: SharpSevelop (http://www.icsharpcode.net/OpenSource/SD/), Astrogrep (http://astrogrep.sourceforge.net/), SharpBarcode (http://sourceforge.net/projects/sharpbarcode/) and XML Copy Editor (http://xml-copy-editor.sourceforge.net/).
+author of PlaneDisaster.NET (http://plane-disaster.sf.net) a SQL front end 
+to JetSQL (MSACCESS) and SQLite databases. He has also contributed to the 
+following projects: SharpSevelop (http://www.icsharpcode.net/OpenSource/SD/), 
+Astrogrep (http://astrogrep.sourceforge.net/), SharpBarcode (http://sourceforge.net/projects/sharpbarcode/) 
+and XML Copy Editor (http://xml-copy-editor.sourceforge.net/).

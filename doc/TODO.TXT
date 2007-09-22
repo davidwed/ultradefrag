@@ -22,6 +22,11 @@ Items to describe:
 4. Volumes with UDF filesystem (on Vista only) are supported too. User can create 
    UDF volume using 'format volume_letter: /FS:UDF'.
 
+5. "I would appreciate direct links from the entries in the suffix column to
+   the executables for download. I guess that it would also be clearer if the
+   corresponding notes will be positioned on the right side instead of under
+   the table." [about supported processors table]
+
 				***
 
 1.  (DONE) compact command move all files AND defrag fragmented if possible.
