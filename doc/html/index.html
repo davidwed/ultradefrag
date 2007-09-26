@@ -35,44 +35,46 @@
 <h3><a id="news" name="news"><font size="+3">N</font>ews</a></h3>
 <ul type="disc">
  <li>UltraDefrag 1.1.0 has been released.<br />
- The main news in 1.1.0 are:<br /><br />
+ The main changes in 1.1.0 are:<br /><br />
  <ul type="disc">
   <li><span style="font-weight: bold; font-family: monospace; color: rgb(144, 18, 6);">
-  Ability to defragment system files at boot time</span></li>
+  You can now defragment system files at boot time</span></li>
   <li><span style="font-weight: bold; font-family: monospace; color: rgb(126, 20, 126);">
-  Useful filter presets</span></li>
+  More useful filter defaults.</span></li>
  </ul><br />
  Also have a look at the more detailed <a href="http://ultradefrag.sourceforge.net/HISTORY.TXT">ChangeLog</a>.
  <br /><br /></li>
  <li><span style="font-weight: bold; font-family: monospace; color: rgb(54, 107, 54);">
- Online User Manual is available now!</span></li>
+ An online <a href="http://ultradefrag.sourceforge.net/manual.html">User Manual</a> is available now!</span></li>
 </ul>
 <!--<br /><font size="5" color="#CC0000">Help wanted! </font> -->
 
 <h3><a id="abstract" name="abstract"><font size="+3">A</font>bstract</a></h3>
 <p>UltraDefrag is powerful Open Source defragmentation tool for Windows NT. 
 It is very fast, because the defragmenting is done by kernel-mode driver. 
-They are three interfaces to them: graphical, console and native. The GUI is very useful, because visually
-represents your filesystem as a color coded cluster map. The console is another option for those that prefer 
-the command line. It is also benificial in that it can be run in the task scheduler. Finally,
-the native executable will run at boot time in a manner similar to chkdsk.</p>
-<p>The design of UltraDefrag is very simple. There are no skins, localization, or animations. It is a
-small and powerful program!</p>
-<p>It can be used on Windows 2000, Windows XP, Windows Server 2003,Windows Vista and all of the 
-64-bit editions of Windows. NT 4.0 is currently unsupported.</p>
+They are three interfaces to them: graphical, console and native. The GUI is
+very useful, because it represents your filesystem visually as a color coded
+cluster map. The console is another option for those that prefer the command
+line. It is also allows you to run UltraDefrag from the task scheduler and
+scripts. Finally, the native executable will run at boot time in a manner
+similar to chkdsk.</p>
+<p>The design of UltraDefrag is very simple. There are no skins, localization,
+or animations. It is a small and powerful program!</p>
+<p>It can be used on Windows NT 4.0, Windows 2000, Windows XP, Windows Server 2003,Windows Vista and all of the 
+64-bit editions of Windows. </p>
 
 <h3><a id="overview" name="overview"><font size="+3">O</font>verview</a></h3>
 <p class="p10">UltraDefrag has the following features:</p>
 <ul type="disc">
- <li>very fast defragmentation, because engine is kernel mode driver and has optimal algorithm.</li>
- <li>very small engine written in pure C language.</li>
- <li>nice graphical interface - compact and comfortable.</li>
- <li>safety, because the file moving is accomplished with Microsoft's own Defrag API.</li>
- <li>simple to use.</li>
- <li>generate html reports.</li>
- <li>ability to include/exclude files based on simple filters</li>
- <li>has native x64 support.</li>
- <li>free: distributed with full source code under the GNU General Public License.</li>
+ <li>Very fast defragmentation, the work is done via a kernel mode driver which has an optimal defraging algorithm.</li>
+ <li>Very small engine written in pure C.</li>
+ <li>Nice graphical interface - compact and functional.</li>
+ <li>Safety, because the file moving is accomplished with Microsoft's own Defrag API.</li>
+ <li>Simple to use.</li>
+ <li>Ability to generate html reports of fragmentation status.</li>
+ <li>Ability to include/exclude files based on simple filters.</li>
+ <li>Native x64 support.</li>
+ <li>Free: Distributed with full source code under the GNU General Public License.</li>
 </ul>
 
 <p class="p10">Supported platforms:</p>
@@ -81,27 +83,31 @@ small and powerful program!</p>
 <td style="width: 154px;">Processor architecture</td>
 <td style="width: 243px;">Processor types</td>
 <td style="width: 156px;">Binary package suffix</td>
+<td style="width: 350px;"><b>N</b>otes:</td>
 </tr><tr bgcolor="#00ffff">
-<td>i386</td><td>Intel 80486, Intel Pentium etc.</td><td>i386</td>
+<td>i386</td><td>Intel 80486, Intel Pentium etc.</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&filesize=107084&filename=ultradefrag-1.1.0.bin.i386.exe&56530804">i386</a></td>
+<td rowspan="4">
+<ol>
+	<li>i386 version can be used on all of the supported architectures with 32-bit Windows.</li>
+	<li>All of the yellow marked versions are only for 64-bit editions of Windows.</li>
+	<li>On Vista you must disable driver signature check to run UltraDefrag <br />
+	(see <a href="http://ultradefrag.sourceforge.net/faq.html">FAQ</a> for more details).</li>
+</ol>
+</td>
 </tr><tr bgcolor="#ffff00">
-<td>AMD64</td><td>AMD Athlon etc.</td><td>amd64</td>
+<td>AMD64</td><td>AMD Athlon etc.</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&use_mirror=internap&filename=ultradefrag-1.1.0.bin.amd64.exe&8695565">amd64</a></td>
 </tr><tr bgcolor="#ffff00">
-<td>IA64</td><td>Intel Itanium</td><td>ia64</td>
+<td>IA64</td><td>Intel Itanium</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&use_mirror=internap&filename=ultradefrag-1.1.0.bin.ia64.exe&62607284">ia64</a></td>
 </tr><tr bgcolor="#ffff00">
-<td>EM64T</td><td>Intel Core Duo etc.</td><td>amd64</td>
+<td>EM64T</td><td>Intel Core Duo etc.</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&use_mirror=internap&filename=ultradefrag-1.1.0.bin.amd64.exe&8695565">amd64</a></td>
 </tr></tbody>
 </table>
 
-<p class="p10"><b><font size="+1">N</font>otes</b>:<br />
-1. i386 version can be used on all of the supported architectures with 32-bit Windows.<br />
-2. All of the yellow marked versions are only for 64-bit editions of Windows.<br />
-3. On Vista you must disable driver signature check to run UltraDefrag 
-(see <a href="http://ultradefrag.sourceforge.net/faq.html">FAQ</a> for more details).
-</p>
 
 <h3><a id="bugtracker" name="bugtracker"><font size="+3">B</font>ug tracker</a></h3>
-<p class="p10">Please report all problems and bugs in our <a href="http://sourceforge.net/tracker/?group_id=199532">bug
-tracker</a>.<br />
+<p class="p10">Please report all problems and bugs via the
+<a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">
+	sourceforge bug tracker</a>.<br />
 </p>
 <p class="p10"><b>NOTE:</b> include please in your report following data:<br />
 1. If you see 'Blue Screen Of Death' as result of UltraDefrag working

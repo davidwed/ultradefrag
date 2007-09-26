@@ -40,10 +40,11 @@ work. The second is the ability to run the application at boot up
 time in a manner similar to chkdsk. This allows for faster
 defragmentation time and the ability to defragment all files
 including system files.</P>
-<P>UltraDefrag can defragment volumes with FAT12/16/32 and NTFS file
-systems. It has also the ability to defragment volumes at boot time
-allowing you to move many system files that are always locked by the
-operating system. Currently all files besides the registry hives and
+<P>UltraDefrag supports the following filesystems FAT12/16/32, NTFS and
+on Vista UDF. UDF is a file system intended for optical media such as DVDs that
+unlike ISO9660, is rewriteable. It has also the ability to defragment volumes
+at boot time allowing you to move many system files that are always locked by
+the operating system. Currently all files besides the registry hives and
 the pagefile can be scanned at boot time. UltraDefrag can also
 defragment files and folders compressed by NTFS file system
 compression. And can even defragment floppies, although doing so is
@@ -61,12 +62,9 @@ UltraDefrag.</P>
 <P><B>IMPORTANT</B><SPAN STYLE="font-weight: medium"> You must
 disable your virus detection software before using UltraDefrag.</SPAN></P>
 <H2 CLASS="western">Console Application</H2>
-<P>The console application is called defrag.exe. Since this is also
-the name of the windows defrag utility, you will probably have to
-call it by its full name or be in the same directory as it. By
-default that directory is <A HREF="file://C:/Program Files/UltraDefrag">C:\Program
-Files\UltraDefrag</A>. Note that beginning with v1.1.0 console
-program has name udefrag.exe and is placed in system32 directory.</P>
+<P>The console application is called udefrag.exe as of v1.1.0. It is 
+placed in system32 directory by the installer. Therefore you can call it from the
+command line or run box.</P>
 <H3 CLASS="western">Usage</H3>
 <H3 CLASS="western"><IMG SRC="images/console.png" NAME="Frame1" ALT="Console application" ALIGN=BOTTOM></H3>
 <I>Console Application after a successful analyze run.</I>
@@ -219,7 +217,24 @@ is no constant switching between user mode and kernel mode.</P>
 <A HREF="https://ultradefrag.svn.sourceforge.net/svnroot/">https://ultradefrag.svn.sourceforge.net/svnroot/</A>.
 The program is written in C. The code is very clear and
 understandable.  To build it you will need a C compiler and the
-Windows Driver Development Kit(DDK).</P>
+Windows Driver Development Kit (DDK).</P>
+<H1 CLASS="western">Reporting Bugs</H1>
+<p class="western">Please report all problems and bugs via the
+<a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">
+	sourceforge bug tracker</a>.</p>
+
+<P><B>NOTE:</B> Please include the following data in your bug report:</P>
+<ol>
+	<li>If you see a 'Blue Screen Of Death' when running UltraDefrag 
+	then include the important parts of the message.</li>
+	<li>If UltraDefrag crashes without bringing down the operating system,
+	please run Sysinternals DebugView before you start UltraDefrag 
+	and include in your report last 200 significant messages (or less).<br> 
+	You can download DebugView for free from
+	<a href="http://www.microsoft.com/technet/sysinternals/Miscellaneous/DebugView.mspx">
+		http://www.microsoft.com/technet/sysinternals/Miscellaneous/DebugView.mspx</a></li>
+	<li>For gui releated bugs please attach a screenshot</li>
+</ol>
 <H1 CLASS="western">See Also</H1>
 <UL>
 	<LI><P><A HREF="http://ultradefrag.sourceforge.net/">UltraDefrag

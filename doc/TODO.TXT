@@ -2,9 +2,10 @@ The following is Justin Dearing's TODO list for the manual and other technical
 documents included in the upcoming version 1.2.0.
 Items to describe:
 
-/* maybe we need to use this file as stack */
+/* maybe we need to use this file as stack  -- Dmitri */
+/* Agreed -- Justin */
 
-1. add to manual information about bug reporting:
+1. (DONE) add to manual information about bug reporting:
    NOTE: include please in your bug report following data:
    1. If you see 'Blue Screen Of Death' as result of UltraDefrag working 
    then include important parts of messages on them.
@@ -17,12 +18,12 @@ Items to describe:
 2. Scheduler.NET requires NET Framework 2.0. And provide [small] description 
    about the scheduler and useful features of them.
 
-3. UltraDefrag has now full NT 4.0 support.
+3. (DONE) UltraDefrag has now full NT 4.0 support.
 
 4. Volumes with UDF filesystem (on Vista only) are supported too. User can create 
    UDF volume using 'format volume_letter: /FS:UDF'.
 
-5. "I would appreciate direct links from the entries in the suffix column to
+5. (DONE) "I would appreciate direct links from the entries in the suffix column to
    the executables for download. I guess that it would also be clearer if the
    corresponding notes will be positioned on the right side instead of under
    the table." [about supported processors table]
