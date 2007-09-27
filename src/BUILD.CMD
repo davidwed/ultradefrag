@@ -171,6 +171,19 @@ echo Build installer...
 cd .\bin
 copy /Y ..\UltraDefrag.nsi .\
 copy /Y ..\*.TXT .\
+copy /Y ..\*.bmp .\
+copy /Y ..\*.ini .\
+
+copy /Y ..\..\doc\html\manual.html .\
+copy /Y ..\..\doc\html\images\console.png .\
+copy /Y ..\..\doc\html\images\main_screen110.png .\
+copy /Y ..\..\doc\html\images\about.png .\
+copy /Y ..\..\doc\html\images\valid-html401.png .\
+copy /Y ..\gui\res\app.ico .\gui.ico
+copy /Y ..\gui\res\console.ico .\
+copy /Y ..\gui\res\install.ico .\
+copy /Y ..\gui\res\web.ico .\
+
 xcopy /I /Y ..\presets .\presets
 upx udefrag.exe
 if %errorlevel% neq 0 goto fail
@@ -186,6 +199,19 @@ if "%DDK_TYPE%" equ "ReactOS_DDK" goto build_source_package
 copy /Y .\UltraDefrag.nsi .\amd64\
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y .\*.TXT .\amd64\
+copy /Y .\*.bmp .\amd64\
+copy /Y .\*.ini .\amd64\
+
+copy /Y ..\..\doc\html\manual.html .\amd64\
+copy /Y ..\..\doc\html\images\console.png .\amd64\
+copy /Y ..\..\doc\html\images\main_screen110.png .\amd64\
+copy /Y ..\..\doc\html\images\about.png .\amd64\
+copy /Y ..\..\doc\html\images\valid-html401.png .\amd64\
+copy /Y ..\gui\res\app.ico .\amd64\gui.ico
+copy /Y ..\gui\res\console.ico .\amd64\
+copy /Y ..\gui\res\install.ico .\amd64\
+copy /Y ..\gui\res\web.ico .\amd64\
+
 xcopy /I /Y .\presets .\amd64\presets
 cd amd64
 echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
@@ -197,6 +223,19 @@ cd..
 copy /Y .\UltraDefrag.nsi .\ia64\
 copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y .\*.TXT .\ia64\
+copy /Y .\*.bmp .\ia64\
+copy /Y .\*.ini .\ia64\
+
+copy /Y ..\..\doc\html\manual.html .\ia64\
+copy /Y ..\..\doc\html\images\console.png .\ia64\
+copy /Y ..\..\doc\html\images\main_screen110.png .\ia64\
+copy /Y ..\..\doc\html\images\about.png .\ia64\
+copy /Y ..\..\doc\html\images\valid-html401.png .\ia64\
+copy /Y ..\gui\res\app.ico .\ia64\gui.ico
+copy /Y ..\gui\res\console.ico .\ia64\
+copy /Y ..\gui\res\install.ico .\ia64\
+copy /Y ..\gui\res\web.ico .\ia64\
+
 xcopy /I /Y .\presets .\ia64\presets
 cd ia64
 echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
@@ -210,21 +249,31 @@ echo Build source code package...
 cd ..
 rmdir /s /q .\rel_src
 mkdir .\rel_src
-xcopy /I /Y .\driver .\rel_src\driver
-xcopy /I /Y .\console .\rel_src\console
-xcopy /I /Y .\gui .\rel_src\gui
-xcopy /I /Y .\gui\res .\rel_src\gui\res
-xcopy /I /Y .\native .\rel_src\native
-xcopy /I /Y .\inst_helper .\rel_src\inst_helper
-xcopy /I /Y .\x64_inst .\rel_src\x64_inst
-xcopy /I /Y .\include .\rel_src\include
-xcopy /I /Y .\shared .\rel_src\shared
-xcopy /I /Y .\presets .\rel_src\presets
-mkdir .\rel_src\scheduler
-xcopy /I /Y .\scheduler\DotNET .\rel_src\scheduler\DotNET
-xcopy /I /Y .\scheduler\DotNET\Properties .\rel_src\scheduler\DotNET\Properties
+mkdir .\rel_src\src
+xcopy /I /Y .\driver .\rel_src\src\driver
+xcopy /I /Y .\console .\rel_src\src\console
+xcopy /I /Y .\gui .\rel_src\src\gui
+xcopy /I /Y .\gui\res .\rel_src\src\gui\res
+xcopy /I /Y .\native .\rel_src\src\native
+xcopy /I /Y .\inst_helper .\rel_src\src\inst_helper
+xcopy /I /Y .\x64_inst .\rel_src\src\x64_inst
+xcopy /I /Y .\include .\rel_src\src\include
+xcopy /I /Y .\shared .\rel_src\src\shared
+xcopy /I /Y .\presets .\rel_src\src\presets
+mkdir .\rel_src\src\scheduler
+xcopy /I /Y .\scheduler\DotNET .\rel_src\src\scheduler\DotNET
+xcopy /I /Y .\scheduler\DotNET\Properties .\rel_src\src\scheduler\DotNET\Properties
 
-copy .\*.* .\rel_src\
+mkdir .\rel_src\doc
+mkdir .\rel_src\doc\html
+mkdir .\rel_src\doc\html\images
+copy /Y ..\doc\html\manual.html .\rel_src\doc\html\
+copy /Y ..\doc\html\images\console.png .\rel_src\doc\html\images\
+copy /Y ..\doc\html\images\main_screen110.png .\rel_src\doc\html\images\
+copy /Y ..\doc\html\images\about.png .\rel_src\doc\html\images\
+copy /Y ..\doc\html\images\valid-html401.png .\rel_src\doc\html\images\
+
+copy .\*.* .\rel_src\src\
 cd .\rel_src
 del /s /q *.ncb,*.opt,*.plg,*.aps
 zip -r -m ultradefrag-%ULTRADFGVER%.src.zip .
@@ -237,6 +286,7 @@ echo Start installer...
 if %errorlevel% neq 0 goto fail_inst
 echo Install success!
 goto end
+:fail_inst
 echo Install error!
 
 :end
@@ -250,10 +300,12 @@ rem pause
 exit /B
 
 :clean
+call SETVARS.CMD
 echo Delete all intermediate files...
 cd bin
 rd /s /q amd64
 rd /s /q ia64
+rd /s /q presets
 del /s /q *.*
 cd ..\obj
 rd /s /q console
@@ -262,6 +314,7 @@ rd /s /q gui
 rd /s /q include
 rd /s /q native
 rd /s /q x64_inst
+rd /s /q inst_helper
 del /s /q *.*
 cd ..
 call BLDSCHED.CMD --clean

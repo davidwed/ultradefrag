@@ -18,10 +18,11 @@
  */
 
 /*
- *  Installer source.
+ *  Installer + portable launcher source.
  */
 
 !include "ultradefrag_globals.nsh"
+!include "x64.nsh"
 
 ;-----------------------------------------
 
@@ -51,10 +52,17 @@ VIAddVersionKey "FileDescription" "Ultra Defragmenter Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
+ReserveFile "PORTABLE.INI"
+ReserveFile "gui.ico"
+ReserveFile "console.ico"
+ReserveFile "install.ico"
+ReserveFile "web.ico"
+
 !ifdef MODERN_UI
-  !define MUI_ABORTWARNING
+  ;;!define MUI_ABORTWARNING
   !define MUI_COMPONENTSPAGE_SMALLDESC
 
+  Page custom ShowPortable LeavePortable " - Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE "LICENSE.TXT"
   !insertmacro MUI_PAGE_COMPONENTS
@@ -68,7 +76,9 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
   !insertmacro MUI_UNPAGE_FINISH
 
   !insertmacro MUI_LANGUAGE "English"
+  !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 !else
+  Page custom ShowPortable LeavePortable " - Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
   Page license
   Page components
   Page directory
@@ -81,13 +91,23 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
 Var NT4_TARGET
+Var SchedulerNETinstalled
+Var DocsInstalled
+Var RunPortable
+Var ShowBootsplash
 
 Function .onInit
 
   push $R0
   push $R1
 
+  /* variables initialization */
   StrCpy $NT4_TARGET 0
+  StrCpy $SchedulerNETinstalled 0
+  StrCpy $DocsInstalled 0
+  StrCpy $RunPortable 0
+  StrCpy $ShowBootsplash 1
+
   ClearErrors
   ReadRegStr $R0 HKLM \
    "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "CurrentVersion"
@@ -108,14 +128,153 @@ winnt:
   goto abort_inst
 winnt_456:
   StrCmp $R1 '4' 0 winnt_56
-  ;;;MessageBox MB_OK|MB_ICONEXCLAMATION \
-  ;;; "Windows NT 4.x is not supported yet!" \
-  ;;; /SD IDOK
-  ;;;goto abort_inst
   StrCpy $NT4_TARGET 1
 
 winnt_56:
+  /* portable package? */
+  ClearErrors
+  FileOpen $R0 "$EXEDIR\PORTABLE.X" r
+  IfErrors init_ok 0
+  FileClose $R0
+  StrCpy $RunPortable 1
+  ReadINIStr $ShowBootsplash "$EXEDIR\PORTABLE.X" "Bootsplash" "Show"
+!ifdef MODERN_UI
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "PORTABLE.INI"
+!endif
+init_ok:
   pop $R1
+  pop $R0
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function install_driver
+
+  StrCpy $R0 "$WINDIR\System32\Drivers"
+  SetOutPath $R0
+  StrCmp $NT4_TARGET '1' 0 modern_win
+  DetailPrint "NT 4.0 version"
+  File /nonfatal "ultradfg_nt4.sys"
+  Delete "$R0\ultradfg.sys"
+  Rename "ultradfg_nt4.sys" "ultradfg.sys"
+  goto driver_installed
+modern_win:
+  File "ultradfg.sys"
+driver_installed:
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function prepare_portable_environment
+
+  SetOutPath $TEMP
+  File "Dfrg.exe"
+  File "LICENSE.TXT"
+  File "CREDITS.TXT"
+  File "udefrag.exe"
+!insertmacro DisableX64FSRedirection
+  call install_driver
+!insertmacro EnableX64FSRedirection
+  StrCpy $R0 "SYSTEM\CurrentControlSet\Services\ultradfg"
+  call WriteDriverSettings
+  SetOutPath $TEMP
+  ClearErrors
+  FileOpen $R0 "$TEMP\P.CMD" w
+  IfErrors exit_prepare_proc
+  FileWrite $R0 "@echo off$\n"
+  FileWrite $R0 "cd $TEMP$\n"
+  FileWrite $R0 "cls$\n"
+  FileWrite $R0 "echo Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build - console.$\n"
+  FileWrite $R0 "echo Type udefrag -h for help.$\n"
+  FileClose $R0
+exit_prepare_proc:
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function ShowPortable
+
+  push $R0
+  push $R1
+  
+  /* show bootsplash */
+  InitPluginsDir
+  SetOutPath $PLUGINSDIR
+  StrCmp $RunPortable '1' 0 show_general_splash
+  StrCmp $ShowBootsplash '1' 0 prepare_env
+  File "PortableUltraDefrag.bmp"
+  advsplash::show 2000 400 0 -1 "$PLUGINSDIR\PortableUltraDefrag"
+  pop $R0
+  Delete "$PLUGINSDIR\PortableUltraDefrag.bmp"
+  goto prepare_env
+show_general_splash:
+  File "UltraDefrag.bmp"
+  advsplash::show 2000 400 0 -1 "$PLUGINSDIR\UltraDefrag"
+  pop $R0
+  Delete "$PLUGINSDIR\UltraDefrag.bmp"
+  goto exit_portable
+prepare_env:
+  /* prepare executables and environment */
+  call prepare_portable_environment
+!ifdef MODERN_UI
+  !insertmacro MUI_HEADER_TEXT "" "Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
+!endif
+  SetOutPath $PLUGINSDIR
+  File "PORTABLE.INI"
+  File "gui.ico"
+  WriteINIStr "$PLUGINSDIR\PORTABLE.INI" "Field 4" "Text" "$PLUGINSDIR\gui.ico"
+  File "console.ico"
+  WriteINIStr "$PLUGINSDIR\PORTABLE.INI" "Field 5" "Text" "$PLUGINSDIR\console.ico"
+  File "install.ico"
+  WriteINIStr "$PLUGINSDIR\PORTABLE.INI" "Field 6" "Text" "$PLUGINSDIR\install.ico"
+  File "web.ico"
+  WriteINIStr "$PLUGINSDIR\PORTABLE.INI" "Field 8" "Text" "$PLUGINSDIR\web.ico"
+  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\PORTABLE.INI"
+  pop $R0
+  InstallOptions::show
+  pop $R0
+
+exit_portable:
+  pop $R1
+  pop $R0
+  Abort
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function LeavePortable
+
+  push $R0
+
+  ReadINIStr $R0 "$PLUGINSDIR\PORTABLE.INI" "Settings" "State"
+  StrCmp $R0 0 exit_notify_handler
+  StrCmp $R0 1 run_gui
+  StrCmp $R0 2 run_console
+  StrCmp $R0 3 install
+  StrCmp $R0 7 visit_website
+  goto exit_notify_handler
+run_gui:
+  ExecWait '"$TEMP\dfrg.exe" /P'
+  goto exit_notify_handler
+run_console:
+!insertmacro DisableX64FSRedirection
+  ExecWait '"$SYSDIR\cmd.exe" /K "$TEMP\P.CMD"'
+!insertmacro EnableX64FSRedirection
+  goto exit_notify_handler
+install:
+  goto exit_notify_handler_install
+visit_website:
+  ExecShell "open" "http://ultradefrag.sourceforge.net/"
+  goto exit_notify_handler
+
+exit_notify_handler:
+  pop $R0
+  Abort ; return to the page
+exit_notify_handler_install:
   pop $R0
 
 FunctionEnd
@@ -137,8 +296,10 @@ FunctionEnd
 Section "Ultra Defrag core files (required)" SecCore
 
   push $R0
+  push $R1
 
   SectionIn RO
+  AddSize 38 /* for the components installed in system directories */
   DetailPrint "Install core files..."
   SetOutPath $INSTDIR
   File "Dfrg.exe"
@@ -157,16 +318,8 @@ Section "Ultra Defrag core files (required)" SecCore
   File "presets\system"
 
   DetailPrint "Install driver..."
-  SetOutPath "$WINDIR\System32\Drivers"
-  StrCmp $NT4_TARGET '1' 0 modern_win
-  DetailPrint "NT 4.0 version"
-  File /nonfatal "ultradfg_nt4.sys"
-  Delete "$WINDIR\System32\Drivers\ultradfg.sys"
-  Rename "ultradfg_nt4.sys" "ultradfg.sys"
-  goto driver_installed
-modern_win:
-  File "ultradfg.sys"
-driver_installed:
+!insertmacro DisableX64FSRedirection
+  call install_driver
 
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"
@@ -179,6 +332,7 @@ driver_installed:
 native_modern_win:
   File "defrag_native.exe"
 native_installed:
+!insertmacro EnableX64FSRedirection
 
   /* create custom preset and correct program settings */
   SetOutPath "$TEMP"
@@ -193,12 +347,6 @@ native_installed:
 custom_created:
   Delete "$TEMP\inst_helper.exe"
 
-!if ${ULTRADFGARCH} != "i386"
-  File "x64_inst.exe"
-  ExecWait "$TEMP\x64_inst.exe"
-  Delete "$TEMP\x64_inst.exe"
-!endif
-
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
   StrCpy $R0 "SYSTEM\CurrentControlSet\Services\ultradfg"
@@ -210,7 +358,7 @@ custom_created:
 
   DetailPrint "Write filter settings..."
   StrCpy $R0 "Software\DASoft\NTDefrag"
-  WriteRegStr HKCU $R0 "boot time include filter" "windows;ntuser;pagefile"
+  WriteRegStr HKCU $R0 "boot time include filter" "windows;winnt;ntuser;pagefile"
   WriteRegStr HKCU $R0 "boot time exclude filter" "temp"
 
   DetailPrint "Write the uninstall keys..."
@@ -221,22 +369,66 @@ custom_created:
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
+  pop $R1
   pop $R0
 
 SectionEnd
 
-Section "Console interface" SecConsole
+Section "Console interface (required)" SecConsole
 
+  SectionIn RO
+  AddSize 6
   DetailPrint "Install console interface..."
+!insertmacro DisableX64FSRedirection
   SetOutPath "$WINDIR\System32"
   File "udefrag.exe"
+!insertmacro EnableX64FSRedirection
 
+SectionEnd
+
+Section "Scheduler.NET" SecSchedNET
+
+  DetailPrint "Install Scheduler.NET..."
+  SetOutPath $INSTDIR
+  File "UltraDefragScheduler.NET.exe"
+  StrCpy $SchedulerNETinstalled 1
+
+SectionEnd
+
+Section "Documentation" SecDocs
+
+  DetailPrint "Install documentation..."
+  SetOutPath "$INSTDIR\doc"
+  File "manual.html"
+  SetOutPath "$INSTDIR\doc\images"
+  File "console.png"
+  File "main_screen110.png"
+  File "about.png"
+  File "valid-html401.png"
+  StrCpy $DocsInstalled 1
+
+SectionEnd
+
+Section "Portable UltraDefrag package" SecPortable
+
+  push $R0
+  
+  DetailPrint "Build portable package..."
+  StrCpy $R0 "$INSTDIR\portable_${ULTRADFGARCH}_package"
+  CreateDirectory $R0
+  CopyFiles /SILENT $EXEPATH $R0 200
+  WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
+  WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
+    "Put this directory contents to your USB drive and enjoy!"
+
+  pop $R0
+  
 SectionEnd
 
 Section "Shortcuts" SecShortcuts
 
   push $R0
-  AddSize 3
+  AddSize 5
   DetailPrint "Install shortcuts..."
   SetShellVarContext all
   SetOutPath $INSTDIR
@@ -250,6 +442,16 @@ Section "Shortcuts" SecShortcuts
    "$INSTDIR\README.TXT"
   CreateShortCut "$R0\FAQ.lnk" \
    "$INSTDIR\FAQ.TXT"
+  StrCmp $SchedulerNETinstalled '1' 0 no_sched_net
+  CreateShortCut "$R0\Scheduler.NET.lnk" \
+   "$INSTDIR\UltraDefragScheduler.NET.exe"
+no_sched_net:
+  StrCmp $DocsInstalled '1' 0 no_docs
+  WriteINIStr "$R0\User manual.url" "InternetShortcut" "URL" "$INSTDIR\doc\manual.html"
+  goto doc_url_ok
+no_docs:
+  WriteINIStr "$R0\User manual.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/manual.html"
+doc_url_ok:
   CreateShortCut "$R0\Uninstall UltraDefrag.lnk" \
    "$INSTDIR\uninstall.exe"
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
@@ -275,23 +477,21 @@ Section "Uninstall"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
   Delete "$INSTDIR\FAQ.TXT"
+  Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$INSTDIR\uninstall.exe"
   Delete "$INSTDIR\presets\standard"
   Delete "$INSTDIR\presets\system"
   RMDir "$INSTDIR\presets"
+  RMDir /r "$INSTDIR\doc"
+  RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
   RMDir $INSTDIR
 
   DetailPrint "Uninstall driver and boot time defragger..."
-!if ${ULTRADFGARCH} != "i386"
-  SetOutPath "$TEMP"
-  File "x64_inst.exe"
-  ExecWait '"$TEMP\x64_inst.exe" -u'
-  Delete "$TEMP\x64_inst.exe"
-!else
+!insertmacro DisableX64FSRedirection
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\udefrag.exe"
-!endif
+!insertmacro EnableX64FSRedirection
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
@@ -311,6 +511,9 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecConsole} "Useful for scripts and scheduling."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecSchedNET} "Small and useful scheduler.$\nNET Framework 2.0 required."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "User manual."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecPortable} "Build portable package to place them on USB drive."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 !endif

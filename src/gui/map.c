@@ -73,14 +73,27 @@ void CalculateBlockSize()
 {
 	RECT _rc;
 	double n;
+	int x_edge,y_edge;
+	LONG width, height, delta_x;
 
 	GetWindowRect(hMap,&_rc);
-	iMAP_WIDTH = _rc.right - _rc.left - 2 * 2;
-	iMAP_HEIGHT = _rc.bottom - _rc.top - 2 * 2;
-	n = (double)(iMAP_WIDTH * iMAP_HEIGHT);
+	x_edge = GetSystemMetrics(SM_CXEDGE);
+	y_edge = GetSystemMetrics(SM_CYEDGE);
+	iMAP_WIDTH = _rc.right - _rc.left - 2 * y_edge;
+	iMAP_HEIGHT = _rc.bottom - _rc.top - 2 * x_edge;
+	n = (double)((iMAP_WIDTH - 1) * (iMAP_HEIGHT - 1));
 	n /= (double)N_BLOCKS;
-	iBLOCK_SIZE = (int)floor(sqrt(n));
-	if(iBLOCK_SIZE == 10) iBLOCK_SIZE --;
+	iBLOCK_SIZE = (int)floor(sqrt(n)) - 1; /* 1 pixel for grid line */
+	/* adjust map size */
+	/* this is an universal solution for various DPI's */
+	width = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1 + 2 * y_edge;
+	height = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1 + 2 * x_edge;
+	delta_x = _rc.right - _rc.left - width;
+	if(delta_x > 0)
+	{ /* align="center" */
+		_rc.left += (delta_x >> 1);
+	}
+	SetWindowPos(hMap,hWindow,_rc.left,_rc.top,width,height,0);
 }
 
 BOOL CreateBitMap(signed int index)
