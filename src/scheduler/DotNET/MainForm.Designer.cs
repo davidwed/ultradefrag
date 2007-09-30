@@ -67,9 +67,10 @@ namespace UltraDefrag.Scheduler
         	// 
         	this.radDaily.AutoSize = true;
         	this.radDaily.Checked = true;
-        	this.radDaily.Location = new System.Drawing.Point(13, 13);
+        	this.radDaily.Location = new System.Drawing.Point(17, 16);
+        	this.radDaily.Margin = new System.Windows.Forms.Padding(4);
         	this.radDaily.Name = "radDaily";
-        	this.radDaily.Size = new System.Drawing.Size(48, 17);
+        	this.radDaily.Size = new System.Drawing.Size(57, 21);
         	this.radDaily.TabIndex = 0;
         	this.radDaily.TabStop = true;
         	this.radDaily.Text = "Daily";
@@ -79,9 +80,10 @@ namespace UltraDefrag.Scheduler
         	// radWeekly
         	// 
         	this.radWeekly.AutoSize = true;
-        	this.radWeekly.Location = new System.Drawing.Point(12, 36);
+        	this.radWeekly.Location = new System.Drawing.Point(16, 44);
+        	this.radWeekly.Margin = new System.Windows.Forms.Padding(4);
         	this.radWeekly.Name = "radWeekly";
-        	this.radWeekly.Size = new System.Drawing.Size(61, 17);
+        	this.radWeekly.Size = new System.Drawing.Size(72, 21);
         	this.radWeekly.TabIndex = 1;
         	this.radWeekly.Text = "Weekly";
         	this.radWeekly.UseVisualStyleBackColor = true;
@@ -90,19 +92,22 @@ namespace UltraDefrag.Scheduler
         	// timePicker
         	// 
         	this.timePicker.Format = System.Windows.Forms.DateTimePickerFormat.Time;
-        	this.timePicker.Location = new System.Drawing.Point(127, 11);
+        	this.timePicker.Location = new System.Drawing.Point(169, 14);
+        	this.timePicker.Margin = new System.Windows.Forms.Padding(4);
         	this.timePicker.Name = "timePicker";
         	this.timePicker.ShowUpDown = true;
-        	this.timePicker.Size = new System.Drawing.Size(108, 20);
+        	this.timePicker.Size = new System.Drawing.Size(143, 22);
         	this.timePicker.TabIndex = 2;
         	this.timePicker.Value = new System.DateTime(2007, 9, 12, 0, 0, 0, 0);
         	// 
         	// chkMonday
         	// 
         	this.chkMonday.AutoSize = true;
-        	this.chkMonday.Location = new System.Drawing.Point(9, 60);
+        	this.chkMonday.Enabled = false;
+        	this.chkMonday.Location = new System.Drawing.Point(12, 74);
+        	this.chkMonday.Margin = new System.Windows.Forms.Padding(4);
         	this.chkMonday.Name = "chkMonday";
-        	this.chkMonday.Size = new System.Drawing.Size(64, 17);
+        	this.chkMonday.Size = new System.Drawing.Size(77, 21);
         	this.chkMonday.TabIndex = 3;
         	this.chkMonday.Text = "&Monday";
         	this.chkMonday.UseVisualStyleBackColor = true;
@@ -110,9 +115,11 @@ namespace UltraDefrag.Scheduler
         	// chkSaturday
         	// 
         	this.chkSaturday.AutoSize = true;
-        	this.chkSaturday.Location = new System.Drawing.Point(152, 83);
+        	this.chkSaturday.Enabled = false;
+        	this.chkSaturday.Location = new System.Drawing.Point(203, 102);
+        	this.chkSaturday.Margin = new System.Windows.Forms.Padding(4);
         	this.chkSaturday.Name = "chkSaturday";
-        	this.chkSaturday.Size = new System.Drawing.Size(68, 17);
+        	this.chkSaturday.Size = new System.Drawing.Size(84, 21);
         	this.chkSaturday.TabIndex = 4;
         	this.chkSaturday.Text = "&Saturday";
         	this.chkSaturday.UseVisualStyleBackColor = true;
@@ -120,9 +127,11 @@ namespace UltraDefrag.Scheduler
         	// chkFriday
         	// 
         	this.chkFriday.AutoSize = true;
-        	this.chkFriday.Location = new System.Drawing.Point(82, 83);
+        	this.chkFriday.Enabled = false;
+        	this.chkFriday.Location = new System.Drawing.Point(109, 102);
+        	this.chkFriday.Margin = new System.Windows.Forms.Padding(4);
         	this.chkFriday.Name = "chkFriday";
-        	this.chkFriday.Size = new System.Drawing.Size(54, 17);
+        	this.chkFriday.Size = new System.Drawing.Size(66, 21);
         	this.chkFriday.TabIndex = 5;
         	this.chkFriday.Text = "&Friday";
         	this.chkFriday.UseVisualStyleBackColor = true;
@@ -130,9 +139,11 @@ namespace UltraDefrag.Scheduler
         	// chkThursday
         	// 
         	this.chkThursday.AutoSize = true;
-        	this.chkThursday.Location = new System.Drawing.Point(9, 83);
+        	this.chkThursday.Enabled = false;
+        	this.chkThursday.Location = new System.Drawing.Point(12, 102);
+        	this.chkThursday.Margin = new System.Windows.Forms.Padding(4);
         	this.chkThursday.Name = "chkThursday";
-        	this.chkThursday.Size = new System.Drawing.Size(70, 17);
+        	this.chkThursday.Size = new System.Drawing.Size(87, 21);
         	this.chkThursday.TabIndex = 6;
         	this.chkThursday.Text = "T&hursday";
         	this.chkThursday.UseVisualStyleBackColor = true;
@@ -140,9 +151,11 @@ namespace UltraDefrag.Scheduler
         	// chkWednesday
         	// 
         	this.chkWednesday.AutoSize = true;
-        	this.chkWednesday.Location = new System.Drawing.Point(152, 60);
+        	this.chkWednesday.Enabled = false;
+        	this.chkWednesday.Location = new System.Drawing.Point(203, 74);
+        	this.chkWednesday.Margin = new System.Windows.Forms.Padding(4);
         	this.chkWednesday.Name = "chkWednesday";
-        	this.chkWednesday.Size = new System.Drawing.Size(83, 17);
+        	this.chkWednesday.Size = new System.Drawing.Size(102, 21);
         	this.chkWednesday.TabIndex = 7;
         	this.chkWednesday.Text = "&Wednesday";
         	this.chkWednesday.UseVisualStyleBackColor = true;
@@ -150,9 +163,11 @@ namespace UltraDefrag.Scheduler
         	// chkTuesday
         	// 
         	this.chkTuesday.AutoSize = true;
-        	this.chkTuesday.Location = new System.Drawing.Point(82, 60);
+        	this.chkTuesday.Enabled = false;
+        	this.chkTuesday.Location = new System.Drawing.Point(109, 74);
+        	this.chkTuesday.Margin = new System.Windows.Forms.Padding(4);
         	this.chkTuesday.Name = "chkTuesday";
-        	this.chkTuesday.Size = new System.Drawing.Size(67, 17);
+        	this.chkTuesday.Size = new System.Drawing.Size(82, 21);
         	this.chkTuesday.TabIndex = 8;
         	this.chkTuesday.Text = "&Tuesday";
         	this.chkTuesday.UseVisualStyleBackColor = true;
@@ -160,9 +175,11 @@ namespace UltraDefrag.Scheduler
         	// chkSunday
         	// 
         	this.chkSunday.AutoSize = true;
-        	this.chkSunday.Location = new System.Drawing.Point(9, 106);
+        	this.chkSunday.Enabled = false;
+        	this.chkSunday.Location = new System.Drawing.Point(12, 130);
+        	this.chkSunday.Margin = new System.Windows.Forms.Padding(4);
         	this.chkSunday.Name = "chkSunday";
-        	this.chkSunday.Size = new System.Drawing.Size(62, 17);
+        	this.chkSunday.Size = new System.Drawing.Size(75, 21);
         	this.chkSunday.TabIndex = 9;
         	this.chkSunday.Text = "S&unday";
         	this.chkSunday.UseVisualStyleBackColor = true;
@@ -170,10 +187,10 @@ namespace UltraDefrag.Scheduler
         	// cmdCancel
         	// 
         	this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-        	this.cmdCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-        	this.cmdCancel.Location = new System.Drawing.Point(159, 106);
+        	this.cmdCancel.Location = new System.Drawing.Point(212, 130);
+        	this.cmdCancel.Margin = new System.Windows.Forms.Padding(4);
         	this.cmdCancel.Name = "cmdCancel";
-        	this.cmdCancel.Size = new System.Drawing.Size(75, 23);
+        	this.cmdCancel.Size = new System.Drawing.Size(100, 28);
         	this.cmdCancel.TabIndex = 10;
         	this.cmdCancel.Text = "&Cancel";
         	this.cmdCancel.UseVisualStyleBackColor = true;
@@ -181,10 +198,10 @@ namespace UltraDefrag.Scheduler
         	// 
         	// cmdOk
         	// 
-        	this.cmdOk.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-        	this.cmdOk.Location = new System.Drawing.Point(78, 106);
+        	this.cmdOk.Location = new System.Drawing.Point(104, 130);
+        	this.cmdOk.Margin = new System.Windows.Forms.Padding(4);
         	this.cmdOk.Name = "cmdOk";
-        	this.cmdOk.Size = new System.Drawing.Size(75, 23);
+        	this.cmdOk.Size = new System.Drawing.Size(100, 28);
         	this.cmdOk.TabIndex = 11;
         	this.cmdOk.Text = "&Ok";
         	this.cmdOk.UseVisualStyleBackColor = true;
@@ -194,19 +211,19 @@ namespace UltraDefrag.Scheduler
         	// 
         	this.cmbDrives.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
         	this.cmbDrives.FormattingEnabled = true;
-        	this.cmbDrives.Location = new System.Drawing.Point(127, 36);
-        	this.cmbDrives.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
+        	this.cmbDrives.Location = new System.Drawing.Point(169, 44);
+        	this.cmbDrives.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
         	this.cmbDrives.Name = "cmbDrives";
-        	this.cmbDrives.Size = new System.Drawing.Size(108, 21);
+        	this.cmbDrives.Size = new System.Drawing.Size(143, 24);
         	this.cmbDrives.TabIndex = 12;
         	// 
         	// MainForm
         	// 
         	this.AcceptButton = this.cmdOk;
-        	this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+        	this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
         	this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
         	this.CancelButton = this.cmdCancel;
-        	this.ClientSize = new System.Drawing.Size(242, 131);
+        	this.ClientSize = new System.Drawing.Size(323, 161);
         	this.Controls.Add(this.cmbDrives);
         	this.Controls.Add(this.cmdOk);
         	this.Controls.Add(this.cmdCancel);
@@ -222,6 +239,7 @@ namespace UltraDefrag.Scheduler
         	this.Controls.Add(this.radDaily);
         	this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
         	this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+        	this.Margin = new System.Windows.Forms.Padding(4);
         	this.MaximizeBox = false;
         	this.Name = "MainForm";
         	this.Text = "UltraDefrag Scheduler";

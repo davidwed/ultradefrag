@@ -25,6 +25,25 @@ using System.Runtime.InteropServices;
 
 namespace UltraDefrag.Scheduler
 {
+	internal enum DriveType : uint
+	{
+		/// <summary>The drive type cannot be determined.</summary>
+		Unknown = 0,    //DRIVE_UNKNOWN
+		/// <summary>The root path is invalid, for example, no volume is mounted at the path.</summary>
+		Error = 1,        //DRIVE_NO_ROOT_DIR
+		/// <summary>The drive is a type that has removable media, for example, a floppy drive or removable hard disk.</summary>
+		Removable = 2,    //DRIVE_REMOVABLE
+		/// <summary>The drive is a type that cannot be removed, for example, a fixed hard drive.</summary>
+		Fixed = 3,        //DRIVE_FIXED
+		/// <summary>The drive is a remote (network) drive.</summary>
+		Remote = 4,        //DRIVE_REMOTE
+		/// <summary>The drive is a CD-ROM drive.</summary>
+		CDROM = 5,        //DRIVE_CDROM
+		/// <summary>The drive is a RAM disk.</summary>
+		RAMDisk = 6        //DRIVE_RAMDISK
+	}
+	
+	
     /// <summary>
     /// Info for a scheduled task.
     /// </summary>
@@ -72,6 +91,19 @@ namespace UltraDefrag.Scheduler
     /// </summary>
     internal class Native
     {
+    	/// <summary>
+    	/// The GetDriveType function determines whether a disk drive is a removable, fixed, CD-ROM, RAM disk,
+    	/// or network drive.
+    	/// </summary>
+    	/// <param name="lpRootPathName">
+    	/// A pointer to a null-terminated string that specifies the root directory and returns information
+    	/// about the disk.A trailing backslash is required. If this parameter is NULL, the function uses
+    	/// the root of the current directory.
+    	/// </param>
+    	[DllImport("kernel32.dll")]
+    	internal static extern DriveType GetDriveType([MarshalAs(UnmanagedType.LPStr)] string lpRootPathName);
+    	
+    	
         /// <summary>
         /// Adds a windows schedukled task.
         /// </summary>
@@ -85,5 +117,9 @@ namespace UltraDefrag.Scheduler
         [DllImport("Netapi32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern int NetScheduleJobAdd
             (string Servername, IntPtr Buffer, out int JobId);
+        
+        
+        [DllImport("kernel32.dll")]
+        internal static extern uint QueryDosDevice(string lpDeviceName, IntPtr lpTargetPath, uint ucchMax);
     }
 }

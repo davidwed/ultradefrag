@@ -18,6 +18,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -35,11 +36,24 @@ namespace UltraDefrag.Scheduler
         public MainForm()
         {
             InitializeComponent();
-            //TODO: filter the list for only local writeable drives.
-            DriveInfo[] drives = DriveInfo.GetDrives();
+            
+            DriveInfo[] driveInfo = DriveInfo.GetDrives();
+            List<string> drives = new List<string>();
+            DriveType driveType;
+            
+            foreach (DriveInfo drive in driveInfo) {
+            	driveType = Native.GetDriveType(drive.Name);
+            	if(
+            		driveType != DriveType.Fixed
+            		 &&
+            		driveType != DriveType.Removable
+            		 &&
+            		driveType != DriveType.RAMDisk
+            	) continue;
+            	drives.Add(drive.Name);
+            }
+            
             cmbDrives.DataSource = drives;
-            cmbDrives.DisplayMember = "Name";
-            cmbDrives.ValueMember = "Name";
         }
 
         #region Event Handlers
@@ -101,9 +115,29 @@ namespace UltraDefrag.Scheduler
             ptr = Marshal.AllocHGlobal(Marshal.SizeOf(atInfo));
             Marshal.StructureToPtr(atInfo, ptr, true);
 
-            Native.NetScheduleJobAdd(null, ptr, out jobId);
+            Native.NetScheduleJobAdd(null, ptr, out jobId); 
         }
 
         #endregion Event Handlers
+        
+        /// <summary>
+        /// Returns true if the drive letter is assigned by SUBST command.
+        /// </summary>
+        /// <param name="vol_letter"></param>
+        /// <returns></returns>
+        bool is_virtual(char vol_letter)
+        {
+        	string dev_name = string.Format("{0}:", vol_letter);
+        	string targetPath;;
+        	const int maxSize = 512;
+        	uint retSize;
+        	
+        	IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(maxSize));
+
+        	retSize = Native.QueryDosDevice(dev_name, ptr, maxSize);
+        	targetPath = Marshal.PtrToStringAnsi(ptr, (int) retSize);
+        	
+        	return targetPath.Contains("\\??\\");
+        }
     }
 }
