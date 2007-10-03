@@ -32,6 +32,10 @@
   !include "MUI.nsh"
 !endif
 
+!macro PORTABLE_APP_PAGE
+  Page custom ShowPortable LeavePortable " - Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
+!macroend
+
 ;-----------------------------------------
 Name "Ultra Defrag"
 OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
@@ -61,8 +65,9 @@ ReserveFile "web.ico"
 !ifdef MODERN_UI
   ;;!define MUI_ABORTWARNING
   !define MUI_COMPONENTSPAGE_SMALLDESC
+  !define MUI_CUSTOMFUNCTION_ABORT abort_handler
 
-  Page custom ShowPortable LeavePortable " - Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
+  !insertmacro PORTABLE_APP_PAGE
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE "LICENSE.TXT"
   !insertmacro MUI_PAGE_COMPONENTS
@@ -78,7 +83,7 @@ ReserveFile "web.ico"
   !insertmacro MUI_LANGUAGE "English"
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 !else
-  Page custom ShowPortable LeavePortable " - Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
+  !insertmacro PORTABLE_APP_PAGE
   Page license
   Page components
   Page directory
@@ -95,6 +100,7 @@ Var SchedulerNETinstalled
 Var DocsInstalled
 Var RunPortable
 Var ShowBootsplash
+Var IsInstalled
 
 Function .onInit
 
@@ -107,6 +113,7 @@ Function .onInit
   StrCpy $DocsInstalled 0
   StrCpy $RunPortable 0
   StrCpy $ShowBootsplash 1
+  StrCpy $IsInstalled 0
 
   ClearErrors
   ReadRegStr $R0 HKLM \
@@ -131,6 +138,13 @@ winnt_456:
   StrCpy $NT4_TARGET 1
 
 winnt_56:
+  /* is already installed? */
+  ClearErrors
+  ReadRegDWORD $R0 HKLM \
+   "SYSTEM\CurrentControlSet\Control\UltraDefrag" "next boot"
+  IfErrors not_installed 0
+  StrCpy $IsInstalled 1
+not_installed:
   /* portable package? */
   ClearErrors
   FileOpen $R0 "$EXEDIR\PORTABLE.X" r
@@ -220,7 +234,8 @@ prepare_env:
   /* prepare executables and environment */
   call prepare_portable_environment
 !ifdef MODERN_UI
-  !insertmacro MUI_HEADER_TEXT "" "Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
+  !insertmacro MUI_HEADER_TEXT "" \
+    "Portable UltraDefrag v${ULTRADFGVER} - ${ULTRADFGARCH} build."
 !endif
   SetOutPath $PLUGINSDIR
   File "PORTABLE.INI"
@@ -276,6 +291,43 @@ exit_notify_handler:
   Abort ; return to the page
 exit_notify_handler_install:
   pop $R0
+
+FunctionEnd
+
+;-----------------------------------------
+
+!ifndef MODERN_UI
+Function .onUserAbort
+  call abort_handler
+FunctionEnd
+!endif
+
+Function abort_handler
+
+  /* clean registry after portable run
+     if app isn't already installed */
+  StrCmp $RunPortable '1' 0 abort_done
+  /* remove files from temporary directory */
+  Delete "$TEMP\Dfrg.exe"
+  Delete "$TEMP\LICENSE.TXT"
+  Delete "$TEMP\CREDITS.TXT"
+  Delete "$TEMP\udefrag.exe"
+  Delete "$TEMP\P.CMD"
+  StrCmp $IsInstalled '0' 0 abort_done
+  ;;MessageBox MB_OK "Clean reg." /SD IDOK
+  /* remove any program data to leave clear target machine */
+  SetoutPath "$TEMP"
+  File "dfrg.exe"
+  ExecWait '"$TEMP\dfrg.exe" /U'
+  Delete "$TEMP\dfrg.exe"
+  DeleteRegKey HKCU "Software\DASoft\NTDefrag"
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
+  /* remove driver and it's settings */
+!insertmacro DisableX64FSRedirection
+  Delete "$SYSDIR\Drivers\ultradfg.sys"
+!insertmacro EnableX64FSRedirection
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
+abort_done:
 
 FunctionEnd
 
@@ -470,6 +522,8 @@ Section "Uninstall"
   Delete "$DESKTOP\UltraDefrag.lnk"
 
   DetailPrint "Remove program files..."
+  /* remove unuseful registry settings */
+  ExecWait '"$INSTDIR\Dfrg.exe" /U'
   Delete "$INSTDIR\Dfrg.exe"
   Delete "$INSTDIR\LICENSE.TXT"
   Delete "$INSTDIR\CREDITS.TXT"

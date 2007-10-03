@@ -50,7 +50,8 @@ namespace UltraDefrag.Scheduler
             		 &&
             		driveType != DriveType.RAMDisk
             	) continue;
-            	drives.Add(drive.Name);
+            	if(!is_virtual(drive.Name[0]))
+	            	drives.Add(drive.Name);
             }
             
             cmbDrives.DataSource = drives;
@@ -128,11 +129,11 @@ namespace UltraDefrag.Scheduler
         bool is_virtual(char vol_letter)
         {
         	string dev_name = string.Format("{0}:", vol_letter);
-        	string targetPath;;
+        	string targetPath;
         	const int maxSize = 512;
         	uint retSize;
         	
-        	IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(maxSize));
+        	IntPtr ptr = Marshal.AllocHGlobal(maxSize);
 
         	retSize = Native.QueryDosDevice(dev_name, ptr, maxSize);
         	targetPath = Marshal.PtrToStringAnsi(ptr, (int) retSize);
