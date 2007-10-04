@@ -22,12 +22,12 @@
 <center><br />
 <img src="images/logo.jpg" alt="&lt;UltraDefrag logo&gt;" height="324" width="425" /><br /><br />
 <font size="+1">U</font>ltra <font size="+1">D</font>efragmenter<br />
-<br /><font size="+3">Version 1.1.0</font><br />
-5 Sept 2007<br />
+<br /><font size="+3">Version 1.2.0</font><br />
+4 Oct 2007<br />
 <br />Copyright (C) 2007 <a href="mailto:dmitriar@gmail.com">Dmitri Arkhangelski</a>, 
 <a href="mailto:zippy1981@gmail.com">Justin Dearing</a>.<br />
 <p align="center" style="text-indent:0pt; padding-left:0pt"><a href="#news">[News]</a> <a href="#abstract">[Abstract]</a> 
-<a href="http://sourceforge.net/project/platformdownload.php?group_id=199532&amp;sel_platform=4248">[Download]</a> 
+<a href="http://sourceforge.net/project/platformdownload.php?group_id=199532&amp;sel_platform=4690">[Download]</a> 
 <a href="#overview">[Overview]</a> <a href="http://ultradefrag.sourceforge.net/manual.html">[User Manual]</a><br />
 <a href="http://ultradefrag.sourceforge.net/faq.html">[FAQ]</a> <a href="#bugtracker">[Bug tracker]</a> 
 <a href="#disclaimer">[Disclaimer]</a> <a href="#copyright">[Copyright]</a>
@@ -35,13 +35,19 @@
 </center>
 <h3><a id="news" name="news"><font size="+3">N</font>ews</a></h3>
 <ul type="disc">
- <li>UltraDefrag 1.1.0 has been released.<br />
- The main changes in 1.1.0 are:<br /><br />
+ <li>UltraDefrag 1.2.0 has been released.<br />
+ The main changes in 1.2.0 are:<br /><br />
  <ul type="disc">
   <li><span style="font-weight: bold; font-family: monospace; color: rgb(144, 18, 6);">
-  You can now defragment system files at boot time</span></li>
+  FULL NT 4.0 SUPPORT!</span></li>
   <li><span style="font-weight: bold; font-family: monospace; color: rgb(126, 20, 126);">
-  More useful filter defaults.</span></li>
+  Boot time defragmentation support for 64-bit  systems.</span></li>
+  <li><span style="font-weight: bold; font-family: monospace; color: rgb(23, 5, 174);">
+  Scheduler.NET - small and useful application designed specially for UltraDefrag.</span></li>
+  <li><span style="font-weight: bold; font-family: monospace; color: rgb(174, 7, 12);">
+  Program is now portable.</span></li>
+  <li><span style="font-weight: bold; font-family: monospace; color: rgb(105, 105, 105);">
+  Many bugs are fixed.</span></li>
  </ul><br />
  Also have a look at the more detailed <a href="http://ultradefrag.sourceforge.net/HISTORY.TXT">ChangeLog</a>.
  <br /><br /></li>
@@ -86,7 +92,8 @@ or animations. It is a small and powerful program!</p>
 <td style="width: 99px;">Binary package suffix</td>
 <td style="width: 222px;"><b>N</b>otes:</td>
 </tr><tr bgcolor="#00ffff">
-<td>i386</td><td>Intel 80486, Intel Pentium etc.</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&filesize=107084&filename=ultradefrag-1.1.0.bin.i386.exe&56530804">i386</a></td>
+<td>i386</td><td>Intel 80486, Intel Pentium etc.</td><td>
+<a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-1.2.0.bin.i386.exe?use_mirror=osdn">i386</a></td>
 <td rowspan="4" style="text-align:left">
 <ol>
 	<li>i386 version can be used on all of the supported architectures with 32-bit Windows.</li>
@@ -96,18 +103,21 @@ or animations. It is a small and powerful program!</p>
 </ol>
 </td>
 </tr><tr bgcolor="#ffff00">
-<td>AMD64</td><td>AMD Athlon etc.</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&use_mirror=internap&filename=ultradefrag-1.1.0.bin.amd64.exe&8695565">amd64</a></td>
+<td>AMD64</td><td>AMD Athlon etc.</td><td>
+<a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-1.2.0.bin.amd64.exe?use_mirror=osdn">amd64</a></td>
 </tr><tr bgcolor="#ffff00">
-<td>IA64</td><td>Intel Itanium</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&use_mirror=internap&filename=ultradefrag-1.1.0.bin.ia64.exe&62607284">ia64</a></td>
+<td>IA64</td><td>Intel Itanium</td><td>
+<a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-1.2.0.bin.ia64.exe?use_mirror=osdn">ia64</a></td>
 </tr><tr bgcolor="#ffff00">
-<td>EM64T</td><td>Intel Core Duo etc.</td><td><a href="http://sourceforge.net/project/downloading.php?group_id=199532&use_mirror=internap&filename=ultradefrag-1.1.0.bin.amd64.exe&8695565">amd64</a></td>
+<td>EM64T</td><td>Intel Core Duo etc.</td><td>
+<a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-1.2.0.bin.amd64.exe?use_mirror=osdn">amd64</a></td>
 </tr></tbody>
 </table>
 
 
 <h3><a id="bugtracker" name="bugtracker"><font size="+3">B</font>ug tracker</a></h3>
 <p class="p10">Please report all problems and bugs via the
-<a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">
+<a href="http://sourceforge.net/tracker/?atid=969870&amp;group_id=199532&amp;func=browse">
 	sourceforge bug tracker</a>.<br />
 </p>
 <p class="p10"><b>NOTE:</b> include please in your report following data:<br />
@@ -122,7 +132,7 @@ UltraDefrag and include in your report last 200 significant messages
 <p class="p10"><b>UltraDefrag</b> comes with ABSOLUTELY NO WARRANTY,<br /> for details see the GNU 
 <a href="http://www.gnu.org/copyleft/gpl.html">General Public License</a>.
 </p>
-<p class="p10">Please report all problems or suggestions to the author. Thanks.</p>
+<p class="p10">Please report all problems or suggestions to the authors. Thanks.</p>
 
 <h3><a id="copyright" name="copyright"><font size="+3">C</font>opyright</a></h3>
 <pre class="p10" style="font-size:11pt">
@@ -148,11 +158,11 @@ Enjoy!<br /></div>
 </div><br />
 <hr /><br /><table>
 <tbody><tr>
-<td> <font size="-1"><i>The term </i></font><b><font size="2">UltraDefrag</font></b> <font size="-1"><i> is a shorthand for the Ultra
+<td style="text-align:left"> <font size="-1"><i>The term </i></font><b><font size="2">UltraDefrag</font></b> <font size="-1"><i> is a shorthand for the Ultra
 Defragmenter and holds no connection with potential owners of
 registered trademarks or other rights. All trademarks, brands, and
 names are the property of their respective owners.<br />
-<br />Last modified Wed September 06 21.28.22 PDT 2007.</i></font>
+<br /></i></font>
 </td></tr>
 </tbody></table>
 </body></html>
