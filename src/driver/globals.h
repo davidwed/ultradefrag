@@ -29,4 +29,6 @@ extern short link_name[];
 #ifdef NT4_DBG
 extern HANDLE hDbgLog;
 extern LARGE_INTEGER dbg_log_offset;
+extern UCHAR *dbg_ring_buffer;
+extern unsigned int dbg_ring_buffer_offset;
 #endif

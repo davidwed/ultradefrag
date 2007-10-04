@@ -1,11 +1,14 @@
 CREDITS
 
-Main programmer and project administrator:
+Main programmer,
+Project administrator:
 
 Dmitri Arkhangelski
 
 
-Boot time defragmentation idea author and Documentation Writer:
+Boot time defragmentation idea author,
+Documentation Writer,
+Scheduler author:
 
 Justin Dearing
 

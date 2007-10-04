@@ -74,7 +74,7 @@ void CalculateBlockSize()
 	RECT _rc;
 	double n;
 	int x_edge,y_edge;
-	LONG width, height, delta_x;
+	LONG delta_x;
 
 	GetWindowRect(hMap,&_rc);
 	x_edge = GetSystemMetrics(SM_CXEDGE);
@@ -86,14 +86,18 @@ void CalculateBlockSize()
 	iBLOCK_SIZE = (int)floor(sqrt(n)) - 1; /* 1 pixel for grid line */
 	/* adjust map size */
 	/* this is an universal solution for various DPI's */
-	width = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1 + 2 * y_edge;
-	height = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1 + 2 * x_edge;
-	delta_x = _rc.right - _rc.left - width;
+	iMAP_WIDTH = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1 + 2 * y_edge;
+	iMAP_HEIGHT = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1 + 2 * x_edge;
+	delta_x = _rc.right - _rc.left - iMAP_WIDTH;
 	if(delta_x > 0)
 	{ /* align="center" */
 		_rc.left += (delta_x >> 1);
 	}
-	SetWindowPos(hMap,hWindow,_rc.left,_rc.top,width,height,0);
+	SetWindowPos(hMap,0,_rc.left - y_edge - 1, \
+		_rc.top - GetSystemMetrics(SM_CYCAPTION) - x_edge - 1, \
+		iMAP_WIDTH,iMAP_HEIGHT,0);
+	iMAP_WIDTH -= 2 * y_edge; /* new sizes for map without borders */
+	iMAP_HEIGHT -= 2 * x_edge;
 }
 
 BOOL CreateBitMap(signed int index)

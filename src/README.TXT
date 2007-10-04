@@ -6,7 +6,7 @@ Updated Aug 16th, 2007
 1. What is UltraDefrag?
 
    UltraDefrag is a powerful Open Source defragmentation utility for Windows
-2000 and later operating systems.  It is very fast, because the defragmenting
+NT 4.0 and later operating systems.  It is very fast, because the defragmenting
 is done by kernel-mode driver. They are three interfaces to them: graphical,
 console and native.  The GUI is very useful, because visually represents your
 filesystem as a color coded cluster  map. The console is another option for 
@@ -18,9 +18,8 @@ chkdsk.
    The design of UltraDefrag is very simple. There are no skins, localization, 
 or animations. It is a small and powerful program!
 
-   It can be used on Windows 2000, Windows XP, Windows Server 2003,
-Windows Vista and all of the 64-bit editions of Windows.
-Windows NT 4.0 is currently unsupported.
+   It can be used on Windows NT 4.0, Windows 2000, Windows XP, Windows Server 
+2003, Windows Vista and all of the 64-bit editions of Windows.
 
    You must have administrative rights to install and use UltraDefrag.
 
@@ -42,7 +41,6 @@ Windows NT 4.0 is currently unsupported.
 
 2.2 Limitations
 - does not support volumes with more than 4.294.967.295 clusters
-- does not work on NT 4.0
 - gui does not work if screen color depth is less than 16 bits per pixel
 
 3. Reporting Bugs
@@ -61,8 +59,9 @@ Windows NT 4.0 is currently unsupported.
    For help requests visit our forum:
                  http://sourceforge.net/forum/?group_id=199532
 
-   Other messages you can send to authors email:
-                dmitriar@gmail.com
+   Other messages you can send to authors emails:
+                dmitriar@gmail.com (main program)
+                zippy1981@gmail.com (scheduler & documentation)
 
 
 4. Frequently Asked Questions
@@ -88,6 +87,7 @@ See the CREDITS file.
 8. Copyright
 
    Copyright (C) 2007 by Dmitri Arkhangelski.
+   Copyright (C) 2007 by Justin Dearing.
 
    This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

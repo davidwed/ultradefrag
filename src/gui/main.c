@@ -47,6 +47,9 @@ HWND hCheckSkipRem;
 HWND hProgressMsg,hProgressBar;
 HWND hMap;
 
+BOOL portable_run = FALSE;
+BOOL uninstall_run = FALSE;
+
 HANDLE hUltraDefragDevice = INVALID_HANDLE_VALUE;
 
 extern RECT win_rc; /* coordinates of main window */
@@ -81,7 +84,7 @@ int thr_id;
 BOOL busy_flag = 0;
 char buffer[64];
 
-HANDLE hEventComplete = 0,hEvt = 0,hEvtStop = 0;
+HANDLE hEventComplete = 0,hEvt = 0,hEvtStop = 0, hEvtDone = 0;
 
 char current_operation;
 BOOL stop_pressed;
@@ -154,6 +157,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	OVERLAPPED ovrl;
 	DWORD txd;
 
+	/* check command line keys */
+	_strupr(lpCmdLine);
+	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
+	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
+	if(uninstall_run)
+	{	
+		/* clear registry */
+		//next_boot = every_boot = 0; default values
+		SaveBootTimeSettings();
+		ExitProcess(0);
+	}
 	/* only one instance of program! */
 	hEventIsRunning = OpenEvent(EVENT_MODIFY_STATE,FALSE,
 				    "UltraDefragIsRunning");
@@ -168,7 +182,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	hEventComplete = CreateEvent(NULL,TRUE,TRUE,"UltraDefragCommandComplete");
 	hEvt = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIoComplete");
 	hEvtStop = CreateEvent(NULL,TRUE,TRUE,"UltraDefragStop");
-	if(!hEventIsRunning || !hEventComplete || !hEvt || !hEvtStop)
+	hEvtDone = CreateEvent(NULL,TRUE,TRUE,"UltraDefragDone");
+	if(!hEventIsRunning || !hEventComplete || !hEvt || !hEvtStop || !hEvtDone)
 	{
 		err_code = 2; goto cleanup;
 	}
@@ -345,6 +360,7 @@ void Stop()
 					NULL,0,NULL,0,&txd,&ovrl);
 	WaitForSingleObject(hEvtStop,INFINITE);
 	stop_pressed = TRUE;
+	////WaitForSingleObject(hEvtDone,INFINITE);
 }
 
 void ShowProgress(void)
@@ -400,7 +416,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			hMap = GetDlgItem(hWnd,IDC_MAP);
 			GetWindowRect(hMap,&_rc);
 			_rc.bottom ++;
-			SetWindowPos(hMap,0,_rc.left,_rc.top,_rc.right - _rc.left,
+			SetWindowPos(hMap,0,0,0,_rc.right - _rc.left,
 				_rc.bottom - _rc.top,SWP_NOMOVE);
 			CalculateBlockSize();
 			cx = GetSystemMetrics(SM_CXSCREEN);
@@ -731,6 +747,7 @@ wait:
 		SetWindowText(hProgressMsg,progress_msg);
 		SendMessage(hProgressBar,PBM_SETPOS,100,0);
 	}
+	SetEvent(hEvtDone);
 	return 0;
 }
 
@@ -767,6 +784,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 	stop_pressed = FALSE;
 	ResetEvent(hEventComplete);
+	ResetEvent(hEvtDone);
 	CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)UpdateMapThreadProc,(void *)(size_t)index,0,&thr_id);
 
 	ovrl.hEvent = hEventComplete;

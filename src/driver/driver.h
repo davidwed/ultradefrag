@@ -37,13 +37,14 @@
 #undef NT4_DBG
 #endif
 
-////#define NT4_DBG
+///#define NT4_DBG
 
 #ifdef NT4_DBG
-void __stdcall OpenLogFile();
-void __stdcall CloseLogFile();
+void __stdcall OpenLog();
+void __stdcall CloseLog();
 void __cdecl WriteLogMessage(char *format, ...);
 #define DebugPrint WriteLogMessage
+#define RING_BUFFER_SIZE (512 * 1024) 
 #else
 #define DebugPrint DbgPrint
 #endif

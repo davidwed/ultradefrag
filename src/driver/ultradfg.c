@@ -46,6 +46,9 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL]=
 											  DeviceControlRoutine;
 
+#ifdef NT4_DBG
+	OpenLog(); /* We should call them before any DebugPrint() calls !!! */
+#endif
 	RtlInitUnicodeString(&devName,device_name);
 	status = IoCreateDevice(DriverObject,
 				sizeof(EXAMPLE_DEVICE_EXTENSION),
@@ -351,9 +354,6 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	PEXAMPLE_DEVICE_EXTENSION dx = \
 			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
-#ifdef NT4_DBG
-	OpenLogFile();
-#endif
 	DebugPrint("-Ultradfg- Create File\n");
 	/* allocate memory for maps processing */
 #ifndef NT4_TARGET
@@ -382,9 +382,6 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
 no_mem:
 	DbgPrintNoMem();
-#ifdef NT4_DBG
-	CloseLogFile();
-#endif
 	return CompleteIrp(Irp,STATUS_NO_MEMORY,0);
 }
 
@@ -413,9 +410,6 @@ NTSTATUS NTAPI Close_HandleIRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		ExFreePool(dx->tmp_buf);
 		dx->tmp_buf = NULL;
 	}
-#ifdef NT4_DBG
-	CloseLogFile();
-#endif
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
 }
 
@@ -687,6 +681,9 @@ VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 	if(dx->tmp_buf) ExFreePool(dx->tmp_buf);
 	DestroyFilter(dx);
 	WaitForThreadComplete(dx);
+#ifdef NT4_DBG
+	CloseLog();
+#endif
 	/* Delete symbolic link and FDO: */
 	IoDeleteSymbolicLink(pLinkName);
 	IoDeleteDevice(dx->fdo);

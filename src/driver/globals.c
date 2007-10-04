@@ -33,4 +33,6 @@ short link_name[] = L"\\DosDevices\\ultradfg";
 #ifdef NT4_DBG
 HANDLE hDbgLog = 0;
 LARGE_INTEGER dbg_log_offset;
+UCHAR *dbg_ring_buffer;
+unsigned int dbg_ring_buffer_offset;
 #endif

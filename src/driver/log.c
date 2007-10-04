@@ -171,15 +171,32 @@ done:
 
 #ifdef NT4_DBG
 
-void __stdcall OpenLogFile()
+void __stdcall OpenLog()
+{
+	char header[] = "[Begin]\r\n";
+
+	dbg_ring_buffer = NULL; dbg_ring_buffer_offset = 0;
+	dbg_ring_buffer = AllocatePool(NonPagedPool,RING_BUFFER_SIZE); /* 512 kb ring-buffer */
+	if(!dbg_ring_buffer) DbgPrint("=Ultradfg= Can't allocate ring buffer!\n");
+	else memset(dbg_ring_buffer,0,RING_BUFFER_SIZE);
+	if(dbg_ring_buffer)
+	{
+		strcpy(dbg_ring_buffer,header);
+		dbg_ring_buffer_offset += sizeof(header) - 1;
+	}
+}
+
+void __stdcall CloseLog()
 {
 	UNICODE_STRING log_path;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS Status;
 	IO_STATUS_BLOCK ioStatus;
+	char error_msg[] = "No enough memory to save debug messages. It requires 512 kb.";
+	char terminator[] = "[End]\r\n";
 
 	/* Create the file */
-	RtlInitUnicodeString(&log_path,L"\\??\\A:\\DBGPRINT.LOG");
+	RtlInitUnicodeString(&log_path,L"\\??\\C:\\DBGPRINT.LOG");
 	InitializeObjectAttributes(&ObjectAttributes,&log_path,0,NULL,NULL);
 	ZwDeleteFile(&ObjectAttributes);
 	Status = ZwCreateFile(&hDbgLog,FILE_GENERIC_WRITE,&ObjectAttributes,&ioStatus,
@@ -187,15 +204,26 @@ void __stdcall OpenLogFile()
 			  0,NULL,0);
 	if(Status)
 	{
-		DbgPrint("-Ultradfg- Can't create A:\\DBGPRINT.LOG!\n");
-		hDbgLog = 0;
+		DbgPrint("-Ultradfg- Can't create C:\\DBGPRINT.LOG!\n");
+		return;
 	}
 	dbg_log_offset.QuadPart = 0;
-}
-
-void __stdcall CloseLogFile()
-{
-	if(hDbgLog) ZwClose(hDbgLog);
+	/* write ring buffer to file */
+	if(!dbg_ring_buffer)
+	{
+		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+			error_msg,sizeof(error_msg) - 1,&dbg_log_offset,NULL);
+	}
+	else
+	{
+		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,terminator,sizeof(terminator) - 1);
+		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+			dbg_ring_buffer,strlen(dbg_ring_buffer),
+			&dbg_log_offset,NULL);
+	}
+	/* close file */
+	ZwClose(hDbgLog);
+	if(dbg_ring_buffer) ExFreePool(dbg_ring_buffer);
 }
 
 void __cdecl WriteLogMessage(char *format, ...)
@@ -203,8 +231,8 @@ void __cdecl WriteLogMessage(char *format, ...)
 	char buffer[1024]; /* 512 */
 	va_list ap;
 	ULONG length;
-	IO_STATUS_BLOCK ioStatus;
 	char crlf[] = "\r\n";
+	char terminator[] = "[End]\r\n";
 
 	va_start(ap,format);
 	length = _vsnprintf(buffer,sizeof(buffer),format,ap);
@@ -214,17 +242,25 @@ void __cdecl WriteLogMessage(char *format, ...)
 		length = sizeof(buffer) - 1;
 	}
 	buffer[sizeof(buffer) - 1] = 0;
-	if(KeGetCurrentIrql() == PASSIVE_LEVEL)
-	{
+	//if(KeGetCurrentIrql() == PASSIVE_LEVEL)
+	//{
 		if(length != 0)
 			length --; /* remove last new line character */
-		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
-			buffer,length,&dbg_log_offset,NULL);
-		dbg_log_offset.QuadPart += length;
-		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
-			crlf,2,&dbg_log_offset,NULL);
-		dbg_log_offset.QuadPart += 2;
-	}
+		//ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+		//	buffer,length,&dbg_log_offset,NULL);
+		//dbg_log_offset.QuadPart += length;
+		//ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+		//	crlf,2,&dbg_log_offset,NULL);
+		//dbg_log_offset.QuadPart += 2;
+		if(dbg_ring_buffer_offset + length >= RING_BUFFER_SIZE - (sizeof(terminator) - 1))
+			dbg_ring_buffer_offset = 0;
+		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,buffer,length);
+		dbg_ring_buffer_offset += length;
+		if(dbg_ring_buffer_offset + 2 >= RING_BUFFER_SIZE - (sizeof(terminator) - 1))
+			dbg_ring_buffer_offset = 0;
+		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,crlf,2);
+		dbg_ring_buffer_offset += 2;
+	//}
 	/* and send message to debugger */
 	DbgPrint(buffer);
 	va_end(ap);

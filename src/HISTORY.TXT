@@ -5,7 +5,8 @@ HISTORY
 1.2.0 (22.5) - full NT 4.0 support; boot time defragmentation for 64-bit
                systems; Scheduler.NET; bug #1771887 (I/O error!) fixed;
                native application optimized; offline manual;
-               system preset improved
+               system preset improved; portable application option added;
+               small gui bugs fixed
 
 1.1.0 (22.5) - BOOT TIME DEFRAG ADDED; filter presets added;
                'progress bar disappears' bug fixed; installer improved;

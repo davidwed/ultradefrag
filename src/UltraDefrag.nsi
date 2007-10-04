@@ -98,6 +98,7 @@ ReserveFile "web.ico"
 Var NT4_TARGET
 Var SchedulerNETinstalled
 Var DocsInstalled
+Var PortableInstalled
 Var RunPortable
 Var ShowBootsplash
 Var IsInstalled
@@ -111,6 +112,7 @@ Function .onInit
   StrCpy $NT4_TARGET 0
   StrCpy $SchedulerNETinstalled 0
   StrCpy $DocsInstalled 0
+  StrCpy $PortableInstalled 0
   StrCpy $RunPortable 0
   StrCpy $ShowBootsplash 1
   StrCpy $IsInstalled 0
@@ -410,7 +412,7 @@ custom_created:
 
   DetailPrint "Write filter settings..."
   StrCpy $R0 "Software\DASoft\NTDefrag"
-  WriteRegStr HKCU $R0 "boot time include filter" "windows;winnt;ntuser;pagefile"
+  WriteRegStr HKCU $R0 "boot time include filter" "windows;winnt;ntuser;pagefile;hiberfil"
   WriteRegStr HKCU $R0 "boot time exclude filter" "temp"
 
   DetailPrint "Write the uninstall keys..."
@@ -472,6 +474,7 @@ Section "Portable UltraDefrag package" SecPortable
   WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
   WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
     "Put this directory contents to your USB drive and enjoy!"
+  StrCpy $PortableInstalled 1
 
   pop $R0
   
@@ -509,6 +512,10 @@ doc_url_ok:
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
    "$INSTDIR\Dfrg.exe"
   WriteINIStr "$R0\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
+  StrCmp $PortableInstalled '1' 0 no_portable
+  CreateShortCut "$R0\Portable package.lnk" \
+   "$INSTDIR\portable_${ULTRADFGARCH}_package"
+no_portable:
   pop $R0
   
 SectionEnd
