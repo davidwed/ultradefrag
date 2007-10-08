@@ -96,6 +96,7 @@ ReserveFile "web.ico"
 ;-----------------------------------------
 
 Var NT4_TARGET
+Var W2K_TARGET
 Var SchedulerNETinstalled
 Var DocsInstalled
 Var PortableInstalled
@@ -110,6 +111,7 @@ Function .onInit
 
   /* variables initialization */
   StrCpy $NT4_TARGET 0
+  StrCpy $W2K_TARGET 0
   StrCpy $SchedulerNETinstalled 0
   StrCpy $DocsInstalled 0
   StrCpy $PortableInstalled 0
@@ -140,6 +142,11 @@ winnt_456:
   StrCpy $NT4_TARGET 1
 
 winnt_56:
+  StrCpy $R1 $R0 3
+  StrCmp $R1 '5.0' 0 xp_or_later
+  StrCpy $W2K_TARGET 1
+xp_or_later:
+  
   /* is already installed? */
   ClearErrors
   ReadRegDWORD $R0 HKLM \
@@ -378,7 +385,8 @@ Section "Ultra Defrag core files (required)" SecCore
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"
   StrCmp $NT4_TARGET '1' 0 native_modern_win
-  DetailPrint "NT 4.0 version"
+  StrCmp $W2K_TARGET '1' 0 native_modern_win
+  DetailPrint "NT 4.0 and W2K version"
   File /nonfatal "defrag_native_nt4.exe"
   Delete "$WINDIR\System32\defrag_native.exe"
   Rename "defrag_native_nt4.exe" "defrag_native.exe"

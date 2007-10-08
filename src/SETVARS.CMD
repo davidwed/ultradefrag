@@ -1,8 +1,8 @@
 @echo off
 echo Set common environment variables...
-set ULTRADFGVER=1.2.0
-set VERSION=1,2,0,0
-set VERSION2="1, 2, 0, 0\0"
+set ULTRADFGVER=1.2.1
+set VERSION=1,2,1,0
+set VERSION2="1, 2, 1, 0\0"
 set NSISDIR=D:\Software\Tools\NSIS
 set MSVSBIN=D:\Software\Microsoft Visual Studio\VC98\Bin
 set WINDDKBASE=D:\WINDDK\3790~1.183

@@ -63,12 +63,6 @@ cd ..\inst_helper
 build.exe
 if %errorlevel% neq 0 goto fail
 
-if "%1" equ "" goto x86
-echo Build the x64 installation helper...
-cd ..\x64_inst
-build.exe
-if %errorlevel% neq 0 goto fail
-
 :x86
 
 :fail

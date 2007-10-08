@@ -88,7 +88,6 @@ xcopy /I /Y .\gui\res .\obj\gui\res
 xcopy /I /Y .\native .\obj\native
 xcopy /I /Y .\include .\obj\include
 xcopy /I /Y .\inst_helper .\obj\inst_helper
-xcopy /I /Y .\x64_inst .\obj\x64_inst
 copy /Y .\shared\misc.c .\obj\console\
 copy /Y .\shared\misc.c .\obj\gui\
 copy /Y .\shared\misc.c .\obj\native\
@@ -149,7 +148,6 @@ copy .\console\objfre_wnet_amd64\amd64\udefrag.exe ..\bin\amd64\
 copy .\gui\objfre_wnet_amd64\amd64\dfrg.exe ..\bin\amd64\
 copy .\native\objfre_wnet_amd64\amd64\defrag_native.exe ..\bin\amd64\
 copy .\inst_helper\objfre_wnet_amd64\amd64\inst_helper.exe ..\bin\amd64\
-copy .\x64_inst\objfre_wnet_amd64\amd64\x64_inst.exe ..\bin\amd64\
 echo --------- Target is ia64 ---------
 set AMD64=
 call blditems.cmd 64
@@ -161,7 +159,6 @@ copy .\console\objfre_wnet_ia64\ia64\udefrag.exe ..\bin\ia64\
 copy .\gui\objfre_wnet_ia64\ia64\dfrg.exe ..\bin\ia64\
 copy .\native\objfre_wnet_ia64\ia64\defrag_native.exe ..\bin\ia64\
 copy .\inst_helper\objfre_wnet_ia64\ia64\inst_helper.exe ..\bin\ia64\
-copy .\x64_inst\objfre_wnet_ia64\ia64\x64_inst.exe ..\bin\ia64\
 
 :build_scheduler
 cd ..
@@ -169,10 +166,10 @@ call BLDSCHED.CMD
 :build_installer
 echo Build installer...
 cd .\bin
-copy /Y ..\UltraDefrag.nsi .\
+copy /Y ..\installer\UltraDefrag.nsi .\
 copy /Y ..\*.TXT .\
-copy /Y ..\*.bmp .\
-copy /Y ..\*.ini .\
+copy /Y ..\installer\*.bmp .\
+copy /Y ..\installer\*.ini .\
 
 copy /Y ..\..\doc\html\manual.html .\
 copy /Y ..\..\doc\html\images\console.png .\
@@ -193,7 +190,6 @@ echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
 echo !define ULTRADFGARCH i386 >> ultradefrag_globals.nsh
 %NSISDIR%\makensis.exe UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
-REM ren ultradefrag-1.0.0.bin.i386.exe ultradefrag-%ULTRADFGVER%.bin.i386.exe
 
 if "%DDK_TYPE%" equ "ReactOS_DDK" goto build_source_package
 copy /Y .\UltraDefrag.nsi .\amd64\
@@ -256,7 +252,7 @@ xcopy /I /Y .\gui .\rel_src\src\gui
 xcopy /I /Y .\gui\res .\rel_src\src\gui\res
 xcopy /I /Y .\native .\rel_src\src\native
 xcopy /I /Y .\inst_helper .\rel_src\src\inst_helper
-xcopy /I /Y .\x64_inst .\rel_src\src\x64_inst
+xcopy /I /Y .\installer .\rel_src\src\installer
 xcopy /I /Y .\include .\rel_src\src\include
 xcopy /I /Y .\shared .\rel_src\src\shared
 xcopy /I /Y .\presets .\rel_src\src\presets
@@ -313,7 +309,6 @@ rd /s /q driver
 rd /s /q gui
 rd /s /q include
 rd /s /q native
-rd /s /q x64_inst
 rd /s /q inst_helper
 del /s /q *.*
 cd ..

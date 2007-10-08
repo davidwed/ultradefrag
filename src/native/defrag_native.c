@@ -26,7 +26,7 @@
 
 HANDLE hUltraDefragDevice = NULL;
 HANDLE hStopEvent = NULL;
-HANDLE hDeviceIoEvent;
+HANDLE hDeviceIoEvent = NULL;
 UNICODE_STRING uStr;
 char letter;
 
@@ -188,7 +188,7 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 	wait_flag = 0;
 
 	/* Exit the thread */
-	/* On NT 4.0 we should do nothing, on XP SP1 both variants are acceptable,
+	/* On NT 4.0 and W2K we should do nothing, on XP SP1 both variants are acceptable,
 	   on XP x64 RtlExitUserThread() MUST be called. */
 #ifndef NT4_TARGET
 	RtlExitUserThread(STATUS_SUCCESS);
@@ -199,18 +199,21 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 void Cleanup()
 {
 	IO_STATUS_BLOCK IoStatusBlock;
-
+//print("before stop\n");
 	/* stop device */
 	NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
 				IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
+//print("after stop\n");
 	/* close handles */
 	if(hUltraDefragDevice) NtClose(hUltraDefragDevice);
 	if(hStopEvent) NtClose(hStopEvent);
 	if(hDeviceIoEvent) NtClose(hDeviceIoEvent);
+//print("before kb_close\n");
 	kb_close();
+//print("before unload\n");
 	/* unload driver */
 	NtUnloadDriver(&uStr);
-
+//print("after unload\n");
 	/* registry cleanup */
 	CleanRegistry();
 }

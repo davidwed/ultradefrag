@@ -123,7 +123,16 @@ BOOL kb_scan()
 			kb_buffer[index] = ch;
 			index ++;
 		}
-		else return FALSE;
+		else
+		{
+/*_itoa(Status,kb_buffer,16);
+print(kb_buffer);
+print(" : ");
+_itoa(hStdInput,kb_buffer,16);
+print(kb_buffer);
+print("\n");
+*/			return FALSE;
+		}
 	}
 	kb_buffer[index] = 0;
 	return TRUE;
