@@ -384,8 +384,9 @@ Section "Ultra Defrag core files (required)" SecCore
 
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"
-  StrCmp $NT4_TARGET '1' 0 native_modern_win
+  StrCmp $NT4_TARGET '1' nt4_native 0
   StrCmp $W2K_TARGET '1' 0 native_modern_win
+nt4_native:
   DetailPrint "NT 4.0 and W2K version"
   File /nonfatal "defrag_native_nt4.exe"
   Delete "$WINDIR\System32\defrag_native.exe"
