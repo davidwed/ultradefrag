@@ -2,6 +2,7 @@ HISTORY
 
 [version number (x86 driver size in Kbytes) - changes description]
 
+1.2.1 (22.5) - bug #1807912 fixed (Boot time defrag BSOD on w2k)
 1.2.0 (22.5) - full NT 4.0 support; boot time defragmentation for 64-bit
                systems; Scheduler.NET; bug #1771887 (I/O error!) fixed;
                native application optimized; offline manual;
