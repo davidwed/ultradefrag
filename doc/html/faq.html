@@ -85,6 +85,24 @@
     suffixes: (Kb | Mb | Gb | Tb).
   </td>
  </tr>
+ <tr style="height:10pt"><td /><td /></tr>
+ <tr>
+  <td><span style="font-weight: bold;">Q.:</span></td>
+  <td>The progress bar updates irregularally. Why is this?</td>
+ </tr>
+ <tr style="height:10pt"><td /><td /></tr>
+ <tr>
+  <td valign="top"><span style="font-weight: bold;">A.:</span></td>
+  <td>The progress bar measures disk space, not the number of files. So when 
+   few big files are analysed, the progress bar will increase very fast.
+   Conversely, when a thousands of small files are analysed, progress will
+   be relatively slow.<br /><br />
+   <span style="font-weight: bold;">Example:</span> You
+   have 1x100 Mb + 1000x100kb files. Let us assume that we need 10 msec
+   per file and a big file is in the root directory placed. In this
+   instance, progress will be at the 50% point after 10 msec, but at the
+   100% point after 10 sec.</td>
+ </tr>
  <tr style="height:20pt"><td /><td /></tr>
  <tr>
   <td valign="top"><b>Q.:</b></td>
