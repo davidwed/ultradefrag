@@ -20,19 +20,18 @@
 /*
  *  Main source of native interface.
  */
+#include <stdio.h>
 
 #include "defrag_native.h"
 #include "../include/ultradfgver.h"
 
 HANDLE hUltraDefragDevice = NULL;
-HANDLE hStopEvent = NULL;
+//HANDLE hStopEvent = NULL;
 HANDLE hDeviceIoEvent = NULL;
 UNICODE_STRING uStr;
 char letter;
 
-DWORD next_boot, every_boot = 1; /* to prevent reg. cleanup */
-short *letters;
-ULONGLONG sizelimit = 0;
+ud_settings *settings;
 
 int abort_flag = 0,done_flag = 0,wait_flag = 0;
 char last_op = 0;
@@ -42,7 +41,7 @@ extern char kb_buffer[];
 
 char buffer[65536]; /* instead malloc calls */
 
-char user_mode_buffer[65536]; /* for nt 4.0 support */
+char msg[2048];
 
 #define USAGE  "Supported commands:\n" \
 		"  analyse X:\n" \
@@ -55,15 +54,12 @@ char user_mode_buffer[65536]; /* for nt 4.0 support */
 		"  shutdown\n" \
 		"  help\n"
 
-void ReadSettings();
-void CleanRegistry();
 int __cdecl putch(int ch);
 int __cdecl print(const char *str);
 BOOL kb_open();
 BOOL kb_scan();
 void kb_close();
 NTSTATUS WaitKbHit(DWORD msec,KEYBOARD_INPUT_DATA *pkbd);
-BOOL EnablePrivilege(DWORD dwLowPartOfLUID);
 void IntSleep(DWORD dwMilliseconds);
 
 /*DWORD WINAPI wait_kb_proc(LPVOID unused)
@@ -80,42 +76,11 @@ void IntSleep(DWORD dwMilliseconds);
 
 void UpdateProgress()
 {
-	NTSTATUS Status;
-	IO_STATUS_BLOCK IoStatusBlock;
 	STATISTIC stat;
 	double percentage;
 
-	Status = NtDeviceIoControlFile(hUltraDefragDevice,hStopEvent,NULL,NULL,&IoStatusBlock, \
-		IOCTL_GET_STATISTIC,NULL,0,&stat,sizeof(STATISTIC));
-	if(Status == STATUS_PENDING)
+	if(!udefrag_get_progress(&stat,&percentage))
 	{
-		Status = NtWaitForSingleObject(hStopEvent,FALSE,NULL);
-		if(!Status)	Status = IoStatusBlock.Status;
-	}
-	if(Status == STATUS_SUCCESS)
-	{
-		switch(stat.current_operation)
-		{
-		case 'A':
-			percentage = (double)(LONGLONG)stat.processed_clusters *
-					(double)(LONGLONG)stat.bytes_per_cluster / 
-					(double)(LONGLONG)stat.total_space;
-			break;
-		case 'D':
-			if(stat.clusters_to_move_initial == 0)
-				percentage = 1.00;
-			else
-				percentage = 1.00 - (double)(LONGLONG)stat.clusters_to_move / 
-						(double)(LONGLONG)stat.clusters_to_move_initial;
-			break;
-		case 'C':
-			if(stat.clusters_to_compact_initial == 0)
-				percentage = 1.00;
-			else
-				percentage = 1.00 - (double)(LONGLONG)stat.clusters_to_compact / 
-						(double)(LONGLONG)stat.clusters_to_compact_initial;
-		}
-		percentage *= 100.00;
 		if(stat.current_operation != last_op)
 		{
 			if(last_op)
@@ -129,9 +94,7 @@ void UpdateProgress()
 				{
 					print("\nA: ");
 					for(k = 0; k < 50; k++)
-					{
 						putch('-');
-					}
 				}
 			}
 			i = 0; /* new operation */
@@ -153,8 +116,8 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 {
 	KEYBOARD_INPUT_DATA kbd;
 	NTSTATUS status;
-	IO_STATUS_BLOCK IoStatusBlock;
-	///char b[32];
+//	IO_STATUS_BLOCK IoStatusBlock;
+	char *err_msg;
 
 	wait_flag = 1;
 	i = j = 0;
@@ -166,10 +129,16 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 		{
 			if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d))
 			{
-				status = NtDeviceIoControlFile(hUltraDefragDevice,hStopEvent,NULL,NULL,&IoStatusBlock, \
-					IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
-				if(status == STATUS_PENDING)
-					status = NtWaitForSingleObject(hStopEvent,FALSE,NULL);
+				//status = NtDeviceIoControlFile(hUltraDefragDevice,hStopEvent,NULL,NULL,&IoStatusBlock, \
+				//	IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
+				//if(status == STATUS_PENDING)
+				//	status = NtWaitForSingleObject(hStopEvent,FALSE,NULL);
+				err_msg = udefrag_stop();
+				if(err_msg)
+				{
+					sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+					print(msg);
+				}
 				abort_flag = 1;
 			}
 		}
@@ -177,9 +146,6 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 	} while(!done_flag);
 	if(!abort_flag) /* set progress to 100 % */
 	{
-		///_itoa(i,b,10);
-		///print(b);
-		///print("\n");
 		for(k = i; k < 50; k++)
 			putch('-');
 	}
@@ -198,36 +164,49 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 
 void Cleanup()
 {
-	IO_STATUS_BLOCK IoStatusBlock;
+//	IO_STATUS_BLOCK IoStatusBlock;
+	char *err_msg;
+
 //print("before stop\n");
 	/* stop device */
-	NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
-				IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
+	err_msg = udefrag_stop();
+	if(err_msg)
+	{
+		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		print(msg);
+	}
+//	NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
+//				IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
 //print("after stop\n");
 	/* close handles */
-	if(hUltraDefragDevice) NtClose(hUltraDefragDevice);
-	if(hStopEvent) NtClose(hStopEvent);
+//	if(hStopEvent) NtClose(hStopEvent);
 	if(hDeviceIoEvent) NtClose(hDeviceIoEvent);
 //print("before kb_close\n");
 	kb_close();
 //print("before unload\n");
 	/* unload driver */
-	NtUnloadDriver(&uStr);
+	udefrag_unload();
 //print("after unload\n");
 	/* registry cleanup */
-	CleanRegistry();
+	err_msg = udefrag_save_settings();
+	if(err_msg)
+	{
+		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		print(msg);
+	}
 }
 
 void ProcessVolume(char letter,char command)
 {
 	ULTRADFG_COMMAND cmd;
 	STATISTIC stat;
-	char s[16];
-	char *str;
+	char s[32];
 	LARGE_INTEGER offset;
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
 	HANDLE hThread;
+	double p;
+	unsigned int ip;
 
 	print("\nPreparing to ");
 	switch(command)
@@ -260,7 +239,7 @@ void ProcessVolume(char letter,char command)
 
 	cmd.command = command;
 	cmd.letter = letter;
-	cmd.sizelimit = sizelimit;
+	cmd.sizelimit = settings->sizelimit;
 	cmd.mode = __UserMode;///__KernelMode;
 	offset.QuadPart = 0;
 
@@ -292,22 +271,20 @@ void ProcessVolume(char letter,char command)
 	else
 	{
 		print("\nVolume information:");
-		str = FormatBySize(stat.total_space,s,LEFT_ALIGNED);
+		fbsize(s,stat.total_space);
 		print("\n  Volume size                  = ");
-		print(str);
-		str = FormatBySize(stat.free_space,s,LEFT_ALIGNED);
+		print(s);
+		fbsize(s,stat.free_space);
 		print("\n  Free space                   = ");
-		print(str);
-		print("\n\n  Total number of files        = ");
-		_itoa(stat.filecounter,s,10);
 		print(s);
-		print("\n  Number of fragmented files   = ");
-		_itoa(stat.fragmfilecounter,s,10);
-		print(s);
-		Format2(((double)(stat.fragmcounter)/(double)(stat.filecounter)),s);
-		print("\n  Fragments per file           = ");
-		print(s);
-		print("\r\n\r\n");
+		sprintf(msg,"\n\n  Total number of files        = %u",stat.filecounter);
+		print(msg);
+		sprintf(msg,"\n  Number of fragmented files   = %u",stat.fragmfilecounter);
+		print(msg);
+		p = (double)(stat.fragmcounter)/(double)(stat.filecounter);
+		ip = (unsigned int)(p * 100.00);
+		sprintf(msg,"\n  Fragments per file           = %u.%02u\r\n\r\n",ip / 100,ip % 100);
+		print(msg);
 	}
 }
 
@@ -331,6 +308,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	HANDLE hThread = NULL;
 	DWORD i,length;
 	KEYBOARD_INPUT_DATA kbd;
+	char *err_msg;
 
 	/* 1. Normalize and get the Process Parameters */
 	ProcessParameters = RtlNormalizeProcessParams(Peb->ProcessParameters);
@@ -339,6 +317,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	if (ProcessParameters->DebugFlags) DbgBreakPoint();
 
 	/* 3. Initialization */
+	settings = udefrag_get_settings();
 #if USE_INSTEAD_SMSS
 	NtInitializeRegistry(FALSE);
 #endif
@@ -355,17 +334,10 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		L"and select 'Last Known Good Configuration'.\n"
 		L"Use Break key to abort defragmentation.\n\n");
 	NtDisplayString(&strU);
-	/* 5. Enable neccessary privileges */
-	if(!EnablePrivilege(SE_SHUTDOWN_PRIVILEGE))
-		print("Can't enable SE_SHUTDOWN\n");
-	if(!EnablePrivilege(SE_MANAGE_VOLUME_PRIVILEGE))
-		print("Can't enable SE_MANAGE_VOLUME\n");
-	if(!EnablePrivilege(SE_LOAD_DRIVER_PRIVILEGE))
-		print("Can't enable SE_LOAD_DRIVER\n");
 	/* 6. Open the keyboard */
 	if(!kb_open())
 		goto continue_boot;
-	RtlInitUnicodeString(&strU,L"\\UDefragStopEvent");
+/*	RtlInitUnicodeString(&strU,L"\\UDefragStopEvent");
 	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
 	Status = NtCreateEvent(&hStopEvent,0x1f01ff,&ObjectAttributes,1,0);
 	if(Status)
@@ -374,7 +346,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		IntSleep(5000);
 		goto continue_boot;///abort;
 	}
-	/* 6b. Prompt to exit */
+*/	/* 6b. Prompt to exit */
 	print("Press any key to exit...  ");
 	/*Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
 		0,0,0,wait_kb_proc,NULL,&hThread,NULL);
@@ -403,19 +375,14 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	print("\n\n");
 	/* 7. Open the ultradfg device */
-	RtlInitUnicodeString(&uStr,driver_key);
-	NtLoadDriver(&uStr);
-	RtlInitUnicodeString(&strU,L"\\Device\\UltraDefrag");
-	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
-	Status = NtCreateFile(&hUltraDefragDevice,FILE_GENERIC_READ | FILE_GENERIC_WRITE,
-			    &ObjectAttributes,&IoStatusBlock,NULL,0,
-			    FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,NULL,0);
-	if(Status)
+	err_msg = udefrag_init(TRUE);
+	if(err_msg)
 	{
-		print("\nERROR: Can't access ULTRADFG driver! Wait 5 seconds.\n");
-		IntSleep(5000);
-		goto continue_boot;///abort;
+		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		print(msg); IntSleep(5000);
+		goto continue_boot;
 	}
+	hUltraDefragDevice = get_device_handle();
 	RtlInitUnicodeString(&strU,L"\\UltraDefragIoEvent");
 	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
 	Status = NtCreateEvent(&hDeviceIoEvent,0x1f01ff,&ObjectAttributes,1,0);
@@ -425,38 +392,37 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		IntSleep(5000);
 		goto continue_boot;///abort;
 	}
-	/* nt 4.0 specific code */
-	Status = NtDeviceIoControlFile(hUltraDefragDevice,hDeviceIoEvent,NULL,NULL,&IoStatusBlock, \
-		IOCTL_SET_USER_MODE_BUFFER,user_mode_buffer,0,NULL,0);
-	if(Status == STATUS_PENDING)
-	{
-		Status = NtWaitForSingleObject(hDeviceIoEvent,FALSE,NULL);
-		if(!Status)	Status = IoStatusBlock.Status;
-	}
-	if(Status != STATUS_SUCCESS)
-	{
-		print("\nERROR: Can't setup user mode buffer! Wait 5 seconds.\n");
-		IntSleep(5000);
-		goto continue_boot;///abort;
-	}
 	/* read parameters from registry */
-	ReadSettings();
+	err_msg = udefrag_load_settings(0,NULL);
+	if(err_msg)
+	{
+		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		print(msg); IntSleep(5000);
+		goto continue_boot;
+	}
+	err_msg = udefrag_apply_settings();
+	if(err_msg)
+	{
+		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		print(msg); IntSleep(5000);
+		goto continue_boot;
+	}
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
 #else
-	if(!next_boot && !every_boot)
+	if(!settings->next_boot && !settings->every_boot)
 		goto cmd_loop;
 	/* do job */
-	if(!letters)
+	if(!settings->sched_letters) // and if empty string
 	{
 		print("\nNo letters specified!\n");
 		goto continue_boot;
 	}
-	length = wcslen(letters);
+	length = wcslen(settings->sched_letters);
 	for(i = 0; i < length; i++)
 	{
-		ProcessVolume((char)(letters[i]),'d');
+		ProcessVolume((char)(settings->sched_letters[i]),'d');
 		if(abort_flag) goto clear_reg;
 	}
 	/* clear registry */

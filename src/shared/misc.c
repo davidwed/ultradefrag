@@ -72,34 +72,3 @@ char *FormatBySize(ULONGLONG long_number,char *s,int alignment)
 	else
 		return (s + n);
 }
-
-void Format2(double number,char *s)
-{
-	register unsigned int digit;
-	register unsigned int index = 0;
-	register unsigned int flag = 0;
-
-	digit = (int)number / 100;
-	if(digit)
-	{
-		flag = 1;
-		s[0] = digit + '0';
-		index ++;
-	}
-	digit = (int)number % 100;
-	digit /= 10;
-	if(digit || flag)
-	{
-		s[index] = digit + '0';
-		index ++;
-	}
-	digit = (int)number % 10;
-	s[index] = digit + '0';
-	s[index+1] = '.';
-
-	number *= 100;
-	digit = (int)number % 100;
-	s[index+2] = digit / 10 + '0';
-	s[index+3] = digit % 10 + '0';
-	s[index+4] = 0;
-}

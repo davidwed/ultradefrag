@@ -27,37 +27,17 @@
 #include <winioctl.h>
 
 #include "../include/misc.h"
+#include "../include/udefrag.h"
 #include "../include/ultradfg.h"
 #include "../include/ultradfgver.h"
-
-typedef LONG NTSTATUS;
-
-typedef struct _UNICODE_STRING
-{
-    USHORT Length;
-    USHORT MaximumLength;
-    PWSTR Buffer;
-} UNICODE_STRING, *PUNICODE_STRING;
-
-NTSYSAPI VOID NTAPI RtlInitUnicodeString(
-  IN OUT PUNICODE_STRING DestinationString,
-  IN PCWSTR SourceString);
-
-NTSTATUS NTAPI
-NtLoadDriver(IN PUNICODE_STRING DriverServiceName);
-
-NTSTATUS NTAPI
-NtUnloadDriver(IN PUNICODE_STRING DriverServiceName);
 
 HANDLE hOut;
 WORD console_attr = 0x7;
 HANDLE hUltraDefragDevice = INVALID_HANDLE_VALUE;
 HANDLE hEvt = NULL;
 OVERLAPPED ovrl;
-short driver_key[] = \
-	L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 
-char user_mode_buffer[65536]; /* for nt 4.0 support */
+ud_settings *settings;
 
 void __cdecl print(const char *str)
 {
@@ -82,7 +62,7 @@ void display_error(char *msg)
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
-	DWORD txd;
+/*	DWORD txd;
 	HANDLE hEvtStop = NULL;
 
 	hEvtStop = CreateEvent(NULL,TRUE,TRUE,"UltraDefragStop");
@@ -92,6 +72,14 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 					NULL,0,NULL,0,&txd,&ovrl))
 		WaitForSingleObject(hEvtStop,INFINITE);
 	if(hEvtStop) CloseHandle(hEvtStop);
+	*/
+	char *err_msg;
+
+	err_msg = udefrag_stop();
+	if(err_msg)
+	{
+		display_error(err_msg); putchar('\n');
+	}
 	return TRUE;
 }
 
@@ -119,25 +107,23 @@ int __cdecl wmain(int argc, short **argv)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	int n;
-	int a_flag = 0,c_flag = 0,f_flag = 0;
-	short *in_filter = NULL, *ex_filter = NULL;
-	int length;
-	HANDLE hEventIsRunning = NULL;
+	int a_flag = 0,c_flag = 0;//,f_flag = 0;
+//	short *in_filter = NULL, *ex_filter = NULL;
+//	int length;
 	char letter = 0;
 	char rootdir[] = "A:\\";
 	DWORD txd;
-	char s[16];
-	char *str;
+	char s[32];
 	STATISTIC stat;
 	int err_code = 0;
 	ULONGLONG sizelimit = 0;
+	double p;
 
 	ULTRADFG_COMMAND cmd;
-	UNICODE_STRING uStr;
+	char *err_msg;
+	UCHAR command;
 
-	HANDLE hToken;
-	TOKEN_PRIVILEGES tp;
-
+	settings = udefrag_get_settings();
 	/* display copyright */
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(hOut,&csbi))
@@ -145,15 +131,6 @@ int __cdecl wmain(int argc, short **argv)
 	SetConsoleTextAttribute(hOut, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	print(VERSIONINTITLE " console interface\n"
 	      "Copyright (c) Dmitri Arkhangelski, 2007.\n\n");
-	/* only one instance of program ! */
-	hEventIsRunning = OpenEvent(EVENT_MODIFY_STATE,FALSE, \
-	                            "UltraDefragIsRunning");
-	if(hEventIsRunning)
-	{
-		display_error("You can run only one instance of UltraDefrag!\n");
-		err_code = 1; goto cleanup;
-	}
-	hEventIsRunning = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIsRunning");
 	/* analyse command line */
 	if(argc < 2)
 	{
@@ -175,26 +152,28 @@ int __cdecl wmain(int argc, short **argv)
 			case 'C':
 				c_flag = 1;
 				break;
-			case 'f':
+/*			case 'f':
 			case 'F':
 				f_flag = 1;
 				break;
-			case '?':
+*/			case '?':
 			case 'h':
 			case 'H':
 				show_help();
 				goto cleanup;
 			case 's':
 			case 'S':
-				sizelimit = _wtoi64(argv[n] + 2);
-				break;
+				//sizelimit = _wtoi64(argv[n] + 2);
+				//break;
 			case 'i':
 			case 'I':
-				in_filter = (argv[n] + 2);
-				break;
+				//in_filter = (argv[n] + 2);
+				//break;
+			case 'd':
+			case 'D':
 			case 'e':
 			case 'E':
-				ex_filter = (argv[n] + 2);
+				//ex_filter = (argv[n] + 2);
 				break;
 			default:
 				display_error("Unknown option: ");
@@ -229,27 +208,26 @@ int __cdecl wmain(int argc, short **argv)
 	hEvt = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIoComplete");
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* to do our job */
-	if(OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES,&hToken))
+	err_msg = udefrag_init(FALSE);
+	if(err_msg)
 	{
-		tp.PrivilegeCount = 1;
-		tp.Privileges->Attributes = SE_PRIVILEGE_ENABLED;
-		tp.Privileges->Luid.HighPart = 0;
-		tp.Privileges->Luid.LowPart = 0xA; /*SE_LOAD_DRIVER_PRIVILEGE;*/
-		AdjustTokenPrivileges(hToken,FALSE,&tp,0,NULL,NULL);
-		CloseHandle(hToken);
-	}
-	RtlInitUnicodeString(&uStr,driver_key);
-	NtLoadDriver(&uStr);
-	hUltraDefragDevice = CreateFileW(L"\\\\.\\ultradfg",GENERIC_ALL, \
-			FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING, \
-			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,0);
-	if(hUltraDefragDevice == INVALID_HANDLE_VALUE)
-	{
-		display_error("Can't access ultradfg driver!\n");
+		display_error(err_msg); putchar('\n');
 		err_code = 3; goto cleanup;
 	}
-
-	length = in_filter ? ((wcslen(in_filter) + 1) << 1) : 0;
+	err_msg = udefrag_load_settings(argc,argv);
+	if(err_msg)
+	{
+		display_error(err_msg); putchar('\n');
+		err_code = 3; goto cleanup;
+	}
+	err_msg = udefrag_apply_settings();
+	if(err_msg)
+	{
+		display_error(err_msg); putchar('\n');
+		err_code = 3; goto cleanup;
+	}
+	hUltraDefragDevice = get_device_handle();
+/*	length = in_filter ? ((wcslen(in_filter) + 1) << 1) : 0;
 	ovrl.hEvent = hEvt;
 	ovrl.Offset = ovrl.OffsetHigh = 0;
 	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_INCLUDE_FILTER,
@@ -261,27 +239,14 @@ int __cdecl wmain(int argc, short **argv)
 	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_EXCLUDE_FILTER,
 		ex_filter,length,NULL,0,&txd,&ovrl))
 		WaitForSingleObject(hEvt,INFINITE);
-	/* nt 4.0 specific code */
-	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_USER_MODE_BUFFER,
-		user_mode_buffer,0,NULL,0,&txd,&ovrl))
-	{
-		WaitForSingleObject(hEvt,INFINITE);
-	}
-	else
-	{
-		display_error("Can't setup user mode buffer!\n");
-		err_code = 5; goto cleanup;
-	}
+*/
+//	command = a_flag ? 'a' : 'd';
+//	if(c_flag) command = 'c';
+	//cmd.letter = letter;
+	//cmd.sizelimit = settings->sizelimit;
+	//cmd.mode = __UserMode;
 
-	cmd.command = a_flag ? 'a' : 'd';
-	if(c_flag) cmd.command = 'c';
-	cmd.letter = letter;
-	cmd.sizelimit = sizelimit;
-	cmd.mode = __UserMode;
-
-	ovrl.hEvent = hEvt;
+/*	ovrl.hEvent = hEvt;
 	ovrl.Offset = ovrl.OffsetHigh = 0;
 	if(!WriteFile(hUltraDefragDevice,&cmd,sizeof(ULTRADFG_COMMAND), \
 		      &txd,&ovrl))
@@ -293,40 +258,49 @@ int __cdecl wmain(int argc, short **argv)
 	{
 		WaitForSingleObject(hEvt,INFINITE);
 	}
-
-	/* display results */
-	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(DeviceIoControl(hUltraDefragDevice,IOCTL_GET_STATISTIC,NULL,0, \
-		&stat,sizeof(STATISTIC),&txd,&ovrl))
+*/
+	if(a_flag)
 	{
-		WaitForSingleObject(hEvt,INFINITE);
+		err_msg = udefrag_analyse(letter);
+		goto done;
+	}
+	if(!c_flag)
+	{
+		err_msg = udefrag_defragment(letter);
+		goto done;
+	}
+	else
+	{
+		err_msg = udefrag_optimize(letter);
+		goto done;
+	}
+done:
+	if(err_msg)	{ display_error(err_msg); putchar('\n'); err_code = 3; goto cleanup; }
+	/* display results */
+	//ovrl.hEvent = hEvt;
+	//ovrl.Offset = ovrl.OffsetHigh = 0;
+	//if(DeviceIoControl(hUltraDefragDevice,IOCTL_GET_STATISTIC,NULL,0, \
+	//	&stat,sizeof(STATISTIC),&txd,&ovrl))
+	err_msg = udefrag_get_progress(&stat,NULL);
+	if(err_msg)	{ display_error(err_msg); putchar('\n'); err_code = 3; }
+	else
+	{
+	//	WaitForSingleObject(hEvt,INFINITE);
 		print("\nVolume information:\n");
-		str = FormatBySize(stat.total_space,s,LEFT_ALIGNED);
-		print("\n  Volume size                  = ");
-		print(str);
-		str = FormatBySize(stat.free_space,s,LEFT_ALIGNED);
-		print("\n  Free space                   = ");
-		print(str);
-		print("\n\n  Total number of files        = ");
-		_itoa(stat.filecounter,s,10);
-		print(s);
-		print("\n  Number of fragmented files   = ");
-		_itoa(stat.fragmfilecounter,s,10);
-		print(s);
-		Format2(((double)(stat.fragmcounter)/(double)(stat.filecounter)),s);
-		print("\n  Fragments per file           = ");
-		print(s);
-		print("\n");
+		fbsize(s,stat.total_space);
+		printf("\n  Volume size                  = %s",s);
+		fbsize(s,stat.free_space);
+		printf("\n  Free space                   = %s",s);
+		printf("\n\n  Total number of files        = %u",stat.filecounter);
+		printf("\n  Number of fragmented files   = %u",stat.fragmfilecounter);
+		p = (double)(stat.fragmcounter)/(double)(stat.filecounter);
+		printf("\n  Fragments per file           = %.2f\n",p);
 	}
 
 cleanup:
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-	if(hUltraDefragDevice != INVALID_HANDLE_VALUE)
-		CloseHandle(hUltraDefragDevice);
-	if(hEventIsRunning) CloseHandle(hEventIsRunning);
 	if(hEvt) CloseHandle(hEvt);
-	NtUnloadDriver(&uStr);
+	udefrag_unload();
 	SetConsoleTextAttribute(hOut, console_attr);
 	ExitProcess(err_code);
 }

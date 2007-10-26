@@ -36,17 +36,17 @@ CPP=cl.exe
 !IF  "$(CFG)" != "WinDDK"
 
 !IF "$(NT4_TARGET)" == "true"
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /I "$(DDKINCDIR)\ndk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "NT4_TARGET" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native_nt4.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "NT4_TARGET" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native_nt4.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 !ELSE
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /I "$(DDKINCDIR)\ndk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 !ENDIF
 
 !ELSE
 
 !IF "$(NT4_TARGET)" == "true"
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /I "$(DDKINCDIR)\ndk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "USE_WINDDK" /D "X86_WINDDK_BUILD" /D "NT4_TARGET" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native_nt4.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "USE_WINDDK" /D "X86_WINDDK_BUILD" /D "NT4_TARGET" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native_nt4.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 !ELSE
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /I "$(DDKINCDIR)\ndk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "USE_WINDDK" /D "X86_WINDDK_BUILD" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "WIN32" /D "NDEBUG" /D "_MBCS" /D "USE_WINDDK" /D "X86_WINDDK_BUILD" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\defrag_native.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 !ENDIF
 
 !ENDIF
@@ -65,9 +65,9 @@ RSC_PROJ=/l 0x409 /fo"$(INTDIR)\defrag_native.res" /d "NDEBUG"
 
 LINK32=link.exe
 !IF "$(NT4_TARGET)" == "true"
-LINK32_FLAGS=ntdll.lib /nologo /entry:"NtProcessStartup" /incremental:no /pdb:"$(OUTDIR)\defrag_native_nt4.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\defrag_native_nt4.exe" /subsystem:native 
+LINK32_FLAGS=ntdll.lib ..\lib\udefrag.lib /nologo /entry:"NtProcessStartup" /incremental:no /pdb:"$(OUTDIR)\defrag_native_nt4.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\defrag_native_nt4.exe" /subsystem:native 
 !ELSE
-LINK32_FLAGS=ntdll.lib /nologo /entry:"NtProcessStartup" /incremental:no /pdb:"$(OUTDIR)\defrag_native.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\defrag_native.exe" /subsystem:native 
+LINK32_FLAGS=ntdll.lib ..\lib\udefrag.lib /nologo /entry:"NtProcessStartup" /incremental:no /pdb:"$(OUTDIR)\defrag_native.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\defrag_native.exe" /subsystem:native 
 !ENDIF
 LINK32_OBJS= \
 	"$(INTDIR)\defrag_native.obj" \

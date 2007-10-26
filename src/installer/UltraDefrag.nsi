@@ -194,6 +194,7 @@ Function prepare_portable_environment
 
   SetOutPath $TEMP
   File "Dfrg.exe"
+  File "udefrag.dll"
   File "LICENSE.TXT"
   File "CREDITS.TXT"
   File "udefrag.exe"
@@ -318,6 +319,7 @@ Function abort_handler
   StrCmp $RunPortable '1' 0 abort_done
   /* remove files from temporary directory */
   Delete "$TEMP\Dfrg.exe"
+  Delete "$TEMP\udefrag.dll"
   Delete "$TEMP\LICENSE.TXT"
   Delete "$TEMP\CREDITS.TXT"
   Delete "$TEMP\udefrag.exe"
@@ -384,6 +386,7 @@ Section "Ultra Defrag core files (required)" SecCore
 
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"
+  File "udefrag.dll"
   StrCmp $NT4_TARGET '1' nt4_native 0
   StrCmp $W2K_TARGET '1' 0 native_modern_win
 nt4_native:
@@ -560,6 +563,7 @@ Section "Uninstall"
 !insertmacro DisableX64FSRedirection
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   Delete "$SYSDIR\defrag_native.exe"
+  Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\udefrag.exe"
 !insertmacro EnableX64FSRedirection
 

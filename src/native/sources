@@ -17,6 +17,10 @@ SOURCES=defrag_native.c misc.c keytrans.c registry.c stdio.c sys.c defrag_native
 
 USE_NTDLL=1
 
+# very important for nt 4.0 (without RtlUnhandledExceptionFilter function)
+BUFFER_OVERFLOW_CHECKS=0
+
+LINKLIBS=$(UDEFRAG_LIB_PATH)\udefrag.lib
+
 UMTYPE=nt
 UMBASE=0x0400000
-UMENTRYABS=NtProcessStartup

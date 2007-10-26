@@ -436,7 +436,7 @@ void UpdateFilter(PFILTER pf,short *buffer,int length)
 		pf->buffer = NULL;
 		DestroyList((PLIST *)pf->offsets);
 	}
-	if(length)
+	if(length > sizeof(short))
 	{
 		pf->offsets = NULL;
 		pf->buffer = AllocatePool(NonPagedPool,length);
@@ -586,17 +586,20 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			DebugPrint("-Ultradfg- IOCTL_SET_XXX_FILTER\n");
 			length = IrpStack->Parameters.DeviceIoControl.InputBufferLength;
 			filter = (short *)Irp->AssociatedIrp.SystemBuffer;
-			if(IoControlCode == IOCTL_SET_INCLUDE_FILTER)
+			if(filter)
 			{
-				DebugPrint("-Ultradfg- Include: %ws\n",filter);
-				UpdateFilter(&dx->in_filter,filter,length);
+				if(IoControlCode == IOCTL_SET_INCLUDE_FILTER)
+				{
+					DebugPrint("-Ultradfg- Include: %ws\n",filter);
+					UpdateFilter(&dx->in_filter,filter,length);
+				}
+				else
+				{
+					DebugPrint("-Ultradfg- Exclude: %ws\n",filter);
+					UpdateFilter(&dx->ex_filter,filter,length);
+				}
+				UpdateInformation(dx);
 			}
-			else
-			{
-				DebugPrint("-Ultradfg- Exclude: %ws\n",filter);
-				UpdateFilter(&dx->ex_filter,filter,length);
-			}
-			UpdateInformation(dx);
 			BytesTxd = length;
 			break;
 		}

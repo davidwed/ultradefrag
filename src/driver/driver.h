@@ -103,13 +103,15 @@ ULONGLONG _rdtsc(void);
 #endif
 
 #ifdef NT4_TARGET
+#ifdef USE_WINDDK
 #undef ExFreePool
-
-DECLSPEC_IMPORT
-VOID
-NTAPI
-ExFreePool(
-  IN PVOID  P);
+DECLSPEC_IMPORT VOID NTAPI ExFreePool(IN PVOID P);
+#endif /* USE_WINDDK */
+#else /* NT4_TARGET */
+#ifndef USE_WINDDK
+#undef ExFreePool
+#define ExFreePool(a) ExFreePoolWithTag(a,0)
+#endif /* USE_WINDDK */
 #endif /* NT4_TARGET */
 
 BOOLEAN  NTAPI RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);

@@ -31,15 +31,12 @@
 
 #include <stdlib.h>
 
-#ifndef USE_WINDDK
-#include <ntndk.h>
-#else
-#include "ntndk.h"
-#endif
+#include "../include/ntndk.h"
 
 #include <ntddkbd.h>
 
 #include "../include/misc.h"
+#include "../include/udefrag.h"
 #include "../include/ultradfg.h"
 
 #define USE_INSTEAD_SMSS  0

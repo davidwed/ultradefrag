@@ -24,25 +24,6 @@
 #include "defrag_native.h"
 #include "../include/ultradfgver.h"
 
-BOOL EnablePrivilege(DWORD dwLowPartOfLUID)
-{
-	TOKEN_PRIVILEGES tp;
-	LUID luid;
-	NTSTATUS status;
-	HANDLE UserToken;
-
-	NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED/*0x2000000*/,&UserToken);
-
-	luid.HighPart = 0x0;
-	luid.LowPart = dwLowPartOfLUID;
-	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
-	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	status = NtAdjustPrivilegesToken(UserToken,FALSE,&tp,sizeof(TOKEN_PRIVILEGES),
-									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
-	return NT_SUCCESS(status);
-}
-
 void IntSleep(DWORD dwMilliseconds)
 {
 	LARGE_INTEGER Interval;

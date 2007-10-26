@@ -53,10 +53,6 @@ BOOL uninstall_run = FALSE;
 HANDLE hUltraDefragDevice = INVALID_HANDLE_VALUE;
 
 extern RECT win_rc; /* coordinates of main window */
-extern DWORD skip_rem;
-extern ULONGLONG sizelimit;
-extern int update_interval;
-extern BOOL show_progress;
 
 signed int delta_h = 0;
 
@@ -84,7 +80,7 @@ int thr_id;
 BOOL busy_flag = 0;
 char buffer[64];
 
-HANDLE hEventComplete = 0,hEvt = 0,hEvtStop = 0, hEvtDone = 0;
+HANDLE hEventComplete = 0,hEvt = 0,/*hEvtStop = 0,*/ hEvtDone = 0;
 
 char current_operation;
 BOOL stop_pressed;
@@ -92,10 +88,7 @@ BOOL stop_pressed;
 #define N_OF_STATUSBAR_PARTS  5
 #define IDM_STATUSBAR         500
 
-short driver_key[] = \
-	L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
-
-char user_mode_buffer[65536]; /* for nt 4.0 support */
+ud_settings *settings;
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -114,11 +107,6 @@ extern BOOL RequestMap(HANDLE hDev,char *map,DWORD *txd,LPOVERLAPPED lpovrl);
 extern BOOL FillBitMap(int);
 extern BOOL CreateBitMapGrid();
 extern void DeleteMaps();
-
-extern void LoadSettings();
-extern void SaveSettings(HKEY hRootKey,BOOL system_hive);
-extern void SaveBootTimeSettings();
-extern void DestroyFilters();
 
 BOOL CreateStatusBar();
 void UpdateStatusBar(int index);
@@ -148,15 +136,12 @@ BOOL is_virtual(char vol_letter)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	HANDLE hEventIsRunning = 0;
 	int err_code = 0;
-	UNICODE_STRING uStr;
-	NTSTATUS status;
-	HANDLE hToken;
-	TOKEN_PRIVILEGES tp;
-	OVERLAPPED ovrl;
-	DWORD txd;
+	char *err_msg;
+	HKEY hKey,hKey1,hKey2;
+	ULONG _len;
 
+	settings = udefrag_get_settings();
 	/* check command line keys */
 	_strupr(lpCmdLine);
 	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
@@ -164,69 +149,46 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(uninstall_run)
 	{	
 		/* clear registry */
-		//next_boot = every_boot = 0; default values
-		SaveBootTimeSettings();
+		settings->next_boot = settings->every_boot = FALSE;
+		udefrag_save_settings();
 		ExitProcess(0);
 	}
-	/* only one instance of program! */
-	hEventIsRunning = OpenEvent(EVENT_MODIFY_STATE,FALSE,
-				    "UltraDefragIsRunning");
-	if(hEventIsRunning)
-	{
-		CloseHandle(hEventIsRunning);
-		MessageBox(0,"You can run only one instance of UltraDefrag!", \
-			"Warning!",MB_OK | MB_ICONHAND);
-		ExitProcess(1);
-	}
-	hEventIsRunning = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIsRunning");
 	hEventComplete = CreateEvent(NULL,TRUE,TRUE,"UltraDefragCommandComplete");
 	hEvt = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIoComplete");
-	hEvtStop = CreateEvent(NULL,TRUE,TRUE,"UltraDefragStop");
+	//hEvtStop = CreateEvent(NULL,TRUE,TRUE,"UltraDefragStop");
 	hEvtDone = CreateEvent(NULL,TRUE,TRUE,"UltraDefragDone");
-	if(!hEventIsRunning || !hEventComplete || !hEvt || !hEvtStop || !hEvtDone)
+	if(!hEventComplete || !hEvt || /*!hEvtStop ||*/ !hEvtDone)
 	{
 		err_code = 2; goto cleanup;
 	}
-	/* open our device */
-	if(OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES,&hToken))
+	err_msg = udefrag_init(FALSE);
+	if(err_msg)
 	{
-		tp.PrivilegeCount = 1;
-		tp.Privileges->Attributes = SE_PRIVILEGE_ENABLED;
-		tp.Privileges->Luid.HighPart = 0;
-		tp.Privileges->Luid.LowPart = 0xA; /*SE_LOAD_DRIVER_PRIVILEGE;*/
-		AdjustTokenPrivileges(hToken,FALSE,&tp,0,NULL,NULL);
-		CloseHandle(hToken);
-	}
-	RtlInitUnicodeString(&uStr,driver_key);
-	status = NtLoadDriver(&uStr);
-	if(status != STATUS_SUCCESS && status != STATUS_IMAGE_ALREADY_LOADED)
-	{
-		MessageBox(0,"Can't load ultradfg driver!","Error!",MB_OK | MB_ICONHAND);
+		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
 		err_code = 3; goto cleanup;
 	}
-	hUltraDefragDevice = CreateFileW(L"\\\\.\\ultradfg",GENERIC_ALL, \
-			FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING, \
-			FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED,0);
-	if(hUltraDefragDevice == INVALID_HANDLE_VALUE)
-	{
-		MessageBox(0,"Can't access ultradfg driver!","Error!",MB_OK | MB_ICONHAND);
-		err_code = 3; goto cleanup;
-	}
-	/* nt 4.0 specific code */
-	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_USER_MODE_BUFFER,
-		user_mode_buffer,0,NULL,0,&txd,&ovrl))
-	{
-		WaitForSingleObject(hEvt,INFINITE);
-	}
-	else
-	{
-		MessageBox(0,"Can't setup user mode buffer!","Error!",MB_OK | MB_ICONHAND);
-		err_code = 4; goto cleanup;
-	}
+	hUltraDefragDevice = get_device_handle();
 	/* get window coordinates and other settings from registry */
-	LoadSettings();
+	err_msg = udefrag_load_settings(0,NULL);
+	if(err_msg)
+	{
+		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		err_code = 3; goto cleanup;
+	}
+	err_msg = udefrag_apply_settings();
+	if(err_msg)
+	{
+		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		err_code = 3; goto cleanup;
+	}
+	/* load window coordinates */
+	if(RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\DASoft\\NTDefrag",
+		0,KEY_QUERY_VALUE,&hKey) == ERROR_SUCCESS)
+	{
+		_len = sizeof(RECT);
+		RegQueryValueEx(hKey,"position",NULL,NULL,(BYTE*)&win_rc,&_len);
+		RegCloseKey(hKey);
+	}
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
 	InitCommonControls();
@@ -236,18 +198,35 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* delete all created gdi objects */
 	DeleteMaps();
 	/* save window coordinates and other settings to registry */
-	SaveSettings(HKEY_CURRENT_USER,FALSE); /* for compatibility with 1.0.x versions */
-	SaveSettings(0,TRUE);
-	///SaveSettings(HKEY_LOCAL_MACHINE);
-	SaveBootTimeSettings();
+	if(RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\DASoft\\NTDefrag",
+		0,KEY_SET_VALUE,&hKey) != ERROR_SUCCESS)
+	{
+		RegCreateKeyEx(HKEY_CURRENT_USER,"Software",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey1,NULL);
+		RegCreateKeyEx(hKey1,"DASoft",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey2,NULL);
+		if(RegCreateKeyEx(hKey2,"NTDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
+			ERROR_SUCCESS)
+		{
+			RegSetValueEx(hKey,"position",0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
+			RegCloseKey(hKey);
+		}
+		RegCloseKey(hKey1); RegCloseKey(hKey2);
+	}
+	else
+	{
+		RegSetValueEx(hKey,"position",0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
+		RegCloseKey(hKey);
+	}
+	err_msg = udefrag_save_settings();
+	if(err_msg)
+	{
+		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		err_code = 3; goto cleanup;
+	}
 cleanup:
-	DestroyFilters();
-	if(hEventIsRunning) CloseHandle(hEventIsRunning);
 	if(hEventComplete) CloseHandle(hEventComplete);
 	if(hEvt) CloseHandle(hEvt);
-	if(hEvtStop) CloseHandle(hEvtStop);
-	if(hUltraDefragDevice != INVALID_HANDLE_VALUE) CloseHandle(hUltraDefragDevice);
-	NtUnloadDriver(&uStr);
+	//if(hEvtStop) CloseHandle(hEvtStop);
+	udefrag_unload();
 	ExitProcess(err_code);
 }
 
@@ -265,10 +244,10 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 											  of GetDiskFreeSpaceEx */
 	char volname[32];
 	char filesys[7];
-	char s[11];
+	char s[16];
 	char *str;
 	int maxcomp, flags;
-	static char tmpl[] = "A:\t      \t      \t\t       \t  \t       \t  \t00 %";
+	const char tmpl[] = "A:\t      \t      \t\t       \t  \t       \t  \t00 %";
 	char line[sizeof(tmpl)+1];
 	int percent,digit;
 	int drive_type;
@@ -296,7 +275,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 		if( drive_type != DRIVE_FIXED && drive_type != DRIVE_REMOVABLE && \
 			drive_type != DRIVE_RAMDISK ) continue;
 		if(is_virtual(chr)) continue;
-		if(drive_type == DRIVE_REMOVABLE && skip_rem) continue;
+		if(drive_type == DRIVE_REMOVABLE && settings->skip_removable) continue;
 		if(GetDiskFreeSpaceEx(rootpath,(ULARGE_INTEGER *)&BytesAvailable,
 			(ULARGE_INTEGER *)&total,(ULARGE_INTEGER *)&free))
 		{
@@ -315,10 +294,8 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 				memcpy((void *)(line + 3),(void *)(stat_msg[stat]),strlen(stat_msg[stat]));
 				memcpy((void *)(line + 11),(void *)filesys,strlen(filesys));
 				str = FormatBySize(total,s,RIGHT_ALIGNED);
-				chr = line[0]; /* to flush cpu cache ? */
 				memcpy((void *)(line + 18),(void *)str,strlen(str));
 				str = FormatBySize(free,s,RIGHT_ALIGNED);
-				chr = line[0];
 				memcpy((void *)(line + 29),(void *)str,strlen(str));
 				percent = (int)(100 * \
 					(double)(signed __int64)free / (double)(signed __int64)total);
@@ -351,7 +328,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 void Stop()
 {
-	DWORD txd;
+/*	DWORD txd;
 	OVERLAPPED ovrl;
 
 	ovrl.hEvent = hEvtStop;
@@ -359,13 +336,18 @@ void Stop()
 	DeviceIoControl(hUltraDefragDevice,IOCTL_ULTRADEFRAG_STOP,
 					NULL,0,NULL,0,&txd,&ovrl);
 	WaitForSingleObject(hEvtStop,INFINITE);
+*/
+	char *err_msg;
+
+	err_msg = udefrag_stop();
+	if(err_msg) MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
 	stop_pressed = TRUE;
 	////WaitForSingleObject(hEvtDone,INFINITE);
 }
 
 void ShowProgress(void)
 {
-	if(show_progress)
+	if(settings->show_progress)
 	{
 		ShowWindow(hProgressMsg,SW_SHOWNORMAL);
 		ShowWindow(hProgressBar,SW_SHOWNORMAL);
@@ -406,7 +388,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			hBtnRescan = GetDlgItem(hWnd,IDC_RESCAN);
 			hBtnSettings = GetDlgItem(hWnd,IDC_SETTINGS);
 			hCheckSkipRem = GetDlgItem(hWnd,IDC_SKIPREMOVABLE);
-			if(skip_rem)
+			if(settings->skip_removable)
 				SendMessage(hCheckSkipRem,BM_SETCHECK,BST_CHECKED,0);
 			else
 				SendMessage(hCheckSkipRem,BM_SETCHECK,BST_UNCHECKED,0);
@@ -472,7 +454,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case IDC_SKIPREMOVABLE:
 				if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
 					HIWORD(wParam) == BN_UNPUSHED || HIWORD(wParam) == BN_DBLCLK)
-					skip_rem = (SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
+					settings->skip_removable = (SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
 				return FALSE;
 			case IDC_SHOWFRAGMENTED:
 				ShowFragmented();
@@ -696,48 +678,22 @@ DWORD WINAPI UpdateMapThreadProc(LPVOID lpParameter)
 	do
 	{
 		wait_result = WaitForSingleObject(hEventComplete,1);
-		if(!DeviceIoControl(hUltraDefragDevice,IOCTL_GET_STATISTIC,
-			NULL,0,pst,sizeof(STATISTIC),&txd,&ovrl))
-				goto wait;
-		WaitForSingleObject(hEvt,INFINITE);
+		if(udefrag_get_progress(pst,&percentage)) goto wait;
 		UpdateStatusBar(index);
-		if(!show_progress) goto get_map;
-		switch(pst->current_operation)
+		if(settings->show_progress)
 		{
-		case 'A':
-			percentage = (double)(LONGLONG)pst->processed_clusters *
-					(double)(LONGLONG)pst->bytes_per_cluster / 
-					(double)(LONGLONG)pst->total_space;
-			break;
-		case 'D':
-			if(pst->clusters_to_move_initial == 0)
-				percentage = 1.00;
-			else
-				percentage = 1.00 - (double)(LONGLONG)pst->clusters_to_move / 
-						(double)(LONGLONG)pst->clusters_to_move_initial;
-			break;
-		case 'C':
-			if(pst->clusters_to_compact_initial == 0)
-				percentage = 1.00;
-			else
-				percentage = 1.00 - (double)(LONGLONG)pst->clusters_to_compact / 
-						(double)(LONGLONG)pst->clusters_to_compact_initial;
+			sprintf(progress_msg,"%c %u %%",
+				current_operation = pst->current_operation,(int)percentage);
+			SetWindowText(hProgressMsg,progress_msg);
+			SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 		}
-		percentage *= 100.00;
-		progress_msg[0] = current_operation = pst->current_operation;
-		progress_msg[1] = 0x20;
-		_itoa((int)percentage,progress_msg + 2,10);
-		strcat(progress_msg," %");
-		SetWindowText(hProgressMsg,progress_msg);
-		SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
-get_map:
 		if(!RequestMap(hUltraDefragDevice,_map,&txd,&ovrl))
 				goto wait;
 		WaitForSingleObject(hEvt,INFINITE);
 		FillBitMap(index);
 		RedrawMap();
 wait: 
-		Sleep(update_interval);
+		Sleep(settings->update_interval);
 	} while(wait_result == WAIT_TIMEOUT);
 	if(!stop_pressed)
 	{
@@ -755,9 +711,11 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
 	LRESULT linenumber;
 	int index;
-	ULTRADFG_COMMAND cmd;
-	DWORD txd;
-	OVERLAPPED ovrl;
+//	ULTRADFG_COMMAND cmd;
+//	DWORD txd;
+//	OVERLAPPED ovrl;
+	UCHAR command;
+	char *err_msg;
 
 	busy_flag = 1;
 	linenumber = SendMessage(hList,LB_GETCURSEL,0,0);
@@ -772,12 +730,13 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	ClearMap();
 
 	index = letter_numbers[linenumber - 2];
-	cmd.command = (char)lpParameter;
-	cmd.letter = index + 'A';
-	cmd.sizelimit = sizelimit;
-	cmd.mode = __UserMode;
+	//cmd.command = (char)lpParameter;
+	//cmd.letter = index + 'A';
+	//cmd.sizelimit = settings->sizelimit;
+	//cmd.mode = __UserMode;
+	command = (UCHAR)lpParameter;
 
-	if(cmd.command == 'a')
+	if(/*cmd.*/command == 'a')
 		ShowStatus(STAT_AN,linenumber);
 	else
 		ShowStatus(STAT_DFRG,linenumber);
@@ -787,7 +746,26 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	ResetEvent(hEvtDone);
 	CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)UpdateMapThreadProc,(void *)(size_t)index,0,&thr_id);
 
-	ovrl.hEvent = hEventComplete;
+	switch(command)
+	{
+	case 'a':
+		err_msg = udefrag_analyse((UCHAR)(index + 'A'));
+		break;
+	case 'd':
+		err_msg = udefrag_defragment((UCHAR)(index + 'A'));
+		break;
+	default:
+		err_msg = udefrag_optimize((UCHAR)(index + 'A'));
+	}
+	if(err_msg)
+	{
+		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		ShowStatus(STAT_CLEAR,linenumber);
+		ClearMap();
+	}
+	SetEvent(hEventComplete);
+
+/*	ovrl.hEvent = hEventComplete;
 	ovrl.Offset = ovrl.OffsetHigh = 0;
 	if(!WriteFile(hUltraDefragDevice,&cmd,sizeof(ULTRADFG_COMMAND),&txd,&ovrl))
 	{
@@ -797,6 +775,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		SetEvent(hEventComplete);
 	}
 	WaitForSingleObject(hEventComplete,INFINITE);
+	*/
 	EnableButtons();
 	busy_flag = 0;
 	return 0;
@@ -836,16 +815,10 @@ void ShowFragmented()
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	//RECT _rc;
-	//int dx, dy;
-
 	switch(msg)
 	{
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		//GetWindowRect(hWnd,&_rc);
-		//dx = _rc.right - _rc.left;
-		//dy = _rc.bottom - _rc.top;
 		SetWindowPos(hWnd,0,win_rc.left + 106,win_rc.top + 59,0,0,SWP_NOSIZE);
 		return FALSE;
 	case WM_COMMAND:

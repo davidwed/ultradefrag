@@ -24,6 +24,8 @@
 #ifndef _DFRG_MAIN_H_
 #define _DFRG_MAIN_H_
 
+#include "../include/udefrag.h"
+/*
 typedef LONG NTSTATUS;
 
 typedef struct _UNICODE_STRING
@@ -45,7 +47,7 @@ NtUnloadDriver(IN PUNICODE_STRING DriverServiceName);
 
 #define STATUS_SUCCESS                   ((NTSTATUS)0x00000000)
 #define STATUS_IMAGE_ALREADY_LOADED      ((NTSTATUS)0xC000010E)
-
+*/
 #ifndef USE_WINDDK
 #define SetWindowLongPtr SetWindowLong
 #define LONG_PTR LONG
