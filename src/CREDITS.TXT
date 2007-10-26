@@ -32,9 +32,10 @@ Markus Oberhumer, Laszlo Molnar & John Reiser (http://upx.sf.net)
 
 Special thanks for good suggestions to (in alphabetical order):
 
+Mike Braca, Markus Elfring,
 Bryan Kirk, Jan Loncik, Christopher Naegel, Dario Raparelli,
 Alexander Vedyakin, Leland G. Whitlock
 
 
-Also many thanks to all people that help me to improve UltraDefrag.
+Also many thanks to all people that help us to improve UltraDefrag.
 

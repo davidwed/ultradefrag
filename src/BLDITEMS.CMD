@@ -25,10 +25,23 @@ rem save nt4 version
 copy .\objfre_wnet_x86\i386\ultradfg_nt4.sys ..\..\bin\
 :L1
 
-if "%1" equ "" goto x86
+echo Build the udefrag.dll ...
+cd ..\dll\udefrag.dll
+build.exe
+if %errorlevel% neq 0 goto fail
+if "%1" equ "AMD64" goto amd_lib_copy
+if "%1" equ "64" goto ia_lib_copy
+copy .\objfre_wnet_x86\i386\udefrag.lib ..\..\..\lib\
+goto build_console
+:amd_lib_copy
+copy .\objfre_wnet_amd64\amd64\udefrag.lib ..\..\..\lib\amd64\
+goto build_console
+:ia_lib_copy
+copy .\objfre_wnet_ia64\ia64\udefrag.lib ..\..\..\lib\ia64\
 
+:build_console
 echo Build the console interface...
-cd ..\console
+cd ..\..\console
 build.exe
 if %errorlevel% neq 0 goto fail
 
@@ -62,7 +75,5 @@ echo Build the installation helper...
 cd ..\inst_helper
 build.exe
 if %errorlevel% neq 0 goto fail
-
-:x86
 
 :fail

@@ -43,7 +43,7 @@ c). To build UltraDefrag use BUILD.CMD. Synopsis is:
     build --install     it will install x86 program to default location
                         after build
 
-    build {--use-winddk | --use-rosddk} {--use-msvc | --use-gcc} [--install]
-			you can specify ddk and compiler
+    build {--use-winddk | --use-msvc} [--install]
+			you can specify compiler
 
     build --clean       use it to delete all intermediate files

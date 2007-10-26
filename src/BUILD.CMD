@@ -1,34 +1,8 @@
 @echo off
-set DDK_TYPE=Windows_Server2003_DDK
-set COMPILER_TYPE=MSVC
 
-if "%1" neq "" goto no_defaults
-echo No parameters specified, use defaults.
-goto first_step
+rem Build script for the UltraDefrag project.
+rem Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
-:no_defaults
-if "%1" equ "--clean" goto clean
-if "%1" equ "--install" goto set_inst
-if "%1" equ "--use-winddk" goto parse_second_parameter
-if "%1" equ "--use-rosddk" goto rosddk
-echo No --use-xxxddk parameter specified, use winddk.
-goto parse_second_parameter
-:rosddk
-set DDK_TYPE=ReactOS_DDK
-
-:parse_second_parameter
-if "%2" equ "--use-msvc" goto parse_third_parameter
-if "%2" equ "--use-gcc" goto gcc
-echo Neither --use-msvc nor --use-gcc parameter specified, use msvc.
-goto parse_third_parameter
-:gcc
-set COMPILER_TYPE=GCC
-
-:parse_third_parameter
-if "%3" neq "--install" goto first_step
-:set_inst
-set _INST_=1
-:first_step
 echo Set environment variables...
 call SETVARS.CMD
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
@@ -36,133 +10,29 @@ echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE_U L"UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 echo #define ABOUT_VERSION "About UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
+mkdir lib
+mkdir lib\amd64
+mkdir lib\ia64
 
-if "%DDK_TYPE%" equ "Windows_Server2003_DDK" goto build_with_winddk
-:build_with_rosddk
-echo Build the driver...
-cd .\driver
-echo NT 5.0+ version...
-set NT4_TARGET=false
-nmake /NOLOGO /A /f ultradfg.mak
-if %errorlevel% neq 0 goto fail
-echo NT 4.0 version...
-set NT4_TARGET=true
-nmake /NOLOGO /A /f ultradfg.mak
-if %errorlevel% neq 0 goto fail
+if "%1" neq "" goto parse_first_parameter
+echo No parameters specified, use defaults.
+goto ddk_build
 
-echo Build the console interface...
-cd ..\console
-nmake /NOLOGO /A /f defrag.mak CFG="Defrag - Win32 Release"
+:parse_first_parameter
+if "%1" equ "--clean" goto clean
+if "%1" equ "--use-msvc" goto msvc_build
+:ddk_build
+call DDK_BUILD.CMD
 if %errorlevel% neq 0 goto fail
-
-echo Build the gui interface...
-cd ..\gui
-nmake /NOLOGO /A /f dfrg.mak CFG="Dfrg - Win32 Release"
-if %errorlevel% neq 0 goto fail
-
-echo Build the native interface...
-cd ..\native
-echo NT 5.0+ version...
-set NT4_TARGET=false
-nmake /NOLOGO /A /f defrag_native.mak CFG="RosDDK"
-if %errorlevel% neq 0 goto fail
-echo NT 4.0 version...
-set NT4_TARGET=true
-nmake /NOLOGO /A /f defrag_native.mak CFG="RosDDK"
-if %errorlevel% neq 0 goto fail
-
-echo Build the installation helper...
-cd ..\inst_helper
-nmake /NOLOGO /A /f inst_helper.mak
-if %errorlevel% neq 0 goto fail
-
 goto build_scheduler
-
-:build_with_winddk
-echo Copy sources to obj directory...
-mkdir .\obj
-xcopy /I /Y .\driver .\obj\driver
-xcopy /I /Y .\console .\obj\console
-xcopy /I /Y .\gui .\obj\gui
-xcopy /I /Y .\gui\res .\obj\gui\res
-xcopy /I /Y .\native .\obj\native
-xcopy /I /Y .\include .\obj\include
-xcopy /I /Y .\inst_helper .\obj\inst_helper
-copy /Y .\shared\misc.c .\obj\console\
-copy /Y .\shared\misc.c .\obj\gui\
-copy /Y .\shared\misc.c .\obj\native\
-copy /Y .\blditems.cmd .\obj\
-cd .\obj
-echo --------- Target is x86 ---------
-echo Because GUI produced by WINDDK has runtime errors,
-echo we must build user interfaces using MSVC.
-call "%MSVSBIN%\vcvars32.bat"
-
-echo Build the console interface...
-cd ..\console
-nmake /NOLOGO /A /f defrag.mak CFG="Defrag - Win32 Release"
+:msvc_build
+call MSVC_BUILD.CMD
 if %errorlevel% neq 0 goto fail
-
-echo Build the gui interface...
-cd ..\gui
-nmake /NOLOGO /A /f dfrg.mak CFG="Dfrg - Win32 Release"
-if %errorlevel% neq 0 goto fail
-
-echo Build the native interface...
-cd ..\native
-set DDKINCDIR=%WINDDKBASE%\inc\ddk\wnet
-echo NT 5.0+ version...
-set NT4_TARGET=false
-nmake /NOLOGO /A /f defrag_native.mak CFG="WinDDK"
-if %errorlevel% neq 0 goto fail
-echo NT 4.0 version...
-set NT4_TARGET=true
-nmake /NOLOGO /A /f defrag_native.mak CFG="WinDDK"
-if %errorlevel% neq 0 goto fail
-
-echo Build the installation helper...
-cd ..\inst_helper
-nmake /NOLOGO /A /f inst_helper.mak
-if %errorlevel% neq 0 goto fail
-
-cd ..\obj
-set AMD64=
-set IA64=
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-cd ..
-mkdir ..\bin
-rem blditems save driver versions to bin directory
-REM copy .\console\objfre_wnet_x86\i386\udefrag.exe ..\bin\
-REM copy .\gui\objfre_wnet_x86\i386\dfrg.exe ..\bin\
-REM copy .\native\objfre_wnet_x86\i386\defrag_native.exe ..\bin\
-REM copy .\inst_helper\objfre_wnet_x86\i386\inst_helper.exe ..\bin\
-echo --------- Target is x64 ---------
-set IA64=
-call blditems.cmd AMD64
-if %errorlevel% neq 0 goto fail
-cd ..
-mkdir ..\bin\amd64
-copy .\driver\objfre_wnet_amd64\amd64\ultradfg.sys ..\bin\amd64\
-copy .\console\objfre_wnet_amd64\amd64\udefrag.exe ..\bin\amd64\
-copy .\gui\objfre_wnet_amd64\amd64\dfrg.exe ..\bin\amd64\
-copy .\native\objfre_wnet_amd64\amd64\defrag_native.exe ..\bin\amd64\
-copy .\inst_helper\objfre_wnet_amd64\amd64\inst_helper.exe ..\bin\amd64\
-echo --------- Target is ia64 ---------
-set AMD64=
-call blditems.cmd 64
-if %errorlevel% neq 0 goto fail
-cd ..
-mkdir ..\bin\ia64
-copy .\driver\objfre_wnet_ia64\ia64\ultradfg.sys ..\bin\ia64\
-copy .\console\objfre_wnet_ia64\ia64\udefrag.exe ..\bin\ia64\
-copy .\gui\objfre_wnet_ia64\ia64\dfrg.exe ..\bin\ia64\
-copy .\native\objfre_wnet_ia64\ia64\defrag_native.exe ..\bin\ia64\
-copy .\inst_helper\objfre_wnet_ia64\ia64\inst_helper.exe ..\bin\ia64\
 
 :build_scheduler
 cd ..
 call BLDSCHED.CMD
+
 :build_installer
 echo Build installer...
 cd .\bin
@@ -191,7 +61,7 @@ echo !define ULTRADFGARCH i386 >> ultradefrag_globals.nsh
 %NSISDIR%\makensis.exe UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 
-if "%DDK_TYPE%" equ "ReactOS_DDK" goto build_source_package
+if "%1" equ "--use-msvc" goto build_source_package
 copy /Y .\UltraDefrag.nsi .\amd64\
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y .\*.TXT .\amd64\
@@ -243,40 +113,45 @@ cd..
 :build_source_package
 echo Build source code package...
 cd ..
-rmdir /s /q .\rel_src
-mkdir .\rel_src
-mkdir .\rel_src\src
-xcopy /I /Y .\driver .\rel_src\src\driver
-xcopy /I /Y .\console .\rel_src\src\console
-xcopy /I /Y .\gui .\rel_src\src\gui
-xcopy /I /Y .\gui\res .\rel_src\src\gui\res
-xcopy /I /Y .\native .\rel_src\src\native
-xcopy /I /Y .\inst_helper .\rel_src\src\inst_helper
-xcopy /I /Y .\installer .\rel_src\src\installer
-xcopy /I /Y .\include .\rel_src\src\include
-xcopy /I /Y .\shared .\rel_src\src\shared
-xcopy /I /Y .\presets .\rel_src\src\presets
-mkdir .\rel_src\src\scheduler
-xcopy /I /Y .\scheduler\DotNET .\rel_src\src\scheduler\DotNET
-xcopy /I /Y .\scheduler\DotNET\Properties .\rel_src\src\scheduler\DotNET\Properties
+rmdir /s /q .\src_package
+mkdir .\src_package
+set SRC_PKG_PATH=.\src_package\ultradefrag-%ULTRADFGVER%
+mkdir %SRC_PKG_PATH%\src
+xcopy /I /Y .\driver %SRC_PKG_PATH%\src\driver
+xcopy /I /Y .\console %SRC_PKG_PATH%\src\console
+xcopy /I /Y .\gui %SRC_PKG_PATH%\src\gui
+xcopy /I /Y .\gui\res %SRC_PKG_PATH%\src\gui\res
+xcopy /I /Y .\native %SRC_PKG_PATH%\src\native
+xcopy /I /Y .\inst_helper %SRC_PKG_PATH%\src\inst_helper
+xcopy /I /Y .\installer %SRC_PKG_PATH%\src\installer
+xcopy /I /Y .\include %SRC_PKG_PATH%\src\include
+xcopy /I /Y .\shared %SRC_PKG_PATH%\src\shared
+xcopy /I /Y .\presets %SRC_PKG_PATH%\src\presets
+mkdir %SRC_PKG_PATH%\src\scheduler
+xcopy /I /Y .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
+xcopy /I /Y .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties
+mkdir %SRC_PKG_PATH%\src\dll
+xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
 
-mkdir .\rel_src\doc
-mkdir .\rel_src\doc\html
-mkdir .\rel_src\doc\html\images
-copy /Y ..\doc\html\manual.html .\rel_src\doc\html\
-copy /Y ..\doc\html\images\console.png .\rel_src\doc\html\images\
-copy /Y ..\doc\html\images\main_screen110.png .\rel_src\doc\html\images\
-copy /Y ..\doc\html\images\about.png .\rel_src\doc\html\images\
-copy /Y ..\doc\html\images\valid-html401.png .\rel_src\doc\html\images\
+mkdir %SRC_PKG_PATH%\doc
+mkdir %SRC_PKG_PATH%\doc\html
+mkdir %SRC_PKG_PATH%\doc\html\images
+copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
+copy /Y ..\doc\html\images\console.png %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\images\main_screen110.png %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\images\about.png %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\images\valid-html401.png %SRC_PKG_PATH%\doc\html\images\
 
-copy .\*.* .\rel_src\src\
-cd .\rel_src
+copy .\*.* %SRC_PKG_PATH%\src\
+cd .\src_package
 del /s /q *.ncb,*.opt,*.plg,*.aps
 zip -r -m ultradefrag-%ULTRADFGVER%.src.zip .
 cd ..
 echo Build success!
 
-if "%_INST_%" neq "1" goto end
+if "%1" equ "--install" goto install
+if "%2" neq "--install" goto end
+:install
 echo Start installer...
 .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe /S
 if %errorlevel% neq 0 goto fail_inst
@@ -286,12 +161,10 @@ goto end
 echo Install error!
 
 :end
-set _INST_=
 exit /B
 
 :fail
 echo Build error (code %ERRORLEVEL%)!
-set _INST_=
 rem pause
 exit /B
 
@@ -310,7 +183,14 @@ rd /s /q gui
 rd /s /q include
 rd /s /q native
 rd /s /q inst_helper
+rd /s /q dll\udefrag.dll
+rd /s /q dll
 del /s /q *.*
 cd ..
 call BLDSCHED.CMD --clean
+cd lib
+del /s /q *.*
+rd /s /q amd64
+rd /s /q ia64
+cd..
 echo Done.
