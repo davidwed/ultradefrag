@@ -1,0 +1,14 @@
+EXPORTS
+	udefrag_init			@1
+	udefrag_unload			@2
+	get_device_handle		@3
+	fbsize					@4
+	udefrag_get_progress	@5
+	udefrag_load_settings	@6
+	udefrag_get_settings	@7
+	udefrag_apply_settings	@8
+	udefrag_save_settings	@9
+	udefrag_analyse			@10
+	udefrag_defragment		@11
+	udefrag_optimize		@12
+	udefrag_stop			@13

@@ -76,6 +76,10 @@
 #define UTF_FORMAT    'U'
 #define ASCII_FORMAT  'A'
 
+#define DBG_NORMAL     0
+#define DBG_DETAILED   1
+#define DBG_PARANOID   2
+
 typedef struct _REPORT_TYPE {
 	UCHAR		type;
 	UCHAR		format;
