@@ -15,7 +15,7 @@ Items to describe:
                  http://www.sysinternals.com
    3. For gui bugs attach screenshot
 
-2. Scheduler.NET requires NET Framework 2.0. And provide [small] description 
+2. (DONE) Scheduler.NET requires NET Framework 2.0. And provide [small] description 
    about the scheduler and useful features of them.
 
 3. (DONE) UltraDefrag has now full NT 4.0 support.
