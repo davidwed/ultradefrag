@@ -23,7 +23,6 @@ ALL : "$(OUTDIR)\udefrag.exe"
 CLEAN :
 	-@erase "$(INTDIR)\defrag.obj"
 	-@erase "$(INTDIR)\defrag.res"
-	-@erase "$(INTDIR)\misc.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(OUTDIR)\udefrag.exe"
 !IF  "$(CFG)" != "Defrag - Win32 Release"
@@ -39,11 +38,11 @@ CLEAN :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 !IF  "$(CFG)" == "Defrag - Win32 Release"
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\defrag.res" /d "NDEBUG" 
 LINK32_FLAGS=kernel32.lib advapi32.lib msvcrt.lib ntdll.lib ..\lib\udefrag.lib /nologo /subsystem:console /incremental:no /pdb:"$(OUTDIR)\Defrag.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\udefrag.exe" 
 !ELSE
-CPP_PROJ=/nologo /MLd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
+CPP_PROJ=/nologo /MLd /W3 /Gm /GX /ZI /Od /I "$(DDKINCDIR)\ddk" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /FR"$(INTDIR)\\" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /GZ /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\defrag.res" /d "_DEBUG" 
 LINK32_FLAGS=kernel32.lib advapi32.lib msvcrt.lib ntdll.lib ..\lib\udefrag.lib /nologo /subsystem:console /incremental:yes /pdb:"$(OUTDIR)\Defrag.pdb" /debug /machine:I386 /nodefaultlib /out:"$(OUTDIR)\udefrag.exe" /pdbtype:sept 
 !ENDIF
@@ -60,8 +59,7 @@ RSC=rc.exe
 LINK32=link.exe
 LINK32_OBJS= \
 	"$(INTDIR)\defrag.obj" \
-	"$(INTDIR)\defrag.res" \
-	"$(INTDIR)\misc.obj"
+	"$(INTDIR)\defrag.res"
 
 "$(OUTDIR)\udefrag.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
@@ -73,9 +71,3 @@ SOURCE=.\defrag.rc
 
 "$(INTDIR)\defrag.res" : $(SOURCE) "$(INTDIR)"
 	$(RSC) $(RSC_PROJ) $(SOURCE)
-
-
-SOURCE=..\Shared\misc.c
-
-"$(INTDIR)\misc.obj" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)

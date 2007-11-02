@@ -24,284 +24,114 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <winioctl.h>
 
-#include "../include/misc.h"
 #include "../include/udefrag.h"
-#include "../include/ultradfg.h"
 #include "../include/ultradfgver.h"
 
+#define settextcolor(c) SetConsoleTextAttribute(hOut,c)
+
+/* global variables */
 HANDLE hOut;
 WORD console_attr = 0x7;
-HANDLE hUltraDefragDevice = INVALID_HANDLE_VALUE;
-HANDLE hEvt = NULL;
-OVERLAPPED ovrl;
+int a_flag = 0,c_flag = 0;
+char letter = 0;
 
-ud_settings *settings;
-
-void __cdecl print(const char *str)
-{
-	DWORD txd;
-	WriteConsole(hOut,str,strlen(str),&txd,NULL);
-}
+/* internal functions prototypes */
+void HandleError(char *err_msg,int exit_code);
+BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 
 void show_help(void)
 {
-	print("Usage: defrag [-a,-c,-?] driveletter:\n"
+	printf("Usage: defrag [-a,-c,-?] driveletter:\n"
 		 " -a\tanalyse only\n"
 		 " -c\tcompact space\n"
-		 " -?\tshow this help\n\n");
+		 " -?\tshow this help");
+	HandleError("",0);
 }
 
-void display_error(char *msg)
+void HandleError(char *err_msg,int exit_code)
 {
-	SetConsoleTextAttribute(hOut, FOREGROUND_RED | FOREGROUND_INTENSITY);
-	print(msg);
-	SetConsoleTextAttribute(hOut, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	if(err_msg)
+	{ /* we should display error and terminate process */
+		settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("%s\n",err_msg);
+		settextcolor(console_attr);
+		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+		udefrag_unload();
+		exit(exit_code);
+	}
 }
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
-/*	DWORD txd;
-	HANDLE hEvtStop = NULL;
-
-	hEvtStop = CreateEvent(NULL,TRUE,TRUE,"UltraDefragStop");
-	ovrl.hEvent = hEvtStop;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(DeviceIoControl(hUltraDefragDevice,IOCTL_ULTRADEFRAG_STOP,
-					NULL,0,NULL,0,&txd,&ovrl))
-		WaitForSingleObject(hEvtStop,INFINITE);
-	if(hEvtStop) CloseHandle(hEvtStop);
-	*/
 	char *err_msg;
 
 	err_msg = udefrag_stop();
 	if(err_msg)
 	{
-		display_error(err_msg); putchar('\n');
+		settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("\n%s\n",err_msg);
+		settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	}
 	return TRUE;
 }
 
-/* small function to exclude letters assigned by SUBST command */
-BOOL is_virtual(char vol_letter)
+void parse_cmdline(int argc, short **argv)
 {
-	char dev_name[] = "A:";
-	char target_path[512];
+	int i;
+	short c1,c2;
+	char unk_opt[] = "Unknown option: x!";
 
-	dev_name[0] = vol_letter;
-	QueryDosDevice(dev_name,target_path,512);
-	return (strstr(target_path,"\\??\\") == target_path);
-}
-
-BOOL is_mounted(char vol_letter)
-{
-	char rootpath[] = "A:\\";
-	ULARGE_INTEGER total, free, BytesAvailable;
-
-	rootpath[0] = vol_letter;
-	return (BOOL)GetDiskFreeSpaceEx(rootpath,&BytesAvailable,&total,&free);
+	if(argc < 2) show_help();
+	for(i = 1; i < argc; i++)
+	{
+		c1 = argv[i][0]; c2 = argv[i][1];
+		if(c1 && c2 == ':')	letter = (char)c1;
+		if(c1 == '-')
+		{
+			c2 = (short)towlower((wint_t)c2);
+			if(!wcschr(L"acsideh?",c2))
+			{ /* unknown option */
+				unk_opt[16] = (char)c2;
+				HandleError(unk_opt,1);
+			}
+			if(c2 == 'h' || c2 == '?')
+				show_help();
+			else if(c2 == 'a') a_flag = 1;
+			else if(c2 == 'c') c_flag = 1;
+		}
+	}
 }
 
 int __cdecl wmain(int argc, short **argv)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	int n;
-	int a_flag = 0,c_flag = 0;//,f_flag = 0;
-//	short *in_filter = NULL, *ex_filter = NULL;
-//	int length;
-	char letter = 0;
-	char rootdir[] = "A:\\";
-	DWORD txd;
-	char s[32];
 	STATISTIC stat;
-	int err_code = 0;
-	ULONGLONG sizelimit = 0;
-	double p;
 
-	ULTRADFG_COMMAND cmd;
-	char *err_msg;
-	UCHAR command;
-
-	settings = udefrag_get_settings();
 	/* display copyright */
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(hOut,&csbi))
 		console_attr = csbi.wAttributes;
-	SetConsoleTextAttribute(hOut, FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	print(VERSIONINTITLE " console interface\n"
+	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	printf(VERSIONINTITLE " console interface\n"
 	      "Copyright (c) Dmitri Arkhangelski, 2007.\n\n");
 	/* analyse command line */
-	if(argc < 2)
-	{
-		show_help(); goto cleanup;
-	}
-	for(n = 1; n < argc; n++)
-	{
-		if(argv[n][0] && argv[n][1] == ':')
-			letter = (char)argv[n][0];
-		if(argv[n][0] == '-')
-		{
-			switch(argv[n][1])
-			{
-			case 'a':
-			case 'A':
-				a_flag = 1;
-				break;
-			case 'c':
-			case 'C':
-				c_flag = 1;
-				break;
-/*			case 'f':
-			case 'F':
-				f_flag = 1;
-				break;
-*/			case '?':
-			case 'h':
-			case 'H':
-				show_help();
-				goto cleanup;
-			case 's':
-			case 'S':
-				//sizelimit = _wtoi64(argv[n] + 2);
-				//break;
-			case 'i':
-			case 'I':
-				//in_filter = (argv[n] + 2);
-				//break;
-			case 'd':
-			case 'D':
-			case 'e':
-			case 'E':
-				//ex_filter = (argv[n] + 2);
-				break;
-			default:
-				display_error("Unknown option: ");
-				///WriteConsole(hOut,str,strlen(str),&txd,NULL);
-				display_error("\n");
-				goto cleanup;
-			}
-		}
-	}
+	parse_cmdline(argc,argv);
 	/* validate driveletter */
-	if(!((letter >= 'A' && letter <= 'Z') || \
-	     (letter >= 'a' && letter <= 'z')))
-	{
-		display_error("Incorrect or not specified drive letter\n");
-		err_code = 2; goto cleanup;
-	}
-	SetErrorMode(SEM_FAILCRITICALERRORS);
-	rootdir[0] = letter;
-	switch(GetDriveType(rootdir))
-	{
-	case DRIVE_FIXED:
-	case DRIVE_REMOVABLE:
-	case DRIVE_RAMDISK:
-		if(!is_virtual(letter) && is_mounted(letter))
-			break; /* OK */
-	default:
-		SetErrorMode(0);
-		display_error("Volume must be on non-cdrom local drive\n");
-		err_code = 2; goto cleanup;
-	}
-	SetErrorMode(0);
-	hEvt = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIoComplete");
+	if(!letter)	HandleError("Drive letter should be specified!",1);
+	HandleError(udefrag_validate_volume(letter,FALSE),1);
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
-	/* to do our job */
-	err_msg = udefrag_init(FALSE);
-	if(err_msg)
-	{
-		display_error(err_msg); putchar('\n');
-		err_code = 3; goto cleanup;
-	}
-	err_msg = udefrag_load_settings(argc,argv);
-	if(err_msg)
-	{
-		display_error(err_msg); putchar('\n');
-		err_code = 3; goto cleanup;
-	}
-	err_msg = udefrag_apply_settings();
-	if(err_msg)
-	{
-		display_error(err_msg); putchar('\n');
-		err_code = 3; goto cleanup;
-	}
-	hUltraDefragDevice = get_device_handle();
-/*	length = in_filter ? ((wcslen(in_filter) + 1) << 1) : 0;
-	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_INCLUDE_FILTER,
-		in_filter,length,NULL,0,&txd,&ovrl))
-		WaitForSingleObject(hEvt,INFINITE);
-	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	length = ex_filter ? ((wcslen(ex_filter) + 1) << 1) : 0;
-	if(DeviceIoControl(hUltraDefragDevice,IOCTL_SET_EXCLUDE_FILTER,
-		ex_filter,length,NULL,0,&txd,&ovrl))
-		WaitForSingleObject(hEvt,INFINITE);
-*/
-//	command = a_flag ? 'a' : 'd';
-//	if(c_flag) command = 'c';
-	//cmd.letter = letter;
-	//cmd.sizelimit = settings->sizelimit;
-	//cmd.mode = __UserMode;
+	/* do our job */
+	HandleError(udefrag_init(FALSE),2);
+	udefrag_load_settings(argc,argv);
+	HandleError(udefrag_apply_settings(),2);
 
-/*	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(!WriteFile(hUltraDefragDevice,&cmd,sizeof(ULTRADFG_COMMAND), \
-		      &txd,&ovrl))
-	{
-		display_error("I/O error!\n");
-		err_code = 4; goto cleanup;
-	}
-	else
-	{
-		WaitForSingleObject(hEvt,INFINITE);
-	}
-*/
-	if(a_flag)
-	{
-		err_msg = udefrag_analyse(letter);
-		goto done;
-	}
-	if(!c_flag)
-	{
-		err_msg = udefrag_defragment(letter);
-		goto done;
-	}
-	else
-	{
-		err_msg = udefrag_optimize(letter);
-		goto done;
-	}
-done:
-	if(err_msg)	{ display_error(err_msg); putchar('\n'); err_code = 3; goto cleanup; }
-	/* display results */
-	//ovrl.hEvent = hEvt;
-	//ovrl.Offset = ovrl.OffsetHigh = 0;
-	//if(DeviceIoControl(hUltraDefragDevice,IOCTL_GET_STATISTIC,NULL,0, \
-	//	&stat,sizeof(STATISTIC),&txd,&ovrl))
-	err_msg = udefrag_get_progress(&stat,NULL);
-	if(err_msg)	{ display_error(err_msg); putchar('\n'); err_code = 3; }
-	else
-	{
-	//	WaitForSingleObject(hEvt,INFINITE);
-		print("\nVolume information:\n");
-		fbsize(s,stat.total_space);
-		printf("\n  Volume size                  = %s",s);
-		fbsize(s,stat.free_space);
-		printf("\n  Free space                   = %s",s);
-		printf("\n\n  Total number of files        = %u",stat.filecounter);
-		printf("\n  Number of fragmented files   = %u",stat.fragmfilecounter);
-		p = (double)(stat.fragmcounter)/(double)(stat.filecounter);
-		printf("\n  Fragments per file           = %.2f\n",p);
-	}
+	if(a_flag) HandleError(udefrag_analyse(letter),3);
+	else if(c_flag) HandleError(udefrag_optimize(letter),3);
+	else HandleError(udefrag_defragment(letter),3);
 
-cleanup:
-	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-	if(hEvt) CloseHandle(hEvt);
-	udefrag_unload();
-	SetConsoleTextAttribute(hOut, console_attr);
-	ExitProcess(err_code);
+	/* display results and exit */
+	HandleError(udefrag_get_progress(&stat,NULL),0);
+	printf("\n%s",get_default_formatted_results(&stat));
+	HandleError("",0);
 }
- 

@@ -20,28 +20,30 @@
 /*
  *  Main source of native interface.
  */
+#define WIN32_NO_STATUS
+#define NOMINMAX
+#include <windows.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#include "defrag_native.h"
+#include <ntddkbd.h>
+
+#include "../include/ntndk.h"
+#include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
-HANDLE hUltraDefragDevice = NULL;
-//HANDLE hStopEvent = NULL;
-HANDLE hDeviceIoEvent = NULL;
-UNICODE_STRING uStr;
-char letter;
+#define USE_INSTEAD_SMSS  0
 
 ud_settings *settings;
+
+char letter;
 
 int abort_flag = 0,done_flag = 0,wait_flag = 0;
 char last_op = 0;
 int i = 0,j = 0,k; /* number of '-' */
 
-extern char kb_buffer[];
-
-char buffer[65536]; /* instead malloc calls */
-
 char msg[2048];
+char buffer[256];
 
 #define USAGE  "Supported commands:\n" \
 		"  analyse X:\n" \
@@ -53,26 +55,21 @@ char msg[2048];
 		"  reboot\n" \
 		"  shutdown\n" \
 		"  help\n"
-
-int __cdecl putch(int ch);
-int __cdecl print(const char *str);
-BOOL kb_open();
-BOOL kb_scan();
-void kb_close();
-NTSTATUS WaitKbHit(DWORD msec,KEYBOARD_INPUT_DATA *pkbd);
-void IntSleep(DWORD dwMilliseconds);
-
-/*DWORD WINAPI wait_kb_proc(LPVOID unused)
+void Cleanup();
+void HandleError(char *err_msg,int exit_code)
 {
-	KEYBOARD_INPUT_DATA kbd;
-
-	if(WaitKbHit(3000,&kbd) == STATUS_SUCCESS)
-		abort_flag = 1;
-
-	// Exit the thread
-	RtlExitUserThread(STATUS_SUCCESS);
-	return 0;
-}*/
+	if(err_msg)
+	{
+		if(err_msg[0])
+		{
+			nprint(err_msg);
+			nprint("\n");
+		}
+		nprint("Good bye ...\n");
+		Cleanup();
+		NtTerminateProcess(NtCurrentProcess(),4);
+	}
+}
 
 void UpdateProgress()
 {
@@ -86,28 +83,25 @@ void UpdateProgress()
 			if(last_op)
 			{
 				for(k = i; k < 50; k++)
-					putch('-'); /* 100 % of previous operation */
+					nputch('-'); /* 100 % of previous operation */
 			}
 			else
 			{
 				if(stat.current_operation != 'A')
 				{
-					print("\nA: ");
+					nprint("\nA: ");
 					for(k = 0; k < 50; k++)
-						putch('-');
+						nputch('-');
 				}
 			}
 			i = 0; /* new operation */
-			print("\n");
-			putch(stat.current_operation);
-			print(": ");
+			sprintf(msg,"\n%c: ",stat.current_operation);
+			nprint(msg);
 			last_op = stat.current_operation;
 		}
 		j = (int)percentage / 2;
 		for(k = i; k < j; k++)
-		{
-			putch('-');
-		}
+			nputch('-');
 		i = j;
 	}
 }
@@ -115,29 +109,21 @@ void UpdateProgress()
 DWORD WINAPI wait_break_proc(LPVOID unused)
 {
 	KEYBOARD_INPUT_DATA kbd;
-	NTSTATUS status;
-//	IO_STATUS_BLOCK IoStatusBlock;
 	char *err_msg;
 
-	wait_flag = 1;
 	i = j = 0;
 	last_op = 0;
 	do
 	{
-		status = WaitKbHit(100,&kbd);
-		if(!status)
+		if(kb_hit(&kbd,100))
 		{
 			if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d))
 			{
-				//status = NtDeviceIoControlFile(hUltraDefragDevice,hStopEvent,NULL,NULL,&IoStatusBlock, \
-				//	IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
-				//if(status == STATUS_PENDING)
-				//	status = NtWaitForSingleObject(hStopEvent,FALSE,NULL);
 				err_msg = udefrag_stop();
 				if(err_msg)
 				{
 					sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-					print(msg);
+					nprint(msg);
 				}
 				abort_flag = 1;
 			}
@@ -147,9 +133,8 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 	if(!abort_flag) /* set progress to 100 % */
 	{
 		for(k = i; k < 50; k++)
-			putch('-');
+			nputch('-');
 	}
-	///UpdateProgress();
 
 	wait_flag = 0;
 
@@ -164,150 +149,102 @@ DWORD WINAPI wait_break_proc(LPVOID unused)
 
 void Cleanup()
 {
-//	IO_STATUS_BLOCK IoStatusBlock;
 	char *err_msg;
 
-//print("before stop\n");
+//nprint("before stop\n");
 	/* stop device */
 	err_msg = udefrag_stop();
 	if(err_msg)
 	{
 		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-		print(msg);
+		nprint(msg);
 	}
-//	NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
-//				IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0);
-//print("after stop\n");
-	/* close handles */
-//	if(hStopEvent) NtClose(hStopEvent);
-	if(hDeviceIoEvent) NtClose(hDeviceIoEvent);
-//print("before kb_close\n");
+nprint("before kb_close\n");
 	kb_close();
-//print("before unload\n");
+nprint("before unload\n");
 	/* unload driver */
 	udefrag_unload();
-//print("after unload\n");
+nprint("after unload\n");
 	/* registry cleanup */
-	err_msg = udefrag_save_settings();
-	if(err_msg)
-	{
-		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-		print(msg);
-	}
+//	err_msg = udefrag_save_settings();
+//	if(err_msg)
+//	{
+//		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+//		nprint(msg);
+//	}
 }
 
 void ProcessVolume(char letter,char command)
 {
-	ULTRADFG_COMMAND cmd;
 	STATISTIC stat;
-	char s[32];
-	LARGE_INTEGER offset;
-	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
 	HANDLE hThread;
-	double p;
-	unsigned int ip;
-
-	print("\nPreparing to ");
-	switch(command)
-	{
-	case 'a':
-	case 'A':
-		print("analyse ");
-		break;
-	case 'd':
-	case 'D':
-		print("defragment ");
-		break;
-	case 'c':
-	case 'C':
-		print("compact ");
-		break;
-	}
-	putch(letter);
-	print(": ...\n");
+	char *err_msg;
 
 	done_flag = 0;
 	Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
 		0,0,0,wait_break_proc,NULL,&hThread,NULL);
-	if(Status)
+	if(!NT_SUCCESS(Status))
 	{
-		print("\nCan't create thread: "); 
-		_itoa(Status,buffer,16);
-		print(buffer);
+		sprintf(msg,"\nCan't create thread: %x!\n",Status); 
+		nprint(msg);
 	}
 
-	cmd.command = command;
-	cmd.letter = letter;
-	cmd.sizelimit = settings->sizelimit;
-	cmd.mode = __UserMode;///__KernelMode;
-	offset.QuadPart = 0;
-
-	Status = NtWriteFile(hUltraDefragDevice,hDeviceIoEvent,NULL,NULL,&IoStatusBlock, \
-		&cmd,sizeof(ULTRADFG_COMMAND),&offset,0);
-	if(Status == STATUS_PENDING)
+	wait_flag = 1;
+	nprint("\nPreparing to ");
+	switch(command)
 	{
-		Status = NtWaitForSingleObject(hDeviceIoEvent,FALSE,NULL);
-		if(!Status)
-			Status = IoStatusBlock.Status;
-	}
-	if(Status)
-	{
-		print("\nIncorrect drive letter or internal driver error!\n");
-		done_flag = 1;
-		while(wait_flag)
-			IntSleep(10);
-		return;
+	case 'a':
+		sprintf(msg,"analyse %c: ...\n",letter);
+		nprint(msg);
+		err_msg = udefrag_analyse(letter);
+		break;
+	case 'd':
+		sprintf(msg,"defragment %c: ...\n",letter);
+		nprint(msg);
+		err_msg = udefrag_defragment(letter);
+		break;
+	case 'c':
+		sprintf(msg,"optimize %c: ...\n",letter);
+		nprint(msg);
+		err_msg = udefrag_optimize(letter);
+		break;
 	}
 	done_flag = 1;
-	while(wait_flag)
-		IntSleep(10);
-	Status = NtDeviceIoControlFile(hUltraDefragDevice,NULL,NULL,NULL,&IoStatusBlock, \
-		IOCTL_GET_STATISTIC,NULL,0,&stat,sizeof(STATISTIC));
-	if(Status)
+	while(wait_flag) nsleep(10);
+	if(err_msg)
 	{
-		print("\nNo statistic available.\n");
+		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		nprint(msg);
+		return;
+	}
+
+	err_msg = udefrag_get_progress(&stat,NULL);
+	if(err_msg)
+	{
+		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		nprint(msg);
 	}
 	else
 	{
-		print("\nVolume information:");
-		fbsize(s,stat.total_space);
-		print("\n  Volume size                  = ");
-		print(s);
-		fbsize(s,stat.free_space);
-		print("\n  Free space                   = ");
-		print(s);
-		sprintf(msg,"\n\n  Total number of files        = %u",stat.filecounter);
-		print(msg);
-		sprintf(msg,"\n  Number of fragmented files   = %u",stat.fragmfilecounter);
-		print(msg);
-		p = (double)(stat.fragmcounter)/(double)(stat.filecounter);
-		ip = (unsigned int)(p * 100.00);
-		sprintf(msg,"\n  Fragments per file           = %u.%02u\r\n\r\n",ip / 100,ip % 100);
-		print(msg);
+		nprint("\n");
+		nprint(get_default_formatted_results(&stat));
+		nprint("\n\n");
 	}
 }
 
 void __stdcall NtProcessStartup(PPEB Peb)
 {
 	PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-	UNICODE_STRING strU;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	IO_STATUS_BLOCK IoStatusBlock;
-	NTSTATUS Status;
 	DWORD Action = ShutdownReboot;
 	char *pos;
-	unsigned short path[] = L"\\??\\A:\\";
-	HANDLE hFile;
-	FILE_FS_DEVICE_INFORMATION FileFsDevice;
 	int a_flag, d_flag, c_flag;
-	short driver_key[] = \
-	  L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 	char command;
-	LARGE_INTEGER offset;
 	HANDLE hThread = NULL;
 	DWORD i,length;
 	KEYBOARD_INPUT_DATA kbd;
+	volume_info *v;
+	int n;
 	char *err_msg;
 
 	/* 1. Normalize and get the Process Parameters */
@@ -321,164 +258,92 @@ void __stdcall NtProcessStartup(PPEB Peb)
 #if USE_INSTEAD_SMSS
 	NtInitializeRegistry(FALSE);
 #endif
-	offset.QuadPart = 0;
 	/* 4. Display Copyright */
 #ifdef NT4_TARGET
-	print("\n\n");
+	nprint("\n\n");
 #endif
-	RtlInitUnicodeString(&strU,
-		VERSIONINTITLE_U L" native interface\n"
-		L"Copyright (c) Dmitri Arkhangelski, 2007.\n\n"
-		L"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
-		L"If something is wrong, hit F8 on startup\n"
-		L"and select 'Last Known Good Configuration'.\n"
-		L"Use Break key to abort defragmentation.\n\n");
-	NtDisplayString(&strU);
+	nprint(VERSIONINTITLE " native interface\n"
+		"Copyright (c) Dmitri Arkhangelski, 2007.\n\n"
+		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
+		"If something is wrong, hit F8 on startup\n"
+		"and select 'Last Known Good Configuration'.\n"
+		"Use Break key to abort defragmentation.\n\n");
 	/* 6. Open the keyboard */
-	if(!kb_open())
-		goto continue_boot;
-/*	RtlInitUnicodeString(&strU,L"\\UDefragStopEvent");
-	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
-	Status = NtCreateEvent(&hStopEvent,0x1f01ff,&ObjectAttributes,1,0);
-	if(Status)
-	{
-		print("\nERROR: Can't create \\UDefragStopEvent! Wait 5 seconds.\n");
-		IntSleep(5000);
-		goto continue_boot;///abort;
-	}
-*/	/* 6b. Prompt to exit */
-	print("Press any key to exit...  ");
-	/*Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
-		0,0,0,wait_kb_proc,NULL,&hThread,NULL);
-	if(Status)
-	{
-		print("\nCan't create thread: "); 
-		_itoa(Status,buffer,16);
-		print(buffer);
-		print("\n");
-	}
-	*/
+	HandleError(kb_open(),2);
+	/* 6b. Prompt to exit */
+	nprint("Press any key to exit...  ");
 	for(i = 0; i < 3; i++)
 	{
-		///IntSleep(1000);
-		if(WaitKbHit(1000,&kbd) == STATUS_SUCCESS)
-			//abort_flag = 1;
-
-		//if(abort_flag)
-		{
-			print("\n\n");
-			goto continue_boot;
-		}
-		//putch('\b');
-		putch('0' + 3 - i);
-		putch(' ');
+		if(kb_hit(&kbd,1000)) HandleError("\n",0);
+		nputch((char)('0' + 3 - i));
+		nputch(' ');
 	}
-	print("\n\n");
-	/* 7. Open the ultradfg device */
-	err_msg = udefrag_init(TRUE);
-	if(err_msg)
-	{
-		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-		print(msg); IntSleep(5000);
-		goto continue_boot;
-	}
-	hUltraDefragDevice = get_device_handle();
-	RtlInitUnicodeString(&strU,L"\\UltraDefragIoEvent");
-	InitializeObjectAttributes(&ObjectAttributes,&strU,0,NULL,NULL);
-	Status = NtCreateEvent(&hDeviceIoEvent,0x1f01ff,&ObjectAttributes,1,0);
-	if(Status)
-	{
-		print("\nERROR: Can't create \\UltraDefragIoEvent! Wait 5 seconds.\n");
-		IntSleep(5000);
-		goto continue_boot;///abort;
-	}
+	nprint("\n\n");
+	/* 7. Initialize the ultradfg device */
+	HandleError(udefrag_init(TRUE),2);
 	/* read parameters from registry */
-	err_msg = udefrag_load_settings(0,NULL);
-	if(err_msg)
-	{
-		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-		print(msg); IntSleep(5000);
-		goto continue_boot;
-	}
-	err_msg = udefrag_apply_settings();
-	if(err_msg)
-	{
-		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-		print(msg); IntSleep(5000);
-		goto continue_boot;
-	}
+	udefrag_load_settings(0,NULL);
+	HandleError(udefrag_apply_settings(),2);
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
 #else
-	if(!settings->next_boot && !settings->every_boot)
-		goto cmd_loop;
-	/* do job */
-	if(!settings->sched_letters) // and if empty string
+	if(settings->next_boot || settings->every_boot)
 	{
-		print("\nNo letters specified!\n");
-		goto continue_boot;
+		/* do scheduled job and exit */
+		if(!settings->sched_letters)
+			HandleError("\nNo letters specified!",1);
+		if(!settings->sched_letters[0])
+			HandleError("\nNo letters specified!",1);
+		length = wcslen(settings->sched_letters);
+		for(i = 0; i < length; i++)
+		{
+			ProcessVolume((char)(settings->sched_letters[i]),'d');
+			if(abort_flag) HandleError("",0);
+		}
+		HandleError("",0);
 	}
-	length = wcslen(settings->sched_letters);
-	for(i = 0; i < length; i++)
-	{
-		ProcessVolume((char)(settings->sched_letters[i]),'d');
-		if(abort_flag) goto clear_reg;
-	}
-	/* clear registry */
-clear_reg: /* clear reg entries code moved to cleanup proc */
-	goto continue_boot;
 #endif
 	/* 8b. Command Loop */
-cmd_loop:
 	while(1)
 	{
-		print("# ");
-		if(!kb_scan())
+		nprint("# ");
+		HandleError(kb_gets(buffer,sizeof(buffer)),5);
+		if(strstr(buffer,"shutdown"))
 		{
-			print("\nERROR: Can't read \\Device\\KeyboardClass0! Wait 10 seconds.\n");
-			Action = ShutdownReboot;
-			goto abort;
-		}
-		if(strstr(kb_buffer,"shutdown"))
-		{
-			print("Shutdown ...");
+			nprint("Shutdown ...");
 			Action = ShutdownNoReboot;
 			goto exit;
 		}
-		if(strstr(kb_buffer,"reboot"))
+		if(strstr(buffer,"reboot"))
 		{
-			print("Reboot ...");
+			nprint("Reboot ...");
 			goto exit;
 		}
-		if(strstr(kb_buffer,"batch"))
+		if(strstr(buffer,"batch"))
 		{
-			print("Prepare to batch processing ...\n");
+			nprint("Prepare to batch processing ...\n");
 			continue;
 		}
-		if(strstr(kb_buffer,"exit"))
+		if(strstr(buffer,"exit"))
 		{
-continue_boot:
-			print("Good bye ...\n");
-			Cleanup();
-			///IntSleep(6000);
-			NtTerminateProcess(NtCurrentProcess(), 0);
+			HandleError("",0);
 			return;
 		}
 
-		if(strstr(kb_buffer,"analyse")) a_flag = 1;
+		if(strstr(buffer,"analyse")) a_flag = 1;
 		else a_flag = 0;
 
-		if(strstr(kb_buffer,"defrag")) d_flag = 1;
+		if(strstr(buffer,"defrag")) d_flag = 1;
 		else d_flag = 0;
 
-		if(strstr(kb_buffer,"compact")) c_flag = 1;
+		if(strstr(buffer,"compact")) c_flag = 1;
 		else c_flag = 0;
 
 		if(a_flag || d_flag || c_flag)
 		{
-			pos = strchr(kb_buffer,':');
-			if(!pos || pos == kb_buffer)
+			pos = strchr(buffer,':');
+			if(!pos || pos == buffer)
 				continue;
 			if(a_flag) command = 'a';
 			else if(d_flag)	command = 'd';
@@ -486,48 +351,30 @@ continue_boot:
 			ProcessVolume(pos[-1],command);
 			continue;
 		}
-		if(strstr(kb_buffer,"drives"))
+		if(strstr(buffer,"drives"))
 		{
-			print("Available drive letters:   ");
-			for(letter = 'A'; letter <= 'Z'; letter ++)
+			nprint("Available drive letters:   ");
+			err_msg = udefrag_get_avail_volumes(&v,FALSE);
+			if(err_msg) nprint(err_msg);
+			else
 			{
-				path[4] = (unsigned short)letter;
-				RtlInitUnicodeString(&strU,path);
-				InitializeObjectAttributes(&ObjectAttributes,&strU,
-							   FILE_READ_ATTRIBUTES,NULL,NULL);
-
-				Status = NtCreateFile (&hFile,FILE_GENERIC_READ,
-							&ObjectAttributes,&IoStatusBlock,NULL,0,
-							FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
-							NULL,0);
-
-				if(Status) continue;
-
-				Status = NtQueryVolumeInformationFile(hFile,&IoStatusBlock,&FileFsDevice,
-						  sizeof(FILE_FS_DEVICE_INFORMATION),FileFsDeviceInformation);
-				NtClose(hFile);
-				if(Status) continue;
-				if((FileFsDevice.DeviceType != FILE_DEVICE_DISK) && 
-					(FileFsDevice.DeviceType != FILE_DEVICE_DISK_FILE_SYSTEM))
-					continue;
-				if((FileFsDevice.Characteristics & FILE_REMOTE_DEVICE) ||
-					(FileFsDevice.Characteristics & FILE_REMOVABLE_MEDIA))
-					continue;
-				putch(letter);
-				print("   ");
+				for(n = 0;;n++)
+				{
+					if(v[n].letter == 0) break;
+					sprintf(msg,"%c   ",v[n].letter);
+					nprint(msg);
+				}
 			}
-			print("\r\n");
+			nprint("\r\n");
 			continue;
 		}
-		if(strstr(kb_buffer,"help"))
+		if(strstr(buffer,"help"))
 		{
-			print(USAGE);
+			nprint(USAGE);
 			continue;
 		}
-		print("Unknown command!\n");
+		nprint("Unknown command!\n");
 	}
-abort:
-	IntSleep(10000);
 exit:
 	Cleanup();
 	NtShutdownSystem(Action);

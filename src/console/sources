@@ -4,7 +4,7 @@ TARGETTYPE=PROGRAM
 
 CFLAGS=$(CFLAGS) /MT
 
-SOURCES=defrag.c misc.c defrag.rc
+SOURCES=defrag.c defrag.rc
 USE_MSVCRT=1
 
 LINKLIBS=$(DDK_LIB_PATH)\ntdll.lib \

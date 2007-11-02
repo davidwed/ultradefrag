@@ -8,7 +8,7 @@ call SETVARS.CMD
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
-echo #define VERSIONINTITLE_U L"UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
+REM echo #define VERSIONINTITLE_U L"UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 echo #define ABOUT_VERSION "About UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 mkdir lib
 mkdir lib\amd64
@@ -122,10 +122,8 @@ xcopy /I /Y .\console %SRC_PKG_PATH%\src\console
 xcopy /I /Y .\gui %SRC_PKG_PATH%\src\gui
 xcopy /I /Y .\gui\res %SRC_PKG_PATH%\src\gui\res
 xcopy /I /Y .\native %SRC_PKG_PATH%\src\native
-xcopy /I /Y .\inst_helper %SRC_PKG_PATH%\src\inst_helper
 xcopy /I /Y .\installer %SRC_PKG_PATH%\src\installer
 xcopy /I /Y .\include %SRC_PKG_PATH%\src\include
-xcopy /I /Y .\shared %SRC_PKG_PATH%\src\shared
 xcopy /I /Y .\presets %SRC_PKG_PATH%\src\presets
 mkdir %SRC_PKG_PATH%\src\scheduler
 xcopy /I /Y .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
@@ -144,8 +142,11 @@ copy /Y ..\doc\html\images\valid-html401.png %SRC_PKG_PATH%\doc\html\images\
 
 copy .\*.* %SRC_PKG_PATH%\src\
 cd .\src_package
-del /s /q *.ncb,*.opt,*.plg,*.aps
-zip -r -m ultradefrag-%ULTRADFGVER%.src.zip .
+del /s /q *.ncb,*.opt,*.plg,*.aps,*.7z
+REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .
+"%SEVENZIP_PATH%\7z.exe" a ultradefrag-%ULTRADFGVER%.src.7z *
+rd /s /q ultradefrag-%ULTRADFGVER%
+if %errorlevel% neq 0 goto fail
 cd ..
 echo Build success!
 
@@ -182,7 +183,6 @@ rd /s /q driver
 rd /s /q gui
 rd /s /q include
 rd /s /q native
-rd /s /q inst_helper
 rd /s /q dll\udefrag.dll
 rd /s /q dll
 del /s /q *.*

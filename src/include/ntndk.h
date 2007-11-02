@@ -24,10 +24,12 @@
 
 typedef LONG NTSTATUS;
 #define STATUS_SUCCESS               ((NTSTATUS)0x00000000L)
+#define STATUS_TIMEOUT               ((NTSTATUS)0x00000102)
 #define STATUS_PENDING               ((NTSTATUS)0x00000103)
 #define STATUS_IMAGE_ALREADY_LOADED  ((NTSTATUS)0xC000010E)
 #define STATUS_NOT_ALL_ASSIGNED      ((NTSTATUS)0x00000106)
 #define STATUS_OBJECT_NAME_COLLISION ((NTSTATUS)0xC0000035)
+#define STATUS_INVALID_INFO_CLASS    ((NTSTATUS)0xC0000003)
 #ifndef NT_SUCCESS
 #define NT_SUCCESS(x) ((x)>=0)
 #endif
@@ -274,6 +276,43 @@ typedef enum _FSINFOCLASS {
     FileFsMaximumInformation
 } FS_INFORMATION_CLASS, *PFS_INFORMATION_CLASS;
 
+typedef enum _PROCESSINFOCLASS {
+    ProcessBasicInformation = 0,
+    ProcessQuotaLimits = 1,
+    ProcessIoCounters = 2,
+    ProcessVmCounters = 3,
+    ProcessTimes = 4,
+    ProcessBasePriority = 5,
+    ProcessRaisePriority = 6,
+    ProcessDebugPort = 7,
+    ProcessExceptionPort = 8,
+    ProcessAccessToken = 9,
+    ProcessLdtInformation = 10,
+    ProcessLdtSize = 11,
+    ProcessDefaultHardErrorMode = 12,
+    ProcessIoPortHandlers = 13,
+    ProcessPooledUsageAndLimits = 14,
+    ProcessWorkingSetWatch = 15,
+    ProcessUserModeIOPL = 16,
+    ProcessEnableAlignmentFaultFixup = 17,
+    ProcessPriorityClass = 18,
+    ProcessWx86Information = 19,
+    ProcessHandleCount = 20,
+    ProcessAffinityMask = 21,
+    ProcessPriorityBoost = 22,
+    ProcessDeviceMap = 23,
+    ProcessSessionInformation = 24,
+    ProcessForegroundInformation = 25,
+    ProcessWow64Information = 26,
+    ProcessImageFileName = 27,
+    ProcessLUIDDeviceMapsEnabled = 28,
+    ProcessBreakOnTermination = 29,
+    ProcessDebugObjectHandle = 30,
+    ProcessDebugFlags = 31,
+    ProcessHandleTracing = 32,
+    MaxProcessInfoClass
+} PROCESSINFOCLASS, PROCESS_INFORMATION_CLASS;
+
 NTSTATUS	WINAPI	NtCreateFile(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,PIO_STATUS_BLOCK,PLARGE_INTEGER,ULONG,ULONG,ULONG,ULONG,PVOID,ULONG);
 NTSTATUS	WINAPI	NtReadFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,ULONG,PLARGE_INTEGER,PULONG);
 NTSTATUS	WINAPI	NtWriteFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,ULONG,PLARGE_INTEGER,PULONG);
@@ -290,6 +329,14 @@ NTSTATUS	WINAPI	NtQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,ULONG
 NTSTATUS	WINAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,BOOLEAN,BOOLEAN);
 NTSTATUS	WINAPI	NtDeviceIoControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,ULONG,PVOID,ULONG,PVOID,ULONG);
 NTSTATUS	WINAPI	NtOpenEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *);
+NTSTATUS	WINAPI	NtQueryInformationProcess(HANDLE,PROCESSINFOCLASS,PVOID,ULONG,PULONG);
+NTSTATUS	WINAPI	NtSetInformationProcess(HANDLE,PROCESS_INFORMATION_CLASS,PVOID,ULONG);
+NTSTATUS	WINAPI	NtOpenSymbolicLinkObject(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES);
+NTSTATUS	WINAPI	NtQuerySymbolicLinkObject(HANDLE,PUNICODE_STRING,PULONG);
+NTSTATUS	WINAPI	NtCancelIoFile(HANDLE,PIO_STATUS_BLOCK);
+
+#define SYMBOLIC_LINK_QUERY               0x0001
+#define SYMBOLIC_LINK_ALL_ACCESS          (STANDARD_RIGHTS_REQUIRED | 0x1)
 
 #define FILE_OPEN	1
 
@@ -579,6 +626,44 @@ typedef enum _EVENT_TYPE {
 
 void      WINAPI RtlInitAnsiString(PANSI_STRING,PCSZ);
 NTSTATUS  WINAPI RtlAnsiStringToUnicodeString(PUNICODE_STRING,PANSI_STRING,BOOL);
+NTSTATUS  WINAPI RtlUnicodeStringToAnsiString(PANSI_STRING,PUNICODE_STRING,BOOL);
 void      WINAPI RtlFreeUnicodeString(PUNICODE_STRING);
+
+typedef struct _PROCESS_DEVICEMAP_INFORMATION
+{
+    union
+    {
+        struct
+        {
+            HANDLE DirectoryHandle;
+        } Set;
+        struct
+        {
+            ULONG DriveMap;
+            UCHAR DriveType[32];
+        } Query;
+    };
+} PROCESS_DEVICEMAP_INFORMATION, *PPROCESS_DEVICEMAP_INFORMATION;
+
+typedef struct _FILE_FS_SIZE_INFORMATION {
+    LARGE_INTEGER   TotalAllocationUnits;
+    LARGE_INTEGER   AvailableAllocationUnits;
+    ULONG           SectorsPerAllocationUnit;
+    ULONG           BytesPerSector;
+} FILE_FS_SIZE_INFORMATION, *PFILE_FS_SIZE_INFORMATION;
+
+typedef struct _FILE_FS_ATTRIBUTE_INFORMATION {
+    ULONG   FileSystemAttributes;
+    ULONG   MaximumComponentNameLength;
+    ULONG   FileSystemNameLength;
+    WCHAR   FileSystemName[1];
+} FILE_FS_ATTRIBUTE_INFORMATION, *PFILE_FS_ATTRIBUTE_INFORMATION;
+
+typedef struct _KBD_RECORD {
+	WORD	wVirtualScanCode;
+	DWORD	dwControlKeyState;
+	UCHAR	AsciiChar;
+	BOOL	bKeyDown;
+} KBD_RECORD, *PKBD_RECORD;
 
 #endif /* _NTNDK_H_ */

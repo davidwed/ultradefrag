@@ -7,7 +7,7 @@ USER_C_FLAGS=/DUSE_WINDDK
 CFLAGS=$(CFLAGS) /MT
 USE_MSVCRT=1
 
-SOURCES=main.c map.c settings.c misc.c dfrg.rc
+SOURCES=main.c map.c settings.c dfrg.rc
 
 LINKLIBS=$(DDK_LIB_PATH)\ntdll.lib \
 	 $(DDK_LIB_PATH)\shell32.lib \

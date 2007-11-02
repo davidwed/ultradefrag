@@ -7,3 +7,4 @@ set NSISDIR=D:\Software\Tools\NSIS
 set MSVSBIN=D:\Software\Microsoft Visual Studio\VC98\Bin
 set WINDDKBASE=D:\WINDDK\3790~1.183
 set NETRUNTIMEPATH=C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727
+set SEVENZIP_PATH=C:\Program Files\7-Zip

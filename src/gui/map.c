@@ -22,7 +22,7 @@
  */
 
 #include <windows.h>
-#include <winioctl.h>
+#include <commctrl.h>
 #include <math.h>
 
 #include "main.h"
@@ -62,12 +62,6 @@ BOOL CreateBitMap(int);
 void DrawBlock(HDC,char *,int,COLORREF);
 BOOL FillBitMap(int);
 BOOL CreateBitMapGrid();
-
-BOOL RequestMap(HANDLE hDev,char *map,DWORD *txd,LPOVERLAPPED lpovrl)
-{
-	return DeviceIoControl(hDev,IOCTL_GET_CLUSTER_MAP,
-			NULL,0,map,N_BLOCKS,txd,lpovrl);
-}
 
 void CalculateBlockSize()
 {
@@ -234,8 +228,7 @@ BOOL FillBitMap(int index)
 	rc.right = iMAP_WIDTH;
 	_map = map[index];
 	hdc = bit_map_dc[index];
-	if(!hdc)
-		return FALSE;
+	if(!hdc) return FALSE;
 	hBrush = CreateSolidBrush(GRID_COLOR);
 	hOldBrush = SelectObject(hdc,hBrush);
 	FillRect(hdc,&rc,hBrush);
@@ -278,27 +271,21 @@ void ClearMap()
 void RedrawMap()
 {
 	HDC hdc;
-	LRESULT index;
+	LRESULT iItem, index;
 
-	hdc = GetDC(hMap);
-	index = SendMessage(hList,LB_GETCURSEL,0,0);
-	if(index != LB_ERR)
+	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+	if(iItem != -1)
 	{
-		index = letter_numbers[index - 2];
+		index = letter_numbers[iItem];
+		if(work_status[index] > 1 && bit_map_dc[index])
+		{
+			hdc = GetDC(hMap);
+			BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_dc[index],0,0,MERGECOPY);
+			ReleaseDC(hMap,hdc);
+			return;
+		}
 	}
-	else
-	{
-		BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_grid_dc,0,0,SRCCOPY);
-		goto exit_redraw;
-	}
-	if(work_status[index] <= 1 || !bit_map_dc[index])
-	{
-		BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_grid_dc,0,0,SRCCOPY);
-		goto exit_redraw;
-	}
-	BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_dc[index],0,0,MERGECOPY);
-exit_redraw:
-	ReleaseDC(hMap,hdc);
+	ClearMap();
 }
 
 void DeleteMaps()
@@ -307,13 +294,9 @@ void DeleteMaps()
 
 	for(i = 0; i < 'Z' - 'A'; i++)
 	{
-		if(bit_map[i])
-			DeleteObject(bit_map[i]);
-		if(bit_map_dc[i])
-			DeleteDC(bit_map_dc[i]);
+		if(bit_map[i]) DeleteObject(bit_map[i]);
+		if(bit_map_dc[i]) DeleteDC(bit_map_dc[i]);
 	}
-	if(bit_map_grid)
-		DeleteObject(bit_map_grid);
-	if(bit_map_grid_dc)
-		DeleteDC(bit_map_grid_dc);
+	if(bit_map_grid) DeleteObject(bit_map_grid);
+	if(bit_map_grid_dc) DeleteDC(bit_map_grid_dc);
 }

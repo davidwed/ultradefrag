@@ -55,7 +55,9 @@ ud_settings settings = \
 	L"",           /* sched_letters */
 	FALSE,         /* every_boot */
 	FALSE,         /* next_boot */
-	FALSE          /* only_reg_and_pagefile */
+	FALSE,         /* only_reg_and_pagefile */
+	0,             /* x */
+	0              /* y */
 };
 
 short ud_key[] = \
@@ -103,7 +105,7 @@ char * __cdecl udefrag_load_settings(int argc, short **argv)
 	int i;
 
 	/* open program key */
-	if(!OpenKey(ud_key,&hKey)) return msg;
+	if(!OpenKey(ud_key,&hKey)) goto analyse_cmdline;
 	/* read dword parameters */
 	ReadRegDWORD(hKey,L"skip removable",&settings.skip_removable);
 	ReadRegDWORD(hKey,L"update interval",&settings.update_interval);
@@ -116,6 +118,8 @@ char * __cdecl udefrag_load_settings(int argc, short **argv)
 		settings.report_type = (UCHAR)x;
 	if(ReadRegDWORD(hKey,L"report format",&x))
 		settings.report_format = (UCHAR)x;
+	ReadRegDWORD(hKey,L"x",&settings.x);
+	ReadRegDWORD(hKey,L"y",&settings.y);
 	/* read binary parameters */
 	ReadRegBinary(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
 	/* read strings */
@@ -144,6 +148,7 @@ char * __cdecl udefrag_load_settings(int argc, short **argv)
 		sched_letters[MAX_SCHED_LETTERS] = 0; settings.sched_letters = sched_letters;
 	}
 	NtClose(hKey);
+analyse_cmdline:
 	/* overwrite parameters from the command line */
 	if(!argv) goto no_cmdline;
 	for(i = 1; i < argc; i++)
@@ -247,6 +252,8 @@ char * __cdecl udefrag_save_settings(void)
 	WriteRegDWORD(hKey,L"report type",x);
 	x = (DWORD)settings.report_format;
 	WriteRegDWORD(hKey,L"report format",x);
+	WriteRegDWORD(hKey,L"x",settings.x);
+	WriteRegDWORD(hKey,L"y",settings.y);
 	/* set binary data */
 	WriteRegBinary(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
 	/* write strings */

@@ -22,8 +22,6 @@
  */
 
 #include <windows.h>
-#include <winreg.h>
-#include <winioctl.h>
 #include <commctrl.h>
 #include <commdlg.h>
 #include <memory.h>
@@ -37,8 +35,6 @@
 #include "resource.h"
 
 extern HINSTANCE hInstance;
-extern HANDLE hEvt;
-extern HANDLE hUltraDefragDevice;
 RECT win_rc; /* coordinates of main window */
 
 HWND hTabCtrl;
@@ -59,58 +55,6 @@ short boot_in_filter[MAX_FILTER_SIZE + 1];
 short boot_ex_filter[MAX_FILTER_SIZE + 1];
 
 extern ud_settings *settings;
-
-ULONGLONG get_formatted_number(char *buf)
-{
-	char *ext = buf;
-	char c;
-	ULONGLONG m = 1;
-
-	while(*ext)
-	{
-		c = *ext;
-		switch(c)
-		{
-		case 'k':
-		case 'K':
-			m = 1024;
-			*ext = 0;
-			goto done;
-		case 'm':
-		case 'M':
-			m = 1024 * 1024;
-			*ext = 0;
-			goto done;
-		case 'g':
-		case 'G':
-			m = 1024 * 1024 * 1024;
-			*ext = 0;
-			goto done;
-		case 't':
-		case 'T':
-			m = (ULONGLONG)1024 * 1024 * 1024 * 1024;
-			*ext = 0;
-			goto done;
-		}
-		ext++;
-	}
-done:
-	return m * _atoi64(buf);
-}
-
-void format_number(ULONGLONG number,char *buf)
-{
-	char *ext[] = {""," Kb"," Mb"," Gb"," Tb"};
-	int i = 0;
-
-	while(number >= 1024)
-	{
-		i ++;
-		number /= 1024;
-	}
-	_i64toa(number,buf,10);
-	strcat(buf,ext[i]);
-}
 
 BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
@@ -149,7 +93,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			(DLGPROC)BootSchedDlgProc,0);
 		ShowWindow(hBootSchedDlg,SW_HIDE);
 
-		format_number(settings->sizelimit,buf);
+		fbsize2(buf,settings->sizelimit);
 		SetWindowText(GetDlgItem(hFilterDlg,IDC_SIZELIMIT),buf);
 		_itoa(settings->update_interval,buf,10);
 		SetWindowText(GetDlgItem(hGuiDlg,IDC_UPDATE_INTERVAL),buf);
@@ -225,7 +169,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		{
 		case IDOK:
 			GetWindowText(GetDlgItem(hFilterDlg,IDC_SIZELIMIT),buf,22);
-			settings->sizelimit = get_formatted_number(buf);
+			dfbsize2(buf,&settings->sizelimit);
 			GetWindowText(GetDlgItem(hGuiDlg,IDC_UPDATE_INTERVAL),buf,22);
 			settings->update_interval = atoi(buf);
 			settings->report_format = \

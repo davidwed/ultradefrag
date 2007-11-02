@@ -66,34 +66,10 @@ SOURCE=.\defrag_native.c
 
 SOURCE=.\defrag_native.rc
 # End Source File
-# Begin Source File
-
-SOURCE=.\keytrans.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\Shared\misc.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\registry.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\stdio.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\sys.c
-# End Source File
 # End Group
 # Begin Group "Header Files"
 
 # PROP Default_Filter "h;hpp;hxx;hm;inl"
-# Begin Source File
-
-SOURCE=.\defrag_native.h
-# End Source File
 # Begin Source File
 
 SOURCE=.\ntndk.h

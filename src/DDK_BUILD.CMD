@@ -16,12 +16,8 @@ xcopy /I /Y .\gui .\obj\gui
 xcopy /I /Y .\gui\res .\obj\gui\res
 xcopy /I /Y .\native .\obj\native
 xcopy /I /Y .\include .\obj\include
-xcopy /I /Y .\inst_helper .\obj\inst_helper
 mkdir .\obj\dll
 xcopy /I /Y .\dll\udefrag .\obj\dll\udefrag.dll
-copy /Y .\shared\misc.c .\obj\console\
-copy /Y .\shared\misc.c .\obj\gui\
-copy /Y .\shared\misc.c .\obj\native\
 copy /Y .\blditems.cmd .\obj\
 cd .\obj
 echo --------- Target is x86 ---------
@@ -36,7 +32,6 @@ rem blditems save driver versions to bin directory
 copy .\console\objfre_wnet_x86\i386\udefrag.exe ..\bin\
 copy .\gui\objfre_wnet_x86\i386\dfrg.exe ..\bin\
 copy .\native\objfre_wnet_x86\i386\defrag_native.exe ..\bin\
-copy .\inst_helper\objfre_wnet_x86\i386\inst_helper.exe ..\bin\
 copy .\dll\udefrag.dll\objfre_wnet_x86\i386\udefrag.dll ..\bin\
 echo --------- Target is x64 ---------
 set IA64=
@@ -49,7 +44,6 @@ copy .\driver\objfre_wnet_amd64\amd64\ultradfg.sys ..\bin\amd64\
 copy .\console\objfre_wnet_amd64\amd64\udefrag.exe ..\bin\amd64\
 copy .\gui\objfre_wnet_amd64\amd64\dfrg.exe ..\bin\amd64\
 copy .\native\objfre_wnet_amd64\amd64\defrag_native.exe ..\bin\amd64\
-copy .\inst_helper\objfre_wnet_amd64\amd64\inst_helper.exe ..\bin\amd64\
 copy .\dll\udefrag.dll\objfre_wnet_amd64\amd64\udefrag.dll ..\bin\amd64\
 echo --------- Target is ia64 ---------
 set AMD64=
@@ -62,7 +56,6 @@ copy .\driver\objfre_wnet_ia64\ia64\ultradfg.sys ..\bin\ia64\
 copy .\console\objfre_wnet_ia64\ia64\udefrag.exe ..\bin\ia64\
 copy .\gui\objfre_wnet_ia64\ia64\dfrg.exe ..\bin\ia64\
 copy .\native\objfre_wnet_ia64\ia64\defrag_native.exe ..\bin\ia64\
-copy .\inst_helper\objfre_wnet_ia64\ia64\inst_helper.exe ..\bin\ia64\
 copy .\dll\udefrag.dll\objfre_wnet_ia64\ia64\udefrag.dll ..\bin\ia64\
 
 exit /B 0

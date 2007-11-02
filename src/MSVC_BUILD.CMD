@@ -47,11 +47,6 @@ set NT4_TARGET=true
 nmake /NOLOGO /A /f defrag_native.mak CFG="RosDDK"
 if %errorlevel% neq 0 goto fail
 
-echo Build the installation helper...
-cd ..\inst_helper
-nmake /NOLOGO /A /f inst_helper.mak
-if %errorlevel% neq 0 goto fail
-
 exit /B 0
 
 :fail

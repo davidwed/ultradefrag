@@ -400,19 +400,6 @@ native_modern_win:
 native_installed:
 !insertmacro EnableX64FSRedirection
 
-  /* create custom preset and correct program settings */
-  SetOutPath "$TEMP"
-  File "inst_helper.exe"
-  ClearErrors
-  ExecWait '"$TEMP\inst_helper.exe" $INSTDIR\presets\custom'
-  IfErrors 0 custom_created
-  DetailPrint "Write filter settings..."
-  StrCpy $R0 "Software\DASoft\NTDefrag"
-  DeleteRegValue HKCU $R0 "include filter"
-  WriteRegStr HKCU $R0 "exclude filter" "system volume information;temp;recycler"
-custom_created:
-  Delete "$TEMP\inst_helper.exe"
-
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
   StrCpy $R0 "SYSTEM\CurrentControlSet\Services\ultradfg"

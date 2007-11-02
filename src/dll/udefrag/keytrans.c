@@ -29,7 +29,13 @@
 
 /* Modified by Dmitri Arkhangelski, 2007. */ 
 
-#include "defrag_native.h"
+#define WIN32_NO_STATUS
+#define NOMINMAX
+#include <windows.h>
+#include <stdio.h>
+#include <ntddkbd.h>
+#include "../../include/ntndk.h"
+#include "../../include/udefrag.h"
 
 typedef struct _SCANTOASCII {
 	USHORT ScanCode;

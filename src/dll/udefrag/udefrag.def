@@ -1,14 +1,42 @@
 EXPORTS
-	udefrag_init			@1
-	udefrag_unload			@2
-	get_device_handle		@3
-	fbsize					@4
-	udefrag_get_progress	@5
-	udefrag_load_settings	@6
-	udefrag_get_settings	@7
-	udefrag_apply_settings	@8
-	udefrag_save_settings	@9
-	udefrag_analyse			@10
-	udefrag_defragment		@11
-	udefrag_optimize		@12
-	udefrag_stop			@13
+	udefrag_init
+	udefrag_unload
+	udefrag_load_settings
+	udefrag_get_settings
+	udefrag_apply_settings
+	udefrag_save_settings
+	udefrag_analyse
+	udefrag_defragment
+	udefrag_optimize
+	udefrag_stop
+	udefrag_get_progress
+	udefrag_get_map
+	get_default_formatted_results
+	udefrag_get_avail_volumes
+	udefrag_validate_volume
+	scheduler_get_avail_letters
+	nputch
+	nprint
+	kb_open
+	kb_hit
+	kb_gets
+	kb_close
+	nsleep
+	fbsize
+	fbsize2
+	dfbsize2
+	udefrag_s_init
+	udefrag_s_unload
+	udefrag_s_analyse
+	udefrag_s_defragment
+	udefrag_s_optimize
+	udefrag_s_stop
+	udefrag_s_get_progress
+	udefrag_s_get_map
+	udefrag_s_load_settings
+	udefrag_s_get_settings
+	udefrag_s_apply_settings
+	udefrag_s_save_settings
+	udefrag_s_get_avail_volumes
+	udefrag_s_validate_volume
+	scheduler_s_get_avail_letters

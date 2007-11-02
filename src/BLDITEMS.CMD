@@ -71,9 +71,4 @@ rem save nt4 version
 copy .\objfre_wnet_x86\i386\defrag_native_nt4.exe ..\..\bin\
 :L2
 
-echo Build the installation helper...
-cd ..\inst_helper
-build.exe
-if %errorlevel% neq 0 goto fail
-
 :fail

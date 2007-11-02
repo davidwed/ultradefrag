@@ -16,11 +16,6 @@ ALL : "$(OUTDIR)\defrag_native.exe"
 CLEAN :
 	-@erase "$(INTDIR)\defrag_native.obj"
 	-@erase "$(INTDIR)\defrag_native.res"
-	-@erase "$(INTDIR)\keytrans.obj"
-	-@erase "$(INTDIR)\registry.obj"
-	-@erase "$(INTDIR)\stdio.obj"
-	-@erase "$(INTDIR)\sys.obj"
-	-@erase "$(INTDIR)\misc.obj"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(OUTDIR)\defrag_native.exe"
 	-@erase "$(OUTDIR)\defrag_native_nt4.exe"
@@ -71,12 +66,7 @@ LINK32_FLAGS=ntdll.lib ..\lib\udefrag.lib /nologo /entry:"NtProcessStartup" /inc
 !ENDIF
 LINK32_OBJS= \
 	"$(INTDIR)\defrag_native.obj" \
-	"$(INTDIR)\defrag_native.res" \
-	"$(INTDIR)\keytrans.obj" \
-	"$(INTDIR)\registry.obj" \
-	"$(INTDIR)\stdio.obj" \
-	"$(INTDIR)\sys.obj" \
-	"$(INTDIR)\misc.obj"
+	"$(INTDIR)\defrag_native.res"
 
 !IF "$(NT4_TARGET)" == "true"
 "$(OUTDIR)\defrag_native_nt4.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
@@ -94,9 +84,3 @@ SOURCE=.\defrag_native.rc
 
 "$(INTDIR)\defrag_native.res" : $(SOURCE) "$(INTDIR)"
 	$(RSC) $(RSC_PROJ) $(SOURCE)
-
-
-SOURCE=..\Shared\misc.c
-
-"$(INTDIR)\misc.obj"	"$(INTDIR)\misc.sbr" : $(SOURCE) "$(INTDIR)"
-	$(CPP) $(CPP_PROJ) $(SOURCE)

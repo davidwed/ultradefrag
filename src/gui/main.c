@@ -22,7 +22,6 @@
  */
 
 #include <windows.h>
-#include <winioctl.h>
 #include <commctrl.h>
 #include <memory.h>
 #include <string.h>
@@ -32,7 +31,6 @@
 #include <math.h>
 
 #include "main.h"
-#include "../include/misc.h"
 #include "../include/ultradfg.h"
 
 #include "resource.h"
@@ -49,8 +47,6 @@ HWND hMap;
 
 BOOL portable_run = FALSE;
 BOOL uninstall_run = FALSE;
-
-HANDLE hUltraDefragDevice = INVALID_HANDLE_VALUE;
 
 extern RECT win_rc; /* coordinates of main window */
 
@@ -80,7 +76,7 @@ int thr_id;
 BOOL busy_flag = 0;
 char buffer[64];
 
-HANDLE hEventComplete = 0,hEvt = 0,/*hEvtStop = 0,*/ hEvtDone = 0;
+HANDLE hEventComplete = NULL, hEvtDone = NULL;
 
 char current_operation;
 BOOL stop_pressed;
@@ -103,7 +99,6 @@ void ShowProgress();
 void HideProgress();
 
 extern void CalculateBlockSize();
-extern BOOL RequestMap(HANDLE hDev,char *map,DWORD *txd,LPOVERLAPPED lpovrl);
 extern BOOL FillBitMap(int);
 extern BOOL CreateBitMapGrid();
 extern void DeleteMaps();
@@ -119,28 +114,24 @@ LRESULT CALLBACK CheckWndProc(HWND, UINT, WPARAM, LPARAM);
 DWORD WINAPI ThreadProc(LPVOID);
 DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 
-extern char *FormatBySize(ULONGLONG long_number,char *s,int alignment);
-extern void Format2(double number,char *s);
+#define create_thread(func,param) \
+		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,&thr_id)
 
-/* small function to exclude letters assigned by SUBST command */
-BOOL is_virtual(char vol_letter)
+void HandleError(char *err_msg,int exit_code)
 {
-	char dev_name[] = "A:";
-	char target_path[512];
-
-	dev_name[0] = vol_letter;
-	QueryDosDevice(dev_name,target_path,512);
-	return (strstr(target_path,"\\??\\") == target_path);
+	if(err_msg)
+	{
+		if(err_msg[0]) MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		if(hEvtDone) CloseHandle(hEvtDone);
+		if(hEventComplete) CloseHandle(hEventComplete);
+		udefrag_unload();
+		ExitProcess(exit_code);
+	}
 }
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	int err_code = 0;
-	char *err_msg;
-	HKEY hKey,hKey1,hKey2;
-	ULONG _len;
-
 	settings = udefrag_get_settings();
 	/* check command line keys */
 	_strupr(lpCmdLine);
@@ -154,41 +145,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		ExitProcess(0);
 	}
 	hEventComplete = CreateEvent(NULL,TRUE,TRUE,"UltraDefragCommandComplete");
-	hEvt = CreateEvent(NULL,TRUE,TRUE,"UltraDefragIoComplete");
-	//hEvtStop = CreateEvent(NULL,TRUE,TRUE,"UltraDefragStop");
 	hEvtDone = CreateEvent(NULL,TRUE,TRUE,"UltraDefragDone");
-	if(!hEventComplete || !hEvt || /*!hEvtStop ||*/ !hEvtDone)
-	{
-		err_code = 2; goto cleanup;
-	}
-	err_msg = udefrag_init(FALSE);
-	if(err_msg)
-	{
-		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		err_code = 3; goto cleanup;
-	}
-	hUltraDefragDevice = get_device_handle();
-	/* get window coordinates and other settings from registry */
-	err_msg = udefrag_load_settings(0,NULL);
-	if(err_msg)
-	{
-		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		err_code = 3; goto cleanup;
-	}
-	err_msg = udefrag_apply_settings();
-	if(err_msg)
-	{
-		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		err_code = 3; goto cleanup;
-	}
-	/* load window coordinates */
-	if(RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\DASoft\\NTDefrag",
-		0,KEY_QUERY_VALUE,&hKey) == ERROR_SUCCESS)
-	{
-		_len = sizeof(RECT);
-		RegQueryValueEx(hKey,"position",NULL,NULL,(BYTE*)&win_rc,&_len);
-		RegCloseKey(hKey);
-	}
+	if(!hEventComplete || !hEvtDone) HandleError("Can't create events!",2);
+	HandleError(udefrag_init(FALSE),2);
+	/* load settings - always successful */
+	udefrag_load_settings(0,NULL);
+	HandleError(udefrag_apply_settings(),2);
+	win_rc.left = settings->x; win_rc.top = settings->y;
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
 	InitCommonControls();
@@ -197,60 +160,27 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
 	/* delete all created gdi objects */
 	DeleteMaps();
-	/* save window coordinates and other settings to registry */
-	if(RegOpenKeyEx(HKEY_CURRENT_USER,"Software\\DASoft\\NTDefrag",
-		0,KEY_SET_VALUE,&hKey) != ERROR_SUCCESS)
-	{
-		RegCreateKeyEx(HKEY_CURRENT_USER,"Software",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey1,NULL);
-		RegCreateKeyEx(hKey1,"DASoft",0,NULL,0,KEY_CREATE_SUB_KEY,NULL,&hKey2,NULL);
-		if(RegCreateKeyEx(hKey2,"NTDefrag",0,NULL,0,KEY_SET_VALUE,NULL,&hKey,NULL) != \
-			ERROR_SUCCESS)
-		{
-			RegSetValueEx(hKey,"position",0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
-			RegCloseKey(hKey);
-		}
-		RegCloseKey(hKey1); RegCloseKey(hKey2);
-	}
-	else
-	{
-		RegSetValueEx(hKey,"position",0,REG_BINARY,(BYTE*)&win_rc,sizeof(RECT));
-		RegCloseKey(hKey);
-	}
-	err_msg = udefrag_save_settings();
-	if(err_msg)
-	{
-		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		err_code = 3; goto cleanup;
-	}
-cleanup:
-	if(hEventComplete) CloseHandle(hEventComplete);
-	if(hEvt) CloseHandle(hEvt);
-	//if(hEvtStop) CloseHandle(hEvtStop);
-	udefrag_unload();
-	ExitProcess(err_code);
+	/* save settings */
+	settings->x = win_rc.left; settings->y = win_rc.top;
+	HandleError(udefrag_save_settings(),4);
+	HandleError("",0);
 }
 
 __inline void RescanDrives()
 {
-	CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)RescanDrivesThreadProc,NULL,0,&thr_id);
+	create_thread(RescanDrivesThreadProc,NULL);
 }
 
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 {
 	char chr;
 	int stat,index;
-	static char rootpath[] = "A:\\";
-	ULONGLONG total, free, BytesAvailable; /* on NT 4.0 we must specify all parameters 
-											  of GetDiskFreeSpaceEx */
-	char volname[32];
-	char filesys[7];
 	char s[16];
-	char *str;
-	int maxcomp, flags;
-	const char tmpl[] = "A:\t      \t      \t\t       \t  \t       \t  \t00 %";
-	char line[sizeof(tmpl)+1];
-	int percent,digit;
-	int drive_type;
+	int p;
+	char *err_msg;
+	volume_info *v;
+	int i;
+	LV_ITEM lvi;
 
 	/* Disable 'Rescan' button [and others] */
 	EnableWindow(hBtnRescan,FALSE);
@@ -260,60 +190,60 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	EnableWindow(hBtnFragm,FALSE);
 	HideProgress();
 
-	SendMessage(hList,LB_RESETCONTENT,0,0);
-	SendMessage(hList,LB_ADDSTRING,0, \
-		(LPARAM)"Volume  Status  File system      Total size         Free      Percent");
-	SendMessage(hList,LB_ADDSTRING,0, \
-		(LPARAM)"------------------------------------------------------------------------"
-				"-----------");
-	SetErrorMode(SEM_FAILCRITICALERRORS);
+	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	index = 0;
-	for(chr = 'A'; chr <= 'Z'; chr++)
+	err_msg = udefrag_get_avail_volumes(&v,settings->skip_removable);
+	if(err_msg)
 	{
-		rootpath[0] = chr;
-		drive_type = GetDriveType(rootpath);
-		if( drive_type != DRIVE_FIXED && drive_type != DRIVE_REMOVABLE && \
-			drive_type != DRIVE_RAMDISK ) continue;
-		if(is_virtual(chr)) continue;
-		if(drive_type == DRIVE_REMOVABLE && settings->skip_removable) continue;
-		if(GetDiskFreeSpaceEx(rootpath,(ULARGE_INTEGER *)&BytesAvailable,
-			(ULARGE_INTEGER *)&total,(ULARGE_INTEGER *)&free))
-		{
-			if(GetVolumeInformation(rootpath,volname,sizeof(volname)-1,NULL,&maxcomp,&flags, \
-				filesys,sizeof(filesys)-1))
-			{
-				/*
-				 * Add to list following formatted string:
-				 * L:    ssssss    ffffff    xxxx.xx AA    yyyy.yy BB    zz %
-				 * -------------------------------------------------------------
-				 *       status    filesys   total        free         percent
-				 */
-				memcpy((void *)line,(void *)tmpl,sizeof(tmpl));
-				line[0] = chr;
-				stat = work_status[chr - 'A'];
-				memcpy((void *)(line + 3),(void *)(stat_msg[stat]),strlen(stat_msg[stat]));
-				memcpy((void *)(line + 11),(void *)filesys,strlen(filesys));
-				str = FormatBySize(total,s,RIGHT_ALIGNED);
-				memcpy((void *)(line + 18),(void *)str,strlen(str));
-				str = FormatBySize(free,s,RIGHT_ALIGNED);
-				memcpy((void *)(line + 29),(void *)str,strlen(str));
-				percent = (int)(100 * \
-					(double)(signed __int64)free / (double)(signed __int64)total);
-				digit = percent / 10;
-				if(digit)
-					line[40] = (char)digit + '0';
-				else
-					line[40] = 0x20;
-				digit = percent % 10;
-				line[41] = (char)digit + '0';
-				SendMessage(hList,LB_ADDSTRING,0,(LRESULT)line);
-			}
-			letter_numbers[index] = chr - 'A';
-			index ++;
-		}
+		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		goto scan_done;
 	}
-	SetErrorMode(0);
-	SendMessage(hList,LB_SETCURSEL,2,0);
+	for(i = 0;;i++)
+	{
+		chr = v[i].letter;
+		if(!chr) break;
+
+		sprintf(s,"%c:",chr);
+		lvi.mask = LVIF_TEXT;
+		lvi.iItem = i;
+		lvi.iSubItem = 0;
+		lvi.pszText = s;
+		SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
+
+		stat = work_status[chr - 'A'];
+		lvi.iSubItem = 1;
+		lvi.pszText = stat_msg[stat];
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+
+		lvi.iSubItem = 2;
+		lvi.pszText = v[i].fsname;
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+
+		fbsize(s,(ULONGLONG)(v[i].total_space.QuadPart));
+		lvi.iSubItem = 3;
+		lvi.pszText = s;
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+
+		fbsize(s,(ULONGLONG)(v[i].free_space.QuadPart));
+		lvi.iSubItem = 4;
+		lvi.pszText = s;
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+
+		p = (int)(100 * \
+			((double)(signed __int64)(v[i].free_space.QuadPart) / (double)(signed __int64)(v[i].total_space.QuadPart)));
+		sprintf(s,"%u %%",p);
+		lvi.iSubItem = 5;
+		lvi.pszText = s;
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+
+		letter_numbers[index] = chr - 'A';
+		index ++;
+	}
+scan_done:
+	lvi.mask = LVIF_STATE;
+	lvi.stateMask = LVIS_SELECTED;
+	lvi.state = LVIS_SELECTED;
+	SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
 	Index = letter_numbers[0];
 	RedrawMap();
 	UpdateStatusBar(Index);
@@ -328,15 +258,6 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 void Stop()
 {
-/*	DWORD txd;
-	OVERLAPPED ovrl;
-
-	ovrl.hEvent = hEvtStop;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	DeviceIoControl(hUltraDefragDevice,IOCTL_ULTRADEFRAG_STOP,
-					NULL,0,NULL,0,&txd,&ovrl);
-	WaitForSingleObject(hEvtStop,INFINITE);
-*/
 	char *err_msg;
 
 	err_msg = udefrag_stop();
@@ -370,6 +291,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	int cx,cy;
 	int dx,dy;
 	RECT _rc;
+	LV_COLUMN lvc;
 
 	switch(msg)
 	{
@@ -412,6 +334,30 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
 			SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
 			if(hIcon) DeleteObject(hIcon);
+			/* initialize listview control */
+			SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
+				(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
+			lvc.mask = LVCF_TEXT | LVCF_WIDTH;
+			lvc.pszText = "Volume";
+			lvc.cx = 60;
+			SendMessage(hList,LVM_INSERTCOLUMN,0,(LRESULT)&lvc);
+			lvc.pszText = "Status";
+			lvc.cx = 60;
+			SendMessage(hList,LVM_INSERTCOLUMN,1,(LRESULT)&lvc);
+			lvc.pszText = "File system";
+			lvc.cx = 100;
+			SendMessage(hList,LVM_INSERTCOLUMN,2,(LRESULT)&lvc);
+			lvc.mask |= LVCF_FMT;
+			lvc.fmt = LVCFMT_RIGHT;
+			lvc.pszText = "Total space";
+			lvc.cx = 100;
+			SendMessage(hList,LVM_INSERTCOLUMN,3,(LRESULT)&lvc);
+			lvc.pszText = "Free space";
+			lvc.cx = 100;
+			SendMessage(hList,LVM_INSERTCOLUMN,4,(LRESULT)&lvc);
+			lvc.pszText = "Percentage";
+			lvc.cx = 85;
+			SendMessage(hList,LVM_INSERTCOLUMN,5,(LRESULT)&lvc);
 			/* set window procs */
 			OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
 			OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
@@ -424,7 +370,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			SetWindowLongPtr(GetDlgItem(hWnd,IDC_SETTINGS),GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
 			SetWindowLongPtr(GetDlgItem(hWnd,IDC_ABOUT),GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
 			SetWindowLongPtr(hBtnRescan,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			OldCheckWndProc = (WNDPROC)SetWindowLongPtr(hCheckSkipRem,GWLP_WNDPROC,(LONG_PTR)CheckWndProc);
+			OldCheckWndProc = \
+				(WNDPROC)SetWindowLongPtr(hCheckSkipRem,GWLP_WNDPROC,(LONG_PTR)CheckWndProc);
 			RescanDrives();
 			CreateBitMapGrid();
 			CreateStatusBar();
@@ -437,32 +384,33 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			switch(LOWORD(wParam))
 			{
 			case IDC_ANALYSE:
-				CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)ThreadProc,(void *)(DWORD)'a',0,&thr_id);
-				return FALSE;
+				create_thread(ThreadProc,(DWORD)'a');
+				break;
 			case IDC_DEFRAGM:
-				CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)ThreadProc,(void *)(DWORD)'d',0,&thr_id);
-				return FALSE;
+				create_thread(ThreadProc,(DWORD)'d');
+				break;
 			case IDC_COMPACT:
-				CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)ThreadProc,(void *)(DWORD)'c',0,&thr_id);
-				return FALSE;
+				create_thread(ThreadProc,(DWORD)'c');
+				break;
 			case IDC_ABOUT:
 				DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
-				return FALSE;
+				break;
 			case IDC_SETTINGS:
 				DialogBox(hInstance,MAKEINTRESOURCE(IDD_SETTINGS),hWindow,(DLGPROC)SettingsDlgProc);
-				return FALSE;
+				break;
 			case IDC_SKIPREMOVABLE:
 				if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
 					HIWORD(wParam) == BN_UNPUSHED || HIWORD(wParam) == BN_DBLCLK)
-					settings->skip_removable = (SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
-				return FALSE;
+					settings->skip_removable = \
+						(SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
+				break;
 			case IDC_SHOWFRAGMENTED:
 				ShowFragmented();
-				return FALSE;
+				break;
 			case IDC_PAUSE:
 			case IDC_STOP:
 				Stop();
-				return FALSE;
+				break;
 			case IDC_RESCAN:
 				RescanDrives();
 			}
@@ -497,9 +445,10 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	MSG message;
-	LRESULT i, retval = 0;
+	LRESULT iItem, retval = 0;
 
-	if((iMsg == WM_KEYDOWN || iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP) && busy_flag)
+	if((iMsg == WM_KEYDOWN || iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP ||
+		iMsg == WM_RBUTTONDOWN || iMsg == WM_RBUTTONUP) && busy_flag)
 		return 0;
 	if(iMsg == WM_KEYDOWN)
 	{
@@ -516,19 +465,17 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 	if(iMsg == WM_KEYDOWN || iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP)
 	{
-		i = SendMessage(hList,LB_GETCURSEL,0,0);
-		if(i < 2) /* don't select first two lines! */
+		iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+		if(iItem != -1)
 		{
-			i = 2;
-			SendMessage(hList,LB_SETCURSEL,2,0);
+			HideProgress();
+			/* change Index */
+			Index = letter_numbers[iItem];
+			/* redraw indicator */
+			RedrawMap();
+			/* Update status bar */
+			UpdateStatusBar(Index);
 		}
-		HideProgress();
-		/* change Index */
-		Index = letter_numbers[i - 2];
-		/* redraw indicator */
-		RedrawMap();
-		/* Update status bar */
-		UpdateStatusBar(Index);
 	}
 	return retval;
 }
@@ -617,7 +564,7 @@ BOOL CreateStatusBar()
 
 void UpdateStatusBar(int index)
 {
-	char *str;
+	char s[32];
 
 	if(!hStatus) return;
 	sprintf(buffer,"%u dirs",(stat[index]).dircounter);
@@ -628,9 +575,9 @@ void UpdateStatusBar(int index)
 	SendMessage(hStatus,SB_SETTEXT,2,(LPARAM)buffer);
 	sprintf(buffer,"%u compressed",(stat[index]).compressedcounter);
 	SendMessage(hStatus,SB_SETTEXT,3,(LPARAM)buffer);
-	str = FormatBySize((ULONGLONG)((stat[index]).mft_size),buffer,LEFT_ALIGNED);
-	strcat(str," MFT");
-	SendMessage(hStatus,SB_SETTEXT,4,(LPARAM)str);
+	fbsize(s,(ULONGLONG)((stat[index]).mft_size));
+	strcat(s," MFT");
+	SendMessage(hStatus,SB_SETTEXT,4,(LPARAM)s);
 }
 
 __inline void EnableButtons(void)
@@ -659,17 +606,13 @@ __inline void DisableButtons(void)
 
 DWORD WINAPI UpdateMapThreadProc(LPVOID lpParameter)
 {
-	DWORD txd;
 	int index = (int)(size_t)lpParameter;
 	char *_map;
 	DWORD wait_result;
-	OVERLAPPED ovrl;
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
 
-	ovrl.hEvent = hEvt;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
 	_map = map[index];
 	pst = &stat[index];
 	ShowProgress();
@@ -687,9 +630,7 @@ DWORD WINAPI UpdateMapThreadProc(LPVOID lpParameter)
 			SetWindowText(hProgressMsg,progress_msg);
 			SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 		}
-		if(!RequestMap(hUltraDefragDevice,_map,&txd,&ovrl))
-				goto wait;
-		WaitForSingleObject(hEvt,INFINITE);
+		if(udefrag_get_map(_map,N_BLOCKS)) goto wait;
 		FillBitMap(index);
 		RedrawMap();
 wait: 
@@ -697,9 +638,7 @@ wait:
 	} while(wait_result == WAIT_TIMEOUT);
 	if(!stop_pressed)
 	{
-		progress_msg[0] = current_operation;
-		progress_msg[1] = 0;
-		strcat(progress_msg," 100 %");
+		sprintf(progress_msg,"%c 100 %%",current_operation);
 		SetWindowText(hProgressMsg,progress_msg);
 		SendMessage(hProgressBar,PBM_SETPOS,100,0);
 	}
@@ -709,42 +648,35 @@ wait:
 
 DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
-	LRESULT linenumber;
+	LRESULT iItem;
 	int index;
-//	ULTRADFG_COMMAND cmd;
-//	DWORD txd;
-//	OVERLAPPED ovrl;
 	UCHAR command;
 	char *err_msg;
 
 	busy_flag = 1;
-	linenumber = SendMessage(hList,LB_GETCURSEL,0,0);
-	if(linenumber == LB_ERR)
+	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+	if(iItem == -1)
 	{
 		busy_flag = 0;
 		return 0;
 	}
 
-	ShowStatus(STAT_WORK,linenumber);
+	ShowStatus(STAT_WORK,iItem);
 	DisableButtons();
 	ClearMap();
 
-	index = letter_numbers[linenumber - 2];
-	//cmd.command = (char)lpParameter;
-	//cmd.letter = index + 'A';
-	//cmd.sizelimit = settings->sizelimit;
-	//cmd.mode = __UserMode;
+	index = letter_numbers[iItem];
 	command = (UCHAR)lpParameter;
 
-	if(/*cmd.*/command == 'a')
-		ShowStatus(STAT_AN,linenumber);
+	if(command == 'a')
+		ShowStatus(STAT_AN,iItem);
 	else
-		ShowStatus(STAT_DFRG,linenumber);
+		ShowStatus(STAT_DFRG,iItem);
 
 	stop_pressed = FALSE;
 	ResetEvent(hEventComplete);
 	ResetEvent(hEvtDone);
-	CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)UpdateMapThreadProc,(void *)(size_t)index,0,&thr_id);
+	create_thread(UpdateMapThreadProc,(size_t)index);
 
 	switch(command)
 	{
@@ -760,53 +692,40 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	if(err_msg)
 	{
 		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		ShowStatus(STAT_CLEAR,linenumber);
+		ShowStatus(STAT_CLEAR,iItem/*linenumber*/);
 		ClearMap();
 	}
 	SetEvent(hEventComplete);
-
-/*	ovrl.hEvent = hEventComplete;
-	ovrl.Offset = ovrl.OffsetHigh = 0;
-	if(!WriteFile(hUltraDefragDevice,&cmd,sizeof(ULTRADFG_COMMAND),&txd,&ovrl))
-	{
-		MessageBox(0,"Incorrect drive letter or driver error!","Error!",MB_OK | MB_ICONHAND);
-		ShowStatus(STAT_CLEAR,linenumber);
-		ClearMap();
-		SetEvent(hEventComplete);
-	}
-	WaitForSingleObject(hEventComplete,INFINITE);
-	*/
 	EnableButtons();
 	busy_flag = 0;
 	return 0;
 }
 
-void ShowStatus(int stat,LRESULT linenumber)
+void ShowStatus(int stat,LRESULT iItem)
 {
-	char buffer[256];
+	LV_ITEM lvi;
 
-	work_status[letter_numbers[linenumber-2]] = stat;
+	work_status[letter_numbers[(int)iItem]] = stat;
 	if(stat == STAT_CLEAR)
 		return;
-	SendMessage(hList,LB_GETTEXT,linenumber,(LPARAM)buffer);
-	memset((void *)(buffer + 3),0x20,6);
-	memcpy((void *)(buffer + 3),(void *)(stat_msg[stat]),strlen(stat_msg[stat]));
-	SendMessage(hList,LB_DELETESTRING,linenumber,0);
-	SendMessage(hList,LB_INSERTSTRING,linenumber,(LPARAM)buffer);
-	SendMessage(hList,LB_SETCURSEL,linenumber,0);
+	lvi.mask = LVIF_TEXT;
+	lvi.iItem = (int)iItem;
+	lvi.iSubItem = 1;
+	lvi.pszText = stat_msg[stat];
+	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 }
 
 void ShowFragmented()
 {
 	char path[] = "C:\\FRAGLIST.HTM";
-	LRESULT linenumber;
+	LRESULT iItem;
 	int index;
 
-	linenumber = SendMessage(hList,LB_GETCURSEL,0,0);
-	if(linenumber == LB_ERR)
+	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+	if(iItem == -1)
 		return;
 
-	index = letter_numbers[linenumber - 2];
+	index = letter_numbers[iItem];
 	if(work_status[index] == STAT_CLEAR)
 		return;
 	path[0] = index + 'A';
