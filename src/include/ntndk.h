@@ -666,4 +666,12 @@ typedef struct _KBD_RECORD {
 	BOOL	bKeyDown;
 } KBD_RECORD, *PKBD_RECORD;
 
+NTSTATUS  WINAPI LdrGetDllHandle(ULONG, ULONG, const UNICODE_STRING*, HMODULE*);
+
+NTSTATUS WINAPI
+LdrGetProcedureAddress (IN PVOID BaseAddress,
+                        IN PANSI_STRING Name,
+                        IN ULONG Ordinal,
+                        OUT PVOID *ProcedureAddress);
+
 #endif /* _NTNDK_H_ */

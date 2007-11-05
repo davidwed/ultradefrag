@@ -98,7 +98,7 @@ extern BOOL _ioctl(HANDLE handle,HANDLE event,ULONG code,
 			char *err_format_string);
 
 /* functions */
-char * __cdecl udefrag_load_settings(int argc, short **argv)
+char * __stdcall udefrag_load_settings(int argc, short **argv)
 {
 	HANDLE hKey;
 	DWORD x;
@@ -181,12 +181,12 @@ no_cmdline:
 	return NULL;
 }
 
-ud_settings * __cdecl udefrag_get_settings(void)
+ud_settings * __stdcall udefrag_get_settings(void)
 {
 	return &settings;
 }
 
-char * __cdecl udefrag_apply_settings(void)
+char * __stdcall udefrag_apply_settings(void)
 {
 	REPORT_TYPE rt;
 
@@ -229,7 +229,7 @@ apply_settings_fail:
 	return msg;
 }
 
-char * __cdecl udefrag_save_settings(void)
+char * __stdcall udefrag_save_settings(void)
 {
 	HANDLE hKey;
 	DWORD x;

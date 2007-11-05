@@ -79,6 +79,10 @@ SOURCE=.\stdio.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\thread.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\udefrag.c
 # End Source File
 # Begin Source File

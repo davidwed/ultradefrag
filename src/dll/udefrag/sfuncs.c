@@ -196,3 +196,27 @@ char * __stdcall scheduler_s_get_avail_letters(void)
 	strcat(s_msg,result);
 	return s_msg;
 }
+
+char * __stdcall udefrag_s_analyse_ex(unsigned char letter,STATUPDATEPROC sproc)
+{
+	char *result;
+
+	result = udefrag_analyse_ex(letter,sproc);
+	return result ? result : "";
+}
+
+char * __stdcall udefrag_s_defragment_ex(unsigned char letter,STATUPDATEPROC sproc)
+{
+	char *result;
+
+	result = udefrag_defragment_ex(letter,sproc);
+	return result ? result : "";
+}
+
+char * __stdcall udefrag_s_optimize_ex(unsigned char letter,STATUPDATEPROC sproc)
+{
+	char *result;
+
+	result = udefrag_optimize_ex(letter,sproc);
+	return result ? result : "";
+}

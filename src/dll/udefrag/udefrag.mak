@@ -26,6 +26,7 @@ CLEAN :
 	-@erase "$(INTDIR)\stdio.obj"
 	-@erase "$(INTDIR)\keytrans.obj"
 	-@erase "$(INTDIR)\sfuncs.obj"
+	-@erase "$(INTDIR)\thread.obj"
 	-@erase "$(INTDIR)\udefrag.res"
 	-@erase "$(INTDIR)\vc60.idb"
 	-@erase "$(OUTDIR)\udefrag.dll"
@@ -71,6 +72,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\stdio.obj" \
 	"$(INTDIR)\keytrans.obj" \
 	"$(INTDIR)\sfuncs.obj" \
+	"$(INTDIR)\thread.obj" \
 	"$(INTDIR)\udefrag.res"
 
 "$(OUTDIR)\udefrag.dll" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)

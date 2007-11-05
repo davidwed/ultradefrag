@@ -47,7 +47,7 @@ extern void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData,KBD_RECORD *kbd_rec);
  * Write Data to Display procedures.
  */
 
-void __cdecl nputch(char ch)
+void __stdcall nputch(char ch)
 {
 	short str[2];
 	UNICODE_STRING uStr;
@@ -57,7 +57,7 @@ void __cdecl nputch(char ch)
 	NtDisplayString(&uStr);
 }
 
-void __cdecl nprint(char *str)
+void __stdcall nprint(char *str)
 {
 	int i,len;
 	ANSI_STRING aStr;
@@ -80,7 +80,7 @@ void __cdecl nprint(char *str)
 /*
  * Read Keyboard Input procedures.
  */
-char * __cdecl kb_open(void)
+char * __stdcall kb_open(void)
 {
 	short kb_device_name[] = L"\\Device\\KeyboardClass0";
 	UNICODE_STRING uStr;
@@ -120,7 +120,7 @@ kb_open_fail:
 }
 
 /* NOTE: if keyboard is inaccessible return value is always FALSE */
-int __cdecl kb_hit(KEYBOARD_INPUT_DATA *pkbd,int msec_timeout)
+int __stdcall kb_hit(KEYBOARD_INPUT_DATA *pkbd,int msec_timeout)
 {
 	if(kb_read_error) return FALSE;
 	return (kb_read(pkbd,msec_timeout) == STATUS_SUCCESS);
@@ -165,7 +165,7 @@ NTSTATUS kb_read(KEYBOARD_INPUT_DATA *pkbd,int msec_timeout)
 	return Status;
 }
 
-char * __cdecl kb_gets(char *buffer,int max_chars)
+char * __stdcall kb_gets(char *buffer,int max_chars)
 {
 	KEYBOARD_INPUT_DATA kbd;
 	KBD_RECORD kbd_rec;
@@ -205,7 +205,7 @@ kb_gets_successful:
 	return NULL;
 }
 
-char * __cdecl kb_close(void)
+char * __stdcall kb_close(void)
 {
 	SafeNtClose(hKbDevice);
 	SafeNtClose(hKbEvent);

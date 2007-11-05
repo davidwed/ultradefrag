@@ -56,8 +56,13 @@ volume_info v[MAX_DOS_DRIVES + 1];
 
 BOOL nt4_system = FALSE; /* TRUE for nt 4.0 */
 
+unsigned char c, lett;
+BOOL done_flag;
+char *error_message;
+
 /* internal functions prototypes */
 BOOL udefrag_send_command(unsigned char command,unsigned char letter);
+BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
 BOOL get_drive_map(PROCESS_DEVICEMAP_INFORMATION *pProcessDeviceMapInfo);
 BOOL internal_open_rootdir(unsigned char letter,HANDLE *phFile);
 BOOL internal_validate_volume(unsigned char letter,int skip_removable,
@@ -81,7 +86,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
-char * __cdecl udefrag_init(int native_mode)
+char * __stdcall udefrag_init(int native_mode)
 {
 	UNICODE_STRING uStr;
 	HANDLE UserToken = NULL;
@@ -150,7 +155,7 @@ init_fail:
 	return msg;
 }
 
-char * __cdecl udefrag_unload(void)
+char * __stdcall udefrag_unload(void)
 {
 	UNICODE_STRING uStr;
 
@@ -176,22 +181,66 @@ unload_fail:
 	return msg;
 }
 
-char * __cdecl udefrag_analyse(unsigned char letter)
+char * __stdcall udefrag_analyse(unsigned char letter)
 {
 	return udefrag_send_command('a',letter) ? NULL : msg;
 }
 
-char * __cdecl udefrag_defragment(unsigned char letter)
+char * __stdcall udefrag_defragment(unsigned char letter)
 {
 	return udefrag_send_command('d',letter) ? NULL : msg;
 }
 
-char * __cdecl udefrag_optimize(unsigned char letter)
+char * __stdcall udefrag_optimize(unsigned char letter)
 {
 	return udefrag_send_command('c',letter) ? NULL : msg;
 }
 
-char * __cdecl udefrag_stop(void)
+/* asynchronous functions set - they returns immediately */
+DWORD WINAPI send_command(LPVOID unused)
+{
+	error_message = udefrag_send_command(c,lett) ? NULL : msg;
+	done_flag = TRUE;
+	exit_thread();
+	return 0;
+}
+
+BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc)
+{
+	done_flag = FALSE;
+	/* create a thread for driver command processing */
+	c = command; lett = letter;
+	if(create_thread(send_command,NULL)) return FALSE;
+	if(sproc)
+	{
+		/* call specified callback 
+		 * every (settings.update_interval) milliseconds */
+		do
+		{
+			nsleep(settings.update_interval);
+			sproc(FALSE);//,"");
+		} while(!done_flag);
+		sproc(TRUE);//,error_message);
+	}
+	return TRUE;
+}
+
+char * __stdcall udefrag_analyse_ex(unsigned char letter,STATUPDATEPROC sproc)
+{
+	return udefrag_send_command_ex('a',letter,sproc) ? NULL : msg;
+}
+
+char * __stdcall udefrag_defragment_ex(unsigned char letter,STATUPDATEPROC sproc)
+{
+	return udefrag_send_command_ex('d',letter,sproc) ? NULL : msg;
+}
+
+char * __stdcall udefrag_optimize_ex(unsigned char letter,STATUPDATEPROC sproc)
+{
+	return udefrag_send_command_ex('c',letter,sproc) ? NULL : msg;
+}
+
+char * __stdcall udefrag_stop(void)
 {
 	if(!init_event)
 	{
@@ -220,15 +269,17 @@ BOOL udefrag_send_command(unsigned char command,unsigned char letter)
 	cmd.sizelimit = settings.sizelimit;
 	cmd.mode = __UserMode;
 	offset.QuadPart = 0;
-	Status = NtWriteFile(udefrag_device_handle,io_event,
+	Status = NtWriteFile(udefrag_device_handle,/*NULL*/io_event,
 		NULL,NULL,&IoStatusBlock,
 		&cmd,sizeof(ULTRADFG_COMMAND),&offset,0);
+#if 0
 	if(Status == STATUS_PENDING)
 	{
-		Status = NtWaitForSingleObject(io_event,FALSE,NULL);
+		Status = NtWaitForSingleObject(udefrag_device_handle/*io_event*/,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = IoStatusBlock.Status;
 	}
-	if(!NT_SUCCESS(Status))
+#endif
+	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING)
 	{
 		sprintf(msg,"Can't execute driver command \'%c\' for volume %c: %x!",
 			command,letter,Status);
@@ -237,7 +288,7 @@ BOOL udefrag_send_command(unsigned char command,unsigned char letter)
 	return TRUE;
 }
 
-char * __cdecl udefrag_get_progress(STATISTIC *pstat, double *percentage)
+char * __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
 	if(!init_event)
 	{
@@ -277,7 +328,7 @@ get_progress_fail:
 	return msg;
 }
 
-char * __cdecl udefrag_get_map(char *buffer,int size)
+char * __stdcall udefrag_get_map(char *buffer,int size)
 {
 	if(!init_event)
 	{
@@ -289,7 +340,7 @@ char * __cdecl udefrag_get_map(char *buffer,int size)
 }
 
 /* useful for native and console applications */
-char * __cdecl get_default_formatted_results(STATISTIC *pstat)
+char * __stdcall get_default_formatted_results(STATISTIC *pstat)
 {
 	char s[64];
 	double p;
@@ -319,7 +370,7 @@ char * __cdecl get_default_formatted_results(STATISTIC *pstat)
 /* NOTE: if(skip_removable == FALSE && you have floppy drive without floppy disk)
  *       then you will hear noise :))
  */
-char * __cdecl udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable)
+char * __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable)
 {
 	PROCESS_DEVICEMAP_INFORMATION ProcessDeviceMapInfo;
 	ULONG drive_map;
@@ -361,7 +412,7 @@ get_volumes_fail:
 /* NOTE: this is something like udefrag_get_avail_volumes()
  *       but without noise.
  */
-char * __cdecl udefrag_validate_volume(unsigned char letter,int skip_removable)
+char * __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
 	PROCESS_DEVICEMAP_INFORMATION ProcessDeviceMapInfo;
 	FILE_FS_SIZE_INFORMATION FileFsSize;
@@ -656,12 +707,12 @@ BOOL _ioctl(HANDLE handle,HANDLE event,ULONG code,
 	Status = NtDeviceIoControlFile(handle,event,
 				NULL,NULL,&IoStatusBlock,code,
 				in_buf,in_size,out_buf,out_size);
-	if(Status == STATUS_PENDING)
+/*	if(Status == STATUS_PENDING)
 	{
 		Status = NtWaitForSingleObject(event,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = IoStatusBlock.Status;
 	}
-	if(!NT_SUCCESS(Status))
+*/	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING)
 	{
 		sprintf(msg,err_format_string,Status);
 		return FALSE;
@@ -685,7 +736,7 @@ BOOL set_error_mode(UINT uMode)
 	return TRUE;
 }
 
-void __cdecl nsleep(int msec)
+void __stdcall nsleep(int msec)
 {
 	LARGE_INTEGER Interval;
 
@@ -703,7 +754,7 @@ void __cdecl nsleep(int msec)
 }
 
 /* original name was StrFormatByteSize */
-int __cdecl fbsize(char *s,ULONGLONG n)
+int __stdcall fbsize(char *s,ULONGLONG n)
 {
 	char symbols[] = {'K','M','G','T','P','E'};
 	double fn;
@@ -720,7 +771,7 @@ int __cdecl fbsize(char *s,ULONGLONG n)
 }
 
 /* fbsize variant for other purposes */
-int __cdecl fbsize2(char *s,ULONGLONG n)
+int __stdcall fbsize2(char *s,ULONGLONG n)
 {
 	char symbols[] = {'K','M','G','T','P','E'};
 	unsigned int i;
@@ -733,7 +784,7 @@ int __cdecl fbsize2(char *s,ULONGLONG n)
 }
 
 /* decode fbsize2 formatted string */
-int __cdecl dfbsize2(char *s,ULONGLONG *pn)
+int __stdcall dfbsize2(char *s,ULONGLONG *pn)
 {
 	char symbols[] = {'K','M','G','T','P','E'};
 	char t[64];

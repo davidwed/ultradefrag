@@ -3,33 +3,23 @@
 # This is the Ultra Defragmenter Modern User Interface.
 # Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
-use threads; # perl 5.8 or higher required
-#use threads::shared;
-
 use Win32::API;
-
+use Win32::API::Callback;
 use Tk;
 use Tk::HList;
 use Tk::ItemStyle;
 use strict;
 
-#share($_TK_RESULT_);
-
 # global variables
 my $x_blocks = 52;
 my $y_blocks = 14;
-#share($x_blocks);
-#share($y_blocks);
 my $block_size = 10;
 my %colors = (chr(1) => 'white',chr(2) => 'green4', chr(3) => 'red2', chr(4) => 'blue3',
 	chr(5) => 'magenta4', chr(6) => 'yellow1', chr(7) => 'yellow3', chr(8) => 'green4',
 	chr(9) => 'red4', chr(10) => 'blue4', chr(11) => 'yellow2', chr(12) => 'yellow4',
 	chr(13) => 'cyan1');
-#share(%colors);
 my $i;
 my $j;
-my $result;
-my $working_thread;
 my $skip_rem = 1;
 
 $SIG{INT} = sub {gui_unload(); udefrag_s_unload();};
@@ -50,9 +40,9 @@ if(!$import_result){
 	display_critical_error('Can\'t import functions from udefrag.dll!');
 }
 Win32::API->Import('udefrag','char* udefrag_s_unload()');
-Win32::API->Import('udefrag','char* udefrag_s_analyse(char letter)');
-Win32::API->Import('udefrag','char* udefrag_s_defragment(char letter)');
-Win32::API->Import('udefrag','char* udefrag_s_optimize(char letter)');
+Win32::API->Import('udefrag','udefrag_s_analyse_ex','CK','P');
+Win32::API->Import('udefrag','udefrag_s_defragment_ex','CK','P');
+Win32::API->Import('udefrag','udefrag_s_optimize_ex','CK','P');
 Win32::API->Import('udefrag','char* udefrag_s_stop()');
 Win32::API->Import('udefrag','char* udefrag_s_get_avail_volumes(int skip_removable)');
 Win32::API->Import('udefrag','char* udefrag_s_get_progress()');
@@ -86,17 +76,17 @@ for($i = 0; $i < 6; $i++){
 
 my $label1 = $top->Label(
 	-text => 'Cluster map:'
-	);#->pack(-side => 'left');
+	);
 
 my $skip_rem_btn = $top->Checkbutton(
 	-text => 'Skip removable media',
 	-variable => \$skip_rem
-	);#->pack;
+	);
 
 my $rescan_btn = $top->Button(
 	-text => 'Rescan drives',
 	-command => sub { rescan_drives(); }
-	);#->pack(-side => 'right');
+	);
 
 my $map = $top->Canvas(
 	-relief => 'sunken', -borderwidth => '2', -background => 'black',
@@ -115,10 +105,7 @@ for($j = 0; $j < $y_blocks; $j++){
 
 my $analyse_btn = $top->Button(
 	-text => 'Analyse',
-	-command => sub {
-		#$working_thread = threads->create('analyse',' ');
-		analyse();
-	}
+	-command => sub { analyse(); }
 	);
 
 my $defrag_btn = $top->Button(
@@ -151,6 +138,7 @@ my $about_btn = $top->Button(
 	-command => sub { exit }
 	);
 
+# set controls positions
 $list->form(-top => '%0', -left => '%0', -right => '%100');
 $label1->form(
 	-top => $list, -left => '%0',
@@ -178,11 +166,31 @@ rescan_drives();
 # initialize ultradefrag engine
 handle_error(udefrag_s_init());
 
+# create callback procedure
+my $update_map = sub {
+print $_[0]."\n";
+	my $map_buffer = udefrag_s_get_map($x_blocks * $y_blocks + 1);
+	$_ = $map_buffer;
+	if(m/ERROR/o){
+	}else{
+		my $i = 0;
+		my @m = split(/ */,$map_buffer); # ????????
+		foreach ($map->find('all')){
+			$map->itemconfigure($_,-fill => $colors{$m[$i]});
+			$i++;
+		}
+	}
+	$map->update();
+	#DoOneEvent(); #??
+	return 0;
+};
+
+my $update_map_callback = Win32::API::Callback->new($update_map,"N","N");
+
 MainLoop;
 
 # useful subroutines
 sub gui_unload {
-	#$working_thread->join();
 	print('Before unload...');
 }
 
@@ -200,6 +208,7 @@ sub display_critical_error {
 
 sub handle_error {
 	if(length($_[0])){
+		udefrag_s_unload();
 		display_critical_error($_[0]);
 	}
 }
@@ -258,30 +267,14 @@ sub rescan_drives {
 	}
 }
 
-sub update_map {
-	my $i = 0;
-	my @m = split(/ */,$_[0]); # ????????
-	foreach ($map->find('all')){
-		$map->itemconfigure($_,-fill => $colors{$m[$i]});
-		$i++;
-	}
-}
-
 sub analyse {
-	my $map_buffer;
 	my $row;
 	my $letter;
 	my @sel = $list->info('selection');
 	if(!@sel){ return; }
 	$row = $sel[0];
 	$letter = $list->itemCget($row, 0, 'text');
-	udefrag_s_analyse($letter);
-	$map_buffer = udefrag_s_get_map($x_blocks * $y_blocks + 1);
-	$_ = $map_buffer;
-	if(m/ERROR/o){
-	}else{
-		update_map($map_buffer);
-	}
+	udefrag_s_analyse_ex($letter, $update_map_callback);
 }
 
 __END__

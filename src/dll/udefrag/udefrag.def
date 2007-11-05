@@ -8,6 +8,9 @@ EXPORTS
 	udefrag_analyse
 	udefrag_defragment
 	udefrag_optimize
+	udefrag_analyse_ex
+	udefrag_defragment_ex
+	udefrag_optimize_ex
 	udefrag_stop
 	udefrag_get_progress
 	udefrag_get_map
@@ -30,6 +33,9 @@ EXPORTS
 	udefrag_s_analyse
 	udefrag_s_defragment
 	udefrag_s_optimize
+	udefrag_s_analyse_ex
+	udefrag_s_defragment_ex
+	udefrag_s_optimize_ex
 	udefrag_s_stop
 	udefrag_s_get_progress
 	udefrag_s_get_map
@@ -40,3 +46,5 @@ EXPORTS
 	udefrag_s_get_avail_volumes
 	udefrag_s_validate_volume
 	scheduler_s_get_avail_letters
+	create_thread
+	exit_thread
