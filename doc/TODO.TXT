@@ -1,9 +1,37 @@
 The following is Justin Dearing's TODO list for the manual and other technical 
-documents included in the upcoming version 1.2.0.
+documents included in the upcoming version 1.2.2.
 Items to describe:
 
 /* maybe we need to use this file as stack  -- Dmitri */
 /* Agreed -- Justin */
+
+1. On windows nt 4.0 sysinternals dbgview don't works. Instead of them user can
+   find debug messages in c:\dbgprint.log. Size of them is hard limited by 
+   512 Kb. When overflow occurs new messages will be written in the beginning of
+   the file. In all cases after the last message [End] tag will be written.
+
+2. files encrypted by ntfs filesystem cannot be processed at boot time.
+   [because defrag_native.exe starts always before winlogon.exe, therefore
+   before lsass.exe]
+
+3. Program settings are accepted in the following order:
+   a). default settings (you can find it in /src/dll/udefrag/settings.c)
+   b). settings specified by user in configuration dialog (they are saved in
+   registry in HKEY_LOCAL_MACHINE\CurrentControlSet\Control\UltraDefrag, because
+   keys other than SYSTEM aren't accessible from the native app, because they are
+   not loaded by smss.exe yet). NOTE: If user will return to the 'last known 
+   good configuration', settings may be lost.
+   c). settings listed above can be overwritten using command line keys
+   (currently only for udefrag.exe). Overwritten settings will not be saved
+   anywhere.
+
+4. Some settings are limited: each filter must contain no more than 4096 
+   characters.
+
+5. Describe new options of console application.
+
+
+				***
 
 1. (DONE) add to manual information about bug reporting:
    NOTE: include please in your bug report following data:
@@ -20,7 +48,7 @@ Items to describe:
 
 3. (DONE) UltraDefrag has now full NT 4.0 support.
 
-4. Volumes with UDF filesystem (on Vista only) are supported too. User can create 
+4. (DONE) Volumes with UDF filesystem (on Vista only) are supported too. User can create 
    UDF volume using 'format volume_letter: /FS:UDF'.
 
 5. (DONE) "I would appreciate direct links from the entries in the suffix column to
