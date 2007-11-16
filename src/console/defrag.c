@@ -33,8 +33,11 @@
 /* global variables */
 HANDLE hOut;
 WORD console_attr = 0x7;
-int a_flag = 0,c_flag = 0;
+int a_flag = 0,o_flag = 0;
+int b_flag = 0,h_flag = 0;
 char letter = 0;
+char unk_opt[] = "Unknown option: x!";
+int unknown_option = 0;
 
 /* internal functions prototypes */
 void HandleError(char *err_msg,int exit_code);
@@ -42,10 +45,22 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 
 void show_help(void)
 {
-	printf("Usage: defrag [-a,-c,-?] driveletter:\n"
-		 " -a\tanalyse only\n"
-		 " -c\tcompact space\n"
-		 " -?\tshow this help");
+	printf(
+		"Usage: udefrag [command] [options] [volumeletter:]\n"
+		"  The default action is to display this help message.\n"
+		"Commands:\n"
+		"  -a  analyse only\n"
+		"  -o  optimize volume space\n"
+		"  -?  show this help\n"
+		"  If command is not specified it will defragment volume.\n"
+		"Options:\n"
+		"  -sN      ignore files larger than N bytes\n"
+		"  -iA;B;C  set include filter with items A, B and C\n"
+		"  -eX;Y;Z  set exclude filter with items X, Y and Z\n"
+		"  -dN      set debug print level:\n"
+		"           N=0 Normal, N=1 Detailed, N=2 Paranoid\n"
+		"  -b       use default color scheme"
+		);
 	HandleError("",0);
 }
 
@@ -53,11 +68,11 @@ void HandleError(char *err_msg,int exit_code)
 {
 	if(err_msg)
 	{ /* we should display error and terminate process */
-		settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 		printf("%s\n",err_msg);
-		settextcolor(console_attr);
+		if(!b_flag) settextcolor(console_attr);
 		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		udefrag_unload();
+		udefrag_unload(FALSE);
 		exit(exit_code);
 	}
 }
@@ -69,9 +84,9 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 	err_msg = udefrag_stop();
 	if(err_msg)
 	{
-		settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 		printf("\n%s\n",err_msg);
-		settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	}
 	return TRUE;
 }
@@ -80,9 +95,8 @@ void parse_cmdline(int argc, short **argv)
 {
 	int i;
 	short c1,c2;
-	char unk_opt[] = "Unknown option: x!";
 
-	if(argc < 2) show_help();
+	if(argc < 2) h_flag = 1;
 	for(i = 1; i < argc; i++)
 	{
 		c1 = argv[i][0]; c2 = argv[i][1];
@@ -90,17 +104,20 @@ void parse_cmdline(int argc, short **argv)
 		if(c1 == '-')
 		{
 			c2 = (short)towlower((wint_t)c2);
-			if(!wcschr(L"acsideh?",c2))
+			if(!wcschr(L"abosideh?",c2))
 			{ /* unknown option */
 				unk_opt[16] = (char)c2;
-				HandleError(unk_opt,1);
+				unknown_option = 1;
 			}
 			if(c2 == 'h' || c2 == '?')
-				show_help();
+				h_flag = 1;
 			else if(c2 == 'a') a_flag = 1;
-			else if(c2 == 'c') c_flag = 1;
+			else if(c2 == 'o') o_flag = 1;
+			else if(c2 == 'b') b_flag = 1;
 		}
 	}
+	/* if only -b option is specified, show help message */
+	if(argc == 2 && b_flag) h_flag = 1;
 }
 
 int __cdecl wmain(int argc, short **argv)
@@ -108,26 +125,28 @@ int __cdecl wmain(int argc, short **argv)
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	STATISTIC stat;
 
+	/* analyse command line */
+	parse_cmdline(argc,argv);
 	/* display copyright */
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(hOut,&csbi))
 		console_attr = csbi.wAttributes;
-	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	if(!b_flag)
+		settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf(VERSIONINTITLE " console interface\n"
 	      "Copyright (c) Dmitri Arkhangelski, 2007.\n\n");
-	/* analyse command line */
-	parse_cmdline(argc,argv);
+	/* handle unknown option and help request */
+	if(unknown_option) HandleError(unk_opt,1);
+	if(h_flag) show_help();
 	/* validate driveletter */
 	if(!letter)	HandleError("Drive letter should be specified!",1);
 	HandleError(udefrag_validate_volume(letter,FALSE),1);
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* do our job */
-	HandleError(udefrag_init(FALSE),2);
-	udefrag_load_settings(argc,argv);
-	HandleError(udefrag_apply_settings(),2);
+	HandleError(udefrag_init(argc,argv,FALSE),2);
 
 	if(a_flag) HandleError(udefrag_analyse(letter),3);
-	else if(c_flag) HandleError(udefrag_optimize(letter),3);
+	else if(o_flag) HandleError(udefrag_optimize(letter),3);
 	else HandleError(udefrag_defragment(letter),3);
 
 	/* display results and exit */

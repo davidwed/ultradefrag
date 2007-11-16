@@ -30,7 +30,7 @@
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
 
-extern char msg[];
+char kb_msg[1024];
 HANDLE hKbDevice = NULL;
 HANDLE hKbEvent = NULL;
 
@@ -90,7 +90,7 @@ char * __stdcall kb_open(void)
 
 	if(hKbDevice)
 	{
-		strcpy(msg,"Keyboard %ws is already opened!");
+		strcpy(kb_msg,"Keyboard %ws is already opened!");
 		goto kb_open_fail;
 	}
 	RtlInitUnicodeString(&uStr,kb_device_name);
@@ -101,7 +101,7 @@ char * __stdcall kb_open(void)
 			    0,FILE_OPEN/*1*/,FILE_DIRECTORY_FILE/*1*/,NULL,0);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't open keyboard %ws: %x!",kb_device_name,Status);
+		sprintf(kb_msg,"Can't open keyboard %ws: %x!",kb_device_name,Status);
 		goto kb_open_fail;
 	}
 	RtlInitUnicodeString(&uStr,L"\\kb_event");
@@ -110,13 +110,13 @@ char * __stdcall kb_open(void)
 		&ObjectAttributes,SynchronizationEvent,FALSE);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't create kb_event: %x!",Status);
+		sprintf(kb_msg,"Can't create kb_event: %x!",Status);
 		goto kb_open_fail;
 	}
 	return NULL;
 kb_open_fail:
 	kb_close();
-	return msg;
+	return kb_msg;
 }
 
 /* NOTE: if keyboard is inaccessible return value is always FALSE */
@@ -152,8 +152,8 @@ NTSTATUS kb_read(KEYBOARD_INPUT_DATA *pkbd,int msec_timeout)
 			if(!NT_SUCCESS(Status))
 			{ /* this is fatal error because the next read request
 			   * will corrupt some program data */
-				sprintf(msg,"\nCan't cancel keyboard read request: %x!\n",Status);
-				nprint(msg);
+				sprintf(kb_msg,"\nCan't cancel keyboard read request: %x!\n",Status);
+				nprint(kb_msg);
 				kb_read_error = TRUE;
 				return Status;
 			}
@@ -181,7 +181,7 @@ char * __stdcall kb_gets(char *buffer,int max_chars)
 		Status = kb_read(&kbd,INFINITE);
 		if(!NT_SUCCESS(Status))
 		{
-			sprintf(msg,"Can't read keyboard input: %x!",Status);
+			sprintf(kb_msg,"Can't read keyboard input: %x!",Status);
 			goto kb_scan_fail;
 		}
 		IntTranslateKey(&kbd,&kbd_rec);
@@ -197,9 +197,9 @@ char * __stdcall kb_gets(char *buffer,int max_chars)
 		buffer[i] = ch;
 		i ++;
 	}
-	strcpy(msg,"Buffer overflow!");
+	strcpy(kb_msg,"Buffer overflow!");
 kb_scan_fail:
-	return msg;
+	return kb_msg;
 kb_gets_successful:
 	buffer[i] = 0;
 	return NULL;

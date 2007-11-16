@@ -38,13 +38,7 @@ if %errorlevel% neq 0 goto fail
 
 echo Build the native interface...
 cd ..\native
-echo NT 5.0+ version...
-set NT4_TARGET=false
-nmake /NOLOGO /A /f defrag_native.mak CFG="RosDDK"
-if %errorlevel% neq 0 goto fail
-echo NT 4.0 version...
-set NT4_TARGET=true
-nmake /NOLOGO /A /f defrag_native.mak CFG="RosDDK"
+nmake /NOLOGO /A /f defrag_native.mak
 if %errorlevel% neq 0 goto fail
 
 exit /B 0

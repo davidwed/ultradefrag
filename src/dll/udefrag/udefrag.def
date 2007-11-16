@@ -1,16 +1,17 @@
 EXPORTS
 	udefrag_init
 	udefrag_unload
-	udefrag_load_settings
-	udefrag_get_settings
-	udefrag_apply_settings
-	udefrag_save_settings
+	udefrag_get_options
+	udefrag_set_options
+	udefrag_clean_registry
+	udefrag_native_clean_registry
 	udefrag_analyse
 	udefrag_defragment
 	udefrag_optimize
 	udefrag_analyse_ex
 	udefrag_defragment_ex
 	udefrag_optimize_ex
+	udefrag_get_ex_command_result
 	udefrag_stop
 	udefrag_get_progress
 	udefrag_get_map
@@ -25,6 +26,7 @@ EXPORTS
 	kb_gets
 	kb_close
 	nsleep
+	get_os_version
 	fbsize
 	fbsize2
 	dfbsize2
@@ -39,10 +41,8 @@ EXPORTS
 	udefrag_s_stop
 	udefrag_s_get_progress
 	udefrag_s_get_map
-	udefrag_s_load_settings
-	udefrag_s_get_settings
-	udefrag_s_apply_settings
-	udefrag_s_save_settings
+	udefrag_s_get_options
+	udefrag_s_set_options
 	udefrag_s_get_avail_volumes
 	udefrag_s_validate_volume
 	scheduler_s_get_avail_letters

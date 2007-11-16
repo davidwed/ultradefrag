@@ -629,6 +629,10 @@ NTSTATUS  WINAPI RtlAnsiStringToUnicodeString(PUNICODE_STRING,PANSI_STRING,BOOL)
 NTSTATUS  WINAPI RtlUnicodeStringToAnsiString(PANSI_STRING,PUNICODE_STRING,BOOL);
 void      WINAPI RtlFreeUnicodeString(PUNICODE_STRING);
 
+/* DriveMap member must be declared as unsigned int and alignment must be 1 
+ * because without that it don't works on Windows XP x64 !!!
+ */
+#pragma pack(push,1)
 typedef struct _PROCESS_DEVICEMAP_INFORMATION
 {
     union
@@ -639,11 +643,13 @@ typedef struct _PROCESS_DEVICEMAP_INFORMATION
         } Set;
         struct
         {
-            ULONG DriveMap;
+            //ULONG DriveMap;
+            UINT DriveMap;
             UCHAR DriveType[32];
         } Query;
     };
 } PROCESS_DEVICEMAP_INFORMATION, *PPROCESS_DEVICEMAP_INFORMATION;
+#pragma pack(pop)
 
 typedef struct _FILE_FS_SIZE_INFORMATION {
     LARGE_INTEGER   TotalAllocationUnits;
@@ -673,5 +679,7 @@ LdrGetProcedureAddress (IN PVOID BaseAddress,
                         IN PANSI_STRING Name,
                         IN ULONG Ordinal,
                         OUT PVOID *ProcedureAddress);
+
+typedef LPOSVERSIONINFOW PRTL_OSVERSIONINFOW;
 
 #endif /* _NTNDK_H_ */

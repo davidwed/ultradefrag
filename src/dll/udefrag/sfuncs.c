@@ -32,25 +32,24 @@
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
 
-#define MAX_DOS_DRIVES 26
-
 char s_letters[MAX_DOS_DRIVES + 1];
 char s_msg[4096];
+char s_map_msg[4096];
 char map[32768];
 
 char * __stdcall udefrag_s_init(void)
 {
 	char *result;
 
-	result = udefrag_init(FALSE);
+	result = udefrag_init(0,NULL,FALSE);
 	return result ? result : "";
 }
 
-char * __stdcall udefrag_s_unload(void)
+char * __stdcall udefrag_s_unload(BOOL save_options)
 {
 	char *result;
 
-	result = udefrag_unload();
+	result = udefrag_unload(save_options);
 	return result ? result : "";
 }
 
@@ -101,9 +100,9 @@ char * __stdcall udefrag_s_get_map(int size)
 	result = udefrag_get_map(map,size - 1);
 	if(result)
 	{
-		strcpy(s_msg,"ERROR: ");
-		strcat(s_msg,result);
-		return s_msg;
+		strcpy(s_map_msg,"ERROR: ");
+		strcat(s_map_msg,result);
+		return s_map_msg;
 	}
 	/* remove zeroes from the map and terminate string */
 	for(i = 0; i < size - 1; i++)
@@ -112,30 +111,14 @@ char * __stdcall udefrag_s_get_map(int size)
 	return map;
 }
 
-char * __stdcall udefrag_s_load_settings(void)
-{
-	char *result;
-
-	result = udefrag_load_settings(0,NULL);
-	return result ? result : "";
-}
-
-char * __stdcall udefrag_s_get_settings(void)
+char * __stdcall udefrag_s_get_options(void)
 {
 	return "";
 }
 
-char * __stdcall udefrag_s_apply_settings(char *string)
+char * __stdcall udefrag_s_set_options(char *string)
 {
 	return "";
-}
-
-char * __stdcall udefrag_s_save_settings(void)
-{
-	char *result;
-
-	result = udefrag_save_settings();
-	return result ? result : "";
 }
 
 char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)

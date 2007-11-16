@@ -33,13 +33,13 @@
 #include "../../include/ultradfg.h"
 
 /* global variables */
-extern char msg[];
+char settings_msg[1024];
 extern int __native_mode;
 extern HANDLE udefrag_device_handle;
 extern HANDLE init_event;
 extern HANDLE io_event;
 
-ud_settings settings = \
+ud_options settings = \
 { \
 	L"",          /* in_filter */
 	L"system volume information;temp;recycler", /* ex_filter */
@@ -95,9 +95,9 @@ BOOL RemoveAppFromBootExecute(void);
 extern BOOL _ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
-			char *err_format_string);
+			char *err_format_string,char *msg_buffer);
 
-/* functions */
+/* load settings: always returns NULL */
 char * __stdcall udefrag_load_settings(int argc, short **argv)
 {
 	HANDLE hKey;
@@ -181,52 +181,54 @@ no_cmdline:
 	return NULL;
 }
 
-ud_settings * __stdcall udefrag_get_settings(void)
+ud_options * __stdcall udefrag_get_options(void)
 {
 	return &settings;
 }
 
-char * __stdcall udefrag_apply_settings(void)
+char * __stdcall udefrag_set_options(ud_options *ud_opts)
 {
 	REPORT_TYPE rt;
 
 	if(!init_event)
 	{
-		strcpy(msg,"Udefrag.dll apply_settings call without initialization!");
+		strcpy(settings_msg,"Udefrag.dll apply_settings call without initialization!");
 		goto apply_settings_fail;
 	}
+	if(ud_opts != &settings)
+		memcpy(&settings,ud_opts,sizeof(ud_options));
 	/* set debug print level */
 	if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_DBGPRINT_LEVEL,
 		&settings.dbgprint_level,sizeof(DWORD),NULL,0,
-		"Can't set debug print level: %x!")) goto apply_settings_fail;
+		"Can't set debug print level: %x!",settings_msg)) goto apply_settings_fail;
 	/* set report characterisics */
 	rt.format = settings.report_format;
 	rt.type = settings.report_type;
 	if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_REPORT_TYPE,
 		&rt,sizeof(REPORT_TYPE),NULL,0,
-		"Can't set report type: %x!")) goto apply_settings_fail;
+		"Can't set report type: %x!",settings_msg)) goto apply_settings_fail;
 	/* set filters */
 	if(__native_mode)
 	{
 		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
 			settings.boot_in_filter,(wcslen(settings.boot_in_filter) + 1) << 1,NULL,0,
-			"Can't set include filter: %x!")) goto apply_settings_fail;
+			"Can't set include filter: %x!",settings_msg)) goto apply_settings_fail;
 		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
 			settings.boot_ex_filter,(wcslen(settings.boot_ex_filter) + 1) << 1,NULL,0,
-			"Can't set exclude filter: %x!")) goto apply_settings_fail;
+			"Can't set exclude filter: %x!",settings_msg)) goto apply_settings_fail;
 	}
 	else
 	{
 		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
 			settings.in_filter,(wcslen(settings.in_filter) + 1) << 1,NULL,0,
-			"Can't set include filter: %x!")) goto apply_settings_fail;
+			"Can't set include filter: %x!",settings_msg)) goto apply_settings_fail;
 		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
 			settings.ex_filter,(wcslen(settings.ex_filter) + 1) << 1,NULL,0,
-			"Can't set exclude filter: %x!")) goto apply_settings_fail;
+			"Can't set exclude filter: %x!",settings_msg)) goto apply_settings_fail;
 	}
 	return NULL;
 apply_settings_fail:
-	return msg;
+	return settings_msg;
 }
 
 char * __stdcall udefrag_save_settings(void)
@@ -284,7 +286,33 @@ char * __stdcall udefrag_save_settings(void)
 	}
 	return NULL;
 save_fail:
-	return msg;
+	return settings_msg;
+}
+
+/* important registry cleanup for uninstaller */
+char * __stdcall udefrag_clean_registry(void)
+{
+	return RemoveAppFromBootExecute() ? NULL : settings_msg;
+}
+
+/* registry cleanup for native executable */
+char * __stdcall udefrag_native_clean_registry(void)
+{
+	HANDLE hKey;
+
+	udefrag_load_settings(0,NULL);
+	if(settings.next_boot)
+	{
+		settings.next_boot = 0;
+		/* set next boot parameter to zero */
+		if(OpenKey(ud_key,&hKey))
+		{
+			WriteRegDWORD(hKey,L"next boot",settings.next_boot);
+			NtClose(hKey);
+		}
+	}
+	if(settings.every_boot) return NULL;
+	return RemoveAppFromBootExecute() ? NULL : settings_msg;
 }
 
 BOOL OpenKey(short *key_name,PHANDLE phKey)
@@ -299,7 +327,7 @@ BOOL OpenKey(short *key_name,PHANDLE phKey)
 	Status = NtOpenKey(phKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&ObjectAttributes);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't open %ws key: %x!",key_name,Status);
+		sprintf(settings_msg,"Can't open %ws key: %x!",key_name,Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -318,7 +346,7 @@ BOOL CreateKey(short *key_name,PHANDLE phKey)
 				0,NULL,REG_OPTION_NON_VOLATILE,NULL);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't create %ws key: %x!",key_name,Status);
+		sprintf(settings_msg,"Can't create %ws key: %x!",key_name,Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -342,10 +370,10 @@ BOOL ReadRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD s
 				RtlCopyMemory(buffer,pInfo->Data,pInfo->DataLength);
 			return TRUE;
 		}
-		sprintf(msg,"Invalid parameter %ws!",value_name);
+		sprintf(settings_msg,"Invalid parameter %ws!",value_name);
 		goto read_fail;
 	}
-	sprintf(msg,"Can't read %ws value: %x!",value_name,Status);
+	sprintf(settings_msg,"Can't read %ws value: %x!",value_name,Status);
 read_fail:
 	return FALSE;
 }
@@ -359,7 +387,7 @@ BOOL WriteRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD 
 	Status = NtSetValueKey(hKey,&uStr,0,type,buffer,size);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't write %ws value: %x!",value_name,Status);
+		sprintf(settings_msg,"Can't write %ws value: %x!",value_name,Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -384,7 +412,7 @@ BOOL AddAppToBootExecute(void)
 	length = pInfo->DataLength;
 	if(length > 32000)
 	{
-		sprintf(msg,"BootExecute value is too long - %u!",length);
+		sprintf(settings_msg,"BootExecute value is too long - %u!",length);
 		NtClose(hKey);
 		return FALSE;
 	}
@@ -432,7 +460,7 @@ BOOL RemoveAppFromBootExecute(void)
 	length = pInfo->DataLength;
 	if(length > 32000)
 	{
-		sprintf(msg,"BootExecute value is too long - %u!",length);
+		sprintf(settings_msg,"BootExecute value is too long - %u!",length);
 		NtClose(hKey);
 		return FALSE;
 	}

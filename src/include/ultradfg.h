@@ -27,15 +27,15 @@
 /* this numbers MUST BE THE SAME */
 #define FREE_SPACE                  0
 #define SYSTEM_SPACE                1
-#define FRAGM_SPACE                 2
-#define UNFRAGM_SPACE               3
-#define MFT_SPACE                   4
-#define DIR_SPACE                   5
-#define COMPRESSED_SPACE            6
-#define SYSTEM_OVERLIMIT_SPACE      7
-#define FRAGM_OVERLIMIT_SPACE       8
-#define UNFRAGM_OVERLIMIT_SPACE     9
-#define DIR_OVERLIMIT_SPACE         10
+#define SYSTEM_OVERLIMIT_SPACE      2
+#define FRAGM_SPACE                 3
+#define FRAGM_OVERLIMIT_SPACE       4
+#define UNFRAGM_SPACE               5
+#define UNFRAGM_OVERLIMIT_SPACE     6
+#define MFT_SPACE                   7
+#define DIR_SPACE                   8
+#define DIR_OVERLIMIT_SPACE         9
+#define COMPRESSED_SPACE            10
 #define COMPRESSED_OVERLIMIT_SPACE  11
 #define NO_CHECKED_SPACE            12
 

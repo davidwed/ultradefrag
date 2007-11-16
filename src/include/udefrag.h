@@ -27,9 +27,10 @@
 #include <ntddkbd.h>
 #include "ultradfg.h"
 
-#define MAXFSNAME 32  /* I think that's enough. */
+#define MAX_DOS_DRIVES 26
+#define MAXFSNAME      32  /* I think that's enough. */
 
-typedef struct _ud_settings
+typedef struct _ud_options
 {
 	short *in_filter;
 	short *ex_filter;
@@ -48,7 +49,7 @@ typedef struct _ud_settings
 	DWORD only_reg_and_pagefile;
 	long x;
 	long y;
-} ud_settings;
+} ud_options;
 
 typedef struct _volume_info
 {
@@ -58,8 +59,8 @@ typedef struct _volume_info
 	LARGE_INTEGER free_space;
 } volume_info;
 
-char * __stdcall udefrag_init(int native_mode);
-char * __stdcall udefrag_unload(void);
+char * __stdcall udefrag_init(int argc, short **argv,int native_mode);
+char * __stdcall udefrag_unload(BOOL save_options);
 
 char * __stdcall udefrag_analyse(unsigned char letter);
 char * __stdcall udefrag_defragment(unsigned char letter);
@@ -70,9 +71,12 @@ char * __stdcall udefrag_get_map(char *buffer,int size);
 char * __stdcall get_default_formatted_results(STATISTIC *pstat);
 
 char * __stdcall udefrag_load_settings(int argc, short **argv);
-ud_settings * __stdcall udefrag_get_settings(void);
-char * __stdcall udefrag_apply_settings(void);
 char * __stdcall udefrag_save_settings(void);
+
+ud_options * __stdcall udefrag_get_options(void);
+char * __stdcall udefrag_set_options(ud_options *ud_opts);
+char * __stdcall udefrag_clean_registry(void);
+char * __stdcall udefrag_native_clean_registry(void);
 
 char * __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 char * __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
@@ -87,6 +91,7 @@ char * __stdcall kb_gets(char *buffer,int max_chars);
 char * __stdcall kb_close(void);
 
 void   __stdcall nsleep(int msec);
+int    __stdcall get_os_version(void);
 
 int    __stdcall fbsize(char *s,ULONGLONG n);
 int    __stdcall fbsize2(char *s,ULONGLONG n);
@@ -94,7 +99,7 @@ int    __stdcall dfbsize2(char *s,ULONGLONG *pn);
 
 /* interface for scripting languages */
 char * __stdcall udefrag_s_init(void);
-char * __stdcall udefrag_s_unload(void);
+char * __stdcall udefrag_s_unload(BOOL save_options);
 
 char * __stdcall udefrag_s_analyse(unsigned char letter);
 char * __stdcall udefrag_s_defragment(unsigned char letter);
@@ -103,10 +108,8 @@ char * __stdcall udefrag_s_stop(void);
 char * __stdcall udefrag_s_get_progress(void);
 char * __stdcall udefrag_s_get_map(int size);
 
-char * __stdcall udefrag_s_load_settings(void);
-char * __stdcall udefrag_s_get_settings(void);
-char * __stdcall udefrag_s_apply_settings(char *string);
-char * __stdcall udefrag_s_save_settings(void);
+char * __stdcall udefrag_s_get_options(void);
+char * __stdcall udefrag_s_set_options(char *string);
 
 char * __stdcall udefrag_s_get_avail_volumes(int skip_removable);
 char * __stdcall udefrag_s_validate_volume(unsigned char letter,int skip_removable);
@@ -115,10 +118,11 @@ char * __stdcall scheduler_s_get_avail_letters(void);
 /* because Tk is incompatible with threads 
  * we should provide callback functions
  */
-typedef int (__stdcall *STATUPDATEPROC)(int done_flag);//,char *msg);
+typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
 char * __stdcall udefrag_analyse_ex(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_defragment_ex(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_optimize_ex(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall udefrag_get_ex_command_result(void);
 
 char * __stdcall udefrag_s_analyse_ex(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_s_defragment_ex(unsigned char letter,STATUPDATEPROC sproc);

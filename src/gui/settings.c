@@ -44,7 +44,7 @@ BOOL CALLBACK FilterDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK BootSchedDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK EmptyDlgProc(HWND, UINT, WPARAM, LPARAM);
 
-extern void HideProgress();
+//extern void HideProgress();
 
 char buffer[32768];
 #define MAX_FILTER_SIZE 4096
@@ -54,7 +54,7 @@ short ex_filter[MAX_FILTER_SIZE + 1];
 short boot_in_filter[MAX_FILTER_SIZE + 1];
 short boot_ex_filter[MAX_FILTER_SIZE + 1];
 
-extern ud_settings *settings;
+extern ud_options *settings;
 
 BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
@@ -119,8 +119,8 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			check_id = IDC_DBG_PARANOID;
 		}
 		SendMessage(GetDlgItem(hReportDlg,check_id),BM_SETCHECK,BST_CHECKED,0);
-		if(settings->show_progress)
-			SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_SETCHECK,BST_CHECKED,0);
+		//if(settings->show_progress)
+		//	SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_SETCHECK,BST_CHECKED,0);
 		SetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_LETTERS),settings->sched_letters);
 		if(settings->next_boot)
 			SendMessage(GetDlgItem(hBootSchedDlg,IDC_NEXTBOOT),BM_SETCHECK,BST_CHECKED,0);
@@ -184,11 +184,11 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(SendMessage(GetDlgItem(hReportDlg,IDC_DBG_PARANOID),BM_GETCHECK,0,0) == \
 				BST_CHECKED)
 				settings->dbgprint_level = 2;
-			settings->show_progress = \
-				(SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? TRUE : FALSE;
-			if(!settings->show_progress)
-				HideProgress();
+			//settings->show_progress = \
+			//	(SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_GETCHECK,0,0) == \
+			//	BST_CHECKED) ? TRUE : FALSE;
+			//if(!settings->show_progress)
+			//	HideProgress();
 			GetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_LETTERS),settings->sched_letters,40);
 			settings->next_boot = \
 				(SendMessage(GetDlgItem(hBootSchedDlg,IDC_NEXTBOOT),BM_GETCHECK,0,0) == \
@@ -207,7 +207,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			settings->boot_in_filter = boot_in_filter;
 			GetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_EXCLUDE2),boot_ex_filter,MAX_FILTER_SIZE);
 			settings->boot_ex_filter = boot_ex_filter;
-			udefrag_apply_settings();
+			udefrag_set_options(settings);
 			EndDialog(hWnd,1);
 			return TRUE;
 		case IDCANCEL:

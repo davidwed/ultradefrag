@@ -34,11 +34,11 @@
 
 #define USE_INSTEAD_SMSS  0
 
-ud_settings *settings;
+ud_options *settings;
 
 char letter;
 
-int abort_flag = 0,done_flag = 0,wait_flag = 0;
+int abort_flag = 0;
 char last_op = 0;
 int i = 0,j = 0,k; /* number of '-' */
 
@@ -55,16 +55,26 @@ char buffer[256];
 		"  reboot\n" \
 		"  shutdown\n" \
 		"  help\n"
+
 void Cleanup();
-void HandleError(char *err_msg,int exit_code)
+
+void DisplayMessage(char *err_msg)
 {
 	if(err_msg)
 	{
 		if(err_msg[0])
 		{
-			nprint(err_msg);
-			nprint("\n");
+			sprintf(msg,"\nERROR: %s\n",err_msg);
+			nprint(msg);
 		}
+	}
+}
+
+void HandleError(char *err_msg,int exit_code)
+{
+	if(err_msg)
+	{
+		DisplayMessage(err_msg);
 		nprint("Good bye ...\n");
 		Cleanup();
 		NtTerminateProcess(NtCurrentProcess(),4);
@@ -106,44 +116,32 @@ void UpdateProgress()
 	}
 }
 
-DWORD WINAPI wait_break_proc(LPVOID unused)
+int __stdcall update_stat(int df)
 {
 	KEYBOARD_INPUT_DATA kbd;
 	char *err_msg;
 
-	i = j = 0;
-	last_op = 0;
-	do
+	if(kb_hit(&kbd,100))
 	{
-		if(kb_hit(&kbd,100))
+		if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d))
 		{
-			if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d))
-			{
-				err_msg = udefrag_stop();
-				if(err_msg)
-				{
-					sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-					nprint(msg);
-				}
-				abort_flag = 1;
-			}
+			DisplayMessage(udefrag_stop());
+			abort_flag = 1;
 		}
-		UpdateProgress();
-	} while(!done_flag);
+	}
+	UpdateProgress();
+	if(df == FALSE) return 0;
+	err_msg = udefrag_get_ex_command_result();
+	if(strlen(err_msg) > 0)
+	{
+		DisplayMessage(err_msg);
+		return 0;
+	}
 	if(!abort_flag) /* set progress to 100 % */
 	{
 		for(k = i; k < 50; k++)
 			nputch('-');
 	}
-
-	wait_flag = 0;
-
-	/* Exit the thread */
-	/* On NT 4.0 and W2K we should do nothing, on XP SP1 both variants are acceptable,
-	   on XP x64 RtlExitUserThread() MUST be called. */
-#ifndef NT4_TARGET
-	RtlExitUserThread(STATUS_SUCCESS);
-#endif
 	return 0;
 }
 
@@ -153,77 +151,58 @@ void Cleanup()
 
 //nprint("before stop\n");
 	/* stop device */
-	err_msg = udefrag_stop();
-	if(err_msg)
+	/*err_msg = */udefrag_stop();
+/*	if(err_msg)
 	{
-		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
+		sprintf(msg,"\nERROR: %s\n",err_msg);
 		nprint(msg);
 	}
-nprint("before kb_close\n");
+*/
+//nprint("before kb_close\n");
 	kb_close();
-nprint("before unload\n");
-	/* unload driver */
-	udefrag_unload();
-nprint("after unload\n");
-	/* registry cleanup */
-//	err_msg = udefrag_save_settings();
-//	if(err_msg)
-//	{
-//		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-//		nprint(msg);
-//	}
+//nprint("before unload\n");
+	/* unload driver and registry cleanup */
+	/*err_msg = */udefrag_unload(FALSE);
+	DisplayMessage(udefrag_native_clean_registry());
+//nprint("after unload\n");
 }
 
 void ProcessVolume(char letter,char command)
 {
 	STATISTIC stat;
-	NTSTATUS Status;
-	HANDLE hThread;
 	char *err_msg;
 
-	done_flag = 0;
-	Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
-		0,0,0,wait_break_proc,NULL,&hThread,NULL);
-	if(!NT_SUCCESS(Status))
-	{
-		sprintf(msg,"\nCan't create thread: %x!\n",Status); 
-		nprint(msg);
-	}
-
-	wait_flag = 1;
+	i = j = 0;
+	last_op = 0;
 	nprint("\nPreparing to ");
 	switch(command)
 	{
 	case 'a':
 		sprintf(msg,"analyse %c: ...\n",letter);
 		nprint(msg);
-		err_msg = udefrag_analyse(letter);
+		err_msg = udefrag_analyse_ex(letter,update_stat);
 		break;
 	case 'd':
 		sprintf(msg,"defragment %c: ...\n",letter);
 		nprint(msg);
-		err_msg = udefrag_defragment(letter);
+		err_msg = udefrag_defragment_ex(letter,update_stat);
 		break;
 	case 'c':
 		sprintf(msg,"optimize %c: ...\n",letter);
 		nprint(msg);
-		err_msg = udefrag_optimize(letter);
+		err_msg = udefrag_optimize_ex(letter,update_stat);
 		break;
 	}
-	done_flag = 1;
-	while(wait_flag) nsleep(10);
 	if(err_msg)
 	{
-		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-		nprint(msg);
+		DisplayMessage(err_msg);
 		return;
 	}
 
 	err_msg = udefrag_get_progress(&stat,NULL);
 	if(err_msg)
 	{
-		sprintf(msg,"\nERROR: %s Wait 5 seconds.\n",err_msg);
-		nprint(msg);
+		DisplayMessage(err_msg);
 	}
 	else
 	{
@@ -254,14 +233,12 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	if (ProcessParameters->DebugFlags) DbgBreakPoint();
 
 	/* 3. Initialization */
-	settings = udefrag_get_settings();
+	settings = udefrag_get_options();
 #if USE_INSTEAD_SMSS
 	NtInitializeRegistry(FALSE);
 #endif
 	/* 4. Display Copyright */
-#ifdef NT4_TARGET
-	nprint("\n\n");
-#endif
+	if(get_os_version() < 51) nprint("\n\n");
 	nprint(VERSIONINTITLE " native interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
@@ -274,16 +251,13 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	nprint("Press any key to exit...  ");
 	for(i = 0; i < 3; i++)
 	{
-		if(kb_hit(&kbd,1000)) HandleError("\n",0);
+		if(kb_hit(&kbd,1000)){ nprint("\n"); HandleError("",0); }
 		nputch((char)('0' + 3 - i));
 		nputch(' ');
 	}
 	nprint("\n\n");
 	/* 7. Initialize the ultradfg device */
-	HandleError(udefrag_init(TRUE),2);
-	/* read parameters from registry */
-	udefrag_load_settings(0,NULL);
-	HandleError(udefrag_apply_settings(),2);
+	HandleError(udefrag_init(0,NULL,TRUE),2);
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
@@ -292,12 +266,14 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	{
 		/* do scheduled job and exit */
 		if(!settings->sched_letters)
-			HandleError("\nNo letters specified!",1);
+			HandleError("No letters specified!",1);
 		if(!settings->sched_letters[0])
-			HandleError("\nNo letters specified!",1);
+			HandleError("No letters specified!",1);
 		length = wcslen(settings->sched_letters);
 		for(i = 0; i < length; i++)
 		{
+			if((char)(settings->sched_letters[i]) == ';')
+				continue; /* skip delimiters */
 			ProcessVolume((char)(settings->sched_letters[i]),'d');
 			if(abort_flag) HandleError("",0);
 		}
@@ -355,7 +331,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		{
 			nprint("Available drive letters:   ");
 			err_msg = udefrag_get_avail_volumes(&v,FALSE);
-			if(err_msg) nprint(err_msg);
+			if(err_msg) DisplayMessage(err_msg);
 			else
 			{
 				for(n = 0;;n++)

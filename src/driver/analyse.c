@@ -466,6 +466,10 @@ BOOLEAN FindFiles(PEXAMPLE_DEVICE_EXTENSION dx,UNICODE_STRING *path,BOOLEAN is_r
 		if(pFileInfo->FileName[0] == 0x002E)
 			if(pFileInfo->FileName[1] == 0x002E || pFileInfo->FileNameLength == sizeof(short))
 				continue;	/* for . and .. */
+//DebugPrint("%ws %x\n",pFileInfo->FileName,pFileInfo->FileAttributes);
+//continue;
+		/* VERY IMPORTANT: skip reparse points */
+		if(IS_REPARSE_POINT(pFileInfo)) continue;
 		wcsncpy(dx->tmp_buf,path->Buffer,(path->Length) >> 1);
 		dx->tmp_buf[(path->Length) >> 1] = 0;
 		if(!is_root)

@@ -326,6 +326,9 @@ void DbgPrintNoMem();
 #define IS_COMPRESSED(pFileInfo) \
 (((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_COMPRESSED) ? TRUE : FALSE)
 
+#define IS_REPARSE_POINT(pFileInfo) \
+(((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) ? TRUE : FALSE)
+
 typedef struct _FILE_BOTH_DIRECTORY_INFORMATION {
     ULONG               NextEntryOffset;
     ULONG               FileIndex;

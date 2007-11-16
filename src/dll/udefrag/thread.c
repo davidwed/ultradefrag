@@ -37,9 +37,11 @@
 #define ExitThreadUndefined	2
 
 /* global variables */
-extern char msg[4096];
+char th_msg[1024];
+char exit_th_msg[1024];
 int ExitThreadState = ExitThreadUndefined;
 VOID (__stdcall *_RtlExitUserThread)(NTSTATUS Status);
+NTSTATUS (__stdcall *_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
 
 /* internal functions prototypes */
 BOOL get_proc_address(char *name,PVOID *proc_addr);
@@ -59,8 +61,8 @@ char * __stdcall create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle)
 					0,0,0,start_addr,NULL,ph,NULL);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't create thread: %x!",Status);
-		return msg;
+		sprintf(th_msg,"Can't create thread: %x!",Status);
+		return th_msg;
 	}
 	return NULL;
 }
@@ -91,15 +93,26 @@ BOOL get_proc_address(char *name,PVOID *proc_addr)
 	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't get ntdll handle: %x!",Status);
+		sprintf(exit_th_msg,"Can't get ntdll handle: %x!",Status);
 		return FALSE;
 	}
 	RtlInitAnsiString(&aStr,name);
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't get address for %s: %x!",name,Status);
+		sprintf(exit_th_msg,"Can't get address for %s: %x!",name,Status);
 		return FALSE;
 	}
 	return TRUE;
+}
+
+/* return values: 40 for nt 4.0; 50 for w2k etc. */
+int __stdcall get_os_version(void)
+{
+	OSVERSIONINFOW ver;
+
+	if(!get_proc_address("RtlGetVersion",(void *)&_RtlGetVersion))
+		return 40;
+	_RtlGetVersion(&ver);
+	return (ver.dwMajorVersion * 10 + ver.dwMinorVersion);
 }

@@ -36,24 +36,19 @@ call BLDSCHED.CMD
 :build_installer
 echo Build installer...
 cd .\bin
-copy /Y ..\installer\UltraDefrag.nsi .\
 copy /Y ..\*.TXT .\
+copy /Y ..\installer\UltraDefrag.nsi .\
 copy /Y ..\installer\*.bmp .\
-copy /Y ..\installer\*.ini .\
 
 copy /Y ..\..\doc\html\manual.html .\
 copy /Y ..\..\doc\html\images\console.png .\
 copy /Y ..\..\doc\html\images\main_screen110.png .\
 copy /Y ..\..\doc\html\images\about.png .\
 copy /Y ..\..\doc\html\images\valid-html401.png .\
-copy /Y ..\gui\res\app.ico .\gui.ico
-copy /Y ..\gui\res\console.ico .\
-copy /Y ..\gui\res\install.ico .\
-copy /Y ..\gui\res\web.ico .\
 
 xcopy /I /Y ..\presets .\presets
-upx udefrag.exe
-if %errorlevel% neq 0 goto fail
+rem upx udefrag.exe
+rem if %errorlevel% neq 0 goto fail
 upx dfrg.exe
 if %errorlevel% neq 0 goto fail
 echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
@@ -66,17 +61,12 @@ copy /Y .\UltraDefrag.nsi .\amd64\
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y .\*.TXT .\amd64\
 copy /Y .\*.bmp .\amd64\
-copy /Y .\*.ini .\amd64\
 
 copy /Y ..\..\doc\html\manual.html .\amd64\
 copy /Y ..\..\doc\html\images\console.png .\amd64\
 copy /Y ..\..\doc\html\images\main_screen110.png .\amd64\
 copy /Y ..\..\doc\html\images\about.png .\amd64\
 copy /Y ..\..\doc\html\images\valid-html401.png .\amd64\
-copy /Y ..\gui\res\app.ico .\amd64\gui.ico
-copy /Y ..\gui\res\console.ico .\amd64\
-copy /Y ..\gui\res\install.ico .\amd64\
-copy /Y ..\gui\res\web.ico .\amd64\
 
 xcopy /I /Y .\presets .\amd64\presets
 cd amd64
@@ -90,17 +80,12 @@ copy /Y .\UltraDefrag.nsi .\ia64\
 copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y .\*.TXT .\ia64\
 copy /Y .\*.bmp .\ia64\
-copy /Y .\*.ini .\ia64\
 
 copy /Y ..\..\doc\html\manual.html .\ia64\
 copy /Y ..\..\doc\html\images\console.png .\ia64\
 copy /Y ..\..\doc\html\images\main_screen110.png .\ia64\
 copy /Y ..\..\doc\html\images\about.png .\ia64\
 copy /Y ..\..\doc\html\images\valid-html401.png .\ia64\
-copy /Y ..\gui\res\app.ico .\ia64\gui.ico
-copy /Y ..\gui\res\console.ico .\ia64\
-copy /Y ..\gui\res\install.ico .\ia64\
-copy /Y ..\gui\res\web.ico .\ia64\
 
 xcopy /I /Y .\presets .\ia64\presets
 cd ia64
@@ -145,8 +130,8 @@ cd .\src_package
 del /s /q *.ncb,*.opt,*.plg,*.aps,*.7z
 REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .
 "%SEVENZIP_PATH%\7z.exe" a ultradefrag-%ULTRADFGVER%.src.7z *
-rd /s /q ultradefrag-%ULTRADFGVER%
 if %errorlevel% neq 0 goto fail
+rd /s /q ultradefrag-%ULTRADFGVER%
 cd ..
 echo Build success!
 

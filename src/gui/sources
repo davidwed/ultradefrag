@@ -16,5 +16,5 @@ LINKLIBS=$(DDK_LIB_PATH)\ntdll.lib \
 	 $(UDEFRAG_LIB_PATH)\udefrag.lib
 
 UMTYPE=windows
-UMBASE=0x0400000
+#UMBASE=0x0400000
 UMENTRY=winmain

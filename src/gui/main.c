@@ -52,14 +52,10 @@ extern RECT win_rc; /* coordinates of main window */
 
 signed int delta_h = 0;
 
-//#define MAP_WIDTH         0x209
-//#define MAP_HEIGHT        0x8c
-//#define BLOCK_SIZE        0x9   /* in pixels */
-
-char letter_numbers['Z' - 'A' + 1];
-STATISTIC stat['Z' - 'A' + 1];
-int work_status['Z' - 'A' + 1] = {0};
-extern char map['Z' - 'A' + 1][N_BLOCKS];
+char letter_numbers[MAX_DOS_DRIVES];
+STATISTIC stat[MAX_DOS_DRIVES];
+int work_status[MAX_DOS_DRIVES] = {0};
+extern char map[MAX_DOS_DRIVES][N_BLOCKS];
 
 #define STAT_CLEAR	0
 #define STAT_WORK	1
@@ -76,15 +72,14 @@ int thr_id;
 BOOL busy_flag = 0;
 char buffer[64];
 
-HANDLE hEventComplete = NULL, hEvtDone = NULL;
-
 char current_operation;
 BOOL stop_pressed;
+int My_Index;
 
 #define N_OF_STATUSBAR_PARTS  5
 #define IDM_STATUSBAR         500
 
-ud_settings *settings;
+ud_options *settings;
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -101,6 +96,7 @@ void HideProgress();
 extern void CalculateBlockSize();
 extern BOOL FillBitMap(int);
 extern BOOL CreateBitMapGrid();
+extern void CreateMaps();
 extern void DeleteMaps();
 
 BOOL CreateStatusBar();
@@ -122,9 +118,7 @@ void HandleError(char *err_msg,int exit_code)
 	if(err_msg)
 	{
 		if(err_msg[0]) MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		if(hEvtDone) CloseHandle(hEvtDone);
-		if(hEventComplete) CloseHandle(hEventComplete);
-		udefrag_unload();
+		udefrag_unload(TRUE);
 		ExitProcess(exit_code);
 	}
 }
@@ -132,25 +126,17 @@ void HandleError(char *err_msg,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	settings = udefrag_get_settings();
+	settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
 	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
 	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
 	if(uninstall_run)
 	{	
-		/* clear registry */
-		settings->next_boot = settings->every_boot = FALSE;
-		udefrag_save_settings();
+		udefrag_clean_registry();
 		ExitProcess(0);
 	}
-	hEventComplete = CreateEvent(NULL,TRUE,TRUE,"UltraDefragCommandComplete");
-	hEvtDone = CreateEvent(NULL,TRUE,TRUE,"UltraDefragDone");
-	if(!hEventComplete || !hEvtDone) HandleError("Can't create events!",2);
-	HandleError(udefrag_init(FALSE),2);
-	/* load settings - always successful */
-	udefrag_load_settings(0,NULL);
-	HandleError(udefrag_apply_settings(),2);
+	HandleError(udefrag_init(0,NULL,FALSE),2);
 	win_rc.left = settings->x; win_rc.top = settings->y;
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
@@ -162,7 +148,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	DeleteMaps();
 	/* save settings */
 	settings->x = win_rc.left; settings->y = win_rc.top;
-	HandleError(udefrag_save_settings(),4);
 	HandleError("",0);
 }
 
@@ -181,6 +166,9 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	volume_info *v;
 	int i;
 	LV_ITEM lvi;
+	RECT rc;
+	int dx;
+	int cw[] = {60,60,100,100,100,85};
 
 	/* Disable 'Rescan' button [and others] */
 	EnableWindow(hBtnRescan,FALSE);
@@ -240,6 +228,13 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 		index ++;
 	}
 scan_done:
+	/* adjust columns widths */
+	GetWindowRect(hList,&rc);
+	dx = rc.right - rc.left;
+	if(SendMessage(hList,LVM_GETITEMCOUNT,0,0) > SendMessage(hList,LVM_GETCOUNTPERPAGE,0,0))
+		dx -= GetSystemMetrics(SM_CXVSCROLL);
+	for(i = 0; i < 6; i++)
+		SendMessage(hList,LVM_SETCOLUMNWIDTH,i,cw[i] * dx / 505);
 	lvi.mask = LVIF_STATE;
 	lvi.stateMask = LVIS_SELECTED;
 	lvi.state = LVIS_SELECTED;
@@ -260,19 +255,24 @@ void Stop()
 {
 	char *err_msg;
 
+	stop_pressed = TRUE;
 	err_msg = udefrag_stop();
 	if(err_msg) MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-	stop_pressed = TRUE;
-	////WaitForSingleObject(hEvtDone,INFINITE);
+	/* VERY IMPORTANT:
+	 *  Because we call Sleep() from SendMessage() handler,
+	 *  all other gui operations must be cancelled until we done here.
+	 *  If not, a deadlock will occured.
+	 */
+	while(busy_flag) Sleep(10);
 }
 
 void ShowProgress(void)
 {
-	if(settings->show_progress)
-	{
+//	if(settings->show_progress)
+//	{
 		ShowWindow(hProgressMsg,SW_SHOWNORMAL);
 		ShowWindow(hProgressBar,SW_SHOWNORMAL);
-	}
+//	}
 }
 
 void HideProgress(void)
@@ -283,7 +283,7 @@ void HideProgress(void)
 	SendMessage(hProgressBar,PBM_SETPOS,0,0);
 }
 
-/*---------------- Dialog Box Function ---------------------*/
+/*---------------- Main Dialog Callback ---------------------*/
 
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
@@ -292,152 +292,167 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	int dx,dy;
 	RECT _rc;
 	LV_COLUMN lvc;
+	LPNMLISTVIEW lpnm;
 
 	switch(msg)
 	{
 	case WM_INITDIALOG:
+		/* Window Initialization */
+		hWindow = hWnd;
+		hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
+		hList = GetDlgItem(hWnd,IDC_VOLUMES);
+		hBtnAnalyse = GetDlgItem(hWnd,IDC_ANALYSE);
+		hBtnDfrg = GetDlgItem(hWnd,IDC_DEFRAGM);
+		hBtnCompact = GetDlgItem(hWnd,IDC_COMPACT);
+		hBtnPause = GetDlgItem(hWnd,IDC_PAUSE);
+		hBtnStop = GetDlgItem(hWnd,IDC_STOP);
+		hBtnFragm = GetDlgItem(hWnd,IDC_SHOWFRAGMENTED);
+		hBtnRescan = GetDlgItem(hWnd,IDC_RESCAN);
+		hBtnSettings = GetDlgItem(hWnd,IDC_SETTINGS);
+		hCheckSkipRem = GetDlgItem(hWnd,IDC_SKIPREMOVABLE);
+		if(settings->skip_removable)
+			SendMessage(hCheckSkipRem,BM_SETCHECK,BST_CHECKED,0);
+		else
+			SendMessage(hCheckSkipRem,BM_SETCHECK,BST_UNCHECKED,0);
+		hProgressMsg = GetDlgItem(hWnd,IDC_PROGRESSMSG);
+		hProgressBar = GetDlgItem(hWnd,IDC_PROGRESS1);
+		HideProgress();
+		hMap = GetDlgItem(hWnd,IDC_MAP);
+		GetWindowRect(hMap,&_rc);
+		_rc.bottom ++;
+		SetWindowPos(hMap,0,0,0,_rc.right - _rc.left,
+			_rc.bottom - _rc.top,SWP_NOMOVE);
+		CalculateBlockSize();
+		cx = GetSystemMetrics(SM_CXSCREEN);
+		cy = GetSystemMetrics(SM_CYSCREEN);
+		if(win_rc.left < 0) win_rc.left = 0; if(win_rc.top < 0) win_rc.top = 0;
+		if(win_rc.left >= cx) win_rc.left = cx - 10; if(win_rc.top >= cy) win_rc.top = cy - 10;
+		GetWindowRect(hWnd,&_rc);
+		dx = _rc.right - _rc.left;
+		dy = _rc.bottom - _rc.top + delta_h;
+		SetWindowPos(hWnd,0,win_rc.left,win_rc.top,dx,dy,0);
+		hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
+		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
+		if(hIcon) DeleteObject(hIcon);
+		/* initialize listview control */
+		GetWindowRect(hList,&_rc);
+		dx = _rc.right - _rc.left;
+		SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
+			(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
+		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
+		lvc.pszText = "Volume";
+		lvc.cx = 60 * dx / 505;
+		SendMessage(hList,LVM_INSERTCOLUMN,0,(LRESULT)&lvc);
+		lvc.pszText = "Status";
+		lvc.cx = 60 * dx / 505;
+		SendMessage(hList,LVM_INSERTCOLUMN,1,(LRESULT)&lvc);
+		lvc.pszText = "File system";
+		lvc.cx = 100 * dx / 505;
+		SendMessage(hList,LVM_INSERTCOLUMN,2,(LRESULT)&lvc);
+		lvc.mask |= LVCF_FMT;
+		lvc.fmt = LVCFMT_RIGHT;
+		lvc.pszText = "Total space";
+		lvc.cx = 100 * dx / 505;
+		SendMessage(hList,LVM_INSERTCOLUMN,3,(LRESULT)&lvc);
+		lvc.pszText = "Free space";
+		lvc.cx = 100 * dx / 505;
+		SendMessage(hList,LVM_INSERTCOLUMN,4,(LRESULT)&lvc);
+		lvc.pszText = "Percentage";
+		lvc.cx = 85 * dx / 505;
+		SendMessage(hList,LVM_INSERTCOLUMN,5,(LRESULT)&lvc);
+		/* reduce hight of list view control */
+		GetWindowRect(hList,&_rc);
+		_rc.bottom --;
+		SetWindowPos(hList,0,0,0,_rc.right - _rc.left,
+			_rc.bottom - _rc.top,SWP_NOMOVE);
+		/* set window procs */
+		OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
+		OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
+		OldBtnWndProc = (WNDPROC)SetWindowLongPtr(hBtnAnalyse,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(hBtnDfrg,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(hBtnCompact,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(hBtnPause,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(hBtnStop,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(hBtnFragm,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(GetDlgItem(hWnd,IDC_SETTINGS),GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(GetDlgItem(hWnd,IDC_ABOUT),GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		SetWindowLongPtr(hBtnRescan,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
+		OldCheckWndProc = \
+			(WNDPROC)SetWindowLongPtr(hCheckSkipRem,GWLP_WNDPROC,(LONG_PTR)CheckWndProc);
+		RescanDrives();
+		CreateMaps();
+		CreateBitMapGrid();
+		CreateStatusBar();
+		memset((void *)stat,0,sizeof(STATISTIC) * (MAX_DOS_DRIVES));
+		UpdateStatusBar(0);
+		break;
+	case WM_NOTIFY:
+		lpnm = (LPNMLISTVIEW)lParam;
+		if(lpnm->hdr.code == LVN_ITEMCHANGED && (lpnm->uNewState & LVIS_SELECTED))
 		{
-			/* Window Initialization */
-			hWindow = hWnd;
-			hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
-			hList = GetDlgItem(hWnd,IDC_VOLUMES);
-			hBtnAnalyse = GetDlgItem(hWnd,IDC_ANALYSE);
-			hBtnDfrg = GetDlgItem(hWnd,IDC_DEFRAGM);
-			hBtnCompact = GetDlgItem(hWnd,IDC_COMPACT);
-			hBtnPause = GetDlgItem(hWnd,IDC_PAUSE);
-			hBtnStop = GetDlgItem(hWnd,IDC_STOP);
-			hBtnFragm = GetDlgItem(hWnd,IDC_SHOWFRAGMENTED);
-			hBtnRescan = GetDlgItem(hWnd,IDC_RESCAN);
-			hBtnSettings = GetDlgItem(hWnd,IDC_SETTINGS);
-			hCheckSkipRem = GetDlgItem(hWnd,IDC_SKIPREMOVABLE);
-			if(settings->skip_removable)
-				SendMessage(hCheckSkipRem,BM_SETCHECK,BST_CHECKED,0);
-			else
-				SendMessage(hCheckSkipRem,BM_SETCHECK,BST_UNCHECKED,0);
-			hProgressMsg = GetDlgItem(hWnd,IDC_PROGRESSMSG);
-			hProgressBar = GetDlgItem(hWnd,IDC_PROGRESS1);
 			HideProgress();
-			hMap = GetDlgItem(hWnd,IDC_MAP);
-			GetWindowRect(hMap,&_rc);
-			_rc.bottom ++;
-			SetWindowPos(hMap,0,0,0,_rc.right - _rc.left,
-				_rc.bottom - _rc.top,SWP_NOMOVE);
-			CalculateBlockSize();
-			cx = GetSystemMetrics(SM_CXSCREEN);
-			cy = GetSystemMetrics(SM_CYSCREEN);
-			if(win_rc.left < 0) win_rc.left = 0; if(win_rc.top < 0) win_rc.top = 0;
-			if(win_rc.left >= cx) win_rc.left = cx - 10; if(win_rc.top >= cy) win_rc.top = cy - 10;
-			GetWindowRect(hWnd,&_rc);
-			dx = _rc.right - _rc.left;
-			dy = _rc.bottom - _rc.top + delta_h;
-			SetWindowPos(hWnd,0,win_rc.left,win_rc.top,dx,dy,0);
-			hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
-			SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
-			if(hIcon) DeleteObject(hIcon);
-			/* initialize listview control */
-			SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
-				(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
-			lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-			lvc.pszText = "Volume";
-			lvc.cx = 60;
-			SendMessage(hList,LVM_INSERTCOLUMN,0,(LRESULT)&lvc);
-			lvc.pszText = "Status";
-			lvc.cx = 60;
-			SendMessage(hList,LVM_INSERTCOLUMN,1,(LRESULT)&lvc);
-			lvc.pszText = "File system";
-			lvc.cx = 100;
-			SendMessage(hList,LVM_INSERTCOLUMN,2,(LRESULT)&lvc);
-			lvc.mask |= LVCF_FMT;
-			lvc.fmt = LVCFMT_RIGHT;
-			lvc.pszText = "Total space";
-			lvc.cx = 100;
-			SendMessage(hList,LVM_INSERTCOLUMN,3,(LRESULT)&lvc);
-			lvc.pszText = "Free space";
-			lvc.cx = 100;
-			SendMessage(hList,LVM_INSERTCOLUMN,4,(LRESULT)&lvc);
-			lvc.pszText = "Percentage";
-			lvc.cx = 85;
-			SendMessage(hList,LVM_INSERTCOLUMN,5,(LRESULT)&lvc);
-			/* set window procs */
-			OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
-			OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
-			OldBtnWndProc = (WNDPROC)SetWindowLongPtr(hBtnAnalyse,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(hBtnDfrg,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(hBtnCompact,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(hBtnPause,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(hBtnStop,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(hBtnFragm,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(GetDlgItem(hWnd,IDC_SETTINGS),GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(GetDlgItem(hWnd,IDC_ABOUT),GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			SetWindowLongPtr(hBtnRescan,GWLP_WNDPROC,(LONG_PTR)BtnWndProc);
-			OldCheckWndProc = \
-				(WNDPROC)SetWindowLongPtr(hCheckSkipRem,GWLP_WNDPROC,(LONG_PTR)CheckWndProc);
-			RescanDrives();
-			CreateBitMapGrid();
-			CreateStatusBar();
-			memset((void *)stat,0,sizeof(STATISTIC) * ('Z' - 'A' + 1));
-			UpdateStatusBar(0);
-			return FALSE;
+			/* change Index */
+			Index = letter_numbers[lpnm->iItem];
+			/* redraw indicator */
+			RedrawMap();
+			/* Update status bar */
+			UpdateStatusBar(Index);
 		}
+		break;
 	case WM_COMMAND:
+		switch(LOWORD(wParam))
 		{
-			switch(LOWORD(wParam))
-			{
-			case IDC_ANALYSE:
-				create_thread(ThreadProc,(DWORD)'a');
-				break;
-			case IDC_DEFRAGM:
-				create_thread(ThreadProc,(DWORD)'d');
-				break;
-			case IDC_COMPACT:
-				create_thread(ThreadProc,(DWORD)'c');
-				break;
-			case IDC_ABOUT:
-				DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
-				break;
-			case IDC_SETTINGS:
+		case IDC_ANALYSE:
+			create_thread(ThreadProc,(DWORD)'a');
+			break;
+		case IDC_DEFRAGM:
+			create_thread(ThreadProc,(DWORD)'d');
+			break;
+		case IDC_COMPACT:
+			create_thread(ThreadProc,(DWORD)'c');
+			break;
+		case IDC_ABOUT:
+			DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
+			break;
+		case IDC_SETTINGS:
+			if(!busy_flag)
 				DialogBox(hInstance,MAKEINTRESOURCE(IDD_SETTINGS),hWindow,(DLGPROC)SettingsDlgProc);
-				break;
-			case IDC_SKIPREMOVABLE:
-				if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
-					HIWORD(wParam) == BN_UNPUSHED || HIWORD(wParam) == BN_DBLCLK)
-					settings->skip_removable = \
-						(SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
-				break;
-			case IDC_SHOWFRAGMENTED:
-				ShowFragmented();
-				break;
-			case IDC_PAUSE:
-			case IDC_STOP:
-				Stop();
-				break;
-			case IDC_RESCAN:
-				RescanDrives();
-			}
-			return FALSE;
-		}
-	case WM_MOVE:
-		{
-			GetWindowRect(hWnd,&_rc);
-			if((HIWORD(_rc.bottom)) != 0xffff)
-			{
-				_rc.bottom -= delta_h;
-				memcpy((void *)&win_rc,(void *)&_rc,sizeof(RECT));
-			}
-			return FALSE;
-		}
-	case WM_CLOSE:
-		{
+			break;
+		case IDC_SKIPREMOVABLE:
+			if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
+				HIWORD(wParam) == BN_UNPUSHED || HIWORD(wParam) == BN_DBLCLK)
+				settings->skip_removable = \
+					(SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
+			break;
+		case IDC_SHOWFRAGMENTED:
+			if(!busy_flag) ShowFragmented();
+			break;
+		case IDC_PAUSE:
+		case IDC_STOP:
 			Stop();
-			GetWindowRect(hWnd,&_rc);
-			if((HIWORD(_rc.bottom)) != 0xffff)
-			{
-				_rc.bottom -= delta_h;
-				memcpy((void *)&win_rc,(void *)&_rc,sizeof(RECT));
-			}
-			EndDialog(hWnd,0);
-			return TRUE;
+			break;
+		case IDC_RESCAN:
+			if(!busy_flag) RescanDrives();
 		}
+		break;
+	case WM_MOVE:
+		GetWindowRect(hWnd,&_rc);
+		if((HIWORD(_rc.bottom)) != 0xffff)
+		{
+			_rc.bottom -= delta_h;
+			memcpy((void *)&win_rc,(void *)&_rc,sizeof(RECT));
+		}
+		break;
+	case WM_CLOSE:
+		Stop();
+		GetWindowRect(hWnd,&_rc);
+		if((HIWORD(_rc.bottom)) != 0xffff)
+		{
+			_rc.bottom -= delta_h;
+			memcpy((void *)&win_rc,(void *)&_rc,sizeof(RECT));
+		}
+		EndDialog(hWnd,0);
+		return TRUE;
 	}
 	return FALSE;
 }
@@ -445,9 +460,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	MSG message;
-	LRESULT iItem, retval = 0;
 
-	if((iMsg == WM_KEYDOWN || iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP ||
+	if((iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP ||
 		iMsg == WM_RBUTTONDOWN || iMsg == WM_RBUTTONUP) && busy_flag)
 		return 0;
 	if(iMsg == WM_KEYDOWN)
@@ -459,25 +473,9 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		message.pt.x = message.pt.y = 0;
 		message.time = 0;
 		TranslateAccelerator(hWindow,hAccel,&message);
+		if(busy_flag) return 0;
 	}
-
-	retval = CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
-
-	if(iMsg == WM_KEYDOWN || iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP)
-	{
-		iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
-		if(iItem != -1)
-		{
-			HideProgress();
-			/* change Index */
-			Index = letter_numbers[iItem];
-			/* redraw indicator */
-			RedrawMap();
-			/* Update status bar */
-			UpdateStatusBar(Index);
-		}
-	}
-	return retval;
+	return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
 }
 
 LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
@@ -604,45 +602,44 @@ __inline void DisableButtons(void)
 	EnableWindow(hBtnSettings,FALSE);
 }
 
-DWORD WINAPI UpdateMapThreadProc(LPVOID lpParameter)
+int __stdcall update_stat(int df)
 {
-	int index = (int)(size_t)lpParameter;
+	int index = My_Index;
 	char *_map;
-	DWORD wait_result;
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
+	char *err_msg;
 
+	if(stop_pressed) return 0; /* it's neccessary: see above one comment in Stop() */
 	_map = map[index];
 	pst = &stat[index];
-	ShowProgress();
-	SetWindowText(hProgressMsg,"0 %");
-	SendMessage(hProgressBar,PBM_SETPOS,0,0);
-	do
+	if(udefrag_get_progress(pst,&percentage)) goto done;
+	UpdateStatusBar(index);
+//	if(settings->show_progress)
+//	{
+		sprintf(progress_msg,"%c %u %%",
+			current_operation = pst->current_operation,(int)percentage);
+		SetWindowText(hProgressMsg,progress_msg);
+		SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
+//	}
+	if(udefrag_get_map(_map,N_BLOCKS)) goto done;
+	FillBitMap(index);
+	RedrawMap();
+done: 
+	if(df == FALSE) return 0;
+	err_msg = udefrag_get_ex_command_result();
+	if(strlen(err_msg) > 0)
 	{
-		wait_result = WaitForSingleObject(hEventComplete,1);
-		if(udefrag_get_progress(pst,&percentage)) goto wait;
-		UpdateStatusBar(index);
-		if(settings->show_progress)
-		{
-			sprintf(progress_msg,"%c %u %%",
-				current_operation = pst->current_operation,(int)percentage);
-			SetWindowText(hProgressMsg,progress_msg);
-			SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
-		}
-		if(udefrag_get_map(_map,N_BLOCKS)) goto wait;
-		FillBitMap(index);
-		RedrawMap();
-wait: 
-		Sleep(settings->update_interval);
-	} while(wait_result == WAIT_TIMEOUT);
+		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		return 0;
+	}
 	if(!stop_pressed)
 	{
 		sprintf(progress_msg,"%c 100 %%",current_operation);
 		SetWindowText(hProgressMsg,progress_msg);
 		SendMessage(hProgressBar,PBM_SETPOS,100,0);
 	}
-	SetEvent(hEvtDone);
 	return 0;
 }
 
@@ -653,7 +650,13 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	UCHAR command;
 	char *err_msg;
 
+	/* return immediately if we are busy */
+	if(busy_flag) return 0;
 	busy_flag = 1;
+	stop_pressed = FALSE;
+
+	/* return if stop button was pressed */
+	if(stop_pressed) return 0;
 	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
 	if(iItem == -1)
 	{
@@ -661,43 +664,49 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		return 0;
 	}
 
+	if(stop_pressed) return 0;
 	ShowStatus(STAT_WORK,iItem);
+	if(stop_pressed) return 0;
 	DisableButtons();
+	if(stop_pressed) return 0;
 	ClearMap();
 
 	index = letter_numbers[iItem];
 	command = (UCHAR)lpParameter;
 
+	if(stop_pressed) return 0;
 	if(command == 'a')
 		ShowStatus(STAT_AN,iItem);
 	else
 		ShowStatus(STAT_DFRG,iItem);
 
-	stop_pressed = FALSE;
-	ResetEvent(hEventComplete);
-	ResetEvent(hEvtDone);
-	create_thread(UpdateMapThreadProc,(size_t)index);
+	My_Index = index;
 
+	if(stop_pressed) return 0;
+	ShowProgress();
+	if(stop_pressed) return 0;
+	SetWindowText(hProgressMsg,"0 %");
+	if(stop_pressed) return 0;
+	SendMessage(hProgressBar,PBM_SETPOS,0,0);
 	switch(command)
 	{
 	case 'a':
-		err_msg = udefrag_analyse((UCHAR)(index + 'A'));
+		err_msg = udefrag_analyse_ex((UCHAR)(index + 'A'),update_stat);
 		break;
 	case 'd':
-		err_msg = udefrag_defragment((UCHAR)(index + 'A'));
+		err_msg = udefrag_defragment_ex((UCHAR)(index + 'A'),update_stat);
 		break;
 	default:
-		err_msg = udefrag_optimize((UCHAR)(index + 'A'));
+		err_msg = udefrag_optimize_ex((UCHAR)(index + 'A'),update_stat);
 	}
+	busy_flag = 0; /* it's neccessary: see above one comment in Stop() */
 	if(err_msg)
 	{
 		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		ShowStatus(STAT_CLEAR,iItem/*linenumber*/);
+		ShowStatus(STAT_CLEAR,iItem);
 		ClearMap();
 	}
-	SetEvent(hEventComplete);
 	EnableButtons();
-	busy_flag = 0;
 	return 0;
 }
 

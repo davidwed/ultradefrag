@@ -22,6 +22,10 @@
  *  functions to interact with driver.
  */
 
+/*
+ *  NOTE: this library isn't absolutely thread-safe. Be careful!
+ */
+
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
@@ -32,12 +36,15 @@
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
 
-#define MAX_DOS_DRIVES 26
 #define FS_ATTRIBUTE_BUFFER_SIZE (MAX_PATH * sizeof(WCHAR) + sizeof(FILE_FS_ATTRIBUTE_INFORMATION))
 #define INTERNAL_SEM_FAILCRITICALERRORS 0
 
 /* global variables */
 char msg[1024]; /* buffer for error messages */
+char stop_msg[1024];
+char progress_msg[1024];
+char map_msg[1024];
+char vol_msg[1024];
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
 int __native_mode = FALSE;
@@ -50,7 +57,9 @@ short driver_key[] = \
   L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 HANDLE udefrag_device_handle = NULL;
 
-extern ud_settings settings;
+extern ud_options settings;
+extern char th_msg[];
+extern char settings_msg[];
 
 volume_info v[MAX_DOS_DRIVES + 1];
 
@@ -58,7 +67,7 @@ BOOL nt4_system = FALSE; /* TRUE for nt 4.0 */
 
 unsigned char c, lett;
 BOOL done_flag;
-char *error_message;
+char *error_message = "";
 
 /* internal functions prototypes */
 BOOL udefrag_send_command(unsigned char command,unsigned char letter);
@@ -74,7 +83,7 @@ BOOL __CreateEvent(HANDLE *pHandle,short *name);
 BOOL _ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
-			char *err_format_string);
+			char *err_format_string,char *msg_buffer);
 BOOL set_error_mode(UINT uMode);
 
 /* inline functions */
@@ -86,7 +95,10 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
-char * __stdcall udefrag_init(int native_mode)
+/*!
+ *  udefrag_init procedure
+ */
+char * __stdcall udefrag_init(int argc, short **argv,int native_mode)
 {
 	UNICODE_STRING uStr;
 	HANDLE UserToken = NULL;
@@ -96,6 +108,18 @@ char * __stdcall udefrag_init(int native_mode)
 
 	/* 0. only one instance of program ! */
 	__native_mode = native_mode;
+	/* 1. Enable neccessary privileges */
+	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&UserToken);
+	if(!NT_SUCCESS(Status))
+	{
+		sprintf(msg,"Can't open process token: %x!",Status);
+		goto init_fail;
+	}
+	if(!EnablePrivilege(UserToken,SE_SHUTDOWN_PRIVILEGE)) goto init_fail;
+	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) goto init_fail;*/
+	if(!EnablePrivilege(UserToken,SE_LOAD_DRIVER_PRIVILEGE)) goto init_fail;
+	SafeNtClose(UserToken);
+	/* create init_event - this must be after privileges enabling */
 	RtlInitUnicodeString(&uStr,L"\\udefrag_init");
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
 	Status = NtCreateEvent(&init_event,STANDARD_RIGHTS_ALL | 0x1ff,
@@ -108,17 +132,6 @@ char * __stdcall udefrag_init(int native_mode)
 			sprintf(msg,"Can't create init_event: %x!",Status);
 		goto init_fail;
 	}
-	/* 1. Enable neccessary privileges */
-	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&UserToken);
-	if(!NT_SUCCESS(Status))
-	{
-		sprintf(msg,"Can't open process token: %x!",Status);
-		goto init_fail;
-	}
-	if(!EnablePrivilege(UserToken,SE_SHUTDOWN_PRIVILEGE)) goto init_fail;
-	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) goto init_fail;*/
-	if(!EnablePrivilege(UserToken,SE_LOAD_DRIVER_PRIVILEGE)) goto init_fail;
-	SafeNtClose(UserToken);
 	/* 2. Load driver */
 	RtlInitUnicodeString(&uStr,driver_key);
 	Status = NtLoadDriver(&uStr);
@@ -147,15 +160,22 @@ char * __stdcall udefrag_init(int native_mode)
 	/* 5. Set user mode buffer - nt 4.0 specific */
 	if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_USER_MODE_BUFFER,
 		user_mode_buffer,0,NULL,0,
-		"Can't set user mode buffer: %x!")) goto init_fail;
+		"Can't set user mode buffer: %x!",msg)) goto init_fail;
+	/* 6. Load settings */
+	udefrag_load_settings(argc,argv);
+	if(udefrag_set_options(&settings))
+	{
+		strcpy(msg,settings_msg);
+		goto init_fail;
+	}
 	return NULL;
 init_fail:
 	SafeNtClose(UserToken);
-	if(init_event) udefrag_unload();
+	if(init_event) udefrag_unload(FALSE);
 	return msg;
 }
 
-char * __stdcall udefrag_unload(void)
+char * __stdcall udefrag_unload(BOOL save_options)
 {
 	UNICODE_STRING uStr;
 
@@ -176,11 +196,15 @@ char * __stdcall udefrag_unload(void)
 	/* unload driver */
 	RtlInitUnicodeString(&uStr,driver_key);
 	NtUnloadDriver(&uStr);
+	/* save settings */
+	if(save_options)
+		if(udefrag_save_settings()) return settings_msg;
 	return NULL;
 unload_fail:
 	return msg;
 }
 
+/* you can send only one command at the same time */
 char * __stdcall udefrag_analyse(unsigned char letter)
 {
 	return udefrag_send_command('a',letter) ? NULL : msg;
@@ -196,10 +220,9 @@ char * __stdcall udefrag_optimize(unsigned char letter)
 	return udefrag_send_command('c',letter) ? NULL : msg;
 }
 
-/* asynchronous functions set - they returns immediately */
 DWORD WINAPI send_command(LPVOID unused)
 {
-	error_message = udefrag_send_command(c,lett) ? NULL : msg;
+	error_message = udefrag_send_command(c,lett) ? "" : msg;
 	done_flag = TRUE;
 	exit_thread();
 	return 0;
@@ -207,10 +230,14 @@ DWORD WINAPI send_command(LPVOID unused)
 
 BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc)
 {
-	done_flag = FALSE;
+	done_flag = FALSE; error_message = "";
 	/* create a thread for driver command processing */
 	c = command; lett = letter;
-	if(create_thread(send_command,NULL)) return FALSE;
+	if(create_thread(send_command,NULL))
+	{
+		strcpy(msg,th_msg);
+		return FALSE;
+	}
 	if(sproc)
 	{
 		/* call specified callback 
@@ -218,13 +245,20 @@ BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDA
 		do
 		{
 			nsleep(settings.update_interval);
-			sproc(FALSE);//,"");
+			sproc(FALSE);
 		} while(!done_flag);
-		sproc(TRUE);//,error_message);
+		sproc(TRUE);
+	}
+	else
+	{
+		while(!done_flag) nsleep(settings.update_interval);
 	}
 	return TRUE;
 }
 
+/*
+ * NOTE: don't use create_thread call before command_ex returns!
+ */
 char * __stdcall udefrag_analyse_ex(unsigned char letter,STATUPDATEPROC sproc)
 {
 	return udefrag_send_command_ex('a',letter,sproc) ? NULL : msg;
@@ -240,16 +274,21 @@ char * __stdcall udefrag_optimize_ex(unsigned char letter,STATUPDATEPROC sproc)
 	return udefrag_send_command_ex('c',letter,sproc) ? NULL : msg;
 }
 
+char * __stdcall udefrag_get_ex_command_result(void)
+{
+	return error_message;
+}
+
 char * __stdcall udefrag_stop(void)
 {
 	if(!init_event)
 	{
-		strcpy(msg,"Udefrag.dll stop call without initialization!");
-		return msg;
+		strcpy(stop_msg,"Udefrag.dll stop call without initialization!");
+		return stop_msg;
 	}
 	return _ioctl(udefrag_device_handle,stop_event,
 		IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0,
-		"Can't stop driver command: %x!") ? NULL : msg;
+		"Can't stop driver command: %x!",stop_msg) ? NULL : stop_msg;
 }
 
 BOOL udefrag_send_command(unsigned char command,unsigned char letter)
@@ -292,12 +331,12 @@ char * __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
 	if(!init_event)
 	{
-		strcpy(msg,"Udefrag.dll get_progress call without initialization!");
+		strcpy(progress_msg,"Udefrag.dll get_progress call without initialization!");
 		goto get_progress_fail;
 	}
 	if(!_ioctl(udefrag_device_handle,io2_event,IOCTL_GET_STATISTIC,
 		NULL,0,pstat,sizeof(STATISTIC),
-		"Statistical data unavailable: %x!")) goto get_progress_fail;
+		"Statistical data unavailable: %x!",progress_msg)) goto get_progress_fail;
 	if(percentage) /* calculate percentage only if we have such request */
 	{
 		switch(pstat->current_operation)
@@ -325,18 +364,18 @@ char * __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	}
 	return NULL;
 get_progress_fail:
-	return msg;
+	return progress_msg;
 }
 
 char * __stdcall udefrag_get_map(char *buffer,int size)
 {
 	if(!init_event)
 	{
-		strcpy(msg,"Udefrag.dll get_map call without initialization!");
-		return msg;
+		strcpy(map_msg,"Udefrag.dll get_map call without initialization!");
+		return map_msg;
 	}
 	return _ioctl(udefrag_device_handle,map_event,IOCTL_GET_CLUSTER_MAP,
-		NULL,0,buffer,(ULONG)size,"Cluster map unavailable: %x!") ? NULL : msg;
+		NULL,0,buffer,(ULONG)size,"Cluster map unavailable: %x!",map_msg) ? NULL : map_msg;
 }
 
 /* useful for native and console applications */
@@ -366,6 +405,8 @@ char * __stdcall get_default_formatted_results(STATISTIC *pstat)
 	strcat(result_msg,s);
 	return result_msg;
 }
+
+/* following functions set isn't thread-safe: you should call only one at same time */
 
 /* NOTE: if(skip_removable == FALSE && you have floppy drive without floppy disk)
  *       then you will hear noise :))
@@ -406,7 +447,7 @@ char * __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_remov
 	set_error_mode(1); /* equal to SetErrorMode(0) */
 	return NULL;
 get_volumes_fail:
-	return msg;
+	return vol_msg;
 }
 
 /* NOTE: this is something like udefrag_get_avail_volumes()
@@ -420,7 +461,7 @@ char * __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable
 	letter = (unsigned char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z')
 	{
-		sprintf(msg,"Invalid volume letter %c!",letter);
+		sprintf(vol_msg,"Invalid volume letter %c!",letter);
 		goto validate_fail;
 	}
 	if(!nt4_system)
@@ -433,7 +474,7 @@ char * __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable
 	set_error_mode(1); /* equal to SetErrorMode(0) */
 	return NULL;
 validate_fail:
-	return msg;
+	return vol_msg;
 }
 
 BOOL get_drive_map(PROCESS_DEVICEMAP_INFORMATION *pProcessDeviceMapInfo)
@@ -452,7 +493,7 @@ BOOL get_drive_map(PROCESS_DEVICEMAP_INFORMATION *pProcessDeviceMapInfo)
 			nt4_system = TRUE;
 		else
 		{
-			sprintf(msg,"Can't get drive map: %x!",Status);
+			sprintf(vol_msg,"Can't get drive map: %x!",Status);
 			return FALSE;
 		}
 	}
@@ -477,7 +518,7 @@ BOOL internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 				NULL,0);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't open %ws: %x!",rootpath,Status);
+		sprintf(vol_msg,"Can't open %ws: %x!",rootpath,Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -523,7 +564,7 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 		NtClose(hFile);
 		if(!NT_SUCCESS(Status))
 		{
-			sprintf(msg,"Can't get volume type for \'%c\': %x!",letter,Status);
+			sprintf(vol_msg,"Can't get volume type for \'%c\': %x!",letter,Status);
 			goto invalid_volume;
 		}
 		switch(FileFsDevice.DeviceType)
@@ -562,13 +603,13 @@ validate_type:
 	/* exclude remote and read-only volumes */
 	if(type != DRIVE_FIXED && type != DRIVE_REMOVABLE && type != DRIVE_RAMDISK)
 	{
-		sprintf(msg,"Volume must be on non-cdrom local drive, but it's %u!",type);
+		sprintf(vol_msg,"Volume must be on non-cdrom local drive, but it's %u!",type);
 		goto invalid_volume;
 	}
 	/* exclude removable media if requested */
 	if(type == DRIVE_REMOVABLE && skip_removable)
 	{
-		strcpy(msg,"It's removable volume!");
+		strcpy(vol_msg,"It's removable volume!");
 		goto invalid_volume;
 	}
 	/* exclude letters assigned by 'subst' command - 
@@ -583,7 +624,7 @@ validate_type:
 			&ObjectAttributes);
 		if(!NT_SUCCESS(Status))
 		{
-			sprintf(msg,"Can't open symbolic link %ws: %x!",link_name,Status);
+			sprintf(vol_msg,"Can't open symbolic link %ws: %x!",link_name,Status);
 			goto invalid_volume;
 		}
 		uStr.Buffer = link_target;
@@ -594,13 +635,13 @@ validate_type:
 		NtClose(hLink);
 		if(!NT_SUCCESS(Status))
 		{
-			sprintf(msg,"Can't query symbolic link %ws: %x!",link_name,Status);
+			sprintf(vol_msg,"Can't query symbolic link %ws: %x!",link_name,Status);
 			goto invalid_volume;
 		}
 		link_target[4] = 0; /* terminate the buffer */
 		if(!wcscmp(link_target,L"\\??\\"))
 		{
-			strcpy(msg,"Volume letter is assigned by \'subst\' command!");
+			strcpy(vol_msg,"Volume letter is assigned by \'subst\' command!");
 			goto invalid_volume;
 		}
 	}
@@ -611,7 +652,7 @@ validate_type:
 	if(!NT_SUCCESS(Status))
 	{
 		NtClose(hFile);
-		sprintf(msg,"Can't get size of volume \'%c\': %x!",letter,Status);
+		sprintf(vol_msg,"Can't get size of volume \'%c\': %x!",letter,Status);
 		goto invalid_volume;
 	}
 	if(fsname)
@@ -623,7 +664,7 @@ validate_type:
 		if(!NT_SUCCESS(Status))
 		{
 			NtClose(hFile);
-			sprintf(msg,"Can't get file system name for \'%c\': %x!",letter,Status);
+			sprintf(vol_msg,"Can't get file system name for \'%c\': %x!",letter,Status);
 			goto invalid_volume;
 		}
 		memcpy(str,pFileFsAttribute->FileSystemName,(MAXFSNAME - 1) * sizeof(short));
@@ -648,7 +689,7 @@ char * __stdcall scheduler_get_avail_letters(char *letters)
 	volume_info *v;
 	int i;
 
-	if(udefrag_get_avail_volumes(&v,TRUE)) return msg;
+	if(udefrag_get_avail_volumes(&v,TRUE)) return vol_msg;
 	for(i = 0;;i++)
 	{
 		letters[i] = v[i].letter;
@@ -699,7 +740,7 @@ BOOL __CreateEvent(HANDLE *pHandle,short *name)
 BOOL _ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
-			char *err_format_string)
+			char *err_format_string,char *msg_buffer)
 {
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
@@ -714,7 +755,7 @@ BOOL _ioctl(HANDLE handle,HANDLE event,ULONG code,
 	}
 */	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING)
 	{
-		sprintf(msg,err_format_string,Status);
+		sprintf(msg_buffer,err_format_string,Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -730,7 +771,7 @@ BOOL set_error_mode(UINT uMode)
 					sizeof(uMode));
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't set error mode %u: %x!",uMode,Status);
+		sprintf(vol_msg,"Can't set error mode %u: %x!",uMode,Status);
 		return FALSE;
 	}
 	return TRUE;
