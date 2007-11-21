@@ -1,33 +1,30 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
  <link rev="made" href="mailto:dmitriar@gmail.com" />
  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
  <meta name="description" content="UltraDefrag FAQ" />
  <meta name="keywords" content="UltraDefrag, Ultra Defragmenter, defragmentation,Open Source disk defragmenter, defragger, boot time defragmentation, boot time defragger, FAQ, Frequently Asked Questions" />
  <meta name="revisit-after" content="30 days" />
  <meta name="robots" content="index, follow, noarchive" />
- <title>UltraDefrag - powerful Open Source disk defragmenter - FAQ</title>
- <style type="text/css">
+ 
+ <title>UltraDefrag - powerful Open Source disk defragmenter - FAQ</title><style type="text/css">
   <!--
   P {text-indent:10pt; padding-left:10pt}
   TD {text-align:left}
   .p10 {text-indent: 0pt; padding-left: 10pt}
   -->
- </style>
-</head>
-<body 
- style="color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt"
- alink="#ff0000" vlink="#660099">
+ </style></head>
+
+<body style="color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt;" alink="#ff0000" vlink="#660099">
 <center><hr />
-<font size="+1">U</font>ltra <font size="+1">D</font>efragmenter <font size="+1">V</font>ersion <font size="+1">1.2.1</font><br />
+<font size="+1">U</font>ltra <font size="+1">D</font>efragmenter <font size="+1">V</font>ersion <font size="+1">1.2.2</font><br />
 <br />Copyright (C) 2007 <a href="mailto:dmitriar@gmail.com">Dmitri Arkhangelski</a>, 
 <a href="mailto:zippy1981@gmail.com">Justin Dearing</a>.<br />
 <hr />
-<p align="center" style="text-indent:0pt; padding-left:0pt">
+<p style="text-indent: 0pt; padding-left: 0pt;" align="center">
 <a href="http://ultradefrag.sourceforge.net/index.html#news">[News]</a> 
 <a href="http://ultradefrag.sourceforge.net/index.html#abstract">[Abstract]</a> 
-<a href="http://sourceforge.net/project/platformdownload.php?group_id=199532&amp;sel_platform=4745">[Download]</a> 
+<a href="http://sourceforge.net/project/platformdownload.php?group_id=199532&amp;sel_platform=5306">[Download]</a> 
 <a href="http://ultradefrag.sourceforge.net/index.html#overview">[Overview]</a> 
 <a href="http://ultradefrag.sourceforge.net/manual.html">[User Manual]</a><br />
 <a href="http://ultradefrag.sourceforge.net/faq.html">[FAQ]</a> 
@@ -39,14 +36,14 @@
 <hr />
 </center>
 <h3>Frequently Asked Questions</h3>
-<div class="p10" style="font-family:monospace; font-size:11pt">
-<table width="100%" border="0px"><tbody>
+<div class="p10" style="font-family: monospace; font-size: 11pt;">
+<table border="0" width="100%"><tbody>
  <tr>
   <td valign="top"><b>Q.:</b></td>
   <td valign="top">I have 3 Gb of RAM, but the Debug Output includes the message 'No enough memory'.
   I have 150 millions clusters on the volume I am trying to defrag.</td>
  </tr>
- <tr style="height:10pt"><td /><td /></tr>
+ <tr style="height: 10pt;"><td></td><td></td></tr>
  <tr>
   <td valign="top"><b>A.:</b></td>
   <td valign="top">You have too many clusters on the specified volume. Since you have 
@@ -57,7 +54,7 @@
     Note that many drivers besides ultradfg.sys use nonpaged memory!<br /><br />
  
     There are few ways how YOU, the user, can fix this problem:<br />
-	<div style="padding-left:20pt">
+	<div style="padding-left: 20pt;">
     1. Increase cluster size of volume. This is probably a good idea for
        performance reasons.<br />
     2. Buy new PC with a 64 bit processor, and install a 64 bit version of
@@ -68,12 +65,12 @@
 	</div>
   </td>
  </tr>
- <tr style="height:20pt"><td /><td /></tr>
+ <tr style="height: 20pt;"><td></td><td></td></tr>
  <tr>
   <td valign="top"><b>Q.:</b></td>
   <td valign="top">How can I use filters?</td>
  </tr>
- <tr style="height:10pt"><td /><td /></tr>
+ <tr style="height: 10pt;"><td></td><td></td></tr>
  <tr>
   <td valign="top"><b>A.:</b></td>
   <td valign="top">The include field is where you enter substring expressions that match
@@ -85,12 +82,12 @@
     suffixes: (Kb | Mb | Gb | Tb).
   </td>
  </tr>
- <tr style="height:10pt"><td /><td /></tr>
+ <tr style="height: 10pt;"><td></td><td></td></tr>
  <tr>
   <td><span style="font-weight: bold;">Q.:</span></td>
   <td>The progress bar updates irregularally. Why is this?</td>
  </tr>
- <tr style="height:10pt"><td /><td /></tr>
+ <tr style="height: 10pt;"><td></td><td></td></tr>
  <tr>
   <td valign="top"><span style="font-weight: bold;">A.:</span></td>
   <td>The progress bar measures disk space, not the number of files. So when 
@@ -103,7 +100,7 @@
    instance, progress will be at the 50% point after 10 msec, but at the
    100% point after 10 sec.</td>
  </tr>
- <tr style="height:20pt"><td /><td /></tr>
+ <tr style="height: 20pt;"><td></td><td></td></tr>
  <tr>
   <td valign="top"><b>Q.:</b></td>
   <td valign="top">I've seen message "Can't load ultradfg driver!" on Windows Vista. I think 
@@ -111,11 +108,11 @@
     check is enabled.  How can I disable it?
   </td>
  </tr>
- <tr style="height:10pt"><td /><td /></tr>
+ <tr style="height: 10pt;"><td></td><td></td></tr>
  <tr>
   <td valign="top"><b>A.:</b></td>
   <td valign="top">Thanks to <b>Christopher Naegel</b> for providing the following instructions:<br />
-    <div style="padding-left:20pt">
+    <div style="padding-left: 20pt;">
 	<ol>
 	 <li>Open a command line with admin-rights:<br />
          Start -&gt; execute -&gt; CMD (with admin rights).<br />
@@ -153,5 +150,4 @@
 _uacct = "UA-2897964-4";
 urchinTracker();
 </script>
-</body>
-</html>
+</body></html>

@@ -4,7 +4,6 @@ rem This batch file use ms c compiler and reactos ddk.
 
 rem set environment
 if "%MSVC_ENV%" neq "" goto start_build
-set DDKINCDIR=D:\MyDocs\ReactOS030\include
 call "%MSVSBIN%\vcvars32.bat"
 set MSVC_ENV=ok
 
@@ -20,8 +19,14 @@ set NT4_TARGET=true
 nmake /NOLOGO /A /f ultradfg.mak
 if %errorlevel% neq 0 goto fail
 
+rem Build the winx.dll ...
+cd ..\dll\winx\src
+call MSVC_BUILD_WINX.CMD
+if %errorlevel% neq 0 goto fail
+copy /Y .\bin\winx.lib ..\..\..\lib\
+
 echo Build the udefrag.dll ...
-cd ..\dll\udefrag
+cd ..\..\udefrag
 nmake /NOLOGO /A /f udefrag.mak CFG="udefrag - Win32 Release"
 if %errorlevel% neq 0 goto fail
 copy /Y ..\..\bin\udefrag.lib ..\..\lib\

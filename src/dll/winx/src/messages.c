@@ -1,5 +1,5 @@
 /*
- *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  WINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -17,4 +17,20 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "../dll/winx/src/ntndk.h"
+/*
+ *  winx.dll error messages.
+ */
+
+const short *emsg[] = \
+{
+	L"",
+	L"Can't open the keyboard",
+	L"Can't create kb_event"
+};
+
+short * __stdcall winx_get_error_message(long code)
+{
+	if(code < 0 || code >= sizeof(emsg) / sizeof(short *))
+		return L"";
+	return emsg[code];
+}

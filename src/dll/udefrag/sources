@@ -5,7 +5,15 @@ DLLDEF=udefrag.def
 
 USER_C_FLAGS=/DUSE_WINDDK
 
-SOURCES=udefrag.c settings.c stdio.c keytrans.c sfuncs.c thread.c udefrag.rc
+SOURCES=udefrag.c \
+	settings.c \
+	stdio.c \
+	keytrans.c \
+	cfuncs.c \
+	sfuncs.c \
+	thread.c \
+	misc.c \
+	udefrag.rc
 
 USE_NTDLL=1
 

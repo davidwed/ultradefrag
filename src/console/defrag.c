@@ -38,6 +38,8 @@ int b_flag = 0,h_flag = 0;
 char letter = 0;
 char unk_opt[] = "Unknown option: x!";
 int unknown_option = 0;
+char oem_buffer[4096];
+char oem_stop_buffer[4096];
 
 /* internal functions prototypes */
 void HandleError(char *err_msg,int exit_code);
@@ -77,15 +79,30 @@ void HandleError(char *err_msg,int exit_code)
 	}
 }
 
+void HandleErrorW(short *err_msg,int exit_code)
+{
+	if(err_msg)
+	{ /* we should display error and terminate process */
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		WideCharToMultiByte(CP_OEMCP,0,err_msg,-1,oem_buffer,4095,NULL,NULL);
+		printf("%s\n",oem_buffer);
+		if(!b_flag) settextcolor(console_attr);
+		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+		udefrag_unload(FALSE);
+		exit(exit_code);
+	}
+}
+
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
-	char *err_msg;
+	short *err_msg;
 
 	err_msg = udefrag_stop();
 	if(err_msg)
 	{
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		printf("\n%s\n",err_msg);
+		WideCharToMultiByte(CP_OEMCP,0,err_msg,-1,oem_stop_buffer,4095,NULL,NULL);
+		printf("\n%s\n",oem_stop_buffer);
 		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	}
 	return TRUE;
@@ -140,17 +157,17 @@ int __cdecl wmain(int argc, short **argv)
 	if(h_flag) show_help();
 	/* validate driveletter */
 	if(!letter)	HandleError("Drive letter should be specified!",1);
-	HandleError(udefrag_validate_volume(letter,FALSE),1);
+	HandleErrorW(udefrag_validate_volume(letter,FALSE),1);
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* do our job */
-	HandleError(udefrag_init(argc,argv,FALSE),2);
+	HandleErrorW(udefrag_init(argc,argv,FALSE),2);
 
-	if(a_flag) HandleError(udefrag_analyse(letter),3);
-	else if(o_flag) HandleError(udefrag_optimize(letter),3);
-	else HandleError(udefrag_defragment(letter),3);
+	if(a_flag) HandleErrorW(udefrag_analyse(letter),3);
+	else if(o_flag) HandleErrorW(udefrag_optimize(letter),3);
+	else HandleErrorW(udefrag_defragment(letter),3);
 
 	/* display results and exit */
-	HandleError(udefrag_get_progress(&stat,NULL),0);
-	printf("\n%s",get_default_formatted_results(&stat));
+	HandleErrorW(udefrag_get_progress(&stat,NULL),0);
+	printf("\n%s",udefrag_get_default_formatted_results(&stat));
 	HandleError("",0);
 }

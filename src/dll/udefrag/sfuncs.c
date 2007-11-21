@@ -37,11 +37,32 @@ char s_msg[4096];
 char s_map_msg[4096];
 char map[32768];
 
+/* internal functions prototypes */
+char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode);
+char * __stdcall i_udefrag_unload(BOOL save_options);
+char * __stdcall i_udefrag_analyse(unsigned char letter);
+char * __stdcall i_udefrag_defragment(unsigned char letter);
+char * __stdcall i_udefrag_optimize(unsigned char letter);
+char * __stdcall i_udefrag_analyse_ex(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall i_udefrag_defragment_ex(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall i_udefrag_optimize_ex(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall i_udefrag_get_ex_command_result(void);
+char * __stdcall i_udefrag_stop(void);
+char * __stdcall i_udefrag_get_progress(STATISTIC *pstat, double *percentage);
+char * __stdcall i_udefrag_get_map(char *buffer,int size);
+char * __stdcall i_udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
+char * __stdcall i_udefrag_validate_volume(unsigned char letter,int skip_removable);
+char * __stdcall i_scheduler_get_avail_letters(char *letters);
+char * __stdcall i_udefrag_set_options(ud_options *ud_opts);
+char * __stdcall i_udefrag_save_settings(void);
+char * __stdcall i_udefrag_clean_registry(void);
+char * __stdcall i_udefrag_native_clean_registry(void);
+
 char * __stdcall udefrag_s_init(void)
 {
 	char *result;
 
-	result = udefrag_init(0,NULL,FALSE);
+	result = i_udefrag_init(0,NULL,FALSE);
 	return result ? result : "";
 }
 
@@ -49,7 +70,7 @@ char * __stdcall udefrag_s_unload(BOOL save_options)
 {
 	char *result;
 
-	result = udefrag_unload(save_options);
+	result = i_udefrag_unload(save_options);
 	return result ? result : "";
 }
 
@@ -57,7 +78,7 @@ char * __stdcall udefrag_s_analyse(unsigned char letter)
 {
 	char *result;
 
-	result = udefrag_analyse(letter);
+	result = i_udefrag_analyse(letter);
 	return result ? result : "";
 }
 
@@ -65,7 +86,7 @@ char * __stdcall udefrag_s_defragment(unsigned char letter)
 {
 	char *result;
 
-	result = udefrag_defragment(letter);
+	result = i_udefrag_defragment(letter);
 	return result ? result : "";
 }
 
@@ -73,7 +94,7 @@ char * __stdcall udefrag_s_optimize(unsigned char letter)
 {
 	char *result;
 
-	result = udefrag_optimize(letter);
+	result = i_udefrag_optimize(letter);
 	return result ? result : "";
 }
 
@@ -81,7 +102,7 @@ char * __stdcall udefrag_s_stop(void)
 {
 	char *result;
 
-	result = udefrag_stop();
+	result = i_udefrag_stop();
 	return result ? result : "";
 }
 
@@ -97,7 +118,7 @@ char * __stdcall udefrag_s_get_map(int size)
 
 	if(size > sizeof(map) - 1)
 		return "ERROR: Map resolution is too high!";
-	result = udefrag_get_map(map,size - 1);
+	result = i_udefrag_get_map(map,size - 1);
 	if(result)
 	{
 		strcpy(s_map_msg,"ERROR: ");
@@ -130,7 +151,7 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 	char t[256];
 	int p;
 
-	result = udefrag_get_avail_volumes(&v,skip_removable);
+	result = i_udefrag_get_avail_volumes(&v,skip_removable);
 	if(result)
 	{
 		strcpy(s_msg,"ERROR: ");
@@ -165,7 +186,7 @@ char * __stdcall udefrag_s_validate_volume(unsigned char letter,int skip_removab
 {
 	char *result;
 
-	result = udefrag_validate_volume(letter,skip_removable);
+	result = i_udefrag_validate_volume(letter,skip_removable);
 	return result ? result : "";
 }
 
@@ -173,7 +194,7 @@ char * __stdcall scheduler_s_get_avail_letters(void)
 {
 	char *result;
 
-	result = scheduler_get_avail_letters(s_letters);
+	result = i_scheduler_get_avail_letters(s_letters);
 	if(!result) return s_letters;
 	strcpy(s_msg,"ERROR: ");
 	strcat(s_msg,result);
@@ -184,7 +205,7 @@ char * __stdcall udefrag_s_analyse_ex(unsigned char letter,STATUPDATEPROC sproc)
 {
 	char *result;
 
-	result = udefrag_analyse_ex(letter,sproc);
+	result = i_udefrag_analyse_ex(letter,sproc);
 	return result ? result : "";
 }
 
@@ -192,7 +213,7 @@ char * __stdcall udefrag_s_defragment_ex(unsigned char letter,STATUPDATEPROC spr
 {
 	char *result;
 
-	result = udefrag_defragment_ex(letter,sproc);
+	result = i_udefrag_defragment_ex(letter,sproc);
 	return result ? result : "";
 }
 
@@ -200,6 +221,6 @@ char * __stdcall udefrag_s_optimize_ex(unsigned char letter,STATUPDATEPROC sproc
 {
 	char *result;
 
-	result = udefrag_optimize_ex(letter,sproc);
+	result = i_udefrag_optimize_ex(letter,sproc);
 	return result ? result : "";
 }

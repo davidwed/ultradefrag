@@ -8,6 +8,18 @@ rem ...
 set DDK_ENV=ok
 
 :start_build
+echo Build the winx.dll ...
+cd .\dll\winx\src
+call DDK_BUILD_WINX.CMD
+if %errorlevel% neq 0 goto fail
+rem copy files
+mkdir ..\..\..\obj\dll\winx
+mkdir ..\..\..\obj\dll\winx\src
+copy /Y ntndk.h ..\..\..\obj\dll\winx\src\
+copy /Y .\objfre_wnet_x86\i386\winx.lib ..\..\..\lib\
+copy /Y .\objfre_wnet_amd64\amd64\winx.lib ..\..\..\lib\amd64\
+copy /Y .\objfre_wnet_ia64\ia64\winx.lib ..\..\..\lib\ia64\
+cd ..\..\..
 echo Copy sources to obj directory...
 mkdir .\obj
 xcopy /I /Y .\driver .\obj\driver

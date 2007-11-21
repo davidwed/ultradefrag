@@ -1,5 +1,5 @@
 /*
- *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  WINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -17,4 +17,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "../dll/winx/src/ntndk.h"
+/*
+ *  winx.dll interface definitions.
+ */
+
+typedef LONGLONG WINX_STATUS;
+
+#define MAKE_WINX_STATUS(code,status) \
+		((WINX_STATUS)(((LONG)(status)) | ((WINX_STATUS)((LONG)(code))) << 32))
+
+#define NTSTATUS(ws)  ((LONG)(ws))
+#define ERRCODE(ws)   ((LONG)(((WINX_STATUS)(ws) >> 32) & 0xFFFFFFFF))
+
+/* winx error codes */
+#define WINX_SUCCESS                  0x00000000L
+#define WINX_KEYBOARD_INACCESSIBLE    0x00000001L
+#define WINX_CREATE_KB_EVENT_ERROR    0x00000002L
+
+
+#define SafeNtClose(h) if(h) { NtClose(h); h = NULL; }
+
+/* winx functions prototypes */
+WINX_STATUS __stdcall winx_init(PVOID Peb);
+WINX_STATUS __stdcall winx_exit(void);

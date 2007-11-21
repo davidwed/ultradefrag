@@ -44,7 +44,7 @@ COLORREF colors[NUM_OF_SPACE_STATES] =
 };
 HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 
-int iMAP_WIDTH = 0x209;
+int iMAP_WIDTH  = 0x209;
 int iMAP_HEIGHT = 0x8c;
 int iBLOCK_SIZE = 0x9;   /* in pixels */
 
@@ -66,16 +66,16 @@ void ClearMap();
 
 void CalculateBlockSize()
 {
-	RECT _rc;
+	RECT rc;
 	double n;
 	int x_edge,y_edge;
 	LONG delta_x;
 
-	GetWindowRect(hMap,&_rc);
+	GetWindowRect(hMap,&rc);
 	x_edge = GetSystemMetrics(SM_CXEDGE);
 	y_edge = GetSystemMetrics(SM_CYEDGE);
-	iMAP_WIDTH = _rc.right - _rc.left - 2 * y_edge;
-	iMAP_HEIGHT = _rc.bottom - _rc.top - 2 * x_edge;
+	iMAP_WIDTH = rc.right - rc.left - 2 * y_edge;
+	iMAP_HEIGHT = rc.bottom - rc.top - 2 * x_edge;
 	n = (double)((iMAP_WIDTH - 1) * (iMAP_HEIGHT - 1));
 	n /= (double)N_BLOCKS;
 	iBLOCK_SIZE = (int)floor(sqrt(n)) - 1; /* 1 pixel for grid line */
@@ -83,13 +83,13 @@ void CalculateBlockSize()
 	/* this is an universal solution for various DPI's */
 	iMAP_WIDTH = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1 + 2 * y_edge;
 	iMAP_HEIGHT = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1 + 2 * x_edge;
-	delta_x = _rc.right - _rc.left - iMAP_WIDTH;
+	delta_x = rc.right - rc.left - iMAP_WIDTH;
 	if(delta_x > 0)
 	{ /* align="center" */
-		_rc.left += (delta_x >> 1);
+		rc.left += (delta_x >> 1);
 	}
-	SetWindowPos(hMap,0,_rc.left - y_edge - 1, \
-		_rc.top - GetSystemMetrics(SM_CYCAPTION) - x_edge - 1, \
+	SetWindowPos(hMap,0,rc.left - y_edge - 1, \
+		rc.top - GetSystemMetrics(SM_CYCAPTION) - x_edge - 1, \
 		iMAP_WIDTH,iMAP_HEIGHT,0);
 	iMAP_WIDTH -= 2 * y_edge; /* new sizes for map without borders */
 	iMAP_HEIGHT -= 2 * x_edge;
@@ -118,7 +118,7 @@ BOOL CreateBitMap(signed int index)
 		iMAP_WIDTH * iMAP_HEIGHT * sizeof(RGBQUAD) + sizeof(BITMAPINFOHEADER));
 	if(!data) return FALSE;
 	bh = (BITMAPINFOHEADER*)data;
-	hDC    = GetDC(hWindow);
+	hDC = GetDC(hWindow);
 	res = (unsigned short)GetDeviceCaps(hDC, BITSPIXEL);
 	ReleaseDC(hWindow, hDC);
 
@@ -196,13 +196,13 @@ BOOL CreateBitMapGrid()
 BOOL FillBitMap(int index)
 {
 	HDC hdc;
-	char *_map;
+	char *cl_map;
 	int i, j;
 	HBRUSH hOldBrush;
 	RECT block_rc;
 
 	if(!(bit_map_dc[index])) return FALSE;
-	_map = map[index];
+	cl_map = map[index];
 	hdc = bit_map_dc[index];
 	if(!hdc) return FALSE;
 	hOldBrush = SelectObject(hdc,hBrushes[0]);
@@ -214,7 +214,7 @@ BOOL FillBitMap(int index)
 			block_rc.left = (iBLOCK_SIZE + 1) * j + 1;
 			block_rc.right = block_rc.left + iBLOCK_SIZE;
 			block_rc.bottom = block_rc.top + iBLOCK_SIZE;
-			FillRect(hdc,&block_rc,hBrushes[_map[i * BLOCKS_PER_HLINE + j]]);
+			FillRect(hdc,&block_rc,hBrushes[cl_map[i * BLOCKS_PER_HLINE + j]]);
 		}
 	}
 	SelectObject(hdc,hOldBrush);

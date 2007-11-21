@@ -21,6 +21,7 @@
  *  GUI - main code.
  */
 
+#define WIN32_NO_STATUS
 #include <windows.h>
 #include <commctrl.h>
 #include <memory.h>
@@ -31,6 +32,7 @@
 #include <math.h>
 
 #include "main.h"
+#include "../include/ntndk.h"
 #include "../include/ultradfg.h"
 
 #include "resource.h"
@@ -112,7 +114,46 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 
 #define create_thread(func,param) \
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,&thr_id)
+#if 0
+void DisplayError(char *err_msg)
+{
+	NTSTATUS Status;
+	ULONG err_code;
+	char *p;
+	short msg_buffer[65536];
+	int length;
 
+	if(err_msg)
+	{
+		/* get status from message */
+		p = strrchr(err_msg,':');
+		if(!p)
+		{
+error_code_not_specified:
+			MessageBoxA(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+			return;
+		}
+		/* skip ':' and spaces */
+		p ++;
+		while(*p == 0x20) p++;
+		sscanf(p,"%x",&Status);
+		err_code = RtlNtStatusToDosError(Status);
+		MultiByteToWideChar(CP_ACP,0,err_msg,-1,msg_buffer,65536 - 1);
+		wcscat(msg_buffer,L"\n");
+		length = wcslen(msg_buffer);
+		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			msg_buffer + length,65536 - length - 1,NULL))
+		{
+			MessageBoxW(0,msg_buffer,L"Error!",MB_OK | MB_ICONHAND);
+		}
+		else
+		{
+			goto error_code_not_specified;
+		}
+	}
+}
+#endif
 void HandleError(char *err_msg,int exit_code)
 {
 	if(err_msg)
@@ -123,9 +164,21 @@ void HandleError(char *err_msg,int exit_code)
 	}
 }
 
+void HandleErrorW(short *err_msg,int exit_code)
+{
+	if(err_msg)
+	{
+		if(err_msg[0]) MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
+		udefrag_unload(TRUE);
+		ExitProcess(exit_code);
+	}
+}
+
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	short *x[] = {L"one",L"two",L"",L"drughwurhfgwherhwe"};
+	int y = sizeof(x);
 	settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
@@ -136,7 +189,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		udefrag_clean_registry();
 		ExitProcess(0);
 	}
-	HandleError(udefrag_init(0,NULL,FALSE),2);
+	HandleErrorW(udefrag_init(0,NULL,FALSE),2);
 	win_rc.left = settings->x; win_rc.top = settings->y;
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
@@ -162,7 +215,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int stat,index;
 	char s[16];
 	int p;
-	char *err_msg;
+	short *err_msg;
 	volume_info *v;
 	int i;
 	LV_ITEM lvi;
@@ -183,7 +236,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	err_msg = udefrag_get_avail_volumes(&v,settings->skip_removable);
 	if(err_msg)
 	{
-		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
 		goto scan_done;
 	}
 	for(i = 0;;i++)
@@ -253,11 +306,11 @@ scan_done:
 
 void Stop()
 {
-	char *err_msg;
+	short *err_msg;
 
 	stop_pressed = TRUE;
 	err_msg = udefrag_stop();
-	if(err_msg) MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+	if(err_msg) MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
 	/* VERY IMPORTANT:
 	 *  Because we call Sleep() from SendMessage() handler,
 	 *  all other gui operations must be cancelled until we done here.
@@ -290,7 +343,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	HICON hIcon;
 	int cx,cy;
 	int dx,dy;
-	RECT _rc;
+	RECT rc;
 	LV_COLUMN lvc;
 	LPNMLISTVIEW lpnm;
 
@@ -318,25 +371,25 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hProgressBar = GetDlgItem(hWnd,IDC_PROGRESS1);
 		HideProgress();
 		hMap = GetDlgItem(hWnd,IDC_MAP);
-		GetWindowRect(hMap,&_rc);
-		_rc.bottom ++;
-		SetWindowPos(hMap,0,0,0,_rc.right - _rc.left,
-			_rc.bottom - _rc.top,SWP_NOMOVE);
+		GetWindowRect(hMap,&rc);
+		rc.bottom ++;
+		SetWindowPos(hMap,0,0,0,rc.right - rc.left,
+			rc.bottom - rc.top,SWP_NOMOVE);
 		CalculateBlockSize();
 		cx = GetSystemMetrics(SM_CXSCREEN);
 		cy = GetSystemMetrics(SM_CYSCREEN);
 		if(win_rc.left < 0) win_rc.left = 0; if(win_rc.top < 0) win_rc.top = 0;
 		if(win_rc.left >= cx) win_rc.left = cx - 10; if(win_rc.top >= cy) win_rc.top = cy - 10;
-		GetWindowRect(hWnd,&_rc);
-		dx = _rc.right - _rc.left;
-		dy = _rc.bottom - _rc.top + delta_h;
+		GetWindowRect(hWnd,&rc);
+		dx = rc.right - rc.left;
+		dy = rc.bottom - rc.top + delta_h;
 		SetWindowPos(hWnd,0,win_rc.left,win_rc.top,dx,dy,0);
 		hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
 		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
 		if(hIcon) DeleteObject(hIcon);
 		/* initialize listview control */
-		GetWindowRect(hList,&_rc);
-		dx = _rc.right - _rc.left;
+		GetWindowRect(hList,&rc);
+		dx = rc.right - rc.left;
 		SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 			(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
@@ -361,10 +414,10 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		lvc.cx = 85 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMN,5,(LRESULT)&lvc);
 		/* reduce hight of list view control */
-		GetWindowRect(hList,&_rc);
-		_rc.bottom --;
-		SetWindowPos(hList,0,0,0,_rc.right - _rc.left,
-			_rc.bottom - _rc.top,SWP_NOMOVE);
+		GetWindowRect(hList,&rc);
+		rc.bottom --;
+		SetWindowPos(hList,0,0,0,rc.right - rc.left,
+			rc.bottom - rc.top,SWP_NOMOVE);
 		/* set window procs */
 		OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
 		OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
@@ -436,20 +489,20 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_MOVE:
-		GetWindowRect(hWnd,&_rc);
-		if((HIWORD(_rc.bottom)) != 0xffff)
+		GetWindowRect(hWnd,&rc);
+		if((HIWORD(rc.bottom)) != 0xffff)
 		{
-			_rc.bottom -= delta_h;
-			memcpy((void *)&win_rc,(void *)&_rc,sizeof(RECT));
+			rc.bottom -= delta_h;
+			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 		}
 		break;
 	case WM_CLOSE:
 		Stop();
-		GetWindowRect(hWnd,&_rc);
-		if((HIWORD(_rc.bottom)) != 0xffff)
+		GetWindowRect(hWnd,&rc);
+		if((HIWORD(rc.bottom)) != 0xffff)
 		{
-			_rc.bottom -= delta_h;
-			memcpy((void *)&win_rc,(void *)&_rc,sizeof(RECT));
+			rc.bottom -= delta_h;
+			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 		}
 		EndDialog(hWnd,0);
 		return TRUE;
@@ -605,14 +658,14 @@ __inline void DisableButtons(void)
 int __stdcall update_stat(int df)
 {
 	int index = My_Index;
-	char *_map;
+	char *cl_map;
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
-	char *err_msg;
+	short *err_msg;
 
 	if(stop_pressed) return 0; /* it's neccessary: see above one comment in Stop() */
-	_map = map[index];
+	cl_map = map[index];
 	pst = &stat[index];
 	if(udefrag_get_progress(pst,&percentage)) goto done;
 	UpdateStatusBar(index);
@@ -623,15 +676,16 @@ int __stdcall update_stat(int df)
 		SetWindowText(hProgressMsg,progress_msg);
 		SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 //	}
-	if(udefrag_get_map(_map,N_BLOCKS)) goto done;
+	if(udefrag_get_map(cl_map,N_BLOCKS)) goto done;
 	FillBitMap(index);
 	RedrawMap();
-done: 
+done:
 	if(df == FALSE) return 0;
 	err_msg = udefrag_get_ex_command_result();
-	if(strlen(err_msg) > 0)
+	if(wcslen(err_msg) > 0)
 	{
-		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
+		//DisplayError(err_msg);
 		return 0;
 	}
 	if(!stop_pressed)
@@ -648,7 +702,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	LRESULT iItem;
 	int index;
 	UCHAR command;
-	char *err_msg;
+	short *err_msg;
 
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
@@ -702,7 +756,8 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	busy_flag = 0; /* it's neccessary: see above one comment in Stop() */
 	if(err_msg)
 	{
-		MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
+		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
+		//DisplayError(err_msg);
 		ShowStatus(STAT_CLEAR,iItem);
 		ClearMap();
 	}

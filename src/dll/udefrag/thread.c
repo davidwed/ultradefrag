@@ -40,11 +40,11 @@
 char th_msg[1024];
 char exit_th_msg[1024];
 int ExitThreadState = ExitThreadUndefined;
-VOID (__stdcall *_RtlExitUserThread)(NTSTATUS Status);
-NTSTATUS (__stdcall *_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
+VOID (__stdcall *func_RtlExitUserThread)(NTSTATUS Status);
+NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
 
 /* internal functions prototypes */
-BOOL get_proc_address(char *name,PVOID *proc_addr);
+BOOL get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
 
 char * __stdcall create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle)
 {
@@ -73,34 +73,34 @@ void __stdcall exit_thread(void)
 	   on XP x64 and Vista RtlExitUserThread() MUST be called. */
 	if(ExitThreadState == ExitThreadUndefined)
 	{ /* try to find it */
-		if(get_proc_address("RtlExitUserThread",(void *)&_RtlExitUserThread))
+		if(get_proc_address(L"ntdll.dll","RtlExitUserThread",(void *)&func_RtlExitUserThread))
 			ExitThreadState = ExitThreadFound;
 		else
 			ExitThreadState = ExitThreadNotFound;
 	}
 	if(ExitThreadState == ExitThreadFound)
-		_RtlExitUserThread(STATUS_SUCCESS);
+		func_RtlExitUserThread(STATUS_SUCCESS);
 }
 
-BOOL get_proc_address(char *name,PVOID *proc_addr)
+BOOL get_proc_address(short *libname,char *funcname,PVOID *proc_addr)
 {
 	UNICODE_STRING uStr;
 	ANSI_STRING aStr;
 	NTSTATUS Status;
 	PVOID base_addr;
 
-	RtlInitUnicodeString(&uStr,L"ntdll.dll");
+	RtlInitUnicodeString(&uStr,libname);
 	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(exit_th_msg,"Can't get ntdll handle: %x!",Status);
+		sprintf(exit_th_msg,"Can't get %ws handle: %x!",libname,Status);
 		return FALSE;
 	}
-	RtlInitAnsiString(&aStr,name);
+	RtlInitAnsiString(&aStr,funcname);
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(exit_th_msg,"Can't get address for %s: %x!",name,Status);
+		sprintf(exit_th_msg,"Can't get address for %s: %x!",funcname,Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -111,8 +111,8 @@ int __stdcall get_os_version(void)
 {
 	OSVERSIONINFOW ver;
 
-	if(!get_proc_address("RtlGetVersion",(void *)&_RtlGetVersion))
+	if(!get_proc_address(L"ntdll.dll","RtlGetVersion",(void *)&func_RtlGetVersion))
 		return 40;
-	_RtlGetVersion(&ver);
+	func_RtlGetVersion(&ver);
 	return (ver.dwMajorVersion * 10 + ver.dwMinorVersion);
 }

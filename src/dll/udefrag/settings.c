@@ -92,7 +92,7 @@ BOOL RemoveAppFromBootExecute(void);
 #define ReadRegDWORD(h,n,pv) ReadRegBinary(h,n,REG_DWORD,pv,sizeof(DWORD))
 #define WriteRegDWORD(h,n,v) WriteRegBinary(h,n,REG_DWORD,&(v),sizeof(DWORD))
 
-extern BOOL _ioctl(HANDLE handle,HANDLE event,ULONG code,
+extern BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
 			char *err_format_string,char *msg_buffer);
@@ -186,7 +186,7 @@ ud_options * __stdcall udefrag_get_options(void)
 	return &settings;
 }
 
-char * __stdcall udefrag_set_options(ud_options *ud_opts)
+char * __stdcall i_udefrag_set_options(ud_options *ud_opts)
 {
 	REPORT_TYPE rt;
 
@@ -198,31 +198,31 @@ char * __stdcall udefrag_set_options(ud_options *ud_opts)
 	if(ud_opts != &settings)
 		memcpy(&settings,ud_opts,sizeof(ud_options));
 	/* set debug print level */
-	if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_DBGPRINT_LEVEL,
+	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_DBGPRINT_LEVEL,
 		&settings.dbgprint_level,sizeof(DWORD),NULL,0,
 		"Can't set debug print level: %x!",settings_msg)) goto apply_settings_fail;
 	/* set report characterisics */
 	rt.format = settings.report_format;
 	rt.type = settings.report_type;
-	if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_REPORT_TYPE,
+	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_REPORT_TYPE,
 		&rt,sizeof(REPORT_TYPE),NULL,0,
 		"Can't set report type: %x!",settings_msg)) goto apply_settings_fail;
 	/* set filters */
 	if(__native_mode)
 	{
-		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
 			settings.boot_in_filter,(wcslen(settings.boot_in_filter) + 1) << 1,NULL,0,
 			"Can't set include filter: %x!",settings_msg)) goto apply_settings_fail;
-		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
 			settings.boot_ex_filter,(wcslen(settings.boot_ex_filter) + 1) << 1,NULL,0,
 			"Can't set exclude filter: %x!",settings_msg)) goto apply_settings_fail;
 	}
 	else
 	{
-		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
 			settings.in_filter,(wcslen(settings.in_filter) + 1) << 1,NULL,0,
 			"Can't set include filter: %x!",settings_msg)) goto apply_settings_fail;
-		if(!_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
 			settings.ex_filter,(wcslen(settings.ex_filter) + 1) << 1,NULL,0,
 			"Can't set exclude filter: %x!",settings_msg)) goto apply_settings_fail;
 	}
@@ -231,7 +231,7 @@ apply_settings_fail:
 	return settings_msg;
 }
 
-char * __stdcall udefrag_save_settings(void)
+char * __stdcall i_udefrag_save_settings(void)
 {
 	HANDLE hKey;
 	DWORD x;
@@ -290,13 +290,13 @@ save_fail:
 }
 
 /* important registry cleanup for uninstaller */
-char * __stdcall udefrag_clean_registry(void)
+char * __stdcall i_udefrag_clean_registry(void)
 {
 	return RemoveAppFromBootExecute() ? NULL : settings_msg;
 }
 
 /* registry cleanup for native executable */
-char * __stdcall udefrag_native_clean_registry(void)
+char * __stdcall i_udefrag_native_clean_registry(void)
 {
 	HANDLE hKey;
 

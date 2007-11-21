@@ -81,6 +81,29 @@ void HandleError(char *err_msg,int exit_code)
 	}
 }
 
+void DisplayMessageW(short *err_msg)
+{
+	if(err_msg)
+	{
+		if(err_msg[0])
+		{
+			sprintf(msg,"\nERROR: %ws\n",err_msg);
+			nprint(msg);
+		}
+	}
+}
+
+void HandleErrorW(short *err_msg,int exit_code)
+{
+	if(err_msg)
+	{
+		DisplayMessageW(err_msg);
+		nprint("Good bye ...\n");
+		Cleanup();
+		NtTerminateProcess(NtCurrentProcess(),4);
+	}
+}
+
 void UpdateProgress()
 {
 	STATISTIC stat;
@@ -119,22 +142,22 @@ void UpdateProgress()
 int __stdcall update_stat(int df)
 {
 	KEYBOARD_INPUT_DATA kbd;
-	char *err_msg;
+	short *err_msg;
 
 	if(kb_hit(&kbd,100))
 	{
 		if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d))
 		{
-			DisplayMessage(udefrag_stop());
+			DisplayMessageW(udefrag_stop());
 			abort_flag = 1;
 		}
 	}
 	UpdateProgress();
 	if(df == FALSE) return 0;
 	err_msg = udefrag_get_ex_command_result();
-	if(strlen(err_msg) > 0)
+	if(wcslen(err_msg) > 0)
 	{
-		DisplayMessage(err_msg);
+		DisplayMessageW(err_msg);
 		return 0;
 	}
 	if(!abort_flag) /* set progress to 100 % */
@@ -147,7 +170,7 @@ int __stdcall update_stat(int df)
 
 void Cleanup()
 {
-	char *err_msg;
+//	char *err_msg;
 
 //nprint("before stop\n");
 	/* stop device */
@@ -163,14 +186,14 @@ void Cleanup()
 //nprint("before unload\n");
 	/* unload driver and registry cleanup */
 	/*err_msg = */udefrag_unload(FALSE);
-	DisplayMessage(udefrag_native_clean_registry());
+	DisplayMessageW(udefrag_native_clean_registry());
 //nprint("after unload\n");
 }
 
 void ProcessVolume(char letter,char command)
 {
 	STATISTIC stat;
-	char *err_msg;
+	short *err_msg;
 
 	i = j = 0;
 	last_op = 0;
@@ -195,19 +218,19 @@ void ProcessVolume(char letter,char command)
 	}
 	if(err_msg)
 	{
-		DisplayMessage(err_msg);
+		DisplayMessageW(err_msg);
 		return;
 	}
 
 	err_msg = udefrag_get_progress(&stat,NULL);
 	if(err_msg)
 	{
-		DisplayMessage(err_msg);
+		DisplayMessageW(err_msg);
 	}
 	else
 	{
 		nprint("\n");
-		nprint(get_default_formatted_results(&stat));
+		nprint(udefrag_get_default_formatted_results(&stat));
 		nprint("\n\n");
 	}
 }
@@ -224,7 +247,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	KEYBOARD_INPUT_DATA kbd;
 	volume_info *v;
 	int n;
-	char *err_msg;
+	short *err_msg;
 
 	/* 1. Normalize and get the Process Parameters */
 	ProcessParameters = RtlNormalizeProcessParams(Peb->ProcessParameters);
@@ -257,7 +280,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	nprint("\n\n");
 	/* 7. Initialize the ultradfg device */
-	HandleError(udefrag_init(0,NULL,TRUE),2);
+	HandleErrorW(udefrag_init(0,NULL,TRUE),2);
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
@@ -331,7 +354,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		{
 			nprint("Available drive letters:   ");
 			err_msg = udefrag_get_avail_volumes(&v,FALSE);
-			if(err_msg) DisplayMessage(err_msg);
+			if(err_msg) DisplayMessageW(err_msg);
 			else
 			{
 				for(n = 0;;n++)

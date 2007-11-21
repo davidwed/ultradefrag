@@ -29,6 +29,8 @@
 #define _PCR
 #endif
 
+#pragma warning(disable:4103) /* used #pragma pack to change alignment */
+
 #define DBG 1 /* it's very useful! */
 
 #ifdef NT4_TARGET

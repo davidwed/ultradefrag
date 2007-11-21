@@ -1,5 +1,5 @@
 /*
- *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  WINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -17,4 +17,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "../dll/winx/src/ntndk.h"
+/*
+ *  Common version header.
+ */
+
+#include "winxver.h"
+
+#define VS_VERSION_INFO     1
+#ifndef WINVER
+#define WINVER 0x0400
+#endif
+#include <winresrc.h>
+#ifdef IDC_STATIC
+#undef IDC_STATIC
+#endif
+#define IDC_STATIC      (-1)

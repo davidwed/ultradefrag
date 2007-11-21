@@ -15,7 +15,7 @@ EXPORTS
 	udefrag_stop
 	udefrag_get_progress
 	udefrag_get_map
-	get_default_formatted_results
+	udefrag_get_default_formatted_results
 	udefrag_get_avail_volumes
 	udefrag_validate_volume
 	scheduler_get_avail_letters
@@ -26,6 +26,8 @@ EXPORTS
 	kb_gets
 	kb_close
 	nsleep
+	create_thread
+	exit_thread
 	get_os_version
 	fbsize
 	fbsize2
@@ -46,5 +48,3 @@ EXPORTS
 	udefrag_s_get_avail_volumes
 	udefrag_s_validate_volume
 	scheduler_s_get_avail_letters
-	create_thread
-	exit_thread

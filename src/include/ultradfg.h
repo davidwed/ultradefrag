@@ -103,6 +103,7 @@ typedef struct _STATISTIC {
 	ULONGLONG	clusters_to_compact;
 } STATISTIC, *PSTATISTIC;
 
+/* should be removed!!! */
 #define __KernelMode TRUE /* used by native app to defrag system files */
 #define __UserMode FALSE /* used by gui and console to defrag encrypted files */
 

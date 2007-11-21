@@ -115,6 +115,8 @@ xcopy /I /Y .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
 xcopy /I /Y .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties
 mkdir %SRC_PKG_PATH%\src\dll
 xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
+mkdir %SRC_PKG_PATH%\src\dll\winx
+xcopy /I /Y .\dll\winx\src %SRC_PKG_PATH%\src\dll\winx\src
 
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
@@ -177,5 +179,7 @@ cd lib
 del /s /q *.*
 rd /s /q amd64
 rd /s /q ia64
-cd..
+cd ..\dll\winx\src
+call BUILD_WINX.CMD --clean
+cd ..\..\..
 echo Done.
