@@ -33,7 +33,7 @@ RSC=rc.exe
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\defrag_native.res" /d "NDEBUG" 
 
 LINK32=link.exe
-LINK32_FLAGS=ntdll.lib ..\lib\udefrag.lib /nologo /entry:"NtProcessStartup" /incremental:no /pdb:"$(OUTDIR)\defrag_native.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\defrag_native.exe" /subsystem:native 
+LINK32_FLAGS=ntdll.lib ..\lib\udefrag.lib ..\lib\zenwinx.lib /nologo /entry:"NtProcessStartup" /incremental:no /pdb:"$(OUTDIR)\defrag_native.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\defrag_native.exe" /subsystem:native 
 LINK32_OBJS= \
 	"$(INTDIR)\defrag_native.obj" \
 	"$(INTDIR)\defrag_native.res"

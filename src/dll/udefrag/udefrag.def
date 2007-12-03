@@ -19,12 +19,6 @@ EXPORTS
 	udefrag_get_avail_volumes
 	udefrag_validate_volume
 	scheduler_get_avail_letters
-	nputch
-	nprint
-	kb_open
-	kb_hit
-	kb_gets
-	kb_close
 	nsleep
 	create_thread
 	exit_thread
@@ -40,6 +34,7 @@ EXPORTS
 	udefrag_s_analyse_ex
 	udefrag_s_defragment_ex
 	udefrag_s_optimize_ex
+	udefrag_s_get_ex_command_result
 	udefrag_s_stop
 	udefrag_s_get_progress
 	udefrag_s_get_map

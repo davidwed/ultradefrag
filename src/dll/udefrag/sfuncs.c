@@ -32,10 +32,26 @@
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
 
+#define FormatMessageFound		0
+#define FormatMessageNotFound	1
+#define FormatMessageUndefined	2
+
+#define CFUNCBUFFERSIZE 2048
+
+char msg_buffer_a[CFUNCBUFFERSIZE+2];
+char map_msg_buffer_a[CFUNCBUFFERSIZE+2];
+char vol_msg_buffer_a[CFUNCBUFFERSIZE+2];
+
 char s_letters[MAX_DOS_DRIVES + 1];
 char s_msg[4096];
 char s_map_msg[4096];
 char map[32768];
+
+char unk_code_a[] = "Unknown error code.";
+extern int FormatMessageState;
+
+extern DWORD (WINAPI *func_FormatMessageA)(DWORD,PVOID,DWORD,DWORD,LPSTR,DWORD,va_list*);
+extern DWORD (WINAPI *func_FormatMessageW)(DWORD,PVOID,DWORD,DWORD,LPWSTR,DWORD,va_list*);
 
 /* internal functions prototypes */
 char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode);
@@ -58,11 +74,68 @@ char * __stdcall i_udefrag_save_settings(void);
 char * __stdcall i_udefrag_clean_registry(void);
 char * __stdcall i_udefrag_native_clean_registry(void);
 
+BOOL get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
+
+char *format_message_a(char *string,char *buffer)
+{
+	char *p;
+	NTSTATUS Status;
+	ULONG err_code;
+	int length;
+
+	/* check string */
+	if(!string) return NULL;
+	if(!string[0])
+	{
+		buffer[0] = 0;
+		return buffer;
+	}
+	/* copy string to buffer */
+	strcpy(buffer,string);
+	/* if status code is specified, add corresponding text */
+	p = strrchr(string,':');
+	if(p)
+	{
+		if(FormatMessageState == FormatMessageUndefined)
+		{
+			if(get_proc_address(L"kernel32.dll","FormatMessageA",(void *)&func_FormatMessageA))
+				FormatMessageState = FormatMessageFound;
+			else
+				FormatMessageState = FormatMessageNotFound;
+			if(!get_proc_address(L"kernel32.dll","FormatMessageW",(void *)&func_FormatMessageW))
+				FormatMessageState = FormatMessageNotFound;
+		}
+		if(FormatMessageState == FormatMessageFound)
+		{
+			strcat(buffer,"\n");
+			/* skip ':' and spaces */
+			p ++;
+			while(*p == 0x20) p++;
+			sscanf(p,"%x",&Status);
+			err_code = RtlNtStatusToDosError(Status);
+			length = strlen(buffer);
+			if(!func_FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,
+				MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
+				buffer + length,CFUNCBUFFERSIZE - length - 1,NULL))
+			{
+				strcat(buffer,unk_code_a);
+			}
+		}
+		else
+		{
+			/*
+			 * FIXME: handle this error
+			 */
+		}
+	}
+	return buffer;
+}
+
 char * __stdcall udefrag_s_init(void)
 {
 	char *result;
 
-	result = i_udefrag_init(0,NULL,FALSE);
+	result = format_message_a(i_udefrag_init(0,NULL,FALSE),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -70,7 +143,7 @@ char * __stdcall udefrag_s_unload(BOOL save_options)
 {
 	char *result;
 
-	result = i_udefrag_unload(save_options);
+	result = format_message_a(i_udefrag_unload(save_options),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -78,7 +151,7 @@ char * __stdcall udefrag_s_analyse(unsigned char letter)
 {
 	char *result;
 
-	result = i_udefrag_analyse(letter);
+	result = format_message_a(i_udefrag_analyse(letter),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -86,7 +159,7 @@ char * __stdcall udefrag_s_defragment(unsigned char letter)
 {
 	char *result;
 
-	result = i_udefrag_defragment(letter);
+	result = format_message_a(i_udefrag_defragment(letter),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -94,7 +167,7 @@ char * __stdcall udefrag_s_optimize(unsigned char letter)
 {
 	char *result;
 
-	result = i_udefrag_optimize(letter);
+	result = format_message_a(i_udefrag_optimize(letter),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -102,7 +175,7 @@ char * __stdcall udefrag_s_stop(void)
 {
 	char *result;
 
-	result = i_udefrag_stop();
+	result = format_message_a(i_udefrag_stop(),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -118,7 +191,7 @@ char * __stdcall udefrag_s_get_map(int size)
 
 	if(size > sizeof(map) - 1)
 		return "ERROR: Map resolution is too high!";
-	result = i_udefrag_get_map(map,size - 1);
+	result = format_message_a(i_udefrag_get_map(map,size - 1),map_msg_buffer_a);
 	if(result)
 	{
 		strcpy(s_map_msg,"ERROR: ");
@@ -151,7 +224,7 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 	char t[256];
 	int p;
 
-	result = i_udefrag_get_avail_volumes(&v,skip_removable);
+	result = format_message_a(i_udefrag_get_avail_volumes(&v,skip_removable),vol_msg_buffer_a);
 	if(result)
 	{
 		strcpy(s_msg,"ERROR: ");
@@ -186,7 +259,7 @@ char * __stdcall udefrag_s_validate_volume(unsigned char letter,int skip_removab
 {
 	char *result;
 
-	result = i_udefrag_validate_volume(letter,skip_removable);
+	result = format_message_a(i_udefrag_validate_volume(letter,skip_removable),vol_msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -194,7 +267,7 @@ char * __stdcall scheduler_s_get_avail_letters(void)
 {
 	char *result;
 
-	result = i_scheduler_get_avail_letters(s_letters);
+	result = format_message_a(i_scheduler_get_avail_letters(s_letters),vol_msg_buffer_a);
 	if(!result) return s_letters;
 	strcpy(s_msg,"ERROR: ");
 	strcat(s_msg,result);
@@ -205,7 +278,7 @@ char * __stdcall udefrag_s_analyse_ex(unsigned char letter,STATUPDATEPROC sproc)
 {
 	char *result;
 
-	result = i_udefrag_analyse_ex(letter,sproc);
+	result = format_message_a(i_udefrag_analyse_ex(letter,sproc),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -213,7 +286,7 @@ char * __stdcall udefrag_s_defragment_ex(unsigned char letter,STATUPDATEPROC spr
 {
 	char *result;
 
-	result = i_udefrag_defragment_ex(letter,sproc);
+	result = format_message_a(i_udefrag_defragment_ex(letter,sproc),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -221,6 +294,14 @@ char * __stdcall udefrag_s_optimize_ex(unsigned char letter,STATUPDATEPROC sproc
 {
 	char *result;
 
-	result = i_udefrag_optimize_ex(letter,sproc);
+	result = format_message_a(i_udefrag_optimize_ex(letter,sproc),msg_buffer_a);
+	return result ? result : "";
+}
+
+char * __stdcall udefrag_s_get_ex_command_result(void)
+{
+	char *result;
+
+	result = format_message_a(i_udefrag_get_ex_command_result(),msg_buffer_a);
 	return result ? result : "";
 }

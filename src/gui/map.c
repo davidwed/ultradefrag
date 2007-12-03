@@ -25,6 +25,8 @@
 #include <commctrl.h>
 #include <math.h>
 
+#include <stdio.h>
+
 #include "main.h"
 #include "../include/udefrag.h"
 #include "../include/ultradfg.h"
@@ -70,7 +72,10 @@ void CalculateBlockSize()
 	double n;
 	int x_edge,y_edge;
 	LONG delta_x;
+FILE *pf;
+char b[1024];
 
+pf = fopen("c:\\dfrg.log","wt");
 	GetWindowRect(hMap,&rc);
 	x_edge = GetSystemMetrics(SM_CXEDGE);
 	y_edge = GetSystemMetrics(SM_CYEDGE);
@@ -88,11 +93,16 @@ void CalculateBlockSize()
 	{ /* align="center" */
 		rc.left += (delta_x >> 1);
 	}
+sprintf(b,"Y: bottom-%i  left-%i  right-%i  top-%i\n",rc.bottom, rc.left, rc.right, rc.top);
+fputs(b,pf);
+sprintf(b,"Z: %i - %i - %i\n",rc.top,GetSystemMetrics(SM_CYCAPTION),x_edge);
+fputs(b,pf);
 	SetWindowPos(hMap,0,rc.left - y_edge - 1, \
 		rc.top - GetSystemMetrics(SM_CYCAPTION) - x_edge - 1, \
 		iMAP_WIDTH,iMAP_HEIGHT,0);
 	iMAP_WIDTH -= 2 * y_edge; /* new sizes for map without borders */
 	iMAP_HEIGHT -= 2 * x_edge;
+fclose(pf);
 }
 
 void CreateMaps(void)

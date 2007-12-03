@@ -8,5 +8,5 @@ call "%MSVSBIN%\vcvars32.bat"
 set MSVC_ENV=ok
 
 :start_build
-echo Build the winx.dll ...
-nmake /NOLOGO /A /f winx.mak CFG="winx - Win32 Release"
+echo Build the zenwinx.dll ...
+nmake /NOLOGO /A /f zenwinx.mak CFG="zenwinx - Win32 Release"

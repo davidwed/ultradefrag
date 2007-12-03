@@ -13,6 +13,9 @@ echo #define ABOUT_VERSION "About UltraDefrag v%ULTRADFGVER%" >> .\include\ultra
 mkdir lib
 mkdir lib\amd64
 mkdir lib\ia64
+mkdir bin
+mkdir bin\amd64
+mkdir bin\ia64
 
 if "%1" neq "" goto parse_first_parameter
 echo No parameters specified, use defaults.
@@ -115,8 +118,8 @@ xcopy /I /Y .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
 xcopy /I /Y .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties
 mkdir %SRC_PKG_PATH%\src\dll
 xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
-mkdir %SRC_PKG_PATH%\src\dll\winx
-xcopy /I /Y .\dll\winx\src %SRC_PKG_PATH%\src\dll\winx\src
+mkdir %SRC_PKG_PATH%\src\dll\zenwinx
+xcopy /I /Y .\dll\zenwinx\src %SRC_PKG_PATH%\src\dll\zenwinx\src
 
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
@@ -179,7 +182,7 @@ cd lib
 del /s /q *.*
 rd /s /q amd64
 rd /s /q ia64
-cd ..\dll\winx\src
-call BUILD_WINX.CMD --clean
+cd ..\dll\zenwinx\src
+call BUILD_ZENWINX.CMD --clean
 cd ..\..\..
 echo Done.

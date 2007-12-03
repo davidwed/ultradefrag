@@ -23,8 +23,6 @@ ALL : "$(OUTDIR)\udefrag.dll"
 CLEAN :
 	-@erase "$(INTDIR)\udefrag.obj"
 	-@erase "$(INTDIR)\settings.obj"
-	-@erase "$(INTDIR)\stdio.obj"
-	-@erase "$(INTDIR)\keytrans.obj"
 	-@erase "$(INTDIR)\cfuncs.obj"
 	-@erase "$(INTDIR)\sfuncs.obj"
 	-@erase "$(INTDIR)\thread.obj"
@@ -71,8 +69,6 @@ DEF_FILE= \
 LINK32_OBJS= \
 	"$(INTDIR)\udefrag.obj" \
 	"$(INTDIR)\settings.obj" \
-	"$(INTDIR)\stdio.obj" \
-	"$(INTDIR)\keytrans.obj" \
 	"$(INTDIR)\cfuncs.obj" \
 	"$(INTDIR)\sfuncs.obj" \
 	"$(INTDIR)\thread.obj" \

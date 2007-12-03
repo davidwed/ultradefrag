@@ -34,8 +34,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <ntddkbd.h>
-#include "../../include/ntndk.h"
-#include "../../include/udefrag.h"
+#include "ntndk.h"
 
 typedef struct _SCANTOASCII {
 	USHORT ScanCode;

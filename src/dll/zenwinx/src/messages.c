@@ -1,5 +1,5 @@
 /*
- *  WINX - WIndows Native eXtended library.
+ *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -18,17 +18,17 @@
  */
 
 /*
- *  Common version header.
+ *  zenwinx.dll error messages.
  */
 
-#include "winxver.h"
+short *emsg[] = \
+{
+	L""
+};
 
-#define VS_VERSION_INFO     1
-#ifndef WINVER
-#define WINVER 0x0400
-#endif
-#include <winresrc.h>
-#ifdef IDC_STATIC
-#undef IDC_STATIC
-#endif
-#define IDC_STATIC      (-1)
+short * __stdcall winx_get_error_message(long code)
+{
+	if(code < 0 || code >= sizeof(emsg) / sizeof(short *))
+		return L"";
+	return emsg[code];
+}

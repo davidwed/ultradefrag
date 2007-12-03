@@ -67,10 +67,6 @@ SOURCE=.\cfuncs.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\keytrans.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc.c
 # End Source File
 # Begin Source File
@@ -80,10 +76,6 @@ SOURCE=.\settings.c
 # Begin Source File
 
 SOURCE=.\sfuncs.c
-# End Source File
-# Begin Source File
-
-SOURCE=.\stdio.c
 # End Source File
 # Begin Source File
 

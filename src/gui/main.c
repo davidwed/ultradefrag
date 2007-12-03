@@ -21,6 +21,41 @@
  *  GUI - main code.
  */
 
+/*
+ * VERY IMPORTANT NOTE: (bug #1839755 cause)
+ * 
+ * + You should not wait for one SendMessage handler completion
+ *   from another SendMessage handler. Because it will be a deadlock cause.
+ *
+ * + Example:
+ *
+ * int done;
+ *
+ * window_proc()
+ * {
+ *   if(stop button was pressed)
+ *   {
+ *     stop_the_driver();
+ *     wait for done flag;
+ *   }
+ * }
+ *
+ * analyse_thread_proc()
+ * {
+ *   done = 0;
+ *   analyse();
+ *   RedrawMap();
+ *   done = 1;
+ * }
+ *
+ * + How it works:
+ * 
+ * RedrawMap() will send message to the map control 
+ * that can not be handled by system before window_proc() returns.
+ * But window_proc() is waiting for done flag, that can be set
+ * after(!) RedrawMap() call. Therefore we have a deadlock.
+ */
+
 #define WIN32_NO_STATUS
 #include <windows.h>
 #include <commctrl.h>
@@ -75,7 +110,7 @@ BOOL busy_flag = 0;
 char buffer[64];
 
 char current_operation;
-BOOL stop_pressed;
+BOOL stop_pressed, exit_pressed = FALSE;
 int My_Index;
 
 #define N_OF_STATUSBAR_PARTS  5
@@ -114,57 +149,8 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 
 #define create_thread(func,param) \
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,&thr_id)
-#if 0
-void DisplayError(char *err_msg)
-{
-	NTSTATUS Status;
-	ULONG err_code;
-	char *p;
-	short msg_buffer[65536];
-	int length;
 
-	if(err_msg)
-	{
-		/* get status from message */
-		p = strrchr(err_msg,':');
-		if(!p)
-		{
-error_code_not_specified:
-			MessageBoxA(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-			return;
-		}
-		/* skip ':' and spaces */
-		p ++;
-		while(*p == 0x20) p++;
-		sscanf(p,"%x",&Status);
-		err_code = RtlNtStatusToDosError(Status);
-		MultiByteToWideChar(CP_ACP,0,err_msg,-1,msg_buffer,65536 - 1);
-		wcscat(msg_buffer,L"\n");
-		length = wcslen(msg_buffer);
-		if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			msg_buffer + length,65536 - length - 1,NULL))
-		{
-			MessageBoxW(0,msg_buffer,L"Error!",MB_OK | MB_ICONHAND);
-		}
-		else
-		{
-			goto error_code_not_specified;
-		}
-	}
-}
-#endif
-void HandleError(char *err_msg,int exit_code)
-{
-	if(err_msg)
-	{
-		if(err_msg[0]) MessageBox(0,err_msg,"Error!",MB_OK | MB_ICONHAND);
-		udefrag_unload(TRUE);
-		ExitProcess(exit_code);
-	}
-}
-
-void HandleErrorW(short *err_msg,int exit_code)
+void HandleError(short *err_msg,int exit_code)
 {
 	if(err_msg)
 	{
@@ -177,8 +163,6 @@ void HandleErrorW(short *err_msg,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	short *x[] = {L"one",L"two",L"",L"drughwurhfgwherhwe"};
-	int y = sizeof(x);
 	settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
@@ -189,7 +173,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		udefrag_clean_registry();
 		ExitProcess(0);
 	}
-	HandleErrorW(udefrag_init(0,NULL,FALSE),2);
+	HandleError(udefrag_init(0,NULL,FALSE),2);
 	win_rc.left = settings->x; win_rc.top = settings->y;
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
@@ -201,7 +185,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	DeleteMaps();
 	/* save settings */
 	settings->x = win_rc.left; settings->y = win_rc.top;
-	HandleError("",0);
+	HandleError(L"",0);
 }
 
 __inline void RescanDrives()
@@ -311,12 +295,6 @@ void Stop()
 	stop_pressed = TRUE;
 	err_msg = udefrag_stop();
 	if(err_msg) MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
-	/* VERY IMPORTANT:
-	 *  Because we call Sleep() from SendMessage() handler,
-	 *  all other gui operations must be cancelled until we done here.
-	 *  If not, a deadlock will occured.
-	 */
-	while(busy_flag) Sleep(10);
 }
 
 void ShowProgress(void)
@@ -371,6 +349,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hProgressBar = GetDlgItem(hWnd,IDC_PROGRESS1);
 		HideProgress();
 		hMap = GetDlgItem(hWnd,IDC_MAP);
+		/* increase hight of map */
 		GetWindowRect(hMap,&rc);
 		rc.bottom ++;
 		SetWindowPos(hMap,0,0,0,rc.right - rc.left,
@@ -504,7 +483,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			rc.bottom -= delta_h;
 			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 		}
-		EndDialog(hWnd,0);
+		exit_pressed = TRUE;
+		if(!busy_flag) EndDialog(hWnd,0);
 		return TRUE;
 	}
 	return FALSE;
@@ -709,8 +689,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	busy_flag = 1;
 	stop_pressed = FALSE;
 
-	/* return if stop button was pressed */
-	if(stop_pressed) return 0;
 	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
 	if(iItem == -1)
 	{
@@ -718,17 +696,13 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		return 0;
 	}
 
-	if(stop_pressed) return 0;
 	ShowStatus(STAT_WORK,iItem);
-	if(stop_pressed) return 0;
 	DisableButtons();
-	if(stop_pressed) return 0;
 	ClearMap();
 
 	index = letter_numbers[iItem];
 	command = (UCHAR)lpParameter;
 
-	if(stop_pressed) return 0;
 	if(command == 'a')
 		ShowStatus(STAT_AN,iItem);
 	else
@@ -736,11 +710,8 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 	My_Index = index;
 
-	if(stop_pressed) return 0;
 	ShowProgress();
-	if(stop_pressed) return 0;
 	SetWindowText(hProgressMsg,"0 %");
-	if(stop_pressed) return 0;
 	SendMessage(hProgressBar,PBM_SETPOS,0,0);
 	switch(command)
 	{
@@ -753,7 +724,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	default:
 		err_msg = udefrag_optimize_ex((UCHAR)(index + 'A'),update_stat);
 	}
-	busy_flag = 0; /* it's neccessary: see above one comment in Stop() */
 	if(err_msg)
 	{
 		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
@@ -762,6 +732,8 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		ClearMap();
 	}
 	EnableButtons();
+	busy_flag = 0;
+	if(exit_pressed) EndDialog(hWindow,0);
 	return 0;
 }
 

@@ -66,7 +66,7 @@ void PrepareDataFields(PEXAMPLE_DEVICE_EXTENSION dx)
 }
 
 /* Init() - initialize filename list and map of free space */
-BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
+NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 {
 	short path[50] = L"\\??\\A:";
 	///short p[] = L"\\??\\A:\\FRAGLIST.HTM";
@@ -99,7 +99,11 @@ BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	}
 
 	/* 1. get number of clusters: free and total */
-	if(!GetTotalClusters(dx)) goto fail;
+	if(!GetTotalClusters(dx))
+	{
+		Status = STATUS_INVALID_PARAMETER;
+		goto fail;
+	}
 	DebugPrint("-Ultradfg- total clusters: %I64u\n", dx->clusters_total);
 
 	/* Synchronize drive.
@@ -112,7 +116,11 @@ BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",Status);
 #endif
 ///tm = _rdtsc();
-	if(!FillFreeClusterMap(dx)) goto fail;
+	if(!FillFreeClusterMap(dx))
+	{
+		Status = STATUS_NO_MEMORY;
+		goto fail;
+	}
 ///DebugPrint("%I64u\n", _rdtsc() - tm);
 	/* 2. initialize file list and put their clusters to map */
 	//tm = _rdtsc();
@@ -120,15 +128,21 @@ BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	if(!RtlCreateUnicodeString(&pathU,path))
 	{
 		DbgPrintNoMem();
+		Status = STATUS_NO_MEMORY;
 		goto fail;
 	}
 	if(!FindFiles(dx,&pathU,TRUE))
 	{
 		RtlFreeUnicodeString(&pathU);
+		Status = STATUS_NO_MORE_FILES;
 		goto fail;
 	}
 	RtlFreeUnicodeString(&pathU);
-	if(!dx->filelist) goto fail;
+	if(!dx->filelist)
+	{
+		Status = STATUS_NO_MORE_FILES;
+		goto fail;
+	}
 	DebugPrint("-Ultradfg- Files found: %u\n",dx->filecounter);
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",dx->fragmfilecounter);
 	//DebugPrint("Time: %I64u",_rdtsc() - tm);
@@ -141,9 +155,9 @@ BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 		dx->status = STATUS_BEFORE_PROCESSING;
 	dx->clusters_to_move = dx->clusters_to_move_initial = dx->clusters_to_move_tmp;
 	dx->clusters_to_compact_initial = dx->clusters_to_compact_tmp;
-	return TRUE;
+	return STATUS_SUCCESS;
 fail:
-	return FALSE;
+	return Status;
 }
 
 BOOLEAN GetTotalClusters(PEXAMPLE_DEVICE_EXTENSION dx)

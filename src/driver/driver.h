@@ -272,7 +272,7 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 /* Function Prototypes */
 void *_int64_malloc(ULONGLONG);
 void *_int64_memset(void *,int,ULONGLONG);
-BOOLEAN Analyse(PEXAMPLE_DEVICE_EXTENSION dx);
+NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx);
 void ProcessMFT(PEXAMPLE_DEVICE_EXTENSION dx);
 BOOLEAN FindFiles(PEXAMPLE_DEVICE_EXTENSION dx,UNICODE_STRING *path,
 	       BOOLEAN is_root);

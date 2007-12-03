@@ -235,6 +235,7 @@ void __cdecl WriteLogMessage(char *format, ...)
 	char terminator[] = "[End]\r\n";
 
 	va_start(ap,format);
+	memset(buffer,0,1024); /* required! */
 	length = _vsnprintf(buffer,sizeof(buffer),format,ap);
 	if(length == -1)
 	{

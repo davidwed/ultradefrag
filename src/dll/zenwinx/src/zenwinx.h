@@ -1,5 +1,5 @@
 /*
- *  WINX - WIndows Native eXtended library.
+ *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -18,25 +18,30 @@
  */
 
 /*
- *  winx.dll interface definitions.
+ *  zenwinx.dll interface definitions.
  */
-
-typedef LONGLONG WINX_STATUS;
-
-#define MAKE_WINX_STATUS(code,status) \
-		((WINX_STATUS)(((LONG)(status)) | ((WINX_STATUS)((LONG)(code))) << 32))
-
-#define NTSTATUS(ws)  ((LONG)(ws))
-#define ERRCODE(ws)   ((LONG)(((WINX_STATUS)(ws) >> 32) & 0xFFFFFFFF))
-
-/* winx error codes */
-#define WINX_SUCCESS                  0x00000000L
-#define WINX_KEYBOARD_INACCESSIBLE    0x00000001L
-#define WINX_CREATE_KB_EVENT_ERROR    0x00000002L
-
 
 #define SafeNtClose(h) if(h) { NtClose(h); h = NULL; }
 
 /* winx functions prototypes */
-WINX_STATUS __stdcall winx_init(PVOID Peb);
-WINX_STATUS __stdcall winx_exit(void);
+int  __stdcall winx_init(void *peb);
+void __stdcall winx_exit(int exit_code);
+void __stdcall winx_reboot(void);
+void __stdcall winx_shutdown(void);
+
+void * __stdcall winx_virtual_alloc(unsigned long size);
+void   __stdcall winx_virtual_free(void *addr,unsigned long size);
+
+int __cdecl winx_putch(int ch);
+int __cdecl winx_puts(const char *string);
+int __cdecl winx_printf(const char *format, ...);
+
+int __cdecl winx_getch(void);
+int __cdecl winx_getche(void);
+int __cdecl winx_gets(char *string,int n);
+/*
+ * Note: winx_scanf() can not be implemented;
+ * use winx_gets() and sscanf() instead.
+ */
+int __cdecl winx_kbhit(int msec);
+int __cdecl winx_breakhit(int msec);

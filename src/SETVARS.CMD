@@ -1,8 +1,8 @@
 @echo off
 echo Set common environment variables...
-set ULTRADFGVER=1.2.2
-set VERSION=1,2,2,0
-set VERSION2="1, 2, 2, 0\0"
+set ULTRADFGVER=1.2.3
+set VERSION=1,2,3,0
+set VERSION2="1, 2, 3, 0\0"
 set NSISDIR=D:\Software\Tools\NSIS
 set MSVSBIN=D:\Software\Microsoft Visual Studio\VC98\Bin
 set DDKINCDIR=D:\MyDocs\ReactOS030\include

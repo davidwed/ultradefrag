@@ -1,11 +1,11 @@
-TARGETNAME=winx
+TARGETNAME=zenwinx
 TARGETPATH=obj
 TARGETTYPE=DYNLINK
-DLLDEF=winx.def
+DLLDEF=zenwinx.def
 
 USER_C_FLAGS=/DUSE_WINDDK
 
-SOURCES=winx.c winx.rc
+SOURCES=zenwinx.c keyboard.c keytrans.c mem.c messages.c stdio.c zenwinx.rc
 
 USE_NTDLL=1
 

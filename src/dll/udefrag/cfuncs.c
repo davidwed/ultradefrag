@@ -110,6 +110,10 @@ short *format_message_w(char *string,short *buffer)
 	p = strrchr(string,':');
 	if(p)
 	{
+		/* skip ':' and spaces */
+		p ++;
+		while(*p == 0x20) p++;
+		sscanf(p,"%x",&Status);
 		if(FormatMessageState == FormatMessageUndefined)
 		{
 			if(get_proc_address(L"kernel32.dll","FormatMessageA",(void *)&func_FormatMessageA))
@@ -122,10 +126,6 @@ short *format_message_w(char *string,short *buffer)
 		if(FormatMessageState == FormatMessageFound)
 		{
 			wcscat(buffer,L"\n");
-			/* skip ':' and spaces */
-			p ++;
-			while(*p == 0x20) p++;
-			sscanf(p,"%x",&Status);
 			err_code = RtlNtStatusToDosError(Status);
 			length = wcslen(buffer);
 			if(!func_FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,
@@ -134,6 +134,12 @@ short *format_message_w(char *string,short *buffer)
 			{
 				wcscat(buffer,unk_code);
 			}
+		}
+		else
+		{
+			/* in native applicatons we should display 
+			 * detailed info for common errors
+			 */
 		}
 	}
 	return buffer;

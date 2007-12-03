@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 # This is the Ultra Defragmenter Modern User Interface.
 # Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
@@ -18,56 +18,73 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #
 
+use strict;
 use Win32::API;
 use Win32::API::Callback;
 use Tk;
 use Tk::HList;
 use Tk::ItemStyle;
-use strict;
+use Tk::Photo;
 
-# global variables
+##############  global variables ###############
 my $x_blocks = 52;
 my $y_blocks = 14;
 my $block_size = 10;
-my %colors = (chr(1) => 'white',chr(2) => 'green4', chr(3) => 'red2', chr(4) => 'blue3',
-	chr(5) => 'magenta4', chr(6) => 'yellow1', chr(7) => 'yellow3', chr(8) => 'green4',
-	chr(9) => 'red4', chr(10) => 'blue4', chr(11) => 'yellow2', chr(12) => 'yellow4',
+my %colors = (chr(1) => 'white',chr(2) => 'green4', chr(3) => 'green4', chr(4) => 'red2',
+	chr(5) => 'red4', chr(6) => 'blue3', chr(7) => 'blue4', chr(8) => 'magenta4',
+	chr(9) => 'yellow1', chr(10) => 'yellow2', chr(11) => 'yellow3', chr(12) => 'yellow4',
 	chr(13) => 'cyan1');
 my $i;
 my $j;
 my $skip_rem = 1;
+my %opts = ('x'=>200, 'y'=>200);
 
-$SIG{INT} = sub {gui_unload(); udefrag_s_unload();};
+############# set signal handlers ###############
+$SIG{INT} = sub {gui_unload(); udefrag_s_unload(1);};
 
-# create the main window
-my $top = MainWindow->new(
-	-title => 'UltraDefrag v1.2.2 modern user interface'
-	);
+############# load the program settings ###########
+if(open(CFGFILE,'.\\my_guitest.cfg')){
+	my @fields;
+	foreach (<CFGFILE>){
+		chomp($_);
+		@fields = split(/=/);
+		if((@fields == 2) && ($opts{$fields[0]} ne undef)){
+			$opts{$fields[0]} = $fields[1];
+			print "$fields[0]=$fields[1]\n";
+		}
+	}
+	close CFGFILE;
+}
 
+############# create the main window ############
+my $top = MainWindow->new();
+$top->wm('geometry', '527x350+'.$opts{'x'}.'+'.$opts{'y'});
+my $appicon = &img(0);
+my $icon = $top->Photo('image',-data=>$appicon,format=>'gif');
+$top->title('UltraDefrag v1.2.2 modern user interface');
+$top->iconimage($icon);
+#display_error("привет!");
 $top->bind(
 	ref($top),'<Destroy>',
-	sub {gui_unload(); udefrag_s_unload();}
+	sub {gui_unload(); udefrag_s_unload(1);}
 	);
 
-# import necessary functions from the udefrag.dll
-my $import_result = Win32::API->Import('udefrag','char* udefrag_s_init()');
-if(!$import_result){
+############ import necessary functions from the udefrag.dll ##############
+Win32::API->Import('udefrag','char* udefrag_s_init()') or \
 	display_critical_error('Can\'t import functions from udefrag.dll!');
-}
-Win32::API->Import('udefrag','char* udefrag_s_unload()');
+Win32::API->Import('udefrag','char* udefrag_s_unload(int save_options)');
 Win32::API->Import('udefrag','udefrag_s_analyse_ex','CK','P');
 Win32::API->Import('udefrag','udefrag_s_defragment_ex','CK','P');
 Win32::API->Import('udefrag','udefrag_s_optimize_ex','CK','P');
+Win32::API->Import('udefrag','char* udefrag_s_get_ex_command_result()');
 Win32::API->Import('udefrag','char* udefrag_s_stop()');
 Win32::API->Import('udefrag','char* udefrag_s_get_avail_volumes(int skip_removable)');
 Win32::API->Import('udefrag','char* udefrag_s_get_progress()');
 Win32::API->Import('udefrag','char* udefrag_s_get_map(int size)');
-Win32::API->Import('udefrag','char* udefrag_s_load_settings()');
-Win32::API->Import('udefrag','char* udefrag_s_get_settings()');
-Win32::API->Import('udefrag','char* udefrag_s_apply_settings(char* string)');
-Win32::API->Import('udefrag','char* udefrag_s_save_settings()');
+Win32::API->Import('udefrag','char* udefrag_s_get_options()');
+Win32::API->Import('udefrag','char* udefrag_s_set_options(char* string)');
 
-# fill the main window with controls
+############ fill the main window with controls ###############
 #my $list = $top->Scrolled(
 #	qw/HList -header 10 -columns 6 
 #	-width 58 -height 7 -scrollbars e/
@@ -81,11 +98,12 @@ my $list = $top->HList(
 	-selectbackground => 'blue',
 	-selectborderwidth => '1'
 	);
-my @h_items = ('Volume ', 'Status ', 'File system', 
-	'   Total space', '    Free space', 'Percentage');
+my @h_items = ('Volume', 'Status', 'File system', 
+	'Total space', 'Free space', 'Percentage');
 my @h_width = (55, 65, 100, 100, 100, 99);
 for($i = 0; $i < 6; $i++){
 	$list->header('create', $i, -text => $h_items[$i]);#, -relief => 'flat');
+	#$list->header('configure',$i,-text => 'right');
 	$list->columnWidth($i, $h_width[$i]);
 }
 
@@ -176,6 +194,10 @@ $fragm_btn->form(-left => '%25', -right => '%50', -bottom => '%100');
 $settings_btn->form(-left => $fragm_btn, -right => '%75', -bottom => '%100');
 $about_btn->form(-left => $settings_btn, -right => '%100', -bottom => '%100');
 
+#$top->resizable(0,0);
+$top->minsize($top->width,$top->height);
+$top->maxsize($top->width,$top->height);
+
 # fill list of available volumes
 rescan_drives();
 # initialize ultradefrag engine
@@ -197,6 +219,12 @@ print $_[0]."\n";
 	}
 	$map->update();
 	#DoOneEvent(); #??
+	if($_[0] ne 0){
+		$_ = udefrag_s_get_ex_command_result();
+		if(length($_)){
+			display_error($_);
+		}
+	}
 	return 0;
 };
 
@@ -204,9 +232,25 @@ my $update_map_callback = Win32::API::Callback->new($update_map,"N","N");
 
 MainLoop;
 
-# useful subroutines
+############### useful subroutines ##################
 sub gui_unload {
+	my $key;
+	my $geom;
+	my @fields;
 	print('Before unload...');
+	# save program settings
+	$geom = $top->wm('geometry');
+	@fields = split(/\+/,$geom);
+	$opts{'x'} = $fields[1]; $opts{'y'} = $fields[2];
+	if(open(CFGFILE,'> .\\my_guitest.cfg')){
+		foreach $key (keys (%opts)) {
+			if($opts{$key} eq undef){
+				$opts{$key} = '';
+			}
+			print CFGFILE "$key=$opts{$key}\n";
+		}
+		close CFGFILE;
+	}
 }
 
 sub display_error {
@@ -223,7 +267,7 @@ sub display_critical_error {
 
 sub handle_error {
 	if(length($_[0])){
-		udefrag_s_unload();
+		udefrag_s_unload(1);
 		display_critical_error($_[0]);
 	}
 }
@@ -290,6 +334,31 @@ sub analyse {
 	$row = $sel[0];
 	$letter = $list->itemCget($row, 0, 'text');
 	udefrag_s_analyse_ex($letter, $update_map_callback);
+}
+
+sub img {
+# images should be in Base64 format
+	my $app_gif = 
+"R0lGODlhIAAgAPcAAAAAAIAAAACAAICAAAAAgIAAgACAgICAgMDAwP8AAAD/AP//AAAA//8A/wD/
+/////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMwAAZgAAmQAAzAAA/wAzAAAzMwAzZgAzmQAzzAAz/wBm
+AABmMwBmZgBmmQBmzABm/wCZAACZMwCZZgCZmQCZzACZ/wDMAADMMwDMZgDMmQDMzADM/wD/AAD/
+MwD/ZgD/mQD/zAD//zMAADMAMzMAZjMAmTMAzDMA/zMzADMzMzMzZjMzmTMzzDMz/zNmADNmMzNm
+ZjNmmTNmzDNm/zOZADOZMzOZZjOZmTOZzDOZ/zPMADPMMzPMZjPMmTPMzDPM/zP/ADP/MzP/ZjP/
+mTP/zDP//2YAAGYAM2YAZmYAmWYAzGYA/2YzAGYzM2YzZmYzmWYzzGYz/2ZmAGZmM2ZmZmZmmWZm
+zGZm/2aZAGaZM2aZZmaZmWaZzGaZ/2bMAGbMM2bMZmbMmWbMzGbM/2b/AGb/M2b/Zmb/mWb/zGb/
+/5kAAJkAM5kAZpkAmZkAzJkA/5kzAJkzM5kzZpkzmZkzzJkz/5lmAJlmM5lmZplmmZlmzJlm/5mZ
+AJmZM5mZZpmZmZmZzJmZ/5nMAJnMM5nMZpnMmZnMzJnM/5n/AJn/M5n/Zpn/mZn/zJn//8wAAMwA
+M8wAZswAmcwAzMwA/8wzAMwzM8wzZswzmcwzzMwz/8xmAMxmM8xmZsxmmcxmzMxm/8yZAMyZM8yZ
+ZsyZmcyZzMyZ/8zMAMzMM8zMZszMmczMzMzM/8z/AMz/M8z/Zsz/mcz/zMz///8AAP8AM/8AZv8A
+mf8AzP8A//8zAP8zM/8zZv8zmf8zzP8z//9mAP9mM/9mZv9mmf9mzP9m//+ZAP+ZM/+ZZv+Zmf+Z
+zP+Z///MAP/MM//MZv/Mmf/MzP/M////AP//M///Zv//mf//zP///ywAAAAAIAAgAAAI2wABCBxI
+sKDBgwUVKFzIsCGABBAjSpQosKFFhg8naoRY8eLFjBsndvToMKRGhChTHlzAsiVLAAhiypw5E4BF
+gS5dwqTJM6ZNhwByttzZk+ZPjEGFLiBaVObRhSqjqmRAtarVq0mV5hR4tavVrFqHAvBKFmzYpWPJ
+djUbVqrbgw7iyo0L0iRHOHjzCpw7t65dAHn1AuAr169JwIHh7CXswHBIxIHfSh5I8mZTo08rK2B6
+eaTmzZdrZq7MuenkyY/VYhUqMLXqqmxbb0z7mkFsxwlov77tuvbt01IDAgA7";
+	my %h = (0 => $app_gif );
+	return($h{$_[0]});
 }
 
 __END__

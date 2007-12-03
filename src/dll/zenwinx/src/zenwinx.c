@@ -1,5 +1,5 @@
 /*
- *  WINX - WIndows Native eXtended library.
+ *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@
  */
 
 /*
- *  winx.dll startup code and some basic procedures.
+ *  zenwinx.dll startup code and some basic procedures.
  */
 
 #define WIN32_NO_STATUS
@@ -29,9 +29,9 @@
 #include <stdlib.h>
 
 #include "ntndk.h"
-#include "winx.h"
+#include "zenwinx.h"
 
-WINX_STATUS __stdcall kb_open(short *kb_device_name);
+int  __stdcall kb_open(short *kb_device_name);
 void __stdcall kb_close(void);
 
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
@@ -39,22 +39,34 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
-WINX_STATUS __stdcall winx_init(PVOID Peb)
+int __stdcall winx_init(void *peb)
 {
-	PRTL_USER_PROCESS_PARAMETERS ProcessParameters;
-	WINX_STATUS wstatus;
+	PRTL_USER_PROCESS_PARAMETERS pp;
+	int status;
 
 	/* 1. Normalize and get the Process Parameters */
-	ProcessParameters = RtlNormalizeProcessParams(((PPEB)Peb)->ProcessParameters);
+	pp = RtlNormalizeProcessParams(((PPEB)peb)->ProcessParameters);
 	/* 2. Breakpoint if we were requested to do so */
-	if(ProcessParameters->DebugFlags) DbgBreakPoint();
+	if(pp->DebugFlags) DbgBreakPoint();
 	/* 3. Open the keyboard */
-	wstatus = kb_open(L"\\Device\\KeyboardClass0");
-	return wstatus;
+	status = kb_open(L"\\Device\\KeyboardClass0");
+	return status;
 }
 
-WINX_STATUS __stdcall winx_exit(void)
+void __stdcall winx_exit(int exit_code)
 {
 	kb_close();
-	return MAKE_WINX_STATUS(0,0);
+	NtTerminateProcess(NtCurrentProcess(),exit_code);
+}
+
+void __stdcall winx_reboot(void)
+{
+	kb_close();
+	NtShutdownSystem(ShutdownReboot);
+}
+
+void __stdcall winx_shutdown(void)
+{
+	kb_close();
+	NtShutdownSystem(ShutdownNoReboot);
 }

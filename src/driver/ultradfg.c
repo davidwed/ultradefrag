@@ -246,6 +246,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	PVOID addr;
 	LARGE_INTEGER interval;
+	NTSTATUS request_status;
 
 	/* If previous request isn't complete, return STATUS_DEVICE_BUSY. */
 	/* Because new request change global variables. */
@@ -276,7 +277,11 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 
 	cmd.letter = (UCHAR)toupper((int)cmd.letter); /* important for nt 4.0 and w2k - bug #1771887 solution */
 
-	if(!validate_letter(cmd.letter)) goto invalid_request;
+	if(!validate_letter(cmd.letter))
+	{
+		request_status = STATUS_INVALID_PARAMETER;
+		goto request_failure;
+	}
 
 	dx->compact_flag = (cmd.command == 'c' || cmd.command == 'C') ? TRUE : FALSE;
 	dx->sizelimit = cmd.sizelimit;
@@ -305,7 +310,8 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		case 'a':
 		case 'A':
 			dx->letter = cmd.letter;
-			if(Analyse(dx)) break;
+			request_status = Analyse(dx);
+			if(NT_SUCCESS(request_status)) break;
 			if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
 				dx->request_is_successful = FALSE;
 			break;
@@ -317,7 +323,8 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 				dx->letter != cmd.letter)
 			{
 				dx->letter = cmd.letter;
-				if(!Analyse(dx))
+				request_status = Analyse(dx);
+				if(!NT_SUCCESS(request_status))
 				{
 					if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
 						dx->request_is_successful = FALSE;
@@ -336,8 +343,9 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	}
 	if(dx->request_is_successful)
 		return CompleteIrp(Irp,STATUS_SUCCESS,sizeof(ULTRADFG_COMMAND));
+request_failure:
 	dx->status = STATUS_BEFORE_PROCESSING;
-	return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
+	return CompleteIrp(Irp,request_status,0);
 invalid_request:
 	KeClearEvent(&(dx->sync_event));
 	return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);

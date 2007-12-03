@@ -1,5 +1,5 @@
 /*
- *  WINX - WIndows Native eXtended library.
+ *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@
  */
 
 /*
- *  winx.dll keyboard input procedures.
+ *  zenwinx.dll keyboard input procedures.
  */
 
 #define WIN32_NO_STATUS
@@ -29,14 +29,14 @@
 #include <stdlib.h>
 
 #include "ntndk.h"
-#include "winx.h"
+#include "zenwinx.h"
 
 HANDLE hKbDevice = NULL;
 HANDLE hKbEvent = NULL;
 
 void __stdcall kb_close(void);
 
-WINX_STATUS __stdcall kb_open(short *kb_device_name)
+int __stdcall kb_open(short *kb_device_name)
 {
 	UNICODE_STRING uStr;
 	OBJECT_ATTRIBUTES ObjectAttributes;
@@ -51,7 +51,10 @@ WINX_STATUS __stdcall kb_open(short *kb_device_name)
 			    &ObjectAttributes,&IoStatusBlock,NULL,FILE_ATTRIBUTE_NORMAL/*0x80*/,
 			    0,FILE_OPEN/*1*/,FILE_DIRECTORY_FILE/*1*/,NULL,0);
 	if(!NT_SUCCESS(Status))
-		return MAKE_WINX_STATUS(WINX_KEYBOARD_INACCESSIBLE,Status);
+	{
+		winx_printf("\nCan't open the keyboard %ws: %x!\n",kb_device_name,Status);
+		return -1;
+	}
 	RtlInitUnicodeString(&uStr,L"\\kb_event");
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
 	Status = NtCreateEvent(&hKbEvent,STANDARD_RIGHTS_ALL | 0x1ff/*0x1f01ff*/,
@@ -59,10 +62,11 @@ WINX_STATUS __stdcall kb_open(short *kb_device_name)
 	if(!NT_SUCCESS(Status))
 	{
 		kb_close();
-		return MAKE_WINX_STATUS(WINX_CREATE_KB_EVENT_ERROR,Status);
+		winx_printf("\nCan't create kb_event: %x!\n",Status);
+		return -1;
 	}
 kb_open_success:
-	return MAKE_WINX_STATUS(0,0);
+	return 0;
 }
 
 void __stdcall kb_close(void)

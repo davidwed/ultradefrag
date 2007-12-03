@@ -8,17 +8,21 @@ rem ...
 set DDK_ENV=ok
 
 :start_build
-echo Build the winx.dll ...
-cd .\dll\winx\src
-call DDK_BUILD_WINX.CMD
+echo Build the zenwinx.dll ...
+cd .\dll\zenwinx\src
+call DDK_BUILD_ZENWINX.CMD
 if %errorlevel% neq 0 goto fail
 rem copy files
-mkdir ..\..\..\obj\dll\winx
-mkdir ..\..\..\obj\dll\winx\src
-copy /Y ntndk.h ..\..\..\obj\dll\winx\src\
-copy /Y .\objfre_wnet_x86\i386\winx.lib ..\..\..\lib\
-copy /Y .\objfre_wnet_amd64\amd64\winx.lib ..\..\..\lib\amd64\
-copy /Y .\objfre_wnet_ia64\ia64\winx.lib ..\..\..\lib\ia64\
+mkdir ..\..\..\obj\dll\zenwinx
+mkdir ..\..\..\obj\dll\zenwinx\src
+copy /Y ntndk.h ..\..\..\obj\dll\zenwinx\src\
+copy /Y zenwinx.h ..\..\..\obj\dll\zenwinx\src\
+copy /Y .\objfre_wnet_x86\i386\zenwinx.lib ..\..\..\lib\
+copy /Y .\objfre_wnet_amd64\amd64\zenwinx.lib ..\..\..\lib\amd64\
+copy /Y .\objfre_wnet_ia64\ia64\zenwinx.lib ..\..\..\lib\ia64\
+copy /Y .\objfre_wnet_x86\i386\zenwinx.dll ..\..\..\bin\
+copy /Y .\objfre_wnet_amd64\amd64\zenwinx.dll ..\..\..\bin\amd64\
+copy /Y .\objfre_wnet_ia64\ia64\zenwinx.dll ..\..\..\bin\ia64\
 cd ..\..\..
 echo Copy sources to obj directory...
 mkdir .\obj

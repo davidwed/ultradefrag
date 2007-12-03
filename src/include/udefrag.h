@@ -24,7 +24,6 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
-#include <ntddkbd.h>
 #include "ultradfg.h"
 
 #define MAX_DOS_DRIVES 26
@@ -68,7 +67,7 @@ short * __stdcall udefrag_optimize(unsigned char letter);
 short * __stdcall udefrag_stop(void);
 short * __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
 short * __stdcall udefrag_get_map(char *buffer,int size);
-char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
+char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
 
 ud_options * __stdcall udefrag_get_options(void);
 short * __stdcall udefrag_set_options(ud_options *ud_opts);
@@ -78,14 +77,6 @@ short * __stdcall udefrag_native_clean_registry(void);
 short * __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 short * __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 short * __stdcall scheduler_get_avail_letters(char *letters);
-
-void   __stdcall nputch(char ch);
-void   __stdcall nprint(char *str);
-
-char * __stdcall kb_open(void);
-int    __stdcall kb_hit(KEYBOARD_INPUT_DATA *pkbd,int msec_timeout);
-char * __stdcall kb_gets(char *buffer,int max_chars);
-char * __stdcall kb_close(void);
 
 void   __stdcall nsleep(int msec);
 char * __stdcall create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
@@ -126,5 +117,6 @@ short * __stdcall udefrag_get_ex_command_result(void);
 char * __stdcall udefrag_s_analyse_ex(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_s_defragment_ex(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_s_optimize_ex(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall udefrag_s_get_ex_command_result(void);
 
 #endif /* _UDEFRAG_H_ */

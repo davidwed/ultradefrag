@@ -258,6 +258,7 @@ Section "Ultra Defrag core files (required)" SecCore
   DetailPrint "Install boot time defragger..."
   SetOutPath "$WINDIR\System32"
   File "udefrag.dll"
+  File "zenwinx.dll"
   File "defrag_native.exe"
 !insertmacro EnableX64FSRedirection
 
@@ -407,6 +408,7 @@ Section "Uninstall"
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\udefrag.dll"
+  Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\udefrag.exe"
 !insertmacro EnableX64FSRedirection
 

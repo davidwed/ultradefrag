@@ -1,0 +1,16 @@
+EXPORTS
+	winx_init
+	winx_exit
+	winx_reboot
+	winx_shutdown
+	winx_virtual_alloc
+	winx_virtual_free
+	winx_putch
+	winx_puts
+	winx_printf
+	winx_getch
+	winx_getche
+	winx_gets
+	winx_kbhit
+	winx_breakhit
+	winx_get_error_message

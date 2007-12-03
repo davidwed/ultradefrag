@@ -1,8 +1,8 @@
 @echo off
 echo Set common environment variables...
-set WINXVER=0.0.1
-set WINX_VERSION=0,0,1,0
-set WINX_VERSION2="0, 0, 1, 0\0"
+set ZENWINXVER=0.0.1
+set ZENWINX_VERSION=0,0,1,0
+set ZENWINX_VERSION2="0, 0, 1, 0\0"
 set NSISDIR=D:\Software\Tools\NSIS
 set MSVSBIN=D:\Software\Microsoft Visual Studio\VC98\Bin
 set DDKINCDIR=D:\MyDocs\ReactOS030\include

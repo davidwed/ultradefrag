@@ -1,5 +1,5 @@
 /*
- *  WINX - WIndows Native eXtended library.
+ *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -18,19 +18,17 @@
  */
 
 /*
- *  winx.dll error messages.
+ *  Common version header.
  */
 
-const short *emsg[] = \
-{
-	L"",
-	L"Can't open the keyboard",
-	L"Can't create kb_event"
-};
+#include "zenwinxver.h"
 
-short * __stdcall winx_get_error_message(long code)
-{
-	if(code < 0 || code >= sizeof(emsg) / sizeof(short *))
-		return L"";
-	return emsg[code];
-}
+#define VS_VERSION_INFO     1
+#ifndef WINVER
+#define WINVER 0x0400
+#endif
+#include <winresrc.h>
+#ifdef IDC_STATIC
+#undef IDC_STATIC
+#endif
+#define IDC_STATIC      (-1)

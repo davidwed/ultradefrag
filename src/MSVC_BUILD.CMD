@@ -19,11 +19,12 @@ set NT4_TARGET=true
 nmake /NOLOGO /A /f ultradfg.mak
 if %errorlevel% neq 0 goto fail
 
-rem Build the winx.dll ...
-cd ..\dll\winx\src
-call MSVC_BUILD_WINX.CMD
+rem Build the zenwinx.dll ...
+cd ..\dll\zenwinx\src
+call MSVC_BUILD_ZENWINX.CMD
 if %errorlevel% neq 0 goto fail
-copy /Y .\bin\winx.lib ..\..\..\lib\
+copy /Y .\bin\zenwinx.lib ..\..\..\lib\
+copy /Y .\bin\zenwinx.dll ..\..\..\bin\
 
 echo Build the udefrag.dll ...
 cd ..\..\udefrag

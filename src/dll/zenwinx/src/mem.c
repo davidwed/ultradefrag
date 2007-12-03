@@ -1,5 +1,5 @@
 /*
- *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -17,4 +17,32 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "../dll/zenwinx/src/ntndk.h"
+/*
+ *  zenwinx.dll functions to allocate and free memory.
+ */
+
+#define WIN32_NO_STATUS
+#define NOMINMAX
+#include <windows.h>
+#include <winioctl.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "ntndk.h"
+#include "zenwinx.h"
+
+void * __stdcall winx_virtual_alloc(unsigned long size)
+{
+	void *addr = NULL;
+	NTSTATUS Status;
+
+	Status = NtAllocateVirtualMemory(NtCurrentProcess(),
+				&addr,0,&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
+	return (NT_SUCCESS(Status)) ? addr : NULL;
+}
+
+void __stdcall winx_virtual_free(void *addr,unsigned long size)
+{
+	NtFreeVirtualMemory(NtCurrentProcess(),&addr,&size,MEM_RELEASE);
+}
