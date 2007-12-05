@@ -25,7 +25,7 @@
 #include <commctrl.h>
 #include <math.h>
 
-#include <stdio.h>
+//#include <stdio.h>
 
 #include "main.h"
 #include "../include/udefrag.h"
@@ -71,38 +71,35 @@ void CalculateBlockSize()
 	RECT rc;
 	double n;
 	int x_edge,y_edge;
-	LONG delta_x;
-FILE *pf;
-char b[1024];
+	LONG delta_x, delta_y;
 
-pf = fopen("c:\\dfrg.log","wt");
-	GetWindowRect(hMap,&rc);
+	GetClientRect(hMap,&rc);
+	MapWindowPoints(hMap,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)));
 	x_edge = GetSystemMetrics(SM_CXEDGE);
 	y_edge = GetSystemMetrics(SM_CYEDGE);
-	iMAP_WIDTH = rc.right - rc.left - 2 * y_edge;
-	iMAP_HEIGHT = rc.bottom - rc.top - 2 * x_edge;
+	iMAP_WIDTH = rc.right - rc.left;// - 2 * y_edge;
+	iMAP_HEIGHT = rc.bottom - rc.top;// - 2 * x_edge;
+///iMAP_WIDTH -= 20;
 	n = (double)((iMAP_WIDTH - 1) * (iMAP_HEIGHT - 1));
 	n /= (double)N_BLOCKS;
 	iBLOCK_SIZE = (int)floor(sqrt(n)) - 1; /* 1 pixel for grid line */
 	/* adjust map size */
 	/* this is an universal solution for various DPI's */
-	iMAP_WIDTH = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1 + 2 * y_edge;
-	iMAP_HEIGHT = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1 + 2 * x_edge;
+	iMAP_WIDTH = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1;// + 2 * y_edge;
+	iMAP_HEIGHT = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1;// + 2 * x_edge;
 	delta_x = rc.right - rc.left - iMAP_WIDTH;
+	delta_y = rc.bottom - rc.top - iMAP_HEIGHT;
 	if(delta_x > 0)
 	{ /* align="center" */
 		rc.left += (delta_x >> 1);
 	}
-sprintf(b,"Y: bottom-%i  left-%i  right-%i  top-%i\n",rc.bottom, rc.left, rc.right, rc.top);
-fputs(b,pf);
-sprintf(b,"Z: %i - %i - %i\n",rc.top,GetSystemMetrics(SM_CYCAPTION),x_edge);
-fputs(b,pf);
-	SetWindowPos(hMap,0,rc.left - y_edge - 1, \
-		rc.top - GetSystemMetrics(SM_CYCAPTION) - x_edge - 1, \
-		iMAP_WIDTH,iMAP_HEIGHT,0);
-	iMAP_WIDTH -= 2 * y_edge; /* new sizes for map without borders */
-	iMAP_HEIGHT -= 2 * x_edge;
-fclose(pf);
+	if(delta_y > 0) rc.top += (delta_y >> 1);
+	SetWindowPos(hMap,NULL,rc.left/* - y_edge - 1*/, \
+		rc.top/* - GetSystemMetrics(SM_CYCAPTION) - x_edge - 1*/, \
+		iMAP_WIDTH + 2 * y_edge,iMAP_HEIGHT + 2 * x_edge,SWP_NOZORDER);
+	InvalidateRect(hMap,NULL,TRUE);
+//	iMAP_WIDTH -= 2 * y_edge; /* new sizes for map without borders */
+//	iMAP_HEIGHT -= 2 * x_edge;
 }
 
 void CreateMaps(void)

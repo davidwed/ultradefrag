@@ -266,10 +266,10 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	}
 scan_done:
 	/* adjust columns widths */
-	GetWindowRect(hList,&rc);
+	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;
-	if(SendMessage(hList,LVM_GETITEMCOUNT,0,0) > SendMessage(hList,LVM_GETCOUNTPERPAGE,0,0))
-		dx -= GetSystemMetrics(SM_CXVSCROLL);
+	//if(SendMessage(hList,LVM_GETITEMCOUNT,0,0) > SendMessage(hList,LVM_GETCOUNTPERPAGE,0,0))
+	//	dx -= GetSystemMetrics(SM_CXVSCROLL);
 	for(i = 0; i < 6; i++)
 		SendMessage(hList,LVM_SETCOLUMNWIDTH,i,cw[i] * dx / 505);
 	lvi.mask = LVIF_STATE;
@@ -367,7 +367,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
 		if(hIcon) DeleteObject(hIcon);
 		/* initialize listview control */
-		GetWindowRect(hList,&rc);
+		GetClientRect(hList,&rc);
 		dx = rc.right - rc.left;
 		SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 			(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));

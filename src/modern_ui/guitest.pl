@@ -63,7 +63,7 @@ my $appicon = &img(0);
 my $icon = $top->Photo('image',-data=>$appicon,format=>'gif');
 $top->title('UltraDefrag v1.2.2 modern user interface');
 $top->iconimage($icon);
-#display_error("привет!");
+#display_error("привет!"); # incorrect appearance
 $top->bind(
 	ref($top),'<Destroy>',
 	sub {gui_unload(); udefrag_s_unload(1);}

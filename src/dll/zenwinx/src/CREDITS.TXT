@@ -1,0 +1,19 @@
+CREDITS
+
+Main programmer,
+Project administrator:
+
+Dmitri Arkhangelski
+
+
+Documentation Writer:
+
+Justin Dearing
+
+
+Special thanks to:
+
+ReactOS Team (http://www.reactos.org)
+
+
+Also many thanks to all people that help us to improve ZenWINX.

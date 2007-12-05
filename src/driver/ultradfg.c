@@ -86,14 +86,14 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 
 	DebugPrint("=Ultradfg= FDO %X, DevExt=%X\n",fdo,dx);
 
-	status = PsCreateSystemThread(&dx->hThread,0,NULL,NULL,NULL,WorkSystemThread,(PVOID)dx);
+/*	status = PsCreateSystemThread(&dx->hThread,0,NULL,NULL,NULL,WorkSystemThread,(PVOID)dx);
 	if(!NT_SUCCESS(status))
 	{
 		DebugPrint("=Ultradfg= PsCreateSystemThread %x\n",status);
 		IoDeleteDevice(fdo);
 		return status;
 	}
-
+*/
 	/* For NT-drivers it can be L"\\??\\ultradfg" */
 	RtlInitUnicodeString(&symLinkName,link_name);
 	dx->ustrSymLinkName = symLinkName;
@@ -103,7 +103,7 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	{
 		DebugPrint("=Ultradfg= IoCreateSymbolicLink %x\n",status);
 		KeSetEvent(&(dx->unload_event),IO_NO_INCREMENT,FALSE);
-		WaitForThreadComplete(dx);
+		///WaitForThreadComplete(dx);
 		IoDeleteDevice(fdo);
 		return status;
 	}
@@ -158,61 +158,11 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 */
 __inline BOOLEAN validate_letter(char letter)
 {
-	return ((letter >= 'A' && letter <= 'Z') || (letter >= 'a' && letter <= 'z'));
+	return /*(*/(letter >= 'A' && letter <= 'Z')/* || (letter >= 'a' && letter <= 'z'))*/;
 }
-
+/*
 VOID NTAPI WorkSystemThread(PVOID pContext)
 {
-	PEXAMPLE_DEVICE_EXTENSION dx = \
-			(PEXAMPLE_DEVICE_EXTENSION)pContext;
-	LARGE_INTEGER interval;
-	NTSTATUS Status;
-
-	interval.QuadPart = WAIT_CMD_INTERVAL;
-	do
-	{
-		if(dx->command)
-		{
-			dx->request_is_successful = TRUE;
-			switch(dx->command)
-			{
-			case 'a':
-			case 'A':
-				dx->letter = dx->new_letter;
-				if(Analyse(dx)) break;
-				if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
-					dx->request_is_successful = FALSE;
-				break;
-			case 'c':
-			case 'C':
-			case 'd':
-			case 'D':
-				if(dx->status == STATUS_BEFORE_PROCESSING || \
-					dx->letter != dx->new_letter)
-				{
-					dx->letter = dx->new_letter;
-					if(!Analyse(dx))
-					{
-						if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
-							dx->request_is_successful = FALSE;
-						break;
-					}
-					if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
-						break;
-				}
-				Defragment(dx);
-				break;
-			//default:
-			//	goto invalid_request;
-			}
-			/* request completed */
-			KeClearEvent(&(dx->sync_event));
-			dx->command = 0;
-		}
-		Status = KeWaitForSingleObject(&(dx->unload_event),
-				Executive,KernelMode,FALSE,&interval);
-	} while (Status == STATUS_TIMEOUT);
-
 	DebugPrint("-Ultradfg- System thread said good bye ...\n");
 	PsTerminateSystemThread(0);
 }
@@ -232,7 +182,7 @@ VOID WaitForThreadComplete(PEXAMPLE_DEVICE_EXTENSION dx)
 	}
 	ZwClose(dx->hThread);
 }
-
+*/
 /*
  * Write request: analyse / defrag / compact.
  */
@@ -245,7 +195,6 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	PEXAMPLE_DEVICE_EXTENSION dx = \
 			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	PVOID addr;
-	LARGE_INTEGER interval;
 	NTSTATUS request_status;
 
 	/* If previous request isn't complete, return STATUS_DEVICE_BUSY. */
@@ -286,61 +235,43 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	dx->compact_flag = (cmd.command == 'c' || cmd.command == 'C') ? TRUE : FALSE;
 	dx->sizelimit = cmd.sizelimit;
 
-#ifdef NT4_TARGET
-	//////////cmd.mode = __KernelMode;
-	///DebugPrint("hDbgLog address %x\n",&hDbgLog);
-#endif
-
-	if(cmd.mode == __KernelMode)
-	{ /* native app defrag system files */
-		dx->command = cmd.command;
-		dx->new_letter = cmd.letter;
-
-		/* wait for request completion */
-		interval.QuadPart = WAIT_CMD_INTERVAL;
-		while(KeReadStateEvent(&(dx->sync_event)))
-			KeWaitForSingleObject(&(dx->wait_event),
-					Executive,KernelMode,FALSE,&interval);
-	}
-	else
-	{ /* gui or console must have permission to access encrypted files */
-		dx->request_is_successful = TRUE;
-		switch(cmd.command)
+	/* gui or console must have permission to access encrypted files */
+	dx->request_is_successful = TRUE;
+	switch(cmd.command)
+	{
+	case 'a':
+	case 'A':
+		dx->letter = cmd.letter;
+		request_status = Analyse(dx);
+		if(NT_SUCCESS(request_status)) break;
+		if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
+			dx->request_is_successful = FALSE;
+		break;
+	case 'c':
+	case 'C':
+	case 'd':
+	case 'D':
+		if(dx->status == STATUS_BEFORE_PROCESSING || \
+			dx->letter != cmd.letter)
 		{
-		case 'a':
-		case 'A':
 			dx->letter = cmd.letter;
 			request_status = Analyse(dx);
-			if(NT_SUCCESS(request_status)) break;
-			if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
-				dx->request_is_successful = FALSE;
-			break;
-		case 'c':
-		case 'C':
-		case 'd':
-		case 'D':
-			if(dx->status == STATUS_BEFORE_PROCESSING || \
-				dx->letter != cmd.letter)
+			if(!NT_SUCCESS(request_status))
 			{
-				dx->letter = cmd.letter;
-				request_status = Analyse(dx);
-				if(!NT_SUCCESS(request_status))
-				{
-					if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
-						dx->request_is_successful = FALSE;
-					break;
-				}
-				if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
-					break;
+				if(KeReadStateEvent(&(dx->stop_event)) != 0x1)
+					dx->request_is_successful = FALSE;
+				break;
 			}
-			Defragment(dx);
-			break;
-		//default:
-		//	goto invalid_request;
+			if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+				break;
 		}
-		/* request completed */
-		KeClearEvent(&(dx->sync_event));
+		Defragment(dx);
+		break;
+	//default:
+	//	goto invalid_request;
 	}
+	/* request completed */
+	KeClearEvent(&(dx->sync_event));
 	if(dx->request_is_successful)
 		return CompleteIrp(Irp,STATUS_SUCCESS,sizeof(ULTRADFG_COMMAND));
 request_failure:
@@ -691,7 +622,7 @@ VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 #endif
 	if(dx->tmp_buf) ExFreePool(dx->tmp_buf);
 	DestroyFilter(dx);
-	WaitForThreadComplete(dx);
+///	WaitForThreadComplete(dx);
 #ifdef NT4_DBG
 	CloseLog();
 #endif

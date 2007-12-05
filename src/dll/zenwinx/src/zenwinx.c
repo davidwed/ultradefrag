@@ -39,6 +39,17 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
+/**
+ * @name winx_init
+ *
+ * Initialize a native application and ZenWINX library.
+ *
+ * @param peb 
+ *        Pointer for the Process Environment Block - 
+ *        the first parameter of NtProcessStartup() function.
+ * @return zero value indicates success, negative value - failure.
+ */
+
 int __stdcall winx_init(void *peb)
 {
 	PRTL_USER_PROCESS_PARAMETERS pp;

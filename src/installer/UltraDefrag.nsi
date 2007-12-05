@@ -372,6 +372,8 @@ doc_url_ok:
   CreateShortCut "$R0\Portable package.lnk" \
    "$INSTDIR\portable_${ULTRADFGARCH}_package"
 no_portable:
+  CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
+   "$INSTDIR\Dfrg.exe"
   pop $R0
   
 SectionEnd
@@ -383,6 +385,7 @@ Section "Uninstall"
   RMDir /r "$SMPROGRAMS\DASoft\UltraDefrag"
   RMDir "$SMPROGRAMS\DASoft"
   Delete "$DESKTOP\UltraDefrag.lnk"
+  Delete "$QUICKLAUNCH\UltraDefrag.lnk"
 
   DetailPrint "Remove program files..."
   /* remove unuseful registry settings */

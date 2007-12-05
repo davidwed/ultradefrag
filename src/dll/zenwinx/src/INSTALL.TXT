@@ -1,0 +1,2 @@
+Download source archive and unpack it somewhere. Use dll and lib files 
+compiled for your target processor architecture and header file zenwinx.h
