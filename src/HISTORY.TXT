@@ -2,6 +2,10 @@ HISTORY
 
 [version number (x86 w2k driver size in Kbytes) - changes description]
 
+1.2.3 (22.0) - two gui bugs (#1833605 and #1839755) are fixed;
+               localized errors descriptions added;
+               small driver optimization performed;
+
 1.2.2 (22.5) - all modules was internally completely redesigned;
                full NTFS junctions (reparse points) support!
                many bugs are fixed; documentation improved;
