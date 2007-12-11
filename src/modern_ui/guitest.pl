@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # This is the Ultra Defragmenter Modern User Interface.
 # Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
 #
@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-#
+#  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 use strict;
 use Win32::API;
@@ -48,7 +48,7 @@ if(open(CFGFILE,'.\\my_guitest.cfg')){
 	foreach (<CFGFILE>){
 		chomp($_);
 		@fields = split(/=/);
-		if((@fields == 2) && ($opts{$fields[0]} ne undef)){
+		if(@fields == 2 && $opts{$fields[0]} ne undef){
 			$opts{$fields[0]} = $fields[1];
 			print "$fields[0]=$fields[1]\n";
 		}
@@ -57,15 +57,15 @@ if(open(CFGFILE,'.\\my_guitest.cfg')){
 }
 
 ############# create the main window ############
-my $top = MainWindow->new();
-$top->wm('geometry', '527x350+'.$opts{'x'}.'+'.$opts{'y'});
+my $mw = MainWindow->new();
+$mw->wm('geometry', '527x350+'.$opts{'x'}.'+'.$opts{'y'});
 my $appicon = &img(0);
-my $icon = $top->Photo('image',-data=>$appicon,format=>'gif');
-$top->title('UltraDefrag v1.2.2 modern user interface');
-$top->iconimage($icon);
+my $icon = $mw->Photo('image',-data=>$appicon,format=>'gif');
+$mw->title('UltraDefrag v1.2.2 modern user interface');
+$mw->iconimage($icon);
 #display_error("привет!"); # incorrect appearance
-$top->bind(
-	ref($top),'<Destroy>',
+$mw->bind(
+	ref($mw),'<Destroy>',
 	sub {gui_unload(); udefrag_s_unload(1);}
 	);
 
@@ -85,12 +85,12 @@ Win32::API->Import('udefrag','char* udefrag_s_get_options()');
 Win32::API->Import('udefrag','char* udefrag_s_set_options(char* string)');
 
 ############ fill the main window with controls ###############
-#my $list = $top->Scrolled(
+#my $list = $mw->Scrolled(
 #	qw/HList -header 10 -columns 6 
 #	-width 58 -height 7 -scrollbars e/
 #	);#->pack;
 
-my $list = $top->HList(
+my $list = $mw->HList(
 	-header => "10", -columns => "6",
 	-width => "58", -height => "8",
 	-background => 'black',
@@ -107,21 +107,21 @@ for($i = 0; $i < 6; $i++){
 	$list->columnWidth($i, $h_width[$i]);
 }
 
-my $label1 = $top->Label(
+my $label1 = $mw->Label(
 	-text => 'Cluster map:'
 	);
 
-my $skip_rem_btn = $top->Checkbutton(
+my $skip_rem_btn = $mw->Checkbutton(
 	-text => 'Skip removable media',
 	-variable => \$skip_rem
 	);
 
-my $rescan_btn = $top->Button(
+my $rescan_btn = $mw->Button(
 	-text => 'Rescan drives',
 	-command => sub { rescan_drives(); }
 	);
 
-my $map = $top->Canvas(
+my $map = $mw->Canvas(
 	-relief => 'sunken', -borderwidth => '2', -background => 'black',
 	-width => '519', -height => '138'
 	);
@@ -136,37 +136,37 @@ for($j = 0; $j < $y_blocks; $j++){
 	}
 }
 
-my $analyse_btn = $top->Button(
+my $analyse_btn = $mw->Button(
 	-text => 'Analyse',
 	-command => sub { analyse(); }
 	);
 
-my $defrag_btn = $top->Button(
+my $defrag_btn = $mw->Button(
 	-text => 'Defragment',
 	-command => sub { exit }
 	);
 
-my $optimize_btn = $top->Button(
+my $optimize_btn = $mw->Button(
 	-text => 'Optimize',
 	-command => sub { exit }
 	);
 
-my $stop_btn = $top->Button(
+my $stop_btn = $mw->Button(
 	-text => 'Stop',
 	-command => sub { exit }
 	);
 
-my $fragm_btn = $top->Button(
+my $fragm_btn = $mw->Button(
 	-text => 'Fragmented',
 	-command => sub { exit }
 	);
 
-my $settings_btn = $top->Button(
+my $settings_btn = $mw->Button(
 	-text => 'Settings',
 	-command => sub { exit }
 	);
 
-my $about_btn = $top->Button(
+my $about_btn = $mw->Button(
 	-text => 'About',
 	-command => sub { exit }
 	);
@@ -194,9 +194,9 @@ $fragm_btn->form(-left => '%25', -right => '%50', -bottom => '%100');
 $settings_btn->form(-left => $fragm_btn, -right => '%75', -bottom => '%100');
 $about_btn->form(-left => $settings_btn, -right => '%100', -bottom => '%100');
 
-#$top->resizable(0,0);
-$top->minsize($top->width,$top->height);
-$top->maxsize($top->width,$top->height);
+#$mw->resizable(0,0);
+$mw->minsize($mw->width,$mw->height);
+$mw->maxsize($mw->width,$mw->height);
 
 # fill list of available volumes
 rescan_drives();
@@ -239,7 +239,7 @@ sub gui_unload {
 	my @fields;
 	print('Before unload...');
 	# save program settings
-	$geom = $top->wm('geometry');
+	$geom = $mw->wm('geometry');
 	@fields = split(/\+/,$geom);
 	$opts{'x'} = $fields[1]; $opts{'y'} = $fields[2];
 	if(open(CFGFILE,'> .\\my_guitest.cfg')){
@@ -254,7 +254,7 @@ sub gui_unload {
 }
 
 sub display_error {
-	$top->messageBox(
+	$mw->messageBox(
 		-icon => 'error', -type => 'OK',
 		-title => 'Error!', -message => $_[0]
 		);

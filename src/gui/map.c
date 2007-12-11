@@ -77,29 +77,24 @@ void CalculateBlockSize()
 	MapWindowPoints(hMap,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)));
 	x_edge = GetSystemMetrics(SM_CXEDGE);
 	y_edge = GetSystemMetrics(SM_CYEDGE);
-	iMAP_WIDTH = rc.right - rc.left;// - 2 * y_edge;
-	iMAP_HEIGHT = rc.bottom - rc.top;// - 2 * x_edge;
-///iMAP_WIDTH -= 20;
+	iMAP_WIDTH = rc.right - rc.left;
+	iMAP_HEIGHT = rc.bottom - rc.top;
 	n = (double)((iMAP_WIDTH - 1) * (iMAP_HEIGHT - 1));
 	n /= (double)N_BLOCKS;
 	iBLOCK_SIZE = (int)floor(sqrt(n)) - 1; /* 1 pixel for grid line */
 	/* adjust map size */
 	/* this is an universal solution for various DPI's */
-	iMAP_WIDTH = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1;// + 2 * y_edge;
-	iMAP_HEIGHT = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1;// + 2 * x_edge;
+	iMAP_WIDTH = (iBLOCK_SIZE + 1) * BLOCKS_PER_HLINE + 1;
+	iMAP_HEIGHT = (iBLOCK_SIZE + 1) * BLOCKS_PER_VLINE + 1;
 	delta_x = rc.right - rc.left - iMAP_WIDTH;
 	delta_y = rc.bottom - rc.top - iMAP_HEIGHT;
-	if(delta_x > 0)
-	{ /* align="center" */
-		rc.left += (delta_x >> 1);
-	}
+	/* align="center" */
+	if(delta_x > 0)	rc.left += (delta_x >> 1);
 	if(delta_y > 0) rc.top += (delta_y >> 1);
-	SetWindowPos(hMap,NULL,rc.left/* - y_edge - 1*/, \
-		rc.top/* - GetSystemMetrics(SM_CYCAPTION) - x_edge - 1*/, \
+	/* border width is used because window size = client size + borders */
+	SetWindowPos(hMap,NULL,rc.left - y_edge,rc.top - x_edge, \
 		iMAP_WIDTH + 2 * y_edge,iMAP_HEIGHT + 2 * x_edge,SWP_NOZORDER);
 	InvalidateRect(hMap,NULL,TRUE);
-//	iMAP_WIDTH -= 2 * y_edge; /* new sizes for map without borders */
-//	iMAP_HEIGHT -= 2 * x_edge;
 }
 
 void CreateMaps(void)

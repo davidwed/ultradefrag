@@ -2,43 +2,123 @@
 
 1.1 System requirements
 
-You need Windows 2000, Windows XP, Windows Server 2003 or Windows Vista.
-Also Windows XP x64, Server 2003 x64 and Vista x64 editions supported.
+  You need Windows NT 4.0, Windows 2000, Windows XP, Windows Server 2003 
+or Windows Vista. Also Windows XP x64, Server 2003 x64 and Vista x64 editions 
+supported.
+
 
 1.2 Installation
 
-To install UltraDefrag you can download ultradefrag-x.y.z.bin.xxxx.exe
+  To install UltraDefrag you can download ultradefrag-x.y.z.bin.xxxx.exe
 from project site. In common cases xxxx must be 'i386'. If you have AMD x64
 or Intel Core Duo processor and 64-bit Edition of Windows installed, xxxx 
 must be 'amd64'. If you use PC with IA-64 architecture than try to download
-IA64 version. It was never tested, because I don't have such kind of CPU.
-Installation process is very simple. Enjoy it!
+IA64 version. It was never tested by the authors, because we don't have 
+such kind of CPU.
+
+  Installation process is very simple. Enjoy it!
+
 
 2. Installation from sources
 
 2.1 Software requirements
 
-You need:
-a). either Microsoft C Compiler for Windows or gcc installed
-    (p.a. Microsoft Visual C++ 6.0 or Bloodshed Dev-C++ -
-    you can find it at http://www.bloodshed.net)
-    NOTE: GCC is currently unsupported!
-b). Microsoft Windows DDK (I use Windows Server 2003 DDK) or ReactOS DDK
-    (http://www.reactos.org)
-c). NSIS compiler (http://nsis.sourceforge.net)
-d). Ultimate Packer for eXecutables (upx) (http://upx.sf.net)
-e). zip compressor (http://www.info-zip.org)
+2.1.1 Compilation with Windows Server 2003 DDK
+
+  The best way to build UltraDefrag is to do this using Windows Server 2003 
+Driver Development Kit (DDK). You can simply download it from 
+one of the locations that can be found using any web search system (e.g. Google).
+
+  Only one disadvantage of this way is that the Windows DDK is a really 
+big package (about 230 Mb). But if you have internet connection with good 
+bandwidth, that's not a problem for you.
+
+
+2.1.2 Compilation using other compilers
+
+  Other way to build the program is more difficult, but you don't need have 
+Windows DDK for them. You can use Microsoft C compiler included in 
+MS Visual Studio 6.0 (or later versions). GNU C Compiler (GCC) is not supported 
+yet, but it seems that this support can be added in future without any problems.
+And we will become an ability to use opensource IDE like Bloodshed Dev-C++ 
+(http://www.bloodshed.net).
+ 
+  In addition you need obtain a copy of ReactOS source code 
+(from http://www.reactos.org) for special header files used to build the driver.
+
+  Also you should download the following files:
+- ntdll.lib from http://www.masm32.com/board/index.php?topic=2124.new
+- ntoskrnl.lib + hal.lib from http://www.freewebs.com/four-f/index.htm
+  (included in KmdKit package).
+
+  Finally, edit *.dsp files, because they have references to ReactOS headers.
+
+  Note that currently only i386 binaries can be produced using this way.
+
+
+2.1.3 Common tools
+
+  There are a few other tools that you should have installed on your PC to
+perform a full-featured build:
+
+a). NSIS compiler (http://nsis.sourceforge.net) is used to produce installers.
+    Currently I'm using NSIS v2.28.
+    NOTE: In my nsisconf.nsh file (in NSIS root directory) I have 
+    the following line:
+
+          !packhdr temp.dat '"C:\WINDOWS\upx" -9 -q temp.dat'
+
+b). Ultimate Packer for eXecutables (upx) (http://upx.sf.net) is used to
+    reduce sizes of some binary modules. I'm using version 2.03w.
+
+c). 7-zip file archiver (http://www.7-zip.org) is used to produce 
+    the source code package.
+
+d). .NET framework v2.0.50727 or later is used to compile the 
+    UltraDefrag Scheduler.NET application.
+
+e). Perl language package for Windows. You can download it from
+    http://www.activestate.com. Currently I'm using v5.8.6 to execute
+    configure.pl script and to develop the Modern UltraDefrag User Interface
+    (that was created for extended gui configuration abilities).
+
+
+2.1.4 Software recommended for debugging purposes
+
+  Because the main work is done by kernel mode driver, you can download 
+tools described below to find program bugs. Even if you are not programmer, 
+these tools may be very useful for you:
+
+a). DebugView and other tools created by Mark Russinovich. You can download it
+    from http://www.sysinternals.com. In DebugView window you can see some 
+    interesting information given by driver engine: number of clusters on your 
+    volumes, mft position and much more. Other useful tools are, par example, 
+    WinObj (using them you can see when UltraDefrag opens his driver, creates 
+    some events etc.), File Monitor and Registry Monitor.
+
+b). PoolTag. This tool is included in Windows DDK or can be downloaded from 
+    http://www.osr.com. Using this tool you can watch driver memory allocation.
+    The UltraDefrag driver tag is 'ULTR'.
+
+c). StatusToError tool included in KmdKit (see above). Input the NTSTATUS code
+    given by gui, console or native app and you will become the localized error 
+    description. Simple but very useful. Especially for boot time defragmentation
+    errors decoding, because I can't do it at boot time.
+
 
 2.2 Building and installation
 
 a). Download sources archive and unpack it somewhere.
-b). Edit SETVARS.CMD. Environment variable NSISDIR must contain path
-    to NSIS compiler, ULTRADFGVER - version of UltraDefrag program,
-    etc.
+    NOTE: Currently path must not contain spaces. If you have some ideas
+          how to fix that send your report to the authors, please.
+b). Configure build options by typing the following command:
+
+    perl configure.pl
+
 c). To build UltraDefrag use BUILD.CMD. Synopsis is:
 
-    build               in .\bin directory you find installer;
-                        in .\src - sources zip-archive.
+    build               in .\bin directory you will find installer;
+                        in .\src_package - sources 7zip-archive.
 
     build --install     it will install x86 program to default location
                         after build

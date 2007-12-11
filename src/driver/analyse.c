@@ -49,7 +49,9 @@ void PrepareDataFields(PEXAMPLE_DEVICE_EXTENSION dx)
 	dx->fragmfilecounter = 0;
 	dx->fragmcounter = 0;
 	dx->clusters_total = 0;
-	dx->cluster_map = 0;
+	dx->clusters_per_mapblock = 0;
+	dx->clusters_per_last_mapblock = 0;
+//	dx->cluster_map = 0;
 	dx->total_space = 0; dx->free_space = 0;
 	dx->hVol = NULL;
 	dx->partition_type = 0x0;
@@ -63,6 +65,7 @@ void PrepareDataFields(PEXAMPLE_DEVICE_EXTENSION dx)
 	dx->clusters_to_compact = dx->clusters_to_compact_initial = 0;
 	dx->clusters_to_move_tmp = 0;
 	dx->clusters_to_compact_tmp = 0;
+	///DbgPrint("sdfgdsfgsd - %u\n",sizeof(new_cluster_map));
 }
 
 /* Init() - initialize filename list and map of free space */
@@ -75,20 +78,21 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	NTSTATUS Status;
 	UNICODE_STRING pathU;
 	//ULONGLONG tm;
+	int i;
 
 	/* TODO: optimize FindFiles() */
 	/* data initialization */
 	FreeAllBuffers(dx);
 	PrepareDataFields(dx);
 	/* Clear the 'Stop' event. */
-	KeClearEvent(&(dx->stop_event));
+	KeClearEvent(&dx->stop_event);
 
 	/* 0. open the volume */
 	DeleteLogFile(dx);
 	path[4] = (short)(dx->letter);
 	RtlInitUnicodeString(&pathU,path);
 	InitializeObjectAttributes(&ObjectAttributes,&pathU,0,NULL,NULL);
-	Status = ZwCreateFile(&(dx->hVol),FILE_GENERIC_READ | FILE_WRITE_DATA,
+	Status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA,
 		&ObjectAttributes,&IoStatusBlock,
 		NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 		NULL,0);
@@ -105,7 +109,11 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 		goto fail;
 	}
 	DebugPrint("-Ultradfg- total clusters: %I64u\n", dx->clusters_total);
-
+	/* assume that all space is system space */
+	memset(new_cluster_map,0,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
+	for(i = 0; i < N_BLOCKS - 1; i++)
+		new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_mapblock;
+	new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_last_mapblock;
 	/* Synchronize drive.
 	 *
 	 * On NT 4.0 (at least under MS Virtual PC) it will crash system:
@@ -149,7 +157,7 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	/* 3. If it's NTFS volume, we can locate MFT and put its clusters to map */
 	ProcessMFT(dx);
 	SaveFragmFilesListToDisk(dx);
-	if(KeReadStateEvent(&(dx->stop_event)) == 0x0)
+	if(KeReadStateEvent(&dx->stop_event) == 0x0)
 		dx->status = STATUS_ANALYSED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;
@@ -194,6 +202,9 @@ BOOLEAN GetTotalClusters(PEXAMPLE_DEVICE_EXTENSION dx)
 	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
 
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
+	dx->clusters_per_mapblock = dx->clusters_total / N_BLOCKS;
+	dx->clusters_per_last_mapblock = dx->clusters_per_mapblock + \
+		(dx->clusters_total - dx->clusters_per_mapblock * N_BLOCKS);
 exit:
 	return (errCode == STATUS_SUCCESS);
 }
@@ -235,19 +246,19 @@ void ProcessMFT(PEXAMPLE_DEVICE_EXTENSION dx)
 			len = ntfs_data.MftValidDataLength.QuadPart / ntfs_data.BytesPerCluster;
 			DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
 			///dx->processed_clusters += len;
-			_int64_memset(dx->cluster_map + start,MFT_SPACE,len);
+			ProcessBlock(dx,start,len,MFT_SPACE);
 			mft_len += len;
 			/* $MFT2 */
 			start = ntfs_data.MftZoneStart.QuadPart;
 			len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
 			DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",start,len);
 			///dx->processed_clusters += len;
-			_int64_memset(dx->cluster_map + start,MFT_SPACE,len);
+			ProcessBlock(dx,start,len,MFT_SPACE);
 			mft_len += len;
 			/* $MFTMirror */
 			start = ntfs_data.Mft2StartLcn.QuadPart;
 			DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",start);
-			dx->cluster_map[start] = MFT_SPACE;
+			ProcessBlock(dx,start,1,MFT_SPACE);
 			///dx->processed_clusters ++;
 			mft_len ++;
 			dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
@@ -289,14 +300,15 @@ BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
 //ULONGLONG t;
 	ULONGLONG *pnextLcn;
 	/* Allocate memory */
-	dx->cluster_map = (UCHAR *)_int64_malloc(dx->clusters_total);
+/*	dx->cluster_map = (UCHAR *)_int64_malloc(dx->clusters_total);
 	if(!dx->cluster_map)
 	{
 		DbgPrintNoMem();
 		goto fail;
 	}
 	_int64_memset((void *)(dx->cluster_map),SYSTEM_SPACE,dx->clusters_total);
-//	t = _rdtsc();
+*/
+	//	t = _rdtsc();
 	/* Start scanning */
 	bitMappings = (PBITMAP_DESCRIPTOR)(dx->BitMap);
 #ifndef NT4_TARGET
@@ -379,7 +391,7 @@ BOOLEAN InsertFileName(PEXAMPLE_DEVICE_EXTENSION dx,short *path,
 	/* Add file name with path to filelist */
 	pfn = (PFILENAME)InsertFirstItem((PLIST *)&dx->filelist,sizeof(FILENAME));
 	if(!pfn) return FALSE; /* No enough memory! */
-	if(!RtlCreateUnicodeString(&(pfn->name),path))
+	if(!RtlCreateUnicodeString(&pfn->name,path))
 	{
 		DbgPrintNoMem();
 		dx->filelist = pfn->next_ptr;
@@ -397,7 +409,7 @@ BOOLEAN InsertFileName(PEXAMPLE_DEVICE_EXTENSION dx,short *path,
 	{
 no_mem:
 		dx->filelist = pfn->next_ptr;
-		RtlFreeUnicodeString(&(pfn->name));
+		RtlFreeUnicodeString(&pfn->name);
 		ExFreePool(pfn);
 	}
 	else
@@ -457,7 +469,7 @@ BOOLEAN FindFiles(PEXAMPLE_DEVICE_EXTENSION dx,UNICODE_STRING *path,BOOLEAN is_r
 	pFileInfo->NextEntryOffset = 0;
 	while(1)
 	{
-		if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+		if(KeReadStateEvent(&dx->stop_event) == 0x1)
 			goto no_more_items;
 		if (pFileInfo->NextEntryOffset != 0)
 		{
@@ -499,7 +511,7 @@ BOOLEAN FindFiles(PEXAMPLE_DEVICE_EXTENSION dx,UNICODE_STRING *path,BOOLEAN is_r
 		if(IS_DIR(pFileInfo))
 		{
 			/*if(!*/FindFiles(dx,&new_path,FALSE)/*) goto fail*/;
-			if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+			if(KeReadStateEvent(&dx->stop_event) == 0x1)
 				goto no_more_items;
 		}
 		else
@@ -685,7 +697,7 @@ BOOLEAN DumpFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 	pfn->blockmap = NULL;
 	dx->lastblock = NULL;
 	/* Open the file */
-	InitializeObjectAttributes(&ObjectAttributes,&(pfn->name),0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,0,NULL,NULL);
 	Status = ZwCreateFile(&hFile,FILE_GENERIC_READ,&ObjectAttributes,&ioStatus,
 			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
 			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,

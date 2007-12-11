@@ -34,6 +34,6 @@
 
 #define BLOCKS_PER_HLINE  52
 #define BLOCKS_PER_VLINE  14
-#define N_BLOCKS          BLOCKS_PER_HLINE * BLOCKS_PER_VLINE
+#define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
 
 #endif /* _DFRG_MAIN_H_ */

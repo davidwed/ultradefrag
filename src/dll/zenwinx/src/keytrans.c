@@ -173,7 +173,7 @@ IntAsciiFromInput(PKEYBOARD_INPUT_DATA InputData, DWORD KeyState)
 }
 
 /*
- * Only the bKeyDown and AsciiChar members are used in the app.
+ * Only the bKeyDown and AsciiChar members are used in the zenwinx library.
  */
 void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec)
 {

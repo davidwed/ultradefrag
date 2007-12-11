@@ -268,8 +268,6 @@ scan_done:
 	/* adjust columns widths */
 	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;
-	//if(SendMessage(hList,LVM_GETITEMCOUNT,0,0) > SendMessage(hList,LVM_GETCOUNTPERPAGE,0,0))
-	//	dx -= GetSystemMetrics(SM_CXVSCROLL);
 	for(i = 0; i < 6; i++)
 		SendMessage(hList,LVM_SETCOLUMNWIDTH,i,cw[i] * dx / 505);
 	lvi.mask = LVIF_STATE;

@@ -32,3 +32,7 @@ extern LARGE_INTEGER dbg_log_offset;
 extern UCHAR *dbg_ring_buffer;
 extern unsigned int dbg_ring_buffer_offset;
 #endif
+
+#define N_BLOCKS (728 * 5) /* cluster map will divide into this number of blocks */
+
+extern ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];

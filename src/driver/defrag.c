@@ -178,10 +178,59 @@ void UpdateFragmentedFilesList(PEXAMPLE_DEVICE_EXTENSION dx)
  * On FAT partitions after file moving filesystem driver mark
  * previously allocated clusters as free immediately.
  */
-__inline void ProcessBlock(PEXAMPLE_DEVICE_EXTENSION dx,ULONGLONG start,
+/*__inline */void ProcessBlock(PEXAMPLE_DEVICE_EXTENSION dx,ULONGLONG start,
 						   ULONGLONG len,int space_state)
 {
-	_int64_memset(dx->cluster_map + start,space_state,len);
+//	ULONGLONG clusters_per_mapblock = dx->clusters_total / N_BLOCKS;
+	ULONGLONG target_block, target_offset;
+
+//	_int64_memset(dx->cluster_map + start,space_state,len);
+	/* the last block can represent less clusters than other blocks */
+//	if(dx->clusters_total % N_BLOCKS) clusters_per_mapblock++;
+	target_block = start / dx->clusters_per_mapblock;
+	target_offset = start % dx->clusters_per_mapblock;
+	do
+	{
+		if(target_block == N_BLOCKS - 1)
+		{
+			if(len <= dx->clusters_per_last_mapblock - target_offset)
+			{
+				new_cluster_map[target_block][space_state] += len;
+				/*
+				 * some space is identified as free and mft allocated at the same time;
+				 * therefore this check required;
+				 * because in space states enum mft has number above free space number,
+				 * these blocks will be displayed as mft blocks
+				 */
+				if(new_cluster_map[target_block][SYSTEM_SPACE] >= len)
+					new_cluster_map[target_block][SYSTEM_SPACE] -= len;
+				else
+					new_cluster_map[target_block][SYSTEM_SPACE] = 0;
+			}
+			break;
+		}
+		if(len <= dx->clusters_per_mapblock - target_offset)
+		{
+			new_cluster_map[target_block][space_state] += len;
+			if(new_cluster_map[target_block][SYSTEM_SPACE] >= len)
+				new_cluster_map[target_block][SYSTEM_SPACE] -= len;
+			else
+				new_cluster_map[target_block][SYSTEM_SPACE] = 0;
+			break;
+		}
+		else
+		{
+			new_cluster_map[target_block][space_state] += (dx->clusters_per_mapblock - target_offset);
+			if(new_cluster_map[target_block][SYSTEM_SPACE] >= dx->clusters_per_mapblock - target_offset)
+				new_cluster_map[target_block][SYSTEM_SPACE] -= (dx->clusters_per_mapblock - target_offset);
+			else
+				new_cluster_map[target_block][SYSTEM_SPACE] = 0;
+////		DbgPrint("x %I64u\n", new_cluster_map[target_block][SYSTEM_SPACE]);
+			len -= (dx->clusters_per_mapblock - target_offset);
+			target_block++;
+			target_offset = 0;
+		}
+	} while(1);
 }
 
 /*
@@ -249,7 +298,7 @@ void Defragment(PEXAMPLE_DEVICE_EXTENSION dx)
 ///PFREEBLOCKMAP block = dx->free_space_map;
 
 	/* Clear the 'Stop' event. */
-	KeClearEvent(&(dx->stop_event));
+	KeClearEvent(&dx->stop_event);
 	/* Delete temporary file. */
 	DeleteLogFile(dx);
 
@@ -289,7 +338,7 @@ void Defragment(PEXAMPLE_DEVICE_EXTENSION dx)
 				goto next;
 			if(curr_file->is_filtered)
 				goto next;
-			if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+			if(KeReadStateEvent(&dx->stop_event) == 0x1)
 				goto exit_defrag;
 			result = DefragmentFile(dx,curr_file);
 			if(result)
@@ -307,7 +356,7 @@ exit_defrag:
 	CheckPendingBlocks(dx);
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
-	if(KeReadStateEvent(&(dx->stop_event)) == 0x0)
+	if(KeReadStateEvent(&dx->stop_event) == 0x0)
 		dx->status = STATUS_DEFRAGMENTED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;
@@ -324,7 +373,7 @@ NTSTATUS __MoveFile(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
 	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",
 		 startVcn,targetLcn,n_clusters);
 
-	if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+	if(KeReadStateEvent(&dx->stop_event) == 0x1)
 		return STATUS_UNSUCCESSFUL;
 
 #ifndef NT4_TARGET
@@ -631,7 +680,7 @@ BOOLEAN DefragmentFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 	BOOLEAN was_fragmented;
 
 	/* Open the file */
-	InitializeObjectAttributes(&ObjectAttributes,&(pfn->name),0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,0,NULL,NULL);
 	Status = ZwCreateFile(&hFile,FILE_GENERIC_READ,&ObjectAttributes,&IoStatusBlock,
 			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
 			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,
@@ -752,7 +801,7 @@ void DefragmentFreeSpace(PEXAMPLE_DEVICE_EXTENSION dx)
 			continue;
 		}
 */
-		if(KeReadStateEvent(&(dx->stop_event)) == 0x1)
+		if(KeReadStateEvent(&dx->stop_event) == 0x1)
 			return;
 		DefragmentFile(dx,curr_file);
 		dx->clusters_to_compact -= curr_file->clusters_total;
@@ -765,29 +814,21 @@ void FreeAllBuffers(PEXAMPLE_DEVICE_EXTENSION dx)
 	PFILENAME ptr,next_ptr;
 
 	/* Set 'Stop' event. */
-	KeSetEvent(&(dx->stop_event),IO_NO_INCREMENT,FALSE);
-	KeWaitForSingleObject(&(dx->lock_map_event),
-		Executive,KernelMode,FALSE,NULL);
+	KeSetEvent(&dx->stop_event,IO_NO_INCREMENT,FALSE);
 	/* Now we can free buffers */
 	DestroyList((PLIST *)&dx->no_checked_blocks);
 	dx->unprocessed_blocks = 0;
-	if(dx->cluster_map)
-	{
-		ExFreePool(dx->cluster_map);
-		dx->cluster_map = NULL;
-	}
 	ptr = dx->filelist;
 	while(ptr)
 	{
 		next_ptr = ptr->next_ptr;
 		DestroyList((PLIST *)&ptr->blockmap);
-		RtlFreeUnicodeString(&(ptr->name));
+		RtlFreeUnicodeString(&ptr->name);
 		ExFreePool((void *)ptr);
 		ptr = next_ptr;
 	}
 	DestroyList((PLIST *)&dx->free_space_map);
 	DestroyList((PLIST *)&dx->fragmfileslist);
 	dx->filelist = NULL;
-	if(dx->hVol) { ZwClose(dx->hVol); dx->hVol = NULL; }
-	KeSetEvent(&(dx->lock_map_event),IO_NO_INCREMENT,FALSE);
+	ZwCloseSafe(dx->hVol);
 }

@@ -57,6 +57,9 @@ void __cdecl WriteLogMessage(char *format, ...);
 
 #include "globals.h"
 
+#define ZwCloseSafe(h) if(h) { ZwClose(h); h = NULL; }
+#define ExFreePoolSafe(p) if(p) { ExFreePool(p); p = NULL; }
+
 #ifdef USE_WINDDK
 NTSTATUS
 NTAPI
@@ -178,11 +181,11 @@ typedef struct _FRAGMENTED {
 
 #define NTFS_PARTITION 0x7
 
-#define QUEUE_WAIT_INTERVAL -1 * 10000 /* in 100 ns intervals */
+#define QUEUE_WAIT_INTERVAL (-1 * 10000) /* in 100 ns intervals */
 #define CHECKPOINT_WAIT_INTERVAL 30 /* sec */ //-300 * 10000 /* in 100 ns intervals */
-#define WAIT_CMD_INTERVAL -200 * 10000 /* 200 ms */
+#define WAIT_CMD_INTERVAL (-200 * 10000) /* 200 ms */
 
-#define _256K    256 * 1024
+#define _256K    (256 * 1024)
 
 typedef struct _PROCESS_BLOCK_STRUCT
 {
@@ -210,11 +213,6 @@ typedef struct _FILTER
 typedef struct _EXAMPLE_DEVICE_EXTENSION
 {
 	PDEVICE_OBJECT fdo;
-	HANDLE hThread;
-	UCHAR command;
-	UCHAR new_letter;
-	BOOLEAN request_is_successful;
-	UNICODE_STRING ustrSymLinkName; /* L"\\DosDevices\\Ultradfg" */
 	UNICODE_STRING log_path;
 	PFREEBLOCKMAP free_space_map;
 	PFILENAME filelist;
@@ -234,8 +232,10 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 	ULONGLONG clusters_to_compact;
 	ULONGLONG clusters_to_compact_tmp;
 	/* Cluster map: bytes are set to FREE_SPACE, SYSTEM_SPACE etc. */
-	UCHAR *cluster_map;
+//	UCHAR *cluster_map;
 	ULONGLONG clusters_total;
+	ULONGLONG clusters_per_mapblock;
+	ULONGLONG clusters_per_last_mapblock; /* last block can represent more clusters */
 	ULONGLONG total_space;
 	ULONGLONG free_space; /* in bytes */
 	HANDLE hVol;
@@ -246,9 +246,6 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 	NTSTATUS status;
 	KEVENT sync_event;
 	KEVENT stop_event;
-	KEVENT lock_map_event;
-	KEVENT unload_event;
-	KEVENT wait_event;
 	KSPIN_LOCK spin_lock;
 	unsigned char partition_type;
 	ULONG mft_size;
@@ -258,7 +255,6 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 	BOOLEAN xp_compatible; /* true for NT 5.1 and later versions */
 	PROCESS_BLOCK_STRUCT *no_checked_blocks;
 	ULONG unprocessed_blocks; /* number of no-checked blocks */
-	ULONG q_flag;
 	FILTER in_filter;
 	FILTER ex_filter;
 	POFFSET in_offsets;
@@ -266,7 +262,6 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 	REPORT_TYPE report_type;
 	ULONGLONG processed_clusters;
 	short *tmp_buf;
-	UCHAR *user_mode_buffer; /* for nt 4.0 */
 } EXAMPLE_DEVICE_EXTENSION, *PEXAMPLE_DEVICE_EXTENSION;
 
 /* Function Prototypes */

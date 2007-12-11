@@ -233,7 +233,7 @@ Section "Ultra Defrag core files (required)" SecCore
   push $R1
 
   SectionIn RO
-  AddSize 38 /* for the components installed in system directories */
+  AddSize 44 /* for the components installed in system directories */
   DetailPrint "Install core files..."
   SetOutPath $INSTDIR
   File "Dfrg.exe"
@@ -260,6 +260,9 @@ Section "Ultra Defrag core files (required)" SecCore
   File "udefrag.dll"
   File "zenwinx.dll"
   File "defrag_native.exe"
+  DetailPrint "Install console interface..."
+  File "udefrag.exe"
+  File "udctxhandler.cmd"
 !insertmacro EnableX64FSRedirection
 
   DetailPrint "Write driver settings..."
@@ -281,18 +284,6 @@ Section "Ultra Defrag core files (required)" SecCore
 
   pop $R1
   pop $R0
-
-SectionEnd
-
-Section "Console interface (required)" SecConsole
-
-  SectionIn RO
-  AddSize 6
-  DetailPrint "Install console interface..."
-!insertmacro DisableX64FSRedirection
-  SetOutPath "$WINDIR\System32"
-  File "udefrag.exe"
-!insertmacro EnableX64FSRedirection
 
 SectionEnd
 
@@ -334,6 +325,13 @@ Section "Portable UltraDefrag package" SecPortable
 
   pop $R0
   
+SectionEnd
+
+Section "Context menu handler" SecContextMenuHandler
+
+  WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\cmd.exe /C udctxhandler.cmd %1"
+
 SectionEnd
 
 Section "Shortcuts" SecShortcuts
@@ -413,6 +411,7 @@ Section "Uninstall"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\udefrag.exe"
+  Delete "$SYSDIR\udctxhandler.cmd"
 !insertmacro EnableX64FSRedirection
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
@@ -426,6 +425,9 @@ Section "Uninstall"
   DeleteRegKey /ifempty HKCU "Software\DASoft"
   DeleteRegKey HKLM "Software\DASoft\NTDefrag"
   DeleteRegKey /ifempty HKLM "Software\DASoft"
+  
+  DetailPrint "Uninstall the context menu handler..."
+  DeleteRegKey HKCR "Drive\shell\udefrag"
 
 SectionEnd
 
@@ -433,11 +435,11 @@ SectionEnd
 
 !ifdef MODERN_UI
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecConsole} "Useful for scripts and scheduling."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag.$\nIncluding console interface."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSchedNET} "Small and useful scheduler.$\nNET Framework 2.0 required."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "User manual."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecPortable} "Build portable package to place them on USB drive."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenuHandler} "Defragment your volumes from their context menu."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 !endif

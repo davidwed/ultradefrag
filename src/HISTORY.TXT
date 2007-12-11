@@ -1,54 +1,165 @@
 HISTORY
 
-[version number (x86 w2k driver size in Kbytes) - changes description]
+[Version x.x.x (x86 w2k driver size in Kbytes)   release date]
 
-1.2.3 (22.0) - two gui bugs (#1833605 and #1839755) are fixed;
-               localized errors descriptions added;
-               small driver optimization performed;
 
-1.2.2 (22.5) - all modules was internally completely redesigned;
-               full NTFS junctions (reparse points) support!
-               many bugs are fixed; documentation improved;
-               full optimization performed; portable application 
-               simplified; full WinDDK support for compilation;
-               gui improved with new list of volumes;
-               console program improved with new useful options;
-1.2.1 (22.5) - bug #1807912 fixed (Boot time defrag BSOD on w2k)
-1.2.0 (22.5) - full NT 4.0 support; boot time defragmentation for 64-bit
-               systems; Scheduler.NET; bug #1771887 (I/O error!) fixed;
-               native application optimized; offline manual;
-               system preset improved; portable application option added;
-               small gui bugs fixed
 
-1.1.0 (22.5) - BOOT TIME DEFRAG ADDED; filter presets added;
-               'progress bar disappears' bug fixed; installer improved;
-               'paranoid debug print' option added;
-               DOCUMENTATION AND WEB SITE IMPROVED
+  Version 1.2.3 ()   2007--
+  ------------------------------------------------------------------------------
+    - big modern volumes support was added (by reducing memory requirements)
+    - context menu handler for volumes in Explorer was added
 
-1.0.5 (21.0) - 120 DPI bug fixed; small console bug fixed;
-               drive letters assigned by subst command excluded;
-               this is most stable 1.0.x release
-1.0.4 (21.0) - fatal buffer overflow bug fixed; small gui bug fixed
-1.0.3 (21.5) - progress bar in gui; more settings; small bug fixes
-1.0.2 (20.5) - FULL x64 SUPPORT; significant bug fixes; Windows DDK support
-1.0.1 (22.8) - fix 'stop' function and some other significant bugs
-1.0.0 (22.7) - initial public release; add full docs; clear source code;
-               create build.cmd tool and makefiles
 
-0.6.0 (21.1) - add include & exclude filters; UTF-16/ASCII report format option
-0.5.0 (19.0) - add fragmented files list generation (HTML);
-               display cluster map in progress; significant bug fixes
-0.4.3 (16.3) - optimization and bug fixes
-0.4.2 (16.5) - very significant optimization; clear source code
-0.4.1 (17.9) - some optimization and small bug fixes
-0.4.0 (17.9) - add free space optimization command for NTFS-volumes;
-               some fatal bug fixes
-0.3.0 (17.0) - add NT 4.x [in theory] & 5.0 [practically] support; 
-               processing for compressed files;
-               new gui design - better results display; add accelerators;
-               some bug fixes
-0.2.0 (12.6) - exclude defragmentation of fat directories (because not possible);
-               new design of gui interface - better cluster map visualization
-0.1.0 (12.6) - add defragmentation of ntfs directories; some bug fixes;
-               add displaying of mft and directories in cluster map
-0.0.1 (11.3) - first stable release for NT 5.1 & 5.2
+  Version 1.2.3 (22.0)   2007-12-04
+  ------------------------------------------------------------------------------
+    - two gui bugs (#1833605 and #1839755) were fixed
+    - localized error descriptions were added
+    - small driver optimization was performed
+
+
+
+  Version 1.2.2 (22.5)   2007-11-16
+  ------------------------------------------------------------------------------
+    - all modules were internally completely redesigned
+    - full NTFS junctions (reparse points) support!
+    - many bugs were fixed
+    - documentation was improved
+    - full optimization was performed
+    - portable application was simplified
+    - full WinDDK support for compilation
+    - gui was improved with new list of volumes
+    - console program was improved with new useful options
+
+
+  Version 1.2.1 (22.5)   2007-10-08
+  ------------------------------------------------------------------------------
+    - bug #1807912 was fixed (Boot time defrag BSOD on w2k)
+
+
+  Version 1.2.0 (22.5)   2007-10-04
+  ------------------------------------------------------------------------------
+    - full NT 4.0 support
+    - boot time defragmentation for 64-bit systems
+    - Scheduler.NET
+    - bug #1771887 (I/O error!) was fixed
+    - native application was optimized
+    - offline manual
+    - system preset was improved
+    - portable application option was added
+    - small gui bugs were fixed
+
+
+
+  Version 1.1.0 (22.5)   2007-09-05
+  ------------------------------------------------------------------------------
+    - BOOT TIME DEFRAGMENTATION WAS ADDED
+    - filter presets were added
+    - 'progress bar disappears' bug was fixed
+    - installer improved
+    - 'paranoid debug print' option was added
+    - DOCUMENTATION AND WEB SITE WERE IMPROVED
+
+
+
+  Version 1.0.5 (21.0)   2007-08-03
+  ------------------------------------------------------------------------------
+    - 120 DPI bug was fixed
+    - small console bug was fixed
+    - drive letters assigned by subst command were excluded
+    - most stable 1.0.x release
+
+
+  Version 1.0.4 (21.0)   2007-07-27
+  ------------------------------------------------------------------------------
+    - fatal buffer overflow bug was fixed
+    - small gui bug was fixed
+
+
+  Version 1.0.3 (21.5)   2007-07-22
+  ------------------------------------------------------------------------------
+    - progress bar in gui
+    - more settings
+    - few small bugs were fixed
+
+
+  Version 1.0.2 (20.5)   2007-07-17
+  ------------------------------------------------------------------------------
+    - FULL x64 SUPPORT
+    - significant bugs were fixed
+    - Windows DDK support for compilation [partially]
+
+
+  Version 1.0.1 (22.8)   2007-07-11
+  ------------------------------------------------------------------------------
+    - 'stop' function and some other significant bugs were fixed
+
+
+  Version 1.0.0 (22.7)   2007-07-05
+  ------------------------------------------------------------------------------
+    - initial public release
+    - basic documentation was added
+    - source code cleanup
+    - build.cmd tool and makefiles
+
+                                    ***
+
+  Version 0.6.0 (21.1)   2007-06-07
+  ------------------------------------------------------------------------------
+    - include & exclude filters were added
+    - UTF-16/ASCII report format option
+
+
+  Version 0.5.0 (19.0)   2007-06-05
+  ------------------------------------------------------------------------------
+    - fragmented files list generation (in HTML) was added
+    - cluster map in progress displaying
+    - significant bugs were fixed
+
+
+  Version 0.4.3 (16.3)   2007-06-02
+  ------------------------------------------------------------------------------
+    - optimization and bug fixes
+
+
+  Version 0.4.2 (16.5)   2007-05-19
+  ------------------------------------------------------------------------------
+    - very significant optimization
+    - source code cleanup
+
+
+  Version 0.4.1 (17.9)   2007-05-18
+  ------------------------------------------------------------------------------
+    - some optimization and small bug fixes
+
+
+  Version 0.4.0 (17.9)   2007-05-17
+  ------------------------------------------------------------------------------
+    - free space optimization command for NTFS-volumes
+    - some fatal bugs were fixed
+
+
+  Version 0.3.0 (17.0)   2007-05-08
+  ------------------------------------------------------------------------------
+    - NT4.0 [in theory] & 5.0 [practically] support in defragmentation algorithm
+    - full support for files compressed by NTFS
+    - new gui design - better results displaying
+    - gui: accelerators were added
+    - some bugs were fixed
+
+
+  Version 0.2.0 (12.6)   2007-04-26
+  ------------------------------------------------------------------------------
+    - exclude defragmentation of fat directories (because not possible)
+    - new design of gui interface - better cluster map visualization
+
+
+  Version 0.1.0 (12.6)   2007-04-25
+  ------------------------------------------------------------------------------
+    - defragmentation of ntfs directories
+    - some bugs were fixed
+    - mft and directories displaying in cluster map
+
+
+  Version 0.0.1	(11.3)   2007-04-13
+  ------------------------------------------------------------------------------
+    - first stable release for NT 5.1 & 5.2

@@ -40,8 +40,7 @@ call BLDSCHED.CMD
 echo Build installer...
 cd .\bin
 copy /Y ..\*.TXT .\
-copy /Y ..\installer\UltraDefrag.nsi .\
-copy /Y ..\installer\*.bmp .\
+copy /Y ..\installer\*.* .\
 
 copy /Y ..\..\doc\html\manual.html .\
 copy /Y ..\..\doc\html\images\console.png .\
@@ -64,6 +63,7 @@ copy /Y .\UltraDefrag.nsi .\amd64\
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y .\*.TXT .\amd64\
 copy /Y .\*.bmp .\amd64\
+copy /Y .\*.cmd .\amd64\
 
 copy /Y ..\..\doc\html\manual.html .\amd64\
 copy /Y ..\..\doc\html\images\console.png .\amd64\
@@ -83,6 +83,7 @@ copy /Y .\UltraDefrag.nsi .\ia64\
 copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y .\*.TXT .\ia64\
 copy /Y .\*.bmp .\ia64\
+copy /Y .\*.cmd .\ia64\
 
 copy /Y ..\..\doc\html\manual.html .\ia64\
 copy /Y ..\..\doc\html\images\console.png .\ia64\

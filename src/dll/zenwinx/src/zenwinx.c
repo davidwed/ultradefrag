@@ -39,17 +39,40 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
-/**
- * @name winx_init
- *
- * Initialize a native application and ZenWINX library.
- *
- * @param peb 
- *        Pointer for the Process Environment Block - 
- *        the first parameter of NtProcessStartup() function.
- * @return zero value indicates success, negative value - failure.
- */
-
+/****f* zenwinx.startup/winx_init
+ *  NAME
+ *     winx_init
+ *  SYNOPSIS
+ *     error = winx_init(peb);
+ *  FUNCTION
+ *     Initialize a native application and ZenWINX library.
+ *  INPUTS
+ *     peb - pointer for the Process Environment Block, that is 
+ *           the first parameter of NtProcessStartup() function.
+ *  RESULT
+ *     error - zero for success, -1 for error
+ *  EXAMPLE
+ *     void __stdcall NtProcessStartup(PPEB Peb) // native entry point
+ *     {
+ *         if(winx_init(Peb) == -1)
+ *         {
+ *             winx_printf("winx_init() call unsuccessful!"); // print error message
+ *             winx_exit(1); // exit with code 1
+ *         }
+ *         // your program code here
+ *         // ...
+ *         winx_exit(0); // successful exit
+ *     }
+ *  NOTES
+ *     1. You should call this function before any attempt
+ *        to use keyboard related functions.
+ *     2. Messages about the internal errors are 
+ *        always displayed on the screen.
+ *  BUGS
+ *     It seems that USB keyboards are unsupported.
+ *  SEE ALSO
+ *     winx_exit,winx_reboot,winx_shutdown
+ ******/
 int __stdcall winx_init(void *peb)
 {
 	PRTL_USER_PROCESS_PARAMETERS pp;
@@ -64,18 +87,92 @@ int __stdcall winx_init(void *peb)
 	return status;
 }
 
+/****f* zenwinx.startup/winx_exit
+ *  NAME
+ *     winx_exit
+ *  SYNOPSIS
+ *     winx_exit(status);
+ *  FUNCTION
+ *     Terminate the calling native process after ZenWINX cleanup.
+ *  INPUTS
+ *     status - exit status.
+ *  RESULT
+ *     This function does not return a value.
+ *  EXAMPLE
+ *     See an example for the winx_init() function.
+ *  NOTES
+ *     This function should be used instead of 
+ *     NtTerminateProcess() to free resources
+ *     allocated by winx_init() function.
+ *  SEE ALSO
+ *     winx_init,winx_reboot,winx_shutdown
+ ******/
 void __stdcall winx_exit(int exit_code)
 {
 	kb_close();
 	NtTerminateProcess(NtCurrentProcess(),exit_code);
 }
 
+/****f* zenwinx.startup/winx_reboot
+ *  NAME
+ *     winx_reboot
+ *  SYNOPSIS
+ *     winx_reboot();
+ *  FUNCTION
+ *      Reboot the computer after ZenWINX cleanup.
+ *  INPUTS
+ *     Nothing.
+ *  RESULT
+ *     This function does not return a value.
+ *  EXAMPLE
+ *     if(command == RebootCommand)
+ *     {
+ *         winx_printf("Reboot ...");
+ *         winx_reboot();
+ *         winx_printf("You don't have a special privilege\n"
+ *                     "to reboot the computer!\n");
+ *     }
+ *  NOTES
+ *     If a SE_SHUTDOWN privilege can not be enabled,
+ *     then the computer will not be rebooted
+ *     and the program execution will continue with
+ *     the first instruction after this call.
+ *  SEE ALSO
+ *     winx_init,winx_exit,winx_shutdown
+ ******/
 void __stdcall winx_reboot(void)
 {
 	kb_close();
 	NtShutdownSystem(ShutdownReboot);
 }
 
+/****f* zenwinx.startup/winx_shutdown
+ *  NAME
+ *     winx_shutdown
+ *  SYNOPSIS
+ *     winx_shutdown();
+ *  FUNCTION
+ *      Shutdown the computer after ZenWINX cleanup.
+ *  INPUTS
+ *     Nothing.
+ *  RESULT
+ *     This function does not return a value.
+ *  EXAMPLE
+ *     if(command == ShutdownCommand)
+ *     {
+ *         winx_printf("Shutdown ...");
+ *         winx_shutdown();
+ *         winx_printf("You don't have a special privilege\n"
+ *                     "to shutdown the computer!\n");
+ *     }
+ *  NOTES
+ *     If a SE_SHUTDOWN privilege can not be enabled,
+ *     then the computer will not be shutdown
+ *     and the program execution will continue with
+ *     the first instruction after this call.
+ *  SEE ALSO
+ *     winx_init,winx_exit,winx_reboot
+ ******/
 void __stdcall winx_shutdown(void)
 {
 	kb_close();

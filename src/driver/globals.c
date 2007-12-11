@@ -36,3 +36,10 @@ LARGE_INTEGER dbg_log_offset;
 UCHAR *dbg_ring_buffer;
 unsigned int dbg_ring_buffer_offset;
 #endif
+
+/*
+ * Buffer to store the number of clusters of each kind.
+ * More details at http://www.thescripts.com/forum/thread617704.html
+ * ('Dynamically-allocated Multi-dimensional Arrays - C').
+ */
+ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];

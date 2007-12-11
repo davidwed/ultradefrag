@@ -1,0 +1,13 @@
+options:
+    --src .
+    --doc ./robo-doc
+    --html
+    --multidoc
+    --sections
+    --tell
+    --toc
+    --index
+    --css robodoc_strong.css
+    --documenttitle "ZenWINX Documentation"
+ignore files:
+    CVS .svn obj* doxy-doc src* bin *.css
