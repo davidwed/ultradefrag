@@ -36,6 +36,7 @@
 #include <winioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h> /* for toupper() function for gcc on mingw */
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
@@ -118,7 +119,7 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
 	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&UserToken);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't open process token: %x!",Status);
+		sprintf(msg,"Can't open process token: %x!",(UINT)Status);
 		goto init_fail;
 	}
 	if(!EnablePrivilege(UserToken,SE_SHUTDOWN_PRIVILEGE)) goto init_fail;
@@ -135,7 +136,7 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
 		if(Status == STATUS_OBJECT_NAME_COLLISION)
 			strcpy(msg,"You can run only one instance of UltraDefrag!");
 		else
-			sprintf(msg,"Can't create init_event: %x!",Status);
+			sprintf(msg,"Can't create init_event: %x!",(UINT)Status);
 		goto init_fail;
 	}
 	/* 2. Load driver */
@@ -143,7 +144,7 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
 	Status = NtLoadDriver(&uStr);
 	if(!NT_SUCCESS(Status) && Status != STATUS_IMAGE_ALREADY_LOADED)
 	{
-		sprintf(msg,"Can't load ultradfg driver: %x!",Status);
+		sprintf(msg,"Can't load ultradfg driver: %x!",(UINT)Status);
 		goto init_fail;
 	}
 	/* 3. Open device */
@@ -155,7 +156,7 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
 			    FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,NULL,0);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't access ULTRADFG driver: %x!",Status);
+		sprintf(msg,"Can't access ULTRADFG driver: %x!",(UINT)Status);
 		goto init_fail;
 	}
 	/* 4. Create events */
@@ -327,7 +328,7 @@ BOOL udefrag_send_command(unsigned char command,unsigned char letter)
 	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING)
 	{
 		sprintf(msg,"Can't execute driver command \'%c\' for volume %c: %x!",
-			command,letter,Status);
+			command,letter,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -499,7 +500,7 @@ BOOL get_drive_map(PROCESS_DEVICEMAP_INFORMATION *pProcessDeviceMapInfo)
 			nt4_system = TRUE;
 		else
 		{
-			sprintf(vol_msg,"Can't get drive map: %x!",Status);
+			sprintf(vol_msg,"Can't get drive map: %x!",(UINT)Status);
 			return FALSE;
 		}
 	}
@@ -524,7 +525,7 @@ BOOL internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 				NULL,0);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(vol_msg,"Can't open %ws: %x!",rootpath,Status);
+		sprintf(vol_msg,"Can't open %ls: %x!",rootpath,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -570,7 +571,7 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 		NtClose(hFile);
 		if(!NT_SUCCESS(Status))
 		{
-			sprintf(vol_msg,"Can't get volume type for \'%c\': %x!",letter,Status);
+			sprintf(vol_msg,"Can't get volume type for \'%c\': %x!",letter,(UINT)Status);
 			goto invalid_volume;
 		}
 		switch(FileFsDevice.DeviceType)
@@ -630,7 +631,7 @@ validate_type:
 			&ObjectAttributes);
 		if(!NT_SUCCESS(Status))
 		{
-			sprintf(vol_msg,"Can't open symbolic link %ws: %x!",link_name,Status);
+			sprintf(vol_msg,"Can't open symbolic link %ls: %x!",link_name,(UINT)Status);
 			goto invalid_volume;
 		}
 		uStr.Buffer = link_target;
@@ -641,7 +642,7 @@ validate_type:
 		NtClose(hLink);
 		if(!NT_SUCCESS(Status))
 		{
-			sprintf(vol_msg,"Can't query symbolic link %ws: %x!",link_name,Status);
+			sprintf(vol_msg,"Can't query symbolic link %ls: %x!",link_name,(UINT)Status);
 			goto invalid_volume;
 		}
 		link_target[4] = 0; /* terminate the buffer */
@@ -658,7 +659,7 @@ validate_type:
 	if(!NT_SUCCESS(Status))
 	{
 		NtClose(hFile);
-		sprintf(vol_msg,"Can't get size of volume \'%c\': %x!",letter,Status);
+		sprintf(vol_msg,"Can't get size of volume \'%c\': %x!",letter,(UINT)Status);
 		goto invalid_volume;
 	}
 	if(fsname)
@@ -670,7 +671,7 @@ validate_type:
 		if(!NT_SUCCESS(Status))
 		{
 			NtClose(hFile);
-			sprintf(vol_msg,"Can't get file system name for \'%c\': %x!",letter,Status);
+			sprintf(vol_msg,"Can't get file system name for \'%c\': %x!",letter,(UINT)Status);
 			goto invalid_volume;
 		}
 		memcpy(str,pFileFsAttribute->FileSystemName,(MAXFSNAME - 1) * sizeof(short));
@@ -719,7 +720,7 @@ BOOL EnablePrivilege(HANDLE hToken,DWORD dwLowPartOfLUID)
 									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
 	if(Status == STATUS_NOT_ALL_ASSIGNED || !NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't enable privilege: %x : %x!",dwLowPartOfLUID,Status);
+		sprintf(msg,"Can't enable privilege: %x : %x!",(UINT)dwLowPartOfLUID,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -737,7 +738,7 @@ BOOL n_create_event(HANDLE *pHandle,short *name)
 				&ObjectAttributes,SynchronizationEvent,FALSE);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(msg,"Can't create %ws event: %x!",name,Status);
+		sprintf(msg,"Can't create %ls event: %x!",name,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -761,7 +762,7 @@ BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 	}
 */	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING)
 	{
-		sprintf(msg_buffer,err_format_string,Status);
+		sprintf(msg_buffer,err_format_string,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -777,7 +778,7 @@ BOOL set_error_mode(UINT uMode)
 					sizeof(uMode));
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(vol_msg,"Can't set error mode %u: %x!",uMode,Status);
+		sprintf(vol_msg,"Can't set error mode %u: %x!",uMode,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;

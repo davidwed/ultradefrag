@@ -15,12 +15,17 @@ goto ddk_build
 :parse_first_parameter
 if "%1" equ "--clean" goto clean
 if "%1" equ "--use-msvc" goto msvc_build
+if "%1" equ "--use-mingw" goto mingw_build
 :ddk_build
 call DDK_BUILD_ZENWINX.CMD
 if %errorlevel% neq 0 goto fail
 goto build_source_package
 :msvc_build
 call MSVC_BUILD_ZENWINX.CMD
+if %errorlevel% neq 0 goto fail
+goto build_source_package
+:mingw_build
+call MINGW_BUILD_ZENWINX
 if %errorlevel% neq 0 goto fail
 
 :build_source_package
@@ -33,6 +38,7 @@ mkdir %SRC_PKG_PATH%\bin
 mkdir %SRC_PKG_PATH%\bin\amd64
 mkdir %SRC_PKG_PATH%\bin\ia64
 if "%1" equ "--use-msvc" goto msvc_bin
+if "%1" equ "--use-mingw" goto mingw_bin
 :winddk_bin
 copy /Y .\objfre_wnet_x86\i386\zenwinx.dll %SRC_PKG_PATH%\bin\
 copy /Y .\objfre_wnet_x86\i386\zenwinx.lib %SRC_PKG_PATH%\bin\
@@ -42,8 +48,12 @@ copy /Y .\objfre_wnet_ia64\ia64\zenwinx.dll %SRC_PKG_PATH%\bin\ia64\
 copy /Y .\objfre_wnet_ia64\ia64\zenwinx.lib %SRC_PKG_PATH%\bin\ia64\
 goto xxx
 :msvs_bin
-copy /Y .\objfre_wnet_x86\i386\zenwinx.dll %SRC_PKG_PATH%\bin\
-copy /Y .\objfre_wnet_x86\i386\zenwinx.lib %SRC_PKG_PATH%\bin\
+copy /Y .\bin\zenwinx.dll %SRC_PKG_PATH%\bin\
+copy /Y .\bin\zenwinx.lib %SRC_PKG_PATH%\bin\
+goto xxx
+:mingw_bin
+copy /Y .\bin\zenwinx.dll %SRC_PKG_PATH%\bin\
+copy /Y .\bin\libzenwinx.dll.a %SRC_PKG_PATH%\bin\
 :xxx
 copy .\*.* %SRC_PKG_PATH%\src\
 cd .\src_package

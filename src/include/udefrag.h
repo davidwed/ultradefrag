@@ -79,7 +79,7 @@ short * __stdcall udefrag_validate_volume(unsigned char letter,int skip_removabl
 short * __stdcall scheduler_get_avail_letters(char *letters);
 
 void   __stdcall nsleep(int msec);
-char * __stdcall create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
+char * __stdcall create_thread(LPTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
 void   __stdcall exit_thread(void);
 int    __stdcall get_os_version(void);
 

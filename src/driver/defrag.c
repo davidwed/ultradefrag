@@ -53,6 +53,8 @@ void CheckPendingBlocks(PEXAMPLE_DEVICE_EXTENSION dx)
 		if(ppbs->len)
 		{
 			*pnextLcn = ppbs->start; cluster = data_cluster = LLINVALID;
+			startLcn = ppbs->start;
+			i = 0;
 			do
 			{
 				status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
@@ -66,7 +68,7 @@ void CheckPendingBlocks(PEXAMPLE_DEVICE_EXTENSION dx)
 				if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW)
 				{
 					DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",
-						 status);
+						 (UINT)status);
 					ppbs->len -= startLcn + i - ppbs->start;
 					ppbs->start = startLcn + i;
 					goto fail;
@@ -161,7 +163,7 @@ void UpdateFragmentedFilesList(PEXAMPLE_DEVICE_EXTENSION dx)
 		{
 			//DbgPrint("2: %x;%x\n",pf,prev_pf);
 			pf = (PFRAGMENTED)RemoveItem((PLIST *)&dx->fragmfileslist,
-				(PLIST *)&prev_pf,(PLIST *)&pf);
+				(PLIST *)(void *)&prev_pf,(PLIST *)(void *)&pf);
 			//DbgPrint("3: %x;%x\n",pf,prev_pf);
 		}
 		else
@@ -183,54 +185,72 @@ void UpdateFragmentedFilesList(PEXAMPLE_DEVICE_EXTENSION dx)
 {
 //	ULONGLONG clusters_per_mapblock = dx->clusters_total / N_BLOCKS;
 	ULONGLONG target_block, target_offset;
+	ULONGLONG target_len, i, j;
 
 //	_int64_memset(dx->cluster_map + start,space_state,len);
 	/* the last block can represent less clusters than other blocks */
 //	if(dx->clusters_total % N_BLOCKS) clusters_per_mapblock++;
-	target_block = start / dx->clusters_per_mapblock;
-	target_offset = start % dx->clusters_per_mapblock;
-	do
+	if(!dx->opposite_order)
 	{
-		if(target_block == N_BLOCKS - 1)
+		target_block = start / dx->clusters_per_mapblock;
+		target_offset = start % dx->clusters_per_mapblock;
+		do
 		{
-			if(len <= dx->clusters_per_last_mapblock - target_offset)
+			if(target_block == N_BLOCKS - 1)
+			{
+				if(len <= dx->clusters_per_last_mapblock - target_offset)
+				{
+					new_cluster_map[target_block][space_state] += len;
+					/*
+					 * some space is identified as free and mft allocated at the same time;
+					 * therefore this check required;
+					 * because in space states enum mft has number above free space number,
+					 * these blocks will be displayed as mft blocks
+					 */
+					if(new_cluster_map[target_block][SYSTEM_SPACE] >= len)
+						new_cluster_map[target_block][SYSTEM_SPACE] -= len;
+					else
+						new_cluster_map[target_block][SYSTEM_SPACE] = 0;
+				}
+				break;
+			}
+			if(len <= dx->clusters_per_mapblock - target_offset)
 			{
 				new_cluster_map[target_block][space_state] += len;
-				/*
-				 * some space is identified as free and mft allocated at the same time;
-				 * therefore this check required;
-				 * because in space states enum mft has number above free space number,
-				 * these blocks will be displayed as mft blocks
-				 */
 				if(new_cluster_map[target_block][SYSTEM_SPACE] >= len)
 					new_cluster_map[target_block][SYSTEM_SPACE] -= len;
 				else
 					new_cluster_map[target_block][SYSTEM_SPACE] = 0;
+				break;
 			}
-			break;
-		}
-		if(len <= dx->clusters_per_mapblock - target_offset)
-		{
-			new_cluster_map[target_block][space_state] += len;
-			if(new_cluster_map[target_block][SYSTEM_SPACE] >= len)
-				new_cluster_map[target_block][SYSTEM_SPACE] -= len;
 			else
-				new_cluster_map[target_block][SYSTEM_SPACE] = 0;
-			break;
-		}
-		else
+			{
+				new_cluster_map[target_block][space_state] += (dx->clusters_per_mapblock - target_offset);
+				if(new_cluster_map[target_block][SYSTEM_SPACE] >= dx->clusters_per_mapblock - target_offset)
+					new_cluster_map[target_block][SYSTEM_SPACE] -= (dx->clusters_per_mapblock - target_offset);
+				else
+					new_cluster_map[target_block][SYSTEM_SPACE] = 0;
+	////		DbgPrint("x %I64u\n", new_cluster_map[target_block][SYSTEM_SPACE]);
+				len -= (dx->clusters_per_mapblock - target_offset);
+				target_block++;
+				target_offset = 0;
+			}
+		} while(1);
+	}
+	else /* dx->opposite_order */
+	{
+		target_block = start * dx->blocks_per_cluster;
+		target_len = len * dx->blocks_per_cluster;
+		//if(start + len > dx->clusters_total) KeBugCheck();
+		if(start + len == dx->clusters_total)
+			target_len += (dx->blocks_per_last_cluster - dx->blocks_per_cluster);
+		for(i = 0; i < target_len; i++)
 		{
-			new_cluster_map[target_block][space_state] += (dx->clusters_per_mapblock - target_offset);
-			if(new_cluster_map[target_block][SYSTEM_SPACE] >= dx->clusters_per_mapblock - target_offset)
-				new_cluster_map[target_block][SYSTEM_SPACE] -= (dx->clusters_per_mapblock - target_offset);
-			else
-				new_cluster_map[target_block][SYSTEM_SPACE] = 0;
-////		DbgPrint("x %I64u\n", new_cluster_map[target_block][SYSTEM_SPACE]);
-			len -= (dx->clusters_per_mapblock - target_offset);
-			target_block++;
-			target_offset = 0;
+			for(j = 0; j < NUM_OF_SPACE_STATES; j++)
+				new_cluster_map[target_block + i][j] = 0;
+			new_cluster_map[target_block + i][space_state] = 1;
 		}
-	} while(1);
+	}
 }
 
 /*
@@ -468,8 +488,8 @@ void InsertFreeSpaceBlock(PEXAMPLE_DEVICE_EXTENSION dx,
 					break;
 				}
 				//InsertBlock(dx,prev_block,block,start,length);
-				new_block = (PFREEBLOCKMAP)InsertMiddleItem((PLIST *)&prev_block,
-					(PLIST *)&block,sizeof(FREEBLOCKMAP));
+				new_block = (PFREEBLOCKMAP)InsertMiddleItem((PLIST *)(void *)&prev_block,
+					(PLIST *)(void *)&block,sizeof(FREEBLOCKMAP));
 				if(new_block)
 				{
 					new_block->lcn = start;
@@ -495,7 +515,7 @@ void InsertFreeSpaceBlock(PEXAMPLE_DEVICE_EXTENSION dx,
 		//dx->lastfreeblock = prev_block;
 		//InsertNewFreeBlock(dx,start,length);
 		new_block = (PFREEBLOCKMAP)InsertLastItem((PLIST *)&dx->free_space_map,
-			(PLIST *)&prev_block,sizeof(FREEBLOCKMAP));
+			(PLIST *)(void *)&prev_block,sizeof(FREEBLOCKMAP));
 		if(new_block)
 		{
 			new_block->lcn = start;
@@ -538,7 +558,7 @@ void RemoveFreeSpaceBlocks(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 				//InsertBlock(dx,block,block->next_ptr,
 				//	file_block->lcn + file_block->length,
 				//	block->lcn + block->length - file_block->lcn - file_block->length);
-				new_block = (PFREEBLOCKMAP)InsertMiddleItem((PLIST *)&block,
+				new_block = (PFREEBLOCKMAP)InsertMiddleItem((PLIST *)(void *)&block,
 					(PLIST *)&block->next_ptr,sizeof(FREEBLOCKMAP));
 				if(new_block)
 				{
@@ -554,7 +574,7 @@ next:
 		if(!block->length)
 		{
 			block = (PFREEBLOCKMAP)RemoveItem((PLIST *)&dx->free_space_map,
-				(PLIST *)&prev_block,(PLIST *)&block);
+				(PLIST *)(void *)&prev_block,(PLIST *)(void *)&block);
 		}
 		else
 		{
@@ -688,7 +708,7 @@ BOOLEAN DefragmentFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 	if(Status)
 	{
 		if(dbg_level > 0)
-			DebugPrint("-Ultradfg- %ws open: %x\n", pfn->name.Buffer, Status);
+			DebugPrint("-Ultradfg- %ws open: %x\n", pfn->name.Buffer,(UINT)Status);
 		return FALSE;
 	}
 	/* Find free space */
@@ -716,7 +736,7 @@ BOOLEAN DefragmentFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 		Status = __MoveFile(dx,hFile,0,target,pfn->clusters_total);
 	ZwClose(hFile);
 	if(Status != STATUS_SUCCESS)
-		DebugPrint("MoveFile error: %x\n",Status);
+		DebugPrint("MoveFile error: %x\n",(UINT)Status);
 	/* mark space as free */
 	curr_block = pfn->blockmap;
 	while(curr_block)

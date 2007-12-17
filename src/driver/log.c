@@ -37,7 +37,7 @@ void DeleteLogFile(PEXAMPLE_DEVICE_EXTENSION dx)
 	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,0,NULL,NULL);
 	status = ZwDeleteFile(&ObjectAttributes);
 	if(dbg_level > 0)
-		DebugPrint("-Ultradfg- Delete %ws status %x\n",p,status);
+		DebugPrint("-Ultradfg- Delete %ws status %x\n",p,(UINT)status);
 }
 
 void Write(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
@@ -123,7 +123,7 @@ BOOLEAN SaveFragmFilesListToDisk(PEXAMPLE_DEVICE_EXTENSION dx)
 	NTSTATUS Status;
 	HANDLE hFile;
 	IO_STATUS_BLOCK ioStatus;
-	short crlf[] = L"\r\n";
+//	short crlf[] = L"\r\n";
 	LARGE_INTEGER offset;
 
 	short p[] = L"\\??\\A:\\FRAGLIST.HTM";

@@ -4,10 +4,13 @@ HISTORY
 
 
 
-  Version 1.2.3 ()   2007--
+  Version 1.2.4 ()   2007--
   ------------------------------------------------------------------------------
     - big modern volumes support was added (by reducing memory requirements)
     - context menu handler for volumes in Explorer was added
+    - documentation improved
+    - first compilation using gcc -> strong code verifying ->
+      hundreds of small bugs were fixed
 
 
   Version 1.2.3 (22.0)   2007-12-04

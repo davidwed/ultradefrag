@@ -61,7 +61,7 @@ char * __stdcall create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle)
 					0,0,0,start_addr,NULL,ph,NULL);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(th_msg,"Can't create thread: %x!",Status);
+		sprintf(th_msg,"Can't create thread: %x!",(UINT)Status);
 		return th_msg;
 	}
 	return NULL;
@@ -87,20 +87,20 @@ BOOL get_proc_address(short *libname,char *funcname,PVOID *proc_addr)
 	UNICODE_STRING uStr;
 	ANSI_STRING aStr;
 	NTSTATUS Status;
-	PVOID base_addr;
+	/*PVOID*/HMODULE base_addr;
 
 	RtlInitUnicodeString(&uStr,libname);
 	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(exit_th_msg,"Can't get %ws handle: %x!",libname,Status);
+		sprintf(exit_th_msg,"Can't get %ls handle: %x!",libname,(UINT)Status);
 		return FALSE;
 	}
 	RtlInitAnsiString(&aStr,funcname);
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(exit_th_msg,"Can't get address for %s: %x!",funcname,Status);
+		sprintf(exit_th_msg,"Can't get address for %s: %x!",funcname,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;

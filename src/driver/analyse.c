@@ -36,6 +36,7 @@ ULONGLONG _rdtsc(void)
 	return retval;
 }
 #endif
+
 void PrepareDataFields(PEXAMPLE_DEVICE_EXTENSION dx)
 {
 	dx->free_space_map = NULL;
@@ -51,6 +52,9 @@ void PrepareDataFields(PEXAMPLE_DEVICE_EXTENSION dx)
 	dx->clusters_total = 0;
 	dx->clusters_per_mapblock = 0;
 	dx->clusters_per_last_mapblock = 0;
+	dx->opposite_order = FALSE;
+	dx->blocks_per_cluster = 0;
+	dx->blocks_per_last_cluster = 0;
 //	dx->cluster_map = 0;
 	dx->total_space = 0; dx->free_space = 0;
 	dx->hVol = NULL;
@@ -81,6 +85,10 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	int i;
 
 	/* TODO: optimize FindFiles() */
+	/* A: assume that all space is system space */
+	memset(new_cluster_map,0,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
+	for(i = 0; i < N_BLOCKS; i++)
+		new_cluster_map[i][SYSTEM_SPACE] = 1;
 	/* data initialization */
 	FreeAllBuffers(dx);
 	PrepareDataFields(dx);
@@ -98,7 +106,7 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 		NULL,0);
 	if(!NT_SUCCESS(Status))
 	{
-		DebugPrint("-Ultradfg- Can't open volume %x\n",Status);
+		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)Status);
 		goto fail;
 	}
 
@@ -109,19 +117,27 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 		goto fail;
 	}
 	DebugPrint("-Ultradfg- total clusters: %I64u\n", dx->clusters_total);
-	/* assume that all space is system space */
-	memset(new_cluster_map,0,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
-	for(i = 0; i < N_BLOCKS - 1; i++)
-		new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_mapblock;
-	new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_last_mapblock;
-	/* Synchronize drive.
-	 *
+	/* B: assume that all space is system space: correct number of clusters */
+	if(!dx->opposite_order)
+	{
+		///memset(new_cluster_map,0,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
+		for(i = 0; i < N_BLOCKS - 1; i++)
+			new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_mapblock;
+		new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_last_mapblock;
+	}
+	else
+	{
+		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
+			dx->clusters_total,dx->blocks_per_cluster,dx->blocks_per_last_cluster);
+	}
+	/*
+	 * Synchronize drive.
 	 * On NT 4.0 (at least under MS Virtual PC) it will crash system:
 	 */
 #ifndef NT4_TARGET 
 	Status = __NtFlushBuffersFile(dx->hVol);
 	if(Status)
-		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",Status);
+		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",(UINT)Status);
 #endif
 ///tm = _rdtsc();
 	if(!FillFreeClusterMap(dx))
@@ -202,9 +218,20 @@ BOOLEAN GetTotalClusters(PEXAMPLE_DEVICE_EXTENSION dx)
 	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
 
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
+	dx->opposite_order = FALSE;
 	dx->clusters_per_mapblock = dx->clusters_total / N_BLOCKS;
-	dx->clusters_per_last_mapblock = dx->clusters_per_mapblock + \
-		(dx->clusters_total - dx->clusters_per_mapblock * N_BLOCKS);
+	if(dx->clusters_per_mapblock)
+	{
+		dx->clusters_per_last_mapblock = dx->clusters_per_mapblock + \
+			(dx->clusters_total - dx->clusters_per_mapblock * N_BLOCKS);
+	}
+	else
+	{
+		dx->opposite_order = TRUE;
+		dx->blocks_per_cluster = N_BLOCKS / dx->clusters_total;
+		dx->blocks_per_last_cluster = dx->blocks_per_cluster + \
+			(N_BLOCKS - dx->blocks_per_cluster * dx->clusters_total);
+	}
 exit:
 	return (errCode == STATUS_SUCCESS);
 }
@@ -335,7 +362,7 @@ BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
 		}
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW)
 		{
-			DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",status);
+			DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",(UINT)status);
 			goto fail;
 		}
 		/* Scan through the returned bitmap info, 
@@ -459,7 +486,7 @@ BOOLEAN FindFiles(PEXAMPLE_DEVICE_EXTENSION dx,UNICODE_STRING *path,BOOLEAN is_r
 	if(Status != STATUS_SUCCESS)
 	{
 		if(dbg_level > 0)
-			DebugPrint("-Ultradfg- Can't open %ws %x\n",path->Buffer,Status);
+			DebugPrint("-Ultradfg- Can't open %ws %x\n",path->Buffer,(UINT)Status);
 		goto fail;
 	}
 
@@ -492,7 +519,7 @@ BOOLEAN FindFiles(PEXAMPLE_DEVICE_EXTENSION dx,UNICODE_STRING *path,BOOLEAN is_r
 		if(pFileInfo->FileName[0] == 0x002E)
 			if(pFileInfo->FileName[1] == 0x002E || pFileInfo->FileNameLength == sizeof(short))
 				continue;	/* for . and .. */
-//DebugPrint("%ws %x\n",pFileInfo->FileName,pFileInfo->FileAttributes);
+//DebugPrint("%ws %x\n",pFileInfo->FileName,(UINT)pFileInfo->FileAttributes);
 //continue;
 		/* VERY IMPORTANT: skip reparse points */
 		if(IS_REPARSE_POINT(pFileInfo)) continue;
@@ -705,7 +732,7 @@ BOOLEAN DumpFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 	if(Status)
 	{
 		if(dbg_level > 0)
-			DebugPrint("-Ultradfg- System file found: %ws %x\n",pfn->name.Buffer,Status);
+			DebugPrint("-Ultradfg- System file found: %ls %x\n",pfn->name.Buffer,(UINT)Status);
 		goto dump_success; /* System file! */
 	}
 
@@ -739,7 +766,7 @@ BOOLEAN DumpFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
 dump_fail:
 			/*#if DBG
 			if(dbg_level > 0)
-				DbgPrint("-Ultradfg- Dump failed for %ws %x\n",pfn->name.Buffer,Status);
+				DbgPrint("-Ultradfg- Dump failed for %ws %x\n",pfn->name.Buffer,(UINT)Status);
 			#endif
 			*/
 			DeleteBlockmap(pfn);

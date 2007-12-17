@@ -1,0 +1,144 @@
+#################################################################
+## This Makefile Exported by MinGW Developer Studio
+## Copyright (c) 2002-2004 by Parinya Thipchart
+#################################################################
+
+ifneq (,$(findstring Release, $(CFG)))
+  override CFG = Release
+else
+  override CFG = Debug
+endif
+
+PROJECT = zenwinx
+CC = "D:\Software\MinGWStudio\MinGW\bin\gcc.exe"
+
+WINDRES = "$(COMPILER_BIN)windres.exe"
+ifeq ($(CFG),Debug)
+  OBJ_DIR = obj
+  OUTPUT_DIR = bin
+  TARGET = zenwinx.dll
+  C_INCLUDE_DIRS = 
+  C_PREPROC = 
+  CFLAGS = -pipe  -Wall -g2 -O0 
+  RC_INCLUDE_DIRS = 
+  RC_PREPROC = 
+  RCFLAGS = 
+  LIB_DIRS = 
+  LIBS = -lntdll 
+  LDFLAGS = -pipe -shared -Wl,--output-def,"$(OBJ_DIR)\zenwinx.def",--out-implib,"$(OBJ_DIR)\libzenwinx.dll.a" -nostartfiles -nodefaultlibs zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12
+endif
+
+ifeq ($(CFG),Release)
+  OBJ_DIR = obj
+  OUTPUT_DIR = bin
+  TARGET = zenwinx.dll
+  C_INCLUDE_DIRS = 
+  C_PREPROC = 
+  CFLAGS = -pipe  -Wall -g0 -O2 
+  RC_INCLUDE_DIRS = 
+  RC_PREPROC = 
+  RCFLAGS = 
+  LIB_DIRS = 
+  LIBS = -lntdll 
+  LDFLAGS = -pipe -shared -Wl,--output-def,"$(OBJ_DIR)\zenwinx.def",--out-implib,"$(OBJ_DIR)\libzenwinx.dll.a" -nostartfiles -nodefaultlibs zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12
+endif
+
+ifeq ($(OS),Windows_NT)
+  NULL =
+else
+  NULL = nul
+endif
+
+SRC_OBJS = \
+  $(OBJ_DIR)/keyboard.o	\
+  $(OBJ_DIR)/keytrans.o	\
+  $(OBJ_DIR)/mem.o	\
+  $(OBJ_DIR)/messages.o	\
+  $(OBJ_DIR)/stdio.o	\
+  $(OBJ_DIR)/zenwinx.o
+
+RSRC_OBJS = \
+  $(OBJ_DIR)/zenwinx.res
+
+define build_target
+@echo Linking...
+@$(CC) -o "$(OUTPUT_DIR)\$(TARGET)" $(SRC_OBJS) $(RSRC_OBJS) $(LIB_DIRS) $(LIBS) $(LDFLAGS)
+endef
+
+define compile_resource
+@echo Compiling $<
+@$(WINDRES) $(RCFLAGS) $(RC_PREPROC) $(RC_INCLUDE_DIRS) -O COFF -i "$<" -o "$@"
+endef
+
+define compile_source
+@echo Compiling $<
+@$(CC) $(CFLAGS) $(C_PREPROC) $(C_INCLUDE_DIRS) -c "$<" -o "$@"
+endef
+
+.PHONY: print_header directories
+
+$(TARGET): print_header directories $(RSRC_OBJS) $(SRC_OBJS)
+	$(build_target)
+	$(correct_lib)
+
+.PHONY: clean cleanall
+
+cleanall:
+	@echo Deleting intermediate files for 'zenwinx - $(CFG)'
+	-@del $(OBJ_DIR)\*.o
+	-@del $(OBJ_DIR)\*.res
+	-@del "$(OUTPUT_DIR)\$(TARGET)"
+	-@del "$(OBJ_DIR)\$(PROJECT).def"
+	-@del "$(OBJ_DIR)\lib$(PROJECT).dll.a"
+	-@rmdir "$(OUTPUT_DIR)"
+
+clean:
+	@echo Deleting intermediate files for 'zenwinx - $(CFG)'
+	-@del $(OBJ_DIR)\*.o
+	-@del $(OBJ_DIR)\*.res
+
+print_header:
+	@echo ----------Configuration: zenwinx - $(CFG)----------
+
+directories:
+	-@if not exist "$(OUTPUT_DIR)\$(NULL)" mkdir "$(OUTPUT_DIR)"
+	-@if not exist "$(OBJ_DIR)\$(NULL)" mkdir "$(OBJ_DIR)"
+
+define correct_lib
+	@echo ------ correct the lib$(PROJECT).dll.a library ------
+	@dlltool -k --output-lib "$(OUTPUT_DIR)\lib$(PROJECT).dll.a" --def zenwinx-mingw.def
+endef
+
+$(OBJ_DIR)/zenwinx.res: zenwinx.rc	\
+version.h	\
+zenwinxver.h
+	$(compile_resource)
+
+$(OBJ_DIR)/keyboard.o: keyboard.c	\
+ntndk.h	\
+zenwinx.h
+	$(compile_source)
+
+$(OBJ_DIR)/keytrans.o: keytrans.c	\
+ntndk.h
+	$(compile_source)
+
+$(OBJ_DIR)/mem.o: mem.c	\
+ntndk.h	\
+zenwinx.h
+	$(compile_source)
+
+$(OBJ_DIR)/messages.o: messages.c
+
+	$(compile_source)
+
+$(OBJ_DIR)/stdio.o: stdio.c	\
+ntndk.h	\
+zenwinx.h
+	$(compile_source)
+
+$(OBJ_DIR)/zenwinx.o: zenwinx.c	\
+ntndk.h	\
+zenwinx.h
+	$(compile_source)
+

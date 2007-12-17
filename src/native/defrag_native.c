@@ -155,7 +155,7 @@ void DisplayAvailableVolumes(void)
 void ProcessVolume(char letter,char command)
 {
 	STATISTIC stat;
-	short *err_msg;
+	short *err_msg = NULL;
 
 	i = j = 0;
 	last_op = 0;

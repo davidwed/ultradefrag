@@ -135,7 +135,7 @@ BOOL CreateBitMap(signed int index)
 
 	/* create the bitmap */
 	hBmp = CreateDIBSection(0, (BITMAPINFO*)bh, \
-		DIB_RGB_COLORS, &ppvBits, NULL, 0);
+		DIB_RGB_COLORS, (VOID *)&ppvBits, NULL, 0);
 	if(!hBmp)
 	{
 		HeapFree(GetProcessHeap(),0,data);
@@ -216,7 +216,7 @@ BOOL FillBitMap(int index)
 			block_rc.left = (iBLOCK_SIZE + 1) * j + 1;
 			block_rc.right = block_rc.left + iBLOCK_SIZE;
 			block_rc.bottom = block_rc.top + iBLOCK_SIZE;
-			FillRect(hdc,&block_rc,hBrushes[cl_map[i * BLOCKS_PER_HLINE + j]]);
+			FillRect(hdc,&block_rc,hBrushes[(int)cl_map[i * BLOCKS_PER_HLINE + j]]);
 		}
 	}
 	SelectObject(hdc,hOldBrush);

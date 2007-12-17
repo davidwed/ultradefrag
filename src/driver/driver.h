@@ -29,7 +29,9 @@
 #define _PCR
 #endif
 
+#if !defined(__GNUC__)
 #pragma warning(disable:4103) /* used #pragma pack to change alignment */
+#endif
 
 #define DBG 1 /* it's very useful! */
 
@@ -51,9 +53,24 @@ void __cdecl WriteLogMessage(char *format, ...);
 #define DebugPrint DbgPrint
 #endif
 
+#if defined(__GNUC__)
+#include <ddk/ntddk.h>
+#include <ddk/ntdddisk.h>
+#else
 #include <ntddk.h>
 #include <ntdddisk.h>
+#endif
+#include <ctype.h>
 #include "../include/ultradfg.h"
+
+#if defined(__GNUC__)
+#define PLACE_IN_SECTION(s)	__attribute__((section (s)))
+#define INIT_FUNCTION       PLACE_IN_SECTION("INIT")
+#define PAGED_OUT_FUNCTION  PLACE_IN_SECTION("PAGE")
+#else
+#define INIT_FUNCTION
+#define PAGED_OUT_FUNCTION
+#endif
 
 #include "globals.h"
 
@@ -101,8 +118,13 @@ IoGetAttachedDevice(
 
 ULONGLONG _rdtsc(void);
 
+#ifndef TAG
+#define TAG(A, B, C, D) (ULONG)(((A)<<0) + ((B)<<8) + ((C)<<16) + ((D)<<24))
+#endif
+
 #if DBG
-#define AllocatePool(type,size) ExAllocatePoolWithTag((type),(size),'RTLU')
+#define UDEFRAG_TAG TAG('R','T','L','U')
+#define AllocatePool(type,size) ExAllocatePoolWithTag((type),(size),UDEFRAG_TAG)
 #else
 #define AllocatePool(type,size) ExAllocatePool((type),(size))
 #endif
@@ -236,6 +258,9 @@ typedef struct _EXAMPLE_DEVICE_EXTENSION
 	ULONGLONG clusters_total;
 	ULONGLONG clusters_per_mapblock;
 	ULONGLONG clusters_per_last_mapblock; /* last block can represent more clusters */
+	BOOLEAN opposite_order; /* if true then number of clusters is less than number of blocks */
+	ULONGLONG blocks_per_cluster;
+	ULONGLONG blocks_per_last_cluster;
 	ULONGLONG total_space;
 	ULONGLONG free_space; /* in bytes */
 	HANDLE hVol;

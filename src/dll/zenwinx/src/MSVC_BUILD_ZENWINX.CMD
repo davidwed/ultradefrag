@@ -9,4 +9,4 @@ set MSVC_ENV=ok
 
 :start_build
 echo Build the zenwinx.dll ...
-nmake /NOLOGO /A /f zenwinx.mak CFG="zenwinx - Win32 Release"
+nmake /NOLOGO /A /f zenwinx.mak

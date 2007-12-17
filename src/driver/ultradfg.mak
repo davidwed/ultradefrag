@@ -13,20 +13,6 @@ ALL: "$(OUTDIR)\ultradfg_nt4.sys"
 ALL: "$(OUTDIR)\ultradfg.sys"
 !ENDIF
 
-CLEAN :
-	-@erase "$(INTDIR)\analyse.obj"
-	-@erase "$(INTDIR)\defrag.obj"
-	-@erase "$(INTDIR)\int64.obj"
-	-@erase "$(INTDIR)\io.obj"
-	-@erase "$(INTDIR)\list.obj"
-	-@erase "$(INTDIR)\log.obj"
-	-@erase "$(INTDIR)\globals.obj"
-	-@erase "$(INTDIR)\ultradfg.obj"
-	-@erase "$(INTDIR)\ultradfg.res"
-	-@erase "$(INTDIR)\vc60.idb"
-	-@erase "$(OUTDIR)\ultradfg.sys"
-	-@erase "$(OUTDIR)\ultradfg_nt4.sys"
-
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 

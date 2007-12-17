@@ -42,7 +42,7 @@ void __stdcall nsleep(int msec)
 	else
 	{
 		/* Approximately 292000 years hence */
-		Interval.QuadPart = -0x7FFFFFFFFFFFFFFF;
+		Interval.QuadPart = MAX_WAIT_INTERVAL;
 	}
 	NtDelayExecution(FALSE,&Interval);
 }

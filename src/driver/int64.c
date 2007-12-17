@@ -17,9 +17,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* int64.c - memory functions for long arrays */
+/* int64.c - 64-bit integer functions for mingw */
 
-/*#include "driver.h"*/
+#include "driver.h"
 
 /* This functions aren't used in UD v1.2.4+ */
 
@@ -41,3 +41,22 @@ void *_int64_memset(void *buf,int ch,ULONGLONG size)
 	return NULL;
 }
 */
+
+#if defined(__GNUC__)
+ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
+
+ULONGLONG __udivdi3(ULONGLONG n, ULONGLONG d)
+{
+	return _aulldiv(n,d);
+}
+LONGLONG __divdi3(LONGLONG n,LONGLONG d)
+{
+	return _alldiv(n,d);
+}
+ULONGLONG __umoddi3(ULONGLONG u, ULONGLONG v)
+{
+	return _aullrem(u,v);
+}
+#endif

@@ -1,0 +1,157 @@
+#################################################################
+## This Makefile Exported by MinGW Developer Studio
+## Copyright (c) 2002-2004 by Parinya Thipchart
+#################################################################
+
+ifneq (,$(findstring Release, $(CFG)))
+  override CFG = Release
+else
+  override CFG = Debug
+endif
+
+PROJECT = ultradfg
+CC = "D:\Software\MinGWStudio\MinGW\bin\gcc.exe"
+
+WINDRES = "$(COMPILER_BIN)windres.exe"
+ifeq ($(CFG),Debug)
+  OBJ_DIR = ../obj/driver
+  OUTPUT_DIR = ../bin
+  TARGET = ultradfg.sys
+  C_INCLUDE_DIRS = 
+  C_PREPROC = 
+  CFLAGS = -pipe  -Wall -g2 -O0 
+  RC_INCLUDE_DIRS = 
+  RC_PREPROC = 
+  RCFLAGS = 
+  LIB_DIRS = -L"../lib" 
+  LIBS = -lntoskrnl -lhal 
+  LDFLAGS = -pipe -nostartfiles -nodefaultlibs -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared
+endif
+
+ifeq ($(CFG),Release)
+  OBJ_DIR = ../obj/driver
+  OUTPUT_DIR = ../bin
+  TARGET = ultradfg.sys
+  C_INCLUDE_DIRS = 
+  C_PREPROC = 
+  CFLAGS = -pipe  -Wall -g0 -O2 
+  RC_INCLUDE_DIRS = 
+  RC_PREPROC = 
+  RCFLAGS = 
+  LIB_DIRS = -L"../lib" 
+  LIBS = -lntoskrnl -lhal 
+  LDFLAGS = -pipe -nostartfiles -nodefaultlibs -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared
+endif
+
+ifeq ($(OS),Windows_NT)
+  NULL =
+else
+  NULL = nul
+endif
+
+SRC_OBJS = \
+  $(OBJ_DIR)/analyse.o	\
+  $(OBJ_DIR)/defrag.o	\
+  $(OBJ_DIR)/globals.o	\
+  $(OBJ_DIR)/int64.o	\
+  $(OBJ_DIR)/io.o	\
+  $(OBJ_DIR)/list.o	\
+  $(OBJ_DIR)/log.o	\
+  $(OBJ_DIR)/ultradfg.o
+
+RSRC_OBJS = \
+  $(OBJ_DIR)/ultradfg.res
+
+define build_target
+@echo Linking...
+@$(CC) -o "$(OUTPUT_DIR)\$(TARGET)" $(SRC_OBJS) $(RSRC_OBJS) $(LIB_DIRS) $(LIBS) $(LDFLAGS)
+endef
+
+define compile_resource
+@echo Compiling $<
+@$(WINDRES) $(RCFLAGS) $(RC_PREPROC) $(RC_INCLUDE_DIRS) -O COFF -i "$<" -o "$@"
+endef
+
+define compile_source
+@echo Compiling $<
+@$(CC) $(CFLAGS) $(C_PREPROC) $(C_INCLUDE_DIRS) -c "$<" -o "$@"
+endef
+
+.PHONY: print_header directories
+
+$(TARGET): print_header directories $(RSRC_OBJS) $(SRC_OBJS)
+	$(build_target)
+
+.PHONY: clean cleanall
+
+cleanall:
+	@echo Deleting intermediate files for 'ultradfg - $(CFG)'
+	-@del $(OBJ_DIR)\*.o
+	-@del $(OBJ_DIR)\*.res
+	-@del "$(OUTPUT_DIR)\$(TARGET)"
+	-@rmdir "$(OUTPUT_DIR)"
+
+clean:
+	@echo Deleting intermediate files for 'ultradfg - $(CFG)'
+	-@del $(OBJ_DIR)\*.o
+	-@del $(OBJ_DIR)\*.res
+
+print_header:
+	@echo ----------Configuration: ultradfg - $(CFG)----------
+
+directories:
+	-@if not exist "$(OUTPUT_DIR)\$(NULL)" mkdir "$(OUTPUT_DIR)"
+	-@if not exist "$(OBJ_DIR)\$(NULL)" mkdir "$(OBJ_DIR)"
+
+$(OBJ_DIR)/ultradfg.res: ultradfg.rc	\
+../include/version.h
+	$(compile_resource)
+
+$(OBJ_DIR)/analyse.o: analyse.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+
+$(OBJ_DIR)/defrag.o: defrag.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+
+$(OBJ_DIR)/globals.o: globals.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+
+$(OBJ_DIR)/int64.o: int64.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+
+$(OBJ_DIR)/io.o: io.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+
+$(OBJ_DIR)/list.o: list.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+
+$(OBJ_DIR)/log.o: log.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+
+$(OBJ_DIR)/ultradfg.o: ultradfg.c	\
+driver.h	\
+../include/ultradfg.h	\
+globals.h
+	$(compile_source)
+

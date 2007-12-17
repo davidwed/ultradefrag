@@ -91,7 +91,7 @@ void * __stdcall winx_virtual_alloc(unsigned long size)
  *  EXAMPLE
  *     See an example for the winx_virtual_alloc() function.
  *  NOTES
- *     After this call you can never refer
+ *     After this call you must not refer
  *     to the specified memory again.
  *  SEE ALSO
  *     winx_virtual_alloc

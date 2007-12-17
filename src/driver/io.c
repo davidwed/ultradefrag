@@ -35,11 +35,11 @@ NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
 
 	/* Get the File Object */
 	Status = ObReferenceObjectByHandle(FileHandle,0,NULL,KernelMode,
-					   (PVOID*)&FileObject,NULL);
+					   (PVOID*)(void *)&FileObject,NULL);
 	if(Status != STATUS_SUCCESS) return(Status);
 
 	/* Check if this is a direct open or not */
-	DebugPrint("Vol. flags = %x\n",FileObject->Flags);
+	DebugPrint("Vol. flags = %x\n",(UINT)FileObject->Flags);
 	if (FileObject->Flags & FO_DIRECT_DEVICE_OPEN)
 		DeviceObject = IoGetAttachedDevice(FileObject->DeviceObject);
 	else

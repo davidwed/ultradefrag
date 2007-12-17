@@ -32,16 +32,28 @@ typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
 #endif
 
 /* define status codes */
+/* ifndef directives are used to prevent warnings when gcc on mingw is used */
 typedef LONG NTSTATUS;
 #define STATUS_SUCCESS               ((NTSTATUS)0x00000000L)
+#ifndef STATUS_TIMEOUT
 #define STATUS_TIMEOUT               ((NTSTATUS)0x00000102)
+#endif
+#ifndef STATUS_PENDING
 #define STATUS_PENDING               ((NTSTATUS)0x00000103)
+#endif
 #define STATUS_IMAGE_ALREADY_LOADED  ((NTSTATUS)0xC000010E)
 #define STATUS_NOT_ALL_ASSIGNED      ((NTSTATUS)0x00000106)
 #define STATUS_OBJECT_NAME_COLLISION ((NTSTATUS)0xC0000035)
 #define STATUS_INVALID_INFO_CLASS    ((NTSTATUS)0xC0000003)
 #ifndef NT_SUCCESS
 #define NT_SUCCESS(x) ((x)>=0)
+#endif
+
+#if defined(__GNUC__)
+#define MAX_WAIT_INTERVAL -0x7FFFFFFFFFFFFFFFLL
+#else
+/* c compiler from ms visual studio 6.0 don't supports LL suffix */
+#define MAX_WAIT_INTERVAL -0x7FFFFFFFFFFFFFFF
 #endif
 
 /* define base nt structures */
@@ -334,7 +346,10 @@ typedef enum _PROCESSINFOCLASS {
 
 #define SYMBOLIC_LINK_QUERY       0x0001
 #define SYMBOLIC_LINK_ALL_ACCESS  (STANDARD_RIGHTS_REQUIRED | 0x1)
+
+#ifndef FILE_OPEN
 #define FILE_OPEN                 0x1
+#endif
 
 typedef struct RTL_DRIVE_LETTER_CURDIR
 {
@@ -559,6 +574,21 @@ typedef struct _KBD_RECORD {
 } KBD_RECORD, *PKBD_RECORD;
 
 typedef LPOSVERSIONINFOW PRTL_OSVERSIONINFOW;
+
+/* keyboard related structures */
+/* KEYBOARD_INPUT_DATA.Flags constants */
+#define KEY_MAKE                          0
+#define KEY_BREAK                         1
+#define KEY_E0                            2
+#define KEY_E1                            4
+
+typedef struct _KEYBOARD_INPUT_DATA {
+  USHORT  UnitId;
+  USHORT  MakeCode;
+  USHORT  Flags;
+  USHORT  Reserved;
+  ULONG  ExtraInformation;
+} KEYBOARD_INPUT_DATA, *PKEYBOARD_INPUT_DATA;
 
 /* native functions prototypes */
 NTSTATUS	NTAPI	NtCreateFile(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,PIO_STATUS_BLOCK,PLARGE_INTEGER,ULONG,ULONG,ULONG,ULONG,PVOID,ULONG);

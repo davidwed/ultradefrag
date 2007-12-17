@@ -58,7 +58,16 @@
 
 #define WIN32_NO_STATUS
 #include <windows.h>
+/*
+ * Next definition is very important for mingw:
+ * _WIN32_IE must be no less than 0x0400
+ * to include some important constant definitions.
+ */
+#ifndef _WIN32_IE
+#define _WIN32_IE 0x0400
+#endif
 #include <commctrl.h>
+
 #include <memory.h>
 #include <string.h>
 #include <stdio.h>
@@ -71,6 +80,11 @@
 #include "../include/ultradfg.h"
 
 #include "resource.h"
+
+#ifndef LR_VGACOLOR
+/* this constant is not defined in winuser.h on mingw */
+#define LR_VGACOLOR         0x0080
+#endif
 
 /* Global variables */
 HINSTANCE hInstance;
@@ -105,7 +119,7 @@ int Index;
 
 WNDPROC OldListProc,OldRectangleWndProc,OldBtnWndProc,OldCheckWndProc;
 
-int thr_id;
+DWORD thr_id;
 BOOL busy_flag = 0;
 char buffer[64];
 
@@ -163,6 +177,13 @@ void HandleError(short *err_msg,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+/*	char b[100];
+	signed int i = +1 * (signed int)hInst;
+	signed __int64 j = (signed __int64)i;
+	unsigned int k = (unsigned int)j;
+	j = (signed __int64)(signed int)k;
+	sprintf(b,"%x",-1 * (int)hInst);
+*/
 	settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
@@ -186,6 +207,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* save settings */
 	settings->x = win_rc.left; settings->y = win_rc.top;
 	HandleError(L"",0);
+	/*
+	 * We will never reach this point, 
+	 * but we should be compatible with C standard.
+	 */
+	return 0;
 }
 
 __inline void RescanDrives()
@@ -596,13 +622,13 @@ void UpdateStatusBar(int index)
 	char s[32];
 
 	if(!hStatus) return;
-	sprintf(buffer,"%u dirs",(stat[index]).dircounter);
+	sprintf(buffer,"%lu dirs",(stat[index]).dircounter);
 	SendMessage(hStatus,SB_SETTEXT,0,(LPARAM)buffer);
-	sprintf(buffer,"%u files",(stat[index]).filecounter);
+	sprintf(buffer,"%lu files",(stat[index]).filecounter);
 	SendMessage(hStatus,SB_SETTEXT,1,(LPARAM)buffer);
-	sprintf(buffer,"%u fragmented",(stat[index]).fragmfilecounter);
+	sprintf(buffer,"%lu fragmented",(stat[index]).fragmfilecounter);
 	SendMessage(hStatus,SB_SETTEXT,2,(LPARAM)buffer);
-	sprintf(buffer,"%u compressed",(stat[index]).compressedcounter);
+	sprintf(buffer,"%lu compressed",(stat[index]).compressedcounter);
 	SendMessage(hStatus,SB_SETTEXT,3,(LPARAM)buffer);
 	fbsize(s,(ULONGLONG)((stat[index]).mft_size));
 	strcat(s," MFT");
@@ -699,7 +725,8 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	ClearMap();
 
 	index = letter_numbers[iItem];
-	command = (UCHAR)lpParameter;
+	/* LONG_PTR cast removes warnings both on mingw and winddk */
+	command = (UCHAR)(LONG_PTR)lpParameter;
 
 	if(command == 'a')
 		ShowStatus(STAT_AN,iItem);
@@ -739,7 +766,7 @@ void ShowStatus(int stat,LRESULT iItem)
 {
 	LV_ITEM lvi;
 
-	work_status[letter_numbers[(int)iItem]] = stat;
+	work_status[(int)letter_numbers[(int)iItem]] = stat;
 	if(stat == STAT_CLEAR)
 		return;
 	lvi.mask = LVIF_TEXT;

@@ -27,9 +27,13 @@
 #include "../include/udefrag.h"
 
 #ifndef USE_WINDDK
+#ifndef SetWindowLongPtr
 #define SetWindowLongPtr SetWindowLong
+#endif
 #define LONG_PTR LONG
+#ifndef GWLP_WNDPROC
 #define GWLP_WNDPROC GWL_WNDPROC
+#endif
 #endif
 
 #define BLOCKS_PER_HLINE  52

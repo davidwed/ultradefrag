@@ -88,6 +88,7 @@ short *format_message_w(char *string,short *buffer)
 	char *p;
 	ANSI_STRING aStr;
 	UNICODE_STRING uStr;
+	UINT iStatus;
 	NTSTATUS Status;
 	ULONG err_code;
 	int length;
@@ -113,7 +114,9 @@ short *format_message_w(char *string,short *buffer)
 		/* skip ':' and spaces */
 		p ++;
 		while(*p == 0x20) p++;
-		sscanf(p,"%x",&Status);
+		sscanf(p,"%x",&iStatus);
+		/* very important for x64 targets */
+		Status = (NTSTATUS)(signed int)iStatus;
 		if(FormatMessageState == FormatMessageUndefined)
 		{
 			if(get_proc_address(L"kernel32.dll","FormatMessageA",(void *)&func_FormatMessageA))
@@ -138,7 +141,7 @@ short *format_message_w(char *string,short *buffer)
 		else
 		{
 			/* in native applicatons we should display 
-			 * detailed info for common errors
+			 * detailed info for most encountered errors?
 			 */
 		}
 	}

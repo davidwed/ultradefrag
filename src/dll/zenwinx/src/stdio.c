@@ -28,7 +28,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ntddkbd.h>
+///#include <ntddkbd.h>
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -143,11 +143,23 @@ int __cdecl winx_printf(const char *format, ...)
 	int size = INTERNAL_BUFFER_SIZE * 2;
 
 	if(!format) return 0;
+	/* if we have just one argument then call winx_print directly */
 	va_start(arg,format);
-	/*
-	 * Undocumented requirement: buffer must be filled
-	 * with zero characters before _vsnprintf() call!
-	 */
+	if(!va_arg(arg,int))
+	{
+		winx_print((char *)format);
+		return strlen(format);
+	}
+	va_end(arg);
+	/* prepare for _vsnprintf call */
+	va_start(arg,format);
+	/****if* zenwinx.internals/_vsnprintf
+	 *  NAME
+	 *     _vsnprintf
+	 *  NOTES
+	 *     Undocumented requirement: buffer must be filled
+	 *     with zero characters before _vsnprintf() call!
+	 ******/
 	memset(small_buffer,0,INTERNAL_BUFFER_SIZE);
 	done = _vsnprintf(small_buffer,sizeof(INTERNAL_BUFFER_SIZE),format,arg);
 	if(done == -1 || done == INTERNAL_BUFFER_SIZE)
@@ -223,7 +235,7 @@ int __cdecl winx_kbhit(int msec)
 	if(msec != INFINITE)
 		interval.QuadPart = -((signed long)msec * 10000);
 	else
-		interval.QuadPart = -0x7FFFFFFFFFFFFFFF;
+		interval.QuadPart = MAX_WAIT_INTERVAL;
 	ByteOffset.QuadPart = 0;
 	Status = NtReadFile(hKbDevice,hKbEvent,NULL,NULL,
 		&iosb,&kbd,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);

@@ -24,12 +24,17 @@ goto ddk_build
 :parse_first_parameter
 if "%1" equ "--clean" goto clean
 if "%1" equ "--use-msvc" goto msvc_build
+if "%1" equ "--use-mingw" goto mingw_build
 :ddk_build
 call DDK_BUILD.CMD
 if %errorlevel% neq 0 goto fail
 goto build_scheduler
 :msvc_build
 call MSVC_BUILD.CMD
+if %errorlevel% neq 0 goto fail
+goto build_scheduler
+:mingw_build
+call MINGW_BUILD.CMD
 if %errorlevel% neq 0 goto fail
 
 :build_scheduler
@@ -59,6 +64,7 @@ echo !define ULTRADFGARCH i386 >> ultradefrag_globals.nsh
 if %errorlevel% neq 0 goto fail
 
 if "%1" equ "--use-msvc" goto build_source_package
+if "%1" equ "--use-mingw" goto build_source_package
 copy /Y .\UltraDefrag.nsi .\amd64\
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y .\*.TXT .\amd64\

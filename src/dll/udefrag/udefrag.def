@@ -1,3 +1,5 @@
+LIBRARY udefrag.dll
+
 EXPORTS
 	udefrag_init
 	udefrag_unload

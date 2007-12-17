@@ -9,12 +9,6 @@ INTDIR=../obj/native
 
 ALL : "$(OUTDIR)\defrag_native.exe"
 
-CLEAN :
-	-@erase "$(INTDIR)\defrag_native.obj"
-	-@erase "$(INTDIR)\defrag_native.res"
-	-@erase "$(INTDIR)\vc60.idb"
-	-@erase "$(OUTDIR)\defrag_native.exe"
-
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 

@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
@@ -170,4 +171,48 @@ int __cdecl wmain(int argc, short **argv)
 	HandleErrorW(udefrag_get_progress(&stat,NULL),0);
 	printf("\n%s",udefrag_get_default_formatted_results(&stat));
 	HandleError("",0);
+	return 0; /* we will never reach this point */
 }
+
+#if defined(__GNUC__)
+/* HACK - MINGW HAS NO OFFICIAL SUPPORT FOR wmain()!!! */
+/* Copyright (c) ReactOS Development Team */
+int main( int argc, char **argv )
+{
+    WCHAR **argvW;
+    int i, j, Ret = 1;
+
+    if ((argvW = malloc(argc * sizeof(WCHAR*))))
+    {
+        /* convert the arguments */
+        for (i = 0, j = 0; i < argc; i++)
+        {
+            if (!(argvW[i] = malloc((strlen(argv[i]) + 1) * sizeof(WCHAR))))
+            {
+                j++;
+            }
+            swprintf(argvW[i], L"%hs", argv[i]);
+        }
+        
+        if (j == 0)
+        {
+            /* no error converting the parameters, call wmain() */
+            Ret = wmain(argc, (short **)argvW);
+        }
+		else
+		{
+			printf("No enough memory for the program execution!\n");
+		}
+        
+        /* free the arguments */
+        for (i = 0; i < argc; i++)
+        {
+            if (argvW[i])
+                free(argvW[i]);
+        }
+        free(argvW);
+    }
+    
+    return Ret;
+}
+#endif

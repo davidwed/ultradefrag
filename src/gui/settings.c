@@ -184,8 +184,8 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(SendMessage(GetDlgItem(hReportDlg,IDC_DBG_PARANOID),BM_GETCHECK,0,0) == \
 				BST_CHECKED)
 				settings->dbgprint_level = 2;
-			//settings->show_progress = \
-			//	(SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_GETCHECK,0,0) == \
+			//settings->show_progress =
+			//	(SendMessage(GetDlgItem(hGuiDlg,IDC_SHOWPROGRESS),BM_GETCHECK,0,0) ==
 			//	BST_CHECKED) ? TRUE : FALSE;
 			//if(!settings->show_progress)
 			//	HideProgress();

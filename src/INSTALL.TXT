@@ -34,11 +34,28 @@ big package (about 230 Mb). But if you have internet connection with good
 bandwidth, that's not a problem for you.
 
 
-2.1.2 Compilation using other compilers
+2.1.2 Compilation with MinGW
+
+  Other interesting way to produce UltraDefrag package is to do this using MinGW.
+GNU C Compiler (GCC) has one important advantage (MS C compiler don't have them) -
+very strong C language standard checking. I have removed from the program code
+hundreds of small bugs using this unique ability of GCC. Only one disadvantage of
+described tool is that compiled code has greater size. P.a. driver produced by DDK
+may have 22.0 Kb size, but the same driver produced by GCC has about 50.0 Kb.
+
+  You can either download MinGW from http://www.mingw.org or download
+MinGW Developer Studio from http://www.parinyasoft.com (about 25 Mb).
+
+  Note that currently only i386 binaries can be produced using this way.
+
+
+2.1.3 Compilation with Microsoft Visual Studio 6.0
 
   Other way to build the program is more difficult, but you don't need have 
 Windows DDK for them. You can use Microsoft C compiler included in 
-MS Visual Studio 6.0 (or later versions). GNU C Compiler (GCC) is not supported 
+MS Visual Studio 6.0 (or later versions).
+
+ GNU C Compiler (GCC) is not supported 
 yet, but it seems that this support can be added in future without any problems.
 And we will become an ability to use opensource IDE like Bloodshed Dev-C++ 
 (http://www.bloodshed.net).
@@ -56,7 +73,7 @@ And we will become an ability to use opensource IDE like Bloodshed Dev-C++
   Note that currently only i386 binaries can be produced using this way.
 
 
-2.1.3 Common tools
+2.1.4 Common tools
 
   There are a few other tools that you should have installed on your PC to
 perform a full-featured build:
@@ -82,8 +99,29 @@ e). Perl language package for Windows. You can download it from
     configure.pl script and to develop the Modern UltraDefrag User Interface
     (that was created for extended gui configuration abilities).
 
+f). Doxygen (http://www.doxygen.org) is used to produce a special kind of 
+    documentation from project's source files. It contains description 
+    of functions and global variables dependencies and may be used p.a. for 
+    removing unnecessary data fields from program's internal structures.
+    Also it is helpful for any other program code cleanup.
+    So, if you are programmer, this tool is highly recommended for you.
 
-2.1.4 Software recommended for debugging purposes
+g). ROBODoc (http://www.xs4all.nl/~rfsber/Robo/robodoc.html) is used to 
+    build interface documentation, that you should use as main developer
+    manual. You will find here all descriptions of functions exported by 
+    UltraDefrag and ZenWINX (that is a part of the Ultra Defragmenter)
+    libraries, important notes about undocumented windows functions usage
+    and many other aspects of the Ultra Defragmenter development.
+    To build a basic version of docs, simply type:
+
+        robodoc
+
+    To produce more detailed developer manual, type:
+
+        robodoc --internal
+
+
+2.1.5 Software recommended for debugging purposes
 
   Because the main work is done by kernel mode driver, you can download 
 tools described below to find program bugs. Even if you are not programmer, 
@@ -115,6 +153,12 @@ b). Configure build options by typing the following command:
 
     perl configure.pl
 
+    This tool has graphical interface. Enter please correct paths to installed
+    software and other options. If you prefer to use MinGW, click the button
+    'Apply patch to MinGW' to replace some libraries included in MinGW
+    (libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
+    will be saved in files with additional suffix '.orig'.
+
 c). To build UltraDefrag use BUILD.CMD. Synopsis is:
 
     build               in .\bin directory you will find installer;
@@ -123,7 +167,7 @@ c). To build UltraDefrag use BUILD.CMD. Synopsis is:
     build --install     it will install x86 program to default location
                         after build
 
-    build {--use-winddk | --use-msvc} [--install]
-			you can specify compiler
+    build {--use-winddk | --use-mingw | --use-msvc} [--install]
+			you can specify your favorite compiler
 
     build --clean       use it to delete all intermediate files

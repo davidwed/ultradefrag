@@ -79,6 +79,7 @@ BOOL get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
 char *format_message_a(char *string,char *buffer)
 {
 	char *p;
+	UINT iStatus;
 	NTSTATUS Status;
 	ULONG err_code;
 	int length;
@@ -111,7 +112,9 @@ char *format_message_a(char *string,char *buffer)
 			/* skip ':' and spaces */
 			p ++;
 			while(*p == 0x20) p++;
-			sscanf(p,"%x",&Status);
+			sscanf(p,"%x",&iStatus);
+			/* very important for x64 targets */
+			Status = (NTSTATUS)(signed int)iStatus;
 			err_code = RtlNtStatusToDosError(Status);
 			length = strlen(buffer);
 			if(!func_FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,

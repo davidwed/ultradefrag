@@ -23,10 +23,12 @@
 
 #include "driver.h"
 
+#if !defined(__GNUC__)
 #pragma code_seg("INIT") /* begin of section INIT */
+#endif
 /* DriverEntry - driver initialization
  */
-NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
+INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 						IN PUNICODE_STRING RegistryPath)
 {
 	PEXAMPLE_DEVICE_EXTENSION dx;
@@ -58,7 +60,7 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 				&fdo);
 	if(status != STATUS_SUCCESS)
 	{
-		DebugPrint("=Ultradfg= IoCreateDevice %x\n",status);
+		DebugPrint("=Ultradfg= IoCreateDevice %x\n",(UINT)status);
 		return status;
 	}
 
@@ -88,7 +90,9 @@ NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	new_cluster_map = AllocatePool(NonPagedPool,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
 	if(!dx->tmp_buf || !new_cluster_map)
 	{
+#ifndef NT4_TARGET
 no_mem:
+#endif
 		DbgPrintNoMem();
 #ifndef NT4_TARGET
 		ExFreePoolSafe(dx->FileMap);
@@ -100,14 +104,14 @@ no_mem:
 		return STATUS_NO_MEMORY;
 	}
 
-	DebugPrint("=Ultradfg= FDO %X, DevExt=%X\n",fdo,dx);
+	DebugPrint("=Ultradfg= FDO %p, DevExt=%p\n",fdo,dx);
 
 	/* For NT-drivers it can be L"\\??\\ultradfg" */
 	RtlInitUnicodeString(&symLinkName,link_name);
 	status = IoCreateSymbolicLink(&symLinkName,&devName);
 	if(!NT_SUCCESS(status))
 	{
-		DebugPrint("=Ultradfg= IoCreateSymbolicLink %x\n",status);
+		DebugPrint("=Ultradfg= IoCreateSymbolicLink %x\n",(UINT)status);
 		IoDeleteDevice(fdo);
 		return status;
 	}
@@ -122,7 +126,9 @@ no_mem:
 	DebugPrint("=Ultradfg= DriverEntry successfully completed\n");
 	return STATUS_SUCCESS;
 }
+#if !defined(__GNUC__)
 #pragma code_seg() /* end INIT section */
+#endif
 
 /* CompleteIrp: Set IoStatus and complete IRP processing
  */ 
@@ -146,7 +152,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	PEXAMPLE_DEVICE_EXTENSION dx = \
 			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	PVOID addr;
-	NTSTATUS request_status;
+	NTSTATUS request_status = STATUS_SUCCESS;
 	BOOLEAN request_is_successful;
 
 	/* If previous request isn't complete, return STATUS_DEVICE_BUSY. */
@@ -312,8 +318,8 @@ void UpdateFilter(PFILTER pf,short *buffer,int length)
 
 void DestroyFilter(PEXAMPLE_DEVICE_EXTENSION dx)
 {
-	ExFreePoolSafe((void *)dx->in_filter.buffer);
-	ExFreePoolSafe((void *)dx->ex_filter.buffer);
+	ExFreePoolSafe(dx->in_filter.buffer);
+	ExFreePoolSafe(dx->ex_filter.buffer);
 	DestroyList((PLIST *)&dx->in_filter.offsets);
 	DestroyList((PLIST *)&dx->ex_filter.offsets);
 }
@@ -346,8 +352,8 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	out_len = IrpStack->Parameters.DeviceIoControl.OutputBufferLength;
 
 	/*
-	DebugPrint("-Ultradfg- In DeviceControlRoutine (fdo= %X)\n",fdo);
-	DebugPrint("-Ultradfg- DeviceIoControl: IOCTL %X\n", ControlCode );
+	DebugPrint("-Ultradfg- In DeviceControlRoutine (fdo= %p)\n",fdo);
+	DebugPrint("-Ultradfg- DeviceIoControl: IOCTL %X\n", (UINT)ControlCode );
 	*/
 
 	switch(IoControlCode)
@@ -476,7 +482,7 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		case IOCTL_SET_USER_MODE_BUFFER:
 		{
 			DebugPrint("-Ultradfg- IOCTL_SET_USER_MODE_BUFFER\n");
-			DebugPrint("-Ultradfg- Address = %x\n",
+			DebugPrint("-Ultradfg- Address = %p\n",
 				IrpStack->Parameters.DeviceIoControl.Type3InputBuffer);
 			user_mode_buffer = IrpStack->Parameters.DeviceIoControl.Type3InputBuffer;
 		#ifdef NT4_TARGET
@@ -497,9 +503,11 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 /* UnloadRoutine: unload the driver and free allocated memory.
  * Can be placed in paged memory.
  */
+#if !defined(__GNUC__)
 #pragma code_seg("PAGE")
+#endif
 
-VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
+PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 {
 	PEXAMPLE_DEVICE_EXTENSION dx;
 	UNICODE_STRING symLinkName;
@@ -508,7 +516,7 @@ VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 	RtlInitUnicodeString(&symLinkName,link_name);
 
 	DebugPrint("-Ultradfg- In Unload Routine\n");
-	DebugPrint("-Ultradfg- Deleted device: pointer to FDO = %X\n",dx->fdo);
+	DebugPrint("-Ultradfg- Deleted device: pointer to FDO = %p\n",dx->fdo);
 	DebugPrint("-Ultradfg- Deleted symlink = %ws\n", symLinkName.Buffer);
 
 	FreeAllBuffers(dx);
@@ -526,4 +534,6 @@ VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 	IoDeleteSymbolicLink(&symLinkName);
 	IoDeleteDevice(dx->fdo);
 }
+#if !defined(__GNUC__)
 #pragma code_seg() /* end PAGE section */
+#endif

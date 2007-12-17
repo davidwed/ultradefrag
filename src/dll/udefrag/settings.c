@@ -327,7 +327,7 @@ BOOL OpenKey(short *key_name,PHANDLE phKey)
 	Status = NtOpenKey(phKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&ObjectAttributes);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(settings_msg,"Can't open %ws key: %x!",key_name,Status);
+		sprintf(settings_msg,"Can't open %ls key: %x!",key_name,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -346,7 +346,7 @@ BOOL CreateKey(short *key_name,PHANDLE phKey)
 				0,NULL,REG_OPTION_NON_VOLATILE,NULL);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(settings_msg,"Can't create %ws key: %x!",key_name,Status);
+		sprintf(settings_msg,"Can't create %ls key: %x!",key_name,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -370,10 +370,10 @@ BOOL ReadRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD s
 				RtlCopyMemory(buffer,pInfo->Data,pInfo->DataLength);
 			return TRUE;
 		}
-		sprintf(settings_msg,"Invalid parameter %ws!",value_name);
+		sprintf(settings_msg,"Invalid parameter %ls!",value_name);
 		goto read_fail;
 	}
-	sprintf(settings_msg,"Can't read %ws value: %x!",value_name,Status);
+	sprintf(settings_msg,"Can't read %ls value: %x!",value_name,(UINT)Status);
 read_fail:
 	return FALSE;
 }
@@ -387,7 +387,7 @@ BOOL WriteRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD 
 	Status = NtSetValueKey(hKey,&uStr,0,type,buffer,size);
 	if(!NT_SUCCESS(Status))
 	{
-		sprintf(settings_msg,"Can't write %ws value: %x!",value_name,Status);
+		sprintf(settings_msg,"Can't write %ls value: %x!",value_name,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;
@@ -398,7 +398,7 @@ BOOL AddAppToBootExecute(void)
 	HANDLE hKey;
 	KEY_VALUE_PARTIAL_INFORMATION *pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)reg_buffer;
 	short *data, *curr_pos;
-	unsigned long length,curr_len,i,new_length = 0;
+	unsigned long length,curr_len,i;///,new_length = 0;
 
 
 	/* add native program name to the BootExecute registry parameter */
@@ -412,7 +412,7 @@ BOOL AddAppToBootExecute(void)
 	length = pInfo->DataLength;
 	if(length > 32000)
 	{
-		sprintf(settings_msg,"BootExecute value is too long - %u!",length);
+		sprintf(settings_msg,"BootExecute value is too long - %lu!",length);
 		NtClose(hKey);
 		return FALSE;
 	}
@@ -460,7 +460,7 @@ BOOL RemoveAppFromBootExecute(void)
 	length = pInfo->DataLength;
 	if(length > 32000)
 	{
-		sprintf(settings_msg,"BootExecute value is too long - %u!",length);
+		sprintf(settings_msg,"BootExecute value is too long - %lu!",length);
 		NtClose(hKey);
 		return FALSE;
 	}
