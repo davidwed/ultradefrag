@@ -58,7 +58,7 @@ typedef struct _volume_info
 	LARGE_INTEGER free_space;
 } volume_info;
 
-short * __stdcall udefrag_init(int argc, short **argv,int native_mode);
+short * __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size);
 short * __stdcall udefrag_unload(BOOL save_options);
 
 short * __stdcall udefrag_analyse(unsigned char letter);
@@ -88,7 +88,7 @@ int    __stdcall fbsize2(char *s,ULONGLONG n);
 int    __stdcall dfbsize2(char *s,ULONGLONG *pn);
 
 /* interface for scripting languages */
-char * __stdcall udefrag_s_init(void);
+char * __stdcall udefrag_s_init(long map_size);
 char * __stdcall udefrag_s_unload(BOOL save_options);
 
 char * __stdcall udefrag_s_analyse(unsigned char letter);

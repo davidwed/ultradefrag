@@ -1,8 +1,3 @@
-#################################################################
-## This Makefile Exported by MinGW Developer Studio
-## Copyright (c) 2002-2004 by Parinya Thipchart
-#################################################################
-
 ifneq (,$(findstring Release, $(CFG)))
   override CFG = Release
 else
@@ -10,7 +5,7 @@ else
 endif
 
 PROJECT = ultradfg
-CC = "D:\Software\MinGWStudio\MinGW\bin\gcc.exe"
+CC = gcc.exe
 
 WINDRES = "$(COMPILER_BIN)windres.exe"
 ifeq ($(CFG),Debug)
@@ -25,7 +20,7 @@ ifeq ($(CFG),Debug)
   RCFLAGS = 
   LIB_DIRS = -L"../lib" 
   LIBS = -lntoskrnl -lhal 
-  LDFLAGS = -pipe -nostartfiles -nodefaultlibs -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared
+  LDFLAGS = -pipe -nostartfiles -nodefaultlibs ultradfg-mingw.def -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared,--strip-all
 endif
 
 ifeq ($(CFG),Release)
@@ -40,7 +35,7 @@ ifeq ($(CFG),Release)
   RCFLAGS = 
   LIB_DIRS = -L"../lib" 
   LIBS = -lntoskrnl -lhal 
-  LDFLAGS = -pipe -nostartfiles -nodefaultlibs -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared
+  LDFLAGS = -pipe -nostartfiles -nodefaultlibs ultradfg-mingw.def -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared,--strip-all
 endif
 
 ifeq ($(OS),Windows_NT)

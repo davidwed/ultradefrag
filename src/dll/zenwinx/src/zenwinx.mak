@@ -15,7 +15,7 @@ ALL : "$(OUTDIR)\zenwinx.dll"
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
-CPP_PROJ=/nologo /Gd /MT /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_USRDLL" /D "zenwinx_EXPORTS" /Fp"$(INTDIR)\zenwinx.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /Gd /MT /W3 /GX /O2 /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_USRDLL" /D "zenwinx_EXPORTS" /Fp"$(INTDIR)\zenwinx.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\zenwinx.res" /d "NDEBUG" 
 LINK32_FLAGS=ntdll.lib /nologo /entry:"DllMain" /subsystem:console /dll /incremental:no /pdb:"$(OUTDIR)\zenwinx.dll.pdb" /machine:I386 /nodefaultlib /def:".\zenwinx.def" /out:"$(OUTDIR)\zenwinx.dll" /implib:"$(OUTDIR)\zenwinx.lib" 
 
@@ -35,7 +35,7 @@ LINK32_OBJS= \
 	"$(INTDIR)\keyboard.obj" \
 	"$(INTDIR)\keytrans.obj" \
 	"$(INTDIR)\mem.obj" \
-	"$(INTDIR)\messages.obj" \
+	"$(INTDIR)\error.obj" \
 	"$(INTDIR)\stdio.obj" \
 	"$(INTDIR)\zenwinx.obj" \
 	"$(INTDIR)\zenwinx.res"

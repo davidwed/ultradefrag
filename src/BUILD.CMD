@@ -1,10 +1,14 @@
 @echo off
 
-rem Build script for the UltraDefrag project.
-rem Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+echo Build script for the UltraDefrag project.
+echo Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+
+if "%1" equ "--help" goto usage
 
 echo Set environment variables...
 call SETVARS.CMD
+if "%1" equ "--clean" goto clean
+
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
@@ -22,7 +26,6 @@ echo No parameters specified, use defaults.
 goto ddk_build
 
 :parse_first_parameter
-if "%1" equ "--clean" goto clean
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
 :ddk_build
@@ -193,3 +196,14 @@ cd ..\dll\zenwinx\src
 call BUILD_ZENWINX.CMD --clean
 cd ..\..\..
 echo Done.
+exit /B
+
+:usage
+echo.
+echo Synopsis:
+echo     build              - perform the build using default options
+echo     build --install    - run installer silently after the build
+echo     build [--use-winddk or --use-mingw or --use-msvc] [--install]
+echo                        - specify your favorite compiler
+echo     build --clean      - perform full cleanup instead of the build
+echo     build --help       - show this help message

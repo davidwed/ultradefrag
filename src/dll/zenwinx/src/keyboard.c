@@ -43,6 +43,7 @@ int __stdcall kb_open(short *kb_device_name)
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
 
+	winx_set_last_error(0);
 	if(hKbDevice) goto kb_open_success;
 	RtlInitUnicodeString(&uStr,kb_device_name);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
@@ -52,8 +53,9 @@ int __stdcall kb_open(short *kb_device_name)
 			    0,FILE_OPEN/*1*/,FILE_DIRECTORY_FILE/*1*/,NULL,0);
 	if(!NT_SUCCESS(Status))
 	{
-		winx_printf("\nCan't open the keyboard %ws: %x!\n",kb_device_name,Status);
-		return -1;
+		//winx_printf("\nCan't open the keyboard %ws: %x!\n",kb_device_name,Status);
+		winx_set_last_error((ULONG)Status);
+		return -WINX_INVALID_KEYBOARD;
 	}
 	RtlInitUnicodeString(&uStr,L"\\kb_event");
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
@@ -62,8 +64,9 @@ int __stdcall kb_open(short *kb_device_name)
 	if(!NT_SUCCESS(Status))
 	{
 		kb_close();
-		winx_printf("\nCan't create kb_event: %x!\n",Status);
-		return -1;
+		//winx_printf("\nCan't create kb_event: %x!\n",Status);
+		winx_set_last_error((ULONG)Status);
+		return -WINX_CREATE_EVENT_FAILED;
 	}
 kb_open_success:
 	return 0;
@@ -71,6 +74,6 @@ kb_open_success:
 
 void __stdcall kb_close(void)
 {
-	SafeNtClose(hKbDevice);
-	SafeNtClose(hKbEvent);
+	NtCloseSafe(hKbDevice);
+	NtCloseSafe(hKbEvent);
 }

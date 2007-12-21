@@ -28,7 +28,7 @@ optimizeLevel=0
 libraryPath=..\lib
 outputFilename=../bin/ultradfg.sys
 libraries=ntoskrnl,hal
-extraLinkerOptions=-Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared
+extraLinkerOptions=ultradfg-mingw.def -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -66,7 +66,7 @@ optimizeLevel=2
 libraryPath=..\lib
 outputFilename=../bin/ultradfg.sys
 libraries=ntoskrnl,hal
-extraLinkerOptions=-Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared
+extraLinkerOptions=ultradfg-mingw.def -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -95,13 +95,14 @@ extraResourceOptions=
 1=ultradfg.rc
 [Other]
 [History]
+driver.h,1710
+..\include\ultradfg.h,2495
 globals.c,0
 globals.h,0
-analyse.c,3341
-driver.h,6998
 int64.c,947
 list.c,0
-io.c,1443
-log.c,1340
-ultradfg.c,2114
-defrag.c,2030
+io.c,0
+log.c,3716
+defrag.c,23069
+ultradfg.c,447
+analyse.c,3994

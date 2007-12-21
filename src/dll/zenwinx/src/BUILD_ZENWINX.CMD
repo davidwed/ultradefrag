@@ -1,10 +1,14 @@
 @echo off
 
-rem Build script for the ZenWINX project.
-rem Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+echo Build script for the ZenWINX project.
+echo Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+
+if "%1" equ "--help" goto usage
 
 echo Set environment variables...
 call SETVARS_ZENWINX.CMD
+if "%1" equ "--clean" goto clean
+
 echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\zenwinxver.h
 echo #define ZENWINX_VERSION2 %ZENWINX_VERSION2% >> .\zenwinxver.h
 
@@ -13,7 +17,6 @@ echo No parameters specified, use defaults.
 goto ddk_build
 
 :parse_first_parameter
-if "%1" equ "--clean" goto clean
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
 :ddk_build
@@ -47,7 +50,7 @@ copy /Y .\objfre_wnet_amd64\amd64\zenwinx.lib %SRC_PKG_PATH%\bin\amd64\
 copy /Y .\objfre_wnet_ia64\ia64\zenwinx.dll %SRC_PKG_PATH%\bin\ia64\
 copy /Y .\objfre_wnet_ia64\ia64\zenwinx.lib %SRC_PKG_PATH%\bin\ia64\
 goto xxx
-:msvs_bin
+:msvc_bin
 copy /Y .\bin\zenwinx.dll %SRC_PKG_PATH%\bin\
 copy /Y .\bin\zenwinx.lib %SRC_PKG_PATH%\bin\
 goto xxx
@@ -100,3 +103,14 @@ rd /s /q objfre_wnet_x86
 rd /s /q objfre_wnet_amd64
 rd /s /q objfre_wnet_ia64
 echo Done.
+exit /B
+
+:usage
+echo.
+echo Synopsis:
+echo     build_zenwinx              - perform the build using default options
+echo     build_zenwinx --install    - run installer silently after the build
+echo     build_zenwinx [--use-winddk or --use-mingw or --use-msvc] [--install]
+echo                                - specify your favorite compiler
+echo     build_zenwinx --clean      - perform full cleanup instead of the build
+echo     build_zenwinx --help       - show this help message

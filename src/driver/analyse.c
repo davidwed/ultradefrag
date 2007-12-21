@@ -37,7 +37,7 @@ ULONGLONG _rdtsc(void)
 }
 #endif
 
-void PrepareDataFields(PEXAMPLE_DEVICE_EXTENSION dx)
+void PrepareDataFields(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	dx->free_space_map = NULL;
 	dx->filelist = NULL;
@@ -73,7 +73,7 @@ void PrepareDataFields(PEXAMPLE_DEVICE_EXTENSION dx)
 }
 
 /* Init() - initialize filename list and map of free space */
-NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
+NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	short path[50] = L"\\??\\A:";
 	///short p[] = L"\\??\\A:\\FRAGLIST.HTM";
@@ -82,13 +82,16 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 	NTSTATUS Status;
 	UNICODE_STRING pathU;
 	//ULONGLONG tm;
-	int i;
+	ULONG i;
 
 	/* TODO: optimize FindFiles() */
 	/* A: assume that all space is system space */
-	memset(new_cluster_map,0,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
-	for(i = 0; i < N_BLOCKS; i++)
-		new_cluster_map[i][SYSTEM_SPACE] = 1;
+	if(new_cluster_map)
+	{
+		memset(new_cluster_map,0,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
+		for(i = 0; i < map_size; i++)
+			new_cluster_map[i][SYSTEM_SPACE] = 1;
+	}
 	/* data initialization */
 	FreeAllBuffers(dx);
 	PrepareDataFields(dx);
@@ -117,18 +120,26 @@ NTSTATUS Analyse(PEXAMPLE_DEVICE_EXTENSION dx)
 		goto fail;
 	}
 	DebugPrint("-Ultradfg- total clusters: %I64u\n", dx->clusters_total);
-	/* B: assume that all space is system space: correct number of clusters */
-	if(!dx->opposite_order)
+	if(!dx->clusters_total || !dx->total_space || !dx->bytes_per_cluster)
 	{
-		///memset(new_cluster_map,0,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
-		for(i = 0; i < N_BLOCKS - 1; i++)
-			new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_mapblock;
-		new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_last_mapblock;
+		Status = STATUS_INVALID_PARAMETER;
+		goto fail;
 	}
-	else
+	/* B: assume that all space is system space: correct number of clusters */
+	if(new_cluster_map)
 	{
-		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
-			dx->clusters_total,dx->blocks_per_cluster,dx->blocks_per_last_cluster);
+		if(!dx->opposite_order)
+		{
+			///memset(new_cluster_map,0,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
+			for(i = 0; i < map_size - 1; i++)
+				new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_mapblock;
+			new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_last_mapblock;
+		}
+		else
+		{
+			DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
+				dx->clusters_total,dx->blocks_per_cluster,dx->blocks_per_last_cluster);
+		}
 	}
 	/*
 	 * Synchronize drive.
@@ -184,7 +195,7 @@ fail:
 	return Status;
 }
 
-BOOLEAN GetTotalClusters(PEXAMPLE_DEVICE_EXTENSION dx)
+BOOLEAN GetTotalClusters(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	FILE_FS_SIZE_INFORMATION FileFsSize;
 	IO_STATUS_BLOCK IoStatusBlock;
@@ -216,33 +227,36 @@ BOOLEAN GetTotalClusters(PEXAMPLE_DEVICE_EXTENSION dx)
 	dx->bytes_per_cluster = bpc;
 	dx->total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
 	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
-
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
-	dx->opposite_order = FALSE;
-	dx->clusters_per_mapblock = dx->clusters_total / N_BLOCKS;
-	if(dx->clusters_per_mapblock)
+
+	if(new_cluster_map && dx->clusters_total)
 	{
-		dx->clusters_per_last_mapblock = dx->clusters_per_mapblock + \
-			(dx->clusters_total - dx->clusters_per_mapblock * N_BLOCKS);
-	}
-	else
-	{
-		dx->opposite_order = TRUE;
-		dx->blocks_per_cluster = N_BLOCKS / dx->clusters_total;
-		dx->blocks_per_last_cluster = dx->blocks_per_cluster + \
-			(N_BLOCKS - dx->blocks_per_cluster * dx->clusters_total);
+		dx->opposite_order = FALSE;
+		dx->clusters_per_mapblock = dx->clusters_total / map_size;
+		if(dx->clusters_per_mapblock)
+		{
+			dx->clusters_per_last_mapblock = dx->clusters_per_mapblock + \
+				(dx->clusters_total - dx->clusters_per_mapblock * map_size);
+		}
+		else
+		{
+			dx->opposite_order = TRUE;
+			dx->blocks_per_cluster = map_size / dx->clusters_total;
+			dx->blocks_per_last_cluster = dx->blocks_per_cluster + \
+				(map_size - dx->blocks_per_cluster * dx->clusters_total);
+		}
 	}
 exit:
 	return (errCode == STATUS_SUCCESS);
 }
 
-void ProcessMFT(PEXAMPLE_DEVICE_EXTENSION dx)
+void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	NTSTATUS Status;
 	IO_STATUS_BLOCK IoStatusBlock;
 	PARTITION_INFORMATION part_info;
 	NTFS_DATA ntfs_data;
-	ULONGLONG start,len,/*i,*/mft_len = 0;
+	ULONGLONG start,len,mft_len = 0;
 
 	Status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&IoStatusBlock, \
 		IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
@@ -270,7 +284,10 @@ void ProcessMFT(PEXAMPLE_DEVICE_EXTENSION dx)
 			DebugPrint("-Ultradfg- MFT_file   : start : length\n");
 			/* $MFT */
 			start = ntfs_data.MftStartLcn.QuadPart;
-			len = ntfs_data.MftValidDataLength.QuadPart / ntfs_data.BytesPerCluster;
+			if(ntfs_data.BytesPerCluster)
+				len = ntfs_data.MftValidDataLength.QuadPart / ntfs_data.BytesPerCluster;
+			else
+				len = 0;
 			DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
 			///dx->processed_clusters += len;
 			ProcessBlock(dx,start,len,MFT_SPACE);
@@ -293,7 +310,7 @@ void ProcessMFT(PEXAMPLE_DEVICE_EXTENSION dx)
 	}
 }
 
-FREEBLOCKMAP *InsertNewFreeBlock(PEXAMPLE_DEVICE_EXTENSION dx,
+FREEBLOCKMAP *InsertNewFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 				 ULONGLONG start,ULONGLONG length)
 {
 	PFREEBLOCKMAP block;
@@ -314,7 +331,7 @@ FREEBLOCKMAP *InsertNewFreeBlock(PEXAMPLE_DEVICE_EXTENSION dx,
 
 /* FillFreeClusterMap() */
 /* Dumps all the free clusters on the volume */
-BOOLEAN FillFreeClusterMap(PEXAMPLE_DEVICE_EXTENSION dx)
+BOOLEAN FillFreeClusterMap(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ULONG status;
 	PBITMAP_DESCRIPTOR bitMappings;
@@ -410,7 +427,7 @@ fail:
 	return FALSE;
 }
 
-BOOLEAN InsertFileName(PEXAMPLE_DEVICE_EXTENSION dx,short *path,
+BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					PFILE_BOTH_DIR_INFORMATION pFileInfo,BOOLEAN is_root)
 {
 	PFILENAME pfn;
@@ -459,7 +476,7 @@ no_mem:
 
 /* FindFiles() - recursive search of all files on specified path
    and put their clusters to map */
-BOOLEAN FindFiles(PEXAMPLE_DEVICE_EXTENSION dx,UNICODE_STRING *path,BOOLEAN is_root)
+BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	PFILE_BOTH_DIR_INFORMATION pFileInfoFirst = NULL, pFileInfo;
@@ -582,7 +599,7 @@ BOOLEAN IsStringInFilter(short *str,PFILTER pf)
 	return FALSE;
 }
 
-void ApplyFilter(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	UNICODE_STRING str;
 
@@ -608,7 +625,7 @@ excl:
 	return;
 }
 
-BOOLEAN InsertFragmFileBlock(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+BOOLEAN InsertFragmFileBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	PFRAGMENTED pf,plist;
 
@@ -651,7 +668,7 @@ void DeleteBlockmap(PFILENAME pfn)
 	pfn->is_fragm = FALSE;
 }
 
-BLOCKMAP *InsertNewBlock(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn,
+BLOCKMAP *InsertNewBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 					ULONGLONG startVcn,ULONGLONG startLcn,ULONGLONG length)
 {
 	PBLOCKMAP block;
@@ -676,7 +693,7 @@ BLOCKMAP *InsertNewBlock(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn,
 	return block;
 }
 
-void MarkSpace(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	PBLOCKMAP block;
 	UCHAR space_state;
@@ -706,7 +723,7 @@ void MarkSpace(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
  * 2. On NTFS we skip 0-filled virtual clusters of compressed files.
  */
 
-BOOLEAN DumpFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS Status;
@@ -811,7 +828,7 @@ dump_success:
 	return TRUE; /* success */
 }
 
-void RedumpFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+void RedumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	BOOLEAN is_fragm;
 

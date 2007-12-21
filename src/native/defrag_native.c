@@ -223,7 +223,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	winx_printf("\n\n");
 	/* 7. Initialize the ultradfg device */
-	HandleError(udefrag_init(0,NULL,TRUE),2);
+	HandleError(udefrag_init(0,NULL,TRUE,0),2);
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS

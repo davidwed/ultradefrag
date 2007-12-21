@@ -46,6 +46,7 @@ NSIS developers (http://nsis.sourceforge.net)
 
 Markus Oberhumer, Laszlo Molnar & John Reiser (http://upx.sf.net)
 
+MinGW Team (http://www.mingw.org)
 
 Also many thanks to all people that help us to improve UltraDefrag.
 

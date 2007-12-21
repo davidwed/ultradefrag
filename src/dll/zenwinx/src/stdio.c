@@ -153,11 +153,12 @@ int __cdecl winx_printf(const char *format, ...)
 	va_end(arg);
 	/* prepare for _vsnprintf call */
 	va_start(arg,format);
-	/****if* zenwinx.internals/_vsnprintf
+	/****ix* zenwinx.internals/_vsnprintf
 	 *  NAME
-	 *     _vsnprintf
+	 *     _vsnprintf undocumented behaviour
 	 *  NOTES
-	 *     Undocumented requirement: buffer must be filled
+	 *     Undocumented requirement: buffer specified 
+	 *     by the first parameter must be filled
 	 *     with zero characters before _vsnprintf() call!
 	 ******/
 	memset(small_buffer,0,INTERNAL_BUFFER_SIZE);
@@ -216,8 +217,11 @@ int __cdecl winx_printf(const char *format, ...)
  *         winx_printf("%c ",(char)('0' + 3 - i));
  *     }
  *  NOTES
- *     If msec is INFINITE, the function's
- *     time-out interval never elapses. 
+ *     1. If msec is INFINITE, the function's
+ *        time-out interval never elapses.
+ *     2. If winx_get_last_error() != 0 after
+ *        this call, the read keyboard error
+ *        was encountered.
  *  BUGS
  *     The erroneous situation, when we have
  *     timeout for read request but
@@ -231,7 +235,12 @@ int __cdecl winx_kbhit(int msec)
 	NTSTATUS Status;
 	LARGE_INTEGER interval;
 
-	if(!hKbDevice) return -1;
+	winx_set_last_error(0);
+	if(!hKbDevice)
+	{
+		winx_set_last_error((ULONG)STATUS_INVALID_HANDLE);
+		return -1;
+	}
 	if(msec != INFINITE)
 		interval.QuadPart = -((signed long)msec * 10000);
 	else
@@ -262,7 +271,11 @@ int __cdecl winx_kbhit(int msec)
 		}
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
-	if(!NT_SUCCESS(Status)) return -1;
+	if(!NT_SUCCESS(Status))
+	{
+		winx_set_last_error((ULONG)Status);
+		return -1;
+	}
 	IntTranslateKey(&kbd,&kbd_rec);
 	if(!kbd_rec.bKeyDown) return -1;
 	return (int)kbd_rec.AsciiChar;
@@ -289,8 +302,11 @@ int __cdecl winx_kbhit(int msec)
  *         winx_exit(0);
  *     }
  *  NOTES
- *     If msec is INFINITE, the function's
- *     time-out interval never elapses.
+ *     1. If msec is INFINITE, the function's
+ *        time-out interval never elapses.
+ *     2. If winx_get_last_error() != 0 after
+ *        this call, the read keyboard error
+ *        was encountered.
  *  BUGS
  *     This function is based on winx_kbhit(),
  *     so look at bugs of them.
@@ -310,6 +326,10 @@ int __cdecl winx_breakhit(int msec)
  *     character = winx_getch();
  *  FUNCTION
  *     CRT getch() native equivalent.
+ *  NOTES
+ *     If winx_get_last_error() != 0 after
+ *     this call, the read keyboard error
+ *     was encountered.
  *  SEE ALSO
  *     winx_getche,winx_gets
  ******/
@@ -321,7 +341,12 @@ int __cdecl winx_getch(void)
 	KBD_RECORD kbd_rec;
 	NTSTATUS Status;
 
-	if(!hKbDevice) return -1;
+	winx_set_last_error(0);
+	if(!hKbDevice)
+	{
+		winx_set_last_error((ULONG)STATUS_INVALID_HANDLE);
+		return -1;
+	}
 repeate_attempt:
 	ByteOffset.QuadPart = 0;
 	Status = NtReadFile(hKbDevice,hKbEvent,NULL,NULL,
@@ -332,7 +357,11 @@ repeate_attempt:
 		Status = NtWaitForSingleObject(hKbEvent,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
-	if(!NT_SUCCESS(Status)) return -1;
+	if(!NT_SUCCESS(Status))
+	{
+		winx_set_last_error((ULONG)Status);
+		return -1;
+	}
 	IntTranslateKey(&kbd,&kbd_rec);
 	if(!kbd_rec.bKeyDown) goto repeate_attempt;
 	return (int)kbd_rec.AsciiChar;
@@ -345,6 +374,10 @@ repeate_attempt:
  *     character = winx_getche();
  *  FUNCTION
  *     CRT getche() native equivalent.
+ *  NOTES
+ *     If winx_get_last_error() != 0 after
+ *     this call, the read keyboard error
+ *     was encountered.
  *  BUGS
  *     Does not recognize special characters
  *     such as 'backspace'.
@@ -374,6 +407,10 @@ int __cdecl winx_getche(void)
  *  RESULT
  *     nonnegative value for number of characters
  *     -1 for error.
+ *  NOTES
+ *     If winx_get_last_error() != 0 after
+ *     this call, the read keyboard error
+ *     was encountered.
  *  BUGS
  *     Does not recognize special characters
  *     such as 'backspace'.
@@ -385,6 +422,7 @@ int __cdecl winx_gets(char *string,int n)
 	int i;
 	int ch;
 
+	winx_set_last_error(0);
 	if(!string) return -1;
 	for(i = 0; i < n; i ++)
 	{

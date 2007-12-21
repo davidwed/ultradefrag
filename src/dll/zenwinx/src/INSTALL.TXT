@@ -1,2 +1,128 @@
+1. Installation from binary package
+
+1.1 System requirements
+
+  You need Windows NT 4.0, Windows 2000, Windows XP, Windows Server 2003 
+or Windows Vista. Also Windows XP x64, Server 2003 x64 and Vista x64 editions 
+supported.
+
+
+1.2 Installation
+
 Download source archive and unpack it somewhere. Use dll and lib files 
 compiled for your target processor architecture and header file zenwinx.h
+
+
+2. Installation from sources
+
+2.1 Software requirements
+
+2.1.1 Compilation with Windows Server 2003 DDK
+
+  The best way to build ZenWINX is to do this using Windows Server 2003 
+Driver Development Kit (DDK). You can simply download it from 
+one of the locations that can be found using any web search system (e.g. Google).
+
+  Only one disadvantage of this way is that the Windows DDK is a really 
+big package (about 230 Mb). But if you have internet connection with good 
+bandwidth, that's not a problem for you.
+
+
+2.1.2 Compilation with MinGW
+
+  Other interesting way to produce ZenWINX package is to do this using MinGW.
+GNU C Compiler (GCC) has one important advantage (MS C compiler don't have them) -
+very strong C language standard compatibility checking. I have removed from the 
+program code hundreds of small bugs using this unique ability of GCC. Only one 
+disadvantage of described tool is that compiled code has greater size.
+
+  You can either download MinGW from http://www.mingw.org or download
+MinGW Developer Studio from http://www.parinyasoft.com (about 25 Mb).
+
+  Note that currently only i386 binaries can be produced using this way.
+
+  VERY IMPORTANT NOTE: If you will build the dynamic libraries from the MinGW
+Developer Studio, note that produced *.a files are invalid. Because I don't know
+how to specify true options in Developer Studio's project file. Use makefiles
+instead:
+
+  mingw32-make Makefile.mingw
+
+
+2.1.3 Compilation with Microsoft Visual Studio 6.0
+
+  Other way to build the library is more difficult. You can use Microsoft C 
+  compiler included in MS Visual Studio 6.0 (or later versions).
+
+  Also you should download the ntdll.lib file from 
+  http://www.masm32.com/board/index.php?topic=2124.new
+
+  Note that currently only i386 binaries can be produced using this way.
+
+
+2.1.4 Common tools
+
+  There are a few other tools that you should have installed on your PC to
+perform a full-featured build:
+
+a). 7-zip file archiver (http://www.7-zip.org) is used to produce 
+    the source code package.
+
+b). Perl language package for Windows. You can download it from
+    http://www.activestate.com. Currently I'm using v5.8.6 to execute
+    zen-configure.pl script.
+
+c). Doxygen (http://www.doxygen.org) is used to produce a special kind of 
+    documentation from project's source files. It contains description 
+    of functions and global variables dependencies and may be used p.a. for 
+    removing unnecessary data fields from program's internal structures.
+    Also it is helpful for any other program code cleanup.
+    So, if you are programmer, this tool is highly recommended for you.
+
+d). ROBODoc (http://www.xs4all.nl/~rfsber/Robo/robodoc.html) is used to 
+    build interface documentation, that you should use as main developer
+    manual. You will find here all descriptions of functions exported by 
+    ZenWINX, important notes about undocumented windows functions usage
+    and many other aspects of the ZenWINX development.
+    To build a basic version of docs, simply type:
+
+        robodoc
+
+    To produce more detailed developer manual, type:
+
+        robodoc --internal
+
+e). md5sum tool is used to generate file zenwinx-x.y.z.md5 that
+    gives you an ability to check downloaded package integrity.
+    You can download this tool from http://www.etree.org/md5com.html.
+
+
+2.2 Building and installation
+
+a). Download sources archive and unpack it somewhere.
+    NOTE: Currently path must not contain spaces. If you have some ideas
+          how to fix that send your report to the authors, please.
+b). Configure build options by typing the following command:
+
+    perl zen-configure.pl
+
+    This tool has graphical interface. Enter please correct paths to installed
+    software and other options. If you prefer to use MinGW, click the button
+    'Apply patch to MinGW' to replace some libraries included in MinGW
+    (libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
+    will be saved in files with additional suffix '.orig'.
+
+c). To build ZenWINX use BUILD_ZENWINX.CMD. Synopsis is:
+
+    build_zenwinx               in .\src_package you will find 
+                                sources 7zip-archive
+
+    build_zenwinx --install     it will put x86 library in %windir%\system32
+                                directory after build
+
+    build_zenwinx {--use-winddk | --use-mingw | --use-msvc} [--install]
+                                you can specify your favorite compiler
+
+    build_zenwinx --clean       use it to delete all intermediate files
+
+    build_zenwinx --help        show usage information and exit

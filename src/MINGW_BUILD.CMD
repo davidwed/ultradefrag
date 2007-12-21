@@ -37,12 +37,12 @@ copy /Y ..\..\lib\udefrag.dll ..\..\bin\
 
 echo Build the console interface...
 cd ..\..\console
-mingw32-make -f Makefile.mingw CFG=Release
+mingw32-make --always-make -f Makefile.mingw CFG=Release
 if %errorlevel% neq 0 goto fail
 
 echo Build the gui interface...
 cd ..\gui
-mingw32-make -f Makefile.mingw CFG=Release
+mingw32-make --always-make -f Makefile.mingw CFG=Release
 if %errorlevel% neq 0 goto fail
 
 echo Build the native interface...

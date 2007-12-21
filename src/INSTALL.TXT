@@ -38,15 +38,23 @@ bandwidth, that's not a problem for you.
 
   Other interesting way to produce UltraDefrag package is to do this using MinGW.
 GNU C Compiler (GCC) has one important advantage (MS C compiler don't have them) -
-very strong C language standard checking. I have removed from the program code
-hundreds of small bugs using this unique ability of GCC. Only one disadvantage of
-described tool is that compiled code has greater size. P.a. driver produced by DDK
-may have 22.0 Kb size, but the same driver produced by GCC has about 50.0 Kb.
+very strong C language standard compatibility checking. I have removed from the 
+program code hundreds of small bugs using this unique ability of GCC. Only one 
+disadvantage of described tool is that compiled code has greater size.
+P.a. driver produced by DDK may have 22.0 Kb size, but the same driver produced 
+by GCC has about 50.0 Kb.
 
   You can either download MinGW from http://www.mingw.org or download
 MinGW Developer Studio from http://www.parinyasoft.com (about 25 Mb).
 
   Note that currently only i386 binaries can be produced using this way.
+
+  VERY IMPORTANT NOTE: If you will build the dynamic libraries from the MinGW
+Developer Studio, note that produced *.a files are invalid. Because I don't know
+how to specify true options in Developer Studio's project file. Use makefiles
+instead:
+
+  mingw32-make Makefile.mingw
 
 
 2.1.3 Compilation with Microsoft Visual Studio 6.0
@@ -55,20 +63,17 @@ MinGW Developer Studio from http://www.parinyasoft.com (about 25 Mb).
 Windows DDK for them. You can use Microsoft C compiler included in 
 MS Visual Studio 6.0 (or later versions).
 
- GNU C Compiler (GCC) is not supported 
-yet, but it seems that this support can be added in future without any problems.
-And we will become an ability to use opensource IDE like Bloodshed Dev-C++ 
-(http://www.bloodshed.net).
- 
   In addition you need obtain a copy of ReactOS source code 
 (from http://www.reactos.org) for special header files used to build the driver.
 
   Also you should download the following files:
 - ntdll.lib from http://www.masm32.com/board/index.php?topic=2124.new
 - ntoskrnl.lib + hal.lib from http://www.freewebs.com/four-f/index.htm
-  (included in KmdKit package).
+  (included in KmdKit package). Put these files to lib subdirectory of your
+  Visual Studio installation.
 
-  Finally, edit *.dsp files, because they have references to ReactOS headers.
+  Finally, edit ultradfg.dsp file (driver project file), because they are 
+references to ReactOS headers here.
 
   Note that currently only i386 binaries can be produced using this way.
 
@@ -86,7 +91,9 @@ a). NSIS compiler (http://nsis.sourceforge.net) is used to produce installers.
           !packhdr temp.dat '"C:\WINDOWS\upx" -9 -q temp.dat'
 
 b). Ultimate Packer for eXecutables (upx) (http://upx.sf.net) is used to
-    reduce sizes of some binary modules. I'm using version 2.03w.
+    reduce sizes of some binary modules. I'm using version 2.03w. Put the
+    upx.exe file in one of the directories, specified in your PATH environment
+    variable, p.a. in %windir%\system32.
 
 c). 7-zip file archiver (http://www.7-zip.org) is used to produce 
     the source code package.
@@ -120,6 +127,10 @@ g). ROBODoc (http://www.xs4all.nl/~rfsber/Robo/robodoc.html) is used to
 
         robodoc --internal
 
+h). md5sum tool is used to generate file ultradefrag-x.y.z.MD5SUMS that
+    gives you an ability to check downloaded packages integrity.
+    You can download this tool from http://www.etree.org/md5com.html.
+
 
 2.1.5 Software recommended for debugging purposes
 
@@ -142,6 +153,17 @@ c). StatusToError tool included in KmdKit (see above). Input the NTSTATUS code
     given by gui, console or native app and you will become the localized error 
     description. Simple but very useful. Especially for boot time defragmentation
     errors decoding, because I can't do it at boot time.
+
+
+2.1.6 Especially for mr. Random Newbe (notes for the beginners)
+
+a). Many of described tools have small size, and you don't need high-speed
+    internet connection to download their latest versions. Simply do it. 
+    And enjoy!
+
+b). If you will place tools executables in one of the directories, specified 
+    in your PATH environment variable, the command execution will be very easy 
+    process, because you can type commands without paths in the command prompt.
 
 
 2.2 Building and installation
@@ -171,3 +193,5 @@ c). To build UltraDefrag use BUILD.CMD. Synopsis is:
 			you can specify your favorite compiler
 
     build --clean       use it to delete all intermediate files
+
+    build --help        show usage information and exit

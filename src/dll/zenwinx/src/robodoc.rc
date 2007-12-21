@@ -11,3 +11,8 @@ options:
     --documenttitle "ZenWINX Documentation"
 ignore files:
     CVS .svn obj* doxy-doc src* bin *.css
+accept files:
+    *.c *.h *.pl *.txt *.TXT
+headertypes:
+    x  "Undocumented Windows" robo_undoc_win
+	N  "Installation Notes"   robo_inst_notes

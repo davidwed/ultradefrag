@@ -15,7 +15,7 @@ ALL : "$(OUTDIR)\udefrag.exe"
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /Fp"$(INTDIR)\Defrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\defrag.res" /d "NDEBUG" 
 LINK32_FLAGS=kernel32.lib advapi32.lib msvcrt.lib ntdll.lib ..\lib\udefrag.lib /nologo /subsystem:console /incremental:no /pdb:"$(OUTDIR)\Defrag.pdb" /machine:I386 /nodefaultlib /out:"$(OUTDIR)\udefrag.exe" 
 

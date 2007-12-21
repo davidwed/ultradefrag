@@ -31,7 +31,7 @@
 INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 						IN PUNICODE_STRING RegistryPath)
 {
-	PEXAMPLE_DEVICE_EXTENSION dx;
+	UDEFRAG_DEVICE_EXTENSION *dx;
 
 	NTSTATUS status = STATUS_SUCCESS;
 	PDEVICE_OBJECT fdo;
@@ -52,7 +52,7 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 #endif
 	RtlInitUnicodeString(&devName,device_name);
 	status = IoCreateDevice(DriverObject,
-				sizeof(EXAMPLE_DEVICE_EXTENSION),
+				sizeof(UDEFRAG_DEVICE_EXTENSION),
 				&devName, /* can be NULL */
 				FILE_DEVICE_UNKNOWN,
 				0,
@@ -65,7 +65,7 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	}
 
 	/* get device_extension pointer */
-	dx = (PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
+	dx = (PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	dx->fdo = fdo;  /* save backward pointer */
 	fdo->Flags |= DO_DIRECT_IO;
 	/* data initialization */
@@ -79,7 +79,8 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	dx->report_type.format = ASCII_FORMAT;
 	dx->report_type.type = HTML_REPORT;
 	dbg_level = 0;
-	new_cluster_map = NULL;
+	new_cluster_map = NULL; /* console and native tools don't needs them */
+	map_size = 0;
 	/* allocate memory */
 #ifndef NT4_TARGET
 	dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
@@ -87,8 +88,7 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	if(!dx->FileMap || !dx->BitMap) goto no_mem;
 #endif
 	dx->tmp_buf = AllocatePool(NonPagedPool,32768 + 5);
-	new_cluster_map = AllocatePool(NonPagedPool,NUM_OF_SPACE_STATES * N_BLOCKS * sizeof(ULONGLONG));
-	if(!dx->tmp_buf || !new_cluster_map)
+	if(!dx->tmp_buf)
 	{
 #ifndef NT4_TARGET
 no_mem:
@@ -99,7 +99,6 @@ no_mem:
 		ExFreePoolSafe(dx->BitMap);
 #endif
 		ExFreePoolSafe(dx->tmp_buf);
-		ExFreePoolSafe(new_cluster_map);
 		IoDeleteDevice(fdo);
 		return STATUS_NO_MEMORY;
 	}
@@ -112,6 +111,11 @@ no_mem:
 	if(!NT_SUCCESS(status))
 	{
 		DebugPrint("=Ultradfg= IoCreateSymbolicLink %x\n",(UINT)status);
+#ifndef NT4_TARGET
+		ExFreePoolSafe(dx->FileMap);
+		ExFreePoolSafe(dx->BitMap);
+#endif
+		ExFreePoolSafe(dx->tmp_buf);
 		IoDeleteDevice(fdo);
 		return status;
 	}
@@ -149,8 +153,8 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	KIRQL oldIrql;
 	PIO_STACK_LOCATION IrpStack = IoGetCurrentIrpStackLocation(Irp);
 
-	PEXAMPLE_DEVICE_EXTENSION dx = \
-			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
+	UDEFRAG_DEVICE_EXTENSION *dx = \
+			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	PVOID addr;
 	NTSTATUS request_status = STATUS_SUCCESS;
 	BOOLEAN request_is_successful;
@@ -192,7 +196,6 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	dx->compact_flag = (cmd.command == 'c' || cmd.command == 'C') ? TRUE : FALSE;
 	dx->sizelimit = cmd.sizelimit;
 
-	/* gui or console must have permission to access encrypted files */
 	request_is_successful = TRUE;
 	switch(cmd.command)
 	{
@@ -247,8 +250,8 @@ void DbgPrintNoMem()
 /* CreateFile() request processing. */
 NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 {
-	PEXAMPLE_DEVICE_EXTENSION dx = \
-			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
+	UDEFRAG_DEVICE_EXTENSION *dx = \
+			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	DebugPrint("-Ultradfg- Create File\n");
 	dx->status = STATUS_BEFORE_PROCESSING;
@@ -258,15 +261,15 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 /* CloseHandle() request processing. */
 NTSTATUS NTAPI Close_HandleIRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 {
-	PEXAMPLE_DEVICE_EXTENSION dx = \
-			(PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
+	UDEFRAG_DEVICE_EXTENSION *dx = \
+			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	DebugPrint("-Ultradfg- In Close handler\n"); 
 	FreeAllBuffers(dx);
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
 }
 
-void UpdateInformation(PEXAMPLE_DEVICE_EXTENSION dx)
+void UpdateInformation(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFRAGMENTED pf;
 
@@ -316,7 +319,7 @@ void UpdateFilter(PFILTER pf,short *buffer,int length)
 	}
 }
 
-void DestroyFilter(PEXAMPLE_DEVICE_EXTENSION dx)
+void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ExFreePoolSafe(dx->in_filter.buffer);
 	ExFreePoolSafe(dx->ex_filter.buffer);
@@ -327,7 +330,7 @@ void DestroyFilter(PEXAMPLE_DEVICE_EXTENSION dx)
 /* DeviceControlRoutine: IRP_MJ_DEVICE_CONTROL request handler. */
 NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 {
-	PEXAMPLE_DEVICE_EXTENSION dx;
+	UDEFRAG_DEVICE_EXTENSION *dx;
 	PIO_STACK_LOCATION IrpStack;
 	ULONG IoControlCode;
 	PSTATISTIC pst;
@@ -345,7 +348,7 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	//PVOID in_buf, out_buf;
 	ULONG in_len, out_len;
 
-	dx = (PEXAMPLE_DEVICE_EXTENSION)(fdo->DeviceExtension);
+	dx = (PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	IrpStack = IoGetCurrentIrpStackLocation(Irp);
 	IoControlCode = IrpStack->Parameters.DeviceIoControl.IoControlCode;
 	in_len = IrpStack->Parameters.DeviceIoControl.InputBufferLength;
@@ -388,14 +391,19 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		case IOCTL_GET_CLUSTER_MAP:
 		{
 			DebugPrint("-Ultradfg- IOCTL_GET_CLUSTER_MAP\n");
+			if(!new_cluster_map)
+			{
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
 			map = (char *)Irp->AssociatedIrp.SystemBuffer;
 			if(!out_len || !map)
 			{
 				status = STATUS_INVALID_PARAMETER;
 				break;
 			}
-			bpb = N_BLOCKS / out_len;
-			if(!bpb || (N_BLOCKS % out_len))
+			bpb = map_size / out_len;
+			if(!bpb || (map_size % out_len))
 			{
 				status = STATUS_INVALID_PARAMETER; /* buffer has invalid size */
 				break;
@@ -494,6 +502,36 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		#endif
 			break;
 		}
+		case IOCTL_SET_CLUSTER_MAP_SIZE:
+		{
+			DebugPrint("-Ultradfg- IOCTL_SET_CLUSTER_MAP_SIZE\n");
+			if(new_cluster_map)
+			{
+				/* map size changing don't supported yet */
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
+			if(in_len != sizeof(ULONG))
+			{
+				status = STATUS_INVALID_PARAMETER;
+				break;
+			}
+			map_size = *((ULONG *)Irp->AssociatedIrp.SystemBuffer);
+			DebugPrint("-Ultradfg- Map size = %u\n",map_size);
+			if(map_size)
+			{
+				new_cluster_map = AllocatePool(NonPagedPool,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
+				if(!new_cluster_map)
+				{
+					DbgPrintNoMem();
+					map_size = 0;
+					status = STATUS_NO_MEMORY;
+					break;
+				}
+			}
+			BytesTxd = in_len;
+			break;
+		}
 		/* Invalid request */
 		default: status = STATUS_INVALID_DEVICE_REQUEST;
 	}
@@ -509,10 +547,10 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 
 PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 {
-	PEXAMPLE_DEVICE_EXTENSION dx;
+	UDEFRAG_DEVICE_EXTENSION *dx;
 	UNICODE_STRING symLinkName;
 
-	dx = (PEXAMPLE_DEVICE_EXTENSION)pDriverObject->DeviceObject->DeviceExtension;
+	dx = (PUDEFRAG_DEVICE_EXTENSION)pDriverObject->DeviceObject->DeviceExtension;
 	RtlInitUnicodeString(&symLinkName,link_name);
 
 	DebugPrint("-Ultradfg- In Unload Routine\n");

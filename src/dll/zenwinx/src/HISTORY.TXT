@@ -1,5 +1,8 @@
 HISTORY
 
-[version number (x86 dll size in Kbytes) - changes description]
+[version x.y.z (x86 dll size in Kbytes)   release date]
 
-0.0.1 (6.5) - initial release with basic console i/o functions (printf etc.)
+
+  Version 0.0.1 (6.5)   2007-12-05
+  ------------------------------------------------------------------------------
+    - initial release with basic console i/o functions (printf etc.)

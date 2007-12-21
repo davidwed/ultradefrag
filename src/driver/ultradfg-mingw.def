@@ -1,0 +1,4 @@
+LIBRARY ultradfg.sys
+
+EXPORTS
+	DriverEntry@8

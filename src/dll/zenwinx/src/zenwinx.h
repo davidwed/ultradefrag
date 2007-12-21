@@ -21,9 +21,12 @@
  *  zenwinx.dll interface definitions.
  */
 
-#define SafeNtClose(h) if(h) { NtClose(h); h = NULL; }
+#ifndef _ZENWINX_H_
+#define _ZENWINX_H_
 
-/* winx functions prototypes */
+#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
+
+/* zenwinx functions prototypes */
 int  __stdcall winx_init(void *peb);
 void __stdcall winx_exit(int exit_code);
 void __stdcall winx_reboot(void);
@@ -45,3 +48,12 @@ int __cdecl winx_gets(char *string,int n);
  */
 int __cdecl winx_kbhit(int msec);
 int __cdecl winx_breakhit(int msec);
+
+void __stdcall winx_set_last_error(unsigned long code);
+unsigned long __stdcall winx_get_last_error(void);
+
+/* zenwinx error codes */
+#define WINX_INVALID_KEYBOARD    0x00000001
+#define WINX_CREATE_EVENT_FAILED 0x00000002
+
+#endif /* _ZENWINX_H_ */

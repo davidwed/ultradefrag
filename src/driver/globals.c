@@ -43,3 +43,4 @@ unsigned int dbg_ring_buffer_offset;
  * ('Dynamically-allocated Multi-dimensional Arrays - C').
  */
 ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];
+ULONG map_size;

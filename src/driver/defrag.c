@@ -23,7 +23,7 @@
 
 #include "driver.h"
 
-void CheckPendingBlocks(PEXAMPLE_DEVICE_EXTENSION dx)
+void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PROCESS_BLOCK_STRUCT *ppbs,*new_ppbs;
 	NTSTATUS status;
@@ -150,7 +150,7 @@ done:
 	return;
 }
 
-void UpdateFragmentedFilesList(PEXAMPLE_DEVICE_EXTENSION dx)
+void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFRAGMENTED pf,prev_pf;
 
@@ -180,23 +180,25 @@ void UpdateFragmentedFilesList(PEXAMPLE_DEVICE_EXTENSION dx)
  * On FAT partitions after file moving filesystem driver mark
  * previously allocated clusters as free immediately.
  */
-/*__inline */void ProcessBlock(PEXAMPLE_DEVICE_EXTENSION dx,ULONGLONG start,
+/*__inline */void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 						   ULONGLONG len,int space_state)
 {
-//	ULONGLONG clusters_per_mapblock = dx->clusters_total / N_BLOCKS;
+//	ULONGLONG clusters_per_mapblock = dx->clusters_total / map_size;
 	ULONGLONG target_block, target_offset;
 	ULONGLONG target_len, i, j;
 
 //	_int64_memset(dx->cluster_map + start,space_state,len);
 	/* the last block can represent less clusters than other blocks */
-//	if(dx->clusters_total % N_BLOCKS) clusters_per_mapblock++;
+//	if(dx->clusters_total % map_size) clusters_per_mapblock++;
+	if(!new_cluster_map) return;
 	if(!dx->opposite_order)
 	{
+		if(!dx->clusters_per_mapblock) return;
 		target_block = start / dx->clusters_per_mapblock;
 		target_offset = start % dx->clusters_per_mapblock;
 		do
 		{
-			if(target_block == N_BLOCKS - 1)
+			if(target_block == map_size - 1)
 			{
 				if(len <= dx->clusters_per_last_mapblock - target_offset)
 				{
@@ -256,7 +258,7 @@ void UpdateFragmentedFilesList(PEXAMPLE_DEVICE_EXTENSION dx)
 /*
  * But on NTFS we must wait until the volume has been checkpointed. 
  */
-void ProcessFreeBlock(PEXAMPLE_DEVICE_EXTENSION dx,ULONGLONG start, ULONGLONG len)
+void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start, ULONGLONG len)
 {
 	PROCESS_BLOCK_STRUCT *ppbs;
 
@@ -293,7 +295,7 @@ direct_call:
 	}
 }
 
-void ProcessUnfragmentedBlock(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn,
+void ProcessUnfragmentedBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 							  ULONGLONG start, ULONGLONG len)
 {
 	UCHAR space_state[] = {UNFRAGM_SPACE,UNFRAGM_OVERLIMIT_SPACE, \
@@ -309,7 +311,7 @@ void ProcessUnfragmentedBlock(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn,
 }
 
 /* Kernel of defragmenter */
-void Defragment(PEXAMPLE_DEVICE_EXTENSION dx)
+void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFRAGMENTED pflist;
 	PFILENAME curr_file;
@@ -382,7 +384,7 @@ exit_defrag:
 		dx->status = STATUS_BEFORE_PROCESSING;
 }
 
-NTSTATUS __MoveFile(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile, 
+NTSTATUS __MoveFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
 		    ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)
 {
 	ULONG status;
@@ -431,7 +433,7 @@ NTSTATUS __MoveFile(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
 	return status;
 }
 
-void InsertFreeSpaceBlock(PEXAMPLE_DEVICE_EXTENSION dx,
+void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 			  ULONGLONG start,ULONGLONG length)
 {
 	PFREEBLOCKMAP block, prev_block, new_block;
@@ -524,7 +526,7 @@ void InsertFreeSpaceBlock(PEXAMPLE_DEVICE_EXTENSION dx,
 	}
 }
 
-void RemoveFreeSpaceBlocks(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+void RemoveFreeSpaceBlocks(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	PFREEBLOCKMAP block, prev_block, new_block;
 	PBLOCKMAP file_block;
@@ -584,7 +586,7 @@ next:
 	}
 }
 
-NTSTATUS MoveBlocksOfFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn,
+NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 			  HANDLE hFile,ULONGLONG targetLcn,
 			  ULONGLONG clusters_per_block)
 {
@@ -621,7 +623,7 @@ exit:
 	return Status;
 }
 
-NTSTATUS MoveCompressedFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn,
+NTSTATUS MoveCompressedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 			    HANDLE hFile,ULONGLONG targetLcn)
 {
 	PBLOCKMAP curr_block;
@@ -641,7 +643,7 @@ NTSTATUS MoveCompressedFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn,
 	return Status;
 }
 
-ULONGLONG FindTarget(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+ULONGLONG FindTarget(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	ULONGLONG t_before = LLINVALID, t_after = LLINVALID;
 	ULONGLONG target;
@@ -686,7 +688,7 @@ exit:
 	return target;
 }
 
-BOOLEAN DefragmentFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
+BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;
@@ -791,7 +793,7 @@ BOOLEAN DefragmentFile(PEXAMPLE_DEVICE_EXTENSION dx,PFILENAME pfn)
  * 2. On NTFS cycle of attempts is bad solution,
  *    because it increase processing time and can be as while(1) {}.
  */
-void DefragmentFreeSpace(PEXAMPLE_DEVICE_EXTENSION dx)
+void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFILENAME curr_file;
 
@@ -829,7 +831,7 @@ void DefragmentFreeSpace(PEXAMPLE_DEVICE_EXTENSION dx)
 	}
 }
 
-void FreeAllBuffers(PEXAMPLE_DEVICE_EXTENSION dx)
+void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFILENAME ptr,next_ptr;
 

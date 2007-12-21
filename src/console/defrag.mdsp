@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=..\lib
 outputFilename=../bin/udefrag.exe
-libraries=udefrag
+libraries=udefrag,msvcrt
 extraLinkerOptions=
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -65,8 +65,8 @@ optimizeLevel=2
 // linker
 libraryPath=..\lib
 outputFilename=../bin/udefrag.exe
-libraries=udefrag
-extraLinkerOptions=
+libraries=udefrag,msvcrt
+extraLinkerOptions=-Wl,--strip-all
 ignoreStartupFile=0
 ignoreDefaultLibs=0
 stripExecutableFile=0
@@ -86,5 +86,5 @@ extraResourceOptions=
 1=defrag.rc
 [Other]
 [History]
-..\include\udefrag.h,2687
-defrag.c,5405
+..\include\udefrag.h,2665
+defrag.c,0

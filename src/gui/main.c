@@ -181,9 +181,18 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	signed int i = +1 * (signed int)hInst;
 	signed __int64 j = (signed __int64)i;
 	unsigned int k = (unsigned int)j;
-	j = (signed __int64)(signed int)k;
+	unsigned __int64 m;
+	j = -1 * (int)hInst;
+	m  = (unsigned __int64) j;
+	j = (signed __int64) m;
+	sprintf(b,"%I64i",j);
+	MessageBox(0,b,0,0);
+	//j = (signed __int64)(signed int)k;
 	sprintf(b,"%x",-1 * (int)hInst);
 */
+//	char msg[256];
+//	int q = sizeof(msg);
+	
 	settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
@@ -194,7 +203,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		udefrag_clean_registry();
 		ExitProcess(0);
 	}
-	HandleError(udefrag_init(0,NULL,FALSE),2);
+	HandleError(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
 	win_rc.left = settings->x; win_rc.top = settings->y;
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
@@ -225,6 +234,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int stat,index;
 	char s[16];
 	int p;
+	double d;
 	short *err_msg;
 	volume_info *v;
 	int i;
@@ -280,8 +290,10 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 		lvi.pszText = s;
 		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 
-		p = (int)(100 * \
-			((double)(signed __int64)(v[i].free_space.QuadPart) / (double)(signed __int64)(v[i].total_space.QuadPart)));
+		d = (double)(signed __int64)(v[i].free_space.QuadPart);
+		/* 0.1 constant is used to exclude divide by zero error */
+		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
+		p = (int)(100 * d);
 		sprintf(s,"%u %%",p);
 		lvi.iSubItem = 5;
 		lvi.pszText = s;

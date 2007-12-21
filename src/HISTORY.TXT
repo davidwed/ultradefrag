@@ -1,6 +1,6 @@
 HISTORY
 
-[Version x.x.x (x86 w2k driver size in Kbytes)   release date]
+[Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
 
 
@@ -11,6 +11,8 @@ HISTORY
     - documentation improved
     - first compilation using gcc -> strong code verifying ->
       hundreds of small bugs were fixed
+    - full MinGW support for compilation
+    - configure.pl script was created
 
 
   Version 1.2.3 (22.0)   2007-12-04

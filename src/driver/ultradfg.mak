@@ -21,9 +21,9 @@ ALL: "$(OUTDIR)\ultradfg.sys"
 
 CPP=cl.exe
 !IF "$(NT4_TARGET)" == "true"
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /I "$(DDKINCDIR)\ndk" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "NATIVE" /D "NT4_TARGET" /Fp"$(INTDIR)\ultradfg_nt4.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "NATIVE" /D "NT4_TARGET" /Fp"$(INTDIR)\ultradfg_nt4.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 !ELSE
-CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /I "$(DDKINCDIR)\ndk" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "NATIVE" /Fp"$(INTDIR)\ultradfg.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /ML /W3 /GX /O2 /I "$(DDKINCDIR)" /I "$(DDKINCDIR)\ddk" /D "NDEBUG" /D "WIN32" /D "_MBCS" /D "NATIVE" /Fp"$(INTDIR)\ultradfg.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 !ENDIF
 
 .c{$(INTDIR)}.obj::

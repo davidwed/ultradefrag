@@ -168,7 +168,6 @@ IntAsciiFromInput(PKEYBOARD_INPUT_DATA InputData, DWORD KeyState)
 		}
 		Counter++;
 	}
-
 	return 0;
 }
 

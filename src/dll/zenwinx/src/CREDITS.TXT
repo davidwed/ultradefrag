@@ -15,5 +15,7 @@ Special thanks to:
 
 ReactOS Team (http://www.reactos.org)
 
+MinGW Team (http://www.mingw.org)
+
 
 Also many thanks to all people that help us to improve ZenWINX.

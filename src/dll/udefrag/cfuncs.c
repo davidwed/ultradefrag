@@ -61,7 +61,7 @@ DWORD (WINAPI *func_FormatMessageA)(DWORD,PVOID,DWORD,DWORD,LPSTR,DWORD,va_list*
 DWORD (WINAPI *func_FormatMessageW)(DWORD,PVOID,DWORD,DWORD,LPWSTR,DWORD,va_list*);
 
 /* internal functions prototypes */
-char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode);
+char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode,long map_size);
 char * __stdcall i_udefrag_unload(BOOL save_options);
 char * __stdcall i_udefrag_analyse(unsigned char letter);
 char * __stdcall i_udefrag_defragment(unsigned char letter);
@@ -148,9 +148,9 @@ short *format_message_w(char *string,short *buffer)
 	return buffer;
 }
 
-short * __stdcall udefrag_init(int argc, short **argv,int native_mode)
+short * __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 {
-	return format_message_w(i_udefrag_init(argc,argv,native_mode),msg_buffer);
+	return format_message_w(i_udefrag_init(argc,argv,native_mode,map_size),msg_buffer);
 }
 
 short * __stdcall udefrag_unload(BOOL save_options)

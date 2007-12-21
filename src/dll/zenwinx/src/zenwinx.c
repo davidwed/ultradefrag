@@ -47,14 +47,16 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
  *  FUNCTION
  *     Initialize a native application and ZenWINX library.
  *  INPUTS
- *     peb - pointer for the Process Environment Block, that is 
- *           the first parameter of NtProcessStartup() function.
+ *     peb   - pointer for the Process Environment Block, that is 
+ *             the first parameter of NtProcessStartup() function.
  *  RESULT
- *     error - zero for success, -1 for error
+ *     error - zero for success; negative values are error codes,
+ *             defined in zenwinx.h; use winx_get_last_error function
+ *             to get the extented error code.
  *  EXAMPLE
  *     void __stdcall NtProcessStartup(PPEB Peb) // native entry point
  *     {
- *         if(winx_init(Peb) == -1)
+ *         if(winx_init(Peb) < 0)
  *         {
  *             winx_printf("winx_init() call unsuccessful!"); // print error message
  *             winx_exit(1); // exit with code 1
@@ -64,14 +66,12 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
  *         winx_exit(0); // successful exit
  *     }
  *  NOTES
- *     1. You should call this function before any attempt
- *        to use keyboard related functions.
- *     2. Messages about the internal errors are 
- *        always displayed on the screen.
+ *     You should call this function before any attempt
+ *     to use keyboard related functions.
  *  BUGS
  *     It seems that USB keyboards are unsupported.
  *  SEE ALSO
- *     winx_exit,winx_reboot,winx_shutdown
+ *     winx_exit,winx_reboot,winx_shutdown,winx_get_last_error
  ******/
 int __stdcall winx_init(void *peb)
 {

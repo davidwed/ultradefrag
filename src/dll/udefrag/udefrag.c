@@ -93,8 +93,7 @@ BOOL set_error_mode(UINT uMode);
 char * __stdcall udefrag_load_settings(int argc, short **argv);
 char * __stdcall i_udefrag_save_settings(void);
 
-/* inline functions */
-#define SafeNtClose(h) if(h) { NtClose(h); h = NULL; }
+#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
@@ -105,7 +104,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 /*!
  *  udefrag_init procedure
  */
-char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
+char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode,long map_size)
 {
 	UNICODE_STRING uStr;
 	HANDLE UserToken = NULL;
@@ -125,7 +124,7 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
 	if(!EnablePrivilege(UserToken,SE_SHUTDOWN_PRIVILEGE)) goto init_fail;
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) goto init_fail;*/
 	if(!EnablePrivilege(UserToken,SE_LOAD_DRIVER_PRIVILEGE)) goto init_fail;
-	SafeNtClose(UserToken);
+	NtCloseSafe(UserToken);
 	/* create init_event - this must be after privileges enabling */
 	RtlInitUnicodeString(&uStr,L"\\udefrag_init");
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
@@ -168,7 +167,11 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
 	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_USER_MODE_BUFFER,
 		user_mode_buffer,0,NULL,0,
 		"Can't set user mode buffer: %x!",msg)) goto init_fail;
-	/* 6. Load settings */
+	/* 6. Set cluster map size */
+	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_CLUSTER_MAP_SIZE,
+		&map_size,sizeof(long),NULL,0,
+		"Can't setup cluster map buffer: %x!",msg)) goto init_fail;
+	/* 7. Load settings */
 	udefrag_load_settings(argc,argv);
 	if(udefrag_set_options(&settings))
 	{
@@ -177,7 +180,7 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode)
 	}
 	return NULL;
 init_fail:
-	SafeNtClose(UserToken);
+	NtCloseSafe(UserToken);
 	if(init_event) udefrag_unload(FALSE);
 	return msg;
 }
@@ -194,12 +197,12 @@ char * __stdcall i_udefrag_unload(BOOL save_options)
 	}
 	/* close events */
 	NtClose(init_event); init_event = NULL;
-	SafeNtClose(io_event);
-	SafeNtClose(io2_event);
-	SafeNtClose(stop_event);
-	SafeNtClose(map_event);
+	NtCloseSafe(io_event);
+	NtCloseSafe(io2_event);
+	NtCloseSafe(stop_event);
+	NtCloseSafe(map_event);
 	/* close device handle */
-	SafeNtClose(udefrag_device_handle);
+	NtCloseSafe(udefrag_device_handle);
 	/* unload driver */
 	RtlInitUnicodeString(&uStr,driver_key);
 	NtUnloadDriver(&uStr);
@@ -351,21 +354,21 @@ char * __stdcall i_udefrag_get_progress(STATISTIC *pstat, double *percentage)
 		case 'A':
 			*percentage = (double)(LONGLONG)pstat->processed_clusters *
 					(double)(LONGLONG)pstat->bytes_per_cluster / 
-					(double)(LONGLONG)pstat->total_space;
+					((double)(LONGLONG)pstat->total_space + 0.1);
 			break;
 		case 'D':
 			if(pstat->clusters_to_move_initial == 0)
 				*percentage = 1.00;
 			else
 				*percentage = 1.00 - (double)(LONGLONG)pstat->clusters_to_move / 
-						(double)(LONGLONG)pstat->clusters_to_move_initial;
+						((double)(LONGLONG)pstat->clusters_to_move_initial + 0.1);
 			break;
 		case 'C':
 			if(pstat->clusters_to_compact_initial == 0)
 				*percentage = 1.00;
 			else
 				*percentage = 1.00 - (double)(LONGLONG)pstat->clusters_to_compact / 
-						(double)(LONGLONG)pstat->clusters_to_compact_initial;
+						((double)(LONGLONG)pstat->clusters_to_compact_initial + 0.1);
 		}
 		*percentage = (*percentage) * 100.00;
 	}
@@ -405,7 +408,7 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 	strcat(result_msg,"\n  Number of fragmented files   = ");
 	_itoa(pstat->fragmfilecounter,s,10);
 	strcat(result_msg,s);
-	p = (double)(pstat->fragmcounter)/(double)(pstat->filecounter);
+	p = (double)(pstat->fragmcounter)/((double)(pstat->filecounter) + 0.1);
 	ip = (unsigned int)(p * 100.00);
 	strcat(result_msg,"\n  Fragments per file           = ");
 	sprintf(s,"%u.%02u",ip / 100,ip % 100);

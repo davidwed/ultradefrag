@@ -54,7 +54,7 @@ extern DWORD (WINAPI *func_FormatMessageA)(DWORD,PVOID,DWORD,DWORD,LPSTR,DWORD,v
 extern DWORD (WINAPI *func_FormatMessageW)(DWORD,PVOID,DWORD,DWORD,LPWSTR,DWORD,va_list*);
 
 /* internal functions prototypes */
-char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode);
+char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode,long map_size);
 char * __stdcall i_udefrag_unload(BOOL save_options);
 char * __stdcall i_udefrag_analyse(unsigned char letter);
 char * __stdcall i_udefrag_defragment(unsigned char letter);
@@ -134,11 +134,11 @@ char *format_message_a(char *string,char *buffer)
 	return buffer;
 }
 
-char * __stdcall udefrag_s_init(void)
+char * __stdcall udefrag_s_init(long map_size)
 {
 	char *result;
 
-	result = format_message_a(i_udefrag_init(0,NULL,FALSE),msg_buffer_a);
+	result = format_message_a(i_udefrag_init(0,NULL,FALSE,map_size),msg_buffer_a);
 	return result ? result : "";
 }
 
@@ -226,6 +226,7 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 	char chr;
 	char t[256];
 	int p;
+	double d;
 
 	result = format_message_a(i_udefrag_get_avail_volumes(&v,skip_removable),vol_msg_buffer_a);
 	if(result)
@@ -247,8 +248,9 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 		fbsize(t,(ULONGLONG)(v[i].free_space.QuadPart));
 		strcat(s_msg,t);
 		strcat(s_msg,":");
-		p = (int)(100 * \
-			((double)(signed __int64)(v[i].free_space.QuadPart) / (double)(signed __int64)(v[i].total_space.QuadPart)));
+		d = (double)(signed __int64)(v[i].free_space.QuadPart);
+		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
+		p = (int)(100 * d);
 		sprintf(t,"%u %%:",p);
 		strcat(s_msg,t);
 	}

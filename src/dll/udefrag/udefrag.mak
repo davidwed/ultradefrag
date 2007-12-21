@@ -15,7 +15,7 @@ ALL : "$(OUTDIR)\udefrag.dll"
 "$(INTDIR)" :
     if not exist "$(INTDIR)/$(NULL)" mkdir "$(INTDIR)"
 
-CPP_PROJ=/nologo /Gd /MT /W3 /GX /O2 /I "$(DDKINCDIR)\ddk" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_USRDLL" /D "UDEFRAG_EXPORTS" /Fp"$(INTDIR)\udefrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
+CPP_PROJ=/nologo /Gd /MT /W3 /GX /O2 /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "_USRDLL" /D "UDEFRAG_EXPORTS" /Fp"$(INTDIR)\udefrag.pch" /YX /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\udefrag.res" /d "NDEBUG" 
 LINK32_FLAGS=ntdll.lib /nologo /entry:"DllMain" /subsystem:console /dll /incremental:no /pdb:"$(OUTDIR)\udefrag.dll.pdb" /machine:I386 /nodefaultlib /def:".\udefrag.def" /out:"$(OUTDIR)\udefrag.dll" /implib:"$(OUTDIR)\udefrag.lib" 
 

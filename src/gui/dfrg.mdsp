@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=..\lib
 outputFilename=../bin/dfrg.exe
-libraries=udefrag,gdi32,comdlg32,comctl32
+libraries=udefrag,gdi32,comdlg32,comctl32,msvcrt
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -65,8 +65,8 @@ optimizeLevel=2
 // linker
 libraryPath=..\lib
 outputFilename=../bin/dfrg.exe
-libraries=udefrag,gdi32,comdlg32,comctl32
-extraLinkerOptions=-mwindows
+libraries=udefrag,gdi32,comdlg32,comctl32,msvcrt
+extraLinkerOptions=-mwindows -Wl,--strip-all
 ignoreStartupFile=0
 ignoreDefaultLibs=0
 stripExecutableFile=0
@@ -90,7 +90,7 @@ extraResourceOptions=
 1=dfrg.rc
 [Other]
 [History]
-map.c,6101
+settings.c,0
 main.h,1341
-settings.c,6687
-main.c,20284
+map.c,0
+main.c,5084

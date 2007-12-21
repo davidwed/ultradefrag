@@ -26,7 +26,7 @@
 
 #include "driver.h"
 
-void DeleteLogFile(PEXAMPLE_DEVICE_EXTENSION dx)
+void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	short p[] = L"\\??\\A:\\FRAGLIST.HTM";
 	OBJECT_ATTRIBUTES ObjectAttributes;
@@ -40,7 +40,7 @@ void DeleteLogFile(PEXAMPLE_DEVICE_EXTENSION dx)
 		DebugPrint("-Ultradfg- Delete %ws status %x\n",p,(UINT)status);
 }
 
-void Write(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
+void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		   PVOID buffer,ULONG length,PLARGE_INTEGER pOffset)
 {
 	IO_STATUS_BLOCK ioStatus;
@@ -67,7 +67,7 @@ void Write(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
 	}
 }
 
-void WriteLogBody(PEXAMPLE_DEVICE_EXTENSION dx,HANDLE hFile,
+void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 				  PLARGE_INTEGER pOffset,BOOLEAN is_filtered)
 {
 	PFRAGMENTED pf;
@@ -117,7 +117,7 @@ next:
 	}
 }
 
-BOOLEAN SaveFragmFilesListToDisk(PEXAMPLE_DEVICE_EXTENSION dx)
+BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS Status;

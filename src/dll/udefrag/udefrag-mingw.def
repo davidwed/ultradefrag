@@ -1,7 +1,7 @@
 LIBRARY udefrag.dll
 
 EXPORTS
-	udefrag_init@12
+	udefrag_init@16
 	udefrag_unload@4
 	udefrag_get_options@0
 	udefrag_set_options@4
@@ -28,7 +28,7 @@ EXPORTS
 	fbsize@12
 	fbsize2@12
 	dfbsize2@8
-	udefrag_s_init@0
+	udefrag_s_init@4
 	udefrag_s_unload@4
 	udefrag_s_analyse@4
 	udefrag_s_defragment@4

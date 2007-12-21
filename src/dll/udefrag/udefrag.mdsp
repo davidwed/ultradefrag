@@ -28,7 +28,7 @@ optimizeLevel=0
 libraryPath=
 outputFilename=../../lib/udefrag.dll
 libraries=ntdll
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12
+extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -66,7 +66,7 @@ optimizeLevel=2
 libraryPath=
 outputFilename=../../lib/udefrag.dll
 libraries=ntdll
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12
+extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -91,10 +91,11 @@ extraResourceOptions=
 1=udefrag.rc
 [Other]
 [History]
-misc.c,1406
-..\zenwinx\src\ntndk.h,2006
-sfuncs.c,4244
-settings.c,13165
-cfuncs.c,4283
+udefrag.c,3524
+settings.c,0
+..\..\include\udefrag.h,3053
+misc.c,0
+..\zenwinx\src\ntndk.h,910
+sfuncs.c,7288
 thread.c,3148
-udefrag.c,0
+cfuncs.c,1076

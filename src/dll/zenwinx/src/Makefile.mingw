@@ -1,8 +1,3 @@
-#################################################################
-## This Makefile Exported by MinGW Developer Studio
-## Copyright (c) 2002-2004 by Parinya Thipchart
-#################################################################
-
 ifneq (,$(findstring Release, $(CFG)))
   override CFG = Release
 else
@@ -10,7 +5,7 @@ else
 endif
 
 PROJECT = zenwinx
-CC = "D:\Software\MinGWStudio\MinGW\bin\gcc.exe"
+CC = gcc.exe
 
 WINDRES = "$(COMPILER_BIN)windres.exe"
 ifeq ($(CFG),Debug)
@@ -25,7 +20,7 @@ ifeq ($(CFG),Debug)
   RCFLAGS = 
   LIB_DIRS = 
   LIBS = -lntdll 
-  LDFLAGS = -pipe -shared -Wl,--output-def,"$(OBJ_DIR)\zenwinx.def",--out-implib,"$(OBJ_DIR)\libzenwinx.dll.a" -nostartfiles -nodefaultlibs zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12
+  LDFLAGS = -pipe -shared -Wl,--output-def,"$(OBJ_DIR)\zenwinx.def",--out-implib,"$(OBJ_DIR)\libzenwinx.dll.a" -nostartfiles -nodefaultlibs zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 endif
 
 ifeq ($(CFG),Release)
@@ -40,7 +35,7 @@ ifeq ($(CFG),Release)
   RCFLAGS = 
   LIB_DIRS = 
   LIBS = -lntdll 
-  LDFLAGS = -pipe -shared -Wl,--output-def,"$(OBJ_DIR)\zenwinx.def",--out-implib,"$(OBJ_DIR)\libzenwinx.dll.a" -nostartfiles -nodefaultlibs zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12
+  LDFLAGS = -pipe -shared -Wl,--output-def,"$(OBJ_DIR)\zenwinx.def",--out-implib,"$(OBJ_DIR)\libzenwinx.dll.a" -nostartfiles -nodefaultlibs zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 endif
 
 ifeq ($(OS),Windows_NT)
@@ -53,7 +48,7 @@ SRC_OBJS = \
   $(OBJ_DIR)/keyboard.o	\
   $(OBJ_DIR)/keytrans.o	\
   $(OBJ_DIR)/mem.o	\
-  $(OBJ_DIR)/messages.o	\
+  $(OBJ_DIR)/error.o	\
   $(OBJ_DIR)/stdio.o	\
   $(OBJ_DIR)/zenwinx.o
 
@@ -128,7 +123,7 @@ ntndk.h	\
 zenwinx.h
 	$(compile_source)
 
-$(OBJ_DIR)/messages.o: messages.c
+$(OBJ_DIR)/error.o: error.c
 
 	$(compile_source)
 

@@ -34,17 +34,47 @@ typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
 /* define status codes */
 /* ifndef directives are used to prevent warnings when gcc on mingw is used */
 typedef LONG NTSTATUS;
-#define STATUS_SUCCESS               ((NTSTATUS)0x00000000L)
+#define STATUS_SUCCESS                ((NTSTATUS)0x00000000)
 #ifndef STATUS_TIMEOUT
-#define STATUS_TIMEOUT               ((NTSTATUS)0x00000102)
+#define STATUS_TIMEOUT                ((NTSTATUS)0x00000102)
 #endif
 #ifndef STATUS_PENDING
-#define STATUS_PENDING               ((NTSTATUS)0x00000103)
+#define STATUS_PENDING                ((NTSTATUS)0x00000103)
 #endif
-#define STATUS_IMAGE_ALREADY_LOADED  ((NTSTATUS)0xC000010E)
-#define STATUS_NOT_ALL_ASSIGNED      ((NTSTATUS)0x00000106)
-#define STATUS_OBJECT_NAME_COLLISION ((NTSTATUS)0xC0000035)
-#define STATUS_INVALID_INFO_CLASS    ((NTSTATUS)0xC0000003)
+#ifndef STATUS_INVALID_HANDLE
+#define STATUS_INVALID_HANDLE         ((NTSTATUS)0xC0000008)
+#endif
+#define STATUS_IMAGE_ALREADY_LOADED   ((NTSTATUS)0xC000010E)
+#define STATUS_NOT_ALL_ASSIGNED       ((NTSTATUS)0x00000106)
+#define STATUS_UNSUCCESSFUL           ((NTSTATUS)0xC0000001)
+#define STATUS_NOT_IMPLEMENTED        ((NTSTATUS)0xC0000002)
+#define STATUS_INVALID_INFO_CLASS     ((NTSTATUS)0xC0000003)
+#define STATUS_INFO_LENGTH_MISMATCH   ((NTSTATUS)0xC0000004)
+#ifndef STATUS_ACCESS_VIOLATION
+#define STATUS_ACCESS_VIOLATION       ((NTSTATUS)0xC0000005)
+#endif
+#ifndef STATUS_INVALID_HANDLE
+#define STATUS_INVALID_HANDLE         ((NTSTATUS)0xC0000008)
+#endif
+#define STATUS_INVALID_PARAMETER      ((NTSTATUS)0xC000000D)
+#define STATUS_NO_SUCH_DEVICE         ((NTSTATUS)0xC000000E)
+#define STATUS_NO_SUCH_FILE           ((NTSTATUS)0xC000000F)
+#define STATUS_INVALID_DEVICE_REQUEST ((NTSTATUS)0xC0000010)
+#define STATUS_END_OF_FILE            ((NTSTATUS)0xC0000011)
+#define STATUS_WRONG_VOLUME           ((NTSTATUS)0xC0000012)
+#define STATUS_NO_MEDIA_IN_DEVICE     ((NTSTATUS)0xC0000013)
+#ifndef STATUS_NO_MEMORY
+#define STATUS_NO_MEMORY              ((NTSTATUS)0xC0000017)
+#endif
+#define STATUS_ACCESS_DENIED          ((NTSTATUS)0xC0000022)
+#define STATUS_BUFFER_TOO_SMALL       ((NTSTATUS)0xC0000023)
+#define STATUS_OBJECT_NAME_INVALID    ((NTSTATUS)0xC0000033)
+#define STATUS_OBJECT_NAME_NOT_FOUND  ((NTSTATUS)0xC0000034)
+#define STATUS_OBJECT_NAME_COLLISION  ((NTSTATUS)0xC0000035)
+#define STATUS_OBJECT_PATH_INVALID    ((NTSTATUS)0xC0000039)
+#define STATUS_OBJECT_PATH_NOT_FOUND  ((NTSTATUS)0xC000003A)
+#define STATUS_OBJECT_PATH_SYNTAX_BAD ((NTSTATUS)0xC000003B)
+#define STATUS_INVALID_INFO_CLASS     ((NTSTATUS)0xC0000003)
 #ifndef NT_SUCCESS
 #define NT_SUCCESS(x) ((x)>=0)
 #endif
@@ -406,6 +436,19 @@ typedef struct _PEB_LDR_DATA
     LIST_ENTRY          InInitializationOrderModuleList;
 } PEB_LDR_DATA, *PPEB_LDR_DATA;
 
+typedef struct _CLIENT_ID
+{
+    HANDLE UniqueProcess;
+    HANDLE UniqueThread;
+} CLIENT_ID, *PCLIENT_ID;
+
+typedef struct _GDI_TEB_BATCH
+{
+    ULONG  Offset;
+    HANDLE HDC;
+    ULONG  Buffer[0x136];
+} GDI_TEB_BATCH;
+
 /***********************************************************************
  * PEB data structure
  */
@@ -468,7 +511,77 @@ typedef struct _PEB
     ULONG                        SessionId;                         /* 1d4 */
 } PEB, *PPEB;
 
+/***********************************************************************
+ * TEB data structure
+ */
+typedef struct _TEB
+{
+    NT_TIB          Tib;                        /* 000 */
+    PVOID           EnvironmentPointer;         /* 01c */
+    CLIENT_ID       ClientId;                   /* 020 */
+    PVOID           ActiveRpcHandle;            /* 028 */
+    PVOID           ThreadLocalStoragePointer;  /* 02c */
+    PPEB            Peb;                        /* 030 */
+    ULONG           LastErrorValue;             /* 034 */
+    ULONG           CountOfOwnedCriticalSections;/* 038 */
+    PVOID           CsrClientThread;            /* 03c */
+    PVOID           Win32ThreadInfo;            /* 040 */
+    ULONG           Win32ClientInfo[31];        /* 044 used for user32 private data in Wine */
+    PVOID           WOW32Reserved;              /* 0c0 */
+    ULONG           CurrentLocale;              /* 0c4 */
+    ULONG           FpSoftwareStatusRegister;   /* 0c8 */
+    PVOID           SystemReserved1[54];        /* 0cc used for kernel32 private data in Wine */
+    PVOID           Spare1;                     /* 1a4 */
+    LONG            ExceptionCode;              /* 1a8 */
+    BYTE            SpareBytes1[40];            /* 1ac */
+    PVOID           SystemReserved2[10];        /* 1d4 used for ntdll private data in Wine */
+    GDI_TEB_BATCH   GdiTebBatch;                /* 1fc */
+    ULONG           gdiRgn;                     /* 6dc */
+    ULONG           gdiPen;                     /* 6e0 */
+    ULONG           gdiBrush;                   /* 6e4 */
+    CLIENT_ID       RealClientId;               /* 6e8 */
+    HANDLE          GdiCachedProcessHandle;     /* 6f0 */
+    ULONG           GdiClientPID;               /* 6f4 */
+    ULONG           GdiClientTID;               /* 6f8 */
+    PVOID           GdiThreadLocaleInfo;        /* 6fc */
+    PVOID           UserReserved[5];            /* 700 */
+    PVOID           glDispachTable[280];        /* 714 */
+    ULONG           glReserved1[26];            /* b74 */
+    PVOID           glReserved2;                /* bdc */
+    PVOID           glSectionInfo;              /* be0 */
+    PVOID           glSection;                  /* be4 */
+    PVOID           glTable;                    /* be8 */
+    PVOID           glCurrentRC;                /* bec */
+    PVOID           glContext;                  /* bf0 */
+    ULONG           LastStatusValue;            /* bf4 */
+    UNICODE_STRING  StaticUnicodeString;        /* bf8 used by advapi32 */
+    WCHAR           StaticUnicodeBuffer[261];   /* c00 used by advapi32 */
+    PVOID           DeallocationStack;          /* e0c */
+    PVOID           TlsSlots[64];               /* e10 */
+    LIST_ENTRY      TlsLinks;                   /* f10 */
+    PVOID           Vdm;                        /* f18 */
+    PVOID           ReservedForNtRpc;           /* f1c */
+    PVOID           DbgSsReserved[2];           /* f20 */
+    ULONG           HardErrorDisabled;          /* f28 */
+    PVOID           Instrumentation[16];        /* f2c */
+    PVOID           WinSockData;                /* f6c */
+    ULONG           GdiBatchCount;              /* f70 */
+    ULONG           Spare2;                     /* f74 */
+    ULONG           Spare3;                     /* f78 */
+    ULONG           Spare4;                     /* f7c */
+    PVOID           ReservedForOle;             /* f80 */
+    ULONG           WaitingOnLoaderLock;        /* f84 */
+    PVOID           Reserved5[3];               /* f88 */
+    PVOID          *TlsExpansionSlots;          /* f94 */
+} TEB, *PTEB;
+
 #define NtCurrentProcess() ((HANDLE)-1)
+/*
+ * NtCurrentTeb() is imported from ntdll.dll if we use ms c compiler.
+ * Otherwise (on mingw) this is inline function, defined in one of the
+ * mingw headers.
+ */
+struct _TEB *NtCurrentTeb(void);
 
 #define SE_ASSIGNPRIMARYTOKEN_PRIVILEGE  0x3
 #define SE_AUDIT_PRIVILEGE               0x15
@@ -515,12 +628,6 @@ typedef enum _KEY_VALUE_INFORMATION_CLASS
     KeyValueFullInformationAlign64,
     KeyValuePartialInformationAlign64
 } KEY_VALUE_INFORMATION_CLASS;
-
-typedef struct _CLIENT_ID
-{
-    HANDLE UniqueProcess;
-    HANDLE UniqueThread;
-} CLIENT_ID, *PCLIENT_ID;
 
 typedef enum _EVENT_TYPE {
   NotificationEvent,

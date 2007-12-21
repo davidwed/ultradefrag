@@ -15,3 +15,5 @@ EXPORTS
 	winx_gets
 	winx_kbhit
 	winx_breakhit
+	winx_get_last_error@0
+	winx_set_last_error@4

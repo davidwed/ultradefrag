@@ -164,7 +164,9 @@ sub save_opts {
 	print CFGFILE "set ZENWINX_VERSION=$v[0],$v[1],$v[2],0\n";
 	print CFGFILE "set ZENWINX_VERSION2=\"$v[0], $v[1], $v[2], 0\\0\"\n";
 	foreach $key (keys (%opts)) {
-		if($key ne 'ULTRADFGVER'){
+		if($key ne 'ULTRADFGVER' && $key ne 'NETRUNTIMEPATH' &&
+		   $key ne 'NSISDIR' && $key ne 'DDKINCDIR'){
+		   print "$key\n";
 			print CFGFILE "set $key=$opts{$key}\n";
 		}
 	}

@@ -1,8 +1,3 @@
-#################################################################
-## This Makefile Exported by MinGW Developer Studio
-## Copyright (c) 2002-2004 by Parinya Thipchart
-#################################################################
-
 ifneq (,$(findstring Release, $(CFG)))
   override CFG = Release
 else
@@ -10,7 +5,7 @@ else
 endif
 
 PROJECT = dfrg
-CC = "D:\Software\MinGWStudio\MinGW\bin\gcc.exe"
+CC = gcc.exe
 
 WINDRES = "$(COMPILER_BIN)windres.exe"
 ifeq ($(CFG),Debug)
@@ -24,7 +19,7 @@ ifeq ($(CFG),Debug)
   RC_PREPROC = 
   RCFLAGS = 
   LIB_DIRS = -L"../lib" 
-  LIBS = -ludefrag -lgdi32 -lcomdlg32 -lcomctl32 
+  LIBS = -ludefrag -lgdi32 -lcomdlg32 -lcomctl32 -lmsvcrt 
   LDFLAGS = -pipe -mwindows
 endif
 
@@ -39,8 +34,8 @@ ifeq ($(CFG),Release)
   RC_PREPROC = 
   RCFLAGS = 
   LIB_DIRS = -L"../lib" 
-  LIBS = -ludefrag -lgdi32 -lcomdlg32 -lcomctl32 
-  LDFLAGS = -pipe -mwindows
+  LIBS = -ludefrag -lgdi32 -lcomdlg32 -lcomctl32 -lmsvcrt 
+  LDFLAGS = -pipe -mwindows -Wl,--strip-all
 endif
 
 ifeq ($(OS),Windows_NT)

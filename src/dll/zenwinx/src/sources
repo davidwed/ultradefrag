@@ -5,7 +5,7 @@ DLLDEF=zenwinx.def
 
 USER_C_FLAGS=/DUSE_WINDDK
 
-SOURCES=zenwinx.c keyboard.c keytrans.c mem.c messages.c stdio.c zenwinx.rc
+SOURCES=zenwinx.c keyboard.c keytrans.c mem.c error.c stdio.c zenwinx.rc
 
 USE_NTDLL=1
 
