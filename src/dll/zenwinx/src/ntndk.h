@@ -581,7 +581,11 @@ typedef struct _TEB
  * Otherwise (on mingw) this is inline function, defined in one of the
  * mingw headers.
  */
-struct _TEB *NtCurrentTeb(void);
+//#if defined(__GNUC__)
+//struct _TEB *NtCurrentTeb(void);
+//#else
+//struct _TEB *NtCurrentTeb(void);
+//#endif
 
 #define SE_ASSIGNPRIMARYTOKEN_PRIVILEGE  0x3
 #define SE_AUDIT_PRIVILEGE               0x15

@@ -94,10 +94,11 @@ extraResourceOptions=
 1=zenwinx.rc
 [Other]
 [History]
-zenwinx.c,0
+ntndk.h,2985
+keyboard.c,2441
+zenwinx.h,1970
+stdio.c,11071
+error.c,2275
+keytrans.c,0
 mem.c,0
-keytrans.c,1240
-stdio.c,6035
-zenwinx.h,904
-keyboard.c,2316
-ntndk.h,1937
+zenwinx.c,3116

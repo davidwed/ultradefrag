@@ -11,13 +11,25 @@ WINDRES = "$(COMPILER_BIN)windres.exe"
 ifeq ($(CFG),Debug)
   OBJ_DIR = ../obj/driver
   OUTPUT_DIR = ../bin
+ifeq ($(NT4_TARGET),true)
+  TARGET = ultradfg_nt4.sys
+else
   TARGET = ultradfg.sys
+endif
   C_INCLUDE_DIRS = 
   C_PREPROC = 
+ifeq ($(NT4_TARGET),true)
+  CFLAGS = -pipe  -Wall -g2 -O0 -DNT4_TARGET 
+else
   CFLAGS = -pipe  -Wall -g2 -O0 
+endif
   RC_INCLUDE_DIRS = 
   RC_PREPROC = 
+ifeq ($(NT4_TARGET),true)
+  RCFLAGS = -DNT4_TARGET 
+else
   RCFLAGS = 
+endif
   LIB_DIRS = -L"../lib" 
   LIBS = -lntoskrnl -lhal 
   LDFLAGS = -pipe -nostartfiles -nodefaultlibs ultradfg-mingw.def -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared,--strip-all
@@ -26,13 +38,25 @@ endif
 ifeq ($(CFG),Release)
   OBJ_DIR = ../obj/driver
   OUTPUT_DIR = ../bin
+ifeq ($(NT4_TARGET),true)
+  TARGET = ultradfg_nt4.sys
+else
   TARGET = ultradfg.sys
+endif
   C_INCLUDE_DIRS = 
   C_PREPROC = 
+ifeq ($(NT4_TARGET),true)
+  CFLAGS = -pipe  -Wall -g0 -O2 -DNT4_TARGET 
+else
   CFLAGS = -pipe  -Wall -g0 -O2 
+endif
   RC_INCLUDE_DIRS = 
   RC_PREPROC = 
+ifeq ($(NT4_TARGET),true)
+  RCFLAGS = -DNT4_TARGET 
+else
   RCFLAGS = 
+endif
   LIB_DIRS = -L"../lib" 
   LIBS = -lntoskrnl -lhal 
   LDFLAGS = -pipe -nostartfiles -nodefaultlibs ultradfg-mingw.def -Wl,--entry,_DriverEntry@8,--subsystem,native,--image-base,0x10000,-shared,--strip-all

@@ -72,6 +72,25 @@ MS Visual Studio 6.0 (or later versions).
   (included in KmdKit package). Put these files to lib subdirectory of your
   Visual Studio installation.
 
+  VERY IMPORTANT NOTE: The winnt.h file in visual studio 6.0 contains wrong
+  definition of the NtCurrentTeb function. Therefore replace the following lines:
+
+  #if defined(_M_ALPHA)
+  #define NtCurrentTeb() ((struct _TEB *)_rdteb())
+  #else
+  struct _TEB *
+  NtCurrentTeb(void);
+  #endif
+
+  with:
+
+  #if defined(_M_ALPHA)
+  #define NtCurrentTeb() ((struct _TEB *)_rdteb())
+  #else
+  struct _TEB *
+  __stdcall NtCurrentTeb(void);
+  #endif
+
   Finally, edit ultradfg.dsp file (driver project file), because they are 
 references to ReactOS headers here.
 

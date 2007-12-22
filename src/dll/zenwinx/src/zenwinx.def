@@ -17,3 +17,6 @@ EXPORTS
 	winx_breakhit
 	winx_get_last_error
 	winx_set_last_error
+	winx_get_error_description
+	winx_get_error_message
+	winx_get_error_message_ex

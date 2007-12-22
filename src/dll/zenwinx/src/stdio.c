@@ -428,7 +428,7 @@ int __cdecl winx_gets(char *string,int n)
 	{
 repeate_attempt:
 		ch = winx_getche();
-		if(ch == -1) return -1;
+		if(ch == -1) { string[i] = 0; return -1; }
 		if(ch == 0) goto repeate_attempt;
 		if(ch == 13) { winx_putch('\n'); string[i] = 0; break; }
 		string[i] = (char)ch;

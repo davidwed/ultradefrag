@@ -194,8 +194,14 @@ void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(!dx->opposite_order)
 	{
 		if(!dx->clusters_per_mapblock) return;
+		/*
+		 * The following code uses _aulldvrm() function:
+		 * target_block = start / dx->clusters_per_mapblock;
+		 * target_offset = start % dx->clusters_per_mapblock;
+		 * But we don't have this function on NT 4.0!!!
+		 */
 		target_block = start / dx->clusters_per_mapblock;
-		target_offset = start % dx->clusters_per_mapblock;
+		target_offset = start - target_block * dx->clusters_per_mapblock;
 		do
 		{
 			if(target_block == map_size - 1)

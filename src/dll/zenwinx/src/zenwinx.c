@@ -51,14 +51,23 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
  *             the first parameter of NtProcessStartup() function.
  *  RESULT
  *     error - zero for success; negative values are error codes,
- *             defined in zenwinx.h; use winx_get_last_error function
- *             to get the extented error code.
+ *             defined in zenwinx.h; use winx_get_last_error
+ *             function to get the extented error code.
  *  EXAMPLE
- *     void __stdcall NtProcessStartup(PPEB Peb) // native entry point
+ *     // native entry point
+ *     void __stdcall NtProcessStartup(PPEB Peb)
  *     {
- *         if(winx_init(Peb) < 0)
+ *         signed int code;
+ *         char buffer[256];
+ *
+ *         code = winx_init(Peb);
+ *         if(code < 0)
  *         {
- *             winx_printf("winx_init() call unsuccessful!"); // print error message
+ *             winx_get_error_message_ex(buffer,
+ *                                       sizeof(buffer),
+ *                                       code);
+ *             winx_printf("winx_init() call unsuccessful!");
+ *             winx_printf("\n\n%s\n",buffer);
  *             winx_exit(1); // exit with code 1
  *         }
  *         // your program code here

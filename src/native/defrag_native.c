@@ -64,8 +64,12 @@ void HandleError(short *err_msg,int exit_code)
 	if(err_msg)
 	{
 		DisplayMessage(err_msg);
-		winx_printf("Good bye ...\n");
 		Cleanup();
+		if(exit_code) {
+			winx_printf("Wait 10 seconds ...\n");
+			nsleep(10000); /* show error message at least 5 seconds */
+		}
+		winx_printf("Good bye ...\n");
 		winx_exit(exit_code);
 	}
 }
@@ -108,7 +112,7 @@ int __stdcall update_stat(int df)
 {
 	short *err_msg;
 
-	if(winx_breakhit(100) != -1)
+	if(winx_breakhit(100) >= 0)
 	{
 		DisplayMessage(udefrag_stop());
 		abort_flag = 1;
@@ -195,6 +199,9 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	char *commands[] = {"shutdown","reboot","batch","exit",
 	                    "analyse","defrag","optimize",
 						"drives","help"};
+	signed int code;
+	unsigned long excode;
+	char buffer[256];
 
 	/* 3. Initialization */
 	settings = udefrag_get_options();
@@ -209,16 +216,22 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		"If something is wrong, hit F8 on startup\n"
 		"and select 'Last Known Good Configuration'.\n"
 		"Use Break key to abort defragmentation.\n\n");
-	if(winx_init(Peb) == -1)
+	code = winx_init(Peb);
+	if(code < 0)
 	{
-		nsleep(2000);
-		winx_exit(4);
+		if(winx_get_error_message_ex(buffer,sizeof(buffer),code) < 0)
+			winx_printf("Initialization failed and buffer is too small!\n");
+		else
+			winx_printf("%s\n",buffer);
+		winx_printf("Wait 10 seconds ...\n");
+		nsleep(10000);
+		winx_exit(1);
 	}
 	/* 6b. Prompt to exit */
 	winx_printf("Press any key to exit...  ");
 	for(i = 0; i < 3; i++)
 	{
-		if(winx_kbhit(1000) != -1){ winx_printf("\n"); HandleError(L"",0); }
+		if(winx_kbhit(1000) >= 0){ winx_printf("\n"); HandleError(L"",0); }
 		winx_printf("%c ",(char)('0' + 3 - i));
 	}
 	winx_printf("\n\n");
@@ -232,9 +245,9 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	{
 		/* do scheduled job and exit */
 		if(!settings->sched_letters)
-			HandleError(L"No letters specified!",1);
+			HandleError(L"No letters specified!",3);
 		if(!settings->sched_letters[0])
-			HandleError(L"No letters specified!",1);
+			HandleError(L"No letters specified!",3);
 		length = wcslen(settings->sched_letters);
 		for(i = 0; i < length; i++)
 		{
@@ -250,7 +263,20 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	while(1)
 	{
 		winx_printf("# ");
-		winx_gets(buffer,sizeof(buffer) - 1);
+		if(winx_gets(buffer,sizeof(buffer) - 1) < 0)
+		{
+			excode = winx_get_last_error();
+			if(excode)
+			{
+				winx_printf("Keyboard read error %x!\n%s\n",(UINT)excode,
+				            winx_get_error_description(excode));
+				Cleanup();
+				winx_printf("Wait 10 seconds\n");
+				nsleep(10000);
+				winx_exit(4);
+				return;
+			}
+		}
 		cmd[0] = arg[0] = 0;
 		sscanf(buffer,"%32s %4s",cmd,arg);
 		for(i = 0; i < sizeof(commands) / sizeof(char*); i++)

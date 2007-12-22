@@ -49,8 +49,11 @@ int __cdecl winx_gets(char *string,int n);
 int __cdecl winx_kbhit(int msec);
 int __cdecl winx_breakhit(int msec);
 
-void __stdcall winx_set_last_error(unsigned long code);
 unsigned long __stdcall winx_get_last_error(void);
+void   __stdcall winx_set_last_error(unsigned long code);
+char * __stdcall winx_get_error_description(unsigned long code);
+char * __stdcall winx_get_error_message(int code);
+int    __stdcall winx_get_error_message_ex(char *s, int n, signed int code);
 
 /* zenwinx error codes */
 #define WINX_INVALID_KEYBOARD    0x00000001

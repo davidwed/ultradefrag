@@ -157,7 +157,11 @@ Function install_driver
   SetOutPath $R0
   StrCmp $NT4_TARGET '1' 0 modern_win
   DetailPrint "NT 4.0 version"
+!if ${ULTRADFGARCH} == 'i386'
+  File "ultradfg_nt4.sys"
+!else
   File /nonfatal "ultradfg_nt4.sys"
+!endif
   Delete "$R0\ultradfg.sys"
   Rename "ultradfg_nt4.sys" "ultradfg.sys"
   goto driver_installed

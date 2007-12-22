@@ -3,8 +3,7 @@ HISTORY
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
 
-
-  Version 1.2.4 ()   2007--
+  Version 1.2.4 (23.0)   2007-12-22
   ------------------------------------------------------------------------------
     - big modern volumes support was added (by reducing memory requirements)
     - context menu handler for volumes in Explorer was added
@@ -20,7 +19,6 @@ HISTORY
     - two gui bugs (#1833605 and #1839755) were fixed
     - localized error descriptions were added
     - small driver optimization was performed
-
 
 
   Version 1.2.2 (22.5)   2007-11-16
