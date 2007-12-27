@@ -2,21 +2,21 @@
 
 1.1 System requirements
 
-  You need Windows NT 4.0, Windows 2000, Windows XP, Windows Server 2003 
-or Windows Vista. Also Windows XP x64, Server 2003 x64 and Vista x64 editions 
-supported.
+  Reactos runs on Windows NT 4.0, Windows 2000, Windows XP, Windows Server
+2003 and  Windows Vista, including 64 bit versions of Windows. NT 4.0 Alpha
+is not supported currently.
 
 
 1.2 Installation
 
-  To install UltraDefrag you can download ultradefrag-x.y.z.bin.xxxx.exe
+  To install UltraDefrag, simply download ultradefrag-x.y.z.bin.xxxx.exe
 from project site. In common cases xxxx must be 'i386'. If you have AMD x64
 or Intel Core Duo processor and 64-bit Edition of Windows installed, xxxx 
-must be 'amd64'. If you use PC with IA-64 architecture than try to download
-IA64 version. It was never tested by the authors, because we don't have 
-such kind of CPU.
+must be 'amd64'. If you use PC with IA-64 architecture then try to download
+IA64 version. The IA-64 build is untested because the authors lack access to
+IA-64 bit hardware. We would like to hear reports of attempts to run.
 
-  Installation process is very simple. Enjoy it!
+  The installation process is very simple. Enjoy!
 
 
 2. Installation from sources
@@ -25,55 +25,57 @@ such kind of CPU.
 
 2.1.1 Compilation with Windows Server 2003 DDK
 
-  The best way to build UltraDefrag is to do this using Windows Server 2003 
-Driver Development Kit (DDK). You can simply download it from 
-one of the locations that can be found using any web search system (e.g. Google).
+  The best way to build UltraDefrag is to use the Windows Server 2003 Driver
+Development Kit (DDK). You can simply download it from one of the locations
+that can be found using any web search system (e.g. Google).
 
-  Only one disadvantage of this way is that the Windows DDK is a really 
-big package (about 230 Mb). But if you have internet connection with good 
-bandwidth, that's not a problem for you.
+  The only disadvantage of this method is that the Windows DDK is a really 
+big package (about 230 Mb). However, if you have an internet connection with 
+a good download rate, its should not be a large problem.
 
 
 2.1.2 Compilation with MinGW
 
-  Other interesting way to produce UltraDefrag package is to do this using MinGW.
-GNU C Compiler (GCC) has one important advantage (MS C compiler don't have them) -
-very strong C language standard compatibility checking. I have removed from the 
-program code hundreds of small bugs using this unique ability of GCC. Only one 
-disadvantage of described tool is that compiled code has greater size.
-P.a. driver produced by DDK may have 22.0 Kb size, but the same driver produced 
-by GCC has about 50.0 Kb.
+  Other interesting way to produce UltraDefrag package is to do so using MinGW.
+GNU C Compiler (GCC) has one important advantage over the Microsoft C
+compiler, it produces many useful warnings for code that is not completly
+within the C standard. I have removed hundreds of small bugs from UltraDefrag
+thanks to the warnings produced by GCC. The biggest disadvantage of gcc is that 
+it produces larger executables than the microsoft compiler. e.g: A driver
+produced by DDK may have 22.0 Kb size, but the same driver produced by GCC is
+only about 50.0 kb.
 
   You can either download MinGW from http://www.mingw.org or download
 MinGW Developer Studio from http://www.parinyasoft.com (about 25 Mb).
 
-  Note that currently only i386 binaries can be produced using this way.
+  Note that the MinGW build system can only build i386 binaries.
 
-  VERY IMPORTANT NOTE: If you will build the dynamic libraries from the MinGW
-Developer Studio, note that produced *.a files are invalid. Because I don't know
-how to specify true options in Developer Studio's project file. Use makefiles
-instead:
+  VERY IMPORTANT NOTE: If you build the dynamic libraries from the MinGW
+Developer Studio, the resulting *.a files are invalid. This is because I don't
+know how to specify linker options in Developer Studio's project file. Use
+makefiles instead:
 
   mingw32-make Makefile.mingw
 
 
 2.1.3 Compilation with Microsoft Visual Studio 6.0
 
-  Other way to build the program is more difficult, but you don't need have 
-Windows DDK for them. You can use Microsoft C compiler included in 
-MS Visual Studio 6.0 (or later versions).
+  This is another method for building UltraDefrag. It does not require the
+DDK.You can use Microsoft C compiler included in MS Visual Studio version 6.0
+or later.
 
-  In addition you need obtain a copy of ReactOS source code 
-(from http://www.reactos.org) for special header files used to build the driver.
+  To use this method you will need to obtain a copy of ReactOS source code
+from http://www.reactos.org for special header files used to build the driver.
 
-  Also you should download the following files:
+  You will also need to download the following files:
 - ntdll.lib from http://www.masm32.com/board/index.php?topic=2124.new
 - ntoskrnl.lib + hal.lib from http://www.freewebs.com/four-f/index.htm
   (included in KmdKit package). Put these files to lib subdirectory of your
   Visual Studio installation.
 
-  VERY IMPORTANT NOTE: The winnt.h file in visual studio 6.0 contains wrong
-  definition of the NtCurrentTeb function. Therefore replace the following lines:
+  VERY IMPORTANT NOTE: The winnt.h file in visual studio 6.0 contains an
+incorrect definition of the NtCurrentTeb function. Therefore replace the
+following lines:
 
   #if defined(_M_ALPHA)
   #define NtCurrentTeb() ((struct _TEB *)_rdteb())
@@ -91,8 +93,8 @@ MS Visual Studio 6.0 (or later versions).
   __stdcall NtCurrentTeb(void);
   #endif
 
-  Finally, edit ultradfg.dsp file (driver project file), because they are 
-references to ReactOS headers here.
+  Finally, edit ultradfg.dsp file (driver project file), and ensure that the
+reactos header paths are properly set.
 
   Note that currently only i386 binaries can be produced using this way.
 
@@ -126,8 +128,8 @@ e). Perl language package for Windows. You can download it from
     (that was created for extended gui configuration abilities).
 
 f). Doxygen (http://www.doxygen.org) is used to produce a special kind of 
-    documentation from project's source files. It contains description 
-    of functions and global variables dependencies and may be used p.a. for 
+    documentation from project's source files. It contains descriptions 
+    of functions and global variables dependencies and may be used e.g. for
     removing unnecessary data fields from program's internal structures.
     Also it is helpful for any other program code cleanup.
     So, if you are programmer, this tool is highly recommended for you.
@@ -153,28 +155,32 @@ h). md5sum tool is used to generate file ultradefrag-x.y.z.MD5SUMS that
 
 2.1.5 Software recommended for debugging purposes
 
-  Because the main work is done by kernel mode driver, you can download 
-tools described below to find program bugs. Even if you are not programmer, 
-these tools may be very useful for you:
+  Because the actual work done by UltraDefrag is done by kernel mode driver,
+you can download the tools described below to troubleshoot bugs. Even if you
+are not programmer, these tools may be very useful for you:
 
-a). DebugView and other tools created by Mark Russinovich. You can download it
+a). DebugView. You can download it and other tools created by Mark Russinovich
     from http://www.sysinternals.com. In DebugView window you can see some 
     interesting information given by driver engine: number of clusters on your 
-    volumes, mft position and much more. Other useful tools are, par example, 
-    WinObj (using them you can see when UltraDefrag opens his driver, creates 
-    some events etc.), File Monitor and Registry Monitor.
+    volumes, mft position and much more. Some other useful tools available from
+    sysinternals are
+    - WinObj: Allows you to see when UltraDefrag opens its driver, creates 
+    some events etc.
+    - File Monitor
+    - Registry Monitor.
 
 b). PoolTag. This tool is included in Windows DDK or can be downloaded from 
     http://www.osr.com. Using this tool you can watch driver memory allocation.
     The UltraDefrag driver tag is 'ULTR'.
 
 c). StatusToError tool included in KmdKit (see above). Input the NTSTATUS code
-    given by gui, console or native app and you will become the localized error 
-    description. Simple but very useful. Especially for boot time defragmentation
-    errors decoding, because I can't do it at boot time.
+    given by the UltraDefrag gui, console or native app and it will give you
+    the localized error description. A simple but very useful tool, especially 
+    for boot time defragmentation errors, where it is impossible for the
+    program to do localization lookups.
 
 
-2.1.6 Especially for mr. Random Newbe (notes for the beginners)
+2.1.6 Especially for Mr. Random Newbe (Some notes for the beginners)
 
 a). Many of described tools have small size, and you don't need high-speed
     internet connection to download their latest versions. Simply do it. 
@@ -187,20 +193,20 @@ b). If you will place tools executables in one of the directories, specified
 
 2.2 Building and installation
 
-a). Download sources archive and unpack it somewhere.
+a). Download source archive and unpack it somewhere.
     NOTE: Currently path must not contain spaces. If you have some ideas
           how to fix that send your report to the authors, please.
 b). Configure build options by typing the following command:
 
     perl configure.pl
 
-    This tool has graphical interface. Enter please correct paths to installed
-    software and other options. If you prefer to use MinGW, click the button
+    This tool has a graphical interface. Enter the paths to prerequesite
+    libraties and other options. If you prefer to use MinGW, click the button
     'Apply patch to MinGW' to replace some libraries included in MinGW
     (libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
     will be saved in files with additional suffix '.orig'.
 
-c). To build UltraDefrag use BUILD.CMD. Synopsis is:
+c). To build UltraDefrag use the BUILD.CMD script. parameters are:
 
     build               in .\bin directory you will find installer;
                         in .\src_package - sources 7zip-archive.
@@ -209,8 +215,8 @@ c). To build UltraDefrag use BUILD.CMD. Synopsis is:
                         after build
 
     build {--use-winddk | --use-mingw | --use-msvc} [--install]
-			you can specify your favorite compiler
+			you can specify your compiler of choice
 
-    build --clean       use it to delete all intermediate files
+    build --clean       use to delete all intermediate files
 
     build --help        show usage information and exit
