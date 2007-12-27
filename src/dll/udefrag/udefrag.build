@@ -1,0 +1,12 @@
+# this is the udefrag library build options
+NAME=udefrag
+TYPE=dll
+
+SRC=cfuncs.c;misc.c;settings.c;sfuncs.c;thread.c;udefrag.c
+RC=udefrag.rc
+
+DEFFILE=udefrag.def
+BASEADDR=0x01500000
+
+LIBS=ntdll
+ADLIBS=

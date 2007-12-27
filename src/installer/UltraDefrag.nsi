@@ -33,7 +33,13 @@
 !endif
 
 ;-----------------------------------------
-Name "Ultra Defragmenter"
+!if ${ULTRADFGARCH} == 'amd64'
+Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
+!else if ${ULTRADFGARCH} == 'ia64'
+Name "Ultra Defragmenter v${ULTRADFGVER} (IA64)"
+!else
+Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
+!endif
 OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
 
 LicenseData "LICENSE.TXT"

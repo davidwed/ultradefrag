@@ -1,0 +1,12 @@
+# this is the zenwinx library build options
+NAME=zenwinx
+TYPE=dll
+
+SRC=error.c;keyboard.c;keytrans.c;mem.c;stdio.c;zenwinx.c
+RC=zenwinx.rc
+
+DEFFILE=zenwinx.def
+BASEADDR=0x01800000
+
+LIBS=ntdll
+ADLIBS=

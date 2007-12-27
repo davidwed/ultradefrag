@@ -30,6 +30,14 @@ Items to describe:
 
 5. Describe new options of console application.
 
+6. In version 1.2.4 and later versions cluster map for very small volumes
+   can be very inaccurate. P.a., one floppy disk contains 2847 clusters.
+   But internally they are represented (in 1.2.4 version of program) 
+   by 3640 blocks. Therefore we have one block (3640 / 2847) per cluster 
+   plus 794 blocks per the last one. 
+   So, the bottom part of the cluster map is invalid.
+   If you have no less than 3640 clusters, don't worry about the cluster map.
+   This restriction is a small cost for the big modern volumes support.
 
 				***
 

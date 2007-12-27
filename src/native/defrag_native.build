@@ -1,0 +1,9 @@
+# this is the UltraDefrag native interface build options
+NAME=defrag_native
+TYPE=native
+
+SRC=defrag_native.c
+RC=defrag_native.rc
+
+LIBS=ntdll
+ADLIBS=$(UDEFRAG_LIB_PATH)\udefrag;$(UDEFRAG_LIB_PATH)\zenwinx
