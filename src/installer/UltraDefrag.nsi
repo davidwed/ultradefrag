@@ -21,8 +21,29 @@
  *  Installer + portable launcher source.
  */
 
-!include "ultradefrag_globals.nsh"
+/*
+ *  NOTE: The following symbols should be defined
+ *        through makensis command line:
+ *  ULTRADFGVER=<version number in form x.y.z>
+ *  ULTRADFGARCH=<i386 | amd64 | ia64>
+ */
+
+!ifndef ULTRADFGVER
+!define ULTRADFGVER 1.10.0
+!endif
+
+!ifndef ULTRADFGARCH
+!define ULTRADFGARCH i386
+!endif
+
+;!include "ultradefrag_globals.nsh"
 !include "x64.nsh"
+
+!if ${ULTRADFGARCH} == 'i386'
+!define ROOTDIR "..\.."
+!else
+!define ROOTDIR "..\..\.."
+!endif
 
 ;-----------------------------------------
 
@@ -42,7 +63,7 @@ Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
 !endif
 OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
 
-LicenseData "LICENSE.TXT"
+LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 InstallDir "$PROGRAMFILES64\UltraDefrag"
 InstallDirRegKey HKLM "Software\DASoft\NTDefrag" "Install_Dir"
 ShowInstDetails show
@@ -62,7 +83,7 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
   !define MUI_COMPONENTSPAGE_SMALLDESC
 
   !insertmacro MUI_PAGE_WELCOME
-  !insertmacro MUI_PAGE_LICENSE "LICENSE.TXT"
+  !insertmacro MUI_PAGE_LICENSE "${ROOTDIR}\src\LICENSE.TXT"
   !insertmacro MUI_PAGE_COMPONENTS
   !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
@@ -190,13 +211,13 @@ Function ShowBootSplash
   SetOutPath $PLUGINSDIR
   StrCmp $RunPortable '1' 0 show_general_splash
   StrCmp $ShowBootsplash '1' 0 splash_done
-  File "PortableUltraDefrag.bmp"
+  File "${ROOTDIR}\src\installer\PortableUltraDefrag.bmp"
   advsplash::show 2000 400 0 -1 "$PLUGINSDIR\PortableUltraDefrag"
   pop $R0
   Delete "$PLUGINSDIR\PortableUltraDefrag.bmp"
   goto splash_done
 show_general_splash:
-  File "UltraDefrag.bmp"
+  File "${ROOTDIR}\src\installer\UltraDefrag.bmp"
   advsplash::show 2000 400 0 -1 "$PLUGINSDIR\UltraDefrag"
   pop $R0
   Delete "$PLUGINSDIR\UltraDefrag.bmp"
@@ -247,19 +268,19 @@ Section "Ultra Defrag core files (required)" SecCore
   DetailPrint "Install core files..."
   SetOutPath $INSTDIR
   File "Dfrg.exe"
-  File "LICENSE.TXT"
-  File "CREDITS.TXT"
-  File "HISTORY.TXT"
-  File "INSTALL.TXT"
-  File "README.TXT"
-  File "FAQ.TXT"
+  File "${ROOTDIR}\src\LICENSE.TXT"
+  File "${ROOTDIR}\src\CREDITS.TXT"
+  File "${ROOTDIR}\src\HISTORY.TXT"
+  File "${ROOTDIR}\src\INSTALL.TXT"
+  File "${ROOTDIR}\src\README.TXT"
+  File "${ROOTDIR}\src\FAQ.TXT"
 
   Delete "$INSTDIR\defrag.exe"
   Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
 
   SetOutPath "$INSTDIR\presets"
-  File "presets\standard"
-  File "presets\system"
+  File "${ROOTDIR}\src\presets\standard"
+  File "${ROOTDIR}\src\presets\system"
 
   DetailPrint "Install driver..."
 !insertmacro DisableX64FSRedirection
@@ -272,7 +293,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "defrag_native.exe"
   DetailPrint "Install console interface..."
   File "udefrag.exe"
-  File "udctxhandler.cmd"
+  File "${ROOTDIR}\src\installer\udctxhandler.cmd"
 !insertmacro EnableX64FSRedirection
 
   DetailPrint "Write driver settings..."
@@ -310,12 +331,12 @@ Section "Documentation" SecDocs
 
   DetailPrint "Install documentation..."
   SetOutPath "$INSTDIR\doc"
-  File "manual.html"
+  File "${ROOTDIR}\doc\html\manual.html"
   SetOutPath "$INSTDIR\doc\images"
-  File "console.png"
-  File "main_screen110.png"
-  File "about.png"
-  File "valid-html401.png"
+  File "${ROOTDIR}\doc\html\images\console.png"
+  File "${ROOTDIR}\doc\html\images\main_screen110.png"
+  File "${ROOTDIR}\doc\html\images\about.png"
+  File "${ROOTDIR}\doc\html\images\valid-html401.png"
   StrCpy $DocsInstalled 1
 
 SectionEnd

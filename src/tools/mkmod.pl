@@ -18,9 +18,14 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# SYNOPSIS:    perl mkmod.pl <filename>
+# If processing was sucessful, binary modules will be placed in ../../bin directory;
+# *.lib or *.a files - in  ../../lib directory.
+
 use strict;
 use Switch;
-use Cwd;
+#use Cwd;
+use File::Copy;
 
 my %opts = (
 	'NAME' => ' ',
@@ -38,32 +43,148 @@ my @rc_files;
 my @libs;
 my @adlibs;
 
-my @ddk_cmd = ("build.exe","-c");
+my $input_filename;
+my ($target_type,$target_ext,$target_name,$nt4target_name);
+my $arch;
+my @ddk_cmd = ("build.exe"," ");
+my @msvc_cmd = ("nmake.exe","/NOLOGO","/A","/f"," ");
+my @mingw_cmd = ("mingw32-make","--always-make","-f","Makefile.mingw");
 
 # frontend
-if($ARGV[0] eq undef){
+$input_filename = $ARGV[0];
+if($input_filename eq undef){
 	die("Filename must be specified!");
 }
-print "$ARGV[0] Preparing to makefile generation...\n";
-get_opts($ARGV[0]);
+print "$input_filename Preparing to makefile generation...\n";
+get_opts($input_filename);
+$target_type = $opts{'TYPE'};
+switch($target_type){
+	case 'console' {$target_ext = 'exe';}
+	case 'gui'     {$target_ext = 'exe';}
+	case 'dll'     {$target_ext = 'dll';}
+	case 'driver'  {$target_ext = 'sys';}
+	case 'native'  {$target_ext = 'exe';}
+	else           {die("Unknown target type: $target_type!");}
+}
+$target_name = "$opts{'NAME'}.$target_ext";
+$nt4target_name = "$opts{'NAME'}_nt4.$target_ext";
 switch($ENV{'BUILD_ENV'}){
 	case 'winddk' {
-		produce_ddk_makefile();
-		print "$ARGV[0] winddk build performing...\n";
-		prepare_ddk_env('AMD64');
-		system(@ddk_cmd) == 0 or die("Can't build AMD64 target!");
+		produce_ddk_makefile() if obsolete($input_filename,"sources");
+		print "$input_filename winddk build performing...\n";
+		$arch = 'i386';
+		if($ENV{'AMD64'} ne undef){
+			$arch = 'amd64';
+		}
+		if($ENV{'IA64'} ne undef){
+			$arch = 'ia64';
+		}
+		switch($target_type){
+			case 'dll' {
+				system(@ddk_cmd) == 0 or die("Can't build the target!");
+				if($arch eq 'i386'){
+					copy("objfre_wnet_x86\\i386\\$target_name","..\\..\\bin\\$target_name")
+						or die("Can't copy file $target_name: $!");
+					copy("objfre_wnet_x86\\i386\\$opts{'NAME'}.lib","..\\..\\lib\\$opts{'NAME'}.lib")
+						or die("Can't copy file $opts{'NAME'}.lib: $!");
+				} else {
+					copy("objfre_wnet_$arch\\$arch\\$target_name","..\\..\\bin\\$arch\\$target_name")
+						or die("Can't copy file $target_name: $!");
+					copy("objfre_wnet_$arch\\$arch\\$opts{'NAME'}.lib",
+						 "..\\..\\lib\\$arch\\$opts{'NAME'}.lib")
+						or die("Can't copy file $opts{'NAME'}.lib: $!");
+				}
+			}
+			case 'driver' {
+				$ddk_cmd[@ddk_cmd - 1] = "-c";
+				if($arch eq 'i386'){
+					$ENV{'NT4_TARGET'} = "true";
+					system(@ddk_cmd) == 0 or die("Can't build the target!");
+					copy("objfre_wnet_x86\\i386\\$nt4target_name","..\\..\\bin\\$nt4target_name")
+						or die("Can't copy file $target_name: $!");
+				}
+				$ENV{'NT4_TARGET'} = "false";
+				system(@ddk_cmd) == 0 or die("Can't build the target!");
+				if($arch eq 'i386'){
+					copy("objfre_wnet_x86\\i386\\$target_name","..\\..\\bin\\$target_name")
+						or die("Can't copy file $target_name: $!");
+				} else {
+					copy("objfre_wnet_$arch\\$arch\\$target_name","..\\..\\bin\\$arch\\$target_name")
+						or die("Can't copy file $target_name: $!");
+				}
+			}
+			else {
+				system(@ddk_cmd) == 0 or die("Can't build the target!");
+				if($arch eq 'i386'){
+					copy("objfre_wnet_x86\\i386\\$target_name","..\\..\\bin\\$target_name")
+						or die("Can't copy file $target_name: $!");
+				} else {
+					copy("objfre_wnet_$arch\\$arch\\$target_name","..\\..\\bin\\$arch\\$target_name")
+						or die("Can't copy file $target_name: $!");
+				}
+			}
+		}
 	}
 	case 'msvc' {
-		produce_msvc_makefile();
-		print "$ARGV[0] msvc build performing...\n";
+		produce_msvc_makefile() if obsolete($input_filename,"$opts{'NAME'}.mak");
+		print "$input_filename msvc build performing...\n";
+		$msvc_cmd[@msvc_cmd - 1] = "$opts{'NAME'}.mak";
+		switch($target_type){
+			case 'dll' {
+				system(@msvc_cmd) == 0 or die("Can't build the target!");
+				copy("$target_name","..\\..\\bin\\$target_name")
+					or die("Can't copy file $target_name: $!");
+				copy("$opts{'NAME'}.lib","..\\..\\lib\\$opts{'NAME'}.lib")
+					or die("Can't copy file $opts{'NAME'}.lib: $!");
+			}
+			case 'driver' {
+				$ENV{'NT4_TARGET'} = "true";
+				system(@msvc_cmd) == 0 or die("Can't build the target!");
+				copy("$nt4target_name","..\\..\\bin\\$nt4target_name")
+					or die("Can't copy file $target_name: $!");
+				$ENV{'NT4_TARGET'} = "false";
+				system(@msvc_cmd) == 0 or die("Can't build the target!");
+				copy("$target_name","..\\..\\bin\\$target_name")
+					or die("Can't copy file $target_name: $!");
+			}
+			else {
+				system(@msvc_cmd) == 0 or die("Can't build the target!");
+				copy("$target_name","..\\..\\bin\\$target_name")
+					or die("Can't copy file $target_name: $!");
+			}
+		}
 	}
 	case 'mingw' {
-		produce_mingw_makefile();
-		print "$ARGV[0] mingw build performing...\n";
+		produce_mingw_makefile() if obsolete($input_filename,"Makefile.mingw");
+		print "$input_filename mingw build performing...\n";
+		switch($target_type){
+			case 'dll' {
+				system(@mingw_cmd) == 0 or die("Can't build the target!");
+				copy("$target_name","..\\..\\bin\\$target_name")
+					or die("Can't copy file $target_name: $!");
+				copy("lib$target_name.a","..\\..\\lib\\lib$target_name.a")
+					or die("Can't copy file lib$target_name.a: $!");
+			}
+			case 'driver' {
+				$ENV{'NT4_TARGET'} = "true";
+				system(@mingw_cmd) == 0 or die("Can't build the target!");
+				copy("$nt4target_name","..\\..\\bin\\$nt4target_name")
+					or die("Can't copy file $target_name: $!");
+				$ENV{'NT4_TARGET'} = "false";
+				system(@mingw_cmd) == 0 or die("Can't build the target!");
+				copy("$target_name","..\\..\\bin\\$target_name")
+					or die("Can't copy file $target_name: $!");
+			}
+			else {
+				system(@mingw_cmd) == 0 or die("Can't build the target!");
+				copy("$target_name","..\\..\\bin\\$target_name")
+					or die("Can't copy file $target_name: $!");
+			}
+		}
 	}
 	else {die("\%BUILD_ENV\% has wrong value: $ENV{'BUILD_ENV'}!");}
 }
-print "$ARGV[0] $ENV{'BUILD_ENV'} Build was successful.\n";
+print "$input_filename $ENV{'BUILD_ENV'} build was successful.\n";
 
 # frontend subroutines
 sub get_opts {
@@ -87,24 +208,18 @@ sub get_opts {
 	if($opts{'ADLIBS'} ne ' '){@adlibs = split(/;/,$opts{'ADLIBS'});}
 }
 
-sub prepare_ddk_env {
-	my $arch = $_[0];
-	my $curdir;
-	my @cmd = (
-		"cmd.exe","/C",
-		"\"\%WINDDKBASE\%\\bin\\setenv.bat\"",
-		"\%WINDDKBASE\%","fre"," ","WNET"
-		);
+sub obsolete {
+	my ($src,$dst) = @_;
+	my $src_mtime;
 
-	switch($arch){
-		case 'AMD64' {$cmd[@cmd - 2] = 'AMD64'}
-		case 'IA64' {$cmd[@cmd - 2] = '64'}
-	}
-	$curdir = getcwd;
-	system(@cmd) == 0 or die("Can't prepare DDK environment!");
-	$ENV{'BUILD_DEFAULT'} = "-nmake -i -g -P";
-	chdir($curdir) or die("Can't restore directory $curdir!");
+	my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+       $atime,$mtime,$ctime,$blksize,$blocks) = stat($src);
+	$src_mtime = $mtime;
+	($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+       $atime,$mtime,$ctime,$blksize,$blocks) = stat($dst);
+ 	return ($mtime > $src_mtime) ? 1 : 0;
 }
+
 # WinDDK backend
 sub produce_ddk_makefile {
 	my ($type,$t,$umt,$e);
@@ -184,7 +299,9 @@ sub produce_ddk_makefile {
 	}
 	print OUT "LINKLIBS=";
 	foreach (@libs){
-		print OUT "\$(DDK_LIB_PATH)\\$_.lib ";
+		if($_ ne 'msvcrt'){
+			print OUT "\$(DDK_LIB_PATH)\\$_.lib ";
+		}
 	}
 	foreach (@adlibs){
 		print OUT "$_.lib ";
@@ -235,7 +352,7 @@ sub produce_msvc_makefile {
 			$s = 'console'; $ext = 'dll';
 		}
 		case 'driver'  {
-			$cl_flags = $cl_flags."/I \"\$(DDKINCDIR)\" /I \"\$(DDKINCDIR)\ddk\" ";
+			$cl_flags = $cl_flags."/I \"\$(DDKINCDIR)\" /I \"\$(DDKINCDIR)\\ddk\" ";
 			$s = 'native'; $ext = 'sys';
 		}
 		case 'native'  {
@@ -304,7 +421,7 @@ sub produce_msvc_makefile {
 		print OUT "!ENDIF\n\n";
 	}
 	print OUT "CPP=cl.exe\nRSC=rc.exe\nLINK32=link.exe\n\n";
-	print OUT ".c{.}.obj::\n";
+	print OUT ".c.obj::\n";
 	print OUT "    \$(CPP) \@<<\n";
 	print OUT "    \$(CPP_PROJ) \$<\n"; 
 	print OUT "<<\n\n";
@@ -380,7 +497,7 @@ sub produce_mingw_makefile {
 	$target = "$opts{'NAME'}.$ext";
 	$targetnt = "$opts{'NAME'}_nt4.$ext";
 	if($type eq 'driver'){
-		print OUT "ifeq ($(NT4_TARGET),true)\n";
+		print OUT "ifeq (\$(NT4_TARGET),true)\n";
 		print OUT "TARGET = $targetnt\n";
 		print OUT "else\n";
 		print OUT "TARGET = $target\n";
@@ -415,18 +532,18 @@ sub produce_mingw_makefile {
 		case 'gui'     {print OUT "LDFLAGS = -pipe -mwindows -Wl,--strip-all\n";}
 		case 'native'  {
 			print OUT "LDFLAGS = -pipe -nostartfiles -nodefaultlibs ";
-			print OUT "-Wl,--entry,_NtProcessStartup@4,--subsystem,native,--strip-all\n";
+			print OUT "-Wl,--entry,_NtProcessStartup\@4,--subsystem,native,--strip-all\n";
 		}
 		case 'driver'  {
 			print OUT "LDFLAGS = -pipe -nostartfiles -nodefaultlibs ";
-			print OUT "$opts{'NAME'}-mingw.def -Wl,--entry,_DriverEntry@8,";
+			print OUT "$opts{'NAME'}-mingw.def -Wl,--entry,_DriverEntry\@8,";
 			print OUT "--subsystem,native,--image-base,0x10000,-shared,--strip-all\n";
 		}
 		case 'dll'     {
 			print OUT "LDFLAGS = -pipe -shared -Wl,";
 			print OUT "--out-implib,lib$opts{'NAME'}.dll.a -nostartfiles ";
 			print OUT "-nodefaultlibs $opts{'NAME'}-mingw.def -Wl,--kill-at,";
-			print OUT "--entry,_DllMain@12,--strip-all\n";
+			print OUT "--entry,_DllMain\@12,--strip-all\n";
 		}
 	}
 	print OUT "LIBS = ";
@@ -477,27 +594,27 @@ sub produce_mingw_makefile {
 	
 	print OUT ".PHONY: print_header\n\n";
 	print OUT "\$(TARGET): print_header \$(RSRC_OBJS) \$(SRC_OBJS)\n";
-	print OUT "    \$(build_target)\n";
+	print OUT "\t\$(build_target)\n";
 	if($type eq 'dll'){
-		print OUT "    \$(correct_lib)\n";
+		print OUT "\t\$(correct_lib)\n";
 	}
 	print OUT "\nprint_header:\n";
-	print OUT "\@echo ----------Configuration: $opts{'NAME'} - Release----------\n\n";
+	print OUT "\t\@echo ----------Configuration: $opts{'NAME'} - Release----------\n\n";
 	if($type eq 'dll'){
 		print OUT "define correct_lib\n";
-		print OUT "    \@echo ------ correct the lib\$(PROJECT).dll.a library ------\n";
-		print OUT "    \@dlltool -k --output-lib lib\$(PROJECT).dll.a --def $opts{'NAME'}-mingw.def\n";
+		print OUT "\t\@echo ------ correct the lib\$(PROJECT).dll.a library ------\n";
+		print OUT "\t\@dlltool -k --output-lib lib\$(PROJECT).dll.a --def $opts{'NAME'}-mingw.def\n";
 		print OUT "endef\n\n";
 	}
 	foreach (@src_files){
 		$x = $_;
 		$x =~ s/\.c/\.o/;
-		print OUT "$x: $_\n    \$(compile_source)\n\n";
+		print OUT "$x: $_\n\t\$(compile_source)\n\n";
 	}
 	foreach (@rc_files){
 		$x = $_;
 		$x =~ s/\.rc/\.res/;
-		print OUT "$x: $_\n    \$(compile_resource)\n\n";
+		print OUT "$x: $_\n\t\$(compile_resource)\n\n";
 	}
 	close OUT;
 }

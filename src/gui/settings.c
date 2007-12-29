@@ -24,6 +24,7 @@
 #include <windows.h>
 #include <commctrl.h>
 #include <commdlg.h>
+#include <shellapi.h>
 #include <memory.h>
 #include <string.h>
 #include <stdio.h>
@@ -35,6 +36,7 @@
 #include "resource.h"
 
 extern HINSTANCE hInstance;
+extern HWND hWindow;
 RECT win_rc; /* coordinates of main window */
 
 HWND hTabCtrl;
@@ -213,6 +215,9 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case IDCANCEL:
 			EndDialog(hWnd,0);
 			return TRUE;
+		case IDC_SETTINGS_HELP:
+			ShellExecute(hWindow,"open",".\\doc\\manual.html",NULL,NULL,SW_SHOW);
+			break;
 		}
 		return FALSE;
 	case WM_CLOSE:

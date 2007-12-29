@@ -86,4 +86,4 @@ extraResourceOptions=
 1=defrag_native.rc
 [Other]
 [History]
-defrag_native.c,6720
+defrag_native.c,6707

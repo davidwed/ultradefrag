@@ -113,7 +113,7 @@ END
 IDD_SETTINGS DIALOG DISCARDABLE  0, 0, 278, 165
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     DEFPUSHBUTTON   "OK",IDOK,96,147,55,12,WS_GROUP
     PUSHBUTTON      "Cancel",IDCANCEL,157,147,55,12,NOT WS_TABSTOP
@@ -124,7 +124,7 @@ END
 
 IDD_FILTER DIALOG DISCARDABLE  2, 15, 260, 116
 STYLE WS_CHILD
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Files",IDC_STATIC,6,5,248,63
     LTEXT           "Enter multiple filter match strings separated by the ';' character.",
@@ -142,7 +142,7 @@ END
 
 IDD_GUI DIALOG DISCARDABLE  2, 15, 260, 119
 STYLE WS_CHILD
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     LTEXT           "Map update interval (ms)",IDC_STATIC,11,16,84,9,
                     SS_CENTERIMAGE
@@ -155,7 +155,7 @@ END
 
 IDD_REPORT DIALOG DISCARDABLE  2, 15, 259, 119
 STYLE WS_CHILD
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "Report type",IDC_STATIC,7,5,244,28
     CONTROL         "html",IDC_HTML,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
@@ -177,7 +177,7 @@ END
 
 IDD_BOOT_SCHEDULER DIALOGEX 2, 15, 262, 119
 STYLE WS_CHILD
-FONT 8, "MS Sans Serif"
+FONT 8, "MS Shell Dlg"
 BEGIN
     GROUPBOX        "General",IDC_STATIC,6,5,143,42
     LTEXT           "Volume letters",IDC_STATIC,11,17,47,10

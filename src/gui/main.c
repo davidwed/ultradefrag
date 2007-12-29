@@ -76,7 +76,7 @@
 #include <math.h>
 
 #include "main.h"
-#include "../include/ntndk.h"
+///#include "../include/ntndk.h"
 #include "../include/ultradfg.h"
 
 #include "resource.h"

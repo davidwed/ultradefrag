@@ -1,4 +1,29 @@
 @echo off
+cd obj\driver
+perl ..\..\tools\mkmod.pl ultradfg.build
+if %errorlevel% neq 0 goto fail
+cd ..\zenwinx
+perl ..\..\tools\mkmod.pl zenwinx.build
+if %errorlevel% neq 0 goto fail
+cd ..\udefrag
+perl ..\..\tools\mkmod.pl udefrag.build
+if %errorlevel% neq 0 goto fail
+cd ..\console
+perl ..\..\tools\mkmod.pl defrag.build
+if %errorlevel% neq 0 goto fail
+cd ..\gui
+perl ..\..\tools\mkmod.pl dfrg.build
+if %errorlevel% neq 0 goto fail
+cd ..\native
+perl ..\..\tools\mkmod.pl defrag_native.build
+if %errorlevel% neq 0 goto fail
+cd ..\..
+
+exit /B
+
+
+
+
 pushd ..
 call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre %1 WNET
 popd
