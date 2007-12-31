@@ -4,7 +4,7 @@ rem This batch file use ms c compiler and reactos ddk.
 
 rem set environment
 if "%MINGW_ENV%" neq "" goto start_build
-set path=%path%;%MINGWBASE%\bin
+set path=%MINGWBASE%\bin;%path%
 set MINGW_ENV=ok
 
 :start_build

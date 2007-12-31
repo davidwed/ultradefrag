@@ -43,8 +43,8 @@ goto ddk_build
 :parse_first_parameter
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
+
 :ddk_build
-rem call DDK_BUILD.CMD
 
 set BUILD_ENV=winddk
 
@@ -59,6 +59,7 @@ set UDEFRAG_LIB_PATH=..\..\lib
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
+
 echo --------- Target is x64 ---------
 set IA64=
 pushd ..
@@ -69,6 +70,7 @@ set UDEFRAG_LIB_PATH=..\..\lib\amd64
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
+
 echo --------- Target is ia64 ---------
 set AMD64=
 pushd ..
@@ -80,117 +82,71 @@ call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
 
-
-rem if %errorlevel% neq 0 goto fail
 goto build_scheduler
-:msvc_build
-rem call MSVC_BUILD.CMD
 
+:msvc_build
 
 if "%MSVC_ENV%" neq "" goto start_msvc_build
 call "%MSVSBIN%\vcvars32.bat"
 set MSVC_ENV=ok
 :start_msvc_build
-
 set BUILD_ENV=msvc
 set UDEFRAG_LIB_PATH=..\..\lib
-
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
-goto build_scheduler
-:mingw_build
 
-rem call MINGW_BUILD.CMD
+goto build_scheduler
+
+:mingw_build
 
 if "%MINGW_ENV%" neq "" goto start_mingw_build
 set path=%MINGWBASE%\bin;%path%
 set MINGW_ENV=ok
 :start_mingw_build
-
 set BUILD_ENV=mingw
 set UDEFRAG_LIB_PATH=..\..\lib
-
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
 
+
 :build_scheduler
-
-rem cd ..
-
-
 
 call BLDSCHED.CMD
 
+
 :build_installer
+
 echo Build installer...
 cd .\bin
-rem copy /Y ..\*.TXT .\
 copy /Y ..\installer\UltraDefrag.nsi .\
-
-rem copy /Y ..\..\doc\html\manual.html .\
-rem copy /Y ..\..\doc\html\images\console.png .\
-rem copy /Y ..\..\doc\html\images\main_screen110.png .\
-rem copy /Y ..\..\doc\html\images\about.png .\
-rem copy /Y ..\..\doc\html\images\valid-html401.png .\
-
-rem xcopy /I /Y ..\presets .\presets
 rem upx udefrag.exe
 rem if %errorlevel% neq 0 goto fail
 upx dfrg.exe
 if %errorlevel% neq 0 goto fail
-rem echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
-rem echo !define ULTRADFGARCH i386 >> ultradefrag_globals.nsh
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 
-
 if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
-rem copy /Y .\UltraDefrag.nsi .\amd64\
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
-rem copy /Y .\*.TXT .\amd64\
-rem copy /Y .\*.bmp .\amd64\
-rem copy /Y .\*.cmd .\amd64\
-
-rem copy /Y ..\..\doc\html\manual.html .\amd64\
-rem copy /Y ..\..\doc\html\images\console.png .\amd64\
-rem copy /Y ..\..\doc\html\images\main_screen110.png .\amd64\
-rem copy /Y ..\..\doc\html\images\about.png .\amd64\
-rem copy /Y ..\..\doc\html\images\valid-html401.png .\amd64\
-
-rem xcopy /I /Y .\presets .\amd64\presets
 cd amd64
-rem echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
-rem echo !define ULTRADFGARCH amd64 >> ultradefrag_globals.nsh
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 
 cd..
-rem copy /Y .\UltraDefrag.nsi .\ia64\
 copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
-rem copy /Y .\*.TXT .\ia64\
-rem copy /Y .\*.bmp .\ia64\
-rem copy /Y .\*.cmd .\ia64\
-
-rem copy /Y ..\..\doc\html\manual.html .\ia64\
-rem copy /Y ..\..\doc\html\images\console.png .\ia64\
-rem copy /Y ..\..\doc\html\images\main_screen110.png .\ia64\
-rem copy /Y ..\..\doc\html\images\about.png .\ia64\
-rem copy /Y ..\..\doc\html\images\valid-html401.png .\ia64\
-
-rem xcopy /I /Y .\presets .\ia64\presets
 cd ia64
-rem echo !define ULTRADFGVER %ULTRADFGVER% > ultradefrag_globals.nsh
-rem echo !define ULTRADFGARCH ia64 >> ultradefrag_globals.nsh
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 
 cd..
+
 :build_source_package
+
 echo Build source code package...
 cd ..
 rmdir /s /q .\src_package
@@ -200,7 +156,6 @@ mkdir %SRC_PKG_PATH%\src
 xcopy /I /Y /Q    .\driver %SRC_PKG_PATH%\src\driver
 xcopy /I /Y /Q    .\console %SRC_PKG_PATH%\src\console
 xcopy /I /Y /Q /S .\gui %SRC_PKG_PATH%\src\gui
-rem xcopy /I /Y /Q .\gui\res %SRC_PKG_PATH%\src\gui\res
 xcopy /I /Y /Q    .\native %SRC_PKG_PATH%\src\native
 xcopy /I /Y /Q    .\installer %SRC_PKG_PATH%\src\installer
 xcopy /I /Y /Q    .\include %SRC_PKG_PATH%\src\include
@@ -251,7 +206,6 @@ exit /B
 echo Build error (code %ERRORLEVEL%)!
 set Path=%OLD_PATH%
 set OLD_PATH=
-rem pause
 exit /B
 
 :clean
@@ -260,7 +214,6 @@ echo Delete all intermediate files...
 cd bin
 rd /s /q amd64
 rd /s /q ia64
-rem rd /s /q presets
 del /s /q *.*
 cd ..\obj
 rd /s /q console

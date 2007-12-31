@@ -24,6 +24,7 @@
 #ifndef _DRIVER_H_
 #define _DRIVER_H_
 
+// gcc ???
 #ifndef USE_WINDDK
 #define __MSVC__
 #define _PCR

@@ -95,6 +95,7 @@ extraResourceOptions=
 1=ultradfg.rc
 [Other]
 [History]
+log.c,8509
 defrag.c,10082
 ..\include\ultradfg.h,2495
 globals.c,0
@@ -102,7 +103,6 @@ globals.h,0
 int64.c,947
 list.c,2180
 io.c,1348
-log.c,3716
 analyse.c,1885
-driver.h,9136
 ultradfg.c,11361
+driver.h,951

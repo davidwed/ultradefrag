@@ -21,6 +21,8 @@
 # SYNOPSIS:    perl mkmod.pl <filename>
 # If processing was sucessful, binary modules will be placed in ../../bin directory;
 # *.lib or *.a files - in  ../../lib directory.
+# NOTE: BUILD_ENV environment variable must be set before this script
+# execution in one of three values: winddk, msvc, mingw.
 
 use strict;
 use Switch;

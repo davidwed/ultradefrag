@@ -48,5 +48,8 @@ Markus Oberhumer, Laszlo Molnar & John Reiser (http://upx.sf.net)
 
 MinGW Team (http://www.mingw.org)
 
+Alexander A. Telyatnikov (http://alter.org.ua/en/)
+
+
 Also many thanks to all people that help us to improve UltraDefrag.
 

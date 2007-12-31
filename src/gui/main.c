@@ -174,6 +174,20 @@ void HandleError(short *err_msg,int exit_code)
 	}
 }
 
+/*ULONGLONG __stdcall _rdtsc(void)
+{
+	__asm {
+		rdtsc
+		pop		edi
+		pop		esi
+		pop		ebx
+		mov		esp, ebp
+		pop		ebp
+		retn
+	}
+	return 0;
+}*/
+
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -192,7 +206,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 */
 //	char msg[256];
 //	int q = sizeof(msg);
-	
+//	ULONGLONG t;
+//	INITCOMMONCONTROLSEX icc;
+
 	settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
@@ -207,7 +223,21 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	win_rc.left = settings->x; win_rc.top = settings->y;
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
+
+	
+//	t = _rdtsc();
+	/*
+	 * This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
+	 * but InitCommonControlsEx() needs about 90000 tacts.
+	 */
 	InitCommonControls();
+//	icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
+//	icc.dwICC = ICC_BAR_CLASSES | ICC_LISTVIEW_CLASSES | ICC_PROGRESS_CLASS | ICC_TAB_CLASSES;
+	/* 90000 tacts */
+//	InitCommonControlsEx(&icc);
+//	t = _rdtsc() - t;
+	
+	
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);

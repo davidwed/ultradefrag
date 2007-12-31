@@ -7,7 +7,7 @@ echo.
 
 if "%1" equ "" goto the_end
 echo Preparing to patch applying...
-set path=%path%;%1\bin
+set path=%1\bin;%path%
 if exist %1\lib\libntdll.a.orig goto ntdll_saved
 move %1\lib\libntdll.a %1\lib\libntdll.a.orig
 :ntdll_saved
