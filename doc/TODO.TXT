@@ -1,20 +1,20 @@
 The following is Justin Dearing's TODO list for the manual and other technical 
-documents included in the upcoming version 1.2.2.
+documents included with UltraDefrag.
 Items to describe:
 
 /* maybe we need to use this file as stack  -- Dmitri */
 /* Agreed -- Justin */
 
-1. On windows nt 4.0 sysinternals dbgview don't works. Instead of them user can
+1. On windows nt 4.0 sysinternals dbgview doesn't work. Instead, the user can
    find debug messages in c:\dbgprint.log. Size of them is hard limited by 
    512 Kb. When overflow occurs new messages will be written in the beginning of
    the file. In all cases after the last message [End] tag will be written.
 
-2. files encrypted by ntfs filesystem cannot be processed at boot time.
+2. (DONE) files encrypted by ntfs filesystem cannot be processed at boot time.
    [because defrag_native.exe starts always before winlogon.exe, therefore
    before lsass.exe]
 
-3. Program settings are accepted in the following order:
+3. (DONE) Program settings are accepted in the following order:
    a). default settings (you can find it in /src/dll/udefrag/settings.c)
    b). settings specified by user in configuration dialog (they are saved in
    registry in HKEY_LOCAL_MACHINE\CurrentControlSet\Control\UltraDefrag, because
@@ -25,10 +25,10 @@ Items to describe:
    (currently only for udefrag.exe). Overwritten settings will not be saved
    anywhere.
 
-4. Some settings are limited: each filter must contain no more than 4096 
+4. (DONE) Some settings are limited: each filter must contain no more than 4096 
    characters.
 
-5. Describe new options of console application.
+5. (DONE) Describe new options of console application.
 
 6. In version 1.2.4 and later versions cluster map for very small volumes
    can be very inaccurate. P.a., one floppy disk contains 2847 clusters.

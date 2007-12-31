@@ -29,8 +29,7 @@ User Manual</font></h1>
 <h1 class="western" style="" align="right"><i>Written
 by <a href="mailto:zippy1981@gmail.com">Justin Dearing</a></i></h1>
 <h1 class="western">What is UltraDefrag?</h1>
-<p>UltraDefrag is an open source disk defragmenter for Windows NT
-4.0
+<p>UltraDefrag is an open source disk defragmenter for Windows NT 4.0
 and later operating systems. It makes use of the same defragmenting
 API used by many other windows defrag utilities, both open and closed
 source. However, UltraDefrag has two features that make it unique.
@@ -39,54 +38,59 @@ work. The second is the ability to run the application at boot up
 time in a manner similar to chkdsk. This allows for faster
 defragmentation time and the ability to defragment all files
 including system files.</p>
-<p>UltraDefrag supports the following filesystems FAT12/16/32,
-NTFS and
-on Vista UDF. UDF is a file system intended for optical media such as
-DVDs that
-unlike ISO9660, is rewriteable. It has also the ability to defragment
-volumes
-at boot time allowing you to move many system files that are always
-locked by
-the operating system. Currently all files besides the registry hives
-and
+<p>UltraDefrag supports the following filesystems FAT12/16/32, NTFS and on
+Vista UDF. UDF is a file system intended for optical media such as DVDs that
+unlike ISO9660, is rewriteable. It has also the ability to defragment volumes
+at boot time allowing you to move many system files that are always locked by
+the operating system. Currently all files besides the registry hives and
 the pagefile can be scanned at boot time. UltraDefrag can also
 defragment files and folders compressed by NTFS file system
 compression. And can even defragment floppies, although doing so is
 not particularly useful. </p>
-<p>UltraDefrag binaries are available for the 32 bit and all 64
-bit
+<p>UltraDefrag binaries are available for the 32 bit and all 64 bit
 versions of Windows.</p>
 <h1 class="western">Installing UltraDefrag</h1>
 <p>You can download the latest installer for UltraDefrag at the
-project homepage (<a href="http://ultradefrag.sourceforge.net/">http://ultradefrag.sourceforge.net/</a>).
+project homepage (<a href="http://ultradefrag.sourceforge.net/">
+http://ultradefrag.sourceforge.net/</a>).
 Simply download and run the installer. No reboot is required.</p>
 <p>Note that you must be an administrator to install and run
 UltraDefrag.</p>
 <h1 class="western">Using UltraDefrag</h1>
-<p><b>IMPORTANT</b><span style=""> You
-must
-disable your virus detection software before using UltraDefrag.</span></p>
+<p><b>IMPORTANT</b><span style=""> You must disable your virus detection
+software before using UltraDefrag.</span></p>
 <h2 class="western">Console Application</h2>
-<p>The console application is called udefrag.exe as of v1.1.0. It
+<p>The console application is called udefrag.exe. It
 is placed in system32 directory by the installer. Therefore you can
-call it from the
-command line or run box.</p>
+call it from the command line or run box.</p>
 <h3 class="western">Usage</h3>
 <h3 class="western"><img src="images/console.png" name="Frame1" alt="Console application" align="bottom"></h3>
 <i>Console Application after a successful analyze run.</i>
 <p>The command line version takes one of three switches and a
 drive
-letter. The switches are -? which displays the usage message, -a
-which analyzes the drive in question, and -c which compacts the drive
-in question. Specifying just the drive letter will cause UltraDefrag
+letter. The switches are as follows:</p>
+<ul>
+<li>-? Displays the usage message</li>
+<li>-a Analyze the drive specifued on the command line</li>
+<li>-o Optomize file space by moving all files to the begining of the drive</li>
+</ul>
+<p>In addition the following switches can be used when defraging and compacting.
+They override the settings in the registry set by the gui described below. The defaults
+for the registry setting are set at compile time.</p>
+<ul>
+<li>-sN ignore files larger than N bytes</li>
+<li>-iA;B;C Include these files and directories from the scan (Maximum 4096 bytes)</li>
+<li>-d[0-3] Set debug level: 0 Normal, 1 Detailed, 2 Paranoid</li>
+<li>-b Use default color scheme</li>
+</ul>
+<p>Specifying just the drive letter will cause UltraDefrag
 to defragment the drive. When the operation finishes or you stop the
 program with a Ctrl+C, the program will display the results to the
 console. If you about the operation with Ctrl+C or close the shell
 window, UltraDefrag will exit safely without destroying any data.</p>
 <h3 class="western">Windows Application</h3>
 <p>The windows application is a simple application with one main
-form
-of fixed size and an about box. An illustration of the window as well
+form of fixed size and an about box. An illustration of the window as well
 as an explanation of their functionality is below:</p>
 <p><img src="images/main_screen110.png" name="graphics1" alt="Main window" align="bottom" border="0"></p>
 <ol>
@@ -170,20 +174,21 @@ small but useful. It is generated by the driver, so all versions of
 UltraDefrag generate it.</span></p>
 </li>
 <li>
-<p><b>Settings</b><span style="">
-</span><b>(Ctrl+T) </b><span style="">Displays
-the Settings Dialog. The settings dialog has three tabs.</span></p>
+<p><b>Settings (Ctrl+T) </b>Displays the Settings Dialog. The settings dialog has
+three tabs. These settings are stored in the registry and override the setting
+hardcoded into the executable at compile time. The compile tome defaults are
+set in "src\dll\udefrag\settings.c".</p>
 <ol>
 <li>
-<p><b>Filter</b><span style="">
-You can specify file to include and exclude from the scan as well as
-ignore files over a given size. <br>
-The patterns you supply for the include and exclude functionality
+<p><b>Filter</b> You can specify file to include and exclude from the scan as well as
+ignore files over a given size.</p>
+<p>The patterns you supply for the include and exclude functionality
 applies to the whole path. For example, if you specify temp\ in the
 exclude path you would exclude both the temp folder (%WINDIR%\temp) and
-the internet explorer temporary files folder.<br>
-You can specify maximum file size with the following suffixes (Kb | Mb
-| Gb | Tb)</span></p>
+the internet explorer temporary files folder. Filter strings cannnot be longer
+than 4096 bytes.</p>
+<p>You can specify maximum file size with the following suffixes (Kb | Mb
+| Gb | Tb). </p>
 </li>
 <li>
 <p><b>GUI</b><span style="">
@@ -254,10 +259,13 @@ to disappear.</span></p>
 <p style="">UltraDefrag also includes a new mode
 that allows you to run it at boot time in a manner similar to chkdsk.
 This is known as a native application.</p>
-<p style="">[TODO: Write this section]</p>
+<p>Boot time settings may be specified in the gui. You may schedule a boot
+time scan for the next reboot, or at every reboot. The only restriction on
+boot time scans is that you may not scan encrypted volumes. This is because
+lsass.exe, the component of the operating system that reads encrypted volumes,
+is loaded after the native executable runs.</p>
 <h1 class="western">The Report</h1>
-<p>Everytime you run analyze, compact or disparagement, a report
-of
+<p>Everytime you run analyze, compact or defragment, a report of
 all files on the file system is created. This report has the
 following fields.</p>
 <ol>
