@@ -65,6 +65,15 @@ Items to describe:
 12. All webpages must contain SF.net logo in accordance 
     with SF.net terms and conditions.
 
+13. Rxvt (from MSYS; tested version is 2.7.2) terminates udefrag.exe when 
+    you press Ctrl + C without special message sending (for CtrlHandlerRoutine).
+    Therefore, unload function will never executed, 
+    and driver will not be unloaded.
+    This is a bug of rxvt.
+
+14. If you terminate dfrg.exe or udefrag.exe (using task manager or rxvt) then 
+    you will have small memory leak (16 bytes) from the nonpaged pool.
+    Reboot is required to free this memory.
 
 				***
 

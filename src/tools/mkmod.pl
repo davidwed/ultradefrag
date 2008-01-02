@@ -212,14 +212,19 @@ sub get_opts {
 
 sub obsolete {
 	my ($src,$dst) = @_;
-	my $src_mtime;
+	my ($src_mtime,$dst_mtime);
 
-	my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-       $atime,$mtime,$ctime,$blksize,$blocks) = stat($src);
-	$src_mtime = $mtime;
-	($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-       $atime,$mtime,$ctime,$blksize,$blocks) = stat($dst);
- 	return ($mtime > $src_mtime) ? 1 : 0;
+	unless(-f $src){
+		die("Source not found!");
+		return;
+	}
+	unless(-f $dst){
+		return 1;
+	}
+    $src_mtime = (stat($src))[9];
+	$dst_mtime = (stat($dst))[9];
+	#print "src:$src_mtime, dst:$dst_mtime\n";
+ 	return ($dst_mtime > $src_mtime) ? 0 : 1;
 }
 
 # WinDDK backend

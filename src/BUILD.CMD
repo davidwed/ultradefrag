@@ -86,10 +86,13 @@ goto build_scheduler
 
 :msvc_build
 
-if "%MSVC_ENV%" neq "" goto start_msvc_build
+rem if "%MSVC_ENV%" neq "" goto start_msvc_build
+
 call "%MSVSBIN%\vcvars32.bat"
-set MSVC_ENV=ok
-:start_msvc_build
+
+rem set MSVC_ENV=ok
+rem :start_msvc_build
+
 set BUILD_ENV=msvc
 set UDEFRAG_LIB_PATH=..\..\lib
 call blditems.cmd
@@ -100,10 +103,13 @@ goto build_scheduler
 
 :mingw_build
 
-if "%MINGW_ENV%" neq "" goto start_mingw_build
+rem if "%MINGW_ENV%" neq "" goto start_mingw_build
+
 set path=%MINGWBASE%\bin;%path%
-set MINGW_ENV=ok
-:start_mingw_build
+
+rem set MINGW_ENV=ok
+rem :start_mingw_build
+
 set BUILD_ENV=mingw
 set UDEFRAG_LIB_PATH=..\..\lib
 call blditems.cmd

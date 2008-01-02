@@ -76,7 +76,6 @@
 #include <math.h>
 
 #include "main.h"
-///#include "../include/ntndk.h"
 #include "../include/ultradfg.h"
 
 #include "resource.h"
@@ -636,9 +635,8 @@ void SetIcon(int part,int id)
 BOOL CreateStatusBar()
 {
 	RECT rc;
-	double total = 560.00;
-	double x;
-
+	int width, i;
+	int x[N_OF_STATUSBAR_PARTS-1] = {100,200,320,440};
 	int a[N_OF_STATUSBAR_PARTS];
 
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
@@ -646,10 +644,10 @@ BOOL CreateStatusBar()
 	if(hStatus)
 	{
 		GetClientRect(hStatus,&rc);
-		x = (double)(rc.right - rc.left) / total;
-		a[0] = (int)floor(100 * x); a[1] = (int)floor(200 * x);
-		a[2] = (int)floor(320 * x); a[3] = (int)floor(440 * x);
-		a[4] = rc.right - rc.left;
+		width = rc.right - rc.left;
+		for(i = 0; i < N_OF_STATUSBAR_PARTS-1; i++)
+			a[i] = width * x[i] / 560;
+		a[N_OF_STATUSBAR_PARTS-1] = width;
 		SendMessage(hStatus,SB_SETPARTS,N_OF_STATUSBAR_PARTS + 1,(LPARAM)a);
 		SetIcon(0,IDI_DIR); SetIcon(1,IDI_UNFRAGM);
 		SetIcon(2,IDI_FRAGM); SetIcon(3,IDI_CMP);

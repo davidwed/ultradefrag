@@ -92,12 +92,16 @@ BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 BOOL set_error_mode(UINT uMode);
 char * __stdcall udefrag_load_settings(int argc, short **argv);
 char * __stdcall i_udefrag_save_settings(void);
+char * __stdcall i_udefrag_unload(BOOL save_options);
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
+	/* here we have last chance to unload the driver */
+	if(dwReason == DLL_PROCESS_DETACH)
+		i_udefrag_unload(FALSE);
 	return 1;
 }
 
@@ -181,7 +185,7 @@ char * __stdcall i_udefrag_init(int argc, short **argv,int native_mode,long map_
 	return NULL;
 init_fail:
 	NtCloseSafe(UserToken);
-	if(init_event) udefrag_unload(FALSE);
+	if(init_event) i_udefrag_unload(FALSE);
 	return msg;
 }
 
