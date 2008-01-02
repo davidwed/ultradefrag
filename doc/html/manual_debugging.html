@@ -1,0 +1,59 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><head>
+<meta http-equiv="CONTENT-TYPE" content="text/html; charset=us-ascii"><title>Debugging UltraDefrag</title>
+
+<meta name="GENERATOR" content="OpenOffice.org 2.1 (Win32)">
+<meta name="CREATED" content="20070808;19191900">
+<meta name="CHANGEDBY" content="Dmitri Arkhangelski">
+<meta name="CHANGED" content="20070905;22040900">
+<style type="text/css">
+<!--
+@page { size: 21.59cm 27.94cm; margin: 2cm }
+P { margin-bottom: 0.21cm }
+H1 { margin-bottom: 0.21cm }
+H1.western { font-family: "Arial", sans-serif; font-size: 16pt }
+H1.cjk { font-family: "Arial Unicode MS"; font-size: 16pt }
+H1.ctl { font-family: "Tahoma"; font-size: 16pt }
+H2 { margin-bottom: 0.21cm }
+H2.western { font-family: "Arial", sans-serif; font-size: 14pt; font-style: italic }
+H2.cjk { font-size: 14pt; font-style: italic }
+H2.ctl { font-size: 14pt; font-style: italic }
+H3 { margin-bottom: 0.21cm }
+H3.western { font-family: "Arial", sans-serif }
+-->
+</style>
+</head>
+<body style="direction: ltr; color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt;" alink="#ff0000" lang="en-US" vlink="#660099">
+<h1 class="western" style="" align="center"><font style="font-size: 20pt;" size="5">UltraDefrag
+User Manual</font></h1>
+<h1 class="western" style="" align="right"><i>Written
+by <a href="mailto:zippy1981@gmail.com">Justin Dearing</a></i></h1>
+<h1 class="western">Overview</h1>
+<p>While the author of UltraDefrag has taken great pains to ensure that
+UltraDefrag operates properly, no software is perfect. As such bugs are
+inevitable. The author accepts bug reports and will attempt to fix issues that
+are brought to his attention. In order to facilitate this the author has built
+logging mechanisms into UltraDefrag. This document describes how to get these
+logs from UltraDefrag.</p>
+<h1 class="western">How UltraDefrag Logs Information</h1>
+<p>The actual task of defragmenting your hard drive is performed by a kernel
+driver, "ultradfg.sys." This kernel driver logs information via the system
+call DbgPrint(). This function writes messages to a special buffer that can
+be read by several utilities.</p>
+<p>Two utilities that can be used for reading from this buffer are
+<a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">
+Sysinternals DebugView</a> and 
+<a href="http://www1.alter.org.ua/en/soft/win/dbgdump/dbgdump.php">DbgPrintLog
+</a> by <a href="http://alter.org.ua/">Alexander A. Telyatnikov</a> DebugView
+is a GUI program that does not include source code and does not work on 
+NT 4.0. DbgPrintLog is a console based program that does not work on 64 bit
+versions of windows yet. However, it comes with full source code, can capture
+the debug output of the native executable at boot time, and works on NT 4.0
+and even 3,51.</p>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-2897964-4";
+urchinTracker();
+</script>
+</body></html>

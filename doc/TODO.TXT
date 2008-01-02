@@ -18,9 +18,9 @@ Items to describe:
    a). default settings (you can find it in /src/dll/udefrag/settings.c)
    b). settings specified by user in configuration dialog (they are saved in
    registry in HKEY_LOCAL_MACHINE\CurrentControlSet\Control\UltraDefrag, because
-   keys other than SYSTEM aren't accessible from the native app, because they are
-   not loaded by smss.exe yet). NOTE: If user will return to the 'last known 
-   good configuration', settings may be lost.
+   keys other than SYSTEM aren't accessible from the native app, because they
+   are not loaded by smss.exe yet). NOTE: If user will return to the
+   'last known good configuration', settings may be lost.
    c). settings listed above can be overwritten using command line keys
    (currently only for udefrag.exe). Overwritten settings will not be saved
    anywhere.
@@ -38,6 +38,9 @@ Items to describe:
    So, the bottom part of the cluster map is invalid.
    If you have no less than 3640 clusters, don't worry about the cluster map.
    This restriction is a small cost for the big modern volumes support.
+
+7. Describe how to use DebugPrintLog and DebugView to get logging information
+   out of UltraDefrag.
 
 				***
 
