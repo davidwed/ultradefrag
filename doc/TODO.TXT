@@ -31,16 +31,40 @@ Items to describe:
 5. (DONE) Describe new options of console application.
 
 6. In version 1.2.4 and later versions cluster map for very small volumes
-   can be very inaccurate. P.a., one floppy disk contains 2847 clusters.
+   can be very inaccurate. P.a., one strange disk contains just 500 clusters.
    But internally they are represented (in 1.2.4 version of program) 
-   by 3640 blocks. Therefore we have one block (3640 / 2847) per cluster 
-   plus 794 blocks per the last one. 
+   by 728 blocks. Therefore we have one block (728 / 500) per cluster 
+   plus 229 blocks per the last one. 
    So, the bottom part of the cluster map is invalid.
-   If you have no less than 3640 clusters, don't worry about the cluster map.
+   If you have no less than 728 clusters, don't worry about the cluster map.
    This restriction is a small cost for the big modern volumes support.
+   Maybe it will be fixed in next versions, but currently 
+   I don't know how to do it.
 
 7. Describe how to use DebugPrintLog and DebugView to get logging information
    out of UltraDefrag.
+
+8. Project targets are:
+   - for end users: simplicity, high speed processing, nice gui
+   - for developers: windows hacking
+
+9. antispam ?? because I have 350 messages per month; they are automatically 
+   filtered by google, but ...
+
+10. Maybe we should include some useful links in our website pages to:
+    - SF.net project's home
+    - project's forums home
+    - UD in wikipedia entry
+
+11. Udefrag.dll, zenwinx.dll and defrag_native.exe are components critical for
+    windows boot process. If one of them is missing and boot time defrag is
+    enabled, you will see BSOD at boot time, and Last Known Good configuration 
+    will be not helpful. Currently I don't know how make our software absolutely
+    safe.
+
+12. All webpages must contain SF.net logo in accordance 
+    with SF.net terms and conditions.
+
 
 				***
 
