@@ -61,16 +61,8 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = console \
-                         dll\udefrag \
-                         driver \
-                         gui \
-                         include \
-                         native \
-                         scheduler
-FILE_PATTERNS          = *.c \
-                         *.h \
-                         *.cs
+INPUT                  = driver
+FILE_PATTERNS          = *.c
 RECURSIVE              = YES
 EXCLUDE                = 
 EXCLUDE_SYMLINKS       = NO
@@ -210,4 +202,4 @@ DOT_CLEANUP            = YES
 #---------------------------------------------------------------------------
 # Configuration::addtions related to the search engine   
 #---------------------------------------------------------------------------
-SEARCHENGINE           = YES
+SEARCHENGINE           = NO

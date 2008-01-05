@@ -21,32 +21,7 @@
 
 #include "driver.h"
 
-/* This functions aren't used in UD v1.2.4+ */
-
-/*  NOTE! If size > MAXULONG then return ERROR.
-	Because more than 4 bln. CLUSTERS on disk
-	is very strange and illogical!
-*/
-/*
-void *_int64_malloc(ULONGLONG size)
-{
-	if(size <= (ULONGLONG)MAXULONG)
-		return AllocatePool(NonPagedPool,(ULONG)size);
-	return NULL;
-}
-void *_int64_memset(void *buf,int ch,ULONGLONG size)
-{
-	if(size <= (ULONGLONG)MAXULONG)
-		return memset(buf,ch,(ULONG)size);
-	return NULL;
-}
-*/
-
 #if defined(__GNUC__)
-ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
-ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
-ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
-
 ULONGLONG __udivdi3(ULONGLONG n, ULONGLONG d)
 {
 	return _aulldiv(n,d);

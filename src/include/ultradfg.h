@@ -106,14 +106,9 @@ typedef struct _STATISTIC {
 	ULONGLONG	clusters_to_compact;
 } STATISTIC, *PSTATISTIC;
 
-/* should be removed!!! */
-#define __KernelMode TRUE /* used by native app to defrag system files */
-#define __UserMode FALSE /* used by gui and console to defrag encrypted files */
-
 typedef struct _ULTRADFG_COMMAND {
 	UCHAR		command;
 	UCHAR		letter;
 	ULONGLONG	sizelimit;
-	BOOLEAN		mode;
 } ULTRADFG_COMMAND, *PULTRADFG_COMMAND;
 #endif /* _ULTRADFG_H_ */

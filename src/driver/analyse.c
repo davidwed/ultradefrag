@@ -50,11 +50,11 @@ void PrepareDataFields(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->fragmfilecounter = 0;
 	dx->fragmcounter = 0;
 	dx->clusters_total = 0;
-	dx->clusters_per_mapblock = 0;
-	dx->clusters_per_last_mapblock = 0;
+	dx->clusters_per_cell = 0;
+	dx->clusters_per_last_cell = 0;
 	dx->opposite_order = FALSE;
-	dx->blocks_per_cluster = 0;
-	dx->blocks_per_last_cluster = 0;
+	dx->cells_per_cluster = 0;
+	dx->cells_per_last_cluster = 0;
 //	dx->cluster_map = 0;
 	dx->total_space = 0; dx->free_space = 0;
 	dx->hVol = NULL;
@@ -75,23 +75,14 @@ void PrepareDataFields(UDEFRAG_DEVICE_EXTENSION *dx)
 /* Init() - initialize filename list and map of free space */
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	short path[50] = L"\\??\\A:";
-	///short p[] = L"\\??\\A:\\FRAGLIST.HTM";
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	IO_STATUS_BLOCK IoStatusBlock;
+	short path[50] = L"\\??\\A:\\";
 	NTSTATUS Status;
 	UNICODE_STRING pathU;
 	//ULONGLONG tm;
-	ULONG i;
 
 	/* TODO: optimize FindFiles() */
 	/* A: assume that all space is system space */
-	if(new_cluster_map)
-	{
-		memset(new_cluster_map,0,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
-		for(i = 0; i < map_size; i++)
-			new_cluster_map[i][SYSTEM_SPACE] = 1;
-	}
+	MarkAllSpaceAsSystem0(dx);
 	/* data initialization */
 	FreeAllBuffers(dx);
 	PrepareDataFields(dx);
@@ -100,13 +91,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	/* 0. open the volume */
 	DeleteLogFile(dx);
-	path[4] = (short)(dx->letter);
-	RtlInitUnicodeString(&pathU,path);
-	InitializeObjectAttributes(&ObjectAttributes,&pathU,0,NULL,NULL);
-	Status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA,
-		&ObjectAttributes,&IoStatusBlock,
-		NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
-		NULL,0);
+	Status = OpenVolume(dx);
 	if(!NT_SUCCESS(Status))
 	{
 		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)Status);
@@ -114,42 +99,15 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 
 	/* 1. get number of clusters: free and total */
-	if(!GetTotalClusters(dx))
+	if(!NT_SUCCESS(GetVolumeInfo(dx)))
 	{
 		Status = STATUS_INVALID_PARAMETER;
 		goto fail;
 	}
-	DebugPrint("-Ultradfg- total clusters: %I64u\n", dx->clusters_total);
-	if(!dx->clusters_total || !dx->total_space || !dx->bytes_per_cluster)
-	{
-		Status = STATUS_INVALID_PARAMETER;
-		goto fail;
-	}
-	/* B: assume that all space is system space: correct number of clusters */
-	if(new_cluster_map)
-	{
-		if(!dx->opposite_order)
-		{
-			///memset(new_cluster_map,0,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
-			for(i = 0; i < map_size - 1; i++)
-				new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_mapblock;
-			new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_last_mapblock;
-		}
-		else
-		{
-			DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
-				dx->clusters_total,dx->blocks_per_cluster,dx->blocks_per_last_cluster);
-		}
-	}
-	/*
-	 * Synchronize drive.
-	 * On NT 4.0 (at least under MS Virtual PC) it will crash system:
-	 */
-#ifndef NT4_TARGET 
+	/* synchronize drive */
 	Status = __NtFlushBuffersFile(dx->hVol);
 	if(Status)
 		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",(UINT)Status);
-#endif
 ///tm = _rdtsc();
 	if(!FillFreeClusterMap(dx))
 	{
@@ -159,7 +117,8 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 ///DebugPrint("%I64u\n", _rdtsc() - tm);
 	/* 2. initialize file list and put their clusters to map */
 	//tm = _rdtsc();
-	wcscat(path,L"\\");
+	//wcscat(path,L"\\");
+	path[4] = (short)dx->letter;
 	if(!RtlCreateUnicodeString(&pathU,path))
 	{
 		DbgPrintNoMem();
@@ -195,121 +154,6 @@ fail:
 	return Status;
 }
 
-BOOLEAN GetTotalClusters(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	FILE_FS_SIZE_INFORMATION FileFsSize;
-	IO_STATUS_BLOCK IoStatusBlock;
-	unsigned short path[] = L"\\??\\A:\\";
-	UNICODE_STRING NtPathU;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	HANDLE hFile;
-	NTSTATUS errCode;
-	ULONGLONG bpc; /* bytes per cluster */
-
-	path[4] = (unsigned short)dx->letter;
-	RtlInitUnicodeString(&NtPathU,path);
-	InitializeObjectAttributes(&ObjectAttributes,&NtPathU,
-			       FILE_READ_ATTRIBUTES,NULL,NULL);
-
-	errCode = ZwCreateFile(&hFile,FILE_GENERIC_READ,
-			    &ObjectAttributes,&IoStatusBlock,NULL,0,
-			    FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
-			    NULL,0);
-
-	if(errCode) goto exit;
-
-	errCode = ZwQueryVolumeInformationFile(hFile,&IoStatusBlock,&FileFsSize,
-			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
-	ZwClose(hFile);
-	if(errCode) goto exit;
-
-	bpc = FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
-	dx->bytes_per_cluster = bpc;
-	dx->total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
-	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
-	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
-
-	if(new_cluster_map && dx->clusters_total)
-	{
-		dx->opposite_order = FALSE;
-		dx->clusters_per_mapblock = dx->clusters_total / map_size;
-		if(dx->clusters_per_mapblock)
-		{
-			dx->clusters_per_last_mapblock = dx->clusters_per_mapblock + \
-				(dx->clusters_total - dx->clusters_per_mapblock * map_size);
-		}
-		else
-		{
-			dx->opposite_order = TRUE;
-			dx->blocks_per_cluster = map_size / dx->clusters_total;
-			dx->blocks_per_last_cluster = dx->blocks_per_cluster + \
-				(map_size - dx->blocks_per_cluster * dx->clusters_total);
-		}
-	}
-exit:
-	return (errCode == STATUS_SUCCESS);
-}
-
-void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	NTSTATUS Status;
-	IO_STATUS_BLOCK IoStatusBlock;
-	PARTITION_INFORMATION part_info;
-	NTFS_DATA ntfs_data;
-	ULONGLONG start,len,mft_len = 0;
-
-	Status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&IoStatusBlock, \
-		IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
-		&part_info, sizeof(PARTITION_INFORMATION));
-	if(Status == STATUS_PENDING)
-	{
-		NtWaitForSingleObject(dx->hVol,FALSE,NULL);
-		Status = IoStatusBlock.Status;
-	}
-	if(Status == STATUS_SUCCESS)
-		dx->partition_type = part_info.PartitionType;
-	if(Status == STATUS_SUCCESS && part_info.PartitionType == NTFS_PARTITION)
-	{
-		Status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&IoStatusBlock, \
-				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
-				&ntfs_data, sizeof(NTFS_DATA));
-		if(Status == STATUS_PENDING)
-		{
-			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
-			Status = IoStatusBlock.Status;
-		}
-		if(Status == STATUS_SUCCESS)
-		{
-			/* not increment dx->processed_clusters here, because some part of MFT marked as free */
-			DebugPrint("-Ultradfg- MFT_file   : start : length\n");
-			/* $MFT */
-			start = ntfs_data.MftStartLcn.QuadPart;
-			if(ntfs_data.BytesPerCluster)
-				len = ntfs_data.MftValidDataLength.QuadPart / ntfs_data.BytesPerCluster;
-			else
-				len = 0;
-			DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
-			///dx->processed_clusters += len;
-			ProcessBlock(dx,start,len,MFT_SPACE);
-			mft_len += len;
-			/* $MFT2 */
-			start = ntfs_data.MftZoneStart.QuadPart;
-			len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
-			DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",start,len);
-			///dx->processed_clusters += len;
-			ProcessBlock(dx,start,len,MFT_SPACE);
-			mft_len += len;
-			/* $MFTMirror */
-			start = ntfs_data.Mft2StartLcn.QuadPart;
-			DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",start);
-			ProcessBlock(dx,start,1,MFT_SPACE);
-			///dx->processed_clusters ++;
-			mft_len ++;
-			dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
-		}
-	}
-}
-
 FREEBLOCKMAP *InsertNewFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 				 ULONGLONG start,ULONGLONG length)
 {
@@ -343,15 +187,6 @@ BOOLEAN FillFreeClusterMap(UDEFRAG_DEVICE_EXTENSION *dx)
 	UCHAR BitShift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 //ULONGLONG t;
 	ULONGLONG *pnextLcn;
-	/* Allocate memory */
-/*	dx->cluster_map = (UCHAR *)_int64_malloc(dx->clusters_total);
-	if(!dx->cluster_map)
-	{
-		DbgPrintNoMem();
-		goto fail;
-	}
-	_int64_memset((void *)(dx->cluster_map),SYSTEM_SPACE,dx->clusters_total);
-*/
 	//	t = _rdtsc();
 	/* Start scanning */
 	bitMappings = (PBITMAP_DESCRIPTOR)(dx->BitMap);
@@ -691,26 +526,6 @@ BLOCKMAP *InsertNewBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 		pfn->clusters_total += length;
 	}
 	return block;
-}
-
-void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
-{
-	PBLOCKMAP block;
-	UCHAR space_state;
-
-	if(!pfn->is_fragm)
-		ProcessUnfragmentedBlock(dx,pfn,pfn->blockmap->lcn,pfn->clusters_total);
-	else
-	{
-		space_state = pfn->is_overlimit ? FRAGM_OVERLIMIT_SPACE : FRAGM_SPACE;
-		block = pfn->blockmap;
-		while(block)
-		{
-			ProcessBlock(dx,block->lcn,block->length,space_state);
-			///DbgPrint("lcn %I64u:len %I64u %ws",block->lcn,block->length,pfn->name.Buffer);
-			block = block->next_ptr;
-		}
-	}
 }
 
 /* Dump File()

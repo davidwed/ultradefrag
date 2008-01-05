@@ -166,6 +166,12 @@ NTSTATUS NTAPI ZwDeleteFile(IN POBJECT_ATTRIBUTES ObjectAttributes);
 
 char *__cdecl _itoa(int value,char *str,int radix);
 
+#if defined(__GNUC__)
+ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
+#endif
+
 /*
  * NOTE! NEXT_PTR MUST BE FIRST MEMBER OF STRUCTURES!
  */
@@ -259,11 +265,11 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	/* Cluster map: bytes are set to FREE_SPACE, SYSTEM_SPACE etc. */
 //	UCHAR *cluster_map;
 	ULONGLONG clusters_total;
-	ULONGLONG clusters_per_mapblock;
-	ULONGLONG clusters_per_last_mapblock; /* last block can represent more clusters */
+	ULONGLONG clusters_per_cell;
+	ULONGLONG clusters_per_last_cell; /* last block can represent more clusters */
 	BOOLEAN opposite_order; /* if true then number of clusters is less than number of blocks */
-	ULONGLONG blocks_per_cluster;
-	ULONGLONG blocks_per_last_cluster;
+	ULONGLONG cells_per_cluster;
+	ULONGLONG cells_per_last_cluster;
 	ULONGLONG total_space;
 	ULONGLONG free_space; /* in bytes */
 	HANDLE hVol;
@@ -293,8 +299,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 } UDEFRAG_DEVICE_EXTENSION, *PUDEFRAG_DEVICE_EXTENSION;
 
 /* Function Prototypes */
-void *_int64_malloc(ULONGLONG);
-void *_int64_memset(void *,int,ULONGLONG);
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
 void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root);
@@ -333,6 +337,13 @@ void NTAPI DestroyList(PLIST *phead);
 NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE hFile);
 
 void DbgPrintNoMem();
+
+void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);
+void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx);
+
+NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx);
+NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx);
+void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #define FIND_DATA_SIZE	(16*1024)
 

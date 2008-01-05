@@ -338,9 +338,7 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	short *filter;
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONG BytesTxd = 0;
-	ULONGLONG bpb; /* internal blocks per one external block */
-	ULONGLONG i, j;
-	ULONGLONG x_part[NUM_OF_SPACE_STATES];
+	ULONGLONG i;
 	ULONGLONG maximum;
 	UCHAR index, k;
 	REPORT_TYPE *rt;
@@ -397,37 +395,24 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 				break;
 			}
 			map = (char *)Irp->AssociatedIrp.SystemBuffer;
-			if(!out_len || !map)
+			if(out_len != map_size || !map)
 			{
 				status = STATUS_INVALID_PARAMETER;
 				break;
 			}
-			bpb = map_size / out_len;
-			if(!bpb || (map_size % out_len))
+			for(i = 0; i < map_size; i++)
 			{
-				status = STATUS_INVALID_PARAMETER; /* buffer has invalid size */
-				break;
-			}
-			else
-			{
-				for(i = 0; i < out_len; i++)
+				maximum = new_cluster_map[i][0];
+				index = 0;
+				for(k = 1; k < NUM_OF_SPACE_STATES; k++)
 				{
-					memset((void *)x_part,0,NUM_OF_SPACE_STATES * sizeof(ULONGLONG));
-					for(j = 0; j < bpb; j++)
-						for(k = 0; k < NUM_OF_SPACE_STATES; k++)
-							x_part[k] += new_cluster_map[i * bpb + j][k];
-					maximum = x_part[0];
-					index = 0;
-					for(k = 1; k < NUM_OF_SPACE_STATES; k++)
+					if(new_cluster_map[i][k] >= maximum) /* >= is very important: mft and free */
 					{
-						if(x_part[k] >= maximum) /* >= is very important: mft and free */
-						{
-							maximum = x_part[k];
-							index = k;
-						}
+						maximum = new_cluster_map[i][k];
+						index = k;
 					}
-					map[i] = index;
 				}
+				map[i] = index;
 			}
 			BytesTxd = out_len;
 			break;

@@ -87,11 +87,19 @@ SOURCE=.\log.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\map.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\ultradfg.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\ultradfg.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\volume.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

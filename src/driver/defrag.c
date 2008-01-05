@@ -177,91 +177,8 @@ void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 }
 
 /*
- * On FAT partitions after file moving filesystem driver mark
+ * On FAT partitions after file moving filesystem driver marks
  * previously allocated clusters as free immediately.
- */
-/*__inline */void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
-						   ULONGLONG len,int space_state)
-{
-//	ULONGLONG clusters_per_mapblock = dx->clusters_total / map_size;
-	ULONGLONG target_block, target_offset;
-	ULONGLONG target_len, i, j;
-
-//	_int64_memset(dx->cluster_map + start,space_state,len);
-	/* the last block can represent less clusters than other blocks */
-//	if(dx->clusters_total % map_size) clusters_per_mapblock++;
-	if(!new_cluster_map) return;
-	if(!dx->opposite_order)
-	{
-		if(!dx->clusters_per_mapblock) return;
-		/*
-		 * The following code uses _aulldvrm() function:
-		 * target_block = start / dx->clusters_per_mapblock;
-		 * target_offset = start % dx->clusters_per_mapblock;
-		 * But we don't have this function on NT 4.0!!!
-		 */
-		target_block = start / dx->clusters_per_mapblock;
-		target_offset = start - target_block * dx->clusters_per_mapblock;
-		do
-		{
-			if(target_block == map_size - 1)
-			{
-				if(len <= dx->clusters_per_last_mapblock - target_offset)
-				{
-					new_cluster_map[target_block][space_state] += len;
-					/*
-					 * some space is identified as free and mft allocated at the same time;
-					 * therefore this check required;
-					 * because in space states enum mft has number above free space number,
-					 * these blocks will be displayed as mft blocks
-					 */
-					if(new_cluster_map[target_block][SYSTEM_SPACE] >= len)
-						new_cluster_map[target_block][SYSTEM_SPACE] -= len;
-					else
-						new_cluster_map[target_block][SYSTEM_SPACE] = 0;
-				}
-				break;
-			}
-			if(len <= dx->clusters_per_mapblock - target_offset)
-			{
-				new_cluster_map[target_block][space_state] += len;
-				if(new_cluster_map[target_block][SYSTEM_SPACE] >= len)
-					new_cluster_map[target_block][SYSTEM_SPACE] -= len;
-				else
-					new_cluster_map[target_block][SYSTEM_SPACE] = 0;
-				break;
-			}
-			else
-			{
-				new_cluster_map[target_block][space_state] += (dx->clusters_per_mapblock - target_offset);
-				if(new_cluster_map[target_block][SYSTEM_SPACE] >= dx->clusters_per_mapblock - target_offset)
-					new_cluster_map[target_block][SYSTEM_SPACE] -= (dx->clusters_per_mapblock - target_offset);
-				else
-					new_cluster_map[target_block][SYSTEM_SPACE] = 0;
-	////		DbgPrint("x %I64u\n", new_cluster_map[target_block][SYSTEM_SPACE]);
-				len -= (dx->clusters_per_mapblock - target_offset);
-				target_block++;
-				target_offset = 0;
-			}
-		} while(1);
-	}
-	else /* dx->opposite_order */
-	{
-		target_block = start * dx->blocks_per_cluster;
-		target_len = len * dx->blocks_per_cluster;
-		//if(start + len > dx->clusters_total) KeBugCheck();
-		if(start + len == dx->clusters_total)
-			target_len += (dx->blocks_per_last_cluster - dx->blocks_per_cluster);
-		for(i = 0; i < target_len; i++)
-		{
-			for(j = 0; j < NUM_OF_SPACE_STATES; j++)
-				new_cluster_map[target_block + i][j] = 0;
-			new_cluster_map[target_block + i][space_state] = 1;
-		}
-	}
-}
-
-/*
  * But on NTFS we must wait until the volume has been checkpointed. 
  */
 void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start, ULONGLONG len)
@@ -299,21 +216,6 @@ void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start, ULONGLONG le
 direct_call:
 		InsertFreeSpaceBlock(dx,start,len);
 	}
-}
-
-void ProcessUnfragmentedBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
-							  ULONGLONG start, ULONGLONG len)
-{
-	UCHAR space_state[] = {UNFRAGM_SPACE,UNFRAGM_OVERLIMIT_SPACE, \
-			      COMPRESSED_SPACE,COMPRESSED_OVERLIMIT_SPACE, \
-			      DIR_SPACE,DIR_OVERLIMIT_SPACE,DIR_SPACE, \
-			      DIR_OVERLIMIT_SPACE};
-	int d,c,o;
-
-	d = (int)(pfn->is_dir) & 0x1;
-	c = (int)(pfn->is_compressed) & 0x1;
-	o = (int)(pfn->is_overlimit) & 0x1;
-	ProcessBlock(dx,start,len,space_state[(d << 2) + (c << 1) + o]);
 }
 
 /* Kernel of defragmenter */
@@ -858,5 +760,5 @@ void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 	DestroyList((PLIST *)&dx->free_space_map);
 	DestroyList((PLIST *)&dx->fragmfileslist);
 	dx->filelist = NULL;
-	ZwCloseSafe(dx->hVol);
+	CloseVolume(dx);
 }
