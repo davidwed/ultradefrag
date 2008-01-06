@@ -47,9 +47,41 @@ Sysinternals DebugView</a> and
 </a> by <a href="http://alter.org.ua/">Alexander A. Telyatnikov</a> DebugView
 is a GUI program that does not include source code and does not work on 
 NT 4.0. DbgPrintLog is a console based program that does not work on 64 bit
-versions of windows yet. However, it comes with full source code, can capture
-the debug output of the native executable at boot time, and works on NT 4.0
-and even 3,51.</p>
+versions of windows yet. However, it comes with full source code, and works on
+NT 4.0 and even NT 3,51. Both applications have a special mode that allows
+capture of events at boot time.</p>
+<h1>Debugging with DbgPrintLog</h1>
+<ol>
+	<li>Download DebugView from 
+	<a href="http://alter.org.ua/en/soft/win/dbgdump/">Alexander A. Telyatnikov' Website</a>.</li>
+	<li>Unzip it and extrace the contents to a new folder. Create a shortcut to it or place it a folder on your
+	%PATH% so you can call it from a command line.</li>
+	<li>Startup DbgPrintLog. It will output messages to the screen as well as write output to "DbgPrint.log"</li>
+	<li>Startup UltraDefrag. Run it to reproduce the crash.</li>
+	<li>In a new text file copy the 200 lines or so leading up to the crash. Submit the file as part of a
+	<a href="http://sourceforge.net/tracker/?group_id=199532&atid=969870">sourceforge bug report</a>.</li>
+</ol>
+<h1>Debugging with DebugView</h1>
+<ol>
+	<li>Download DebugView from 
+	<a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">Microsofts Website</a>.</li>
+	<li>Unzip it and copy the executable somewhere. Create a shortcut to it or place it a folder on your
+	%PATH% so you can call it from a command line.</li>
+	<li>Startup DebugView. Set the following options in the Capture menu:</li>
+	<ul>
+		<li>Disable "Capture Win32"</li>
+		<li>Enable "Capture Kernel"</li>
+		<li>Enable "Capture Events"</li>
+	</ul>
+	<li>In the edit menu select "Clear Dispaly" to remove any messages that may have come up.</li>
+	<li>Startup UltraDefrag. Run it to reproduce the crash.</li>
+	<li>After UltraDefrag crashes, select "Save As" in the File menu. Save the contents to a file.</li>
+	<li>Trim all but the last 200 or so lines from the file. Submit the file as part of a
+	<a href="http://sourceforge.net/tracker/?group_id=199532&atid=969870">sourceforge bug report</a>.</li>
+</ol>
+<h1>Debugging the boot time driver</h1>
+<h2>Using DbgPrintLog</h2>
+<h2>Using DebugView</h2>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 </script>
 <script type="text/javascript">
