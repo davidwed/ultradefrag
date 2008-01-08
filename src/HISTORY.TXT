@@ -2,6 +2,14 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 1.2.5 (23.0)   2008-01-
+  ------------------------------------------------------------------------------
+    - documentation was improved
+    - build scripts were improved
+    - few bugs were fixed
+    - driver code cleanup was performed
+    - driver coding style was changed to improve readability
+
 
   Version 1.2.4 (23.0)   2007-12-22
   ------------------------------------------------------------------------------

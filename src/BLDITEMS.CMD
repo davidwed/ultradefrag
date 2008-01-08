@@ -1,22 +1,32 @@
 @echo off
 pushd obj\driver
-perl ..\..\tools\mkmod.pl ultradfg.build
+rem perl ..\..\tools\mkmod.pl ultradfg.build
+lua ..\..\tools\mkmod.lua ultradfg.build
 if %errorlevel% neq 0 goto end
 cd ..\zenwinx
-perl ..\..\tools\mkmod.pl zenwinx.build
+rem perl ..\..\tools\mkmod.pl zenwinx.build
+lua ..\..\tools\mkmod.lua zenwinx.build
 if %errorlevel% neq 0 goto end
 cd ..\udefrag
-perl ..\..\tools\mkmod.pl udefrag.build
+rem perl ..\..\tools\mkmod.pl udefrag.build
+lua ..\..\tools\mkmod.lua udefrag.build
 if %errorlevel% neq 0 goto end
 cd ..\console
-perl ..\..\tools\mkmod.pl defrag.build
+rem perl ..\..\tools\mkmod.pl defrag.build
+lua ..\..\tools\mkmod.lua defrag.build
 if %errorlevel% neq 0 goto end
 cd ..\gui
-perl ..\..\tools\mkmod.pl dfrg.build
+rem perl ..\..\tools\mkmod.pl dfrg.build
+lua ..\..\tools\mkmod.lua dfrg.build
 if %errorlevel% neq 0 goto end
 cd ..\native
-perl ..\..\tools\mkmod.pl defrag_native.build
-rem if %errorlevel% neq 0 goto end
+rem perl ..\..\tools\mkmod.pl defrag_native.build
+lua ..\..\tools\mkmod.lua defrag_native.build
+if %errorlevel% neq 0 goto end
+
+popd
+exit /B 0
 
 :end
 popd
+exit /B 1

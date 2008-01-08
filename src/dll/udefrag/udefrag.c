@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -320,7 +320,6 @@ BOOL udefrag_send_command(unsigned char command,unsigned char letter)
 	cmd.command = command;
 	cmd.letter = letter;
 	cmd.sizelimit = settings.sizelimit;
-	cmd.mode = __UserMode;
 	offset.QuadPart = 0;
 	Status = NtWriteFile(udefrag_device_handle,/*NULL*/io_event,
 		NULL,NULL,&IoStatusBlock,

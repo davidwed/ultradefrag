@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
 	/* Get the File Object */
 	Status = ObReferenceObjectByHandle(FileHandle,0,NULL,KernelMode,
 					   (PVOID*)(void *)&FileObject,NULL);
-	if(Status != STATUS_SUCCESS) return(Status);
+	if(Status != STATUS_SUCCESS) goto done;
 
 	/* Check if this is a direct open or not */
 	DebugPrint("Vol. flags = %x\n",(UINT)FileObject->Flags);
@@ -52,10 +52,10 @@ NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
 	KeInitializeEvent(&Event, SynchronizationEvent, FALSE);
 
 	/* Allocate the IRP */
-	if(!(Irp = IoAllocateIrp(DeviceObject->StackSize, FALSE)))
-	{
+	if(!(Irp = IoAllocateIrp(DeviceObject->StackSize, FALSE))){
 		ObDereferenceObject(FileObject);
-		return STATUS_INSUFFICIENT_RESOURCES;
+		Status = STATUS_INSUFFICIENT_RESOURCES;
+		goto done;
 	}
 
 	/* Set up the IRP */
@@ -73,12 +73,14 @@ NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
 
 	/* Call the Driver */
 	Status = IoCallDriver(DeviceObject, Irp);
-	if(Status == STATUS_PENDING)
-	{
+	if(Status == STATUS_PENDING){
 		KeWaitForSingleObject(&Event,Executive,KernelMode,FALSE,NULL);
 		Status = IoStatusBlock.Status;
 	}
 	/* NO DEREFERENCE FileObject HERE! */
+done:
+	if(!NT_SUCCESS(Status))
+		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",(UINT)Status);
 	return Status;
 }
 

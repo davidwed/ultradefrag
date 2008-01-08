@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,4 +43,4 @@ unsigned int dbg_ring_buffer_offset;
  * ('Dynamically-allocated Multi-dimensional Arrays - C').
  */
 ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];
-ULONG map_size;
+ULONG map_size = 0;

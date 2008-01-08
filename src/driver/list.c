@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,8 +28,7 @@ LIST* NTAPI InsertFirstItem(PLIST *phead,ULONG size)
 	PLIST p;
 
 	p = (LIST *)AllocatePool(NonPagedPool,size);
-	if(p)
-	{
+	if(p){
 		p->next_ptr = *phead;
 		*phead = p;
 	}
@@ -44,11 +43,9 @@ LIST* NTAPI InsertMiddleItem(PLIST *pprev,PLIST *pnext,ULONG size)
 {
 	PLIST p = NULL;
 
-	if(*pprev)
-	{
+	if(*pprev){
 		p = (LIST *)AllocatePool(NonPagedPool,size);
-		if(p)
-		{
+		if(p){
 			p->next_ptr = *pnext;
 			(*pprev)->next_ptr = p;
 		}
@@ -66,8 +63,7 @@ LIST* NTAPI InsertLastItem(PLIST *phead,PLIST *plast,ULONG size)
 
 	last = *plast;
 	p = (LIST *)AllocatePool(NonPagedPool,size);
-	if(p)
-	{
+	if(p){
 		if(last) last->next_ptr = p;
 		else     *phead = p;
 		p->next_ptr = NULL;
@@ -99,8 +95,7 @@ void NTAPI DestroyList(PLIST *phead)
 	PLIST curr,next;
 
 	curr = *phead;
-	while(curr)
-	{
+	while(curr){
 		next = curr->next_ptr;
 		ExFreePool(curr);
 		curr = next;

@@ -1,7 +1,7 @@
 @echo off
 
 echo Build script for the UltraDefrag project.
-echo Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+echo Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
 if "%1" equ "--help" goto usage
 
@@ -173,6 +173,11 @@ mkdir %SRC_PKG_PATH%\src\dll
 xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
 mkdir %SRC_PKG_PATH%\src\dll\zenwinx
 xcopy /I /Y .\dll\zenwinx\src %SRC_PKG_PATH%\src\dll\zenwinx\src
+
+mkdir %SRC_PKG_PATH%\src\tools
+copy /Y .\tools\*.pl %SRC_PKG_PATH%\src\tools\
+copy /Y .\tools\*.lua %SRC_PKG_PATH%\src\tools\
+copy /Y .\tools\readme.txt %SRC_PKG_PATH%\src\tools\
 
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html

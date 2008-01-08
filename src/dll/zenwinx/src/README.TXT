@@ -51,8 +51,8 @@ See the CREDITS file.
 
 8. Copyright
 
-   Copyright (C) 2007 by Dmitri Arkhangelski.
-   Copyright (C) 2007 by Justin Dearing.
+   Copyright (C) 2007,2008 by Dmitri Arkhangelski.
+   Copyright (C) 2007,2008 by Justin Dearing.
 
    This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

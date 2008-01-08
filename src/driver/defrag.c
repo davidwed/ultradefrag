@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -188,7 +188,7 @@ void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start, ULONGLONG le
 	if(dx->partition_type == NTFS_PARTITION)
 	{
 		/* Mark clusters as no-checked */
-		ProcessBlock(dx,start,len,NO_CHECKED_SPACE);
+		ProcessBlock(dx,start,len,NO_CHECKED_SPACE,SYSTEM_SPACE); /* FIXME!!! */
 
 		ppbs = dx->no_checked_blocks;
 		while(ppbs)
@@ -338,6 +338,11 @@ NTSTATUS __MoveFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		NtWaitForSingleObject(hFile,FALSE,NULL);
 		status = ioStatus.Status;
 	}
+	/* Ensure that the moving was successful on FAT. */
+	/* Target space should be marked by calling function. */
+	/* If the call was unsuccessful, mark target space as system. */
+	/* If the call was successful, mark freed space as free. */
+	/* File's blockmap must be corrected by calling function. */
 	return status;
 }
 
@@ -346,7 +351,7 @@ void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 {
 	PFREEBLOCKMAP block, prev_block, new_block;
 
-	ProcessBlock(dx,start,length,FREE_SPACE);
+	ProcessBlock(dx,start,length,FREE_SPACE,SYSTEM_SPACE); /* FIXME!!! */
 
 	block = dx->free_space_map;
 	prev_block = NULL;
@@ -680,7 +685,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			dx->fragmfilecounter --;
 			pfn->is_fragm = FALSE;
 		}
-		MarkSpace(dx,pfn);
+		MarkSpace(dx,pfn,FREE_SPACE);
 	}
 	else
 	{

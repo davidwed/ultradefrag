@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -304,10 +304,10 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void RedumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
-void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state);
+void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state,int old_space_state);
 void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
 void ProcessUnfragmentedBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG start, ULONGLONG len);
-void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state);
 BOOLEAN FillFreeClusterMap(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN GetTotalClusters(UDEFRAG_DEVICE_EXTENSION *dx);
 void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -338,12 +338,14 @@ NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE hFile);
 
 void DbgPrintNoMem();
 
+NTSTATUS AllocateMap(ULONG size);
 void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);
 void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx);
+void GetMap(char *dest);
 
 NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx);
-void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
+/*__inline */void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #define FIND_DATA_SIZE	(16*1024)
 

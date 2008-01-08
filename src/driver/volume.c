@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -41,7 +41,10 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 				&ObjectAttributes,&iosb,
 				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
-	if(status != STATUS_SUCCESS) goto done;
+	if(status != STATUS_SUCCESS){
+		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)status);
+		goto done;
+	}
 	/* try to get fs type */
 	status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
@@ -132,8 +135,7 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
-	if(status == STATUS_PENDING)
-	{
+	if(status == STATUS_PENDING){
 		NtWaitForSingleObject(dx->hVol,FALSE,NULL);
 		status = iosb.Status;
 	}
@@ -155,25 +157,25 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 		len = 0;
 	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
 	///dx->processed_clusters += len;
-	ProcessBlock(dx,start,len,MFT_SPACE);
+	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFT2 */
 	start = ntfs_data.MftZoneStart.QuadPart;
 	len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
 	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",start,len);
 	///dx->processed_clusters += len;
-	ProcessBlock(dx,start,len,MFT_SPACE);
+	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFTMirror */
 	start = ntfs_data.Mft2StartLcn.QuadPart;
 	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",start);
-	ProcessBlock(dx,start,1,MFT_SPACE);
+	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
 	///dx->processed_clusters ++;
 	mft_len ++;
 	dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
 }
 
-__inline void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx)
+/*__inline*/ void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ZwCloseSafe(dx->hVol);
 }

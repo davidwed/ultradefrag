@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,8 +23,26 @@
 
 #include "driver.h"
 
+/* allocates buffer for cluster map of specified size */
+NTSTATUS AllocateMap(ULONG size)
+{
+	/* map reallocation don't supported yet */
+	if(new_cluster_map) return STATUS_INVALID_DEVICE_REQUEST;
+	map_size = size;
+	DebugPrint("-Ultradfg- Map size = %u\n",map_size);
+	if(!size) return STATUS_SUCCESS;
+	new_cluster_map = AllocatePool(NonPagedPool,
+			NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG));
+	if(!new_cluster_map){
+		DbgPrintNoMem();
+		map_size = 0;
+		return STATUS_NO_MEMORY;
+	}
+	return STATUS_SUCCESS;
+}
+
 /* marks space allocated by specified file */
-void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
+void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
 {
 	PBLOCKMAP block;
 	UCHAR space_states[] = {UNFRAGM_SPACE,UNFRAGM_OVERLIMIT_SPACE, \
@@ -44,12 +62,12 @@ void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	}
 
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
-		ProcessBlock(dx,block->lcn,block->length,state);
+		ProcessBlock(dx,block->lcn,block->length,state,old_space_state);
 }
 
 /* applies clusters block data to cluster map */
 void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
-				  ULONGLONG len,int space_state)
+				  ULONGLONG len,int space_state,int old_space_state)
 {
 	ULONGLONG cell, offset, n;
 	ULONGLONG ncells, i, j;
@@ -70,10 +88,10 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 		while((cell < (map_size - 1)) && len){
 			n = min(len,dx->clusters_per_cell - offset);
 			new_cluster_map[cell][space_state] += n;
-			if(new_cluster_map[cell][SYSTEM_SPACE] >= n)
-				new_cluster_map[cell][SYSTEM_SPACE] -= n;
+			if(new_cluster_map[cell][old_space_state] >= n)
+				new_cluster_map[cell][old_space_state] -= n;
 			else
-				new_cluster_map[cell][SYSTEM_SPACE] = 0;
+				new_cluster_map[cell][old_space_state] = 0;
 			len -= n;
 			cell ++;
 			offset = 0;
@@ -87,10 +105,10 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 			 * Because in space states enum mft has number above free space number,
 			 * these blocks will be displayed as mft blocks.
 			 */
-			if(new_cluster_map[cell][SYSTEM_SPACE] >= n)
-				new_cluster_map[cell][SYSTEM_SPACE] -= n;
+			if(new_cluster_map[cell][old_space_state] >= n)
+				new_cluster_map[cell][old_space_state] -= n;
 			else
-				new_cluster_map[cell][SYSTEM_SPACE] = 0;
+				new_cluster_map[cell][old_space_state] = 0;
 		}
 	} else { /* dx->opposite_order */
 		cell = start * dx->cells_per_cluster;
@@ -130,5 +148,24 @@ void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx)
 	} else {
 		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
 			dx->clusters_total,dx->cells_per_cluster,dx->cells_per_last_cluster);
+	}
+}
+
+void GetMap(char *dest)
+{
+	ULONG i, k, index;
+	ULONGLONG maximum;
+	
+	if(!new_cluster_map) return;
+	for(i = 0; i < map_size; i++){
+		maximum = new_cluster_map[i][0];
+		index = 0;
+		for(k = 1; k < NUM_OF_SPACE_STATES; k++){
+			if(new_cluster_map[i][k] >= maximum){ /* >= is very important: mft and free */
+				maximum = new_cluster_map[i][k];
+				index = k;
+			}
+		}
+		dest[i] = (char)index;
 	}
 }

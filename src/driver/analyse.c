@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ void PrepareDataFields(UDEFRAG_DEVICE_EXTENSION *dx)
 //	dx->cluster_map = 0;
 	dx->total_space = 0; dx->free_space = 0;
 	dx->hVol = NULL;
-	dx->partition_type = 0x0;
+//	dx->partition_type = 0x0;
 	dx->mft_size = 0;
 	dx->processed_clusters = 0;
 	dx->unprocessed_blocks = 0;
@@ -92,22 +92,12 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* 0. open the volume */
 	DeleteLogFile(dx);
 	Status = OpenVolume(dx);
-	if(!NT_SUCCESS(Status))
-	{
-		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)Status);
-		goto fail;
-	}
-
+	if(!NT_SUCCESS(Status)) goto fail;
 	/* 1. get number of clusters: free and total */
-	if(!NT_SUCCESS(GetVolumeInfo(dx)))
-	{
-		Status = STATUS_INVALID_PARAMETER;
-		goto fail;
-	}
+	Status = GetVolumeInfo(dx);
+	if(!NT_SUCCESS(Status)) goto fail;
 	/* synchronize drive */
-	Status = __NtFlushBuffersFile(dx->hVol);
-	if(Status)
-		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",(UINT)Status);
+	__NtFlushBuffersFile(dx->hVol);
 ///tm = _rdtsc();
 	if(!FillFreeClusterMap(dx))
 	{
@@ -141,7 +131,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",dx->fragmfilecounter);
 	//DebugPrint("Time: %I64u",_rdtsc() - tm);
 	/* 3. If it's NTFS volume, we can locate MFT and put its clusters to map */
-	ProcessMFT(dx);
+	if(dx->partition_type == NTFS_PARTITION) ProcessMFT(dx);
 	SaveFragmFilesListToDisk(dx);
 	if(KeReadStateEvent(&dx->stop_event) == 0x0)
 		dx->status = STATUS_ANALYSED;
@@ -169,7 +159,7 @@ FREEBLOCKMAP *InsertNewFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 	}
 
 	/* mark space */
-	ProcessBlock(dx,start,length,FREE_SPACE);
+	ProcessBlock(dx,start,length,FREE_SPACE,SYSTEM_SPACE); // always system?
 	return block;
 }
 
@@ -629,7 +619,7 @@ next_run:
 	if(!cnt) goto dump_fail; /* file is placed in MFT or some error */
 	ZwClose(hFile);
 
-	MarkSpace(dx,pfn);
+	MarkSpace(dx,pfn,SYSTEM_SPACE); /* FIXME: when redump maybe FREE_SPACE */
 	pfn->n_fragments = cnt;
 	if(pfn->is_fragm)
 	{

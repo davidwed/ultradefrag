@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -338,9 +338,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	short *filter;
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONG BytesTxd = 0;
-	ULONGLONG i;
-	ULONGLONG maximum;
-	UCHAR index, k;
 	REPORT_TYPE *rt;
 	UCHAR *user_mode_buffer; /* for nt 4.0 */
 	//PVOID in_buf, out_buf;
@@ -351,11 +348,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	IoControlCode = IrpStack->Parameters.DeviceIoControl.IoControlCode;
 	in_len = IrpStack->Parameters.DeviceIoControl.InputBufferLength;
 	out_len = IrpStack->Parameters.DeviceIoControl.OutputBufferLength;
-
-	/*
-	DebugPrint("-Ultradfg- In DeviceControlRoutine (fdo= %p)\n",fdo);
-	DebugPrint("-Ultradfg- DeviceIoControl: IOCTL %X\n", (UINT)ControlCode );
-	*/
 
 	switch(IoControlCode)
 	{
@@ -389,31 +381,13 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		case IOCTL_GET_CLUSTER_MAP:
 		{
 			DebugPrint("-Ultradfg- IOCTL_GET_CLUSTER_MAP\n");
-			if(!new_cluster_map)
-			{
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
 			map = (char *)Irp->AssociatedIrp.SystemBuffer;
-			if(out_len != map_size || !map)
+			if(out_len != map_size || !map || !new_cluster_map)
 			{
 				status = STATUS_INVALID_PARAMETER;
 				break;
 			}
-			for(i = 0; i < map_size; i++)
-			{
-				maximum = new_cluster_map[i][0];
-				index = 0;
-				for(k = 1; k < NUM_OF_SPACE_STATES; k++)
-				{
-					if(new_cluster_map[i][k] >= maximum) /* >= is very important: mft and free */
-					{
-						maximum = new_cluster_map[i][k];
-						index = k;
-					}
-				}
-				map[i] = index;
-			}
+			GetMap(map);
 			BytesTxd = out_len;
 			break;
 		}
@@ -490,31 +464,14 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		case IOCTL_SET_CLUSTER_MAP_SIZE:
 		{
 			DebugPrint("-Ultradfg- IOCTL_SET_CLUSTER_MAP_SIZE\n");
-			if(new_cluster_map)
-			{
-				/* map size changing don't supported yet */
-				status = STATUS_INVALID_PARAMETER;
-				break;
-			}
 			if(in_len != sizeof(ULONG))
 			{
 				status = STATUS_INVALID_PARAMETER;
 				break;
 			}
-			map_size = *((ULONG *)Irp->AssociatedIrp.SystemBuffer);
-			DebugPrint("-Ultradfg- Map size = %u\n",map_size);
-			if(map_size)
-			{
-				new_cluster_map = AllocatePool(NonPagedPool,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
-				if(!new_cluster_map)
-				{
-					DbgPrintNoMem();
-					map_size = 0;
-					status = STATUS_NO_MEMORY;
-					break;
-				}
-			}
-			BytesTxd = in_len;
+			status = AllocateMap(*((ULONG *)Irp->AssociatedIrp.SystemBuffer));
+			if(NT_SUCCESS(status))
+				BytesTxd = in_len;
 			break;
 		}
 		/* Invalid request */
