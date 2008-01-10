@@ -5,7 +5,7 @@ Items to describe:
 /* maybe we need to use this file as stack  -- Dmitri */
 /* Agreed -- Justin */
 
-1. On windows nt 4.0 sysinternals dbgview doesn't work. Instead, the user can
+1. (No longer valid due to DbgPrintLog) On windows nt 4.0 sysinternals dbgview doesn't work. Instead, the user can
    find debug messages in c:\dbgprint.log. Size of them is hard limited by 
    512 Kb. When overflow occurs new messages will be written in the beginning of
    the file. In all cases after the last message [End] tag will be written.
@@ -41,7 +41,7 @@ Items to describe:
    Maybe it will be fixed in next versions, but currently 
    I don't know how to do it.
 
-7. Describe how to use DebugPrintLog and DebugView to get logging information
+7. (DONE) Describe how to use DebugPrintLog and DebugView to get logging information
    out of UltraDefrag.
 
 8. Project targets are:
