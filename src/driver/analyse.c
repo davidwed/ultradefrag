@@ -21,6 +21,10 @@
  *  Fragmentation analyse engine.
  */
 
+/*
+ * TODO: replace if(dbg_level > n) DebugPrint(...) 
+ * with DebugPrintx(...) where x = 0, 1, 2, ...
+ */
 #include "driver.h"
 #if 0
 ULONGLONG _rdtsc(void)
@@ -37,6 +41,7 @@ ULONGLONG _rdtsc(void)
 }
 #endif
 
+// TODO: simpify this function
 void PrepareDataFields(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	dx->free_space_map = NULL;
@@ -159,7 +164,7 @@ FREEBLOCKMAP *InsertNewFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 	}
 
 	/* mark space */
-	ProcessBlock(dx,start,length,FREE_SPACE,SYSTEM_SPACE); // always system?
+	ProcessBlock(dx,start,length,FREE_SPACE,SYSTEM_SPACE); // always system? no!!!
 	return block;
 }
 
@@ -180,6 +185,7 @@ BOOLEAN FillFreeClusterMap(UDEFRAG_DEVICE_EXTENSION *dx)
 	//	t = _rdtsc();
 	/* Start scanning */
 	bitMappings = (PBITMAP_DESCRIPTOR)(dx->BitMap);
+	// TODO: remove this preprocessor directives
 #ifndef NT4_TARGET
 	pnextLcn = &nextLcn;
 #else
@@ -336,6 +342,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 	pFileInfo = pFileInfoFirst;
 	pFileInfo->FileIndex = 0;
 	pFileInfo->NextEntryOffset = 0;
+	// TODO: add in while cycle some condition
 	while(1)
 	{
 		if(KeReadStateEvent(&dx->stop_event) == 0x1)
@@ -365,6 +372,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 //continue;
 		/* VERY IMPORTANT: skip reparse points */
 		if(IS_REPARSE_POINT(pFileInfo)) continue;
+		/* FIXME: hard links? */
 		wcsncpy(dx->tmp_buf,path->Buffer,(path->Length) >> 1);
 		dx->tmp_buf[(path->Length) >> 1] = 0;
 		if(!is_root)
@@ -559,6 +567,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	}
 
 	/* Start dumping the mapping information. Go until we hit the end of the file. */
+	// TODO: remove this preprocessor directives
 #ifndef NT4_TARGET
 	pstartVcn = &startVcn;
 #else
@@ -599,8 +608,11 @@ dump_fail:
 		*pstartVcn = fileMappings->StartVcn;
 		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs; i++)
 		{
-			/* On NT 4.0, a compressed virtual run (0-filled) is  */
-			/* identified with a cluster offset of -1 */
+			/*
+			 * On NT 4.0 (and later NT versions),
+			 * a compressed virtual run (0-filled) is
+			 * identified with a cluster offset of -1.
+			 */
 			if(fileMappings->Pair[i].Lcn == LLINVALID)
 				goto next_run;
 			if(fileMappings->Pair[i].Vcn == 0)
@@ -633,6 +645,9 @@ dump_success:
 	return TRUE; /* success */
 }
 
+/* FIXME: clusters_to_move and filters changing after analysis */
+
+// TODO: remove this function after DefragmentFile() rewriting
 void RedumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	BOOLEAN is_fragm;

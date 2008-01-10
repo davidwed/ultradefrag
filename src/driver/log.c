@@ -167,6 +167,8 @@ done:
 
 /*************************************************************************************************/
 
+/* TODO: DbgPrint logger or this code? */
+
 /* special code for debug messages saving on nt 4.0 */
 
 #ifdef NT4_DBG

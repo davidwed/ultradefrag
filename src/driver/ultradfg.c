@@ -242,6 +242,7 @@ invalid_request:
 	return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
 }
 
+// TODO: this function should be empty if DBG is not defined
 void DbgPrintNoMem()
 {
 	DebugPrint("-Ultradfg- No Enough Memory!\n");

@@ -23,131 +23,96 @@
 
 #include "driver.h"
 
-void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx)
+/* 
+ * TODO: write special function to perform new analysis if 
+ * number of invalid movings is not zero.
+ * This function must redump free space and redump each file.
+ * And destroy pending blocks queue.
+ */
+
+/* 
+ * TODO: each block must be checked by simple function, that
+ * will check all clusters. This proc will be also used in 
+ * generic move file call.
+ */
+/* returns TRUE if all requested space is really free, FALSE otherwise */
+BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,
+					   ULONGLONG start, ULONGLONG len)
 {
-	PROCESS_BLOCK_STRUCT *ppbs,*new_ppbs;
 	NTSTATUS status;
 	IO_STATUS_BLOCK ioStatus;
-	ULONGLONG startLcn,nextLcn,cluster,data_cluster;
+	ULONGLONG startLcn,nextLcn;
 	ULONGLONG *pnextLcn;
 	PBITMAP_DESCRIPTOR bitMappings;
 	ULONGLONG i;
 
-	if(!dx->unprocessed_blocks)
-		goto done;
 	bitMappings = (PBITMAP_DESCRIPTOR)dx->BitMap;
 #ifndef NT4_TARGET
 	pnextLcn = &nextLcn;
 #else
 	if(dx->FileMap)
 		pnextLcn = (ULONGLONG *)(dx->FileMap + FILEMAPSIZE * sizeof(ULONGLONG) + 2 * sizeof(ULONGLONG));
-	else
-	{
+	else {
 		DebugPrint("-Ultradfg- user mode buffer inaccessible!\n");
 		pnextLcn = &nextLcn;
 	}
 #endif
-	ppbs = dx->no_checked_blocks;
-	while(ppbs)
-	{
-		if(ppbs->len)
-		{
-			*pnextLcn = ppbs->start; cluster = data_cluster = LLINVALID;
-			startLcn = ppbs->start;
-			i = 0;
-			do
-			{
-				status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
-					FSCTL_GET_VOLUME_BITMAP,
-					pnextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
-				if(status == STATUS_PENDING)
-				{
-					NtWaitForSingleObject(dx->hVol,FALSE,NULL);
-					status = ioStatus.Status;
-				}
-				if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW)
-				{
-					DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",
-						 (UINT)status);
-					ppbs->len -= startLcn + i - ppbs->start;
-					ppbs->start = startLcn + i;
-					goto fail;
-				}
-				/* Scan through the returned bitmap info, 
-				   looking for empty clusters */
-				startLcn = bitMappings->StartLcn;
-				for(i = 0; i < min(bitMappings->ClustersToEndOfVol,8*BITMAPBYTES); i++)
-				{
-					if(startLcn + i >= ppbs->start + ppbs->len)
-						goto end_of_scan;
-					if(!(bitMappings->Map[ i/8 ] & BitShift[ i % 8 ]))
-					{
-						/* Cluster is free */
-						if(cluster == LLINVALID)
-							cluster = startLcn + i;
-						if(data_cluster != LLINVALID)
-						{
-							new_ppbs = (PROCESS_BLOCK_STRUCT *)InsertFirstItem((PLIST *) \
-								&dx->no_checked_blocks,sizeof(PROCESS_BLOCK_STRUCT));
-							if(new_ppbs)
-							{
-								new_ppbs->start = data_cluster;
-								new_ppbs->len = startLcn + i - data_cluster;
-								dx->unprocessed_blocks ++;
-							}
-							data_cluster = LLINVALID;
-						}
-					}
-					else
-					{
-						/* Cluster isn't free */
-						if(cluster != LLINVALID)
-						{
-							if(dbg_level > 1)
-								DebugPrint("-Ultradfg- X start: %I64u len: %I64u\n",cluster,
-									startLcn + i - cluster);
-							InsertNewFreeBlock(dx,cluster,startLcn + i - cluster);
-							cluster = LLINVALID;
-						}
-						if(data_cluster == LLINVALID)
-							data_cluster = startLcn + i;
-					}
-				}
-				/* Move to the next block */
-				*pnextLcn = bitMappings->StartLcn + i;
-			} while(status != STATUS_SUCCESS);
-end_of_scan:
-			/* mark current as free */
-			ppbs->len = 0;
-			dx->unprocessed_blocks --;
-			/* if block is full */
-			if(data_cluster == ppbs->start)
-				goto next_item;
-fail:
-			if(cluster != LLINVALID)
-			{
-				if(dbg_level > 1)
-					DebugPrint("-Ultradfg- X start: %I64u len: %I64u\n",cluster,
-							startLcn + i - cluster);
-				InsertNewFreeBlock(dx,cluster,startLcn + i - cluster);
-			}
-			if(data_cluster != LLINVALID)
-			{
-				new_ppbs = (PROCESS_BLOCK_STRUCT *)InsertFirstItem((PLIST *) \
-					&dx->no_checked_blocks,sizeof(PROCESS_BLOCK_STRUCT));
-				if(new_ppbs)
-				{
-					new_ppbs->start = data_cluster;
-					new_ppbs->len = startLcn + i - data_cluster;
-					dx->unprocessed_blocks ++;
-				}
+	*pnextLcn = start; startLcn = start; i = 0;
+	do {
+		status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
+			FSCTL_GET_VOLUME_BITMAP,
+			pnextLcn,sizeof(ULONGLONG),bitMappings,BITMAPSIZE);
+		if(status == STATUS_PENDING){
+			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+			status = ioStatus.Status;
+		}
+		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
+			DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",
+				 (UINT)status);
+			return FALSE;
+		}
+		/* Scan, looking for non-empty clusters. */
+		startLcn = bitMappings->StartLcn;
+		for(i = 0; i < min(bitMappings->ClustersToEndOfVol,8*BITMAPBYTES); i++){
+			if(startLcn + i >= start + len) return TRUE;
+			if(bitMappings->Map[ i/8 ] & BitShift[ i % 8 ]){
+				return FALSE; /* Cluster isn't free */
 			}
 		}
-next_item:
-		ppbs = ppbs->next_ptr;
+		/* Move to the next block */
+		*pnextLcn = bitMappings->StartLcn + i;
+	} while(status != STATUS_SUCCESS);
+
+	return TRUE;
+}
+
+
+/*
+ * FIXME: what is about memory usage growing because
+ * pending blocks may be never freed.
+ */
+/*
+ * FIXME: this function is really not useful, at least on XP,
+ * because all blocks are still not checked by system and 
+ * CheckFreeSpace() always returns FALSE here.
+ */
+void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	PROCESS_BLOCK_STRUCT *ppbs;
+
+	if(!dx->unprocessed_blocks) return;
+	for(ppbs = dx->no_checked_blocks; ppbs != NULL; ppbs = ppbs->next_ptr){
+		if(ppbs->len){
+			if(CheckFreeSpace(dx,ppbs->start,ppbs->len)){
+				if(dbg_level > 1)
+					DebugPrint("-Ultradfg- Pending block was freed start: %I64u len: %I64u\n",
+							ppbs->start,ppbs->len);
+				InsertNewFreeBlock(dx,ppbs->start,ppbs->len);
+				ppbs->len = 0;
+				dx->unprocessed_blocks --;
+			}
+		}
 	}
-done:
-	return;
 }
 
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
@@ -245,6 +210,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	dx->current_operation = 'D';
 	dx->clusters_to_move_initial = dx->clusters_to_move;
+	// TODO: number of invalid movings = 0
 	// signed !!!
 	while(dx->fragmfilecounter > 0)
 	{
@@ -278,6 +244,11 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 next:
 			pflist = pflist->next_ptr;
 		}
+		// TODO:
+		// if number of invalid movings is not zero then
+		//  perform new analysis
+		//  number of invalid movings = 0
+		// end
 		if(dx->fragmfilecounter == prev_fragmfilecounter)
 			break; /* can't defragment more [big] files */
 		UpdateFragmentedFilesList(dx);
@@ -292,6 +263,7 @@ exit_defrag:
 		dx->status = STATUS_BEFORE_PROCESSING;
 }
 
+// TODO: remove some #ifdef's
 NTSTATUS __MoveFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
 		    ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)
 {
@@ -338,14 +310,11 @@ NTSTATUS __MoveFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		NtWaitForSingleObject(hFile,FALSE,NULL);
 		status = ioStatus.Status;
 	}
-	/* Ensure that the moving was successful on FAT. */
-	/* Target space should be marked by calling function. */
-	/* If the call was unsuccessful, mark target space as system. */
-	/* If the call was successful, mark freed space as free. */
-	/* File's blockmap must be corrected by calling function. */
+	/* TODO: check target space to get moving status */
 	return status;
 }
 
+/* TODO: this function should be optimized */
 void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 			  ULONGLONG start,ULONGLONG length)
 {
@@ -439,6 +408,10 @@ void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 	}
 }
 
+/*
+ * TODO: this function is not neccessary - 
+ * remove it after DefragmentFile rewriting
+ */
 void RemoveFreeSpaceBlocks(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	PFREEBLOCKMAP block, prev_block, new_block;
@@ -627,6 +600,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		return FALSE;
 	}
 	/* Find free space */
+	// TODO: the following constant must be calculated one time in GetVolumeInfo()
 	clusters_per_block = _256K / dx->bytes_per_cluster;
 	target = FindTarget(dx,pfn);
 	if(target == LLINVALID)
@@ -652,6 +626,21 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	ZwClose(hFile);
 	if(Status != STATUS_SUCCESS)
 		DebugPrint("MoveFile error: %x\n",(UINT)Status);
+	/* TODO: the next code in this function must be rewritten: */
+	/* if Status is successful then 
+	 *		mark target space using MarkSpace()
+	 *      remove target space from free space map
+	 *		mark source space as free (on fat/udf) or pending (on ntfs)
+	 *      add source space to free space map
+	 *		rebuild file's blockmap
+	 * else
+	 *		mark target space as system (because state is unknown)
+	 *      remove target space from free space map
+	 *      mark source space as system (see above)
+	 *		destroy file's blockmap and mark file as system
+	 *      increase invalid movings counter
+	 * endif
+	 */
 	/* mark space as free */
 	curr_block = pfn->blockmap;
 	while(curr_block)
@@ -693,6 +682,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		RedumpFile(dx,pfn);
 	}
 	RemoveFreeSpaceBlocks(dx,pfn);
+	// the following seems to be valid
 	if(was_fragmented && !pfn->is_fragm)
 		dx->clusters_to_move -= pfn->clusters_total;
 	if(!was_fragmented && pfn->is_fragm)
@@ -716,6 +706,7 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(dx->partition_type != NTFS_PARTITION)
 		return;
 	CheckPendingBlocks(dx);
+	// TODO: number of invalid movings = 0
 	/* process all files */
 	curr_file = dx->filelist;
 	while(curr_file)
@@ -742,6 +733,11 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->clusters_to_compact -= curr_file->clusters_total;
 		curr_file = curr_file->next_ptr;
 	}
+	// TODO:
+	// if number of invalid movings is not zero then
+	//  perform new analysis
+	//  number of invalid movings = 0
+	// end
 }
 
 void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
