@@ -1,6 +1,7 @@
 # this is the udefrag library build options
 NAME=udefrag
 TYPE=dll
+NATIVEDLL=1
 
 SRC=cfuncs.c;misc.c;settings.c;sfuncs.c;thread.c;udefrag.c
 RC=udefrag.rc

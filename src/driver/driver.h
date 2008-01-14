@@ -54,9 +54,15 @@ void __cdecl WriteLogMessage(char *format, ...);
 #define DebugPrint DbgPrint
 #endif
 
+#if 0 /* because windows ddk isn't compatible with ANSI C Standard */
 #define DebugPrint0(...) DebugPrint(__VA_ARGS__)
 #define DebugPrint1(...) { if(dbg_level > 0) DebugPrint(__VA_ARGS__); }
 #define DebugPrint2(...) { if(dbg_level > 1) DebugPrint(__VA_ARGS__); }
+#else
+#define DebugPrint0 DebugPrint
+#define DebugPrint1 if(dbg_level < 1) {} else DebugPrint
+#define DebugPrint2 if(dbg_level < 2) {} else DebugPrint
+#endif
 
 #if defined(__GNUC__)
 #include <ddk/ntddk.h>

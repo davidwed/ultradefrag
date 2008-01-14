@@ -29,6 +29,7 @@ xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\dll\udefrag     .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx\src .\obj\zenwinx
+xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
 
 mkdir obj\dll
 mkdir obj\dll\zenwinx
@@ -173,6 +174,8 @@ mkdir %SRC_PKG_PATH%\src\dll
 xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
 mkdir %SRC_PKG_PATH%\src\dll\zenwinx
 xcopy /I /Y .\dll\zenwinx\src %SRC_PKG_PATH%\src\dll\zenwinx\src
+
+xcopy /I /Y /Q    .\lua5.1 %SRC_PKG_PATH%\src\lua5.1
 
 mkdir %SRC_PKG_PATH%\src\tools
 copy /Y .\tools\*.pl %SRC_PKG_PATH%\src\tools\

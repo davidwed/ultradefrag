@@ -37,6 +37,7 @@ opts = {
 	ADLIBS="",
 	DEFFILE="",
 	BASEADDR="",
+	NATIVEDLL="",
 	}
 
 src_files = {}
@@ -168,8 +169,15 @@ function produce_ddk_makefile()
 	if _type == "console" or _type == "gui" then 
 		f:write("USE_MSVCRT=1\n")
 	end
-	if _type == "native" or _type == "dll" then
+	if _type == "native" then
 		f:write("USE_NTDLL=1\n")
+	end
+	if _type == "dll" then
+		if opts.NATIVEDLL == "1" then
+			f:write("USE_NTDLL=1\n")
+		else
+			f:write("USE_MSVCRT=1\n")
+		end
 	end
 	f:write("\n")
 	
@@ -233,6 +241,10 @@ function produce_msvc_makefile()
 		s = "native"
 	else assert(false,"Unknown target type: " .. _type .. "!")
 	end
+	
+	if opts.NATIVEDLL == "0" then
+		cl_flags = cl_flags .. "/MD "
+	end
 
 	if _type ~= "driver" then
 		f:write("ALL : \"", opts.NAME, ".", target_ext, "\"\n\n")
@@ -267,15 +279,26 @@ function produce_msvc_makefile()
 	
 	link_flags = "LINK32_FLAGS="
 	for i, v in ipairs(libs) do
-		link_flags = link_flags .. v .. ".lib "
+		if opts.NATIVEDLL ~= "0" or v ~= "msvcrt" then
+			link_flags = link_flags .. v .. ".lib "
+		end
 	end
 	for i, v in ipairs(adlibs) do
 		link_flags = link_flags .. v .. ".lib "
 	end
-	link_flags = link_flags .. "/nologo /incremental:no /machine:I386 /nodefaultlib "
+	if opts.NATIVEDLL == "0" then
+		-- DLL for console/gui environment
+		link_flags = link_flags .. "/nologo /incremental:no /machine:I386 "
+	else
+		link_flags = link_flags .. "/nologo /incremental:no /machine:I386 /nodefaultlib "
+	end
 	link_flags = link_flags .. "/subsystem:" .. s .. " "
 	if _type == "dll" then
-		link_flags = link_flags .. "/entry:\"DllMain\" /dll "
+		if opts.NATIVEDLL == "0" then
+			link_flags = link_flags .. "/dll "
+		else
+			link_flags = link_flags .. "/entry:\"DllMain\" /dll "
+		end
 		link_flags = link_flags .. "/def:" .. opts.DEFFILE .. " "
 		link_flags = link_flags .. "/implib:" .. opts.NAME .. ".lib "
 	elseif _type == "native" then

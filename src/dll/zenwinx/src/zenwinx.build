@@ -1,6 +1,7 @@
 # this is the zenwinx library build options
 NAME=zenwinx
 TYPE=dll
+NATIVEDLL=1
 
 SRC=error.c;keyboard.c;keytrans.c;mem.c;stdio.c;zenwinx.c
 RC=zenwinx.rc

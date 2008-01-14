@@ -37,7 +37,8 @@ my %opts = (
 	'LIBS' => ' ',
 	'ADLIBS' => ' ',
 	'DEFFILE' => ' ',
-	'BASEADDR' => ' '
+	'BASEADDR' => ' ',
+	'NATIVEDLL' => ' '
 	);
 
 my @src_files;
@@ -296,7 +297,13 @@ sub produce_ddk_makefile {
 		case 'console' {print OUT "USE_MSVCRT=1\n";}
 		case 'gui'     {print OUT "USE_MSVCRT=1\n";}
 		case 'native'  {print OUT "USE_NTDLL=1\n";}
-		case 'dll'     {print OUT "USE_NTDLL=1\n";}
+		case 'dll'     {
+			if($opts{'NATIVEDLL'} eq "1"){
+				print OUT "USE_NTDLL=1\n";
+			} else {
+				print OUT "USE_MSVCRT=1\n";
+			}
+		}
 	}
 	print OUT "\n";
 	if($type eq 'native' || $type eq 'dll'){
@@ -367,6 +374,9 @@ sub produce_msvc_makefile {
 		}
 		else           {die("Unknown target type: $type!");}
 	}
+	if(opts{'NATIVEDLL'} eq "0"){
+		$cl_flags = $cl_flags."/MD ";
+	}
 	if($type ne 'driver'){
 		print OUT "ALL : \"$opts{'NAME'}.$ext\"\n\n";
 	} else {
@@ -397,16 +407,26 @@ sub produce_msvc_makefile {
 	}
 	$link_flags = "LINK32_FLAGS=";
 	foreach (@libs){
-		$link_flags = $link_flags."$_.lib ";
+		if(opts{'NATIVEDLL'} ne "0" || $_ ne "msvcrt"){
+			$link_flags = $link_flags."$_.lib ";
+		}
 	}
 	foreach (@adlibs){
 		$link_flags = $link_flags."$_.lib ";
 	}
-	$link_flags = $link_flags."/nologo /incremental:no /machine:I386 /nodefaultlib ";
+	if(opts{'NATIVEDLL'} eq "0"){
+		$link_flags = $link_flags."/nologo /incremental:no /machine:I386 ";
+	} else {
+		$link_flags = $link_flags."/nologo /incremental:no /machine:I386 /nodefaultlib ";
+	}
 	$link_flags = $link_flags."/subsystem:$s ";
 	switch($type) {
 		case 'dll' {
-			$link_flags = $link_flags."/entry:\"DllMain\" /dll ";
+			if(opts{'NATIVEDLL'} eq "0"){
+				$link_flags = $link_flags."/dll ";
+			} else {
+				$link_flags = $link_flags."/entry:\"DllMain\" /dll ";
+			}
 			$link_flags = $link_flags."/def:$opts{'DEFFILE'} ";
 			$link_flags = $link_flags."/implib:$opts{'NAME'}.lib ";
 		}

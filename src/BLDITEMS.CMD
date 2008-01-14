@@ -23,6 +23,10 @@ cd ..\native
 rem perl ..\..\tools\mkmod.pl defrag_native.build
 lua ..\..\tools\mkmod.lua defrag_native.build
 if %errorlevel% neq 0 goto end
+cd ..\lua5.1
+rem perl ..\..\tools\mkmod.pl lua5.1_dll.build
+lua ..\..\tools\mkmod.lua lua5.1_dll.build
+if %errorlevel% neq 0 goto end
 
 popd
 exit /B 0

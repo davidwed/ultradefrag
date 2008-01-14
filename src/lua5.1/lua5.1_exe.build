@@ -1,0 +1,9 @@
+# Lua 5.1 interpreter build options
+NAME=lua5.1
+TYPE=console
+
+SRC=lua.c
+RC=lua.rc
+
+LIBS=msvcrt
+ADLIBS=$(UDEFRAG_LIB_PATH)\lua5.1

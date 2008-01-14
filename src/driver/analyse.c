@@ -40,6 +40,7 @@ ULONGLONG _rdtsc(void)
 /* Device Extension initialization */
 void InitDX(UDEFRAG_DEVICE_EXTENSION *dx)
 {
+	DebugPrint1("fucked ddk %u\n",2003);
 	memset(&dx->z_start,0,&dx->z_end - &dx->z_start);
 	dx->hVol = NULL;
 	dx->current_operation = 'A';
