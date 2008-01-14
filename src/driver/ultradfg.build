@@ -2,7 +2,7 @@
 NAME=ultradfg
 TYPE=driver
 
-SRC=analyse.c;defrag.c;globals.c;int64.c;io.c;list.c;log.c;ultradfg.c;map.c;volume.c
+SRC=analyse.c;defrag.c;globals.c;int64.c;io.c;list.c;log.c;ultradfg.c;map.c;volume.c;freespace.c;filedump.c;findfiles.c;filter.c
 RC=ultradfg.rc
 
 LIBS=ntoskrnl;hal

@@ -7,8 +7,8 @@ defaultConfig=1
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=../../obj/dll/udefrag
-outputFilesDirectory=../../obj/dll/udefrag
+intermediateFilesDirectory=../../obj/udefrag
+outputFilesDirectory=../../obj/udefrag
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -45,8 +45,8 @@ extraResourceOptions=
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=../../obj/dll/udefrag
-outputFilesDirectory=../../obj/dll/udefrag
+intermediateFilesDirectory=../../obj/udefrag
+outputFilesDirectory=../../obj/udefrag
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=

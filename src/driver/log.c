@@ -36,8 +36,7 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 	RtlInitUnicodeString(&dx->log_path,p);
 	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,0,NULL,NULL);
 	status = ZwDeleteFile(&ObjectAttributes);
-	if(dbg_level > 0)
-		DebugPrint("-Ultradfg- Delete %ws status %x\n",p,(UINT)status);
+	DebugPrint1("-Ultradfg- Delete %ws status %x\n",p,(UINT)status);
 }
 
 void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,

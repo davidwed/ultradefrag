@@ -61,11 +61,10 @@ void DisplayMessage(short *err_msg)
 
 void HandleError(short *err_msg,int exit_code)
 {
-	if(err_msg)
-	{
+	if(err_msg){
 		DisplayMessage(err_msg);
 		Cleanup();
-		if(exit_code) {
+		if(exit_code){
 			winx_printf("Wait 10 seconds ...\n");
 			nsleep(10000); /* show error message at least 5 seconds */
 		}
@@ -79,19 +78,13 @@ void UpdateProgress()
 	STATISTIC stat;
 	double percentage;
 
-	if(!udefrag_get_progress(&stat,&percentage))
-	{
-		if(stat.current_operation != last_op)
-		{
-			if(last_op)
-			{
+	if(!udefrag_get_progress(&stat,&percentage)){
+		if(stat.current_operation != last_op){
+			if(last_op){
 				for(k = i; k < 50; k++)
 					winx_putch('-'); /* 100 % of previous operation */
-			}
-			else
-			{
-				if(stat.current_operation != 'A')
-				{
+			} else {
+				if(stat.current_operation != 'A'){
 					winx_printf("\nA: ");
 					for(k = 0; k < 50; k++)
 						winx_putch('-');
@@ -112,14 +105,12 @@ int __stdcall update_stat(int df)
 {
 	short *err_msg;
 
-	if(winx_breakhit(100) >= 0)
-	{
+	if(winx_breakhit(100) >= 0){
 		DisplayMessage(udefrag_stop());
 		abort_flag = 1;
 	}
 	UpdateProgress();
-	if(df == TRUE)
-	{
+	if(df == TRUE){
 		err_msg = udefrag_get_ex_command_result();
 		if(wcslen(err_msg) > 0)
 			DisplayMessage(err_msg);
@@ -145,10 +136,8 @@ void DisplayAvailableVolumes(void)
 	winx_printf("Available drive letters:   ");
 	err_msg = udefrag_get_avail_volumes(&v,FALSE);
 	if(err_msg) DisplayMessage(err_msg);
-	else
-	{
-		for(n = 0;;n++)
-		{
+	else {
+		for(n = 0;;n++){
 			if(v[n].letter == 0) break;
 			winx_printf("%c   ",v[n].letter);
 		}
@@ -164,8 +153,7 @@ void ProcessVolume(char letter,char command)
 	i = j = 0;
 	last_op = 0;
 	winx_printf("\nPreparing to ");
-	switch(command)
-	{
+	switch(command){
 	case 'a':
 		winx_printf("analyse %c: ...\n",letter);
 		err_msg = udefrag_analyse_ex(letter,update_stat);
@@ -179,8 +167,7 @@ void ProcessVolume(char letter,char command)
 		err_msg = udefrag_optimize_ex(letter,update_stat);
 		break;
 	}
-	if(err_msg)
-	{
+	if(err_msg){
 		DisplayMessage(err_msg);
 		return;
 	}
@@ -217,8 +204,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		"and select 'Last Known Good Configuration'.\n"
 		"Use Break key to abort defragmentation.\n\n");
 	code = winx_init(Peb);
-	if(code < 0)
-	{
+	if(code < 0){
 		if(winx_get_error_message_ex(buffer,sizeof(buffer),code) < 0)
 			winx_printf("Initialization failed and buffer is too small!\n");
 		else
@@ -229,8 +215,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	/* 6b. Prompt to exit */
 	winx_printf("Press any key to exit...  ");
-	for(i = 0; i < 3; i++)
-	{
+	for(i = 0; i < 3; i++){
 		if(winx_kbhit(1000) >= 0){ winx_printf("\n"); HandleError(L"",0); }
 		winx_printf("%c ",(char)('0' + 3 - i));
 	}
@@ -241,16 +226,14 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
 #else
-	if(settings->next_boot || settings->every_boot)
-	{
+	if(settings->next_boot || settings->every_boot){
 		/* do scheduled job and exit */
 		if(!settings->sched_letters)
 			HandleError(L"No letters specified!",3);
 		if(!settings->sched_letters[0])
 			HandleError(L"No letters specified!",3);
 		length = wcslen(settings->sched_letters);
-		for(i = 0; i < length; i++)
-		{
+		for(i = 0; i < length; i++){
 			if((char)(settings->sched_letters[i]) == ';')
 				continue; /* skip delimiters */
 			ProcessVolume((char)(settings->sched_letters[i]),'d');
@@ -260,14 +243,11 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 #endif
 	/* 8b. Command Loop */
-	while(1)
-	{
+	while(1){
 		winx_printf("# ");
-		if(winx_gets(buffer,sizeof(buffer) - 1) < 0)
-		{
+		if(winx_gets(buffer,sizeof(buffer) - 1) < 0){
 			excode = winx_get_last_error();
-			if(excode)
-			{
+			if(excode){
 				winx_printf("Keyboard read error %x!\n%s\n",(UINT)excode,
 				            winx_get_error_description(excode));
 				Cleanup();
@@ -281,8 +261,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		sscanf(buffer,"%32s %4s",cmd,arg);
 		for(i = 0; i < sizeof(commands) / sizeof(char*); i++)
 			if(strstr(cmd,commands[i])) break;
-		switch(i)
-		{
+		switch(i){
 		case 0:
 			winx_printf("Shutdown ...");
 			Cleanup();

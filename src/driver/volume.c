@@ -97,7 +97,10 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
 	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
+	dx->clusters_per_256k = _256K / dx->bytes_per_cluster;
+	if(!dx->clusters_per_256k) dx->clusters_per_256k ++;
 	DebugPrint("-Ultradfg- total clusters: %I64u\n", dx->clusters_total);
+	DebugPrint("-Ultradfg- cluster size: %I64u\n", dx->bytes_per_cluster);
 	
 	/* validate geometry */
 	if(!dx->clusters_total || !dx->total_space || !dx->bytes_per_cluster){
@@ -156,21 +159,21 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	else
 		len = 0;
 	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
-	///dx->processed_clusters += len;
+	//dx->processed_clusters += len;
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFT2 */
 	start = ntfs_data.MftZoneStart.QuadPart;
 	len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
 	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",start,len);
-	///dx->processed_clusters += len;
+	//dx->processed_clusters += len;
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFTMirror */
 	start = ntfs_data.Mft2StartLcn.QuadPart;
 	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",start);
 	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
-	///dx->processed_clusters ++;
+	//dx->processed_clusters ++;
 	mft_len ++;
 	dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
 }

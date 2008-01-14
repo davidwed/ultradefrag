@@ -67,6 +67,22 @@ SOURCE=.\defrag.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\filedump.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\filter.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\findfiles.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\freespace.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\globals.c
 # End Source File
 # Begin Source File

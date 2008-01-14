@@ -69,7 +69,7 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	dx->fdo = fdo;  /* save backward pointer */
 	fdo->Flags |= DO_DIRECT_IO;
 	/* data initialization */
-	PrepareDataFields(dx);
+	InitDX(dx);
 	KeInitializeEvent(&dx->sync_event,NotificationEvent,FALSE);
 	KeInitializeEvent(&dx->stop_event,NotificationEvent,FALSE);
 	KeInitializeSpinLock(&dx->spin_lock);
@@ -81,6 +81,9 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	dbg_level = 0;
 	new_cluster_map = NULL; /* console and native tools don't needs them */
 	map_size = 0;
+	dx->pnextLcn = &dx->nextLcn;
+	dx->pmoveFile = &dx->moveFile;
+	dx->pstartVcn = &dx->startVcn;
 	/* allocate memory */
 #ifndef NT4_TARGET
 	dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
@@ -164,8 +167,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	KeAcquireSpinLock(&dx->spin_lock,&oldIrql);
 	if(KeSetEvent(&dx->sync_event,IO_NO_INCREMENT,FALSE))
 	{
-		if(dbg_level > 0)
-			DebugPrint("-Ultradfg- is busy!\n");
+		DebugPrint1("-Ultradfg- is busy!\n");
 		KeReleaseSpinLock(&dx->spin_lock,oldIrql);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
@@ -280,52 +282,6 @@ void UpdateInformation(UDEFRAG_DEVICE_EXTENSION *dx)
 		ApplyFilter(dx,pf->pfn);
 		pf = pf->next_ptr;
 	}
-}
-
-void UpdateFilter(PFILTER pf,short *buffer,int length)
-{
-	POFFSET poffset;
-	int i;
-
-	if(pf->buffer)
-	{
-		ExFreePool((void *)pf->buffer);
-		pf->buffer = NULL;
-		DestroyList((PLIST *)pf->offsets);
-	}
-	if(length > sizeof(short))
-	{
-		pf->offsets = NULL;
-		pf->buffer = AllocatePool(NonPagedPool,length);
-		if(pf->buffer)
-		{
-			buffer[(length >> 1) - 1] = 0;
-			_wcslwr(buffer);
-
-			poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
-			if(!poffset) return;
-			poffset->offset = 0;
-			for(i = 0; i < (length >> 1) - 1; i++)
-			{
-				if(buffer[i] == 0x003b)
-				{
-					buffer[i] = 0;
-					poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
-					if(!poffset) break;
-					poffset->offset = i + 1;
-				}
-			}
-			RtlCopyMemory(pf->buffer,buffer,length);
-		}
-	}
-}
-
-void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	ExFreePoolSafe(dx->in_filter.buffer);
-	ExFreePoolSafe(dx->ex_filter.buffer);
-	DestroyList((PLIST *)&dx->in_filter.offsets);
-	DestroyList((PLIST *)&dx->ex_filter.offsets);
 }
 
 /* DeviceControlRoutine: IRP_MJ_DEVICE_CONTROL request handler. */
@@ -458,6 +414,9 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			{
 				dx->BitMap = user_mode_buffer;
 				dx->FileMap = (ULONGLONG *)(user_mode_buffer + BITMAPSIZE * sizeof(UCHAR));
+				dx->pnextLcn = (ULONGLONG *)(dx->FileMap + FILEMAPSIZE * sizeof(ULONGLONG));
+				dx->pstartVcn = (ULONGLONG *)(dx->pnextLcn + sizeof(ULONGLONG));
+				dx->pmoveFile = (MOVEFILE_DESCRIPTOR *)(dx->pnextLcn + 3 * sizeof(ULONGLONG));
 			}
 		#endif
 			break;

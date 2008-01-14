@@ -54,6 +54,10 @@ void __cdecl WriteLogMessage(char *format, ...);
 #define DebugPrint DbgPrint
 #endif
 
+#define DebugPrint0(...) DebugPrint(__VA_ARGS__)
+#define DebugPrint1(...) { if(dbg_level > 0) DebugPrint(__VA_ARGS__); }
+#define DebugPrint2(...) { if(dbg_level > 1) DebugPrint(__VA_ARGS__); }
+
 #if defined(__GNUC__)
 #include <ddk/ntddk.h>
 #include <ddk/ntdddisk.h>
@@ -237,6 +241,29 @@ typedef struct _FILTER
 	POFFSET offsets;
 } FILTER, *PFILTER;
 
+/* This is the definition for the data structure that is passed in to
+ * FSCTL_MOVE_FILE
+ */
+#ifndef _WIN64
+typedef struct {
+     HANDLE            FileHandle; 
+     ULONG             Reserved;   
+     LARGE_INTEGER     StartVcn; 
+     LARGE_INTEGER     TargetLcn;
+     ULONG             NumVcns; 
+     ULONG             Reserved1;	
+} MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
+#else
+typedef struct {
+     HANDLE            FileHandle; 
+     LARGE_INTEGER     StartVcn; 
+     LARGE_INTEGER     TargetLcn;
+     ULONGLONG         NumVcns; 
+} MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
+#endif
+
+#define MARKER int
+
 /* Define UDEFRAG_DEVICE_EXTENSION structure. Include pointer
  * to FDO (for simple realization of UnloadRoutine) and 
  * symbolic link name in format UNOCODE_STRING.
@@ -245,57 +272,72 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 {
 	PDEVICE_OBJECT fdo;
 	UNICODE_STRING log_path;
+	/*
+	 * All fields between markers will be set
+	 * to zero state before each analysis.
+	 */
+	MARKER z_start;
 	PFREEBLOCKMAP free_space_map;
+	PFREEBLOCKMAP lastfreeblock;
 	PFILENAME filelist;
 	PFRAGMENTED fragmfileslist;
-	PBLOCKMAP lastblock;
-	PFREEBLOCKMAP lastfreeblock;
 	ULONG filecounter;
 	ULONG dircounter;
 	ULONG compressedcounter;
 	ULONG fragmfilecounter;
 	ULONG fragmcounter;
-	UCHAR current_operation;
-	ULONGLONG clusters_to_move_initial;
-	ULONGLONG clusters_to_move_tmp;
-	ULONGLONG clusters_to_move;
-	ULONGLONG clusters_to_compact_initial;
-	ULONGLONG clusters_to_compact;
-	ULONGLONG clusters_to_compact_tmp;
-	/* Cluster map: bytes are set to FREE_SPACE, SYSTEM_SPACE etc. */
-//	UCHAR *cluster_map;
+	ULONG mft_size;
+	unsigned char partition_type;
+	ULONGLONG total_space;
+	ULONGLONG free_space; /* in bytes */
 	ULONGLONG clusters_total;
+	ULONGLONG clusters_per_256k;
 	ULONGLONG clusters_per_cell;
 	ULONGLONG clusters_per_last_cell; /* last block can represent more clusters */
 	BOOLEAN opposite_order; /* if true then number of clusters is less than number of blocks */
 	ULONGLONG cells_per_cluster;
 	ULONGLONG cells_per_last_cluster;
-	ULONGLONG total_space;
-	ULONGLONG free_space; /* in bytes */
+	ULONGLONG processed_clusters;
+	ULONGLONG clusters_to_move;
+	ULONGLONG clusters_to_move_initial;
+	ULONGLONG clusters_to_move_tmp;
+	ULONGLONG clusters_to_compact;
+	ULONGLONG clusters_to_compact_initial;
+	ULONGLONG clusters_to_compact_tmp;
+	PROCESS_BLOCK_STRUCT *no_checked_blocks;
+	ULONG unprocessed_blocks; /* number of no-checked blocks */
+	NTSTATUS status;
+	/*
+	 * End of the data with default zero state.
+	 */
+	MARKER z_end;
+	PBLOCKMAP lastblock;
+	UCHAR current_operation;
 	HANDLE hVol;
 	UCHAR letter;
 	/* Buffer to read file mapping information into */
 	ULONGLONG *FileMap;
 	UCHAR *BitMap;
-	NTSTATUS status;
 	KEVENT sync_event;
 	KEVENT stop_event;
 	KSPIN_LOCK spin_lock;
-	unsigned char partition_type;
-	ULONG mft_size;
 	ULONGLONG bytes_per_cluster;
 	ULONGLONG sizelimit;
 	BOOLEAN compact_flag;
 	BOOLEAN xp_compatible; /* true for NT 5.1 and later versions */
-	PROCESS_BLOCK_STRUCT *no_checked_blocks;
-	ULONG unprocessed_blocks; /* number of no-checked blocks */
 	FILTER in_filter;
 	FILTER ex_filter;
 	POFFSET in_offsets;
 	POFFSET ex_offsets;
 	REPORT_TYPE report_type;
-	ULONGLONG processed_clusters;
 	short *tmp_buf;
+	/* nt 4.0 specific */
+	ULONGLONG nextLcn;
+	ULONGLONG *pnextLcn;
+	MOVEFILE_DESCRIPTOR moveFile;
+	MOVEFILE_DESCRIPTOR *pmoveFile;
+	ULONGLONG startVcn;
+	ULONGLONG *pstartVcn;
 } UDEFRAG_DEVICE_EXTENSION, *PUDEFRAG_DEVICE_EXTENSION;
 
 /* Function Prototypes */
@@ -303,25 +345,21 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
 void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
-void RedumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state,int old_space_state);
 void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
-void ProcessUnfragmentedBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG start, ULONGLONG len);
 void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state);
-BOOLEAN FillFreeClusterMap(UDEFRAG_DEVICE_EXTENSION *dx);
+NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN GetTotalClusters(UDEFRAG_DEVICE_EXTENSION *dx);
 void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx);
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS __MoveFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters);
-NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,HANDLE hFile,ULONGLONG target,ULONGLONG clusters_per_block);
+NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,HANDLE hFile,ULONGLONG target);
 void DeleteBlockmap(PFILENAME pfn);
 BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx);
-BOOLEAN validate_letter(char letter);
-void PrepareDataFields(UDEFRAG_DEVICE_EXTENSION *dx);
+void InitDX(UDEFRAG_DEVICE_EXTENSION *dx);
 void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
-FREEBLOCKMAP *InsertNewFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
-BOOLEAN InsertFragmFileBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx);
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -346,6 +384,14 @@ void GetMap(char *dest);
 NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx);
 /*__inline */void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
+
+BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
+void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx);
+void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
+
+void UpdateFilter(PFILTER pf,short *buffer,int length);
+void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
+void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #define FIND_DATA_SIZE	(16*1024)
 
@@ -407,27 +453,6 @@ typedef struct {
 	ULONGLONG			ClustersToEndOfVol;
 	UCHAR				Map[1];
 } BITMAP_DESCRIPTOR, *PBITMAP_DESCRIPTOR; 
-
-/* This is the definition for the data structure that is passed in to
- * FSCTL_MOVE_FILE
- */
-#ifndef _WIN64
-typedef struct {
-     HANDLE            FileHandle; 
-     ULONG             Reserved;   
-     LARGE_INTEGER     StartVcn; 
-     LARGE_INTEGER     TargetLcn;
-     ULONG             NumVcns; 
-     ULONG             Reserved1;	
-} MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
-#else
-typedef struct {
-     HANDLE            FileHandle; 
-     LARGE_INTEGER     StartVcn; 
-     LARGE_INTEGER     TargetLcn;
-     ULONGLONG         NumVcns; 
-} MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
-#endif
 
 /* File System Control commands related to defragging */
 #define	FSCTL_READ_MFT_RECORD         0x90068

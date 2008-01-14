@@ -69,8 +69,7 @@ void show_help(void)
 
 void HandleError(char *err_msg,int exit_code)
 {
-	if(err_msg)
-	{ /* we should display error and terminate process */
+	if(err_msg){ /* we should display error and terminate process */
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 		printf("%s\n",err_msg);
 		if(!b_flag) settextcolor(console_attr);
@@ -82,8 +81,7 @@ void HandleError(char *err_msg,int exit_code)
 
 void HandleErrorW(short *err_msg,int exit_code)
 {
-	if(err_msg)
-	{ /* we should display error and terminate process */
+	if(err_msg){ /* we should display error and terminate process */
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 		WideCharToMultiByte(CP_OEMCP,0,err_msg,-1,oem_buffer,4095,NULL,NULL);
 		printf("%s\n",oem_buffer);
@@ -99,8 +97,7 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 	short *err_msg;
 
 	err_msg = udefrag_stop();
-	if(err_msg)
-	{
+	if(err_msg){
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 		WideCharToMultiByte(CP_OEMCP,0,err_msg,-1,oem_stop_buffer,4095,NULL,NULL);
 		printf("\n%s\n",oem_stop_buffer);
@@ -115,15 +112,13 @@ void parse_cmdline(int argc, short **argv)
 	short c1,c2;
 
 	if(argc < 2) h_flag = 1;
-	for(i = 1; i < argc; i++)
-	{
+	for(i = 1; i < argc; i++){
 		c1 = argv[i][0]; c2 = argv[i][1];
 		if(c1 && c2 == ':')	letter = (char)c1;
-		if(c1 == '-')
-		{
+		if(c1 == '-'){
 			c2 = (short)towlower((wint_t)c2);
-			if(!wcschr(L"abosideh?",c2))
-			{ /* unknown option */
+			if(!wcschr(L"abosideh?",c2)){
+				/* unknown option */
 				unk_opt[16] = (char)c2;
 				unknown_option = 1;
 			}
@@ -182,33 +177,22 @@ int main( int argc, char **argv )
     WCHAR **argvW;
     int i, j, Ret = 1;
 
-    if ((argvW = malloc(argc * sizeof(WCHAR*))))
-    {
+    if ((argvW = malloc(argc * sizeof(WCHAR*)))){
         /* convert the arguments */
-        for (i = 0, j = 0; i < argc; i++)
-        {
+        for (i = 0, j = 0; i < argc; i++){
             if (!(argvW[i] = malloc((strlen(argv[i]) + 1) * sizeof(WCHAR))))
-            {
                 j++;
-            }
             swprintf(argvW[i], L"%hs", argv[i]);
         }
-        
-        if (j == 0)
-        {
-            /* no error converting the parameters, call wmain() */
+
+        if (j == 0) /* no error converting the parameters, call wmain() */
             Ret = wmain(argc, (short **)argvW);
-        }
 		else
-		{
 			printf("No enough memory for the program execution!\n");
-		}
         
         /* free the arguments */
-        for (i = 0; i < argc; i++)
-        {
-            if (argvW[i])
-                free(argvW[i]);
+        for (i = 0; i < argc; i++){
+            if (argvW[i]) free(argvW[i]);
         }
         free(argvW);
     }

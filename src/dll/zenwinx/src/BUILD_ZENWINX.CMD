@@ -1,16 +1,28 @@
 @echo off
 
 echo Build script for the ZenWINX project.
-echo Copyright (c) 2007 by Dmitri Arkhangelski (dmitriar@gmail.com).
+echo Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
 if "%1" equ "--help" goto usage
 
 echo Set environment variables...
+set OLD_PATH=%path%
 call SETVARS_ZENWINX.CMD
 if "%1" equ "--clean" goto clean
 
 echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\zenwinxver.h
 echo #define ZENWINX_VERSION2 %ZENWINX_VERSION2% >> .\zenwinxver.h
+mkdir lib
+mkdir lib\amd64
+mkdir lib\ia64
+mkdir bin
+mkdir bin\amd64
+mkdir bin\ia64
+
+mkdir obj
+mkdir obj\_
+
+copy /Y .\*.*  .\obj\_\
 
 if "%1" neq "" goto parse_first_parameter
 echo No parameters specified, use defaults.
@@ -19,45 +31,72 @@ goto ddk_build
 :parse_first_parameter
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
+
 :ddk_build
-call DDK_BUILD_ZENWINX.CMD
+set BUILD_ENV=winddk
+
+echo --------- Target is x86 ---------
+set AMD64=
+set IA64=
+pushd ..
+call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre WNET
+popd
+set BUILD_DEFAULT=-nmake -i -g -P
+call blditems.cmd
 if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
+echo --------- Target is x64 ---------
+set IA64=
+pushd ..
+call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre AMD64 WNET
+popd
+set BUILD_DEFAULT=-nmake -i -g -P
+call blditems.cmd
+if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
+echo --------- Target is ia64 ---------
+set AMD64=
+pushd ..
+call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre 64 WNET
+popd
+set BUILD_DEFAULT=-nmake -i -g -P
+call blditems.cmd
+if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
 goto build_source_package
+
 :msvc_build
-call MSVC_BUILD_ZENWINX.CMD
+
+call "%MSVSBIN%\vcvars32.bat"
+
+set BUILD_ENV=msvc
+call blditems.cmd
 if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
 goto build_source_package
+
 :mingw_build
-call MINGW_BUILD_ZENWINX
+
+set path=%MINGWBASE%\bin;%path%
+
+set BUILD_ENV=mingw
+call blditems.cmd
 if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
 
 :build_source_package
+
 echo Build source code package...
 rmdir /s /q .\src_package
 mkdir .\src_package
 set SRC_PKG_PATH=.\src_package\zenwinx-%ZENWINXVER%
 mkdir %SRC_PKG_PATH%\src
-mkdir %SRC_PKG_PATH%\bin
-mkdir %SRC_PKG_PATH%\bin\amd64
-mkdir %SRC_PKG_PATH%\bin\ia64
-if "%1" equ "--use-msvc" goto msvc_bin
-if "%1" equ "--use-mingw" goto mingw_bin
-:winddk_bin
-copy /Y .\objfre_wnet_x86\i386\zenwinx.dll %SRC_PKG_PATH%\bin\
-copy /Y .\objfre_wnet_x86\i386\zenwinx.lib %SRC_PKG_PATH%\bin\
-copy /Y .\objfre_wnet_amd64\amd64\zenwinx.dll %SRC_PKG_PATH%\bin\amd64\
-copy /Y .\objfre_wnet_amd64\amd64\zenwinx.lib %SRC_PKG_PATH%\bin\amd64\
-copy /Y .\objfre_wnet_ia64\ia64\zenwinx.dll %SRC_PKG_PATH%\bin\ia64\
-copy /Y .\objfre_wnet_ia64\ia64\zenwinx.lib %SRC_PKG_PATH%\bin\ia64\
-goto xxx
-:msvc_bin
-copy /Y .\bin\zenwinx.dll %SRC_PKG_PATH%\bin\
-copy /Y .\bin\zenwinx.lib %SRC_PKG_PATH%\bin\
-goto xxx
-:mingw_bin
-copy /Y .\bin\zenwinx.dll %SRC_PKG_PATH%\bin\
-copy /Y .\bin\libzenwinx.dll.a %SRC_PKG_PATH%\bin\
-:xxx
+xcopy /I /Y /Q /S .\bin %SRC_PKG_PATH%\bin
+xcopy /I /Y /Q /S .\lib %SRC_PKG_PATH%\bin
 copy .\*.* %SRC_PKG_PATH%\src\
 cd .\src_package
 del /s /q *.ncb,*.opt,*.plg,*.aps,*.7z
@@ -72,18 +111,10 @@ if "%1" equ "--install" goto install
 if "%2" neq "--install" goto end
 :install
 echo copy zenwinx.dll to system directory
-if "%1" equ "--use-msvc" goto msvc_install
-:winddk_install
-copy /Y .\objfre_wnet_x86\i386\zenwinx.dll %windir%\system32\
-if %errorlevel% neq 0 goto fail_inst
-echo Install success!
-goto end
-:msvc_install
 copy /Y .\bin\zenwinx.dll %windir%\system32\
 if %errorlevel% neq 0 goto fail_inst
 echo Install success!
 goto end
-
 :fail_inst
 echo Install error!
 
@@ -99,9 +130,7 @@ exit /B
 echo Delete all intermediate files...
 rd /s /q bin
 rd /s /q obj
-rd /s /q objfre_wnet_x86
-rd /s /q objfre_wnet_amd64
-rd /s /q objfre_wnet_ia64
+rd /s /q lib
 echo Done.
 exit /B
 
