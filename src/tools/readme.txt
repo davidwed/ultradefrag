@@ -1,2 +1,2 @@
-These perl scripts are used as UltraDefrag build tools.
+These scripts are used as UltraDefrag build tools.
 

@@ -25,7 +25,10 @@ lua ..\..\tools\mkmod.lua defrag_native.build
 if %errorlevel% neq 0 goto end
 cd ..\lua5.1
 rem perl ..\..\tools\mkmod.pl lua5.1_dll.build
-lua ..\..\tools\mkmod.lua lua5.1_dll.build
+lua ..\..\tools\mkmod.lua lua5.1a_dll.build
+if %errorlevel% neq 0 goto end
+rem perl ..\..\tools\mkmod.pl lua5.1_exe.build
+lua ..\..\tools\mkmod.lua lua5.1a_exe.build
 if %errorlevel% neq 0 goto end
 
 popd

@@ -394,7 +394,7 @@ char * __stdcall i_udefrag_get_map(char *buffer,int size)
 /* useful for native and console applications */
 char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 {
-	char s[64];
+	char s[68];
 	double p;
 	unsigned int ip;
 

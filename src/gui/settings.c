@@ -60,7 +60,7 @@ extern ud_options *settings;
 
 BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	char buf[24];
+	char buf[68];
 	TC_ITEM tci;
 	LPNMHDR lpn;
 	LRESULT i;

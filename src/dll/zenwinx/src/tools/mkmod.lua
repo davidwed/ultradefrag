@@ -142,6 +142,8 @@ function produce_ddk_makefile()
 	else   assert(false,"Unknown target type: " .. _type .. "!")
 	end
 
+	if _type == "console" and opts.UNICODE ~= "1" then e = "main" end
+	
 	f:write("TARGETTYPE=", t, "\n\n")
 	if _type == "dll" then
 		f:write("DLLDEF=", opts.DEFFILE, "\n\n")

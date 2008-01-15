@@ -1,5 +1,5 @@
 # Lua 5.1 DLL build options
-NAME=lua5.1
+NAME=lua5.1a
 TYPE=dll
 NATIVEDLL=0
 

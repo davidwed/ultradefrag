@@ -38,7 +38,8 @@ my %opts = (
 	'ADLIBS' => ' ',
 	'DEFFILE' => ' ',
 	'BASEADDR' => ' ',
-	'NATIVEDLL' => ' '
+	'NATIVEDLL' => ' ',
+	'UNICODE' => ' '
 	);
 
 my @src_files;
@@ -267,6 +268,9 @@ sub produce_ddk_makefile {
 		case 'driver'  {$t = 'DRIVER';}
 		case 'dll'     {$t = 'DYNLINK';$umt = 'console';}
 		else           {die("Unknown target type: $type!");}
+	}
+	if($type eq 'console' && opts{'UNICODE'} ne "1"){
+		$e = 'main';
 	}
 	print OUT "TARGETTYPE=$t\n\n";
 	if($type eq 'dll'){

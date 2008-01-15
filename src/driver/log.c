@@ -70,7 +70,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 				  PLARGE_INTEGER pOffset,BOOLEAN is_filtered)
 {
 	PFRAGMENTED pf;
-	char buffer[32];
+	char buffer[68];
 	ANSI_STRING aStr;
 	UNICODE_STRING uStr;
 	int length;

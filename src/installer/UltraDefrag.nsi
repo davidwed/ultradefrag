@@ -293,7 +293,11 @@ Section "Ultra Defrag core files (required)" SecCore
   File "defrag_native.exe"
   DetailPrint "Install console interface..."
   File "udefrag.exe"
-  File "${ROOTDIR}\src\installer\udctxhandler.cmd"
+  ;File "${ROOTDIR}\src\installer\udctxhandler.cmd"
+  File "${ROOTDIR}\src\scripts\udctxhandler.lua"
+  DetailPrint "Install Lua 5.1 ..."
+  File "lua5.1a.dll"
+  File "lua5.1a.exe"
 !insertmacro EnableX64FSRedirection
 
   DetailPrint "Write driver settings..."
@@ -361,7 +365,8 @@ SectionEnd
 Section "Context menu handler" SecContextMenuHandler
 
   WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\cmd.exe /C udctxhandler.cmd %1"
+  ;WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\cmd.exe /C udctxhandler.cmd %1"
+  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\lua5.1a.exe $SYSDIR\udctxhandler.lua %1"
 
 SectionEnd
 
@@ -442,7 +447,10 @@ Section "Uninstall"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\udefrag.exe"
-  Delete "$SYSDIR\udctxhandler.cmd"
+  ;Delete "$SYSDIR\udctxhandler.cmd"
+  Delete "$SYSDIR\udctxhandler.lua"
+  Delete "$SYSDIR\lua5.1a.dll"
+  Delete "$SYSDIR\lua5.1a.exe"
 !insertmacro EnableX64FSRedirection
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"

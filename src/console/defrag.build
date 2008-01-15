@@ -1,6 +1,7 @@
 # this is the ultradefag console interface build options
 NAME=udefrag
 TYPE=console
+UNICODE=1
 
 SRC=defrag.c
 RC=defrag.rc

@@ -1,5 +1,5 @@
 VERSION 5.1.2
-LIBRARY lua5.1.dll
+LIBRARY lua5.1a.dll
 EXPORTS
   lua_tolstring
   lua_typename
