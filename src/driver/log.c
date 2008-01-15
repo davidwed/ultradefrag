@@ -26,9 +26,11 @@
 
 #include "driver.h"
 
+char buffer[1024];
+
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	short p[] = L"\\??\\A:\\FRAGLIST.HTM";
+	short p[] = L"\\??\\A:\\FRAGLIST.LUAR";
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS status;
 
@@ -43,101 +45,61 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		   PVOID buffer,ULONG length,PLARGE_INTEGER pOffset)
 {
 	IO_STATUS_BLOCK ioStatus;
-	UNICODE_STRING uStr;
-	ANSI_STRING aStr;
 
-	if(dx->report_type.format == ASCII_FORMAT)
-	{
-		RtlInitUnicodeString(&uStr,buffer);
-		if(RtlUnicodeStringToAnsiString(&aStr,&uStr,TRUE) == \
-			STATUS_SUCCESS)
-		{
-			ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
-				aStr.Buffer,aStr.Length,pOffset,NULL);
-			pOffset->QuadPart += aStr.Length;
-			RtlFreeAnsiString(&aStr);
-		}
-	}
-	else
-	{
-		ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
+	ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
 			buffer,length,pOffset,NULL);
-		pOffset->QuadPart += length;
-	}
+	pOffset->QuadPart += length;
 }
 
 void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 				  PLARGE_INTEGER pOffset,BOOLEAN is_filtered)
 {
 	PFRAGMENTED pf;
-	char buffer[68];
-	ANSI_STRING aStr;
-	UNICODE_STRING uStr;
-	int length;
-	short e1[] = L"<tr class=\"u\"><td class=\"c\">";
-	short e2[] = L"</td><td>";
-	short e3[] = L"</td></tr>\n";
-	short dir[] = L"</td><td class=\"c\">[DIR]";
-	short compr[] = L"</td><td class=\"c\">[CMP]";
-	short over[] = L"</td><td class=\"c\">[OVR]";
-	short normal[] = L"</td><td class=\"c\"> - ";
+	char *p;
+	int i;
+	char *comment;
+	ANSI_STRING as;
 
-	pf = dx->fragmfileslist;
-	while(pf)
-	{
+	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(pf->pfn->is_filtered != is_filtered)
-			goto next;
-		e1[11] = pf->pfn->is_filtered ? (short)'f': (short)'u';
-#if 0
-		Write(dx,hFile,pf->pfn->name.Buffer,pf->pfn->name.Length,pOffset);
-		Write(dx,hFile,crlf,4,pOffset);
-#endif
-		Write(dx,hFile,e1,sizeof(e1) - 2,pOffset);
-		/* because on NT 4.0 we don't have _itow: */
-		_itoa(pf->pfn->n_fragments,buffer,10);
-		RtlInitAnsiString(&aStr,buffer);
-		RtlAnsiStringToUnicodeString(&uStr,&aStr,TRUE);
-		length = wcslen(uStr.Buffer) << 1;
-		Write(dx,hFile,uStr.Buffer,length,pOffset);
-		RtlFreeUnicodeString(&uStr);
-		Write(dx,hFile,e2,sizeof(e2) - 2,pOffset);
-		Write(dx,hFile,pf->pfn->name.Buffer,pf->pfn->name.Length,pOffset);
-		if(pf->pfn->is_dir)
-			Write(dx,hFile,dir,sizeof(dir) - 2,pOffset);
-		else if(pf->pfn->is_overlimit)
-			Write(dx,hFile,over,sizeof(over) - 2,pOffset);
-		else if(pf->pfn->is_compressed)
-			Write(dx,hFile,compr,sizeof(compr) - 2,pOffset);
-		else
-			Write(dx,hFile,normal,sizeof(normal) - 2,pOffset);
-		Write(dx,hFile,e3,sizeof(e3) - 2,pOffset);
-next:
-		pf = pf->next_ptr;
+			continue;
+		if(pf->pfn->is_dir) comment = "[DIR]";
+		else if(pf->pfn->is_overlimit) comment = "[OVR]";
+		else if(pf->pfn->is_compressed) comment = "[CMP]";
+		else comment = " - ";
+		sprintf(buffer,
+			"\t{fragments = %u,size = %I64u,filtered = %u,"
+			"comment = \"%s\",name = [[",
+			(UINT)pf->pfn->n_fragments,
+			pf->pfn->clusters_total * dx->bytes_per_cluster,
+			(UINT)(pf->pfn->is_filtered & 0x1),
+			comment
+			);
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE);
+		Write(dx,hFile,as.Buffer,as.Length,pOffset);
+		RtlFreeAnsiString(&as);
+		strcpy(buffer,"]],uname = {");
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		p = (char *)pf->pfn->name.Buffer;
+		for(i = 0; i < pf->pfn->name.Length; i++){
+			sprintf(buffer,"%03u,",(UINT)p[i]);
+			Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		}
+		strcpy(buffer,"}},\r\n");
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
 	}
 }
 
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
+	IO_STATUS_BLOCK ioStatus;
+	LARGE_INTEGER offset;
 	NTSTATUS Status;
 	HANDLE hFile;
-	IO_STATUS_BLOCK ioStatus;
-//	short crlf[] = L"\r\n";
-	LARGE_INTEGER offset;
 
-	short p[] = L"\\??\\A:\\FRAGLIST.HTM";
-
-	short head[] = L"<html><head><title>Fragmented files on C:</title>\n"
-					L"<style>\ntd {font-family: monospace; font-size: 10pt}\n"
-					L".c {text-align: center}\n.f {background-color:"
-					L" #000000; color: #FFFFFF}\n</style></head>\n<body>\n"
-					L"<center>\n<pre><h3>Fragmented files on C:</h3>\n"
-					L"</pre><table border=\"1\" color=\"#FFAA55\" "
-					L"cellspacing=\"0\" width=\"100%\">\n"
-					L"<tr><td class=\"c\"># fragments</td>\n"
-					L"<td class=\"c\">filename</td>\n"
-					L"<td class=\"c\">comment</td></tr>\n";
-	short end[] = L"</table>\n</center>\n</body></html>";
+	short p[] = L"\\??\\A:\\FRAGLIST.LUAR";
 
 	if(dx->report_type.type == NO_REPORT)
 		goto done;
@@ -148,17 +110,22 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	Status = ZwCreateFile(&hFile,FILE_GENERIC_WRITE,&ObjectAttributes,&ioStatus,
 			  NULL,0,FILE_SHARE_READ,FILE_OVERWRITE_IF,
 			  0,NULL,0);
-	if(Status)
-	{
+	if(Status){
 		DebugPrint("-Ultradfg- Can't create %ws\n",p);
 		return FALSE;
 	}
 	offset.QuadPart = 0;
-	head[39] = head[235] = (short)dx->letter;
-	Write(dx,hFile,head,sizeof(head) - 2,&offset);
+	sprintf(buffer,
+		"-- UltraDefrag report for volume %c:\r\n\r\n"
+		"volume_letter = \"%c\"\r\n\r\n"
+		"files = {\r\n",
+		dx->letter, dx->letter
+		);
+	Write(dx,hFile,buffer,strlen(buffer),&offset);
 	WriteLogBody(dx,hFile,&offset,FALSE);
 	WriteLogBody(dx,hFile,&offset,TRUE);
-	Write(dx,hFile,end,sizeof(end) - 2,&offset);
+	strcpy(buffer,"}\r\n");
+	Write(dx,hFile,buffer,strlen(buffer),&offset);
 	ZwClose(hFile);
 done:
 	return TRUE;
