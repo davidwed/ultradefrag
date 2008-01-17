@@ -157,22 +157,18 @@ IDD_REPORT DIALOG DISCARDABLE  2, 15, 259, 119
 STYLE WS_CHILD
 FONT 8, "MS Shell Dlg"
 BEGIN
-    GROUPBOX        "Report type",IDC_STATIC,7,5,244,28
-    CONTROL         "html",IDC_HTML,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
-                    WS_TABSTOP,46,16,42,10
-    CONTROL         "none",IDC_NONE,"Button",BS_AUTORADIOBUTTON,100,16,35,10
-    GROUPBOX        "Encoding",IDC_STATIC,7,36,244,30
-    CONTROL         "UTF-16",IDC_UTF16,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,46,48,45,9
-    CONTROL         "ASCII",IDC_ASCII,"Button",BS_AUTORADIOBUTTON,100,48,38,
-                    9
-    GROUPBOX        "Debug Print",IDC_STATIC,7,70,244,27
+    GROUPBOX        "Report",IDC_STATIC,6,5,248,27
+    CONTROL         "Enable reports",IDC_ENABLEREPORTS,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,47,13,63,13
+    PUSHBUTTON      "Edit report options",IDC_EDITREPORTOPTS,117,13,128,13,
+                    WS_GROUP
+    GROUPBOX        "Debug Print",IDC_STATIC,6,34,248,29
     CONTROL         "Normal",IDC_DBG_NORMAL,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,46,81,42,9
+                    WS_GROUP | WS_TABSTOP,46,44,42,9
     CONTROL         "Detailed",IDC_DBG_DETAILED,"Button",BS_AUTORADIOBUTTON,
-                    100,81,49,9
-    CONTROL         "Paranoid",IDC_DBG_PARANOID,"Button",BS_AUTORADIOBUTTON,153,
-                    81,58,10
+                    104,44,49,9
+    CONTROL         "Paranoid",IDC_DBG_PARANOID,"Button",BS_AUTORADIOBUTTON,
+                    159,44,58,10
 END
 
 IDD_BOOT_SCHEDULER DIALOGEX 2, 15, 262, 119

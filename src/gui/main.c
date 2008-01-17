@@ -165,8 +165,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 
 void HandleError(short *err_msg,int exit_code)
 {
-	if(err_msg)
-	{
+	if(err_msg){
 		if(err_msg[0]) MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
 		udefrag_unload(TRUE);
 		ExitProcess(exit_code);
@@ -213,8 +212,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	_strupr(lpCmdLine);
 	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
 	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
-	if(uninstall_run)
-	{	
+	if(uninstall_run){	
 		udefrag_clean_registry();
 		ExitProcess(0);
 	}
@@ -283,13 +281,11 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	index = 0;
 	err_msg = udefrag_get_avail_volumes(&v,settings->skip_removable);
-	if(err_msg)
-	{
+	if(err_msg){
 		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
 		goto scan_done;
 	}
-	for(i = 0;;i++)
-	{
+	for(i = 0;;i++){
 		chr = v[i].letter;
 		if(!chr) break;
 
@@ -390,8 +386,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	LV_COLUMN lvc;
 	LPNMLISTVIEW lpnm;
 
-	switch(msg)
-	{
+	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		hWindow = hWnd;
@@ -485,8 +480,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		break;
 	case WM_NOTIFY:
 		lpnm = (LPNMLISTVIEW)lParam;
-		if(lpnm->hdr.code == LVN_ITEMCHANGED && (lpnm->uNewState & LVIS_SELECTED))
-		{
+		if(lpnm->hdr.code == LVN_ITEMCHANGED && (lpnm->uNewState & LVIS_SELECTED)){
 			HideProgress();
 			/* change Index */
 			Index = letter_numbers[lpnm->iItem];
@@ -497,8 +491,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_COMMAND:
-		switch(LOWORD(wParam))
-		{
+		switch(LOWORD(wParam)){
 		case IDC_ANALYSE:
 			create_thread(ThreadProc,(DWORD)'a');
 			break;
@@ -534,8 +527,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		break;
 	case WM_MOVE:
 		GetWindowRect(hWnd,&rc);
-		if((HIWORD(rc.bottom)) != 0xffff)
-		{
+		if((HIWORD(rc.bottom)) != 0xffff){
 			rc.bottom -= delta_h;
 			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 		}
@@ -543,8 +535,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_CLOSE:
 		Stop();
 		GetWindowRect(hWnd,&rc);
-		if((HIWORD(rc.bottom)) != 0xffff)
-		{
+		if((HIWORD(rc.bottom)) != 0xffff){
 			rc.bottom -= delta_h;
 			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 		}
@@ -562,8 +553,7 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	if((iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP ||
 		iMsg == WM_RBUTTONDOWN || iMsg == WM_RBUTTONUP) && busy_flag)
 		return 0;
-	if(iMsg == WM_KEYDOWN)
-	{
+	if(iMsg == WM_KEYDOWN){
 		message.hwnd = hWnd;
 		message.message = iMsg;
 		message.wParam = wParam;
@@ -580,8 +570,7 @@ LRESULT CALLBACK BtnWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	MSG message;
 
-	if(iMsg == WM_KEYDOWN)
-	{
+	if(iMsg == WM_KEYDOWN){
 		message.hwnd = hWnd;
 		message.message = iMsg;
 		message.wParam = wParam;
@@ -597,8 +586,7 @@ LRESULT CALLBACK CheckWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam
 {
 	MSG message;
 
-	if(iMsg == WM_KEYDOWN)
-	{
+	if(iMsg == WM_KEYDOWN){
 		message.hwnd = hWnd;
 		message.message = iMsg;
 		message.wParam = wParam;
@@ -614,8 +602,7 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 
-	if(iMsg == WM_PAINT)
-	{
+	if(iMsg == WM_PAINT){
 		BeginPaint(hWnd,&ps);
 		RedrawMap();
 		EndPaint(hWnd,&ps);
@@ -641,8 +628,7 @@ BOOL CreateStatusBar()
 
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
 									"0 dirs", hWindow, IDM_STATUSBAR);
-	if(hStatus)
-	{
+	if(hStatus){
 		GetClientRect(hStatus,&rc);
 		width = rc.right - rc.left;
 		for(i = 0; i < N_OF_STATUSBAR_PARTS-1; i++)
@@ -726,14 +712,12 @@ int __stdcall update_stat(int df)
 done:
 	if(df == FALSE) return 0;
 	err_msg = udefrag_get_ex_command_result();
-	if(wcslen(err_msg) > 0)
-	{
+	if(wcslen(err_msg) > 0){
 		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
 		//DisplayError(err_msg);
 		return 0;
 	}
-	if(!stop_pressed)
-	{
+	if(!stop_pressed){
 		sprintf(progress_msg,"%c 100 %%",current_operation);
 		SetWindowText(hProgressMsg,progress_msg);
 		SendMessage(hProgressBar,PBM_SETPOS,100,0);
@@ -754,8 +738,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	stop_pressed = FALSE;
 
 	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
-	if(iItem == -1)
-	{
+	if(iItem == -1){
 		busy_flag = 0;
 		return 0;
 	}
@@ -778,8 +761,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	ShowProgress();
 	SetWindowText(hProgressMsg,"0 %");
 	SendMessage(hProgressBar,PBM_SETPOS,0,0);
-	switch(command)
-	{
+	switch(command){
 	case 'a':
 		err_msg = udefrag_analyse_ex((UCHAR)(index + 'A'),update_stat);
 		break;
@@ -789,8 +771,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	default:
 		err_msg = udefrag_optimize_ex((UCHAR)(index + 'A'),update_stat);
 	}
-	if(err_msg)
-	{
+	if(err_msg){
 		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
 		//DisplayError(err_msg);
 		ShowStatus(STAT_CLEAR,iItem);
@@ -818,7 +799,7 @@ void ShowStatus(int stat,LRESULT iItem)
 
 void ShowFragmented()
 {
-	char path[] = "C:\\FRAGLIST.HTM";
+	char path[] = "C:\\FRAGLIST.LUAR";
 	LRESULT iItem;
 	int index;
 
@@ -835,15 +816,13 @@ void ShowFragmented()
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	switch(msg)
-	{
+	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		SetWindowPos(hWnd,0,win_rc.left + 106,win_rc.top + 59,0,0,SWP_NOSIZE);
 		return FALSE;
 	case WM_COMMAND:
-		switch(LOWORD(wParam))
-		{
+		switch(LOWORD(wParam)){
 		case IDC_CREDITS:
 			ShellExecute(hWindow,"open",".\\CREDITS.TXT",NULL,NULL,SW_SHOW);
 			break;

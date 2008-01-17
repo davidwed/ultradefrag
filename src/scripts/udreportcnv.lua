@@ -2,7 +2,7 @@
 --[[
   udreportcnv.lua - UltraDefrag report converter.
   Converts lua reports to HTML and other formats.
-  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+  Copyright (c) 2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -19,22 +19,8 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 --]]
 
--- report options
-
--- I. Output Formats
-produce_html = 1
-
--- II. HTML specific options
-use_utf16 = 0
-style = [[
-<style>
-td {font-family: monospace; font-size: 10pt}
-.c {text-align: center}
-.f {background-color: #000000; color: #FFFFFF}
-</style>
-]]
-title_tags = {open = "<pre><h3>", close = "</h3></pre>"}
-table_style = [[border="1" color="#FFAA55" cellspacing="0" width="100%"]]
+-- read options
+dofile(arg[2] .. "\\udreportopts.lua")
 
 -- source file reading
 dofile(arg[1])
@@ -47,23 +33,15 @@ function write_ansi(f, ...)
 end
 
 function write_unicode(f, ...)
-	local s, j
+	local b, j
 	for i, v in ipairs(arg) do
 		j = 1
 		while true do
-			s = string.byte(v, j)
-			if s == nil then break end
-			s = string.char(s)
-			-- replace "\n" characters with spaces because write call adds 0xd byte before "\n"
-			if s == "\n" then
-				f:write(" ")
-			else
-				f:write(s)
-			end
-			f:write("\0")
+			b = string.byte(v, j)
+			if b == nil then break end
+			f:write(string.char(b), "\0")
 			j = j + 1
 		end
-		
 	end
 end
 
@@ -79,7 +57,8 @@ function produce_html_output()
 	until string.find(arg[1],"\\",pos + 1,true) == nil
 	filename = string.sub(arg[1],0,pos - 1) .. "FRAGLIST.HTM"
 
-	local f = assert(io.open(filename,"w"))
+	-- note that 'b' flag is needed for utf-16 files
+	local f = assert(io.open(filename,"wb"))
 
 	local write_data
 	if use_utf16 == 0 then
@@ -109,8 +88,8 @@ function produce_html_output()
 		if use_utf16 == 0 then
 			f:write(v.name)
 		else
-			for j, w in ipairs(v.uname) do
-				f:write(string.char(w))
+			for j, b in ipairs(v.uname) do
+				f:write(string.char(b))
 			end
 		end
 		write_data(f,
@@ -121,8 +100,14 @@ function produce_html_output()
 	write_data(f,"</table>\n</center>\n</body></html>")
 	f:close()
 	
-	-- if option -v was specified, open report in default web browser
-	os.execute("cmd.exe /C " .. filename)
+	-- if option -v is specified, open report in default web browser
+	if arg[3] == "-v" then
+		if os.shellexec ~= nil then
+			os.shellexec(filename)
+		else
+			os.execute("cmd.exe /C " .. filename)
+		end
+	end
 end
 
 

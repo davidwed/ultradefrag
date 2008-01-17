@@ -1,10 +1,10 @@
 # this is the ultradefag console interface build options
 NAME=udefrag
 TYPE=console
-UNICODE=1
 
 SRC=defrag.c
 RC=defrag.rc
 
 LIBS=ntdll;kernel32;msvcrt
 ADLIBS=$(UDEFRAG_LIB_PATH)\udefrag
+UMENTRY=wmain

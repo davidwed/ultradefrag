@@ -92,6 +92,8 @@
 #define IDC_LOAD2                       1041
 #define IDC_SAVE2                       1042
 #define IDC_SETTINGS_HELP               1043
+#define IDC_ENABLEREPORTS               1044
+#define IDC_EDITREPORTOPTS              1045
 
 // Next default values for new objects
 // 
@@ -99,7 +101,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        126
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1044
+#define _APS_NEXT_CONTROL_VALUE         1046
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -39,7 +39,7 @@ my %opts = (
 	'DEFFILE' => ' ',
 	'BASEADDR' => ' ',
 	'NATIVEDLL' => ' ',
-	'UNICODE' => ' '
+	'UMENTRY' => ' '
 	);
 
 my @src_files;
@@ -83,6 +83,7 @@ switch($ENV{'BUILD_ENV'}){
 		if($ENV{'IA64'} ne undef){
 			$arch = 'ia64';
 		}
+		$ddk_cmd[@ddk_cmd - 1] = "-c";
 		switch($target_type){
 			case 'dll' {
 				system(@ddk_cmd) == 0 or die("Can't build the target!");
@@ -100,7 +101,7 @@ switch($ENV{'BUILD_ENV'}){
 				}
 			}
 			case 'driver' {
-				$ddk_cmd[@ddk_cmd - 1] = "-c";
+				#$ddk_cmd[@ddk_cmd - 1] = "-c";
 				if($arch eq 'i386'){
 					$ENV{'NT4_TARGET'} = "true";
 					system(@ddk_cmd) == 0 or die("Can't build the target!");
@@ -250,6 +251,7 @@ sub produce_ddk_makefile {
 
 	open(OUT,"> sources") 
 		or die("Can\'t open sources: $!");
+	$e = $opts{'UMENTRY'};
 	$type = $opts{'TYPE'};
 	if($type ne 'driver'){
 		print OUT "TARGETNAME=$opts{'NAME'}\n";
@@ -262,15 +264,12 @@ sub produce_ddk_makefile {
 	}
 	print OUT "TARGETPATH=obj\n";
 	switch($type) {
-		case 'console' {$t = 'PROGRAM';$umt = 'console';$e = 'wmain';}
-		case 'gui'     {$t = 'PROGRAM';$umt = 'windows';$e = 'winmain';}
+		case 'console' {$t = 'PROGRAM';$umt = 'console';}
+		case 'gui'     {$t = 'PROGRAM';$umt = 'windows';}
 		case 'native'  {$t = 'PROGRAM';$umt = 'nt';}
 		case 'driver'  {$t = 'DRIVER';}
 		case 'dll'     {$t = 'DYNLINK';$umt = 'console';}
 		else           {die("Unknown target type: $type!");}
-	}
-	if($type eq 'console' && opts{'UNICODE'} ne "1"){
-		$e = 'main';
 	}
 	print OUT "TARGETTYPE=$t\n\n";
 	if($type eq 'dll'){

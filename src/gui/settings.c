@@ -66,8 +66,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	LRESULT i;
 	int check_id;
 
-	switch(msg)
-	{
+	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		SetWindowPos(hWnd,0,win_rc.left + 70,win_rc.top + 55,0,0,SWP_NOSIZE);
@@ -101,7 +100,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		SetWindowText(GetDlgItem(hGuiDlg,IDC_UPDATE_INTERVAL),buf);
 		SetWindowTextW(GetDlgItem(hFilterDlg,IDC_INCLUDE),settings->in_filter);
 		SetWindowTextW(GetDlgItem(hFilterDlg,IDC_EXCLUDE),settings->ex_filter);
-		if(settings->report_format == UTF_FORMAT)
+		/*if(settings->report_format == UTF_FORMAT)
 			SendMessage(GetDlgItem(hReportDlg,IDC_UTF16),BM_SETCHECK,BST_CHECKED,0);
 		else
 			SendMessage(GetDlgItem(hReportDlg,IDC_ASCII),BM_SETCHECK,BST_CHECKED,0);
@@ -109,8 +108,10 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			SendMessage(GetDlgItem(hReportDlg,IDC_HTML),BM_SETCHECK,BST_CHECKED,0);
 		else
 			SendMessage(GetDlgItem(hReportDlg,IDC_NONE),BM_SETCHECK,BST_CHECKED,0);
-		switch(settings->dbgprint_level)
-		{
+		*/
+		if(settings->report_type == HTML_REPORT)
+			SendMessage(GetDlgItem(hReportDlg,IDC_ENABLEREPORTS),BM_SETCHECK,BST_CHECKED,0);
+		switch(settings->dbgprint_level){
 		case 0:
 			check_id = IDC_DBG_NORMAL;
 			break;
@@ -135,11 +136,9 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		return TRUE;
 	case WM_NOTIFY:
 		lpn = (LPNMHDR)lParam;
-		if(lpn->code == TCN_SELCHANGE)
-		{
+		if(lpn->code == TCN_SELCHANGE){
 			i = SendMessage(hTabCtrl,TCM_GETCURSEL,(WPARAM)lpn->hwndFrom,0);
-			switch(i)
-			{
+			switch(i){
 			case 0:
 				ShowWindow(hFilterDlg,SW_SHOW);
 				ShowWindow(hGuiDlg,SW_HIDE);
@@ -167,18 +166,17 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		return TRUE;
 	case WM_COMMAND:
-		switch(LOWORD(wParam))
-		{
+		switch(LOWORD(wParam)){
 		case IDOK:
 			GetWindowText(GetDlgItem(hFilterDlg,IDC_SIZELIMIT),buf,22);
 			dfbsize2(buf,&settings->sizelimit);
 			GetWindowText(GetDlgItem(hGuiDlg,IDC_UPDATE_INTERVAL),buf,22);
 			settings->update_interval = atoi(buf);
-			settings->report_format = \
+			/*settings->report_format = \
 				(SendMessage(GetDlgItem(hReportDlg,IDC_UTF16),BM_GETCHECK,0,0) == \
 				BST_CHECKED) ? UTF_FORMAT : ASCII_FORMAT;
-			settings->report_type = \
-				(SendMessage(GetDlgItem(hReportDlg,IDC_HTML),BM_GETCHECK,0,0) == \
+			*/settings->report_type = \
+				(SendMessage(GetDlgItem(hReportDlg,IDC_ENABLEREPORTS),BM_GETCHECK,0,0) == \
 				BST_CHECKED) ? HTML_REPORT : NO_REPORT;
 			settings->dbgprint_level = \
 				(SendMessage(GetDlgItem(hReportDlg,IDC_DBG_NORMAL),BM_GETCHECK,0,0) == \
@@ -248,12 +246,10 @@ void LoadFilter(HWND hWnd,HWND hIncl,HWND hExcl,BOOL is_boot_time_filter)
 	ofn.nMaxFileTitle = MAX_PATH;
 	ofn.lpstrInitialDir = L".\\presets";
 	ofn.Flags = OFN_FILEMUSTEXIST;
-	if(GetOpenFileNameW(&ofn))
-	{
+	if(GetOpenFileNameW(&ofn)){
 		pf = _wfopen(ofn.lpstrFile,L"rb");
 		if(!pf) MessageBox(hWnd,"Can't open file!","Error!",MB_OK | MB_ICONHAND);
-		else
-		{
+		else {
 			fread(buffer,sizeof(short),2048,pf);
 			buffer[2048] = buffer[2049] = 0;
 			SetWindowTextW(hIncl,buffer);
@@ -284,12 +280,10 @@ void SaveFilter(HWND hWnd,HWND hIncl,HWND hExcl)
 	ofn.nMaxFileTitle = MAX_PATH;
 	ofn.lpstrInitialDir = L".\\presets";
 	ofn.Flags = OFN_PATHMUSTEXIST;
-	if(GetSaveFileNameW(&ofn))
-	{
+	if(GetSaveFileNameW(&ofn)){
 		pf = _wfopen(ofn.lpstrFile,L"wb");
 		if(!pf) MessageBox(hWnd,"Can't open file!","Error!",MB_OK | MB_ICONHAND);
-		else
-		{
+		else {
 			GetWindowTextW(hIncl,buffer,1024);
 			fwrite(buffer,sizeof(short),wcslen(buffer) + 1,pf);
 			GetWindowTextW(hExcl,buffer,1024);
@@ -301,13 +295,11 @@ void SaveFilter(HWND hWnd,HWND hIncl,HWND hExcl)
 
 BOOL CALLBACK FilterDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	switch(msg)
-	{
+	switch(msg){
 	case WM_INITDIALOG:
 		return TRUE;
 	case WM_COMMAND:
-		switch(LOWORD(wParam))
-		{
+		switch(LOWORD(wParam)){
 		case IDC_LOAD1:
 			LoadFilter(hWnd,GetDlgItem(hFilterDlg,IDC_INCLUDE),
 				GetDlgItem(hFilterDlg,IDC_EXCLUDE),FALSE);
@@ -327,13 +319,11 @@ BOOL CALLBACK FilterDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 BOOL CALLBACK BootSchedDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	switch(msg)
-	{
+	switch(msg){
 	case WM_INITDIALOG:
 		return TRUE;
 	case WM_COMMAND:
-		switch(LOWORD(wParam))
-		{
+		switch(LOWORD(wParam)){
 		case IDC_LOAD2:
 			LoadFilter(hWnd,GetDlgItem(hBootSchedDlg,IDC_INCLUDE2),
 				GetDlgItem(hBootSchedDlg,IDC_EXCLUDE2),FALSE);
@@ -353,13 +343,21 @@ BOOL CALLBACK BootSchedDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	switch(msg)
-	{
+	switch(msg){
 	case WM_INITDIALOG:
 		return TRUE;
 	case WM_CLOSE:
 		EndDialog(hWnd,0);
 		return TRUE;
+	case WM_COMMAND:
+		switch(LOWORD(wParam)){
+		case IDC_EDITREPORTOPTS:
+			GetSystemDirectory(buffer,MAX_PATH);
+			strcat(buffer,"\\udreportopts.lua");
+			ShellExecute(hWindow,"open",buffer,NULL,NULL,SW_SHOW);
+			break;
+		}
+		return FALSE;
 	}
 	return FALSE;
 }

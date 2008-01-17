@@ -4,11 +4,13 @@ HISTORY
 
   Version 1.2.5 (23.0)   2008-01-
   ------------------------------------------------------------------------------
+    - driver code was completely rewritten (to improve reliability)
+    - highly configurable reports feature was added
     - documentation was improved
+    - driver code cleanup was performed
     - build scripts were improved
     - few bugs were fixed
-    - driver code cleanup was performed
-    - driver coding style was changed to improve readability
+    - coding style was changed to improve readability
 
 
   Version 1.2.4 (23.0)   2007-12-22

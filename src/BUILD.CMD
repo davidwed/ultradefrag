@@ -236,6 +236,9 @@ rd /s /q gui
 rd /s /q include
 rd /s /q native
 rd /s /q dll
+rd /s /q zenwinx
+rd /s /q udefrag
+rd /s /q lua5.1
 del /s /q *.*
 cd ..
 call BLDSCHED.CMD --clean

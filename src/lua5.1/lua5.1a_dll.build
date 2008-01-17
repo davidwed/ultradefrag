@@ -9,5 +9,5 @@ RC=
 DEFFILE=lua5.1.def
 BASEADDR=0x10000000
 
-LIBS=kernel32;msvcrt
+LIBS=msvcrt;kernel32;shell32
 ADLIBS=

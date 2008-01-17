@@ -296,13 +296,23 @@ Section "Ultra Defrag core files (required)" SecCore
   ;File "${ROOTDIR}\src\installer\udctxhandler.cmd"
   File "${ROOTDIR}\src\scripts\udctxhandler.lua"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
+  File "${ROOTDIR}\src\scripts\udreportopts.lua"
   WriteRegStr HKCR ".luar" "" "LuaReport"
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a.exe $SYSDIR\udreportcnv.lua %1 -v"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $SYSDIR\udreportcnv.lua %1 $SYSDIR -v"
   DetailPrint "Install Lua 5.1 ..."
   File "lua5.1a.dll"
   File "lua5.1a.exe"
+  File "lua5.1a_gui.exe"
+  ClearErrors
+  ReadRegStr $R0 HKCR ".lua" ""
+  IfErrors 0 lua_registered
+  WriteRegStr HKCR ".lua" "" "Lua"
+  WriteRegStr HKCR "Lua" "" "Lua Program"
+  WriteRegStr HKCR "Lua\shell\open" "" "Open"
+  WriteRegStr HKCR "Lua\shell\open\command" "" "$SYSDIR\notepad.exe %1"
+lua_registered:
 !insertmacro EnableX64FSRedirection
 
   DetailPrint "Write driver settings..."
@@ -455,8 +465,10 @@ Section "Uninstall"
   ;Delete "$SYSDIR\udctxhandler.cmd"
   Delete "$SYSDIR\udctxhandler.lua"
   Delete "$SYSDIR\udreportcnv.lua"
+  Delete "$SYSDIR\udreportopts.lua"
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
+  Delete "$SYSDIR\lua5.1a_gui.exe"
 !insertmacro EnableX64FSRedirection
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
@@ -473,6 +485,8 @@ Section "Uninstall"
   
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"
+  DeleteRegKey HKCR "LuaReport"
+  DeleteRegKey HKCR ".luar"
 
 SectionEnd
 

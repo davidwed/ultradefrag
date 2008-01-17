@@ -1,5 +1,19 @@
-Here is the original source code of Lua 5.1. Since Lua 5.0, Lua is licensed
-under the terms of the MIT license reproduced below.
+----------------------- Lua 5.1 for Ultra Defragmenter ------------------------
+
+RELEASE NOTES:
+
+1. Here is the source code of special version of Lua 5.1.
+With os.shellexec() call and other improvements for Win32 environment.
+
+2. The *.build files are included to produce Lua modules for three processor
+architectures: i386, amd64 and ia64. 
+
+3. Lua produced by Windows DDK isn't compatible with standard Lua package,
+because there are used __stdcall calling conventions instead of __cdecl.
+This is a well known DDK bug - it is not compatible with ANSI C Standard.
+
+4. Since Lua 5.0, Lua is licensed under the terms of the MIT license 
+reproduced below.
 
 Copyright © 1994-2007 Lua.org, PUC-Rio.
 
@@ -21,14 +35,3 @@ OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
 OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
 OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE. 
-
-                                   ***
-
-Ultra Defragmenter specific notes:
-
-1. The *.build files are included to produce Lua modules for three processor
-architectures: i386, amd64 and ia64. 
-
-2. Lua produced by Windows DDK isn't compatible with standard Lua package,
-because there are used __stdcall calling conventions instead of __cdecl.
-This is a well known DDK bug - it is not compatible with ANSI C Standard.

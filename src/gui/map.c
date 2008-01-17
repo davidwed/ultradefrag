@@ -136,8 +136,7 @@ BOOL CreateBitMap(signed int index)
 	/* create the bitmap */
 	hBmp = CreateDIBSection(0, (BITMAPINFO*)bh, \
 		DIB_RGB_COLORS, (VOID *)&ppvBits, NULL, 0);
-	if(!hBmp)
-	{
+	if(!hBmp){
 		HeapFree(GetProcessHeap(),0,data);
 		return FALSE;
 	}
@@ -146,13 +145,10 @@ BOOL CreateBitMap(signed int index)
 	SelectObject(hDC,hBmp);
 	SetBkMode(hDC,TRANSPARENT);
 
-	if(index >= 0)
-	{
+	if(index >= 0){
 		bit_map[index] = hBmp;
 		bit_map_dc[index] = hDC;
-	}
-	else
-	{
+	} else {
 		bit_map_grid = hBmp;
 		bit_map_grid_dc = hDC;
 	}
@@ -180,13 +176,11 @@ BOOL CreateBitMapGrid()
 
 	hPen = CreatePen(PS_SOLID,1,GRID_COLOR);
 	hOldPen = SelectObject(bit_map_grid_dc,hPen);
-	for(i = 0; i < BLOCKS_PER_HLINE + 1; i++)
-	{
+	for(i = 0; i < BLOCKS_PER_HLINE + 1; i++){
 		MoveToEx(bit_map_grid_dc,(iBLOCK_SIZE + 1) * i,0,NULL);
 		LineTo(bit_map_grid_dc,(iBLOCK_SIZE + 1) * i,iMAP_HEIGHT);
 	}
-	for(i = 0; i < BLOCKS_PER_VLINE + 1; i++)
-	{
+	for(i = 0; i < BLOCKS_PER_VLINE + 1; i++){
 		MoveToEx(bit_map_grid_dc,0,(iBLOCK_SIZE + 1) * i,NULL);
 		LineTo(bit_map_grid_dc,iMAP_WIDTH,(iBLOCK_SIZE + 1) * i);
 	}
@@ -208,10 +202,8 @@ BOOL FillBitMap(int index)
 	hdc = bit_map_dc[index];
 	if(!hdc) return FALSE;
 	hOldBrush = SelectObject(hdc,hBrushes[0]);
-	for(i = 0; i < BLOCKS_PER_VLINE; i++)
-	{
-		for(j = 0; j < BLOCKS_PER_HLINE; j++)
-		{
+	for(i = 0; i < BLOCKS_PER_VLINE; i++){
+		for(j = 0; j < BLOCKS_PER_HLINE; j++){
 			block_rc.top = (iBLOCK_SIZE + 1) * i + 1;
 			block_rc.left = (iBLOCK_SIZE + 1) * j + 1;
 			block_rc.right = block_rc.left + iBLOCK_SIZE;
@@ -238,11 +230,9 @@ void RedrawMap()
 	LRESULT iItem, index;
 
 	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
-	if(iItem != -1)
-	{
+	if(iItem != -1){
 		index = letter_numbers[iItem];
-		if(work_status[index] > 1 && bit_map_dc[index])
-		{
+		if(work_status[index] > 1 && bit_map_dc[index]){
 			hdc = GetDC(hMap);
 			BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_dc[index],0,0,SRCCOPY);
 			ReleaseDC(hMap,hdc);
@@ -256,8 +246,7 @@ void DeleteMaps()
 {
 	int i;
 
-	for(i = 0; i < 'Z' - 'A'; i++)
-	{
+	for(i = 0; i < 'Z' - 'A'; i++){
 		if(bit_map[i]) DeleteObject(bit_map[i]);
 		if(bit_map_dc[i]) DeleteDC(bit_map_dc[i]);
 	}

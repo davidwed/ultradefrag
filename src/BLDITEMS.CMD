@@ -30,6 +30,9 @@ if %errorlevel% neq 0 goto end
 rem perl ..\..\tools\mkmod.pl lua5.1_exe.build
 lua ..\..\tools\mkmod.lua lua5.1a_exe.build
 if %errorlevel% neq 0 goto end
+rem perl ..\..\tools\mkmod.pl lua5.1a_gui.build
+lua ..\..\tools\mkmod.lua lua5.1a_gui.build
+if %errorlevel% neq 0 goto end
 
 popd
 exit /B 0

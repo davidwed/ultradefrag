@@ -5,6 +5,13 @@
 */
 
 
+#include <windows.h>
+#include <shellapi.h>
+
+#ifndef USE_WINDDK
+#define LONG_PTR LONG
+#endif
+
 #include <errno.h>
 #include <locale.h>
 #include <stdlib.h>
@@ -40,6 +47,10 @@ static int os_execute (lua_State *L) {
   return 1;
 }
 
+static int os_shellexec (lua_State *L) {
+  lua_pushinteger(L, (int)(LONG_PTR)ShellExecuteA(NULL,"open",luaL_optstring(L, 1, NULL),NULL,NULL,SW_SHOW));
+  return 1;
+}
 
 static int os_remove (lua_State *L) {
   const char *filename = luaL_checkstring(L, 1);
@@ -230,6 +241,7 @@ static const luaL_Reg syslib[] = {
   {"setlocale", os_setlocale},
   {"time",      os_time},
   {"tmpname",   os_tmpname},
+  {"shellexec", os_shellexec},
   {NULL, NULL}
 };
 
