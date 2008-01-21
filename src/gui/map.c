@@ -18,14 +18,12 @@
  */
 
 /*
- *  GUI - cluster map processing.
- */
+* GUI - cluster map processing.
+*/
 
 #include <windows.h>
 #include <commctrl.h>
 #include <math.h>
-
-//#include <stdio.h>
 
 #include "main.h"
 #include "../include/udefrag.h"

@@ -19,6 +19,12 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 --]]
 
+-- USAGE: lua udreportcnv.lua <luar file with full path> <path to system32 directory> [-v]
+
+-- parse command line
+assert(arg[1],"Lua Report file name must be specified!")
+assert(arg[2],"Path to the system32 directory\nmust be specified as second parameter!")
+
 -- read options
 dofile(arg[2] .. "\\udreportopts.lua")
 
@@ -86,7 +92,10 @@ function produce_html_output()
 			"</td><td>"
 			)
 		if use_utf16 == 0 then
-			f:write(v.name)
+			-- each <> brackets must be replaced with square brackets
+			local tmp = string.gsub(v.name,"<","[")
+			tmp = string.gsub(tmp,">","]")
+			f:write(tmp)
 		else
 			for j, b in ipairs(v.uname) do
 				f:write(string.char(b))
@@ -103,7 +112,7 @@ function produce_html_output()
 	-- if option -v is specified, open report in default web browser
 	if arg[3] == "-v" then
 		if os.shellexec ~= nil then
-			os.shellexec(filename)
+			os.shellexec(filename,"open")
 		else
 			os.execute("cmd.exe /C " .. filename)
 		end

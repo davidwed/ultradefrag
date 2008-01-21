@@ -18,8 +18,8 @@
  */
 
 /*
- *  Save to logfile procedure.
- */
+*  Procedures for logging.
+*/
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -38,10 +38,10 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 	RtlInitUnicodeString(&dx->log_path,p);
 	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,0,NULL,NULL);
 	status = ZwDeleteFile(&ObjectAttributes);
-	DebugPrint1("-Ultradfg- Delete %ws status %x\n",p,(UINT)status);
+	DebugPrint1("-Ultradfg- Report %ws deleted with status %x\n",p,(UINT)status);
 }
 
-void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
+static __inline void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		   PVOID buffer,ULONG length,PLARGE_INTEGER pOffset)
 {
 	IO_STATUS_BLOCK ioStatus;
@@ -77,13 +77,18 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			);
 		Write(dx,hFile,buffer,strlen(buffer),pOffset);
 		RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE);
+		/* replace square brackets with <> !!! */
+		for(i = 0; i < as.Length; i++){
+			if(as.Buffer[i] == '[') as.Buffer[i] = '<';
+			else if(as.Buffer[i] == ']') as.Buffer[i] = '>';
+		}
 		Write(dx,hFile,as.Buffer,as.Length,pOffset);
 		RtlFreeAnsiString(&as);
 		strcpy(buffer,"]],uname = {");
 		Write(dx,hFile,buffer,strlen(buffer),pOffset);
 		p = (char *)pf->pfn->name.Buffer;
 		for(i = 0; i < pf->pfn->name.Length; i++){
-			sprintf(buffer,"%03u,",(UINT)p[i]);
+			sprintf(buffer,/*"%03u,"*/"%u,",(UINT)p[i]);
 			Write(dx,hFile,buffer,strlen(buffer),pOffset);
 		}
 		strcpy(buffer,"}},\r\n");
@@ -127,16 +132,17 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	strcpy(buffer,"}\r\n");
 	Write(dx,hFile,buffer,strlen(buffer),&offset);
 	ZwClose(hFile);
+	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
 done:
 	return TRUE;
 }
 
 /*************************************************************************************************/
 
-/* TODO: DbgPrint logger or this code? */
-
+/* This code is obsolete and we have them only as an alternative for something unexpected. */
 /* special code for debug messages saving on nt 4.0 */
 
+/* Currently (since v1.3.0) NT4_DBG is always undefined */
 #ifdef NT4_DBG
 
 void __stdcall OpenLog()
@@ -147,8 +153,7 @@ void __stdcall OpenLog()
 	dbg_ring_buffer = AllocatePool(NonPagedPool,RING_BUFFER_SIZE); /* 512 kb ring-buffer */
 	if(!dbg_ring_buffer) DbgPrint("=Ultradfg= Can't allocate ring buffer!\n");
 	else memset(dbg_ring_buffer,0,RING_BUFFER_SIZE);
-	if(dbg_ring_buffer)
-	{
+	if(dbg_ring_buffer){
 		strcpy(dbg_ring_buffer,header);
 		dbg_ring_buffer_offset += sizeof(header) - 1;
 	}
@@ -163,33 +168,29 @@ void __stdcall CloseLog()
 	char error_msg[] = "No enough memory to save debug messages. It requires 512 kb.";
 	char terminator[] = "[End]\r\n";
 
-	/* Create the file */
+	/* create the file */
 	RtlInitUnicodeString(&log_path,L"\\??\\C:\\DBGPRINT.LOG");
 	InitializeObjectAttributes(&ObjectAttributes,&log_path,0,NULL,NULL);
 	ZwDeleteFile(&ObjectAttributes);
 	Status = ZwCreateFile(&hDbgLog,FILE_GENERIC_WRITE,&ObjectAttributes,&ioStatus,
 			  NULL,0,FILE_SHARE_READ,FILE_OVERWRITE_IF,
 			  0,NULL,0);
-	if(Status)
-	{
+	if(Status){
 		DbgPrint("-Ultradfg- Can't create C:\\DBGPRINT.LOG!\n");
 		return;
 	}
 	dbg_log_offset.QuadPart = 0;
-	/* write ring buffer to file */
-	if(!dbg_ring_buffer)
-	{
+	/* write ring buffer to the file */
+	if(!dbg_ring_buffer){
 		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
 			error_msg,sizeof(error_msg) - 1,&dbg_log_offset,NULL);
-	}
-	else
-	{
+	} else {
 		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,terminator,sizeof(terminator) - 1);
 		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
 			dbg_ring_buffer,strlen(dbg_ring_buffer),
 			&dbg_log_offset,NULL);
 	}
-	/* close file */
+	/* close the file */
 	ZwClose(hDbgLog);
 	if(dbg_ring_buffer) ExFreePool(dbg_ring_buffer);
 }
@@ -205,8 +206,7 @@ void __cdecl WriteLogMessage(char *format, ...)
 	va_start(ap,format);
 	memset(buffer,0,1024); /* required! */
 	length = _vsnprintf(buffer,sizeof(buffer),format,ap);
-	if(length == -1)
-	{
+	if(length == -1){
 		buffer[sizeof(buffer) - 2] = '\n';
 		length = sizeof(buffer) - 1;
 	}
@@ -214,13 +214,7 @@ void __cdecl WriteLogMessage(char *format, ...)
 	//if(KeGetCurrentIrql() == PASSIVE_LEVEL)
 	//{
 		if(length != 0)
-			length --; /* remove last new line character */
-		//ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
-		//	buffer,length,&dbg_log_offset,NULL);
-		//dbg_log_offset.QuadPart += length;
-		//ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
-		//	crlf,2,&dbg_log_offset,NULL);
-		//dbg_log_offset.QuadPart += 2;
+			length --; /* remove the last new line character */
 		if(dbg_ring_buffer_offset + length >= RING_BUFFER_SIZE - (sizeof(terminator) - 1))
 			dbg_ring_buffer_offset = 0;
 		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,buffer,length);

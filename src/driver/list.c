@@ -18,8 +18,8 @@
  */
 
 /*
- *  List processing functions.
- */
+* List processing functions.
+*/
 
 #include "driver.h"
 
@@ -28,14 +28,8 @@ LIST* NTAPI InsertFirstItem(PLIST *phead,ULONG size)
 	PLIST p;
 
 	p = (LIST *)AllocatePool(NonPagedPool,size);
-	if(p){
-		p->next_ptr = *phead;
-		*phead = p;
-	}
-	#if DBG
-	else if(dbg_level > 0)
-		DbgPrintNoMem();
-	#endif
+	if(p){ p->next_ptr = *phead; *phead = p; }
+	else { DbgPrintNoMem1(); }
 	return p;
 }
 
@@ -45,14 +39,8 @@ LIST* NTAPI InsertMiddleItem(PLIST *pprev,PLIST *pnext,ULONG size)
 
 	if(*pprev){
 		p = (LIST *)AllocatePool(NonPagedPool,size);
-		if(p){
-			p->next_ptr = *pnext;
-			(*pprev)->next_ptr = p;
-		}
-		#if DBG
-		else if(dbg_level > 0)
-			DbgPrintNoMem();
-		#endif
+		if(p){ p->next_ptr = *pnext; (*pprev)->next_ptr = p; }
+		else { DbgPrintNoMem1(); }
 	}
 	return p;
 }
@@ -68,11 +56,9 @@ LIST* NTAPI InsertLastItem(PLIST *phead,PLIST *plast,ULONG size)
 		else     *phead = p;
 		p->next_ptr = NULL;
 		*plast = p;
+	} else {
+		DbgPrintNoMem1();
 	}
-	#if DBG
-	else if(dbg_level > 0)
-		DbgPrintNoMem();
-	#endif
 	return p;
 }
 

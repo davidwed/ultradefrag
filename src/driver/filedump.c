@@ -18,23 +18,24 @@
  */
 
 /*
- *  Functions for file dump manipulations.
- */
+* Functions for file dump manipulations.
+*/
 
 #include "driver.h"
 
 BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 					  ULONGLONG startVcn,ULONGLONG startLcn,ULONGLONG length);
 
-/* Dump File()
- * Dumps the clusters belonging to the specified file until the
- * end of the file.
- *
- * NOTES: 
- * 1. On NTFS volumes files smaller then 1 kb are placed in MFT.
- *    And we exclude their from defragmenting process.
- * 2. On NTFS we skip 0-filled virtual clusters of compressed files.
- */
+/*
+* Dump File()
+* Dumps the clusters belonging to the specified file until the
+* end of the file.
+*
+* NOTES: 
+* 1. On NTFS volumes files smaller then 1 kb are placed in MFT.
+*    And we exclude their from defragmenting process.
+* 2. On NTFS we skip 0-filled virtual clusters of compressed files.
+*/
 
 // FIXME: NTSTATUS instead of BOOLEAN ?
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
@@ -90,10 +91,10 @@ dump_fail:
 		*dx->pstartVcn = fileMappings->StartVcn;
 		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs; i++){
 			/*
-			 * On NT 4.0 (and later NT versions),
-			 * a compressed virtual run (0-filled) is
-			 * identified with a cluster offset of -1.
-			 */
+			* On NT 4.0 (and later NT versions),
+			* a compressed virtual run (0-filled) is
+			* identified with a cluster offset of -1.
+			*/
 			if(fileMappings->Pair[i].Lcn == LLINVALID)
 				goto next_run;
 			if(fileMappings->Pair[i].Vcn == 0)
@@ -152,4 +153,3 @@ void DeleteBlockmap(PFILENAME pfn)
 {
 	DestroyList((PLIST *)&pfn->blockmap);
 }
-

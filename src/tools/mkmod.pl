@@ -349,7 +349,7 @@ sub produce_msvc_makefile {
 	#print OUT "!ELSE\n";
 	#print OUT "NULL=nul\n";
 	#print OUT "!ENDIF\n\n";
-	# OUTDIR and INTDIR parameters will be replaced with current directory
+	# OUTDIR and INTDIR parameters are replaced with current directory
 	$cl_flags = "CPP_PROJ=/nologo /W3 /O2 /D \"WIN32\" /D \"NDEBUG\" /D \"_MBCS\" ";
 	$type = $opts{'TYPE'};
 	$upname = $opts{'NAME'};

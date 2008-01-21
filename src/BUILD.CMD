@@ -128,10 +128,15 @@ call BLDSCHED.CMD
 echo Build installer...
 cd .\bin
 copy /Y ..\installer\UltraDefrag.nsi .\
+
+rem Executables are too small to use upx.
+rem But upx is used to pack installer
+rem (see INSTALL.TXT for more details).
 rem upx udefrag.exe
 rem if %errorlevel% neq 0 goto fail
-upx dfrg.exe
-if %errorlevel% neq 0 goto fail
+rem upx dfrg.exe
+rem if %errorlevel% neq 0 goto fail
+
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 

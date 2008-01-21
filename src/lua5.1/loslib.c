@@ -48,7 +48,10 @@ static int os_execute (lua_State *L) {
 }
 
 static int os_shellexec (lua_State *L) {
-  lua_pushinteger(L, (int)(LONG_PTR)ShellExecuteA(NULL,"open",luaL_optstring(L, 1, NULL),NULL,NULL,SW_SHOW));
+  lua_pushinteger(L, (int)(LONG_PTR)ShellExecuteA(NULL,
+		luaL_checkstring(L, 2),
+		luaL_checkstring(L, 1),
+		NULL,NULL,SW_SHOW));
   return 1;
 }
 

@@ -387,7 +387,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 {
 	int argc;
 	char **argv;
+	int ret;
 	
 	argv = CommandLineToArgvA(GetCommandLineA(),&argc);
-	return main(argc,argv);
+	ret = main(argc,argv);
+	if(argv) GlobalFree(argv);
+	return ret;
 }

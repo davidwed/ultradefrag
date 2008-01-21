@@ -18,13 +18,15 @@
  */
 
 /*
- *  Global variables definitions.
- */
+* Global variables definitions.
+*/
 
 extern ULONG dbg_level;
 extern UCHAR BitShift[];
 extern short device_name[];
 extern short link_name[];
+
+extern char *no_mem;
 
 #ifdef NT4_DBG
 extern HANDLE hDbgLog;

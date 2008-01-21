@@ -75,6 +75,19 @@ Items to describe:
     you will have small memory leak (16 bytes) from the nonpaged pool.
     Reboot is required to free this memory.
 
+15. The new installer will set silently AutoReboot parameter to zero, because
+    the numbers from BSOD usually are needed to fix a problem. Maybe some users
+    don't need to have this ability?
+
+16. We have few bug reports about driver loading failure. I'm sure that users
+    don't understand something. They must have admin rights during installation
+    and program execution (as described in our docs), must have all restrictions
+    related with device drivers disabled (driver signing and other related 
+    policies). If user is an administrator (has SE_LOAD_DRIVER privilege)
+    and ultradfg driver is registered (in HKLM\System\CurrentControlSet\Services\ultradfg)
+    but he can't load the driver then his windows installation is wrong.
+    I can't imagine anything else.
+
 				***
 
 1. (DONE) add to manual information about bug reporting:

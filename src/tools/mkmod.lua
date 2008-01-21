@@ -67,7 +67,7 @@ end
 
 function copy(src, dst)
 	if os.execute("cmd.exe /C copy /Y " .. src .. " " .. dst) ~= 0 then
-		assert(false,"Can't copy from " .. src .. " to " .. dst .. "!");
+		error("Can't copy from " .. src .. " to " .. dst .. "!");
 	end
 end
 
@@ -140,7 +140,7 @@ function produce_ddk_makefile()
 	elseif _type == "native"  then t = "PROGRAM"; umt = "nt"
 	elseif _type == "driver"  then t = "DRIVER"
 	elseif _type == "dll"     then t = "DYNLINK"; umt = "console"
-	else   assert(false,"Unknown target type: " .. _type .. "!")
+	else   error("Unknown target type: " .. _type .. "!")
 	end
 
 	f:write("TARGETTYPE=", t, "\n\n")
@@ -240,7 +240,7 @@ function produce_msvc_makefile()
 		s = "native"
 	elseif _type == "native" then
 		s = "native"
-	else assert(false,"Unknown target type: " .. _type .. "!")
+	else error("Unknown target type: " .. _type .. "!")
 	end
 	
 	if opts.NATIVEDLL == "0" then
@@ -370,6 +370,26 @@ function produce_msvc_makefile()
 end
 
 -- MinGW backend
+main_mingw_rules = [[
+define build_target
+@echo Linking...
+@$(CC) -o $(TARGET) 
+$(SRC_OBJS) $(RSRC_OBJS) $(LIB_DIRS) $(LIBS) $(LDFLAGS)
+endef
+
+define compile_resource
+@echo Compiling $<
+@$(WINDRES) $(RCFLAGS) $(RC_PREPROC) $(RC_INCLUDE_DIRS) 
+-O COFF -i "$<" -o "$@"
+endef
+
+define compile_source
+@echo Compiling $<
+@$(CC) $(CFLAGS) $(C_PREPROC) $(C_INCLUDE_DIRS) 
+-c "$<" -o "$@"
+endef
+
+]]
 function produce_mingw_makefile()
 	local _type
 	local adlibs_libs = {}
@@ -433,7 +453,7 @@ function produce_mingw_makefile()
 		f:write("--out-implib,lib", opts.NAME, ".dll.a -nostartfiles ")
 		f:write("-nodefaultlibs ", opts.NAME, "-mingw.def -Wl,--kill-at,")
 		f:write("--entry,_DllMain\@12,--strip-all\n")
-	else assert(false,"Unknown target type: " .. _type .. "!")
+	else error("Unknown target type: " .. _type .. "!")
 	end
 
 	f:write("LIBS = ")
@@ -471,22 +491,8 @@ function produce_mingw_makefile()
 		f:write(string.gsub(v,"%.rc","%.res"), " ")
 	end
 	f:write("\n\n")
-	
-	f:write("define build_target\n")
-	f:write("\@echo Linking...\n")
-	f:write("\@\$(CC) -o \$(TARGET) ")
-	f:write("\$(SRC_OBJS) \$(RSRC_OBJS) \$(LIB_DIRS) \$(LIBS) \$(LDFLAGS)\n")
-	f:write("endef\n\n")
-	f:write("define compile_resource\n")
-	f:write("\@echo Compiling \$<\n")
-	f:write("\@\$(WINDRES) \$(RCFLAGS) \$(RC_PREPROC) \$(RC_INCLUDE_DIRS) ")
-	f:write("-O COFF -i \"\$<\" -o \"\$\@\"\n")
-	f:write("endef\n\n")
-	f:write("define compile_source\n")
-	f:write("\@echo Compiling \$<\n")
-	f:write("\@\$(CC) \$(CFLAGS) \$(C_PREPROC) \$(C_INCLUDE_DIRS) ")
-	f:write("-c \"\$<\" -o \"\$\@\"\n")
-	f:write("endef\n\n")
+
+	f:write(main_mingw_rules)
 	
 	f:write(".PHONY: print_header\n\n")
 	f:write("\$(TARGET): print_header \$(RSRC_OBJS) \$(SRC_OBJS)\n")
@@ -523,7 +529,7 @@ end
 -- frontend
 input_filename = arg[1]
 if input_filename == nil then
-	assert(false,"Filename must be specified!")
+	error("Filename must be specified!")
 end
 print(input_filename .. " Preparing to makefile generation...\n")
 
@@ -536,7 +542,7 @@ elseif target_type == "dll" then
 elseif target_type == "driver" then
 	target_ext = "sys"
 else
-	assert(false, "Unknown target type: " .. target_type .. "!")
+	error("Unknown target type: " .. target_type .. "!")
 end
 target_name = opts.NAME .. "." .. target_ext
 nt4target_name = opts.NAME .. "_nt4." .. target_ext
@@ -552,7 +558,7 @@ if os.getenv("BUILD_ENV") == "winddk" then
 	ddk_cmd = ddk_cmd .. " -c"
 	if target_type == "dll" then
 		if os.execute(ddk_cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		if arch == "i386" then
 			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
@@ -571,7 +577,7 @@ if os.getenv("BUILD_ENV") == "winddk" then
 		script:close()
 		if arch == "i386" then
 			if os.execute(cmd) ~= 0 then
-				assert(false,"Can't build the target!")
+				error("Can't build the target!")
 			end
 			copy("objfre_wnet_x86\\i386\\" .. nt4target_name,"..\\..\\bin\\")
 		end
@@ -579,7 +585,7 @@ if os.getenv("BUILD_ENV") == "winddk" then
 		script:write("\@echo off\nset NT4_TARGET=false\n", ddk_cmd, "\n")
 		script:close()
 		if os.execute(cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		if arch == "i386" then
 			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
@@ -589,7 +595,7 @@ if os.getenv("BUILD_ENV") == "winddk" then
 		end
 	else
 		if os.execute(ddk_cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		if arch == "i386" then
 			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
@@ -606,7 +612,7 @@ elseif os.getenv("BUILD_ENV") == "msvc" then
 	msvc_cmd = msvc_cmd .. opts.NAME .. ".mak"
 	if target_type == "dll" then
 		if os.execute(msvc_cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(target_name,"..\\..\\bin\\")
 		copy(opts.NAME .. ".lib","..\\..\\lib\\")
@@ -616,19 +622,19 @@ elseif os.getenv("BUILD_ENV") == "msvc" then
 		script:write("\@echo off\nset NT4_TARGET=true\n", msvc_cmd, "\n")
 		script:close()
 		if os.execute(cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(nt4target_name,"..\\..\\bin\\")
 		script = assert(io.open(".\\builddrv.cmd","w"))
 		script:write("\@echo off\nset NT4_TARGET=false\n", msvc_cmd, "\n")
 		script:close()
 		if os.execute(cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(target_name,"..\\..\\bin\\")
 	else
 		if os.execute(msvc_cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(target_name,"..\\..\\bin\\")
 	end
@@ -639,7 +645,7 @@ elseif os.getenv("BUILD_ENV") == "mingw" then
 	print(input_filename .. " mingw build performing...\n")
 	if target_type == "dll" then
 		if os.execute(mingw_cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(target_name,"..\\..\\bin\\")
 		copy("lib" .. target_name .. ".a","..\\..\\lib\\")
@@ -649,23 +655,23 @@ elseif os.getenv("BUILD_ENV") == "mingw" then
 		script:write("\@echo off\nset NT4_TARGET=true\n", mingw_cmd, "\n")
 		script:close()
 		if os.execute(cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(nt4target_name,"..\\..\\bin\\")
 		script = assert(io.open(".\\builddrv.cmd","w"))
 		script:write("\@echo off\nset NT4_TARGET=false\n", mingw_cmd, "\n")
 		script:close()
 		if os.execute(cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(target_name,"..\\..\\bin\\")
 	else
 		if os.execute(mingw_cmd) ~= 0 then
-			assert(false,"Can't build the target!")
+			error("Can't build the target!")
 		end
 		copy(target_name,"..\\..\\bin\\")
 	end
-else assert(false,"\%BUILD_ENV\% has wrong value: " .. os.getenv("BUILD_ENV") .. "!")
+else error("\%BUILD_ENV\% has wrong value: " .. os.getenv("BUILD_ENV") .. "!")
 end
 
 print(input_filename .. " " .. os.getenv("BUILD_ENV") .. " build was successful.\n")

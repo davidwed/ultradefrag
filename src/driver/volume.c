@@ -18,8 +18,8 @@
  */
 
 /*
- *  Volume information getting.
- */
+* Volume information getting.
+*/
 
 #include "driver.h"
 
@@ -148,9 +148,9 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 		
 	/* 
-	 * Not increment dx->processed_clusters here, 
-	 * because some parts of MFT are really free.
-	 */
+	* Not increment dx->processed_clusters here, 
+	* because some parts of MFT are really free.
+	*/
 	DebugPrint("-Ultradfg- MFT_file   : start : length\n");
 	/* $MFT */
 	start = ntfs_data.MftStartLcn.QuadPart;

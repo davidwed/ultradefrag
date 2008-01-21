@@ -18,8 +18,8 @@
  */
 
 /*
- *  Functions for free space manipulations.
- */
+* Functions for free space manipulations.
+*/
 
 #include "driver.h"
 
@@ -34,8 +34,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 	ULONGLONG len;
 	/* Bit shifting array for efficient processing of the bitmap */
 	UCHAR BitShift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
-//ULONGLONG t;
-	//	t = _rdtsc();
+
 	/* Start scanning */
 	bitMappings = (PBITMAP_DESCRIPTOR)(dx->BitMap);
 	*dx->pnextLcn = 0; cluster = LLINVALID;
@@ -81,7 +80,6 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 			return STATUS_NO_MEMORY;
 		dx->processed_clusters += len;
 	}
-//	DebugPrint("time: %I64u\n",_rdtsc() - t);
 	return STATUS_SUCCESS;
 }
 
@@ -126,14 +124,14 @@ BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,
 }
 
 /*
- * FIXME: what is about memory usage growing because
- * pending blocks may be never freed.
- */
+* FIXME: what is about memory usage growing because
+* pending blocks may be never freed.
+*/
 /*
- * FIXME: this function is really not useful, at least on XP, 
- * because all blocks are still not checked by system and 
- * CheckFreeSpace() always returns FALSE here.
- */
+* FIXME: this function is really not useful, at least on XP, 
+* because all blocks are still not checked by system and 
+* CheckFreeSpace() always returns FALSE here.
+*/
 void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PROCESS_BLOCK_STRUCT *ppbs;
@@ -144,7 +142,7 @@ void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx)
 			if(CheckFreeSpace(dx,ppbs->start,ppbs->len)){
 				DebugPrint2("-Ultradfg- Pending block was freed start: %I64u len: %I64u\n",
 						ppbs->start,ppbs->len);
-				InsertFreeSpaceBlock(dx,ppbs->start,ppbs->len);
+				InsertFreeSpaceBlock(dx,ppbs->start,ppbs->len,NO_CHECKED_SPACE);
 				ppbs->len = 0;
 				dx->unprocessed_blocks --;
 			}
@@ -153,17 +151,18 @@ void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx)
 }
 
 /*
- * On FAT partitions after file moving filesystem driver marks
- * previously allocated clusters as free immediately.
- * But on NTFS we must wait until the volume has been checkpointed. 
- */
-void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start, ULONGLONG len)
+* On FAT partitions after file moving filesystem driver marks
+* previously allocated clusters as free immediately.
+* But on NTFS we must wait until the volume has been checkpointed. 
+*/
+void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
+					  ULONGLONG len,UCHAR old_space_state)
 {
 	PROCESS_BLOCK_STRUCT *ppbs;
 
 	if(dx->partition_type == NTFS_PARTITION){
 		/* Mark clusters as no-checked */
-		ProcessBlock(dx,start,len,NO_CHECKED_SPACE,SYSTEM_SPACE); /* FIXME!!! */
+		ProcessBlock(dx,start,len,NO_CHECKED_SPACE,old_space_state);
 
 		for(ppbs = dx->no_checked_blocks; ppbs != NULL; ppbs = ppbs->next_ptr){
 			if(!ppbs->len){
@@ -182,18 +181,18 @@ void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start, ULONGLONG le
 		dx->unprocessed_blocks ++;
 	} else {
 direct_call:
-		InsertFreeSpaceBlock(dx,start,len);
+		InsertFreeSpaceBlock(dx,start,len,old_space_state);
 	}
 }
 
 /* insert any block in free space map */
 /* TODO: this function should be optimized */
 void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
-			  ULONGLONG start,ULONGLONG length)
+			  ULONGLONG start,ULONGLONG length,UCHAR old_space_state)
 {
 	PFREEBLOCKMAP block, prev_block = NULL, new_block;
 
-	ProcessBlock(dx,start,length,FREE_SPACE,SYSTEM_SPACE); /* FIXME!!! */
+	ProcessBlock(dx,start,length,FREE_SPACE,old_space_state);
 
 	for(block = dx->free_space_map; block != NULL; prev_block = block, block = block->next_ptr){
 		if(block->lcn > start){

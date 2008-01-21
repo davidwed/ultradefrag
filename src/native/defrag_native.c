@@ -18,8 +18,9 @@
  */
 
 /*
- *  Main source of native interface.
- */
+* UltraDefrag native interface.
+*/
+
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>

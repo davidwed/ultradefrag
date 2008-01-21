@@ -18,17 +18,17 @@
  */
 
 /*
- *  Defragmenter engine.
- */
+* Defragmenter engine.
+*/
 
 #include "driver.h"
 
 /* 
- * TODO: write special function to perform new analysis if 
- * number of invalid movings is not zero.
- * This function must redump free space and redump each file.
- * And destroy pending blocks queue.
- */
+* TODO: write special function to perform new analysis if 
+* number of invalid movings is not zero.
+* This function must redump free space and redump each file.
+* And destroy pending blocks queue.
+*/
 
 /* Kernel of defragmenter */
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
@@ -242,6 +242,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	HANDLE hFile;
 	ULONGLONG target,curr_target;
 	PBLOCKMAP block;
+	UCHAR old_state;
 
 	/* Open the file */
 	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,0,NULL,NULL);
@@ -264,6 +265,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	DebugPrint("-Ultradfg- %ws\n",pfn->name.Buffer);
 	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",target,pfn->clusters_total);
 
+	old_state = GetSpaceState(pfn);
 	/* If file is compressed then we must move only non-virtual clusters. */
 	/* If OS version is 4.x and file is greater then 256k ... */
 	if(/*!dx->xp_compatible && */pfn->clusters_total > dx->clusters_per_256k)
@@ -289,7 +291,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	 */
 	if(Status == STATUS_SUCCESS){
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
-			ProcessFreeBlock(dx,block->lcn,block->length);
+			ProcessFreeBlock(dx,block->lcn,block->length,old_state);
 		if(pfn->is_compressed){
 			curr_target = target;
 			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
@@ -316,7 +318,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 				SYSTEM_SPACE,FREE_SPACE);
 		TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
-			ProcessBlock(dx,block->lcn,block->length,SYSTEM_SPACE,FREE_SPACE); // FIXME!!!
+			ProcessBlock(dx,block->lcn,block->length,SYSTEM_SPACE,old_state);
 		DeleteBlockmap(pfn);
 		if(!pfn->is_fragm){
 			dx->fragmfilecounter ++;
@@ -375,28 +377,4 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	//  perform new analysis
 	//  number of invalid movings = 0
 	// end
-}
-
-void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	PFILENAME ptr,next_ptr;
-
-	/* Set 'Stop' event. */
-	KeSetEvent(&dx->stop_event,IO_NO_INCREMENT,FALSE);
-	/* Now we can free buffers */
-	DestroyList((PLIST *)&dx->no_checked_blocks);
-	dx->unprocessed_blocks = 0;
-	ptr = dx->filelist;
-	while(ptr)
-	{
-		next_ptr = ptr->next_ptr;
-		DestroyList((PLIST *)&ptr->blockmap);
-		RtlFreeUnicodeString(&ptr->name);
-		ExFreePool((void *)ptr);
-		ptr = next_ptr;
-	}
-	DestroyList((PLIST *)&dx->free_space_map);
-	DestroyList((PLIST *)&dx->fragmfileslist);
-	dx->filelist = NULL;
-	CloseVolume(dx);
 }

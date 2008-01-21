@@ -18,8 +18,8 @@
  */
 
 /*
- *  Driver interface header.
- */
+* Driver interface header.
+*/
 
 #ifndef _ULTRADFG_H_
 #define _ULTRADFG_H_

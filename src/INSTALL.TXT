@@ -2,7 +2,7 @@
 
 1.1 System requirements
 
-  Reactos runs on Windows NT 4.0, Windows 2000, Windows XP, Windows Server
+  UltraDefrag runs on Windows NT 4.0, Windows 2000, Windows XP, Windows Server
 2003 and  Windows Vista, including 64 bit versions of Windows. NT 4.0 Alpha
 is not supported currently.
 
@@ -38,12 +38,12 @@ a good download rate, its should not be a large problem.
 
   Other interesting way to produce UltraDefrag package is to do so using MinGW.
 GNU C Compiler (GCC) has one important advantage over the Microsoft C
-compiler, it produces many useful warnings for code that is not completly
+compiler, it produces many useful warnings for code that is not completely
 within the C standard. I have removed hundreds of small bugs from UltraDefrag
 thanks to the warnings produced by GCC. The biggest disadvantage of gcc is that 
 it produces larger executables than the microsoft compiler. e.g: A driver
 produced by DDK may have 22.0 Kb size, but the same driver produced by GCC is
-only about 50.0 kb.
+only about 32.0 kb.
 
   You can either download MinGW from http://www.mingw.org or download
 MinGW Developer Studio from http://www.parinyasoft.com (about 25 Mb).
@@ -61,7 +61,7 @@ makefiles instead:
 2.1.3 Compilation with Microsoft Visual Studio 6.0
 
   This is another method for building UltraDefrag. It does not require the
-DDK.You can use Microsoft C compiler included in MS Visual Studio version 6.0
+DDK. You can use Microsoft C compiler included in MS Visual Studio version 6.0
 or later.
 
   To use this method you will need to obtain a copy of ReactOS source code
@@ -152,6 +152,10 @@ h). md5sum tool is used to generate file ultradefrag-x.y.z.MD5SUMS that
     gives you an ability to check downloaded packages integrity.
     You can download this tool from http://www.etree.org/md5com.html.
 
+i). Lua language binaries package is used to execute some build scripts.
+    You can download it from http://luabinaries.luaforge.net/.
+    Install it in some folder on your %PATH% and rename lua5.1.exe to lua.exe.
+
 
 2.1.5 Software recommended for debugging purposes
 
@@ -200,13 +204,13 @@ b). Configure build options by typing the following command:
 
     perl configure.pl
 
-    This tool has a graphical interface. Enter the paths to prerequesite
-    libraties and other options. If you prefer to use MinGW, click the button
+    This tool has a graphical interface. Enter the paths to prerequisite
+    libraries and other options. If you prefer to use MinGW, click the button
     'Apply patch to MinGW' to replace some libraries included in MinGW
     (libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
     will be saved in files with additional suffix '.orig'.
 
-c). To build UltraDefrag use the BUILD.CMD script. parameters are:
+c). To build UltraDefrag use the BUILD.CMD script; parameters are:
 
     build               in .\bin directory you will find installer;
                         in .\src_package - sources 7zip-archive.
@@ -217,6 +221,6 @@ c). To build UltraDefrag use the BUILD.CMD script. parameters are:
     build {--use-winddk | --use-mingw | --use-msvc} [--install]
 			you can specify your compiler of choice
 
-    build --clean       use to delete all intermediate files
+    build --clean       use it to delete all intermediate files
 
     build --help        show usage information and exit

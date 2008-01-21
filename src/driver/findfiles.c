@@ -18,8 +18,8 @@
  */
 
 /*
- *  FindFiles() and related functions.
- */
+* FindFiles() and related functions.
+*/
 
 #include "driver.h"
 
@@ -61,7 +61,6 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 	pFileInfo = pFileInfoFirst;
 	pFileInfo->FileIndex = 0;
 	pFileInfo->NextEntryOffset = 0;
-	// TODO: add in while cycle some condition
 	while(!KeReadStateEvent(&dx->stop_event)){
 		if (pFileInfo->NextEntryOffset != 0){
 			pFileInfo = (PVOID)((ULONG_PTR)pFileInfo + pFileInfo->NextEntryOffset);
@@ -81,11 +80,10 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 		if(pFileInfo->FileName[0] == 0x002E)
 			if(pFileInfo->FileName[1] == 0x002E || pFileInfo->FileNameLength == sizeof(short))
 				continue;	/* for . and .. */
-		//DebugPrint("%ws %x\n",pFileInfo->FileName,(UINT)pFileInfo->FileAttributes);
-		//continue;
 		/* VERY IMPORTANT: skip reparse points */
 		if(IS_REPARSE_POINT(pFileInfo)) continue;
 		/* FIXME: hard links? */
+		/* FIXME: sparse files? */
 		wcsncpy(dx->tmp_buf,path->Buffer,(path->Length) >> 1);
 		dx->tmp_buf[(path->Length) >> 1] = 0;
 		if(!is_root)

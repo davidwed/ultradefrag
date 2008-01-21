@@ -18,8 +18,8 @@
  */
 
 /*
- *  Cluster map (required by gui apps) processing.
- */
+* Cluster map (required by gui apps) processing.
+*/
 
 #include "driver.h"
 
@@ -41,16 +41,15 @@ NTSTATUS AllocateMap(ULONG size)
 	return STATUS_SUCCESS;
 }
 
-/* marks space allocated by specified file */
-void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
+/* returns current space state for the specified file */
+unsigned char GetSpaceState(PFILENAME pfn)
 {
-	PBLOCKMAP block;
 	UCHAR space_states[] = {UNFRAGM_SPACE,UNFRAGM_OVERLIMIT_SPACE, \
 			      COMPRESSED_SPACE,COMPRESSED_OVERLIMIT_SPACE, \
 			      DIR_SPACE,DIR_OVERLIMIT_SPACE,DIR_SPACE, \
 			      DIR_OVERLIMIT_SPACE};
-	UCHAR state;
 	int d,c,o;
+	unsigned char state;
 
 	if(pfn->is_fragm)
 		state = pfn->is_overlimit ? FRAGM_OVERLIMIT_SPACE : FRAGM_SPACE;
@@ -60,7 +59,16 @@ void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
 		o = (int)(pfn->is_overlimit) & 0x1;
 		state = space_states[(d << 2) + (c << 1) + o];
 	}
+	return state;
+}
 
+/* marks space allocated by specified file */
+void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
+{
+	PBLOCKMAP block;
+	UCHAR state;
+	
+	state = GetSpaceState(pfn);
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
 		ProcessBlock(dx,block->lcn,block->length,state,old_space_state);
 }
@@ -78,11 +86,11 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 	if(!dx->opposite_order){
 		if(!dx->clusters_per_cell) return;
 		/*
-		 * The following code uses _aulldvrm() function:
-		 * cell = start / dx->clusters_per_cell;
-		 * offset = start % dx->clusters_per_cell;
-		 * But we don't have this function on NT 4.0!!!
-		 */
+		* The following code uses _aulldvrm() function:
+		* cell = start / dx->clusters_per_cell;
+		* offset = start % dx->clusters_per_cell;
+		* But we don't have this function on NT 4.0!!!
+		*/
 		cell = start / dx->clusters_per_cell;
 		offset = start - cell * dx->clusters_per_cell;
 		while((cell < (map_size - 1)) && len){
@@ -100,11 +108,11 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 			n = min(len,dx->clusters_per_last_cell - offset);
 			new_cluster_map[cell][space_state] += n;
 			/*
-			 * Some space is identified as free and mft allocated at the same time;
-			 * therefore this check is required;
-			 * Because in space states enum mft has number above free space number,
-			 * these blocks will be displayed as mft blocks.
-			 */
+			* Some space is identified as free and mft allocated at the same time;
+			* therefore this check is required;
+			* Because in space states enum mft has number above free space number,
+			* these blocks will be displayed as mft blocks.
+			*/
 			if(new_cluster_map[cell][old_space_state] >= n)
 				new_cluster_map[cell][old_space_state] -= n;
 			else

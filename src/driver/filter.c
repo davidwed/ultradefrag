@@ -18,8 +18,8 @@
  */
 
 /*
- *  Simple filter implementation.
- */
+* Simple filter implementation.
+*/
 
 #include "driver.h"
 
@@ -64,10 +64,12 @@ excl:
 	return;
 }
 
-void UpdateFilter(PFILTER pf,short *buffer,int length)
+void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
+				  short *buffer,int length)
 {
 	POFFSET poffset;
 	int i;
+	PFRAGMENTED pfr;
 
 	if(pf->buffer){
 		ExFreePool((void *)pf->buffer);
@@ -96,6 +98,8 @@ void UpdateFilter(PFILTER pf,short *buffer,int length)
 		}
 		RtlCopyMemory(pf->buffer,buffer,length);
 	}
+	for(pfr = dx->fragmfileslist; pfr != NULL; pfr = pfr->next_ptr)
+		ApplyFilter(dx,pfr->pfn);
 }
 
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)

@@ -18,51 +18,51 @@
  */
 
 /*
- *  GUI - main code.
- */
+* GUI - main code.
+*/
 
 /*
- * VERY IMPORTANT NOTE: (bug #1839755 cause)
- * 
- * + You should not wait for one SendMessage handler completion
- *   from another SendMessage handler. Because it will be a deadlock cause.
- *
- * + Example:
- *
- * int done;
- *
- * window_proc()
- * {
- *   if(stop button was pressed)
- *   {
- *     stop_the_driver();
- *     wait for done flag;
- *   }
- * }
- *
- * analyse_thread_proc()
- * {
- *   done = 0;
- *   analyse();
- *   RedrawMap();
- *   done = 1;
- * }
- *
- * + How it works:
- * 
- * RedrawMap() will send message to the map control 
- * that can not be handled by system before window_proc() returns.
- * But window_proc() is waiting for done flag, that can be set
- * after(!) RedrawMap() call. Therefore we have a deadlock.
- */
+* VERY IMPORTANT NOTE: (bug #1839755 cause)
+* 
+* + You should not wait for one SendMessage handler completion
+*   from another SendMessage handler. Because it will be a deadlock cause.
+*
+* + Example:
+*
+* int done;
+*
+* window_proc()
+* {
+*   if(stop button was pressed)
+*   {
+*     stop_the_driver();
+*     wait for done flag;
+*   }
+* }
+*
+* analyse_thread_proc()
+* {
+*   done = 0;
+*   analyse();
+*   RedrawMap();
+*   done = 1;
+* }
+*
+* + How it works:
+* 
+* RedrawMap() will send message to the map control 
+* that can not be handled by system before window_proc() returns.
+* But window_proc() is waiting for done flag, that can be set
+* after(!) RedrawMap() call. Therefore we have a deadlock.
+*/
 
 #define WIN32_NO_STATUS
 #include <windows.h>
 /*
- * Next definition is very important for mingw:
- * _WIN32_IE must be no less than 0x0400
- * to include some important constant definitions.
- */
+* Next definition is very important for mingw:
+* _WIN32_IE must be no less than 0x0400
+* to include some important constant definitions.
+*/
 #ifndef _WIN32_IE
 #define _WIN32_IE 0x0400
 #endif
@@ -189,24 +189,6 @@ void HandleError(short *err_msg,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-/*	char b[100];
-	signed int i = +1 * (signed int)hInst;
-	signed __int64 j = (signed __int64)i;
-	unsigned int k = (unsigned int)j;
-	unsigned __int64 m;
-	j = -1 * (int)hInst;
-	m  = (unsigned __int64) j;
-	j = (signed __int64) m;
-	sprintf(b,"%I64i",j);
-	MessageBox(0,b,0,0);
-	//j = (signed __int64)(signed int)k;
-	sprintf(b,"%x",-1 * (int)hInst);
-*/
-//	char msg[256];
-//	int q = sizeof(msg);
-//	ULONGLONG t;
-//	INITCOMMONCONTROLSEX icc;
-
 	settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
@@ -221,19 +203,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
 
-	
-//	t = _rdtsc();
 	/*
-	 * This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
-	 * but InitCommonControlsEx() needs about 90000 tacts.
-	 */
+	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
+	* but InitCommonControlsEx() needs about 90000 tacts.
+	* Because the first function is just a stub on xp.
+	*/
 	InitCommonControls();
-//	icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
-//	icc.dwICC = ICC_BAR_CLASSES | ICC_LISTVIEW_CLASSES | ICC_PROGRESS_CLASS | ICC_TAB_CLASSES;
-	/* 90000 tacts */
-//	InitCommonControlsEx(&icc);
-//	t = _rdtsc() - t;
-	
 	
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
@@ -244,9 +219,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	settings->x = win_rc.left; settings->y = win_rc.top;
 	HandleError(L"",0);
 	/*
-	 * We will never reach this point, 
-	 * but we should be compatible with C standard.
-	 */
+	* We will never reach this point, 
+	* but we should be compatible with C standard.
+	*/
 	return 0;
 }
 
@@ -811,7 +786,7 @@ void ShowFragmented()
 	if(work_status[index] == STAT_CLEAR)
 		return;
 	path[0] = index + 'A';
-	ShellExecute(hWindow,NULL,path,NULL,NULL,SW_SHOW);
+	ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
 }
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)

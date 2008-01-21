@@ -18,31 +18,41 @@
  */
 
 /*
- *  Main header.
- */
+* Main header.
+*/
 
 #ifndef _DRIVER_H_
 #define _DRIVER_H_
 
-// gcc ???
+/* compiler specific definitions */
+#if !defined(__GNUC__)
 #ifndef USE_WINDDK
 #define __MSVC__
 #define _PCR
 #endif
-
-#if !defined(__GNUC__)
 #pragma warning(disable:4103) /* used #pragma pack to change alignment */
 #endif
 
 #define DBG 1 /* it's very useful! */
 
+/*
+* Alter's DbgPrint logger is much better than my implementation,
+* so NT4_DBG should be always undefined.
+* The latest version of logger can be downloaded from
+* http://alter.org.ua/en/soft/win/dbgdump/
+* To collect messages during console/gui execution click on 
+* DbgPrintLog.exe icon; to do this at boot time, use the following:
+* DbgPrintLog.exe --full -T DTN -wd c:\ --drv:inst 1 
+* 	--svc:inst A --drv:opt DoNotPassMessagesDown 1 UDefrag.log
+*/
+/*
 #ifdef NT4_TARGET
 #define NT4_DBG
 #else
 #undef NT4_DBG
 #endif
-
-///#define NT4_DBG
+*/
+#undef NT4_DBG
 
 #ifdef NT4_DBG
 void __stdcall OpenLog();
@@ -64,6 +74,11 @@ void __cdecl WriteLogMessage(char *format, ...);
 #define DebugPrint2 if(dbg_level < 2) {} else DebugPrint
 #endif
 
+#define DbgPrintNoMem() DebugPrint(no_mem)
+#define DbgPrintNoMem0() DebugPrint0(no_mem)
+#define DbgPrintNoMem1() DebugPrint1(no_mem)
+#define DbgPrintNoMem2() DebugPrint2(no_mem)
+
 #if defined(__GNUC__)
 #include <ddk/ntddk.h>
 #include <ddk/ntdddisk.h>
@@ -74,7 +89,7 @@ void __cdecl WriteLogMessage(char *format, ...);
 #include <ctype.h>
 #include "../include/ultradfg.h"
 
-typedef unsigned int        UINT;
+typedef unsigned int UINT;
 
 #if defined(__GNUC__)
 #define PLACE_IN_SECTION(s)	__attribute__((section (s)))
@@ -87,37 +102,32 @@ typedef unsigned int        UINT;
 
 #include "globals.h"
 
+/* Safe versions of some frequently used functions. */
 #define ZwCloseSafe(h) if(h) { ZwClose(h); h = NULL; }
 #define ExFreePoolSafe(p) if(p) { ExFreePool(p); p = NULL; }
 
+/* Unfortunately, usually headers don't contains some important prototypes. */
 #ifdef USE_WINDDK
-NTSTATUS
-NTAPI
-ZwDeviceIoControlFile(
-  IN HANDLE  DeviceHandle,
-  IN HANDLE  Event  OPTIONAL,
-  IN PIO_APC_ROUTINE  UserApcRoutine  OPTIONAL,
-  IN PVOID  UserApcContext  OPTIONAL,
-  OUT PIO_STATUS_BLOCK  IoStatusBlock,
-  IN ULONG  IoControlCode,
-  IN PVOID  InputBuffer,
-  IN ULONG  InputBufferSize,
-  OUT PVOID  OutputBuffer,
-  IN ULONG  OutputBufferSize);
-
-NTSTATUS
-NTAPI
-NtWaitForSingleObject(
-  IN HANDLE  ObjectHandle,
-  IN BOOLEAN  Alertable,
-  IN PLARGE_INTEGER  TimeOut  OPTIONAL);
-
-PDEVICE_OBJECT
-NTAPI
-IoGetAttachedDevice(
-  IN PDEVICE_OBJECT  DeviceObject);
-
+NTSTATUS NTAPI ZwDeviceIoControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,
+		PVOID,PIO_STATUS_BLOCK,ULONG,PVOID,ULONG,PVOID,ULONG);
+NTSTATUS NTAPI NtWaitForSingleObject(HANDLE,BOOLEAN,PLARGE_INTEGER);
+PDEVICE_OBJECT NTAPI IoGetAttachedDevice(PDEVICE_OBJECT);
 #define MAX_PATH 260
+#endif
+BOOLEAN  NTAPI RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);
+NTSTATUS NTAPI ZwQueryDirectoryFile(HANDLE,HANDLE,PIO_APC_ROUTINE,
+		PVOID,PIO_STATUS_BLOCK,PVOID,ULONG,FILE_INFORMATION_CLASS,BOOLEAN,
+		PUNICODE_STRING,BOOLEAN);
+NTSTATUS NTAPI ZwFsControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,
+		PIO_STATUS_BLOCK,ULONG,PVOID,ULONG,PVOID,ULONG);
+NTSTATUS NTAPI ZwQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,
+		PVOID,ULONG,FS_INFORMATION_CLASS);
+NTSTATUS NTAPI ZwDeleteFile(IN POBJECT_ATTRIBUTES);
+char *__cdecl _itoa(int value,char *str,int radix);
+#if defined(__GNUC__)
+ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
 #endif
 
 #ifndef NOMINMAX
@@ -128,8 +138,6 @@ IoGetAttachedDevice(
 #define min(a,b) ((a)<(b)?(a):(b))
 #endif
 #endif
-
-ULONGLONG _rdtsc(void);
 
 #ifndef TAG
 #define TAG(A, B, C, D) (ULONG)(((A)<<0) + ((B)<<8) + ((C)<<16) + ((D)<<24))
@@ -154,41 +162,15 @@ DECLSPEC_IMPORT VOID NTAPI ExFreePool(IN PVOID P);
 #endif /* USE_WINDDK */
 #endif /* NT4_TARGET */
 
-BOOLEAN  NTAPI RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);
-NTSTATUS NTAPI ZwQueryDirectoryFile(HANDLE,HANDLE,PIO_APC_ROUTINE,
-				     PVOID,PIO_STATUS_BLOCK,PVOID,ULONG,
-				     FILE_INFORMATION_CLASS,BOOLEAN,
-				     PUNICODE_STRING,BOOLEAN);
-NTSTATUS NTAPI ZwFsControlFile(HANDLE FileHandle,
-				HANDLE Event, /* optional */
-				PIO_APC_ROUTINE ApcRoutine, /* optional */
-				PVOID ApcContext, /* optional */
-				PIO_STATUS_BLOCK IoStatusBlock,	
-				ULONG FsControlCode,
-				PVOID InputBuffer, /* optional */
-				ULONG InputBufferLength,
-				PVOID OutputBuffer, /* optional */
-				ULONG OutputBufferLength
-				);
-NTSTATUS NTAPI ZwQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,
-					     PVOID,ULONG,FS_INFORMATION_CLASS);
-NTSTATUS NTAPI ZwDeleteFile(IN POBJECT_ATTRIBUTES ObjectAttributes);
-
-char *__cdecl _itoa(int value,char *str,int radix);
-
-#if defined(__GNUC__)
-ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
-ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
-ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
-#endif
-
 /*
- * NOTE! NEXT_PTR MUST BE FIRST MEMBER OF STRUCTURES!
- */
+* NOTE! NEXT_PTR MUST BE FIRST MEMBER OF THESE STRUCTURES!
+*/
+/* generic LIST structure definition */
 typedef struct _LIST {
 	struct _LIST *next_ptr;
 } LIST, *PLIST;
 
+/* structure to store information about blocks of file */
 typedef struct _tagBLOCKMAP {
 	struct _tagBLOCKMAP *next_ptr;
 	ULONGLONG vcn; /* useful for compressed files */
@@ -196,12 +178,14 @@ typedef struct _tagBLOCKMAP {
 	ULONGLONG length;
 } BLOCKMAP, *PBLOCKMAP;
 
+/* structure to store information about free space blocks */
 typedef struct _tagFREEBLOCKMAP {
 	struct _tagFREEBLOCKMAP *next_ptr;
 	ULONGLONG lcn;
 	ULONGLONG length;
 } FREEBLOCKMAP, *PFREEBLOCKMAP;
 
+/* structure to store information about file itself */
 typedef struct _tagFILENAME {
 	struct _tagFILENAME *next_ptr;
 	UNICODE_STRING name;
@@ -215,19 +199,16 @@ typedef struct _tagFILENAME {
 	BOOLEAN is_filtered;
 } FILENAME, *PFILENAME;
 
+/* structure to store fragmented item */
 typedef struct _FRAGMENTED {
 	struct _FRAGMENTED *next_ptr;
 	FILENAME *pfn;
 } FRAGMENTED, *PFRAGMENTED;
 
 #define NTFS_PARTITION 0x7
+#define _256K (256 * 1024)
 
-#define QUEUE_WAIT_INTERVAL (-1 * 10000) /* in 100 ns intervals */
-#define CHECKPOINT_WAIT_INTERVAL 30 /* sec */ //-300 * 10000 /* in 100 ns intervals */
-#define WAIT_CMD_INTERVAL (-200 * 10000) /* 200 ms */
-
-#define _256K    (256 * 1024)
-
+/* structure to store information about block with unknown state */
 typedef struct _PROCESS_BLOCK_STRUCT
 {
 	struct _PROCESS_BLOCK_STRUCT *next_ptr;
@@ -235,21 +216,24 @@ typedef struct _PROCESS_BLOCK_STRUCT
 	ULONGLONG len;
 } PROCESS_BLOCK_STRUCT, *PPROCESS_BLOCK_STRUCT;
 
+/* structure to store offset of filter string in multiline filter */
 typedef struct _OFFSET
 {
 	struct _OFFSET *next_ptr;
 	int offset;
 } OFFSET, *POFFSET;
 
+/* structure that represents multiline filter */
 typedef struct _FILTER
 {
 	short *buffer;
 	POFFSET offsets;
 } FILTER, *PFILTER;
 
-/* This is the definition for the data structure that is passed in to
- * FSCTL_MOVE_FILE
- */
+/*
+* This is the definition for the data structure that is passed in to
+* FSCTL_MOVE_FILE
+*/
 #ifndef _WIN64
 typedef struct {
      HANDLE            FileHandle; 
@@ -270,18 +254,19 @@ typedef struct {
 
 #define MARKER int
 
-/* Define UDEFRAG_DEVICE_EXTENSION structure. Include pointer
- * to FDO (for simple realization of UnloadRoutine) and 
- * symbolic link name in format UNOCODE_STRING.
- */
+/*
+* Define UDEFRAG_DEVICE_EXTENSION structure. Include pointer
+* to FDO (for simple realization of UnloadRoutine) and 
+* symbolic link name in format UNOCODE_STRING.
+*/
 typedef struct _UDEFRAG_DEVICE_EXTENSION
 {
 	PDEVICE_OBJECT fdo;
 	UNICODE_STRING log_path;
 	/*
-	 * All fields between markers will be set
-	 * to zero state before each analysis.
-	 */
+	* All fields between markers will be set
+	* to zero state before each analysis.
+	*/
 	MARKER z_start;
 	PFREEBLOCKMAP free_space_map;
 	PFREEBLOCKMAP lastfreeblock;
@@ -314,29 +299,32 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONG unprocessed_blocks; /* number of no-checked blocks */
 	NTSTATUS status;
 	/*
-	 * End of the data with default zero state.
-	 */
+	* End of the data with default zero state.
+	*/
 	MARKER z_end;
+	ULONGLONG *FileMap; /* Buffer to read file mapping information into */
+	UCHAR *BitMap;
+	short *tmp_buf;
+	FILTER in_filter;
+	FILTER ex_filter;
+	HANDLE hVol;
+	LONG working_rq;
+ 	/*
+	* End of the data with initial zero state.
+	*/
+	MARKER z0_end;
 	PBLOCKMAP lastblock;
 	UCHAR current_operation;
-	HANDLE hVol;
 	UCHAR letter;
-	/* Buffer to read file mapping information into */
-	ULONGLONG *FileMap;
-	UCHAR *BitMap;
 	KEVENT sync_event;
 	KEVENT stop_event;
+	KEVENT unload_event;
 	KSPIN_LOCK spin_lock;
 	ULONGLONG bytes_per_cluster;
 	ULONGLONG sizelimit;
 	BOOLEAN compact_flag;
 	BOOLEAN xp_compatible; /* true for NT 5.1 and later versions */
-	FILTER in_filter;
-	FILTER ex_filter;
-	POFFSET in_offsets;
-	POFFSET ex_offsets;
 	REPORT_TYPE report_type;
-	short *tmp_buf;
 	/* nt 4.0 specific */
 	ULONGLONG nextLcn;
 	ULONGLONG *pnextLcn;
@@ -352,7 +340,7 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state,int old_space_state);
-void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
+void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
 void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state);
 NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN GetTotalClusters(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -364,7 +352,8 @@ void DeleteBlockmap(PFILENAME pfn);
 BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx);
 void InitDX(UDEFRAG_DEVICE_EXTENSION *dx);
-void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
+void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx);
+void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length,UCHAR old_space_state);
 FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -380,8 +369,6 @@ void NTAPI DestroyList(PLIST *phead);
 
 NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE hFile);
 
-void DbgPrintNoMem();
-
 NTSTATUS AllocateMap(ULONG size);
 void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);
 void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -395,9 +382,12 @@ BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG le
 void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx);
 void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 
-void UpdateFilter(PFILTER pf,short *buffer,int length);
+void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,short *buffer,int length);
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
+unsigned char GetSpaceState(PFILENAME pfn);
+void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx);
+void wait_for_idle_state(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #define FIND_DATA_SIZE	(16*1024)
 
@@ -482,7 +472,7 @@ typedef struct {
 #define BITMAPBYTES		4096
 #define BITMAPSIZE		(BITMAPBYTES+2*sizeof(ULONGLONG))
 
-/* Invalid longlong number */
+/* "Invalid longlong number" - indicates that cluster is virtual */
 #define LLINVALID		((ULONGLONG) -1)
 
 typedef struct _FILE_FS_SIZE_INFORMATION {
@@ -522,5 +512,7 @@ NTSTATUS NTAPI Read_IRPhandler(PDEVICE_OBJECT fdo,PIRP Irp);
 NTSTATUS NTAPI Write_IRPhandler(PDEVICE_OBJECT fdo,PIRP Irp);
 NTSTATUS NTAPI Create_File_IRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
 NTSTATUS NTAPI Close_HandleIRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
+
+ULONGLONG _rdtsc(void);
 
 #endif /* _DRIVER_H_ */

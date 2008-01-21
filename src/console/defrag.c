@@ -18,8 +18,8 @@
  */
 
 /*
- *  Console interface main code.
- */
+* UltraDefrag console interface.
+*/
 
 #include <windows.h>
 #include <stdio.h>

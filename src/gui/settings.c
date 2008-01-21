@@ -18,8 +18,8 @@
  */
 
 /*
- *  GUI - load/save/change program settings.
- */
+* GUI - load/save/change program settings.
+*/
 
 #include <windows.h>
 #include <commctrl.h>

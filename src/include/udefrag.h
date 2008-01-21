@@ -18,8 +18,8 @@
  */
 
 /*
- *  Udefrag.dll interface header.
- */
+* Udefrag.dll interface header.
+*/
 
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
@@ -29,8 +29,7 @@
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think that's enough. */
 
-typedef struct _ud_options
-{
+typedef struct _ud_options {
 	short *in_filter;
 	short *ex_filter;
 	short *boot_in_filter;
@@ -50,8 +49,7 @@ typedef struct _ud_options
 	long y;
 } ud_options;
 
-typedef struct _volume_info
-{
+typedef struct _volume_info {
 	char letter;
 	char fsname[MAXFSNAME];
 	LARGE_INTEGER total_space;
