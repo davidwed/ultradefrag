@@ -577,15 +577,10 @@ typedef struct _TEB
 
 #define NtCurrentProcess() ((HANDLE)-1)
 /*
- * NtCurrentTeb() is imported from ntdll.dll if we use ms c compiler.
- * Otherwise (on mingw) this is inline function, defined in one of the
- * mingw headers.
- */
-//#if defined(__GNUC__)
-//struct _TEB *NtCurrentTeb(void);
-//#else
-//struct _TEB *NtCurrentTeb(void);
-//#endif
+* NtCurrentTeb() is imported from ntdll.dll if we use ms c compiler.
+* Otherwise (on mingw) this is inline function, defined in one of the
+* mingw headers.
+*/
 
 #define SE_ASSIGNPRIMARYTOKEN_PRIVILEGE  0x3
 #define SE_AUDIT_PRIVILEGE               0x15
@@ -641,9 +636,10 @@ typedef enum _EVENT_TYPE {
 #define FILE_DIRECTORY_FILE		0x00000001
 #define FILE_RESERVE_OPFILTER	0x00100000
 
-/* DriveMap member must be declared as unsigned int and alignment must be 1 
- * because without that it don't works on Windows XP x64 !!!
- */
+/*
+* DriveMap member must be declared as unsigned int and alignment must be 1 
+* because without that it don't works on Windows XP x64 !!!
+*/
 #pragma pack(push,1)
 typedef struct _PROCESS_DEVICEMAP_INFORMATION
 {

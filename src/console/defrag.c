@@ -74,32 +74,35 @@ void HandleError(char *err_msg,int exit_code)
 		printf("%s\n",err_msg);
 		if(!b_flag) settextcolor(console_attr);
 		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		udefrag_unload(FALSE);
+		if(udefrag_unload(FALSE) < 0) udefrag_pop_error(NULL,0);
 		exit(exit_code);
 	}
 }
 
-void HandleErrorW(short *err_msg,int exit_code)
+void HandleErrorW(int status,int exit_code)
 {
-	if(err_msg){ /* we should display error and terminate process */
+	short buffer[ERR_MSG_SIZE];
+	
+	if(status < 0){ /* we should display error and terminate process */
+		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		WideCharToMultiByte(CP_OEMCP,0,err_msg,-1,oem_buffer,4095,NULL,NULL);
+		WideCharToMultiByte(CP_OEMCP,0,buffer,-1,oem_buffer,ERR_MSG_SIZE - 1,NULL,NULL);
 		printf("%s\n",oem_buffer);
 		if(!b_flag) settextcolor(console_attr);
 		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		udefrag_unload(FALSE);
+		if(udefrag_unload(FALSE) < 0) udefrag_pop_werror(NULL,0);
 		exit(exit_code);
 	}
 }
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
-	short *err_msg;
-
-	err_msg = udefrag_stop();
-	if(err_msg){
+	short buffer[ERR_MSG_SIZE];
+	
+	if(udefrag_stop() < 0){
+		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		WideCharToMultiByte(CP_OEMCP,0,err_msg,-1,oem_stop_buffer,4095,NULL,NULL);
+		WideCharToMultiByte(CP_OEMCP,0,buffer,-1,oem_stop_buffer,ERR_MSG_SIZE - 1,NULL,NULL);
 		printf("\n%s\n",oem_stop_buffer);
 		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	}
@@ -158,9 +161,9 @@ int __cdecl wmain(int argc, short **argv)
 	/* do our job */
 	HandleErrorW(udefrag_init(argc,argv,FALSE,0),2);
 
-	if(a_flag) HandleErrorW(udefrag_analyse(letter),3);
-	else if(o_flag) HandleErrorW(udefrag_optimize(letter),3);
-	else HandleErrorW(udefrag_defragment(letter),3);
+	if(a_flag) HandleErrorW(udefrag_analyse(letter,NULL),3);
+	else if(o_flag) HandleErrorW(udefrag_optimize(letter,NULL),3);
+	else HandleErrorW(udefrag_defragment(letter,NULL),3);
 
 	/* display results and exit */
 	HandleErrorW(udefrag_get_progress(&stat,NULL),0);

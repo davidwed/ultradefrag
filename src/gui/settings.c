@@ -207,7 +207,7 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			settings->boot_in_filter = boot_in_filter;
 			GetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_EXCLUDE2),boot_ex_filter,MAX_FILTER_SIZE);
 			settings->boot_ex_filter = boot_ex_filter;
-			udefrag_set_options(settings);
+			if(udefrag_set_options(settings) < 0) udefrag_pop_error(NULL,0);
 			EndDialog(hWnd,1);
 			return TRUE;
 		case IDCANCEL:

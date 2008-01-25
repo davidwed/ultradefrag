@@ -54,20 +54,31 @@ char buffer[256];
 
 void Cleanup();
 
-void DisplayMessage(short *err_msg)
-{
-	if(err_msg)
-		if(err_msg[0]) winx_printf("\nERROR: %ws\n",err_msg);
-}
-
 void HandleError(short *err_msg,int exit_code)
 {
 	if(err_msg){
-		DisplayMessage(err_msg);
+		if(err_msg[0]) winx_printf("\nERROR: %ws\n",err_msg);
 		Cleanup();
 		if(exit_code){
 			winx_printf("Wait 10 seconds ...\n");
-			nsleep(10000); /* show error message at least 5 seconds */
+			winx_sleep(10000); /* show error message at least 5 seconds */
+		}
+		winx_printf("Good bye ...\n");
+		winx_exit(exit_code);
+	}
+}
+
+void HandleError_(int status,int exit_code)
+{
+	char err_msg[ERR_MSG_SIZE];
+
+	if(status < 0){
+		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",err_msg);
+		Cleanup();
+		if(exit_code){
+			winx_printf("Wait 10 seconds ...\n");
+			winx_sleep(10000); /* show error message at least 5 seconds */
 		}
 		winx_printf("Good bye ...\n");
 		winx_exit(exit_code);
@@ -79,7 +90,7 @@ void UpdateProgress()
 	STATISTIC stat;
 	double percentage;
 
-	if(!udefrag_get_progress(&stat,&percentage)){
+	if(udefrag_get_progress(&stat,&percentage) == 0){
 		if(stat.current_operation != last_op){
 			if(last_op){
 				for(k = i; k < 50; k++)
@@ -99,22 +110,30 @@ void UpdateProgress()
 		for(k = i; k < j; k++)
 			winx_putch('-');
 		i = j;
+	} else {
+		udefrag_pop_error(NULL,0);
 	}
 }
 
 int __stdcall update_stat(int df)
 {
-	short *err_msg;
+	char err_msg[ERR_MSG_SIZE];
+	char *msg;
 
 	if(winx_breakhit(100) >= 0){
-		DisplayMessage(udefrag_stop());
+		if(udefrag_stop() < 0){
+			udefrag_pop_error(err_msg,ERR_MSG_SIZE);
+			winx_printf("\nERROR: %s\n",err_msg);
+		}
 		abort_flag = 1;
+	} else {
+		winx_pop_error(NULL,0);
 	}
 	UpdateProgress();
 	if(df == TRUE){
-		err_msg = udefrag_get_ex_command_result();
-		if(wcslen(err_msg) > 0)
-			DisplayMessage(err_msg);
+		msg = udefrag_get_command_result();
+		if(strlen(msg) > 1)
+			winx_printf("\nERROR: %s\n",msg);
 		else if(!abort_flag) /* set progress to 100 % */
 			for(k = i; k < 50; k++)	winx_putch('-');
 	}
@@ -123,21 +142,27 @@ int __stdcall update_stat(int df)
 
 void Cleanup()
 {
+	char err_msg[ERR_MSG_SIZE];
+
 	/* unload driver and registry cleanup */
-	udefrag_unload(FALSE);
-	DisplayMessage(udefrag_native_clean_registry());
+	if(udefrag_unload(FALSE) < 0) udefrag_pop_error(NULL,0);
+	if(udefrag_native_clean_registry() < 0){
+		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",err_msg);
+	}
 }
 
 void DisplayAvailableVolumes(void)
 {
-	short *err_msg;
 	volume_info *v;
 	int n;
+	char err_msg[ERR_MSG_SIZE];
 
 	winx_printf("Available drive letters:   ");
-	err_msg = udefrag_get_avail_volumes(&v,FALSE);
-	if(err_msg) DisplayMessage(err_msg);
-	else {
+	if(udefrag_get_avail_volumes(&v,FALSE) < 0){
+		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",err_msg);
+	} else {
 		for(n = 0;;n++){
 			if(v[n].letter == 0) break;
 			winx_printf("%c   ",v[n].letter);
@@ -149,7 +174,8 @@ void DisplayAvailableVolumes(void)
 void ProcessVolume(char letter,char command)
 {
 	STATISTIC stat;
-	short *err_msg = NULL;
+	int status = 0;
+	char err_msg[ERR_MSG_SIZE];
 
 	i = j = 0;
 	last_op = 0;
@@ -157,27 +183,29 @@ void ProcessVolume(char letter,char command)
 	switch(command){
 	case 'a':
 		winx_printf("analyse %c: ...\n",letter);
-		err_msg = udefrag_analyse_ex(letter,update_stat);
+		status = udefrag_analyse(letter,update_stat);
 		break;
 	case 'd':
 		winx_printf("defragment %c: ...\n",letter);
-		err_msg = udefrag_defragment_ex(letter,update_stat);
+		status = udefrag_defragment(letter,update_stat);
 		break;
 	case 'c':
 		winx_printf("optimize %c: ...\n",letter);
-		err_msg = udefrag_optimize_ex(letter,update_stat);
+		status = udefrag_optimize(letter,update_stat);
 		break;
 	}
-	if(err_msg){
-		DisplayMessage(err_msg);
+	if(status < 0){
+		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",err_msg);
 		return;
 	}
 
-	err_msg = udefrag_get_progress(&stat,NULL);
-	if(err_msg)
-		DisplayMessage(err_msg);
-	else
+	if(udefrag_get_progress(&stat,NULL) < 0){
+		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",err_msg);
+	} else {
 		winx_printf("\n%s\n\n",udefrag_get_default_formatted_results(&stat));
+	}
 }
 
 void __stdcall NtProcessStartup(PPEB Peb)
@@ -188,8 +216,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	                    "analyse","defrag","optimize",
 						"drives","help"};
 	signed int code;
-	unsigned long excode;
-	char buffer[256];
+	char buffer[ERR_MSG_SIZE];
 
 	/* 3. Initialization */
 	settings = udefrag_get_options();
@@ -197,7 +224,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	NtInitializeRegistry(FALSE);
 #endif
 	/* 4. Display Copyright */
-	if(get_os_version() < 51) winx_printf("\n\n");
+	if(winx_get_os_version() < 51) winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007,2008.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
@@ -206,23 +233,22 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		"Use Break key to abort defragmentation.\n\n");
 	code = winx_init(Peb);
 	if(code < 0){
-		if(winx_get_error_message_ex(buffer,sizeof(buffer),code) < 0)
-			winx_printf("Initialization failed and buffer is too small!\n");
-		else
-			winx_printf("%s\n",buffer);
+		winx_pop_error(buffer,sizeof(buffer));
+		winx_printf("%s\n",buffer);
 		winx_printf("Wait 10 seconds ...\n");
-		nsleep(10000);
+		winx_sleep(10000);
 		winx_exit(1);
 	}
 	/* 6b. Prompt to exit */
 	winx_printf("Press any key to exit...  ");
 	for(i = 0; i < 3; i++){
 		if(winx_kbhit(1000) >= 0){ winx_printf("\n"); HandleError(L"",0); }
+		else { winx_pop_error(NULL,0); }
 		winx_printf("%c ",(char)('0' + 3 - i));
 	}
 	winx_printf("\n\n");
 	/* 7. Initialize the ultradfg device */
-	HandleError(udefrag_init(0,NULL,TRUE,0),2);
+	HandleError_(udefrag_init(0,NULL,TRUE,0),2);
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
@@ -247,13 +273,12 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	while(1){
 		winx_printf("# ");
 		if(winx_gets(buffer,sizeof(buffer) - 1) < 0){
-			excode = winx_get_last_error();
-			if(excode){
-				winx_printf("Keyboard read error %x!\n%s\n",(UINT)excode,
-				            winx_get_error_description(excode));
+			winx_pop_error(buffer,sizeof(buffer));
+			if(strcmp(buffer,"Buffer overflow!") == 0){
+				winx_printf("%s\n",buffer);
 				Cleanup();
 				winx_printf("Wait 10 seconds\n");
-				nsleep(10000);
+				winx_sleep(10000);
 				winx_exit(4);
 				return;
 			}

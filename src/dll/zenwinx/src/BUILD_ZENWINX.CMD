@@ -129,7 +129,7 @@ exit /B
 :clean
 echo Delete all intermediate files...
 rd /s /q bin
-rd /s /q obj
+rd /s /q obj/_
 rd /s /q lib
 echo Done.
 exit /B

@@ -63,6 +63,10 @@ PostBuild_Cmds=REL.CMD
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\error.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\keyboard.c
 # End Source File
 # Begin Source File
@@ -71,15 +75,27 @@ SOURCE=.\keytrans.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ldr.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\mem.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\error.c
+SOURCE=.\misc.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\privilege.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\stdio.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\thread.c
 # End Source File
 # Begin Source File
 

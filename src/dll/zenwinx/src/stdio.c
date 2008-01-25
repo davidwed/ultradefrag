@@ -18,17 +18,15 @@
  */
 
 /*
- *  zenwinx.dll console i/o functions.
- */
+* zenwinx.dll console i/o functions.
+*/
 
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
-#include <winioctl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-///#include <ntddkbd.h>
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -48,13 +46,13 @@ void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
 
 /* internal functions */
 /****if* zenwinx.stdio/winx_print
- *  NAME
- *     winx_print
- *  SYNOPSIS
- *     winx_print(string);
- *  FUNCTION
- *     Display the ANSI string on the screen.
- ******/
+* NAME
+*    winx_print
+* SYNOPSIS
+*    winx_print(string);
+* FUNCTION
+*    Display the ANSI string on the screen.
+******/
 void winx_print(char *string)
 {
 	ANSI_STRING aStr;
@@ -63,13 +61,10 @@ void winx_print(char *string)
 
 	if(!string) return;
 	RtlInitAnsiString(&aStr,string);
-	if(RtlAnsiStringToUnicodeString(&uStr,&aStr,TRUE) == STATUS_SUCCESS)
-	{
+	if(RtlAnsiStringToUnicodeString(&uStr,&aStr,TRUE) == STATUS_SUCCESS){
 		NtDisplayString(&uStr);
 		RtlFreeUnicodeString(&uStr);
-	}
-	else
-	{
+	} else {
 		len = strlen(string);
 		for(i = 0; i < len; i ++)
 			winx_putch(string[i]);
@@ -79,18 +74,18 @@ void winx_print(char *string)
 
 /* ansi functions */
 /****f* zenwinx.stdio/winx_putch
- *  NAME
- *     winx_putch
- *  SYNOPSIS
- *     winx_putch(character);
- *  FUNCTION
- *     CRT putch() native equivalent.
- *  BUGS
- *     Does not recognize special characters
- *     such as 'backspace'.
- *  SEE ALSO
- *     winx_puts,winx_printf
- ******/
+* NAME
+*    winx_putch
+* SYNOPSIS
+*    winx_putch(character);
+* FUNCTION
+*    CRT putch() native equivalent.
+* BUGS
+*    Does not recognize special characters
+*    such as 'backspace'.
+* SEE ALSO
+*    winx_puts,winx_printf
+******/
 int __cdecl winx_putch(int ch)
 {
 	UNICODE_STRING uStr;
@@ -103,18 +98,18 @@ int __cdecl winx_putch(int ch)
 }
 
 /****f* zenwinx.stdio/winx_puts
- *  NAME
- *     winx_puts
- *  SYNOPSIS
- *     winx_puts(string);
- *  FUNCTION
- *     CRT puts() native equivalent.
- *  BUGS
- *     Does not recognize special characters
- *     such as 'backspace'.
- *  SEE ALSO
- *     winx_putch,winx_printf
- ******/
+* NAME
+*    winx_puts
+* SYNOPSIS
+*    winx_puts(string);
+* FUNCTION
+*    CRT puts() native equivalent.
+* BUGS
+*    Does not recognize special characters
+*    such as 'backspace'.
+* SEE ALSO
+*    winx_putch,winx_printf
+******/
 int __cdecl winx_puts(const char *string)
 {
 	if(!string) return -1;
@@ -122,18 +117,18 @@ int __cdecl winx_puts(const char *string)
 }
 
 /****f* zenwinx.stdio/winx_printf
- *  NAME
- *     winx_printf
- *  SYNOPSIS
- *     winx_printf("%s %x!",string,number);
- *  FUNCTION
- *     CRT printf() native equivalent.
- *  BUGS
- *     Does not recognize special characters
- *     such as 'backspace'.
- *  SEE ALSO
- *     winx_putch,winx_puts
- ******/
+* NAME
+*    winx_printf
+* SYNOPSIS
+*    winx_printf("%s %x!",string,number);
+* FUNCTION
+*    CRT printf() native equivalent.
+* BUGS
+*    Does not recognize special characters
+*    such as 'backspace'.
+* SEE ALSO
+*    winx_putch,winx_puts
+******/
 int __cdecl winx_printf(const char *format, ...)
 {
 	va_list arg;
@@ -145,8 +140,7 @@ int __cdecl winx_printf(const char *format, ...)
 	if(!format) return 0;
 	/* if we have just one argument then call winx_print directly */
 	va_start(arg,format);
-	if(!va_arg(arg,int))
-	{
+	if(!va_arg(arg,int)){
 		winx_print((char *)format);
 		return strlen(format);
 	}
@@ -154,19 +148,18 @@ int __cdecl winx_printf(const char *format, ...)
 	/* prepare for _vsnprintf call */
 	va_start(arg,format);
 	/****ix* zenwinx.internals/_vsnprintf
-	 *  NAME
-	 *     _vsnprintf undocumented behaviour
-	 *  NOTES
-	 *     Undocumented requirement: buffer specified 
-	 *     by the first parameter must be filled
-	 *     with zero characters before _vsnprintf() call!
-	 ******/
+	* NAME
+	*    _vsnprintf undocumented behaviour
+	* NOTES
+	*    Undocumented requirement: buffer specified 
+	*    by the first parameter must be filled
+	*    with zero characters before _vsnprintf() call!
+	******/
 	memset(small_buffer,0,INTERNAL_BUFFER_SIZE);
 	done = _vsnprintf(small_buffer,sizeof(INTERNAL_BUFFER_SIZE),format,arg);
-	if(done == -1 || done == INTERNAL_BUFFER_SIZE)
-	{   /* buffer is too small; try to allocate two times larger */
-		do
-		{
+	if(done == -1 || done == INTERNAL_BUFFER_SIZE){
+		/* buffer is too small; try to allocate two times larger */
+		do {
 			big_buffer = winx_virtual_alloc((unsigned long)size);
 			if(!big_buffer) { va_end(arg); return 0; }
 			memset(big_buffer,0,size);
@@ -177,13 +170,10 @@ int __cdecl winx_printf(const char *format, ...)
 			if(!size) { va_end(arg); return 0; }
 		} while(1);
 	}
-	if(big_buffer)
-	{
+	if(big_buffer){
 		winx_print(big_buffer);
 		winx_virtual_free(big_buffer,(unsigned long)size);
-	}
-	else
-	{
+	} else {
 		winx_print(small_buffer);
 	}
 	va_end(arg);
@@ -191,54 +181,49 @@ int __cdecl winx_printf(const char *format, ...)
 }
 
 /****f* zenwinx.stdio/winx_kbhit
- *  NAME
- *     winx_kbhit
- *  SYNOPSIS
- *     result = winx_kbhit(msec);
- *  FUNCTION
- *     Read a character from the keyboard
- *     waiting a specified time interval.
- *  INPUTS
- *     msec - the time interval, in milliseconds.
- *  RESULT
- *     If any key was pressed, the return value is
- *     the ascii character or zero for the control keys.
- *     Otherwise, the return value is -1.
- *  EXAMPLE
- *     // Prompt to exit.
- *     winx_printf("Press any key to exit...  ");
- *     for(i = 0; i < 3; i++)
- *     {
- *         if(winx_kbhit(1000) != -1)
- *         {
- *             winx_printf("\nGood bye ...\n");
- *             winx_exit(0);
- *         }
- *         winx_printf("%c ",(char)('0' + 3 - i));
- *     }
- *  NOTES
- *     1. If msec is INFINITE, the function's
- *        time-out interval never elapses.
- *     2. If winx_get_last_error() != 0 after
- *        this call, the read keyboard error
- *        was encountered.
- *  BUGS
- *     The erroneous situation, when we have
- *     timeout for read request but
- *     the next NtCancelIoFile() call is
- *     unsuccessful, is not handled.
- *  SEE ALSO
- *     winx_breakhit
- ******/
+* NAME
+*    winx_kbhit
+* SYNOPSIS
+*    result = winx_kbhit(msec);
+* FUNCTION
+*    Read a character from the keyboard
+*    waiting a specified time interval.
+* INPUTS
+*    msec - the time interval, in milliseconds.
+* RESULT
+*    If any key was pressed, the return value is
+*    the ascii character or zero for the control keys.
+*    Otherwise, the return value is -1.
+* EXAMPLE
+*    // Prompt to exit.
+*    winx_printf("Press any key to exit...  ");
+*    for(i = 0; i < 3; i++){
+*        if(winx_kbhit(1000) == -1){
+*            winx_pop_error(NULL,0);
+*        } else {
+*            winx_printf("\nGood bye ...\n");
+*            winx_exit(0);
+*        }
+*        winx_printf("%c ",(char)('0' + 3 - i));
+*    }
+* NOTES
+*    If msec is INFINITE, the function's
+*    time-out interval never elapses.
+* BUGS
+*    The erroneous situation, when we have
+*    timeout for read request but
+*    the next NtCancelIoFile() call is
+*    unsuccessful, is not handled.
+* SEE ALSO
+*    winx_breakhit
+******/
 int __cdecl winx_kbhit(int msec)
 {
 	NTSTATUS Status;
 	LARGE_INTEGER interval;
 
-	winx_set_last_error(0);
-	if(!hKbDevice)
-	{
-		winx_set_last_error((ULONG)STATUS_INVALID_HANDLE);
+	if(!hKbDevice){
+		winx_push_error("The keyboard is not opened!");
 		return -1;
 	}
 	if(msec != INFINITE)
@@ -249,31 +234,30 @@ int __cdecl winx_kbhit(int msec)
 	Status = NtReadFile(hKbDevice,hKbEvent,NULL,NULL,
 		&iosb,&kbd,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
 	/* wait in case operation is pending */
-	if(Status == STATUS_PENDING)
-	{
+	if(Status == STATUS_PENDING){
 		Status = NtWaitForSingleObject(hKbEvent,FALSE,&interval);
-		if(Status == STATUS_TIMEOUT)
-		{ 
-		   /* 
-		    * If we have timeout we should cancel read operation
-		    * to empty keyboard pending operations queue.
+		if(Status == STATUS_TIMEOUT){ 
+			/* 
+			* If we have timeout we should cancel read operation
+			* to empty keyboard pending operations queue.
 			*/
 			Status = NtCancelIoFile(hKbDevice,&iosb);
-			if(!NT_SUCCESS(Status))
-			{
-				/* this is a hard error because the next read request
-			     * fill global kbd record instead of the special one */
+			if(!NT_SUCCESS(Status)){
 				/*
-				 * FIXME: handle this error.
-				 */
+				* This is a hard error because the next read request
+				* fill global kbd record instead of the special one.
+				*/
+				/*
+				* FIXME: handle this error.
+				*/
 			}
+			winx_push_error("Timeout!");
 			return -1;
 		}
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
-	if(!NT_SUCCESS(Status))
-	{
-		winx_set_last_error((ULONG)Status);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't read the keyboard: %x!",(UINT)Status);
 		return -1;
 	}
 	IntTranslateKey(&kbd,&kbd_rec);
@@ -282,37 +266,35 @@ int __cdecl winx_kbhit(int msec)
 }
 
 /****f* zenwinx.stdio/winx_breakhit
- *  NAME
- *     winx_breakhit
- *  SYNOPSIS
- *     result = winx_breakhit(msec);
- *  FUNCTION
- *     A special variant of winx_kbhit() function.
- *  INPUTS
- *     msec - the time interval, in milliseconds.
- *  RESULT
- *     If 'Break' key was pressed, the return value is zero.
- *     Otherwise, the return value is -1.
- *  EXAMPLE
- *     // Prompt to exit.
- *     winx_printf("Press 'Break' key to exit...  ");
- *     if(winx_breakhit(1000) != -1)
- *     {
- *         winx_printf("\nGood bye ...\n");
- *         winx_exit(0);
- *     }
- *  NOTES
- *     1. If msec is INFINITE, the function's
- *        time-out interval never elapses.
- *     2. If winx_get_last_error() != 0 after
- *        this call, the read keyboard error
- *        was encountered.
- *  BUGS
- *     This function is based on winx_kbhit(),
- *     so look at bugs of them.
- *  SEE ALSO
- *     winx_kbhit
- ******/
+* NAME
+*    winx_breakhit
+* SYNOPSIS
+*    result = winx_breakhit(msec);
+* FUNCTION
+*    A special variant of winx_kbhit() function.
+* INPUTS
+*    msec - the time interval, in milliseconds.
+* RESULT
+*    If 'Break' key was pressed, the return value is zero.
+*    Otherwise, the return value is -1.
+* EXAMPLE
+*    // Prompt to exit.
+*    winx_printf("Press 'Break' key to exit...  ");
+*    if(winx_breakhit(1000) == -1){
+*        winx_pop_error(NULL,0);
+*    } else {
+*        winx_printf("\nGood bye ...\n");
+*        winx_exit(0);
+*    }
+* NOTES
+*    If msec is INFINITE, the function's
+*    time-out interval never elapses.
+* BUGS
+*    This function is based on winx_kbhit(),
+*    so look at bugs of them.
+* SEE ALSO
+*    winx_kbhit
+******/
 int __cdecl winx_breakhit(int msec)
 {
 	if(winx_kbhit(msec) == -1) return -1;
@@ -320,19 +302,15 @@ int __cdecl winx_breakhit(int msec)
 }
 
 /****f* zenwinx.stdio/winx_getch
- *  NAME
- *     winx_getch
- *  SYNOPSIS
- *     character = winx_getch();
- *  FUNCTION
- *     CRT getch() native equivalent.
- *  NOTES
- *     If winx_get_last_error() != 0 after
- *     this call, the read keyboard error
- *     was encountered.
- *  SEE ALSO
- *     winx_getche,winx_gets
- ******/
+* NAME
+*    winx_getch
+* SYNOPSIS
+*    character = winx_getch();
+* FUNCTION
+*    CRT getch() native equivalent.
+* SEE ALSO
+*    winx_getche,winx_gets
+******/
 int __cdecl winx_getch(void)
 {
 	KEYBOARD_INPUT_DATA kbd;
@@ -341,10 +319,8 @@ int __cdecl winx_getch(void)
 	KBD_RECORD kbd_rec;
 	NTSTATUS Status;
 
-	winx_set_last_error(0);
-	if(!hKbDevice)
-	{
-		winx_set_last_error((ULONG)STATUS_INVALID_HANDLE);
+	if(!hKbDevice){
+		winx_push_error("The keyboard is not opened!");
 		return -1;
 	}
 repeate_attempt:
@@ -352,14 +328,12 @@ repeate_attempt:
 	Status = NtReadFile(hKbDevice,hKbEvent,NULL,NULL,
 		&iosb,&kbd,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
 	/* wait in case operation is pending */
-	if(Status == STATUS_PENDING)
-	{
+	if(Status == STATUS_PENDING){
 		Status = NtWaitForSingleObject(hKbEvent,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
-	if(!NT_SUCCESS(Status))
-	{
-		winx_set_last_error((ULONG)Status);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't read the keyboard: %x!",(UINT)Status);
 		return -1;
 	}
 	IntTranslateKey(&kbd,&kbd_rec);
@@ -368,22 +342,18 @@ repeate_attempt:
 }
 
 /****f* zenwinx.stdio/winx_getche
- *  NAME
- *     winx_getche
- *  SYNOPSIS
- *     character = winx_getche();
- *  FUNCTION
- *     CRT getche() native equivalent.
- *  NOTES
- *     If winx_get_last_error() != 0 after
- *     this call, the read keyboard error
- *     was encountered.
- *  BUGS
- *     Does not recognize special characters
- *     such as 'backspace'.
- *  SEE ALSO
- *     winx_getch,winx_gets
- ******/
+* NAME
+*    winx_getche
+* SYNOPSIS
+*    character = winx_getche();
+* FUNCTION
+*    CRT getche() native equivalent.
+* BUGS
+*    Does not recognize special characters
+*    such as 'backspace'.
+* SEE ALSO
+*    winx_getch,winx_gets
+******/
 int __cdecl winx_getche(void)
 {
 	int ch;
@@ -394,38 +364,35 @@ int __cdecl winx_getche(void)
 }
 
 /****f* zenwinx.stdio/winx_gets
- *  NAME
- *     winx_gets
- *  SYNOPSIS
- *     result = winx_gets(buffer, n);
- *  FUNCTION
- *     CRT gets() native equivalent, but with
- *     limited number of characters to read.
- *  INPUTS
- *     buffer - storage location for input string.
- *     n      - the maximum number of characters to read.
- *  RESULT
- *     nonnegative value for number of characters
- *     -1 for error.
- *  NOTES
- *     If winx_get_last_error() != 0 after
- *     this call, the read keyboard error
- *     was encountered.
- *  BUGS
- *     Does not recognize special characters
- *     such as 'backspace'.
- *  SEE ALSO
- *     winx_getch,winx_getche
- ******/
+* NAME
+*    winx_gets
+* SYNOPSIS
+*    result = winx_gets(buffer, n);
+* FUNCTION
+*    CRT gets() native equivalent, but with
+*    limited number of characters to read.
+* INPUTS
+*    buffer - storage location for input string.
+*    n      - the maximum number of characters to read.
+* RESULT
+*    nonnegative value for number of characters
+*    -1 for error.
+* BUGS
+*    Does not recognize special characters
+*    such as 'backspace'.
+* SEE ALSO
+*    winx_getch,winx_getche
+******/
 int __cdecl winx_gets(char *string,int n)
 {
 	int i;
 	int ch;
 
-	winx_set_last_error(0);
-	if(!string) return -1;
-	for(i = 0; i < n; i ++)
-	{
+	if(!string){
+		winx_push_error("Invalid argument #1 of winx_gets!");
+		return -1;
+	}
+	for(i = 0; i < n; i ++){
 repeate_attempt:
 		ch = winx_getche();
 		if(ch == -1) { string[i] = 0; return -1; }
@@ -433,6 +400,9 @@ repeate_attempt:
 		if(ch == 13) { winx_putch('\n'); string[i] = 0; break; }
 		string[i] = (char)ch;
 	}
-	if(i == n) return -1;
+	if(i == n){
+		winx_push_error("Buffer overflow!"); /* never change this !!! */
+		return -1;
+	}
 	return i;
 }

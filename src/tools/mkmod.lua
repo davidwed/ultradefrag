@@ -373,20 +373,17 @@ end
 main_mingw_rules = [[
 define build_target
 @echo Linking...
-@$(CC) -o $(TARGET) 
-$(SRC_OBJS) $(RSRC_OBJS) $(LIB_DIRS) $(LIBS) $(LDFLAGS)
+@$(CC) -o $(TARGET) $(SRC_OBJS) $(RSRC_OBJS) $(LIB_DIRS) $(LIBS) $(LDFLAGS)
 endef
 
 define compile_resource
 @echo Compiling $<
-@$(WINDRES) $(RCFLAGS) $(RC_PREPROC) $(RC_INCLUDE_DIRS) 
--O COFF -i "$<" -o "$@"
+@$(WINDRES) $(RCFLAGS) $(RC_PREPROC) $(RC_INCLUDE_DIRS) -O COFF -i "$<" -o "$@"
 endef
 
 define compile_source
 @echo Compiling $<
-@$(CC) $(CFLAGS) $(C_PREPROC) $(C_INCLUDE_DIRS) 
--c "$<" -o "$@"
+@$(CC) $(CFLAGS) $(C_PREPROC) $(C_INCLUDE_DIRS) -c "$<" -o "$@"
 endef
 
 ]]

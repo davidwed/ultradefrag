@@ -40,7 +40,7 @@ my $skip_rem = 1;
 my %opts = ('x'=>200, 'y'=>200);
 
 ############# set signal handlers ###############
-$SIG{INT} = sub {gui_unload(); udefrag_s_unload(1);};
+$SIG{INT} = sub {gui_unload(); if(udefrag_unload(1) < 0){ udefrag_pop_error(0,0); }};
 
 ############# load the program settings ###########
 if(open(CFGFILE,'.\\my_guitest.cfg')){
@@ -66,23 +66,21 @@ $mw->iconimage($icon);
 #display_error("привет!"); # incorrect appearance
 $mw->bind(
 	ref($mw),'<Destroy>',
-	sub {gui_unload(); udefrag_s_unload(1);}
+	sub {gui_unload(); if(udefrag_unload(1) < 0){ udefrag_pop_error(0,0); }}
 	);
 
 ############ import necessary functions from the udefrag.dll ##############
-Win32::API->Import('udefrag','char* udefrag_s_init(long map_size)') or \
+Win32::API->Import('udefrag','udefrag_init','IPIN','I') or \
 	display_critical_error('Can\'t import functions from udefrag.dll!');
-Win32::API->Import('udefrag','char* udefrag_s_unload(int save_options)');
-Win32::API->Import('udefrag','udefrag_s_analyse_ex','CK','P');
-Win32::API->Import('udefrag','udefrag_s_defragment_ex','CK','P');
-Win32::API->Import('udefrag','udefrag_s_optimize_ex','CK','P');
-Win32::API->Import('udefrag','char* udefrag_s_get_ex_command_result()');
-Win32::API->Import('udefrag','char* udefrag_s_stop()');
+Win32::API->Import('udefrag','udefrag_unload','I','I');
+Win32::API->Import('udefrag','udefrag_analyse','CK','I');
+Win32::API->Import('udefrag','udefrag_defragment','CK','I');
+Win32::API->Import('udefrag','udefrag_optimize','CK','I');
+Win32::API->Import('udefrag','char* udefrag_get_command_result()');
+Win32::API->Import('udefrag','int udefrag_stop()');
 Win32::API->Import('udefrag','char* udefrag_s_get_avail_volumes(int skip_removable)');
-Win32::API->Import('udefrag','char* udefrag_s_get_progress()');
 Win32::API->Import('udefrag','char* udefrag_s_get_map(int size)');
-Win32::API->Import('udefrag','char* udefrag_s_get_options()');
-Win32::API->Import('udefrag','char* udefrag_s_set_options(char* string)');
+Win32::API->Import('udefrag','udefrag_pop_error','PI');
 
 ############ fill the main window with controls ###############
 #my $list = $mw->Scrolled(
@@ -201,7 +199,7 @@ $mw->maxsize($mw->width,$mw->height);
 # fill list of available volumes
 rescan_drives();
 # initialize ultradefrag engine
-handle_error(udefrag_s_init($x_blocks * $y_blocks));
+handle_error(udefrag_init(0,0,0,$x_blocks * $y_blocks));
 
 # create callback procedure
 my $update_map = sub {
@@ -220,8 +218,8 @@ print $_[0]."\n";
 	$map->update();
 	#DoOneEvent(); #??
 	if($_[0] ne 0){
-		$_ = udefrag_s_get_ex_command_result();
-		if(length($_)){
+		$_ = udefrag_get_command_result();
+		if(length($_) > 1){
 			display_error($_);
 		}
 	}
@@ -266,8 +264,9 @@ sub display_critical_error {
 }
 
 sub handle_error {
-	if(length($_[0])){
-		udefrag_s_unload(1);
+	if($_[0] < 0){
+		udefrag_pop_error(0,0);
+		if(udefrag_unload(1) < 0){ udefrag_pop_error(0,0); }
 		display_critical_error($_[0]);
 	}
 }
@@ -333,7 +332,9 @@ sub analyse {
 	if(!@sel){ return; }
 	$row = $sel[0];
 	$letter = $list->itemCget($row, 0, 'text');
-	udefrag_s_analyse_ex($letter, $update_map_callback);
+	if(udefrag_analyse($letter, $update_map_callback) < 0){
+		udefrag_pop_error(0,0);
+	}
 }
 
 sub img {

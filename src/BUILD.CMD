@@ -36,6 +36,8 @@ mkdir obj\dll\zenwinx
 mkdir obj\dll\zenwinx\src
 copy /Y obj\zenwinx\ntndk.h obj\dll\zenwinx\src\
 copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\src\
+mkdir obj\zenwinx\src
+copy /Y obj\zenwinx\zenwinx.h obj\zenwinx\src\
 
 if "%1" neq "" goto parse_first_parameter
 echo No parameters specified, use defaults.

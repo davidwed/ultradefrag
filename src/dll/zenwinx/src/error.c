@@ -18,98 +18,60 @@
  */
 
 /*
- *  zenwinx.dll error handling routines.
- */
+* zenwinx.dll error handling routines.
+*/
 
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "ntndk.h"
 #include "zenwinx.h"
 
-char *emsg[] = \
-{
-	"",
-	"Can't open the keyboard",
-	"Can't create event"
-};
+#define FormatMessageFound		0
+#define FormatMessageNotFound	1
+#define FormatMessageUndefined	2
 
-/****f* zenwinx.error/winx_get_error_message
- *  NAME
- *     winx_get_error_message
- *  SYNOPSIS
- *     winx_get_error_message(code);
- *  FUNCTION
- *     Returns a text description for specified
- *     zenwinx error code.
- *  INPUTS
- *     code - one of the zenwinx error codes,
- *            returned by one of the zenwinx functions.
- *  RESULT
- *     Pointer to string with error description;
- *     NULL for invalid code.
- *  EXAMPLE
- *     signed int code;
- *     unsigned long last_error;
- *
- *     code = winx_xxx();
- *     if(code < 0)
- *     {
- *         winx_printf("%s\n",winx_get_error_message(code));
- *         last_error = winx_get_last_error();
- *         winx_printf(winx_get_error_description(last_error);
- *         // error handling ...
- *     }
- *  NOTES
- *     ZenWINX functions usually returns negative value 
- *     as error code: return -ZENWINX_ERROR_CODE;
- *     Therefore use returned value,
- *     not the code from zenwinx.h.
- *  SEE ALSO
- *     winx_get_error_message_ex
- ******/
-char * __stdcall winx_get_error_message(int code)
-{
-	unsigned int index;
-	
-	index = (unsigned int)(-code);
-	if(index >= sizeof(emsg) / sizeof(short *))
-		return "";
-	return emsg[index];
-}
+long malloc_free_delta = 0;
+
+const char no_mem[] = "Unknown state! No enough memory!";
+
+int FormatMessageState = FormatMessageUndefined;
+DWORD (WINAPI *func_FormatMessageA)(DWORD,PVOID,DWORD,DWORD,LPSTR,DWORD,va_list*);
+DWORD (WINAPI *func_FormatMessageW)(DWORD,PVOID,DWORD,DWORD,LPWSTR,DWORD,va_list*);
+int FindFormatMessage(void);
 
 /****f* zenwinx.error/winx_get_error_description
- *  NAME
- *     winx_get_error_description
- *  SYNOPSIS
- *     winx_get_error_description(code);
- *  FUNCTION
- *     Returns a text description for 
- *     specified extended error code.
- *  INPUTS
- *     code - extended error code, 
- *            returned by winx_get_last_error.
- *  RESULT
- *     Pointer to string with extended error description.
- *  EXAMPLE
- *     See an example for the winx_get_error_message function.
- *  NOTES
- *     If you use winx_set_last_error for purposes 
- *     other than NTSTATUS code saving,
- *     don't use this function to decode error.
- *  SEE ALSO
- *     winx_get_last_error,winx_set_last_error
- ******/
-char * __stdcall winx_get_error_description(unsigned long code)
+* NAME
+*    winx_get_error_description
+* SYNOPSIS
+*    winx_get_error_description(code);
+* FUNCTION
+*    Returns a text description for 
+*    specified NTSTATUS code.
+* INPUTS
+*    code - NTSTATUS code.
+* RESULT
+*    Pointer to string with error description.
+* EXAMPLE
+*    str = winx_get_error_description(STATUS_ACCESS_VIOLATION);
+* NOTES
+*    This function returns messages only for well
+*    known codes. Otherwise it returns predefined
+*    "Unknown error; send report to the authors" message.
+* SEE ALSO
+*    winx_push_error,winx_pop_error,winx_pop_werror,
+*    winx_save_error,winx_restore_error
+******/
+static char * __stdcall winx_get_error_description(unsigned long code)
 {
 	NTSTATUS Status;
 	char *msg = "Unknown error; send report to the authors";
 	
 	Status = (NTSTATUS)code;
-	switch(Status)
-	{
+	switch(Status){
 	case STATUS_SUCCESS:
 		msg = "Operation was successful";
 		break;
@@ -173,116 +135,288 @@ char * __stdcall winx_get_error_description(unsigned long code)
 	return msg;
 }
 
-/****f* zenwinx.error/winx_get_error_message_ex
- *  NAME
- *     winx_get_error_message_ex
- *  SYNOPSIS
- *     winx_get_error_message_ex(s,n,code);
- *  FUNCTION
- *     Returns a full text description for specified
- *     zenwinx error code, including information about
- *     the last-error extended code.
- *  INPUTS
- *     s    - buffer to store description.
- *     n    - maximum number of characters to store.
- *     code - one of the zenwinx error codes,
- *            specified in zenwinx.h.
- *  RESULT
- *     Zero for success;
- *     -1 for error (buffer is too small).
- *  EXAMPLE
- *     NTSTATUS Status = STATUS_SUCCESS;
- *     Status = NtReadFile(...);
- *     if(!NT_SUCCESS(Status))
- *     {
- *         winx_set_last_error((ULONG)Status);
- *         // error handling ...
- *     }
- *  NOTES
- *     1. Use this function to retrieve detailed 
- *        information about the last error.
- *     2. ZenWINX functions usually returns 
- *        negative value as error code:
- *        return -ZENWINX_ERROR_CODE;
- *        Therefore use returned value, 
- *        not the code from zenwinx.h.
- *  SEE ALSO
- *     winx_get_error_message
- ******/
-int __stdcall winx_get_error_message_ex(char *s, int n, signed int code)
+/****f* zenwinx.error/winx_push_error
+* NAME
+*    winx_push_error
+* SYNOPSIS
+*    winx_push_error(format, ...);
+* FUNCTION
+*    Saves formatted error message.
+* INPUTS
+*    format - format string
+*    ...    - parameters
+* RESULT
+*    This function does not return a value.
+* EXAMPLE
+*    winx_push_error("Can't open the file %s: %x!",
+*            filename, (UINT)Status);
+* NOTES
+*    1. If some winx function returns negative value,
+*       such function must call winx_push_error() before.
+*    2. After each unsuccessful call of such functions,
+*       winx_pop_error() must be called before any other
+*       system call in the current thread (win32, 
+*       native, crt, mfc ...).
+*    3. Each winx_push_error() call must be like this:
+*       winx_push_error("error message with parameters: %x!",
+*           parameters,(UINT)Status);
+*       Status parameter is optional.
+* SEE ALSO
+*    winx_get_error_description,winx_pop_error,winx_pop_werror,
+*    winx_save_error,winx_restore_error
+******/
+void __cdecl winx_push_error(char *format, ...)
 {
-	char msg[256];
-	int len;
-	unsigned long last_error;
+	char *buffer;
+	va_list arg;
+	int length;
 	
-	if(!s) return -1;
-	memset(msg,0,sizeof(msg));
-	s[0] = 0;
-	last_error = winx_get_last_error();
-	sprintf(msg,"%s: %x!\n%s.",winx_get_error_message(code),
-		(UINT)last_error,winx_get_error_description(last_error));
-	len = strlen(msg);
-	if(len >= n) return -1;
-	strcpy(s,msg);
-	return 0;
+	buffer = winx_virtual_alloc(ERR_MSG_SIZE);
+	if(!buffer){
+		NtCurrentTeb()->LastErrorValue = (ULONG)(LONG_PTR)no_mem;
+		return;
+	}
+	//InterlockedIncrement(&malloc_free_delta);
+	va_start(arg,format);
+	memset(buffer,0,ERR_MSG_SIZE);
+	length = _vsnprintf(buffer,ERR_MSG_SIZE - 1,format,arg);
+	buffer[ERR_MSG_SIZE - 1] = 0;
+	va_end(arg);
+	NtCurrentTeb()->LastErrorValue = (ULONG)(LONG_PTR)buffer;
 }
 
-/****f* zenwinx.error/winx_set_last_error
- *  NAME
- *     winx_set_last_error
- *  SYNOPSIS
- *     winx_set_last_error(code);
- *  FUNCTION
- *     Sets the last-error code for the calling thread.
- *  INPUTS
- *     code - unsigned long value to be used as last-error code.
- *  RESULT
- *     This function does not return a value.
- *  EXAMPLE
- *     NTSTATUS Status = STATUS_SUCCESS;
- *     Status = NtReadFile(...);
- *     if(!NT_SUCCESS(Status))
- *     {
- *         winx_set_last_error((ULONG)Status);
- *         // error handling ...
- *     }
- *  NOTES
- *     ZenWINX library utilize this function to save NTSTATUS
- *     values threated as extented error codes only.
- *  SEE ALSO
- *     winx_get_last_error
- ******/
-void __stdcall winx_set_last_error(unsigned long code)
+/****f* zenwinx.error/winx_pop_error
+* NAME
+*    winx_pop_error
+* SYNOPSIS
+*    winx_pop_error(buffer, size);
+* FUNCTION
+*    Retrieves formatted error message
+*    and removes it from stack.
+* INPUTS
+*    buffer - memory block to store message into
+*    size   - maximum number of characters to store,
+*             including terminal zero
+* RESULT
+*    This function does not return a value.
+* EXAMPLE
+*    if(winx_xxx() < 0){
+*        winx_pop_error(buffer,sizeof(buffer));
+*    }
+* NOTES
+*    1. See notes for winx_push_error() function.
+*    2. The first parameter may be NULL if you don't
+*       need error message.
+* SEE ALSO
+*    winx_push_error,winx_pop_werror,winx_get_error_description,
+*    winx_save_error,winx_restore_error
+******/
+void __stdcall winx_pop_error(char *buffer, int size)
 {
-	NtCurrentTeb()->LastErrorValue = code;
+	int length, length2;
+	char *source;
+	char desc[256];
+	char *p;
+	UINT iStatus;
+	NTSTATUS Status;
+	ULONG err_code;
+	
+	source = (char *)(LONG_PTR)(NtCurrentTeb()->LastErrorValue);
+
+	if(buffer && size > 0){
+		length = min(strlen(source),(unsigned int)size - 1);
+		strncpy(buffer,source,length);
+		buffer[length] = 0;
+		/* append error description */
+		p = strrchr(buffer,':');
+		if(p){
+			/* skip ':' and spaces */
+			p ++;
+			while(*p == 0x20) p++;
+			sscanf(p,"%x",&iStatus);
+			/* very important for x64 targets */
+			Status = (NTSTATUS)(signed int)iStatus;
+			strcpy(desc,"\r\n");
+			/* try to get FormatMessage function address */
+			if(FindFormatMessage()){
+				/* append localized error description from kernel32.dll */
+				err_code = RtlNtStatusToDosError(Status);
+				if(!func_FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,
+					MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
+					desc + 2,sizeof(desc) - 10,NULL))
+				{
+					goto get_predefined_msg;
+				}
+			} else {
+			get_predefined_msg:
+				strcpy(desc + 2,winx_get_error_description((unsigned long)Status));
+			}
+			length2 = min(strlen(desc),(unsigned int)size - length - 1);
+			strncpy(buffer + length,desc,length2);
+			buffer[length + length2] = 0;
+		}
+	}
+
+	if(strcmp(source,no_mem) != 0){
+		winx_virtual_free(source,ERR_MSG_SIZE);
+		//InterlockedDecrement(&malloc_free_delta);
+	}
 }
 
-/****f* zenwinx.error/winx_get_last_error
- *  NAME
- *     winx_get_last_error
- *  SYNOPSIS
- *     code = winx_get_last_error();
- *  FUNCTION
- *     Retrieves the calling thread's last-error 
- *     extended code value.
- *  INPUTS
- *     Nothing.
- *  RESULT
- *     code - calling thread's last-error
- *            extended code.
- *  EXAMPLE
- *     winx_printf("Last extended error code = %u",
- *                 (UINT)winx_get_last_error());
- *  NOTES
- *     Many of ZenWINX functions (as described in this manual)
- *     returns negative error codes defined in zenwinx.h.
- *     In addition, they stores extended error code using
- *     winx_set_last_error function. To get this stored value
- *     use this function.
- *  SEE ALSO
- *     winx_set_last_error
- ******/
-unsigned long __stdcall winx_get_last_error(void)
+/****f* zenwinx.error/winx_pop_werror
+* NAME
+*    winx_pop_werror
+* SYNOPSIS
+*    winx_pop_werror(buffer, size);
+* FUNCTION
+*    Unicode version of winx_pop_error().
+* SEE ALSO
+*    winx_push_error,winx_pop_error,winx_get_error_description,
+*    winx_save_error,winx_restore_error
+******/
+void __stdcall winx_pop_werror(short *buffer, int size)
 {
-	return NtCurrentTeb()->LastErrorValue;
+	int length, length2;
+	char *source;
+	char c_buffer[ERR_MSG_SIZE];
+	short desc[256];
+	char *p;
+	UINT iStatus;
+	NTSTATUS Status;
+	ULONG err_code;
+	ANSI_STRING aStr;
+	UNICODE_STRING uStr;
+	short fmt_error[] = L"Can't format message!";
+
+	source = (char *)(LONG_PTR)(NtCurrentTeb()->LastErrorValue);
+
+	if(buffer && size > 0){
+		length = min(strlen(source),ERR_MSG_SIZE - 1);
+		strncpy(c_buffer,source,length);
+		c_buffer[length] = 0;
+		/* convert string to unicode */
+		RtlInitAnsiString(&aStr,c_buffer);
+		uStr.Buffer = buffer;
+		uStr.Length = 0;
+		uStr.MaximumLength = size - 1;
+		if(RtlAnsiStringToUnicodeString(&uStr,&aStr,FALSE) != STATUS_SUCCESS)
+			wcscpy(buffer,fmt_error);
+		/* append error description */
+		p = strrchr(c_buffer,':');
+		if(p){
+			/* skip ':' and spaces */
+			p ++;
+			while(*p == 0x20) p++;
+			sscanf(p,"%x",&iStatus);
+			/* very important for x64 targets */
+			Status = (NTSTATUS)(signed int)iStatus;
+			wcscpy(desc,L"\r\n");
+			/* try to get FormatMessage function address */
+			if(FindFormatMessage()){
+				/* append localized error description from kernel32.dll */
+				err_code = RtlNtStatusToDosError(Status);
+				if(!func_FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,
+					MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
+					desc + 2,sizeof(desc) - 10,NULL))
+				{
+					goto get_predefined_msg;
+				}
+			} else {
+			get_predefined_msg:
+				RtlInitAnsiString(&aStr,winx_get_error_description((unsigned long)Status));
+				uStr.Buffer = desc + 2;
+				uStr.Length = 0;
+				uStr.MaximumLength = sizeof(desc) - 10;
+				if(RtlAnsiStringToUnicodeString(&uStr,&aStr,FALSE) != STATUS_SUCCESS)
+					wcscpy(desc + 2,fmt_error);
+			}
+			length = wcslen(buffer);
+			length2 = min(wcslen(desc),(unsigned int)size - length - 1);
+			wcsncpy(buffer + length,desc,length2);
+			buffer[length + length2] = 0;
+		}
+	}
+
+	if(strcmp(source,no_mem) != 0){
+		winx_virtual_free(source,ERR_MSG_SIZE);
+		//InterlockedDecrement(&malloc_free_delta);
+	}
+}
+
+int FindFormatMessage(void)
+{
+	if(FormatMessageState == FormatMessageUndefined){
+		if(winx_get_proc_address(L"kernel32.dll","FormatMessageA",(void *)&func_FormatMessageA) == 0)
+			FormatMessageState = FormatMessageFound;
+		else {
+			FormatMessageState = FormatMessageNotFound; /* before pop_error !!! */
+			winx_pop_error(NULL,0);
+		}
+		if(winx_get_proc_address(L"kernel32.dll","FormatMessageW",(void *)&func_FormatMessageW) < 0){
+			FormatMessageState = FormatMessageNotFound; /* before pop_error !!! */
+			winx_pop_error(NULL,0);
+		}
+	}
+	return (FormatMessageState == FormatMessageFound) ? TRUE : FALSE;
+}
+
+/****f* zenwinx.error/winx_save_error
+* NAME
+*    winx_save_error
+* SYNOPSIS
+*    winx_save_error(buffer, size);
+* FUNCTION
+*    Retrieves unformatted error message
+*    and removes it from stack.
+* INPUTS
+*    buffer - memory block to store message into
+*    size   - maximum number of characters to store,
+*             including terminal zero
+* RESULT
+*    This function does not return a value.
+* EXAMPLE
+*    if(winx_xxx() < 0){
+*        winx_save_error(buffer,sizeof(buffer));
+*        // other winx calls
+*        winx_restore_error(buffer); // for winx_xxx()
+*    }
+* NOTES
+*    See notes for winx_push_error() function.
+* SEE ALSO
+*    winx_push_error,winx_pop_error,winx_pop_werror,
+*    winx_get_error_description,winx_restore_error
+******/
+void __stdcall winx_save_error(char *buffer, int size)
+{
+	int length;
+	char *source;
+	
+	source = (char *)(LONG_PTR)(NtCurrentTeb()->LastErrorValue);
+
+	if(buffer && size > 0){
+		length = min(strlen(source),(unsigned int)size - 1);
+		strncpy(buffer,source,length);
+		buffer[length] = 0;
+	}
+
+	if(strcmp(source,no_mem) != 0){
+		winx_virtual_free(source,ERR_MSG_SIZE);
+		//InterlockedDecrement(&malloc_free_delta);
+	}
+}
+
+/****f* zenwinx.error/winx_restore_error
+* NAME
+*    winx_restore_error
+* SYNOPSIS
+*    winx_restore_error(buffer);
+* FUNCTION
+*    winx_push_error() analog.
+* SEE ALSO
+*    winx_push_error,winx_pop_error,winx_pop_werror,
+*    winx_get_error_description,winx_restore_error
+******/
+void __stdcall winx_restore_error(char *buffer)
+{
+	winx_push_error(buffer);
 }

@@ -205,7 +205,11 @@ typedef struct _FRAGMENTED {
 	FILENAME *pfn;
 } FRAGMENTED, *PFRAGMENTED;
 
-#define NTFS_PARTITION 0x7
+#define FLOPPY_FAT12_PARTITION 0x0 /* really not defined */
+#define FAT16_PARTITION        0x6
+#define NTFS_PARTITION         0x7
+#define FAT32_PARTITION        0xB
+
 #define _256K (256 * 1024)
 
 /* structure to store information about block with unknown state */

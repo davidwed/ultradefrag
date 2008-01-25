@@ -9,7 +9,7 @@ HISTORY
     - documentation was improved
     - driver code cleanup was performed
     - build scripts were improved
-    - few bugs were fixed
+    - many bugs were fixed
     - coding style was changed to improve readability
 
 

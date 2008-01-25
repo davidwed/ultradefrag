@@ -258,6 +258,14 @@ FunctionEnd
 
 ;-----------------------------------------
 
+Function WriteDbgSettings
+
+  WriteRegDWORD HKLM $R0 "AutoReboot" 0x0
+
+FunctionEnd
+
+;-----------------------------------------
+
 Section "Ultra Defrag core files (required)" SecCore
 
   push $R0
@@ -323,6 +331,18 @@ lua_registered:
   call WriteDriverSettings
   StrCpy $R0 "SYSTEM\ControlSet002\Services\ultradfg"
   call WriteDriverSettings
+  StrCpy $R0 "SYSTEM\ControlSet003\Services\ultradfg"
+  call WriteDriverSettings
+
+  DetailPrint "Write debugging settings..."
+  StrCpy $R0 "SYSTEM\CurrentControlSet\Control\CrashControl"
+  call WriteDbgSettings
+  StrCpy $R0 "SYSTEM\ControlSet001\Control\CrashControl"
+  call WriteDbgSettings
+  StrCpy $R0 "SYSTEM\ControlSet002\Control\CrashControl"
+  call WriteDbgSettings
+  StrCpy $R0 "SYSTEM\ControlSet003\Control\CrashControl"
+  call WriteDbgSettings
 
   DetailPrint "Write the uninstall keys..."
   StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
@@ -474,6 +494,7 @@ Section "Uninstall"
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
+  DeleteRegKey HKLM "SYSTEM\ControlSet003\Services\ultradfg"
 
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"

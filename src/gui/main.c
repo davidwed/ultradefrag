@@ -167,7 +167,19 @@ void HandleError(short *err_msg,int exit_code)
 {
 	if(err_msg){
 		if(err_msg[0]) MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
-		udefrag_unload(TRUE);
+		if(udefrag_unload(TRUE) < 0) udefrag_pop_error(NULL,0);
+		ExitProcess(exit_code);
+	}
+}
+
+void HandleError_(int status,int exit_code)
+{
+	short buffer[ERR_MSG_SIZE];
+	
+	if(status < 0){
+		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
+		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
+		if(udefrag_unload(TRUE) < 0) udefrag_pop_error(NULL,0);
 		ExitProcess(exit_code);
 	}
 }
@@ -195,10 +207,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
 	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
 	if(uninstall_run){	
-		udefrag_clean_registry();
+		if(udefrag_clean_registry() < 0) udefrag_pop_error(NULL,0);
 		ExitProcess(0);
 	}
-	HandleError(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
+	HandleError_(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
 	win_rc.left = settings->x; win_rc.top = settings->y;
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
@@ -232,12 +244,12 @@ __inline void RescanDrives()
 
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 {
+	short buffer[ERR_MSG_SIZE];
 	char chr;
 	int stat,index;
 	char s[16];
 	int p;
 	double d;
-	short *err_msg;
 	volume_info *v;
 	int i;
 	LV_ITEM lvi;
@@ -255,9 +267,9 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	index = 0;
-	err_msg = udefrag_get_avail_volumes(&v,settings->skip_removable);
-	if(err_msg){
-		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
+	if(udefrag_get_avail_volumes(&v,settings->skip_removable) < 0){
+		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
+		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
 		goto scan_done;
 	}
 	for(i = 0;;i++){
@@ -326,11 +338,13 @@ scan_done:
 
 void Stop()
 {
-	short *err_msg;
+	short buffer[ERR_MSG_SIZE];
 
 	stop_pressed = TRUE;
-	err_msg = udefrag_stop();
-	if(err_msg) MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
+	if(udefrag_stop() < 0){
+		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
+		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
+	}
 }
 
 void ShowProgress(void)
@@ -667,12 +681,15 @@ int __stdcall update_stat(int df)
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
-	short *err_msg;
+	short *msg;
 
 	if(stop_pressed) return 0; /* it's neccessary: see above one comment in Stop() */
 	cl_map = map[index];
 	pst = &stat[index];
-	if(udefrag_get_progress(pst,&percentage)) goto done;
+	if(udefrag_get_progress(pst,&percentage) < 0){
+		udefrag_pop_werror(NULL,0);
+		goto done;
+	}
 	UpdateStatusBar(index);
 //	if(settings->show_progress)
 //	{
@@ -681,14 +698,17 @@ int __stdcall update_stat(int df)
 		SetWindowText(hProgressMsg,progress_msg);
 		SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 //	}
-	if(udefrag_get_map(cl_map,N_BLOCKS)) goto done;
+	if(udefrag_get_map(cl_map,N_BLOCKS) < 0){
+		udefrag_pop_werror(NULL,0);
+		goto done;
+	}
 	FillBitMap(index);
 	RedrawMap();
 done:
 	if(df == FALSE) return 0;
-	err_msg = udefrag_get_ex_command_result();
-	if(wcslen(err_msg) > 0){
-		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
+	msg = udefrag_get_command_result_w();
+	if(wcslen(msg) > 1){
+		MessageBoxW(0,msg,L"Error!",MB_OK | MB_ICONHAND);
 		//DisplayError(err_msg);
 		return 0;
 	}
@@ -705,7 +725,8 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	LRESULT iItem;
 	int index;
 	UCHAR command;
-	short *err_msg;
+	int status;
+	short buffer[ERR_MSG_SIZE];
 
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
@@ -738,16 +759,17 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	SendMessage(hProgressBar,PBM_SETPOS,0,0);
 	switch(command){
 	case 'a':
-		err_msg = udefrag_analyse_ex((UCHAR)(index + 'A'),update_stat);
+		status = udefrag_analyse((UCHAR)(index + 'A'),update_stat);
 		break;
 	case 'd':
-		err_msg = udefrag_defragment_ex((UCHAR)(index + 'A'),update_stat);
+		status = udefrag_defragment((UCHAR)(index + 'A'),update_stat);
 		break;
 	default:
-		err_msg = udefrag_optimize_ex((UCHAR)(index + 'A'),update_stat);
+		status = udefrag_optimize((UCHAR)(index + 'A'),update_stat);
 	}
-	if(err_msg){
-		MessageBoxW(0,err_msg,L"Error!",MB_OK | MB_ICONHAND);
+	if(status < 0){
+		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
+		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
 		//DisplayError(err_msg);
 		ShowStatus(STAT_CLEAR,iItem);
 		ClearMap();

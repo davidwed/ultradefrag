@@ -26,7 +26,7 @@ optimizeLevel=0
 
 // linker
 libraryPath=
-outputFilename=../../lib/udefrag.dll
+outputFilename=../../bin/udefrag.dll
 libraries=ntdll
 extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
@@ -63,9 +63,9 @@ runtimeTypeEnabled=1
 optimizeLevel=2
 
 // linker
-libraryPath=
-outputFilename=../../lib/udefrag.dll
-libraries=ntdll
+libraryPath=..\..\lib
+outputFilename=../../bin/udefrag.dll
+libraries=ntdll,zenwinx
 extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
@@ -80,22 +80,19 @@ resourceIncludeDirectory=
 extraResourceOptions=
 
 [Source]
-1=cfuncs.c
-2=misc.c
-3=settings.c
-4=sfuncs.c
-5=thread.c
-6=udefrag.c
+1=misc.c
+2=settings.c
+3=sfuncs.c
+4=udefrag.c
+5=volume.c
 [Header]
 [Resource]
 1=udefrag.rc
 [Other]
 [History]
-cfuncs.c,5399
-..\zenwinx\src\ntndk.h,23592
-settings.c,15981
-..\..\include\udefrag.h,3017
-misc.c,0
-sfuncs.c,8797
-thread.c,3136
-udefrag.c,12484
+sfuncs.c,1244
+..\zenwinx\src\ntndk.h,23553
+settings.c,999
+..\..\include\udefrag.h,1271
+volume.c,11003
+udefrag.c,13897

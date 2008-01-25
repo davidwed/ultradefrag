@@ -29,23 +29,7 @@
 #include <stdlib.h>
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
-
-void __stdcall nsleep(int msec)
-{
-	LARGE_INTEGER Interval;
-
-	if(msec != INFINITE)
-	{
-		/* System time units are 100 nanoseconds. */
-		Interval.QuadPart = -((signed long)msec * 10000);
-	}
-	else
-	{
-		/* Approximately 292000 years hence */
-		Interval.QuadPart = MAX_WAIT_INTERVAL;
-	}
-	NtDelayExecution(FALSE,&Interval);
-}
+#include "../zenwinx/src/zenwinx.h"
 
 /* original name was StrFormatByteSize */
 int __stdcall fbsize(char *s,ULONGLONG n)

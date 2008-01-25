@@ -24,10 +24,33 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
+/*
+* List of functions that needs udefrag_pop_error() after
+* each unsuccessfull call:
+*	scheduler_get_avail_letters
+*	udefrag_analyse
+*	udefrag_clean_registry
+*	udefrag_defragment
+*	udefrag_get_avail_volumes
+*	udefrag_get_map
+*	udefrag_get_progress
+*	udefrag_init
+*	udefrag_native_clean_registry
+*	udefrag_optimize
+*	udefrag_set_options
+*	udefrag_stop
+*	udefrag_unload
+*	udefrag_validate_volume
+*/
+
 #include "ultradfg.h"
 
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think that's enough. */
+
+#ifndef ERR_MSG_SIZE
+#define ERR_MSG_SIZE 1024
+#endif
 
 typedef struct _ud_options {
 	short *in_filter;
@@ -56,42 +79,31 @@ typedef struct _volume_info {
 	LARGE_INTEGER free_space;
 } volume_info;
 
-short * __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size);
-short * __stdcall udefrag_unload(BOOL save_options);
+int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size);
+int __stdcall udefrag_unload(BOOL save_options);
 
-short * __stdcall udefrag_analyse(unsigned char letter);
-short * __stdcall udefrag_defragment(unsigned char letter);
-short * __stdcall udefrag_optimize(unsigned char letter);
-short * __stdcall udefrag_stop(void);
-short * __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
-short * __stdcall udefrag_get_map(char *buffer,int size);
+int __stdcall udefrag_stop(void);
+int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
+int __stdcall udefrag_get_map(char *buffer,int size);
 char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
 
 ud_options * __stdcall udefrag_get_options(void);
-short * __stdcall udefrag_set_options(ud_options *ud_opts);
-short * __stdcall udefrag_clean_registry(void);
-short * __stdcall udefrag_native_clean_registry(void);
+int __stdcall udefrag_set_options(ud_options *ud_opts);
+int __stdcall udefrag_clean_registry(void);
+int __stdcall udefrag_native_clean_registry(void);
 
-short * __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
-short * __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
-short * __stdcall scheduler_get_avail_letters(char *letters);
+int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
+int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
+int __stdcall scheduler_get_avail_letters(char *letters);
 
-void   __stdcall nsleep(int msec);
-char * __stdcall create_thread(LPTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
-void   __stdcall exit_thread(void);
-int    __stdcall get_os_version(void);
-
-int    __stdcall fbsize(char *s,ULONGLONG n);
-int    __stdcall fbsize2(char *s,ULONGLONG n);
-int    __stdcall dfbsize2(char *s,ULONGLONG *pn);
+int __stdcall fbsize(char *s,ULONGLONG n);
+int __stdcall fbsize2(char *s,ULONGLONG n);
+int __stdcall dfbsize2(char *s,ULONGLONG *pn);
 
 /* interface for scripting languages */
 char * __stdcall udefrag_s_init(long map_size);
 char * __stdcall udefrag_s_unload(BOOL save_options);
 
-char * __stdcall udefrag_s_analyse(unsigned char letter);
-char * __stdcall udefrag_s_defragment(unsigned char letter);
-char * __stdcall udefrag_s_optimize(unsigned char letter);
 char * __stdcall udefrag_s_stop(void);
 char * __stdcall udefrag_s_get_progress(void);
 char * __stdcall udefrag_s_get_map(int size);
@@ -107,14 +119,18 @@ char * __stdcall scheduler_s_get_avail_letters(void);
  * we should provide callback functions
  */
 typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
-short * __stdcall udefrag_analyse_ex(unsigned char letter,STATUPDATEPROC sproc);
-short * __stdcall udefrag_defragment_ex(unsigned char letter,STATUPDATEPROC sproc);
-short * __stdcall udefrag_optimize_ex(unsigned char letter,STATUPDATEPROC sproc);
-short * __stdcall udefrag_get_ex_command_result(void);
+int __stdcall udefrag_analyse(unsigned char letter,STATUPDATEPROC sproc);
+int __stdcall udefrag_defragment(unsigned char letter,STATUPDATEPROC sproc);
+int __stdcall udefrag_optimize(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall udefrag_get_command_result(void);
+short * __stdcall udefrag_get_command_result_w(void);
 
-char * __stdcall udefrag_s_analyse_ex(unsigned char letter,STATUPDATEPROC sproc);
-char * __stdcall udefrag_s_defragment_ex(unsigned char letter,STATUPDATEPROC sproc);
-char * __stdcall udefrag_s_optimize_ex(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_s_get_ex_command_result(void);
+
+void __stdcall udefrag_pop_error(char *buffer, int size);
+void __stdcall udefrag_pop_werror(short *buffer, int size);
 
 #endif /* _UDEFRAG_H_ */

@@ -3,11 +3,11 @@ NAME=udefrag
 TYPE=dll
 NATIVEDLL=1
 
-SRC=cfuncs.c;misc.c;settings.c;sfuncs.c;thread.c;udefrag.c
+SRC=misc.c;settings.c;sfuncs.c;udefrag.c;volume.c
 RC=udefrag.rc
 
 DEFFILE=udefrag.def
 BASEADDR=0x01500000
 
 LIBS=ntdll
-ADLIBS=
+ADLIBS=$(UDEFRAG_LIB_PATH)\zenwinx

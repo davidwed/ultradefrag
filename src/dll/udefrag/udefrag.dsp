@@ -63,10 +63,6 @@ PostBuild_Cmds=REL.CMD
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=.\cfuncs.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\misc.c
 # End Source File
 # Begin Source File
@@ -79,10 +75,6 @@ SOURCE=.\sfuncs.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\thread.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\udefrag.c
 # End Source File
 # Begin Source File
@@ -92,6 +84,10 @@ SOURCE=.\udefrag.def
 # Begin Source File
 
 SOURCE=.\udefrag.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\volume.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

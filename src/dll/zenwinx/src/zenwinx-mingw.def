@@ -15,8 +15,14 @@ EXPORTS
 	winx_gets
 	winx_kbhit
 	winx_breakhit
-	winx_get_last_error@0
-	winx_set_last_error@4
-	winx_get_error_description@4
-	winx_get_error_message@4
-	winx_get_error_message_ex@12
+	winx_push_error
+	winx_pop_error@8
+	winx_pop_werror@8
+	winx_save_error@8
+	winx_restore_error@4
+	winx_sleep@4
+	winx_get_os_version@0
+	winx_get_proc_address@12
+	winx_create_thread@8
+	winx_exit_thread@0
+	winx_enable_privilege@8

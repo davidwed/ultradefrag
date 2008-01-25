@@ -55,11 +55,19 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	if(!NT_SUCCESS(status)){
 		DebugPrint("-Ultradfg- Can't get fs info: %x!\n",(UINT)status);
-		ZwClose(dx->hVol);
-		status = STATUS_WRONG_VOLUME;
+		if(status == STATUS_INVALID_DEVICE_REQUEST){
+			/* this is usual case for floppies */
+			dx->partition_type = FLOPPY_FAT12_PARTITION;
+			status = STATUS_SUCCESS;
+			goto done;
+		}
+		/* FIXME: maybe more flexible error handling can be applied */
+		ZwCloseSafe(dx->hVol);
+		//status = STATUS_WRONG_VOLUME;
 		goto done;
 	}
 	dx->partition_type = part_info.PartitionType;
+	DbgPrint("-Ultradfg- possible partition type: %u\n",dx->partition_type);
 done:
 	return status;
 }

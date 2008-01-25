@@ -33,7 +33,6 @@
 #define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
-///#include <ntddkbd.h>
 #include "ntndk.h"
 
 typedef struct _SCANTOASCII {
