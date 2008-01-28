@@ -144,8 +144,8 @@ void ShowProgress();
 void HideProgress();
 
 extern void CalculateBlockSize();
+BOOL CreateBitMap(int);
 extern BOOL FillBitMap(int);
-extern BOOL CreateBitMapGrid();
 extern void CreateMaps();
 extern void DeleteMaps();
 
@@ -312,6 +312,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 
 		letter_numbers[index] = chr - 'A';
+		CreateBitMap(chr - 'A');
 		index ++;
 	}
 scan_done:
@@ -462,7 +463,6 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			(WNDPROC)SetWindowLongPtr(hCheckSkipRem,GWLP_WNDPROC,(LONG_PTR)CheckWndProc);
 		RescanDrives();
 		CreateMaps();
-		CreateBitMapGrid();
 		CreateStatusBar();
 		memset((void *)stat,0,sizeof(STATISTIC) * (MAX_DOS_DRIVES));
 		UpdateStatusBar(0);

@@ -98,10 +98,10 @@ extraResourceOptions=
 1=zenwinx.rc
 [Other]
 [History]
+error.c,8481
 privilege.c,1627
 thread.c,1927
 keyboard.c,0
-zenwinx.c,1120
-zenwinx.h,2832
+zenwinx.h,2802
 ldr.c,0
-error.c,8481
+zenwinx.c,2950

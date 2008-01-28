@@ -173,6 +173,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	BOOLEAN request_is_successful;
 
 	DebugPrint("-Ultradfg- in Write_IRPhandler\n");
+	CHECK_IRP(Irp);
 	
 	/*
 	* If the previous request isn't complete,
@@ -269,6 +270,7 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	DebugPrint("-Ultradfg- Create File\n");
+	CHECK_IRP(Irp);
 	KeClearEvent(&dx->unload_event);
 	dx->status = STATUS_BEFORE_PROCESSING;
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
@@ -281,6 +283,7 @@ NTSTATUS NTAPI Close_HandleIRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	DebugPrint("-Ultradfg- In Close handler\n"); 
+	CHECK_IRP(Irp);
 	FreeAllBuffersInIdleState(dx);
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
 }
@@ -301,6 +304,7 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	//PVOID in_buf, out_buf;
 	ULONG in_len, out_len;
 
+	CHECK_IRP(Irp);
 	dx = (PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	if(KeReadStateEvent(&dx->unload_event) == 0x1){

@@ -53,15 +53,34 @@ end
 
 -- converters
 
+table_head = [[
+<tr>
+<td class="c"><a href="javascript:sort_items('fragments')" style="color: #0000FF"># fragments</a></td>
+<td class="c"><a href="javascript:sort_items('name')" style="color: #0000FF">filename</a></td>
+<td class="c"><a href="javascript:sort_items('comment')" style="color: #0000FF">comment</a></td>
+</tr>
+]]
+
+end_of_page = [[
+</table>
+</div>
+</center>
+<script language="javascript">
+init_sorting_engine();
+</script>
+</body></html>
+]]
+
 function produce_html_output()
 	local filename
 	local pos = 0
+	local js
 
 	repeat
 		pos = string.find(arg[1],"\\",pos + 1,true)
 		if pos == nil then filename = "FRAGLIST.HTM" ; break end
 	until string.find(arg[1],"\\",pos + 1,true) == nil
-	filename = string.sub(arg[1],0,pos - 1) .. "FRAGLIST.HTM"
+	filename = string.sub(arg[1],0,pos) .. "FRAGLIST.HTM"
 
 	-- note that 'b' flag is needed for utf-16 files
 	local f = assert(io.open(filename,"wb"))
@@ -73,16 +92,25 @@ function produce_html_output()
 		write_data = write_unicode
 	end
 
+	if(enable_sorting == 1) then
+		-- read udsorting.js file contents
+		local f2 = assert(io.open(arg[2] .. "\\udsorting.js", "r"))
+	    js = f2:read("*all")
+	    f2:close()
+	else
+		js = "function init_sorting_engine(){}\nfunction sort_items(criteria){}\n"
+	end
 	write_data(f,
 		"<html><head><title>Fragmented files on ", volume_letter,
-		":</title>\n", style, "</head>\n",
+		":</title>\n", style,
+		"<script language=\"javascript\">\n", js,
+		"</script>\n</head>\n",
 		"<body>\n<center>\n", title_tags.open,
 		"Fragmented files on ", volume_letter,
 		":", title_tags.close,
+		"<div id=\"for_msie\">\n",
 		"<table ", table_style, ">\n",
-		"<tr><td class=\"c\"># fragments</td>\n",
-		"<td class=\"c\">filename</td>\n",
-		"<td class=\"c\">comment</td></tr>\n"
+		table_head
 		)
 	for i, v in ipairs(files) do
 		local class
@@ -106,7 +134,7 @@ function produce_html_output()
 			"</td></tr>\n"
 			)
 	end
-	write_data(f,"</table>\n</center>\n</body></html>")
+	write_data(f,end_of_page)
 	f:close()
 	
 	-- if option -v is specified, open report in default web browser

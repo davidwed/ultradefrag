@@ -3,7 +3,7 @@ NAME=lua5.1a_gui
 TYPE=gui
 
 SRC=lua_gui.c
-RC=lua.rc
+RC=lua_gui.rc
 
 LIBS=msvcrt;kernel32;user32
 ADLIBS=$(UDEFRAG_LIB_PATH)\lua5.1a

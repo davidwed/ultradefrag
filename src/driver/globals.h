@@ -35,5 +35,7 @@ extern UCHAR *dbg_ring_buffer;
 extern unsigned int dbg_ring_buffer_offset;
 #endif
 
+extern char invalid_request[];
+
 extern ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];
 extern ULONG map_size;

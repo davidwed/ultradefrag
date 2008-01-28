@@ -37,7 +37,7 @@
 /* global variables */
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
-int __native_mode = FALSE;
+int native_mode_flag = FALSE;
 HANDLE init_event = NULL;
 HANDLE io_event = NULL; /* for write requests */
 HANDLE io2_event = NULL; /* for statistical data requests */
@@ -97,7 +97,7 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	char buf[ERR_MSG_SIZE];
 
 	/* 0. only one instance of the program ! */
-	__native_mode = native_mode;
+	native_mode_flag = native_mode;
 	/* 1. Enable neccessary privileges */
 	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&UserToken);
 	if(!NT_SUCCESS(Status)){
@@ -202,7 +202,7 @@ DWORD WINAPI send_command(LPVOID unused)
 	UNICODE_STRING uStr;
 	char fmt_error[] = "Can't format message!";
 
-	if(udefrag_send_command(c,lett) < 0)
+	if(!udefrag_send_command(c,lett))
 		winx_pop_werror(error_message_w,ERR_MSG_SIZE);
 	else
 		wcscpy(error_message_w,L"?");
@@ -242,9 +242,6 @@ BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDA
 	return TRUE;
 }
 
-/*
- * NOTE: don't use create_thread call before command_ex returns!
- */
 int __stdcall udefrag_analyse(unsigned char letter,STATUPDATEPROC sproc)
 {
 	return udefrag_send_command_ex('a',letter,sproc) ? 0 : (-1);

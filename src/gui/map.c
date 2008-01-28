@@ -99,8 +99,9 @@ void CreateMaps(void)
 {
 	int i;
 
-	for(i = 0; i < MAX_DOS_DRIVES; i++)
-		CreateBitMap(i);
+	/*for(i = 0; i < MAX_DOS_DRIVES; i++)
+		CreateBitMap(i);*/
+	CreateBitMapGrid();
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++)
 		hBrushes[i] = CreateSolidBrush(colors[i]);
 }
@@ -114,6 +115,11 @@ BOOL CreateBitMap(signed int index)
 	unsigned short res;
 	HBITMAP hBmp;
 
+	if(index >= 0){
+		if(bit_map[index]) return TRUE;
+	} else {
+		if(bit_map_grid) return TRUE;
+	}
 	data = (BYTE *)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY, \
 		iMAP_WIDTH * iMAP_HEIGHT * sizeof(RGBQUAD) + sizeof(BITMAPINFOHEADER));
 	if(!data) return FALSE;
@@ -195,7 +201,6 @@ BOOL FillBitMap(int index)
 	HBRUSH hOldBrush;
 	RECT block_rc;
 
-	if(!(bit_map_dc[index])) return FALSE;
 	cl_map = map[index];
 	hdc = bit_map_dc[index];
 	if(!hdc) return FALSE;

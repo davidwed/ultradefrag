@@ -34,7 +34,7 @@
 #include "../zenwinx/src/zenwinx.h"
 
 /* global variables */
-extern int __native_mode;
+extern int native_mode_flag;
 extern HANDLE udefrag_device_handle;
 extern HANDLE init_event;
 extern HANDLE io_event;
@@ -223,7 +223,7 @@ int __stdcall udefrag_set_options(ud_options *ud_opts)
 		&rt,sizeof(REPORT_TYPE),NULL,0,
 		"Can't set report type: %x!")) goto apply_settings_fail;
 	/* set filters */
-	if(__native_mode){
+	if(native_mode_flag){
 		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
 			settings.boot_in_filter,(wcslen(settings.boot_in_filter) + 1) << 1,NULL,0,
 			"Can't set include filter: %x!")) goto apply_settings_fail;
@@ -249,7 +249,7 @@ int __stdcall udefrag_save_settings(void)
 	DWORD x;
 
 	/* native app should clean registry */
-	if(__native_mode)
+	if(native_mode_flag)
 		settings.next_boot = FALSE;
 	/* create key if not exist */
 	if(!OpenKey(ud_key,&hKey)){
@@ -285,9 +285,9 @@ int __stdcall udefrag_save_settings(void)
 		(wcslen(settings.sched_letters) + 1) << 1)) winx_pop_error(NULL,0);
 	NtClose(hKey);
 	/* native app should clean registry */
-	if(__native_mode && !settings.every_boot)
+	if(native_mode_flag && !settings.every_boot)
 		if(!RemoveAppFromBootExecute()) goto save_fail;
-	if(!__native_mode){
+	if(!native_mode_flag){
 		if(settings.next_boot || settings.every_boot){
 			if(!AddAppToBootExecute()) goto save_fail;
 		} else {

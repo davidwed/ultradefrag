@@ -90,9 +90,9 @@ extraResourceOptions=
 1=udefrag.rc
 [Other]
 [History]
-sfuncs.c,1244
-..\zenwinx\src\ntndk.h,23553
-settings.c,999
+udefrag.c,1483
 ..\..\include\udefrag.h,1271
-volume.c,11003
-udefrag.c,13897
+settings.c,11066
+..\zenwinx\src\ntndk.h,23553
+sfuncs.c,1209
+volume.c,9133

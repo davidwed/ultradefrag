@@ -8,6 +8,7 @@ HISTORY
     - highly configurable reports feature was added
     - documentation was improved
     - driver code cleanup was performed
+    - gui application memory requirements were reduced
     - build scripts were improved
     - many bugs were fixed
     - coding style was changed to improve readability

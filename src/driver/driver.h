@@ -106,6 +106,22 @@ typedef unsigned int UINT;
 #define ZwCloseSafe(h) if(h) { ZwClose(h); h = NULL; }
 #define ExFreePoolSafe(p) if(p) { ExFreePool(p); p = NULL; }
 
+/* exclude requests for 64-bit driver from 32-bit apps */
+#ifdef _WIN64
+#define Is32bitProcess(irp) IoIs32bitProcess(irp)
+#define CheckIrp(irp) (!IoIs32bitProcess(irp))
+#else
+#define Is32bitProcess(irp) TRUE
+#define CheckIrp(irp) TRUE
+#endif
+
+#define CHECK_IRP(irp) { \
+if(!CheckIrp(Irp)){ \
+	DebugPrint(invalid_request); \
+	return CompleteIrp(Irp,STATUS_INVALID_DEVICE_REQUEST,0); \
+} \
+}
+
 /* Unfortunately, usually headers don't contains some important prototypes. */
 #ifdef USE_WINDDK
 NTSTATUS NTAPI ZwDeviceIoControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,
@@ -350,7 +366,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN GetTotalClusters(UDEFRAG_DEVICE_EXTENSION *dx);
 void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx);
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx);
-NTSTATUS __MoveFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters);
+NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters);
 NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,HANDLE hFile,ULONGLONG target);
 void DeleteBlockmap(PFILENAME pfn);
 BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
@@ -371,7 +387,7 @@ LIST* NTAPI InsertLastItem(PLIST *phead,PLIST *plast,ULONG size);
 LIST* NTAPI RemoveItem(PLIST *phead,PLIST *pprev,PLIST *pcurrent);
 void NTAPI DestroyList(PLIST *phead);
 
-NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE hFile);
+NTSTATUS NTAPI IoFlushBuffersFile(HANDLE hFile);
 
 NTSTATUS AllocateMap(ULONG size);
 void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);

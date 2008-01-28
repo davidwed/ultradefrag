@@ -7,8 +7,8 @@ defaultConfig=0
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=Debug
-outputFilesDirectory=Debug
+intermediateFilesDirectory=../obj/lua5.1
+outputFilesDirectory=../obj/lua5.1
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -26,7 +26,7 @@ optimizeLevel=0
 
 // linker
 libraryPath=../lib
-outputFilename=Debug\lua_gui.exe
+outputFilename=../bin/lua_gui.exe
 libraries=lua5.1a
 extraLinkerOptions=
 ignoreStartupFile=0
@@ -45,8 +45,8 @@ extraResourceOptions=
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=Release
-outputFilesDirectory=Release
+intermediateFilesDirectory=../obj/lua5.1
+outputFilesDirectory=../obj/lua5.1
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -64,7 +64,7 @@ optimizeLevel=2
 
 // linker
 libraryPath=
-outputFilename=Release\lua_gui.exe
+outputFilename=../bin/lua_gui.exe
 libraries=
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
@@ -83,6 +83,7 @@ extraResourceOptions=
 1=lua_gui.c
 [Header]
 [Resource]
+1=lua_gui.rc
 [Other]
 [History]
-lua_gui.c,8985
+lua_gui.c,8004

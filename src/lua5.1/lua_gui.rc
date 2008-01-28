@@ -1,0 +1,6 @@
+0  ICON  "lua.ico"
+1  ICON  "luar.ico"
+
+#ifdef WIN64
+1 24 "lua_64.manifest"
+#endif

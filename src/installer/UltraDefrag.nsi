@@ -248,11 +248,22 @@ FunctionEnd
 
 Function WriteDriverSettings
 
-  WriteRegStr HKLM $R0 "DisplayName" "ultradfg"
-  WriteRegDWORD HKLM $R0 "ErrorControl" 0x0
-  WriteRegExpandStr HKLM $R0 "ImagePath" "System32\DRIVERS\ultradfg.sys"
-  WriteRegDWORD HKLM $R0 "Start" 0x3
-  WriteRegDWORD HKLM $R0 "Type" 0x1
+  push $R2
+  push $R3
+  ; write settings only if control set exists
+  StrCmp $R0 "SYSTEM\CurrentControlSet" write_settings 0
+  StrCpy $R3 0
+  EnumRegKey $R2 HKLM $R0 $R3
+  StrCmp $R2 "" L2 0
+write_settings:
+  WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
+  WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
+  WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
+  WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
+  WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
+L2:
+  pop $R3
+  pop $R2
 
 FunctionEnd
 
@@ -260,7 +271,14 @@ FunctionEnd
 
 Function WriteDbgSettings
 
+  push $R2
+  ; write only if the key exists
+  ClearErrors
+  ReadRegDWORD $R2 HKLM $R0 "AutoReboot"
+  IfErrors L1 0
   WriteRegDWORD HKLM $R0 "AutoReboot" 0x0
+L1:
+  pop $R2
 
 FunctionEnd
 
@@ -305,8 +323,10 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\scripts\udctxhandler.lua"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udreportopts.lua"
+  File "${ROOTDIR}\src\scripts\udsorting.js"
   WriteRegStr HKCR ".luar" "" "LuaReport"
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
+  WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$SYSDIR\lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
   WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $SYSDIR\udreportcnv.lua %1 $SYSDIR -v"
   DetailPrint "Install Lua 5.1 ..."
@@ -325,13 +345,13 @@ lua_registered:
 
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
-  StrCpy $R0 "SYSTEM\CurrentControlSet\Services\ultradfg"
+  StrCpy $R0 "SYSTEM\CurrentControlSet"
   call WriteDriverSettings
-  StrCpy $R0 "SYSTEM\ControlSet001\Services\ultradfg"
+  StrCpy $R0 "SYSTEM\ControlSet001"
   call WriteDriverSettings
-  StrCpy $R0 "SYSTEM\ControlSet002\Services\ultradfg"
+  StrCpy $R0 "SYSTEM\ControlSet002"
   call WriteDriverSettings
-  StrCpy $R0 "SYSTEM\ControlSet003\Services\ultradfg"
+  StrCpy $R0 "SYSTEM\ControlSet003"
   call WriteDriverSettings
 
   DetailPrint "Write debugging settings..."
@@ -486,6 +506,7 @@ Section "Uninstall"
   Delete "$SYSDIR\udctxhandler.lua"
   Delete "$SYSDIR\udreportcnv.lua"
   Delete "$SYSDIR\udreportopts.lua"
+  Delete "$SYSDIR\udsorting.js"
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"

@@ -26,6 +26,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+static HINSTANCE (WINAPI *func_ShellExecuteA)(HWND,LPCSTR,LPCSTR,LPCSTR,LPCSTR,INT);
 
 static int os_pushresult (lua_State *L, int i, const char *filename) {
   int en = errno;  /* calls to Lua API may change this value */
@@ -48,7 +49,18 @@ static int os_execute (lua_State *L) {
 }
 
 static int os_shellexec (lua_State *L) {
-  lua_pushinteger(L, (int)(LONG_PTR)ShellExecuteA(NULL,
+  HINSTANCE hShell = LoadLibrary("shell32.dll");
+  if(!hShell){
+	  lua_pushinteger(L, 0);
+	  return 1;
+  }
+  func_ShellExecuteA = (void *)GetProcAddress(hShell,"ShellExecuteA");
+  if(!func_ShellExecuteA){
+	  lua_pushinteger(L, 0);
+	  return 1;
+  }
+  /* get function address dynamically to reduce lua.dll loading time */
+  lua_pushinteger(L, (int)(LONG_PTR)func_ShellExecuteA(NULL,
 		luaL_checkstring(L, 2),
 		luaL_checkstring(L, 1),
 		NULL,NULL,SW_SHOW));

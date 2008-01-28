@@ -40,6 +40,8 @@ UCHAR *dbg_ring_buffer;
 unsigned int dbg_ring_buffer_offset;
 #endif
 
+char invalid_request[] = "-Ultradfg- 32-bit requests can't be accepted by 64-bit driver!\n";
+
 /*
 * Buffer to store the number of clusters of each kind.
 * More details at http://www.thescripts.com/forum/thread617704.html

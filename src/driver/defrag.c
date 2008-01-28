@@ -105,7 +105,7 @@ exit_defrag:
 		dx->status = STATUS_BEFORE_PROCESSING;
 }
 
-NTSTATUS __MoveFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
+NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
 		    ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)
 {
 	ULONG status;
@@ -154,7 +154,7 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 		/* try to move current block */
 		n = block->length / dx->clusters_per_256k;
 		for(j = 0; j < n; j++){
-			Status = __MoveFile(dx,hFile,block->vcn + j * dx->clusters_per_256k, \
+			Status = MovePartOfFile(dx,hFile,block->vcn + j * dx->clusters_per_256k, \
 				curr_target,dx->clusters_per_256k);
 			if(Status) goto exit;
 			curr_target += dx->clusters_per_256k;
@@ -162,7 +162,7 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 		/* try to move rest of block */
 		r = block->length % dx->clusters_per_256k;
 		if(r){
-			Status = __MoveFile(dx,hFile,block->vcn + j * dx->clusters_per_256k, \
+			Status = MovePartOfFile(dx,hFile,block->vcn + j * dx->clusters_per_256k, \
 				curr_target,r);
 			if(Status) goto exit;
 			curr_target += r;
@@ -181,7 +181,7 @@ NTSTATUS MoveCompressedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 
 	curr_target = targetLcn;
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		Status = __MoveFile(dx,hFile,block->vcn, \
+		Status = MovePartOfFile(dx,hFile,block->vcn, \
 			curr_target,block->length);
 		if(Status) break;
 		curr_target += block->length;
@@ -273,7 +273,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	else if(pfn->is_compressed)
 		Status = MoveCompressedFile(dx,pfn,hFile,target);
 	else
-		Status = __MoveFile(dx,hFile,0,target,pfn->clusters_total);
+		Status = MovePartOfFile(dx,hFile,0,target,pfn->clusters_total);
 	ZwClose(hFile);
 	/* if Status is successful then 
 	 *		mark target space using MarkSpace()

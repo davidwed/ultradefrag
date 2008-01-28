@@ -203,64 +203,11 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 	ULONG length;
 
 	if(nt4_system){
-		/* let us assume that A and B volumes are located on floppies 
-		 * to reduce noise */
-		if(letter == 'A' || letter == 'B'){
-			type = DRIVE_REMOVABLE;
-			goto validate_type;
-		}
-		if(!internal_open_rootdir(letter,&hFile)) goto invalid_volume;
-		Status = NtQueryVolumeInformationFile(hFile,&IoStatusBlock,
-						&FileFsDevice,sizeof(FILE_FS_DEVICE_INFORMATION),
-						FileFsDeviceInformation);
-		NtClose(hFile);
-		if(!NT_SUCCESS(Status)){
-			winx_push_error("Can't get volume type for \'%c\': %x!",letter,(UINT)Status);
-			goto invalid_volume;
-		}
-		switch(FileFsDevice.DeviceType){
-		case FILE_DEVICE_CD_ROM:
-		case FILE_DEVICE_CD_ROM_FILE_SYSTEM:
-			type = DRIVE_CDROM;
-			break;
-		case FILE_DEVICE_VIRTUAL_DISK:
-			type = DRIVE_RAMDISK;
-			break;
-		case FILE_DEVICE_NETWORK_FILE_SYSTEM:
-			type = DRIVE_REMOTE;
-			break;
-		case FILE_DEVICE_DISK:
-		case FILE_DEVICE_DISK_FILE_SYSTEM:
-			if(FileFsDevice.Characteristics & FILE_REMOTE_DEVICE){
-				type = DRIVE_REMOTE;
-				break;
-			}
-			if(FileFsDevice.Characteristics & FILE_REMOVABLE_MEDIA)
-				type = DRIVE_REMOVABLE;
-			else
-				type = DRIVE_FIXED;
-			break;
-		default:
-			type = DRIVE_UNKNOWN;
-		}
-	} else {
-		type = (UINT)pProcessDeviceMapInfo->Query.DriveType[letter - 'A'];
-	}
-validate_type:
-	/* exclude remote and read-only volumes */
-	if(type != DRIVE_FIXED && type != DRIVE_REMOVABLE && type != DRIVE_RAMDISK){
-		winx_push_error("Volume must be on non-cdrom local drive, but it's %u!",type);
-		goto invalid_volume;
-	}
-	/* exclude removable media if requested */
-	if(type == DRIVE_REMOVABLE && skip_removable){
-		winx_push_error("It's removable volume!");
-		goto invalid_volume;
-	}
-
-	/* exclude letters assigned by 'subst' command - 
-	   on w2k and later systems such drives have type DRIVE_NO_ROOT_DIR, but on nt4.0 ... */
-	if(nt4_system){
+		/*
+		* Exclude letters assigned by 'subst' command - 
+		* on w2k and later systems such drives have type
+		* DRIVE_NO_ROOT_DIR, but on nt4.0 ...
+		*/
 		link_name[4] = (short)letter;
 		RtlInitUnicodeString(&uStr,link_name);
 		InitializeObjectAttributes(&ObjectAttributes,&uStr,
@@ -281,12 +228,72 @@ validate_type:
 			winx_push_error("Can't query symbolic link %ls: %x!",link_name,(UINT)Status);
 			goto invalid_volume;
 		}
-		link_target[4] = 0; /* terminate the buffer */
-		if(!wcscmp(link_target,L"\\??\\")){
+		link_target[MAX_TARGET_LENGTH - 1] = 0; /* terminate the buffer */
+		if(wcsstr(link_target,L"\\??\\") == (wchar_t *)link_target){
 			winx_push_error("Volume letter is assigned by \'subst\' command!");
 			goto invalid_volume;
 		}
+		/*
+		* Floppies have "Floppy" substring in their names.
+		*/
+		if(wcsstr(link_target,L"Floppy")){
+			if(skip_removable){
+				winx_push_error("It's removable volume!");
+				goto invalid_volume;
+			}
+			goto get_vol_info;
+		}
+		/*
+		* To exclude other unwanted drives we need to query their types.
+		* Note that the drive motor can be powered on during this check.
+		*/
+		if(!internal_open_rootdir(letter,&hFile)) goto invalid_volume;
+		Status = NtQueryVolumeInformationFile(hFile,&IoStatusBlock,
+						&FileFsDevice,sizeof(FILE_FS_DEVICE_INFORMATION),
+						FileFsDeviceInformation);
+		NtClose(hFile);
+		if(!NT_SUCCESS(Status)){
+			winx_push_error("Can't get volume type for \'%c\': %x!",letter,(UINT)Status);
+			goto invalid_volume;
+		}
+		switch(FileFsDevice.DeviceType){
+		case FILE_DEVICE_CD_ROM:
+		case FILE_DEVICE_CD_ROM_FILE_SYSTEM:
+		case FILE_DEVICE_NETWORK_FILE_SYSTEM:
+			winx_push_error("Volume must be on non-cdrom local drive!");
+			goto invalid_volume;
+		case FILE_DEVICE_DISK:
+		case FILE_DEVICE_DISK_FILE_SYSTEM:
+			if(FileFsDevice.Characteristics & FILE_REMOTE_DEVICE){
+				winx_push_error("Volume must be on non-cdrom local drive!");
+				goto invalid_volume;
+			}
+			if((FileFsDevice.Characteristics & FILE_REMOVABLE_MEDIA) &&
+				skip_removable){
+					winx_push_error("It's removable volume!");
+					goto invalid_volume;
+			}
+			break;
+		default:
+			winx_push_error("Unknown volume type!"); // ???
+			goto invalid_volume;
+		}
+	} else { /* not nt4_system */
+		type = (UINT)pProcessDeviceMapInfo->Query.DriveType[letter - 'A'];
+		if(type == DRIVE_CDROM || type == DRIVE_REMOTE){
+			winx_push_error("Volume must be on non-cdrom local drive, but it's %u!",type);
+			goto invalid_volume;
+		}
+		if(type == DRIVE_NO_ROOT_DIR){
+			winx_push_error("It seems that volume letter is assigned by \'subst\' command!");
+			goto invalid_volume;
+		}
+		if(type == DRIVE_REMOVABLE && skip_removable){
+			winx_push_error("It's removable volume!");
+			goto invalid_volume;
+		}
 	}
+get_vol_info:
 	/* get volume information */
 	if(!internal_open_rootdir(letter,&hFile)) goto invalid_volume;
 	Status = NtQueryVolumeInformationFile(hFile,&IoStatusBlock,pFileFsSize,

@@ -90,7 +90,7 @@ int __stdcall winx_init(void *peb)
 	/* 2. Breakpoint if we were requested to do so */
 	if(pp->DebugFlags) DbgBreakPoint();
 	/* 3. Open the keyboard */
-	status = kb_open(L"\\Device\\KeyboardClass10");
+	status = kb_open(L"\\Device\\KeyboardClass0");
 	return status;
 }
 

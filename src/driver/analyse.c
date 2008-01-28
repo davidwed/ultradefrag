@@ -56,7 +56,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(!NT_SUCCESS(Status)) goto fail;
 	Status = GetVolumeInfo(dx);
 	if(!NT_SUCCESS(Status)) goto fail;
-	__NtFlushBuffersFile(dx->hVol);
+	IoFlushBuffersFile(dx->hVol);
 	Status = FillFreeSpaceMap(dx);
 	if(!NT_SUCCESS(Status)) goto fail;
 
@@ -81,7 +81,8 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",dx->fragmfilecounter);
 
 	/* Get MFT location */
-	if(dx->partition_type == NTFS_PARTITION) ProcessMFT(dx);
+	if(KeReadStateEvent(&dx->stop_event) == 0x0)
+		if(dx->partition_type == NTFS_PARTITION) ProcessMFT(dx);
 
 	/* Save state */
 	SaveFragmFilesListToDisk(dx);
@@ -93,5 +94,6 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->clusters_to_compact_initial = dx->clusters_to_compact_tmp;
 	return STATUS_SUCCESS;
 fail:
+	//dx->status = STATUS_BEFORE_PROCESSING; A_D_C ???
 	return Status;
 }

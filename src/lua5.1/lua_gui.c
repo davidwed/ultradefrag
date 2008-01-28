@@ -332,7 +332,7 @@ CommandLineToArgvA(
 	i = 0;
 	j = 0;
 
-	while( a = CmdLine[i] ) {
+	while( (a = CmdLine[i]) ) {
 		if(in_QM) {
 			if(a == '\"') {
 				in_QM = FALSE;

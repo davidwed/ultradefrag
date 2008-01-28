@@ -27,7 +27,7 @@
 * Synchronize drive.
 * On NT 4.0 (at least under MS Virtual PC) it will crash system.
 */
-NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
+NTSTATUS NTAPI IoFlushBuffersFile(HANDLE FileHandle)
 {
 	PFILE_OBJECT FileObject = NULL;
 	PIRP Irp;
@@ -86,7 +86,7 @@ done:
 
 #else /* NT4_TARGET */
 
-NTSTATUS NTAPI __NtFlushBuffersFile(HANDLE FileHandle)
+NTSTATUS NTAPI IoFlushBuffersFile(HANDLE FileHandle)
 {
 	return 0;
 }

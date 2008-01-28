@@ -1,12 +1,12 @@
 [Project]
 name=defrag
 type=0
-defaultConfig=1
+defaultConfig=0
 
 [Debug]
 // compiler 
 workingDirectory=
-arguments=
+arguments=-a a:
 intermediateFilesDirectory=../obj/console
 outputFilesDirectory=../obj/console
 compilerPreprocessor=
