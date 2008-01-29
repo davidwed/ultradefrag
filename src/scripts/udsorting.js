@@ -30,11 +30,11 @@ var x; // for debugging purposes
 
 // TODO: get this from html page
 var table_head =
-"<table border=\"1\" color=\"#FFAA55\" cellspacing=\"0\" width=\"100%\">";
+"<table id=\"main_table\" border=\"1\" color=\"#FFAA55\" cellspacing=\"0\" width=\"100%\">";
 
 function init_sorting_engine()
 {
-	table = document.getElementsByTagName("table")[0];
+	table = document.getElementById("main_table");
 	//alert(window.navigator.appName);
 	if(window.navigator.appName == "Microsoft Internet Explorer")
 		msie_browser = true;
@@ -88,7 +88,7 @@ function sort_items(criteria)
 		// and we need to replace the whole table ...
 		document.getElementById("for_msie").innerHTML =
 			table_head + header + whitelist + blacklist + "</table>";
-		table = document.getElementsByTagName("table")[0];
+		table = document.getElementById("main_table");
 	}
 }
 

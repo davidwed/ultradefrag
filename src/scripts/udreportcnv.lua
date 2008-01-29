@@ -132,8 +132,6 @@ table_head = [[
 ]]
 
 end_of_page = [[
-</table>
-</div>
 </center>
 <script language="javascript">
 init_sorting_engine();
@@ -141,10 +139,30 @@ init_sorting_engine();
 </body></html>
 ]]
 
+links_x1 = [[
+<table><tbody>
+<tr>
+<td width="40%" style="text-align: left"><a href="http://ultradefrag.sourceforge.net" style="color: #0000FF">Visit our Homepage</a></td>
+<td width="40%" style="text-align: left"><a 
+]]
+
+links_x2 = [[
+style="color: #0000FF">View report options</a></td>
+<td width="20%"><a href="http://www.lua.org/" style="color: #0000FF"><img 
+]]
+
+links_x3 = [[
+alt="Powered by Lua" border="0" height="31" width="124" /></a></td>
+</tr>
+</tbody></table>
+]]
+
 function produce_html_output()
 	local filename
 	local pos = 0
 	local js
+	local links = links_x1 .. "href=\"file:///" .. arg[2] .. "\\udreportopts.lua\" "
+	links = links .. links_x2 .. "src=\"file:///" .. arg[2] .. "\\powered_by_lua.png\" " .. links_x3
 
 	repeat
 		pos = string.find(arg[1],"\\",pos + 1,true)
@@ -178,8 +196,9 @@ function produce_html_output()
 		"<body>\n<center>\n", title_tags.open,
 		"Fragmented files on ", volume_letter,
 		":", title_tags.close,
+		"\n", links, "\n",
 		"<div id=\"for_msie\">\n",
-		"<table ", table_style, ">\n",
+		"<table id=\"main_table\" ", table_style, ">\n",
 		table_head
 		)
 	for i, v in ipairs(files) do
@@ -218,6 +237,9 @@ function produce_html_output()
 			"</td></tr>\n"
 			)
 	end
+	write_data(f,
+		"</table>\n</div>\n", links, "\n"
+		)
 	write_data(f,end_of_page)
 	f:close()
 	

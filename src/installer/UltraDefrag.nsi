@@ -324,6 +324,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udreportopts.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
+  File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
   WriteRegStr HKCR ".luar" "" "LuaReport"
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$SYSDIR\lua5.1a_gui.exe,1"
@@ -396,6 +397,7 @@ Section "Documentation" SecDocs
   File "${ROOTDIR}\doc\html\images\main_screen110.png"
   File "${ROOTDIR}\doc\html\images\about.png"
   File "${ROOTDIR}\doc\html\images\valid-html401.png"
+  File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
   StrCpy $DocsInstalled 1
 
 SectionEnd

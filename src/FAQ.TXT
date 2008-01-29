@@ -1,25 +1,5 @@
 Frequently Asked Questions
 
-Q.: I have 3 Gb of RAM, but the Debug Output includes the message 'No enough memory'.
-    I have 150 millions clusters on the volume I am trying to defrag.
-
-A.: You have too many clusters on the specified volume.  Since you have 
-    150 millions of clusters, you must have more than 150 Mb of 
-    nonpaged memory. All versions of Windows that UltraDefrag run on (at least 
-    Windows 2000, XP, and 2003) allow a maximum of 256 Mb of nonpaged memory.
-    In addition, if you use boot parameter /3GB limit is 128 Mb.
-    Note that many drivers besides ultradfg.sys use nonpaged memory!
- 
-    There are few ways how YOU, the user, can fix this problem:
-    1. Increase cluster size of volume. This is probably a good idea for
-       performance reasons.
-    2. Buy new PC with a 64 bit processor, and install a 64 bit version of
-       Windows. 64 bit versions of WIndows support up to 128 Gb of nonpaged
-       memory.
-    3. Split your big volume into several smaller partitions. Each partition 
-       will have less clusters.
-
-
 Q.: How can I use filters?
 
 A.: The include field is where you enter substring expressions that match

@@ -13,6 +13,7 @@ Programming Languages
 C;
 i386 Assembler (including MMX and SSE instructions);
 Perl;
+Lua;
 JavaSript + HTML + CSS;
 Matlab scripting language;
 Atmel AT90* Assembler;
