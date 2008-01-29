@@ -61,6 +61,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			  NULL,0);
 	if(Status != STATUS_SUCCESS){
 		DebugPrint1("-Ultradfg- System file found: %ls %x\n",pfn->name.Buffer,(UINT)Status);
+		hFile = NULL;
 		goto dump_success; /* System file! */
 	}
 

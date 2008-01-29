@@ -337,6 +337,7 @@ BOOL OpenKey(short *key_name,PHANDLE phKey)
 	Status = NtOpenKey(phKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&ObjectAttributes);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't open %ls key: %x!",key_name,(UINT)Status);
+		*phKey = NULL;
 		return FALSE;
 	}
 	return TRUE;
@@ -355,6 +356,7 @@ BOOL CreateKey(short *key_name,PHANDLE phKey)
 				0,NULL,REG_OPTION_NON_VOLATILE,NULL);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't create %ls key: %x!",key_name,(UINT)Status);
+		*phKey = NULL;
 		return FALSE;
 	}
 	return TRUE;

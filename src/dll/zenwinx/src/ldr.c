@@ -69,6 +69,7 @@ int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_ad
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't get address for %s: %x!",funcname,(UINT)Status);
+		*proc_addr = NULL;
 		return (-1);
 	}
 	return 0;

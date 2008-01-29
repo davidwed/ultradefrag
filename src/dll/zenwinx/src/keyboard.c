@@ -49,6 +49,7 @@ int __stdcall kb_open(short *kb_device_name)
 			    0,FILE_OPEN/*1*/,FILE_DIRECTORY_FILE/*1*/,NULL,0);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't open the keyboard %ws: %x!",kb_device_name,(UINT)Status);
+		hKbDevice = NULL;
 		return (-1);
 	}
 	RtlInitUnicodeString(&uStr,L"\\kb_event");
@@ -56,6 +57,7 @@ int __stdcall kb_open(short *kb_device_name)
 	Status = NtCreateEvent(&hKbEvent,STANDARD_RIGHTS_ALL | 0x1ff/*0x1f01ff*/,
 		&ObjectAttributes,SynchronizationEvent,FALSE);
 	if(!NT_SUCCESS(Status)){
+		hKbEvent = NULL;
 		kb_close();
 		winx_push_error("Can't create kb_event: %x!",(UINT)Status);
 		return (-1);

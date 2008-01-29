@@ -102,6 +102,7 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&UserToken);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't open process token: %x!",(UINT)Status);
+		UserToken = NULL;
 		goto init_fail;
 	}
 	if(winx_enable_privilege(UserToken,SE_SHUTDOWN_PRIVILEGE) < 0) goto init_fail;
@@ -118,6 +119,7 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 			winx_push_error("You can run only one instance of UltraDefrag!");
 		else
 			winx_push_error("Can't create init_event: %x!",(UINT)Status);
+		init_event = NULL;
 		goto init_fail;
 	}
 	/* 2. Load the driver */
@@ -136,6 +138,7 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 			    FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,NULL,0);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't access ULTRADFG driver: %x!",(UINT)Status);
+		udefrag_device_handle = NULL;
 		goto init_fail;
 	}
 	/* 4. Create events */
@@ -397,6 +400,7 @@ BOOL n_create_event(HANDLE *pHandle,short *name)
 				&ObjectAttributes,SynchronizationEvent,FALSE);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't create %ls event: %x!",name,(UINT)Status);
+		*pHandle = NULL;
 		return FALSE;
 	}
 	return TRUE;

@@ -173,6 +173,7 @@ BOOL internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 				NULL,0);
 	if(!NT_SUCCESS(Status)){
 		winx_push_error("Can't open %ls: %x!",rootpath,(UINT)Status);
+		*phFile = NULL;
 		return FALSE;
 	}
 	return TRUE;
@@ -216,6 +217,7 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 			&ObjectAttributes);
 		if(!NT_SUCCESS(Status)){
 			winx_push_error("Can't open symbolic link %ls: %x!",link_name,(UINT)Status);
+			hLink = NULL;
 			goto invalid_volume;
 		}
 		uStr.Buffer = link_target;
@@ -274,8 +276,8 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 					goto invalid_volume;
 			}
 			break;
-		default:
-			winx_push_error("Unknown volume type!"); // ???
+		case FILE_DEVICE_UNKNOWN:
+			winx_push_error("Unknown volume type!");
 			goto invalid_volume;
 		}
 	} else { /* not nt4_system */

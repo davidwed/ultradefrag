@@ -54,6 +54,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 				NULL,0);
 	if(Status != STATUS_SUCCESS){
 		DebugPrint1("-Ultradfg- Can't open %ws %x\n",path->Buffer,(UINT)Status);
+		DirectoryHandle = NULL;
 		goto fail;
 	}
 

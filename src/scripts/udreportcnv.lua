@@ -51,6 +51,76 @@ function write_unicode(f, ...)
 	end
 end
 
+-- write filename to html table; maximum 50 characters per line
+function write_ansi_name(f, name)
+	local i, j, k, n, len
+	local N = max_chars_per_line
+	len = string.len(name)
+	i = 1
+	while len > 0 do
+		if len <= N then f:write(string.sub(name,i,i + len - 1)) ; break end 
+		j = string.find(name,"\\",i,true)
+		if j == nil or j > (i + N) then
+			n = N
+		else
+			k = j
+			while true do
+				k = string.find(name,"\\",k + 1,true)
+				if k == nil then break end
+				if k <= (i + N) then j = k else break end
+			end
+			n = j - i + 1
+		end
+		f:write(string.sub(name,i,i + n - 1), "<br />")
+		if n == 0 then break end -- erroneous situation
+		i = i + n
+		len = len - n
+	end
+end
+
+function write_chars(f, chars, i, j)
+	local k
+	for k=i,j do f:write(chars[k]) end
+end
+
+function find_char(chars, ch, i)
+	local k = i
+	local result = nil
+	while chars[k] ~= nil do
+		if chars[k] == ch and chars[k + 1] == '\0' then
+			result = k ; break
+		end
+		k = k + 1
+	end
+	return result
+end
+
+function write_unicode_name(f, chars, len)
+	local i, j, k, n
+	local N = max_chars_per_line * 2
+	i = 1
+	while len > 0 do
+		if len <= N then write_chars(f,chars,i,i + len - 1) ; break end 
+		j = find_char(chars,'\\',i)
+		if j == nil or j > (i + N) then
+			n = N
+		else
+			k = j
+			while true do
+				k = find_char(chars,'\\',k + 1)
+				if k == nil then break end
+				if k <= (i + N) then j = k else break end
+			end
+			n = j - i + 1 + 1 -- because unicode backslash is '\\\0'
+		end
+		write_chars(f,chars,i,i + n - 1)
+		write_unicode(f,"<br />")
+		if n == 0 then break end -- erroneous situation
+		i = i + n
+		len = len - n
+	end
+end
+
 -- converters
 
 table_head = [[
@@ -80,7 +150,7 @@ function produce_html_output()
 		pos = string.find(arg[1],"\\",pos + 1,true)
 		if pos == nil then filename = "FRAGLIST.HTM" ; break end
 	until string.find(arg[1],"\\",pos + 1,true) == nil
-	filename = string.sub(arg[1],0,pos) .. "FRAGLIST.HTM"
+	filename = string.sub(arg[1],1,pos) .. "FRAGLIST.HTM"
 
 	-- note that 'b' flag is needed for utf-16 files
 	local f = assert(io.open(filename,"wb"))
@@ -123,10 +193,24 @@ function produce_html_output()
 			-- each <> brackets must be replaced with square brackets
 			local tmp = string.gsub(v.name,"<","[")
 			tmp = string.gsub(tmp,">","]")
-			f:write(tmp)
+			if split_long_names == 1 then
+				write_ansi_name(f,tmp)
+			else
+				f:write(tmp)
+			end
 		else
-			for j, b in ipairs(v.uname) do
-				f:write(string.char(b))
+			if split_long_names == 1 then
+				local chars = {}
+				local i = 1
+				for j, b in ipairs(v.uname) do
+					chars[i] = string.char(b)
+					i = i + 1
+				end
+				write_unicode_name(f,chars,i - 1)
+			else
+				for j, b in ipairs(v.uname) do
+					f:write(string.char(b))
+				end
 			end
 		end
 		write_data(f,

@@ -117,6 +117,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			  0,NULL,0);
 	if(Status){
 		DebugPrint("-Ultradfg- Can't create %ws\n",p);
+		hFile = NULL;
 		return FALSE;
 	}
 	offset.QuadPart = 0;
@@ -177,6 +178,7 @@ void __stdcall CloseLog()
 			  0,NULL,0);
 	if(Status){
 		DbgPrint("-Ultradfg- Can't create C:\\DBGPRINT.LOG!\n");
+		hDbgLog = NULL;
 		return;
 	}
 	dbg_log_offset.QuadPart = 0;

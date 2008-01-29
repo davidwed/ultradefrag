@@ -251,7 +251,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,
 			  NULL,0);
 	if(Status){
-		DebugPrint1("-Ultradfg- %ws open: %x\n", pfn->name.Buffer,(UINT)Status);
+		DebugPrint1("-Ultradfg- Can't open %ws: %x\n", pfn->name.Buffer,(UINT)Status);
 		return FALSE;
 	}
 	/* Find free space */

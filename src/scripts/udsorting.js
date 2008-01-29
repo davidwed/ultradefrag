@@ -55,6 +55,7 @@ function sort_items(criteria)
 		a[i-1] = items[i];
 
 	// sort items
+	// Note that sorting is slow: about 1.5 seconds for 550 items on 1.8GHz CPU.
 	if(criteria == 'fragments'){
 		a.sort(sort_by_fragments);
 		fragments_order = fragments_order ? 0 : 1;

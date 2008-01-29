@@ -43,6 +43,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 				NULL,0);
 	if(status != STATUS_SUCCESS){
 		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)status);
+		dx->hVol = NULL;
 		goto done;
 	}
 	/* try to get fs type */
@@ -92,7 +93,12 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 				&ObjectAttributes,&iosb,NULL,0,
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
-	if(status != STATUS_SUCCESS) goto done;
+	if(status != STATUS_SUCCESS){
+		DebugPrint("-Ultradfg- Can't open the root directory %ws: %x!",
+				path,(UINT)status);
+		hFile = NULL;
+		goto done;
+	}
 
 	/* get logical geometry */
 	status = ZwQueryVolumeInformationFile(hFile,&iosb,&FileFsSize,
