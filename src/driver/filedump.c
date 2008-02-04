@@ -119,11 +119,8 @@ next_run:
 	pfn->n_fragments = cnt;
 	if(pfn->is_fragm){
 		dx->fragmfilecounter ++; /* file is true fragmented */
-		if(!pfn->is_dir && !pfn->is_overlimit)
-			dx->clusters_to_move_tmp += pfn->clusters_total;
 	}
 	dx->fragmcounter += cnt;
-	dx->clusters_to_compact_tmp += pfn->clusters_total;
 dump_success:
 	return TRUE; /* success */
 }

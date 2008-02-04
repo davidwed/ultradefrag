@@ -161,6 +161,8 @@ static char * __stdcall winx_get_error_description(unsigned long code)
 *       winx_push_error("error message with parameters: %x!",
 *           parameters,(UINT)Status);
 *       Status parameter is optional.
+*    4. Don't use ": %x!" substring to purposes other than
+*       operation status definition.
 * SEE ALSO
 *    winx_get_error_description,winx_pop_error,winx_pop_werror,
 *    winx_save_error,winx_restore_error
@@ -177,6 +179,7 @@ void __cdecl winx_push_error(char *format, ...)
 		return;
 	}
 	//InterlockedIncrement(&malloc_free_delta);
+	malloc_free_delta ++;
 	va_start(arg,format);
 	memset(buffer,0,ERR_MSG_SIZE);
 	length = _vsnprintf(buffer,ERR_MSG_SIZE - 1,format,arg);
@@ -215,6 +218,7 @@ void __stdcall winx_pop_error(char *buffer, int size)
 {
 	int length, length2;
 	char *source;
+	char src[ERR_MSG_SIZE];
 	char desc[256];
 	char *p;
 	UINT iStatus;
@@ -222,10 +226,16 @@ void __stdcall winx_pop_error(char *buffer, int size)
 	ULONG err_code;
 	
 	source = (char *)(LONG_PTR)(NtCurrentTeb()->LastErrorValue);
+	strcpy(src,source);
+	if(strcmp(source,no_mem) != 0){
+		winx_virtual_free(source,ERR_MSG_SIZE);
+		//InterlockedDecrement(&malloc_free_delta);
+		malloc_free_delta --;
+	}
 
 	if(buffer && size > 0){
-		length = min(strlen(source),(unsigned int)size - 1);
-		strncpy(buffer,source,length);
+		length = min(strlen(src),(unsigned int)size - 1);
+		strncpy(buffer,src,length);
 		buffer[length] = 0;
 		/* append error description */
 		p = strrchr(buffer,':');
@@ -256,11 +266,6 @@ void __stdcall winx_pop_error(char *buffer, int size)
 			buffer[length + length2] = 0;
 		}
 	}
-
-	if(strcmp(source,no_mem) != 0){
-		winx_virtual_free(source,ERR_MSG_SIZE);
-		//InterlockedDecrement(&malloc_free_delta);
-	}
 }
 
 /****f* zenwinx.error/winx_pop_werror
@@ -278,6 +283,7 @@ void __stdcall winx_pop_werror(short *buffer, int size)
 {
 	int length, length2;
 	char *source;
+	char src[ERR_MSG_SIZE];
 	char c_buffer[ERR_MSG_SIZE];
 	short desc[256];
 	char *p;
@@ -289,10 +295,15 @@ void __stdcall winx_pop_werror(short *buffer, int size)
 	short fmt_error[] = L"Can't format message!";
 
 	source = (char *)(LONG_PTR)(NtCurrentTeb()->LastErrorValue);
+	strcpy(src,source);
+	if(strcmp(source,no_mem) != 0){
+		winx_virtual_free(source,ERR_MSG_SIZE);
+		//InterlockedDecrement(&malloc_free_delta);
+	}
 
 	if(buffer && size > 0){
-		length = min(strlen(source),ERR_MSG_SIZE - 1);
-		strncpy(c_buffer,source,length);
+		length = min(strlen(src),ERR_MSG_SIZE - 1);
+		strncpy(c_buffer,src,length);
 		c_buffer[length] = 0;
 		/* convert string to unicode */
 		RtlInitAnsiString(&aStr,c_buffer);
@@ -335,11 +346,6 @@ void __stdcall winx_pop_werror(short *buffer, int size)
 			wcsncpy(buffer + length,desc,length2);
 			buffer[length + length2] = 0;
 		}
-	}
-
-	if(strcmp(source,no_mem) != 0){
-		winx_virtual_free(source,ERR_MSG_SIZE);
-		//InterlockedDecrement(&malloc_free_delta);
 	}
 }
 

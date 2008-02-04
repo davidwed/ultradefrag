@@ -311,13 +311,10 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONGLONG processed_clusters;
 	ULONGLONG clusters_to_move;
 	ULONGLONG clusters_to_move_initial;
-	ULONGLONG clusters_to_move_tmp;
-	ULONGLONG clusters_to_compact;
-	ULONGLONG clusters_to_compact_initial;
-	ULONGLONG clusters_to_compact_tmp;
 	PROCESS_BLOCK_STRUCT *no_checked_blocks;
 	ULONG unprocessed_blocks; /* number of no-checked blocks */
 	NTSTATUS status;
+	ULONG invalid_movings;
 	/*
 	* End of the data with default zero state.
 	*/
@@ -356,6 +353,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 
 /* Function Prototypes */
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
+NTSTATUS RedumpSpace(UDEFRAG_DEVICE_EXTENSION *dx);
 void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);

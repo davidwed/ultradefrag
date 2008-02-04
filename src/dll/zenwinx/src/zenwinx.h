@@ -94,7 +94,7 @@ int  __stdcall winx_get_os_version(void);
 int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
 
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
-int  __stdcall winx_exit_thread(void);
+void __stdcall winx_exit_thread(void);
 
 int  __stdcall winx_enable_privilege(HANDLE hToken,DWORD dwLowPartOfLUID);
 

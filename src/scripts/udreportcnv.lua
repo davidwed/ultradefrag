@@ -140,19 +140,17 @@ init_sorting_engine();
 ]]
 
 links_x1 = [[
-<table><tbody>
+<table width="100%"><tbody>
 <tr>
-<td width="40%" style="text-align: left"><a href="http://ultradefrag.sourceforge.net" style="color: #0000FF">Visit our Homepage</a></td>
-<td width="40%" style="text-align: left"><a 
+<td style="text-align: left"><a href="http://ultradefrag.sourceforge.net" style="color: #0000FF">Visit our Homepage</a></td>
+<td style="text-align: center"><a 
 ]]
 
 links_x2 = [[
 style="color: #0000FF">View report options</a></td>
-<td width="20%"><a href="http://www.lua.org/" style="color: #0000FF"><img 
-]]
-
-links_x3 = [[
-alt="Powered by Lua" border="0" height="31" width="124" /></a></td>
+<td style="text-align: right">
+<a href="http://www.lua.org/" style="color: #0000FF">Powered by Lua</a>
+</td>
 </tr>
 </tbody></table>
 ]]
@@ -161,8 +159,7 @@ function produce_html_output()
 	local filename
 	local pos = 0
 	local js
-	local links = links_x1 .. "href=\"file:///" .. arg[2] .. "\\udreportopts.lua\" "
-	links = links .. links_x2 .. "src=\"file:///" .. arg[2] .. "\\powered_by_lua.png\" " .. links_x3
+	local links = links_x1 .. "href=\"file:///" .. arg[2] .. "\\udreportopts.lua\" " .. links_x2
 
 	repeat
 		pos = string.find(arg[1],"\\",pos + 1,true)

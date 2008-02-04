@@ -261,7 +261,10 @@ int __cdecl winx_kbhit(int msec)
 		return -1;
 	}
 	IntTranslateKey(&kbd,&kbd_rec);
-	if(!kbd_rec.bKeyDown) return -1;
+	if(!kbd_rec.bKeyDown){
+		winx_push_error("The key was released!");
+		return -1;
+	}
 	return (int)kbd_rec.AsciiChar;
 }
 
@@ -298,7 +301,9 @@ int __cdecl winx_kbhit(int msec)
 int __cdecl winx_breakhit(int msec)
 {
 	if(winx_kbhit(msec) == -1) return -1;
-	return ((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d)) ? 0 : -1;
+	if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d)) return 0;
+	winx_push_error("Other key was pressed.");
+	return -1;
 }
 
 /****f* zenwinx.stdio/winx_getch

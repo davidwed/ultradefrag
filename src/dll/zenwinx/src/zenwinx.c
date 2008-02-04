@@ -51,9 +51,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 *    peb   - pointer for the Process Environment Block, that is 
 *            the first parameter of NtProcessStartup() function.
 * RESULT
-*    error - zero for success; negative values are error codes,
-*            defined in zenwinx.h; use winx_get_last_error
-*            function to get the extented error code.
+*    error - zero for success; negative value otherwise.
 * EXAMPLE
 *    // native entry point
 *    void __stdcall NtProcessStartup(PPEB Peb)

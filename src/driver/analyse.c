@@ -90,10 +90,20 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->status = STATUS_ANALYSED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;
-	dx->clusters_to_move = dx->clusters_to_move_initial = dx->clusters_to_move_tmp;
-	dx->clusters_to_compact_initial = dx->clusters_to_compact_tmp;
 	return STATUS_SUCCESS;
 fail:
-	//dx->status = STATUS_BEFORE_PROCESSING; A_D_C ???
+	dx->status = STATUS_BEFORE_PROCESSING;
 	return Status;
+}
+
+/* 
+* TODO: write special function to perform new analysis if 
+* number of invalid movings is not zero.
+* This function must redump free space and redump each file.
+* And destroy pending blocks queue.
+*/
+
+NTSTATUS RedumpSpace(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	return 0;
 }

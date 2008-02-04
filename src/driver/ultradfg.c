@@ -242,7 +242,10 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			if(KeReadStateEvent(&dx->stop_event) == 0x1)
 				break;
 		}
-		Defragment(dx);
+		if(!dx->compact_flag)
+			Defragment(dx);
+		else
+			DefragmentFreeSpace(dx);
 		break;
 	//default:
 	//	goto invalid_request;
@@ -339,8 +342,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		pst->current_operation = dx->current_operation;
 		pst->clusters_to_move_initial = dx->clusters_to_move_initial;
 		pst->clusters_to_move = dx->clusters_to_move;
-		pst->clusters_to_compact_initial = dx->clusters_to_compact_initial;
-		pst->clusters_to_compact = dx->clusters_to_compact;
 		BytesTxd = sizeof(STATISTIC);
 		break;
 	case IOCTL_GET_CLUSTER_MAP:

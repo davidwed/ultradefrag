@@ -576,6 +576,7 @@ typedef struct _TEB
 } TEB, *PTEB;
 
 #define NtCurrentProcess() ((HANDLE)-1)
+#define NtCurrentThread() ((HANDLE)-2)
 /*
 * NtCurrentTeb() is imported from ntdll.dll if we use ms c compiler.
 * Otherwise (on mingw) this is inline function, defined in one of the
@@ -731,7 +732,8 @@ NTSTATUS	NTAPI	NtQueryValueKey(HANDLE,PUNICODE_STRING,KEY_VALUE_INFORMATION_CLAS
 NTSTATUS	NTAPI	NtSetValueKey(HANDLE,PUNICODE_STRING,ULONG,ULONG,PVOID,ULONG);
 NTSTATUS	NTAPI	NtClose(HANDLE);
 NTSTATUS	NTAPI	RtlCreateUserThread(HANDLE,PSECURITY_DESCRIPTOR,BOOLEAN,LONG,ULONG,ULONG,PTHREAD_START_ROUTINE,PVOID,PHANDLE,PCLIENT_ID);
-VOID		NTAPI	RtlExitUserThread(NTSTATUS);
+/* VOID		NTAPI	RtlExitUserThread(NTSTATUS); - NEVER use this unreliable call! */
+NTSTATUS	NTAPI	ZwTerminateThread(HANDLE,NTSTATUS);
 VOID		NTAPI	RtlInitAnsiString(PANSI_STRING,PCSZ);
 NTSTATUS	NTAPI	RtlAnsiStringToUnicodeString(PUNICODE_STRING,PANSI_STRING,BOOL);
 NTSTATUS	NTAPI	RtlUnicodeStringToAnsiString(PANSI_STRING,PUNICODE_STRING,BOOL);

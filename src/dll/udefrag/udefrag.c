@@ -77,16 +77,84 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
+/****f* udefrag.error/udefrag_pop_error
+* NAME
+*    udefrag_pop_error
+* SYNOPSIS
+*    udefrag_pop_error(buffer, size);
+* FUNCTION
+*    Retrieves formatted error message
+*    and removes it from stack.
+* INPUTS
+*    buffer - memory block to store message into
+*    size   - maximum number of characters to store,
+*             including terminal zero
+* RESULT
+*    This function does not return a value.
+* EXAMPLE
+*    if(udefrag_xxx() < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*    }
+* NOTES
+*    The first parameter may be NULL if you don't
+*    need error message.
+* SEE ALSO
+*    udefrag_pop_werror
+******/
 void __stdcall udefrag_pop_error(char *buffer, int size)
 {
 	winx_pop_error(buffer,size);
 }
 
+/****f* udefrag.error/udefrag_pop_werror
+* NAME
+*    udefrag_pop_werror
+* SYNOPSIS
+*    udefrag_pop_werror(buffer, size);
+* FUNCTION
+*    Unicode version of udefrag_pop_error().
+* SEE ALSO
+*    udefrag_pop_error
+******/
 void __stdcall udefrag_pop_werror(short *buffer, int size)
 {
 	winx_pop_werror(buffer,size);
 }
 
+/****f* udefrag.common/udefrag_init
+* NAME
+*    udefrag_init
+* SYNOPSIS
+*    error = udefrag_init(argc,argv,native,mapsize);
+* FUNCTION
+*    Load the Ultra Defragmenter driver and initialize defragmenter.
+* INPUTS
+*    argc, argv - options from the command line, may be 0,NULL
+*    native     - true if the request was made from the native
+*                 application, false otherwise
+*    mapsize    - cluster map size, may be zero
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    int main(int argc, char **argv)
+*    {
+*        char buffer[ERR_MSG_SIZE];
+*
+*        if(udefrag_init(argc,argv,FALSE,0) < 0)
+*            udefrag_pop_error(buffer,sizeof(buffer));
+*            printf("udefrag_init() call unsuccessful!");
+*            printf("\n\n%s\n",buffer);
+*            exit(1);
+*        }
+*        // your program code here
+*        // ...
+*    }
+* NOTES
+*    You must call this function before any other interaction
+*    with driver attempts.
+* SEE ALSO
+*    udefrag_unload
+******/
 int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 {
 	UNICODE_STRING uStr;
@@ -170,6 +238,29 @@ init_fail:
 	return (-1);
 }
 
+/****f* udefrag.common/udefrag_unload
+* NAME
+*    udefrag_unload
+* SYNOPSIS
+*    error = udefrag_unload(save_opts);
+* FUNCTION
+*    Unloads the Ultra Defragmenter driver and saves the options.
+* INPUTS
+*    save_opts - true if options must be saved, false otherwise
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_unload(TRUE) < 0)
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        printf("udefrag_unload() call unsuccessful!");
+*        printf("\n\n%s\n",buffer);
+*    }
+* NOTES
+*    You must call this function before terminating
+*    the calling process to free allocated resources.
+* SEE ALSO
+*    udefrag_init
+******/
 int __stdcall udefrag_unload(BOOL save_options)
 {
 	UNICODE_STRING uStr;
@@ -218,7 +309,7 @@ DWORD WINAPI send_command(LPVOID unused)
 	if(RtlUnicodeStringToAnsiString(&aStr,&uStr,FALSE) != STATUS_SUCCESS)
 		strcpy(error_message,fmt_error);
 	done_flag = TRUE;
-	if(winx_exit_thread() < 0) winx_pop_error(NULL,0);
+	winx_exit_thread();
 	return 0;
 }
 
@@ -245,31 +336,136 @@ BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDA
 	return TRUE;
 }
 
+/****f* udefrag.common/udefrag_analyse
+* NAME
+*    udefrag_analyse
+* SYNOPSIS
+*    error = udefrag_analyse(letter, callback);
+* FUNCTION
+*    Sends the 'Analyse' command to the driver.
+* INPUTS
+*    letter   - volume letter
+*    callback - address of the callback function;
+*               see prototype in udefrag.h header;
+*               this parameter may be NULL
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_analyse('C',callback_proc) < 0)
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        printf("udefrag_analyse() call unsuccessful!");
+*        printf("\n\n%s\n",buffer);
+*    }
+* SEE ALSO
+*    udefrag_defragment, udefrag_optimize, udefrag_stop
+******/
 int __stdcall udefrag_analyse(unsigned char letter,STATUPDATEPROC sproc)
 {
 	return udefrag_send_command_ex('a',letter,sproc) ? 0 : (-1);
 }
 
+/****f* udefrag.common/udefrag_defragment
+* NAME
+*    udefrag_defragment
+* SYNOPSIS
+*    error = udefrag_defragment(letter, callback);
+* FUNCTION
+*    Sends the 'Defragment' command to the driver.
+*    For more details see udefrag_analyse() description.
+* SEE ALSO
+*    udefrag_analyse, udefrag_optimize, udefrag_stop
+******/
 int __stdcall udefrag_defragment(unsigned char letter,STATUPDATEPROC sproc)
 {
 	return udefrag_send_command_ex('d',letter,sproc) ? 0 : (-1);
 }
 
+/****f* udefrag.common/udefrag_optimize
+* NAME
+*    udefrag_optimize
+* SYNOPSIS
+*    error = udefrag_optimize(letter, callback);
+* FUNCTION
+*    Sends the 'Optimize' command to the driver.
+*    For more details see udefrag_analyse() description.
+* SEE ALSO
+*    udefrag_analyse, udefrag_defragment, udefrag_stop
+******/
 int __stdcall udefrag_optimize(unsigned char letter,STATUPDATEPROC sproc)
 {
 	return udefrag_send_command_ex('c',letter,sproc) ? 0 : (-1);
 }
 
+/****f* udefrag.common/udefrag_get_command_result
+* NAME
+*    udefrag_get_command_result
+* SYNOPSIS
+*    message = udefrag_get_command_result();
+* FUNCTION
+*    Retrieves the error message about the last 
+*    analyse/defragment/optimize call.
+* INPUTS
+*    Nothing.
+* RESULT
+*    message - the string with full error description;
+*              if strlen(message) <= 1 then it was 
+*              a successful call
+* EXAMPLE
+*    int __stdcall update_stat(int df)
+*    {
+*    	char *msg;
+*    
+*    	UpdateProgress();
+*    	if(df == TRUE){ // request is completed
+*    		msg = udefrag_get_command_result();
+*    		if(strlen(msg) > 1)
+*    			printf("\nERROR: %s\n",msg);
+*    	}
+*    	return 0;
+*    }
+* SEE ALSO
+*    udefrag_get_command_result_w
+******/
 char * __stdcall udefrag_get_command_result(void)
 {
 	return error_message;
 }
 
+/****f* udefrag.common/udefrag_get_command_result_w
+* NAME
+*    udefrag_get_command_result_w
+* SYNOPSIS
+*    message = udefrag_get_command_result_w();
+* FUNCTION
+*    Unicode version of udefrag_get_command_result().
+* SEE ALSO
+*    udefrag_get_command_result
+******/
 short * __stdcall udefrag_get_command_result_w(void)
 {
 	return error_message_w;
 }
 
+/****f* udefrag.common/udefrag_stop
+* NAME
+*    udefrag_stop
+* SYNOPSIS
+*    error = udefrag_stop();
+* FUNCTION
+*    Stops the current operation.
+* INPUTS
+*    Nothing.
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_stop() < 0)
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        printf("udefrag_stop() call unsuccessful!");
+*        printf("\n\n%s\n",buffer);
+*    }
+* SEE ALSO
+*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+******/
 int __stdcall udefrag_stop(void)
 {
 	if(!init_event){
@@ -313,6 +509,29 @@ BOOL udefrag_send_command(unsigned char command,unsigned char letter)
 	return TRUE;
 }
 
+/****f* udefrag.common/udefrag_get_progress
+* NAME
+*    udefrag_get_progress
+* SYNOPSIS
+*    error = udefrag_get_progress(pstat, percentage);
+* FUNCTION
+*    Retrieves the progress of current operation.
+* INPUTS
+*    pstat      - pointer to STATISTIC structure,
+*                 defined in ultradfg.h header
+*    percentage - pointer to variable of double type
+*                 to store progress percentage
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_get_progress(&stat,&p) < 0)
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        printf("udefrag_get_progress() call unsuccessful!");
+*        printf("\n\n%s\n",buffer);
+*    }
+* SEE ALSO
+*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+******/
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
 	if(!init_event){
@@ -330,18 +549,13 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 					((double)(LONGLONG)pstat->total_space + 0.1);
 			break;
 		case 'D':
+		case 'C':
 			if(pstat->clusters_to_move_initial == 0)
 				*percentage = 1.00;
 			else
 				*percentage = 1.00 - (double)(LONGLONG)pstat->clusters_to_move / 
 						((double)(LONGLONG)pstat->clusters_to_move_initial + 0.1);
 			break;
-		case 'C':
-			if(pstat->clusters_to_compact_initial == 0)
-				*percentage = 1.00;
-			else
-				*percentage = 1.00 - (double)(LONGLONG)pstat->clusters_to_compact / 
-						((double)(LONGLONG)pstat->clusters_to_compact_initial + 0.1);
 		}
 		*percentage = (*percentage) * 100.00;
 	}
@@ -350,6 +564,27 @@ get_progress_fail:
 	return (-1);
 }
 
+/****f* udefrag.common/udefrag_get_map
+* NAME
+*    udefrag_get_map
+* SYNOPSIS
+*    error = udefrag_get_map(buffer, size);
+* FUNCTION
+*    Retrieves the cluster map.
+* INPUTS
+*    buffer - pointer to the map buffer
+*    size   - size of the specified buffer
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_get_map(map,sizeof(map)) < 0)
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        printf("udefrag_get_map() call unsuccessful!");
+*        printf("\n\n%s\n",buffer);
+*    }
+* SEE ALSO
+*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+******/
 int __stdcall udefrag_get_map(char *buffer,int size)
 {
 	if(!init_event){
@@ -360,7 +595,28 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 		NULL,0,buffer,(ULONG)size,"Cluster map unavailable: %x!") ? 0 : (-1);
 }
 
-/* useful for native and console applications */
+/****f* udefrag.common/udefrag_get_default_formatted_results
+* NAME
+*    udefrag_get_default_formatted_results
+* SYNOPSIS
+*    msg = udefrag_get_default_formatted_results(pstat);
+* FUNCTION
+*    Retrieves default formatted results.
+* INPUTS
+*    pstat - pointer to STATISTIC structure,
+*            defined in ultradfg.h header
+* RESULT
+*    msg - string containing default formatted result
+*          of operation defined in pstat.
+* EXAMPLE
+*   udefrag_analyse('C',NULL);
+*   udefrag_get_progress(&pstat,&p);
+*   printf("%s\n", udefrag_get_default_formatted_results(&pstat));
+* NOTES
+*    Useful for native and console applications.
+* SEE ALSO
+*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+******/
 char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 {
 	char s[68];

@@ -162,15 +162,17 @@ void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx)
 void GetMap(char *dest)
 {
 	ULONG i, k, index;
-	ULONGLONG maximum;
+	ULONGLONG maximum, n;
 	
 	if(!new_cluster_map) return;
 	for(i = 0; i < map_size; i++){
 		maximum = new_cluster_map[i][0];
 		index = 0;
 		for(k = 1; k < NUM_OF_SPACE_STATES; k++){
-			if(new_cluster_map[i][k] >= maximum){ /* >= is very important: mft and free */
-				maximum = new_cluster_map[i][k];
+			n = new_cluster_map[i][k];
+			/* >= is very important: mft and free */
+			if(n > maximum || (n == maximum && k != NO_CHECKED_SPACE)){
+				maximum = n;
 				index = k;
 			}
 		}

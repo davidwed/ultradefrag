@@ -47,10 +47,39 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 							  FILE_FS_SIZE_INFORMATION *pFileFsSize);
 BOOL set_error_mode(UINT uMode);
 
-/*
-* NOTE: if(skip_removable == FALSE && you have floppy drive without floppy disk)
+/****f* udefrag.volume/udefrag_get_avail_volumes
+* NAME
+*    udefrag_get_avail_volumes
+* SYNOPSIS
+*    error = udefrag_get_avail_volumes(ppvol_info, skip_removable);
+* FUNCTION
+*    Retrieves the list of available volumes.
+* INPUTS
+*    ppvol_info     - pointer to variable of volume_info* type.
+*    skip_removable - true if we need to skip removable drives,
+*                     false otherwise
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    volume_info *v;
+*    char buffer[ERR_MSG_SIZE];
+*    int i;
+*
+*    if(udefrag_get_avail_volumes(&v,TRUE) < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*    } else {
+*        for(i = 0;;i++){
+*            if(!v[i].letter) break;
+*            // ...
+*        }
+*    }
+* NOTES
+*    if(skip_removable == FALSE && you have 
+*      floppy drive without floppy disk)
 *       then you will hear noise :))
-*/
+* SEE ALSO
+*    udefrag_validate_volume, scheduler_get_avail_letters
+******/
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable)
 {
 	PROCESS_DEVICEMAP_INFORMATION ProcessDeviceMapInfo;

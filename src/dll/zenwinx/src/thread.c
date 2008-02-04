@@ -54,8 +54,7 @@ VOID (__stdcall *func_RtlExitUserThread)(NTSTATUS Status);
 *    DWORD WINAPI thread_proc(LPVOID parameter)
 *    {
 *        // do something
-*        if(winx_exit_thread() < 0))
-*            winx_pop_error(NULL,0);
+*        winx_exit_thread();
 *        return 0;
 *    }
 *
@@ -100,23 +99,26 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 * INPUTS
 *    Nothing.
 * RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
+*    Nothing.
 * EXAMPLE
 *    See an example for the winx_create_thread() function.
 * NOTES
-*    If the function succeeds on xp and later systems,
-*    it will never return.
+*    If the function succeeds it will never return. (?)
 * SEE ALSO
 *    winx_create_thread
 ******/
-int __stdcall winx_exit_thread(void)
+void __stdcall winx_exit_thread(void)
 {
+	/*
+	* The old code was not reliable and we have 
+	* replaced them with ZwTerminateThread() call.
+	*/
+	/* TODO: error handling and exit with specified status */
 	/*
 	* On NT 4.0 and W2K we should do nothing, on XP SP1 both variants are acceptable,
 	* on XP x64 and Vista RtlExitUserThread() MUST be called.
 	*/
-	if(ExitThreadState == ExitThreadUndefined){ /* try to find it */
+	/*if(ExitThreadState == ExitThreadUndefined){ // try to find it 
 		if(winx_get_proc_address(L"ntdll.dll","RtlExitUserThread",
 				(void *)&func_RtlExitUserThread) == 0)
 			ExitThreadState = ExitThreadFound;
@@ -133,5 +135,6 @@ int __stdcall winx_exit_thread(void)
 		winx_push_error("RtlExitThread function not found!");
 		return (-1);
 	}
-	return 0;
+	*/
+	ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
 }
