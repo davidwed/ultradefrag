@@ -30,6 +30,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	KIRQL oldIrql;
 	PFRAGMENTED pflist;
 	PFILENAME curr_file;
+	int x = 0; // temporary replacement for RedumpSpace.
 
 	KeClearEvent(&dx->stop_event);
 	DeleteLogFile(dx);
@@ -77,7 +78,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	*/
 
 	if(dx->invalid_movings)
-		RedumpSpace(dx);
+		x = 1; //RedumpSpace(dx);
 
 exit_defrag:
 	CheckPendingBlocks(dx);
@@ -91,6 +92,7 @@ exit_defrag:
 		dx->status = STATUS_DEFRAGMENTED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;
+	if(x) dx->status = STATUS_BEFORE_PROCESSING;
 }
 
 /*
@@ -104,6 +106,7 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	KSPIN_LOCK spin_lock;
 	KIRQL oldIrql;
 	PFILENAME curr_file;
+	int x = 0; // temporary replacement for RedumpSpace.
 
 	KeClearEvent(&dx->stop_event);
 	DeleteLogFile(dx);
@@ -149,7 +152,7 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	*/
 
 	if(dx->invalid_movings)
-		RedumpSpace(dx);
+		x = 1; //RedumpSpace(dx);
 
 exit_defrag_space:
 	CheckPendingBlocks(dx);
@@ -163,6 +166,7 @@ exit_defrag_space:
 		dx->status = STATUS_DEFRAGMENTED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;
+	if(x) dx->status = STATUS_BEFORE_PROCESSING;
 }
 
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 

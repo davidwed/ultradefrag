@@ -23,8 +23,6 @@
 
 #include "driver.h"
 
-/* FIXME: clusters_to_move(!) and filters(!!) changing after analysis */
-
 BOOLEAN IsStringInFilter(short *str,PFILTER pf)
 {
 	POFFSET po;

@@ -109,32 +109,6 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 ******/
 void __stdcall winx_exit_thread(void)
 {
-	/*
-	* The old code was not reliable and we have 
-	* replaced them with ZwTerminateThread() call.
-	*/
 	/* TODO: error handling and exit with specified status */
-	/*
-	* On NT 4.0 and W2K we should do nothing, on XP SP1 both variants are acceptable,
-	* on XP x64 and Vista RtlExitUserThread() MUST be called.
-	*/
-	/*if(ExitThreadState == ExitThreadUndefined){ // try to find it 
-		if(winx_get_proc_address(L"ntdll.dll","RtlExitUserThread",
-				(void *)&func_RtlExitUserThread) == 0)
-			ExitThreadState = ExitThreadFound;
-		else {
-			winx_pop_error(NULL,0);
-			ExitThreadState = ExitThreadNotFound;
-		}
-	}
-	if(ExitThreadState == ExitThreadFound){
-		func_RtlExitUserThread(STATUS_SUCCESS);
-		return 0;
-	}
-	if(winx_get_os_version() >= 51){
-		winx_push_error("RtlExitThread function not found!");
-		return (-1);
-	}
-	*/
 	ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
 }

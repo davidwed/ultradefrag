@@ -55,7 +55,7 @@ BOOL set_error_mode(UINT uMode);
 * FUNCTION
 *    Retrieves the list of available volumes.
 * INPUTS
-*    ppvol_info     - pointer to variable of volume_info* type.
+*    ppvol_info     - pointer to variable of volume_info* type
 *    skip_removable - true if we need to skip removable drives,
 *                     false otherwise
 * RESULT
@@ -122,9 +122,31 @@ get_volumes_fail:
 	return (-1);
 }
 
-/* NOTE: this is something like udefrag_get_avail_volumes()
- *       but without noise.
- */
+/****f* udefrag.volume/udefrag_validate_volume
+* NAME
+*    udefrag_validate_volume
+* SYNOPSIS
+*    error = udefrag_validate_volume(letter, skip_removable);
+* FUNCTION
+*    Checks specified volume to be valid for defragmentation.
+* INPUTS
+*    letter         - volume letter
+*    skip_removable - true if we need to skip removable drives,
+*                     false otherwise
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_validate_volume("C",TRUE) < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        // handle error
+*    }
+* NOTES
+*    if(skip_removable == FALSE && you want 
+*      to validate floppy drive without floppy disk)
+*       then you will hear noise :))
+* SEE ALSO
+*    udefrag_get_avail_volumes, scheduler_get_avail_letters
+******/
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
 	PROCESS_DEVICEMAP_INFORMATION ProcessDeviceMapInfo;
@@ -150,6 +172,28 @@ validate_fail:
 	return (-1);
 }
 
+/****f* udefrag.volume/scheduler_get_avail_letters
+* NAME
+*    scheduler_get_avail_letters
+* SYNOPSIS
+*    error = scheduler_get_avail_letters(letters);
+* FUNCTION
+*    Retrieves the string containing available letters.
+* INPUTS
+*    letters - buffer to store resulting string into
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    char letters[32];
+*    if(scheduler_get_avail_letters(letters) < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        // handle error
+*    }
+* NOTES
+*    This function skips all removable drives.
+* SEE ALSO
+*    udefrag_get_avail_volumes, udefrag_validate_volume
+******/
 int __stdcall scheduler_get_avail_letters(char *letters)
 {
 	volume_info *v;

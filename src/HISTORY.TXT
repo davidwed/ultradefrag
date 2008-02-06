@@ -2,15 +2,17 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 1.2.5 (23.0)   2008-01-
+  Version 1.2.5 (22.5)   2008-02-06
   ------------------------------------------------------------------------------
     - driver code was completely rewritten (to improve reliability)
     - highly configurable reports feature was added
+    - report sorting ability was added
     - documentation was improved
     - driver code cleanup was performed
     - gui application memory requirements were reduced
     - build scripts were improved
     - many bugs were fixed
+    - error handling was improved
     - coding style was changed to improve readability
 
 

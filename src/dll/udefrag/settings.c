@@ -197,11 +197,45 @@ no_cmdline:
 	return 0;
 }
 
+/****f* udefrag.settings/udefrag_get_options
+* NAME
+*    udefrag_get_options
+* SYNOPSIS
+*    opts = udefrag_get_options();
+* FUNCTION
+*    Retrieves ud_options structure address
+*    containing the defragmenter options.
+* INPUTS
+*    Nothing.
+* RESULT
+*    ud_options structure address.
+* SEE ALSO
+*    udefrag_set_options
+******/
 ud_options * __stdcall udefrag_get_options(void)
 {
 	return &settings;
 }
 
+/****f* udefrag.settings/udefrag_set_options
+* NAME
+*    udefrag_set_options
+* SYNOPSIS
+*    error = udefrag_set_options(opts);
+* FUNCTION
+*    Sets the defragmenter options.
+* INPUTS
+*    opts - ud_options structure address
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_set_options(opts) < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        // handle error
+*    }
+* SEE ALSO
+*    udefrag_get_options
+******/
 int __stdcall udefrag_set_options(ud_options *ud_opts)
 {
 	REPORT_TYPE rt;
