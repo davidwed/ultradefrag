@@ -101,10 +101,11 @@ extraResourceOptions=
 1=ultradfg.rc
 [Other]
 [History]
+defrag.c,6522
 driver.h,9251
 findfiles.c,0
 analyse.c,2538
 ultradfg.c,10784
 filedump.c,4259
 freespace.c,2438
-defrag.c,5443
+log.c,4011

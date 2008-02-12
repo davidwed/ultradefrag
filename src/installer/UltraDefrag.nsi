@@ -396,6 +396,7 @@ Section "Documentation" SecDocs
   File "${ROOTDIR}\doc\html\images\console.png"
   File "${ROOTDIR}\doc\html\images\main_screen110.png"
   File "${ROOTDIR}\doc\html\images\about.png"
+  File "${ROOTDIR}\doc\html\images\sched_net_vista.png"
   File "${ROOTDIR}\doc\html\images\valid-html401.png"
   File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
   StrCpy $DocsInstalled 1

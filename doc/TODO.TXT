@@ -48,21 +48,21 @@ Items to describe:
    - for end users: simplicity, high speed processing, nice gui
    - for developers: windows hacking
 
-9. antispam ?? because I have 350 messages per month; they are automatically 
+9. (DONE) antispam ?? because I have 350 messages per month; they are automatically 
    filtered by google, but ...
 
-10. Maybe we should include some useful links in our website pages to:
+10. (DONE) Maybe we should include some useful links in our website pages to:
     - SF.net project's home
     - project's forums home
     - UD in wikipedia entry
 
-11. Udefrag.dll, zenwinx.dll and defrag_native.exe are components critical for
+11. Udefrag.dll and zenwinx.dll are components critical for
     windows boot process. If one of them is missing and boot time defrag is
     enabled, you will see BSOD at boot time, and Last Known Good configuration 
     will be not helpful. Currently I don't know how make our software absolutely
     safe.
 
-12. All webpages must contain SF.net logo in accordance 
+12. (DONE) All webpages must contain SF.net logo in accordance 
     with SF.net terms and conditions.
 
 13. Rxvt (from MSYS; tested version is 2.7.2) terminates udefrag.exe when 

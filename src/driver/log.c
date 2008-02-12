@@ -67,6 +67,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		else if(pf->pfn->is_overlimit) comment = "[OVR]";
 		else if(pf->pfn->is_compressed) comment = "[CMP]";
 		else comment = " - ";
+		memset(buffer,0,sizeof(buffer));
 		sprintf(buffer,
 			"\t{fragments = %u,size = %I64u,filtered = %u,"
 			"comment = \"%s\",name = [[",
@@ -88,6 +89,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		Write(dx,hFile,buffer,strlen(buffer),pOffset);
 		p = (char *)pf->pfn->name.Buffer;
 		for(i = 0; i < pf->pfn->name.Length; i++){
+			memset(buffer,0,sizeof(buffer));
 			sprintf(buffer,/*"%03u,"*/"%u,",(UINT)p[i]);
 			Write(dx,hFile,buffer,strlen(buffer),pOffset);
 		}
@@ -121,6 +123,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 		return FALSE;
 	}
 	offset.QuadPart = 0;
+	memset(buffer,0,sizeof(buffer));
 	sprintf(buffer,
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
 		"volume_letter = \"%c\"\r\n\r\n"

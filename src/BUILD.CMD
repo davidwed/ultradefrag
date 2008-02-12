@@ -199,6 +199,7 @@ copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
 copy /Y ..\doc\html\images\console.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\main_screen110.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\about.png %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\images\sched_net_vista.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\valid-html401.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\powered_by_lua.png %SRC_PKG_PATH%\doc\html\images\
 

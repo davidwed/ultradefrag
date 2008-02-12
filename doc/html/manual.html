@@ -1,6 +1,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html><head>
-<meta http-equiv="CONTENT-TYPE" content="text/html; charset=us-ascii"><title></title>
+<meta http-equiv="CONTENT-TYPE" content="text/html; charset=us-ascii">
+<title>UltraDefrag User Manual</title>
 
 <meta name="GENERATOR" content="OpenOffice.org 2.1 (Win32)">
 <meta name="CREATED" content="20070808;19191900">
@@ -80,6 +81,7 @@ for the registry setting are set at compile time.</p>
 <ul>
 <li>-sN ignore files larger than N bytes</li>
 <li>-iA;B;C Include these files and directories from the scan (Maximum 4096 bytes)</li>
+<li>-eX;Y;Z Exclude these files and directories from the scan (Maximum 4096 bytes)</li>
 <li>-d[0-3] Set debug level: 0 Normal, 1 Detailed, 2 Paranoid</li>
 <li>-b Use default color scheme</li>
 </ul>
@@ -222,7 +224,8 @@ send to the author when an error is encountered.</span></p>
 Settings releated to the boot time scan with the native executable.</span></p>
 <ol>
 <li>
-<p><b>Drive letters</b><span style=""> The drives to scan.</span></p>
+<p><b>Drive letters</b><span style=""> The drives to scan. Letters must be either 
+separated by semicolons (;) or don't contain any separators between.</span></p>
 </li>
 <li>
 <p><b>Defragment at next boot </b><span style="">and</span><b> Defragment every boot</b><span style=""> Check these boxes to chose when to defragment.</span></p>
@@ -298,7 +301,9 @@ Compressed file.</span></p>
 <p>The command line version of UltraDefrag may be run out of system
 scheduled tasks, The process of adding a scheduled task instance of
 UltraDefrag is simplified throuth a utility called UltraDefrag
-Scheduler.NET. This small application requites Microsoft Framework 2.0to run. The simple gui has 4 settings. </p><p><img style="width: 329px; height: 191px;" alt="UltraDefrag.NET Scheduler" src="images/scheduler_net.png"></p><ol><li>Whether to run Ultra Defrag every day (Daily) or only certain days of the week (Weekly).</li><li>The time of day to run the task.</li><li>The drive letter to scan.</li><li>Days of the week to defrag if Weekly is selected.</li></ol>
+Scheduler.NET. This small application requites Microsoft Framework 2.0to run. The simple gui has 4 settings. </p>
+<p><img style="width: 248px; height: 157px;" alt="UltraDefrag Scheduler.NET" src="images/sched_net_vista.png"></p>
+<ol><li>Whether to run Ultra Defrag every day (Daily) or only certain days of the week (Weekly).</li><li>The time of day to run the task.</li><li>The drive letter to scan.</li><li>Days of the week to defrag if Weekly is selected.</li></ol>
 <h1 class="western">How it works</h1>
 <p>The actual work of moving files to different clusters is
 performed
@@ -335,10 +340,6 @@ Homepage</a></p>
 <li>
 <p><a href="http://en.wikipedia.org/wiki/Defragmentation">Wikipedia
 article on Defragmentation</a></p>
-</li>
-<li>
-<p><a href="http://www.softpedia.com/reviews/windows/UltraDefrag-Review-62694.shtml">Softpedia
-entry on UltraDefrag</a></p>
 </li>
 <li>
 <p><a href="http://www.microsoft.com/whdc/DevTools/ddk/default.mspx">Windows
