@@ -19,7 +19,7 @@
 
 /*
 * udefrag.dll - middle layer between driver and user interfaces:
-* functions to manipulate with program settings.
+* functions for program settings manipulations.
 */
 
 #define WIN32_NO_STATUS
@@ -63,12 +63,6 @@ ud_options settings = \
 short ud_key[] = \
 	L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag";
 
-short smss_key[] = \
-	L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Session Manager";
-
-/* instead of malloc calls */
-char reg_buffer[65536];
-
 #define MAX_FILTER_SIZE 4096
 #define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
 short in_filter[MAX_FILTER_SIZE + 1];
@@ -79,18 +73,27 @@ short boot_ex_filter[MAX_FILTER_SIZE + 1];
 #define MAX_SCHED_LETTERS 64
 short sched_letters[MAX_SCHED_LETTERS + 1];
 
-/* internal functions prototypes */
-BOOL OpenKey(short *key_name,PHANDLE phKey);
-BOOL CreateKey(short *key_name,PHANDLE phKey);
-//BOOL ReadRegDWORD(HANDLE hKey,short *value_name,DWORD *pValue);
-//BOOL WriteRegDWORD(HANDLE hKey,short *value_name,DWORD value);
-BOOL ReadRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD size);
-BOOL WriteRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD size);
-BOOL AddAppToBootExecute(void);
-BOOL RemoveAppFromBootExecute(void);
+static __inline int ReadRegValue(HANDLE h, short *name, DWORD type, void *pval, DWORD size)
+{
+	DWORD dwSize = size;
+	if(winx_reg_query_value(h,name,type,pval,&dwSize) < 0){
+		winx_pop_error(NULL,0);
+		return FALSE;
+	}
+	return TRUE;
+}
 
-#define ReadRegDWORD(h,n,pv) ReadRegBinary(h,n,REG_DWORD,pv,sizeof(DWORD))
-#define WriteRegDWORD(h,n,v) WriteRegBinary(h,n,REG_DWORD,&(v),sizeof(DWORD))
+static __inline int WriteRegValue(HANDLE h, short *name, DWORD type, void *pval, DWORD size)
+{
+	if(winx_reg_set_value(h,name,type,pval,size) < 0){
+		winx_pop_error(NULL,0);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+#define ReadRegDWORD(h,name,pval) ReadRegValue(h,name,REG_DWORD,pval,sizeof(DWORD))
+#define WriteRegDWORD(h,name,val) WriteRegValue(h,name,REG_DWORD,&(val),sizeof(DWORD))
 
 extern BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID in_buf,ULONG in_size,
@@ -105,67 +108,47 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 	int i;
 
 	/* open program key */
-	if(!OpenKey(ud_key,&hKey)){
+	if(winx_reg_open_key(ud_key,&hKey) < 0){
 		winx_pop_error(NULL,0);
 		goto analyse_cmdline;
 	}
 	/* read dword parameters */
-	if(!ReadRegDWORD(hKey,L"skip removable",&settings.skip_removable)) winx_pop_error(NULL,0);
-	if(!ReadRegDWORD(hKey,L"update interval",&settings.update_interval)) winx_pop_error(NULL,0);
-	if(!ReadRegDWORD(hKey,L"show progress",&settings.show_progress)) winx_pop_error(NULL,0);
-	if(!ReadRegDWORD(hKey,L"dbgprint level",&settings.dbgprint_level)) winx_pop_error(NULL,0);
-	if(!ReadRegDWORD(hKey,L"every boot",&settings.every_boot)) winx_pop_error(NULL,0);
-	if(!ReadRegDWORD(hKey,L"next boot",&settings.next_boot)) winx_pop_error(NULL,0);
-	if(!ReadRegDWORD(hKey,L"only registry and pagefile",&settings.only_reg_and_pagefile)) winx_pop_error(NULL,0);
+	ReadRegDWORD(hKey,L"skip removable",&settings.skip_removable);
+	ReadRegDWORD(hKey,L"update interval",(DWORD *)&settings.update_interval);
+	ReadRegDWORD(hKey,L"show progress",(DWORD *)&settings.show_progress);
+	ReadRegDWORD(hKey,L"dbgprint level",&settings.dbgprint_level);
+	ReadRegDWORD(hKey,L"every boot",&settings.every_boot);
+	ReadRegDWORD(hKey,L"next boot",&settings.next_boot);
+	ReadRegDWORD(hKey,L"only registry and pagefile",&settings.only_reg_and_pagefile);
 
 	if(ReadRegDWORD(hKey,L"report type",&x))
 		settings.report_type = (UCHAR)x;
-	else
-		winx_pop_error(NULL,0);
 
 	if(ReadRegDWORD(hKey,L"report format",&x))
 		settings.report_format = (UCHAR)x;
-	else
-		winx_pop_error(NULL,0);
 
-	if(!ReadRegDWORD(hKey,L"x",&settings.x)) winx_pop_error(NULL,0);
-	if(!ReadRegDWORD(hKey,L"y",&settings.y)) winx_pop_error(NULL,0);
+	ReadRegDWORD(hKey,L"x",&settings.x);
+	ReadRegDWORD(hKey,L"y",&settings.y);
 	/* read binary parameters */
-	if(!ReadRegBinary(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG))) winx_pop_error(NULL,0);
+	ReadRegValue(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
 	/* read strings */
 	/* if success then write terminating zero and set ud_settings structure field */
-	if(ReadRegBinary(hKey,L"include filter",REG_SZ,in_filter,MAX_FILTER_BYTESIZE)){
+	if(ReadRegValue(hKey,L"include filter",REG_SZ,in_filter,MAX_FILTER_BYTESIZE)){
 		in_filter[MAX_FILTER_SIZE] = 0; settings.in_filter = in_filter;
-	} else {
-		winx_pop_error(NULL,0);
 	}
-	if(ReadRegBinary(hKey,L"exclude filter",REG_SZ,ex_filter,MAX_FILTER_BYTESIZE)){
+	if(ReadRegValue(hKey,L"exclude filter",REG_SZ,ex_filter,MAX_FILTER_BYTESIZE)){
 		ex_filter[MAX_FILTER_SIZE] = 0; settings.ex_filter = ex_filter;
-	} else {
-		winx_pop_error(NULL,0);
 	}
-	if(ReadRegBinary(hKey,L"boot time include filter",REG_SZ,
-		boot_in_filter,MAX_FILTER_BYTESIZE))
-	{
+	if(ReadRegValue(hKey,L"boot time include filter",REG_SZ,boot_in_filter,MAX_FILTER_BYTESIZE)){
 		boot_in_filter[MAX_FILTER_SIZE] = 0; settings.boot_in_filter = boot_in_filter;
-	} else {
-		winx_pop_error(NULL,0);
 	}
-	if(ReadRegBinary(hKey,L"boot time exclude filter",REG_SZ,
-		boot_ex_filter,MAX_FILTER_BYTESIZE))
-	{
+	if(ReadRegValue(hKey,L"boot time exclude filter",REG_SZ,boot_ex_filter,MAX_FILTER_BYTESIZE)){
 		boot_ex_filter[MAX_FILTER_SIZE] = 0; settings.boot_ex_filter = boot_ex_filter;
-	} else {
-		winx_pop_error(NULL,0);
 	}
-	if(ReadRegBinary(hKey,L"scheduled letters",REG_SZ,sched_letters,
-		MAX_SCHED_LETTERS * sizeof(short)))
-	{
+	if(ReadRegValue(hKey,L"scheduled letters",REG_SZ,sched_letters,MAX_SCHED_LETTERS * sizeof(short))){
 		sched_letters[MAX_SCHED_LETTERS] = 0; settings.sched_letters = sched_letters;
-	} else {
-		winx_pop_error(NULL,0);
 	}
-	NtClose(hKey);
+	winx_reg_close_key(hKey);
 analyse_cmdline:
 	/* overwrite parameters from the command line */
 	if(!argv) goto no_cmdline;
@@ -286,46 +269,46 @@ int __stdcall udefrag_save_settings(void)
 	if(native_mode_flag)
 		settings.next_boot = FALSE;
 	/* create key if not exist */
-	if(!OpenKey(ud_key,&hKey)){
+	if(winx_reg_open_key(ud_key,&hKey) < 0){
 		winx_pop_error(NULL,0);
-		if(!CreateKey(ud_key,&hKey)) goto save_fail;
+		if(winx_reg_create_key(ud_key,&hKey) < 0) goto save_fail;
 	}
 	/* set dword values */
-	if(!WriteRegDWORD(hKey,L"skip removable",settings.skip_removable)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"update interval",settings.update_interval)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"show progress",settings.show_progress)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"dbgprint level",settings.dbgprint_level)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"every boot",settings.every_boot)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"next boot",settings.next_boot)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"only registry and pagefile",settings.only_reg_and_pagefile)) winx_pop_error(NULL,0);
+	WriteRegDWORD(hKey,L"skip removable",settings.skip_removable);
+	WriteRegDWORD(hKey,L"update interval",settings.update_interval);
+	WriteRegDWORD(hKey,L"show progress",settings.show_progress);
+	WriteRegDWORD(hKey,L"dbgprint level",settings.dbgprint_level);
+	WriteRegDWORD(hKey,L"every boot",settings.every_boot);
+	WriteRegDWORD(hKey,L"next boot",settings.next_boot);
+	WriteRegDWORD(hKey,L"only registry and pagefile",settings.only_reg_and_pagefile);
 	x = (DWORD)settings.report_type;
-	if(!WriteRegDWORD(hKey,L"report type",x)) winx_pop_error(NULL,0);
+	WriteRegDWORD(hKey,L"report type",x);
 	x = (DWORD)settings.report_format;
-	if(!WriteRegDWORD(hKey,L"report format",x)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"x",settings.x)) winx_pop_error(NULL,0);
-	if(!WriteRegDWORD(hKey,L"y",settings.y)) winx_pop_error(NULL,0);
+	WriteRegDWORD(hKey,L"report format",x);
+	WriteRegDWORD(hKey,L"x",settings.x);
+	WriteRegDWORD(hKey,L"y",settings.y);
 	/* set binary data */
-	if(!WriteRegBinary(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG))) winx_pop_error(NULL,0);
+	WriteRegValue(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
 	/* write strings */
-	if(!WriteRegBinary(hKey,L"include filter",REG_SZ,settings.in_filter,
-		(wcslen(settings.in_filter) + 1) << 1)) winx_pop_error(NULL,0);
-	if(!WriteRegBinary(hKey,L"exclude filter",REG_SZ,settings.ex_filter,
-		(wcslen(settings.ex_filter) + 1) << 1)) winx_pop_error(NULL,0);
-	if(!WriteRegBinary(hKey,L"boot time include filter",REG_SZ,settings.boot_in_filter,
-		(wcslen(settings.boot_in_filter) + 1) << 1)) winx_pop_error(NULL,0);
-	if(!WriteRegBinary(hKey,L"boot time exclude filter",REG_SZ,settings.boot_ex_filter,
-		(wcslen(settings.boot_ex_filter) + 1) << 1)) winx_pop_error(NULL,0);
-	if(!WriteRegBinary(hKey,L"scheduled letters",REG_SZ,settings.sched_letters,
-		(wcslen(settings.sched_letters) + 1) << 1)) winx_pop_error(NULL,0);
-	NtClose(hKey);
+	WriteRegValue(hKey,L"include filter",REG_SZ,settings.in_filter,
+		(wcslen(settings.in_filter) + 1) << 1);
+	WriteRegValue(hKey,L"exclude filter",REG_SZ,settings.ex_filter,
+		(wcslen(settings.ex_filter) + 1) << 1);
+	WriteRegValue(hKey,L"boot time include filter",REG_SZ,settings.boot_in_filter,
+		(wcslen(settings.boot_in_filter) + 1) << 1);
+	WriteRegValue(hKey,L"boot time exclude filter",REG_SZ,settings.boot_ex_filter,
+		(wcslen(settings.boot_ex_filter) + 1) << 1);
+	WriteRegValue(hKey,L"scheduled letters",REG_SZ,settings.sched_letters,
+		(wcslen(settings.sched_letters) + 1) << 1);
+	winx_reg_close_key(hKey);
 	/* native app should clean registry */
 	if(native_mode_flag && !settings.every_boot)
-		if(!RemoveAppFromBootExecute()) goto save_fail;
+		if(winx_reg_remove_from_boot_execute(L"defrag_native") < 0) goto save_fail;
 	if(!native_mode_flag){
 		if(settings.next_boot || settings.every_boot){
-			if(!AddAppToBootExecute()) goto save_fail;
+			if(winx_reg_add_to_boot_execute(L"defrag_native") < 0) goto save_fail;
 		} else {
-			if(!RemoveAppFromBootExecute()) goto save_fail;
+			if(winx_reg_remove_from_boot_execute(L"defrag_native") < 0) goto save_fail;
 		}
 	}
 	return 0;
@@ -336,7 +319,7 @@ save_fail:
 /* important registry cleanup for uninstaller */
 int __stdcall udefrag_clean_registry(void)
 {
-	return RemoveAppFromBootExecute() ? 0 : (-1);
+	return winx_reg_remove_from_boot_execute(L"defrag_native");
 }
 
 /* registry cleanup for native executable */
@@ -348,180 +331,13 @@ int __stdcall udefrag_native_clean_registry(void)
 	if(settings.next_boot){
 		settings.next_boot = 0;
 		/* set next boot parameter to zero */
-		if(OpenKey(ud_key,&hKey)){
-			if(!WriteRegDWORD(hKey,L"next boot",settings.next_boot)) winx_pop_error(NULL,0);
-			NtClose(hKey);
+		if(winx_reg_open_key(ud_key,&hKey) >= 0){
+			WriteRegDWORD(hKey,L"next boot",settings.next_boot);
+			winx_reg_close_key(hKey);
 		} else {
 			winx_pop_error(NULL,0);
 		}
 	}
 	if(settings.every_boot) return 0;
-	return RemoveAppFromBootExecute() ? 0 : (-1);
-}
-
-BOOL OpenKey(short *key_name,PHANDLE phKey)
-{
-	UNICODE_STRING uStr;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	NTSTATUS Status;
-
-	RtlInitUnicodeString(&uStr,key_name);
-	/* OBJ_CASE_INSENSITIVE must be specified on NT 4.0 !!! */
-	InitializeObjectAttributes(&ObjectAttributes,&uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
-	Status = NtOpenKey(phKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&ObjectAttributes);
-	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't open %ls key: %x!",key_name,(UINT)Status);
-		*phKey = NULL;
-		return FALSE;
-	}
-	return TRUE;
-}
-
-BOOL CreateKey(short *key_name,PHANDLE phKey)
-{
-	UNICODE_STRING uStr;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	NTSTATUS Status;
-
-	RtlInitUnicodeString(&uStr,key_name);
-	/* OBJ_CASE_INSENSITIVE must be specified on NT 4.0 !!! */
-	InitializeObjectAttributes(&ObjectAttributes,&uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
-	Status = NtCreateKey(phKey,KEY_ALL_ACCESS,&ObjectAttributes,
-				0,NULL,REG_OPTION_NON_VOLATILE,NULL);
-	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't create %ls key: %x!",key_name,(UINT)Status);
-		*phKey = NULL;
-		return FALSE;
-	}
-	return TRUE;
-}
-
-BOOL ReadRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD size)
-{
-	UNICODE_STRING uStr;
-	NTSTATUS Status;
-	KEY_VALUE_PARTIAL_INFORMATION *pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)reg_buffer;
-	DWORD buffer_size = sizeof(KEY_VALUE_PARTIAL_INFORMATION) + size;
-
-	RtlInitUnicodeString(&uStr,value_name);
-	Status = NtQueryValueKey(hKey,&uStr,KeyValuePartialInformation,
-		pInfo,buffer_size,&buffer_size);
-	if(NT_SUCCESS(Status)){
-		if(pInfo->Type == type && pInfo->DataLength <= size){
-			if(buffer)
-				RtlCopyMemory(buffer,pInfo->Data,pInfo->DataLength);
-			return TRUE;
-		}
-		winx_push_error("Invalid parameter %ls!",value_name);
-		goto read_fail;
-	}
-	winx_push_error("Can't read %ls value: %x!",value_name,(UINT)Status);
-read_fail:
-	return FALSE;
-}
-
-BOOL WriteRegBinary(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD size)
-{
-	UNICODE_STRING uStr;
-	NTSTATUS Status;
-
-	RtlInitUnicodeString(&uStr,value_name);
-	Status = NtSetValueKey(hKey,&uStr,0,type,buffer,size);
-	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't write %ls value: %x!",value_name,(UINT)Status);
-		return FALSE;
-	}
-	return TRUE;
-}
-
-BOOL AddAppToBootExecute(void)
-{
-	HANDLE hKey;
-	KEY_VALUE_PARTIAL_INFORMATION *pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)reg_buffer;
-	short *data, *curr_pos;
-	unsigned long length,curr_len,i;
-
-
-	/* add native program name to the BootExecute registry parameter */
-	if(!OpenKey(smss_key,&hKey)) return FALSE;
-	if(!ReadRegBinary(hKey,L"BootExecute",REG_MULTI_SZ,NULL,65536)){
-		NtClose(hKey);
-		return FALSE;
-	}
-	data = (short *)pInfo->Data;
-	length = pInfo->DataLength;
-	if(length > 32000){
-		winx_push_error("BootExecute value is too long - %lu!",length);
-		NtClose(hKey);
-		return FALSE;
-	}
-	/* if we have 'defrag_native' string in parameter then exit */
-	/* convert length to number of wchars without the last one */
-	length = (length >> 1) - 1;
-	for(i = 0; i < length;){
-		curr_pos = data + i;
-		curr_len = wcslen(curr_pos) + 1;
-		if(!wcscmp(curr_pos,L"defrag_native")) /* if strings are equal */
-			goto add_success;
-		i +=  curr_len;
-	}
-	wcscpy(data + i,L"defrag_native");
-	data[i + wcslen(L"defrag_native") + 1] = 0;
-	length += wcslen(L"defrag_native") + 1 + 1;
-	if(!WriteRegBinary(hKey,L"BootExecute",REG_MULTI_SZ,data,length << 1)){
-		NtClose(hKey);
-		return FALSE;
-	}
-add_success:
-	NtClose(hKey);
-	return TRUE;
-}
-
-BOOL RemoveAppFromBootExecute(void)
-{
-	HANDLE hKey;
-	KEY_VALUE_PARTIAL_INFORMATION *pInfo = (KEY_VALUE_PARTIAL_INFORMATION *)reg_buffer;
-	short *data, *curr_pos;
-	short *new_data;
-	unsigned long length,curr_len,i,new_length = 0;
-
-
-	/* remove native program name from BootExecute registry parameter */
-	if(!OpenKey(smss_key,&hKey)) return FALSE;
-	if(!ReadRegBinary(hKey,L"BootExecute",REG_MULTI_SZ,NULL,65536)){
-		NtClose(hKey);
-		return FALSE;
-	}
-	data = (short *)pInfo->Data;
-	length = pInfo->DataLength;
-	if(length > 32000){
-		winx_push_error("BootExecute value is too long - %lu!",length);
-		NtClose(hKey);
-		return FALSE;
-	}
-	new_data = (short *)(reg_buffer + 32768);
-	/*
-	* Now we should copy all strings except 'defrag_native'
-	* to the destination buffer.
-	*/
-	memset((void *)new_data,0,length);
-	/* convert length to number of wchars without the last one */
-	length = (length >> 1) - 1;
-	for(i = 0; i < length;){
-		curr_pos = data + i;
-		curr_len = wcslen(curr_pos) + 1;
-		if(wcscmp(curr_pos,L"defrag_native"))
-		{ /* if strings are not equal */
-			wcscpy(new_data + new_length,curr_pos);
-			new_length += curr_len;
-		}
-		i +=  curr_len;
-	}
-	new_data[new_length] = 0;
-	if(!WriteRegBinary(hKey,L"BootExecute",REG_MULTI_SZ,new_data,(new_length + 1) << 1)){
-		NtClose(hKey);
-		return FALSE;
-	}
-	NtClose(hKey);
-	return TRUE;
+	return winx_reg_remove_from_boot_execute(L"defrag_native");
 }

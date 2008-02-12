@@ -26,3 +26,11 @@ EXPORTS
 	winx_create_thread@8
 	winx_exit_thread@0
 	winx_enable_privilege@8
+	winx_reg_create_key@8
+	winx_reg_open_key@8
+	winx_reg_query_value@20
+	winx_reg_set_value@20
+	winx_reg_add_to_boot_execute@4
+	winx_reg_remove_from_boot_execute@4
+	winx_reg_close_key@4
+	winx_get_drive_type@4

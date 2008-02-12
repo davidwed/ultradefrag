@@ -98,4 +98,15 @@ void __stdcall winx_exit_thread(void);
 
 int  __stdcall winx_enable_privilege(HANDLE hToken,DWORD dwLowPartOfLUID);
 
+int  __stdcall winx_reg_create_key(short *key_name,PHANDLE phKey);
+int  __stdcall winx_reg_open_key(short *key_name,PHANDLE phKey);
+int  __stdcall winx_reg_query_value(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD *psize);
+int  __stdcall winx_reg_set_value(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD size);
+int  __stdcall winx_reg_add_to_boot_execute(short *command);
+int  __stdcall winx_reg_remove_from_boot_execute(short *command);
+void __stdcall winx_reg_close_key(HANDLE hKey);
+
+#define DRIVE_ASSIGNED_BY_SUBST_COMMAND 1200
+int __stdcall winx_get_drive_type(char letter);
+
 #endif /* _ZENWINX_H_ */

@@ -259,116 +259,29 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 							  FILE_FS_SIZE_INFORMATION *pFileFsSize)
 {
 	NTSTATUS Status;
-	UINT type;
+	int type;
 	HANDLE hFile;
-	HANDLE hLink;
-	short link_name[] = L"\\??\\A:";
-	#define MAX_TARGET_LENGTH 256
-	short link_target[MAX_TARGET_LENGTH];
-	ULONG size;
 	UNICODE_STRING uStr;
 	ANSI_STRING aStr;
-	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;
-	FILE_FS_DEVICE_INFORMATION FileFsDevice;
 	PFILE_FS_ATTRIBUTE_INFORMATION pFileFsAttribute;
 	UCHAR buffer[FS_ATTRIBUTE_BUFFER_SIZE];
 	short str[MAXFSNAME];
 	ULONG length;
 
-	if(nt4_system){
-		/*
-		* Exclude letters assigned by 'subst' command - 
-		* on w2k and later systems such drives have type
-		* DRIVE_NO_ROOT_DIR, but on nt4.0 ...
-		*/
-		link_name[4] = (short)letter;
-		RtlInitUnicodeString(&uStr,link_name);
-		InitializeObjectAttributes(&ObjectAttributes,&uStr,
-			OBJ_CASE_INSENSITIVE,NULL,NULL);
-		Status = NtOpenSymbolicLinkObject(&hLink,SYMBOLIC_LINK_QUERY,
-			&ObjectAttributes);
-		if(!NT_SUCCESS(Status)){
-			winx_push_error("Can't open symbolic link %ls: %x!",link_name,(UINT)Status);
-			hLink = NULL;
-			goto invalid_volume;
-		}
-		uStr.Buffer = link_target;
-		uStr.Length = 0;
-		uStr.MaximumLength = MAX_TARGET_LENGTH * sizeof(short);
-		size = 0;
-		Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
-		NtClose(hLink);
-		if(!NT_SUCCESS(Status)){
-			winx_push_error("Can't query symbolic link %ls: %x!",link_name,(UINT)Status);
-			goto invalid_volume;
-		}
-		link_target[MAX_TARGET_LENGTH - 1] = 0; /* terminate the buffer */
-		if(wcsstr(link_target,L"\\??\\") == (wchar_t *)link_target){
-			winx_push_error("Volume letter is assigned by \'subst\' command!");
-			goto invalid_volume;
-		}
-		/*
-		* Floppies have "Floppy" substring in their names.
-		*/
-		if(wcsstr(link_target,L"Floppy")){
-			if(skip_removable){
-				winx_push_error("It's removable volume!");
-				goto invalid_volume;
-			}
-			goto get_vol_info;
-		}
-		/*
-		* To exclude other unwanted drives we need to query their types.
-		* Note that the drive motor can be powered on during this check.
-		*/
-		if(!internal_open_rootdir(letter,&hFile)) goto invalid_volume;
-		Status = NtQueryVolumeInformationFile(hFile,&IoStatusBlock,
-						&FileFsDevice,sizeof(FILE_FS_DEVICE_INFORMATION),
-						FileFsDeviceInformation);
-		NtClose(hFile);
-		if(!NT_SUCCESS(Status)){
-			winx_push_error("Can't get volume type for \'%c\': %x!",letter,(UINT)Status);
-			goto invalid_volume;
-		}
-		switch(FileFsDevice.DeviceType){
-		case FILE_DEVICE_CD_ROM:
-		case FILE_DEVICE_CD_ROM_FILE_SYSTEM:
-		case FILE_DEVICE_NETWORK_FILE_SYSTEM:
-			winx_push_error("Volume must be on non-cdrom local drive!");
-			goto invalid_volume;
-		case FILE_DEVICE_DISK:
-		case FILE_DEVICE_DISK_FILE_SYSTEM:
-			if(FileFsDevice.Characteristics & FILE_REMOTE_DEVICE){
-				winx_push_error("Volume must be on non-cdrom local drive!");
-				goto invalid_volume;
-			}
-			if((FileFsDevice.Characteristics & FILE_REMOVABLE_MEDIA) &&
-				skip_removable){
-					winx_push_error("It's removable volume!");
-					goto invalid_volume;
-			}
-			break;
-		case FILE_DEVICE_UNKNOWN:
-			winx_push_error("Unknown volume type!");
-			goto invalid_volume;
-		}
-	} else { /* not nt4_system */
-		type = (UINT)pProcessDeviceMapInfo->Query.DriveType[letter - 'A'];
-		if(type == DRIVE_CDROM || type == DRIVE_REMOTE){
-			winx_push_error("Volume must be on non-cdrom local drive, but it's %u!",type);
-			goto invalid_volume;
-		}
-		if(type == DRIVE_NO_ROOT_DIR){
-			winx_push_error("It seems that volume letter is assigned by \'subst\' command!");
-			goto invalid_volume;
-		}
-		if(type == DRIVE_REMOVABLE && skip_removable){
-			winx_push_error("It's removable volume!");
-			goto invalid_volume;
-		}
+	type = winx_get_drive_type(letter);
+	if(type == DRIVE_CDROM || type == DRIVE_REMOTE){
+		winx_push_error("Volume must be on non-cdrom local drive, but it's %u!",type);
+		goto invalid_volume;
 	}
-get_vol_info:
+	if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
+		winx_push_error("It seems that volume letter is assigned by \'subst\' command!");
+		goto invalid_volume;
+	}
+	if(type == DRIVE_REMOVABLE && skip_removable){
+		winx_push_error("It's removable volume!");
+		goto invalid_volume;
+	}
 	/* get volume information */
 	if(!internal_open_rootdir(letter,&hFile)) goto invalid_volume;
 	Status = NtQueryVolumeInformationFile(hFile,&IoStatusBlock,pFileFsSize,

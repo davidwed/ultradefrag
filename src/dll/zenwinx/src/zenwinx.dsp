@@ -91,11 +91,19 @@ SOURCE=.\privilege.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\reg.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\stdio.c
 # End Source File
 # Begin Source File
 
 SOURCE=.\thread.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\volume.c
 # End Source File
 # Begin Source File
 

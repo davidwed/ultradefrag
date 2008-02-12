@@ -90,6 +90,8 @@ extraResourceOptions=
 8=ldr.c
 9=thread.c
 10=privilege.c
+11=reg.c
+12=volume.c
 [Header]
 1=ntndk.h
 2=version.h
@@ -98,10 +100,13 @@ extraResourceOptions=
 1=zenwinx.rc
 [Other]
 [History]
-error.c,4911
-keytrans.c,2208
-ntndk.h,29356
-zenwinx.h,3167
+reg.c,7713
 stdio.c,2230
-zenwinx.c,1678
 thread.c,3163
+zenwinx.c,1678
+zenwinx.h,3848
+ntndk.h,29356
+keytrans.c,2208
+error.c,4911
+mem.c,2026
+volume.c,3694
