@@ -185,7 +185,7 @@ direct_call:
 	}
 }
 
-/* insert any block in free space map */
+/* inserts any block in free space map */
 /* TODO: this function should be optimized */
 void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 			  ULONGLONG start,ULONGLONG length,UCHAR old_space_state)
@@ -258,7 +258,7 @@ void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 	}
 }
 
-/* insert last block in free space map: used in analysis process only */
+/* inserts last block in free space map: used in analysis process only */
 FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 				 ULONGLONG start,ULONGLONG length)
 {

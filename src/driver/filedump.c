@@ -125,6 +125,7 @@ dump_success:
 	return TRUE; /* success */
 }
 
+/* inserts the specified block in file's blockmap */
 BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 					ULONGLONG startVcn,ULONGLONG startLcn,ULONGLONG length)
 {

@@ -121,6 +121,7 @@ fail:
 	return FALSE;
 }
 
+/* inserts the new FILENAME structure to filelist */
 /* FIXME: improve error handling */
 BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo,BOOLEAN is_root)
@@ -166,6 +167,7 @@ no_mem:
 	return TRUE;
 }
 
+/* inserts the new structure to list of fragmented files */
 /* FIXME: improve error handling */
 BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
@@ -201,6 +203,7 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	return TRUE;
 }
 
+/* removes unfragmented files from the list of fragmented files */
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFRAGMENTED pf,prev_pf;
