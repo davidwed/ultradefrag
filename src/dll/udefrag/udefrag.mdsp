@@ -90,11 +90,11 @@ extraResourceOptions=
 1=udefrag.rc
 [Other]
 [History]
+volume.c,8107
 ..\..\include\ultradfg.h,3436
-misc.c,0
-..\..\include\udefrag.h,1271
 ..\zenwinx\src\ntndk.h,10288
-sfuncs.c,1592
-udefrag.c,21391
-settings.c,11730
-volume.c,10746
+sfuncs.c,2293
+misc.c,947
+udefrag.c,18352
+settings.c,11486
+..\..\include\udefrag.h,1271

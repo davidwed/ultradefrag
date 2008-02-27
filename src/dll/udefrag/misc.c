@@ -31,7 +31,28 @@
 #include "../../include/udefrag.h"
 #include "../zenwinx/src/zenwinx.h"
 
-/* original name was StrFormatByteSize */
+/****f* udefrag.misc/fbsize
+* NAME
+*    fbsize
+* SYNOPSIS
+*    fbsize(buffer, n);
+* FUNCTION
+*    Converts the 64-bit number to string with one of
+*    the suffixes: Kb, Mb, Gb, Tb, Pb, Eb.
+*    With two digits after a dot.
+* INPUTS
+*    buffer - pointer to the buffer
+*    n      - 64-bit integer number
+* RESULT
+*    The number of characters stored.
+* EXAMPLE
+*    char buffer[16];
+*    fbsize(buffer,n);
+* NOTES
+*    Original name was StrFormatByteSize.
+* SEE ALSO
+*    fbsize2, dfbsize2
+******/
 int __stdcall fbsize(char *s,ULONGLONG n)
 {
 	char symbols[] = {'K','M','G','T','P','E'};
@@ -48,7 +69,24 @@ int __stdcall fbsize(char *s,ULONGLONG n)
 	return sprintf(s,"%u.%02u %cb",in / 100,in % 100,symbols[i]);
 }
 
-/* fbsize variant for other purposes */
+/****f* udefrag.misc/fbsize2
+* NAME
+*    fbsize2
+* SYNOPSIS
+*    fbsize2(buffer, n);
+* FUNCTION
+*    fbsize analog, but returns an integer number.
+* INPUTS
+*    buffer - pointer to the buffer
+*    n      - 64-bit integer number
+* RESULT
+*    The number of characters stored.
+* EXAMPLE
+*    char buffer[16];
+*    fbsize2(buffer,n);
+* SEE ALSO
+*    fbsize, dfbsize2
+******/
 int __stdcall fbsize2(char *s,ULONGLONG n)
 {
 	char symbols[] = {'K','M','G','T','P','E'};
@@ -61,7 +99,24 @@ int __stdcall fbsize2(char *s,ULONGLONG n)
 	return sprintf(s,"%u %cb",(int)n,symbols[i]);
 }
 
-/* decode fbsize2 formatted string */
+/****f* udefrag.misc/dfbsize2
+* NAME
+*    dfbsize2
+* SYNOPSIS
+*    dfbsize2(buffer, pn);
+* FUNCTION
+*    Decode fbsize2 formatted string.
+* INPUTS
+*    buffer - pointer to the buffer
+*    pn     - pointer to 64-bit integer number
+* RESULT
+*    Zero for success, -1 otherwise.
+* EXAMPLE
+*    char buffer[16];
+*    dfbsize2(buffer,&n);
+* SEE ALSO
+*    fbsize, fbsize2
+******/
 int __stdcall dfbsize2(char *s,ULONGLONG *pn)
 {
 	char symbols[] = {'K','M','G','T','P','E'};

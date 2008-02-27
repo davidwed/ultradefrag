@@ -35,6 +35,30 @@
 char vlist[4096];
 char map[32768];
 
+/****f* udefrag.scripting/udefrag_s_get_map
+* NAME
+*    udefrag_s_get_map
+* SYNOPSIS
+*    map = udefrag_s_get_map(size);
+* FUNCTION
+*    Retrieves the cluster map.
+* INPUTS
+*    size - size of cluster map.
+* RESULT
+*    map - string containing the cluster map.
+*          Or "ERROR: ..." string if failure.
+* EXAMPLE
+*    my $map_buffer = udefrag_s_get_map($x * $y + 1);
+*    $_ = $map_buffer;
+*    if(m/ERROR/o){
+*        # handle error
+*    }else{
+*        # draw map on the screen
+*    }
+* NOTES
+*    Color codes aren't the same as udefrag_get_map()
+*    returns.
+******/
 char * __stdcall udefrag_s_get_map(int size)
 {
 	char buffer[ERR_MSG_SIZE];
@@ -54,6 +78,32 @@ char * __stdcall udefrag_s_get_map(int size)
 	return map;
 }
 
+/****f* udefrag.scripting/udefrag_s_get_avail_volumes
+* NAME
+*    udefrag_s_get_avail_volumes
+* SYNOPSIS
+*    vlist = udefrag_s_get_avail_volumes(skip_removable);
+* FUNCTION
+*    Retrieves the list of available volumes.
+* INPUTS
+*    skip_removable - true if we need to skip removable drives,
+*                     false otherwise
+* RESULT
+*    vlist - string containing the list of available volumes.
+*            Or "ERROR: ..." string if failure.
+* EXAMPLE
+*    my $volumes = udefrag_s_get_avail_volumes($skip_rem);
+*    $_ = $volumes;
+*    if(m/ERROR/o){
+*        # handle error
+*    }else{
+*        # display list of available volumes
+*    }
+* NOTES
+*    if(skip_removable == FALSE && you have 
+*      floppy drive without floppy disk)
+*       then you will hear noise :))
+******/
 char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 {
 	char buffer[ERR_MSG_SIZE];

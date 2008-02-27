@@ -316,13 +316,49 @@ save_fail:
 	return (-1);
 }
 
-/* important registry cleanup for uninstaller */
+/****f* udefrag.settings/udefrag_clean_registry
+* NAME
+*    udefrag_clean_registry
+* SYNOPSIS
+*    error = udefrag_clean_registry();
+* FUNCTION
+*    Important registry cleanup for the uninstaller.
+* INPUTS
+*    Nothing.
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_clean_registry() < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        // handle error
+*    }
+* SEE ALSO
+*    udefrag_native_clean_registry
+******/
 int __stdcall udefrag_clean_registry(void)
 {
 	return winx_reg_remove_from_boot_execute(L"defrag_native");
 }
 
-/* registry cleanup for native executable */
+/****f* udefrag.settings/udefrag_native_clean_registry
+* NAME
+*    udefrag_native_clean_registry
+* SYNOPSIS
+*    error = udefrag_native_clean_registry();
+* FUNCTION
+*    Registry cleanup for the native executable.
+* INPUTS
+*    Nothing.
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_native_clean_registry() < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        // handle error
+*    }
+* SEE ALSO
+*    udefrag_clean_registry
+******/
 int __stdcall udefrag_native_clean_registry(void)
 {
 	HANDLE hKey;

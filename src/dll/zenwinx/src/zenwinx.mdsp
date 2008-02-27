@@ -100,13 +100,13 @@ extraResourceOptions=
 1=zenwinx.rc
 [Other]
 [History]
-reg.c,7713
+ntndk.h,29356
 stdio.c,2230
 thread.c,3163
 zenwinx.c,1678
-zenwinx.h,3848
-ntndk.h,29356
+zenwinx.h,3809
 keytrans.c,2208
 error.c,4911
 mem.c,2026
-volume.c,3694
+volume.c,3634
+reg.c,7713
