@@ -11,12 +11,13 @@
 <style type="text/css">
 <!--
 P {text-indent:10pt; padding-left:10pt}
-TD {text-align:left}
+TD {text-align:justify}
 .p10 {text-indent: 0pt; padding-left: 10pt}
 -->
 </style>
 </head>
-<body style="color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt;" alink="#ff0000" vlink="#660099">
+<body style="margin-left: 10pt; margin-right: 10pt; color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt;" 
+alink="#ff0000" vlink="#660099">
 <center>
 <hr /><font size="+1">U</font>ltra <font size="+1">D</font>efragmenter
 <font size="+1">V</font>ersion <font size="+1">1.3.0</font><br />
@@ -34,6 +35,38 @@ TD {text-align:left}
 </center><h3>Frequently Asked Questions</h3>
 <div class="p10" style="font-family: monospace; font-size: 11pt;">
 <table border="0" width="100%"><tbody>
+<tr>
+<td valign="top"><b>Q.:</b></td>
+<td valign="top">How many differencies are between the Ultra Defragmenter 
+and well known JkDefrag application?</td>
+</tr>
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+<tr>
+<td valign="top"><b>A.:</b></td>
+<td valign="top">
+Analysis algorithm is generally the same. But defragmentation is done in
+different ways. JkDefrag tries to optimize files placement using original 
+algorithm that is complex enough. On the other hand, Ultra Defragmenter is
+simple as possible - it tries to move all fragmented files to free space areas.
+Nothing more. 'Compact' option was added to give you an ability to move all
+files to the beginning of the volume to enlarge free space areas for future
+defragmentation success.<br /><br /> The best advantages of the Ultra Defragmenter are an
+ability to defragment system files at boot time and well readable reports.
+Also our program has a nice GUI that is very important for many peoples.
+At the same time advanced users can use console interface that is a little bit 
+faster because don't use any cluster map representation.<br /><br />
+The main disadvantage of both applications (Ultra Defragmenter and JkDefrag) is 
+that they are based on MS defragmenting interface that has very ugly 
+implementation. We can't change it's behavior because it's a part of filesystem
+drivers (ntfs.sys, fastfat.sys) that are too complex and not open source to
+modify or replace them.
+</td>
+</tr>
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
 <tr>
 <td valign="top"><b>Q.:</b></td>
 <td valign="top">How can I use filters?</td>
@@ -89,18 +122,26 @@ it? </td>
 </tr>
 <tr>
 <td valign="top"><b>A.:</b></td>
-<td valign="top">Thanks to <b>Christopher Naegel</b>
-for providing the following instructions:<br /> <div style="padding-left: 20pt;"> <ol> <li>Open a
-command line with admin-rights:<br /> Start -&gt; execute
--&gt; CMD (with admin rights).<br /> </li> <li>Type:<br />
-bcdedit /set loadoptions "DDISABLE_INTEGRITY_CHECKS"<br />
-bcdedit /set nointegritychecks ON<br /> </li> <li>Close
-the command prompt and start group policy editor:<br /> Start
--&gt; execute -&gt; gpedit.msc<br /> </li> <li>Go
-to:<br /> User Configuration -&gt; Administrative Templates
--&gt; System -&gt;<br /> Driver Installation -&gt;
-Code Signing for device drivers<br /> </li> <li>Enable
-this policy and set it to Ignore state. </li> </ol> </div>
+<td valign="top">Thanks to <b>Christopher Naegel</b> for providing 
+the following instructions:<br />
+<ol>
+<li>Open a command line with admin-rights:<br />
+<pre>Start -&gt; execute -&gt; CMD (with admin rights).</pre>
+</li>
+<li>Type:<br />
+<pre>bcdedit /set loadoptions "DDISABLE_INTEGRITY_CHECKS"
+bcdedit /set nointegritychecks ON</pre>
+</li>
+<li>Close the command prompt and start group policy editor:<br />
+<pre>Start -&gt; execute -&gt; gpedit.msc</pre>
+</li>
+<li>Go to:<br />
+<pre>User Configuration -&gt; Administrative Templates -&gt; 
+System -&gt; Driver Installation -&gt;
+Code Signing for device drivers</pre>
+</li>
+<li>Enable this policy and set it to Ignore state.</li>
+</ol>
 </td>
 </tr>
 </tbody></table>

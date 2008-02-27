@@ -1,5 +1,28 @@
 Frequently Asked Questions
 
+Q.: How many differencies are between the Ultra Defragmenter and 
+    well known JkDefrag application?
+	
+A.: Analysis algorithm is generally the same. But defragmentation is done 
+    in different ways. JkDefrag tries to optimize files placement using 
+    original algorithm that is complex enough. On the other hand, Ultra 
+    Defragmenter is simple as possible - it tries to move all fragmented 
+    files to free space areas. Nothing more. 'Compact' option was added to 
+    give you an ability to move all files to the beginning of the volume to 
+    enlarge free space areas for future defragmentation success.
+
+    The best advantages of the Ultra Defragmenter are an ability to defragment 
+    system files at boot time and well readable reports. Also our program has 
+    a nice GUI that is very important for many peoples. At the same time 
+    advanced users can use console interface that is a little bit faster 
+    because don't use any cluster map representation.
+
+    The main disadvantage of both applications (Ultra Defragmenter and JkDefrag) 
+    is that they are based on MS defragmenting interface that has very ugly 
+    implementation. We can't change it's behavior because it's a part of the 
+    filesystem drivers (ntfs.sys, fastfat.sys) that are too complex and not 
+    open source to modify or replace them.
+
 Q.: How can I use filters?
 
 A.: The include field is where you enter substring expressions that match

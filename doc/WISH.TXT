@@ -1,0 +1,16 @@
+User's wishes for the next releases:
+
+1. replace tab control in 'Settings' window with PropertySheetPage that has
+   more standard behavior
+
+2. 'compact' option for boot-time defragger
+
+3. new graphical interface with i18n support
+
+4. website translated into several foreign languages
+
+5. font customization in gui
+
+6. remove all TODO and FIXME comments from sources
+
+7. repeat analysis when something has been changed on disk
