@@ -28,6 +28,50 @@
 
 char buffer[1024];
 
+#if 0
+/*
+ * This is ReactOS _i64toa() implementation.
+ * copy _i64toa from wine cvs 2006 month 05 day 21
+ */
+char *
+ros_i64toa(__int64 value, char *string, int radix)
+{
+    ULONGLONG  val;
+    int negative;
+    char buffer[65];
+    char *pos;
+    int digit;
+
+    if (value < 0 && radix == 10) {
+	negative = 1;
+        val = -value;
+    } else {
+	negative = 0;
+        val = value;
+    } /* if */
+
+    pos = &buffer[64];
+    *pos = '\0';
+
+    do {
+	digit = (int)(val % radix);
+	val = val / radix;
+	if (digit < 10) {
+	    *--pos = '0' + digit;
+	} else {
+	    *--pos = 'a' + digit - 10;
+	} /* if */
+    } while (val != 0L);
+
+    if (negative) {
+	*--pos = '-';
+    } /* if */
+
+    memcpy(string, pos, &buffer[64] - pos + 1);
+    return string;
+}
+#endif
+
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	short p[] = L"\\??\\A:\\FRAGLIST.LUAR";
@@ -41,13 +85,13 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint1("-Ultradfg- Report %ws deleted with status %x\n",p,(UINT)status);
 }
 
-static __inline void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
-		   PVOID buffer,ULONG length,PLARGE_INTEGER pOffset)
+void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
+		   PVOID buf,ULONG length,PLARGE_INTEGER pOffset)
 {
 	IO_STATUS_BLOCK ioStatus;
 
 	ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
-			buffer,length,pOffset,NULL);
+			buf,length,pOffset,NULL);
 	pOffset->QuadPart += length;
 }
 
@@ -67,8 +111,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		else if(pf->pfn->is_overlimit) comment = "[OVR]";
 		else if(pf->pfn->is_compressed) comment = "[CMP]";
 		else comment = " - ";
-		memset(buffer,0,sizeof(buffer));
-		sprintf(buffer,
+		_snprintf(buffer, sizeof(buffer),
 			"\t{fragments = %u,size = %I64u,filtered = %u,"
 			"comment = \"%s\",name = [[",
 			(UINT)pf->pfn->n_fragments,
@@ -76,7 +119,26 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			(UINT)(pf->pfn->is_filtered & 0x1),
 			comment
 			);
+		buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		/*strcpy(buffer,"\t{fragments = ");
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		_itoa((UINT)pf->pfn->n_fragments,buffer,10);
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		strcpy(buffer,",size = ");
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);*/
+		/* fucked windows kernel don't have _i64toa() call */
+		/*ros_i64toa(pf->pfn->clusters_total * dx->bytes_per_cluster,buffer,10);
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		strcpy(buffer,",filtered = ");
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		_itoa((UINT)(pf->pfn->is_filtered & 0x1),buffer,10);
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		strcpy(buffer,",comment = \"");
+		strcat(buffer,comment);
+		strcat(buffer,"\",name = [[");
+		Write(dx,hFile,buffer,strlen(buffer),pOffset);*/
+
 		RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE);
 		/* replace square brackets with <> !!! */
 		for(i = 0; i < as.Length; i++){
@@ -89,8 +151,10 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		Write(dx,hFile,buffer,strlen(buffer),pOffset);
 		p = (char *)pf->pfn->name.Buffer;
 		for(i = 0; i < pf->pfn->name.Length; i++){
-			memset(buffer,0,sizeof(buffer));
-			sprintf(buffer,/*"%03u,"*/"%u,",(UINT)p[i]);
+			_snprintf(buffer,sizeof(buffer),/*"%03u,"*/"%u,",(UINT)p[i]);
+			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
+			//_itoa((UINT)p[i],buffer,10);
+			//strcat(buffer,",");
 			Write(dx,hFile,buffer,strlen(buffer),pOffset);
 		}
 		strcpy(buffer,"}},\r\n");
@@ -123,14 +187,26 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 		return FALSE;
 	}
 	offset.QuadPart = 0;
-	memset(buffer,0,sizeof(buffer));
-	sprintf(buffer,
+	_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
 		"volume_letter = \"%c\"\r\n\r\n"
 		"files = {\r\n",
 		dx->letter, dx->letter
 		);
+	buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 	Write(dx,hFile,buffer,strlen(buffer),&offset);
+	
+	/*strcpy(buffer,"-- UltraDefrag report for volume ");
+	Write(dx,hFile,buffer,strlen(buffer),&offset);
+	buffer[0] = dx->letter; buffer[1] = 0;
+	Write(dx,hFile,buffer,1,&offset);
+	strcpy(buffer,":\r\n\r\nvolume_letter = \"");
+	Write(dx,hFile,buffer,strlen(buffer),&offset);
+	buffer[0] = dx->letter; buffer[1] = 0;
+	Write(dx,hFile,buffer,1,&offset);
+	strcpy(buffer,"\"\r\n\r\nfiles = {\r\n");
+	Write(dx,hFile,buffer,strlen(buffer),&offset);*/
+	
 	WriteLogBody(dx,hFile,&offset,FALSE);
 	WriteLogBody(dx,hFile,&offset,TRUE);
 	strcpy(buffer,"}\r\n");
