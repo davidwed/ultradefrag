@@ -30,6 +30,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define lua_c
+#include "../lua5.1/lua.h"
+#include "../lua5.1/lauxlib.h"
+#include "../lua5.1/lualib.h"
+
 #include "main.h"
 #include "../include/ultradfg.h"
 
@@ -38,6 +43,7 @@
 extern HINSTANCE hInstance;
 extern HWND hWindow;
 RECT win_rc; /* coordinates of main window */
+int skip_removable = TRUE;
 
 HWND hTabCtrl;
 HWND hFilterDlg,hGuiDlg,hReportDlg,hBootSchedDlg;
@@ -360,4 +366,58 @@ BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		return FALSE;
 	}
 	return FALSE;
+}
+
+static int getint(lua_State *L, char *variable)
+{
+	int ret;
+	
+	lua_getglobal(L, variable);
+	ret = (int)lua_tointeger(L, lua_gettop(L));
+	lua_pop(L, 1);
+	return ret;
+}
+
+void GetPrefs(void)
+{
+	lua_State *L;
+	int status;
+	
+	win_rc.left = win_rc.top = 0;
+
+	L = lua_open();  /* create state */
+	if(!L) return;
+	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
+	luaL_openlibs(L);  /* open libraries */
+	lua_gc(L, LUA_GCRESTART, 0);
+
+	GetSystemDirectory(buffer,MAX_PATH);
+	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+	status = luaL_dofile(L,buffer);
+	if(!status){ /* successful */
+		win_rc.left = (long)getint(L,"x");
+		win_rc.top = (long)getint(L,"y");
+		skip_removable = getint(L,"skip_removable");
+	}
+	lua_close(L);
+}
+
+void SavePrefs(void)
+{
+	FILE *pf;
+	int result;
+	
+	GetSystemDirectory(buffer,MAX_PATH);
+	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+	pf = fopen(buffer,"wt");
+	if(!pf){
+failure:
+		MessageBox(0,"Can't save gui preferences!","Error!",
+				MB_OK | MB_ICONHAND);
+		return;
+	}
+	result = fprintf(pf,"x = %i\ny = %i\nskip_removable = %i\n",
+			(int)win_rc.left, (int)win_rc.top, skip_removable);
+	fclose(pf);
+	if(result < 0) goto failure;
 }

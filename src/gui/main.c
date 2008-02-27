@@ -99,6 +99,7 @@ BOOL portable_run = FALSE;
 BOOL uninstall_run = FALSE;
 
 extern RECT win_rc; /* coordinates of main window */
+extern int skip_removable;
 
 signed int delta_h = 0;
 
@@ -151,6 +152,9 @@ extern void DeleteMaps();
 
 BOOL CreateStatusBar();
 void UpdateStatusBar(int index);
+
+void GetPrefs(void);
+void SavePrefs(void);
 
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
@@ -211,7 +215,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		ExitProcess(0);
 	}
 	HandleError_(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
-	win_rc.left = settings->x; win_rc.top = settings->y;
+	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
 	memset((void *)work_status,0,sizeof(work_status));
 
@@ -228,7 +232,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* delete all created gdi objects */
 	DeleteMaps();
 	/* save settings */
-	settings->x = win_rc.left; settings->y = win_rc.top;
+	SavePrefs();
 	HandleError(L"",0);
 	/*
 	* We will never reach this point, 
@@ -267,7 +271,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	index = 0;
-	if(udefrag_get_avail_volumes(&v,settings->skip_removable) < 0){
+	if(udefrag_get_avail_volumes(&v,skip_removable) < 0){
 		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
 		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
 		goto scan_done;
@@ -391,7 +395,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hBtnRescan = GetDlgItem(hWnd,IDC_RESCAN);
 		hBtnSettings = GetDlgItem(hWnd,IDC_SETTINGS);
 		hCheckSkipRem = GetDlgItem(hWnd,IDC_SKIPREMOVABLE);
-		if(settings->skip_removable)
+		if(skip_removable)
 			SendMessage(hCheckSkipRem,BM_SETCHECK,BST_CHECKED,0);
 		else
 			SendMessage(hCheckSkipRem,BM_SETCHECK,BST_UNCHECKED,0);
@@ -500,7 +504,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case IDC_SKIPREMOVABLE:
 			if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
 				HIWORD(wParam) == BN_UNPUSHED || HIWORD(wParam) == BN_DBLCLK)
-				settings->skip_removable = \
+				skip_removable = \
 					(SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
 			break;
 		case IDC_SHOWFRAGMENTED:

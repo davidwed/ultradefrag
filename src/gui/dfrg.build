@@ -6,5 +6,5 @@ SRC=main.c;map.c;settings.c
 RC=dfrg.rc
 
 LIBS=kernel32;user32;gdi32;comctl32;shell32;msvcrt;comdlg32
-ADLIBS=$(UDEFRAG_LIB_PATH)\udefrag
+ADLIBS=$(UDEFRAG_LIB_PATH)\udefrag;$(UDEFRAG_LIB_PATH)\lua5.1a
 UMENTRY=winmain
