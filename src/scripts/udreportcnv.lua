@@ -26,7 +26,7 @@ assert(arg[1],"Lua Report file name must be specified!")
 assert(arg[2],"Path to the system32 directory\nmust be specified as second parameter!")
 
 -- read options
-dofile(arg[2] .. "\\udreportopts.lua")
+dofile(arg[2] .. "\\UltraDefrag\\options\\udreportopts.lua")
 
 -- source file reading
 dofile(arg[1])
@@ -159,7 +159,8 @@ function produce_html_output()
 	local filename
 	local pos = 0
 	local js
-	local links = links_x1 .. "href=\"file:///" .. arg[2] .. "\\udreportopts.lua\" " .. links_x2
+	local links = links_x1 .. "href=\"file:///" .. arg[2]
+	links = links .. "\\UltraDefrag\\options\\udreportopts.lua\" " .. links_x2
 
 	repeat
 		pos = string.find(arg[1],"\\",pos + 1,true)
@@ -179,7 +180,7 @@ function produce_html_output()
 
 	if(enable_sorting == 1) then
 		-- read udsorting.js file contents
-		local f2 = assert(io.open(arg[2] .. "\\udsorting.js", "r"))
+		local f2 = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udsorting.js", "r"))
 	    js = f2:read("*all")
 	    f2:close()
 	else
@@ -235,6 +236,7 @@ function produce_html_output()
 			)
 	end
 	write_data(f,
+		--table_head,
 		"</table>\n</div>\n", links, "\n"
 		)
 	write_data(f,end_of_page)

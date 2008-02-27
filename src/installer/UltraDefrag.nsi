@@ -64,8 +64,8 @@ Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
 OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
 
 LicenseData "${ROOTDIR}\src\LICENSE.TXT"
-InstallDir "$PROGRAMFILES64\UltraDefrag"
-InstallDirRegKey HKLM "Software\DASoft\NTDefrag" "Install_Dir"
+;InstallDir "$PROGRAMFILES64\UltraDefrag"
+;InstallDirRegKey HKLM "Software\DASoft\NTDefrag" "Install_Dir"
 ShowInstDetails show
 ShowUninstDetails show
 
@@ -85,7 +85,7 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
   !insertmacro MUI_PAGE_WELCOME
   !insertmacro MUI_PAGE_LICENSE "${ROOTDIR}\src\LICENSE.TXT"
   !insertmacro MUI_PAGE_COMPONENTS
-  !insertmacro MUI_PAGE_DIRECTORY
+;  !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
@@ -95,11 +95,11 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
   !insertmacro MUI_UNPAGE_FINISH
 
   !insertmacro MUI_LANGUAGE "English"
-  !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+  ;;;!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 !else
   Page license
   Page components
-  Page directory
+;  Page directory
   Page instfiles
 
   UninstPage uninstConfirm
@@ -120,6 +120,19 @@ Function .onInit
 
   push $R0
   push $R1
+
+!insertmacro DisableX64FSRedirection
+  ; ultradefrag 1.3.1+ will be installed in %sysdir%\UltraDefrag
+  StrCpy $INSTDIR "$SYSDIR\UltraDefrag"
+  /* is already installed 1.3.0 or earlier version? */
+  IfFileExists "$SYSDIR\defrag_native.exe" 0 version_checked
+  IfFileExists "$INSTDIR\dfrg.exe" version_checked 0
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+   "Uninstall any previous version of Ultra Defragmenter $\nbefore this installation!" \
+   /SD IDOK
+   goto abort_inst
+version_checked:
+!insertmacro EnableX64FSRedirection
 
   /* variables initialization */
   StrCpy $NT4_TARGET 0
@@ -180,7 +193,7 @@ FunctionEnd
 
 Function install_driver
 
-  StrCpy $R0 "$WINDIR\System32\Drivers"
+  StrCpy $R0 "$SYSDIR\Drivers"
   SetOutPath $R0
   StrCmp $NT4_TARGET '1' 0 modern_win
   DetailPrint "NT 4.0 version"
@@ -300,9 +313,17 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\INSTALL.TXT"
   File "${ROOTDIR}\src\README.TXT"
   File "${ROOTDIR}\src\FAQ.TXT"
+  SetOutPath "$INSTDIR\scripts"
+  File "${ROOTDIR}\src\scripts\udctxhandler.lua"
+  File "${ROOTDIR}\src\scripts\udreportcnv.lua"
+  File "${ROOTDIR}\src\scripts\udsorting.js"
+  SetOutPath "$INSTDIR\options"
+  File "${ROOTDIR}\src\scripts\udreportopts.lua"
+  ;;File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
+  SetOutPath $INSTDIR
 
-  Delete "$INSTDIR\defrag.exe"
-  Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
+  ;;Delete "$INSTDIR\defrag.exe"
+  ;;Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
 
   SetOutPath "$INSTDIR\presets"
   File "${ROOTDIR}\src\presets\standard"
@@ -313,23 +334,18 @@ Section "Ultra Defrag core files (required)" SecCore
   call install_driver
 
   DetailPrint "Install boot time defragger..."
-  SetOutPath "$WINDIR\System32"
+  SetOutPath "$SYSDIR"
   File "udefrag.dll"
   File "zenwinx.dll"
   File "defrag_native.exe"
   DetailPrint "Install console interface..."
   File "udefrag.exe"
-  ;File "${ROOTDIR}\src\installer\udctxhandler.cmd"
-  File "${ROOTDIR}\src\scripts\udctxhandler.lua"
-  File "${ROOTDIR}\src\scripts\udreportcnv.lua"
-  File "${ROOTDIR}\src\scripts\udreportopts.lua"
-  File "${ROOTDIR}\src\scripts\udsorting.js"
-  File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
+
   WriteRegStr HKCR ".luar" "" "LuaReport"
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$SYSDIR\lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $SYSDIR\udreportcnv.lua %1 $SYSDIR -v"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $SYSDIR -v"
   DetailPrint "Install Lua 5.1 ..."
   File "lua5.1a.dll"
   File "lua5.1a.exe"
@@ -424,7 +440,7 @@ Section "Context menu handler" SecContextMenuHandler
 
   WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
   ;WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\cmd.exe /C udctxhandler.cmd %1"
-  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\lua5.1a.exe $SYSDIR\udctxhandler.lua %1"
+  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
 
 SectionEnd
 
@@ -472,6 +488,9 @@ SectionEnd
 
 Section "Uninstall"
 
+!insertmacro DisableX64FSRedirection
+  StrCpy $INSTDIR "$SYSDIR\UltraDefrag"
+
   DetailPrint "Remove shortcuts..."
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\DASoft\UltraDefrag"
@@ -489,6 +508,12 @@ Section "Uninstall"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
   Delete "$INSTDIR\FAQ.TXT"
+  Delete "$INSTDIR\scripts\udctxhandler.lua"
+  Delete "$INSTDIR\scripts\udreportcnv.lua"
+  Delete "$INSTDIR\scripts\udsorting.js"
+  RMDir "$INSTDIR\scripts"
+  Delete "$INSTDIR\options\udreportopts.lua"
+  RMDir "$INSTDIR\options"
   Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$INSTDIR\uninstall.exe"
   Delete "$INSTDIR\presets\standard"
@@ -499,17 +524,11 @@ Section "Uninstall"
   RMDir $INSTDIR
 
   DetailPrint "Uninstall driver and boot time defragger..."
-!insertmacro DisableX64FSRedirection
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\udefrag.exe"
-  ;Delete "$SYSDIR\udctxhandler.cmd"
-  Delete "$SYSDIR\udctxhandler.lua"
-  Delete "$SYSDIR\udreportcnv.lua"
-  Delete "$SYSDIR\udreportopts.lua"
-  Delete "$SYSDIR\udsorting.js"
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
@@ -523,10 +542,10 @@ Section "Uninstall"
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
   ; remove settings of previous versions
-  DeleteRegKey HKCU "SOFTWARE\DASoft\NTDefrag"
-  DeleteRegKey /ifempty HKCU "Software\DASoft"
-  DeleteRegKey HKLM "Software\DASoft\NTDefrag"
-  DeleteRegKey /ifempty HKLM "Software\DASoft"
+  ;DeleteRegKey HKCU "SOFTWARE\DASoft\NTDefrag"
+  ;DeleteRegKey /ifempty HKCU "Software\DASoft"
+  ;DeleteRegKey HKLM "Software\DASoft\NTDefrag"
+  ;DeleteRegKey /ifempty HKLM "Software\DASoft"
   
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"
