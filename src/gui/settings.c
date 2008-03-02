@@ -359,7 +359,7 @@ BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		switch(LOWORD(wParam)){
 		case IDC_EDITREPORTOPTS:
 			GetSystemDirectory(buffer,MAX_PATH);
-			strcat(buffer,"\\udreportopts.lua");
+			strcat(buffer,"\\UltraDefrag\\options\\udreportopts.lua");
 			ShellExecute(hWindow,"open",buffer,NULL,NULL,SW_SHOW);
 			break;
 		}
