@@ -318,8 +318,12 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
   SetOutPath "$INSTDIR\options"
+  IfFileExists "$INSTDIR\options\udreportopts.lua" skip_opts 0
   File "${ROOTDIR}\src\scripts\udreportopts.lua"
+skip_opts:
   ;;File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
+  SetOutPath "$INSTDIR\doc"
+  File "${ROOTDIR}\doc\html\about.html"
   SetOutPath $INSTDIR
 
   ;;Delete "$INSTDIR\defrag.exe"
@@ -512,7 +516,7 @@ Section "Uninstall"
   Delete "$INSTDIR\scripts\udreportcnv.lua"
   Delete "$INSTDIR\scripts\udsorting.js"
   RMDir "$INSTDIR\scripts"
-  Delete "$INSTDIR\options\udreportopts.lua"
+  ;;;Delete "$INSTDIR\options\udreportopts.lua"
   RMDir "$INSTDIR\options"
   Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$INSTDIR\uninstall.exe"
