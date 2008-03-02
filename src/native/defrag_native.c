@@ -103,7 +103,21 @@ void UpdateProgress()
 				}
 			}
 			i = 0; /* new operation */
-			winx_printf("\n%c: ",stat.current_operation);
+			//winx_printf("\n%c: ",stat.current_operation);
+			switch(stat.current_operation){
+			case 'a':
+			case 'A':
+				winx_printf("\nAnalyse : ");
+				break;
+			case 'd':
+			case 'D':
+				winx_printf("\nDefrag  : ");
+				break;
+			case 'c':
+			case 'C':
+				winx_printf("\nOptimize: ");
+				break;
+			}
 			last_op = stat.current_operation;
 		}
 		j = (int)percentage / 2;
