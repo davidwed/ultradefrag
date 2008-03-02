@@ -1,6 +1,7 @@
 <html>
 <head>
 <title>About Ultra Defragmenter</title>
+<!-- Tested in Firefox 1.5.0, Safari 3.0, Opera 9.23 and IE 6.0 -->
 <style>
 body {
 	background-color: lightgray;
@@ -19,7 +20,7 @@ a {
 	height: 311pt;
 	*/
 	border: 1px solid;
-	border-color: windowframe;
+	border-color: black;
 }
 
 #caption {
@@ -29,7 +30,7 @@ a {
 	width: 275pt;
 	height: 15pt;
 	border: 1px solid;
-	border-color: windowframe;
+	border-color: black;
 	color: yellow;
 	background-color: darkblue;
 	font-weight: bolder;
@@ -63,7 +64,7 @@ a {
 	width: 275pt;
 	height: 296pt;
 	border: 1px solid;
-	border-color: windowframe;
+	border-color: black;
 }
 
 /* for the legend block */
@@ -74,7 +75,7 @@ a {
 	width: 255pt;
 	height: 100pt;
 	border: 1px solid;
-	border-color: windowframe;
+	border-color: black;
 	z-index: 1;
 }
 
@@ -94,6 +95,7 @@ a {
 	width: 8pt;
 	height: 8pt;
 	border: 1px solid;
+	font-size: 6pt; /* specially for IE */
 }
 
 /* for static text */
@@ -109,7 +111,7 @@ a {
 	width: 235pt;
 	height: 32pt;
 	border: 1px solid;
-	border-color: windowframe;
+	border-color: black;
 	background-color: #ffffe1;
 }
 
@@ -120,7 +122,7 @@ a {
 	width: 255pt;
 	height: 100pt;
 	border: 1px solid;
-	border-color: windowframe;
+	border-color: black;
 	z-index: 1;
 }
 
@@ -137,7 +139,7 @@ a {
 	width: 255pt;
 	height: 45pt;
 	border: 1px solid;
-	border-color: windowframe;
+	border-color: black;
 	z-index: 1;
 }
 </style>
@@ -146,7 +148,9 @@ a {
 <div id="window" style="top: 0pt; left: 0pt; width: 275pt; height: 311pt;">
 <div id="caption">
 &nbsp;About Ultra Defragmenter
-	<a href="javascript:close_win();"><div id="cross"><div id="cross_letter">X</div></div></a>
+	<a href="javascript:close_win();" style="text-decoration: none;">
+		<div id="cross"><div id="cross_letter">X</div></div>
+	</a>
 </div>
 <div id="content">
 <!-- Legend -->
@@ -156,25 +160,25 @@ a {
 		</div>
 	<!-- color boxes -->
 	<div class="cb" style="top: 10pt; left: 10pt; background-color: red;"></div>
-	<div class="cb" style="top: 10pt; left: 20pt; background-color: darkred;"></div>
+	<div class="cb" style="top: 10pt; left: 18pt; background-color: darkred;"></div>
 	<div class="cb" style="top: 10pt; left: 100pt; background-color: blue;"></div>
-	<div class="cb" style="top: 10pt; left: 110pt; background-color: darkblue;"></div>
+	<div class="cb" style="top: 10pt; left: 108pt; background-color: darkblue;"></div>
 	<div class="cb" style="top: 10pt; left: 200pt; background-color: white;"></div>
 	<div class="cb" style="top: 25pt; left: 10pt; background-color: yellow;"></div>
-	<div class="cb" style="top: 25pt; left: 20pt; background-color: #eedd00;"></div>
+	<div class="cb" style="top: 25pt; left: 18pt; background-color: #eedd00;"></div>
 	<div class="cb" style="top: 25pt; left: 100pt; background-color: #aaaa00;"></div>
-	<div class="cb" style="top: 25pt; left: 110pt; background-color: #777700;"></div>
+	<div class="cb" style="top: 25pt; left: 108pt; background-color: #777700;"></div>
 	<div class="cb" style="top: 25pt; left: 200pt; background-color: #00dd00;"></div>
 	<div class="cb" style="top: 40pt; left: 10pt; background-color: cyan;"></div>
 	<div class="cb" style="top: 40pt; left: 200pt; background-color: darkmagenta;"></div>
 	<!-- descriptions -->
-	<div class="st" style="top: 9pt; left: 35pt;">Fragmented</div>
-	<div class="st" style="top: 9pt; left: 125pt;">Unfragmented</div>
+	<div class="st" style="top: 9pt; left: 33pt;">Fragmented</div>
+	<div class="st" style="top: 9pt; left: 123pt;">Unfragmented</div>
 	<div class="st" style="top: 9pt; left: 215pt;">Free</div>
-	<div class="st" style="top: 24pt; left: 35pt;">Directory</div>
-	<div class="st" style="top: 24pt; left: 125pt;">Compressed</div>
+	<div class="st" style="top: 24pt; left: 33pt;">Directory</div>
+	<div class="st" style="top: 24pt; left: 123pt;">Compressed</div>
 	<div class="st" style="top: 24pt; left: 215pt;">System</div>
-	<div class="st" style="top: 39pt; left: 35pt; width: 155pt">Temporary system</div>
+	<div class="st" style="top: 39pt; left: 33pt; width: 155pt">Temporary system</div>
 	<div class="st" style="top: 39pt; left: 215pt;">MFT</div>
 	<div id="threshold_note"></div>
 	<div class="st" style="top: 60pt; left: 14pt;">
@@ -211,12 +215,49 @@ a {
 	</div>
 </div>
 </div>
+<script type="text/javascript">
+// from http://www.tigir.com/javascript.htm
+//IE5+, Mozilla 1.0+, Opera 7+
+
+function getClientWidth(){
+  return document.compatMode=='CSS1Compat' && !window.opera?document.documentElement.clientWidth:document.body.clientWidth;
+}
+
+function getClientHeight(){
+  return document.compatMode=='CSS1Compat' && !window.opera?document.documentElement.clientHeight:document.body.clientHeight;
+}
+</script>
 <script language="javascript">
+var msie_browser = false;
+var cross = document.getElementById("cross");
+var notes = document.getElementById("notes_list");
+if(window.navigator.appName == "Microsoft Internet Explorer"){
+	msie_browser = true;
+	cross.style.cursor = "hand";
+	cross.style.width = cross.style.height = "11pt";
+	notes.style.top = "10pt";
+}
 var win = document.getElementById("window");
-//var left = (document.width - parseInt(win.style.width));
-//alert(left);
-//win.style.top = "10pt";
-//win.style.left = left + "pt";
+onResize(null);
+
+// for debugging
+window.onresize = onResize;
+
+function onResize(e){
+	// I don't know why -40
+	//win.style.display = "none";
+	var left = (getClientWidth() - parseInt(win.style.width)) / 2 - 40;
+	if(left < 0) left = 0;
+	var top = (getClientHeight() - parseInt(win.style.height)) / 2 - 40;
+	if(top < 0) top = 0;
+	win.style.left = left + "px";
+	win.style.top = top + "px";
+	//win.style.display = "block";
+}
+
+function close_win(){
+	window.close();
+}
 </script>
 </body>
 </html>
