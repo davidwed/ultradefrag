@@ -101,19 +101,8 @@ int __stdcall fbsize2(char *s,ULONGLONG n);
 int __stdcall dfbsize2(char *s,ULONGLONG *pn);
 
 /* interface for scripting languages */
-char * __stdcall udefrag_s_init(long map_size);
-char * __stdcall udefrag_s_unload(BOOL save_options);
-
-char * __stdcall udefrag_s_stop(void);
-char * __stdcall udefrag_s_get_progress(void);
 char * __stdcall udefrag_s_get_map(int size);
-
-char * __stdcall udefrag_s_get_options(void);
-char * __stdcall udefrag_s_set_options(char *string);
-
 char * __stdcall udefrag_s_get_avail_volumes(int skip_removable);
-char * __stdcall udefrag_s_validate_volume(unsigned char letter,int skip_removable);
-char * __stdcall scheduler_s_get_avail_letters(void);
 
 /* because perl/Tk is incompatible with threads 
  * we should provide callback functions
@@ -124,11 +113,6 @@ int __stdcall udefrag_defragment(unsigned char letter,STATUPDATEPROC sproc);
 int __stdcall udefrag_optimize(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_get_command_result(void);
 short * __stdcall udefrag_get_command_result_w(void);
-
-char * __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
-char * __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc);
-char * __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc);
-char * __stdcall udefrag_s_get_ex_command_result(void);
 
 void __stdcall udefrag_pop_error(char *buffer, int size);
 void __stdcall udefrag_pop_werror(short *buffer, int size);

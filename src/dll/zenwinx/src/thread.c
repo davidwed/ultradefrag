@@ -28,13 +28,6 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-#define ExitThreadFound		0
-#define ExitThreadNotFound	1
-#define ExitThreadUndefined	2
-
-int ExitThreadState = ExitThreadUndefined;
-VOID (__stdcall *func_RtlExitUserThread)(NTSTATUS Status);
-
 /****f* zenwinx.thread/winx_create_thread
 * NAME
 *    winx_create_thread
