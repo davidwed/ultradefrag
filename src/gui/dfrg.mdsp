@@ -90,8 +90,8 @@ extraResourceOptions=
 1=dfrg.rc
 [Other]
 [History]
+settings.c,8480
 map.c,1558
 main.h,1117
 dfrg.rc,0
-settings.c,13297
-main.c,2710
+main.c,14343

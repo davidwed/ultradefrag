@@ -496,6 +496,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_ABOUT:
 			DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
+			//ShellExecute(hWindow,"open",".\\doc\\about.html",NULL,NULL,SW_SHOW);
 			break;
 		case IDC_SETTINGS:
 			if(!busy_flag)

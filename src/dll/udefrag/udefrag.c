@@ -66,6 +66,9 @@ int __stdcall udefrag_load_settings(int argc, short **argv);
 int __stdcall udefrag_save_settings(void);
 int __stdcall udefrag_unload(BOOL save_options);
 
+int getopts(char *filename);
+int saveopts(char *filename);
+
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
 /* functions */
@@ -224,7 +227,8 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 		"Can't setup cluster map buffer: %x!")) goto init_fail;
 	/* 7. Load settings */
 	udefrag_load_settings(argc,argv);
-	if(udefrag_set_options(&settings)) goto init_fail;
+	///if(saveopts("\\??\\D:\\MyDocs\\udefrag.cfg") < 0) goto init_fail;
+	if(udefrag_set_options(&settings) < 0) goto init_fail;
 	return 0;
 init_fail:
 	NtCloseSafe(UserToken);

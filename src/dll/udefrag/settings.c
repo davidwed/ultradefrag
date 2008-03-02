@@ -73,6 +73,11 @@ short boot_ex_filter[MAX_FILTER_SIZE + 1];
 #define MAX_SCHED_LETTERS 64
 short sched_letters[MAX_SCHED_LETTERS + 1];
 
+short file_buffer[32768];
+
+int getopts(char *filename);
+int saveopts(char *filename);
+
 static __inline int ReadRegValue(HANDLE h, short *name, DWORD type, void *pval, DWORD size)
 {
 	DWORD dwSize = size;
@@ -376,4 +381,93 @@ int __stdcall udefrag_native_clean_registry(void)
 	}
 	if(settings.every_boot) return 0;
 	return winx_reg_remove_from_boot_execute(L"defrag_native");
+}
+
+/* new interface to udefrag.cfg file*/
+int getopts(char *filename)
+{
+	return 0;
+}
+
+int saveopts(char *filename)
+{
+	int status;
+	char sl[68];
+	char *dl;
+	
+	WINX_FILE *f = winx_fopen(filename,"w");
+	if(!f) return -1;
+	fbsize2(sl,settings.sizelimit);
+	switch(settings.dbgprint_level){
+	case DBG_DETAILED:
+		dl = "DETAILED";
+		break;
+	case DBG_PARANOID:
+		dl = "PARANOID";
+		break;
+	default:
+		dl = "NORMAL";
+	}
+	_snwprintf(file_buffer,sizeof(file_buffer),
+			L";------------------------------------------------------------------------------\r\n"
+			L";\r\n"
+			L"; Filter\r\n"
+			L";\r\n"
+			L"; 1. Enter multiple filter match strings separated by the semicolon (;)\r\n"
+			L";    character. Note that filter is case insensitive.\r\n"
+			L"; 2. You can specify maximum file size with the following suffixes:\r\n"
+			L";    Kb, Mb, Gb, Tb, Eb, Pb.\r\n"
+			L";\r\n"
+			L";------------------------------------------------------------------------------\r\n\r\n"
+			L"INCLUDE             = %ws\r\n"
+			L"EXCLUDE             = %ws\r\n"
+			L"SIZELIMIT           = %S\r\n\r\n"
+			L";------------------------------------------------------------------------------\r\n"
+			L";\r\n"
+			L"; Boot time settings\r\n"
+			L";\r\n"
+			L"; 1. Enter multiple filter match strings separated by the semicolon (;)\r\n"
+			L";    character. Note that filter is case insensitive.\r\n"
+			L"; 2. The volume letters must be either separated by semicolons (;)\r\n" 
+			L";    or don't contain any separators between.\r\n"
+			L";\r\n"
+			L";------------------------------------------------------------------------------\r\n\r\n"
+			L"BOOT_TIME_INCLUDE   = %ws\r\n"
+			L"BOOT_TIME_EXCLUDE   = %ws\r\n"
+			L"LETTERS             = %ws\r\n"
+			L"NEXT_BOOT           = %S\r\n"
+			L"EVERY_BOOT          = %S\r\n\r\n"
+			L";------------------------------------------------------------------------------\r\n"
+			L";\r\n"
+			L"; Main report settings.\r\n"
+			L";\r\n"
+			L";------------------------------------------------------------------------------\r\n\r\n"
+			L"ENABLE_REPORTS      = %S\r\n"
+			L"DBGPRINT_LEVEL      = %S\r\n\r\n"
+			L";------------------------------------------------------------------------------\r\n"
+			L";\r\n"
+			L"; Other settings\r\n"
+			L";\r\n"
+			L"; Enter the map update interval in milliseconds.\r\n"
+			L";\r\n"
+			L";------------------------------------------------------------------------------\r\n\r\n"
+			L"MAP_UPDATE_INTERVAL = %u\r\n"
+			,
+			settings.in_filter,
+			settings.ex_filter,
+			sl,
+			settings.boot_in_filter,
+			settings.boot_ex_filter,
+			settings.sched_letters,
+			settings.next_boot ? "YES" : "NO",
+			settings.every_boot ? "YES" : "NO",
+			(settings.report_type != NO_REPORT) ? "YES" : "NO",
+			dl,
+			settings.update_interval
+			);
+	file_buffer[sizeof(file_buffer) - 1] = 0;
+	status = winx_fwrite(file_buffer,
+			 sizeof(short),wcslen(file_buffer),f);
+	winx_fclose(f);
+	return status ? 0 : (-1);
 }
