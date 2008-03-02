@@ -2,6 +2,12 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 1.3.1 (22.5)   2008-03-02
+  ------------------------------------------------------------------------------
+    - SCSI and RAID volumes support was added
+    - some significant bugs were fixed (BSOD's)
+    - new installation location: %windir%\system32\UltraDefrag
+
   Version 1.3.0 (22.5)   2008-02-06
   ------------------------------------------------------------------------------
     - driver code was completely rewritten (to improve reliability)
