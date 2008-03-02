@@ -34,3 +34,7 @@ EXPORTS
 	winx_reg_remove_from_boot_execute@4
 	winx_reg_close_key@4
 	winx_get_drive_type@4
+	winx_fopen@8
+	winx_fread@16
+	winx_fwrite@16
+	winx_fclose@4

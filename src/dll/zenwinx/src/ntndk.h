@@ -378,7 +378,19 @@ typedef enum _PROCESSINFOCLASS {
 #define SYMBOLIC_LINK_ALL_ACCESS  (STANDARD_RIGHTS_REQUIRED | 0x1)
 
 #ifndef FILE_OPEN
-#define FILE_OPEN                 0x1
+#define FILE_OPEN                       1
+#endif
+#ifndef FILE_CREATE
+#define FILE_CREATE                     2
+#endif
+#ifndef FILE_OPEN_IF
+#define FILE_OPEN_IF                    3
+#endif
+#ifndef FILE_OVERWRITE
+#define FILE_OVERWRITE                  4
+#endif
+#ifndef FILE_OVERWRITE_IF
+#define FILE_OVERWRITE_IF               5
 #endif
 
 typedef struct RTL_DRIVE_LETTER_CURDIR

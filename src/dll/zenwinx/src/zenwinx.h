@@ -60,6 +60,12 @@
 
 #define ERR_MSG_SIZE 1024
 
+typedef struct _WINX_FILE {
+	HANDLE hFile;
+	LARGE_INTEGER roffset;
+	LARGE_INTEGER woffset;
+} WINX_FILE, *PWINX_FILE;
+
 /* zenwinx functions prototypes */
 int  __stdcall winx_init(void *peb);
 void __stdcall winx_exit(int exit_code);
@@ -108,5 +114,10 @@ void __stdcall winx_reg_close_key(HANDLE hKey);
 
 #define DRIVE_ASSIGNED_BY_SUBST_COMMAND 1200
 int __stdcall winx_get_drive_type(char letter);
+
+WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
+size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
+size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
+void   __stdcall winx_fclose(WINX_FILE *f);
 
 #endif /* _ZENWINX_H_ */

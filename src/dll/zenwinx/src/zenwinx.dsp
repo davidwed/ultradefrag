@@ -67,6 +67,10 @@ SOURCE=.\error.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\file.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\keyboard.c
 # End Source File
 # Begin Source File
