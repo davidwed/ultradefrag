@@ -229,19 +229,39 @@ function getClientHeight(){
 </script>
 <script language="javascript">
 var msie_browser = false;
-var cross = document.getElementById("cross");
-var notes = document.getElementById("notes_list");
-if(window.navigator.appName == "Microsoft Internet Explorer"){
-	msie_browser = true;
-	cross.style.cursor = "hand";
-	cross.style.width = cross.style.height = "11pt";
-	notes.style.top = "10pt";
-}
-var win = document.getElementById("window");
-onResize(null);
+var win;
 
-// for debugging
-window.onresize = onResize;
+init();
+
+function init(){
+	// The following code must be compatible with IE 3.0
+	if(window.navigator.appName == "Microsoft Internet Explorer"){
+		msie_browser = true;
+
+		var ver = window.navigator.appVersion;
+		var verHi = parseInt(ver);
+		var agent = window.navigator.userAgent.toLowerCase();
+		var ie4_browser = ((ver == 4) && (agent.indexOf("msie 5.0") == -1));
+		if(ver < 4 || ie4_browser){ // the browser is too old
+			document.open();
+			document.write("<h1>Hello!</h1>");
+			window.status = "Your browser is too old!";
+			return;
+		}
+		// The next code could be incompatible with IE 3.0
+		var cross = document.getElementById("cross");
+		cross.style.cursor = "hand";
+		cross.style.width = cross.style.height = "11pt";
+		var notes = document.getElementById("notes_list");
+		notes.style.top = "10pt";
+	}
+
+	win = document.getElementById("window");
+	onResize(null);
+
+	// for debugging
+	window.onresize = onResize;
+}
 
 function onResize(e){
 	// I don't know why -40
