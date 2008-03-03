@@ -4,6 +4,7 @@
 ** See Copyright Notice in lua.h
 */
 
+#include <windows.h>
 
 #define linit_c
 #define LUA_LIB
@@ -13,6 +14,10 @@
 #include "lualib.h"
 #include "lauxlib.h"
 
+/* dll entry point - added by dmitriar */
+BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved) {
+	return 1;
+}
 
 static const luaL_Reg lualibs[] = {
   {"", luaopen_base},
