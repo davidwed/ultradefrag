@@ -132,7 +132,6 @@ Function .onInit
    /SD IDOK
    goto abort_inst
 version_checked:
-!insertmacro EnableX64FSRedirection
 
   /* variables initialization */
   StrCpy $NT4_TARGET 0
@@ -151,6 +150,7 @@ version_checked:
    "On Windows 9.x this program is absolutely unuseful!" \
    /SD IDOK
 abort_inst:
+!insertmacro EnableX64FSRedirection
   pop $R1
   pop $R0
   Abort
@@ -167,11 +167,9 @@ winnt_456:
 winnt_56:
   
   /* is already installed? */
-!insertmacro DisableX64FSRedirection
   IfFileExists "$SYSDIR\defrag_native.exe" 0 not_installed
   StrCpy $IsInstalled 1
 not_installed:
-!insertmacro EnableX64FSRedirection
   /* portable package? */
   ; if silent key specified than continue installation
   IfSilent init_ok
@@ -184,6 +182,7 @@ init_ok:
   call PortableRun
   goto abort_inst
 init_done:
+!insertmacro EnableX64FSRedirection
   pop $R1
   pop $R0
 
@@ -219,6 +218,7 @@ Function ShowBootSplash
   push $R1
 
   IfSilent splash_done
+!insertmacro DisableX64FSRedirection
   /* show bootsplash */
   InitPluginsDir
   SetOutPath $PLUGINSDIR
@@ -235,6 +235,7 @@ show_general_splash:
   pop $R0
   Delete "$PLUGINSDIR\UltraDefrag.bmp"
 splash_done:
+!insertmacro EnableX64FSRedirection
   pop $R1
   pop $R0
 
@@ -244,6 +245,7 @@ FunctionEnd
 
 Function PortableRun
 
+!insertmacro DisableX64FSRedirection
   ; perform silent installation
   ExecWait '"$EXEPATH" /S'
   ; start ultradefrag gui
@@ -254,6 +256,7 @@ Function PortableRun
   Delete "$INSTDIR\uninstall.exe"
   RMDir "$INSTDIR"
 portable_done:
+!insertmacro EnableX64FSRedirection
 
 FunctionEnd
 
@@ -304,6 +307,7 @@ Section "Ultra Defrag core files (required)" SecCore
 
   SectionIn RO
   AddSize 44 /* for the components installed in system directories */
+!insertmacro DisableX64FSRedirection
   DetailPrint "Install core files..."
   SetOutPath $INSTDIR
   File "Dfrg.exe"
@@ -334,7 +338,6 @@ skip_opts:
   File "${ROOTDIR}\src\presets\system"
 
   DetailPrint "Install driver..."
-!insertmacro DisableX64FSRedirection
   call install_driver
 
   DetailPrint "Install boot time defragger..."
@@ -362,7 +365,6 @@ skip_opts:
   WriteRegStr HKCR "Lua\shell\open" "" "Open"
   WriteRegStr HKCR "Lua\shell\open\command" "" "$SYSDIR\notepad.exe %1"
 lua_registered:
-!insertmacro EnableX64FSRedirection
 
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
@@ -392,6 +394,7 @@ lua_registered:
   WriteRegDWORD HKLM $R0 "NoModify" 1
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
+!insertmacro EnableX64FSRedirection
 
   pop $R1
   pop $R0
@@ -400,15 +403,18 @@ SectionEnd
 
 Section "Scheduler.NET" SecSchedNET
 
+!insertmacro DisableX64FSRedirection
   DetailPrint "Install Scheduler.NET..."
   SetOutPath $INSTDIR
   File "UltraDefragScheduler.NET.exe"
   StrCpy $SchedulerNETinstalled 1
+!insertmacro EnableX64FSRedirection
 
 SectionEnd
 
 Section "Documentation" SecDocs
 
+!insertmacro DisableX64FSRedirection
   DetailPrint "Install documentation..."
   SetOutPath "$INSTDIR\doc"
   File "${ROOTDIR}\doc\html\manual.html"
@@ -420,6 +426,7 @@ Section "Documentation" SecDocs
   File "${ROOTDIR}\doc\html\images\valid-html401.png"
   File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
   StrCpy $DocsInstalled 1
+!insertmacro EnableX64FSRedirection
 
 SectionEnd
 
@@ -427,6 +434,7 @@ Section "Portable UltraDefrag package" SecPortable
 
   push $R0
   
+!insertmacro DisableX64FSRedirection
   DetailPrint "Build portable package..."
   StrCpy $R0 "$INSTDIR\portable_${ULTRADFGARCH}_package"
   CreateDirectory $R0
@@ -435,6 +443,7 @@ Section "Portable UltraDefrag package" SecPortable
   WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
     "Put this directory contents to your USB drive and enjoy!"
   StrCpy $PortableInstalled 1
+!insertmacro EnableX64FSRedirection
 
   pop $R0
   
@@ -452,6 +461,8 @@ Section "Shortcuts" SecShortcuts
 
   push $R0
   AddSize 5
+
+!insertmacro DisableX64FSRedirection
   DetailPrint "Install shortcuts..."
   SetShellVarContext all
   SetOutPath $INSTDIR
@@ -486,6 +497,8 @@ doc_url_ok:
 no_portable:
   CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
    "$INSTDIR\Dfrg.exe"
+!insertmacro EnableX64FSRedirection
+
   pop $R0
   
 SectionEnd
@@ -536,7 +549,6 @@ Section "Uninstall"
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
-!insertmacro EnableX64FSRedirection
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
@@ -555,6 +567,7 @@ Section "Uninstall"
   DeleteRegKey HKCR "Drive\shell\udefrag"
   DeleteRegKey HKCR "LuaReport"
   DeleteRegKey HKCR ".luar"
+!insertmacro EnableX64FSRedirection
 
 SectionEnd
 
