@@ -62,6 +62,8 @@ short ex_filter[MAX_FILTER_SIZE + 1];
 short boot_in_filter[MAX_FILTER_SIZE + 1];
 short boot_ex_filter[MAX_FILTER_SIZE + 1];
 
+short letters[64];
+
 extern ud_options *settings;
 
 BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
@@ -195,7 +197,8 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//	BST_CHECKED) ? TRUE : FALSE;
 			//if(!settings->show_progress)
 			//	HideProgress();
-			GetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_LETTERS),settings->sched_letters,40);
+			GetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_LETTERS),letters,40);
+			settings->sched_letters = letters;
 			settings->next_boot = \
 				(SendMessage(GetDlgItem(hBootSchedDlg,IDC_NEXTBOOT),BM_GETCHECK,0,0) == \
 				BST_CHECKED) ? TRUE : FALSE;
