@@ -80,23 +80,34 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	p[4] = (short)dx->letter;
 	RtlInitUnicodeString(&dx->log_path,p);
-	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,
+			&dx->log_path,
+			OBJ_CASE_INSENSITIVE,
+			NULL,
+			NULL
+			);
 	status = ZwDeleteFile(&ObjectAttributes);
 	DebugPrint1("-Ultradfg- Report %ws deleted with status %x\n",p,(UINT)status);
 }
 
 void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
-		   PVOID buf,ULONG length,PLARGE_INTEGER pOffset)
+		   PVOID buf,ULONG length/*,PLARGE_INTEGER pOffset*/)
 {
 	IO_STATUS_BLOCK ioStatus;
+	NTSTATUS Status;
 
-	ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
-			buf,length,pOffset,NULL);
-	pOffset->QuadPart += length;
+	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
+			buf,length,/*pOffset*/NULL,NULL);
+	//pOffset->QuadPart += length;
+	if(Status == STATUS_PENDING){
+		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.");
+		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
+		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
+	}
 }
 
 void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
-				  PLARGE_INTEGER pOffset,BOOLEAN is_filtered)
+				  /*PLARGE_INTEGER pOffset,*/BOOLEAN is_filtered)
 {
 	PFRAGMENTED pf;
 	char *p;
@@ -120,24 +131,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			comment
 			);
 		buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
-		/*strcpy(buffer,"\t{fragments = ");
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
-		_itoa((UINT)pf->pfn->n_fragments,buffer,10);
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
-		strcpy(buffer,",size = ");
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);*/
-		/* fucked windows kernel don't have _i64toa() call */
-		/*ros_i64toa(pf->pfn->clusters_total * dx->bytes_per_cluster,buffer,10);
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
-		strcpy(buffer,",filtered = ");
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
-		_itoa((UINT)(pf->pfn->is_filtered & 0x1),buffer,10);
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
-		strcpy(buffer,",comment = \"");
-		strcat(buffer,comment);
-		strcat(buffer,"\",name = [[");
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);*/
+		Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
 
 		RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE);
 		/* replace square brackets with <> !!! */
@@ -145,20 +139,18 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			if(as.Buffer[i] == '[') as.Buffer[i] = '<';
 			else if(as.Buffer[i] == ']') as.Buffer[i] = '>';
 		}
-		Write(dx,hFile,as.Buffer,as.Length,pOffset);
+		Write(dx,hFile,as.Buffer,as.Length);//,pOffset);
 		RtlFreeAnsiString(&as);
 		strcpy(buffer,"]],uname = {");
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
 		p = (char *)pf->pfn->name.Buffer;
 		for(i = 0; i < pf->pfn->name.Length; i++){
 			_snprintf(buffer,sizeof(buffer),/*"%03u,"*/"%u,",(UINT)p[i]);
 			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-			//_itoa((UINT)p[i],buffer,10);
-			//strcat(buffer,",");
-			Write(dx,hFile,buffer,strlen(buffer),pOffset);
+			Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
 		}
 		strcpy(buffer,"}},\r\n");
-		Write(dx,hFile,buffer,strlen(buffer),pOffset);
+		Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
 	}
 }
 
@@ -166,7 +158,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK ioStatus;
-	LARGE_INTEGER offset;
+	//LARGE_INTEGER offset;
 	NTSTATUS Status;
 	HANDLE hFile;
 
@@ -177,16 +169,30 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Create the file */
 	p[4] = (short)dx->letter;
 	RtlInitUnicodeString(&dx->log_path,p);
-	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,0,NULL,NULL);
-	Status = ZwCreateFile(&hFile,FILE_GENERIC_WRITE,&ObjectAttributes,&ioStatus,
-			  NULL,0,FILE_SHARE_READ,FILE_OVERWRITE_IF,
-			  0,NULL,0);
+	InitializeObjectAttributes(&ObjectAttributes,
+			&dx->log_path,
+			OBJ_CASE_INSENSITIVE,
+			NULL,
+			NULL
+			);
+	Status = ZwCreateFile(&hFile,
+			/*FILE_GENERIC_WRITE*/FILE_APPEND_DATA | SYNCHRONIZE,
+			&ObjectAttributes,
+			&ioStatus,
+			NULL,
+			FILE_ATTRIBUTE_NORMAL,
+			FILE_SHARE_READ,
+			FILE_OVERWRITE_IF,
+			FILE_SYNCHRONOUS_IO_NONALERT,
+			NULL,
+			0
+			);
 	if(Status){
 		DebugPrint("-Ultradfg- Can't create %ws\n",p);
 		hFile = NULL;
 		return FALSE;
 	}
-	offset.QuadPart = 0;
+	//offset.QuadPart = 0;
 	_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
 		"volume_letter = \"%c\"\r\n\r\n"
@@ -194,23 +200,12 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->letter, dx->letter
 		);
 	buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-	Write(dx,hFile,buffer,strlen(buffer),&offset);
+	Write(dx,hFile,buffer,strlen(buffer));//,&offset);
 	
-	/*strcpy(buffer,"-- UltraDefrag report for volume ");
-	Write(dx,hFile,buffer,strlen(buffer),&offset);
-	buffer[0] = dx->letter; buffer[1] = 0;
-	Write(dx,hFile,buffer,1,&offset);
-	strcpy(buffer,":\r\n\r\nvolume_letter = \"");
-	Write(dx,hFile,buffer,strlen(buffer),&offset);
-	buffer[0] = dx->letter; buffer[1] = 0;
-	Write(dx,hFile,buffer,1,&offset);
-	strcpy(buffer,"\"\r\n\r\nfiles = {\r\n");
-	Write(dx,hFile,buffer,strlen(buffer),&offset);*/
-	
-	WriteLogBody(dx,hFile,&offset,FALSE);
-	WriteLogBody(dx,hFile,&offset,TRUE);
+	WriteLogBody(dx,hFile,/*&offset,*/FALSE);
+	WriteLogBody(dx,hFile,/*&offset,*/TRUE);
 	strcpy(buffer,"}\r\n");
-	Write(dx,hFile,buffer,strlen(buffer),&offset);
+	Write(dx,hFile,buffer,strlen(buffer));//,&offset);
 	ZwClose(hFile);
 	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
 done:
