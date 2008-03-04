@@ -128,7 +128,7 @@ Function .onInit
   IfFileExists "$SYSDIR\defrag_native.exe" 0 version_checked
   IfFileExists "$INSTDIR\dfrg.exe" version_checked 0
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "Uninstall any previous version of Ultra Defragmenter $\nbefore this installation!" \
+   "$SYSDIR\defrag_native.exe found!$\n$\nUninstall any previous version of Ultra Defragmenter$\nbefore this installation!" \
    /SD IDOK
    goto abort_inst
 version_checked:
@@ -348,22 +348,53 @@ skip_opts:
   DetailPrint "Install console interface..."
   File "udefrag.exe"
 
+!if ${ULTRADFGARCH} == 'i386'
   WriteRegStr HKCR ".luar" "" "LuaReport"
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$SYSDIR\lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
   WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $SYSDIR -v"
+!else
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
+  WriteRegStr HKCR ".luar" "" "LuaReport"
+  WriteRegStr HKCR "LuaReport" "" "Lua Report"
+  WriteRegStr HKCR "LuaReport\DefaultIcon" "" "lua5.1a_gui.exe,1"
+  WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $SYSDIR -v"
+!endif
+
   DetailPrint "Install Lua 5.1 ..."
   File "lua5.1a.dll"
   File "lua5.1a.exe"
   File "lua5.1a_gui.exe"
+
   ClearErrors
   ReadRegStr $R0 HKCR ".lua" ""
-  IfErrors 0 lua_registered
+  IfErrors register_lua 0
+
+  ; fixes 1.3.1 & 1.3.2 x64 bug
+  ReadRegStr $R0 HKCR "Lua\shell\open\command" ""
+  ;If $R0 contains "SysWow64" 0 lua_registered
+  push $R0
+  push "SysWow64"
+  call StrStr
+  pop $R0
+  StrCpy $R1 $R0 8
+  StrCmp $R1 "SysWow64" 0 lua_registered
+
+register_lua:
   WriteRegStr HKCR ".lua" "" "Lua"
   WriteRegStr HKCR "Lua" "" "Lua Program"
   WriteRegStr HKCR "Lua\shell\open" "" "Open"
+  ;DeleteRegKey HKCR "Lua\shell\open\command"
+!if ${ULTRADFGARCH} == 'i386'
   WriteRegStr HKCR "Lua\shell\open\command" "" "$SYSDIR\notepad.exe %1"
+!else
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
+  WriteRegStr HKCR "Lua\shell\open\command" "" "notepad.exe %1"
+!endif
 lua_registered:
 
   DetailPrint "Write driver settings..."
@@ -453,7 +484,13 @@ Section "Context menu handler" SecContextMenuHandler
 
   WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
   ;WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\cmd.exe /C udctxhandler.cmd %1"
+!if ${ULTRADFGARCH} == 'i386'
   WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
+!else
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
+  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
+!endif
 
 SectionEnd
 
@@ -583,6 +620,52 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 !endif
+
+;---------------------------------------------
+
+; Additional functions
+
+; StrStr
+ ; input, top of stack = string to search for
+ ;        top of stack-1 = string to search in
+ ; output, top of stack (replaces with the portion of the string remaining)
+ ; modifies no other variables.
+ ;
+ ; Usage:
+ ;   Push "this is a long ass string"
+ ;   Push "ass"
+ ;   Call StrStr
+ ;   Pop $R0
+ ;  ($R0 at this point is "ass string")
+
+ Function StrStr
+   Exch $R1 ; st=haystack,old$R1, $R1=needle
+   Exch    ; st=old$R1,haystack
+   Exch $R2 ; st=old$R1,old$R2, $R2=haystack
+   Push $R3
+   Push $R4
+   Push $R5
+   StrLen $R3 $R1
+   StrCpy $R4 0
+   ; $R1=needle
+   ; $R2=haystack
+   ; $R3=len(needle)
+   ; $R4=cnt
+   ; $R5=tmp
+   loop:
+     StrCpy $R5 $R2 $R3 $R4
+     StrCmp $R5 $R1 done
+     StrCmp $R5 "" done
+     IntOp $R4 $R4 + 1
+     Goto loop
+ done:
+   StrCpy $R1 $R2 "" $R4
+   Pop $R5
+   Pop $R4
+   Pop $R3
+   Pop $R2
+   Exch $R1
+ FunctionEnd
 
 ;---------------------------------------------
 
