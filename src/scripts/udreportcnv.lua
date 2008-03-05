@@ -133,7 +133,7 @@ table_head = [[
 
 end_of_page = [[
 </center>
-<script language="javascript">
+<script type="text/javascript">
 init_sorting_engine();
 </script>
 </body></html>
