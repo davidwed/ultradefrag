@@ -218,7 +218,7 @@ Function ShowBootSplash
   push $R1
 
   IfSilent splash_done
-!insertmacro DisableX64FSRedirection
+;;!insertmacro DisableX64FSRedirection
   /* show bootsplash */
   InitPluginsDir
   SetOutPath $PLUGINSDIR
@@ -235,7 +235,7 @@ show_general_splash:
   pop $R0
   Delete "$PLUGINSDIR\UltraDefrag.bmp"
 splash_done:
-!insertmacro EnableX64FSRedirection
+;;!insertmacro EnableX64FSRedirection
   pop $R1
   pop $R0
 
@@ -245,7 +245,7 @@ FunctionEnd
 
 Function PortableRun
 
-!insertmacro DisableX64FSRedirection
+;;!insertmacro DisableX64FSRedirection
   ; perform silent installation
   ExecWait '"$EXEPATH" /S'
   ; start ultradefrag gui
@@ -256,7 +256,7 @@ Function PortableRun
   Delete "$INSTDIR\uninstall.exe"
   RMDir "$INSTDIR"
 portable_done:
-!insertmacro EnableX64FSRedirection
+;;!insertmacro EnableX64FSRedirection
 
 FunctionEnd
 
@@ -328,6 +328,7 @@ skip_opts:
   ;;File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
   SetOutPath "$INSTDIR\doc"
   File "${ROOTDIR}\doc\html\about.html"
+  File "${ROOTDIR}\doc\html\about_simple.html"
   SetOutPath $INSTDIR
 
   ;;Delete "$INSTDIR\defrag.exe"
@@ -623,7 +624,7 @@ SectionEnd
 
 ;---------------------------------------------
 
-; Additional functions
+; Additional functions from NSIS User Manual
 
 ; StrStr
  ; input, top of stack = string to search for

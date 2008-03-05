@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>About Ultra Defragmenter</title>
-<!-- Tested in Firefox 1.5.0, Safari 3.0, Opera 9.23 and IE 6.0 -->
+<!-- Tested in Firefox 1.5.0, Safari 3.0, Opera 9.23, IE 6.0 and IE 3.0 -->
 <style>
 body {
 	background-color: lightgray;
@@ -243,8 +243,7 @@ function init(){
 		var agent = window.navigator.userAgent.toLowerCase();
 		var ie4_browser = ((ver == 4) && (agent.indexOf("msie 5.0") == -1));
 		if(ver < 4 || ie4_browser){ // the browser is too old
-			document.open();
-			document.write("<h1>Hello!</h1>");
+			window.navigate("about_simple.html");
 			window.status = "Your browser is too old!";
 			return;
 		}

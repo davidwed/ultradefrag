@@ -197,6 +197,7 @@ mkdir %SRC_PKG_PATH%\doc\html
 mkdir %SRC_PKG_PATH%\doc\html\images
 copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
 copy /Y ..\doc\html\about.html %SRC_PKG_PATH%\doc\html\
+copy /Y ..\doc\html\about_simple.html %SRC_PKG_PATH%\doc\html\
 copy /Y ..\doc\html\images\console.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\main_screen110.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\about.png %SRC_PKG_PATH%\doc\html\images\
