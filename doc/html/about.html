@@ -6,6 +6,7 @@
 body {
 	background-color: lightgray;
 	font-family: Times New Roman;
+	font-size: 12pt;
 }
 
 a {
@@ -143,6 +144,8 @@ a {
 	z-index: 1;
 }
 </style>
+<script type="text/javascript" src="about.js" 
+tppabs="http://ultradefrag.sourceforge.net/about.js"></script>
 </head>
 <body>
 <div id="window" style="top: 0pt; left: 0pt; width: 275pt; height: 311pt;">
@@ -216,67 +219,7 @@ a {
 </div>
 </div>
 <script type="text/javascript">
-// from http://www.tigir.com/javascript.htm
-//IE5+, Mozilla 1.0+, Opera 7+
-
-function getClientWidth(){
-  return document.compatMode=='CSS1Compat' && !window.opera?document.documentElement.clientWidth:document.body.clientWidth;
-}
-
-function getClientHeight(){
-  return document.compatMode=='CSS1Compat' && !window.opera?document.documentElement.clientHeight:document.body.clientHeight;
-}
-</script>
-<script language="javascript">
-var msie_browser = false;
-var win;
-
 init();
-
-function init(){
-	// The following code must be compatible with IE 3.0
-	if(window.navigator.appName == "Microsoft Internet Explorer"){
-		msie_browser = true;
-
-		var ver = window.navigator.appVersion;
-		var verHi = parseInt(ver);
-		var agent = window.navigator.userAgent.toLowerCase();
-		var ie4_browser = ((ver == 4) && (agent.indexOf("msie 5.0") == -1));
-		if(ver < 4 || ie4_browser){ // the browser is too old
-			window.navigate("about_simple.html");
-			window.status = "Your browser is too old!";
-			return;
-		}
-		// The next code could be incompatible with IE 3.0
-		var cross = document.getElementById("cross");
-		cross.style.cursor = "hand";
-		cross.style.width = cross.style.height = "11pt";
-		var notes = document.getElementById("notes_list");
-		notes.style.top = "10pt";
-	}
-
-	win = document.getElementById("window");
-	onResize(null);
-
-	// for debugging
-	window.onresize = onResize;
-}
-
-function onResize(e){
-	// I don't know why -40
-	//win.style.display = "none";
-	var left = (getClientWidth() - parseInt(win.style.width)) / 2 - 40;
-	if(left < 0) left = 0;
-	var top = (getClientHeight() - parseInt(win.style.height)) / 2 - 40;
-	if(top < 0) top = 0;
-	win.style.left = left + "px";
-	win.style.top = top + "px";
-	//win.style.display = "block";
-}
-
-function close_win(){
-	window.close();
-}
 </script>
 </body>
 </html>
