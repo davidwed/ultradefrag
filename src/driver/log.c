@@ -28,50 +28,6 @@
 
 char buffer[1024];
 
-#if 0
-/*
- * This is ReactOS _i64toa() implementation.
- * copy _i64toa from wine cvs 2006 month 05 day 21
- */
-char *
-ros_i64toa(__int64 value, char *string, int radix)
-{
-    ULONGLONG  val;
-    int negative;
-    char buffer[65];
-    char *pos;
-    int digit;
-
-    if (value < 0 && radix == 10) {
-	negative = 1;
-        val = -value;
-    } else {
-	negative = 0;
-        val = value;
-    } /* if */
-
-    pos = &buffer[64];
-    *pos = '\0';
-
-    do {
-	digit = (int)(val % radix);
-	val = val / radix;
-	if (digit < 10) {
-	    *--pos = '0' + digit;
-	} else {
-	    *--pos = 'a' + digit - 10;
-	} /* if */
-    } while (val != 0L);
-
-    if (negative) {
-	*--pos = '-';
-    } /* if */
-
-    memcpy(string, pos, &buffer[64] - pos + 1);
-    return string;
-}
-#endif
-
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	short p[] = L"\\??\\A:\\FRAGLIST.LUAR";
@@ -107,7 +63,7 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 }
 
 void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
-				  /*PLARGE_INTEGER pOffset,*/BOOLEAN is_filtered)
+				  BOOLEAN is_filtered)
 {
 	PFRAGMENTED pf;
 	char *p;
@@ -131,7 +87,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			comment
 			);
 		buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-		Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
+		Write(dx,hFile,buffer,strlen(buffer));
 
 		RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE);
 		/* replace square brackets with <> !!! */
@@ -139,18 +95,18 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			if(as.Buffer[i] == '[') as.Buffer[i] = '<';
 			else if(as.Buffer[i] == ']') as.Buffer[i] = '>';
 		}
-		Write(dx,hFile,as.Buffer,as.Length);//,pOffset);
+		Write(dx,hFile,as.Buffer,as.Length);
 		RtlFreeAnsiString(&as);
 		strcpy(buffer,"]],uname = {");
-		Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
+		Write(dx,hFile,buffer,strlen(buffer));
 		p = (char *)pf->pfn->name.Buffer;
 		for(i = 0; i < pf->pfn->name.Length; i++){
 			_snprintf(buffer,sizeof(buffer),/*"%03u,"*/"%u,",(UINT)p[i]);
 			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-			Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
+			Write(dx,hFile,buffer,strlen(buffer));
 		}
 		strcpy(buffer,"}},\r\n");
-		Write(dx,hFile,buffer,strlen(buffer));//,pOffset);
+		Write(dx,hFile,buffer,strlen(buffer));
 	}
 }
 
@@ -158,7 +114,6 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK ioStatus;
-	//LARGE_INTEGER offset;
 	NTSTATUS Status;
 	HANDLE hFile;
 
@@ -192,7 +147,6 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 		hFile = NULL;
 		return FALSE;
 	}
-	//offset.QuadPart = 0;
 	_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
 		"volume_letter = \"%c\"\r\n\r\n"
@@ -200,12 +154,12 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->letter, dx->letter
 		);
 	buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-	Write(dx,hFile,buffer,strlen(buffer));//,&offset);
+	Write(dx,hFile,buffer,strlen(buffer));
 	
-	WriteLogBody(dx,hFile,/*&offset,*/FALSE);
-	WriteLogBody(dx,hFile,/*&offset,*/TRUE);
+	WriteLogBody(dx,hFile,FALSE);
+	WriteLogBody(dx,hFile,TRUE);
 	strcpy(buffer,"}\r\n");
-	Write(dx,hFile,buffer,strlen(buffer));//,&offset);
+	Write(dx,hFile,buffer,strlen(buffer));
 	ZwClose(hFile);
 	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
 done:
