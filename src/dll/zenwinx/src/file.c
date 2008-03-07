@@ -51,7 +51,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 		winx_push_error("Can't open %s! No enough memory!",filename);
 		return NULL;
 	}
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
 
 	if(!strcmp(mode,"r")){
 		access_mask = FILE_GENERIC_READ;
@@ -66,10 +66,20 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 		access_mask = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
 		disposition = FILE_OVERWRITE_IF;
 	}
+	access_mask |= SYNCHRONIZE;
 
-	status = NtCreateFile(&hFile,access_mask,&oa,&iosb,
-			  NULL,0,FILE_SHARE_READ | FILE_SHARE_WRITE,
-			  disposition,0,NULL,0);
+	status = NtCreateFile(&hFile,
+			access_mask,
+			&oa,
+			&iosb,
+			NULL,
+			FILE_ATTRIBUTE_NORMAL,
+			FILE_SHARE_READ | FILE_SHARE_WRITE,
+			disposition,
+			FILE_SYNCHRONOUS_IO_NONALERT,
+			NULL,
+			0
+			);
 	RtlFreeUnicodeString(&us);
 	if(status != STATUS_SUCCESS){
 		winx_push_error("Can't open %s: %x!",filename,(UINT)status);
@@ -98,12 +108,20 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 	}
 	status = NtReadFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 buffer,size * count,&f->roffset,NULL);
+	if(status == STATUS_PENDING){
+		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
+		if(NT_SUCCESS(status)) status = iosb.Status;
+	}
+	if(status == STATUS_END_OF_FILE){
+		winx_push_error("EOF!");
+		return 0;
+	}
 	if(status != STATUS_SUCCESS){
 		winx_push_error("Can't read from a file: %x!",(UINT)status);
 		return 0;
 	}
-	f->roffset.QuadPart += size * count;
-	return count;
+	f->roffset.QuadPart += iosb.Information;//size * count;
+	return (iosb.Information / size);//count;
 }
 
 size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f)
@@ -117,12 +135,16 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 	}
 	status = NtWriteFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 (void *)buffer,size * count,&f->woffset,NULL);
+	if(status == STATUS_PENDING){
+		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
+		if(NT_SUCCESS(status)) status = iosb.Status;
+	}
 	if(status != STATUS_SUCCESS){
 		winx_push_error("Can't write to a file: %x!",(UINT)status);
 		return 0;
 	}
-	f->woffset.QuadPart += size * count;
-	return count;
+	f->woffset.QuadPart += iosb.Information;//size * count;
+	return (iosb.Information / size);//count;
 }
 
 void __stdcall winx_fclose(WINX_FILE *f)
