@@ -13,9 +13,11 @@ Scheduler author:
 Justin Dearing
 
 
-Special thanks for strong testing to:
+Special thanks for strong testing to (in alphabetical order):
 
+Jeff Cubillos
 Markus Elfring
+Nagy Zsolt
 
 
 Special thanks for good suggestions to (in alphabetical order):
