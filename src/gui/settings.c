@@ -361,7 +361,7 @@ BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_EDITREPORTOPTS:
-			GetSystemDirectory(buffer,MAX_PATH);
+			GetWindowsDirectory(buffer,MAX_PATH);
 			strcat(buffer,"\\UltraDefrag\\options\\udreportopts.lua");
 			ShellExecute(hWindow,"open",buffer,NULL,NULL,SW_SHOW);
 			break;
@@ -394,7 +394,7 @@ void GetPrefs(void)
 	luaL_openlibs(L);  /* open libraries */
 	lua_gc(L, LUA_GCRESTART, 0);
 
-	GetSystemDirectory(buffer,MAX_PATH);
+	GetWindowsDirectory(buffer,MAX_PATH);
 	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
 	status = luaL_dofile(L,buffer);
 	if(!status){ /* successful */
@@ -410,7 +410,7 @@ void SavePrefs(void)
 	FILE *pf;
 	int result;
 	
-	GetSystemDirectory(buffer,MAX_PATH);
+	GetWindowsDirectory(buffer,MAX_PATH);
 	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
 	pf = fopen(buffer,"wt");
 	if(!pf){

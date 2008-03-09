@@ -123,7 +123,8 @@ Function .onInit
 
 !insertmacro DisableX64FSRedirection
   ; ultradefrag 1.3.1+ will be installed in %sysdir%\UltraDefrag
-  StrCpy $INSTDIR "$SYSDIR\UltraDefrag"
+  ; and ultradefrag 1.3.4+ - in %windir%\UltraDefrag
+  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   /* is already installed 1.3.0 or earlier version? */
   IfFileExists "$SYSDIR\defrag_native.exe" 0 version_checked
   IfFileExists "$INSTDIR\dfrg.exe" version_checked 0
@@ -218,7 +219,7 @@ Function ShowBootSplash
   push $R1
 
   IfSilent splash_done
-;;!insertmacro DisableX64FSRedirection
+!insertmacro EnableX64FSRedirection
   /* show bootsplash */
   InitPluginsDir
   SetOutPath $PLUGINSDIR
@@ -235,7 +236,7 @@ show_general_splash:
   pop $R0
   Delete "$PLUGINSDIR\UltraDefrag.bmp"
 splash_done:
-;;!insertmacro EnableX64FSRedirection
+!insertmacro DisableX64FSRedirection
   pop $R1
   pop $R0
 
@@ -354,7 +355,7 @@ skip_opts:
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$SYSDIR\lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $SYSDIR -v"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $WINDIR -v"
 !else
   ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
   ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
@@ -362,7 +363,7 @@ skip_opts:
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\DefaultIcon" "" "lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $SYSDIR -v"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $WINDIR -v"
 !endif
 
   DetailPrint "Install Lua 5.1 ..."
@@ -426,6 +427,9 @@ lua_registered:
   WriteRegDWORD HKLM $R0 "NoModify" 1
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
+  
+  ; remove files of previous 1.3.1-1.3.3 insllation
+  RMDir /r "$SYSDIR\UltraDefrag"
 !insertmacro EnableX64FSRedirection
 
   pop $R1
@@ -484,7 +488,6 @@ SectionEnd
 Section "Context menu handler" SecContextMenuHandler
 
   WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  ;WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\cmd.exe /C udctxhandler.cmd %1"
 !if ${ULTRADFGARCH} == 'i386'
   WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
 !else
@@ -544,7 +547,7 @@ SectionEnd
 Section "Uninstall"
 
 !insertmacro DisableX64FSRedirection
-  StrCpy $INSTDIR "$SYSDIR\UltraDefrag"
+  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
 
   DetailPrint "Remove shortcuts..."
   SetShellVarContext all

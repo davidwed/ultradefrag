@@ -19,11 +19,11 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 --]]
 
--- USAGE: lua udreportcnv.lua <luar file with full path> <path to system32 directory> [-v]
+-- USAGE: lua udreportcnv.lua <luar file with full path> <path to Windows directory> [-v]
 
 -- parse command line
 assert(arg[1],"Lua Report file name must be specified!")
-assert(arg[2],"Path to the system32 directory\nmust be specified as second parameter!")
+assert(arg[2],"Path to the Windows directory\nmust be specified as second parameter!")
 
 -- read options
 dofile(arg[2] .. "\\UltraDefrag\\options\\udreportopts.lua")
