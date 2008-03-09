@@ -2,6 +2,12 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 1.3.4 (22.5)   2008-03-09
+  ------------------------------------------------------------------------------
+    - new installation location: %windir%\UltraDefrag
+    - driver code was simplified
+    - most stable release at this moment
+
   Version 1.3.3 (22.5)   2008-03-07
   ------------------------------------------------------------------------------
     - one important driver bug was fixed
