@@ -37,7 +37,6 @@ BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 * 2. On NTFS we skip 0-filled virtual clusters of compressed files.
 */
 
-// FIXME: NTSTATUS instead of BOOLEAN ?
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;

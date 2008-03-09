@@ -27,7 +27,6 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo,BOOLEAN is_root);
 BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 
-/* FIXME: NTSTATUS instead of BOOLEAN ? */
 /* FindFiles() - recursive search of all files on specified path. */
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root)
 {
@@ -122,7 +121,7 @@ fail:
 }
 
 /* inserts the new FILENAME structure to filelist */
-/* FIXME: improve error handling */
+/* Returns TRUE on success and FALSE if no enough memory */
 BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo,BOOLEAN is_root)
 {
@@ -168,7 +167,7 @@ no_mem:
 }
 
 /* inserts the new structure to list of fragmented files */
-/* FIXME: improve error handling */
+/* Returns TRUE on success and FALSE if no enough memory */
 BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	PFRAGMENTED pf,plist;

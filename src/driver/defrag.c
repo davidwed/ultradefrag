@@ -168,7 +168,7 @@ exit_defrag_space:
 		dx->status = STATUS_BEFORE_PROCESSING;
 	if(x) dx->status = STATUS_BEFORE_PROCESSING;
 }
-
+ 
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
 		    ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)
 {
@@ -235,7 +235,7 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 exit:
 	return Status;
 }
-
+/*
 NTSTATUS MoveCompressedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 			    HANDLE hFile,ULONGLONG targetLcn)
 {
@@ -252,7 +252,7 @@ NTSTATUS MoveCompressedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 	}
 	return Status;
 }
-
+*/
 ULONGLONG FindTarget(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	ULONGLONG t_before = LLINVALID, t_after = LLINVALID;
@@ -331,6 +331,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",target,pfn->clusters_total);
 
 	old_state = GetSpaceState(pfn);
+#if 0
 	/* If file is compressed then we must move only non-virtual clusters. */
 	/* If OS version is 4.x and file is greater then 256k ... */
 	if(/*!dx->xp_compatible && */pfn->clusters_total > dx->clusters_per_256k)
@@ -339,6 +340,8 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		Status = MoveCompressedFile(dx,pfn,hFile,target);
 	else
 		Status = MovePartOfFile(dx,hFile,0,target,pfn->clusters_total);
+#endif
+	Status = MoveBlocksOfFile(dx,pfn,hFile,target);
 	ZwClose(hFile);
 	/* if Status is successful then 
 	 *		mark target space using MarkSpace()
