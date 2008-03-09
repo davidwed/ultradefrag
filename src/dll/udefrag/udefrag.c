@@ -161,7 +161,6 @@ void __stdcall udefrag_pop_werror(short *buffer, int size)
 int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 {
 	UNICODE_STRING uStr;
-	HANDLE UserToken = NULL;
 	NTSTATUS Status;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;
@@ -170,16 +169,8 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	/* 0. only one instance of the program ! */
 	native_mode_flag = native_mode;
 	/* 1. Enable neccessary privileges */
-	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&UserToken);
-	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't open process token: %x!",(UINT)Status);
-		UserToken = NULL;
-		goto init_fail;
-	}
-	if(winx_enable_privilege(UserToken,SE_SHUTDOWN_PRIVILEGE) < 0) goto init_fail;
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) goto init_fail;*/
-	if(winx_enable_privilege(UserToken,SE_LOAD_DRIVER_PRIVILEGE) < 0) goto init_fail;
-	NtCloseSafe(UserToken);
+	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) goto init_fail;
 	/* create init_event - this must be after privileges enabling */
 	RtlInitUnicodeString(&uStr,L"\\udefrag_init");
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
@@ -227,11 +218,11 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 		"Can't setup cluster map buffer: %x!")) goto init_fail;
 	/* 7. Load settings */
 	udefrag_load_settings(argc,argv);
-	///if(saveopts("\\??\\D:\\MyDocs\\udefrag.cfg") < 0) goto init_fail;
+	//if(saveopts("\\??\\D:\\MyDocs\\udefrag.cfg") < 0)
+	//	winx_pop_error(NULL,0);
 	if(udefrag_set_options(&settings) < 0) goto init_fail;
 	return 0;
 init_fail:
-	NtCloseSafe(UserToken);
 	if(init_event){
 		/* save error message */
 		winx_save_error(buf,ERR_MSG_SIZE);

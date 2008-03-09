@@ -25,7 +25,7 @@ EXPORTS
 	winx_get_proc_address@12
 	winx_create_thread@8
 	winx_exit_thread@0
-	winx_enable_privilege@8
+	winx_enable_privilege@4
 	winx_reg_create_key@8
 	winx_reg_open_key@8
 	winx_reg_query_value@20

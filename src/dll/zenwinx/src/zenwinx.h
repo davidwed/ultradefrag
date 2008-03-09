@@ -102,7 +102,7 @@ int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_a
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
 void __stdcall winx_exit_thread(void);
 
-int  __stdcall winx_enable_privilege(HANDLE hToken,DWORD dwLowPartOfLUID);
+int  __stdcall winx_enable_privilege(unsigned long luid);
 
 int  __stdcall winx_reg_create_key(short *key_name,PHANDLE phKey);
 int  __stdcall winx_reg_open_key(short *key_name,PHANDLE phKey);

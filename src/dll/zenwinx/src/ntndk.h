@@ -393,6 +393,8 @@ typedef enum _PROCESSINFOCLASS {
 #define FILE_OVERWRITE_IF               5
 #endif
 
+#define FILE_SYNCHRONOUS_IO_NONALERT    0x00000020
+
 typedef struct RTL_DRIVE_LETTER_CURDIR
 {
     USHORT              Flags;

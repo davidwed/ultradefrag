@@ -47,22 +47,31 @@
 *        // handle error
 *    }
 ******/
-int __stdcall winx_enable_privilege(HANDLE hToken,DWORD dwLowPartOfLUID)
+int __stdcall winx_enable_privilege(unsigned long luid)
 {
+	HANDLE hToken = NULL;
 	NTSTATUS Status;
 	TOKEN_PRIVILEGES tp;
-	LUID luid;
+	LUID luid_struct;
 
-	luid.HighPart = 0x0;
-	luid.LowPart = dwLowPartOfLUID;
+	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&hToken);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't enable privilege %x! Open token failure: %x!",
+				(UINT)luid,(UINT)Status);
+		return (-1);
+	}
+
+	luid_struct.HighPart = 0x0;
+	luid_struct.LowPart = luid;
 	tp.PrivilegeCount = 1;
-	tp.Privileges[0].Luid = luid;
+	tp.Privileges[0].Luid = luid_struct;
 	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
 	Status = NtAdjustPrivilegesToken(hToken,FALSE,&tp,sizeof(TOKEN_PRIVILEGES),
 									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
+	NtCloseSafe(hToken);
 	if(Status == STATUS_NOT_ALL_ASSIGNED || !NT_SUCCESS(Status)){
-		winx_push_error("Can't enable privilege: %x : %x!",
-				(UINT)dwLowPartOfLUID,(UINT)Status);
+		winx_push_error("Can't enable privilege %x: %x!",
+				(UINT)luid,(UINT)Status);
 		return (-1);
 	}
 	return 0;

@@ -28,9 +28,9 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-extern long malloc_free_delta;
+//extern long malloc_free_delta;
 
-unsigned long __cdecl DbgPrint(char *format, ...);
+//unsigned long __cdecl DbgPrint(char *format, ...);
 
 int  __stdcall kb_open(short *kb_device_name);
 void __stdcall kb_close(void);
@@ -115,7 +115,7 @@ int __stdcall winx_init(void *peb)
 void __stdcall winx_exit(int exit_code)
 {
 	kb_close();
-	DbgPrint("-ZenWINX- malloc_free_delta = %li\n",malloc_free_delta);
+	//DbgPrint("-ZenWINX- malloc_free_delta = %li\n",malloc_free_delta);
 	NtTerminateProcess(NtCurrentProcess(),exit_code);
 }
 
@@ -148,6 +148,8 @@ void __stdcall winx_exit(int exit_code)
 void __stdcall winx_reboot(void)
 {
 	kb_close();
+	if(winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE) < 0)
+		winx_pop_error(NULL,0);
 	NtShutdownSystem(ShutdownReboot);
 }
 
@@ -180,5 +182,7 @@ void __stdcall winx_reboot(void)
 void __stdcall winx_shutdown(void)
 {
 	kb_close();
+	if(winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE) < 0)
+		winx_pop_error(NULL,0);
 	NtShutdownSystem(ShutdownNoReboot);
 }
