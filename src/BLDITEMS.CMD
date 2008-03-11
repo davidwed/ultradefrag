@@ -34,6 +34,16 @@ cd ..\native
 lua ..\..\tools\mkmod.lua defrag_native.build
 if %errorlevel% neq 0 goto end
 
+rem BUILD i18n DLLs
+
+cd ..\hu
+lua ..\..\tools\mkmod.lua hu.build
+if %errorlevel% neq 0 goto end
+
+cd ..\ru
+lua ..\..\tools\mkmod.lua ru.build
+if %errorlevel% neq 0 goto end
+
 popd
 exit /B 0
 

@@ -95,13 +95,25 @@
 #define IDC_ENABLEREPORTS               1044
 #define IDC_EDITREPORTOPTS              1045
 
+#define IDS_LIST_VOLUME                 1046
+#define IDS_LIST_STATUS                 1047
+#define IDS_LIST_FS                     1048
+#define IDS_LIST_TOTAL                  1049
+#define IDS_LIST_FREE                   1050
+#define IDS_LIST_PERCENT                1051
+#define IDS_STATUS_DIRS                 1052
+#define IDS_STATUS_FILES                1053
+#define IDS_STATUS_FRAGM                1054
+#define IDS_STATUS_COMPRESSED           1055
+#define IDS_STATUS_MFT                  1056
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        126
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1046
+#define _APS_NEXT_CONTROL_VALUE         1057
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

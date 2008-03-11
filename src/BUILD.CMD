@@ -24,12 +24,14 @@ mkdir bin\ia64
 
 xcopy /I /Y /Q    .\driver  .\obj\driver
 xcopy /I /Y /Q    .\console .\obj\console
-xcopy /I /Y /Q /S .\gui     .\obj\gui
+xcopy /I /Y /Q    .\gui     .\obj\gui
+xcopy /I /Y /Q    .\gui\res .\obj\gui\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\dll\udefrag     .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx\src .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
+xcopy /I /Y /Q /S .\gui\i18n\*.* .\obj
 
 mkdir obj\dll
 mkdir obj\dll\zenwinx
@@ -130,6 +132,7 @@ call BLDSCHED.CMD
 echo Build installer...
 cd .\bin
 copy /Y ..\installer\UltraDefrag.nsi .\
+copy /Y ..\installer\lang.ini .\
 
 rem Executables are too small to use upx.
 rem But upx is used to pack installer
@@ -146,6 +149,7 @@ if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
+copy /Y ..\installer\lang.ini .\amd64\
 cd amd64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
@@ -153,6 +157,7 @@ if %errorlevel% neq 0 goto fail
 cd..
 copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
+copy /Y ..\installer\lang.ini .\ia64\
 cd ia64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail

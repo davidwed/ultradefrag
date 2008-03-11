@@ -87,6 +87,8 @@
 
 /* Global variables */
 HINSTANCE hInstance;
+HINSTANCE hResInst;
+HMODULE hResHandle = NULL;
 HACCEL hAccel;
 HWND hWindow, hList, hStatus;
 HWND hBtnAnalyse,hBtnDfrg,hBtnPause,hBtnStop,hBtnRescan;
@@ -202,6 +204,18 @@ void HandleError_(int status,int exit_code)
 	return 0;
 }*/
 
+void GetResourcesDllHandle()
+{
+	hResHandle = LoadLibrary("ud_i18n.dll");
+	hResInst = GetModuleHandle("ud_i18n.dll");
+	if(!hResInst) hResInst = hInstance;
+}
+
+void FreeResourcesDll()
+{
+	if(hResHandle) FreeLibrary(hResHandle);
+}
+
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -217,6 +231,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	HandleError_(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
 	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
+	GetResourcesDllHandle();
 	memset((void *)work_status,0,sizeof(work_status));
 
 	/*
@@ -228,11 +243,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
-	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
+	DialogBox(hResInst, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
 	/* delete all created gdi objects */
 	DeleteMaps();
 	/* save settings */
 	SavePrefs();
+	FreeResourcesDll();
 	HandleError(L"",0);
 	/*
 	* We will never reach this point, 
@@ -377,8 +393,9 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	int cx,cy;
 	int dx,dy;
 	RECT rc;
-	LV_COLUMN lvc;
+	LV_COLUMNW lvc;
 	LPNMLISTVIEW lpnm;
+	short bf[64]; /* temporary storage for strings */
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -425,27 +442,34 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		dx = rc.right - rc.left;
 		SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 			(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
+		bf[0] = 0;
+		LoadStringW(hResInst,IDS_LIST_VOLUME,bf,sizeof(bf));
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-		lvc.pszText = "Volume";
+		lvc.pszText = bf;
 		lvc.cx = 60 * dx / 505;
-		SendMessage(hList,LVM_INSERTCOLUMN,0,(LRESULT)&lvc);
-		lvc.pszText = "Status";
+		SendMessage(hList,LVM_INSERTCOLUMNW,0,(LRESULT)&lvc);
+		LoadStringW(hResInst,IDS_LIST_STATUS,bf,sizeof(bf));
+		lvc.pszText = bf;
 		lvc.cx = 60 * dx / 505;
-		SendMessage(hList,LVM_INSERTCOLUMN,1,(LRESULT)&lvc);
-		lvc.pszText = "File system";
+		SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
+		LoadStringW(hResInst,IDS_LIST_FS,bf,sizeof(bf));
+		lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
-		SendMessage(hList,LVM_INSERTCOLUMN,2,(LRESULT)&lvc);
+		SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
+		LoadStringW(hResInst,IDS_LIST_TOTAL,bf,sizeof(bf));
 		lvc.mask |= LVCF_FMT;
 		lvc.fmt = LVCFMT_RIGHT;
-		lvc.pszText = "Total space";
+		lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
-		SendMessage(hList,LVM_INSERTCOLUMN,3,(LRESULT)&lvc);
-		lvc.pszText = "Free space";
+		SendMessage(hList,LVM_INSERTCOLUMNW,3,(LRESULT)&lvc);
+		LoadStringW(hResInst,IDS_LIST_FREE,bf,sizeof(bf));
+		lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
-		SendMessage(hList,LVM_INSERTCOLUMN,4,(LRESULT)&lvc);
-		lvc.pszText = "Percentage";
+		SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
+		LoadStringW(hResInst,IDS_LIST_PERCENT,bf,sizeof(bf));
+		lvc.pszText = bf;
 		lvc.cx = 85 * dx / 505;
-		SendMessage(hList,LVM_INSERTCOLUMN,5,(LRESULT)&lvc);
+		SendMessage(hList,LVM_INSERTCOLUMNW,5,(LRESULT)&lvc);
 		/* reduce hight of list view control */
 		GetWindowRect(hList,&rc);
 		rc.bottom --;
@@ -640,19 +664,32 @@ BOOL CreateStatusBar()
 void UpdateStatusBar(int index)
 {
 	char s[32];
+	short b[64];
+	short bf[64];
 
 	if(!hStatus) return;
-	sprintf(buffer,"%lu dirs",(stat[index]).dircounter);
-	SendMessage(hStatus,SB_SETTEXT,0,(LPARAM)buffer);
-	sprintf(buffer,"%lu files",(stat[index]).filecounter);
-	SendMessage(hStatus,SB_SETTEXT,1,(LPARAM)buffer);
-	sprintf(buffer,"%lu fragmented",(stat[index]).fragmfilecounter);
-	SendMessage(hStatus,SB_SETTEXT,2,(LPARAM)buffer);
-	sprintf(buffer,"%lu compressed",(stat[index]).compressedcounter);
-	SendMessage(hStatus,SB_SETTEXT,3,(LPARAM)buffer);
+	b[0] = 0;
+	LoadStringW(hResInst,IDS_STATUS_DIRS,b,sizeof(b));
+	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).dircounter,b);
+	bf[sizeof(bf) - 1] = 0;
+	SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
+	LoadStringW(hResInst,IDS_STATUS_FILES,b,sizeof(b));
+	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).filecounter,b);
+	bf[sizeof(bf) - 1] = 0;
+	SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
+	LoadStringW(hResInst,IDS_STATUS_FRAGM,b,sizeof(b));
+	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).fragmfilecounter,b);
+	bf[sizeof(bf) - 1] = 0;
+	SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
+	LoadStringW(hResInst,IDS_STATUS_COMPRESSED,b,sizeof(b));
+	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).compressedcounter,b);
+	bf[sizeof(bf) - 1] = 0;
+	SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 	fbsize(s,(ULONGLONG)((stat[index]).mft_size));
-	strcat(s," MFT");
-	SendMessage(hStatus,SB_SETTEXT,4,(LPARAM)s);
+	LoadStringW(hResInst,IDS_STATUS_MFT,b,sizeof(b));
+	_snwprintf(bf,sizeof(bf) - 1,L"%S %s",s,b);
+	bf[sizeof(bf) - 1] = 0;
+	SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
 }
 
 __inline void EnableButtons(void)

@@ -1,0 +1,87 @@
+/*
+* UltraDefrag GUI US English resources.
+* Copyright (C) 2007 by Dmitri Arkhangelski.
+*/
+
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
+IDD_MAIN DIALOGEX 0, 0, 315, 218
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION VERSIONINTITLE
+FONT 9, "Courier New", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_VOLUMES,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | /*LVS_SORTASCENDING | */
+                    WS_BORDER | WS_GROUP | WS_TABSTOP,7,7,300,66
+    PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,76,61,10,WS_GROUP
+    CONTROL         "Skip removable media",IDC_SKIPREMOVABLE,"Button",
+                    BS_AUTOCHECKBOX,123,76,120,10
+    LTEXT           "Cluster map:",IDC_STATIC,7,78,113,9
+    CONTROL         "",IDC_MAP,"Static",SS_GRAYRECT,7,89,300,77,
+                    WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Analyse",IDC_ANALYSE,7,174,59,11,WS_GROUP
+    PUSHBUTTON      "Defragment",IDC_DEFRAGM,71,174,58,11,NOT WS_TABSTOP
+    PUSHBUTTON      "Compact",IDC_COMPACT,133,174,57,11,NOT WS_TABSTOP
+    PUSHBUTTON      "Pause",IDC_PAUSE,194,174,54,11,WS_DISABLED | NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Stop",IDC_STOP,253,174,54,11,WS_DISABLED | NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Fragmented",IDC_SHOWFRAGMENTED,133,189,57,10,NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Settings",IDC_SETTINGS,194,189,54,10,NOT WS_TABSTOP
+    PUSHBUTTON      "About",IDC_ABOUT,253,189,54,10,NOT WS_TABSTOP
+    CTEXT           "0 %",IDC_PROGRESSMSG,0,200,29,8
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
+                    WS_BORDER,30,202,277,5
+END
+
+STRINGTABLE DISCARDABLE
+BEGIN
+    IDS_LIST_VOLUME             "Volume"
+    IDS_LIST_STATUS             "Status"
+    IDS_LIST_FS                 "File system"
+    IDS_LIST_TOTAL              "Total space"
+    IDS_LIST_FREE               "Free space"
+    IDS_LIST_PERCENT            "Percentage"
+    IDS_STATUS_DIRS             "dirs"
+    IDS_STATUS_FILES            "files"
+    IDS_STATUS_FRAGM            "fragmented"
+    IDS_STATUS_COMPRESSED       "compressed"
+    IDS_STATUS_MFT              "MFT"
+END
+
+/*
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION VERSION
+ PRODUCTVERSION VERSION
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "UltraDefrag Development Team\0"
+            VALUE "FileDescription", "US English GUI resources\0"
+            VALUE "FileVersion", VERSION2
+            VALUE "InternalName", "en.dll\0"
+            VALUE "LegalCopyright", "Copyright © 2007,2008 Dmitri Arkhangelski\0"
+            VALUE "OriginalFilename", "en.dll\0"
+            VALUE "ProductName", "UltraDefrag\0"
+            VALUE "ProductVersion", VERSION2
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+*/

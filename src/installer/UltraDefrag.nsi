@@ -53,6 +53,10 @@
   !include "MUI.nsh"
 !endif
 
+!macro LANG_PAGE
+  Page custom LangShow LangLeave ""
+!macroend
+
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'
 Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
@@ -73,11 +77,13 @@ SetCompressor lzma
 
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
-VIAddVersionKey "CompanyName" "DASoft"
-VIAddVersionKey "LegalCopyright" "Copyright © 2007,2008 by DASoft"
+VIAddVersionKey "CompanyName" "UltraDefrag Development Team"
+VIAddVersionKey "LegalCopyright" "Copyright © 2007,2008 UltraDefrag Development Team"
 VIAddVersionKey "FileDescription" "Ultra Defragmenter Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
+
+ReserveFile "lang.ini"
 
 !ifdef MODERN_UI
   !define MUI_COMPONENTSPAGE_SMALLDESC
@@ -86,6 +92,7 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
   !insertmacro MUI_PAGE_LICENSE "${ROOTDIR}\src\LICENSE.TXT"
   !insertmacro MUI_PAGE_COMPONENTS
 ;  !insertmacro MUI_PAGE_DIRECTORY
+  !insertmacro LANG_PAGE
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
@@ -95,11 +102,12 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
   !insertmacro MUI_UNPAGE_FINISH
 
   !insertmacro MUI_LANGUAGE "English"
-  ;;;!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
+  !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 !else
   Page license
   Page components
 ;  Page directory
+  !insertmacro LANG_PAGE
   Page instfiles
 
   UninstPage uninstConfirm
@@ -115,6 +123,7 @@ Var PortableInstalled
 Var RunPortable
 Var ShowBootsplash
 Var IsInstalled
+Var LanguagePack
 
 Function .onInit
 
@@ -142,6 +151,7 @@ version_checked:
   StrCpy $RunPortable 0
   StrCpy $ShowBootsplash 1
   StrCpy $IsInstalled 0
+  StrCpy $LanguagePack "English"
 
   ClearErrors
   ReadRegStr $R0 HKLM \
@@ -184,7 +194,49 @@ init_ok:
   goto abort_inst
 init_done:
 !insertmacro EnableX64FSRedirection
+!ifdef MODERN_UI
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
+!endif
   pop $R1
+  pop $R0
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function LangShow
+
+  push $R0
+  
+!ifdef MODERN_UI
+  !insertmacro MUI_HEADER_TEXT "LanguagePack Packs" \
+      "Choose which LanguagePack pack you want to install."
+!endif
+  SetOutPath $PLUGINSDIR
+  File "lang.ini"
+  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
+  pop $R0
+  InstallOptions::show
+  pop $R0
+
+  pop $R0
+  Abort
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function LangLeave
+
+  push $R0
+
+  ReadINIStr $R0 "$PLUGINSDIR\lang.ini" "Settings" "State"
+  StrCmp $R0 0 exit_notify_handler
+  pop $R0
+  Abort
+
+exit_notify_handler:
+  ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
   pop $R0
 
 FunctionEnd
@@ -330,7 +382,23 @@ skip_opts:
   SetOutPath "$INSTDIR\doc"
   File "${ROOTDIR}\doc\html\about.html"
   File "${ROOTDIR}\doc\html\about_simple.html"
+
+  ; install LanguagePack pack
   SetOutPath $INSTDIR
+  Delete "$INSTDIR\ud_i18n.dll"
+  StrCmp $LanguagePack "English" langpack_installed 0
+  StrCmp $LanguagePack "Hungarian" hu_pack 0
+  StrCmp $LanguagePack "Russian" ru_pack 0
+  GoTo langpack_installed
+hu_pack:
+  File "hu.dll"
+  Rename "hu.dll" "ud_i18n.dll"
+  GoTo langpack_installed
+ru_pack:
+  File "ru.dll"
+  Rename "ru.dll" "ud_i18n.dll"
+  GoTo langpack_installed
+langpack_installed:
 
   ;;Delete "$INSTDIR\defrag.exe"
   ;;Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
