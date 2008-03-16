@@ -13,6 +13,12 @@ Scheduler author:
 Justin Dearing
 
 
+Translators:
+
+Hungarian - Nagy Zsolt
+Russian   - Dmitri Arkhangelski
+
+
 Special thanks for strong testing to (in alphabetical order):
 
 Jeff Cubillos
@@ -22,14 +28,18 @@ Nagy Zsolt
 
 Special thanks for good suggestions to (in alphabetical order):
 
-Alexander Vedyakin
-Bryan Kirk
-Christopher Naegel
-Dario Raparelli
-Jan Loncik
-Leland G. Whitlock
-Markus Elfring
-Mike Braca
+Alexander Vedyakin - Volume type detection improvements.
+                     More effective defragmenting algorithms.
+Bryan Kirk         - Better GUI appearance (new list of drives).
+                     Autodefrag feature.
+Christopher Naegel - Driver loading on Vista problem's partial solution.
+Dario Raparelli    - NT 4.0 support.
+Jan Loncik         - x64 native support. Better 'system' filter preset.
+Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
+Markus Elfring     - Strong error handling.
+Mike Braca         - Reducing driver's memory usage (new cluster map 
+                     internal representation).
+Nagy Zsolt         - interesting ideas about translation.
 
 
 Also special thanks to:

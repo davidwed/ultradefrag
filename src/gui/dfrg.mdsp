@@ -83,6 +83,7 @@ extraResourceOptions=
 1=main.c
 2=map.c
 3=settings.c
+4=i18n.c
 [Header]
 1=main.h
 2=resource.h
@@ -90,8 +91,9 @@ extraResourceOptions=
 1=dfrg.rc
 [Other]
 [History]
-settings.c,8480
-map.c,1558
-main.h,1117
+i18n.c,1476
+settings.c,12423
 dfrg.rc,0
-main.c,14343
+main.h,1117
+map.c,1558
+main.c,22259

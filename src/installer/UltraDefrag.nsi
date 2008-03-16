@@ -131,17 +131,26 @@ Function .onInit
   push $R1
 
 !insertmacro DisableX64FSRedirection
+
   ; ultradefrag 1.3.1+ will be installed in %sysdir%\UltraDefrag
   ; and ultradefrag 1.3.4+ - in %windir%\UltraDefrag
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
+
+
   /* is already installed 1.3.0 or earlier version? */
-  IfFileExists "$SYSDIR\defrag_native.exe" 0 version_checked
-  IfFileExists "$INSTDIR\dfrg.exe" version_checked 0
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "$SYSDIR\defrag_native.exe found!$\n$\nUninstall any previous version of Ultra Defragmenter$\nbefore this installation!" \
-   /SD IDOK
-   goto abort_inst
-version_checked:
+  RMDir /r "$SYSDIR\UltraDefrag"
+  ; don't work on some systems
+  ;;IfFileExists "$SYSDIR\defrag_native.exe" 0 version_checked
+;  ClearErrors
+;  FileOpen $R0 "$SYSDIR\defrag_native.exe" "r"
+;  FileClose $R0
+;  IfErrors version_checked 0
+;  IfFileExists "$INSTDIR\dfrg.exe" version_checked 0
+;  MessageBox MB_OK|MB_ICONEXCLAMATION \
+;   "$SYSDIR\defrag_native.exe found!$\n$\nUninstall any previous version of Ultra Defragmenter$\nbefore this installation!" \
+;   /SD IDOK
+;   goto abort_inst
+;version_checked:
 
   /* variables initialization */
   StrCpy $NT4_TARGET 0
@@ -385,18 +394,18 @@ skip_opts:
 
   ; install LanguagePack pack
   SetOutPath $INSTDIR
-  Delete "$INSTDIR\ud_i18n.dll"
+  Delete "$INSTDIR\ud_i18n.lng"
   StrCmp $LanguagePack "English" langpack_installed 0
   StrCmp $LanguagePack "Hungarian" hu_pack 0
   StrCmp $LanguagePack "Russian" ru_pack 0
   GoTo langpack_installed
 hu_pack:
-  File "hu.dll"
-  Rename "hu.dll" "ud_i18n.dll"
+  File "${ROOTDIR}\src\gui\i18n\Hungarian.lng"
+  Rename "Hungarian.lng" "ud_i18n.lng"
   GoTo langpack_installed
 ru_pack:
-  File "ru.dll"
-  Rename "ru.dll" "ud_i18n.dll"
+  File "${ROOTDIR}\src\gui\i18n\Russian.lng"
+  Rename "Russian.lng" "Russian.lng"
   GoTo langpack_installed
 langpack_installed:
 
@@ -466,6 +475,23 @@ register_lua:
   WriteRegStr HKCR "Lua\shell\open\command" "" "notepad.exe %1"
 !endif
 lua_registered:
+
+  ; register lng file extension
+  ClearErrors
+  ReadRegStr $R0 HKCR ".lng" ""
+  IfErrors 0 lng_registered
+  WriteRegStr HKCR ".lng" "" "LanguagePack"
+  WriteRegStr HKCR "LanguagePack" "" "Language Pack"
+  WriteRegStr HKCR "LanguagePack\shell\open" "" "Open"
+  WriteRegStr HKCR "LanguagePack\DefaultIcon" "" "shell32.dll,0"
+!if ${ULTRADFGARCH} == 'i386'
+  WriteRegStr HKCR "LanguagePack\shell\open\command" "" "$SYSDIR\notepad.exe %1"
+!else
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
+  WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
+!endif
+lng_registered:
 
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
@@ -645,6 +671,8 @@ Section "Uninstall"
   Delete "$INSTDIR\presets\standard"
   Delete "$INSTDIR\presets\system"
   RMDir "$INSTDIR\presets"
+  Delete "$INSTDIR\ud_i18n.lng"
+  Delete "$INSTDIR\ud_i18n.dll"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
   RMDir $INSTDIR

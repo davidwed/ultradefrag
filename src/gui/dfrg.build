@@ -2,7 +2,7 @@
 NAME=dfrg
 TYPE=gui
 
-SRC=main.c;map.c;settings.c
+SRC=main.c;map.c;settings.c;i18n.c
 RC=dfrg.rc
 
 LIBS=kernel32;user32;gdi32;comctl32;shell32;msvcrt;comdlg32

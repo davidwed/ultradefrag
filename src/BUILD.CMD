@@ -31,7 +31,8 @@ xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\dll\udefrag     .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx\src .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
-xcopy /I /Y /Q /S .\gui\i18n\*.* .\obj
+
+rem xcopy /I /Y /Q /S source destination
 
 mkdir obj\dll
 mkdir obj\dll\zenwinx

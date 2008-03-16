@@ -96,6 +96,10 @@ SOURCE=.\dfrg.rc
 # End Source File
 # Begin Source File
 
+SOURCE=.\i18n.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\main.c
 # End Source File
 # Begin Source File

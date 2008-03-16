@@ -87,8 +87,6 @@
 
 /* Global variables */
 HINSTANCE hInstance;
-HINSTANCE hResInst;
-HMODULE hResHandle = NULL;
 HACCEL hAccel;
 HWND hWindow, hList, hStatus;
 HWND hBtnAnalyse,hBtnDfrg,hBtnPause,hBtnStop,hBtnRescan;
@@ -158,6 +156,12 @@ void UpdateStatusBar(int index);
 void GetPrefs(void);
 void SavePrefs(void);
 
+void BuildResourceTable(void);
+void DestroyResourceTable(void);
+int  GetResourceString(short *id,short *buf,int maxchars);
+
+short tmp_buffer[1024];
+
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK BtnWndProc(HWND, UINT, WPARAM, LPARAM);
@@ -204,18 +208,6 @@ void HandleError_(int status,int exit_code)
 	return 0;
 }*/
 
-void GetResourcesDllHandle()
-{
-	hResHandle = LoadLibrary("ud_i18n.dll");
-	hResInst = GetModuleHandle("ud_i18n.dll");
-	if(!hResInst) hResInst = hInstance;
-}
-
-void FreeResourcesDll()
-{
-	if(hResHandle) FreeLibrary(hResHandle);
-}
-
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -231,7 +223,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	HandleError_(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
 	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
-	GetResourcesDllHandle();
+	BuildResourceTable();
 	memset((void *)work_status,0,sizeof(work_status));
 
 	/*
@@ -243,12 +235,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
-	DialogBox(hResInst, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
+	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
 	/* delete all created gdi objects */
 	DeleteMaps();
 	/* save settings */
 	SavePrefs();
-	FreeResourcesDll();
+	DestroyResourceTable();
 	HandleError(L"",0);
 	/*
 	* We will never reach this point, 
@@ -404,14 +396,32 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 		hList = GetDlgItem(hWnd,IDC_VOLUMES);
 		hBtnAnalyse = GetDlgItem(hWnd,IDC_ANALYSE);
+		if(!GetResourceString(L"ANALYSE",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnAnalyse,tmp_buffer);
 		hBtnDfrg = GetDlgItem(hWnd,IDC_DEFRAGM);
+		if(!GetResourceString(L"DEFRAGMENT",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnDfrg,tmp_buffer);
 		hBtnCompact = GetDlgItem(hWnd,IDC_COMPACT);
+		if(!GetResourceString(L"COMPACT",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnCompact,tmp_buffer);
 		hBtnPause = GetDlgItem(hWnd,IDC_PAUSE);
+		if(!GetResourceString(L"PAUSE",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnPause,tmp_buffer);
 		hBtnStop = GetDlgItem(hWnd,IDC_STOP);
+		if(!GetResourceString(L"STOP",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnStop,tmp_buffer);
 		hBtnFragm = GetDlgItem(hWnd,IDC_SHOWFRAGMENTED);
+		if(!GetResourceString(L"REPORT",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnFragm,tmp_buffer);
 		hBtnRescan = GetDlgItem(hWnd,IDC_RESCAN);
+		if(!GetResourceString(L"RESCAN_DRIVES",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnRescan,tmp_buffer);
 		hBtnSettings = GetDlgItem(hWnd,IDC_SETTINGS);
+		if(!GetResourceString(L"SETTINGS",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hBtnSettings,tmp_buffer);
 		hCheckSkipRem = GetDlgItem(hWnd,IDC_SKIPREMOVABLE);
+		if(!GetResourceString(L"SKIP_REMOVABLE_MEDIA",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(hCheckSkipRem,tmp_buffer);
 		if(skip_removable)
 			SendMessage(hCheckSkipRem,BM_SETCHECK,BST_CHECKED,0);
 		else
@@ -419,6 +429,10 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hProgressMsg = GetDlgItem(hWnd,IDC_PROGRESSMSG);
 		hProgressBar = GetDlgItem(hWnd,IDC_PROGRESS1);
 		HideProgress();
+		if(!GetResourceString(L"ABOUT",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(GetDlgItem(hWnd,IDC_ABOUT),tmp_buffer);
+		if(!GetResourceString(L"CLUSTER_MAP",tmp_buffer,sizeof(tmp_buffer)))
+			SetWindowTextW(GetDlgItem(hWnd,IDC_CL_MAP_STATIC),tmp_buffer);
 		hMap = GetDlgItem(hWnd,IDC_MAP);
 		/* increase hight of map */
 		GetWindowRect(hMap,&rc);
@@ -443,31 +457,49 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 			(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
 		bf[0] = 0;
-		LoadStringW(hResInst,IDS_LIST_VOLUME,bf,sizeof(bf));
+		LoadStringW(hInstance,IDS_LIST_VOLUME,bf,sizeof(bf));
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-		lvc.pszText = bf;
+		if(!GetResourceString(L"VOLUME",tmp_buffer,sizeof(tmp_buffer)))
+			lvc.pszText = tmp_buffer;
+		else
+			lvc.pszText = bf;
 		lvc.cx = 60 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,0,(LRESULT)&lvc);
-		LoadStringW(hResInst,IDS_LIST_STATUS,bf,sizeof(bf));
-		lvc.pszText = bf;
+		LoadStringW(hInstance,IDS_LIST_STATUS,bf,sizeof(bf));
+		if(!GetResourceString(L"STATUS",tmp_buffer,sizeof(tmp_buffer)))
+			lvc.pszText = tmp_buffer;
+		else
+			lvc.pszText = bf;
 		lvc.cx = 60 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
-		LoadStringW(hResInst,IDS_LIST_FS,bf,sizeof(bf));
-		lvc.pszText = bf;
+		LoadStringW(hInstance,IDS_LIST_FS,bf,sizeof(bf));
+		if(!GetResourceString(L"FILESYSTEM",tmp_buffer,sizeof(tmp_buffer)))
+			lvc.pszText = tmp_buffer;
+		else
+			lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
-		LoadStringW(hResInst,IDS_LIST_TOTAL,bf,sizeof(bf));
+		LoadStringW(hInstance,IDS_LIST_TOTAL,bf,sizeof(bf));
+		if(!GetResourceString(L"TOTAL",tmp_buffer,sizeof(tmp_buffer)))
+			lvc.pszText = tmp_buffer;
+		else
+			lvc.pszText = bf;
 		lvc.mask |= LVCF_FMT;
 		lvc.fmt = LVCFMT_RIGHT;
-		lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,3,(LRESULT)&lvc);
-		LoadStringW(hResInst,IDS_LIST_FREE,bf,sizeof(bf));
-		lvc.pszText = bf;
+		LoadStringW(hInstance,IDS_LIST_FREE,bf,sizeof(bf));
+		if(!GetResourceString(L"FREE",tmp_buffer,sizeof(tmp_buffer)))
+			lvc.pszText = tmp_buffer;
+		else
+			lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
-		LoadStringW(hResInst,IDS_LIST_PERCENT,bf,sizeof(bf));
-		lvc.pszText = bf;
+		LoadStringW(hInstance,IDS_LIST_PERCENT,bf,sizeof(bf));
+		if(!GetResourceString(L"PERCENT",tmp_buffer,sizeof(tmp_buffer)))
+			lvc.pszText = tmp_buffer;
+		else
+			lvc.pszText = bf;
 		lvc.cx = 85 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,5,(LRESULT)&lvc);
 		/* reduce hight of list view control */
@@ -665,29 +697,45 @@ void UpdateStatusBar(int index)
 {
 	char s[32];
 	short b[64];
-	short bf[64];
+	short bf[128];
+	short tmp_bf[64];
 
 	if(!hStatus) return;
 	b[0] = 0;
-	LoadStringW(hResInst,IDS_STATUS_DIRS,b,sizeof(b));
-	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).dircounter,b);
+	LoadStringW(hInstance,IDS_STATUS_DIRS,b,sizeof(b));
+	if(!GetResourceString(L"DIRS",tmp_bf,sizeof(tmp_bf)))
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).dircounter,tmp_bf);
+	else
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).dircounter,b);
 	bf[sizeof(bf) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
-	LoadStringW(hResInst,IDS_STATUS_FILES,b,sizeof(b));
-	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).filecounter,b);
+	LoadStringW(hInstance,IDS_STATUS_FILES,b,sizeof(b));
+	if(!GetResourceString(L"FILES",tmp_bf,sizeof(tmp_bf)))
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).filecounter,tmp_bf);
+	else
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).filecounter,b);
 	bf[sizeof(bf) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
-	LoadStringW(hResInst,IDS_STATUS_FRAGM,b,sizeof(b));
-	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).fragmfilecounter,b);
+	LoadStringW(hInstance,IDS_STATUS_FRAGM,b,sizeof(b));
+	if(!GetResourceString(L"FRAGMENTED",tmp_bf,sizeof(tmp_bf)))
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).fragmfilecounter,tmp_bf);
+	else
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).fragmfilecounter,b);
 	bf[sizeof(bf) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
-	LoadStringW(hResInst,IDS_STATUS_COMPRESSED,b,sizeof(b));
-	_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).compressedcounter,b);
+	LoadStringW(hInstance,IDS_STATUS_COMPRESSED,b,sizeof(b));
+	if(!GetResourceString(L"COMPRESSED",tmp_bf,sizeof(tmp_bf)))
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).compressedcounter,tmp_bf);
+	else
+		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).compressedcounter,b);
 	bf[sizeof(bf) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 	fbsize(s,(ULONGLONG)((stat[index]).mft_size));
-	LoadStringW(hResInst,IDS_STATUS_MFT,b,sizeof(b));
-	_snwprintf(bf,sizeof(bf) - 1,L"%S %s",s,b);
+	LoadStringW(hInstance,IDS_STATUS_MFT,b,sizeof(b));
+	if(!GetResourceString(L"MFT",tmp_bf,sizeof(tmp_bf)))
+		_snwprintf(bf,sizeof(bf) - 1,L"%S %s",s,tmp_bf);
+	else
+		_snwprintf(bf,sizeof(bf) - 1,L"%S %s",s,b);
 	bf[sizeof(bf) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
 }
