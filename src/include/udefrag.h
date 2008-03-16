@@ -58,18 +58,12 @@ typedef struct _ud_options {
 	short *boot_in_filter;
 	short *boot_ex_filter;
 	ULONGLONG sizelimit;
-	DWORD skip_removable;
 	int update_interval;
-	BOOL show_progress;
 	UCHAR report_type;
-	UCHAR report_format;
 	DWORD dbgprint_level;
 	short *sched_letters;
 	DWORD every_boot;
 	DWORD next_boot;
-	DWORD only_reg_and_pagefile;
-	long x;
-	long y;
 } ud_options;
 
 typedef struct _volume_info {

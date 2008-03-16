@@ -46,18 +46,12 @@ ud_options settings = \
 	L"windows;winnt;ntuser;pagefile;hiberfil",  /* boot_in_filter */
 	L"temp",       /* boot_ex_filter */
 	0,             /* sizelimit */
-	TRUE,          /* skip_removable */
 	500,           /* update_interval */
-	TRUE,          /* show_progress */
 	HTML_REPORT,   /* report_type */
-	ASCII_FORMAT,  /* report_format */
 	DBG_NORMAL,    /* dbgprint_level */
 	L"",           /* sched_letters */
 	FALSE,         /* every_boot */
 	FALSE,         /* next_boot */
-	FALSE,         /* only_reg_and_pagefile */
-	0,             /* x */
-	0              /* y */
 };
 
 short ud_key[] = \
@@ -74,6 +68,9 @@ short boot_ex_filter[MAX_FILTER_SIZE + 1];
 short sched_letters[MAX_SCHED_LETTERS + 1];
 
 short file_buffer[32768];
+short line_buffer[8192];
+short param_buffer[8192];
+short value_buffer[8192];
 
 int getopts(char *filename);
 int saveopts(char *filename);
@@ -111,29 +108,25 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 	HANDLE hKey;
 	DWORD x;
 	int i;
+//	char filename[64];
 
+//	if(getopts(filename) >= 0) goto analyse_cmdline;
+//	winx_pop_error(NULL,0);
+	
 	/* open program key */
 	if(winx_reg_open_key(ud_key,&hKey) < 0){
 		winx_pop_error(NULL,0);
 		goto analyse_cmdline;
 	}
 	/* read dword parameters */
-	ReadRegDWORD(hKey,L"skip removable",&settings.skip_removable);
 	ReadRegDWORD(hKey,L"update interval",(DWORD *)&settings.update_interval);
-	ReadRegDWORD(hKey,L"show progress",(DWORD *)&settings.show_progress);
 	ReadRegDWORD(hKey,L"dbgprint level",&settings.dbgprint_level);
 	ReadRegDWORD(hKey,L"every boot",&settings.every_boot);
 	ReadRegDWORD(hKey,L"next boot",&settings.next_boot);
-	ReadRegDWORD(hKey,L"only registry and pagefile",&settings.only_reg_and_pagefile);
 
 	if(ReadRegDWORD(hKey,L"report type",&x))
 		settings.report_type = (UCHAR)x;
 
-	if(ReadRegDWORD(hKey,L"report format",&x))
-		settings.report_format = (UCHAR)x;
-
-	ReadRegDWORD(hKey,L"x",&settings.x);
-	ReadRegDWORD(hKey,L"y",&settings.y);
 	/* read binary parameters */
 	ReadRegValue(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
 	/* read strings */
@@ -154,6 +147,7 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 		sched_letters[MAX_SCHED_LETTERS] = 0; settings.sched_letters = sched_letters;
 	}
 	winx_reg_close_key(hKey);
+
 analyse_cmdline:
 	/* overwrite parameters from the command line */
 	if(!argv) goto no_cmdline;
@@ -239,7 +233,6 @@ int __stdcall udefrag_set_options(ud_options *ud_opts)
 		&settings.dbgprint_level,sizeof(DWORD),NULL,0,
 		"Can't set debug print level: %x!")) goto apply_settings_fail;
 	/* set report characterisics */
-	rt.format = settings.report_format;
 	rt.type = settings.report_type;
 	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_REPORT_TYPE,
 		&rt,sizeof(REPORT_TYPE),NULL,0,
@@ -269,29 +262,24 @@ int __stdcall udefrag_save_settings(void)
 {
 	HANDLE hKey;
 	DWORD x;
+//	char filename[64];
 
-	/* native app should clean registry */
-	if(native_mode_flag)
-		settings.next_boot = FALSE;
+	if(native_mode_flag) settings.next_boot = FALSE;
+//	if(saveopts(filename) < 0) goto save_fail;
+
+#if 1
 	/* create key if not exist */
 	if(winx_reg_open_key(ud_key,&hKey) < 0){
 		winx_pop_error(NULL,0);
 		if(winx_reg_create_key(ud_key,&hKey) < 0) goto save_fail;
 	}
 	/* set dword values */
-	WriteRegDWORD(hKey,L"skip removable",settings.skip_removable);
 	WriteRegDWORD(hKey,L"update interval",settings.update_interval);
-	WriteRegDWORD(hKey,L"show progress",settings.show_progress);
 	WriteRegDWORD(hKey,L"dbgprint level",settings.dbgprint_level);
 	WriteRegDWORD(hKey,L"every boot",settings.every_boot);
 	WriteRegDWORD(hKey,L"next boot",settings.next_boot);
-	WriteRegDWORD(hKey,L"only registry and pagefile",settings.only_reg_and_pagefile);
 	x = (DWORD)settings.report_type;
 	WriteRegDWORD(hKey,L"report type",x);
-	x = (DWORD)settings.report_format;
-	WriteRegDWORD(hKey,L"report format",x);
-	WriteRegDWORD(hKey,L"x",settings.x);
-	WriteRegDWORD(hKey,L"y",settings.y);
 	/* set binary data */
 	WriteRegValue(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
 	/* write strings */
@@ -306,16 +294,14 @@ int __stdcall udefrag_save_settings(void)
 	WriteRegValue(hKey,L"scheduled letters",REG_SZ,settings.sched_letters,
 		(wcslen(settings.sched_letters) + 1) << 1);
 	winx_reg_close_key(hKey);
-	/* native app should clean registry */
-	if(native_mode_flag && !settings.every_boot)
+#endif
+	
+	if(settings.next_boot || settings.every_boot){
+		if(winx_reg_add_to_boot_execute(L"defrag_native") < 0) goto save_fail;
+	} else {
 		if(winx_reg_remove_from_boot_execute(L"defrag_native") < 0) goto save_fail;
-	if(!native_mode_flag){
-		if(settings.next_boot || settings.every_boot){
-			if(winx_reg_add_to_boot_execute(L"defrag_native") < 0) goto save_fail;
-		} else {
-			if(winx_reg_remove_from_boot_execute(L"defrag_native") < 0) goto save_fail;
-		}
 	}
+
 	return 0;
 save_fail:
 	return (-1);
@@ -345,47 +331,145 @@ int __stdcall udefrag_clean_registry(void)
 	return winx_reg_remove_from_boot_execute(L"defrag_native");
 }
 
-/****f* udefrag.settings/udefrag_native_clean_registry
-* NAME
-*    udefrag_native_clean_registry
-* SYNOPSIS
-*    error = udefrag_native_clean_registry();
-* FUNCTION
-*    Registry cleanup for the native executable.
-* INPUTS
-*    Nothing.
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    if(udefrag_native_clean_registry() < 0){
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        // handle error
-*    }
-* SEE ALSO
-*    udefrag_clean_registry
-******/
-int __stdcall udefrag_native_clean_registry(void)
+void ExtractToken(short *dest, short *src, int max_chars)
 {
-	HANDLE hKey;
-
-	udefrag_load_settings(0,NULL);
-	if(settings.next_boot){
-		settings.next_boot = 0;
-		/* set next boot parameter to zero */
-		if(winx_reg_open_key(ud_key,&hKey) >= 0){
-			WriteRegDWORD(hKey,L"next boot",settings.next_boot);
-			winx_reg_close_key(hKey);
-		} else {
-			winx_pop_error(NULL,0);
+	signed int i,cnt;
+	short ch;
+	
+	cnt = 0;
+	for(i = 0; i < max_chars; i++){
+		ch = src[i];
+		/* skip spaces and tabs in the beginning */
+		if((ch != 0x20 && ch != '\t') || cnt){
+			dest[cnt] = ch;
+			cnt++;
 		}
 	}
-	if(settings.every_boot) return 0;
-	return winx_reg_remove_from_boot_execute(L"defrag_native");
+	dest[cnt] = 0;
+	/* remove spaces and tabs from the end */
+	if(cnt == 0) return;
+	for(i = (cnt - 1); i >= 0; i--){
+		ch = dest[i];
+		if(ch != 0x20 && ch != '\t') break;
+		dest[i] = 0;
+	}
+}
+
+void ParseParameter()
+{
+	UNICODE_STRING us;
+	ANSI_STRING as;
+	
+	int empty_value = value_buffer[0] ? FALSE : TRUE;
+	/* check for invalid parameter */
+	if(!param_buffer[0]) return;
+	if(!wcscmp(param_buffer,L"INCLUDE")){
+		wcsncpy(in_filter,value_buffer,MAX_FILTER_SIZE);
+		in_filter[MAX_FILTER_SIZE] = 0;
+		settings.in_filter = in_filter;
+	} else if(!wcscmp(param_buffer,L"EXCLUDE")){
+		wcsncpy(ex_filter,value_buffer,MAX_FILTER_SIZE);
+		ex_filter[MAX_FILTER_SIZE] = 0;
+		settings.ex_filter = ex_filter;
+	} else if(!wcscmp(param_buffer,L"SIZELIMIT")){
+		if(empty_value)
+			settings.sizelimit = 0;
+		else {
+			RtlInitUnicodeString(&us,value_buffer);
+			if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) == STATUS_SUCCESS){
+				dfbsize2(as.Buffer,&settings.sizelimit);
+				RtlFreeAnsiString(&as);
+			}
+		}
+	} else if(!wcscmp(param_buffer,L"BOOT_TIME_INCLUDE")){
+		wcsncpy(boot_in_filter,value_buffer,MAX_FILTER_SIZE);
+		boot_in_filter[MAX_FILTER_SIZE] = 0;
+		settings.boot_in_filter = boot_in_filter;
+	} else if(!wcscmp(param_buffer,L"BOOT_TIME_EXCLUDE")){
+		wcsncpy(boot_ex_filter,value_buffer,MAX_FILTER_SIZE);
+		boot_ex_filter[MAX_FILTER_SIZE] = 0;
+		settings.boot_ex_filter = boot_ex_filter;
+	} else if(!wcscmp(param_buffer,L"LETTERS")){
+		wcsncpy(sched_letters,value_buffer,MAX_SCHED_LETTERS);
+		sched_letters[MAX_SCHED_LETTERS] = 0;
+		settings.sched_letters = sched_letters;
+	} else if(!wcscmp(param_buffer,L"NEXT_BOOT")){
+		_wcsupr(value_buffer);
+		settings.next_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
+	} else if(!wcscmp(param_buffer,L"EVERY_BOOT")){
+		_wcsupr(value_buffer);
+		settings.every_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
+	} else if(!wcscmp(param_buffer,L"ENABLE_REPORTS")){
+		_wcsupr(value_buffer);
+		settings.report_type = (wcscmp(value_buffer,L"YES") == 0) ? HTML_REPORT : NO_REPORT;
+	} else if(!wcscmp(param_buffer,L"DBGPRINT_LEVEL")){
+		_wcsupr(value_buffer);
+		if(!wcscmp(value_buffer,L"DETAILED"))
+			settings.dbgprint_level = DBG_DETAILED;
+		else if(!wcscmp(value_buffer,L"PARANOID"))
+			settings.dbgprint_level = DBG_PARANOID;
+		else if(!wcscmp(value_buffer,L"NORMAL"))
+			settings.dbgprint_level = DBG_NORMAL;
+	} else if(!wcscmp(param_buffer,L"MAP_UPDATE_INTERVAL")){
+		if(!empty_value){
+			settings.update_interval = _wtoi(value_buffer);
+		}
+	}
+}
+
+/* TODO: allow first blanks */
+void ParseLine()
+{
+	short first_char = line_buffer[0];
+	short *eq_pos;
+	int param_len, value_len;
+
+	/* skip empty lines */
+	if(!first_char) return;
+	/* skip comments */
+	if(first_char == ';' || first_char == '#')
+		return;
+	/* find the equality sign */
+	eq_pos = wcschr(line_buffer,'=');
+	if(!eq_pos) return;
+	/* extract a parameter-value pair */
+	param_buffer[0] = value_buffer[0] = 0;
+	param_len = (int)(LONG_PTR)(eq_pos - line_buffer);
+	value_len = (int)(LONG_PTR)(line_buffer + wcslen(line_buffer) - eq_pos - 1);
+	ExtractToken(param_buffer,line_buffer,param_len);
+	ExtractToken(value_buffer,eq_pos + 1,value_len);
+	_wcsupr(param_buffer);
+	ParseParameter();
 }
 
 /* new interface to udefrag.cfg file*/
 int getopts(char *filename)
 {
+	int filesize,i,cnt;
+	short ch;
+
+	WINX_FILE *f  = winx_fopen(filename,"r");
+	if(!f) return -1;
+	filesize = winx_fread(file_buffer,sizeof(short),
+			(sizeof(file_buffer) / sizeof(short)) - 1,f);
+	winx_fclose(f);
+	if(!filesize) return -1;
+	file_buffer[filesize] = 0;
+	line_buffer[0] = 0;
+	cnt = 0;
+	for(i = 0; i < filesize; i++){
+		ch = file_buffer[i];
+		if(ch == '\r' || ch == '\n'){
+			/* terminate the line buffer */
+			line_buffer[cnt] = 0;
+			cnt = 0;
+			/* parse line buffer contents */
+			ParseLine();
+		} else {
+			line_buffer[cnt] = ch;
+			cnt++;
+		}
+	}
 	return 0;
 }
 
@@ -408,7 +492,8 @@ int saveopts(char *filename)
 	default:
 		dl = "NORMAL";
 	}
-	_snwprintf(file_buffer,sizeof(file_buffer),
+	_snwprintf(file_buffer,sizeof(file_buffer) / sizeof(short),
+			L"; !!! NOTE: THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING !!!\r\n\r\n"
 			L";------------------------------------------------------------------------------\r\n"
 			L";\r\n"
 			L"; Filter\r\n"
@@ -465,9 +550,9 @@ int saveopts(char *filename)
 			dl,
 			settings.update_interval
 			);
-	file_buffer[sizeof(file_buffer) - 1] = 0;
+	file_buffer[(sizeof(file_buffer) / sizeof(short)) - 1] = 0;
 	status = winx_fwrite(file_buffer,
 			 sizeof(short),wcslen(file_buffer),f);
 	winx_fclose(f);
-	return status ? 0 : (-1);
+	return (status == wcslen(file_buffer)) ? 0 : (-1);
 }

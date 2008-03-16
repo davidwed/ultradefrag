@@ -40,6 +40,7 @@ int abort_flag = 0;
 char last_op = 0;
 int i = 0,j = 0,k; /* number of '-' */
 char buffer[256];
+int udefrag_initialized = FALSE;
 
 #define USAGE  "Supported commands:\n" \
 		"  analyse X:\n" \
@@ -159,10 +160,11 @@ void Cleanup()
 	char err_msg[ERR_MSG_SIZE];
 
 	/* unload driver and registry cleanup */
-	if(udefrag_unload(FALSE) < 0) udefrag_pop_error(NULL,0);
-	if(udefrag_native_clean_registry() < 0){
+	if(udefrag_unload(TRUE) < 0)/* udefrag_pop_error(NULL,0);
+	if(udefrag_native_clean_registry() < 0)*/{
 		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",err_msg);
+		if(udefrag_initialized) /* because otherwise the message is trivial */
+			winx_printf("\nERROR: %s\n",err_msg);
 	}
 }
 
@@ -263,6 +265,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_printf("\n\n");
 	/* 7. Initialize the ultradfg device */
 	HandleError_(udefrag_init(0,NULL,TRUE,0),2);
+	udefrag_initialized = TRUE;
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS

@@ -137,8 +137,8 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			SendMessage(GetDlgItem(hBootSchedDlg,IDC_NEXTBOOT),BM_SETCHECK,BST_CHECKED,0);
 		if(settings->every_boot)
 			SendMessage(GetDlgItem(hBootSchedDlg,IDC_EVERYBOOT),BM_SETCHECK,BST_CHECKED,0);
-		if(settings->only_reg_and_pagefile)
-			SendMessage(GetDlgItem(hBootSchedDlg,IDC_REGANDPAGEFILE),BM_SETCHECK,BST_CHECKED,0);
+		//if(settings->only_reg_and_pagefile)
+		//	SendMessage(GetDlgItem(hBootSchedDlg,IDC_REGANDPAGEFILE),BM_SETCHECK,BST_CHECKED,0);
 		SetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_INCLUDE2),settings->boot_in_filter);
 		SetWindowTextW(GetDlgItem(hBootSchedDlg,IDC_EXCLUDE2),settings->boot_ex_filter);
 		return TRUE;
@@ -205,9 +205,9 @@ BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			settings->every_boot = \
 				(SendMessage(GetDlgItem(hBootSchedDlg,IDC_EVERYBOOT),BM_GETCHECK,0,0) == \
 				BST_CHECKED) ? TRUE : FALSE;
-			settings->only_reg_and_pagefile = \
-				(SendMessage(GetDlgItem(hBootSchedDlg,IDC_REGANDPAGEFILE),BM_GETCHECK,0,0) == \
-				BST_CHECKED) ? TRUE : FALSE;
+			//settings->only_reg_and_pagefile =
+			//	(SendMessage(GetDlgItem(hBootSchedDlg,IDC_REGANDPAGEFILE),BM_GETCHECK,0,0) ==
+			//	BST_CHECKED) ? TRUE : FALSE;
 			GetWindowTextW(GetDlgItem(hFilterDlg,IDC_INCLUDE),in_filter,MAX_FILTER_SIZE);
 			settings->in_filter = in_filter;
 			GetWindowTextW(GetDlgItem(hFilterDlg,IDC_EXCLUDE),ex_filter,MAX_FILTER_SIZE);

@@ -6,7 +6,6 @@ EXPORTS
 	udefrag_get_options
 	udefrag_set_options
 	udefrag_clean_registry
-	udefrag_native_clean_registry
 	udefrag_analyse
 	udefrag_defragment
 	udefrag_optimize
