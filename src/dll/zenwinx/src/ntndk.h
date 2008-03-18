@@ -22,6 +22,7 @@
 
 /* define base types */
 #define ULONG_PTR unsigned long*
+#define LONG_PTR  signed long*
 typedef int BOOL;
 typedef const char *PCSZ;
 

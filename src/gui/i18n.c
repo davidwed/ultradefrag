@@ -78,8 +78,8 @@ void AddResourceEntry()
 	if(!eq_pos) return;
 	/* extract a parameter-value pair */
 	param_buffer[0] = value_buffer[0] = 0;
-	param_len = (int)(LONG_PTR)(eq_pos - line_buffer);
-	value_len = (int)(LONG_PTR)(line_buffer + wcslen(line_buffer) - eq_pos - 1);
+	param_len = (int)/*(LONG_PTR)*/(eq_pos - line_buffer);
+	value_len = (int)/*(LONG_PTR)*/(line_buffer + wcslen(line_buffer) - eq_pos - 1);
 	ExtractToken(param_buffer,line_buffer,param_len);
 	ExtractToken(value_buffer,eq_pos + 1,value_len);
 	_wcsupr(param_buffer);
@@ -98,8 +98,8 @@ void BuildResourceTable(void)
 {
 	FILE *f = fopen(".\\ud_i18n.lng","rb");
 	if(!f) return;
-	while(fgetws(line_buffer,sizeof(line_buffer),f)){
-		line_buffer[sizeof(line_buffer) - 1] = 0;
+	while(fgetws(line_buffer,sizeof(line_buffer) / sizeof(short),f)){
+		line_buffer[sizeof(line_buffer) / sizeof(short) - 1] = 0;
 		AddResourceEntry();
 	}
 	fclose(f);

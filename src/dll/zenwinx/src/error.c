@@ -328,7 +328,7 @@ void __stdcall winx_pop_werror(short *buffer, int size)
 				err_code = RtlNtStatusToDosError(Status);
 				if(!func_FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM,NULL,err_code,
 					MAKELANGID(LANG_NEUTRAL,SUBLANG_DEFAULT),
-					desc + 2,sizeof(desc) - 10,NULL))
+					desc + 2,sizeof(desc) / sizeof(short)  - 10,NULL))
 				{
 					goto get_predefined_msg;
 				}
@@ -337,7 +337,7 @@ void __stdcall winx_pop_werror(short *buffer, int size)
 				RtlInitAnsiString(&aStr,winx_get_error_description((unsigned long)Status));
 				uStr.Buffer = desc + 2;
 				uStr.Length = 0;
-				uStr.MaximumLength = sizeof(desc) - 10;
+				uStr.MaximumLength = sizeof(desc) / sizeof(short) - 10;
 				if(RtlAnsiStringToUnicodeString(&uStr,&aStr,FALSE) != STATUS_SUCCESS)
 					wcscpy(desc + 2,fmt_error);
 			}

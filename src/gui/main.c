@@ -396,31 +396,31 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
 		hList = GetDlgItem(hWnd,IDC_VOLUMES);
 		hBtnAnalyse = GetDlgItem(hWnd,IDC_ANALYSE);
-		if(!GetResourceString(L"ANALYSE",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"ANALYSE",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnAnalyse,tmp_buffer);
 		hBtnDfrg = GetDlgItem(hWnd,IDC_DEFRAGM);
-		if(!GetResourceString(L"DEFRAGMENT",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"DEFRAGMENT",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnDfrg,tmp_buffer);
 		hBtnCompact = GetDlgItem(hWnd,IDC_COMPACT);
-		if(!GetResourceString(L"COMPACT",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"COMPACT",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnCompact,tmp_buffer);
 		hBtnPause = GetDlgItem(hWnd,IDC_PAUSE);
-		if(!GetResourceString(L"PAUSE",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"PAUSE",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnPause,tmp_buffer);
 		hBtnStop = GetDlgItem(hWnd,IDC_STOP);
-		if(!GetResourceString(L"STOP",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"STOP",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnStop,tmp_buffer);
 		hBtnFragm = GetDlgItem(hWnd,IDC_SHOWFRAGMENTED);
-		if(!GetResourceString(L"REPORT",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"REPORT",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnFragm,tmp_buffer);
 		hBtnRescan = GetDlgItem(hWnd,IDC_RESCAN);
-		if(!GetResourceString(L"RESCAN_DRIVES",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"RESCAN_DRIVES",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnRescan,tmp_buffer);
 		hBtnSettings = GetDlgItem(hWnd,IDC_SETTINGS);
-		if(!GetResourceString(L"SETTINGS",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"SETTINGS",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hBtnSettings,tmp_buffer);
 		hCheckSkipRem = GetDlgItem(hWnd,IDC_SKIPREMOVABLE);
-		if(!GetResourceString(L"SKIP_REMOVABLE_MEDIA",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"SKIP_REMOVABLE_MEDIA",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(hCheckSkipRem,tmp_buffer);
 		if(skip_removable)
 			SendMessage(hCheckSkipRem,BM_SETCHECK,BST_CHECKED,0);
@@ -429,9 +429,9 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hProgressMsg = GetDlgItem(hWnd,IDC_PROGRESSMSG);
 		hProgressBar = GetDlgItem(hWnd,IDC_PROGRESS1);
 		HideProgress();
-		if(!GetResourceString(L"ABOUT",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"ABOUT",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(GetDlgItem(hWnd,IDC_ABOUT),tmp_buffer);
-		if(!GetResourceString(L"CLUSTER_MAP",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"CLUSTER_MAP",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			SetWindowTextW(GetDlgItem(hWnd,IDC_CL_MAP_STATIC),tmp_buffer);
 		hMap = GetDlgItem(hWnd,IDC_MAP);
 		/* increase hight of map */
@@ -457,30 +457,30 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 			(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
 		bf[0] = 0;
-		LoadStringW(hInstance,IDS_LIST_VOLUME,bf,sizeof(bf));
+		LoadStringW(hInstance,IDS_LIST_VOLUME,bf,sizeof(bf) / sizeof(short));
 		lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-		if(!GetResourceString(L"VOLUME",tmp_buffer,sizeof(tmp_buffer)))
+		if(!GetResourceString(L"VOLUME",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			lvc.pszText = tmp_buffer;
 		else
 			lvc.pszText = bf;
 		lvc.cx = 60 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,0,(LRESULT)&lvc);
-		LoadStringW(hInstance,IDS_LIST_STATUS,bf,sizeof(bf));
-		if(!GetResourceString(L"STATUS",tmp_buffer,sizeof(tmp_buffer)))
+		LoadStringW(hInstance,IDS_LIST_STATUS,bf,sizeof(bf) / sizeof(short));
+		if(!GetResourceString(L"STATUS",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			lvc.pszText = tmp_buffer;
 		else
 			lvc.pszText = bf;
 		lvc.cx = 60 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
-		LoadStringW(hInstance,IDS_LIST_FS,bf,sizeof(bf));
-		if(!GetResourceString(L"FILESYSTEM",tmp_buffer,sizeof(tmp_buffer)))
+		LoadStringW(hInstance,IDS_LIST_FS,bf,sizeof(bf) / sizeof(short));
+		if(!GetResourceString(L"FILESYSTEM",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			lvc.pszText = tmp_buffer;
 		else
 			lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
-		LoadStringW(hInstance,IDS_LIST_TOTAL,bf,sizeof(bf));
-		if(!GetResourceString(L"TOTAL",tmp_buffer,sizeof(tmp_buffer)))
+		LoadStringW(hInstance,IDS_LIST_TOTAL,bf,sizeof(bf) / sizeof(short));
+		if(!GetResourceString(L"TOTAL",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			lvc.pszText = tmp_buffer;
 		else
 			lvc.pszText = bf;
@@ -488,15 +488,15 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		lvc.fmt = LVCFMT_RIGHT;
 		lvc.cx = 100 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,3,(LRESULT)&lvc);
-		LoadStringW(hInstance,IDS_LIST_FREE,bf,sizeof(bf));
-		if(!GetResourceString(L"FREE",tmp_buffer,sizeof(tmp_buffer)))
+		LoadStringW(hInstance,IDS_LIST_FREE,bf,sizeof(bf) / sizeof(short));
+		if(!GetResourceString(L"FREE",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			lvc.pszText = tmp_buffer;
 		else
 			lvc.pszText = bf;
 		lvc.cx = 100 * dx / 505;
 		SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
-		LoadStringW(hInstance,IDS_LIST_PERCENT,bf,sizeof(bf));
-		if(!GetResourceString(L"PERCENT",tmp_buffer,sizeof(tmp_buffer)))
+		LoadStringW(hInstance,IDS_LIST_PERCENT,bf,sizeof(bf) / sizeof(short));
+		if(!GetResourceString(L"PERCENT",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
 			lvc.pszText = tmp_buffer;
 		else
 			lvc.pszText = bf;
@@ -702,41 +702,41 @@ void UpdateStatusBar(int index)
 
 	if(!hStatus) return;
 	b[0] = 0;
-	LoadStringW(hInstance,IDS_STATUS_DIRS,b,sizeof(b));
-	if(!GetResourceString(L"DIRS",tmp_bf,sizeof(tmp_bf)))
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).dircounter,tmp_bf);
+	LoadStringW(hInstance,IDS_STATUS_DIRS,b,sizeof(b) / sizeof(short));
+	if(!GetResourceString(L"DIRS",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).dircounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).dircounter,b);
-	bf[sizeof(bf) - 1] = 0;
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).dircounter,b);
+	bf[sizeof(bf) / sizeof(short) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
 	LoadStringW(hInstance,IDS_STATUS_FILES,b,sizeof(b));
 	if(!GetResourceString(L"FILES",tmp_bf,sizeof(tmp_bf)))
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).filecounter,tmp_bf);
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).filecounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).filecounter,b);
-	bf[sizeof(bf) - 1] = 0;
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).filecounter,b);
+	bf[sizeof(bf) / sizeof(short) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
-	LoadStringW(hInstance,IDS_STATUS_FRAGM,b,sizeof(b));
-	if(!GetResourceString(L"FRAGMENTED",tmp_bf,sizeof(tmp_bf)))
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).fragmfilecounter,tmp_bf);
+	LoadStringW(hInstance,IDS_STATUS_FRAGM,b,sizeof(b) / sizeof(short));
+	if(!GetResourceString(L"FRAGMENTED",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).fragmfilecounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).fragmfilecounter,b);
-	bf[sizeof(bf) - 1] = 0;
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).fragmfilecounter,b);
+	bf[sizeof(bf) / sizeof(short) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
-	LoadStringW(hInstance,IDS_STATUS_COMPRESSED,b,sizeof(b));
-	if(!GetResourceString(L"COMPRESSED",tmp_bf,sizeof(tmp_bf)))
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).compressedcounter,tmp_bf);
+	LoadStringW(hInstance,IDS_STATUS_COMPRESSED,b,sizeof(b) / sizeof(short));
+	if(!GetResourceString(L"COMPRESSED",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).compressedcounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) - 1,L"%lu %s",(stat[index]).compressedcounter,b);
-	bf[sizeof(bf) - 1] = 0;
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",(stat[index]).compressedcounter,b);
+	bf[sizeof(bf) / sizeof(short) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 	fbsize(s,(ULONGLONG)((stat[index]).mft_size));
-	LoadStringW(hInstance,IDS_STATUS_MFT,b,sizeof(b));
-	if(!GetResourceString(L"MFT",tmp_bf,sizeof(tmp_bf)))
-		_snwprintf(bf,sizeof(bf) - 1,L"%S %s",s,tmp_bf);
+	LoadStringW(hInstance,IDS_STATUS_MFT,b,sizeof(b) / sizeof(short));
+	if(!GetResourceString(L"MFT",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%S %s",s,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) - 1,L"%S %s",s,b);
-	bf[sizeof(bf) - 1] = 0;
+		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%S %s",s,b);
+	bf[sizeof(bf) / sizeof(short) - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
 }
 

@@ -107,7 +107,7 @@ int __stdcall winx_get_drive_type(char letter)
 	}
 	uStr.Buffer = link_target;
 	uStr.Length = 0;
-	uStr.MaximumLength = MAX_TARGET_LENGTH * sizeof(short);
+	uStr.MaximumLength = MAX_TARGET_LENGTH;
 	size = 0;
 	Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
 	NtClose(hLink);

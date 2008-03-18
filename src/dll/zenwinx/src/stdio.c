@@ -156,7 +156,7 @@ int __cdecl winx_printf(const char *format, ...)
 	*    with zero characters before _vsnprintf() call!
 	******/
 	memset(small_buffer,0,INTERNAL_BUFFER_SIZE);
-	done = _vsnprintf(small_buffer,sizeof(INTERNAL_BUFFER_SIZE),format,arg);
+	done = _vsnprintf(small_buffer,INTERNAL_BUFFER_SIZE,format,arg);
 	if(done == -1 || done == INTERNAL_BUFFER_SIZE){
 		/* buffer is too small; try to allocate two times larger */
 		do {
