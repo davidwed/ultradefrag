@@ -39,7 +39,8 @@ Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
 Markus Elfring     - Strong error handling.
 Mike Braca         - Reducing driver's memory usage (new cluster map 
                      internal representation).
-Nagy Zsolt         - interesting ideas about translation.
+Nagy Zsolt         - Interesting ideas about translation.
+                     Installer improvements.
 
 
 Also special thanks to:
