@@ -68,6 +68,7 @@ int __stdcall udefrag_unload(BOOL save_options);
 
 int getopts(char *filename);
 int saveopts(char *filename);
+int get_configfile_location(void);
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
@@ -216,7 +217,9 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_CLUSTER_MAP_SIZE,
 		&map_size,sizeof(long),NULL,0,
 		"Can't setup cluster map buffer: %x!")) goto init_fail;
-	/* 7. Load settings */
+	/* 7a. */
+	if(get_configfile_location() < 0) goto init_fail;
+	/* 7b. Load settings */
 	udefrag_load_settings(argc,argv);
 	/*if(getopts("\\??\\D:\\MyDocs\\udefrag.cfg") < 0)
 		winx_pop_error(NULL,0);

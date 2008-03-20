@@ -50,6 +50,9 @@
 #define IDB_CMP_A                       124
 
 #define IDR_ACCELERATOR1                125
+#define IDD_NEW_SETTINGS                126
+
+#define IDB_SETTINGS_PICTURE            127
 
 #define IDC_VOLUMES                     1002
 #define IDC_ANALYSE                     1003
@@ -108,14 +111,15 @@
 #define IDS_STATUS_MFT                  1056
 
 #define IDC_CL_MAP_STATIC               1057
+#define IDC_EDITMAINOPTS                1058
 
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        126
+#define _APS_NEXT_RESOURCE_VALUE        127
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1058
+#define _APS_NEXT_CONTROL_VALUE         1059
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

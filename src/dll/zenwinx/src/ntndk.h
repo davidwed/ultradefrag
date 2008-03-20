@@ -22,11 +22,11 @@
 
 /* define base types */
 #define ULONG_PTR unsigned long*
-#define LONG_PTR  signed long*
 typedef int BOOL;
 typedef const char *PCSZ;
 
 #ifndef USE_WINDDK
+#define LONG_PTR  signed long*
 typedef ULONG_PTR KAFFINITY;
 typedef KAFFINITY *PKAFFINITY;
 typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
@@ -755,6 +755,7 @@ NTSTATUS	NTAPI	RtlUnicodeStringToAnsiString(PANSI_STRING,PUNICODE_STRING,BOOL);
 VOID		NTAPI	RtlFreeUnicodeString(PUNICODE_STRING);
 VOID		NTAPI	RtlFreeAnsiString(PANSI_STRING);
 ULONG		NTAPI	RtlNtStatusToDosError(NTSTATUS);
+BOOLEAN     NTAPI	RtlDosPathNameToNtPathName_U(PCWSTR,PUNICODE_STRING,PCWSTR*,CURDIR*);
 NTSTATUS	NTAPI	LdrGetDllHandle(ULONG,ULONG,const UNICODE_STRING*,HMODULE*);
 NTSTATUS	NTAPI	LdrGetProcedureAddress(PVOID,PANSI_STRING,ULONG,PVOID *);
 NTSTATUS	NTAPI	NtAllocateVirtualMemory(HANDLE,PVOID*,ULONG,PULONG,ULONG,ULONG);

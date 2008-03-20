@@ -75,6 +75,8 @@ short value_buffer[8192];
 int getopts(char *filename);
 int saveopts(char *filename);
 
+char configfile[MAX_PATH] = "";
+
 static __inline int ReadRegValue(HANDLE h, short *name, DWORD type, void *pval, DWORD size)
 {
 	DWORD dwSize = size;
@@ -102,16 +104,49 @@ extern BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID out_buf,ULONG out_size,
 			char *err_format_string);
 
+int get_configfile_location(void)
+{
+	HANDLE hKey;
+	int status;
+	UNICODE_STRING us;
+	ANSI_STRING as;
+	short buf[MAX_PATH];
+	DWORD dwSize = sizeof(buf) - sizeof(short);
+
+	if(winx_reg_open_key(L"\\REGISTRY\\MACHINE\\SYSTEM\\UltraDefrag",&hKey) < 0)
+		return -1;
+	status = winx_reg_query_value(hKey,L"WindowsDirectory",REG_SZ,buf,&dwSize);
+	winx_reg_close_key(hKey);
+	if(status < 0) return -1;
+
+	buf[dwSize / sizeof(short)] = 0;
+	RtlInitUnicodeString(&us,buf);
+	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
+		winx_push_error("No enough memory!");
+		return -1;
+	}
+	strcpy(configfile,"\\??\\");
+	strncat(configfile,as.Buffer,sizeof(configfile) - strlen(configfile) - 1);
+	configfile[sizeof(configfile) - 1] = 0;
+	strncat(configfile,"\\UltraDefrag\\options\\udefrag.cfg",
+			sizeof(configfile) - strlen(configfile) - 1);
+	RtlFreeAnsiString(&as);
+	if(!strstr(configfile,"udefrag.cfg")){
+		winx_push_error("Invalid config path %s!",configfile);
+		return -1;
+	}
+	return 0;
+}
+
 /* load settings: always successful */
 int __stdcall udefrag_load_settings(int argc, short **argv)
 {
 	HANDLE hKey;
 	DWORD x;
 	int i;
-//	char filename[64];
 
-//	if(getopts(filename) >= 0) goto analyse_cmdline;
-//	winx_pop_error(NULL,0);
+	if(getopts(configfile) >= 0) goto analyse_cmdline;
+	winx_pop_error(NULL,0);
 	
 	/* open program key */
 	if(winx_reg_open_key(ud_key,&hKey) < 0){
@@ -260,14 +295,13 @@ apply_settings_fail:
 
 int __stdcall udefrag_save_settings(void)
 {
-	HANDLE hKey;
-	DWORD x;
-//	char filename[64];
+//	HANDLE hKey;
+//	DWORD x;
 
 	if(native_mode_flag) settings.next_boot = FALSE;
-//	if(saveopts(filename) < 0) goto save_fail;
+	if(saveopts(configfile) < 0) goto save_fail;
 
-#if 1
+#if 0
 	/* create key if not exist */
 	if(winx_reg_open_key(ud_key,&hKey) < 0){
 		winx_pop_error(NULL,0);

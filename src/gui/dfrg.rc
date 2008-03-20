@@ -42,6 +42,7 @@ IDB_FRAGM_A             BITMAP  DISCARDABLE     "res/fragm_a.bmp"
 IDB_UNFRAGM_A           BITMAP  DISCARDABLE     "res/unfragm_a.bmp"
 IDB_DIR_A               BITMAP  DISCARDABLE     "res/dir_a.bmp"
 IDB_CMP_A               BITMAP  DISCARDABLE     "res/cmp_a.bmp"
+IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
 
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
@@ -174,6 +175,20 @@ BEGIN
                     147,12,BS_FLAT
 END
 
+IDD_NEW_SETTINGS DIALOG DISCARDABLE  0, 0, 212, 76
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    CONTROL         127,IDC_STATIC,"Static",SS_BITMAP,7,6,65,60
+    DEFPUSHBUTTON   "Edit main options",IDC_EDITMAINOPTS,81,7,124,15,WS_GROUP
+    PUSHBUTTON      "Edit report options",IDC_EDITREPORTOPTS,81,30,123,14,NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Read user manual",IDC_SETTINGS_HELP,81,52,123,14,NOT 
+                    WS_TABSTOP
+END
+
+/*
 IDD_SETTINGS DIALOG DISCARDABLE  0, 0, 278, 165
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
@@ -260,3 +275,4 @@ BEGIN
     CONTROL         "Defragment every boot",IDC_EVERYBOOT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,159,32,91,8
 END
+*/

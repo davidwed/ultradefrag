@@ -392,6 +392,18 @@ skip_opts:
   File "${ROOTDIR}\doc\html\about.html"
   File "${ROOTDIR}\doc\html\about_simple.html"
 
+  ; save %windir% path
+  ClearErrors
+  WriteRegStr HKLM "SYSTEM\UltraDefrag" "WindowsDirectory" $WINDIR
+  IfErrors 0 L10
+  MessageBox MB_OK|MB_ICONEXCLAMATION \
+   "Can't save %windir% in registry!" \
+   /SD IDOK
+L10:
+
+  ; create configuration file if it doesn't exist
+  ExecWait '"$INSTDIR\Dfrg.exe" /I'
+
   ; install LanguagePack pack
   SetOutPath $INSTDIR
   Delete "$INSTDIR\ud_i18n.lng"
@@ -492,6 +504,23 @@ lua_registered:
   WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
 !endif
 lng_registered:
+
+  ; register cfg file extension
+  ClearErrors
+  ReadRegStr $R0 HKCR ".cfg" ""
+  IfErrors 0 cfg_registered
+  WriteRegStr HKCR ".cfg" "" "ConfigFile"
+  WriteRegStr HKCR "ConfigFile" "" "Configuration File"
+  WriteRegStr HKCR "ConfigFile\shell\open" "" "Open"
+  WriteRegStr HKCR "ConfigFile\DefaultIcon" "" "shell32.dll,0"
+!if ${ULTRADFGARCH} == 'i386'
+  WriteRegStr HKCR "ConfigFile\shell\open\command" "" "$SYSDIR\notepad.exe %1"
+!else
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
+  WriteRegStr HKCR "ConfigFile\shell\open\command" "" "notepad.exe %1"
+!endif
+cfg_registered:
 
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"

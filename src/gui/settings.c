@@ -44,7 +44,7 @@ extern HINSTANCE hInstance;
 extern HWND hWindow;
 RECT win_rc; /* coordinates of main window */
 int skip_removable = TRUE;
-
+/*
 HWND hTabCtrl;
 HWND hFilterDlg,hGuiDlg,hReportDlg,hBootSchedDlg;
 
@@ -54,7 +54,6 @@ BOOL CALLBACK EmptyDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 //extern void HideProgress();
 
-char buffer[32768];
 #define MAX_FILTER_SIZE 4096
 #define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
 short in_filter[MAX_FILTER_SIZE + 1];
@@ -65,7 +64,40 @@ short boot_ex_filter[MAX_FILTER_SIZE + 1];
 short letters[64];
 
 extern ud_options *settings;
+*/
 
+char buffer[32768];
+
+BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+	switch(msg){
+	case WM_INITDIALOG:
+		/* Window Initialization */
+		SetWindowPos(hWnd,0,win_rc.left + 117,win_rc.top + 155,0,0,SWP_NOSIZE);
+		return TRUE;
+	case WM_COMMAND:
+		switch(LOWORD(wParam)){
+		case IDC_EDITMAINOPTS:
+			ShellExecute(hWindow,"open",".\\options\\udefrag.cfg",NULL,NULL,SW_SHOW);
+			break;
+		case IDC_EDITREPORTOPTS:
+			ShellExecute(hWindow,"open",".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
+			break;
+		case IDC_SETTINGS_HELP:
+			ShellExecute(hWindow,"open",".\\doc\\manual.html",NULL,NULL,SW_SHOW);
+			break;
+		}
+		return FALSE;
+	case WM_CLOSE:
+		EndDialog(hWnd,0);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+
+#if 0
 BOOL CALLBACK SettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	char buf[68];
@@ -370,6 +402,9 @@ BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	}
 	return FALSE;
 }
+#endif
+
+
 
 static int getint(lua_State *L, char *variable)
 {

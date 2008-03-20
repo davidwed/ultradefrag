@@ -96,6 +96,7 @@ HWND hProgressMsg,hProgressBar;
 HWND hMap;
 
 BOOL portable_run = FALSE;
+BOOL install_run = FALSE;
 BOOL uninstall_run = FALSE;
 
 extern RECT win_rc; /* coordinates of main window */
@@ -130,12 +131,13 @@ int My_Index;
 #define N_OF_STATUSBAR_PARTS  5
 #define IDM_STATUSBAR         500
 
-ud_options *settings;
+//ud_options *settings;
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 extern BOOL CALLBACK SettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
+extern BOOL CALLBACK NewSettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
 void RescanDrives();
 void ClearMap();
 void RedrawMap();
@@ -211,14 +213,22 @@ void HandleError_(int status,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	settings = udefrag_get_options();
+	//settings = udefrag_get_options();
 	/* check command line keys */
 	_strupr(lpCmdLine);
 	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
 	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
+	install_run = (strstr(lpCmdLine,"/I") != NULL) ? TRUE : FALSE;
 	if(uninstall_run){	
 		if(udefrag_clean_registry() < 0) udefrag_pop_error(NULL,0);
 		ExitProcess(0);
+	}
+	if(install_run){
+		if(udefrag_init(0,NULL,FALSE,N_BLOCKS) < 0)
+			udefrag_pop_error(NULL,0);
+		if(udefrag_unload(TRUE) < 0)
+			udefrag_pop_error(NULL,0);
+		return 0;
 	}
 	HandleError_(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
 	GetPrefs();
@@ -555,8 +565,10 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//ShellExecute(hWindow,"open",".\\doc\\about.html",NULL,NULL,SW_SHOW);
 			break;
 		case IDC_SETTINGS:
-			if(!busy_flag)
-				DialogBox(hInstance,MAKEINTRESOURCE(IDD_SETTINGS),hWindow,(DLGPROC)SettingsDlgProc);
+			if(!busy_flag){
+				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),hWindow,(DLGPROC)NewSettingsDlgProc);
+				/* reload and apply settings */
+			}
 			break;
 		case IDC_SKIPREMOVABLE:
 			if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
