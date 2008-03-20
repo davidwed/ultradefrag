@@ -6,13 +6,13 @@ body {
 }
 
 p {
-	padding-left:10pt;
-	text-indent:10pt;
+	/*padding-left:10pt;*/
+	/*text-indent:10pt;*/
 }
 
 /* for paragraphs and other blocks */
 .p0 {
-	padding-left:10pt;
+	/*padding-left:10pt;*/
 	text-indent:0pt;
 }
 
@@ -27,5 +27,10 @@ a:visited {
 #links {
 	padding-left: 0pt;
 	text-indent: 0pt;
+	text-align: center;
+}
+
+.header2 {
+	font-variant: small-caps;
 	text-align: center;
 }

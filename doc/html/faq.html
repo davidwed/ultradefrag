@@ -12,7 +12,7 @@
 <title>UltraDefrag - powerful Open Source disk defragmenter - FAQ</title>
 <style type="text/css">
 <!--
-TD {text-align:justify}
+/*TD {text-align:justify}*/
 -->
 </style>
 </head>
@@ -142,6 +142,27 @@ Code Signing for device drivers</pre>
 </li>
 <li>Enable this policy and set it to Ignore state.</li>
 </ol>
+</td>
+</tr>
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+<tr>
+<td><span style="font-weight: bold;">Q.:</span></td>
+<td>Why UD doesn't work on x64 Vista with Service Pack 1?</td>
+</tr>
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+<tr>
+<td valign="top"><span style="font-weight: bold;">A.:</span></td>
+<td>This version of Windows needs driver signature (from Microsoft) to load program's 
+engine. Bill Gates thinks that you are so stupid that you can't decide, 
+load the driver without signature or not. Therefore you can't allow that 
+though you are a system administrator and maybe payed few hunreds of dollars 
+for a Windows license.<br /><br /><b>THE DRIVER SIGNATURE IS COMPLETELY INCOMPATIBLE WITH 
+GPL!!!</b> Because we need a new signature for each new build. Therefore I will never try 
+to become them for UD driver.
 </td>
 </tr>
 </tbody></table>
