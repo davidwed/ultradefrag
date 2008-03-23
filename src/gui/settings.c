@@ -67,6 +67,10 @@ extern ud_options *settings;
 */
 
 char buffer[32768];
+extern short tmp_buffer[1024];
+
+
+int  GetResourceString(short *id,short *buf,int maxchars);
 
 BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
@@ -74,6 +78,14 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		SetWindowPos(hWnd,0,win_rc.left + 117,win_rc.top + 155,0,0,SWP_NOSIZE);
+		if(!GetResourceString(L"SETTINGS",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
+			SetWindowTextW(hWnd,tmp_buffer);
+		if(!GetResourceString(L"EDIT_MAIN_OPTS",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
+			SetWindowTextW(GetDlgItem(hWnd,IDC_EDITMAINOPTS),tmp_buffer);
+		if(!GetResourceString(L"EDIT_REPORT_OPTS",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
+			SetWindowTextW(GetDlgItem(hWnd,IDC_EDITREPORTOPTS),tmp_buffer);
+		if(!GetResourceString(L"READ_USER_MANUAL",tmp_buffer,sizeof(tmp_buffer) / sizeof(short)))
+			SetWindowTextW(GetDlgItem(hWnd,IDC_SETTINGS_HELP),tmp_buffer);
 		return TRUE;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){

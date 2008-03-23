@@ -31,6 +31,7 @@ IDI_FRAGM               ICON    DISCARDABLE     "res/fragm.ico"
 IDI_CMP                 ICON    DISCARDABLE     "res/cmp.ico"
 IDI_MFT                 ICON    DISCARDABLE     "res/mft.ico"
 
+/*
 IDB_FRAGM               BITMAP  DISCARDABLE     "res/fragm.bmp"
 IDB_UNFRAGM             BITMAP  DISCARDABLE     "res/unfragm.bmp"
 IDB_SYS                 BITMAP  DISCARDABLE     "res/sys.bmp"
@@ -42,7 +43,10 @@ IDB_FRAGM_A             BITMAP  DISCARDABLE     "res/fragm_a.bmp"
 IDB_UNFRAGM_A           BITMAP  DISCARDABLE     "res/unfragm_a.bmp"
 IDB_DIR_A               BITMAP  DISCARDABLE     "res/dir_a.bmp"
 IDB_CMP_A               BITMAP  DISCARDABLE     "res/cmp_a.bmp"
+*/
+
 IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
+IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/t3.bmp"
 
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
@@ -121,7 +125,7 @@ BEGIN
     CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
                     WS_BORDER,30,202,277,5
 END
-
+/*
 STRINGTABLE DISCARDABLE
 BEGIN
     IDS_LIST_VOLUME             "Volume"
@@ -136,15 +140,15 @@ BEGIN
     IDS_STATUS_COMPRESSED       "compressed"
     IDS_STATUS_MFT              "MFT"
 END
-
+*/
 /* temporary resources */
 
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 194, 173
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION ABOUT_VERSION
+CAPTION "About Ultra Defragmenter"
 FONT 9, "Courier New"
 BEGIN
-    GROUPBOX        "Legend",IDC_STATIC,7,3,180,55
+/*    GROUPBOX        "Legend",IDC_STATIC,7,3,180,55
     CONTROL         114,IDC_STATIC,"Static",SS_BITMAP,12,15,7,6
     CONTROL         115,IDC_STATIC,"Static",SS_BITMAP,74,15,7,6
     CONTROL         116,IDC_STATIC,"Static",SS_BITMAP,144,25,7,6
@@ -168,11 +172,16 @@ BEGIN
     GROUPBOX        "Notes",IDC_STATIC,7,63,180,71
     LTEXT           "1. Deactivate your virus scanner\n   for better performance.\n2. Directories on FAT volumes\n   cannot be moved.\n3. System files will not be moved. \n   Run the boot time scan to\n   defragment system files.",
                     IDC_STATIC,30,73,140,57
-    PUSHBUTTON      "Credits",IDC_CREDITS,7,139,87,10
-    PUSHBUTTON      "License",IDC_LICENSE,101,139,86,10
-    DEFPUSHBUTTON   "OK",IDOK,158,154,29,12
-    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,7,154,
-                    147,12,BS_FLAT
+*/
+    CONTROL         128,IDC_STATIC,"Static",SS_BITMAP,5,4,62,78
+    LTEXT           ABOUT_VERSION,IDC_STATIC,86,6,146,
+                    18
+    LTEXT           "Copyright (C) 2007,2008",IDC_STATIC,103,22,100,13
+    LTEXT           "UltraDefrag Development Team",IDC_STATIC,93,38,122,12
+    PUSHBUTTON      "Credits",IDC_CREDITS,72,53,76,10
+    PUSHBUTTON      "License",IDC_LICENSE,153,53,80,10
+    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
+                    161,12,BS_FLAT
 END
 
 IDD_NEW_SETTINGS DIALOG DISCARDABLE  0, 0, 212, 76
