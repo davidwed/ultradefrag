@@ -9,7 +9,7 @@
 <meta name="CHANGED" content="20070905;22040900">
 <style type="text/css">
 <!--
-@page { size: 21.59cm 27.94cm; margin: 2cm }
+/*@page { size: 21.59cm 27.94cm; margin: 2cm }*/
 P { margin-bottom: 0.21cm }
 H1 { margin-bottom: 0.21cm }
 H1.western { font-family: "Arial", sans-serif; font-size: 16pt }
@@ -21,14 +21,33 @@ H2.cjk { font-size: 14pt; font-style: italic }
 H2.ctl { font-size: 14pt; font-style: italic }
 H3 { margin-bottom: 0.21cm }
 H3.western { font-family: "Arial", sans-serif }
+
+/* for color boxes */
+.cb {
+	position: absolute;
+	width: 8pt;
+	height: 8pt;
+	border: 1px solid;
+	font-size: 6pt; /* specially for IE */
+}
+
+/* for static text */
+.st {
+	position: absolute;
+	font-size: 11pt;
+}
 -->
 </style>
+<link rel="stylesheet" type="text/css" href="udefrag.css" />
 </head>
 <body style="direction: ltr; color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt;" alink="#ff0000" lang="en-US" vlink="#660099">
-<h1 class="western" style="" align="center"><font style="font-size: 20pt;" size="5">UltraDefrag
+<h1 class="western" align="center"><font style="font-size: 20pt;" size="5">UltraDefrag
 User Manual</font></h1>
-<h1 class="western" style="" align="right"><i>Written
-by <a href="mailto:zippy1981 + at + gmail + dot + com">Justin Dearing</a></i></h1>
+<div class="western" align="right">Written by 
+<a href="mailto:zippy1981 + at + gmail + dot + com">Justin Dearing</a>.<br>
+Modified by 
+<a href="mailto:dmitriar + at + gmail + dot + com">Dmitri Arkhangelski.</a>
+</div>
 <h1 class="western">What is UltraDefrag?</h1>
 <p>UltraDefrag is an open source disk defragmenter for Windows NT 4.0
 and later operating systems. It makes use of the same defragmenting
@@ -55,17 +74,68 @@ versions of Windows.</p>
 project homepage 
 (<a href="http://ultradefrag.sourceforge.net/">http://ultradefrag.sourceforge.net/</a>).
 Simply download and run the installer. No reboot is required.</p>
-<p>Note that you must be an administrator to install and run
-UltraDefrag.</p>
+<p><b>SOFTWARE REQUIREMENTS:</b>
+<ul type="disc">
+<li><b>Minimal</b>
+<ul type="disc">
+<li>Windows NT 4.0 or later operating system.</li>
+</ul>
+<ul type="disc">
+<li>Text editor with Unicode (UTF-16) support.</li>
+</ul>
+</li>
+<li><b>Advanced</b>
+<ul type="disc">
+<li>Web browser (at least IE 3.0). With enabled JavaScript.</li>
+</ul>
+<ul type="disc">
+<li>DbgView program or DbgPrint Logger.</li>
+</ul>
+</li>
+</ul>
+</p>
+<p><b>Note that you must be an administrator to install and run
+UltraDefrag.</b></p>
+<p>If you have problems with configuration files editing, use the following menu
+in Explorer <span class="path">Tools > Folder options > File types</span>
+and associate 'lua' and 'cfg' extensions with your preferred text editor. 
+</p>
 <h1 class="western">Using UltraDefrag</h1>
-<p><b>IMPORTANT</b><span style=""> You must disable your virus detection
-software before using UltraDefrag.</span></p>
+<p><b>IMPORTANT:</b>
+<ul>
+<li>You must disable your virus detection
+software before using UltraDefrag.</li>
+<li>Directories on FAT volumes cannot be moved.</li>
+<li>Use the boot time defragmentation feature to defragment system files.</li>
+</ul>
+</p>
 <h2 class="western">Console Application</h2>
 <p>The console application is called udefrag.exe. It
 is placed in system32 directory by the installer. Therefore you can
 call it from the command line or run box.</p>
-<h3 class="western">Usage</h3>
-<h3 class="western"><img src="images/console.png" name="Frame1" alt="Console application" align="bottom"></h3>
+<!--<h3 class="western">Usage</h3>
+<img src="images/console.png" name="Frame1" alt="Console application" align="bottom">-->
+<pre style="border: 2px solid; background-color: black">
+<div align="center" style="background-color: blue; color: white">Command prompt</div><div style="color: white">
+Microsoft Windows XP [5.1.2600]
+(C) Microsoft Corporation, 1985-2001.
+
+C:\>udefrag -a c:</div><div style="color: #00FF00">UltraDefrag v1.1.0 console interface
+Copyright (c) Dmitri Arkhangelski, 2007.
+
+
+Volume information:
+
+  Volume size                  = 3.92 Gb
+  Free space                   = 917.56 Mb
+  
+  Total number of files        = 14688
+  Number of fragmented files   = 126
+  Fragments per file           = 1.21
+</div><div style="color: white">
+C:\>_
+</div>
+</pre>
 <i>Console Application after a successful analyze run.</i>
 <p>The command line version takes one of three switches and a
 drive
@@ -76,8 +146,8 @@ letter. The switches are as follows:</p>
 <li>-o Optomize file space by moving all files to the begining of the drive</li>
 </ul>
 <p>In addition the following switches can be used when defraging and compacting.
-They override the settings in the registry set by the gui described below. The defaults
-for the registry setting are set at compile time.</p>
+They override the settings in the <a href="#cfgfile">udefrag.cfg</a> file described below. 
+The default settings are set at compile time.</p>
 <ul>
 <li>-sN ignore files larger than N bytes</li>
 <li>-iA;B;C Include these files and directories from the scan (Maximum 4096 bytes)</li>
@@ -90,47 +160,81 @@ to defragment the drive. When the operation finishes or you stop the
 program with a Ctrl+C, the program will display the results to the
 console. If you abort the operation with Ctrl+C or close the shell
 window, UltraDefrag will exit safely without destroying any data.</p>
+<p>The console application is also used as context menu handler. When you right click 
+drive/folder/file icon in Explorer you can select <b>[--- Ultra Defragmenter --]</b> item 
+to defragment selected file.</p>
 <h3 class="western">Windows Application</h3>
 <p>The windows application is a simple application with one main
 form of fixed size and an about box. An illustration of the window as well
 as an explanation of their functionality is below:</p>
-<p><img src="images/main_screen110.png" name="graphics1" alt="Main window" align="bottom" border="0"></p>
+<p><img src="images/main_screen140.png" name="graphics1" alt="Main window" align="bottom" border="0"></p>
 <ol>
 <li>
-<p><b>List of volumes.</b> This list all drives
-on the machine that you can scan. It has the following fields:</p>
-<ol>
+<p><b>List of volumes.</b> This list all drives on the machine that you can scan. 
+CDROM's and other drives that cannot be defragmented are excluded from list automatically.
+If the 'Skip removable media' box is checked, also floppies and other similar devices will 
+be excluded. This list has the following fields:</p>
+<ul type="disc">
 <li>
-<p><b>Volume</b> (Drive Letter)</p>
+<p><b>Volume</b> - drive letter.</p>
 </li>
 <li>
-<p><b>Status</b> A description of the action
+<p><b>Status</b> - a description of the action
 being performed (Analyze, defrag, etc).</p>
 </li>
 <li>
-<p><b>File Sytem</b> type of file system
-contained on the <span style="">volume.</span></p>
+<p><b>FS</b> - type of file system
+contained on the volume.</p>
 </li>
 <li>
-<p><b>Total Size</b></p>
+<p><b>Total space</b></p>
 </li>
 <li>
-<p><b>Free </b><span style="">Free
-space</span></p>
+<p><b>Free space</b></p>
 </li>
 <li>
-<p><b>Percent</b> Percent Free.</p>
+<p><b>Percentage</b> - percent free.</p>
 </li>
-</ol>
+</ul>
 </li>
 <li>
 <p><b>Skip Removeable Media Checkbox</b></p>
 </li>
 <li>
-<p><b>Cluster Map</b><span style="">
-This is a color coded representation of all drives. The </span><a href="#AboutBox%7Cgraphic"><span style="">about
-box</span></a><span style=""> explains what
-the colors represent.</span></p>
+<p><b>Cluster Map</b>
+This is a color coded representation of all drives. 
+Here is colors explaination:</p>
+
+<!-- doesn't work in old IE browsers -->
+<div style="position: relative; height: 60pt;">
+	<!-- color boxes -->
+	<div class="cb" style="top: 10pt; left: 10pt; background-color: red;"></div>
+	<div class="cb" style="top: 10pt; left: 18pt; background-color: darkred;"></div>
+	<div class="cb" style="top: 10pt; left: 100pt; background-color: blue;"></div>
+	<div class="cb" style="top: 10pt; left: 108pt; background-color: darkblue;"></div>
+	<div class="cb" style="top: 10pt; left: 200pt; background-color: white;"></div>
+	<div class="cb" style="top: 25pt; left: 10pt; background-color: yellow;"></div>
+	<div class="cb" style="top: 25pt; left: 18pt; background-color: #eedd00;"></div>
+	<div class="cb" style="top: 25pt; left: 100pt; background-color: #aaaa00;"></div>
+	<div class="cb" style="top: 25pt; left: 108pt; background-color: #777700;"></div>
+	<div class="cb" style="top: 25pt; left: 200pt; background-color: #00dd00;"></div>
+	<div class="cb" style="top: 40pt; left: 10pt; background-color: cyan;"></div>
+	<div class="cb" style="top: 40pt; left: 200pt; background-color: darkmagenta;"></div>
+	<!-- descriptions -->
+	<div class="st" style="top: 9pt; left: 33pt;">Fragmented</div>
+	<div class="st" style="top: 9pt; left: 123pt;">Unfragmented</div>
+	<div class="st" style="top: 9pt; left: 215pt;">Free</div>
+	<div class="st" style="top: 24pt; left: 33pt;">Directory</div>
+	<div class="st" style="top: 24pt; left: 123pt;">Compressed</div>
+	<div class="st" style="top: 24pt; left: 215pt;">System</div>
+	<div class="st" style="top: 39pt; left: 33pt; width: 155pt">Temporary system</div>
+	<div class="st" style="top: 39pt; left: 215pt;">MFT</div>
+</div>
+
+<p>Some of the categories on the legend have a lighter and
+darker color on them. The lighter colors represent files below the file
+size threshold, and the darker colors represent files above the
+threshold if one is set.</p>
 </li>
 <li>
 <p><b>Rescan <span style="font-style: normal;">Drives
@@ -142,7 +246,7 @@ or removed.</span></p>
 <p><b>Buttons</b><span style=""><br>
 The following section explains the buttons along with listing their
 shortcut keys.</span></p>
-<ol>
+<ul type="disc">
 <li>
 <p><b>Analyze (Ctrl+A)</b><span style="">
 Scans the currently selected drive to determine how fragmented it is.</span></p>
@@ -177,79 +281,16 @@ UltraDefrag generate it.</span></p>
 </li>
 <li>
 <p><b>Settings (Ctrl+T) </b>Displays the Settings Dialog. The settings dialog has
-three tabs. These settings are stored in the registry and override the setting
-hardcoded into the executable at compile time. The compile tome defaults are
-set in "src\dll\udefrag\settings.c".</p>
-<ol>
-<li>
-<p><b>Filter</b> You can specify file to include and exclude from the scan as well as
-ignore files over a given size.</p>
-<p>The patterns you supply for the include and exclude functionality
-applies to the whole path. For example, if you specify temp\ in the
-exclude path you would exclude both the temp folder (%WINDIR%\temp) and
-the internet explorer temporary files folder. Filter strings cannnot be longer
-than 4096 bytes.</p>
-<p>You can specify maximum file size with the following suffixes (Kb | Mb
-| Gb | Tb). </p>
+three buttons as shortcuts to <a href="#cfgfile">main options</a>, 
+<a href="#reportopts">report options</a> and this User Manual. 
+The settings stored in files override the settings hardcoded into the executable 
+at compile time (in "src\dll\udefrag\settings.c").</p>
 </li>
 <li>
-<p><b>GUI</b><span style="">
-You can toggle the progress bar and specify the interval to update the
-map.</span></p>
+<p><b>About (F1) </b>Displays the simple about box containing copyright notice 
+and links to most important information about program.</p>
 </li>
-<li>
-<p><b>Report</b><span style="">
-Specify the following settings for the report.</span></p>
-<ol>
-<li>
-<p><b>Type</b><span style="">
-html or none.</span></p>
-</li>
-<li>
-<p><b>Encoding</b><span style="">
-UTF-18 or ASCII. Generally ASCII renders better in Internet Explorer
-and UTF-16 renders better in FireFox. UTF-16 is of course required to
-properly render Asian characters such as Japanese and Chinese.</span></p>
-</li>
-<li>
-<p><b>Debug Print</b><span style="">
-Normal or Detailed. Select normal to view useful messages about the
-analyse or defrag progress. Select detailed to create a bug report to
-send to the author when an error is encountered.</span></p>
-</li>
-</ol>
-</li>
-<li>
-<p><b>Boot time</b><span style="">
-Settings releated to the boot time scan with the native executable.</span></p>
-<ol>
-<li>
-<p><b>Drive letters</b><span style=""> The drives to scan. Letters must be either 
-separated by semicolons (;) or don't contain any separators between.</span></p>
-</li>
-<li>
-<p><b>Defragment at next boot </b><span style="">and</span><b> Defragment every boot</b><span style=""> Check these boxes to chose when to defragment.</span></p>
-</li>
-<li>
-<p><b>Include</b><span style="">
-and </span><b>Exclude</b><span style="">
-file filters. These operate the same as the ones in the filter dialog.</span></p>
-</li>
-</ol>
-</li>
-</ol>
-</li>
-<li>
-<p><b>About (F1)</b><span style="">
-Displays the about box shown below. <br>
-Included in the about box is a legend of the color codes found on the
-cluster map. Some of the categories on the legend have a lighter and
-darker color on them. The lighter colors represent files below the file
-size threshold, and the darker colors represent files above the
-threshold if one is set.<br>
-<a name="AboutBox|graphic"></a><img src="images/about.png" name="AboutBox" alt="About box" border="0"></span></p>
-</li>
-</ol>
+</ul>
 </li>
 <li>
 <p><b>Progress bar</b><span style="">
@@ -279,31 +320,196 @@ following fields.</p>
 <p><b>Filename</b></p>
 </li>
 <li>
-<p><b>Comment</b><span style="">
-This can be blank or contain one of three values:</span></p>
-<ol>
+<p><b>Comment</b> This can be blank or contain one of three values:</p>
+<ul type="disc">
 <li>
-<p><b>[OVR]</b><span style="">
-File is over limit.</span></p>
+<p><b>[OVR]</b> File is above the size threshold.</p>
 </li>
 <li>
-<p><b>[DIR]</b><span style="">
-Object is a directory.</span></p>
+<p><b>[DIR]</b> Object is a directory.</p>
 </li>
 <li>
-<p><b>[CMP]</b><span style="">
-Compressed file.</span></p>
+<p><b>[CMP]</b> Compressed file.</p>
+</li>
+</ul>
 </li>
 </ol>
-</li>
-</ol>
+<p>To change items sorting click top link on the preferred column. Note that it's a slow 
+process - about 1.5 seconds for 550 items on 1.8GHz CPU. Sorting implemented in JavaScript 
+is slow, but very reliable.
+</p>
 <h1 class="western">Scheduling Defrag runs.</h1>
 <p>The command line version of UltraDefrag may be run out of system
-scheduled tasks, The process of adding a scheduled task instance of
+scheduled tasks. The process of adding a scheduled task instance of
 UltraDefrag is simplified throuth a utility called UltraDefrag
-Scheduler.NET. This small application requites Microsoft Framework 2.0to run. The simple gui has 4 settings. </p>
+Scheduler.NET. This small application requires Microsoft .NET Framework 2.0 to run. The simple gui has 4 settings. </p>
 <p><img style="width: 248px; height: 157px;" alt="UltraDefrag Scheduler.NET" src="images/sched_net_vista.png"></p>
 <ol><li>Whether to run Ultra Defrag every day (Daily) or only certain days of the week (Weekly).</li><li>The time of day to run the task.</li><li>The drive letter to scan.</li><li>Days of the week to defrag if Weekly is selected.</li></ol>
+<h1 class="western">Configuration files</h1>
+<h2 name="cfgfile" id="cfgfile">Main options</h2>
+<p>They are stored in <span class="path">udefrag.cfg</span> file located in 
+<span class="path">%windir%\UltraDefrag\options</span> 
+directory. This is just a simple text file with comments and parameter-value pairs. 
+Note please that it must be saved in Unicode (UTF-16) encoding. On most systems built-in 
+Notepad can be used as editor. On NT 4.0 that application doesn't have an Unicode support, 
+so use something else.
+</p>
+<p>The strings with a semicolon (;) or # characters in the beginning are comments. 
+Note that your own comments will be lost after next program's run. Sorry, but comments 
+saving function isn't implemented yet. Here is a complete example:</p>
+<pre style="border: 1px solid black; color: black; 
+background-color: #ffffe1; font-size: 10pt;">
+
+; !!! NOTE: THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING !!!
+
+;-------------------------------------------------------------------
+;
+; Filter
+;
+; 1. Enter multiple filter match strings separated
+;    by the semicolon (;) character. Note that filter 
+;    is case insensitive.
+; 2. You can specify maximum file size with the
+;    following suffixes: Kb, Mb, Gb, Tb, Eb, Pb.
+; 3. The patterns you supply for the include and exclude 
+;    functionality applies to the whole path. For example, 
+;    if you specify 'temp' in the exclude path you would 
+;    exclude both the temp folder (WINDIR\temp) and
+;    the internet explorer temporary files folder. 
+;    Filter strings cannot be longer than 4096 bytes.
+;
+;-------------------------------------------------------------------
+
+INCLUDE             = 
+EXCLUDE             = system volume information;temp;recycler
+SIZELIMIT           = 126 Pb
+
+;-------------------------------------------------------------------
+;
+; Boot time settings
+;
+; 1. Enter multiple filter match strings separated
+;    by the semicolon (;) character. Note that filter
+;    is case insensitive.
+; 2. The volume letters must be either separated 
+;    by semicolons (;) or don't contain any separators 
+;    between.
+; 3. Set NEXT_BOOT/EVERY_BOOT to YES/NO 
+;    to chose when to defragment.
+;
+;-------------------------------------------------------------------
+
+BOOT_TIME_INCLUDE   = windows;winnt;ntuser;pagefile;hiberfil
+BOOT_TIME_EXCLUDE   = temp
+LETTERS             = CLD
+NEXT_BOOT           = NO
+EVERY_BOOT          = YES
+
+;-------------------------------------------------------------------
+;
+; Main report settings.
+;
+; 1. Set ENABLE_REPORTS parameter to YES/NO state 
+;    to enable/disable HTML reports.
+; 2. Set DBGPRINT_LEVEL = NORMAL to view useful 
+;    messages about the analyse or defrag progress. 
+;    Select DETAILED to create a bug report to send
+;    to the author when an error is encountered. 
+;    Select PARANOID in extraordinary cases. 
+;    Of course, you need have DbgView program or 
+;    DbgPrint Logger installed to view logs.
+;
+;-------------------------------------------------------------------
+
+ENABLE_REPORTS      = YES
+DBGPRINT_LEVEL      = NORMAL
+
+;-------------------------------------------------------------------
+;
+; Other settings
+;
+; Specify the map update interval in milliseconds.
+;
+;-------------------------------------------------------------------
+
+MAP_UPDATE_INTERVAL = 500
+
+</pre>
+<h2 name="reportopts" id="reportopts">Report options</h2>
+<p>They are stored in <span class="path">udreportopts.lua</span> file located in 
+<span class="path">%windir%\UltraDefrag\options</span> 
+directory. This is just a simple text file (in ANSI encoding) with comments and 
+parameter-value pairs. However it's a real program written in 
+<a href="http://www.lua.org/">Lua</a> language.
+</p>
+<p>The strings with -- character sequence in the beginning are comments. Here is 
+a complete example:</p>
+<pre style="border: 1px solid black; color: black; 
+background-color: #ffffe1; font-size: 10pt;">
+
+--------------------------------------------------------------------
+-- Ultra Defragmenter report options
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+-- I. Output Formats
+--------------------------------------------------------------------
+produce_html = 1
+
+--------------------------------------------------------------------
+-- II. HTML specific options
+--------------------------------------------------------------------
+
+--------------------------------------------------------------------
+-- Generally ASCII renders better in Internet Explorer and 
+-- UTF-16 renders better in FireFox. UTF-16 is of course required
+-- to properly render Asian characters such as Japanese and Chinese.
+--------------------------------------------------------------------
+use_utf16 = 0
+
+--------------------------------------------------------------------
+-- Set enable_sorting to zero if your web browser is too old
+-- and you have error messages about ivalid javascript code.
+--------------------------------------------------------------------
+enable_sorting = 1
+
+--------------------------------------------------------------------
+-- Set this parameter to 1 if you prefer to look at filenames 
+-- splitted into few short lines. If you prefer to use fullscreen 
+-- mode of your web browser then set this parameter to zero.
+--------------------------------------------------------------------
+split_long_names = 1
+--------------------------------------------------------------------
+-- Set here maximum number of characters per line 
+-- in filename cells.
+--------------------------------------------------------------------
+max_chars_per_line = 50
+
+--------------------------------------------------------------------
+-- This stylesheet is used to set styles for various 
+-- report elements.
+--------------------------------------------------------------------
+style = [[
+&lt;style&gt;
+td {font-family: monospace; font-size: 10pt}
+.c {text-align: center}
+.f {background-color: #000000; color: #FFFFFF}
+&lt;/style&gt;
+]]
+
+title_tags = {
+	open = "&lt;pre&gt;&lt;h3&gt;",
+	close = "&lt;/h3&gt;&lt;/pre&gt;"
+}
+
+--------------------------------------------------------------------
+-- Main report table properties.
+--------------------------------------------------------------------
+table_style = [[
+border="1" color="#FFAA55" cellspacing="0" width="100%"
+]]
+
+</pre>
 <h1 class="western">How it works</h1>
 <p>The actual work of moving files to different clusters is
 performed
@@ -313,11 +519,12 @@ determine where to place files. Also, the actual work is done by the
 kernel driver ultradfg.sys. This enhances performance because there
 is no constant switching between user mode and kernel mode.</p>
 <h1 class="western">Getting the Source</h1>
-<p>Source for UltraDefrag is available via subversion. The url is
+<p>The latest sources for UltraDefrag is available via subversion. <br>The url is
 <a href="https://ultradefrag.svn.sourceforge.net/svnroot/">https://ultradefrag.svn.sourceforge.net/svnroot/</a>.
 The program is written in C. The code is very clear and
-understandable. To build it you will need a C compiler and the
-Windows Driver Development Kit (DDK).</p>
+understandable. Detailed compilation instructions are located in 
+<span class="path">INSTALL.TXT</span> file in <span class="path">/src</span> 
+subdirectory of the source code.</p>
 <h1 class="western">Reporting Bugs</h1>
 <p class="western">Please report all problems and bugs via
 the
@@ -325,12 +532,14 @@ the
 sourceforge bug tracker</a>.</p>
 <p><b>NOTE:</b> Please include the following data in
 your bug report:</p>
-<ol>
+<ul type="disc">
 <li>If you see a 'Blue Screen Of Death' when running
 UltraDefrag then include the important parts of the message.</li>
 <li>For gui releated bugs, please attach a screenshot</li>
-<li>If the bug is not gui related, please follow <a href="manual_debugging.html">these directions</a> to get the debuging information.</li>
-</ol>
+<li>If the bug is not gui related, please follow 
+<a href="manual_debugging.html">these directions</a> 
+to get the debuging information.</li>
+</ul>
 <h1 class="western">See Also</h1>
 <ul>
 <li>

@@ -50,3 +50,15 @@ A.: Thanks to Christopher Naegel for providing the following instructions:
           Driver Installation -> Code Signing for device drivers
     5. Enable this policy and set it to Ignore state.
 
+Q.: Why UD doesn't work on x64 Vista with Service Pack 1?
+
+A.: This version of Windows needs driver signature (from Microsoft) to load 
+    program's engine. Bill Gates thinks that you are so stupid that you can't 
+    decide, load the driver without signature or not. Therefore you can't allow 
+    that though you are a system administrator and maybe payed few hunreds 
+    of dollars for a Windows license.
+
+    THE DRIVER SIGNATURE IS COMPLETELY INCOMPATIBLE WITH GPL!!!
+    Because we need a new signature for each new build. Therefore I will never 
+    try to get them for UD driver.
+

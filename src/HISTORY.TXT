@@ -4,6 +4,11 @@ HISTORY
 
   Version 1.4.0 (22.5)   2008-
   ------------------------------------------------------------------------------
+    - i18n support was added
+    - gui program was translated into Hungarian and Russian languages
+    - documentation was improved
+    - program settings were moved to one file
+    - gui design was improved and simplified
     - many significant bugs were fixed (possible buffer overflows)
 
 

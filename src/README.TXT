@@ -6,20 +6,20 @@ Updated Aug 16th, 2007
 1. What is UltraDefrag?
 
    UltraDefrag is a powerful Open Source defragmentation utility for Windows
-NT 4.0 and later operating systems.  It is very fast, because the defragmenting
+NT 4.0 and later operating systems. It is very fast, because the defragmenting
 is done by kernel-mode driver. They are three interfaces to them: graphical,
-console and native.  The GUI is very useful, because visually represents your
-filesystem as a color coded cluster  map. The console is another option for 
-those that prefer the command line.  It is also benificial in that it can be 
-run in the task scheduler. 
-Finally, the native executable will run at boot time in a manner similar to 
-chkdsk.
+console and native. The GUI is very useful, because visually represents your
+filesystem as a color coded cluster map. The console is another option for 
+those that prefer the command line. It is also benificial in that it can be 
+run in the task scheduler. Finally, the native executable will run at boot time 
+in a manner similar to chkdsk.
 
-   The design of UltraDefrag is very simple. There are no skins, localization, 
-or animations. It is a small and powerful program!
+   The design of UltraDefrag is very simple. There are no skins and other 
+unnecessary stuff. It is a small and powerful program!
 
    It can be used on Windows NT 4.0, Windows 2000, Windows XP, Windows Server 
-2003, Windows Vista and all of the 64-bit editions of Windows.
+2003, Windows Vista and all of the 64-bit editions of Windows. For details
+about x64 Vista SP1 see FAQ.TXT file.
 
    You must have administrative rights to install and use UltraDefrag.
 
@@ -33,8 +33,7 @@ or animations. It is a small and powerful program!
 + ability to include/exclude files based on simple filters
 + exclude zero-length files and files that are placed in MFT
 + full support of compressed files processing
-+ 'Compact' command to optimize free space disposition (faster than a full 
-  defrag)
++ 'Compact' command to optimize free space disposition
 + ability to generate a html fragmentation report
 + nice graphical interface
 + full x64 support
@@ -43,7 +42,26 @@ or animations. It is a small and powerful program!
 - does not support volumes with more than 4.294.967.295 clusters
 - gui does not work if screen color depth is less than 16 bits per pixel
 
-3. Reporting Bugs
+3. Important notes
+
+- Deactivate your virus scanner for better performance.
+
+- Directories on FAT volumes cannot be moved.
+
+- System files will not be moved. Run the boot time scan to defragment them.
+
+- Colors explaination:
+
+  RED     - Fragmented
+  BLUE    - Unfragmented
+  WHITE   - Free
+  YELLOW  - Directory
+  OLIVE   - Compressed
+  GREEN   - System
+  CYAN    - Temporary system
+  MAGENTA - MFT
+
+4. Reporting Bugs
 
    Please report all problems and bugs in our bug tracker:
                  http://sourceforge.net/tracker/?group_id=199532
@@ -64,27 +82,27 @@ or animations. It is a small and powerful program!
                 zippy1981@gmail.com (scheduler & documentation)
 
 
-4. Frequently Asked Questions
+5. Frequently Asked Questions
 
 See the FAQ.TXT file.
 
 
-5. Building UltraDefrag
+6. Building UltraDefrag
 
 See the INSTALL.TXT file.
 
 
-6. History
+7. History
 
 See the HISTORY.TXT file.
 
 
-7. Authors.
+8. Authors.
 
 See the CREDITS file.
 
 
-8. Copyright
+9. Copyright
 
    Copyright (C) 2007,2008 by Dmitri Arkhangelski.
    Copyright (C) 2007,2008 by Justin Dearing.
