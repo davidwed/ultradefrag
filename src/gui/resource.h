@@ -23,19 +23,20 @@
 
 #define IDD_MAIN                        101
 #define IDD_ABOUT                       102
+/*
 #define IDD_SETTINGS                    103
 #define IDD_FILTER                      104
 #define IDD_GUI                         105
 #define IDD_REPORT                      106
 #define IDD_BOOT_SCHEDULER              107
-
+*/
 #define IDI_APP                         108
 #define IDI_DIR                         109
 #define IDI_UNFRAGM                     110
 #define IDI_FRAGM                       111
 #define IDI_CMP                         112
 #define IDI_MFT                         113
-
+/*
 #define IDB_FRAGM                       114
 #define IDB_UNFRAGM                     115
 #define IDB_SYS                         116
@@ -48,11 +49,12 @@
 #define IDB_UNFRAGM_A                   122
 #define IDB_DIR_A                       123
 #define IDB_CMP_A                       124
-
+*/
 #define IDR_ACCELERATOR1                125
 #define IDD_NEW_SETTINGS                126
 
 #define IDB_SETTINGS_PICTURE            127
+#define IDB_ABOUTBOX_PICTURE            128
 
 #define IDC_VOLUMES                     1002
 #define IDC_ANALYSE                     1003
@@ -66,19 +68,24 @@
 #define IDC_SETTINGS                    1011
 #define IDC_ABOUT                       1012
 #define IDC_SHOWFRAGMENTED              1013
+/*
 #define IDC_SIZELIMIT                   1014
 #define IDC_UPDATE_INTERVAL             1015
 #define IDC_INCLUDE                     1016
 #define IDC_EXCLUDE                     1017
 #define IDC_UTF16                       1018
 #define IDC_ASCII                       1019
+*/
 #define IDC_CREDITS                     1020
 #define IDC_LICENSE                     1021
+/*
 #define IDC_DBG_NORMAL                  1022
 #define IDC_DBG_DETAILED                1023
 #define IDC_DBG_PARANOID                1024
+*/
 #define IDC_PROGRESS1                   1025
 #define IDC_PROGRESSMSG                 1026
+/*
 #define IDC_TAB1                        1027
 #define IDC_SHOWPROGRESS                1028
 #define IDC_HTML                        1029
@@ -86,7 +93,9 @@
 #define IDC_LETTERS                     1032
 #define IDC_NEXTBOOT                    1033
 #define IDC_EVERYBOOT                   1034
+*/
 #define IDC_HOMEPAGE                    1035
+/*
 #define IDC_LOAD1                       1036
 #define IDC_SAVE1                       1037
 #define IDC_REGANDPAGEFILE              1038
@@ -94,10 +103,13 @@
 #define IDC_EXCLUDE2                    1040
 #define IDC_LOAD2                       1041
 #define IDC_SAVE2                       1042
+*/
 #define IDC_SETTINGS_HELP               1043
+/*
 #define IDC_ENABLEREPORTS               1044
+*/
 #define IDC_EDITREPORTOPTS              1045
-
+/*
 #define IDS_LIST_VOLUME                 1046
 #define IDS_LIST_STATUS                 1047
 #define IDS_LIST_FS                     1048
@@ -109,7 +121,7 @@
 #define IDS_STATUS_FRAGM                1054
 #define IDS_STATUS_COMPRESSED           1055
 #define IDS_STATUS_MFT                  1056
-
+*/
 #define IDC_CL_MAP_STATIC               1057
 #define IDC_EDITMAINOPTS                1058
 
@@ -117,7 +129,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        127
+#define _APS_NEXT_RESOURCE_VALUE        129
 #define _APS_NEXT_COMMAND_VALUE         40001
 #define _APS_NEXT_CONTROL_VALUE         1059
 #define _APS_NEXT_SYMED_VALUE           101

@@ -13,8 +13,8 @@ if "%1" equ "--clean" goto clean
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
-REM echo #define VERSIONINTITLE_U L"UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
-echo #define ABOUT_VERSION "About UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
+echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
+
 mkdir lib
 mkdir lib\amd64
 mkdir lib\ia64
@@ -202,11 +202,16 @@ mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
 mkdir %SRC_PKG_PATH%\doc\html\images
 copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
-copy /Y ..\doc\html\about.html %SRC_PKG_PATH%\doc\html\
-copy /Y ..\doc\html\about_simple.html %SRC_PKG_PATH%\doc\html\
-copy /Y ..\doc\html\images\console.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\main_screen110.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\about.png %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\udefrag.css %SRC_PKG_PATH%\doc\html\
+
+rem copy /Y ..\doc\html\about.html %SRC_PKG_PATH%\doc\html\
+rem copy /Y ..\doc\html\about_simple.html %SRC_PKG_PATH%\doc\html\
+rem copy /Y ..\doc\html\images\console.png %SRC_PKG_PATH%\doc\html\images\
+
+copy /Y ..\doc\html\images\main_screen140.png %SRC_PKG_PATH%\doc\html\images\
+
+rem copy /Y ..\doc\html\images\about.png %SRC_PKG_PATH%\doc\html\images\
+
 copy /Y ..\doc\html\images\sched_net_vista.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\valid-html401.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\powered_by_lua.png %SRC_PKG_PATH%\doc\html\images\

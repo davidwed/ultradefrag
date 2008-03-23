@@ -389,8 +389,8 @@ Section "Ultra Defrag core files (required)" SecCore
 skip_opts:
   ;;File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
   SetOutPath "$INSTDIR\doc"
-  File "${ROOTDIR}\doc\html\about.html"
-  File "${ROOTDIR}\doc\html\about_simple.html"
+  ;File "${ROOTDIR}\doc\html\about.html"
+  ;File "${ROOTDIR}\doc\html\about_simple.html"
 
   ; save %windir% path
   ClearErrors
@@ -400,9 +400,6 @@ skip_opts:
    "Can't save %windir% in registry!" \
    /SD IDOK
 L10:
-
-  ; create configuration file if it doesn't exist
-  ExecWait '"$INSTDIR\Dfrg.exe" /I'
 
   ; install LanguagePack pack
   SetOutPath $INSTDIR
@@ -417,7 +414,7 @@ hu_pack:
   GoTo langpack_installed
 ru_pack:
   File "${ROOTDIR}\src\gui\i18n\Russian.lng"
-  Rename "Russian.lng" "Russian.lng"
+  Rename "Russian.lng" "ud_i18n.lng"
   GoTo langpack_installed
 langpack_installed:
 
@@ -551,8 +548,17 @@ cfg_registered:
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
   
-  ; remove files of previous 1.3.1-1.3.3 insllation
+  ; remove files of previous 1.3.1-1.3.3 installation
   RMDir /r "$SYSDIR\UltraDefrag"
+  Delete "$INSTDIR\doc\about.html"
+  Delete "$INSTDIR\doc\about_simple.html"
+  Delete "$INSTDIR\doc\images\about.png"
+  Delete "$INSTDIR\doc\images\console.png"
+  Delete "$INSTDIR\doc\images\main_screen110.png"
+
+  ; create configuration file if it doesn't exist
+  ExecWait '"$INSTDIR\Dfrg.exe" /I'
+
 !insertmacro EnableX64FSRedirection
 
   pop $R1
@@ -577,10 +583,11 @@ Section "Documentation" SecDocs
   DetailPrint "Install documentation..."
   SetOutPath "$INSTDIR\doc"
   File "${ROOTDIR}\doc\html\manual.html"
+  File "${ROOTDIR}\doc\html\udefrag.css"
   SetOutPath "$INSTDIR\doc\images"
-  File "${ROOTDIR}\doc\html\images\console.png"
-  File "${ROOTDIR}\doc\html\images\main_screen110.png"
-  File "${ROOTDIR}\doc\html\images\about.png"
+  ;File "${ROOTDIR}\doc\html\images\console.png"
+  File "${ROOTDIR}\doc\html\images\main_screen140.png"
+  ;File "${ROOTDIR}\doc\html\images\about.png"
   File "${ROOTDIR}\doc\html\images\sched_net_vista.png"
   File "${ROOTDIR}\doc\html\images\valid-html401.png"
   File "${ROOTDIR}\doc\html\images\powered_by_lua.png"

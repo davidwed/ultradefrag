@@ -34,3 +34,9 @@ a:visited {
 	font-variant: small-caps;
 	text-align: center;
 }
+
+.path {
+	font-family: monospace;
+	font-size: 10pt;
+	font-weight: bold;
+}

@@ -1,6 +1,4 @@
 cd /home/groups/u/ul/ultradefrag/htdocs
-put about.html
-put about_simple.html
 put art.html
 put authors_about.html
 put design_notes.html
@@ -10,7 +8,6 @@ put index.html
 put links.html
 put manual.html
 put udefrag.css
-put about.js
 put udefrag.ico
 lcd ..
 put WISH.TXT
