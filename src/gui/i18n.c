@@ -133,6 +133,6 @@ int  GetResourceString(short *id,short *buf,int maxchars)
 			return 0;
 		}
 	}
-
+	buf[0] = 0;
 	return -1;
 }

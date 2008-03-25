@@ -112,7 +112,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
-	if(status == STATUS_END_OF_FILE){
+	if(status == STATUS_END_OF_FILE || (iosb.Information < size)){
 		winx_push_error("EOF!");
 		return 0;
 	}
@@ -139,11 +139,15 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
-	if(status != STATUS_SUCCESS){
+	if(status != STATUS_SUCCESS/* || (iosb.Information < size)*/){
 		winx_push_error("Can't write to a file: %x!",(UINT)status);
 		return 0;
 	}
 	f->woffset.QuadPart += iosb.Information;//size * count;
+
+	/* FIXME: iosb,Information may be zero though a write call was successful */
+	if(iosb.Information < size) return count;
+
 	return (iosb.Information / size);//count;
 }
 

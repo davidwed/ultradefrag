@@ -70,6 +70,8 @@ int getopts(char *filename);
 int saveopts(char *filename);
 int get_configfile_location(void);
 
+int fsz = 0;
+
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
 /* functions */
@@ -221,10 +223,6 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	if(get_configfile_location() < 0) goto init_fail;
 	/* 7b. Load settings */
 	udefrag_load_settings(argc,argv);
-	/*if(getopts("\\??\\D:\\MyDocs\\udefrag.cfg") < 0)
-		winx_pop_error(NULL,0);
-	if(saveopts("\\??\\D:\\MyDocs\\udefrag!!.cfg") < 0)
-		winx_pop_error(NULL,0);*/
 	if(udefrag_set_options(&settings) < 0) goto init_fail;
 	return 0;
 init_fail:

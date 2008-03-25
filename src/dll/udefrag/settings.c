@@ -77,6 +77,8 @@ int saveopts(char *filename);
 
 char configfile[MAX_PATH] = "";
 
+extern int fsz;
+
 static __inline int ReadRegValue(HANDLE h, short *name, DWORD type, void *pval, DWORD size)
 {
 	DWORD dwSize = size;
@@ -128,7 +130,7 @@ int get_configfile_location(void)
 	strcpy(configfile,"\\??\\");
 	strncat(configfile,as.Buffer,sizeof(configfile) - strlen(configfile) - 1);
 	configfile[sizeof(configfile) - 1] = 0;
-	strncat(configfile,"\\UltraDefrag\\options\\udefrag.cfg",
+ 	strncat(configfile,"\\UltraDefrag\\options\\udefrag.cfg",
 			sizeof(configfile) - strlen(configfile) - 1);
 	RtlFreeAnsiString(&as);
 	if(!strstr(configfile,"udefrag.cfg")){
@@ -599,8 +601,14 @@ int saveopts(char *filename)
 			settings.update_interval
 			);
 	file_buffer[(sizeof(file_buffer) / sizeof(short)) - 1] = 0;
+	if(!wcslen(file_buffer)) goto failure;
 	status = winx_fwrite(file_buffer,
 			 sizeof(short),wcslen(file_buffer),f);
 	winx_fclose(f);
-	return (status == wcslen(file_buffer)) ? 0 : (-1);
+	if(status == wcslen(file_buffer)) return 0;
+	if(status){
+failure:
+	winx_push_error("Can't save settings!");
+	}
+	return -1;
 }
