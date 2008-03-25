@@ -5,32 +5,7 @@ Items to describe:
 /* maybe we need to use this file as stack  -- Dmitri */
 /* Agreed -- Justin */
 
-1. (No longer valid due to DbgPrintLog) On windows nt 4.0 sysinternals dbgview doesn't work. Instead, the user can
-   find debug messages in c:\dbgprint.log. Size of them is hard limited by 
-   512 Kb. When overflow occurs new messages will be written in the beginning of
-   the file. In all cases after the last message [End] tag will be written.
-
-2. (DONE) files encrypted by ntfs filesystem cannot be processed at boot time.
-   [because defrag_native.exe starts always before winlogon.exe, therefore
-   before lsass.exe]
-
-3. (DONE) Program settings are accepted in the following order:
-   a). default settings (you can find it in /src/dll/udefrag/settings.c)
-   b). settings specified by user in configuration dialog (they are saved in
-   registry in HKEY_LOCAL_MACHINE\CurrentControlSet\Control\UltraDefrag, because
-   keys other than SYSTEM aren't accessible from the native app, because they
-   are not loaded by smss.exe yet). NOTE: If user will return to the
-   'last known good configuration', settings may be lost.
-   c). settings listed above can be overwritten using command line keys
-   (currently only for udefrag.exe). Overwritten settings will not be saved
-   anywhere.
-
-4. (DONE) Some settings are limited: each filter must contain no more than 4096 
-   characters.
-
-5. (DONE) Describe new options of console application.
-
-6. In version 1.2.4 and later versions cluster map for very small volumes
+1. In version 1.2.4 and later versions cluster map for very small volumes
    can be very inaccurate. P.a., one strange disk contains just 500 clusters.
    But internally they are represented (in 1.2.4 version of program) 
    by 728 blocks. Therefore we have one block (728 / 500) per cluster 
@@ -41,45 +16,31 @@ Items to describe:
    Maybe it will be fixed in next versions, but currently 
    I don't know how to do it.
 
-7. (DONE) Describe how to use DebugPrintLog and DebugView to get logging information
-   out of UltraDefrag.
-
-8. Project targets are:
+2. Project targets are:
    - for end users: simplicity, high speed processing, nice gui
    - for developers: windows hacking
 
-9. (DONE) antispam ?? because I have 350 messages per month; they are automatically 
-   filtered by google, but ...
-
-10. (DONE) Maybe we should include some useful links in our website pages to:
-    - SF.net project's home
-    - project's forums home
-    - UD in wikipedia entry
-
-11. Udefrag.dll and zenwinx.dll are components critical for
+3. Udefrag.dll and zenwinx.dll are components critical for
     windows boot process. If one of them is missing and boot time defrag is
     enabled, you will see BSOD at boot time, and Last Known Good configuration 
     will be not helpful. Currently I don't know how make our software absolutely
     safe.
 
-12. (DONE) All webpages must contain SF.net logo in accordance 
-    with SF.net terms and conditions.
-
-13. Rxvt (from MSYS; tested version is 2.7.2) terminates udefrag.exe when 
+4. Rxvt (from MSYS; tested version is 2.7.2) terminates udefrag.exe when 
     you press Ctrl + C without special message sending (for CtrlHandlerRoutine).
     Therefore, unload function will never executed, 
     and driver will not be unloaded.
     This is a bug of rxvt.
 
-14. If you terminate dfrg.exe or udefrag.exe (using task manager or rxvt) then 
+5. If you terminate dfrg.exe or udefrag.exe (using task manager or rxvt) then 
     you will have small memory leak (16 bytes) from the nonpaged pool.
     Reboot is required to free this memory.
 
-15. The new installer will set silently AutoReboot parameter to zero, because
+6. The new installer will set silently AutoReboot parameter to zero, because
     the numbers from BSOD usually are needed to fix a problem. Maybe some users
     don't need to have this ability?
 
-16. We have few bug reports about driver loading failure. I'm sure that users
+7. We have few bug reports about driver loading failure. I'm sure that users
     don't understand something. They must have admin rights during installation
     and program execution (as described in our docs), must have all restrictions
     related with device drivers disabled (driver signing and other related 
@@ -87,74 +48,3 @@ Items to describe:
     and ultradfg driver is registered (in HKLM\System\CurrentControlSet\Services\ultradfg)
     but he can't load the driver then his windows installation is wrong.
     I can't imagine anything else.
-
-				***
-
-1. (DONE) add to manual information about bug reporting:
-   NOTE: include please in your bug report following data:
-   1. If you see 'Blue Screen Of Death' as result of UltraDefrag working 
-   then include important parts of messages on them.
-   2. In other cases run Sysinternals DebugView before you start UltraDefrag 
-   and include in your report last 200 significant messages (or less). 
-   You can free download DebugView here:
-                 http://www.sysinternals.com
-   3. For gui bugs attach screenshot
-
-2. (DONE) Scheduler.NET requires NET Framework 2.0. And provide [small] description 
-   about the scheduler and useful features of them.
-
-3. (DONE) UltraDefrag has now full NT 4.0 support.
-
-4. (DONE) Volumes with UDF filesystem (on Vista only) are supported too. User can create 
-   UDF volume using 'format volume_letter: /FS:UDF'.
-
-5. (DONE) "I would appreciate direct links from the entries in the suffix column to
-   the executables for download. I guess that it would also be clearer if the
-   corresponding notes will be positioned on the right side instead of under
-   the table." [about supported processors table]
-
-				***
-
-1.  (DONE) compact command move all files AND defrag fragmented if possible.
-2.  (DONE) currently compact don't applied to FAT volumes because directories on them
-    isn't moveable. 
-3.  (DONE) gui app hot keys:
-
-    Ctrl + A - analyse
-    Ctrl + C - compact
-    Ctrl + D - defrag
-    Ctrl + F - show fragmented
-    Ctrl + P - pause
-    Ctrl + S - stop
-    Ctrl + R - rescan drives
-    Ctrl + T - settings
-    F1       - about
-    Pause    - pause
-
-4.  (DONE) Pause and Stop actions are equal. You can analyse volume once and then
-    defrag and/or compact them few times.
-5.  (DONE) FAQ must be rewritten in good style
-6.  (DONE) Readme.txt must be rewritten in good style
-7.  (DONE) To developers: program has clear and easy to understand code.
-8.  (DONE) Full support for NTFS compressed files.
-9.  (DONE) Console command line options description. And nice appearance description.
-10. (DONE) files with size over limit are shown with dark color
-11. (DONE) full description of filter using. patterns are applied to full path. So \temp
-    include either temporary files or internet explorer cache.
-12. in report - all excluded files are marked with black color
-13. (DONE) settings - report encoding - ASCII is useful for Internet explorer and 
-    utf-16 for mozilla firefox (better for chinese and japanese)
-14. (DONE) They are versions for all of the supported processor architectures for x64 
-    Windows.
-15. (DONE) progress bar disappears when you select other drive: it's normal behaviour
-16. (DONE) can analyse and defrag floppies (isn't useful but ...)
-17. (DONE) report - comment column:
-    [OVR] - file is over limit
-    [DIR] - is directory
-    [CMP] - compressed file
-18. (DONE) about report - small size but very useful [should be in future] - generated 
-    by driver very fast.
-19. (DONE) filter: ignore files greater than: n [Kb | Mb | Gb | Tb]
-20. (DONE) Debug print: normal to view useful messages about analyse / defrag progress;
-    detailed to send to an author when error encountered.
-21. (DONE) Virus scanner must be stopped.

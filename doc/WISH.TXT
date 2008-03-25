@@ -1,35 +1,32 @@
 User's wishes for the next releases:
 
-1. replace tab control in 'Settings' window with PropertySheetPage that has
-   more standard behavior
+1. 'compact' option for boot-time defragger
 
-2. 'compact' option for boot-time defragger
+2. new graphical interface with i18n support
 
-3. new graphical interface with i18n support
+3. website translated into several foreign languages
 
-4. website translated into several foreign languages
+4. font customization in gui
 
-5. font customization in gui
+5. remove all TODO and FIXME comments from sources
 
-6. remove all TODO and FIXME comments from sources
+6. repeat analysis when something has been changed on disk
 
-7. repeat analysis when something has been changed on disk
+7. increase compilation speed
 
-8. increase compilation speed
+8. make screensaver
 
-9. make screensaver
+9. defragment volumes that doesn't have any letter assigned
 
-10. defragment volumes that doesn't have any letter assigned
+10. perform driver code optimization and cleanup
 
-11. perform driver code optimization and cleanup
+11. implement partially defragmentation
 
-12. implement partially defragmentation
+12. defragment files and folders from the context menu
 
-13. defragment files and folders from the context menu
-
-14. in console and native applications analyse only files that aren't
+13. in console and native applications analyse only files that aren't
     filtered out
 
-15. make Lua package built with ddk compatible with standard Lua package
+14. make Lua package built with ddk compatible with standard Lua package
 
-16. process hard ntfs links correctly
+15. process hard ntfs links correctly
