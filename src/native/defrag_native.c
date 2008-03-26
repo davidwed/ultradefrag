@@ -30,7 +30,7 @@
 #include "../include/ntndk.h"
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
-#include "../dll/zenwinx/src/zenwinx.h"
+#include "../dll/zenwinx/zenwinx.h"
 
 #define USE_INSTEAD_SMSS  0
 

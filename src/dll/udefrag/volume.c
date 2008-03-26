@@ -31,7 +31,7 @@
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
-#include "../zenwinx/src/zenwinx.h"
+#include "../zenwinx/zenwinx.h"
 
 #define FS_ATTRIBUTE_BUFFER_SIZE (MAX_PATH * sizeof(WCHAR) + sizeof(FILE_FS_ATTRIBUTE_INFORMATION))
 #define INTERNAL_SEM_FAILCRITICALERRORS 0

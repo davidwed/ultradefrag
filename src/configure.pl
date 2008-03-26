@@ -110,21 +110,6 @@ if(open(CFGFILE,'.\\SETVARS.CMD')){
 #my @bk_cmd = ("cmd.exe","/C","copy","/Y","SETVARS.CMD","SETVARS.BK");
 #system(@bk_cmd) == 0 or msg_and_die('Can\'t make backup for SETVARS.CMD file!');
 
-# get zenwinx version from the file .\dll\zenwinx\src\SETVARS_ZENWINX.CMD
-open(CFGFILE,'.\\dll\\zenwinx\\src\\SETVARS_ZENWINX.CMD')
-	or msg_and_die('Can\'t open SETVARS_ZENWINX.CMD file: $!');
-foreach (<CFGFILE>){
-	chomp($_);
-	@fields = split(/=/);
-	if(@fields == 2){
-		$p = substr($fields[0],4);
-		if($p eq 'ZENWINXVER'){
-			$opts{$p} = $fields[1];
-		}
-	}
-}
-close CFGFILE;
-
 $mw->Popup();
 MainLoop;
 
@@ -150,25 +135,11 @@ sub save_opts {
 	@v = split(/\./,$opts{'ULTRADFGVER'});
 	print CFGFILE "set VERSION=$v[0],$v[1],$v[2],0\n";
 	print CFGFILE "set VERSION2=\"$v[0], $v[1], $v[2], 0\\0\"\n";
-	foreach $key (keys (%opts)) {
-		if($key ne 'ZENWINXVER'){
-			print CFGFILE "set $key=$opts{$key}\n";
-		}
-	}
-	close CFGFILE;
-
-	open(CFGFILE,'> .\\dll\\zenwinx\\src\\SETVARS_ZENWINX.CMD')
-		or msg_and_die('Can\'t open SETVARS_ZENWINX.CMD file: $!');
-	print CFGFILE "\@echo off\necho Set common environment variables...\n";
 	@v = split(/\./,$opts{'ZENWINXVER'});
 	print CFGFILE "set ZENWINX_VERSION=$v[0],$v[1],$v[2],0\n";
 	print CFGFILE "set ZENWINX_VERSION2=\"$v[0], $v[1], $v[2], 0\\0\"\n";
 	foreach $key (keys (%opts)) {
-		if($key ne 'ULTRADFGVER' && $key ne 'NETRUNTIMEPATH' &&
-		   $key ne 'NSISDIR' && $key ne 'DDKINCDIR'){
-		   print "$key\n";
 			print CFGFILE "set $key=$opts{$key}\n";
-		}
 	}
 	close CFGFILE;
 }

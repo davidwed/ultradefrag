@@ -31,7 +31,7 @@
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
-#include "../zenwinx/src/zenwinx.h"
+#include "../zenwinx/zenwinx.h"
 
 /* global variables */
 extern int native_mode_flag;

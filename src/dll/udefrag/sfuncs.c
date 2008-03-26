@@ -30,7 +30,7 @@
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
-#include "../zenwinx/src/zenwinx.h"
+#include "../zenwinx/zenwinx.h"
 
 char vlist[4096];
 char map[32768];

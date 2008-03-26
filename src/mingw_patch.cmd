@@ -1,15 +1,15 @@
 @echo off
 
-cd dll\zenwinx\src
+cd dll\zenwinx
 if %errorlevel% neq 0 goto fail
 
 call mingw_patch.cmd %1
 if %errorlevel% equ 0 goto the_end
-cd ..\..\..
+cd ..\..
 goto fail
 
 :the_end
-cd ..\..\..
+cd ..\..
 exit /B 0
 
 :fail

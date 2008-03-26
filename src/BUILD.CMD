@@ -28,19 +28,17 @@ xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
-xcopy /I /Y /Q    .\dll\udefrag     .\obj\udefrag
-xcopy /I /Y /Q    .\dll\zenwinx\src .\obj\zenwinx
+xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
+xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
 
 rem xcopy /I /Y /Q /S source destination
 
 mkdir obj\dll
 mkdir obj\dll\zenwinx
-mkdir obj\dll\zenwinx\src
-copy /Y obj\zenwinx\ntndk.h obj\dll\zenwinx\src\
-copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\src\
-mkdir obj\zenwinx\src
-copy /Y obj\zenwinx\zenwinx.h obj\zenwinx\src\
+copy /Y obj\zenwinx\ntndk.h obj\dll\zenwinx\
+copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\
+
 
 if "%1" neq "" goto parse_first_parameter
 echo No parameters specified, use defaults.
@@ -186,7 +184,7 @@ xcopy /I /Y /Q .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET
 mkdir %SRC_PKG_PATH%\src\dll
 xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
 mkdir %SRC_PKG_PATH%\src\dll\zenwinx
-xcopy /I /Y .\dll\zenwinx\src %SRC_PKG_PATH%\src\dll\zenwinx\src
+xcopy /I /Y .\dll\zenwinx %SRC_PKG_PATH%\src\dll\zenwinx
 
 xcopy /I /Y /Q    .\lua5.1 %SRC_PKG_PATH%\src\lua5.1
 
@@ -271,9 +269,7 @@ cd lib
 del /s /q *.*
 rd /s /q amd64
 rd /s /q ia64
-cd ..\dll\zenwinx\src
-call BUILD_ZENWINX.CMD --clean
-cd ..\..\..
+cd ..
 echo Done.
 set OLD_PATH=
 exit /B

@@ -32,7 +32,7 @@
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
-#include "../zenwinx/src/zenwinx.h"
+#include "../zenwinx/zenwinx.h"
 
 /* global variables */
 char result_msg[4096]; /* buffer for the default formatted result message */

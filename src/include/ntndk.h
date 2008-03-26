@@ -17,4 +17,4 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "../dll/zenwinx/src/ntndk.h"
+#include "../dll/zenwinx/ntndk.h"

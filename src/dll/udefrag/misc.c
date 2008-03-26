@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
-#include "../zenwinx/src/zenwinx.h"
+#include "../zenwinx/zenwinx.h"
 
 /****f* udefrag.misc/fbsize
 * NAME
