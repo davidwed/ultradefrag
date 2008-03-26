@@ -1,10 +1,12 @@
-# Lua 5.1 interpreter build options
-NAME=lua5.1a
-TYPE=console
+-- Lua 5.1 interpreter build options
 
-SRC=lua.c
-RC=lua.rc
+name        = "lua5.1a"
+target_type = "console"
 
-LIBS=msvcrt
-ADLIBS=$(UDEFRAG_LIB_PATH)\lua5.1a
-UMENTRY=main
+src = { "lua.c" }
+rc = { "lua.rc" }
+
+libs = { "msvcrt" }
+adlibs = { "$(UDEFRAG_LIB_PATH)\\lua5.1a" }
+
+umentry = "main"

@@ -1,13 +1,17 @@
-# this is the udefrag library build options
-NAME=udefrag
-TYPE=dll
-NATIVEDLL=1
+-- this is the udefrag library build options
 
-SRC=misc.c;settings.c;sfuncs.c;udefrag.c;volume.c
-RC=udefrag.rc
+name        = "udefrag"
+target_type = "dll"
+nativedll   = 1
 
-DEFFILE=udefrag.def
-BASEADDR=0x01500000
+src = {
+	"misc.c", "settings.c", "sfuncs.c", "udefrag.c", "volume.c"
+}
 
-LIBS=ntdll
-ADLIBS=$(UDEFRAG_LIB_PATH)\zenwinx
+rc = { "udefrag.rc" }
+
+deffile  = "udefrag.def"
+baseaddr = "0x01500000"
+
+libs = { "ntdll" }
+adlibs = { "$(UDEFRAG_LIB_PATH)\\zenwinx" }

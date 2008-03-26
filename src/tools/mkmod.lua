@@ -28,23 +28,8 @@
 --   1. the first element of each array has index 1.
 --   2. only nil and false values are false, all other including 0 are true
 
-opts = {
-	NAME="",
-	TYPE="",
-	SRC="",
-	RC="",
-	LIBS="",
-	ADLIBS="",
-	DEFFILE="",
-	BASEADDR="",
-	NATIVEDLL="",
-	UMENTRY="",
-	}
-
-src_files = {}
-rc_files = {}
-libs = {}
-adlibs = {}
+name, deffile, baseaddr, nativedll, umentry = "", "", "", 0, ""
+src, rc, libs, adlibs = {}, {}, {}, {}
 
 input_filename = ""
 target_type, target_ext, target_name, nt4target_name = "", "", "", ""
@@ -55,16 +40,6 @@ msvc_cmd = "nmake.exe /NOLOGO /A /f"
 mingw_cmd = "mingw32-make --always-make -f Makefile.mingw"
 
 -- common subroutines
-function my_split(str, separator)
-	local i = 1; local values = {}
-	if str == nil then return {} end
-	for v in string.gmatch(str,"[^" .. separator .. "]+") do
-		values[i] = v
-		i = i + 1
-	end
-	return values
-end
-
 function copy(src, dst)
 	if os.execute("cmd.exe /C copy /Y " .. src .. " " .. dst) ~= 0 then
 		error("Can't copy from " .. src .. " to " .. dst .. "!");
@@ -72,18 +47,6 @@ function copy(src, dst)
 end
 
 -- frontend subroutines
-function get_opts(path)
-	for line in io.lines(path) do
-		for k, v in string.gmatch(line,"(.+)=(.+)") do
-			if v ~= nil then opts[k] = v end
-		end
-	end
-	src_files = my_split(opts.SRC,";")
-	rc_files = my_split(opts.RC,";")
-	libs = my_split(opts.LIBS,";")
-	adlibs = my_split(opts.ADLIBS,";")
-end
-
 function obsolete(src, dst)
 --[[	my ($src_mtime,$dst_mtime);
 
@@ -114,7 +77,7 @@ makefile_contents = [[
 
 ]]
 function produce_ddk_makefile()
-	local _type, t, umt, e
+	local t, umt
 
 	local f = assert(io.open(".\\makefile","w"))
 	f:write(makefile_contents)
@@ -122,33 +85,31 @@ function produce_ddk_makefile()
 
 	f = assert(io.open(".\\sources","w"))
 
-	e = opts.UMENTRY
-	_type = opts.TYPE
-	if _type ~= "driver" then
-		f:write("TARGETNAME=", opts.NAME, "\n")
+	if target_type ~= "driver" then
+		f:write("TARGETNAME=", name, "\n")
 	else
 		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write("TARGETNAME=", opts.NAME, "_nt4\n")
+		f:write("TARGETNAME=", name, "_nt4\n")
 		f:write("!ELSE\n")
-		f:write("TARGETNAME=", opts.NAME, "\n")
+		f:write("TARGETNAME=", name, "\n")
 		f:write("!ENDIF\n")
 	end
 	f:write("TARGETPATH=obj\n")
 
-	if     _type == "console" then t = "PROGRAM"; umt = "console"
-	elseif _type == "gui"     then t = "PROGRAM"; umt = "windows"
-	elseif _type == "native"  then t = "PROGRAM"; umt = "nt"
-	elseif _type == "driver"  then t = "DRIVER"
-	elseif _type == "dll"     then t = "DYNLINK"; umt = "console"
-	else   error("Unknown target type: " .. _type .. "!")
+	if     target_type == "console" then t = "PROGRAM"; umt = "console"
+	elseif target_type == "gui"     then t = "PROGRAM"; umt = "windows"
+	elseif target_type == "native"  then t = "PROGRAM"; umt = "nt"
+	elseif target_type == "driver"  then t = "DRIVER"
+	elseif target_type == "dll"     then t = "DYNLINK"; umt = "console"
+	else   error("Unknown target type: " .. target_type .. "!")
 	end
 
 	f:write("TARGETTYPE=", t, "\n\n")
-	if _type == "dll" then
-		f:write("DLLDEF=", opts.DEFFILE, "\n\n")
+	if target_type == "dll" then
+		f:write("DLLDEF=", deffile, "\n\n")
 	end
 
-	if _type ~= "driver" then
+	if target_type ~= "driver" then
 		f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
 	else
 		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
@@ -158,23 +119,23 @@ function produce_ddk_makefile()
 		f:write("USER_C_FLAGS=/DUSE_WINDDK\n")
 		f:write("!ENDIF\n\n")
 	end
-	if _type == "console" or _type == "gui" then
+	if target_type == "console" or target_type == "gui" then
 		f:write("CFLAGS=\$(CFLAGS) /MT\n\n")
 	end
 
 	f:write("SOURCES=")
-	for i, v in ipairs(src_files) do f:write(v, " ") end
-	for i, v in ipairs(rc_files) do f:write(v, " ") end
+	for i, v in ipairs(src) do f:write(v, " ") end
+	for i, v in ipairs(rc) do f:write(v, " ") end
 	f:write("\n")
 	
-	if _type == "console" or _type == "gui" then 
+	if target_type == "console" or target_type == "gui" then 
 		f:write("USE_MSVCRT=1\n")
 	end
-	if _type == "native" then
+	if target_type == "native" then
 		f:write("USE_NTDLL=1\n")
 	end
-	if _type == "dll" then
-		if opts.NATIVEDLL == "1" then
+	if target_type == "dll" then
+		if nativedll == 1 then
 			f:write("USE_NTDLL=1\n")
 		else
 			f:write("USE_MSVCRT=1\n")
@@ -182,7 +143,7 @@ function produce_ddk_makefile()
 	end
 	f:write("\n")
 	
-	if _type == "native" or _type == "dll" then
+	if target_type == "native" or target_type == "dll" then
 		f:write("# very important for nt 4.0 ")
 		f:write("(without RtlUnhandledExceptionFilter function)\n")
 		f:write("BUFFER_OVERFLOW_CHECKS=0\n\n")
@@ -197,22 +158,22 @@ function produce_ddk_makefile()
 	for i, v in ipairs(adlibs) do f:write(v, ".lib ") end
 	f:write("\n\n")
 	
-	if _type ~= "driver" then f:write("UMTYPE=", umt, "\n") end
-	if _type ==  "console" or _type == "gui" then
-		f:write("UMENTRY=", e, "\n")
+	if target_type ~= "driver" then f:write("UMTYPE=", umt, "\n") end
+	if target_type ==  "console" or target_type == "gui" then
+		f:write("UMENTRY=", umentry, "\n")
 	end
-	if _type == "dll" then
-		f:write("DLLBASE=", opts.BASEADDR, "\nDLLENTRY=DllMain\n")
+	if target_type == "dll" then
+		f:write("DLLBASE=", baseaddr, "\nDLLENTRY=DllMain\n")
 	end
 	f:close()
 end
 
 -- MS Visual Studio backend
 function produce_msvc_makefile()
-	local _type, s, upname
+	local s, upname
 	local cl_flags, rsc_flags, link_flags
 
-	local f = assert(io.open(".\\" .. opts.NAME .. ".mak","w"))
+	local f = assert(io.open(".\\" .. name .. ".mak","w"))
 
 	--[[
 	OUTDIR and INTDIR parameters are replaced with current directory
@@ -224,40 +185,39 @@ function produce_msvc_makefile()
 	--]]
 
 	cl_flags = "CPP_PROJ=/nologo /W3 /O2 /D \"WIN32\" /D \"NDEBUG\" /D \"_MBCS\" "
-	_type = opts.TYPE
-	upname = string.upper(opts.NAME) .. "_EXPORTS"
-	if _type == "console" then
+	upname = string.upper(name) .. "_EXPORTS"
+	if target_type == "console" then
 		cl_flags = cl_flags .. "/D \"_CONSOLE\" "
 		s = "console"
-	elseif _type == "gui" then
+	elseif target_type == "gui" then
 		cl_flags = cl_flags .. "/D \"_WINDOWS\" "
 		s = "windows"
-	elseif _type == "dll" then
+	elseif target_type == "dll" then
 		cl_flags = cl_flags .. "/D \"_CONSOLE\" /D \"_USRDLL\" /D \"" .. upname .. "\" "
 		s = "console"
-	elseif _type == "driver" then
+	elseif target_type == "driver" then
 		cl_flags = cl_flags .. "/I \"\$(DDKINCDIR)\" /I \"\$(DDKINCDIR)\\ddk\" "
 		s = "native"
-	elseif _type == "native" then
+	elseif target_type == "native" then
 		s = "native"
-	else error("Unknown target type: " .. _type .. "!")
+	else error("Unknown target type: " .. target_type .. "!")
 	end
 	
-	if opts.NATIVEDLL == "0" then
+	if nativedll == 0 then
 		cl_flags = cl_flags .. "/MD "
 	end
 
-	if _type ~= "driver" then
-		f:write("ALL : \"", opts.NAME, ".", target_ext, "\"\n\n")
+	if target_type ~= "driver" then
+		f:write("ALL : \"", name, ".", target_ext, "\"\n\n")
 	else
 		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write("ALL : \"", opts.NAME, "_nt4.", target_ext, "\"\n")
+		f:write("ALL : \"", name, "_nt4.", target_ext, "\"\n")
 		f:write("!ELSE\n")
-		f:write("ALL : \"", opts.NAME, ".", target_ext, "\"\n")
+		f:write("ALL : \"", name, ".", target_ext, "\"\n")
 		f:write("!ENDIF\n\n")
 	end
 
-	if _type ~= "driver" then
+	if target_type ~= "driver" then
 		f:write(cl_flags, " /c \n")
 	else
 		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
@@ -268,7 +228,7 @@ function produce_msvc_makefile()
 	end
 
 	rsc_flags = "RSC_PROJ=/l 0x409 /d \"NDEBUG\" "
-	if _type ~= "driver" then
+	if target_type ~= "driver" then
 		f:write(rsc_flags, " \n")
 	else
 		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
@@ -280,41 +240,41 @@ function produce_msvc_makefile()
 	
 	link_flags = "LINK32_FLAGS="
 	for i, v in ipairs(libs) do
-		if opts.NATIVEDLL ~= "0" or v ~= "msvcrt" then
+		if nativedll ~= 0 or v ~= "msvcrt" then
 			link_flags = link_flags .. v .. ".lib "
 		end
 	end
 	for i, v in ipairs(adlibs) do
 		link_flags = link_flags .. v .. ".lib "
 	end
-	if opts.NATIVEDLL == "0" then
+	if nativedll == 0 then
 		-- DLL for console/gui environment
 		link_flags = link_flags .. "/nologo /incremental:no /machine:I386 "
 	else
 		link_flags = link_flags .. "/nologo /incremental:no /machine:I386 /nodefaultlib "
 	end
 	link_flags = link_flags .. "/subsystem:" .. s .. " "
-	if _type == "dll" then
-		if opts.NATIVEDLL == "0" then
+	if target_type == "dll" then
+		if nativedll == 0 then
 			link_flags = link_flags .. "/dll "
 		else
 			link_flags = link_flags .. "/entry:\"DllMain\" /dll "
 		end
-		link_flags = link_flags .. "/def:" .. opts.DEFFILE .. " "
-		link_flags = link_flags .. "/implib:" .. opts.NAME .. ".lib "
-	elseif _type == "native" then
+		link_flags = link_flags .. "/def:" .. deffile .. " "
+		link_flags = link_flags .. "/implib:" .. name .. ".lib "
+	elseif target_type == "native" then
 		link_flags = link_flags .. "/entry:\"NtProcessStartup\" "
-	elseif _type == "driver" then
+	elseif target_type == "driver" then
 		link_flags = link_flags .. "/base:\"0x10000\" /entry:\"DriverEntry\" "
 		link_flags = link_flags .. "/driver /align:32 "
 	end
-	if _type ~= "driver" then
-		f:write(link_flags, " /out:\"", opts.NAME, ".", target_ext, "\" \n\n")
+	if target_type ~= "driver" then
+		f:write(link_flags, " /out:\"", name, ".", target_ext, "\" \n\n")
 	else
 		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write(link_flags, " /out:\"", opts.NAME, "_nt4.", target_ext, "\" \n")
+		f:write(link_flags, " /out:\"", name, "_nt4.", target_ext, "\" \n")
 		f:write("!ELSE\n")
-		f:write(link_flags, " /out:\"", opts.NAME, ".", target_ext, "\" \n")
+		f:write(link_flags, " /out:\"", name, ".", target_ext, "\" \n")
 		f:write("!ENDIF\n\n")
 	end
 	
@@ -325,42 +285,42 @@ function produce_msvc_makefile()
 	f:write("<<\n\n")
 
 	f:write("LINK32_OBJS=")
-	for i, v in ipairs(src_files) do
+	for i, v in ipairs(src) do
 		f:write(string.gsub(v,"%.c","%.obj"), " ")
 	end
-	for i, v in ipairs(rc_files) do
+	for i, v in ipairs(rc) do
 		f:write(string.gsub(v,"%.rc","%.res"), " ")
 	end
 	f:write("\n\n")
 	
-	if _type ~= "driver" then
-		if _type == "dll" then
-			f:write("DEF_FILE=", opts.DEFFILE, "\n\n")
-			f:write("\"", opts.NAME, ".", target_ext, "\" : \$(DEF_FILE) \$(LINK32_OBJS)\n")
+	if target_type ~= "driver" then
+		if target_type == "dll" then
+			f:write("DEF_FILE=", deffile, "\n\n")
+			f:write("\"", name, ".", target_ext, "\" : \$(DEF_FILE) \$(LINK32_OBJS)\n")
 			f:write("    \$(LINK32) \@<<\n")
 			f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
 			f:write("<<\n\n")
 		else
-			f:write("\"", opts.NAME, ".", target_ext, "\" : \$(LINK32_OBJS)\n")
+			f:write("\"", name, ".", target_ext, "\" : \$(LINK32_OBJS)\n")
 			f:write("    \$(LINK32) \@<<\n")
 			f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
 			f:write("<<\n\n")
 		end
 	else
 		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write("\"", opts.NAME, "_nt4.", target_ext, "\" : \$(LINK32_OBJS)\n")
+		f:write("\"", name, "_nt4.", target_ext, "\" : \$(LINK32_OBJS)\n")
 		f:write("    \$(LINK32) \@<<\n")
 		f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
 		f:write("<<\n\n")
 		f:write("!ELSE\n")
-		f:write("\"", opts.NAME, ".", target_ext, "\" : \$(LINK32_OBJS)\n")
+		f:write("\"", name, ".", target_ext, "\" : \$(LINK32_OBJS)\n")
 		f:write("    \$(LINK32) \@<<\n")
 		f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
 		f:write("<<\n\n")
 		f:write("!ENDIF\n\n")
 	end
 
-	for i, v in ipairs(rc_files) do
+	for i, v in ipairs(rc) do
 		f:write("SOURCE=", v, "\n\n")
 		f:write(string.gsub(v,"%.rc","%.res"), " : \$(SOURCE)\n")
 		f:write("    \$(RSC) \$(RSC_PROJ) \$(SOURCE)\n\n")
@@ -388,18 +348,16 @@ endef
 
 ]]
 function produce_mingw_makefile()
-	local _type
 	local adlibs_libs = {}
 	local adlibs_paths = {}
 	local pos, j
 
 	local f = assert(io.open(".\\Makefile.mingw","w"))
 
-	f:write("PROJECT = ", opts.NAME, "\nCC = gcc.exe\n\n")
+	f:write("PROJECT = ", name, "\nCC = gcc.exe\n\n")
 	f:write("WINDRES = \"\$(COMPILER_BIN)windres.exe\"\n\n")
 	
-	_type = opts.TYPE
-	if _type == "driver" then
+	if target_type == "driver" then
 		f:write("ifeq (\$(NT4_TARGET),true)\n")
 		f:write("TARGET = ", nt4target_name, "\n")
 		f:write("else\n")
@@ -409,7 +367,7 @@ function produce_mingw_makefile()
 		f:write("TARGET = ", target_name, "\n")
 	end
 	
-	if _type == "driver" then
+	if target_type == "driver" then
 		f:write("ifeq (\$(NT4_TARGET),true)\n")
 		f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DNT4_TARGET \n")
 		f:write("else\n")
@@ -419,7 +377,7 @@ function produce_mingw_makefile()
 		f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
 	end
 	
-	if _type == "driver" then
+	if target_type == "driver" then
 		f:write("ifeq (\$(NT4_TARGET),true)\n")
 		f:write("RCFLAGS = -DNT4_TARGET \n")
 		f:write("else\n")
@@ -434,23 +392,23 @@ function produce_mingw_makefile()
 	f:write("RC_INCLUDE_DIRS = \n")
 	f:write("RC_PREPROC = \n")
 	
-	if _type == "console" then
+	if target_type == "console" then
 		f:write("LDFLAGS = -pipe -Wl,--strip-all\n")
-	elseif _type == "gui" then
+	elseif target_type == "gui" then
 		f:write("LDFLAGS = -pipe -mwindows -Wl,--strip-all\n")
-	elseif _type == "native" then
+	elseif target_type == "native" then
 		f:write("LDFLAGS = -pipe -nostartfiles -nodefaultlibs ")
 		f:write("-Wl,--entry,_NtProcessStartup\@4,--subsystem,native,--strip-all\n")
-	elseif _type == "driver" then
+	elseif target_type == "driver" then
 		f:write("LDFLAGS = -pipe -nostartfiles -nodefaultlibs ")
-		f:write(opts.NAME .. "-mingw.def -Wl,--entry,_DriverEntry\@8,")
+		f:write(name .. "-mingw.def -Wl,--entry,_DriverEntry\@8,")
 		f:write("--subsystem,native,--image-base,0x10000,-shared,--strip-all\n")
-	elseif _type == "dll" then
+	elseif target_type == "dll" then
 		f:write("LDFLAGS = -pipe -shared -Wl,")
-		f:write("--out-implib,lib", opts.NAME, ".dll.a -nostartfiles ")
-		f:write("-nodefaultlibs ", opts.NAME, "-mingw.def -Wl,--kill-at,")
+		f:write("--out-implib,lib", name, ".dll.a -nostartfiles ")
+		f:write("-nodefaultlibs ", name, "-mingw.def -Wl,--kill-at,")
 		f:write("--entry,_DllMain\@12,--strip-all\n")
-	else error("Unknown target type: " .. _type .. "!")
+	else error("Unknown target type: " .. target_type .. "!")
 	end
 
 	f:write("LIBS = ")
@@ -479,12 +437,12 @@ function produce_mingw_makefile()
 	f:write("\n\n")
 	
 	f:write("SRC_OBJS = ")
-	for i, v in ipairs(src_files) do
+	for i, v in ipairs(src) do
 		f:write(string.gsub(v,"%.c","%.o"), " ")
 	end
 
 	f:write("\n\nRSRC_OBJS = ")
-	for i, v in ipairs(rc_files) do
+	for i, v in ipairs(rc) do
 		f:write(string.gsub(v,"%.rc","%.res"), " ")
 	end
 	f:write("\n\n")
@@ -495,27 +453,27 @@ function produce_mingw_makefile()
 	f:write("\$(TARGET): print_header \$(RSRC_OBJS) \$(SRC_OBJS)\n")
 	f:write("\t\$(build_target)\n")
 
-	if _type == "dll" then
+	if target_type == "dll" then
 		f:write("\t\$(correct_lib)\n")
 	end
 	
 	f:write("\nprint_header:\n")
-	f:write("\t\@echo ----------Configuration: ", opts.NAME, " - Release----------\n\n")
+	f:write("\t\@echo ----------Configuration: ", name, " - Release----------\n\n")
 	
-	if _type == "dll" then
+	if target_type == "dll" then
 		f:write("define correct_lib\n")
 		f:write("\t\@echo ------ correct the lib\$(PROJECT).dll.a library ------\n")
 		f:write("\t\@dlltool -k --output-lib lib\$(PROJECT).dll.a --def ")
-		f:write(opts.NAME, "-mingw.def\n")
+		f:write(name, "-mingw.def\n")
 		f:write("endef\n\n")
 	end
 	
-	for i, v in ipairs(src_files) do
+	for i, v in ipairs(src) do
 		f:write(string.gsub(v,"%.c","%.o"), ": ")
 		f:write(v, "\n\t\$(compile_source)\n\n")
 	end
 
-	for i, v in ipairs(rc_files) do
+	for i, v in ipairs(rc) do
 		f:write(string.gsub(v,"%.rc","%.res"), ": ")
 		f:write(v, "\n\t\$(compile_resource)\n\n")
 	end
@@ -530,8 +488,8 @@ if input_filename == nil then
 end
 print(input_filename .. " Preparing to makefile generation...\n")
 
-get_opts(input_filename)
-target_type = opts.TYPE
+dofile(input_filename)
+
 if target_type == "console" or target_type == "gui" or target_type == "native" then
 	target_ext = "exe"
 elseif target_type == "dll" then
@@ -541,8 +499,8 @@ elseif target_type == "driver" then
 else
 	error("Unknown target type: " .. target_type .. "!")
 end
-target_name = opts.NAME .. "." .. target_ext
-nt4target_name = opts.NAME .. "_nt4." .. target_ext
+target_name = name .. "." .. target_ext
+nt4target_name = name .. "_nt4." .. target_ext
 
 if os.getenv("BUILD_ENV") == "winddk" then
 	if obsolete(input_filename,".\\sources") then
@@ -559,12 +517,12 @@ if os.getenv("BUILD_ENV") == "winddk" then
 		end
 		if arch == "i386" then
 			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
-			copy("objfre_wnet_x86\\i386\\" .. opts.NAME .. ".lib","..\\..\\lib\\")
+			copy("objfre_wnet_x86\\i386\\" .. name .. ".lib","..\\..\\lib\\")
 		else
 			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. target_name,
 				"..\\..\\bin\\" .. arch .. "\\")
-			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. opts.NAME .. ".lib",
-				 "..\\..\\lib\\" .. arch .. "\\" .. opts.NAME .. ".lib")
+			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. name .. ".lib",
+				 "..\\..\\lib\\" .. arch .. "\\" .. name .. ".lib")
 		end
 	elseif target_type == "driver" then
 		--ddk_cmd = ddk_cmd .. " -c"
@@ -602,17 +560,17 @@ if os.getenv("BUILD_ENV") == "winddk" then
 		end
 	end
 elseif os.getenv("BUILD_ENV") == "msvc" then
-	if obsolete(input_filename, opts.NAME .. ".mak") then
+	if obsolete(input_filename, name .. ".mak") then
 		produce_msvc_makefile()
 	end
 	print(input_filename .. " msvc build performing...\n")
-	msvc_cmd = msvc_cmd .. opts.NAME .. ".mak"
+	msvc_cmd = msvc_cmd .. name .. ".mak"
 	if target_type == "dll" then
 		if os.execute(msvc_cmd) ~= 0 then
 			error("Can't build the target!")
 		end
 		copy(target_name,"..\\..\\bin\\")
-		copy(opts.NAME .. ".lib","..\\..\\lib\\")
+		copy(name .. ".lib","..\\..\\lib\\")
 	elseif target_type == "driver" then
 		local script = assert(io.open(".\\builddrv.cmd","w"))
 		local cmd = "cmd.exe /C builddrv.cmd"

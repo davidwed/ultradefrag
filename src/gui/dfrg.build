@@ -1,10 +1,15 @@
-# this is the UltraDefrag GUI build options
-NAME=dfrg
-TYPE=gui
+-- this is the UltraDefrag GUI build options
 
-SRC=main.c;map.c;settings.c;i18n.c
-RC=dfrg.rc
+name        = "dfrg"
+target_type ="gui"
 
-LIBS=kernel32;user32;gdi32;comctl32;shell32;msvcrt;comdlg32
-ADLIBS=$(UDEFRAG_LIB_PATH)\udefrag;$(UDEFRAG_LIB_PATH)\lua5.1a
-UMENTRY=winmain
+src = { "main.c", "map.c", "settings.c", "i18n.c" }
+rc = { "dfrg.rc" }
+
+libs = {
+	"kernel32", "user32", "gdi32", "comctl32",
+	"shell32", "msvcrt", "comdlg32"
+}
+adlibs = { "$(UDEFRAG_LIB_PATH)\\udefrag", "$(UDEFRAG_LIB_PATH)\\lua5.1a" }
+
+umentry = "winmain"

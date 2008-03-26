@@ -1,9 +1,13 @@
-# this is the ultradefag driver build options
-NAME=ultradfg
-TYPE=driver
+-- this is the ultradefag driver build options
+name        = "ultradfg"
+target_type = "driver"
 
-SRC=analyse.c;defrag.c;globals.c;int64.c;io.c;list.c;log.c;ultradfg.c;map.c;volume.c;freespace.c;filedump.c;findfiles.c;filter.c
-RC=ultradfg.rc
+src = {
+	"analyse.c", "defrag.c", "globals.c", "int64.c", "io.c", "list.c",
+	"log.c", "ultradfg.c", "map.c", "volume.c", "freespace.c",
+	"filedump.c", "findfiles.c", "filter.c"
+}
 
-LIBS=ntoskrnl;hal
-ADLIBS=
+rc = { "ultradfg.rc" }
+
+libs = { "ntoskrnl", "hal" }
