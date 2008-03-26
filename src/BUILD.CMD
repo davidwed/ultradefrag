@@ -180,7 +180,6 @@ xcopy /I /Y /Q /S .\gui %SRC_PKG_PATH%\src\gui
 xcopy /I /Y /Q    .\native %SRC_PKG_PATH%\src\native
 xcopy /I /Y /Q    .\installer %SRC_PKG_PATH%\src\installer
 xcopy /I /Y /Q    .\include %SRC_PKG_PATH%\src\include
-xcopy /I /Y /Q    .\presets %SRC_PKG_PATH%\src\presets
 mkdir %SRC_PKG_PATH%\src\scheduler
 xcopy /I /Y /Q .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
 xcopy /I /Y /Q .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties

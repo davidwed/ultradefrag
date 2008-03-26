@@ -418,13 +418,6 @@ ru_pack:
   GoTo langpack_installed
 langpack_installed:
 
-  ;;Delete "$INSTDIR\defrag.exe"
-  ;;Delete "$INSTDIR\defrag_native.exe" /* from previous 1.0.x installation */
-
-  SetOutPath "$INSTDIR\presets"
-  File "${ROOTDIR}\src\presets\standard"
-  File "${ROOTDIR}\src\presets\system"
-
   DetailPrint "Install driver..."
   call install_driver
 
@@ -555,6 +548,7 @@ cfg_registered:
   Delete "$INSTDIR\doc\images\about.png"
   Delete "$INSTDIR\doc\images\console.png"
   Delete "$INSTDIR\doc\images\main_screen110.png"
+  RMDir /r "$INSTDIR\presets"
 
   ; create configuration file if it doesn't exist
   ExecWait '"$INSTDIR\Dfrg.exe" /I'
