@@ -15,6 +15,9 @@ echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
 
+echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\dll\zenwinx\zenwinxver.h
+echo #define ZENWINX_VERSION2 %ZENWINX_VERSION2% >> .\dll\zenwinx\zenwinxver.h
+
 mkdir lib
 mkdir lib\amd64
 mkdir lib\ia64
