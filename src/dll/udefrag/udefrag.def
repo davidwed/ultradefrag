@@ -5,6 +5,7 @@ EXPORTS
 	udefrag_unload
 	udefrag_get_options
 	udefrag_set_options
+	udefrag_update_settings
 	udefrag_clean_registry
 	udefrag_analyse
 	udefrag_defragment

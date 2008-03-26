@@ -343,6 +343,31 @@ save_fail:
 	return (-1);
 }
 
+/****f* udefrag.settings/udefrag_update_settings
+* NAME
+*    udefrag_update_settings
+* SYNOPSIS
+*    error = udefrag_update_settings();
+* FUNCTION
+*    Reloads settings and applies them.
+* INPUTS
+*    Nothing.
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    if(udefrag_update_settings() < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        // handle error
+*    }
+* SEE ALSO
+*    udefrag_set_options
+******/
+int __stdcall udefrag_update_settings(void)
+{
+	udefrag_load_settings(0,NULL);
+	return udefrag_set_options(&settings);
+}
+
 /****f* udefrag.settings/udefrag_clean_registry
 * NAME
 *    udefrag_clean_registry

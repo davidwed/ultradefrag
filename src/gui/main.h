@@ -24,7 +24,33 @@
 #ifndef _DFRG_MAIN_H_
 #define _DFRG_MAIN_H_
 
+#define WIN32_NO_STATUS
+#include <windows.h>
+/*
+* Next definition is very important for mingw:
+* _WIN32_IE must be no less than 0x0400
+* to include some important constant definitions.
+*/
+#ifndef _WIN32_IE
+#define _WIN32_IE 0x0400
+#endif
+#include <commctrl.h>
+
+#include <memory.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <shellapi.h>
+#include <math.h>
+
+#define lua_c
+#include "../lua5.1/lua.h"
+#include "../lua5.1/lauxlib.h"
+#include "../lua5.1/lualib.h"
+
 #include "../include/udefrag.h"
+#include "../include/ultradfg.h"
+#include "resource.h"
 
 #ifndef USE_WINDDK
 #ifndef SetWindowLongPtr
@@ -36,8 +62,21 @@
 #endif
 #endif
 
+#ifndef LR_VGACOLOR
+/* this constant is not defined in winuser.h on mingw */
+#define LR_VGACOLOR         0x0080
+#endif
+
 #define BLOCKS_PER_HLINE  52
 #define BLOCKS_PER_VLINE  14
 #define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
+
+void GetPrefs(void);
+void SavePrefs(void);
+
+void BuildResourceTable(void);
+void DestroyResourceTable(void);
+int  GetResourceString(short *id,short *buf,int maxchars);
+void SetText(HWND hWnd, short *id);
 
 #endif /* _DFRG_MAIN_H_ */

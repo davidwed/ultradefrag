@@ -82,9 +82,9 @@ int __stdcall udefrag_get_map(char *buffer,int size);
 char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
 
 ud_options * __stdcall udefrag_get_options(void);
+int __stdcall udefrag_update_settings(void);
 int __stdcall udefrag_set_options(ud_options *ud_opts);
 int __stdcall udefrag_clean_registry(void);
-int __stdcall udefrag_native_clean_registry(void);
 
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);

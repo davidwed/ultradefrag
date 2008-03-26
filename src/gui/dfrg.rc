@@ -31,22 +31,67 @@ IDI_FRAGM               ICON    DISCARDABLE     "res/fragm.ico"
 IDI_CMP                 ICON    DISCARDABLE     "res/cmp.ico"
 IDI_MFT                 ICON    DISCARDABLE     "res/mft.ico"
 
-/*
-IDB_FRAGM               BITMAP  DISCARDABLE     "res/fragm.bmp"
-IDB_UNFRAGM             BITMAP  DISCARDABLE     "res/unfragm.bmp"
-IDB_SYS                 BITMAP  DISCARDABLE     "res/sys.bmp"
-IDB_FREE                BITMAP  DISCARDABLE     "res/free.bmp"
-IDB_MFT                 BITMAP  DISCARDABLE     "res/mft.bmp"
-IDB_DIR                 BITMAP  DISCARDABLE     "res/dir.bmp"
-IDB_CMP                 BITMAP  DISCARDABLE     "res/cmp.bmp"
-IDB_FRAGM_A             BITMAP  DISCARDABLE     "res/fragm_a.bmp"
-IDB_UNFRAGM_A           BITMAP  DISCARDABLE     "res/unfragm_a.bmp"
-IDB_DIR_A               BITMAP  DISCARDABLE     "res/dir_a.bmp"
-IDB_CMP_A               BITMAP  DISCARDABLE     "res/cmp_a.bmp"
-*/
-
 IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/t3.bmp"
+
+IDD_MAIN DIALOGEX 0, 0, 315, 218
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION VERSIONINTITLE
+FONT 9, "Courier New", 0, 0, 0x1
+BEGIN
+    CONTROL         "",IDC_VOLUMES,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | /*LVS_SORTASCENDING | */
+                    WS_BORDER | WS_GROUP | WS_TABSTOP,7,7,300,66
+    PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,76,61,10,WS_GROUP
+    CONTROL         "Skip removable media",IDC_SKIPREMOVABLE,"Button",
+                    BS_AUTOCHECKBOX,123,76,120,10
+    LTEXT           "Cluster map:",IDC_CL_MAP_STATIC,7,78,113,9
+    CONTROL         "",IDC_MAP,"Static",SS_GRAYRECT,7,89,300,77,
+                    WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Analyse",IDC_ANALYSE,7,174,59,11,WS_GROUP
+    PUSHBUTTON      "Defragment",IDC_DEFRAGM,71,174,58,11,NOT WS_TABSTOP
+    PUSHBUTTON      "Compact",IDC_COMPACT,133,174,57,11,NOT WS_TABSTOP
+    PUSHBUTTON      "Pause",IDC_PAUSE,194,174,54,11,WS_DISABLED | NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Stop",IDC_STOP,253,174,54,11,WS_DISABLED | NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Fragmented",IDC_SHOWFRAGMENTED,133,189,57,10,NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Settings",IDC_SETTINGS,194,189,54,10,NOT WS_TABSTOP
+    PUSHBUTTON      "About",IDC_ABOUT,253,189,54,10,NOT WS_TABSTOP
+    CTEXT           "0 %",IDC_PROGRESSMSG,0,200,29,8
+    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
+                    WS_BORDER,30,202,277,5
+END
+
+IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Ultra Defragmenter"
+FONT 9, "Courier New"
+BEGIN
+    CONTROL         128,IDC_STATIC,"Static",SS_BITMAP,5,4,62,78
+    LTEXT           ABOUT_VERSION,IDC_STATIC,86,6,146,18
+    LTEXT           "Copyright (C) 2007,2008",IDC_STATIC,103,22,100,13
+    LTEXT           "UltraDefrag Development Team",IDC_STATIC,93,38,122,12
+    PUSHBUTTON      "Credits",IDC_CREDITS,72,53,76,10
+    PUSHBUTTON      "License",IDC_LICENSE,153,53,80,10
+    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
+                    161,12,BS_FLAT
+END
+
+IDD_NEW_SETTINGS DIALOG DISCARDABLE  0, 0, 212, 76
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Settings"
+FONT 8, "MS Shell Dlg"
+BEGIN
+    CONTROL         127,IDC_STATIC,"Static",SS_BITMAP,7,6,65,60
+    DEFPUSHBUTTON   "Edit main options",IDC_EDITMAINOPTS,81,7,124,15,WS_GROUP
+    PUSHBUTTON      "Edit report options",IDC_EDITREPORTOPTS,81,30,123,14,NOT 
+                    WS_TABSTOP
+    PUSHBUTTON      "Read user manual",IDC_SETTINGS_HELP,81,52,123,14,NOT 
+                    WS_TABSTOP
+END
 
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
@@ -94,194 +139,3 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
-
-IDD_MAIN DIALOGEX 0, 0, 315, 218
-STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
-EXSTYLE WS_EX_APPWINDOW
-CAPTION VERSIONINTITLE
-FONT 9, "Courier New", 0, 0, 0x1
-BEGIN
-    CONTROL         "",IDC_VOLUMES,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | /*LVS_SORTASCENDING | */
-                    WS_BORDER | WS_GROUP | WS_TABSTOP,7,7,300,66
-    PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,76,61,10,WS_GROUP
-    CONTROL         "Skip removable media",IDC_SKIPREMOVABLE,"Button",
-                    BS_AUTOCHECKBOX,123,76,120,10
-    LTEXT           "Cluster map:",IDC_CL_MAP_STATIC,7,78,113,9
-    CONTROL         "",IDC_MAP,"Static",SS_GRAYRECT,7,89,300,77,
-                    WS_EX_CLIENTEDGE
-    PUSHBUTTON      "Analyse",IDC_ANALYSE,7,174,59,11,WS_GROUP
-    PUSHBUTTON      "Defragment",IDC_DEFRAGM,71,174,58,11,NOT WS_TABSTOP
-    PUSHBUTTON      "Compact",IDC_COMPACT,133,174,57,11,NOT WS_TABSTOP
-    PUSHBUTTON      "Pause",IDC_PAUSE,194,174,54,11,WS_DISABLED | NOT 
-                    WS_TABSTOP
-    PUSHBUTTON      "Stop",IDC_STOP,253,174,54,11,WS_DISABLED | NOT 
-                    WS_TABSTOP
-    PUSHBUTTON      "Fragmented",IDC_SHOWFRAGMENTED,133,189,57,10,NOT 
-                    WS_TABSTOP
-    PUSHBUTTON      "Settings",IDC_SETTINGS,194,189,54,10,NOT WS_TABSTOP
-    PUSHBUTTON      "About",IDC_ABOUT,253,189,54,10,NOT WS_TABSTOP
-    CTEXT           "0 %",IDC_PROGRESSMSG,0,200,29,8
-    CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
-                    WS_BORDER,30,202,277,5
-END
-/*
-STRINGTABLE DISCARDABLE
-BEGIN
-    IDS_LIST_VOLUME             "Volume"
-    IDS_LIST_STATUS             "Status"
-    IDS_LIST_FS                 "File system"
-    IDS_LIST_TOTAL              "Total space"
-    IDS_LIST_FREE               "Free space"
-    IDS_LIST_PERCENT            "Percentage"
-    IDS_STATUS_DIRS             "dirs"
-    IDS_STATUS_FILES            "files"
-    IDS_STATUS_FRAGM            "fragmented"
-    IDS_STATUS_COMPRESSED       "compressed"
-    IDS_STATUS_MFT              "MFT"
-END
-*/
-/* temporary resources */
-
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About Ultra Defragmenter"
-FONT 9, "Courier New"
-BEGIN
-/*    GROUPBOX        "Legend",IDC_STATIC,7,3,180,55
-    CONTROL         114,IDC_STATIC,"Static",SS_BITMAP,12,15,7,6
-    CONTROL         115,IDC_STATIC,"Static",SS_BITMAP,74,15,7,6
-    CONTROL         116,IDC_STATIC,"Static",SS_BITMAP,144,25,7,6
-    CONTROL         117,IDC_STATIC,"Static",SS_BITMAP,144,15,7,6
-    CONTROL         118,IDC_STATIC,"Static",SS_BITMAP,144,36,7,6
-    CONTROL         119,IDC_STATIC,"Static",SS_BITMAP,12,25,7,6
-    CONTROL         120,IDC_STATIC,"Static",SS_BITMAP,74,25,7,6
-    CONTROL         121,IDC_STATIC,"Static",SS_BITMAP,18,15,7,6
-    CONTROL         122,IDC_STATIC,"Static",SS_BITMAP,80,15,7,6
-    CONTROL         123,IDC_STATIC,"Static",SS_BITMAP,18,25,7,6
-    CONTROL         124,IDC_STATIC,"Static",SS_BITMAP,80,25,7,6
-    LTEXT           "The darker colors represent files above the size threshold.",
-                    IDC_STATIC,12,36,127,18
-    LTEXT           "Fragmented",IDC_STATIC,28,12,42,12,SS_CENTERIMAGE
-    LTEXT           "Unfragmented",IDC_STATIC,90,12,52,12,SS_CENTERIMAGE
-    LTEXT           "System",IDC_STATIC,156,22,28,12,SS_CENTERIMAGE
-    LTEXT           "Free",IDC_STATIC,156,12,24,12,SS_CENTERIMAGE
-    LTEXT           "MFT",IDC_STATIC,156,33,28,12,SS_CENTERIMAGE
-    LTEXT           "Directory",IDC_STATIC,28,22,40,12,SS_CENTERIMAGE
-    LTEXT           "Compressed",IDC_STATIC,90,24,47,8,SS_CENTERIMAGE
-    GROUPBOX        "Notes",IDC_STATIC,7,63,180,71
-    LTEXT           "1. Deactivate your virus scanner\n   for better performance.\n2. Directories on FAT volumes\n   cannot be moved.\n3. System files will not be moved. \n   Run the boot time scan to\n   defragment system files.",
-                    IDC_STATIC,30,73,140,57
-*/
-    CONTROL         128,IDC_STATIC,"Static",SS_BITMAP,5,4,62,78
-    LTEXT           ABOUT_VERSION,IDC_STATIC,86,6,146,
-                    18
-    LTEXT           "Copyright (C) 2007,2008",IDC_STATIC,103,22,100,13
-    LTEXT           "UltraDefrag Development Team",IDC_STATIC,93,38,122,12
-    PUSHBUTTON      "Credits",IDC_CREDITS,72,53,76,10
-    PUSHBUTTON      "License",IDC_LICENSE,153,53,80,10
-    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
-                    161,12,BS_FLAT
-END
-
-IDD_NEW_SETTINGS DIALOG DISCARDABLE  0, 0, 212, 76
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Settings"
-FONT 8, "MS Shell Dlg"
-BEGIN
-    CONTROL         127,IDC_STATIC,"Static",SS_BITMAP,7,6,65,60
-    DEFPUSHBUTTON   "Edit main options",IDC_EDITMAINOPTS,81,7,124,15,WS_GROUP
-    PUSHBUTTON      "Edit report options",IDC_EDITREPORTOPTS,81,30,123,14,NOT 
-                    WS_TABSTOP
-    PUSHBUTTON      "Read user manual",IDC_SETTINGS_HELP,81,52,123,14,NOT 
-                    WS_TABSTOP
-END
-
-/*
-IDD_SETTINGS DIALOG DISCARDABLE  0, 0, 278, 165
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Settings"
-FONT 8, "MS Shell Dlg"
-BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,96,147,55,12,WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "Cancel",IDCANCEL,157,147,55,12,NOT WS_TABSTOP
-    PUSHBUTTON      "Help",IDC_SETTINGS_HELP,219,147,51,12,NOT WS_TABSTOP
-    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",WS_GROUP | WS_TABSTOP,
-                    5,4,266,138
-END
-
-IDD_FILTER DIALOG DISCARDABLE  2, 15, 260, 116
-STYLE WS_CHILD
-FONT 8, "MS Shell Dlg"
-BEGIN
-    GROUPBOX        "Files",IDC_STATIC,6,5,248,63
-    LTEXT           "Enter multiple filter match strings separated by the ';' character.",
-                    IDC_STATIC,10,17,236,12
-    LTEXT           "Include:",IDC_STATIC,11,34,30,10
-    LTEXT           "Exclude:",IDC_STATIC,10,50,31,10
-    EDITTEXT        IDC_INCLUDE,44,32,149,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EXCLUDE,44,48,149,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Load",IDC_LOAD1,198,32,50,12
-    PUSHBUTTON      "Save",IDC_SAVE1,198,48,50,12
-    GROUPBOX        "Size limit",IDC_STATIC,6,70,248,32
-    LTEXT           "Ignore files greater than",IDC_STATIC,11,83,77,10
-    EDITTEXT        IDC_SIZELIMIT,93,81,99,12,ES_AUTOHSCROLL
-END
-
-IDD_GUI DIALOG DISCARDABLE  2, 15, 260, 119
-STYLE WS_CHILD
-FONT 8, "MS Shell Dlg"
-BEGIN
-    LTEXT           "Map update interval (ms)",IDC_STATIC,11,16,84,9,
-                    SS_CENTERIMAGE
-    EDITTEXT        IDC_UPDATE_INTERVAL,96,15,57,12,ES_AUTOHSCROLL | 
-                    ES_NUMBER
-    CONTROL         "Show progress bar",IDC_SHOWPROGRESS,"Button",
-                    BS_AUTOCHECKBOX | BS_LEFTTEXT | WS_TABSTOP | NOT WS_VISIBLE,
-                    9,33,95,10
-END
-
-IDD_REPORT DIALOG DISCARDABLE  2, 15, 259, 119
-STYLE WS_CHILD
-FONT 8, "MS Shell Dlg"
-BEGIN
-    GROUPBOX        "Report",IDC_STATIC,6,5,248,27
-    CONTROL         "Enable reports",IDC_ENABLEREPORTS,"Button",
-                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,47,13,63,13
-    PUSHBUTTON      "Edit report options",IDC_EDITREPORTOPTS,117,13,128,13,
-                    WS_GROUP
-    GROUPBOX        "Debug Print",IDC_STATIC,6,34,248,29
-    CONTROL         "Normal",IDC_DBG_NORMAL,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,46,44,42,9
-    CONTROL         "Detailed",IDC_DBG_DETAILED,"Button",BS_AUTORADIOBUTTON,
-                    104,44,49,9
-    CONTROL         "Paranoid",IDC_DBG_PARANOID,"Button",BS_AUTORADIOBUTTON,
-                    159,44,58,10
-END
-
-IDD_BOOT_SCHEDULER DIALOGEX 2, 15, 262, 119
-STYLE WS_CHILD
-FONT 8, "MS Shell Dlg"
-BEGIN
-    GROUPBOX        "General",IDC_STATIC,6,5,143,42
-    LTEXT           "Volume letters",IDC_STATIC,11,17,47,10
-    EDITTEXT        IDC_LETTERS,59,15,84,12,ES_AUTOHSCROLL
-    CONTROL         "Defragment only registry and pagefile  ",
-                    IDC_REGANDPAGEFILE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP | WS_DISABLED,
-                    7,30,136,12,WS_EX_RIGHT
-    GROUPBOX        "Files",IDC_STATIC,6,49,250,62
-    LTEXT           "Enter multiple filter match strings separated by the ';' character.",
-                    IDC_STATIC,10,60,240,12
-    LTEXT           "Include:",IDC_STATIC,11,76,30,10
-    LTEXT           "Exclude:",IDC_STATIC,10,93,31,10
-    EDITTEXT        IDC_INCLUDE2,44,75,150,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_EXCLUDE2,44,91,150,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "Load",IDC_LOAD2,200,75,50,12
-    PUSHBUTTON      "Save",IDC_SAVE2,200,91,50,12
-    GROUPBOX        "Boot time",IDC_STATIC,154,5,102,42
-    CONTROL         "Defragment at next boot",IDC_NEXTBOOT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,159,16,92,9
-    CONTROL         "Defragment every boot",IDC_EVERYBOOT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,159,32,91,8
-END
-*/

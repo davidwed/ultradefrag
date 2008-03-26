@@ -119,7 +119,7 @@ void DestroyResourceTable(void)
 }
 
 /* zero for success, negative value otherwise */
-int  GetResourceString(short *id,short *buf,int maxchars)
+int GetResourceString(short *id,short *buf,int maxchars)
 {
 	struct pair *p;
 
@@ -135,4 +135,12 @@ int  GetResourceString(short *id,short *buf,int maxchars)
 	}
 	buf[0] = 0;
 	return -1;
+}
+
+void SetText(HWND hWnd, short *id)
+{
+	short text[256];
+	
+	if(!GetResourceString(id,text,sizeof(text) / sizeof(short)))
+		SetWindowTextW(hWnd,text);
 }
