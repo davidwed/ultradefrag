@@ -24,6 +24,41 @@
 #ifndef _DFRG_MAIN_H_
 #define _DFRG_MAIN_H_
 
+/*
+* VERY IMPORTANT NOTE: (bug #1839755 cause)
+* 
+* + You should not wait for one SendMessage handler completion
+*   from another SendMessage handler. Because it will be a deadlock cause.
+*
+* + Example:
+*
+* int done;
+*
+* window_proc()
+* {
+*   if(stop button was pressed)
+*   {
+*     stop_the_driver();
+*     wait for done flag;
+*   }
+* }
+*
+* analyse_thread_proc()
+* {
+*   done = 0;
+*   analyse();
+*   RedrawMap();
+*   done = 1;
+* }
+*
+* + How it works:
+* 
+* RedrawMap() will send message to the map control 
+* that can not be handled by system before window_proc() returns.
+* But window_proc() is waiting for done flag, that can be set
+* after(!) RedrawMap() call. Therefore we have a deadlock.
+*/
+
 #define WIN32_NO_STATUS
 #include <windows.h>
 /*
@@ -67,16 +102,83 @@
 #define LR_VGACOLOR         0x0080
 #endif
 
+/* application defined constants */
 #define BLOCKS_PER_HLINE  52
 #define BLOCKS_PER_VLINE  14
 #define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
 
+#define STAT_CLEAR	0
+#define STAT_WORK	1
+#define STAT_AN		2
+#define STAT_DFRG	3
+
+#define create_thread(func,param,ph) \
+		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)
+
+void analyse(void);
+void defragment(void);
+void optimize(void);
+void stop(void);
+
+/* settings related functions */
 void GetPrefs(void);
 void SavePrefs(void);
 
+/* i18n related functions */
 void BuildResourceTable(void);
 void DestroyResourceTable(void);
 int  GetResourceString(short *id,short *buf,int maxchars);
 void SetText(HWND hWnd, short *id);
+
+/* map manipulation functions */
+void InitMap(void);
+void CalculateBlockSize();
+void CreateMaps();
+void DeleteMaps();
+
+BOOL CreateBitMap(int);
+BOOL CreateBitMapGrid();
+BOOL FillBitMap(int);
+
+void RedrawMap();
+void ClearMap();
+
+/* dialog procedures */
+BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK NewSettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
+
+/* status bar procedures */
+BOOL CreateStatusBar();
+void UpdateStatusBar(STATISTIC *pst);
+
+/* progress bar stuff */
+void InitProgress(void);
+void ShowProgress(void);
+void HideProgress(void);
+void SetProgress(char *message, int percentage);
+
+/* volume list manipulations */
+void InitVolList(void);
+void UpdateVolList(int skip_removable);
+LRESULT VolListGetSelectedItemIndex(void);
+char VolListGetLetter(LRESULT iItem);
+int VolListGetLetterNumber(LRESULT iItem);
+int  VolListGetWorkStatus(LRESULT iItem);
+void VolListUpdateStatusField(int stat,LRESULT iItem);
+void VolListNotifyHandler(LPARAM lParam);
+
+/* window procedures */
+void HandleShortcuts(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK BtnWndProc(HWND, UINT, WPARAM, LPARAM);
+LRESULT CALLBACK CheckWndProc(HWND, UINT, WPARAM, LPARAM);
+
+/* buttons manipulation */
+void InitButtons(void);
+void DisableButtonsBeforeDrivesRescan(void);
+void EnableButtonsAfterDrivesRescan(void);
+void DisableButtonsBeforeTask(void);
+void EnableButtonsAfterTask(void);
 
 #endif /* _DFRG_MAIN_H_ */

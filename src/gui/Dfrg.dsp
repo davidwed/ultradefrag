@@ -92,11 +92,23 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
+SOURCE=.\about.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\buttons.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\dfrg.rc
 # End Source File
 # Begin Source File
 
 SOURCE=.\i18n.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\job.c
 # End Source File
 # Begin Source File
 
@@ -108,7 +120,19 @@ SOURCE=.\map.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\progress.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\settings.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\statbar.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\vollist.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

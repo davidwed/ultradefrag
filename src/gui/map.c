@@ -21,13 +21,7 @@
 * GUI - cluster map processing.
 */
 
-#include <windows.h>
-#include <commctrl.h>
-#include <math.h>
-
 #include "main.h"
-#include "../include/udefrag.h"
-#include "../include/ultradfg.h"
 
 #define GRID_COLOR                  RGB(0,0,0)
 
@@ -59,10 +53,33 @@ HDC bit_map_grid_dc = 0;
 HBITMAP bit_map[MAX_DOS_DRIVES] = {0};
 HBITMAP bit_map_grid = 0;
 
-BOOL CreateBitMap(int);
-BOOL FillBitMap(int);
-BOOL CreateBitMapGrid();
-void ClearMap();
+WNDPROC OldRectangleWndProc;
+
+void InitMap(void)
+{
+	RECT rc;
+	
+	hMap = GetDlgItem(hWindow,IDC_MAP);
+	/* increase hight of map */
+	GetWindowRect(hMap,&rc);
+	rc.bottom ++;
+	SetWindowPos(hMap,0,0,0,rc.right - rc.left,
+		rc.bottom - rc.top,SWP_NOMOVE);
+	CalculateBlockSize();
+	OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
+}
+
+LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
+{
+	PAINTSTRUCT ps;
+
+	if(iMsg == WM_PAINT){
+		BeginPaint(hWnd,&ps);
+		RedrawMap();
+		EndPaint(hWnd,&ps);
+	}
+	return CallWindowProc(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
+}
 
 void CalculateBlockSize()
 {
@@ -99,8 +116,6 @@ void CreateMaps(void)
 {
 	int i;
 
-	/*for(i = 0; i < MAX_DOS_DRIVES; i++)
-		CreateBitMap(i);*/
 	CreateBitMapGrid();
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++)
 		hBrushes[i] = CreateSolidBrush(colors[i]);

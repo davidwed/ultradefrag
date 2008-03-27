@@ -3,7 +3,10 @@
 name        = "dfrg"
 target_type ="gui"
 
-src = { "main.c", "map.c", "settings.c", "i18n.c" }
+src = {
+	"main.c", "map.c", "settings.c", "i18n.c", "about.c", "buttons.c",
+	"progress.c", "statbar.c", "vollist.c", "job.c"
+}
 rc = { "dfrg.rc" }
 
 libs = {

@@ -35,6 +35,8 @@
 #define IDB_SETTINGS_PICTURE            127
 #define IDB_ABOUTBOX_PICTURE            128
 
+#define IDM_STATUSBAR                   500
+
 #define IDC_VOLUMES                     1002
 #define IDC_ANALYSE                     1003
 #define IDC_DEFRAGM                     1004
