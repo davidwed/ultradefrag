@@ -65,44 +65,45 @@ BOOL CreateStatusBar()
 void UpdateStatusBar(STATISTIC *pst)
 {
 	char s[32];
-	short bf[128];
+	#define BFSIZE 128
+	short bf[BFSIZE];
 	short tmp_bf[64];
 
 	if(!hStatus) return;
 
 	if(!GetResourceString(L"DIRS",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",pst->dircounter,tmp_bf);
+		_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->dircounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu dirs",pst->dircounter);
-	bf[sizeof(bf) / sizeof(short) - 1] = 0;
+		_snwprintf(bf,BFSIZE - 1,L"%lu dirs",pst->dircounter);
+	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
 
-	if(!GetResourceString(L"FILES",tmp_bf,sizeof(tmp_bf)))
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",pst->filecounter,tmp_bf);
+	if(!GetResourceString(L"FILES",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
+		_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->filecounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu files",pst->filecounter);
-	bf[sizeof(bf) / sizeof(short) - 1] = 0;
+		_snwprintf(bf,BFSIZE - 1,L"%lu files",pst->filecounter);
+	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
 
 	if(!GetResourceString(L"FRAGMENTED",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",pst->fragmfilecounter,tmp_bf);
+		_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->fragmfilecounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu fragmented",pst->fragmfilecounter);
-	bf[sizeof(bf) / sizeof(short) - 1] = 0;
+		_snwprintf(bf,BFSIZE - 1,L"%lu fragmented",pst->fragmfilecounter);
+	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
 
 	if(!GetResourceString(L"COMPRESSED",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu %s",pst->compressedcounter,tmp_bf);
+		_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->compressedcounter,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%lu compressed",pst->compressedcounter);
-	bf[sizeof(bf) / sizeof(short) - 1] = 0;
+		_snwprintf(bf,BFSIZE - 1,L"%lu compressed",pst->compressedcounter);
+	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 
 	fbsize(s,(ULONGLONG)pst->mft_size);
 	if(!GetResourceString(L"MFT",tmp_bf,sizeof(tmp_bf) / sizeof(short)))
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%S %s",s,tmp_bf);
+		_snwprintf(bf,BFSIZE - 1,L"%S %s",s,tmp_bf);
 	else
-		_snwprintf(bf,sizeof(bf) / sizeof(short) - 1,L"%S MFT",s);
-	bf[sizeof(bf) / sizeof(short) - 1] = 0;
+		_snwprintf(bf,BFSIZE - 1,L"%S MFT",s);
+	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
 }
