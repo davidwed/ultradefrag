@@ -57,6 +57,7 @@ void HandleError(int status,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	char b[1000];
 	BOOL portable_run, install_run, uninstall_run;
 	
 	/* check command line keys */
@@ -71,8 +72,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(install_run){
 		if(udefrag_init(0,NULL,FALSE,N_BLOCKS) < 0)
 			udefrag_pop_error(NULL,0);
-		if(udefrag_unload(TRUE) < 0)
-			udefrag_pop_error(NULL,0);
+		if(udefrag_unload(TRUE) < 0){
+			/* FIXME: with NULL,0 options saving fails on x64 XP (empty udefrag.cfg) */
+			udefrag_pop_error(b,1000);
+		}
 		return 0;
 	}
 	HandleError(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
