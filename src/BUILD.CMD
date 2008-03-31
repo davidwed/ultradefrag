@@ -26,6 +26,7 @@ mkdir bin\amd64
 mkdir bin\ia64
 
 xcopy /I /Y /Q    .\driver  .\obj\driver
+xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
 xcopy /I /Y /Q    .\console .\obj\console
 xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
@@ -175,6 +176,7 @@ mkdir .\src_package
 set SRC_PKG_PATH=.\src_package\ultradefrag-%ULTRADFGVER%
 mkdir %SRC_PKG_PATH%\src
 xcopy /I /Y /Q    .\driver %SRC_PKG_PATH%\src\driver
+xcopy /I /Y /Q    .\bootexctrl %SRC_PKG_PATH%\src\bootexctrl
 xcopy /I /Y /Q    .\console %SRC_PKG_PATH%\src\console
 xcopy /I /Y /Q /S .\gui %SRC_PKG_PATH%\src\gui
 xcopy /I /Y /Q    .\native %SRC_PKG_PATH%\src\native
@@ -255,6 +257,7 @@ rd /s /q amd64
 rd /s /q ia64
 del /s /q *.*
 cd ..\obj
+rd /s /q bootexctrl
 rd /s /q console
 rd /s /q driver
 rd /s /q gui

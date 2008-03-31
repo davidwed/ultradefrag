@@ -34,6 +34,10 @@ cd ..\native
 lua ..\..\tools\mkmod.lua defrag_native.build
 if %errorlevel% neq 0 goto end
 
+cd ..\bootexctrl
+lua ..\..\tools\mkmod.lua bootexctrl.build
+if %errorlevel% neq 0 goto end
+
 popd
 exit /B 0
 
