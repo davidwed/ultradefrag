@@ -1,5 +1,44 @@
 Frequently Asked Questions
 
+Q.: Why configuration files editing is better than settings window with tabs?
+	
+A.: This way is more reliable. The settings window was nothing more 
+    than a specialized editor. But we have thousands of free universal text 
+    editors including standard Notepad. Use your favorite text editor for 
+    configuration editing and enjoy!
+
+    They were removed few hundred lines of source code related to old settings 
+    window. Less code we have less bugs we have!!
+	
+Q.: Why UD doesn't work on x64 Vista with Service Pack 1?
+
+A.: This version of Windows needs driver signature (from Microsoft) to load 
+    program's engine. Bill Gates thinks that you are so stupid that you can't 
+    decide, load the driver without signature or not. Therefore you can't allow 
+    that though you are a system administrator and maybe payed few hunreds 
+    of dollars for a Windows license.
+
+    THE DRIVER SIGNATURE IS COMPLETELY INCOMPATIBLE WITH GPL!!!
+    Because we need a new signature for each new build. Therefore I will never 
+    try to get them for UD driver.
+
+Q.: I've seen message "Can't load ultradfg driver!" on Windows Vista. I think 
+    that Vista is preventing this driver from loading because the signature
+    check is enabled.  How can I disable it?
+
+A.: Thanks to Christopher Naegel for providing the following instructions:
+    1. Open a command line with admin-rights:
+          Start -> execute -> CMD (with admin rights).
+    2. Type:
+          bcdedit /set loadoptions "DDISABLE_INTEGRITY_CHECKS"
+          bcdedit /set nointegritychecks ON
+    3. Close the command prompt and start group policy editor:
+          Start -> execute -> gpedit.msc
+    4. Go to:
+          User Configuration -> Administrative Templates -> System ->
+          Driver Installation -> Code Signing for device drivers
+    5. Enable this policy and set it to Ignore state.
+
 Q.: How many differencies are between the Ultra Defragmenter and 
     well known JkDefrag application?
 	
@@ -32,33 +71,4 @@ A.: The include field is where you enter substring expressions that match
     The next field in the form is captioned 'Ignore files greater than.' Files
     over this size are not dedragmented. You may specify sizes with the following 
     suffixes: (Kb | Mb | Gb | Tb).
-
-Q.: I've seen message "Can't load ultradfg driver!" on Windows Vista. I think 
-    that Vista is preventing this driver from loading because the signature
-    check is enabled.  How can I disable it?
-
-A.: Thanks to Christopher Naegel for providing the following instructions:
-    1. Open a command line with admin-rights:
-          Start -> execute -> CMD (with admin rights).
-    2. Type:
-          bcdedit /set loadoptions "DDISABLE_INTEGRITY_CHECKS"
-          bcdedit /set nointegritychecks ON
-    3. Close the command prompt and start group policy editor:
-          Start -> execute -> gpedit.msc
-    4. Go to:
-          User Configuration -> Administrative Templates -> System ->
-          Driver Installation -> Code Signing for device drivers
-    5. Enable this policy and set it to Ignore state.
-
-Q.: Why UD doesn't work on x64 Vista with Service Pack 1?
-
-A.: This version of Windows needs driver signature (from Microsoft) to load 
-    program's engine. Bill Gates thinks that you are so stupid that you can't 
-    decide, load the driver without signature or not. Therefore you can't allow 
-    that though you are a system administrator and maybe payed few hunreds 
-    of dollars for a Windows license.
-
-    THE DRIVER SIGNATURE IS COMPLETELY INCOMPATIBLE WITH GPL!!!
-    Because we need a new signature for each new build. Therefore I will never 
-    try to get them for UD driver.
 

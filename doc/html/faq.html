@@ -35,81 +35,55 @@
 </center><h3>Frequently Asked Questions</h3>
 <div class="p0" style="font-family: monospace; font-size: 11pt;">
 <table border="0" width="100%"><tbody>
+
 <tr>
-<td valign="top"><b>Q.:</b></td>
-<td valign="top">How many differencies are between the Ultra Defragmenter 
-and well known JkDefrag application?</td>
+<td valign="top"><span style="font-weight: bold;">Q.:</span></td>
+<td>Why configuration files editing is better than settings window with tabs?</td>
 </tr>
+
 <tr style="height: 10pt;">
 <td></td><td></td>
 </tr>
-<tr>
-<td valign="top"><b>A.:</b></td>
-<td valign="top">
-Analysis algorithm is generally the same. But defragmentation is done in
-different ways. JkDefrag tries to optimize files placement using original 
-algorithm that is complex enough. On the other hand, Ultra Defragmenter is
-simple as possible - it tries to move all fragmented files to free space areas.
-Nothing more. 'Compact' option was added to give you an ability to move all
-files to the beginning of the volume to enlarge free space areas for future
-defragmentation success.<br /><br /> The best advantages of the Ultra Defragmenter are an
-ability to defragment system files at boot time and well readable reports.
-Also our program has a nice GUI that is very important for many peoples.
-At the same time advanced users can use console interface that is a little bit 
-faster because don't use any cluster map representation.<br /><br />
-The main disadvantage of both applications (Ultra Defragmenter and JkDefrag) is 
-that they are based on MS defragmenting interface that has very ugly 
-implementation. We can't change it's behavior because it's a part of filesystem
-drivers (ntfs.sys, fastfat.sys) that are too complex and not open source to
-modify or replace them.
-</td>
-</tr>
-<tr style="height: 10pt;">
-<td></td><td></td>
-</tr>
-<tr>
-<td valign="top"><b>Q.:</b></td>
-<td valign="top">How can I use filters?</td>
-</tr>
-<tr style="height: 10pt;">
-<td></td><td></td>
-</tr>
-<tr>
-<td valign="top"><b>A.:</b></td>
-<td valign="top">The include field is where you enter
-substring expressions that match file names (incl. path) that you want
-to defragment. And the exclude field expressions disable
-defragmentation of matching files. You can enter multiple expressions,
-separating each with a semicolon (;). The next field in the form is
-captioned 'Ignore files greater than.' Files over this size are not
-defragmented. You may specify sizes with the following suffixes: (Kb |
-Mb | Gb | Tb).</td>
-</tr>
-<tr style="height: 10pt;">
-<td></td><td></td>
-</tr>
-<tr>
-<td><span style="font-weight: bold;">Q.:</span></td>
-<td>The progress bar updates irregularally. Why is this?</td>
-</tr>
-<tr style="height: 10pt;">
-<td></td><td></td>
-</tr>
+
 <tr>
 <td valign="top"><span style="font-weight: bold;">A.:</span></td>
-<td>The
-progress bar measures disk space, not the number of files. So when few
-big files are analysed, the progress bar will increase very fast.
-Conversely, when a thousands of small files are analysed, progress will
-be relatively slow.<br /><br /> <span style="font-weight: bold;">Example:</span> You have
-1x100 Mb + 1000x100kb files. Let us assume that we need 10 msec per
-file and a big file is in the root directory placed. In this instance,
-progress will be at the 50% point after 10 msec, but at the 100% point
-after 10 sec.</td>
+<td>This way is more reliable. The settings window was nothing more than a 
+specialized editor. But we have thousands of free universal text editors 
+including standard Notepad. Use your favorite text editor for configuration 
+editing and enjoy! <br /><br />They were removed few hundred lines of source code related 
+to old settings window. Less code we have less bugs we have!!
+</td>
 </tr>
-<tr style="height: 20pt;">
+
+<tr style="height: 10pt;">
 <td></td><td></td>
 </tr>
+
+<tr>
+<td valign="top"><span style="font-weight: bold;">Q.:</span></td>
+<td>Why UD doesn't work on x64 Vista with Service Pack 1?</td>
+</tr>
+
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+
+<tr>
+<td valign="top"><span style="font-weight: bold;">A.:</span></td>
+<td>This version of Windows needs driver signature (from Microsoft) to load program's 
+engine. Bill Gates thinks that you are so stupid that you can't decide, 
+load the driver without signature or not. Therefore you can't allow that 
+though you are a system administrator and maybe payed few hunreds of dollars 
+for a Windows license.<br /><br /><b>THE DRIVER SIGNATURE IS COMPLETELY INCOMPATIBLE WITH 
+GPL!!!</b> Because we need a new signature for each new build. Therefore I will never try 
+to get them for UD driver.
+</td>
+</tr>
+
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+
 <tr>
 <td valign="top"><b>Q.:</b></td>
 <td valign="top">I've seen message "Can't load ultradfg
@@ -117,9 +91,11 @@ driver!" on Windows Vista. I think that Vista is preventing this driver
 from loading because the signature check is enabled. How can I disable
 it? </td>
 </tr>
+
 <tr style="height: 10pt;">
 <td></td><td></td>
 </tr>
+
 <tr>
 <td valign="top"><b>A.:</b></td>
 <td valign="top">Thanks to <b>Christopher Naegel</b> for providing 
@@ -144,27 +120,98 @@ Code Signing for device drivers</pre>
 </ol>
 </td>
 </tr>
+
 <tr style="height: 10pt;">
 <td></td><td></td>
 </tr>
+
 <tr>
-<td><span style="font-weight: bold;">Q.:</span></td>
-<td>Why UD doesn't work on x64 Vista with Service Pack 1?</td>
+<td valign="top"><b>Q.:</b></td>
+<td valign="top">How many differencies are between the Ultra Defragmenter 
+and well known JkDefrag application?</td>
 </tr>
+
 <tr style="height: 10pt;">
 <td></td><td></td>
 </tr>
+
 <tr>
-<td valign="top"><span style="font-weight: bold;">A.:</span></td>
-<td>This version of Windows needs driver signature (from Microsoft) to load program's 
-engine. Bill Gates thinks that you are so stupid that you can't decide, 
-load the driver without signature or not. Therefore you can't allow that 
-though you are a system administrator and maybe payed few hunreds of dollars 
-for a Windows license.<br /><br /><b>THE DRIVER SIGNATURE IS COMPLETELY INCOMPATIBLE WITH 
-GPL!!!</b> Because we need a new signature for each new build. Therefore I will never try 
-to get them for UD driver.
+<td valign="top"><b>A.:</b></td>
+<td valign="top">
+Analysis algorithm is generally the same. But defragmentation is done in
+different ways. JkDefrag tries to optimize files placement using original 
+algorithm that is complex enough. On the other hand, Ultra Defragmenter is
+simple as possible - it tries to move all fragmented files to free space areas.
+Nothing more. 'Compact' option was added to give you an ability to move all
+files to the beginning of the volume to enlarge free space areas for future
+defragmentation success.<br /><br /> The best advantages of the Ultra Defragmenter are an
+ability to defragment system files at boot time and well readable reports.
+Also our program has a nice GUI that is very important for many peoples.
+At the same time advanced users can use console interface that is a little bit 
+faster because don't use any cluster map representation.<br /><br />
+The main disadvantage of both applications (Ultra Defragmenter and JkDefrag) is 
+that they are based on MS defragmenting interface that has very ugly 
+implementation. We can't change it's behavior because it's a part of filesystem
+drivers (ntfs.sys, fastfat.sys) that are too complex and not open source to
+modify or replace them.
 </td>
 </tr>
+
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+
+<tr>
+<td valign="top"><b>Q.:</b></td>
+<td valign="top">How can I use filters?</td>
+</tr>
+
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+
+<tr>
+<td valign="top"><b>A.:</b></td>
+<td valign="top">The include field is where you enter
+substring expressions that match file names (incl. path) that you want
+to defragment. And the exclude field expressions disable
+defragmentation of matching files. You can enter multiple expressions,
+separating each with a semicolon (;). The next field in the form is
+captioned 'Ignore files greater than.' Files over this size are not
+defragmented. You may specify sizes with the following suffixes: (Kb |
+Mb | Gb | Tb).</td>
+</tr>
+
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+
+<tr>
+<td valign="top"><span style="font-weight: bold;">Q.:</span></td>
+<td>The progress bar updates irregularally. Why is this?</td>
+</tr>
+
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+
+<tr>
+<td valign="top"><span style="font-weight: bold;">A.:</span></td>
+<td>The
+progress bar measures disk space, not the number of files. So when few
+big files are analysed, the progress bar will increase very fast.
+Conversely, when a thousands of small files are analysed, progress will
+be relatively slow.<br /><br /> <span style="font-weight: bold;">Example:</span> You have
+1x100 Mb + 1000x100kb files. Let us assume that we need 10 msec per
+file and a big file is in the root directory placed. In this instance,
+progress will be at the 50% point after 10 msec, but at the 100% point
+after 10 sec.</td>
+</tr>
+
+<tr style="height: 10pt;">
+<td></td><td></td>
+</tr>
+
 </tbody></table>
 </div>
 <hr />
