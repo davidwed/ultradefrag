@@ -51,7 +51,7 @@ ud_options settings = \
 	DBG_NORMAL,    /* dbgprint_level */
 	L"",           /* sched_letters */
 	FALSE,         /* every_boot */
-	FALSE,         /* next_boot */
+//	FALSE,         /* next_boot */
 };
 
 short ud_key[] = \
@@ -89,17 +89,7 @@ static __inline int ReadRegValue(HANDLE h, short *name, DWORD type, void *pval, 
 	return TRUE;
 }
 
-static __inline int WriteRegValue(HANDLE h, short *name, DWORD type, void *pval, DWORD size)
-{
-	if(winx_reg_set_value(h,name,type,pval,size) < 0){
-		winx_pop_error(NULL,0);
-		return FALSE;
-	}
-	return TRUE;
-}
-
 #define ReadRegDWORD(h,name,pval) ReadRegValue(h,name,REG_DWORD,pval,sizeof(DWORD))
-#define WriteRegDWORD(h,name,val) WriteRegValue(h,name,REG_DWORD,&(val),sizeof(DWORD))
 
 extern BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID in_buf,ULONG in_size,
@@ -108,14 +98,25 @@ extern BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 
 int get_configfile_location(void)
 {
-	HANDLE hKey;
-	int status;
-	UNICODE_STRING us;
+//	HANDLE hKey;
+//	int status;
+	NTSTATUS Status;
+	UNICODE_STRING name, us;
 	ANSI_STRING as;
-	short buf[MAX_PATH];
-	DWORD dwSize = sizeof(buf) - sizeof(short);
+	short buf[MAX_PATH + 1];
+//	DWORD dwSize = sizeof(buf) - sizeof(short);
 
-	if(winx_reg_open_key(L"\\REGISTRY\\MACHINE\\SYSTEM\\UltraDefrag",&hKey) < 0)
+	RtlInitUnicodeString(&name,L"SystemRoot");
+	us.Buffer = buf;
+	us.Length = 0;
+	us.MaximumLength = MAX_PATH * sizeof(short);
+	Status = RtlQueryEnvironmentVariable_U(NULL,&name,&us);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't query SystemRoot variable: %x!",(UINT)Status);
+		return -1;
+	}
+
+/*	if(winx_reg_open_key(L"\\REGISTRY\\MACHINE\\SYSTEM\\UltraDefrag",&hKey) < 0)
 		return -1;
 	status = winx_reg_query_value(hKey,L"WindowsDirectory",REG_SZ,buf,&dwSize);
 	winx_reg_close_key(hKey);
@@ -123,7 +124,7 @@ int get_configfile_location(void)
 
 	buf[dwSize / sizeof(short)] = 0;
 	RtlInitUnicodeString(&us,buf);
-	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
+*/	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
 		winx_push_error("No enough memory!");
 		return -1;
 	}
@@ -150,16 +151,20 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 	if(getopts(configfile) >= 0) goto analyse_cmdline;
 	winx_pop_error(NULL,0);
 	
+	/* Get settings from old location and save them into file. */
+	//if(saveopts(configfile) < 0) winx_pop_error(NULL,0);
+
 	/* open program key */
 	if(winx_reg_open_key(ud_key,&hKey) < 0){
 		winx_pop_error(NULL,0);
+		if(saveopts(configfile) < 0) winx_pop_error(NULL,0);
 		goto analyse_cmdline;
 	}
 	/* read dword parameters */
 	ReadRegDWORD(hKey,L"update interval",(DWORD *)&settings.update_interval);
 	ReadRegDWORD(hKey,L"dbgprint level",&settings.dbgprint_level);
 	ReadRegDWORD(hKey,L"every boot",&settings.every_boot);
-	ReadRegDWORD(hKey,L"next boot",&settings.next_boot);
+	//ReadRegDWORD(hKey,L"next boot",&settings.next_boot);
 
 	if(ReadRegDWORD(hKey,L"report type",&x))
 		settings.report_type = (UCHAR)x;
@@ -184,6 +189,7 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 		sched_letters[MAX_SCHED_LETTERS] = 0; settings.sched_letters = sched_letters;
 	}
 	winx_reg_close_key(hKey);
+	if(saveopts(configfile) < 0) winx_pop_error(NULL,0);
 
 analyse_cmdline:
 	/* overwrite parameters from the command line */
@@ -297,41 +303,9 @@ apply_settings_fail:
 
 int __stdcall udefrag_save_settings(void)
 {
-//	HANDLE hKey;
-//	DWORD x;
-
-	if(native_mode_flag) settings.next_boot = FALSE;
+/*	if(native_mode_flag) settings.next_boot = FALSE;
 	if(saveopts(configfile) < 0) goto save_fail;
 
-#if 0
-	/* create key if not exist */
-	if(winx_reg_open_key(ud_key,&hKey) < 0){
-		winx_pop_error(NULL,0);
-		if(winx_reg_create_key(ud_key,&hKey) < 0) goto save_fail;
-	}
-	/* set dword values */
-	WriteRegDWORD(hKey,L"update interval",settings.update_interval);
-	WriteRegDWORD(hKey,L"dbgprint level",settings.dbgprint_level);
-	WriteRegDWORD(hKey,L"every boot",settings.every_boot);
-	WriteRegDWORD(hKey,L"next boot",settings.next_boot);
-	x = (DWORD)settings.report_type;
-	WriteRegDWORD(hKey,L"report type",x);
-	/* set binary data */
-	WriteRegValue(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
-	/* write strings */
-	WriteRegValue(hKey,L"include filter",REG_SZ,settings.in_filter,
-		(wcslen(settings.in_filter) + 1) << 1);
-	WriteRegValue(hKey,L"exclude filter",REG_SZ,settings.ex_filter,
-		(wcslen(settings.ex_filter) + 1) << 1);
-	WriteRegValue(hKey,L"boot time include filter",REG_SZ,settings.boot_in_filter,
-		(wcslen(settings.boot_in_filter) + 1) << 1);
-	WriteRegValue(hKey,L"boot time exclude filter",REG_SZ,settings.boot_ex_filter,
-		(wcslen(settings.boot_ex_filter) + 1) << 1);
-	WriteRegValue(hKey,L"scheduled letters",REG_SZ,settings.sched_letters,
-		(wcslen(settings.sched_letters) + 1) << 1);
-	winx_reg_close_key(hKey);
-#endif
-	
 	if(settings.next_boot || settings.every_boot){
 		if(winx_reg_add_to_boot_execute(L"defrag_native") < 0) goto save_fail;
 	} else {
@@ -341,6 +315,8 @@ int __stdcall udefrag_save_settings(void)
 	return 0;
 save_fail:
 	return (-1);
+*/
+	return 0;
 }
 
 /****f* udefrag.settings/udefrag_update_settings
@@ -454,10 +430,10 @@ void ParseParameter()
 		wcsncpy(sched_letters,value_buffer,MAX_SCHED_LETTERS);
 		sched_letters[MAX_SCHED_LETTERS] = 0;
 		settings.sched_letters = sched_letters;
-	} else if(!wcscmp(param_buffer,L"NEXT_BOOT")){
+/*	} else if(!wcscmp(param_buffer,L"NEXT_BOOT")){
 		_wcsupr(value_buffer);
 		settings.next_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
-	} else if(!wcscmp(param_buffer,L"EVERY_BOOT")){
+*/	} else if(!wcscmp(param_buffer,L"EVERY_BOOT")){
 		_wcsupr(value_buffer);
 		settings.every_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
 	} else if(!wcscmp(param_buffer,L"ENABLE_REPORTS")){
@@ -581,13 +557,12 @@ int saveopts(char *filename)
 			L";    character. Note that filter is case insensitive.\r\n"
 			L"; 2. The volume letters must be either separated by semicolons (;)\r\n" 
 			L";    or don't contain any separators between.\r\n"
-			L"; 3. Set NEXT_BOOT/EVERY_BOOT to YES/NO to chose when to defragment.\r\n"
+			L"; 3. Set EVERY_BOOT to YES/NO to chose when to defragment.\r\n"
 			L";\r\n"
 			L";------------------------------------------------------------------------------\r\n\r\n"
 			L"BOOT_TIME_INCLUDE   = %ws\r\n"
 			L"BOOT_TIME_EXCLUDE   = %ws\r\n"
 			L"LETTERS             = %ws\r\n"
-			L"NEXT_BOOT           = %S\r\n"
 			L"EVERY_BOOT          = %S\r\n\r\n"
 			L";------------------------------------------------------------------------------\r\n"
 			L";\r\n"
@@ -619,7 +594,6 @@ int saveopts(char *filename)
 			settings.boot_in_filter,
 			settings.boot_ex_filter,
 			settings.sched_letters,
-			settings.next_boot ? "YES" : "NO",
 			settings.every_boot ? "YES" : "NO",
 			(settings.report_type != NO_REPORT) ? "YES" : "NO",
 			dl,

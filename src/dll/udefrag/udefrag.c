@@ -280,8 +280,8 @@ int __stdcall udefrag_unload(BOOL save_options)
 	RtlInitUnicodeString(&uStr,driver_key);
 	NtUnloadDriver(&uStr);
 	/* save settings */
-	if(save_options)
-		if(udefrag_save_settings() < 0) goto unload_fail;
+//	if(save_options)
+//		if(udefrag_save_settings() < 0) goto unload_fail;
 	return 0;
 unload_fail:
 	return (-1);

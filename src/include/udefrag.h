@@ -63,7 +63,7 @@ typedef struct _ud_options {
 	DWORD dbgprint_level;
 	short *sched_letters;
 	DWORD every_boot;
-	DWORD next_boot;
+//	DWORD next_boot;
 } ud_options;
 
 typedef struct _volume_info {

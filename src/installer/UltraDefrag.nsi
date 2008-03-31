@@ -393,13 +393,13 @@ skip_opts:
   ;File "${ROOTDIR}\doc\html\about_simple.html"
 
   ; save %windir% path
-  ClearErrors
-  WriteRegStr HKLM "SYSTEM\UltraDefrag" "WindowsDirectory" $WINDIR
-  IfErrors 0 L10
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "Can't save %windir% in registry!" \
-   /SD IDOK
-L10:
+;;  ClearErrors
+;;  WriteRegStr HKLM "SYSTEM\UltraDefrag" "WindowsDirectory" $WINDIR
+;;  IfErrors 0 L10
+;;  MessageBox MB_OK|MB_ICONEXCLAMATION \
+;;   "Can't save %windir% in registry!" \
+;;   /SD IDOK
+;;L10:
 
   ; install LanguagePack pack
   SetOutPath $INSTDIR
@@ -549,9 +549,12 @@ cfg_registered:
   Delete "$INSTDIR\doc\images\console.png"
   Delete "$INSTDIR\doc\images\main_screen110.png"
   RMDir /r "$INSTDIR\presets"
-
+  DeleteRegKey HKLM "SYSTEM\UltraDefrag"
+  
   ; create configuration file if it doesn't exist
   ExecWait '"$INSTDIR\Dfrg.exe" /I'
+
+  ;DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
 
 !insertmacro EnableX64FSRedirection
 
