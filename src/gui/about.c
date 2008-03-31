@@ -45,7 +45,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			ShellExecute(hWindow,"open",".\\LICENSE.TXT",NULL,NULL,SW_SHOW);
 			break;
 		case IDC_HOMEPAGE:
-			SetFocus(GetDlgItem(hWnd,IDOK));
+			SetFocus(GetDlgItem(hWnd,IDC_CREDITS));
 			ShellExecute(hWindow,"open","http://ultradefrag.sourceforge.net",NULL,NULL,SW_SHOW);
 		}
 		if(LOWORD(wParam) != IDOK)
