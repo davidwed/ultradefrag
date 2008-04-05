@@ -308,6 +308,16 @@ time scan for the next reboot, or at every reboot. The only restriction on
 boot time scans is that you may not scan encrypted volumes. This is because
 lsass.exe, the component of the operating system that reads encrypted volumes,
 is loaded after the native executable runs.</p>
+<p>To change boot time options properly you should follow these instructions:
+<ul type="disc"><li>Press 'Settings' button in GUI, then edit main options. 
+When you close the Settings dialog, boot time options will be set.</li>
+<li>As an alternative you can edit <a href="#cfgfile">udefrag.cfg</a> file 
+outside the GUI and use boot_on.cmd/boot_off.cmd scripts to enable/disable 
+boot time defragger. These scripts are located in UltraDefrag's installation 
+directory (currently <span class="path">%windir%\UltraDefrag</span>). Just click 
+the icons to run them.</li>
+</ul>
+</p>
 <h1 class="western">The Report</h1>
 <p>Everytime you run analyze, compact or defragment, a report of
 all files on the file system is created. This report has the
@@ -354,8 +364,7 @@ Note please that it must be saved in Unicode (UTF-16) encoding. On all supported
 built-in Notepad can be used as editor.
 </p>
 <p>The strings with a semicolon (;) or # characters in the beginning are comments. 
-Note that your own comments will be lost after next program's run. Sorry, but comments 
-saving function isn't implemented yet. Here is a complete example:</p>
+Here is a complete example:</p>
 <pre style="border: 1px solid black; color: black; 
 background-color: #ffffe1; font-size: 10pt;">
 

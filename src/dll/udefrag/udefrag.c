@@ -276,12 +276,9 @@ int __stdcall udefrag_unload(BOOL save_options)
 	NtCloseSafe(map_event);
 	/* close device handle */
 	NtCloseSafe(udefrag_device_handle);
-	/* unload driver */
+	/* unload the driver */
 	RtlInitUnicodeString(&uStr,driver_key);
 	NtUnloadDriver(&uStr);
-	/* save settings */
-//	if(save_options)
-//		if(udefrag_save_settings() < 0) goto unload_fail;
 	return 0;
 unload_fail:
 	return (-1);

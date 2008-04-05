@@ -379,6 +379,8 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\INSTALL.TXT"
   File "${ROOTDIR}\src\README.TXT"
   File "${ROOTDIR}\src\FAQ.TXT"
+  File "${ROOTDIR}\src\installer\boot_on.cmd"
+  File "${ROOTDIR}\src\installer\boot_off.cmd"
   SetOutPath "$INSTDIR\scripts"
   File "${ROOTDIR}\src\scripts\udctxhandler.lua"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
@@ -426,6 +428,7 @@ langpack_installed:
   File "udefrag.dll"
   File "zenwinx.dll"
   File "defrag_native.exe"
+  File "bootexctrl.exe"
   DetailPrint "Install console interface..."
   File "udefrag.exe"
 
@@ -552,8 +555,11 @@ cfg_registered:
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
   
   ; create configuration file if it doesn't exist
-  ExecWait '"$INSTDIR\Dfrg.exe" /I'
-
+  ;;ExecWait '"$INSTDIR\Dfrg.exe" /I'
+  SetOutPath "$INSTDIR\options"
+  IfFileExists "$INSTDIR\options\udefrag.cfg" cfg_ok 0
+  File "${ROOTDIR}\src\installer\udefrag.cfg"
+cfg_ok:
   ;DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
 
 !insertmacro EnableX64FSRedirection
@@ -685,7 +691,7 @@ Section "Uninstall"
 
   DetailPrint "Remove program files..."
   /* remove unuseful registry settings */
-  ExecWait '"$INSTDIR\Dfrg.exe" /U'
+  ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
   Delete "$INSTDIR\Dfrg.exe"
   Delete "$INSTDIR\LICENSE.TXT"
   Delete "$INSTDIR\CREDITS.TXT"
@@ -693,6 +699,8 @@ Section "Uninstall"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
   Delete "$INSTDIR\FAQ.TXT"
+  Delete "$INSTDIR\boot_on.cmd"
+  Delete "$INSTDIR\boot_off.cmd"
   Delete "$INSTDIR\scripts\udctxhandler.lua"
   Delete "$INSTDIR\scripts\udreportcnv.lua"
   Delete "$INSTDIR\scripts\udsorting.js"
@@ -712,6 +720,7 @@ Section "Uninstall"
 
   DetailPrint "Uninstall driver and boot time defragger..."
   Delete "$SYSDIR\Drivers\ultradfg.sys"
+  Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"

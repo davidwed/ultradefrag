@@ -77,20 +77,6 @@ int saveopts(char *filename);
 
 char configfile[MAX_PATH] = "";
 
-extern int fsz;
-
-static __inline int ReadRegValue(HANDLE h, short *name, DWORD type, void *pval, DWORD size)
-{
-	DWORD dwSize = size;
-	if(winx_reg_query_value(h,name,type,pval,&dwSize) < 0){
-		winx_pop_error(NULL,0);
-		return FALSE;
-	}
-	return TRUE;
-}
-
-#define ReadRegDWORD(h,name,pval) ReadRegValue(h,name,REG_DWORD,pval,sizeof(DWORD))
-
 extern BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
@@ -144,56 +130,13 @@ int get_configfile_location(void)
 /* load settings: always successful */
 int __stdcall udefrag_load_settings(int argc, short **argv)
 {
-	HANDLE hKey;
-	DWORD x;
 	int i;
 
-	if(getopts(configfile) >= 0) goto analyse_cmdline;
-	winx_pop_error(NULL,0);
-	
-	/* Get settings from old location and save them into file. */
-	//if(saveopts(configfile) < 0) winx_pop_error(NULL,0);
-
-	/* open program key */
-	if(winx_reg_open_key(ud_key,&hKey) < 0){
+	if(getopts(configfile) < 0)
 		winx_pop_error(NULL,0);
-		if(saveopts(configfile) < 0) winx_pop_error(NULL,0);
-		goto analyse_cmdline;
-	}
-	/* read dword parameters */
-	ReadRegDWORD(hKey,L"update interval",(DWORD *)&settings.update_interval);
-	ReadRegDWORD(hKey,L"dbgprint level",&settings.dbgprint_level);
-	ReadRegDWORD(hKey,L"every boot",&settings.every_boot);
-	//ReadRegDWORD(hKey,L"next boot",&settings.next_boot);
 
-	if(ReadRegDWORD(hKey,L"report type",&x))
-		settings.report_type = (UCHAR)x;
-
-	/* read binary parameters */
-	ReadRegValue(hKey,L"sizelimit",REG_BINARY,&settings.sizelimit,sizeof(ULONGLONG));
-	/* read strings */
-	/* if success then write terminating zero and set ud_settings structure field */
-	if(ReadRegValue(hKey,L"include filter",REG_SZ,in_filter,MAX_FILTER_BYTESIZE)){
-		in_filter[MAX_FILTER_SIZE] = 0; settings.in_filter = in_filter;
-	}
-	if(ReadRegValue(hKey,L"exclude filter",REG_SZ,ex_filter,MAX_FILTER_BYTESIZE)){
-		ex_filter[MAX_FILTER_SIZE] = 0; settings.ex_filter = ex_filter;
-	}
-	if(ReadRegValue(hKey,L"boot time include filter",REG_SZ,boot_in_filter,MAX_FILTER_BYTESIZE)){
-		boot_in_filter[MAX_FILTER_SIZE] = 0; settings.boot_in_filter = boot_in_filter;
-	}
-	if(ReadRegValue(hKey,L"boot time exclude filter",REG_SZ,boot_ex_filter,MAX_FILTER_BYTESIZE)){
-		boot_ex_filter[MAX_FILTER_SIZE] = 0; settings.boot_ex_filter = boot_ex_filter;
-	}
-	if(ReadRegValue(hKey,L"scheduled letters",REG_SZ,sched_letters,MAX_SCHED_LETTERS * sizeof(short))){
-		sched_letters[MAX_SCHED_LETTERS] = 0; settings.sched_letters = sched_letters;
-	}
-	winx_reg_close_key(hKey);
-	if(saveopts(configfile) < 0) winx_pop_error(NULL,0);
-
-analyse_cmdline:
 	/* overwrite parameters from the command line */
-	if(!argv) goto no_cmdline;
+	if(!argv) return 0;
 	for(i = 1; i < argc; i++){
 		if(argv[i][0] != '-' && argv[i][0] != '/')
 			continue;
@@ -218,7 +161,6 @@ analyse_cmdline:
 			break;
 		}
 	}
-no_cmdline:
 	return 0;
 }
 
@@ -301,24 +243,6 @@ apply_settings_fail:
 	return (-1);
 }
 
-int __stdcall udefrag_save_settings(void)
-{
-/*	if(native_mode_flag) settings.next_boot = FALSE;
-	if(saveopts(configfile) < 0) goto save_fail;
-
-	if(settings.next_boot || settings.every_boot){
-		if(winx_reg_add_to_boot_execute(L"defrag_native") < 0) goto save_fail;
-	} else {
-		if(winx_reg_remove_from_boot_execute(L"defrag_native") < 0) goto save_fail;
-	}
-
-	return 0;
-save_fail:
-	return (-1);
-*/
-	return 0;
-}
-
 /****f* udefrag.settings/udefrag_update_settings
 * NAME
 *    udefrag_update_settings
@@ -342,30 +266,6 @@ int __stdcall udefrag_update_settings(void)
 {
 	udefrag_load_settings(0,NULL);
 	return udefrag_set_options(&settings);
-}
-
-/****f* udefrag.settings/udefrag_clean_registry
-* NAME
-*    udefrag_clean_registry
-* SYNOPSIS
-*    error = udefrag_clean_registry();
-* FUNCTION
-*    Important registry cleanup for the uninstaller.
-* INPUTS
-*    Nothing.
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    if(udefrag_clean_registry() < 0){
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        // handle error
-*    }
-* SEE ALSO
-*    udefrag_native_clean_registry
-******/
-int __stdcall udefrag_clean_registry(void)
-{
-	return winx_reg_remove_from_boot_execute(L"defrag_native");
 }
 
 void ExtractToken(short *dest, short *src, int max_chars)
@@ -508,106 +408,4 @@ int getopts(char *filename)
 		}
 	}
 	return 0;
-}
-
-int saveopts(char *filename)
-{
-	int status;
-	char sl[68];
-	char *dl;
-	
-	WINX_FILE *f = winx_fopen(filename,"w");
-	if(!f) return -1;
-	fbsize2(sl,settings.sizelimit);
-	switch(settings.dbgprint_level){
-	case DBG_DETAILED:
-		dl = "DETAILED";
-		break;
-	case DBG_PARANOID:
-		dl = "PARANOID";
-		break;
-	default:
-		dl = "NORMAL";
-	}
-	_snwprintf(file_buffer,sizeof(file_buffer) / sizeof(short),
-			L"; !!! NOTE: THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING !!!\r\n\r\n"
-			L";------------------------------------------------------------------------------\r\n"
-			L";\r\n"
-			L"; Filter\r\n"
-			L";\r\n"
-			L"; 1. Enter multiple filter match strings separated by the semicolon (;)\r\n"
-			L";    character. Note that filter is case insensitive.\r\n"
-			L"; 2. You can specify maximum file size with the following suffixes:\r\n"
-			L";    Kb, Mb, Gb, Tb, Eb, Pb.\r\n"
-			L"; 3. The patterns you supply for the include and exclude functionality\r\n"
-			L";    applies to the whole path. For example, if you specify temp in the\r\n"
-			L";    exclude path you would exclude both the temp folder (WINDIR\\temp) and\r\n"
-			L";    the internet explorer temporary files folder. Filter strings cannot be\r\n"
-			L";    longer than 4096 bytes.\r\n"
-			L";\r\n"
-			L";------------------------------------------------------------------------------\r\n\r\n"
-			L"INCLUDE             = %ws\r\n"
-			L"EXCLUDE             = %ws\r\n"
-			L"SIZELIMIT           = %S\r\n\r\n"
-			L";------------------------------------------------------------------------------\r\n"
-			L";\r\n"
-			L"; Boot time settings\r\n"
-			L";\r\n"
-			L"; 1. Enter multiple filter match strings separated by the semicolon (;)\r\n"
-			L";    character. Note that filter is case insensitive.\r\n"
-			L"; 2. The volume letters must be either separated by semicolons (;)\r\n" 
-			L";    or don't contain any separators between.\r\n"
-			L"; 3. Set EVERY_BOOT to YES/NO to chose when to defragment.\r\n"
-			L";\r\n"
-			L";------------------------------------------------------------------------------\r\n\r\n"
-			L"BOOT_TIME_INCLUDE   = %ws\r\n"
-			L"BOOT_TIME_EXCLUDE   = %ws\r\n"
-			L"LETTERS             = %ws\r\n"
-			L"EVERY_BOOT          = %S\r\n\r\n"
-			L";------------------------------------------------------------------------------\r\n"
-			L";\r\n"
-			L"; Main report settings.\r\n"
-			L";\r\n"
-			L"; 1. Set ENABLE_REPORTS parameter to YES/NO state \r\n"
-			L";    to enable/disable HTML reports.\r\n"
-			L"; 2. Set DBGPRINT_LEVEL = NORMAL to view useful messages about the analyse or\r\n"
-			L";    defrag progress. Select DETAILED to create a bug report to send to the\r\n"
-			L";    author when an error is encountered. Select PARANOID in extraordinary\r\n"
-			L";    cases. Of course, you need have DbgView program or DbgPrint Logger\r\n"
-			L";    installed to view logs.\r\n"
-			L";\r\n"
-			L";------------------------------------------------------------------------------\r\n\r\n"
-			L"ENABLE_REPORTS      = %S\r\n"
-			L"DBGPRINT_LEVEL      = %S\r\n\r\n"
-			L";------------------------------------------------------------------------------\r\n"
-			L";\r\n"
-			L"; Other settings\r\n"
-			L";\r\n"
-			L"; Specify the map update interval in milliseconds.\r\n"
-			L";\r\n"
-			L";------------------------------------------------------------------------------\r\n\r\n"
-			L"MAP_UPDATE_INTERVAL = %u\r\n"
-			,
-			settings.in_filter,
-			settings.ex_filter,
-			sl,
-			settings.boot_in_filter,
-			settings.boot_ex_filter,
-			settings.sched_letters,
-			settings.every_boot ? "YES" : "NO",
-			(settings.report_type != NO_REPORT) ? "YES" : "NO",
-			dl,
-			settings.update_interval
-			);
-	file_buffer[(sizeof(file_buffer) / sizeof(short)) - 1] = 0;
-	if(!wcslen(file_buffer)) goto failure;
-	status = winx_fwrite(file_buffer,
-			 sizeof(short),wcslen(file_buffer),f);
-	winx_fclose(f);
-	if(status == wcslen(file_buffer)) return 0;
-	if(status){
-failure:
-	winx_push_error("Can't save settings!");
-	}
-	return -1;
 }

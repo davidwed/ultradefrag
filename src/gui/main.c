@@ -57,27 +57,27 @@ void HandleError(int status,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	char b[1000];
-	BOOL portable_run, install_run, uninstall_run;
+//	char b[1000];
+//	BOOL /*portable_run, install_run,*/ uninstall_run;
 	
 	/* check command line keys */
-	_strupr(lpCmdLine);
-	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
-	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
-	install_run = (strstr(lpCmdLine,"/I") != NULL) ? TRUE : FALSE;
-	if(uninstall_run){	
-		if(udefrag_clean_registry() < 0) udefrag_pop_error(NULL,0);
-		ExitProcess(0);
-	}
-	if(install_run){
-		if(udefrag_init(0,NULL,FALSE,N_BLOCKS) < 0)
-			udefrag_pop_error(NULL,0);
-		if(udefrag_unload(TRUE) < 0){
+//	_strupr(lpCmdLine);
+//	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
+//	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
+//	install_run = (strstr(lpCmdLine,"/I") != NULL) ? TRUE : FALSE;
+//	if(uninstall_run){
+		//if(udefrag_clean_registry() < 0) udefrag_pop_error(NULL,0);
+//		ExitProcess(0);
+//	}
+//	if(install_run){
+		//if(udefrag_init(0,NULL,FALSE,N_BLOCKS) < 0)
+		//	udefrag_pop_error(NULL,0);
+		//if(udefrag_unload(TRUE) < 0){
 			/* FIXME: with NULL,0 options saving fails on x64 XP (empty udefrag.cfg) */
-			udefrag_pop_error(b,1000);
-		}
-		return 0;
-	}
+			//udefrag_pop_error(b,1000);
+		//}
+//		return 0;
+//	}
 	HandleError(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
 	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
@@ -110,6 +110,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	int cx,cy;
 	int dx,dy;
 	RECT rc;
+	ud_options *settings;
+	char cmd[MAX_PATH + 32];
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -159,6 +161,14 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),hWindow,(DLGPROC)NewSettingsDlgProc);
 				/* reload and apply settings */
 				if(udefrag_update_settings() < 0) udefrag_pop_error(NULL,0);
+				/* update the BootExecute parameter */
+				settings = udefrag_get_options();
+				GetSystemDirectory(cmd,MAX_PATH);
+				strcat(cmd,"\\bootexctrl.exe");
+				if(settings->every_boot)
+					_spawnl(_P_WAIT,cmd,cmd,"/r","defrag_native",NULL);
+				else
+					_spawnl(_P_WAIT,cmd,cmd,"/u","defrag_native",NULL);
 			}
 			break;
 		case IDC_SKIPREMOVABLE:
