@@ -74,7 +74,7 @@ void HandleError(char *err_msg,int exit_code)
 		printf("%s\n",err_msg);
 		if(!b_flag) settextcolor(console_attr);
 		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		if(udefrag_unload(FALSE) < 0) udefrag_pop_error(NULL,0);
+		if(udefrag_unload() < 0) udefrag_pop_error(NULL,0);
 		exit(exit_code);
 	}
 }
@@ -90,7 +90,7 @@ void HandleErrorW(int status,int exit_code)
 		printf("%s\n",oem_buffer);
 		if(!b_flag) settextcolor(console_attr);
 		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		if(udefrag_unload(FALSE) < 0) udefrag_pop_werror(NULL,0);
+		if(udefrag_unload() < 0) udefrag_pop_werror(NULL,0);
 		exit(exit_code);
 	}
 }

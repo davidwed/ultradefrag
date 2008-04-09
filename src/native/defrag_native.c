@@ -160,8 +160,7 @@ void Cleanup()
 	char err_msg[ERR_MSG_SIZE];
 
 	/* unload driver and registry cleanup */
-	if(udefrag_unload(TRUE) < 0)/* udefrag_pop_error(NULL,0);
-	if(udefrag_native_clean_registry() < 0)*/{
+	if(udefrag_unload() < 0){
 		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
 		if(udefrag_initialized) /* because otherwise the message is trivial */
 			winx_printf("\nERROR: %s\n",err_msg);

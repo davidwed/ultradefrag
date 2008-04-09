@@ -64,13 +64,9 @@ BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 			char *err_format_string);
 int __stdcall udefrag_load_settings(int argc, short **argv);
 int __stdcall udefrag_save_settings(void);
-int __stdcall udefrag_unload(BOOL save_options);
 
 int getopts(char *filename);
-int saveopts(char *filename);
 int get_configfile_location(void);
-
-int fsz = 0;
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
@@ -79,7 +75,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	/* here we have last chance to unload the driver */
 	if(dwReason == DLL_PROCESS_DETACH)
-		if(udefrag_unload(FALSE) < 0) winx_pop_error(NULL,0);
+		if(udefrag_unload() < 0) winx_pop_error(NULL,0);
 	return 1;
 }
 
@@ -229,7 +225,7 @@ init_fail:
 	if(init_event){
 		/* save error message */
 		winx_save_error(buf,ERR_MSG_SIZE);
-		if(udefrag_unload(FALSE) < 0) winx_pop_error(NULL,0);
+		if(udefrag_unload() < 0) winx_pop_error(NULL,0);
 		/* restore error message */
 		winx_restore_error(buf);
 	}
@@ -259,14 +255,14 @@ init_fail:
 * SEE ALSO
 *    udefrag_init
 ******/
-int __stdcall udefrag_unload(BOOL save_options)
+int __stdcall udefrag_unload(void)
 {
 	UNICODE_STRING uStr;
 
 	/* unload only if init_event was created */
 	if(!init_event){
 		winx_push_error("Udefrag.dll unload without initialization!");
-		goto unload_fail;
+		return -1;
 	}
 	/* close events */
 	NtClose(init_event); init_event = NULL;
@@ -280,8 +276,6 @@ int __stdcall udefrag_unload(BOOL save_options)
 	RtlInitUnicodeString(&uStr,driver_key);
 	NtUnloadDriver(&uStr);
 	return 0;
-unload_fail:
-	return (-1);
 }
 
 /* you can send only one command at the same time */

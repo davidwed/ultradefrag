@@ -74,7 +74,7 @@ typedef struct _volume_info {
 } volume_info;
 
 int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size);
-int __stdcall udefrag_unload(BOOL save_options);
+int __stdcall udefrag_unload(void);
 
 int __stdcall udefrag_stop(void);
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
@@ -84,7 +84,6 @@ char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
 ud_options * __stdcall udefrag_get_options(void);
 int __stdcall udefrag_update_settings(void);
 int __stdcall udefrag_set_options(ud_options *ud_opts);
-int __stdcall udefrag_clean_registry(void);
 
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);

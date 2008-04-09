@@ -73,7 +73,6 @@ short param_buffer[8192];
 short value_buffer[8192];
 
 int getopts(char *filename);
-int saveopts(char *filename);
 
 char configfile[MAX_PATH] = "";
 

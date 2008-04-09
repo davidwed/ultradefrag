@@ -2,7 +2,7 @@ LIBRARY udefrag.dll
 
 EXPORTS
 	udefrag_init@16
-	udefrag_unload@4
+	udefrag_unload@0
 	udefrag_get_options@0
 	udefrag_set_options@4
 	udefrag_update_settings@0

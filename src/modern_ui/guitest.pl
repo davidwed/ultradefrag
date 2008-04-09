@@ -40,7 +40,7 @@ my $skip_rem = 1;
 my %opts = ('x'=>200, 'y'=>200);
 
 ############# set signal handlers ###############
-$SIG{INT} = sub {gui_unload(); if(udefrag_unload(1) < 0){ udefrag_pop_error(0,0); }};
+$SIG{INT} = sub {gui_unload(); if(udefrag_unload() < 0){ udefrag_pop_error(0,0); }};
 
 ############# load the program settings ###########
 if(open(CFGFILE,'.\\my_guitest.cfg')){
@@ -66,13 +66,13 @@ $mw->iconimage($icon);
 #display_error("привет!"); # incorrect appearance
 $mw->bind(
 	ref($mw),'<Destroy>',
-	sub {gui_unload(); if(udefrag_unload(1) < 0){ udefrag_pop_error(0,0); }}
+	sub {gui_unload(); if(udefrag_unload() < 0){ udefrag_pop_error(0,0); }}
 	);
 
 ############ import necessary functions from the udefrag.dll ##############
 Win32::API->Import('udefrag','udefrag_init','IPIN','I') or \
 	display_critical_error('Can\'t import functions from udefrag.dll!');
-Win32::API->Import('udefrag','udefrag_unload','I','I');
+Win32::API->Import('udefrag','int udefrag_unload()');
 Win32::API->Import('udefrag','udefrag_analyse','CK','I');
 Win32::API->Import('udefrag','udefrag_defragment','CK','I');
 Win32::API->Import('udefrag','udefrag_optimize','CK','I');

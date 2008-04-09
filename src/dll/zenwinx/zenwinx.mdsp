@@ -7,8 +7,8 @@ defaultConfig=1
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=obj/_
-outputFilesDirectory=obj/_
+intermediateFilesDirectory=../../obj/zenwinx
+outputFilesDirectory=../../obj/zenwinx
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -26,7 +26,7 @@ optimizeLevel=0
 
 // linker
 libraryPath=
-outputFilename=bin/zenwinx.dll
+outputFilename=../../bin/zenwinx.dll
 libraries=ntdll
 extraLinkerOptions=zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
@@ -45,8 +45,8 @@ extraResourceOptions=
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=obj/_
-outputFilesDirectory=obj/_
+intermediateFilesDirectory=../../obj/zenwinx
+outputFilesDirectory=../../obj/zenwinx
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -64,7 +64,7 @@ optimizeLevel=2
 
 // linker
 libraryPath=
-outputFilename=bin/zenwinx.dll
+outputFilename=../../bin/zenwinx.dll
 libraries=ntdll
 extraLinkerOptions=zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
@@ -101,15 +101,14 @@ extraResourceOptions=
 1=zenwinx.rc
 [Other]
 [History]
-reg.c,7713
-ntndk.h,12978
-stdio.c,2230
-thread.c,1025
-zenwinx.c,1034
-zenwinx.h,3333
-keytrans.c,2208
-mem.c,2026
-volume.c,5479
-privilege.c,2499
+volume.c,5675
 error.c,4911
 file.c,2390
+privilege.c,2499
+mem.c,2026
+keytrans.c,2208
+zenwinx.c,1034
+thread.c,1025
+stdio.c,1734
+ntndk.h,12978
+zenwinx.h,1618

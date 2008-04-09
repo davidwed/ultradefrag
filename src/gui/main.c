@@ -49,7 +49,7 @@ void HandleError(int status,int exit_code)
 	if(status < 0){
 		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
 		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
-		if(udefrag_unload(TRUE) < 0) udefrag_pop_error(NULL,0);
+		if(udefrag_unload() < 0) udefrag_pop_error(NULL,0);
 		ExitProcess(exit_code);
 	}
 }
@@ -57,27 +57,6 @@ void HandleError(int status,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-//	char b[1000];
-//	BOOL /*portable_run, install_run,*/ uninstall_run;
-	
-	/* check command line keys */
-//	_strupr(lpCmdLine);
-//	portable_run = (strstr(lpCmdLine,"/P") != NULL) ? TRUE : FALSE;
-//	uninstall_run = (strstr(lpCmdLine,"/U") != NULL) ? TRUE : FALSE;
-//	install_run = (strstr(lpCmdLine,"/I") != NULL) ? TRUE : FALSE;
-//	if(uninstall_run){
-		//if(udefrag_clean_registry() < 0) udefrag_pop_error(NULL,0);
-//		ExitProcess(0);
-//	}
-//	if(install_run){
-		//if(udefrag_init(0,NULL,FALSE,N_BLOCKS) < 0)
-		//	udefrag_pop_error(NULL,0);
-		//if(udefrag_unload(TRUE) < 0){
-			/* FIXME: with NULL,0 options saving fails on x64 XP (empty udefrag.cfg) */
-			//udefrag_pop_error(b,1000);
-		//}
-//		return 0;
-//	}
 	HandleError(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
 	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
@@ -98,7 +77,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* save settings */
 	SavePrefs();
 	DestroyResourceTable();
-	if(udefrag_unload(TRUE) < 0) udefrag_pop_error(NULL,0);
+	if(udefrag_unload() < 0) udefrag_pop_error(NULL,0);
 	return 0;
 }
 

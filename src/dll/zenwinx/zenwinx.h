@@ -41,6 +41,10 @@
 *		winx_create_thread
 *		winx_enable_privilege
 *		winx_exit_thread
+*		winx_fopen
+*		winx_fread
+*		winx_fwrite
+*		winx_get_drive_type
 *		winx_get_proc_address
 *		winx_getch
 *		winx_getche
@@ -103,14 +107,6 @@ int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phand
 void __stdcall winx_exit_thread(void);
 
 int  __stdcall winx_enable_privilege(unsigned long luid);
-
-int  __stdcall winx_reg_create_key(short *key_name,PHANDLE phKey);
-int  __stdcall winx_reg_open_key(short *key_name,PHANDLE phKey);
-int  __stdcall winx_reg_query_value(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD *psize);
-int  __stdcall winx_reg_set_value(HANDLE hKey,short *value_name,DWORD type,void *buffer,DWORD size);
-int  __stdcall winx_reg_add_to_boot_execute(short *command);
-int  __stdcall winx_reg_remove_from_boot_execute(short *command);
-void __stdcall winx_reg_close_key(HANDLE hKey);
 
 #define DRIVE_ASSIGNED_BY_SUBST_COMMAND 1200
 int __stdcall winx_get_drive_type(char letter);

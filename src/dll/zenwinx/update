@@ -9,7 +9,6 @@ put masterindex.html
 put mem_c.html
 put misc_c.html
 put privilege_c.html
-put reg_c.html
 put robo_functions.html
 put robo_sourcefiles.html
 put robodoc.css
