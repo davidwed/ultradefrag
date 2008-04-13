@@ -35,6 +35,12 @@
 #define IDB_SETTINGS_PICTURE            127
 #define IDB_ABOUTBOX_PICTURE            128
 
+#define IDI_FIXED                       129
+#define IDI_REMOVABLE                   130
+
+#define IDB_RTL                         131
+#define IDB_LTR                         132
+
 #define IDM_STATUSBAR                   500
 
 #define IDC_VOLUMES                     1002
@@ -59,13 +65,17 @@
 #define IDC_CL_MAP_STATIC               1057
 #define IDC_EDITMAINOPTS                1058
 
+#define IDC_PIC1                        1059
+#define IDC_RTL                         1060
+#define IDC_LTR                         1061
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        129
+#define _APS_NEXT_RESOURCE_VALUE        133
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1059
+#define _APS_NEXT_CONTROL_VALUE         1062
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

@@ -200,6 +200,9 @@ copy /Y .\tools\readme.txt %SRC_PKG_PATH%\src\tools\
 mkdir %SRC_PKG_PATH%\src\scripts
 copy /Y .\scripts\*.* %SRC_PKG_PATH%\src\scripts\
 
+mkdir %SRC_PKG_PATH%\src\music
+copy /Y .\music\*.* %SRC_PKG_PATH%\src\music\
+
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
 mkdir %SRC_PKG_PATH%\doc\html\images

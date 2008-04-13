@@ -562,6 +562,11 @@ cfg_registered:
 cfg_ok:
   ;DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
 
+  ; Install music theme
+  SetOutPath "$INSTDIR\music"
+  File "${ROOTDIR}\src\music\main_theme.mid"
+  File "${ROOTDIR}\src\music\license.txt"
+
 !insertmacro EnableX64FSRedirection
 
   pop $R1
@@ -715,6 +720,7 @@ Section "Uninstall"
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_i18n.dll"
   RMDir /r "$INSTDIR\doc"
+  RMDir /r "$INSTDIR\music"
   RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
   RMDir $INSTDIR
 
