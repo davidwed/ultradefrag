@@ -269,7 +269,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
 #else
-	if(/*settings->next_boot || */settings->every_boot){
+	if(settings->next_boot || settings->every_boot){
 		/* do scheduled job and exit */
 		if(!settings->sched_letters)
 			HandleError(L"No letters specified!",3);

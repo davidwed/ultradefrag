@@ -51,7 +51,7 @@ ud_options settings = \
 	DBG_NORMAL,    /* dbgprint_level */
 	L"",           /* sched_letters */
 	FALSE,         /* every_boot */
-//	FALSE,         /* next_boot */
+	FALSE,         /* next_boot */
 };
 
 short ud_key[] = \
@@ -329,10 +329,10 @@ void ParseParameter()
 		wcsncpy(sched_letters,value_buffer,MAX_SCHED_LETTERS);
 		sched_letters[MAX_SCHED_LETTERS] = 0;
 		settings.sched_letters = sched_letters;
-/*	} else if(!wcscmp(param_buffer,L"NEXT_BOOT")){
+	} else if(!wcscmp(param_buffer,L"NEXT_BOOT")){
 		_wcsupr(value_buffer);
 		settings.next_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
-*/	} else if(!wcscmp(param_buffer,L"EVERY_BOOT")){
+	} else if(!wcscmp(param_buffer,L"EVERY_BOOT")){
 		_wcsupr(value_buffer);
 		settings.every_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
 	} else if(!wcscmp(param_buffer,L"ENABLE_REPORTS")){

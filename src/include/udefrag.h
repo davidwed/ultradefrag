@@ -63,7 +63,7 @@ typedef struct _ud_options {
 	DWORD dbgprint_level;
 	short *sched_letters;
 	DWORD every_boot;
-//	DWORD next_boot;
+	DWORD next_boot;
 } ud_options;
 
 typedef struct _volume_info {
@@ -71,6 +71,7 @@ typedef struct _volume_info {
 	char fsname[MAXFSNAME];
 	LARGE_INTEGER total_space;
 	LARGE_INTEGER free_space;
+	int is_removable;
 } volume_info;
 
 int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size);
