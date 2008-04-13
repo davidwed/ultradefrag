@@ -37,9 +37,6 @@ IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/t3.bmp"
 IDI_FIXED               ICON    DISCARDABLE     "res/fixed.ico"
 IDI_REMOVABLE           ICON    DISCARDABLE     "res/removable.ico"
 
-IDB_RTL                 BITMAP  DISCARDABLE     "res/rtl.bmp"
-IDB_LTR                 BITMAP  DISCARDABLE     "res/ltr.bmp"
-
 IDD_MAIN DIALOGEX 0, 0, 315, 218
 STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
@@ -104,23 +101,6 @@ BEGIN
 END
 */
 
-IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, /*93*/113
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About Ultra Defragmenter"
-FONT 9, "Courier New"
-BEGIN
-    CONTROL         128,IDC_PIC1,"Static",SS_BITMAP,5,16,62,78
-    LTEXT           ABOUT_VERSION,IDC_STATIC,86,18,146,18
-    LTEXT           "Copyright (C) 2007,2008",IDC_STATIC,103,34,100,13
-    LTEXT           "UltraDefrag Development Team",IDC_STATIC,93,50,122,12
-    PUSHBUTTON      "Credits",IDC_CREDITS,72,65,76,10
-    PUSHBUTTON      "License",IDC_LICENSE,153,65,80,10
-    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,82,
-                    161,12,BS_FLAT
-    CONTROL         131,IDC_RTL,"Static",SS_BITMAP,190,0,39,15
-    CONTROL         132,IDC_LTR,"Static",SS_BITMAP,5,102,39,15
-END
-/*
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Ultra Defragmenter"
@@ -135,7 +115,7 @@ BEGIN
     PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
                     161,12,BS_FLAT
 END
-*/
+
 IDD_NEW_SETTINGS DIALOG DISCARDABLE  0, 0, 212, 76
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"

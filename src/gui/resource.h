@@ -38,9 +38,6 @@
 #define IDI_FIXED                       129
 #define IDI_REMOVABLE                   130
 
-#define IDB_RTL                         131
-#define IDB_LTR                         132
-
 #define IDM_STATUSBAR                   500
 
 #define IDC_VOLUMES                     1002
@@ -66,8 +63,6 @@
 #define IDC_EDITMAINOPTS                1058
 
 #define IDC_PIC1                        1059
-#define IDC_RTL                         1060
-#define IDC_LTR                         1061
 
 // Next default values for new objects
 // 
