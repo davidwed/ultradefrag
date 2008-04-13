@@ -32,7 +32,7 @@ COLORREF colors[NUM_OF_SPACE_STATES] =
 	RGB(255,0,0),RGB(128,0,0),     /* fragmented */
 	RGB(0,0,255),RGB(0,0,128),     /* unfragmented */
 	RGB(128,0,128),                /* mft */
-	RGB(255,255,0),RGB(128,128,0), /* directories */
+	RGB(255,255,0),RGB(238,221,0), /* directories */
 	RGB(185,185,0),RGB(93,93,0),   /* compressed */
 	RGB(0,255,255)                 /* no checked space */
 };
