@@ -44,7 +44,8 @@ BOOL internal_open_rootdir(unsigned char letter,HANDLE *phFile);
 BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 							  char *fsname,
 							  PROCESS_DEVICEMAP_INFORMATION *pProcessDeviceMapInfo,
-							  FILE_FS_SIZE_INFORMATION *pFileFsSize);
+							  FILE_FS_SIZE_INFORMATION *pFileFsSize,
+							  int *is_removable);
 BOOL set_error_mode(UINT uMode);
 
 /****f* udefrag.volume/udefrag_get_avail_volumes
@@ -86,6 +87,7 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 	ULONG drive_map;
 	ULONG i, index;
 	char letter;
+	int is_removable = FALSE;
 	FILE_FS_SIZE_INFORMATION FileFsSize;
 
 	/* get full list of volumes */
@@ -100,7 +102,7 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 		if((drive_map & (1 << i)) || nt4_system){
 			letter = 'A' + (char)i;
 			if(!internal_validate_volume(letter,skip_removable,v[index].fsname,
-				&ProcessDeviceMapInfo,&FileFsSize)){
+				&ProcessDeviceMapInfo,&FileFsSize,&is_removable)){
 					winx_pop_error(NULL,0);
 					continue;
 			}
@@ -109,6 +111,7 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 			v[index].free_space.QuadPart = FileFsSize.AvailableAllocationUnits.QuadPart * \
 				FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
 			v[index].letter = letter;
+			v[index].is_removable = is_removable;
 			index ++;
 		}
 	}
@@ -151,6 +154,7 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
 	PROCESS_DEVICEMAP_INFORMATION ProcessDeviceMapInfo;
 	FILE_FS_SIZE_INFORMATION FileFsSize;
+	int is_removable;
 
 	letter = (unsigned char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
@@ -162,7 +166,7 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 	/* set error mode to ignore missing removable drives */
 	if(!set_error_mode(INTERNAL_SEM_FAILCRITICALERRORS)) goto validate_fail;
 	if(!internal_validate_volume(letter,skip_removable,NULL,
-		&ProcessDeviceMapInfo,&FileFsSize)) goto validate_fail;
+		&ProcessDeviceMapInfo,&FileFsSize,&is_removable)) goto validate_fail;
 	/* try to restore error mode to default state */
 	if(!set_error_mode(1)){ /* equal to SetErrorMode(0) */
 		winx_pop_error(NULL,0);
@@ -256,7 +260,8 @@ BOOL internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 							  char *fsname,
 							  PROCESS_DEVICEMAP_INFORMATION *pProcessDeviceMapInfo,
-							  FILE_FS_SIZE_INFORMATION *pFileFsSize)
+							  FILE_FS_SIZE_INFORMATION *pFileFsSize,
+							  int *is_removable)
 {
 	NTSTATUS Status;
 	int type;
@@ -269,6 +274,7 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 	short str[MAXFSNAME];
 	ULONG length;
 
+	*is_removable = FALSE;
 	type = winx_get_drive_type(letter);
 	if(type == DRIVE_CDROM || type == DRIVE_REMOTE){
 		winx_push_error("Volume must be on non-cdrom local drive, but it's %u!",type);
@@ -278,6 +284,7 @@ BOOL internal_validate_volume(unsigned char letter,int skip_removable,
 		winx_push_error("It seems that volume letter is assigned by \'subst\' command!");
 		goto invalid_volume;
 	}
+	if(type == DRIVE_REMOVABLE) *is_removable = TRUE;
 	if(type == DRIVE_REMOVABLE && skip_removable){
 		winx_push_error("It's removable volume!");
 		goto invalid_volume;

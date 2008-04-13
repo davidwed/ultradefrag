@@ -23,6 +23,7 @@
 
 #include "main.h"
 
+extern HINSTANCE hInstance;
 extern HWND hWindow;
 extern STATISTIC stat[MAX_DOS_DRIVES];
 extern BOOL busy_flag;
@@ -34,7 +35,24 @@ int work_status[MAX_DOS_DRIVES] = {0};
 char *stat_msg[] = {"","Proc","Analys","Defrag"};
 WNDPROC OldListProc;
 
+HIMAGELIST hImgList;
+
 DWORD WINAPI RescanDrivesThreadProc(LPVOID);
+
+void InitImageList(void)
+{
+	hImgList = ImageList_Create(16,16,ILC_COLOR8,2,0);
+	if(!hImgList) return;
+	
+	ImageList_AddIcon(hImgList,LoadIcon(hInstance,MAKEINTRESOURCE(IDI_FIXED)));
+	ImageList_AddIcon(hImgList,LoadIcon(hInstance,MAKEINTRESOURCE(IDI_REMOVABLE)));
+	SendMessage(hList,LVM_SETIMAGELIST,LVSIL_SMALL,(LRESULT)hImgList);
+}
+
+void DestroyImageList(void)
+{
+	if(hImgList) ImageList_Destroy(hImgList);
+}
 
 void InitVolList(void)
 {
@@ -62,12 +80,14 @@ void InitVolList(void)
 		lvc.pszText = L"Status";
 	lvc.cx = 60 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
-	if(!GetResourceString(L"FILESYSTEM",bf,sizeof(bf) / sizeof(short)))
+
+/*	if(!GetResourceString(L"FILESYSTEM",bf,sizeof(bf) / sizeof(short)))
 		lvc.pszText = bf;
 	else
 		lvc.pszText = L"FS";
 	lvc.cx = 100 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
+*/
 	if(!GetResourceString(L"TOTAL",bf,sizeof(bf) / sizeof(short)))
 		lvc.pszText = bf;
 	else
@@ -75,25 +95,27 @@ void InitVolList(void)
 	lvc.mask |= LVCF_FMT;
 	lvc.fmt = LVCFMT_RIGHT;
 	lvc.cx = 100 * dx / 505;
-	SendMessage(hList,LVM_INSERTCOLUMNW,3,(LRESULT)&lvc);
+	SendMessage(hList,LVM_INSERTCOLUMNW,2/*3*/,(LRESULT)&lvc);
 	if(!GetResourceString(L"FREE",bf,sizeof(bf) / sizeof(short)))
 		lvc.pszText = bf;
 	else
 		lvc.pszText = L"Free space";
 	lvc.cx = 100 * dx / 505;
-	SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
+	SendMessage(hList,LVM_INSERTCOLUMNW,3/*4*/,(LRESULT)&lvc);
 	if(!GetResourceString(L"PERCENT",bf,sizeof(bf) / sizeof(short)))
 		lvc.pszText = bf;
 	else
 		lvc.pszText = L"Percentage";
 	lvc.cx = 85 * dx / 505;
-	SendMessage(hList,LVM_INSERTCOLUMNW,5,(LRESULT)&lvc);
-	/* reduce hight of list view control */
+	SendMessage(hList,LVM_INSERTCOLUMNW,4/*5*/,(LRESULT)&lvc);
+	/* reduce(?) hight of list view control */
 	GetWindowRect(hList,&rc);
-	rc.bottom --;
+	rc.bottom += 5; //--; // changed after icons adding
 	SetWindowPos(hList,0,0,0,rc.right - rc.left,
 		rc.bottom - rc.top,SWP_NOMOVE);
 	OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
+	SendMessage(hList,LVM_SETBKCOLOR,0,RGB(255,255,255));
+	InitImageList();
 }
 
 void UpdateVolList(int skip_removable)
@@ -105,34 +127,35 @@ void UpdateVolList(int skip_removable)
 static void VolListAddItem(int index, volume_info *v)
 {
 	LV_ITEM lvi;
-	char s[16];
+	char s[32];
 	int st;
 	double d;
 	int p;
 
-	sprintf(s,"%c:",v->letter);
-	lvi.mask = LVIF_TEXT;
+	sprintf(s,"%c: [%s]",v->letter,v->fsname);
+	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
 	lvi.iItem = index;
 	lvi.iSubItem = 0;
 	lvi.pszText = s;
+	lvi.iImage = v->is_removable ? 1 : 0;
 	SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
 
 	st = work_status[v->letter - 'A'];
 	lvi.iSubItem = 1;
 	lvi.pszText = stat_msg[st];
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-
+/*
 	lvi.iSubItem = 2;
 	lvi.pszText = v->fsname;
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-
+*/
 	fbsize(s,(ULONGLONG)(v->total_space.QuadPart));
-	lvi.iSubItem = 3;
+	lvi.iSubItem = 2;//3;
 	lvi.pszText = s;
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 
 	fbsize(s,(ULONGLONG)(v->free_space.QuadPart));
-	lvi.iSubItem = 4;
+	lvi.iSubItem = 3;//4;
 	lvi.pszText = s;
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 
@@ -141,7 +164,7 @@ static void VolListAddItem(int index, volume_info *v)
 	d /= ((double)(signed __int64)(v->total_space.QuadPart) + 0.1);
 	p = (int)(100 * d);
 	sprintf(s,"%u %%",p);
-	lvi.iSubItem = 5;
+	lvi.iSubItem = 4;//5;
 	lvi.pszText = s;
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 }
@@ -157,7 +180,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int i;
 	RECT rc;
 	int dx;
-	int cw[] = {77,83,63,98,98,86};
+	int cw[] = {100,90,110,120,85}; //{77,70,94,96,98,70};
 	LV_ITEM lvi;
 
 	DisableButtonsBeforeDrivesRescan();
@@ -182,7 +205,7 @@ scan_done:
 	/* adjust columns widths */
 	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;
-	for(i = 0; i < 6; i++)
+	for(i = 0; i < 5/*6*/; i++)
 		SendMessage(hList,LVM_SETCOLUMNWIDTH,i,cw[i] * dx / 505);
 	lvi.mask = LVIF_STATE;
 	lvi.stateMask = LVIS_SELECTED;

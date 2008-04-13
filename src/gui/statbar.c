@@ -42,7 +42,7 @@ BOOL CreateStatusBar()
 {
 	RECT rc;
 	int width, i;
-	int x[N_OF_STATUSBAR_PARTS-1] = {100,200,320,440};
+	int x[N_OF_STATUSBAR_PARTS-1] = {110,210,330,450};
 	int a[N_OF_STATUSBAR_PARTS];
 
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \

@@ -41,6 +41,7 @@ signed int delta_h = 0;
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void ShowFragmented();
+void DestroyImageList(void);
 
 void HandleError(int status,int exit_code)
 {
@@ -74,6 +75,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
 	/* delete all created gdi objects */
 	DeleteMaps();
+	DestroyImageList();
 	/* save settings */
 	SavePrefs();
 	DestroyResourceTable();
