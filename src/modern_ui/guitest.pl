@@ -151,12 +151,12 @@ my $optimize_btn = $mw->Button(
 
 my $stop_btn = $mw->Button(
 	-text => 'Stop',
-	-command => sub { exit }
+	-command => sub { stop(); }
 	);
 
 my $fragm_btn = $mw->Button(
 	-text => 'Fragmented',
-	-command => sub { exit }
+	-command => sub { showreport(); }
 	);
 
 my $settings_btn = $mw->Button(
@@ -166,7 +166,7 @@ my $settings_btn = $mw->Button(
 
 my $about_btn = $mw->Button(
 	-text => 'About',
-	-command => sub { exit }
+	-command => sub { aboutbox(); }
 	);
 
 # set controls positions
@@ -335,6 +335,57 @@ sub analyse {
 	if(udefrag_analyse($letter, $update_map_callback) < 0){
 		udefrag_pop_error(0,0);
 	}
+}
+
+sub stop {
+}
+
+sub showreport {
+	my $row;
+	my $letter;
+	my @sel = $list->info('selection');
+	if(!@sel){ return; }
+	$row = $sel[0];
+	$letter = $list->itemCget($row, 0, 'text');
+	my @args = ($letter.":\\FRAGLIST.LUAR");
+	system(@args);
+}
+
+sub aboutbox {
+	my $a = MainWindow->new();
+	my $x = $opts{'x'} + 128;
+	my $y = $opts{'y'} + 90;
+	$a->wm('geometry', '282x150+'.$x.'+'.$y);
+	$a->title('About Ultra Defragmenter');
+#	$a->minsize($a->width,$a->height);
+#	$a->maxsize($a->width,$a->height);
+	my $logo = $a->Label(
+		-width => '109',
+		-height => '147'
+		);
+	my $msg = $a->Label(
+		-text => "Ultra Defragmenter version 1.4.0\n\nCopyright (C) 2007,2008\n\nUltraDefrag Development Team\n"
+		);
+	my $credits = $a->Button(
+		-text => 'Credits',
+		-command => sub {}
+		);
+	my $license = $a->Button(
+		-text => 'License',
+		-command => sub {}
+		);
+	my $homepage = $a->Button(
+		-text => 'http://ultradefrag.sourceforge.net',
+		-command => sub {}
+		);
+	my $im = $a->Photo( -file => 't3.gif' );
+	$logo->configure( -image => $im );
+	$logo->form(-left => '%0');
+	$msg->form(-left => $logo, -top => '%5');
+	$credits->form(-left => $logo, -top => $msg);
+	$license->form(-left => $credits, -top => $msg, -right => '%100');
+	$homepage->form(-left => $logo, -top => $credits, -right => '%100', -bottom => '%95');
+	MainLoop;
 }
 
 sub img {
