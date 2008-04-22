@@ -142,19 +142,21 @@ C:\>_
 drive
 letter. The switches are as follows:</p>
 <ul>
-<li>-? Displays the usage message</li>
-<li>-a Analyze the drive specifued on the command line</li>
-<li>-o Optomize file space by moving all files to the begining of the drive</li>
+<li><b>-?</b> Displays the usage message</li>
+<li><b>-a</b> Analyze the drive specified on the command line</li>
+<li><b>-o</b> Optomize file space by moving all files to the begining of the drive</li>
+<li><b>-l</b> List volumes available for defragmentation except removable</li>
+<li><b>-la</b> List all volumes available for defragmentation</li>
 </ul>
 <p>In addition the following switches can be used when defraging and compacting.
 They override the settings in the <a href="#cfgfile">udefrag.cfg</a> file described below. 
 The default settings are set at compile time.</p>
 <ul>
-<li>-sN ignore files larger than N bytes</li>
-<li>-iA;B;C Include these files and directories from the scan (Maximum 4096 bytes)</li>
-<li>-eX;Y;Z Exclude these files and directories from the scan (Maximum 4096 bytes)</li>
-<li>-d[0-3] Set debug level: 0 Normal, 1 Detailed, 2 Paranoid</li>
-<li>-b Use default color scheme</li>
+<li><b>-sN</b> ignore files larger than N bytes</li>
+<li><b>-iA;B;C</b> Include these files and directories from the scan (Maximum 4096 bytes)</li>
+<li><b>-eX;Y;Z</b> Exclude these files and directories from the scan (Maximum 4096 bytes)</li>
+<li><b>-d[0-3]</b> Set debug level: 0 Normal, 1 Detailed, 2 Paranoid</li>
+<li><b>-b</b> Use default color scheme</li>
 </ul>
 <p>Specifying just the drive letter will cause UltraDefrag
 to defragment the drive. When the operation finishes or you stop the
@@ -164,6 +166,39 @@ window, UltraDefrag will exit safely without destroying any data.</p>
 <p>The console application is also used as context menu handler. When you right click 
 drive/folder/file icon in Explorer you can select <b>[--- Ultra Defragmenter --]</b> item 
 to defragment selected file.</p>
+<p>You can use the console application in batch files. Par example, you would like to 
+shutdown your system after defragmentation. Store the following code into one file with 
+<b>.cmd</b> extension and click it's icon to start batch processing:</br>
+<pre style="border: 2px solid; background-color: black; color: white;">
+@echo off
+udefrag c: > c:\ud.log
+udefrag d: >> c:\ud.log
+shutdown -s -t 00
+</pre>
+Batch files are powerful enough, try to insert commands to play sounds after 
+each defragmentation. If you doubt that your volumes are in good state then add 
+<b>chkdsk</b> command too.
+</p>
+<p>To get list of available volumes type <span class="path">udefrag -l</span>. 
+Each line of output contains volume letter, type of file system, total size and percent 
+of free space. Here is an example:
+<pre style="border: 2px solid; background-color: black">
+<div align="center" style="background-color: blue; color: white">Command prompt</div><div style="color: white">
+Microsoft Windows XP [5.1.2600]
+(C) Microsoft Corporation, 1985-2001.
+
+C:\>udefrag -l</div><div style="color: #00FF00">UltraDefrag v1.4.0 console interface
+Copyright (c) Dmitri Arkhangelski, 2007.</div><div style="color: #FFFF00">
+Volumes available for defragmentation:
+
+C:      NTFS      3.92 Gb        6 %
+D:      NTFS      9.42 Gb        3 %
+E:     FAT32     59.30 Gb        5 %
+</div><div style="color: white">
+C:\>_
+</div>
+</pre>
+</p>
 <h3 class="western">Windows Application</h3>
 <p>The windows application is a simple application with one main
 form of fixed size and an about box. An illustration of the window as well
@@ -177,15 +212,16 @@ If the 'Skip removable media' box is checked, also floppies and other similar de
 be excluded. This list has the following fields:</p>
 <ul type="disc">
 <li>
-<p><b>Volume</b> - drive letter.</p>
+<p><b>Volume</b> - drive letter plus file system type in square brackets. There are used 
+two types of icons in this field: 
+<img src="images/fixed.ico" alt="fixed" border="0" height="16" width="16" /> 
+for fixed drives and 
+<img src="images/removable.ico" alt="removable" border="0" height="16" width="16" /> 
+for removable media.</p>
 </li>
 <li>
 <p><b>Status</b> - a description of the action
 being performed (Analyze, defrag, etc).</p>
-</li>
-<li>
-<p><b>FS</b> - type of file system
-contained on the volume.</p>
 </li>
 <li>
 <p><b>Total space</b></p>

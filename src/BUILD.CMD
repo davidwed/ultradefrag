@@ -206,13 +206,9 @@ mkdir %SRC_PKG_PATH%\doc\html\images
 copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
 copy /Y ..\doc\html\udefrag.css %SRC_PKG_PATH%\doc\html\
 
-rem copy /Y ..\doc\html\about.html %SRC_PKG_PATH%\doc\html\
-rem copy /Y ..\doc\html\about_simple.html %SRC_PKG_PATH%\doc\html\
-rem copy /Y ..\doc\html\images\console.png %SRC_PKG_PATH%\doc\html\images\
-
 copy /Y ..\doc\html\images\main_screen140.png %SRC_PKG_PATH%\doc\html\images\
-
-rem copy /Y ..\doc\html\images\about.png %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\images\fixed.ico %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\images\removable.ico %SRC_PKG_PATH%\doc\html\images\
 
 copy /Y ..\doc\html\images\sched_net_vista.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\valid-html401.png %SRC_PKG_PATH%\doc\html\images\
