@@ -34,6 +34,50 @@ struct pair {
 	short *value;
 };
 
+struct local_pair {
+	short *name;
+	short *value;
+};
+
+struct local_pair stringtable[] = {
+	{L"RESCAN_DRIVES", L"Rescan drives"},
+	{L"SKIP_REMOVABLE_MEDIA", L"Skip removable media"},
+	{L"CLUSTER_MAP", L"Cluster map:"},
+	{L"ANALYSE", L"Analyse"},
+	{L"DEFRAGMENT", L"Defragment"},
+	{L"COMPACT", L"Compact"},
+	{L"PAUSE", L"Pause"},
+	{L"STOP", L"Stop"},
+	{L"REPORT", L"Fragmented"},
+	{L"SETTINGS", L"Settings"},
+	{L"ABOUT", L"About"},
+
+	{L"VOLUME", L"Volume"},
+	{L"STATUS", L"Status"},
+	{L"FILESYSTEM", L"File system"},
+	{L"TOTAL", L"Total space"},
+	{L"FREE", L"Free space"},
+	{L"PERCENT", L"Percentage"},
+	
+	{L"ANALYSE_STATUS", L"Analyse"},
+	{L"DEFRAG_STATUS", L"Defrag"},
+
+	{L"DIRS", L"dirs"},
+	{L"FILES", L"files"},
+	{L"FRAGMENTED", L"fragmented"},
+	{L"COMPRESSED", L"compressed"},
+	{L"MFT", L"MFT"},
+	
+	{L"EDIT_MAIN_OPTS", L"Edit main options"},
+	{L"EDIT_REPORT_OPTS", L"Edit report options"},
+	{L"READ_USER_MANUAL", L"Read user manual"},
+
+	{L"ABOUT_WIN_TITLE", L"About Ultra Defragmenter"},
+	{L"CREDITS", L"Credits"},
+	{L"LICENSE", L"License"},
+	{NULL, NULL}
+};
+
 short line_buffer[8192];
 short param_buffer[8192];
 short value_buffer[8192];
@@ -118,29 +162,29 @@ void DestroyResourceTable(void)
 	}
 }
 
-/* zero for success, negative value otherwise */
-int GetResourceString(short *id,short *buf,int maxchars)
+short * GetResourceString(short *id)
 {
 	struct pair *p;
+	int i;
 
-	if(!pairs) return -1;
-	
+	/* search for string in external language file */
 	_wcsupr(id);
 	for(p = pairs; p != NULL; p = p->next){
-		if(wcscmp(id,p->name) == 0){
-			wcsncpy(buf,p->value,maxchars);
-			buf[maxchars - 1] = 0;
-			return 0;
-		}
+		if(wcscmp(id,p->name) == 0)
+			return (p->value);
 	}
-	buf[0] = 0;
-	return -1;
+	/* search for string in local string table */
+	i = 0;
+	while(stringtable[i].name){
+		if(wcscmp(id,stringtable[i].name) == 0)
+			return (stringtable[i].value);
+		i++;
+	}
+	/* return an empty string otherwise */
+	return (L"");
 }
 
 void SetText(HWND hWnd, short *id)
 {
-	short text[256];
-	
-	if(!GetResourceString(id,text,sizeof(text) / sizeof(short)))
-		SetWindowTextW(hWnd,text);
+	SetWindowTextW(hWnd,GetResourceString(id));
 }

@@ -114,7 +114,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		return 0;
 	}
 
-	VolListUpdateStatusField(STAT_WORK,iItem);
+	//VolListUpdateStatusField(STAT_WORK,iItem);
 	DisableButtonsBeforeTask();
 	ClearMap();
 

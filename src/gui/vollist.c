@@ -32,7 +32,6 @@ HWND hList;
 int Index; /* Index of currently selected list item */
 char letter_numbers[MAX_DOS_DRIVES];
 int work_status[MAX_DOS_DRIVES] = {0};
-char *stat_msg[] = {"","Proc","Analys","Defrag"};
 WNDPROC OldListProc;
 
 HIMAGELIST hImgList;
@@ -59,7 +58,6 @@ void InitVolList(void)
 	LV_COLUMNW lvc;
 	RECT rc;
 	int dx;
-	short bf[64];
 
 	memset((void *)work_status,0,sizeof(work_status));
 	hList = GetDlgItem(hWindow,IDC_VOLUMES);
@@ -68,44 +66,26 @@ void InitVolList(void)
 	SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 		(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
 	lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-	if(!GetResourceString(L"VOLUME",bf,sizeof(bf) / sizeof(short)))
-		lvc.pszText = bf;
-	else
-		lvc.pszText = L"Volume";
+	lvc.pszText = GetResourceString(L"VOLUME");
 	lvc.cx = 60 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,0,(LRESULT)&lvc);
-	if(!GetResourceString(L"STATUS",bf,sizeof(bf) / sizeof(short)))
-		lvc.pszText = bf;
-	else
-		lvc.pszText = L"Status";
+	lvc.pszText = GetResourceString(L"STATUS");
 	lvc.cx = 60 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
 
-/*	if(!GetResourceString(L"FILESYSTEM",bf,sizeof(bf) / sizeof(short)))
-		lvc.pszText = bf;
-	else
-		lvc.pszText = L"FS";
+/*	lvc.pszText = GetResourceString(L"FILESYSTEM");
 	lvc.cx = 100 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
 */
-	if(!GetResourceString(L"TOTAL",bf,sizeof(bf) / sizeof(short)))
-		lvc.pszText = bf;
-	else
-		lvc.pszText = L"Total space";
+	lvc.pszText = GetResourceString(L"TOTAL");
 	lvc.mask |= LVCF_FMT;
 	lvc.fmt = LVCFMT_RIGHT;
 	lvc.cx = 100 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,2/*3*/,(LRESULT)&lvc);
-	if(!GetResourceString(L"FREE",bf,sizeof(bf) / sizeof(short)))
-		lvc.pszText = bf;
-	else
-		lvc.pszText = L"Free space";
+	lvc.pszText = GetResourceString(L"FREE");
 	lvc.cx = 100 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,3/*4*/,(LRESULT)&lvc);
-	if(!GetResourceString(L"PERCENT",bf,sizeof(bf) / sizeof(short)))
-		lvc.pszText = bf;
-	else
-		lvc.pszText = L"Percentage";
+	lvc.pszText = GetResourceString(L"PERCENT");
 	lvc.cx = 85 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,4/*5*/,(LRESULT)&lvc);
 	/* reduce(?) hight of list view control */
@@ -127,6 +107,7 @@ void UpdateVolList(int skip_removable)
 static void VolListAddItem(int index, volume_info *v)
 {
 	LV_ITEM lvi;
+	LV_ITEMW lviw;
 	char s[32];
 	int st;
 	double d;
@@ -141,9 +122,19 @@ static void VolListAddItem(int index, volume_info *v)
 	SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
 
 	st = work_status[v->letter - 'A'];
-	lvi.iSubItem = 1;
-	lvi.pszText = stat_msg[st];
-	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+	lviw.mask = LVIF_TEXT | LVIF_IMAGE;
+	lviw.iItem = index;
+	lviw.iSubItem = 1;
+
+	if(st == STAT_AN){
+		lviw.pszText = GetResourceString(L"ANALYSE_STATUS");
+	} else if(st == STAT_DFRG){
+		lviw.pszText = GetResourceString(L"DEFRAG_STATUS");
+	} else {
+		lviw.pszText = L"";
+	}
+
+	SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
 /*
 	lvi.iSubItem = 2;
 	lvi.pszText = v->fsname;
@@ -152,7 +143,7 @@ static void VolListAddItem(int index, volume_info *v)
 	fbsize(s,(ULONGLONG)(v->total_space.QuadPart));
 	lvi.iSubItem = 2;//3;
 	lvi.pszText = s;
-	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+ 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 
 	fbsize(s,(ULONGLONG)(v->free_space.QuadPart));
 	lvi.iSubItem = 3;//4;
@@ -243,16 +234,24 @@ int VolListGetLetterNumber(LRESULT iItem)
 
 void VolListUpdateStatusField(int stat,LRESULT iItem)
 {
-	LV_ITEM lvi;
+	LV_ITEMW lviw;
 
 	work_status[(int)letter_numbers[(int)iItem]] = stat;
 	if(stat == STAT_CLEAR)
 		return;
-	lvi.mask = LVIF_TEXT;
-	lvi.iItem = (int)iItem;
-	lvi.iSubItem = 1;
-	lvi.pszText = stat_msg[stat];
-	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+	lviw.mask = LVIF_TEXT;
+	lviw.iItem = (int)iItem;
+	lviw.iSubItem = 1;
+
+	if(stat == STAT_AN){
+		lviw.pszText = GetResourceString(L"ANALYSE_STATUS");
+	} else if(stat == STAT_DFRG){
+		lviw.pszText = GetResourceString(L"DEFRAG_STATUS");
+	} else {
+		lviw.pszText = L"";
+	}
+
+	SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
 }
 
 void VolListNotifyHandler(LPARAM lParam)

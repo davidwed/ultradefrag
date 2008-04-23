@@ -109,7 +109,7 @@
 #define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
 
 #define STAT_CLEAR	0
-#define STAT_WORK	1
+//#define STAT_WORK	1
 #define STAT_AN		2
 #define STAT_DFRG	3
 
@@ -128,7 +128,7 @@ void SavePrefs(void);
 /* i18n related functions */
 void BuildResourceTable(void);
 void DestroyResourceTable(void);
-int  GetResourceString(short *id,short *buf,int maxchars);
+short * GetResourceString(short *id);
 void SetText(HWND hWnd, short *id);
 
 /* map manipulation functions */
