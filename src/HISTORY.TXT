@@ -9,6 +9,7 @@ HISTORY
     - documentation was improved
     - program settings were moved to one file
     - gui design was improved and simplified
+    - console program's option -l was added
     - many significant bugs were fixed (possible buffer overflows)
 
 
