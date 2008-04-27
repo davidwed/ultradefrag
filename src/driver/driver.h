@@ -282,6 +282,10 @@ typedef struct {
 typedef struct _UDEFRAG_DEVICE_EXTENSION
 {
 	PDEVICE_OBJECT fdo;
+	int second_device;
+	int map_device;
+	int stat_device;
+	struct _UDEFRAG_DEVICE_EXTENSION *main_dx;
 	UNICODE_STRING log_path;
 	/*
 	* All fields between markers will be set

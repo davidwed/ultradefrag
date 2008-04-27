@@ -29,7 +29,7 @@ ULONG dbg_level;
 UCHAR BitShift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 
 short device_name[] = L"\\Device\\UltraDefrag";
-short link_name[] = L"\\DosDevices\\ultradfg";
+short link_name[] = L"\\DosDevices\\ultradfg"; 	/* On NT can be L"\\??\\ultradfg" */
 
 char *no_mem = "-Ultradfg- No Enough Memory!\n";
 
