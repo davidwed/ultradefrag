@@ -46,11 +46,11 @@ BEGIN
     CONTROL         "",IDC_VOLUMES,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
                     WS_BORDER | WS_GROUP | WS_TABSTOP,7,7,300,66
-    PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,/*76*/80,61,10,WS_GROUP
+    PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,80,61,10,WS_GROUP
     CONTROL         "Skip removable media",IDC_SKIPREMOVABLE,"Button",
-                    BS_AUTOCHECKBOX | BS_RIGHTBUTTON | BS_RIGHT,/*123*/100,/*76*/81,/*120*/140,10
-    LTEXT           "Cluster map:",IDC_CL_MAP_STATIC,7,/*78*/81,/*113*/90,9
-    CONTROL         "",IDC_MAP,"Static",SS_GRAYRECT,7,/*89*/93,300,77,
+                    BS_AUTOCHECKBOX /*| BS_RIGHTBUTTON | BS_RIGHT*/,100,81,140,10
+    LTEXT           "Cluster map:",IDC_CL_MAP_STATIC,7,81,90,9
+    CONTROL         "",IDC_MAP,"Static",SS_GRAYRECT,7,93,300,77,
                     WS_EX_CLIENTEDGE
     PUSHBUTTON      "Analyse",IDC_ANALYSE,7,174,59,11,WS_GROUP
     PUSHBUTTON      "Defragment",IDC_DEFRAGM,71,174,58,11,NOT WS_TABSTOP
