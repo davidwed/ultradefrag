@@ -27,6 +27,46 @@
 #pragma code_seg("INIT") /* begin of section INIT */
 #endif
 
+/* Don't use them in any functions except DriverEntry!!! */
+INIT_FUNCTION NTSTATUS CreateDevice(IN PDRIVER_OBJECT DriverObject,
+									IN short *name,
+									IN short *link,
+									OUT UDEFRAG_DEVICE_EXTENSION **dev_ext)
+{
+	UNICODE_STRING devName;
+	UNICODE_STRING symLinkName;
+	NTSTATUS status;
+	DEVICE_OBJECT *fdo;
+	UDEFRAG_DEVICE_EXTENSION *dx;
+
+	RtlInitUnicodeString(&devName,name);
+	status = IoCreateDevice(DriverObject,
+				sizeof(UDEFRAG_DEVICE_EXTENSION),
+				&devName,
+				FILE_DEVICE_UNKNOWN,
+				0,
+				FALSE, /* without exclusive access */
+				&fdo);
+	if(status != STATUS_SUCCESS){
+		DebugPrint("=Ultradfg= IoCreateDevice failed for %ws: %x\n",
+				name,(UINT)status);
+		return status;
+	}
+
+	dx = (PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
+	dx->fdo = fdo;  /* save backward pointer */
+	fdo->Flags |= DO_DIRECT_IO;
+	*dev_ext = dx;
+
+	/* IMPORTANT: links cannot be created twice */
+	RtlInitUnicodeString(&symLinkName,link);
+	status = IoCreateSymbolicLink(&symLinkName,&devName);
+	if(!NT_SUCCESS(status))
+		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed for %ws: %x\n",
+				link,(UINT)status);
+	return status;
+}
+									
 INIT_FUNCTION void driver_entry_cleanup(PDRIVER_OBJECT DriverObject)
 {
 	UNICODE_STRING us;
@@ -53,11 +93,8 @@ INIT_FUNCTION void driver_entry_cleanup(PDRIVER_OBJECT DriverObject)
 INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 						IN PUNICODE_STRING RegistryPath)
 {
-	UDEFRAG_DEVICE_EXTENSION *dx, *dx_map, *dx_stat;
+	UDEFRAG_DEVICE_EXTENSION *dx, *dx_map, *dx_stat, *dx_stop;
 	NTSTATUS status = STATUS_SUCCESS;
-	DEVICE_OBJECT *fdo, *fdo_map, *fdo_stat;
-	UNICODE_STRING devName;
-	UNICODE_STRING symLinkName;
 	ULONG mj,mn;
 
 	/* Export entry points */
@@ -73,93 +110,57 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	OpenLog(); /* We should call them before any DebugPrint() calls !!! */
 #endif
 
-	/*
-	* Create the main device.
-	*/
-	RtlInitUnicodeString(&devName,device_name);
-	status = IoCreateDevice(DriverObject,
-				sizeof(UDEFRAG_DEVICE_EXTENSION),
-				&devName, /* can be NULL */
-				FILE_DEVICE_UNKNOWN,
-				0,
-				FALSE, /* without exclusive access */
-				&fdo);
-	if(status != STATUS_SUCCESS){
-		DebugPrint("=Ultradfg= IoCreateDevice failed %x\n",(UINT)status);
+	/* Create the main device. */
+	status = CreateDevice(DriverObject,device_name,link_name,&dx);
+	if(!NT_SUCCESS(status)){
 		driver_entry_cleanup(DriverObject);
 		return status;
 	}
-	dx = (PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
-	dx->fdo = fdo;  /* save backward pointer */
-	fdo->Flags |= DO_DIRECT_IO;
 	dx->second_device = 0; dx->map_device = 0; dx->stat_device = 0;
+	dx->stop_device = 0;
 	dx->main_dx = dx;
-	RtlInitUnicodeString(&symLinkName,link_name);
-	status = IoCreateSymbolicLink(&symLinkName,&devName);
-	if(!NT_SUCCESS(status)){
-		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed %x\n",(UINT)status);
-		driver_entry_cleanup(DriverObject);
-		return status;
-	}
 
-	/*
-	* Create the map device.
-	*/
-	RtlInitUnicodeString(&devName,L"\\Device\\UltraDefragMap");
-	status = IoCreateDevice(DriverObject,
-				sizeof(UDEFRAG_DEVICE_EXTENSION),
-				&devName,
-				FILE_DEVICE_UNKNOWN,
-				0,
-				FALSE, /* without exclusive access */
-				&fdo_map);
-	if(status != STATUS_SUCCESS){
-		DebugPrint("=Ultradfg= IoCreateDevice failed %x\n",(UINT)status);
+	/* Create the map device. */
+	status = CreateDevice(DriverObject,L"\\Device\\UltraDefragMap",
+			L"\\DosDevices\\ultradfgmap",&dx_map);
+	if(!NT_SUCCESS(status)){
 		driver_entry_cleanup(DriverObject);
 		return status;
 	}
-	dx_map = (PUDEFRAG_DEVICE_EXTENSION)(fdo_map->DeviceExtension);
-	dx_map->fdo = fdo_map;  /* save backward pointer */
-	fdo_map->Flags |= DO_DIRECT_IO;
 	dx_map->second_device = 1; dx_map->map_device = 1; dx_map->stat_device = 0;
+	dx_map->stop_device = 0;
 	dx_map->main_dx = dx;
-	RtlInitUnicodeString(&symLinkName,L"\\DosDevices\\ultradfgmap");
+
+/*	RtlInitUnicodeString(&symLinkName,L"\\??\\X:");
 	status = IoCreateSymbolicLink(&symLinkName,&devName);
 	if(!NT_SUCCESS(status)){
 		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed %x\n",(UINT)status);
-		driver_entry_cleanup(DriverObject);
-		return status;
 	}
-	
+*/
 	/*
 	* Create the separated device for statistical data
 	* representation.
 	*/
-	RtlInitUnicodeString(&devName,L"\\Device\\UltraDefragStat");
-	status = IoCreateDevice(DriverObject,
-				sizeof(UDEFRAG_DEVICE_EXTENSION),
-				&devName,
-				FILE_DEVICE_UNKNOWN,
-				0,
-				FALSE,
-				&fdo_stat);
-	if(status != STATUS_SUCCESS){
-		DebugPrint("=Ultradfg= IoCreateDevice failed %x\n",(UINT)status);
-		driver_entry_cleanup(DriverObject);
-		return status;
-	}
-	dx_stat = (PUDEFRAG_DEVICE_EXTENSION)(fdo_stat->DeviceExtension);
-	dx_stat->fdo = fdo_stat;
-	fdo_stat->Flags |= DO_DIRECT_IO;
-	dx_stat->second_device = 1; dx_stat->map_device = 0; dx_stat->stat_device = 1;
-	dx_stat->main_dx = dx;
-	RtlInitUnicodeString(&symLinkName,L"\\DosDevices\\ultradfgstat");
-	status = IoCreateSymbolicLink(&symLinkName,&devName);
+	status = CreateDevice(DriverObject,L"\\Device\\UltraDefragStat",
+			L"\\DosDevices\\ultradfgstat",&dx_stat);
 	if(!NT_SUCCESS(status)){
-		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed %x\n",(UINT)status);
 		driver_entry_cleanup(DriverObject);
 		return status;
 	}
+	dx_stat->second_device = 1; dx_stat->map_device = 0; dx_stat->stat_device = 1;
+	dx_stat->stop_device = 0;
+	dx_stat->main_dx = dx;
+
+	/* create a special device for 'stop' requests processing */
+	status = CreateDevice(DriverObject,L"\\Device\\UltraDefragStop",
+			L"\\DosDevices\\ultradfgstop",&dx_stop);
+	if(!NT_SUCCESS(status)){
+		driver_entry_cleanup(DriverObject);
+		return status;
+	}
+	dx_stop->second_device = 1; dx_stop->map_device = 0; dx_stop->stat_device = 0;
+	dx_stop->stop_device = 1;
+	dx_stop->main_dx = dx;
 
 	/* data initialization */
 	InitDX_0(dx);
@@ -189,9 +190,9 @@ no_mem:
 		return STATUS_NO_MEMORY;
 	}
 
-	DebugPrint("=Ultradfg= Main FDO %p, DevExt=%p\n",fdo,dx);
-	DebugPrint("=Ultradfg= Map  FDO %p, DevExt=%p\n",fdo_map,dx_map);
-	DebugPrint("=Ultradfg= Stat FDO %p, DevExt=%p\n",fdo_stat,dx_stat);
+	DebugPrint("=Ultradfg= Main FDO %p, DevExt=%p\n",dx->fdo,dx);
+	DebugPrint("=Ultradfg= Map  FDO %p, DevExt=%p\n",dx_map->fdo,dx_map);
+	DebugPrint("=Ultradfg= Stat FDO %p, DevExt=%p\n",dx_stat->fdo,dx_stat);
 
 	/* Get Windows version */
 	if(PsGetVersion(&mj,&mn,NULL,NULL))
@@ -228,6 +229,11 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 
 	CHECK_IRP(Irp);
 
+	if(KeReadStateEvent(&dx->unload_event) == 0x1){
+		DebugPrint1("-Ultradfg- is busy!\n");
+		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
+	}
+	InterlockedIncrement(&dx->working_rq);
 //	DebugPrint("-Ultradfg- in Read_IRPhandler\n");
 
 	length = IrpStack->Parameters.Read.Length;
@@ -239,16 +245,21 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 
 	if(dx->map_device){
 		DebugPrint2("-Ultradfg- Map request\n");
-		if(length != map_size || !pBuffer || !new_cluster_map)
+		if(length != map_size || !pBuffer || !new_cluster_map){
+			InterlockedDecrement(&dx->working_rq);
 			return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
+		}
 		GetMap(pBuffer);
+		InterlockedDecrement(&dx->working_rq);
 		return CompleteIrp(Irp,STATUS_SUCCESS,map_size);
 	}
 
 	if(dx->stat_device){
 		DebugPrint2("-Ultradfg- Statistics request\n");
-		if(length != sizeof(STATISTIC) || !pBuffer)
+		if(length != sizeof(STATISTIC) || !pBuffer){
+			InterlockedDecrement(&dx->working_rq);
 			return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
+		}
 		st = (STATISTIC *)pBuffer;
 		st->filecounter = main_dx->filecounter;
 		st->dircounter = main_dx->dircounter;
@@ -263,9 +274,10 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 		st->current_operation = main_dx->current_operation;
 		st->clusters_to_move_initial = main_dx->clusters_to_move_initial;
 		st->clusters_to_move = main_dx->clusters_to_move;
+		InterlockedDecrement(&dx->working_rq);
 		return CompleteIrp(Irp,STATUS_SUCCESS,sizeof(STATISTIC));
 	}
-		
+	InterlockedDecrement(&dx->working_rq);		
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
 }
 
@@ -297,121 +309,187 @@ void wait_for_idle_state(UDEFRAG_DEVICE_EXTENSION *dx)
 	//KeBugCheckEx(0,(ULONG_PTR)dx->working_rq,0,0,0);
 }
 
+/* NOTE: always change state to busy */
+BOOLEAN is_device_busy(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	KIRQL oldIrql;
+
+	KeAcquireSpinLock(&dx->spin_lock,&oldIrql);
+	if(KeSetEvent(&dx->sync_event,IO_NO_INCREMENT,FALSE)){
+		DebugPrint1("-Ultradfg- is busy!\n");
+		KeReleaseSpinLock(&dx->spin_lock,oldIrql);
+		return TRUE;
+	}
+	KeReleaseSpinLock(&dx->spin_lock,oldIrql);
+	return FALSE;
+}
+/*
+void QueryEnvVariable(short *name, short *buffer, int bytes)
+{
+	UNICODE_STRING n, v;
+	NTSTATUS Status;
+	
+	RtlInitUnicodeString(&n,name);
+	v.Buffer = buffer;
+	v.Length = 0;
+	v.MaximumLength = bytes;
+	Status = RtlQueryEnvironmentVariable_U(NULL,&n,&v);
+	if(!NT_SUCCESS(Status))
+		DebugPrint("Can't query %ws environment variable: %x!",
+				name,(UINT)Status);
+}
+*/
+void ReloadSettings(void)
+{
+	short *b;
+	/* reload settings from environment variables */
+	b = AllocatePool(NonPagedPool,4097 * sizeof(short));
+	if(!b){
+		DbgPrintNoMem();
+		return;
+	}
+	ExFreePool(b);
+}
+
 /*
 * Write request handler.
 * Possible commands are:
-* 	aX   - analyse the X volume
-* 	dX   - defragment
-* 	cX   - compact
+* 	aX   - analyse the X volume -
+* 	dX   - defragment            | for main device
+* 	cX   - compact               |
+*   r    - reload settings      -
+*
+*   s    - stop                 =  for 'stop' device
 */
 NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 {
-	ULTRADFG_COMMAND cmd;
-	KIRQL oldIrql;
 	PIO_STACK_LOCATION IrpStack = IoGetCurrentIrpStackLocation(Irp);
 
 	UDEFRAG_DEVICE_EXTENSION *dx = \
 			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 	PVOID addr;
+	ULONG length;
+	UCHAR letter;
 	NTSTATUS request_status = STATUS_SUCCESS;
-	BOOLEAN request_is_successful;
+	char cmd[32]; /* FIXME: replace it with malloc call */
 
 	CHECK_IRP(Irp);
 
+	if(dx->stop_device){
+		DebugPrint("-Ultradfg- STOP request\n");
+		KeSetEvent(&dx->main_dx->stop_event,IO_NO_INCREMENT,FALSE);
+		return CompleteIrp(Irp,STATUS_SUCCESS,1);
+	}
+	
 	if(dx->second_device)
 		return CompleteIrp(Irp,STATUS_SUCCESS,0);
 	
 	DebugPrint("-Ultradfg- in Write_IRPhandler\n");
 	
-	/*
-	* If the previous request isn't complete,
-	* return STATUS_DEVICE_BUSY.
-	* Because the new one will change global variables.
-	*/
-	KeAcquireSpinLock(&dx->spin_lock,&oldIrql);
-	if(KeSetEvent(&dx->sync_event,IO_NO_INCREMENT,FALSE)){
-		DebugPrint1("-Ultradfg- is busy!\n");
-		KeReleaseSpinLock(&dx->spin_lock,oldIrql);
-		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
-	}
-	KeReleaseSpinLock(&dx->spin_lock,oldIrql);
-
 	if(KeReadStateEvent(&dx->unload_event) == 0x1){
 		DebugPrint1("-Ultradfg- is busy!\n");
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
 	InterlockedIncrement(&dx->working_rq);
-	
-	if(IrpStack->Parameters.Write.Length != sizeof(ULTRADFG_COMMAND))
-		goto invalid_request;
+
+	length = IrpStack->Parameters.Write.Length;
 #ifdef NT4_TARGET
 	addr = MmGetSystemAddressForMdl(Irp->MdlAddress);
 #else
 	addr = MmGetSystemAddressForMdlSafe(Irp->MdlAddress,NormalPagePriority);
 #endif
-	if(!addr) goto invalid_request;
-	RtlCopyMemory(&cmd,addr,sizeof(ULTRADFG_COMMAND));
-	DebugPrint("-Ultradfg- Command = %c%c\n",cmd.command,cmd.letter);
-	DebugPrint("-Ultradfg- Sizelimit = %I64u\n",cmd.sizelimit);
+	if(!length || !addr) goto invalid_request;
+	RtlCopyMemory(cmd,addr,min(length,31));
+	cmd[min(length,31)] = 0;
 
-	cmd.letter = (UCHAR)toupper((int)cmd.letter); /* important for nt 4.0 and w2k - bug #1771887 solution */
-	if(cmd.letter < 'A' || cmd.letter > 'Z'){
-		request_status = STATUS_INVALID_PARAMETER;
-		goto request_failure;
+	DebugPrint("-Ultradfg- Command = %s\n",cmd);
+
+	/*
+	* If the previous request isn't complete,
+	* return STATUS_DEVICE_BUSY.
+	* Because the new one will change global variables.
+	*/
+	if(is_device_busy(dx)){
+		InterlockedDecrement(&dx->working_rq);
+		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
-	
-	/* volume letters assigned by SUBST command are wrong */
 
-	dx->compact_flag = (cmd.command == 'c' || cmd.command == 'C') ? TRUE : FALSE;
-	dx->sizelimit = cmd.sizelimit;
-
-	request_is_successful = TRUE;
-	switch(cmd.command){
+	dx->compact_flag = FALSE;
+	switch(cmd[0]){
 	case 'a':
 	case 'A':
-		dx->letter = cmd.letter;
+		if(length < 2){
+			KeClearEvent(&dx->sync_event);
+			goto invalid_request;
+		}
+		/* important for nt 4.0 and w2k - bug #1771887 solution: */
+		letter = (UCHAR)toupper((int)cmd[1]);
+		/* validate letter */
+		if(letter < 'A' || letter > 'Z'){
+			KeClearEvent(&dx->sync_event);
+			goto invalid_request;
+		}
+		/* volume letters assigned by SUBST command are wrong... */
+		dx->letter = letter;
 		request_status = Analyse(dx);
-		if(NT_SUCCESS(request_status)) break;
-		if(KeReadStateEvent(&dx->stop_event) != 0x1)
-			request_is_successful = FALSE;
 		break;
 	case 'c':
 	case 'C':
+		dx->compact_flag = TRUE;
 	case 'd':
 	case 'D':
-		if(dx->status == STATUS_BEFORE_PROCESSING || \
-			dx->letter != cmd.letter)
-		{
-			dx->letter = cmd.letter;
-			request_status = Analyse(dx);
-			if(!NT_SUCCESS(request_status)){
-				if(KeReadStateEvent(&dx->stop_event) != 0x1)
-					request_is_successful = FALSE;
-				break;
-			}
-			if(KeReadStateEvent(&dx->stop_event) == 0x1)
-				break;
+		if(length < 2){
+			KeClearEvent(&dx->sync_event);
+			goto invalid_request;
 		}
-		if(!dx->compact_flag)
-			Defragment(dx);
-		else
-			DefragmentFreeSpace(dx);
+		/* important for nt 4.0 and w2k - bug #1771887 solution: */
+		letter = (UCHAR)toupper((int)cmd[1]);
+		/* validate letter */
+		if(letter < 'A' || letter > 'Z'){
+			KeClearEvent(&dx->sync_event);
+			goto invalid_request;
+		}
+		/* volume letters assigned by SUBST command are wrong... */
+		if(dx->status == STATUS_BEFORE_PROCESSING || \
+			dx->letter != letter)
+		{
+			dx->letter = letter;
+			request_status = Analyse(dx);
+			if(KeReadStateEvent(&dx->stop_event) == 0x1) break;
+			if(!NT_SUCCESS(request_status)) break;
+		}
+		request_status = STATUS_SUCCESS;
+		if(!dx->compact_flag) Defragment(dx);
+		else DefragmentFreeSpace(dx);
 		break;
-	//default:
-	//	goto invalid_request;
-	}
-	/* request completed */
-	KeClearEvent(&dx->sync_event);
-	if(request_is_successful){
+	case 'r':
+	case 'R':
+		ReloadSettings();
+		KeClearEvent(&dx->sync_event);
 		InterlockedDecrement(&dx->working_rq);
-		return CompleteIrp(Irp,STATUS_SUCCESS,sizeof(ULTRADFG_COMMAND));
+		return CompleteIrp(Irp,STATUS_SUCCESS,1);
+		break;
+	default:
+		KeClearEvent(&dx->sync_event);
+		goto invalid_request;
 	}
-request_failure:
-	dx->status = STATUS_BEFORE_PROCESSING;
-	InterlockedDecrement(&dx->working_rq);
-	return CompleteIrp(Irp,request_status,0);
-invalid_request:
+	/* a/d/c request completed */
 	KeClearEvent(&dx->sync_event);
+	/* if the operation was aborted by user then return success */
+	if(KeReadStateEvent(&dx->stop_event) == 0x1){
+		InterlockedDecrement(&dx->working_rq);
+		return CompleteIrp(Irp,STATUS_SUCCESS,length);
+	}
+	/* if the operation has unsuccessful result, clear the dx->status field */
+	if(!NT_SUCCESS(request_status)){
+		dx->status = STATUS_BEFORE_PROCESSING;
+		InterlockedDecrement(&dx->working_rq);
+		return CompleteIrp(Irp,request_status,0);
+	}
+	InterlockedDecrement(&dx->working_rq);
+	return CompleteIrp(Irp,STATUS_SUCCESS,length);
+
+invalid_request:
 	InterlockedDecrement(&dx->working_rq);
 	return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
 }
@@ -453,14 +531,11 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	UDEFRAG_DEVICE_EXTENSION *dx;
 	PIO_STACK_LOCATION IrpStack;
 	ULONG IoControlCode;
-	PSTATISTIC pst;
-	char *map;
 	short *filter;
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONG BytesTxd = 0;
 	REPORT_TYPE *rt;
 	UCHAR *user_mode_buffer; /* for nt 4.0 */
-	//PVOID in_buf, out_buf;
 	ULONG in_len, out_len;
 
 	CHECK_IRP(Irp);
@@ -481,42 +556,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	out_len = IrpStack->Parameters.DeviceIoControl.OutputBufferLength;
 
 	switch(IoControlCode){
-	case IOCTL_GET_STATISTIC:
-		DebugPrint("-Ultradfg- IOCTL_GET_STATISTIC\n");
-		pst = (PSTATISTIC)Irp->AssociatedIrp.SystemBuffer;
-		if(out_len != sizeof(STATISTIC) || !pst){
-			status = STATUS_INVALID_PARAMETER;
-			break;
-		}
-		pst->filecounter = dx->filecounter;
-		pst->dircounter = dx->dircounter;
-		pst->compressedcounter = dx->compressedcounter;
-		pst->fragmcounter = dx->fragmcounter;
-		pst->fragmfilecounter = dx->fragmfilecounter;
-		pst->free_space = dx->free_space;
-		pst->total_space = dx->total_space;
-		pst->mft_size = dx->mft_size;
-		pst->processed_clusters = dx->processed_clusters;
-		pst->bytes_per_cluster = dx->bytes_per_cluster;
-		pst->current_operation = dx->current_operation;
-		pst->clusters_to_move_initial = dx->clusters_to_move_initial;
-		pst->clusters_to_move = dx->clusters_to_move;
-		BytesTxd = sizeof(STATISTIC);
-		break;
-	case IOCTL_GET_CLUSTER_MAP:
-		DebugPrint("-Ultradfg- IOCTL_GET_CLUSTER_MAP\n");
-		map = (char *)Irp->AssociatedIrp.SystemBuffer;
-		if(out_len != map_size || !map || !new_cluster_map){
-			status = STATUS_INVALID_PARAMETER;
-			break;
-		}
-		GetMap(map);
-		BytesTxd = out_len;
-		break;
-	case IOCTL_ULTRADEFRAG_STOP:
-		DebugPrint("-Ultradfg- IOCTL_ULTRADEFRAG_STOP\n");
-		KeSetEvent(&dx->stop_event,IO_NO_INCREMENT,FALSE);
-		break;
 	case IOCTL_SET_INCLUDE_FILTER:
 	case IOCTL_SET_EXCLUDE_FILTER:
 		DebugPrint("-Ultradfg- IOCTL_SET_XXX_FILTER\n");
@@ -549,7 +588,7 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			break;
 		}
 		rt = (REPORT_TYPE *)Irp->AssociatedIrp.SystemBuffer;
-		dx->report_type.format = rt->format;
+		//dx->report_type.format = rt->format;
 		dx->report_type.type = rt->type;
 		BytesTxd = in_len;
 		break;
@@ -577,6 +616,16 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		status = AllocateMap(*((ULONG *)Irp->AssociatedIrp.SystemBuffer));
 		if(NT_SUCCESS(status))
 			BytesTxd = in_len;
+		break;
+	case IOCTL_SET_SIZELIMIT:
+		DebugPrint("-Ultradfg- IOCTL_SET_SIZELIMIT\n");
+		if(in_len != sizeof(ULONGLONG)){
+			status = STATUS_INVALID_PARAMETER;
+			break;
+		}
+		dx->sizelimit = *((ULONGLONG *)Irp->AssociatedIrp.SystemBuffer);
+		DebugPrint("-Ultradfg- Sizelimit = %I64u\n",dx->sizelimit);
+		BytesTxd = in_len;
 		break;
 	/* Invalid request */
 	default: status = STATUS_INVALID_DEVICE_REQUEST;
@@ -606,6 +655,8 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 	RtlInitUnicodeString(&us,L"\\DosDevices\\ultradfgmap");
 	IoDeleteSymbolicLink(&us);
 	RtlInitUnicodeString(&us,L"\\DosDevices\\ultradfgstat");
+	IoDeleteSymbolicLink(&us);
+	RtlInitUnicodeString(&us,L"\\DosDevices\\ultradfgstop");
 	IoDeleteSymbolicLink(&us);
 	DebugPrint("-Ultradfg- Symbolic links were deleted\n");
 

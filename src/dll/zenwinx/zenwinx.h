@@ -70,6 +70,8 @@ typedef struct _WINX_FILE {
 	LARGE_INTEGER woffset;
 } WINX_FILE, *PWINX_FILE;
 
+#define winx_fileno(f) (f->hFile)
+
 /* zenwinx functions prototypes */
 int  __stdcall winx_init(void *peb);
 void __stdcall winx_exit(int exit_code);

@@ -4,8 +4,7 @@ EXPORTS
 	udefrag_init@16
 	udefrag_unload@0
 	udefrag_get_options@0
-	udefrag_set_options@4
-	udefrag_update_settings@0
+	udefrag_reload_settings@8
 	udefrag_analyse@8
 	udefrag_defragment@8
 	udefrag_optimize@8

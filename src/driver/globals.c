@@ -68,7 +68,7 @@ void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx)
 	KeInitializeEvent(&dx->unload_event,NotificationEvent,FALSE);
 	memset(&dx->z_start,0,(LONG_PTR)&(dx->z0_end) - (LONG_PTR)&(dx->z_start));
 	dx->current_operation = 'A';
-	dx->report_type.format = ASCII_FORMAT;
+	//dx->report_type.format = ASCII_FORMAT;
 	dx->report_type.type = HTML_REPORT;
 	dx->pnextLcn = &dx->nextLcn;
 	dx->pmoveFile = &dx->moveFile;

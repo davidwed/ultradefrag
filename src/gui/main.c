@@ -141,7 +141,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(!busy_flag){
 				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),hWindow,(DLGPROC)NewSettingsDlgProc);
 				/* reload and apply settings */
-				if(udefrag_update_settings() < 0) udefrag_pop_error(NULL,0);
+				if(udefrag_reload_settings(0,NULL) < 0) udefrag_pop_error(NULL,0);
 				/* update the BootExecute parameter */
 				settings = udefrag_get_options();
 				GetSystemDirectory(cmd,MAX_PATH);

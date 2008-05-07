@@ -285,6 +285,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	int second_device;
 	int map_device;
 	int stat_device;
+	int stop_device;
 	struct _UDEFRAG_DEVICE_EXTENSION *main_dx;
 	UNICODE_STRING log_path;
 	/*

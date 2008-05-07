@@ -28,7 +28,7 @@
 #include <winioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h> /* for toupper() function for mingw */
+#include <ctype.h> /* for toupper() on mingw */
 #include "../../include/ntndk.h"
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
@@ -39,14 +39,11 @@ char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
 int native_mode_flag = FALSE;
 HANDLE init_event = NULL;
-HANDLE io_event = NULL; /* for write requests */
-HANDLE io2_event = NULL; /* for statistical data requests */
-HANDLE stop_event = NULL; /* for stop request */
-HANDLE map_event = NULL; /* for cluster map request */
 short driver_key[] = \
   L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 HANDLE udefrag_device_handle = NULL;
-WINX_FILE *f_map = NULL, *f_stat = NULL;
+WINX_FILE *f_ud = NULL;
+WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
 
 extern ud_options settings;
 
@@ -59,14 +56,12 @@ short error_message_w[ERR_MSG_SIZE];
 BOOL udefrag_send_command(unsigned char command,unsigned char letter);
 BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
 BOOL n_create_event(HANDLE *pHandle,short *name);
-BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
+BOOL n_ioctl(HANDLE handle,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
 			char *err_format_string);
-int __stdcall udefrag_load_settings(int argc, short **argv);
-int __stdcall udefrag_save_settings(void);
+int __stdcall udefrag_set_options(void);
 
-int getopts(char *filename);
 int get_configfile_location(void);
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
@@ -163,7 +158,6 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	UNICODE_STRING uStr;
 	NTSTATUS Status;
 	OBJECT_ATTRIBUTES ObjectAttributes;
-	IO_STATUS_BLOCK IoStatusBlock;
 	char buf[ERR_MSG_SIZE];
 
 	/* 0. only one instance of the program ! */
@@ -192,39 +186,28 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 		goto init_fail;
 	}
 	/* 3. Open our device */
-	RtlInitUnicodeString(&uStr,L"\\Device\\UltraDefrag");
-	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
-	Status = NtCreateFile(&udefrag_device_handle,
-				FILE_GENERIC_READ | FILE_GENERIC_WRITE/* | SYNCHRONIZE*/,
-			    &ObjectAttributes,&IoStatusBlock,NULL,0,
-			    FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,/*FILE_SYNCHRONOUS_IO_NONALERT*/ 0,NULL,0);
-	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't access ULTRADFG driver: %x!",(UINT)Status);
-		udefrag_device_handle = NULL;
-		goto init_fail;
-	}
+	f_ud = winx_fopen("\\Device\\UltraDefrag","w");
+	if(!f_ud) goto init_fail;
+	udefrag_device_handle = winx_fileno(f_ud);
+	/* FIXME: detailed error information. "Can't access ULTRADFG driver: %x!" */
 	f_map = winx_fopen("\\Device\\UltraDefragMap","r");
 	if(!f_map) goto init_fail;
 	f_stat = winx_fopen("\\Device\\UltraDefragStat","r");
 	if(!f_stat) goto init_fail;
-	/* 4. Create events */
-	if(!n_create_event(&io_event,L"\\udefrag_io")) goto init_fail;
-	if(!n_create_event(&io2_event,L"\\udefrag_io2")) goto init_fail;
-	if(!n_create_event(&stop_event,L"\\udefrag_stop")) goto init_fail;
-	if(!n_create_event(&map_event,L"\\udefrag_map")) goto init_fail;
+	f_stop = winx_fopen("\\Device\\UltraDefragStop","w");
+	if(!f_stop) goto init_fail;
 	/* 5. Set user mode buffer - nt 4.0 specific */
-	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_USER_MODE_BUFFER,
+	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_USER_MODE_BUFFER,
 		user_mode_buffer,0,NULL,0,
 		"Can't set user mode buffer: %x!")) goto init_fail;
 	/* 6. Set cluster map size */
-	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_CLUSTER_MAP_SIZE,
+	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_CLUSTER_MAP_SIZE,
 		&map_size,sizeof(long),NULL,0,
 		"Can't setup cluster map buffer: %x!")) goto init_fail;
 	/* 7a. */
 	if(get_configfile_location() < 0) goto init_fail;
 	/* 7b. Load settings */
-	udefrag_load_settings(argc,argv);
-	if(udefrag_set_options(&settings) < 0) goto init_fail;
+	if(udefrag_reload_settings(argc,argv) < 0) goto init_fail;
 	return 0;
 init_fail:
 	if(init_event){
@@ -271,14 +254,11 @@ int __stdcall udefrag_unload(void)
 	}
 	/* close events */
 	NtClose(init_event); init_event = NULL;
-	NtCloseSafe(io_event);
-	NtCloseSafe(io2_event);
-	NtCloseSafe(stop_event);
-	NtCloseSafe(map_event);
 	/* close device handle */
-	NtCloseSafe(udefrag_device_handle);
+	if(f_ud) winx_fclose(f_ud);
 	if(f_map) winx_fclose(f_map);
 	if(f_stat) winx_fclose(f_stat);
+	if(f_stop) winx_fclose(f_stop);
 	/* unload the driver */
 	RtlInitUnicodeString(&uStr,driver_key);
 	NtUnloadDriver(&uStr);
@@ -311,12 +291,6 @@ DWORD WINAPI send_command(LPVOID unused)
 
 BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc)
 {
-//LARGE_INTEGER o;
-//NTSTATUS Status;
-//IO_STATUS_BLOCK IoStatusBlock;
-//ULONG xyz;
-//WINX_FILE *f;
-
 	if(!sproc){
 		/* send command directly and return */
 		return udefrag_send_command(command,letter) ? TRUE : FALSE;
@@ -332,16 +306,6 @@ BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDA
 	*/
 	do {
 		winx_sleep(settings.update_interval);
-//o.QuadPart = 0;
-//Status = NtReadFile(udefrag_device_handle,NULL,
-//NULL,NULL,&IoStatusBlock,&xyz,sizeof(ULONG),&o,NULL);
-//f = winx_fopen("\\Device\\UltraDefragStat","r");
-//if(!f){
-//	winx_pop_error(NULL,0);
-//} else {
-//	winx_fread(&xyz,sizeof(ULONG),1,f);
-//	winx_fclose(f);
-//}
 		sproc(FALSE);
 	} while(!done_flag);
 	sproc(TRUE);
@@ -484,41 +448,23 @@ int __stdcall udefrag_stop(void)
 		winx_push_error("Udefrag.dll stop call without initialization!");
 		return (-1);
 	}
-	return n_ioctl(udefrag_device_handle,stop_event,
-		IOCTL_ULTRADEFRAG_STOP,NULL,0,NULL,0,
-		"Can't stop driver command: %x!") ? 0 : (-1);
+	/* FIXME: better error messages "Can't stop driver command: %x!" */
+	return winx_fwrite("s",1,1,f_stop) ? 0 : (-1);
 }
 
 BOOL udefrag_send_command(unsigned char command,unsigned char letter)
 {
-	ULTRADFG_COMMAND cmd;
-	LARGE_INTEGER offset;
-	NTSTATUS Status;
-	IO_STATUS_BLOCK IoStatusBlock;
+	char cmd[32];
 
 	if(!init_event){
 		winx_push_error("Udefrag.dll \'%c\' call without initialization!",command);
 		return FALSE;
 	}
-	cmd.command = command;
-	cmd.letter = letter;
-	cmd.sizelimit = settings.sizelimit;
-	offset.QuadPart = 0;
-	Status = NtWriteFile(udefrag_device_handle,NULL/*io_event*/,
-		NULL,NULL,&IoStatusBlock,
-		&cmd,sizeof(ULTRADFG_COMMAND),&offset,0);
-#if 1
-	if(Status == STATUS_PENDING){
-		Status = NtWaitForSingleObject(udefrag_device_handle/*io_event*/,FALSE,NULL);
-		if(NT_SUCCESS(Status)) Status = IoStatusBlock.Status;
-	}
-#endif
-	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){
-		winx_push_error("Can't execute driver command \'%c\' for volume %c: %x!",
-			command,letter,(UINT)Status);
-		return FALSE;
-	}
-	return TRUE;
+	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
+
+	/* FIXME: detailed error message! 
+	"Can't execute driver command \'%c\' for volume %c: %x!" */
+	return winx_fwrite(cmd,strlen(cmd),1,f_ud) ? TRUE : FALSE;
 }
 
 /****f* udefrag.common/udefrag_get_progress
@@ -551,9 +497,7 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 		goto get_progress_fail;
 	}
 
-//	if(!n_ioctl(udefrag_device_handle,io2_event,IOCTL_GET_STATISTIC,
-//		NULL,0,pstat,sizeof(STATISTIC),
-//		"Statistical data unavailable: %x!")) goto get_progress_fail;
+	/* FIXME: detailed error message! "Statistical data unavailable: %x!" */
 	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)) goto get_progress_fail;
 
 	if(percentage){ /* calculate percentage only if we have such request */
@@ -606,9 +550,8 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 		winx_push_error("Udefrag.dll get_map call without initialization!");
 		return (-1);
 	}
+	/* FIXME: detailed error message! "Cluster map unavailable: %x!" */
 	return winx_fread(buffer,size,1,f_map) ? 0 : (-1);
-//	return n_ioctl(udefrag_device_handle,map_event,IOCTL_GET_CLUSTER_MAP,
-//		NULL,0,buffer,(ULONG)size,"Cluster map unavailable: %x!") ? 0 : (-1);
 }
 
 /****f* udefrag.common/udefrag_get_default_formatted_results
@@ -678,7 +621,7 @@ BOOL n_create_event(HANDLE *pHandle,short *name)
 	return TRUE;
 }
 
-BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
+BOOL n_ioctl(HANDLE handle,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
 			char *err_format_string)
@@ -686,12 +629,12 @@ BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
 
-	Status = NtDeviceIoControlFile(handle,/*event*/NULL,
+	Status = NtDeviceIoControlFile(handle,NULL,
 				NULL,NULL,&IoStatusBlock,code,
 				in_buf,in_size,out_buf,out_size);
 	if(Status == STATUS_PENDING)
 	{
-		Status = NtWaitForSingleObject(handle/*event*/,FALSE,NULL);
+		Status = NtWaitForSingleObject(handle,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = IoStatusBlock.Status;
 	}
 	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){

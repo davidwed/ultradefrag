@@ -37,7 +37,7 @@
 extern int native_mode_flag;
 extern HANDLE udefrag_device_handle;
 extern HANDLE init_event;
-extern HANDLE io_event;
+extern WINX_FILE *f_ud;
 
 ud_options settings = \
 { \
@@ -76,20 +76,17 @@ int getopts(char *filename);
 
 char configfile[MAX_PATH] = "";
 
-extern BOOL n_ioctl(HANDLE handle,HANDLE event,ULONG code,
+extern BOOL n_ioctl(HANDLE handle,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
 			char *err_format_string);
 
 int get_configfile_location(void)
 {
-//	HANDLE hKey;
-//	int status;
 	NTSTATUS Status;
 	UNICODE_STRING name, us;
 	ANSI_STRING as;
 	short buf[MAX_PATH + 1];
-//	DWORD dwSize = sizeof(buf) - sizeof(short);
 
 	RtlInitUnicodeString(&name,L"SystemRoot");
 	us.Buffer = buf;
@@ -101,15 +98,7 @@ int get_configfile_location(void)
 		return -1;
 	}
 
-/*	if(winx_reg_open_key(L"\\REGISTRY\\MACHINE\\SYSTEM\\UltraDefrag",&hKey) < 0)
-		return -1;
-	status = winx_reg_query_value(hKey,L"WindowsDirectory",REG_SZ,buf,&dwSize);
-	winx_reg_close_key(hKey);
-	if(status < 0) return -1;
-
-	buf[dwSize / sizeof(short)] = 0;
-	RtlInitUnicodeString(&us,buf);
-*/	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
+	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
 		winx_push_error("No enough memory!");
 		return -1;
 	}
@@ -183,70 +172,91 @@ ud_options * __stdcall udefrag_get_options(void)
 	return &settings;
 }
 
-/****f* udefrag.settings/udefrag_set_options
-* NAME
-*    udefrag_set_options
-* SYNOPSIS
-*    error = udefrag_set_options(opts);
-* FUNCTION
-*    Sets the defragmenter options.
-* INPUTS
-*    opts - ud_options structure address
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    if(udefrag_set_options(opts) < 0){
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        // handle error
-*    }
-* SEE ALSO
-*    udefrag_get_options
-******/
-int __stdcall udefrag_set_options(ud_options *ud_opts)
+BOOLEAN SetEnvVariable(short *name, short *value)
+{
+	UNICODE_STRING n, v;
+	NTSTATUS status;
+
+	RtlInitUnicodeString(&n,name);
+	RtlInitUnicodeString(&v,value);
+	status = RtlSetEnvironmentVariable(NULL,&n,&v);
+	if(!NT_SUCCESS(status)){
+		winx_push_error("Can't set %ws environment variable: %x!",
+				name,(UINT)status);
+		return FALSE;
+	}
+	return TRUE;
+}
+
+int __stdcall udefrag_set_options()
 {
 	REPORT_TYPE rt;
+//	short b[128];
 
 	if(!init_event){
 		winx_push_error("Udefrag.dll apply_settings call without initialization!");
 		goto apply_settings_fail;
 	}
-	if(ud_opts != &settings)
-		memcpy(&settings,ud_opts,sizeof(ud_options));
+/*
+	swprintf(b,L"%u",settings.dbgprint_level);
+	if(!SetEnvVariable(L"UD_DBGLEVEL",b)) goto apply_settings_fail;
+	swprintf(b,L"%I64u",settings.sizelimit);
+	if(!SetEnvVariable(L"UD_SIZELIMIT",b)) goto apply_settings_fail;
+	swprintf(b,L"%u",settings.report_type);
+	if(!SetEnvVariable(L"UD_REPORTTYPE",b)) goto apply_settings_fail;
+	if(native_mode_flag){
+		if(!SetEnvVariable(L"UD_INCLUDE",settings.boot_in_filter)) goto apply_settings_fail;
+		if(!SetEnvVariable(L"UD_EXCLUDE",settings.boot_ex_filter)) goto apply_settings_fail;
+	} else {
+		if(!SetEnvVariable(L"UD_INCLUDE",settings.in_filter)) goto apply_settings_fail;
+		if(!SetEnvVariable(L"UD_EXCLUDE",settings.ex_filter)) goto apply_settings_fail;
+	}
+*/	/* FIXME: detailed error message! */
+//	return winx_fwrite("r",1,1,f_ud) ? 0 : (-1);
+
+#if 1	
 	/* set debug print level */
-	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_DBGPRINT_LEVEL,
+	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_DBGPRINT_LEVEL,
 		&settings.dbgprint_level,sizeof(DWORD),NULL,0,
 		"Can't set debug print level: %x!")) goto apply_settings_fail;
+	/* set sizelimit */
+	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_SIZELIMIT,
+		&settings.sizelimit,sizeof(ULONGLONG),NULL,0,
+		"Can't set size limit: %x!")) goto apply_settings_fail;
 	/* set report characterisics */
 	rt.type = settings.report_type;
-	if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_REPORT_TYPE,
+	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_REPORT_TYPE,
 		&rt,sizeof(REPORT_TYPE),NULL,0,
 		"Can't set report type: %x!")) goto apply_settings_fail;
 	/* set filters */
 	if(native_mode_flag){
-		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_INCLUDE_FILTER,
 			settings.boot_in_filter,(wcslen(settings.boot_in_filter) + 1) << 1,NULL,0,
 			"Can't set include filter: %x!")) goto apply_settings_fail;
-		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_EXCLUDE_FILTER,
 			settings.boot_ex_filter,(wcslen(settings.boot_ex_filter) + 1) << 1,NULL,0,
 			"Can't set exclude filter: %x!")) goto apply_settings_fail;
 	} else {
-		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_INCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_INCLUDE_FILTER,
 			settings.in_filter,(wcslen(settings.in_filter) + 1) << 1,NULL,0,
 			"Can't set include filter: %x!")) goto apply_settings_fail;
-		if(!n_ioctl(udefrag_device_handle,io_event,IOCTL_SET_EXCLUDE_FILTER,
+		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_EXCLUDE_FILTER,
 			settings.ex_filter,(wcslen(settings.ex_filter) + 1) << 1,NULL,0,
 			"Can't set exclude filter: %x!")) goto apply_settings_fail;
 	}
+
+
 	return 0;
+#endif
 apply_settings_fail:
 	return (-1);
 }
 
-/****f* udefrag.settings/udefrag_update_settings
+/****f* udefrag.settings/udefrag_reload_settings
 * NAME
-*    udefrag_update_settings
+*    udefrag_reload_settings
 * SYNOPSIS
-*    error = udefrag_update_settings();
+*    error = udefrag_reload_settings();
 * FUNCTION
 *    Reloads settings and applies them.
 * INPUTS
@@ -254,17 +264,15 @@ apply_settings_fail:
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_update_settings() < 0){
+*    if(udefrag_reload_settings(argc,argv) < 0){
 *        udefrag_pop_error(buffer,sizeof(buffer));
 *        // handle error
 *    }
-* SEE ALSO
-*    udefrag_set_options
 ******/
-int __stdcall udefrag_update_settings(void)
+int __stdcall udefrag_reload_settings(int argc, short **argv)
 {
-	udefrag_load_settings(0,NULL);
-	return udefrag_set_options(&settings);
+	udefrag_load_settings(argc,argv);
+	return udefrag_set_options();
 }
 
 void ExtractToken(short *dest, short *src, int max_chars)
