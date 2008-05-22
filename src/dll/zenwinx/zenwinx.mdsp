@@ -103,7 +103,6 @@ extraResourceOptions=
 [History]
 volume.c,5675
 error.c,4911
-file.c,2390
 privilege.c,2499
 mem.c,2026
 keytrans.c,2208
@@ -111,4 +110,5 @@ zenwinx.c,1034
 thread.c,1025
 stdio.c,1734
 ntndk.h,12978
-zenwinx.h,1618
+zenwinx.h,2143
+file.c,2936

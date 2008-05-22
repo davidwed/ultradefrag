@@ -240,7 +240,7 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 #ifdef NT4_TARGET
 	pBuffer = MmGetSystemAddressForMdl(Irp->MdlAddress);
 #else
-	pBuffer = (ULONG *)MmGetSystemAddressForMdlSafe(Irp->MdlAddress,NormalPagePriority);
+	pBuffer = (char *)MmGetSystemAddressForMdlSafe(Irp->MdlAddress,NormalPagePriority);
 #endif
 
 	if(dx->map_device){
