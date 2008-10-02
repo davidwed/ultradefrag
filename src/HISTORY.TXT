@@ -2,7 +2,7 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 1.4.0 (22.5)   2008-10-01
+  Version 1.4.0 (22.5)   2008-10-02
   ------------------------------------------------------------------------------
     - i18n support was added
     - gui program was translated into Hungarian and Russian languages
