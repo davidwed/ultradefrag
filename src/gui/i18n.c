@@ -140,7 +140,17 @@ void AddResourceEntry()
 
 void BuildResourceTable(void)
 {
-	FILE *f = fopen(".\\ud_i18n.lng","rb");
+	/*
+	* When a portable app launches gui 
+	* the current directory points to a temp dir.
+	*/
+	//FILE *f = fopen(".\\ud_i18n.lng","rb");
+	char buf[MAX_PATH];
+	FILE *f;
+	
+	GetWindowsDirectory(buf,MAX_PATH);
+	strcat(buf,"\\UltraDefrag\\ud_i18n.lng");
+	f = fopen(buf,"rb");
 	if(!f) return;
 	while(fgetws(line_buffer,sizeof(line_buffer) / sizeof(short),f)){
 		line_buffer[sizeof(line_buffer) / sizeof(short) - 1] = 0;

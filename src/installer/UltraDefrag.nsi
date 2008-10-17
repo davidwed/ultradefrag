@@ -68,8 +68,6 @@ Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
 OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
 
 LicenseData "${ROOTDIR}\src\LICENSE.TXT"
-;InstallDir "$PROGRAMFILES64\UltraDefrag"
-;InstallDirRegKey HKLM "Software\DASoft\NTDefrag" "Install_Dir"
 ShowInstDetails show
 ShowUninstDetails show
 
@@ -125,6 +123,10 @@ Var ShowBootsplash
 Var IsInstalled
 Var LanguagePack
 
+; 1 when an installer was loaded in silent mode by portable application
+; 0 otherwise
+Var PortableInstallationFlag
+
 Function .onInit
 
   push $R0
@@ -161,6 +163,7 @@ Function .onInit
   StrCpy $ShowBootsplash 1
   StrCpy $IsInstalled 0
   StrCpy $LanguagePack "English"
+  StrCpy $PortableInstallationFlag 0
 
   ClearErrors
   ReadRegStr $R0 HKLM \
@@ -192,7 +195,17 @@ winnt_56:
 not_installed:
   /* portable package? */
   ; if silent key specified than continue installation
-  IfSilent init_ok
+  IfSilent 0 portable_check
+  IfFileExists "$EXEDIR\PORTABLE.X" 0 init_ok
+  StrCpy $PortableInstallationFlag 1
+  ; TODO: read an installation language name from the PORTABLE.X file
+  ; describe in manual format of this file
+  ClearErrors
+  ReadINIStr $R0 "$EXEDIR\PORTABLE.X" "i18n" "Language"
+  IfErrors init_ok 0
+  StrCpy $LanguagePack $R0
+  goto init_ok
+portable_check:
   IfFileExists "$EXEDIR\PORTABLE.X" 0 init_ok
   StrCpy $RunPortable 1
   ReadINIStr $ShowBootsplash "$EXEDIR\PORTABLE.X" "Bootsplash" "Show"
@@ -308,10 +321,32 @@ FunctionEnd
 Function PortableRun
 
 ;;!insertmacro DisableX64FSRedirection
+  ; make a backup copy of all installed configuration files
+  Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
+  Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
+  Rename "$INSTDIR\options\udefrag.cfg" "$INSTDIR\options\udefrag.cfg.bak"
+  Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
   ; perform silent installation
   ExecWait '"$EXEPATH" /S'
+  ; replace configuration files with files contained in portable directory
+  CopyFiles /SILENT "$EXEDIR\guiopts.lua" "$INSTDIR\options"
+  CopyFiles /SILENT "$EXEDIR\udreportopts.lua" "$INSTDIR\options"
+  CopyFiles /SILENT "$EXEDIR\udefrag.cfg" "$INSTDIR\options"
   ; start ultradefrag gui
   ExecWait "$INSTDIR\dfrg.exe"
+  ; move configuration files to portable directory
+  Delete "$EXEDIR\guiopts.lua"
+  Delete "$EXEDIR\udreportopts.lua"
+  Delete "$EXEDIR\udefrag.cfg"
+  Rename "$INSTDIR\options\guiopts.lua" "$EXEDIR\guiopts.lua"
+  Rename "$INSTDIR\options\udefrag.cfg" "$EXEDIR\udefrag.cfg"
+  Rename "$INSTDIR\options\udreportopts.lua" "$EXEDIR\udreportopts.lua"
+  ; restore all original configuration files
+  Rename "$INSTDIR\options\guiopts.lua.bak" "$INSTDIR\options\guiopts.lua"
+  Rename "$INSTDIR\options\udefrag.cfg.bak" "$INSTDIR\options\udefrag.cfg"
+  Rename "$INSTDIR\options\udreportopts.lua.bak" "$INSTDIR\options\udreportopts.lua"
+  Delete "$INSTDIR\ud_i18n.lng"
+  Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
   ; uninstall if necessary
   StrCmp $IsInstalled '1' portable_done 0
   ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
@@ -389,19 +424,6 @@ Section "Ultra Defrag core files (required)" SecCore
   IfFileExists "$INSTDIR\options\udreportopts.lua" skip_opts 0
   File "${ROOTDIR}\src\scripts\udreportopts.lua"
 skip_opts:
-  ;;File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
-  SetOutPath "$INSTDIR\doc"
-  ;File "${ROOTDIR}\doc\html\about.html"
-  ;File "${ROOTDIR}\doc\html\about_simple.html"
-
-  ; save %windir% path
-;;  ClearErrors
-;;  WriteRegStr HKLM "SYSTEM\UltraDefrag" "WindowsDirectory" $WINDIR
-;;  IfErrors 0 L10
-;;  MessageBox MB_OK|MB_ICONEXCLAMATION \
-;;   "Can't save %windir% in registry!" \
-;;   /SD IDOK
-;;L10:
 
   ; install LanguagePack pack
   SetOutPath $INSTDIR
@@ -423,12 +445,17 @@ langpack_installed:
   DetailPrint "Install driver..."
   call install_driver
 
-  DetailPrint "Install boot time defragger..."
   SetOutPath "$SYSDIR"
+  DetailPrint "Install DLL's..."
   File "udefrag.dll"
   File "zenwinx.dll"
+
+  StrCmp $PortableInstallationFlag '1' skip_boot_time_inst 0
+  DetailPrint "Install boot time defragger..."
   File "defrag_native.exe"
   File "bootexctrl.exe"
+skip_boot_time_inst:
+
   DetailPrint "Install console interface..."
   File "udefrag.exe"
 
@@ -571,12 +598,16 @@ SectionEnd
 
 Section "Scheduler.NET" SecSchedNET
 
+  StrCmp $PortableInstallationFlag '1' L10 0
+
 !insertmacro DisableX64FSRedirection
   DetailPrint "Install Scheduler.NET..."
   SetOutPath $INSTDIR
   File "UltraDefragScheduler.NET.exe"
   StrCpy $SchedulerNETinstalled 1
 !insertmacro EnableX64FSRedirection
+
+L10:
 
 SectionEnd
 
@@ -601,6 +632,7 @@ SectionEnd
 
 Section "Portable UltraDefrag package" SecPortable
 
+  StrCmp $PortableInstallationFlag '1' L20 0
   push $R0
   
 !insertmacro DisableX64FSRedirection
@@ -608,18 +640,24 @@ Section "Portable UltraDefrag package" SecPortable
   StrCpy $R0 "$INSTDIR\portable_${ULTRADFGARCH}_package"
   CreateDirectory $R0
   CopyFiles /SILENT $EXEPATH $R0 200
+  CopyFiles /SILENT "$INSTDIR\options\*.*" $R0
   WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
+  WriteINIStr "$R0\PORTABLE.X" "i18n" "Language" $LanguagePack
   WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
     "Put this directory contents to your USB drive and enjoy!"
   StrCpy $PortableInstalled 1
 !insertmacro EnableX64FSRedirection
 
   pop $R0
-  
+
+L20:
+
 SectionEnd
 
 Section "Context menu handler" SecContextMenuHandler
 
+  StrCmp $PortableInstallationFlag '1' L30 0
+  
   WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
 !if ${ULTRADFGARCH} == 'i386'
   WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
@@ -629,9 +667,13 @@ Section "Context menu handler" SecContextMenuHandler
   WriteRegStr HKCR "Drive\shell\udefrag\command" "" "lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
 !endif
 
+L30:
+
 SectionEnd
 
 Section "Shortcuts" SecShortcuts
+
+  StrCmp $PortableInstallationFlag '1' L40 0
 
   push $R0
   AddSize 5
@@ -640,7 +682,7 @@ Section "Shortcuts" SecShortcuts
   DetailPrint "Install shortcuts..."
   SetShellVarContext all
   SetOutPath $INSTDIR
-  StrCpy $R0 "$SMPROGRAMS\DASoft\UltraDefrag"
+  StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
   CreateShortCut "$R0\UltraDefrag.lnk" \
    "$INSTDIR\Dfrg.exe"
@@ -674,7 +716,9 @@ no_portable:
 !insertmacro EnableX64FSRedirection
 
   pop $R0
-  
+
+L40:
+
 SectionEnd
 
 Section "Uninstall"
@@ -684,8 +728,9 @@ Section "Uninstall"
 
   DetailPrint "Remove shortcuts..."
   SetShellVarContext all
-  RMDir /r "$SMPROGRAMS\DASoft\UltraDefrag"
-  RMDir "$SMPROGRAMS\DASoft"
+  RMDir /r "$SMPROGRAMS\UltraDefrag"
+  ; remove shortcuts of any previous version of the program
+  RMDir /r "$SMPROGRAMS\DASoft"
   Delete "$DESKTOP\UltraDefrag.lnk"
   Delete "$QUICKLAUNCH\UltraDefrag.lnk"
 
@@ -736,12 +781,21 @@ Section "Uninstall"
 
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+  ; this is important for portable application
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
   ; remove settings of previous versions
   ;DeleteRegKey HKCU "SOFTWARE\DASoft\NTDefrag"
   ;DeleteRegKey /ifempty HKCU "Software\DASoft"
   ;DeleteRegKey HKLM "Software\DASoft\NTDefrag"
   ;DeleteRegKey /ifempty HKLM "Software\DASoft"
-  
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
+  DeleteRegKey HKLM "SYSTEM\ControlSet001\Control\UltraDefrag"
+  DeleteRegKey HKLM "SYSTEM\ControlSet002\Control\UltraDefrag"
+  DeleteRegKey HKLM "SYSTEM\ControlSet003\Control\UltraDefrag"
+
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"
   DeleteRegKey HKCR "LuaReport"

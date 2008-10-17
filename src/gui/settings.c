@@ -31,6 +31,9 @@ char buffer[MAX_PATH];
 
 BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
+	/* When a portable app launches gui the current directory points to a temp dir. */
+	char buf[MAX_PATH];
+	
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
@@ -43,13 +46,20 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_EDITMAINOPTS:
-			ShellExecute(hWindow,"open",".\\options\\udefrag.cfg",NULL,NULL,SW_SHOW);
+			GetWindowsDirectory(buf,MAX_PATH);
+			strcat(buf,"\\UltraDefrag\\options\\udefrag.cfg");
+			//ShellExecute(hWindow,"open",".\\options\\udefrag.cfg",NULL,NULL,SW_SHOW);
+			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_EDITREPORTOPTS:
-			ShellExecute(hWindow,"open",".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
+			GetWindowsDirectory(buf,MAX_PATH);
+			strcat(buf,"\\UltraDefrag\\options\\udreportopts.lua");
+			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_SETTINGS_HELP:
-			ShellExecute(hWindow,"open",".\\doc\\manual.html",NULL,NULL,SW_SHOW);
+			GetWindowsDirectory(buf,MAX_PATH);
+			strcat(buf,"\\UltraDefrag\\doc\\manual.html");
+			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
 			break;
 		}
 		return FALSE;
