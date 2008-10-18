@@ -196,7 +196,7 @@ int __cdecl wmain(int argc, short **argv)
 	if(!b_flag)
 		settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf(VERSIONINTITLE " console interface\n"
-	      "Copyright (c) Dmitri Arkhangelski, 2007.\n\n");
+	      "Copyright (c) Dmitri Arkhangelski, 2007,2008.\n\n");
 	/* handle unknown option and help request */
 	if(unknown_option) HandleError(unk_opt,1);
 	if(h_flag) show_help();
