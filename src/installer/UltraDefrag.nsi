@@ -414,8 +414,6 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\INSTALL.TXT"
   File "${ROOTDIR}\src\README.TXT"
   File "${ROOTDIR}\src\FAQ.TXT"
-  File "${ROOTDIR}\src\installer\boot_on.cmd"
-  File "${ROOTDIR}\src\installer\boot_off.cmd"
   SetOutPath "$INSTDIR\scripts"
   File "${ROOTDIR}\src\scripts\udctxhandler.lua"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
@@ -454,6 +452,8 @@ langpack_installed:
   DetailPrint "Install boot time defragger..."
   File "defrag_native.exe"
   File "bootexctrl.exe"
+  File "${ROOTDIR}\src\installer\boot-on.cmd"
+  File "${ROOTDIR}\src\installer\boot-off.cmd"
 skip_boot_time_inst:
 
   DetailPrint "Install console interface..."
@@ -744,8 +744,11 @@ Section "Uninstall"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
   Delete "$INSTDIR\FAQ.TXT"
+
+  ; delete two scripts from the 1.4.0 version
   Delete "$INSTDIR\boot_on.cmd"
   Delete "$INSTDIR\boot_off.cmd"
+
   Delete "$INSTDIR\scripts\udctxhandler.lua"
   Delete "$INSTDIR\scripts\udreportcnv.lua"
   Delete "$INSTDIR\scripts\udsorting.js"
@@ -767,6 +770,8 @@ Section "Uninstall"
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
+  Delete "$SYSDIR\boot-on.cmd"
+  Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\udefrag.exe"

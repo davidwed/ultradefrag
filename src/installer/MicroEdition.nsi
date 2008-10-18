@@ -198,18 +198,21 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\INSTALL.TXT"
   File "${ROOTDIR}\src\README.TXT"
   File "${ROOTDIR}\src\FAQ.TXT"
-  File "${ROOTDIR}\src\installer\boot_on.cmd"
-  File "${ROOTDIR}\src\installer\boot_off.cmd"
 
   DetailPrint "Install driver..."
   call install_driver
 
-  DetailPrint "Install boot time defragger..."
   SetOutPath "$SYSDIR"
+  DetailPrint "Install DLL's..."
   File "udefrag.dll"
   File "zenwinx.dll"
+
+  DetailPrint "Install boot time defragger..."
   File "defrag_native.exe"
   File "bootexctrl.exe"
+  File "${ROOTDIR}\src\installer\boot-on.cmd"
+  File "${ROOTDIR}\src\installer\boot-off.cmd"
+
   DetailPrint "Install console interface..."
   File "udefrag.exe"
 
@@ -291,8 +294,11 @@ Section "Uninstall"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
   Delete "$INSTDIR\FAQ.TXT"
+
+  ; delete two scripts from the 1.4.0 version
   Delete "$INSTDIR\boot_on.cmd"
   Delete "$INSTDIR\boot_off.cmd"
+  
   RMDir "$INSTDIR\options"
   Delete "$INSTDIR\uninstall.exe"
   RMDir $INSTDIR
@@ -301,6 +307,8 @@ Section "Uninstall"
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
+  Delete "$SYSDIR\boot-on.cmd"
+  Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\udefrag.exe"
