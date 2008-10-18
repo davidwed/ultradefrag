@@ -121,8 +121,8 @@ call it from the command line or run box.</p>
 Microsoft Windows XP [5.1.2600]
 (C) Microsoft Corporation, 1985-2001.
 
-C:\>udefrag -a c:</div><div style="color: #00FF00">UltraDefrag v1.1.0 console interface
-Copyright (c) Dmitri Arkhangelski, 2007.
+C:\>udefrag -a c:</div><div style="color: #00FF00">UltraDefrag v1.4.1 console interface
+Copyright (c) Dmitri Arkhangelski, 2007,2008.
 
 
 Volume information:
@@ -158,6 +158,7 @@ The default settings are set at compile time.</p>
 <li><b>-d[0-3]</b> Set debug level: 0 Normal, 1 Detailed, 2 Paranoid</li>
 <li><b>-b</b> Use default color scheme</li>
 </ul>
+<p>Note that <b>-i</b> and <b>-e</b> parameters should be maximum 4096 characters long.</p>
 <p>Specifying just the drive letter will cause UltraDefrag
 to defragment the drive. When the operation finishes or you stop the
 program with a Ctrl+C, the program will display the results to the
@@ -188,7 +189,7 @@ Microsoft Windows XP [5.1.2600]
 (C) Microsoft Corporation, 1985-2001.
 
 C:\>udefrag -l</div><div style="color: #00FF00">UltraDefrag v1.4.0 console interface
-Copyright (c) Dmitri Arkhangelski, 2007.</div><div style="color: #FFFF00">
+Copyright (c) Dmitri Arkhangelski, 2007,2008.</div><div style="color: #FFFF00">
 Volumes available for defragmentation:
 
 C:      NTFS      3.92 Gb        6 %
@@ -349,10 +350,9 @@ is loaded after the native executable runs.</p>
 <ul type="disc"><li>Press 'Settings' button in GUI, then edit main options. 
 When you close the Settings dialog, boot time options will be set.</li>
 <li>As an alternative you can edit <a href="#cfgfile">udefrag.cfg</a> file 
-outside the GUI and use boot_on.cmd/boot_off.cmd scripts to enable/disable 
-boot time defragger. These scripts are located in UltraDefrag's installation 
-directory (currently <span class="path">%windir%\UltraDefrag</span>). Just click 
-the icons to run them.</li>
+outside the GUI. Type in command prompt <span class="path">bt-on</span> to enable 
+the boot time defragmantation feature and <span class="path">bt-off</span> to disable 
+them.</li>
 </ul>
 </p>
 <h1 class="western">The Report</h1>
@@ -392,6 +392,46 @@ UltraDefrag is simplified throuth a utility called UltraDefrag
 Scheduler.NET. This small application requires Microsoft .NET Framework 2.0 to run. The simple gui has 4 settings. </p>
 <p><img style="width: 248px; height: 157px;" alt="UltraDefrag Scheduler.NET" src="images/sched_net_vista.png"></p>
 <ol><li>Whether to run Ultra Defrag every day (Daily) or only certain days of the week (Weekly).</li><li>The time of day to run the task.</li><li>The drive letter to scan.</li><li>Days of the week to defrag if Weekly is selected.</li></ol>
+
+<h1 class="western">Portable UltraDefrag</h1>
+
+<p>Portable package was made especially for people who wants to launch UltraDefrag from USB-flash without 
+an installation. If you have selected a portable app to be installed, the installer will write all needed files 
+into one directory on your hard drive. To get access to that directory use shortcut <br />
+<span class="path">Start -> Programs -> UltraDefrag -> Portable package</span>. 
+Or find it manually in <span class="path">%windir%\UltraDefrag</span>. Place all files contained there 
+on any removable media, p.a. on your USB-flash. Than you can run UltraDefrag on any compatible 
+computer without an installation. <a href="http://en.wikipedia.org/wiki/Portable_application">Here</a> 
+is more information about portable applications.</p>
+
+<p>There is one configuration file used by portable application. Here you can specify some options, 
+most useful is a language definition. The file has a <span class="path">PORTABLE.X</span> name. The 
+complete example is here:</p>
+
+<pre style="border: 1px solid black; color: black; 
+background-color: #ffffe1; font-size: 10pt;">
+[Bootsplash]
+Show=1
+[i18n]
+Language=Hungarian
+</pre>
+
+<p>Set <span class="path">Show=0</span> in the <span class="path">[Bootsplash]</span> section to 
+disable bootsplash on startup.</p>
+
+<p>Set <span class="path">Language=LanguageName</span> to choose your preferred language to be used by 
+portable GUI. Available languages are: <span class="path">English, Hungarian, Russian</span>.</p>
+
+<h1 class="western">UltraDefrag Micro Edition</h1>
+
+<p>The UltraDefrag Micro Edition is a special package for advanced users appreciating 
+extreme stability and power. This edition is much faster, much stable (it's driver contains just 
+most important parts). It has only console interface to speed up defragmentation process. 
+Boot-time feature is available too.</p>
+
+<p>Note that console interface is very powerful, it has a full set of commands to perform any disk
+defragmentation job.</p>
+
 <h1 class="western">Configuration files</h1>
 <h2 name="cfgfile" id="cfgfile">Main options</h2>
 <p>They are stored in <span class="path">udefrag.cfg</span> file located in 
@@ -480,6 +520,10 @@ DBGPRINT_LEVEL      = NORMAL
 MAP_UPDATE_INTERVAL = 500
 
 </pre>
+
+<p>The following options are obsolete: <span class="path">NEXT_BOOT</span>. They does not take any 
+effect in the current version of the program.</p>
+
 <h2 name="reportopts" id="reportopts">Report options</h2>
 <p>They are stored in <span class="path">udreportopts.lua</span> file located in 
 <span class="path">%windir%\UltraDefrag\options</span> 

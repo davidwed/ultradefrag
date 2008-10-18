@@ -2,6 +2,14 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 1.4.1 (22.5)   2008-10-
+  ------------------------------------------------------------------------------
+    - UltraDefrag Micro Edition package was added
+    - a lot of portable application bugs were fixed
+    - gui program was translated into the following languages:
+      
+
+
   Version 1.4.0 (22.5)   2008-10-02
   ------------------------------------------------------------------------------
     - i18n support was added

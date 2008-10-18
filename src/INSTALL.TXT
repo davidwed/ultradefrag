@@ -224,3 +224,6 @@ c). To build UltraDefrag use the BUILD.CMD script; parameters are:
     build --clean       use it to delete all intermediate files
 
     build --help        show usage information and exit
+
+d). To build UltraDefrag Micro Edition package use the build-micro.cmd scipt.
+    It has the same options that build.cmd has.
