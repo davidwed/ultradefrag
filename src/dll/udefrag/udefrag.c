@@ -37,7 +37,7 @@
 /* global variables */
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
-int native_mode_flag = FALSE;
+//int native_mode_flag = FALSE;
 HANDLE init_event = NULL;
 short driver_key[] = \
   L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
@@ -161,7 +161,7 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	char buf[ERR_MSG_SIZE];
 
 	/* 0. only one instance of the program ! */
-	native_mode_flag = native_mode;
+//	native_mode_flag = native_mode;
 	/* 1. Enable neccessary privileges */
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) goto init_fail;*/
 	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) goto init_fail;

@@ -51,6 +51,7 @@
 *		winx_gets
 *		winx_init
 *		winx_kbhit
+*		winx_get_windows_directory
 */
 
 #ifndef max
@@ -103,6 +104,7 @@ void __stdcall winx_restore_error(char *buffer);
 
 void __stdcall winx_sleep(int msec);
 int  __stdcall winx_get_os_version(void);
+int  __stdcall winx_get_windows_directory(char *buffer, int length);
 int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
 
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);

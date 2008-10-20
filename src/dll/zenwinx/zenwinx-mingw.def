@@ -22,6 +22,7 @@ EXPORTS
 	winx_restore_error@4
 	winx_sleep@4
 	winx_get_os_version@0
+	winx_get_windows_directory@8
 	winx_get_proc_address@12
 	winx_create_thread@8
 	winx_exit_thread@0

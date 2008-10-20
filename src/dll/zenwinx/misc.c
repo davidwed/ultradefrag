@@ -98,3 +98,59 @@ int __stdcall winx_get_os_version(void)
 	func_RtlGetVersion(&ver);
 	return (ver.dwMajorVersion * 10 + ver.dwMinorVersion);
 }
+
+/****f* zenwinx.misc/winx_get_windows_directory
+* NAME
+*    winx_get_windows_directory
+* SYNOPSIS
+*    error = winx_get_windows_directory(buffer, length);
+* FUNCTION
+*    Returns %windir% path. In native form, as follows: \??\C:\WINDOWS
+* INPUTS
+*    buffer - pointer to the buffer to receive
+*             the null-terminated path.
+*    length - length of the buffer, usually equal to MAX_PATH.
+* RESULT
+*    If the function succeeds, the return value is zero.
+*    Otherwise - negative value.
+* EXAMPLE
+*    if(winx_get_windows_directory(buffer,sizeof(buffer)) < 0){
+*        winx_pop_error(NULL,0);
+*        // something is wrong...
+*    }
+* NOTES
+*    Buffer should be at least MAX_PATH characters long.
+******/
+int __stdcall winx_get_windows_directory(char *buffer, int length)
+{
+	NTSTATUS Status;
+	UNICODE_STRING name, us;
+	ANSI_STRING as;
+	short buf[MAX_PATH + 1];
+
+	if(!buffer || length <= 0){
+		winx_push_error("Invalid parameter!");
+		return (-1);
+	}
+
+	RtlInitUnicodeString(&name,L"SystemRoot");
+	us.Buffer = buf;
+	us.Length = 0;
+	us.MaximumLength = MAX_PATH * sizeof(short);
+	Status = RtlQueryEnvironmentVariable_U(NULL,&name,&us);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't query SystemRoot variable: %x!",(UINT)Status);
+		return -1;
+	}
+
+	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
+		winx_push_error("No enough memory!");
+		return -1;
+	}
+
+	strcpy(buffer,"\\??\\");
+	strncat(buffer,as.Buffer,length - strlen(buffer) - 1);
+	buffer[length - 1] = 0; /* important ? */
+	RtlFreeAnsiString(&as);
+	return 0;
+}

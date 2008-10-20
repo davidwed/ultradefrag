@@ -269,8 +269,9 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
 #else
-	if(settings->next_boot || settings->every_boot){
+//	if(settings->next_boot || settings->every_boot){
 		/* do scheduled job and exit */
+#if 0
 		if(!settings->sched_letters)
 			HandleError(L"No letters specified!",3);
 		if(!settings->sched_letters[0])
@@ -283,7 +284,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 			if(abort_flag) break;
 		}
 		HandleError(L"",0);
-	}
+#endif		
+//	}
 #endif
 	/* 8b. Command Loop */
 	while(1){

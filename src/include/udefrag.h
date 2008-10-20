@@ -53,17 +53,17 @@
 #endif
 
 typedef struct _ud_options {
-	short *in_filter;
-	short *ex_filter;
-	short *boot_in_filter;
-	short *boot_ex_filter;
+//	short *in_filter;
+//	short *ex_filter;
+//	short *boot_in_filter;
+//	short *boot_ex_filter;
 	ULONGLONG sizelimit;
 	int update_interval;
 	UCHAR report_type;
 	DWORD dbgprint_level;
-	short *sched_letters;
-	DWORD every_boot;
-	DWORD next_boot;
+//	short *sched_letters;
+//	DWORD every_boot;
+//	DWORD next_boot;
 } ud_options;
 
 typedef struct _volume_info {

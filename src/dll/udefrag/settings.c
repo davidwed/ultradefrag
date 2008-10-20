@@ -34,38 +34,38 @@
 #include "../zenwinx/zenwinx.h"
 
 /* global variables */
-extern int native_mode_flag;
+//extern int native_mode_flag;
 extern HANDLE udefrag_device_handle;
 extern HANDLE init_event;
 extern WINX_FILE *f_ud;
 
+//short ud_key[] = 
+//	L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag";
+
+#define MAX_FILTER_SIZE 4096
+#define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
+short in_filter[MAX_FILTER_SIZE + 1] = L"";
+short ex_filter[MAX_FILTER_SIZE + 1] = L"";
+//short boot_in_filter[MAX_FILTER_SIZE + 1];
+//short boot_ex_filter[MAX_FILTER_SIZE + 1];
+
+//#define MAX_SCHED_LETTERS 64
+//short sched_letters[MAX_SCHED_LETTERS + 1];
+
 ud_options settings = \
 { \
-	L"",          /* in_filter */
-	L"system volume information;temp;recycler", /* ex_filter */
-	L"windows;winnt;ntuser;pagefile;hiberfil",  /* boot_in_filter */
-	L"temp",       /* boot_ex_filter */
+//	in_filter,          /* in_filter */
+//	ex_filter, //system volume information;temp;recycler", /* ex_filter */
+//	L"windows;winnt;ntuser;pagefile;hiberfil",  /* boot_in_filter */
+//	L"temp",       /* boot_ex_filter */
 	0,             /* sizelimit */
 	500,           /* update_interval */
 	HTML_REPORT,   /* report_type */
 	DBG_NORMAL,    /* dbgprint_level */
-	L"",           /* sched_letters */
-	FALSE,         /* every_boot */
-	FALSE,         /* next_boot */
+//	L"",           /* sched_letters */
+//	FALSE,         /* every_boot */
+//	FALSE,         /* next_boot */
 };
-
-short ud_key[] = \
-	L"\\REGISTRY\\MACHINE\\SYSTEM\\CurrentControlSet\\Control\\UltraDefrag";
-
-#define MAX_FILTER_SIZE 4096
-#define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
-short in_filter[MAX_FILTER_SIZE + 1];
-short ex_filter[MAX_FILTER_SIZE + 1];
-short boot_in_filter[MAX_FILTER_SIZE + 1];
-short boot_ex_filter[MAX_FILTER_SIZE + 1];
-
-#define MAX_SCHED_LETTERS 64
-short sched_letters[MAX_SCHED_LETTERS + 1];
 
 short file_buffer[32768];
 short line_buffer[8192];
@@ -83,7 +83,7 @@ extern BOOL n_ioctl(HANDLE handle,ULONG code,
 
 int get_configfile_location(void)
 {
-	NTSTATUS Status;
+/*	NTSTATUS Status;
 	UNICODE_STRING name, us;
 	ANSI_STRING as;
 	short buf[MAX_PATH + 1];
@@ -105,9 +105,14 @@ int get_configfile_location(void)
 	strcpy(configfile,"\\??\\");
 	strncat(configfile,as.Buffer,sizeof(configfile) - strlen(configfile) - 1);
 	configfile[sizeof(configfile) - 1] = 0;
+*/
+	if(winx_get_windows_directory(configfile,sizeof(configfile)) < 0)
+		return -1;
+	
  	strncat(configfile,"\\UltraDefrag\\options\\udefrag.cfg",
 			sizeof(configfile) - strlen(configfile) - 1);
-	RtlFreeAnsiString(&as);
+
+//	RtlFreeAnsiString(&as);
 	if(!strstr(configfile,"udefrag.cfg")){
 		winx_push_error("Invalid config path %s!",configfile);
 		return -1;
@@ -120,11 +125,24 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 {
 	int i;
 
-	if(getopts(configfile) < 0)
-		winx_pop_error(NULL,0);
+	/* reset all parameters */
+	wcscpy(in_filter,L"");
+	wcscpy(ex_filter,L"");
+	settings.sizelimit = 0;
+	settings.report_type = HTML_REPORT;
+	settings.dbgprint_level = DBG_NORMAL;
+	
+	/*
+	* Get options from the config file only for gui program.
+	* Other interfaces will provide options through the comand line.
+	*/
+	if(!argv){
+		if(getopts(configfile) < 0)
+			winx_pop_error(NULL,0);
+		return 0;
+	}
 
 	/* overwrite parameters from the command line */
-	if(!argv) return 0;
 	for(i = 1; i < argc; i++){
 		if(argv[i][0] != '-' && argv[i][0] != '/')
 			continue;
@@ -136,12 +154,12 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 		case 'i':
 		case 'I':
 			if(wcslen(argv[i] + 2) <= MAX_FILTER_SIZE)
-				wcscpy(settings.in_filter,argv[i] + 2);
+				wcscpy(/*settings.*/in_filter,argv[i] + 2);
 			break;
 		case 'e':
 		case 'E':
 			if(wcslen(argv[i] + 2) <= MAX_FILTER_SIZE)
-				wcscpy(settings.ex_filter,argv[i] + 2);
+				wcscpy(/*settings.*/ex_filter,argv[i] + 2);
 			break;
 		case 'd':
 		case 'D':
@@ -167,11 +185,13 @@ int __stdcall udefrag_load_settings(int argc, short **argv)
 * SEE ALSO
 *    udefrag_set_options
 ******/
+
+// Absolutely unuseful function!
 ud_options * __stdcall udefrag_get_options(void)
 {
 	return &settings;
 }
-
+/*
 BOOLEAN SetEnvVariable(short *name, short *value)
 {
 	UNICODE_STRING n, v;
@@ -187,7 +207,7 @@ BOOLEAN SetEnvVariable(short *name, short *value)
 	}
 	return TRUE;
 }
-
+*/
 int __stdcall udefrag_set_options()
 {
 	REPORT_TYPE rt;
@@ -229,21 +249,21 @@ int __stdcall udefrag_set_options()
 		&rt,sizeof(REPORT_TYPE),NULL,0,
 		"Can't set report type: %x!")) goto apply_settings_fail;
 	/* set filters */
-	if(native_mode_flag){
+	/*if(native_mode_flag){
 		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_INCLUDE_FILTER,
 			settings.boot_in_filter,(wcslen(settings.boot_in_filter) + 1) << 1,NULL,0,
 			"Can't set include filter: %x!")) goto apply_settings_fail;
 		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_EXCLUDE_FILTER,
 			settings.boot_ex_filter,(wcslen(settings.boot_ex_filter) + 1) << 1,NULL,0,
 			"Can't set exclude filter: %x!")) goto apply_settings_fail;
-	} else {
+	} else {*/
 		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_INCLUDE_FILTER,
-			settings.in_filter,(wcslen(settings.in_filter) + 1) << 1,NULL,0,
+			/*settings.*/in_filter,(wcslen(/*settings.*/in_filter) + 1) << 1,NULL,0,
 			"Can't set include filter: %x!")) goto apply_settings_fail;
 		if(!n_ioctl(udefrag_device_handle,IOCTL_SET_EXCLUDE_FILTER,
-			settings.ex_filter,(wcslen(settings.ex_filter) + 1) << 1,NULL,0,
+			/*settings.*/ex_filter,(wcslen(/*settings.*/ex_filter) + 1) << 1,NULL,0,
 			"Can't set exclude filter: %x!")) goto apply_settings_fail;
-	}
+//	}
 
 
 	return 0;
@@ -310,11 +330,11 @@ void ParseParameter()
 	if(!wcscmp(param_buffer,L"INCLUDE")){
 		wcsncpy(in_filter,value_buffer,MAX_FILTER_SIZE);
 		in_filter[MAX_FILTER_SIZE] = 0;
-		settings.in_filter = in_filter;
+		//settings.in_filter = in_filter;
 	} else if(!wcscmp(param_buffer,L"EXCLUDE")){
 		wcsncpy(ex_filter,value_buffer,MAX_FILTER_SIZE);
 		ex_filter[MAX_FILTER_SIZE] = 0;
-		settings.ex_filter = ex_filter;
+		//settings.ex_filter = ex_filter;
 	} else if(!wcscmp(param_buffer,L"SIZELIMIT")){
 		if(empty_value)
 			settings.sizelimit = 0;
@@ -325,7 +345,7 @@ void ParseParameter()
 				RtlFreeAnsiString(&as);
 			}
 		}
-	} else if(!wcscmp(param_buffer,L"BOOT_TIME_INCLUDE")){
+	}/* else if(!wcscmp(param_buffer,L"BOOT_TIME_INCLUDE")){
 		wcsncpy(boot_in_filter,value_buffer,MAX_FILTER_SIZE);
 		boot_in_filter[MAX_FILTER_SIZE] = 0;
 		settings.boot_in_filter = boot_in_filter;
@@ -337,13 +357,13 @@ void ParseParameter()
 		wcsncpy(sched_letters,value_buffer,MAX_SCHED_LETTERS);
 		sched_letters[MAX_SCHED_LETTERS] = 0;
 		settings.sched_letters = sched_letters;
-	} else if(!wcscmp(param_buffer,L"NEXT_BOOT")){
+	}*//* else if(!wcscmp(param_buffer,L"NEXT_BOOT")){
 		_wcsupr(value_buffer);
 		settings.next_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
 	} else if(!wcscmp(param_buffer,L"EVERY_BOOT")){
 		_wcsupr(value_buffer);
 		settings.every_boot = (wcscmp(value_buffer,L"YES") == 0) ? TRUE : FALSE;
-	} else if(!wcscmp(param_buffer,L"ENABLE_REPORTS")){
+	}*/ else if(!wcscmp(param_buffer,L"ENABLE_REPORTS")){
 		_wcsupr(value_buffer);
 		settings.report_type = (wcscmp(value_buffer,L"YES") == 0) ? HTML_REPORT : NO_REPORT;
 	} else if(!wcscmp(param_buffer,L"DBGPRINT_LEVEL")){
