@@ -9,7 +9,14 @@ A.: This way is more reliable. The settings window was nothing more
 
     They were removed few hundred lines of source code related to old settings 
     window. Less code we have less bugs we have!!
-	
+
+Q.: How can I disable boot time defragmenter manually?
+
+A.: If something is wrong and boot-off script does not work properly, remove 
+    the defrag_native entry from the following Registry parameter manually:
+
+    HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
+
 Q.: Why UD doesn't work on x64 Vista with Service Pack 1?
 
 A.: This version of Windows needs driver signature (from Microsoft) to load 

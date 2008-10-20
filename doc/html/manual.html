@@ -138,7 +138,7 @@ C:\>_
 </div>
 </pre>
 <i>Console Application after a successful analyze run.</i>
-<p>The command line version takes one of three switches and a
+<p>The command line version takes one of five switches and a
 drive
 letter. The switches are as follows:</p>
 <ul>
@@ -149,8 +149,6 @@ letter. The switches are as follows:</p>
 <li><b>-la</b> List all volumes available for defragmentation</li>
 </ul>
 <p>In addition the following switches can be used when defraging and compacting.
-They override the settings in the <a href="#cfgfile">udefrag.cfg</a> file described below. 
-The default settings are set at compile time.</p>
 <ul>
 <li><b>-sN</b> ignore files larger than N bytes</li>
 <li><b>-iA;B;C</b> Include these files and directories from the scan (Maximum 4096 bytes)</li>
@@ -158,7 +156,18 @@ The default settings are set at compile time.</p>
 <li><b>-d[0-3]</b> Set debug level: 0 Normal, 1 Detailed, 2 Paranoid</li>
 <li><b>-b</b> Use default color scheme</li>
 </ul>
-<p>Note that <b>-i</b> and <b>-e</b> parameters should be maximum 4096 characters long.</p>
+Note that since 
+1.4.1 version there are no default values for these options. You must specify each of them in 
+command line to perform a full featured defragmentation. Most useful hack is</p>
+<p><b>udefrag "-esystem volume information;temp;recycler" c:</b></p>
+<p>This command defragments the C: volume excluding temporary files on them.</p>
+
+<p>Note that <b>-i</b> and <b>-e</b> parameters should be maximum 4096 characters long. 
+The filter is case insensitive. Par example, <span class="path">Temp</span> and 
+<span class="path">temp</span> have the same result. If the option contains spaces inside, 
+enclose them in double quotes, p.a. 
+<span class="path">"-esystem volume information"</span>.</p>
+
 <p>Specifying just the drive letter will cause UltraDefrag
 to defragment the drive. When the operation finishes or you stop the
 program with a Ctrl+C, the program will display the results to the
@@ -178,7 +187,21 @@ shutdown -s -t 00
 </pre>
 Batch files are powerful enough, try to insert commands to play sounds after 
 each defragmentation. If you doubt that your volumes are in good state then add 
-<b>chkdsk</b> command too.
+<b>chkdsk</b> command too. Aslo you can specify all options in command file once to save 
+your time when you are running defragmenter. Here is an example:
+<pre style="border: 2px solid; background-color: black; color: white;">
+@echo off
+
+REM defrag the c: drive excluding temporary contents
+REM and save the short report to c:\ud.log
+udefrag "-esystem volume information;temp;recycler" c: 
+> c:\ud.log
+
+REM defrag My Documents folder on d: drive excluding
+REM any files larger than ~10 Mb;
+REM append the short report to c:\ud.log file
+udefrag "-iMy Documents" -s10000000 d: >> c:\ud.log
+</pre>
 </p>
 <p>To get list of available volumes type <span class="path">udefrag -l</span>. 
 Each line of output contains volume letter, type of file system, total size and percent 
@@ -341,12 +364,15 @@ to disappear.</span></p>
 <p style="">UltraDefrag also includes a new mode
 that allows you to run it at boot time in a manner similar to chkdsk.
 This is known as a native application.</p>
-<p>Boot time settings may be specified in the gui. You may schedule a boot
-time scan for the next reboot, or at every reboot. The only restriction on
+
+<p>The only restriction on
 boot time scans is that you may not scan encrypted volumes. This is because
 lsass.exe, the component of the operating system that reads encrypted volumes,
 is loaded after the native executable runs.</p>
-<p>To change boot time options properly you should follow these instructions:
+
+<!--
+<p>Boot time settings may be specified in the gui. You may schedule a boot
+time scan for the next reboot, or at every reboot. To change boot time options properly you should follow these instructions:
 <ul type="disc"><li>Press 'Settings' button in GUI, then edit main options. 
 When you close the Settings dialog, boot time options will be set.</li>
 <li>As an alternative you can edit <a href="#cfgfile">udefrag.cfg</a> file 
@@ -355,6 +381,25 @@ the boot time defragmantation feature and <span class="path">boot-off</span> to 
 them.</li>
 </ul>
 </p>
+-->
+
+There are two ways to configure them:
+<ul type="disc">
+
+<li>
+<p>Press 'Settings' button in GUI, than edit main options.</p>
+<p>To enable boot time scan use the following shortcut: 
+<span class="path">Start -> Programs -> UltraDefrag -> Enable boot time scan</span>.</p>
+<p>To disable them use: 
+<span class="path">Start -> Programs -> UltraDefrag -> Disable boot time scan</span>.</p>
+</li>
+
+<li>Type in command prompt <span class="path">ud-config</span> to open the configuration file 
+in Notepad editor. Use <span class="path">boot-on</span> command to enable boot time scan and 
+<span class="path">boot-off</span> to disable them.</li>
+
+</ul>
+
 <h1 class="western">The Report</h1>
 <p>Everytime you run analyze, compact or defragment, a report of
 all files on the file system is created. This report has the
@@ -471,27 +516,6 @@ SIZELIMIT           = 126 Pb
 
 ;-------------------------------------------------------------------
 ;
-; Boot time settings
-;
-; 1. Enter multiple filter match strings separated
-;    by the semicolon (;) character. Note that filter
-;    is case insensitive.
-; 2. The volume letters must be either separated 
-;    by semicolons (;) or don't contain any separators 
-;    between.
-; 3. Set NEXT_BOOT/EVERY_BOOT to YES/NO 
-;    to chose when to defragment.
-;
-;-------------------------------------------------------------------
-
-BOOT_TIME_INCLUDE   = windows;winnt;ntuser;pagefile;hiberfil
-BOOT_TIME_EXCLUDE   = temp
-LETTERS             = CLD
-NEXT_BOOT           = NO
-EVERY_BOOT          = YES
-
-;-------------------------------------------------------------------
-;
 ; Main report settings.
 ;
 ; 1. Set ENABLE_REPORTS parameter to YES/NO state 
@@ -521,8 +545,9 @@ MAP_UPDATE_INTERVAL = 500
 
 </pre>
 
-<p>The following options are obsolete: <span class="path">NEXT_BOOT</span>. They does not take any 
-effect in the current version of the program.</p>
+<p>The following options are obsolete: <span class="path">NEXT_BOOT, EVERY_BOOT, 
+BOOT_TIME_INCLUDE, BOOT_TIME_EXCLUDE, LETTERS</span>. 
+They does not take any effect in the current version of the program.</p>
 
 <h2 name="reportopts" id="reportopts">Report options</h2>
 <p>They are stored in <span class="path">udreportopts.lua</span> file located in 

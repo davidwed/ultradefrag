@@ -8,6 +8,10 @@ HISTORY
     - a lot of portable application bugs were fixed
     - gui program was translated into the following languages:
       
+    - boot-on, boot-off, ud-config scripts were added
+    - since this version there are no default values for program options
+      when console and boot time interfaces are used; this increases flexibility
+      and makes program more predictable
 
 
   Version 1.4.0 (22.5)   2008-10-02
