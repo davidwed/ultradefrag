@@ -203,6 +203,7 @@ Section "Ultra Defrag core files (required)" SecCore
   call install_driver
 
   SetOutPath "$SYSDIR"
+
   DetailPrint "Install DLL's..."
   File "udefrag.dll"
   File "zenwinx.dll"
@@ -212,6 +213,9 @@ Section "Ultra Defrag core files (required)" SecCore
   File "bootexctrl.exe"
   File "${ROOTDIR}\src\installer\boot-on.cmd"
   File "${ROOTDIR}\src\installer\boot-off.cmd"
+
+  DetailPrint "Install scripts..."
+  File "${ROOTDIR}\src\installer\ud-config.cmd"
 
   DetailPrint "Install console interface..."
   File "udefrag.exe"
@@ -311,6 +315,9 @@ Section "Uninstall"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
+
+  DetailPrint "Uninstall scripts and console interface..."
+  Delete "$SYSDIR\ud-config.cmd"
   Delete "$SYSDIR\udefrag.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"

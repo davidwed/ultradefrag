@@ -35,6 +35,8 @@ input_filename = ""
 target_type, target_ext, target_name, nt4target_name = "", "", "", ""
 arch = ""
 
+micro_edition = 0
+
 ddk_cmd = "build.exe"
 msvc_cmd = "nmake.exe /NOLOGO /A /f"
 mingw_cmd = "mingw32-make --always-make -f Makefile.mingw"
@@ -110,15 +112,31 @@ function produce_ddk_makefile()
 	end
 
 	if target_type ~= "driver" then
-		f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
+		if micro_edition == 0 then
+			f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
+		else
+			f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n\n")
+			f:write("RCOPTIONS=/d MICRO_EDITION\n\n")
+		end
 	else
-		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write("USER_C_FLAGS=/DUSE_WINDDK /DNT4_TARGET\n")
-		f:write("RCOPTIONS=/d NT4_TARGET\n")
-		f:write("!ELSE\n")
-		f:write("USER_C_FLAGS=/DUSE_WINDDK\n")
-		f:write("!ENDIF\n\n")
+		if micro_edition == 0 then
+			f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
+			f:write("USER_C_FLAGS=/DUSE_WINDDK /DNT4_TARGET\n")
+			f:write("RCOPTIONS=/d NT4_TARGET\n")
+			f:write("!ELSE\n")
+			f:write("USER_C_FLAGS=/DUSE_WINDDK\n")
+			f:write("!ENDIF\n\n")
+		else
+			f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
+			f:write("USER_C_FLAGS=/DUSE_WINDDK /DNT4_TARGET /DMICRO_EDITION\n")
+			f:write("RCOPTIONS=/d NT4_TARGET /d MICRO_EDITION\n")
+			f:write("!ELSE\n")
+			f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n")
+			f:write("RCOPTIONS=/d MICRO_EDITION\n")
+			f:write("!ENDIF\n\n")
+		end
 	end
+
 	if target_type == "console" or target_type == "gui" then
 		f:write("CFLAGS=\$(CFLAGS) /MT\n\n")
 	end
@@ -203,6 +221,10 @@ function produce_msvc_makefile()
 	else error("Unknown target type: " .. target_type .. "!")
 	end
 	
+	if micro_edition == 1 then
+		cl_flags = cl_flags .. "/D \"MICRO_EDITION\" "
+	end
+	
 	if nativedll == 0 then
 		cl_flags = cl_flags .. "/MD "
 	end
@@ -228,6 +250,9 @@ function produce_msvc_makefile()
 	end
 
 	rsc_flags = "RSC_PROJ=/l 0x409 /d \"NDEBUG\" "
+	if micro_edition == 1 then
+		rsc_flags = rsc_flags .. "/d \"MICRO_EDITION\" "
+	end
 	if target_type ~= "driver" then
 		f:write(rsc_flags, " \n")
 	else
@@ -368,23 +393,47 @@ function produce_mingw_makefile()
 	end
 	
 	if target_type == "driver" then
-		f:write("ifeq (\$(NT4_TARGET),true)\n")
-		f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DNT4_TARGET \n")
-		f:write("else\n")
-		f:write("CFLAGS = -pipe  -Wall -g0 -O2 \n")
-		f:write("endif\n")
+		if micro_edition == 0 then
+			f:write("ifeq (\$(NT4_TARGET),true)\n")
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DNT4_TARGET \n")
+			f:write("else\n")
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 \n")
+			f:write("endif\n")
+		else
+			f:write("ifeq (\$(NT4_TARGET),true)\n")
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DNT4_TARGET -DMICRO_EDITION \n")
+			f:write("else\n")
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION \n")
+			f:write("endif\n")
+		end
 	else
-		f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
+		if micro_edition == 0 then
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
+		else
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION\n")
+		end
 	end
 	
 	if target_type == "driver" then
-		f:write("ifeq (\$(NT4_TARGET),true)\n")
-		f:write("RCFLAGS = -DNT4_TARGET \n")
-		f:write("else\n")
-		f:write("RCFLAGS = \n")
-		f:write("endif\n")
+		if micro_edition == 0 then
+			f:write("ifeq (\$(NT4_TARGET),true)\n")
+			f:write("RCFLAGS = -DNT4_TARGET \n")
+			f:write("else\n")
+			f:write("RCFLAGS = \n")
+			f:write("endif\n")
+		else
+			f:write("ifeq (\$(NT4_TARGET),true)\n")
+			f:write("RCFLAGS = -DNT4_TARGET -DMICRO_EDITION \n")
+			f:write("else\n")
+			f:write("RCFLAGS = -DMICRO_EDITION \n")
+			f:write("endif\n")
+		end
 	else
-		f:write("RCFLAGS = \n")
+		if micro_edition == 0 then
+			f:write("RCFLAGS = \n")
+		else
+			f:write("RCFLAGS = -DMICRO_EDITION \n")
+		end
 	end
 	
 	f:write("C_INCLUDE_DIRS = \n")
@@ -501,6 +550,10 @@ else
 end
 target_name = name .. "." .. target_ext
 nt4target_name = name .. "_nt4." .. target_ext
+
+if os.getenv("UD_MICRO_EDITION") == "1" then
+	micro_edition = 1
+end
 
 if os.getenv("BUILD_ENV") == "winddk" then
 	if obsolete(input_filename,".\\sources") then

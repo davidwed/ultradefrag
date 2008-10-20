@@ -42,7 +42,11 @@ BEGIN
         BEGIN
 #ifndef NT4_TARGET
             VALUE "CompanyName", "UltraDefrag Development Team\0"
+#ifndef MICRO_EDITION
             VALUE "FileDescription", "UltraDefrag Driver\0"
+#else
+            VALUE "FileDescription", "UltraDefrag Micro Edition Driver\0"
+#endif
             VALUE "FileVersion", VERSION2
             VALUE "InternalName", "ultradfg\0"
             VALUE "LegalCopyright", "Copyright © 2007,2008 Dmitri Arkhangelski\0"
@@ -51,7 +55,11 @@ BEGIN
             VALUE "ProductVersion", VERSION2
 #else
             VALUE "CompanyName", "UltraDefrag Development Team\0"
+#ifndef MICRO_EDITION
             VALUE "FileDescription", "UltraDefrag Driver for NT 4.0\0"
+#else
+            VALUE "FileDescription", "UltraDefrag Micro Edition Driver for NT 4.0\0"
+#endif
             VALUE "FileVersion", VERSION2
             VALUE "InternalName", "ultradfg_nt4\0"
             VALUE "LegalCopyright", "Copyright © 2007,2008 Dmitri Arkhangelski\0"

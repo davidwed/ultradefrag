@@ -6,6 +6,7 @@ echo Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
 if "%1" equ "--help" goto usage
 
 echo Set environment variables...
+set UD_MICRO_EDITION=1
 set OLD_PATH=%path%
 call SETVARS.CMD
 if "%1" equ "--clean" goto clean
@@ -28,13 +29,10 @@ mkdir bin\ia64
 xcopy /I /Y /Q    .\driver  .\obj\driver
 xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
 xcopy /I /Y /Q    .\console .\obj\console
-xcopy /I /Y /Q    .\gui     .\obj\gui
-xcopy /I /Y /Q    .\gui\res .\obj\gui\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
-xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
 
 rem xcopy /I /Y /Q /S source destination
 
@@ -126,8 +124,7 @@ set Path=%OLD_PATH%
 
 
 :build_scheduler
-
-call BLDSCHED.CMD
+rem The scheduler is not included in Micro Edition.
 
 
 :build_installer
@@ -135,100 +132,37 @@ call BLDSCHED.CMD
 echo Build installer...
 cd .\bin
 copy /Y ..\installer\MicroEdition.nsi .\
-copy /Y ..\installer\lang.ini .\
-
-rem Executables are too small to use upx.
-rem But upx is used to pack installer
-rem (see INSTALL.TXT for more details).
-rem upx udefrag.exe
-rem if %errorlevel% neq 0 goto fail
-rem upx dfrg.exe
-rem if %errorlevel% neq 0 goto fail
 
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
 
 if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
-copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y ..\installer\MicroEdition.nsi .\amd64\
-copy /Y ..\installer\lang.ini .\amd64\
 cd amd64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
 
 cd..
-copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\MicroEdition.nsi .\ia64\
-copy /Y ..\installer\lang.ini .\ia64\
 cd ia64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
 
-cd..
+cd ..\..
 
 :build_source_package
+rem This section was removed to increase compilation speed.
+rem Run build.cmd to make an archive of sources.
 
-echo Build source code package...
-cd ..
-rmdir /s /q .\src_package
-mkdir .\src_package
-set SRC_PKG_PATH=.\src_package\ultradefrag-%ULTRADFGVER%
-mkdir %SRC_PKG_PATH%\src
-xcopy /I /Y /Q    .\driver %SRC_PKG_PATH%\src\driver
-xcopy /I /Y /Q    .\bootexctrl %SRC_PKG_PATH%\src\bootexctrl
-xcopy /I /Y /Q    .\console %SRC_PKG_PATH%\src\console
-xcopy /I /Y /Q /S .\gui %SRC_PKG_PATH%\src\gui
-xcopy /I /Y /Q    .\native %SRC_PKG_PATH%\src\native
-xcopy /I /Y /Q    .\installer %SRC_PKG_PATH%\src\installer
-xcopy /I /Y /Q    .\include %SRC_PKG_PATH%\src\include
-mkdir %SRC_PKG_PATH%\src\scheduler
-xcopy /I /Y /Q .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
-xcopy /I /Y /Q .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties
-mkdir %SRC_PKG_PATH%\src\dll
-xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
-mkdir %SRC_PKG_PATH%\src\dll\zenwinx
-xcopy /I /Y .\dll\zenwinx %SRC_PKG_PATH%\src\dll\zenwinx
-
-xcopy /I /Y /Q    .\lua5.1 %SRC_PKG_PATH%\src\lua5.1
-
-mkdir %SRC_PKG_PATH%\src\tools
-copy /Y .\tools\*.pl %SRC_PKG_PATH%\src\tools\
-copy /Y .\tools\*.lua %SRC_PKG_PATH%\src\tools\
-copy /Y .\tools\readme.txt %SRC_PKG_PATH%\src\tools\
-
-mkdir %SRC_PKG_PATH%\src\scripts
-copy /Y .\scripts\*.* %SRC_PKG_PATH%\src\scripts\
-
-mkdir %SRC_PKG_PATH%\doc
-mkdir %SRC_PKG_PATH%\doc\html
-mkdir %SRC_PKG_PATH%\doc\html\images
-copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
-copy /Y ..\doc\html\udefrag.css %SRC_PKG_PATH%\doc\html\
-
-copy /Y ..\doc\html\images\main_screen140.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\fixed.ico %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\removable.ico %SRC_PKG_PATH%\doc\html\images\
-
-copy /Y ..\doc\html\images\sched_net_vista.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\valid-html401.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\powered_by_lua.png %SRC_PKG_PATH%\doc\html\images\
-
-copy .\*.* %SRC_PKG_PATH%\src\
-cd .\src_package
-del /s /q *.ncb,*.opt,*.plg,*.aps,*.7z,*.bk
-REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-%ULTRADFGVER%.src.7z *
-if %errorlevel% neq 0 goto fail
-rd /s /q ultradefrag-%ULTRADFGVER%
-cd ..
+echo.
 echo Build success!
 
 if "%1" equ "--install" goto install
 if "%2" neq "--install" goto end
 :install
 echo Start installer...
-.\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe /S
+.\bin\ultradefrag-micro-edition-%ULTRADFGVER%.bin.i386.exe /S
 if %errorlevel% neq 0 goto fail_inst
 echo Install success!
 goto end
@@ -236,11 +170,14 @@ goto end
 echo Install error!
 
 :end
+set UD_MICRO_EDITION=
 set OLD_PATH=
 exit /B
 
 :fail
+echo.
 echo Build error (code %ERRORLEVEL%)!
+set UD_MICRO_EDITION=
 set Path=%OLD_PATH%
 set OLD_PATH=
 exit /B
@@ -272,6 +209,7 @@ rd /s /q amd64
 rd /s /q ia64
 cd ..
 echo Done.
+set UD_MICRO_EDITION=
 set OLD_PATH=
 exit /B
 

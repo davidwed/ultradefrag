@@ -444,6 +444,7 @@ langpack_installed:
   call install_driver
 
   SetOutPath "$SYSDIR"
+
   DetailPrint "Install DLL's..."
   File "udefrag.dll"
   File "zenwinx.dll"
@@ -455,6 +456,9 @@ langpack_installed:
   File "${ROOTDIR}\src\installer\boot-on.cmd"
   File "${ROOTDIR}\src\installer\boot-off.cmd"
 skip_boot_time_inst:
+
+  DetailPrint "Install scripts..."
+  File "${ROOTDIR}\src\installer\ud-config.cmd"
 
   DetailPrint "Install console interface..."
   File "udefrag.exe"
@@ -682,37 +686,51 @@ Section "Shortcuts" SecShortcuts
   DetailPrint "Install shortcuts..."
   SetShellVarContext all
   SetOutPath $INSTDIR
+
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
+
+  CreateShortCut "$R0\Enable boot time scan.lnk" \
+   "$SYSDIR\bootexctrl.exe" "/r defrag_native"
+  CreateShortCut "$R0\Disable boot time scan.lnk" \
+   "$SYSDIR\bootexctrl.exe" "/u defrag_native"
+
   CreateShortCut "$R0\UltraDefrag.lnk" \
    "$INSTDIR\Dfrg.exe"
+
   CreateShortCut "$R0\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"
   CreateShortCut "$R0\README.lnk" \
    "$INSTDIR\README.TXT"
   CreateShortCut "$R0\FAQ.lnk" \
    "$INSTDIR\FAQ.TXT"
+
   StrCmp $SchedulerNETinstalled '1' 0 no_sched_net
   CreateShortCut "$R0\Scheduler.NET.lnk" \
    "$INSTDIR\UltraDefragScheduler.NET.exe"
 no_sched_net:
+
   StrCmp $DocsInstalled '1' 0 no_docs
   WriteINIStr "$R0\User manual.url" "InternetShortcut" "URL" "file://$INSTDIR\doc\manual.html"
   goto doc_url_ok
 no_docs:
   WriteINIStr "$R0\User manual.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/manual.html"
 doc_url_ok:
+  WriteINIStr "$R0\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
+
   CreateShortCut "$R0\Uninstall UltraDefrag.lnk" \
    "$INSTDIR\uninstall.exe"
+
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
    "$INSTDIR\Dfrg.exe"
-  WriteINIStr "$R0\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
+  CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
+   "$INSTDIR\Dfrg.exe"
+
   StrCmp $PortableInstalled '1' 0 no_portable
   CreateShortCut "$R0\Portable package.lnk" \
    "$INSTDIR\portable_${ULTRADFGARCH}_package"
 no_portable:
-  CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
-   "$INSTDIR\Dfrg.exe"
+
 !insertmacro EnableX64FSRedirection
 
   pop $R0
@@ -774,10 +792,14 @@ Section "Uninstall"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
-  Delete "$SYSDIR\udefrag.exe"
+
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
+
+  DetailPrint "Uninstall scripts and console interface..."
+  Delete "$SYSDIR\ud-config.cmd"
+  Delete "$SYSDIR\udefrag.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
