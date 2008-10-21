@@ -37,7 +37,6 @@
 /* global variables */
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
-//int native_mode_flag = FALSE;
 HANDLE init_event = NULL;
 short driver_key[] = \
   L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
@@ -123,13 +122,10 @@ void __stdcall udefrag_pop_werror(short *buffer, int size)
 * NAME
 *    udefrag_init
 * SYNOPSIS
-*    error = udefrag_init(argc,argv,native,mapsize);
+*    error = udefrag_init(mapsize);
 * FUNCTION
 *    Load the Ultra Defragmenter driver and initialize defragmenter.
 * INPUTS
-*    argc, argv - options from the command line, may be 0,NULL
-*    native     - true if the request was made from the native
-*                 application, false otherwise
 *    mapsize    - cluster map size, may be zero
 * RESULT
 *    error - zero for success; negative value otherwise.
@@ -138,7 +134,7 @@ void __stdcall udefrag_pop_werror(short *buffer, int size)
 *    {
 *        char buffer[ERR_MSG_SIZE];
 *
-*        if(udefrag_init(argc,argv,FALSE,0) < 0)
+*        if(udefrag_init(0) < 0)
 *            udefrag_pop_error(buffer,sizeof(buffer));
 *            printf("udefrag_init() call unsuccessful!");
 *            printf("\n\n%s\n",buffer);
@@ -153,7 +149,7 @@ void __stdcall udefrag_pop_werror(short *buffer, int size)
 * SEE ALSO
 *    udefrag_unload
 ******/
-int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
+int __stdcall udefrag_init(long map_size)
 {
 	UNICODE_STRING uStr;
 	NTSTATUS Status;
@@ -161,7 +157,6 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 	char buf[ERR_MSG_SIZE];
 
 	/* 0. only one instance of the program ! */
-//	native_mode_flag = native_mode;
 	/* 1. Enable neccessary privileges */
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) goto init_fail;*/
 	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) goto init_fail;
@@ -205,9 +200,9 @@ int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size)
 		&map_size,sizeof(long),NULL,0,
 		"Can't setup cluster map buffer: %x!")) goto init_fail;
 	/* 7a. */
-	if(get_configfile_location() < 0) goto init_fail;
+	//if(get_configfile_location() < 0) goto init_fail;
 	/* 7b. Load settings */
-	if(udefrag_reload_settings(argc,argv) < 0) goto init_fail;
+	if(udefrag_reload_settings() < 0) goto init_fail;
 	return 0;
 init_fail:
 	if(init_event){

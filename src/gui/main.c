@@ -58,7 +58,7 @@ void HandleError(int status,int exit_code)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	HandleError(udefrag_init(0,NULL,FALSE,N_BLOCKS),2);
+	HandleError(udefrag_init(N_BLOCKS),2);
 	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
 	BuildResourceTable();
@@ -91,8 +91,6 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	int cx,cy;
 	int dx,dy;
 	RECT rc;
-	ud_options *settings;
-	char cmd[MAX_PATH + 32];
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -141,15 +139,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(!busy_flag){
 				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),hWindow,(DLGPROC)NewSettingsDlgProc);
 				/* reload and apply settings */
-				if(udefrag_reload_settings(0,NULL) < 0) udefrag_pop_error(NULL,0);
-				/* update the BootExecute parameter */
-				settings = udefrag_get_options();
-				GetSystemDirectory(cmd,MAX_PATH);
-				strcat(cmd,"\\bootexctrl.exe");
-				if(settings->every_boot)
-					_spawnl(_P_WAIT,cmd,cmd,"/r","defrag_native",NULL);
-				else
-					_spawnl(_P_WAIT,cmd,cmd,"/u","defrag_native",NULL);
+				//if(udefrag_reload_settings() < 0) udefrag_pop_error(NULL,0);
 			}
 			break;
 		case IDC_SKIPREMOVABLE:

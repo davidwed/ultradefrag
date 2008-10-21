@@ -207,7 +207,7 @@ int __cdecl wmain(int argc, short **argv)
 	HandleErrorW(udefrag_validate_volume(letter,FALSE),1);
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* do our job */
-	HandleErrorW(udefrag_init(argc,argv,FALSE,0),2);
+	HandleErrorW(udefrag_init(0),2);
 
 	if(a_flag) HandleErrorW(udefrag_analyse(letter,NULL),3);
 	else if(o_flag) HandleErrorW(udefrag_optimize(letter,NULL),3);

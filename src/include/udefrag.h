@@ -53,17 +53,10 @@
 #endif
 
 typedef struct _ud_options {
-//	short *in_filter;
-//	short *ex_filter;
-//	short *boot_in_filter;
-//	short *boot_ex_filter;
 	ULONGLONG sizelimit;
 	int update_interval;
 	UCHAR report_type;
 	DWORD dbgprint_level;
-//	short *sched_letters;
-//	DWORD every_boot;
-//	DWORD next_boot;
 } ud_options;
 
 typedef struct _volume_info {
@@ -74,7 +67,7 @@ typedef struct _volume_info {
 	int is_removable;
 } volume_info;
 
-int __stdcall udefrag_init(int argc, short **argv,int native_mode,long map_size);
+int __stdcall udefrag_init(long map_size);
 int __stdcall udefrag_unload(void);
 
 int __stdcall udefrag_stop(void);
@@ -82,8 +75,7 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
 int __stdcall udefrag_get_map(char *buffer,int size);
 char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
 
-ud_options * __stdcall udefrag_get_options(void);
-int __stdcall udefrag_reload_settings(int argc, short **argv);
+int __stdcall udefrag_reload_settings();
 
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);

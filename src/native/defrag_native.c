@@ -34,13 +34,15 @@
 
 #define USE_INSTEAD_SMSS  0
 
-ud_options *settings;
 char letter;
 int abort_flag = 0;
 char last_op = 0;
 int i = 0,j = 0,k; /* number of '-' */
 char buffer[256];
 int udefrag_initialized = FALSE;
+
+short file_buffer[32768];
+short line_buffer[32768];
 
 #define USAGE  "Supported commands:\n" \
 		"  analyse X:\n" \
@@ -223,18 +225,27 @@ void ProcessVolume(char letter,char command)
 	}
 }
 
+void ParseCommand()
+{
+	winx_printf("%ws\n", line_buffer);
+}
+
 void __stdcall NtProcessStartup(PPEB Peb)
 {
-	DWORD i,length;
+	DWORD i;
 	char cmd[33], arg[5];
 	char *commands[] = {"shutdown","reboot","batch","exit",
 	                    "analyse","defrag","optimize",
 						"drives","help"};
 	signed int code;
 	char buffer[ERR_MSG_SIZE];
+	
+	WINX_FILE *f;
+	char filename[MAX_PATH];
+	int filesize,j,cnt;
+	unsigned short ch;
 
 	/* 3. Initialization */
-	settings = udefrag_get_options();
 #if USE_INSTEAD_SMSS
 	NtInitializeRegistry(FALSE);
 #endif
@@ -263,31 +274,75 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	winx_printf("\n\n");
 	/* 7. Initialize the ultradfg device */
-	HandleError_(udefrag_init(0,NULL,TRUE,0),2);
+	HandleError_(udefrag_init(0),2);
 	udefrag_initialized = TRUE;
 
 	/* 8a. Batch mode */
 #if USE_INSTEAD_SMSS
 #else
-//	if(settings->next_boot || settings->every_boot){
-		/* do scheduled job and exit */
+
 #if 0
-		if(!settings->sched_letters)
-			HandleError(L"No letters specified!",3);
-		if(!settings->sched_letters[0])
-			HandleError(L"No letters specified!",3);
-		length = wcslen(settings->sched_letters);
-		for(i = 0; i < length; i++){
-			if((char)(settings->sched_letters[i]) == ';')
-				continue; /* skip delimiters */
-			ProcessVolume((char)(settings->sched_letters[i]),'d');
-			if(abort_flag) break;
+	if(!settings->sched_letters)
+		HandleError(L"No letters specified!",3);
+	if(!settings->sched_letters[0])
+		HandleError(L"No letters specified!",3);
+	length = wcslen(settings->sched_letters);
+	for(i = 0; i < length; i++){
+		if((char)(settings->sched_letters[i]) == ';')
+			continue; /* skip delimiters */
+		ProcessVolume((char)(settings->sched_letters[i]),'d');
+		if(abort_flag) break;
+	}
+	HandleError(L"",0);
+#endif
+
+
+	/* open script file */
+	if(winx_get_windows_directory(filename,MAX_PATH) < 0){
+		udefrag_pop_error(buffer,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",buffer);
+		goto cmdloop;
+	}
+	strncat(filename,"\\system32\\ud-boot-time.sh",
+			MAX_PATH - strlen(filename) - 1);
+	f = winx_fopen(filename,"r");
+	if(!f){
+		udefrag_pop_error(buffer,ERR_MSG_SIZE);
+		winx_printf("\n%s\n",buffer);
+		goto cmdloop;
+	}
+	/* read contents */
+	filesize = winx_fread(file_buffer,sizeof(short),
+			(sizeof(file_buffer) / sizeof(short)) - 1,f);
+	/* close file */
+	winx_fclose(f);
+	/* read commands and interpret them */
+	if(!filesize){
+		udefrag_pop_error(NULL,0);
+		goto cmdloop;
+	}
+	file_buffer[filesize] = 0;
+	line_buffer[0] = 0;
+	cnt = 0;
+	for(j = 0; j < filesize; j++){
+		ch = file_buffer[j];
+		/* skip first 0xFEFF character added by Notepad */
+		if(j == 0 && ch == 0xFEFF) continue;
+		if(ch == '\r' || ch == '\n'){
+			/* terminate the line buffer */
+			line_buffer[cnt] = 0;
+			cnt = 0;
+			/* parse line buffer contents */
+			ParseCommand();
+		} else {
+			line_buffer[cnt] = ch;
+			cnt++;
 		}
-		HandleError(L"",0);
-#endif		
-//	}
+	}
+
 #endif
 	/* 8b. Command Loop */
+cmdloop:
 	while(1){
 		winx_printf("# ");
 		if(winx_gets(buffer,sizeof(buffer) - 1) < 0){

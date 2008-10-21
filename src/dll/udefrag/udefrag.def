@@ -3,7 +3,6 @@ LIBRARY udefrag.dll
 EXPORTS
 	udefrag_init
 	udefrag_unload
-	udefrag_get_options
 	udefrag_reload_settings
 	udefrag_analyse
 	udefrag_defragment
