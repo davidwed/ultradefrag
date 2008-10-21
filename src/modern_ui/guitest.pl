@@ -70,7 +70,7 @@ $mw->bind(
 	);
 
 ############ import necessary functions from the udefrag.dll ##############
-Win32::API->Import('udefrag','udefrag_init','IPIN','I') or \
+Win32::API->Import('udefrag','udefrag_init','N','I') or \
 	display_critical_error('Can\'t import functions from udefrag.dll!');
 Win32::API->Import('udefrag','int udefrag_unload()');
 Win32::API->Import('udefrag','udefrag_analyse','CK','I');
@@ -199,7 +199,7 @@ $mw->maxsize($mw->width,$mw->height);
 # fill list of available volumes
 rescan_drives();
 # initialize ultradefrag engine
-handle_error(udefrag_init(0,0,0,$x_blocks * $y_blocks));
+handle_error(udefrag_init($x_blocks * $y_blocks));
 
 # create callback procedure
 my $update_map = sub {

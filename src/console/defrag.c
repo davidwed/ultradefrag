@@ -37,6 +37,7 @@ WORD console_attr = 0x7;
 int a_flag = 0,o_flag = 0;
 int b_flag = 0,h_flag = 0;
 int l_flag = 0,la_flag = 0;
+int obsolete_option = 0;
 char letter = 0;
 char unk_opt[] = "Unknown option: x!";
 int unknown_option = 0;
@@ -60,11 +61,6 @@ void show_help(void)
 		"  -?  show this help\n"
 		"  If command is not specified it will defragment volume.\n"
 		"Options:\n"
-		"  -sN      ignore files larger than N bytes\n"
-		"  -iA;B;C  set include filter with items A, B and C\n"
-		"  -eX;Y;Z  set exclude filter with items X, Y and Z\n"
-		"  -dN      set debug print level:\n"
-		"           N=0 Normal, N=1 Detailed, N=2 Paranoid\n"
 		"  -b       use default color scheme"
 		);
 	HandleError("",0);
@@ -157,8 +153,10 @@ void parse_cmdline(int argc, short **argv)
 	if(argc < 2) h_flag = 1;
 	for(i = 1; i < argc; i++){
 		/* FIXME: if argv[i] has zero length */
-		c1 = argv[i][0]; c2 = argv[i][1];
-		if(c1 && c2 == ':')	letter = (char)c1;
+		c1 = argv[i][0];
+		if(!c1) continue;
+		c2 = argv[i][1];
+		if(c2 == ':') letter = (char)c1;
 		if(c1 == '-'){
 			c2 = (short)towlower((wint_t)c2);
 			if(!wcschr(L"abosideh?l",c2)){
@@ -166,6 +164,8 @@ void parse_cmdline(int argc, short **argv)
 				unk_opt[16] = (char)c2;
 				unknown_option = 1;
 			}
+			if(wcschr(L"iesd",c2))
+				obsolete_option = 1;
 			if(c2 == 'h' || c2 == '?')
 				h_flag = 1;
 			else if(c2 == 'a') a_flag = 1;
@@ -199,6 +199,9 @@ int __cdecl wmain(int argc, short **argv)
 	      "Copyright (c) Dmitri Arkhangelski, 2007,2008.\n\n");
 	/* handle unknown option and help request */
 	if(unknown_option) HandleError(unk_opt,1);
+	if(obsolete_option)
+		HandleError("The -i, -e, -s, -d options are oblolete.\n"
+					"Use environment variables instead!",1);
 	if(h_flag) show_help();
 	/* show list of volumes if requested */
 	if(l_flag){ exit(show_vollist()); }

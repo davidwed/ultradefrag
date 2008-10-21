@@ -52,13 +52,6 @@
 #define ERR_MSG_SIZE 1024
 #endif
 
-typedef struct _ud_options {
-	ULONGLONG sizelimit;
-	int update_interval;
-	UCHAR report_type;
-	DWORD dbgprint_level;
-} ud_options;
-
 typedef struct _volume_info {
 	char letter;
 	char fsname[MAXFSNAME];

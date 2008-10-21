@@ -42,14 +42,13 @@ extern WINX_FILE *f_ud;
 #define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
 short in_filter[MAX_FILTER_SIZE + 1] = L"";
 short ex_filter[MAX_FILTER_SIZE + 1] = L"";
+ULONGLONG sizelimit  = 0;
+int refresh_interval  = 500;
+UCHAR report_type    = HTML_REPORT;
+DWORD dbgprint_level = DBG_NORMAL;
 
-ud_options settings = \
-{ \
-	0,             /* sizelimit */
-	500,           /* update_interval */
-	HTML_REPORT,   /* report_type */
-	DBG_NORMAL,    /* dbgprint_level */
-};
+short env_buffer[8192];
+char  bf[8192];
 
 extern BOOL n_ioctl(HANDLE handle,ULONG code,
 			PVOID in_buf,ULONG in_size,
@@ -59,17 +58,62 @@ extern BOOL n_ioctl(HANDLE handle,ULONG code,
 /* load settings: always successful */
 int __stdcall udefrag_load_settings()
 {
+	UNICODE_STRING us;
+	ANSI_STRING as;
+	
 	/* reset all parameters */
 	wcscpy(in_filter,L"");
 	wcscpy(ex_filter,L"");
-	settings.sizelimit = 0;
-	settings.report_type = HTML_REPORT;
-	settings.dbgprint_level = DBG_NORMAL;
+	sizelimit = 0;
+	report_type = HTML_REPORT;
+	dbgprint_level = DBG_NORMAL;
 
 	/*
 	* Since 2.0.0 version all options will be received 
 	* from the Environment.
 	*/
+	if(winx_query_env_variable(L"UD_IN_FILTER",env_buffer,sizeof(env_buffer)) >= 0)
+		wcsncpy(in_filter,env_buffer,MAX_FILTER_SIZE);
+	else
+		winx_pop_error(NULL,0);
+
+	if(winx_query_env_variable(L"UD_EX_FILTER",env_buffer,sizeof(env_buffer)) >= 0)
+		wcsncpy(ex_filter,env_buffer,MAX_FILTER_SIZE);
+	else
+		winx_pop_error(NULL,0);
+	
+	if(winx_query_env_variable(L"UD_SIZELIMIT",env_buffer,sizeof(env_buffer)) >= 0){
+		RtlInitUnicodeString(&us,env_buffer);
+		if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) == STATUS_SUCCESS){
+			dfbsize2(as.Buffer,&sizelimit);
+			RtlFreeAnsiString(&as);
+		}
+	} else {
+		winx_pop_error(NULL,0);
+	}
+
+	if(winx_query_env_variable(L"UD_REFRESH_INTERVAL",env_buffer,sizeof(env_buffer)) >= 0)
+		refresh_interval = _wtoi(env_buffer);
+	else
+		winx_pop_error(NULL,0);
+
+	if(winx_query_env_variable(L"UD_DISABLE_REPORTS",env_buffer,sizeof(env_buffer)) >= 0) {
+		if(!wcscmp(env_buffer,L"1")) report_type = NO_REPORT;
+	} else {
+		winx_pop_error(NULL,0);
+	}
+
+	if(winx_query_env_variable(L"UD_DBGPRINT_LEVEL",env_buffer,sizeof(env_buffer)) >= 0){
+		_wcsupr(env_buffer);
+		if(!wcscmp(env_buffer,L"DETAILED"))
+			dbgprint_level = DBG_DETAILED;
+		else if(!wcscmp(env_buffer,L"PARANOID"))
+			dbgprint_level = DBG_PARANOID;
+		else if(!wcscmp(env_buffer,L"NORMAL"))
+			dbgprint_level = DBG_NORMAL;
+	} else {
+		winx_pop_error(NULL,0);
+	}
 
 	return 0;
 }
@@ -85,23 +129,23 @@ int __stdcall udefrag_set_options()
 
 	/* set debug print level */
 	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_DBGPRINT_LEVEL,
-		&settings.dbgprint_level,sizeof(DWORD),NULL,0,
+		&dbgprint_level,sizeof(DWORD),NULL,0,
 		"Can't set debug print level: %x!")) goto apply_settings_fail;
 	/* set sizelimit */
 	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_SIZELIMIT,
-		&settings.sizelimit,sizeof(ULONGLONG),NULL,0,
+		&sizelimit,sizeof(ULONGLONG),NULL,0,
 		"Can't set size limit: %x!")) goto apply_settings_fail;
 	/* set report characterisics */
-	rt.type = settings.report_type;
+	rt.type = report_type;
 	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_REPORT_TYPE,
 		&rt,sizeof(REPORT_TYPE),NULL,0,
 		"Can't set report type: %x!")) goto apply_settings_fail;
 	/* set filters */
 	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_INCLUDE_FILTER,
-		/*settings.*/in_filter,(wcslen(/*settings.*/in_filter) + 1) << 1,NULL,0,
+		in_filter,(wcslen(in_filter) + 1) << 1,NULL,0,
 		"Can't set include filter: %x!")) goto apply_settings_fail;
 	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_EXCLUDE_FILTER,
-		/*settings.*/ex_filter,(wcslen(/*settings.*/ex_filter) + 1) << 1,NULL,0,
+		ex_filter,(wcslen(ex_filter) + 1) << 1,NULL,0,
 		"Can't set exclude filter: %x!")) goto apply_settings_fail;
 	return 0;
 

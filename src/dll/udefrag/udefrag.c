@@ -44,7 +44,7 @@ HANDLE udefrag_device_handle = NULL;
 WINX_FILE *f_ud = NULL;
 WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
 
-extern ud_options settings;
+extern int refresh_interval;
 
 unsigned char c, lett;
 BOOL done_flag;
@@ -297,10 +297,10 @@ BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDA
 		return FALSE;
 	/*
 	* Call specified callback 
-	* every (settings.update_interval) milliseconds.
+	* every (settings.refresh_interval) milliseconds.
 	*/
 	do {
-		winx_sleep(settings.update_interval);
+		winx_sleep(refresh_interval);
 		sproc(FALSE);
 	} while(!done_flag);
 	sproc(TRUE);
