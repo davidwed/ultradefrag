@@ -138,71 +138,152 @@ C:\>_
 </div>
 </pre>
 <i>Console Application after a successful analyze run.</i>
-<p>The command line version takes one of five switches and a
-drive
-letter. The switches are as follows:</p>
-<ul>
-<li><b>-?</b> Displays the usage message</li>
-<li><b>-a</b> Analyze the drive specified on the command line</li>
-<li><b>-o</b> Optomize file space by moving all files to the begining of the drive</li>
-<li><b>-l</b> List volumes available for defragmentation except removable</li>
-<li><b>-la</b> List all volumes available for defragmentation</li>
+<p>The command line version takes a drive letter and one of the following switches:</p>
+<ul style="padding-left: 0px">
+<li><span class="path">-?&nbsp;</span><span class="lpath"> displays the usage message (<b>-h</b> has the same effect)</span></li>
+<li><span class="path">-a&nbsp;</span><span class="lpath"> analyze the drive specified on the command line</span></li>
+<li><span class="path">-o&nbsp;</span><span class="lpath"> optimize file space by moving all files to the begining of the drive</span></li>
+<li><span class="path">-l&nbsp;</span><span class="lpath"> list volumes available for defragmentation except removable</span></li>
+<li><span class="path">-la</span><span class="lpath"> list all volumes available for defragmentation</span></li>
+<li><span class="path">-b&nbsp;</span><span class="lpath"> use default color scheme (usually black/white)</span></li>
 </ul>
-<p>In addition the following switches can be used when defraging and compacting.
-<ul>
-<li><b>-sN</b> ignore files larger than N bytes</li>
-<li><b>-iA;B;C</b> Include these files and directories from the scan (Maximum 4096 bytes)</li>
-<li><b>-eX;Y;Z</b> Exclude these files and directories from the scan (Maximum 4096 bytes)</li>
-<li><b>-d[0-3]</b> Set debug level: 0 Normal, 1 Detailed, 2 Paranoid</li>
-<li><b>-b</b> Use default color scheme</li>
+</p>
+<p>
+To set defragger options you should use the Environment Variables. To set each of them you can 
+simply type in command line <span class="path">set VarName=Value</span> where 
+<span class="path">VarName</span> is a name of the environment variable and 
+<span class="path">Value</span> is a string to be assigned to the specified variable. The good practice 
+is to store such commands in a batch script before udefrag.exe calls. That will save a lot of your time. 
+This practice will be discussed below. Here is a list of defragmentation related environment variables 
+with full explaination:
+</p>
+<table border="1" cellpadding="3"><tbody>
+
+<tr>
+<td class="path" align="center">UD_IN_FILTER</td>
+<td>
+List of files to be included in defragmentation process. 
+File names must be separated by semicolon. Most useful example is: <br />
+<span class="path">set UD_IN_FILTER=My Documents</span>. 
+After this assignment the defragger will process 
+<span class="path">My Documents</span> directory contents only.
+<br />The default value is an empty string that means: all files will be included.
+</td>
+</tr>
+
+<tr>
+<td class="path" align="center">UD_EX_FILTER</td>
+<td>
+List of files to be excluded from defragmentation process. 
+File names must be separated by semicolon. Most useful example is: <br />
+<span class="path">set UD_EX_FILTER=system volume information;<br />temp;recycler</span>. 
+After this assignment many temporary files will be excluded from the 
+defragmentation process.
+<br />The default value is an empty string. It means: no files will be excluded.
+</td>
+</tr>
+
+<tr>
+<td class="path" align="center">UD_SIZELIMIT</td>
+<td>
+Ignore files larger than specified value. You can either specify size in bytes 
+or use the following suffixes: <span class="path">Kb, Mb, Gb, Tb, Pb, Eb</span>. <br />
+P.a., use <span class="path">set UD_SIZELIMIT=10Mb</span> to exclude all files 
+greater than 10 megabytes.
+<br />The default value is zero. It means: there is no size limit.
+</td>
+</tr>
+
+<tr>
+<td class="path" align="center">UD_REFRESH_INTERVAL</td>
+<td>
+Specify the progress indicator refresh interval in milliseconds.
+<br />The default value is <span class="path">500</span>.
+</td>
+</tr>
+
+<tr>
+<td class="path" align="center">UD_DISABLE_REPORTS</td>
+<td>
+Set this parameter to <span class="path">1</span> (one) to disable reports generation.
+<br />The default value is <span class="path">0</span>.
+</td>
+</tr>
+
+<tr>
+<td class="path" align="center">UD_DBGPRINT_LEVEL</td>
+<td>
+This parameter can be in one of three states. Set 
+<span class="path">UD_DBGPRINT_LEVEL=NORMAL</span> to view useful messages about 
+the analyse or defrag progress. Select <span class="path">DETAILED</span> to create 
+a bug report to send to the author when an error is encountered. Select 
+<span class="path">PARANOID</span> in extraordinary cases. Of course, you need have DbgView 
+program or DbgPrint Logger installed to view logs.
+<br />The default value is <span class="path">NORMAL</span>.
+</td>
+</tr>
+
+</tbody></table>
+
+<p>Notes about filter:
+<ul type="disc">
+<li>Enter multiple filter match strings separated by the semicolon (;) character.</li>
+<li>The filter is case insensitive.</li>
+<li>The patterns you supply for the include and exclude functionality 
+applies to the whole path. For example, if you specify <span class="path">UD_EX_FILTER=temp</span> 
+you would exclude both the temp folder (<span class="path">%windir%\temp</span>) and 
+the internet explorer temporary files folder.</li>
+<li>Filter strings cannot be longer than 4096 characters.</li>
 </ul>
-Note that since 
-1.4.1 version there are no default values for these options. You must specify each of them in 
-command line to perform a full featured defragmentation. Most useful hack is</p>
-<p><b>udefrag "-esystem volume information;temp;recycler" c:</b></p>
-<p>This command defragments the C: volume excluding temporary files on them.</p>
+</p>
 
-<p>Note that <b>-i</b> and <b>-e</b> parameters should be maximum 4096 characters long. 
-The filter is case insensitive. Par example, <span class="path">Temp</span> and 
-<span class="path">temp</span> have the same result. If the option contains spaces inside, 
-enclose them in double quotes, p.a. 
-<span class="path">"-esystem volume information"</span>.</p>
-
-<p>Specifying just the drive letter will cause UltraDefrag
+<p>
+Specifying just the drive letter will cause UltraDefrag
 to defragment the drive. When the operation finishes or you stop the
 program with a Ctrl+C, the program will display the results to the
 console. If you abort the operation with Ctrl+C or close the shell
-window, UltraDefrag will exit safely without destroying any data.</p>
-<p>The console application is also used as context menu handler. When you right click 
+window, UltraDefrag will exit safely without destroying any data.
+</p>
+
+<p>
+The console application is also used as context menu handler. When you right click 
 drive/folder/file icon in Explorer you can select <b>[--- Ultra Defragmenter --]</b> item 
-to defragment selected file.</p>
-<p>You can use the console application in batch files. Par example, you would like to 
-shutdown your system after defragmentation. Store the following code into one file with 
-<b>.cmd</b> extension and click it's icon to start batch processing:</br>
+to defragment selected file.
+</p>
+
+
+<p>
+The best practice is to use the console application in batch scripts. You can define 
+all program's options there and defragment multiple volumes in series by typing a single command. 
+Here is the complete example. To try them store the code into <span class="path">ud-example.cmd</span> 
+file and click it's icon.
+</p>
 <pre style="border: 2px solid; background-color: black; color: white;">
 @echo off
+
+set UD_EX_FILTER=system volume information;temp;recycler
+set UD_SIZELIMIT=50Mb
 udefrag c: > c:\ud.log
+
+set UD_IN_FILTER=My Documents
 udefrag d: >> c:\ud.log
-shutdown -s -t 00
+
+set UD_IN_FILTER=
+udefrag e: >> c:\ud.log
+
 </pre>
+
+<p>The command <span class="path">set UD_IN_FILTER=</span> destroys the specified variable. The 
+appropriate option will have the default value after this command.</p>
+
+<p>
 Batch files are powerful enough, try to insert commands to play sounds after 
 each defragmentation. If you doubt that your volumes are in good state then add 
-<b>chkdsk</b> command too. Aslo you can specify all options in command file once to save 
-your time when you are running defragmenter. Here is an example:
-<pre style="border: 2px solid; background-color: black; color: white;">
-@echo off
-
-REM defrag the c: drive excluding temporary contents
-REM and save the short report to c:\ud.log
-udefrag "-esystem volume information;temp;recycler" c: 
-> c:\ud.log
-
-REM defrag My Documents folder on d: drive excluding
-REM any files larger than ~10 Mb;
-REM append the short report to c:\ud.log file
-udefrag "-iMy Documents" -s10000000 d: >> c:\ud.log
-</pre>
+<span class="path">chkdsk</span> command too. Also you can use 
+<span class="path">shutdown -s -t 00</span> command to halt your computer after 
+the defragmentation job. 
 </p>
+
 <p>To get list of available volumes type <span class="path">udefrag -l</span>. 
 Each line of output contains volume letter, type of file system, total size and percent 
 of free space. Here is an example:
