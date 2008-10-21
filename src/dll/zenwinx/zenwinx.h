@@ -120,4 +120,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
 size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
 void   __stdcall winx_fclose(WINX_FILE *f);
 
+int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
+int __stdcall winx_set_env_variable(short *name, short *value);
+
 #endif /* _ZENWINX_H_ */
