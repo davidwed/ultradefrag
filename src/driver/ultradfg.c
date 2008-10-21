@@ -323,22 +323,7 @@ BOOLEAN is_device_busy(UDEFRAG_DEVICE_EXTENSION *dx)
 	KeReleaseSpinLock(&dx->spin_lock,oldIrql);
 	return FALSE;
 }
-/*
-void QueryEnvVariable(short *name, short *buffer, int bytes)
-{
-	UNICODE_STRING n, v;
-	NTSTATUS Status;
-	
-	RtlInitUnicodeString(&n,name);
-	v.Buffer = buffer;
-	v.Length = 0;
-	v.MaximumLength = bytes;
-	Status = RtlQueryEnvironmentVariable_U(NULL,&n,&v);
-	if(!NT_SUCCESS(Status))
-		DebugPrint("Can't query %ws environment variable: %x!",
-				name,(UINT)Status);
-}
-*/
+
 void ReloadSettings(void)
 {
 	short *b;
