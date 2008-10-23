@@ -50,6 +50,8 @@ DWORD dbgprint_level = DBG_NORMAL;
 short env_buffer[8192];
 char  bf[8192];
 
+#define ENV_BUF_SIZE (sizeof(env_buffer) / sizeof(short))
+
 extern BOOL n_ioctl(HANDLE handle,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
@@ -72,17 +74,17 @@ int __stdcall udefrag_load_settings()
 	* Since 2.0.0 version all options will be received 
 	* from the Environment.
 	*/
-	if(winx_query_env_variable(L"UD_IN_FILTER",env_buffer,sizeof(env_buffer)) >= 0)
+	if(winx_query_env_variable(L"UD_IN_FILTER",env_buffer,ENV_BUF_SIZE) >= 0)
 		wcsncpy(in_filter,env_buffer,MAX_FILTER_SIZE);
 	else
 		winx_pop_error(NULL,0);
 
-	if(winx_query_env_variable(L"UD_EX_FILTER",env_buffer,sizeof(env_buffer)) >= 0)
+	if(winx_query_env_variable(L"UD_EX_FILTER",env_buffer,ENV_BUF_SIZE) >= 0)
 		wcsncpy(ex_filter,env_buffer,MAX_FILTER_SIZE);
 	else
 		winx_pop_error(NULL,0);
 	
-	if(winx_query_env_variable(L"UD_SIZELIMIT",env_buffer,sizeof(env_buffer)) >= 0){
+	if(winx_query_env_variable(L"UD_SIZELIMIT",env_buffer,ENV_BUF_SIZE) >= 0){
 		RtlInitUnicodeString(&us,env_buffer);
 		if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) == STATUS_SUCCESS){
 			dfbsize2(as.Buffer,&sizelimit);
@@ -92,18 +94,18 @@ int __stdcall udefrag_load_settings()
 		winx_pop_error(NULL,0);
 	}
 
-	if(winx_query_env_variable(L"UD_REFRESH_INTERVAL",env_buffer,sizeof(env_buffer)) >= 0)
+	if(winx_query_env_variable(L"UD_REFRESH_INTERVAL",env_buffer,ENV_BUF_SIZE) >= 0)
 		refresh_interval = _wtoi(env_buffer);
 	else
 		winx_pop_error(NULL,0);
 
-	if(winx_query_env_variable(L"UD_DISABLE_REPORTS",env_buffer,sizeof(env_buffer)) >= 0) {
+	if(winx_query_env_variable(L"UD_DISABLE_REPORTS",env_buffer,ENV_BUF_SIZE) >= 0) {
 		if(!wcscmp(env_buffer,L"1")) report_type = NO_REPORT;
 	} else {
 		winx_pop_error(NULL,0);
 	}
 
-	if(winx_query_env_variable(L"UD_DBGPRINT_LEVEL",env_buffer,sizeof(env_buffer)) >= 0){
+	if(winx_query_env_variable(L"UD_DBGPRINT_LEVEL",env_buffer,ENV_BUF_SIZE) >= 0){
 		_wcsupr(env_buffer);
 		if(!wcscmp(env_buffer,L"DETAILED"))
 			dbgprint_level = DBG_DETAILED;
@@ -114,7 +116,6 @@ int __stdcall udefrag_load_settings()
 	} else {
 		winx_pop_error(NULL,0);
 	}
-
 	return 0;
 }
 

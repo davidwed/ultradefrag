@@ -75,10 +75,12 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 * SYNOPSIS
 *    error = winx_set_env_variable(name, value);
 * FUNCTION
-*    Sets the specified environment variable.
+*    Sets the specified environment variable 
+*    for the current process.
 * INPUTS
 *    name  - variable name
-*    value - value string
+*    value - value string (NULL if you wish to delete 
+*            the variable)
 * RESULT
 *    If the function succeeds, the return value is zero.
 *    Otherwise - negative value.
@@ -96,8 +98,12 @@ int __stdcall winx_set_env_variable(short *name, short *value)
 	NTSTATUS status;
 
 	RtlInitUnicodeString(&n,name);
-	RtlInitUnicodeString(&v,value);
-	status = RtlSetEnvironmentVariable(NULL,&n,&v);
+	if(value){
+		RtlInitUnicodeString(&v,value);
+		status = RtlSetEnvironmentVariable(NULL,&n,&v);
+	} else {
+		status = RtlSetEnvironmentVariable(NULL,&n,NULL);
+	}
 	if(!NT_SUCCESS(status)){
 		winx_push_error("Can't set %ws environment variable: %x!",
 				name,(UINT)status);

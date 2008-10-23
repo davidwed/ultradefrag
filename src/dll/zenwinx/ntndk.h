@@ -32,6 +32,15 @@ typedef KAFFINITY *PKAFFINITY;
 typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
 #endif
 
+#ifndef NOMINMAX
+#ifndef max
+#define max(a,b) ((a)>(b)?(a):(b))
+#endif
+#ifndef min
+#define min(a,b) ((a)<(b)?(a):(b))
+#endif
+#endif
+
 /* define status codes */
 /* ifndef directives are used to prevent warnings when gcc on mingw is used */
 typedef LONG NTSTATUS;
