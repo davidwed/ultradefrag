@@ -41,8 +41,15 @@ int i = 0,j = 0,k; /* number of '-' */
 char buffer[256];
 int udefrag_initialized = FALSE;
 
+int echo_flag = 1;
+
 short file_buffer[32768];
 short line_buffer[32768];
+short name_buffer[128];
+short value_buffer[4096];
+
+#define NAME_BUF_SIZE (sizeof(name_buffer) / sizeof(short))
+#define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
 #define USAGE  "Supported commands:\n" \
 		"  analyse X:\n" \
@@ -169,14 +176,14 @@ void Cleanup()
 	}
 }
 
-void DisplayAvailableVolumes(void)
+void DisplayAvailableVolumes(int skip_removable)
 {
 	volume_info *v;
 	int n;
 	char err_msg[ERR_MSG_SIZE];
 
 	winx_printf("Available drive letters:   ");
-	if(udefrag_get_avail_volumes(&v,FALSE) < 0){
+	if(udefrag_get_avail_volumes(&v,skip_removable) < 0){
 		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
 		winx_printf("\nERROR: %s\n",err_msg);
 	} else {
@@ -194,6 +201,12 @@ void ProcessVolume(char letter,char command)
 	int status = 0;
 	char err_msg[ERR_MSG_SIZE];
 
+	if(udefrag_reload_settings() < 0){
+		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",err_msg);
+		return;
+	}
+	
 	i = j = 0;
 	last_op = 0;
 	winx_printf("\nPreparing to ");
@@ -225,9 +238,136 @@ void ProcessVolume(char letter,char command)
 	}
 }
 
+void ExtractToken(short *dest, short *src, int max_chars)
+{
+	signed int i,cnt;
+	short ch;
+	
+	cnt = 0;
+	for(i = 0; i < max_chars; i++){
+		ch = src[i];
+		/* skip spaces and tabs in the beginning */
+		if((ch != 0x20 && ch != '\t') || cnt){
+			dest[cnt] = ch;
+			cnt++;
+		}
+	}
+	dest[cnt] = 0;
+	/* remove spaces and tabs from the end */
+	if(cnt == 0) return;
+	for(i = (cnt - 1); i >= 0; i--){
+		ch = dest[i];
+		if(ch != 0x20 && ch != '\t') break;
+		dest[i] = 0;
+	}
+}
+
+void SetEnvVariable()
+{
+	short *eq_pos;
+	int name_len, value_len;
+	short *val = value_buffer;
+	char buffer[ERR_MSG_SIZE];
+	
+	/* find the equality sign */
+	eq_pos = wcschr(line_buffer,'=');
+	if(!eq_pos){
+		winx_printf("\nThere is no name-value pair specified!\n\n");
+		return;
+	}
+	/* extract a name-value pair */
+	name_buffer[0] = value_buffer[0] = 0;
+	name_len = (int)(LONG_PTR)(eq_pos - line_buffer - wcslen(L"set"));
+	value_len = (int)(LONG_PTR)(line_buffer + wcslen(line_buffer) - eq_pos - 1);
+	ExtractToken(name_buffer,line_buffer + wcslen(L"set"),min(name_len,NAME_BUF_SIZE - 1));
+	ExtractToken(value_buffer,eq_pos + 1,min(value_len,VALUE_BUF_SIZE - 1));
+	_wcsupr(name_buffer);
+	if(!name_buffer[0]){
+		winx_printf("\nVariable name is not specified!\n\n");
+		return;
+	}
+	if(!value_buffer[0]) val = NULL;
+	if(winx_set_env_variable(name_buffer,val) < 0){
+		winx_pop_error(buffer,ERR_MSG_SIZE);
+		winx_printf("\nERROR: %s\n",buffer);
+	}
+}
+
 void ParseCommand()
 {
-	winx_printf("%ws\n", line_buffer);
+	int echo_cmd = 0;
+	int comment_flag = 0;
+	int a_flag = 0, o_flag = 0;
+	char letter = 0, command = 'd';
+	short *pos;
+	
+	/* supported commands: @echo, set, udefrag, exit, shutdown, reboot */
+	/* TODO: skip leading spaces and tabs */
+	/* check for comment */
+	if(line_buffer[0] == ';' || line_buffer[0] == '#') comment_flag = 1;
+	/* check for an empty string */
+	if(!line_buffer[0]) comment_flag = 1;
+	/* check for @echo command */
+	if((short *)wcsstr(line_buffer,L"@echo on") == line_buffer){
+		echo_flag = 1; echo_cmd = 1;
+	}
+	if((short *)wcsstr(line_buffer,L"@echo off") == line_buffer){
+		echo_flag = 0; echo_cmd = 1;
+	}
+	if(echo_flag && !echo_cmd) winx_printf("%ws\n", line_buffer);
+	if(echo_cmd || comment_flag) return;
+	/* check for set command */
+	if((short *)wcsstr(line_buffer,L"set") == line_buffer){
+		SetEnvVariable();
+		return;
+	}
+	/* handle udefrag command */
+	if((short *)wcsstr(line_buffer,L"udefrag") == line_buffer){
+		if(wcsstr(line_buffer,L"-la")){
+			DisplayAvailableVolumes(FALSE);
+			return;
+		}
+		if(wcsstr(line_buffer,L"-l")){
+			DisplayAvailableVolumes(TRUE);
+			return;
+		}
+		if(wcsstr(line_buffer,L"-a")) a_flag = 1;
+		if(wcsstr(line_buffer,L"-o")) o_flag = 1;
+		/* find volume letter */
+		pos = (short *)wcschr(line_buffer,':');
+		if(pos > line_buffer) letter = (char)pos[-1];
+		if(!letter){
+			winx_printf("\nNo volume letter specified!\n\n");
+			return;
+		}
+		if(a_flag) command = 'a';
+		else if(o_flag) command = 'c';
+		ProcessVolume(letter,command);
+		/* if an operation was aborted then exit */
+		if(abort_flag) goto break_execution;
+		return;
+	}
+	/* handle exit command */
+	if((short *)wcsstr(line_buffer,L"exit") == line_buffer){
+break_execution:
+		HandleError(L"",0);
+		return;
+	}
+	/* handle shutdown command */
+	if((short *)wcsstr(line_buffer,L"shutdown") == line_buffer){
+		winx_printf("Shutdown ...");
+		Cleanup();
+		winx_shutdown();
+		return;
+	}
+	/* handle reboot command */
+	if((short *)wcsstr(line_buffer,L"reboot") == line_buffer){
+		winx_printf("Reboot ...");
+		Cleanup();
+		winx_reboot();
+		return;
+	}
+	winx_printf("\nUnknown command!\n\n");
 }
 
 void __stdcall NtProcessStartup(PPEB Peb)
@@ -387,7 +527,7 @@ cmdloop:
 			ProcessVolume(arg[0],'c');
 			continue;
 		case 7:
-			DisplayAvailableVolumes();
+			DisplayAvailableVolumes(FALSE);
 			continue;
 		case 8:
 			winx_printf(USAGE);

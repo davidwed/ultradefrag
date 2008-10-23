@@ -454,6 +454,7 @@ skip_boot_time_inst:
 
   DetailPrint "Install scripts..."
   File "${ROOTDIR}\src\installer\ud-config.cmd"
+  File "${ROOTDIR}\src\installer\boot-config.cmd"
 
   DetailPrint "Install console interface..."
   File "udefrag.exe"
@@ -775,6 +776,7 @@ Section "Uninstall"
 
   DetailPrint "Uninstall scripts and console interface..."
   Delete "$SYSDIR\ud-config.cmd"
+  Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\udefrag.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
