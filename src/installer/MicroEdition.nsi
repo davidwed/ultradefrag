@@ -220,23 +220,6 @@ Section "Ultra Defrag core files (required)" SecCore
   DetailPrint "Install console interface..."
   File "udefrag.exe"
 
-  ; register cfg file extension
-  ClearErrors
-  ReadRegStr $R0 HKCR ".cfg" ""
-  IfErrors 0 cfg_registered
-  WriteRegStr HKCR ".cfg" "" "ConfigFile"
-  WriteRegStr HKCR "ConfigFile" "" "Configuration File"
-  WriteRegStr HKCR "ConfigFile\shell\open" "" "Open"
-  WriteRegStr HKCR "ConfigFile\DefaultIcon" "" "shell32.dll,0"
-!if ${ULTRADFGARCH} == 'i386'
-  WriteRegStr HKCR "ConfigFile\shell\open\command" "" "$SYSDIR\notepad.exe %1"
-!else
-  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
-  WriteRegStr HKCR "ConfigFile\shell\open\command" "" "notepad.exe %1"
-!endif
-cfg_registered:
-
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
   StrCpy $R0 "SYSTEM\CurrentControlSet"
@@ -271,11 +254,11 @@ cfg_registered:
   RMDir /r "$INSTDIR\presets"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
 
-  ; create configuration file if it doesn't exist
-  SetOutPath "$INSTDIR\options"
-  IfFileExists "$INSTDIR\options\udefrag.cfg" cfg_ok 0
-  File "${ROOTDIR}\src\installer\udefrag.cfg"
-cfg_ok:
+  ; create boot time script if it doesn't exist
+  SetOutPath "$SYSDIR"
+  IfFileExists "$SYSDIR\ud-boot-time.cmd" bt_ok 0
+  File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
+bt_ok:
 
 !insertmacro EnableX64FSRedirection
 

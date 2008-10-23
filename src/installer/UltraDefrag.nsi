@@ -324,26 +324,21 @@ Function PortableRun
   ; make a backup copy of all installed configuration files
   Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
   Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
-  Rename "$INSTDIR\options\udefrag.cfg" "$INSTDIR\options\udefrag.cfg.bak"
   Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
   ; perform silent installation
   ExecWait '"$EXEPATH" /S'
   ; replace configuration files with files contained in portable directory
   CopyFiles /SILENT "$EXEDIR\guiopts.lua" "$INSTDIR\options"
   CopyFiles /SILENT "$EXEDIR\udreportopts.lua" "$INSTDIR\options"
-  CopyFiles /SILENT "$EXEDIR\udefrag.cfg" "$INSTDIR\options"
   ; start ultradefrag gui
   ExecWait "$INSTDIR\dfrg.exe"
   ; move configuration files to portable directory
   Delete "$EXEDIR\guiopts.lua"
   Delete "$EXEDIR\udreportopts.lua"
-  Delete "$EXEDIR\udefrag.cfg"
   Rename "$INSTDIR\options\guiopts.lua" "$EXEDIR\guiopts.lua"
-  Rename "$INSTDIR\options\udefrag.cfg" "$EXEDIR\udefrag.cfg"
   Rename "$INSTDIR\options\udreportopts.lua" "$EXEDIR\udreportopts.lua"
   ; restore all original configuration files
   Rename "$INSTDIR\options\guiopts.lua.bak" "$INSTDIR\options\guiopts.lua"
-  Rename "$INSTDIR\options\udefrag.cfg.bak" "$INSTDIR\options\udefrag.cfg"
   Rename "$INSTDIR\options\udreportopts.lua.bak" "$INSTDIR\options\udreportopts.lua"
   Delete "$INSTDIR\ud_i18n.lng"
   Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
@@ -529,23 +524,6 @@ lua_registered:
 !endif
 lng_registered:
 
-  ; register cfg file extension
-  ClearErrors
-  ReadRegStr $R0 HKCR ".cfg" ""
-  IfErrors 0 cfg_registered
-  WriteRegStr HKCR ".cfg" "" "ConfigFile"
-  WriteRegStr HKCR "ConfigFile" "" "Configuration File"
-  WriteRegStr HKCR "ConfigFile\shell\open" "" "Open"
-  WriteRegStr HKCR "ConfigFile\DefaultIcon" "" "shell32.dll,0"
-!if ${ULTRADFGARCH} == 'i386'
-  WriteRegStr HKCR "ConfigFile\shell\open\command" "" "$SYSDIR\notepad.exe %1"
-!else
-  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
-  WriteRegStr HKCR "ConfigFile\shell\open\command" "" "notepad.exe %1"
-!endif
-cfg_registered:
-
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
   StrCpy $R0 "SYSTEM\CurrentControlSet"
@@ -585,13 +563,11 @@ cfg_registered:
   RMDir /r "$INSTDIR\presets"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
   
-  ; create configuration file if it doesn't exist
-  ;;ExecWait '"$INSTDIR\Dfrg.exe" /I'
-  SetOutPath "$INSTDIR\options"
-  IfFileExists "$INSTDIR\options\udefrag.cfg" cfg_ok 0
-  File "${ROOTDIR}\src\installer\udefrag.cfg"
-cfg_ok:
-  ;DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
+  ; create boot time script if it doesn't exist
+  SetOutPath "$SYSDIR"
+  IfFileExists "$SYSDIR\ud-boot-time.cmd" bt_ok 0
+  File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
+bt_ok:
 
 !insertmacro EnableX64FSRedirection
 

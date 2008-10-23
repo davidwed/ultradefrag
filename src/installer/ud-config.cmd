@@ -1,2 +1,2 @@
 @echo off
-notepad %windir%\UltraDefrag\options\udefrag.cfg
+notepad %windir%\system32\ud-boot-time.cmd

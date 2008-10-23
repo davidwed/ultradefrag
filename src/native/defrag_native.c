@@ -303,7 +303,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_printf("\nERROR: %s\n",buffer);
 		goto cmdloop;
 	}
-	strncat(filename,"\\system32\\ud-boot-time.sh",
+	strncat(filename,"\\system32\\ud-boot-time.cmd",
 			MAX_PATH - strlen(filename) - 1);
 	f = winx_fopen(filename,"r");
 	if(!f){
