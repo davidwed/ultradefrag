@@ -29,6 +29,7 @@ int skip_removable = TRUE;
 
 char buffer[MAX_PATH];
 
+#if 0 /* in 2.0.0 this dialog is not useful */
 BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	/* When a portable app launches gui the current directory points to a temp dir. */
@@ -69,6 +70,7 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	}
 	return FALSE;
 }
+#endif
 
 static int getint(lua_State *L, char *variable)
 {
