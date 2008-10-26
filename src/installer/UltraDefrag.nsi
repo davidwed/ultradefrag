@@ -666,20 +666,28 @@ Section "Shortcuts" SecShortcuts
 
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
+  CreateDirectory "$R0\Boot time options"
+  CreateDirectory "$R0\Preferences"
+  CreateDirectory "$R0\Documentation"
 
-  CreateShortCut "$R0\Enable boot time scan.lnk" \
+  CreateShortCut "$R0\Boot time options\Enable boot time scan.lnk" \
    "$SYSDIR\bootexctrl.exe" "/r defrag_native"
-  CreateShortCut "$R0\Disable boot time scan.lnk" \
+  CreateShortCut "$R0\Boot time options\Disable boot time scan.lnk" \
    "$SYSDIR\bootexctrl.exe" "/u defrag_native"
+  CreateShortCut "$R0\Boot time options\Edit boot time script.lnk" \
+   "$SYSDIR\notepad.exe" "$SYSDIR\ud-boot-time.cmd"
+
+  CreateShortCut "$R0\Preferences\Edit report options.lnk" \
+   "$SYSDIR\notepad.exe" "$INSTDIR\options\udreportopts.lua"
 
   CreateShortCut "$R0\UltraDefrag.lnk" \
    "$INSTDIR\Dfrg.exe"
 
-  CreateShortCut "$R0\LICENSE.lnk" \
+  CreateShortCut "$R0\Documentation\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"
-  CreateShortCut "$R0\README.lnk" \
+  CreateShortCut "$R0\Documentation\README.lnk" \
    "$INSTDIR\README.TXT"
-  CreateShortCut "$R0\FAQ.lnk" \
+  CreateShortCut "$R0\Documentation\FAQ.lnk" \
    "$INSTDIR\FAQ.TXT"
 
   StrCmp $SchedulerNETinstalled '1' 0 no_sched_net
@@ -688,12 +696,12 @@ Section "Shortcuts" SecShortcuts
 no_sched_net:
 
   StrCmp $DocsInstalled '1' 0 no_docs
-  WriteINIStr "$R0\User manual.url" "InternetShortcut" "URL" "file://$INSTDIR\doc\manual.html"
+  WriteINIStr "$R0\Documentation\User manual.url" "InternetShortcut" "URL" "file://$INSTDIR\doc\manual.html"
   goto doc_url_ok
 no_docs:
-  WriteINIStr "$R0\User manual.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/manual.html"
+  WriteINIStr "$R0\Documentation\User manual.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/manual.html"
 doc_url_ok:
-  WriteINIStr "$R0\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
+  WriteINIStr "$R0\Documentation\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
 
   CreateShortCut "$R0\Uninstall UltraDefrag.lnk" \
    "$INSTDIR\uninstall.exe"

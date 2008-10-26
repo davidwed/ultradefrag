@@ -11,6 +11,7 @@ HISTORY
     - gui program was translated into the following languages:
       
     - boot-on, boot-off, ud-config scripts were added
+    - few useful shortcuts were added
 
                                     ***
 
