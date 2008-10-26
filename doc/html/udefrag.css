@@ -35,13 +35,13 @@ a:visited {
 	text-align: center;
 }
 
-.path {
+.code {
 	font-family: monospace;
 	font-size: 10pt;
 	font-weight: bold;
 }
 
-.lpath{
+.lcode{
 	font-family: monospace;
 	font-size: 10pt;
 }
