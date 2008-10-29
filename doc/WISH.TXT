@@ -30,3 +30,6 @@ User's wishes for the next releases:
 14. make Lua package built with ddk compatible with standard Lua package
 
 15. process hard ntfs links correctly
+
+16. make a graphical gui configurator
+
