@@ -61,7 +61,7 @@ my $mw = MainWindow->new();
 $mw->wm('geometry', '527x350+'.$opts{'x'}.'+'.$opts{'y'});
 my $appicon = &img(0);
 my $icon = $mw->Photo('image',-data=>$appicon,format=>'gif');
-$mw->title('UltraDefrag v1.2.2 modern user interface');
+$mw->title('UltraDefrag v2.0.0 modern user interface');
 $mw->iconimage($icon);
 #display_error("привет!"); # incorrect appearance
 $mw->bind(
@@ -73,10 +73,9 @@ $mw->bind(
 Win32::API->Import('udefrag','udefrag_init','N','I') or \
 	display_critical_error('Can\'t import functions from udefrag.dll!');
 Win32::API->Import('udefrag','int udefrag_unload()');
-Win32::API->Import('udefrag','udefrag_analyse','CK','I');
-Win32::API->Import('udefrag','udefrag_defragment','CK','I');
-Win32::API->Import('udefrag','udefrag_optimize','CK','I');
-Win32::API->Import('udefrag','char* udefrag_get_command_result()');
+Win32::API->Import('udefrag','udefrag_s_analyse','CK','I');
+Win32::API->Import('udefrag','udefrag_s_defragment','CK','I');
+Win32::API->Import('udefrag','udefrag_s_optimize','CK','I');
 Win32::API->Import('udefrag','int udefrag_stop()');
 Win32::API->Import('udefrag','char* udefrag_s_get_avail_volumes(int skip_removable)');
 Win32::API->Import('udefrag','char* udefrag_s_get_map(int size)');
@@ -217,12 +216,6 @@ print $_[0]."\n";
 	}
 	$map->update();
 	#DoOneEvent(); #??
-	if($_[0] ne 0){
-		$_ = udefrag_get_command_result();
-		if(length($_) > 1){
-			display_error($_);
-		}
-	}
 	return 0;
 };
 
@@ -332,7 +325,7 @@ sub analyse {
 	if(!@sel){ return; }
 	$row = $sel[0];
 	$letter = $list->itemCget($row, 0, 'text');
-	if(udefrag_analyse($letter, $update_map_callback) < 0){
+	if(udefrag_s_analyse($letter, $update_map_callback) < 0){
 		udefrag_pop_error(0,0);
 	}
 }
@@ -364,7 +357,7 @@ sub aboutbox {
 		-height => '147'
 		);
 	my $msg = $a->Label(
-		-text => "Ultra Defragmenter version 1.4.0\n\nCopyright (C) 2007,2008\n\nUltraDefrag Development Team\n"
+		-text => "Ultra Defragmenter version 2.0.0\n\nCopyright (C) 2007,2008\n\nUltraDefrag Development Team\n"
 		);
 	my $credits = $a->Button(
 		-text => 'Credits',

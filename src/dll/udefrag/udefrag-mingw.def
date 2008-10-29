@@ -4,11 +4,10 @@ EXPORTS
 	udefrag_init@4
 	udefrag_unload@0
 	udefrag_reload_settings@0
-	udefrag_analyse@8
-	udefrag_defragment@8
-	udefrag_optimize@8
-	udefrag_get_command_result@0
-	udefrag_get_command_result_w@0
+	udefrag_s_analyse@8
+	udefrag_s_defragment@8
+	udefrag_s_optimize@8
+	udefrag_send_command_ex@12
 	udefrag_stop@0
 	udefrag_get_progress@8
 	udefrag_get_map@8

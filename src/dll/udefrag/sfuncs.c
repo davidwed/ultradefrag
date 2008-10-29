@@ -143,3 +143,18 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 		vlist[strlen(vlist) - 1] = 0;
 	return vlist;
 }
+
+int __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc)
+{
+	return udefrag_send_command_ex('a',letter,sproc);
+}
+
+int __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc)
+{
+	return udefrag_send_command_ex('d',letter,sproc);
+}
+
+int __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc)
+{
+	return udefrag_send_command_ex('c',letter,sproc);
+}

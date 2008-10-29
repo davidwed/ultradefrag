@@ -49,19 +49,13 @@ extern int refresh_interval;
 unsigned char c, lett;
 BOOL done_flag;
 char error_message[ERR_MSG_SIZE];
-short error_message_w[ERR_MSG_SIZE];
 
 /* internal functions prototypes */
-BOOL udefrag_send_command(unsigned char command,unsigned char letter);
-BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
-BOOL n_create_event(HANDLE *pHandle,short *name);
+int udefrag_send_command(unsigned char command,unsigned char letter);
 BOOL n_ioctl(HANDLE handle,ULONG code,
 			PVOID in_buf,ULONG in_size,
 			PVOID out_buf,ULONG out_size,
 			char *err_format_string);
-int __stdcall udefrag_set_options(void);
-
-int get_configfile_location(void);
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
@@ -199,9 +193,7 @@ int __stdcall udefrag_init(long map_size)
 	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_CLUSTER_MAP_SIZE,
 		&map_size,sizeof(long),NULL,0,
 		"Can't setup cluster map buffer: %x!")) goto init_fail;
-	/* 7a. */
-	//if(get_configfile_location() < 0) goto init_fail;
-	/* 7b. Load settings */
+	/* 7. Load settings */
 	if(udefrag_reload_settings() < 0) goto init_fail;
 	return 0;
 init_fail:
@@ -263,58 +255,41 @@ int __stdcall udefrag_unload(void)
 /* you can send only one command at the same time */
 DWORD WINAPI send_command(LPVOID unused)
 {
-	ANSI_STRING aStr;
-	UNICODE_STRING uStr;
-	char fmt_error[] = "Can't format message!";
-
-	if(!udefrag_send_command(c,lett))
-		winx_pop_werror(error_message_w,ERR_MSG_SIZE);
-	else
-		wcscpy(error_message_w,L"?");
-
-	/* convert string to ansi */
-	RtlInitUnicodeString(&uStr,error_message_w);
-	aStr.Buffer = error_message;
-	aStr.Length = 0;
-	aStr.MaximumLength = ERR_MSG_SIZE - 1;
-	if(RtlUnicodeStringToAnsiString(&aStr,&uStr,FALSE) != STATUS_SUCCESS)
-		strcpy(error_message,fmt_error);
+	if(udefrag_send_command(c,lett) < 0){
+		/* save error message */
+		winx_save_error(error_message,ERR_MSG_SIZE);
+	}
 	done_flag = TRUE;
 	winx_exit_thread();
 	return 0;
 }
 
-BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc)
+int udefrag_send_command(unsigned char command,unsigned char letter)
 {
-	if(!sproc){
-		/* send command directly and return */
-		return udefrag_send_command(command,letter) ? TRUE : FALSE;
+	char cmd[32];
+
+	if(!init_event){
+		winx_push_error("Udefrag.dll \'%c\' call without initialization!",command);
+		return (-1);
 	}
-	done_flag = FALSE; strcpy(error_message,"?"); wcscpy(error_message_w,L"?");
-	/* create a thread for driver command processing */
-	c = command; lett = letter;
-	if(winx_create_thread(send_command,NULL) < 0)
-		return FALSE;
-	/*
-	* Call specified callback 
-	* every (settings.refresh_interval) milliseconds.
-	*/
-	do {
-		winx_sleep(refresh_interval);
-		sproc(FALSE);
-	} while(!done_flag);
-	sproc(TRUE);
-	return TRUE;
+	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
+
+	/* FIXME: detailed error message! 
+	"Can't execute driver command \'%c\' for volume %c: %x!" */
+	return winx_fwrite(cmd,strlen(cmd),1,f_ud) ? 0 : (-1);
 }
 
-/****f* udefrag.common/udefrag_analyse
+/****f* udefrag.common/udefrag_send_command_ex
 * NAME
-*    udefrag_analyse
+*    udefrag_send_command_ex
 * SYNOPSIS
-*    error = udefrag_analyse(letter, callback);
+*    error = udefrag_send_command_ex(cmd, letter, callback);
 * FUNCTION
-*    Sends the 'Analyse' command to the driver.
+*    Sends the 'Analyse | Defragment | Optimize' 
+*    command to the driver.
 * INPUTS
+*    cmd      - command: 'a' for Analyse, 'd' for Defragmentation,
+*               'c' for Optimization
 *    letter   - volume letter
 *    callback - address of the callback function;
 *               see prototype in udefrag.h header;
@@ -327,94 +302,40 @@ BOOL udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDA
 *        printf("udefrag_analyse() call unsuccessful!");
 *        printf("\n\n%s\n",buffer);
 *    }
-* SEE ALSO
-*    udefrag_defragment, udefrag_optimize, udefrag_stop
+* NOTES
+*    Use udefrag_analyse, udefrag_defragment, udefrag_optimize
+*    macro definitions instead.
 ******/
-int __stdcall udefrag_analyse(unsigned char letter,STATUPDATEPROC sproc)
+int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc)
 {
-	return udefrag_send_command_ex('a',letter,sproc) ? 0 : (-1);
-}
-
-/****f* udefrag.common/udefrag_defragment
-* NAME
-*    udefrag_defragment
-* SYNOPSIS
-*    error = udefrag_defragment(letter, callback);
-* FUNCTION
-*    Sends the 'Defragment' command to the driver.
-*    For more details see udefrag_analyse() description.
-* SEE ALSO
-*    udefrag_analyse, udefrag_optimize, udefrag_stop
-******/
-int __stdcall udefrag_defragment(unsigned char letter,STATUPDATEPROC sproc)
-{
-	return udefrag_send_command_ex('d',letter,sproc) ? 0 : (-1);
-}
-
-/****f* udefrag.common/udefrag_optimize
-* NAME
-*    udefrag_optimize
-* SYNOPSIS
-*    error = udefrag_optimize(letter, callback);
-* FUNCTION
-*    Sends the 'Optimize' command to the driver.
-*    For more details see udefrag_analyse() description.
-* SEE ALSO
-*    udefrag_analyse, udefrag_defragment, udefrag_stop
-******/
-int __stdcall udefrag_optimize(unsigned char letter,STATUPDATEPROC sproc)
-{
-	return udefrag_send_command_ex('c',letter,sproc) ? 0 : (-1);
-}
-
-/****f* udefrag.common/udefrag_get_command_result
-* NAME
-*    udefrag_get_command_result
-* SYNOPSIS
-*    message = udefrag_get_command_result();
-* FUNCTION
-*    Retrieves the error message about the last 
-*    analyse/defragment/optimize call.
-* INPUTS
-*    Nothing.
-* RESULT
-*    message - the string with full error description;
-*              if strlen(message) <= 1 then it was 
-*              a successful call
-* EXAMPLE
-*    int __stdcall update_stat(int df)
-*    {
-*    	char *msg;
-*    
-*    	UpdateProgress();
-*    	if(df == TRUE){ // request is completed
-*    		msg = udefrag_get_command_result();
-*    		if(strlen(msg) > 1)
-*    			printf("\nERROR: %s\n",msg);
-*    	}
-*    	return 0;
-*    }
-* SEE ALSO
-*    udefrag_get_command_result_w
-******/
-char * __stdcall udefrag_get_command_result(void)
-{
-	return error_message;
-}
-
-/****f* udefrag.common/udefrag_get_command_result_w
-* NAME
-*    udefrag_get_command_result_w
-* SYNOPSIS
-*    message = udefrag_get_command_result_w();
-* FUNCTION
-*    Unicode version of udefrag_get_command_result().
-* SEE ALSO
-*    udefrag_get_command_result
-******/
-short * __stdcall udefrag_get_command_result_w(void)
-{
-	return error_message_w;
+	if(!sproc){
+		/* send command directly and return */
+		return udefrag_send_command(command,letter);
+	}
+	done_flag = FALSE;
+	error_message[0] = 0;
+	/* create a thread for driver command processing */
+	c = command; lett = letter;
+	if(winx_create_thread(send_command,NULL) < 0)
+		return (-1);
+	/*
+	* Call specified callback 
+	* every (settings.refresh_interval) milliseconds.
+	*/
+	do {
+		winx_sleep(refresh_interval);
+		sproc(FALSE);
+	} while(!done_flag);
+	sproc(TRUE);
+	/*
+	* If an error occured during the send_command() execution 
+	* then return -1 and an error description.
+	*/
+	if(error_message[0]){
+		winx_restore_error(error_message);
+		return (-1);
+	}
+	return 0;
 }
 
 /****f* udefrag.common/udefrag_stop
@@ -445,21 +366,6 @@ int __stdcall udefrag_stop(void)
 	}
 	/* FIXME: better error messages "Can't stop driver command: %x!" */
 	return winx_fwrite("s",1,1,f_stop) ? 0 : (-1);
-}
-
-BOOL udefrag_send_command(unsigned char command,unsigned char letter)
-{
-	char cmd[32];
-
-	if(!init_event){
-		winx_push_error("Udefrag.dll \'%c\' call without initialization!",command);
-		return FALSE;
-	}
-	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-
-	/* FIXME: detailed error message! 
-	"Can't execute driver command \'%c\' for volume %c: %x!" */
-	return winx_fwrite(cmd,strlen(cmd),1,f_ud) ? TRUE : FALSE;
 }
 
 /****f* udefrag.common/udefrag_get_progress
@@ -596,24 +502,6 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 	sprintf(s,"%u.%02u",ip / 100,ip % 100);
 	strcat(result_msg,s);
 	return result_msg;
-}
-
-BOOL n_create_event(HANDLE *pHandle,short *name)
-{
-	UNICODE_STRING uStr;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	NTSTATUS Status;
-
-	RtlInitUnicodeString(&uStr,name);
-	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
-	Status = NtCreateEvent(pHandle,STANDARD_RIGHTS_ALL | 0x1ff,
-				&ObjectAttributes,SynchronizationEvent,FALSE);
-	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't create %ls event: %x!",name,(UINT)Status);
-		*pHandle = NULL;
-		return FALSE;
-	}
-	return TRUE;
 }
 
 BOOL n_ioctl(HANDLE handle,ULONG code,

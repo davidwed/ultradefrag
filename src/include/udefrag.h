@@ -86,11 +86,16 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable);
  * we should provide callback functions
  */
 typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
-int __stdcall udefrag_analyse(unsigned char letter,STATUPDATEPROC sproc);
-int __stdcall udefrag_defragment(unsigned char letter,STATUPDATEPROC sproc);
-int __stdcall udefrag_optimize(unsigned char letter,STATUPDATEPROC sproc);
-char * __stdcall udefrag_get_command_result(void);
-short * __stdcall udefrag_get_command_result_w(void);
+int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
+int __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
+int __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc);
+int __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc);
+char * __stdcall udefrag_s_get_command_result(void);
+short * __stdcall udefrag_s_get_command_result_w(void);
+
+#define udefrag_analyse(letter,sproc) udefrag_send_command_ex('a',letter,sproc)
+#define udefrag_defragment(letter,sproc) udefrag_send_command_ex('d',letter,sproc)
+#define udefrag_optimize(letter,sproc) udefrag_send_command_ex('c',letter,sproc)
 
 void __stdcall udefrag_pop_error(char *buffer, int size);
 void __stdcall udefrag_pop_werror(short *buffer, int size);

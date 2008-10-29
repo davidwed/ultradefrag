@@ -84,12 +84,12 @@ int __stdcall update_stat(int df)
 	RedrawMap();
 done:
 	if(df == FALSE) return 0;
-	msg = udefrag_get_command_result_w();
+/*	msg = udefrag_get_command_result_w();
 	if(wcslen(msg) > 1){
 		MessageBoxW(0,msg,L"Error!",MB_OK | MB_ICONHAND);
 		return 0;
 	}
-	if(!stop_pressed){
+*/	if(!stop_pressed){
 		sprintf(progress_msg,"%c 100 %%",current_operation);
 		SetProgress(progress_msg,100);
 	}

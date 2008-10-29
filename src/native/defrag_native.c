@@ -155,10 +155,10 @@ int __stdcall update_stat(int df)
 	}
 	UpdateProgress();
 	if(df == TRUE){
-		msg = udefrag_get_command_result();
+/*		msg = udefrag_get_command_result();
 		if(strlen(msg) > 1)
 			winx_printf("\nERROR: %s\n",msg);
-		else if(!abort_flag) /* set progress to 100 % */
+		else */if(!abort_flag) /* set progress to 100 % */
 			for(k = i; k < 50; k++)	winx_putch('-');
 	}
 	return 0;
