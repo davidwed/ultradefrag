@@ -24,6 +24,8 @@
 # NOTE: BUILD_ENV environment variable must be set before this script
 # execution in one of three values: winddk, msvc, mingw.
 
+# WARNING: this script is obsolete, don't use it
+
 use strict;
 use Switch;
 #use Cwd;
