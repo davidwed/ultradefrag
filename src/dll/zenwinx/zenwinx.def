@@ -24,10 +24,13 @@ EXPORTS
 	winx_get_os_version
 	winx_get_windows_directory
 	winx_get_proc_address
+	winx_set_system_error_mode
 	winx_create_thread
 	winx_exit_thread
 	winx_enable_privilege
 	winx_get_drive_type
+	winx_get_volume_size
+	winx_get_filesystem_name
 	winx_fopen
 	winx_fread
 	winx_fwrite

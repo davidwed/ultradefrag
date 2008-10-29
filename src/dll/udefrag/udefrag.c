@@ -266,7 +266,7 @@ DWORD WINAPI send_command(LPVOID unused)
 
 int udefrag_send_command(unsigned char command,unsigned char letter)
 {
-	char cmd[32];
+	char cmd[4];
 
 	if(!init_event){
 		winx_push_error("Udefrag.dll \'%c\' call without initialization!",command);
@@ -515,8 +515,7 @@ BOOL n_ioctl(HANDLE handle,ULONG code,
 	Status = NtDeviceIoControlFile(handle,NULL,
 				NULL,NULL,&IoStatusBlock,code,
 				in_buf,in_size,out_buf,out_size);
-	if(Status == STATUS_PENDING)
-	{
+	if(Status == STATUS_PENDING){
 		Status = NtWaitForSingleObject(handle,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = IoStatusBlock.Status;
 	}

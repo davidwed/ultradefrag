@@ -45,13 +45,18 @@
 *		winx_fread
 *		winx_fwrite
 *		winx_get_drive_type
+*		winx_get_filesystem_name
 *		winx_get_proc_address
+*		winx_get_volume_size
+*		winx_get_windows_directory
 *		winx_getch
 *		winx_getche
 *		winx_gets
 *		winx_init
 *		winx_kbhit
-*		winx_get_windows_directory
+*		winx_query_env_variable
+*		winx_set_env_variable
+*		winx_set_system_error_mode
 */
 
 #ifndef max
@@ -107,6 +112,10 @@ int  __stdcall winx_get_os_version(void);
 int  __stdcall winx_get_windows_directory(char *buffer, int length);
 int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
 
+/* process mode constants */
+#define INTERNAL_SEM_FAILCRITICALERRORS 0
+int  __stdcall winx_set_system_error_mode(unsigned int mode);
+
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
 void __stdcall winx_exit_thread(void);
 
@@ -114,6 +123,8 @@ int  __stdcall winx_enable_privilege(unsigned long luid);
 
 #define DRIVE_ASSIGNED_BY_SUBST_COMMAND 1200
 int __stdcall winx_get_drive_type(char letter);
+int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree);
+int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length);
 
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);

@@ -13,6 +13,7 @@ HISTORY
     - boot-on, boot-off, ud-config scripts were added
     - few useful shortcuts were added
     - udefrag.dll code big optimization was performed
+    - many functions were added to zenwinx.dll
 
                                     ***
 

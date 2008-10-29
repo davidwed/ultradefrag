@@ -35,6 +35,41 @@
 char vlist[4096];
 char map[32768];
 
+/****f* udefrag.volume/scheduler_get_avail_letters
+* NAME
+*    scheduler_get_avail_letters
+* SYNOPSIS
+*    error = scheduler_get_avail_letters(letters);
+* FUNCTION
+*    Retrieves the string containing available letters.
+* INPUTS
+*    letters - buffer to store resulting string into
+* RESULT
+*    error - zero for success; negative value otherwise.
+* EXAMPLE
+*    char letters[32];
+*    if(scheduler_get_avail_letters(letters) < 0){
+*        udefrag_pop_error(buffer,sizeof(buffer));
+*        // handle error
+*    }
+* NOTES
+*    This function skips all removable drives.
+* SEE ALSO
+*    udefrag_get_avail_volumes, udefrag_validate_volume
+******/
+int __stdcall scheduler_get_avail_letters(char *letters)
+{
+	volume_info *v;
+	int i;
+
+	if(udefrag_get_avail_volumes(&v,TRUE)) return (-1);
+	for(i = 0;;i++){
+		letters[i] = v[i].letter;
+		if(v[i].letter == 0) break;
+	}
+	return 0;
+}
+
 /****f* udefrag.scripting/udefrag_s_get_map
 * NAME
 *    udefrag_s_get_map

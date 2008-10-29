@@ -30,6 +30,8 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+#define FS_ATTRIBUTE_BUFFER_SIZE (MAX_PATH * sizeof(WCHAR) + sizeof(FILE_FS_ATTRIBUTE_INFORMATION))
+
 BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile);
 
 /****f* zenwinx.volume/winx_get_drive_type
@@ -52,6 +54,7 @@ BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile);
 *        // handle error here
 *    }
 * SEE ALSO
+*    winx_get_disk_free_space, winx_get_filesystem_name
 ******/
 int __stdcall winx_get_drive_type(char letter)
 {
@@ -161,6 +164,137 @@ int __stdcall winx_get_drive_type(char letter)
 	return DRIVE_UNKNOWN;
 }
 
+/****f* zenwinx.volume/winx_get_volume_size
+* NAME
+*    winx_get_volume_size
+* SYNOPSIS
+*    error = winx_get_volume_size(letter, ptotal, pfree);
+* FUNCTION
+*    Retrieves total size of the specified volume
+*    and free space on them in bytes.
+* INPUTS
+*    letter - volume letter
+*    ptotal - pointer to a variable that receives 
+*             the total number of bytes on the disk
+*    pfree  - Pointer to a variable that receives 
+*             the total number of free bytes on the disk 
+* RESULT
+*    If the function fails, the return value is (-1).
+*    Otherwise it returns zero.
+* EXAMPLE
+*    if(winx_get_volume_size('C',&total,&free) < 0){
+*        winx_pop_error(buffer,sizeof(buffer));
+*        // handle error here
+*    }
+* SEE ALSO
+*    winx_get_drive_type, winx_get_filesystem_name
+******/
+int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree)
+{
+	HANDLE hRoot;
+	NTSTATUS Status;
+	IO_STATUS_BLOCK IoStatusBlock;
+	FILE_FS_SIZE_INFORMATION ffs;
+	
+	letter = (char)toupper((int)letter);
+	if(letter < 'A' || letter > 'Z'){
+		winx_push_error("Invalid volume letter %c!",letter);
+		return (-1);
+	}
+	if(!ptotal || !pfree){
+		winx_push_error("Invalid parameter!");
+		return (-1);
+	}
+
+	if(!internal_open_rootdir(letter,&hRoot)) return (-1);
+	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,&ffs,
+				sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
+	NtClose(hRoot);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't get size of volume \'%c\': %x!",letter,(UINT)Status);
+		return (-1);
+	}
+	
+	ptotal->QuadPart = ffs.TotalAllocationUnits.QuadPart * \
+				ffs.SectorsPerAllocationUnit * ffs.BytesPerSector;
+	pfree->QuadPart = ffs.AvailableAllocationUnits.QuadPart * \
+				ffs.SectorsPerAllocationUnit * ffs.BytesPerSector;
+	return 0;
+}
+
+/****f* zenwinx.volume/winx_get_filesystem_name
+* NAME
+*    winx_get_filesystem_name
+* SYNOPSIS
+*    error = winx_get_filesystem_name(letter, buffer, length);
+* FUNCTION
+*    Retrieves the name of file system containing
+*    on the specified volume.
+* INPUTS
+*    letter - volume letter
+*    buffer - pointer to the buffer to receive
+*             the name of filesystem
+*    length - maximum size of the buffer in characters.
+* RESULT
+*    If the function fails, the return value is (-1).
+*    Otherwise it returns zero.
+* EXAMPLE
+*    if(winx_get_filesystem_name('C',fsname,sizeof(fsname)) < 0){
+*        winx_pop_error(buffer,sizeof(buffer));
+*        // handle error here
+*    }
+* SEE ALSO
+*    winx_get_drive_type, winx_get_disk_free_space
+******/
+int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
+{
+	HANDLE hRoot;
+	NTSTATUS Status;
+	IO_STATUS_BLOCK IoStatusBlock;
+	UCHAR buf[FS_ATTRIBUTE_BUFFER_SIZE];
+	PFILE_FS_ATTRIBUTE_INFORMATION pFileFsAttribute;
+	UNICODE_STRING us;
+	ANSI_STRING as;
+	ULONG len;
+	
+	letter = (char)toupper((int)letter);
+	if(letter < 'A' || letter > 'Z'){
+		winx_push_error("Invalid volume letter %c!",letter);
+		return (-1);
+	}
+	if(!buffer || length <= 0){
+		winx_push_error("Invalid parameter!");
+		return (-1);
+	}
+
+	buffer[0] = 0;
+	if(!internal_open_rootdir(letter,&hRoot)) return (-1);
+	pFileFsAttribute = (PFILE_FS_ATTRIBUTE_INFORMATION)buf;
+	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pFileFsAttribute,
+				FS_ATTRIBUTE_BUFFER_SIZE,FileFsAttributeInformation);
+	NtClose(hRoot);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't get file system name for \'%c\': %x!",letter,(UINT)Status);
+		return (-1);
+	}
+
+	us.Buffer = pFileFsAttribute->FileSystemName;
+	len = pFileFsAttribute->FileSystemNameLength;
+	us.Length = us.MaximumLength = len;
+	
+	as.Buffer = buffer;
+	as.Length = 0;
+	as.MaximumLength = length;
+	if(RtlUnicodeStringToAnsiString(&as,&us,FALSE) != STATUS_SUCCESS){
+		if(length >= 2)
+			strcpy(buffer,"?");
+		else
+			buffer[0] = 0;
+	}
+	return 0;
+}
+
+/* internal function */
 BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 {
 	NTSTATUS Status;

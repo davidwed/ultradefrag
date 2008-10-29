@@ -154,3 +154,47 @@ int __stdcall winx_get_windows_directory(char *buffer, int length)
 	RtlFreeAnsiString(&as);
 	return 0;
 }
+
+/****f* zenwinx.misc/winx_set_system_error_mode
+* NAME
+*    winx_set_system_error_mode
+* SYNOPSIS
+*    error = winx_set_system_error_mode(mode);
+* FUNCTION
+*    SetErrorMode() native analog.
+* INPUTS
+*    mode - process error mode.
+* RESULT
+*    If the function succeeds, the return value is zero.
+*    Otherwise - negative value.
+* EXAMPLE
+*    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0){
+*        winx_pop_error(buffer,sizeof(buffer));
+*        // handle error here
+*    }
+* NOTES
+*    1. Mode constants aren't the same as in SetErrorMode() call.
+*    2. Use INTERNAL_SEM_FAILCRITICALERRORS constant to 
+*    disable the critical-error-handler message box. After that
+*    you can p.a. try to read a missing floppy disk without any 
+*    popup windows displaying error messages.
+*    3. winx_set_system_error_mode(1) call is equal
+*    to SetErrorMode(0).
+*    4. Other mode constants can be found in ReactOS source 
+*    code. They needs to be tested before including into this 
+*    documentation to ensure that they are doing what expected.
+******/
+int __stdcall winx_set_system_error_mode(unsigned int mode)
+{
+	NTSTATUS Status;
+
+	Status = NtSetInformationProcess(NtCurrentProcess(),
+					ProcessDefaultHardErrorMode,
+					(PVOID)&mode,
+					sizeof(int));
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't set error mode %u: %x!",mode,(UINT)Status);
+		return (-1);
+	}
+	return 0;
+}
