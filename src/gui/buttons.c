@@ -113,7 +113,7 @@ void DisableButtonsBeforeTask(void)
 	EnableWindow(hBtnPause,TRUE);
 	EnableWindow(hBtnStop,TRUE);
 	EnableWindow(hBtnRescan,FALSE);
-	EnableWindow(hBtnSettings,FALSE);
+	//EnableWindow(hBtnSettings,FALSE);
 }
 
 void EnableButtonsAfterTask(void)
@@ -125,5 +125,5 @@ void EnableButtonsAfterTask(void)
 	EnableWindow(hBtnPause,FALSE);
 	EnableWindow(hBtnStop,FALSE);
 	EnableWindow(hBtnRescan,TRUE);
-	EnableWindow(hBtnSettings,TRUE);
+	//EnableWindow(hBtnSettings,TRUE);
 }

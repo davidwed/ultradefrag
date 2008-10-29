@@ -31,7 +31,7 @@ IDI_FRAGM               ICON    DISCARDABLE     "res/fragm.ico"
 IDI_CMP                 ICON    DISCARDABLE     "res/cmp.ico"
 IDI_MFT                 ICON    DISCARDABLE     "res/mft.ico"
 
-IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
+//IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/t3.bmp"
 
 IDI_FIXED               ICON    DISCARDABLE     "res/fixed.ico"
@@ -61,7 +61,8 @@ BEGIN
                     WS_TABSTOP
     PUSHBUTTON      "Fragmented",IDC_SHOWFRAGMENTED,133,189,57,10,NOT 
                     WS_TABSTOP
-    PUSHBUTTON      "Settings",IDC_SETTINGS,194,189,54,10,NOT WS_TABSTOP
+    PUSHBUTTON      "Settings",IDC_SETTINGS,194,189,54,10,WS_DISABLED | NOT 
+                    WS_TABSTOP
     PUSHBUTTON      "About",IDC_ABOUT,253,189,54,10,NOT WS_TABSTOP
     CTEXT           "0 %",IDC_PROGRESSMSG,0,200,29,8
     CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
@@ -115,7 +116,7 @@ BEGIN
     PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
                     161,12,BS_FLAT
 END
-
+/*
 IDD_NEW_SETTINGS DIALOG DISCARDABLE  0, 0, 212, 76
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
@@ -128,7 +129,7 @@ BEGIN
     PUSHBUTTON      "Read user manual",IDC_SETTINGS_HELP,81,52,123,14,NOT 
                     WS_TABSTOP
 END
-
+*/
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
     "A",            IDC_ANALYSE,            VIRTKEY, CONTROL, NOINVERT
