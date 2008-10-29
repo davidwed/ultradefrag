@@ -5,7 +5,7 @@ target_type = "console"
 src = { "defrag.c" }
 rc = { "defrag.rc" }
 
-libs = { "ntdll", "kernel32", "msvcrt" }
+libs = { "kernel32", "msvcrt" }
 adlibs ={ "$(UDEFRAG_LIB_PATH)\\udefrag" }
 
 umentry = "wmain"
