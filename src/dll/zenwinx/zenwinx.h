@@ -54,9 +54,11 @@
 *		winx_gets
 *		winx_init
 *		winx_kbhit
+*		winx_load_driver
 *		winx_query_env_variable
 *		winx_set_env_variable
 *		winx_set_system_error_mode
+*		winx_unload_driver
 */
 
 #ifndef max
@@ -115,6 +117,9 @@ int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_a
 /* process mode constants */
 #define INTERNAL_SEM_FAILCRITICALERRORS 0
 int  __stdcall winx_set_system_error_mode(unsigned int mode);
+
+int __stdcall winx_load_driver(short *driver_name);
+int __stdcall winx_unload_driver(short *driver_name);
 
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
 void __stdcall winx_exit_thread(void);

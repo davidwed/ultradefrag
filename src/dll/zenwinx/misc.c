@@ -198,3 +198,90 @@ int __stdcall winx_set_system_error_mode(unsigned int mode)
 	}
 	return 0;
 }
+
+/****f* zenwinx.misc/winx_load_driver
+* NAME
+*    winx_load_driver
+* SYNOPSIS
+*    error = winx_load_driver(driver_name);
+* FUNCTION
+*    Loads the specified driver.
+* INPUTS
+*    driver_name - name of the driver
+* RESULT
+*    If the function succeeds, the return value is zero.
+*    Otherwise - negative value.
+* EXAMPLE
+*    if(winx_load_driver(L"ultradfg") < 0){
+*        winx_pop_error(buffer,sizeof(buffer));
+*        // the UltraDefrag driver cannot be loaded,
+*        // handle error here
+*    }
+* NOTES
+*    If the specified driver is already loaded,
+*    this function returns success.
+* SEE ALSO
+*    winx_unload_driver
+******/
+int __stdcall winx_load_driver(short *driver_name)
+{
+	UNICODE_STRING us;
+	short driver_key[128]; /* enough for any driver registry path */
+	NTSTATUS Status;
+
+	wcscpy(driver_key,L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\");
+	if(wcslen(driver_name) > (128 - wcslen(driver_key) - 1)){
+		winx_push_error("Driver name %ws is too long!", driver_name);
+		return (-1);
+	}
+	wcscat(driver_key,driver_name);
+	RtlInitUnicodeString(&us,driver_key);
+	Status = NtLoadDriver(&us);
+	if(!NT_SUCCESS(Status) && Status != STATUS_IMAGE_ALREADY_LOADED){
+		winx_push_error("Can't load %ws driver: %x!",driver_name,(UINT)Status);
+		return (-1);
+	}
+	return 0;
+}
+
+/****f* zenwinx.misc/winx_unload_driver
+* NAME
+*    winx_unload_driver
+* SYNOPSIS
+*    error = winx_unload_driver(driver_name);
+* FUNCTION
+*    Unloads the specified driver.
+* INPUTS
+*    driver_name - name of the driver
+* RESULT
+*    If the function succeeds, the return value is zero.
+*    Otherwise - negative value.
+* EXAMPLE
+*    if(winx_unload_driver(L"ultradfg") < 0){
+*        winx_pop_error(buffer,sizeof(buffer));
+*        // the UltraDefrag driver cannot be unloaded,
+*        // handle error here
+*    }
+* SEE ALSO
+*    winx_load_driver
+******/
+int __stdcall winx_unload_driver(short *driver_name)
+{
+	UNICODE_STRING us;
+	short driver_key[128]; /* enough for any driver registry path */
+	NTSTATUS Status;
+
+	wcscpy(driver_key,L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\");
+	if(wcslen(driver_name) > (128 - wcslen(driver_key) - 1)){
+		winx_push_error("Driver name %ws is too long!", driver_name);
+		return (-1);
+	}
+	wcscat(driver_key,driver_name);
+	RtlInitUnicodeString(&us,driver_key);
+	Status = NtUnloadDriver(&us);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("Can't unload %ws driver: %x!",driver_name,(UINT)Status);
+		return (-1);
+	}
+	return 0;
+}

@@ -38,8 +38,6 @@
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
 HANDLE init_event = NULL;
-short driver_key[] = \
-  L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\ultradfg";
 HANDLE udefrag_device_handle = NULL;
 WINX_FILE *f_ud = NULL;
 WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
@@ -58,6 +56,8 @@ BOOL n_ioctl(HANDLE handle,ULONG code,
 			char *err_format_string);
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
+
+#define CHECK_INIT_EVENT(msg) { if(!init_event){ winx_push_error(msg); return -1; } }
 
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
@@ -168,12 +168,7 @@ int __stdcall udefrag_init(long map_size)
 		goto init_fail;
 	}
 	/* 2. Load the driver */
-	RtlInitUnicodeString(&uStr,driver_key);
-	Status = NtLoadDriver(&uStr);
-	if(!NT_SUCCESS(Status) && Status != STATUS_IMAGE_ALREADY_LOADED){
-		winx_push_error("Can't load ultradfg driver: %x!",(UINT)Status);
-		goto init_fail;
-	}
+	if(winx_load_driver(L"ultradfg") < 0) return (-1);
 	/* 3. Open our device */
 	f_ud = winx_fopen("\\Device\\UltraDefrag","w");
 	if(!f_ud) goto init_fail;
@@ -232,13 +227,8 @@ init_fail:
 ******/
 int __stdcall udefrag_unload(void)
 {
-	UNICODE_STRING uStr;
+	CHECK_INIT_EVENT("Udefrag.dll unload call without initialization!");
 
-	/* unload only if init_event was created */
-	if(!init_event){
-		winx_push_error("Udefrag.dll unload without initialization!");
-		return -1;
-	}
 	/* close events */
 	NtClose(init_event); init_event = NULL;
 	/* close device handle */
@@ -247,8 +237,8 @@ int __stdcall udefrag_unload(void)
 	if(f_stat) winx_fclose(f_stat);
 	if(f_stop) winx_fclose(f_stop);
 	/* unload the driver */
-	RtlInitUnicodeString(&uStr,driver_key);
-	NtUnloadDriver(&uStr);
+	if(winx_unload_driver(L"ultradfg") < 0)
+		winx_pop_error(NULL,0);
 	return 0;
 }
 
@@ -360,10 +350,7 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 ******/
 int __stdcall udefrag_stop(void)
 {
-	if(!init_event){
-		winx_push_error("Udefrag.dll stop call without initialization!");
-		return (-1);
-	}
+	CHECK_INIT_EVENT("Udefrag.dll stop call without initialization!");
 	/* FIXME: better error messages "Can't stop driver command: %x!" */
 	return winx_fwrite("s",1,1,f_stop) ? 0 : (-1);
 }
@@ -393,10 +380,7 @@ int __stdcall udefrag_stop(void)
 ******/
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
-	if(!init_event){
-		winx_push_error("Udefrag.dll get_progress call without initialization!");
-		goto get_progress_fail;
-	}
+	CHECK_INIT_EVENT("Udefrag.dll get_progress call without initialization!");
 
 	/* FIXME: detailed error message! "Statistical data unavailable: %x!" */
 	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)) goto get_progress_fail;
@@ -447,10 +431,7 @@ get_progress_fail:
 ******/
 int __stdcall udefrag_get_map(char *buffer,int size)
 {
-	if(!init_event){
-		winx_push_error("Udefrag.dll get_map call without initialization!");
-		return (-1);
-	}
+	CHECK_INIT_EVENT("Udefrag.dll get_map call without initialization!");
 	/* FIXME: detailed error message! "Cluster map unavailable: %x!" */
 	return winx_fread(buffer,size,1,f_map) ? 0 : (-1);
 }

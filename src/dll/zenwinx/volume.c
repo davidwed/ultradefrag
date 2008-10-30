@@ -280,11 +280,11 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 
 	us.Buffer = pFileFsAttribute->FileSystemName;
 	len = pFileFsAttribute->FileSystemNameLength;
-	us.Length = us.MaximumLength = len;
+	us.Length = us.MaximumLength = (USHORT)len;
 	
 	as.Buffer = buffer;
 	as.Length = 0;
-	as.MaximumLength = length;
+	as.MaximumLength = (USHORT)length;
 	if(RtlUnicodeStringToAnsiString(&as,&us,FALSE) != STATUS_SUCCESS){
 		if(length >= 2)
 			strcpy(buffer,"?");

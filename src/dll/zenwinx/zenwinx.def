@@ -25,6 +25,8 @@ EXPORTS
 	winx_get_windows_directory
 	winx_get_proc_address
 	winx_set_system_error_mode
+	winx_load_driver
+	winx_unload_driver
 	winx_create_thread
 	winx_exit_thread
 	winx_enable_privilege
