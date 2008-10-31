@@ -71,7 +71,7 @@ LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 ShowInstDetails show
 ShowUninstDetails show
 
-SetCompressor lzma
+SetCompressor /SOLID lzma
 
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
@@ -325,23 +325,28 @@ Function PortableRun
   Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
   Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
   Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
+  Rename "$SYSDIR\udefrag-gui.cmd" "$SYSDIR\udefrag-gui.cmd.bak"
   ; perform silent installation
   ExecWait '"$EXEPATH" /S'
   ; replace configuration files with files contained in portable directory
   CopyFiles /SILENT "$EXEDIR\guiopts.lua" "$INSTDIR\options"
   CopyFiles /SILENT "$EXEDIR\udreportopts.lua" "$INSTDIR\options"
+  CopyFiles /SILENT "$EXEDIR\udefrag-gui.cmd" "$SYSDIR"
   ; start ultradefrag gui
   ExecWait "$INSTDIR\dfrg.exe"
   ; move configuration files to portable directory
   Delete "$EXEDIR\guiopts.lua"
   Delete "$EXEDIR\udreportopts.lua"
+  Delete "$EXEDIR\udefrag-gui.cmd"
   Rename "$INSTDIR\options\guiopts.lua" "$EXEDIR\guiopts.lua"
   Rename "$INSTDIR\options\udreportopts.lua" "$EXEDIR\udreportopts.lua"
+  Rename "$SYSDIR\udefrag-gui.cmd" "$EXEDIR\udefrag-gui.cmd"
   ; restore all original configuration files
   Rename "$INSTDIR\options\guiopts.lua.bak" "$INSTDIR\options\guiopts.lua"
   Rename "$INSTDIR\options\udreportopts.lua.bak" "$INSTDIR\options\udreportopts.lua"
   Delete "$INSTDIR\ud_i18n.lng"
   Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
+  Rename "$SYSDIR\udefrag-gui.cmd.bak" "$SYSDIR\udefrag-gui.cmd"
   ; uninstall if necessary
   StrCmp $IsInstalled '1' portable_done 0
   ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
@@ -439,6 +444,9 @@ langpack_installed:
   call install_driver
 
   SetOutPath "$SYSDIR"
+  
+  DetailPrint "Install GUI Launcher..."
+  File "udefrag-gui.exe"
 
   DetailPrint "Install DLL's..."
   File "udefrag.dll"
@@ -570,6 +578,12 @@ lng_registered:
   File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
 bt_ok:
 
+  ; create gui startup script
+  SetOutPath "$SYSDIR"
+  IfFileExists "$SYSDIR\udefrag-gui.cmd" gui_ok 0
+  File "${ROOTDIR}\src\installer\udefrag-gui.cmd"
+gui_ok:
+
 !insertmacro EnableX64FSRedirection
 
   pop $R1
@@ -622,6 +636,7 @@ Section "Portable UltraDefrag package" SecPortable
   CreateDirectory $R0
   CopyFiles /SILENT $EXEPATH $R0 200
   CopyFiles /SILENT "$INSTDIR\options\*.*" $R0
+  CopyFiles /SILENT "$SYSDIR\udefrag-gui.cmd" $R0
   WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
   WriteINIStr "$R0\PORTABLE.X" "i18n" "Language" $LanguagePack
   WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
@@ -679,9 +694,11 @@ Section "Shortcuts" SecShortcuts
 
   CreateShortCut "$R0\Preferences\Edit report options.lnk" \
    "$SYSDIR\notepad.exe" "$INSTDIR\options\udreportopts.lua"
+  CreateShortCut "$R0\Preferences\Edit GUI preferences.lnk" \
+   "$SYSDIR\notepad.exe" "$SYSDIR\udefrag-gui.cmd"
 
   CreateShortCut "$R0\UltraDefrag.lnk" \
-   "$INSTDIR\Dfrg.exe"
+   "$SYSDIR\udefrag-gui.exe"
 
   CreateShortCut "$R0\Documentation\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"
@@ -707,9 +724,9 @@ doc_url_ok:
    "$INSTDIR\uninstall.exe"
 
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
-   "$INSTDIR\Dfrg.exe"
+   "$SYSDIR\udefrag-gui.exe"
   CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
-   "$INSTDIR\Dfrg.exe"
+   "$SYSDIR\udefrag-gui.exe"
 
   StrCmp $PortableInstalled '1' 0 no_portable
   CreateShortCut "$R0\Portable package.lnk" \
@@ -781,6 +798,8 @@ Section "Uninstall"
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
+  
+  Delete "$SYSDIR\udefrag-gui.exe"
 
   DetailPrint "Uninstall scripts and console interface..."
   Delete "$SYSDIR\ud-config.cmd"

@@ -59,7 +59,7 @@ LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 ShowInstDetails show
 ShowUninstDetails show
 
-SetCompressor lzma
+SetCompressor /SOLID lzma
 
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"

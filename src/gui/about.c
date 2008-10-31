@@ -28,6 +28,9 @@ extern RECT win_rc;
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
+	/* When a portable app launches gui the current directory points to a temp dir. */
+	char buf[MAX_PATH];
+
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
@@ -39,10 +42,14 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_CREDITS:
-			ShellExecute(hWindow,"open",".\\CREDITS.TXT",NULL,NULL,SW_SHOW);
+			GetWindowsDirectory(buf,MAX_PATH);
+			strcat(buf,"\\UltraDefrag\\CREDITS.TXT");
+			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_LICENSE:
-			ShellExecute(hWindow,"open",".\\LICENSE.TXT",NULL,NULL,SW_SHOW);
+			GetWindowsDirectory(buf,MAX_PATH);
+			strcat(buf,"\\UltraDefrag\\LICENSE.TXT");
+			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_HOMEPAGE:
 			SetFocus(GetDlgItem(hWnd,IDC_CREDITS));
