@@ -383,7 +383,7 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	CHECK_INIT_EVENT("Udefrag.dll get_progress call without initialization!");
 
 	/* FIXME: detailed error message! "Statistical data unavailable: %x!" */
-	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)) goto get_progress_fail;
+	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)) return (-1);
 
 	if(percentage){ /* calculate percentage only if we have such request */
 		switch(pstat->current_operation){
@@ -404,8 +404,6 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 		*percentage = (*percentage) * 100.00;
 	}
 	return 0;
-get_progress_fail:
-	return (-1);
 }
 
 /****f* udefrag.common/udefrag_get_map
