@@ -4,6 +4,6 @@ rem ----------------- UltraDefrag GUI startup commands ------------------------
 
 set UD_EX_FILTER=system volume information;temp;recycler
 
-%windir%\UltraDefrag\dfrg.exe
+%windir%\system32\ultradefrag.exe
 
 exit

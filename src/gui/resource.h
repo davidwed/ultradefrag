@@ -23,6 +23,7 @@
 
 #define IDD_MAIN                        101
 #define IDD_ABOUT                       102
+#define IDI_MAIN                        107
 #define IDI_APP                         108
 #define IDI_DIR                         109
 #define IDI_UNFRAGM                     110

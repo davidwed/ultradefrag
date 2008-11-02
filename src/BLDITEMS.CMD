@@ -37,6 +37,10 @@ cd ..\gui
 lua ..\..\tools\mkmod.lua dfrg.build
 if %errorlevel% neq 0 goto end
 
+cd ..\gui-launcher
+lua ..\..\tools\mkmod.lua udefrag-gui.build
+if %errorlevel% neq 0 goto end
+
 :skip_gui
 
 cd ..\native

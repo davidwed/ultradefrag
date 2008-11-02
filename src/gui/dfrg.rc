@@ -24,6 +24,7 @@
 #include "../include/version.h"
 #include "resource.h"
 
+IDI_MAIN                ICON    DISCARDABLE     "res/icon1.ico"
 IDI_APP                 ICON    DISCARDABLE     "res/app.ico"
 IDI_DIR                 ICON    DISCARDABLE     "res/dir.ico"
 IDI_UNFRAGM             ICON    DISCARDABLE     "res/unfragm.ico"

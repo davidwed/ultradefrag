@@ -333,7 +333,7 @@ Function PortableRun
   CopyFiles /SILENT "$EXEDIR\udreportopts.lua" "$INSTDIR\options"
   CopyFiles /SILENT "$EXEDIR\udefrag-gui.cmd" "$SYSDIR"
   ; start ultradefrag gui
-  ExecWait "$INSTDIR\dfrg.exe"
+  ExecWait "$SYSDIR\udefrag-gui.exe"
   ; move configuration files to portable directory
   Delete "$EXEDIR\guiopts.lua"
   Delete "$EXEDIR\udreportopts.lua"
@@ -407,7 +407,6 @@ Section "Ultra Defrag core files (required)" SecCore
 !insertmacro DisableX64FSRedirection
   DetailPrint "Install core files..."
   SetOutPath $INSTDIR
-  File "Dfrg.exe"
   File "${ROOTDIR}\src\LICENSE.TXT"
   File "${ROOTDIR}\src\CREDITS.TXT"
   File "${ROOTDIR}\src\HISTORY.TXT"
@@ -445,7 +444,12 @@ langpack_installed:
 
   SetOutPath "$SYSDIR"
   
-  DetailPrint "Install GUI Launcher..."
+  DetailPrint "Install GUI..."
+  File "dfrg.exe"
+  Delete "$SYSDIR\ultradefrag.exe"
+  ; since 2.0.0 version GUI program will be stored
+  ; as ultradefrag.exe in system directory
+  Rename "$SYSDIR\dfrg.exe" "$SYSDIR\ultradefrag.exe"
   File "udefrag-gui.exe"
 
   DetailPrint "Install DLL's..."
@@ -795,10 +799,13 @@ Section "Uninstall"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
 
+  DetailPrint "Uninstall Lua..."
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
-  
+
+  DetailPrint "Uninstall GUI..."
+  Delete "$SYSDIR\ultradefrag.exe"
   Delete "$SYSDIR\udefrag-gui.exe"
 
   DetailPrint "Uninstall scripts and console interface..."
