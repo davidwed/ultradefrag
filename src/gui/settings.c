@@ -29,7 +29,6 @@ int skip_removable = TRUE;
 
 char buffer[MAX_PATH];
 
-#if 0 /* in 2.0.0 this dialog is not useful */
 BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	/* When a portable app launches gui the current directory points to a temp dir. */
@@ -47,10 +46,10 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_EDITMAINOPTS:
-			GetWindowsDirectory(buf,MAX_PATH);
-			strcat(buf,"\\UltraDefrag\\options\\udefrag.cfg");
+			GetSystemDirectory(buf,MAX_PATH);
+			strcat(buf,"\\udefrag-gui.cmd");
 			//ShellExecute(hWindow,"open",".\\options\\udefrag.cfg",NULL,NULL,SW_SHOW);
-			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
+			ShellExecute(hWindow,"edit",buf,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_EDITREPORTOPTS:
 			GetWindowsDirectory(buf,MAX_PATH);
@@ -70,7 +69,6 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	}
 	return FALSE;
 }
-#endif
 
 static int getint(lua_State *L, char *variable)
 {

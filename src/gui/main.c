@@ -136,11 +136,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
 			break;
 		case IDC_SETTINGS:
-			//if(!busy_flag){
-				//DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),hWindow,(DLGPROC)NewSettingsDlgProc);
+			if(!busy_flag){
+				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),hWindow,(DLGPROC)NewSettingsDlgProc);
 				/* reload and apply settings */
 				//if(udefrag_reload_settings() < 0) udefrag_pop_error(NULL,0);
-			//}
+			}
 			break;
 		case IDC_SKIPREMOVABLE:
 			if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \

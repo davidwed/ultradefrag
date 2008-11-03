@@ -58,7 +58,7 @@ int __stdcall update_stat(int df)
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
-	short *msg;
+//	short *msg;
 
 	if(stop_pressed) return 0; /* it's neccessary: see above one comment in Stop() */
 	iItem = VolListGetSelectedItemIndex();
