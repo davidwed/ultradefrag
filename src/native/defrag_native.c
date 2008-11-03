@@ -294,6 +294,16 @@ void SetEnvVariable()
 	}
 }
 
+void PauseExecution()
+{
+	int msec;
+	
+	ExtractToken(value_buffer,command + wcslen(L"pause"),
+		min(wcslen(command) - wcslen(L"pause"),VALUE_BUF_SIZE - 1));
+	msec = _wtoi(value_buffer);
+	winx_sleep(msec);
+}
+
 void ParseCommand()
 {
 	int echo_cmd = 0;
@@ -302,7 +312,7 @@ void ParseCommand()
 	char letter = 0, cmd = 'd';
 	short *pos;
 	
-	/* supported commands: @echo, set, udefrag, exit, shutdown, reboot */
+	/* supported commands: @echo, set, udefrag, exit, shutdown, reboot, pause */
 	/* skip leading spaces and tabs */
 	command = line_buffer;
 	while(*command == 0x20 || *command == '\t'){
@@ -370,6 +380,10 @@ break_execution:
 		winx_printf("Reboot ...");
 		Cleanup();
 		winx_reboot();
+		return;
+	}
+	if((short *)wcsstr(command,L"pause") == command){
+		PauseExecution();
 		return;
 	}
 	winx_printf("\nUnknown command %ws!\n\n",command);
