@@ -164,9 +164,9 @@ function produce_html_output()
 
 	repeat
 		pos = string.find(arg[1],"\\",pos + 1,true)
-		if pos == nil then filename = "FRAGLIST.HTM" ; break end
+		if pos == nil then filename = "fraglist.htm" ; break end
 	until string.find(arg[1],"\\",pos + 1,true) == nil
-	filename = string.sub(arg[1],1,pos) .. "FRAGLIST.HTM"
+	filename = string.sub(arg[1],1,pos) .. "fraglist.htm"
 
 	-- note that 'b' flag is needed for utf-16 files
 	local f = assert(io.open(filename,"wb"))

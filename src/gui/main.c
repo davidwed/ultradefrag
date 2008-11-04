@@ -195,7 +195,7 @@ void HandleShortcuts(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 void ShowFragmented()
 {
-	char path[] = "C:\\FRAGLIST.LUAR";
+	char path[] = "C:\\fraglist.luar";
 	LRESULT iItem;
 
 	iItem = VolListGetSelectedItemIndex();

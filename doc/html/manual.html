@@ -566,38 +566,26 @@ specified, the program will run in interactive mode after the last script comman
 To show list of supported commands type <span class="code">help</span>. To continue the Windows
 Boot Process type <span class="code">exit</span>.
 </p>
-<!--
 <p><b>Hack:</b> If you are using Windows 98 operating system but you wish to use the 
-UltraDefragmenter to optimize your drives than you have now one cool solution for that. 
+UltraDefragmenter to optimize your drives from time to time than you have now one cool solution for that. 
 Install Windows XP as a second operating system, install UltraDefrag on them and enable the boot time 
-defragmenter. Insert the <span class="code">reboot</span> command in the boot script and enjoy! 
+defragmenter. Insert the <span class="code">reboot</span> command in the boot time script and enjoy! 
 You can simply boot Windows XP, it will defrag anything and automatically reboot the computer 
 at the end.
 </p>
--->
 <h1 class="western">The Report</h1>
-<p>Everytime you run analyze, compact or defragment, a report of
-all files on the file system is created. This report has the
-following fields.</p>
+<p>Everytime you run analyze, compact or defragment, a report of all fragmented files on the file 
+system is created. Objects excluded from the defragmentation process are marked by black color. 
+The report has the following fields:</p>
 <ol>
+<li><b>Number of fragments.</b></li>
+<li><b>Filename</b></li>
 <li>
-<p><b>Number of fragments.</b></p>
-</li>
-<li>
-<p><b>Filename</b></p>
-</li>
-<li>
-<p><b>Comment</b> This can be blank or contain one of three values:</p>
+<b>Comment</b> - can be blank or contain one of three values:
 <ul type="disc">
-<li>
-<p><b>[OVR]</b> File is above the size threshold.</p>
-</li>
-<li>
-<p><b>[DIR]</b> Object is a directory.</p>
-</li>
-<li>
-<p><b>[CMP]</b> Compressed file.</p>
-</li>
+<li><b>[OVR]</b> File is above the size threshold.</li>
+<li><b>[DIR]</b> Object is a directory.</li>
+<li><b>[CMP]</b> Compressed file.</li>
 </ul>
 </li>
 </ol>
@@ -645,9 +633,10 @@ portable GUI. Available languages are: <span class="code">English, Hungarian, Ru
 <h1 class="western">UltraDefrag Micro Edition</h1>
 
 <p>The UltraDefrag Micro Edition is a special package for advanced users who prefers 
-extreme stability and power. This edition is much faster, much stable (it's driver contains just 
+extreme stability and power. This edition is a little bit faster, much stable (it's driver contains just 
 most important parts). It has only console interface to speed up defragmentation process. 
-Boot-time feature is available too.</p>
+Boot-time feature is available too. The Micro Edition saves reports in plain text format. You can 
+find them in <span class="code">x:\fraglist.txt</span> file (x = drive letter).</p>
 
 <p>Note that console interface is very powerful, it has a full set of commands to perform any disk
 defragmentation job.</p>

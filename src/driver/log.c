@@ -28,9 +28,10 @@
 
 char buffer[1024];
 
+#ifndef MICRO_EDITION
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	short p[] = L"\\??\\A:\\FRAGLIST.LUAR";
+	short p[] = L"\\??\\A:\\fraglist.luar";
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS status;
 
@@ -117,7 +118,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	NTSTATUS Status;
 	HANDLE hFile;
 
-	short p[] = L"\\??\\A:\\FRAGLIST.LUAR";
+	short p[] = L"\\??\\A:\\fraglist.luar";
 
 	if(dx->report_type.type == NO_REPORT)
 		goto done;
@@ -165,6 +166,123 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 done:
 	return TRUE;
 }
+#else /* MICRO_EDITION */
+/*
+* This code was designed especially for Micro Edition.
+* It saves report in plain text format.
+*/
+void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	short p[] = L"\\??\\A:\\fraglist.txt";
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	NTSTATUS status;
+
+	p[4] = (short)dx->letter;
+	RtlInitUnicodeString(&dx->log_path,p);
+	InitializeObjectAttributes(&ObjectAttributes,
+			&dx->log_path,
+			OBJ_CASE_INSENSITIVE,
+			NULL,
+			NULL
+			);
+	status = ZwDeleteFile(&ObjectAttributes);
+	DebugPrint1("-Ultradfg- Report %ws deleted with status %x\n",p,(UINT)status);
+}
+
+void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
+		   PVOID buf,ULONG length/*,PLARGE_INTEGER pOffset*/)
+{
+	IO_STATUS_BLOCK ioStatus;
+	NTSTATUS Status;
+
+	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
+			buf,length,/*pOffset*/NULL,NULL);
+	//pOffset->QuadPart += length;
+	if(Status == STATUS_PENDING){
+		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.");
+		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
+		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
+	}
+}
+
+void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
+				  BOOLEAN is_filtered)
+{
+	PFRAGMENTED pf;
+	ANSI_STRING as;
+	UNICODE_STRING us;
+	short e1[] = L"\t";
+	short e2[] = L"\r\n";
+
+	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
+		if(pf->pfn->is_filtered != is_filtered)
+			continue;
+		/* because on NT 4.0 we don't have _itow: */
+		_itoa(pf->pfn->n_fragments,buffer,10);
+		RtlInitAnsiString(&as,buffer);
+		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
+			DebugPrint("No enough memory!");
+			continue;
+		}
+		Write(dx,hFile,us.Buffer,us.Length);
+		RtlFreeUnicodeString(&us);
+		Write(dx,hFile,e1,sizeof(e1) - sizeof(short));
+		Write(dx,hFile,pf->pfn->name.Buffer,pf->pfn->name.Length);
+		Write(dx,hFile,e2,sizeof(e2) - sizeof(short));
+	}
+}
+
+BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	IO_STATUS_BLOCK ioStatus;
+	NTSTATUS Status;
+	HANDLE hFile;
+
+	short p[] = L"\\??\\A:\\fraglist.txt";
+	short head[] = L"\r\nFragmented files on C:\r\n\r\n";
+	short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
+
+	if(dx->report_type.type == NO_REPORT)
+		goto done;
+	/* Create the file */
+	p[4] = (short)dx->letter;
+	RtlInitUnicodeString(&dx->log_path,p);
+	InitializeObjectAttributes(&ObjectAttributes,
+			&dx->log_path,
+			OBJ_CASE_INSENSITIVE,
+			NULL,
+			NULL
+			);
+	Status = ZwCreateFile(&hFile,
+			/*FILE_GENERIC_WRITE*/FILE_APPEND_DATA | SYNCHRONIZE,
+			&ObjectAttributes,
+			&ioStatus,
+			NULL,
+			FILE_ATTRIBUTE_NORMAL,
+			FILE_SHARE_READ,
+			FILE_OVERWRITE_IF,
+			FILE_SYNCHRONOUS_IO_NONALERT,
+			NULL,
+			0
+			);
+	if(Status){
+		DebugPrint("-Ultradfg- Can't create %ws\n",p);
+		hFile = NULL;
+		return FALSE;
+	}
+
+	head[22] = (short)dx->letter;
+	Write(dx,hFile,head,sizeof(head) - sizeof(short));
+	WriteLogBody(dx,hFile,FALSE);
+	Write(dx,hFile,line,sizeof(line) - sizeof(short));
+	WriteLogBody(dx,hFile,TRUE);
+	ZwClose(hFile);
+	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
+done:
+	return TRUE;
+}
+#endif /* MICRO_EDITION */
 
 /*************************************************************************************************/
 
