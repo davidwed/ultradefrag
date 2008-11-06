@@ -4,9 +4,14 @@ EXPORTS
 	udefrag_init@4
 	udefrag_unload@0
 	udefrag_reload_settings@0
-	udefrag_s_analyse@8
-	udefrag_s_defragment@8
-	udefrag_s_optimize@8
+
+;	udefrag_s_analyse@8
+;	udefrag_s_defragment@8
+;	udefrag_s_optimize@8
+;	udefrag_s_get_map@4
+;	udefrag_s_get_avail_volumes@4
+;	scheduler_get_avail_letters@4
+
 	udefrag_send_command_ex@12
 	udefrag_stop@0
 	udefrag_get_progress@8
@@ -14,11 +19,8 @@ EXPORTS
 	udefrag_get_default_formatted_results@4
 	udefrag_get_avail_volumes@8
 	udefrag_validate_volume@8
-	scheduler_get_avail_letters@4
-	fbsize@12
-	fbsize2@12
-	dfbsize2@8
-	udefrag_s_get_map@4
-	udefrag_s_get_avail_volumes@4
 	udefrag_pop_error@8
 	udefrag_pop_werror@8
+
+	udefrag_fbsize@20
+	dfbsize2@8

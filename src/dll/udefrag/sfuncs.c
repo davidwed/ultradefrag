@@ -22,6 +22,16 @@
 * simple interface for scripting languages.
 */
 
+/*
+* This interface is practically unuseful now,
+* therefore it will be disabled by default.
+* To enable them define PERL_SUPPORT and uncomment 
+* appropriate entries in *.def files.
+*/
+#undef PERL_SUPPORT
+
+#ifdef PERL_SUPPORT
+
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
@@ -193,3 +203,5 @@ int __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc)
 {
 	return udefrag_send_command_ex('c',letter,sproc);
 }
+
+#endif /* PERL_SUPPORT */

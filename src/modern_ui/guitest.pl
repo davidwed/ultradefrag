@@ -18,6 +18,8 @@
 # Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+# PERL_SUPPORT should be defined before udefrag.dll compilation to run this script
+
 use strict;
 use Win32::API;
 use Win32::API::Callback;

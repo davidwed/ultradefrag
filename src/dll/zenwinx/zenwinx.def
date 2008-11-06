@@ -39,3 +39,4 @@ EXPORTS
 	winx_fclose
 	winx_query_env_variable
 	winx_set_env_variable
+	winx_fbsize

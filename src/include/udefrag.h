@@ -27,17 +27,15 @@
 /*
 * List of functions that needs udefrag_pop_error() after
 * each unsuccessfull call:
-*	scheduler_get_avail_letters
+*	scheduler_get_avail_volumes
 *	udefrag_analyse
-*	udefrag_clean_registry
 *	udefrag_defragment
 *	udefrag_get_avail_volumes
 *	udefrag_get_map
 *	udefrag_get_progress
 *	udefrag_init
-*	udefrag_native_clean_registry
 *	udefrag_optimize
-*	udefrag_set_options
+*	udefrag_reload_settings
 *	udefrag_stop
 *	udefrag_unload
 *	udefrag_validate_volume
@@ -72,7 +70,6 @@ int __stdcall udefrag_reload_settings();
 
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
-int __stdcall scheduler_get_avail_letters(char *letters);
 
 int __stdcall fbsize(char *s,ULONGLONG n);
 int __stdcall fbsize2(char *s,ULONGLONG n);
@@ -87,11 +84,14 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable);
  */
 typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
 int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
-int __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
+
+/*int __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
 int __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc);
 int __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc);
 char * __stdcall udefrag_s_get_command_result(void);
 short * __stdcall udefrag_s_get_command_result_w(void);
+int __stdcall scheduler_get_avail_letters(char *letters);
+*/
 
 #define udefrag_analyse(letter,sproc) udefrag_send_command_ex('a',letter,sproc)
 #define udefrag_defragment(letter,sproc) udefrag_send_command_ex('d',letter,sproc)
@@ -99,5 +99,7 @@ short * __stdcall udefrag_s_get_command_result_w(void);
 
 void __stdcall udefrag_pop_error(char *buffer, int size);
 void __stdcall udefrag_pop_werror(short *buffer, int size);
+
+int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 
 #endif /* _UDEFRAG_H_ */

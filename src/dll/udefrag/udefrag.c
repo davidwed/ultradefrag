@@ -68,48 +68,22 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
-/****f* udefrag.error/udefrag_pop_error
-* NAME
-*    udefrag_pop_error
-* SYNOPSIS
-*    udefrag_pop_error(buffer, size);
-* FUNCTION
-*    Retrieves formatted error message
-*    and removes it from stack.
-* INPUTS
-*    buffer - memory block to store message into
-*    size   - maximum number of characters to store,
-*             including terminal zero
-* RESULT
-*    This function does not return a value.
-* EXAMPLE
-*    if(udefrag_xxx() < 0){
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*    }
-* NOTES
-*    The first parameter may be NULL if you don't
-*    need error message.
-* SEE ALSO
-*    udefrag_pop_werror
-******/
+/* winx_pop_error() equivalent */
 void __stdcall udefrag_pop_error(char *buffer, int size)
 {
 	winx_pop_error(buffer,size);
 }
 
-/****f* udefrag.error/udefrag_pop_werror
-* NAME
-*    udefrag_pop_werror
-* SYNOPSIS
-*    udefrag_pop_werror(buffer, size);
-* FUNCTION
-*    Unicode version of udefrag_pop_error().
-* SEE ALSO
-*    udefrag_pop_error
-******/
+/* winx_pop_werror() equivalent */
 void __stdcall udefrag_pop_werror(short *buffer, int size)
 {
 	winx_pop_werror(buffer,size);
+}
+
+/* winx_fbsize() equivalent */
+int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length)
+{
+	return winx_fbsize(number,digits,buffer,length);
 }
 
 /****f* udefrag.common/udefrag_init
@@ -464,10 +438,10 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 
 	strcpy(result_msg,"Volume information:\n");
 	strcat(result_msg,"\n  Volume size                  = ");
-	fbsize(s,pstat->total_space);
+	winx_fbsize(pstat->total_space,2,s,sizeof(s));
 	strcat(result_msg,s);
 	strcat(result_msg,"\n  Free space                   = ");
-	fbsize(s,pstat->free_space);
+	winx_fbsize(pstat->free_space,2,s,sizeof(s));
 	strcat(result_msg,s);
 	strcat(result_msg,"\n\n  Total number of files        = ");
 	_itoa(pstat->filecounter,s,10);

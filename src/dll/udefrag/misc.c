@@ -31,6 +31,7 @@
 #include "../../include/udefrag.h"
 #include "../zenwinx/zenwinx.h"
 
+#if 0
 /****f* udefrag.misc/fbsize
 * NAME
 *    fbsize
@@ -98,6 +99,7 @@ int __stdcall fbsize2(char *s,ULONGLONG n)
 	if(i > sizeof(symbols) - 1) i = sizeof(symbols) - 1;
 	return sprintf(s,"%u %cb",(int)n,symbols[i]);
 }
+#endif
 
 /****f* udefrag.misc/dfbsize2
 * NAME

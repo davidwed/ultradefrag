@@ -117,7 +117,7 @@ int show_vollist(void)
 	} else {
 		for(n = 0;;n++){
 			if(v[n].letter == 0) break;
-			fbsize(s,(ULONGLONG)(v[n].total_space.QuadPart));
+			udefrag_fbsize((ULONGLONG)(v[n].total_space.QuadPart),2,s,sizeof(s));
 			d = (double)(signed __int64)(v[n].free_space.QuadPart);
 			/* 0.1 constant is used to exclude divide by zero error */
 			d /= ((double)(signed __int64)(v[n].total_space.QuadPart) + 0.1);

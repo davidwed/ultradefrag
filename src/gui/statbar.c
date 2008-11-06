@@ -86,7 +86,7 @@ void UpdateStatusBar(STATISTIC *pst)
 	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 
-	fbsize(s,(ULONGLONG)pst->mft_size);
+	udefrag_fbsize((ULONGLONG)pst->mft_size,2,s,sizeof(s));
 	_snwprintf(bf,BFSIZE - 1,L"%S %s",s,GetResourceString(L"MFT"));
 	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);

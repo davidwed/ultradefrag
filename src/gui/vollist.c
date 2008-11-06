@@ -140,12 +140,12 @@ static void VolListAddItem(int index, volume_info *v)
 	lvi.pszText = v->fsname;
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 */
-	fbsize(s,(ULONGLONG)(v->total_space.QuadPart));
+	udefrag_fbsize((ULONGLONG)(v->total_space.QuadPart),2,s,sizeof(s));
 	lvi.iSubItem = 2;//3;
 	lvi.pszText = s;
  	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 
-	fbsize(s,(ULONGLONG)(v->free_space.QuadPart));
+	udefrag_fbsize((ULONGLONG)(v->free_space.QuadPart),2,s,sizeof(s));
 	lvi.iSubItem = 3;//4;
 	lvi.pszText = s;
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);

@@ -25,6 +25,7 @@
 #define NOMINMAX
 #include <windows.h>
 #include <winioctl.h>
+#include <stdio.h>
 #include <ctype.h>
 
 #include "ntndk.h"
@@ -33,6 +34,81 @@
 #define FS_ATTRIBUTE_BUFFER_SIZE (MAX_PATH * sizeof(WCHAR) + sizeof(FILE_FS_ATTRIBUTE_INFORMATION))
 
 BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile);
+
+/* TODO: move these two functions to a string.c file. */
+
+/****f* zenwinx.volume/winx_fbsize
+* NAME
+*    winx_fbsize
+* SYNOPSIS
+*    winx_fbsize(number,digits,buffer,length);
+* FUNCTION
+*    Converts the 64-bit number of bytes 
+*    to human readable format with the following suffixes:
+*    Kb, Mb, Gb, Tb, Pb, Eb. With specified number of 
+*    digits after a dot.
+* INPUTS
+*    number - number of bytes to be converted
+*    digits - number of digits after a dot
+*    buffer - pointer to the buffer for a resulting string
+*    length - length of the buffer
+* RESULT
+*    The number of characters stored.
+* EXAMPLE
+*    winx_fbsize(1548,2,buffer,sizeof(buffer));
+*    // buffer contains now "1.51 Kb"
+* NOTES
+*    The prototype of this function was StrFormatByteSize()
+*    from shlwapi.dll implementation included in ReactOS.
+* SEE ALSO
+*    winx_dfbsize
+******/
+int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length)
+{
+	char symbols[] = {'K','M','G','T','P','E'};
+	char spec[] = "%u.%00u %cb";
+	double fn,n;
+	unsigned int i,j,k;
+
+	if(!buffer || !length) return (-1);
+	if(number < 1024) return _snprintf(buffer,length - 1,"%u",(int)number);
+	/* 
+	* Because win ddk compiler doesn't have ULONGLONG -> double converter,
+	* we need first divide an integer number and then convert in to double.
+	*/
+	if(number < 1024 * 1024){
+		if(digits){
+			/* we can convert a number to int here */
+			fn = (double)(int)number;
+			fn /= 1024.0;
+			k = 0;
+L0:
+			/* example: fn = 128.45638, digits = 4 */
+			/* %.2f doesn't work in native mode */
+			n = 1.0;
+			for(i = digits; i > 0; i--)
+				n *= 10.0;
+			fn *= n;
+			/* example: n = 10000.0, fn = 1284563.8 */
+			i = (int)fn;
+			j = (int)n;
+			/* example: i = 1284563, j = 10000 */
+			spec[4] = '0' + digits / 10;
+			spec[5] = '0' + digits % 10;
+			return _snprintf(buffer,length - 1,spec,i/j,i%j,symbols[k]);
+		} else {
+			return _snprintf(buffer,length - 1,"%u Kb",(int)number / 1024);
+		}
+		return (-1); /* this point will never be reached */
+	}
+	/* convert integer number to kilobytes */
+	number /= 1024;
+	fn = (double)(signed __int64)number / 1024.00;
+	for(k = 1; fn >= 1024.00; k++) fn /= 1024.00;
+	if(k > sizeof(symbols) - 1) k = sizeof(symbols) - 1;
+	goto L0;
+	return (-1); /* this point will never be reached */
+}
 
 /****f* zenwinx.volume/winx_get_drive_type
 * NAME
