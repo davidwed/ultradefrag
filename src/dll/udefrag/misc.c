@@ -99,7 +99,6 @@ int __stdcall fbsize2(char *s,ULONGLONG n)
 	if(i > sizeof(symbols) - 1) i = sizeof(symbols) - 1;
 	return sprintf(s,"%u %cb",(int)n,symbols[i]);
 }
-#endif
 
 /****f* udefrag.misc/dfbsize2
 * NAME
@@ -136,3 +135,5 @@ int __stdcall dfbsize2(char *s,ULONGLONG *pn)
 	*pn = m * _atoi64(s);
 	return 0;
 }
+
+#endif

@@ -140,5 +140,6 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);
 
 int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length);
+int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber);
 
 #endif /* _ZENWINX_H_ */

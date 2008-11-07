@@ -87,7 +87,7 @@ int __stdcall udefrag_load_settings()
 	if(winx_query_env_variable(L"UD_SIZELIMIT",env_buffer,ENV_BUF_SIZE) >= 0){
 		RtlInitUnicodeString(&us,env_buffer);
 		if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) == STATUS_SUCCESS){
-			dfbsize2(as.Buffer,&sizelimit);
+			winx_dfbsize(as.Buffer,&sizelimit);
 			RtlFreeAnsiString(&as);
 		}
 	} else {

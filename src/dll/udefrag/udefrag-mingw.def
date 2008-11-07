@@ -23,4 +23,4 @@ EXPORTS
 	udefrag_pop_werror@8
 
 	udefrag_fbsize@20
-	dfbsize2@8
+	udefrag_dfbsize@8

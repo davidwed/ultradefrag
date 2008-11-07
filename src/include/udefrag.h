@@ -101,5 +101,6 @@ void __stdcall udefrag_pop_error(char *buffer, int size);
 void __stdcall udefrag_pop_werror(short *buffer, int size);
 
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
+int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);
 
 #endif /* _UDEFRAG_H_ */

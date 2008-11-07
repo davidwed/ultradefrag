@@ -86,6 +86,12 @@ int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int len
 	return winx_fbsize(number,digits,buffer,length);
 }
 
+/* winx_dfbsize() equivalent */
+int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber)
+{
+	return winx_dfbsize(string,pnumber);
+}
+
 /****f* udefrag.common/udefrag_init
 * NAME
 *    udefrag_init
