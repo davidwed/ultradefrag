@@ -25,6 +25,10 @@
 #include <string.h>
 #include <shellapi.h>
 
+#ifndef USE_WINDDK
+#define LONG_PTR  signed long*
+#endif
+
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	char buffer[MAX_PATH];
