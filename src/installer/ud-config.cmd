@@ -1,2 +1,2 @@
 @echo off
-notepad %windir%\system32\ud-boot-time.cmd
+notepad %windir%\system32\udefrag-gui.cmd

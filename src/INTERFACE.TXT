@@ -1,32 +1,3 @@
 How do I communicate with the UltraDefrag engine?
 
-1). Load device driver.
-2). Open device \\.\ultradfg
-3). Make a write request. You must send structure ULTRADFG_COMMAND,
-    described in ultradfg.h. All fields must be valid. Requests
-    (command field) are 'a' (analyse), 'd' (defragment) and 'c' 
-    (compact).
-4). If you use synchronous api, the request will return only when it's done.
-    If the asynchronous version of api used, you can send DeviceIoControl
-    requests while the engine is still working.
-5). To get information about the volume and defragmentation process you must 
-    use DeviceIoControl requests. They are:
-
-    IOCTL_GET_STATISTIC
-    Input: nothing. Output: STATISTIC structure.
-
-    IOCTL_GET_CLUSTER_MAP
-    Input: nothing. Output: UCHAR array for cluster map.
-
-    IOCTL_SET_INCLUDE_FILTER
-    Input: WCHAR string of semicolon separated words. Output: nothing.
-
-    IOCTL_SET_EXCLUDE_FILTER
-    Input: WCHAR string of semicolon separated words. Output: nothing.
-6). To stop analyse / defrag / compact send special IoControl request:
-
-    IOCTL_ULTRADEFRAG_STOP
-    Input: nothing. Output: nothing.
-7). Before you exit close the device handle.
-8). Unload the driver.
-
+See udefrag.dll source code for details.

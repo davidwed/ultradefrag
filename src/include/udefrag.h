@@ -76,8 +76,9 @@ int __stdcall fbsize2(char *s,ULONGLONG n);
 int __stdcall dfbsize2(char *s,ULONGLONG *pn);
 
 /* interface for scripting languages */
-char * __stdcall udefrag_s_get_map(int size);
+/*char * __stdcall udefrag_s_get_map(int size);
 char * __stdcall udefrag_s_get_avail_volumes(int skip_removable);
+*/
 
 /* because perl/Tk is incompatible with threads 
  * we should provide callback functions
@@ -88,8 +89,6 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 /*int __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
 int __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc);
 int __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc);
-char * __stdcall udefrag_s_get_command_result(void);
-short * __stdcall udefrag_s_get_command_result_w(void);
 int __stdcall scheduler_get_avail_letters(char *letters);
 */
 
