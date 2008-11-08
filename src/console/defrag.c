@@ -22,7 +22,6 @@
 */
 
 #include <windows.h>
-#include <shellapi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -146,31 +145,25 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 	return TRUE;
 }
 
-void parse_cmdline(void)
+void parse_cmdline(int argc, char **argv)
 {
-	int argc;
-	short **argv;
 	int i;
-	short c1,c2,c3;
-
-	argv = (short **)CommandLineToArgvW(GetCommandLineW(),&argc);
-	if(!argv) return;
+	char c1,c2,c3;
 
 	if(argc < 2) h_flag = 1;
 	for(i = 1; i < argc; i++){
-		/* FIXME: if argv[i] has zero length */
 		c1 = argv[i][0];
 		if(!c1) continue;
 		c2 = argv[i][1];
 		if(c2 == ':') letter = (char)c1;
 		if(c1 == '-'){
-			c2 = (short)towlower((wint_t)c2);
-			if(!wcschr(L"abosideh?l",c2)){
+			c2 = (char)tolower((int)c2);
+			if(!strchr("abosideh?l",c2)){
 				/* unknown option */
-				unk_opt[16] = (char)c2;
+				unk_opt[16] = c2;
 				unknown_option = 1;
 			}
-			if(wcschr(L"iesd",c2))
+			if(strchr("iesd",c2))
 				obsolete_option = 1;
 			if(c2 == 'h' || c2 == '?')
 				h_flag = 1;
@@ -179,14 +172,13 @@ void parse_cmdline(void)
 			else if(c2 == 'b') b_flag = 1;
 			else if(c2 == 'l'){
 				l_flag = 1;
-				c3 = (short)towlower((wint_t)argv[i][2]);
+				c3 = (char)tolower((int)argv[i][2]);
 				if(c3 == 'a') la_flag = 1;
 			}
 		}
 	}
 	/* if only -b option is specified, show help message */
 	if(argc == 2 && b_flag) h_flag = 1;
-	GlobalFree(argv);
 }
 
 int __cdecl main(int argc, char **argv)
@@ -195,7 +187,7 @@ int __cdecl main(int argc, char **argv)
 	STATISTIC stat;
 
 	/* analyse command line */
-	parse_cmdline();
+	parse_cmdline(argc,argv);
 	/* display copyright */
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(hOut,&csbi))
