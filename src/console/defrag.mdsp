@@ -86,5 +86,5 @@ extraResourceOptions=
 1=defrag.rc
 [Other]
 [History]
-..\include\udefrag.h,1433
-defrag.c,1255
+..\include\udefrag.h,1378
+defrag.c,962

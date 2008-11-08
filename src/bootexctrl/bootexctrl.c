@@ -22,6 +22,7 @@
 */
 
 #include <windows.h>
+#include <shellapi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -173,142 +174,46 @@ void unregister_cmd(void)
 	free(new_data);
 }
 
-void parse_cmdline(int argc, char **argv)
+void parse_cmdline(void)
 {
+	int argc;
+	short **argv;
 	int i;
-	char *param;
+	short *param;
+
+	argv = (short **)CommandLineToArgvW(GetCommandLineW(),&argc);
+	if(!argv) return;
 
 	if(argc < 3){
 		h_flag = 1;
+		GlobalFree(argv);
 		return;
 	}
 	for(i = 1; i < argc; i++){
 		param = argv[i];
-		_strlwr(param);
-		if(!strcmp(param,"/r")) r_flag = 1;
-		else if(!strcmp(param,"/u")) u_flag = 1;
-		else if(!strcmp(param,"/h")) h_flag = 1;
-		else if(!strcmp(param,"/?")) h_flag = 1;
+		_wcslwr(param);
+		if(!wcscmp(param,L"/r")) r_flag = 1;
+		else if(!wcscmp(param,L"/u")) u_flag = 1;
+		else if(!wcscmp(param,L"/h")) h_flag = 1;
+		else if(!wcscmp(param,L"/?")) h_flag = 1;
 		else {
-			if(strlen(argv[i]) > MAX_PATH){
+			if(wcslen(param) > MAX_PATH){
 				invalid_opts = 1;
 				MessageBox(0,"Command name is too long!","Error",MB_OK | MB_ICONHAND);
-			} else strncpy(cmd,argv[i],MAX_PATH);
+			} else _snprintf(cmd,MAX_PATH,"%ws",param);
 		}
 	}
 	cmd[MAX_PATH] = 0;
+	GlobalFree(argv);
 }
 
-int __cdecl main(int argc, char **argv)
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	parse_cmdline(argc,argv);
+	parse_cmdline();
 	if(invalid_opts) return 1;
 	if(h_flag || !cmd[0]) show_help();
 	else if(r_flag) register_cmd();
 	else if(u_flag) unregister_cmd();
 	else show_help();
 	return 0;
-}
-
-/* Copyright (C) Alexander A. Telyatnikov (http://alter.org.ua/) */
-PCHAR*
-CommandLineToArgvA(
-	PCHAR CmdLine,
-	int* _argc
-	)
-{
-	PCHAR* argv;
-	PCHAR  _argv;
-	ULONG   len;
-	ULONG   argc;
-	CHAR   a;
-	ULONG   i, j;
-
-	BOOLEAN  in_QM;
-	BOOLEAN  in_TEXT;
-	BOOLEAN  in_SPACE;
-
-	len = strlen(CmdLine);
-	i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
-
-	argv = (PCHAR*)GlobalAlloc(GMEM_FIXED,
-		i + (len+2)*sizeof(CHAR));
-
-	/* added by dmitriar */
-	if(!argv){
-		*_argc = 0;
-		return NULL;
-	}
-
-	_argv = (PCHAR)(((PUCHAR)argv)+i);
-
-	argc = 0;
-	argv[argc] = _argv;
-	in_QM = FALSE;
-	in_TEXT = FALSE;
-	in_SPACE = TRUE;
-	i = 0;
-	j = 0;
-
-	while( (a = CmdLine[i]) ) {
-		if(in_QM) {
-			if(a == '\"') {
-				in_QM = FALSE;
-			} else {
-				_argv[j] = a;
-				j++;
-			}
-		} else {
-			switch(a) {
-			case '\"':
-				in_QM = TRUE;
-				in_TEXT = TRUE;
-				if(in_SPACE) {
-					argv[argc] = _argv+j;
-					argc++;
-				}
-				in_SPACE = FALSE;
-				break;
-			case ' ':
-			case '\t':
-			case '\n':
-			case '\r':
-				if(in_TEXT) {
-					_argv[j] = '\0';
-					j++;
-				}
-				in_TEXT = FALSE;
-				in_SPACE = TRUE;
-				break;
-			default:
-				in_TEXT = TRUE;
-				if(in_SPACE) {
-					argv[argc] = _argv+j;
-					argc++;
-				}
-				_argv[j] = a;
-				j++;
-				in_SPACE = FALSE;
-				break;
-			}
-		}
-		i++;
-	}
-	_argv[j] = '\0';
-	argv[argc] = NULL;
-
-	(*_argc) = argc;
-	return argv;
-}
-
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
-{
-	int argc;
-	char **argv;
-	int ret;
-	
-	argv = CommandLineToArgvA(GetCommandLineA(),&argc);
-	ret = main(argc,argv);
-	if(argv) GlobalFree(argv);
-	return ret;
 }

@@ -22,6 +22,7 @@
 */
 
 #include <windows.h>
+#include <shellapi.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -145,10 +146,15 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 	return TRUE;
 }
 
-void parse_cmdline(int argc, short **argv)
+void parse_cmdline(void)
 {
+	int argc;
+	short **argv;
 	int i;
 	short c1,c2,c3;
+
+	argv = (short **)CommandLineToArgvW(GetCommandLineW(),&argc);
+	if(!argv) return;
 
 	if(argc < 2) h_flag = 1;
 	for(i = 1; i < argc; i++){
@@ -180,15 +186,16 @@ void parse_cmdline(int argc, short **argv)
 	}
 	/* if only -b option is specified, show help message */
 	if(argc == 2 && b_flag) h_flag = 1;
+	GlobalFree(argv);
 }
 
-int __cdecl wmain(int argc, short **argv)
+int __cdecl main(int argc, char **argv)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	STATISTIC stat;
 
 	/* analyse command line */
-	parse_cmdline(argc,argv);
+	parse_cmdline();
 	/* display copyright */
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(hOut,&csbi))
@@ -222,35 +229,3 @@ int __cdecl wmain(int argc, short **argv)
 	HandleError("",0);
 	return 0; /* we will never reach this point */
 }
-
-#if defined(__GNUC__)
-/* HACK - MINGW HAS NO OFFICIAL SUPPORT FOR wmain()!!! */
-/* Copyright (c) ReactOS Development Team */
-int main( int argc, char **argv )
-{
-    WCHAR **argvW;
-    int i, j, Ret = 1;
-
-    if ((argvW = malloc(argc * sizeof(WCHAR*)))){
-        /* convert the arguments */
-        for (i = 0, j = 0; i < argc; i++){
-            if (!(argvW[i] = malloc((strlen(argv[i]) + 1) * sizeof(WCHAR))))
-                j++;
-            swprintf(argvW[i], L"%hs", argv[i]);
-        }
-
-        if (j == 0) /* no error converting the parameters, call wmain() */
-            Ret = wmain(argc, (short **)argvW);
-		else
-			printf("No enough memory for the program execution!\n");
-        
-        /* free the arguments */
-        for (i = 0; i < argc; i++){
-            if (argvW[i]) free(argvW[i]);
-        }
-        free(argvW);
-    }
-    
-    return Ret;
-}
-#endif
