@@ -162,7 +162,7 @@ Function .onInit
   StrCpy $RunPortable 0
   StrCpy $ShowBootsplash 1
   StrCpy $IsInstalled 0
-  StrCpy $LanguagePack "English"
+  StrCpy $LanguagePack "English (US)"
   StrCpy $PortableInstallationFlag 0
 
   ClearErrors
@@ -397,6 +397,83 @@ FunctionEnd
 
 ;-----------------------------------------
 
+Function install_langpack
+
+  SetOutPath $INSTDIR
+  Delete "$INSTDIR\ud_i18n.lng"
+  StrCmp $LanguagePack "English (US)" langpack_installed 0
+  StrCmp $LanguagePack "Catala" catala_pack 0
+  StrCmp $LanguagePack "Chinese (Simplified)" chinese_simp_pack 0
+  StrCmp $LanguagePack "Chinese (Traditional)" chinese_trad_pack 0
+  StrCmp $LanguagePack "Dutch" dutch_pack 0
+  StrCmp $LanguagePack "French (FR)" french_fr_pack 0
+  StrCmp $LanguagePack "German" german_pack 0
+  StrCmp $LanguagePack "Greek" greek_pack 0
+  StrCmp $LanguagePack "Hungarian" hu_pack 0
+  StrCmp $LanguagePack "Italian" it_pack 0
+  StrCmp $LanguagePack "Russian" ru_pack 0
+  StrCmp $LanguagePack "Slovak" slovak_pack 0
+  StrCmp $LanguagePack "Slovenian" slovenian_pack 0
+  StrCmp $LanguagePack "Portuguese" portuguese_pack 0
+  GoTo langpack_installed
+catala_pack:
+  File "${ROOTDIR}\src\gui\i18n\Catala.lng"
+  Rename "Catala.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+chinese_simp_pack:
+  File "${ROOTDIR}\src\gui\i18n\Chinese(Simp).lng"
+  Rename "Chinese(Simp).lng" "ud_i18n.lng"
+  GoTo langpack_installed
+chinese_trad_pack:
+  File "${ROOTDIR}\src\gui\i18n\Chinese(Trad).lng"
+  Rename "Chinese(Trad).lng" "ud_i18n.lng"
+  GoTo langpack_installed
+dutch_pack:
+  File "${ROOTDIR}\src\gui\i18n\Dutch.lng"
+  Rename "Dutch.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+french_fr_pack:
+  File "${ROOTDIR}\src\gui\i18n\French(FR).lng"
+  Rename "French(FR).lng" "ud_i18n.lng"
+  GoTo langpack_installed
+german_pack:
+  File "${ROOTDIR}\src\gui\i18n\German.lng"
+  Rename "German.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+greek_pack:
+  File "${ROOTDIR}\src\gui\i18n\Greek.lng"
+  Rename "Greek.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+hu_pack:
+  File "${ROOTDIR}\src\gui\i18n\Hungarian.lng"
+  Rename "Hungarian.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+it_pack:
+  File "${ROOTDIR}\src\gui\i18n\Italian.lng"
+  Rename "Italian.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+ru_pack:
+  File "${ROOTDIR}\src\gui\i18n\Russian.lng"
+  Rename "Russian.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+slovak_pack:
+  File "${ROOTDIR}\src\gui\i18n\Slovak.lng"
+  Rename "Slovak.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+slovenian_pack:
+  File "${ROOTDIR}\src\gui\i18n\Slovenian.lng"
+  Rename "Slovenian.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+portuguese_pack:
+  File "${ROOTDIR}\src\gui\i18n\Portuguese.lng"
+  Rename "Portuguese.lng" "ud_i18n.lng"
+  GoTo langpack_installed
+langpack_installed:
+
+FunctionEnd
+
+;------------------------------------------
+
 Section "Ultra Defrag core files (required)" SecCore
 
   push $R0
@@ -423,21 +500,7 @@ Section "Ultra Defrag core files (required)" SecCore
 skip_opts:
 
   ; install LanguagePack pack
-  SetOutPath $INSTDIR
-  Delete "$INSTDIR\ud_i18n.lng"
-  StrCmp $LanguagePack "English" langpack_installed 0
-  StrCmp $LanguagePack "Hungarian" hu_pack 0
-  StrCmp $LanguagePack "Russian" ru_pack 0
-  GoTo langpack_installed
-hu_pack:
-  File "${ROOTDIR}\src\gui\i18n\Hungarian.lng"
-  Rename "Hungarian.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-ru_pack:
-  File "${ROOTDIR}\src\gui\i18n\Russian.lng"
-  Rename "Russian.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-langpack_installed:
+  call install_langpack
 
   DetailPrint "Install driver..."
   call install_driver
@@ -467,6 +530,7 @@ skip_boot_time_inst:
   DetailPrint "Install scripts..."
   File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
+  File "${ROOTDIR}\src\installer\ud-help.cmd"
 
   DetailPrint "Install console interface..."
   File "udefrag.exe"
@@ -683,6 +747,8 @@ Section "Shortcuts" SecShortcuts
   SetShellVarContext all
   SetOutPath $INSTDIR
 
+  ; remove shortcuts of any previous version of the program
+  RMDir /r "$SMPROGRAMS\DASoft"
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
   CreateDirectory "$R0\Boot time options"
@@ -812,6 +878,7 @@ Section "Uninstall"
   Delete "$SYSDIR\ud-config.cmd"
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\udefrag.exe"
+  Delete "$SYSDIR\ud-help.cmd"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
