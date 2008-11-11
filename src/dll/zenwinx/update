@@ -5,6 +5,7 @@ lcd robo-doc
 cd robo-doc
 put env_c.html
 put error_c.html
+put event_c.html
 put ldr_c.html
 put masterindex.html
 put mem_c.html

@@ -151,6 +151,44 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 	return (iosb.Information / size);//count;
 }
 
+/* 0 on success, -1 otherwise */
+int __stdcall winx_ioctl(WINX_FILE *f,
+                         int code,char *description,
+                         void *in_buffer,int in_size,
+                         void *out_buffer,int out_size,
+						 int *pbytes_returned)
+{
+	IO_STATUS_BLOCK iosb;
+	NTSTATUS Status;
+
+	if(!f){
+		winx_push_error("Invalid parameter!");
+		return (-1);
+	}
+	
+	if(pbytes_returned) *pbytes_returned = 0;
+	if((code >> 16) == FILE_DEVICE_FILE_SYSTEM){ /* on x64? */
+		Status = NtFsControlFile(f->hFile,NULL,NULL,NULL,
+			&iosb,code,in_buffer,in_size,out_buffer,out_size);
+	} else {
+		Status = NtDeviceIoControlFile(f->hFile,NULL,NULL,NULL,
+			&iosb,code,in_buffer,in_size,out_buffer,out_size);
+	}
+	if(Status == STATUS_PENDING){
+		Status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
+		if(NT_SUCCESS(Status)) Status = iosb.Status;
+	}
+	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){
+		if(description)
+			winx_push_error("%s failed: %x!",description,(UINT)Status);
+		else
+			winx_push_error("Ioctl %u failed: %x!",code,(UINT)Status);
+		return (-1);
+	}
+	if(pbytes_returned) *pbytes_returned = iosb.Information;
+	return 0;
+}
+						 
 void __stdcall winx_fclose(WINX_FILE *f)
 {
 	if(!f) return;

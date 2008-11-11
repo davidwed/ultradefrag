@@ -135,11 +135,19 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
 size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
 void   __stdcall winx_fclose(WINX_FILE *f);
+int __stdcall winx_ioctl(WINX_FILE *f,
+                         int code,char *description,
+                         void *in_buffer,int in_size,
+                         void *out_buffer,int out_size,
+						 int *pbytes_returned);
 
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);
 
 int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber);
+
+int __stdcall winx_create_event(short *name,int type,HANDLE *phandle);
+void __stdcall winx_destroy_event(HANDLE h);
 
 #endif /* _ZENWINX_H_ */

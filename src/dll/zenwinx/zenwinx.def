@@ -36,8 +36,11 @@ EXPORTS
 	winx_fopen
 	winx_fread
 	winx_fwrite
+	winx_ioctl
 	winx_fclose
 	winx_query_env_variable
 	winx_set_env_variable
 	winx_fbsize
 	winx_dfbsize
+	winx_create_event
+	winx_destroy_event
