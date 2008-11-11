@@ -217,6 +217,7 @@ Section "Ultra Defrag core files (required)" SecCore
   DetailPrint "Install scripts..."
   File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
+  File "${ROOTDIR}\src\installer\ud-help.cmd"
 
   DetailPrint "Install console interface..."
   File "udefrag.exe"
@@ -304,6 +305,7 @@ Section "Uninstall"
   Delete "$SYSDIR\ud-config.cmd"
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\udefrag.exe"
+  Delete "$SYSDIR\ud-help.cmd"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
