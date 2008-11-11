@@ -149,11 +149,12 @@ cd ia64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
 
-cd ..\..
+cd ..
 
 :build_source_package
 rem This section was removed to increase compilation speed.
 rem Run build.cmd to make an archive of sources.
+cd ..
 
 echo.
 echo Build success!

@@ -22,37 +22,29 @@
 */
 
 #include <windows.h>
-#include <string.h>
-#include <shellapi.h>
-
-#ifndef USE_WINDDK
-#define LONG_PTR  signed long*
-#endif
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	char buffer[MAX_PATH];
-	unsigned long result;
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
 
 	GetSystemDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\udefrag-gui.cmd");
-	result = (unsigned long)(LONG_PTR)ShellExecute(NULL,NULL,buffer,NULL,NULL,SW_HIDE);
+	SetCurrentDirectory(buffer);
 
-	if(result == SE_ERR_FNF || result == SE_ERR_PNF){
-		MessageBox(NULL,"udefrag-gui.cmd file not found!","Error!",MB_OK | MB_ICONHAND);
-		return 1;
+	ZeroMemory( &si, sizeof(si) );
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_HIDE;
+	ZeroMemory( &pi, sizeof(pi) );
+
+	if(!CreateProcess("cmd.exe","cmd.exe /C udefrag-gui.cmd",
+		NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+	    MessageBox(NULL,"Can't execute udefrag-gui.cmd!","Error",MB_OK | MB_ICONHAND);
+	    return 1;
 	}
-	if(result == SE_ERR_ACCESSDENIED || result == SE_ERR_SHARE){
-		MessageBox(NULL,"udefrag-gui.cmd access denied!","Error!",MB_OK | MB_ICONHAND);
-		return 1;
-	}
-	if(result == SE_ERR_OOM){
-		MessageBox(NULL,"No enough memory!","Error!",MB_OK | MB_ICONHAND);
-		return 1;
-	}
-	if(result == SE_ERR_ASSOCINCOMPLETE || result == SE_ERR_NOASSOC){
-		MessageBox(NULL,"CMD file association not registered!","Error!",MB_OK | MB_ICONHAND);
-		return 1;
-	}
+	WaitForSingleObject(pi.hProcess,INFINITE);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
 	return 0;
 }

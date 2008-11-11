@@ -6,6 +6,6 @@ target_type ="gui"
 src = {	"main.c" }
 rc = { "udefrag-gui.rc" }
 
-libs = { "kernel32", "user32", "shell32", "msvcrt" }
+libs = { "kernel32", "user32", "msvcrt" }
 
 umentry = "winmain"
