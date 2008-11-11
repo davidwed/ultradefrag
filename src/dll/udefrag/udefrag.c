@@ -34,11 +34,22 @@
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
 
+#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
+
+#ifndef __FUNCTION__
+#define __FUNCTION__ "udefrag_xxx"
+#endif
+#define CHECK_INIT_EVENT() { \
+	if(!init_event){ \
+		winx_push_error("%s call without initialization!", __FUNCTION__); \
+		return -1; \
+	} \
+}
+
 /* global variables */
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
 HANDLE init_event = NULL;
-HANDLE udefrag_device_handle = NULL;
 WINX_FILE *f_ud = NULL;
 WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
 
@@ -47,17 +58,6 @@ extern int refresh_interval;
 unsigned char c, lett;
 BOOL done_flag;
 char error_message[ERR_MSG_SIZE];
-
-/* internal functions prototypes */
-int udefrag_send_command(unsigned char command,unsigned char letter);
-BOOL n_ioctl(HANDLE handle,ULONG code,
-			PVOID in_buf,ULONG in_size,
-			PVOID out_buf,ULONG out_size,
-			char *err_format_string);
-
-#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
-
-#define CHECK_INIT_EVENT(msg) { if(!init_event){ winx_push_error(msg); return -1; } }
 
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
@@ -68,39 +68,15 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
-/* winx_pop_error() equivalent */
-void __stdcall udefrag_pop_error(char *buffer, int size)
-{
-	winx_pop_error(buffer,size);
-}
-
-/* winx_pop_werror() equivalent */
-void __stdcall udefrag_pop_werror(short *buffer, int size)
-{
-	winx_pop_werror(buffer,size);
-}
-
-/* winx_fbsize() equivalent */
-int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length)
-{
-	return winx_fbsize(number,digits,buffer,length);
-}
-
-/* winx_dfbsize() equivalent */
-int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber)
-{
-	return winx_dfbsize(string,pnumber);
-}
-
 /****f* udefrag.common/udefrag_init
 * NAME
 *    udefrag_init
 * SYNOPSIS
 *    error = udefrag_init(mapsize);
 * FUNCTION
-*    Load the Ultra Defragmenter driver and initialize defragmenter.
+*    Ultra Defragmenter initialization procedure.
 * INPUTS
-*    mapsize    - cluster map size, may be zero
+*    mapsize - cluster map size, may be zero
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
@@ -125,35 +101,26 @@ int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber)
 ******/
 int __stdcall udefrag_init(long map_size)
 {
-	UNICODE_STRING uStr;
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES ObjectAttributes;
 	char buf[ERR_MSG_SIZE];
 
 	/* 0. only one instance of the program ! */
 	/* 1. Enable neccessary privileges */
-	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) goto init_fail;*/
-	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) goto init_fail;
+	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) return (-1)*/
+	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) return (-1);
 	/* create init_event - this must be after privileges enabling */
-	RtlInitUnicodeString(&uStr,L"\\udefrag_init");
-	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
-	Status = NtCreateEvent(&init_event,STANDARD_RIGHTS_ALL | 0x1ff,
-				&ObjectAttributes,SynchronizationEvent,TRUE);
-	if(!NT_SUCCESS(Status)){
-		if(Status == STATUS_OBJECT_NAME_COLLISION)
+	if(winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event) < 0){
+		winx_save_error(buf,ERR_MSG_SIZE);
+		if(strstr(buf,"c0000035")) /* STATUS_OBJECT_NAME_COLLISION */
 			winx_push_error("You can run only one instance of UltraDefrag!");
-		else
-			winx_push_error("Can't create init_event: %x!",(UINT)Status);
-		init_event = NULL;
-		goto init_fail;
+		else winx_restore_error(buf);
+		return (-1);
 	}
 	/* 2. Load the driver */
 	if(winx_load_driver(L"ultradfg") < 0) return (-1);
 	/* 3. Open our device */
+	/* FIXME: detailed error information. "Can't access ULTRADFG driver: %x!" */
 	f_ud = winx_fopen("\\Device\\UltraDefrag","w");
 	if(!f_ud) goto init_fail;
-	udefrag_device_handle = winx_fileno(f_ud);
-	/* FIXME: detailed error information. "Can't access ULTRADFG driver: %x!" */
 	f_map = winx_fopen("\\Device\\UltraDefragMap","r");
 	if(!f_map) goto init_fail;
 	f_stat = winx_fopen("\\Device\\UltraDefragStat","r");
@@ -161,13 +128,11 @@ int __stdcall udefrag_init(long map_size)
 	f_stop = winx_fopen("\\Device\\UltraDefragStop","w");
 	if(!f_stop) goto init_fail;
 	/* 5. Set user mode buffer - nt 4.0 specific */
-	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_USER_MODE_BUFFER,
-		user_mode_buffer,0,NULL,0,
-		"Can't set user mode buffer: %x!")) goto init_fail;
+	if(winx_ioctl(f_ud,IOCTL_SET_USER_MODE_BUFFER,"User mode buffer setup",
+		user_mode_buffer,0,NULL,0,NULL) < 0) goto init_fail;
 	/* 6. Set cluster map size */
-	if(!n_ioctl(udefrag_device_handle,IOCTL_SET_CLUSTER_MAP_SIZE,
-		&map_size,sizeof(long),NULL,0,
-		"Can't setup cluster map buffer: %x!")) goto init_fail;
+	if(winx_ioctl(f_ud,IOCTL_SET_CLUSTER_MAP_SIZE,"Cluster map buffer setup",
+		&map_size,sizeof(long),NULL,0,NULL) < 0) goto init_fail;
 	/* 7. Load settings */
 	if(udefrag_reload_settings() < 0) goto init_fail;
 	return 0;
@@ -207,10 +172,10 @@ init_fail:
 ******/
 int __stdcall udefrag_unload(void)
 {
-	CHECK_INIT_EVENT("Udefrag.dll unload call without initialization!");
+	CHECK_INIT_EVENT();
 
 	/* close events */
-	NtClose(init_event); init_event = NULL;
+	winx_destroy_event(init_event); init_event = NULL;
 	/* close device handle */
 	if(f_ud) winx_fclose(f_ud);
 	if(f_map) winx_fclose(f_map);
@@ -220,6 +185,18 @@ int __stdcall udefrag_unload(void)
 	if(winx_unload_driver(L"ultradfg") < 0)
 		winx_pop_error(NULL,0);
 	return 0;
+}
+
+int udefrag_send_command(unsigned char command,unsigned char letter)
+{
+	char cmd[4];
+
+	CHECK_INIT_EVENT();
+
+	/* FIXME: detailed error message! 
+	"Can't execute driver command \'%c\' for volume %c: %x!" */
+	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
+	return winx_fwrite(cmd,strlen(cmd),1,f_ud) ? 0 : (-1);
 }
 
 /* you can send only one command at the same time */
@@ -232,21 +209,6 @@ DWORD WINAPI send_command(LPVOID unused)
 	done_flag = TRUE;
 	winx_exit_thread();
 	return 0;
-}
-
-int udefrag_send_command(unsigned char command,unsigned char letter)
-{
-	char cmd[4];
-
-	if(!init_event){
-		winx_push_error("Udefrag.dll \'%c\' call without initialization!",command);
-		return (-1);
-	}
-	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-
-	/* FIXME: detailed error message! 
-	"Can't execute driver command \'%c\' for volume %c: %x!" */
-	return winx_fwrite(cmd,strlen(cmd),1,f_ud) ? 0 : (-1);
 }
 
 /****f* udefrag.common/udefrag_send_command_ex
@@ -330,7 +292,7 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 ******/
 int __stdcall udefrag_stop(void)
 {
-	CHECK_INIT_EVENT("Udefrag.dll stop call without initialization!");
+	CHECK_INIT_EVENT();
 	/* FIXME: better error messages "Can't stop driver command: %x!" */
 	return winx_fwrite("s",1,1,f_stop) ? 0 : (-1);
 }
@@ -360,7 +322,7 @@ int __stdcall udefrag_stop(void)
 ******/
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
-	CHECK_INIT_EVENT("Udefrag.dll get_progress call without initialization!");
+	CHECK_INIT_EVENT();
 
 	/* FIXME: detailed error message! "Statistical data unavailable: %x!" */
 	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)) return (-1);
@@ -409,7 +371,7 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 ******/
 int __stdcall udefrag_get_map(char *buffer,int size)
 {
-	CHECK_INIT_EVENT("Udefrag.dll get_map call without initialization!");
+	CHECK_INIT_EVENT();
 	/* FIXME: detailed error message! "Cluster map unavailable: %x!" */
 	return winx_fread(buffer,size,1,f_map) ? 0 : (-1);
 }
@@ -438,49 +400,27 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 ******/
 char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 {
-	char s[68];
+	char total_space[68];
+	char free_space[68];
 	double p;
 	unsigned int ip;
 
-	strcpy(result_msg,"Volume information:\n");
-	strcat(result_msg,"\n  Volume size                  = ");
-	winx_fbsize(pstat->total_space,2,s,sizeof(s));
-	strcat(result_msg,s);
-	strcat(result_msg,"\n  Free space                   = ");
-	winx_fbsize(pstat->free_space,2,s,sizeof(s));
-	strcat(result_msg,s);
-	strcat(result_msg,"\n\n  Total number of files        = ");
-	_itoa(pstat->filecounter,s,10);
-	strcat(result_msg,s);
-	strcat(result_msg,"\n  Number of fragmented files   = ");
-	_itoa(pstat->fragmfilecounter,s,10);
-	strcat(result_msg,s);
+	winx_fbsize(pstat->total_space,2,total_space,sizeof(total_space));
+	winx_fbsize(pstat->free_space,2,free_space,sizeof(free_space));
 	p = (double)(pstat->fragmcounter)/((double)(pstat->filecounter) + 0.1);
 	ip = (unsigned int)(p * 100.00);
-	strcat(result_msg,"\n  Fragments per file           = ");
-	sprintf(s,"%u.%02u",ip / 100,ip % 100);
-	strcat(result_msg,s);
+	_snprintf(result_msg,sizeof(result_msg) - 1,
+			  "Volume information:\r\n\r\n"
+			  "  Volume size                  = %s\r\n"
+			  "  Free space                   = %s\r\n\r\n"
+			  "  Total number of files        = %u\r\n"
+			  "  Number of fragmented files   = %u\r\n"
+			  "  Fragments per file           = %u.%02u\r\n",
+			  total_space,
+			  free_space,
+			  pstat->filecounter,
+			  pstat->fragmfilecounter,
+			  ip / 100, ip % 100
+			 );
 	return result_msg;
-}
-
-BOOL n_ioctl(HANDLE handle,ULONG code,
-			PVOID in_buf,ULONG in_size,
-			PVOID out_buf,ULONG out_size,
-			char *err_format_string)
-{
-	IO_STATUS_BLOCK IoStatusBlock;
-	NTSTATUS Status;
-
-	Status = NtDeviceIoControlFile(handle,NULL,
-				NULL,NULL,&IoStatusBlock,code,
-				in_buf,in_size,out_buf,out_size);
-	if(Status == STATUS_PENDING){
-		Status = NtWaitForSingleObject(handle,FALSE,NULL);
-		if(NT_SUCCESS(Status)) Status = IoStatusBlock.Status;
-	}
-	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){
-		winx_push_error(err_format_string,(UINT)Status);
-		return FALSE;
-	}
-	return TRUE;
 }

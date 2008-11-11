@@ -71,21 +71,21 @@ int __stdcall udefrag_reload_settings();
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 
-int __stdcall fbsize(char *s,ULONGLONG n);
-int __stdcall fbsize2(char *s,ULONGLONG n);
-int __stdcall dfbsize2(char *s,ULONGLONG *pn);
+/*
+* This callback procedure was designed especially 
+* to refresh progress indicator during defragmentation process.
+*/
+typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
+int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
 
 /* interface for scripting languages */
 /*char * __stdcall udefrag_s_get_map(int size);
 char * __stdcall udefrag_s_get_avail_volumes(int skip_removable);
 */
-
-/* because perl/Tk is incompatible with threads 
- * we should provide callback functions
- */
-typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
-int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
-
+/*
+* because perl/Tk is incompatible with threads 
+* we should provide callback functions
+*/
 /*int __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
 int __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc);
 int __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc);

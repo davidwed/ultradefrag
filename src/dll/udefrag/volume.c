@@ -70,7 +70,7 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 *      floppy drive without floppy disk)
 *       then you will hear noise :))
 * SEE ALSO
-*    udefrag_validate_volume, scheduler_get_avail_letters
+*    udefrag_validate_volume
 ******/
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable)
 {
@@ -125,7 +125,7 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 *      to validate floppy drive without floppy disk)
 *       then you will hear noise :))
 * SEE ALSO
-*    udefrag_get_avail_volumes, scheduler_get_avail_letters
+*    udefrag_get_avail_volumes
 ******/
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
@@ -178,9 +178,3 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 	}
 	return 0;
 }
-
-/*
-* This call is practically unuseful, especially on NT 4 system.
-* Removed at 29 Oct 2008.
-*/
-/*BOOL get_drive_map(PROCESS_DEVICEMAP_INFORMATION *pProcessDeviceMapInfo);*/
