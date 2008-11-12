@@ -2,20 +2,24 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 2.0.0 (22.5)   2008-10-
+  Version 2.0.0 (24.0)   2008-11-
   ------------------------------------------------------------------------------
     - scripting support for boot time interface was added
     - program options were moved to environment variables
     - UltraDefrag Micro Edition package was added
     - a lot of portable application bugs were fixed
+
     - gui program was translated into the following languages:
-      
+
+      Catala, Chinese (Simplified), Chinese (Traditional), Dutch, 
+      French (FR), German, Greek, Italian, Portuguese, Slovak, Slovenian
+
     - boot-on, boot-off, ud-config scripts were added
     - few useful shortcuts were added
-    - udefrag.dll code big optimization was performed
+    - udefrag.dll great optimization was performed
     - many functions were added to zenwinx.dll
     - installer compression ratio was increased
-    - gui design improved
+    - gui design was improved
 
                                     ***
 

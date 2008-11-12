@@ -42,7 +42,7 @@ H3.western { font-family: "Arial", sans-serif }
 </head>
 <body style="direction: ltr; color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt;" alink="#ff0000" lang="en-US" vlink="#660099">
 <h1 class="western" align="center"><font style="font-size: 20pt;" size="5">UltraDefrag
-User Manual</font></h1>
+User Manual (for version 2.0.0)</font></h1>
 <div class="western" align="right">Written by 
 <a href="mailto:zippy1981 + at + gmail + dot + com">Justin Dearing</a>.<br>
 Modified by 
@@ -305,6 +305,16 @@ C:\>_
 </div>
 </pre>
 </p>
+
+<p>There are also few defragmentation related command line utilites:</p>
+<p class="lcode">
+<b>boot-config</b> - edit boot time defragmenter options<br />
+<b>boot-off</b>&nbsp;&nbsp;&nbsp; - disable boot time defragmenter<br />
+<b>boot-on</b>&nbsp;&nbsp;&nbsp;&nbsp; - enable boot time defragmenter<br />
+<b>ud-config</b>&nbsp;&nbsp; - edit GUI options<br />
+<b>ud-help</b>&nbsp;&nbsp;&nbsp;&nbsp; - show list of supported commands<br />
+</p>
+
 <h3 class="western">Windows Application</h3>
 <p>The windows application is a simple application with one main
 form of fixed size and an about box. An illustration of the window as well
@@ -498,7 +508,7 @@ The following commands are supported:
 <table border="1" cellpadding="3"><tbody>
 
 <tr>
-<td class="code">@echo on</td><td>Show commands on the screen.</td>
+<td class="code">@echo on</td><td>Show commands on the screen. This is the default behaviour.</td>
 </tr>
 
 <tr>
@@ -629,8 +639,9 @@ disable bootsplash on startup.</p>
 
 <p>Set <span class="code">Language=LanguageName</span> to choose your preferred language to be used by 
 portable GUI. Available languages are: <span class="code">Catala, Chinese (Simplified), 
-Chinese (Traditional), 
-English (US), French (FR), Hungarian, Russian</span>.</p>
+Chinese (Traditional), Dutch,
+English (US), French (FR), German, Greek, Hungarian, Italian, 
+Portuguese, Russian, Slovak, Slovenian</span>.</p>
 
 <h1 class="western">UltraDefrag Micro Edition</h1>
 
