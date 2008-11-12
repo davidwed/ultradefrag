@@ -3,6 +3,11 @@ HISTORY
 [version x.y.z (x86 dll size in Kbytes)   release date]
 
 
+  Version 0.1.0 (17.0)  2008-11-11
+  ------------------------------------------------------------------------------
+    - many functions were added
+
+
   Version 0.0.2 (7.5)   2007-12-22
   ------------------------------------------------------------------------------
     - full documentation was added
