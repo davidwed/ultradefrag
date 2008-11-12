@@ -481,6 +481,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	/* 8b. Command Loop */
 cmdloop:
+	winx_printf("\nInteractive mode:\n"
+				"Type 'help' for list of supported commands.\n\n");
 	while(1){
 		winx_printf("# ");
 		if(winx_gets(buffer,sizeof(buffer) - 1) < 0){

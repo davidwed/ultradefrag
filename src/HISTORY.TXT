@@ -15,6 +15,7 @@ HISTORY
     - udefrag.dll code big optimization was performed
     - many functions were added to zenwinx.dll
     - installer compression ratio was increased
+    - gui design improved
 
                                     ***
 
