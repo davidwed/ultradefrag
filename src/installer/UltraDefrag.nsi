@@ -229,18 +229,27 @@ FunctionEnd
 Function LangShow
 
   push $R0
+  push $R1
   
 !ifdef MODERN_UI
-  !insertmacro MUI_HEADER_TEXT "LanguagePack Packs" \
-      "Choose which LanguagePack pack you want to install."
+  !insertmacro MUI_HEADER_TEXT "Language Packs" \
+      "Choose which language pack you want to install."
 !endif
   SetOutPath $PLUGINSDIR
   File "lang.ini"
+
+  ClearErrors
+  ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
+  IfErrors default_lang 0
+  WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
+default_lang:
+
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
   pop $R0
   InstallOptions::show
   pop $R0
 
+  pop $R1
   pop $R0
   Abort
 
@@ -259,6 +268,7 @@ Function LangLeave
 
 exit_notify_handler:
   ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
+  WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
   pop $R0
 
 FunctionEnd
@@ -480,7 +490,7 @@ Section "Ultra Defrag core files (required)" SecCore
   push $R1
 
   SectionIn RO
-  AddSize 44 /* for the components installed in system directories */
+  AddSize 24 /* for the components installed in system directories (driver) */
 !insertmacro DisableX64FSRedirection
   DetailPrint "Install core files..."
   SetOutPath $INSTDIR
@@ -639,6 +649,7 @@ lng_registered:
   Delete "$INSTDIR\doc\images\main_screen110.png"
   RMDir /r "$INSTDIR\presets"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
+  Delete "$INSTDIR\dfrg.exe"
   
   ; create boot time script if it doesn't exist
   SetOutPath "$SYSDIR"
@@ -702,7 +713,7 @@ Section "Portable UltraDefrag package" SecPortable
   DetailPrint "Build portable package..."
   StrCpy $R0 "$INSTDIR\portable_${ULTRADFGARCH}_package"
   CreateDirectory $R0
-  CopyFiles /SILENT $EXEPATH $R0 200
+  CopyFiles /SILENT $EXEPATH $R0 265
   CopyFiles /SILENT "$INSTDIR\options\*.*" $R0
   CopyFiles /SILENT "$SYSDIR\udefrag-gui.cmd" $R0
   WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
@@ -892,6 +903,7 @@ Section "Uninstall"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "Software\UltraDefrag"
   ; remove settings of previous versions
   ;DeleteRegKey HKCU "SOFTWARE\DASoft\NTDefrag"
   ;DeleteRegKey /ifempty HKCU "Software\DASoft"
