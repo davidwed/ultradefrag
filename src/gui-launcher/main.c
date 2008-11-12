@@ -22,8 +22,9 @@
 */
 
 #include <windows.h>
+#include "resource.h"
 
-int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
+int StartGUI(void)
 {
 	char buffer[MAX_PATH];
 	STARTUPINFO si;
@@ -47,4 +48,30 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 	return 0;
+}
+
+BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+	switch(msg){
+	case WM_INITDIALOG:
+		/* kill our window before showing them :) */
+		EndDialog(hWnd,1);
+		return FALSE;
+	case WM_CLOSE:
+		/* this code - for extraordinary cases */
+		EndDialog(hWnd,1);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
+{
+	/*
+	* To disable the sand glass on the cursor
+	* we must show a window on startup.
+	*/
+	DialogBox(hInst,MAKEINTRESOURCE(IDD_EMPTY),NULL,(DLGPROC)EmptyDlgProc);
+	/* start UltraDefrag GUI */
+	return StartGUI();
 }

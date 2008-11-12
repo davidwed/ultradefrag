@@ -276,7 +276,7 @@ static int pmain (lua_State *L) {
 }
 
 
-int __cdecl main (int argc, char **argv) {
+int __cdecl internal_main (int argc, char **argv) {
   int status;
   struct Smain s;
   lua_State *L = lua_open();  /* create state */
@@ -383,14 +383,34 @@ CommandLineToArgvA(
 	return argv;
 }
 
+BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+	switch(msg){
+	case WM_INITDIALOG:
+		/* kill our window before showing them :) */
+		EndDialog(hWnd,1);
+		return FALSE;
+	case WM_CLOSE:
+		/* this code - for extraordinary cases */
+		EndDialog(hWnd,1);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	int argc;
 	char **argv;
 	int ret;
 	
+	/*
+	* To disable the sand glass on the cursor
+	* we must show a window on startup.
+	*/
+	DialogBox(hInst,MAKEINTRESOURCE(100),NULL,(DLGPROC)EmptyDlgProc);
 	argv = CommandLineToArgvA(GetCommandLineA(),&argc);
-	ret = main(argc,argv);
+	ret = internal_main(argc,argv);
 	if(argv) GlobalFree(argv);
 	return ret;
 }
