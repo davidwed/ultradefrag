@@ -104,7 +104,7 @@
 #endif
 
 /* application defined constants */
-#define BLOCKS_PER_HLINE  52 /*60*/
+#define BLOCKS_PER_HLINE  65 /*52*/ /*60*/
 #define BLOCKS_PER_VLINE  14 /*16*/
 #define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
 

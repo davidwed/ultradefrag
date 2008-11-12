@@ -171,7 +171,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int i;
 	RECT rc;
 	int dx;
-	int cw[] = {100,90,110,120,85}; //{77,70,94,96,98,70};
+	int cw[] = {90,90,110,125,90}; //{100,90,110,120,85}; //{77,70,94,96,98,70};
 	LV_ITEM lvi;
 
 	DisableButtonsBeforeDrivesRescan();
