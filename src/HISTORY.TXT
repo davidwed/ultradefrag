@@ -2,7 +2,7 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 2.0.0 (24.0)   2008-11-
+  Version 2.0.0 (24.0)   2008-11-13
   ------------------------------------------------------------------------------
     - scripting support for boot time interface was added
     - program options were moved to environment variables

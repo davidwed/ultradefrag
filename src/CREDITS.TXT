@@ -15,9 +15,18 @@ Justin Dearing
 
 Translators:
 
-Hungarian - Nagy Zsolt
-Russian   - Dmitri Arkhangelski
-
+Catala     - Illes Balears
+Chinese    - muzuiget
+Dutch      - Wim Kerstens
+French     - Pascal Crozet
+German     - Stefan Geuken
+Greek      - Konstantinos Kapoukranidis
+Hungarian  - Nagy Zsolt
+Italian    - Paolo Loggia
+Portuguese - Ricardo A. Garcia
+Russian    - Dmitri Arkhangelski
+Slovak     - Milan Cerovsky /Milanbb55/
+Slovenian  - Miha Mlakar
 
 Special thanks for strong testing to (in alphabetical order):
 

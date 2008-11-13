@@ -1,5 +1,5 @@
 =========================
-UltraDefrag Version 1.1.0
+UltraDefrag Version 2.0.0
 Updated Aug 16th, 2007
 =========================
 

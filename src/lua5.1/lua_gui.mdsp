@@ -26,7 +26,7 @@ optimizeLevel=0
 
 // linker
 libraryPath=..\lib
-outputFilename=../bin/lua_gui.exe
+outputFilename=../bin/lua5.1a_gui.exe
 libraries=lua5.1a
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
@@ -64,7 +64,7 @@ optimizeLevel=2
 
 // linker
 libraryPath=..\lib
-outputFilename=../bin/lua_gui.exe
+outputFilename=../bin/lua5.1a_gui.exe
 libraries=lua5.1a
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0

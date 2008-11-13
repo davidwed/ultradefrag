@@ -499,7 +499,8 @@ cmdloop:
 		cmd[0] = arg[0] = 0;
 		sscanf(buffer,"%32s %4s",cmd,arg);
 		for(i = 0; i < sizeof(commands) / sizeof(char*); i++)
-			if(strstr(cmd,commands[i])) break;
+			//if(strstr(cmd,commands[i])) break;
+			if(!strcmp(cmd,commands[i])) break;
 		switch(i){
 		case 0:
 			winx_printf("Shutdown ...");
