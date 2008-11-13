@@ -215,7 +215,7 @@ mkdir %SRC_PKG_PATH%\doc\html\images
 copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
 copy /Y ..\doc\html\udefrag.css %SRC_PKG_PATH%\doc\html\
 
-copy /Y ..\doc\html\images\main_screen140.png %SRC_PKG_PATH%\doc\html\images\
+copy /Y ..\doc\html\images\main_screen200.png %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\fixed.ico %SRC_PKG_PATH%\doc\html\images\
 copy /Y ..\doc\html\images\removable.ico %SRC_PKG_PATH%\doc\html\images\
 
