@@ -170,7 +170,7 @@ Function .onInit
    "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "CurrentVersion"
   IfErrors 0 winnt
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "On Windows 9.x this program is absolutely unuseful!" \
+   "On Windows 9.x this program is absolutely useless!" \
    /SD IDOK
 abort_inst:
 !insertmacro EnableX64FSRedirection
@@ -181,7 +181,7 @@ winnt:
   StrCpy $R1 $R0 1
   StrCmp $R1 '3' 0 winnt_456
   MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "On Windows NT 3.x this program is absolutely unuseful!" \
+   "On Windows NT 3.x this program is absolutely useless!" \
    /SD IDOK
   goto abort_inst
 winnt_456:
@@ -836,7 +836,7 @@ Section "Uninstall"
   Delete "$QUICKLAUNCH\UltraDefrag.lnk"
 
   DetailPrint "Remove program files..."
-  /* remove unuseful registry settings */
+  /* remove useless registry settings */
   ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
   Delete "$INSTDIR\Dfrg.exe"
   Delete "$INSTDIR\LICENSE.TXT"

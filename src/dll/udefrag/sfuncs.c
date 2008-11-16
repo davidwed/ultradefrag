@@ -23,7 +23,7 @@
 */
 
 /*
-* This interface is practically unuseful now,
+* This interface is practically useless now,
 * therefore it will be disabled by default.
 * To enable them define PERL_SUPPORT and uncomment 
 * appropriate entries in *.def files.
