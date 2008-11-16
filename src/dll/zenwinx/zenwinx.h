@@ -41,6 +41,7 @@
 *		winx_create_thread
 *		winx_enable_privilege
 *		winx_exit_thread
+*		winx_fflush
 *		winx_fopen
 *		winx_fread
 *		winx_fwrite
@@ -53,6 +54,7 @@
 *		winx_getche
 *		winx_gets
 *		winx_init
+*		winx_ioctl
 *		winx_kbhit
 *		winx_load_driver
 *		winx_query_env_variable
@@ -140,6 +142,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
                          void *in_buffer,int in_size,
                          void *out_buffer,int out_size,
 						 int *pbytes_returned);
+int __stdcall winx_fflush(WINX_FILE *f);
 
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);

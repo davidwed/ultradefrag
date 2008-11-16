@@ -37,6 +37,7 @@ EXPORTS
 	winx_fread
 	winx_fwrite
 	winx_ioctl
+	winx_fflush
 	winx_fclose
 	winx_query_env_variable
 	winx_set_env_variable

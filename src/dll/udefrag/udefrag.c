@@ -191,8 +191,6 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 {
 	char cmd[4];
 
-	CHECK_INIT_EVENT();
-
 	/* FIXME: detailed error message! 
 	"Can't execute driver command \'%c\' for volume %c: %x!" */
 	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
@@ -240,6 +238,32 @@ DWORD WINAPI send_command(LPVOID unused)
 ******/
 int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc)
 {
+	WINX_FILE *f;
+	char volume[] = "\\??\\A:";
+
+	CHECK_INIT_EVENT();
+
+	/*
+	* Here we can flush all file buffers. We cannot do it 
+	* in driver due to te following two reasons:
+	* 1. There is no NtFlushBuffersFile() call in kernel mode.
+	* 2. IRP_MJ_FLUSH_BUFFERS request causes BSOD on NT 4.0
+	* (at least under MS Virtual PC 2004).
+	*/
+	if(command == 'a'){
+		volume[4] = letter;
+		f = winx_fopen(volume,"r+");
+		if(f){
+			if(winx_fflush(f) < 0){
+				winx_fclose(f);
+				return -1;//winx_pop_error(NULL,0);
+			}
+			winx_fclose(f);
+		} else {
+			return -1;//winx_pop_error(NULL,0);
+		}
+	}
+
 	if(!sproc){
 		/* send command directly and return */
 		return udefrag_send_command(command,letter);

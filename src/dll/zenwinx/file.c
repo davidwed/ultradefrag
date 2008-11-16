@@ -188,7 +188,25 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	if(pbytes_returned) *pbytes_returned = iosb.Information;
 	return 0;
 }
-						 
+
+int __stdcall winx_fflush(WINX_FILE *f)
+{
+	NTSTATUS Status;
+	IO_STATUS_BLOCK iosb;
+	
+	if(!f){
+		winx_push_error("Invalid parameter!");
+		return (-1);
+	}
+
+	Status = NtFlushBuffersFile(f->hFile,&iosb);
+	if(!NT_SUCCESS(Status)){
+		winx_push_error("NtFlushBuffersFile() failed: %x!",(UINT)Status);
+		return (-1);
+	}
+	return 0;
+}
+
 void __stdcall winx_fclose(WINX_FILE *f)
 {
 	if(!f) return;

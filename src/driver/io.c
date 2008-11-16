@@ -19,6 +19,8 @@
 
 /* io.c - low level I/O functions */
 
+#if 0 /* Since the 2.0.1 release this code must be turned off. */
+
 #include "driver.h"
 
 #ifndef NT4_TARGET
@@ -90,5 +92,7 @@ NTSTATUS NTAPI IoFlushBuffersFile(HANDLE FileHandle)
 {
 	return 0;
 }
+
+#endif
 
 #endif

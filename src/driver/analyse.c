@@ -56,7 +56,9 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(!NT_SUCCESS(Status)) goto fail;
 	Status = GetVolumeInfo(dx);
 	if(!NT_SUCCESS(Status)) goto fail;
-	IoFlushBuffersFile(dx->hVol);
+
+	///IoFlushBuffersFile(dx->hVol);
+
 	Status = FillFreeSpaceMap(dx);
 	if(!NT_SUCCESS(Status)) goto fail;
 
@@ -94,16 +96,4 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 fail:
 	dx->status = STATUS_BEFORE_PROCESSING;
 	return Status;
-}
-
-/* 
-* TODO: write special function to perform new analysis if 
-* number of invalid movings is not zero.
-* This function must redump free space and redump each file.
-* And destroy pending blocks queue.
-*/
-
-NTSTATUS RedumpSpace(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	return 0;
 }
