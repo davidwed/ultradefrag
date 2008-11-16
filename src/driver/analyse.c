@@ -43,6 +43,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	short path[50] = L"\\??\\A:\\";
 	NTSTATUS Status;
 	UNICODE_STRING us;
+	//ULONGLONG tm;
 
 	/* Initialization */
 	MarkAllSpaceAsSystem0(dx);
@@ -59,8 +60,10 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	///IoFlushBuffersFile(dx->hVol);
 
+	//tm = _rdtsc();
 	Status = FillFreeSpaceMap(dx);
 	if(!NT_SUCCESS(Status)) goto fail;
+	//DbgPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
 
 	/* Find files */
 	path[4] = (short)dx->letter;

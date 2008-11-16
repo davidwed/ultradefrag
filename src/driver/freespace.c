@@ -124,65 +124,18 @@ BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,
 }
 
 /*
-* FIXME: what is about memory usage growing because
-* pending blocks may be never freed.
-*/
-/*
-* FIXME: this function is really not useful, at least on XP, 
-* because all blocks are still not checked by system and 
-* CheckFreeSpace() always returns FALSE here.
-*/
-void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	PROCESS_BLOCK_STRUCT *ppbs;
-
-	if(!dx->unprocessed_blocks) return;
-	for(ppbs = dx->no_checked_blocks; ppbs != NULL; ppbs = ppbs->next_ptr){
-		if(ppbs->len){
-			if(CheckFreeSpace(dx,ppbs->start,ppbs->len)){
-				DebugPrint2("-Ultradfg- Pending block was freed start: %I64u len: %I64u\n",
-						ppbs->start,ppbs->len);
-				InsertFreeSpaceBlock(dx,ppbs->start,ppbs->len,NO_CHECKED_SPACE);
-				ppbs->len = 0;
-				dx->unprocessed_blocks --;
-			}
-		}
-	}
-}
-
-/*
 * On FAT partitions after file moving filesystem driver marks
 * previously allocated clusters as free immediately.
-* But on NTFS we must wait until the volume has been checkpointed. 
+* But on NTFS they are always allocated by system, not free, never free.
+* Only the next analyse frees them.
 */
 void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 					  ULONGLONG len,UCHAR old_space_state)
 {
-	PROCESS_BLOCK_STRUCT *ppbs;
-
-	if(dx->partition_type == NTFS_PARTITION){
-		/* Mark clusters as no-checked */
+	if(dx->partition_type == NTFS_PARTITION) /* Mark clusters as no-checked */
 		ProcessBlock(dx,start,len,NO_CHECKED_SPACE,old_space_state);
-
-		for(ppbs = dx->no_checked_blocks; ppbs != NULL; ppbs = ppbs->next_ptr){
-			if(!ppbs->len){
-				ppbs->start = start;
-				ppbs->len = len;
-				break;
-			}
-		}
-		if(!ppbs){
-			/* insert new item */
-			ppbs = (PROCESS_BLOCK_STRUCT *)InsertFirstItem((PLIST *)&dx->no_checked_blocks,
-				sizeof(PROCESS_BLOCK_STRUCT));
-			if(!ppbs) goto direct_call; /* ??? */
-			ppbs->len = len; ppbs->start = start;
-		}
-		dx->unprocessed_blocks ++;
-	} else {
-direct_call:
+	else
 		InsertFreeSpaceBlock(dx,start,len,old_space_state);
-	}
 }
 
 /* inserts any block in free space map */

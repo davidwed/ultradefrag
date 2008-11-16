@@ -229,13 +229,13 @@ typedef struct _FRAGMENTED {
 #define _256K (256 * 1024)
 
 /* structure to store information about block with unknown state */
-typedef struct _PROCESS_BLOCK_STRUCT
+/*typedef struct _PROCESS_BLOCK_STRUCT
 {
 	struct _PROCESS_BLOCK_STRUCT *next_ptr;
 	ULONGLONG start;
 	ULONGLONG len;
 } PROCESS_BLOCK_STRUCT, *PPROCESS_BLOCK_STRUCT;
-
+*/
 /* structure to store offset of filter string in multiline filter */
 typedef struct _OFFSET
 {
@@ -316,8 +316,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONGLONG processed_clusters;
 	ULONGLONG clusters_to_move;
 	ULONGLONG clusters_to_move_initial;
-	PROCESS_BLOCK_STRUCT *no_checked_blocks;
-	ULONG unprocessed_blocks; /* number of no-checked blocks */
 	NTSTATUS status;
 	ULONG invalid_movings;
 	/*

@@ -23,6 +23,32 @@
 
 #include "driver.h"
 
+/*
+* Since the 2.0.1 version the state of files 
+* after defragmentation will be unknown.
+* So we need analyse() call before 
+* each next defragmentation.
+* We can simply do it, because the OS
+* (at least XP) has disk requests caching system.
+* The first analysis will be still slow enough,
+* but each next one will be very fast 
+* (no more than few seconds).
+*
+* Therefore the code that corrects file maps
+* after each defragmentation will be removed.
+*
+* Due to imperfectness of the NTFS file system
+* the CheckPendingBlocks() call always returns
+* failure, and we should remove them.
+*
+* We can destroy block map after defragmentation
+* because on NTFS we need analysis due to 
+* file system imperfectness. On the other hand,
+* FAT formatted volumes usually aren't big enough 
+* to slow down the process.
+*/
+
+
 /* Kernel of defragmenter */
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -30,7 +56,6 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	KIRQL oldIrql;
 	PFRAGMENTED pflist;
 	PFILENAME curr_file;
-	int x = 0; // temporary replacement for RedumpSpace.
 
 	KeClearEvent(&dx->stop_event);
 	DeleteLogFile(dx);
@@ -52,7 +77,6 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	/* process fragmented files */
 	dx->invalid_movings = 0;
-	CheckPendingBlocks(dx);
 	for(pflist = dx->fragmfileslist; pflist != NULL; pflist = pflist->next_ptr){
 		curr_file = pflist->pfn;
 		/* skip system and unfragmented files */
@@ -77,22 +101,16 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	* We have reached 100% progress point.
 	*/
 
-	if(dx->invalid_movings)
-		x = 1; //RedumpSpace(dx);
-
 exit_defrag:
-	CheckPendingBlocks(dx);
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
 	/*
-	* If defragmentation was stopped then we need
-	* repeat analyse before the next defragmentation.
+	* The state of some processed files maybe unknown...
 	*/
-	if(KeReadStateEvent(&dx->stop_event) == 0x0)
+	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0)
 		dx->status = STATUS_DEFRAGMENTED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;
-	if(x) dx->status = STATUS_BEFORE_PROCESSING;
 }
 
 /*
@@ -106,7 +124,6 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	KSPIN_LOCK spin_lock;
 	KIRQL oldIrql;
 	PFILENAME curr_file;
-	int x = 0; // temporary replacement for RedumpSpace.
 
 	KeClearEvent(&dx->stop_event);
 	DeleteLogFile(dx);
@@ -131,7 +148,6 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	/* process all files */
 	dx->invalid_movings = 0;
-	CheckPendingBlocks(dx);
 	for(curr_file = dx->filelist; curr_file != NULL; curr_file = curr_file->next_ptr){
 		/* skip system files */
 		if(!curr_file->blockmap) continue;
@@ -151,22 +167,16 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	* We have reached 100% progress point.
 	*/
 
-	if(dx->invalid_movings)
-		x = 1; //RedumpSpace(dx);
-
 exit_defrag_space:
-	CheckPendingBlocks(dx);
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
 	/*
-	* If defragmentation was stopped then we need
-	* repeat analyse before the next defragmentation.
+	* The state of some processed files maybe unknown...
 	*/
-	if(KeReadStateEvent(&dx->stop_event) == 0x0)
+	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0)
 		dx->status = STATUS_DEFRAGMENTED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;
-	if(x) dx->status = STATUS_BEFORE_PROCESSING;
 }
  
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
@@ -190,6 +200,7 @@ NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 #else
 	dx->pmoveFile->NumVcns = (ULONG)n_clusters;
 #endif
+	/* On NT 4.0 it can move no more than 256 kbytes once. */
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
 						FSCTL_MOVE_FILE,
 						dx->pmoveFile,sizeof(MOVEFILE_DESCRIPTOR),
@@ -235,24 +246,7 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 exit:
 	return Status;
 }
-/*
-NTSTATUS MoveCompressedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
-			    HANDLE hFile,ULONGLONG targetLcn)
-{
-	PBLOCKMAP block;
-	ULONGLONG curr_target;
-	NTSTATUS Status = STATUS_SUCCESS;
 
-	curr_target = targetLcn;
-	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		Status = MovePartOfFile(dx,hFile,block->vcn, \
-			curr_target,block->length);
-		if(Status) break;
-		curr_target += block->length;
-	}
-	return Status;
-}
-*/
 ULONGLONG FindTarget(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	ULONGLONG t_before = LLINVALID, t_after = LLINVALID;
@@ -305,7 +299,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
 	HANDLE hFile;
-	ULONGLONG target,curr_target;
+	ULONGLONG target, curr_target;
 	PBLOCKMAP block;
 	UCHAR old_state;
 
@@ -331,33 +325,11 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",target,pfn->clusters_total);
 
 	old_state = GetSpaceState(pfn);
-#if 0
-	/* If file is compressed then we must move only non-virtual clusters. */
-	/* If OS version is 4.x and file is greater then 256k ... */
-	if(/*!dx->xp_compatible && */pfn->clusters_total > dx->clusters_per_256k)
-		Status = MoveBlocksOfFile(dx,pfn,hFile,target);
-	else if(pfn->is_compressed)
-		Status = MoveCompressedFile(dx,pfn,hFile,target);
-	else
-		Status = MovePartOfFile(dx,hFile,0,target,pfn->clusters_total);
-#endif
 	Status = MoveBlocksOfFile(dx,pfn,hFile,target);
 	ZwClose(hFile);
-	/* if Status is successful then 
-	 *		mark target space using MarkSpace()
-	 *      remove target space from free space map
-	 *		mark source space as free (on fat/udf) or pending (on ntfs)
-	 *      add source space to free space map
-	 *		rebuild file's blockmap
-	 * else
-	 *		mark target space as system (because state is unknown)
-	 *      remove target space from free space map
-	 *      mark source space as system (see above)
-	 *		destroy file's blockmap and mark file as system
-	 *      increase invalid movings counter
-	 * endif
-	 */
+
 	if(Status == STATUS_SUCCESS){
+		/* free previously allocated space */
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
 			ProcessFreeBlock(dx,block->lcn,block->length,old_state);
 		if(pfn->is_compressed){
@@ -377,15 +349,12 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			dx->fragmfilecounter --;
 			pfn->is_fragm = FALSE;
 		}
-		MarkSpace(dx,pfn,FREE_SPACE);
-		TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
 	} else {
 		DebugPrint("MoveFile error: %x\n",(UINT)Status);
-		ProcessBlock(dx,target,pfn->clusters_total,
-				SYSTEM_SPACE,FREE_SPACE);
-		TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
+		/* mark space allocated by file as fragmented */
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
-			ProcessBlock(dx,block->lcn,block->length,SYSTEM_SPACE,old_state);
+			ProcessBlock(dx,block->lcn,block->length,FRAGM_SPACE,old_state);
+		/* destroy blockmap */
 		DeleteBlockmap(pfn);
 		if(!pfn->is_fragm){
 			dx->fragmfilecounter ++;
@@ -393,5 +362,8 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		}
 		dx->invalid_movings ++;
 	}
+	/* remove target space from free space pool */
+	ProcessBlock(dx,target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
+	TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
 	return (!pfn->is_fragm);
 }

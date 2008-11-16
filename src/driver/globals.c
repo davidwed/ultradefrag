@@ -79,8 +79,6 @@ void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFILENAME ptr,next_ptr;
 
-	DestroyList((PLIST *)&dx->no_checked_blocks);
-	dx->unprocessed_blocks = 0;
 	ptr = dx->filelist;
 	while(ptr){
 		next_ptr = ptr->next_ptr;
