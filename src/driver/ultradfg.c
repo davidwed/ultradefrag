@@ -324,25 +324,12 @@ BOOLEAN is_device_busy(UDEFRAG_DEVICE_EXTENSION *dx)
 	return FALSE;
 }
 
-void ReloadSettings(void)
-{
-	short *b;
-	/* reload settings from environment variables */
-	b = AllocatePool(NonPagedPool,4097 * sizeof(short));
-	if(!b){
-		DbgPrintNoMem();
-		return;
-	}
-	ExFreePool(b);
-}
-
 /*
 * Write request handler.
 * Possible commands are:
 * 	aX   - analyse the X volume -
 * 	dX   - defragment            | for main device
 * 	cX   - compact               |
-*   r    - reload settings      -
 *
 *   s    - stop                 =  for 'stop' device
 */
@@ -414,7 +401,6 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			KeClearEvent(&dx->sync_event);
 			goto invalid_request;
 		}
-		/* volume letters assigned by SUBST command are wrong... */
 		dx->letter = letter;
 		request_status = Analyse(dx);
 		break;
@@ -434,7 +420,6 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			KeClearEvent(&dx->sync_event);
 			goto invalid_request;
 		}
-		/* volume letters assigned by SUBST command are wrong... */
 		if(dx->status == STATUS_BEFORE_PROCESSING || \
 			dx->letter != letter)
 		{
@@ -446,13 +431,6 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		request_status = STATUS_SUCCESS;
 		if(!dx->compact_flag) Defragment(dx);
 		else DefragmentFreeSpace(dx);
-		break;
-	case 'r':
-	case 'R':
-		ReloadSettings();
-		KeClearEvent(&dx->sync_event);
-		InterlockedDecrement(&dx->working_rq);
-		return CompleteIrp(Irp,STATUS_SUCCESS,1);
 		break;
 	default:
 		KeClearEvent(&dx->sync_event);

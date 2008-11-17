@@ -107,10 +107,9 @@ exit_defrag:
 	/*
 	* The state of some processed files maybe unknown...
 	*/
-	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0)
-		dx->status = STATUS_DEFRAGMENTED;
-	else
-		dx->status = STATUS_BEFORE_PROCESSING;
+	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0 && \
+		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
+	else dx->status = STATUS_BEFORE_PROCESSING;
 }
 
 /*
@@ -173,10 +172,9 @@ exit_defrag_space:
 	/*
 	* The state of some processed files maybe unknown...
 	*/
-	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0)
-		dx->status = STATUS_DEFRAGMENTED;
-	else
-		dx->status = STATUS_BEFORE_PROCESSING;
+	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0 && \
+		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
+	else dx->status = STATUS_BEFORE_PROCESSING;
 }
  
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
@@ -251,44 +249,32 @@ ULONGLONG FindTarget(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	ULONGLONG t_before = LLINVALID, t_after = LLINVALID;
 	ULONGLONG target;
-	PFREEBLOCKMAP block = dx->free_space_map;
+	PFREEBLOCKMAP block;
 
-	while(block)
-	{
-		if(block->length >= pfn->clusters_total)
-		{
-			if(block->lcn < pfn->blockmap->lcn)
-			{
+	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
+		if(block->length >= pfn->clusters_total){
+			if(block->lcn < pfn->blockmap->lcn){
 				if(dx->compact_flag && t_before != LLINVALID)
-					goto next;
+					continue;
 				t_before = dx->compact_flag ? block->lcn : \
 					(block->lcn + block->length - pfn->clusters_total);
-			}
-			else
-			{
+			} else {
 				t_after = block->lcn;
 				break;
 			}
 		}
-next:
-		block = block->next_ptr;
 	}
-	if(dx->compact_flag)
-	{
-		target = t_before;
-		if(pfn->is_fragm && t_before == LLINVALID)
-			target = t_after;
-	}
-	else
-	{
-		if(t_after == LLINVALID) { target = t_before; goto exit; }
-		if(t_before == LLINVALID) { target = t_after;  goto exit; }
+
+	if(dx->compact_flag){
+		if(pfn->is_fragm && t_before == LLINVALID) target = t_after;
+		else target = t_before;
+	} else {
+		if(t_after == LLINVALID) return t_before;
+		if(t_before == LLINVALID) return t_after;
 		target = \
 			((pfn->blockmap->lcn - t_before) < (t_after - pfn->blockmap->lcn)) ? \
 			t_before : t_after;
-
 	}
-exit:
 	return target;
 }
 
@@ -330,8 +316,10 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 
 	if(Status == STATUS_SUCCESS){
 		/* free previously allocated space */
-		for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
+		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
 			ProcessFreeBlock(dx,block->lcn,block->length,old_state);
+		}
+		/* correct file information */
 		if(pfn->is_compressed){
 			curr_target = target;
 			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
