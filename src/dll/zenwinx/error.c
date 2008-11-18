@@ -238,12 +238,15 @@ status_code_missing:
 
 int FindFormatMessage(void)
 {
+	ERRORHANDLERPROC eh;
+	
 	if(FormatMessageState == FormatMessageUndefined){
-		/* optimize these functions */
+		eh = winx_set_error_handler(NULL);
 		if(winx_get_proc_address(L"kernel32.dll","FormatMessageW",(void *)&func_FormatMessageW) == 0)
 			FormatMessageState = FormatMessageFound;
 		else
 			FormatMessageState = FormatMessageNotFound;
+		winx_set_error_handler(eh);
 	}
 	return (FormatMessageState == FormatMessageFound) ? TRUE : FALSE;
 }

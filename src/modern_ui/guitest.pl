@@ -42,7 +42,7 @@ my $skip_rem = 1;
 my %opts = ('x'=>200, 'y'=>200);
 
 ############# set signal handlers ###############
-$SIG{INT} = sub {gui_unload(); if(udefrag_unload() < 0){ udefrag_pop_error(0,0); }};
+$SIG{INT} = sub {gui_unload(); udefrag_unload();};
 
 ############# load the program settings ###########
 if(open(CFGFILE,'.\\my_guitest.cfg')){
@@ -68,7 +68,7 @@ $mw->iconimage($icon);
 #display_error("привет!"); # incorrect appearance
 $mw->bind(
 	ref($mw),'<Destroy>',
-	sub {gui_unload(); if(udefrag_unload() < 0){ udefrag_pop_error(0,0); }}
+	sub {gui_unload(); udefrag_unload();}
 	);
 
 ############ import necessary functions from the udefrag.dll ##############
@@ -81,7 +81,6 @@ Win32::API->Import('udefrag','udefrag_s_optimize','CK','I');
 Win32::API->Import('udefrag','int udefrag_stop()');
 Win32::API->Import('udefrag','char* udefrag_s_get_avail_volumes(int skip_removable)');
 Win32::API->Import('udefrag','char* udefrag_s_get_map(int size)');
-Win32::API->Import('udefrag','udefrag_pop_error','PI');
 
 ############ fill the main window with controls ###############
 #my $list = $mw->Scrolled(
@@ -260,8 +259,7 @@ sub display_critical_error {
 
 sub handle_error {
 	if($_[0] < 0){
-		udefrag_pop_error(0,0);
-		if(udefrag_unload(1) < 0){ udefrag_pop_error(0,0); }
+		udefrag_unload();
 		display_critical_error($_[0]);
 	}
 }
@@ -327,9 +325,7 @@ sub analyse {
 	if(!@sel){ return; }
 	$row = $sel[0];
 	$letter = $list->itemCget($row, 0, 'text');
-	if(udefrag_s_analyse($letter, $update_map_callback) < 0){
-		udefrag_pop_error(0,0);
-	}
+	udefrag_s_analyse($letter, $update_map_callback);
 }
 
 sub stop {
