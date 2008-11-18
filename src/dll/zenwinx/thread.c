@@ -51,10 +51,7 @@
 *        return 0;
 *    }
 *
-*    if(create_thread(thread_proc,param1) < 0){
-*        winx_pop_error(buffer,sizeof(buffer));
-*        // handle error
-*    }
+*    create_thread(thread_proc,param1);
 * NOTES
 *    Thread's function must have the following prototype:
 *    DWORD WINAPI thread_proc(LPVOID parameter);
@@ -67,6 +64,11 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	HANDLE hThread;
 	HANDLE *ph;
 
+	if(!start_addr){
+		winx_raise_error("E: winx_create_thread() invalid start_addr (NULL)!");
+		return (-1);
+	}
+
 	/*
 	* Implementation is very easy, because we have required call
 	* on all of the supported versions of Windows.
@@ -76,7 +78,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
 					0,0,0,start_addr,NULL,ph,NULL);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't create thread: %x!",(UINT)Status);
+		winx_raise_error("E: Can't create thread: %x!",(UINT)Status);
 		return (-1);
 	}
 	return 0;
@@ -103,5 +105,8 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 void __stdcall winx_exit_thread(void)
 {
 	/* TODO: error handling and exit with specified status */
-	ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
+	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
+	if(!NT_SUCCESS(Status)){
+		winx_raise_error("E: Can't terminate thread: %x!",(UINT)Status);
+	}
 }

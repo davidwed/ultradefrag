@@ -41,7 +41,7 @@
 #endif
 #define CHECK_INIT_EVENT() { \
 	if(!init_event){ \
-		winx_push_error("%s call without initialization!", __FUNCTION__); \
+		winx_raise_error("E: %s call without initialization!", __FUNCTION__); \
 		return -1; \
 	} \
 }
@@ -57,14 +57,24 @@ extern int refresh_interval;
 
 unsigned char c, lett;
 BOOL done_flag;
-char error_message[ERR_MSG_SIZE];
+int cmd_status;
+
+ERRORHANDLERPROC eh;
+
+void __stdcall ErrorHandler(short *msg)
+{
+	if(wcsstr(msg, L"c0000035")) /* STATUS_OBJECT_NAME_COLLISION */
+		eh(L"You can run only one instance of UltraDefrag!");
+	else
+		eh(msg);
+}
 
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	/* here we have last chance to unload the driver */
 	if(dwReason == DLL_PROCESS_DETACH)
-		if(udefrag_unload() < 0) winx_pop_error(NULL,0);
+		/*if(init_event)*/ udefrag_unload();
 	return 1;
 }
 
@@ -82,12 +92,8 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 * EXAMPLE
 *    int main(int argc, char **argv)
 *    {
-*        char buffer[ERR_MSG_SIZE];
-*
-*        if(udefrag_init(0) < 0)
-*            udefrag_pop_error(buffer,sizeof(buffer));
+*        if(udefrag_init(0) < 0){
 *            printf("udefrag_init() call unsuccessful!");
-*            printf("\n\n%s\n",buffer);
 *            exit(1);
 *        }
 *        // your program code here
@@ -101,24 +107,21 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 ******/
 int __stdcall udefrag_init(long map_size)
 {
-	char buf[ERR_MSG_SIZE];
-
-	/* 0. only one instance of the program ! */
 	/* 1. Enable neccessary privileges */
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) return (-1)*/
 	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) return (-1);
+
+	/* 2. only one instance of the program ! */
 	/* create init_event - this must be after privileges enabling */
+	eh = winx_set_error_handler(ErrorHandler);
 	if(winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event) < 0){
-		winx_save_error(buf,ERR_MSG_SIZE);
-		if(strstr(buf,"c0000035")) /* STATUS_OBJECT_NAME_COLLISION */
-			winx_push_error("You can run only one instance of UltraDefrag!");
-		else winx_restore_error(buf);
+		winx_set_error_handler(eh);
 		return (-1);
 	}
-	/* 2. Load the driver */
+	winx_set_error_handler(eh);
+	/* 3. Load the driver */
 	if(winx_load_driver(L"ultradfg") < 0) return (-1);
-	/* 3. Open our device */
-	/* FIXME: detailed error information. "Can't access ULTRADFG driver: %x!" */
+	/* 4. Open our device */
 	f_ud = winx_fopen("\\Device\\UltraDefrag","w");
 	if(!f_ud) goto init_fail;
 	f_map = winx_fopen("\\Device\\UltraDefragMap","r");
@@ -137,13 +140,7 @@ int __stdcall udefrag_init(long map_size)
 	if(udefrag_reload_settings() < 0) goto init_fail;
 	return 0;
 init_fail:
-	if(init_event){
-		/* save error message */
-		winx_save_error(buf,ERR_MSG_SIZE);
-		if(udefrag_unload() < 0) winx_pop_error(NULL,0);
-		/* restore error message */
-		winx_restore_error(buf);
-	}
+	/*if(init_event)*/ udefrag_unload();
 	return (-1);
 }
 
@@ -151,19 +148,15 @@ init_fail:
 * NAME
 *    udefrag_unload
 * SYNOPSIS
-*    error = udefrag_unload(save_opts);
+*    error = udefrag_unload();
 * FUNCTION
-*    Unloads the Ultra Defragmenter driver and saves the options.
+*    Unloads the Ultra Defragmenter driver.
 * INPUTS
-*    save_opts - true if options must be saved, false otherwise
+*    Nothing.
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_unload(TRUE) < 0)
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        printf("udefrag_unload() call unsuccessful!");
-*        printf("\n\n%s\n",buffer);
-*    }
+*    udefrag_unload();
 * NOTES
 *    You must call this function before terminating
 *    the calling process to free allocated resources.
@@ -172,7 +165,8 @@ init_fail:
 ******/
 int __stdcall udefrag_unload(void)
 {
-	CHECK_INIT_EVENT();
+	//CHECK_INIT_EVENT();
+	if(!init_event) return 0;
 
 	/* close events */
 	winx_destroy_event(init_event); init_event = NULL;
@@ -182,8 +176,7 @@ int __stdcall udefrag_unload(void)
 	if(f_stat) winx_fclose(f_stat);
 	if(f_stop) winx_fclose(f_stop);
 	/* unload the driver */
-	if(winx_unload_driver(L"ultradfg") < 0)
-		winx_pop_error(NULL,0);
+	winx_unload_driver(L"ultradfg");
 	return 0;
 }
 
@@ -191,19 +184,20 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 {
 	char cmd[4];
 
-	/* FIXME: detailed error message! 
-	"Can't execute driver command \'%c\' for volume %c: %x!" */
 	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-	return winx_fwrite(cmd,strlen(cmd),1,f_ud) ? 0 : (-1);
+	if(winx_fwrite(cmd,strlen(cmd),1,f_ud))
+		return 0;
+	else {
+		winx_raise_error("E: Can't execute driver command \'%c\' for volume %c!",
+			command,letter);
+		return (-1);
+	}
 }
 
 /* you can send only one command at the same time */
 DWORD WINAPI send_command(LPVOID unused)
 {
-	if(udefrag_send_command(c,lett) < 0){
-		/* save error message */
-		winx_save_error(error_message,ERR_MSG_SIZE);
-	}
+	cmd_status = udefrag_send_command(c,lett);
 	done_flag = TRUE;
 	winx_exit_thread();
 	return 0;
@@ -227,10 +221,8 @@ DWORD WINAPI send_command(LPVOID unused)
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_analyse('C',callback_proc) < 0)
-*        udefrag_pop_error(buffer,sizeof(buffer));
+*    if(udefrag_analyse('C',callback_proc) < 0){
 *        printf("udefrag_analyse() call unsuccessful!");
-*        printf("\n\n%s\n",buffer);
 *    }
 * NOTES
 *    Use udefrag_analyse, udefrag_defragment, udefrag_optimize
@@ -250,18 +242,16 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 	* 2. IRP_MJ_FLUSH_BUFFERS request causes BSOD on NT 4.0
 	* (at least under MS Virtual PC 2004).
 	*/
-	if(command == 'a'){
-		volume[4] = letter;
-		f = winx_fopen(volume,"r+");
-		if(f){
-			if(winx_fflush(f) < 0){
+	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) >= 0){
+		if(command == 'a'){
+			volume[4] = letter;
+			f = winx_fopen(volume,"r+");
+			if(f){
+				winx_fflush(f);
 				winx_fclose(f);
-				return -1;//winx_pop_error(NULL,0);
 			}
-			winx_fclose(f);
-		} else {
-			return -1;//winx_pop_error(NULL,0);
 		}
+		winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	}
 
 	if(!sproc){
@@ -269,8 +259,8 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 		return udefrag_send_command(command,letter);
 	}
 	done_flag = FALSE;
-	error_message[0] = 0;
 	/* create a thread for driver command processing */
+	cmd_status = 0;
 	c = command; lett = letter;
 	if(winx_create_thread(send_command,NULL) < 0)
 		return (-1);
@@ -283,15 +273,8 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 		sproc(FALSE);
 	} while(!done_flag);
 	sproc(TRUE);
-	/*
-	* If an error occured during the send_command() execution 
-	* then return -1 and an error description.
-	*/
-	if(error_message[0]){
-		winx_restore_error(error_message);
-		return (-1);
-	}
-	return 0;
+
+	return cmd_status;
 }
 
 /****f* udefrag.common/udefrag_stop
@@ -306,19 +289,19 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_stop() < 0)
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        printf("udefrag_stop() call unsuccessful!");
-*        printf("\n\n%s\n",buffer);
-*    }
+*    udefrag_stop();
 * SEE ALSO
-*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+*    udefrag_send_command_ex
 ******/
 int __stdcall udefrag_stop(void)
 {
 	CHECK_INIT_EVENT();
-	/* FIXME: better error messages "Can't stop driver command: %x!" */
-	return winx_fwrite("s",1,1,f_stop) ? 0 : (-1);
+	if(winx_fwrite("s",1,1,f_stop))
+		return 0;
+	else {
+		winx_raise_error("E: Stop request failed!");
+		return (-1);
+	}
 }
 
 /****f* udefrag.common/udefrag_get_progress
@@ -336,20 +319,18 @@ int __stdcall udefrag_stop(void)
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_get_progress(&stat,&p) < 0)
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        printf("udefrag_get_progress() call unsuccessful!");
-*        printf("\n\n%s\n",buffer);
-*    }
+*    udefrag_get_progress(&stat,&p);
 * SEE ALSO
-*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+*    udefrag_send_command_ex
 ******/
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
 	CHECK_INIT_EVENT();
 
-	/* FIXME: detailed error message! "Statistical data unavailable: %x!" */
-	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)) return (-1);
+	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
+		winx_raise_error("E: Statistical data unavailable!");
+		return (-1);
+	}
 
 	if(percentage){ /* calculate percentage only if we have such request */
 		switch(pstat->current_operation){
@@ -385,19 +366,19 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_get_map(map,sizeof(map)) < 0)
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        printf("udefrag_get_map() call unsuccessful!");
-*        printf("\n\n%s\n",buffer);
-*    }
+*    udefrag_get_map(map,sizeof(map));
 * SEE ALSO
-*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+*    udefrag_send_command_ex
 ******/
 int __stdcall udefrag_get_map(char *buffer,int size)
 {
 	CHECK_INIT_EVENT();
-	/* FIXME: detailed error message! "Cluster map unavailable: %x!" */
-	return winx_fread(buffer,size,1,f_map) ? 0 : (-1);
+	if(winx_fread(buffer,size,1,f_map))
+		return 0;
+	else {
+		winx_raise_error("E: Cluster map unavailable!");
+		return (-1);
+	}
 }
 
 /****f* udefrag.common/udefrag_get_default_formatted_results
@@ -420,7 +401,7 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 * NOTES
 *    Useful for native and console applications.
 * SEE ALSO
-*    udefrag_analyse, udefrag_defragment, udefrag_optimize
+*    udefrag_send_command_ex
 ******/
 char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 {

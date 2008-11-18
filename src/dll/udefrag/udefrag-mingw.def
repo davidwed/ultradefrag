@@ -19,8 +19,7 @@ EXPORTS
 	udefrag_get_default_formatted_results@4
 	udefrag_get_avail_volumes@8
 	udefrag_validate_volume@8
-	udefrag_pop_error@8
-	udefrag_pop_werror@8
 
 	udefrag_fbsize@20
 	udefrag_dfbsize@8
+	udefrag_set_error_handler@4

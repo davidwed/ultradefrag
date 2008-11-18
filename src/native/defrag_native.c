@@ -38,8 +38,6 @@ char letter;
 int abort_flag = 0;
 char last_op = 0;
 int i = 0,j = 0,k; /* number of '-' */
-char buffer[256];
-int udefrag_initialized = FALSE;
 
 int echo_flag = 1;
 
@@ -63,37 +61,16 @@ short *command;
 		"  shutdown\n" \
 		"  help\n"
 
-void Cleanup();
-
-void HandleError(short *err_msg,int exit_code)
+void __stdcall ErrorHandler(short *msg)
 {
-	if(err_msg){
-		if(err_msg[0]) winx_printf("\nERROR: %ws\n",err_msg);
-		Cleanup();
-		if(exit_code){
-			winx_printf("Wait 10 seconds ...\n");
-			winx_sleep(10000); /* show error message at least 5 seconds */
-		}
-		winx_printf("Good bye ...\n");
-		winx_exit(exit_code);
-	}
+	winx_printf("\n%ws\n",msg);
 }
 
-void HandleError_(int status,int exit_code)
+void Exit(int exit_code)
 {
-	char err_msg[ERR_MSG_SIZE];
-
-	if(status < 0){
-		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",err_msg);
-		Cleanup();
-		if(exit_code){
-			winx_printf("Wait 10 seconds ...\n");
-			winx_sleep(10000); /* show error message at least 5 seconds */
-		}
-		winx_printf("Good bye ...\n");
-		winx_exit(exit_code);
-	}
+	udefrag_unload();
+	winx_printf("Good bye ...\n");
+	winx_exit(exit_code);
 }
 
 void UpdateProgress()
@@ -101,112 +78,81 @@ void UpdateProgress()
 	STATISTIC stat;
 	double percentage;
 
-	if(udefrag_get_progress(&stat,&percentage) == 0){
-		if(stat.current_operation != last_op){
-			if(last_op){
-				for(k = i; k < 50; k++)
-					winx_putch('-'); /* 100 % of previous operation */
-			} else {
-				if(stat.current_operation != 'A'){
-					winx_printf("\nA: ");
-					for(k = 0; k < 50; k++)
-						winx_putch('-');
-				}
+	if(udefrag_get_progress(&stat,&percentage) < 0) return;
+
+	if(stat.current_operation != last_op){
+		if(last_op){
+			for(k = i; k < 50; k++)
+				winx_putch('-'); /* 100 % of previous operation */
+		} else {
+			if(stat.current_operation != 'A'){
+				winx_printf("\nA: ");
+				for(k = 0; k < 50; k++)
+					winx_putch('-');
 			}
-			i = 0; /* new operation */
-			//winx_printf("\n%c: ",stat.current_operation);
-			switch(stat.current_operation){
-			case 'a':
-			case 'A':
-				winx_printf("\nAnalyse : ");
-				break;
-			case 'd':
-			case 'D':
-				winx_printf("\nDefrag  : ");
-				break;
-			case 'c':
-			case 'C':
-				winx_printf("\nOptimize: ");
-				break;
-			}
-			last_op = stat.current_operation;
 		}
-		j = (int)percentage / 2;
-		for(k = i; k < j; k++)
-			winx_putch('-');
-		i = j;
-	} else {
-		udefrag_pop_error(NULL,0);
+		i = 0; /* new operation */
+		//winx_printf("\n%c: ",stat.current_operation);
+		switch(stat.current_operation){
+		case 'a':
+		case 'A':
+			winx_printf("\nAnalyse : ");
+			break;
+		case 'd':
+		case 'D':
+			winx_printf("\nDefrag  : ");
+			break;
+		case 'c':
+		case 'C':
+			winx_printf("\nOptimize: ");
+			break;
+		}
+		last_op = stat.current_operation;
 	}
+	j = (int)percentage / 2;
+	for(k = i; k < j; k++)
+		winx_putch('-');
+	i = j;
+	return;
 }
 
 int __stdcall update_stat(int df)
 {
-	char err_msg[ERR_MSG_SIZE];
-//	char *msg;
-
 	if(winx_breakhit(100) >= 0){
-		if(udefrag_stop() < 0){
-			udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-			winx_printf("\nERROR: %s\n",err_msg);
-		}
+		udefrag_stop();
 		abort_flag = 1;
-	} else {
-		winx_pop_error(NULL,0);
 	}
 	UpdateProgress();
 	if(df == TRUE){
-/*		msg = udefrag_get_command_result();
-		if(strlen(msg) > 1)
-			winx_printf("\nERROR: %s\n",msg);
-		else */if(!abort_flag) /* set progress to 100 % */
+		if(!abort_flag) /* set progress to 100 % */
 			for(k = i; k < 50; k++)	winx_putch('-');
 	}
 	return 0;
-}
-
-void Cleanup()
-{
-	char err_msg[ERR_MSG_SIZE];
-
-	/* unload driver and registry cleanup */
-	if(udefrag_unload() < 0){
-		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-		if(udefrag_initialized) /* because otherwise the message is trivial */
-			winx_printf("\nERROR: %s\n",err_msg);
-	}
 }
 
 void DisplayAvailableVolumes(int skip_removable)
 {
 	volume_info *v;
 	int n;
-	char err_msg[ERR_MSG_SIZE];
 
+	winx_set_error_handler(NULL);
 	winx_printf("Available drive letters:   ");
-	if(udefrag_get_avail_volumes(&v,skip_removable) < 0){
-		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",err_msg);
-	} else {
+	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
 		for(n = 0;;n++){
 			if(v[n].letter == 0) break;
 			winx_printf("%c   ",v[n].letter);
 		}
 	}
 	winx_printf("\r\n");
+	winx_set_error_handler(ErrorHandler);
 }
 
 void ProcessVolume(char letter,char _command)
 {
 	STATISTIC stat;
 	int status = 0;
-	char err_msg[ERR_MSG_SIZE];
 
-	if(udefrag_reload_settings() < 0){
-		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",err_msg);
-		return;
-	}
+	udefrag_reload_settings();
 	
 	i = j = 0;
 	last_op = 0;
@@ -225,18 +171,10 @@ void ProcessVolume(char letter,char _command)
 		status = udefrag_optimize(letter,update_stat);
 		break;
 	}
-	if(status < 0){
-		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",err_msg);
-		return;
-	}
+	if(status < 0) return;
 
-	if(udefrag_get_progress(&stat,NULL) < 0){
-		udefrag_pop_error(err_msg,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",err_msg);
-	} else {
+	if(udefrag_get_progress(&stat,NULL) >= 0)
 		winx_printf("\n%s\n\n",udefrag_get_default_formatted_results(&stat));
-	}
 }
 
 void ExtractToken(short *dest, short *src, int max_chars)
@@ -268,7 +206,6 @@ void SetEnvVariable()
 	short *eq_pos;
 	int name_len, value_len;
 	short *val = value_buffer;
-	char buffer[ERR_MSG_SIZE];
 	
 	/* find the equality sign */
 	eq_pos = wcschr(command,'=');
@@ -288,10 +225,7 @@ void SetEnvVariable()
 		return;
 	}
 	if(!value_buffer[0]) val = NULL;
-	if(winx_set_env_variable(name_buffer,val) < 0){
-		winx_pop_error(buffer,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",buffer);
-	}
+	winx_set_env_variable(name_buffer,val);
 }
 
 void PauseExecution()
@@ -365,20 +299,20 @@ void ParseCommand()
 	/* handle exit command */
 	if((short *)wcsstr(command,L"exit") == command){
 break_execution:
-		HandleError(L"",0);
+		Exit(0);
 		return;
 	}
 	/* handle shutdown command */
 	if((short *)wcsstr(command,L"shutdown") == command){
 		winx_printf("Shutdown ...");
-		Cleanup();
+		udefrag_unload();
 		winx_shutdown();
 		return;
 	}
 	/* handle reboot command */
 	if((short *)wcsstr(command,L"reboot") == command){
 		winx_printf("Reboot ...");
-		Cleanup();
+		udefrag_unload();
 		winx_reboot();
 		return;
 	}
@@ -391,24 +325,23 @@ break_execution:
 
 void __stdcall NtProcessStartup(PPEB Peb)
 {
-	DWORD i;
+	int i;
 	char cmd[33], arg[5];
 	char *commands[] = {"shutdown","reboot","batch","exit",
 	                    "analyse","defrag","optimize",
 						"drives","help"};
-	signed int code;
-	char buffer[ERR_MSG_SIZE];
-	
 	WINX_FILE *f;
 	char filename[MAX_PATH];
 	int filesize,j,cnt;
 	unsigned short ch;
+	char buffer[256];
 
 	/* 3. Initialization */
 #if USE_INSTEAD_SMSS
 	NtInitializeRegistry(FALSE);
 #endif
 	/* 4. Display Copyright */
+	winx_set_error_handler(ErrorHandler);
 	if(winx_get_os_version() < 51) winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007,2008.\n\n"
@@ -416,10 +349,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		"If something is wrong, hit F8 on startup\n"
 		"and select 'Last Known Good Configuration'.\n"
 		"Use Break key to abort defragmentation.\n\n");
-	code = winx_init(Peb);
-	if(code < 0){
-		winx_pop_error(buffer,sizeof(buffer));
-		winx_printf("%s\n",buffer);
+	if(winx_init(Peb) < 0){
 		winx_printf("Wait 10 seconds ...\n");
 		winx_sleep(10000);
 		winx_exit(1);
@@ -427,40 +357,32 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	/* 6b. Prompt to exit */
 	winx_printf("Press any key to exit...  ");
 	for(i = 0; i < 3; i++){
-		if(winx_kbhit(1000) >= 0){ winx_printf("\n"); HandleError(L"",0); }
-		else { winx_pop_error(NULL,0); }
+		if(winx_kbhit(1000) >= 0){ winx_printf("\n"); Exit(0); }
 		winx_printf("%c ",(char)('0' + 3 - i));
 	}
 	winx_printf("\n\n");
 	/* 7. Initialize the ultradfg device */
-	HandleError_(udefrag_init(0),2);
-	udefrag_initialized = TRUE;
+	if(udefrag_init(0) < 0){
+		winx_printf("Wait 10 seconds ...\n");
+		winx_sleep(10000); /* show error message at least 10 seconds */
+		Exit(1);
+	}
 
 	/* 8a. Batch script processing */
 	/* open script file */
-	if(winx_get_windows_directory(filename,MAX_PATH) < 0){
-		udefrag_pop_error(buffer,ERR_MSG_SIZE);
-		winx_printf("\nERROR: %s\n",buffer);
+	if(winx_get_windows_directory(filename,MAX_PATH) < 0)
 		goto cmdloop;
-	}
 	strncat(filename,"\\system32\\ud-boot-time.cmd",
 			MAX_PATH - strlen(filename) - 1);
 	f = winx_fopen(filename,"r");
-	if(!f){
-		udefrag_pop_error(buffer,ERR_MSG_SIZE);
-		winx_printf("\n%s\n",buffer);
-		goto cmdloop;
-	}
+	if(!f) goto cmdloop;
 	/* read contents */
 	filesize = winx_fread(file_buffer,sizeof(short),
 			(sizeof(file_buffer) / sizeof(short)) - 1,f);
 	/* close file */
 	winx_fclose(f);
 	/* read commands and interpret them */
-	if(!filesize){
-		udefrag_pop_error(NULL,0);
-		goto cmdloop;
-	}
+	if(!filesize) goto cmdloop;
 	file_buffer[filesize] = 0;
 	line_buffer[0] = 0;
 	cnt = 0;
@@ -485,38 +407,27 @@ cmdloop:
 				"Type 'help' for list of supported commands.\n\n");
 	while(1){
 		winx_printf("# ");
-		if(winx_gets(buffer,sizeof(buffer) - 1) < 0){
-			winx_pop_error(buffer,sizeof(buffer));
-			if(strcmp(buffer,"Buffer overflow!") == 0){
-				winx_printf("%s\n",buffer);
-				Cleanup();
-				winx_printf("Wait 10 seconds\n");
-				winx_sleep(10000);
-				winx_exit(4);
-				return;
-			}
-		}
+		if(winx_gets(buffer,sizeof(buffer) - 1) < 0) continue;
 		cmd[0] = arg[0] = 0;
 		sscanf(buffer,"%32s %4s",cmd,arg);
 		for(i = 0; i < sizeof(commands) / sizeof(char*); i++)
-			//if(strstr(cmd,commands[i])) break;
 			if(!strcmp(cmd,commands[i])) break;
 		switch(i){
 		case 0:
 			winx_printf("Shutdown ...");
-			Cleanup();
+			udefrag_unload();
 			winx_shutdown();
 			continue;
 		case 1:
 			winx_printf("Reboot ...");
-			Cleanup();
+			udefrag_unload();
 			winx_reboot();
 			continue;
 		case 2:
 			winx_printf("Prepare to batch processing ...\n");
 			continue;
 		case 3:
-			HandleError(L"",0);
+			Exit(0);
 			return;
 		case 4:
 			ProcessVolume(arg[0],'a');

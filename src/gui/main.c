@@ -43,22 +43,19 @@ BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void ShowFragmented();
 void DestroyImageList(void);
 
-void HandleError(int status,int exit_code)
+void __stdcall ErrorHandler(short *msg)
 {
-	short buffer[ERR_MSG_SIZE];
-	
-	if(status < 0){
-		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
-		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
-		if(udefrag_unload() < 0) udefrag_pop_error(NULL,0);
-		ExitProcess(exit_code);
-	}
+	MessageBoxW(0,msg,0,0);
 }
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	HandleError(udefrag_init(N_BLOCKS),2);
+	udefrag_set_error_handler(ErrorHandler);
+	if(udefrag_init(N_BLOCKS) < 0){
+		udefrag_unload();
+		return 2;
+	}
 	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
 	BuildResourceTable();
@@ -79,7 +76,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* save settings */
 	SavePrefs();
 	DestroyResourceTable();
-	if(udefrag_unload() < 0) udefrag_pop_error(NULL,0);
+	udefrag_unload();
 	return 0;
 }
 

@@ -41,12 +41,11 @@ int obsolete_option = 0;
 char letter = 0;
 char unk_opt[] = "Unknown option: x!";
 int unknown_option = 0;
-char oem_buffer[4096];
-char oem_stop_buffer[4096];
 
 /* internal functions prototypes */
 void HandleError(char *err_msg,int exit_code);
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
+void __stdcall ErrorHandler(short *msg);
 
 void show_help(void)
 {
@@ -73,23 +72,17 @@ void HandleError(char *err_msg,int exit_code)
 		printf("%s\n",err_msg);
 		if(!b_flag) settextcolor(console_attr);
 		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		if(udefrag_unload() < 0) udefrag_pop_error(NULL,0);
+		udefrag_unload();
 		exit(exit_code);
 	}
 }
 
 void HandleErrorW(int status,int exit_code)
 {
-	short buffer[ERR_MSG_SIZE];
-	
-	if(status < 0){ /* we should display error and terminate process */
-		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
-		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		WideCharToMultiByte(CP_OEMCP,0,buffer,-1,oem_buffer,ERR_MSG_SIZE - 1,NULL,NULL);
-		printf("%s\n",oem_buffer);
+	if(status < 0){
 		if(!b_flag) settextcolor(console_attr);
 		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		if(udefrag_unload() < 0) udefrag_pop_werror(NULL,0);
+		udefrag_unload();
 		exit(exit_code);
 	}
 }
@@ -102,17 +95,14 @@ int show_vollist(void)
 	char s[32];
 	double d;
 	int p;
-	short buffer[ERR_MSG_SIZE];
 
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("Volumes available for defragmentation:\n\n");
+	udefrag_set_error_handler(NULL);
 
 	if(udefrag_get_avail_volumes(&v,la_flag ? FALSE : TRUE) < 0){
-		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
-		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		WideCharToMultiByte(CP_OEMCP,0,buffer,-1,oem_buffer,ERR_MSG_SIZE - 1,NULL,NULL);
-		printf("%s\n",oem_buffer);
 		if(!b_flag) settextcolor(console_attr);
+		udefrag_set_error_handler(ErrorHandler);
 		return 1;
 	} else {
 		for(n = 0;;n++){
@@ -122,27 +112,45 @@ int show_vollist(void)
 			/* 0.1 constant is used to exclude divide by zero error */
 			d /= ((double)(signed __int64)(v[n].total_space.QuadPart) + 0.1);
 			p = (int)(100 * d);
+			if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 			printf("%c:  %8s %12s %8u %%\n",
 				v[n].letter,v[n].fsname,s,p);
 		}
 	}
 
 	if(!b_flag) settextcolor(console_attr);
+	udefrag_set_error_handler(ErrorHandler);
 	return 0;
 }
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
-	short buffer[ERR_MSG_SIZE];
-	
-	if(udefrag_stop() < 0){
-		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
-		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		WideCharToMultiByte(CP_OEMCP,0,buffer,-1,oem_stop_buffer,ERR_MSG_SIZE - 1,NULL,NULL);
-		printf("\n%s\n",oem_stop_buffer);
-		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	}
+	udefrag_stop();
 	return TRUE;
+}
+
+void __stdcall ErrorHandler(short *msg)
+{
+	char oem_buffer[1024]; /* see zenwinx.h ERR_MSG_SIZE */
+	WORD color = FOREGROUND_RED | FOREGROUND_INTENSITY;
+
+	if(!b_flag){
+		switch(msg[0]){
+		case 'N':
+			color = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
+			break;
+		case 'W':
+			color = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
+			break;
+		/*case 'E':
+			color = FOREGROUND_RED | FOREGROUND_INTENSITY;
+			break;*/
+		}
+		settextcolor(color);
+	}
+	WideCharToMultiByte(CP_OEMCP,0,msg,-1,oem_buffer,1023,NULL,NULL);
+	printf("%s\n",oem_buffer);
+	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
 void parse_cmdline(int argc, char **argv)
@@ -202,6 +210,10 @@ int __cdecl main(int argc, char **argv)
 		HandleError("The -i, -e, -s, -d options are oblolete.\n"
 					"Use environment variables instead!",1);
 	if(h_flag) show_help();
+
+	/* set udefrag.dll ErrorHandler */
+	udefrag_set_error_handler(ErrorHandler);
+	
 	/* show list of volumes if requested */
 	if(l_flag){ exit(show_vollist()); }
 	/* validate driveletter */

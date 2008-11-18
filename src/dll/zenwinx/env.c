@@ -44,10 +44,7 @@
 *    If the function succeeds, the return value is zero.
 *    Otherwise - negative value.
 * EXAMPLE
-*    if(winx_query_env_variable(L"SystemRoot",buffer,sizeof(buffer)) < 0){
-*        winx_pop_error(NULL,0);
-*        // handle error
-*    }
+*    winx_query_env_variable(L"SystemRoot",buffer,sizeof(buffer));
 * SEE ALSO
 *    winx_set_env_variable
 ******/
@@ -56,13 +53,22 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 	UNICODE_STRING n, v;
 	NTSTATUS Status;
 	
+	if(!name){
+		winx_raise_error("E: winx_query_env_variable() invalid name!");
+		return (-1);
+	}
+	if(!buffer){
+		winx_raise_error("E: winx_query_env_variable() invalid buffer!");
+		return (-1);
+	}
+
 	RtlInitUnicodeString(&n,name);
 	v.Buffer = buffer;
 	v.Length = 0;
 	v.MaximumLength = length * sizeof(short);
 	Status = RtlQueryEnvironmentVariable_U(NULL,&n,&v);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't query %ws environment variable: %x!",
+		winx_raise_error("N: Can't query %ws environment variable: %x!",
 				name,(UINT)Status);
 		return -1;
 	}
@@ -85,10 +91,7 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 *    If the function succeeds, the return value is zero.
 *    Otherwise - negative value.
 * EXAMPLE
-*    if(winx_set_env_variable(L"XYZ",L"abc") < 0){
-*        winx_pop_error(NULL,0);
-*        // handle error
-*    }
+*    winx_set_env_variable(L"XYZ",L"abc");
 * SEE ALSO
 *    winx_query_env_variable
 ******/
@@ -96,6 +99,11 @@ int __stdcall winx_set_env_variable(short *name, short *value)
 {
 	UNICODE_STRING n, v;
 	NTSTATUS status;
+
+	if(!name){
+		winx_raise_error("E: winx_set_env_variable() invalid name!");
+		return (-1);
+	}
 
 	RtlInitUnicodeString(&n,name);
 	if(value){
@@ -105,7 +113,7 @@ int __stdcall winx_set_env_variable(short *name, short *value)
 		status = RtlSetEnvironmentVariable(NULL,&n,NULL);
 	}
 	if(!NT_SUCCESS(status)){
-		winx_push_error("Can't set %ws environment variable: %x!",
+		winx_raise_error("E: Can't set %ws environment variable: %x!",
 				name,(UINT)status);
 		return -1;
 	}

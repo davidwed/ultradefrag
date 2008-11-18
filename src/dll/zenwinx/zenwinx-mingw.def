@@ -15,11 +15,8 @@ EXPORTS
 	winx_gets
 	winx_kbhit
 	winx_breakhit
-	winx_push_error
-	winx_pop_error@8
-	winx_pop_werror@8
-	winx_save_error@8
-	winx_restore_error@4
+	winx_set_error_handler@4
+	winx_raise_error
 	winx_sleep@4
 	winx_get_os_version@0
 	winx_get_windows_directory@8

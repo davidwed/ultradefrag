@@ -31,18 +31,6 @@
 #include "../../include/udefrag.h"
 #include "../zenwinx/zenwinx.h"
 
-/* winx_pop_error() equivalent */
-void __stdcall udefrag_pop_error(char *buffer, int size)
-{
-	winx_pop_error(buffer,size);
-}
-
-/* winx_pop_werror() equivalent */
-void __stdcall udefrag_pop_werror(short *buffer, int size)
-{
-	winx_pop_werror(buffer,size);
-}
-
 /* winx_fbsize() equivalent */
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length)
 {
@@ -55,3 +43,8 @@ int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber)
 	return winx_dfbsize(string,pnumber);
 }
 
+/* winx_set_error_handler() equivalent */
+ERRORHANDLERPROC __stdcall udefrag_set_error_handler(ERRORHANDLERPROC handler)
+{
+	return winx_set_error_handler(handler);
+}

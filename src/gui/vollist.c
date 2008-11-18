@@ -164,7 +164,6 @@ static void VolListAddItem(int index, volume_info *v)
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 {
 	int skip_rem = (int)(LONG_PTR)lpParameter;
-	short buffer[ERR_MSG_SIZE];
 	char chr;
 	int index;
 	volume_info *v;
@@ -173,26 +172,25 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int dx;
 	int cw[] = {90,90,110,125,90}; //{100,90,110,120,85}; //{77,70,94,96,98,70};
 	LV_ITEM lvi;
-
+	ERRORHANDLERPROC eh;
+	
 	DisableButtonsBeforeDrivesRescan();
 	HideProgress();
 
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	index = 0;
-	if(udefrag_get_avail_volumes(&v,skip_rem) < 0){
-		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
-		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
-		goto scan_done;
+	eh = udefrag_set_error_handler(NULL);
+	if(udefrag_get_avail_volumes(&v,skip_rem) >= 0){
+		for(i = 0;;i++){
+			chr = v[i].letter;
+			if(!chr) break;
+			VolListAddItem(i,&v[i]);
+			letter_numbers[index] = chr - 'A';
+			CreateBitMap(chr - 'A');
+			index ++;
+		}
 	}
-	for(i = 0;;i++){
-		chr = v[i].letter;
-		if(!chr) break;
-		VolListAddItem(i,&v[i]);
-		letter_numbers[index] = chr - 'A';
-		CreateBitMap(chr - 'A');
-		index ++;
-	}
-scan_done:
+	udefrag_set_error_handler(eh);
 	/* adjust columns widths */
 	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;

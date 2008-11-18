@@ -43,12 +43,17 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	WINX_FILE *f;
 
 	if(!filename){
-		winx_push_error("Can't open a file because name isn't specified!");
+		winx_raise_error("E: winx_fopen() invalid filename!");
 		return NULL;
 	}
+	if(!mode){
+		winx_raise_error("E: winx_fopen() invalid mode (NULL)!");
+		return NULL;
+	}
+
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_push_error("Can't open %s! No enough memory!",filename);
+		winx_raise_error("E: Can't open %s! No enough memory!",filename);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -82,13 +87,13 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 			);
 	RtlFreeUnicodeString(&us);
 	if(status != STATUS_SUCCESS){
-		winx_push_error("Can't open %s: %x!",filename,(UINT)status);
+		winx_raise_error("W: Can't open %s: %x!",filename,(UINT)status);
 		return NULL;
 	}
 	f = (WINX_FILE *)winx_virtual_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		winx_push_error("Can't open %s! No enough memory!",filename);
+		winx_raise_error("E: Can't open %s! No enough memory!",filename);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -103,9 +108,14 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 	IO_STATUS_BLOCK iosb;
 	
 	if(!buffer){
-		winx_push_error("Can't read from a file because buffer isn't specified!");
+		winx_raise_error("E: winx_fread() invalid buffer!");
 		return 0;
 	}
+	if(!f){
+		winx_raise_error("E: winx_fread() invalid f (NULL)!");
+		return 0;
+	}
+
 	status = NtReadFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 buffer,size * count,&f->roffset,NULL);
 	if(status == STATUS_PENDING){
@@ -113,11 +123,11 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status == STATUS_END_OF_FILE || (iosb.Information < size)){
-		winx_push_error("EOF!");
+		/*winx_raise_error("N: EOF!");*/
 		return 0;
 	}
 	if(status != STATUS_SUCCESS){
-		winx_push_error("Can't read from a file: %x!",(UINT)status);
+		winx_raise_error("E: Can't read from a file: %x!",(UINT)status);
 		return 0;
 	}
 	f->roffset.QuadPart += iosb.Information;//size * count;
@@ -130,9 +140,14 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 	IO_STATUS_BLOCK iosb;
 	
 	if(!buffer){
-		winx_push_error("Can't write to a file because buffer isn't specified!");
+		winx_raise_error("E: winx_fwrite() invalid buffer!");
 		return 0;
 	}
+	if(!f){
+		winx_raise_error("E: winx_fwrite() invalid f (NULL)!");
+		return 0;
+	}
+
 	status = NtWriteFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 (void *)buffer,size * count,&f->woffset,NULL);
 	if(status == STATUS_PENDING){
@@ -140,12 +155,12 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status != STATUS_SUCCESS/* || (iosb.Information < size)*/){
-		winx_push_error("Can't write to a file: %x!",(UINT)status);
+		winx_raise_error("E: Can't write to a file: %x!",(UINT)status);
 		return 0;
 	}
 	f->woffset.QuadPart += iosb.Information;//size * count;
 
-	/* FIXME: iosb,Information may be zero though a write call was successful */
+	/* FIXME: iosb.Information may be zero though a write call was successful */
 	if(iosb.Information < size) return count;
 
 	return (iosb.Information / size);//count;
@@ -162,7 +177,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	NTSTATUS Status;
 
 	if(!f){
-		winx_push_error("Invalid parameter!");
+		winx_raise_error("E: winx_ioctl() invalid f (NULL)!");
 		return (-1);
 	}
 	
@@ -180,9 +195,9 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	}
 	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){
 		if(description)
-			winx_push_error("%s failed: %x!",description,(UINT)Status);
+			winx_raise_error("E: %s failed: %x!",description,(UINT)Status);
 		else
-			winx_push_error("Ioctl %u failed: %x!",code,(UINT)Status);
+			winx_raise_error("E: Ioctl %u failed: %x!",code,(UINT)Status);
 		return (-1);
 	}
 	if(pbytes_returned) *pbytes_returned = iosb.Information;
@@ -195,13 +210,13 @@ int __stdcall winx_fflush(WINX_FILE *f)
 	IO_STATUS_BLOCK iosb;
 	
 	if(!f){
-		winx_push_error("Invalid parameter!");
+		winx_raise_error("E: winx_fflush() invalid f (NULL)!");
 		return (-1);
 	}
 
 	Status = NtFlushBuffersFile(f->hFile,&iosb);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("NtFlushBuffersFile() failed: %x!",(UINT)Status);
+		winx_raise_error("W: NtFlushBuffersFile() failed: %x!",(UINT)Status);
 		return (-1);
 	}
 	return 0;

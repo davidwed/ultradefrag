@@ -38,7 +38,7 @@
 #endif
 #define CHECK_INIT_EVENT() { \
 	if(!init_event){ \
-		winx_push_error("%s call without initialization!", __FUNCTION__); \
+		winx_raise_error("E: %s call without initialization!", __FUNCTION__); \
 		return -1; \
 	} \
 }
@@ -64,7 +64,6 @@ BOOL query_env_variable(short *name)
 {
 	if(winx_query_env_variable(name,env_buffer,ENV_BUF_SIZE) >= 0)
 		return TRUE;
-	winx_pop_error(NULL,0);
 	return FALSE;
 }
 
@@ -145,10 +144,7 @@ int __stdcall udefrag_apply_settings()
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_reload_settings() < 0){
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*        // handle error
-*    }
+*    udefrag_reload_settings();
 ******/
 int __stdcall udefrag_reload_settings()
 {

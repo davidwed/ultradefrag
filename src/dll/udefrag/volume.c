@@ -57,9 +57,7 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 *    char buffer[ERR_MSG_SIZE];
 *    int i;
 *
-*    if(udefrag_get_avail_volumes(&v,TRUE) < 0){
-*        udefrag_pop_error(buffer,sizeof(buffer));
-*    } else {
+*    if(udefrag_get_avail_volumes(&v,TRUE) >= 0){
 *        for(i = 0;;i++){
 *            if(!v[i].letter) break;
 *            // ...
@@ -87,18 +85,13 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 		letter = 'A' + (char)i;
 		if(internal_validate_volume(letter, skip_removable,
 			 &(v[index].is_removable), v[index].fsname,
-			 &(v[index].total_space), &(v[index].free_space)) < 0){
-				winx_pop_error(NULL,0);
-				continue;
-		}
+			 &(v[index].total_space), &(v[index].free_space)) < 0) continue;
 		v[index].letter = letter;
 		index ++;
 	}
 	v[index].letter = 0;
 	/* try to restore error mode to default state */
-	if(winx_set_system_error_mode(1) < 0){ /* equal to SetErrorMode(0) */
-		winx_pop_error(NULL,0);
-	}
+	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	return 0;
 }
 
@@ -116,10 +109,8 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 * RESULT
 *    error - zero for success; negative value otherwise.
 * EXAMPLE
-*    if(udefrag_validate_volume("C",TRUE) < 0){
-*        udefrag_pop_error(buffer,sizeof(buffer));
+*    if(udefrag_validate_volume("C",TRUE) < 0)
 *        // handle error
-*    }
 * NOTES
 *    if(skip_removable == FALSE && you want 
 *      to validate floppy drive without floppy disk)
@@ -130,16 +121,20 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
 	int is_removable;
+	/*
+	* The following parameters are required 
+	* to exclude missing floppies.
+	*/
+	char fsname[MAXFSNAME];
+	LARGE_INTEGER total, free;
 
 	/* set error mode to ignore missing removable drives */
 	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
 		return (-1);
 	if(internal_validate_volume(letter,skip_removable,&is_removable,
-		NULL,NULL,NULL) < 0) return (-1);
+		fsname,&total,&free) < 0) return (-1);
 	/* try to restore error mode to default state */
-	if(winx_set_system_error_mode(1) < 0){ /* equal to SetErrorMode(0) */
-		winx_pop_error(NULL,0);
-	}
+	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	return 0;
 }
 
@@ -153,17 +148,17 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 	type = winx_get_drive_type(letter);
 	if(type < 0) return (-1);
 	if(type == DRIVE_CDROM || type == DRIVE_REMOTE){
-		winx_push_error("Volume must be on non-cdrom local drive, but it's %u!",type);
+		winx_raise_error("E: Volume must be on non-cdrom local drive, but it's %u!",type);
 		return (-1);
 	}
 	if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
-		winx_push_error("It seems that volume letter is assigned by \'subst\' command!");
+		winx_raise_error("E: It seems that volume letter is assigned by \'subst\' command!");
 		return (-1);
 	}
 	if(type == DRIVE_REMOVABLE){
 		*is_removable = TRUE;
 		if(skip_removable){
-			winx_push_error("It's removable volume!");
+			winx_raise_error("E: It's removable volume!");
 			return (-1);
 		}
 	}

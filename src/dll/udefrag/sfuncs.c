@@ -106,19 +106,14 @@ int __stdcall scheduler_get_avail_letters(char *letters)
 ******/
 char * __stdcall udefrag_s_get_map(int size)
 {
-	char buffer[ERR_MSG_SIZE];
 	int i;
 
 	if(size > sizeof(map) - 1)
 		return "ERROR: Map resolution is too high!";
-	if(udefrag_get_map(map,size - 1) < 0){
-		udefrag_pop_error(buffer,ERR_MSG_SIZE);
-		sprintf(map,"ERROR: %s",buffer);
-		return map;
-	}
+	if(udefrag_get_map(map,size - 1) < 0)
+		return "ERROR: Map request failed!";
 	/* remove zeroes from the map and terminate string */
-	for(i = 0; i < size - 1; i++)
-		map[i] ++;
+	for(i = 0; i < size - 1; i++) map[i] ++;
 	map[i] = 0;
 	return map;
 }
@@ -151,7 +146,6 @@ char * __stdcall udefrag_s_get_map(int size)
 ******/
 char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 {
-	char buffer[ERR_MSG_SIZE];
 	volume_info *v;
 	int i;
 	char chr;
@@ -160,11 +154,8 @@ char * __stdcall udefrag_s_get_avail_volumes(int skip_removable)
 	double d;
 	
 
-	if(udefrag_get_avail_volumes(&v,skip_removable) < 0){
-		udefrag_pop_error(buffer,ERR_MSG_SIZE);
-		sprintf(vlist,"ERROR: %s",buffer);
-		return vlist;
-	}
+	if(udefrag_get_avail_volumes(&v,skip_removable) < 0)
+		return "ERROR: udefrag_get_avail_volumes() request failed!";
 	strcpy(vlist,"");
 	for(i = 0;;i++){
 		chr = v[i].letter;

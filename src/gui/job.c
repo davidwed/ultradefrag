@@ -58,7 +58,6 @@ int __stdcall update_stat(int df)
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
-//	short *msg;
 
 	if(stop_pressed) return 0; /* it's neccessary: see above one comment in Stop() */
 	iItem = VolListGetSelectedItemIndex();
@@ -66,30 +65,19 @@ int __stdcall update_stat(int df)
 	index = VolListGetLetterNumber(iItem);
 	cl_map = map[index];
 	pst = &stat[index];
-	if(udefrag_get_progress(pst,&percentage) < 0){
-		udefrag_pop_werror(NULL,0);
-		goto done;
+	if(udefrag_get_progress(pst,&percentage) >= 0){
+		UpdateStatusBar(&stat[index]);
+		sprintf(progress_msg,"%c %u %%",
+			current_operation = pst->current_operation,(int)percentage);
+		SetProgress(progress_msg,(int)percentage);
 	}
-	UpdateStatusBar(&stat[index]);
 
-	sprintf(progress_msg,"%c %u %%",
-		current_operation = pst->current_operation,(int)percentage);
-	SetProgress(progress_msg,(int)percentage);
-
-	if(udefrag_get_map(cl_map,N_BLOCKS) < 0){
-		udefrag_pop_werror(NULL,0);
-		goto done;
+	if(udefrag_get_map(cl_map,N_BLOCKS) >= 0){
+		FillBitMap(index);
+		RedrawMap();
 	}
-	FillBitMap(index);
-	RedrawMap();
-done:
 	if(df == FALSE) return 0;
-/*	msg = udefrag_get_command_result_w();
-	if(wcslen(msg) > 1){
-		MessageBoxW(0,msg,L"Error!",MB_OK | MB_ICONHAND);
-		return 0;
-	}
-*/	if(!stop_pressed){
+	if(!stop_pressed){
 		sprintf(progress_msg,"%c 100 %%",current_operation);
 		SetProgress(progress_msg,100);
 	}
@@ -101,7 +89,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	LRESULT iItem;
 	UCHAR command;
 	int status;
-	short buffer[ERR_MSG_SIZE];
 
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
@@ -139,8 +126,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		status = udefrag_optimize((UCHAR)VolListGetLetter(iItem),update_stat);
 	}
 	if(status < 0){
-		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
-		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
 		VolListUpdateStatusField(STAT_CLEAR,iItem);
 		ClearMap();
 	}
@@ -152,11 +137,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 void stop(void)
 {
-	short buffer[ERR_MSG_SIZE];
-
 	stop_pressed = TRUE;
-	if(udefrag_stop() < 0){
-		udefrag_pop_werror(buffer,ERR_MSG_SIZE);
-		MessageBoxW(0,buffer,L"Error!",MB_OK | MB_ICONHAND);
-	}
+	udefrag_stop();
 }

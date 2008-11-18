@@ -42,10 +42,7 @@
 *    If the function succeeds, the return value is zero.
 *    Otherwise - negative value.
 * EXAMPLE
-*    if(winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE) < 0){
-*        winx_pop_error(NULL,0);
-*        // handle error
-*    }
+*    winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
 ******/
 int __stdcall winx_enable_privilege(unsigned long luid)
 {
@@ -56,7 +53,7 @@ int __stdcall winx_enable_privilege(unsigned long luid)
 
 	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&hToken);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't enable privilege %x! Open token failure: %x!",
+		winx_raise_error("E: Can't enable privilege %x! Open token failure: %x!",
 				(UINT)luid,(UINT)Status);
 		return (-1);
 	}
@@ -70,7 +67,7 @@ int __stdcall winx_enable_privilege(unsigned long luid)
 									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
 	NtCloseSafe(hToken);
 	if(Status == STATUS_NOT_ALL_ASSIGNED || !NT_SUCCESS(Status)){
-		winx_push_error("Can't enable privilege %x: %x!",
+		winx_raise_error("E: Can't enable privilege %x: %x!",
 				(UINT)luid,(UINT)Status);
 		return (-1);
 	}

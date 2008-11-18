@@ -198,9 +198,7 @@ int __cdecl winx_printf(const char *format, ...)
 *    // Prompt to exit.
 *    winx_printf("Press any key to exit...  ");
 *    for(i = 0; i < 3; i++){
-*        if(winx_kbhit(1000) == -1){
-*            winx_pop_error(NULL,0);
-*        } else {
+*        if(winx_kbhit(1000) != -1){
 *            winx_printf("\nGood bye ...\n");
 *            winx_exit(0);
 *        }
@@ -223,8 +221,8 @@ int __cdecl winx_kbhit(int msec)
 	LARGE_INTEGER interval;
 
 	if(!hKbDevice){
-		winx_push_error("The keyboard is not opened!");
-		return -1;
+		winx_raise_error("E: winx_kbhit(): the keyboard is not opened!");
+		return (-1);
 	}
 	if(msec != INFINITE)
 		interval.QuadPart = -((signed long)msec * 10000);
@@ -251,19 +249,19 @@ int __cdecl winx_kbhit(int msec)
 				* FIXME: handle this error.
 				*/
 			}
-			winx_push_error("Timeout!");
-			return -1;
+			/*winx_raise_error("N: winx_kbhit() timeout!");*/
+			return (-1);
 		}
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't read the keyboard: %x!",(UINT)Status);
-		return -1;
+		winx_raise_error("E: winx_kbhit(): can't read the keyboard: %x!",(UINT)Status);
+		return (-1);
 	}
 	IntTranslateKey(&kbd,&kbd_rec);
 	if(!kbd_rec.bKeyDown){
-		winx_push_error("The key was released!");
-		return -1;
+		/*winx_raise_error("N: winx_kbhit(): The key was released!");*/
+		return (-1);
 	}
 	return (int)kbd_rec.AsciiChar;
 }
@@ -283,9 +281,7 @@ int __cdecl winx_kbhit(int msec)
 * EXAMPLE
 *    // Prompt to exit.
 *    winx_printf("Press 'Break' key to exit...  ");
-*    if(winx_breakhit(1000) == -1){
-*        winx_pop_error(NULL,0);
-*    } else {
+*    if(winx_breakhit(1000) != -1){
 *        winx_printf("\nGood bye ...\n");
 *        winx_exit(0);
 *    }
@@ -300,10 +296,10 @@ int __cdecl winx_kbhit(int msec)
 ******/
 int __cdecl winx_breakhit(int msec)
 {
-	if(winx_kbhit(msec) == -1) return -1;
+	if(winx_kbhit(msec) == -1) return (-1);
 	if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d)) return 0;
-	winx_push_error("Other key was pressed.");
-	return -1;
+	/*winx_raise_error("N: winx_breakhit(): Other key was pressed.");*/
+	return (-1);
 }
 
 /****f* zenwinx.stdio/winx_getch
@@ -325,8 +321,8 @@ int __cdecl winx_getch(void)
 	NTSTATUS Status;
 
 	if(!hKbDevice){
-		winx_push_error("The keyboard is not opened!");
-		return -1;
+		winx_raise_error("E: winx_getch(): the keyboard is not opened!");
+		return (-1);
 	}
 repeate_attempt:
 	ByteOffset.QuadPart = 0;
@@ -338,8 +334,8 @@ repeate_attempt:
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't read the keyboard: %x!",(UINT)Status);
-		return -1;
+		winx_raise_error("E: winx_getch(): can't read the keyboard: %x!",(UINT)Status);
+		return (-1);
 	}
 	IntTranslateKey(&kbd,&kbd_rec);
 	if(!kbd_rec.bKeyDown) goto repeate_attempt;
@@ -394,9 +390,10 @@ int __cdecl winx_gets(char *string,int n)
 	int ch;
 
 	if(!string){
-		winx_push_error("Invalid argument #1 of winx_gets!");
-		return -1;
+		winx_raise_error("E: winx_gets() invalid string!");
+		return (-1);
 	}
+	
 	for(i = 0; i < n; i ++){
 repeate_attempt:
 		ch = winx_getche();
@@ -406,8 +403,8 @@ repeate_attempt:
 		string[i] = (char)ch;
 	}
 	if(i == n){
-		winx_push_error("Buffer overflow!"); /* never change this !!! */
-		return -1;
+		winx_raise_error("W: winx_gets() buffer overflow!");
+		return (-1);
 	}
 	return i;
 }

@@ -46,7 +46,6 @@
 * EXAMPLE
 *    if(winx_get_proc_address(L"ntdll.dll","RtlGetVersion",
 *            (void *)&func_RtlGetVersion) < 0){
-*        winx_pop_error(NULL,0);
 *        // it seems that we have nt 4.0 system without RtlGetVersion()
 *    }
 * NOTES
@@ -59,16 +58,29 @@ int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_ad
 	NTSTATUS Status;
 	HMODULE base_addr;
 
+	if(!libname){
+		winx_raise_error("E: winx_get_proc_address() invalid libname!");
+		return (-1);
+	}
+	if(!funcname){
+		winx_raise_error("E: winx_get_proc_address() invalid funcname!");
+		return (-1);
+	}
+	if(!proc_addr){
+		winx_raise_error("E: winx_get_proc_address() invalid proc_addr!");
+		return (-1);
+	}
+
 	RtlInitUnicodeString(&uStr,libname);
 	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't get %ls handle: %x!",libname,(UINT)Status);
+		winx_raise_error("N: Can't get %ls handle: %x!",libname,(UINT)Status);
 		return (-1);
 	}
 	RtlInitAnsiString(&aStr,funcname);
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't get address for %s: %x!",funcname,(UINT)Status);
+		winx_raise_error("N: Can't get address for %s: %x!",funcname,(UINT)Status);
 		*proc_addr = NULL;
 		return (-1);
 	}

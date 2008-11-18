@@ -48,7 +48,7 @@ int __stdcall kb_open(short *kb_device_name)
 			    &ObjectAttributes,&IoStatusBlock,NULL,FILE_ATTRIBUTE_NORMAL/*0x80*/,
 			    0,FILE_OPEN/*1*/,FILE_DIRECTORY_FILE/*1*/,NULL,0);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't open the keyboard %ws: %x!",kb_device_name,(UINT)Status);
+		winx_raise_error("W: Can't open the keyboard %ws: %x!",kb_device_name,(UINT)Status);
 		hKbDevice = NULL;
 		return (-1);
 	}
@@ -59,7 +59,7 @@ int __stdcall kb_open(short *kb_device_name)
 	if(!NT_SUCCESS(Status)){
 		hKbEvent = NULL;
 		kb_close();
-		winx_push_error("Can't create kb_event: %x!",(UINT)Status);
+		winx_raise_error("E: Can't create kb_event: %x!",(UINT)Status);
 		return (-1);
 	}
 kb_open_success:

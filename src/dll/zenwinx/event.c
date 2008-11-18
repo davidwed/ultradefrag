@@ -41,12 +41,9 @@
 *    phandle - pointer to event handle
 * RESULT
 *    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
+*    Otherwise - negative value and phandle == NULL.
 * EXAMPLE
-*    if(winx_create_event(L"\\xyz_event",SynchronizationEvent,&hEvent) < 0){
-*        winx_pop_error(NULL,0);
-*        // handle error
-*    }
+*    winx_create_event(L"\\xyz_event",SynchronizationEvent,&hEvent);
 * SEE ALSO
 *    winx_destroy_event
 ******/
@@ -56,12 +53,18 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 	NTSTATUS Status;
 	OBJECT_ATTRIBUTES oa;
 
-	if(!phandle || !name){
-		winx_push_error("Invalid parameter!");
+	if(!phandle){
+		winx_raise_error("E: winx_create_event() invalid phandle!");
+		return (-1);
+	}
+	*phandle = NULL;
+
+	if(!name){
+		winx_raise_error("E: winx_create_event() invalid name!");
 		return (-1);
 	}
 	if(type != SynchronizationEvent && type != NotificationEvent){
-		winx_push_error("Invalid parameter!");
+		winx_raise_error("E: winx_create_event() invalid type!");
 		return (-1);
 	}
 
@@ -70,7 +73,7 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 	Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,
 				&oa,(BOOLEAN)type,TRUE);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't create %ws: %x!",name,(UINT)Status);
+		winx_raise_error("E: Can't create %ws: %x!",name,(UINT)Status);
 		*phandle = NULL;
 		return (-1);
 	}

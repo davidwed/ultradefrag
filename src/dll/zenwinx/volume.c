@@ -168,10 +168,6 @@ int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber)
 *    that GetDriveType() returns.
 * EXAMPLE
 *    type = winx_get_drive_type('C');
-*    if(type < 0){
-*        winx_pop_error(buffer,sizeof(buffer));
-*        // handle error here
-*    }
 * SEE ALSO
 *    winx_get_disk_free_space, winx_get_filesystem_name
 ******/
@@ -193,8 +189,8 @@ int __stdcall winx_get_drive_type(char letter)
 
 	letter = (unsigned char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
-		winx_push_error("Invalid letter %c!",letter);
-		return -1;
+		winx_raise_error("E: winx_get_drive_type() invalid letter %c!",letter);
+		return (-1);
 	}
 	/* this call is applicable only for w2k and later versions */
 	Status = NtQueryInformationProcess(NtCurrentProcess(),
@@ -203,8 +199,8 @@ int __stdcall winx_get_drive_type(char letter)
 					NULL);
 	if(!NT_SUCCESS(Status)){
 		if(Status != STATUS_INVALID_INFO_CLASS){
-			winx_push_error("Can't get drive map: %x!",(UINT)Status);
-			return -1;
+			winx_raise_error("E: winx_get_drive_type(): can't get drive map: %x!",(UINT)Status);
+			return (-1);
 		}
 		nt4_system = TRUE;
 	}
@@ -223,9 +219,9 @@ int __stdcall winx_get_drive_type(char letter)
 	Status = NtOpenSymbolicLinkObject(&hLink,SYMBOLIC_LINK_QUERY,
 		&ObjectAttributes);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't open symbolic link %ls: %x!",
+		winx_raise_error("N: winx_get_drive_type(): can't open symbolic link %ls: %x!",
 			link_name,(UINT)Status);
-		return -1;
+		return (-1);
 	}
 	uStr.Buffer = link_target;
 	uStr.Length = 0;
@@ -234,9 +230,9 @@ int __stdcall winx_get_drive_type(char letter)
 	Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
 	NtClose(hLink);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't query symbolic link %ls: %x!",
+		winx_raise_error("N: winx_get_drive_type(): can't query symbolic link %ls: %x!",
 			link_name,(UINT)Status);
-		return -1;
+		return (-1);
 	}
 	link_target[MAX_TARGET_LENGTH - 1] = 0; /* terminate the buffer */
 	if(wcsstr(link_target,L"\\??\\") == (wchar_t *)link_target)
@@ -254,15 +250,15 @@ int __stdcall winx_get_drive_type(char letter)
 	* Note that the drive motor can be powered on during this check.
 	*/
 	if(!internal_open_rootdir(letter,&hFile))
-		return -1;
+		return (-1);
 	Status = NtQueryVolumeInformationFile(hFile,&iosb,
 					&ffdi,sizeof(FILE_FS_DEVICE_INFORMATION),
 					FileFsDeviceInformation);
 	NtClose(hFile);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't get volume type for \'%c\': %x!",
+		winx_raise_error("E: winx_get_drive_type(): can't get volume type for \'%c\': %x!",
 			letter,(UINT)Status);
-		return -1;
+		return (-1);
 	}
 	switch(ffdi.DeviceType){
 	case FILE_DEVICE_CD_ROM:
@@ -301,10 +297,7 @@ int __stdcall winx_get_drive_type(char letter)
 *    If the function fails, the return value is (-1).
 *    Otherwise it returns zero.
 * EXAMPLE
-*    if(winx_get_volume_size('C',&total,&free) < 0){
-*        winx_pop_error(buffer,sizeof(buffer));
-*        // handle error here
-*    }
+*    winx_get_volume_size('C',&total,&free);
 * SEE ALSO
 *    winx_get_drive_type, winx_get_filesystem_name
 ******/
@@ -317,11 +310,15 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 	
 	letter = (char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
-		winx_push_error("Invalid volume letter %c!",letter);
+		winx_raise_error("E: winx_get_volume_size() invalid letter %c!",letter);
 		return (-1);
 	}
-	if(!ptotal || !pfree){
-		winx_push_error("Invalid parameter!");
+	if(!ptotal){
+		winx_raise_error("E: winx_get_volume_size() invalid ptotal (NULL)!");
+		return (-1);
+	}
+	if(!pfree){
+		winx_raise_error("E: winx_get_volume_size() invalid pfree (NULL)!");
 		return (-1);
 	}
 
@@ -330,7 +327,8 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 				sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	NtClose(hRoot);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't get size of volume \'%c\': %x!",letter,(UINT)Status);
+		winx_raise_error("E: winx_get_volume_size(): can't get size of volume \'%c\': %x!",
+			letter,(UINT)Status);
 		return (-1);
 	}
 	
@@ -358,10 +356,7 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 *    If the function fails, the return value is (-1).
 *    Otherwise it returns zero.
 * EXAMPLE
-*    if(winx_get_filesystem_name('C',fsname,sizeof(fsname)) < 0){
-*        winx_pop_error(buffer,sizeof(buffer));
-*        // handle error here
-*    }
+*    winx_get_filesystem_name('C',fsname,sizeof(fsname));
 * SEE ALSO
 *    winx_get_drive_type, winx_get_disk_free_space
 ******/
@@ -378,11 +373,15 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 	
 	letter = (char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
-		winx_push_error("Invalid volume letter %c!",letter);
+		winx_raise_error("E: winx_get_filesystem_name() invalid letter %c!",letter);
 		return (-1);
 	}
-	if(!buffer || length <= 0){
-		winx_push_error("Invalid parameter!");
+	if(!buffer){
+		winx_raise_error("E: winx_get_filesystem_name() invalid buffer!");
+		return (-1);
+	}
+	if(length <= 0){
+		winx_raise_error("E: winx_get_filesystem_name() invalid length == %i!",length);
 		return (-1);
 	}
 
@@ -393,7 +392,7 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 				FS_ATTRIBUTE_BUFFER_SIZE,FileFsAttributeInformation);
 	NtClose(hRoot);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't get file system name for \'%c\': %x!",letter,(UINT)Status);
+		winx_raise_error("W: Can't get file system name for \'%c\': %x!",letter,(UINT)Status);
 		return (-1);
 	}
 
@@ -431,7 +430,7 @@ BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(!NT_SUCCESS(Status)){
-		winx_push_error("Can't open %ls: %x!",rootpath,(UINT)Status);
+		winx_raise_error("E: Can't open %ls: %x!",rootpath,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;

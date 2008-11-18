@@ -24,31 +24,10 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
-/*
-* List of functions that needs udefrag_pop_error() after
-* each unsuccessfull call:
-*	scheduler_get_avail_volumes
-*	udefrag_analyse
-*	udefrag_defragment
-*	udefrag_get_avail_volumes
-*	udefrag_get_map
-*	udefrag_get_progress
-*	udefrag_init
-*	udefrag_optimize
-*	udefrag_reload_settings
-*	udefrag_stop
-*	udefrag_unload
-*	udefrag_validate_volume
-*/
-
 #include "ultradfg.h"
 
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think that's enough. */
-
-#ifndef ERR_MSG_SIZE
-#define ERR_MSG_SIZE 1024
-#endif
 
 typedef struct _volume_info {
 	char letter;
@@ -96,10 +75,12 @@ int __stdcall scheduler_get_avail_letters(char *letters);
 #define udefrag_defragment(letter,sproc) udefrag_send_command_ex('d',letter,sproc)
 #define udefrag_optimize(letter,sproc) udefrag_send_command_ex('c',letter,sproc)
 
-void __stdcall udefrag_pop_error(char *buffer, int size);
-void __stdcall udefrag_pop_werror(short *buffer, int size);
-
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);
+
+#ifndef _ZENWINX_H_
+typedef void (__stdcall *ERRORHANDLERPROC)(short *msg);
+#endif
+ERRORHANDLERPROC __stdcall udefrag_set_error_handler(ERRORHANDLERPROC handler);
 
 #endif /* _UDEFRAG_H_ */

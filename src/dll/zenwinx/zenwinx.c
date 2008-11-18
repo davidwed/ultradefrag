@@ -56,16 +56,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 *    // native entry point
 *    void __stdcall NtProcessStartup(PPEB Peb)
 *    {
-*        signed int code;
-*        char buffer[256];
-*
-*        code = winx_init(Peb);
-*        if(code < 0){
-*            winx_pop_error(buffer,sizeof(buffer));
-*            winx_printf("winx_init() call unsuccessful!");
-*            winx_printf("\n\n%s\n",buffer);
-*            winx_exit(1); // exit with code 1
-*        }
+*        winx_init(Peb);
 *        // your program code here
 *        // ...
 *        winx_exit(0); // successful exit
@@ -148,8 +139,7 @@ void __stdcall winx_exit(int exit_code)
 void __stdcall winx_reboot(void)
 {
 	kb_close();
-	if(winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE) < 0)
-		winx_pop_error(NULL,0);
+	winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
 	NtShutdownSystem(ShutdownReboot);
 }
 
@@ -182,7 +172,6 @@ void __stdcall winx_reboot(void)
 void __stdcall winx_shutdown(void)
 {
 	kb_close();
-	if(winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE) < 0)
-		winx_pop_error(NULL,0);
+	winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
 	NtShutdownSystem(ShutdownNoReboot);
 }

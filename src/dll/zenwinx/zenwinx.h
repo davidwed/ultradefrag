@@ -24,45 +24,6 @@
 #ifndef _ZENWINX_H_
 #define _ZENWINX_H_
 
-/*
-* IMPORTANT NOTES:
-*   1. If some winx function returns negative value,
-*   such function must call winx_push_error() before.
-*   2. After each unsuccessful call of such functions,
-*   winx_pop_error() must be called before any other
-*   system call in the current thread (win32, 
-*   native, crt, mfc ...).
-*   3. Each winx_push_error() call must be like this:
-*       winx_push_error("error message with parameters: %x!",
-*           parameters,(UINT)Status);
-*      Status parameter is optional.
-*   4. List of functions that needs winx_pop_error:
-*		winx_breakhit
-*		winx_create_thread
-*		winx_enable_privilege
-*		winx_exit_thread
-*		winx_fflush
-*		winx_fopen
-*		winx_fread
-*		winx_fwrite
-*		winx_get_drive_type
-*		winx_get_filesystem_name
-*		winx_get_proc_address
-*		winx_get_volume_size
-*		winx_get_windows_directory
-*		winx_getch
-*		winx_getche
-*		winx_gets
-*		winx_init
-*		winx_ioctl
-*		winx_kbhit
-*		winx_load_driver
-*		winx_query_env_variable
-*		winx_set_env_variable
-*		winx_set_system_error_mode
-*		winx_unload_driver
-*/
-
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
@@ -105,11 +66,11 @@ int __cdecl winx_gets(char *string,int n);
 int __cdecl winx_kbhit(int msec);
 int __cdecl winx_breakhit(int msec);
 
-void __cdecl winx_push_error(char *format, ...);
-void __stdcall winx_pop_error(char *buffer,int size);
-void __stdcall winx_pop_werror(short *buffer, int size);
-void __stdcall winx_save_error(char *buffer, int size);
-void __stdcall winx_restore_error(char *buffer);
+#ifndef _UDEFRAG_H_
+typedef void (__stdcall *ERRORHANDLERPROC)(short *msg);
+#endif
+ERRORHANDLERPROC __stdcall winx_set_error_handler(ERRORHANDLERPROC ehproc);
+void __cdecl winx_raise_error(char *format, ...);
 
 void __stdcall winx_sleep(int msec);
 int  __stdcall winx_get_os_version(void);
