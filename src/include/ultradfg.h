@@ -60,7 +60,7 @@
 #define IOCTL_SET_DBGPRINT_LEVEL CTL_CODE(\
 	FILE_DEVICE_UNKNOWN, 0x806, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
-#define IOCTL_SET_REPORT_TYPE CTL_CODE(\
+#define IOCTL_SET_REPORT_STATE CTL_CODE(\
 	FILE_DEVICE_UNKNOWN, 0x807, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
 /* nt 4.0 specific */
@@ -77,16 +77,9 @@
 #define STATUS_ANALYSED           0x1
 #define STATUS_DEFRAGMENTED       0x2
 
-#define HTML_REPORT   'H'
-#define NO_REPORT     'N'
-
 #define DBG_NORMAL     0
 #define DBG_DETAILED   1
 #define DBG_PARANOID   2
-
-typedef struct _REPORT_TYPE {
-	UCHAR		type;
-} REPORT_TYPE, *PREPORT_TYPE;
 
 typedef struct _STATISTIC {
 	ULONG		filecounter;
@@ -97,13 +90,9 @@ typedef struct _STATISTIC {
 	ULONGLONG	total_space;
 	ULONGLONG	free_space; /* in bytes */
 	ULONG		mft_size;
-	ULONGLONG	processed_clusters;
-	ULONGLONG	bytes_per_cluster;
 	UCHAR		current_operation;
-	ULONGLONG	clusters_to_move_initial;
-	ULONGLONG	clusters_to_move;
-	ULONGLONG	clusters_to_compact_initial;
-	ULONGLONG	clusters_to_compact;
+	ULONGLONG	clusters_to_process;
+	ULONGLONG	processed_clusters;
 } STATISTIC, *PSTATISTIC;
 
 #endif /* _ULTRADFG_H_ */

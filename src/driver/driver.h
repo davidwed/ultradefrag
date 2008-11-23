@@ -313,9 +313,8 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	BOOLEAN opposite_order; /* if true then number of clusters is less than number of blocks */
 	ULONGLONG cells_per_cluster;
 	ULONGLONG cells_per_last_cluster;
+	ULONGLONG clusters_to_process;
 	ULONGLONG processed_clusters;
-	ULONGLONG clusters_to_move;
-	ULONGLONG clusters_to_move_initial;
 	NTSTATUS status;
 	ULONG invalid_movings;
 	/*
@@ -343,8 +342,8 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONGLONG bytes_per_cluster;
 	ULONGLONG sizelimit;
 	BOOLEAN compact_flag;
-	BOOLEAN xp_compatible; /* true for NT 5.1 and later versions */
-	REPORT_TYPE report_type;
+//	BOOLEAN xp_compatible; /* true for NT 5.1 and later versions */
+	ULONG disable_reports;
 	/* nt 4.0 specific */
 	ULONGLONG nextLcn;
 	ULONGLONG *pnextLcn;
@@ -356,7 +355,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 
 /* Function Prototypes */
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
-NTSTATUS RedumpSpace(UDEFRAG_DEVICE_EXTENSION *dx);
 void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
@@ -364,7 +362,6 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, in
 void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
 void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state);
 NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx);
-BOOLEAN GetTotalClusters(UDEFRAG_DEVICE_EXTENSION *dx);
 void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx);
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters);
@@ -388,8 +385,6 @@ LIST* NTAPI InsertLastItem(PLIST *phead,PLIST *plast,ULONG size);
 LIST* NTAPI RemoveItem(PLIST *phead,PLIST *pprev,PLIST *pcurrent);
 void NTAPI DestroyList(PLIST *phead);
 
-NTSTATUS NTAPI IoFlushBuffersFile(HANDLE hFile);
-
 NTSTATUS AllocateMap(ULONG size);
 void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);
 void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -397,10 +392,9 @@ void GetMap(char *dest);
 
 NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx);
-/*__inline */void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
+void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 
 BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
-void CheckPendingBlocks(UDEFRAG_DEVICE_EXTENSION *dx);
 void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 
 void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,short *buffer,int length);

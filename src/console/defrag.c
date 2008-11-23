@@ -47,6 +47,14 @@ void HandleError(char *err_msg,int exit_code);
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 void __stdcall ErrorHandler(short *msg);
 
+void Exit(int exit_code)
+{
+	if(!b_flag) settextcolor(console_attr);
+	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+	udefrag_unload();
+	exit(exit_code);
+}
+
 void show_help(void)
 {
 	printf(
@@ -62,29 +70,14 @@ void show_help(void)
 		"Options:\n"
 		"  -b       use default color scheme"
 		);
-	HandleError("",0);
+	Exit(0);
 }
 
 void HandleError(char *err_msg,int exit_code)
 {
-	if(err_msg){ /* we should display error and terminate process */
-		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		printf("%s\n",err_msg);
-		if(!b_flag) settextcolor(console_attr);
-		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		udefrag_unload();
-		exit(exit_code);
-	}
-}
-
-void HandleErrorW(int status,int exit_code)
-{
-	if(status < 0){
-		if(!b_flag) settextcolor(console_attr);
-		SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-		udefrag_unload();
-		exit(exit_code);
-	}
+	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+	printf("%s\n",err_msg);
+	Exit(exit_code);
 }
 
 /* returns an exit code for console program terminating */
@@ -134,6 +127,9 @@ void __stdcall ErrorHandler(short *msg)
 	char oem_buffer[1024]; /* see zenwinx.h ERR_MSG_SIZE */
 	WORD color = FOREGROUND_RED | FOREGROUND_INTENSITY;
 
+	/* ignore notifications */
+	if(msg[0] == 'N') return;
+	
 	if(!b_flag){
 		switch(msg[0]){
 		case 'N':
@@ -218,18 +214,18 @@ int __cdecl main(int argc, char **argv)
 	if(l_flag){ exit(show_vollist()); }
 	/* validate driveletter */
 	if(!letter)	HandleError("Drive letter should be specified!",1);
-	HandleErrorW(udefrag_validate_volume(letter,FALSE),1);
+	if(udefrag_validate_volume(letter,FALSE) < 0) Exit(1);
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* do our job */
-	HandleErrorW(udefrag_init(0),2);
+	if(udefrag_init(0) < 0) Exit(2);
 
-	if(a_flag) HandleErrorW(udefrag_analyse(letter,NULL),3);
-	else if(o_flag) HandleErrorW(udefrag_optimize(letter,NULL),3);
-	else HandleErrorW(udefrag_defragment(letter,NULL),3);
+	if(a_flag) { if(udefrag_analyse(letter,NULL) < 0) Exit(3); }
+	else if(o_flag) { if(udefrag_optimize(letter,NULL) < 0) Exit(3); }
+	else { if(udefrag_defragment(letter,NULL) < 0) Exit(3); }
 
 	/* display results and exit */
-	HandleErrorW(udefrag_get_progress(&stat,NULL),0);
-	printf("\n%s",udefrag_get_default_formatted_results(&stat));
-	HandleError("",0);
+	if(udefrag_get_progress(&stat,NULL) >= 0)
+		printf("\n%s",udefrag_get_default_formatted_results(&stat));
+	Exit(0);
 	return 0; /* we will never reach this point */
 }

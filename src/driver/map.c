@@ -26,6 +26,7 @@
 /* allocates buffer for cluster map of specified size */
 NTSTATUS AllocateMap(ULONG size)
 {
+#ifndef MICRO_EDITION
 	/* map reallocation don't supported yet */
 	if(new_cluster_map) return STATUS_INVALID_DEVICE_REQUEST;
 	map_size = size;
@@ -38,12 +39,14 @@ NTSTATUS AllocateMap(ULONG size)
 		map_size = 0;
 		return STATUS_NO_MEMORY;
 	}
+#endif
 	return STATUS_SUCCESS;
 }
 
 /* returns current space state for the specified file */
 unsigned char GetSpaceState(PFILENAME pfn)
 {
+#ifndef MICRO_EDITION
 	UCHAR space_states[] = {UNFRAGM_SPACE,UNFRAGM_OVERLIMIT_SPACE, \
 			      COMPRESSED_SPACE,COMPRESSED_OVERLIMIT_SPACE, \
 			      DIR_SPACE,DIR_OVERLIMIT_SPACE,DIR_SPACE, \
@@ -60,23 +63,29 @@ unsigned char GetSpaceState(PFILENAME pfn)
 		state = space_states[(d << 2) + (c << 1) + o];
 	}
 	return state;
+#else
+	return 0;
+#endif
 }
 
 /* marks space allocated by specified file */
 void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
 {
+#ifndef MICRO_EDITION
 	PBLOCKMAP block;
 	UCHAR state;
 	
 	state = GetSpaceState(pfn);
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
 		ProcessBlock(dx,block->lcn,block->length,state,old_space_state);
+#endif
 }
 
 /* applies clusters block data to cluster map */
 void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 				  ULONGLONG len,int space_state,int old_space_state)
 {
+#ifndef MICRO_EDITION
 	ULONGLONG cell, offset, n;
 	ULONGLONG ncells, i, j;
 
@@ -130,37 +139,52 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 			new_cluster_map[cell + i][space_state] = 1;
 		}
 	}
+#endif
 }
 
 /* marks all space as system with 1 cluster per cell */
 void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx)
 {
+#ifndef MICRO_EDITION
 	ULONG i;
 	
 	if(!new_cluster_map) return;
 	memset(new_cluster_map,0,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
 	for(i = 0; i < map_size; i++)
 		new_cluster_map[i][SYSTEM_SPACE] = 1;
+#endif
 }
 
 /* corrects number of clusters per cell set by MarkAllSpaceAsSystem0() */
 void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx)
 {
+#ifndef MICRO_EDITION
 	ULONG i;
 	
 	if(!new_cluster_map) return;
-	if(!dx->opposite_order){
+	/* calculate map parameters */
+	dx->clusters_per_cell = dx->clusters_total / map_size;
+	if(dx->clusters_per_cell){
+		dx->opposite_order = FALSE;
+		dx->clusters_per_last_cell = dx->clusters_per_cell + \
+			(dx->clusters_total - dx->clusters_per_cell * map_size);
 		for(i = 0; i < map_size - 1; i++)
 			new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_cell;
 		new_cluster_map[i][SYSTEM_SPACE] = dx->clusters_per_last_cell;
 	} else {
+		dx->opposite_order = TRUE;
+		dx->cells_per_cluster = map_size / dx->clusters_total;
+		dx->cells_per_last_cluster = dx->cells_per_cluster + \
+			(map_size - dx->cells_per_cluster * dx->clusters_total);
 		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
 			dx->clusters_total,dx->cells_per_cluster,dx->cells_per_last_cluster);
 	}
+#endif
 }
 
 void GetMap(char *dest)
 {
+#ifndef MICRO_EDITION
 	ULONG i, k, index;
 	ULONGLONG maximum, n;
 	
@@ -178,4 +202,5 @@ void GetMap(char *dest)
 		}
 		dest[i] = (char)index;
 	}
+#endif
 }

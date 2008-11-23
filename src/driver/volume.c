@@ -97,14 +97,14 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 		DebugPrint("-Ultradfg- Can't open the root directory %ws: %x!",
 				path,(UINT)status);
 		hFile = NULL;
-		goto done;
+		return status;
 	}
 
 	/* get logical geometry */
 	status = ZwQueryVolumeInformationFile(hFile,&iosb,&FileFsSize,
 			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	ZwClose(hFile);
-	if(status != STATUS_SUCCESS) goto done;
+	if(status != STATUS_SUCCESS) return status;
 
 	bpc = FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
 	dx->bytes_per_cluster = bpc;
@@ -117,29 +117,9 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint("-Ultradfg- cluster size: %I64u\n", dx->bytes_per_cluster);
 	
 	/* validate geometry */
-	if(!dx->clusters_total || !dx->total_space || !dx->bytes_per_cluster){
-		status = STATUS_WRONG_VOLUME;
-		goto done;
-	}
-
-	/* calculate map parameters */
-	if(new_cluster_map){
-		dx->clusters_per_cell = dx->clusters_total / map_size;
-		if(dx->clusters_per_cell){
-			dx->opposite_order = FALSE;
-			dx->clusters_per_last_cell = dx->clusters_per_cell + \
-				(dx->clusters_total - dx->clusters_per_cell * map_size);
-		} else {
-			dx->opposite_order = TRUE;
-			dx->cells_per_cluster = map_size / dx->clusters_total;
-			dx->cells_per_last_cluster = dx->cells_per_cluster + \
-				(map_size - dx->cells_per_cluster * dx->clusters_total);
-		}
-		/* update map representation */
-		MarkAllSpaceAsSystem1(dx);
-	}
-done:
-	return status;
+	if(!dx->clusters_total || !dx->total_space || !dx->bytes_per_cluster)
+		return STATUS_WRONG_VOLUME;
+	return STATUS_SUCCESS;
 }
 
 void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
@@ -192,7 +172,7 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
 }
 
-/*__inline*/ void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx)
+void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ZwCloseSafe(dx->hVol);
 }

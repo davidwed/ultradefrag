@@ -57,10 +57,14 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(!NT_SUCCESS(Status)) goto fail;
 	Status = GetVolumeInfo(dx);
 	if(!NT_SUCCESS(Status)) goto fail;
+	/* update map representation */
+	MarkAllSpaceAsSystem1(dx);
 
 	///IoFlushBuffersFile(dx->hVol);
 
 	//tm = _rdtsc();
+	dx->clusters_to_process = dx->clusters_total;
+	dx->processed_clusters = 0;
 	Status = FillFreeSpaceMap(dx);
 	if(!NT_SUCCESS(Status)) goto fail;
 	//DbgPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);

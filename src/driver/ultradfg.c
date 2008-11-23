@@ -199,7 +199,7 @@ no_mem:
 		DebugPrint("=Ultradfg= NT %u.%u checked.\n",mj,mn);
 	else
 		DebugPrint("=Ultradfg= NT %u.%u free.\n",mj,mn);
-	dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));
+//	dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));
 	DebugPrint("=Ultradfg= DriverEntry successfully completed\n");
 	return STATUS_SUCCESS;
 }
@@ -269,11 +269,9 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 		st->free_space = main_dx->free_space;
 		st->total_space = main_dx->total_space;
 		st->mft_size = main_dx->mft_size;
-		st->processed_clusters = main_dx->processed_clusters;
-		st->bytes_per_cluster = main_dx->bytes_per_cluster;
 		st->current_operation = main_dx->current_operation;
-		st->clusters_to_move_initial = main_dx->clusters_to_move_initial;
-		st->clusters_to_move = main_dx->clusters_to_move;
+		st->clusters_to_process = main_dx->clusters_to_process;
+		st->processed_clusters = main_dx->processed_clusters;
 		InterlockedDecrement(&dx->working_rq);
 		return CompleteIrp(Irp,STATUS_SUCCESS,sizeof(STATISTIC));
 	}
@@ -497,7 +495,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	short *filter;
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONG BytesTxd = 0;
-	REPORT_TYPE *rt;
 	UCHAR *user_mode_buffer; /* for nt 4.0 */
 	ULONG in_len, out_len;
 
@@ -544,15 +541,13 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		DebugPrint("-Ultradfg- dbg_level=%u\n",dbg_level);
 		BytesTxd = in_len;
 		break;
-	case IOCTL_SET_REPORT_TYPE:
-		DebugPrint("-Ultradfg- IOCTL_SET_REPORT_TYPE\n");
-		if(in_len != sizeof(REPORT_TYPE)){
+	case IOCTL_SET_REPORT_STATE:
+		DebugPrint("-Ultradfg- IOCTL_SET_REPORT_STATE\n");
+		if(in_len != sizeof(ULONG)){
 			status = STATUS_INVALID_PARAMETER;
 			break;
 		}
-		rt = (REPORT_TYPE *)Irp->AssociatedIrp.SystemBuffer;
-		//dx->report_type.format = rt->format;
-		dx->report_type.type = rt->type;
+		dx->disable_reports = *((ULONG *)Irp->AssociatedIrp.SystemBuffer);
 		BytesTxd = in_len;
 		break;
 	case IOCTL_SET_USER_MODE_BUFFER:

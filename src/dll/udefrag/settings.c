@@ -53,8 +53,8 @@ short in_filter[MAX_FILTER_SIZE + 1] = L"";
 short ex_filter[MAX_FILTER_SIZE + 1] = L"";
 ULONGLONG sizelimit  = 0;
 int refresh_interval  = 500;
-UCHAR report_type    = HTML_REPORT;
-DWORD dbgprint_level = DBG_NORMAL;
+ULONG disable_reports = FALSE;
+ULONG dbgprint_level = DBG_NORMAL;
 
 short env_buffer[8192];
 
@@ -75,7 +75,7 @@ int __stdcall udefrag_load_settings()
 	/* reset all parameters */
 	in_filter[0] = ex_filter[0] = 0;
 	sizelimit = 0;
-	report_type = HTML_REPORT;
+	disable_reports = FALSE;
 	dbgprint_level = DBG_NORMAL;
 
 	/*
@@ -93,7 +93,7 @@ int __stdcall udefrag_load_settings()
 	if(query_env_variable(L"UD_REFRESH_INTERVAL")) refresh_interval = _wtoi(env_buffer);
 
 	if(query_env_variable(L"UD_DISABLE_REPORTS")) {
-		if(!wcscmp(env_buffer,L"1")) report_type = NO_REPORT;
+		if(!wcscmp(env_buffer,L"1")) disable_reports = TRUE;
 	}
 
 	if(query_env_variable(L"UD_DBGPRINT_LEVEL")){
@@ -110,20 +110,17 @@ int __stdcall udefrag_load_settings()
 
 int __stdcall udefrag_apply_settings()
 {
-	REPORT_TYPE rt;
-
 	CHECK_INIT_EVENT();
 
 	/* set debug print level */
 	if(winx_ioctl(f_ud,IOCTL_SET_DBGPRINT_LEVEL,"Debug print level setup",
-		&dbgprint_level,sizeof(DWORD),NULL,0,NULL) < 0) return (-1);
+		&dbgprint_level,sizeof(ULONG),NULL,0,NULL) < 0) return (-1);
 	/* set sizelimit */
 	if(winx_ioctl(f_ud,IOCTL_SET_SIZELIMIT,"Size limit setup",
 		&sizelimit,sizeof(ULONGLONG),NULL,0,NULL) < 0) return (-1);
-	/* set report characterisics */
-	rt.type = report_type;
-	if(winx_ioctl(f_ud,IOCTL_SET_REPORT_TYPE,"Report type setup",
-		&rt,sizeof(REPORT_TYPE),NULL,0,NULL) < 0) return (-1);
+	/* set report state */
+	if(winx_ioctl(f_ud,IOCTL_SET_REPORT_STATE,"Report state setup",
+		&disable_reports,sizeof(ULONG),NULL,0,NULL) < 0) return (-1);
 	/* set filters */
 	if(winx_ioctl(f_ud,IOCTL_SET_INCLUDE_FILTER,"Include filter setup",
 		in_filter,(wcslen(in_filter) + 1) << 1,NULL,0,NULL) < 0) return (-1);

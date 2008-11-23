@@ -63,16 +63,15 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
 	KeAcquireSpinLock(&spin_lock,&oldIrql);
-	dx->clusters_to_move = dx->clusters_to_move_initial = 0;
+	dx->clusters_to_process = dx->processed_clusters = 0;
 	KeReleaseSpinLock(&spin_lock,oldIrql);
 	for(pflist = dx->fragmfileslist; pflist != NULL; pflist = pflist->next_ptr){
 		if(!pflist->pfn->blockmap) continue;
 		if(pflist->pfn->is_overlimit) continue;
 		if(pflist->pfn->is_filtered) continue;
 		if(pflist->pfn->is_dir && dx->partition_type != NTFS_PARTITION) continue;
-		dx->clusters_to_move_initial += pflist->pfn->clusters_total;
+		dx->clusters_to_process += pflist->pfn->clusters_total;
 	}
-	dx->clusters_to_move = dx->clusters_to_move_initial;
 	dx->current_operation = 'D';
 
 	/* process fragmented files */
@@ -94,19 +93,13 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 			DebugPrint("-Ultradfg- Defrag success.\n");
 		else
 			DebugPrint("-Ultradfg- Defrag error for %ws\n",curr_file->name.Buffer);
-		dx->clusters_to_move -= curr_file->clusters_total;
+		dx->processed_clusters += curr_file->clusters_total;
 	}
-	/*
-	* Here dx->clusters_to_move should be zero.
-	* We have reached 100% progress point.
-	*/
 
 exit_defrag:
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
-	/*
-	* The state of some processed files maybe unknown...
-	*/
+	/* The state of some processed files maybe unknown... */
 	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0 && \
 		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
 	else dx->status = STATUS_BEFORE_PROCESSING;
@@ -130,18 +123,17 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
 	KeAcquireSpinLock(&spin_lock,&oldIrql);
-	dx->clusters_to_move = dx->clusters_to_move_initial = 0;
+	dx->clusters_to_process = dx->processed_clusters = 0;
 	KeReleaseSpinLock(&spin_lock,oldIrql);
 	for(curr_file = dx->filelist; curr_file != NULL; curr_file = curr_file->next_ptr){
 		if(!curr_file->blockmap) continue;
-		dx->clusters_to_move_initial += curr_file->clusters_total;
+		dx->clusters_to_process += curr_file->clusters_total;
 	}
-	dx->clusters_to_move = dx->clusters_to_move_initial;
 	dx->current_operation = 'C';
 
 	/* On FAT volumes it increase distance between dir & files inside it. */
 	if(dx->partition_type != NTFS_PARTITION){
-		dx->clusters_to_move = 0;
+		dx->processed_clusters = dx->clusters_to_process;
 		return;
 	}
 
@@ -159,19 +151,13 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(KeReadStateEvent(&dx->stop_event) == 0x1)
 			goto exit_defrag_space;
 		DefragmentFile(dx,curr_file);
-		dx->clusters_to_move -= curr_file->clusters_total;
+		dx->processed_clusters += curr_file->clusters_total;
 	}
-	/*
-	* Here dx->clusters_to_move should be zero.
-	* We have reached 100% progress point.
-	*/
 
 exit_defrag_space:
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
-	/*
-	* The state of some processed files maybe unknown...
-	*/
+	/* The state of some processed files maybe unknown... */
 	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0 && \
 		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
 	else dx->status = STATUS_BEFORE_PROCESSING;

@@ -65,8 +65,7 @@ void __stdcall ErrorHandler(short *msg)
 {
 	if(wcsstr(msg, L"c0000035")) /* STATUS_OBJECT_NAME_COLLISION */
 		eh(L"You can run only one instance of UltraDefrag!");
-	else
-		eh(msg);
+	else eh(msg);
 }
 
 /* functions */
@@ -185,13 +184,10 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 	char cmd[4];
 
 	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-	if(winx_fwrite(cmd,strlen(cmd),1,f_ud))
-		return 0;
-	else {
-		winx_raise_error("E: Can't execute driver command \'%c\' for volume %c!",
-			command,letter);
-		return (-1);
-	}
+	if(winx_fwrite(cmd,strlen(cmd),1,f_ud)) return 0;
+	winx_raise_error("E: Can't execute driver command \'%c\' for volume %c!",
+		command,letter);
+	return (-1);
 }
 
 /* you can send only one command at the same time */
@@ -243,14 +239,9 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 	* (at least under MS Virtual PC 2004).
 	*/
 	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) >= 0){
-		if(command == 'a'){
-			volume[4] = letter;
-			f = winx_fopen(volume,"r+");
-			if(f){
-				winx_fflush(f);
-				winx_fclose(f);
-			}
-		}
+		volume[4] = letter;
+		f = winx_fopen(volume,"r+");
+		if(f){ winx_fflush(f); winx_fclose(f); }
 		winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	}
 
@@ -296,12 +287,9 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 int __stdcall udefrag_stop(void)
 {
 	CHECK_INIT_EVENT();
-	if(winx_fwrite("s",1,1,f_stop))
-		return 0;
-	else {
-		winx_raise_error("E: Stop request failed!");
-		return (-1);
-	}
+	if(winx_fwrite("s",1,1,f_stop)) return 0;
+	winx_raise_error("E: Stop request failed!");
+	return (-1);
 }
 
 /****f* udefrag.common/udefrag_get_progress
@@ -325,6 +313,8 @@ int __stdcall udefrag_stop(void)
 ******/
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
+	double x, y;
+	
 	CHECK_INIT_EVENT();
 
 	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
@@ -333,22 +323,10 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	}
 
 	if(percentage){ /* calculate percentage only if we have such request */
-		switch(pstat->current_operation){
-		case 'A':
-			*percentage = (double)(LONGLONG)pstat->processed_clusters *
-					(double)(LONGLONG)pstat->bytes_per_cluster / 
-					((double)(LONGLONG)pstat->total_space + 0.1);
-			break;
-		case 'D':
-		case 'C':
-			if(pstat->clusters_to_move_initial == 0)
-				*percentage = 1.00;
-			else
-				*percentage = 1.00 - (double)(LONGLONG)pstat->clusters_to_move / 
-						((double)(LONGLONG)pstat->clusters_to_move_initial + 0.1);
-			break;
-		}
-		*percentage = (*percentage) * 100.00;
+		/* FIXME: do it more accurate */
+		x = (double)(LONGLONG)pstat->processed_clusters;
+		y = (double)(LONGLONG)pstat->clusters_to_process + 0.1;
+		*percentage = (x / y) * 100.00;
 	}
 	return 0;
 }
@@ -373,12 +351,9 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 int __stdcall udefrag_get_map(char *buffer,int size)
 {
 	CHECK_INIT_EVENT();
-	if(winx_fread(buffer,size,1,f_map))
-		return 0;
-	else {
-		winx_raise_error("E: Cluster map unavailable!");
-		return (-1);
-	}
+	if(winx_fread(buffer,size,1,f_map)) return 0;
+	winx_raise_error("E: Cluster map unavailable!");
+	return (-1);
 }
 
 /****f* udefrag.common/udefrag_get_default_formatted_results

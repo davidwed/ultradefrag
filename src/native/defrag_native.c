@@ -63,6 +63,8 @@ short *command;
 
 void __stdcall ErrorHandler(short *msg)
 {
+	/* ignore notifications */
+	if(msg[0] == 'N') return;
 	winx_printf("\n%ws\n",msg);
 }
 

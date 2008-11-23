@@ -45,7 +45,8 @@ void DestroyImageList(void);
 
 void __stdcall ErrorHandler(short *msg)
 {
-	MessageBoxW(0,msg,0,0);
+	/* ignore notifications and warnings */
+	if(msg[0] == 'E') MessageBoxW(NULL,msg,L"Error!",MB_OK | MB_ICONHAND);
 }
 
 /*-------------------- Main Function -----------------------*/

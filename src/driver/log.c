@@ -120,8 +120,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	short p[] = L"\\??\\A:\\fraglist.luar";
 
-	if(dx->report_type.type == NO_REPORT)
-		goto done;
+	if(dx->disable_reports) return TRUE;
 	/* Create the file */
 	p[4] = (short)dx->letter;
 	RtlInitUnicodeString(&dx->log_path,p);
@@ -163,7 +162,6 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	Write(dx,hFile,buffer,strlen(buffer));
 	ZwClose(hFile);
 	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
-done:
 	return TRUE;
 }
 #else /* MICRO_EDITION */
@@ -243,8 +241,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	short head[] = L"\r\nFragmented files on C:\r\n\r\n";
 	short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
 
-	if(dx->report_type.type == NO_REPORT)
-		goto done;
+	if(dx->disable_reports) return TRUE;
 	/* Create the file */
 	p[4] = (short)dx->letter;
 	RtlInitUnicodeString(&dx->log_path,p);
@@ -279,7 +276,6 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	WriteLogBody(dx,hFile,TRUE);
 	ZwClose(hFile);
 	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
-done:
 	return TRUE;
 }
 #endif /* MICRO_EDITION */

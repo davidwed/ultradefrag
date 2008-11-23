@@ -219,7 +219,7 @@ int __stdcall winx_get_drive_type(char letter)
 	Status = NtOpenSymbolicLinkObject(&hLink,SYMBOLIC_LINK_QUERY,
 		&ObjectAttributes);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("N: winx_get_drive_type(): can't open symbolic link %ls: %x!",
+		winx_raise_error("E: winx_get_drive_type(): can't open symbolic link %ls: %x!",
 			link_name,(UINT)Status);
 		return (-1);
 	}
@@ -230,7 +230,7 @@ int __stdcall winx_get_drive_type(char letter)
 	Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
 	NtClose(hLink);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("N: winx_get_drive_type(): can't query symbolic link %ls: %x!",
+		winx_raise_error("E: winx_get_drive_type(): can't query symbolic link %ls: %x!",
 			link_name,(UINT)Status);
 		return (-1);
 	}
