@@ -12,17 +12,20 @@
 
 <body bgcolor="white" text="black" alink="#0000ff" link="#0000ff" vlink="#840084">
 
-<div style="position: absolute; top: 0px; left: 10px; z-index: 1; background-color: transparent; color: rgb(255, 255, 255);"><a href="http://docs.kde.org/" style="background-color: transparent; color: #FFFFFF; font-weight: bold;">docs.kde.org</a></div>
-
+<!--
+<div style="position: absolute; top: 0px; left: 10px; z-index: 1; background-color: transparent; color: rgb(255, 255, 255);">
+<a href="http://ultradefrag.sourceforge.net/" style="background-color: transparent; color: #FFFFFF; font-weight: bold;">ultradefrag.sourceforge.net</a>
+</div>
+-->
 <div style="background-image: url(top-middle.png); width: 100%; height: 131px;">
 	<div style="position: absolute; right: 0px;">
 		<img src="top-right-konqueror.png" style="margin: 0px;" alt="" />
 	</div>
-
+<!--
 	<div style="position: absolute; left: 0px;">
 		<img src="top-left.png" style="margin: 0px;" alt="" />
 	</div>
-
+-->
 	<div style="position: absolute; top: 25px; right: 100px; text-align: right; font-size: xx-large; font-weight: bold; text-shadow: #fff 0px 0px 5px; color: #444;">The
 	<span class="application">UltraDefrag</span> Handbook</div>
 </div>
@@ -85,6 +88,7 @@
 
 			<dd><dl>
 				<dt><span class="sect1"><a href="introduction.html#whats-ud">What is <span class="application">UltraDefrag</span>?</a></span></dt>
+				<dt><span class="sect1"><a href="introduction.html#features">Features</a></span></dt>
 				<dt><span class="sect1"><a href="introduction.html#fs">Supported file systems</a></span></dt>
 				<dt><span class="sect1"><a href="introduction.html#platforms">Supported operating systems</a></span></dt>
 			</dl></dd>
@@ -99,7 +103,6 @@
 			<dt><span class="chapter"><a href="console.html">3. Console interface</a></span></dt>
 
 			<dd><dl>
-				<dt><span class="sect1"><a href="console.html#overview">Overview</a></span></dt>
 				<dt><span class="sect1"><a href="console.html#switches">Command line switches</a></span></dt>
 				<dt><span class="sect1"><a href="console.html#env">Accepted environment variables</a></span></dt>
 				<dt><span class="sect1"><a href="console.html#ctxhandler">Context menu handler</a></span></dt>
@@ -109,14 +112,12 @@
 			<dt><span class="chapter"><a href="gui.html">4. Graphical interface</a></span></dt>
 
 			<dd><dl>
-				<dt><span class="sect1"><a href="gui.html#overview">Overview</a></span></dt>
 				<dt><span class="sect1"><a href="gui.html#config">Configuring</a></span></dt>
 			</dl></dd>
 
 			<dt><span class="chapter"><a href="boot_time.html">5. Boot time defragmentation</a></span></dt>
 
 			<dd><dl>
-				<dt><span class="sect1"><a href="boot_time.html#overview">Overview</a></span></dt>
 				<dt><span class="sect1"><a href="boot_time.html#commands">Supported commands</a></span></dt>
 				<dt><span class="sect1"><a href="boot_time.html#examples">Example boot time scripts</a></span></dt>
 			</dl></dd>
@@ -124,44 +125,34 @@
 			<dt><span class="chapter"><a href="reports.html">6. Reports</a></span></dt>
 
 			<dd><dl>
-				<dt><span class="sect1"><a href="reports.html#overview">Overview</a></span></dt>
 				<dt><span class="sect1"><a href="reports.html#config">Configuring</a></span></dt>
 			</dl></dd>
 
 			<dt><span class="chapter"><a href="scheduler.html">7. Scheduler</a></span></dt>
 
-			<dd><dl>
-				<dt><span class="sect1"><a href="scheduler.html#overview">Overview</a></span></dt>
-			</dl></dd>
-
 			<dt><span class="chapter"><a href="portable.html">8. Portable <span class="application">UltraDefrag</span></a></span></dt>
 
 			<dd><dl>
-				<dt><span class="sect1"><a href="portable.html#overview">Overview</a></span></dt>
 				<dt><span class="sect1"><a href="portable.html#config">Configuring</a></span></dt>
 			</dl></dd>
 
 			<dt><span class="chapter"><a href="micro_edition.html">9. <span class="application">UltraDefrag</span> Micro Edition</a></span></dt>
 
-			<dd><dl>
-				<dt><span class="sect1"><a href="micro_edition.html#overview">Overview</a></span></dt>
-			</dl></dd>
-
 			<dt><span class="chapter"><a href="faq.html">10. Frequently Asked Questions</a></span></dt>
 			
-			<dd><dl>
-			</dl></dd>
-
-			<dt><span class="chapter"><a href="credits.html">11. Credits and License</a></span></dt>
+			<dt><span class="chapter"><a href="reporting_bugs.html">11. Reporting bugs</a></span></dt>
+			
+			<dt><span class="chapter"><a href="credits.html">12. Credits and License</a></span></dt>
 		</dl>
 	</div>
-
+<!--
 	<div class="list-of-tables">
 		<p><b>List of Tables</b></p>
 		<dl>
 			<dt>2.1. <a href="amor-themes.html#id2525833">Available <span class="application">AMOR</span> Themes</a></dt>
 		</dl>
 	</div>
+-->
 </div>
 
 <div style="color: black; margin-top: 20px; margin-left: 20px; margin-right: 20px;">
@@ -184,12 +175,31 @@
 <br />
 
 <div class="bannerBottom" style="background-image: url(bottom-middle.png); width: 100%; height: 100px; bottom: 0px;">
-	<div class="bannerBottomRight"><img src="bottom-right.png" style="margin: 0px;" alt="" /></div>
+	<div class="bannerBottomRight">
+		<img src="bottom-right.png" style="margin: 0px;" alt="" />
+	</div>
 	<div class="bannerBottomLeft">
 		<img src="bottom-left.png" style="margin: 0px;" alt="" />
-		<a href="http://docs.kde.org/" style="position: absolute; left: 10px; background-color: transparent; color: rgb(255, 255, 255); font-weight: bold;">docs.kde.org</a>
+		<a href="http://ultradefrag.sourceforge.net/" 
+		style="position: absolute; left: 10px; background-color: transparent; color: #FFFFFF; font-weight: bold;">ultradefrag.sourceforge.net</a>
+		<a href="http://sourceforge.net" 
+		style="position: absolute; left: 10px; bottom: 35px; background-color: transparent; color: #FFFFFF; font-weight: bold;">
+			<img src="http://sourceforge.net/sflogo.php?group_id=199532&amp;type=1" alt="SourceForge.net Homepage" border="0" height="31" width="88"  />
+		</a>
 	</div>
 </div>
+
+<!-- GOOGLE ANALYTICS BEGIN -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-2897964-4");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+<!-- GOOGLE ANALYTICS END -->
 
 </body>
 </html>
