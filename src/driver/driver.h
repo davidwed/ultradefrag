@@ -404,6 +404,8 @@ unsigned char GetSpaceState(PFILENAME pfn);
 void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx);
 void wait_for_idle_state(UDEFRAG_DEVICE_EXTENSION *dx);
 
+NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
+
 #define FIND_DATA_SIZE	(16*1024)
 
 #define IS_DIR(pFileInfo) \

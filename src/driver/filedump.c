@@ -39,7 +39,6 @@ BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
-	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK ioStatus;
 	PGET_RETRIEVAL_DESCRIPTOR fileMappings;
 	NTSTATUS Status;
@@ -53,11 +52,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	pfn->blockmap = NULL;
 	dx->lastblock = NULL;
 	/* Open the file */
-	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,0,NULL,NULL);
-	Status = ZwCreateFile(&hFile,FILE_GENERIC_READ,&ObjectAttributes,&ioStatus,
-			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
-			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,
-			  NULL,0);
+	Status = OpenTheFile(pfn,&hFile);
 	if(Status != STATUS_SUCCESS){
 		DebugPrint1("-Ultradfg- System file found: %ls %x\n",pfn->name.Buffer,(UINT)Status);
 		hFile = NULL;

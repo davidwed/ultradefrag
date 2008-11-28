@@ -106,11 +106,13 @@ exit_defrag:
 }
 
 /*
- * NOTES:
- * 1. On FAT it's bad idea, because dirs isn't moveable.
- * 2. On NTFS cycle of attempts is bad solution,
- *    because it increase processing time and can be as while(1) {}.
- */
+* NOTES:
+* 1. On FAT it's bad idea, because dirs aren't moveable.
+* 2. On NTFS cycle of attempts is a bad solution,
+* because it increases processing time. Also on NTFS all 
+* space freed during the defragmentation is still temporarily
+* allocated by system for a long time.
+*/
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	KSPIN_LOCK spin_lock;
@@ -267,8 +269,6 @@ ULONGLONG FindTarget(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 /* Returns true when file was moved, otherwise false and file in undefined state. */
 BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
 	HANDLE hFile;
 	ULONGLONG target, curr_target;
@@ -276,11 +276,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	UCHAR old_state;
 
 	/* Open the file */
-	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,0,NULL,NULL);
-	Status = ZwCreateFile(&hFile,FILE_GENERIC_READ,&ObjectAttributes,&IoStatusBlock,
-			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
-			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,
-			  NULL,0);
+	Status = OpenTheFile(pfn,&hFile);
 	if(Status){
 		DebugPrint1("-Ultradfg- Can't open %ws: %x\n", pfn->name.Buffer,(UINT)Status);
 		return FALSE;

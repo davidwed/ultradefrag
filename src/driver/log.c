@@ -90,14 +90,17 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 		Write(dx,hFile,buffer,strlen(buffer));
 
-		RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE);
-		/* replace square brackets with <> !!! */
-		for(i = 0; i < as.Length; i++){
-			if(as.Buffer[i] == '[') as.Buffer[i] = '<';
-			else if(as.Buffer[i] == ']') as.Buffer[i] = '>';
+		if(RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE) == STATUS_SUCCESS){
+			/* replace square brackets with <> !!! */
+			for(i = 0; i < as.Length; i++){
+				if(as.Buffer[i] == '[') as.Buffer[i] = '<';
+				else if(as.Buffer[i] == ']') as.Buffer[i] = '>';
+			}
+			Write(dx,hFile,as.Buffer,as.Length);
+			RtlFreeAnsiString(&as);
+		} else {
+			DebugPrint("No enough memory!");
 		}
-		Write(dx,hFile,as.Buffer,as.Length);
-		RtlFreeAnsiString(&as);
 		strcpy(buffer,"]],uname = {");
 		Write(dx,hFile,buffer,strlen(buffer));
 		p = (char *)pf->pfn->name.Buffer;
