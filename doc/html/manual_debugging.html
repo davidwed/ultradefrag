@@ -22,23 +22,25 @@ H3 { margin-bottom: 0.21cm }
 H3.western { font-family: "Arial", sans-serif }
 -->
 </style>
+<link rel="stylesheet" type="text/css" href="udefrag.css" />
 </head>
 <body style="direction: ltr; color: rgb(0, 0, 0); background-color: rgb(240, 240, 255); font-family: Times New Roman; font-size: 12pt;" alink="#ff0000" lang="en-US" vlink="#660099">
-<h1 class="western" style="" align="center"><font style="font-size: 20pt;" size="5">UltraDefrag
-User Manual</font></h1>
-<h1 class="western" style="" align="right"><i>Written
-by <a href="mailto:zippy1981 + at + gmail + dot + com">Justin Dearing</a></i></h1>
+<h1 class="western" align="center">Debugging UltraDefrag</h1>
+<div align="right">Written 
+by <a href="mailto:zippy1981 + at + gmail + dot + com">Justin Dearing</a></div>
+
 <h1 class="western">Overview</h1>
-<p>While the author of UltraDefrag has taken great pains to ensure that
+<p>While the author of UltraDefrag Driver has taken great pains to ensure that
 UltraDefrag operates properly, no software is perfect. As such bugs are
 inevitable. The author accepts bug reports and will attempt to fix issues that
 are brought to his attention. In order to facilitate this the author has built
 logging mechanisms into UltraDefrag. This document describes how to get these
-logs from UltraDefrag.</p>
+logs from UltraDefrag and attach them to your bug report.</p>
+
 <h1 class="western">How UltraDefrag Logs Information</h1>
-<p>The actual task of defragmenting your hard drive is performed by a kernel
-driver, "ultradfg.sys." This kernel driver logs information via the system
-call DbgPrint(). This function writes messages to a special buffer that can
+<p>The actual task of defragmenting your hard drive is performed by a kernel mode
+driver, <span class="code">ultradfg.sys</span>. This driver logs information via the system
+call <span class="code">DbgPrint()</span>. This function writes messages to a special buffer that can
 be read by several utilities.</p>
 <p>Two utilities that can be used for reading from this buffer are
 <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">
@@ -50,18 +52,18 @@ NT 4.0. DbgPrintLog is a console based program that does not work on 64 bit
 versions of windows yet. However, it comes with full source code, and works on
 NT 4.0 and even NT 3,51. Both applications have a special mode that allows
 capture of events at boot time.</p>
-<h1>Debugging with DbgPrintLog</h1>
+<h1 class="western">Debugging with DbgPrintLog</h1>
 <ol>
-	<li>Download DebugView from 
+	<li>Download DbgPrintLog from 
 	<a href="http://alter.org.ua/en/soft/win/dbgdump/">Alexander A. Telyatnikov' Website</a>.</li>
-	<li>Unzip it and extrace the contents to a new folder. Create a shortcut to it or place it a folder on your
+	<li>Unzip it and extract the contents to a new folder. Create a shortcut to it or place it a folder on your
 	%PATH% so you can call it from a command line.</li>
 	<li>Startup DbgPrintLog. It will output messages to the screen as well as write output to "DbgPrint.log"</li>
 	<li>Startup UltraDefrag. Run it to reproduce the crash.</li>
 	<li>In a new text file copy the 200 lines or so leading up to the crash. Submit the file as part of a
 	<a href="http://sourceforge.net/tracker/?group_id=199532&atid=969870">sourceforge bug report</a>.</li>
 </ol>
-<h1>Debugging with DebugView</h1>
+<h1 class="western">Debugging with DebugView</h1>
 <ol>
 	<li>Download DebugView from 
 	<a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">Microsofts Website</a>.</li>
@@ -79,11 +81,6 @@ capture of events at boot time.</p>
 	<li>Trim all but the last 200 or so lines from the file. Submit the file as part of a
 	<a href="http://sourceforge.net/tracker/?group_id=199532&atid=969870">sourceforge bug report</a>.</li>
 </ol>
-<h1>Debugging the boot time driver</h1>
-<h2>Using DbgPrintLog</h2>
-<p>To be written.</p>
-<h2>Using DebugView</h2>
-<p>To be written.</p>
 <hr />
 <table align="right">
 <tbody>
