@@ -541,6 +541,7 @@ skip_boot_time_inst:
   File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
+  File "${ROOTDIR}\src\installer\udefrag-gui-dbg.cmd"
 
   DetailPrint "Install console interface..."
   File "udefrag.exe"
@@ -780,6 +781,8 @@ Section "Shortcuts" SecShortcuts
 
   CreateShortCut "$R0\UltraDefrag.lnk" \
    "$SYSDIR\udefrag-gui.exe"
+  CreateShortCut "$R0\UltraDefrag (Debug mode).lnk" \
+   "$SYSDIR\udefrag-gui-dbg.cmd" "" "$SYSDIR\udefrag-gui.exe" 0
 
   CreateShortCut "$R0\Documentation\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"
@@ -890,6 +893,7 @@ Section "Uninstall"
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\ud-help.cmd"
+  Delete "$SYSDIR\udefrag-gui-dbg.cmd"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
