@@ -1,0 +1,285 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	<title>Chapter 4. Graphical interface</title>
+	<link rel="stylesheet" href="kde-default.css" type="text/css" />
+	<link rel="stylesheet" href="udefrag.css" type="text/css" />
+	<meta name="description" content="Ultra Defragmenter is a powerful Open Source defragmentation tool for Windows NT." />
+	<meta name="keywords" content="UltraDefrag, Ultra Defragmenter, defragmentation, Open Source disk defragmenter, defragger, boot time defragmentation, boot time defragger, handbook, user manual, graphical interface, GUI" />
+	<link rel="start" href="index.html" title="Ultra Defragmenter Handbook" />
+	<link rel="prev" href="console.html" title="Chapter 3. Console interface" />
+	<link rel="next" href="boot.html" title="Chapter 5. Boot time defragmentation" />
+	<style type="text/css">
+	<!--
+	/* for color boxes */
+	.cb {
+		position: absolute;
+		width: 8pt;
+		height: 8pt;
+		border: 1px solid;
+		font-size: 6pt; /* specially for IE */
+	}
+
+	/* for static text */
+	.st {
+		position: absolute;
+		font-size: 11pt;
+	}
+	-->
+	</style>
+</head>
+
+<body bgcolor="white" text="black" alink="#0000ff" link="#0000ff" vlink="#840084">
+
+<div style="background-image: url(top-middle.png); width: 100%; height: 131px;">
+	<div style="position: absolute; right: 0px;">
+		<img src="top-right-konqueror.png" style="margin: 0px;" alt="" />
+	</div>
+
+	<div style="position: absolute; top: 25px; right: 100px; text-align: right; font-size: xx-large; font-weight: bold; text-shadow: #fff 0px 0px 5px; color: #444;">
+	Graphical interface</div>
+</div>
+
+<div style="margin-top: 20px; background-color: white; color: black; margin-left: 20px; margin-right: 20px;">
+	<div style="position: absolute; left: 20px;"><a accesskey="p" href="console.html">Prev</a></div>
+
+	<div style="position: absolute; right: 20px;"><a accesskey="n" href="boot.html">Next</a></div>
+
+	<div class="navCenter">&nbsp;</div>
+</div>
+
+<div class="chapter" lang="en">
+	<div class="titlepage">
+		<div><div>
+				<h2 class="title">Chapter 4. Graphical interface</h2>
+		</div></div>
+	</div>
+
+	<div class="toc">
+		<p><b>Table of Contents</b></p>
+		<dl>
+			<dt>
+				<span class="sect1"><a href="gui.html#overview">
+				Overview</a></span>
+			</dt>
+			<dt>
+				<span class="sect1"><a href="gui.html#config">
+				Configuring</a></span>
+			</dt>
+		</dl>
+	</div>
+	
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="overview"></a>
+				Overview</h2>
+			</div></div>
+		</div>
+		<p>The windows application is a simple application with one main
+		form of fixed size and an about box. An illustration of the window as well
+		as an explanation of their functionality is below:</p>
+		<p><div align="center"><img src="main_screen200.png" alt="Main window" align="bottom" border="0"></div></p>
+		<ol>
+		<li>
+		<p><span class="guimenuitem">List of volumes</span> This list all drives on the machine that you can scan. 
+		CDROM's and other drives that cannot be defragmented are excluded from list automatically.
+		If the <span class="guimenuitem">Skip removable media</span> box is checked, also floppies 
+		and other similar devices will be excluded. This list has the following fields:</p>
+		<ul type="disc">
+			<li>
+			<p><span class="guimenuitem">Volume</span> - drive letter plus file system type in square brackets. There are used 
+			two types of icons in this field: 
+			<img src="fixed.ico" alt="fixed" border="0" height="16" width="16" /> for fixed drives and 
+			<img src="removable.ico" alt="removable" border="0" height="16" width="16" /> for removable media.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">Status</span> - a description of the action
+			being performed.</p>
+			</li>
+			<li><p><span class="guimenuitem">Total space</span></p></li>
+			<li><p><span class="guimenuitem">Free space</span></p></li>
+			<li><p><span class="guimenuitem">Percentage</span> - percent free.</p></li>
+		</ul>
+		</li>
+		<li><p><span class="guimenuitem">Skip Removeable Media Checkbox</span></p></li>
+		<li>
+		<p><span class="guimenuitem">Cluster Map</span>
+		This is a color coded representation of all drives. 
+		Here is colors explaination:</p>
+
+		<!-- doesn't work in old IE browsers -->
+		<div style="position: relative; height: 60pt;">
+			<!-- color boxes -->
+			<div class="cb" style="top: 10pt; left: 10pt; background-color: #FF0000;"></div>
+			<div class="cb" style="top: 10pt; left: 18pt; background-color: #800000;"></div>
+			<div class="cb" style="top: 10pt; left: 100pt; background-color: #0000FF;"></div>
+			<div class="cb" style="top: 10pt; left: 108pt; background-color: #000080;"></div>
+			<div class="cb" style="top: 10pt; left: 200pt; background-color: #FFFFFF;"></div>
+			<div class="cb" style="top: 25pt; left: 10pt; background-color: #FFFF00;"></div>
+			<div class="cb" style="top: 25pt; left: 18pt; background-color: #eedd00;"></div>
+			<div class="cb" style="top: 25pt; left: 100pt; background-color: #B9B900;"></div>
+			<div class="cb" style="top: 25pt; left: 108pt; background-color: #5D5D00;"></div>
+			<div class="cb" style="top: 25pt; left: 200pt; background-color: #00B43C;"></div>
+			<div class="cb" style="top: 40pt; left: 10pt; background-color: #00FFFF;"></div>
+			<div class="cb" style="top: 40pt; left: 200pt; background-color: #800080;"></div>
+			<!-- descriptions -->
+			<div class="st" style="top: 9pt; left: 33pt;">Fragmented</div>
+			<div class="st" style="top: 9pt; left: 123pt;">Unfragmented</div>
+			<div class="st" style="top: 9pt; left: 215pt;">Free</div>
+			<div class="st" style="top: 24pt; left: 33pt;">Directory</div>
+			<div class="st" style="top: 24pt; left: 123pt;">Compressed</div>
+			<div class="st" style="top: 24pt; left: 215pt;">System</div>
+			<div class="st" style="top: 39pt; left: 33pt; width: 155pt">Temporary system</div>
+			<div class="st" style="top: 39pt; left: 215pt;">MFT</div>
+		</div>
+
+		<p>Some of the categories on the legend have a lighter and
+		darker color on them. The lighter colors represent files below the file
+		size threshold, and the darker colors represent files above the
+		threshold if one is set. The cyan color represents space temporarily allocated by system.
+		</p>
+		</li>
+		<li>
+		<p><span class="guimenuitem">Rescan Drives (Ctrl+R)</span> This
+		button will recheck all volumes in the system to see if some were added
+		or removed.</p>
+		</li>
+		<li>
+		<p><span class="guimenuitem">Buttons</span>	The following section explains the buttons 
+		along with listing their shortcut keys.</p>
+		<ul type="disc">
+			<li>
+			<p><span class="guimenuitem">Analyze (Ctrl+A)</span> 
+			Scans the currently selected drive to determine how fragmented it is.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">Defrag (Ctrl+D)</span> 
+			Exactly what it says.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">Compact (Ctrl+C)</span> Moves
+			all files to the beginning of the partition, defragmenting them if
+			possible. The compact command does not work on volumes with the FAT
+			filesystem because you cannot move directories on them.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">Pause (Ctrl+P)</span> 
+			Stops the currently	running analyze or defrag operation. This behavior is 
+			the same as stop.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">Stop (Ctrl+S)</span> Stops the currently
+			running analyze or defrag operation.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">Fragmented (Ctrl+F)</span> Display
+			a report of all fragmented files on the volume. This report is very
+			small but useful. It is generated by the driver, so all versions of
+			UltraDefrag generate it.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">Settings (Ctrl+T)</span> This button opens the 
+			settings dialog with three shortcuts to main options 
+			(<a href="gui.html#config">GUI startup commands</a>), 
+			<a href="reports.html#config">report options</a> and 
+			<a href="index.html">this user manual</a>.</p>
+			</li>
+			<li>
+			<p><span class="guimenuitem">About (F1)</span> Displays the simple about box 
+			containing copyright notice and links to most important information about program.</p>
+			</li>
+		</ul>
+		</li>
+		<li>
+		<p><span class="guimenuitem">Progress bar</span> 
+		This displays the progress of the currently running analyze, compact or
+		defrag task. Note that selecting a different volume will cause this bar
+		to disappear.</p>
+		</li>
+		</ol>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="config"></a>Configuring</h2>
+			</div></div>
+		</div>
+		<p>The file <span class="code">%windir%\system32\udefrag-gui.exe</span> 
+		contains the GUI executable since 2.0.0 version of the program. This executable starts 
+		the GUI startup script contained in <span class="code">udefrag-gui.cmd</span> file. To 
+		edit this script click <span class="guimenuitem">Main options</span> button in 
+		<span class="guimenuitem">Settings</span> dialog or use the appropriate shortcut in 
+		<span class="guimenuitem">Start Menu</span>.</p> 
+		<p>The GUI startup script usually contains few <span class="code">set</span> commands 
+		plus <span class="code">ultradefrag.exe</span> command at the end 
+		to launch the UltraDefrag GUI Shell. To understand the contents of this script read please 
+		carefully the <a href="console.html">console application</a> section of this 
+		document. The environment variables used here are the same. Here is an example of script, 
+		installed by default:</p>
+<pre style="border: 1px solid black; color: black; 
+background-color: #ffffe1; font-size: 10pt;">
+@echo off
+rem ------------ UltraDefrag GUI startup commands -------------------
+set UD_EX_FILTER=system volume information;temp;recycler
+%windir%\system32\ultradefrag.exe
+exit
+
+</pre>
+		<p>The first command disables commands displaying in command prompt. 
+		<span class="code">Rem</span> includes comment in script. <span class="code">Set</span> 
+		sets list of files to be excluded from defragmentation process. The next command launches 
+		the UltraDefrag GUI Shell. <span class="code">Exit</span> command is used to break script execution.</p>
+	</div>
+</div>
+
+<div style="color: black; margin-top: 20px; margin-left: 20px; margin-right: 20px;">
+	<div style="position: absolute; left: 20px;"><a accesskey="p" href="console.html">Prev</a></div>
+
+	<div style="position: absolute; right: 20px;"><a accesskey="n" href="boot.html">Next</a></div>
+
+	<div align="center"><a accesskey="h" href="index.html">Home</a></div>
+</div>
+
+<div style="color: black; margin-left: 20px; margin-right: 20px;">
+	<div class="navLeft">Console interface&nbsp;</div>
+
+	<div class="navRight">&nbsp;Boot time defragmentation</div>
+
+	<div class="navCenter"><a accesskey="u" href="index.html">Up</a></div>
+</div>
+
+<br />
+<br />
+
+<div class="bannerBottom" style="background-image: url(bottom-middle.png); width: 100%; height: 100px; bottom: 0px;">
+	<div class="bannerBottomRight">
+		<img src="bottom-right.png" style="margin: 0px;" alt="" />
+	</div>
+	<div class="bannerBottomLeft">
+		<img src="bottom-left.png" style="margin: 0px;" alt="" />
+		<a href="http://ultradefrag.sourceforge.net/" 
+		style="position: absolute; left: 10px; background-color: transparent; color: #FFFFFF; font-weight: bold;">ultradefrag.sourceforge.net</a>
+		<a href="http://sourceforge.net" 
+		style="position: absolute; left: 10px; bottom: 35px; background-color: transparent; color: #FFFFFF; font-weight: bold;">
+			<img src="http://sourceforge.net/sflogo.php?group_id=199532&amp;type=1" alt="SourceForge.net Homepage" border="0" height="31" width="88"  />
+		</a>
+	</div>
+</div>
+
+<!-- GOOGLE ANALYTICS BEGIN -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-2897964-4");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+<!-- GOOGLE ANALYTICS END -->
+
+</body>
+</html>
