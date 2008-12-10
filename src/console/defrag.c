@@ -128,23 +128,18 @@ void __stdcall ErrorHandler(short *msg)
 	WORD color = FOREGROUND_RED | FOREGROUND_INTENSITY;
 
 	/* ignore notifications */
-	if(msg[0] == 'N') return;
+	if((short *)wcsstr(msg,L"N: ") == msg) return;
 	
 	if(!b_flag){
-		switch(msg[0]){
-		case 'N':
-			color = FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY;
-			break;
-		case 'W':
+		if((short *)wcsstr(msg,L"W: ") == msg)
 			color = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY;
-			break;
-		/*case 'E':
-			color = FOREGROUND_RED | FOREGROUND_INTENSITY;
-			break;*/
-		}
 		settextcolor(color);
 	}
-	WideCharToMultiByte(CP_OEMCP,0,msg,-1,oem_buffer,1023,NULL,NULL);
+	/* skip W: and E: labels */
+	if((short *)wcsstr(msg,L"W: ") == msg || (short *)wcsstr(msg,L"E: ") == msg)
+		WideCharToMultiByte(CP_OEMCP,0,msg + 3,-1,oem_buffer,1023,NULL,NULL);
+	else
+		WideCharToMultiByte(CP_OEMCP,0,msg,-1,oem_buffer,1023,NULL,NULL);
 	printf("%s\n",oem_buffer);
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }

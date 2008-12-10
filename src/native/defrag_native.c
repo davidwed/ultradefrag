@@ -64,8 +64,12 @@ short *command;
 void __stdcall ErrorHandler(short *msg)
 {
 	/* ignore notifications */
-	if(msg[0] == 'N') return;
-	winx_printf("\n%ws\n",msg);
+	if((short *)wcsstr(msg,L"N: ") == msg) return;
+	/* skip W: and E: labels */
+	if((short *)wcsstr(msg,L"W: ") == msg || (short *)wcsstr(msg,L"E: ") == msg)
+		winx_printf("\n%ws\n",msg + 3);
+	else
+		winx_printf("\n%ws\n",msg);
 }
 
 void Exit(int exit_code)

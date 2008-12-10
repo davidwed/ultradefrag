@@ -46,7 +46,12 @@ void DestroyImageList(void);
 void __stdcall ErrorHandler(short *msg)
 {
 	/* ignore notifications and warnings */
-	if(msg[0] == 'E') MessageBoxW(NULL,msg,L"Error!",MB_OK | MB_ICONHAND);
+	if((short *)wcsstr(msg,L"N: ") == msg || (short *)wcsstr(msg,L"W: ") == msg) return;
+	/* skip E: labels */
+	if((short *)wcsstr(msg,L"E: ") == msg)
+		MessageBoxW(NULL,msg + 3,L"Error!",MB_OK | MB_ICONHAND);
+	else
+		MessageBoxW(NULL,msg,L"Error!",MB_OK | MB_ICONHAND);
 }
 
 /*-------------------- Main Function -----------------------*/
