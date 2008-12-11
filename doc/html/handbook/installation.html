@@ -42,6 +42,7 @@
 		<p><b>Table of Contents</b></p>
 		<dl>
 				<dt><span class="sect1"><a href="installation.html#requirements">Software requirements</a></span></dt>
+				<dt><span class="sect1"><a href="installation.html#vista">Special notes for Windows Vista users</a></span></dt>
 				<dt><span class="sect1"><a href="installation.html#binaries">Precompiled binaries</a></span></dt>
 				<dt><span class="sect1"><a href="installation.html#sources">Compilation from sources</a></span></dt>
 		</dl>
@@ -76,6 +77,58 @@
 		</ul>
 		</li>
 		</ul>
+		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
+			<h3 class="title">Notes</h3>
+			<ul type="disc">
+			<li><span style="color: darkred; font-weight: bolder">You must be an administrator to install and run 
+			<span class="application">UltraDefrag</span>.</span> You need admin rights to 
+			load the defragmenter's driver.</li>
+			<li><span style="color: darkred; font-weight: bolder">You must disable your virus detection software 
+			before using <span class="application">UltraDefrag</span>.</span> Any virus scanner 
+			running during the defragmentation extremely slows down this process.</li>
+			</ul>
+		</div>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="vista"></a>
+				Special notes for Windows Vista users</h2>
+			</div></div>
+		</div>
+		<p>The new versions of Windows are stupid enough: they have few important bugs that 
+		reduce your control over your software and even your hardware...</p>
+		<p>First of all, to install and use <span class="application">UltraDefrag</span> you must 
+		disable User Account Control (UAC). This "Windows feature" is one of the most known Vista bugs. 
+		Just disable them to fix the problem. You will have no security leaks and mistakes without UAC. 
+		Additionally you will be able to install and use many other Open Source programs!</p>
+		<p>Also you must execute both installer and <span class="application">UltraDefrag</span> GUI 
+		only in "Run as administrator" mode. Click right mouse button on the installer icon and choose 
+		the appropriate context menu item. Click right mouse button on the <span class="application">UltraDefrag</span> 
+		GUI shortcut on your desktop and select properties. Check  
+		<span class="guimenuitem">Run as administrator</span> item.</p>
+		<p>Finally, you must disable the "Driver signature verification" feature of Windows. This 
+		"feature" is one of the most important bugs of the latest Windows versions. Due to them you 
+		have no chance to try unsigned drivers, p.a. drivers for your old hardware components! And 
+		you cannot try the most powerful Open Source software using it's own drivers. There are at 
+		least three ways to resolve this problem:</p>
+		<ul type="disc">
+		<li>Press F8 button on Windows startup and choose <span class="guimenuitem">Disable driver 
+		signature verification</span> menu item. You should do these steps after each reboot to have 
+		an ability to load the <span class="application">UltraDefrag</span> driver. The next solution 
+		automates this job.</li>
+		<li>Install the <a href="http://citadel.x10hosting.com/readydriverplus/index.php">ReadyDriver 
+		Plus</a> program. It will automate F8 key pressing on Windows startup and so on.</li>
+		<li>Use the <a href="http://www.ngohq.com/home.php?page=dseo">Driver Signature Enforcement 
+		Overrider</a> program to digitally sign our driver <span class="code">ultradfg.sys</span>.</li>
+		</ul>
+		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
+			<h3 class="title">Note</h3>
+			<p style="color: darkred">You must do all steps described in this section. To fix most 
+			important Vista bugs. Otherwise you will not be able to use the 
+			Ultra Defragmenter.</p>
+		</div>
 	</div>
 
 	<div class="sect1" lang="en">
@@ -84,7 +137,7 @@
 				<h2 class="title" style="clear: both"><a name="binaries"></a>Precompiled binaries</h2>
 			</div></div>
 		</div>
-		<p>You can download the latest installer for UltraDefrag at the 
+		<p>You can download the latest binary package for <span class="application">UltraDefrag</span> at the 
 		<a href="http://ultradefrag.sourceforge.net/">project homepage</a>. 
 		Simply download and run the installer. No reboot is required.</p>
 		<p>You can use precompiled packages on the following processor architectures:</p>
@@ -106,8 +159,9 @@
 		</table>
 		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
 			<h3 class="title">Note</h3>
-			<p>You can use i386 package on any 32-bit versions of Windows. For amd64 and ia64 packages 
-			you need have a 64-bit Windows installed.</p>
+			<p style="color: darkred">You can use <b>i386</b> package on any <b>32-bit</b> versions of 
+			Windows. For <b>amd64</b> and <b>ia64</b> packages you need have a <b>64-bit</b> Windows 
+			installed.</p>
 		</div>
 	</div>
 
