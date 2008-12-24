@@ -57,7 +57,6 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	PFRAGMENTED pflist;
 	PFILENAME curr_file;
 
-	KeClearEvent(&dx->stop_event);
 	DeleteLogFile(dx);
 
 	/* Initialize progress counters. */
@@ -87,12 +86,12 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 		/* skip filtered out files */
 		if(curr_file->is_overlimit) continue;
 		if(curr_file->is_filtered) continue;
-		if(KeReadStateEvent(&dx->stop_event) == 0x1)
+		if(KeReadStateEvent(&stop_event) == 0x1)
 			goto exit_defrag;
 		if(DefragmentFile(dx,curr_file))
-			DebugPrint("-Ultradfg- Defrag success.\n");
+			DebugPrint("-Ultradfg- Defrag success.\n",NULL);
 		else
-			DebugPrint("-Ultradfg- Defrag error for %ws\n",curr_file->name.Buffer);
+			DebugPrint("-Ultradfg- Defrag error for\n",curr_file->name.Buffer);
 		dx->processed_clusters += curr_file->clusters_total;
 	}
 
@@ -100,7 +99,7 @@ exit_defrag:
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
 	/* The state of some processed files maybe unknown... */
-	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0 && \
+	if(!dx->invalid_movings && KeReadStateEvent(&stop_event) == 0x0 && \
 		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
 	else dx->status = STATUS_BEFORE_PROCESSING;
 }
@@ -119,7 +118,6 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	KIRQL oldIrql;
 	PFILENAME curr_file;
 
-	KeClearEvent(&dx->stop_event);
 	DeleteLogFile(dx);
 
 	/* Initialize progress counters. */
@@ -150,7 +148,7 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 			curr_file = curr_file->next_ptr;
 			continue;
 		}*/
-		if(KeReadStateEvent(&dx->stop_event) == 0x1)
+		if(KeReadStateEvent(&stop_event) == 0x1)
 			goto exit_defrag_space;
 		DefragmentFile(dx,curr_file);
 		dx->processed_clusters += curr_file->clusters_total;
@@ -160,7 +158,7 @@ exit_defrag_space:
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
 	/* The state of some processed files maybe unknown... */
-	if(!dx->invalid_movings && KeReadStateEvent(&dx->stop_event) == 0x0 && \
+	if(!dx->invalid_movings && KeReadStateEvent(&stop_event) == 0x0 && \
 		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
 	else dx->status = STATUS_BEFORE_PROCESSING;
 }
@@ -171,10 +169,10 @@ NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 	ULONG status;
 	IO_STATUS_BLOCK ioStatus;
 
-	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",
+	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",NULL,
 		 startVcn,targetLcn,n_clusters);
 
-	if(KeReadStateEvent(&dx->stop_event) == 0x1)
+	if(KeReadStateEvent(&stop_event) == 0x1)
 		return STATUS_UNSUCCESSFUL;
 
 	/* Setup movefile descriptor and make the call */
@@ -278,19 +276,19 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	/* Open the file */
 	Status = OpenTheFile(pfn,&hFile);
 	if(Status){
-		DebugPrint1("-Ultradfg- Can't open %ws: %x\n", pfn->name.Buffer,(UINT)Status);
+		DebugPrint1("-Ultradfg- Can't open file: %x\n",pfn->name.Buffer,(UINT)Status);
 		return FALSE;
 	}
 	/* Find free space */
 	target = FindTarget(dx,pfn);
 	if(target == LLINVALID){
-		DebugPrint2("-Ultradfg- no enough continuous free space on volume\n");
+		DebugPrint2("-Ultradfg- no enough continuous free space on volume\n",NULL);
 		ZwClose(hFile);
 		return FALSE;
 	}
 
-	DebugPrint("-Ultradfg- %ws\n",pfn->name.Buffer);
-	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",target,pfn->clusters_total);
+	DebugPrint("-Ultradfg-\n",pfn->name.Buffer);
+	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",NULL,target,pfn->clusters_total);
 
 	old_state = GetSpaceState(pfn);
 	Status = MoveBlocksOfFile(dx,pfn,hFile,target);
@@ -320,7 +318,7 @@ BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			pfn->is_fragm = FALSE;
 		}
 	} else {
-		DebugPrint("MoveFile error: %x\n",(UINT)Status);
+		DebugPrint("MoveFile error: %x\n",NULL,(UINT)Status);
 		/* mark space allocated by file as fragmented */
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
 			ProcessBlock(dx,block->lcn,block->length,FRAGM_SPACE,old_state);

@@ -42,7 +42,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(status != STATUS_SUCCESS){
-		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)status);
+		DebugPrint("-Ultradfg- Can't open volume %x\n",NULL,(UINT)status);
 		dx->hVol = NULL;
 		goto done;
 	}
@@ -55,7 +55,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 		status = iosb.Status;
 	}
 	if(!NT_SUCCESS(status)){
-		DebugPrint("-Ultradfg- Can't get fs info: %x!\n",(UINT)status);
+		DebugPrint("-Ultradfg- Can't get fs info: %x!\n",NULL,(UINT)status);
 		if(status == STATUS_INVALID_DEVICE_REQUEST){
 			/* this is usual case for floppies */
 			dx->partition_type = FLOPPY_FAT12_PARTITION;
@@ -68,7 +68,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 		goto done;
 	}
 	dx->partition_type = part_info.PartitionType;
-	DbgPrint("-Ultradfg- possible partition type: %u\n",dx->partition_type);
+	DebugPrint("-Ultradfg- possible partition type: %u\n",NULL,dx->partition_type);
 done:
 	return status;
 }
@@ -94,7 +94,7 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(status != STATUS_SUCCESS){
-		DebugPrint("-Ultradfg- Can't open the root directory %ws: %x!",
+		DebugPrint("-Ultradfg- Can't open the root directory: %x!",
 				path,(UINT)status);
 		hFile = NULL;
 		return status;
@@ -113,8 +113,8 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
 	dx->clusters_per_256k = _256K / dx->bytes_per_cluster;
 	if(!dx->clusters_per_256k) dx->clusters_per_256k ++;
-	DebugPrint("-Ultradfg- total clusters: %I64u\n", dx->clusters_total);
-	DebugPrint("-Ultradfg- cluster size: %I64u\n", dx->bytes_per_cluster);
+	DebugPrint("-Ultradfg- total clusters: %I64u\n",NULL, dx->clusters_total);
+	DebugPrint("-Ultradfg- cluster size: %I64u\n",NULL, dx->bytes_per_cluster);
 	
 	/* validate geometry */
 	if(!dx->clusters_total || !dx->total_space || !dx->bytes_per_cluster)
@@ -137,7 +137,7 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 		status = iosb.Status;
 	}
 	if(!NT_SUCCESS(status)){
-		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",status);
+		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",NULL,status);
 		return;
 	}
 		
@@ -145,27 +145,27 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	* Not increment dx->processed_clusters here, 
 	* because some parts of MFT are really free.
 	*/
-	DebugPrint("-Ultradfg- MFT_file   : start : length\n");
+	DebugPrint("-Ultradfg- MFT_file   : start : length\n",NULL);
 	/* $MFT */
 	start = ntfs_data.MftStartLcn.QuadPart;
 	if(ntfs_data.BytesPerCluster)
 		len = ntfs_data.MftValidDataLength.QuadPart / ntfs_data.BytesPerCluster;
 	else
 		len = 0;
-	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
+	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",NULL,start,len);
 	//dx->processed_clusters += len;
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFT2 */
 	start = ntfs_data.MftZoneStart.QuadPart;
 	len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
-	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",start,len);
+	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",NULL,start,len);
 	//dx->processed_clusters += len;
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFTMirror */
 	start = ntfs_data.Mft2StartLcn.QuadPart;
-	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",start);
+	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",NULL,start);
 	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
 	//dx->processed_clusters ++;
 	mft_len ++;

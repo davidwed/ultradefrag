@@ -44,7 +44,7 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 			NULL
 			);
 	status = ZwDeleteFile(&ObjectAttributes);
-	DebugPrint1("-Ultradfg- Report %ws deleted with status %x\n",p,(UINT)status);
+	DebugPrint1("-Ultradfg- Report was deleted with status %x\n",p,(UINT)status);
 }
 
 void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
@@ -57,7 +57,7 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			buf,length,/*pOffset*/NULL,NULL);
 	//pOffset->QuadPart += length;
 	if(Status == STATUS_PENDING){
-		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.");
+		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.",NULL);
 		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
@@ -99,7 +99,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			Write(dx,hFile,as.Buffer,as.Length);
 			RtlFreeAnsiString(&as);
 		} else {
-			DebugPrint("No enough memory!");
+			DebugPrint("No enough memory!",NULL);
 		}
 		strcpy(buffer,"]],uname = {");
 		Write(dx,hFile,buffer,strlen(buffer));
@@ -146,7 +146,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			0
 			);
 	if(Status){
-		DebugPrint("-Ultradfg- Can't create %ws\n",p);
+		DebugPrint("-Ultradfg- Can't create file: %x\n",p,(UINT)Status);
 		hFile = NULL;
 		return FALSE;
 	}
@@ -164,7 +164,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	strcpy(buffer,"}\r\n");
 	Write(dx,hFile,buffer,strlen(buffer));
 	ZwClose(hFile);
-	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
+	DebugPrint("-Ultradfg- Report saved to\n",p);
 	return TRUE;
 }
 #else /* MICRO_EDITION */
@@ -187,7 +187,7 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 			NULL
 			);
 	status = ZwDeleteFile(&ObjectAttributes);
-	DebugPrint1("-Ultradfg- Report %ws deleted with status %x\n",p,(UINT)status);
+	DebugPrint1("-Ultradfg- Report was deleted with status %x\n",p,(UINT)status);
 }
 
 void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
@@ -200,7 +200,7 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			buf,length,/*pOffset*/NULL,NULL);
 	//pOffset->QuadPart += length;
 	if(Status == STATUS_PENDING){
-		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.");
+		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.",NULL);
 		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
@@ -222,7 +222,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		_itoa(pf->pfn->n_fragments,buffer,10);
 		RtlInitAnsiString(&as,buffer);
 		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-			DebugPrint("No enough memory!");
+			DebugPrint("No enough memory!",NULL);
 			continue;
 		}
 		Write(dx,hFile,us.Buffer,us.Length);
@@ -267,7 +267,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			0
 			);
 	if(Status){
-		DebugPrint("-Ultradfg- Can't create %ws\n",p);
+		DebugPrint("-Ultradfg- Can't create file: %x\n",p,(UINT)Status);
 		hFile = NULL;
 		return FALSE;
 	}
@@ -278,102 +278,129 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	Write(dx,hFile,line,sizeof(line) - sizeof(short));
 	WriteLogBody(dx,hFile,TRUE);
 	ZwClose(hFile);
-	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
+	DebugPrint("-Ultradfg- Report saved to\n",p);
 	return TRUE;
 }
 #endif /* MICRO_EDITION */
 
 /*************************************************************************************************/
-
-/* This code is obsolete and we have them only as an alternative for something unexpected. */
-/* special code for debug messages saving on nt 4.0 */
-
-/* Currently (since v1.3.0) NT4_DBG is always undefined */
-#ifdef NT4_DBG
+/* Since v2.1.0 this code is used to collect debugging messages. */
 
 void __stdcall OpenLog()
 {
-	char header[] = "[Begin]\r\n";
-
-	dbg_ring_buffer = NULL; dbg_ring_buffer_offset = 0;
-	dbg_ring_buffer = AllocatePool(NonPagedPool,RING_BUFFER_SIZE); /* 512 kb ring-buffer */
-	if(!dbg_ring_buffer) DbgPrint("=Ultradfg= Can't allocate ring buffer!\n");
-	else memset(dbg_ring_buffer,0,RING_BUFFER_SIZE);
-	if(dbg_ring_buffer){
-		strcpy(dbg_ring_buffer,header);
-		dbg_ring_buffer_offset += sizeof(header) - 1;
+	dbg_buffer = AllocatePool(NonPagedPool,DBG_BUFFER_SIZE); /* 512 kb ring-buffer */
+	if(!dbg_buffer) DbgPrint("=Ultradfg= Can't allocate dbg_buffer!\n");
+	else{
+		memset((void *)dbg_buffer,0,DBG_BUFFER_SIZE);
+		dbg_offset = 0;
 	}
+	KeInitializeEvent(&dbgprint_event,SynchronizationEvent,TRUE);
 }
 
 void __stdcall CloseLog()
+{
+	if(dbg_buffer){
+		ExFreePool(dbg_buffer);
+		dbg_buffer = NULL;
+	}
+}
+
+void __stdcall SaveLog()
 {
 	UNICODE_STRING log_path;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS Status;
 	IO_STATUS_BLOCK ioStatus;
-	char error_msg[] = "No enough memory to save debug messages. It requires 512 kb.";
-	char terminator[] = "[End]\r\n";
+	short error_msg[] = L"No enough memory to save debug messages. It requires 512 kb.";
+	HANDLE hDbgLog;
 
 	/* create the file */
 	RtlInitUnicodeString(&log_path,L"\\??\\C:\\DBGPRINT.LOG");
 	InitializeObjectAttributes(&ObjectAttributes,&log_path,0,NULL,NULL);
-	ZwDeleteFile(&ObjectAttributes);
-	Status = ZwCreateFile(&hDbgLog,FILE_GENERIC_WRITE,&ObjectAttributes,&ioStatus,
-			  NULL,0,FILE_SHARE_READ,FILE_OVERWRITE_IF,
-			  0,NULL,0);
+	//ZwDeleteFile(&ObjectAttributes);
+	Status = ZwCreateFile(&hDbgLog,FILE_APPEND_DATA | SYNCHRONIZE,&ObjectAttributes,&ioStatus,
+			  NULL,FILE_ATTRIBUTE_NORMAL,FILE_SHARE_READ,FILE_OPEN_IF,
+			  FILE_SYNCHRONOUS_IO_NONALERT,NULL,0);
 	if(Status){
-		DbgPrint("-Ultradfg- Can't create C:\\DBGPRINT.LOG!\n");
+		DbgPrint("-Ultradfg- Can't create C:\\DBGPRINT.LOG: %x!\n",(UINT)Status);
 		hDbgLog = NULL;
 		return;
 	}
-	dbg_log_offset.QuadPart = 0;
 	/* write ring buffer to the file */
-	if(!dbg_ring_buffer){
-		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
-			error_msg,sizeof(error_msg) - 1,&dbg_log_offset,NULL);
-	} else {
-		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,terminator,sizeof(terminator) - 1);
-		ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
-			dbg_ring_buffer,strlen(dbg_ring_buffer),
-			&dbg_log_offset,NULL);
-	}
+	if(!dbg_buffer)	ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+		error_msg,sizeof(error_msg) - sizeof(short),NULL,NULL);
+	else ZwWriteFile(hDbgLog,NULL,NULL,NULL,&ioStatus,
+		dbg_buffer,wcslen(dbg_buffer) << 1,NULL,NULL);
 	/* close the file */
 	ZwClose(hDbgLog);
-	if(dbg_ring_buffer) ExFreePool(dbg_ring_buffer);
 }
 
-void __cdecl WriteLogMessage(char *format, ...)
+void __cdecl DebugPrint(char *format, short *ustring, ...)
 {
-	char buffer[1024]; /* 512 */
 	va_list ap;
-	ULONG length;
-	char crlf[] = "\r\n";
-	char terminator[] = "[End]\r\n";
-
-	va_start(ap,format);
-	memset(buffer,0,1024); /* required! */
-	length = _vsnprintf(buffer,sizeof(buffer),format,ap);
-	if(length == -1){
-		buffer[sizeof(buffer) - 2] = '\n';
-		length = sizeof(buffer) - 1;
+	/* this buffer must be less than dbg_buffer */
+	#define BUFFER_SIZE 1024 /* 512 */
+	char buffer[BUFFER_SIZE];
+	short bf[BUFFER_SIZE];
+	short crlf[] = L"\r\n";
+	signed long length; /* Signed!!! */
+	NTSTATUS Status;
+	int timeout_flag = 0;
+	
+	/* Wait for another DebugPrint calls to be finished */
+	if(KeGetCurrentIrql() > DISPATCH_LEVEL) timeout_flag = 1;
+	else {
+		Status = KeWaitForSingleObject(&dbgprint_event,Executive,KernelMode,FALSE,NULL);
+		if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
+			timeout_flag = 1;
+			DbgPrint("-Ultradfg- dbgprint_event waiting failure!\n");
+		}
 	}
-	buffer[sizeof(buffer) - 1] = 0;
-	//if(KeGetCurrentIrql() == PASSIVE_LEVEL)
-	//{
-		if(length != 0)
-			length --; /* remove the last new line character */
-		if(dbg_ring_buffer_offset + length >= RING_BUFFER_SIZE - (sizeof(terminator) - 1))
-			dbg_ring_buffer_offset = 0;
-		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,buffer,length);
-		dbg_ring_buffer_offset += length;
-		if(dbg_ring_buffer_offset + 2 >= RING_BUFFER_SIZE - (sizeof(terminator) - 1))
-			dbg_ring_buffer_offset = 0;
-		memcpy(dbg_ring_buffer + dbg_ring_buffer_offset,crlf,2);
-		dbg_ring_buffer_offset += 2;
-	//}
-	/* and send message to debugger */
-	DbgPrint(buffer);
-	va_end(ap);
-}
 
-#endif /* NT4_DBG */
+	/* Fucked nt 4.0 & w2k kernels don't contain _vsnwprintf() call! */
+	va_start(ap,ustring);
+	memset((void *)buffer,0,BUFFER_SIZE); /* required! */
+	length = _vsnprintf(buffer,BUFFER_SIZE - 1,format,ap);
+	va_end(ap);
+	if(length < 0){
+		buffer[BUFFER_SIZE - 2] = '\n';
+		length = BUFFER_SIZE - 1;
+	}
+	buffer[BUFFER_SIZE - 1] = 0;
+	/* remove the last new line character */
+	if(length > 0){ buffer[length - 1] = 0; length--; }
+	/* convert the string to unicode and append the ustring parameter */
+	if(ustring)
+		length = _snwprintf(bf,BUFFER_SIZE - 1,L"%S %s",buffer,ustring);
+	else
+		length = _snwprintf(bf,BUFFER_SIZE - 1,L"%S",buffer);
+	if(length < 0) length = BUFFER_SIZE - 1;
+	bf[BUFFER_SIZE - 1] = 0;
+
+	/* send message to debugger */
+	DbgPrint("%ws\n",bf);
+
+	/*
+	* We cannot write to a file if the previous 
+	* operation is not completed.
+	*/
+	if(timeout_flag) goto cleanup;
+	
+	if(!dbg_buffer) goto cleanup;
+
+	if(!strcmp(format,"FLUSH_DBG_CACHE\n")) goto save_log;
+	if(dbg_offset + (length << 1) >= DBG_BUFFER_SIZE - (2 << 1) - sizeof(short)){
+	save_log:
+		/* Save buffer contents to disc and reinitialize the ring buffer */
+		if(KeGetCurrentIrql() == PASSIVE_LEVEL) SaveLog();
+		memset((void *)dbg_buffer,0,DBG_BUFFER_SIZE);
+		dbg_offset = 0;
+	}
+	memcpy((void *)(dbg_buffer + (dbg_offset >> 1)),(void *)bf,length << 1);
+	dbg_offset += (length << 1);
+	memcpy((void *)(dbg_buffer + (dbg_offset >> 1)),(void *)crlf,2 * sizeof(short));
+	dbg_offset += (2 << 1);
+cleanup:
+	if(KeGetCurrentIrql() > DISPATCH_LEVEL) return;
+	KeSetEvent(&dbgprint_event,IO_NO_INCREMENT,FALSE);
+}

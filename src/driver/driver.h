@@ -33,36 +33,40 @@
 #pragma warning(disable:4103) /* used #pragma pack to change alignment */
 #endif
 
+/************************** DEBUGGING ISSUES ***************************/
+
 #define DBG 1 /* it's very useful! */
 
 /*
-* Alter's DbgPrint logger is much better than my implementation,
-* so NT4_DBG should be always undefined.
+* Alter's DbgPrint logger is a good alternative for DbgView
+* program, especially on NT 4.0 system.
 * The latest version of logger can be downloaded from
 * http://alter.org.ua/en/soft/win/dbgdump/
 * To collect messages during console/gui execution click on 
 * DbgPrintLog.exe icon; to do this at boot time, use the following:
 * DbgPrintLog.exe --full -T DTN -wd c:\ --drv:inst 1 
-* 	--svc:inst A --drv:opt DoNotPassMessagesDown 1 UDefrag.log
+* 	--svc:inst A --drv:opt DoNotPassMessagesDown 1 udefrag.log
 */
-/*
-#ifdef NT4_TARGET
-#define NT4_DBG
-#else
-#undef NT4_DBG
-#endif
-*/
-#undef NT4_DBG
 
-#ifdef NT4_DBG
+/*
+* 21 Dec. 2008
+* LOG file on disk is better than unsaved messages after a crash.
+*/
+
+#define DBG_BUFFER_SIZE (512 * 1024) /* 512 kb */
+
 void __stdcall OpenLog();
 void __stdcall CloseLog();
-void __cdecl WriteLogMessage(char *format, ...);
-#define DebugPrint WriteLogMessage
-#define RING_BUFFER_SIZE (512 * 1024) 
-#else
-#define DebugPrint DbgPrint
-#endif
+
+/*
+* Fucked nt 4.0 and w2k kernels don't have _vsnwprintf() call, 
+* fucked MS C compiler is not compatible with ANSI C Standard - 
+* __VA_ARGS__ support is missing. Therefore we need something like 
+* this imperfect definition.
+*/
+void __cdecl DebugPrint(char *format, short *ustring, ...);
+
+#define FLUSH_DBG_CACHE() DebugPrint("FLUSH_DBG_CACHE\n",NULL);
 
 #if 0 /* because windows ddk isn't compatible with ANSI C Standard */
 #define DebugPrint0(...) DebugPrint(__VA_ARGS__)
@@ -74,10 +78,12 @@ void __cdecl WriteLogMessage(char *format, ...);
 #define DebugPrint2 if(dbg_level < 2) {} else DebugPrint
 #endif
 
-#define DbgPrintNoMem() DebugPrint(no_mem)
-#define DbgPrintNoMem0() DebugPrint0(no_mem)
-#define DbgPrintNoMem1() DebugPrint1(no_mem)
-#define DbgPrintNoMem2() DebugPrint2(no_mem)
+#define DbgPrintNoMem() DebugPrint(no_mem,NULL)
+#define DbgPrintNoMem0() DebugPrint0(no_mem,NULL)
+#define DbgPrintNoMem1() DebugPrint1(no_mem,NULL)
+#define DbgPrintNoMem2() DebugPrint2(no_mem,NULL)
+
+/*********************** END OF DEBUGGING ISSUES ***********************/
 
 #if defined(__GNUC__)
 #include <ddk/ntddk.h>
@@ -100,6 +106,13 @@ typedef unsigned int UINT;
 #define PAGED_OUT_FUNCTION
 #endif
 
+#ifdef NT4_TARGET
+#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdl(addr)
+#else
+#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdlSafe(addr,NormalPagePriority)
+#endif
+
+
 #include "globals.h"
 
 /* Safe versions of some frequently used functions. */
@@ -117,7 +130,7 @@ typedef unsigned int UINT;
 
 #define CHECK_IRP(irp) { \
 if(!CheckIrp(Irp)){ \
-	DebugPrint(invalid_request); \
+	DebugPrint(invalid_request,NULL); \
 	return CompleteIrp(Irp,STATUS_INVALID_DEVICE_REQUEST,0); \
 } \
 }
@@ -327,7 +340,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	FILTER in_filter;
 	FILTER ex_filter;
 	HANDLE hVol;
-	LONG working_rq;
  	/*
 	* End of the data with initial zero state.
 	*/
@@ -335,14 +347,9 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	PBLOCKMAP lastblock;
 	UCHAR current_operation;
 	UCHAR letter;
-	KEVENT sync_event;
-	KEVENT stop_event;
-	KEVENT unload_event;
-	KSPIN_LOCK spin_lock;
 	ULONGLONG bytes_per_cluster;
 	ULONGLONG sizelimit;
 	BOOLEAN compact_flag;
-//	BOOLEAN xp_compatible; /* true for NT 5.1 and later versions */
 	ULONG disable_reports;
 	/* nt 4.0 specific */
 	ULONGLONG nextLcn;
@@ -402,7 +409,7 @@ void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
 unsigned char GetSpaceState(PFILENAME pfn);
 void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx);
-void wait_for_idle_state(UDEFRAG_DEVICE_EXTENSION *dx);
+void stop_all_requests(void);
 
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
 

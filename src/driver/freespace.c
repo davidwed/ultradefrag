@@ -47,7 +47,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 			status = ioStatus.Status;
 		}
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
-			DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",(UINT)status);
+			DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",NULL,(UINT)status);
 			return status;
 		}
 		/* Scan through the returned bitmap info. */
@@ -61,7 +61,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 				/* Cluster isn't free */
 				if(cluster != LLINVALID){
 					len = startLcn + i - cluster;
-					DebugPrint2("-Ultradfg- start: %I64u len: %I64u\n",cluster,len);
+					DebugPrint2("-Ultradfg- start: %I64u len: %I64u\n",NULL,cluster,len);
 					if(!InsertLastFreeBlock(dx,cluster,len))
 						return STATUS_NO_MEMORY;
 					dx->processed_clusters += len;
@@ -75,7 +75,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	if(cluster != LLINVALID){
 		len = startLcn + i - cluster;
-		DebugPrint2("-Ultradfg- start: %I64u len: %I64u\n",cluster,len);
+		DebugPrint2("-Ultradfg- start: %I64u len: %I64u\n",NULL,cluster,len);
 		if(!InsertLastFreeBlock(dx,cluster,len))
 			return STATUS_NO_MEMORY;
 		dx->processed_clusters += len;
@@ -104,7 +104,7 @@ BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,
 			status = ioStatus.Status;
 		}
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
-			DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",
+			DebugPrint("-Ultradfg- Get Volume Bitmap Error: %x!\n",NULL,
 				 (UINT)status);
 			return FALSE;
 		}

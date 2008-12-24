@@ -59,7 +59,7 @@ NTSTATUS NTAPI IoFlushBuffersFile(HANDLE FileHandle)
 	if(Status != STATUS_SUCCESS) goto done;
 
 	/* Check if this is a direct open or not */
-	DebugPrint("Vol. flags = %x\n",(UINT)FileObject->Flags);
+	DebugPrint("Vol. flags = %x\n",NULL,(UINT)FileObject->Flags);
 	if (FileObject->Flags & FO_DIRECT_DEVICE_OPEN)
 		DeviceObject = IoGetAttachedDevice(FileObject->DeviceObject);
 	else
@@ -96,7 +96,7 @@ NTSTATUS NTAPI IoFlushBuffersFile(HANDLE FileHandle)
 	/* NO DEREFERENCE FileObject HERE! */
 done:
 	if(!NT_SUCCESS(Status))
-		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",(UINT)Status);
+		DebugPrint("-Ultradfg- Can't flush volume buffers %x\n",NULL,(UINT)Status);
 	return Status;
 }
 

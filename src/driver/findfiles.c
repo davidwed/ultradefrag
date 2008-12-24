@@ -52,7 +52,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 				FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_OPEN_FOR_BACKUP_INTENT,
 				NULL,0);
 	if(Status != STATUS_SUCCESS){
-		DebugPrint1("-Ultradfg- Can't open %ws %x\n",path->Buffer,(UINT)Status);
+		DebugPrint1("-Ultradfg- Can't open file: %x\n",path->Buffer,(UINT)Status);
 		DirectoryHandle = NULL;
 		goto fail;
 	}
@@ -61,7 +61,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 	pFileInfo = pFileInfoFirst;
 	pFileInfo->FileIndex = 0;
 	pFileInfo->NextEntryOffset = 0;
-	while(!KeReadStateEvent(&dx->stop_event)){
+	while(!KeReadStateEvent(&stop_event)){
 		if (pFileInfo->NextEntryOffset != 0){
 			pFileInfo = (PVOID)((ULONG_PTR)pFileInfo + pFileInfo->NextEntryOffset);
 		} else {
@@ -97,13 +97,13 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 
 		if(IS_DIR(pFileInfo)){
 			/*if(!*/FindFiles(dx,&new_path,FALSE)/*) goto fail*/;
-			if(KeReadStateEvent(&dx->stop_event) == 0x1)
+			if(KeReadStateEvent(&stop_event) == 0x1)
 				goto no_more_items;
 		} else {
 			if(!pFileInfo->EndOfFile.QuadPart) goto next; /* file is empty */
 		}
 		if(!InsertFileName(dx,new_path.Buffer,pFileInfo,is_root)){
-			DebugPrint1("-Ultradfg- InsertFileName failed for %ws\n",new_path.Buffer);
+			DebugPrint1("-Ultradfg- InsertFileName failed for\n",new_path.Buffer);
 			ZwClose(DirectoryHandle);
 			RtlFreeUnicodeString(&new_path);
 			goto fail;

@@ -49,7 +49,6 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	MarkAllSpaceAsSystem0(dx);
 	FreeAllBuffers(dx);
 	InitDX(dx);
-	KeClearEvent(&dx->stop_event);
 
 	/* Volume space analysis */
 	DeleteLogFile(dx);
@@ -86,16 +85,16 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		Status = STATUS_NO_MORE_FILES;
 		goto fail;
 	}
-	DebugPrint("-Ultradfg- Files found: %u\n",dx->filecounter);
-	DebugPrint("-Ultradfg- Fragmented files: %u\n",dx->fragmfilecounter);
+	DebugPrint("-Ultradfg- Files found: %u\n",NULL,dx->filecounter);
+	DebugPrint("-Ultradfg- Fragmented files: %u\n",NULL,dx->fragmfilecounter);
 
 	/* Get MFT location */
-	if(KeReadStateEvent(&dx->stop_event) == 0x0)
+	if(KeReadStateEvent(&stop_event) == 0x0)
 		if(dx->partition_type == NTFS_PARTITION) ProcessMFT(dx);
 
 	/* Save state */
 	SaveFragmFilesListToDisk(dx);
-	if(KeReadStateEvent(&dx->stop_event) == 0x0)
+	if(KeReadStateEvent(&stop_event) == 0x0)
 		dx->status = STATUS_ANALYSED;
 	else
 		dx->status = STATUS_BEFORE_PROCESSING;

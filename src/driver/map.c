@@ -30,7 +30,7 @@ NTSTATUS AllocateMap(ULONG size)
 	/* map reallocation don't supported yet */
 	if(new_cluster_map) return STATUS_INVALID_DEVICE_REQUEST;
 	map_size = size;
-	DebugPrint("-Ultradfg- Map size = %u\n",map_size);
+	DebugPrint("-Ultradfg- Map size = %u\n",NULL,map_size);
 	if(!size) return STATUS_SUCCESS;
 	new_cluster_map = AllocatePool(NonPagedPool,
 			NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG));
@@ -176,7 +176,7 @@ void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->cells_per_cluster = map_size / dx->clusters_total;
 		dx->cells_per_last_cluster = dx->cells_per_cluster + \
 			(map_size - dx->cells_per_cluster * dx->clusters_total);
-		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
+		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n",NULL, \
 			dx->clusters_total,dx->cells_per_cluster,dx->cells_per_last_cluster);
 	}
 #endif

@@ -33,12 +33,13 @@ short link_name[] = L"\\DosDevices\\ultradfg"; 	/* On NT can be L"\\??\\ultradfg
 
 char *no_mem = "-Ultradfg- No Enough Memory!\n";
 
-#ifdef NT4_DBG
-HANDLE hDbgLog = 0;
-LARGE_INTEGER dbg_log_offset;
-UCHAR *dbg_ring_buffer;
-unsigned int dbg_ring_buffer_offset;
-#endif
+KEVENT sync_event;
+KEVENT sync_event_2;
+KEVENT stop_event;
+KEVENT unload_event;
+KEVENT dbgprint_event;
+short *dbg_buffer;
+unsigned int dbg_offset;
 
 char invalid_request[] = "-Ultradfg- 32-bit requests can't be accepted by 64-bit driver!\n";
 
@@ -62,10 +63,10 @@ void InitDX(UDEFRAG_DEVICE_EXTENSION *dx)
 /* Full Device Extension initialization */
 void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	KeInitializeSpinLock(&dx->spin_lock);
-	KeInitializeEvent(&dx->sync_event,NotificationEvent,FALSE);
-	KeInitializeEvent(&dx->stop_event,NotificationEvent,FALSE);
-	KeInitializeEvent(&dx->unload_event,NotificationEvent,FALSE);
+	KeInitializeEvent(&sync_event,SynchronizationEvent,TRUE);
+	KeInitializeEvent(&sync_event_2,SynchronizationEvent,TRUE);
+	KeInitializeEvent(&stop_event,NotificationEvent,FALSE);
+	KeInitializeEvent(&unload_event,NotificationEvent,FALSE);
 	memset(&dx->z_start,0,(LONG_PTR)&(dx->z0_end) - (LONG_PTR)&(dx->z_start));
 	dx->current_operation = 'A';
 	dx->disable_reports = FALSE;
@@ -91,10 +92,3 @@ void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->filelist = NULL;
 	CloseVolume(dx);
 }
-
-void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	wait_for_idle_state(dx);
-	FreeAllBuffers(dx);
-}
-

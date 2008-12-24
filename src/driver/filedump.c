@@ -54,7 +54,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	/* Open the file */
 	Status = OpenTheFile(pfn,&hFile);
 	if(Status != STATUS_SUCCESS){
-		DebugPrint1("-Ultradfg- System file found: %ls %x\n",pfn->name.Buffer,(UINT)Status);
+		DebugPrint1("-Ultradfg- System file found: %x\n",pfn->name.Buffer,(UINT)Status);
 		hFile = NULL;
 		goto dump_success; /* System file! */
 	}
@@ -74,7 +74,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		if(Status != STATUS_SUCCESS && Status != STATUS_BUFFER_OVERFLOW){
 dump_fail:
 			/*
-			DebugPrint1("-Ultradfg- Dump failed for %ws %x\n",pfn->name.Buffer,(UINT)Status);
+			DebugPrint1("-Ultradfg- Dump failed %x\n",pfn->name.Buffer,(UINT)Status);
 			*/
 			DeleteBlockmap(pfn);
 			pfn->clusters_total = pfn->n_fragments = 0;

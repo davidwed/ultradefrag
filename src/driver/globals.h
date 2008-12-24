@@ -28,12 +28,13 @@ extern short link_name[];
 
 extern char *no_mem;
 
-#ifdef NT4_DBG
-extern HANDLE hDbgLog;
-extern LARGE_INTEGER dbg_log_offset;
-extern UCHAR *dbg_ring_buffer;
-extern unsigned int dbg_ring_buffer_offset;
-#endif
+extern KEVENT sync_event;
+extern KEVENT sync_event_2;
+extern KEVENT stop_event;
+extern KEVENT unload_event;
+extern KEVENT dbgprint_event;
+extern short *dbg_buffer;
+extern unsigned int dbg_offset;
 
 extern char invalid_request[];
 
