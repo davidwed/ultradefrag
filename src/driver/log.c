@@ -307,7 +307,7 @@ void __stdcall CloseLog()
 
 void __stdcall SaveLog()
 {
-	UNICODE_STRING log_path;
+	UNICODE_STRING us_log_path;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS Status;
 	IO_STATUS_BLOCK ioStatus;
@@ -315,14 +315,13 @@ void __stdcall SaveLog()
 	HANDLE hDbgLog;
 
 	/* create the file */
-	RtlInitUnicodeString(&log_path,L"\\??\\C:\\DBGPRINT.LOG");
-	InitializeObjectAttributes(&ObjectAttributes,&log_path,0,NULL,NULL);
-	//ZwDeleteFile(&ObjectAttributes);
+	RtlInitUnicodeString(&us_log_path,log_path);
+	InitializeObjectAttributes(&ObjectAttributes,&us_log_path,0,NULL,NULL);
 	Status = ZwCreateFile(&hDbgLog,FILE_APPEND_DATA | SYNCHRONIZE,&ObjectAttributes,&ioStatus,
 			  NULL,FILE_ATTRIBUTE_NORMAL,FILE_SHARE_READ,FILE_OPEN_IF,
 			  FILE_SYNCHRONOUS_IO_NONALERT,NULL,0);
 	if(Status){
-		DbgPrint("-Ultradfg- Can't create C:\\DBGPRINT.LOG: %x!\n",(UINT)Status);
+		DbgPrint("-Ultradfg- Can't create %ws: %x!\n",log_path,(UINT)Status);
 		hDbgLog = NULL;
 		return;
 	}

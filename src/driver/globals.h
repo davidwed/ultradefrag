@@ -35,6 +35,7 @@ extern KEVENT unload_event;
 extern KEVENT dbgprint_event;
 extern short *dbg_buffer;
 extern unsigned int dbg_offset;
+extern short log_path[MAX_PATH];
 
 extern char invalid_request[];
 

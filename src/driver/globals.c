@@ -40,6 +40,7 @@ KEVENT unload_event;
 KEVENT dbgprint_event;
 short *dbg_buffer;
 unsigned int dbg_offset;
+short log_path[MAX_PATH] = L"Empty Path";
 
 char invalid_request[] = "-Ultradfg- 32-bit requests can't be accepted by 64-bit driver!\n";
 

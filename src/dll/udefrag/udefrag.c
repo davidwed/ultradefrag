@@ -46,6 +46,8 @@
 	} \
 }
 
+int __stdcall udefrag_set_dbg_cache(void);
+
 /* global variables */
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
@@ -129,13 +131,15 @@ int __stdcall udefrag_init(long map_size)
 	if(!f_stat) goto init_fail;
 	f_stop = winx_fopen("\\Device\\UltraDefragStop","w");
 	if(!f_stop) goto init_fail;
-	/* 5. Set user mode buffer - nt 4.0 specific */
+	/* 5. Set debug log path and delete old cache contents */
+	if(udefrag_set_dbg_cache() < 0) goto init_fail;
+	/* 6. Set user mode buffer - nt 4.0 specific */
 	if(winx_ioctl(f_ud,IOCTL_SET_USER_MODE_BUFFER,"User mode buffer setup",
 		user_mode_buffer,0,NULL,0,NULL) < 0) goto init_fail;
-	/* 6. Set cluster map size */
+	/* 7. Set cluster map size */
 	if(winx_ioctl(f_ud,IOCTL_SET_CLUSTER_MAP_SIZE,"Cluster map buffer setup",
 		&map_size,sizeof(long),NULL,0,NULL) < 0) goto init_fail;
-	/* 7. Load settings */
+	/* 8. Load settings */
 	if(udefrag_reload_settings() < 0) goto init_fail;
 	return 0;
 init_fail:
@@ -402,5 +406,6 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 			  pstat->fragmfilecounter,
 			  ip / 100, ip % 100
 			 );
+	result_msg[sizeof(result_msg) - 1] = 0;
 	return result_msg;
 }

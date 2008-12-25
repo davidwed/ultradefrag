@@ -442,6 +442,9 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	UCHAR *user_mode_buffer; /* for nt 4.0 */
 	ULONG in_len, out_len;
 	NTSTATUS Status;
+	KSPIN_LOCK spin_lock;
+	KIRQL oldIrql;
+	ULONG length;
 
 	CHECK_IRP(Irp);
 	dx = (PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
@@ -534,6 +537,17 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		}
 		dx->sizelimit = *((ULONGLONG *)Irp->AssociatedIrp.SystemBuffer);
 		DebugPrint("-Ultradfg- Sizelimit = %I64u\n",NULL,dx->sizelimit);
+		BytesTxd = in_len;
+		break;
+	case IOCTL_SET_LOG_PATH:
+		KeInitializeSpinLock(&spin_lock);
+		KeAcquireSpinLock(&spin_lock,&oldIrql);
+		length = min(MAX_PATH, in_len >> 1);
+		wcsncpy(log_path,(short *)Irp->AssociatedIrp.SystemBuffer,length);
+		log_path[MAX_PATH - 1] = 0;
+		KeReleaseSpinLock(&spin_lock,oldIrql);
+		DebugPrint("-Ultradfg- IOCTL_SET_LOG_PATH\n",NULL);
+		DebugPrint("-Ultradfg- Log path\n",log_path);
 		BytesTxd = in_len;
 		break;
 	/* Invalid request */

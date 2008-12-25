@@ -43,6 +43,8 @@
 	} \
 }
 
+#define LOG_CACHE_SIZE 25 /* maximum number of files in cache */
+
 /* global variables */
 extern HANDLE init_event;
 extern WINX_FILE *f_ud;
@@ -56,6 +58,7 @@ int refresh_interval  = 500;
 ULONG disable_reports = FALSE;
 ULONG dbgprint_level = DBG_NORMAL;
 
+/* also is used in udefrag_set_dbg_cache() function */
 short env_buffer[8192];
 
 #define ENV_BUF_SIZE (sizeof(env_buffer) / sizeof(short))
@@ -87,6 +90,7 @@ int __stdcall udefrag_load_settings()
 	
 	if(query_env_variable(L"UD_SIZELIMIT")){
 		_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
+		buf[sizeof(buf) - 1] = 0;
 		winx_dfbsize(buf,&sizelimit);
 	}
 
@@ -147,4 +151,60 @@ int __stdcall udefrag_reload_settings()
 {
 	udefrag_load_settings();
 	return udefrag_apply_settings();
+}
+
+/* internal function */
+int __stdcall udefrag_set_dbg_cache(void)
+{
+	char buffer[MAX_PATH];
+	char log_path[MAX_PATH];
+	char cache_path[MAX_PATH];
+	char cache_dir[MAX_PATH];
+	WINX_FILE *f;
+	int log_number, i;
+	
+	/* get windows directory */
+	if(winx_get_windows_directory(buffer,MAX_PATH) < 0) return (-1);
+	/* read the previous log number from the cache */
+	_snprintf(cache_path,MAX_PATH,"%s\\UltraDefrag\\logs\\cache",buffer);
+	cache_path[MAX_PATH - 1] = 0;
+	f = winx_fopen(cache_path,"r");
+	if(!f){ log_number = 0; goto save_log_number; }
+	if(!winx_fread(&log_number,sizeof(log_number),1,f)){
+		log_number = 0; winx_fclose(f); goto save_log_number;
+	}
+	winx_fclose(f);
+	/* increment the log number */
+	log_number ++;
+	/* save new log number */
+save_log_number:
+	_snprintf(cache_dir,MAX_PATH,"%s\\UltraDefrag\\logs",buffer);
+	cache_dir[MAX_PATH - 1] = 0;
+	if(winx_create_directory(cache_dir) < 0) return (-1);
+	f = winx_fopen(cache_path,"w");
+	if(!f){
+		winx_raise_error("E: Cannot open %s file for write access!",cache_path);
+		return (-1);
+	}
+	if(!winx_fwrite(&log_number,sizeof(log_number),1,f)){
+		winx_fclose(f);
+		winx_raise_error("E: Cannot save data into %s file!",cache_path);
+		return (-1);
+	}
+	winx_fclose(f);
+	/* produce log path */
+	_snwprintf(env_buffer,MAX_PATH,L"%S\\UltraDefrag\\logs\\%06u.log",buffer,log_number);
+	env_buffer[MAX_PATH - 1] = 0;
+	/* set log path */
+	if(winx_ioctl(f_ud,IOCTL_SET_LOG_PATH,"Log path setup",
+		env_buffer,(wcslen(env_buffer) + 1) << 1,NULL,0,NULL) < 0) return (-1);
+	/* clear logs cache - delete old log files */
+	if(log_number % LOG_CACHE_SIZE == 0 && log_number > 0){
+		for(i = log_number - LOG_CACHE_SIZE; i < LOG_CACHE_SIZE; i++){
+			_snprintf(log_path,MAX_PATH,"%s\\UltraDefrag\\logs\\%06u.log",buffer,i);
+			log_path[MAX_PATH - 1] = 0;
+			winx_delete_file(log_path);
+		}
+	}
+	return 0;
 }
