@@ -43,7 +43,7 @@
 	} \
 }
 
-#define LOG_CACHE_SIZE 25 /* maximum number of files in cache */
+#define LOG_CACHE_SIZE 30 /* 1/2 of maximum number of files in cache */
 
 /* global variables */
 extern HANDLE init_event;
@@ -161,7 +161,7 @@ int __stdcall udefrag_set_dbg_cache(void)
 	char cache_path[MAX_PATH];
 	char cache_dir[MAX_PATH];
 	WINX_FILE *f;
-	int log_number, i;
+	int log_number,i,j;
 	
 	/* get windows directory */
 	if(winx_get_windows_directory(buffer,MAX_PATH) < 0) return (-1);
@@ -200,10 +200,21 @@ save_log_number:
 		env_buffer,(wcslen(env_buffer) + 1) << 1,NULL,0,NULL) < 0) return (-1);
 	/* clear logs cache - delete old log files */
 	if(log_number % LOG_CACHE_SIZE == 0 && log_number > 0){
-		for(i = log_number - LOG_CACHE_SIZE; i < LOG_CACHE_SIZE; i++){
+		/* delete the first half of current cache */
+		for(j = 0; j < (LOG_CACHE_SIZE / 2 + 1); j++){
+			i = log_number - LOG_CACHE_SIZE + j;
 			_snprintf(log_path,MAX_PATH,"%s\\UltraDefrag\\logs\\%06u.log",buffer,i);
 			log_path[MAX_PATH - 1] = 0;
 			winx_delete_file(log_path);
+		}
+		/* delete the second half of previous cache */
+		if(log_number >= LOG_CACHE_SIZE * 2){
+			for(j = 0; j < (LOG_CACHE_SIZE / 2); j++){
+				i = log_number - LOG_CACHE_SIZE - LOG_CACHE_SIZE / 2 + j;
+				_snprintf(log_path,MAX_PATH,"%s\\UltraDefrag\\logs\\%06u.log",buffer,i);
+				log_path[MAX_PATH - 1] = 0;
+				winx_delete_file(log_path);
+			}
 		}
 	}
 	return 0;
