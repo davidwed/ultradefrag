@@ -36,6 +36,8 @@ EXPORTS
 	winx_ioctl@32
 	winx_fflush@4
 	winx_fclose@4
+	winx_create_directory@4
+	winx_delete_file@4
 	winx_query_env_variable@12
 	winx_set_env_variable@8
 	winx_fbsize@20
