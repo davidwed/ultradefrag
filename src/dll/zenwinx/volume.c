@@ -70,9 +70,14 @@ int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length
 	char spec[] = "%u.%00u %cb";
 	double fn,n;
 	unsigned int i,j,k;
+	int result;
 
 	if(!buffer || !length) return (-1);
-	if(number < 1024) return _snprintf(buffer,length - 1,"%u",(int)number);
+	if(number < 1024){
+		result = _snprintf(buffer,length - 1,"%u",(int)number);
+		buffer[length - 1] = 0;
+		return result;
+	}
 	/* 
 	* Because win ddk compiler doesn't have ULONGLONG -> double converter,
 	* we need first divide an integer number and then convert in to double.
@@ -96,9 +101,13 @@ L0:
 			/* example: i = 1284563, j = 10000 */
 			spec[4] = '0' + digits / 10;
 			spec[5] = '0' + digits % 10;
-			return _snprintf(buffer,length - 1,spec,i/j,i%j,symbols[k]);
+			result = _snprintf(buffer,length - 1,spec,i/j,i%j,symbols[k]);
+			buffer[length - 1] = 0;
+			return result;
 		} else {
-			return _snprintf(buffer,length - 1,"%u Kb",(int)number / 1024);
+			result = _snprintf(buffer,length - 1,"%u Kb",(int)number / 1024);
+			buffer[length - 1] = 0;
+			return result;
 		}
 		return (-1); /* this point will never be reached */
 	}
