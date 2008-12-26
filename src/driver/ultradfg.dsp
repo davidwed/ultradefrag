@@ -95,6 +95,10 @@ SOURCE=.\io.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ldr.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\list.c
 # End Source File
 # Begin Source File

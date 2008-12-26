@@ -42,6 +42,11 @@ short *dbg_buffer;
 unsigned int dbg_offset;
 short log_path[MAX_PATH] = L"Empty Path";
 
+int nt4_system = 0;
+PVOID kernel_addr;
+PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
+	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY) = NULL;
+
 char invalid_request[] = "-Ultradfg- 32-bit requests can't be accepted by 64-bit driver!\n";
 
 /*

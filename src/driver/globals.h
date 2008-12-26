@@ -37,6 +37,12 @@ extern short *dbg_buffer;
 extern unsigned int dbg_offset;
 extern short log_path[MAX_PATH];
 
+extern int nt4_system;
+extern PVOID kernel_addr;
+extern PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
+	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY);
+
+
 extern char invalid_request[];
 
 extern ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];

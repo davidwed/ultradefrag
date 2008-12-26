@@ -29,6 +29,27 @@
 #endif
 
 /* Don't use them in any functions except DriverEntry!!! */
+
+INIT_FUNCTION void GetKernelProcAddresses(void)
+{
+	ULONG mj,mn;
+
+	/* get windows version */
+	PsGetVersion(&mj,&mn,NULL,NULL);
+	nt4_system = (mj == 4) ? 1 : 0;
+	
+	/* get nt kernel base address */
+	kernel_addr = KernelGetModuleBase("ntoskrnl.exe");
+	if(!kernel_addr) kernel_addr = KernelGetModuleBase("ntkrnlpa.exe");
+	if(!kernel_addr) kernel_addr = KernelGetModuleBase("ntkrnlmp.exe");
+	/* FIXME: add all other kernel names */
+
+	if(kernel_addr){
+		ptrMmMapLockedPagesSpecifyCache = KernelGetProcAddress(kernel_addr,
+			"MmMapLockedPagesSpecifyCache");
+	}
+}
+
 INIT_FUNCTION NTSTATUS CreateDevice(IN PDRIVER_OBJECT DriverObject,
 									IN short *name,
 									IN short *link,
@@ -111,10 +132,23 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] =
 											  DeviceControlRoutine;
 
+	/* our driver (since 2.1.0 version) must be os version independent */
+	GetKernelProcAddresses();
+	
 	OpenLog(); /* We should call them before any DebugPrint() calls !!! */
 	/* print driver version */
 	DebugPrint("=Ultradfg= %s\n",NULL,VERSIONINTITLE);
-
+	/* print windows version */
+	if(PsGetVersion(&mj,&mn,NULL,NULL))
+		DebugPrint("=Ultradfg= NT %u.%u checked.\n",NULL,mj,mn);
+	else
+		DebugPrint("=Ultradfg= NT %u.%u free.\n",NULL,mj,mn);
+	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
+	/* print kernel functions addresses */
+	DebugPrint("=Ultradfg= Kernel address: %p\n",NULL,kernel_addr);
+	DebugPrint("=Ultradfg= MmMapLockedPagesSpecifyCache address: %p\n",
+		NULL,ptrMmMapLockedPagesSpecifyCache);
+	
 	/* Create the main device. */
 	status = CreateDevice(DriverObject,device_name,link_name,&dx);
 	if(!NT_SUCCESS(status)){
@@ -175,21 +209,25 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	dbg_level = 0;
 
 	/* allocate memory */
-#ifndef NT4_TARGET
-	dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
-	dx->BitMap = AllocatePool(NonPagedPool,BITMAPSIZE * sizeof(UCHAR));
-	if(!dx->FileMap || !dx->BitMap) goto no_mem;
-#endif
+//#ifndef NT4_TARGET
+	if(!nt4_system){
+		dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
+		dx->BitMap = AllocatePool(NonPagedPool,BITMAPSIZE * sizeof(UCHAR));
+		if(!dx->FileMap || !dx->BitMap) goto no_mem;
+	}
+//#endif
 	dx->tmp_buf = AllocatePool(NonPagedPool,32768 + 5);
 	if(!dx->tmp_buf){
-#ifndef NT4_TARGET
+//#ifndef NT4_TARGET
 no_mem:
-#endif
+//#endif
 		DbgPrintNoMem();
-#ifndef NT4_TARGET
-		ExFreePoolSafe(dx->FileMap);
-		ExFreePoolSafe(dx->BitMap);
-#endif
+//#ifndef NT4_TARGET
+		if(!nt4_system){
+			ExFreePoolSafe(dx->FileMap);
+			ExFreePoolSafe(dx->BitMap);
+		}
+//#endif
 		ExFreePoolSafe(dx->tmp_buf);
 
 		driver_entry_cleanup(DriverObject);
@@ -200,18 +238,25 @@ no_mem:
 	DebugPrint("=Ultradfg= Map  FDO %p, DevExt=%p\n",NULL,dx_map->fdo,dx_map);
 	DebugPrint("=Ultradfg= Stat FDO %p, DevExt=%p\n",NULL,dx_stat->fdo,dx_stat);
 
-	/* Get Windows version */
-	if(PsGetVersion(&mj,&mn,NULL,NULL))
-		DebugPrint("=Ultradfg= NT %u.%u checked.\n",NULL,mj,mn);
-	else
-		DebugPrint("=Ultradfg= NT %u.%u free.\n",NULL,mj,mn);
-	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
 	DebugPrint("=Ultradfg= DriverEntry successfully completed\n",NULL);
 	return STATUS_SUCCESS;
 }
 #if !defined(__GNUC__)
 #pragma code_seg() /* end INIT section */
 #endif
+
+/* OS version independent code */
+PVOID NTAPI Nt_MmGetSystemAddressForMdl(PMDL addr)
+{
+	if(ptrMmMapLockedPagesSpecifyCache){
+		if(addr->MdlFlags & (MDL_MAPPED_TO_SYSTEM_VA | MDL_SOURCE_IS_NONPAGED_POOL))
+			return addr->MappedSystemVa;
+		else
+			return ptrMmMapLockedPagesSpecifyCache(addr,KernelMode,MmCached,
+				NULL,FALSE,NormalPagePriority);
+	}
+	return MmGetSystemAddressForMdl(addr);
+}
 
 /* CompleteIrp: Set IoStatus and complete IRP processing */ 
 NTSTATUS CompleteIrp(PIRP Irp,NTSTATUS status,ULONG info)
@@ -509,15 +554,15 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		DebugPrint("-Ultradfg- Address = %p\n",NULL,
 			IrpStack->Parameters.DeviceIoControl.Type3InputBuffer);
 		user_mode_buffer = IrpStack->Parameters.DeviceIoControl.Type3InputBuffer;
-		#ifdef NT4_TARGET
-		if(user_mode_buffer){
+		//#ifdef NT4_TARGET
+		if(nt4_system && user_mode_buffer){
 			dx->BitMap = user_mode_buffer;
 			dx->FileMap = (ULONGLONG *)(user_mode_buffer + BITMAPSIZE * sizeof(UCHAR));
 			dx->pnextLcn = (ULONGLONG *)(dx->FileMap + FILEMAPSIZE * sizeof(ULONGLONG));
 			dx->pstartVcn = (ULONGLONG *)(dx->pnextLcn + sizeof(ULONGLONG));
 			dx->pmoveFile = (MOVEFILE_DESCRIPTOR *)(dx->pnextLcn + 3 * sizeof(ULONGLONG));
 		}
-		#endif
+		//#endif
 		break;
 	case IOCTL_SET_CLUSTER_MAP_SIZE:
 		DebugPrint("-Ultradfg- IOCTL_SET_CLUSTER_MAP_SIZE\n",NULL);
@@ -617,10 +662,12 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 		pDevice = pDevice->NextDevice;
 		if(!dx->second_device){
 			FreeAllBuffers(dx);
-			#ifndef NT4_TARGET
-			ExFreePoolSafe(dx->FileMap);
-			ExFreePoolSafe(dx->BitMap);
-			#endif
+			//#ifndef NT4_TARGET
+			if(!nt4_system){
+				ExFreePoolSafe(dx->FileMap);
+				ExFreePoolSafe(dx->BitMap);
+			}
+			//#endif
 			ExFreePoolSafe(dx->tmp_buf);
 			ExFreePoolSafe(new_cluster_map);
 			DestroyFilter(dx);

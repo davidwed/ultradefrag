@@ -106,12 +106,13 @@ typedef unsigned int UINT;
 #define PAGED_OUT_FUNCTION
 #endif
 
-#ifdef NT4_TARGET
-#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdl(addr)
-#else
-#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdlSafe(addr,NormalPagePriority)
+#if 0 /* since v2.1.0 */
+	#ifdef NT4_TARGET
+	#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdl(addr)
+	#else
+	#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdlSafe(addr,NormalPagePriority)
+	#endif
 #endif
-
 
 #include "globals.h"
 
@@ -151,8 +152,94 @@ NTSTATUS NTAPI ZwFsControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,
 		PIO_STATUS_BLOCK,ULONG,PVOID,ULONG,PVOID,ULONG);
 NTSTATUS NTAPI ZwQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,
 		PVOID,ULONG,FS_INFORMATION_CLASS);
+
+//
+//  System Information Classes for NtQuerySystemInformation
+//
+typedef enum _SYSTEM_INFORMATION_CLASS
+{
+    SystemBasicInformation,
+    SystemProcessorInformation,
+    SystemPerformanceInformation,
+    SystemTimeOfDayInformation,
+    SystemPathInformation, /// Obsolete: Use KUSER_SHARED_DATA
+    SystemProcessInformation,
+    SystemCallCountInformation,
+    SystemDeviceInformation,
+    SystemProcessorPerformanceInformation,
+    SystemFlagsInformation,
+    SystemCallTimeInformation,
+    SystemModuleInformation,
+    SystemLocksInformation,
+    SystemStackTraceInformation,
+    SystemPagedPoolInformation,
+    SystemNonPagedPoolInformation,
+    SystemHandleInformation,
+    SystemObjectInformation,
+    SystemPageFileInformation,
+    SystemVdmInstemulInformation,
+    SystemVdmBopInformation,
+    SystemFileCacheInformation,
+    SystemPoolTagInformation,
+    SystemInterruptInformation,
+    SystemDpcBehaviorInformation,
+    SystemFullMemoryInformation,
+    SystemLoadGdiDriverInformation,
+    SystemUnloadGdiDriverInformation,
+    SystemTimeAdjustmentInformation,
+    SystemSummaryMemoryInformation,
+    SystemNextEventIdInformation,
+    SystemEventIdsInformation,
+    SystemCrashDumpInformation,
+    SystemExceptionInformation,
+    SystemCrashDumpStateInformation,
+    SystemKernelDebuggerInformation,
+    SystemContextSwitchInformation,
+    SystemRegistryQuotaInformation,
+    SystemExtendServiceTableInformation,
+    SystemPrioritySeperation,
+    SystemPlugPlayBusInformation,
+    SystemDockInformation,
+    SystemPowerInformationNative,
+    SystemProcessorSpeedInformation,
+    SystemCurrentTimeZoneInformation,
+    SystemLookasideInformation,
+    SystemTimeSlipNotification,
+    SystemSessionCreate,
+    SystemSessionDetach,
+    SystemSessionInformation,
+    SystemRangeStartInformation,
+    SystemVerifierInformation,
+    SystemAddVerifier,
+    SystemSessionProcessesInformation,
+    SystemInformationClassMax
+} SYSTEM_INFORMATION_CLASS;
+
+// Class 11
+typedef struct _SYSTEM_MODULE_INFORMATION_ENTRY
+{
+    ULONG  Unknown1;
+    ULONG  Unknown2;
+    PVOID  Base;
+    ULONG  Size;
+    ULONG  Flags;
+    USHORT  Index;
+    USHORT  NameLength;
+    USHORT  LoadCount;
+    USHORT  PathLength;
+    CHAR  ImageName[256];
+} SYSTEM_MODULE_INFORMATION_ENTRY, *PSYSTEM_MODULE_INFORMATION_ENTRY;
+typedef struct _SYSTEM_MODULE_INFORMATION
+{
+    ULONG Count;
+    SYSTEM_MODULE_INFORMATION_ENTRY Module[1];
+} SYSTEM_MODULE_INFORMATION, *PSYSTEM_MODULE_INFORMATION;
+
+NTSTATUS NTAPI ZwQuerySystemInformation(SYSTEM_INFORMATION_CLASS,PVOID,ULONG,PULONG);
+
 NTSTATUS NTAPI ZwDeleteFile(IN POBJECT_ATTRIBUTES);
 char *__cdecl _itoa(int value,char *str,int radix);
+
 #if defined(__GNUC__)
 ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
 ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
@@ -412,6 +499,9 @@ void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx);
 void stop_all_requests(void);
 
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
+
+PVOID KernelGetModuleBase(PCHAR pModuleName);
+PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
 
 #define FIND_DATA_SIZE	(16*1024)
 
