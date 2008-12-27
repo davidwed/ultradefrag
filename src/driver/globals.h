@@ -41,7 +41,7 @@ extern int nt4_system;
 extern PVOID kernel_addr;
 extern PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
 	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY);
-
+extern VOID (NTAPI *ptrExFreePoolWithTag)(PVOID,ULONG);
 
 extern char invalid_request[];
 

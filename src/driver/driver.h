@@ -33,9 +33,36 @@
 #pragma warning(disable:4103) /* used #pragma pack to change alignment */
 #endif
 
-/************************** DEBUGGING ISSUES ***************************/
-
 #define DBG 1 /* it's very useful! */
+
+#if defined(__GNUC__)
+#include <ddk/ntddk.h>
+#include <ddk/ntdddisk.h>
+#else
+#include <ntddk.h>
+#include <ntdddisk.h>
+#endif
+
+#include <windef.h> /* for MAX_PATH constant */
+#include <ctype.h>
+#include "../include/ultradfg.h"
+
+#ifdef USE_WINDDK
+#include <ntimage.h>
+#endif
+
+typedef unsigned int UINT;
+
+#if defined(__GNUC__)
+#define PLACE_IN_SECTION(s)	__attribute__((section (s)))
+#define INIT_FUNCTION       PLACE_IN_SECTION("INIT")
+#define PAGED_OUT_FUNCTION  PLACE_IN_SECTION("PAGE")
+#else
+#define INIT_FUNCTION
+#define PAGED_OUT_FUNCTION
+#endif
+
+/************************** DEBUGGING ISSUES ***************************/
 
 /*
 * Alter's DbgPrint logger is a good alternative for DbgView
@@ -85,27 +112,6 @@ void __cdecl DebugPrint(char *format, short *ustring, ...);
 
 /*********************** END OF DEBUGGING ISSUES ***********************/
 
-#if defined(__GNUC__)
-#include <ddk/ntddk.h>
-#include <ddk/ntdddisk.h>
-#else
-#include <ntddk.h>
-#include <ntdddisk.h>
-#endif
-#include <ctype.h>
-#include "../include/ultradfg.h"
-
-typedef unsigned int UINT;
-
-#if defined(__GNUC__)
-#define PLACE_IN_SECTION(s)	__attribute__((section (s)))
-#define INIT_FUNCTION       PLACE_IN_SECTION("INIT")
-#define PAGED_OUT_FUNCTION  PLACE_IN_SECTION("PAGE")
-#else
-#define INIT_FUNCTION
-#define PAGED_OUT_FUNCTION
-#endif
-
 #if 0 /* since v2.1.0 */
 	#ifdef NT4_TARGET
 	#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdl(addr)
@@ -114,11 +120,9 @@ typedef unsigned int UINT;
 	#endif
 #endif
 
-#include "globals.h"
+PVOID NTAPI Nt_MmGetSystemAddressForMdl(PMDL addr);
 
-/* Safe versions of some frequently used functions. */
-#define ZwCloseSafe(h) if(h) { ZwClose(h); h = NULL; }
-#define ExFreePoolSafe(p) if(p) { ExFreePool(p); p = NULL; }
+#include "globals.h"
 
 /* exclude requests for 64-bit driver from 32-bit apps */
 #ifdef _WIN64
@@ -266,17 +270,28 @@ ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
 #define AllocatePool(type,size) ExAllocatePool((type),(size))
 #endif
 
-#ifdef NT4_TARGET
-#ifdef USE_WINDDK
+//#ifdef NT4_TARGET
+
+/* ExFreePool must be always ExFreePool call, nothing more! */
 #undef ExFreePool
+#ifdef USE_WINDDK
 DECLSPEC_IMPORT VOID NTAPI ExFreePool(IN PVOID P);
 #endif /* USE_WINDDK */
-#else /* NT4_TARGET */
-#ifndef USE_WINDDK
-#undef ExFreePool
-#define ExFreePool(a) ExFreePoolWithTag(a,0)
-#endif /* USE_WINDDK */
-#endif /* NT4_TARGET */
+
+VOID NTAPI Nt_ExFreePool(PVOID);
+
+/* Safe versions of some frequently used functions. */
+#define ZwCloseSafe(h) if(h) { ZwClose(h); h = NULL; }
+#define ExFreePoolSafe(p) if(p) { Nt_ExFreePool(p); p = NULL; }
+
+//#else /* NT4_TARGET */
+
+//#ifndef USE_WINDDK
+//#undef ExFreePool
+//#define ExFreePool(a) ExFreePoolWithTag(a,0)
+//#endif /* USE_WINDDK */
+
+//#endif /* NT4_TARGET */
 
 /*
 * NOTE! NEXT_PTR MUST BE FIRST MEMBER OF THESE STRUCTURES!

@@ -114,7 +114,7 @@ ReserveFile "lang.ini"
 
 ;-----------------------------------------
 
-Var NT4_TARGET
+;Var NT4_TARGET
 Var SchedulerNETinstalled
 Var DocsInstalled
 Var PortableInstalled
@@ -155,7 +155,7 @@ Function .onInit
 ;version_checked:
 
   /* variables initialization */
-  StrCpy $NT4_TARGET 0
+  ;StrCpy $NT4_TARGET 0
   StrCpy $SchedulerNETinstalled 0
   StrCpy $DocsInstalled 0
   StrCpy $PortableInstalled 0
@@ -185,9 +185,9 @@ winnt:
    /SD IDOK
   goto abort_inst
 winnt_456:
-  StrCmp $R1 '4' 0 winnt_56
-  StrCpy $NT4_TARGET 1
-winnt_56:
+;  StrCmp $R1 '4' 0 winnt_56
+;  StrCpy $NT4_TARGET 1
+;winnt_56:
   
   /* is already installed? */
   IfFileExists "$SYSDIR\defrag_native.exe" 0 not_installed
@@ -277,21 +277,21 @@ FunctionEnd
 
 Function install_driver
 
-  StrCpy $R0 "$SYSDIR\Drivers"
-  SetOutPath $R0
-  StrCmp $NT4_TARGET '1' 0 modern_win
-  DetailPrint "NT 4.0 version"
-!if ${ULTRADFGARCH} == 'i386'
-  File "ultradfg_nt4.sys"
-!else
-  File /nonfatal "ultradfg_nt4.sys"
-!endif
-  Delete "$R0\ultradfg.sys"
-  Rename "ultradfg_nt4.sys" "ultradfg.sys"
-  goto driver_installed
-modern_win:
+  ;StrCpy $R0 "$SYSDIR\Drivers"
+  SetOutPath "$SYSDIR\Drivers" ;$R0
+;  StrCmp $NT4_TARGET '1' 0 modern_win
+;  DetailPrint "NT 4.0 version"
+;!if ${ULTRADFGARCH} == 'i386'
+;  File "ultradfg_nt4.sys"
+;!else
+;  File /nonfatal "ultradfg_nt4.sys"
+;!endif
+;  Delete "$R0\ultradfg.sys"
+;  Rename "ultradfg_nt4.sys" "ultradfg.sys"
+;  goto driver_installed
+;modern_win:
   File "ultradfg.sys"
-driver_installed:
+;driver_installed:
 
 FunctionEnd
 

@@ -46,6 +46,7 @@ int nt4_system = 0;
 PVOID kernel_addr;
 PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
 	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY) = NULL;
+VOID (NTAPI *ptrExFreePoolWithTag)(PVOID,ULONG) = NULL;
 
 char invalid_request[] = "-Ultradfg- 32-bit requests can't be accepted by 64-bit driver!\n";
 

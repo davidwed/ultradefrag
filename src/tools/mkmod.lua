@@ -28,11 +28,14 @@
 --   1. the first element of each array has index 1.
 --   2. only nil and false values are false, all other including 0 are true
 
+-- Due to OS version independent driver code the nt4 specific issues were removed
+-- in 2.1.0 version.
+
 name, deffile, baseaddr, nativedll, umentry = "", "", "", 0, ""
 src, rc, libs, adlibs = {}, {}, {}, {}
 
 input_filename = ""
-target_type, target_ext, target_name, nt4target_name = "", "", "", ""
+target_type, target_ext, target_name = "", "", ""
 arch = ""
 
 micro_edition = 0
@@ -87,15 +90,7 @@ function produce_ddk_makefile()
 
 	f = assert(io.open(".\\sources","w"))
 
-	if target_type ~= "driver" then
-		f:write("TARGETNAME=", name, "\n")
-	else
-		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write("TARGETNAME=", name, "_nt4\n")
-		f:write("!ELSE\n")
-		f:write("TARGETNAME=", name, "\n")
-		f:write("!ENDIF\n")
-	end
+	f:write("TARGETNAME=", name, "\n")
 	f:write("TARGETPATH=obj\n")
 
 	if     target_type == "console" then t = "PROGRAM"; umt = "console"
@@ -111,30 +106,11 @@ function produce_ddk_makefile()
 		f:write("DLLDEF=", deffile, "\n\n")
 	end
 
-	if target_type ~= "driver" then
-		if micro_edition == 0 then
-			f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
-		else
-			f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n\n")
-			f:write("RCOPTIONS=/d MICRO_EDITION\n\n")
-		end
+	if micro_edition == 0 then
+		f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
 	else
-		if micro_edition == 0 then
-			f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-			f:write("USER_C_FLAGS=/DUSE_WINDDK /DNT4_TARGET\n")
-			f:write("RCOPTIONS=/d NT4_TARGET\n")
-			f:write("!ELSE\n")
-			f:write("USER_C_FLAGS=/DUSE_WINDDK\n")
-			f:write("!ENDIF\n\n")
-		else
-			f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-			f:write("USER_C_FLAGS=/DUSE_WINDDK /DNT4_TARGET /DMICRO_EDITION\n")
-			f:write("RCOPTIONS=/d NT4_TARGET /d MICRO_EDITION\n")
-			f:write("!ELSE\n")
-			f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n")
-			f:write("RCOPTIONS=/d MICRO_EDITION\n")
-			f:write("!ENDIF\n\n")
-		end
+		f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n\n")
+		f:write("RCOPTIONS=/d MICRO_EDITION\n\n")
 	end
 
 	if target_type == "console" or target_type == "gui" then
@@ -229,39 +205,14 @@ function produce_msvc_makefile()
 		cl_flags = cl_flags .. "/MD "
 	end
 
-	if target_type ~= "driver" then
-		f:write("ALL : \"", name, ".", target_ext, "\"\n\n")
-	else
-		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write("ALL : \"", name, "_nt4.", target_ext, "\"\n")
-		f:write("!ELSE\n")
-		f:write("ALL : \"", name, ".", target_ext, "\"\n")
-		f:write("!ENDIF\n\n")
-	end
-
-	if target_type ~= "driver" then
-		f:write(cl_flags, " /c \n")
-	else
-		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write(cl_flags, " /D \"NT4_TARGET\" /c \n")
-		f:write("!ELSE\n")
-		f:write(cl_flags, " /c \n")
-		f:write("!ENDIF\n")
-	end
+	f:write("ALL : \"", name, ".", target_ext, "\"\n\n")
+	f:write(cl_flags, " /c \n")
 
 	rsc_flags = "RSC_PROJ=/l 0x409 /d \"NDEBUG\" "
 	if micro_edition == 1 then
 		rsc_flags = rsc_flags .. "/d \"MICRO_EDITION\" "
 	end
-	if target_type ~= "driver" then
-		f:write(rsc_flags, " \n")
-	else
-		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write(rsc_flags, " /d \"NT4_TARGET\" \n")
-		f:write("!ELSE\n")
-		f:write(rsc_flags, " \n")
-		f:write("!ENDIF\n")
-	end
+	f:write(rsc_flags, " \n")
 	
 	link_flags = "LINK32_FLAGS="
 	for i, v in ipairs(libs) do
@@ -293,15 +244,7 @@ function produce_msvc_makefile()
 		link_flags = link_flags .. "/base:\"0x10000\" /entry:\"DriverEntry\" "
 		link_flags = link_flags .. "/driver /align:32 "
 	end
-	if target_type ~= "driver" then
-		f:write(link_flags, " /out:\"", name, ".", target_ext, "\" \n\n")
-	else
-		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write(link_flags, " /out:\"", name, "_nt4.", target_ext, "\" \n")
-		f:write("!ELSE\n")
-		f:write(link_flags, " /out:\"", name, ".", target_ext, "\" \n")
-		f:write("!ENDIF\n\n")
-	end
+	f:write(link_flags, " /out:\"", name, ".", target_ext, "\" \n\n")
 	
 	f:write("CPP=cl.exe\nRSC=rc.exe\nLINK32=link.exe\n\n")
 	f:write(".c.obj::\n")
@@ -318,31 +261,17 @@ function produce_msvc_makefile()
 	end
 	f:write("\n\n")
 	
-	if target_type ~= "driver" then
-		if target_type == "dll" then
-			f:write("DEF_FILE=", deffile, "\n\n")
-			f:write("\"", name, ".", target_ext, "\" : \$(DEF_FILE) \$(LINK32_OBJS)\n")
-			f:write("    \$(LINK32) \@<<\n")
-			f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
-			f:write("<<\n\n")
-		else
-			f:write("\"", name, ".", target_ext, "\" : \$(LINK32_OBJS)\n")
-			f:write("    \$(LINK32) \@<<\n")
-			f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
-			f:write("<<\n\n")
-		end
-	else
-		f:write("!IF \"\$(NT4_TARGET)\" == \"true\"\n")
-		f:write("\"", name, "_nt4.", target_ext, "\" : \$(LINK32_OBJS)\n")
+	if target_type == "dll" then
+		f:write("DEF_FILE=", deffile, "\n\n")
+		f:write("\"", name, ".", target_ext, "\" : \$(DEF_FILE) \$(LINK32_OBJS)\n")
 		f:write("    \$(LINK32) \@<<\n")
 		f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
 		f:write("<<\n\n")
-		f:write("!ELSE\n")
+	else
 		f:write("\"", name, ".", target_ext, "\" : \$(LINK32_OBJS)\n")
 		f:write("    \$(LINK32) \@<<\n")
 		f:write("  \$(LINK32_FLAGS) \$(LINK32_OBJS)\n")
 		f:write("<<\n\n")
-		f:write("!ENDIF\n\n")
 	end
 
 	for i, v in ipairs(rc) do
@@ -382,58 +311,14 @@ function produce_mingw_makefile()
 	f:write("PROJECT = ", name, "\nCC = gcc.exe\n\n")
 	f:write("WINDRES = \"\$(COMPILER_BIN)windres.exe\"\n\n")
 	
-	if target_type == "driver" then
-		f:write("ifeq (\$(NT4_TARGET),true)\n")
-		f:write("TARGET = ", nt4target_name, "\n")
-		f:write("else\n")
-		f:write("TARGET = ", target_name, "\n")
-		f:write("endif\n")
-	else
-		f:write("TARGET = ", target_name, "\n")
-	end
+	f:write("TARGET = ", target_name, "\n")
 	
-	if target_type == "driver" then
-		if micro_edition == 0 then
-			f:write("ifeq (\$(NT4_TARGET),true)\n")
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DNT4_TARGET \n")
-			f:write("else\n")
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 \n")
-			f:write("endif\n")
-		else
-			f:write("ifeq (\$(NT4_TARGET),true)\n")
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DNT4_TARGET -DMICRO_EDITION \n")
-			f:write("else\n")
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION \n")
-			f:write("endif\n")
-		end
+	if micro_edition == 0 then
+		f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
+		f:write("RCFLAGS = \n")
 	else
-		if micro_edition == 0 then
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
-		else
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION\n")
-		end
-	end
-	
-	if target_type == "driver" then
-		if micro_edition == 0 then
-			f:write("ifeq (\$(NT4_TARGET),true)\n")
-			f:write("RCFLAGS = -DNT4_TARGET \n")
-			f:write("else\n")
-			f:write("RCFLAGS = \n")
-			f:write("endif\n")
-		else
-			f:write("ifeq (\$(NT4_TARGET),true)\n")
-			f:write("RCFLAGS = -DNT4_TARGET -DMICRO_EDITION \n")
-			f:write("else\n")
-			f:write("RCFLAGS = -DMICRO_EDITION \n")
-			f:write("endif\n")
-		end
-	else
-		if micro_edition == 0 then
-			f:write("RCFLAGS = \n")
-		else
-			f:write("RCFLAGS = -DMICRO_EDITION \n")
-		end
+		f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION\n")
+		f:write("RCFLAGS = -DMICRO_EDITION \n")
 	end
 	
 	f:write("C_INCLUDE_DIRS = \n")
@@ -549,7 +434,6 @@ else
 	error("Unknown target type: " .. target_type .. "!")
 end
 target_name = name .. "." .. target_ext
-nt4target_name = name .. "_nt4." .. target_ext
 
 if os.getenv("UD_MICRO_EDITION") == "1" then
 	micro_edition = 1
@@ -564,52 +448,21 @@ if os.getenv("BUILD_ENV") == "winddk" then
 	if os.getenv("AMD64") ~= nil then arch = "amd64" end
 	if os.getenv("IA64") ~= nil then arch = "ia64" end
 	ddk_cmd = ddk_cmd .. " -c"
+	if os.execute(ddk_cmd) ~= 0 then
+		error("Can't build the target!")
+	end
+	if arch == "i386" then
+		copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
+	else
+		copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. target_name,
+			"..\\..\\bin\\" .. arch .. "\\")
+	end
 	if target_type == "dll" then
-		if os.execute(ddk_cmd) ~= 0 then
-			error("Can't build the target!")
-		end
 		if arch == "i386" then
-			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
 			copy("objfre_wnet_x86\\i386\\" .. name .. ".lib","..\\..\\lib\\")
 		else
-			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. target_name,
-				"..\\..\\bin\\" .. arch .. "\\")
 			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. name .. ".lib",
 				 "..\\..\\lib\\" .. arch .. "\\" .. name .. ".lib")
-		end
-	elseif target_type == "driver" then
-		--ddk_cmd = ddk_cmd .. " -c"
-		local script = assert(io.open(".\\builddrv.cmd","w"))
-		local cmd = "cmd.exe /C builddrv.cmd"
-		script:write("\@echo off\nset NT4_TARGET=true\n", ddk_cmd, "\n")
-		script:close()
-		if arch == "i386" then
-			if os.execute(cmd) ~= 0 then
-				error("Can't build the target!")
-			end
-			copy("objfre_wnet_x86\\i386\\" .. nt4target_name,"..\\..\\bin\\")
-		end
-		script = assert(io.open(".\\builddrv.cmd","w"))
-		script:write("\@echo off\nset NT4_TARGET=false\n", ddk_cmd, "\n")
-		script:close()
-		if os.execute(cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		if arch == "i386" then
-			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
-		else
-			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. target_name,
-				"..\\..\\bin\\" .. arch .. "\\")
-		end
-	else
-		if os.execute(ddk_cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		if arch == "i386" then
-			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
-		else
-			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. target_name,
-				"..\\..\\bin\\" .. arch .. "\\")
 		end
 	end
 elseif os.getenv("BUILD_ENV") == "msvc" then
@@ -618,66 +471,24 @@ elseif os.getenv("BUILD_ENV") == "msvc" then
 	end
 	print(input_filename .. " msvc build performing...\n")
 	msvc_cmd = msvc_cmd .. name .. ".mak"
+	if os.execute(msvc_cmd) ~= 0 then
+		error("Can't build the target!")
+	end
+	copy(target_name,"..\\..\\bin\\")
 	if target_type == "dll" then
-		if os.execute(msvc_cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(target_name,"..\\..\\bin\\")
 		copy(name .. ".lib","..\\..\\lib\\")
-	elseif target_type == "driver" then
-		local script = assert(io.open(".\\builddrv.cmd","w"))
-		local cmd = "cmd.exe /C builddrv.cmd"
-		script:write("\@echo off\nset NT4_TARGET=true\n", msvc_cmd, "\n")
-		script:close()
-		if os.execute(cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(nt4target_name,"..\\..\\bin\\")
-		script = assert(io.open(".\\builddrv.cmd","w"))
-		script:write("\@echo off\nset NT4_TARGET=false\n", msvc_cmd, "\n")
-		script:close()
-		if os.execute(cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(target_name,"..\\..\\bin\\")
-	else
-		if os.execute(msvc_cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(target_name,"..\\..\\bin\\")
 	end
 elseif os.getenv("BUILD_ENV") == "mingw" then
 	if obsolete(input_filename, ".\\Makefile.mingw") then
 		produce_mingw_makefile()
 	end
 	print(input_filename .. " mingw build performing...\n")
+	if os.execute(mingw_cmd) ~= 0 then
+		error("Can't build the target!")
+	end
+	copy(target_name,"..\\..\\bin\\")
 	if target_type == "dll" then
-		if os.execute(mingw_cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(target_name,"..\\..\\bin\\")
 		copy("lib" .. target_name .. ".a","..\\..\\lib\\")
-	elseif target_type == "driver" then
-		local script = assert(io.open(".\\builddrv.cmd","w"))
-		local cmd = "cmd.exe /C builddrv.cmd"
-		script:write("\@echo off\nset NT4_TARGET=true\n", mingw_cmd, "\n")
-		script:close()
-		if os.execute(cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(nt4target_name,"..\\..\\bin\\")
-		script = assert(io.open(".\\builddrv.cmd","w"))
-		script:write("\@echo off\nset NT4_TARGET=false\n", mingw_cmd, "\n")
-		script:close()
-		if os.execute(cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(target_name,"..\\..\\bin\\")
-	else
-		if os.execute(mingw_cmd) ~= 0 then
-			error("Can't build the target!")
-		end
-		copy(target_name,"..\\..\\bin\\")
 	end
 else error("\%BUILD_ENV\% has wrong value: " .. os.getenv("BUILD_ENV") .. "!")
 end

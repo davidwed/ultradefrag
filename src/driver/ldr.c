@@ -41,7 +41,7 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 		&SystemInfoBufferSize,0,&SystemInfoBufferSize);
 	if(!SystemInfoBufferSize) return NULL;
 
-	pSystemInfoBuffer = (PULONG)ExAllocatePool(NonPagedPool, SystemInfoBufferSize*2);
+	pSystemInfoBuffer = (PULONG)AllocatePool(NonPagedPool, SystemInfoBufferSize*2);
 	if(!pSystemInfoBuffer) return NULL;
 
 	memset(pSystemInfoBuffer, 0, SystemInfoBufferSize*2);
@@ -91,18 +91,18 @@ PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName)
 	/* this function is missing on nt4, therefore we cannot use them */
 	exports = (PIMAGE_EXPORT_DIRECTORY)RtlImageDirectoryEntryToData(ModuleBase,
 		TRUE,IMAGE_DIRECTORY_ENTRY_EXPORT,&size);
-	addr = (PUCHAR)((ULONG)exports-(ULONG)ModuleBase);
+	addr = (PUCHAR)((PCHAR)exports-(PCHAR)ModuleBase);
 #else
 	dos = (PIMAGE_DOS_HEADER) ModuleBase;
-	nt = (PIMAGE_NT_HEADERS)((ULONG)ModuleBase + dos->e_lfanew);
+	nt = (PIMAGE_NT_HEADERS)((PCHAR)ModuleBase + dos->e_lfanew);
 	expdir = (PIMAGE_DATA_DIRECTORY)(nt->OptionalHeader.DataDirectory + IMAGE_DIRECTORY_ENTRY_EXPORT);
 	addr = expdir->VirtualAddress;
-	exports = (PIMAGE_EXPORT_DIRECTORY)((ULONG)ModuleBase + addr);
+	exports = (PIMAGE_EXPORT_DIRECTORY)((PCHAR)ModuleBase + addr);
 #endif
 
-	functions = (PULONG)((ULONG)ModuleBase + exports->AddressOfFunctions);
-	ordinals = (PSHORT)((ULONG)ModuleBase + exports->AddressOfNameOrdinals);
-	names = (PULONG)((ULONG)ModuleBase + exports->AddressOfNames);
+	functions = (PULONG)((PCHAR)ModuleBase + exports->AddressOfFunctions);
+	ordinals = (PSHORT)((PCHAR)ModuleBase + exports->AddressOfNameOrdinals);
+	names = (PULONG)((PCHAR)ModuleBase + exports->AddressOfNames);
 	max_name = exports->NumberOfNames;
 	max_func = exports->NumberOfFunctions;
 
@@ -119,4 +119,23 @@ PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName)
 	}
 
 	return pFunctionAddress;
+}
+
+/* OS version independent code */
+PVOID NTAPI Nt_MmGetSystemAddressForMdl(PMDL addr)
+{
+	if(ptrMmMapLockedPagesSpecifyCache){
+		if(addr->MdlFlags & (MDL_MAPPED_TO_SYSTEM_VA | MDL_SOURCE_IS_NONPAGED_POOL))
+			return addr->MappedSystemVa;
+		else
+			return ptrMmMapLockedPagesSpecifyCache(addr,KernelMode,MmCached,
+				NULL,FALSE,NormalPagePriority);
+	}
+	return MmGetSystemAddressForMdl(addr);
+}
+
+VOID NTAPI Nt_ExFreePool(PVOID P)
+{
+	if(ptrExFreePoolWithTag) ptrExFreePoolWithTag(P, 0);
+	else ExFreePool(P);
 }

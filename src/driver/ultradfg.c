@@ -47,6 +47,8 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 	if(kernel_addr){
 		ptrMmMapLockedPagesSpecifyCache = KernelGetProcAddress(kernel_addr,
 			"MmMapLockedPagesSpecifyCache");
+		ptrExFreePoolWithTag = KernelGetProcAddress(kernel_addr,
+			"ExFreePoolWithTag");
 	}
 }
 
@@ -146,6 +148,8 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
 	/* print kernel functions addresses */
 	DebugPrint("=Ultradfg= Kernel address: %p\n",NULL,kernel_addr);
+	DebugPrint("=Ultradfg= ExFreePoolWithTag address: %p\n",
+		NULL,ptrExFreePoolWithTag);
 	DebugPrint("=Ultradfg= MmMapLockedPagesSpecifyCache address: %p\n",
 		NULL,ptrMmMapLockedPagesSpecifyCache);
 	
@@ -244,19 +248,6 @@ no_mem:
 #if !defined(__GNUC__)
 #pragma code_seg() /* end INIT section */
 #endif
-
-/* OS version independent code */
-PVOID NTAPI Nt_MmGetSystemAddressForMdl(PMDL addr)
-{
-	if(ptrMmMapLockedPagesSpecifyCache){
-		if(addr->MdlFlags & (MDL_MAPPED_TO_SYSTEM_VA | MDL_SOURCE_IS_NONPAGED_POOL))
-			return addr->MappedSystemVa;
-		else
-			return ptrMmMapLockedPagesSpecifyCache(addr,KernelMode,MmCached,
-				NULL,FALSE,NormalPagePriority);
-	}
-	return MmGetSystemAddressForMdl(addr);
-}
 
 /* CompleteIrp: Set IoStatus and complete IRP processing */ 
 NTSTATUS CompleteIrp(PIRP Irp,NTSTATUS status,ULONG info)
