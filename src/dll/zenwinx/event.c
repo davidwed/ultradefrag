@@ -70,8 +70,9 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 
 	RtlInitUnicodeString(&us,name);
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+	/* (BOOLEAN)type fails on MSVC!!! */
 	Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,
-				&oa,(BOOLEAN)type,TRUE);
+		&oa,type == SynchronizationEvent ? SynchronizationEvent : NotificationEvent,TRUE);
 	if(!NT_SUCCESS(Status)){
 		winx_raise_error("E: Can't create %ws: %x!",name,(UINT)Status);
 		*phandle = NULL;
