@@ -1,0 +1,120 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+  <title>Chapter 11. Reporting bugs</title>
+  <link rel="stylesheet" href="kde-default.css" type="text/css" />
+  <link rel="stylesheet" href="udefrag.css" type="text/css" />
+  <meta name="description" content="Ultra Defragmenter is a powerful Open Source defragmentation tool for Windows NT." />
+  <meta name="keywords" content="UltraDefrag, Ultra Defragmenter, defragmentation, Open Source disk defragmenter, defragger, boot time defragmentation, boot time defragger, handbook, user manual, reporting bugs, bug tracker" />
+  <link rel="start" href="index.html" title="Ultra Defragmenter Handbook" />
+  <link rel="prev" href="faq.html" title="Chapter 10. Frequently Asked Questions" />
+  <link rel="next" href="credits.html" title="Chapter 12. Credits and License" />
+</head>
+
+<body bgcolor="white" text="black" alink="#0000ff" link="#0000ff" vlink="#840084">
+
+<div style="background-image: url(top-middle.png); width: 100%; height: 131px;">
+	<div style="position: absolute; right: 0px;">
+		<img src="top-right-konqueror.png" style="margin: 0px;" alt="" />
+	</div>
+
+	<div style="position: absolute; top: 25px; right: 100px; text-align: right; font-size: xx-large; font-weight: bold; text-shadow: #fff 0px 0px 5px; color: #444;">
+	Reporting bugs</div>
+</div>
+
+<div style="margin-top: 20px; background-color: white; color: black; margin-left: 20px; margin-right: 20px;">
+	<div style="position: absolute; left: 20px;"><a accesskey="p" href="faq.html">Prev</a></div>
+
+	<div style="position: absolute; right: 20px;"><a accesskey="n" href="credits.html">Next</a></div>
+
+	<div class="navCenter">&nbsp;</div>
+</div>
+
+<div class="chapter" lang="en">
+	<div class="titlepage">
+		<div><div>
+				<h2 class="title">Chapter 11. Reporting bugs</h2>
+		</div></div>
+	</div>
+
+	<div class="sect1" lang="en">
+		<p>While the author of <span class="application">UltraDefrag</span> Driver has taken great pains to ensure that
+		<span class="application">UltraDefrag</span> operates properly, no software is perfect. As such bugs are
+		inevitable. The author accepts bug reports and will attempt to fix issues that
+		are brought to his attention. In order to facilitate this the author has built
+		logging mechanisms into UltraDefrag. This document describes how to get these
+		logs and attach them to your bug report.</p>
+
+		<p>Also if you have any problems with scheduler, documentation, web site appearance
+		and any other parts of the <span class="application">UltraDefrag</span> project, please send a bug report with the 
+		following data attached:
+		<ol>
+		<li>Screenshot (required for GUI related bugs).</li>
+		<li><span class="code">%windir%\UltraDefrag\logs</span> directory contents. If this directory 
+		is empty please start <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> 
+		program before <span class="application">UltraDefrag</span> runs to see what happens. Also 
+		<a href="http://alter.org.ua/en/soft/win/dbgdump/">DbgPrint Logger</a> can be used 
+		to collect debugging information. Since the 2.1.0 version of the Ultra Defragmenter 
+		these tools are optional and should be used only if debugging logs are empty due to some 
+		logging related bugs.</li>
+		<li>If you have seen Blue Screen Of Death (BSOD), include in your report numbers 
+		shown on BSOD and Mini Crash Dump file (required!) that can be found in 
+		<span class="code">%windir%\Minidump</span> directory.</li>
+		</ol>
+		</p>
+		<p>Please report all problems and bugs via the 
+		<a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">bug tracker</a>.
+		Don't forget to register on <a href="http://sourceforge.net">sourceforge.net</a> before. 
+		As an alternative you can send your report directly to the authors by email.</p>
+	</div>
+</div>
+
+<div style="color: black; margin-top: 20px; margin-left: 20px; margin-right: 20px;">
+	<div style="position: absolute; left: 20px;"><a accesskey="p" href="faq.html">Prev</a></div>
+
+	<div style="position: absolute; right: 20px;"><a accesskey="n" href="credits.html">Next</a></div>
+
+	<div align="center"><a accesskey="h" href="index.html">Home</a></div>
+</div>
+
+<div style="color: black; margin-left: 20px; margin-right: 20px;">
+	<div class="navLeft">Frequently Asked Questions&nbsp;</div>
+
+	<div class="navRight">&nbsp;Credits and License</div>
+
+	<div class="navCenter"><a accesskey="u" href="index.html">Up</a></div>
+</div>
+
+<br />
+<br />
+
+<div class="bannerBottom" style="background-image: url(bottom-middle.png); width: 100%; height: 100px; bottom: 0px;">
+	<div class="bannerBottomRight">
+		<img src="bottom-right.png" style="margin: 0px;" alt="" />
+	</div>
+	<div class="bannerBottomLeft">
+		<img src="bottom-left.png" style="margin: 0px;" alt="" />
+		<a href="http://ultradefrag.sourceforge.net/" 
+		style="position: absolute; left: 10px; background-color: transparent; color: #FFFFFF; font-weight: bold;">ultradefrag.sourceforge.net</a>
+		<a href="http://sourceforge.net" 
+		style="position: absolute; left: 10px; bottom: 35px; background-color: transparent; color: #FFFFFF; font-weight: bold;">
+			<img src="http://sourceforge.net/sflogo.php?group_id=199532&amp;type=1" alt="SourceForge.net Homepage" border="0" height="31" width="88"  />
+		</a>
+	</div>
+</div>
+
+<!-- GOOGLE ANALYTICS BEGIN -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-2897964-4");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+<!-- GOOGLE ANALYTICS END -->
+
+</body>
+</html>

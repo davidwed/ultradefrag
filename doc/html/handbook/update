@@ -4,6 +4,8 @@ put bottom-left.png
 put bottom-middle.png
 put bottom-right.png
 put console.html
+put credits.html
+put faq.html
 put fdl-license.html
 put fixed.ico
 put gui.html
@@ -14,7 +16,13 @@ put kde-default.css
 put kde_logo_bg.png
 put ln.html
 put main_screen200.png
+put micro_edition.html
+put portable.html
 put removable.ico
+put reporting_bugs.html
+put reports.html
+put sched_net_vista.png
+put scheduler.html
 put top-left.png
 put top-middle.png
 put top-right-konqueror.png
