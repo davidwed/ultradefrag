@@ -1,5 +1,5 @@
-var fileLoadingImage = "/doc/lightbox_assets/images/loading.gif";		
-var fileBottomNavCloseImage = "/doc/lightbox_assets/images/closelabel.gif";
+var fileLoadingImage = "/doc/html/lightbox_assets/images/loading.gif";		
+var fileBottomNavCloseImage = "/doc/html/lightbox_assets/images/closelabel.gif";
 var overlayOpacity = 0.8;	// controls transparency of shadow overlay
 var animate = true;
 var resizeSpeed = 7;
