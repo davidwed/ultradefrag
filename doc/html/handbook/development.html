@@ -1,0 +1,318 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	<title>Appendix A. Development</title>
+	<link rel="stylesheet" href="kde-default.css" type="text/css" />
+	<link rel="stylesheet" href="udefrag.css" type="text/css" />
+	<meta name="description" content="Ultra Defragmenter is a powerful Open Source defragmentation tool for Windows NT." />
+	<meta name="keywords" content="UltraDefrag, Ultra Defragmenter, defragmentation, Open Source disk defragmenter, defragger, boot time defragmentation, boot time defragger, handbook, user manual, development, compilation" />
+	<link rel="start" href="index.html" title="Ultra Defragmenter Handbook" />
+	<link rel="prev" href="credits.html" title="Chapter 12. Credits and License" />
+	<link rel="next" href="design_notes.html" title="Design Notes" />
+</head>
+
+<body bgcolor="white" text="black" alink="#0000ff" link="#0000ff" vlink="#840084">
+
+<div style="background-image: url(top-middle.png); width: 100%; height: 131px;">
+	<div style="position: absolute; right: 0px;">
+		<img src="top-right-konqueror.png" style="margin: 0px;" alt="" />
+	</div>
+
+	<div style="position: absolute; top: 25px; right: 100px; text-align: right; font-size: xx-large; font-weight: bold; text-shadow: #fff 0px 0px 5px; color: #444;">
+	Development</div>
+</div>
+
+<div style="margin-top: 20px; background-color: white; color: black; margin-left: 20px; margin-right: 20px;">
+	<div style="position: absolute; left: 20px;"><a accesskey="p" href="credits.html">Prev</a></div>
+
+	<div style="position: absolute; right: 20px;"><a accesskey="n" href="design_notes.html">Next</a></div>
+
+	<div class="navCenter">&nbsp;</div>
+</div>
+
+<div class="chapter" lang="en">
+	<div class="titlepage">
+		<div><div>
+				<h2 class="title">Appendix A. Development</h2>
+		</div></div>
+	</div>
+
+	<div class="toc">
+		<p><b>Table of Contents</b></p>
+		<dl>
+			<dt><span class="sect1"><a href="development.html#compilation">Compilation</a></span></dt>
+			<dt><span class="sect1"><a href="design_notes.html">Design notes</a></span></dt>
+			<dt><span class="sect1"><a href="i18n.html">Translation</a></span></dt>
+		</dl>
+	</div>
+	
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="compilation"></a>
+				Compilation</h2>
+			</div></div>
+		</div>
+<pre>
+1. Software requirements
+
+1.1 Compilation with Windows Server 2003 DDK
+
+  The best way to build UltraDefrag is to use the Windows Server 2003 Driver
+Development Kit (DDK). You can simply download it from one of the locations
+that can be found using any web search system (e.g. Google).
+
+  The only disadvantage of this method is that the Windows DDK is a really 
+big package (about 230 Mb). However, if you have an internet connection with 
+a good download rate, its should not be a large problem.
+
+
+1.2 Compilation with MinGW
+
+  Other interesting way to produce UltraDefrag package is to do so using MinGW.
+GNU C Compiler (GCC) has one important advantage over the Microsoft C
+compiler, it produces many useful warnings for code that is not completely
+within the C standard. I have removed hundreds of small bugs from UltraDefrag
+thanks to the warnings produced by GCC. The biggest disadvantage of gcc is that 
+it produces larger executables than the microsoft compiler. e.g: A driver
+produced by DDK may have 22.0 Kb size, but the same driver produced by GCC is
+only about 32.0 kb.
+
+  You can either download MinGW from http://www.mingw.org or download
+MinGW Developer Studio from http://www.parinyasoft.com (about 25 Mb).
+
+  Note that the MinGW build system can only build i386 binaries.
+
+  VERY IMPORTANT NOTE: If you build the dynamic libraries from the MinGW
+Developer Studio, the resulting *.a files are invalid. This is because I don't
+know how to specify linker options in Developer Studio's project file. Use
+makefiles instead:
+
+  mingw32-make Makefile.mingw
+
+
+1.3 Compilation with Microsoft Visual Studio 6.0
+
+  This is another method for building UltraDefrag. It does not require the
+DDK. You can use Microsoft C compiler included in MS Visual Studio version 6.0
+or later.
+
+  To use this method you will need to obtain a copy of ReactOS source code
+from http://www.reactos.org for special header files used to build the driver.
+
+  You will also need to download the following files:
+- ntdll.lib from http://www.masm32.com/board/index.php?topic=2124.new
+- ntoskrnl.lib + hal.lib from http://www.freewebs.com/four-f/index.htm
+  (included in KmdKit package). Put these files to lib subdirectory of your
+  Visual Studio installation.
+
+  VERY IMPORTANT NOTE: The winnt.h file in visual studio 6.0 contains an
+incorrect definition of the NtCurrentTeb function. Therefore replace the
+following lines:
+
+  #if defined(_M_ALPHA)
+  #define NtCurrentTeb() ((struct _TEB *)_rdteb())
+  #else
+  struct _TEB *
+  NtCurrentTeb(void);
+  #endif
+
+  with:
+
+  #if defined(_M_ALPHA)
+  #define NtCurrentTeb() ((struct _TEB *)_rdteb())
+  #else
+  struct _TEB *
+  __stdcall NtCurrentTeb(void);
+  #endif
+
+  Finally, edit ultradfg.dsp file (driver project file), and ensure that the
+reactos header paths are properly set.
+
+  Note that currently only i386 binaries can be produced using this way.
+
+
+1.4 Common tools
+
+  There are a few other tools that you should have installed on your PC to
+perform a full-featured build:
+
+a). NSIS compiler (http://nsis.sourceforge.net) is used to produce installers.
+    Currently I'm using NSIS v2.28.
+    NOTE: In my nsisconf.nsh file (in NSIS root directory) I have 
+    the following line:
+
+          !packhdr temp.dat '"C:\WINDOWS\upx" -9 -q temp.dat'
+
+b). Ultimate Packer for eXecutables (upx) (http://upx.sf.net) is used to
+    reduce sizes of some binary modules. I'm using version 2.03w. Put the
+    upx.exe file in one of the directories, specified in your PATH environment
+    variable, p.a. in %windir%\system32.
+
+c). 7-zip file archiver (http://www.7-zip.org) is used to produce 
+    the source code package.
+
+d). .NET framework v2.0.50727 or later is used to compile the 
+    UltraDefrag Scheduler.NET application.
+
+e). Perl language package for Windows. You can download it from
+    http://www.activestate.com. Currently I'm using v5.8.6 to execute
+    configure.pl script and to develop the Modern UltraDefrag User Interface
+    (that was created for extended gui configuration abilities).
+
+f). Doxygen (http://www.doxygen.org) is used to produce a special kind of 
+    documentation from project's source files. It contains descriptions 
+    of functions and global variables dependencies and may be used e.g. for
+    removing unnecessary data fields from program's internal structures.
+    Also it is helpful for any other program code cleanup.
+    So, if you are programmer, this tool is highly recommended for you.
+
+g). ROBODoc (http://www.xs4all.nl/~rfsber/Robo/robodoc.html) is used to 
+    build interface documentation, that you should use as main developer
+    manual. You will find here all descriptions of functions exported by 
+    UltraDefrag and ZenWINX (that is a part of the Ultra Defragmenter)
+    libraries, important notes about undocumented windows functions usage
+    and many other aspects of the Ultra Defragmenter development.
+    To build a basic version of docs, simply type:
+
+        robodoc
+
+    To produce more detailed developer manual, type:
+
+        robodoc --internal
+
+h). md5sum tool is used to generate file ultradefrag-x.y.z.MD5SUMS that
+    gives you an ability to check downloaded packages integrity.
+    You can download this tool from http://www.etree.org/md5com.html.
+
+i). Lua language binaries package is used to execute some build scripts.
+    You can download it from http://luabinaries.luaforge.net/.
+    Install it in some folder on your %PATH% and rename lua5.1.exe to lua.exe.
+
+
+1.5 Software recommended for debugging purposes
+
+  Because the actual work done by UltraDefrag is done by kernel mode driver,
+you can download the tools described below to troubleshoot bugs. Even if you
+are not programmer, these tools may be very useful for you:
+
+a). DebugView. You can download it and other tools created by Mark Russinovich
+    from http://www.sysinternals.com. In DebugView window you can see some 
+    interesting information given by driver engine: number of clusters on your 
+    volumes, mft position and much more. Some other useful tools available from
+    sysinternals are
+    - WinObj: Allows you to see when UltraDefrag opens its driver, creates 
+    some events etc.
+    - File Monitor
+    - Registry Monitor.
+
+b). PoolTag. This tool is included in Windows DDK or can be downloaded from 
+    http://www.osr.com. Using this tool you can watch driver memory allocation.
+    The UltraDefrag driver tag is 'ULTR'.
+
+c). StatusToError tool included in KmdKit (see above). Input the NTSTATUS code
+    given by the UltraDefrag gui, console or native app and it will give you
+    the localized error description. A simple but very useful tool, especially 
+    for boot time defragmentation errors, where it is impossible for the
+    program to do localization lookups.
+
+
+1.6 Especially for Mr. Random Newbe (Some notes for the beginners)
+
+a). Many of described tools have small size, and you don't need high-speed
+    internet connection to download their latest versions. Simply do it. 
+    And enjoy!
+
+b). If you will place tools executables in one of the directories, specified 
+    in your PATH environment variable, the command execution will be very easy 
+    process, because you can type commands without paths in the command prompt.
+
+
+2. Building and installation
+
+a). Download source archive and unpack it somewhere.
+    NOTE: Currently path must not contain spaces. If you have some ideas
+          how to fix that send your report to the authors, please.
+b). Configure build options by typing the following command:
+
+    perl configure.pl
+
+    This tool has a graphical interface. Enter the paths to prerequisite
+    libraries and other options. If you prefer to use MinGW, click the button
+    'Apply patch to MinGW' to replace some libraries included in MinGW
+    (libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
+    will be saved in files with additional suffix '.orig'.
+
+c). To build UltraDefrag use the BUILD.CMD script; parameters are:
+
+    build               in .\bin directory you will find installer;
+                        in .\src_package - sources 7zip-archive.
+
+    build --install     it will install x86 program to default location
+                        after build
+
+    build {--use-winddk | --use-mingw | --use-msvc} [--install]
+			you can specify your compiler of choice
+
+    build --clean       use it to delete all intermediate files
+
+    build --help        show usage information and exit
+
+d). To build UltraDefrag Micro Edition package use the build-micro.cmd scipt.
+    It has the same options that build.cmd has. After a successfull 
+    compilation you will have ready to use binary packages, but the source 
+    code archive will not be produced (to increase the compilation speed).
+    To make an archive of sources run build.cmd script.
+</pre>
+	</div>
+</div>
+
+<div style="color: black; margin-top: 20px; margin-left: 20px; margin-right: 20px;">
+	<div style="position: absolute; left: 20px;"><a accesskey="p" href="credits.html">Prev</a></div>
+
+	<div style="position: absolute; right: 20px;"><a accesskey="n" href="design_notes.html">Next</a></div>
+
+	<div align="center"><a accesskey="h" href="index.html">Home</a></div>
+</div>
+
+<div style="color: black; margin-left: 20px; margin-right: 20px;">
+	<div class="navLeft">Credits and License&nbsp;</div>
+
+	<div class="navRight">&nbsp;Design Notes</div>
+
+	<div class="navCenter"><a accesskey="u" href="index.html">Up</a></div>
+</div>
+
+<br />
+<br />
+
+<div class="bannerBottom" style="background-image: url(bottom-middle.png); width: 100%; height: 100px; bottom: 0px;">
+	<div class="bannerBottomRight">
+		<img src="bottom-right.png" style="margin: 0px;" alt="" />
+	</div>
+	<div class="bannerBottomLeft">
+		<img src="bottom-left.png" style="margin: 0px;" alt="" />
+		<a href="http://ultradefrag.sourceforge.net/" 
+		style="position: absolute; left: 10px; background-color: transparent; color: #FFFFFF; font-weight: bold;">ultradefrag.sourceforge.net</a>
+		<a href="http://sourceforge.net" 
+		style="position: absolute; left: 10px; bottom: 35px; background-color: transparent; color: #FFFFFF; font-weight: bold;">
+			<img src="http://sourceforge.net/sflogo.php?group_id=199532&amp;type=1" alt="SourceForge.net Homepage" border="0" height="31" width="88"  />
+		</a>
+	</div>
+</div>
+
+<!-- GOOGLE ANALYTICS BEGIN -->
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+var pageTracker = _gat._getTracker("UA-2897964-4");
+pageTracker._initData();
+pageTracker._trackPageview();
+</script>
+<!-- GOOGLE ANALYTICS END -->
+
+</body>
+</html>

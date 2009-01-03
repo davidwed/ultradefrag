@@ -5,6 +5,8 @@ put bottom-middle.png
 put bottom-right.png
 put console.html
 put credits.html
+put design_notes.html
+put development.html
 put faq.html
 put fdl-license.html
 put fixed.ico
@@ -28,3 +30,4 @@ put top-middle.png
 put top-right-konqueror.png
 put ud-boot-time.png
 put udefrag.css
+put udscheme.png
