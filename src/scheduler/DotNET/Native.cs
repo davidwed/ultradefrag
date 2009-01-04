@@ -1,6 +1,6 @@
 /*
  *  UltraDefragScheduler.NET
- *  Copyright (c) 2007 by:
+ *  Copyright (c) 2007, 2009 by:
  *		Justin Dearing (zippy1981@gmail.com)
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -89,7 +89,7 @@ namespace UltraDefrag.Scheduler
     /// <summary>
     /// Native functions accessed via pInvoke.
     /// </summary>
-    internal class Native
+    internal static class Native
     {
     	/// <summary>
     	/// The GetDriveType function determines whether a disk drive is a removable, fixed, CD-ROM, RAM disk,
@@ -105,7 +105,7 @@ namespace UltraDefrag.Scheduler
     	
     	
         /// <summary>
-        /// Adds a windows schedukled task.
+        /// Adds a windows scheduled task.
         /// </summary>
         /// <param name="Servername">
         /// The name of the machine to add the scheduled task to.
