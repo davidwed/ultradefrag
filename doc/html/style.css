@@ -18,7 +18,7 @@ hr {height:1px;border-style:none;color:#d0d0d0;margin:10px 0;background:#c0c0c0}
 #menu li {list-style:none;display:inline;line-height:34px}
 #menu li a {text-decoration:none;margin:0;padding:9px 15px 10px;font-weight:bold;color:#fff}
 #menu li a:hover {color:#fff;background:#616161;margin:0}
-#menu li a.current {background:#616161 url(images/trcorner.gif) no-repeat top right;color:#fff}
+#menu li a.current {background:#616161 url(images/box.gif) no-repeat top left;color:#fff}
 #main {width:900px;margin:0;padding:0}
 #right_side {float:right;width:230px;background:#fff url(images/corner.jpg) no-repeat top right;overflow:hidden}
 #right_side .pad {padding:35px 10px 10px 17px}
