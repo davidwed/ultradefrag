@@ -34,7 +34,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		SetWindowPos(hWnd,0,win_rc.left + 65,win_rc.top + 137,0,0,SWP_NOSIZE);
+		SetWindowPos(hWnd,0,win_rc.left + /*65*/98,win_rc.top + 140/*137*/,0,0,SWP_NOSIZE);
 		SetText(hWnd,L"ABOUT_WIN_TITLE");
 		SetText(GetDlgItem(hWnd,IDC_CREDITS),L"CREDITS");
 		SetText(GetDlgItem(hWnd,IDC_LICENSE),L"LICENSE");
