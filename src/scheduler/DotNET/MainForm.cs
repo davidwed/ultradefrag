@@ -39,10 +39,9 @@ namespace UltraDefrag.Scheduler
             
             DriveInfo[] driveInfo = DriveInfo.GetDrives();
             List<string> drives = new List<string>();
-            DriveType driveType;
             
             foreach (DriveInfo drive in driveInfo) {
-            	driveType = Native.GetDriveType(drive.Name);
+                DriveType driveType = Native.GetDriveType(drive.Name);
             	if(
             		driveType != DriveType.Fixed
             		 &&
@@ -124,18 +123,18 @@ namespace UltraDefrag.Scheduler
         /// <summary>
         /// Returns true if the drive letter is assigned by SUBST command.
         /// </summary>
-        /// <param name="vol_letter"></param>
+        /// <param name="volLetter"></param>
         /// <returns></returns>
-        private static bool is_virtual(char vol_letter)
+        private static bool is_virtual(char volLetter)
         {
-        	string dev_name = string.Format("{0}:", vol_letter);
+        	string deviceName = string.Format("{0}:", volLetter);
         	string targetPath;
         	const int maxSize = 512;
         	uint retSize;
         	
         	IntPtr ptr = Marshal.AllocHGlobal(maxSize);
 
-        	retSize = Native.QueryDosDevice(dev_name, ptr, maxSize);
+        	retSize = Native.QueryDosDevice(deviceName, ptr, maxSize);
         	targetPath = Marshal.PtrToStringAnsi(ptr, (int) retSize);
         	
         	return targetPath.Contains("\\??\\");

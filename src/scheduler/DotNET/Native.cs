@@ -77,6 +77,7 @@ namespace UltraDefrag.Scheduler
     }
 
     /// <remarks />
+    [Flags]
     internal enum AT_JobFlags : byte
     {
         JOB_RUN_PERIODICALLY = 1,
