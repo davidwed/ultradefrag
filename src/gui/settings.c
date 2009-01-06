@@ -37,7 +37,7 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		SetWindowPos(hWnd,0,win_rc.left + 117,win_rc.top + 155,0,0,SWP_NOSIZE);
+		SetWindowPos(hWnd,0,win_rc.left + /*117*/153,win_rc.top + 158/*155*/,0,0,SWP_NOSIZE);
 		SetText(hWnd,L"SETTINGS");
 		SetText(GetDlgItem(hWnd,IDC_EDITMAINOPTS),L"EDIT_MAIN_OPTS");
 		SetText(GetDlgItem(hWnd,IDC_EDITREPORTOPTS),L"EDIT_REPORT_OPTS");
@@ -58,7 +58,7 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_SETTINGS_HELP:
 			GetWindowsDirectory(buf,MAX_PATH);
-			strcat(buf,"\\UltraDefrag\\doc\\manual.html");
+			strcat(buf,"\\UltraDefrag\\handbook\\index.html");
 			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
 			break;
 		}

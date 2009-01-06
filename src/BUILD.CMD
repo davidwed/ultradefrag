@@ -211,17 +211,8 @@ copy /Y .\scripts\*.* %SRC_PKG_PATH%\src\scripts\
 
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
-mkdir %SRC_PKG_PATH%\doc\html\images
-copy /Y ..\doc\html\manual.html %SRC_PKG_PATH%\doc\html\
-copy /Y ..\doc\html\udefrag.css %SRC_PKG_PATH%\doc\html\
-
-copy /Y ..\doc\html\images\main_screen200.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\fixed.ico %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\removable.ico %SRC_PKG_PATH%\doc\html\images\
-
-copy /Y ..\doc\html\images\sched_net_vista.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\valid-html401.png %SRC_PKG_PATH%\doc\html\images\
-copy /Y ..\doc\html\images\powered_by_lua.png %SRC_PKG_PATH%\doc\html\images\
+mkdir %SRC_PKG_PATH%\doc\html\handbook
+copy /Y ..\doc\html\handbook\*.* %SRC_PKG_PATH%\doc\html\handbook\
 
 copy .\*.* %SRC_PKG_PATH%\src\
 cd .\src_package

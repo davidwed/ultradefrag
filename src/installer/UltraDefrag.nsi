@@ -641,13 +641,9 @@ lng_registered:
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
   
-  ; remove files of previous 1.3.1-1.3.3 installation
+  ; remove files of previous installations
   RMDir /r "$SYSDIR\UltraDefrag"
-  Delete "$INSTDIR\doc\about.html"
-  Delete "$INSTDIR\doc\about_simple.html"
-  Delete "$INSTDIR\doc\images\about.png"
-  Delete "$INSTDIR\doc\images\console.png"
-  Delete "$INSTDIR\doc\images\main_screen110.png"
+  RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\presets"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
   Delete "$INSTDIR\dfrg.exe"
@@ -690,16 +686,11 @@ Section "Documentation" SecDocs
 
 !insertmacro DisableX64FSRedirection
   DetailPrint "Install documentation..."
-  SetOutPath "$INSTDIR\doc"
-  File "${ROOTDIR}\doc\html\manual.html"
-  File "${ROOTDIR}\doc\html\udefrag.css"
-  SetOutPath "$INSTDIR\doc\images"
-  File "${ROOTDIR}\doc\html\images\main_screen140.png"
-  File "${ROOTDIR}\doc\html\images\fixed.ico"
-  File "${ROOTDIR}\doc\html\images\removable.ico"
-  File "${ROOTDIR}\doc\html\images\sched_net_vista.png"
-  File "${ROOTDIR}\doc\html\images\valid-html401.png"
-  File "${ROOTDIR}\doc\html\images\powered_by_lua.png"
+  SetOutPath "$INSTDIR\handbook"
+  File "${ROOTDIR}\doc\html\handbook\*.html"
+  File "${ROOTDIR}\doc\html\handbook\*.css"
+  File "${ROOTDIR}\doc\html\handbook\*.png"
+  File "${ROOTDIR}\doc\html\handbook\*.ico"
   StrCpy $DocsInstalled 1
 !insertmacro EnableX64FSRedirection
 
@@ -797,10 +788,10 @@ Section "Shortcuts" SecShortcuts
 no_sched_net:
 
   StrCmp $DocsInstalled '1' 0 no_docs
-  WriteINIStr "$R0\Documentation\User manual.url" "InternetShortcut" "URL" "file://$INSTDIR\doc\manual.html"
+  WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\index.html"
   goto doc_url_ok
 no_docs:
-  WriteINIStr "$R0\Documentation\User manual.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/manual.html"
+  WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/"
 doc_url_ok:
   WriteINIStr "$R0\Documentation\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
 
@@ -866,7 +857,7 @@ Section "Uninstall"
   RMDir "$INSTDIR\presets"
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_i18n.dll"
-  RMDir /r "$INSTDIR\doc"
+  RMDir /r "$INSTDIR\handbook"
   RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
   RMDir $INSTDIR
 
@@ -932,7 +923,7 @@ SectionEnd
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag.$\nIncluding console interface."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecSchedNET} "Small and useful scheduler.$\nNET Framework 2.0 required."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "User manual."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "Handbook."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecPortable} "Build portable package to place them on USB drive."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenuHandler} "Defragment your volumes from their context menu."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."
