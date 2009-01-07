@@ -497,9 +497,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\LICENSE.TXT"
   File "${ROOTDIR}\src\CREDITS.TXT"
   File "${ROOTDIR}\src\HISTORY.TXT"
-  File "${ROOTDIR}\src\INSTALL.TXT"
   File "${ROOTDIR}\src\README.TXT"
-  File "${ROOTDIR}\src\FAQ.TXT"
   SetOutPath "$INSTDIR\scripts"
   File "${ROOTDIR}\src\scripts\udctxhandler.lua"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
@@ -541,7 +539,6 @@ skip_boot_time_inst:
   File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
-  File "${ROOTDIR}\src\installer\udefrag-gui-dbg.cmd"
 
   DetailPrint "Install console interface..."
   File "udefrag.exe"
@@ -647,7 +644,10 @@ lng_registered:
   RMDir /r "$INSTDIR\presets"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
   Delete "$INSTDIR\dfrg.exe"
-  
+  Delete "$INSTDIR\INSTALL.TXT"
+  Delete "$INSTDIR\FAQ.TXT"
+  Delete "$SYSDIR\udefrag-gui-dbg.cmd"
+
   ; create boot time script if it doesn't exist
   SetOutPath "$SYSDIR"
   IfFileExists "$SYSDIR\ud-boot-time.cmd" bt_ok 0
@@ -752,6 +752,10 @@ Section "Shortcuts" SecShortcuts
 
   ; remove shortcuts of any previous version of the program
   RMDir /r "$SMPROGRAMS\DASoft"
+  Delete "$SMPROGRAMS\UltraDefrag\Documentation\FAQ.lnk"
+  Delete "$SMPROGRAMS\UltraDefrag\Documentation\User manual.url"
+  Delete "$SMPROGRAMS\UltraDefrag\UltraDefrag (Debug mode).lnk"
+
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
   CreateDirectory "$R0\Boot time options"
@@ -772,15 +776,11 @@ Section "Shortcuts" SecShortcuts
 
   CreateShortCut "$R0\UltraDefrag.lnk" \
    "$SYSDIR\udefrag-gui.exe"
-  CreateShortCut "$R0\UltraDefrag (Debug mode).lnk" \
-   "$SYSDIR\udefrag-gui-dbg.cmd" "" "$SYSDIR\udefrag-gui.exe" 0
 
   CreateShortCut "$R0\Documentation\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"
   CreateShortCut "$R0\Documentation\README.lnk" \
    "$INSTDIR\README.TXT"
-  CreateShortCut "$R0\Documentation\FAQ.lnk" \
-   "$INSTDIR\FAQ.TXT"
 
   StrCmp $SchedulerNETinstalled '1' 0 no_sched_net
   CreateShortCut "$R0\Scheduler.NET.lnk" \
@@ -789,9 +789,11 @@ no_sched_net:
 
   StrCmp $DocsInstalled '1' 0 no_docs
   WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\index.html"
+  WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\faq.html"
   goto doc_url_ok
 no_docs:
   WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/"
+  WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/faq.html"
 doc_url_ok:
   WriteINIStr "$R0\Documentation\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
 
@@ -836,9 +838,7 @@ Section "Uninstall"
   Delete "$INSTDIR\LICENSE.TXT"
   Delete "$INSTDIR\CREDITS.TXT"
   Delete "$INSTDIR\HISTORY.TXT"
-  Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
-  Delete "$INSTDIR\FAQ.TXT"
 
   ; delete two scripts from the 1.4.0 version
   Delete "$INSTDIR\boot_on.cmd"
@@ -884,7 +884,6 @@ Section "Uninstall"
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\ud-help.cmd"
-  Delete "$SYSDIR\udefrag-gui-dbg.cmd"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
