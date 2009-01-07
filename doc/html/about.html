@@ -10,13 +10,6 @@
 <meta name="Robots" content="index,follow" />
 <link rel="shortcut icon" href="udefrag.ico" />
 <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
-<script type="text/javascript">
-<!--
-function MM_popupMsg(msg) { //v1.0
-  alert(msg);
-}
-//-->
-    </script>
 <style type="text/css">
 <!--
 .style1 {
@@ -25,7 +18,6 @@ function MM_popupMsg(msg) { //v1.0
 }
 -->
 </style>
-
 <script src="Scripts/AC_RunActiveContent.js" type="text/javascript"></script>
 <link href="scrpt/web.css" rel="stylesheet" type="text/css" media="all" />
 <script type="text/javascript" src="scrpt/web.js"></script>
@@ -35,15 +27,19 @@ function MM_popupMsg(msg) { //v1.0
 .style3 {font-weight: bold}
 -->
 </style>
+<link rel="stylesheet" href="lightbox_assets/css/lightbox.css" type="text/css" media="screen" />
+<script src="lightbox_assets/js/prototype.js" type="text/javascript"></script>
+<script src="lightbox_assets/js/scriptaculous.js?load=effects" type="text/javascript"></script>
+<script src="lightbox_assets/js/lightbox.js" type="text/javascript"></script>
 </head>
-<body>
+<body onload="initLightbox()">
 	
 <div class="content">
 	<div id="top">
 				<div id="icons">
 					<a href="/index.html" title="Home page"><img src="images/home.gif" alt="Home" /></a>
 
-					<a href="#" title="Contact us"><img src="images/contact.gif" alt="Contact" onclick="MM_popupMsg('Dmitri Arkhangelski:\rdmitriar + at + gmail + dot + com and Justin Dearing:\rzippy1981 + at + gmail + dot + com')" /></a>
+					<a href="images/msg.jpg" title="UltraDefrag Authors" rel="lightbox"><img src="images/contact.gif" alt="Contact" /></a>
 					<a href="sitemap.html" title="Sitemap"><img src="images/sitemap.gif" alt="Sitemap" /></a>				</div>
 	  <h1>ULTRADEFRAG</h1>
 				<h2>An Open Source Defragmenter</h2>
@@ -195,7 +191,7 @@ AC_FL_RunContent( 'codebase','http://download.macromedia.com/pub/shockwave/cabs/
 
                       <p>At age 18 Justin discovered Linux and FreeBSD. He experiemnted  with Shell scripting, perl, java and of course C. He released his first  Open Source project, Sanctum, a JAVA wrapper around bochs that he wrote  with help from a friend. The program achieved partial functionality, but was never  completed. The source is available on <a href="https://sourceforge.net/projects/sanctum">sourceforge</a>.</p>
                       <p>Justin later began working for a series of companies in IT and  programming capacities. He currently is a .NET programmer for a small company with  the title of Senior Developer.</p>
-                      <p>In addition to maintaining the documentation for UltraDefrag,  Justin is the author of <a href="http://plane-disaster.sf.net">PlaneDisaster.NET</a> a SQL front end to JetSQL (MSACCESS) and SQLite databases. He is the current maintainer of <a href="http://sourceforge.net/projects/mqmanager">MQManager.NET</a>, a utility for browsing Misrosoft Message Queues (<a href="http://en.wikipedia.org/wiki/Microsoft_Message_Queuing">MSMQs</a>). He has also  contributed to the following projects: <a href="http://www.icsharpcode.net/OpenSource/SD/">SharpDevelop</a>, <a href="http://astrogrep.sourceforge.net/">Astrogrep, SharpBarcode</a> and <a href="http://xml-copy-editor.sourceforge.net/">XML Copy Editor</a>.                      </p>
+                      <p>In addition to maintaining the documentation for UltraDefrag,  Justin is the author of <a href="http://plane-disaster.sf.net">PlaneDisaster.NET</a> a SQL front end to JetSQL (MSACCESS) and SQLite databases. He has also  contributed to the following projects: <a href="http://www.icsharpcode.net/OpenSource/SD/">SharpDevelop</a>, <a href="http://astrogrep.sourceforge.net/">Astrogrep, SharpBarcode</a> and <a href="http://xml-copy-editor.sourceforge.net/">XML Copy Editor</a>.                      </p>
 
                       <hr />
                       <p><span class="style3"><a href="http://zippy1981.blogspot.com/">Personal Blog of Justin</a> | <a href="mailto:zippy1981 + at + gmail + dot + com">Mail Justin</a></span></p>
