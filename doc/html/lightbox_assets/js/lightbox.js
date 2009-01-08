@@ -1,13 +1,13 @@
 var fileLoadingImage = "/lightbox_assets/images/loading.gif";		
 var fileBottomNavCloseImage = "/lightbox_assets/images/closelabel.gif";
-var overlayOpacity = 0.8;	// controls transparency of shadow overlay
+var overlayOpacity = 0.8;
 var animate = true;
 var resizeSpeed = 7;
 var borderSize = 10;
 var imageArray = new Array;
 var activeImage;
 if(animate == true){
-	overlayDuration = 0.2;	// shadow fade in/out duration
+	overlayDuration = 0.2;
 	if(resizeSpeed > 10){ resizeSpeed = 10;}
 	if(resizeSpeed < 1){ resizeSpeed = 1;}
 	resizeDuration = (11 - resizeSpeed) * 0.15;
@@ -77,7 +77,7 @@ Lightbox.prototype = {
 		var objLightbox = document.createElement("div");
 		objLightbox.setAttribute('id','lightbox');
 		objLightbox.style.display = 'none';
-		objLightbox.onclick = function(e) {	// close Lightbox is user clicks shadow overlay
+		objLightbox.onclick = function(e) {
 			if (!e) var e = window.event;
 			var clickObj = Event.element(e).id;
 			if ( clickObj == 'lightbox') {
@@ -217,7 +217,7 @@ Lightbox.prototype = {
 			Element.setSrc('lightboxImage', imageArray[activeImage][0]);
 			myLightbox.resizeImageContainer(imgPreloader.width, imgPreloader.height);
 			
-			imgPreloader.onload=function(){};	//	clear onLoad, IE behaves irratically with animated gifs otherwise 
+			imgPreloader.onload=function(){};
 		}
 		imgPreloader.src = imageArray[activeImage][0];
 	},
@@ -260,7 +260,6 @@ Lightbox.prototype = {
 			[ new Effect.SlideDown( 'imageDataContainer', { sync: true, duration: resizeDuration, from: 0.0, to: 1.0 }), 
 			  new Effect.Appear('imageDataContainer', { sync: true, duration: resizeDuration }) ], 
 			{ duration: resizeDuration, afterFinish: function() {
-				// update overlay size and update nav
 				var arrayPageSize = getPageSize();
 				Element.setHeight('overlay', arrayPageSize[1]);
 				myLightbox.updateNav();
@@ -294,24 +293,24 @@ Lightbox.prototype = {
 	},
 
 	keyboardAction: function(e) {
-		if (e == null) { // ie
+		if (e == null) {
 			keycode = event.keyCode;
 			escapeKey = 27;
-		} else { // mozilla
+		} else {
 			keycode = e.keyCode;
 			escapeKey = e.DOM_VK_ESCAPE;
 		}
 
 		key = String.fromCharCode(keycode).toLowerCase();
 		
-		if((key == 'x') || (key == 'o') || (key == 'c') || (keycode == escapeKey)){	// close lightbox
+		if((key == 'x') || (key == 'o') || (key == 'c') || (keycode == escapeKey)){
 			myLightbox.end();
-		} else if((key == 'p') || (keycode == 37)){	// display previous image
+		} else if((key == 'p') || (keycode == 37)){	
 			if(activeImage != 0){
 				myLightbox.disableKeyboardNav();
 				myLightbox.changeImage(activeImage - 1);
 			}
-		} else if((key == 'n') || (keycode == 39)){	// display next image
+		} else if((key == 'n') || (keycode == 39)){
 			if(activeImage != (imageArray.length - 1)){
 				myLightbox.disableKeyboardNav();
 				myLightbox.changeImage(activeImage + 1);
@@ -344,10 +343,10 @@ function getPageScroll(){
 	if (self.pageYOffset) {
 		yScroll = self.pageYOffset;
 		xScroll = self.pageXOffset;
-	} else if (document.documentElement && document.documentElement.scrollTop){	 // Explorer 6 Strict
+	} else if (document.documentElement && document.documentElement.scrollTop){
 		yScroll = document.documentElement.scrollTop;
 		xScroll = document.documentElement.scrollLeft;
-	} else if (document.body) {// all other Explorers
+	} else if (document.body) {
 		yScroll = document.body.scrollTop;
 		xScroll = document.body.scrollLeft;	
 	}
@@ -359,26 +358,26 @@ function getPageSize(){
 	if (window.innerHeight && window.scrollMaxY) {	
 		xScroll = window.innerWidth + window.scrollMaxX;
 		yScroll = window.innerHeight + window.scrollMaxY;
-	} else if (document.body.scrollHeight > document.body.offsetHeight){ // all but Explorer Mac
+	} else if (document.body.scrollHeight > document.body.offsetHeight){
 		xScroll = document.body.scrollWidth;
 		yScroll = document.body.scrollHeight;
-	} else { // Explorer Mac...would also work in Explorer 6 Strict, Mozilla and Safari
+	} else {
 		xScroll = document.body.offsetWidth;
 		yScroll = document.body.offsetHeight;
 	}
 	var windowWidth, windowHeight;
 
-	if (self.innerHeight) {	// all except Explorer
+	if (self.innerHeight) {
 		if(document.documentElement.clientWidth){
 			windowWidth = document.documentElement.clientWidth; 
 		} else {
 			windowWidth = self.innerWidth;
 		}
 		windowHeight = self.innerHeight;
-	} else if (document.documentElement && document.documentElement.clientHeight) { // Explorer 6 Strict Mode
+	} else if (document.documentElement && document.documentElement.clientHeight) {
 		windowWidth = document.documentElement.clientWidth;
 		windowHeight = document.documentElement.clientHeight;
-	} else if (document.body) { // other Explorers
+	} else if (document.body) {
 		windowWidth = document.body.clientWidth;
 		windowHeight = document.body.clientHeight;
 	}
@@ -397,9 +396,9 @@ function getPageSize(){
 	return arrayPageSize;
 }
 function getKey(e){
-	if (e == null) { // ie
+	if (e == null) {
 		keycode = event.keyCode;
-	} else { // mozilla
+	} else {
 		keycode = e.which;
 	}
 	key = String.fromCharCode(keycode).toLowerCase();
