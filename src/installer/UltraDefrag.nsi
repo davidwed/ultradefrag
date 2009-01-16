@@ -28,15 +28,12 @@
  *  ULTRADFGARCH=<i386 | amd64 | ia64>
  */
 
-!ifndef ULTRADFGVER
-!define ULTRADFGVER 1.10.0
+!ifndef ULTRADFGVER | ULTRADFGARCH
+!error "One of the predefined symbols missing!"
 !endif
 
-!ifndef ULTRADFGARCH
-!define ULTRADFGARCH i386
-!endif
-
-;!include "ultradefrag_globals.nsh"
+!include "Sections.nsh"
+!include "WinVer.nsh"
 !include "x64.nsh"
 
 !if ${ULTRADFGARCH} == 'i386'
@@ -65,12 +62,11 @@ Name "Ultra Defragmenter v${ULTRADFGVER} (IA64)"
 !else
 Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
 !endif
-OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
 
+OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
 LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 ShowInstDetails show
 ShowUninstDetails show
-
 SetCompressor /SOLID lzma
 
 VIProductVersion "${ULTRADFGVER}.0"
@@ -114,142 +110,35 @@ ReserveFile "lang.ini"
 
 ;-----------------------------------------
 
-;Var NT4_TARGET
-Var SchedulerNETinstalled
-Var DocsInstalled
-Var PortableInstalled
-Var RunPortable
-Var ShowBootsplash
 Var IsInstalled
+Var ShowBootsplash
 Var LanguagePack
-
-; 1 when an installer was loaded in silent mode by portable application
-; 0 otherwise
-Var PortableInstallationFlag
-
-Function .onInit
-
-  push $R0
-  push $R1
-
-!insertmacro DisableX64FSRedirection
-
-  ; ultradefrag 1.3.1+ will be installed in %sysdir%\UltraDefrag
-  ; and ultradefrag 1.3.4+ - in %windir%\UltraDefrag
-  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
-
-
-  /* is already installed 1.3.0 or earlier version? */
-  RMDir /r "$SYSDIR\UltraDefrag"
-  ; don't work on some systems
-  ;;IfFileExists "$SYSDIR\defrag_native.exe" 0 version_checked
-;  ClearErrors
-;  FileOpen $R0 "$SYSDIR\defrag_native.exe" "r"
-;  FileClose $R0
-;  IfErrors version_checked 0
-;  IfFileExists "$INSTDIR\dfrg.exe" version_checked 0
-;  MessageBox MB_OK|MB_ICONEXCLAMATION \
-;   "$SYSDIR\defrag_native.exe found!$\n$\nUninstall any previous version of Ultra Defragmenter$\nbefore this installation!" \
-;   /SD IDOK
-;   goto abort_inst
-;version_checked:
-
-  /* variables initialization */
-  ;StrCpy $NT4_TARGET 0
-  StrCpy $SchedulerNETinstalled 0
-  StrCpy $DocsInstalled 0
-  StrCpy $PortableInstalled 0
-  StrCpy $RunPortable 0
-  StrCpy $ShowBootsplash 1
-  StrCpy $IsInstalled 0
-  StrCpy $LanguagePack "English (US)"
-  StrCpy $PortableInstallationFlag 0
-
-  ClearErrors
-  ReadRegStr $R0 HKLM \
-   "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "CurrentVersion"
-  IfErrors 0 winnt
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "On Windows 9.x this program is absolutely useless!" \
-   /SD IDOK
-abort_inst:
-!insertmacro EnableX64FSRedirection
-  pop $R1
-  pop $R0
-  Abort
-winnt:
-  StrCpy $R1 $R0 1
-  StrCmp $R1 '3' 0 winnt_456
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "On Windows NT 3.x this program is absolutely useless!" \
-   /SD IDOK
-  goto abort_inst
-winnt_456:
-;  StrCmp $R1 '4' 0 winnt_56
-;  StrCpy $NT4_TARGET 1
-;winnt_56:
-  
-  /* is already installed? */
-  IfFileExists "$SYSDIR\defrag_native.exe" 0 not_installed
-  StrCpy $IsInstalled 1
-not_installed:
-  /* portable package? */
-  ; if silent key specified than continue installation
-  IfSilent 0 portable_check
-  IfFileExists "$EXEDIR\PORTABLE.X" 0 init_ok
-  StrCpy $PortableInstallationFlag 1
-  ; TODO: read an installation language name from the PORTABLE.X file
-  ; describe in manual format of this file
-  ClearErrors
-  ReadINIStr $R0 "$EXEDIR\PORTABLE.X" "i18n" "Language"
-  IfErrors init_ok 0
-  StrCpy $LanguagePack $R0
-  goto init_ok
-portable_check:
-  IfFileExists "$EXEDIR\PORTABLE.X" 0 init_ok
-  StrCpy $RunPortable 1
-  ReadINIStr $ShowBootsplash "$EXEDIR\PORTABLE.X" "Bootsplash" "Show"
-init_ok:
-  call ShowBootSplash
-  StrCmp $RunPortable '1' 0 init_done
-  call PortableRun
-  goto abort_inst
-init_done:
-!insertmacro EnableX64FSRedirection
-!ifdef MODERN_UI
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
-!endif
-  pop $R1
-  pop $R0
-
-FunctionEnd
 
 ;-----------------------------------------
 
 Function LangShow
 
   push $R0
-  push $R1
   
 !ifdef MODERN_UI
   !insertmacro MUI_HEADER_TEXT "Language Packs" \
       "Choose which language pack you want to install."
 !endif
+  ;;InitPluginsDir
   SetOutPath $PLUGINSDIR
   File "lang.ini"
 
   ClearErrors
   ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
-  IfErrors default_lang 0
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
-default_lang:
+  ${Unless} ${Errors}
+    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
+  ${EndUnless}
 
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
   pop $R0
   InstallOptions::show
   pop $R0
 
-  pop $R1
   pop $R0
   Abort
 
@@ -262,11 +151,11 @@ Function LangLeave
   push $R0
 
   ReadINIStr $R0 "$PLUGINSDIR\lang.ini" "Settings" "State"
-  StrCmp $R0 0 exit_notify_handler
-  pop $R0
-  Abort
+  ${If} $R0 != "0"
+    pop $R0
+    Abort
+  ${EndIf}
 
-exit_notify_handler:
   ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
   WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
   pop $R0
@@ -275,54 +164,21 @@ FunctionEnd
 
 ;-----------------------------------------
 
-Function install_driver
-
-  ;StrCpy $R0 "$SYSDIR\Drivers"
-  SetOutPath "$SYSDIR\Drivers" ;$R0
-;  StrCmp $NT4_TARGET '1' 0 modern_win
-;  DetailPrint "NT 4.0 version"
-;!if ${ULTRADFGARCH} == 'i386'
-;  File "ultradfg_nt4.sys"
-;!else
-;  File /nonfatal "ultradfg_nt4.sys"
-;!endif
-;  Delete "$R0\ultradfg.sys"
-;  Rename "ultradfg_nt4.sys" "ultradfg.sys"
-;  goto driver_installed
-;modern_win:
-  File "ultradfg.sys"
-;driver_installed:
-
-FunctionEnd
-
-;-----------------------------------------
-
 Function ShowBootSplash
 
-  push $R0
-  push $R1
-
-  IfSilent splash_done
-!insertmacro EnableX64FSRedirection
-  /* show bootsplash */
-  InitPluginsDir
-  SetOutPath $PLUGINSDIR
-  StrCmp $RunPortable '1' 0 show_general_splash
-  StrCmp $ShowBootsplash '1' 0 splash_done
-  File "${ROOTDIR}\src\installer\PortableUltraDefrag.bmp"
-  advsplash::show 2000 400 0 -1 "$PLUGINSDIR\PortableUltraDefrag"
-  pop $R0
-  Delete "$PLUGINSDIR\PortableUltraDefrag.bmp"
-  goto splash_done
-show_general_splash:
-  File "${ROOTDIR}\src\installer\UltraDefrag.bmp"
-  advsplash::show 2000 400 0 -1 "$PLUGINSDIR\UltraDefrag"
-  pop $R0
-  Delete "$PLUGINSDIR\UltraDefrag.bmp"
-splash_done:
-!insertmacro DisableX64FSRedirection
-  pop $R1
-  pop $R0
+  ${Unless} ${Silent}
+  ${AndUnless} $ShowBootsplash == "0"
+    push $R0
+    ${EnableX64FSRedirection}
+    InitPluginsDir
+    SetOutPath $PLUGINSDIR
+    File "${ROOTDIR}\src\installer\*.bmp"
+    advsplash::show 2000 400 0 -1 "$PLUGINSDIR\$R1"
+    pop $R0
+    Delete "$PLUGINSDIR\*.bmp"
+    ${DisableX64FSRedirection}
+    pop $R0
+  ${EndUnless}
 
 FunctionEnd
 
@@ -330,7 +186,7 @@ FunctionEnd
 
 Function PortableRun
 
-;;!insertmacro DisableX64FSRedirection
+  ${DisableX64FSRedirection}
   ; make a backup copy of all installed configuration files
   Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
   Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
@@ -358,49 +214,34 @@ Function PortableRun
   Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
   Rename "$SYSDIR\udefrag-gui.cmd.bak" "$SYSDIR\udefrag-gui.cmd"
   ; uninstall if necessary
-  StrCmp $IsInstalled '1' portable_done 0
-  ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
-  Delete "$INSTDIR\uninstall.exe"
-  RMDir "$INSTDIR"
-portable_done:
-;;!insertmacro EnableX64FSRedirection
+  ${Unless} $IsInstalled == '1'
+    ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
+    Delete "$INSTDIR\uninstall.exe"
+    RMDir "$INSTDIR"
+  ${EndUnless}
 
 FunctionEnd
 
 ;-----------------------------------------
 
-Function WriteDriverSettings
+Function WriteDriverAndDbgSettings
 
   push $R2
   push $R3
   ; write settings only if control set exists
-  StrCmp $R0 "SYSTEM\CurrentControlSet" write_settings 0
   StrCpy $R3 0
   EnumRegKey $R2 HKLM $R0 $R3
-  StrCmp $R2 "" L2 0
-write_settings:
-  WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
-  WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
-  WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
-  WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
-  WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
-L2:
+  ${If} $R2 != ""
+  ${OrIf} $R0 == "SYSTEM\CurrentControlSet"
+    WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
+    WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
+
+    WriteRegDWORD HKLM "$R0\Control\CrashControl" "AutoReboot" 0x0
+  ${EndIf}
   pop $R3
-  pop $R2
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function WriteDbgSettings
-
-  push $R2
-  ; write only if the key exists
-  ClearErrors
-  ReadRegDWORD $R2 HKLM $R0 "AutoReboot"
-  IfErrors L1 0
-  WriteRegDWORD HKLM $R0 "AutoReboot" 0x0
-L1:
   pop $R2
 
 FunctionEnd
@@ -409,77 +250,52 @@ FunctionEnd
 
 Function install_langpack
 
+  push $R0
+
   SetOutPath $INSTDIR
   Delete "$INSTDIR\ud_i18n.lng"
-  StrCmp $LanguagePack "English (US)" langpack_installed 0
-  StrCmp $LanguagePack "Catala" catala_pack 0
-  StrCmp $LanguagePack "Chinese (Simplified)" chinese_simp_pack 0
-  StrCmp $LanguagePack "Chinese (Traditional)" chinese_trad_pack 0
-  StrCmp $LanguagePack "Dutch" dutch_pack 0
-  StrCmp $LanguagePack "French (FR)" french_fr_pack 0
-  StrCmp $LanguagePack "German" german_pack 0
-  StrCmp $LanguagePack "Greek" greek_pack 0
-  StrCmp $LanguagePack "Hungarian" hu_pack 0
-  StrCmp $LanguagePack "Italian" it_pack 0
-  StrCmp $LanguagePack "Russian" ru_pack 0
-  StrCmp $LanguagePack "Slovak" slovak_pack 0
-  StrCmp $LanguagePack "Slovenian" slovenian_pack 0
-  StrCmp $LanguagePack "Portuguese" portuguese_pack 0
-  GoTo langpack_installed
-catala_pack:
-  File "${ROOTDIR}\src\gui\i18n\Catala.lng"
-  Rename "Catala.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-chinese_simp_pack:
-  File "${ROOTDIR}\src\gui\i18n\Chinese(Simp).lng"
-  Rename "Chinese(Simp).lng" "ud_i18n.lng"
-  GoTo langpack_installed
-chinese_trad_pack:
-  File "${ROOTDIR}\src\gui\i18n\Chinese(Trad).lng"
-  Rename "Chinese(Trad).lng" "ud_i18n.lng"
-  GoTo langpack_installed
-dutch_pack:
-  File "${ROOTDIR}\src\gui\i18n\Dutch.lng"
-  Rename "Dutch.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-french_fr_pack:
-  File "${ROOTDIR}\src\gui\i18n\French(FR).lng"
-  Rename "French(FR).lng" "ud_i18n.lng"
-  GoTo langpack_installed
-german_pack:
-  File "${ROOTDIR}\src\gui\i18n\German.lng"
-  Rename "German.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-greek_pack:
-  File "${ROOTDIR}\src\gui\i18n\Greek.lng"
-  Rename "Greek.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-hu_pack:
-  File "${ROOTDIR}\src\gui\i18n\Hungarian.lng"
-  Rename "Hungarian.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-it_pack:
-  File "${ROOTDIR}\src\gui\i18n\Italian.lng"
-  Rename "Italian.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-ru_pack:
-  File "${ROOTDIR}\src\gui\i18n\Russian.lng"
-  Rename "Russian.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-slovak_pack:
-  File "${ROOTDIR}\src\gui\i18n\Slovak.lng"
-  Rename "Slovak.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-slovenian_pack:
-  File "${ROOTDIR}\src\gui\i18n\Slovenian.lng"
-  Rename "Slovenian.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-portuguese_pack:
-  File "${ROOTDIR}\src\gui\i18n\Portuguese.lng"
-  Rename "Portuguese.lng" "ud_i18n.lng"
-  GoTo langpack_installed
-langpack_installed:
+  StrCpy $R0 "NOTHING"
 
+  ${Select} $LanguagePack
+    ${Case} "English (US)"
+      nop
+    ${Case} "Catala"
+      StrCpy $R0 "Catala.lng"
+    ${Case} "Chinese (Simplified)"
+      StrCpy $R0 "Chinese(Simp).lng"
+    ${Case} "Chinese (Traditional)"
+      StrCpy $R0 "Chinese(Trad).lng"
+    ${Case} "Dutch"
+      StrCpy $R0 "Dutch.lng"
+    ${Case} "French (FR)"
+      StrCpy $R0 "French(FR).lng"
+    ${Case} "German"
+      StrCpy $R0 "German.lng"
+    ${Case} "Greek"
+      StrCpy $R0 "Greek.lng"
+    ${Case} "Hungarian"
+      StrCpy $R0 "Hungarian.lng"
+    ${Case} "Italian"
+      StrCpy $R0 "Italian.lng"
+    ${Case} "Russian"
+      StrCpy $R0 "Russian.lng"
+    ${Case} "Slovak"
+      StrCpy $R0 "Slovak.lng"
+    ${Case} "Slovenian"
+      StrCpy $R0 "Slovenian.lng"
+    ${Case} "Portuguese"
+      StrCpy $R0 "Portuguese.lng"
+  ${EndSelect}
+
+  ${If} $R0 != "NOTHING"
+    File "${ROOTDIR}\src\gui\i18n\*.lng"
+    Rename "$R0" "ud_i18n.bk"
+    Delete "$INSTDIR\*.lng"
+    Rename "ud_i18n.bk" "ud_i18n.lng"
+  ${EndIf}
+
+  pop $R0
+  
 FunctionEnd
 
 ;------------------------------------------
@@ -487,12 +303,12 @@ FunctionEnd
 Section "Ultra Defrag core files (required)" SecCore
 
   push $R0
-  push $R1
 
   SectionIn RO
   AddSize 24 /* for the components installed in system directories (driver) */
-!insertmacro DisableX64FSRedirection
+
   DetailPrint "Install core files..."
+  ${DisableX64FSRedirection}
   SetOutPath $INSTDIR
   File "${ROOTDIR}\src\LICENSE.TXT"
   File "${ROOTDIR}\src\CREDITS.TXT"
@@ -503,132 +319,75 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
   SetOutPath "$INSTDIR\options"
-  IfFileExists "$INSTDIR\options\udreportopts.lua" skip_opts 0
-  File "${ROOTDIR}\src\scripts\udreportopts.lua"
-skip_opts:
+  ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua"
+    File "${ROOTDIR}\src\scripts\udreportopts.lua"
+  ${EndUnless}
 
-  ; install LanguagePack pack
+  ; install LanguagePack
   call install_langpack
 
-  DetailPrint "Install driver..."
-  call install_driver
+  SetOutPath "$SYSDIR\Drivers"
+  File "ultradfg.sys"
 
   SetOutPath "$SYSDIR"
-  
-  DetailPrint "Install GUI..."
   File "dfrg.exe"
   Delete "$SYSDIR\ultradefrag.exe"
-  ; since 2.0.0 version GUI program will be stored
-  ; as ultradefrag.exe in system directory
   Rename "$SYSDIR\dfrg.exe" "$SYSDIR\ultradefrag.exe"
-  File "udefrag-gui.exe"
 
-  DetailPrint "Install DLL's..."
+  File "${ROOTDIR}\src\installer\boot-config.cmd"
+  File "${ROOTDIR}\src\installer\boot-off.cmd"
+  File "${ROOTDIR}\src\installer\boot-on.cmd"
+  File "bootexctrl.exe"
+  File "defrag_native.exe"
+  File "lua5.1a.dll"
+  File "lua5.1a.exe"
+  File "lua5.1a_gui.exe"
+  File "${ROOTDIR}\src\installer\ud-config.cmd"
+  File "${ROOTDIR}\src\installer\ud-help.cmd"
+  File "udefrag-gui.exe"
   File "udefrag.dll"
+  File "udefrag.exe"
   File "zenwinx.dll"
 
-  StrCmp $PortableInstallationFlag '1' skip_boot_time_inst 0
-  DetailPrint "Install boot time defragger..."
-  File "defrag_native.exe"
-  File "bootexctrl.exe"
-  File "${ROOTDIR}\src\installer\boot-on.cmd"
-  File "${ROOTDIR}\src\installer\boot-off.cmd"
-skip_boot_time_inst:
-
-  DetailPrint "Install scripts..."
-  File "${ROOTDIR}\src\installer\ud-config.cmd"
-  File "${ROOTDIR}\src\installer\boot-config.cmd"
-  File "${ROOTDIR}\src\installer\ud-help.cmd"
-
-  DetailPrint "Install console interface..."
-  File "udefrag.exe"
-
-!if ${ULTRADFGARCH} == 'i386'
-  WriteRegStr HKCR ".luar" "" "LuaReport"
-  WriteRegStr HKCR "LuaReport" "" "Lua Report"
-  WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$SYSDIR\lua5.1a_gui.exe,1"
-  WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$SYSDIR\lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $WINDIR -v"
-!else
+  DetailPrint "Register file extensions..."
   ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
+  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
+
   WriteRegStr HKCR ".luar" "" "LuaReport"
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\DefaultIcon" "" "lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
   WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $WINDIR -v"
-!endif
-
-  DetailPrint "Install Lua 5.1 ..."
-  File "lua5.1a.dll"
-  File "lua5.1a.exe"
-  File "lua5.1a_gui.exe"
 
   ClearErrors
   ReadRegStr $R0 HKCR ".lua" ""
-  IfErrors register_lua 0
+  ${If} ${Errors}
+    WriteRegStr HKCR ".lua" "" "Lua"
+    WriteRegStr HKCR "Lua" "" "Lua Program"
+    WriteRegStr HKCR "Lua\shell\open" "" "Open"
+    WriteRegStr HKCR "Lua\shell\open\command" "" "notepad.exe %1"
+  ${EndIf}
 
-  ; fixes 1.3.1 & 1.3.2 x64 bug
-  ReadRegStr $R0 HKCR "Lua\shell\open\command" ""
-  ;If $R0 contains "SysWow64" 0 lua_registered
-  push $R0
-  push "SysWow64"
-  call StrStr
-  pop $R0
-  StrCpy $R1 $R0 8
-  StrCmp $R1 "SysWow64" 0 lua_registered
-
-register_lua:
-  WriteRegStr HKCR ".lua" "" "Lua"
-  WriteRegStr HKCR "Lua" "" "Lua Program"
-  WriteRegStr HKCR "Lua\shell\open" "" "Open"
-  ;DeleteRegKey HKCR "Lua\shell\open\command"
-!if ${ULTRADFGARCH} == 'i386'
-  WriteRegStr HKCR "Lua\shell\open\command" "" "$SYSDIR\notepad.exe %1"
-!else
-  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
-  WriteRegStr HKCR "Lua\shell\open\command" "" "notepad.exe %1"
-!endif
-lua_registered:
-
-  ; register lng file extension
   ClearErrors
   ReadRegStr $R0 HKCR ".lng" ""
-  IfErrors 0 lng_registered
-  WriteRegStr HKCR ".lng" "" "LanguagePack"
-  WriteRegStr HKCR "LanguagePack" "" "Language Pack"
-  WriteRegStr HKCR "LanguagePack\shell\open" "" "Open"
-  WriteRegStr HKCR "LanguagePack\DefaultIcon" "" "shell32.dll,0"
-!if ${ULTRADFGARCH} == 'i386'
-  WriteRegStr HKCR "LanguagePack\shell\open\command" "" "$SYSDIR\notepad.exe %1"
-!else
-  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
-  WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
-!endif
-lng_registered:
+  ${If} ${Errors}
+    WriteRegStr HKCR ".lng" "" "LanguagePack"
+    WriteRegStr HKCR "LanguagePack" "" "Language Pack"
+    WriteRegStr HKCR "LanguagePack\shell\open" "" "Open"
+    WriteRegStr HKCR "LanguagePack\DefaultIcon" "" "shell32.dll,0"
+    WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
+  ${EndIf}
 
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
   StrCpy $R0 "SYSTEM\CurrentControlSet"
-  call WriteDriverSettings
+  call WriteDriverAndDbgSettings
   StrCpy $R0 "SYSTEM\ControlSet001"
-  call WriteDriverSettings
+  call WriteDriverAndDbgSettings
   StrCpy $R0 "SYSTEM\ControlSet002"
-  call WriteDriverSettings
+  call WriteDriverAndDbgSettings
   StrCpy $R0 "SYSTEM\ControlSet003"
-  call WriteDriverSettings
-
-  DetailPrint "Write debugging settings..."
-  StrCpy $R0 "SYSTEM\CurrentControlSet\Control\CrashControl"
-  call WriteDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet001\Control\CrashControl"
-  call WriteDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet002\Control\CrashControl"
-  call WriteDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet003\Control\CrashControl"
-  call WriteDbgSettings
+  call WriteDriverAndDbgSettings
 
   DetailPrint "Write the uninstall keys..."
   StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
@@ -642,67 +401,55 @@ lng_registered:
   RMDir /r "$SYSDIR\UltraDefrag"
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\presets"
-  DeleteRegKey HKLM "SYSTEM\UltraDefrag"
   Delete "$INSTDIR\dfrg.exe"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\FAQ.TXT"
   Delete "$SYSDIR\udefrag-gui-dbg.cmd"
+  DeleteRegKey HKLM "SYSTEM\UltraDefrag"
 
-  ; create boot time script if it doesn't exist
+  ; create boot time and gui startup scripts if they doesn't exist
   SetOutPath "$SYSDIR"
-  IfFileExists "$SYSDIR\ud-boot-time.cmd" bt_ok 0
-  File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
-bt_ok:
+  ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
+    File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
+  ${EndUnless}
+  ${Unless} ${FileExists} "$SYSDIR\udefrag-gui.cmd"
+    File "${ROOTDIR}\src\installer\udefrag-gui.cmd"
+  ${EndUnless}
 
-  ; create gui startup script
-  SetOutPath "$SYSDIR"
-  IfFileExists "$SYSDIR\udefrag-gui.cmd" gui_ok 0
-  File "${ROOTDIR}\src\installer\udefrag-gui.cmd"
-gui_ok:
-
-!insertmacro EnableX64FSRedirection
-
-  pop $R1
+  ${EnableX64FSRedirection}
   pop $R0
-
-SectionEnd
-
-Section "Scheduler.NET" SecSchedNET
-
-  StrCmp $PortableInstallationFlag '1' L10 0
-
-!insertmacro DisableX64FSRedirection
-  DetailPrint "Install Scheduler.NET..."
-  SetOutPath $INSTDIR
-  File "UltraDefragScheduler.NET.exe"
-  StrCpy $SchedulerNETinstalled 1
-!insertmacro EnableX64FSRedirection
-
-L10:
 
 SectionEnd
 
 Section "Documentation" SecDocs
 
-!insertmacro DisableX64FSRedirection
   DetailPrint "Install documentation..."
+  ${DisableX64FSRedirection}
   SetOutPath "$INSTDIR\handbook"
   File "${ROOTDIR}\doc\html\handbook\*.html"
   File "${ROOTDIR}\doc\html\handbook\*.css"
   File "${ROOTDIR}\doc\html\handbook\*.png"
   File "${ROOTDIR}\doc\html\handbook\*.ico"
-  StrCpy $DocsInstalled 1
-!insertmacro EnableX64FSRedirection
+  ${EnableX64FSRedirection}
 
 SectionEnd
 
-Section "Portable UltraDefrag package" SecPortable
+Section /o "Scheduler.NET" SecSchedNET
 
-  StrCmp $PortableInstallationFlag '1' L20 0
+  DetailPrint "Install Scheduler.NET..."
+  ${DisableX64FSRedirection}
+  SetOutPath $INSTDIR
+  File "UltraDefragScheduler.NET.exe"
+  ${EnableX64FSRedirection}
+
+SectionEnd
+
+Section /o "Portable UltraDefrag package" SecPortable
+
   push $R0
   
-!insertmacro DisableX64FSRedirection
   DetailPrint "Build portable package..."
+  ${DisableX64FSRedirection}
   StrCpy $R0 "$INSTDIR\portable_${ULTRADFGARCH}_package"
   CreateDirectory $R0
   CopyFiles /SILENT $EXEPATH $R0 265
@@ -712,41 +459,28 @@ Section "Portable UltraDefrag package" SecPortable
   WriteINIStr "$R0\PORTABLE.X" "i18n" "Language" $LanguagePack
   WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
     "Put this directory contents to your USB drive and enjoy!"
-  StrCpy $PortableInstalled 1
-!insertmacro EnableX64FSRedirection
+  ${EnableX64FSRedirection}
 
   pop $R0
 
-L20:
-
 SectionEnd
 
-Section "Context menu handler" SecContextMenuHandler
+Section /o "Context menu handler" SecContextMenuHandler
 
-  StrCmp $PortableInstallationFlag '1' L30 0
-  
   WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-!if ${ULTRADFGARCH} == 'i386'
-  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "$SYSDIR\lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
-!else
   ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are used $SYSDIR it was converted into C:\WINDOWS\SysWow64 by system.
+  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
   WriteRegStr HKCR "Drive\shell\udefrag\command" "" "lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
-!endif
-
-L30:
 
 SectionEnd
 
-Section "Shortcuts" SecShortcuts
-
-  StrCmp $PortableInstallationFlag '1' L40 0
+Section /o "Shortcuts" SecShortcuts
 
   push $R0
   AddSize 5
 
-!insertmacro DisableX64FSRedirection
   DetailPrint "Install shortcuts..."
+  ${DisableX64FSRedirection}
   SetShellVarContext all
   SetOutPath $INSTDIR
 
@@ -782,19 +516,18 @@ Section "Shortcuts" SecShortcuts
   CreateShortCut "$R0\Documentation\README.lnk" \
    "$INSTDIR\README.TXT"
 
-  StrCmp $SchedulerNETinstalled '1' 0 no_sched_net
-  CreateShortCut "$R0\Scheduler.NET.lnk" \
-   "$INSTDIR\UltraDefragScheduler.NET.exe"
-no_sched_net:
+  ${If} ${FileExists} "$INSTDIR\UltraDefragScheduler.NET.exe"
+    CreateShortCut "$R0\Scheduler.NET.lnk" \
+     "$INSTDIR\UltraDefragScheduler.NET.exe"
+  ${EndIf}
 
-  StrCmp $DocsInstalled '1' 0 no_docs
-  WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\index.html"
-  WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\faq.html"
-  goto doc_url_ok
-no_docs:
-  WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/"
-  WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/faq.html"
-doc_url_ok:
+  ${If} ${FileExists} "$INSTDIR\handbook\index.html"
+    WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\index.html"
+    WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\faq.html"
+  ${Else}
+    WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/"
+    WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/faq.html"
+  ${EndIf}
   WriteINIStr "$R0\Documentation\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
 
   CreateShortCut "$R0\Uninstall UltraDefrag.lnk" \
@@ -805,22 +538,76 @@ doc_url_ok:
   CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
    "$SYSDIR\udefrag-gui.exe"
 
-  StrCmp $PortableInstalled '1' 0 no_portable
-  CreateShortCut "$R0\Portable package.lnk" \
-   "$INSTDIR\portable_${ULTRADFGARCH}_package"
-no_portable:
+  ${If} ${FileExists} "$INSTDIR\portable_${ULTRADFGARCH}_package\PORTABLE.X"
+    CreateShortCut "$R0\Portable package.lnk" \
+     "$INSTDIR\portable_${ULTRADFGARCH}_package"
+  ${EndIf}
 
-!insertmacro EnableX64FSRedirection
-
+  ${EnableX64FSRedirection}
   pop $R0
-
-L40:
 
 SectionEnd
 
+;----------------------------------------------
+
+Function .onInit
+
+  ${Unless} ${IsNT}
+  ${OrUnless} ${AtLeastWinNT4}
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+     "On Windows 9x and NT 3.x this program is absolutely useless!" \
+     /SD IDOK
+    Abort
+  ${EndUnless}
+
+  ${DisableX64FSRedirection}
+  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
+  push $R1
+
+  /* variables initialization */
+  StrCpy $IsInstalled 0
+  StrCpy $ShowBootsplash 1
+  StrCpy $LanguagePack "English (US)"
+
+  /* is already installed? */
+  ${If} ${FileExists} "$SYSDIR\defrag_native.exe"
+    StrCpy $IsInstalled 1
+  ${EndIf}
+
+  /* portable package? */
+  ${If} ${FileExists} "$EXEDIR\PORTABLE.X"
+    ReadINIStr $ShowBootsplash "$EXEDIR\PORTABLE.X" "Bootsplash" "Show"
+    ReadINIStr $LanguagePack "$EXEDIR\PORTABLE.X" "i18n" "Language"
+    ${Unless} ${Silent}
+      StrCpy $R1 "PortableUltraDefrag"
+      call ShowBootSplash
+      call PortableRun
+      pop $R1
+      ${EnableX64FSRedirection}
+      Abort
+    ${EndUnless}
+  ${Else}
+    !insertmacro SelectSection ${SecSchedNET}
+    !insertmacro SelectSection ${SecPortable}
+    !insertmacro SelectSection ${SecContextMenuHandler}
+    !insertmacro SelectSection ${SecShortcuts}
+    StrCpy $R1 "UltraDefrag"
+    call ShowBootSplash
+  ${EndIf}
+
+!ifdef MODERN_UI
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
+!endif
+  pop $R1
+  ${EnableX64FSRedirection}
+
+FunctionEnd
+
+;----------------------------------------------
+
 Section "Uninstall"
 
-!insertmacro DisableX64FSRedirection
+  ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
 
   DetailPrint "Remove shortcuts..."
@@ -831,59 +618,46 @@ Section "Uninstall"
   Delete "$DESKTOP\UltraDefrag.lnk"
   Delete "$QUICKLAUNCH\UltraDefrag.lnk"
 
-  DetailPrint "Remove program files..."
   /* remove useless registry settings */
   ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
-  Delete "$INSTDIR\Dfrg.exe"
+
+  DetailPrint "Remove program files..."
   Delete "$INSTDIR\LICENSE.TXT"
   Delete "$INSTDIR\CREDITS.TXT"
   Delete "$INSTDIR\HISTORY.TXT"
   Delete "$INSTDIR\README.TXT"
-
-  ; delete two scripts from the 1.4.0 version
-  Delete "$INSTDIR\boot_on.cmd"
-  Delete "$INSTDIR\boot_off.cmd"
-
-  Delete "$INSTDIR\scripts\udctxhandler.lua"
-  Delete "$INSTDIR\scripts\udreportcnv.lua"
-  Delete "$INSTDIR\scripts\udsorting.js"
-  RMDir "$INSTDIR\scripts"
-  ;;;Delete "$INSTDIR\options\udreportopts.lua"
-  RMDir "$INSTDIR\options"
   Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$INSTDIR\uninstall.exe"
-  Delete "$INSTDIR\presets\standard"
-  Delete "$INSTDIR\presets\system"
-  RMDir "$INSTDIR\presets"
+
+  ; delete files from previous installations
+  Delete "$INSTDIR\boot_on.cmd"
+  Delete "$INSTDIR\boot_off.cmd"
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_i18n.dll"
+  RMDir /r "$INSTDIR\presets"
+
+  RMDir /r "$INSTDIR\scripts"
   RMDir /r "$INSTDIR\handbook"
   RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
+  RMDir "$INSTDIR\options"
   RMDir $INSTDIR
 
-  DetailPrint "Uninstall driver and boot time defragger..."
   Delete "$SYSDIR\Drivers\ultradfg.sys"
+  Delete "$SYSDIR\boot-config.cmd"
+  Delete "$SYSDIR\boot-off.cmd"
+  Delete "$SYSDIR\boot-on.cmd"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
-  Delete "$SYSDIR\boot-on.cmd"
-  Delete "$SYSDIR\boot-off.cmd"
-  Delete "$SYSDIR\udefrag.dll"
-  Delete "$SYSDIR\zenwinx.dll"
-
-  DetailPrint "Uninstall Lua..."
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
-
-  DetailPrint "Uninstall GUI..."
-  Delete "$SYSDIR\ultradefrag.exe"
-  Delete "$SYSDIR\udefrag-gui.exe"
-
-  DetailPrint "Uninstall scripts and console interface..."
   Delete "$SYSDIR\ud-config.cmd"
-  Delete "$SYSDIR\boot-config.cmd"
-  Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\ud-help.cmd"
+  Delete "$SYSDIR\udefrag.dll"
+  Delete "$SYSDIR\udefrag.exe"
+  Delete "$SYSDIR\udefrag-gui.exe"
+  Delete "$SYSDIR\ultradefrag.exe"
+  Delete "$SYSDIR\zenwinx.dll"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
@@ -897,12 +671,7 @@ Section "Uninstall"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "Software\UltraDefrag"
-  ; remove settings of previous versions
-  ;DeleteRegKey HKCU "SOFTWARE\DASoft\NTDefrag"
-  ;DeleteRegKey /ifempty HKCU "Software\DASoft"
-  ;DeleteRegKey HKLM "Software\DASoft\NTDefrag"
-  ;DeleteRegKey /ifempty HKLM "Software\DASoft"
+  ;DeleteRegKey HKLM "Software\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Control\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Control\UltraDefrag"
@@ -912,7 +681,7 @@ Section "Uninstall"
   DeleteRegKey HKCR "Drive\shell\udefrag"
   DeleteRegKey HKCR "LuaReport"
   DeleteRegKey HKCR ".luar"
-!insertmacro EnableX64FSRedirection
+  ${EnableX64FSRedirection}
 
 SectionEnd
 
@@ -928,52 +697,6 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 !endif
-
-;---------------------------------------------
-
-; Additional functions from NSIS User Manual
-
-; StrStr
- ; input, top of stack = string to search for
- ;        top of stack-1 = string to search in
- ; output, top of stack (replaces with the portion of the string remaining)
- ; modifies no other variables.
- ;
- ; Usage:
- ;   Push "this is a long ass string"
- ;   Push "ass"
- ;   Call StrStr
- ;   Pop $R0
- ;  ($R0 at this point is "ass string")
-
- Function StrStr
-   Exch $R1 ; st=haystack,old$R1, $R1=needle
-   Exch    ; st=old$R1,haystack
-   Exch $R2 ; st=old$R1,old$R2, $R2=haystack
-   Push $R3
-   Push $R4
-   Push $R5
-   StrLen $R3 $R1
-   StrCpy $R4 0
-   ; $R1=needle
-   ; $R2=haystack
-   ; $R3=len(needle)
-   ; $R4=cnt
-   ; $R5=tmp
-   loop:
-     StrCpy $R5 $R2 $R3 $R4
-     StrCmp $R5 $R1 done
-     StrCmp $R5 "" done
-     IntOp $R4 $R4 + 1
-     Goto loop
- done:
-   StrCpy $R1 $R2 "" $R4
-   Pop $R5
-   Pop $R4
-   Pop $R3
-   Pop $R2
-   Exch $R1
- FunctionEnd
 
 ;---------------------------------------------
 

@@ -28,15 +28,12 @@
  *  ULTRADFGARCH=<i386 | amd64 | ia64>
  */
 
-!ifndef ULTRADFGVER
-!define ULTRADFGVER 1.10.0
-!endif
-
-!ifndef ULTRADFGARCH
-!define ULTRADFGARCH i386
+!ifndef ULTRADFGVER | ULTRADFGARCH
+!error "One of the predefined symbols missing!"
 !endif
 
 !include "x64.nsh"
+!include "WinVer.nsh"
 
 !if ${ULTRADFGARCH} == 'i386'
 !define ROOTDIR "..\.."
@@ -52,13 +49,11 @@ Name "Ultra Defragmenter Micro Edition v${ULTRADFGVER} (IA64)"
 !else
 Name "Ultra Defragmenter Micro Edition v${ULTRADFGVER} (i386)"
 !endif
+
 OutFile "ultradefrag-micro-edition-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
-
 LicenseData "${ROOTDIR}\src\LICENSE.TXT"
-
 ShowInstDetails show
 ShowUninstDetails show
-
 SetCompressor /SOLID lzma
 
 VIProductVersion "${ULTRADFGVER}.0"
@@ -77,105 +72,42 @@ UninstPage instfiles
 
 ;-----------------------------------------
 
-;Var NT4_TARGET
-
 Function .onInit
 
-  push $R0
-  push $R1
+  ${Unless} ${IsNT}
+  ${OrUnless} ${AtLeastWinNT4}
+    MessageBox MB_OK|MB_ICONEXCLAMATION \
+     "On Windows 9x and NT 3.x this program is absolutely useless!" \
+     /SD IDOK
+    Abort
+  ${EndUnless}
 
-!insertmacro DisableX64FSRedirection
-
-  /* variables initialization */
+  ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
-;  StrCpy $NT4_TARGET 0
-
-  ClearErrors
-  ReadRegStr $R0 HKLM \
-   "SOFTWARE\Microsoft\Windows NT\CurrentVersion" "CurrentVersion"
-  IfErrors 0 winnt
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "On Windows 9.x this program is absolutely useless!" \
-   /SD IDOK
-abort_inst:
-!insertmacro EnableX64FSRedirection
-  pop $R1
-  pop $R0
-  Abort
-winnt:
-  StrCpy $R1 $R0 1
-  StrCmp $R1 '3' 0 winnt_456
-  MessageBox MB_OK|MB_ICONEXCLAMATION \
-   "On Windows NT 3.x this program is absolutely useless!" \
-   /SD IDOK
-  goto abort_inst
-winnt_456:
-;  StrCmp $R1 '4' 0 winnt_56
-;  StrCpy $NT4_TARGET 1
-;winnt_56:
-
-!insertmacro EnableX64FSRedirection
-  pop $R1
-  pop $R0
+  ${EnableX64FSRedirection}
 
 FunctionEnd
 
 ;-----------------------------------------
 
-Function install_driver
-
-  ;StrCpy $R0 "$SYSDIR\Drivers"
-  SetOutPath "$SYSDIR\Drivers" ;$R0
-;  StrCmp $NT4_TARGET '1' 0 modern_win
-;  DetailPrint "NT 4.0 version"
-;!if ${ULTRADFGARCH} == 'i386'
-;  File "ultradfg_nt4.sys"
-;!else
-;  File /nonfatal "ultradfg_nt4.sys"
-;!endif
-;  Delete "$R0\ultradfg.sys"
-;  Rename "ultradfg_nt4.sys" "ultradfg.sys"
-;  goto driver_installed
-;modern_win:
-  File "ultradfg.sys"
-;driver_installed:
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function WriteDriverSettings
+Function WriteDriverAndDbgSettings
 
   push $R2
   push $R3
   ; write settings only if control set exists
-  StrCmp $R0 "SYSTEM\CurrentControlSet" write_settings 0
   StrCpy $R3 0
   EnumRegKey $R2 HKLM $R0 $R3
-  StrCmp $R2 "" L2 0
-write_settings:
-  WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
-  WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
-  WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
-  WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
-  WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
-L2:
+  ${If} $R2 != ""
+  ${OrIf} $R0 == "SYSTEM\CurrentControlSet"
+    WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
+    WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
+
+    WriteRegDWORD HKLM "$R0\Control\CrashControl" "AutoReboot" 0x0
+  ${EndIf}
   pop $R3
-  pop $R2
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function WriteDbgSettings
-
-  push $R2
-  ; write only if the key exists
-  ClearErrors
-  ReadRegDWORD $R2 HKLM $R0 "AutoReboot"
-  IfErrors L1 0
-  WriteRegDWORD HKLM $R0 "AutoReboot" 0x0
-L1:
   pop $R2
 
 FunctionEnd
@@ -185,63 +117,43 @@ FunctionEnd
 Section "Ultra Defrag core files (required)" SecCore
 
   push $R0
-  push $R1
 
   SectionIn RO
   AddSize 44 /* for the components installed in system directories */
-!insertmacro DisableX64FSRedirection
+
   DetailPrint "Install core files..."
+  ${DisableX64FSRedirection}
   SetOutPath $INSTDIR
   File "${ROOTDIR}\src\LICENSE.TXT"
   File "${ROOTDIR}\src\CREDITS.TXT"
   File "${ROOTDIR}\src\HISTORY.TXT"
-  File "${ROOTDIR}\src\INSTALL.TXT"
   File "${ROOTDIR}\src\README.TXT"
-  File "${ROOTDIR}\src\FAQ.TXT"
 
-  DetailPrint "Install driver..."
-  call install_driver
+  SetOutPath "$SYSDIR\Drivers"
+  File "ultradfg.sys"
 
   SetOutPath "$SYSDIR"
-
-  DetailPrint "Install DLL's..."
-  File "udefrag.dll"
-  File "zenwinx.dll"
-
-  DetailPrint "Install boot time defragger..."
-  File "defrag_native.exe"
-  File "bootexctrl.exe"
-  File "${ROOTDIR}\src\installer\boot-on.cmd"
-  File "${ROOTDIR}\src\installer\boot-off.cmd"
-
-  DetailPrint "Install scripts..."
-  File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
+  File "${ROOTDIR}\src\installer\boot-off.cmd"
+  File "${ROOTDIR}\src\installer\boot-on.cmd"
+  File "bootexctrl.exe"
+  File "defrag_native.exe"
+  File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
-
-  DetailPrint "Install console interface..."
+  File "udefrag.dll"
   File "udefrag.exe"
+  File "zenwinx.dll"
 
   DetailPrint "Write driver settings..."
   SetOutPath "$INSTDIR"
   StrCpy $R0 "SYSTEM\CurrentControlSet"
-  call WriteDriverSettings
+  call WriteDriverAndDbgSettings
   StrCpy $R0 "SYSTEM\ControlSet001"
-  call WriteDriverSettings
+  call WriteDriverAndDbgSettings
   StrCpy $R0 "SYSTEM\ControlSet002"
-  call WriteDriverSettings
+  call WriteDriverAndDbgSettings
   StrCpy $R0 "SYSTEM\ControlSet003"
-  call WriteDriverSettings
-
-  DetailPrint "Write debugging settings..."
-  StrCpy $R0 "SYSTEM\CurrentControlSet\Control\CrashControl"
-  call WriteDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet001\Control\CrashControl"
-  call WriteDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet002\Control\CrashControl"
-  call WriteDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet003\Control\CrashControl"
-  call WriteDbgSettings
+  call WriteDriverAndDbgSettings
 
   DetailPrint "Write the uninstall keys..."
   StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
@@ -254,58 +166,55 @@ Section "Ultra Defrag core files (required)" SecCore
   ; remove files of previous 1.3.1-1.3.3 installation
   RMDir /r "$SYSDIR\UltraDefrag"
   RMDir /r "$INSTDIR\presets"
+  Delete "$INSTDIR\INSTALL.TXT"
+  Delete "$INSTDIR\FAQ.TXT"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
 
   ; create boot time script if it doesn't exist
   SetOutPath "$SYSDIR"
-  IfFileExists "$SYSDIR\ud-boot-time.cmd" bt_ok 0
-  File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
-bt_ok:
+  ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
+    File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
+  ${EndUnless}
 
-!insertmacro EnableX64FSRedirection
+  ${EnableX64FSRedirection}
 
-  pop $R1
   pop $R0
 
 SectionEnd
 
 Section "Uninstall"
 
-!insertmacro DisableX64FSRedirection
+  ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
 
-  DetailPrint "Remove program files..."
   /* remove useless registry settings */
   ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
+
+  DetailPrint "Remove program files..."
   Delete "$INSTDIR\LICENSE.TXT"
   Delete "$INSTDIR\CREDITS.TXT"
   Delete "$INSTDIR\HISTORY.TXT"
-  Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\README.TXT"
-  Delete "$INSTDIR\FAQ.TXT"
 
   ; delete two scripts from the 1.4.0 version
   Delete "$INSTDIR\boot_on.cmd"
   Delete "$INSTDIR\boot_off.cmd"
   
-  RMDir "$INSTDIR\options"
   Delete "$INSTDIR\uninstall.exe"
+  RMDir "$INSTDIR\options"
   RMDir $INSTDIR
 
-  DetailPrint "Uninstall driver and boot time defragger..."
   Delete "$SYSDIR\Drivers\ultradfg.sys"
+  Delete "$SYSDIR\boot-config.cmd"
+  Delete "$SYSDIR\boot-off.cmd"
+  Delete "$SYSDIR\boot-on.cmd"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
-  Delete "$SYSDIR\boot-on.cmd"
-  Delete "$SYSDIR\boot-off.cmd"
-  Delete "$SYSDIR\udefrag.dll"
-  Delete "$SYSDIR\zenwinx.dll"
-
-  DetailPrint "Uninstall scripts and console interface..."
   Delete "$SYSDIR\ud-config.cmd"
-  Delete "$SYSDIR\boot-config.cmd"
-  Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\ud-help.cmd"
+  Delete "$SYSDIR\udefrag.dll"
+  Delete "$SYSDIR\udefrag.exe"
+  Delete "$SYSDIR\zenwinx.dll"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
@@ -315,7 +224,7 @@ Section "Uninstall"
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
 
-!insertmacro EnableX64FSRedirection
+  ${EnableX64FSRedirection}
 
 SectionEnd
 
