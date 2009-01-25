@@ -30,8 +30,8 @@
 
 PVOID KernelGetModuleBase(PCHAR pModuleName)
 {
-    PVOID pModuleBase = NULL;
-    PULONG pSystemInfoBuffer = NULL;
+	PVOID pModuleBase = NULL;
+	PULONG pSystemInfoBuffer = NULL;
 	NTSTATUS status = STATUS_INSUFFICIENT_RESOURCES;
 	ULONG SystemInfoBufferSize = 0;
 	PSYSTEM_MODULE_INFORMATION_ENTRY pSysModuleEntry;
@@ -39,10 +39,16 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 
 	status = ZwQuerySystemInformation(SystemModuleInformation,
 		&SystemInfoBufferSize,0,&SystemInfoBufferSize);
-	if(!SystemInfoBufferSize) return NULL;
+	if(!SystemInfoBufferSize){
+		DbgPrint("-Ultradfg- SystemInfoBufferSize request failed: %x!\n",(UINT)status);
+		return NULL;
+	}
 
 	pSystemInfoBuffer = (PULONG)AllocatePool(NonPagedPool, SystemInfoBufferSize*2);
-	if(!pSystemInfoBuffer) return NULL;
+	if(!pSystemInfoBuffer){
+		DbgPrint("-Ultradfg- KernelGetModuleBase: No enough memory!\n");
+		return NULL;
+	}
 
 	memset(pSystemInfoBuffer, 0, SystemInfoBufferSize*2);
 	status = ZwQuerySystemInformation(SystemModuleInformation,
@@ -50,26 +56,29 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 	if(NT_SUCCESS(status)){
 		pSysModuleEntry = ((PSYSTEM_MODULE_INFORMATION)(pSystemInfoBuffer))->Module;
 		for (i = 0; i <((PSYSTEM_MODULE_INFORMATION)(pSystemInfoBuffer))->Count; i++){
+			DbgPrint("%s\n",pSysModuleEntry[i].ImageName);
 			if (_stricmp(pSysModuleEntry[i]./*ModuleName*/ImageName + 
 			  pSysModuleEntry[i]./*ModuleNameOffset*/PathLength,pModuleName) == 0){
 				pModuleBase = pSysModuleEntry[i].Base;
 				break;
 			}
 		}
+	}else{
+		DbgPrint("-Ultradfg- SystemModuleInformation request failed: %x!\n",(UINT)status);
 	}
 
-    if(pSystemInfoBuffer) ExFreePool(pSystemInfoBuffer);
-    return pModuleBase;
+	if(pSystemInfoBuffer) ExFreePool(pSystemInfoBuffer);
+	return pModuleBase;
 }
 
-PVOID
+/*PVOID
 RtlImageDirectoryEntryToData(
     IN PVOID Base,
     IN BOOLEAN MappedAsImage,
     IN USHORT DirectoryEntry,
     OUT PULONG Size
     );
-
+*/
 PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName)
 {
 	PVOID pFunctionAddress = NULL;

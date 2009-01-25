@@ -224,6 +224,10 @@ typedef struct _SYSTEM_MODULE_INFORMATION_ENTRY
 {
     ULONG  Unknown1;
     ULONG  Unknown2;
+#ifdef _WIN64
+	ULONG Unknown3;
+	ULONG Unknown4;
+#endif
     PVOID  Base;
     ULONG  Size;
     ULONG  Flags;
