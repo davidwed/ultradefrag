@@ -128,7 +128,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
-	if(status == STATUS_END_OF_FILE || (iosb.Information < size)){
+	if(status == STATUS_END_OF_FILE/* || (iosb.Information < size)*/){
 		/*winx_raise_error("N: EOF!");*/
 		return 0;
 	}
@@ -136,6 +136,13 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		winx_raise_error("E: Can't read from a file: %x!",(UINT)status);
 		return 0;
 	}
+
+	/* FIXME: iosb.Information may be zero though a read call was successful */
+	if(iosb.Information < size){
+		f->roffset.QuadPart += size * count;
+		return count;
+	}
+
 	f->roffset.QuadPart += iosb.Information;//size * count;
 	return (iosb.Information / size);//count;
 }
@@ -164,11 +171,14 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 		winx_raise_error("E: Can't write to a file: %x!",(UINT)status);
 		return 0;
 	}
-	f->woffset.QuadPart += iosb.Information;//size * count;
 
 	/* FIXME: iosb.Information may be zero though a write call was successful */
-	if(iosb.Information < size) return count;
+	if(iosb.Information < size){
+		f->woffset.QuadPart += size * count;
+		return count;
+	}
 
+	f->woffset.QuadPart += iosb.Information;//size * count;
 	return (iosb.Information / size);//count;
 }
 
