@@ -315,7 +315,7 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 	HANDLE hRoot;
 	NTSTATUS Status;
 	IO_STATUS_BLOCK IoStatusBlock;
-	FILE_FS_SIZE_INFORMATION ffs;
+	FILE_FS_SIZE_INFORMATION *pffs;
 	
 	letter = (char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
@@ -332,19 +332,36 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 	}
 
 	if(!internal_open_rootdir(letter,&hRoot)) return (-1);
-	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,&ffs,
+
+	/*
+	* Oh, you fucked ms c x64 compiler :(((
+	* FILE_FS_SIZE_INFORMATION structure needs to be filled by zeros
+	* before system call. But x64 compiler doesn't allow to do this.
+	* Therefore we must allocate memory...
+	*/
+	pffs = winx_virtual_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
+	if(!pffs){
+		winx_raise_error("E: winx_get_volume_size(): no enough memory!");
+		return (-1);
+	}
+	/* now we have zero filled space pointed by pffs */
+
+	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pffs,
 				sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	NtClose(hRoot);
 	if(!NT_SUCCESS(Status)){
 		winx_raise_error("E: winx_get_volume_size(): can't get size of volume \'%c\': %x!",
 			letter,(UINT)Status);
+		winx_virtual_free(pffs,sizeof(FILE_FS_SIZE_INFORMATION));
 		return (-1);
 	}
 	
-	ptotal->QuadPart = ffs.TotalAllocationUnits.QuadPart * \
-				ffs.SectorsPerAllocationUnit * ffs.BytesPerSector;
-	pfree->QuadPart = ffs.AvailableAllocationUnits.QuadPart * \
-				ffs.SectorsPerAllocationUnit * ffs.BytesPerSector;
+	ptotal->QuadPart = pffs->TotalAllocationUnits.QuadPart * \
+				pffs->SectorsPerAllocationUnit * pffs->BytesPerSector;
+	pfree->QuadPart = pffs->AvailableAllocationUnits.QuadPart * \
+				pffs->SectorsPerAllocationUnit * pffs->BytesPerSector;
+
+	winx_virtual_free(pffs,sizeof(FILE_FS_SIZE_INFORMATION));
 	return 0;
 }
 

@@ -28,6 +28,35 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+/****ix* zenwinx.internals/long_type_on_x64
+* NAME
+*   long data type on x64 system
+* NOTES
+*   If we are using winx_virtual_alloc(long size) then
+*   x64 MS C compiler generates the following commands:
+*
+*   mov  dword ptr [rsp+8], ecx ; ecx contains size
+*   sub  rsp, 0x40
+*   lea  r9, [rsp+0x50]
+*   ...
+*   call NtAllocateVirtualMemory
+*
+*   Low part of r9 register contains size, high part - TRASH!
+*   Because MS C compiler assumes that 'long' data type is always
+*   32-bit long.
+*
+*   On the other hand, NtAllocateVirtualMemory() system call
+*   is compatible with ISO C standard, it uses all 64-bits of it's 
+*   argument.
+*
+*   Therefore NtAllocateVirtualMemory always has trash in 
+*   'size' parameter. Therefore it fails.
+*
+*   To suppress this mistake we are using since 2.1.0 version
+*   of the Ultra Defragmenter the following form:
+*   winx_virtual_alloc(ULONGLONG size);
+******/
+
 /****f* zenwinx.memory/winx_virtual_alloc
 * NAME
 *    winx_virtual_alloc
@@ -58,13 +87,13 @@
 * SEE ALSO
 *    winx_virtual_free
 ******/
-void * __stdcall winx_virtual_alloc(unsigned long size)
+void * __stdcall winx_virtual_alloc(ULONGLONG size)
 {
 	void *addr = NULL;
 	NTSTATUS Status;
 
-	Status = NtAllocateVirtualMemory(NtCurrentProcess(),
-				&addr,0,&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
+	Status = NtAllocateVirtualMemory(NtCurrentProcess(),&addr,0,
+		(PULONG)&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
 	return (NT_SUCCESS(Status)) ? addr : NULL;
 }
 
@@ -91,7 +120,8 @@ void * __stdcall winx_virtual_alloc(unsigned long size)
 * SEE ALSO
 *    winx_virtual_alloc
 ******/
-void __stdcall winx_virtual_free(void *addr,unsigned long size)
+void __stdcall winx_virtual_free(void *addr,ULONGLONG size)
 {
-	NtFreeVirtualMemory(NtCurrentProcess(),&addr,&size,MEM_RELEASE);
+	NtFreeVirtualMemory(NtCurrentProcess(),&addr,
+		(PULONG)&size,MEM_RELEASE);
 }

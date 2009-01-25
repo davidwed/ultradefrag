@@ -49,8 +49,8 @@ void __stdcall winx_exit(int exit_code);
 void __stdcall winx_reboot(void);
 void __stdcall winx_shutdown(void);
 
-void * __stdcall winx_virtual_alloc(unsigned long size);
-void   __stdcall winx_virtual_free(void *addr,unsigned long size);
+void * __stdcall winx_virtual_alloc(ULONGLONG size);
+void   __stdcall winx_virtual_free(void *addr,ULONGLONG size);
 
 int __cdecl winx_putch(int ch);
 int __cdecl winx_puts(const char *string);

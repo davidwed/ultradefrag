@@ -5,8 +5,8 @@ EXPORTS
 	winx_exit@4
 	winx_reboot@0
 	winx_shutdown@0
-	winx_virtual_alloc@4
-	winx_virtual_free@8
+	winx_virtual_alloc@8
+	winx_virtual_free@12
 	winx_putch
 	winx_puts
 	winx_printf
