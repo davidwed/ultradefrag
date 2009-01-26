@@ -36,11 +36,11 @@ Reporting Bugs
 
 Please report all problems and bugs via our bug tracker:
 
-	http://sourceforge.net/tracker/?group_id=199532
+	http://ultradefrag.sourceforge.net/bugs.html
 
 For help requests visit our forum:
 
-	http://sourceforge.net/forum/?group_id=199532
+	http://ultradefrag.sourceforge.net/forum.html
 
 
 Copyright
