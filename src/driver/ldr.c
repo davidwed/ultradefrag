@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -40,13 +40,13 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 	status = ZwQuerySystemInformation(SystemModuleInformation,
 		&SystemInfoBufferSize,0,&SystemInfoBufferSize);
 	if(!SystemInfoBufferSize){
-		DbgPrint("-Ultradfg- SystemInfoBufferSize request failed: %x!\n",(UINT)status);
+		DebugPrint("-Ultradfg- SystemInfoBufferSize request failed: %x!\n",NULL,(UINT)status);
 		return NULL;
 	}
 
 	pSystemInfoBuffer = (PULONG)AllocatePool(NonPagedPool, SystemInfoBufferSize*2);
 	if(!pSystemInfoBuffer){
-		DbgPrint("-Ultradfg- KernelGetModuleBase: No enough memory!\n");
+		DebugPrint("-Ultradfg- KernelGetModuleBase: No enough memory!\n",NULL);
 		return NULL;
 	}
 
@@ -56,7 +56,7 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 	if(NT_SUCCESS(status)){
 		pSysModuleEntry = ((PSYSTEM_MODULE_INFORMATION)(pSystemInfoBuffer))->Module;
 		for (i = 0; i <((PSYSTEM_MODULE_INFORMATION)(pSystemInfoBuffer))->Count; i++){
-			DbgPrint("%s\n",pSysModuleEntry[i].ImageName);
+			DebugPrint("%s\n",NULL,pSysModuleEntry[i].ImageName);
 			if (_stricmp(pSysModuleEntry[i]./*ModuleName*/ImageName + 
 			  pSysModuleEntry[i]./*ModuleNameOffset*/PathLength,pModuleName) == 0){
 				pModuleBase = pSysModuleEntry[i].Base;
@@ -64,10 +64,10 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 			}
 		}
 	}else{
-		DbgPrint("-Ultradfg- SystemModuleInformation request failed: %x!\n",(UINT)status);
+		DebugPrint("-Ultradfg- SystemModuleInformation request failed: %x!\n",NULL,(UINT)status);
 	}
 
-	if(pSystemInfoBuffer) ExFreePool(pSystemInfoBuffer);
+	if(pSystemInfoBuffer) ExFreePool(pSystemInfoBuffer); /* Nt_ExFreePool cannot be used here :) */
 	return pModuleBase;
 }
 

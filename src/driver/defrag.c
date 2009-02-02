@@ -46,6 +46,8 @@
 * file system imperfectness. On the other hand,
 * FAT formatted volumes usually aren't big enough 
 * to slow down the process.
+*
+* ???
 */
 
 

@@ -42,6 +42,16 @@ extern PVOID kernel_addr;
 extern PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
 	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY);
 extern VOID (NTAPI *ptrExFreePoolWithTag)(PVOID,ULONG);
+extern BOOLEAN (NTAPI *ptrKeRegisterBugCheckReasonCallback)(
+	PKBUGCHECK_REASON_CALLBACK_RECORD,PKBUGCHECK_REASON_CALLBACK_ROUTINE,
+	KBUGCHECK_CALLBACK_REASON,PUCHAR);
+extern BOOLEAN (NTAPI *ptrKeDeregisterBugCheckReasonCallback)(
+    PKBUGCHECK_REASON_CALLBACK_RECORD CallbackRecord);
+
+extern KBUGCHECK_CALLBACK_RECORD bug_check_record;
+extern KBUGCHECK_REASON_CALLBACK_RECORD bug_check_reason_record;
+
+extern GUID ultradfg_guid;
 
 extern char invalid_request[];
 

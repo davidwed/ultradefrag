@@ -24,11 +24,11 @@
 #include "driver.h"
 
 BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
-					   PFILE_BOTH_DIR_INFORMATION pFileInfo,BOOLEAN is_root);
+					   PFILE_BOTH_DIR_INFORMATION pFileInfo);
 BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 
 /* FindFiles() - recursive search of all files on specified path. */
-BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root)
+BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	PFILE_BOTH_DIR_INFORMATION pFileInfoFirst = NULL, pFileInfo;
@@ -36,13 +36,14 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 	NTSTATUS Status;
 	UNICODE_STRING new_path;
 	HANDLE DirectoryHandle;
+	int length;
 
 	/* Allocate memory */
 	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(NonPagedPool,
 		FIND_DATA_SIZE + sizeof(PFILE_BOTH_DIR_INFORMATION));
 	if(!pFileInfoFirst){
-		DbgPrintNoMem();
-		goto fail;
+		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n",NULL);
+		return FALSE;
 	}
 	/* Open directory */
 	InitializeObjectAttributes(&ObjectAttributes,path,0,NULL,NULL);
@@ -52,9 +53,9 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 				FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_OPEN_FOR_BACKUP_INTENT,
 				NULL,0);
 	if(Status != STATUS_SUCCESS){
-		DebugPrint1("-Ultradfg- Can't open file: %x\n",path->Buffer,(UINT)Status);
-		DirectoryHandle = NULL;
-		goto fail;
+		DebugPrint1("-Ultradfg- cannot open directory: %x\n",path->Buffer,(UINT)Status);
+		DirectoryHandle = NULL;	ExFreePoolSafe(pFileInfoFirst);
+		return FALSE;
 	}
 
 	/* Query information about files */
@@ -74,70 +75,115 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_r
 									FALSE, /* ReturnSingleEntry */
 									NULL,
 									FALSE); /* RestartScan */
-			if(Status != STATUS_SUCCESS) goto no_more_items;
+			if(Status != STATUS_SUCCESS) break; /* no more items */
 		}
-		/* Interpret information */
-		if(pFileInfo->FileName[0] == 0x002E)
-			if(pFileInfo->FileName[1] == 0x002E || pFileInfo->FileNameLength == sizeof(short))
-				continue;	/* for . and .. */
-		/* VERY IMPORTANT: skip reparse points */
-		if(IS_REPARSE_POINT(pFileInfo)) continue;
-		/* FIXME: hard links? */
-		/* FIXME: sparse files? */
-		wcsncpy(dx->tmp_buf,path->Buffer,(path->Length) >> 1);
-		dx->tmp_buf[(path->Length) >> 1] = 0;
-		if(!is_root)
+
+		/* skip . and .. */
+		if(!pFileInfo->FileNameLength) continue;
+		if(pFileInfo->FileNameLength == sizeof(short) && pFileInfo->FileName[0] == 0x002E)
+			continue;
+		if(pFileInfo->FileName[0] == 0x002E && pFileInfo->FileName[1] == 0x002E)
+			continue;
+
+		length = min(path->Length >> 1,TEMP_BUFFER_CHARS - 2);
+		if(length == (TEMP_BUFFER_CHARS - 2)){
+			DebugPrint("-Ultradfg- path->Buffer is too long: %u bytes!\n",NULL,path->Length);
+			continue;
+		}
+		wcsncpy(dx->tmp_buf,path->Buffer,length);
+		dx->tmp_buf[length] = 0;
+
+		/* rootdir contains closing backslash, other directories aren't enclosed */
+		if(dx->tmp_buf[length - 1] != '\\'){
 			wcscat(dx->tmp_buf,L"\\");
+			length ++;
+		}
+
+		if((pFileInfo->FileNameLength >> 1) > (TEMP_BUFFER_CHARS - 1 - length)){
+			DebugPrint("-Ultradfg- resulting path is too long: %u bytes!\n",NULL,
+				length + (pFileInfo->FileNameLength >> 1));
+			continue;
+		}
 		wcsncat(dx->tmp_buf,pFileInfo->FileName,(pFileInfo->FileNameLength) >> 1);
+
+		/* VERY IMPORTANT: skip reparse points */
+		/* FIXME: what is reparse point? How to detect these that represents another volumes? */
+		if(IS_REPARSE_POINT(pFileInfo)){
+			DebugPrint("-Ultradfg- Reparse point found\n",dx->tmp_buf);
+			continue;
+		}
+
+		/* skip temporary files */
+		if(IS_TEMPORARY_FILE(pFileInfo)){
+			DebugPrint2("-Ultradfg- Temporary file found\n",dx->tmp_buf);
+			continue;
+		}
+
+		/*
+		* Skip hard links:
+		* It seems that we don't have any simple way to get information 
+		* on hard links. So we couldn't skip them, although there is safe enough.
+		*/
+		/*if(IS_HARD_LINK(pFileInfo)){
+			DebugPrint("-Ultradfg- Hard link found\n",dx->tmp_buf);
+		}
+		if(wcsstr(dx->tmp_buf,L"HardLink")){
+			DebugPrint("Attributes = %x\n",dx->tmp_buf,pFileInfo->FileAttributes);
+		}*/
+
+		/* UltraDefrag has a full support for sparse files! :D */
+		if(IS_SPARSE_FILE(pFileInfo)){
+			DebugPrint("-Ultradfg- Sparse file found\n",dx->tmp_buf);
+			/* Let's to defragment them! :) */
+		}
+
+		if(IS_ENCRYPTED_FILE(pFileInfo)){
+			DebugPrint2("-Ultradfg- Encrypted file found\n",dx->tmp_buf);
+		}
+
 		if(!RtlCreateUnicodeString(&new_path,dx->tmp_buf)){
-			DbgPrintNoMem();
-			ZwClose(DirectoryHandle);
-			goto fail;
+			DebugPrint2("-Ultradfg- cannot allocate memory for the new_path!\n",NULL);
+			ZwClose(DirectoryHandle); ExFreePoolSafe(pFileInfoFirst);
+			return FALSE;
 		}
 
 		if(IS_DIR(pFileInfo)){
-			/*if(!*/FindFiles(dx,&new_path,FALSE)/*) goto fail*/;
-			if(KeReadStateEvent(&stop_event) == 0x1)
-				goto no_more_items;
+			FindFiles(dx,&new_path);
 		} else {
-			if(!pFileInfo->EndOfFile.QuadPart) goto next; /* file is empty */
+			if(!pFileInfo->EndOfFile.QuadPart){ /* file is empty */
+				RtlFreeUnicodeString(&new_path); continue;
+			}
 		}
-		if(!InsertFileName(dx,new_path.Buffer,pFileInfo,is_root)){
-			DebugPrint1("-Ultradfg- InsertFileName failed for\n",new_path.Buffer);
+		
+		if(!InsertFileName(dx,new_path.Buffer,pFileInfo)){
+			DebugPrint("-Ultradfg- InsertFileName failed for\n",new_path.Buffer);
 			ZwClose(DirectoryHandle);
-			RtlFreeUnicodeString(&new_path);
-			goto fail;
+			RtlFreeUnicodeString(&new_path); ExFreePoolSafe(pFileInfoFirst);
+			return FALSE;
 		}
-next:
 		RtlFreeUnicodeString(&new_path);
 	}
-no_more_items:
+
 	ZwClose(DirectoryHandle);
-	ExFreePool(pFileInfoFirst);
+	Nt_ExFreePool(pFileInfoFirst);
     return TRUE;
-fail:
-	ExFreePoolSafe(pFileInfoFirst);
-	return FALSE;
 }
 
 /* inserts the new FILENAME structure to filelist */
 /* Returns TRUE on success and FALSE if no enough memory */
 BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
-					   PFILE_BOTH_DIR_INFORMATION pFileInfo,BOOLEAN is_root)
+					   PFILE_BOTH_DIR_INFORMATION pFileInfo)
 {
 	PFILENAME pfn;
 
 	/* Add file name with path to filelist */
 	pfn = (PFILENAME)InsertFirstItem((PLIST *)&dx->filelist,sizeof(FILENAME));
-	if(!pfn){
-		DbgPrintNoMem();
-		return FALSE;
-	}
+	if(!pfn) return FALSE;
 	if(!RtlCreateUnicodeString(&pfn->name,path)){
-		DbgPrintNoMem();
+		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
 		dx->filelist = pfn->next_ptr;
-		ExFreePool(pfn);
-		return TRUE;
+		Nt_ExFreePool(pfn);
+		return FALSE;
 	}
 	pfn->is_dir = IS_DIR(pFileInfo);
 	pfn->is_compressed = IS_COMPRESSED(pFileInfo);
@@ -146,17 +192,12 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 		pfn->is_overlimit = TRUE;
 	else
 		pfn->is_overlimit = FALSE;
-	if(!DumpFile(dx,pfn)){
-no_mem:
-		dx->filelist = pfn->next_ptr;
-		RtlFreeUnicodeString(&pfn->name);
-		ExFreePool(pfn);
-	} else {
-		if(pfn->is_fragm) {
-			if(!InsertFragmentedFile(dx,pfn)) {
+	if(DumpFile(dx,pfn)){
+		if(pfn->is_fragm){
+			if(!InsertFragmentedFile(dx,pfn)){
 				dx->fragmfilecounter --;
 				dx->fragmcounter -= pfn->n_fragments;
-				goto no_mem;
+				goto fail;
 			}
 		}
 		dx->filecounter ++;
@@ -164,6 +205,12 @@ no_mem:
 		if(pfn->is_compressed) dx->compressedcounter ++;
 	}
 	return TRUE;
+
+fail:
+	dx->filelist = pfn->next_ptr;
+	RtlFreeUnicodeString(&pfn->name);
+	Nt_ExFreePool(pfn);
+	return FALSE;
 }
 
 /* inserts the new structure to list of fragmented files */
@@ -174,7 +221,7 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 
 	pf = (PFRAGMENTED)AllocatePool(NonPagedPool,sizeof(FRAGMENTED));
 	if(!pf){
-		DbgPrintNoMem();
+		DebugPrint2("-Ultradfg- cannot allocate memory for InsertFragmentedFile()!\n",NULL);
 		return FALSE;
 	}
 	pf->pfn = pfn;

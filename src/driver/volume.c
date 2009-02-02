@@ -44,7 +44,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(status != STATUS_SUCCESS){
 		DebugPrint("-Ultradfg- Can't open volume %x\n",NULL,(UINT)status);
 		dx->hVol = NULL;
-		goto done;
+		return status;
 	}
 	/* try to get fs type */
 	status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
@@ -59,18 +59,15 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(status == STATUS_INVALID_DEVICE_REQUEST){
 			/* this is usual case for floppies */
 			dx->partition_type = FLOPPY_FAT12_PARTITION;
-			status = STATUS_SUCCESS;
-			goto done;
+			return STATUS_SUCCESS;
 		}
-		/* FIXME: maybe more flexible error handling can be applied */
 		ZwCloseSafe(dx->hVol);
-		//status = STATUS_WRONG_VOLUME;
-		goto done;
+		DebugPrint("-Ultradfg- Unknown filesystem!\n",NULL);
+		return status;
 	}
 	dx->partition_type = part_info.PartitionType;
 	DebugPrint("-Ultradfg- possible partition type: %u\n",NULL,dx->partition_type);
-done:
-	return status;
+	return STATUS_SUCCESS;
 }
 
 NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
@@ -94,8 +91,8 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(status != STATUS_SUCCESS){
-		DebugPrint("-Ultradfg- Can't open the root directory: %x!",
-				path,(UINT)status);
+		DebugPrint("-Ultradfg- Can't open the root directory: %x!\n",
+			path,(UINT)status);
 		hFile = NULL;
 		return status;
 	}
@@ -104,7 +101,11 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	status = ZwQueryVolumeInformationFile(hFile,&iosb,&FileFsSize,
 			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	ZwClose(hFile);
-	if(status != STATUS_SUCCESS) return status;
+	if(status != STATUS_SUCCESS){
+		DebugPrint("-Ultradfg- FileFsSizeInformation() request failed: %x!\n",
+			path,(UINT)status);
+		return status;
+	}
 
 	bpc = FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
 	dx->bytes_per_cluster = bpc;
@@ -112,13 +113,18 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
 	dx->clusters_per_256k = _256K / dx->bytes_per_cluster;
-	if(!dx->clusters_per_256k) dx->clusters_per_256k ++;
 	DebugPrint("-Ultradfg- total clusters: %I64u\n",NULL, dx->clusters_total);
 	DebugPrint("-Ultradfg- cluster size: %I64u\n",NULL, dx->bytes_per_cluster);
+	if(!dx->clusters_per_256k){
+		DebugPrint("-Ultradfg- clusters are larger than 256 kbytes!\n",NULL);
+		dx->clusters_per_256k ++;
+	}
 	
 	/* validate geometry */
-	if(!dx->clusters_total || !dx->total_space || !dx->bytes_per_cluster)
+	if(!dx->clusters_total || !dx->bytes_per_cluster){
+		DebugPrint("-Ultradfg- wrong volume geometry!\n",NULL);
 		return STATUS_WRONG_VOLUME;
+	}
 	return STATUS_SUCCESS;
 }
 
@@ -142,7 +148,7 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 		
 	/* 
-	* Not increment dx->processed_clusters here, 
+	* Don't increment dx->processed_clusters here, 
 	* because some parts of MFT are really free.
 	*/
 	DebugPrint("-Ultradfg- MFT_file   : start : length\n",NULL);
@@ -153,21 +159,18 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	else
 		len = 0;
 	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",NULL,start,len);
-	//dx->processed_clusters += len;
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFT2 */
 	start = ntfs_data.MftZoneStart.QuadPart;
 	len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
 	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",NULL,start,len);
-	//dx->processed_clusters += len;
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
 	mft_len += len;
 	/* $MFTMirror */
 	start = ntfs_data.Mft2StartLcn.QuadPart;
 	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",NULL,start);
 	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
-	//dx->processed_clusters ++;
 	mft_len ++;
 	dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
 }

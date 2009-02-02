@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,6 +24,13 @@
 #include "driver.h"
 #include "../include/ultradfgver.h"
 
+VOID __stdcall BugCheckCallback(PVOID Buffer,ULONG Length);
+VOID __stdcall BugCheckSecondaryDumpDataCallback(
+    KBUGCHECK_CALLBACK_REASON Reason,
+    PKBUGCHECK_REASON_CALLBACK_RECORD Record,
+    PVOID ReasonSpecificData,
+    ULONG ReasonSpecificDataLength);
+
 #if !defined(__GNUC__)
 #pragma code_seg("INIT") /* begin of section INIT */
 #endif
@@ -34,14 +41,22 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 {
 	ULONG mj,mn;
 
+	/* print driver version */
+	DebugPrint("=Ultradfg= %s\n",NULL,VERSIONINTITLE);
+
 	/* get windows version */
-	PsGetVersion(&mj,&mn,NULL,NULL);
+	if(PsGetVersion(&mj,&mn,NULL,NULL))
+		DebugPrint("=Ultradfg= NT %u.%u checked.\n",NULL,mj,mn);
+	else
+		DebugPrint("=Ultradfg= NT %u.%u free.\n",NULL,mj,mn);
+	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
 	nt4_system = (mj == 4) ? 1 : 0;
 	
 	/* get nt kernel base address */
 	kernel_addr = KernelGetModuleBase("ntoskrnl.exe");
 	if(!kernel_addr) kernel_addr = KernelGetModuleBase("ntkrnlpa.exe");
 	if(!kernel_addr) kernel_addr = KernelGetModuleBase("ntkrnlmp.exe");
+	if(!kernel_addr) kernel_addr = KernelGetModuleBase("ntkrpamp.exe");
 	/* FIXME: add all other kernel names */
 
 	if(kernel_addr){
@@ -49,7 +64,22 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 			"MmMapLockedPagesSpecifyCache");
 		ptrExFreePoolWithTag = KernelGetProcAddress(kernel_addr,
 			"ExFreePoolWithTag");
+		ptrKeRegisterBugCheckReasonCallback = KernelGetProcAddress(kernel_addr,
+			"KeRegisterBugCheckReasonCallback");
+		ptrKeDeregisterBugCheckReasonCallback = KernelGetProcAddress(kernel_addr,
+			"KeDeregisterBugCheckReasonCallback");
 	}
+
+	/* print kernel functions addresses */
+	DebugPrint("=Ultradfg= Kernel address: %p\n",NULL,kernel_addr);
+	DebugPrint("=Ultradfg= ExFreePoolWithTag address: %p\n",
+		NULL,ptrExFreePoolWithTag);
+	DebugPrint("=Ultradfg= KeDeregisterBugCheckReasonCallback address: %p\n",
+		NULL,ptrKeDeregisterBugCheckReasonCallback);
+	DebugPrint("=Ultradfg= KeRegisterBugCheckReasonCallback address: %p\n",
+		NULL,ptrKeRegisterBugCheckReasonCallback);
+	DebugPrint("=Ultradfg= MmMapLockedPagesSpecifyCache address: %p\n",
+		NULL,ptrMmMapLockedPagesSpecifyCache);
 }
 
 INIT_FUNCTION NTSTATUS CreateDevice(IN PDRIVER_OBJECT DriverObject,
@@ -113,6 +143,9 @@ INIT_FUNCTION void driver_entry_cleanup(PDRIVER_OBJECT DriverObject)
 	}
 
 	FLUSH_DBG_CACHE(); CloseLog();
+	KeDeregisterBugCheckCallback(&bug_check_record);
+	if(ptrKeDeregisterBugCheckReasonCallback)
+		ptrKeDeregisterBugCheckReasonCallback(&bug_check_reason_record);
 }
 
 /* DriverEntry - driver initialization */
@@ -121,11 +154,10 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 {
 	UDEFRAG_DEVICE_EXTENSION *dx, *dx_map, *dx_stat, *dx_stop;
 	NTSTATUS status = STATUS_SUCCESS;
-	ULONG mj,mn;
 /*	UNICODE_STRING devName;
 	UNICODE_STRING symLinkName;
 */
-	/* Export entry points */
+	/* 1. Export entry points */
 	DriverObject->DriverUnload = UnloadRoutine;
 	DriverObject->MajorFunction[IRP_MJ_CREATE]= Create_File_IRPprocessing;
 	DriverObject->MajorFunction[IRP_MJ_CLOSE] = Close_HandleIRPprocessing;
@@ -134,24 +166,35 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] =
 											  DeviceControlRoutine;
 
-	/* our driver (since 2.1.0 version) must be os version independent */
-	GetKernelProcAddresses();
-	
+	/* 2. */
 	OpenLog(); /* We should call them before any DebugPrint() calls !!! */
-	/* print driver version */
-	DebugPrint("=Ultradfg= %s\n",NULL,VERSIONINTITLE);
-	/* print windows version */
-	if(PsGetVersion(&mj,&mn,NULL,NULL))
-		DebugPrint("=Ultradfg= NT %u.%u checked.\n",NULL,mj,mn);
-	else
-		DebugPrint("=Ultradfg= NT %u.%u free.\n",NULL,mj,mn);
-	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
-	/* print kernel functions addresses */
-	DebugPrint("=Ultradfg= Kernel address: %p\n",NULL,kernel_addr);
-	DebugPrint("=Ultradfg= ExFreePoolWithTag address: %p\n",
-		NULL,ptrExFreePoolWithTag);
-	DebugPrint("=Ultradfg= MmMapLockedPagesSpecifyCache address: %p\n",
-		NULL,ptrMmMapLockedPagesSpecifyCache);
+	if(!dbg_buffer) return STATUS_NO_MEMORY;
+
+	/* 3. our driver (since 2.1.0 version) must be os version independent */
+	GetKernelProcAddresses();
+
+	/* 4. Set bug check callbacks */
+	KeInitializeCallbackRecord((&bug_check_record)); /* double brackets are required */
+	KeInitializeCallbackRecord((&bug_check_reason_record));
+	/*
+	* Register callback on systems older than XP SP1 / Server 2003.
+	* There is one significant restriction: bug data will be saved only 
+	* in full kernel memory dump.
+	*/
+	if(!KeRegisterBugCheckCallback(&bug_check_record,(VOID *)BugCheckCallback,
+		dbg_buffer,DBG_BUFFER_SIZE,"UltraDefrag"))
+			DebugPrint("=Ultradfg= Cannot register bug check routine!\n",NULL);
+	/*
+	* Register another callback procedure on modern systems: XP SP1, Server 2003 etc.
+	* Bug data will be available even in small memory dump, but just in theory :(
+	*/
+	if(ptrKeRegisterBugCheckReasonCallback){
+		if(!ptrKeRegisterBugCheckReasonCallback(&bug_check_reason_record,
+			(VOID *)BugCheckSecondaryDumpDataCallback,
+			KbCallbackSecondaryDumpData,
+			"UltraDefrag"))
+				DebugPrint("=Ultradfg= Cannot register bug check dump data routine!\n",NULL);
+	}
 	
 	/* Create the main device. */
 	status = CreateDevice(DriverObject,device_name,link_name,&dx);
@@ -213,27 +256,20 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	dbg_level = 0;
 
 	/* allocate memory */
-//#ifndef NT4_TARGET
 	if(!nt4_system){
 		dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
 		dx->BitMap = AllocatePool(NonPagedPool,BITMAPSIZE * sizeof(UCHAR));
 		if(!dx->FileMap || !dx->BitMap) goto no_mem;
 	}
-//#endif
-	dx->tmp_buf = AllocatePool(NonPagedPool,32768 + 5);
+	dx->tmp_buf = AllocatePool(NonPagedPool,TEMP_BUFFER_CHARS * sizeof(short));
 	if(!dx->tmp_buf){
-//#ifndef NT4_TARGET
 no_mem:
-//#endif
-		DbgPrintNoMem();
-//#ifndef NT4_TARGET
+		DebugPrint("-Ultradfg- cannot allocate memory for FileMap, BitMap and tmp_buf!\n",NULL);
 		if(!nt4_system){
 			ExFreePoolSafe(dx->FileMap);
 			ExFreePoolSafe(dx->BitMap);
 		}
-//#endif
 		ExFreePoolSafe(dx->tmp_buf);
-
 		driver_entry_cleanup(DriverObject);
 		return STATUS_NO_MEMORY;
 	}
@@ -248,6 +284,24 @@ no_mem:
 #if !defined(__GNUC__)
 #pragma code_seg() /* end INIT section */
 #endif
+
+VOID __stdcall BugCheckCallback(PVOID Buffer,ULONG Length)
+{
+}
+
+VOID __stdcall BugCheckSecondaryDumpDataCallback(
+    KBUGCHECK_CALLBACK_REASON Reason,
+    PKBUGCHECK_REASON_CALLBACK_RECORD Record,
+    PVOID ReasonSpecificData,
+    ULONG ReasonSpecificDataLength)
+{
+	PKBUGCHECK_SECONDARY_DUMP_DATA p;
+	
+	p = (PKBUGCHECK_SECONDARY_DUMP_DATA)ReasonSpecificData;
+	p->OutBuffer = dbg_buffer;
+	p->OutBufferLength = DBG_BUFFER_SIZE;
+	p->Guid = ultradfg_guid;
+}
 
 /* CompleteIrp: Set IoStatus and complete IRP processing */ 
 NTSTATUS CompleteIrp(PIRP Irp,NTSTATUS status,ULONG info)
@@ -265,7 +319,7 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	if(!dx->second_device){
-		DebugPrint("-Ultradfg- Create File\n",NULL);
+		DebugPrint("-Ultradfg- CreateFile request for main device\n",NULL);
 		CHECK_IRP(Irp);
 		dx->status = STATUS_BEFORE_PROCESSING;
 	}
@@ -279,7 +333,7 @@ NTSTATUS NTAPI Close_HandleIRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	if(!dx->second_device){
-		DebugPrint("-Ultradfg- In Close handler\n",NULL); 
+		DebugPrint("-Ultradfg- CloseHandle request for main device\n",NULL); 
 		CHECK_IRP(Irp);
 	
 		stop_all_requests();
@@ -308,11 +362,11 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 	/* wait for other operations to be finished */
 	Status = KeWaitForSingleObject(&sync_event_2,Executive,KernelMode,FALSE,NULL);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint1("-Ultradfg- is busy!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (sync_event_2, Read_IRPhandler)!\n",NULL);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
 	if(KeReadStateEvent(&unload_event) == 0x1){
-		DebugPrint1("-Ultradfg- is busy!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (unload_event, Read_IRPhandler)!\n",NULL);
 		KeSetEvent(&sync_event_2,IO_NO_INCREMENT,FALSE);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
@@ -376,6 +430,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	char cmd[32]; /* FIXME: replace it with malloc call */
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
+//	int *p = NULL;
 
 	CHECK_IRP(Irp);
 
@@ -406,7 +461,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	interval.QuadPart = (-1); /* 100 nsec */
 	Status = KeWaitForSingleObject(&sync_event,Executive,KernelMode,FALSE,&interval);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint1("-Ultradfg- is busy!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (sync_event, Write_IRPhandler)!\n",NULL);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
 
@@ -419,6 +474,10 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	case 'A':
 	case 'd':
 	case 'D':
+		
+/* Make a BSOD for debugging purposes */
+//*p = 0x20;
+		
 		KeClearEvent(&stop_event);
 		if(KeReadStateEvent(&unload_event) == 0x1) break;
 		
@@ -491,11 +550,11 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	/* wait for other operations to be finished */
 	Status = KeWaitForSingleObject(&sync_event_2,Executive,KernelMode,FALSE,NULL);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint1("-Ultradfg- is busy!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (sync_event_2, DeviceControlRoutine)!\n",NULL);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
 	if(KeReadStateEvent(&unload_event) == 0x1){
-		DebugPrint1("-Ultradfg- is busy!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (unload_event, DeviceControlRoutine)!\n",NULL);
 		KeSetEvent(&sync_event_2,IO_NO_INCREMENT,FALSE);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
@@ -538,6 +597,10 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			break;
 		}
 		dx->disable_reports = *((ULONG *)Irp->AssociatedIrp.SystemBuffer);
+		if(dx->disable_reports)
+			DebugPrint("-Ultradfg- Disable reports: YES",NULL);
+		else
+			DebugPrint("-Ultradfg- Disable reports: NO",NULL);
 		BytesTxd = in_len;
 		break;
 	case IOCTL_SET_USER_MODE_BUFFER:
@@ -545,7 +608,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		DebugPrint("-Ultradfg- Address = %p\n",NULL,
 			IrpStack->Parameters.DeviceIoControl.Type3InputBuffer);
 		user_mode_buffer = IrpStack->Parameters.DeviceIoControl.Type3InputBuffer;
-		//#ifdef NT4_TARGET
 		if(nt4_system && user_mode_buffer){
 			dx->BitMap = user_mode_buffer;
 			dx->FileMap = (ULONGLONG *)(user_mode_buffer + BITMAPSIZE * sizeof(UCHAR));
@@ -553,7 +615,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			dx->pstartVcn = (ULONGLONG *)(dx->pnextLcn + sizeof(ULONGLONG));
 			dx->pmoveFile = (MOVEFILE_DESCRIPTOR *)(dx->pnextLcn + 3 * sizeof(ULONGLONG));
 		}
-		//#endif
 		break;
 	case IOCTL_SET_CLUSTER_MAP_SIZE:
 		DebugPrint("-Ultradfg- IOCTL_SET_CLUSTER_MAP_SIZE\n",NULL);
@@ -653,12 +714,10 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 		pDevice = pDevice->NextDevice;
 		if(!dx->second_device){
 			FreeAllBuffers(dx);
-			//#ifndef NT4_TARGET
 			if(!nt4_system){
 				ExFreePoolSafe(dx->FileMap);
 				ExFreePoolSafe(dx->BitMap);
 			}
-			//#endif
 			ExFreePoolSafe(dx->tmp_buf);
 			ExFreePoolSafe(new_cluster_map);
 			DestroyFilter(dx);
@@ -669,6 +728,10 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 	}
 
 	FLUSH_DBG_CACHE(); CloseLog();
+	
+	KeDeregisterBugCheckCallback(&bug_check_record);
+	if(ptrKeDeregisterBugCheckReasonCallback)
+		ptrKeDeregisterBugCheckReasonCallback(&bug_check_reason_record);
 }
 #if !defined(__GNUC__)
 #pragma code_seg() /* end PAGE section */

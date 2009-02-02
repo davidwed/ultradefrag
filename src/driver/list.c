@@ -29,7 +29,7 @@ LIST* NTAPI InsertFirstItem(PLIST *phead,ULONG size)
 
 	p = (LIST *)AllocatePool(NonPagedPool,size);
 	if(p){ p->next_ptr = *phead; *phead = p; }
-	else { DbgPrintNoMem1(); }
+	else { DebugPrint2("-Ultradfg- InsertFirstItem() no enough memory!\n",NULL); }
 	return p;
 }
 
@@ -40,7 +40,7 @@ LIST* NTAPI InsertMiddleItem(PLIST *pprev,PLIST *pnext,ULONG size)
 	if(*pprev){
 		p = (LIST *)AllocatePool(NonPagedPool,size);
 		if(p){ p->next_ptr = *pnext; (*pprev)->next_ptr = p; }
-		else { DbgPrintNoMem1(); }
+		else { DebugPrint2("-Ultradfg- InsertMiddleItem() no enough memory!\n",NULL); }
 	}
 	return p;
 }
@@ -57,7 +57,7 @@ LIST* NTAPI InsertLastItem(PLIST *phead,PLIST *plast,ULONG size)
 		p->next_ptr = NULL;
 		*plast = p;
 	} else {
-		DbgPrintNoMem1();
+		DebugPrint2("-Ultradfg- InsertLastItem() no enough memory!\n",NULL);
 	}
 	return p;
 }
@@ -67,7 +67,7 @@ LIST* NTAPI RemoveItem(PLIST *phead,PLIST *pprev,PLIST *pcurrent)
 	PLIST next;
 
 	next = (*pcurrent)->next_ptr;
-	ExFreePool(*pcurrent);
+	Nt_ExFreePool(*pcurrent);
 	if(*pprev)
 		(*pprev)->next_ptr = next;
 	else
@@ -83,7 +83,7 @@ void NTAPI DestroyList(PLIST *phead)
 	curr = *phead;
 	while(curr){
 		next = curr->next_ptr;
-		ExFreePool(curr);
+		Nt_ExFreePool(curr);
 		curr = next;
 	}
 	*phead = NULL;

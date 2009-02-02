@@ -31,8 +31,6 @@ UCHAR BitShift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 short device_name[] = L"\\Device\\UltraDefrag";
 short link_name[] = L"\\DosDevices\\ultradfg"; 	/* On NT can be L"\\??\\ultradfg" */
 
-char *no_mem = "-Ultradfg- No Enough Memory!\n";
-
 KEVENT sync_event;
 KEVENT sync_event_2;
 KEVENT stop_event;
@@ -47,8 +45,20 @@ PVOID kernel_addr;
 PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
 	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY) = NULL;
 VOID (NTAPI *ptrExFreePoolWithTag)(PVOID,ULONG) = NULL;
+BOOLEAN (NTAPI *ptrKeRegisterBugCheckReasonCallback)(
+	PKBUGCHECK_REASON_CALLBACK_RECORD,PKBUGCHECK_REASON_CALLBACK_ROUTINE,
+	KBUGCHECK_CALLBACK_REASON,PUCHAR) = NULL;
+BOOLEAN (NTAPI *ptrKeDeregisterBugCheckReasonCallback)(
+    PKBUGCHECK_REASON_CALLBACK_RECORD CallbackRecord) = NULL;
 
-char invalid_request[] = "-Ultradfg- 32-bit requests can't be accepted by 64-bit driver!\n";
+KBUGCHECK_CALLBACK_RECORD bug_check_record;
+KBUGCHECK_REASON_CALLBACK_RECORD bug_check_reason_record;
+
+// {B7B5FCD6-FB0A-48f9-AEE5-02AF097C9504}
+GUID ultradfg_guid = \
+{ 0xb7b5fcd6, 0xfb0a, 0x48f9, { 0xae, 0xe5, 0x2, 0xaf, 0x9, 0x7c, 0x95, 0x4 } };
+
+char invalid_request[] = "-Ultradfg- 32-bit request cannot be accepted by 64-bit driver!\n";
 
 /*
 * Buffer to store the number of clusters of each kind.
@@ -62,7 +72,6 @@ ULONG map_size = 0;
 void InitDX(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	memset(&dx->z_start,0,(LONG_PTR)&(dx->z_end) - (LONG_PTR)&(dx->z_start));
-	//DbgPrint("%u\n",(LONG_PTR)&(dx->z_end) - (LONG_PTR)&(dx->z_start));
 	dx->hVol = NULL;
 	dx->current_operation = 'A';
 }
@@ -91,7 +100,7 @@ void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 		next_ptr = ptr->next_ptr;
 		DestroyList((PLIST *)&ptr->blockmap);
 		RtlFreeUnicodeString(&ptr->name);
-		ExFreePool((void *)ptr);
+		Nt_ExFreePool((void *)ptr);
 		ptr = next_ptr;
 	}
 	DestroyList((PLIST *)&dx->free_space_map);

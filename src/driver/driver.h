@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@
 
 #include <windef.h> /* for MAX_PATH constant */
 #include <ctype.h>
+#include <stdio.h> /* for _snwprintf */
 #include "../include/ultradfg.h"
 
 #ifdef USE_WINDDK
@@ -80,7 +81,13 @@ typedef unsigned int UINT;
 * LOG file on disk is better than unsaved messages after a crash.
 */
 
-#define DBG_BUFFER_SIZE (512 * 1024) /* 512 kb */
+/*
+* It must be always greater than PAGE_SIZE (8192 ?), because the 
+* dbg_buffer needs to be aligned on a page boundary. This is a 
+* special requirement of BugCheckSecondaryDumpDataCallback() 
+* function described in DDK documentation.
+*/
+#define DBG_BUFFER_SIZE (32 * 1024) /* 32 kb - more than enough */
 
 void __stdcall OpenLog();
 void __stdcall CloseLog();
@@ -105,12 +112,45 @@ void __cdecl DebugPrint(char *format, short *ustring, ...);
 #define DebugPrint2 if(dbg_level < 2) {} else DebugPrint
 #endif
 
-#define DbgPrintNoMem() DebugPrint(no_mem,NULL)
-#define DbgPrintNoMem0() DebugPrint0(no_mem,NULL)
-#define DbgPrintNoMem1() DebugPrint1(no_mem,NULL)
-#define DbgPrintNoMem2() DebugPrint2(no_mem,NULL)
+#ifndef USE_WINDDK
+typedef enum _KBUGCHECK_CALLBACK_REASON {
+    KbCallbackInvalid,
+    KbCallbackReserved1,
+    KbCallbackSecondaryDumpData,
+    KbCallbackDumpIo,
+} KBUGCHECK_CALLBACK_REASON;
+
+typedef struct _KBUGCHECK_REASON_CALLBACK_RECORD {
+    LIST_ENTRY Entry;
+    VOID *CallbackRoutine;
+    PUCHAR Component;
+    ULONG_PTR Checksum;
+    KBUGCHECK_CALLBACK_REASON Reason;
+    UCHAR State;
+} KBUGCHECK_REASON_CALLBACK_RECORD, *PKBUGCHECK_REASON_CALLBACK_RECORD;
+
+typedef
+VOID
+(*PKBUGCHECK_REASON_CALLBACK_ROUTINE) (
+    IN KBUGCHECK_CALLBACK_REASON Reason,
+    IN struct _KBUGCHECK_REASON_CALLBACK_RECORD* Record,
+    IN OUT PVOID ReasonSpecificData,
+    IN ULONG ReasonSpecificDataLength
+    );
+	
+typedef struct _KBUGCHECK_SECONDARY_DUMP_DATA {
+    IN PVOID InBuffer;
+    IN ULONG InBufferLength;
+    IN ULONG MaximumAllowed;
+    OUT GUID Guid;
+    OUT PVOID OutBuffer;
+    OUT ULONG OutBufferLength;
+} KBUGCHECK_SECONDARY_DUMP_DATA, *PKBUGCHECK_SECONDARY_DUMP_DATA;
+#endif /* USE_WINDDK */
 
 /*********************** END OF DEBUGGING ISSUES ***********************/
+
+#define TEMP_BUFFER_CHARS 32768
 
 #if 0 /* since v2.1.0 */
 	#ifdef NT4_TARGET
@@ -469,7 +509,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 /* Function Prototypes */
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
 void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
-BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path,BOOLEAN is_root);
+BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state,int old_space_state);
 void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
@@ -532,6 +572,21 @@ PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
 
 #define IS_REPARSE_POINT(pFileInfo) \
 (((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) ? TRUE : FALSE)
+
+#define IS_SPARSE_FILE(pFileInfo) \
+(((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_SPARSE_FILE) ? TRUE : FALSE)
+
+#define IS_TEMPORARY_FILE(pFileInfo) \
+(((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_TEMPORARY) ? TRUE : FALSE)
+
+#define IS_ENCRYPTED_FILE(pFileInfo) \
+(((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_ENCRYPTED) ? TRUE : FALSE)
+
+#define IS_NOT_CONTENT_INDEXED(pFileInfo) \
+(((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_NOT_CONTENT_INDEXED) ? TRUE : FALSE)
+
+/* cannot be retrieved from pFileInfo */
+#define IS_HARD_LINK(pFileInfo) FALSE
 
 typedef struct _FILE_BOTH_DIRECTORY_INFORMATION {
     ULONG               NextEntryOffset;

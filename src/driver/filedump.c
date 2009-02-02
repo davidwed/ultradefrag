@@ -56,7 +56,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	if(Status != STATUS_SUCCESS){
 		DebugPrint1("-Ultradfg- System file found: %x\n",pfn->name.Buffer,(UINT)Status);
 		hFile = NULL;
-		goto dump_success; /* System file! */
+		return TRUE; /* System file! */
 	}
 
 	/* Start dumping the mapping information. Go until we hit the end of the file. */
@@ -72,10 +72,8 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			Status = ioStatus.Status;
 		}
 		if(Status != STATUS_SUCCESS && Status != STATUS_BUFFER_OVERFLOW){
+			DebugPrint2("-Ultradfg- Dump failed %x\n",pfn->name.Buffer,(UINT)Status);
 dump_fail:
-			/*
-			DebugPrint1("-Ultradfg- Dump failed %x\n",pfn->name.Buffer,(UINT)Status);
-			*/
 			DeleteBlockmap(pfn);
 			pfn->clusters_total = pfn->n_fragments = 0;
 			pfn->is_fragm = FALSE;
@@ -115,7 +113,6 @@ next_run:
 		dx->fragmfilecounter ++; /* file is true fragmented */
 	}
 	dx->fragmcounter += cnt;
-dump_success:
 	return TRUE; /* success */
 }
 

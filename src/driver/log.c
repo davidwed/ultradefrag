@@ -57,7 +57,7 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			buf,length,/*pOffset*/NULL,NULL);
 	//pOffset->QuadPart += length;
 	if(Status == STATUS_PENDING){
-		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.",NULL);
+		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n",NULL);
 		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
@@ -99,7 +99,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			Write(dx,hFile,as.Buffer,as.Length);
 			RtlFreeAnsiString(&as);
 		} else {
-			DebugPrint("No enough memory!",NULL);
+			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n",NULL);
 		}
 		strcpy(buffer,"]],uname = {");
 		Write(dx,hFile,buffer,strlen(buffer));
@@ -222,7 +222,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		_itoa(pf->pfn->n_fragments,buffer,10);
 		RtlInitAnsiString(&as,buffer);
 		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-			DebugPrint("No enough memory!",NULL);
+			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n",NULL);
 			continue;
 		}
 		Write(dx,hFile,us.Buffer,us.Length);
@@ -288,7 +288,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 
 void __stdcall OpenLog()
 {
-	dbg_buffer = AllocatePool(NonPagedPool,DBG_BUFFER_SIZE); /* 512 kb ring-buffer */
+	dbg_buffer = AllocatePool(NonPagedPool,DBG_BUFFER_SIZE); /* 32 kb ring-buffer */
 	if(!dbg_buffer) DbgPrint("=Ultradfg= Can't allocate dbg_buffer!\n");
 	else{
 		memset((void *)dbg_buffer,0,DBG_BUFFER_SIZE);
@@ -300,7 +300,7 @@ void __stdcall OpenLog()
 void __stdcall CloseLog()
 {
 	if(dbg_buffer){
-		ExFreePool(dbg_buffer);
+		Nt_ExFreePool(dbg_buffer);
 		dbg_buffer = NULL;
 	}
 }
@@ -311,7 +311,7 @@ void __stdcall SaveLog()
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS Status;
 	IO_STATUS_BLOCK ioStatus;
-	short error_msg[] = L"No enough memory to save debug messages. It requires 512 kb.";
+	short error_msg[] = L"No enough memory to save debug messages. It requires 32 kb.";
 	HANDLE hDbgLog;
 
 	/* create the file */

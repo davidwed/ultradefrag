@@ -40,7 +40,7 @@ ULONGLONG _rdtsc(void)
 /* initialize files list and free space map */
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	short path[50] = L"\\??\\A:\\";
+	short path[] = L"\\??\\A:\\";
 	NTSTATUS Status;
 	UNICODE_STRING us;
 	//ULONGLONG tm;
@@ -53,35 +53,44 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Volume space analysis */
 	DeleteLogFile(dx);
 	Status = OpenVolume(dx);
-	if(!NT_SUCCESS(Status)) goto fail;
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- OpenVolume() failed: %x!\n",NULL,(UINT)Status);
+		goto fail;
+	}
 	Status = GetVolumeInfo(dx);
-	if(!NT_SUCCESS(Status)) goto fail;
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- GetVolumeInfo() failed: %x!\n",NULL,(UINT)Status);
+		goto fail;
+	}
 	/* update map representation */
 	MarkAllSpaceAsSystem1(dx);
-
-	///IoFlushBuffersFile(dx->hVol);
 
 	//tm = _rdtsc();
 	dx->clusters_to_process = dx->clusters_total;
 	dx->processed_clusters = 0;
 	Status = FillFreeSpaceMap(dx);
-	if(!NT_SUCCESS(Status)) goto fail;
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- FillFreeSpaceMap() failed: %x!\n",NULL,(UINT)Status);
+		goto fail;
+	}
 	//DbgPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
 
 	/* Find files */
 	path[4] = (short)dx->letter;
 	if(!RtlCreateUnicodeString(&us,path)){
-		DbgPrintNoMem();
+		DebugPrint("-Ultradfg- no enough memory for path initialization!\n",NULL);
 		Status = STATUS_NO_MEMORY;
 		goto fail;
 	}
-	if(!FindFiles(dx,&us,TRUE)){
+	if(!FindFiles(dx,&us)){
 		RtlFreeUnicodeString(&us);
+		DebugPrint("-Ultradfg- FindFiles() failed!\n",NULL);
 		Status = STATUS_NO_MORE_FILES;
 		goto fail;
 	}
 	RtlFreeUnicodeString(&us);
 	if(!dx->filelist){
+		DebugPrint("-Ultradfg- No files found!\n",NULL);
 		Status = STATUS_NO_MORE_FILES;
 		goto fail;
 	}

@@ -27,15 +27,18 @@
 NTSTATUS AllocateMap(ULONG size)
 {
 #ifndef MICRO_EDITION
-	/* map reallocation don't supported yet */
-	if(new_cluster_map) return STATUS_INVALID_DEVICE_REQUEST;
+	/* map reallocation doesn't supported yet */
+	if(new_cluster_map){
+		DebugPrint("-Ultradfg- map reallocation doesn't supported yet!\n",NULL);
+		return STATUS_INVALID_DEVICE_REQUEST;
+	}
 	map_size = size;
 	DebugPrint("-Ultradfg- Map size = %u\n",NULL,map_size);
 	if(!size) return STATUS_SUCCESS;
 	new_cluster_map = AllocatePool(NonPagedPool,
 			NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG));
 	if(!new_cluster_map){
-		DbgPrintNoMem();
+		DebugPrint("-Ultradfg- cannot allocate memory for cluster map!\n",NULL);
 		map_size = 0;
 		return STATUS_NO_MEMORY;
 	}
