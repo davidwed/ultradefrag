@@ -18,6 +18,10 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 --]]
 
+-- obsolete since the 2.1.0 version of the program
+
+print(arg[1] .. "\n")
+
 os.execute("udefrag " .. arg[1])
 print("\nPress 'Enter' key to exit...")
 io.read()

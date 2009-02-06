@@ -1,6 +1,6 @@
 /*
  *  ULTRADEFRAG - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by D. Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by D. Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ SetCompressor /SOLID lzma
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
 VIAddVersionKey "CompanyName" "UltraDefrag Development Team"
-VIAddVersionKey "LegalCopyright" "Copyright © 2007,2008 UltraDefrag Development Team"
+VIAddVersionKey "LegalCopyright" "Copyright © 2007-2009 UltraDefrag Development Team"
 VIAddVersionKey "FileDescription" "Ultra Defragmenter Micro Edition Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
@@ -140,6 +140,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "defrag_native.exe"
   File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
+  File "${ROOTDIR}\src\installer\udctxhandler.cmd"
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
@@ -175,6 +176,18 @@ Section "Ultra Defrag core files (required)" SecCore
   ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
     File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
   ${EndUnless}
+
+  ; register context menu handler
+  WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
+  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd %1"
+
+  WriteRegStr HKCR "Folder\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "Folder\shell\udefrag\command" "" "udctxhandler.cmd %1"
+
+  WriteRegStr HKCR "*\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "*\shell\udefrag\command" "" "udctxhandler.cmd %1"
 
   ${EnableX64FSRedirection}
 
@@ -212,6 +225,7 @@ Section "Uninstall"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\ud-config.cmd"
   Delete "$SYSDIR\ud-help.cmd"
+  Delete "$SYSDIR\udctxhandler.cmd"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\zenwinx.dll"
@@ -223,6 +237,11 @@ Section "Uninstall"
 
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+
+  DetailPrint "Uninstall the context menu handler..."
+  DeleteRegKey HKCR "Drive\shell\udefrag"
+  DeleteRegKey HKCR "Folder\shell\udefrag"
+  DeleteRegKey HKCR "*\shell\udefrag"
 
   ${EnableX64FSRedirection}
 

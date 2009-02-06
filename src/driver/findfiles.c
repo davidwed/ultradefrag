@@ -34,9 +34,9 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 	PFILE_BOTH_DIR_INFORMATION pFileInfoFirst = NULL, pFileInfo;
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
-	UNICODE_STRING new_path;
+	UNICODE_STRING new_path, temp_path;
 	HANDLE DirectoryHandle;
-	int length;
+	unsigned int length;
 
 	/* Allocate memory */
 	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(NonPagedPool,
@@ -134,13 +134,43 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 		/* UltraDefrag has a full support for sparse files! :D */
 		if(IS_SPARSE_FILE(pFileInfo)){
 			DebugPrint("-Ultradfg- Sparse file found\n",dx->tmp_buf);
-			/* Let's to defragment them! :) */
+			/* Let's defragment them! :) */
 		}
 
 		if(IS_ENCRYPTED_FILE(pFileInfo)){
 			DebugPrint2("-Ultradfg- Encrypted file found\n",dx->tmp_buf);
 		}
 
+		/*
+		* If we don't need to redraw a cluster map and the next operation
+		* will not be the volume optimization, we can skip all filtered out files!
+		*/
+		if(!new_cluster_map && !dx->compact_flag){
+			if(RtlCreateUnicodeString(&temp_path,dx->tmp_buf)){
+				_wcslwr(temp_path.Buffer);
+				/* skip all filtered out files */
+				/* NEVER USE THE FOLLOWING CODE: */
+				/*if(dx->in_filter.buffer){
+					if(!IsStringInFilter(temp_path.Buffer,&dx->in_filter)){
+						DebugPrint("-Ultradfg- Not included:\n",temp_path.Buffer);
+						RtlFreeUnicodeString(&temp_path); continue;
+					}
+				}*/
+				/*
+				* To speed up the analysis in console/native apps 
+				* set UD_EX_FILTER option, to speed up both analysis 
+				* and defragmentation set UD_IN_FILTER and UD_EX_FILTER options.
+				*/
+				if(dx->ex_filter.buffer){
+					if(IsStringInFilter(temp_path.Buffer,&dx->ex_filter)){
+						DebugPrint("-Ultradfg- Excluded:\n",temp_path.Buffer);
+						RtlFreeUnicodeString(&temp_path); continue;
+					}
+				}
+				RtlFreeUnicodeString(&temp_path);
+			} else DebugPrint2("-Ultradfg- cannot allocate memory for the temp_path !\n",NULL);
+		}
+		
 		if(!RtlCreateUnicodeString(&new_path,dx->tmp_buf)){
 			DebugPrint2("-Ultradfg- cannot allocate memory for the new_path!\n",NULL);
 			ZwClose(DirectoryHandle); ExFreePoolSafe(pFileInfoFirst);

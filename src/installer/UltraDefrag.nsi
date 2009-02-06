@@ -1,6 +1,6 @@
 /*
  *  ULTRADEFRAG - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by D. Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by D. Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ SetCompressor /SOLID lzma
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
 VIAddVersionKey "CompanyName" "UltraDefrag Development Team"
-VIAddVersionKey "LegalCopyright" "Copyright © 2007,2008 UltraDefrag Development Team"
+VIAddVersionKey "LegalCopyright" "Copyright © 2007-2009 UltraDefrag Development Team"
 VIAddVersionKey "FileDescription" "Ultra Defragmenter Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
@@ -315,7 +315,6 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\HISTORY.TXT"
   File "${ROOTDIR}\src\README.TXT"
   SetOutPath "$INSTDIR\scripts"
-  File "${ROOTDIR}\src\scripts\udctxhandler.lua"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
   SetOutPath "$INSTDIR\options"
@@ -344,6 +343,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "lua5.1a_gui.exe"
   File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
+  File "${ROOTDIR}\src\installer\udctxhandler.cmd"
   File "udefrag-gui.exe"
   File "udefrag.dll"
   File "udefrag.exe"
@@ -404,6 +404,7 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$INSTDIR\dfrg.exe"
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\FAQ.TXT"
+  Delete "$INSTDIR\scripts\udctxhandler.lua"
   Delete "$SYSDIR\udefrag-gui-dbg.cmd"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
 
@@ -470,7 +471,13 @@ Section /o "Context menu handler" SecContextMenuHandler
   WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
   ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
   ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
-  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "lua5.1a.exe $INSTDIR\scripts\udctxhandler.lua %1"
+  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd %1"
+  
+  WriteRegStr HKCR "Folder\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "Folder\shell\udefrag\command" "" "udctxhandler.cmd %1"
+
+  WriteRegStr HKCR "*\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "*\shell\udefrag\command" "" "udctxhandler.cmd %1"
 
 SectionEnd
 
@@ -568,6 +575,11 @@ Function .onInit
   StrCpy $IsInstalled 0
   StrCpy $ShowBootsplash 1
   StrCpy $LanguagePack "English (US)"
+  ClearErrors
+  ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
+  ${Unless} ${Errors}
+    StrCpy $LanguagePack $R1
+  ${EndUnless}
 
   /* is already installed? */
   ${If} ${FileExists} "$SYSDIR\defrag_native.exe"
@@ -653,6 +665,7 @@ Section "Uninstall"
   Delete "$SYSDIR\lua5.1a_gui.exe"
   Delete "$SYSDIR\ud-config.cmd"
   Delete "$SYSDIR\ud-help.cmd"
+  Delete "$SYSDIR\udctxhandler.cmd"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\udefrag-gui.exe"
@@ -679,6 +692,9 @@ Section "Uninstall"
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"
+  DeleteRegKey HKCR "Folder\shell\udefrag"
+  DeleteRegKey HKCR "*\shell\udefrag"
+
   DeleteRegKey HKCR "LuaReport"
   DeleteRegKey HKCR ".luar"
   ${EnableX64FSRedirection}

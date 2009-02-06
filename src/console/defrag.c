@@ -154,6 +154,7 @@ void parse_cmdline(int argc, char **argv)
 		c1 = argv[i][0];
 		if(!c1) continue;
 		c2 = argv[i][1];
+		/* next check supports UltraDefrag context menu handler */
 		if(c2 == ':') letter = (char)c1;
 		if(c1 == '-'){
 			c2 = (char)tolower((int)c2);

@@ -494,7 +494,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		}
 
 		if(dx->status == STATUS_BEFORE_PROCESSING || \
-			dx->letter != letter)
+			dx->letter != letter || !new_cluster_map)
 		{
 			dx->letter = letter;
 			request_status = Analyse(dx);
