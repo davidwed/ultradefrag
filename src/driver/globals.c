@@ -65,7 +65,7 @@ char invalid_request[] = "-Ultradfg- 32-bit request cannot be accepted by 64-bit
 * More details at http://www.thescripts.com/forum/thread617704.html
 * ('Dynamically-allocated Multi-dimensional Arrays - C').
 */
-ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];
+ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES] = NULL;
 ULONG map_size = 0;
 
 /* Partial Device Extension initialization */

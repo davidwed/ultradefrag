@@ -112,7 +112,7 @@ void __cdecl DebugPrint(char *format, short *ustring, ...);
 #define DebugPrint2 if(dbg_level < 2) {} else DebugPrint
 #endif
 
-#ifndef USE_WINDDK
+#if defined(__GNUC__)
 typedef enum _KBUGCHECK_CALLBACK_REASON {
     KbCallbackInvalid,
     KbCallbackReserved1,
@@ -138,6 +138,9 @@ VOID
     IN ULONG ReasonSpecificDataLength
     );
 	
+#endif /* __GNUC__ */
+
+#ifndef USE_WINDDK
 typedef struct _KBUGCHECK_SECONDARY_DUMP_DATA {
     IN PVOID InBuffer;
     IN ULONG InBufferLength;
@@ -561,6 +564,8 @@ NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
 
 PVOID KernelGetModuleBase(PCHAR pModuleName);
 PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
+
+BOOLEAN IsStringInFilter(short *str,PFILTER pf);
 
 #define FIND_DATA_SIZE	(16*1024)
 
