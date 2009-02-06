@@ -35,6 +35,20 @@ BOOLEAN IsStringInFilter(short *str,PFILTER pf)
 	return FALSE;
 }
 
+BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	POFFSET po;
+	short *p;
+	
+	if(!dx->in_filter.buffer) return FALSE;
+	po = dx->in_filter.offsets;
+	if(po->next_ptr) return FALSE;
+	p = dx->in_filter.buffer + po->offset;
+	if(wcslen(p) < 3) return FALSE;
+	if(p[1] != ':' || p[2] != '\\') return FALSE;
+	return TRUE;
+}
+
 void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	UNICODE_STRING str;

@@ -566,6 +566,7 @@ PVOID KernelGetModuleBase(PCHAR pModuleName);
 PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
 
 BOOLEAN IsStringInFilter(short *str,PFILTER pf);
+BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #define FIND_DATA_SIZE	(16*1024)
 

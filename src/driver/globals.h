@@ -57,3 +57,5 @@ extern char invalid_request[];
 
 extern ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];
 extern ULONG map_size;
+
+extern BOOLEAN context_menu_handler;

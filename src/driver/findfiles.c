@@ -34,7 +34,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 	PFILE_BOTH_DIR_INFORMATION pFileInfoFirst = NULL, pFileInfo;
 	IO_STATUS_BLOCK IoStatusBlock;
 	NTSTATUS Status;
-	UNICODE_STRING new_path, temp_path;
+	UNICODE_STRING new_path, temp_path, temp_win32_path;
 	HANDLE DirectoryHandle;
 	unsigned int length;
 
@@ -149,13 +149,30 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 			if(RtlCreateUnicodeString(&temp_path,dx->tmp_buf)){
 				_wcslwr(temp_path.Buffer);
 				/* skip all filtered out files */
-				/* NEVER USE THE FOLLOWING CODE: */
-				/*if(dx->in_filter.buffer){
-					if(!IsStringInFilter(temp_path.Buffer,&dx->in_filter)){
-						DebugPrint("-Ultradfg- Not included:\n",temp_path.Buffer);
-						RtlFreeUnicodeString(&temp_path); continue;
+				/* USE THE FOLLOWING CODE ONLY FOR CONTEXT MENU HANDLER: */
+				if(context_menu_handler){
+					if(RtlCreateUnicodeString(&temp_win32_path,dx->tmp_buf + 4)){
+						_wcslwr(temp_win32_path.Buffer);
+						/*
+						* temp_win32_path contains the full path of the current file 
+						* without leading '\??\' sequence
+						*/
+						/* is the current file placed in directory selected in context menu? */
+						if(!wcsstr(temp_win32_path.Buffer,
+						  dx->in_filter.buffer + dx->in_filter.offsets->offset)){
+							/* is current path a part of the path selected in context menu? */
+							if(!wcsstr(dx->in_filter.buffer + dx->in_filter.offsets->offset,
+							  temp_win32_path.Buffer)){
+								DebugPrint("-Ultradfg- Not included:\n",temp_path.Buffer);
+								RtlFreeUnicodeString(&temp_win32_path);
+								RtlFreeUnicodeString(&temp_path); continue;
+							}
+						}
+						RtlFreeUnicodeString(&temp_win32_path);
+					}else{
+						DebugPrint2("-Ultradfg- cannot allocate memory for the temp_win32_path !\n",NULL);
 					}
-				}*/
+				}
 				/*
 				* To speed up the analysis in console/native apps 
 				* set UD_EX_FILTER option, to speed up both analysis 

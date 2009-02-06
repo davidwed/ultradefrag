@@ -573,6 +573,9 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			if(IoControlCode == IOCTL_SET_INCLUDE_FILTER){
 				DebugPrint("-Ultradfg- Include:\n",filter);
 				UpdateFilter(dx,&dx->in_filter,filter,in_len);
+				context_menu_handler = CheckForContextMenuHandler(dx);
+				if(context_menu_handler)
+					DebugPrint("-Ultradfg- Context menu handler?\n",NULL);
 			} else {
 				DebugPrint("-Ultradfg- Exclude:\n",filter);
 				UpdateFilter(dx,&dx->ex_filter,filter,in_len);
@@ -598,9 +601,9 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		}
 		dx->disable_reports = *((ULONG *)Irp->AssociatedIrp.SystemBuffer);
 		if(dx->disable_reports)
-			DebugPrint("-Ultradfg- Disable reports: YES",NULL);
+			DebugPrint("-Ultradfg- Disable reports: YES\n",NULL);
 		else
-			DebugPrint("-Ultradfg- Disable reports: NO",NULL);
+			DebugPrint("-Ultradfg- Disable reports: NO\n",NULL);
 		BytesTxd = in_len;
 		break;
 	case IOCTL_SET_USER_MODE_BUFFER:

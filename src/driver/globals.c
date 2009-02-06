@@ -68,6 +68,8 @@ char invalid_request[] = "-Ultradfg- 32-bit request cannot be accepted by 64-bit
 ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES] = NULL;
 ULONG map_size = 0;
 
+BOOLEAN context_menu_handler = FALSE;
+
 /* Partial Device Extension initialization */
 void InitDX(UDEFRAG_DEVICE_EXTENSION *dx)
 {
