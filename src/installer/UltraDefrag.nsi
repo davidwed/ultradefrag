@@ -259,32 +259,63 @@ Function install_langpack
   ${Select} $LanguagePack
     ${Case} "English (US)"
       nop
+
     ${Case} "Catala"
       StrCpy $R0 "Catala.lng"
+
     ${Case} "Chinese (Simplified)"
       StrCpy $R0 "Chinese(Simp).lng"
+
     ${Case} "Chinese (Traditional)"
       StrCpy $R0 "Chinese(Trad).lng"
+
+    ${Case} "Czech"
+      StrCpy $R0 "Czech.lng"
+
     ${Case} "Dutch"
       StrCpy $R0 "Dutch.lng"
+
     ${Case} "French (FR)"
       StrCpy $R0 "French(FR).lng"
+
     ${Case} "German"
       StrCpy $R0 "German.lng"
+
     ${Case} "Greek"
       StrCpy $R0 "Greek.lng"
+
     ${Case} "Hungarian"
       StrCpy $R0 "Hungarian.lng"
+
     ${Case} "Italian"
       StrCpy $R0 "Italian.lng"
-    ${Case} "Russian"
-      StrCpy $R0 "Russian.lng"
-    ${Case} "Slovak"
-      StrCpy $R0 "Slovak.lng"
-    ${Case} "Slovenian"
-      StrCpy $R0 "Slovenian.lng"
+
+    ${Case} "Korean"
+      StrCpy $R0 "Korean.lng"
+
+    ${Case} "Latvian"
+      StrCpy $R0 "Latvian.lng"
+
+    ${Case} "Polish"
+      StrCpy $R0 "Polish.lng"
+
     ${Case} "Portuguese"
       StrCpy $R0 "Portuguese.lng"
+
+    ${Case} "Portuguese (BR)"
+      StrCpy $R0 "Portuguese(BR).lng"
+
+    ${Case} "Russian"
+      StrCpy $R0 "Russian.lng"
+
+    ${Case} "Slovak"
+      StrCpy $R0 "Slovak.lng"
+
+    ${Case} "Slovenian"
+      StrCpy $R0 "Slovenian.lng"
+
+    ${Case} "Spanish (AR)"
+      StrCpy $R0 "Spanish(AR).lng"
   ${EndSelect}
 
   ${If} $R0 != "NOTHING"

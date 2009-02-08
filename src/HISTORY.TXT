@@ -8,10 +8,17 @@ HISTORY
     - website was completely redesigned
     - UltraDefrag Handbook was added
     - many important x64 bugs were fixed
-    - winx_fopen: a, a+ modes were added
+    - single file/directory defragmentation ability was added
+    - console and native programs great speedup performed
+    - gui program was translated into the following languages:
+
+      Czech, Korean, Latvian, Polish, Portuguese (Brazilian), Spanish (AR)
+
+    - gui design was improved
     - two different driver versions (for NT4 and later systems) were replaced 
       by one universal os version independent driver
     - installer was highly optimized
+    - winx_fopen: a, a+ modes were added
 
 
   Version 2.0.0 (24.0)   2008-11-13

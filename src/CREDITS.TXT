@@ -20,18 +20,24 @@ Sayem Chaklader
 
 Translators:
 
-Catala     - Illes Balears
-Chinese    - muzuiget
-Dutch      - Wim Kerstens
-French     - Pascal Crozet
-German     - Stefan Geuken
-Greek      - Konstantinos Kapoukranidis
-Hungarian  - Nagy Zsolt
-Italian    - Paolo Loggia
-Portuguese - Ricardo A. Garcia
-Russian    - Dmitri Arkhangelski
-Slovak     - Milan Cerovsky /Milanbb55/
-Slovenian  - Miha Mlakar
+Catala          - Illes Balears
+Chinese         - muzuiget
+Czech           - David Horak /Dave MacBlack/
+Dutch           - Wim Kerstens
+French          - Pascal Crozet
+German          - Stefan Geuken
+Greek           - Konstantinos Kapoukranidis
+Hungarian       - Nagy Zsolt
+Italian         - Paolo Loggia
+Korean          - Alex Han
+Latvian         - Vladislav Stuzhnev
+Polish          - Andrzej Rudnik
+Portuguese      - Ricardo A. Garcia
+Portuguese (BR) - Depeo da Masol
+Russian         - Dmitri Arkhangelski
+Slovak          - Milan Cerovsky /Milanbb55/
+Slovenian       - Miha Mlakar
+Spanish (AR)    - Daniel Testa
 
 Special thanks for strong testing to (in alphabetical order):
 
