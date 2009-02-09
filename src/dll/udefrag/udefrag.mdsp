@@ -90,8 +90,8 @@ extraResourceOptions=
 1=udefrag.rc
 [Other]
 [History]
-settings.c,1271
-volume.c,2383
-..\..\include\udefrag.h,3601
-..\..\include\ultradfg.h,3531
-udefrag.c,13169
+..\..\include\udefrag.h,3225
+..\..\include\ultradfg.h,3241
+settings.c,1492
+udefrag.c,3787
+volume.c,2356

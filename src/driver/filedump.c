@@ -73,6 +73,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		}
 		if(Status != STATUS_SUCCESS && Status != STATUS_BUFFER_OVERFLOW){
 			DebugPrint2("-Ultradfg- Dump failed %x\n",pfn->name.Buffer,(UINT)Status);
+			/* 0xc0000011 for very small files */
 dump_fail:
 			DeleteBlockmap(pfn);
 			pfn->clusters_total = pfn->n_fragments = 0;

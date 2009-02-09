@@ -80,6 +80,8 @@ static int getint(lua_State *L, char *variable)
 	return ret;
 }
 
+/* FIXME: add listbox column widths */
+
 void GetPrefs(void)
 {
 	lua_State *L;

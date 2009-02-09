@@ -581,6 +581,19 @@ Section /o "Shortcuts" SecShortcuts
      "$INSTDIR\portable_${ULTRADFGARCH}_package"
   ${EndIf}
 
+  CreateDirectory "$R0\Debugging information"
+  CreateShortCut "$R0\Debugging information\Log files.lnk" \
+   "$INSTDIR\logs"
+  CreateShortCut "$R0\Debugging information\Mini Crash Dump files.lnk" \
+   "$WINDIR\MiniDump"
+  ${If} ${FileExists} "$INSTDIR\handbook\reporting_bugs.html"
+    WriteINIStr "$R0\Debugging information\How to use it.url" "InternetShortcut" "URL" \
+     "file://$INSTDIR\handbook\reporting_bugs.html"
+  ${Else}
+    WriteINIStr "$R0\Debugging information\How to use it.url" "InternetShortcut" "URL" \
+     "http://ultradefrag.sourceforge.net/handbook/reporting_bugs.html"
+  ${EndIf}
+
   ${EnableX64FSRedirection}
   pop $R0
 

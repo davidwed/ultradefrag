@@ -2,7 +2,7 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 2.1.0 (24.0)   2009-01-
+  Version 2.1.0 (30.0)   2009-02-09
   ------------------------------------------------------------------------------
     - debug logging feature was added
     - website was completely redesigned

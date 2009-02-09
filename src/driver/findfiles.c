@@ -158,9 +158,11 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 						* without leading '\??\' sequence
 						*/
 						/* is the current file placed in directory selected in context menu? */
+						/* in other words: are we inside the selected folder? */
 						if(!wcsstr(temp_win32_path.Buffer,
 						  dx->in_filter.buffer + dx->in_filter.offsets->offset)){
 							/* is current path a part of the path selected in context menu? */
+							/* in other words: are we going in right direction? */
 							if(!wcsstr(dx->in_filter.buffer + dx->in_filter.offsets->offset,
 							  temp_win32_path.Buffer)){
 								DebugPrint("-Ultradfg- Not included:\n",temp_path.Buffer);

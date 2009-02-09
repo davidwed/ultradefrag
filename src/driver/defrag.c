@@ -50,6 +50,15 @@
 * ???
 */
 
+/*
+* Arguments for analysis before each defragmentation:
+*---------------------------------------------------------
+* 1. Advanced users will change something on selected volume
+* before the second attempt to defragment them.
+* 2. The second attempt is not so useful in most cases. If 
+* the first one was unsuccessful, the second will be the same
+* due to the free space deficit. ???
+*/
 
 /* Kernel of defragmenter */
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
