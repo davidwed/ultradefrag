@@ -1,8 +1,8 @@
 User's wishes for the next releases:
 
-1. 'compact' option for boot-time defragger
+1. DONE 'compact' option for boot-time defragger
 
-2. new graphical interface with i18n support
+2. DONE new graphical interface with i18n support
 
 3. website translated into several foreign languages
 
@@ -22,9 +22,9 @@ User's wishes for the next releases:
 
 11. implement partially defragmentation
 
-12. defragment files and folders from the context menu
+12. DONE defragment files and folders from the context menu
 
-13. in console and native applications analyse only files that aren't
+13. DONE in console and native applications analyse only files that aren't
     filtered out
 
 14. make Lua package built with ddk compatible with standard Lua package
