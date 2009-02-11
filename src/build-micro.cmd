@@ -132,6 +132,7 @@ rem The scheduler is not included in Micro Edition.
 echo Build installer...
 cd .\bin
 copy /Y ..\installer\MicroEdition.nsi .\
+copy /Y ..\installer\UltraDefrag.nsh .\
 
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
@@ -139,12 +140,14 @@ if %errorlevel% neq 0 goto fail
 if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
 copy /Y ..\installer\MicroEdition.nsi .\amd64\
+copy /Y ..\installer\UltraDefrag.nsh .\amd64\
 cd amd64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
 
 cd..
 copy /Y ..\installer\MicroEdition.nsi .\ia64\
+copy /Y ..\installer\UltraDefrag.nsh .\ia64\
 cd ia64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail

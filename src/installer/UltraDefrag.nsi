@@ -42,6 +42,8 @@
 !define ROOTDIR "..\..\.."
 !endif
 
+!include ".\UltraDefrag.nsh"
+
 ;-----------------------------------------
 
 !define MODERN_UI
@@ -603,13 +605,7 @@ SectionEnd
 
 Function .onInit
 
-  ${Unless} ${IsNT}
-  ${OrUnless} ${AtLeastWinNT4}
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-     "On Windows 9x and NT 3.x this program is absolutely useless!" \
-     /SD IDOK
-    Abort
-  ${EndUnless}
+  ${UD_CheckWinVersion}
 
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"

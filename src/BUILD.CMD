@@ -136,6 +136,7 @@ call BLDSCHED.CMD
 echo Build installer...
 cd .\bin
 copy /Y ..\installer\UltraDefrag.nsi .\
+copy /Y ..\installer\UltraDefrag.nsh .\
 copy /Y ..\installer\lang.ini .\
 
 rem echo Build the gui launcher program
@@ -158,8 +159,8 @@ if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
 copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
+copy /Y ..\installer\UltraDefrag.nsh .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
-rem copy /Y .\udefrag-gui.exe .\amd64\
 cd amd64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
@@ -167,8 +168,8 @@ if %errorlevel% neq 0 goto fail
 cd..
 copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
+copy /Y ..\installer\UltraDefrag.nsh .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
-rem copy /Y .\udefrag-gui.exe .\ia64\
 cd ia64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail

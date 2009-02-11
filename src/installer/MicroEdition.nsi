@@ -41,6 +41,8 @@
 !define ROOTDIR "..\..\.."
 !endif
 
+!include ".\UltraDefrag.nsh"
+
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'
 Name "Ultra Defragmenter Micro Edition v${ULTRADFGVER} (AMD64)"
@@ -74,13 +76,7 @@ UninstPage instfiles
 
 Function .onInit
 
-  ${Unless} ${IsNT}
-  ${OrUnless} ${AtLeastWinNT4}
-    MessageBox MB_OK|MB_ICONEXCLAMATION \
-     "On Windows 9x and NT 3.x this program is absolutely useless!" \
-     /SD IDOK
-    Abort
-  ${EndUnless}
+  ${UD_CheckWinVersion}
 
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
