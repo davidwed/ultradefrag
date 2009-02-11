@@ -29,6 +29,8 @@ int skip_removable = TRUE;
 
 char buffer[MAX_PATH];
 
+char err_msg[1024];
+
 extern int user_defined_column_widths[];
 
 BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
@@ -121,9 +123,11 @@ void SavePrefs(void)
 	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
 	pf = fopen(buffer,"wt");
 	if(!pf){
-failure:
-		MessageBox(0,"Can't save gui preferences!","Error!",
-				MB_OK | MB_ICONHAND);
+		snprintf(err_msg,sizeof(err_msg) - 1,
+			"Can't save gui preferences to %s!\n%s",
+			buffer,_strerror(NULL));
+		err_msg[sizeof(err_msg) - 1] = 0;
+		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
 		return;
 	}
 
@@ -141,6 +145,10 @@ failure:
 		);
 	fclose(pf);
 	if(result < 0){
-		goto failure;
+		snprintf(err_msg,sizeof(err_msg) - 1,
+			"Can't write gui preferences to %s!\n%s",
+			buffer,_strerror(NULL));
+		err_msg[sizeof(err_msg) - 1] = 0;
+		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
 	}
 }
