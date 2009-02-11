@@ -165,7 +165,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 							/* in other words: are we going in right direction? */
 							if(!wcsstr(dx->in_filter.buffer + dx->in_filter.offsets->offset,
 							  temp_win32_path.Buffer)){
-								DebugPrint("-Ultradfg- Not included:\n",temp_path.Buffer);
+								DebugPrint1("-Ultradfg- Not included:\n",temp_path.Buffer);
 								RtlFreeUnicodeString(&temp_win32_path);
 								RtlFreeUnicodeString(&temp_path); continue;
 							}
@@ -182,7 +182,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 				*/
 				if(dx->ex_filter.buffer){
 					if(IsStringInFilter(temp_path.Buffer,&dx->ex_filter)){
-						DebugPrint("-Ultradfg- Excluded:\n",temp_path.Buffer);
+						DebugPrint1("-Ultradfg- Excluded:\n",temp_path.Buffer);
 						RtlFreeUnicodeString(&temp_path); continue;
 					}
 				}

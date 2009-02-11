@@ -226,30 +226,6 @@ FunctionEnd
 
 ;-----------------------------------------
 
-Function WriteDriverAndDbgSettings
-
-  push $R2
-  push $R3
-  ; write settings only if control set exists
-  StrCpy $R3 0
-  EnumRegKey $R2 HKLM $R0 $R3
-  ${If} $R2 != ""
-  ${OrIf} $R0 == "SYSTEM\CurrentControlSet"
-    WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
-    WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
-    WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
-    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
-    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
-
-    WriteRegDWORD HKLM "$R0\Control\CrashControl" "AutoReboot" 0x0
-  ${EndIf}
-  pop $R3
-  pop $R2
-
-FunctionEnd
-
-;-----------------------------------------
-
 Function install_langpack
 
   push $R0
@@ -412,17 +388,10 @@ Section "Ultra Defrag core files (required)" SecCore
   ${EndIf}
 
   DetailPrint "Write driver settings..."
-  SetOutPath "$INSTDIR"
-  StrCpy $R0 "SYSTEM\CurrentControlSet"
-  call WriteDriverAndDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet001"
-  call WriteDriverAndDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet002"
-  call WriteDriverAndDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet003"
-  call WriteDriverAndDbgSettings
+  ${WriteDriverAndDbgSettings}
 
   DetailPrint "Write the uninstall keys..."
+  SetOutPath "$INSTDIR"
   StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
   WriteRegStr HKLM  $R0 "DisplayName" "Ultra Defragmenter"
   WriteRegStr HKLM $R0 "UninstallString" '"$INSTDIR\uninstall.exe"'
@@ -501,17 +470,8 @@ SectionEnd
 
 Section /o "Context menu handler" SecContextMenuHandler
 
-  WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
-  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd %1"
+  ${SetContextMenuHandler}
   
-  WriteRegStr HKCR "Folder\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  WriteRegStr HKCR "Folder\shell\udefrag\command" "" "udctxhandler.cmd %1"
-
-  WriteRegStr HKCR "*\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  WriteRegStr HKCR "*\shell\udefrag\command" "" "udctxhandler.cmd %1"
-
 SectionEnd
 
 Section /o "Shortcuts" SecShortcuts
@@ -605,7 +565,7 @@ SectionEnd
 
 Function .onInit
 
-  ${UD_CheckWinVersion}
+  ${CheckWinVersion}
 
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"

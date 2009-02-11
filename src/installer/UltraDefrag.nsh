@@ -21,7 +21,7 @@
 * Universal code for both main and micro edition installers.
 */
 
-!macro UD_CheckWinVersion
+!macro CheckWinVersion
 
   ${Unless} ${IsNT}
   ${OrUnless} ${AtLeastWinNT4}
@@ -68,4 +68,66 @@
 
 !macroend
 
-!define UD_CheckWinVersion "!insertmacro UD_CheckWinVersion"
+;-----------------------------------------
+
+!macro SetContextMenuHandler
+
+  WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
+  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd %1"
+
+  WriteRegStr HKCR "Folder\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "Folder\shell\udefrag\command" "" "udctxhandler.cmd %1"
+
+  WriteRegStr HKCR "*\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "*\shell\udefrag\command" "" "udctxhandler.cmd %1"
+
+!macroend
+
+;-----------------------------------------
+
+Function WriteDriverAndDbgSettings
+
+  push $R2
+  push $R3
+  ; write settings only if control set exists
+  StrCpy $R3 0
+  EnumRegKey $R2 HKLM $R0 $R3
+  ${If} $R2 != ""
+  ${OrIf} $R0 == "SYSTEM\CurrentControlSet"
+    WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
+    WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
+    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
+
+    WriteRegDWORD HKLM "$R0\Control\CrashControl" "AutoReboot" 0x0
+  ${EndIf}
+  pop $R3
+  pop $R2
+
+FunctionEnd
+
+;-----------------------------------------
+
+!macro WriteDriverAndDbgSettingsMacro
+
+  push $R0
+  StrCpy $R0 "SYSTEM\CurrentControlSet"
+  call WriteDriverAndDbgSettings
+  StrCpy $R0 "SYSTEM\ControlSet001"
+  call WriteDriverAndDbgSettings
+  StrCpy $R0 "SYSTEM\ControlSet002"
+  call WriteDriverAndDbgSettings
+  StrCpy $R0 "SYSTEM\ControlSet003"
+  call WriteDriverAndDbgSettings
+  pop $R0
+
+!macroend
+
+;-----------------------------------------
+
+!define CheckWinVersion "!insertmacro CheckWinVersion"
+!define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
+!define WriteDriverAndDbgSettings "!insertmacro WriteDriverAndDbgSettingsMacro"
