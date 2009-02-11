@@ -393,6 +393,7 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 	winx_fbsize(pstat->free_space,2,free_space,sizeof(free_space));
 	p = (double)(pstat->fragmcounter)/((double)(pstat->filecounter) + 0.1);
 	ip = (unsigned int)(p * 100.00);
+	if(ip < 100) ip = 100; /* fix round off error */
 	_snprintf(result_msg,sizeof(result_msg) - 1,
 			  "Volume information:\r\n\r\n"
 			  "  Volume size                  = %s\r\n"

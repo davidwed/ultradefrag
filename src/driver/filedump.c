@@ -56,6 +56,8 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	if(Status != STATUS_SUCCESS){
 		DebugPrint1("-Ultradfg- System file found: %x\n",pfn->name.Buffer,(UINT)Status);
 		hFile = NULL;
+		/* number of fragments should be no less than number of files */
+		dx->fragmcounter ++;
 		return TRUE; /* System file! */
 	}
 
