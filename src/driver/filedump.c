@@ -72,8 +72,9 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			Status = ioStatus.Status;
 		}
 		if(Status != STATUS_SUCCESS && Status != STATUS_BUFFER_OVERFLOW){
-			DebugPrint2("-Ultradfg- Dump failed %x\n",pfn->name.Buffer,(UINT)Status);
-			/* 0xc0000011 for very small files */
+			/* it always returns STATUS_END_OF_FILE for small files placed in MFT */
+			if(Status != STATUS_END_OF_FILE)
+				DebugPrint("-Ultradfg- Dump failed %x\n",pfn->name.Buffer,(UINT)Status);
 dump_fail:
 			DeleteBlockmap(pfn);
 			pfn->clusters_total = pfn->n_fragments = 0;
@@ -104,7 +105,13 @@ next_run:
 		}
 	} while(Status != STATUS_SUCCESS);
 
-	if(!cnt) goto dump_fail; /* file is placed in MFT or some error */
+	if(!cnt){
+		/*
+		* It's a small directory placed in MFT
+		* (at least on dmitriar's 32-bit XP system).
+		*/
+		goto dump_fail;
+	}
 	ZwClose(hFile);
 
 	MarkSpace(dx,pfn,SYSTEM_SPACE);
