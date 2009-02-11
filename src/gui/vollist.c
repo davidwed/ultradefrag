@@ -36,6 +36,8 @@ WNDPROC OldListProc;
 
 HIMAGELIST hImgList;
 
+int user_defined_column_widths[] = {0,0,0,0,0};
+
 DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 
 void InitImageList(void)
@@ -170,7 +172,9 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int i;
 	RECT rc;
 	int dx;
-	int cw[] = {90,90,110,125,90}; //{100,90,110,120,85}; //{77,70,94,96,98,70};
+	int cw[] = {90,90,110,125,90};
+	int user_defined_widths = 0;
+	int total_width = 0;
 	LV_ITEM lvi;
 	ERRORHANDLERPROC eh;
 	
@@ -194,8 +198,21 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	/* adjust columns widths */
 	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;
-	for(i = 0; i < 5/*6*/; i++)
-		SendMessage(hList,LVM_SETCOLUMNWIDTH,i,cw[i] * dx / 505);
+
+	if(user_defined_column_widths[0])
+		user_defined_widths = 1;
+	for(i = 0; i < 5; i++)
+		total_width += user_defined_column_widths[i];
+	
+	for(i = 0; i < 5; i++){
+		if(user_defined_widths){
+			SendMessage(hList,LVM_SETCOLUMNWIDTH,i,
+				user_defined_column_widths[i] * dx / total_width);
+		}else{
+			SendMessage(hList,LVM_SETCOLUMNWIDTH,i,
+				cw[i] * dx / 505);
+		}
+	}
 	lvi.mask = LVIF_STATE;
 	lvi.stateMask = LVIS_SELECTED;
 	lvi.state = LVIS_SELECTED;
@@ -276,4 +293,19 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		if(busy_flag) return 0;
 	}
 	return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
+}
+
+void VolListGetColumnWidths(void)
+{
+	int i;
+	RECT rc;
+	int dx;
+
+	GetClientRect(hList,&rc);
+	dx = rc.right - rc.left;
+	if(!dx) return;
+	for(i = 0; i < 5; i++){
+		user_defined_column_widths[i] = \
+			SendMessage(hList,LVM_GETCOLUMNWIDTH,i,0);
+	}
 }

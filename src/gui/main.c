@@ -42,6 +42,7 @@ signed int delta_h = 0;
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void ShowFragmented();
 void DestroyImageList(void);
+void VolListGetColumnWidths(void);
 
 void __stdcall ErrorHandler(short *msg)
 {
@@ -176,6 +177,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			rc.bottom -= delta_h;
 			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 		}
+		VolListGetColumnWidths();
 		exit_pressed = TRUE;
 		if(!busy_flag) EndDialog(hWnd,0);
 		return TRUE;

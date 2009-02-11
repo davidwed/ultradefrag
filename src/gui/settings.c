@@ -29,6 +29,8 @@ int skip_removable = TRUE;
 
 char buffer[MAX_PATH];
 
+extern int user_defined_column_widths[];
+
 BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	/* When a portable app launches gui the current directory points to a temp dir. */
@@ -70,6 +72,7 @@ BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	return FALSE;
 }
 
+/* returns 0 if variable is not defined */
 static int getint(lua_State *L, char *variable)
 {
 	int ret;
@@ -79,8 +82,6 @@ static int getint(lua_State *L, char *variable)
 	lua_pop(L, 1);
 	return ret;
 }
-
-/* FIXME: add listbox column widths */
 
 void GetPrefs(void)
 {
@@ -102,6 +103,11 @@ void GetPrefs(void)
 		win_rc.left = (long)getint(L,"x");
 		win_rc.top = (long)getint(L,"y");
 		skip_removable = getint(L,"skip_removable");
+		user_defined_column_widths[0] = getint(L,"column1_width");
+		user_defined_column_widths[1] = getint(L,"column2_width");
+		user_defined_column_widths[2] = getint(L,"column3_width");
+		user_defined_column_widths[3] = getint(L,"column4_width");
+		user_defined_column_widths[4] = getint(L,"column5_width");
 	}
 	lua_close(L);
 }
@@ -120,8 +126,21 @@ failure:
 				MB_OK | MB_ICONHAND);
 		return;
 	}
-	result = fprintf(pf,"x = %i\ny = %i\nskip_removable = %i\n",
-			(int)win_rc.left, (int)win_rc.top, skip_removable);
+
+	result = fprintf(pf,
+		"x = %i\ny = %i\n\nskip_removable = %i\n\n"
+		"column1_width = %i\ncolumn2_width = %i\n"
+		"column3_width = %i\ncolumn4_width = %i\n"
+		"column5_width = %i\n",
+		(int)win_rc.left, (int)win_rc.top, skip_removable,
+		user_defined_column_widths[0],
+		user_defined_column_widths[1],
+		user_defined_column_widths[2],
+		user_defined_column_widths[3],
+		user_defined_column_widths[4]
+		);
 	fclose(pf);
-	if(result < 0) goto failure;
+	if(result < 0){
+		goto failure;
+	}
 }

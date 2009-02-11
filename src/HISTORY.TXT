@@ -4,6 +4,7 @@ HISTORY
 
   Version 2.1.1 (30.0)   2009-02-
   ------------------------------------------------------------------------------
+    - column widths in GUI are now adjustable
     - processor architecture check was added to installer
     - few small bugs were fixed
 
