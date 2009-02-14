@@ -45,6 +45,8 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	HANDLE hFile;
 	ULONGLONG startLcn,length;
 	int i,cnt = 0;
+	long counter, counter2;
+	#define MAX_COUNTER 1000
 
 	/* Data initialization */
 	pfn->clusters_total = pfn->n_fragments = 0;
@@ -64,11 +66,13 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	/* Start dumping the mapping information. Go until we hit the end of the file. */
 	*dx->pstartVcn = 0;
 	fileMappings = (PGET_RETRIEVAL_DESCRIPTOR)(dx->FileMap);
+	counter = 0;
 	do {
 		Status = ZwFsControlFile(hFile, NULL, NULL, 0, &ioStatus, \
 						FSCTL_GET_RETRIEVAL_POINTERS, \
 						dx->pstartVcn, sizeof(ULONGLONG), \
 						fileMappings, FILEMAPSIZE * sizeof(LARGE_INTEGER));
+		counter ++;
 		if(Status == STATUS_PENDING){
 			NtWaitForSingleObject(hFile,FALSE,NULL);
 			Status = ioStatus.Status;
@@ -84,9 +88,34 @@ dump_fail:
 			ZwClose(hFile);
 			return FALSE;
 		}
+
+		/* user must have a chance to break infinite loops */
+		if(KeReadStateEvent(&stop_event)){
+			if(counter > MAX_COUNTER)
+				DebugPrint("-Ultradfg- Infinite main loop?\n",pfn->name.Buffer);
+			goto dump_fail;
+		}
+
 		/* Loop through the buffer of number/cluster pairs. */
 		*dx->pstartVcn = fileMappings->StartVcn;
+		
+		if(!fileMappings->NumberOfPairs && Status != STATUS_SUCCESS){
+			DebugPrint("-Ultradfg- Empty map of file\n",pfn->name.Buffer);
+			goto dump_fail;
+		}
+		
+		counter2 = 0;
 		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs; i++){
+			counter2 ++;
+			/* user must have a chance to break infinite loops */
+			if(KeReadStateEvent(&stop_event)){
+				if(counter > MAX_COUNTER)
+					DebugPrint("-Ultradfg- Infinite main loop?\n",pfn->name.Buffer);
+				if(counter2 > MAX_COUNTER)
+					DebugPrint("-Ultradfg- Infinite second loop?\n",pfn->name.Buffer);
+				goto dump_fail;
+			}
+
 			/*
 			* On NT 4.0 (and later NT versions),
 			* a compressed virtual run (0-filled) is
@@ -94,8 +123,16 @@ dump_fail:
 			*/
 			if(fileMappings->Pair[i].Lcn == LLINVALID)
 				goto next_run;
-			if(fileMappings->Pair[i].Vcn == 0)
-				goto next_run; /* only for some 3.99 Gb files on FAT32 */
+			
+			/* the following code will cause an infinite loop (bug #2053941) */
+			/*if(fileMappings->Pair[i].Vcn == 0)
+				goto next_run;*/ /* only for some 3.99 Gb files on FAT32 */
+			
+			if(fileMappings->Pair[i].Vcn == 0){
+				DebugPrint("-Ultradfg- Wrong map of file\n",pfn->name.Buffer);
+				goto next_run;/*dump_fail;*/
+			}
+			
 			startLcn = fileMappings->Pair[i].Lcn;
 			length = fileMappings->Pair[i].Vcn - *dx->pstartVcn;
 			dx->processed_clusters += length;

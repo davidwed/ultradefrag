@@ -197,6 +197,9 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 		}
 
 		if(IS_DIR(pFileInfo)){
+			/*if(IS_COMPRESSED(pFileInfo)){
+				DebugPrint("-Ultradfg- Compressed directory found\n",new_path.Buffer);
+			}*/
 			FindFiles(dx,&new_path);
 		} else {
 			if(!pFileInfo->EndOfFile.QuadPart){ /* file is empty */
