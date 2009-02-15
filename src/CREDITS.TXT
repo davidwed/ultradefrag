@@ -29,6 +29,7 @@ German          - Stefan Geuken
 Greek           - Konstantinos Kapoukranidis
 Hungarian       - Nagy Zsolt
 Italian         - Paolo Loggia
+Japanese        - ao3 at users.sourceforge.net
 Korean          - Alex Han
 Latvian         - Vladislav Stuzhnev
 Polish          - Andrzej Rudnik

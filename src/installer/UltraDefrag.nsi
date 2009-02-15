@@ -268,6 +268,9 @@ Function install_langpack
     ${Case} "Italian"
       StrCpy $R0 "Italian.lng"
 
+    ${Case} "Japanese"
+      StrCpy $R0 "Japanese.lng"
+
     ${Case} "Korean"
       StrCpy $R0 "Korean.lng"
 
