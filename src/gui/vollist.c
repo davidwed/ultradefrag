@@ -306,6 +306,6 @@ void VolListGetColumnWidths(void)
 	if(!dx) return;
 	for(i = 0; i < 5; i++){
 		user_defined_column_widths[i] = \
-			SendMessage(hList,LVM_GETCOLUMNWIDTH,i,0);
+			(int)(LONG_PTR)SendMessage(hList,LVM_GETCOLUMNWIDTH,i,0);
 	}
 }

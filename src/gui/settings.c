@@ -123,7 +123,7 @@ void SavePrefs(void)
 	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
 	pf = fopen(buffer,"wt");
 	if(!pf){
-		snprintf(err_msg,sizeof(err_msg) - 1,
+		_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Can't save gui preferences to %s!\n%s",
 			buffer,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
@@ -145,7 +145,7 @@ void SavePrefs(void)
 		);
 	fclose(pf);
 	if(result < 0){
-		snprintf(err_msg,sizeof(err_msg) - 1,
+		_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Can't write gui preferences to %s!\n%s",
 			buffer,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;

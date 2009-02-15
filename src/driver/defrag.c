@@ -18,49 +18,12 @@
  */
 
 /*
-* Defragmenter engine.
+* Defragmenter's engine.
 */
 
 #include "driver.h"
 
-/*
-* Since the 2.0.1 version the state of files 
-* after defragmentation will be unknown.
-* So we need analyse() call before 
-* each next defragmentation.
-* We can simply do it, because the OS
-* (at least XP) has disk requests caching system.
-* The first analysis will be still slow enough,
-* but each next one will be very fast 
-* (no more than few seconds).
-*
-* Therefore the code that corrects file maps
-* after each defragmentation will be removed.
-*
-* Due to imperfectness of the NTFS file system
-* the CheckPendingBlocks() call always returns
-* failure, and we should remove them.
-*
-* We can destroy block map after defragmentation
-* because on NTFS we need analysis due to 
-* file system imperfectness. On the other hand,
-* FAT formatted volumes usually aren't big enough 
-* to slow down the process.
-*
-* ???
-*/
-
-/*
-* Arguments for analysis before each defragmentation:
-*---------------------------------------------------------
-* 1. Advanced users will change something on selected volume
-* before the second attempt to defragment them.
-* 2. The second attempt is not so useful in most cases. If 
-* the first one was unsuccessful, the second will be the same
-* due to the free space deficit. ???
-*/
-
-/* Kernel of defragmenter */
+/* Kernel of the defragmenter */
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	KSPIN_LOCK spin_lock;
@@ -217,7 +180,7 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 	PBLOCKMAP block;
 	ULONGLONG curr_target;
 	ULONGLONG j,n,r;
-	NTSTATUS Status = STATUS_SUCCESS;
+	NTSTATUS Status;
 
 	curr_target = targetLcn;
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
@@ -226,7 +189,7 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 		for(j = 0; j < n; j++){
 			Status = MovePartOfFile(dx,hFile,block->vcn + j * dx->clusters_per_256k, \
 				curr_target,dx->clusters_per_256k);
-			if(Status) goto exit;
+			if(Status) return Status;
 			curr_target += dx->clusters_per_256k;
 		}
 		/* try to move rest of block */
@@ -234,12 +197,11 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 		if(r){
 			Status = MovePartOfFile(dx,hFile,block->vcn + j * dx->clusters_per_256k, \
 				curr_target,r);
-			if(Status) goto exit;
+			if(Status) return Status;
 			curr_target += r;
 		}
 	}
-exit:
-	return Status;
+	return STATUS_SUCCESS;
 }
 
 ULONGLONG FindTarget(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
