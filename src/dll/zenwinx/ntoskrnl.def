@@ -739,7 +739,7 @@ NtFreeVirtualMemory@16
 ;NtLockFile
 ;NtMakePermanentObject
 NtMapViewOfSection@40
-;NtNotifyChangeDirectoryFile
+NtNotifyChangeDirectoryFile@36
 NtOpenFile@24
 NtOpenProcess@16
 NtOpenProcessToken@12

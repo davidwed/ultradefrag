@@ -23,6 +23,23 @@
 
 #include "driver.h"
 
+/*
+* Why analysis repeats before each defragmentation attempt (v2.1.2)?
+*
+* 1. On NTFS volumes we must do it, because otherwise Windows will not free
+*    temporarily allocated space.
+* 2. Modern FAT volumes aren't large enough to extremely slow down 
+*    defragmentation by an additional analysis.
+* 3. We cannot use NtNotifyChangeDirectoryFile() function in kernel mode.
+*    It always returns 0xc0000005 error code (tested in XP 32-bit). It seems
+*    that it's arguments must be in user memory space.
+* 4. Filesystem data is cached by Windows, therefore second analysis will be
+*    always much faster (at least on modern versions of Windows - tested on XP)
+*    then the first attempt.
+* 5. On very large volumes the second analysis may take few minutes. Well, the 
+*    first one may take few hours... :)
+*/
+
 /* Kernel of the defragmenter */
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -31,8 +48,50 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	PFRAGMENTED pflist;
 	PFILENAME curr_file;
 
+	/* directory change notification support */
+	short rootdir[] = L"\\??\\A:\\";
+	UNICODE_STRING us;
+	OBJECT_ATTRIBUTES oa;
+	NTSTATUS Status;
+	IO_STATUS_BLOCK iosb;
+	HANDLE hRootDir;
+	FILE_NOTIFY_INFORMATION fni;
+	
 	DeleteLogFile(dx);
 
+	/* set directory change notification */
+	FLUSH_DBG_CACHE();
+	rootdir[4] = dx->letter;
+	RtlInitUnicodeString(&us,rootdir);
+	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
+	Status = ZwOpenFile(&hRootDir,
+			SYNCHRONIZE | FILE_LIST_DIRECTORY,
+			&oa,
+			&iosb,
+			FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+			FILE_OPEN_FOR_BACKUP_INTENT
+			);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- Cannot open root directory %x\n",rootdir,(UINT)Status);
+		hRootDir = NULL;
+	}
+	if(hRootDir){
+		Status = NtNotifyChangeDirectoryFile(hRootDir,
+				NULL,
+				NULL,
+				NULL,
+				&iosb,
+				&fni,
+				sizeof(fni),
+				FILE_NOTIFY_CHANGE_FILE_NAME | FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE,
+				TRUE
+				);
+		// always returns 0xc0000005 on dmitriar's system
+		if(!NT_SUCCESS(Status)){
+			DebugPrint("-Ultradfg- NtNotifyChangeDirectoryFile failed %x\n",rootdir,(UINT)Status);
+		}
+	}
+	
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
 	KeAcquireSpinLock(&spin_lock,&oldIrql);
@@ -70,6 +129,10 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 
 exit_defrag:
+
+	/* was any directory changed? */
+	ZwCloseSafe(hRootDir);
+
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
 	/* The state of some processed files maybe unknown... */

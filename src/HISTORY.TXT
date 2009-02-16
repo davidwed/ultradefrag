@@ -2,6 +2,12 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 2.1.2 (30.0)   2009-02-
+  ------------------------------------------------------------------------------
+    - NOTE: you need to press 'Apply patch to MinGW' button in configure.pl
+      program again to build this release
+
+
   Version 2.1.1 (30.0)   2009-02-16
   ------------------------------------------------------------------------------
     - Japanese translation was made
