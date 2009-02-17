@@ -101,6 +101,9 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		return 0;
 	}
 
+	/* refresh selected volume information (bug #2036873) */
+	VolListRefreshItem(iItem);
+	
 	//VolListUpdateStatusField(STAT_WORK,iItem);
 	DisableButtonsBeforeTask();
 	ClearMap();

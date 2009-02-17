@@ -28,6 +28,8 @@ extern HWND hWindow;
 extern STATISTIC stat[MAX_DOS_DRIVES];
 extern BOOL busy_flag;
 
+extern int skip_removable;
+
 HWND hList;
 int Index; /* Index of currently selected list item */
 char letter_numbers[MAX_DOS_DRIVES];
@@ -100,10 +102,10 @@ void InitVolList(void)
 	InitImageList();
 }
 
-void UpdateVolList(int skip_removable)
+void UpdateVolList(void)
 {
 	DWORD thr_id;
-	create_thread(RescanDrivesThreadProc,(void *)(LONG_PTR)skip_removable,&thr_id);
+	create_thread(RescanDrivesThreadProc,NULL,&thr_id);
 }
 
 static void VolListAddItem(int index, volume_info *v)
@@ -165,7 +167,6 @@ static void VolListAddItem(int index, volume_info *v)
 /* TODO: cleanup */
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 {
-	int skip_rem = (int)(LONG_PTR)lpParameter;
 	char chr;
 	int index;
 	volume_info *v;
@@ -184,7 +185,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	index = 0;
 	eh = udefrag_set_error_handler(NULL);
-	if(udefrag_get_avail_volumes(&v,skip_rem) >= 0){
+	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
 		for(i = 0;;i++){
 			chr = v[i].letter;
 			if(!chr) break;
@@ -308,4 +309,55 @@ void VolListGetColumnWidths(void)
 		user_defined_column_widths[i] = \
 			(int)(LONG_PTR)SendMessage(hList,LVM_GETCOLUMNWIDTH,i,0);
 	}
+}
+
+/* TODO: optimize */
+void VolListRefreshItem(LRESULT iItem)
+{
+	ERRORHANDLERPROC eh;
+	volume_info *v;
+	int i;
+	char chr, letter;
+	
+	LV_ITEM lvi;
+	char s[32];
+	double d;
+	int p;
+
+	letter = VolListGetLetter(iItem);
+	chr = 0;
+	eh = udefrag_set_error_handler(NULL);
+	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
+		for(i = 0;;i++){
+			chr = v[i].letter;
+			if(!chr) break;
+			if(chr == letter) break;
+		}
+	}
+	if(chr){
+		/* update the Total space, Free space and Percentage fields */
+		lvi.mask = LVIF_TEXT | LVIF_IMAGE;
+		lvi.iItem = (int)(LONG_PTR)iItem;
+		lvi.iImage = v[i].is_removable ? 1 : 0;
+
+		udefrag_fbsize((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
+		lvi.iSubItem = 2;
+		lvi.pszText = s;
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+	
+		udefrag_fbsize((ULONGLONG)(v[i].free_space.QuadPart),2,s,sizeof(s));
+		lvi.iSubItem = 3;
+		lvi.pszText = s;
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+	
+		d = (double)(signed __int64)(v[i].free_space.QuadPart);
+		/* 0.1 constant is used to exclude divide by zero error */
+		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
+		p = (int)(100 * d);
+		sprintf(s,"%u %%",p);
+		lvi.iSubItem = 4;
+		lvi.pszText = s;
+		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+	}
+	udefrag_set_error_handler(eh);
 }

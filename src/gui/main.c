@@ -116,7 +116,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
 		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
 		if(hIcon) DeleteObject(hIcon);
-		UpdateVolList(skip_removable);
+		UpdateVolList();
 		CreateMaps();
 		CreateStatusBar();
 		memset((void *)stat,0,sizeof(STATISTIC) * (MAX_DOS_DRIVES));
@@ -141,9 +141,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_SETTINGS:
 			if(!busy_flag){
-				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),hWindow,(DLGPROC)NewSettingsDlgProc);
-				/* reload and apply settings */
-				//if(udefrag_reload_settings() < 0) udefrag_pop_error(NULL,0);
+				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),
+					hWindow,(DLGPROC)NewSettingsDlgProc);
 			}
 			break;
 		case IDC_SKIPREMOVABLE:
@@ -160,7 +159,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			stop();
 			break;
 		case IDC_RESCAN:
-			if(!busy_flag) UpdateVolList(skip_removable);
+			if(!busy_flag) UpdateVolList();
 		}
 		break;
 	case WM_MOVE:

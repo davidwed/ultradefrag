@@ -160,13 +160,14 @@ void SetProgress(char *message, int percentage);
 
 /* volume list manipulations */
 void InitVolList(void);
-void UpdateVolList(int skip_removable);
+void UpdateVolList(void);
 LRESULT VolListGetSelectedItemIndex(void);
 char VolListGetLetter(LRESULT iItem);
 int VolListGetLetterNumber(LRESULT iItem);
 int  VolListGetWorkStatus(LRESULT iItem);
 void VolListUpdateStatusField(int stat,LRESULT iItem);
 void VolListNotifyHandler(LPARAM lParam);
+void VolListRefreshItem(LRESULT iItem);
 
 /* window procedures */
 void HandleShortcuts(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
