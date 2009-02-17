@@ -57,12 +57,12 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	Status = OpenVolume(dx);
 	if(!NT_SUCCESS(Status)){
 		DebugPrint("-Ultradfg- OpenVolume() failed: %x!\n",NULL,(UINT)Status);
-		return Status;//goto fail;
+		return Status;
 	}
 	Status = GetVolumeInfo(dx);
 	if(!NT_SUCCESS(Status)){
 		DebugPrint("-Ultradfg- GetVolumeInfo() failed: %x!\n",NULL,(UINT)Status);
-		return Status;//goto fail;
+		return Status;
 	}
 	/* update map representation */
 	MarkAllSpaceAsSystem1(dx);
@@ -73,7 +73,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	Status = FillFreeSpaceMap(dx);
 	if(!NT_SUCCESS(Status)){
 		DebugPrint("-Ultradfg- FillFreeSpaceMap() failed: %x!\n",NULL,(UINT)Status);
-		return Status;//goto fail;
+		return Status;
 	}
 	//DbgPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
 
@@ -81,20 +81,17 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	path[4] = (short)dx->letter;
 	if(!RtlCreateUnicodeString(&us,path)){
 		DebugPrint("-Ultradfg- no enough memory for path initialization!\n",NULL);
-		/*Status = */ return STATUS_NO_MEMORY;
-		//goto fail;
+		return STATUS_NO_MEMORY;
 	}
 	if(!FindFiles(dx,&us)){
 		RtlFreeUnicodeString(&us);
 		DebugPrint("-Ultradfg- FindFiles() failed!\n",NULL);
-		/*Status = */ return STATUS_NO_MORE_FILES;
-		//goto fail;
+		return STATUS_NO_MORE_FILES;
 	}
 	RtlFreeUnicodeString(&us);
 	if(!dx->filelist){
 		DebugPrint("-Ultradfg- No files found!\n",NULL);
-		/*Status = */ return STATUS_NO_MORE_FILES;
-		//goto fail;
+		return STATUS_NO_MORE_FILES;
 	}
 	DebugPrint("-Ultradfg- Files found: %u\n",NULL,dx->filecounter);
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",NULL,dx->fragmfilecounter);
@@ -105,12 +102,5 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	/* Save state */
 	SaveFragmFilesListToDisk(dx);
-/*	if(KeReadStateEvent(&stop_event) == 0x0)
-		dx->status = STATUS_ANALYSED;
-	else
-		dx->status = STATUS_BEFORE_PROCESSING;
-*/	return STATUS_SUCCESS;
-//fail:
-//	dx->status = STATUS_BEFORE_PROCESSING;
-//	return Status;
+	return STATUS_SUCCESS;
 }
