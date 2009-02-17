@@ -48,19 +48,21 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	PFRAGMENTED pflist;
 	PFILENAME curr_file;
 
+	DebugPrint("-Ultradfg- ----- Defragmentation of %c: -----\n",NULL,dx->letter);
+	
 	/* directory change notification support */
-	short rootdir[] = L"\\??\\A:\\";
+/*	short rootdir[] = L"\\??\\A:\\";
 	UNICODE_STRING us;
 	OBJECT_ATTRIBUTES oa;
 	NTSTATUS Status;
 	IO_STATUS_BLOCK iosb;
 	HANDLE hRootDir;
 	FILE_NOTIFY_INFORMATION fni;
-	
+*/	
 	DeleteLogFile(dx);
 
 	/* set directory change notification */
-	FLUSH_DBG_CACHE();
+/*	FLUSH_DBG_CACHE();
 	rootdir[4] = dx->letter;
 	RtlInitUnicodeString(&us,rootdir);
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -91,7 +93,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 			DebugPrint("-Ultradfg- NtNotifyChangeDirectoryFile failed %x\n",rootdir,(UINT)Status);
 		}
 	}
-	
+*/	
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
 	KeAcquireSpinLock(&spin_lock,&oldIrql);
@@ -131,14 +133,15 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 exit_defrag:
 
 	/* was any directory changed? */
-	ZwCloseSafe(hRootDir);
+//	ZwCloseSafe(hRootDir);
 
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
 	/* The state of some processed files maybe unknown... */
-	if(!dx->invalid_movings && KeReadStateEvent(&stop_event) == 0x0 && \
+/*	if(!dx->invalid_movings && KeReadStateEvent(&stop_event) == 0x0 && \
 		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
 	else dx->status = STATUS_BEFORE_PROCESSING;
+*/
 }
 
 /*
@@ -155,6 +158,8 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	KIRQL oldIrql;
 	PFILENAME curr_file;
 
+	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",NULL,dx->letter);
+	
 	DeleteLogFile(dx);
 
 	/* Initialize progress counters. */
@@ -195,9 +200,10 @@ exit_defrag_space:
 	UpdateFragmentedFilesList(dx);
 	SaveFragmFilesListToDisk(dx);
 	/* The state of some processed files maybe unknown... */
-	if(!dx->invalid_movings && KeReadStateEvent(&stop_event) == 0x0 && \
+/*	if(!dx->invalid_movings && KeReadStateEvent(&stop_event) == 0x0 && \
 		dx->partition_type != NTFS_PARTITION) dx->status = STATUS_DEFRAGMENTED;
 	else dx->status = STATUS_BEFORE_PROCESSING;
+*/
 }
  
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 

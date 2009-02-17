@@ -321,7 +321,7 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	if(!dx->second_device){
 		DebugPrint("-Ultradfg- CreateFile request for main device\n",NULL);
 		CHECK_IRP(Irp);
-		dx->status = STATUS_BEFORE_PROCESSING;
+//		dx->status = STATUS_BEFORE_PROCESSING;
 	}
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
 }
@@ -487,20 +487,23 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		/* validate letter */
 		if(letter < 'A' || letter > 'Z') goto invalid_request;
 
+		dx->letter = letter;
+		request_status = Analyse(dx);
+
 		if(cmd[0] == 'a' || cmd[0] == 'A'){
-			dx->letter = letter;
-			request_status = Analyse(dx);
+//			dx->letter = letter;
+//			request_status = Analyse(dx);
 			break;
 		}
 
-		if(dx->status == STATUS_BEFORE_PROCESSING || \
+/*		if(dx->status == STATUS_BEFORE_PROCESSING || \
 			dx->letter != letter || !new_cluster_map)
 		{
-			dx->letter = letter;
-			request_status = Analyse(dx);
+*///			dx->letter = letter;
+//			request_status = Analyse(dx);
 			if(KeReadStateEvent(&stop_event) == 0x1) break;
 			if(!NT_SUCCESS(request_status)) break;
-		}
+//		}
 		request_status = STATUS_SUCCESS;
 		if(!dx->compact_flag) Defragment(dx);
 		else DefragmentFreeSpace(dx);
@@ -517,7 +520,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	if(KeReadStateEvent(&stop_event) == 0x1 || NT_SUCCESS(request_status))
 		return CompleteIrp(Irp,STATUS_SUCCESS,length);
 	/* if the operation has unsuccessful result, clear the dx->status field */
-	dx->status = STATUS_BEFORE_PROCESSING;
+//	dx->status = STATUS_BEFORE_PROCESSING;
 	return CompleteIrp(Irp,request_status,0);
 
 invalid_request:

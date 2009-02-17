@@ -479,7 +479,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONGLONG cells_per_last_cluster;
 	ULONGLONG clusters_to_process;
 	ULONGLONG processed_clusters;
-	NTSTATUS status;
+//	NTSTATUS status;
 	ULONG invalid_movings;
 	/*
 	* End of the data with default zero state.
