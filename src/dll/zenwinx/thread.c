@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -81,6 +81,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 		winx_raise_error("E: Can't create thread: %x!",(UINT)Status);
 		return (-1);
 	}
+	/*NtCloseSafe(*ph);*/
 	return 0;
 }
 

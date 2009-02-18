@@ -10,7 +10,7 @@ User's wishes for the next releases:
 
 5. remove all TODO and FIXME comments from sources
 
-6. repeat analysis when something has been changed on disk
+6. DONE repeat analysis when something has been changed on disk
 
 7. increase compilation speed
 

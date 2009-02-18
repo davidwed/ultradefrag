@@ -36,17 +36,20 @@ DWORD WINAPI ThreadProc(LPVOID);
 
 void analyse(void)
 {
-	create_thread(ThreadProc,(DWORD)'a',&thr_id);
+	HANDLE h = create_thread(ThreadProc,(DWORD)'a',&thr_id);
+	if(h) CloseHandle(h);
 }
 
 void defragment(void)
 {
-	create_thread(ThreadProc,(DWORD)'d',&thr_id);
+	HANDLE h = create_thread(ThreadProc,(DWORD)'d',&thr_id);
+	if(h) CloseHandle(h);
 }
 
 void optimize(void)
 {
-	create_thread(ThreadProc,(DWORD)'c',&thr_id);
+	HANDLE h = create_thread(ThreadProc,(DWORD)'c',&thr_id);
+	if(h) CloseHandle(h);
 }
 
 /* callback function */

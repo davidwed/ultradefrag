@@ -34,7 +34,14 @@
   /* this idea was suggested by bender647 at users.sourceforge.net */
   push $R0
   ClearErrors
-  ReadEnvStr $R0 "PROCESSOR_ARCHITECTURE"
+  ;ReadEnvStr $R0 "PROCESSOR_ARCHITECTURE"
+  ; On 64-bit systems it always returns 'x86' because the installer
+  ; is a 32-bit application and runs on a virtual machine :(((
+
+  ; read the PROCESSOR_ARCHITECTURE variable from registry
+  ReadRegStr $R0 HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" \
+   "PROCESSOR_ARCHITECTURE"
+
   ${Unless} ${Errors}
     ${If} $R0 == "x86"
     ${AndIf} ${ULTRADFGARCH} != "i386"

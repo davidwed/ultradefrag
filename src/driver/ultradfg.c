@@ -499,6 +499,8 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	default:
 		goto invalid_request;
 	}
+	/* free all buffers, free the volume handle (bug #1794336 fixup) */
+	FreeAllBuffers(dx);
 	/* a/d/c request completed */
 	KeSetEvent(&sync_event,IO_NO_INCREMENT,FALSE);
 	/*

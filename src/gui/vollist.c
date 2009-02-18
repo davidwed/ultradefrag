@@ -105,7 +105,8 @@ void InitVolList(void)
 void UpdateVolList(void)
 {
 	DWORD thr_id;
-	create_thread(RescanDrivesThreadProc,NULL,&thr_id);
+	HANDLE h = create_thread(RescanDrivesThreadProc,NULL,&thr_id);
+	if(h) CloseHandle(h);
 }
 
 static void VolListAddItem(int index, volume_info *v)

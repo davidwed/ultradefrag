@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -232,6 +232,7 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 {
 	WINX_FILE *f;
 	char volume[] = "\\??\\A:";
+	HANDLE hThread;
 
 	CHECK_INIT_EVENT();
 
@@ -257,8 +258,9 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 	/* create a thread for driver command processing */
 	cmd_status = 0;
 	c = command; lett = letter;
-	if(winx_create_thread(send_command,NULL) < 0)
+	if(winx_create_thread(send_command,&hThread) < 0)
 		return (-1);
+	NtCloseSafe(hThread);
 	/*
 	* Call specified callback 
 	* every (settings.refresh_interval) milliseconds.
