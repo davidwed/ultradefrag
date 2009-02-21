@@ -341,7 +341,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Fill free space areas. */
 	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
 	L0:
-		if(block->length == 1) continue; /* skip 1 cluster blocks */
+		if(block->length <= 1) continue; /* skip 1 cluster blocks and zero length blocks */
 		/* find largest fragmented file that can be stored here */
 		plargest = NULL; length = 0;
 		for(pflist = dx->fragmfileslist; pflist != NULL; pflist = pflist->next_ptr){
@@ -365,14 +365,11 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 			DebugPrint("-Ultradfg- Defrag error for\n",plargest->pfn->name.Buffer);
 		dx->processed_clusters += plargest->pfn->clusters_total;
 		UpdateFragmentedFilesList(dx);
+		if(KeReadStateEvent(&stop_event)) break;
 		/* after file moving continue from the first free space block */
 		block = dx->free_space_map; if(!block) break; else goto L0;
 	}
 	SaveFragmFilesListToDisk(dx);
-}
-
-void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
-{
 }
 
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
@@ -408,9 +405,15 @@ NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 	}
 	if(!NT_SUCCESS(status)) return status;
 	/* Check target space to get moving status: */
-	return CheckFreeSpace(dx,targetLcn,n_clusters) ? STATUS_UNSUCCESSFUL : STATUS_SUCCESS;
+	/*
+	* This check is invalid, because it returns success when target space is allocated 
+	* by another file.
+	*/
+	//return CheckFreeSpace(dx,targetLcn,n_clusters) ? STATUS_UNSUCCESSFUL : STATUS_SUCCESS;
+	return STATUS_SUCCESS; /* it means: the result is unknown */
 }
 
+/* Tries to move the file entirely. */
 NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 			  HANDLE hFile,ULONGLONG targetLcn)
 {
@@ -438,7 +441,8 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 			curr_target += r;
 		}
 	}
-	return STATUS_SUCCESS;
+	/* Check new file blocks to get moving status. */
+	return CheckFilePosition(dx,hFile,targetLcn,pfn->clusters_total) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
 }
 
 /* For defragmenter only, not for optimizer! */
@@ -466,8 +470,12 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 	Status = MoveBlocksOfFile(dx,pfn,hFile,target);
 	ZwClose(hFile);
 
+	/* first of all: remove target space from free space pool */
+	ProcessBlock(dx,target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
+	TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
+
 	if(Status == STATUS_SUCCESS){
-		/* free previously allocated space */
+		/* free previously allocated space (after TruncateFreeSpaceBlock() call!) */
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
 			ProcessFreeBlock(dx,block->lcn,block->length,FRAGM_SPACE/*old_state*/);
 		}
@@ -490,7 +498,7 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 			pfn->is_fragm = FALSE;
 		//}
 	} else {
-		DebugPrint("MoveFile error: %x\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- MoveFile error: %x\n",NULL,(UINT)Status);
 		/* mark space allocated by file as fragmented */
 //		for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
 //			ProcessBlock(dx,block->lcn,block->length,FRAGM_SPACE,old_state);
@@ -502,8 +510,5 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 //		}
 	}
 	DeleteBlockmap(pfn); /* because we don't need this info after file moving */
-	/* remove target space from free space pool */
-	ProcessBlock(dx,target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
-	TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
 	return (!pfn->is_fragm);
 }

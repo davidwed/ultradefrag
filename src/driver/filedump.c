@@ -163,6 +163,95 @@ next_run:
 	return TRUE; /* success */
 }
 
+/* TRUE if the file was successfuly moved or placed in MFT. */
+BOOLEAN CheckFilePosition(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
+					ULONGLONG targetLcn, ULONGLONG n_clusters)
+{
+	IO_STATUS_BLOCK ioStatus;
+	PGET_RETRIEVAL_DESCRIPTOR fileMappings;
+	NTSTATUS Status;
+	ULONGLONG startLcn;
+	long counter, counter2;
+	#define MAX_COUNTER 1000
+	int i;
+
+	/* Start dumping the mapping information. Go until we hit the end of the file. */
+	*dx->pstartVcn = 0;
+	fileMappings = (PGET_RETRIEVAL_DESCRIPTOR)(dx->FileMap);
+	counter = 0;
+	do {
+		Status = ZwFsControlFile(hFile, NULL, NULL, 0, &ioStatus, \
+						FSCTL_GET_RETRIEVAL_POINTERS, \
+						dx->pstartVcn, sizeof(ULONGLONG), \
+						fileMappings, FILEMAPSIZE * sizeof(LARGE_INTEGER));
+		counter ++;
+		if(Status == STATUS_PENDING){
+			NtWaitForSingleObject(hFile,FALSE,NULL);
+			Status = ioStatus.Status;
+		}
+		if(Status != STATUS_SUCCESS && Status != STATUS_BUFFER_OVERFLOW){
+			/* it always returns STATUS_END_OF_FILE for small files placed in MFT */
+			if(Status != STATUS_END_OF_FILE){
+				DebugPrint("-Ultradfg- Dump failed %x\n",NULL,(UINT)Status);
+				return FALSE;
+			}
+			return TRUE;
+		}
+
+		/* user must have a chance to break infinite loops */
+		if(KeReadStateEvent(&stop_event)){
+			if(counter > MAX_COUNTER)
+				DebugPrint("-Ultradfg- Infinite main loop?\n",NULL);
+			return FALSE;
+		}
+
+		/* Loop through the buffer of number/cluster pairs. */
+		*dx->pstartVcn = fileMappings->StartVcn;
+		
+		if(!fileMappings->NumberOfPairs){
+			DebugPrint("-Ultradfg- Empty map of file\n",NULL);
+			return TRUE;
+		}
+		
+		counter2 = 0;
+		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs; i++){
+			counter2 ++;
+			/* user must have a chance to break infinite loops */
+			if(KeReadStateEvent(&stop_event)){
+				if(counter > MAX_COUNTER)
+					DebugPrint("-Ultradfg- Infinite main loop?\n",NULL);
+				if(counter2 > MAX_COUNTER)
+					DebugPrint("-Ultradfg- Infinite second loop?\n",NULL);
+				return FALSE;
+			}
+
+			/*
+			* On NT 4.0 (and later NT versions),
+			* a compressed virtual run (0-filled) is
+			* identified with a cluster offset of -1.
+			*/
+			if(fileMappings->Pair[i].Lcn == LLINVALID)
+				goto next_run;
+			
+			/* the following code will cause an infinite loop (bug #2053941) */
+			/*if(fileMappings->Pair[i].Vcn == 0)
+				goto next_run;*/ /* only for some 3.99 Gb files on FAT32 */
+			
+			if(fileMappings->Pair[i].Vcn == 0){
+				DebugPrint("-Ultradfg- Wrong map of file\n",NULL);
+				goto next_run;/*dump_fail;*/
+			}
+			
+			startLcn = fileMappings->Pair[i].Lcn;
+			if(startLcn < targetLcn || startLcn >= (targetLcn + n_clusters))
+				return FALSE;
+next_run:
+			*dx->pstartVcn = fileMappings->Pair[i].Vcn;
+		}
+	} while(Status != STATUS_SUCCESS);
+	return TRUE;
+}
+
 /* inserts the specified block in file's blockmap */
 BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 					ULONGLONG startVcn,ULONGLONG startLcn,ULONGLONG length)

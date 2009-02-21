@@ -569,6 +569,9 @@ PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
 BOOLEAN IsStringInFilter(short *str,PFILTER pf);
 BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx);
 
+BOOLEAN CheckFilePosition(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
+					ULONGLONG targetLcn, ULONGLONG n_clusters);
+
 #define FIND_DATA_SIZE	(16*1024)
 
 #define IS_DIR(pFileInfo) \

@@ -83,6 +83,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 	return STATUS_SUCCESS;
 }
 
+#if 0
 /* returns TRUE if all requested space is really free, FALSE otherwise */
 BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,
 					   ULONGLONG start, ULONGLONG len)
@@ -122,6 +123,7 @@ BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,
 
 	return TRUE;
 }
+#endif
 
 /*
 * On FAT partitions after file moving filesystem driver marks
@@ -226,6 +228,7 @@ FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 	return block;
 }
 
+#if 0 /* OLD ALGORITHM */
 /* TODO: remove for() cycle */
 void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 							ULONGLONG start,ULONGLONG length)
@@ -252,5 +255,28 @@ found:
 	if(!block->length)
 		RemoveItem((PLIST *)&dx->free_space_map,
 			(PLIST *)(void *)&prev_block,(PLIST *)(void *)&block);
+}
+#endif
+
+/* NEW ALGORITHM */
+/*
+* Cuts the left side of the free block. If length is equal 
+* to free block length it marks them as zero length block.
+*/
+void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
+							ULONGLONG start,ULONGLONG length)
+{
+	PFREEBLOCKMAP block;
+	ULONGLONG n;
+
+	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
+		if(block->lcn == start){
+			n = min(block->length,length);
+			block->lcn += n;
+			block->length -= n;
+			return;
+		}
+	}
+	DebugPrint("-Ultradfg- TruncateFreeSpaceBlock() failed: Lcn=%I64u!\n",NULL,start);
 }
 
