@@ -471,6 +471,10 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 	ZwClose(hFile);
 
 	/* first of all: remove target space from free space pool */
+	if(Status == STATUS_SUCCESS){
+		dx->fragmfilecounter --;
+		pfn->is_fragm = FALSE; /* before GetSpaceState() call */
+	}
 	ProcessBlock(dx,target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
 	TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
 
@@ -494,8 +498,6 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 			pfn->n_fragments = 1;
 		}
 */		//if(pfn->is_fragm){
-			dx->fragmfilecounter --;
-			pfn->is_fragm = FALSE;
 		//}
 	} else {
 		DebugPrint("-Ultradfg- MoveFile error: %x\n",NULL,(UINT)Status);
