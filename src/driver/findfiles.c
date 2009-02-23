@@ -228,6 +228,68 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 {
 	PFILENAME pfn;
 
+	/* NEW ALGORITHM: Analyse C: on dmitriar's pc: 0.3 Mb of allocated memory. */
+	/* Add a file only if we need to have its information cached. */
+	/* 1. First of all try to allocate pfn structure. */
+	pfn = (PFILENAME)AllocatePool(NonPagedPool,sizeof(FILENAME));
+	if(!pfn){
+		DebugPrint2("-Ultradfg- no enough memory for pfn structure!\n",NULL);
+		return FALSE;
+	}
+	/* 2. Initialize pfn->name field. */
+	if(!RtlCreateUnicodeString(&pfn->name,path)){
+		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
+		Nt_ExFreePool(pfn);
+		return FALSE;
+	}
+	/* 3. Set flags. */
+	pfn->is_dir = IS_DIR(pFileInfo);
+	pfn->is_compressed = IS_COMPRESSED(pFileInfo);
+	if(dx->sizelimit && \
+		(unsigned __int64)(pFileInfo->AllocationSize.QuadPart) > dx->sizelimit)
+		pfn->is_overlimit = TRUE;
+	else
+		pfn->is_overlimit = FALSE;
+
+	/* 4. Dump the file. */
+	if(!DumpFile(dx,pfn)){
+		/* skip files with unknown state */
+		RtlFreeUnicodeString(&pfn->name);
+		Nt_ExFreePool(pfn);
+		return TRUE;
+	}
+	/* 5. Increment counters. */
+	dx->filecounter ++;
+	if(pfn->is_dir) dx->dircounter ++;
+	if(pfn->is_compressed) dx->compressedcounter ++;
+
+	/* 6. Insert pfn structure to file list. */
+	if(dx->compact_flag || pfn->is_fragm){
+		pfn->next_ptr = dx->filelist;
+		dx->filelist = pfn;
+		if(pfn->is_fragm){
+			if(!InsertFragmentedFile(dx,pfn)){
+				dx->fragmfilecounter --;
+				dx->fragmcounter -= pfn->n_fragments;
+				dx->filelist = pfn->next_ptr;
+				DeleteBlockmap(pfn);
+				RtlFreeUnicodeString(&pfn->name);
+				Nt_ExFreePool(pfn);
+				return FALSE;
+			}
+		}
+		return TRUE;
+	}
+
+	/* 7. Destroy useless data. */
+	DeleteBlockmap(pfn);
+	RtlFreeUnicodeString(&pfn->name);
+	Nt_ExFreePool(pfn);
+	return TRUE;
+	
+
+	/* OLD ALGORITHM: Analyse C: on dmitriar's pc: 2.3 Mb of allocated memory. */
+#if 0
 	/* Add file name with path to filelist */
 	pfn = (PFILENAME)InsertFirstItem((PLIST *)&dx->filelist,sizeof(FILENAME));
 	if(!pfn) return FALSE;
@@ -263,6 +325,7 @@ fail:
 	RtlFreeUnicodeString(&pfn->name);
 	Nt_ExFreePool(pfn);
 	return FALSE;
+#endif
 }
 
 /* inserts the new structure to list of fragmented files */
