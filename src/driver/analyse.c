@@ -101,6 +101,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(dx->partition_type == NTFS_PARTITION) ProcessMFT(dx);
 
 	/* Save state */
+	ApplyFilter(dx);
 	SaveFragmFilesListToDisk(dx);
 	return STATUS_SUCCESS;
 }

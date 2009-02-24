@@ -360,7 +360,7 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		pf->next_ptr = dx->fragmfileslist;
 		dx->fragmfileslist = pf;
 	}
-	ApplyFilter(dx,pfn);
+///	ApplyFilter(dx,pfn);
 	return TRUE;
 }
 

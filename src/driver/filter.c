@@ -49,7 +49,8 @@ BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx)
 	return TRUE;
 }
 
-void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
+#if 0 /* OLD ALGORITHM */
+/*void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	UNICODE_STRING str;
 
@@ -72,6 +73,38 @@ excl:
 	RtlFreeUnicodeString(&str);
 	pfn->is_filtered = TRUE;
 	return;
+}*/
+#endif
+
+/* NEW ALGORITHM */
+void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	PFRAGMENTED pf;
+	UNICODE_STRING us;
+
+	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
+		pf->pfn->is_filtered = TRUE;
+
+		if(!RtlCreateUnicodeString(&us,pf->pfn->name.Buffer)){
+			DebugPrint2("-Ultradfg- cannot allocate memory for ApplyFilter()!\n",NULL);
+			continue;
+		}
+		_wcslwr(us.Buffer);
+
+		if(dx->in_filter.buffer){
+			if(!IsStringInFilter(us.Buffer,&dx->in_filter)){
+				RtlFreeUnicodeString(&us); continue;
+			}
+		}
+
+		if(dx->ex_filter.buffer){
+			if(IsStringInFilter(us.Buffer,&dx->ex_filter)){
+				RtlFreeUnicodeString(&us); continue;
+			}
+		}
+		pf->pfn->is_filtered = FALSE;
+		RtlFreeUnicodeString(&us);
+	}
 }
 
 void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
@@ -79,7 +112,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 {
 	POFFSET poffset;
 	int i;
-	PFRAGMENTED pfr;
+//	PFRAGMENTED pfr;
 
 	if(pf->buffer){
 		Nt_ExFreePool((void *)pf->buffer);
@@ -91,27 +124,31 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 
 	pf->offsets = NULL;
 	pf->buffer = AllocatePool(NonPagedPool,length);
-	if(pf->buffer){
-		buffer[(length >> 1) - 1] = 0;
-		_wcslwr(buffer);
-
-		poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
-		if(!poffset) return;
-		poffset->offset = 0;
-		for(i = 0; i < (length >> 1) - 1; i++){
-			if(buffer[i] == 0x003b){
-				buffer[i] = 0;
-				poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
-				if(!poffset) break;
-				poffset->offset = i + 1;
-			}
-		}
-		RtlCopyMemory(pf->buffer,buffer,length);
-	} else {
+	if(!pf->buffer){
 		DebugPrint("-Ultradfg- cannot allocate memory for pf->buffer in UpdateFilter()!\n",NULL);
+		return;
 	}
-	for(pfr = dx->fragmfileslist; pfr != NULL; pfr = pfr->next_ptr)
-		ApplyFilter(dx,pfr->pfn);
+
+	buffer[(length >> 1) - 1] = 0;
+	_wcslwr(buffer);
+
+	poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
+	if(!poffset) return;
+	poffset->offset = 0;
+	for(i = 0; i < (length >> 1) - 1; i++){
+		if(buffer[i] == 0x003b){
+			buffer[i] = 0;
+			poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
+			if(!poffset) break;
+			poffset->offset = i + 1;
+		}
+	}
+	RtlCopyMemory(pf->buffer,buffer,length);
+
+//	} else {
+//	}
+/*	for(pfr = dx->fragmfileslist; pfr != NULL; pfr = pfr->next_ptr)
+		ApplyFilter(dx,pfr->pfn);*/
 }
 
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)

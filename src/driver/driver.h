@@ -534,7 +534,7 @@ FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,U
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx);
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx);
 
-void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx/*,PFILENAME pfn*/);
 
 LIST* NTAPI InsertFirstItem(PLIST *phead,ULONG size);
 LIST* NTAPI InsertMiddleItem(PLIST *pprev,PLIST *pnext,ULONG size);
@@ -558,7 +558,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,short *buffer,int leng
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
 unsigned char GetSpaceState(PFILENAME pfn);
-void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx);
+//void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx);
 void stop_all_requests(void);
 
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
