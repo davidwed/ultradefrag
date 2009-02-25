@@ -145,7 +145,7 @@ void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 			  ULONGLONG start,ULONGLONG length,UCHAR old_space_state)
 {
-	PFREEBLOCKMAP block, prev_block = NULL, new_block;
+/*	PFREEBLOCKMAP block, prev_block = NULL, new_block;
 
 	ProcessBlock(dx,start,length,FREE_SPACE,old_space_state);
 
@@ -208,16 +208,63 @@ void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 			new_block->length = length;
 		}
 	}
+	*/
+	
+	PFREEBLOCKMAP block, prev_block = NULL, next_block;
+	
+	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
+		if(block->lcn > start){
+			if(block != dx->free_space_map) prev_block = block->prev_ptr;
+			break;
+		}
+		if(block->next_ptr == dx->free_space_map){
+			prev_block = block;
+			break;
+		}
+	}
+
+	/* hits the new block previous? */
+	if(prev_block){
+		if(prev_block->lcn + prev_block->length == start){
+			prev_block->length += length;
+			if(prev_block->lcn + prev_block->length == prev_block->next_ptr->lcn){
+				prev_block->length += prev_block->next_ptr->length;
+				prev_block->next_ptr->length = 0;
+			}
+			return;
+		}
+	}
+	
+	/* hits the new block the next one? */
+	if(dx->free_space_map){
+		if(prev_block == NULL) next_block = dx->free_space_map;
+		else next_block = prev_block->next_ptr;
+		if(start + length == next_block->lcn){
+			next_block->lcn = start;
+			next_block->length += length;
+			return;
+		}
+	}
+	
+	block = (PFREEBLOCKMAP)InsertItem((PLIST *)&dx->free_space_map,(PLIST)prev_block,sizeof(FREEBLOCKMAP));
+	if(!block) return;
+	
+	block->lcn = start;
+	block->length = length;
 }
 
 /* inserts last block in free space map: used in analysis process only */
 FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 				 ULONGLONG start,ULONGLONG length)
 {
-	PFREEBLOCKMAP block;
+	PFREEBLOCKMAP block, lastblock = NULL;
+	
+	if(dx->free_space_map) lastblock = dx->free_space_map->prev_ptr;
+	block = (PFREEBLOCKMAP)InsertItem((PLIST *)&dx->free_space_map,(PLIST)lastblock,sizeof(FREEBLOCKMAP));
 
-	block = (PFREEBLOCKMAP)InsertLastItem((PLIST *)&dx->free_space_map,
-		(PLIST *)&dx->lastfreeblock,sizeof(FREEBLOCKMAP));
+//	block = (PFREEBLOCKMAP)InsertLastItem((PLIST *)&dx->free_space_map,
+	//	(PLIST *)&dx->lastfreeblock,sizeof(FREEBLOCKMAP));
+
 	if(block){
 		block->lcn = start;
 		block->length = length;
@@ -276,6 +323,7 @@ void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 			block->length -= n;
 			return;
 		}
+		if(block->next_ptr == dx->free_space_map) break;
 	}
 	DebugPrint("-Ultradfg- TruncateFreeSpaceBlock() failed: Lcn=%I64u!\n",NULL,start);
 }

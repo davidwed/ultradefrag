@@ -226,7 +226,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo)
 {
-	PFILENAME pfn;
+	PFILENAME pfn, prev_pfn;
 
 	/* NEW ALGORITHM: Analyse C: on dmitriar's pc: 0.3 Mb of allocated memory. */
 	/* Add a file only if we need to have its information cached. */
@@ -265,19 +265,27 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 
 	/* 6. Insert pfn structure to file list. */
 	if(dx->compact_flag || pfn->is_fragm){
-		pfn->next_ptr = dx->filelist;
-		dx->filelist = pfn;
 		if(pfn->is_fragm){
 			if(!InsertFragmentedFile(dx,pfn)){
 				dx->fragmfilecounter --;
 				dx->fragmcounter -= pfn->n_fragments;
-				dx->filelist = pfn->next_ptr;
 				DeleteBlockmap(pfn);
 				RtlFreeUnicodeString(&pfn->name);
 				Nt_ExFreePool(pfn);
 				return FALSE;
 			}
 		}
+		if(dx->filelist == NULL){
+			dx->filelist = pfn;
+			pfn->prev_ptr = pfn->next_ptr = pfn;
+		} else {
+			prev_pfn = dx->filelist->prev_ptr;
+			dx->filelist = pfn;
+			pfn->prev_ptr = prev_pfn;
+			pfn->next_ptr = prev_pfn->next_ptr;
+			pfn->prev_ptr->next_ptr = pfn;
+			pfn->next_ptr->prev_ptr = pfn;
+		}			
 		return TRUE;
 	}
 
@@ -332,7 +340,7 @@ fail:
 /* Returns TRUE on success and FALSE if no enough memory */
 BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
-	PFRAGMENTED pf,plist;
+/*	PFRAGMENTED pf,plist;
 
 	pf = (PFRAGMENTED)AllocatePool(NonPagedPool,sizeof(FRAGMENTED));
 	if(!pf){
@@ -360,14 +368,35 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		pf->next_ptr = dx->fragmfileslist;
 		dx->fragmfileslist = pf;
 	}
-///	ApplyFilter(dx,pfn);
+///	ApplyFilter(dx,pfn);*/
+
+	PFRAGMENTED pf, prev_pf = NULL;
+	
+	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
+		if(pf->pfn->n_fragments <= pfn->n_fragments){
+			if(pf != dx->fragmfileslist) prev_pf = pf->prev_ptr;
+			break;
+		}
+		if(pf->next_ptr == dx->fragmfileslist){
+			prev_pf = pf;
+			break;
+		}
+	}
+
+	pf = (PFRAGMENTED)InsertItem((PLIST *)&dx->fragmfileslist,(PLIST)prev_pf,sizeof(FRAGMENTED));
+	if(!pf){
+		DebugPrint2("-Ultradfg- cannot allocate memory for InsertFragmentedFile()!\n",NULL);
+		return FALSE;
+	}
+
+	pf->pfn = pfn;
 	return TRUE;
 }
 
 /* removes unfragmented files from the list of fragmented files */
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	PFRAGMENTED pf,prev_pf;
+/*	PFRAGMENTED pf,prev_pf;
 
 	pf = dx->fragmfileslist;
 	prev_pf = NULL;
@@ -380,5 +409,6 @@ void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 			pf = pf->next_ptr;
 		}
 	}
+	*/
 }
 

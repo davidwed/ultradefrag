@@ -31,6 +31,7 @@ BOOLEAN IsStringInFilter(short *str,PFILTER pf)
 	for(po = pf->offsets; po != NULL; po = po->next_ptr){
 		p = pf->buffer + po->offset;
 		if(p[0]){ if(wcsstr(str,p)) return TRUE; }
+		if(po->next_ptr == pf->offsets) break;
 	}
 	return FALSE;
 }
@@ -42,7 +43,7 @@ BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	if(!dx->in_filter.buffer) return FALSE;
 	po = dx->in_filter.offsets;
-	if(po->next_ptr) return FALSE;
+	if(po->next_ptr != po) return FALSE;
 	p = dx->in_filter.buffer + po->offset;
 	if(wcslen(p) < 3) return FALSE;
 	if(p[1] != ':' || p[2] != '\\') return FALSE;
@@ -87,23 +88,25 @@ void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
 
 		if(!RtlCreateUnicodeString(&us,pf->pfn->name.Buffer)){
 			DebugPrint2("-Ultradfg- cannot allocate memory for ApplyFilter()!\n",NULL);
-			continue;
+			goto L0;//continue;
 		}
 		_wcslwr(us.Buffer);
 
 		if(dx->in_filter.buffer){
 			if(!IsStringInFilter(us.Buffer,&dx->in_filter)){
-				RtlFreeUnicodeString(&us); continue;
+				RtlFreeUnicodeString(&us); goto L0;//continue;
 			}
 		}
 
 		if(dx->ex_filter.buffer){
 			if(IsStringInFilter(us.Buffer,&dx->ex_filter)){
-				RtlFreeUnicodeString(&us); continue;
+				RtlFreeUnicodeString(&us); goto L0;//continue;
 			}
 		}
 		pf->pfn->is_filtered = FALSE;
 		RtlFreeUnicodeString(&us);
+	L0:
+		if(pf->next_ptr == dx->fragmfileslist) break;
 	}
 }
 
@@ -112,6 +115,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 {
 	POFFSET poffset;
 	int i;
+	char ch;
 //	PFRAGMENTED pfr;
 
 	if(pf->buffer){
@@ -132,19 +136,31 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 	buffer[(length >> 1) - 1] = 0;
 	_wcslwr(buffer);
 
-	poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
+	/* replace double quotes and semicolons with zeros */
+	poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));//InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
 	if(!poffset) return;
-	poffset->offset = 0;
+	if(length > sizeof(short) && buffer[0] == 0x0022) poffset->offset = 1; /* skip leading double quote */
+	else poffset->offset = 0;
+
 	for(i = 0; i < (length >> 1) - 1; i++){
+		if(buffer[i] == 0x0022) { buffer[i] = 0; continue; } /* replace all double quotes with zeros */
 		if(buffer[i] == 0x003b){
 			buffer[i] = 0;
-			poffset = (POFFSET)InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
+			poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));//InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
 			if(!poffset) break;
-			poffset->offset = i + 1;
+			if(buffer[i + 1] == 0x0022) poffset->offset = i + 2; /* safe, because we always have null terminated buffer */
+			else poffset->offset = i + 1;
 		}
 	}
+
 	RtlCopyMemory(pf->buffer,buffer,length);
 
+	DebugPrint("-Ultradfg- Filter strings:\n",NULL);
+	ch = (pf == &dx->in_filter) ? '+' : '-';
+	for(poffset = pf->offsets; poffset != NULL; poffset = poffset->next_ptr){
+		DebugPrint("-Ultradfg-  %c\n",pf->buffer + poffset->offset,ch);
+		if(poffset->next_ptr == pf->offsets) break;
+	}
 //	} else {
 //	}
 /*	for(pfr = dx->fragmfileslist; pfr != NULL; pfr = pfr->next_ptr)

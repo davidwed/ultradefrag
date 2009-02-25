@@ -95,7 +95,7 @@ void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx)
 
 void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	PFILENAME ptr,next_ptr;
+/*	PFILENAME ptr,next_ptr;
 
 	ptr = dx->filelist;
 	while(ptr){
@@ -105,6 +105,19 @@ void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 		Nt_ExFreePool((void *)ptr);
 		ptr = next_ptr;
 	}
+*/
+	PFILENAME pfn;
+	
+	pfn = dx->filelist;
+	if(pfn){
+		do {
+			DestroyList((PLIST *)&pfn->blockmap);
+			RtlFreeUnicodeString(&pfn->name);
+			pfn = pfn->next_ptr;
+		} while(pfn != dx->filelist);
+		DestroyList((PLIST *)&dx->filelist);
+	}
+
 	DestroyList((PLIST *)&dx->free_space_map);
 	DestroyList((PLIST *)&dx->fragmfileslist);
 	dx->filelist = NULL;

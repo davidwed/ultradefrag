@@ -331,8 +331,9 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	if(percentage){ /* calculate percentage only if we have such request */
 		/* FIXME: do it more accurate */
 		x = (double)(LONGLONG)pstat->processed_clusters;
-		y = (double)(LONGLONG)pstat->clusters_to_process + 0.1;
-		*percentage = (x / y) * 100.00;
+		y = (double)(LONGLONG)pstat->clusters_to_process;
+		if(y == 0) *percentage = 0.00;
+		else *percentage = (x / y) * 100.00;
 	}
 	return 0;
 }
@@ -393,7 +394,8 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 
 	winx_fbsize(pstat->total_space,2,total_space,sizeof(total_space));
 	winx_fbsize(pstat->free_space,2,free_space,sizeof(free_space));
-	p = (double)(pstat->fragmcounter)/((double)(pstat->filecounter) + 0.1);
+	if(pstat->filecounter == 0) p = 0.00;
+	else p = (double)(pstat->fragmcounter)/((double)(pstat->filecounter));
 	ip = (unsigned int)(p * 100.00);
 	if(ip < 100) ip = 100; /* fix round off error */
 	_snprintf(result_msg,sizeof(result_msg) - 1,

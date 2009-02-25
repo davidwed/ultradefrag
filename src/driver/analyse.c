@@ -89,10 +89,12 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		return STATUS_NO_MORE_FILES;
 	}
 	RtlFreeUnicodeString(&us);
-	if(!dx->filelist){
+#if 0
+	if(!dx->filecounter/*filelist*/){
 		DebugPrint("-Ultradfg- No files found!\n",NULL);
 		return STATUS_NO_MORE_FILES;
 	}
+#endif
 	DebugPrint("-Ultradfg- Files found: %u\n",NULL,dx->filecounter);
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",NULL,dx->fragmfilecounter);
 

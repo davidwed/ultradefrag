@@ -72,9 +72,11 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 	char *comment;
 	ANSI_STRING as;
 
-	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
+	pf = dx->fragmfileslist; if(!pf) return;
+	do {
+	//for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(pf->pfn->is_filtered != is_filtered)
-			continue;
+			goto next_item;//continue;
 		if(pf->pfn->is_dir) comment = "[DIR]";
 		else if(pf->pfn->is_overlimit) comment = "[OVR]";
 		else if(pf->pfn->is_compressed) comment = "[CMP]";
@@ -111,7 +113,9 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		}
 		strcpy(buffer,"}},\r\n");
 		Write(dx,hFile,buffer,strlen(buffer));
-	}
+	next_item:
+		pf = pf->next_ptr;
+	} while(pf != dx->fragmfileslist);
 }
 
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
@@ -215,22 +219,26 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 	short e1[] = L"\t";
 	short e2[] = L"\r\n";
 
-	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
+	pf = dx->fragmfileslist; if(!pf) return;
+	do {
+	//for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(pf->pfn->is_filtered != is_filtered)
-			continue;
+			goto next_item;//continue;
 		/* because on NT 4.0 we don't have _itow: */
 		_itoa(pf->pfn->n_fragments,buffer,10);
 		RtlInitAnsiString(&as,buffer);
 		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
 			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n",NULL);
-			continue;
+			return;
 		}
 		Write(dx,hFile,us.Buffer,us.Length);
 		RtlFreeUnicodeString(&us);
 		Write(dx,hFile,e1,sizeof(e1) - sizeof(short));
 		Write(dx,hFile,pf->pfn->name.Buffer,pf->pfn->name.Length);
 		Write(dx,hFile,e2,sizeof(e2) - sizeof(short));
-	}
+	next_item:
+		pf = pf->next_ptr;
+	} while(pf != dx->fragmfileslist);
 }
 
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)

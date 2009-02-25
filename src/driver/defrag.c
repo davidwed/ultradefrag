@@ -316,7 +316,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	KSPIN_LOCK spin_lock;
 	KIRQL oldIrql;
-	PFRAGMENTED pflist, plargest;
+	PFRAGMENTED pf, plargest;
 	PFREEBLOCKMAP block;
 	ULONGLONG length;
 
@@ -328,36 +328,42 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	KeAcquireSpinLock(&spin_lock,&oldIrql);
 	dx->clusters_to_process = dx->processed_clusters = 0;
 	KeReleaseSpinLock(&spin_lock,oldIrql);
-	for(pflist = dx->fragmfileslist; pflist != NULL; pflist = pflist->next_ptr){
-		if(!pflist->pfn->blockmap) continue; /* skip fragmented files with unknown state */
-		if(pflist->pfn->is_overlimit) continue; /* skip fragmented but filtered out files */
-		if(pflist->pfn->is_filtered) continue;
+
+	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
+		if(!pf->pfn->blockmap) goto next_item;/*continue;*/ /* skip fragmented files with unknown state */
+		if(pf->pfn->is_overlimit) goto next_item;/*continue;*/ /* skip fragmented but filtered out files */
+		if(pf->pfn->is_filtered) goto next_item;/*continue;*/
 		/* skip fragmented directories on FAT/UDF partitions */
-		if(pflist->pfn->is_dir && dx->partition_type != NTFS_PARTITION) continue;
-		dx->clusters_to_process += pflist->pfn->clusters_total;
+		if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto next_item;/*continue;*/
+		dx->clusters_to_process += pf->pfn->clusters_total;
+	next_item:
+		if(pf->next_ptr == dx->fragmfileslist) break;
 	}
+
 	dx->current_operation = 'D';
 	
 	/* Fill free space areas. */
 	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
 	L0:
-		if(block->length <= 1) continue; /* skip 1 cluster blocks and zero length blocks */
+		if(block->length <= 1) goto L1; /* skip 1 cluster blocks and zero length blocks */
 		/* find largest fragmented file that can be stored here */
 		plargest = NULL; length = 0;
-		for(pflist = dx->fragmfileslist; pflist != NULL; pflist = pflist->next_ptr){
-			if(!pflist->pfn->blockmap) continue; /* skip fragmented files with unknown state */
-			if(pflist->pfn->is_overlimit) continue; /* skip fragmented but filtered out files */
-			if(pflist->pfn->is_filtered) continue;
+		for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
+			if(!pf->pfn->blockmap) goto L2; /* skip fragmented files with unknown state */
+			if(pf->pfn->is_overlimit) goto L2; /* skip fragmented but filtered out files */
+			if(pf->pfn->is_filtered) goto L2;
 			/* skip fragmented directories on FAT/UDF partitions */
-			if(pflist->pfn->is_dir && dx->partition_type != NTFS_PARTITION) continue;
-			if(pflist->pfn->clusters_total <= block->length){
-				if(pflist->pfn->clusters_total > length){
-					plargest = pflist;
-					length = pflist->pfn->clusters_total;
+			if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto L2;
+			if(pf->pfn->clusters_total <= block->length){
+				if(pf->pfn->clusters_total > length){
+					plargest = pf;
+					length = pf->pfn->clusters_total;
 				}
 			}
+		L2:
+			if(pf->next_ptr == dx->fragmfileslist) break;
 		}
-		if(!plargest) continue; /* current block is too small */
+		if(!plargest) goto L1; /* current block is too small */
 		/* move file */
 		if(MoveTheFile(dx,plargest->pfn,block->lcn))
 			DebugPrint("-Ultradfg- Defrag success for\n",plargest->pfn->name.Buffer);
@@ -368,6 +374,8 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(KeReadStateEvent(&stop_event)) break;
 		/* after file moving continue from the first free space block */
 		block = dx->free_space_map; if(!block) break; else goto L0;
+	L1:
+		if(block->next_ptr == dx->free_space_map) break;
 	}
 	SaveFragmFilesListToDisk(dx);
 }
@@ -440,6 +448,7 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 			if(Status) return Status;
 			curr_target += r;
 		}
+		if(block->next_ptr == pfn->blockmap) break;
 	}
 	/* Check new file blocks to get moving status. */
 	return CheckFilePosition(dx,hFile,targetLcn,pfn->clusters_total) ? STATUS_SUCCESS : STATUS_UNSUCCESSFUL;
@@ -482,6 +491,7 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 		/* free previously allocated space (after TruncateFreeSpaceBlock() call!) */
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
 			ProcessFreeBlock(dx,block->lcn,block->length,FRAGM_SPACE/*old_state*/);
+			if(block->next_ptr == pfn->blockmap) break;
 		}
 		/* correct file information */
 /*		if(pfn->is_compressed){

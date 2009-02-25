@@ -79,8 +79,14 @@ void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
 	UCHAR state;
 	
 	state = GetSpaceState(pfn);
-	for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
+//	for(block = pfn->blockmap; block != NULL; block = block->next_ptr)
+//		ProcessBlock(dx,block->lcn,block->length,state,old_space_state);
+	block = pfn->blockmap;
+	if(!block) return;
+	do {
 		ProcessBlock(dx,block->lcn,block->length,state,old_space_state);
+		block = block->next_ptr;
+	} while (block != pfn->blockmap);
 #endif
 }
 

@@ -52,7 +52,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	pfn->clusters_total = pfn->n_fragments = 0;
 	pfn->is_fragm = FALSE;
 	pfn->blockmap = NULL;
-	dx->lastblock = NULL;
+//	dx->lastblock = NULL;
 	/* Open the file */
 	Status = OpenTheFile(pfn,&hFile);
 	if(Status != STATUS_SUCCESS){
@@ -159,7 +159,8 @@ next_run:
 	if(pfn->is_fragm){
 		dx->fragmfilecounter ++; /* file is true fragmented */
 	}
-	dx->fragmcounter += cnt;
+	if(pfn->is_fragm) dx->fragmcounter += cnt;
+	else dx->fragmcounter ++;
 	return TRUE; /* success */
 }
 
@@ -256,15 +257,18 @@ next_run:
 BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 					ULONGLONG startVcn,ULONGLONG startLcn,ULONGLONG length)
 {
-	PBLOCKMAP block;
+	PBLOCKMAP block, lastblock = NULL;
 
 	/* for compressed files it's neccessary: */
-	if(dx->lastblock){
-		if(startLcn != dx->lastblock->lcn + dx->lastblock->length)
+	if(pfn->blockmap/*dx->lastblock*/){
+		lastblock = pfn->blockmap->prev_ptr;
+		if(startLcn != lastblock->lcn + lastblock->length)
 			pfn->is_fragm = TRUE;
 	}
-	block = (PBLOCKMAP)InsertLastItem((PLIST *)&pfn->blockmap,
+/*	block = (PBLOCKMAP)InsertLastItem((PLIST *)&pfn->blockmap,
 		(PLIST *)&dx->lastblock,sizeof(BLOCKMAP));
+*/
+	block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)lastblock,sizeof(BLOCKMAP));
 	if(block){
 		block->lcn = startLcn;
 		block->length = length;

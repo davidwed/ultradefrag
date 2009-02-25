@@ -344,15 +344,18 @@ VOID NTAPI Nt_ExFreePool(PVOID);
 
 /*
 * NOTE! NEXT_PTR MUST BE FIRST MEMBER OF THESE STRUCTURES!
+* PREV_PTR MUST BE THE SECOND MEMBER!
 */
 /* generic LIST structure definition */
 typedef struct _LIST {
 	struct _LIST *next_ptr;
+	struct _LIST *prev_ptr;
 } LIST, *PLIST;
 
 /* structure to store information about blocks of file */
 typedef struct _tagBLOCKMAP {
 	struct _tagBLOCKMAP *next_ptr;
+	struct _tagBLOCKMAP *prev_ptr;
 	ULONGLONG vcn; /* useful for compressed files */
 	ULONGLONG lcn;
 	ULONGLONG length;
@@ -361,6 +364,7 @@ typedef struct _tagBLOCKMAP {
 /* structure to store information about free space blocks */
 typedef struct _tagFREEBLOCKMAP {
 	struct _tagFREEBLOCKMAP *next_ptr;
+	struct _tagFREEBLOCKMAP *prev_ptr;
 	ULONGLONG lcn;
 	ULONGLONG length;
 } FREEBLOCKMAP, *PFREEBLOCKMAP;
@@ -368,6 +372,7 @@ typedef struct _tagFREEBLOCKMAP {
 /* structure to store information about file itself */
 typedef struct _tagFILENAME {
 	struct _tagFILENAME *next_ptr;
+	struct _tagFILENAME *prev_ptr;
 	UNICODE_STRING name;
 	BOOLEAN is_fragm;
 	ULONG n_fragments;
@@ -382,6 +387,7 @@ typedef struct _tagFILENAME {
 /* structure to store fragmented item */
 typedef struct _FRAGMENTED {
 	struct _FRAGMENTED *next_ptr;
+	struct _FRAGMENTED *prev_ptr;
 	FILENAME *pfn;
 } FRAGMENTED, *PFRAGMENTED;
 
@@ -392,18 +398,11 @@ typedef struct _FRAGMENTED {
 
 #define _256K (256 * 1024)
 
-/* structure to store information about block with unknown state */
-/*typedef struct _PROCESS_BLOCK_STRUCT
-{
-	struct _PROCESS_BLOCK_STRUCT *next_ptr;
-	ULONGLONG start;
-	ULONGLONG len;
-} PROCESS_BLOCK_STRUCT, *PPROCESS_BLOCK_STRUCT;
-*/
 /* structure to store offset of filter string in multiline filter */
 typedef struct _OFFSET
 {
 	struct _OFFSET *next_ptr;
+	struct _OFFSET *prev_ptr;
 	int offset;
 } OFFSET, *POFFSET;
 
@@ -494,7 +493,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	* End of the data with initial zero state.
 	*/
 	MARKER z0_end;
-	PBLOCKMAP lastblock;
+//	PBLOCKMAP lastblock;
 	UCHAR current_operation;
 	UCHAR letter;
 	ULONGLONG bytes_per_cluster;
@@ -536,10 +535,15 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx);
 
 void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx/*,PFILENAME pfn*/);
 
-LIST* NTAPI InsertFirstItem(PLIST *phead,ULONG size);
+/*LIST* NTAPI InsertFirstItem(PLIST *phead,ULONG size);
 LIST* NTAPI InsertMiddleItem(PLIST *pprev,PLIST *pnext,ULONG size);
 LIST* NTAPI InsertLastItem(PLIST *phead,PLIST *plast,ULONG size);
 LIST* NTAPI RemoveItem(PLIST *phead,PLIST *pprev,PLIST *pcurrent);
+void NTAPI DestroyList(PLIST *phead);
+*/
+
+LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size);
+void NTAPI RemoveItem(PLIST *phead,PLIST item);
 void NTAPI DestroyList(PLIST *phead);
 
 NTSTATUS AllocateMap(ULONG size);
@@ -551,7 +555,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx);
 void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 
-BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
+//BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
 void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 
 void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,short *buffer,int length);
