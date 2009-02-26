@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -410,5 +410,23 @@ void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 		}
 	}
 	*/
+	
+	PFRAGMENTED pf, next_pf, head;
+	
+	head = dx->fragmfileslist;
+	for(pf = dx->fragmfileslist; pf != NULL;){
+		next_pf = pf->next_ptr;
+		if(!pf->pfn->is_fragm){
+			RemoveItem((PLIST *)&dx->fragmfileslist,(PLIST)pf);
+			if(dx->fragmfileslist == NULL) break;
+			if(dx->fragmfileslist != head){
+				head = dx->fragmfileslist;
+				pf = next_pf;
+				continue;
+			}
+		}
+		pf = next_pf;
+		if(pf == head) break;
+	}
 }
 
