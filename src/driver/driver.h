@@ -155,13 +155,13 @@ typedef struct _KBUGCHECK_SECONDARY_DUMP_DATA {
 
 #define TEMP_BUFFER_CHARS 32768
 
-#if 0 /* since v2.1.0 */
-	#ifdef NT4_TARGET
-	#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdl(addr)
-	#else
-	#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdlSafe(addr,NormalPagePriority)
-	#endif
+/*
+#ifdef NT4_TARGET
+#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdl(addr)
+#else
+#define Nt_MmGetSystemAddressForMdl(addr) MmGetSystemAddressForMdlSafe(addr,NormalPagePriority)
 #endif
+*/
 
 PVOID NTAPI Nt_MmGetSystemAddressForMdl(PMDL addr);
 
@@ -289,7 +289,6 @@ typedef struct _SYSTEM_MODULE_INFORMATION
 } SYSTEM_MODULE_INFORMATION, *PSYSTEM_MODULE_INFORMATION;
 
 NTSTATUS NTAPI ZwQuerySystemInformation(SYSTEM_INFORMATION_CLASS,PVOID,ULONG,PULONG);
-
 NTSTATUS NTAPI ZwDeleteFile(IN POBJECT_ATTRIBUTES);
 char *__cdecl _itoa(int value,char *str,int radix);
 
@@ -457,7 +456,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	*/
 	MARKER z_start;
 	PFREEBLOCKMAP free_space_map;
-	PFREEBLOCKMAP lastfreeblock;
 	PFILENAME filelist;
 	PFRAGMENTED fragmfileslist;
 	ULONG filecounter;
@@ -478,7 +476,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONGLONG cells_per_last_cluster;
 	ULONGLONG clusters_to_process;
 	ULONGLONG processed_clusters;
-//	ULONG invalid_movings;
 	/*
 	* End of the data with default zero state.
 	*/
@@ -493,7 +490,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	* End of the data with initial zero state.
 	*/
 	MARKER z0_end;
-//	PBLOCKMAP lastblock;
 	UCHAR current_operation;
 	UCHAR letter;
 	ULONGLONG bytes_per_cluster;
@@ -529,50 +525,30 @@ void InitDX(UDEFRAG_DEVICE_EXTENSION *dx);
 void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx);
 void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length,UCHAR old_space_state);
 FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
-
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx);
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx);
-
-void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx/*,PFILENAME pfn*/);
-
-/*LIST* NTAPI InsertFirstItem(PLIST *phead,ULONG size);
-LIST* NTAPI InsertMiddleItem(PLIST *pprev,PLIST *pnext,ULONG size);
-LIST* NTAPI InsertLastItem(PLIST *phead,PLIST *plast,ULONG size);
-LIST* NTAPI RemoveItem(PLIST *phead,PLIST *pprev,PLIST *pcurrent);
-void NTAPI DestroyList(PLIST *phead);
-*/
-
+void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
 LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size);
 void NTAPI RemoveItem(PLIST *phead,PLIST item);
 void NTAPI DestroyList(PLIST *phead);
-
 NTSTATUS AllocateMap(ULONG size);
 void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);
 void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx);
 void GetMap(char *dest);
-
 NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx);
 void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
-
-//BOOLEAN CheckFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
 void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
-
 void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,short *buffer,int length);
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
 unsigned char GetSpaceState(PFILENAME pfn);
-//void FreeAllBuffersInIdleState(UDEFRAG_DEVICE_EXTENSION *dx);
 void stop_all_requests(void);
-
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
-
 PVOID KernelGetModuleBase(PCHAR pModuleName);
 PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
-
 BOOLEAN IsStringInFilter(short *str,PFILTER pf);
 BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx);
-
 BOOLEAN CheckFilePosition(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 					ULONGLONG targetLcn, ULONGLONG n_clusters);
 

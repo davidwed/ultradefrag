@@ -47,15 +47,12 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint1("-Ultradfg- Report was deleted with status %x\n",p,(UINT)status);
 }
 
-void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
-		   PVOID buf,ULONG length/*,PLARGE_INTEGER pOffset*/)
+void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 {
 	IO_STATUS_BLOCK ioStatus;
 	NTSTATUS Status;
 
-	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
-			buf,length,/*pOffset*/NULL,NULL);
-	//pOffset->QuadPart += length;
+	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
 	if(Status == STATUS_PENDING){
 		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n",NULL);
 		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
@@ -74,9 +71,8 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 
 	pf = dx->fragmfileslist; if(!pf) return;
 	do {
-	//for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(pf->pfn->is_filtered != is_filtered)
-			goto next_item;//continue;
+			goto next_item;
 		if(pf->pfn->is_dir) comment = "[DIR]";
 		else if(pf->pfn->is_overlimit) comment = "[OVR]";
 		else if(pf->pfn->is_compressed) comment = "[CMP]";
@@ -194,15 +190,12 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint1("-Ultradfg- Report was deleted with status %x\n",p,(UINT)status);
 }
 
-void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
-		   PVOID buf,ULONG length/*,PLARGE_INTEGER pOffset*/)
+void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 {
 	IO_STATUS_BLOCK ioStatus;
 	NTSTATUS Status;
 
-	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,
-			buf,length,/*pOffset*/NULL,NULL);
-	//pOffset->QuadPart += length;
+	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
 	if(Status == STATUS_PENDING){
 		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.",NULL);
 		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
@@ -221,9 +214,8 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 
 	pf = dx->fragmfileslist; if(!pf) return;
 	do {
-	//for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(pf->pfn->is_filtered != is_filtered)
-			goto next_item;//continue;
+			goto next_item;
 		/* because on NT 4.0 we don't have _itow: */
 		_itoa(pf->pfn->n_fragments,buffer,10);
 		RtlInitAnsiString(&as,buffer);

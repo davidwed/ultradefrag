@@ -37,6 +37,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 	UNICODE_STRING new_path, temp_path, temp_win32_path;
 	HANDLE DirectoryHandle;
 	unsigned int length;
+	BOOLEAN inside_flag = TRUE;
 
 	/* Allocate memory */
 	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(NonPagedPool,
@@ -161,6 +162,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 						/* in other words: are we inside the selected folder? */
 						if(!wcsstr(temp_win32_path.Buffer,
 						  dx->in_filter.buffer + dx->in_filter.offsets->offset)){
+							inside_flag = FALSE;
 							/* is current path a part of the path selected in context menu? */
 							/* in other words: are we going in right direction? */
 							if(!wcsstr(dx->in_filter.buffer + dx->in_filter.offsets->offset,
@@ -169,10 +171,13 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 								RtlFreeUnicodeString(&temp_win32_path);
 								RtlFreeUnicodeString(&temp_path); continue;
 							}
+						} else {
+							inside_flag = TRUE;
 						}
 						RtlFreeUnicodeString(&temp_win32_path);
 					}else{
 						DebugPrint2("-Ultradfg- cannot allocate memory for the temp_win32_path !\n",NULL);
+						inside_flag = TRUE;
 					}
 				}
 				/*
@@ -207,6 +212,11 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 			}
 		}
 		
+		/* skip parent directories in context menu handler */
+		if(context_menu_handler && !inside_flag){
+			RtlFreeUnicodeString(&new_path);
+			continue;
+		}
 		if(!InsertFileName(dx,new_path.Buffer,pFileInfo)){
 			DebugPrint("-Ultradfg- InsertFileName failed for\n",new_path.Buffer);
 			ZwClose(DirectoryHandle);
@@ -228,7 +238,6 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 {
 	PFILENAME pfn, prev_pfn;
 
-	/* NEW ALGORITHM: Analyse C: on dmitriar's pc: 0.3 Mb of allocated memory. */
 	/* Add a file only if we need to have its information cached. */
 	/* 1. First of all try to allocate pfn structure. */
 	pfn = (PFILENAME)AllocatePool(NonPagedPool,sizeof(FILENAME));
@@ -262,6 +271,14 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 	dx->filecounter ++;
 	if(pfn->is_dir) dx->dircounter ++;
 	if(pfn->is_compressed) dx->compressedcounter ++;
+	if(pfn->is_fragm){
+		dx->fragmfilecounter ++;
+		dx->fragmcounter += pfn->n_fragments;
+	} else {
+		dx->fragmcounter ++;
+	}
+	dx->processed_clusters += pfn->clusters_total;
+	MarkSpace(dx,pfn,SYSTEM_SPACE);
 
 	/* 6. Insert pfn structure to file list. */
 	if(dx->compact_flag || pfn->is_fragm){
@@ -294,82 +311,12 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 	RtlFreeUnicodeString(&pfn->name);
 	Nt_ExFreePool(pfn);
 	return TRUE;
-	
-
-	/* OLD ALGORITHM: Analyse C: on dmitriar's pc: 2.3 Mb of allocated memory. */
-#if 0
-	/* Add file name with path to filelist */
-	pfn = (PFILENAME)InsertFirstItem((PLIST *)&dx->filelist,sizeof(FILENAME));
-	if(!pfn) return FALSE;
-	if(!RtlCreateUnicodeString(&pfn->name,path)){
-		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
-		dx->filelist = pfn->next_ptr;
-		Nt_ExFreePool(pfn);
-		return FALSE;
-	}
-	pfn->is_dir = IS_DIR(pFileInfo);
-	pfn->is_compressed = IS_COMPRESSED(pFileInfo);
-	if(dx->sizelimit && \
-		(unsigned __int64)(pFileInfo->AllocationSize.QuadPart) > dx->sizelimit)
-		pfn->is_overlimit = TRUE;
-	else
-		pfn->is_overlimit = FALSE;
-	if(DumpFile(dx,pfn)){
-		if(pfn->is_fragm){
-			if(!InsertFragmentedFile(dx,pfn)){
-				dx->fragmfilecounter --;
-				dx->fragmcounter -= pfn->n_fragments;
-				goto fail;
-			}
-		}
-		dx->filecounter ++;
-		if(pfn->is_dir) dx->dircounter ++;
-		if(pfn->is_compressed) dx->compressedcounter ++;
-	}
-	return TRUE;
-
-fail:
-	dx->filelist = pfn->next_ptr;
-	RtlFreeUnicodeString(&pfn->name);
-	Nt_ExFreePool(pfn);
-	return FALSE;
-#endif
 }
 
 /* inserts the new structure to list of fragmented files */
 /* Returns TRUE on success and FALSE if no enough memory */
 BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
-/*	PFRAGMENTED pf,plist;
-
-	pf = (PFRAGMENTED)AllocatePool(NonPagedPool,sizeof(FRAGMENTED));
-	if(!pf){
-		DebugPrint2("-Ultradfg- cannot allocate memory for InsertFragmentedFile()!\n",NULL);
-		return FALSE;
-	}
-	pf->pfn = pfn;
-	plist = dx->fragmfileslist;
-	while(plist){
-		if(plist->pfn->n_fragments > pfn->n_fragments){
-			if(!plist->next_ptr){
-				plist->next_ptr = pf;
-				pf->next_ptr = NULL;
-				break;
-			}
-			if(plist->next_ptr->pfn->n_fragments <= pfn->n_fragments){
-				pf->next_ptr = plist->next_ptr;
-				plist->next_ptr = pf;
-				break;
-			}
-		}
-		plist = plist->next_ptr;
-	}
-	if(!plist){
-		pf->next_ptr = dx->fragmfileslist;
-		dx->fragmfileslist = pf;
-	}
-///	ApplyFilter(dx,pfn);*/
-
 	PFRAGMENTED pf, prev_pf = NULL;
 	
 	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
@@ -388,7 +335,6 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		DebugPrint2("-Ultradfg- cannot allocate memory for InsertFragmentedFile()!\n",NULL);
 		return FALSE;
 	}
-
 	pf->pfn = pfn;
 	return TRUE;
 }
@@ -396,21 +342,6 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 /* removes unfragmented files from the list of fragmented files */
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-/*	PFRAGMENTED pf,prev_pf;
-
-	pf = dx->fragmfileslist;
-	prev_pf = NULL;
-	while(pf){
-		if(!pf->pfn->is_fragm){
-			pf = (PFRAGMENTED)RemoveItem((PLIST *)&dx->fragmfileslist,
-				(PLIST *)(void *)&prev_pf,(PLIST *)(void *)&pf);
-		} else {
-			prev_pf = pf;
-			pf = pf->next_ptr;
-		}
-	}
-	*/
-	
 	PFRAGMENTED pf, next_pf, head;
 	
 	head = dx->fragmfileslist;
@@ -429,4 +360,3 @@ void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(pf == head) break;
 	}
 }
-

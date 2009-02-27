@@ -95,17 +95,6 @@ void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx)
 
 void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-/*	PFILENAME ptr,next_ptr;
-
-	ptr = dx->filelist;
-	while(ptr){
-		next_ptr = ptr->next_ptr;
-		DestroyList((PLIST *)&ptr->blockmap);
-		RtlFreeUnicodeString(&ptr->name);
-		Nt_ExFreePool((void *)ptr);
-		ptr = next_ptr;
-	}
-*/
 	PFILENAME pfn;
 	
 	pfn = dx->filelist;

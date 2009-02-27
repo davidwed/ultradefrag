@@ -23,6 +23,54 @@
 
 #include "driver.h"
 
+#if 0
+/*
+* NOTES:
+* 1. On FAT it's bad idea, because dirs aren't moveable.
+* 2. On NTFS cycle of attempts is a bad solution,
+* because it increases processing time. Also on NTFS all 
+* space freed during the defragmentation is still temporarily
+* allocated by system for a long time.
+*/
+void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	KSPIN_LOCK spin_lock;
+	KIRQL oldIrql;
+	PFILENAME curr_file;
+
+	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",NULL,dx->letter);
+	DeleteLogFile(dx);
+
+	/* Initialize progress counters. */
+	KeInitializeSpinLock(&spin_lock);
+	KeAcquireSpinLock(&spin_lock,&oldIrql);
+	dx->clusters_to_process = dx->processed_clusters = 0;
+	KeReleaseSpinLock(&spin_lock,oldIrql);
+	for(curr_file = dx->filelist; curr_file != NULL; curr_file = curr_file->next_ptr){
+		if(!curr_file->blockmap) continue;
+		dx->clusters_to_process += curr_file->clusters_total;
+	}
+	dx->current_operation = 'C';
+
+	/* On FAT volumes it increase distance between dir & files inside it. */
+	if(dx->partition_type != NTFS_PARTITION){
+		dx->processed_clusters = dx->clusters_to_process;
+		return;
+	}
+
+	/* process all files */
+	for(curr_file = dx->filelist; curr_file != NULL; curr_file = curr_file->next_ptr){
+		/* skip system files */
+		if(!curr_file->blockmap) continue;
+		if(KeReadStateEvent(&stop_event)) break;
+		DefragmentFile(dx,curr_file);
+		dx->processed_clusters += curr_file->clusters_total;
+	}
+	UpdateFragmentedFilesList(dx);
+	SaveFragmFilesListToDisk(dx);
+}
+#endif
+
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 }

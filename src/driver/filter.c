@@ -50,34 +50,6 @@ BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx)
 	return TRUE;
 }
 
-#if 0 /* OLD ALGORITHM */
-/*void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
-{
-	UNICODE_STRING str;
-
-	if(!RtlCreateUnicodeString(&str,pfn->name.Buffer)){
-		DebugPrint2("-Ultradfg- cannot allocate memory for ApplyFilter()!\n",NULL);
-		pfn->is_filtered = FALSE;
-		return;
-	}
-	_wcslwr(str.Buffer);
-	if(dx->in_filter.buffer)
-		if(!IsStringInFilter(str.Buffer,&dx->in_filter))
-			goto excl;
-	if(dx->ex_filter.buffer)
-		if(IsStringInFilter(str.Buffer,&dx->ex_filter))
-			goto excl;
-	RtlFreeUnicodeString(&str);
-	pfn->is_filtered = FALSE;
-	return;
-excl:
-	RtlFreeUnicodeString(&str);
-	pfn->is_filtered = TRUE;
-	return;
-}*/
-#endif
-
-/* NEW ALGORITHM */
 void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFRAGMENTED pf;
@@ -88,19 +60,19 @@ void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
 
 		if(!RtlCreateUnicodeString(&us,pf->pfn->name.Buffer)){
 			DebugPrint2("-Ultradfg- cannot allocate memory for ApplyFilter()!\n",NULL);
-			goto L0;//continue;
+			goto L0;
 		}
 		_wcslwr(us.Buffer);
 
 		if(dx->in_filter.buffer){
 			if(!IsStringInFilter(us.Buffer,&dx->in_filter)){
-				RtlFreeUnicodeString(&us); goto L0;//continue;
+				RtlFreeUnicodeString(&us); goto L0;
 			}
 		}
 
 		if(dx->ex_filter.buffer){
 			if(IsStringInFilter(us.Buffer,&dx->ex_filter)){
-				RtlFreeUnicodeString(&us); goto L0;//continue;
+				RtlFreeUnicodeString(&us); goto L0;
 			}
 		}
 		pf->pfn->is_filtered = FALSE;
@@ -116,7 +88,6 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 	POFFSET poffset;
 	int i;
 	char ch;
-//	PFRAGMENTED pfr;
 
 	if(pf->buffer){
 		Nt_ExFreePool((void *)pf->buffer);
@@ -137,7 +108,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 	_wcslwr(buffer);
 
 	/* replace double quotes and semicolons with zeros */
-	poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));//InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
+	poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));
 	if(!poffset) return;
 	if(length > sizeof(short) && buffer[0] == 0x0022) poffset->offset = 1; /* skip leading double quote */
 	else poffset->offset = 0;
@@ -146,7 +117,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 		if(buffer[i] == 0x0022) { buffer[i] = 0; continue; } /* replace all double quotes with zeros */
 		if(buffer[i] == 0x003b){
 			buffer[i] = 0;
-			poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));//InsertFirstItem((PLIST *)&pf->offsets,sizeof(OFFSET));
+			poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));
 			if(!poffset) break;
 			if(buffer[i + 1] == 0x0022) poffset->offset = i + 2; /* safe, because we always have null terminated buffer */
 			else poffset->offset = i + 1;
@@ -161,10 +132,6 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 		DebugPrint("-Ultradfg-  %c\n",pf->buffer + poffset->offset,ch);
 		if(poffset->next_ptr == pf->offsets) break;
 	}
-//	} else {
-//	}
-/*	for(pfr = dx->fragmfileslist; pfr != NULL; pfr = pfr->next_ptr)
-		ApplyFilter(dx,pfr->pfn);*/
 }
 
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
