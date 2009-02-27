@@ -383,6 +383,8 @@ typedef struct _tagFILENAME {
 	BOOLEAN is_filtered;
 } FILENAME, *PFILENAME;
 
+#define DeleteBlockmap(pfn) DestroyList((PLIST *)&(pfn)->blockmap)
+
 /* structure to store fragmented item */
 typedef struct _FRAGMENTED {
 	struct _FRAGMENTED *next_ptr;
@@ -518,7 +520,7 @@ void FreeAllBuffers(UDEFRAG_DEVICE_EXTENSION *dx);
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters);
 NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,HANDLE hFile,ULONGLONG target);
-void DeleteBlockmap(PFILENAME pfn);
+//void DeleteBlockmap(PFILENAME pfn);
 BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx);
 void InitDX(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -549,8 +551,6 @@ PVOID KernelGetModuleBase(PCHAR pModuleName);
 PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
 BOOLEAN IsStringInFilter(short *str,PFILTER pf);
 BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx);
-BOOLEAN CheckFilePosition(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
-					ULONGLONG targetLcn, ULONGLONG n_clusters);
 
 #define FIND_DATA_SIZE	(16*1024)
 

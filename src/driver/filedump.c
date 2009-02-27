@@ -23,14 +23,7 @@
 
 #include "driver.h"
 
-BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
-					  ULONGLONG startVcn,ULONGLONG startLcn,ULONGLONG length);
-
 /*
-* Dump File()
-* Dumps the clusters belonging to the specified file until the
-* end of the file.
-*
 * NOTES: 
 * 1. On NTFS volumes files smaller then 1 kb are placed in MFT.
 *    And we exclude their from defragmenting process.
@@ -44,11 +37,10 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	PGET_RETRIEVAL_DESCRIPTOR fileMappings;
 	NTSTATUS Status;
 	HANDLE hFile;
-	ULONGLONG startLcn,length;
 	int i,cnt = 0;
 	long counter;
 	#define MAX_COUNTER 1000
-	PBLOCKMAP block;
+	PBLOCKMAP block = NULL;
 
 	/* Data initialization */
 	pfn->clusters_total = pfn->n_fragments = 0;
@@ -114,10 +106,11 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 				goto next_run;
 			}
 			
-			startLcn = fileMappings->Pair[i].Lcn;
-			length = fileMappings->Pair[i].Vcn - *dx->pstartVcn;
-			if(!InsertBlock(dx,pfn,*dx->pstartVcn,startLcn,length))
-				goto dump_fail;
+			block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)block,sizeof(BLOCKMAP));
+			if(!block) goto dump_fail;
+			block->lcn = fileMappings->Pair[i].Lcn;
+			block->length = fileMappings->Pair[i].Vcn - *dx->pstartVcn;
+			block->vcn = *dx->pstartVcn;
 			cnt ++;	/* block counter */
 next_run:
 			*dx->pstartVcn = fileMappings->Pair[i].Vcn;
@@ -157,25 +150,4 @@ dump_fail:
 	DeleteBlockmap(pfn);
 	ZwClose(hFile);
 	return FALSE;
-}
-
-/* inserts the specified block in file's blockmap */
-BLOCKMAP *InsertBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
-					ULONGLONG startVcn,ULONGLONG startLcn,ULONGLONG length)
-{
-	PBLOCKMAP block, lastblock = NULL;
-
-	if(pfn->blockmap) lastblock = pfn->blockmap->prev_ptr;
-	block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)lastblock,sizeof(BLOCKMAP));
-	if(block){
-		block->lcn = startLcn;
-		block->length = length;
-		block->vcn = startVcn;
-	}
-	return block;
-}
-
-void DeleteBlockmap(PFILENAME pfn)
-{
-	DestroyList((PLIST *)&pfn->blockmap);
 }
