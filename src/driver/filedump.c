@@ -37,7 +37,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	PGET_RETRIEVAL_DESCRIPTOR fileMappings;
 	NTSTATUS Status;
 	HANDLE hFile;
-	int i,cnt = 0;
+	int i;
 	long counter;
 	#define MAX_COUNTER 1000
 	PBLOCKMAP block = NULL;
@@ -82,16 +82,15 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			goto dump_fail;
 		}
 
-		/* Loop through the buffer of number/cluster pairs. */
-		*dx->pstartVcn = fileMappings->StartVcn;
-		
 		if(!fileMappings->NumberOfPairs && Status != STATUS_SUCCESS){
 			DebugPrint("-Ultradfg- Empty map of file\n",pfn->name.Buffer);
 			goto dump_fail;
 		}
 		
-		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs; i++){
-			/* Infinite loop will cause BSOD. */
+		/* Loop through the buffer of number/cluster pairs. */
+		 *dx->pstartVcn = fileMappings->StartVcn;
+		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs;	i++){
+			/* Infinite loop here will cause BSOD. */
 
 			/*
 			* A compressed virtual run (0-filled) is
@@ -99,7 +98,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			*/
 			if(fileMappings->Pair[i].Lcn == LLINVALID) goto next_run;
 			
-			/* The following code may cause an infinite loop (bug #2053941?), */
+			/* The following code may cause an infinite main loop (bug #2053941?), */
 			/* but for some 3.99 Gb files on FAT32 it works fine. */
 			if(fileMappings->Pair[i].Vcn == 0){
 				DebugPrint("-Ultradfg- Wrong map of file\n",pfn->name.Buffer);
@@ -111,43 +110,30 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			block->lcn = fileMappings->Pair[i].Lcn;
 			block->length = fileMappings->Pair[i].Vcn - *dx->pstartVcn;
 			block->vcn = *dx->pstartVcn;
-			cnt ++;	/* block counter */
-next_run:
+			pfn->clusters_total += block->length;
+			pfn->n_fragments ++;
+			/*
+			* Sometimes normal file has more than one fragment, 
+			* but is not fragmented yet! *CRAZY* 
+			*/
+			if(block != pfn->blockmap && \
+			  block->lcn != (block->prev_ptr->lcn + block->prev_ptr->length))
+				pfn->is_fragm = TRUE;
+		next_run:
 			*dx->pstartVcn = fileMappings->Pair[i].Vcn;
 		}
 	} while(Status != STATUS_SUCCESS);
 
-	if(!cnt){
-		/*
-		* It's a small directory placed in MFT
-		* (at least on dmitriar's 32-bit XP system).
-		*/
-		goto dump_fail;
+	/* Skip small directories placed in MFT (tested on 32-bit XP system). */
+	if(pfn->blockmap){
+		ZwClose(hFile);
+		return TRUE; /* success */
 	}
-
-	pfn->n_fragments = cnt;
-	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		pfn->clusters_total += block->length;
-		if(block->next_ptr == pfn->blockmap) break;
-	}
-	if(cnt > 1){
-		/*
-		* Sometimes normal file has more than one fragment, 
-		* but is not fragmented yet! *CRAZY* 
-		*/
-		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-			if(block->next_ptr == pfn->blockmap) break;
-			if(block->next_ptr->lcn != block->lcn + block->length){
-				pfn->is_fragm = TRUE;
-				break;
-			}
-		}
-	}
-	ZwClose(hFile);
-	return TRUE; /* success */
 
 dump_fail:
 	DeleteBlockmap(pfn);
+	pfn->clusters_total = pfn->n_fragments = 0;
+	pfn->is_fragm = FALSE;
 	ZwClose(hFile);
 	return FALSE;
 }

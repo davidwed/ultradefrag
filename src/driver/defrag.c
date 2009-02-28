@@ -188,7 +188,7 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 	/* Open the file */
 	Status = OpenTheFile(pfn,&hFile);
 	if(Status){
-		DebugPrint1("-Ultradfg- Can't open file: %x\n",pfn->name.Buffer,(UINT)Status);
+		DebugPrint("-Ultradfg- Can't open file: %x\n",pfn->name.Buffer,(UINT)Status);
 		/* we need to destroy the block map to avoid infinite loops */
 		DeleteBlockmap(pfn); /* file is locked by other application, so its state is unknown */
 		return FALSE;

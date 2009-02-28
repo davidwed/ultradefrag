@@ -23,6 +23,9 @@
 
 #include "driver.h"
 
+void MovePartOfFileBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG startVcn,
+		ULONGLONG targetLcn,ULONGLONG n_clusters);
+
 #if 0
 /*
 * NOTES:
@@ -73,4 +76,82 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 {
+	PFILENAME pfn, lastpfn;
+	PBLOCKMAP block, lastblock;
+	PFREEBLOCKMAP freeblock;
+	ULONGLONG maxlcn;
+	ULONGLONG vcn, length;
+	ULONGLONG movings;
+	
+	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",NULL,dx->letter);
+	
+	while(1){
+		/* 1. Find the latest file block on the volume. */
+		lastblock = NULL; lastpfn = NULL; maxlcn = 0;
+		for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+				if(block->lcn > maxlcn){
+					lastblock = block;
+					lastpfn = pfn;
+					maxlcn = block->lcn;
+				}
+				if(block->next_ptr == pfn->blockmap) break;
+			}
+			if(pfn->next_ptr == dx->filelist) break;
+		}
+		if(!lastblock) break;
+		DebugPrint("-Ultradfg- Last block = Lcn:%I64u Length:%I64u\n",lastpfn->name.Buffer,
+			lastblock->lcn,lastblock->length);
+		if(KeReadStateEvent(&stop_event)) break;
+		/* 2. Fill free space areas in the beginning of the volume with lastblock contents. */
+		movings = 0;
+		for(freeblock = dx->free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
+			if(freeblock->lcn < lastblock->lcn && freeblock->length){
+				/* fill block with lastblock contents */
+				length = min(freeblock->length,lastblock->length);
+				vcn = lastblock->vcn + (lastblock->length - length);
+				MovePartOfFileBlock(dx,lastpfn,vcn,freeblock->lcn,length);
+				movings ++;
+				freeblock->length -= length;
+				freeblock->lcn += length;
+				lastblock->length -= length;
+				if(!lastblock->length){
+					RemoveItem((PLIST *)&lastpfn->blockmap,(PLIST)lastblock);
+					break;
+				}
+			}
+			if(KeReadStateEvent(&stop_event)) break;
+			if(freeblock->next_ptr == dx->free_space_map) break;
+		}
+		if(!movings) break;
+	}
+}
+
+void MovePartOfFileBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG startVcn,
+		ULONGLONG targetLcn,ULONGLONG n_clusters)
+{
+	HANDLE hFile;
+	ULONGLONG target;
+	ULONGLONG j,n,r;
+	NTSTATUS Status;
+
+	Status = OpenTheFile(pfn,&hFile);
+	if(Status) return;
+
+	target = targetLcn;
+	n = n_clusters / dx->clusters_per_256k;
+	for(j = 0; j < n; j++){
+		Status = MovePartOfFile(dx,hFile,startVcn + j * dx->clusters_per_256k, \
+			target,dx->clusters_per_256k);
+		if(Status){ ZwClose(hFile); return; }
+		target += dx->clusters_per_256k;
+	}
+	r = n_clusters % dx->clusters_per_256k;
+	if(r){
+		Status = MovePartOfFile(dx,hFile,startVcn + j * dx->clusters_per_256k, \
+			target,r);
+		if(Status){ ZwClose(hFile); return; }
+	}
+
+	ZwClose(hFile);
 }
