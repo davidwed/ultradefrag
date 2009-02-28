@@ -62,7 +62,9 @@ int __stdcall update_stat(int df)
 	double percentage;
 	char progress_msg[32];
 
-	if(stop_pressed) return 0; /* it's neccessary: see above one comment in Stop() */
+	/* due to the following line of code we have obsolete statistics when we have stopped */
+	if(stop_pressed) return 0; /* it's neccessary: see comment in main.h file */
+	
 	iItem = VolListGetSelectedItemIndex();
 	if(iItem == -1) return 0;
 	index = VolListGetLetterNumber(iItem);
