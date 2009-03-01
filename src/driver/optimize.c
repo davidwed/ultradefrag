@@ -26,7 +26,6 @@
 void MovePartOfFileBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG startVcn,
 		ULONGLONG targetLcn,ULONGLONG n_clusters);
 
-#if 0
 /*
 * NOTES:
 * 1. On FAT it's bad idea, because dirs aren't moveable.
@@ -34,48 +33,16 @@ void MovePartOfFileBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG st
 * because it increases processing time. Also on NTFS all 
 * space freed during the defragmentation is still temporarily
 * allocated by system for a long time.
+* 3. It makes an analysis after each volume optimization to 
+* update list of fragmented files.
+* 4. Usually this function increases a number of fragmented files.
+* 5. We cannot update a number of fragmented files during the 
+* optimization process.
 */
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	KSPIN_LOCK spin_lock;
 	KIRQL oldIrql;
-	PFILENAME curr_file;
-
-	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",NULL,dx->letter);
-	DeleteLogFile(dx);
-
-	/* Initialize progress counters. */
-	KeInitializeSpinLock(&spin_lock);
-	KeAcquireSpinLock(&spin_lock,&oldIrql);
-	dx->clusters_to_process = dx->processed_clusters = 0;
-	KeReleaseSpinLock(&spin_lock,oldIrql);
-	for(curr_file = dx->filelist; curr_file != NULL; curr_file = curr_file->next_ptr){
-		if(!curr_file->blockmap) continue;
-		dx->clusters_to_process += curr_file->clusters_total;
-	}
-	dx->current_operation = 'C';
-
-	/* On FAT volumes it increase distance between dir & files inside it. */
-	if(dx->partition_type != NTFS_PARTITION){
-		dx->processed_clusters = dx->clusters_to_process;
-		return;
-	}
-
-	/* process all files */
-	for(curr_file = dx->filelist; curr_file != NULL; curr_file = curr_file->next_ptr){
-		/* skip system files */
-		if(!curr_file->blockmap) continue;
-		if(KeReadStateEvent(&stop_event)) break;
-		DefragmentFile(dx,curr_file);
-		dx->processed_clusters += curr_file->clusters_total;
-	}
-	UpdateFragmentedFilesList(dx);
-	SaveFragmFilesListToDisk(dx);
-}
-#endif
-
-void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
-{
 	PFILENAME pfn, lastpfn;
 	PBLOCKMAP block, lastblock;
 	PFREEBLOCKMAP freeblock;
@@ -84,7 +51,22 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 	ULONGLONG movings;
 	
 	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",NULL,dx->letter);
+	DeleteLogFile(dx);
+
+	/* Initialize progress counters. */
+	KeInitializeSpinLock(&spin_lock);
+	KeAcquireSpinLock(&spin_lock,&oldIrql);
+	dx->clusters_to_process = dx->processed_clusters = 0;
+	KeReleaseSpinLock(&spin_lock,oldIrql);
+	for(freeblock = dx->free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
+		if(freeblock->next_ptr == dx->free_space_map) break;
+		dx->clusters_to_process += freeblock->length;
+	}
+	dx->current_operation = 'C';
 	
+	/* On FAT volumes it increase distance between dir & files inside it. */
+	if(dx->partition_type != NTFS_PARTITION) return;
+
 	while(1){
 		/* 1. Find the latest file block on the volume. */
 		lastblock = NULL; lastpfn = NULL; maxlcn = 0;
@@ -112,6 +94,10 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 				vcn = lastblock->vcn + (lastblock->length - length);
 				MovePartOfFileBlock(dx,lastpfn,vcn,freeblock->lcn,length);
 				movings ++;
+				dx->processed_clusters += length;
+				ProcessBlock(dx,freeblock->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
+				ProcessBlock(dx,lastblock->lcn + (lastblock->length - length),length,
+					FREE_SPACE,GetSpaceState(lastpfn));
 				freeblock->length -= length;
 				freeblock->lcn += length;
 				lastblock->length -= length;
@@ -125,6 +111,10 @@ void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
 		}
 		if(!movings) break;
 	}
+	
+	/* Analyse volume again to update fragmented files list. */
+	KeClearEvent(&stop_event);
+	Analyse(dx);
 }
 
 void MovePartOfFileBlock(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG startVcn,
