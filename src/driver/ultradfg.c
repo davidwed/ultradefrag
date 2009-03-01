@@ -494,7 +494,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 
 		request_status = STATUS_SUCCESS;
 		if(!dx->compact_flag) Defragment(dx);
-		else DefragmentFreeSpace(dx);
+		else Optimize(dx);
 		break;
 	default:
 		goto invalid_request;

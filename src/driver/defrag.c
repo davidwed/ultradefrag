@@ -61,10 +61,12 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(!pf->pfn->blockmap) goto next_item; /* skip fragmented files with unknown state */
-		if(pf->pfn->is_overlimit) goto next_item; /* skip fragmented but filtered out files */
-		if(pf->pfn->is_filtered) goto next_item;
-		/* skip fragmented directories on FAT/UDF partitions */
-		if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto next_item;
+		if(!dx->compact_flag){
+			if(pf->pfn->is_overlimit) goto next_item; /* skip fragmented but filtered out files */
+			if(pf->pfn->is_filtered) goto next_item;
+			/* skip fragmented directories on FAT/UDF partitions */
+			if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto next_item;
+		}
 		dx->clusters_to_process += pf->pfn->clusters_total;
 	next_item:
 		if(pf->next_ptr == dx->fragmfileslist) break;
@@ -80,10 +82,12 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 		plargest = NULL; length = 0;
 		for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
 			if(!pf->pfn->blockmap) goto L2; /* skip fragmented files with unknown state */
-			if(pf->pfn->is_overlimit) goto L2; /* skip fragmented but filtered out files */
-			if(pf->pfn->is_filtered) goto L2;
-			/* skip fragmented directories on FAT/UDF partitions */
-			if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto L2;
+			if(!dx->compact_flag){
+				if(pf->pfn->is_overlimit) goto L2; /* skip fragmented but filtered out files */
+				if(pf->pfn->is_filtered) goto L2;
+				/* skip fragmented directories on FAT/UDF partitions */
+				if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto L2;
+			}
 			if(pf->pfn->clusters_total <= block->length){
 				if(pf->pfn->clusters_total > length){
 					plargest = pf;
