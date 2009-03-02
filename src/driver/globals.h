@@ -32,10 +32,8 @@ extern KEVENT sync_event;
 extern KEVENT sync_event_2;
 extern KEVENT stop_event;
 extern KEVENT unload_event;
-extern KEVENT dbgprint_event;
-extern short *dbg_buffer;
-extern unsigned int dbg_offset;
 extern short log_path[MAX_PATH];
+extern char volume_letter;
 
 extern int nt4_system;
 extern PVOID kernel_addr;
@@ -47,11 +45,6 @@ extern BOOLEAN (NTAPI *ptrKeRegisterBugCheckReasonCallback)(
 	KBUGCHECK_CALLBACK_REASON,PUCHAR);
 extern BOOLEAN (NTAPI *ptrKeDeregisterBugCheckReasonCallback)(
     PKBUGCHECK_REASON_CALLBACK_RECORD CallbackRecord);
-
-extern KBUGCHECK_CALLBACK_RECORD bug_check_record;
-extern KBUGCHECK_REASON_CALLBACK_RECORD bug_check_reason_record;
-
-extern GUID ultradfg_guid;
 
 extern char invalid_request[];
 

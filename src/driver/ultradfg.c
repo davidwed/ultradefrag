@@ -24,13 +24,6 @@
 #include "driver.h"
 #include "../include/ultradfgver.h"
 
-VOID __stdcall BugCheckCallback(PVOID Buffer,ULONG Length);
-VOID __stdcall BugCheckSecondaryDumpDataCallback(
-    KBUGCHECK_CALLBACK_REASON Reason,
-    PKBUGCHECK_REASON_CALLBACK_RECORD Record,
-    PVOID ReasonSpecificData,
-    ULONG ReasonSpecificDataLength);
-
 #if !defined(__GNUC__)
 #pragma code_seg("INIT") /* begin of section INIT */
 #endif
@@ -142,10 +135,8 @@ INIT_FUNCTION void driver_entry_cleanup(PDRIVER_OBJECT DriverObject)
 		IoDeleteDevice(pDevice);
 	}
 
-	FLUSH_DBG_CACHE(); CloseLog();
-	KeDeregisterBugCheckCallback(&bug_check_record);
-	if(ptrKeDeregisterBugCheckReasonCallback)
-		ptrKeDeregisterBugCheckReasonCallback(&bug_check_reason_record);
+	CloseLog();
+	DeregisterBugCheckCallbacks();
 }
 
 /* DriverEntry - driver initialization */
@@ -157,6 +148,12 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 /*	UNICODE_STRING devName;
 	UNICODE_STRING symLinkName;
 */
+/*	OBJECT_ATTRIBUTES ObjectAttributes;
+	IO_STATUS_BLOCK ioStatus;
+	HANDLE hFile;
+	NTSTATUS Status;
+	UNICODE_STRING us;
+*/
 	/* 1. Export entry points */
 	DriverObject->DriverUnload = UnloadRoutine;
 	DriverObject->MajorFunction[IRP_MJ_CREATE]= Create_File_IRPprocessing;
@@ -167,34 +164,25 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 											  DeviceControlRoutine;
 
 	/* 2. */
-	OpenLog(); /* We should call them before any DebugPrint() calls !!! */
-	if(!dbg_buffer) return STATUS_NO_MEMORY;
+	/* We should call them before any DebugPrint() calls !!! */
+	if(!OpenLog()) return STATUS_NO_MEMORY;
 
 	/* 3. our driver (since 2.1.0 version) must be os version independent */
 	GetKernelProcAddresses();
 
 	/* 4. Set bug check callbacks */
-	KeInitializeCallbackRecord((&bug_check_record)); /* double brackets are required */
-	KeInitializeCallbackRecord((&bug_check_reason_record));
-	/*
-	* Register callback on systems older than XP SP1 / Server 2003.
-	* There is one significant restriction: bug data will be saved only 
-	* in full kernel memory dump.
-	*/
-	if(!KeRegisterBugCheckCallback(&bug_check_record,(VOID *)BugCheckCallback,
-		dbg_buffer,DBG_BUFFER_SIZE,"UltraDefrag"))
-			DebugPrint("=Ultradfg= Cannot register bug check routine!\n",NULL);
-	/*
-	* Register another callback procedure on modern systems: XP SP1, Server 2003 etc.
-	* Bug data will be available even in small memory dump, but just in theory :(
-	*/
-	if(ptrKeRegisterBugCheckReasonCallback){
-		if(!ptrKeRegisterBugCheckReasonCallback(&bug_check_reason_record,
-			(VOID *)BugCheckSecondaryDumpDataCallback,
-			KbCallbackSecondaryDumpData,
-			"UltraDefrag"))
-				DebugPrint("=Ultradfg= Cannot register bug check dump data routine!\n",NULL);
-	}
+	RegisterBugCheckCallbacks();
+
+
+/*	RtlInitUnicodeString(&us,L"\\??\\C:\\$MFT");
+	InitializeObjectAttributes(&ObjectAttributes,&us,0,NULL,NULL);
+	Status = ZwCreateFile(&hFile,FILE_GENERIC_READ,&ObjectAttributes,&ioStatus,
+			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
+			  FILE_NO_INTERMEDIATE_BUFFERING,NULL,0);
+	DbgPrint("$MFT opened with status %x\n",(UINT)Status);
+	// Always 0xC0000022 - look at http://free.pages.at/blumetools/tools.html 
+	// for more details.
+*/
 	
 	/* Create the main device. */
 	status = CreateDevice(DriverObject,device_name,link_name,&dx);
@@ -284,24 +272,6 @@ no_mem:
 #if !defined(__GNUC__)
 #pragma code_seg() /* end INIT section */
 #endif
-
-VOID __stdcall BugCheckCallback(PVOID Buffer,ULONG Length)
-{
-}
-
-VOID __stdcall BugCheckSecondaryDumpDataCallback(
-    KBUGCHECK_CALLBACK_REASON Reason,
-    PKBUGCHECK_REASON_CALLBACK_RECORD Record,
-    PVOID ReasonSpecificData,
-    ULONG ReasonSpecificDataLength)
-{
-	PKBUGCHECK_SECONDARY_DUMP_DATA p;
-	
-	p = (PKBUGCHECK_SECONDARY_DUMP_DATA)ReasonSpecificData;
-	p->OutBuffer = dbg_buffer;
-	p->OutBufferLength = DBG_BUFFER_SIZE;
-	p->Guid = ultradfg_guid;
-}
 
 /* CompleteIrp: Set IoStatus and complete IRP processing */ 
 NTSTATUS CompleteIrp(PIRP Irp,NTSTATUS status,ULONG info)
@@ -487,6 +457,10 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		if(letter < 'A' || letter > 'Z') goto invalid_request;
 
 		dx->letter = letter;
+		volume_letter = letter;
+		if(CheckForSystemVolume()) DebugPrint("-Ultradfg- Request for a system volume.\n",NULL);
+		DeleteLogFile(dx);
+
 		request_status = Analyse(dx);
 		if(cmd[0] == 'a' || cmd[0] == 'A') break;
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
@@ -499,9 +473,10 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	default:
 		goto invalid_request;
 	}
+	/* a/d/c request completed */
+	SaveFragmFilesListToDisk(dx);
 	/* free all buffers, free the volume handle (bug #1794336 fixup) */
 	FreeAllBuffers(dx);
-	/* a/d/c request completed */
 	KeSetEvent(&sync_event,IO_NO_INCREMENT,FALSE);
 	/*
 	* If the operation was aborted by user or 
@@ -722,11 +697,8 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 		IoDeleteDevice(dx->fdo);
 	}
 
-	FLUSH_DBG_CACHE(); CloseLog();
-	
-	KeDeregisterBugCheckCallback(&bug_check_record);
-	if(ptrKeDeregisterBugCheckReasonCallback)
-		ptrKeDeregisterBugCheckReasonCallback(&bug_check_reason_record);
+	CloseLog();
+	DeregisterBugCheckCallbacks();
 }
 #if !defined(__GNUC__)
 #pragma code_seg() /* end PAGE section */

@@ -63,6 +63,10 @@ SOURCE=.\analyse.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\dbglog.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\defrag.c
 # End Source File
 # Begin Source File
@@ -108,6 +112,10 @@ SOURCE=.\log.c
 # Begin Source File
 
 SOURCE=.\map.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\optimize.c
 # End Source File
 # Begin Source File
 

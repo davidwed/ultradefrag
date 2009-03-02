@@ -51,7 +51,6 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	ULONGLONG length;
 
 	DebugPrint("-Ultradfg- ----- Defragmentation of %c: -----\n",NULL,dx->letter);
-	DeleteLogFile(dx);
 
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
@@ -111,7 +110,6 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	L1:
 		if(block->next_ptr == dx->free_space_map) break;
 	}
-	SaveFragmFilesListToDisk(dx);
 }
 
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 

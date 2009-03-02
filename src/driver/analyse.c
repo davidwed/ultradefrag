@@ -53,7 +53,6 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	InitDX(dx);
 
 	/* Volume space analysis */
-	DeleteLogFile(dx);
 	Status = OpenVolume(dx);
 	if(!NT_SUCCESS(Status)){
 		DebugPrint("-Ultradfg- OpenVolume() failed: %x!\n",NULL,(UINT)Status);
@@ -98,6 +97,5 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	/* Save state */
 	ApplyFilter(dx);
-	SaveFragmFilesListToDisk(dx);
 	return STATUS_SUCCESS;
 }

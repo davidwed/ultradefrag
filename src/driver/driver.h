@@ -81,15 +81,10 @@ typedef unsigned int UINT;
 * LOG file on disk is better than unsaved messages after a crash.
 */
 
-/*
-* It must be always greater than PAGE_SIZE (8192 ?), because the 
-* dbg_buffer needs to be aligned on a page boundary. This is a 
-* special requirement of BugCheckSecondaryDumpDataCallback() 
-* function described in DDK documentation.
-*/
-#define DBG_BUFFER_SIZE (32 * 1024) /* 32 kb - more than enough */
+void __stdcall RegisterBugCheckCallbacks(void);
+void __stdcall DeregisterBugCheckCallbacks(void);
 
-void __stdcall OpenLog();
+BOOLEAN __stdcall OpenLog();
 void __stdcall CloseLog();
 
 /*
@@ -100,7 +95,9 @@ void __stdcall CloseLog();
 */
 void __cdecl DebugPrint(char *format, short *ustring, ...);
 
-#define FLUSH_DBG_CACHE() DebugPrint("FLUSH_DBG_CACHE\n",NULL);
+BOOLEAN CheckForSystemVolume(void);
+
+//#define FLUSH_DBG_CACHE() DebugPrint("FLUSH_DBG_CACHE\n",NULL);
 
 #if 0 /* because windows ddk isn't compatible with ANSI C Standard */
 #define DebugPrint0(...) DebugPrint(__VA_ARGS__)

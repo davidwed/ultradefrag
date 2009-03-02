@@ -40,16 +40,17 @@ void Optimize(UDEFRAG_DEVICE_EXTENSION *dx)
 	PFREEBLOCKMAP freeblock;
 
 	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",NULL,dx->letter);
-	DeleteLogFile(dx);
 
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
 	KeAcquireSpinLock(&spin_lock,&oldIrql);
 	dx->clusters_to_process = dx->processed_clusters = 0;
 	KeReleaseSpinLock(&spin_lock,oldIrql);
-	for(freeblock = dx->free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-		if(freeblock->next_ptr == dx->free_space_map) break;
-		dx->clusters_to_process += freeblock->length;
+	if(dx->free_space_map){
+		for(freeblock = dx->free_space_map->prev_ptr; 1; freeblock = freeblock->prev_ptr){
+			dx->clusters_to_process += freeblock->length;
+			if(freeblock->prev_ptr == dx->free_space_map) break;
+		}
 	}
 	dx->current_operation = 'C';
 	

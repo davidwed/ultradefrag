@@ -35,10 +35,8 @@ KEVENT sync_event;
 KEVENT sync_event_2;
 KEVENT stop_event;
 KEVENT unload_event;
-KEVENT dbgprint_event;
-short *dbg_buffer;
-unsigned int dbg_offset;
 short log_path[MAX_PATH] = L"Empty Path";
+char volume_letter;
 
 int nt4_system = 0;
 PVOID kernel_addr;
@@ -50,13 +48,6 @@ BOOLEAN (NTAPI *ptrKeRegisterBugCheckReasonCallback)(
 	KBUGCHECK_CALLBACK_REASON,PUCHAR) = NULL;
 BOOLEAN (NTAPI *ptrKeDeregisterBugCheckReasonCallback)(
     PKBUGCHECK_REASON_CALLBACK_RECORD CallbackRecord) = NULL;
-
-KBUGCHECK_CALLBACK_RECORD bug_check_record;
-KBUGCHECK_REASON_CALLBACK_RECORD bug_check_reason_record;
-
-// {B7B5FCD6-FB0A-48f9-AEE5-02AF097C9504}
-GUID ultradfg_guid = \
-{ 0xb7b5fcd6, 0xfb0a, 0x48f9, { 0xae, 0xe5, 0x2, 0xaf, 0x9, 0x7c, 0x95, 0x4 } };
 
 char invalid_request[] = "-Ultradfg- 32-bit request cannot be accepted by 64-bit driver!\n";
 
