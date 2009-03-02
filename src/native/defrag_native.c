@@ -350,7 +350,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_set_error_handler(ErrorHandler);
 	if(winx_get_os_version() < 51) winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
-		"Copyright (c) Dmitri Arkhangelski, 2007,2008.\n\n"
+		"Copyright (c) Dmitri Arkhangelski, 2007-2009.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
 		"If something is wrong, hit F8 on startup\n"
 		"and select 'Last Known Good Configuration'.\n"
