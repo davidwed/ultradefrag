@@ -1,6 +1,6 @@
 body {padding:0;margin:0;font:0.74em Arial,sans-serif;line-height:1.5em;background:#fff url(images/bg.gif) repeat-x top;color:#454545}
 a {color:#7a9833;background:inherit;text-decoration:none}
-a:hover {color:#7a9833;background:inherit;text-decoration:underline}
+a:hover {color:#000000;background:inherit;text-decoration:underline}
 p {margin:5px 0}
 h1 {font:bold 1.8em Arial,Sans-Serif;padding:8px 0 4px;margin:0;letter-spacing:-1px}
 h2 {font:bold 1.6em Arial,Sans-Serif;letter-spacing:-1px}
