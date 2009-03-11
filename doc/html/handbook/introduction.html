@@ -56,6 +56,10 @@
 				<span class="sect1"><a href="introduction.html#platforms">
 				Supported operating systems</a></span>
 			</dt>
+			<dt>
+				<span class="sect1"><a href="introduction.html#algorithm">
+				Defragmentation algorithm</a></span>
+			</dt>
 		</dl>
 	</div>
 	
@@ -133,6 +137,80 @@
 	<p><span class="application">UltraDefrag</span> runs on Windows NT 4.0, Windows 2000, Windows XP, Windows Server
 	2003 and  Windows Vista, including 64 bit versions of Windows. NT 4.0 Alpha
 	is not supported currently.</p>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="algorithm"></a>
+				Defragmentation algorithm</h2>
+			</div></div>
+		</div>
+		<p><span class="application">UltraDefrag</span> can perform 3 jobs: Volume Analysis, 
+		Volume Defragmentation and Volume Optimization. Read carefully next chapters to understand 
+		how to run them. Here the appropriate algorithms will be discussed.</p>
+		<ul>
+			<li><b>Volume Analysis</b> When the analysis job is requested, driver searches for 
+			files in specified directory. GUI program analyses all found files, 
+			because it needs a full information to redraw the cluster map properly. Console and native 
+			interfaces skips all unwanted files filtered out by user defined filters. Therefore 
+			these interfaces makes an analysis faster.</li>
+			<li><b>Volume Defragmentation</b> Program's engine defragments files by filling the free 
+			space areas at the beginning of the volume with fragmented files contents. To speed up 
+			this process, exclude unimportant files (temporary, archives and so on) using filters.</li>
+			<li><b>Volume Optimization</b> This job contains six steps:
+				<ul>
+					<li>Initial analysis. The defragmenter collects information about all files
+					on the volume.</li>
+					<li>First optimization step. The program tries to become largest free space area 
+					at the beginning of the volume by moving all data from the beginning to the free 
+					space areas in the terminal part of volume.</li>
+					<li>Second analysis. This operation updates all information and frees temporarily 
+					allocated system space on NTFS.</li>
+					<li>Volume defragmentation. Fragmented files will be defragmented. As described 
+					above they will be placed in the leading free space areas, freed on the first 
+					optimization step.</li>
+					<li>Second optimization step. Unfragmented files will be moved to the beginning of 
+					the volume. They will be placed into the rest of the leading free space areas after 
+					files successfully moved at the previous step.</li>
+					<li>Final analysis. This operation updates all information.</li>
+				</ul>
+				<p>Note that Volume Optimization is very effective only when processed volume has a lot of 
+				free space. This is not a program's mistake, this is a cause of the Windows 
+				Defragmentation	API imperfectness.</p>
+				<p>Volume optimization algorithm works only on NTFS volumes, because FAT directories 
+				aren't moveable.</p>
+				<p>NTFS file system is very imperfect. We cannot move internal files, such as $MFT,
+				$Bitmap and other internal files with a '$' in the begginning of their names. This is 
+				a well known ntfs.sys driver's bug. Free space may be splitted  
+				into few small parts by such unmoveable internal files. So you may never become a large free 
+				space area to defragment pagefile and other big files.
+				Though there are still two ways to achieve a full volume optimization:
+				<ul>
+					<li>The easiest way is very simple. Move all files from selected volume to another 
+					disk, than reformat the volume and move all files back. Works fine, except for
+					system volumes that have locked files.</li>
+					<li>The second way requires an additional software: 
+					<a href="http://gparted.sourceforge.net/">GParted Live CD</a> (open source 
+					program) or Partition Magic (commercial software). First of all - reduce the 
+					selected volume size as much as possible. This 
+					operation will move all data to the beginning of the 
+					volume. All system files will be moved too. Next step - restore size of the 
+					selected volume. After this step we will have large contignuous free space area at 
+					the end of the volume. Final step - make a boot time defragmentation of the volume.
+					</li>
+				</ul>
+				</p>
+			</li>
+		</ul>
+		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
+			<h3 class="title">Note</h3>
+			<p style="color: darkred">This section is applicable only for 
+			<span class="application">UltraDefrag</span> 
+			version 3.0.0 or higher. Old versions of the program have a little bit imperfect 
+			algorithms. The new algorithms described here are much faster, effective 
+			and reliable!</p>
+		</div>
 	</div>
 </div>
 
