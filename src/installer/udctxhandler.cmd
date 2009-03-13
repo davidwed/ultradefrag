@@ -6,7 +6,7 @@ echo.
 
 set UD_IN_FILTER=%1
 
-udefrag %1
+%windir%\system32\udefrag.exe %1
 echo.
 
 pause
