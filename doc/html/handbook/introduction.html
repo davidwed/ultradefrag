@@ -192,12 +192,15 @@
 					system volumes that have locked files.</li>
 					<li>The second way requires an additional software: 
 					<a href="http://gparted.sourceforge.net/">GParted Live CD</a> (open source 
-					program) or Partition Magic (commercial software). First of all - reduce the 
+					program) or <a href="http://en.wikipedia.org/wiki/PartitionMagic">Partition Magic</a> 
+					(commercial software). First of all - reduce the 
 					selected volume size as much as possible. This 
 					operation will move all data to the beginning of the 
-					volume. All system files will be moved too. Next step - restore size of the 
+					volume. All system files will be moved too (including $MFT, $Bitmap and so on). Next step - restore size of the 
 					selected volume. After this step we will have large contignuous free space area at 
-					the end of the volume. Final step - make a boot time defragmentation of the volume.
+					the end of the volume. Final step - make a 
+					<a href="boot.html">boot time defragmentation</a> of the volume 
+					using <span class="application">UltraDefrag</span>.
 					</li>
 				</ul>
 				</p>
