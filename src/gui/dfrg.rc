@@ -113,6 +113,9 @@ BEGIN
     VK_PAUSE,       IDC_PAUSE,              VIRTKEY, NOINVERT
 END
 
+/* manifests for all targets produces make-manifests.cmd script */
+1 24 "res\dfrg.manifest"
+
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VERSION
  PRODUCTVERSION VERSION

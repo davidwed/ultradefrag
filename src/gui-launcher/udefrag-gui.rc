@@ -33,6 +33,9 @@ FONT 9, "Courier New"
 BEGIN
 END
 
+/* manifests for all targets produces make-manifests.cmd script */
+1 24 "udefrag-gui.manifest"
+
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VERSION
  PRODUCTVERSION VERSION

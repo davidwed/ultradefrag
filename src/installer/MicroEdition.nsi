@@ -58,6 +58,9 @@ ShowInstDetails show
 ShowUninstDetails show
 SetCompressor /SOLID lzma
 
+XPStyle on
+RequestExecutionLevel admin
+
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
 VIAddVersionKey "CompanyName" "UltraDefrag Development Team"
