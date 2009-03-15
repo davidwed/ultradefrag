@@ -91,7 +91,7 @@ extraResourceOptions=
 [Other]
 [History]
 ..\..\include\udefrag.h,3225
-..\..\include\ultradfg.h,3219
-settings.c,1492
+..\..\include\ultradfg.h,3198
 volume.c,2356
-udefrag.c,7995
+settings.c,6416
+udefrag.c,7425
