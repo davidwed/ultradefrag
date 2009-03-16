@@ -81,8 +81,18 @@ extraResourceOptions=
 
 [Source]
 1=accel.c
+2=wgx.c
+3=i18n.c
+4=misc.c
 [Header]
+1=wgx.h
 [Resource]
 1=wgx.rc
 [Other]
 [History]
+accel.c,2261
+wgx.h,2157
+wgx.rc,884
+wgx.c,1044
+i18n.c,1024
+misc.c,1660

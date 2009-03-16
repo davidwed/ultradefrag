@@ -1,4 +1,4 @@
-The Ultra Defragmenter Version 2.1.2
+The Ultra Defragmenter Version 3.0.0
 ------------------------------------
 
 Ultra Defragmenter is a powerful Open Source defragmentation utility for 
