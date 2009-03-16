@@ -1,0 +1,12 @@
+LIBRARY wgx.dll
+
+EXPORTS
+	WgxAddAccelerators@12
+
+	WgxBuildResourceTable@8
+	WgxApplyResourceTable@8
+	WgxGetResourceString@8
+	WgxDestroyResourceTable@4
+
+	WgxEnableWindows
+	WgxDisableWindows

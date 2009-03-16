@@ -1,0 +1,19 @@
+-- this is the wgx library build options
+
+name        = "wgx"
+target_type = "dll"
+
+src = {
+	"accel.c", "i18n.c", "misc.c", "wgx.c"
+}
+
+rc = { "wgx.rc" }
+
+deffile  = "wgx.def"
+baseaddr = "0x01700000"
+
+libs = {
+	"kernel32", "user32", "gdi32", "comctl32",
+	"shell32", "msvcrt", "comdlg32"
+}
+adlibs = { "$(UDEFRAG_LIB_PATH)\\lua5.1a" }

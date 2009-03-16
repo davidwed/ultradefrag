@@ -37,7 +37,7 @@ IDI_FIXED               ICON    DISCARDABLE     "res/fixed.ico"
 IDI_REMOVABLE           ICON    DISCARDABLE     "res/removable.ico"
 
 /* these images were highly improved by Sayem Chaklader */
-IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
+//IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/t3.bmp"
 
 IDD_MAIN DIALOGEX 0, 0, 351, 218 /*315, 218*/
@@ -85,7 +85,7 @@ BEGIN
     PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
                     161,12,BS_FLAT
 END
-
+/*
 IDD_NEW_SETTINGS DIALOG DISCARDABLE  0, 0, 212, 76
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Settings"
@@ -98,7 +98,7 @@ BEGIN
     PUSHBUTTON      "Read user manual",IDC_SETTINGS_HELP,81,52,123,14,NOT 
                     WS_TABSTOP
 END
-
+*/
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
     "A",            IDC_ANALYSE,            VIRTKEY, CONTROL, NOINVERT
@@ -114,7 +114,7 @@ BEGIN
 END
 
 /* manifests for all targets produces make-manifests.cmd script */
-1 24 "res\dfrg.manifest"
+1 24 "res/dfrg.manifest"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VERSION

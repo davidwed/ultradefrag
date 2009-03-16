@@ -88,20 +88,7 @@
 #include "../include/ultradfg.h"
 #include "resource.h"
 
-#ifndef USE_WINDDK
-#ifndef SetWindowLongPtr
-#define SetWindowLongPtr SetWindowLong
-#endif
-#define LONG_PTR LONG
-#ifndef GWLP_WNDPROC
-#define GWLP_WNDPROC GWL_WNDPROC
-#endif
-#endif
-
-#ifndef LR_VGACOLOR
-/* this constant is not defined in winuser.h on mingw */
-#define LR_VGACOLOR         0x0080
-#endif
+#include "../dll/wgx/wgx.h"
 
 /* application defined constants */
 #define BLOCKS_PER_HLINE  65 /*52*/ /*60*/
@@ -126,10 +113,7 @@ void GetPrefs(void);
 void SavePrefs(void);
 
 /* i18n related functions */
-void BuildResourceTable(void);
-void DestroyResourceTable(void);
-short * GetResourceString(short *id);
-void SetText(HWND hWnd, short *id);
+void SetText(HWND hWnd, short *key);
 
 /* map manipulation functions */
 void InitMap(void);
@@ -146,7 +130,6 @@ void ClearMap();
 
 /* dialog procedures */
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK NewSettingsDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 /* status bar procedures */
 BOOL CreateStatusBar();
@@ -170,17 +153,7 @@ void VolListNotifyHandler(LPARAM lParam);
 void VolListRefreshItem(LRESULT iItem);
 
 /* window procedures */
-void HandleShortcuts(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK BtnWndProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK CheckWndProc(HWND, UINT, WPARAM, LPARAM);
-
-/* buttons manipulation */
-void InitButtons(void);
-void DisableButtonsBeforeDrivesRescan(void);
-void EnableButtonsAfterDrivesRescan(void);
-void DisableButtonsBeforeTask(void);
-void EnableButtonsAfterTask(void);
 
 #endif /* _DFRG_MAIN_H_ */

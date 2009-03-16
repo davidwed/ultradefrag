@@ -36,6 +36,7 @@ xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
+xcopy /I /Y /Q    .\dll\wgx .\obj\wgx
 
 rem xcopy /I /Y /Q /S source destination
 
@@ -43,6 +44,8 @@ mkdir obj\dll
 mkdir obj\dll\zenwinx
 copy /Y obj\zenwinx\ntndk.h obj\dll\zenwinx\
 copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\
+mkdir obj\dll\wgx
+copy /Y obj\wgx\wgx.h obj\dll\wgx
 
 
 if "%1" neq "" goto parse_first_parameter
@@ -205,12 +208,13 @@ xcopy /I /Y /Q    .\include %SRC_PKG_PATH%\src\include
 mkdir %SRC_PKG_PATH%\src\scheduler
 xcopy /I /Y /Q .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
 xcopy /I /Y /Q .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties
-mkdir %SRC_PKG_PATH%\src\dll
-xcopy /I /Y .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
-mkdir %SRC_PKG_PATH%\src\dll\zenwinx
-xcopy /I /Y .\dll\zenwinx %SRC_PKG_PATH%\src\dll\zenwinx
 
-xcopy /I /Y /Q    .\lua5.1 %SRC_PKG_PATH%\src\lua5.1
+mkdir %SRC_PKG_PATH%\src\dll
+xcopy /I /Y /Q .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
+xcopy /I /Y /Q .\dll\zenwinx %SRC_PKG_PATH%\src\dll\zenwinx
+xcopy /I /Y /Q .\dll\wgx %SRC_PKG_PATH%\src\dll\wgx
+
+xcopy /I /Y /Q .\lua5.1 %SRC_PKG_PATH%\src\lua5.1
 
 mkdir %SRC_PKG_PATH%\src\tools
 copy /Y .\tools\*.pl %SRC_PKG_PATH%\src\tools\
@@ -275,6 +279,7 @@ rd /s /q dll
 rd /s /q zenwinx
 rd /s /q udefrag
 rd /s /q lua5.1
+rd /s /q wgx
 del /s /q *.*
 cd ..
 call BLDSCHED.CMD --clean

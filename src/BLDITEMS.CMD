@@ -33,6 +33,10 @@ if %errorlevel% neq 0 goto end
 
 if "%UD_MICRO_EDITION%" equ "1" goto skip_gui
 
+cd ..\wgx
+lua ..\..\tools\mkmod.lua wgx.build
+if %errorlevel% neq 0 goto end
+
 cd ..\gui
 lua ..\..\tools\mkmod.lua dfrg.build
 if %errorlevel% neq 0 goto end

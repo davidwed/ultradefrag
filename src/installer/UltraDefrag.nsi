@@ -347,6 +347,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "dfrg.exe"
   Delete "$SYSDIR\ultradefrag.exe"
   Rename "$SYSDIR\dfrg.exe" "$SYSDIR\ultradefrag.exe"
+  File "wgx.dll"
 
   File "${ROOTDIR}\src\installer\boot-config.cmd"
   File "${ROOTDIR}\src\installer\boot-off.cmd"
@@ -676,6 +677,7 @@ Section "Uninstall"
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\udefrag-gui.exe"
   Delete "$SYSDIR\ultradefrag.exe"
+  Delete "$SYSDIR\wgx.dll"
   Delete "$SYSDIR\zenwinx.dll"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"

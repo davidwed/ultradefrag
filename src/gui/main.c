@@ -25,10 +25,10 @@
 
 /* Global variables */
 HINSTANCE hInstance;
-HACCEL hAccel;
 HWND hWindow;
 HWND hMap;
-HWND hCheckSkipRem;
+
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 extern RECT win_rc; /* coordinates of main window */
 extern int skip_removable;
@@ -37,6 +37,8 @@ extern STATISTIC stat[MAX_DOS_DRIVES];
 extern BOOL busy_flag, exit_pressed;
 
 signed int delta_h = 0;
+
+HFONT hFont;
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -65,7 +67,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	}
 	GetPrefs();
 	hInstance = GetModuleHandle(NULL);
-	BuildResourceTable();
 
 	/*
 	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
@@ -77,12 +78,19 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
+
+	
+//if(hFont) DeleteObject(hFont);
+
+
 	/* delete all created gdi objects */
 	DeleteMaps();
 	DestroyImageList();
 	/* save settings */
 	SavePrefs();
-	DestroyResourceTable();
+
+	WgxDestroyResourceTable(i18n_table);
+
 	udefrag_unload();
 	return 0;
 }
@@ -95,14 +103,46 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	int cx,cy;
 	int dx,dy;
 	RECT rc;
-
+/*LOGFONT lf;
+CHOOSEFONT cf;
+HANDLE hChild;
+*/
+//	BOOL res;
+	short lng_file_path[MAX_PATH];
+	
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		hWindow = hWnd;
-		hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
+
+hFont = NULL;
+/* default font should be Courier New 9pt */
+//memset(&cf,0,sizeof(cf));
+//cf.lStructSize = sizeof(CHOOSEFONT);
+//cf.lpLogFont = &lf;
+//cf.Flags = CF_SCREENFONTS | CF_FORCEFONTEXIST/* | CF_INITTOLOGFONTSTRUCT*/;
+/*
+if(ChooseFont(&cf)){
+	hFont = CreateFontIndirect(&lf);
+	if(hFont){
+		hChild = GetWindow(hWindow,GW_CHILD);
+		while(hChild){
+			SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
+			hChild = GetWindow(hChild,GW_HWNDNEXT);
+		}
+	}
+}*/
+
+		WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
+		GetWindowsDirectoryW(lng_file_path,MAX_PATH);
+		wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
+		if(WgxBuildResourceTable(i18n_table,lng_file_path))
+			WgxApplyResourceTable(i18n_table,hWindow);
 		InitVolList(); /* before map! */
-		InitButtons();
+		if(skip_removable)
+			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
+		else
+			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
 		InitProgress();
 		InitMap();
 		cx = GetSystemMetrics(SM_CXSCREEN);
@@ -141,15 +181,15 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_SETTINGS:
 			if(!busy_flag){
-				DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),
-					hWindow,(DLGPROC)NewSettingsDlgProc);
+				//DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),
+				//	hWindow,(DLGPROC)NewSettingsDlgProc);
 			}
 			break;
 		case IDC_SKIPREMOVABLE:
 			if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
 				HIWORD(wParam) == BN_UNPUSHED || HIWORD(wParam) == BN_DBLCLK)
 				skip_removable = \
-					(SendMessage(hCheckSkipRem,BM_GETCHECK,0,0) == BST_CHECKED);
+					(SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_GETCHECK,0,0) == BST_CHECKED);
 			break;
 		case IDC_SHOWFRAGMENTED:
 			if(!busy_flag) ShowFragmented();
@@ -182,19 +222,6 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		return TRUE;
 	}
 	return FALSE;
-}
-
-void HandleShortcuts(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
-{
-	MSG message;
-
-	message.hwnd = hWnd;
-	message.message = iMsg;
-	message.wParam = wParam;
-	message.lParam = lParam;
-	message.pt.x = message.pt.y = 0;
-	message.time = 0;
-	TranslateAccelerator(hWindow,hAccel,&message);
 }
 
 void ShowFragmented()

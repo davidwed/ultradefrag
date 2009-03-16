@@ -56,6 +56,7 @@ Bryan Kirk         - Better GUI appearance (new list of drives).
 Christopher Naegel - Driver loading on Vista problem's partial solution.
 Dario Raparelli    - NT 4.0 support.
 Jan Loncik         - x64 native support. Better 'system' filter preset.
+Jim Laski          - system fonts and visual styles for graphical interface
 Kerem Gümrükcü     - manifests for Vista User Account Control (UAC)
 Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
 Markus Elfring     - Strong error handling.

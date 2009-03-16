@@ -1,9 +1,4 @@
 </description>
- <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
-  <security>
-    <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
-      <requestedExecutionLevel  level="requireAdministrator" uiAccess="false" />
-    </requestedPrivileges>
-  </security>
- </trustInfo>
-</assembly>
+<dependency>
+  <dependentAssembly>
+    <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" 

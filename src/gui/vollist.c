@@ -42,6 +42,8 @@ int user_defined_column_widths[] = {0,0,0,0,0};
 
 DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
+
 void InitImageList(void)
 {
 	hImgList = ImageList_Create(16,16,ILC_COLOR8,2,0);
@@ -70,10 +72,10 @@ void InitVolList(void)
 	SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 		(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
 	lvc.mask = LVCF_TEXT | LVCF_WIDTH;
-	lvc.pszText = GetResourceString(L"VOLUME");
+	lvc.pszText = WgxGetResourceString(i18n_table,L"VOLUME");
 	lvc.cx = 60 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,0,(LRESULT)&lvc);
-	lvc.pszText = GetResourceString(L"STATUS");
+	lvc.pszText = WgxGetResourceString(i18n_table,L"STATUS");
 	lvc.cx = 60 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
 
@@ -81,15 +83,15 @@ void InitVolList(void)
 	lvc.cx = 100 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
 */
-	lvc.pszText = GetResourceString(L"TOTAL");
+	lvc.pszText = WgxGetResourceString(i18n_table,L"TOTAL");
 	lvc.mask |= LVCF_FMT;
 	lvc.fmt = LVCFMT_RIGHT;
 	lvc.cx = 100 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,2/*3*/,(LRESULT)&lvc);
-	lvc.pszText = GetResourceString(L"FREE");
+	lvc.pszText = WgxGetResourceString(i18n_table,L"FREE");
 	lvc.cx = 100 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,3/*4*/,(LRESULT)&lvc);
-	lvc.pszText = GetResourceString(L"PERCENT");
+	lvc.pszText = WgxGetResourceString(i18n_table,L"PERCENT");
 	lvc.cx = 85 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,4/*5*/,(LRESULT)&lvc);
 	/* reduce(?) hight of list view control */
@@ -132,9 +134,9 @@ static void VolListAddItem(int index, volume_info *v)
 	lviw.iSubItem = 1;
 
 	if(st == STAT_AN){
-		lviw.pszText = GetResourceString(L"ANALYSE_STATUS");
+		lviw.pszText = WgxGetResourceString(i18n_table,L"ANALYSE_STATUS");
 	} else if(st == STAT_DFRG){
-		lviw.pszText = GetResourceString(L"DEFRAG_STATUS");
+		lviw.pszText = WgxGetResourceString(i18n_table,L"DEFRAG_STATUS");
 	} else {
 		lviw.pszText = L"";
 	}
@@ -180,7 +182,8 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	LV_ITEM lvi;
 	ERRORHANDLERPROC eh;
 	
-	DisableButtonsBeforeDrivesRescan();
+	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
+		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,0);
 	HideProgress();
 
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
@@ -222,7 +225,8 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	Index = letter_numbers[0];
 	RedrawMap();
 	UpdateStatusBar(&stat[Index]);
-	EnableButtonsAfterDrivesRescan();
+	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
+		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,0);
 	return 0;
 }
 
@@ -261,9 +265,9 @@ void VolListUpdateStatusField(int stat,LRESULT iItem)
 	lviw.iSubItem = 1;
 
 	if(stat == STAT_AN){
-		lviw.pszText = GetResourceString(L"ANALYSE_STATUS");
+		lviw.pszText = WgxGetResourceString(i18n_table,L"ANALYSE_STATUS");
 	} else if(stat == STAT_DFRG){
-		lviw.pszText = GetResourceString(L"DEFRAG_STATUS");
+		lviw.pszText = WgxGetResourceString(i18n_table,L"DEFRAG_STATUS");
 	} else {
 		lviw.pszText = L"";
 	}
@@ -291,8 +295,10 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		iMsg == WM_RBUTTONDOWN || iMsg == WM_RBUTTONUP) && busy_flag)
 		return 0;
 	if(iMsg == WM_KEYDOWN){
-		HandleShortcuts(hWnd,iMsg,wParam,lParam);
-		if(busy_flag) return 0;
+		//HandleShortcuts(hWnd,iMsg,wParam,lParam);
+		if(busy_flag){ /* only 'Stop' and 'About' actions are allowed */
+			if(wParam != VK_F1 && wParam != 'S') return 0;
+		}
 	}
 	return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
 }

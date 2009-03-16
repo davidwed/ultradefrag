@@ -29,6 +29,8 @@ extern HINSTANCE hInstance;
 extern HWND hWindow;
 HWND hStatus;
 
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
+
 void SetIcon(int part,int id)
 {
 	HANDLE hImg;
@@ -70,24 +72,24 @@ void UpdateStatusBar(STATISTIC *pst)
 
 	if(!hStatus) return;
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->dircounter,GetResourceString(L"DIRS"));
+	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->dircounter,WgxGetResourceString(i18n_table,L"DIRS"));
 	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->filecounter,GetResourceString(L"FILES"));
+	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->filecounter,WgxGetResourceString(i18n_table,L"FILES"));
 	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->fragmfilecounter,GetResourceString(L"FRAGMENTED"));
+	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->fragmfilecounter,WgxGetResourceString(i18n_table,L"FRAGMENTED"));
 	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->compressedcounter,GetResourceString(L"COMPRESSED"));
+	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->compressedcounter,WgxGetResourceString(i18n_table,L"COMPRESSED"));
 	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 
 	udefrag_fbsize((ULONGLONG)pst->mft_size,2,s,sizeof(s));
-	_snwprintf(bf,BFSIZE - 1,L"%S %s",s,GetResourceString(L"MFT"));
+	_snwprintf(bf,BFSIZE - 1,L"%S %s",s,WgxGetResourceString(i18n_table,L"MFT"));
 	bf[BFSIZE - 1] = 0;
 	SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
 }

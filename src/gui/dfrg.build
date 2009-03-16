@@ -4,7 +4,7 @@ name        = "dfrg"
 target_type ="gui"
 
 src = {
-	"main.c", "map.c", "settings.c", "i18n.c", "about.c", "buttons.c",
+	"main.c", "map.c", "settings.c", "i18n.c", "about.c",
 	"progress.c", "statbar.c", "vollist.c", "job.c"
 }
 rc = { "dfrg.rc" }
@@ -13,6 +13,10 @@ libs = {
 	"kernel32", "user32", "gdi32", "comctl32",
 	"shell32", "msvcrt", "comdlg32"
 }
-adlibs = { "$(UDEFRAG_LIB_PATH)\\udefrag", "$(UDEFRAG_LIB_PATH)\\lua5.1a" }
+adlibs = { 
+	"$(UDEFRAG_LIB_PATH)\\udefrag", 
+	"$(UDEFRAG_LIB_PATH)\\lua5.1a", 
+	"$(UDEFRAG_LIB_PATH)\\wgx"
+}
 
 umentry = "winmain"

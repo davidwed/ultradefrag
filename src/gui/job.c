@@ -125,7 +125,11 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	VolListRefreshItem(iItem);
 	
 	//VolListUpdateStatusField(STAT_WORK,iItem);
-	DisableButtonsBeforeTask();
+	//DisableButtonsBeforeTask();
+	WgxDisableWindows(hWindow,IDC_ANALYSE,
+		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,
+		IDC_RESCAN,IDC_SETTINGS,0);
+	WgxEnableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	ClearMap();
 
 	/* LONG_PTR cast removes warnings both on mingw and winddk */
@@ -153,7 +157,12 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		VolListUpdateStatusField(STAT_CLEAR,iItem);
 		ClearMap();
 	}
-	EnableButtonsAfterTask();
+//	EnableButtonsAfterTask();
+	WgxEnableWindows(hWindow,IDC_ANALYSE,
+		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,
+		IDC_RESCAN,IDC_SETTINGS,0);
+	WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
+
 	busy_flag = 0;
 	if(exit_pressed) EndDialog(hWindow,0);
 	return 0;

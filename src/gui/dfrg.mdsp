@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=..\lib
 outputFilename=../bin/dfrg.exe
-libraries=udefrag,lua5.1a,gdi32,comdlg32,comctl32,msvcrt
+libraries=udefrag,lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -65,7 +65,7 @@ optimizeLevel=2
 // linker
 libraryPath=..\lib
 outputFilename=../bin/dfrg.exe
-libraries=udefrag,lua5.1a,gdi32,comdlg32,comctl32,msvcrt
+libraries=udefrag,lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt
 extraLinkerOptions=-mwindows -Wl,--strip-all
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -88,8 +88,7 @@ extraResourceOptions=
 6=statbar.c
 7=progress.c
 8=vollist.c
-9=buttons.c
-10=job.c
+9=job.c
 [Header]
 1=main.h
 2=resource.h
@@ -97,15 +96,15 @@ extraResourceOptions=
 1=dfrg.rc
 [Other]
 [History]
-statbar.c,0
-progress.c,0
-map.c,0
-buttons.c,0
-vollist.c,5468
-i18n.c,0
-main.c,0
+progress.c,1541
+map.c,4454
+vollist.c,6651
+i18n.c,6709
+main.c,5479
 about.c,1239
-main.h,1449
-settings.c,4565
-dfrg.rc,0
-job.c,2763
+main.h,3411
+settings.c,974
+dfrg.rc,1716
+job.c,4469
+resource.h,1433
+statbar.c,1044

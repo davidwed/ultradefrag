@@ -23,56 +23,11 @@
 
 #include "main.h"
 
-extern HWND hWindow;
 RECT win_rc; /* coordinates of main window */
 int skip_removable = TRUE;
-
 char buffer[MAX_PATH];
-
 char err_msg[1024];
-
 extern int user_defined_column_widths[];
-
-BOOL CALLBACK NewSettingsDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
-{
-	/* When a portable app launches gui the current directory points to a temp dir. */
-	char buf[MAX_PATH];
-	
-	switch(msg){
-	case WM_INITDIALOG:
-		/* Window Initialization */
-		SetWindowPos(hWnd,0,win_rc.left + /*117*/153,win_rc.top + 158/*155*/,0,0,SWP_NOSIZE);
-		SetText(hWnd,L"SETTINGS");
-		SetText(GetDlgItem(hWnd,IDC_EDITMAINOPTS),L"EDIT_MAIN_OPTS");
-		SetText(GetDlgItem(hWnd,IDC_EDITREPORTOPTS),L"EDIT_REPORT_OPTS");
-		SetText(GetDlgItem(hWnd,IDC_SETTINGS_HELP),L"READ_USER_MANUAL");
-		return TRUE;
-	case WM_COMMAND:
-		switch(LOWORD(wParam)){
-		case IDC_EDITMAINOPTS:
-			GetSystemDirectory(buf,MAX_PATH);
-			strcat(buf,"\\udefrag-gui.cmd");
-			//ShellExecute(hWindow,"open",".\\options\\udefrag.cfg",NULL,NULL,SW_SHOW);
-			ShellExecute(hWindow,"edit",buf,NULL,NULL,SW_SHOW);
-			break;
-		case IDC_EDITREPORTOPTS:
-			GetWindowsDirectory(buf,MAX_PATH);
-			strcat(buf,"\\UltraDefrag\\options\\udreportopts.lua");
-			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
-			break;
-		case IDC_SETTINGS_HELP:
-			GetWindowsDirectory(buf,MAX_PATH);
-			strcat(buf,"\\UltraDefrag\\handbook\\index.html");
-			ShellExecute(hWindow,"open",buf,NULL,NULL,SW_SHOW);
-			break;
-		}
-		return FALSE;
-	case WM_CLOSE:
-		EndDialog(hWnd,0);
-		return TRUE;
-	}
-	return FALSE;
-}
 
 /* returns 0 if variable is not defined */
 static int getint(lua_State *L, char *variable)

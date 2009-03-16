@@ -1,5 +1,5 @@
 [Project]
-name=udefrag
+name=wgx
 type=2
 defaultConfig=1
 
@@ -7,8 +7,8 @@ defaultConfig=1
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=../../obj/udefrag
-outputFilesDirectory=../../obj/udefrag
+intermediateFilesDirectory=../../obj/wgx
+outputFilesDirectory=../../obj/wgx
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -25,12 +25,12 @@ runtimeTypeEnabled=1
 optimizeLevel=0
 
 // linker
-libraryPath=
-outputFilename=../../bin/udefrag.dll
-libraries=ntdll,zenwinx
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
-ignoreStartupFile=1
-ignoreDefaultLibs=1
+libraryPath=..\..\lib
+outputFilename=../../bin/wgx.dll
+libraries=lua5.1a,gdi32,comdlg32,comctl32,msvcrt
+extraLinkerOptions=wgx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+ignoreStartupFile=0
+ignoreDefaultLibs=0
 stripExecutableFile=0
 
 // archive
@@ -45,8 +45,8 @@ extraResourceOptions=
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=../../obj/udefrag
-outputFilesDirectory=../../obj/udefrag
+intermediateFilesDirectory=../../obj/wgx
+outputFilesDirectory=../../obj/wgx
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -64,11 +64,11 @@ optimizeLevel=2
 
 // linker
 libraryPath=..\..\lib
-outputFilename=../../bin/udefrag.dll
-libraries=ntdll,zenwinx
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
-ignoreStartupFile=1
-ignoreDefaultLibs=1
+outputFilename=../../bin/wgx.dll
+libraries=lua5.1a,gdi32,comdlg32,comctl32,msvcrt
+extraLinkerOptions=wgx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+ignoreStartupFile=0
+ignoreDefaultLibs=0
 stripExecutableFile=0
 
 // archive
@@ -80,18 +80,9 @@ resourceIncludeDirectory=
 extraResourceOptions=
 
 [Source]
-1=misc.c
-2=settings.c
-3=sfuncs.c
-4=udefrag.c
-5=volume.c
+1=accel.c
 [Header]
 [Resource]
-1=udefrag.rc
+1=wgx.rc
 [Other]
 [History]
-..\..\include\udefrag.h,3225
-..\..\include\ultradfg.h,3198
-volume.c,2356
-settings.c,6416
-udefrag.c,7425
