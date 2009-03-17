@@ -1,4 +1,4 @@
-The Ultra Defragmenter Version 3.0.0
+The Ultra Defragmenter Version 3.1.0
 ------------------------------------
 
 Ultra Defragmenter is a powerful Open Source defragmentation utility for 
@@ -22,7 +22,7 @@ You must have administrative rights to install and use Ultra Defragmenter.
 To install Ultra Defragmenter on Windows Vista or Windows Server 2008 
 operating systems follow steps described here:
 
-	http://ultradefrag.sourceforge.net/vista.html
+	http://ultradefrag.sourceforge.net/vista
 
 Or install the program, use [Start -> Programs -> UltraDefrag ->
 Documentation -> Handbook] menu to access the local copy of documentation 
@@ -46,11 +46,11 @@ Reporting Bugs
 
 Please report all problems and bugs via our bug tracker:
 
-	http://ultradefrag.sourceforge.net/bugs.html
+	http://ultradefrag.sourceforge.net/bugs
 
 For help requests visit our forum:
 
-	http://ultradefrag.sourceforge.net/forum.html
+	http://ultradefrag.sourceforge.net/forum
 
 
 Copyright
