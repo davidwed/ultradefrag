@@ -24,14 +24,12 @@
 #include "main.h"
 
 extern HWND hWindow;
-extern char map[MAX_DOS_DRIVES][N_BLOCKS];
 
+char global_cluster_map[N_BLOCKS];
 DWORD thr_id;
 BOOL busy_flag = 0;
 char current_operation;
 BOOL stop_pressed, exit_pressed = FALSE;
-STATISTIC stat[MAX_DOS_DRIVES];
-
 BOOL err_flag = FALSE, err_flag2 = FALSE;
 
 DWORD WINAPI ThreadProc(LPVOID);
@@ -57,9 +55,7 @@ void optimize(void)
 /* callback function */
 int __stdcall update_stat(int df)
 {
-	LRESULT iItem;
-	int index;
-	char *cl_map;
+	PVOLUME_LIST_ENTRY vl;
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
@@ -68,16 +64,15 @@ int __stdcall update_stat(int df)
 	/* due to the following line of code we have obsolete statistics when we have stopped */
 	if(stop_pressed) return 0; /* it's neccessary: see comment in main.h file */
 	
-	iItem = VolListGetSelectedItemIndex();
-	if(iItem == -1) return 0;
-	index = VolListGetLetterNumber(iItem);
-	cl_map = map[index];
-	pst = &stat[index];
+	vl = VolListGetSelectedEntry();
+	if(vl->VolumeName == NULL) return 0;
+
+	pst = &(vl->Statistics);
 
 	/* show error message no more than once */
 	if(err_flag) eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_progress(pst,&percentage) >= 0){
-		UpdateStatusBar(&stat[index]);
+		UpdateStatusBar(pst);
 		sprintf(progress_msg,"%c %u %%",
 			current_operation = pst->current_operation,(int)percentage);
 		SetProgress(progress_msg,(int)percentage);
@@ -88,8 +83,8 @@ int __stdcall update_stat(int df)
 
 	/* show error message no more than once */
 	if(err_flag2) eh = udefrag_set_error_handler(NULL);
-	if(udefrag_get_map(cl_map,N_BLOCKS) >= 0){
-		FillBitMap(index);
+	if(udefrag_get_map(global_cluster_map,N_BLOCKS) >= 0){
+		FillBitMap(global_cluster_map);
 		RedrawMap();
 	} else {
 		err_flag2 = TRUE;
@@ -106,26 +101,26 @@ int __stdcall update_stat(int df)
 
 DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
-	LRESULT iItem;
+	PVOLUME_LIST_ENTRY vl;
 	UCHAR command;
 	int status;
+	char letter;
 
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
 	busy_flag = 1;
 	stop_pressed = FALSE;
 
-	iItem = VolListGetSelectedItemIndex();
-	if(iItem == -1){
+	vl = VolListGetSelectedEntry();
+	if(vl->VolumeName == NULL){
 		busy_flag = 0;
 		return 0;
 	}
 
 	/* refresh selected volume information (bug #2036873) */
-	VolListRefreshItem(iItem);
+	VolListRefreshSelectedItem();
 	
-	//VolListUpdateStatusField(STAT_WORK,iItem);
-	//DisableButtonsBeforeTask();
+	//VolListUpdateSelectedStatusField(STAT_WORK);
 	WgxDisableWindows(hWindow,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,
 		IDC_RESCAN,IDC_SETTINGS,0);
@@ -134,30 +129,31 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 	/* LONG_PTR cast removes warnings both on mingw and winddk */
 	command = (UCHAR)(LONG_PTR)lpParameter;
+	letter = vl->VolumeName[0];
 
 	if(command == 'a')
-		VolListUpdateStatusField(STAT_AN,iItem);
+		VolListUpdateSelectedStatusField(STAT_AN);
 	else
-		VolListUpdateStatusField(STAT_DFRG,iItem);
+		VolListUpdateSelectedStatusField(STAT_DFRG);
 
 	ShowProgress();
 	SetProgress("0 %",0);
 	err_flag = err_flag2 = FALSE;
 	switch(command){
 	case 'a':
-		status = udefrag_analyse((UCHAR)VolListGetLetter(iItem),update_stat);
+		status = udefrag_analyse(letter,update_stat);
 		break;
 	case 'd':
-		status = udefrag_defragment((UCHAR)VolListGetLetter(iItem),update_stat);
+		status = udefrag_defragment(letter,update_stat);
 		break;
 	default:
-		status = udefrag_optimize((UCHAR)VolListGetLetter(iItem),update_stat);
+		status = udefrag_optimize(letter,update_stat);
 	}
 	if(status < 0){
-		VolListUpdateStatusField(STAT_CLEAR,iItem);
+		VolListUpdateSelectedStatusField(STAT_CLEAR);
 		ClearMap();
 	}
-//	EnableButtonsAfterTask();
+
 	WgxEnableWindows(hWindow,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,
 		IDC_RESCAN,IDC_SETTINGS,0);

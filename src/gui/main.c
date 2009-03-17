@@ -30,20 +30,20 @@ HWND hMap;
 
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
+extern VOLUME_LIST_ENTRY volume_list[];
+
 extern RECT win_rc; /* coordinates of main window */
 extern int skip_removable;
 
-extern STATISTIC stat[MAX_DOS_DRIVES];
 extern BOOL busy_flag, exit_pressed;
 
 signed int delta_h = 0;
 
-HFONT hFont;
+//HFONT hFont;
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void ShowFragmented();
-void DestroyImageList(void);
 void VolListGetColumnWidths(void);
 
 void __stdcall ErrorHandler(short *msg)
@@ -84,8 +84,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 
 
 	/* delete all created gdi objects */
+	FreeVolListResources();
 	DeleteMaps();
-	DestroyImageList();
 	/* save settings */
 	SavePrefs();
 
@@ -115,7 +115,7 @@ HANDLE hChild;
 		/* Window Initialization */
 		hWindow = hWnd;
 
-hFont = NULL;
+//hFont = NULL;
 /* default font should be Courier New 9pt */
 //memset(&cf,0,sizeof(cf));
 //cf.lStructSize = sizeof(CHOOSEFONT);
@@ -139,12 +139,17 @@ if(ChooseFont(&cf)){
 		if(WgxBuildResourceTable(i18n_table,lng_file_path))
 			WgxApplyResourceTable(i18n_table,hWindow);
 		InitVolList(); /* before map! */
+
+
 		if(skip_removable)
 			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
 		else
 			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
+
 		InitProgress();
+
 		InitMap();
+
 		cx = GetSystemMetrics(SM_CXSCREEN);
 		cy = GetSystemMetrics(SM_CYSCREEN);
 		if(win_rc.left < 0) win_rc.left = 0; if(win_rc.top < 0) win_rc.top = 0;
@@ -156,11 +161,12 @@ if(ChooseFont(&cf)){
 		hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
 		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
 		if(hIcon) DeleteObject(hIcon);
+
 		UpdateVolList();
+
 		CreateMaps();
 		CreateStatusBar();
-		memset((void *)stat,0,sizeof(STATISTIC) * (MAX_DOS_DRIVES));
-		UpdateStatusBar(&stat[0]);
+		UpdateStatusBar(&(volume_list[0].Statistics));
 		break;
 	case WM_NOTIFY:
 		VolListNotifyHandler(lParam);
@@ -227,13 +233,11 @@ if(ChooseFont(&cf)){
 void ShowFragmented()
 {
 	char path[] = "C:\\fraglist.luar";
-	LRESULT iItem;
+	PVOLUME_LIST_ENTRY vl;
 
-	iItem = VolListGetSelectedItemIndex();
-	if(iItem == -1)	return;
+	vl = VolListGetSelectedEntry();
+	if(vl->VolumeName == NULL || vl->Status == STAT_CLEAR) return;
 
-	if(VolListGetWorkStatus(iItem) == STAT_CLEAR)
-		return;
-	path[0] = VolListGetLetter(iItem);
+	path[0] = vl->VolumeName[0];
 	ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
 }

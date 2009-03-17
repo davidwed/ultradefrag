@@ -103,6 +103,15 @@
 #define create_thread(func,param,ph) \
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)
 
+typedef struct _VOLUME_LIST_ENTRY {
+	char *VolumeName;
+	int Status;
+	STATISTIC Statistics;
+	HDC hDC;
+	HBITMAP hBitmap;
+} VOLUME_LIST_ENTRY, *PVOLUME_LIST_ENTRY;
+
+		
 void analyse(void);
 void defragment(void);
 void optimize(void);
@@ -123,7 +132,7 @@ void DeleteMaps();
 
 BOOL CreateBitMap(int);
 BOOL CreateBitMapGrid();
-BOOL FillBitMap(int);
+BOOL FillBitMap(char *);//int);
 
 void RedrawMap();
 void ClearMap();
@@ -143,14 +152,21 @@ void SetProgress(char *message, int percentage);
 
 /* volume list manipulations */
 void InitVolList(void);
+void FreeVolListResources(void);
 void UpdateVolList(void);
-LRESULT VolListGetSelectedItemIndex(void);
-char VolListGetLetter(LRESULT iItem);
-int VolListGetLetterNumber(LRESULT iItem);
-int  VolListGetWorkStatus(LRESULT iItem);
-void VolListUpdateStatusField(int stat,LRESULT iItem);
+PVOLUME_LIST_ENTRY VolListGetSelectedEntry(void);
+void VolListUpdateSelectedStatusField(int Status);
+void VolListRefreshSelectedItem(void/*LRESULT iItem*/);
+
+
+
+//LRESULT VolListGetSelectedItemIndex(void);
+//char VolListGetLetter(LRESULT iItem);
+//int VolListGetLetterNumber(LRESULT iItem);
+//int  VolListGetWorkStatus(LRESULT iItem);
+//void VolListUpdateStatusField(int stat,LRESULT iItem);
 void VolListNotifyHandler(LPARAM lParam);
-void VolListRefreshItem(LRESULT iItem);
+//void VolListRefreshItem(LRESULT iItem);
 
 /* window procedures */
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);

@@ -43,16 +43,9 @@ int iMAP_HEIGHT = 0x8c;
 int iBLOCK_SIZE = 0x9;   /* in pixels */
 
 extern HWND hWindow,hMap,hList;
-extern char letter_numbers[];
-extern int work_status[];
 
-char map[MAX_DOS_DRIVES][N_BLOCKS];
-
-HDC bit_map_dc[MAX_DOS_DRIVES] = {0};
-HDC bit_map_grid_dc = 0;
-HBITMAP bit_map[MAX_DOS_DRIVES] = {0};
-HBITMAP bit_map_grid = 0;
-
+HDC hGridDC = NULL;
+HBITMAP hGridBitmap = NULL;
 WNDPROC OldRectangleWndProc;
 
 void InitMap(void)
@@ -122,80 +115,61 @@ void CreateMaps(void)
 }
 
 /* Since v3.1.0 it supports all screen color depths. */
-BOOL CreateBitMap(signed int index)
-{
-	HDC hDC, hMainDC;
-	HBITMAP hBmp;
-
-	if(index >= 0){
-		if(bit_map[index]) return TRUE;
-	} else {
-		if(bit_map_grid) return TRUE;
-	}
-
-	hMainDC = GetDC(hWindow);
-	hDC = CreateCompatibleDC(hMainDC);
-	hBmp = CreateCompatibleBitmap(hMainDC,iMAP_WIDTH,iMAP_HEIGHT);
-	ReleaseDC(hWindow,hMainDC);
-	if(!hBmp) { DeleteDC(hDC); return FALSE; }
-	SelectObject(hDC,hBmp);
-	SetBkMode(hDC,TRANSPARENT);
-
-	if(index >= 0){
-		bit_map[index] = hBmp;
-		bit_map_dc[index] = hDC;
-	} else {
-		bit_map_grid = hBmp;
-		bit_map_grid_dc = hDC;
-	}
-	return TRUE;
-}
-
 BOOL CreateBitMapGrid()
 {
+	HDC hMainDC;
 	HBRUSH hBrush, hOldBrush;
 	HPEN hPen, hOldPen;
-	int i;
 	RECT rc;
+	int i;
 
-	if(!CreateBitMap(-1))
-		return FALSE;
+	hMainDC = GetDC(hWindow);
+	hGridDC = CreateCompatibleDC(hMainDC);
+	hGridBitmap = CreateCompatibleBitmap(hMainDC,iMAP_WIDTH,iMAP_HEIGHT);
+	ReleaseDC(hWindow,hMainDC);
+	if(!hGridBitmap) { DeleteDC(hGridDC); hGridDC = NULL; return FALSE; }
+	SelectObject(hGridDC,hGridBitmap);
+	SetBkMode(hGridDC,TRANSPARENT);
+	
 	/* draw grid */
 	rc.top = rc.left = 0;
 	rc.bottom = iMAP_HEIGHT;
 	rc.right = iMAP_WIDTH;
 	hBrush = GetStockObject(WHITE_BRUSH);
-	hOldBrush = SelectObject(bit_map_grid_dc,hBrush);
-	FillRect(bit_map_grid_dc,&rc,hBrush);
-	SelectObject(bit_map_grid_dc,hOldBrush);
+	hOldBrush = SelectObject(hGridDC,hBrush);
+	FillRect(hGridDC,&rc,hBrush);
+	SelectObject(hGridDC,hOldBrush);
 	DeleteObject(hBrush);
 
 	hPen = CreatePen(PS_SOLID,1,GRID_COLOR);
-	hOldPen = SelectObject(bit_map_grid_dc,hPen);
+	hOldPen = SelectObject(hGridDC,hPen);
 	for(i = 0; i < BLOCKS_PER_HLINE + 1; i++){
-		MoveToEx(bit_map_grid_dc,(iBLOCK_SIZE + 1) * i,0,NULL);
-		LineTo(bit_map_grid_dc,(iBLOCK_SIZE + 1) * i,iMAP_HEIGHT);
+		MoveToEx(hGridDC,(iBLOCK_SIZE + 1) * i,0,NULL);
+		LineTo(hGridDC,(iBLOCK_SIZE + 1) * i,iMAP_HEIGHT);
 	}
 	for(i = 0; i < BLOCKS_PER_VLINE + 1; i++){
-		MoveToEx(bit_map_grid_dc,0,(iBLOCK_SIZE + 1) * i,NULL);
-		LineTo(bit_map_grid_dc,iMAP_WIDTH,(iBLOCK_SIZE + 1) * i);
+		MoveToEx(hGridDC,0,(iBLOCK_SIZE + 1) * i,NULL);
+		LineTo(hGridDC,iMAP_WIDTH,(iBLOCK_SIZE + 1) * i);
 	}
-	SelectObject(bit_map_grid_dc,hOldPen);
+	SelectObject(hGridDC,hOldPen);
 	DeleteObject(hPen);
 	return TRUE;
 }
 
-BOOL FillBitMap(int index)
+BOOL FillBitMap(char *cluster_map)
 {
+	PVOLUME_LIST_ENTRY vl;
 	HDC hdc;
-	char *cl_map;
-	int i, j;
 	HBRUSH hOldBrush;
 	RECT block_rc;
+	int i, j;
 
-	cl_map = map[index];
-	hdc = bit_map_dc[index];
+	vl = VolListGetSelectedEntry();
+	if(vl->VolumeName == NULL) return FALSE;
+
+	hdc = vl->hDC;
 	if(!hdc) return FALSE;
+	
 	hOldBrush = SelectObject(hdc,hBrushes[0]);
 	for(i = 0; i < BLOCKS_PER_VLINE; i++){
 		for(j = 0; j < BLOCKS_PER_HLINE; j++){
@@ -203,7 +177,7 @@ BOOL FillBitMap(int index)
 			block_rc.left = (iBLOCK_SIZE + 1) * j + 1;
 			block_rc.right = block_rc.left + iBLOCK_SIZE;
 			block_rc.bottom = block_rc.top + iBLOCK_SIZE;
-			FillRect(hdc,&block_rc,hBrushes[(int)cl_map[i * BLOCKS_PER_HLINE + j]]);
+			FillRect(hdc,&block_rc,hBrushes[(int)cluster_map[i * BLOCKS_PER_HLINE + j]]);
 		}
 	}
 	SelectObject(hdc,hOldBrush);
@@ -215,21 +189,20 @@ void ClearMap()
 	HDC hdc;
 
 	hdc = GetDC(hMap);
-	BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_grid_dc,0,0,SRCCOPY);
+	BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,hGridDC,0,0,SRCCOPY);
 	ReleaseDC(hMap,hdc);
 }
 
 void RedrawMap()
 {
+	PVOLUME_LIST_ENTRY vl;
 	HDC hdc;
-	LRESULT iItem, index;
 
-	iItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
-	if(iItem != -1){
-		index = letter_numbers[iItem];
-		if(work_status[index] > 1 && bit_map_dc[index]){
+	vl = VolListGetSelectedEntry();
+	if(vl->VolumeName != NULL){
+		if(vl->Status > 1 && vl->hDC){
 			hdc = GetDC(hMap);
-			BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,bit_map_dc[index],0,0,SRCCOPY);
+			BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,vl->hDC,0,0,SRCCOPY);
 			ReleaseDC(hMap,hdc);
 			return;
 		}
@@ -241,12 +214,8 @@ void DeleteMaps()
 {
 	int i;
 
-	for(i = 0; i < 'Z' - 'A'; i++){
-		if(bit_map[i]) DeleteObject(bit_map[i]);
-		if(bit_map_dc[i]) DeleteDC(bit_map_dc[i]);
-	}
-	if(bit_map_grid) DeleteObject(bit_map_grid);
-	if(bit_map_grid_dc) DeleteDC(bit_map_grid_dc);
+	if(hGridBitmap) DeleteObject(hGridBitmap);
+	if(hGridDC) DeleteDC(hGridDC);
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++)
 		DeleteObject(hBrushes[i]);
 }

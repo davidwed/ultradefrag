@@ -25,24 +25,27 @@
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
-extern STATISTIC stat[MAX_DOS_DRIVES];
+
 extern BOOL busy_flag;
 
 extern int skip_removable;
+extern int iMAP_WIDTH;
+extern int iMAP_HEIGHT;
+
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 HWND hList;
-int Index; /* Index of currently selected list item */
-char letter_numbers[MAX_DOS_DRIVES];
-int work_status[MAX_DOS_DRIVES] = {0};
 WNDPROC OldListProc;
-
 HIMAGELIST hImgList;
-
 int user_defined_column_widths[] = {0,0,0,0,0};
 
 DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
+/* no more than 255 volumes :) */
+#define MAX_NUMBER_OF_VOLUMES 255
+VOLUME_LIST_ENTRY volume_list[MAX_NUMBER_OF_VOLUMES + 1];
+
+BOOL error_flag = FALSE, error_flag2 = FALSE;
 
 void InitImageList(void)
 {
@@ -65,7 +68,7 @@ void InitVolList(void)
 	RECT rc;
 	int dx;
 
-	memset((void *)work_status,0,sizeof(work_status));
+	memset(volume_list,0,sizeof(volume_list));
 	hList = GetDlgItem(hWindow,IDC_VOLUMES);
 	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;
@@ -104,6 +107,21 @@ void InitVolList(void)
 	InitImageList();
 }
 
+void FreeVolListResources(void)
+{
+	int i;
+
+	DestroyImageList();
+	
+	for(i = 0;; i++){
+		if(volume_list[i].VolumeName == NULL) break;
+		free(volume_list[i].VolumeName);
+		if(volume_list[i].hDC) DeleteDC(volume_list[i].hDC);
+		if(volume_list[i].hBitmap) DeleteObject(volume_list[i].hBitmap);
+	}
+	memset(volume_list,0,sizeof(volume_list));
+}
+
 void UpdateVolList(void)
 {
 	DWORD thr_id;
@@ -111,12 +129,81 @@ void UpdateVolList(void)
 	if(h) CloseHandle(h);
 }
 
+static PVOLUME_LIST_ENTRY AddVolumeListEntry(char *VolumeName)
+{
+	PVOLUME_LIST_ENTRY pv = NULL;
+	int i;
+	HDC hDC, hMainDC;
+	HBITMAP hBitmap;
+	
+	for(i = 0; i <= MAX_NUMBER_OF_VOLUMES; i++){
+		if(volume_list[i].VolumeName == NULL) break;
+		if(!strcmp(volume_list[i].VolumeName,VolumeName)){
+			pv = &(volume_list[i]);
+			return pv;
+		}
+	}
+	if(i == MAX_NUMBER_OF_VOLUMES){ /* too many volumes */
+		pv = &(volume_list[1]);
+		if(pv->VolumeName) free(pv->VolumeName);
+		if(pv->hDC) DeleteDC(pv->hDC);
+		if(pv->hBitmap) DeleteObject(pv->hBitmap);
+		memset(pv,0,sizeof(VOLUME_LIST_ENTRY));
+	} else {
+		pv = &(volume_list[i]);
+	}
+
+	pv->VolumeName = malloc(strlen(VolumeName) + 1);
+	if(!pv->VolumeName){
+		if(!error_flag){ /* show message once */
+			MessageBox(hWindow,"No enough memory for AddVolumeListEntry()!",
+				"Error",MB_OK | MB_ICONEXCLAMATION);
+			error_flag = TRUE;
+		}
+		return pv;
+	}
+	strcpy(pv->VolumeName,VolumeName);
+
+	hMainDC = GetDC(hWindow);
+	hDC = CreateCompatibleDC(hMainDC);
+	hBitmap = CreateCompatibleBitmap(hMainDC,iMAP_WIDTH,iMAP_HEIGHT);
+	ReleaseDC(hWindow,hMainDC);
+	if(!hBitmap){
+		DeleteDC(hDC);
+		if(!error_flag2){ /* show message once */
+			MessageBox(hWindow,"Cannot create bitmap in AddVolumeListEntry()!",
+				"Error",MB_OK | MB_ICONEXCLAMATION);
+			error_flag2 = TRUE;
+		}
+	} else {
+		SelectObject(hDC,hBitmap);
+		SetBkMode(hDC,TRANSPARENT);
+		pv->hDC = hDC;
+		pv->hBitmap = hBitmap;
+	}
+	return pv;
+}
+
+/* DON'T MODIFY RETURNED ENTRY! */
+static PVOLUME_LIST_ENTRY GetVolumeListEntry(char *VolumeName)
+{
+	PVOLUME_LIST_ENTRY pv = NULL;
+	int i;
+	
+	for(i = 0; i <= MAX_NUMBER_OF_VOLUMES; i++){
+		if(volume_list[i].VolumeName == NULL) break;
+		if(!strcmp(volume_list[i].VolumeName,VolumeName)) break;
+	}
+	pv = &(volume_list[i]);
+	return pv;
+}
+
 static void VolListAddItem(int index, volume_info *v)
 {
+	PVOLUME_LIST_ENTRY pv;
 	LV_ITEM lvi;
 	LV_ITEMW lviw;
 	char s[32];
-	int st;
 	double d;
 	int p;
 
@@ -128,14 +215,15 @@ static void VolListAddItem(int index, volume_info *v)
 	lvi.iImage = v->is_removable ? 1 : 0;
 	SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
 
-	st = work_status[v->letter - 'A'];
+	pv = AddVolumeListEntry(s);
+
 	lviw.mask = LVIF_TEXT | LVIF_IMAGE;
 	lviw.iItem = index;
 	lviw.iSubItem = 1;
 
-	if(st == STAT_AN){
+	if(pv->Status == STAT_AN){
 		lviw.pszText = WgxGetResourceString(i18n_table,L"ANALYSE_STATUS");
-	} else if(st == STAT_DFRG){
+	} else if(pv->Status == STAT_DFRG){
 		lviw.pszText = WgxGetResourceString(i18n_table,L"DEFRAG_STATUS");
 	} else {
 		lviw.pszText = L"";
@@ -171,7 +259,6 @@ static void VolListAddItem(int index, volume_info *v)
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 {
 	char chr;
-	int index;
 	volume_info *v;
 	int i;
 	RECT rc;
@@ -187,16 +274,12 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	HideProgress();
 
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
-	index = 0;
 	eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
 		for(i = 0;;i++){
 			chr = v[i].letter;
 			if(!chr) break;
 			VolListAddItem(i,&v[i]);
-			letter_numbers[index] = chr - 'A';
-			CreateBitMap(chr - 'A');
-			index ++;
 		}
 	}
 	udefrag_set_error_handler(eh);
@@ -222,70 +305,73 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	lvi.stateMask = LVIS_SELECTED;
 	lvi.state = LVIS_SELECTED;
 	SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
-	Index = letter_numbers[0];
+
 	RedrawMap();
-	UpdateStatusBar(&stat[Index]);
+	UpdateStatusBar(&(volume_list[0].Statistics));
+	
 	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,0);
 	return 0;
 }
 
-LRESULT VolListGetSelectedItemIndex(void)
+PVOLUME_LIST_ENTRY VolListGetSelectedEntry(void)
 {
-	return SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+	LRESULT SelectedItem;
+	LV_ITEM lvi;
+	char *VolumeName = NULL;
+	char buffer[128];
+	
+	SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+	if(SelectedItem != -1){
+		lvi.iItem = (int)SelectedItem;
+		lvi.iSubItem = 0;
+		lvi.mask = LVIF_TEXT;
+		lvi.pszText = buffer;
+		lvi.cchTextMax = 127;
+		SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi);
+		VolumeName = lvi.pszText;
+	}
+	return GetVolumeListEntry(VolumeName);
 }
 
-int VolListGetWorkStatus(LRESULT iItem)
+void VolListUpdateSelectedStatusField(int Status)
 {
-	int index = letter_numbers[iItem];
-	return work_status[index];
-}
-
-char VolListGetLetter(LRESULT iItem)
-{
-	int index = letter_numbers[iItem];
-	return (index + 'A');
-}
-
-/* 0 for A, 1 for B etc. */
-int VolListGetLetterNumber(LRESULT iItem)
-{
-	return letter_numbers[iItem];
-}
-
-void VolListUpdateStatusField(int stat,LRESULT iItem)
-{
+	PVOLUME_LIST_ENTRY vl;
+	LRESULT SelectedItem;
 	LV_ITEMW lviw;
 
-	work_status[(int)letter_numbers[(int)iItem]] = stat;
-	if(stat == STAT_CLEAR)
-		return;
-	lviw.mask = LVIF_TEXT;
-	lviw.iItem = (int)iItem;
-	lviw.iSubItem = 1;
+	vl = VolListGetSelectedEntry();
+	if(vl->VolumeName) vl->Status = Status;
 
-	if(stat == STAT_AN){
-		lviw.pszText = WgxGetResourceString(i18n_table,L"ANALYSE_STATUS");
-	} else if(stat == STAT_DFRG){
-		lviw.pszText = WgxGetResourceString(i18n_table,L"DEFRAG_STATUS");
-	} else {
-		lviw.pszText = L"";
+	SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+	if(SelectedItem != -1){
+		lviw.mask = LVIF_TEXT;
+		lviw.iItem = (int)SelectedItem;
+		lviw.iSubItem = 1;
+	
+		if(Status == STAT_AN){
+			lviw.pszText = WgxGetResourceString(i18n_table,L"ANALYSE_STATUS");
+		} else if(Status == STAT_DFRG){
+			lviw.pszText = WgxGetResourceString(i18n_table,L"DEFRAG_STATUS");
+		} else {
+			lviw.pszText = L"";
+		}
+	
+		SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
 	}
-
-	SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
 }
 
 void VolListNotifyHandler(LPARAM lParam)
 {
+	PVOLUME_LIST_ENTRY vl;
 	LPNMLISTVIEW lpnm = (LPNMLISTVIEW)lParam;
 	if(lpnm->hdr.code == LVN_ITEMCHANGED && (lpnm->uNewState & LVIS_SELECTED)){
 		HideProgress();
-		/* change Index */
-		Index = letter_numbers[lpnm->iItem];
 		/* redraw indicator */
 		RedrawMap();
 		/* Update status bar */
-		UpdateStatusBar(&stat[Index]);
+		vl = VolListGetSelectedEntry();
+		UpdateStatusBar(&(vl->Statistics));
 	}
 }
 
@@ -295,7 +381,6 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		iMsg == WM_RBUTTONDOWN || iMsg == WM_RBUTTONUP) && busy_flag)
 		return 0;
 	if(iMsg == WM_KEYDOWN){
-		//HandleShortcuts(hWnd,iMsg,wParam,lParam);
 		if(busy_flag){ /* only 'Stop' and 'About' actions are allowed */
 			if(wParam != VK_F1 && wParam != 'S') return 0;
 		}
@@ -319,19 +404,23 @@ void VolListGetColumnWidths(void)
 }
 
 /* TODO: optimize */
-void VolListRefreshItem(LRESULT iItem)
+void VolListRefreshSelectedItem(void)
 {
 	ERRORHANDLERPROC eh;
 	volume_info *v;
 	int i;
 	char chr, letter;
 	
+	LRESULT SelectedItem;
+	PVOLUME_LIST_ENTRY vl;
 	LV_ITEM lvi;
 	char s[32];
 	double d;
 	int p;
 
-	letter = VolListGetLetter(iItem);
+	vl = VolListGetSelectedEntry();
+	if(vl->VolumeName == NULL) return;
+	letter = vl->VolumeName[0];
 	chr = 0;
 	eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
@@ -341,10 +430,13 @@ void VolListRefreshItem(LRESULT iItem)
 			if(chr == letter) break;
 		}
 	}
+	udefrag_set_error_handler(eh);
 	if(chr){
+		SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+		if(SelectedItem == -1) return;
 		/* update the Total space, Free space and Percentage fields */
 		lvi.mask = LVIF_TEXT | LVIF_IMAGE;
-		lvi.iItem = (int)(LONG_PTR)iItem;
+		lvi.iItem = (int)SelectedItem;
 		lvi.iImage = v[i].is_removable ? 1 : 0;
 
 		udefrag_fbsize((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
@@ -366,5 +458,4 @@ void VolListRefreshItem(LRESULT iItem)
 		lvi.pszText = s;
 		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 	}
-	udefrag_set_error_handler(eh);
 }

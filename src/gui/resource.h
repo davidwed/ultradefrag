@@ -31,9 +31,6 @@
 #define IDI_CMP                         112
 #define IDI_MFT                         113
 #define IDR_ACCELERATOR1                125
-//#define IDD_NEW_SETTINGS                126
-
-//#define IDB_SETTINGS_PICTURE            127
 #define IDB_ABOUTBOX_PICTURE            128
 
 #define IDI_FIXED                       129
@@ -58,10 +55,7 @@
 #define IDC_PROGRESS1                   1025
 #define IDC_PROGRESSMSG                 1026
 #define IDC_HOMEPAGE                    1035
-//#define IDC_SETTINGS_HELP               1043
-//#define IDC_EDITREPORTOPTS              1045
 #define IDC_CL_MAP_STATIC               1057
-//#define IDC_EDITMAINOPTS                1058
 
 #define IDC_PIC1                        1059
 
