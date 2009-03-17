@@ -121,13 +121,10 @@ void CreateMaps(void)
 		hBrushes[i] = CreateSolidBrush(colors[i]);
 }
 
+/* Since v3.1.0 it supports all screen color depths. */
 BOOL CreateBitMap(signed int index)
 {
-	BYTE *ppvBits;
-	BYTE *data;
-	BITMAPINFOHEADER *bh;
-	HDC hDC;
-	unsigned short res;
+	HDC hDC, hMainDC;
 	HBITMAP hBmp;
 
 	if(index >= 0){
@@ -135,32 +132,12 @@ BOOL CreateBitMap(signed int index)
 	} else {
 		if(bit_map_grid) return TRUE;
 	}
-	data = (BYTE *)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY, \
-		iMAP_WIDTH * iMAP_HEIGHT * sizeof(RGBQUAD) + sizeof(BITMAPINFOHEADER));
-	if(!data) return FALSE;
-	bh = (BITMAPINFOHEADER*)data;
-	hDC = GetDC(hWindow);
-	res = (unsigned short)GetDeviceCaps(hDC, BITSPIXEL);
-	ReleaseDC(hWindow, hDC);
 
-	bh->biWidth       = iMAP_WIDTH;
-	bh->biHeight      = iMAP_HEIGHT;
-	bh->biPlanes      = 1;
-	bh->biBitCount    = res;
-	bh->biClrUsed     = bh->biClrImportant = 32;
-	bh->biSizeImage   = 0;
-	bh->biCompression = BI_RGB;
-	bh->biSize        = sizeof(BITMAPINFOHEADER);
-
-	/* create the bitmap */
-	hBmp = CreateDIBSection(0, (BITMAPINFO*)bh, \
-		DIB_RGB_COLORS, (VOID *)&ppvBits, NULL, 0);
-	if(!hBmp){
-		HeapFree(GetProcessHeap(),0,data);
-		return FALSE;
-	}
-
-	hDC = CreateCompatibleDC(0);
+	hMainDC = GetDC(hWindow);
+	hDC = CreateCompatibleDC(hMainDC);
+	hBmp = CreateCompatibleBitmap(hMainDC,iMAP_WIDTH,iMAP_HEIGHT);
+	ReleaseDC(hWindow,hMainDC);
+	if(!hBmp) { DeleteDC(hDC); return FALSE; }
 	SelectObject(hDC,hBmp);
 	SetBkMode(hDC,TRANSPARENT);
 
