@@ -1,25 +1,28 @@
-﻿CREDITS
-
+﻿----------------------------------------
+--- CREDITS ---
+----------------------------------------
+ULTRADEFRAG TEAM
+----------------------------------------
 Main programmer,
 Project administrator:
 
-Dmitri Arkhangelski
+	Dmitri Arkhangelski
 
 
 Boot time defragmentation idea author,
 Documentation Writer,
 Scheduler author:
 
-Justin Dearing
+	Justin Dearing
 
 
 Web designer:
 
-Sayem Chaklader
+	Sayem Chaklader
 
-
-Translators:
-
+----------------------------------------
+	Translators:
+----------------------------------------
 Catala          - Illes Balears
 Chinese         - muzuiget
 Czech           - David Horák /Dave MacBlack/
@@ -40,15 +43,16 @@ Slovak          - Milan Cerovský /Milanbb55/
 Slovenian       - Miha Mlakar
 Spanish (AR)    - Daniel Testa
 
+--------------------------------------------------------------------------------
 Special thanks for strong testing to (in alphabetical order):
-
+--------------------------------------------------------------------------------
 Jeff Cubillos
 Markus Elfring
 Nagy Zsolt
 
-
+--------------------------------------------------------------------------------
 Special thanks for good suggestions to (in alphabetical order):
-
+--------------------------------------------------------------------------------
 Alexander Vedyakin - Volume type detection improvements.
                      More effective defragmenting algorithms.
 Bryan Kirk         - Better GUI appearance (new list of drives).
@@ -65,9 +69,9 @@ Mike Braca         - Reducing driver's memory usage (new cluster map
 Nagy Zsolt         - Interesting ideas about translation.
                      Installer improvements.
 
-
+--------------------------------------------------------------------------------
 Also special thanks to:
-
+--------------------------------------------------------------------------------
 Egor Letov (http://www.gr-oborona.ru)
 
 Mark Russinovich (http://www.sysinternals.com)
@@ -86,6 +90,6 @@ MinGW Team (http://www.mingw.org)
 
 Alexander A. Telyatnikov (http://alter.org.ua/en/)
 
-
+-------------------------------------------------------------------------------------
 Also many thanks to all people that help us to improve UltraDefrag.
-
+--------------------------------------------------------------------------------------
