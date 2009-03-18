@@ -61,4 +61,7 @@ void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table);
 
 void __cdecl WgxEnableWindows(HANDLE hMainWindow, ...);
 void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...);
+HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf);
+void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID);
+void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height);
 #endif /* _WGX_H_ */

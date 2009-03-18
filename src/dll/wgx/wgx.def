@@ -10,3 +10,6 @@ EXPORTS
 
 	WgxEnableWindows
 	WgxDisableWindows
+	WgxSetFont
+	WgxSetIcon
+	WgxCheckWindowCoordinates

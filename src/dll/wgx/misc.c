@@ -59,3 +59,46 @@ void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...)
 	} while(id);
 	va_end(marker);
 }
+
+void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID)
+{
+	HICON hIcon;
+
+	hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IconID));
+	SendMessage(hWindow,WM_SETICON,1,(LRESULT)hIcon);
+	if(hIcon) DeleteObject(hIcon);
+}
+
+/* Sets font for specified window and all children. */
+HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf)
+{
+	HFONT hFont;
+	HWND hChild;
+	
+	hFont = CreateFontIndirect(lplf);
+	if(!hFont) return NULL;
+	
+	SendMessage(hWindow,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
+	hChild = GetWindow(hWindow,GW_CHILD);
+	while(hChild){
+		SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
+		hChild = GetWindow(hChild,GW_HWNDNEXT);
+	}
+	return hFont;
+}
+
+/*
+* Prevents the specified window to be outside the screen.
+* Second and third parameters specifies the minimal size of 
+* visible part of the window.
+*/
+void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height)
+{
+	int cx,cy;
+
+	cx = GetSystemMetrics(SM_CXSCREEN);
+	cy = GetSystemMetrics(SM_CYSCREEN);
+	if(lprc->left < 0) lprc->left = 0; if(lprc->top < 0) lprc->top = 0;
+	if(lprc->left >= (cx - min_width)) lprc->left = cx - min_width;
+	if(lprc->top >= (cy - min_height)) lprc->top = cy - min_height;
+}

@@ -37,10 +37,6 @@ extern int skip_removable;
 
 extern BOOL busy_flag, exit_pressed;
 
-signed int delta_h = 0;
-
-//HFONT hFont;
-
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void ShowFragmented();
@@ -75,22 +71,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	*/
 	InitCommonControls();
 	
-	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
-	if(delta_h < 0) delta_h = 0;
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
-
-	
-//if(hFont) DeleteObject(hFont);
-
-
 	/* delete all created gdi objects */
 	FreeVolListResources();
 	DeleteMaps();
 	/* save settings */
 	SavePrefs();
-
 	WgxDestroyResourceTable(i18n_table);
-
 	udefrag_unload();
 	return 0;
 }
@@ -99,74 +86,45 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	HICON hIcon;
-	int cx,cy;
+	short lng_file_path[MAX_PATH];
+	signed int delta_h;
 	int dx,dy;
 	RECT rc;
-/*LOGFONT lf;
-CHOOSEFONT cf;
-HANDLE hChild;
-*/
-//	BOOL res;
-	short lng_file_path[MAX_PATH];
-	
+
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		hWindow = hWnd;
-
-//hFont = NULL;
-/* default font should be Courier New 9pt */
-//memset(&cf,0,sizeof(cf));
-//cf.lStructSize = sizeof(CHOOSEFONT);
-//cf.lpLogFont = &lf;
-//cf.Flags = CF_SCREENFONTS | CF_FORCEFONTEXIST/* | CF_INITTOLOGFONTSTRUCT*/;
-/*
-if(ChooseFont(&cf)){
-	hFont = CreateFontIndirect(&lf);
-	if(hFont){
-		hChild = GetWindow(hWindow,GW_CHILD);
-		while(hChild){
-			SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-			hChild = GetWindow(hChild,GW_HWNDNEXT);
-		}
-	}
-}*/
-
 		WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 		GetWindowsDirectoryW(lng_file_path,MAX_PATH);
 		wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
 		if(WgxBuildResourceTable(i18n_table,lng_file_path))
 			WgxApplyResourceTable(i18n_table,hWindow);
-		InitVolList(); /* before map! */
-
+		WgxSetIcon(hInstance,hWindow,IDI_APP);
 
 		if(skip_removable)
 			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
 		else
 			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
 
+		InitVolList(); /* before map! */
 		InitProgress();
-
 		InitMap();
 
-		cx = GetSystemMetrics(SM_CXSCREEN);
-		cy = GetSystemMetrics(SM_CYSCREEN);
-		if(win_rc.left < 0) win_rc.left = 0; if(win_rc.top < 0) win_rc.top = 0;
-		if(win_rc.left >= cx) win_rc.left = cx - 10; if(win_rc.top >= cy) win_rc.top = cy - 10;
+		WgxCheckWindowCoordinates(&win_rc,130,50);
+
+		delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
+		if(delta_h < 0) delta_h = 0;
+
 		GetWindowRect(hWnd,&rc);
 		dx = rc.right - rc.left;
 		dy = rc.bottom - rc.top + delta_h;
 		SetWindowPos(hWnd,0,win_rc.left,win_rc.top,dx,dy,0);
-		hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IDI_APP));
-		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
-		if(hIcon) DeleteObject(hIcon);
 
-		UpdateVolList();
-
-		CreateMaps();
 		CreateStatusBar();
 		UpdateStatusBar(&(volume_list[0].Statistics));
+
+		UpdateVolList();
 		break;
 	case WM_NOTIFY:
 		VolListNotifyHandler(lParam);
@@ -186,16 +144,13 @@ if(ChooseFont(&cf)){
 			DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
 			break;
 		case IDC_SETTINGS:
-			if(!busy_flag){
-				//DialogBox(hInstance,MAKEINTRESOURCE(IDD_NEW_SETTINGS),
-				//	hWindow,(DLGPROC)NewSettingsDlgProc);
-			}
+			//if(!busy_flag) CallGUIConfigurator();
 			break;
 		case IDC_SKIPREMOVABLE:
-			if(HIWORD(wParam) == BN_CLICKED || HIWORD(wParam) == BN_PUSHED || \
-				HIWORD(wParam) == BN_UNPUSHED || HIWORD(wParam) == BN_DBLCLK)
-				skip_removable = \
-					(SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_GETCHECK,0,0) == BST_CHECKED);
+			skip_removable = (
+				SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),
+					BM_GETCHECK,0,0) == BST_CHECKED
+				);
 			break;
 		case IDC_SHOWFRAGMENTED:
 			if(!busy_flag) ShowFragmented();

@@ -127,12 +127,9 @@ void SetText(HWND hWnd, short *key);
 /* map manipulation functions */
 void InitMap(void);
 void CalculateBlockSize();
-void CreateMaps();
 void DeleteMaps();
 
-BOOL CreateBitMap(int);
-BOOL CreateBitMapGrid();
-BOOL FillBitMap(char *);//int);
+BOOL FillBitMap(char *);
 
 void RedrawMap();
 void ClearMap();
@@ -156,17 +153,8 @@ void FreeVolListResources(void);
 void UpdateVolList(void);
 PVOLUME_LIST_ENTRY VolListGetSelectedEntry(void);
 void VolListUpdateSelectedStatusField(int Status);
-void VolListRefreshSelectedItem(void/*LRESULT iItem*/);
-
-
-
-//LRESULT VolListGetSelectedItemIndex(void);
-//char VolListGetLetter(LRESULT iItem);
-//int VolListGetLetterNumber(LRESULT iItem);
-//int  VolListGetWorkStatus(LRESULT iItem);
-//void VolListUpdateStatusField(int stat,LRESULT iItem);
+void VolListRefreshSelectedItem(void);
 void VolListNotifyHandler(LPARAM lParam);
-//void VolListRefreshItem(LRESULT iItem);
 
 /* window procedures */
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);

@@ -69,11 +69,13 @@ void InitVolList(void)
 	int dx;
 
 	memset(volume_list,0,sizeof(volume_list));
+
 	hList = GetDlgItem(hWindow,IDC_VOLUMES);
 	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;
 	SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 		(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
+
 	lvc.mask = LVCF_TEXT | LVCF_WIDTH;
 	lvc.pszText = WgxGetResourceString(i18n_table,L"VOLUME");
 	lvc.cx = 60 * dx / 505;
@@ -81,27 +83,24 @@ void InitVolList(void)
 	lvc.pszText = WgxGetResourceString(i18n_table,L"STATUS");
 	lvc.cx = 60 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
-
-/*	lvc.pszText = GetResourceString(L"FILESYSTEM");
-	lvc.cx = 100 * dx / 505;
-	SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
-*/
 	lvc.pszText = WgxGetResourceString(i18n_table,L"TOTAL");
 	lvc.mask |= LVCF_FMT;
 	lvc.fmt = LVCFMT_RIGHT;
 	lvc.cx = 100 * dx / 505;
-	SendMessage(hList,LVM_INSERTCOLUMNW,2/*3*/,(LRESULT)&lvc);
+	SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
 	lvc.pszText = WgxGetResourceString(i18n_table,L"FREE");
 	lvc.cx = 100 * dx / 505;
-	SendMessage(hList,LVM_INSERTCOLUMNW,3/*4*/,(LRESULT)&lvc);
+	SendMessage(hList,LVM_INSERTCOLUMNW,3,(LRESULT)&lvc);
 	lvc.pszText = WgxGetResourceString(i18n_table,L"PERCENT");
 	lvc.cx = 85 * dx / 505;
-	SendMessage(hList,LVM_INSERTCOLUMNW,4/*5*/,(LRESULT)&lvc);
-	/* reduce(?) hight of list view control */
+	SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
+
+	/* adjust hight of list view control */
 	GetWindowRect(hList,&rc);
 	rc.bottom += 5; //--; // changed after icons adding
 	SetWindowPos(hList,0,0,0,rc.right - rc.left,
 		rc.bottom - rc.top,SWP_NOMOVE);
+
 	OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
 	SendMessage(hList,LVM_SETBKCOLOR,0,RGB(255,255,255));
 	InitImageList();
@@ -198,14 +197,43 @@ static PVOLUME_LIST_ENTRY GetVolumeListEntry(char *VolumeName)
 	return pv;
 }
 
+static void AddCapacityInformation(int index, volume_info *v)
+{
+	LV_ITEM lvi;
+	char s[32];
+	double d;
+	int p;
+
+	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
+	lvi.iItem = index;
+	lvi.iImage = v->is_removable ? 1 : 0;
+
+	udefrag_fbsize((ULONGLONG)(v->total_space.QuadPart),2,s,sizeof(s));
+	lvi.iSubItem = 2;
+	lvi.pszText = s;
+ 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+
+	udefrag_fbsize((ULONGLONG)(v->free_space.QuadPart),2,s,sizeof(s));
+	lvi.iSubItem = 3;
+	lvi.pszText = s;
+	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+
+	d = (double)(signed __int64)(v->free_space.QuadPart);
+	/* 0.1 constant is used to exclude divide by zero error */
+	d /= ((double)(signed __int64)(v->total_space.QuadPart) + 0.1);
+	p = (int)(100 * d);
+	sprintf(s,"%u %%",p);
+	lvi.iSubItem = 4;
+	lvi.pszText = s;
+	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+}
+
 static void VolListAddItem(int index, volume_info *v)
 {
 	PVOLUME_LIST_ENTRY pv;
 	LV_ITEM lvi;
 	LV_ITEMW lviw;
 	char s[32];
-	double d;
-	int p;
 
 	sprintf(s,"%c: [%s]",v->letter,v->fsname);
 	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
@@ -235,30 +263,12 @@ static void VolListAddItem(int index, volume_info *v)
 	lvi.pszText = v->fsname;
 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 */
-	udefrag_fbsize((ULONGLONG)(v->total_space.QuadPart),2,s,sizeof(s));
-	lvi.iSubItem = 2;//3;
-	lvi.pszText = s;
- 	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-
-	udefrag_fbsize((ULONGLONG)(v->free_space.QuadPart),2,s,sizeof(s));
-	lvi.iSubItem = 3;//4;
-	lvi.pszText = s;
-	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-
-	d = (double)(signed __int64)(v->free_space.QuadPart);
-	/* 0.1 constant is used to exclude divide by zero error */
-	d /= ((double)(signed __int64)(v->total_space.QuadPart) + 0.1);
-	p = (int)(100 * d);
-	sprintf(s,"%u %%",p);
-	lvi.iSubItem = 4;//5;
-	lvi.pszText = s;
-	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
+	AddCapacityInformation(index,v);
 }
 
-/* TODO: cleanup */
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 {
-	char chr;
+	ERRORHANDLERPROC eh;
 	volume_info *v;
 	int i;
 	RECT rc;
@@ -267,7 +277,6 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int user_defined_widths = 0;
 	int total_width = 0;
 	LV_ITEM lvi;
-	ERRORHANDLERPROC eh;
 	
 	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,0);
@@ -276,11 +285,8 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
-		for(i = 0;;i++){
-			chr = v[i].letter;
-			if(!chr) break;
+		for(i = 0; v[i].letter != 0; i++)
 			VolListAddItem(i,&v[i]);
-		}
 	}
 	udefrag_set_error_handler(eh);
 	/* adjust columns widths */
@@ -407,55 +413,23 @@ void VolListGetColumnWidths(void)
 void VolListRefreshSelectedItem(void)
 {
 	ERRORHANDLERPROC eh;
-	volume_info *v;
-	int i;
-	char chr, letter;
-	
 	LRESULT SelectedItem;
 	PVOLUME_LIST_ENTRY vl;
-	LV_ITEM lvi;
-	char s[32];
-	double d;
-	int p;
+	volume_info *v;
+	int i;
 
 	vl = VolListGetSelectedEntry();
 	if(vl->VolumeName == NULL) return;
-	letter = vl->VolumeName[0];
-	chr = 0;
 	eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
-		for(i = 0;;i++){
-			chr = v[i].letter;
-			if(!chr) break;
-			if(chr == letter) break;
+		for(i = 0; v[i].letter != 0; i++){
+			if(v[i].letter == vl->VolumeName[0]){
+				SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+				if(SelectedItem != -1)
+					AddCapacityInformation((int)SelectedItem,&v[i]);
+				break;
+			}
 		}
 	}
 	udefrag_set_error_handler(eh);
-	if(chr){
-		SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
-		if(SelectedItem == -1) return;
-		/* update the Total space, Free space and Percentage fields */
-		lvi.mask = LVIF_TEXT | LVIF_IMAGE;
-		lvi.iItem = (int)SelectedItem;
-		lvi.iImage = v[i].is_removable ? 1 : 0;
-
-		udefrag_fbsize((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
-		lvi.iSubItem = 2;
-		lvi.pszText = s;
-		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-	
-		udefrag_fbsize((ULONGLONG)(v[i].free_space.QuadPart),2,s,sizeof(s));
-		lvi.iSubItem = 3;
-		lvi.pszText = s;
-		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-	
-		d = (double)(signed __int64)(v[i].free_space.QuadPart);
-		/* 0.1 constant is used to exclude divide by zero error */
-		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
-		p = (int)(100 * d);
-		sprintf(s,"%u %%",p);
-		lvi.iSubItem = 4;
-		lvi.pszText = s;
-		SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-	}
 }

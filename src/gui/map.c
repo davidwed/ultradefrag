@@ -48,9 +48,12 @@ HDC hGridDC = NULL;
 HBITMAP hGridBitmap = NULL;
 WNDPROC OldRectangleWndProc;
 
+static BOOL CreateBitMapGrid(void);
+
 void InitMap(void)
 {
 	RECT rc;
+	int i;
 	
 	hMap = GetDlgItem(hWindow,IDC_MAP);
 	/* increase hight of map */
@@ -60,6 +63,11 @@ void InitMap(void)
 		rc.bottom - rc.top,SWP_NOMOVE);
 	CalculateBlockSize();
 	OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
+
+	CreateBitMapGrid();
+	for(i = 0; i < NUM_OF_SPACE_STATES; i++){
+		hBrushes[i] = CreateSolidBrush(colors[i]);
+	}
 }
 
 LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
@@ -105,17 +113,8 @@ void CalculateBlockSize()
 	InvalidateRect(hMap,NULL,TRUE);
 }
 
-void CreateMaps(void)
-{
-	int i;
-
-	CreateBitMapGrid();
-	for(i = 0; i < NUM_OF_SPACE_STATES; i++)
-		hBrushes[i] = CreateSolidBrush(colors[i]);
-}
-
 /* Since v3.1.0 it supports all screen color depths. */
-BOOL CreateBitMapGrid()
+static BOOL CreateBitMapGrid(void)
 {
 	HDC hMainDC;
 	HBRUSH hBrush, hOldBrush;
