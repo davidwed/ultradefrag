@@ -27,10 +27,19 @@ type manifest.part3 >> .\obj\gui-launcher\udefrag-gui.manifest
 echo processorArchitecture="%1" >> .\obj\gui-launcher\udefrag-gui.manifest
 type manifest.part4 >> .\obj\gui-launcher\udefrag-gui.manifest
 
+type manifest.part1 > .\obj\udefrag-gui-config\res\config.manifest
+echo version="%ULTRADFGVER%.0" name="udefrag-gui-config" processorArchitecture="%1" >> .\obj\udefrag-gui-config\res\config.manifest
+type manifest.part2 >> .\obj\udefrag-gui-config\res\config.manifest
+echo UltraDefrag GUI Configurator >> .\obj\udefrag-gui-config\res\config.manifest
+type manifest.part3 >> .\obj\udefrag-gui-config\res\config.manifest
+echo processorArchitecture="%1" >> .\obj\udefrag-gui-config\res\config.manifest
+type manifest.part4 >> .\obj\udefrag-gui-config\res\config.manifest
+
 rem update manifests in working copy of sources
 copy /Y .\obj\console\defrag.manifest .\console\defrag.manifest
 copy /Y .\obj\gui\res\dfrg.manifest .\gui\res\dfrg.manifest
 copy /Y .\obj\gui-launcher\udefrag-gui.manifest .\gui-launcher\udefrag-gui.manifest
+copy /Y .\obj\udefrag-gui-config\res\config.manifest .\udefrag-gui-config\res\config.manifest
 
 exit /B 0
 

@@ -31,6 +31,8 @@ xcopy /I /Y /Q    .\console .\obj\console
 xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
 xcopy /I /Y /Q    .\gui-launcher .\obj\gui-launcher
+xcopy /I /Y /Q    .\udefrag-gui-config .\obj\udefrag-gui-config
+xcopy /I /Y /Q    .\udefrag-gui-config\res .\obj\udefrag-gui-config\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
@@ -202,6 +204,7 @@ xcopy /I /Y /Q    .\bootexctrl %SRC_PKG_PATH%\src\bootexctrl
 xcopy /I /Y /Q    .\console %SRC_PKG_PATH%\src\console
 xcopy /I /Y /Q /S .\gui %SRC_PKG_PATH%\src\gui
 xcopy /I /Y /Q    .\gui-launcher %SRC_PKG_PATH%\src\gui-launcher
+xcopy /I /Y /Q /S .\udefrag-gui-config %SRC_PKG_PATH%\src\udefrag-gui-config
 xcopy /I /Y /Q    .\native %SRC_PKG_PATH%\src\native
 xcopy /I /Y /Q    .\installer %SRC_PKG_PATH%\src\installer
 xcopy /I /Y /Q    .\include %SRC_PKG_PATH%\src\include
@@ -273,6 +276,7 @@ rd /s /q console
 rd /s /q driver
 rd /s /q gui
 rd /s /q gui-launcher
+rd /s /q udefrag-gui-config
 rd /s /q include
 rd /s /q native
 rd /s /q dll
