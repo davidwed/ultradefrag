@@ -28,6 +28,8 @@ HINSTANCE hInstance;
 HWND hWindow;
 HWND hMap;
 
+signed int delta_h = 0;
+
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 extern VOLUME_LIST_ENTRY volume_list[];
@@ -87,7 +89,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	short lng_file_path[MAX_PATH];
-	signed int delta_h;
 	int dx,dy;
 	RECT rc;
 
