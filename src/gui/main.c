@@ -30,6 +30,8 @@ HWND hMap;
 
 signed int delta_h = 0;
 
+HFONT hFont = NULL;
+
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 extern VOLUME_LIST_ENTRY volume_list[];
@@ -43,6 +45,9 @@ extern BOOL busy_flag, exit_pressed;
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void ShowFragmented();
 void VolListGetColumnWidths(void);
+
+void InitFont(void);
+void CallGUIConfigurator(void);
 
 void __stdcall ErrorHandler(short *msg)
 {
@@ -77,6 +82,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* delete all created gdi objects */
 	FreeVolListResources();
 	DeleteMaps();
+	if(hFont) DeleteObject(hFont);
 	/* save settings */
 	SavePrefs();
 	WgxDestroyResourceTable(i18n_table);
@@ -126,6 +132,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		UpdateStatusBar(&(volume_list[0].Statistics));
 
 		UpdateVolList();
+		InitFont();
 		break;
 	case WM_NOTIFY:
 		VolListNotifyHandler(lParam);
@@ -145,7 +152,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
 			break;
 		case IDC_SETTINGS:
-			//if(!busy_flag) CallGUIConfigurator();
+			if(!busy_flag) CallGUIConfigurator();
 			break;
 		case IDC_SKIPREMOVABLE:
 			skip_removable = (
@@ -196,4 +203,13 @@ void ShowFragmented()
 
 	path[0] = vl->VolumeName[0];
 	ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
+}
+
+void CallGUIConfigurator(void)
+{
+	char path[MAX_PATH];
+	
+	GetWindowsDirectory(path,MAX_PATH);
+	strcat(path,"\\System32\\udefrag-gui-config.exe");
+	ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
 }

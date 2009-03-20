@@ -25,14 +25,17 @@
 #define IDI_CONFIG                      102
 #define IDB_SETTINGS_PICTURE            103
 
-#define IDC_BUTTON1                     1001
-#define IDC_BUTTON2                     1002
-#define IDC_BUTTON3                     1003
-#define IDC_CHECK1                      1004
-#define IDC_BUTTON4                     1005
-#define IDC_BUTTON5                     1006
-#define IDC_BUTTON6                     1007
-#define IDC_BUTTON7                     1008
+#define IDC_GUI                         1001
+#define IDC_FONT                        1002
+#define IDC_GUI_SCRIPT                  1003
+#define IDC_GUI_HELP                    1004
+#define IDC_BOOT_TIME                   1005
+#define IDC_ENABLE                      1006
+#define IDC_BOOT_SCRIPT                 1007
+#define IDC_BOOT_HELP                   1008
+#define IDC_REPORTS                     1009
+#define IDC_REPORT_OPTIONS              1010
+#define IDC_REPORT_HELP                 1011
 
 // Next default values for new objects
 // 
@@ -40,7 +43,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        103
 #define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1009
+#define _APS_NEXT_CONTROL_VALUE         1012
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

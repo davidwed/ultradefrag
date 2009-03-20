@@ -29,6 +29,9 @@ char buffer[MAX_PATH];
 char err_msg[1024];
 extern int user_defined_column_widths[];
 
+extern HWND hWindow;
+extern HFONT hFont;
+
 /* returns 0 if variable is not defined */
 static int getint(lua_State *L, char *variable)
 {
@@ -105,5 +108,61 @@ void SavePrefs(void)
 			buffer,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
 		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
+	}
+}
+
+void InitFont(void)
+{
+	LOGFONT lf;
+	lua_State *L;
+	int status;
+	char *string;
+	HFONT hNewFont;
+
+	/* initialize LOGFONT structure */
+	memset(&lf,0,sizeof(LOGFONT));
+	/* default font should be Courier New 9pt */
+	strcpy(lf.lfFaceName,"Courier New");
+	lf.lfHeight = -12;
+	
+	/* load saved font settings */
+	L = lua_open();  /* create state */
+	if(!L) return;
+	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
+	luaL_openlibs(L);  /* open libraries */
+	lua_gc(L, LUA_GCRESTART, 0);
+
+	GetWindowsDirectory(buffer,MAX_PATH);
+	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
+	status = luaL_dofile(L,buffer);
+	if(!status){ /* successful */
+		lf.lfHeight = getint(L,"height");
+		lf.lfWidth = getint(L,"width");
+		lf.lfEscapement = getint(L,"escapement");
+		lf.lfOrientation = getint(L,"orientation");
+		lf.lfWeight = getint(L,"weight");
+		lf.lfItalic = getint(L,"italic");
+		lf.lfUnderline = getint(L,"underline");
+		lf.lfStrikeOut = getint(L,"strikeout");
+		lf.lfCharSet = getint(L,"charset");
+		lf.lfOutPrecision = getint(L,"outprecision");
+		lf.lfClipPrecision = getint(L,"clipprecision");
+		lf.lfQuality = getint(L,"quality");
+		lf.lfPitchAndFamily = getint(L,"pitchandfamily");
+		lua_getglobal(L, "facename");
+		string = (char *)lua_tostring(L, lua_gettop(L));
+		if(string){
+			strncpy(lf.lfFaceName,string,LF_FACESIZE);
+			lf.lfFaceName[LF_FACESIZE - 1] = 0;
+		}
+		lua_pop(L, 1);
+	}
+	lua_close(L);
+	
+	/* apply font to application's window */
+	hNewFont = WgxSetFont(hWindow,&lf);
+	if(hNewFont){
+		if(hFont) DeleteObject(hFont);
+		hFont = hNewFont;
 	}
 }
