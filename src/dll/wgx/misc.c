@@ -84,6 +84,11 @@ HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf)
 		SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
 		hChild = GetWindow(hChild,GW_HWNDNEXT);
 	}
+
+	/* redraw the main window */
+	InvalidateRect(hWindow,NULL,TRUE);
+	UpdateWindow(hWindow);
+	
 	return hFont;
 }
 

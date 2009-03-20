@@ -87,7 +87,7 @@ void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,short *line_buffer)
 		if(!wcscmp(table[i].Key,param_buffer)){
 			table[i].LoadedString = malloc((wcslen(value_buffer) + 1) * sizeof(short));
 			if(table[i].LoadedString) wcscpy(table[i].LoadedString, value_buffer);
-			break;
+			/* break; // the same text may be used for few GUI controls */
 		}
 	}
 	free(param_buffer); free(value_buffer);
