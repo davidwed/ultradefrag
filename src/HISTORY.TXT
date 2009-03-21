@@ -2,6 +2,12 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 3.1.0 (29.5)   2009-03-
+  ------------------------------------------------------------------------------
+    - graphical interface was completely rewritten
+    - a lot of GUI bugs were fixed
+
+
   Version 3.0.0 (29.5)   2009-03-15
   ------------------------------------------------------------------------------
     - defragmentation algorithm was completely rewritten to be more effective

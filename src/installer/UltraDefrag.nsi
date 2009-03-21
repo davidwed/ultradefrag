@@ -195,25 +195,30 @@ Function PortableRun
   ; make a backup copy of all installed configuration files
   Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
   Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
+  Rename "$INSTDIR\options\font.lua" "$INSTDIR\options\font.lua.bak"
   Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
   Rename "$SYSDIR\udefrag-gui.cmd" "$SYSDIR\udefrag-gui.cmd.bak"
   ; perform silent installation
   ExecWait '"$EXEPATH" /S'
   ; replace configuration files with files contained in portable directory
   CopyFiles /SILENT "$EXEDIR\guiopts.lua" "$INSTDIR\options"
+  CopyFiles /SILENT "$EXEDIR\font.lua" "$INSTDIR\options"
   CopyFiles /SILENT "$EXEDIR\udreportopts.lua" "$INSTDIR\options"
   CopyFiles /SILENT "$EXEDIR\udefrag-gui.cmd" "$SYSDIR"
   ; start ultradefrag gui
   ExecWait "$SYSDIR\udefrag-gui.exe"
   ; move configuration files to portable directory
   Delete "$EXEDIR\guiopts.lua"
+  Delete "$EXEDIR\font.lua"
   Delete "$EXEDIR\udreportopts.lua"
   Delete "$EXEDIR\udefrag-gui.cmd"
   Rename "$INSTDIR\options\guiopts.lua" "$EXEDIR\guiopts.lua"
+  Rename "$INSTDIR\options\font.lua" "$EXEDIR\font.lua"
   Rename "$INSTDIR\options\udreportopts.lua" "$EXEDIR\udreportopts.lua"
   Rename "$SYSDIR\udefrag-gui.cmd" "$EXEDIR\udefrag-gui.cmd"
   ; restore all original configuration files
   Rename "$INSTDIR\options\guiopts.lua.bak" "$INSTDIR\options\guiopts.lua"
+  Rename "$INSTDIR\options\font.lua.bak" "$INSTDIR\options\font.lua"
   Rename "$INSTDIR\options\udreportopts.lua.bak" "$INSTDIR\options\udreportopts.lua"
   Delete "$INSTDIR\ud_i18n.lng"
   Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
@@ -463,9 +468,26 @@ Section /o "Portable UltraDefrag package" SecPortable
   ${DisableX64FSRedirection}
   StrCpy $R0 "$INSTDIR\portable_${ULTRADFGARCH}_package"
   CreateDirectory $R0
+  
+  ; delete old versions of the installer
+  Delete "$R0\ultradefrag*.exe"
+  
   CopyFiles /SILENT $EXEPATH $R0 265
-  CopyFiles /SILENT "$INSTDIR\options\*.*" $R0
-  CopyFiles /SILENT "$SYSDIR\udefrag-gui.cmd" $R0
+
+  ; never replace existing files
+  ${Unless} ${FileExists} "$R0\font.lua"
+    CopyFiles /SILENT "$INSTDIR\options\font.lua" $R0
+  ${EndUnless}
+  ${Unless} ${FileExists} "$R0\guiopts.lua"
+    CopyFiles /SILENT "$INSTDIR\options\guiopts.lua" $R0
+  ${EndUnless}
+  ${Unless} ${FileExists} "$R0\udreportopts.lua"
+    CopyFiles /SILENT "$INSTDIR\options\udreportopts.lua" $R0
+  ${EndUnless}
+  ${Unless} ${FileExists} "$R0\udefrag-gui.cmd"
+    CopyFiles /SILENT "$SYSDIR\udefrag-gui.cmd" $R0
+  ${EndUnless}
+
   WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
   WriteINIStr "$R0\PORTABLE.X" "i18n" "Language" $LanguagePack
   WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
@@ -498,13 +520,16 @@ Section /o "Shortcuts" SecShortcuts
   Delete "$SMPROGRAMS\UltraDefrag\Documentation\User manual.url"
   Delete "$SMPROGRAMS\UltraDefrag\UltraDefrag (Debug mode).lnk"
 
+  RMDir /r "$SMPROGRAMS\UltraDefrag\Boot time options"
+  RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
+
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
-  CreateDirectory "$R0\Boot time options"
-  CreateDirectory "$R0\Preferences"
+;  CreateDirectory "$R0\Boot time options"
+;  CreateDirectory "$R0\Preferences"
   CreateDirectory "$R0\Documentation"
 
-  CreateShortCut "$R0\Boot time options\Enable boot time scan.lnk" \
+/*  CreateShortCut "$R0\Boot time options\Enable boot time scan.lnk" \
    "$SYSDIR\bootexctrl.exe" "/r defrag_native"
   CreateShortCut "$R0\Boot time options\Disable boot time scan.lnk" \
    "$SYSDIR\bootexctrl.exe" "/u defrag_native"
@@ -515,9 +540,12 @@ Section /o "Shortcuts" SecShortcuts
    "$SYSDIR\notepad.exe" "$INSTDIR\options\udreportopts.lua"
   CreateShortCut "$R0\Preferences\Edit GUI preferences.lnk" \
    "$SYSDIR\notepad.exe" "$SYSDIR\udefrag-gui.cmd"
-
+*/
   CreateShortCut "$R0\UltraDefrag.lnk" \
    "$SYSDIR\udefrag-gui.exe"
+
+  CreateShortCut "$R0\Preferences.lnk" \
+   "$SYSDIR\udefrag-gui-config.exe"
 
   CreateShortCut "$R0\Documentation\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"

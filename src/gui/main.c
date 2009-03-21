@@ -66,6 +66,8 @@ void __stdcall ErrorHandler(short *msg)
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	char path[MAX_PATH];
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
 	
 	udefrag_set_error_handler(ErrorHandler);
 	if(udefrag_init(N_BLOCKS) < 0){
@@ -96,7 +98,24 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(restart_flag){
 		GetWindowsDirectory(path,MAX_PATH);
 		strcat(path,"\\System32\\udefrag-gui.exe");
-		ShellExecute(NULL,"open",path,NULL,NULL,SW_SHOW);
+		/*ShellExecute(NULL,"open",path,NULL,NULL,SW_SHOW);*/
+		/* create process and wait for finish */
+		/* because the portable installer uses ExecWait call */
+		ZeroMemory( &si, sizeof(si) );
+		si.cb = sizeof(si);
+		si.dwFlags = STARTF_USESHOWWINDOW;
+		si.wShowWindow = SW_SHOW;
+		ZeroMemory( &pi, sizeof(pi) );
+	
+		if(!CreateProcess(path,path,
+			NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+			MessageBox(NULL,"Can't execute udefrag-gui.exe program!",
+				"Error",MB_OK | MB_ICONHAND);
+			return 1;
+		}
+		WaitForSingleObject(pi.hProcess,INFINITE);
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
 	}
 	
 	return 0;
