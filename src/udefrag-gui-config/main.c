@@ -253,6 +253,7 @@ void InitFont(void)
 	HFONT hNewFont;
 	int x,y,width,height;
 	RECT rc;
+	short *cmdline;
 
 	/* initialize LOGFONT structure */
 	memset(&lf,0,sizeof(LOGFONT));
@@ -300,24 +301,29 @@ void InitFont(void)
 		hFont = hNewFont;
 	}
 
-	/* set main window position */
-	GetWindowsDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
-	status = luaL_dofile(L,buffer);
-	if(!status){ /* successful */
-		x = getint(L,"x");
-		y = getint(L,"y");
-		width = getint(L,"width");
-		height = getint(L,"height");
-		GetWindowRect(hWindow,&rc);
-		if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
-			SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
-		else
-			SetWindowPos(hWindow,0,
-				x + (width - (rc.right - rc.left)) / 2,
-				y + (height - (rc.bottom - rc.top)) / 2,
-				0,0,SWP_NOSIZE
-			);
+	/* set main window position if requested */
+	cmdline = GetCommandLineW();
+	if(cmdline){
+		if(wcsstr(cmdline,L"CalledByGUI")){
+			GetWindowsDirectory(buffer,MAX_PATH);
+			strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+			status = luaL_dofile(L,buffer);
+			if(!status){ /* successful */
+				x = getint(L,"x");
+				y = getint(L,"y");
+				width = getint(L,"width");
+				height = getint(L,"height");
+				GetWindowRect(hWindow,&rc);
+				if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
+					SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
+				else
+					SetWindowPos(hWindow,0,
+						x + (width - (rc.right - rc.left)) / 2,
+						y + (height - (rc.bottom - rc.top)) / 2,
+						0,0,SWP_NOSIZE
+					);
+			}
+		}
 	}
 
 	lua_close(L);

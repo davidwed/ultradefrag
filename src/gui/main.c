@@ -221,6 +221,7 @@ void ShowFragmented()
 DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 {
 	char path[MAX_PATH];
+	char buffer[MAX_PATH + 64];
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 
@@ -229,6 +230,10 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	
 	GetWindowsDirectory(path,MAX_PATH);
 	strcat(path,"\\System32\\udefrag-gui-config.exe");
+	
+	/* the configurator must know when it should reposition its window */
+	strcpy(buffer,path);
+	strcat(buffer," CalledByGUI");
 
 	ZeroMemory( &si, sizeof(si) );
 	si.cb = sizeof(si);
@@ -236,7 +241,7 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	si.wShowWindow = SW_SHOW;
 	ZeroMemory( &pi, sizeof(pi) );
 
-	if(!CreateProcess(path,path,
+	if(!CreateProcess(path,buffer,
 		NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
 	    MessageBox(NULL,"Can't execute udefrag-gui-config.exe program!",
 			"Error",MB_OK | MB_ICONHAND);
