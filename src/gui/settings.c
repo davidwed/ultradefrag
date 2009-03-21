@@ -89,12 +89,18 @@ void SavePrefs(void)
 		return;
 	}
 
+	/* save main window size for configurator's initialization */
 	result = fprintf(pf,
-		"x = %i\ny = %i\n\nskip_removable = %i\n\n"
+		"x = %i\ny = %i\n"
+		"width = %i\nheight = %i\n\n"
+		"skip_removable = %i\n\n"
 		"column1_width = %i\ncolumn2_width = %i\n"
 		"column3_width = %i\ncolumn4_width = %i\n"
 		"column5_width = %i\n",
-		(int)win_rc.left, (int)win_rc.top, skip_removable,
+		(int)win_rc.left, (int)win_rc.top,
+		(int)(win_rc.right - win_rc.left),
+		(int)(win_rc.bottom - win_rc.top),
+		skip_removable,
 		user_defined_column_widths[0],
 		user_defined_column_widths[1],
 		user_defined_column_widths[2],
@@ -141,14 +147,14 @@ void InitFont(void)
 		lf.lfEscapement = getint(L,"escapement");
 		lf.lfOrientation = getint(L,"orientation");
 		lf.lfWeight = getint(L,"weight");
-		lf.lfItalic = getint(L,"italic");
-		lf.lfUnderline = getint(L,"underline");
-		lf.lfStrikeOut = getint(L,"strikeout");
-		lf.lfCharSet = getint(L,"charset");
-		lf.lfOutPrecision = getint(L,"outprecision");
-		lf.lfClipPrecision = getint(L,"clipprecision");
-		lf.lfQuality = getint(L,"quality");
-		lf.lfPitchAndFamily = getint(L,"pitchandfamily");
+		lf.lfItalic = (BYTE)getint(L,"italic");
+		lf.lfUnderline = (BYTE)getint(L,"underline");
+		lf.lfStrikeOut = (BYTE)getint(L,"strikeout");
+		lf.lfCharSet = (BYTE)getint(L,"charset");
+		lf.lfOutPrecision = (BYTE)getint(L,"outprecision");
+		lf.lfClipPrecision = (BYTE)getint(L,"clipprecision");
+		lf.lfQuality = (BYTE)getint(L,"quality");
+		lf.lfPitchAndFamily = (BYTE)getint(L,"pitchandfamily");
 		lua_getglobal(L, "facename");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){

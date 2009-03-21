@@ -73,10 +73,15 @@ void __stdcall ErrorHandler(short *msg)
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
+	/*
+	* This code was commented 20 mar 2009, because it is 
+	* a little bit dangerous:
+	* GUI can restart itself and than unload the driver.
+	*/
 	/* here we have last chance to unload the driver */
-	if(dwReason == DLL_PROCESS_DETACH)
-		/*if(init_event)*/ udefrag_unload();
-	return 1;
+/*	if(dwReason == DLL_PROCESS_DETACH)
+		udefrag_unload();
+*/	return 1;
 }
 
 /****f* udefrag.common/udefrag_init

@@ -77,9 +77,9 @@ CAPTION "About Ultra Defragmenter"
 FONT 9, "Courier New"
 BEGIN
     CONTROL         128,IDC_PIC1,"Static",SS_BITMAP,5,4,62,78
-    LTEXT           ABOUT_VERSION,IDC_STATIC,86,6,146,18
-    LTEXT           "Copyright (C) 2007-2009",IDC_STATIC,103,22,100,13
-    LTEXT           "UltraDefrag Development Team",IDC_STATIC,93,38,122,12
+    CTEXT           ABOUT_VERSION,IDC_STATIC,72,6,161,12
+    CTEXT           "Copyright (C) 2007-2009",IDC_STATIC,72,22,161,12
+    CTEXT           "UltraDefrag Development Team",IDC_STATIC,72,38,161,12
     PUSHBUTTON      "Credits",IDC_CREDITS,72,53,76,10
     PUSHBUTTON      "License",IDC_LICENSE,153,53,80,10
     PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,

@@ -67,6 +67,8 @@ void InitVolList(void)
 	LV_COLUMNW lvc;
 	RECT rc;
 	int dx;
+	
+//	int y;
 
 	memset(volume_list,0,sizeof(volume_list));
 
@@ -95,6 +97,11 @@ void InitVolList(void)
 	lvc.cx = 85 * dx / 505;
 	SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
 
+/*	rc.top = 1;
+	rc.left = LVIR_BOUNDS;
+	SendMessage(hList,LVM_GETSUBITEMRECT,0,(LRESULT)&rc);
+	y = rc.bottom - rc.top;
+*/	
 	/* adjust hight of list view control */
 	GetWindowRect(hList,&rc);
 	rc.bottom += 5; //--; // changed after icons adding
@@ -189,6 +196,11 @@ static PVOLUME_LIST_ENTRY GetVolumeListEntry(char *VolumeName)
 	PVOLUME_LIST_ENTRY pv = NULL;
 	int i;
 	
+	if(VolumeName == NULL){
+		pv = &(volume_list[MAX_NUMBER_OF_VOLUMES]);
+		return pv;
+	}
+	
 	for(i = 0; i <= MAX_NUMBER_OF_VOLUMES; i++){
 		if(volume_list[i].VolumeName == NULL) break;
 		if(!strcmp(volume_list[i].VolumeName,VolumeName)) break;
@@ -258,11 +270,7 @@ static void VolListAddItem(int index, volume_info *v)
 	}
 
 	SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
-/*
-	lvi.iSubItem = 2;
-	lvi.pszText = v->fsname;
-	SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-*/
+
 	AddCapacityInformation(index,v);
 }
 
@@ -277,6 +285,9 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int user_defined_widths = 0;
 	int total_width = 0;
 	LV_ITEM lvi;
+
+	HWND hHeader;
+	int h,y,height,delta;
 	
 	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,0);
@@ -312,6 +323,23 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	lvi.state = LVIS_SELECTED;
 	SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
 
+	rc.top = 1;
+	rc.left = LVIR_BOUNDS;
+	SendMessage(hList,LVM_GETSUBITEMRECT,0,(LRESULT)&rc);
+	y = rc.bottom - rc.top;
+	
+	hHeader = (HWND)(LONG_PTR)SendMessage(hList,LVM_GETHEADER,0,0);
+	SendMessage(hHeader,HDM_GETITEMRECT,0,(LRESULT)&rc);
+	h = rc.bottom - rc.top;
+	
+	GetWindowRect(hList,&rc);
+	height = rc.bottom - rc.top;
+	delta = (height - h) % y;
+	rc.bottom -= (delta - 4);
+
+	SetWindowPos(hList,0,0,0,rc.right - rc.left,
+		rc.bottom - rc.top,SWP_NOMOVE);
+	
 	RedrawMap();
 	UpdateStatusBar(&(volume_list[0].Statistics));
 	

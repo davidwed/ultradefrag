@@ -33,6 +33,8 @@
 #endif
 #include <commctrl.h>
 
+#include <commdlg.h>
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -249,6 +251,8 @@ void InitFont(void)
 	int status;
 	char *string;
 	HFONT hNewFont;
+	int x,y,width,height;
+	RECT rc;
 
 	/* initialize LOGFONT structure */
 	memset(&lf,0,sizeof(LOGFONT));
@@ -272,14 +276,14 @@ void InitFont(void)
 		lf.lfEscapement = getint(L,"escapement");
 		lf.lfOrientation = getint(L,"orientation");
 		lf.lfWeight = getint(L,"weight");
-		lf.lfItalic = getint(L,"italic");
-		lf.lfUnderline = getint(L,"underline");
-		lf.lfStrikeOut = getint(L,"strikeout");
-		lf.lfCharSet = getint(L,"charset");
-		lf.lfOutPrecision = getint(L,"outprecision");
-		lf.lfClipPrecision = getint(L,"clipprecision");
-		lf.lfQuality = getint(L,"quality");
-		lf.lfPitchAndFamily = getint(L,"pitchandfamily");
+		lf.lfItalic = (BYTE)getint(L,"italic");
+		lf.lfUnderline = (BYTE)getint(L,"underline");
+		lf.lfStrikeOut = (BYTE)getint(L,"strikeout");
+		lf.lfCharSet = (BYTE)getint(L,"charset");
+		lf.lfOutPrecision = (BYTE)getint(L,"outprecision");
+		lf.lfClipPrecision = (BYTE)getint(L,"clipprecision");
+		lf.lfQuality = (BYTE)getint(L,"quality");
+		lf.lfPitchAndFamily = (BYTE)getint(L,"pitchandfamily");
 		lua_getglobal(L, "facename");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
@@ -288,14 +292,35 @@ void InitFont(void)
 		}
 		lua_pop(L, 1);
 	}
-	lua_close(L);
-	
+
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);
 	if(hNewFont){
 		if(hFont) DeleteObject(hFont);
 		hFont = hNewFont;
 	}
+
+	/* set main window position */
+	GetWindowsDirectory(buffer,MAX_PATH);
+	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+	status = luaL_dofile(L,buffer);
+	if(!status){ /* successful */
+		x = getint(L,"x");
+		y = getint(L,"y");
+		width = getint(L,"width");
+		height = getint(L,"height");
+		GetWindowRect(hWindow,&rc);
+		if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
+			SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
+		else
+			SetWindowPos(hWindow,0,
+				x + (width - (rc.right - rc.left)) / 2,
+				y + (height - (rc.bottom - rc.top)) / 2,
+				0,0,SWP_NOSIZE
+			);
+	}
+
+	lua_close(L);
 }
 
 void SaveFontSettings(void)

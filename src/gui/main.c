@@ -32,6 +32,8 @@ signed int delta_h = 0;
 
 HFONT hFont = NULL;
 
+BOOL restart_flag = FALSE;
+
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 extern VOLUME_LIST_ENTRY volume_list[];
@@ -63,6 +65,8 @@ void __stdcall ErrorHandler(short *msg)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	char path[MAX_PATH];
+	
 	udefrag_set_error_handler(ErrorHandler);
 	if(udefrag_init(N_BLOCKS) < 0){
 		udefrag_unload();
@@ -87,6 +91,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	SavePrefs();
 	WgxDestroyResourceTable(i18n_table);
 	udefrag_unload();
+	
+	/* restart GUI after configurator running */
+	if(restart_flag){
+		GetWindowsDirectory(path,MAX_PATH);
+		strcat(path,"\\System32\\udefrag-gui.exe");
+		ShellExecute(NULL,"open",path,NULL,NULL,SW_SHOW);
+	}
+	
 	return 0;
 }
 
@@ -128,11 +140,12 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		dy = rc.bottom - rc.top + delta_h;
 		SetWindowPos(hWnd,0,win_rc.left,win_rc.top,dx,dy,0);
 
-		CreateStatusBar();
-		UpdateStatusBar(&(volume_list[0].Statistics));
-
 		UpdateVolList();
 		InitFont();
+
+		/* status bar will always have default font */
+		CreateStatusBar();
+		UpdateStatusBar(&(volume_list[0].Statistics));
 		break;
 	case WM_NOTIFY:
 		VolListNotifyHandler(lParam);
@@ -205,11 +218,44 @@ void ShowFragmented()
 	ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
 }
 
-void CallGUIConfigurator(void)
+DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 {
 	char path[MAX_PATH];
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	/* window coordinates must be accessible by configurator */
+	SavePrefs();
 	
 	GetWindowsDirectory(path,MAX_PATH);
 	strcat(path,"\\System32\\udefrag-gui-config.exe");
-	ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
+
+	ZeroMemory( &si, sizeof(si) );
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_SHOW;
+	ZeroMemory( &pi, sizeof(pi) );
+
+	if(!CreateProcess(path,path,
+		NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+	    MessageBox(NULL,"Can't execute udefrag-gui-config.exe program!",
+			"Error",MB_OK | MB_ICONHAND);
+	    return 0;
+	}
+	WaitForSingleObject(pi.hProcess,INFINITE);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+	restart_flag = TRUE;
+	SendMessage(hWindow,WM_CLOSE,0,0);
+	return 0;
+}
+
+void CallGUIConfigurator(void)
+{
+	HANDLE h;
+	DWORD id;
+	
+	h = create_thread(ConfigThreadProc,NULL,&id);
+	if(h) CloseHandle(h);
 }
