@@ -419,6 +419,13 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			if(wParam != VK_F1 && wParam != 'S') return 0;
 		}
 	}
+
+	/* why? */
+	if(iMsg == WM_VSCROLL){
+		InvalidateRect(hList,NULL,TRUE);
+		UpdateWindow(hList);
+	}
+
 	return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
 }
 

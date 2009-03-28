@@ -90,6 +90,8 @@ MinGW Team (http://www.mingw.org)
 
 Alexander A. Telyatnikov (http://alter.org.ua/en/)
 
+Mumtaz Zaheer (http://www.codeproject.com/Members/Mumtaz-Zaheer)
+
 -------------------------------------------------------------------------------------
 Also many thanks to all people that help us to improve UltraDefrag.
 --------------------------------------------------------------------------------------

@@ -100,6 +100,14 @@ BEGIN
     VK_PAUSE,       IDC_PAUSE,              VIRTKEY, NOINVERT
 END
 
+IDR_ACCELERATOR2 ACCELERATORS DISCARDABLE 
+BEGIN
+/*    VK_ESCAPE,     IDOK,                    VIRTKEY, NOINVERT*/
+    VK_F1,         IDC_CREDITS,             VIRTKEY, NOINVERT
+    VK_F2,         IDC_LICENSE,             VIRTKEY, NOINVERT
+    VK_F3,         IDC_HOMEPAGE,            VIRTKEY, NOINVERT
+END
+
 /* manifests for all targets produces make-manifests.cmd script */
 1 24 "res/dfrg.manifest"
 

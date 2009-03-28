@@ -161,7 +161,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 		UpdateVolList();
 		InitFont();
-
+		
 		/* status bar will always have default font */
 		CreateStatusBar();
 		UpdateStatusBar(&(volume_list[0].Statistics));

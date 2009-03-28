@@ -36,6 +36,8 @@
 #define IDI_FIXED                       129
 #define IDI_REMOVABLE                   130
 
+#define IDR_ACCELERATOR2                131
+
 #define IDM_STATUSBAR                   500
 
 #define IDC_VOLUMES                     1002

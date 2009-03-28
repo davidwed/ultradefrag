@@ -31,6 +31,9 @@
 #ifndef SetWindowLongPtr
 #define SetWindowLongPtr SetWindowLong
 #endif
+#ifndef SetWindowLongPtrW
+#define SetWindowLongPtrW SetWindowLongW
+#endif
 #define LONG_PTR LONG
 #ifndef GWLP_WNDPROC
 #define GWLP_WNDPROC GWL_WNDPROC

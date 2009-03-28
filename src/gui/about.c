@@ -23,6 +23,7 @@
 
 #include "main.h"
 
+extern HINSTANCE hInstance;
 extern HWND hWindow;
 extern RECT win_rc;
 extern HFONT hFont;
@@ -60,6 +61,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				hChild = GetWindow(hChild,GW_HWNDNEXT);
 			}
 		}
+		WgxAddAccelerators(hInstance,hWnd,IDR_ACCELERATOR2);
 		return FALSE;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
