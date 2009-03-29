@@ -120,19 +120,44 @@
   <assembly alias="System.Drawing" name="System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
-        AAABAAEAICAQAAAAAADoAgAAFgAAACgAAAAgAAAAQAAAAAEABAAAAAAAgAIAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAwMDAAICAgAAAAP8AAP8AAAD//wD/AAAA/wD/AP//
-        AAD///8AAAAAAAAAAAAAAAAAAAAAAAmZmZmQzMzMzMzMzAu7u7AJmZmZkMzMzMzMzMwLu7uwCZmZmZDM
-        zMzMzMzMC7u7sAmZmZmQzMzMzMzMzAu7u7AJmZmZkMzMzMzMzMwLu7uwAAAAAAAAAAAAAAAAAAAAAAqq
-        qqqqqqqqB3d3d3d3d3AKqqqqqqqqqgd3d3d3d3dwCqqqqqqqqqoHd3d3d3d3cAqqqqqqqqqqB3d3d3d3
-        d3AAAAAAAAAAAAAAAAAAAAAADu7u7uCZmZmZmZmZAREREA7u7u7gmZmZmZmZmQERERAO7u7u4JmZmZmZ
-        mZkBEREQDu7u7uCZmZmZmZmZAREREAAAAAAAAAAAAAAAAAAAAAAMzMzMzMzMzAu7u7u7u7uwDMzMzMzM
-        zMwLu7u7u7u7sAzMzMzMzMzMC7u7u7u7u7AMzMzMzMzMzAu7u7u7u7uwAAAAAAAAAAAAAAAAAAAAAAu7
-        u7uwd3d3d3d3dwqqqqALu7u7sHd3d3d3d3cKqqqgC7u7u7B3d3d3d3d3CqqqoAu7u7uwd3d3d3d3dwqq
-        qqAAAAAAAAAAAAAAAAAAAAAACqqqqqqqqqoJmZmZmZmZkAqqqqqqqqqqCZmZmZmZmZAKqqqqqqqqqgmZ
-        mZmZmZmQCqqqqqqqqqoJmZmZmZmZkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+        AAABAAEAICAAAAAAAACoCAAAFgAAACgAAAAgAAAAQAAAAAEACAAAAAAAgAQAAAAAAAAAAAAAAAAAAAAA
+        AAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAwMDAAMDcwADwyqYABAQEAAgICAAMDAwAERERABYW
+        FgAcHBwAIiIiACkpKQBVVVUATU1NAEJCQgA5OTkAgHz/AFBQ/wCTANYA/+zMAMbW7wDW5+cAkKmtAAAA
+        MwAAAGYAAACZAAAAzAAAMwAAADMzAAAzZgAAM5kAADPMAAAz/wAAZgAAAGYzAABmZgAAZpkAAGbMAABm
+        /wAAmQAAAJkzAACZZgAAmZkAAJnMAACZ/wAAzAAAAMwzAADMZgAAzJkAAMzMAADM/wAA/2YAAP+ZAAD/
+        zAAzAAAAMwAzADMAZgAzAJkAMwDMADMA/wAzMwAAMzMzADMzZgAzM5kAMzPMADMz/wAzZgAAM2YzADNm
+        ZgAzZpkAM2bMADNm/wAzmQAAM5kzADOZZgAzmZkAM5nMADOZ/wAzzAAAM8wzADPMZgAzzJkAM8zMADPM
+        /wAz/zMAM/9mADP/mQAz/8wAM///AGYAAABmADMAZgBmAGYAmQBmAMwAZgD/AGYzAABmMzMAZjNmAGYz
+        mQBmM8wAZjP/AGZmAABmZjMAZmZmAGZmmQBmZswAZpkAAGaZMwBmmWYAZpmZAGaZzABmmf8AZswAAGbM
+        MwBmzJkAZszMAGbM/wBm/wAAZv8zAGb/mQBm/8wAzAD/AP8AzACZmQAAmTOZAJkAmQCZAMwAmQAAAJkz
+        MwCZAGYAmTPMAJkA/wCZZgAAmWYzAJkzZgCZZpkAmWbMAJkz/wCZmTMAmZlmAJmZmQCZmcwAmZn/AJnM
+        AACZzDMAZsxmAJnMmQCZzMwAmcz/AJn/AACZ/zMAmcxmAJn/mQCZ/8wAmf//AMwAAACZADMAzABmAMwA
+        mQDMAMwAmTMAAMwzMwDMM2YAzDOZAMwzzADMM/8AzGYAAMxmMwCZZmYAzGaZAMxmzACZZv8AzJkAAMyZ
+        MwDMmWYAzJmZAMyZzADMmf8AzMwAAMzMMwDMzGYAzMyZAMzMzADMzP8AzP8AAMz/MwCZ/2YAzP+ZAMz/
+        zADM//8AzAAzAP8AZgD/AJkAzDMAAP8zMwD/M2YA/zOZAP8zzAD/M/8A/2YAAP9mMwDMZmYA/2aZAP9m
+        zADMZv8A/5kAAP+ZMwD/mWYA/5mZAP+ZzAD/mf8A/8wAAP/MMwD/zGYA/8yZAP/MzAD/zP8A//8zAMz/
+        ZgD//5kA///MAGZm/wBm/2YAZv//AP9mZgD/Zv8A//9mACEApQBfX18Ad3d3AIaGhgCWlpYAy8vLALKy
+        sgDX19cA3d3dAOPj4wDq6uoA8fHxAPj4+ADw+/8ApKCgAICAgAAAAP8AAP8AAAD//wD/AAAA/wD/AP//
+        AAD///8ACgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgwMDAwMDAwMDAwMDAoKCgoO6uzs
+        7Ozs6g4KDAwKCgouAiEhISEhISEhISFJExIK6uzsvLy8vLzs7OoK7AwKCk+Y/////////////+zrCurs
+        vLwZ/+v/Gby87OoKIQoKT////////////////wrq7LwZ6///7///6xm87OoKCgpP//////////////K8
+        D+y8Gf//7////+///xm87A4KCk////////////8H7ezq7Lzr////////////67zs6goKT/8J8xn/////
+        /5IVCuy8Gf/v/////////+//GbzsCgpP/wnz1v//////B+wK7Lz///////8g//////8ZvOwKCk//////
+        /////////wrsvOvv/////yD/////7+u87AoKT//v7+/v7+/v7///Cuy8////////7CD/////GbzsCgpP
+        //////////////8K7Lz//+/////sIP//7/8ZvOwKCk///////////////+zq7Lzr/////+z/IP//67zs
+        6goKT//d893/////////vA/svP///+//7P8g////vOwOCgpP/wkZ3f//////////CursvP/r///v///r
+        /7zs6goKCk////////////////+8CursvLz//+v//7y87OoKIQoKVf/v7+/v7+/v7///vAogCurs7Ly8
+        vLy87OzqCv8KCgpV//////////////8KIPm9Cg/q7Ozs7OzqDwrs9/8KClX//////////////7wKvQq8
+        vAoKCgoKCgq8vArsCgoKVf8Z//P//////////7wKvP///wrs9/8K////vAohCgpV/wnz3f//////////
+        723/////7AoKCuz/////SSEKClX////////////////vbf////////////////9JIQoKVf/v7+/v7+/v
+        7////wdt/////+/v7+/v7+/v/0khCgpV//////////////L/9xLx//L/////////////SSEKClX/////
+        //////8HbbzvvPFtB/////////////9JIQoKVf+U/5T//////5ITSgfz7UTs////////lP+U/0khCgpV
+        /5S9vf//////9JL07xL/kvD///////+Uvb3/SSEKClb////////////////v6v////////////////9J
+        IQoKVf//////////////9O/s/////////////////0khCgpVmP//////////9v/sB/Ls////////////
+        9vYoLiEKClVVVVVVVVVVVVVVVU9JSUlPT09PLi4uLi4uLi4uDAoKCgoKCgoKCgoKCgoKCgoKCgoKCgoK
+        CgoKCgoKCgoKCsAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
         AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
-        AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==
+        AAAAAAAAAAAAAAAAAACAAAAD
 </value>
   </data>
 </root>

@@ -25,6 +25,11 @@
 #include "../include/version.h"
 #include "resource.h"
 
+/*
+* This icon was made from GPL licensed images 
+* provided by Window Manager Icons project:
+* http://wm-icons.sourceforge.net/
+*/
 IDI_CONFIG              ICON    DISCARDABLE     "res/config.ico"
 
 /*

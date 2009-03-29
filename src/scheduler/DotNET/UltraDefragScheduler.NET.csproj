@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>UltraDefrag.Scheduler</RootNamespace>
     <AssemblyName>UltraDefragScheduler.NET</AssemblyName>
-    <ApplicationIcon>..\..\gui\res\app.ico</ApplicationIcon>
+    <ApplicationIcon>Clock.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

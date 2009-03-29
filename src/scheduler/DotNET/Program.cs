@@ -17,6 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
  
+/*
+* Application's icon was made from GPL licensed images 
+* provided by Window Manager Icons project:
+* http://wm-icons.sourceforge.net/
+*/
+
 using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
