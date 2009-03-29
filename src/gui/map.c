@@ -47,6 +47,7 @@ extern HWND hWindow,hMap,hList;
 HDC hGridDC = NULL;
 HBITMAP hGridBitmap = NULL;
 WNDPROC OldRectangleWndProc;
+BOOL isRectangleUnicode = FALSE;
 
 static BOOL CreateBitMapGrid(void);
 
@@ -62,7 +63,13 @@ void InitMap(void)
 	SetWindowPos(hMap,0,0,0,rc.right - rc.left,
 		rc.bottom - rc.top,SWP_NOMOVE);
 	CalculateBlockSize();
-	OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,(LONG_PTR)RectWndProc);
+	isRectangleUnicode = IsWindowUnicode(hMap);
+	if(isRectangleUnicode)
+		OldRectangleWndProc = (WNDPROC)SetWindowLongPtrW(hMap,GWLP_WNDPROC,
+			(LONG_PTR)RectWndProc);
+	else
+		OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,
+			(LONG_PTR)RectWndProc);
 
 	CreateBitMapGrid();
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++){
@@ -79,7 +86,10 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		RedrawMap();
 		EndPaint(hWnd,&ps);
 	}
-	return CallWindowProc(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
+	if(isRectangleUnicode)
+		return CallWindowProcW(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
+	else
+		return CallWindowProc(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
 }
 
 void CalculateBlockSize()

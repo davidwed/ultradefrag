@@ -36,6 +36,7 @@ extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 HWND hList;
 WNDPROC OldListProc;
+BOOL isListUnicode = FALSE;
 HIMAGELIST hImgList;
 int user_defined_column_widths[] = {0,0,0,0,0};
 
@@ -108,7 +109,13 @@ void InitVolList(void)
 	SetWindowPos(hList,0,0,0,rc.right - rc.left,
 		rc.bottom - rc.top,SWP_NOMOVE);
 
-	OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,(LONG_PTR)ListWndProc);
+	isListUnicode = IsWindowUnicode(hList);
+	if(isListUnicode)
+		OldListProc = (WNDPROC)SetWindowLongPtrW(hList,GWLP_WNDPROC,
+			(LONG_PTR)ListWndProc);
+	else
+		OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,
+			(LONG_PTR)ListWndProc);
 	SendMessage(hList,LVM_SETBKCOLOR,0,RGB(255,255,255));
 	InitImageList();
 }
@@ -426,7 +433,10 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		UpdateWindow(hList);
 	}
 
-	return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
+	if(isListUnicode)
+		return CallWindowProcW(OldListProc,hWnd,iMsg,wParam,lParam);
+	else
+		return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
 }
 
 void VolListGetColumnWidths(void)

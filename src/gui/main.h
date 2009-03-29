@@ -25,6 +25,12 @@
 #define _DFRG_MAIN_H_
 
 /*
+* An article of Mumtaz Zaheer from Pakistan helped me very much
+* to make a valid subclassing:
+* http://www.codeproject.com/KB/winsdk/safesubclassing.aspx
+*/
+
+/*
 * VERY IMPORTANT NOTE: (bug #1839755 cause)
 * 
 * + You should not wait for one SendMessage handler completion
