@@ -139,7 +139,8 @@ void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 		}
 	}
 	
-	block = (PFREEBLOCKMAP)InsertItem((PLIST *)&dx->free_space_map,(PLIST)prev_block,sizeof(FREEBLOCKMAP));
+	block = (PFREEBLOCKMAP)InsertItem((PLIST *)&dx->free_space_map,
+		(PLIST)prev_block,sizeof(FREEBLOCKMAP),PagedPool);
 	if(!block) return;
 	
 	block->lcn = start;
@@ -153,7 +154,8 @@ FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 	PFREEBLOCKMAP block, lastblock = NULL;
 	
 	if(dx->free_space_map) lastblock = dx->free_space_map->prev_ptr;
-	block = (PFREEBLOCKMAP)InsertItem((PLIST *)&dx->free_space_map,(PLIST)lastblock,sizeof(FREEBLOCKMAP));
+	block = (PFREEBLOCKMAP)InsertItem((PLIST *)&dx->free_space_map,
+		(PLIST)lastblock,sizeof(FREEBLOCKMAP),PagedPool);
 	if(block){
 		block->lcn = start;
 		block->length = length;

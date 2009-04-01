@@ -111,6 +111,7 @@ BOOLEAN __stdcall OpenLog()
 {
 	BOOLEAN result = TRUE;
 
+	/* This buffer must be in NonPaged pool to be accessible from BugCheckCallback's. */
 	dbg_buffer = AllocatePool(NonPagedPool,DBG_BUFFER_SIZE); /* 32 kb ring-buffer */
 	if(!dbg_buffer){
 		result = FALSE;
@@ -171,6 +172,10 @@ BOOLEAN CheckForSystemVolume(void)
 	return FALSE;
 }
 
+/*
+* NOTE: Never call this function with parameters 
+* from paged memory pool when IRQL >= DISPATCH_LEVEL!
+*/
 void __cdecl DebugPrint(char *format, short *ustring, ...)
 {
 	va_list ap;

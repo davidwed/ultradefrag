@@ -40,7 +40,11 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 	BOOLEAN inside_flag = TRUE;
 
 	/* Allocate memory */
-	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(NonPagedPool,
+	/*
+	* This buffer must be allocated from the PagedPool,
+	* to prevent from NonPagedPool exhaustion.
+	*/
+	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(PagedPool,
 		FIND_DATA_SIZE + sizeof(PFILE_BOTH_DIR_INFORMATION));
 	if(!pFileInfoFirst){
 		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n",NULL);
@@ -240,7 +244,8 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 
 	/* Add a file only if we need to have its information cached. */
 	/* 1. First of all try to allocate pfn structure. */
-	pfn = (PFILENAME)AllocatePool(NonPagedPool,sizeof(FILENAME));
+	/* From PagedPool - see above. */
+	pfn = (PFILENAME)AllocatePool(PagedPool,sizeof(FILENAME));
 	if(!pfn){
 		DebugPrint2("-Ultradfg- no enough memory for pfn structure!\n",NULL);
 		return FALSE;
@@ -330,7 +335,7 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		}
 	}
 
-	pf = (PFRAGMENTED)InsertItem((PLIST *)&dx->fragmfileslist,(PLIST)prev_pf,sizeof(FRAGMENTED));
+	pf = (PFRAGMENTED)InsertItem((PLIST *)&dx->fragmfileslist,(PLIST)prev_pf,sizeof(FRAGMENTED),PagedPool);
 	if(!pf){
 		DebugPrint2("-Ultradfg- cannot allocate memory for InsertFragmentedFile()!\n",NULL);
 		return FALSE;

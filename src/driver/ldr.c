@@ -44,7 +44,7 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 		return NULL;
 	}
 
-	pSystemInfoBuffer = (PULONG)AllocatePool(NonPagedPool, SystemInfoBufferSize*2);
+	pSystemInfoBuffer = (PULONG)AllocatePool(PagedPool, SystemInfoBufferSize*2);
 	if(!pSystemInfoBuffer){
 		DebugPrint("=Ultradfg= KernelGetModuleBase: No enough memory!\n",NULL);
 		return NULL;

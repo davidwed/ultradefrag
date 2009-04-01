@@ -25,13 +25,13 @@
 
 /*
 * Returns NULL or pointer to successfully inserted structure.
-* To insert item as a new head of list use InsertItem(phead,NULL,size).
+* To insert item as a new head of list use InsertItem(phead,NULL,size,pool_type).
 */
-LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size)
+LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size,POOL_TYPE pool_type)
 {
 	PLIST new_item;
 
-	new_item = (LIST *)AllocatePool(NonPagedPool,size);
+	new_item = (LIST *)AllocatePool(pool_type,size);
 	if(!new_item){
 		DebugPrint2("-Ultradfg- InsertItem() no enough memory!\n",NULL);
 		return NULL;
@@ -91,6 +91,9 @@ void NTAPI DestroyList(PLIST *phead)
 	do {
 		next = item->next_ptr;
 		Nt_ExFreePool(item);
+/* try to reproduce BAD_POOL_CALLER BSOD */
+/*Nt_ExFreePool(item);*/
+/* Successful! */
 		item = next;
 	} while (next != head);
 

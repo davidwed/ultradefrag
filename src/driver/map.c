@@ -27,6 +27,8 @@
 NTSTATUS AllocateMap(ULONG size)
 {
 #ifndef MICRO_EDITION
+	ULONG buffer_size;
+	
 	/* map reallocation doesn't supported yet */
 	if(new_cluster_map){
 		DebugPrint("-Ultradfg- map reallocation doesn't supported yet!\n",NULL);
@@ -35,8 +37,18 @@ NTSTATUS AllocateMap(ULONG size)
 	map_size = size;
 	DebugPrint("-Ultradfg- Map size = %u\n",NULL,map_size);
 	if(!size) return STATUS_SUCCESS;
-	new_cluster_map = AllocatePool(NonPagedPool,
-			NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG));
+	
+	buffer_size = NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG);
+	
+	/* allocate small maps from the NonPagedPool, large maps - from PagedPool */
+	if(buffer_size <= (100 * 1024)){ /* no larger than 100 kb */
+		DebugPrint("-Ultradfg- Cluster map will be allocated from NonPagedPool.\n",NULL);
+		new_cluster_map = AllocatePool(NonPagedPool,buffer_size);
+	} else {
+		DebugPrint("-Ultradfg- Cluster map will be allocated from PagedPool.\n",NULL);
+		new_cluster_map = AllocatePool(PagedPool,buffer_size);
+	}
+
 	if(!new_cluster_map){
 		DebugPrint("-Ultradfg- cannot allocate memory for cluster map!\n",NULL);
 		map_size = 0;

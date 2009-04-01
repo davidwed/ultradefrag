@@ -245,11 +245,13 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 
 	/* allocate memory */
 	if(!nt4_system){
+		/* few kb from nonpaged pool */
 		dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
 		dx->BitMap = AllocatePool(NonPagedPool,BITMAPSIZE * sizeof(UCHAR));
 		if(!dx->FileMap || !dx->BitMap) goto no_mem;
 	}
-	dx->tmp_buf = AllocatePool(NonPagedPool,TEMP_BUFFER_CHARS * sizeof(short));
+	/* 64 kb from paged pool */
+	dx->tmp_buf = AllocatePool(PagedPool,TEMP_BUFFER_CHARS * sizeof(short));
 	if(!dx->tmp_buf){
 no_mem:
 		DebugPrint("-Ultradfg- cannot allocate memory for FileMap, BitMap and tmp_buf!\n",NULL);

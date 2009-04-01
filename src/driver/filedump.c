@@ -105,7 +105,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 				goto next_run;
 			}
 			
-			block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)block,sizeof(BLOCKMAP));
+			block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)block,sizeof(BLOCKMAP),PagedPool);
 			if(!block) goto dump_fail;
 			block->lcn = fileMappings->Pair[i].Lcn;
 			block->length = fileMappings->Pair[i].Vcn - *dx->pstartVcn;

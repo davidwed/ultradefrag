@@ -98,6 +98,10 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 	if(length <= sizeof(short)) return;
 
 	pf->offsets = NULL;
+	/*
+	* These buffers may be allocated from the NonPagedPool, 
+	* because they are very short - less than 4 kb.
+	*/
 	pf->buffer = AllocatePool(NonPagedPool,length);
 	if(!pf->buffer){
 		DebugPrint("-Ultradfg- cannot allocate memory for pf->buffer in UpdateFilter()!\n",NULL);
@@ -108,7 +112,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 	_wcslwr(buffer);
 
 	/* replace double quotes and semicolons with zeros */
-	poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));
+	poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET),NonPagedPool);
 	if(!poffset) return;
 	if(length > sizeof(short) && buffer[0] == 0x0022) poffset->offset = 1; /* skip leading double quote */
 	else poffset->offset = 0;
@@ -117,7 +121,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 		if(buffer[i] == 0x0022) { buffer[i] = 0; continue; } /* replace all double quotes with zeros */
 		if(buffer[i] == 0x003b){
 			buffer[i] = 0;
-			poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));
+			poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET),NonPagedPool);
 			if(!poffset) break;
 			if(buffer[i + 1] == 0x0022) poffset->offset = i + 2; /* safe, because we always have null terminated buffer */
 			else poffset->offset = i + 1;
@@ -136,8 +140,34 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
 {
+	POFFSET po;
+	
 	ExFreePoolSafe(dx->in_filter.buffer);
 	ExFreePoolSafe(dx->ex_filter.buffer);
+/* make a BSOD */
+//dx->in_filter.offsets->next_ptr = NULL;
+/* Result - access violation :( */
+	
+/* allocate all available memory -> BSOD? */
+/*for(;;){
+	if(!AllocatePool(NonPagedPool,1024)) break;
+}
+for(;;){
+	if(!AllocatePool(NonPagedPool,10)) break;
+}*/
+/* yes: on w2k ACPI.sys raise blue screen after unloading */
+
+	for(po = dx->in_filter.offsets; po != NULL; po = po->next_ptr){
+		DebugPrint("-Ultradfg- in_po = %p next = %p prev = %p\n",NULL,po,po->next_ptr,po->prev_ptr);
+		if(po->next_ptr == dx->in_filter.offsets) break;
+	}
+
 	DestroyList((PLIST *)&dx->in_filter.offsets);
+
+	for(po = dx->ex_filter.offsets; po != NULL; po = po->next_ptr){
+		DebugPrint("-Ultradfg- ex_po = %p next = %p prev = %p\n",NULL,po,po->next_ptr,po->prev_ptr);
+		if(po->next_ptr == dx->ex_filter.offsets) break;
+	}
+
 	DestroyList((PLIST *)&dx->ex_filter.offsets);
 }

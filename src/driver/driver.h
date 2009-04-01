@@ -315,6 +315,18 @@ ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
 #define AllocatePool(type,size) ExAllocatePool((type),(size))
 #endif
 
+/*
+* Since v3.1.0 we are using paged pool when possible.
+* Because Windows has a strong limitation: if all nonpaged 
+* memory will be allocated then any Windows driver may crash system.
+* With BAD_POOL_CALLER bug code or 0x24 (NTFS_FILE_SYSTEM) for ntfs.sys driver.
+*/
+#define AllocateNonPagedPool(size) AllocatePool(NonPagedPool,size)
+#define AllocatePagedPool(size) AllocatePool(PagedPool,size)
+
+/* FIXME: RtlCreateUnicodeString allocates memory from which pool??? */
+/* It seems that system allocates memory from paged pool. :) */
+
 //#ifdef NT4_TARGET
 
 /* ExFreePool must be always ExFreePool call, nothing more! */
@@ -527,7 +539,7 @@ FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,U
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx);
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx);
 void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
-LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size);
+LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size,POOL_TYPE pool_type);
 void NTAPI RemoveItem(PLIST *phead,PLIST item);
 void NTAPI DestroyList(PLIST *phead);
 NTSTATUS AllocateMap(ULONG size);
