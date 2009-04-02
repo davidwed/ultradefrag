@@ -93,5 +93,5 @@ Alexander A. Telyatnikov (http://alter.org.ua/en/)
 Mumtaz Zaheer (http://www.codeproject.com/Members/Mumtaz-Zaheer)
 
 -------------------------------------------------------------------------------------
-Also many thanks to all the people that helped us improve UltraDefrag.
+Also many thanks to all the people who helped us improve UltraDefrag.
 --------------------------------------------------------------------------------------
