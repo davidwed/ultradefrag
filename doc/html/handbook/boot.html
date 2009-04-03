@@ -58,7 +58,10 @@
 		</div>
 		<p><span class="application">UltraDefrag</span> also includes a new mode
 		that allows you to run it at boot time in a manner similar to chkdsk.
-		This is known as a native application.</p>
+		This is known as a native application. It provides an ability to defragment any system files. 
+		Including page file, registry hives, hiberfil.sys file, another files locked by system 
+		or applications. Native <span class="application">UltraDefrag</span> runs before any file 
+		locking, therefore it can process them as an ordinary files.</p>
 		<p><div align="center"><img src="ud-boot-time.png" alt="Boot time defragmenter" align="bottom" border="0"></div></p>
 		<p>If the boot time defragmenter is enabled, you will see such picture at every reboot. Note 
 		that you will have a chance to exit safely without a driver loading, just press any key when 
@@ -69,10 +72,12 @@
 		boot time scans is that you may not scan encrypted volumes. This is because
 		lsass.exe, the component of the operating system that reads encrypted volumes,
 		is loaded after the native executable runs.</p>
-		<p>The boot time defragmenter can be enabled by <span class="code">boot-on</span> command 
+		<p>To enable the boot time defragmenter open 
+		<a href="gui.html#config">UltraDefrag GUI Configurator</a> and check 
+		<span class="guimenuitem">Enable</span> box in <span class="guimenuitem">Boot time scan</span> 
+		section.
+		The boot time defragmenter can also be enabled by <span class="code">boot-on</span> command 
 		typed in the command line. To disable them use the <span class="code">boot-off</span> command. 
-		There are also the corresponding shortcuts in 
-		<span class="guimenuitem">Start > Programs > UltraDefrag > Boot time options</span> menu.
 		</p>
 	</div>
 
@@ -84,8 +89,9 @@
 		</div>
 		<p>To edit the boot time script (contained in 
 		<span class="code">%windir%\system32\ud-boot-time.cmd</span> file) type in command prompt 
-		<span class="code">boot-config</span> or use the corresponding shortcut in 
-		<span class="guimenuitem">Start > Programs > UltraDefrag > Boot time options</span> menu.</p>
+		<span class="code">boot-config</span> or click <span class="guimenuitem">Script</span> 
+		button in <a href="gui.html#config">UltraDefrag GUI Configurator</a>.
+		</p>
 		<p>The script contains defragmentation related commands and comments. To understand better 
 		commands used here, read please carefully the <a href="console">console interface</a> 
 		section of this document.</p>
@@ -148,7 +154,7 @@
 		<span class="code">exit</span> command in script to leave the program to be running after 
 		the last command execution.</p>
 		<p>In interactive mode program shows a prompt like this:</p>
-<pre class="screen"><strong class="userinput"><code>Interactive mode:
+<pre width="80pt" class="screen"><strong class="userinput"><code>Interactive mode:
 Type 'help' for list of supported commands.
 
 #
@@ -168,7 +174,7 @@ Type 'help' for list of supported commands.
 		</div>
 		<p>The complete example, installed by default:
 		</p>
-<pre style="border: 1px solid black; color: black; 
+<pre width="80pt" style="border: 1px solid black; color: black; 
 background-color: #ffffe1; font-size: 10pt;">
 ;--------------------------------------------------------------------
 ;                UltraDefrag Boot Time Shell Script

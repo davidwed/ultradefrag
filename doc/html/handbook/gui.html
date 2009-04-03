@@ -80,7 +80,7 @@
 		<p>The windows application is a simple application with one main
 		form of fixed size and an about box. An illustration of the window as well
 		as an explanation of their functionality is below:</p>
-		<p><div align="center"><img src="main_screen200.png" alt="Main window" align="bottom" border="0"></div></p>
+		<p><div align="center"><img src="vista_b2_theme_main_window.png" alt="Main window" align="bottom" border="0"></div></p>
 		<ol>
 		<li>
 		<p><span class="guimenuitem">List of volumes</span> This list all drives on the machine that you can scan. 
@@ -180,11 +180,8 @@
 			UltraDefrag generate it.</p>
 			</li>
 			<li>
-			<p><span class="guimenuitem">Settings (Ctrl+T)</span> This button opens the 
-			settings dialog with three shortcuts to main options 
-			(<a href="gui.html#config">GUI startup commands</a>), 
-			<a href="reports.html#config">report options</a> and 
-			<a href="index.html">this user manual</a>.</p>
+			<p><span class="guimenuitem">Settings (Ctrl+T)</span> This button starts 
+			the <a href="gui.html#config">UltraDefrag GUI Configurator</a> program.</p>
 			</li>
 			<li>
 			<p><span class="guimenuitem">About (F1)</span> Displays the simple about box 
@@ -207,19 +204,29 @@
 				<h2 class="title" style="clear: both"><a name="config"></a>Configuring</h2>
 			</div></div>
 		</div>
-		<p>The file <span class="code">%windir%\system32\udefrag-gui.exe</span> 
-		contains the GUI executable since 2.0.0 version of the program. This executable starts 
-		the GUI startup script contained in <span class="code">udefrag-gui.cmd</span> file. To 
-		edit this script click <span class="guimenuitem">Main options</span> button in 
-		<span class="guimenuitem">Settings</span> dialog or use the appropriate shortcut in 
-		<span class="guimenuitem">Start Menu</span>.</p> 
-		<p>The GUI startup script usually contains few <span class="code">set</span> commands 
-		plus <span class="code">ultradefrag.exe</span> command at the end 
-		to launch the UltraDefrag GUI Shell. To understand the contents of this script read please 
-		carefully the <a href="console.html">console application</a> section of this 
-		document. The environment variables used here are the same. Here is an example of script, 
-		installed by default:</p>
-<pre style="border: 1px solid black; color: black; 
+		
+		<p>To configure <span class="application">UltraDefrag</span> push 
+		<span class="guimenuitem">Settings</span> button on	the main GUI window. This action 
+		opens the UltraDefrag GUI Configurator:</p>
+		<p><div align="center"><img src="vista_b2_theme_config_window.png" alt="Main window" align="bottom" border="0"></div></p>
+		
+		<p>Configurator's window contains three sections:
+		<ol>
+		<li><span class="guimenuitem">Graphical interface</span> Buttons in this section 
+		provides an access to GUI related options.
+		 <ul type="disc">
+		 <li><p><span class="guimenuitem">Font</span> Opens the font selection dialog. Choose 
+		 your preferred font for GUI application rendering. The default font is 
+		<span style="color: darkgreen">Courier New, 9</span>
+		 </p></li>
+		 <li><p><span class="guimenuitem">Script</span> Opens the GUI startup script in text editor.
+		 Usually it contains few <span class="code">set</span> commands 
+		 plus <span class="code">ultradefrag.exe</span> command at the end 
+		 to launch the UltraDefrag GUI application. To understand the contents of this script read 
+		 please carefully the <a href="console.html">console application</a> section of this 
+		 document. The environment variables used here are the same. The following script 
+		 (installed by default) illustrates usage of discussed commands: 
+<pre width="80pt" style="border: 1px solid black; color: black; 
 background-color: #ffffe1; font-size: 10pt;">
 @echo off
 rem ------------ UltraDefrag GUI startup commands -------------------
@@ -228,10 +235,52 @@ set UD_EX_FILTER=system volume information;temp;recycler
 exit
 
 </pre>
-		<p>The first command disables commands displaying in command prompt. 
-		<span class="code">Rem</span> includes comment in script. <span class="code">Set</span> 
-		sets list of files to be excluded from defragmentation process. The next command launches 
-		the UltraDefrag GUI Shell. <span class="code">Exit</span> command is used to break script execution.</p>
+		 </p>
+		 <p>The first command disables commands displaying in command prompt. 
+		 <span class="code">Rem</span> includes comment in script. <span class="code">Set</span> 
+		 sets list of files to be excluded from defragmentation process. The next command launches 
+		 the UltraDefrag GUI application. <span class="code">Exit</span> command is used to break 
+		 script execution.
+		 </p>
+		 </li>
+		 <li><p><span class="guimenuitem">Help</span> button opens this section of the Handbook. 
+		 If you have a local copy of documentation installed, the Configurator will use it. 
+		 Otherwise the same page will be loaded from the project's web site.
+		 </p></li>
+		 </ul>
+		</li>
+		<li><span class="guimenuitem">Windows boot time scan</span> This section contains options 
+		of the <a href="boot.html">boot time defragmenter</a>.
+		 <ul type="disc">
+		 <li><p><span class="guimenuitem">Enable</span> checkbox gives you an ability to turn on/off
+		 the boot time defragmenter by one click.</p></li>
+		 <li><p><span class="guimenuitem">Script</span> button opens the 
+		 <a href="boot.html#script">boot time script</a> in text editor.</p></li>
+		 <li><p><span class="guimenuitem">Help</span> button opens the 
+		 <a href="boot.html#script">Boot time script</a> section of the Handbook.</p></li>
+		 </ul>
+		</li>
+		<li><span class="guimenuitem">Reports</span> section contains fragmentation report related 
+		settings.
+		 <ul type="disc">
+		 <li><p><span class="guimenuitem">Options</span> button opens the 
+		 <a href="reports.html#config">report options script</a> in text editor.</p></li>
+		 <li><p><span class="guimenuitem">Help</span> button opens the 
+		 <a href="reports.html#config">Reports configuring</a> section of the Handbook.</p></li>
+		 </ul>
+		</li>
+		</ol>
+		</p>
+		
+		<p>Also UltraDefrag GUI Configurator can be launched from the Start menu. Use 
+		<span class="guimenuitem">Start > Programs > UltraDefrag > Preferences</span> shortcut.
+		</p>
+		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
+			<h3 class="title">Note</h3>
+			<p style="color: darkred">When you launches the Configurator from UltraDefrag GUI 
+			application, it restarts automatically after Configurator's closing. This may take 
+			two seconds on slow machines. Don't worry, that's a normal behaviour.</p>
+		</div>
 	</div>
 </div>
 

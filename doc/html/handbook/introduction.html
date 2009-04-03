@@ -91,16 +91,19 @@
 		<li>Very fast defragmentation, the work is done via a kernel mode 
 		driver which has an optimal defraging algorithm.</li>
 		<li>Ability to defragment system files.</li>
+		<li>Single file or directory defragmentation: select any object
+		in Explorer and choose the appropriate context menu item to defragment them.</li>
 		<li>Very small engine written in pure C.</li>
 		<li>Nice graphical interface - compact and functional.</li>
-		<li>Safety, because the file moving is accomplished with
-		Microsoft's own Defrag API.</li>
+		<li>Safety, because the file moving is accomplished with Microsoft's own Defrag API.</li>
 		<li>Simple to use.</li>
 		<li>Ability to generate html reports of fragmentation status.</li>
 		<li>Ability to include/exclude files based on simple filters.</li>
 		<li>Native x64 support.</li>
-		<li>Free: Distributed
-		with full source code under the GNU General Public License.</li>
+		<li>Portable UltraDefrag can be installed on demand which can be carried around 
+		in USB storage devices and used without any installation.</li>
+		<li>Many GUI translations available.</li>
+		<li>Free: Distributed with full source code under the GNU General Public License.</li>
 		</ul>
 	</div>
 
@@ -120,10 +123,16 @@
 		defragment files and folders compressed by NTFS file system	compression. And can even 
 		defragment floppies, although doing so is not particularly useful.</p>
 		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
-			<h3 class="title">Note</h3>
-			<p>Directories on FAT volumes cannot be moved. This is a well known fastfat.sys 
+			<h3 class="title">Notes</h3>
+			<p><span style="color: darkred">Directories on FAT volumes cannot be moved.</span> 
+			This is a well known fastfat.sys 
 			system driver mistake, it cannot be fixed. Most of other defraggers have the same 
 			restriction.</p>
+			<p><span style="color: darkred"><b>$MFT</b>, <b>$Bitmap</b> and another <b>internal NTFS files</b> 
+			cannot be defragmented at this moment.</span> 
+			Because NTFS driver provided by Microsoft is very imperfect. Such 
+			internal files defragmentation support may be added in future versions of 
+			<span class="application">UltraDefrag</span>.</p>
 		</div>
 	</div>
 
@@ -135,7 +144,7 @@
 			</div></div>
 		</div>
 	<p><span class="application">UltraDefrag</span> runs on Windows NT 4.0, Windows 2000, Windows XP, Windows Server
-	2003 and  Windows Vista, including 64 bit versions of Windows. NT 4.0 Alpha
+	2003, Windows Vista, Windows Server 2008 and Vindows 7, including 64 bit versions of Windows. NT 4.0 Alpha
 	is not supported currently.</p>
 	</div>
 

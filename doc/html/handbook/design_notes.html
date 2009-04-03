@@ -81,6 +81,16 @@
 		is very simple, can be embedded in web pages and has good (though primitive enough) 
 		support for strings processing.
 		</p>
+		<p>Also UltraDefrag uses two libraries to simplify GUI development. First is Lua library, 
+		it simplifies settings reading from text files. Second is WGX (Windows GUI Extended) 
+		library made especially for UltraDefrag. It highly simplifies GUI development, because 
+		contains a set of very useful functions that can be used in any GUI application. 
+		UltraDefrag's i18n support is powered by WGX.
+		</p>
+		<p>Since version 3.1.0 UltraDefrag contains the Configurator program - a graphical interface 
+		to all program's configuration files. This application utilize functions from Lua and WGX 
+		libraries, but not from udefrag.dll.
+		</p>
 		<p>Of course, we have not discussed yet our installer and scheduler. NSIS gives us an 
 		ability to have both installer and portable package in the same file. This language is 
 		very powerful and we don't need to use something else at this moment.
