@@ -43,6 +43,7 @@ BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	if(!dx->in_filter.buffer) return FALSE;
 	po = dx->in_filter.offsets;
+	if(!po) return FALSE;
 	if(po->next_ptr != po) return FALSE;
 	p = dx->in_filter.buffer + po->offset;
 	if(wcslen(p) < 3) return FALSE;
@@ -91,13 +92,14 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 
 	if(pf->buffer){
 		Nt_ExFreePool((void *)pf->buffer);
-		pf->buffer = NULL;
 		DestroyList((PLIST *)pf->offsets);
 	}
 
+	pf->buffer = NULL;
+	pf->offsets = NULL;
+
 	if(length <= sizeof(short)) return;
 
-	pf->offsets = NULL;
 	/*
 	* These buffers may be allocated from the NonPagedPool, 
 	* because they are very short - less than 4 kb.

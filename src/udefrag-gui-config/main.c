@@ -151,7 +151,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case IDC_REPORT_OPTIONS:
 			GetWindowsDirectoryW(path,MAX_PATH);
 			wcscat(path,L"\\UltraDefrag\\options\\udreportopts.lua");
-			ShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
+			ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_REPORT_HELP:
 			OpenWebPage("reports.html");
