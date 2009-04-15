@@ -194,6 +194,7 @@ Function PortableRun
   ${DisableX64FSRedirection}
   ; make a backup copy of all installed configuration files
   Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
+  Rename "$INSTDIR\ud_config_i18n.lng" "$INSTDIR\ud_config_i18n.lng.bak"
   Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
   Rename "$INSTDIR\options\font.lua" "$INSTDIR\options\font.lua.bak"
   Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
@@ -222,6 +223,8 @@ Function PortableRun
   Rename "$INSTDIR\options\udreportopts.lua.bak" "$INSTDIR\options\udreportopts.lua"
   Delete "$INSTDIR\ud_i18n.lng"
   Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
+  Delete "$INSTDIR\ud_config_i18n.lng"
+  Rename "$INSTDIR\ud_config_i18n.lng.bak" "$INSTDIR\ud_config_i18n.lng"
   Rename "$SYSDIR\udefrag-gui.cmd.bak" "$SYSDIR\udefrag-gui.cmd"
   ; uninstall if necessary
   ${Unless} $IsInstalled == '1'
@@ -237,14 +240,15 @@ FunctionEnd
 Function install_langpack
 
   push $R0
+  push $R1
 
   SetOutPath $INSTDIR
   Delete "$INSTDIR\ud_i18n.lng"
-
-;  StrCpy $R0 "NOTHING"
+  Delete "$INSTDIR\ud_config_i18n.lng"
 
   ${If} $LanguagePack != "English (US)"
-    StrCpy $R0 "$LanguagePack.lng"
+    StrCpy $R1 $LanguagePack
+    StrCpy $R0 "$R1.lng"
     ${Select} $LanguagePack
       ${Case} "Chinese (Simplified)"
         StrCpy $R0 "Chinese(Simp).lng"
@@ -257,12 +261,20 @@ Function install_langpack
       ${Case} "Spanish (AR)"
         StrCpy $R0 "Spanish(AR).lng"
     ${EndSelect}
+
     File "${ROOTDIR}\src\gui\i18n\*.lng"
     Rename "$R0" "ud_i18n.bk"
     Delete "$INSTDIR\*.lng"
+    ;;;Rename "ud_i18n.bk" "ud_i18n.lng"
+
+    File "${ROOTDIR}\src\udefrag-gui-config\i18n\*.lng"
+    Rename "$R0" "ud_config_i18n.bk"
+    Delete "$INSTDIR\*.lng"
+    Rename "ud_config_i18n.bk" "ud_config_i18n.lng"
     Rename "ud_i18n.bk" "ud_i18n.lng"
   ${EndIf}
 
+  pop $R1
   pop $R0
   
 FunctionEnd
@@ -630,6 +642,7 @@ Section "Uninstall"
   Delete "$INSTDIR\boot_on.cmd"
   Delete "$INSTDIR\boot_off.cmd"
   Delete "$INSTDIR\ud_i18n.lng"
+  Delete "$INSTDIR\ud_config_i18n.lng"
   Delete "$INSTDIR\ud_i18n.dll"
   RMDir /r "$INSTDIR\presets"
 

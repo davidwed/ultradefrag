@@ -27,6 +27,7 @@ Catala          - Illes Balears
 Chinese         - muzuiget
 Czech           - David Horák /Dave MacBlack/
 Dutch           - Wim Kerstens
+Farsi           - Ali Jafari
 French          - Pascal Crozet
 German          - Stefan Geuken
 Greek           - Konstantinos Kapoukranidis
