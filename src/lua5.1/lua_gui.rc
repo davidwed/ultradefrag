@@ -11,6 +11,5 @@ FONT 9, "Courier New"
 BEGIN
 END
 
-#ifdef WIN64
-1 24 "lua_64.manifest"
-#endif
+/* manifests for all targets produces make-manifests.cmd script */
+1 24 "lua.manifest"
