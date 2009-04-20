@@ -227,6 +227,9 @@ copy /Y .\tools\readme.txt %SRC_PKG_PATH%\src\tools\
 mkdir %SRC_PKG_PATH%\src\scripts
 copy /Y .\scripts\*.* %SRC_PKG_PATH%\src\scripts\
 
+mkdir %SRC_PKG_PATH%\src\icons-for-mdsp-files
+copy /Y .\icons-for-mdsp-files\*.* %SRC_PKG_PATH%\src\icons-for-mdsp-files\
+
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
 mkdir %SRC_PKG_PATH%\doc\html\handbook
