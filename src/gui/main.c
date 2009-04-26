@@ -28,6 +28,8 @@ HINSTANCE hInstance;
 HWND hWindow;
 HWND hMap;
 
+PROCESS_INFORMATION pi;
+
 signed int delta_h = 0;
 
 HFONT hFont = NULL;
@@ -65,10 +67,6 @@ void __stdcall ErrorHandler(short *msg)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	char path[MAX_PATH];
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-	
 	udefrag_set_error_handler(ErrorHandler);
 	if(udefrag_init(N_BLOCKS) < 0){
 		udefrag_unload();
@@ -92,79 +90,69 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* save settings */
 	SavePrefs();
 	WgxDestroyResourceTable(i18n_table);
-	udefrag_unload();
 	
-	/* restart GUI after configurator running */
-	if(restart_flag){
-		GetWindowsDirectory(path,MAX_PATH);
-		strcat(path,"\\System32\\udefrag-gui.exe");
-		/*ShellExecute(NULL,"open",path,NULL,NULL,SW_SHOW);*/
-		/* create process and wait for finish */
-		/* because the portable installer uses ExecWait call */
-		ZeroMemory( &si, sizeof(si) );
-		si.cb = sizeof(si);
-		si.dwFlags = STARTF_USESHOWWINDOW;
-		si.wShowWindow = SW_SHOW;
-		ZeroMemory( &pi, sizeof(pi) );
-	
-		if(!CreateProcess(path,path,
-			NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-			MessageBox(NULL,"Can't execute udefrag-gui.exe program!",
-				"Error",MB_OK | MB_ICONHAND);
-			return 1;
-		}
+	if(restart_flag && pi.hProcess){
 		WaitForSingleObject(pi.hProcess,INFINITE);
 		CloseHandle(pi.hProcess);
 		CloseHandle(pi.hThread);
 	}
-	
+
 	return 0;
+}
+
+void InitMainWindow(void)
+{
+	short lng_file_path[MAX_PATH];
+	int dx,dy;
+	RECT rc;
+
+	WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
+	GetWindowsDirectoryW(lng_file_path,MAX_PATH);
+	wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
+	if(WgxBuildResourceTable(i18n_table,lng_file_path))
+		WgxApplyResourceTable(i18n_table,hWindow);
+	WgxSetIcon(hInstance,hWindow,IDI_APP);
+
+	if(skip_removable)
+		SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
+	else
+		SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
+
+	InitVolList(); /* before map! */
+	InitProgress();
+	InitMap();
+
+	WgxCheckWindowCoordinates(&win_rc,130,50);
+
+	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
+	if(delta_h < 0) delta_h = 0;
+
+	GetWindowRect(hWindow,&rc);
+	dx = rc.right - rc.left;
+	dy = rc.bottom - rc.top + delta_h;
+	SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
+
+	UpdateVolList();
+	InitFont();
+	
+	/* status bar will always have default font */
+	CreateStatusBar();
+	UpdateStatusBar(&(volume_list[0].Statistics));
 }
 
 /*---------------- Main Dialog Callback ---------------------*/
 
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	short lng_file_path[MAX_PATH];
-	int dx,dy;
 	RECT rc;
+	char path[MAX_PATH];
+	STARTUPINFO si;
 
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		hWindow = hWnd;
-		WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
-		GetWindowsDirectoryW(lng_file_path,MAX_PATH);
-		wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
-		if(WgxBuildResourceTable(i18n_table,lng_file_path))
-			WgxApplyResourceTable(i18n_table,hWindow);
-		WgxSetIcon(hInstance,hWindow,IDI_APP);
-
-		if(skip_removable)
-			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
-		else
-			SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
-
-		InitVolList(); /* before map! */
-		InitProgress();
-		InitMap();
-
-		WgxCheckWindowCoordinates(&win_rc,130,50);
-
-		delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
-		if(delta_h < 0) delta_h = 0;
-
-		GetWindowRect(hWnd,&rc);
-		dx = rc.right - rc.left;
-		dy = rc.bottom - rc.top + delta_h;
-		SetWindowPos(hWnd,0,win_rc.left,win_rc.top,dx,dy,0);
-
-		UpdateVolList();
-		InitFont();
-		
-		/* status bar will always have default font */
-		CreateStatusBar();
-		UpdateStatusBar(&(volume_list[0].Statistics));
+		InitMainWindow();
 		break;
 	case WM_NOTIFY:
 		VolListNotifyHandler(lParam);
@@ -219,7 +207,35 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		VolListGetColumnWidths();
 		exit_pressed = TRUE;
-		if(!busy_flag) EndDialog(hWnd,0);
+		if(busy_flag) return TRUE;
+		
+		/* if restart_flag is set, restart application here */
+		udefrag_unload();
+		/* restart GUI after configurator running */
+		if(restart_flag){
+			GetWindowsDirectory(path,MAX_PATH);
+			strcat(path,"\\System32\\udefrag-gui.exe");
+			/*ShellExecute(NULL,"open",path,NULL,NULL,SW_SHOW);*/
+			/* create process and wait for finish */
+			/* because the portable installer uses ExecWait call */
+			ZeroMemory( &si, sizeof(si) );
+			si.cb = sizeof(si);
+			si.dwFlags = STARTF_USESHOWWINDOW;
+			si.wShowWindow = SW_SHOW;
+			ZeroMemory( &pi, sizeof(pi) );
+		
+			/*
+			* Call this function before EndDialog() to speed up 
+			* restart on slow machines.
+			*/
+			if(!CreateProcess(path,path,
+				NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+				MessageBox(NULL,"Can't execute udefrag-gui.exe program!",
+					"Error",MB_OK | MB_ICONHAND);
+			}
+		}
+
+		EndDialog(hWnd,0);
 		return TRUE;
 	}
 	return FALSE;
