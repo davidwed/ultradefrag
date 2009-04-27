@@ -175,7 +175,7 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 
 
 /*	RtlInitUnicodeString(&us,L"\\??\\C:\\$MFT");
-	InitializeObjectAttributes(&ObjectAttributes,&us,0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
 	Status = ZwCreateFile(&hFile,FILE_GENERIC_READ,&ObjectAttributes,&ioStatus,
 			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
 			  FILE_NO_INTERMEDIATE_BUFFERING,NULL,0);

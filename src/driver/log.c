@@ -129,7 +129,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	RtlInitUnicodeString(&dx->log_path,p);
 	InitializeObjectAttributes(&ObjectAttributes,
 			&dx->log_path,
-			OBJ_CASE_INSENSITIVE,
+			OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
 			NULL,
 			NULL
 			);
@@ -250,7 +250,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	RtlInitUnicodeString(&dx->log_path,p);
 	InitializeObjectAttributes(&ObjectAttributes,
 			&dx->log_path,
-			OBJ_CASE_INSENSITIVE,
+			OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
 			NULL,
 			NULL
 			);

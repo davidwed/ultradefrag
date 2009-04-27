@@ -36,7 +36,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* open volume */
 	path[4] = (short)(dx->letter);
 	RtlInitUnicodeString(&us,path);
-	InitializeObjectAttributes(&ObjectAttributes,&us,0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
 	status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA,
 				&ObjectAttributes,&iosb,
 				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
@@ -84,9 +84,8 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* open the volume */
 	path[4] = (unsigned short)dx->letter;
 	RtlInitUnicodeString(&us,path);
-	InitializeObjectAttributes(&ObjectAttributes,&us,
-			       FILE_READ_ATTRIBUTES,NULL,NULL);
-	status = ZwCreateFile(&hFile,FILE_GENERIC_READ,
+	InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
+	status = ZwCreateFile(&hFile,FILE_GENERIC_READ | FILE_READ_ATTRIBUTES,
 				&ObjectAttributes,&iosb,NULL,0,
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);

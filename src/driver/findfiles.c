@@ -42,7 +42,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 	/* Allocate memory */
 	/*
 	* This buffer must be allocated from the PagedPool,
-	* to prevent from NonPagedPool exhaustion.
+	* to prevent the NonPagedPool exhaustion.
 	*/
 	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(PagedPool,
 		FIND_DATA_SIZE + sizeof(PFILE_BOTH_DIR_INFORMATION));
@@ -51,7 +51,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 		return FALSE;
 	}
 	/* Open directory */
-	InitializeObjectAttributes(&ObjectAttributes,path,0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,path,OBJ_KERNEL_HANDLE,NULL,NULL);
 	Status = ZwCreateFile(&DirectoryHandle,FILE_LIST_DIRECTORY | FILE_RESERVE_OPFILTER,
 			    &ObjectAttributes,&IoStatusBlock,NULL,0,
 			    FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,

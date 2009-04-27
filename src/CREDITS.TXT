@@ -47,7 +47,9 @@ Spanish (AR)    - Daniel Testa
 --------------------------------------------------------------------------------
 Special thanks for strong testing to (in alphabetical order):
 --------------------------------------------------------------------------------
+Andrei Maksimov
 Jeff Cubillos
+Kerem Gümrükcü
 Markus Elfring
 Nagy Zsolt
 

@@ -27,7 +27,7 @@ NTSTATUS OpenTheFile(PFILENAME pfn, HANDLE *phFile)
 	IO_STATUS_BLOCK ioStatus;
 
 	if(!pfn || !phFile) return STATUS_INVALID_PARAMETER;
-	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,OBJ_KERNEL_HANDLE,NULL,NULL);
 	return ZwCreateFile(phFile,FILE_GENERIC_READ,&ObjectAttributes,&ioStatus,
 			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
 			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,

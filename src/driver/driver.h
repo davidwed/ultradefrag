@@ -180,6 +180,10 @@ if(!CheckIrp(Irp)){ \
 } \
 }
 
+#ifndef OBJ_KERNEL_HANDLE
+#define OBJ_KERNEL_HANDLE    0x00000200
+#endif
+
 /* Unfortunately, usually headers don't contains some important prototypes. */
 #ifdef USE_WINDDK
 NTSTATUS NTAPI ZwDeviceIoControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,

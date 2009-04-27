@@ -37,7 +37,7 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 *    that it's arguments must be in user memory space.
 * 4. Filesystem data is cached by Windows, therefore second analysis will be
 *    always much faster (at least on modern versions of Windows - tested on XP)
-*    then the first attempt.
+*    than the first attempt.
 * 5. On very large volumes the second analysis may take few minutes. Well, the 
 *    first one may take few hours... :)
 */
@@ -179,6 +179,17 @@ NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 	return STATUS_SUCCESS;
 }
 
+void DbgPrintBlocksOfFile(PBLOCKMAP blockmap)
+{
+	PBLOCKMAP block;
+	
+	for(block = blockmap; block != NULL; block = block->next_ptr){
+		DebugPrint("-Ultradfg- VCN: %I64u, LCN: %I64u, LENGTH: %u\n",NULL,
+			block->vcn,block->lcn,block->length);
+		if(block->next_ptr == blockmap) break;
+	}
+}
+
 /* For defragmenter only, not for optimizer! */
 BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 {
@@ -206,9 +217,19 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 		/* Check new file blocks to get moving status. */
 		fn.name = pfn->name;
 		if(DumpFile(dx,&fn)){ /* otherwise let's assume the successful moving result? */
-			if(fn.is_fragm) Status = STATUS_UNSUCCESSFUL;
+			if(fn.is_fragm){
+				DebugPrint("-Ultradfg- MoveBlocksOfFile failed: "
+						   "still fragmented.\n",NULL);
+				DbgPrintBlocksOfFile(fn.blockmap);
+				Status = STATUS_UNSUCCESSFUL;
+			}
 			if(fn.blockmap){
-				if(fn.blockmap->lcn != target) Status = STATUS_UNSUCCESSFUL;
+				if(fn.blockmap->lcn != target){
+					DebugPrint("-Ultradfg- MoveBlocksOfFile failed: "
+							   "first block not found on target space.\n",NULL);
+					DbgPrintBlocksOfFile(fn.blockmap);
+					Status = STATUS_UNSUCCESSFUL;
+				}
 			}
 			DeleteBlockmap(&fn);
 		}
