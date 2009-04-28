@@ -26,6 +26,7 @@ Web designer:
 Catala          - Illes Balears
 Chinese         - muzuiget
 Czech           - David Horák /Dave MacBlack/
+Danish          - Patrick Paludan-Müller
 Dutch           - Wim Kerstens
 Farsi           - Ali Jafari
 French          - Pascal Crozet
@@ -43,6 +44,7 @@ Russian         - Dmitri Arkhangelski
 Slovak          - Milan Cerovský /Milanbb55/
 Slovenian       - Miha Mlakar
 Spanish (AR)    - Daniel Testa
+Swedish         - Magnus Rostedt
 
 --------------------------------------------------------------------------------
 Special thanks for strong testing to (in alphabetical order):

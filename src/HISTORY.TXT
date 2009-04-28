@@ -4,6 +4,7 @@ HISTORY
 
   Version 3.1.0 (29.5)   2009-04-
   ------------------------------------------------------------------------------
+    - this is the first really stable release
     - graphical interface was completely rewritten
     - gui program was translated into the following languages:
 
