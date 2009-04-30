@@ -149,18 +149,20 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	default:
 		status = udefrag_optimize(letter,update_stat);
 	}
-	if(status < 0){
+	if(status < 0 && !exit_pressed){
 		VolListUpdateSelectedStatusField(STAT_CLEAR);
 		ClearMap();
 	}
 
-	WgxEnableWindows(hWindow,IDC_ANALYSE,
-		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,
-		IDC_RESCAN,IDC_SETTINGS,0);
-	WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
+	if(!exit_pressed){
+		WgxEnableWindows(hWindow,IDC_ANALYSE,
+			IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,
+			IDC_RESCAN,IDC_SETTINGS,0);
+		WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
+	}
 
 	busy_flag = 0;
-	if(exit_pressed) EndDialog(hWindow,0);
+//	if(exit_pressed) EndDialog(hWindow,0);
 	return 0;
 }
 

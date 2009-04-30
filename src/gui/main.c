@@ -147,6 +147,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	RECT rc;
 	char path[MAX_PATH];
 	STARTUPINFO si;
+	BOOL local_busy_flag;
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -199,15 +200,16 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_CLOSE:
-		stop();
 		GetWindowRect(hWnd,&rc);
 		if((HIWORD(rc.bottom)) != 0xffff){
 			rc.bottom -= delta_h;
 			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 		}
 		VolListGetColumnWidths();
+
+		local_busy_flag = busy_flag;
 		exit_pressed = TRUE;
-		if(busy_flag) return TRUE;
+		stop();
 		
 		/* if restart_flag is set, restart application here */
 		udefrag_unload();
@@ -235,6 +237,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 		}
 
+		//if(local_busy_flag) return TRUE;
 		EndDialog(hWnd,0);
 		return TRUE;
 	}
