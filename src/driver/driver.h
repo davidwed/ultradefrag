@@ -180,6 +180,13 @@ if(!CheckIrp(Irp)){ \
 } \
 }
 
+/*
+* Important note: never specify OBJ_KERNEL_HANDLE flag in
+* InitializeObjectAttributes() call before ZwCreateFile()
+* on NT 4.0. On w2k and later systems always set this flag!
+*/
+
+
 #ifndef OBJ_KERNEL_HANDLE
 #define OBJ_KERNEL_HANDLE    0x00000200
 #endif
@@ -525,6 +532,8 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
 void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
+void DbgPrintFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx);
 void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state,int old_space_state);
 void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
 void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state);

@@ -51,7 +51,11 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 		return FALSE;
 	}
 	/* Open directory */
-	InitializeObjectAttributes(&ObjectAttributes,path,OBJ_KERNEL_HANDLE,NULL,NULL);
+	if(nt4_system){
+		InitializeObjectAttributes(&ObjectAttributes,path,0,NULL,NULL);
+	} else {
+		InitializeObjectAttributes(&ObjectAttributes,path,OBJ_KERNEL_HANDLE,NULL,NULL);
+	}
 	Status = ZwCreateFile(&DirectoryHandle,FILE_LIST_DIRECTORY | FILE_RESERVE_OPFILTER,
 			    &ObjectAttributes,&IoStatusBlock,NULL,0,
 			    FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,

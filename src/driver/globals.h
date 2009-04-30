@@ -36,6 +36,7 @@ extern short log_path[MAX_PATH];
 extern char volume_letter;
 
 extern int nt4_system;
+extern int w2k_system;
 extern PVOID kernel_addr;
 extern PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
 	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY);

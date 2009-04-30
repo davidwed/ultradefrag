@@ -145,7 +145,11 @@ void __stdcall SaveLog()
 	/* create the file */
 	RtlInitUnicodeString(&us_log_path,log_path);
 	/* OBJ_KERNEL_HANDLE is very important for Vista and later systems!!! */
-	InitializeObjectAttributes(&ObjectAttributes,&us_log_path,OBJ_KERNEL_HANDLE,NULL,NULL);
+	if(nt4_system){
+		InitializeObjectAttributes(&ObjectAttributes,&us_log_path,0,NULL,NULL);
+	} else {
+		InitializeObjectAttributes(&ObjectAttributes,&us_log_path,OBJ_KERNEL_HANDLE,NULL,NULL);
+	}
 	Status = ZwCreateFile(&hDbgLog,FILE_APPEND_DATA | SYNCHRONIZE,&ObjectAttributes,&ioStatus,
 			  NULL,FILE_ATTRIBUTE_NORMAL,FILE_SHARE_READ,FILE_OPEN_IF,
 			  FILE_SYNCHRONOUS_IO_NONALERT,NULL,0);

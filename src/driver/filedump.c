@@ -65,7 +65,10 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 						fileMappings, FILEMAPSIZE * sizeof(LARGE_INTEGER));
 		counter ++;
 		if(Status == STATUS_PENDING){
-			NtWaitForSingleObject(hFile,FALSE,NULL);
+			if(nt4_system)
+				NtWaitForSingleObject(hFile,FALSE,NULL);
+			else
+				ZwWaitForSingleObject(hFile,FALSE,NULL);
 			Status = ioStatus.Status;
 		}
 		if(Status != STATUS_SUCCESS && Status != STATUS_BUFFER_OVERFLOW){

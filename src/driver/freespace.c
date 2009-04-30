@@ -43,7 +43,10 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 			FSCTL_GET_VOLUME_BITMAP,
 			dx->pnextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
 		if(status == STATUS_PENDING){
-			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+			if(nt4_system)
+				NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+			else
+				ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
 			status = ioStatus.Status;
 		}
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
@@ -97,14 +100,20 @@ void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 	else InsertFreeSpaceBlock(dx,start,len,old_space_state);
 }
 
-/* inserts any block in free space map */
+void InsertFreeSpaceBlockInternal(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
+
 void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 			  ULONGLONG start,ULONGLONG length,UCHAR old_space_state)
 {
+	ProcessBlock(dx,start,length,FREE_SPACE,old_space_state);
+	InsertFreeSpaceBlockInternal(dx,start,length);
+}
+			  
+/* inserts any block in free space map */
+void InsertFreeSpaceBlockInternal(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length)
+{
 	PFREEBLOCKMAP block, prev_block = NULL, next_block;
 	
-	ProcessBlock(dx,start,length,FREE_SPACE,old_space_state);
-
 	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
 		if(block->lcn > start){
 			if(block != dx->free_space_map) prev_block = block->prev_ptr;
@@ -186,4 +195,68 @@ void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 		if(block->next_ptr == dx->free_space_map) break;
 	}
 	DebugPrint("-Ultradfg- TruncateFreeSpaceBlock() failed: Lcn=%I64u!\n",NULL,start);
+}
+
+/* Removes specified range of clusters from the free space list. */
+void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len)
+{
+	PFREEBLOCKMAP block;
+	ULONGLONG new_lcn, new_length;
+	
+	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
+		if(block->lcn >= start && (block->lcn + block->length) <= (start + len)){
+			/*
+			* block is inside a specified range
+			* |--------------------|
+			*        |block|
+			*/
+			block->length = 0;
+			goto next_block;
+		}
+		if(block->lcn < start && (block->lcn + block->length) > start && \
+		  (block->lcn + block->length) <= (start + len)){
+			/*
+			* cut the right side of block
+			*     |--------------------|
+			* |block|
+			*/
+			block->length = start - block->lcn;
+			goto next_block;
+		}
+		if(block->lcn >= start && block->lcn < (start + len)){
+			/*
+			* cut the left side of block
+			* |--------------------|
+			*                    |block|
+			*/
+			block->length = block->lcn + block->length - (start + len);
+			block->lcn = start + len;
+			goto next_block;
+		}
+		if(block->lcn < start && (block->lcn + block->length) > (start + len)){
+			/*
+			* specified range is inside a block
+			*   |----|
+			* |-------block--------|
+			*/
+			new_lcn = start + len;
+			new_length = block->lcn + block->length - (start + len);
+			block->length = start - block->lcn;
+			InsertFreeSpaceBlockInternal(dx,new_lcn,new_length);
+			goto next_block;
+		}
+
+next_block:
+		if(block->next_ptr == dx->free_space_map) break;
+	}
+}
+
+void DbgPrintFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	PFREEBLOCKMAP block;
+	
+	for(block = dx->free_space_map; block != NULL; block = block->next_ptr){
+		DebugPrint2("-Ultradfg- Free Block start: %I64u len: %I64u\n",NULL,block->lcn,block->length);
+		if(block->next_ptr == dx->free_space_map) break;
+	}
 }

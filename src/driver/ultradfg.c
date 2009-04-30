@@ -44,6 +44,7 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 		DebugPrint("=Ultradfg= NT %u.%u free.\n",NULL,mj,mn);
 	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
 	nt4_system = (mj == 4) ? 1 : 0;
+	w2k_system = (mj == 5 && mn == 0) ? 1 : 0;
 	
 	/* get nt kernel base address */
 	kernel_addr = KernelGetModuleBase("ntoskrnl.exe");
@@ -154,6 +155,8 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	NTSTATUS Status;
 	UNICODE_STRING us;
 */
+	ULONG mj,mn;
+
 	/* 1. Export entry points */
 	DriverObject->DriverUnload = UnloadRoutine;
 	DriverObject->MajorFunction[IRP_MJ_CREATE]= Create_File_IRPprocessing;
@@ -162,6 +165,9 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	DriverObject->MajorFunction[IRP_MJ_WRITE] = Write_IRPhandler;
 	DriverObject->MajorFunction[IRP_MJ_DEVICE_CONTROL] =
 											  DeviceControlRoutine;
+
+	PsGetVersion(&mj,&mn,NULL,NULL);
+	nt4_system = (mj == 4) ? 1 : 0;
 
 	/* 2. */
 	/* We should call them before any DebugPrint() calls !!! */
@@ -468,6 +474,19 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		if(!NT_SUCCESS(request_status)) break;
 
+		/*
+		* NTFS volumes with cluster size greater than 4 kb
+		* cannot be defragmented on Windows 2000.
+		* This is a well known limitation of Windows Defrag API.
+		*/
+		if(dx->partition_type == NTFS_PARTITION && dx->bytes_per_cluster > 4096 && w2k_system){
+			DebugPrint("-Ultradfg- Cannot defragment NTFS volumes with ->\n",NULL);
+			DebugPrint("-Ultradfg- -> cluster size greater than 4 kb   ->\n",NULL);
+			DebugPrint("-Ultradfg- -> on Windows 2000 (read docs for details).\n",NULL);
+			request_status = STATUS_NOT_IMPLEMENTED;
+			break;
+		}
+		
 		request_status = STATUS_SUCCESS;
 		if(!dx->compact_flag) Defragment(dx);
 		else Optimize(dx);

@@ -36,7 +36,11 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* open volume */
 	path[4] = (short)(dx->letter);
 	RtlInitUnicodeString(&us,path);
-	InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
+	if(nt4_system){
+		InitializeObjectAttributes(&ObjectAttributes,&us,0,NULL,NULL);
+	} else {
+		InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
+	}
 	status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA,
 				&ObjectAttributes,&iosb,
 				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
@@ -51,7 +55,10 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
 				&part_info, sizeof(PARTITION_INFORMATION));
 	if(status == STATUS_PENDING){
-		NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		if(nt4_system)
+			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		else
+			ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
 		status = iosb.Status;
 	}
 	if(!NT_SUCCESS(status)){
@@ -84,7 +91,11 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* open the volume */
 	path[4] = (unsigned short)dx->letter;
 	RtlInitUnicodeString(&us,path);
-	InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
+	if(nt4_system){
+		InitializeObjectAttributes(&ObjectAttributes,&us,0,NULL,NULL);
+	} else {
+		InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
+	}
 	status = ZwCreateFile(&hFile,FILE_GENERIC_READ | FILE_READ_ATTRIBUTES,
 				&ObjectAttributes,&iosb,NULL,0,
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
@@ -138,14 +149,24 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
 	if(status == STATUS_PENDING){
-		NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		if(nt4_system)
+			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		else
+			ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
 		status = iosb.Status;
 	}
 	if(!NT_SUCCESS(status)){
 		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",NULL,status);
 		return;
 	}
-		
+
+	/*
+	* MFT space must be excluded from the free space list.
+	* Because Windows 2000 disallows to move files there.
+	* And because on other systems this dirty technique 
+	* causes MFT fragmentation.
+	*/
+	
 	/* 
 	* Don't increment dx->processed_clusters here, 
 	* because some parts of MFT are really free.
@@ -159,19 +180,24 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 		len = 0;
 	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",NULL,start,len);
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
+	CleanupFreeSpaceList(dx,start,len);
 	mft_len += len;
 	/* $MFT2 */
 	start = ntfs_data.MftZoneStart.QuadPart;
 	len = ntfs_data.MftZoneEnd.QuadPart - ntfs_data.MftZoneStart.QuadPart;
 	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",NULL,start,len);
 	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
+	CleanupFreeSpaceList(dx,start,len);
 	mft_len += len;
 	/* $MFTMirror */
 	start = ntfs_data.Mft2StartLcn.QuadPart;
 	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",NULL,start);
 	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
+	CleanupFreeSpaceList(dx,start,1);
 	mft_len ++;
 	dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
+	
+	DbgPrintFreeSpaceList(dx);
 }
 
 void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx)

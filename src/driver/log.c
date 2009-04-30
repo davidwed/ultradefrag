@@ -55,7 +55,10 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
 	if(Status == STATUS_PENDING){
 		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n",NULL);
-		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
+		if(nt4_system)
+			Status = NtWaitForSingleObject(hFile,FALSE,NULL);
+		else
+			Status = ZwWaitForSingleObject(hFile,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
 }
@@ -120,6 +123,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	IO_STATUS_BLOCK ioStatus;
 	NTSTATUS Status;
 	HANDLE hFile;
+	ULONG attr;
 
 	short p[] = L"\\??\\A:\\fraglist.luar";
 
@@ -127,9 +131,11 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Create the file */
 	p[4] = (short)dx->letter;
 	RtlInitUnicodeString(&dx->log_path,p);
+	attr = OBJ_CASE_INSENSITIVE;
+	if(!nt4_system) attr |= OBJ_KERNEL_HANDLE; /* !!! */
 	InitializeObjectAttributes(&ObjectAttributes,
 			&dx->log_path,
-			OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
+			attr,
 			NULL,
 			NULL
 			);
@@ -198,7 +204,10 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
 	if(Status == STATUS_PENDING){
 		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.",NULL);
-		Status = NtWaitForSingleObject(hFile,FALSE,NULL);
+		if(nt4_system)
+			Status = NtWaitForSingleObject(hFile,FALSE,NULL);
+		else
+			Status = ZwWaitForSingleObject(hFile,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
 }
@@ -239,6 +248,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	IO_STATUS_BLOCK ioStatus;
 	NTSTATUS Status;
 	HANDLE hFile;
+	ULONG attr;
 
 	short p[] = L"\\??\\A:\\fraglist.txt";
 	short head[] = L"\r\nFragmented files on C:\r\n\r\n";
@@ -248,9 +258,11 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Create the file */
 	p[4] = (short)dx->letter;
 	RtlInitUnicodeString(&dx->log_path,p);
+	attr = OBJ_CASE_INSENSITIVE;
+	if(!nt4_system) attr |= OBJ_KERNEL_HANDLE; /* !!! */
 	InitializeObjectAttributes(&ObjectAttributes,
 			&dx->log_path,
-			OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE,
+			attr,
 			NULL,
 			NULL
 			);

@@ -38,7 +38,7 @@ KEVENT unload_event;
 short log_path[MAX_PATH] = L"Empty Path";
 char volume_letter;
 
-int nt4_system = 0;
+int nt4_system = 0, w2k_system = 0;
 PVOID kernel_addr;
 PVOID (NTAPI *ptrMmMapLockedPagesSpecifyCache)(PMDL,KPROCESSOR_MODE,
 	MEMORY_CACHING_TYPE,PVOID,ULONG,MM_PAGE_PRIORITY) = NULL;

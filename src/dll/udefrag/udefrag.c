@@ -70,6 +70,14 @@ void __stdcall ErrorHandler(short *msg)
 	else eh(msg);
 }
 
+void __stdcall DefragErrorHandler(short *msg)
+{
+	if(wcsstr(msg, L"c0000002")) /* STATUS_NOT_IMPLEMENTED */
+		eh(L"NTFS volumes with cluster size greater than 4 kb\n"
+		   L"cannot be defragmented on Windows 2000.");
+	else eh(msg);
+}
+
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
@@ -192,8 +200,13 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 {
 	char cmd[4];
 
+	eh = winx_set_error_handler(DefragErrorHandler);
 	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-	if(winx_fwrite(cmd,strlen(cmd),1,f_ud)) return 0;
+	if(winx_fwrite(cmd,strlen(cmd),1,f_ud)){
+		winx_set_error_handler(eh);
+		return 0;
+	}
+	winx_set_error_handler(eh);
 	winx_raise_error("E: Can't execute driver command \'%c\' for volume %c!",
 		command,letter);
 	return (-1);
