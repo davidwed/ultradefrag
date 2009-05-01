@@ -32,6 +32,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	UNICODE_STRING us;
 	NTSTATUS status = STATUS_SUCCESS;
 	PARTITION_INFORMATION part_info;
+	NTFS_DATA ntfs_data;
 
 	/* open volume */
 	path[4] = (short)(dx->letter);
@@ -50,7 +51,12 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->hVol = NULL;
 		return status;
 	}
-	/* try to get fs type */
+
+	/*
+	* Try to get fs type through IOCTL_DISK_GET_PARTITION_INFO request.
+	* Works only on MBR-formatted disks. To retrieve information about 
+	* GPT-formatted disks use IOCTL_DISK_GET_PARTITION_INFO_EX.
+	*/
 	status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
 				&part_info, sizeof(PARTITION_INFORMATION));
@@ -61,19 +67,46 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 			ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
 		status = iosb.Status;
 	}
-	if(!NT_SUCCESS(status)){
-		DebugPrint("-Ultradfg- Can't get fs info: %x!\n",NULL,(UINT)status);
-		if(status == STATUS_INVALID_DEVICE_REQUEST){
-			/* this is usual case for floppies */
-			dx->partition_type = FLOPPY_FAT12_PARTITION;
+	if(NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- partition type: %u\n",NULL,part_info.PartitionType);
+		if(part_info.PartitionType == 0x7){
+			DebugPrint("-Ultradfg- NTFS found\n",NULL);
+			dx->partition_type = NTFS_PARTITION;
 			return STATUS_SUCCESS;
 		}
-		ZwCloseSafe(dx->hVol);
-		DebugPrint("-Ultradfg- Unknown filesystem!\n",NULL);
-		return status;
+	} else {
+		DebugPrint("-Ultradfg- Can't get fs info: %x!\n",NULL,(UINT)status);
 	}
-	dx->partition_type = part_info.PartitionType;
-	DebugPrint("-Ultradfg- possible partition type: %u\n",NULL,dx->partition_type);
+
+	/*
+	* To ensure that we have a NTFS formatted partition
+	* on GPT disks and when partition type is 0x27
+	* FSCTL_GET_NTFS_VOLUME_DATA request can be used.
+	*/
+	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
+				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
+				&ntfs_data, sizeof(NTFS_DATA));
+	if(status == STATUS_PENDING){
+		if(nt4_system)
+			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		else
+			ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
+		status = iosb.Status;
+	}
+	if(NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- NTFS found\n",NULL);
+		dx->partition_type = NTFS_PARTITION;
+		return STATUS_SUCCESS;
+	} else {
+		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",NULL,status);
+	}
+
+	/*
+	* Let's assume that we have a FAT32 formatted partition.
+	* Currently we don't need more detailed information.
+	*/
+	dx->partition_type = FAT32_PARTITION;
+	DebugPrint("-Ultradfg- NTFS not found\n",NULL);
 	return STATUS_SUCCESS;
 }
 
