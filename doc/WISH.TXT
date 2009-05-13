@@ -6,7 +6,7 @@ User's wishes for the next releases:
 
 3. website translated into several foreign languages
 
-4. font customization in gui
+4. DONE font customization in gui
 
 5. remove all TODO and FIXME comments from sources
 
@@ -31,5 +31,5 @@ User's wishes for the next releases:
 
 15. process hard ntfs links correctly
 
-16. make a graphical gui configurator
+16. DONE make a graphical gui configurator
 

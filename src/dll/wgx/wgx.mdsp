@@ -90,9 +90,9 @@ extraResourceOptions=
 1=wgx.rc
 [Other]
 [History]
-accel.c,2261
-wgx.h,2157
-wgx.rc,884
+misc.c,2356
+wgx.h,1286
+wgx.rc,855
 wgx.c,1044
-i18n.c,1024
-misc.c,1660
+accel.c,1067
+i18n.c,4092

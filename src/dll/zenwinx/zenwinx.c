@@ -80,7 +80,10 @@ int __stdcall winx_init(void *peb)
 	if(pp->DebugFlags) DbgBreakPoint();
 	/* 3. Open the keyboard */
 	status = kb_open(L"\\Device\\KeyboardClass0");
-	return status;
+/*	if(status < 0) status = kb_open(L"\\Device\\KeyboardClass1");
+	if(status < 0) status = kb_open(L"\\Device\\KeyboardClass2");
+	if(status < 0) status = kb_open(L"\\Device\\KeyboardClass3");
+*/	return status;
 }
 
 /****f* zenwinx.startup/winx_exit

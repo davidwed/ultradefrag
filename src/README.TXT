@@ -14,8 +14,8 @@ The design of Ultra Defragmenter is very simple. There are no skins and other
 unnecessary stuff. It is a small and powerful program!
 
 It can be used on Windows NT 4.0, Windows 2000, Windows XP, Windows Server 
-2003, Windows Vista, Windows Server 2008 and all of the 64-bit editions of 
-Windows.
+2003, Windows Vista, Windows Server 2008, Windows 7 and all of the 64-bit 
+editions of Windows.
 
 You must have administrative rights to install and use Ultra Defragmenter. 
 

@@ -94,4 +94,4 @@ extraResourceOptions=
 ..\..\include\ultradfg.h,3198
 volume.c,2356
 settings.c,6416
-udefrag.c,7425
+udefrag.c,6280
