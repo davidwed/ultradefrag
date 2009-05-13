@@ -45,6 +45,7 @@ Slovak          - Milan Cerovský /Milanbb55/
 Slovenian       - Miha Mlakar
 Spanish (AR)    - Daniel Testa
 Swedish         - Magnus Rostedt
+Turkish         - Huseyin Kozan
 
 --------------------------------------------------------------------------------
 Special thanks for strong testing to (in alphabetical order):
@@ -52,6 +53,7 @@ Special thanks for strong testing to (in alphabetical order):
 Andrei Maksimov
 Jeff Cubillos
 Kerem Gümrükcü
+Leslie Trenholm
 Markus Elfring
 Nagy Zsolt
 

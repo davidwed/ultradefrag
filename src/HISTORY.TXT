@@ -2,13 +2,13 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 3.1.0 (29.5)   2009-04-
+  Version 3.1.0 (33.0)   2009-05-13
   ------------------------------------------------------------------------------
     - this is the first really stable release
     - graphical interface was completely rewritten
     - gui program was translated into the following languages:
 
-      Danish, Farsi, Swedish
+      Danish, Farsi, Swedish, Turkish
 
     - a lot of GUI bugs were fixed
     - very important driver bugs were fixed
