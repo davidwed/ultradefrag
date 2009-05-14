@@ -95,6 +95,11 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(KeReadStateEvent(&stop_event) == 0x0)
 		if(dx->partition_type == NTFS_PARTITION) ProcessMFT(dx);
 
+	/* Experimental support of retrieving information directly from MFT. */
+	/* Don't forget ProcessMFT() before! */
+	if(KeReadStateEvent(&stop_event) == 0x0)
+		if(dx->partition_type == NTFS_PARTITION) ScanMFT(dx);
+
 	/* Save state */
 	ApplyFilter(dx);
 	return STATUS_SUCCESS;

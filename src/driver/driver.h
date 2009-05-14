@@ -486,7 +486,9 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONG compressedcounter;
 	ULONG fragmfilecounter;
 	ULONG fragmcounter;
-	ULONG mft_size;
+	ULONGLONG mft_size;
+	ULONG ntfs_record_size;
+	ULONGLONG max_mft_entries;
 	unsigned char partition_type;
 	ULONGLONG total_space;
 	ULONGLONG free_space; /* in bytes */
@@ -715,5 +717,6 @@ NTSTATUS NTAPI Create_File_IRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
 NTSTATUS NTAPI Close_HandleIRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
 
 ULONGLONG _rdtsc(void);
+BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #endif /* _DRIVER_H_ */

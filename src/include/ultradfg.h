@@ -95,7 +95,7 @@ typedef struct _STATISTIC {
 	ULONG		fragmcounter;
 	ULONGLONG	total_space;
 	ULONGLONG	free_space; /* in bytes */
-	ULONG		mft_size;
+	ULONGLONG	mft_size;
 	UCHAR		current_operation;
 	ULONGLONG	clusters_to_process;
 	ULONGLONG	processed_clusters;

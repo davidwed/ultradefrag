@@ -115,6 +115,10 @@ SOURCE=.\map.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ntfs.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\optimize.c
 # End Source File
 # Begin Source File
@@ -140,6 +144,10 @@ SOURCE=.\driver.h
 # Begin Source File
 
 SOURCE=.\globals.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\ntfs.h
 # End Source File
 # End Group
 # Begin Group "Resource Files"

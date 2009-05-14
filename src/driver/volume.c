@@ -228,7 +228,16 @@ void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
 	CleanupFreeSpaceList(dx,start,1);
 	mft_len ++;
-	dx->mft_size = (ULONG)(mft_len * dx->bytes_per_cluster);
+
+	dx->mft_size = mft_len * dx->bytes_per_cluster;
+	DebugPrint("-Ultradfg- MFT size = %I64u bytes\n",NULL,dx->mft_size);
+
+	dx->ntfs_record_size = ntfs_data.BytesPerFileRecordSegment;
+	DebugPrint("-Ultradfg- NTFS record size = %u bytes\n",NULL,dx->ntfs_record_size);
+
+	dx->max_mft_entries = dx->mft_size / dx->ntfs_record_size;
+	DebugPrint("-Ultradfg- MFT contains no more than %I64u records\n",NULL,
+		dx->max_mft_entries);
 	
 	DbgPrintFreeSpaceList(dx);
 }
