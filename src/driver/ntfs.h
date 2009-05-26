@@ -235,9 +235,23 @@ typedef struct {
 	UCHAR ReparseData[1];
 } REPARSE_POINT, *PREPARSE_POINT;
 
+typedef struct {
+	ATTRIBUTE_TYPE AttributeType;  /* The type of the attribute. */
+	USHORT Length;                 /* The size, in bytes, of the attribute list entry. */
+	UCHAR NameLength;              /* The size, in characters, of the name (if any) of the attribute. */
+	UCHAR NameOffset;              /* The offset, in bytes, from the start of the structure to the attribute name (Unicode). */
+	ULONGLONG LowVcn;              /* The lowest VCN of this portion of the attribute value. */
+	ULONGLONG FileReferenceNumber; /* The FRN of the MFT entry containing the NONRESIDENT_ATTRIBUTE structure for this portion 
+									* of the attribute value. */
+	USHORT AttributeNumber;        /* A numeric identifier for the instance of the attribute. */
+	USHORT AlignmentOrReserved[3];
+} ATTRIBUTE_LIST, *PATTRIBUTE_LIST;
+
+/* this constant must be equal or larger than MAX_PATH */
 #define MAX_NTFS_PATH MAX_PATH
 
 typedef struct {
+	ULONGLONG BaseMftId;
 	ULONGLONG ParentDirectoryMftId;
 	ULONG Flags;
 	UCHAR NameType;

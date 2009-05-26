@@ -24,6 +24,13 @@
 #include "driver.h"
 #include "ntfs.h"
 
+/*
++ Control an amount of debugging information 
+* through this parameter.
+* NOTE: Designed especially for development stage.
+*/
+//#define DETAILED_LOGGING
+
 NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 					  ULONG nfrob_size,ULONGLONG mft_id);
 void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
@@ -31,6 +38,8 @@ void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 void AnalyseAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
 void AnalyseResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
 void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi);
+void AnalyseResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
+void AnalyseAttributeFromAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE_LIST attr_list_entry,PMY_FILE_INFORMATION pmfi);
 void GetFileFlags(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
 void GetFileName(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
 void UpdateFileName(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi,WCHAR *name,UCHAR name_type);
@@ -43,6 +52,8 @@ void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
 
 void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 		ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length);
+
+void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi);
 
 /* extracts low 48 bits of File Reference Number */
 #define GetMftIdFromFRN(n) ((n) & 0xffffffffffffLL)
@@ -97,7 +108,9 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 
 		/* analyse retrieved mft record */
 		ret_mft_id = GetMftIdFromFRN(pnfrob->FileReferenceNumber);
+		#ifdef DETAILED_LOGGING
 		DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",NULL,ret_mft_id);
+		#endif
 		AnalyseMftRecord(dx,pnfrob,nfrob_size,pmfi);
 		
 		/* go to the next record */
@@ -136,6 +149,12 @@ void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
 
 	/* Find DATA attribute. */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
+	if(pfrh->Ntfs.Type != TAG('F','I','L','E')){
+		DebugPrint("-Ultradfg- UpdateMaxMftEntriesNumber() failed - FILE_MFT record has invalid type %u.\n",
+			NULL,pfrh->Ntfs.Type);
+		return;
+	}
+	
 	attr_offset = pfrh->AttributeOffset;
 	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
 
@@ -233,18 +252,27 @@ void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 //	DebugPrint("-Ultradfg- SequenceNumber = %hu, LinkCount = %hu, Flags = 0x%hx\n",
 //		NULL,pfrh->SequenceNumber,pfrh->LinkCount,pfrh->Flags);
 //	if(Flags & 0x1) DebugPrint("-Ultradfg- In Use\n",NULL);
-	if(Flags & 0x2) DebugPrint("-Ultradfg- Directory\n",NULL);
-	if(pfrh->BaseFileRecord)
+	#ifdef DETAILED_LOGGING
+	if(Flags & 0x2) DebugPrint("-Ultradfg- Directory\n",NULL); /* May be wrong? */
+	#endif
+
+	if(pfrh->BaseFileRecord){ /* skip these records, we will analyse them later */
 		DebugPrint("-Ultradfg- BaseFileRecord (id) = %I64u\n",
 			NULL,GetMftIdFromFRN(pfrh->BaseFileRecord));
+		DebugPrint("\n",NULL);
+		//Nt_ExFreePool(name);
+		return;
+	}
 	
 	/* analyse attributes of MFT entry */
+	pmfi->BaseMftId = mft_id;
 	pmfi->ParentDirectoryMftId = FILE_root;
 	pmfi->Flags = 0x0;
 	pmfi->NameType = 0x0; /* Assume FILENAME_POSIX */
 	memset(pmfi->Name,0,MAX_NTFS_PATH);
 //	DebugPrint("-Ultradfg- Attributes\n",NULL);
-	
+
+	/* skip AttributeList attributes */
 	attr_offset = pfrh->AttributeOffset;
 	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
 
@@ -263,55 +291,65 @@ void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 		/* is an attribute inside a record bounds? */
 		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
 			attr_offset + pattr->Length > dx->ntfs_record_size) break;
-		
+
 		if(pattr->AttributeType > AttributeFileName && path_built == FALSE){
 			BuildPath(dx,pmfi);
 			path_built = TRUE;
 		}
 
-		AnalyseAttribute(dx,pattr,pmfi);
+		if(pattr->AttributeType != AttributeAttributeList)
+			AnalyseAttribute(dx,pattr,pmfi);
 		
 		/* go to the next attribute */
 		attr_length = pattr->Length;
 		attr_offset += attr_length;
 		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
 	}
+	
+	if(!path_built){
+		BuildPath(dx,pmfi);
+		path_built = TRUE;
+	}
+
+	/* analyse AttributeList attributes */
+	attr_offset = pfrh->AttributeOffset;
+	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
+
+	while(pattr){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+
+		/* is an attribute header inside a record bounds? */
+		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
+			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
+		
+		/* is it a valid attribute */
+		if(pattr->AttributeType == 0xffffffff) break;
+		if(pattr->AttributeType == 0x0) break;
+		if(pattr->Length == 0) break;
+
+		/* is an attribute inside a record bounds? */
+		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
+			attr_offset + pattr->Length > dx->ntfs_record_size) break;
+
+		if(pattr->AttributeType == AttributeAttributeList)
+			AnalyseAttribute(dx,pattr,pmfi);
+		
+		/* go to the next attribute */
+		attr_length = pattr->Length;
+		attr_offset += attr_length;
+		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
+	}
+
 //	Nt_ExFreePool(name);
+	#ifdef DETAILED_LOGGING
 	DebugPrint("\n",NULL);
+	#endif
 }
 
 void AnalyseAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
 {
-	short *name;
-
-	/* allocate memory */
-	name = (short *)AllocatePool(NonPagedPool,(MAX_PATH + 1) * sizeof(short));
-	if(!name){
-		DebugPrint("-Ultradfg- Cannot allocate memory for AnalyseAttribute()!\n",NULL);
-		return;
-	}
-
-	/* print characteristics of the attribute */
-	if(/*!*/pattr->Nonresident){
-		/*	DebugPrint("-Ultradfg- type = 0x%x Resident\n",NULL,pattr->AttributeType);
-		else*/
-			DebugPrint("-Ultradfg- type = 0x%x NonResident\n",NULL,pattr->AttributeType);
-		if(pattr->Flags & 0x1) DebugPrint("-Ultradfg- Compressed\n",NULL);
-		
-		/* print name of the attribute */
-		/* pattr->NameLength is always less than MAX_PATH :) */
-		if(pattr->NameLength){
-			wcsncpy(name,(short *)((char *)pattr + pattr->NameOffset),pattr->NameLength);
-			name[pattr->NameLength] = 0;
-			DebugPrint("-Ultradfg- Name = \n",name);
-		}// else DebugPrint("-Ultradfg- Attribute has no name\n",NULL);
-	}
-
 	if(pattr->Nonresident) AnalyseNonResidentAttribute(dx,(PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
 	else AnalyseResidentAttribute(dx,(PRESIDENT_ATTRIBUTE)pattr,pmfi);
-	
-	/* free allocated memory */
-	Nt_ExFreePool(name);
 }
 
 /*
@@ -335,6 +373,8 @@ void AnalyseResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE p
 		GetVolumeInformation(dx,pr_attr); break;
 
 	case AttributeAttributeList: /* always nonresident? */
+		DebugPrint("Resident AttributeList found!\n",NULL);
+		AnalyseResidentAttributeList(dx,pr_attr,pmfi);
 		break;
 
 	/*case AttributeIndexRoot:  // always resident */
@@ -413,8 +453,12 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	ULONG name_length;
 	WCHAR header[] = L"\\??\\A:";
 	
+	#ifdef DETAILED_LOGGING
 	DebugPrint("-Ultradfg- parent id = %I64u, FILENAME =\n",
 		pmfi->Name,pmfi->ParentDirectoryMftId);
+	#endif
+		
+	if(pmfi->Name[0] == 0) return;
 		
 	/* allocate memory */
 	buffer1 = (WCHAR *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH) * sizeof(short));
@@ -458,6 +502,7 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 
 	parent_mft_id = pmfi->ParentDirectoryMftId;
 	while(parent_mft_id != FILE_root){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		mft_id = parent_mft_id;
 		GetFileNameAndParentMftIdFromMftRecord(dx,mft_id,
 			&parent_mft_id,buffer2,MAX_NTFS_PATH);
@@ -489,7 +534,10 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	/* replace pmfi->Name contents with full path */
 	wcsncpy(pmfi->Name,buffer1 + offset,MAX_NTFS_PATH);
 	pmfi->Name[MAX_NTFS_PATH - 1] = 0;
+	
+	#ifdef DETAILED_LOGGING
 	DebugPrint("-Ultradfg- FULL PATH =\n",pmfi->Name);
+	#endif
 	
 build_path_done:
 	Nt_ExFreePool(buffer1);
@@ -557,6 +605,7 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 	attr_offset = pfrh->AttributeOffset;
 	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
 
+	pmfi->BaseMftId = mft_id;
 	pmfi->ParentDirectoryMftId = FILE_root;
 	pmfi->Flags = 0x0;
 	pmfi->NameType = 0x0; /* Assume FILENAME_POSIX */
@@ -623,6 +672,117 @@ void CheckReparsePointResident(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE 
 	DebugPrint("-Ultradfg- Reparse tag = 0x%x\n",NULL,tag);
 }
 
+/* Analyse attributes of the current file packed in another mft records. */
+void AnalyseResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
+{
+	ULONG n_entries;
+	PATTRIBUTE_LIST attr_list_entry;
+	
+	attr_list_entry = (PATTRIBUTE_LIST)((char *)pr_attr + pr_attr->ValueOffset);
+	n_entries = pr_attr->ValueLength / sizeof(ATTRIBUTE_LIST);
+	while(n_entries){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+		n_entries --;
+		/* is it a valid attribute */
+		if(attr_list_entry->AttributeType == 0xffffffff) break;
+		if(attr_list_entry->AttributeType == 0x0) break;
+		if(attr_list_entry->Length == 0) break;
+		AnalyseAttributeFromAttributeList(dx,attr_list_entry,pmfi);
+		/* go to the next attribute list entry */
+		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + sizeof(ATTRIBUTE_LIST));
+	}
+}
+
+void AnalyseAttributeFromAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE_LIST attr_list_entry,PMY_FILE_INFORMATION pmfi)
+{
+	PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob = NULL;
+	ULONG nfrob_size;
+	ULONGLONG child_record_mft_id;
+	NTSTATUS status;
+	PFILE_RECORD_HEADER pfrh;
+	PATTRIBUTE pattr;
+	ULONG attr_length;
+	USHORT attr_offset;
+	
+	/* skip entries describing attributes stored in base mft record */
+	if(GetMftIdFromFRN(attr_list_entry->FileReferenceNumber) == pmfi->BaseMftId){
+		DebugPrint("Resident attribute found, type = 0x%x\n",NULL,attr_list_entry->AttributeType);
+		return;
+	}
+	
+	/* allocate memory for another mft record */
+	nfrob_size = sizeof(NTFS_FILE_RECORD_OUTPUT_BUFFER) + dx->ntfs_record_size - 1;
+	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)AllocatePool(NonPagedPool,nfrob_size);
+	if(!pnfrob){
+		DebugPrint("-Ultradfg- AnalyseAttributeFromAttributeList():\n",NULL);
+		DebugPrint("-Ultradfg- no enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n",NULL);
+		return;
+	}
+
+	/* get another mft record */
+	child_record_mft_id = GetMftIdFromFRN(attr_list_entry->FileReferenceNumber);
+	status = GetMftRecord(dx,pnfrob,nfrob_size,child_record_mft_id);
+	if(!NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- AnalyseAttributeFromAttributeList(): FSCTL_GET_NTFS_FILE_RECORD failed: %x!\n",NULL,status);
+		Nt_ExFreePool(pnfrob);
+		return;
+	}
+	if(GetMftIdFromFRN(pnfrob->FileReferenceNumber) != child_record_mft_id){
+		DebugPrint("-Ultradfg- AnalyseAttributeFromAttributeList() failed - unable to get %I64u record.\n",
+			NULL,child_record_mft_id);
+		Nt_ExFreePool(pnfrob);
+		return;
+	}
+
+	/* Analyse all nonresident attributes. */
+	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
+	if(pfrh->Ntfs.Type != TAG('F','I','L','E')){
+		DebugPrint("-Ultradfg- AnalyseAttributeFromAttributeList() failed - %I64u record has invalid type %u.\n",
+			NULL,child_record_mft_id,pfrh->Ntfs.Type);
+		Nt_ExFreePool(pnfrob);
+		return;
+	}
+
+	if(pfrh->BaseFileRecord == 0){
+		DebugPrint("-Ultradfg- AnalyseAttributeFromAttributeList() failed - %I64u is not a child record.\n",
+			NULL,child_record_mft_id);
+		Nt_ExFreePool(pnfrob);
+		return;
+	}
+
+	attr_offset = pfrh->AttributeOffset;
+	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
+
+	while(pattr){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+
+		/* is an attribute header inside a record bounds? */
+		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
+			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
+		
+		/* is it a valid attribute */
+		if(pattr->AttributeType == 0xffffffff) break;
+		if(pattr->AttributeType == 0x0) break;
+		if(pattr->Length == 0) break;
+
+		/* is an attribute inside a record bounds? */
+		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
+			attr_offset + pattr->Length > dx->ntfs_record_size) break;
+
+		if(pattr->Nonresident)
+			AnalyseNonResidentAttribute(dx,
+				(PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
+		
+		/* go to the next attribute */
+		attr_length = pattr->Length;
+		attr_offset += attr_length;
+		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
+	}
+
+	/* free allocated memory */
+	Nt_ExFreePool(pnfrob);
+}
+
 /*
 * These attributes may contain fragmented data.
 * 
@@ -632,18 +792,95 @@ void CheckReparsePointResident(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE 
 */
 void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi)
 {
+	WCHAR *default_attr_name = NULL;
+	short *attr_name;
+	short *full_path;
+
+	/* allocate memory */
+	attr_name = (short *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH + 1) * sizeof(short));
+	if(!attr_name){
+		DebugPrint("-Ultradfg- Cannot allocate memory for attr_name in AnalyseNonResidentAttribute()!\n",NULL);
+		return;
+	}
+	full_path = (short *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH + 1) * sizeof(short));
+	if(!full_path){
+		DebugPrint("-Ultradfg- Cannot allocate memory for full_path in AnalyseNonResidentAttribute()!\n",NULL);
+		Nt_ExFreePool(attr_name);
+		return;
+	}
+	
+	/* print characteristics of the attribute */
+//	DebugPrint("-Ultradfg- type = 0x%x NonResident\n",NULL,pattr->AttributeType);
+//	if(pnr_attr->Attribute.Flags & 0x1) DebugPrint("-Ultradfg- Compressed\n",NULL);
+	
 	switch(pnr_attr->Attribute.AttributeType){
 	case AttributeAttributeList: /* always nonresident? */
+		//DebugPrint("Nonresident AttributeList found!\n",NULL);
+		default_attr_name = L"$ATTRIBUTE_LIST";
+		break;
+    case AttributeEA:
+		default_attr_name = L"$EA";
 		break;
     case AttributeSecurityDescriptor:
+		default_attr_name = L"$SECURITY_DESCRIPTOR";
+		break;
 	case AttributeData:
+		default_attr_name = L"$DATA";
+		break;
 	case AttributeIndexRoot:
+		default_attr_name = L"$INDEX_ROOT";
+		break;
 	case AttributeIndexAllocation:
+		default_attr_name = L"$INDEX_ALLOCATION";
+		break;
 	case AttributeBitmap:
+		default_attr_name = L"$BITMAP";
+		break;
 	case AttributeReparsePoint:
+		default_attr_name = L"$Reparse";
+		break;
 	case AttributeLoggedUtulityStream:
+		default_attr_name = L"$LOGGED_UTILITY_STREAM";
 		break;
 	default:
 		break;
 	}
+	
+	if(default_attr_name == NULL){
+		Nt_ExFreePool(attr_name);
+		Nt_ExFreePool(full_path);
+		return;
+	}
+	
+	if(pnr_attr->Attribute.NameLength){
+		/* append a name of attribute to filename */
+		/* NameLength is always less than MAX_PATH :) */
+		wcsncpy(attr_name,(short *)((char *)pnr_attr + pnr_attr->Attribute.NameOffset),
+			pnr_attr->Attribute.NameLength);
+		attr_name[pnr_attr->Attribute.NameLength] = 0;
+		_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
+	} else {
+		/* append default name of attribute to filename */
+		if(wcscmp(default_attr_name,L"$DATA")){
+			_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,default_attr_name);
+		} else {
+			wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
+		}
+	}
+	full_path[MAX_NTFS_PATH - 1] = 0;
+
+	ProcessRunList(dx,full_path,pnr_attr,pmfi);
+
+	/* free allocated memory */
+	Nt_ExFreePool(attr_name);
+	Nt_ExFreePool(full_path);
+}
+
+/* Saves information about VCN/LCN pairs of the attribute specified by full_path parameter. */
+void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi)
+{
+	if(pnr_attr->Attribute.Flags & 0x1)
+		DbgPrint("[CMP] %ws VCN %I64u - %I64u\n",full_path,pnr_attr->LowVcn,pnr_attr->HighVcn);
+	else
+		DbgPrint("[ORD] %ws VCN %I64u - %I64u\n",full_path,pnr_attr->LowVcn,pnr_attr->HighVcn);
 }
