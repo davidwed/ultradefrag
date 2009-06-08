@@ -110,13 +110,15 @@ void DefragmentFreeSpaceRTL(UDEFRAG_DEVICE_EXTENSION *dx)
 		/* 1. Find the latest file block on the volume. */
 		lastblock = NULL; lastpfn = NULL; maxlcn = 0;
 		for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
-			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-				if(block->lcn > maxlcn){
-					lastblock = block;
-					lastpfn = pfn;
-					maxlcn = block->lcn;
+			if(pfn->is_reparse_point == FALSE){
+				for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+					if(block->lcn > maxlcn){
+						lastblock = block;
+						lastpfn = pfn;
+						maxlcn = block->lcn;
+					}
+					if(block->next_ptr == pfn->blockmap) break;
 				}
-				if(block->next_ptr == pfn->blockmap) break;
 			}
 			if(pfn->next_ptr == dx->filelist) break;
 		}
@@ -165,13 +167,15 @@ void DefragmentFreeSpaceLTR(UDEFRAG_DEVICE_EXTENSION *dx)
 		/* 1. Find the first file block on the volume. */
 		firstblock = NULL; firstpfn = NULL; minlcn = (dx->clusters_total - 1);
 		for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
-			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-				if(block->lcn < minlcn){
-					firstblock = block;
-					firstpfn = pfn;
-					minlcn = block->lcn;
+			if(pfn->is_reparse_point == FALSE){
+				for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+					if(block->lcn < minlcn){
+						firstblock = block;
+						firstpfn = pfn;
+						minlcn = block->lcn;
+					}
+					if(block->next_ptr == pfn->blockmap) break;
 				}
-				if(block->next_ptr == pfn->blockmap) break;
 			}
 			if(pfn->next_ptr == dx->filelist) break;
 		}
@@ -260,7 +264,8 @@ void MoveAllFilesRTL(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->clusters_to_process = dx->processed_clusters = 0;
 	KeReleaseSpinLock(&spin_lock,oldIrql);
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
-		if(pfn->blockmap) dx->clusters_to_process += pfn->clusters_total;
+		if(pfn->blockmap && !pfn->is_reparse_point)
+			dx->clusters_to_process += pfn->clusters_total;
 		if(pfn->next_ptr == dx->filelist) break;
 	}
 	dx->current_operation = 'C';
@@ -271,10 +276,12 @@ void MoveAllFilesRTL(UDEFRAG_DEVICE_EXTENSION *dx)
 		/* find largest unfragmented file that can be stored here */
 		plargest = NULL; length = 0;
 		for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
-			if(pfn->blockmap && pfn->clusters_total <= block->length){
-				if(pfn->clusters_total > length){
-					plargest = pfn;
-					length = pfn->clusters_total;
+			if(pfn->is_reparse_point == FALSE){
+				if(pfn->blockmap && pfn->clusters_total <= block->length){
+					if(pfn->clusters_total > length){
+						plargest = pfn;
+						length = pfn->clusters_total;
+					}
 				}
 			}
 			if(pfn->next_ptr == dx->filelist) break;

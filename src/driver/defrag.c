@@ -62,7 +62,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(!pf->pfn->blockmap) goto next_item; /* skip fragmented files with unknown state */
 		if(!dx->compact_flag){
 			if(pf->pfn->is_overlimit) goto next_item; /* skip fragmented but filtered out files */
-			if(pf->pfn->is_filtered) goto next_item;
+			//if(pf->pfn->is_filtered) goto next_item; /* since v3.2.0 fragmfileslist never contains such entries */
 			/* skip fragmented directories on FAT/UDF partitions */
 			if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto next_item;
 		}
@@ -83,7 +83,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 			if(!pf->pfn->blockmap) goto L2; /* skip fragmented files with unknown state */
 			if(!dx->compact_flag){
 				if(pf->pfn->is_overlimit) goto L2; /* skip fragmented but filtered out files */
-				if(pf->pfn->is_filtered) goto L2;
+				//if(pf->pfn->is_filtered) goto L2; /* since v3.2.0 fragmfileslist never contains such entries */
 				/* skip fragmented directories on FAT/UDF partitions */
 				if(pf->pfn->is_dir && dx->partition_type != NTFS_PARTITION) goto L2;
 			}

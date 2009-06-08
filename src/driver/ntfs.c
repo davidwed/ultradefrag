@@ -255,7 +255,8 @@ void __stdcall UpdateMaxMftEntriesNumberCallback(UDEFRAG_DEVICE_EXTENSION *dx,
 
 	if(pattr->Nonresident && pattr->AttributeType == AttributeData){
 		pnr_attr = (PNONRESIDENT_ATTRIBUTE)pattr;
-		dx->max_mft_entries = pnr_attr->DataSize / dx->ntfs_record_size;
+		if(dx->ntfs_record_size)
+			dx->max_mft_entries = pnr_attr->DataSize / dx->ntfs_record_size;
 		DebugPrint("-Ultradfg- MFT contains no more than %I64u records (more accurately)\n",NULL,
 			dx->max_mft_entries);
 	}
@@ -944,7 +945,14 @@ void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_A
 		length = RunCount(run);
 		
 		/* skip virtual runs */
-		if(RunLCN(run))	ProcessRun(dx,full_path,pmfi,pfn,vcn,length,lcn);
+		if(RunLCN(run)){
+			/* check for data consistency */
+			if((lcn + length) > dx->clusters_total){
+				DebugPrint("-Ultradfg- Error in MFT found, run Check Disk program!\n",NULL);
+				break;
+			}
+			ProcessRun(dx,full_path,pmfi,pfn,vcn,length,lcn);
+		}
 		
 		/* go to the next run */
 		run += RunLength(run);

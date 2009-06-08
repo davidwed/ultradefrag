@@ -416,10 +416,12 @@ typedef struct _FRAGMENTED {
 	FILENAME *pfn;
 } FRAGMENTED, *PFRAGMENTED;
 
-#define FLOPPY_FAT12_PARTITION 0x0 /* really not defined */
+#define FAT12_PARTITION        0x0 /* really not defined */
 #define FAT16_PARTITION        0x6
 #define NTFS_PARTITION         0x7
 #define FAT32_PARTITION        0xB
+#define UDF_PARTITION          0xC /* really not defined */
+#define UNKNOWN_PARTITION      0xF /* really not defined */
 
 #define _256K (256 * 1024)
 
@@ -521,6 +523,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	UCHAR current_operation;
 	UCHAR letter;
 	ULONGLONG bytes_per_cluster;
+	ULONG bytes_per_sector;
 	ULONGLONG sizelimit;
 	BOOLEAN compact_flag;
 	ULONG disable_reports;
@@ -565,7 +568,6 @@ void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);
 void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx);
 void GetMap(char *dest);
 NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx);
-NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx);
 void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,short *buffer,int length);
@@ -703,5 +705,7 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 void GenerateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
+
+void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #endif /* _DRIVER_H_ */

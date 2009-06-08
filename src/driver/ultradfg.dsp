@@ -71,6 +71,22 @@ SOURCE=.\defrag.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\fat.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\fat12.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\fat16.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\fat32.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\filedump.c
 # End Source File
 # Begin Source File
@@ -140,6 +156,10 @@ SOURCE=.\volume.c
 # Begin Source File
 
 SOURCE=.\driver.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\fat.h
 # End Source File
 # Begin Source File
 

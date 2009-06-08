@@ -23,6 +23,8 @@
 
 #include "driver.h"
 
+NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx);
+
 /* dx->hVol should be zero before this call */
 NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -50,11 +52,20 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 		return status;
 	}
 
+	status = GetVolumeGeometry(dx);
+	if(!NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- GetVolumeGeometry() failed: %x!\n",NULL,(UINT)status);
+		return status;
+	}
+
 	CheckForNtfsPartition(dx);
+	if(dx->partition_type != NTFS_PARTITION)
+		CheckForFatPartition(dx);
+
 	return STATUS_SUCCESS;
 }
 
-NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
+NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	unsigned short path[] = L"\\??\\A:\\";
 	FILE_FS_SIZE_INFORMATION FileFsSize;
@@ -65,7 +76,7 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONGLONG bpc; /* bytes per cluster */
 
-	/* open the volume */
+	/* open the root directory */
 	path[4] = (unsigned short)dx->letter;
 	RtlInitUnicodeString(&us,path);
 	if(nt4_system){
@@ -96,10 +107,12 @@ NTSTATUS GetVolumeInfo(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	bpc = FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
 	dx->bytes_per_cluster = bpc;
+	dx->bytes_per_sector = FileFsSize.BytesPerSector;
 	dx->total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
 	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
-	dx->clusters_per_256k = _256K / dx->bytes_per_cluster;
+	if(dx->bytes_per_cluster)
+		dx->clusters_per_256k = _256K / dx->bytes_per_cluster;
 	DebugPrint("-Ultradfg- total clusters: %I64u\n",NULL, dx->clusters_total);
 	DebugPrint("-Ultradfg- cluster size: %I64u\n",NULL, dx->bytes_per_cluster);
 	if(!dx->clusters_per_256k){

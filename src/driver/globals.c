@@ -66,6 +66,8 @@ void InitDX(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	memset(&dx->z_start,0,(LONG_PTR)&(dx->z_end) - (LONG_PTR)&(dx->z_start));
 	dx->hVol = NULL;
+	dx->bytes_per_cluster = 0;
+	dx->bytes_per_sector = 0;
 	dx->current_operation = 'A';
 }
 
@@ -80,7 +82,7 @@ void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->current_operation = 'A';
 	dx->disable_reports = FALSE;
 	dx->pnextLcn = &dx->nextLcn;
-	dx->pmoveFile = &dx->moveFile;
+	dx->pmoveFile = &dx->moveFile; /* ??? */
 	dx->pstartVcn = &dx->startVcn;
 }
 

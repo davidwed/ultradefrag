@@ -74,11 +74,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		DebugPrint("-Ultradfg- OpenVolume() failed: %x!\n",NULL,(UINT)Status);
 		return Status;
 	}
-	Status = GetVolumeInfo(dx);
-	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- GetVolumeInfo() failed: %x!\n",NULL,(UINT)Status);
-		return Status;
-	}
+
 	/* update map representation */
 	MarkAllSpaceAsSystem1(dx);
 
