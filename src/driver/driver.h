@@ -402,6 +402,9 @@ typedef struct _tagFILENAME {
 	BOOLEAN is_compressed;
 	BOOLEAN is_overlimit;
 	BOOLEAN is_filtered;
+	BOOLEAN is_reparse_point;
+	BOOLEAN is_dirty; /* it means: not all members of the structure are set */
+	ULONGLONG BaseMftId; /* ancillary field - valid on NTFS volumes only */
 } FILENAME, *PFILENAME;
 
 #define DeleteBlockmap(pfn) DestroyList((PLIST *)&(pfn)->blockmap)
@@ -532,7 +535,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 
 /* Function Prototypes */
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
-void ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
@@ -601,7 +603,7 @@ BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx);
 (((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_NOT_CONTENT_INDEXED) ? TRUE : FALSE)
 
 /* cannot be retrieved from pFileInfo */
-#define IS_HARD_LINK(pFileInfo) FALSE
+//#define IS_HARD_LINK(pFileInfo) FALSE
 
 typedef struct _FILE_BOTH_DIRECTORY_INFORMATION {
     ULONG               NextEntryOffset;
@@ -685,29 +687,6 @@ typedef struct _FILE_FS_SIZE_INFORMATION {
     ULONG           BytesPerSector;
 } FILE_FS_SIZE_INFORMATION, *PFILE_FS_SIZE_INFORMATION;
 
-/* This is the definition for the data structure that is passed in to
- * FSCTL_GET_NTFS_VOLUME_DATA
- */
-typedef struct _NTFS_DATA {
-    LARGE_INTEGER VolumeSerialNumber;
-    LARGE_INTEGER NumberSectors;
-    LARGE_INTEGER TotalClusters;
-    LARGE_INTEGER FreeClusters;
-    LARGE_INTEGER TotalReserved;
-    ULONG BytesPerSector;
-    ULONG BytesPerCluster;
-    ULONG BytesPerFileRecordSegment;
-    ULONG ClustersPerFileRecordSegment;
-    LARGE_INTEGER MftValidDataLength;
-    LARGE_INTEGER MftStartLcn;
-    LARGE_INTEGER Mft2StartLcn;
-    LARGE_INTEGER MftZoneStart;
-    LARGE_INTEGER MftZoneEnd;
-} NTFS_DATA, *PNTFS_DATA;
-
-#define FSCTL_GET_NTFS_VOLUME_DATA      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 25, METHOD_BUFFERED, FILE_ANY_ACCESS)
-#define FSCTL_GET_NTFS_FILE_RECORD      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 26, METHOD_BUFFERED, FILE_ANY_ACCESS)
-
 /* Function prototypes */
 NTSTATUS NTAPI DeviceControlRoutine(PDEVICE_OBJECT fdo,PIRP Irp);
 VOID     NTAPI UnloadRoutine(PDRIVER_OBJECT DriverObject);
@@ -716,7 +695,13 @@ NTSTATUS NTAPI Write_IRPhandler(PDEVICE_OBJECT fdo,PIRP Irp);
 NTSTATUS NTAPI Create_File_IRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
 NTSTATUS NTAPI Close_HandleIRPprocessing(PDEVICE_OBJECT fdo,PIRP Irp);
 
+BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+
 ULONGLONG _rdtsc(void);
+ULONGLONG _rdtsc_1(void);
+void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx);
+NTSTATUS ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx);
+void GenerateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #endif /* _DRIVER_H_ */

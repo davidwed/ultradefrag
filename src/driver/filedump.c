@@ -113,6 +113,11 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			block->lcn = fileMappings->Pair[i].Lcn;
 			block->length = fileMappings->Pair[i].Vcn - *dx->pstartVcn;
 			block->vcn = *dx->pstartVcn;
+
+			if(!wcscmp(pfn->name.Buffer,L"\\??\\L:\\go.zip")){
+				DbgPrint("VCN %I64u : LEN %I64u : LCN %I64u\n",block->vcn,block->length,block->lcn);
+			}
+
 			pfn->clusters_total += block->length;
 			pfn->n_fragments ++;
 			/*

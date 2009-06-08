@@ -68,7 +68,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 {
 	PFRAGMENTED pf;
 	char *p;
-	int i;
+	int i, offset;
 	char *comment;
 	ANSI_STRING as;
 
@@ -97,7 +97,13 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 				if(as.Buffer[i] == '[') as.Buffer[i] = '<';
 				else if(as.Buffer[i] == ']') as.Buffer[i] = '>';
 			}
-			Write(dx,hFile,as.Buffer,as.Length);
+			
+			/* skip \??\ sequence in the beginning */
+			if(as.Length > 0x4)
+				Write(dx,hFile,(void *)((char *)(as.Buffer) + 0x4),as.Length - 0x4);
+			else
+				Write(dx,hFile,as.Buffer,as.Length);
+			
 			RtlFreeAnsiString(&as);
 		} else {
 			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n",NULL);
@@ -105,7 +111,10 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		strcpy(buffer,"]],uname = {");
 		Write(dx,hFile,buffer,strlen(buffer));
 		p = (char *)pf->pfn->name.Buffer;
-		for(i = 0; i < pf->pfn->name.Length; i++){
+		/* skip \??\ sequence in the beginning */
+		if(pf->pfn->name.Length > 0x8) offset = 0x8;
+		else offset = 0x0;
+		for(i = offset; i < (pf->pfn->name.Length - offset); i++){
 			_snprintf(buffer,sizeof(buffer),/*"%03u,"*/"%u,",(UINT)p[i]);
 			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 			Write(dx,hFile,buffer,strlen(buffer));
@@ -235,7 +244,11 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		Write(dx,hFile,us.Buffer,us.Length);
 		RtlFreeUnicodeString(&us);
 		Write(dx,hFile,e1,sizeof(e1) - sizeof(short));
-		Write(dx,hFile,pf->pfn->name.Buffer,pf->pfn->name.Length);
+		/* skip \??\ sequence in the beginning */
+		if(pf->pfn->name.Length > 0x8)
+			Write(dx,hFile,(void *)((char *)(pf->pfn->name.Buffer) + 0x8),pf->pfn->name.Length - 0x8);
+		else
+			Write(dx,hFile,pf->pfn->name.Buffer,pf->pfn->name.Length);
 		Write(dx,hFile,e2,sizeof(e2) - sizeof(short));
 	next_item:
 		pf = pf->next_ptr;

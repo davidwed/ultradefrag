@@ -33,6 +33,21 @@
 * Both files can also be found in /doc subdirectory of source tree in svn repository.
 */
 
+/*
+* NOTE: All these structures and function prototypes
+* are internal - for ntfs.c file only.
+*/
+
+/*
++ Control an amount of debugging information 
+* through this parameter.
+* NOTE: Designed especially for development stage.
+*/
+//#define DETAILED_LOGGING
+
+/* extracts low 48 bits of File Reference Number */
+#define GetMftIdFromFRN(n) ((n) & 0xffffffffffffLL)
+
 typedef struct {
 	ULONGLONG FileReferenceNumber;
 } NTFS_FILE_RECORD_INPUT_BUFFER, *PNTFS_FILE_RECORD_BUFFER;
@@ -254,8 +269,88 @@ typedef struct {
 	ULONGLONG BaseMftId;
 	ULONGLONG ParentDirectoryMftId;
 	ULONG Flags;
+	BOOLEAN IsDirectory;
+	BOOLEAN IsReparsePoint;
 	UCHAR NameType;
+	BOOLEAN PathBuilt;
 	WCHAR Name[MAX_NTFS_PATH];
 } MY_FILE_INFORMATION, *PMY_FILE_INFORMATION;
 
+/*
+* This is the definition for the data structure
+* that is passed in to FSCTL_GET_NTFS_VOLUME_DATA.
+*/
+typedef struct _NTFS_DATA {
+    LARGE_INTEGER VolumeSerialNumber;
+    LARGE_INTEGER NumberSectors;
+    LARGE_INTEGER TotalClusters;
+    LARGE_INTEGER FreeClusters;
+    LARGE_INTEGER TotalReserved;
+    ULONG BytesPerSector;
+    ULONG BytesPerCluster;
+    ULONG BytesPerFileRecordSegment;
+    ULONG ClustersPerFileRecordSegment;
+    LARGE_INTEGER MftValidDataLength;
+    LARGE_INTEGER MftStartLcn;
+    LARGE_INTEGER Mft2StartLcn;
+    LARGE_INTEGER MftZoneStart;
+    LARGE_INTEGER MftZoneEnd;
+} NTFS_DATA, *PNTFS_DATA;
+
+#define FSCTL_GET_NTFS_VOLUME_DATA      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 25, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define FSCTL_GET_NTFS_FILE_RECORD      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 26, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+/* internal functions prototypes */
+NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
+					  ULONG nfrob_size,ULONGLONG mft_id);
+void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
+					  ULONG nfrob_size,PMY_FILE_INFORMATION pmfi);
+
+typedef void (__stdcall *ATTRHANDLER_PROC)(UDEFRAG_DEVICE_EXTENSION *dx,
+					  PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
+void EnumerateAttributes(UDEFRAG_DEVICE_EXTENSION *dx,PFILE_RECORD_HEADER pfrh,
+					  ATTRHANDLER_PROC ahp,PMY_FILE_INFORMATION pmfi);
+
+void __stdcall UpdateMaxMftEntriesNumberCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+					  PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
+void __stdcall AnalyseAttributeCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+					  PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
+void __stdcall AnalyseAttributeListCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+					  PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
+void __stdcall GetFileNameAndParentMftIdFromMftRecordCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+					  PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
+void __stdcall AnalyseAttributeFromAttributeListCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+					  PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
+
+void AnalyseAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
+void AnalyseResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
+void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi);
+void AnalyseResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
+void AnalyseAttributeFromAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE_LIST attr_list_entry,PMY_FILE_INFORMATION pmfi);
+void GetFileFlags(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
+void GetFileName(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
+void UpdateFileName(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi,WCHAR *name,UCHAR name_type);
+void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi);
+void GetVolumeInformation(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr);
+void CheckReparsePointResident(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
+
+void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
+		PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,ULONG nfrob_size);
+
+void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
+		ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length);
+
+ULONG RunLength(PUCHAR run);
+LONGLONG RunLCN(PUCHAR run);
+ULONGLONG RunCount(PUCHAR run);
+void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi);
+void ProcessRun(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
+				PFILENAME pfn,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn);
+
+ULONGLONG ProcessMftSpace(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_DATA nd);
+
+void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi);
+PFILENAME FindFileListEntryForTheAttribute(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PMY_FILE_INFORMATION pmfi);
+BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,
+		PMY_FILE_INFORMATION pmfi,PFILENAME pfn);
 #endif /* _NTFS_H_ */

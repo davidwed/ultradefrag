@@ -91,9 +91,6 @@ void NTAPI DestroyList(PLIST *phead)
 	do {
 		next = item->next_ptr;
 		Nt_ExFreePool(item);
-/* try to reproduce BAD_POOL_CALLER BSOD */
-/*Nt_ExFreePool(item);*/
-/* Successful! */
 		item = next;
 	} while (next != head);
 

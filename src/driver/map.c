@@ -69,7 +69,11 @@ unsigned char GetSpaceState(PFILENAME pfn)
 	int d,c,o;
 	unsigned char state;
 
-	if(pfn->is_fragm)
+	/*
+	* Show filtered out stuff and files above size threshold
+	* and reparse points as unfragmented.
+	*/
+	if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point)
 		state = pfn->is_overlimit ? FRAGM_OVERLIMIT_SPACE : FRAGM_SPACE;
 	else{
 		d = (int)(pfn->is_dir) & 0x1;
@@ -108,6 +112,11 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 
 	/* return if we don't need cluster map */
 	if(!new_cluster_map) return;
+	
+	/* check parameters */
+	if(space_state < 0 || space_state >= NUM_OF_SPACE_STATES) return;
+	if(old_space_state < 0 || old_space_state >= NUM_OF_SPACE_STATES) return;
+	if(start + len > dx->clusters_total) return;
 
 	if(!dx->opposite_order){
 		if(!dx->clusters_per_cell) return;
@@ -130,6 +139,10 @@ void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 			cell ++;
 			offset = 0;
 		}
+		
+		/* ckeck cell correctness */
+		if(cell >= map_size) return; /* important !!! */
+		
 		if(len){
 			n = min(len,dx->clusters_per_last_cell - offset);
 			new_cluster_map[cell][space_state] += n;

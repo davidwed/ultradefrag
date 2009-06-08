@@ -25,38 +25,123 @@
 #include "ntfs.h"
 
 /*
-+ Control an amount of debugging information 
-* through this parameter.
-* NOTE: Designed especially for development stage.
+* We should exclude here as many files as possible.
+* All temporary files (in large meaning) 
+* may be left fragmented ;-)
+*
+* Better is to include all files in full list.
+* Because this method has simplest implementation ;-)
 */
-//#define DETAILED_LOGGING
 
-NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
-					  ULONG nfrob_size,ULONGLONG mft_id);
-void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
-					  ULONG nfrob_size,PMY_FILE_INFORMATION pmfi);
-void AnalyseAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi);
-void AnalyseResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
-void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi);
-void AnalyseResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
-void AnalyseAttributeFromAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE_LIST attr_list_entry,PMY_FILE_INFORMATION pmfi);
-void GetFileFlags(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
-void GetFileName(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
-void UpdateFileName(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi,WCHAR *name,UCHAR name_type);
-void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi);
-void GetVolumeInformation(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr);
-void CheckReparsePointResident(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
+/*
+* FIXME: add data consistency checks everywhere,
+* because NTFS volumes often have invalid data in MFT entries.
+*/
 
-void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
-		PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,ULONG nfrob_size);
+/*---------------------------------- NTFS related code -------------------------------------*/
 
-void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
-		ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length);
+/* sets dx->partition_type member */
+void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	PARTITION_INFORMATION part_info;
+	NTFS_DATA ntfs_data;
+	NTSTATUS status;
+	IO_STATUS_BLOCK iosb;
 
-void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi);
+	/*
+	* Try to get fs type through IOCTL_DISK_GET_PARTITION_INFO request.
+	* Works only on MBR-formatted disks. To retrieve information about 
+	* GPT-formatted disks use IOCTL_DISK_GET_PARTITION_INFO_EX.
+	*/
+	status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
+				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
+				&part_info, sizeof(PARTITION_INFORMATION));
+	if(status == STATUS_PENDING){
+		if(nt4_system)
+			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		else
+			ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
+		status = iosb.Status;
+	}
+	if(NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- partition type: %u\n",NULL,part_info.PartitionType);
+		if(part_info.PartitionType == 0x7){
+			DebugPrint("-Ultradfg- NTFS found\n",NULL);
+			dx->partition_type = NTFS_PARTITION;
+			return;
+		}
+	} else {
+		DebugPrint("-Ultradfg- Can't get fs info: %x!\n",NULL,(UINT)status);
+	}
 
-/* extracts low 48 bits of File Reference Number */
-#define GetMftIdFromFRN(n) ((n) & 0xffffffffffffLL)
+	/*
+	* To ensure that we have a NTFS formatted partition
+	* on GPT disks and when partition type is 0x27
+	* FSCTL_GET_NTFS_VOLUME_DATA request can be used.
+	*/
+	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
+				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
+				&ntfs_data, sizeof(NTFS_DATA));
+	if(status == STATUS_PENDING){
+		if(nt4_system)
+			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		else
+			ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
+		status = iosb.Status;
+	}
+	if(NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- NTFS found\n",NULL);
+		dx->partition_type = NTFS_PARTITION;
+		return;
+	} else {
+		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",NULL,status);
+	}
+
+	/*
+	* Let's assume that we have a FAT32 formatted partition.
+	* Currently we don't need more detailed information.
+	*/
+	dx->partition_type = FAT32_PARTITION;
+	DebugPrint("-Ultradfg- NTFS not found\n",NULL);
+}
+
+NTSTATUS ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	IO_STATUS_BLOCK iosb;
+	NTFS_DATA ntfs_data;
+	NTSTATUS status;
+	ULONGLONG mft_len;
+
+	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
+				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
+				&ntfs_data, sizeof(NTFS_DATA));
+	if(status == STATUS_PENDING){
+		if(nt4_system)
+			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
+		else
+			ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
+		status = iosb.Status;
+	}
+	if(!NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",NULL,status);
+		return status;
+	}
+
+	mft_len = ProcessMftSpace(dx,&ntfs_data);
+
+	dx->mft_size = mft_len * dx->bytes_per_cluster;
+	DebugPrint("-Ultradfg- MFT size = %I64u bytes\n",NULL,dx->mft_size);
+
+	dx->ntfs_record_size = ntfs_data.BytesPerFileRecordSegment;
+	DebugPrint("-Ultradfg- NTFS record size = %u bytes\n",NULL,dx->ntfs_record_size);
+
+	dx->max_mft_entries = dx->mft_size / dx->ntfs_record_size;
+	DebugPrint("-Ultradfg- MFT contains no more than %I64u records\n",NULL,
+		dx->max_mft_entries);
+	
+	//DbgPrintFreeSpaceList(dx);
+	return STATUS_SUCCESS;
+}
 
 BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -66,11 +151,17 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	ULONGLONG mft_id, ret_mft_id;
 	NTSTATUS status;
 	
+	ULONGLONG tm, tm1, time;
+	
 	DebugPrint("-Ultradfg- MFT scan started!\n",NULL);
 
 	/* allocate memory for NTFS record */
 	nfrob_size = sizeof(NTFS_FILE_RECORD_OUTPUT_BUFFER) + dx->ntfs_record_size - 1;
+	tm = _rdtsc();
+	tm1 = _rdtsc_1();
 	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)AllocatePool(NonPagedPool,nfrob_size);
+	time = _rdtsc_1() - tm1;
+	DbgPrint("AllocatePool needs %I64u ns\n",time);
 	if(!pnfrob){
 		DebugPrint("-Ultradfg- no enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n",NULL);
 		DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
@@ -121,8 +212,10 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* free allocated memory */
 	Nt_ExFreePool(pnfrob);
 	Nt_ExFreePool(pmfi);
-	
+
 	DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
+	time = _rdtsc() - tm;
+	DbgPrint("MFT scan needs %I64u ms\n",time);
 	return TRUE;
 }
 
@@ -131,10 +224,6 @@ void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
 {
 	NTSTATUS status;
 	PFILE_RECORD_HEADER pfrh;
-	PATTRIBUTE pattr;
-	ULONG attr_length;
-	USHORT attr_offset;
-	PNONRESIDENT_ATTRIBUTE pnr_attr;
 
 	/* Get record for FILE_MFT. */
 	status = GetMftRecord(dx,pnfrob,nfrob_size,FILE_MFT);
@@ -155,37 +244,20 @@ void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
 		return;
 	}
 	
-	attr_offset = pfrh->AttributeOffset;
-	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
+	EnumerateAttributes(dx,pfrh,UpdateMaxMftEntriesNumberCallback,NULL);
+}
 
-	while(pattr){
-		if(KeReadStateEvent(&stop_event) == 0x1) break;
+/* pmfi == NULL */
+void __stdcall UpdateMaxMftEntriesNumberCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+												 PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
+{
+	PNONRESIDENT_ATTRIBUTE pnr_attr;
 
-		/* is an attribute header inside a record bounds? */
-		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
-			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
-		
-		/* is it a valid attribute */
-		if(pattr->AttributeType == 0xffffffff) break;
-		if(pattr->AttributeType == 0x0) break;
-		if(pattr->Length == 0) break;
-
-		/* is an attribute inside a record bounds? */
-		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
-			attr_offset + pattr->Length > dx->ntfs_record_size) break;
-
-		if(pattr->Nonresident && pattr->AttributeType == AttributeData){
-			pnr_attr = (PNONRESIDENT_ATTRIBUTE)pattr;
-			dx->max_mft_entries = pnr_attr->DataSize / dx->ntfs_record_size;
-			DebugPrint("-Ultradfg- MFT contains no more than %I64u records (more accurately)\n",NULL,
-				dx->max_mft_entries);
-			break;
-		}
-		
-		/* go to the next attribute */
-		attr_length = pattr->Length;
-		attr_offset += attr_length;
-		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
+	if(pattr->Nonresident && pattr->AttributeType == AttributeData){
+		pnr_attr = (PNONRESIDENT_ATTRIBUTE)pattr;
+		dx->max_mft_entries = pnr_attr->DataSize / dx->ntfs_record_size;
+		DebugPrint("-Ultradfg- MFT contains no more than %I64u records (more accurately)\n",NULL,
+			dx->max_mft_entries);
 	}
 }
 
@@ -215,135 +287,110 @@ NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 					  ULONG nfrob_size,PMY_FILE_INFORMATION pmfi)
 {
-	ULONGLONG mft_id;
 	PFILE_RECORD_HEADER pfrh;
-	ULONG type;
+	#ifdef DETAILED_LOGGING
 	USHORT Flags;
-//	char a,b,c,d;
-	PATTRIBUTE pattr;
-//	short *name;
-	ULONG attr_length;
-	USHORT attr_offset;
-	BOOLEAN path_built = FALSE;
+	#endif
 	
-	/* allocate memory */
-//	name = (short *)AllocatePool(NonPagedPool,(MAX_PATH + 1) * sizeof(short));
-//	if(!name){}
-	
-	/* get Mft entry ID */
-	mft_id = GetMftIdFromFRN(pnfrob->FileReferenceNumber);
-
 	/* analyse record's header */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
-	type = pfrh->Ntfs.Type;
-	Flags = pfrh->Flags;
-/*	a = (char)(type & 0xff);
-	b = (char)((type & 0xff00) >> 8);
-	c = (char)((type & 0xff0000) >> 16);
-	d = (char)(type >> 24);
-	DebugPrint("-Ultradfg- Type = %c%c%c%c\n",NULL,a,b,c,d);
-*/	
-	if(type != TAG('F','I','L','E')){
-//		Nt_ExFreePool(name);
-		return;
-	}
+
+	if(pfrh->Ntfs.Type != TAG('F','I','L','E')) return;
 	
 	/* analyse file record */
-//	DebugPrint("-Ultradfg- SequenceNumber = %hu, LinkCount = %hu, Flags = 0x%hx\n",
-//		NULL,pfrh->SequenceNumber,pfrh->LinkCount,pfrh->Flags);
-//	if(Flags & 0x1) DebugPrint("-Ultradfg- In Use\n",NULL);
 	#ifdef DETAILED_LOGGING
+	Flags = pfrh->Flags;
 	if(Flags & 0x2) DebugPrint("-Ultradfg- Directory\n",NULL); /* May be wrong? */
 	#endif
 
-	if(pfrh->BaseFileRecord){ /* skip these records, we will analyse them later */
-		DebugPrint("-Ultradfg- BaseFileRecord (id) = %I64u\n",
-			NULL,GetMftIdFromFRN(pfrh->BaseFileRecord));
-		DebugPrint("\n",NULL);
-		//Nt_ExFreePool(name);
+	if(pfrh->BaseFileRecord){ /* skip child records, we will analyse them later */
+		//DebugPrint("-Ultradfg- BaseFileRecord (id) = %I64u\n",
+		//	NULL,GetMftIdFromFRN(pfrh->BaseFileRecord));
+		//DebugPrint("\n",NULL);
 		return;
 	}
 	
 	/* analyse attributes of MFT entry */
-	pmfi->BaseMftId = mft_id;
+	pmfi->BaseMftId = GetMftIdFromFRN(pnfrob->FileReferenceNumber);
 	pmfi->ParentDirectoryMftId = FILE_root;
 	pmfi->Flags = 0x0;
+	
+	/* FIXME: L:\.:$SECURITY_DESCRIPTOR ? */
+	pmfi->IsDirectory = (pfrh->Flags & 0x2) ? TRUE : FALSE;
+	
+	pmfi->IsReparsePoint = FALSE;
 	pmfi->NameType = 0x0; /* Assume FILENAME_POSIX */
+	pmfi->PathBuilt = FALSE;
 	memset(pmfi->Name,0,MAX_NTFS_PATH);
-//	DebugPrint("-Ultradfg- Attributes\n",NULL);
 
 	/* skip AttributeList attributes */
-	attr_offset = pfrh->AttributeOffset;
-	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
-
-	while(pattr){
-		if(KeReadStateEvent(&stop_event) == 0x1) break;
-
-		/* is an attribute header inside a record bounds? */
-		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
-			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
-		
-		/* is it a valid attribute */
-		if(pattr->AttributeType == 0xffffffff) break;
-		if(pattr->AttributeType == 0x0) break;
-		if(pattr->Length == 0) break;
-
-		/* is an attribute inside a record bounds? */
-		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
-			attr_offset + pattr->Length > dx->ntfs_record_size) break;
-
-		if(pattr->AttributeType > AttributeFileName && path_built == FALSE){
-			BuildPath(dx,pmfi);
-			path_built = TRUE;
-		}
-
-		if(pattr->AttributeType != AttributeAttributeList)
-			AnalyseAttribute(dx,pattr,pmfi);
-		
-		/* go to the next attribute */
-		attr_length = pattr->Length;
-		attr_offset += attr_length;
-		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
-	}
+	EnumerateAttributes(dx,pfrh,AnalyseAttributeCallback,pmfi);
 	
-	if(!path_built){
-		BuildPath(dx,pmfi);
-		path_built = TRUE;
-	}
-
+	if(!pmfi->PathBuilt) BuildPath(dx,pmfi);
+	
 	/* analyse AttributeList attributes */
-	attr_offset = pfrh->AttributeOffset;
-	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
+	EnumerateAttributes(dx,pfrh,AnalyseAttributeListCallback,pmfi);
+	
+	/* update cluster map and statistics */
+	UpdateClusterMapAndStatistics(dx,pmfi);
 
-	while(pattr){
-		if(KeReadStateEvent(&stop_event) == 0x1) break;
-
-		/* is an attribute header inside a record bounds? */
-		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
-			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
-		
-		/* is it a valid attribute */
-		if(pattr->AttributeType == 0xffffffff) break;
-		if(pattr->AttributeType == 0x0) break;
-		if(pattr->Length == 0) break;
-
-		/* is an attribute inside a record bounds? */
-		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
-			attr_offset + pattr->Length > dx->ntfs_record_size) break;
-
-		if(pattr->AttributeType == AttributeAttributeList)
-			AnalyseAttribute(dx,pattr,pmfi);
-		
-		/* go to the next attribute */
-		attr_length = pattr->Length;
-		attr_offset += attr_length;
-		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
-	}
-
-//	Nt_ExFreePool(name);
 	#ifdef DETAILED_LOGGING
 	DebugPrint("\n",NULL);
 	#endif
+}
+
+/* dx->ntfs_record_size must be initialized before */
+void EnumerateAttributes(UDEFRAG_DEVICE_EXTENSION *dx,PFILE_RECORD_HEADER pfrh,
+						 ATTRHANDLER_PROC ahp,PMY_FILE_INFORMATION pmfi)
+{
+	PATTRIBUTE pattr;
+	ULONG attr_length;
+	USHORT attr_offset;
+
+	attr_offset = pfrh->AttributeOffset;
+	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
+
+	while(pattr){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+
+		/* is an attribute header inside a record bounds? */
+		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
+			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
+		
+		/* is it a valid attribute */
+		if(pattr->AttributeType == 0xffffffff) break;
+		if(pattr->AttributeType == 0x0) break;
+		if(pattr->Length == 0) break;
+
+		/* is an attribute inside a record bounds? */
+		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
+			attr_offset + pattr->Length > dx->ntfs_record_size) break;
+
+		/* call specified callback procedure */
+		ahp(dx,pattr,pmfi);
+		
+		/* go to the next attribute */
+		attr_length = pattr->Length;
+		attr_offset += attr_length;
+		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
+	}
+}
+
+void __stdcall AnalyseAttributeCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+										PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
+{
+	if(pattr->AttributeType > AttributeFileName && pmfi->PathBuilt == FALSE)
+		BuildPath(dx,pmfi);
+
+	if(pattr->AttributeType != AttributeAttributeList)
+		AnalyseAttribute(dx,pattr,pmfi);
+}
+
+void __stdcall AnalyseAttributeListCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+										    PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
+{
+	if(pattr->AttributeType == AttributeAttributeList)
+		AnalyseAttribute(dx,pattr,pmfi);
 }
 
 void AnalyseAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
@@ -372,8 +419,8 @@ void AnalyseResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE p
 	case AttributeVolumeInformation: /* always resident */
 		GetVolumeInformation(dx,pr_attr); break;
 
-	case AttributeAttributeList: /* always nonresident? */
-		DebugPrint("Resident AttributeList found!\n",NULL);
+	case AttributeAttributeList:
+		//DebugPrint("Resident AttributeList found!\n",NULL);
 		AnalyseResidentAttributeList(dx,pr_attr,pmfi);
 		break;
 
@@ -457,6 +504,8 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	DebugPrint("-Ultradfg- parent id = %I64u, FILENAME =\n",
 		pmfi->Name,pmfi->ParentDirectoryMftId);
 	#endif
+	
+	pmfi->PathBuilt = TRUE; /* in any case ;-) */
 		
 	if(pmfi->Name[0] == 0) return;
 		
@@ -557,10 +606,6 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 	ULONG nfrob_size;
 	NTSTATUS status;
 	PFILE_RECORD_HEADER pfrh;
-	PATTRIBUTE pattr;
-	ULONG attr_length;
-	USHORT attr_offset;
-	PRESIDENT_ATTRIBUTE pr_attr;
 	PMY_FILE_INFORMATION pmfi;
 
 	/* initialize data */
@@ -602,41 +647,17 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 	
 	/* analyse filename attributes */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
-	attr_offset = pfrh->AttributeOffset;
-	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
 
 	pmfi->BaseMftId = mft_id;
 	pmfi->ParentDirectoryMftId = FILE_root;
 	pmfi->Flags = 0x0;
+	pmfi->IsDirectory = FALSE; /* not important here */
+	pmfi->IsReparsePoint = FALSE; /* not important here */
 	pmfi->NameType = 0x0; /* Assume FILENAME_POSIX */
+	pmfi->PathBuilt = FALSE; /* though not neccessary here :-) */
 	memset(pmfi->Name,0,MAX_NTFS_PATH);
 
-	while(pattr){
-		if(KeReadStateEvent(&stop_event) == 0x1) break;
-
-		/* is an attribute header inside a record bounds? */
-		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
-			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
-		
-		/* is it a valid attribute */
-		if(pattr->AttributeType == 0xffffffff) break;
-		if(pattr->AttributeType == 0x0) break;
-		if(pattr->Length == 0) break;
-
-		/* is an attribute inside a record bounds? */
-		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
-			attr_offset + pattr->Length > dx->ntfs_record_size) break;
-
-		if(pattr->AttributeType == AttributeFileName){
-			pr_attr = (PRESIDENT_ATTRIBUTE)pattr;
-			GetFileName(dx,pr_attr,pmfi);
-		}
-		
-		/* go to the next attribute */
-		attr_length = pattr->Length;
-		attr_offset += attr_length;
-		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
-	}
+	EnumerateAttributes(dx,pfrh,GetFileNameAndParentMftIdFromMftRecordCallback,pmfi);
 	
 	/* update data */
 	*parent_mft_id = pmfi->ParentDirectoryMftId;
@@ -647,7 +668,14 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 	Nt_ExFreePool(pnfrob);
 	Nt_ExFreePool(pmfi);
 }
-		
+
+void __stdcall GetFileNameAndParentMftIdFromMftRecordCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+															  PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
+{
+	if(pattr->AttributeType == AttributeFileName)
+		GetFileName(dx,(PRESIDENT_ATTRIBUTE)pattr,pmfi);
+}
+
 void GetVolumeInformation(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr)
 {
 	PVOLUME_INFORMATION pvi;
@@ -670,6 +698,8 @@ void CheckReparsePointResident(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE 
 	prp = (PREPARSE_POINT)((char *)pr_attr + pr_attr->ValueOffset);
 	tag = prp->ReparseTag;
 	DebugPrint("-Ultradfg- Reparse tag = 0x%x\n",NULL,tag);
+	
+	pmfi->IsReparsePoint = TRUE;
 }
 
 /* Analyse attributes of the current file packed in another mft records. */
@@ -700,13 +730,10 @@ void AnalyseAttributeFromAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE_L
 	ULONGLONG child_record_mft_id;
 	NTSTATUS status;
 	PFILE_RECORD_HEADER pfrh;
-	PATTRIBUTE pattr;
-	ULONG attr_length;
-	USHORT attr_offset;
 	
 	/* skip entries describing attributes stored in base mft record */
 	if(GetMftIdFromFRN(attr_list_entry->FileReferenceNumber) == pmfi->BaseMftId){
-		DebugPrint("Resident attribute found, type = 0x%x\n",NULL,attr_list_entry->AttributeType);
+		//DebugPrint("Resident attribute found, type = 0x%x\n",NULL,attr_list_entry->AttributeType);
 		return;
 	}
 	
@@ -749,38 +776,17 @@ void AnalyseAttributeFromAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE_L
 		Nt_ExFreePool(pnfrob);
 		return;
 	}
-
-	attr_offset = pfrh->AttributeOffset;
-	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
-
-	while(pattr){
-		if(KeReadStateEvent(&stop_event) == 0x1) break;
-
-		/* is an attribute header inside a record bounds? */
-		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
-			attr_offset + sizeof(ATTRIBUTE) > dx->ntfs_record_size)	break;
-		
-		/* is it a valid attribute */
-		if(pattr->AttributeType == 0xffffffff) break;
-		if(pattr->AttributeType == 0x0) break;
-		if(pattr->Length == 0) break;
-
-		/* is an attribute inside a record bounds? */
-		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
-			attr_offset + pattr->Length > dx->ntfs_record_size) break;
-
-		if(pattr->Nonresident)
-			AnalyseNonResidentAttribute(dx,
-				(PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
-		
-		/* go to the next attribute */
-		attr_length = pattr->Length;
-		attr_offset += attr_length;
-		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
-	}
+	
+	EnumerateAttributes(dx,pfrh,AnalyseAttributeFromAttributeListCallback,pmfi);
 
 	/* free allocated memory */
 	Nt_ExFreePool(pnfrob);
+}
+
+void __stdcall AnalyseAttributeFromAttributeListCallback(UDEFRAG_DEVICE_EXTENSION *dx,
+														 PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
+{
+	if(pattr->Nonresident) AnalyseNonResidentAttribute(dx,(PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
 }
 
 /*
@@ -821,6 +827,9 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
     case AttributeEA:
 		default_attr_name = L"$EA";
 		break;
+    case AttributeEAInformation:
+		default_attr_name = L"$EA_INFORMATION";
+		break;
     case AttributeSecurityDescriptor:
 		default_attr_name = L"$SECURITY_DESCRIPTOR";
 		break;
@@ -837,9 +846,11 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 		default_attr_name = L"$BITMAP";
 		break;
 	case AttributeReparsePoint:
-		default_attr_name = L"$Reparse";
+		pmfi->IsReparsePoint = TRUE;
+		default_attr_name = L"$REPARSE_POINT";
 		break;
 	case AttributeLoggedUtulityStream:
+		/* used by EFS */
 		default_attr_name = L"$LOGGED_UTILITY_STREAM";
 		break;
 	default:
@@ -869,18 +880,284 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 	}
 	full_path[MAX_NTFS_PATH - 1] = 0;
 
-	ProcessRunList(dx,full_path,pnr_attr,pmfi);
+	/* skip all filtered out attributes */
+	//if(AttributeNeedsToBeDefragmented(dx,full_path,pnr_attr->DataSize,pmfi))
+		ProcessRunList(dx,full_path,pnr_attr,pmfi);
 
 	/* free allocated memory */
 	Nt_ExFreePool(attr_name);
 	Nt_ExFreePool(full_path);
 }
 
+ULONG RunLength(PUCHAR run)
+{
+	return (*run & 0xf) + ((*run >> 4) & 0xf) + 1;
+}
+
+LONGLONG RunLCN(PUCHAR run)
+{
+	LONG i;
+	UCHAR n1 = *run & 0xf;
+	UCHAR n2 = (*run >> 4) & 0xf;
+	LONGLONG lcn = (n2 == 0) ? 0 : (LONGLONG)(((signed char *)run)[n1 + n2]);
+	
+	for(i = n1 + n2 - 1; i > n1; i--)
+		lcn = (lcn << 8) + run[i];
+	return lcn;
+}
+
+ULONGLONG RunCount(PUCHAR run)
+{
+	ULONG i;
+	UCHAR n = *run & 0xf;
+	ULONGLONG count = 0;
+	
+	for(i = n; i > 0; i--)
+		count = (count << 8) + run[i];
+	return count;
+}
+
 /* Saves information about VCN/LCN pairs of the attribute specified by full_path parameter. */
 void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi)
 {
-	if(pnr_attr->Attribute.Flags & 0x1)
+	PUCHAR run;
+	ULONGLONG lcn, vcn, length;
+	PFILENAME pfn;
+	BOOLEAN is_compressed = (pnr_attr->Attribute.Flags & 0x1) ? TRUE : FALSE;
+	
+/*	if(pnr_attr->Attribute.Flags & 0x1)
 		DbgPrint("[CMP] %ws VCN %I64u - %I64u\n",full_path,pnr_attr->LowVcn,pnr_attr->HighVcn);
 	else
 		DbgPrint("[ORD] %ws VCN %I64u - %I64u\n",full_path,pnr_attr->LowVcn,pnr_attr->HighVcn);
+*/	
+	/* find corresponding FILENAME structure in dx->filelist or add a new one */
+	pfn = FindFileListEntryForTheAttribute(dx,full_path,pmfi);
+	if(pfn == NULL) return;
+	
+	if(is_compressed) pfn->is_compressed = TRUE;
+	
+	/* loop through runs */
+	lcn = 0; vcn = pnr_attr->LowVcn;
+	run = (PUCHAR)((char *)pnr_attr + pnr_attr->RunArrayOffset);
+	while(*run){
+		lcn += RunLCN(run);
+		length = RunCount(run);
+		
+		/* skip virtual runs */
+		if(RunLCN(run))	ProcessRun(dx,full_path,pmfi,pfn,vcn,length,lcn);
+		
+		/* go to the next run */
+		run += RunLength(run);
+		vcn += length;
+	}
+}
+
+/*------------------------ Defragmentation related code ------------------------------*/
+
+/* returns complete MFT length, in clusters */
+ULONGLONG ProcessMftSpace(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_DATA nd)
+{
+	ULONGLONG start,len,mft_len = 0;
+
+	/*
+	* MFT space must be excluded from the free space list.
+	* Because Windows 2000 disallows to move files there.
+	* And because on other systems this dirty technique 
+	* causes MFT fragmentation.
+	*/
+	
+	/* 
+	* Don't increment dx->processed_clusters here, 
+	* because some parts of MFT are really free.
+	*/
+	DebugPrint("-Ultradfg- MFT_file   : start : length\n",NULL);
+
+	/* $MFT */
+	start = nd->MftStartLcn.QuadPart;
+	if(nd->BytesPerCluster)
+		len = nd->MftValidDataLength.QuadPart / nd->BytesPerCluster;
+	else
+		len = 0;
+	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",NULL,start,len);
+	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
+	CleanupFreeSpaceList(dx,start,len);
+	mft_len += len;
+
+	/* $MFT2 */
+	start = nd->MftZoneStart.QuadPart;
+	len = nd->MftZoneEnd.QuadPart - nd->MftZoneStart.QuadPart;
+	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",NULL,start,len);
+	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
+	CleanupFreeSpaceList(dx,start,len);
+	mft_len += len;
+
+	/* $MFTMirror */
+	start = nd->Mft2StartLcn.QuadPart;
+	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",NULL,start);
+	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
+	CleanupFreeSpaceList(dx,start,1);
+	mft_len ++;
+	
+	return mft_len;
+}
+
+/*
+* This code may slow down the program: 
+* for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr) for each file
+*/
+
+void ProcessRun(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
+				PFILENAME pfn,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn)
+{
+	PBLOCKMAP block, prev_block = NULL;
+	
+/*	if(!wcscmp(full_path,L"\\??\\L:\\go.zip")){
+		DbgPrint("VCN %I64u : LEN %I64u : LCN %I64u\n",vcn,length,lcn);
+	}
+*/
+	/* add information to blockmap member of specified pfn structure */
+	if(pfn->blockmap) prev_block = pfn->blockmap->prev_ptr;
+	block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)prev_block,sizeof(BLOCKMAP),PagedPool);
+	if(!block) return;
+	
+	block->vcn = vcn;
+	block->length = length;
+	block->lcn = lcn;
+
+	pfn->n_fragments ++;
+	pfn->clusters_total += block->length;
+	/*
+	* Sometimes normal file has more than one fragment, 
+	* but is not fragmented yet! *CRAZY* 
+	*/
+	if(block != pfn->blockmap && \
+	  block->lcn != (block->prev_ptr->lcn + block->prev_ptr->length))
+		pfn->is_fragm = TRUE;
+}
+
+PFILENAME FindFileListEntryForTheAttribute(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PMY_FILE_INFORMATION pmfi)
+{
+	PFILENAME pfn;
+	
+	/* few entries (attributes) may have the same mft id */
+	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+		/*
+		* we scan mft from the end to the beginning 
+		* and we add new records to the left side of the file list...
+		*/
+		if(pfn->BaseMftId > pmfi->BaseMftId) break; /* we have no chance to find record in list */
+		/* if(!wcscmp(pfn->name.Buffer,full_path))	return pfn; // very slow */
+		if(pfn->BaseMftId == pmfi->BaseMftId) return pfn; /* safe? */
+		if(pfn->next_ptr == dx->filelist) break;
+	}
+	
+	pfn = (PFILENAME)InsertItem((PLIST *)&dx->filelist,NULL,sizeof(FILENAME),PagedPool);
+	if(pfn == NULL) return NULL;
+	
+	/* fill a name member of the created structure */
+	if(!RtlCreateUnicodeString(&pfn->name,full_path)){
+		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
+		RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
+		return NULL;
+	}
+	pfn->blockmap = NULL; /* !!! */
+	pfn->BaseMftId = pmfi->BaseMftId;
+	pfn->n_fragments = 0;
+	pfn->clusters_total = 0;
+	pfn->is_fragm = FALSE;
+	pfn->is_compressed = FALSE;
+	pfn->is_dirty = TRUE;
+	return pfn;
+}
+
+void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
+{
+	PFILENAME pfn;
+	ULONGLONG filesize;
+
+	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+		/* only the first few entries may have dirty flag set */
+		if(pfn->is_dirty == FALSE) break;
+
+		pfn->is_dirty = FALSE;
+		/* 1. fill all members of pfn */
+		/* 1.1 set flags in pfn ??? */
+		/* always sets is_dir flag to FALSE */
+		/*if(pmfi->Flags & FILE_ATTRIBUTE_DIRECTORY) pfn->is_dir = TRUE;
+		else pfn->is_dir = FALSE;
+		*/
+		pfn->is_dir = pmfi->IsDirectory;
+		/* ordinary attributes in compressed file? */
+		/*if(pmfi->Flags & FILE_ATTRIBUTE_COMPRESSED) pfn->is_compressed = TRUE;
+		else pfn->is_compressed = FALSE;
+		*/
+		if((pmfi->Flags & FILE_ATTRIBUTE_REPARSE_POINT) || pmfi->IsReparsePoint){
+			DebugPrint("-Ultradfg- Reparse point found\n",pfn->name.Buffer);
+			pfn->is_reparse_point = TRUE;
+		} else pfn->is_reparse_point = FALSE;
+		/* 1.2 calculate size of attribute data */
+		filesize = pfn->clusters_total * dx->bytes_per_cluster;
+		if(dx->sizelimit && filesize > dx->sizelimit) pfn->is_overlimit = TRUE;
+		else pfn->is_overlimit = FALSE;
+		/* 1.3 detect temporary files and other unwanted stuff */
+		if(UnwantedStuffDetected(dx,pmfi,pfn)) pfn->is_filtered = TRUE;
+		else pfn->is_filtered = FALSE;
+		/* 1.4 detect sparse files */
+		if(pmfi->Flags & FILE_ATTRIBUTE_SPARSE_FILE)
+			DebugPrint("-Ultradfg- Sparse file found\n",pfn->name.Buffer);
+		/* 1.5 detect encrypted files */
+		if(pmfi->Flags & FILE_ATTRIBUTE_ENCRYPTED)
+			DbgPrint("-Ultradfg- Encrypted file found %ws\n",pfn->name.Buffer);
+		/* 2. redraw cluster map */
+		MarkSpace(dx,pfn,SYSTEM_SPACE);
+		/* 3. update statistics */
+		dx->filecounter ++;
+		if(pfn->is_dir) dx->dircounter ++;
+		if(pfn->is_compressed) dx->compressedcounter ++;
+		/* skip here filtered out and big files and reparse points */
+		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
+			dx->fragmfilecounter ++;
+			dx->fragmcounter += pfn->n_fragments;
+		} else {
+			dx->fragmcounter ++;
+		}
+		dx->processed_clusters += pfn->clusters_total;
+
+		if(pfn->next_ptr == dx->filelist) break;
+	}
+}
+
+/* that's unbelievable, but this function runs fast */
+BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,
+		PMY_FILE_INFORMATION pmfi,PFILENAME pfn)
+{
+	UNICODE_STRING us;
+
+	/* skip temporary files ;-) */
+	if(pmfi->Flags & FILE_ATTRIBUTE_TEMPORARY){
+		DebugPrint2("-Ultradfg- Temporary file found\n",pfn->name.Buffer);
+		return TRUE;
+	}
+	
+	/* skip all unwanted files by user defined patterns */
+	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
+		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n",NULL);
+		return FALSE;
+	}
+	_wcslwr(us.Buffer);
+
+	if(dx->in_filter.buffer){
+		if(!IsStringInFilter(us.Buffer,&dx->in_filter)){
+			RtlFreeUnicodeString(&us); return TRUE; /* not included */
+		}
+	}
+
+	if(dx->ex_filter.buffer){
+		if(IsStringInFilter(us.Buffer,&dx->ex_filter)){
+			RtlFreeUnicodeString(&us); return TRUE; /* excluded */
+		}
+	}
+	RtlFreeUnicodeString(&us);
+
+	return FALSE;
 }

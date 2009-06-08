@@ -25,7 +25,8 @@
 
 BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo);
-BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+BOOLEAN UnwantedStuffOnFatOrUdfDetected(UDEFRAG_DEVICE_EXTENSION *dx,
+		PFILE_BOTH_DIR_INFORMATION pFileInfo,PFILENAME pfn);
 
 /* FindFiles() - recursive search of all files on specified path. */
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
@@ -122,11 +123,11 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 			continue;
 		}
 
-		/* skip temporary files */
-		if(IS_TEMPORARY_FILE(pFileInfo)){
+		/* skip temporary files - not applicable for the volume optimization */
+		/*if(IS_TEMPORARY_FILE(pFileInfo)){
 			DebugPrint2("-Ultradfg- Temporary file found\n",dx->tmp_buf);
 			continue;
-		}
+		}*/
 
 		/*
 		* Skip hard links:
@@ -244,43 +245,60 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo)
 {
-	PFILENAME pfn, prev_pfn;
+	PFILENAME pfn;
+	ULONGLONG filesize;
 
 	/* Add a file only if we need to have its information cached. */
-	/* 1. First of all try to allocate pfn structure. */
-	/* From PagedPool - see above. */
-	pfn = (PFILENAME)AllocatePool(PagedPool,sizeof(FILENAME));
-	if(!pfn){
-		DebugPrint2("-Ultradfg- no enough memory for pfn structure!\n",NULL);
-		return FALSE;
-	}
-	/* 2. Initialize pfn->name field. */
+	pfn = (PFILENAME)InsertItem((PLIST *)&dx->filelist,NULL,sizeof(FILENAME),PagedPool);
+	if(pfn == NULL) return FALSE;
+	
+	/* Initialize pfn->name field. */
 	if(!RtlCreateUnicodeString(&pfn->name,path)){
 		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
-		Nt_ExFreePool(pfn);
+		RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
 		return FALSE;
 	}
-	/* 3. Set flags. */
+
+	/* Set flags. */
 	pfn->is_dir = IS_DIR(pFileInfo);
 	pfn->is_compressed = IS_COMPRESSED(pFileInfo);
-	if(dx->sizelimit && \
-		(unsigned __int64)(pFileInfo->AllocationSize.QuadPart) > dx->sizelimit)
+	pfn->is_reparse_point = IS_REPARSE_POINT(pFileInfo);
+
+	/*
+	* This code fails for 3.99 Gb files on FAT32 volumes with 32k cluster size (tested on 32-bit XP),
+	* because pFileInfo->AllocationSize member holds zero value in this case.
+	*/
+	/*if(dx->sizelimit && \
+		(ULONGLONG)(pFileInfo->AllocationSize.QuadPart) > dx->sizelimit)
 		pfn->is_overlimit = TRUE;
 	else
 		pfn->is_overlimit = FALSE;
+	*/
 
-	/* 4. Dump the file. */
+	if(UnwantedStuffOnFatOrUdfDetected(dx,pFileInfo,pfn)) pfn->is_filtered = TRUE;
+	else pfn->is_filtered = FALSE;
+
+	/* Dump the file. */
 	if(!DumpFile(dx,pfn)){
 		/* skip files with unknown state */
 		RtlFreeUnicodeString(&pfn->name);
-		Nt_ExFreePool(pfn);
+		RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
 		return TRUE;
 	}
-	/* 5. Increment counters. */
+
+	filesize = pfn->clusters_total * dx->bytes_per_cluster;
+	if(dx->sizelimit && filesize > dx->sizelimit) pfn->is_overlimit = TRUE;
+	else pfn->is_overlimit = FALSE;
+
+	if(wcsstr(path,L"largefile"))
+		DbgPrint("SIZE = %I64u\n", filesize); /* shows approx. 1.6 Gb instead of 3.99 Gb */
+
+	/* Update statistics and cluster map. */
 	dx->filecounter ++;
 	if(pfn->is_dir) dx->dircounter ++;
 	if(pfn->is_compressed) dx->compressedcounter ++;
-	if(pfn->is_fragm){
+	/* skip here filtered out and big files and reparse points */
+	if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
 		dx->fragmfilecounter ++;
 		dx->fragmcounter += pfn->n_fragments;
 	} else {
@@ -289,36 +307,12 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 	dx->processed_clusters += pfn->clusters_total;
 	MarkSpace(dx,pfn,SYSTEM_SPACE);
 
-	/* 6. Insert pfn structure to file list. */
-	if(dx->compact_flag || pfn->is_fragm){
-		if(pfn->is_fragm){
-			if(!InsertFragmentedFile(dx,pfn)){
-				dx->fragmfilecounter --;
-				dx->fragmcounter -= pfn->n_fragments;
-				DeleteBlockmap(pfn);
-				RtlFreeUnicodeString(&pfn->name);
-				Nt_ExFreePool(pfn);
-				return FALSE;
-			}
-		}
-		if(dx->filelist == NULL){
-			dx->filelist = pfn;
-			pfn->prev_ptr = pfn->next_ptr = pfn;
-		} else {
-			prev_pfn = dx->filelist->prev_ptr;
-			dx->filelist = pfn;
-			pfn->prev_ptr = prev_pfn;
-			pfn->next_ptr = prev_pfn->next_ptr;
-			pfn->prev_ptr->next_ptr = pfn;
-			pfn->next_ptr->prev_ptr = pfn;
-		}			
-		return TRUE;
-	}
+	if(dx->compact_flag || pfn->is_fragm) return TRUE;
 
 	/* 7. Destroy useless data. */
 	DeleteBlockmap(pfn);
 	RtlFreeUnicodeString(&pfn->name);
-	Nt_ExFreePool(pfn);
+	RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
 	return TRUE;
 }
 
@@ -368,4 +362,38 @@ void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 		pf = next_pf;
 		if(pf == head) break;
 	}
+}
+
+BOOLEAN UnwantedStuffOnFatOrUdfDetected(UDEFRAG_DEVICE_EXTENSION *dx,
+		PFILE_BOTH_DIR_INFORMATION pFileInfo,PFILENAME pfn)
+{
+	UNICODE_STRING us;
+
+	/* skip temporary files ;-) */
+	if(IS_TEMPORARY_FILE(pFileInfo)){
+		DebugPrint2("-Ultradfg- Temporary file found\n",pfn->name.Buffer);
+		return TRUE;
+	}
+	
+	/* skip all unwanted files by user defined patterns */
+	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
+		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n",NULL);
+		return FALSE;
+	}
+	_wcslwr(us.Buffer);
+
+	if(dx->in_filter.buffer){
+		if(!IsStringInFilter(us.Buffer,&dx->in_filter)){
+			RtlFreeUnicodeString(&us); return TRUE; /* not included */
+		}
+	}
+
+	if(dx->ex_filter.buffer){
+		if(IsStringInFilter(us.Buffer,&dx->ex_filter)){
+			RtlFreeUnicodeString(&us); return TRUE; /* excluded */
+		}
+	}
+	RtlFreeUnicodeString(&us);
+
+	return FALSE;
 }
