@@ -24,7 +24,13 @@
 #include "driver.h"
 #include "fat.h"
 
-BPB FirstSector;
+/*
+* FIXME: 
+* 1. Volume ditry flag?
+* 2. Using second FAT if the first one has invalid data.
+*/
+
+BPB Bpb;
 
 /* updates dx->partition_type member */
 void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
@@ -39,40 +45,61 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	ULONG DataSectors;
 	ULONG CountOfClusters;
 	
+	UCHAR *FirstSector;
+	ULONG BytesPerSector;
 	
-	/* read first 512 bytes of the partition */
-	Status = ReadSector(dx,0,&FirstSector,sizeof(BPB));
-	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- cannot read the first sector of the partition!\n",NULL);
-		dx->partition_type = UNKNOWN_PARTITION;
+	ULONG mj, mn;
+	
+	/* allocate memory */
+	BytesPerSector = dx->bytes_per_sector;
+	if(BytesPerSector < sizeof(BPB)){
+		DebugPrint("-Ultradfg- Sector size is too small: %u bytes!\n",
+			NULL,BytesPerSector);
 		return;
 	}
+	FirstSector = (UCHAR *)AllocatePool(NonPagedPool,BytesPerSector);
+	if(FirstSector == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for the first sector!\n",NULL);
+		return;
+	}
+	
+	/* read first sector of the partition */
+	Status = ReadSectors(dx,0,FirstSector,BytesPerSector);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- cannot read the first sector of the partition: %x!\n",
+			NULL,(UINT)Status);
+		dx->partition_type = UNKNOWN_PARTITION;
+		Nt_ExFreePool(FirstSector);
+		return;
+	}
+	memcpy((void *)&Bpb,(void *)FirstSector,sizeof(BPB));
 
 	/* search for FAT signatures */
 	signature[8] = 0;
-	memcpy((void *)signature,(const void *)FirstSector.Fat16.BS_FilSysType,8);
+	memcpy((void *)signature,(const void *)Bpb.Fat1x.BS_FilSysType,8);
 	if(strstr(signature,"FAT")) fat_found = TRUE;
 	else {
-		memcpy((void *)signature,(const void *)FirstSector.Fat32.BS_FilSysType,8);
+		memcpy((void *)signature,(const void *)Bpb.Fat32.BS_FilSysType,8);
 		if(strstr(signature,"FAT")) fat_found = TRUE;
 	}
 	if(!fat_found){
 		DebugPrint("-Ultradfg- FAT signatures not found in the first sector.\n",NULL);
 		dx->partition_type = UNKNOWN_PARTITION;
+		Nt_ExFreePool(FirstSector);
 		return;
 	}
 
 	/* determine which type of FAT we have */
-	RootDirSectors = ((FirstSector.RootDirEnts * 32) + (FirstSector.BytesPerSec - 1)) / FirstSector.BytesPerSec;
+	RootDirSectors = ((Bpb.RootDirEnts * 32) + (Bpb.BytesPerSec - 1)) / Bpb.BytesPerSec;
 
-	if(FirstSector.FAT16sectors) FatSectors = FirstSector.FAT16sectors;
-	else FatSectors = FirstSector.Fat32.FAT32sectors;
+	if(Bpb.FAT16sectors) FatSectors = Bpb.FAT16sectors;
+	else FatSectors = Bpb.Fat32.FAT32sectors;
 	
-	if(FirstSector.FAT16totalsectors) TotalSectors = FirstSector.FAT16totalsectors;
-	else TotalSectors = FirstSector.FAT32totalsectors;
+	if(Bpb.FAT16totalsectors) TotalSectors = Bpb.FAT16totalsectors;
+	else TotalSectors = Bpb.FAT32totalsectors;
 	
-	DataSectors = TotalSectors - (FirstSector.ReservedSectors + (FirstSector.NumFATs * FatSectors) + RootDirSectors);
-	CountOfClusters = DataSectors / FirstSector.SecPerCluster;
+	DataSectors = TotalSectors - (Bpb.ReservedSectors + (Bpb.NumFATs * FatSectors) + RootDirSectors);
+	CountOfClusters = DataSectors / Bpb.SecPerCluster;
 	
 	if(CountOfClusters < 4085) {
 		/* Volume is FAT12 */
@@ -87,10 +114,27 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 		DebugPrint("-Ultradfg- FAT32 partition found!\n",NULL);
 		dx->partition_type = FAT32_PARTITION;
 	}
+	
+	if(dx->partition_type == FAT32_PARTITION){
+		/* check FAT32 version */
+		mj = (ULONG)((Bpb.Fat32.BPB_FSVer >> 8) & 0xFF);
+		mn = (ULONG)(Bpb.Fat32.BPB_FSVer & 0xFF);
+		if(mj > 0 || mn > 0){
+			DebugPrint("-Ultradfg- cannot recognize FAT32 version %u.%u!\n",
+				NULL,mj,mn);
+			dx->partition_type = UNKNOWN_PARTITION;
+			Nt_ExFreePool(FirstSector);
+			return;
+		}
+	}
+	
+	dx->FatCountOfClusters = CountOfClusters;
+	Nt_ExFreePool(FirstSector);
 }
 
 /* LSN, buffer, length must be valid before this call! */
-NTSTATUS ReadSector(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length)
+/* Length MUST BE an integral of sector size */
+NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length)
 {
 	IO_STATUS_BLOCK ioStatus;
 	LARGE_INTEGER offset;
@@ -106,5 +150,6 @@ NTSTATUS ReadSector(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULON
 			Status = ZwWaitForSingleObject(dx->hVol,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
+	/* FIXME: number of bytes actually read check? */
 	return Status;
 }

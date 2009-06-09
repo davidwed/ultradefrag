@@ -88,7 +88,23 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	//DbgPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
 
-	if(dx->partition_type != NTFS_PARTITION){
+	if(KeReadStateEvent(&stop_event) == 0x1) return STATUS_SUCCESS;
+
+	switch(dx->partition_type){
+	case NTFS_PARTITION:
+		/* Experimental support of retrieving information directly from MFT. */
+		ScanMFT(dx);
+		break;
+	case FAT12_PARTITION:
+		ScanFat12Partition(dx);
+		break;
+	case FAT16_PARTITION:
+		ScanFat16Partition(dx);
+		break;
+	case FAT32_PARTITION:
+		ScanFat32Partition(dx);
+		break;
+	default: /* UDF, Ext2 and so on... */
 		/* Find files */
 		path[4] = (short)dx->letter;
 		if(!RtlCreateUnicodeString(&us,path)){
@@ -103,18 +119,6 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		RtlFreeUnicodeString(&us);
 		time = _rdtsc() - tm;
 		DbgPrint("An universal scan needs %I64u ms\n",time);
-	} else {
-		if(KeReadStateEvent(&stop_event) == 0x0){
-			/* Get MFT location */
-			Status = ProcessMFT(dx);
-			if(!NT_SUCCESS(Status)){
-				DebugPrint("-Ultradfg- ProcessMFT() failed!\n",NULL);
-				return Status;
-			}
-			/* Experimental support of retrieving information directly from MFT. */
-			/* Don't forget ProcessMFT() before! */
-			ScanMFT(dx);
-		}
 	}
 
 	DebugPrint("-Ultradfg- Files found: %u\n",NULL,dx->filecounter);

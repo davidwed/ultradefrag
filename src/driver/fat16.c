@@ -23,3 +23,63 @@
 
 #include "driver.h"
 #include "fat.h"
+
+/*
+* 1. FAT contains 2 bytes long records 
+*    for each cluster on the volume.
+* 2. FAT16 volume may contain no more than 65536 clusters.
+*
+* Therefore, maximum FAT size is 131072 bytes. We can allocate
+* this memory once and read complete FAT into it for fast access.
+*/
+
+USHORT *Fat16 = NULL;
+ULONG Fat16Entries;
+
+BOOLEAN InitFat16(UDEFRAG_DEVICE_EXTENSION *dx);
+
+BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	/* cache file allocation table */
+	if(!InitFat16(dx)) return FALSE;
+	
+	/* scan filesystem */
+	
+	/* free allocated resources */
+	ExFreePoolSafe(Fat16);
+	return TRUE;
+}
+
+BOOLEAN InitFat16(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	ULONGLONG FirstFatSector;
+	ULONG FatSize;
+	NTSTATUS Status;
+	
+	/* allocate memory */
+	Fat16Entries = (dx->FatCountOfClusters + 1) + 1; /* ? */
+	FatSize = (Bpb.FAT16sectors * Bpb.BytesPerSec); /* must be an integral of sector size */
+	DebugPrint("-Ultradfg- FAT16 table has %u entries.\n",
+		NULL,Fat16Entries);
+	if(FatSize < (Fat16Entries * sizeof(short))){
+		DebugPrint("-Ultradfg- FatSize (%u) is less than Fat16Entries (%u) * 2!\n",
+			NULL,FatSize,Fat16Entries);
+		return FALSE;
+	}
+		
+	Fat16 = AllocatePool(NonPagedPool,FatSize);
+	if(Fat16 == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for InitFat16()!\n",NULL);
+		return FALSE;
+	}
+	
+	/* cache the first File Allocation Table */
+	FirstFatSector = 0 + Bpb.ReservedSectors;
+	Status = ReadSectors(dx,FirstFatSector,(PVOID)Fat16,FatSize);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",NULL,(UINT)Status);
+		ExFreePoolSafe(Fat16);
+		return FALSE;
+	}
+	return TRUE;
+}

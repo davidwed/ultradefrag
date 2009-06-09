@@ -38,6 +38,12 @@
 * because NTFS volumes often have invalid data in MFT entries.
 */
 
+/*
+* FIXME: 
+* 1. Volume ditry flag?
+* 2. Reading non resident AttributeLists from disk.
+*/
+
 /*---------------------------------- NTFS related code -------------------------------------*/
 
 /* sets dx->partition_type member */
@@ -105,7 +111,7 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint("-Ultradfg- NTFS not found\n",NULL);
 }
 
-NTSTATUS ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx)
+NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	IO_STATUS_BLOCK iosb;
 	NTFS_DATA ntfs_data;
@@ -154,6 +160,13 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	ULONGLONG tm, tm1, time;
 	
 	DebugPrint("-Ultradfg- MFT scan started!\n",NULL);
+
+	/* Get information about MFT */
+	status = GetMftLayout(dx);
+	if(!NT_SUCCESS(status)){
+		DebugPrint("-Ultradfg- ProcessMFT() failed!\n",NULL);
+		return FALSE; /* FIXME: better error handling */
+	}
 
 	/* allocate memory for NTFS record */
 	nfrob_size = sizeof(NTFS_FILE_RECORD_OUTPUT_BUFFER) + dx->ntfs_record_size - 1;

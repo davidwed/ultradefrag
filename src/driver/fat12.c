@@ -23,3 +23,8 @@
 
 #include "driver.h"
 #include "fat.h"
+
+BOOLEAN ScanFat12Partition(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	return TRUE;
+}

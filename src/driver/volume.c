@@ -42,7 +42,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	} else {
 		InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
 	}
-	status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA,
+	status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA/* | SYNCHRONIZE*/,
 				&ObjectAttributes,&iosb,
 				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);

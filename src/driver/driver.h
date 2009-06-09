@@ -524,6 +524,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	UCHAR letter;
 	ULONGLONG bytes_per_cluster;
 	ULONG bytes_per_sector;
+	ULONG FatCountOfClusters; /* FAT specific */
 	ULONGLONG sizelimit;
 	BOOLEAN compact_flag;
 	ULONG disable_reports;
@@ -702,10 +703,12 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 ULONGLONG _rdtsc(void);
 ULONGLONG _rdtsc_1(void);
 void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx);
-NTSTATUS ProcessMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx);
 void GenerateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
 
 void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx);
+BOOLEAN ScanFat12Partition(UDEFRAG_DEVICE_EXTENSION *dx);
+BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx);
+BOOLEAN ScanFat32Partition(UDEFRAG_DEVICE_EXTENSION *dx);
 
 #endif /* _DRIVER_H_ */

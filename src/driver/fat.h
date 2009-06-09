@@ -50,16 +50,7 @@ typedef struct BPB {
           UCHAR  BS_VolLab[11];      // 43
           UCHAR  BS_FilSysType[8];   // 54
           UCHAR  BS_Reserved2[448];  // 62
-          } Fat12;
-        struct {
-          UCHAR  BS_DrvNum;          // 36
-          UCHAR  BS_Reserved1;       // 37
-          UCHAR  BS_BootSig;         // 38
-          ULONG  BS_VolID;           // 39
-          UCHAR  BS_VolLab[11];      // 43
-          UCHAR  BS_FilSysType[8];   // 54
-          UCHAR  BS_Reserved2[448];  // 62
-          } Fat16;
+          } Fat1x;
         struct {
           ULONG  FAT32sectors;       // 36
           USHORT BPB_ExtFlags;       // 40
@@ -81,7 +72,10 @@ typedef struct BPB {
 } BPB;
 #pragma pack(pop)
 
+/* global variables */
+extern BPB Bpb;
+
 /* internal function prototypes */
-NTSTATUS ReadSector(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length);
+NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length);
 
 #endif /* _FAT_H_ */
