@@ -153,3 +153,26 @@ NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULO
 	/* FIXME: number of bytes actually read check? */
 	return Status;
 }
+
+//-----------------------------------------------------------------------------
+//	ChkSum()
+//	Returns an unsigned byte checksum computed on an unsigned byte
+//	array.  The array must be 11 bytes long and is assumed to contain
+//	a name stored in the format of a MS-DOS directory entry.
+//	Passed:	 pFcbName    Pointer to an unsigned byte array assumed to be
+//                       11 bytes long.
+//	Returns: Sum         An 8-bit unsigned checksum of the array pointed
+//                       to by pFcbName.
+//------------------------------------------------------------------------------
+unsigned char ChkSum (unsigned char *pFcbName)
+{
+	short FcbNameLen;
+	unsigned char Sum;
+
+	Sum = 0;
+	for (FcbNameLen=11; FcbNameLen!=0; FcbNameLen--) {
+		// NOTE: The operation is an unsigned char rotate right
+		Sum = ((Sum & 1) ? 0x80 : 0) + (Sum >> 1) + *pFcbName++;
+	}
+	return (Sum);
+}

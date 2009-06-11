@@ -21,12 +21,32 @@
 * FAT related definitions and structures.
 */
 
+/*
+* Code based on:
+* Microsoft Extensible Firmware Initiative
+* FAT32 File System Specification
+*/
+
 #ifndef _FAT_H_
 #define _FAT_H_
 
+/* file attribute flags */
+#define ATTR_READ_ONLY  0x01
+#define ATTR_HIDDEN 	0x02
+#define ATTR_SYSTEM 	0x04
+#define ATTR_VOLUME_ID 	0x08
+#define ATTR_DIRECTORY	0x10
+#define ATTR_ARCHIVE  	0x20
+#define ATTR_LONG_NAME 	(ATTR_READ_ONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_VOLUME_ID)
+
+#define FIRST_LONG_ENTRY      0x01
+#define LAST_LONG_ENTRY_FLAG  0x40 /* the last long entry has Order == (N | 0x40) */
+
+#define MAX_LONG_PATH 260 /* incl. trailing null */
+
 /* first of all - BIOS parameter block */
 #pragma pack(push, 1)
-typedef struct BPB {
+typedef struct _BPB {
     UCHAR    Jump[3];            //  0 jmp instruction
     UCHAR    OemName[8];         //  3 OEM name and version    // This portion is the BPB (BIOS Parameter Block)
     USHORT   BytesPerSec;        // 11 bytes per sector
@@ -70,6 +90,40 @@ typedef struct BPB {
     };
     USHORT Signature;              // 510
 } BPB;
+
+typedef struct _DIRENTRY {
+	UCHAR ShortName[11];   /* short name of the file */
+	UCHAR Attr;            /* file attributes */
+	UCHAR NtReserved;
+	UCHAR CrtTimeTenth;
+	USHORT CrtTime;
+	USHORT CrtDate;
+	USHORT LstAccDate;
+	USHORT FirstClusterHI; /* high word of the entry's first cluster number,
+							  always zero for a FAT12 and FAT16 volumes */
+	USHORT WrtTime;
+	USHORT WrtDate;
+	USHORT FirstClusterLO; /* low word of the entry's first cluster number */
+	ULONG FileSize;        /* file size, in bytes */
+} DIRENTRY, *PDIRENTRY;
+
+typedef struct _LONGDIRENTRY {
+	UCHAR Order;     /* Entry's order in the sequence of long dir entries,
+	                    associated with the short dir entry at the end of the long dir set. */
+					 /* If masked with 0x40 (LAST_LONG_ENTRY), this indicates the entry 
+	                    is the last long dir entry in a set of long dir entries. All valid sets 
+	                    of long dir entries must begin with an entry having this mask. */
+	                 /* Cannot have 0x00 or 0xE5 value. */
+	WCHAR Name1[5];  /* Characters 1-5 of the long-name sub-component in this dir entry. */
+	UCHAR Attr;      /* must be ATTR_LONG_NAME */
+	UCHAR Type;      /* Zero indicates - dir entry is a sub-component of a long name. 
+	                    Other values reserved for future extensions. */
+	UCHAR Chksum;    /* Checksum of name in the short dir entry at the end of the long dir set. */
+	WCHAR Name2[6]; /* Characters 6-11 of long name sub-component. */
+	USHORT FirstClusterLO; /* This artifact must be zero. */
+	WCHAR Name3[2];  /* Characters 12-13 of long name sub-component. */
+} LONGDIRENTRY, *PLONGDIRENTRY;
+
 #pragma pack(pop)
 
 /* global variables */
@@ -77,5 +131,6 @@ extern BPB Bpb;
 
 /* internal function prototypes */
 NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length);
+unsigned char ChkSum (unsigned char *pFcbName);
 
 #endif /* _FAT_H_ */
