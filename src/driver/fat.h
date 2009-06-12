@@ -44,6 +44,10 @@
 
 #define MAX_LONG_PATH 260 /* incl. trailing null */
 
+#define FAT12_EOC 0x0FF8
+#define FAT16_EOC 0xFFF8
+#define FAT32_EOC 0x0FFFFFF8
+
 /* first of all - BIOS parameter block */
 #pragma pack(push, 1)
 typedef struct _BPB {
@@ -128,6 +132,7 @@ typedef struct _LONGDIRENTRY {
 
 /* global variables */
 extern BPB Bpb;
+extern ULONGLONG FirstDataSector;
 
 /* internal function prototypes */
 NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length);

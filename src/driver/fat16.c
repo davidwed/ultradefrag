@@ -46,6 +46,7 @@ BOOLEAN InitFat16(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanFat16RootDirectory(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN AnalyseFat16DirEntry(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath);
 void ProcessFat16File(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *FileName);
+void ScanFat16Directory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *DirName);
 
 BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -135,6 +136,7 @@ BOOLEAN ScanFat16RootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* analyse root directory contents */
 	Path[0] = (WCHAR)(dx->letter);
 	for(i = 0; i < RootDirEntries; i++){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		if(!AnalyseFat16DirEntry(dx,&(RootDir[i]),Path)) break;
 	}
 	
@@ -169,6 +171,8 @@ BOOLEAN AnalyseFat16DirEntry(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCH
 	WCHAR LongNameBuffer[MAX_LONG_PATH];
 	ANSI_STRING as;
 	UNICODE_STRING us;
+	
+	if(KeReadStateEvent(&stop_event) == 0x1) return FALSE;
 	
 	if(DirEntry->ShortName[0] == 0x00) return FALSE; /* no more files */
 	if(DirEntry->ShortName[0] == 0xE5) return TRUE;  /* skip free structures */
@@ -301,5 +305,90 @@ BOOLEAN AnalyseFat16DirEntry(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCH
 /* adds a file to dx->filelist, if it is a directory - scans it */
 void ProcessFat16File(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *FileName)
 {
+	BOOLEAN IsDir = FALSE;
+	
 	DbgPrint("%ws%ws\n",ParentDirPath,FileName);
+	
+	/* skip volume label */
+	if(DirEntry->Attr & ATTR_VOLUME_ID){
+		DebugPrint("-Ultradfg- Volume label = \n",FileName);
+		return;
+	}
+	
+	/* decide is current file directory or not */
+	if(DirEntry->Attr & ATTR_DIRECTORY) IsDir = TRUE;
+	
+	/* add file to dx->filelist */
+	
+	/* if directory found scan it */
+	if(IsDir == FALSE) return;
+	ScanFat16Directory(dx,DirEntry,ParentDirPath,FileName);
+}
+
+void ScanFat16Directory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *DirName)
+{
+	WCHAR *DirPath = NULL; /* including closing backslash */
+	DIRENTRY *Dir = NULL;
+	ULONG BytesPerCluster;
+	ULONG DirEntriesPerCluster;
+	USHORT FirstCluster;
+	USHORT ClusterNumber;
+	ULONGLONG FirstSectorOfCluster;
+	NTSTATUS Status;
+	ULONG i;
+	
+	if(KeReadStateEvent(&stop_event) == 0x1) return;
+	
+	/* initialize variables */
+	BytesPerCluster = Bpb.BytesPerSec * Bpb.SecPerCluster;
+	DirEntriesPerCluster = BytesPerCluster / 32; /* let's assume that cluster size is an integral of 32 */
+	FirstCluster = DirEntry->FirstClusterLO;
+	
+	/* allocate memory */
+	DirPath = (WCHAR *)AllocatePool(PagedPool,MAX_LONG_PATH * sizeof(short));
+	if(DirPath == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for DirPath in ScanFat16Directory()!\n",NULL);
+		return;
+	}
+	Dir = (DIRENTRY *)AllocatePool(PagedPool,BytesPerCluster);
+	if(Dir == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for Dir in ScanFat16Directory()!\n",NULL);
+		Nt_ExFreePool(DirPath);
+		return;
+	}
+	
+	/* generate DirPath */
+	_snwprintf(DirPath,MAX_LONG_PATH,L"%s%s\\",ParentDirPath,DirName);
+	DirPath[MAX_LONG_PATH - 1] = 0;
+	
+	/* read clusters sequentially */
+	ClusterNumber = FirstCluster;
+	do {
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+		if(ClusterNumber > (Fat16Entries - 1)){ /* directory seems to be invalid */
+			DebugPrint("-Ultradfg- invalid cluster number %u in ScanFat16Directory()!\n",
+				NULL,(ULONG)ClusterNumber);
+			ExFreePoolSafe(DirPath);
+			ExFreePoolSafe(Dir);
+			return;
+		}
+		FirstSectorOfCluster = (ClusterNumber - 2) * Bpb.SecPerCluster + FirstDataSector;
+		Status = ReadSectors(dx,FirstSectorOfCluster,(PVOID)Dir,BytesPerCluster);
+		if(!NT_SUCCESS(Status)){
+			DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
+				NULL,FirstSectorOfCluster,(UINT)Status);
+			ExFreePoolSafe(DirPath);
+			ExFreePoolSafe(Dir);
+			return; /* directory seems to be invalid */
+		}
+		for(i = 0; i < DirEntriesPerCluster; i++){
+			if(!AnalyseFat16DirEntry(dx,&(Dir[i]),DirPath)) break;
+		}
+		/* goto the next cluster in chain */
+		ClusterNumber = Fat16[ClusterNumber];
+	} while(ClusterNumber < FAT16_EOC);
+	
+	/* free allocated resources */
+	ExFreePoolSafe(DirPath);
+	ExFreePoolSafe(Dir);
 }

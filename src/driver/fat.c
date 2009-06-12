@@ -31,6 +31,7 @@
 */
 
 BPB Bpb;
+ULONGLONG FirstDataSector;
 
 /* updates dx->partition_type member */
 void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
@@ -129,6 +130,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	
 	dx->FatCountOfClusters = CountOfClusters;
+	FirstDataSector = Bpb.ReservedSectors + (Bpb.NumFATs * FatSectors) + RootDirSectors;
 	Nt_ExFreePool(FirstSector);
 }
 
