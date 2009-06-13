@@ -42,7 +42,7 @@
 #define FIRST_LONG_ENTRY      0x01
 #define LAST_LONG_ENTRY_FLAG  0x40 /* the last long entry has Order == (N | 0x40) */
 
-#define MAX_LONG_PATH 260 /* incl. trailing null */
+#define MAX_LONG_PATH (260 + 4) /* incl. trailing null and \??\ sequence */
 
 #define FAT12_EOC 0x0FF8
 #define FAT16_EOC 0xFFF8

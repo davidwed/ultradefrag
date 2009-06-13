@@ -48,6 +48,7 @@
 /* extracts low 48 bits of File Reference Number */
 #define GetMftIdFromFRN(n) ((n) & 0xffffffffffffLL)
 
+#pragma pack(push, 1)
 typedef struct {
 	ULONGLONG FileReferenceNumber;
 } NTFS_FILE_RECORD_INPUT_BUFFER, *PNTFS_FILE_RECORD_BUFFER;
@@ -296,6 +297,7 @@ typedef struct _NTFS_DATA {
     LARGE_INTEGER MftZoneStart;
     LARGE_INTEGER MftZoneEnd;
 } NTFS_DATA, *PNTFS_DATA;
+#pragma pack(pop)
 
 #define FSCTL_GET_NTFS_VOLUME_DATA      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 25, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #define FSCTL_GET_NTFS_FILE_RECORD      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 26, METHOD_BUFFERED, FILE_ANY_ACCESS)

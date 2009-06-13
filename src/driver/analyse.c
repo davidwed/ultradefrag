@@ -58,7 +58,6 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	short path[] = L"\\??\\A:\\";
 	NTSTATUS Status;
-	UNICODE_STRING us;
 	ULONGLONG tm, time;
 
 	DebugPrint("-Ultradfg- ----- Analyse of %c: -----\n",NULL,dx->letter);
@@ -95,31 +94,28 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		/* Experimental support of retrieving information directly from MFT. */
 		ScanMFT(dx);
 		break;
-	case FAT12_PARTITION:
+	/*case FAT12_PARTITION:
 		ScanFat12Partition(dx);
 		break;
-	case FAT16_PARTITION:
+	*//*case FAT16_PARTITION:
 		ScanFat16Partition(dx);
 		break;
-	case FAT32_PARTITION:
+	*//*case FAT32_PARTITION:
 		ScanFat32Partition(dx);
 		break;
-	default: /* UDF, Ext2 and so on... */
+	*/default: /* UDF, Ext2 and so on... */
 		/* Find files */
+		tm = _rdtsc();
 		path[4] = (short)dx->letter;
-		if(!RtlCreateUnicodeString(&us,path)){
-			DebugPrint("-Ultradfg- no enough memory for path initialization!\n",NULL);
-			return STATUS_NO_MEMORY;
-		}
-		if(!FindFiles(dx,&us)){
-			RtlFreeUnicodeString(&us);
+		if(!FindFiles(dx,path)){
 			DebugPrint("-Ultradfg- FindFiles() failed!\n",NULL);
 			return STATUS_NO_MORE_FILES;
 		}
-		RtlFreeUnicodeString(&us);
 		time = _rdtsc() - tm;
 		DbgPrint("An universal scan needs %I64u ms\n",time);
 	}
+	
+	//if(dx->partition_type == FAT16_PARTITION) ScanFat16Partition(dx);
 
 	DebugPrint("-Ultradfg- Files found: %u\n",NULL,dx->filecounter);
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",NULL,dx->fragmfilecounter);

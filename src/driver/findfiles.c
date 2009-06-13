@@ -29,33 +29,40 @@ BOOLEAN UnwantedStuffOnFatOrUdfDetected(UDEFRAG_DEVICE_EXTENSION *dx,
 		PFILE_BOTH_DIR_INFORMATION pFileInfo,PFILENAME pfn);
 
 /* FindFiles() - recursive search of all files on specified path. */
-BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
+BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	PFILE_BOTH_DIR_INFORMATION pFileInfoFirst = NULL, pFileInfo;
 	IO_STATUS_BLOCK IoStatusBlock;
+	UNICODE_STRING us;
 	NTSTATUS Status;
-	UNICODE_STRING new_path, temp_path, temp_win32_path;
 	HANDLE DirectoryHandle;
-	unsigned int length;
-	BOOLEAN inside_flag = TRUE;
+	WCHAR *Path = NULL;
+	#define PATH_BUFFER_LENGTH (MAX_PATH + 5)
+	static WCHAR FileName[MAX_PATH]; /* static is used to allocate this variable in global space */
+	USHORT FileNameLength;
+	ULONG inside_flag = TRUE;
 
-	/* Allocate memory */
-	/*
-	* This buffer must be allocated from the PagedPool,
-	* to prevent the NonPagedPool exhaustion.
-	*/
+	/* allocate memory */
 	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(PagedPool,
 		FIND_DATA_SIZE + sizeof(PFILE_BOTH_DIR_INFORMATION));
 	if(!pFileInfoFirst){
 		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n",NULL);
 		return FALSE;
 	}
-	/* Open directory */
+	Path = (WCHAR *)AllocatePool(PagedPool,PATH_BUFFER_LENGTH * sizeof(WCHAR));
+	if(Path == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n",NULL);
+		Nt_ExFreePool(pFileInfoFirst);
+		return FALSE;
+	}
+
+	/* open directory */
+	RtlInitUnicodeString(&us,ParentDirectoryPath);
 	if(nt4_system){
-		InitializeObjectAttributes(&ObjectAttributes,path,0,NULL,NULL);
+		InitializeObjectAttributes(&ObjectAttributes,&us,0,NULL,NULL);
 	} else {
-		InitializeObjectAttributes(&ObjectAttributes,path,OBJ_KERNEL_HANDLE,NULL,NULL);
+		InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
 	}
 	Status = ZwCreateFile(&DirectoryHandle,FILE_LIST_DIRECTORY | FILE_RESERVE_OPFILTER,
 			    &ObjectAttributes,&IoStatusBlock,NULL,0,
@@ -63,8 +70,8 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 				FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_OPEN_FOR_BACKUP_INTENT,
 				NULL,0);
 	if(Status != STATUS_SUCCESS){
-		DebugPrint1("-Ultradfg- cannot open directory: %x\n",path->Buffer,(UINT)Status);
-		DirectoryHandle = NULL;	ExFreePoolSafe(pFileInfoFirst);
+		DebugPrint1("-Ultradfg- cannot open directory: %x\n",ParentDirectoryPath,(UINT)Status);
+		DirectoryHandle = NULL;	ExFreePoolSafe(pFileInfoFirst); ExFreePoolSafe(Path);
 		return FALSE;
 	}
 
@@ -88,155 +95,79 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path)
 			if(Status != STATUS_SUCCESS) break; /* no more items */
 		}
 
+		FileNameLength = pFileInfo->FileNameLength / sizeof(WCHAR);
+		if(FileNameLength > (MAX_PATH - 1)) continue; /* really it must be no longer than 255 characters */
+
+		/* here we can use FileName variable */
+		wcsncpy(FileName,pFileInfo->FileName,FileNameLength);
+		FileName[FileNameLength] = 0;
+		
 		/* skip . and .. */
-		if(!pFileInfo->FileNameLength) continue;
-		if(pFileInfo->FileNameLength == sizeof(short) && pFileInfo->FileName[0] == 0x002E)
-			continue;
-		if(pFileInfo->FileName[0] == 0x002E && pFileInfo->FileName[1] == 0x002E)
-			continue;
+		if(wcscmp(FileName,L".") == 0 || wcscmp(FileName,L"..") == 0) continue;
 
-		length = min(path->Length >> 1,TEMP_BUFFER_CHARS - 2);
-		if(length == (TEMP_BUFFER_CHARS - 2)){
-			DebugPrint("-Ultradfg- path->Buffer is too long: %u bytes!\n",NULL,path->Length);
-			continue;
+		/* store into Path buffer retrieved file name appended to ParentDirectoryPath */
+		if(ParentDirectoryPath[wcslen(ParentDirectoryPath) - 1] == '\\'){
+			/* rootdir contains closing backslash, other directories aren't enclosed */
+			_snwprintf(Path,PATH_BUFFER_LENGTH,L"%s%s",ParentDirectoryPath,FileName);
+		} else {
+			_snwprintf(Path,PATH_BUFFER_LENGTH,L"%s\\%s",ParentDirectoryPath,FileName);
 		}
-		wcsncpy(dx->tmp_buf,path->Buffer,length);
-		dx->tmp_buf[length] = 0;
-
-		/* rootdir contains closing backslash, other directories aren't enclosed */
-		if(dx->tmp_buf[length - 1] != '\\'){
-			wcscat(dx->tmp_buf,L"\\");
-			length ++;
-		}
-
-		if((pFileInfo->FileNameLength >> 1) > (TEMP_BUFFER_CHARS - 1 - length)){
-			DebugPrint("-Ultradfg- resulting path is too long: %u bytes!\n",NULL,
-				length + (pFileInfo->FileNameLength >> 1));
-			continue;
-		}
-		wcsncat(dx->tmp_buf,pFileInfo->FileName,(pFileInfo->FileNameLength) >> 1);
+		Path[PATH_BUFFER_LENGTH - 1] = 0;
+		/* and here we cannot use FileName variable! */
 
 		/* VERY IMPORTANT: skip reparse points */
 		/* FIXME: what is reparse point? How to detect these that represents another volumes? */
 		if(IS_REPARSE_POINT(pFileInfo)){
-			DebugPrint("-Ultradfg- Reparse point found\n",dx->tmp_buf);
+			DebugPrint("-Ultradfg- Reparse point found\n",Path);
 			continue;
 		}
 
-		/* skip temporary files - not applicable for the volume optimization */
-		/*if(IS_TEMPORARY_FILE(pFileInfo)){
-			DebugPrint2("-Ultradfg- Temporary file found\n",dx->tmp_buf);
-			continue;
-		}*/
-
 		/*
+		* Skip temporary files:
+		* Not applicable for the volume optimization.
+		*
 		* Skip hard links:
 		* It seems that we don't have any simple way to get information 
 		* on hard links. So we couldn't skip them, although there is safe enough.
 		*/
-		/*if(IS_HARD_LINK(pFileInfo)){
-			DebugPrint("-Ultradfg- Hard link found\n",dx->tmp_buf);
-		}
-		if(wcsstr(dx->tmp_buf,L"HardLink")){
-			DebugPrint("Attributes = %x\n",dx->tmp_buf,pFileInfo->FileAttributes);
-		}*/
 
 		/* UltraDefrag has a full support for sparse files! :D */
 		if(IS_SPARSE_FILE(pFileInfo)){
-			DebugPrint("-Ultradfg- Sparse file found\n",dx->tmp_buf);
+			DebugPrint("-Ultradfg- Sparse file found\n",Path);
 			/* Let's defragment them! :) */
 		}
 
 		if(IS_ENCRYPTED_FILE(pFileInfo)){
-			DebugPrint2("-Ultradfg- Encrypted file found\n",dx->tmp_buf);
+			DebugPrint2("-Ultradfg- Encrypted file found\n",Path);
 		}
 
-		/*
-		* If we don't need to redraw a cluster map and the next operation
-		* will not be the volume optimization, we can skip all filtered out files!
-		*/
-		if(!new_cluster_map && !dx->compact_flag){
-			if(RtlCreateUnicodeString(&temp_path,dx->tmp_buf)){
-				_wcslwr(temp_path.Buffer);
-				/* skip all filtered out files */
-				/* USE THE FOLLOWING CODE ONLY FOR CONTEXT MENU HANDLER: */
-				if(context_menu_handler){
-					if(RtlCreateUnicodeString(&temp_win32_path,dx->tmp_buf + 4)){
-						_wcslwr(temp_win32_path.Buffer);
-						/*
-						* temp_win32_path contains the full path of the current file 
-						* without leading '\??\' sequence
-						*/
-						/* is the current file placed in directory selected in context menu? */
-						/* in other words: are we inside the selected folder? */
-						if(!wcsstr(temp_win32_path.Buffer,
-						  dx->in_filter.buffer + dx->in_filter.offsets->offset)){
-							inside_flag = FALSE;
-							/* is current path a part of the path selected in context menu? */
-							/* in other words: are we going in right direction? */
-							if(!wcsstr(dx->in_filter.buffer + dx->in_filter.offsets->offset,
-							  temp_win32_path.Buffer)){
-								DebugPrint1("-Ultradfg- Not included:\n",temp_path.Buffer);
-								RtlFreeUnicodeString(&temp_win32_path);
-								RtlFreeUnicodeString(&temp_path); continue;
-							}
-						} else {
-							inside_flag = TRUE;
-						}
-						RtlFreeUnicodeString(&temp_win32_path);
-					}else{
-						DebugPrint2("-Ultradfg- cannot allocate memory for the temp_win32_path !\n",NULL);
-						inside_flag = TRUE;
-					}
-				}
-				/*
-				* To speed up the analysis in console/native apps 
-				* set UD_EX_FILTER option, to speed up both analysis 
-				* and defragmentation set UD_IN_FILTER and UD_EX_FILTER options.
-				*/
-				if(dx->ex_filter.buffer){
-					if(IsStringInFilter(temp_path.Buffer,&dx->ex_filter)){
-						DebugPrint1("-Ultradfg- Excluded:\n",temp_path.Buffer);
-						RtlFreeUnicodeString(&temp_path); continue;
-					}
-				}
-				RtlFreeUnicodeString(&temp_path);
-			} else DebugPrint2("-Ultradfg- cannot allocate memory for the temp_path !\n",NULL);
-		}
-		
-		if(!RtlCreateUnicodeString(&new_path,dx->tmp_buf)){
-			DebugPrint2("-Ultradfg- cannot allocate memory for the new_path!\n",NULL);
-			ZwClose(DirectoryHandle); ExFreePoolSafe(pFileInfoFirst);
-			return FALSE;
-		}
-
-		if(IS_DIR(pFileInfo)){
-			/*if(IS_COMPRESSED(pFileInfo)){
-				DebugPrint("-Ultradfg- Compressed directory found\n",new_path.Buffer);
-			}*/
-			FindFiles(dx,&new_path);
-		} else {
-			if(!pFileInfo->EndOfFile.QuadPart){ /* file is empty */
-				RtlFreeUnicodeString(&new_path); continue;
-			}
-		}
-		
-		/* skip parent directories in context menu handler */
-		if(context_menu_handler && !inside_flag){
-			RtlFreeUnicodeString(&new_path);
+		if(ConsoleUnwantedStuffDetected(dx,Path,&inside_flag)){
+			///DbgPrint("excluded = %ws\n",dx->tmp_buf);
 			continue;
 		}
-		if(!InsertFileName(dx,new_path.Buffer,pFileInfo)){
-			DebugPrint("-Ultradfg- InsertFileName failed for\n",new_path.Buffer);
+
+		/*if(IS_DIR(pFileInfo) && IS_COMPRESSED(pFileInfo))
+			DebugPrint("-Ultradfg- Compressed directory found\n",Path);
+		*/
+
+		if(IS_DIR(pFileInfo)) FindFiles(dx,Path);
+		else if(!pFileInfo->EndOfFile.QuadPart) continue; /* file is empty */
+		
+		/* skip parent directories in context menu handler */
+		if(context_menu_handler && !inside_flag) continue;
+
+		if(!InsertFileName(dx,Path,pFileInfo)){
+			DebugPrint("-Ultradfg- InsertFileName failed for\n",Path);
 			ZwClose(DirectoryHandle);
-			RtlFreeUnicodeString(&new_path); ExFreePoolSafe(pFileInfoFirst);
+			ExFreePoolSafe(pFileInfoFirst);
+			ExFreePoolSafe(Path);
 			return FALSE;
 		}
-		RtlFreeUnicodeString(&new_path);
 	}
 
 	ZwClose(DirectoryHandle);
 	Nt_ExFreePool(pFileInfoFirst);
+	Nt_ExFreePool(Path);
     return TRUE;
 }
 
@@ -395,5 +326,71 @@ BOOLEAN UnwantedStuffOnFatOrUdfDetected(UDEFRAG_DEVICE_EXTENSION *dx,
 	}
 	RtlFreeUnicodeString(&us);
 
+	return FALSE;
+}
+
+/*
+* If we don't need to redraw a cluster map and the next operation
+* will not be the volume optimization, we can skip all filtered out files!
+*/
+/*
+* InsideFlag is applicable only for context menu handler.
+* TRUE indicates that we are inside the selected directory
+* and we need to save information about specified file.
+* FALSE indicates that we are going in right direction
+* and we must scan specified parent directory for files,
+* but we don't need to save information about 
+* this parent directory itself.
+*/
+BOOLEAN ConsoleUnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path,ULONG *InsideFlag)
+{
+	WCHAR *lpath = NULL;
+	ULONG path_length;
+
+	/* let's assume that we are inside directory selected in context menu handler */
+	if(InsideFlag) *InsideFlag = TRUE;
+	
+	if(new_cluster_map || dx->compact_flag) return FALSE;
+	
+	/* allocate memory for Path converted to lowercase */
+	path_length = wcslen(Path);
+	if(path_length < 4) return FALSE; /* because must contain \??\ sequence */
+	lpath = (WCHAR *)AllocatePool(PagedPool,(path_length + 1) * sizeof(WCHAR));
+	if(lpath == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for ConsoleUnwantedStuffDetected()!\n",NULL);
+		return FALSE;
+	}
+	wcscpy(lpath,Path);
+	_wcslwr(lpath);
+	
+	/* USE THE FOLLOWING CODE ONLY FOR CONTEXT MENU HANDLER: */
+	if(context_menu_handler){
+		/* is the current file placed in directory selected in context menu? */
+		/* in other words: are we inside the selected folder? */
+		if(!wcsstr(lpath,dx->in_filter.buffer + dx->in_filter.offsets->offset)){
+			if(InsideFlag) *InsideFlag = FALSE;
+			/* is current path a part of the path selected in context menu? */
+			/* in other words: are we going in right direction? */
+			if(!wcsstr(dx->in_filter.buffer + dx->in_filter.offsets->offset,lpath + 4)){
+				DebugPrint1("-Ultradfg- Not included:\n",Path);
+				ExFreePoolSafe(lpath);
+				return TRUE;
+			}
+		}
+	}
+
+	/*
+	* To speed up the analysis in console/native apps 
+	* set UD_EX_FILTER option, to speed up both analysis 
+	* and defragmentation set UD_IN_FILTER and UD_EX_FILTER options.
+	*/
+	if(dx->ex_filter.buffer){
+		if(IsStringInFilter(lpath,&dx->ex_filter)){
+			DebugPrint1("-Ultradfg- Excluded:\n",Path);
+			ExFreePoolSafe(lpath);
+			return TRUE;
+		}
+	}
+	ExFreePoolSafe(lpath);
 	return FALSE;
 }

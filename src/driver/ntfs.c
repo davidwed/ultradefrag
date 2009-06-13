@@ -165,6 +165,7 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	status = GetMftLayout(dx);
 	if(!NT_SUCCESS(status)){
 		DebugPrint("-Ultradfg- ProcessMFT() failed!\n",NULL);
+		DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
 		return FALSE; /* FIXME: better error handling */
 	}
 

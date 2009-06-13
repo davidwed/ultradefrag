@@ -254,20 +254,15 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 		/* few kb from nonpaged pool */
 		dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
 		dx->BitMap = AllocatePool(NonPagedPool,BITMAPSIZE * sizeof(UCHAR));
-		if(!dx->FileMap || !dx->BitMap) goto no_mem;
-	}
-	/* 64 kb from paged pool */
-	dx->tmp_buf = AllocatePool(PagedPool,TEMP_BUFFER_CHARS * sizeof(short));
-	if(!dx->tmp_buf){
-no_mem:
-		DebugPrint("-Ultradfg- cannot allocate memory for FileMap, BitMap and tmp_buf!\n",NULL);
-		if(!nt4_system){
-			ExFreePoolSafe(dx->FileMap);
-			ExFreePoolSafe(dx->BitMap);
+		if(!dx->FileMap || !dx->BitMap){
+			DebugPrint("-Ultradfg- cannot allocate memory for FileMap and BitMap!\n",NULL);
+			if(!nt4_system){
+				ExFreePoolSafe(dx->FileMap);
+				ExFreePoolSafe(dx->BitMap);
+			}
+			driver_entry_cleanup(DriverObject);
+			return STATUS_NO_MEMORY;
 		}
-		ExFreePoolSafe(dx->tmp_buf);
-		driver_entry_cleanup(DriverObject);
-		return STATUS_NO_MEMORY;
 	}
 
 	DebugPrint("=Ultradfg= Main FDO %p, DevExt=%p\n",NULL,dx->fdo,dx);
@@ -709,7 +704,6 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 				ExFreePoolSafe(dx->FileMap);
 				ExFreePoolSafe(dx->BitMap);
 			}
-			ExFreePoolSafe(dx->tmp_buf);
 			ExFreePoolSafe(new_cluster_map);
 			DestroyFilter(dx);
 		}

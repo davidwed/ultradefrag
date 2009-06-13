@@ -403,7 +403,7 @@ typedef struct _tagFILENAME {
 	BOOLEAN is_overlimit;
 	BOOLEAN is_filtered;
 	BOOLEAN is_reparse_point;
-	BOOLEAN is_dirty; /* it means: not all members of the structure are set */
+	BOOLEAN is_dirty; /* for ntfs scan it means: not all members of the structure are set */
 	ULONGLONG BaseMftId; /* ancillary field - valid on NTFS volumes only */
 } FILENAME, *PFILENAME;
 
@@ -512,7 +512,6 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	MARKER z_end;
 	ULONGLONG *FileMap; /* Buffer to read file mapping information into */
 	UCHAR *BitMap;
-	short *tmp_buf;
 	FILTER in_filter;
 	FILTER ex_filter;
 	HANDLE hVol;
@@ -539,7 +538,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 
 /* Function Prototypes */
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
-BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,UNICODE_STRING *path);
+BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
 void DbgPrintFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -710,5 +709,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanFat12Partition(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanFat32Partition(UDEFRAG_DEVICE_EXTENSION *dx);
+
+BOOLEAN ConsoleUnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path,ULONG *InsideFlag);
 
 #endif /* _DRIVER_H_ */

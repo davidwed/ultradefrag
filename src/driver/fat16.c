@@ -47,17 +47,32 @@ BOOLEAN ScanFat16RootDirectory(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN AnalyseFat16DirEntry(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath);
 void ProcessFat16File(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *FileName);
 void ScanFat16Directory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *DirName);
+BOOLEAN InsertFileToFileList(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Path);
+BOOLEAN UnwantedStuffOnFatDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path);
+void DumpFat16File(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,PFILENAME pfn);
+
+/*----------------- FAT16 related code ----------------------*/
 
 BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
+	ULONGLONG tm;
+	
+	DebugPrint("-Ultradfg- FAT16 scan started!\n",NULL);
+	tm = _rdtsc();
+
 	/* cache file allocation table */
-	if(!InitFat16(dx)) return FALSE;
+	if(!InitFat16(dx)){
+		DebugPrint("-Ultradfg- FAT16 scan finished!\n",NULL);
+		return FALSE;
+	}
 	
 	/* scan filesystem */
 	ScanFat16RootDirectory(dx);
 	
 	/* free allocated resources */
 	ExFreePoolSafe(Fat16);
+	DebugPrint("-Ultradfg- FAT16 scan finished!\n",NULL);
+	DbgPrint("FAT16 scan needs %I64u ms\n",_rdtsc() - tm);
 	return TRUE;
 }
 
@@ -103,7 +118,7 @@ BOOLEAN ScanFat16RootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 	DIRENTRY *RootDir = NULL;
 	NTSTATUS Status;
 	USHORT i;
-	WCHAR Path[] = L"A:\\";
+	WCHAR Path[] = L"\\??\\A:\\";
 	
 	/* Initialize LongName related global variables before directories scan. */
 	LongNameOffset = LONG_PATH_OFFSET_MAX_VALUE;
@@ -134,7 +149,7 @@ BOOLEAN ScanFat16RootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	
 	/* analyse root directory contents */
-	Path[0] = (WCHAR)(dx->letter);
+	Path[4] = (WCHAR)(dx->letter);
 	for(i = 0; i < RootDirEntries; i++){
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		if(!AnalyseFat16DirEntry(dx,&(RootDir[i]),Path)) break;
@@ -302,29 +317,6 @@ BOOLEAN AnalyseFat16DirEntry(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCH
 	return TRUE;
 }
 
-/* adds a file to dx->filelist, if it is a directory - scans it */
-void ProcessFat16File(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *FileName)
-{
-	BOOLEAN IsDir = FALSE;
-	
-	DbgPrint("%ws%ws\n",ParentDirPath,FileName);
-	
-	/* skip volume label */
-	if(DirEntry->Attr & ATTR_VOLUME_ID){
-		DebugPrint("-Ultradfg- Volume label = \n",FileName);
-		return;
-	}
-	
-	/* decide is current file directory or not */
-	if(DirEntry->Attr & ATTR_DIRECTORY) IsDir = TRUE;
-	
-	/* add file to dx->filelist */
-	
-	/* if directory found scan it */
-	if(IsDir == FALSE) return;
-	ScanFat16Directory(dx,DirEntry,ParentDirPath,FileName);
-}
-
 void ScanFat16Directory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *DirName)
 {
 	WCHAR *DirPath = NULL; /* including closing backslash */
@@ -391,4 +383,194 @@ void ScanFat16Directory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *P
 	/* free allocated resources */
 	ExFreePoolSafe(DirPath);
 	ExFreePoolSafe(Dir);
+}
+
+/*------------------------ Defragmentation related code ------------------------------*/
+
+/* adds a file to dx->filelist, if it is a directory - scans it */
+void ProcessFat16File(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *FileName)
+{
+	WCHAR *Path = NULL;
+	BOOLEAN IsDir = FALSE;
+	ULONG InsideFlag = TRUE; /* for context menu handler */
+	
+	//DbgPrint("%ws%ws\n",ParentDirPath,FileName);
+	
+	/* 1. skip volume label */
+	if(DirEntry->Attr & ATTR_VOLUME_ID){
+		DebugPrint("-Ultradfg- Volume label = \n",FileName);
+		return;
+	}
+	
+	/* 2. decide is current file directory or not */
+	if(DirEntry->Attr & ATTR_DIRECTORY) IsDir = TRUE;
+	
+	/* 3. allocate memory */
+	Path = (WCHAR *)AllocatePool(PagedPool,MAX_LONG_PATH * sizeof(short));
+	if(Path == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for Path in ProcessFat16File()!\n",NULL);
+		return;
+	}
+	
+	/* 4. initialize Path variable */
+	_snwprintf(Path,MAX_LONG_PATH,L"%s%s",ParentDirPath,FileName);
+	Path[MAX_LONG_PATH - 1] = 0;
+
+	
+	/* 5. add file to dx->filelist */
+	/* 5.1 skip unwanted stuff to speed up an analysis in console/native apps */
+	if(ConsoleUnwantedStuffDetected(dx,Path,&InsideFlag)){
+		ExFreePoolSafe(Path);
+		return;
+	}
+	
+	/* 5.2 if directory found scan it */
+	if(IsDir == TRUE)
+		ScanFat16Directory(dx,DirEntry,ParentDirPath,FileName);
+	else if(DirEntry->FileSize == 0){
+		ExFreePoolSafe(Path);
+		return; /* skip empty files */
+	}
+	
+	/* 5.3 skip parent directories in context menu handler */
+	if(context_menu_handler && !InsideFlag){
+		ExFreePoolSafe(Path);
+		return; /* skip empty files */
+	}
+	
+	/* 5.4 insert pfn structure */
+	InsertFileToFileList(dx,DirEntry,Path);
+
+	/* 6. free allocated resources */
+	ExFreePoolSafe(Path);
+}
+
+BOOLEAN InsertFileToFileList(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Path)
+{
+	PFILENAME pfn;
+	ULONGLONG filesize;
+
+	/* Add a file only if we need to have its information cached. */
+	pfn = (PFILENAME)InsertItem((PLIST *)&dx->filelist,NULL,sizeof(FILENAME),PagedPool);
+	if(pfn == NULL) return FALSE;
+	
+	/* Initialize pfn->name field. */
+	if(!RtlCreateUnicodeString(&pfn->name,Path)){
+		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
+		RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
+		return FALSE;
+	}
+
+	/* Set flags. */
+	if(DirEntry->Attr & ATTR_DIRECTORY) pfn->is_dir = TRUE;
+	else pfn->is_dir = FALSE;
+	pfn->is_compressed = pfn->is_reparse_point = FALSE;
+
+	filesize = (ULONGLONG)(DirEntry->FileSize);
+	if(dx->sizelimit && filesize > dx->sizelimit) pfn->is_overlimit = TRUE;
+	else pfn->is_overlimit = FALSE;
+
+	if(UnwantedStuffOnFatDetected(dx,Path)) pfn->is_filtered = TRUE;
+	else pfn->is_filtered = FALSE;
+
+	/* Dump the file. */
+	DumpFat16File(dx,DirEntry,pfn);
+
+	/* Update statistics and cluster map. */
+	dx->filecounter ++;
+	if(pfn->is_dir) dx->dircounter ++;
+	/* skip here filtered out and big files */
+	if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit){
+		dx->fragmfilecounter ++;
+		dx->fragmcounter += pfn->n_fragments;
+	} else {
+		dx->fragmcounter ++;
+	}
+	dx->processed_clusters += pfn->clusters_total;
+	MarkSpace(dx,pfn,SYSTEM_SPACE);
+
+	if(dx->compact_flag || pfn->is_fragm) return TRUE;
+
+	/* 7. Destroy useless data. */
+	DeleteBlockmap(pfn);
+	RtlFreeUnicodeString(&pfn->name);
+	RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
+	return TRUE;
+}
+
+BOOLEAN UnwantedStuffOnFatDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path)
+{
+	UNICODE_STRING us;
+
+	/* skip all unwanted files by user defined patterns */
+	if(!RtlCreateUnicodeString(&us,Path)){
+		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n",NULL);
+		return FALSE;
+	}
+	_wcslwr(us.Buffer);
+
+	if(dx->in_filter.buffer){
+		if(!IsStringInFilter(us.Buffer,&dx->in_filter)){
+			RtlFreeUnicodeString(&us); return TRUE; /* not included */
+		}
+	}
+
+	if(dx->ex_filter.buffer){
+		if(IsStringInFilter(us.Buffer,&dx->ex_filter)){
+			RtlFreeUnicodeString(&us); return TRUE; /* excluded */
+		}
+	}
+	RtlFreeUnicodeString(&us);
+
+	return FALSE;
+}
+
+void DumpFat16File(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,PFILENAME pfn)
+{
+	USHORT ClusterNumber;
+	USHORT PrevClusterNumber = FAT16_EOC;
+	PBLOCKMAP block, prev_block;
+
+	/* reset special fields of pfn structure */
+	pfn->is_fragm = FALSE;
+	pfn->n_fragments = 0;
+	pfn->clusters_total = 0;
+	pfn->blockmap = NULL;
+
+	ClusterNumber = DirEntry->FirstClusterLO;
+	do {
+		if(KeReadStateEvent(&stop_event) == 0x1) goto fail;
+		if(ClusterNumber > (Fat16Entries - 1)){ /* file seems to be invalid */
+			DebugPrint("-Ultradfg- invalid cluster number %u in DumpFat16File()!\n",
+				NULL,(ULONG)ClusterNumber);
+			goto fail;
+		}
+		/* add cluster to blockmap */
+		if(ClusterNumber == (PrevClusterNumber + 1) && pfn->blockmap){
+			pfn->blockmap->prev_ptr->length++;
+			pfn->clusters_total++;
+		} else {
+			if(pfn->blockmap) prev_block = pfn->blockmap->prev_ptr;
+			else prev_block = NULL;
+			block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)prev_block,sizeof(BLOCKMAP),PagedPool);
+			if(!block) goto fail;
+			pfn->n_fragments++;
+			block->lcn = ClusterNumber;
+			block->length = 1;
+			block->vcn = pfn->clusters_total;
+			pfn->clusters_total++;
+		}
+		PrevClusterNumber = ClusterNumber;
+		/* goto the next cluster in chain */
+		ClusterNumber = Fat16[ClusterNumber];
+	} while(ClusterNumber < FAT16_EOC);
+
+	if(pfn->n_fragments > 1) pfn->is_fragm = TRUE;
+	return;
+
+fail:
+	DeleteBlockmap(pfn);
+	pfn->clusters_total = pfn->n_fragments = 0;
+	pfn->is_fragm = FALSE;
+	return;
 }
