@@ -68,6 +68,7 @@ void InitDX(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->hVol = NULL;
 	dx->bytes_per_cluster = 0;
 	dx->bytes_per_sector = 0;
+	dx->sectors_per_cluster = 0;
 	dx->current_operation = 'A';
 }
 

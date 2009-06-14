@@ -523,6 +523,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	UCHAR letter;
 	ULONGLONG bytes_per_cluster;
 	ULONG bytes_per_sector;
+	ULONG sectors_per_cluster;
 	ULONG FatCountOfClusters; /* FAT specific */
 	ULONGLONG sizelimit;
 	BOOLEAN compact_flag;
@@ -711,5 +712,7 @@ BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanFat32Partition(UDEFRAG_DEVICE_EXTENSION *dx);
 
 BOOLEAN ConsoleUnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path,ULONG *InsideFlag);
+
+NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length);
 
 #endif /* _DRIVER_H_ */

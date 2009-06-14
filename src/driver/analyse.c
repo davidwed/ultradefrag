@@ -97,10 +97,10 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	/*case FAT12_PARTITION:
 		ScanFat12Partition(dx);
 		break;
-	*//*case FAT16_PARTITION:
+	*/case FAT16_PARTITION:
 		ScanFat16Partition(dx);
 		break;
-	*//*case FAT32_PARTITION:
+	/*case FAT32_PARTITION:
 		ScanFat32Partition(dx);
 		break;
 	*/default: /* UDF, Ext2 and so on... */
@@ -115,7 +115,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		DbgPrint("An universal scan needs %I64u ms\n",time);
 	}
 	
-	//if(dx->partition_type == FAT16_PARTITION) ScanFat16Partition(dx);
+	///if(dx->partition_type == FAT16_PARTITION) ScanFat16Partition(dx);
 
 	DebugPrint("-Ultradfg- Files found: %u\n",NULL,dx->filecounter);
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",NULL,dx->fragmfilecounter);

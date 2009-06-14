@@ -106,6 +106,7 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 
 	bpc = FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
+	dx->sectors_per_cluster = FileFsSize.SectorsPerAllocationUnit;
 	dx->bytes_per_cluster = bpc;
 	dx->bytes_per_sector = FileFsSize.BytesPerSector;
 	dx->total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;

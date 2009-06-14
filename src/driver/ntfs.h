@@ -304,6 +304,8 @@ typedef struct _NTFS_DATA {
 
 /* internal functions prototypes */
 NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx);
+NTSTATUS GetMftRecordThroughWinAPI(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
+					  ULONG nfrob_size,ULONGLONG mft_id);
 NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 					  ULONG nfrob_size,ULONGLONG mft_id);
 void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
@@ -356,4 +358,9 @@ void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMA
 PFILENAME FindFileListEntryForTheAttribute(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PMY_FILE_INFORMATION pmfi);
 BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,
 		PMY_FILE_INFORMATION pmfi,PFILENAME pfn);
+		
+void ProcessMFTRunList(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_attr);
+void ProcessMFTRun(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn);
+void DestroyMftBlockmap(void);
+
 #endif /* _NTFS_H_ */

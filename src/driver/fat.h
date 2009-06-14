@@ -135,7 +135,6 @@ extern BPB Bpb;
 extern ULONGLONG FirstDataSector;
 
 /* internal function prototypes */
-NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULONG length);
 unsigned char ChkSum (unsigned char *pFcbName);
 
 #endif /* _FAT_H_ */

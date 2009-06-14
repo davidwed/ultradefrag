@@ -46,6 +46,9 @@
 
 /*---------------------------------- NTFS related code -------------------------------------*/
 
+BOOLEAN MaxMftEntriesNumberUpdated = FALSE;
+PBLOCKMAP MftBlockmap = NULL;
+
 /* sets dx->partition_type member */
 void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -192,9 +195,21 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	
 	/* read all MFT records sequentially */
+	MftBlockmap	= NULL;
+	MaxMftEntriesNumberUpdated = FALSE;
 	UpdateMaxMftEntriesNumber(dx,pnfrob,nfrob_size);
 	mft_id = dx->max_mft_entries - 1;
 	DebugPrint("\n",NULL);
+	
+	if(MaxMftEntriesNumberUpdated == FALSE){
+		DebugPrint("-Ultradfg- UpdateMaxMftEntriesNumber() failed!\n",NULL);
+		DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
+		Nt_ExFreePool(pnfrob);
+		Nt_ExFreePool(pmfi);
+		DestroyMftBlockmap();
+		return FALSE; /* FIXME: better error handling */
+	}
+	
 	while(1){
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		status = GetMftRecord(dx,pnfrob,nfrob_size,mft_id);
@@ -204,6 +219,7 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 				Nt_ExFreePool(pnfrob);
 				Nt_ExFreePool(pmfi);
 				DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
+				DestroyMftBlockmap();
 				return FALSE;
 			}
 			/* it returns 0xc000000d (invalid parameter) for non existing records */
@@ -226,6 +242,7 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* free allocated memory */
 	Nt_ExFreePool(pnfrob);
 	Nt_ExFreePool(pmfi);
+	DestroyMftBlockmap();
 
 	DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
 	time = _rdtsc() - tm;
@@ -239,8 +256,8 @@ void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
 	NTSTATUS status;
 	PFILE_RECORD_HEADER pfrh;
 
-	/* Get record for FILE_MFT. */
-	status = GetMftRecord(dx,pnfrob,nfrob_size,FILE_MFT);
+	/* Get record for FILE_MFT using WinAPI, because MftBitmap is not ready yet. */
+	status = GetMftRecordThroughWinAPI(dx,pnfrob,nfrob_size,FILE_MFT);
 	if(!NT_SUCCESS(status)){
 		DebugPrint("-Ultradfg- UpdateMaxMftEntriesNumber(): FSCTL_GET_NTFS_FILE_RECORD failed: %x!\n",NULL,status);
 		return;
@@ -257,6 +274,10 @@ void UpdateMaxMftEntriesNumber(UDEFRAG_DEVICE_EXTENSION *dx,
 			NULL,pfrh->Ntfs.Type);
 		return;
 	}
+	if(!(pfrh->Flags & 0x1)){
+		DebugPrint("-Ultradfg- UpdateMaxMftEntriesNumber() failed - FILE_MFT record marked as free.\n",NULL);
+		return; /* skip free records */
+	}
 	
 	EnumerateAttributes(dx,pfrh,UpdateMaxMftEntriesNumberCallback,NULL);
 }
@@ -269,14 +290,67 @@ void __stdcall UpdateMaxMftEntriesNumberCallback(UDEFRAG_DEVICE_EXTENSION *dx,
 
 	if(pattr->Nonresident && pattr->AttributeType == AttributeData){
 		pnr_attr = (PNONRESIDENT_ATTRIBUTE)pattr;
-		if(dx->ntfs_record_size)
+		if(dx->ntfs_record_size){
 			dx->max_mft_entries = pnr_attr->DataSize / dx->ntfs_record_size;
+			ProcessMFTRunList(dx,pnr_attr);
+			/* FIXME: check correctness of MftBlockmap */
+			MaxMftEntriesNumberUpdated = TRUE;
+		}
 		DebugPrint("-Ultradfg- MFT contains no more than %I64u records (more accurately)\n",NULL,
 			dx->max_mft_entries);
 	}
 }
 
-NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
+/* Saves information about VCN/LCN pairs of the $MFT file. */
+void ProcessMFTRunList(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_attr)
+{
+	PUCHAR run;
+	ULONGLONG lcn, vcn, length;
+
+	/* loop through runs */
+	lcn = 0; vcn = pnr_attr->LowVcn;
+	run = (PUCHAR)((char *)pnr_attr + pnr_attr->RunArrayOffset);
+	while(*run){
+		lcn += RunLCN(run);
+		length = RunCount(run);
+		
+		/* skip virtual runs */
+		if(RunLCN(run)){
+			/* check for data consistency */
+			if((lcn + length) > dx->clusters_total){
+				DebugPrint("-Ultradfg- Error in MFT found, run Check Disk program!\n",NULL);
+				break;
+			}
+			ProcessMFTRun(dx,vcn,length,lcn);
+		}
+		
+		/* go to the next run */
+		run += RunLength(run);
+		vcn += length;
+	}
+}
+
+void ProcessMFTRun(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn)
+{
+	PBLOCKMAP block, prev_block = NULL;
+	
+	/* add information to MftBlockmap */
+	if(MftBlockmap) prev_block = MftBlockmap->prev_ptr;
+	block = (PBLOCKMAP)InsertItem((PLIST *)(PVOID)&MftBlockmap,(PLIST)prev_block,sizeof(BLOCKMAP),PagedPool);
+	if(!block) return;
+	
+	block->vcn = vcn;
+	block->length = length;
+	block->lcn = lcn;
+}
+
+void DestroyMftBlockmap(void)
+{
+	DestroyList((PLIST *)(PVOID)&MftBlockmap);
+}
+
+/* it seems that Win API works very slow here */
+NTSTATUS GetMftRecordThroughWinAPI(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 					  ULONG nfrob_size,ULONGLONG mft_id)
 {
 	NTFS_FILE_RECORD_INPUT_BUFFER nfrib;
@@ -299,6 +373,95 @@ NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 	return status;
 }
 
+NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
+					  ULONG nfrob_size,ULONGLONG mft_id)
+{
+	ULONGLONG vsn; /* virtual sector number */
+	ULONGLONG offset;
+	PBLOCKMAP block;
+	USHORT SectorsToRead, N, K, i;
+	signed long size;
+	UCHAR *Sectors = NULL;
+	FILE_RECORD_HEADER *pfrh;
+	ULONGLONG lsn, FirstSector;
+	NTSTATUS Status;
+	
+	/* validate length of pnfrob structure */
+	if(nfrob_size < (sizeof(NTFS_FILE_RECORD_OUTPUT_BUFFER) + dx->ntfs_record_size - 1))
+		return STATUS_INVALID_PARAMETER;
+
+	/* calculate vsn and offset for specified record */
+	offset = mft_id * dx->ntfs_record_size;
+	vsn = offset / dx->bytes_per_sector;
+	offset = offset % dx->bytes_per_sector;
+	/* calculate number of sectors to read */
+	SectorsToRead = 1;
+	size = dx->ntfs_record_size - (dx->bytes_per_sector - offset);
+	while(size > 0){
+		SectorsToRead ++;
+		size -= dx->bytes_per_sector;
+	}
+	
+	/* allocate memory for SectorsToRead number of sectors */
+	Sectors = (UCHAR *)AllocatePool(NonPagedPool,SectorsToRead * dx->bytes_per_sector);
+	if(Sectors == NULL){
+		DebugPrint("-Ultradfg- no enough memory for GetMftRecord()!\n",NULL);
+		return STATUS_INSUFFICIENT_RESOURCES;
+	}
+	
+	/* search for specified vsn in MftBlockmap */
+	K = 0;
+	for(block = MftBlockmap; block != NULL; block = block->next_ptr){
+		if((vsn >= block->vcn * dx->sectors_per_cluster) && \
+		   (vsn < (block->vcn + block->length) * dx->sectors_per_cluster)
+		   ){
+			/* read sectors from the current run */
+			N = min(SectorsToRead,(block->vcn + block->length) * dx->sectors_per_cluster - vsn);
+			/* read N sectors to allocated buffer */
+			lsn = block->lcn * dx->sectors_per_cluster + (vsn - block->vcn * dx->sectors_per_cluster);
+			FirstSector = lsn;
+			for(i = 0; i < N; i++){
+				Status = ReadSectors(dx,FirstSector,(PVOID)((Sectors + K) + i * dx->bytes_per_sector),dx->bytes_per_sector);
+				if(!NT_SUCCESS(Status)){
+					DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
+						NULL,FirstSector,(UINT)Status);
+					ExFreePoolSafe(Sectors);
+					return Status;
+				}
+				/* skip free records */
+				if((K + i * dx->bytes_per_sector + dx->bytes_per_sector) >= (offset + sizeof(FILE_RECORD_HEADER))){
+					pfrh = (PFILE_RECORD_HEADER)(Sectors + offset);
+					if(!(pfrh->Flags & 0x1)){
+						ExFreePoolSafe(Sectors);
+						return STATUS_NO_MORE_FILES;
+					}
+				}
+				FirstSector ++;
+			}
+			/* correct SectorsToRead, vsn and K */
+			K += N * dx->bytes_per_sector;
+			vsn += N;
+			SectorsToRead -= N;
+			if(SectorsToRead == 0) break;
+		}
+		if(block->next_ptr == MftBlockmap) break;
+	}
+	
+	if(SectorsToRead){
+		DebugPrint("-Ultradfg- MftBlockmap invalid?\n",NULL);
+		ExFreePoolSafe(Sectors);
+		return STATUS_INVALID_PARAMETER;
+	}
+
+	/* fill nfrob structure members */
+	pnfrob->FileReferenceNumber = mft_id;
+	pnfrob->FileRecordLength = dx->ntfs_record_size;
+	memcpy(pnfrob->FileRecordBuffer,Sectors + offset,dx->ntfs_record_size);
+	
+	ExFreePoolSafe(Sectors);
+	return STATUS_SUCCESS;
+}
+
 void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 					  ULONG nfrob_size,PMY_FILE_INFORMATION pmfi)
 {
@@ -311,6 +474,7 @@ void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
 
 	if(pfrh->Ntfs.Type != TAG('F','I','L','E')) return;
+	if(!(pfrh->Flags & 0x1)) return; /* skip free records */
 	
 	/* analyse file record */
 	#ifdef DETAILED_LOGGING
@@ -651,6 +815,15 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 		return;
 	}
 
+	/* analyse filename attributes */
+	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
+	if(!(pfrh->Flags & 0x1)){
+		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n",NULL);
+		DebugPrint("-Ultradfg- %I64u record marked as free.\n",NULL,mft_id);
+		Nt_ExFreePool(pnfrob);
+		return; /* skip free records */
+	}
+
 	/* allocate memory for MY_FILE_INFORMATION structure */
 	pmfi = (PMY_FILE_INFORMATION)AllocatePool(NonPagedPool,sizeof(MY_FILE_INFORMATION));
 	if(!pmfi){
@@ -660,9 +833,6 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 		return;
 	}
 	
-	/* analyse filename attributes */
-	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
-
 	pmfi->BaseMftId = mft_id;
 	pmfi->ParentDirectoryMftId = FILE_root;
 	pmfi->Flags = 0x0;
@@ -783,6 +953,12 @@ void AnalyseAttributeFromAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PATTRIBUTE_L
 			NULL,child_record_mft_id,pfrh->Ntfs.Type);
 		Nt_ExFreePool(pnfrob);
 		return;
+	}
+	if(!(pfrh->Flags & 0x1)){
+		DebugPrint("-Ultradfg- AnalyseAttributeFromAttributeList() failed\n",NULL);
+		DebugPrint("-Ultradfg- %I64u record marked as free.\n",NULL,child_record_mft_id);
+		Nt_ExFreePool(pnfrob);
+		return; /* skip free records */
 	}
 
 	if(pfrh->BaseFileRecord == 0){
