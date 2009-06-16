@@ -52,6 +52,8 @@ BOOLEAN MaxMftEntriesNumberUpdated = FALSE;
 PBLOCKMAP MftBlockmap = NULL;
 ULONGLONG MftClusters = 0; /* never access this variable if MaxMftEntriesNumberUpdated is not TRUE */
 
+BOOLEAN ResidentDirectory;
+
 /* sets dx->partition_type member */
 void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -214,9 +216,10 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 
 	/* Is MFT size an integral of NTFS record size? */
-	if(MftClusters == 0 || \
+	/*if(MftClusters == 0 || \
 	  (MftClusters * (ULONGLONG)dx->bytes_per_cluster % (ULONGLONG)dx->ntfs_record_size) || \
-	  (dx->ntfs_record_size % dx->bytes_per_sector)){
+	  (dx->ntfs_record_size % dx->bytes_per_sector)){*/
+	if(TRUE){
 		MftScanDirection = MFT_SCAN_RTL;
 		while(1){
 			if(KeReadStateEvent(&stop_event) == 0x1) break;
@@ -255,6 +258,9 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 	Nt_ExFreePool(pnfrob);
 	Nt_ExFreePool(pmfi);
 	DestroyMftBlockmap();
+	
+	/* Build paths. */
+	BuildPaths(dx);
 
 	DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
 	time = _rdtsc() - tm;
@@ -737,7 +743,7 @@ void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 	pmfi->ParentDirectoryMftId = FILE_root;
 	pmfi->Flags = 0x0;
 	
-	/* FIXME: L:\.:$SECURITY_DESCRIPTOR ? */
+	/* FIXME: L:\.:$SECURITY_DESCRIPTOR ?! */
 	pmfi->IsDirectory = (pfrh->Flags & 0x2) ? TRUE : FALSE;
 	
 	pmfi->IsReparsePoint = FALSE;
@@ -745,6 +751,8 @@ void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 	pmfi->PathBuilt = FALSE;
 	memset(pmfi->Name,0,MAX_NTFS_PATH);
 
+	ResidentDirectory = TRUE; /* let's assume that we have a resident directory */
+	
 	/* skip AttributeList attributes */
 	EnumerateAttributes(dx,pfrh,AnalyseAttributeCallback,pmfi);
 	
@@ -752,6 +760,10 @@ void AnalyseMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 	
 	/* analyse AttributeList attributes */
 	EnumerateAttributes(dx,pfrh,AnalyseAttributeListCallback,pmfi);
+	
+	/* add resident directories to filelist - required by BuildPath() */
+	if(pmfi->IsDirectory && ResidentDirectory)
+		AddResidentDirectoryToFileList(dx,pmfi);
 	
 	/* update cluster map and statistics */
 	UpdateClusterMapAndStatistics(dx,pmfi);
@@ -928,6 +940,9 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	#endif
 	
 	pmfi->PathBuilt = TRUE; /* in any case ;-) */
+	
+	/* return immediately to speed up an analysis :-D */
+	return;
 		
 	if(pmfi->Name[0] == 0) return;
 		
@@ -1296,6 +1311,8 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 		Nt_ExFreePool(full_path);
 		return;
 	}
+
+	/* do not append $I30 attributes - required by GetFileNameAndParentMftId() */
 	
 	if(pnr_attr->Attribute.NameLength){
 		/* append a name of attribute to filename */
@@ -1303,13 +1320,19 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 		wcsncpy(attr_name,(short *)((char *)pnr_attr + pnr_attr->Attribute.NameOffset),
 			pnr_attr->Attribute.NameLength);
 		attr_name[pnr_attr->Attribute.NameLength] = 0;
-		_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
+		if(wcscmp(attr_name,L"$I30") != 0){
+			_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
+		} else {
+			wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
+			ResidentDirectory = FALSE;
+		}
 	} else {
 		/* append default name of attribute to filename */
 		if(wcscmp(default_attr_name,L"$DATA")){
 			_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,default_attr_name);
 		} else {
 			wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
+			ResidentDirectory = FALSE; /* let's assume that */
 		}
 	}
 	full_path[MAX_NTFS_PATH - 1] = 0;
@@ -1491,8 +1514,11 @@ PFILENAME FindFileListEntryForTheAttribute(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *f
 		} else {
 			if(pfn->BaseMftId < pmfi->BaseMftId) break;
 		}
-		/* if(!wcscmp(pfn->name.Buffer,full_path))	return pfn; // very slow */
-		if(pfn->BaseMftId == pmfi->BaseMftId) return pfn; /* safe? */
+		if(!wcscmp(pfn->name.Buffer,full_path) && \
+		  (pfn->ParentDirectoryMftId == pmfi->ParentDirectoryMftId) && \
+		  (pfn->BaseMftId == pmfi->BaseMftId))
+			return pfn; /* very slow? */
+		//if(pfn->BaseMftId == pmfi->BaseMftId) return pfn; /* safe? */
 		if(pfn->next_ptr == dx->filelist) break;
 	}
 	
@@ -1507,6 +1533,8 @@ PFILENAME FindFileListEntryForTheAttribute(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *f
 	}
 	pfn->blockmap = NULL; /* !!! */
 	pfn->BaseMftId = pmfi->BaseMftId;
+	pfn->ParentDirectoryMftId = pmfi->ParentDirectoryMftId;
+	pfn->PathBuilt = FALSE;
 	pfn->n_fragments = 0;
 	pfn->clusters_total = 0;
 	pfn->is_fragm = FALSE;
@@ -1605,4 +1633,194 @@ BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,
 	RtlFreeUnicodeString(&us);
 
 	return FALSE;
+}
+
+void BuildPaths(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	PFILENAME pfn;
+	
+	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+		BuildPath2(dx,pfn);
+		if(pfn->next_ptr == dx->filelist) break;
+	}
+}
+
+void BuildPath2(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
+{
+	WCHAR *buffer1;
+	WCHAR *buffer2;
+	ULONG offset;
+	ULONGLONG mft_id,parent_mft_id;
+	ULONG name_length;
+	WCHAR header[] = L"\\??\\A:";
+	BOOLEAN FullPathRetrieved = FALSE;
+	UNICODE_STRING us;
+	
+	/* allocate memory */
+	buffer1 = (WCHAR *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH) * sizeof(short));
+	if(!buffer1){
+		DebugPrint("-Ultradfg- BuildPath(): cannot allocate memory for buffer1\n",NULL);
+		return;
+	}
+	buffer2 = (WCHAR *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH) * sizeof(short));
+	if(!buffer2){
+		DebugPrint("-Ultradfg- BuildPath(): cannot allocate memory for buffer2\n",NULL);
+		Nt_ExFreePool(buffer1);
+		return;
+	}
+
+	/* terminate buffer1 with zero */
+	offset = MAX_NTFS_PATH - 1;
+	buffer1[offset] = 0; /* terminating zero */
+	offset --;
+	
+	/* copy filename to the right side of buffer1 */
+	name_length = wcslen(pfn->name.Buffer);
+	if(offset < (name_length - 1)){
+		DebugPrint("-Ultradfg- BuildPath2(): filename is too long (%u characters)\n",
+			pfn->name.Buffer,name_length);
+		Nt_ExFreePool(buffer1);
+		Nt_ExFreePool(buffer2);
+		return;
+	}
+
+	offset -= (name_length - 1);
+	wcsncpy(buffer1 + offset,pfn->name.Buffer,name_length);
+
+	if(offset == 0) goto path_is_too_long;
+	offset --;
+	
+	/* add backslash */
+	buffer1[offset] = '\\';
+	offset --;
+	
+	if(offset == 0) goto path_is_too_long;
+
+	parent_mft_id = pfn->ParentDirectoryMftId;
+	while(parent_mft_id != FILE_root){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+		mft_id = parent_mft_id;
+		FullPathRetrieved = GetFileNameAndParentMftId(dx,mft_id,&parent_mft_id,buffer2,MAX_NTFS_PATH);
+		if(buffer2[0] == 0){
+			DebugPrint("-Ultradfg- BuildPath2(): cannot retrieve parent directory name!\n",NULL);
+			goto build_path_done;
+		}
+		//DbgPrint("%ws\n",buffer2);
+		/* append buffer2 contents to the right side of buffer1 */
+		name_length = wcslen(buffer2);
+		if(offset < (name_length - 1)) goto path_is_too_long;
+		offset -= (name_length - 1);
+		wcsncpy(buffer1 + offset,buffer2,name_length);
+		
+		if(FullPathRetrieved) goto update_filename;
+		
+		if(offset == 0) goto path_is_too_long;
+		offset --;
+		/* add backslash */
+		buffer1[offset] = '\\';
+		offset --;
+		if(offset == 0) goto path_is_too_long;
+	}
+	
+	/* append volume letter */
+	header[4] = dx->letter;
+	name_length = wcslen(header);
+	if(offset < (name_length - 1)) goto path_is_too_long;
+	offset -= (name_length - 1);
+	wcsncpy(buffer1 + offset,header,name_length);
+
+update_filename:	
+	/* replace pfn->name contents with full path */
+	//wcsncpy(pmfi->Name,buffer1 + offset,MAX_NTFS_PATH);
+	//pmfi->Name[MAX_NTFS_PATH - 1] = 0;
+	if(!RtlCreateUnicodeString(&us,buffer1 + offset)){
+		DebugPrint2("-Ultradfg- cannot allocate memory for BuildPath2()!\n",NULL);
+	} else {
+		RtlFreeUnicodeString(&(pfn->name));
+		pfn->name.Buffer = us.Buffer;
+		pfn->name.Length = us.Length;
+		pfn->name.MaximumLength = us.MaximumLength;
+	}
+	pfn->PathBuilt = TRUE;
+	
+	#ifdef DETAILED_LOGGING
+	DebugPrint("-Ultradfg- FULL PATH =\n",pfn->name.Buffer);
+	#endif
+	
+build_path_done:
+	Nt_ExFreePool(buffer1);
+	Nt_ExFreePool(buffer2);
+	return;
+	
+path_is_too_long:
+	DebugPrint("-Ultradfg- BuildPath2(): path is too long:\n",buffer1);
+	Nt_ExFreePool(buffer1);
+	Nt_ExFreePool(buffer2);
+}
+
+BOOLEAN GetFileNameAndParentMftId(UDEFRAG_DEVICE_EXTENSION *dx,
+		ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length)
+{
+	PFILENAME pfn;
+	BOOLEAN FullPathRetrieved = FALSE;
+	BOOLEAN DirectoryFound = FALSE;
+	
+	/* initialize data */
+	buffer[0] = 0;
+	*parent_mft_id = FILE_root;
+
+	/* find an appropriate pfn structure */
+	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(pfn->BaseMftId == mft_id){
+			if(wcsstr(pfn->name.Buffer,L":$") == NULL){
+				DirectoryFound = TRUE;
+				break;
+			} else DbgPrint("%ws\n",pfn->name.Buffer);
+		}
+		if(pfn->next_ptr == dx->filelist) break;
+	}
+	
+	if(DirectoryFound == FALSE){
+		DbgPrint("%I64u directory not found!\n",mft_id);
+		return FullPathRetrieved;
+	}
+	
+	/* update data */
+	*parent_mft_id = pfn->ParentDirectoryMftId;
+	wcsncpy(buffer,pfn->name.Buffer,length);
+	buffer[length-1] = 0;
+	FullPathRetrieved = pfn->PathBuilt;
+	return FullPathRetrieved;
+}
+
+void AddResidentDirectoryToFileList(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
+{
+	PFILENAME pfn;
+	
+	pfn = (PFILENAME)InsertItem((PLIST *)&dx->filelist,NULL,sizeof(FILENAME),PagedPool);
+	if(pfn == NULL){
+		DebugPrint2("-Ultradfg- no enough memory for AddResidentDirectoryToFileList()!\n",NULL);
+		return;
+	}
+	
+	/* fill a name member of the created structure */
+	if(!RtlCreateUnicodeString(&pfn->name,pmfi->Name)){
+		DebugPrint2("-Ultradfg- AddResidentDirectoryToFileList():\n",NULL);
+		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
+		RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
+		return;
+	}
+	pfn->blockmap = NULL; /* !!! */
+	pfn->BaseMftId = pmfi->BaseMftId;
+	pfn->ParentDirectoryMftId = pmfi->ParentDirectoryMftId;
+	pfn->PathBuilt = TRUE;
+	pfn->n_fragments = 0;
+	pfn->clusters_total = 0;
+	pfn->is_fragm = FALSE;
+	pfn->is_compressed = FALSE;
+	pfn->is_dir = TRUE;
+	pfn->is_reparse_point = pmfi->IsReparsePoint;
+	pfn->is_overlimit = FALSE;
+	pfn->is_filtered = TRUE;
+	pfn->is_dirty = TRUE;
 }

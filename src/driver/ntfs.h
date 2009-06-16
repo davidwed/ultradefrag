@@ -373,4 +373,10 @@ void ProcessMFTRunList(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_a
 void ProcessMFTRun(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn);
 void DestroyMftBlockmap(void);
 
+void BuildPaths(UDEFRAG_DEVICE_EXTENSION *dx);
+void BuildPath2(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+BOOLEAN GetFileNameAndParentMftId(UDEFRAG_DEVICE_EXTENSION *dx,
+		ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length);
+void AddResidentDirectoryToFileList(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi);
+
 #endif /* _NTFS_H_ */

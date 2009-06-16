@@ -405,6 +405,8 @@ typedef struct _tagFILENAME {
 	BOOLEAN is_reparse_point;
 	BOOLEAN is_dirty; /* for ntfs scan it means: not all members of the structure are set */
 	ULONGLONG BaseMftId; /* ancillary field - valid on NTFS volumes only */
+	ULONGLONG ParentDirectoryMftId;
+	BOOLEAN PathBuilt; /* ntfs specific */
 } FILENAME, *PFILENAME;
 
 #define DeleteBlockmap(pfn) DestroyList((PLIST *)&(pfn)->blockmap)
