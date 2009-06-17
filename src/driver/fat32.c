@@ -28,3 +28,7 @@ BOOLEAN ScanFat32Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	return TRUE;
 }
+
+/*
+* Don't forget to remove fixme comments from DumpFatFile, ScanFatDirectory
+*/

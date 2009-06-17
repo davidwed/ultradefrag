@@ -173,7 +173,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	POFFSET po;
+//	POFFSET po;
 	
 	ExFreePoolSafe(dx->in_filter.buffer);
 	ExFreePoolSafe(dx->ex_filter.buffer);
@@ -190,17 +190,17 @@ for(;;){
 }*/
 /* yes: on w2k ACPI.sys raise blue screen after unloading */
 
-	for(po = dx->in_filter.offsets; po != NULL; po = po->next_ptr){
+/*	for(po = dx->in_filter.offsets; po != NULL; po = po->next_ptr){
 		DebugPrint("-Ultradfg- in_po = %p next = %p prev = %p\n",NULL,po,po->next_ptr,po->prev_ptr);
 		if(po->next_ptr == dx->in_filter.offsets) break;
 	}
-
+*/
 	DestroyList((PLIST *)&dx->in_filter.offsets);
 
-	for(po = dx->ex_filter.offsets; po != NULL; po = po->next_ptr){
+/*	for(po = dx->ex_filter.offsets; po != NULL; po = po->next_ptr){
 		DebugPrint("-Ultradfg- ex_po = %p next = %p prev = %p\n",NULL,po,po->next_ptr,po->prev_ptr);
 		if(po->next_ptr == dx->ex_filter.offsets) break;
 	}
-
+*/
 	DestroyList((PLIST *)&dx->ex_filter.offsets);
 }

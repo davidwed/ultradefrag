@@ -133,8 +133,25 @@ typedef struct _LONGDIRENTRY {
 /* global variables */
 extern BPB Bpb;
 extern ULONGLONG FirstDataSector;
+extern ULONG FatEntries;
 
 /* internal function prototypes */
 unsigned char ChkSum (unsigned char *pFcbName);
+
+#define LONG_PATH_OFFSET_MAX_VALUE (MAX_LONG_PATH - 1)
+
+BOOLEAN ScanFat1xRootDirectory(UDEFRAG_DEVICE_EXTENSION *dx);
+BOOLEAN AnalyseFatDirEntry(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath);
+
+void ProcessFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *FileName);
+void ScanFatDirectory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *ParentDirPath,WCHAR *DirName);
+
+void DumpFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,PFILENAME pfn);
+BOOLEAN InsertFileToFileList(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Path);
+BOOLEAN UnwantedStuffOnFatDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path);
+
+ULONG GetNextClusterInFat12Chain(UDEFRAG_DEVICE_EXTENSION *dx,ULONG ClusterNumber);
+ULONG GetNextClusterInFat16Chain(UDEFRAG_DEVICE_EXTENSION *dx,ULONG ClusterNumber);
+ULONG GetNextClusterInChain(UDEFRAG_DEVICE_EXTENSION *dx,ULONG ClusterNumber);
 
 #endif /* _FAT_H_ */

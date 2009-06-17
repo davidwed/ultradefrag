@@ -21,6 +21,21 @@
 * Fragmentation analyse engine.
 */
 
+/*
+* NOTE: the following file systems will be analysed 
+* through reading their structures directly from disk
+* and interpreting them: NTFS, FAT12, FAT16, FAT32.
+*
+* UDF filesystem is missing in this list, because its
+* standard is too complicated (http://www.osta.org/specs/).
+* Therefore it will be analysed through standard Windows API.
+*
+* Why a special code?
+* It works faster:
+* NTFS ultra fast scan may be 25 times faster than universal scan,
+* FAT16 scan may be 40% faster.
+*/
+
 #include "driver.h"
 #if 0
 ULONGLONG _rdtsc(void)
@@ -94,10 +109,10 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		/* Experimental support of retrieving information directly from MFT. */
 		ScanMFT(dx);
 		break;
-	/*case FAT12_PARTITION:
+	case FAT12_PARTITION:
 		ScanFat12Partition(dx);
 		break;
-	*/case FAT16_PARTITION:
+	case FAT16_PARTITION:
 		ScanFat16Partition(dx);
 		break;
 	/*case FAT32_PARTITION:
