@@ -135,6 +135,10 @@ SOURCE=.\ntfs.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\ntfs_trash.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\optimize.c
 # End Source File
 # Begin Source File

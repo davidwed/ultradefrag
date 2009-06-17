@@ -273,7 +273,7 @@ typedef struct {
 	BOOLEAN IsDirectory;
 	BOOLEAN IsReparsePoint;
 	UCHAR NameType;
-	BOOLEAN PathBuilt;
+	BOOLEAN PathBuilt; /* not used by new optimized code */
 	WCHAR Name[MAX_NTFS_PATH];
 } MY_FILE_INFORMATION, *PMY_FILE_INFORMATION;
 

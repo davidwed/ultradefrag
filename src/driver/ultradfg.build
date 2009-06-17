@@ -6,7 +6,8 @@ src = {
 	"analyse.c", "defrag.c", "globals.c", "int64.c", "io.c", "list.c",
 	"log.c", "ultradfg.c", "map.c", "volume.c", "freespace.c",
 	"filedump.c", "findfiles.c", "filter.c", "ldr.c", "optimize.c",
-	"dbglog.c", "ntfs.c", "fat.c", "fat12.c", "fat16.c", "fat32.c"
+	"dbglog.c", "ntfs.c", "fat.c", "fat12.c", "fat16.c", "fat32.c",
+	"ntfs_trash.c"
 }
 
 rc = { "ultradfg.rc" }
