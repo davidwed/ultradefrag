@@ -307,6 +307,11 @@ typedef enum {
 	MFT_SCAN_LTR,
 } MFT_SCAN_DIRECTION;
 
+typedef struct {
+	ULONGLONG mft_id;
+	FILENAME *pfn;
+} MY_FILE_ENTRY, *PMY_FILE_ENTRY; /* for binary search */
+
 /* internal functions prototypes */
 NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
@@ -366,9 +371,9 @@ ULONGLONG ProcessMftSpace(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_DATA nd);
 
 void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi);
 PFILENAME FindFileListEntryForTheAttribute(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PMY_FILE_INFORMATION pmfi);
-BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,
-		PMY_FILE_INFORMATION pmfi,PFILENAME pfn);
-		
+BOOLEAN TemporaryStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi);
+BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+
 void ProcessMFTRunList(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_attr);
 void ProcessMFTRun(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn);
 void DestroyMftBlockmap(void);
@@ -378,5 +383,6 @@ void BuildPath2(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 BOOLEAN GetFileNameAndParentMftId(UDEFRAG_DEVICE_EXTENSION *dx,
 		ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length);
 void AddResidentDirectoryToFileList(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi);
+PFILENAME FindDirectoryByMftId(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG mft_id);
 
 #endif /* _NTFS_H_ */

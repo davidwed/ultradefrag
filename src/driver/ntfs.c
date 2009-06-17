@@ -1548,6 +1548,7 @@ void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMA
 	PFILENAME pfn;
 	ULONGLONG filesize;
 
+	/* All stuff commented with C++ style comments was moved to BuildPaths() function. */
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
 		/* only the first few entries may have dirty flag set */
 		if(pfn->is_dirty == FALSE) break;
@@ -1573,7 +1574,7 @@ void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMA
 		if(dx->sizelimit && filesize > dx->sizelimit) pfn->is_overlimit = TRUE;
 		else pfn->is_overlimit = FALSE;
 		/* 1.3 detect temporary files and other unwanted stuff */
-		if(UnwantedStuffDetected(dx,pmfi,pfn)) pfn->is_filtered = TRUE;
+		if(TemporaryStuffDetected(dx,pmfi)) pfn->is_filtered = TRUE;
 		else pfn->is_filtered = FALSE;
 		/* 1.4 detect sparse files */
 		if(pmfi->Flags & FILE_ATTRIBUTE_SPARSE_FILE)
@@ -1582,36 +1583,39 @@ void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMA
 		if(pmfi->Flags & FILE_ATTRIBUTE_ENCRYPTED)
 			DbgPrint("-Ultradfg- Encrypted file found %ws\n",pfn->name.Buffer);
 		/* 2. redraw cluster map */
-		MarkSpace(dx,pfn,SYSTEM_SPACE);
+//		MarkSpace(dx,pfn,SYSTEM_SPACE);
 		/* 3. update statistics */
 		dx->filecounter ++;
 		if(pfn->is_dir) dx->dircounter ++;
 		if(pfn->is_compressed) dx->compressedcounter ++;
 		/* skip here filtered out and big files and reparse points */
-		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
-			dx->fragmfilecounter ++;
-			dx->fragmcounter += pfn->n_fragments;
-		} else {
-			dx->fragmcounter ++;
-		}
+//		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
+//			dx->fragmfilecounter ++;
+//			dx->fragmcounter += pfn->n_fragments;
+//		} else {
+//			dx->fragmcounter ++;
+//		}
 		dx->processed_clusters += pfn->clusters_total;
 
 		if(pfn->next_ptr == dx->filelist) break;
 	}
 }
 
+BOOLEAN TemporaryStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
+{
+	/* skip temporary files ;-) */
+	if(pmfi->Flags & FILE_ATTRIBUTE_TEMPORARY){
+		DebugPrint2("-Ultradfg- Temporary file found\n",pmfi->Name);
+		return TRUE;
+	}
+	return FALSE;
+}
+
 /* that's unbelievable, but this function runs fast */
-BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,
-		PMY_FILE_INFORMATION pmfi,PFILENAME pfn)
+BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	UNICODE_STRING us;
 
-	/* skip temporary files ;-) */
-	if(pmfi->Flags & FILE_ATTRIBUTE_TEMPORARY){
-		DebugPrint2("-Ultradfg- Temporary file found\n",pfn->name.Buffer);
-		return TRUE;
-	}
-	
 	/* skip all unwanted files by user defined patterns */
 	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
 		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n",NULL);
@@ -1635,14 +1639,53 @@ BOOLEAN UnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,
 	return FALSE;
 }
 
+PMY_FILE_ENTRY mf = NULL; /* pointer to array of MY_FILE_ENTRY structures */
+ULONG n_entries;
+BOOLEAN mf_allocated = FALSE;
+
 void BuildPaths(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFILENAME pfn;
+	ULONG i;
+
+	/* prepare data for fast binary search */
+	mf_allocated = FALSE;
+	n_entries = dx->filecounter;
+	if(n_entries){
+		mf = (PMY_FILE_ENTRY)AllocatePool(PagedPool,n_entries * sizeof(MY_FILE_ENTRY));
+		if(mf != NULL) mf_allocated = TRUE;
+		else DebugPrint("-Ultradfg- cannot allocate %u bytes of memory for mf array!\n",
+				NULL,n_entries * sizeof(MY_FILE_ENTRY));
+	}
+	if(mf_allocated){
+		/* fill array */
+		i = 0;
+		for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+			mf[i].mft_id = pfn->BaseMftId;
+			mf[i].pfn = pfn;
+			if(i == (n_entries - 1)) break;
+			i++;
+			if(pfn->next_ptr == dx->filelist) break;
+		}
+	}
 	
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
 		BuildPath2(dx,pfn);
+		if(UnwantedStuffDetected(dx,pfn)) pfn->is_filtered = TRUE;
+		else pfn->is_filtered = FALSE;
+		MarkSpace(dx,pfn,SYSTEM_SPACE);
+		/* skip here filtered out and big files and reparse points */
+		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
+			dx->fragmfilecounter ++;
+			dx->fragmcounter += pfn->n_fragments;
+		} else {
+			dx->fragmcounter ++;
+		}
 		if(pfn->next_ptr == dx->filelist) break;
 	}
+	
+	/* free allocated resources */
+	if(mf_allocated) ExFreePoolSafe(mf);
 }
 
 void BuildPath2(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
@@ -1763,24 +1806,15 @@ BOOLEAN GetFileNameAndParentMftId(UDEFRAG_DEVICE_EXTENSION *dx,
 {
 	PFILENAME pfn;
 	BOOLEAN FullPathRetrieved = FALSE;
-	BOOLEAN DirectoryFound = FALSE;
 	
 	/* initialize data */
 	buffer[0] = 0;
 	*parent_mft_id = FILE_root;
 
 	/* find an appropriate pfn structure */
-	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
-		if(pfn->BaseMftId == mft_id){
-			if(wcsstr(pfn->name.Buffer,L":$") == NULL){
-				DirectoryFound = TRUE;
-				break;
-			} else DbgPrint("%ws\n",pfn->name.Buffer);
-		}
-		if(pfn->next_ptr == dx->filelist) break;
-	}
+	pfn = FindDirectoryByMftId(dx,mft_id);
 	
-	if(DirectoryFound == FALSE){
+	if(pfn == NULL){
 		DbgPrint("%I64u directory not found!\n",mft_id);
 		return FullPathRetrieved;
 	}
@@ -1823,4 +1857,54 @@ void AddResidentDirectoryToFileList(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORM
 	pfn->is_overlimit = FALSE;
 	pfn->is_filtered = TRUE;
 	pfn->is_dirty = TRUE;
+}
+
+PFILENAME FindDirectoryByMftId(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG mft_id)
+{
+	PFILENAME pfn;
+	ULONG lim, i, k;
+	long m;
+	BOOLEAN ascending_order;
+
+	if(mf_allocated == FALSE){ /* use slow search */
+		for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+			if(pfn->BaseMftId == mft_id){
+				if(wcsstr(pfn->name.Buffer,L":$") == NULL)
+					return pfn;
+			}
+			if(pfn->next_ptr == dx->filelist) break;
+		}
+		return NULL;
+	} else { /* use fast binary search */
+		/* Based on bsearch() algorithm copyrighted by DJ Delorie (1994). */
+		ascending_order = (MftScanDirection == MFT_SCAN_RTL) ? TRUE : FALSE;
+		i = 0;
+		for(lim = n_entries; lim != 0; lim >>= 1){
+			k = i + (lim >> 1);
+			if(mf[k].mft_id == mft_id){
+				/* search for proper entry in neighbourhood of found entry */
+				for(m = k; m >= 0; m --){
+					if(mf[m].mft_id != mft_id) break;
+				}
+				for(m = m + 1; m < n_entries; m ++){
+					if(mf[m].mft_id != mft_id) break;
+					if(wcsstr(mf[m].pfn->name.Buffer,L":$") == NULL)
+						return mf[m].pfn;
+				}
+				DbgPrint("FUCK 1\n");
+				return NULL;
+			}
+			if(ascending_order){
+				if(mft_id > mf[k].mft_id){
+					i = k + 1; lim --; /* move right */
+				} /* else move left */
+			} else {
+				if(mft_id < mf[k].mft_id){
+					i = k + 1; lim --; /* move right */
+				} /* else move left */
+			}
+		}
+		DbgPrint("FUCK 2\n");
+		return NULL;
+	}
 }
