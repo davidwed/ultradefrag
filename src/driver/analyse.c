@@ -115,10 +115,10 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	case FAT16_PARTITION:
 		ScanFat16Partition(dx);
 		break;
-	/*case FAT32_PARTITION:
+	case FAT32_PARTITION:
 		ScanFat32Partition(dx);
 		break;
-	*/default: /* UDF, Ext2 and so on... */
+	default: /* UDF, Ext2 and so on... */
 		/* Find files */
 		tm = _rdtsc();
 		path[4] = (short)dx->letter;

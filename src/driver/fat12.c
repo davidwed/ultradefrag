@@ -57,7 +57,7 @@ BOOLEAN ScanFat12Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	
 	/* scan filesystem */
-	ScanFat1xRootDirectory(dx);
+	ScanFatRootDirectory(dx);
 	
 	/* free allocated resources */
 	ExFreePoolSafe(Fat12);

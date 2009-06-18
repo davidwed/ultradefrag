@@ -190,22 +190,37 @@ unsigned char ChkSum (unsigned char *pFcbName)
 	return (Sum);
 }
 
-BOOLEAN ScanFat1xRootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
+BOOLEAN ScanFatRootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ULONGLONG FirstRootDirSector;
 	ULONG RootDirSectors;
 	USHORT RootDirEntries;
 	DIRENTRY *RootDir = NULL;
+	DIRENTRY RootDirEntry;
 	NTSTATUS Status;
 	USHORT i;
 	WCHAR Path[] = L"\\??\\A:\\";
+	WCHAR PathForFat32[] = L"\\??\\A:";
 	
 	/* Initialize LongName related global variables before directories scan. */
 	LongNameOffset = LONG_PATH_OFFSET_MAX_VALUE;
 	LongNameIsOrphan = FALSE;
+	Path[4] = PathForFat32[4] = (WCHAR)(dx->letter);
 
 	/*
-	* On FAT16 volumes the root directory
+	* On FAT32 volumes root directory is 
+	* as any other directory.
+	*/
+	if(dx->partition_type == FAT32_PARTITION){
+		memset(&RootDirEntry,0,sizeof(DIRENTRY));
+		RootDirEntry.FirstClusterLO = (USHORT)(Bpb.Fat32.BPB_RootClus & 0xFFFF);
+		RootDirEntry.FirstClusterHI = (USHORT)(Bpb.Fat32.BPB_RootClus >> 16);
+		ScanFatDirectory(dx,&RootDirEntry,PathForFat32,L"");
+		return TRUE; /* FIXME: better error handling */
+	}
+	
+	/*
+	* On FAT1x volumes the root directory
 	* has fixed disposition and size.
 	*/
 	FirstRootDirSector = Bpb.ReservedSectors + Bpb.NumFATs * Bpb.FAT16sectors;
@@ -229,7 +244,6 @@ BOOLEAN ScanFat1xRootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	
 	/* analyse root directory contents */
-	Path[4] = (WCHAR)(dx->letter);
 	for(i = 0; i < RootDirEntries; i++){
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		if(!AnalyseFatDirEntry(dx,&(RootDir[i]),Path)) break;
@@ -403,8 +417,8 @@ void ScanFatDirectory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Par
 	DIRENTRY *Dir = NULL;
 	ULONG BytesPerCluster;
 	ULONG DirEntriesPerCluster;
-	USHORT FirstCluster;
-	USHORT ClusterNumber;
+	ULONG FirstCluster;
+	ULONG ClusterNumber;
 	ULONGLONG FirstSectorOfCluster;
 	NTSTATUS Status;
 	ULONG i;
@@ -415,8 +429,11 @@ void ScanFatDirectory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Par
 	BytesPerCluster = Bpb.BytesPerSec * Bpb.SecPerCluster;
 	DirEntriesPerCluster = BytesPerCluster / 32; /* let's assume that cluster size is an integral of 32 */
 	
-	/* FIXME: FAT32 */
 	FirstCluster = DirEntry->FirstClusterLO;
+	if(dx->partition_type == FAT32_PARTITION){
+		FirstCluster += ((ULONG)(DirEntry->FirstClusterHI) << 16);
+		FirstCluster &= 0x0FFFFFFF;
+	}
 	
 	/* allocate memory */
 	DirPath = (WCHAR *)AllocatePool(PagedPool,MAX_LONG_PATH * sizeof(short));
@@ -471,6 +488,7 @@ ULONG GetNextClusterInChain(UDEFRAG_DEVICE_EXTENSION *dx,ULONG ClusterNumber)
 {
 	if(dx->partition_type == FAT12_PARTITION) return GetNextClusterInFat12Chain(dx,ClusterNumber);
 	else if(dx->partition_type == FAT16_PARTITION) return GetNextClusterInFat16Chain(dx,ClusterNumber);
+	else if(dx->partition_type == FAT32_PARTITION) return GetNextClusterInFat32Chain(dx,ClusterNumber);
 	else return FAT32_EOC;
 }
 
@@ -505,7 +523,7 @@ void ProcessFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Paren
 	_snwprintf(Path,MAX_LONG_PATH,L"%s%s",ParentDirPath,FileName);
 	Path[MAX_LONG_PATH - 1] = 0;
 
-	DbgPrint("%ws\n",Path);	
+	//DbgPrint("%ws\n",Path);	
 
 	/* 5. add file to dx->filelist */
 	/* 5.1 skip unwanted stuff to speed up an analysis in console/native apps */
@@ -592,8 +610,8 @@ BOOLEAN InsertFileToFileList(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCH
 
 void DumpFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,PFILENAME pfn)
 {
-	USHORT ClusterNumber;
-	USHORT PrevClusterNumber = FatEOC;
+	ULONG ClusterNumber;
+	ULONG PrevClusterNumber = FatEOC;
 	PBLOCKMAP block, prev_block;
 
 	/* reset special fields of pfn structure */
@@ -602,8 +620,11 @@ void DumpFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,PFILENAME pfn)
 	pfn->clusters_total = 0;
 	pfn->blockmap = NULL;
 
-	/* FIXME: FAT32 */
 	ClusterNumber = DirEntry->FirstClusterLO;
+	if(dx->partition_type == FAT32_PARTITION){
+		ClusterNumber += ((ULONG)(DirEntry->FirstClusterHI) << 16);
+		ClusterNumber &= 0x0FFFFFFF;
+	}
 
 	do {
 		if(KeReadStateEvent(&stop_event) == 0x1) goto fail;
