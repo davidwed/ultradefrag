@@ -33,9 +33,23 @@
 * this memory once. We will read it on a one sector basis for fast access.
 */
 
+/*
+* Strategy with reading by one sector is very slow.
+* Therefore we should cache all FAT or return with failure.
+*/
+
+/*
+* Strategy of caching the complete FAT is very slow too.
+*/
+
 ULONG *Fat32Sector = NULL;
 ULONGLONG CurrentSector = 0;
 
+//#define COMPLETE_CACHING
+
+#ifdef COMPLETE_CACHING
+ULONG *Fat32 = NULL;
+#endif
 
 BOOLEAN InitFat32(UDEFRAG_DEVICE_EXTENSION *dx);
 
@@ -59,6 +73,9 @@ BOOLEAN ScanFat32Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	/* free allocated resources */
 	ExFreePoolSafe(Fat32Sector);
+#ifdef COMPLETE_CACHING
+	ExFreePoolSafe(Fat32);
+#endif
 	DebugPrint("-Ultradfg- FAT32 scan finished!\n",NULL);
 	DbgPrint("FAT32 scan needs %I64u ms\n",_rdtsc() - tm);
 	return TRUE;
@@ -95,17 +112,51 @@ BOOLEAN InitFat32(UDEFRAG_DEVICE_EXTENSION *dx)
 		ExFreePoolSafe(Fat32Sector);
 		return FALSE;
 	}
+	
+#ifdef COMPLETE_CACHING
+	/*
+	* allocate memory for complete FAT 
+	* only if it requires no more than 4 Mb
+	*/
+	if(FatSize > (4 * 1024 * 1024)){
+		DebugPrint("-Ultradfg- FAT is too long: %u bytes!\n",NULL,FatSize);
+		DebugPrint("-Ultradfg- Specific scan cannot be performed!\n",NULL);
+		ExFreePoolSafe(Fat32Sector);
+		return FALSE;
+	}
+	
+	Fat32 = AllocatePool(PagedPool,FatSize);
+	if(Fat32 == NULL){
+		DebugPrint("-Ultradfg- cannot allocate memory for InitFat32()!\n",NULL);
+		ExFreePoolSafe(Fat32Sector);
+		return FALSE;
+	}
+
+	/* cache the first File Allocation Table entirely */
+	FirstFatSector = 0 + Bpb.ReservedSectors;
+	Status = ReadSectors(dx,FirstFatSector,(PVOID)Fat32,FatSize);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",NULL,(UINT)Status);
+		ExFreePoolSafe(Fat32Sector);
+		ExFreePoolSafe(Fat32);
+		return FALSE;
+	}
+#endif
+	
 	return TRUE;
 }
 
 ULONG GetNextClusterInFat32Chain(UDEFRAG_DEVICE_EXTENSION *dx,ULONG ClusterNumber)
 {
+#ifndef COMPLETE_CACHING
 	ULONG SectorNumber;
 	ULONG Offset;
 	NTSTATUS Status;
-	
+#endif
+
 	if(ClusterNumber > (FatEntries - 1)) return FAT32_EOC;
-	
+
+#ifndef COMPLETE_CACHING
 	/* FIXME: sizeof(ULONG) on x64 system ??? */
 	SectorNumber = Bpb.ReservedSectors + (ClusterNumber * sizeof(ULONG) / dx->bytes_per_sector);
 	Offset = (ClusterNumber * sizeof(ULONG)) % dx->bytes_per_sector;
@@ -118,4 +169,7 @@ ULONG GetNextClusterInFat32Chain(UDEFRAG_DEVICE_EXTENSION *dx,ULONG ClusterNumbe
 	}
 	
 	return (Fat32Sector[Offset] & 0x0FFFFFFF);
+#else
+	return (Fat32[ClusterNumber] & 0x0FFFFFFF);
+#endif
 }
