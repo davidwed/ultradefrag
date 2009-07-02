@@ -93,7 +93,7 @@ void * __stdcall winx_virtual_alloc(ULONGLONG size)
 	NTSTATUS Status;
 
 	Status = NtAllocateVirtualMemory(NtCurrentProcess(),&addr,0,
-		(PULONG)&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
+		(PULONG)(PVOID)&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
 	return (NT_SUCCESS(Status)) ? addr : NULL;
 }
 
@@ -123,5 +123,5 @@ void * __stdcall winx_virtual_alloc(ULONGLONG size)
 void __stdcall winx_virtual_free(void *addr,ULONGLONG size)
 {
 	NtFreeVirtualMemory(NtCurrentProcess(),&addr,
-		(PULONG)&size,MEM_RELEASE);
+		(PULONG)(PVOID)&size,MEM_RELEASE);
 }

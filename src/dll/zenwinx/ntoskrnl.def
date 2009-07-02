@@ -1436,10 +1436,10 @@ strrchr
 strspn
 strstr
 swprintf
-;tolower
+tolower
 toupper
-;towlower
-;towupper
+towlower
+towupper
 ;vDbgPrintEx
 ;vDbgPrintExWithPrefix
 ;vsprintf
