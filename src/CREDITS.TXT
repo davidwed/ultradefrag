@@ -45,6 +45,7 @@ Slovak          - Milan Cerovský /Milanbb55/
 Slovenian       - Miha Mlakar
 Spanish (AR)    - Daniel Testa
 Swedish         - Magnus Rostedt
+Thai            - Pat Taweewat
 Turkish         - Huseyin Kozan
 
 --------------------------------------------------------------------------------
