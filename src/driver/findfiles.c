@@ -95,7 +95,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 			if(Status != STATUS_SUCCESS) break; /* no more items */
 		}
 
-		FileNameLength = pFileInfo->FileNameLength / sizeof(WCHAR);
+		FileNameLength = (USHORT)(pFileInfo->FileNameLength / sizeof(WCHAR));
 		if(FileNameLength > (MAX_PATH - 1)) continue; /* really it must be no longer than 255 characters */
 
 		/* here we can use FileName variable */

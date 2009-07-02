@@ -48,7 +48,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	BOOLEAN fat_found = FALSE;
 	
 	ULONG RootDirSectors; /* USHORT ? */
-	USHORT FatSectors;
+	ULONG FatSectors;
 	ULONG TotalSectors;
 	ULONG DataSectors;
 	ULONG CountOfClusters;
@@ -100,7 +100,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* determine which type of FAT we have */
 	RootDirSectors = ((Bpb.RootDirEnts * 32) + (Bpb.BytesPerSec - 1)) / Bpb.BytesPerSec;
 
-	if(Bpb.FAT16sectors) FatSectors = Bpb.FAT16sectors;
+	if(Bpb.FAT16sectors) FatSectors = (ULONG)(Bpb.FAT16sectors);
 	else FatSectors = Bpb.Fat32.FAT32sectors;
 	
 	if(Bpb.FAT16totalsectors) TotalSectors = Bpb.FAT16totalsectors;
@@ -397,7 +397,7 @@ BOOLEAN AnalyseFatDirEntry(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR
 			LongName[MAX_LONG_PATH - 1] = 0;
 			LongNameOffset--;
 		}
-		PartOfLongNameLength = wcslen(PartOfLongName);
+		PartOfLongNameLength = (UCHAR)wcslen(PartOfLongName);
 		if(PartOfLongNameLength > (LongNameOffset + 1) || LongNameOffset == 0){
 			/* name is too long, therefore it is an orphan */
 			LongNameIsOrphan = TRUE;

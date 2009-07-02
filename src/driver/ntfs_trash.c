@@ -24,6 +24,8 @@
 #include "driver.h"
 #include "ntfs.h"
 
+#if 0
+
 extern UINT MftScanDirection;
 PBLOCKMAP MftBlockmap = NULL;
 ULONGLONG MftClusters = 0; /* never access this variable if MaxMftEntriesNumberUpdated is not TRUE */
@@ -588,3 +590,5 @@ void __stdcall GetFileNameAndParentMftIdFromMftRecordCallback(UDEFRAG_DEVICE_EXT
 	if(pattr->AttributeType == AttributeFileName)
 		GetFileName(dx,(PRESIDENT_ATTRIBUTE)pattr,pmfi);
 }
+
+#endif

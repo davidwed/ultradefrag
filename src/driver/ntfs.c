@@ -204,7 +204,7 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 		DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
 		Nt_ExFreePool(pnfrob);
 		Nt_ExFreePool(pmfi);
-		DestroyMftBlockmap();
+		//DestroyMftBlockmap();
 		return FALSE; /* FIXME: better error handling */
 	}
 
@@ -223,7 +223,7 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 					Nt_ExFreePool(pnfrob);
 					Nt_ExFreePool(pmfi);
 					DebugPrint("-Ultradfg- MFT scan finished!\n",NULL);
-					DestroyMftBlockmap();
+					//DestroyMftBlockmap();
 					return FALSE;
 				}
 				/* it returns 0xc000000d (invalid parameter) for non existing records */
@@ -242,15 +242,15 @@ BOOLEAN ScanMFT(UDEFRAG_DEVICE_EXTENSION *dx)
 			if(ret_mft_id == 0) break;
 			mft_id = ret_mft_id - 1;
 		}
-	} else {
+	}/* else {
 		DebugPrint("-Ultradfg- MFT size is an integral of NTFS record size :-D\n",NULL);
 		ScanMftDirectly(dx,pnfrob,nfrob_size,pmfi);
-	}
+	}*/
 	
 	/* free allocated memory */
 	Nt_ExFreePool(pnfrob);
 	Nt_ExFreePool(pmfi);
-	DestroyMftBlockmap();
+	//DestroyMftBlockmap();
 	
 	/* Build paths. */
 	BuildPaths(dx);
@@ -429,7 +429,7 @@ void EnumerateAttributes(UDEFRAG_DEVICE_EXTENSION *dx,PFILE_RECORD_HEADER pfrh,
 		
 		/* go to the next attribute */
 		attr_length = pattr->Length;
-		attr_offset += attr_length;
+		attr_offset += (USHORT)(attr_length);
 		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
 	}
 }
@@ -1289,7 +1289,7 @@ PFILENAME FindDirectoryByMftId(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG mft_id)
 {
 	PFILENAME pfn;
 	ULONG lim, i, k;
-	long m;
+	signed long m;
 	BOOLEAN ascending_order;
 
 	if(mf_allocated == FALSE){ /* use slow search */
@@ -1312,7 +1312,7 @@ PFILENAME FindDirectoryByMftId(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG mft_id)
 				for(m = k; m >= 0; m --){
 					if(mf[m].mft_id != mft_id) break;
 				}
-				for(m = m + 1; m < n_entries; m ++){
+				for(m = m + 1; (unsigned long)(m) < n_entries; m ++){
 					if(mf[m].mft_id != mft_id) break;
 					if(wcsstr(mf[m].pfn->name.Buffer,L":$") == NULL)
 						return mf[m].pfn;
