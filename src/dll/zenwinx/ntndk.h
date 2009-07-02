@@ -20,6 +20,8 @@
 #ifndef _NTNDK_H_
 #define _NTNDK_H_
 
+#include <winioctl.h>
+
 /* define base types */
 #define ULONG_PTR unsigned long*
 typedef int BOOL;
@@ -732,6 +734,45 @@ typedef struct _KEYBOARD_INPUT_DATA {
   USHORT  Reserved;
   ULONG  ExtraInformation;
 } KEYBOARD_INPUT_DATA, *PKEYBOARD_INPUT_DATA;
+
+typedef struct _KEYBOARD_INDICATOR_PARAMETERS {
+  USHORT  UnitId;
+  USHORT  LedFlags;
+} KEYBOARD_INDICATOR_PARAMETERS, *PKEYBOARD_INDICATOR_PARAMETERS;
+
+//
+// NtDeviceIoControlFile IoControlCode values for the keyboard device.
+//
+// Warning:  Remember that the low two bits of the code specify how the
+//           buffers are passed to the driver!
+//
+
+#define IOCTL_KEYBOARD_QUERY_ATTRIBUTES      CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0000, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_KEYBOARD_SET_TYPEMATIC         CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0001, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_KEYBOARD_SET_INDICATORS        CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0002, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_KEYBOARD_QUERY_TYPEMATIC       CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0008, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_KEYBOARD_QUERY_INDICATORS      CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0010, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_KEYBOARD_QUERY_INDICATOR_TRANSLATION   CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0020, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_KEYBOARD_INSERT_DATA           CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0040, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+//
+// These Device IO control query/set IME status to keyboard hardware.
+//
+#define IOCTL_KEYBOARD_QUERY_IME_STATUS      CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0400, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_KEYBOARD_SET_IME_STATUS        CTL_CODE(FILE_DEVICE_KEYBOARD, 0x0401, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+//
+// Define the keyboard indicators.
+//
+
+#define KEYBOARD_LED_INJECTED     0x8000 //Used by Terminal Server
+#define KEYBOARD_SHADOW           0x4000 //Used by Terminal Server
+//#if defined(FE_SB) || defined(WINDOWS_FE) || defined(DBCS)
+#define KEYBOARD_KANA_LOCK_ON     8 // Japanese keyboard
+//#endif // defined(FE_SB) || defined(WINDOWS_FE) || defined(DBCS)
+#define KEYBOARD_CAPS_LOCK_ON     4
+#define KEYBOARD_NUM_LOCK_ON      2
+#define KEYBOARD_SCROLL_LOCK_ON   1
 
 /* native functions prototypes */
 NTSTATUS	NTAPI	NtCreateFile(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,PIO_STATUS_BLOCK,PLARGE_INTEGER,ULONG,ULONG,ULONG,ULONG,PVOID,ULONG);

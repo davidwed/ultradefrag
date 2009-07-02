@@ -24,6 +24,7 @@
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
+#include <stdio.h>
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -73,17 +74,20 @@ int __stdcall winx_init(void *peb)
 {
 	PRTL_USER_PROCESS_PARAMETERS pp;
 	int status;
+	int i;
+	short kb_device_name[32];
 
 	/* 1. Normalize and get the Process Parameters */
 	pp = RtlNormalizeProcessParams(((PPEB)peb)->ProcessParameters);
 	/* 2. Breakpoint if we were requested to do so */
 	if(pp->DebugFlags) DbgBreakPoint();
 	/* 3. Open the keyboard */
-	status = kb_open(L"\\Device\\KeyboardClass0");
-/*	if(status < 0) status = kb_open(L"\\Device\\KeyboardClass1");
-	if(status < 0) status = kb_open(L"\\Device\\KeyboardClass2");
-	if(status < 0) status = kb_open(L"\\Device\\KeyboardClass3");
-*/	return status;
+	for(i = 0; i < 100; i++){
+		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
+		status = kb_open(kb_device_name);
+		if(status >= 0) break;
+	}
+	return status;
 }
 
 /****f* zenwinx.startup/winx_exit

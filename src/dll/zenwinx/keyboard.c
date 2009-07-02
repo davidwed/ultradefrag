@@ -32,6 +32,7 @@ HANDLE hKbDevice = NULL;
 HANDLE hKbEvent = NULL;
 
 void __stdcall kb_close(void);
+int  __stdcall kb_check(void);
 
 int __stdcall kb_open(short *kb_device_name)
 {
@@ -41,6 +42,8 @@ int __stdcall kb_open(short *kb_device_name)
 	NTSTATUS Status;
 
 	if(hKbDevice) goto kb_open_success;
+
+	/* try to open specified device */
 	RtlInitUnicodeString(&uStr,kb_device_name);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
 	Status = NtCreateFile(&hKbDevice,
@@ -52,6 +55,15 @@ int __stdcall kb_open(short *kb_device_name)
 		hKbDevice = NULL;
 		return (-1);
 	}
+	
+	/* ensure that we have opened a really connected keyboard */
+	if(kb_check() < 0){
+		winx_raise_error("W: Invalid keyboard device %ws: %x!",kb_device_name,(UINT)Status);
+		NtCloseSafe(hKbDevice);
+		return (-1);
+	}
+	
+	/* create a special event object for internal use */
 	RtlInitUnicodeString(&uStr,L"\\kb_event");
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
 	Status = NtCreateEvent(&hKbEvent,STANDARD_RIGHTS_ALL | 0x1ff/*0x1f01ff*/,
@@ -63,6 +75,65 @@ int __stdcall kb_open(short *kb_device_name)
 		return (-1);
 	}
 kb_open_success:
+	return 0;
+}
+
+#define LIGHTING_REPEAT_COUNT 0x5
+
+/* 0 for success, -1 otherwise */
+int __stdcall kb_light_up_indicators(USHORT LedFlags)
+{
+	NTSTATUS Status;
+	IO_STATUS_BLOCK iosb;
+	KEYBOARD_INDICATOR_PARAMETERS kip;
+
+	kip.LedFlags = LedFlags;
+	kip.UnitId = 0;
+	
+	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
+			&iosb,IOCTL_KEYBOARD_SET_INDICATORS,
+			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS),NULL,0);
+	if(Status == STATUS_PENDING){
+		Status = NtWaitForSingleObject(hKbDevice,FALSE,NULL);
+		if(NT_SUCCESS(Status)) Status = iosb.Status;
+	}
+	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING)	return (-1);
+	
+	return 0;
+}
+
+/* internal function; returns -1 for invalid device, 0 otherwise */
+int __stdcall kb_check(void)
+{
+	USHORT LedFlags;
+	NTSTATUS Status;
+	IO_STATUS_BLOCK iosb;
+	KEYBOARD_INDICATOR_PARAMETERS kip;
+	int i;
+	
+	/* try to get LED flags */
+	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
+			&iosb,IOCTL_KEYBOARD_QUERY_INDICATORS,NULL,0,
+			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS));
+	if(Status == STATUS_PENDING){
+		Status = NtWaitForSingleObject(hKbDevice,FALSE,NULL);
+		if(NT_SUCCESS(Status)) Status = iosb.Status;
+	}
+	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING)	return (-1);
+
+	LedFlags = kip.LedFlags;
+	
+	/* light up LED's */
+	for(i = 0; i < LIGHTING_REPEAT_COUNT; i++){
+		kb_light_up_indicators(KEYBOARD_NUM_LOCK_ON);
+		winx_sleep(100);
+		kb_light_up_indicators(KEYBOARD_CAPS_LOCK_ON);
+		winx_sleep(100);
+		kb_light_up_indicators(KEYBOARD_SCROLL_LOCK_ON);
+		winx_sleep(100);
+	}
+
+	kb_light_up_indicators(LedFlags);
 	return 0;
 }
 
