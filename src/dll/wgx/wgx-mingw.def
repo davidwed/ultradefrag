@@ -13,3 +13,6 @@ EXPORTS
 	WgxSetFont@8
 	WgxSetIcon@12
 	WgxCheckWindowCoordinates@12
+
+	WgxGetLogFontStructureFromFile@8
+	WgxSaveLogFontStructureToFile@8

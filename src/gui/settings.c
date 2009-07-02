@@ -120,9 +120,6 @@ void SavePrefs(void)
 void InitFont(void)
 {
 	LOGFONT lf;
-	lua_State *L;
-	int status;
-	char *string;
 	HFONT hNewFont;
 
 	/* initialize LOGFONT structure */
@@ -132,39 +129,10 @@ void InitFont(void)
 	lf.lfHeight = -12;
 	
 	/* load saved font settings */
-	L = lua_open();  /* create state */
-	if(!L) return;
-	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
-	luaL_openlibs(L);  /* open libraries */
-	lua_gc(L, LUA_GCRESTART, 0);
-
 	GetWindowsDirectory(buffer,MAX_PATH);
 	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	status = luaL_dofile(L,buffer);
-	if(!status){ /* successful */
-		lf.lfHeight = getint(L,"height");
-		lf.lfWidth = getint(L,"width");
-		lf.lfEscapement = getint(L,"escapement");
-		lf.lfOrientation = getint(L,"orientation");
-		lf.lfWeight = getint(L,"weight");
-		lf.lfItalic = (BYTE)getint(L,"italic");
-		lf.lfUnderline = (BYTE)getint(L,"underline");
-		lf.lfStrikeOut = (BYTE)getint(L,"strikeout");
-		lf.lfCharSet = (BYTE)getint(L,"charset");
-		lf.lfOutPrecision = (BYTE)getint(L,"outprecision");
-		lf.lfClipPrecision = (BYTE)getint(L,"clipprecision");
-		lf.lfQuality = (BYTE)getint(L,"quality");
-		lf.lfPitchAndFamily = (BYTE)getint(L,"pitchandfamily");
-		lua_getglobal(L, "facename");
-		string = (char *)lua_tostring(L, lua_gettop(L));
-		if(string){
-			strncpy(lf.lfFaceName,string,LF_FACESIZE);
-			lf.lfFaceName[LF_FACESIZE - 1] = 0;
-		}
-		lua_pop(L, 1);
-	}
-	lua_close(L);
-	
+	if(!WgxGetLogFontStructureFromFile(buffer,&lf)) return;
+
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);
 	if(hNewFont){

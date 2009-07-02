@@ -67,4 +67,8 @@ void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...);
 HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf);
 void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID);
 void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height);
+
+BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf);
+BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf);
+
 #endif /* _WGX_H_ */

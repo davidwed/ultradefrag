@@ -58,7 +58,6 @@ LOGFONT lf;
 HFONT hFont = NULL;
 
 char buffer[MAX_PATH];
-char err_msg[1024];
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -249,11 +248,10 @@ void InitFont(void)
 {
 	lua_State *L;
 	int status;
-	char *string;
 	HFONT hNewFont;
 	int x,y,width,height;
-	RECT rc;
 	short *cmdline;
+	RECT rc;
 
 	/* initialize LOGFONT structure */
 	memset(&lf,0,sizeof(LOGFONT));
@@ -262,38 +260,10 @@ void InitFont(void)
 	lf.lfHeight = -12;
 	
 	/* load saved font settings */
-	L = lua_open();  /* create state */
-	if(!L) return;
-	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
-	luaL_openlibs(L);  /* open libraries */
-	lua_gc(L, LUA_GCRESTART, 0);
-
 	GetWindowsDirectory(buffer,MAX_PATH);
 	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	status = luaL_dofile(L,buffer);
-	if(!status){ /* successful */
-		lf.lfHeight = getint(L,"height");
-		lf.lfWidth = getint(L,"width");
-		lf.lfEscapement = getint(L,"escapement");
-		lf.lfOrientation = getint(L,"orientation");
-		lf.lfWeight = getint(L,"weight");
-		lf.lfItalic = (BYTE)getint(L,"italic");
-		lf.lfUnderline = (BYTE)getint(L,"underline");
-		lf.lfStrikeOut = (BYTE)getint(L,"strikeout");
-		lf.lfCharSet = (BYTE)getint(L,"charset");
-		lf.lfOutPrecision = (BYTE)getint(L,"outprecision");
-		lf.lfClipPrecision = (BYTE)getint(L,"clipprecision");
-		lf.lfQuality = (BYTE)getint(L,"quality");
-		lf.lfPitchAndFamily = (BYTE)getint(L,"pitchandfamily");
-		lua_getglobal(L, "facename");
-		string = (char *)lua_tostring(L, lua_gettop(L));
-		if(string){
-			strncpy(lf.lfFaceName,string,LF_FACESIZE);
-			lf.lfFaceName[LF_FACESIZE - 1] = 0;
-		}
-		lua_pop(L, 1);
-	}
-
+	if(!WgxGetLogFontStructureFromFile(buffer,&lf)) return;
+	
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);
 	if(hNewFont){
@@ -303,85 +273,39 @@ void InitFont(void)
 
 	/* set main window position if requested */
 	cmdline = GetCommandLineW();
-	if(cmdline){
-		if(wcsstr(cmdline,L"CalledByGUI")){
-			GetWindowsDirectory(buffer,MAX_PATH);
-			strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
-			status = luaL_dofile(L,buffer);
-			if(!status){ /* successful */
-				x = getint(L,"x");
-				y = getint(L,"y");
-				width = getint(L,"width");
-				height = getint(L,"height");
-				GetWindowRect(hWindow,&rc);
-				if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
-					SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
-				else
-					SetWindowPos(hWindow,0,
-						x + (width - (rc.right - rc.left)) / 2,
-						y + (height - (rc.bottom - rc.top)) / 2,
-						0,0,SWP_NOSIZE
-					);
-			}
-		}
-	}
+	if(cmdline == NULL) return;
 
-	lua_close(L);
+	if(wcsstr(cmdline,L"CalledByGUI")){
+		L = lua_open();  /* create state */
+		if(!L) return;
+		lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
+		luaL_openlibs(L);  /* open libraries */
+		lua_gc(L, LUA_GCRESTART, 0);
+		GetWindowsDirectory(buffer,MAX_PATH);
+		strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+		status = luaL_dofile(L,buffer);
+		if(!status){ /* successful */
+			x = getint(L,"x");
+			y = getint(L,"y");
+			width = getint(L,"width");
+			height = getint(L,"height");
+			GetWindowRect(hWindow,&rc);
+			if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
+				SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
+			else
+				SetWindowPos(hWindow,0,
+					x + (width - (rc.right - rc.left)) / 2,
+					y + (height - (rc.bottom - rc.top)) / 2,
+					0,0,SWP_NOSIZE
+				);
+		}
+		lua_close(L);
+	}
 }
 
 void SaveFontSettings(void)
 {
-	FILE *pf;
-	int result;
-	
 	GetWindowsDirectory(buffer,MAX_PATH);
 	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	pf = fopen(buffer,"wt");
-	if(!pf){
-		_snprintf(err_msg,sizeof(err_msg) - 1,
-			"Can't save font preferences to %s!\n%s",
-			buffer,_strerror(NULL));
-		err_msg[sizeof(err_msg) - 1] = 0;
-		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
-		return;
-	}
-
-	result = fprintf(pf,
-		"height = %li\n"
-		"width = %li\n"
-		"escapement = %li\n"
-		"orientation = %li\n"
-		"weight = %li\n"
-		"italic = %i\n"
-		"underline = %i\n"
-		"strikeout = %i\n"
-		"charset = %i\n"
-		"outprecision = %i\n"
-		"clipprecision = %i\n"
-		"quality = %i\n"
-		"pitchandfamily = %i\n"
-		"facename = \"%s\"\n",
-		lf.lfHeight,
-		lf.lfWidth,
-		lf.lfEscapement,
-		lf.lfOrientation,
-		lf.lfWeight,
-		lf.lfItalic,
-		lf.lfUnderline,
-		lf.lfStrikeOut,
-		lf.lfCharSet,
-		lf.lfOutPrecision,
-		lf.lfClipPrecision,
-		lf.lfQuality,
-		lf.lfPitchAndFamily,
-		lf.lfFaceName
-		);
-	fclose(pf);
-	if(result < 0){
-		_snprintf(err_msg,sizeof(err_msg) - 1,
-			"Can't write gui preferences to %s!\n%s",
-			buffer,_strerror(NULL));
-		err_msg[sizeof(err_msg) - 1] = 0;
-		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
-	}
+	WgxSaveLogFontStructureToFile(buffer,&lf);
 }
