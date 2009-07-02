@@ -115,7 +115,7 @@ env.c,3014
 error.c,5312
 keyboard.c,2131
 zenwinx.h,3723
-mem.c,1452
 thread.c,2569
 ntndk.h,31479
-zenwinx.c,2721
+zenwinx.c,2719
+mem.c,3970

@@ -2,6 +2,14 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 3.2.0 (50.0)   2009-07-
+  ------------------------------------------------------------------------------
+    - Ultra Fast NTFS scanning feature added
+    - information about trash (temporary files) excluded from reports,
+      statistics and cluster map; these files are completely ignored now
+    - the \??\ sequence removed from file names in reports
+
+
   Version 3.1.0 (33.0)   2009-05-13
   ------------------------------------------------------------------------------
     - this is the first really stable release
@@ -21,6 +29,7 @@ HISTORY
       to be more effective
     - a lot of important bugs were fixed
 
+                                    ***
 
   Version 2.1.2 (30.0)   2009-02-18
   ------------------------------------------------------------------------------
