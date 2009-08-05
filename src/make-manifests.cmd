@@ -35,6 +35,14 @@ type manifest.part3 >> .\obj\udefrag-gui-config\res\config.manifest
 echo processorArchitecture="%1" >> .\obj\udefrag-gui-config\res\config.manifest
 type manifest.part4 >> .\obj\udefrag-gui-config\res\config.manifest
 
+type manifest.part1 > .\obj\udefrag-scheduler\res\scheduler.manifest
+echo version="%ULTRADFGVER%.0" name="udefrag-scheduler" processorArchitecture="%1" >> .\obj\udefrag-scheduler\res\scheduler.manifest
+type manifest.part2 >> .\obj\udefrag-scheduler\res\scheduler.manifest
+echo UltraDefrag Scheduler >> .\obj\udefrag-scheduler\res\scheduler.manifest
+type manifest.part3 >> .\obj\udefrag-scheduler\res\scheduler.manifest
+echo processorArchitecture="%1" >> .\obj\udefrag-scheduler\res\scheduler.manifest
+type manifest.part4 >> .\obj\udefrag-scheduler\res\scheduler.manifest
+
 type manifest.part1 > .\obj\bootexctrl\bootexctrl.manifest
 echo version="%ULTRADFGVER%.0" name="bootexctrl" processorArchitecture="%1" >> .\obj\bootexctrl\bootexctrl.manifest
 type manifest.part2 >> .\obj\bootexctrl\bootexctrl.manifest

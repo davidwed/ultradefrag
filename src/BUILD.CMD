@@ -33,6 +33,8 @@ xcopy /I /Y /Q    .\gui\res .\obj\gui\res
 xcopy /I /Y /Q    .\gui-launcher .\obj\gui-launcher
 xcopy /I /Y /Q    .\udefrag-gui-config .\obj\udefrag-gui-config
 xcopy /I /Y /Q    .\udefrag-gui-config\res .\obj\udefrag-gui-config\res
+xcopy /I /Y /Q    .\scheduler\C .\obj\udefrag-scheduler
+xcopy /I /Y /Q    .\scheduler\C\res .\obj\udefrag-scheduler\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
@@ -142,8 +144,8 @@ set Path=%OLD_PATH%
 
 
 :build_scheduler
-
-call BLDSCHED.CMD
+rem Since 3.2.0 version of the program we are using native Scheduler application
+rem call BLDSCHED.CMD
 
 
 :build_installer
@@ -172,7 +174,7 @@ if %errorlevel% neq 0 goto fail
 
 if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
-copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
+rem copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
 copy /Y ..\installer\UltraDefrag.nsh .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
@@ -181,7 +183,7 @@ cd amd64
 if %errorlevel% neq 0 goto fail
 
 cd..
-copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
+rem copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
 copy /Y ..\installer\UltraDefrag.nsh .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
@@ -208,27 +210,38 @@ xcopy /I /Y /Q /S .\udefrag-gui-config %SRC_PKG_PATH%\src\udefrag-gui-config
 xcopy /I /Y /Q    .\native %SRC_PKG_PATH%\src\native
 xcopy /I /Y /Q    .\installer %SRC_PKG_PATH%\src\installer
 xcopy /I /Y /Q    .\include %SRC_PKG_PATH%\src\include
-mkdir %SRC_PKG_PATH%\src\scheduler
-xcopy /I /Y /Q .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
-xcopy /I /Y /Q .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties
 
-mkdir %SRC_PKG_PATH%\src\dll
-xcopy /I /Y /Q .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
-xcopy /I /Y /Q .\dll\zenwinx %SRC_PKG_PATH%\src\dll\zenwinx
-xcopy /I /Y /Q .\dll\wgx %SRC_PKG_PATH%\src\dll\wgx
+rem mkdir %SRC_PKG_PATH%\src\scheduler
+rem xcopy /I /Y /Q .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
+rem xcopy /I /Y /Q .\scheduler\DotNET\Properties %SRC_PKG_PATH%\src\scheduler\DotNET\Properties
+
+xcopy /I /Y /Q /S .\scheduler %SRC_PKG_PATH%\src\scheduler
+
+rem mkdir %SRC_PKG_PATH%\src\dll
+rem xcopy /I /Y /Q .\dll\udefrag %SRC_PKG_PATH%\src\dll\udefrag
+rem xcopy /I /Y /Q .\dll\zenwinx %SRC_PKG_PATH%\src\dll\zenwinx
+rem xcopy /I /Y /Q .\dll\wgx %SRC_PKG_PATH%\src\dll\wgx
+
+xcopy /I /Y /Q /S .\dll %SRC_PKG_PATH%\src\dll
 
 xcopy /I /Y /Q .\lua5.1 %SRC_PKG_PATH%\src\lua5.1
 
-mkdir %SRC_PKG_PATH%\src\tools
-copy /Y .\tools\*.pl %SRC_PKG_PATH%\src\tools\
-copy /Y .\tools\*.lua %SRC_PKG_PATH%\src\tools\
-copy /Y .\tools\readme.txt %SRC_PKG_PATH%\src\tools\
+rem mkdir %SRC_PKG_PATH%\src\tools
+rem copy /Y .\tools\*.pl %SRC_PKG_PATH%\src\tools\
+rem copy /Y .\tools\*.lua %SRC_PKG_PATH%\src\tools\
+rem copy /Y .\tools\readme.txt %SRC_PKG_PATH%\src\tools\
 
-mkdir %SRC_PKG_PATH%\src\scripts
-copy /Y .\scripts\*.* %SRC_PKG_PATH%\src\scripts\
+xcopy /I /Y /Q /S .\tools %SRC_PKG_PATH%\src\tools
 
-mkdir %SRC_PKG_PATH%\src\icons-for-mdsp-files
-copy /Y .\icons-for-mdsp-files\*.* %SRC_PKG_PATH%\src\icons-for-mdsp-files\
+rem mkdir %SRC_PKG_PATH%\src\scripts
+rem copy /Y .\scripts\*.* %SRC_PKG_PATH%\src\scripts\
+
+xcopy /I /Y /Q /S .\scripts %SRC_PKG_PATH%\src\scripts
+
+rem mkdir %SRC_PKG_PATH%\src\icons-for-mdsp-files
+rem copy /Y .\icons-for-mdsp-files\*.* %SRC_PKG_PATH%\src\icons-for-mdsp-files\
+
+xcopy /I /Y /Q /S .\icons-for-mdsp-files %SRC_PKG_PATH%\src\icons-for-mdsp-files
 
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
@@ -236,6 +249,13 @@ mkdir %SRC_PKG_PATH%\doc\html\handbook
 copy /Y ..\doc\html\handbook\*.* %SRC_PKG_PATH%\doc\html\handbook\
 
 copy .\*.* %SRC_PKG_PATH%\src\
+
+rd /s /q %SRC_PKG_PATH%\src\dll\udefrag\doxy-doc
+rd /s /q %SRC_PKG_PATH%\src\dll\udefrag\robo-doc
+rd /s /q %SRC_PKG_PATH%\src\dll\zenwinx\robo-doc
+rd /s /q %SRC_PKG_PATH%\src\scheduler\DotNET\bin
+rd /s /q %SRC_PKG_PATH%\src\scheduler\DotNET\obj
+
 cd .\src_package
 del /s /q *.ncb,*.opt,*.plg,*.aps,*.7z,*.bk
 REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .
@@ -287,9 +307,10 @@ rd /s /q zenwinx
 rd /s /q udefrag
 rd /s /q lua5.1
 rd /s /q wgx
+rd /s /q udefrag-scheduler
 del /s /q *.*
 cd ..
-call BLDSCHED.CMD --clean
+rem call BLDSCHED.CMD --clean
 cd lib
 del /s /q *.*
 rd /s /q amd64

@@ -1,0 +1,20 @@
+-- this is the UltraDefrag Scheduler build options
+
+name        = "udefrag-scheduler"
+target_type ="gui"
+
+src = {
+	"main.c", "i18n.c"
+}
+rc = { "scheduler.rc" }
+
+libs = {
+	"kernel32", "user32", "gdi32", "comctl32",
+	"shell32", "msvcrt", "comdlg32"
+}
+adlibs = { 
+	"$(UDEFRAG_LIB_PATH)\\lua5.1a", 
+	"$(UDEFRAG_LIB_PATH)\\wgx"
+}
+
+umentry = "winmain"

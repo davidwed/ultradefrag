@@ -195,6 +195,7 @@ Function PortableRun
   ; make a backup copy of all installed configuration files
   Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
   Rename "$INSTDIR\ud_config_i18n.lng" "$INSTDIR\ud_config_i18n.lng.bak"
+  Rename "$INSTDIR\ud_scheduler_i18n.lng" "$INSTDIR\ud_scheduler_i18n.lng.bak"
   Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
   Rename "$INSTDIR\options\font.lua" "$INSTDIR\options\font.lua.bak"
   Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
@@ -225,6 +226,8 @@ Function PortableRun
   Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
   Rename "$INSTDIR\ud_config_i18n.lng.bak" "$INSTDIR\ud_config_i18n.lng"
+  Delete "$INSTDIR\ud_scheduler_i18n.lng"
+  Rename "$INSTDIR\ud_scheduler_i18n.lng.bak" "$INSTDIR\ud_scheduler_i18n.lng"
   Rename "$SYSDIR\udefrag-gui.cmd.bak" "$SYSDIR\udefrag-gui.cmd"
   ; uninstall if necessary
   ${Unless} $IsInstalled == '1'
@@ -245,6 +248,7 @@ Function install_langpack
   SetOutPath $INSTDIR
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
+  Delete "$INSTDIR\ud_scheduler_i18n.lng"
 
   ${If} $LanguagePack != "English (US)"
     StrCpy $R1 $LanguagePack
@@ -270,6 +274,12 @@ Function install_langpack
     File "${ROOTDIR}\src\udefrag-gui-config\i18n\*.lng"
     Rename "$R0" "ud_config_i18n.bk"
     Delete "$INSTDIR\*.lng"
+
+    File "${ROOTDIR}\src\scheduler\C\i18n\*.lng"
+    Rename "$R0" "ud_scheduler_i18n.bk"
+    Delete "$INSTDIR\*.lng"
+
+    Rename "ud_scheduler_i18n.bk" "ud_scheduler_i18n.lng"
     Rename "ud_config_i18n.bk" "ud_config_i18n.lng"
     Rename "ud_i18n.bk" "ud_i18n.lng"
   ${EndIf}
@@ -383,6 +393,7 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$INSTDIR\scripts\udctxhandler.lua"
   Delete "$SYSDIR\udefrag-gui-dbg.cmd"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
+  Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
 
   ; create boot time and gui startup scripts if they doesn't exist
   SetOutPath "$SYSDIR"
@@ -411,12 +422,22 @@ Section "Documentation" SecDocs
 
 SectionEnd
 
-Section /o "Scheduler.NET" SecSchedNET
+/*Section /o "Scheduler.NET" SecSchedNET
 
   DetailPrint "Install Scheduler.NET..."
   ${DisableX64FSRedirection}
   SetOutPath $INSTDIR
   File "UltraDefragScheduler.NET.exe"
+  ${EnableX64FSRedirection}
+
+SectionEnd
+*/
+Section /o "Scheduler" SecScheduler
+
+  DetailPrint "Install Scheduler..."
+  ${DisableX64FSRedirection}
+  SetOutPath $SYSDIR
+  File "udefrag-scheduler.exe"
   ${EnableX64FSRedirection}
 
 SectionEnd
@@ -513,9 +534,15 @@ Section /o "Shortcuts" SecShortcuts
   CreateShortCut "$R0\Documentation\README.lnk" \
    "$INSTDIR\README.TXT"
 
-  ${If} ${FileExists} "$INSTDIR\UltraDefragScheduler.NET.exe"
+/*  ${If} ${FileExists} "$INSTDIR\UltraDefragScheduler.NET.exe"
     CreateShortCut "$R0\Scheduler.NET.lnk" \
      "$INSTDIR\UltraDefragScheduler.NET.exe"
+  ${EndIf}
+*/
+  Delete "$R0\Scheduler.NET.lnk"
+  ${If} ${FileExists} "$SYSDIR\udefrag-scheduler.exe"
+    CreateShortCut "$R0\Scheduler.lnk" \
+     "$SYSDIR\udefrag-scheduler.exe"
   ${EndIf}
 
   ${If} ${FileExists} "$INSTDIR\handbook\index.html"
@@ -596,7 +623,8 @@ Function .onInit
       Abort
     ${EndUnless}
   ${Else}
-    !insertmacro SelectSection ${SecSchedNET}
+    ;!insertmacro SelectSection ${SecSchedNET}
+    !insertmacro SelectSection ${SecScheduler}
     !insertmacro SelectSection ${SecPortable}
     !insertmacro SelectSection ${SecContextMenuHandler}
     !insertmacro SelectSection ${SecShortcuts}
@@ -635,7 +663,7 @@ Section "Uninstall"
   Delete "$INSTDIR\CREDITS.TXT"
   Delete "$INSTDIR\HISTORY.TXT"
   Delete "$INSTDIR\README.TXT"
-  Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
+  ;Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$INSTDIR\uninstall.exe"
 
   ; delete files from previous installations
@@ -643,6 +671,7 @@ Section "Uninstall"
   Delete "$INSTDIR\boot_off.cmd"
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
+  Delete "$INSTDIR\ud_scheduler_i18n.lng"
   Delete "$INSTDIR\ud_i18n.dll"
   RMDir /r "$INSTDIR\presets"
 
@@ -671,6 +700,7 @@ Section "Uninstall"
   Delete "$SYSDIR\ultradefrag.exe"
   Delete "$SYSDIR\wgx.dll"
   Delete "$SYSDIR\zenwinx.dll"
+  Delete "$SYSDIR\udefrag-scheduler.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
@@ -706,7 +736,8 @@ SectionEnd
 !ifdef MODERN_UI
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag.$\nIncluding console interface."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecSchedNET} "Small and useful scheduler.$\nNET Framework 2.0 required."
+  ;!insertmacro MUI_DESCRIPTION_TEXT ${SecSchedNET} "Small and useful scheduler.$\nNET Framework 2.0 required."
+  !insertmacro MUI_DESCRIPTION_TEXT ${SecScheduler} "Small handy scheduler."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "Handbook."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecPortable} "Build portable package to place them on USB drive."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenuHandler} "Defragment your volumes from their context menu."
