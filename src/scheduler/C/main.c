@@ -54,12 +54,13 @@
 #include "resource.h"
 
 #include "../../dll/wgx/wgx.h"
+#include "../../include/udefrag.h"
 
 #include <lm.h> /* for NetScheduleJobAdd() */
 
 /* Global variables */
 HINSTANCE hInstance;
-HWND hWindow;
+HWND hWindow, hDrives;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 LOGFONT lf;
@@ -71,7 +72,9 @@ char buffer[MAX_PATH];
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void InitFont(void);
 
-void AddSchedule(void);
+void InitDrivesList(void);
+
+void SchedulerAddJob(void);
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
@@ -99,6 +102,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		hWindow = hWnd;
+		hDrives = GetDlgItem(hWindow,IDC_DRIVES);
 		GetWindowsDirectoryW(path,MAX_PATH);
 		wcscat(path,L"\\UltraDefrag\\ud_scheduler_i18n.lng");
 		if(WgxBuildResourceTable(i18n_table,path))
@@ -106,6 +110,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		WgxSetIcon(hInstance,hWindow,IDI_SCHEDULER);
 		InitFont();
 		SendMessage(GetDlgItem(hWindow,IDC_WEEKLY),BM_SETCHECK,BST_CHECKED,0);
+		InitDrivesList();
 		break;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
@@ -120,11 +125,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 					IDC_THURSDAY,IDC_FRIDAY,IDC_SATURDAY,IDC_SUNDAY,0);
 			break;
 		case IDOK:
-			AddSchedule();
+			SchedulerAddJob();
 			break;
-		case IDCANCEL:
-			EndDialog(hWnd,0);
-			return TRUE;
 		}
 		break;
 	case WM_CLOSE:
@@ -157,12 +159,14 @@ void InitFont(void)
 	}
 }
 
-void AddSchedule(void)
+void SchedulerAddJob(void)
 {
 	SYSTEMTIME st;
 	AT_INFO ati;
+	WCHAR drive[32];
 	WCHAR cmd[64];
 	DWORD JobId;
+	int index;
 	
 	if(SendMessage(GetDlgItem(hWindow,IDC_DATETIMEPICKER1),DTM_GETSYSTEMTIME,
 	  0,(LPARAM)(LPSYSTEMTIME)&st) != GDT_VALID){
@@ -170,7 +174,9 @@ void AddSchedule(void)
 		return;
 	}
 	
-	swprintf(cmd,L"udefrag ");
+	index = (int)(DWORD_PTR)SendMessage(hDrives,CB_GETCURSEL,0,0);
+	SendMessageW(hDrives,CB_GETLBTEXT,(WPARAM)index,(LPARAM)drive);
+	swprintf(cmd,L"udefrag %s",drive);
 	  
 	ati.JobTime = (st.wHour * 60 * 60 * 1000) + (st.wMinute * 60 * 1000) + (st.wSecond * 1000);
 	ati.DaysOfMonth = 0;
@@ -192,4 +198,22 @@ void AddSchedule(void)
 	
 	if(NetScheduleJobAdd(NULL,(LPBYTE)&ati,&JobId) != NERR_Success)
 		MessageBox(hWindow,"Cannot add specified job!","Error",MB_OK | MB_ICONHAND);
+}
+
+void InitDrivesList(void)
+{
+	ERRORHANDLERPROC eh;
+	volume_info *v;
+	int i;
+	char buffer[64];
+
+	eh = udefrag_set_error_handler(NULL);
+	if(udefrag_get_avail_volumes(&v,TRUE) >= 0){ /* skip removable media */
+		for(i = 0; v[i].letter != 0; i++){
+			sprintf(buffer,"%c:\\",v[i].letter);
+			SendMessage(hDrives,CB_ADDSTRING,0,(LPARAM)(LPCTSTR)buffer);
+		}
+	}
+	udefrag_set_error_handler(eh);
+	SendMessage(hDrives,CB_SETCURSEL,0,0);
 }

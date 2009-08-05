@@ -64,8 +64,9 @@ BEGIN
     CONTROL         "DateTimePicker1",IDC_DATETIMEPICKER1,"SysDateTimePick32",
                     DTS_RIGHTALIGN | DTS_UPDOWN | WS_GROUP | WS_TABSTOP | 0x8,
                     148,32,62,13
-    PUSHBUTTON      "OK",IDOK,147,53,64,11,WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "Cancel",IDCANCEL,147,70,64,11,NOT WS_TABSTOP
+    COMBOBOX        IDC_DRIVES,148,53,62,30,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    PUSHBUTTON      "OK",IDOK,147,70,64,11,WS_GROUP | WS_TABSTOP
 END
 
 /* manifests for all targets produces make-manifests.cmd script */
