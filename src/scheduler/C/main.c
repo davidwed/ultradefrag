@@ -55,6 +55,8 @@
 
 #include "../../dll/wgx/wgx.h"
 
+#include <lm.h> /* for NetScheduleJobAdd() */
+
 /* Global variables */
 HINSTANCE hInstance;
 HWND hWindow;
@@ -68,6 +70,8 @@ char buffer[MAX_PATH];
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void InitFont(void);
+
+void AddSchedule(void);
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
@@ -101,10 +105,27 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			WgxApplyResourceTable(i18n_table,hWindow);
 		WgxSetIcon(hInstance,hWindow,IDI_SCHEDULER);
 		InitFont();
+		SendMessage(GetDlgItem(hWindow,IDC_WEEKLY),BM_SETCHECK,BST_CHECKED,0);
 		break;
 	case WM_COMMAND:
-//		switch(LOWORD(wParam)){
-//		}
+		switch(LOWORD(wParam)){
+		case IDC_DAILY:
+			if(SendMessage(GetDlgItem(hWindow,IDC_DAILY),BM_GETCHECK,0,0) == BST_CHECKED)
+				WgxDisableWindows(hWindow,IDC_MONDAY,IDC_TUESDAY,IDC_WEDNESDAY,
+					IDC_THURSDAY,IDC_FRIDAY,IDC_SATURDAY,IDC_SUNDAY,0);
+			break;
+		case IDC_WEEKLY:
+			if(SendMessage(GetDlgItem(hWindow,IDC_WEEKLY),BM_GETCHECK,0,0) == BST_CHECKED)
+				WgxEnableWindows(hWindow,IDC_MONDAY,IDC_TUESDAY,IDC_WEDNESDAY,
+					IDC_THURSDAY,IDC_FRIDAY,IDC_SATURDAY,IDC_SUNDAY,0);
+			break;
+		case IDOK:
+			AddSchedule();
+			break;
+		case IDCANCEL:
+			EndDialog(hWnd,0);
+			return TRUE;
+		}
 		break;
 	case WM_CLOSE:
 		EndDialog(hWnd,0);
@@ -134,4 +155,41 @@ void InitFont(void)
 		if(hFont) DeleteObject(hFont);
 		hFont = hNewFont;
 	}
+}
+
+void AddSchedule(void)
+{
+	SYSTEMTIME st;
+	AT_INFO ati;
+	WCHAR cmd[64];
+	DWORD JobId;
+	
+	if(SendMessage(GetDlgItem(hWindow,IDC_DATETIMEPICKER1),DTM_GETSYSTEMTIME,
+	  0,(LPARAM)(LPSYSTEMTIME)&st) != GDT_VALID){
+		MessageBox(hWindow,"Cannot retrieve specified time!","Error",MB_OK | MB_ICONHAND);
+		return;
+	}
+	
+	swprintf(cmd,L"udefrag ");
+	  
+	ati.JobTime = (st.wHour * 60 * 60 * 1000) + (st.wMinute * 60 * 1000) + (st.wSecond * 1000);
+	ati.DaysOfMonth = 0;
+	ati.DaysOfWeek = 0;
+	ati.Flags = JOB_RUN_PERIODICALLY | JOB_NONINTERACTIVE;
+	ati.Command = cmd;
+	
+	if(SendMessage(GetDlgItem(hWindow,IDC_DAILY),BM_GETCHECK,0,0) == BST_CHECKED)
+		ati.DaysOfWeek = 0x7F;
+	else {
+		if(SendMessage(GetDlgItem(hWindow,IDC_MONDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x1;
+		if(SendMessage(GetDlgItem(hWindow,IDC_TUESDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x2;
+		if(SendMessage(GetDlgItem(hWindow,IDC_WEDNESDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x4;
+		if(SendMessage(GetDlgItem(hWindow,IDC_THURSDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x8;
+		if(SendMessage(GetDlgItem(hWindow,IDC_FRIDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x10;
+		if(SendMessage(GetDlgItem(hWindow,IDC_SATURDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x20;
+		if(SendMessage(GetDlgItem(hWindow,IDC_SUNDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x40;
+	}
+	
+	if(NetScheduleJobAdd(NULL,(LPBYTE)&ati,&JobId) != NERR_Success)
+		MessageBox(hWindow,"Cannot add specified job!","Error",MB_OK | MB_ICONHAND);
 }

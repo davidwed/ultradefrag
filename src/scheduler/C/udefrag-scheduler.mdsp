@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=..\..\lib
 outputFilename=../../bin/udefrag-scheduler.exe
-libraries=lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt
+libraries=lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt,netapi32
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -65,7 +65,7 @@ optimizeLevel=2
 // linker
 libraryPath=..\..\lib
 outputFilename=../../bin/udefrag-scheduler.exe
-libraries=lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt
+libraries=lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt,netapi32
 extraLinkerOptions=-mwindows -Wl,--strip-all
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -88,3 +88,7 @@ extraResourceOptions=
 1=scheduler.rc
 [Other]
 [History]
+i18n.c,91
+scheduler.rc,131
+resource.h,91
+main.c,4441
