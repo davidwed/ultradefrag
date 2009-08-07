@@ -56,7 +56,29 @@
 #include "../../dll/wgx/wgx.h"
 #include "../../include/udefrag.h"
 
+#ifndef USE_WINDDK
 #include <lm.h> /* for NetScheduleJobAdd() */
+#else /* Windows Server 2003 DDK doesn't have these definitions */
+#define NET_API_STATUS DWORD
+#define NERR_Success 0 
+#define JOB_RUN_PERIODICALLY	1
+#define JOB_EXEC_ERROR	2
+#define JOB_RUNS_TODAY	4
+#define JOB_ADD_CURRENT_DATE	8
+#define JOB_NONINTERACTIVE	16
+NET_API_STATUS NetScheduleJobAdd(
+  LPCWSTR Servername,
+  LPBYTE Buffer,
+  LPDWORD JobId
+);
+typedef struct _AT_INFO {
+	DWORD_PTR JobTime;
+	DWORD DaysOfMonth;
+	UCHAR DaysOfWeek;
+	UCHAR Flags;
+	LPWSTR Command;
+} AT_INFO, *PAT_INFO, *LPAT_INFO;
+#endif
 
 /* Global variables */
 HINSTANCE hInstance;

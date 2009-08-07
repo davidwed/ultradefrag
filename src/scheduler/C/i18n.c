@@ -41,7 +41,6 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{IDC_WEEKLY,    L"WEEKLY",    L"Weekly",    NULL},
 
 	{IDOK,          L"OK",        L"OK",        NULL},
-	{IDCANCEL,      L"CANCEL",    L"Cancel",    NULL},
 
 	{0,             NULL,         NULL,         NULL}
 };

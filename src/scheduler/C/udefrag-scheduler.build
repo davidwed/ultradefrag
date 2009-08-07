@@ -14,7 +14,7 @@ libs = {
 }
 adlibs = { 
 	"$(UDEFRAG_LIB_PATH)\\lua5.1a", 
-	"$(UDEFRAG_LIB_PATH)\\wgx"
+	"$(UDEFRAG_LIB_PATH)\\wgx",
 	"$(UDEFRAG_LIB_PATH)\\udefrag"
 }
 
