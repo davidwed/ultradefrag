@@ -31,7 +31,7 @@
 WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{IDC_GUI,           L"GRAPHICAL_INTERFACE", L"Graphical interface",    NULL},
 	{IDC_FONT,          L"FONT",                L"Font",                   NULL},
-	{IDC_GUI_SCRIPT,    L"SCRIPT",              L"Script",                 NULL},
+	{IDC_GUI_SCRIPT,    L"OPTIONS",             L"Options",                NULL},
 	{IDC_GUI_HELP,      L"HELP",                L"Help",                   NULL},
 	{IDC_BOOT_TIME,     L"BOOT_TIME_SCAN",      L"Windows boot time scan", NULL},
 	{IDC_ENABLE,        L"ENABLE",              L"Enable",                 NULL},

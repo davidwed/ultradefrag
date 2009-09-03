@@ -41,9 +41,9 @@ cd ..\gui
 lua ..\..\tools\mkmod.lua dfrg.build
 if %errorlevel% neq 0 goto end
 
-cd ..\gui-launcher
-lua ..\..\tools\mkmod.lua udefrag-gui.build
-if %errorlevel% neq 0 goto end
+rem cd ..\gui-launcher
+rem lua ..\..\tools\mkmod.lua udefrag-gui.build
+rem if %errorlevel% neq 0 goto end
 
 cd ..\udefrag-gui-config
 lua ..\..\tools\mkmod.lua udefrag-gui-config.build

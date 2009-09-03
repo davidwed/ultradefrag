@@ -21,6 +21,11 @@
 * GUI Launcher.
 */
 
+/*
+* NOTE: Useless since the 3.2.0 version of the program.
+*/
+
+
 #include <windows.h>
 #include "resource.h"
 

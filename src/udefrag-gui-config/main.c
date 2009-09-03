@@ -123,9 +123,12 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 			break;
 		case IDC_GUI_SCRIPT:
+			//GetWindowsDirectoryW(path,MAX_PATH);
+			//wcscat(path,L"\\System32\\udefrag-gui.cmd");
+			//ShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
 			GetWindowsDirectoryW(path,MAX_PATH);
-			wcscat(path,L"\\System32\\udefrag-gui.cmd");
-			ShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
+			wcscat(path,L"\\UltraDefrag\\options\\guiopts.lua");
+			ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_GUI_HELP:
 			OpenWebPage("gui.html");

@@ -29,8 +29,36 @@ char buffer[MAX_PATH];
 char err_msg[1024];
 extern int user_defined_column_widths[];
 
+/* they have the same effect as environment variables */
+char in_filter[4096] = {0};
+char ex_filter[4096] = {0};
+char sizelimit[64] = {0};
+int refresh_interval;
+int disable_reports;
+char dbgprint_level[32] = {0};
+
 extern HWND hWindow;
 extern HFONT hFont;
+
+void SetEnvironmentVariables(void)
+{
+	char buffer[128];
+	
+	if(in_filter[0])
+		(void)SetEnvironmentVariable("UD_IN_FILTER",in_filter);
+	if(ex_filter[0])
+		(void)SetEnvironmentVariable("UD_EX_FILTER",ex_filter);
+	if(sizelimit[0])
+		(void)SetEnvironmentVariable("UD_SIZELIMIT",sizelimit);
+	if(refresh_interval){
+		sprintf(buffer,"%i",refresh_interval);
+		(void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",buffer);
+	}
+	sprintf(buffer,"%i",disable_reports);
+	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",buffer);
+	if(dbgprint_level[0])
+		(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",dbgprint_level);
+}
 
 /* returns 0 if variable is not defined */
 static int getint(lua_State *L, char *variable)
@@ -47,8 +75,12 @@ void GetPrefs(void)
 {
 	lua_State *L;
 	int status;
+	char *string;
 	
 	win_rc.left = win_rc.top = 0;
+	in_filter[0] = ex_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
+	refresh_interval = 0;
+	disable_reports = 0;
 
 	L = lua_open();  /* create state */
 	if(!L) return;
@@ -62,12 +94,50 @@ void GetPrefs(void)
 	if(!status){ /* successful */
 		win_rc.left = (long)getint(L,"x");
 		win_rc.top = (long)getint(L,"y");
+		win_rc.right = win_rc.left + (long)getint(L,"width");
+		win_rc.bottom = win_rc.top + (long)getint(L,"height");
 		skip_removable = getint(L,"skip_removable");
 		user_defined_column_widths[0] = getint(L,"column1_width");
 		user_defined_column_widths[1] = getint(L,"column2_width");
 		user_defined_column_widths[2] = getint(L,"column3_width");
 		user_defined_column_widths[3] = getint(L,"column4_width");
 		user_defined_column_widths[4] = getint(L,"column5_width");
+
+		lua_getglobal(L, "in_filter");
+		string = (char *)lua_tostring(L, lua_gettop(L));
+		if(string){
+			strncpy(in_filter,string,sizeof(in_filter));
+			in_filter[sizeof(in_filter) - 1] = 0;
+		}
+		lua_pop(L, 1);
+
+		lua_getglobal(L, "ex_filter");
+		string = (char *)lua_tostring(L, lua_gettop(L));
+		if(string){
+			strncpy(ex_filter,string,sizeof(ex_filter));
+			ex_filter[sizeof(ex_filter) - 1] = 0;
+		}
+		lua_pop(L, 1);
+
+		lua_getglobal(L, "sizelimit");
+		string = (char *)lua_tostring(L, lua_gettop(L));
+		if(string){
+			strncpy(sizelimit,string,sizeof(sizelimit));
+			sizelimit[sizeof(sizelimit) - 1] = 0;
+		}
+		lua_pop(L, 1);
+
+		refresh_interval = getint(L,"refresh_interval");
+		disable_reports = getint(L,"disable_reports");
+
+		lua_getglobal(L, "dbgprint_level");
+		string = (char *)lua_tostring(L, lua_gettop(L));
+		if(string){
+			strncpy(dbgprint_level,string,sizeof(dbgprint_level));
+			dbgprint_level[sizeof(dbgprint_level) - 1] = 0;
+		}
+		lua_pop(L, 1);
+		SetEnvironmentVariables();
 	}
 	lua_close(L);
 }
@@ -91,12 +161,26 @@ void SavePrefs(void)
 
 	/* save main window size for configurator's initialization */
 	result = fprintf(pf,
+		"-- UltraDefrag GUI options\n\n"
+		"in_filter = \"%s\"\n"
+		"ex_filter = \"%s\"\n"
+		"sizelimit = \"%s\"\n"
+		"refresh_interval = %i\n"
+		"disable_reports = %i\n"
+		"dbgprint_level = \"%s\"\n\n"
+		"-- window coordinates etc.\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
 		"skip_removable = %i\n\n"
 		"column1_width = %i\ncolumn2_width = %i\n"
 		"column3_width = %i\ncolumn4_width = %i\n"
 		"column5_width = %i\n",
+		in_filter,
+		ex_filter,
+		sizelimit,
+		refresh_interval,
+		disable_reports,
+		dbgprint_level,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),

@@ -199,25 +199,21 @@ Function PortableRun
   Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
   Rename "$INSTDIR\options\font.lua" "$INSTDIR\options\font.lua.bak"
   Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
-  Rename "$SYSDIR\udefrag-gui.cmd" "$SYSDIR\udefrag-gui.cmd.bak"
   ; perform silent installation
   ExecWait '"$EXEPATH" /S'
   ; replace configuration files with files contained in portable directory
   CopyFiles /SILENT "$EXEDIR\guiopts.lua" "$INSTDIR\options"
   CopyFiles /SILENT "$EXEDIR\font.lua" "$INSTDIR\options"
   CopyFiles /SILENT "$EXEDIR\udreportopts.lua" "$INSTDIR\options"
-  CopyFiles /SILENT "$EXEDIR\udefrag-gui.cmd" "$SYSDIR"
   ; start ultradefrag gui
-  ExecWait "$SYSDIR\udefrag-gui.exe"
+  ExecWait "$SYSDIR\ultradefrag.exe"
   ; move configuration files to portable directory
   Delete "$EXEDIR\guiopts.lua"
   Delete "$EXEDIR\font.lua"
   Delete "$EXEDIR\udreportopts.lua"
-  Delete "$EXEDIR\udefrag-gui.cmd"
   Rename "$INSTDIR\options\guiopts.lua" "$EXEDIR\guiopts.lua"
   Rename "$INSTDIR\options\font.lua" "$EXEDIR\font.lua"
   Rename "$INSTDIR\options\udreportopts.lua" "$EXEDIR\udreportopts.lua"
-  Rename "$SYSDIR\udefrag-gui.cmd" "$EXEDIR\udefrag-gui.cmd"
   ; restore all original configuration files
   Rename "$INSTDIR\options\guiopts.lua.bak" "$INSTDIR\options\guiopts.lua"
   Rename "$INSTDIR\options\font.lua.bak" "$INSTDIR\options\font.lua"
@@ -228,7 +224,6 @@ Function PortableRun
   Rename "$INSTDIR\ud_config_i18n.lng.bak" "$INSTDIR\ud_config_i18n.lng"
   Delete "$INSTDIR\ud_scheduler_i18n.lng"
   Rename "$INSTDIR\ud_scheduler_i18n.lng.bak" "$INSTDIR\ud_scheduler_i18n.lng"
-  Rename "$SYSDIR\udefrag-gui.cmd.bak" "$SYSDIR\udefrag-gui.cmd"
   ; uninstall if necessary
   ${Unless} $IsInstalled == '1'
     ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
@@ -336,7 +331,6 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
   File "${ROOTDIR}\src\installer\udctxhandler.cmd"
-  File "udefrag-gui.exe"
   File "udefrag-gui-config.exe"
   File "udefrag.dll"
   File "udefrag.exe"
@@ -394,15 +388,17 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$SYSDIR\udefrag-gui-dbg.cmd"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
   Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
+  Delete "$SYSDIR\udefrag-gui.exe"
+  Delete "$SYSDIR\udefrag-gui.cmd"
 
   ; create boot time and gui startup scripts if they doesn't exist
   SetOutPath "$SYSDIR"
   ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
     File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
   ${EndUnless}
-  ${Unless} ${FileExists} "$SYSDIR\udefrag-gui.cmd"
-    File "${ROOTDIR}\src\installer\udefrag-gui.cmd"
-  ${EndUnless}
+  
+  ; write default GUI settings to guiopts.lua file
+  ExecWait '"$SYSDIR\ultradefrag.exe" --setup'
 
   ${EnableX64FSRedirection}
   pop $R0
@@ -456,19 +452,16 @@ Section /o "Portable UltraDefrag package" SecPortable
   
   CopyFiles /SILENT $EXEPATH $R0 265
 
-  ; never replace existing files
-  ${Unless} ${FileExists} "$R0\font.lua"
+  ; never replace existing files -- why ???
+  ;${Unless} ${FileExists} "$R0\font.lua"
     CopyFiles /SILENT "$INSTDIR\options\font.lua" $R0
-  ${EndUnless}
-  ${Unless} ${FileExists} "$R0\guiopts.lua"
+  ;${EndUnless}
+  ;${Unless} ${FileExists} "$R0\guiopts.lua"
     CopyFiles /SILENT "$INSTDIR\options\guiopts.lua" $R0
-  ${EndUnless}
-  ${Unless} ${FileExists} "$R0\udreportopts.lua"
+  ;${EndUnless}
+  ;${Unless} ${FileExists} "$R0\udreportopts.lua"
     CopyFiles /SILENT "$INSTDIR\options\udreportopts.lua" $R0
-  ${EndUnless}
-  ${Unless} ${FileExists} "$R0\udefrag-gui.cmd"
-    CopyFiles /SILENT "$SYSDIR\udefrag-gui.cmd" $R0
-  ${EndUnless}
+  ;${EndUnless}
 
   WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
   WriteINIStr "$R0\PORTABLE.X" "i18n" "Language" $LanguagePack
@@ -524,7 +517,7 @@ Section /o "Shortcuts" SecShortcuts
    "$SYSDIR\notepad.exe" "$SYSDIR\udefrag-gui.cmd"
 */
   CreateShortCut "$R0\UltraDefrag.lnk" \
-   "$SYSDIR\udefrag-gui.exe"
+   "$SYSDIR\ultradefrag.exe"
 
   CreateShortCut "$R0\Preferences.lnk" \
    "$SYSDIR\udefrag-gui-config.exe"
@@ -558,9 +551,9 @@ Section /o "Shortcuts" SecShortcuts
    "$INSTDIR\uninstall.exe"
 
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
-   "$SYSDIR\udefrag-gui.exe"
+   "$SYSDIR\ultradefrag.exe"
   CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
-   "$SYSDIR\udefrag-gui.exe"
+   "$SYSDIR\ultradefrag.exe"
 
   ${If} ${FileExists} "$INSTDIR\portable_${ULTRADFGARCH}_package\PORTABLE.X"
     CreateShortCut "$R0\Portable package.lnk" \
@@ -695,7 +688,6 @@ Section "Uninstall"
   Delete "$SYSDIR\udctxhandler.cmd"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\udefrag.exe"
-  Delete "$SYSDIR\udefrag-gui.exe"
   Delete "$SYSDIR\udefrag-gui-config.exe"
   Delete "$SYSDIR\ultradefrag.exe"
   Delete "$SYSDIR\wgx.dll"

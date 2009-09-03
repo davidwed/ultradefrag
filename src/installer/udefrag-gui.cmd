@@ -1,3 +1,5 @@
+rem Useless since the 3.2.0 version of the program.
+
 @echo off
 
 rem ----------------- UltraDefrag GUI startup commands ------------------------
