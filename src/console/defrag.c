@@ -29,6 +29,8 @@
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
+#include "../include/getopt.h"
+
 #define settextcolor(c) SetConsoleTextAttribute(hOut,c)
 
 /* global variables */
@@ -44,9 +46,13 @@ char letter = 0;
 char unk_opt[] = "Unknown option: x!";
 int unknown_option = 0;
 
+int screensaver_mode = 0;
+
 #define BLOCKS_PER_HLINE  68//60//79
 #define BLOCKS_PER_VLINE  10//8//16
 #define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
+
+char *cluster_map = NULL;
 
 /* internal functions prototypes */
 void HandleError(char *err_msg,int exit_code);
@@ -58,28 +64,8 @@ void Exit(int exit_code)
 	if(!b_flag) settextcolor(console_attr);
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
 	udefrag_unload();
+	if(cluster_map) free(cluster_map);
 	exit(exit_code);
-}
-
-void show_help(void)
-{
-	printf(
-		"Usage: udefrag [command] [options] [volumeletter:]\n"
-		"  The default action is to display this help message.\n"
-		"Commands:\n"
-		"  -a  analyse only\n"
-		"  -o  optimize volume space\n"
-		"  -l  list all available volumes except removable\n"
-		"  -la list all available volumes\n"
-		"  -?  show this help\n"
-		"  If command is not specified it will defragment volume.\n"
-		"Options:\n"
-		"  -b  use default color scheme\n"
-		"  -m  show cluster map\n"
-		"  -p  suppress progress indicator\n"
-		"  -v  show volume information after a job\n"
-		);
-	Exit(0);
 }
 
 void HandleError(char *err_msg,int exit_code)
@@ -156,11 +142,15 @@ void __stdcall ErrorHandler(short *msg)
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
+void RunScreenSaver(void)
+{
+	printf("Hello!\n");
+}
+
 BOOL first_run = TRUE;
 BOOL err_flag = FALSE;
 BOOL err_flag2 = FALSE;
 //char last_op = 0;
-char cluster_map[N_BLOCKS] = {};
 
 WORD colors[NUM_OF_SPACE_STATES] = {
 	FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
@@ -194,17 +184,22 @@ WORD bcolors[NUM_OF_SPACE_STATES] = {
 	BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY,
 };
 
-#define MAP_CHAR '@'
+#define MAP_SYMBOL '*'
 BOOL map_completed = FALSE;
 
 #define BORDER_COLOR (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
+
+WORD map_border_color = BORDER_COLOR;
+char map_symbol = MAP_SYMBOL;
+int map_rows = BLOCKS_PER_VLINE;
+int map_symbols_per_line = BLOCKS_PER_HLINE;
 
 void RedrawMap(void)
 {
 	int i,j;
 	WORD color, prev_color = 0x0;
 	char c[2];
-	WORD border_color = BORDER_COLOR;
+	WORD border_color = map_border_color;
 
 	fprintf(stderr,"\n\n");
 	
@@ -212,7 +207,7 @@ void RedrawMap(void)
 	prev_color = border_color;
 	c[0] = 0xC9; c[1] = 0;
 	fprintf(stderr,c);
-	for(j = 0; j < BLOCKS_PER_HLINE; j++){
+	for(j = 0; j < map_symbols_per_line; j++){
 		c[0] = 0xCD; c[1] = 0;
 		fprintf(stderr,c);
 	}
@@ -220,17 +215,17 @@ void RedrawMap(void)
 	fprintf(stderr,c);
 	fprintf(stderr,"\n");
 
-	for(i = 0; i < BLOCKS_PER_VLINE; i++){
+	for(i = 0; i < map_rows; i++){
 		if(border_color != prev_color) settextcolor(border_color);
 		prev_color = border_color;
 		c[0] = 0xBA; c[1] = 0;
 		fprintf(stderr,c);
-		for(j = 0; j < BLOCKS_PER_HLINE; j++){
-			color = colors[(int)cluster_map[i * BLOCKS_PER_HLINE + j]];
+		for(j = 0; j < map_symbols_per_line; j++){
+			color = colors[(int)cluster_map[i * map_symbols_per_line + j]];
 			if(color != prev_color) settextcolor(color);
 			prev_color = color;
-			c[0] = '*'; c[1] = 0;
-			fprintf(stderr,c);
+			c[0] = map_symbol; c[1] = 0;
+			fprintf(stderr,"%s",c);
 		}
 		if(border_color != prev_color) settextcolor(border_color);
 		prev_color = border_color;
@@ -243,7 +238,7 @@ void RedrawMap(void)
 	prev_color = border_color;
 	c[0] = 0xC8; c[1] = 0;
 	fprintf(stderr,c);
-	for(j = 0; j < BLOCKS_PER_HLINE; j++){
+	for(j = 0; j < map_symbols_per_line; j++){
 		c[0] = 0xCD; c[1] = 0;
 		fprintf(stderr,c);
 	}
@@ -260,7 +255,7 @@ void RedrawMap(void)
 int __stdcall ProgressCallback(int done_flag)
 {
 	STATISTIC stat;
-	char op; char *op_name/*, *last_op_name*/;
+	char op; char *op_name = ""/*, *last_op_name*/;
 	double percentage;
 	ERRORHANDLERPROC eh = NULL;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -285,7 +280,7 @@ int __stdcall ProgressCallback(int done_flag)
 			return 0;
 		}
 		cursor_pos.X = 0;
-		cursor_pos.Y = csbi.dwCursorPosition.Y - BLOCKS_PER_VLINE - 3 - 2;
+		cursor_pos.Y = csbi.dwCursorPosition.Y - map_rows - 3 - 2;
 		if(!SetConsoleCursorPosition(hOut,cursor_pos)){
 			if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 			printf("\nCannot set cursor position!\n");
@@ -327,7 +322,7 @@ int __stdcall ProgressCallback(int done_flag)
 	if(m_flag){ /* display cluster map */
 		/* show error message no more than once */
 		if(err_flag2) eh = udefrag_set_error_handler(NULL);
-		if(udefrag_get_map(cluster_map,N_BLOCKS) >= 0){
+		if(udefrag_get_map(cluster_map,map_rows * map_symbols_per_line) >= 0){
 			RedrawMap();
 		} else {
 			err_flag2 = TRUE;
@@ -338,7 +333,8 @@ int __stdcall ProgressCallback(int done_flag)
 	return 0;
 }
 
-void parse_cmdline(int argc, char **argv)
+/* oblsolete code */
+void parse_cmdline__(int argc, char **argv)
 {
 	int i;
 	char c1,c2,c3;
@@ -379,6 +375,314 @@ void parse_cmdline(int argc, char **argv)
 	if(!l_flag && !letter) h_flag = 1;
 }
 
+void show_help(void)
+{
+	printf(
+		"===============================================================================\n"
+		VERSIONINTITLE " - Powerful disk defragmentation tool for Windows NT\n"
+		"Copyright (c) Dmitri Arkhangelski, 2007-2009.\n"
+		"\n"
+		"===============================================================================\n"
+		"This program is free software; you can redistribute it and/or\n"
+		"modify it under the terms of the GNU General Public License\n"
+		"as published by the Free Software Foundation; either version 2\n"
+		"of the License, or (at your option) any later version.\n"
+		"\n"
+		"This program is distributed in the hope that it will be useful,\n"
+		"but WITHOUT ANY WARRANTY; without even the implied warranty of\n"
+		"MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n"
+		"GNU General Public License for more details.\n"
+		"\n"
+		"You should have received a copy of the GNU General Public License\n"
+		"along with this program; if not, write to the Free Software\n"
+		"Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.\n"
+		"===============================================================================\n"
+		"\n"
+		"Usage: udefrag [command] [options] [volumeletter:]\n"
+		"\n"
+		"  The default action is to display this help message.\n"
+		"\n"
+		"Commands:\n"
+		"  -a,  --analyze                      Analyze specified volume only\n"
+		"       --defragment                   Defragment volume\n"
+		"  -o,  --optimize                     Optimize volume space\n"
+		"  -l,  --list-available-volumes       List volumes available\n"
+		"                                      for defragmentation,\n"
+		"                                      except removable media\n"
+		"  -la, --list-available-volumes=all   List all available volumes\n"
+		"  -h,  --help                         Show this help screen\n"
+		"  -?                                  Show this help screen\n"
+		"\n"
+		"  If command is not specified it will defragment volume.\n"
+		"\n"
+		"Options:\n"
+		"  -b,  --use-system-color-scheme      Use B/W scheme instead of green color\n"
+		"  -p,  --suppress-progress-indicator  Hide progress indicator\n"
+		"  -v,  --show-volume-information      Show volume information after a job\n"
+		"  -m,  --show-cluster-map             Show map representing clusters\n"
+		"                                      on specified volume\n"
+		"       --map-border-color=color       Specify cluster map border color here.\n"
+		"                                      Available color values: black, white,\n"
+		"                                      red, green, blue, yellow, magenta, cyan,\n"
+		"                                      darkred, darkgreen, darkblue, darkyellow,\n"
+		"                                      darkmagenta, darkcyan, gray.\n"
+		"                                      Yellow color is used by default.\n"
+		"       --map-symbol=x                 You can specify map symbol here.\n"
+		"                                      There are two supported formats: you can\n"
+		"                                      type symbol directly or specify\n"
+		"                                      its number in hexadecimal form. \n"
+		"                                      Like this: --map-symbol=0x1 :-)\n"
+		"                                      Valid numbers are in range: 0x1 - 0xFF\n"
+		"                                      '*' symbol is used by default.\n"
+		"       --map-rows=n                   Number of rows in cluster map.\n"
+		"                                      Default value is 10.\n"
+		"       --map-symbols-per-line=n       Number of map symbols\n"
+		"                                      containing in each row of map.\n"
+		"                                      Default value is 68.\n"
+		"\n"
+		"  Volume defragmentation options can be specified through system\n"
+		"  environment variables as described in UltraDefrag Handbook.\n"
+		"\n"
+		"Accepted environment variables:\n"
+		"\n"
+		"  UD_IN_FILTER                        List of files to be included\n"
+		"                                      in defragmentation process. File names\n"
+		"                                      must be separated by semicolon. P.a.:\n"
+		"                                      set UD_IN_FILTER=My Documents. After\n"
+		"                                      this assignment defragger will process\n"
+		"                                      My Documents directory contents only.\n"
+		"                                      The default value is an empty string\n"
+		"                                      that means: all files will be included.\n"
+		"\n"
+		"  UD_EX_FILTER                        List of files to be excluded from\n"
+		"                                      defragmentation process. File names\n"
+		"                                      must be separated by semicolon. P.a.:\n"
+		"                                      set UD_EX_FILTER=\n"
+		"                                      system volume information;temp;recycler.\n"
+		"                                      After this assignment many\n"
+		"                                      temporary files will be excluded from the\n"
+		"                                      defragmentation process. The default\n"
+		"                                      value is an empty string. It means:\n"
+		"                                      no files will be excluded.\n"
+		"\n"
+		"  UD_SIZELIMIT                        Ignore files larger than specified value.\n"
+		"                                      You can either specify size in bytes or\n"
+		"                                      use the following suffixes: Kb, Mb, Gb,\n"
+		"                                      Tb, Pb, Eb. P.a., use\n"
+		"                                      set UD_SIZELIMIT=10Mb to exclude\n"
+		"                                      all files greater than 10 megabytes.\n"
+		"                                      The default value is zero. It means:\n"
+		"                                      there is no size limit.\n"
+		"\n"
+		"  UD_REFRESH_INTERVAL                 Specify the progress indicator refresh\n"
+		"                                      interval in milliseconds. The default\n"
+		"                                      value is 500.\n"
+		"\n"
+		"  UD_DISABLE_REPORTS                  Set this parameter to 1 (one) to disable\n"
+		"                                      reports generation. The default\n"
+		"                                      value is 0.\n"
+		"\n"
+		"  UD_DBGPRINT_LEVEL                   This parameter can be in one of three\n"
+		"                                      states. Set UD_DBGPRINT_LEVEL=NORMAL\n"
+		"                                      to view useful messages about the analyse\n"
+		"                                      or defrag progress. Select DETAILED\n"
+		"                                      to create a bug report to send to the\n"
+		"                                      author when an error is encountered.\n"
+		"                                      Select PARANOID in extraordinary cases.\n"
+		"                                      The default value is NORMAL. Logs can be\n"
+		"                                      found in %%windir%%\\Ultradefrag\\logs\n"
+		"                                      directory.\n"
+		);
+	Exit(0);
+}
+
+static struct option long_options_[] = {
+	/*
+	* Disk defragmenting options.
+	*/
+	{ "analyze",                     no_argument,       0, 'a' },
+	{ "defragment",                  no_argument,       0,  0  },
+	{ "optimize",                    no_argument,       0, 'o' },
+	
+	/*
+	* Volume listing options.
+	*/
+	{ "list-available-volumes",      optional_argument, 0, 'l' },
+	
+	/*
+	* Progress indicators options.
+	*/
+	{ "suppress-progress-indicator", no_argument,       0, 'p' },
+	{ "show-volume-information",     no_argument,       0, 'v' },
+	{ "show-cluster-map",            no_argument,       0, 'm' },
+	
+	/*
+	* Colors and decoration.
+	*/
+	{ "use-system-color-scheme",     no_argument,       0, 'b' },
+	{ "map-border-color",            required_argument, 0,  0  },
+	{ "map-symbol",                  required_argument, 0,  0  },
+	{ "map-rows",                    required_argument, 0,  0  },
+	{ "map-symbols-per-line",        required_argument, 0,  0  },
+	
+	/*
+	* Help.
+	*/
+	{ "help",                        no_argument,       0, 'h' },
+	
+	/*
+	* Screensaver options.
+	*/
+	{ "screensaver",                 no_argument,       0,  0  },
+	
+	{ 0,                             0,                 0,  0  }
+};
+
+char short_options_[] = "aol::pvmbh?iesd";
+
+/* new code based on GNU getopt() function */
+void parse_cmdline(int argc, char **argv)
+{
+	int c;
+	int option_index = 0;
+	const char *long_option_name;
+	int dark_color_flag = 0;
+	int map_symbol_number = 0;
+	int rows = 0, symbols_per_line = 0;
+	
+	if(argc < 2) h_flag = 1;
+	while(1){
+		option_index = 0;
+		c = getopt_long(argc,argv,short_options_,
+			long_options_,&option_index);
+		if(c == -1) break;
+		switch(c){
+		case 0:
+			//printf("option %s", long_options_[option_index].name);
+			//if(optarg) printf(" with arg %s", optarg);
+			//printf("\n");
+			long_option_name = long_options_[option_index].name;
+			if(!strcmp(long_option_name,"defragment")) { /* do nothing here */ }
+			else if(!strcmp(long_option_name,"map-border-color")){
+				if(!optarg) break;
+				if(!strcmp(optarg,"black")){
+					map_border_color = 0x0; break;
+				}
+				if(!strcmp(optarg,"white")){
+					map_border_color = FOREGROUND_RED | FOREGROUND_GREEN | \
+						FOREGROUND_BLUE | FOREGROUND_INTENSITY; break;
+				}
+				if(!strcmp(optarg,"gray")){
+					map_border_color = FOREGROUND_RED | FOREGROUND_GREEN | \
+						FOREGROUND_BLUE; break;
+				}
+				if(strstr(optarg,"dark")) dark_color_flag = 1;
+
+				if(strstr(optarg,"red")){
+					map_border_color = FOREGROUND_RED;
+				}
+				else if(strstr(optarg,"green")){
+					map_border_color = FOREGROUND_GREEN;
+				}
+				else if(strstr(optarg,"blue")){
+					map_border_color = FOREGROUND_BLUE;
+				}
+				else if(strstr(optarg,"yellow")){
+					map_border_color = FOREGROUND_RED | FOREGROUND_GREEN;
+				}
+				else if(strstr(optarg,"magenta")){
+					map_border_color = FOREGROUND_RED | FOREGROUND_BLUE;
+				}
+				else if(strstr(optarg,"cyan")){
+					map_border_color = FOREGROUND_GREEN | FOREGROUND_BLUE;
+				}
+				
+				if(!dark_color_flag) map_border_color |= FOREGROUND_INTENSITY;
+			}
+			else if(!strcmp(long_option_name,"map-symbol")){
+				if(!optarg) break;
+				if(strstr(optarg,"0x") == optarg){
+					/* decode hexadecimal number */
+					sscanf(optarg,"%x",&map_symbol_number);
+					if(map_symbol_number > 0 && map_symbol_number < 256)
+						map_symbol = (char)map_symbol_number;
+				} else {
+					if(optarg[0]) map_symbol = optarg[0];
+				}
+			}
+			else if(!strcmp(long_option_name,"screensaver")){
+				screensaver_mode = 1;
+			}
+			else if(!strcmp(long_option_name,"map-rows")){
+				if(!optarg) break;
+				rows = atoi(optarg);
+				if(rows > 0) map_rows = rows;
+			}
+			else if(!strcmp(long_option_name,"map-symbols-per-line")){
+				if(!optarg) break;
+				symbols_per_line = atoi(optarg);
+				if(symbols_per_line > 0) map_symbols_per_line = symbols_per_line;
+			}
+			break;
+		case 'a':
+			a_flag = 1;
+			break;
+		case 'o':
+			o_flag = 1;
+			break;
+		case 'l':
+			l_flag = 1;
+			if(optarg){
+				if(!strcmp(optarg,"a")) la_flag = 1;
+				if(!strcmp(optarg,"all")) la_flag = 1;
+			}
+			break;
+		case 'p':
+			p_flag = 1;
+			break;
+		case 'v':
+			v_flag = 1;
+			break;
+		case 'm':
+			m_flag = 1;
+			break;
+		case 'b':
+			b_flag = 1;
+			break;
+		case 'h':
+			h_flag = 1;
+			break;
+		case 'i':
+		case 'e':
+		case 's':
+		case 'd':
+			obsolete_option = 1;
+			break;
+		case '?': /* invalid option or -? option */
+			if(optopt == '?') h_flag = 1;
+			break;
+		default:
+			printf("?? getopt returned character code 0%o ??\n", c);
+		}
+	}
+	
+	if(optind < argc){ /* scan for volume letters */
+		//printf("non-option ARGV-elements: ");
+		while(optind < argc){
+			//printf("%s ", argv[optind]);
+			if(argv[optind][0]){
+				/* next check supports UltraDefrag context menu handler */
+				if(argv[optind][1] == ':')
+					letter = argv[optind][0];
+			}
+			optind++;
+		}
+		//printf("\n");
+	}
+	
+	if(!l_flag && !letter) h_flag = 1;
+}
+
 int __cdecl main(int argc, char **argv)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -386,12 +690,31 @@ int __cdecl main(int argc, char **argv)
 
 	/* analyse command line */
 	parse_cmdline(argc,argv);
-	/* display copyright */
+
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(hOut,&csbi))
 		console_attr = csbi.wAttributes;
 	if(!b_flag)
 		settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+	if(m_flag){
+		cluster_map = malloc(map_rows * map_symbols_per_line);
+		if(!cluster_map){
+			printf("Cannot allocate %i bytes of memory for cluster map!\n\n",
+				map_rows * map_symbols_per_line);
+			return 1;
+		}
+		memset(cluster_map,0,map_rows * map_symbols_per_line);
+	}
+	
+	if(screensaver_mode){
+		RunScreenSaver();
+		Exit(0);
+	}
+
+	if(h_flag) show_help();
+
+	/* display copyright */
 	printf(VERSIONINTITLE ", " //"console interface\n"
 			"Copyright (c) Dmitri Arkhangelski, 2007-2009.\n"
 			"UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
@@ -401,7 +724,6 @@ int __cdecl main(int argc, char **argv)
 	if(obsolete_option)
 		HandleError("The -i, -e, -s, -d options are oblolete.\n"
 					"Use environment variables instead!",1);
-	if(h_flag) show_help();
 
 	/* set udefrag.dll ErrorHandler */
 	udefrag_set_error_handler(ErrorHandler);
@@ -416,7 +738,7 @@ int __cdecl main(int argc, char **argv)
 	if(!m_flag){
 		if(udefrag_init(0) < 0) Exit(2);
 	} else {
-		if(udefrag_init(N_BLOCKS) < 0) Exit(2);
+		if(udefrag_init(map_rows * map_symbols_per_line) < 0) Exit(2);
 	}
 
 	if(m_flag){ /* prepare console buffer for map */

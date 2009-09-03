@@ -94,6 +94,14 @@ SOURCE=.\defrag.c
 
 SOURCE=.\defrag.rc
 # End Source File
+# Begin Source File
+
+SOURCE=..\share\getopt.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\share\getopt1.c
+# End Source File
 # End Group
 # Begin Group "Header Files"
 

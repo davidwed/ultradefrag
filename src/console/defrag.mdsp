@@ -6,7 +6,7 @@ defaultConfig=0
 [Debug]
 // compiler 
 workingDirectory=
-arguments=-a a:
+arguments=-a a: --show-cluster-map
 intermediateFilesDirectory=../obj/console
 outputFilesDirectory=../obj/console
 compilerPreprocessor=
@@ -81,10 +81,16 @@ extraResourceOptions=
 
 [Source]
 1=defrag.c
+2=..\share\getopt.c
+3=..\share\getopt1.c
 [Header]
 [Resource]
 1=defrag.rc
 [Other]
 [History]
+..\include\ultradfg.h,0
 ..\include\udefrag.h,1358
-defrag.c,5758
+..\share\getopt.c,21960
+..\share\getopt1.c,4747
+..\include\getopt.h,0
+defrag.c,24285
