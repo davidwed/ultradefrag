@@ -37,6 +37,7 @@ xcopy /I /Y /Q    .\scheduler\C .\obj\udefrag-scheduler
 xcopy /I /Y /Q    .\scheduler\C\res .\obj\udefrag-scheduler\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
+xcopy /I /Y /Q    .\share .\obj\share
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
@@ -210,6 +211,7 @@ xcopy /I /Y /Q /S .\udefrag-gui-config %SRC_PKG_PATH%\src\udefrag-gui-config
 xcopy /I /Y /Q    .\native %SRC_PKG_PATH%\src\native
 xcopy /I /Y /Q    .\installer %SRC_PKG_PATH%\src\installer
 xcopy /I /Y /Q    .\include %SRC_PKG_PATH%\src\include
+xcopy /I /Y /Q    .\share %SRC_PKG_PATH%\src\share
 
 rem mkdir %SRC_PKG_PATH%\src\scheduler
 rem xcopy /I /Y /Q .\scheduler\DotNET %SRC_PKG_PATH%\src\scheduler\DotNET
@@ -301,6 +303,7 @@ rd /s /q gui
 rd /s /q gui-launcher
 rd /s /q udefrag-gui-config
 rd /s /q include
+rd /s /q share
 rd /s /q native
 rd /s /q dll
 rd /s /q zenwinx
