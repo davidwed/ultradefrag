@@ -676,6 +676,7 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 	WCHAR *default_attr_name = NULL;
 	short *attr_name;
 	short *full_path;
+	BOOLEAN NonResidentAttrListFound = FALSE;
 
 	/* allocate memory */
 	attr_name = (short *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH + 1) * sizeof(short));
@@ -696,7 +697,8 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 	
 	switch(pnr_attr->Attribute.AttributeType){
 	case AttributeAttributeList: /* always nonresident? */
-		//DebugPrint("Nonresident AttributeList found!\n",NULL);
+		DebugPrint("Nonresident AttributeList found!\n",NULL);
+		NonResidentAttrListFound = TRUE;
 		default_attr_name = L"$ATTRIBUTE_LIST";
 		break;
     case AttributeEA:
@@ -763,6 +765,8 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 	}
 	full_path[MAX_NTFS_PATH - 1] = 0;
 
+	if(NonResidentAttrListFound) DebugPrint("\n",full_path);
+	
 	/* skip all filtered out attributes */
 	//if(AttributeNeedsToBeDefragmented(dx,full_path,pnr_attr->DataSize,pmfi))
 		ProcessRunList(dx,full_path,pnr_attr,pmfi);

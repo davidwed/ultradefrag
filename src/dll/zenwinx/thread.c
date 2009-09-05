@@ -28,6 +28,23 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+#define CreateThreadFound		0
+#define CreateThreadNotFound	1
+#define CreateThreadUndefined	2
+
+int CreateThreadState = CreateThreadUndefined;
+HANDLE (WINAPI *func_CreateThread)(LPSECURITY_ATTRIBUTES,SIZE_T,LPTHREAD_START_ROUTINE,
+	LPVOID,DWORD,LPDWORD);
+int FindCreateThread(void);
+
+#define GetLastErrorFound		0
+#define GetLastErrorNotFound	1
+#define GetLastErrorUndefined	2
+
+int GetLastErrorState = GetLastErrorUndefined;
+DWORD (WINAPI *func_GetLastError)(void);
+int FindGetLastError(void);
+
 /****f* zenwinx.thread/winx_create_thread
 * NAME
 *    winx_create_thread
@@ -63,6 +80,8 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	NTSTATUS Status;
 	HANDLE hThread;
 	HANDLE *ph;
+	DWORD id;
+	DWORD ErrorCode;
 
 	if(!start_addr){
 		winx_raise_error("E: winx_create_thread() invalid start_addr (NULL)!");
@@ -70,18 +89,38 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	}
 
 	/*
-	* Implementation is very easy, because we have required call
-	* on all of the supported versions of Windows.
+	* RtlCreateUserThread() call is incompatible with some 
+	* antivirus or internet security stuff on x64 systems.
+	* The following solution was suggested by 
+	* Parvez Reza (parvez_ku_00@yahoo.com).
 	*/
-	if(phandle) ph = phandle;
-	else ph = &hThread;
-	Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
-					0,0,0,start_addr,NULL,ph,NULL);
-	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: Can't create thread: %x!",(UINT)Status);
-		return (-1);
+	if(FindCreateThread()){
+		hThread = func_CreateThread(NULL,0,start_addr,NULL,0,&id);
+		if(!hThread){ /* failure */
+			if(FindGetLastError()){
+				ErrorCode = func_GetLastError();
+				winx_raise_error("E: CreateThread() failed, error code = 0x%x!",ErrorCode);
+			} else {
+				winx_raise_error("E: CreateThread() failed!");
+			}
+			return (-1);
+		}
+		if(phandle) *phandle = hThread; /* success */
+	} else { /* we are in native mode or kernel32.dll is not loaded */
+		/*
+		* Implementation is very easy, because we have required call
+		* on all of the supported versions of Windows.
+		*/
+		if(phandle) ph = phandle;
+		else ph = &hThread;
+		Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
+						0,0,0,start_addr,NULL,ph,NULL);
+		if(!NT_SUCCESS(Status)){
+			winx_raise_error("E: Can't create thread: %x!",(UINT)Status);
+			return (-1);
+		}
+		/*NtCloseSafe(*ph);*/
 	}
-	/*NtCloseSafe(*ph);*/
 	return 0;
 }
 
@@ -110,4 +149,35 @@ void __stdcall winx_exit_thread(void)
 	if(!NT_SUCCESS(Status)){
 		winx_raise_error("E: Can't terminate thread: %x!",(UINT)Status);
 	}
+}
+
+/* internal functions */
+int FindCreateThread(void)
+{
+	ERRORHANDLERPROC eh;
+	
+	if(CreateThreadState == CreateThreadUndefined){
+		eh = winx_set_error_handler(NULL);
+		if(winx_get_proc_address(L"kernel32.dll","CreateThread",(void *)&func_CreateThread) == 0)
+			CreateThreadState = CreateThreadFound;
+		else
+			CreateThreadState = CreateThreadNotFound;
+		winx_set_error_handler(eh);
+	}
+	return (CreateThreadState == CreateThreadFound) ? TRUE : FALSE;
+}
+
+int FindGetLastError(void)
+{
+	ERRORHANDLERPROC eh;
+	
+	if(GetLastErrorState == GetLastErrorUndefined){
+		eh = winx_set_error_handler(NULL);
+		if(winx_get_proc_address(L"kernel32.dll","GetLastError",(void *)&func_GetLastError) == 0)
+			GetLastErrorState = GetLastErrorFound;
+		else
+			GetLastErrorState = GetLastErrorNotFound;
+		winx_set_error_handler(eh);
+	}
+	return (GetLastErrorState == GetLastErrorFound) ? TRUE : FALSE;
 }

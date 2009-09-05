@@ -29,7 +29,7 @@ char buffer[MAX_PATH];
 char err_msg[1024];
 extern int user_defined_column_widths[];
 
-/* they have the same effect as environment variables */
+/* they have the same effect as environment variables for console program */
 char in_filter[4096] = {0};
 char ex_filter[4096] = {0};
 char sizelimit[64] = {0};
@@ -39,6 +39,16 @@ char dbgprint_level[32] = {0};
 
 extern HWND hWindow;
 extern HFONT hFont;
+
+void DeleteEnvironmentVariables(void)
+{
+	(void)SetEnvironmentVariable("UD_IN_FILTER",NULL);
+	(void)SetEnvironmentVariable("UD_EX_FILTER",NULL);
+	(void)SetEnvironmentVariable("UD_SIZELIMIT",NULL);
+	(void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",NULL);
+	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",NULL);
+	(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",NULL);
+}
 
 void SetEnvironmentVariables(void)
 {
@@ -82,6 +92,8 @@ void GetPrefs(void)
 	refresh_interval = 0;
 	disable_reports = 0;
 
+	DeleteEnvironmentVariables();
+	
 	L = lua_open();  /* create state */
 	if(!L) return;
 	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
@@ -137,9 +149,10 @@ void GetPrefs(void)
 			dbgprint_level[sizeof(dbgprint_level) - 1] = 0;
 		}
 		lua_pop(L, 1);
-		SetEnvironmentVariables();
 	}
 	lua_close(L);
+
+	SetEnvironmentVariables();
 }
 
 void SavePrefs(void)

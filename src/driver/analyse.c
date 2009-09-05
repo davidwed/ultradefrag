@@ -25,6 +25,7 @@
 * NOTE: the following file systems will be analysed 
 * through reading their structures directly from disk
 * and interpreting them: NTFS, FAT12, FAT16, FAT32.
+* This cool idea was suggested by Parvez Reza (parvez_ku_00@yahoo.com).
 *
 * UDF filesystem is missing in this list, because its
 * standard is too complicated (http://www.osta.org/specs/).

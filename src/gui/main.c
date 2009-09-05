@@ -27,24 +27,15 @@
 HINSTANCE hInstance;
 HWND hWindow;
 HWND hMap;
-
-//PROCESS_INFORMATION pi;
-
 signed int delta_h = 0;
-
 HFONT hFont = NULL;
 extern HWND hStatus;
-
-//BOOL restart_flag = FALSE;
-
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
-
 extern VOLUME_LIST_ENTRY volume_list[];
-
 extern RECT win_rc; /* coordinates of main window */
 extern int skip_removable;
 
-/* they have the same effect as environment variables */
+/* they have the same effect as environment variables for console program */
 extern char in_filter[];
 extern char ex_filter[];
 extern char sizelimit[];
@@ -61,6 +52,7 @@ void VolListGetColumnWidths(void);
 
 void InitFont(void);
 void CallGUIConfigurator(void);
+void DeleteEnvironmentVariables(void);
 
 void __stdcall ErrorHandler(short *msg)
 {
@@ -81,6 +73,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		if(!ex_filter[0])
 			strcpy(ex_filter,"system volume information;temp;recycler");
 		SavePrefs();
+		DeleteEnvironmentVariables();
 		return 0;
 	}
 	
@@ -89,6 +82,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	udefrag_set_error_handler(ErrorHandler);
 	if(udefrag_init(N_BLOCKS) < 0){
 		udefrag_unload();
+		DeleteEnvironmentVariables();
 		return 2;
 	}
 
@@ -109,13 +103,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* save settings */
 	SavePrefs();
 	WgxDestroyResourceTable(i18n_table);
-	
-//	if(restart_flag && pi.hProcess){
-//		WaitForSingleObject(pi.hProcess,INFINITE);
-//		CloseHandle(pi.hProcess);
-//		CloseHandle(pi.hThread);
-//	}
-
+	DeleteEnvironmentVariables();
 	return 0;
 }
 
@@ -164,9 +152,6 @@ void InitMainWindow(void)
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	RECT rc;
-//	char path[MAX_PATH];
-//	STARTUPINFO si;
-//	BOOL local_busy_flag;
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -226,38 +211,9 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		VolListGetColumnWidths();
 
-//		local_busy_flag = busy_flag;
 		exit_pressed = TRUE;
 		stop();
-		
-		/* if restart_flag is set, restart application here */
 		udefrag_unload();
-
-//		/* restart GUI after configurator running */
-//		if(restart_flag){
-//			GetWindowsDirectory(path,MAX_PATH);
-//			strcat(path,"\\System32\\udefrag-gui.exe");
-//			/*ShellExecute(NULL,"open",path,NULL,NULL,SW_SHOW);*/
-//			/* create process and wait for finish */
-//			/* because the portable installer uses ExecWait call */
-//			ZeroMemory( &si, sizeof(si) );
-//			si.cb = sizeof(si);
-//			si.dwFlags = STARTF_USESHOWWINDOW;
-//			si.wShowWindow = SW_SHOW;
-//			ZeroMemory( &pi, sizeof(pi) );
-//		
-//			/*
-//			* Call this function before EndDialog() to speed up 
-//			* restart on slow machines.
-//			*/
-//			if(!CreateProcess(path,path,
-//				NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-//				MessageBox(NULL,"Can't execute udefrag-gui.exe program!",
-//					"Error",MB_OK | MB_ICONHAND);
-//			}
-//		}
-
-		//if(local_busy_flag) return TRUE;
 		EndDialog(hWnd,0);
 		return TRUE;
 	}
@@ -317,8 +273,6 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	InitFont();
 	SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
 
-//	restart_flag = TRUE;
-//	SendMessage(hWindow,WM_CLOSE,0,0);
 	return 0;
 }
 
