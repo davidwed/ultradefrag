@@ -2,15 +2,22 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 3.2.0 (50.0)   2009-08-
+  Version 3.2.0 (50.0)   2009-09-
   ------------------------------------------------------------------------------
-    - Ultra Fast NTFS scanning feature added
+    - Ultra Fast NTFS scanning feature was added, NTFS analysis becomes 
+      approximately 25 times faster now
+    - defragmentaion of additional streams attached to NTFS files was added 
     - information about trash (temporary files) excluded from reports,
       statistics and cluster map; these files are completely ignored now
+    - a lot of new options were added to the console program
     - the \??\ sequence removed from file names in reports
     - Thai translation was made
     - Scheduler was rewritten in C language; NET framework is not required now!
     - ability to translate Scheduler into foreign languages was added
+    - GUI options were moved from udefrag-gui.cmd script to 
+      easy to understand guiopts.lua file
+    - NOTE FOR PROGRAMMERS: to successfully recompile the driver run 
+      configure.pl script and click 'Apply patch to MinGW' button once
 
 
   Version 3.1.0 (33.0)   2009-05-13

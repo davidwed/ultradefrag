@@ -56,34 +56,12 @@
 				Overview</h2>
 			</div></div>
 		</div>
-		<p>The console application is called udefrag.exe. It
-		is placed in system32 directory by the installer. Therefore you can
-		call it from the command line or run box.</p>
-
-<center>
-<pre width="55pt" style="border: 2px solid; background-color: black; font-size: 12pt;">
-<div align="center" style="background-color: blue; color: white">Command prompt</div><div align="left" style="color: white">
-Microsoft Windows XP [5.1.2600]
-(C) Microsoft Corporation, 1985-2001.
-
-C:\>udefrag -a c:</div><div align="left" style="color: #00FF00">UltraDefrag v3.1.0 console interface
-Copyright (c) Dmitri Arkhangelski, 2007-2009.
-
-
-Volume information:
-
-  Volume size                  = 3.92 Gb
-  Free space                   = 917.56 Mb
-  
-  Total number of files        = 14688
-  Number of fragmented files   = 126
-  Fragments per file           = 1.21
-</div><div align="left" style="color: white">
-C:\>_
-</div>
-</pre>
-<i>Console Application after a successful analyze run.</i>
-</center>
+		<p>The console application is called <span class="code">udefrag.exe</span>. It
+		is placed in <span class="code">system32</span> directory by the installer. Therefore you can
+		call it from the command line or run box without specifying the full path. 
+		The program accepts a lot of useful options: you can perform any disk defragmentation job 
+		using this tool.
+		</p>
 	</div>
 
 	<div class="sect1" lang="en">
@@ -93,51 +71,124 @@ C:\>_
 				Command line switches</h2>
 			</div></div>
 		</div>
-		<p>The command line version takes a drive letter and one of the following switches:</p>
-		<table border="1" style="border-collapse: collapse;" cellPadding="5pt" align="center"><tbody>
+		<p>Usage:<br /><br /> <span class="code">udefrag [command] [options] [volumeletter:]</span></p>
+
+		<table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#EEEED4"><tbody><tr><td>
+			<table width="100%" border="1" cellpadding="0" bgcolor="#EEEED4"><tbody>
 			<tr>
-				<td class="graycode">-a</td>
-				<td>analyze the drive specified on the command line</td>
+				<td colspan="2" bgcolor="#D3D4C5"><font size="+1">Commands</font></td>
 			</tr>
 			<tr>
-				<td class="graycode">-o</td>
-				<td>optimize file space by moving all files to the begining of the drive</td>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-a, --analyze</td>
+				<td>Analyze specified volume only.</td>
 			</tr>
 			<tr>
-				<td class="graycode">-l</td>
-				<td>list volumes available for defragmentation except removable</td>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">--defragment</td>
+				<td>Defragment volume. This key is optional - if no command is specified 
+				<span class="code">udefrag</span> will defragment volume.</td>
 			</tr>
 			<tr>
-				<td class="graycode">-la</td>
-				<td>list all volumes available for defragmentation</td>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-o, --optimize</td>
+				<td>Optimize volume space by moving all files to the begining of the drive.</td>
 			</tr>
 			<tr>
-				<td class="graycode">-b</td>
-				<td>use default color scheme (usually black/white)</td>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-l, --list-available-volumes</td>
+				<td>List volumes available for defragmentation, except removable media. Each line of output 
+				contains volume letter, type of file system, total size and percent of free space.</td>
 			</tr>
 			<tr>
-				<td class="graycode">-?</td>
-				<td>displays the usage message (-h has the same effect)</td>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-la, --list-available-volumes=all</td>
+				<td>List all available volumes.</td>
 			</tr>
-		</tbody></table>
-		<p>
-		Specifying just the drive letter will cause <span class="application">UltraDefrag</span>
-		to defragment the drive. When the operation finishes or you stop the program with a Ctrl+C, 
-		the program will display the results to the console. If you abort the operation with 
-		Ctrl+C or close the shell window, <span class="application">UltraDefrag</span> will exit 
-		safely without destroying any data.
-		</p>
-<p>To get list of available volumes type <span class="code">udefrag -l</span>. 
-Each line of output contains volume letter, type of file system, total size and percent 
-of free space. Here is an example:
-<center>
-<pre width="55pt" style="border: 2px solid; background-color: black; font-size: 12pt;">
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-h, -?, --help</td>
+				<td>Show help screen. Running <span class="code">udefrag</span> without arguments have the same effect.</td>
+			</tr>
+			<tr>
+				<td colspan="2" bgcolor="#D3D4C5"><font size="+1">Options</font></td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-b, --use-system-color-scheme</td>
+				<td>Use system (usually black/white) scheme instead of green color.</td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-p, --suppress-progress-indicator</td>
+				<td>Hide progress indicator.</td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-v, --show-volume-information</td>
+				<td>Show volume information after a job.</td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">-m, --show-cluster-map</td>
+				<td>Show map representing clusters on specified volume.</td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">--map-border-color=color</td>
+				<td>Specify cluster map border color. Available values: black, white, red, green, blue, 
+				yellow, magenta, cyan, darkred, darkgreen, darkblue, darkyellow, darkmagenta, darkcyan, 
+				gray. Yellow color is used by default.</td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">--map-symbol=x</td>
+				<td>You can specify map symbol here. There are two supported formats: you can
+                type symbol directly or specify its number in hexadecimal form. Like this: 
+				--map-symbol=0x1 :-) Valid numbers are in range: 0x1 - 0xFF '*' symbol is used by default.
+				</td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">--map-rows=n</td>
+				<td>Number of rows in cluster map. Default value is 10.</td>
+			</tr>
+			<tr>
+				<td nowrap="nowrap" align="right" valign="top" bgcolor="#F4F4CC">--map-symbols-per-line=n</td>
+				<td>Number of map symbols containing in each row of map. Default value is 68.</td>
+			</tr>
+			</tbody></table>
+		</td></tr></tbody></table>
+
+		<p>Specifying just the drive letter will cause <span class="application">UltraDefrag</span>
+		to defragment the drive. If you abort the operation with Ctrl+C or close the shell window, 
+		<span class="application">UltraDefrag</span> will exit safely without destroying any data.</p>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="screenshots"></a>
+				Examples</h2>
+			</div></div>
+		</div>
+		
+		<center>
+
+		I. Console application after a successful analyze run:
+		
+<pre width="70pt" style="border: 2px solid; background-color: black; font-size: 11pt;">
 <div align="center" style="background-color: blue; color: white">Command prompt</div><div align="left" style="color: white">
 Microsoft Windows XP [5.1.2600]
 (C) Microsoft Corporation, 1985-2001.
 
-C:\>udefrag -l</div><div align="left" style="color: #00FF00">UltraDefrag v3.1.0 console interface
-Copyright (c) Dmitri Arkhangelski, 2007-2009.</div><div align="left" style="color: #FFFF00">
+C:\>udefrag -a c:</div><div align="left" style="color: #00FF00">UltraDefrag v3.2.0, Copyright (c) Dmitri Arkhangelski, 2007-2009.
+UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to redistribute it under certain conditions.
+
+c: analyse:  100% complete, fragmented/total = 916/16298
+</div><div align="left" style="color: white">
+C:\>_
+</div>
+</pre>
+		
+		II. <span class="code">udefrag -l</span> command in action:<br />
+
+<pre width="70pt" style="border: 2px solid; background-color: black; font-size: 11pt;">
+<div align="center" style="background-color: blue; color: white">Command prompt</div><div align="left" style="color: white">
+Microsoft Windows XP [5.1.2600]
+(C) Microsoft Corporation, 1985-2001.
+
+C:\>udefrag -l</div><div align="left" style="color: #00FF00">UltraDefrag v3.2.0, Copyright (c) Dmitri Arkhangelski, 2007-2009.
+UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software,
+and you are welcome to redistribute it under certain conditions.</div><div align="left" style="color: #FFFF00">
 Volumes available for defragmentation:
 
 C:      NTFS      3.92 Gb        6 %
@@ -147,7 +198,12 @@ E:     FAT32     59.30 Gb        5 %
 C:\>_
 </div>
 </pre>
-</p>
+
+		III. Cluster map customization example:<br /><br />
+		<img src="console_map1.png" alt="" />
+		
+		</center>
+
 	</div>
 
 	<div class="sect1" lang="en">
@@ -166,16 +222,22 @@ C:\>_
 		a lot of your time. This practice will be discussed below. Here is a list of defragmentation 
 		related environment variables with a full explaination:
 		</p>
-		<table border="1" cellpadding="5" style="padding: 0px"><tbody>
+
+		<table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#EEEED4"><tbody><tr><td>
+			<table width="100%" border="1" cellpadding="0" bgcolor="#EEEED4"><tbody>
+			<!--<table border="1" cellpadding="5" style="padding: 0px"><tbody>-->
+
+			<tr>
+				<td colspan="2" bgcolor="#D3D4C5"><font size="+1">Environment variables</font></td>
+			</tr>
 
 		<tr>
 		<td class="code" align="center">UD_IN_FILTER</td>
 		<td>
 		List of files to be included in defragmentation process. File names must be separated by 
-		semicolon. Most useful example is: <span class="code">set UD_IN_FILTER=My Documents</span>. 
+		semicolon. Like this: <span class="code">set UD_IN_FILTER=My Documents</span>. 
 		After this assignment the defragger will process <span class="code">My Documents</span> 
-		directory contents only.<br />
-		The default value is an empty string that means: all files will be included.
+		directory contents only. The default value is an empty string that means: all files will be included.
 		</td>
 		</tr>
 
@@ -183,11 +245,10 @@ C:\>_
 		<td class="code" align="center">UD_EX_FILTER</td>
 		<td>
 		List of files to be excluded from defragmentation process. 
-		File names must be separated by semicolon. Most useful example is:
+		File names must be separated by semicolon. Like this:
 		<span class="code">set UD_EX_FILTER=system volume information;temp;recycler</span>. 
 		After this assignment many temporary files will be excluded from the 
-		defragmentation process.<br />
-		The default value is an empty string. It means: no files will be excluded.
+		defragmentation process. The default value is an empty string. It means: no files will be excluded.
 		</td>
 		</tr>
 
@@ -195,26 +256,25 @@ C:\>_
 		<td class="code" align="center">UD_SIZELIMIT</td>
 		<td>
 		Ignore files larger than specified value. You can either specify size in bytes 
-		or use the following suffixes: <span class="code">Kb, Mb, Gb, Tb, Pb, Eb</span>. <br />
+		or use the following suffixes: <span class="code">Kb, Mb, Gb, Tb, Pb, Eb</span>. 
 		P.a., use <span class="code">set UD_SIZELIMIT=10Mb</span> to exclude all files 
-		greater than 10 megabytes.
-		<br />The default value is zero. It means: there is no size limit.
+		greater than 10 megabytes. The default value is zero. It means: there is no size limit.
 		</td>
 		</tr>
 
 		<tr>
 		<td class="code" align="center">UD_REFRESH_INTERVAL</td>
 		<td>
-		Specify the progress indicator refresh interval in milliseconds.
-		<br />The default value is <span class="code">500</span>.
+		Specify the progress indicator refresh interval in milliseconds. 
+		The default value is <span class="code">500</span>.
 		</td>
 		</tr>
 
 		<tr>
 		<td class="code" align="center">UD_DISABLE_REPORTS</td>
 		<td>
-		Set this parameter to <span class="code">1</span> (one) to disable reports generation.
-		<br />The default value is <span class="code">0</span>.
+		Set this parameter to <span class="code">1</span> (one) to disable reports generation. 
+		The default value is <span class="code">0</span>.
 		</td>
 		</tr>
 
@@ -226,12 +286,12 @@ C:\>_
 		the analyse or defrag progress. Select <span class="code">DETAILED</span> to create 
 		a bug report to send to the author when an error is encountered. Select 
 		<span class="code">PARANOID</span> in extraordinary cases. Of course, you need have DbgView 
-		program or DbgPrint Logger installed to view logs.
-		<br />The default value is <span class="code">NORMAL</span>.
+		program or DbgPrint Logger installed to view logs. The default value is <span class="code">NORMAL</span>.
 		</td>
 		</tr>
 
 		</tbody></table>
+		</td></tr></tbody></table>
 
 		<p>Notes about filter:
 		<ul type="disc">

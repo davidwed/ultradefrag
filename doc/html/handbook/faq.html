@@ -99,7 +99,13 @@
 				How many differences are between the Ultra Defragmenter and well known JkDefrag application?</h4>
 			</div></div>
 		</div>
-		<p>Analysis algorithm is generally the same. But defragmentation is done in
+		<p>Analysis algorithm was generally the same prior to 3.2.0 version of the program. 
+		Since the 3.2.0 version <span class="application">UltraDefrag</span> uses Ultra Fast 
+		NTFS Analysis feature. It reads MFT directly and analyze them to retrieve detailed 
+		information about all the files contained on the selected volume. This algorithm is 
+		much faster (approximately 25 times faster).
+		</p>
+		<p>Defragmentation is done in
 		different ways. JkDefrag tries to optimize files placement using original 
 		algorithm that is complex enough. On the other hand, Ultra Defragmenter is
 		simple as possible - it tries to move all fragmented files to free space areas.
@@ -111,7 +117,7 @@
 		ability to defragment system files at boot time and well readable reports.
 		Also our program has a nice GUI that is very important for many peoples.
 		At the same time advanced users can use console interface that is a little bit 
-		faster because don't use any cluster map representation.</p>
+		faster because don't use any cluster map representation by default.</p>
 		
 		<p>The main disadvantage of both applications (Ultra Defragmenter and JkDefrag) is 
 		that they are based on MS defragmenting interface that has very ugly 

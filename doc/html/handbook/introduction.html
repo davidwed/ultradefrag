@@ -88,13 +88,17 @@
 		</div>
 		<p><span class="application">UltraDefrag</span> has the following features:</p>
 		<ul type="disc">
+		<li>Ultra fast NTFS analysis. The program reads Master File Table (MFT) directly and analyze them 
+		to retrieve detailed information about all the files containing on the selected volume. As a result 
+		NTFS analysis becomes approximately 25 times faster now.</li>
+		<li>Defragmentation of additional streams attached to NTFS files.</li>
 		<li>Very fast defragmentation, the work is done via a kernel mode 
 		driver which has an optimal defraging algorithm.</li>
 		<li>Ability to defragment system files.</li>
 		<li>Single file or directory defragmentation: select any object
 		in Explorer and choose the appropriate context menu item to defragment them.</li>
 		<li>Very small engine written in pure C.</li>
-		<li>Nice graphical interface - compact and functional.</li>
+		<li>Nice graphical interface - compact, functional and easy to use.</li>
 		<li>Safety, because the file moving is accomplished with Microsoft's own Defrag API.</li>
 		<li>Simple to use.</li>
 		<li>Ability to generate html reports of fragmentation status.</li>
@@ -103,6 +107,7 @@
 		<li>Portable UltraDefrag can be installed on demand which can be carried around 
 		in USB storage devices and used without any installation.</li>
 		<li>Many GUI translations available.</li>
+		<li>Easy to use Scheduler.</li>
 		<li>Free: Distributed with full source code under the GNU General Public License.</li>
 		</ul>
 	</div>
@@ -118,7 +123,7 @@
 		FAT12/16/32, NTFS and on Vista UDF. UDF is a file system intended for optical media 
 		such as DVDs that unlike ISO9660, is rewriteable. It has also the ability to defragment 
 		volumes at boot time allowing you to move many system files that are always locked by
-		the operating system. Currently all files besides the registry hives and the pagefile 
+		the operating system. Actually all files including the registry hives and the pagefile 
 		can be scanned at boot time. <span class="application">UltraDefrag</span> can also 
 		defragment files and folders compressed by NTFS file system	compression. And can even 
 		defragment floppies, although doing so is not particularly useful.</p>
@@ -190,7 +195,7 @@
 				<p>Volume optimization algorithm works only on NTFS volumes, because FAT directories 
 				aren't moveable.</p>
 				<p>NTFS file system is very imperfect. We cannot move internal files, such as $MFT,
-				$Bitmap and other internal files with a '$' in the begginning of their names. This is 
+				$Bitmap and other internal files with a '$' sign in the begginning of their names. This is 
 				a well known ntfs.sys driver's bug. Free space may be splitted  
 				into few small parts by such unmoveable internal files. So you may never become a large free 
 				space area to defragment pagefile and other big files.

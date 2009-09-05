@@ -57,25 +57,28 @@ Kerem Gümrükcü
 Leslie Trenholm
 Markus Elfring
 Nagy Zsolt
+Stefan Pendl
 
 --------------------------------------------------------------------------------
 Special thanks for good suggestions to (in alphabetical order):
 --------------------------------------------------------------------------------
 Alexander Vedyakin - Volume type detection improvements.
                      More effective defragmenting algorithms.
+Andrei Maksimov    - GUI improvements.
 Bryan Kirk         - Better GUI appearance (new list of drives).
                      Autodefrag feature.
 Christopher Naegel - Driver loading on Vista problem's partial solution.
 Dario Raparelli    - NT 4.0 support.
 Jan Loncik         - x64 native support. Better 'system' filter preset.
-Jim Laski          - system fonts and visual styles for graphical interface
-Kerem Gümrükcü     - manifests for Vista User Account Control (UAC)
+Jim Laski          - System fonts and visual styles for graphical interface
+Kerem Gümrükcü     - Manifests for Vista User Account Control (UAC)
 Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
 Markus Elfring     - Strong error handling.
 Mike Braca         - Reducing driver's memory usage (new cluster map 
                      internal representation).
 Nagy Zsolt         - Interesting ideas about translation.
                      Installer improvements.
+Parvez Reza        - Various interesting programming tricks.
 
 --------------------------------------------------------------------------------
 Also special thanks to:
