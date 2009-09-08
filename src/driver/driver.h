@@ -81,6 +81,11 @@ typedef unsigned int UINT;
 * LOG file on disk is better than unsaved messages after a crash.
 */
 
+/*
+* 08 Sept. 2009
+* LOG file is useless. Crashdump is always requred to fix the driver bugs.
+*/
+
 void __stdcall RegisterBugCheckCallbacks(void);
 void __stdcall DeregisterBugCheckCallbacks(void);
 

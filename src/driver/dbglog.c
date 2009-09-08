@@ -32,7 +32,7 @@
 * special requirement of BugCheckSecondaryDumpDataCallback() 
 * function described in DDK documentation.
 */
-#define DBG_BUFFER_SIZE (32 * 1024) /* 32 kb - more than enough */
+#define DBG_BUFFER_SIZE (16 * 1024) /* 16 kb - more than enough */
 
 VOID __stdcall BugCheckCallback(PVOID Buffer,ULONG Length);
 VOID __stdcall BugCheckSecondaryDumpDataCallback(
@@ -67,6 +67,7 @@ void __stdcall RegisterBugCheckCallbacks(void)
 	/*
 	* Register another callback procedure on modern systems: XP SP1, Server 2003 etc.
 	* Bug data will be available even in small memory dump, but just in theory :(
+	* Though it seems that Vista saves it.
 	*/
 	if(ptrKeRegisterBugCheckReasonCallback){
 		if(!ptrKeRegisterBugCheckReasonCallback(&bug_check_reason_record,
@@ -105,14 +106,23 @@ void __stdcall DeregisterBugCheckCallbacks(void)
 /*************************************************************************************************/
 /* Since v2.1.0 this code is used to collect debugging messages. */
 
+/*
+* This code is disabled since v3.2.0 because saved log data was never 
+* useful and never helped us to fix driver bugs.
+* Crash dumps are much more useful. Therefore we must write a special 
+* handbook's chapter with detailed kernel mode driver debugging instructions 
+* instead of the following code.
+*/
+#ifndef LOGS_DISABLE_WRITE_ON_DISK
 void __stdcall SaveLog();
+#endif
 
 BOOLEAN __stdcall OpenLog()
 {
 	BOOLEAN result = TRUE;
 
 	/* This buffer must be in NonPaged pool to be accessible from BugCheckCallback's. */
-	dbg_buffer = AllocatePool(NonPagedPool,DBG_BUFFER_SIZE); /* 32 kb ring-buffer */
+	dbg_buffer = AllocatePool(NonPagedPool,DBG_BUFFER_SIZE); /* 16 kb ring-buffer */
 	if(!dbg_buffer){
 		result = FALSE;
 		DbgPrint("=Ultradfg= Can't allocate dbg_buffer!\n");
@@ -127,12 +137,15 @@ BOOLEAN __stdcall OpenLog()
 void __stdcall CloseLog()
 {
 	if(dbg_buffer){
+		#ifndef LOGS_DISABLE_WRITE_ON_DISK
 		if(KeGetCurrentIrql() == PASSIVE_LEVEL) SaveLog();
+		#endif
 		Nt_ExFreePool(dbg_buffer);
 		dbg_buffer = NULL;
 	}
 }
 
+#ifndef LOGS_DISABLE_WRITE_ON_DISK
 void __stdcall SaveLog()
 {
 	UNICODE_STRING us_log_path;
@@ -176,6 +189,12 @@ BOOLEAN CheckForSystemVolume(void)
 	if(ch == ch2) return TRUE;
 	return FALSE;
 }
+#else
+BOOLEAN CheckForSystemVolume(void)
+{
+	return FALSE;
+}
+#endif /* LOGS_DISABLE_WRITE_ON_DISK */
 
 /*
 * NOTE: Never call this function with parameters 
@@ -203,7 +222,7 @@ void __cdecl DebugPrint(char *format, short *ustring, ...)
 		}
 	}
 
-	/* Fucked nt 4.0 & w2k kernels don't contain _vsnwprintf() call! */
+	/* Fucked nt 4.0 & w2k kernels does not contain _vsnwprintf() call! */
 	va_start(ap,ustring);
 	memset((void *)buffer,0,BUFFER_SIZE); /* required! */
 	length = _vsnprintf(buffer,BUFFER_SIZE - 1,format,ap);
@@ -234,6 +253,7 @@ void __cdecl DebugPrint(char *format, short *ustring, ...)
 	
 	if(!dbg_buffer) goto cleanup;
 
+#ifndef LOGS_DISABLE_WRITE_ON_DISK
 	if(CheckForSystemVolume() == FALSE){
 		if(!strcmp(format,"FLUSH_DBG_CACHE\n")) goto save_log;
 		if(dbg_offset + (length << 1) >= DBG_BUFFER_SIZE - (2 << 1) - sizeof(short)){
@@ -253,6 +273,11 @@ void __cdecl DebugPrint(char *format, short *ustring, ...)
 			dbg_offset = 0;
 		}
 	}
+#else
+	if(dbg_offset + (length << 1) >= DBG_BUFFER_SIZE - (2 << 1) - sizeof(short)){
+		dbg_offset = 0;
+	}
+#endif /* LOGS_DISABLE_WRITE_ON_DISK */
 
 	memcpy((void *)(dbg_buffer + (dbg_offset >> 1)),(void *)bf,length << 1);
 	dbg_offset += (length << 1);

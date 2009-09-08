@@ -154,6 +154,7 @@ int __stdcall udefrag_reload_settings()
 }
 
 /* internal function */
+#ifndef LOGS_DISABLE_WRITE_ON_DISK
 int __stdcall udefrag_set_dbg_cache(void)
 {
 	char buffer[MAX_PATH];
@@ -219,3 +220,9 @@ save_log_number:
 	}
 	return 0;
 }
+#else
+int __stdcall udefrag_set_dbg_cache(void)
+{
+	return 0;
+}
+#endif /* LOGS_DISABLE_WRITE_ON_DISK */

@@ -24,6 +24,8 @@
 #ifndef _ULTRADFG_H_
 #define _ULTRADFG_H_
 
+#define LOGS_DISABLE_WRITE_ON_DISK
+
 /* this numbers MUST BE THE SAME */
 #define FREE_SPACE                  0
 #define SYSTEM_SPACE                1

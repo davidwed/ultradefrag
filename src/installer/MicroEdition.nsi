@@ -95,6 +95,9 @@ Section "Ultra Defrag core files (required)" SecCore
 
   SectionIn RO
   AddSize 44 /* for the components installed in system directories */
+  
+  DetailPrint "Uninstall the previous version..."
+  ExecWait '"$INSTDIR\uninstall.exe" /S'
 
   DetailPrint "Install core files..."
   ${DisableX64FSRedirection}
@@ -138,7 +141,8 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$INSTDIR\INSTALL.TXT"
   Delete "$INSTDIR\FAQ.TXT"
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
-
+  RMDir /r "$INSTDIR\logs"
+  
   ; create boot time script if it doesn't exist
   SetOutPath "$SYSDIR"
   ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"

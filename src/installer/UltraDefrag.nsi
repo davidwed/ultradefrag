@@ -390,6 +390,7 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$SYSDIR\udefrag-gui.exe"
   Delete "$SYSDIR\udefrag-gui.cmd"
+  RMDir /r "$INSTDIR\logs"
 
   ; create boot time and gui startup scripts if they doesn't exist
   SetOutPath "$SYSDIR"
@@ -497,6 +498,7 @@ Section /o "Shortcuts" SecShortcuts
 
   RMDir /r "$SMPROGRAMS\UltraDefrag\Boot time options"
   RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
+  RMDir /r "$SMPROGRAMS\UltraDefrag\Debugging information"
 
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
@@ -560,7 +562,7 @@ Section /o "Shortcuts" SecShortcuts
      "$INSTDIR\portable_${ULTRADFGARCH}_package"
   ${EndIf}
 
-  CreateDirectory "$R0\Debugging information"
+/*  CreateDirectory "$R0\Debugging information"
   CreateShortCut "$R0\Debugging information\Log files.lnk" \
    "$INSTDIR\logs"
   CreateShortCut "$R0\Debugging information\Mini Crash Dump files.lnk" \
@@ -572,7 +574,7 @@ Section /o "Shortcuts" SecShortcuts
     WriteINIStr "$R0\Debugging information\How to use it.url" "InternetShortcut" "URL" \
      "http://ultradefrag.sourceforge.net/handbook/reporting_bugs.html"
   ${EndIf}
-
+*/
   ${EnableX64FSRedirection}
   pop $R0
 
