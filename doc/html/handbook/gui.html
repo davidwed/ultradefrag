@@ -219,12 +219,27 @@
 		 your preferred font for GUI application rendering. The default font is 
 		<span style="color: darkgreen">Courier New, 9</span>
 		 </p></li>
-		 <li><p><span class="guimenuitem">Options</span> Opens 
-		 an additional dialog where you can set any GUI options. 
-		 To understand their meaning read please carefully 
+		 <li><p><span class="guimenuitem">Options</span> Opens the <span class="code">guiopts.lua</span> 
+		 file for editing. To understand meaning of GUI options read please carefully 
 		 the <a href="console.html">console application</a> section of this document. 
 		 GUI options have the same meaning as environment variables accepted by console 
 		 interface.</p>
+		 <p>Note that you must specify paths in filters with double back slashes instead of the single. 
+		 Par example: <span class="code">ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"</span></p>
+		 <p>Here is the complete example of the script:
+<pre width="80pt" style="border: 1px solid black; color: black; 
+background-color: #ffffe1; font-size: 10pt;">
+-- UltraDefrag GUI options
+
+in_filter = "windows"
+ex_filter = "temp;tmp"
+sizelimit = "25M"
+refresh_interval = 100
+disable_reports = 0
+dbgprint_level = "PARANOID"
+
+</pre>
+		 </p>
 		 </li>
 		 <li><p><span class="guimenuitem">Help</span> button opens this section of the Handbook. 
 		 If you have a local copy of documentation installed, the Configurator will use it. 

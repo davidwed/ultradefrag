@@ -145,6 +145,9 @@ __stdcall NtCurrentTeb(void);
 		NOTE: In my nsisconf.nsh file (in NSIS root directory) I have 
 		the following line:
 <pre class="screen"><code>!packhdr temp.dat '"C:\WINDOWS\upx" -9 -q temp.dat'</code></pre>
+		You may not include this instruction, because installer script contains 
+		<span class="code">SetCompressor /SOLID lzma</span> 
+		command that is much effective in our case.
 		</li>
 
 		<li><a href="http://upx.sf.net">Ultimate Packer for eXecutables (upx)</a> is used to

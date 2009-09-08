@@ -38,35 +38,203 @@
 		</div></div>
 	</div>
 
+	<div class="toc">
+		<p><b>Table of Contents</b></p>
+		<dl>
+			<dt><span class="sect1"><a href="reporting_bugs.html#intro">Introduction</a></span></dt>
+			<dt><span class="sect1"><a href="reporting_bugs.html#driver">Kernel mode driver debugging</a></span></dt>
+			<dt><span class="sect1"><a href="reporting_bugs.html#gui">Which info must contain a report about GUI bug?</a></span></dt>
+		</dl>
+	</div>
+
 	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="intro"></a>
+				Introduction</h2>
+			</div></div>
+		</div>
 		<p>While the author of <span class="application">UltraDefrag</span> Driver has taken great pains to ensure that
 		<span class="application">UltraDefrag</span> operates properly, no software is perfect. As such bugs are
 		inevitable. The author accepts bug reports and will attempt to fix issues that
 		are brought to his attention. In order to facilitate this the author has built
 		logging mechanisms into UltraDefrag. This document describes how to get these
 		logs and attach them to your bug report.</p>
-
-		<p>Also if you have any problems with scheduler, documentation, web site appearance
-		and any other parts of the <span class="application">UltraDefrag</span> project, please send a bug report with the 
-		following data attached:
-		<ol>
-		<li>Screenshot (required for GUI related bugs).</li>
-		<li><span class="code">%windir%\UltraDefrag\logs</span> directory contents. If this directory 
-		is empty please start <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> 
-		program before <span class="application">UltraDefrag</span> runs to see what happens. Also 
-		<a href="http://alter.org.ua/en/soft/win/dbgdump/">DbgPrint Logger</a> can be used 
-		to collect debugging information. Since the 2.1.0 version of the Ultra Defragmenter 
-		these tools are optional and should be used only if debugging logs are empty due to some 
-		logging related bugs.</li>
-		<li>If you have seen Blue Screen Of Death (BSOD), include in your report numbers 
-		shown on BSOD and Mini Crash Dump file (required!) that can be found in 
-		<span class="code">%windir%\Minidump</span> directory.</li>
-		</ol>
-		</p>
 		<p>Please report all problems and bugs via the 
 		<a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">bug tracker</a>.
 		Don't forget to register on <a href="http://sourceforge.net">sourceforge.net</a> before. 
 		As an alternative you can send your report directly to the authors by email.</p>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="driver"></a>
+				Kernel mode driver debugging</h2>
+			</div></div>
+		</div>
+		<h4>Which types of kernel mode driver bugs can I encounter?</h4>
+		<p>There are two possible types of kernel mode driver bugs:
+		<ul type="disc">
+		<li>Something goes wrong, but Windows is still working.</li>
+		<li>Windows dies and shows well known Blue Screen Of Death (BSOD).</li>
+		</ul>
+		In accordance with them there are two debugging techniques.
+		</p>
+		<h4>1. Algorithmic errors debugging</h4>
+		<p>Algorithmic errors usually expresses themselves in file moving failures and other 
+		lightweight mistakes during the defragmentation process.</p>
+		<h5>Overview</h5>
+		<p>Let us assume that something goes wrong in defragmentation process, but Windows 
+		still works. Par example, you have noticed that some files are still fragmented after a job 
+		completion though they were not excluded by filters. How to understand what happens?</p>
+		<p>The best way to do so is running DbgPrint logger tool at the same time when you are 
+		defragmenting volume. This tool will collect debugging messages from our driver and will display 
+		them on the screen.</p>
+		<p>There are two popular DbgPrint loggers available. Both have freeware status, you may download 
+		them for free:
+		<ul type="disc">
+		<li><a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView program by Mark Russinovich</a></li>
+		<li><a href="http://alter.org.ua/en/soft/win/dbgdump/">DbgPrint Logger by Alexander Telyatnikov</a></li>
+		</ul>
+		</p>
+		<h5>How can I use DbgView program?</h5>
+		<p>DbgView is a nice graphical application which has very easy to use design. Run it and select 
+		<span class="guimenuitem">Capture Kernel</span> item in <span class="guimenuitem">Capture</span> menu. 
+		If you wish to debug the <span class="application">UltraDefrag</span> boot time (native) interface, check also 
+		<span class="guimenuitem">Log Boot</span> menu item. Now you can see all debugging information in application's 
+		window. Yes, it is empty at this moment, because <span class="application">UltraDefrag</span> is still not running. 
+		To reclaim this mistake launch it and see something like this:</p>
+<pre class="screen"><strong class="userinput"><code>=Ultradfg= UltraDefrag v3.2.0
+=Ultradfg= NT 5.1 free.
+=Ultradfg= Kernel found: \WINDOWS\system32\ntoskrnl.exe
+=Ultradfg= Kernel address: 804D4000
+=Ultradfg= ExFreePoolWithTag address: 8053C789
+=Ultradfg= KeDeregisterBugCheckReasonCallback address: 80525BD3
+=Ultradfg= KeRegisterBugCheckReasonCallback address: 80506077
+=Ultradfg= MmMapLockedPagesSpecifyCache address: 804ED02A
+=Ultradfg= KeQueryInterruptTime address: 804EE0EA
+=Ultradfg= Main FDO 81D055A0, DevExt=81D05658
+=Ultradfg= Map  FDO 81C1B8C8, DevExt=81C1B980
+=Ultradfg= Stat FDO 81C29250, DevExt=81C29308
+=Ultradfg= DriverEntry successfully completed
+-Ultradfg- CreateFile request for main device
+-Ultradfg- IOCTL_SET_USER_MODE_BUFFER
+-Ultradfg- Address = 0047E060
+-Ultradfg- IOCTL_SET_CLUSTER_MAP_SIZE
+-Ultradfg- Map size = 910
+-Ultradfg- Cluster map will be allocated from NonPagedPool.
+-Ultradfg- IOCTL_SET_DBGPRINT_LEVEL
+-Ultradfg- dbg_level=2
+-Ultradfg- IOCTL_SET_SIZELIMIT
+-Ultradfg- Sizelimit = 26214400
+-Ultradfg- IOCTL_SET_REPORT_STATE
+-Ultradfg- Disable reports: NO
+-Ultradfg- IOCTL_SET_XXX_FILTER
+-Ultradfg- Include: win
+-Ultradfg- Filter strings:
+-Ultradfg-  + win
+-Ultradfg- IOCTL_SET_XXX_FILTER
+-Ultradfg- Exclude: config
+-Ultradfg- Filter strings:
+-Ultradfg-  - config
+</code></strong></pre>
+		<p>As you can see, our driver successfully retrieved the Windows version and 
+		kernel entry points for some functions missing on NT 4.0. Also defragmentation options 
+		were successfully set.</p>
+		<p>If you will click <span class="guimenuitem">Analyse</span> button in 
+		<span class="application">UltraDefrag</span> GUI you will see debugging information related to 
+		the volume analysis process. In case of running disk defragmentation job you will see detailed 
+		information about files moving including messages about possible moving errors.</p>
+		<p>When you close the Ultra Defragmenter you will see something like this:</p>
+<pre class="screen"><strong class="userinput"><code>-Ultradfg- STOP request
+-Ultradfg- CloseHandle request for main device
+-Ultradfg- In Unload Routine
+-Ultradfg- Symbolic links were deleted
+-Ultradfg- Deleted device 81B44500
+-Ultradfg- Deleted device 81C29250
+-Ultradfg- Deleted device 81C1B8C8
+-Ultradfg- Deleted device 81D055A0
+</code></strong></pre>
+		<p>Here our driver reports you that he was successfully unloaded.</p>
+		<p>As you can see, debugging process is very easy. Enjoy it and don't forget to attach 
+		important parts of debugging log when you are sending a bug report.</p>
+		<p>Note that DbgView program cannot be running on systems older than XP. Hopefully we have one 
+		good alternative for it that runs perfectly on old systems. Yes, I had DbgPrint Logger in view. 
+		Let's look at its features.</p>
+		<h5>How can I use DbgPrint Logger program?</h5>
+		<p>Though DbgPrint Logger has no graphical interface it is still very easy to use. Click on 
+		<span class="code">DbgPrintLog.exe</span> icon to run it. To close debugging session press 
+		<span class="code">Esc</span> button. After that you will find debugging messages in 
+		<span class="code">DbgPrintXX.log</span> file. Unfortunately text saved there has UNIX format. 
+		You can read them using standard Wordpad application included in all versions of Windows.</p>
+		<p>A little bit more hacking is needed for boot time logging. Save the following contents in 
+		<span class="code">udefrag-boot-logging.cmd</span> file:
+<pre class="screen"><strong class="userinput"><code>DbgPrintLog.exe --full -T DTN -wd c:\ --drv:inst 1 --svc:inst 
+                A --drv:opt DoNotPassMessagesDown 1 udefrag.log
+</code></strong></pre>
+		</p>
+		<p style="color:darkred">Note: write this instruction on a single line, without line breaks!</p>
+		<p>Click <span class="code">udefrag-boot-logging.cmd</span> icon. Now DbgPrint Logger is ready 
+		to collect debugging information during Windows boot process. You will fing log files in root directory 
+		of volume C: as specified in <span class="code">DbgPrintLog.exe</span> command options.</p>
+		<p>DbgPrint Logger can be executed on a large number versions of Windows, enjoy it and don't forget to attach 
+		important parts of debugging log when you are sending a bug report.</p>
+		
+		<h4>2. Fatal errors debugging</h4>
+		<p>Fatal driver errors usually crashes your system.</p>
+		<h5>Overview</h5>
+		<p>When Windows dies, all running programs becomes died too. Therefore you cannot use DbgPrint logger 
+		at this time. Hopefully Windows itself contains one good mechanism that helps us to debug such kind of 
+		errors. Its name is Crash Memory Dump.</p>
+		<p>If something in driver goes wrong and Windows decides that this wrong behavior can damage your system, 
+		it stops any running processes and shows you BSOD screen with brief description of the encountered problem. 
+		It is a very good practice to have always a small piece of paper and a pencil near your machine. When you are 
+		encountering BSOD, write on paper numbers shown on your screen. To be able to attach these numbers to your 
+		bug report.</p>
+		<p>Note that BSOD showing feature itself is disabled by default in Windows. <span class="application">UltraDefrag</span> 
+		installer enables them by setting the following system registry value to 0x0 state:
+<pre class="screen"><strong class="userinput"><code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\CrashControl\AutoReboot
+</code></strong></pre>
+		</p>
+		<p>What's about Crash Dump files? These files contain additional information about encountered problem. Therefore it 
+		will be very appreciated if you will attach the Crash Dump file to your bug report. It will help us to fix driver bug 
+		faster and easier.</p>
+		<p>Crash Dump generation may be disabled in your version of Windows. Therefore check please is it enabled or not by opening 
+		the following system dialog: <span class="guimenuitem">MyComputer > Properties > Advanced > Boot and restore options</span>. 
+		Select in <span class="guimenuitem">Saving debugging information</span> section <span class="guimenuitem">Small memory dump</span> 
+		or <span class="guimenuitem">Kernel memory dump</span>. Which differencies are between them? Small memory dump contains less 
+		information but it has small size which is benifit in case of dump file submission to <span class="application">UltraDefrag</span> 
+		bug tracker. Feel free to select <span class="guimenuitem">Small memory dump</span> item in dialog box opened before. On the other 
+		hand if you are advanced user, you may prefer Kernel Memory Dump or even Full Memory Dump. These dumps contain more information 
+		which may be helpful for better error detection. Use <a href="http://www.microsoft.com/whdc/DevTools/Debugging/default.mspx">Debugging 
+		Tools for Windows</a> to analyze such dump files. Note also: when you are selecting <span class="guimenuitem">Kernel Memory Dump</span> 
+		or <span class="guimenuitem">Full Memory Dump</span> menu items, you will always have after a crash a Small Memory Dump generated 
+		additionally.</p>
+		<p>Small Memory Dump files can be found in <span class="code">WINDOWS\Minidump</span> directory.</p>
+		<p>So, if you have encoutered the Blue Screen, don't forget to attach a Small Memory Dump file to your report. Or, at least, 
+		attach please numbers shown on your screen.</p>
+
+		<h5>Which tests can I additionally perform to speed up bug fixing?</h5>
+		<p>There is one cool program shipped with all versions of Windows: Driver Verifier. Open the run box or command line and type 
+		<span class="code">verifier.exe</span> to run it. As a result you will see its window. Select <span class="guimenuitem">Create standard 
+		parameters</span> item and click <span class="guimenuitem">Next</span> button. Choose <span class="guimenuitem">Select driver name 
+		from list</span> item and click <span class="guimenuitem">Next</span> again. Click <span class="guimenuitem">Add offline drivers to this list</span> 
+		button and select <span class="code">ultradfg.sys</span> driver. Click <span class="guimenuitem">Finish</span> button and reboot your system. 
+		Now you are ready for advanced <span class="application">UltraDefrag</span> driver testing.</p>
+		<p>Play with <span class="application">UltraDefrag</span> program trying to reproduce the Blue Screen. After arriving them send bug report 
+		with a small memory dump attached. And don't forget to attach a notice that you have used Driver Verifier during your test. Good luck!</p>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="gui"></a>
+				Which info must contain a report about GUI bug?</h2>
+			</div></div>
+		</div>
+		<p>If you have any problems with GUI application, Configurator, Scheduler or web site appearance, attach screenshots please to your 
+		bug report.</p>
 	</div>
 </div>
 
