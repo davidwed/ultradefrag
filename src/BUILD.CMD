@@ -43,6 +43,8 @@ xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
 xcopy /I /Y /Q    .\dll\wgx .\obj\wgx
 
+copy /Y .\obj\share\*.c .\obj\console\
+
 rem xcopy /I /Y /Q /S source destination
 
 mkdir obj\dll

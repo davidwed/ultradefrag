@@ -148,3 +148,9 @@ VOID NTAPI Nt_ExFreePool(PVOID P)
 	if(ptrExFreePoolWithTag) ptrExFreePoolWithTag(P, 0);
 	else ExFreePool(P);
 }
+
+ULONGLONG NTAPI Nt_KeQueryInterruptTime(VOID)
+{
+	if(ptrKeQueryInterruptTime) return ptrKeQueryInterruptTime();
+	else return 0;
+}

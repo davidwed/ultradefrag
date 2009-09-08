@@ -62,6 +62,8 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 			"KeRegisterBugCheckReasonCallback");
 		ptrKeDeregisterBugCheckReasonCallback = KernelGetProcAddress(kernel_addr,
 			"KeDeregisterBugCheckReasonCallback");
+		ptrKeQueryInterruptTime = KernelGetProcAddress(kernel_addr,
+			"KeQueryInterruptTime");
 	}
 
 	/* print kernel functions addresses */
@@ -74,6 +76,8 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 		NULL,ptrKeRegisterBugCheckReasonCallback);
 	DebugPrint("=Ultradfg= MmMapLockedPagesSpecifyCache address: %p\n",
 		NULL,ptrMmMapLockedPagesSpecifyCache);
+	DebugPrint("=Ultradfg= KeQueryInterruptTime address: %p\n",
+		NULL,ptrKeQueryInterruptTime);
 }
 
 INIT_FUNCTION NTSTATUS CreateDevice(IN PDRIVER_OBJECT DriverObject,

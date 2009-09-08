@@ -48,6 +48,7 @@ BOOLEAN (NTAPI *ptrKeRegisterBugCheckReasonCallback)(
 	KBUGCHECK_CALLBACK_REASON,PUCHAR) = NULL;
 BOOLEAN (NTAPI *ptrKeDeregisterBugCheckReasonCallback)(
     PKBUGCHECK_REASON_CALLBACK_RECORD CallbackRecord) = NULL;
+ULONGLONG (NTAPI *ptrKeQueryInterruptTime)(void) = NULL;
 
 char invalid_request[] = "-Ultradfg- 32-bit request cannot be accepted by 64-bit driver!\n";
 

@@ -2,7 +2,9 @@
 name        = "udefrag"
 target_type = "console"
 
-src = { "defrag.c", "..\\share\\getopt.c", "..\\share\\getopt1.c" }
+-- getopt* files will be copied by build.cmd command to obj\console directory
+
+src = { "defrag.c", "getopt.c", "getopt1.c" }
 rc = { "defrag.rc" }
 
 libs = { "kernel32", "msvcrt" }

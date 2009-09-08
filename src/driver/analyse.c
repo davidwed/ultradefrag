@@ -65,7 +65,7 @@ ULONGLONG _rdtsc(void)
 /* in nanoseconds */
 ULONGLONG _rdtsc_1(void)
 {
-	return KeQueryInterruptTime() * 100;
+	return Nt_KeQueryInterruptTime() * 100;
 }
 #endif
 

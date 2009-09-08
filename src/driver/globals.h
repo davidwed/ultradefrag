@@ -46,6 +46,7 @@ extern BOOLEAN (NTAPI *ptrKeRegisterBugCheckReasonCallback)(
 	KBUGCHECK_CALLBACK_REASON,PUCHAR);
 extern BOOLEAN (NTAPI *ptrKeDeregisterBugCheckReasonCallback)(
     PKBUGCHECK_REASON_CALLBACK_RECORD CallbackRecord);
+extern ULONGLONG (NTAPI *ptrKeQueryInterruptTime)(void);
 
 extern char invalid_request[];
 

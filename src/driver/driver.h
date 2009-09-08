@@ -353,6 +353,8 @@ VOID NTAPI Nt_ExFreePool(PVOID);
 #define ZwCloseSafe(h) if(h) { ZwClose(h); h = NULL; }
 #define ExFreePoolSafe(p) if(p) { Nt_ExFreePool(p); p = NULL; }
 
+ULONGLONG NTAPI Nt_KeQueryInterruptTime(VOID);
+
 //#else /* NT4_TARGET */
 
 //#ifndef USE_WINDDK

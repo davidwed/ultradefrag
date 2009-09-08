@@ -23,6 +23,9 @@
 
 #include "driver.h"
 
+/* Since 3.2.0 version cluster map must be available in micro edition. */
+#undef MICRO_EDITION
+
 /* allocates buffer for cluster map of specified size */
 NTSTATUS AllocateMap(ULONG size)
 {

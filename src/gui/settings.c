@@ -175,6 +175,10 @@ void SavePrefs(void)
 	/* save main window size for configurator's initialization */
 	result = fprintf(pf,
 		"-- UltraDefrag GUI options\n\n"
+		"-- Note that you must specify paths in filters\n"
+		"-- with double back slashes instead of the single.\n"
+		"-- Par example:\n"
+		"-- ex_filter = \"MyDocs\\\\Music\\\\mp3\\\\Red_Hot_Chili_Peppers\"\n\n"
 		"in_filter = \"%s\"\n"
 		"ex_filter = \"%s\"\n"
 		"sizelimit = \"%s\"\n"
