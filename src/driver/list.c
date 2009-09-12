@@ -33,7 +33,7 @@ LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size,POOL_TYPE pool_type)
 
 	new_item = (LIST *)AllocatePool(pool_type,size);
 	if(!new_item){
-		DebugPrint2("-Ultradfg- InsertItem() no enough memory!\n",NULL);
+		DebugPrint2("-Ultradfg- InsertItem() no enough memory!\n");
 		return NULL;
 	}
 

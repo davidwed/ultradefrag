@@ -20,8 +20,10 @@ HISTORY
     - debugging information will not be saved on disk since this version of the 
       program; read carefully an appropriate chapter of program's handbook for 
       detailed instructions about kernel mode driver debugging instead
+    - few fatal driver bugs were fixed
+    - driver's reliability was increased
     - NOTE FOR PROGRAMMERS: to successfully recompile the driver run 
-      configure.pl script and click 'Apply patch to MinGW' button once
+      configure.pl script and click 'Apply patch to MinGW' button once again
 
 
   Version 3.1.0 (33.0)   2009-05-13

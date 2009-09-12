@@ -32,7 +32,6 @@ extern KEVENT sync_event;
 extern KEVENT sync_event_2;
 extern KEVENT stop_event;
 extern KEVENT unload_event;
-extern short log_path[MAX_PATH];
 extern char volume_letter;
 
 extern int nt4_system;

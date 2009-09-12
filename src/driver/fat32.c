@@ -59,12 +59,12 @@ BOOLEAN ScanFat32Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ULONGLONG tm;
 	
-	DebugPrint("-Ultradfg- FAT32 scan started!\n",NULL);
+	DebugPrint("-Ultradfg- FAT32 scan started!\n");
 	tm = _rdtsc();
 
 	/* cache the first sector of file allocation table */
 	if(!InitFat32(dx)){
-		DebugPrint("-Ultradfg- FAT32 scan finished!\n",NULL);
+		DebugPrint("-Ultradfg- FAT32 scan finished!\n");
 		return FALSE;
 	}
 	
@@ -76,7 +76,7 @@ BOOLEAN ScanFat32Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 #ifdef COMPLETE_CACHING
 	ExFreePoolSafe(Fat32);
 #endif
-	DebugPrint("-Ultradfg- FAT32 scan finished!\n",NULL);
+	DebugPrint("-Ultradfg- FAT32 scan finished!\n");
 	DbgPrint("FAT32 scan needs %I64u ms\n",_rdtsc() - tm);
 	return TRUE;
 }
@@ -89,17 +89,16 @@ BOOLEAN InitFat32(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	/* allocate memory for one sector */
 	FatSize = (Bpb.Fat32.FAT32sectors * Bpb.BytesPerSec); /* must be an integral of sector size */
-	DebugPrint("-Ultradfg- FAT32 table has %u entries.\n",
-		NULL,FatEntries);
+	DebugPrint("-Ultradfg- FAT32 table has %u entries.\n",FatEntries);
 	if(FatSize < (FatEntries * sizeof(ULONG))){
 		DebugPrint("-Ultradfg- FatSize (%u) is less than FatEntries (%u) * 4!\n",
-			NULL,FatSize,FatEntries);
+			FatSize,FatEntries);
 		return FALSE;
 	}
 		
 	Fat32Sector = AllocatePool(NonPagedPool,dx->bytes_per_sector);
 	if(Fat32Sector == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for InitFat32()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for InitFat32()!\n");
 		return FALSE;
 	}
 	
@@ -108,7 +107,7 @@ BOOLEAN InitFat32(UDEFRAG_DEVICE_EXTENSION *dx)
 	FirstFatSector = 0 + Bpb.ReservedSectors;
 	Status = ReadSectors(dx,FirstFatSector,(PVOID)Fat32Sector,dx->bytes_per_sector);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- cannot read the first sector of the first FAT: %x!\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- cannot read the first sector of the first FAT: %x!\n",(UINT)Status);
 		ExFreePoolSafe(Fat32Sector);
 		return FALSE;
 	}
@@ -119,15 +118,15 @@ BOOLEAN InitFat32(UDEFRAG_DEVICE_EXTENSION *dx)
 	* only if it requires no more than 4 Mb
 	*/
 	if(FatSize > (4 * 1024 * 1024)){
-		DebugPrint("-Ultradfg- FAT is too long: %u bytes!\n",NULL,FatSize);
-		DebugPrint("-Ultradfg- Specific scan cannot be performed!\n",NULL);
+		DebugPrint("-Ultradfg- FAT is too long: %u bytes!\n",FatSize);
+		DebugPrint("-Ultradfg- Specific scan cannot be performed!\n");
 		ExFreePoolSafe(Fat32Sector);
 		return FALSE;
 	}
 	
 	Fat32 = AllocatePool(PagedPool,FatSize);
 	if(Fat32 == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for InitFat32()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for InitFat32()!\n");
 		ExFreePoolSafe(Fat32Sector);
 		return FALSE;
 	}
@@ -136,7 +135,7 @@ BOOLEAN InitFat32(UDEFRAG_DEVICE_EXTENSION *dx)
 	FirstFatSector = 0 + Bpb.ReservedSectors;
 	Status = ReadSectors(dx,FirstFatSector,(PVOID)Fat32,FatSize);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",(UINT)Status);
 		ExFreePoolSafe(Fat32Sector);
 		ExFreePoolSafe(Fat32);
 		return FALSE;

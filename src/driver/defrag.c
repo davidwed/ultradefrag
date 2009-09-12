@@ -44,13 +44,13 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 
 void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	KSPIN_LOCK spin_lock;
-	KIRQL oldIrql;
+	static KSPIN_LOCK spin_lock;
+	static KIRQL oldIrql;
 	PFRAGMENTED pf, plargest;
 	PFREEBLOCKMAP block;
 	ULONGLONG length;
 
-	DebugPrint("-Ultradfg- ----- Defragmentation of %c: -----\n",NULL,dx->letter);
+	DebugPrint("-Ultradfg- ----- Defragmentation of %c: -----\n",dx->letter);
 
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
@@ -99,9 +99,9 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(!plargest) goto L1; /* current block is too small */
 		/* move file */
 		if(MoveTheFile(dx,plargest->pfn,block->lcn))
-			DebugPrint("-Ultradfg- Defrag success for\n",plargest->pfn->name.Buffer);
+			DebugPrint("-Ultradfg- Defrag success for %ws\n",plargest->pfn->name.Buffer);
 		else
-			DebugPrint("-Ultradfg- Defrag error for\n",plargest->pfn->name.Buffer);
+			DebugPrint("-Ultradfg- Defrag error for %ws\n",plargest->pfn->name.Buffer);
 		dx->processed_clusters += plargest->pfn->clusters_total;
 		UpdateFragmentedFilesList(dx);
 		if(KeReadStateEvent(&stop_event)) break;
@@ -118,7 +118,7 @@ NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 	ULONG status;
 	IO_STATUS_BLOCK ioStatus;
 
-	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",NULL,
+	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",
 		 startVcn,targetLcn,n_clusters);
 
 	if(KeReadStateEvent(&stop_event)) return STATUS_UNSUCCESSFUL;
@@ -187,7 +187,7 @@ void DbgPrintBlocksOfFile(PBLOCKMAP blockmap)
 	PBLOCKMAP block;
 	
 	for(block = blockmap; block != NULL; block = block->next_ptr){
-		DebugPrint("-Ultradfg- VCN: %I64u, LCN: %I64u, LENGTH: %u\n",NULL,
+		DebugPrint("-Ultradfg- VCN: %I64u, LCN: %I64u, LENGTH: %u\n",
 			block->vcn,block->lcn,block->length);
 		if(block->next_ptr == blockmap) break;
 	}
@@ -204,14 +204,14 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 	/* Open the file */
 	Status = OpenTheFile(pfn,&hFile);
 	if(Status){
-		DebugPrint("-Ultradfg- Can't open file: %x\n",pfn->name.Buffer,(UINT)Status);
+		DebugPrint("-Ultradfg- Can't open %ws file: %x\n",pfn->name.Buffer,(UINT)Status);
 		/* we need to destroy the block map to avoid infinite loops */
 		DeleteBlockmap(pfn); /* file is locked by other application, so its state is unknown */
 		return FALSE;
 	}
 
-	DebugPrint("-Ultradfg-\n",pfn->name.Buffer);
-	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",NULL,target,pfn->clusters_total);
+	DebugPrint("-Ultradfg- %ws\n",pfn->name.Buffer);
+	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",target,pfn->clusters_total);
 
 	Status = MoveBlocksOfFile(dx,pfn,hFile,target);
 	ZwClose(hFile);
@@ -222,14 +222,14 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 		if(DumpFile(dx,&fn)){ /* otherwise let's assume the successful moving result? */
 			if(fn.is_fragm){
 				DebugPrint("-Ultradfg- MoveBlocksOfFile failed: "
-						   "still fragmented.\n",NULL);
+						   "still fragmented.\n");
 				DbgPrintBlocksOfFile(fn.blockmap);
 				Status = STATUS_UNSUCCESSFUL;
 			}
 			if(fn.blockmap){
 				if(fn.blockmap->lcn != target){
 					DebugPrint("-Ultradfg- MoveBlocksOfFile failed: "
-							   "first block not found on target space.\n",NULL);
+							   "first block not found on target space.\n");
 					DbgPrintBlocksOfFile(fn.blockmap);
 					Status = STATUS_UNSUCCESSFUL;
 				}
@@ -254,7 +254,7 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 			if(block->next_ptr == pfn->blockmap) break;
 		}
 	} else {
-		DebugPrint("-Ultradfg- MoveFile error: %x\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- MoveFile error: %x\n",(UINT)Status);
 	}
 	DeleteBlockmap(pfn); /* because we don't need this info after file moving */
 	return (!pfn->is_fragm);

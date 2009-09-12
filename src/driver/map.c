@@ -34,26 +34,26 @@ NTSTATUS AllocateMap(ULONG size)
 	
 	/* map reallocation doesn't supported yet */
 	if(new_cluster_map){
-		DebugPrint("-Ultradfg- map reallocation doesn't supported yet!\n",NULL);
+		DebugPrint("-Ultradfg- map reallocation doesn\'t supported yet!\n");
 		return STATUS_INVALID_DEVICE_REQUEST;
 	}
 	map_size = size;
-	DebugPrint("-Ultradfg- Map size = %u\n",NULL,map_size);
+	DebugPrint("-Ultradfg- Map size = %u\n",map_size);
 	if(!size) return STATUS_SUCCESS;
 	
 	buffer_size = NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG);
 	
 	/* allocate small maps from the NonPagedPool, large maps - from PagedPool */
 	if(buffer_size <= (100 * 1024)){ /* no larger than 100 kb */
-		DebugPrint("-Ultradfg- Cluster map will be allocated from NonPagedPool.\n",NULL);
+		DebugPrint("-Ultradfg- Cluster map will be allocated from NonPagedPool.\n");
 		new_cluster_map = AllocatePool(NonPagedPool,buffer_size);
 	} else {
-		DebugPrint("-Ultradfg- Cluster map will be allocated from PagedPool.\n",NULL);
+		DebugPrint("-Ultradfg- Cluster map will be allocated from PagedPool.\n");
 		new_cluster_map = AllocatePool(PagedPool,buffer_size);
 	}
 
 	if(!new_cluster_map){
-		DebugPrint("-Ultradfg- cannot allocate memory for cluster map!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for cluster map!\n");
 		map_size = 0;
 		return STATUS_NO_MEMORY;
 	}
@@ -209,7 +209,7 @@ void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->cells_per_cluster = map_size / dx->clusters_total;
 		dx->cells_per_last_cluster = dx->cells_per_cluster + \
 			(map_size - dx->cells_per_cluster * dx->clusters_total);
-		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n",NULL, \
+		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
 			dx->clusters_total,dx->cells_per_cluster,dx->cells_per_last_cluster);
 	}
 #endif

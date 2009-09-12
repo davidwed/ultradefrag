@@ -47,12 +47,12 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 	pFileInfoFirst = (PFILE_BOTH_DIR_INFORMATION)AllocatePool(PagedPool,
 		FIND_DATA_SIZE + sizeof(PFILE_BOTH_DIR_INFORMATION));
 	if(!pFileInfoFirst){
-		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n");
 		return FALSE;
 	}
 	Path = (WCHAR *)AllocatePool(PagedPool,PATH_BUFFER_LENGTH * sizeof(WCHAR));
 	if(Path == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n");
 		Nt_ExFreePool(pFileInfoFirst);
 		return FALSE;
 	}
@@ -70,7 +70,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 				FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_OPEN_FOR_BACKUP_INTENT,
 				NULL,0);
 	if(Status != STATUS_SUCCESS){
-		DebugPrint1("-Ultradfg- cannot open directory: %x\n",ParentDirectoryPath,(UINT)Status);
+		DebugPrint1("-Ultradfg- cannot open directory: %ws: %x\n",ParentDirectoryPath,(UINT)Status);
 		DirectoryHandle = NULL;	ExFreePoolSafe(pFileInfoFirst); ExFreePoolSafe(Path);
 		return FALSE;
 	}
@@ -118,7 +118,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 		/* VERY IMPORTANT: skip reparse points */
 		/* FIXME: what is reparse point? How to detect these that represents another volumes? */
 		if(IS_REPARSE_POINT(pFileInfo)){
-			DebugPrint("-Ultradfg- Reparse point found\n",Path);
+			DebugPrint("-Ultradfg- Reparse point found %ws\n",Path);
 			continue;
 		}
 
@@ -133,12 +133,12 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 
 		/* UltraDefrag has a full support for sparse files! :D */
 		if(IS_SPARSE_FILE(pFileInfo)){
-			DebugPrint("-Ultradfg- Sparse file found\n",Path);
+			DebugPrint("-Ultradfg- Sparse file found %ws\n",Path);
 			/* Let's defragment them! :) */
 		}
 
 		if(IS_ENCRYPTED_FILE(pFileInfo)){
-			DebugPrint2("-Ultradfg- Encrypted file found\n",Path);
+			DebugPrint2("-Ultradfg- Encrypted file found %ws\n",Path);
 		}
 
 		if(ConsoleUnwantedStuffDetected(dx,Path,&inside_flag)){
@@ -147,7 +147,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 		}
 
 		/*if(IS_DIR(pFileInfo) && IS_COMPRESSED(pFileInfo))
-			DebugPrint("-Ultradfg- Compressed directory found\n",Path);
+			DebugPrint("-Ultradfg- Compressed directory found %ws\n",Path);
 		*/
 
 		if(IS_DIR(pFileInfo)) FindFiles(dx,Path);
@@ -157,7 +157,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 		if(context_menu_handler && !inside_flag) continue;
 
 		if(!InsertFileName(dx,Path,pFileInfo)){
-			DebugPrint("-Ultradfg- InsertFileName failed for\n",Path);
+			DebugPrint("-Ultradfg- InsertFileName failed for %ws\n",Path);
 			ZwClose(DirectoryHandle);
 			ExFreePoolSafe(pFileInfoFirst);
 			ExFreePoolSafe(Path);
@@ -185,7 +185,7 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 	
 	/* Initialize pfn->name field. */
 	if(!RtlCreateUnicodeString(&pfn->name,path)){
-		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
+		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n");
 		RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
 		return FALSE;
 	}
@@ -266,7 +266,7 @@ BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 
 	pf = (PFRAGMENTED)InsertItem((PLIST *)&dx->fragmfileslist,(PLIST)prev_pf,sizeof(FRAGMENTED),PagedPool);
 	if(!pf){
-		DebugPrint2("-Ultradfg- cannot allocate memory for InsertFragmentedFile()!\n",NULL);
+		DebugPrint2("-Ultradfg- cannot allocate memory for InsertFragmentedFile()!\n");
 		return FALSE;
 	}
 	pf->pfn = pfn;
@@ -302,13 +302,13 @@ BOOLEAN UnwantedStuffOnFatOrUdfDetected(UDEFRAG_DEVICE_EXTENSION *dx,
 
 	/* skip temporary files ;-) */
 	if(IS_TEMPORARY_FILE(pFileInfo)){
-		DebugPrint2("-Ultradfg- Temporary file found\n",pfn->name.Buffer);
+		DebugPrint2("-Ultradfg- Temporary file found %ws\n",pfn->name.Buffer);
 		return TRUE;
 	}
 	
 	/* skip all unwanted files by user defined patterns */
 	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
-		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n",NULL);
+		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n");
 		return FALSE;
 	}
 	_wcslwr(us.Buffer);
@@ -357,7 +357,7 @@ BOOLEAN ConsoleUnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path,UL
 	if(path_length < 4) return FALSE; /* because must contain \??\ sequence */
 	lpath = (WCHAR *)AllocatePool(PagedPool,(path_length + 1) * sizeof(WCHAR));
 	if(lpath == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for ConsoleUnwantedStuffDetected()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for ConsoleUnwantedStuffDetected()!\n");
 		return FALSE;
 	}
 	wcscpy(lpath,Path);
@@ -372,7 +372,7 @@ BOOLEAN ConsoleUnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path,UL
 			/* is current path a part of the path selected in context menu? */
 			/* in other words: are we going in right direction? */
 			if(!wcsstr(dx->in_filter.buffer + dx->in_filter.offsets->offset,lpath + 4)){
-				DebugPrint1("-Ultradfg- Not included:\n",Path);
+				DebugPrint1("-Ultradfg- Not included: %ws\n",Path);
 				ExFreePoolSafe(lpath);
 				return TRUE;
 			}
@@ -386,7 +386,7 @@ BOOLEAN ConsoleUnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path,UL
 	*/
 	if(dx->ex_filter.buffer){
 		if(IsStringInFilter(lpath,&dx->ex_filter)){
-			DebugPrint1("-Ultradfg- Excluded:\n",Path);
+			DebugPrint1("-Ultradfg- Excluded: %ws\n",Path);
 			ExFreePoolSafe(lpath);
 			return TRUE;
 		}

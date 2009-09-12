@@ -62,12 +62,12 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	BytesPerSector = dx->bytes_per_sector;
 	if(BytesPerSector < sizeof(BPB)){
 		DebugPrint("-Ultradfg- Sector size is too small: %u bytes!\n",
-			NULL,BytesPerSector);
+			BytesPerSector);
 		return;
 	}
 	FirstSector = (UCHAR *)AllocatePool(NonPagedPool,BytesPerSector);
 	if(FirstSector == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for the first sector!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for the first sector!\n");
 		return;
 	}
 	
@@ -75,7 +75,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	Status = ReadSectors(dx,0,FirstSector,BytesPerSector);
 	if(!NT_SUCCESS(Status)){
 		DebugPrint("-Ultradfg- cannot read the first sector of the partition: %x!\n",
-			NULL,(UINT)Status);
+			(UINT)Status);
 		dx->partition_type = UNKNOWN_PARTITION;
 		Nt_ExFreePool(FirstSector);
 		return;
@@ -91,7 +91,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(strstr(signature,"FAT")) fat_found = TRUE;
 	}
 	if(!fat_found){
-		DebugPrint("-Ultradfg- FAT signatures not found in the first sector.\n",NULL);
+		DebugPrint("-Ultradfg- FAT signatures not found in the first sector.\n");
 		dx->partition_type = UNKNOWN_PARTITION;
 		Nt_ExFreePool(FirstSector);
 		return;
@@ -111,15 +111,15 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	if(CountOfClusters < 4085) {
 		/* Volume is FAT12 */
-		DebugPrint("-Ultradfg- FAT12 partition found!\n",NULL);
+		DebugPrint("-Ultradfg- FAT12 partition found!\n");
 		dx->partition_type = FAT12_PARTITION;
 	} else if(CountOfClusters < 65525) {
 		/* Volume is FAT16 */
-		DebugPrint("-Ultradfg- FAT16 partition found!\n",NULL);
+		DebugPrint("-Ultradfg- FAT16 partition found!\n");
 		dx->partition_type = FAT16_PARTITION;
 	} else {
 		/* Volume is FAT32 */
-		DebugPrint("-Ultradfg- FAT32 partition found!\n",NULL);
+		DebugPrint("-Ultradfg- FAT32 partition found!\n");
 		dx->partition_type = FAT32_PARTITION;
 	}
 	
@@ -129,7 +129,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 		mn = (ULONG)(Bpb.Fat32.BPB_FSVer & 0xFF);
 		if(mj > 0 || mn > 0){
 			DebugPrint("-Ultradfg- cannot recognize FAT32 version %u.%u!\n",
-				NULL,mj,mn);
+				mj,mn);
 			dx->partition_type = UNKNOWN_PARTITION;
 			Nt_ExFreePool(FirstSector);
 			return;
@@ -156,7 +156,7 @@ NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULO
 	offset.QuadPart = lsn * dx->bytes_per_sector;
 	Status = ZwReadFile(dx->hVol,NULL,NULL,NULL,&ioStatus,buffer,length,&offset,NULL);
 	if(Status == STATUS_PENDING){
-		///DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n",NULL);
+		///DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
 		if(nt4_system)
 			Status = NtWaitForSingleObject(dx->hVol,FALSE,NULL);
 		else
@@ -231,14 +231,14 @@ BOOLEAN ScanFatRootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 	RootDir = (DIRENTRY *)AllocatePool(NonPagedPool,RootDirSectors * Bpb.BytesPerSec);
 	if(RootDir == NULL){
 		DebugPrint("-Ultradfg- cannot allocate %u bytes of memory for RootDirectory!\n",
-			NULL,(ULONG)(RootDirSectors * Bpb.BytesPerSec));
+			(ULONG)(RootDirSectors * Bpb.BytesPerSec));
 		return FALSE;
 	}
 	
 	/* read the complete root directory contents */
 	Status = ReadSectors(dx,FirstRootDirSector,(PVOID)RootDir,RootDirSectors * Bpb.BytesPerSec);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- cannot read the root directory: %x!\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- cannot read the root directory: %x!\n",(UINT)Status);
 		ExFreePoolSafe(RootDir);
 		return FALSE;
 	}
@@ -438,12 +438,12 @@ void ScanFatDirectory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Par
 	/* allocate memory */
 	DirPath = (WCHAR *)AllocatePool(PagedPool,MAX_LONG_PATH * sizeof(short));
 	if(DirPath == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for DirPath in ScanFat16Directory()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for DirPath in ScanFat16Directory()!\n");
 		return;
 	}
 	Dir = (DIRENTRY *)AllocatePool(PagedPool,BytesPerCluster);
 	if(Dir == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for Dir in ScanFat16Directory()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for Dir in ScanFat16Directory()!\n");
 		Nt_ExFreePool(DirPath);
 		return;
 	}
@@ -458,7 +458,7 @@ void ScanFatDirectory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Par
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		if(ClusterNumber > (FatEntries - 1)){ /* directory seems to be invalid */
 			DebugPrint("-Ultradfg- invalid cluster number %u in ScanFat16Directory()!\n",
-				NULL,(ULONG)ClusterNumber);
+				(ULONG)ClusterNumber);
 			ExFreePoolSafe(DirPath);
 			ExFreePoolSafe(Dir);
 			return;
@@ -467,7 +467,7 @@ void ScanFatDirectory(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Par
 		Status = ReadSectors(dx,FirstSectorOfCluster,(PVOID)Dir,BytesPerCluster);
 		if(!NT_SUCCESS(Status)){
 			DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
-				NULL,FirstSectorOfCluster,(UINT)Status);
+				FirstSectorOfCluster,(UINT)Status);
 			ExFreePoolSafe(DirPath);
 			ExFreePoolSafe(Dir);
 			return; /* directory seems to be invalid */
@@ -505,7 +505,7 @@ void ProcessFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Paren
 	
 	/* 1. skip volume label */
 	if(DirEntry->Attr & ATTR_VOLUME_ID){
-		DebugPrint("-Ultradfg- Volume label = \n",FileName);
+		DebugPrint("-Ultradfg- Volume label = %ws\n",FileName);
 		return;
 	}
 	
@@ -515,7 +515,7 @@ void ProcessFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCHAR *Paren
 	/* 3. allocate memory */
 	Path = (WCHAR *)AllocatePool(PagedPool,MAX_LONG_PATH * sizeof(short));
 	if(Path == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for Path in ProcessFat16File()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for Path in ProcessFat16File()!\n");
 		return;
 	}
 	
@@ -566,7 +566,7 @@ BOOLEAN InsertFileToFileList(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCH
 	
 	/* Initialize pfn->name field. */
 	if(!RtlCreateUnicodeString(&pfn->name,Path)){
-		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n",NULL);
+		DebugPrint2("-Ultradfg- no enough memory for pfn->name initialization!\n");
 		RemoveItem((PLIST *)&dx->filelist,(LIST *)pfn);
 		return FALSE;
 	}
@@ -630,7 +630,7 @@ void DumpFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,PFILENAME pfn)
 		if(KeReadStateEvent(&stop_event) == 0x1) goto fail;
 		if(ClusterNumber > (FatEntries - 1)){ /* file seems to be invalid */
 			DebugPrint("-Ultradfg- invalid cluster number %u in DumpFat16File()!\n",
-				NULL,(ULONG)ClusterNumber);
+				(ULONG)ClusterNumber);
 			goto fail;
 		}
 		/* add cluster to blockmap */
@@ -669,7 +669,7 @@ BOOLEAN UnwantedStuffOnFatDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path)
 
 	/* skip all unwanted files by user defined patterns */
 	if(!RtlCreateUnicodeString(&us,Path)){
-		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n",NULL);
+		DebugPrint2("-Ultradfg- cannot allocate memory for UnwantedStuffDetected()!\n");
 		return FALSE;
 	}
 	_wcslwr(us.Buffer);

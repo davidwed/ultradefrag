@@ -47,14 +47,14 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(status != STATUS_SUCCESS){
-		DebugPrint("-Ultradfg- Can't open volume %x\n",NULL,(UINT)status);
+		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)status);
 		dx->hVol = NULL;
 		return status;
 	}
 
 	status = GetVolumeGeometry(dx);
 	if(!NT_SUCCESS(status)){
-		DebugPrint("-Ultradfg- GetVolumeGeometry() failed: %x!\n",NULL,(UINT)status);
+		DebugPrint("-Ultradfg- GetVolumeGeometry() failed: %x!\n",(UINT)status);
 		return status;
 	}
 
@@ -89,7 +89,7 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(status != STATUS_SUCCESS){
-		DebugPrint("-Ultradfg- Can't open the root directory: %x!\n",
+		DebugPrint("-Ultradfg- Can't open the root directory %ws: %x!\n",
 			path,(UINT)status);
 		hFile = NULL;
 		return status;
@@ -100,7 +100,7 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	ZwClose(hFile);
 	if(status != STATUS_SUCCESS){
-		DebugPrint("-Ultradfg- FileFsSizeInformation() request failed: %x!\n",
+		DebugPrint("-Ultradfg- FileFsSizeInformation() request failed for %ws: %x!\n",
 			path,(UINT)status);
 		return status;
 	}
@@ -114,16 +114,16 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
 	if(dx->bytes_per_cluster)
 		dx->clusters_per_256k = _256K / dx->bytes_per_cluster;
-	DebugPrint("-Ultradfg- total clusters: %I64u\n",NULL, dx->clusters_total);
-	DebugPrint("-Ultradfg- cluster size: %I64u\n",NULL, dx->bytes_per_cluster);
+	DebugPrint("-Ultradfg- total clusters: %I64u\n",dx->clusters_total);
+	DebugPrint("-Ultradfg- cluster size: %I64u\n",dx->bytes_per_cluster);
 	if(!dx->clusters_per_256k){
-		DebugPrint("-Ultradfg- clusters are larger than 256 kbytes!\n",NULL);
+		DebugPrint("-Ultradfg- clusters are larger than 256 kbytes!\n");
 		dx->clusters_per_256k ++;
 	}
 	
 	/* validate geometry */
 	if(!dx->clusters_total || !dx->bytes_per_cluster){
-		DebugPrint("-Ultradfg- wrong volume geometry!\n",NULL);
+		DebugPrint("-Ultradfg- wrong volume geometry!\n");
 		return STATUS_WRONG_VOLUME;
 	}
 	return STATUS_SUCCESS;

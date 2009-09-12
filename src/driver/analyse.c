@@ -76,7 +76,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	NTSTATUS Status;
 	ULONGLONG tm, time;
 
-	DebugPrint("-Ultradfg- ----- Analyse of %c: -----\n",NULL,dx->letter);
+	DebugPrint("-Ultradfg- ----- Analyse of %c: -----\n",dx->letter);
 	
 	/* Initialization */
 	MarkAllSpaceAsSystem0(dx);
@@ -86,7 +86,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* Volume space analysis */
 	Status = OpenVolume(dx);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- OpenVolume() failed: %x!\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- OpenVolume() failed: %x!\n",(UINT)Status);
 		return Status;
 	}
 
@@ -98,7 +98,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	dx->processed_clusters = 0;
 	Status = FillFreeSpaceMap(dx);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- FillFreeSpaceMap() failed: %x!\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
 		return Status;
 	}
 	//DbgPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
@@ -110,7 +110,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		/* Experimental support of retrieving information directly from MFT. */
 		ScanMFT(dx);
 		break;
-	case FAT12_PARTITION:
+	/*case FAT12_PARTITION:
 		ScanFat12Partition(dx);
 		break;
 	case FAT16_PARTITION:
@@ -118,13 +118,13 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		break;
 	case FAT32_PARTITION:
 		ScanFat32Partition(dx);
-		break;
+		break;*/
 	default: /* UDF, Ext2 and so on... */
 		/* Find files */
 		tm = _rdtsc();
 		path[4] = (short)dx->letter;
 		if(!FindFiles(dx,path)){
-			DebugPrint("-Ultradfg- FindFiles() failed!\n",NULL);
+			DebugPrint("-Ultradfg- FindFiles() failed!\n");
 			return STATUS_NO_MORE_FILES;
 		}
 		time = _rdtsc() - tm;
@@ -133,8 +133,8 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	///if(dx->partition_type == FAT16_PARTITION) ScanFat16Partition(dx);
 
-	DebugPrint("-Ultradfg- Files found: %u\n",NULL,dx->filecounter);
-	DebugPrint("-Ultradfg- Fragmented files: %u\n",NULL,dx->fragmfilecounter);
+	DebugPrint("-Ultradfg- Files found: %u\n",dx->filecounter);
+	DebugPrint("-Ultradfg- Fragmented files: %u\n",dx->fragmfilecounter);
 
 	GenerateFragmentedFilesList(dx);
 

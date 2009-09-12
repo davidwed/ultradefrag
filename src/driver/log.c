@@ -44,7 +44,7 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 			NULL
 			);
 	status = ZwDeleteFile(&ObjectAttributes);
-	DebugPrint1("-Ultradfg- Report was deleted with status %x\n",p,(UINT)status);
+	DebugPrint1("-Ultradfg- Report %ws was deleted with status %x\n",p,(UINT)status);
 }
 
 void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
@@ -54,7 +54,7 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 
 	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
 	if(Status == STATUS_PENDING){
-		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n",NULL);
+		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
 		if(nt4_system)
 			Status = NtWaitForSingleObject(hFile,FALSE,NULL);
 		else
@@ -106,7 +106,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 			
 			RtlFreeAnsiString(&as);
 		} else {
-			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n",NULL);
+			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n");
 		}
 		strcpy(buffer,"]],uname = {");
 		Write(dx,hFile,buffer,strlen(buffer));
@@ -161,7 +161,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			0
 			);
 	if(Status){
-		DebugPrint("-Ultradfg- Can't create file: %x\n",p,(UINT)Status);
+		DebugPrint("-Ultradfg- Can't create %ws file: %x\n",p,(UINT)Status);
 		hFile = NULL;
 		return FALSE;
 	}
@@ -178,8 +178,16 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	WriteLogBody(dx,hFile,TRUE);
 	strcpy(buffer,"}\r\n");
 	Write(dx,hFile,buffer,strlen(buffer));
+
+	/* this code returns UserMode!!! */
+	/*if(ExGetPreviousMode() == KernelMode)
+		DbgPrint("ExGetPreviousMode returned KernelMode\n");
+	else
+		DbgPrint("ExGetPreviousMode returned UserMode\n");*/
+	
 	ZwClose(hFile);
-	DebugPrint("-Ultradfg- Report saved to\n",p);
+	
+	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
 	return TRUE;
 }
 #else /* MICRO_EDITION */
@@ -202,7 +210,7 @@ void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 			NULL
 			);
 	status = ZwDeleteFile(&ObjectAttributes);
-	DebugPrint1("-Ultradfg- Report was deleted with status %x\n",p,(UINT)status);
+	DebugPrint1("-Ultradfg- Report %ws was deleted with status %x\n",p,(UINT)status);
 }
 
 void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
@@ -212,7 +220,7 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 
 	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
 	if(Status == STATUS_PENDING){
-		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.",NULL);
+		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.");
 		if(nt4_system)
 			Status = NtWaitForSingleObject(hFile,FALSE,NULL);
 		else
@@ -238,7 +246,7 @@ void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 		_itoa(pf->pfn->n_fragments,buffer,10);
 		RtlInitAnsiString(&as,buffer);
 		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n",NULL);
+			DebugPrint("-Ultradfg- no enough memory for WriteLogBody()!\n");
 			return;
 		}
 		Write(dx,hFile,us.Buffer,us.Length);
@@ -292,7 +300,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			0
 			);
 	if(Status){
-		DebugPrint("-Ultradfg- Can't create file: %x\n",p,(UINT)Status);
+		DebugPrint("-Ultradfg- Can't create %ws file: %x\n",p,(UINT)Status);
 		hFile = NULL;
 		return FALSE;
 	}
@@ -303,7 +311,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 	Write(dx,hFile,line,sizeof(line) - sizeof(short));
 	WriteLogBody(dx,hFile,TRUE);
 	ZwClose(hFile);
-	DebugPrint("-Ultradfg- Report saved to\n",p);
+	DebugPrint("-Ultradfg- Report saved to %ws\n",p);
 	return TRUE;
 }
 #endif /* MICRO_EDITION */

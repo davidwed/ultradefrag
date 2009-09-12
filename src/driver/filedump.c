@@ -50,7 +50,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	/* Open the file */
 	Status = OpenTheFile(pfn,&hFile);
 	if(Status != STATUS_SUCCESS){
-		DebugPrint("-Ultradfg- System file found: %x\n",pfn->name.Buffer,(UINT)Status);
+		DebugPrint("-Ultradfg- System file found: %ws: %x\n",pfn->name.Buffer,(UINT)Status);
 		return FALSE; /* File has unknown state! */
 	}
 
@@ -74,19 +74,19 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 		if(Status != STATUS_SUCCESS && Status != STATUS_BUFFER_OVERFLOW){
 			/* it always returns STATUS_END_OF_FILE for small files placed in MFT */
 			if(Status != STATUS_END_OF_FILE)
-				DebugPrint("-Ultradfg- Dump failed %x\n",pfn->name.Buffer,(UINT)Status);
+				DebugPrint("-Ultradfg- Dump failed for %ws: %x\n",pfn->name.Buffer,(UINT)Status);
 			goto dump_fail;
 		}
 
 		/* user must have a chance to break infinite loops */
 		if(KeReadStateEvent(&stop_event)){
 			if(counter > MAX_COUNTER)
-				DebugPrint("-Ultradfg- Infinite main loop?\n",pfn->name.Buffer);
+				DebugPrint("-Ultradfg- Infinite main loop? %ws\n",pfn->name.Buffer);
 			goto dump_fail;
 		}
 
 		if(!fileMappings->NumberOfPairs && Status != STATUS_SUCCESS){
-			DebugPrint("-Ultradfg- Empty map of file\n",pfn->name.Buffer);
+			DebugPrint("-Ultradfg- Empty map of file %ws\n",pfn->name.Buffer);
 			goto dump_fail;
 		}
 		
@@ -104,7 +104,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 			/* The following code may cause an infinite main loop (bug #2053941?), */
 			/* but for some 3.99 Gb files on FAT32 it works fine. */
 			if(fileMappings->Pair[i].Vcn == 0){
-				DebugPrint("-Ultradfg- Wrong map of file\n",pfn->name.Buffer);
+				DebugPrint("-Ultradfg- Wrong map of file %ws\n",pfn->name.Buffer);
 				goto next_run;
 			}
 			

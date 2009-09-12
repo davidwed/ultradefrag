@@ -87,12 +87,12 @@ void ScanMftDirectlyRTL(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 	/* allocate memory */
 	Sequence = (UCHAR *)AllocatePool(PagedPool,RECORDS_SEQUENCE_LENGTH * dx->ntfs_record_size);
 	if(Sequence == NULL){
-		DebugPrint("-Ultradfg- no enough memory for ScanMftDirectlyRTL()!\n",NULL);
+		DebugPrint("-Ultradfg- no enough memory for ScanMftDirectlyRTL()!\n");
 		return;
 	}
 	
 	if(MftBlockmap == NULL){
-		DebugPrint("-Ultradfg- MftBlockmap invalid?\n",NULL);
+		DebugPrint("-Ultradfg- MftBlockmap invalid?\n");
 		ExFreePoolSafe(Sequence);
 		return;
 	}
@@ -111,7 +111,7 @@ void ScanMftDirectlyRTL(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 			Status = ReadSectors(dx,lsn,(PVOID)target,N * dx->bytes_per_sector);
 			if(!NT_SUCCESS(Status)){
 				DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
-					NULL,lsn,(UINT)Status);
+					lsn,(UINT)Status);
 				ExFreePoolSafe(Sequence);
 				return;
 			}
@@ -128,7 +128,7 @@ void ScanMftDirectlyRTL(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 						pnfrob->FileRecordLength = dx->ntfs_record_size;
 						memcpy(pnfrob->FileRecordBuffer,(PVOID)pfrh,dx->ntfs_record_size);
 						#ifdef DETAILED_LOGGING
-						DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",NULL,pnfrob->FileReferenceNumber);
+						DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",pnfrob->FileReferenceNumber);
 						#endif
 						AnalyseMftRecord(dx,pnfrob,nfrob_size,pmfi);
 					}
@@ -157,7 +157,7 @@ void ScanMftDirectlyRTL(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 				pnfrob->FileRecordLength = dx->ntfs_record_size;
 				memcpy(pnfrob->FileRecordBuffer,(PVOID)pfrh,dx->ntfs_record_size);
 				#ifdef DETAILED_LOGGING
-				DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",NULL,pnfrob->FileReferenceNumber);
+				DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",pnfrob->FileReferenceNumber);
 				#endif
 				AnalyseMftRecord(dx,pnfrob,nfrob_size,pmfi);
 			}
@@ -202,12 +202,12 @@ void ScanMftDirectlyLTR(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 	/* allocate memory */
 	Sequence = (UCHAR *)AllocatePool(PagedPool,RECORDS_SEQUENCE_LENGTH * dx->ntfs_record_size);
 	if(Sequence == NULL){
-		DebugPrint("-Ultradfg- no enough memory for ScanMftDirectlyLTR()!\n",NULL);
+		DebugPrint("-Ultradfg- no enough memory for ScanMftDirectlyLTR()!\n");
 		return;
 	}
 	
 	if(MftBlockmap == NULL){
-		DebugPrint("-Ultradfg- MftBlockmap invalid?\n",NULL);
+		DebugPrint("-Ultradfg- MftBlockmap invalid?\n");
 		ExFreePoolSafe(Sequence);
 		return;
 	}
@@ -225,7 +225,7 @@ void ScanMftDirectlyLTR(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 			Status = ReadSectors(dx,lsn,(PVOID)target,N * dx->bytes_per_sector);
 			if(!NT_SUCCESS(Status)){
 				DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
-					NULL,lsn,(UINT)Status);
+					lsn,(UINT)Status);
 				ExFreePoolSafe(Sequence);
 				return;
 			}
@@ -243,7 +243,7 @@ void ScanMftDirectlyLTR(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 						pnfrob->FileRecordLength = dx->ntfs_record_size;
 						memcpy(pnfrob->FileRecordBuffer,(PVOID)pfrh,dx->ntfs_record_size);
 						#ifdef DETAILED_LOGGING
-						DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",NULL,pnfrob->FileReferenceNumber);
+						DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",pnfrob->FileReferenceNumber);
 						#endif
 						AnalyseMftRecord(dx,pnfrob,nfrob_size,pmfi);
 					}
@@ -272,7 +272,7 @@ void ScanMftDirectlyLTR(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BU
 				pnfrob->FileRecordLength = dx->ntfs_record_size;
 				memcpy(pnfrob->FileRecordBuffer,(PVOID)pfrh,dx->ntfs_record_size);
 				#ifdef DETAILED_LOGGING
-				DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",NULL,pnfrob->FileReferenceNumber);
+				DebugPrint("-Ultradfg- NTFS record found, id = %I64u\n",pnfrob->FileReferenceNumber);
 				#endif
 				AnalyseMftRecord(dx,pnfrob,nfrob_size,pmfi);
 			}
@@ -304,7 +304,7 @@ void ProcessMFTRunList(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRIBUTE pnr_a
 		if(RunLCN(run)){
 			/* check for data consistency */
 			if((lcn + length) > dx->clusters_total){
-				DebugPrint("-Ultradfg- Error in MFT found, run Check Disk program!\n",NULL);
+				DebugPrint("-Ultradfg- Error in MFT found, run Check Disk program!\n");
 				break;
 			}
 			ProcessMFTRun(dx,vcn,length,lcn);
@@ -372,7 +372,7 @@ NTSTATUS GetMftRecordFromDisk(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUT
 			Status = ReadSectors(dx,FirstSector,(PVOID)(pnfrob->FileRecordBuffer + K),N * dx->bytes_per_sector);
 			if(!NT_SUCCESS(Status)){
 				DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
-					NULL,FirstSector,(UINT)Status);
+					FirstSector,(UINT)Status);
 				return Status;
 			}
 			/* correct SectorsToRead, vsn and K */
@@ -385,7 +385,7 @@ NTSTATUS GetMftRecordFromDisk(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUT
 	}
 	
 	if(SectorsToRead){
-		DebugPrint("-Ultradfg- MftBlockmap invalid?\n",NULL);
+		DebugPrint("-Ultradfg- MftBlockmap invalid?\n");
 		return STATUS_INVALID_PARAMETER;
 	}
 
@@ -407,8 +407,8 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	WCHAR header[] = L"\\??\\A:";
 	
 	#ifdef DETAILED_LOGGING
-	DebugPrint("-Ultradfg- parent id = %I64u, FILENAME =\n",
-		pmfi->Name,pmfi->ParentDirectoryMftId);
+	DebugPrint("-Ultradfg- parent id = %I64u, FILENAME = %ws\n",
+		pmfi->ParentDirectoryMftId,pmfi->Name);
 	#endif
 	
 	pmfi->PathBuilt = TRUE; /* in any case ;-) */
@@ -421,12 +421,12 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	/* allocate memory */
 	buffer1 = (WCHAR *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH) * sizeof(short));
 	if(!buffer1){
-		DebugPrint("-Ultradfg- BuildPath(): cannot allocate memory for buffer1\n",NULL);
+		DebugPrint("-Ultradfg- BuildPath(): cannot allocate memory for buffer1\n");
 		return;
 	}
 	buffer2 = (WCHAR *)AllocatePool(NonPagedPool,(MAX_NTFS_PATH) * sizeof(short));
 	if(!buffer2){
-		DebugPrint("-Ultradfg- BuildPath(): cannot allocate memory for buffer2\n",NULL);
+		DebugPrint("-Ultradfg- BuildPath(): cannot allocate memory for buffer2\n");
 		Nt_ExFreePool(buffer1);
 		return;
 	}
@@ -439,7 +439,7 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	/* copy filename to the right side of buffer1 */
 	name_length = wcslen(pmfi->Name);
 	if(offset < (name_length - 1)){
-		DebugPrint("-Ultradfg- BuildPath(): filename is too long (%u characters)\n",
+		DebugPrint("-Ultradfg- BuildPath(): %ws filename is too long (%u characters)\n",
 			pmfi->Name,name_length);
 		Nt_ExFreePool(buffer1);
 		Nt_ExFreePool(buffer2);
@@ -465,7 +465,7 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 		GetFileNameAndParentMftIdFromMftRecord(dx,mft_id,
 			&parent_mft_id,buffer2,MAX_NTFS_PATH);
 		if(buffer2[0] == 0){
-			DebugPrint("-Ultradfg- BuildPath(): cannot retrieve parent directory name!\n",NULL);
+			DebugPrint("-Ultradfg- BuildPath(): cannot retrieve parent directory name!\n");
 			goto build_path_done;
 		}
 		//DbgPrint("%ws\n",buffer2);
@@ -494,7 +494,7 @@ void BuildPath(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMATION pmfi)
 	pmfi->Name[MAX_NTFS_PATH - 1] = 0;
 	
 	#ifdef DETAILED_LOGGING
-	DebugPrint("-Ultradfg- FULL PATH =\n",pmfi->Name);
+	DebugPrint("-Ultradfg- FULL PATH = %ws\n",pmfi->Name);
 	#endif
 	
 build_path_done:
@@ -503,7 +503,7 @@ build_path_done:
 	return;
 	
 path_is_too_long:
-	DebugPrint("-Ultradfg- BuildPath(): path is too long:\n",buffer1);
+	DebugPrint("-Ultradfg- BuildPath(): path is too long: %ws\n",buffer1);
 	Nt_ExFreePool(buffer1);
 	Nt_ExFreePool(buffer2);
 }
@@ -525,22 +525,22 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 	nfrob_size = sizeof(NTFS_FILE_RECORD_OUTPUT_BUFFER) + dx->ntfs_record_size - 1;
 	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)AllocatePool(NonPagedPool,nfrob_size);
 	if(!pnfrob){
-		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n",NULL);
-		DebugPrint("-Ultradfg- No enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n",NULL);
+		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n");
+		DebugPrint("-Ultradfg- No enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
 		return;
 	}
 
 	/* get record */
 	status = GetMftRecord(dx,pnfrob,nfrob_size,mft_id);
 	if(!NT_SUCCESS(status)){
-		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n",NULL);
-		DebugPrint("-Ultradfg- FSCTL_GET_NTFS_FILE_RECORD failed: %x!\n",NULL,status);
+		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n");
+		DebugPrint("-Ultradfg- FSCTL_GET_NTFS_FILE_RECORD failed: %x!\n",status);
 		Nt_ExFreePool(pnfrob);
 		return;
 	}
 	if(GetMftIdFromFRN(pnfrob->FileReferenceNumber) != mft_id){
-		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n",NULL);
-		DebugPrint("-Ultradfg- Unable to get %I64u record.\n",NULL,mft_id);
+		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n");
+		DebugPrint("-Ultradfg- Unable to get %I64u record.\n",mft_id);
 		Nt_ExFreePool(pnfrob);
 		return;
 	}
@@ -548,8 +548,8 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 	/* analyse filename attributes */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
 	if(!(pfrh->Flags & 0x1)){
-		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n",NULL);
-		DebugPrint("-Ultradfg- %I64u record marked as free.\n",NULL,mft_id);
+		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n");
+		DebugPrint("-Ultradfg- %I64u record marked as free.\n",mft_id);
 		Nt_ExFreePool(pnfrob);
 		return; /* skip free records */
 	}
@@ -557,8 +557,8 @@ void GetFileNameAndParentMftIdFromMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,
 	/* allocate memory for MY_FILE_INFORMATION structure */
 	pmfi = (PMY_FILE_INFORMATION)AllocatePool(NonPagedPool,sizeof(MY_FILE_INFORMATION));
 	if(!pmfi){
-		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n",NULL);
-		DebugPrint("-Ultradfg- Cannot allocate memory for MY_FILE_INFORMATION structure.\n",NULL);
+		DebugPrint("-Ultradfg- GetFileNameAndParentMftIdFromMftRecord()\n");
+		DebugPrint("-Ultradfg- Cannot allocate memory for MY_FILE_INFORMATION structure.\n");
 		Nt_ExFreePool(pnfrob);
 		return;
 	}

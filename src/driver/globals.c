@@ -35,7 +35,6 @@ KEVENT sync_event;
 KEVENT sync_event_2;
 KEVENT stop_event;
 KEVENT unload_event;
-short log_path[MAX_PATH] = L"Empty Path";
 char volume_letter;
 
 int nt4_system = 0, w2k_system = 0;

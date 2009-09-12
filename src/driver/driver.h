@@ -33,7 +33,7 @@
 #pragma warning(disable:4103) /* used #pragma pack to change alignment */
 #endif
 
-#define DBG 1 /* it's very useful! */
+#define DBG 1 /* it's very useful and must always be specified */
 
 #if defined(__GNUC__)
 #include <ddk/ntddk.h>
@@ -66,53 +66,27 @@ typedef unsigned int UINT;
 /************************** DEBUGGING ISSUES ***************************/
 
 /*
-* Alter's DbgPrint logger is a good alternative for DbgView
-* program, especially on NT 4.0 system.
-* The latest version of logger can be downloaded from
-* http://alter.org.ua/en/soft/win/dbgdump/
-* To collect messages during console/gui execution click on 
-* DbgPrintLog.exe icon; to do this at boot time, use the following:
-* DbgPrintLog.exe --full -T DTN -wd c:\ --drv:inst 1 
-* 	--svc:inst A --drv:opt DoNotPassMessagesDown 1 udefrag.log
+* 12 Sept. 2009
+* Due to cool DbgView program simple DbgPrint() 
+* calls are absolutely enough for debugging purposes.
+* Read more about debugging techniques in 
+* \doc\html\handbook\reporting_bugs.html
 */
 
-/*
-* 21 Dec. 2008
-* LOG file on disk is better than unsaved messages after a crash.
-*/
-
-/*
-* 08 Sept. 2009
-* LOG file is useless. Crashdump is always requred to fix the driver bugs.
-*/
+#if 0 /* because windows ddk isn't compatible with ANSI C Standard */
+#define DebugPrint(...) DbgPrint(__VA_ARGS__)
+#define DebugPrint0(...) DbgPrint(__VA_ARGS__)
+#define DebugPrint1(...) { if(dbg_level > 0) DbgPrint(__VA_ARGS__); }
+#define DebugPrint2(...) { if(dbg_level > 1) DbgPrint(__VA_ARGS__); }
+#else
+#define DebugPrint DbgPrint
+#define DebugPrint0 DbgPrint
+#define DebugPrint1 if(dbg_level < 1) {} else DbgPrint
+#define DebugPrint2 if(dbg_level < 2) {} else DbgPrint
+#endif
 
 void __stdcall RegisterBugCheckCallbacks(void);
 void __stdcall DeregisterBugCheckCallbacks(void);
-
-BOOLEAN __stdcall OpenLog();
-void __stdcall CloseLog();
-
-/*
-* Fucked nt 4.0 and w2k kernels don't have _vsnwprintf() call, 
-* fucked MS C compiler is not compatible with ANSI C Standard - 
-* __VA_ARGS__ support is missing. Therefore we need something like 
-* this imperfect definition.
-*/
-void __cdecl DebugPrint(char *format, short *ustring, ...);
-
-BOOLEAN CheckForSystemVolume(void);
-
-//#define FLUSH_DBG_CACHE() DebugPrint("FLUSH_DBG_CACHE\n",NULL);
-
-#if 0 /* because windows ddk isn't compatible with ANSI C Standard */
-#define DebugPrint0(...) DebugPrint(__VA_ARGS__)
-#define DebugPrint1(...) { if(dbg_level > 0) DebugPrint(__VA_ARGS__); }
-#define DebugPrint2(...) { if(dbg_level > 1) DebugPrint(__VA_ARGS__); }
-#else
-#define DebugPrint0 DebugPrint
-#define DebugPrint1 if(dbg_level < 1) {} else DebugPrint
-#define DebugPrint2 if(dbg_level < 2) {} else DebugPrint
-#endif
 
 #if defined(__GNUC__)
 typedef enum _KBUGCHECK_CALLBACK_REASON {
@@ -180,7 +154,7 @@ PVOID NTAPI Nt_MmGetSystemAddressForMdl(PMDL addr);
 
 #define CHECK_IRP(irp) { \
 if(!CheckIrp(Irp)){ \
-	DebugPrint(invalid_request,NULL); \
+	DebugPrint(invalid_request); \
 	return CompleteIrp(Irp,STATUS_INVALID_DEVICE_REQUEST,0); \
 } \
 }
@@ -190,8 +164,6 @@ if(!CheckIrp(Irp)){ \
 * InitializeObjectAttributes() call before ZwCreateFile()
 * on NT 4.0. On w2k and later systems always set this flag!
 */
-
-
 #ifndef OBJ_KERNEL_HANDLE
 #define OBJ_KERNEL_HANDLE    0x00000200
 #endif
@@ -359,6 +331,11 @@ VOID NTAPI Nt_ExFreePool(PVOID);
 #define ExFreePoolSafe(p) if(p) { Nt_ExFreePool(p); p = NULL; }
 
 ULONGLONG NTAPI Nt_KeQueryInterruptTime(VOID);
+
+/*
+* VERY IMPORTANT NOTES:
+* 1. stack can be paged out.
+*/
 
 //#else /* NT4_TARGET */
 

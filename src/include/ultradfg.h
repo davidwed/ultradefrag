@@ -24,8 +24,6 @@
 #ifndef _ULTRADFG_H_
 #define _ULTRADFG_H_
 
-#define LOGS_DISABLE_WRITE_ON_DISK
-
 /* this numbers MUST BE THE SAME */
 #define FREE_SPACE                  0
 #define SYSTEM_SPACE                1
@@ -77,14 +75,6 @@
 #define IOCTL_SET_SIZELIMIT CTL_CODE(\
 	FILE_DEVICE_UNKNOWN, 0x80A, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
-#define IOCTL_SET_LOG_PATH CTL_CODE(\
-	FILE_DEVICE_UNKNOWN, 0x80B, METHOD_BUFFERED, FILE_ANY_ACCESS)
-
-/*
-#define STATUS_BEFORE_PROCESSING  0x0
-#define STATUS_ANALYSED           0x1
-#define STATUS_DEFRAGMENTED       0x2
-*/
 #define DBG_NORMAL     0
 #define DBG_DETAILED   1
 #define DBG_PARANOID   2

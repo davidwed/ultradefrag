@@ -81,39 +81,7 @@ BOOLEAN CheckForContextMenuHandler(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(p[1] != ':' || p[2] != '\\') return FALSE;
 	return TRUE;
 }
-/*
-void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	PFRAGMENTED pf;
-	UNICODE_STRING us;
 
-	for(pf = dx->fragmfileslist; pf != NULL; pf = pf->next_ptr){
-		pf->pfn->is_filtered = TRUE;
-
-		if(!RtlCreateUnicodeString(&us,pf->pfn->name.Buffer)){
-			DebugPrint2("-Ultradfg- cannot allocate memory for ApplyFilter()!\n",NULL);
-			goto L0;
-		}
-		_wcslwr(us.Buffer);
-
-		if(dx->in_filter.buffer){
-			if(!IsStringInFilter(us.Buffer,&dx->in_filter)){
-				RtlFreeUnicodeString(&us); goto L0;
-			}
-		}
-
-		if(dx->ex_filter.buffer){
-			if(IsStringInFilter(us.Buffer,&dx->ex_filter)){
-				RtlFreeUnicodeString(&us); goto L0;
-			}
-		}
-		pf->pfn->is_filtered = FALSE;
-		RtlFreeUnicodeString(&us);
-	L0:
-		if(pf->next_ptr == dx->fragmfileslist) break;
-	}
-}
-*/
 void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 				  short *buffer,int length)
 {
@@ -137,7 +105,7 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 	*/
 	pf->buffer = AllocatePool(NonPagedPool,length);
 	if(!pf->buffer){
-		DebugPrint("-Ultradfg- cannot allocate memory for pf->buffer in UpdateFilter()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for pf->buffer in UpdateFilter()!\n");
 		return;
 	}
 
@@ -163,44 +131,18 @@ void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,
 
 	RtlCopyMemory(pf->buffer,buffer,length);
 
-	DebugPrint("-Ultradfg- Filter strings:\n",NULL);
+	DebugPrint("-Ultradfg- Filter strings:\n");
 	ch = (pf == &dx->in_filter) ? '+' : '-';
 	for(poffset = pf->offsets; poffset != NULL; poffset = poffset->next_ptr){
-		DebugPrint("-Ultradfg-  %c\n",pf->buffer + poffset->offset,ch);
+		DebugPrint("-Ultradfg-  %c %ws\n",ch,pf->buffer + poffset->offset);
 		if(poffset->next_ptr == pf->offsets) break;
 	}
 }
 
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-//	POFFSET po;
-	
 	ExFreePoolSafe(dx->in_filter.buffer);
 	ExFreePoolSafe(dx->ex_filter.buffer);
-/* make a BSOD */
-//dx->in_filter.offsets->next_ptr = NULL;
-/* Result - access violation :( */
-	
-/* allocate all available memory -> BSOD? */
-/*for(;;){
-	if(!AllocatePool(NonPagedPool,1024)) break;
-}
-for(;;){
-	if(!AllocatePool(NonPagedPool,10)) break;
-}*/
-/* yes: on w2k ACPI.sys raise blue screen after unloading */
-
-/*	for(po = dx->in_filter.offsets; po != NULL; po = po->next_ptr){
-		DebugPrint("-Ultradfg- in_po = %p next = %p prev = %p\n",NULL,po,po->next_ptr,po->prev_ptr);
-		if(po->next_ptr == dx->in_filter.offsets) break;
-	}
-*/
 	DestroyList((PLIST *)&dx->in_filter.offsets);
-
-/*	for(po = dx->ex_filter.offsets; po != NULL; po = po->next_ptr){
-		DebugPrint("-Ultradfg- ex_po = %p next = %p prev = %p\n",NULL,po,po->next_ptr,po->prev_ptr);
-		if(po->next_ptr == dx->ex_filter.offsets) break;
-	}
-*/
 	DestroyList((PLIST *)&dx->ex_filter.offsets);
 }

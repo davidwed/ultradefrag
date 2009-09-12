@@ -40,13 +40,18 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 	status = ZwQuerySystemInformation(SystemModuleInformation,
 		&SystemInfoBufferSize,0,&SystemInfoBufferSize);
 	if(!SystemInfoBufferSize){
-		DebugPrint("=Ultradfg= SystemInfoBufferSize request failed: %x!\n",NULL,(UINT)status);
+		DebugPrint("=Ultradfg= SystemInfoBufferSize request failed: %x!\n",(UINT)status);
 		return NULL;
 	}
 
+	/*
+	* In this function we are using ExAllocatePoolWithTag/ExFreePool pair of system calls.
+	* Because we cannot use ExFreePoolWithTag call here. We have never received bug reports 
+	* regarding this part of code. It was never registered BSOD during our driver startup.
+	*/
 	pSystemInfoBuffer = (PULONG)AllocatePool(PagedPool, SystemInfoBufferSize*2);
 	if(!pSystemInfoBuffer){
-		DebugPrint("=Ultradfg= KernelGetModuleBase: No enough memory!\n",NULL);
+		DebugPrint("=Ultradfg= KernelGetModuleBase: No enough memory!\n");
 		return NULL;
 	}
 
@@ -56,7 +61,7 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 	if(NT_SUCCESS(status)){
 		pSysModuleEntry = ((PSYSTEM_MODULE_INFORMATION)(pSystemInfoBuffer))->Module;
 		for (i = 0; i <((PSYSTEM_MODULE_INFORMATION)(pSystemInfoBuffer))->Count; i++){
-			DebugPrint("=Ultradfg= Kernel found: %s\n",NULL,pSysModuleEntry[i].ImageName);
+			DebugPrint("=Ultradfg= Kernel found: %s\n",pSysModuleEntry[i].ImageName);
 			if (_stricmp(pSysModuleEntry[i]./*ModuleName*/ImageName + 
 			  pSysModuleEntry[i]./*ModuleNameOffset*/PathLength,pModuleName) == 0){
 				pModuleBase = pSysModuleEntry[i].Base;
@@ -64,7 +69,7 @@ PVOID KernelGetModuleBase(PCHAR pModuleName)
 			}
 		}
 	}else{
-		DebugPrint("=Ultradfg= SystemModuleInformation request failed: %x!\n",NULL,(UINT)status);
+		DebugPrint("=Ultradfg= SystemModuleInformation request failed: %x!\n",(UINT)status);
 	}
 
 	if(pSystemInfoBuffer) ExFreePool(pSystemInfoBuffer); /* Nt_ExFreePool cannot be used here :) */
@@ -140,12 +145,20 @@ PVOID NTAPI Nt_MmGetSystemAddressForMdl(PMDL addr)
 			return ptrMmMapLockedPagesSpecifyCache(addr,KernelMode,MmCached,
 				NULL,FALSE,NormalPagePriority);
 	}
+	/*
+	* This call is used on NT4 system only. 
+	* It will show BSOD if specifed pages cannot be mapped.
+	*/
 	return MmGetSystemAddressForMdl(addr);
 }
 
 VOID NTAPI Nt_ExFreePool(PVOID P)
 {
-	if(ptrExFreePoolWithTag) ptrExFreePoolWithTag(P, 0);
+	#if DBG
+	if(ptrExFreePoolWithTag) ptrExFreePoolWithTag(P,UDEFRAG_TAG);
+	#else
+	if(ptrExFreePoolWithTag) ptrExFreePoolWithTag(P,0);
+	#endif
 	else ExFreePool(P);
 }
 

@@ -35,13 +35,13 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 	ULONG mj,mn;
 
 	/* print driver version */
-	DebugPrint("=Ultradfg= %s\n",NULL,VERSIONINTITLE);
+	DebugPrint("=Ultradfg= %s\n",VERSIONINTITLE);
 
 	/* get windows version */
 	if(PsGetVersion(&mj,&mn,NULL,NULL))
-		DebugPrint("=Ultradfg= NT %u.%u checked.\n",NULL,mj,mn);
+		DebugPrint("=Ultradfg= NT %u.%u checked.\n",mj,mn);
 	else
-		DebugPrint("=Ultradfg= NT %u.%u free.\n",NULL,mj,mn);
+		DebugPrint("=Ultradfg= NT %u.%u free.\n",mj,mn);
 	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
 	nt4_system = (mj == 4) ? 1 : 0;
 	w2k_system = (mj == 5 && mn == 0) ? 1 : 0;
@@ -67,17 +67,17 @@ INIT_FUNCTION void GetKernelProcAddresses(void)
 	}
 
 	/* print kernel functions addresses */
-	DebugPrint("=Ultradfg= Kernel address: %p\n",NULL,kernel_addr);
+	DebugPrint("=Ultradfg= Kernel address: %p\n",kernel_addr);
 	DebugPrint("=Ultradfg= ExFreePoolWithTag address: %p\n",
-		NULL,ptrExFreePoolWithTag);
+		ptrExFreePoolWithTag);
 	DebugPrint("=Ultradfg= KeDeregisterBugCheckReasonCallback address: %p\n",
-		NULL,ptrKeDeregisterBugCheckReasonCallback);
+		ptrKeDeregisterBugCheckReasonCallback);
 	DebugPrint("=Ultradfg= KeRegisterBugCheckReasonCallback address: %p\n",
-		NULL,ptrKeRegisterBugCheckReasonCallback);
+		ptrKeRegisterBugCheckReasonCallback);
 	DebugPrint("=Ultradfg= MmMapLockedPagesSpecifyCache address: %p\n",
-		NULL,ptrMmMapLockedPagesSpecifyCache);
+		ptrMmMapLockedPagesSpecifyCache);
 	DebugPrint("=Ultradfg= KeQueryInterruptTime address: %p\n",
-		NULL,ptrKeQueryInterruptTime);
+		ptrKeQueryInterruptTime);
 }
 
 INIT_FUNCTION NTSTATUS CreateDevice(IN PDRIVER_OBJECT DriverObject,
@@ -100,7 +100,7 @@ INIT_FUNCTION NTSTATUS CreateDevice(IN PDRIVER_OBJECT DriverObject,
 				FALSE, /* without exclusive access */
 				&fdo);
 	if(status != STATUS_SUCCESS){
-		DebugPrint("=Ultradfg= IoCreateDevice failed: %x\n",
+		DebugPrint("=Ultradfg= IoCreateDevice failed for %ws: %x\n",
 				name,(UINT)status);
 		return status;
 	}
@@ -114,7 +114,7 @@ INIT_FUNCTION NTSTATUS CreateDevice(IN PDRIVER_OBJECT DriverObject,
 	RtlInitUnicodeString(&symLinkName,link);
 	status = IoCreateSymbolicLink(&symLinkName,&devName);
 	if(!NT_SUCCESS(status))
-		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed: %x\n",
+		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed for %ws: %x\n",
 				link,(UINT)status);
 	return status;
 }
@@ -139,8 +139,6 @@ INIT_FUNCTION void driver_entry_cleanup(PDRIVER_OBJECT DriverObject)
 		pNextDevice = pDevice->NextDevice;
 		IoDeleteDevice(pDevice);
 	}
-
-	CloseLog();
 	DeregisterBugCheckCallbacks();
 }
 
@@ -172,10 +170,6 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 
 	PsGetVersion(&mj,&mn,NULL,NULL);
 	nt4_system = (mj == 4) ? 1 : 0;
-
-	/* 2. */
-	/* We should call them before any DebugPrint() calls !!! */
-	if(!OpenLog()) return STATUS_NO_MEMORY;
 
 	/* 3. our driver (since 2.1.0 version) must be os version independent */
 	GetKernelProcAddresses();
@@ -219,7 +213,7 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 	RtlInitUnicodeString(&symLinkName,L"\\??\\X:\\abc");
 	status = IoCreateSymbolicLink(&symLinkName,&devName);
 	if(!NT_SUCCESS(status)){
-		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed %x\n",NULL,(UINT)status);
+		DebugPrint("=Ultradfg= IoCreateSymbolicLink failed %x\n",(UINT)status);
 	}
 */
 	/*
@@ -259,7 +253,7 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 		dx->FileMap = AllocatePool(NonPagedPool,FILEMAPSIZE * sizeof(ULONGLONG));
 		dx->BitMap = AllocatePool(NonPagedPool,BITMAPSIZE * sizeof(UCHAR));
 		if(!dx->FileMap || !dx->BitMap){
-			DebugPrint("-Ultradfg- cannot allocate memory for FileMap and BitMap!\n",NULL);
+			DebugPrint("-Ultradfg- cannot allocate memory for FileMap and BitMap!\n");
 			if(!nt4_system){
 				ExFreePoolSafe(dx->FileMap);
 				ExFreePoolSafe(dx->BitMap);
@@ -269,11 +263,11 @@ INIT_FUNCTION NTSTATUS NTAPI DriverEntry(IN PDRIVER_OBJECT DriverObject,
 		}
 	}
 
-	DebugPrint("=Ultradfg= Main FDO %p, DevExt=%p\n",NULL,dx->fdo,dx);
-	DebugPrint("=Ultradfg= Map  FDO %p, DevExt=%p\n",NULL,dx_map->fdo,dx_map);
-	DebugPrint("=Ultradfg= Stat FDO %p, DevExt=%p\n",NULL,dx_stat->fdo,dx_stat);
+	DebugPrint("=Ultradfg= Main FDO %p, DevExt=%p\n",dx->fdo,dx);
+	DebugPrint("=Ultradfg= Map  FDO %p, DevExt=%p\n",dx_map->fdo,dx_map);
+	DebugPrint("=Ultradfg= Stat FDO %p, DevExt=%p\n",dx_stat->fdo,dx_stat);
 
-	DebugPrint("=Ultradfg= DriverEntry successfully completed\n",NULL);
+	DebugPrint("=Ultradfg= DriverEntry successfully completed\n");
 	return STATUS_SUCCESS;
 }
 #if !defined(__GNUC__)
@@ -296,7 +290,7 @@ NTSTATUS NTAPI Create_File_IRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	if(!dx->second_device){
-		DebugPrint("-Ultradfg- CreateFile request for main device\n",NULL);
+		DebugPrint("-Ultradfg- CreateFile request for main device\n");
 		CHECK_IRP(Irp);
 	}
 	return CompleteIrp(Irp,STATUS_SUCCESS,0);
@@ -309,7 +303,7 @@ NTSTATUS NTAPI Close_HandleIRPprocessing(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			(PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
 
 	if(!dx->second_device){
-		DebugPrint("-Ultradfg- CloseHandle request for main device\n",NULL); 
+		DebugPrint("-Ultradfg- CloseHandle request for main device\n"); 
 		CHECK_IRP(Irp);
 	
 		stop_all_requests();
@@ -338,11 +332,11 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 	/* wait for other operations to be finished */
 	Status = KeWaitForSingleObject(&sync_event_2,Executive,KernelMode,FALSE,NULL);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- is busy (sync_event_2, Read_IRPhandler)!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (sync_event_2, Read_IRPhandler)!\n");
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
 	if(KeReadStateEvent(&unload_event) == 0x1){
-		DebugPrint("-Ultradfg- is busy (unload_event, Read_IRPhandler)!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (unload_event, Read_IRPhandler)!\n");
 		KeSetEvent(&sync_event_2,IO_NO_INCREMENT,FALSE);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
@@ -351,14 +345,14 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 	pBuffer = Nt_MmGetSystemAddressForMdl(Irp->MdlAddress);
 
 	if(dx->map_device){
-		DebugPrint2("-Ultradfg- Map request\n",NULL);
+		DebugPrint2("-Ultradfg- Map request\n");
 		if(length != map_size || !pBuffer || !new_cluster_map)
 			goto invalid_request;
 		GetMap(pBuffer); goto success;
 	}
 
 	if(dx->stat_device){
-		DebugPrint2("-Ultradfg- Statistics request\n",NULL);
+		DebugPrint2("-Ultradfg- Statistics request\n");
 		if(length != sizeof(STATISTIC) || !pBuffer)
 			goto invalid_request;
 		st = (STATISTIC *)pBuffer;
@@ -411,7 +405,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	CHECK_IRP(Irp);
 
 	if(dx->stop_device){
-		DebugPrint("-Ultradfg- STOP request\n",NULL);
+		DebugPrint("-Ultradfg- STOP request\n");
 		KeSetEvent(&stop_event,IO_NO_INCREMENT,FALSE);
 		return CompleteIrp(Irp,STATUS_SUCCESS,1);
 	}
@@ -419,7 +413,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	if(dx->second_device)
 		return CompleteIrp(Irp,STATUS_SUCCESS,0);
 	
-	DebugPrint("-Ultradfg- in Write_IRPhandler\n",NULL);
+	DebugPrint("-Ultradfg- in Write_IRPhandler\n");
 	
 	length = IrpStack->Parameters.Write.Length;
 	addr = Nt_MmGetSystemAddressForMdl(Irp->MdlAddress);
@@ -427,7 +421,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	RtlCopyMemory(cmd,addr,min(length,31));
 	cmd[min(length,31)] = 0;
 
-	DebugPrint("-Ultradfg- Command = %s\n",NULL,cmd);
+	DebugPrint("-Ultradfg- Command = %s\n",cmd);
 
 	/*
 	* If the previous request isn't complete,
@@ -437,7 +431,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	interval.QuadPart = (-1); /* 100 nsec */
 	Status = KeWaitForSingleObject(&sync_event,Executive,KernelMode,FALSE,&interval);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- is busy (sync_event, Write_IRPhandler)!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (sync_event, Write_IRPhandler)!\n");
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
 
@@ -465,7 +459,6 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 
 		dx->letter = letter;
 		volume_letter = letter;
-		if(CheckForSystemVolume()) DebugPrint("-Ultradfg- Request for a system volume.\n",NULL);
 		DeleteLogFile(dx);
 
 		request_status = Analyse(dx);
@@ -479,9 +472,9 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		* This is a well known limitation of Windows Defrag API.
 		*/
 		if(dx->partition_type == NTFS_PARTITION && dx->bytes_per_cluster > 4096 && w2k_system){
-			DebugPrint("-Ultradfg- Cannot defragment NTFS volumes with ->\n",NULL);
-			DebugPrint("-Ultradfg- -> cluster size greater than 4 kb   ->\n",NULL);
-			DebugPrint("-Ultradfg- -> on Windows 2000 (read docs for details).\n",NULL);
+			DebugPrint("-Ultradfg- Cannot defragment NTFS volumes with ->\n");
+			DebugPrint("-Ultradfg- -> cluster size greater than 4 kb   ->\n");
+			DebugPrint("-Ultradfg- -> on Windows 2000 (read docs for details).\n");
 			request_status = STATUS_NOT_IMPLEMENTED;
 			break;
 		}
@@ -524,9 +517,6 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	UCHAR *user_mode_buffer; /* for nt 4.0 */
 	ULONG in_len, out_len;
 	NTSTATUS Status;
-	KSPIN_LOCK spin_lock;
-	KIRQL oldIrql;
-	ULONG length;
 
 	CHECK_IRP(Irp);
 	dx = (PUDEFRAG_DEVICE_EXTENSION)(fdo->DeviceExtension);
@@ -537,11 +527,11 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	/* wait for other operations to be finished */
 	Status = KeWaitForSingleObject(&sync_event_2,Executive,KernelMode,FALSE,NULL);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- is busy (sync_event_2, DeviceControlRoutine)!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (sync_event_2, DeviceControlRoutine)!\n");
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
 	if(KeReadStateEvent(&unload_event) == 0x1){
-		DebugPrint("-Ultradfg- is busy (unload_event, DeviceControlRoutine)!\n",NULL);
+		DebugPrint("-Ultradfg- is busy (unload_event, DeviceControlRoutine)!\n");
 		KeSetEvent(&sync_event_2,IO_NO_INCREMENT,FALSE);
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
@@ -554,48 +544,48 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	switch(IoControlCode){
 	case IOCTL_SET_INCLUDE_FILTER:
 	case IOCTL_SET_EXCLUDE_FILTER:
-		DebugPrint("-Ultradfg- IOCTL_SET_XXX_FILTER\n",NULL);
+		DebugPrint("-Ultradfg- IOCTL_SET_XXX_FILTER\n");
 		filter = (short *)Irp->AssociatedIrp.SystemBuffer;
 		if(filter){
 			if(IoControlCode == IOCTL_SET_INCLUDE_FILTER){
-				DebugPrint("-Ultradfg- Include:\n",filter);
+				DebugPrint("-Ultradfg- Include: %ws\n",filter);
 				UpdateFilter(dx,&dx->in_filter,filter,in_len);
 				context_menu_handler = CheckForContextMenuHandler(dx);
 				if(context_menu_handler)
-					DebugPrint("-Ultradfg- Context menu handler?\n",NULL);
+					DebugPrint("-Ultradfg- Context menu handler?\n");
 			} else {
-				DebugPrint("-Ultradfg- Exclude:\n",filter);
+				DebugPrint("-Ultradfg- Exclude: %ws\n",filter);
 				UpdateFilter(dx,&dx->ex_filter,filter,in_len);
 			}
 		}
 		BytesTxd = in_len;
 		break;
 	case IOCTL_SET_DBGPRINT_LEVEL:
-		DebugPrint("-Ultradfg- IOCTL_SET_DBGPRINT_LEVEL\n",NULL);
+		DebugPrint("-Ultradfg- IOCTL_SET_DBGPRINT_LEVEL\n");
 		if(in_len != sizeof(ULONG)){
 			status = STATUS_INVALID_PARAMETER;
 			break;
 		}
 		dbg_level = *((ULONG *)Irp->AssociatedIrp.SystemBuffer);
-		DebugPrint("-Ultradfg- dbg_level=%u\n",NULL,dbg_level);
+		DebugPrint("-Ultradfg- dbg_level=%u\n",dbg_level);
 		BytesTxd = in_len;
 		break;
 	case IOCTL_SET_REPORT_STATE:
-		DebugPrint("-Ultradfg- IOCTL_SET_REPORT_STATE\n",NULL);
+		DebugPrint("-Ultradfg- IOCTL_SET_REPORT_STATE\n");
 		if(in_len != sizeof(ULONG)){
 			status = STATUS_INVALID_PARAMETER;
 			break;
 		}
 		dx->disable_reports = *((ULONG *)Irp->AssociatedIrp.SystemBuffer);
 		if(dx->disable_reports)
-			DebugPrint("-Ultradfg- Disable reports: YES\n",NULL);
+			DebugPrint("-Ultradfg- Disable reports: YES\n");
 		else
-			DebugPrint("-Ultradfg- Disable reports: NO\n",NULL);
+			DebugPrint("-Ultradfg- Disable reports: NO\n");
 		BytesTxd = in_len;
 		break;
 	case IOCTL_SET_USER_MODE_BUFFER:
-		DebugPrint("-Ultradfg- IOCTL_SET_USER_MODE_BUFFER\n",NULL);
-		DebugPrint("-Ultradfg- Address = %p\n",NULL,
+		DebugPrint("-Ultradfg- IOCTL_SET_USER_MODE_BUFFER\n");
+		DebugPrint("-Ultradfg- Address = %p\n",
 			IrpStack->Parameters.DeviceIoControl.Type3InputBuffer);
 		user_mode_buffer = IrpStack->Parameters.DeviceIoControl.Type3InputBuffer;
 		if(nt4_system && user_mode_buffer){
@@ -607,7 +597,7 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		}
 		break;
 	case IOCTL_SET_CLUSTER_MAP_SIZE:
-		DebugPrint("-Ultradfg- IOCTL_SET_CLUSTER_MAP_SIZE\n",NULL);
+		DebugPrint("-Ultradfg- IOCTL_SET_CLUSTER_MAP_SIZE\n");
 		if(in_len != sizeof(ULONG)){
 			status = STATUS_INVALID_PARAMETER;
 			break;
@@ -617,24 +607,13 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 			BytesTxd = in_len;
 		break;
 	case IOCTL_SET_SIZELIMIT:
-		DebugPrint("-Ultradfg- IOCTL_SET_SIZELIMIT\n",NULL);
+		DebugPrint("-Ultradfg- IOCTL_SET_SIZELIMIT\n");
 		if(in_len != sizeof(ULONGLONG)){
 			status = STATUS_INVALID_PARAMETER;
 			break;
 		}
 		dx->sizelimit = *((ULONGLONG *)Irp->AssociatedIrp.SystemBuffer);
-		DebugPrint("-Ultradfg- Sizelimit = %I64u\n",NULL,dx->sizelimit);
-		BytesTxd = in_len;
-		break;
-	case IOCTL_SET_LOG_PATH:
-		KeInitializeSpinLock(&spin_lock);
-		KeAcquireSpinLock(&spin_lock,&oldIrql);
-		length = min(MAX_PATH, in_len >> 1);
-		wcsncpy(log_path,(short *)Irp->AssociatedIrp.SystemBuffer,length);
-		log_path[MAX_PATH - 1] = 0;
-		KeReleaseSpinLock(&spin_lock,oldIrql);
-		DebugPrint("-Ultradfg- IOCTL_SET_LOG_PATH\n",NULL);
-		DebugPrint("-Ultradfg- Log path\n",log_path);
+		DebugPrint("-Ultradfg- Sizelimit = %I64u\n",dx->sizelimit);
 		BytesTxd = in_len;
 		break;
 	/* Invalid request */
@@ -647,8 +626,8 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 void stop_all_requests(void)
 {
 	NTSTATUS Status;
-	KSPIN_LOCK spin_lock;
-	KIRQL oldIrql;
+	static KSPIN_LOCK spin_lock;
+	static KIRQL oldIrql;
 
 	KeInitializeSpinLock(&spin_lock);
 	KeAcquireSpinLock(&spin_lock,&oldIrql);
@@ -658,30 +637,42 @@ void stop_all_requests(void)
 
 	Status = KeWaitForSingleObject(&sync_event,Executive,KernelMode,FALSE,NULL);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- sync_event waiting failure!\n",NULL);
+		DebugPrint("-Ultradfg- sync_event waiting failure!\n");
 		/* This may cause BSOD... */
 	}
 	Status = KeWaitForSingleObject(&sync_event_2,Executive,KernelMode,FALSE,NULL);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- sync_event_2 waiting failure!\n",NULL);
+		DebugPrint("-Ultradfg- sync_event_2 waiting failure!\n");
 		/* This may cause BSOD... */
 	}
 }
 
-/* UnloadRoutine: unload the driver and free allocated memory.
- * Can be placed in paged memory.
- */
-#if !defined(__GNUC__)
+/*
+* UnloadRoutine: unload the driver and free allocated memory.
+* Can be placed in paged memory.
+*/
+/*
+* Neither the PnP manager nor the I/O manager calls Unload routines 
+* at system shutdown time. A driver that must perform shutdown 
+* processing should register a DispatchShutdown routine.
+*/
+
+/*#if !defined(__GNUC__)
 #pragma code_seg("PAGE")
 #endif
-
-PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
+*/
+/*PAGED_OUT_FUNCTION*/ VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 {
 	PDEVICE_OBJECT pDevice;
 	UDEFRAG_DEVICE_EXTENSION *dx;
 	UNICODE_STRING us;
 	
-	DebugPrint("-Ultradfg- In Unload Routine\n",NULL);
+	/*
+	* Here our driver is marked as "Unload Pending".
+	* The driver can complete outstanding IRPs, 
+	* but the system will not send any new IRPs.
+	*/
+	DebugPrint("-Ultradfg- In Unload Routine\n");
 	
 	/* stop all requests */
 	stop_all_requests();
@@ -695,7 +686,7 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 	IoDeleteSymbolicLink(&us);
 	RtlInitUnicodeString(&us,L"\\DosDevices\\ultradfgstop");
 	IoDeleteSymbolicLink(&us);
-	DebugPrint("-Ultradfg- Symbolic links were deleted\n",NULL);
+	DebugPrint("-Ultradfg- Symbolic links were deleted\n");
 
 	/* loop through all created devices */
 	pDevice = pDriverObject->DeviceObject;
@@ -712,13 +703,14 @@ PAGED_OUT_FUNCTION VOID NTAPI UnloadRoutine(IN PDRIVER_OBJECT pDriverObject)
 			DestroyFilter(dx);
 		}
 		/* delete device */
-		DebugPrint("-Ultradfg- Deleted device %p\n",NULL,dx->fdo);
+		DebugPrint("-Ultradfg- Deleted device %p\n",dx->fdo);
 		IoDeleteDevice(dx->fdo);
 	}
 
-	CloseLog();
 	DeregisterBugCheckCallbacks();
+	/*KeBugCheck(0);*/
 }
-#if !defined(__GNUC__)
-#pragma code_seg() /* end PAGE section */
+/*#if !defined(__GNUC__)
+#pragma code_seg() // end PAGE section
 #endif
+*/

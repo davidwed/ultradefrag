@@ -43,12 +43,12 @@ BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ULONGLONG tm;
 	
-	DebugPrint("-Ultradfg- FAT16 scan started!\n",NULL);
+	DebugPrint("-Ultradfg- FAT16 scan started!\n");
 	tm = _rdtsc();
 
 	/* cache file allocation table */
 	if(!InitFat16(dx)){
-		DebugPrint("-Ultradfg- FAT16 scan finished!\n",NULL);
+		DebugPrint("-Ultradfg- FAT16 scan finished!\n");
 		return FALSE;
 	}
 	
@@ -57,7 +57,7 @@ BOOLEAN ScanFat16Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	/* free allocated resources */
 	ExFreePoolSafe(Fat16);
-	DebugPrint("-Ultradfg- FAT16 scan finished!\n",NULL);
+	DebugPrint("-Ultradfg- FAT16 scan finished!\n");
 	DbgPrint("FAT16 scan needs %I64u ms\n",_rdtsc() - tm);
 	return TRUE;
 }
@@ -70,17 +70,16 @@ BOOLEAN InitFat16(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	/* allocate memory */
 	FatSize = (Bpb.FAT16sectors * Bpb.BytesPerSec); /* must be an integral of sector size */
-	DebugPrint("-Ultradfg- FAT16 table has %u entries.\n",
-		NULL,FatEntries);
+	DebugPrint("-Ultradfg- FAT16 table has %u entries.\n",FatEntries);
 	if(FatSize < (FatEntries * sizeof(short))){
 		DebugPrint("-Ultradfg- FatSize (%u) is less than FatEntries (%u) * 2!\n",
-			NULL,FatSize,FatEntries);
+			FatSize,FatEntries);
 		return FALSE;
 	}
 		
 	Fat16 = AllocatePool(NonPagedPool,FatSize);
 	if(Fat16 == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for InitFat16()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for InitFat16()!\n");
 		return FALSE;
 	}
 	
@@ -88,7 +87,7 @@ BOOLEAN InitFat16(UDEFRAG_DEVICE_EXTENSION *dx)
 	FirstFatSector = 0 + Bpb.ReservedSectors;
 	Status = ReadSectors(dx,FirstFatSector,(PVOID)Fat16,FatSize);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",(UINT)Status);
 		ExFreePoolSafe(Fat16);
 		return FALSE;
 	}

@@ -35,11 +35,11 @@ void MoveAllFilesRTL(UDEFRAG_DEVICE_EXTENSION *dx);
 */
 void Optimize(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	KSPIN_LOCK spin_lock;
-	KIRQL oldIrql;
+	static KSPIN_LOCK spin_lock;
+	static KIRQL oldIrql;
 	PFREEBLOCKMAP freeblock;
 
-	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",NULL,dx->letter);
+	DebugPrint("-Ultradfg- ----- Optimization of %c: -----\n",dx->letter);
 
 	/* Initialize progress counters. */
 	KeInitializeSpinLock(&spin_lock);
@@ -60,7 +60,7 @@ void Optimize(UDEFRAG_DEVICE_EXTENSION *dx)
 	/*
 	* First of all - free the leading part of the volume.
 	*/
-	DebugPrint("-Ultradfg- ----- First step of optimization of %c: -----\n",NULL,dx->letter);
+	DebugPrint("-Ultradfg- ----- First step of optimization of %c: -----\n",dx->letter);
 	DefragmentFreeSpaceLTR(dx);
 	if(KeReadStateEvent(&stop_event)) goto optimization_done;
 	
@@ -68,14 +68,14 @@ void Optimize(UDEFRAG_DEVICE_EXTENSION *dx)
 	* Second step - defragment files.
 	* Large files will be moved to the beginning of the volume.
 	*/
-	DebugPrint("-Ultradfg- ----- Second step of optimization of %c: -----\n",NULL,dx->letter);
+	DebugPrint("-Ultradfg- ----- Second step of optimization of %c: -----\n",dx->letter);
 	Analyse(dx);
 	Defragment(dx);
 
 	/*
 	* Final step - move all files to the leading part of the volume.
 	*/
-	DebugPrint("-Ultradfg- ----- Third step of optimization of %c: -----\n",NULL,dx->letter);
+	DebugPrint("-Ultradfg- ----- Third step of optimization of %c: -----\n",dx->letter);
 	MoveAllFilesRTL(dx);
 	
 optimization_done:	
@@ -123,7 +123,7 @@ void DefragmentFreeSpaceRTL(UDEFRAG_DEVICE_EXTENSION *dx)
 			if(pfn->next_ptr == dx->filelist) break;
 		}
 		if(!lastblock) break;
-		DebugPrint("-Ultradfg- Last block = Lcn:%I64u Length:%I64u\n",lastpfn->name.Buffer,
+		DebugPrint("-Ultradfg- Last block = %ws: Lcn:%I64u Length:%I64u\n",lastpfn->name.Buffer,
 			lastblock->lcn,lastblock->length);
 		if(KeReadStateEvent(&stop_event)) break;
 		/* 2. Fill free space areas in the beginning of the volume with lastblock contents. */
@@ -180,7 +180,7 @@ void DefragmentFreeSpaceLTR(UDEFRAG_DEVICE_EXTENSION *dx)
 			if(pfn->next_ptr == dx->filelist) break;
 		}
 		if(!firstblock) break;
-		DebugPrint("-Ultradfg- First block = Lcn:%I64u Length:%I64u\n",firstpfn->name.Buffer,
+		DebugPrint("-Ultradfg- First block = %ws: Lcn:%I64u Length:%I64u\n",firstpfn->name.Buffer,
 			firstblock->lcn,firstblock->length);
 		if(KeReadStateEvent(&stop_event)) break;
 		/* 2. Fill free space areas in the terminal part of the volume with firstblock contents. */
@@ -224,14 +224,14 @@ BOOLEAN MoveTheUnfragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONG
 	/* Open the file */
 	Status = OpenTheFile(pfn,&hFile);
 	if(Status){
-		DebugPrint("-Ultradfg- Can't open file: %x\n",pfn->name.Buffer,(UINT)Status);
+		DebugPrint("-Ultradfg- Can't open %ws file: %x\n",pfn->name.Buffer,(UINT)Status);
 		/* we need to destroy the block map to avoid infinite loops */
 		DeleteBlockmap(pfn); /* file is locked by other application, so its state is unknown */
 		return FALSE;
 	}
 
-	DebugPrint("-Ultradfg-\n",pfn->name.Buffer);
-	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",NULL,target,pfn->clusters_total);
+	DebugPrint("-Ultradfg- %ws\n",pfn->name.Buffer);
+	DebugPrint("-Ultradfg- t: %I64u n: %I64u\n",target,pfn->clusters_total);
 
 	Status = MoveBlocksOfFile(dx,pfn,hFile,target);
 	ZwClose(hFile);
@@ -289,9 +289,9 @@ void MoveAllFilesRTL(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(!plargest) goto L1; /* current block is too small */
 		/* move file */
 		if(MoveTheUnfragmentedFile(dx,plargest,block->lcn))
-			DebugPrint("-Ultradfg- Moving success for\n",plargest->name.Buffer);
+			DebugPrint("-Ultradfg- Moving success for %ws\n",plargest->name.Buffer);
 		else
-			DebugPrint("-Ultradfg- Moving error for\n",plargest->name.Buffer);
+			DebugPrint("-Ultradfg- Moving error for %ws\n",plargest->name.Buffer);
 		dx->processed_clusters += plargest->clusters_total;
 		if(KeReadStateEvent(&stop_event)) break;
 		/* after file moving continue from the first free space block */

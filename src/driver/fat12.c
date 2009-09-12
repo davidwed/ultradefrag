@@ -47,12 +47,12 @@ BOOLEAN ScanFat12Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	ULONGLONG tm;
 	
-	DebugPrint("-Ultradfg- FAT12 scan started!\n",NULL);
+	DebugPrint("-Ultradfg- FAT12 scan started!\n");
 	tm = _rdtsc();
 
 	/* cache file allocation table */
 	if(!InitFat12(dx)){
-		DebugPrint("-Ultradfg- FAT12 scan finished!\n",NULL);
+		DebugPrint("-Ultradfg- FAT12 scan finished!\n");
 		return FALSE;
 	}
 	
@@ -61,7 +61,7 @@ BOOLEAN ScanFat12Partition(UDEFRAG_DEVICE_EXTENSION *dx)
 	
 	/* free allocated resources */
 	ExFreePoolSafe(Fat12);
-	DebugPrint("-Ultradfg- FAT12 scan finished!\n",NULL);
+	DebugPrint("-Ultradfg- FAT12 scan finished!\n");
 	DbgPrint("FAT12 scan needs %I64u ms\n",_rdtsc() - tm);
 	return TRUE;
 }
@@ -75,22 +75,21 @@ BOOLEAN InitFat12(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* allocate memory */
 	FatEntries = (dx->FatCountOfClusters + 1) + 1; /* ? */
 	FatSize = (Bpb.FAT16sectors * Bpb.BytesPerSec); /* must be an integral of sector size */
-	DebugPrint("-Ultradfg- FAT12 table has %u entries.\n",
-		NULL,FatEntries);
+	DebugPrint("-Ultradfg- FAT12 table has %u entries.\n",FatEntries);
 	if(((FatEntries % 2) == 0) && (FatSize < (FatEntries + FatEntries / 2))){
 		DebugPrint("-Ultradfg- FatSize (%u) is less than FatEntries (%u) * 1.5!\n",
-			NULL,FatSize,FatEntries);
+			FatSize,FatEntries);
 		return FALSE;
 	}
 	if(((FatEntries % 2) == 1) && (FatSize < (FatEntries + FatEntries / 2 + 1))){
 		DebugPrint("-Ultradfg- FatSize (%u) is less than FatEntries (%u) * 1.5!\n",
-			NULL,FatSize,FatEntries);
+			FatSize,FatEntries);
 		return FALSE;
 	}
 		
 	Fat12 = AllocatePool(NonPagedPool,FatSize);
 	if(Fat12 == NULL){
-		DebugPrint("-Ultradfg- cannot allocate memory for InitFat12()!\n",NULL);
+		DebugPrint("-Ultradfg- cannot allocate memory for InitFat12()!\n");
 		return FALSE;
 	}
 	
@@ -98,7 +97,7 @@ BOOLEAN InitFat12(UDEFRAG_DEVICE_EXTENSION *dx)
 	FirstFatSector = 0 + Bpb.ReservedSectors;
 	Status = ReadSectors(dx,FirstFatSector,(PVOID)Fat12,FatSize);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",NULL,(UINT)Status);
+		DebugPrint("-Ultradfg- cannot read the first FAT: %x!\n",(UINT)Status);
 		ExFreePoolSafe(Fat12);
 		return FALSE;
 	}
