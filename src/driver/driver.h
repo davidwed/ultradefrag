@@ -685,4 +685,6 @@ if(!CheckIrp(Irp)){ \
 
 #include "globals.h"
 
+wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
+
 #endif /* _DRIVER_H_ */

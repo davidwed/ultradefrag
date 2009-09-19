@@ -698,6 +698,7 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 	switch(pnr_attr->Attribute.AttributeType){
 	case AttributeAttributeList: /* always nonresident? */
 		DebugPrint("Nonresident AttributeList found!\n");
+		DebugPrint("Wait for the next UltraDefrag v3.2.1 to handle it.\n");
 		NonResidentAttrListFound = TRUE;
 		default_attr_name = L"$ATTRIBUTE_LIST";
 		break;
@@ -767,9 +768,15 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 
 	if(NonResidentAttrListFound) DebugPrint("%ws\n",full_path);
 	
-	/* skip all filtered out attributes */
-	//if(AttributeNeedsToBeDefragmented(dx,full_path,pnr_attr->DataSize,pmfi))
-		ProcessRunList(dx,full_path,pnr_attr,pmfi);
+	/* skip $BadClus file which may have wrong number of clusters */
+	if(wcsistr(full_path,L"$BadClus")){
+		/* on my system this file always exists, even after chkdsk execution */
+		/*DbgPrint("WARNING: %ws file found! Run CheckDisk program!\n",full_path);*/
+	} else {
+		/* skip all filtered out attributes */
+		//if(AttributeNeedsToBeDefragmented(dx,full_path,pnr_attr->DataSize,pmfi))
+			ProcessRunList(dx,full_path,pnr_attr,pmfi);
+	}
 
 	/* free allocated memory */
 	Nt_ExFreePool(attr_name);
@@ -1027,7 +1034,8 @@ void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMA
 //			dx->fragmcounter ++;
 //		}
 		/* MFT? */
-		if(pfn->clusters_total > 10000) DbgPrint("%I64u %ws\n",pfn->clusters_total,pfn->name.Buffer);
+		//if(pfn->clusters_total > 10000) DbgPrint("%I64u %ws\n",pfn->clusters_total,pfn->name.Buffer);
+		//DbgPrint("%ws %I64u\n",pfn->name.Buffer,pfn->clusters_total);
 		dx->processed_clusters += pfn->clusters_total;
 
 		if(pfn->next_ptr == dx->filelist) break;

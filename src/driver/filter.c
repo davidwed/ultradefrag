@@ -40,7 +40,7 @@ wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 	wchar_t *cp = (wchar_t *)wcs1;
 	wchar_t *s1, *s2;
 
-	//if(wcs1 == NULL || wcs2 == NULL) return NULL;
+	if(wcs1 == NULL || wcs2 == NULL) return NULL;
 	
 	while(*cp){
 		s1 = cp;
