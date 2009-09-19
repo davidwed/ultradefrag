@@ -79,7 +79,12 @@
 		<li>Something goes wrong, but Windows is still working.</li>
 		<li>Windows dies and shows well known Blue Screen Of Death (BSOD).</li>
 		</ul>
-		In accordance with them there are two debugging techniques.
+		In accordance with them there are two debugging techniques discussed below.
+		</p>
+		<p><span style="color:darkred"><b>NOTE: </b>Ensure that your hardware is working properly! 
+		Faulty RAM or overclocked CPU may be a cause of the Blue Screen! 
+		Try one of the many free programs available for testing hardware (e.g. 
+		<a href="http://www.memtest86.org/">Memtest86+</a>).
 		</p>
 		<h4>1. Algorithmic errors debugging</h4>
 		<p>Algorithmic errors usually expresses themselves in file moving failures and other 
@@ -99,6 +104,10 @@
 		</ul>
 		</p>
 		<h5>How can I use DbgView program?</h5>
+		<center><img src="debugview.png" alt="DbgView main window sreenshot" /></center>
+		<p>First of all, if you are using Windows NT 4.0, you must download one of the earlier versions of 
+		DbgView that supports it. You may download the 4.05 version 
+		<a href="http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/freeware/debugview.shtml">here</a>.</p>
 		<p>DbgView is a nice graphical application which has very easy to use design. Run it and select 
 		<span class="guimenuitem">Capture Kernel</span> item in <span class="guimenuitem">Capture</span> menu. 
 		If you wish to debug the <span class="application">UltraDefrag</span> boot time (native) interface, check also 
@@ -156,13 +165,12 @@
 -Ultradfg- Deleted device 81C1B8C8
 -Ultradfg- Deleted device 81D055A0
 </code></strong></pre>
-		<p>Here our driver reports you that he was successfully unloaded.</p>
+		<p>Here our driver reports you that it was successfully unloaded.</p>
 		<p>As you can see, debugging process is very easy. Enjoy it and don't forget to attach 
 		important parts of debugging log when you are sending a bug report.</p>
-		<p>Note that DbgView program cannot be running on systems older than XP. Hopefully we have one 
-		good alternative for it that runs perfectly on old systems. Yes, I had DbgPrint Logger in view. 
-		Let's look at its features.</p>
+		
 		<h5>How can I use DbgPrint Logger program?</h5>
+		<center><img src="dbgprint_logger.jpg" alt="DbgPrint Logger screenshot" /></center>
 		<p>Though DbgPrint Logger has no graphical interface it is still very easy to use. Click on 
 		<span class="code">DbgPrintLog.exe</span> icon to run it. To close debugging session press 
 		<span class="code">Esc</span> button. After that you will find debugging messages in 
@@ -192,6 +200,7 @@
 		It is a very good practice to have always a small piece of paper and a pencil near your machine. When you are 
 		encountering BSOD, write on paper numbers shown on your screen. To be able to attach these numbers to your 
 		bug report.</p>
+		<center><img src="bsod.png" alt="One screenshot of the Blue Screen Of Death" /></center>
 		<p>Note that BSOD showing feature itself is disabled by default in Windows. <span class="application">UltraDefrag</span> 
 		installer enables them by setting the following system registry value to 0x0 state:
 <pre class="screen"><strong class="userinput"><code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\CrashControl\AutoReboot
@@ -201,29 +210,61 @@
 		will be very appreciated if you will attach the Crash Dump file to your bug report. It will help us to fix driver bug 
 		faster and easier.</p>
 		<p>Crash Dump generation may be disabled in your version of Windows. Therefore check please is it enabled or not by opening 
-		the following system dialog: <span class="guimenuitem">MyComputer > Properties > Advanced > Boot and restore options</span>. 
-		Select in <span class="guimenuitem">Saving debugging information</span> section <span class="guimenuitem">Small memory dump</span> 
-		or <span class="guimenuitem">Kernel memory dump</span>. Which differencies are between them? Small memory dump contains less 
-		information but it has small size which is benifit in case of dump file submission to <span class="application">UltraDefrag</span> 
-		bug tracker. Feel free to select <span class="guimenuitem">Small memory dump</span> item in dialog box opened before. On the other 
-		hand if you are advanced user, you may prefer Kernel Memory Dump or even Full Memory Dump. These dumps contain more information 
-		which may be helpful for better error detection. Use <a href="http://www.microsoft.com/whdc/DevTools/Debugging/default.mspx">Debugging 
-		Tools for Windows</a> to analyze such dump files. Note also: when you are selecting <span class="guimenuitem">Kernel Memory Dump</span> 
-		or <span class="guimenuitem">Full Memory Dump</span> menu items, you will always have after a crash a Small Memory Dump generated 
-		additionally.</p>
-		<p>Small Memory Dump files can be found in <span class="code">WINDOWS\Minidump</span> directory.</p>
+		the following system dialog: <span class="guimenuitem">MyComputer > Properties > Advanced > Startup and Recovery Settings</span>.</p>
+		
+		<p>It is highly recommended to select <span class="guimenuitem">Kernel memory dump</span> option in 
+		<span class="guimenuitem">Write debugging information</span> section of this dialog. Selecting kernel memory dump gives you 
+		an ability to get much more detailed information about a possible driver's failure. Usually such kind of memory dump requires 
+		few tens of megabytes of disk free space. If and only if you cannot provide such amount of disk space then select the 
+		<span class="guimenuitem">Small memory dump</span> option.</p>
+
+		<p>Note also: when you are selecting <span class="guimenuitem">Kernel Memory Dump</span> 
+		or <span class="guimenuitem">Full Memory Dump</span> options, you will always have after a crash
+		a Small Memory Dump generated too.</p>
+		
+		<p>The following set of screenshots illustrates crash dump tuning process.</p>
+		<center>
+			<img src="crash_control1.png" alt="" /><br /><br />
+			<img src="crash_control2.png" alt="" /><br /><br />
+			<img src="crash_control3.png" alt="" /><br />
+		</center>
+		
+		<p>Small Memory Dump files can be found in <span class="code">WINDOWS\Minidump</span> directory. Kernel Memory Dump 
+		usually contains in a single <span class="code">WINDOWS\MEMORY.DMP</span> file.</p>
+		
+		<p>After setting crash dump parameters you are ready for basic driver testing. The process is very easy:
+		<ol>
+		<li>Start DbgView program. If you have selected kernel memory dump before then DbgView will save debugging messages to it during the system crash.</li>
+		<li>Try to reproduce BSOD.</li>
+		<li>Push <span class="code">Reset</span> button on your PC to reboot after BSOD.</li>
+		<li>Start DbgView program again. Select <span class="guimenuitem">File > Process Crash Dump...</span> menu item and select 
+		the file containing kernel memory dump. DbgView will ask you for a name of file where it will save extracted debugging messages.
+		Click OK button and attach saved data to your bug report.</li>
+		</ol>
+		</p>
+		
 		<p>So, if you have encoutered the Blue Screen, don't forget to attach a Small Memory Dump file to your report. Or, at least, 
-		attach please numbers shown on your screen.</p>
+		attach please numbers shown on your screen. Sending debugging messages saved by DbgView program is very appreciated too.</p>
 
 		<h5>Which tests can I additionally perform to speed up bug fixing?</h5>
 		<p>There is one cool program shipped with all versions of Windows: Driver Verifier. Open the run box or command line and type 
 		<span class="code">verifier.exe</span> to run it. As a result you will see its window. Select <span class="guimenuitem">Create standard 
-		parameters</span> item and click <span class="guimenuitem">Next</span> button. Choose <span class="guimenuitem">Select driver name 
-		from list</span> item and click <span class="guimenuitem">Next</span> again. Click <span class="guimenuitem">Add offline drivers to this list</span> 
-		button and select <span class="code">ultradfg.sys</span> driver. Click <span class="guimenuitem">Finish</span> button and reboot your system. 
-		Now you are ready for advanced <span class="application">UltraDefrag</span> driver testing.</p>
+		settings</span> item and click <span class="guimenuitem">Next</span> button. Choose <span class="guimenuitem">Select driver names 
+		from a list</span> item and click <span class="guimenuitem">Next</span> again. Click <span class="guimenuitem">Add currently not loaded driver(s) 
+		to the list...</span> button and select <span class="code">ultradfg.sys</span> driver. Click <span class="guimenuitem">Finish</span> button and 
+		reboot your system. Now you are ready for advanced <span class="application">UltraDefrag</span> driver testing.</p>
 		<p>Play with <span class="application">UltraDefrag</span> program trying to reproduce the Blue Screen. After arriving them send bug report 
-		with a small memory dump attached. And don't forget to attach a notice that you have used Driver Verifier during your test. Good luck!</p>
+		with a small memory dump (and DbgView log) attached. And don't forget to attach a notice that you have used Driver Verifier during your test. Good luck!</p>
+		<p>The following set of screenshots illustrates a typical verifier's working session.</p>
+		<center>
+			<img src="verifier1.png" alt="" /><br /><br />
+			<img src="verifier2.png" alt="" /><br /><br />
+			<img src="verifier3.png" alt="" /><br /><br />
+			<img src="verifier4.png" alt="" /><br /><br />
+			<img src="verifier5.png" alt="" /><br /><br />
+			<img src="verifier6.png" alt="" /><br /><br />
+			<img src="verifier7.png" alt="" /><br />
+		</center>
 	</div>
 
 	<div class="sect1" lang="en">
