@@ -81,7 +81,16 @@ int __stdcall winx_init(void *peb)
 	pp = RtlNormalizeProcessParams(((PPEB)peb)->ProcessParameters);
 	/* 2. Breakpoint if we were requested to do so */
 	if(pp->DebugFlags) DbgBreakPoint();
-	/* 3. Open the keyboard */
+	/* 3. Open the PS/2 or USB keyboard */
+	for(i = 0; i < 20; i++){
+		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
+		status = kb_open(kb_device_name);
+		if(status >= 0) return status;
+	}
+	
+	winx_printf("Wait 15 seconds for USB keyboard initialization...\n");
+	winx_sleep(15000);
+	
 	for(i = 0; i < 100; i++){
 		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
 		status = kb_open(kb_device_name);
