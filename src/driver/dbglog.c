@@ -26,6 +26,7 @@
 
 #include "driver.h"
 
+#if 0
 /*
 * It must be always greater than PAGE_SIZE (8192 ?), because the 
 * dbg_buffer needs to be aligned on a page boundary. This is a 
@@ -98,3 +99,11 @@ void __stdcall DeregisterBugCheckCallbacks(void)
 	if(ptrKeDeregisterBugCheckReasonCallback)
 		ptrKeDeregisterBugCheckReasonCallback(&bug_check_reason_record);
 }
+#else
+void __stdcall RegisterBugCheckCallbacks(void)
+{
+}
+void __stdcall DeregisterBugCheckCallbacks(void)
+{
+}
+#endif

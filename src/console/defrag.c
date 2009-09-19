@@ -184,7 +184,7 @@ WORD bcolors[NUM_OF_SPACE_STATES] = {
 	BACKGROUND_GREEN | BACKGROUND_BLUE | BACKGROUND_INTENSITY,
 };
 
-#define MAP_SYMBOL '*'
+#define MAP_SYMBOL '%'
 BOOL map_completed = FALSE;
 
 #define BORDER_COLOR (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
@@ -433,7 +433,7 @@ void show_help(void)
 		"                                      its number in hexadecimal form. \n"
 		"                                      Like this: --map-symbol=0x1 :-)\n"
 		"                                      Valid numbers are in range: 0x1 - 0xFF\n"
-		"                                      '*' symbol is used by default.\n"
+		"                                      \'%%\' symbol is used by default.\n"
 		"       --map-rows=n                   Number of rows in cluster map.\n"
 		"                                      Default value is 10.\n"
 		"       --map-symbols-per-line=n       Number of map symbols\n"

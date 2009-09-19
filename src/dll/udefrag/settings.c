@@ -56,7 +56,6 @@ int refresh_interval  = 500;
 ULONG disable_reports = FALSE;
 ULONG dbgprint_level = DBG_NORMAL;
 
-/* also is used in udefrag_set_dbg_cache() function */
 short env_buffer[8192];
 
 #define ENV_BUF_SIZE (sizeof(env_buffer) / sizeof(short))
