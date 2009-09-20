@@ -166,7 +166,11 @@ __stdcall NtCurrentTeb(void);
 
 		<li><a href="http://www.activestate.com">Perl</a> language package for Windows.
 		Currently I'm using v5.8.6 to execute configure.pl script and to develop the Modern 
-		UltraDefrag User Interface (that was created for extended gui configuration abilities).</li>
+		UltraDefrag User Interface (that was created for extended gui configuration abilities). 
+		<span style="color:darkred">Since 3.2.0 version of the program Perl package is an optional component. 
+		Build configurator was rewritten in Lua using IUP toolkit. Modern User Interface could be rewritten too, 
+		though we have no motivation for this.
+		</li>
 
 		<li><a href="http://www.doxygen.org">Doxygen</a> is used to produce a special kind of 
 		documentation from project's source files. It contains descriptions 
@@ -262,6 +266,36 @@ __stdcall NtCurrentTeb(void);
 
 		<p>Here is an example:</p>
 		<center><img src="config.pl.png" /></center><br />
+		
+		<p>Though <span class="code">configure.pl</span> script works fine, it is obsolete. Lua 
+		language gives us better performance and requires much less disk space itself.</p>
+		
+		<p>To run <span class="code">configure.lua</span> script you must have the following 
+		libraries installed on your system:
+		<ul type="disc">
+		<li><span class="code">IUP</span> - You may download it from 
+		<a href="http://sourceforge.net/projects/iup/files/">http://sourceforge.net/projects/iup/files/</a>.
+		If you are running 32-bit system, download <span class="code">iup3_0_rc2_Win32_dll6_lib.zip</span> archive, 
+		unpack it and copy all DLL's to the same folder where you have Lua binaries installed.</li>
+		<li><span class="code">CD</span> - You may download it from 
+		<a href="http://sourceforge.net/projects/canvasdraw/files/">http://sourceforge.net/projects/canvasdraw/files/</a>.
+		If you are running 32-bit system, download <span class="code">cd5_2_Win32_dll6_lib.zip</span> archive, 
+		unpack it and copy all DLL's to the same folder where you have Lua binaries installed.</li>
+		</ul>
+		</p>
+
+		<p>After installing all required components you may configure build options 
+		by typing the following command:
+
+<pre class="screen"><strong class="userinput"><code>lua configure.lua</code></strong></pre>
+
+		</p>
+		<p>Dialog box is very similar to shown above. <span class="guimenuitem">Apply patch to MinGW</span> 
+		button was removed. To achieve the same action check an appropriate checkbox and click 
+		<span class="guimenuitem">OK</span> button.</p>
+
+		<center><img src="config.lua.png" /></center><br />
+
 		</li>
 
 		<li>To build UltraDefrag use the BUILD.CMD script:
