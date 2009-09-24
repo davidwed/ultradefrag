@@ -177,7 +177,7 @@ void OpenWebPage(char *page)
 	strcat(path,page);
 	hApp = ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
 	if((int)(LONG_PTR)hApp <= 32){
-		strcpy(path,"http:\\ultradefrag.sourceforge.net\\handbook\\");
+		strcpy(path,"http://ultradefrag.sourceforge.net/handbook/");
 		strcat(path,page);
 		ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
 	}
