@@ -17,18 +17,26 @@
 <p><a href="http://www.lua.org/"><img src="images/powered_by_lua.gif" alt="powered by lua" width="124" height="31" /></a></p> 
 <p><a href="http://sourceforge.net/projects/ultradefrag/"><img src="images/udefrag124x31.gif" alt="" width="124" height="31" /></a></p> <script type="text/javascript" src="http://www.ohloh.net/p/10790/widgets/project_thin_badge.js"></script> <p> <a href="http://validator.w3.org/check?uri=referer"><img src="http://www.w3.org/Icons/valid-xhtml10" alt="Valid XHTML 1.0 Strict" height="31" width="88" /></a></p> <p> <a href="http://jigsaw.w3.org/css-validator/check/referer"> <img style="border:0;width:88px;height:31px" src="http://jigsaw.w3.org/css-validator/images/vcss-blue" alt="Valid CSS!" /></a></p> </div> </div> <div id="left_side"> <div class="intro"> <div class="pad">UltraDefrag is a powerful Open Source Defragmentation tool for Windows Platform. It is very fast, because the defragmenting is done via the kernel-mode driver. There are three interface available : Graphical, Console and Native.<br /> 
 <a href="http://sourceforge.net/project/showfiles.php?group_id=199532" title="Download the latest build of UltraDefrag">Download </a>&nbsp; | &nbsp;<a href="overview.html" title="Read the complete overview of UltraDefrag">Feature List </a>&nbsp; | &nbsp; <a href="http://ultradefrag.sourceforge.net/handbook/installation.html#vista" title="Instructions for running UltraDefrag on Windows Vista">Vista Installation FAQ</a><a href="overview.html" title="Read the complete overview of UltraDefrag"> </a>&nbsp; | &nbsp; <a href="vista_guide.html">Vista Installation Guide</a></div> 
-</div> <div class="mpart"> <h3> Latest News - UltraDefrag 3.1 - With New GUI Configurator</h3> 
+</div> <div class="mpart"> <h3> Latest News - UltraDefrag 3.2 - Addition of some powerful features and improvements</h3> 
         <h2>&nbsp;</h2> 
-        <p><img src="images/ud31.jpg" alt="" width="200" height="102" />Yes a new GUI Configurator! A lot of effort and programming techniques have been involved in creating UltraDefrag.  UD has gone through serveral graphical modifications to be much more user friendly and give it a fresh new look that will surely be acompanied with upcoming versions of Windows and its looks.</p>
-        <p> - The new upgrade has the following features:</p>
-        <p>&nbsp;</p>
+        <p><img src="images/banner.jpg" alt="" width="631" height="196" />UltraDefrag team now brings its new 3.2 release in to action. Some improvements have been made which makes it even better than ever and loaded with enhancements and features.</p>
+        <p> - The new 3.2 upgrade has the following features:</p>
         <ul>
-          <li>Ability to change font, its size and access to help files and boot time defrag all from the GUI Configurator Option.</li>
-          <li>Ability to adapt to the theme Windows is using.  <a href="overview.html#screenshots">(View Screenshots)</a></li>
-          <li>A lot of bugs regarding the GUI were resolved.</li>
-          <li>A very important driver bug was fixed.</li>
-          <li>UltraDefrag translated to DANISH, FARSI and SWEDISH Languages.</li>
-          <li> The 3.1.0 release is really stable.</li>
+          <li>Ultra Fast NTFS scanning feature was added, NTFS analysis becomes approximately 25 times faster now.</li>
+          <li>Defragmentaion of additional streams attached to NTFS files was added.</li>
+          <li>Information about trash (temporary files) excluded from reports, statistics and cluster map; these files are now completely ignored.</li>
+          <li>The \??\ sequence removed from file names in reports.</li>
+          <li>UltraDefrag thai translation was made.</li>
+          <li> Some important parts of handbook were completely rewritten.</li>
+          <li>Scheduler was rewritten in C language; NET framework is not required now!</li>
+          <li>Ability to translate Scheduler into foreign languages was added.</li>
+          <li>GUI options were moved from udefrag-gui.cmd script to easy to understand guiopts.lua file.</li>
+          <li>Debugging information will not be saved on disk since this version of the program (read carefully an appropriate chapter of program's handbook for detailed instructions about kernel mode driver debugging instead)</li>
+          <li>Few fatal driver bugs were fixed.</li>
+          <li>Driver's reliability was increased.</li>
+          <li>Now, UltraDefrag requires less software for its development.</li>
+          <li><strong>FOR PROGRAMMERS:</strong> Build configurator was rewritten in Lua</li>
+          <li><strong>NOTE FOR PROGRAMMERS:</strong> to successfully recompile the driver run configure.pl script and click 'Apply patch to MinGW' button once again.</li>
         </ul>
         <h3 class="greybox">Translate UltraDefrag to different Languages</h3>
         <p><img src="images/language.gif" alt="" width="60" height="60" /></p>
@@ -40,7 +48,7 @@
           <li>LIST OF SUBMITTED LANGUAGE PACKS</li>
         </ul>
         <p>&nbsp;</p>
-        <h3 class="greybox">Ultra Defrag 3.1 Intro</h3>
+        <h3 class="greybox">Ultra Defrag 3.2 Intro</h3>
         <p><img src="images/ud_small.gif" alt="" width="60" height="52" /></p>
         <p>Release Date - May 13th, 2009.</p>
         <p>UltraDefrag is powerful <strong>Open Source</strong> defragmentation tool for Windows  NT. It is very fast, because the defragmenting is done by kernel-mode  driver. They are three interfaces to them: graphical, console and  native. The GUI is very useful, because it represents your filesystem  visually as a color coded cluster map. The console is another option  for those that prefer the command line. It allows you to run  UltraDefrag from the task scheduler and scripts. Finally, the native  executable will run at boot time in a manner similar to chkdsk. </p>
