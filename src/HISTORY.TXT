@@ -22,6 +22,8 @@ HISTORY
       detailed instructions about kernel mode driver debugging instead
     - few fatal driver bugs were fixed
     - driver's reliability was increased
+    - now UltraDefrag requires less software for its development
+    - FOR PROGRAMMERS: build configurator was rewritten in Lua
     - NOTE FOR PROGRAMMERS: to successfully recompile the driver run 
       configure.pl script and click 'Apply patch to MinGW' button once again
 

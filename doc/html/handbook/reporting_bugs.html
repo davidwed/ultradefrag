@@ -189,6 +189,27 @@
 		<p>DbgPrint Logger can be executed on a large number versions of Windows, enjoy it and don't forget to attach 
 		important parts of debugging log when you are sending a bug report.</p>
 		
+		<h5>Additional software useful for debugging purposes</h5>
+		
+		<p>Download and install the following software to collect an additional information about 
+		running UltraDefrag components:
+		<ul type="disc">
+		<li><a href="http://www.osr.com">PoolTag</a>. Note that it is included in Windows DDK. 
+		Using this tool you can watch driver memory allocation. The UltraDefrag driver tag is 'ULTR'.</li>
+		<li><a href="http://www.freewebs.com/four-f/index.htm">StatusToError</a> tool included in KmdKit. 
+		Input the NTSTATUS code
+		given by the UltraDefrag gui, console or native app and it will give you
+		the localized error description. A simple but very useful tool, especially 
+		for boot time defragmentation errors, where it is impossible for the
+		program to do localization lookups.</li>
+		<li><a href="http://www.sysinternals.com">Sysinternals</a> tools, including 
+		<a href="http://technet.microsoft.com/en-us/sysinternals/bb896657.aspx">WinObj</a> 
+		(Allows you to see when UltraDefrag opens its driver, creates some events etc), 
+		<a href="http://technet.microsoft.com/en-us/sysinternals/bb896645.aspx">Process Monitor</a> 
+		and <a href="http://technet.microsoft.com/en-us/sysinternals/bb896653.aspx">Process Explorer</a>.</li>
+		</ul>
+		</p>
+		
 		<h4>2. Fatal errors debugging</h4>
 		<p>Fatal driver errors usually crashes your system.</p>
 		<h5>Overview</h5>

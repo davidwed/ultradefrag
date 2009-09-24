@@ -134,44 +134,39 @@ __stdcall NtCurrentTeb(void);
 		<p>Note that currently only i386 binaries can be produced using this way.</p>
 
 
-		<h5>1.4 Common tools</h5>
+		<h5><a name="required_tools"></a>1.4 Common tools</h5>
 
 		<p>There are a few other tools that you should have installed on your PC to
 		perform a full-featured build:</p>
 
 		<ul>
-		<li><a href="http://nsis.sourceforge.net">NSIS compiler</a> is used to produce installers.
-		Currently I'm using NSIS v2.28.
-		NOTE: In my nsisconf.nsh file (in NSIS root directory) I have 
-		the following line:
-<pre class="screen"><code>!packhdr temp.dat '"C:\WINDOWS\upx" -9 -q temp.dat'</code></pre>
-		You may not include this instruction, because installer script contains 
-		<span class="code">SetCompressor /SOLID lzma</span> 
-		command that is much effective in our case.
-		</li>
 
-		<li><a href="http://upx.sf.net">Ultimate Packer for eXecutables (upx)</a> is used to
-		reduce sizes of some binary modules. I'm using version 2.03w. Put the
-		upx.exe file in one of the directories, specified in your PATH environment
-		variable, p.a. in %windir%\system32.</li>
+		<li><a href="http://nsis.sourceforge.net">NSIS compiler</a> (v2.28) is required 
+		to produce installers.</li>
 
 		<li><a href="http://www.7-zip.org">7-zip file archiver</a> is used to produce 
-		the source code package.</li>
+		the source code package. It gives us better compression ratio in comparison with 
+		other tools.</li>
 
-		<li>.NET framework v2.0.50727 or later is used to compile the 
-		UltraDefrag Scheduler.NET application. <span style="color:darkred;">Since 3.2.0 version of 
-		the program this component is optional, because Scheduler itself has been rewritten in C 
-		language using Windows API. If you aren't C# developer, feel free to deinstall NET framework 
-		from your system.</span></li>
+		<li><a href="http://luabinaries.luaforge.net/">Lua</a> language binaries are used 
+		to execute build scripts. Install it in some folder on your %PATH% and rename 
+		lua5.1.exe to lua.exe. Also it is highly recommended to install 
+		<a href="http://sourceforge.net/projects/iup/files/">IUP</a> and 
+		<a href="http://sourceforge.net/projects/canvasdraw/files/">CD</a> libraries. If you 
+		are on 32-bit system, download <span class="code">iup3_0_rc2_Win32_dll6_lib.zip</span> and 
+		<span class="code">cd5_2_Win32_dll6_lib.zip</span> archives, unpack them and copy all 
+		DLL's to the same folder where you have Lua binaries installed.</li>
 
-		<li><a href="http://www.activestate.com">Perl</a> language package for Windows.
-		Currently I'm using v5.8.6 to execute configure.pl script and to develop the Modern 
-		UltraDefrag User Interface (that was created for extended gui configuration abilities). 
-		<span style="color:darkred">Since 3.2.0 version of the program Perl package is an optional component. 
-		Build configurator was rewritten in Lua using IUP toolkit. Modern User Interface could be rewritten too, 
-		though we have no motivation for this.
-		</li>
+		<li><a href="http://www.etree.org/md5com.html">md5sum</a> tool is used to generate 
+		file ultradefrag-x.y.z.MD5SUMS that	gives you an ability to check downloaded packages 
+		integrity.</li>
 
+		</ul>
+		
+		<p>The following tools are optional though useful for debugging purposes:</p>
+		
+		<ul>
+		
 		<li><a href="http://www.doxygen.org">Doxygen</a> is used to produce a special kind of 
 		documentation from project's source files. It contains descriptions 
 		of functions and global variables dependencies and may be used e.g. for
@@ -193,51 +188,38 @@ __stdcall NtCurrentTeb(void);
 
 <pre class="screen"><strong class="userinput"><code>robodoc --internal</code></strong></pre>
 		</li>
-
-		<li><a href="http://www.etree.org/md5com.html">md5sum</a> tool is used to generate 
-		file ultradefrag-x.y.z.MD5SUMS that	gives you an ability to check downloaded packages 
-		integrity.</li>
-
-		<li><a href="http://luabinaries.luaforge.net/">Lua</a> language binaries package is used 
-		to execute some build scripts. Install it in some folder on your %PATH% and rename 
-		lua5.1.exe to lua.exe.</li>
 		
 		</ul>
+		
+		<p>There are also few optional tools that were used to develop previous versions 
+		of the program. Since v3.2.0 they aren't required anymore:</p>
+		
+		<ul><font size="-1">
+		
+		<li>.NET framework v2.0.50727 or later was used to compile the 
+		UltraDefrag Scheduler.NET application. <span style="color:darkred;">Since 3.2.0 version of 
+		the program this component is optional, because Scheduler itself has been rewritten in C 
+		language using Windows API. If you aren't C# developer, feel free to deinstall NET framework 
+		from your system.</span></li>
+
+		<li><a href="http://www.activestate.com">Perl</a> language package for Windows (v5.8.6). 
+		It was used to execute configure.pl script and to develop an experimental Modern User Interface.
+		<span style="color:darkred">Since 3.2.0 version of the program Perl package is an optional component. 
+		Build configurator was rewritten in Lua using IUP toolkit. Modern User Interface could be rewritten too, 
+		though we have no motivation for this.</span>
+		</li>
+
+		<li><a href="http://upx.sf.net">Ultimate Packer for eXecutables (upx)</a> (version 2.03w). 
+		<span style="color:darkred">Optional component, because compiled binaries are too small 
+		to be compressed effectively. Also UPX was used to compress an installer as described in NSIS manual, 
+		but <span class="code">SetCompressor /SOLID lzma</span> command seems to be much effective.</span></li>
+
+
+		</font></ul>
 
 		<h5>1.5 Software recommended for debugging purposes</h5>
 
-		<p>Because the actual work done by UltraDefrag is done by kernel mode driver,
-		you can download the tools described below to troubleshoot bugs. Even if you
-		are not programmer, these tools may be very useful for you:</p>
-
-		<ul>
-		<li>
-			<p><a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DebugView</a>. 
-			Its window will show you some interesting information given by driver engine: 
-			number of clusters on your volumes, mft position and much more.</p>
-
-			<p>Some other useful tools available from
-			<a href="http://www.sysinternals.com">sysinternals</a> are:
-				<ul>
-				<li>WinObj: Allows you to see when UltraDefrag opens its driver, creates 
-				some events etc.</li>
-				<li>File Monitor</li>
-				<li>Registry Monitor</li>
-				</ul>
-			</p>
-		</li>
-
-		<li><a href="http://www.osr.com">PoolTag</a>. Note that it is included in Windows DDK. 
-		Using this tool you can watch driver memory allocation. The UltraDefrag driver tag is 'ULTR'.</li>
-
-		<li><a href="http://www.freewebs.com/four-f/index.htm">StatusToError</a> tool included in KmdKit. 
-		Input the NTSTATUS code
-		given by the UltraDefrag gui, console or native app and it will give you
-		the localized error description. A simple but very useful tool, especially 
-		for boot time defragmentation errors, where it is impossible for the
-		program to do localization lookups.</li>
-
-		</ul>
+		<p>Read <a href="reporting_bugs.html">Reporting bugs</a> chapter for details.</p>
 
 		<h5>1.6 Especially for Mr. Random Newbe (Some notes for the beginners)</h5>
 
@@ -253,49 +235,25 @@ __stdcall NtCurrentTeb(void);
 		<ol>
 		<li>Download source archive and unpack it somewhere. <b><font size="-1">NOTE:</font></b> 
 		Currently path must not contain spaces. 
-		If you have some ideas how to fix that send your report to the authors, please.</li>
+		If you have some ideas how to fix that send your suggestion to the authors, please.</li>
 		<li>Configure build options by typing the following command:
-
-<pre class="screen"><strong class="userinput"><code>perl configure.pl</code></strong></pre>
-
-		<p>This tool has a graphical interface. Enter the paths to prerequisite
-		libraries and other options. If you prefer to use MinGW, click the button
-		<span class="guimenuitem">Apply patch to MinGW</span> to replace some libraries included in MinGW
-		(libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
-		will be saved in files with additional suffix '.orig'.</p>
-
-		<p>Here is an example:</p>
-		<center><img src="config.pl.png" /></center><br />
-		
-		<p>Though <span class="code">configure.pl</span> script works fine, it is obsolete. Lua 
-		language gives us better performance and requires much less disk space itself.</p>
-		
-		<p>To run <span class="code">configure.lua</span> script you must have the following 
-		libraries installed on your system:
-		<ul type="disc">
-		<li><span class="code">IUP</span> - You may download it from 
-		<a href="http://sourceforge.net/projects/iup/files/">http://sourceforge.net/projects/iup/files/</a>.
-		If you are running 32-bit system, download <span class="code">iup3_0_rc2_Win32_dll6_lib.zip</span> archive, 
-		unpack it and copy all DLL's to the same folder where you have Lua binaries installed.</li>
-		<li><span class="code">CD</span> - You may download it from 
-		<a href="http://sourceforge.net/projects/canvasdraw/files/">http://sourceforge.net/projects/canvasdraw/files/</a>.
-		If you are running 32-bit system, download <span class="code">cd5_2_Win32_dll6_lib.zip</span> archive, 
-		unpack it and copy all DLL's to the same folder where you have Lua binaries installed.</li>
-		</ul>
-		</p>
-
-		<p>After installing all required components you may configure build options 
-		by typing the following command:
 
 <pre class="screen"><strong class="userinput"><code>lua configure.lua</code></strong></pre>
 
-		</p>
-		<p>Dialog box is very similar to shown above. <span class="guimenuitem">Apply patch to MinGW</span> 
-		button was removed. To achieve the same action check an appropriate checkbox and click 
-		<span class="guimenuitem">OK</span> button.</p>
+		<p>This tool has a graphical interface. Enter the paths to prerequisite
+		libraries and other options. If you prefer to use MinGW, check 
+		<span class="guimenuitem">Apply patch to MinGW</span> box and click 
+		<span class="guimenuitem">OK</span> to replace some libraries included in MinGW
+		(libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
+		will be saved in files with additional suffix '.orig'.</p>
 
 		<center><img src="config.lua.png" /></center><br />
-
+		
+		<p>Though <span class="code">configure.pl</span> script works fine too, it is obsolete. Lua 
+		language gives us better performance and requires much less disk space itself. Note that 
+		you must have IUP and CD libraries installed as described 
+		<a href="development.html#required_tools">above</a> to run this tool.</p>
+		
 		</li>
 
 		<li>To build UltraDefrag use the BUILD.CMD script:
