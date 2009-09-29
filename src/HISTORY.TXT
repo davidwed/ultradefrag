@@ -2,7 +2,7 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 3.2.0 (50.0)   2009-09-
+  Version 3.2.0 (41.0)   2009-09-29
   ------------------------------------------------------------------------------
     - Ultra Fast NTFS scanning feature was added, NTFS analysis becomes 
       approximately 25 times faster now

@@ -88,9 +88,9 @@ extraResourceOptions=
 1=defrag.rc
 [Other]
 [History]
-..\include\ultradfg.h,0
-..\include\udefrag.h,1358
-..\share\getopt.c,21960
-..\share\getopt1.c,4747
 ..\include\getopt.h,0
-defrag.c,24285
+..\share\getopt1.c,4720
+..\share\getopt.c,21934
+..\include\udefrag.h,1358
+..\include\ultradfg.h,0
+defrag.c,14636
