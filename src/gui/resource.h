@@ -61,6 +61,8 @@
 
 #define IDC_PIC1                        1059
 
+#define IDC_SHUTDOWN                    1060
+
 // Next default values for new objects
 // 
 #ifdef APSTUDIO_INVOKED

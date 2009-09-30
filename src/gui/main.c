@@ -35,6 +35,8 @@ extern VOLUME_LIST_ENTRY volume_list[];
 extern RECT win_rc; /* coordinates of main window */
 extern int skip_removable;
 
+int shutdown_flag = FALSE;
+
 /* they have the same effect as environment variables for console program */
 extern char in_filter[];
 extern char ex_filter[];
@@ -68,6 +70,10 @@ void __stdcall ErrorHandler(short *msg)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+//	DWORD error;
+//	int requests_counter = 0;
+	LPVOID error_message;
+	
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
 		if(!ex_filter[0])
@@ -104,6 +110,63 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	SavePrefs();
 	WgxDestroyResourceTable(i18n_table);
 	DeleteEnvironmentVariables();
+	
+	/* check for shutdown request */
+	if(shutdown_flag){
+		/* SE_SHUTDOWN privilege is set by udefrag_init() called before */
+		
+/* the following code works fine but doesn't power off the pc */
+#if 0
+try_again:
+		if(!InitiateSystemShutdown(NULL,
+			"System shutdown was scheduled by UltraDefrag application.",
+			60,
+			FALSE, /* ask user to close apps with unsaved data */
+			FALSE  /* shutdown without reboot */
+			)){
+				error = GetLastError();
+				if(error == ERROR_NOT_READY && requests_counter < 3){
+					/* wait 1 minute and try again (2 times) */
+					requests_counter ++;
+					Sleep(60 * 1000);
+					goto try_again;
+				}
+				/* format message and display it on the screen */
+				if(FormatMessage( 
+					FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+					FORMAT_MESSAGE_FROM_SYSTEM | 
+					FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					error,
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+					(LPTSTR) &error_message,
+					0,
+					NULL )){
+						MessageBox(NULL,(LPCTSTR)error_message,"Error",MB_OK | MB_ICONINFORMATION);
+						LocalFree(error_message);
+				}
+		}
+#else
+		if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
+			SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
+				/* format message and display it on the screen */
+				if(FormatMessage( 
+					FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+					FORMAT_MESSAGE_FROM_SYSTEM | 
+					FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					GetLastError(),
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+					(LPTSTR) &error_message,
+					0,
+					NULL )){
+						MessageBox(NULL,(LPCTSTR)error_message,"Error",MB_OK | MB_ICONINFORMATION);
+						LocalFree(error_message);
+				}
+		}
+#endif	
+	}
+
 	return 0;
 }
 

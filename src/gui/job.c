@@ -32,6 +32,8 @@ char current_operation;
 BOOL stop_pressed, exit_pressed = FALSE;
 BOOL err_flag = FALSE, err_flag2 = FALSE;
 
+extern int shutdown_flag;
+
 DWORD WINAPI ThreadProc(LPVOID);
 
 void analyse(void)
@@ -160,9 +162,19 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 			IDC_RESCAN,IDC_SETTINGS,0);
 		WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	}
-
+	
 	busy_flag = 0;
 //	if(exit_pressed) EndDialog(hWindow,0);
+	
+	/* check the shutdown after a job box state */
+	if(!exit_pressed){
+		if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),
+			BM_GETCHECK,0,0) == BST_CHECKED){
+				shutdown_flag = TRUE;
+				SendMessage(hWindow,WM_CLOSE,0,0);
+		}
+	}
+	
 	return 0;
 }
 

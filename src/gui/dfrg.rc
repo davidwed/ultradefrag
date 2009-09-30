@@ -62,6 +62,9 @@ BEGIN
                     WS_TABSTOP
     PUSHBUTTON      "Stop",IDC_STOP,281,174,63,11,WS_DISABLED | NOT 
                     WS_TABSTOP
+    CONTROL         "Shut down PC after a job",IDC_SHUTDOWN,"Button",
+                    BS_AUTOCHECKBOX /*| BS_RIGHTBUTTON | BS_RIGHT*/ | BS_CENTER | NOT WS_TABSTOP,
+					7,189,126,10
     PUSHBUTTON      "Fragmented",IDC_SHOWFRAGMENTED,137,189,74,10,NOT 
                     WS_TABSTOP
     PUSHBUTTON      "Settings",IDC_SETTINGS,215,189,61,10,NOT WS_TABSTOP

@@ -122,6 +122,7 @@ int __stdcall udefrag_init(long map_size)
 	/* 1. Enable neccessary privileges */
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) return (-1)*/
 	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) return (-1);
+	if(winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE) < 0) return (-1); /* required by GUI client */
 
 	/* 2. only one instance of the program ! */
 	/* create init_event - this must be after privileges enabling */

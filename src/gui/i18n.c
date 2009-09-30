@@ -55,6 +55,8 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"ABOUT_WIN_TITLE",      L"About Ultra Defragmenter", NULL},
 	{IDC_CREDITS,       L"CREDITS",              L"Credits",                  NULL},
 	{IDC_LICENSE,       L"LICENSE",              L"License",                  NULL},
+	
+	{IDC_SHUTDOWN,      L"SHUTDOWN_PC_AFTER_A_JOB", L"Shut down PC after a job", NULL},
 
 	{0,                 NULL,                    NULL,                        NULL}
 };
