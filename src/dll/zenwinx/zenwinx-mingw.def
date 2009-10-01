@@ -44,3 +44,5 @@ EXPORTS
 	winx_dfbsize@8
 	winx_create_event@12
 	winx_destroy_event@4
+	winx_register_boot_exec_command@4
+	winx_unregister_boot_exec_command@4

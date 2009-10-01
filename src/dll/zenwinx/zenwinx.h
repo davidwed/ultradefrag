@@ -116,4 +116,7 @@ int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber);
 int __stdcall winx_create_event(short *name,int type,HANDLE *phandle);
 void __stdcall winx_destroy_event(HANDLE h);
 
+int __stdcall winx_register_boot_exec_command(short *command);
+int __stdcall winx_unregister_boot_exec_command(short *command);
+
 #endif /* _ZENWINX_H_ */

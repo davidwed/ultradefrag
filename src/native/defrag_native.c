@@ -50,16 +50,22 @@ short *command;
 #define NAME_BUF_SIZE (sizeof(name_buffer) / sizeof(short))
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
-#define USAGE  "Supported commands:\n" \
-		"  analyse X:\n" \
-		"  defrag X:\n" \
-		"  optimize X:\n" \
-		"  batch\n" \
-		"  drives\n" \
-		"  exit\n" \
-		"  reboot\n" \
-		"  shutdown\n" \
-		"  help\n"
+void display_help(void)
+{
+	winx_printf("Interactive mode commands:\n"
+				"  analyse X:   - volume analysis\n"
+				"  defrag X:    - volume defragmentation\n"
+				"  optimize X:  - volume optimization\n"
+				"  batch        - not implemented yet\n"
+				"  drives       - displays list of available volumes\n"
+				"  exit         - continue Windows boot\n"
+				"  reboot       - reboot the PC\n"
+				"  shutdown     - shut down the PC\n"
+				"  boot-on      - enable boot time defragger\n"
+				"  boot-off     - disable boot time defragger\n"
+				"  help         - display this help screen\n"
+				);
+}
 
 void __stdcall ErrorHandler(short *msg)
 {
@@ -240,8 +246,20 @@ void PauseExecution()
 	
 	ExtractToken(value_buffer,command + wcslen(L"pause"),
 		min(wcslen(command) - wcslen(L"pause"),VALUE_BUF_SIZE - 1));
-	msec = _wtoi(value_buffer);
+	msec = (int)_wtol(value_buffer);
 	winx_sleep(msec);
+}
+
+/* enables boot time defragmentation */
+void EnableNativeDefragger(void)
+{
+	(void)winx_register_boot_exec_command(L"defrag_native");
+}
+
+/* disables boot time defragmentation */
+void DisableNativeDefragger(void)
+{
+	(void)winx_unregister_boot_exec_command(L"defrag_native");
 }
 
 void ParseCommand()
@@ -326,6 +344,14 @@ break_execution:
 		PauseExecution();
 		return;
 	}
+	if((short *)wcsstr(command,L"boot-on") == command){
+		EnableNativeDefragger();
+		return;
+	}
+	if((short *)wcsstr(command,L"boot-off") == command){
+		DisableNativeDefragger();
+		return;
+	}
 	winx_printf("\nUnknown command %ws!\n\n",command);
 }
 
@@ -335,7 +361,9 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	char cmd[33], arg[5];
 	char *commands[] = {"shutdown","reboot","batch","exit",
 	                    "analyse","defrag","optimize",
-						"drives","help"};
+						"drives","help",
+						"boot-on","boot-off"
+					   };
 	WINX_FILE *f;
 	char filename[MAX_PATH];
 	int filesize,j,cnt;
@@ -448,7 +476,13 @@ cmdloop:
 			DisplayAvailableVolumes(FALSE);
 			continue;
 		case 8:
-			winx_printf(USAGE);
+			display_help();
+			continue;
+		case 9:
+			EnableNativeDefragger();
+			continue;
+		case 10:
+			DisableNativeDefragger();
 			continue;
 		default:
 			winx_printf("Unknown command!\n");
