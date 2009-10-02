@@ -262,6 +262,21 @@ void DisableNativeDefragger(void)
 	(void)winx_unregister_boot_exec_command(L"defrag_native");
 }
 
+void Hibernate(void)
+{
+	winx_printf("Hibernation ...");
+	NtSetSystemPowerState(
+		PowerActionHibernate, /* constants defined in winnt.h */
+		PowerSystemHibernate,
+		0
+		);
+	winx_printf("\nHibernation?\n");
+	/*
+	* It seems that hibernation is impossible at 
+	* windows boot time. At least on XP and earlier systems.
+	*/
+}
+
 void ParseCommand()
 {
 	int echo_cmd = 0;
@@ -352,6 +367,10 @@ break_execution:
 		DisableNativeDefragger();
 		return;
 	}
+	if((short *)wcsstr(command,L"hibernate") == command){
+		Hibernate();
+		return;
+	}
 	winx_printf("\nUnknown command %ws!\n\n",command);
 }
 
@@ -362,7 +381,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	char *commands[] = {"shutdown","reboot","batch","exit",
 	                    "analyse","defrag","optimize",
 						"drives","help",
-						"boot-on","boot-off"
+						"boot-on","boot-off","hibernate"
 					   };
 	WINX_FILE *f;
 	char filename[MAX_PATH];
@@ -483,6 +502,9 @@ cmdloop:
 			continue;
 		case 10:
 			DisableNativeDefragger();
+			continue;
+		case 11:
+			Hibernate();
 			continue;
 		default:
 			winx_printf("Unknown command!\n");

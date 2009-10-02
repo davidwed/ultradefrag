@@ -127,6 +127,11 @@ int __stdcall udefrag_init(long map_size)
 	/* for testing */
 	//winx_unregister_boot_exec_command(L"defrag_native");
 	//winx_register_boot_exec_command(L"defrag_native");
+//	NtSetSystemPowerState(
+//		PowerActionHibernate, /* constants defined in winnt.h */
+//		PowerSystemHibernate,
+//		0
+//		);
 
 	/* 2. only one instance of the program ! */
 	/* create init_event - this must be after privileges enabling */

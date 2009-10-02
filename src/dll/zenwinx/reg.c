@@ -33,6 +33,7 @@
 static int __stdcall open_smss_key(HANDLE *pKey);
 static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size);
 static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size);
+static void __stdcall flush_smss_key(HANDLE hKey);
 
 /* The following two functions replaces bootexctrl in native mode. */
 
@@ -101,6 +102,7 @@ int __stdcall winx_register_boot_exec_command(short *command)
 
 done:	
 	winx_virtual_free((void *)data,size);
+	flush_smss_key(hKey); /* required by native app before shutdown */
 	NtCloseSafe(hKey);
 	return 0;
 }
@@ -186,6 +188,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 
 	winx_virtual_free((void *)new_value,new_value_size);
 	winx_virtual_free((void *)data,size);
+	flush_smss_key(hKey); /* required by native app before shutdown */
 	NtCloseSafe(hKey);
 	return 0;
 }
@@ -257,4 +260,14 @@ static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 	}
 	
 	return 0;
+}
+
+static void __stdcall flush_smss_key(HANDLE hKey)
+{
+	NTSTATUS status;
+	
+	status = NtFlushKey(hKey);
+	if(status != STATUS_SUCCESS)
+		winx_raise_error("E: Cannot update Session Manager "
+				"registry key on disk: %x!",(UINT)status);
 }
