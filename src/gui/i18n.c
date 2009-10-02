@@ -57,6 +57,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{IDC_LICENSE,       L"LICENSE",              L"License",                  NULL},
 	
 	{IDC_SHUTDOWN,      L"SHUTDOWN_PC_AFTER_A_JOB", L"Shut down PC after a job", NULL},
+	{0,                 L"HIBERNATE_PC_AFTER_A_JOB", L"Hibernate PC after a job", NULL},
 
 	{0,                 NULL,                    NULL,                        NULL}
 };

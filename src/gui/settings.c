@@ -25,6 +25,7 @@
 
 RECT win_rc; /* coordinates of main window */
 int skip_removable = TRUE;
+int hibernate_instead_of_shutdown = FALSE;
 char buffer[MAX_PATH];
 char err_msg[1024];
 extern int user_defined_column_widths[];
@@ -149,6 +150,9 @@ void GetPrefs(void)
 			dbgprint_level[sizeof(dbgprint_level) - 1] = 0;
 		}
 		lua_pop(L, 1);
+		
+		hibernate_instead_of_shutdown = getint(L,
+				"hibernate_instead_of_shutdown");
 	}
 	lua_close(L);
 
@@ -185,6 +189,9 @@ void SavePrefs(void)
 		"refresh_interval = %i\n"
 		"disable_reports = %i\n"
 		"dbgprint_level = \"%s\"\n\n"
+		"-- set this parameter to 1 if you prefer to hibernate system\n"
+		"-- after a job instead of shutting them down, otherwise set it to 0\n\n"
+		"hibernate_instead_of_shutdown = %u\n\n"
 		"-- window coordinates etc.\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
@@ -198,6 +205,7 @@ void SavePrefs(void)
 		refresh_interval,
 		disable_reports,
 		dbgprint_level,
+		hibernate_instead_of_shutdown,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),

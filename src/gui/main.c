@@ -36,6 +36,7 @@ extern RECT win_rc; /* coordinates of main window */
 extern int skip_removable;
 
 int shutdown_flag = FALSE;
+extern int hibernate_instead_of_shutdown;
 
 /* they have the same effect as environment variables for console program */
 extern char in_filter[];
@@ -114,6 +115,26 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* check for shutdown request */
 	if(shutdown_flag){
 		/* SE_SHUTDOWN privilege is set by udefrag_init() called before */
+		if(hibernate_instead_of_shutdown){
+			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
+			if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
+				/* format message and display it on the screen */
+				if(FormatMessage( 
+					FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+					FORMAT_MESSAGE_FROM_SYSTEM | 
+					FORMAT_MESSAGE_IGNORE_INSERTS,
+					NULL,
+					GetLastError(),
+					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
+					(LPTSTR) &error_message,
+					0,
+					NULL )){
+						MessageBox(NULL,(LPCTSTR)error_message,"Error",MB_OK | MB_ICONINFORMATION);
+						LocalFree(error_message);
+				}
+			}
+			return 0;
+		}
 		
 /* the following code works fine but doesn't power off the pc */
 #if 0
@@ -181,6 +202,9 @@ void InitMainWindow(void)
 	wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
 	if(WgxBuildResourceTable(i18n_table,lng_file_path))
 		WgxApplyResourceTable(i18n_table,hWindow);
+	if(hibernate_instead_of_shutdown){
+		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
+	}
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
 
 	if(skip_removable)
@@ -335,6 +359,10 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	if(udefrag_init(N_BLOCKS) < 0) udefrag_unload();
 	InitFont();
 	SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
+	if(hibernate_instead_of_shutdown)
+		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
+	else
+		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"SHUTDOWN_PC_AFTER_A_JOB");
 
 	return 0;
 }
