@@ -391,7 +391,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 
 	/* 3. Initialization */
 #if USE_INSTEAD_SMSS
-	NtInitializeRegistry(FALSE);
+	NtInitializeRegistry(FALSE); /* saves boot log etc. */
 #endif
 	/* 4. Display Copyright */
 	winx_set_error_handler(ErrorHandler);
@@ -460,7 +460,10 @@ cmdloop:
 				"Type 'help' for list of supported commands.\n\n");
 	while(1){
 		winx_printf("# ");
-		if(winx_gets(buffer,sizeof(buffer) - 1) < 0) continue;
+		if(winx_gets(buffer,sizeof(buffer) - 1) < 0){
+			Exit(0);
+			return;
+		}
 		cmd[0] = arg[0] = 0;
 		sscanf(buffer,"%32s %4s",cmd,arg);
 		for(i = 0; i < sizeof(commands) / sizeof(char*); i++)

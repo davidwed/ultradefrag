@@ -374,9 +374,10 @@ int __cdecl winx_getche(void)
 *    limited number of characters to read.
 * INPUTS
 *    buffer - storage location for input string.
-*    n      - the maximum number of characters to read.
+*    n      - the maximum number of characters to read
+*             (buffer size in characters).
 * RESULT
-*    nonnegative value for number of characters
+*    nonnegative value for number of characters including term. zero,
 *    -1 for error.
 * BUGS
 *    Does not recognize special characters
@@ -397,14 +398,12 @@ int __cdecl winx_gets(char *string,int n)
 	for(i = 0; i < n; i ++){
 repeate_attempt:
 		ch = winx_getche();
-		if(ch == -1) { string[i] = 0; return -1; }
+		if(ch == -1) { string[i] = 0; return (-1); }
 		if(ch == 0) goto repeate_attempt;
-		if(ch == 13) { winx_putch('\n'); string[i] = 0; break; }
+		if(ch == 13) { winx_putch('\n'); string[i] = 0; return (i+1); }
 		string[i] = (char)ch;
 	}
-	if(i == n){
-		winx_raise_error("W: winx_gets() buffer overflow!");
-		return (-1);
-	}
-	return i;
+	winx_raise_error("W: winx_gets() buffer overflow!");
+	string[n-1] = 0;
+	return n;
 }
