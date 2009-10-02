@@ -62,6 +62,8 @@ call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre WNET
 popd
 set BUILD_DEFAULT=-nmake -i -g -P
 set UDEFRAG_LIB_PATH=..\..\lib
+rem update manifests...
+call make-manifests.cmd X86
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
@@ -73,6 +75,8 @@ call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre AMD64 WNET
 popd
 set BUILD_DEFAULT=-nmake -i -g -P
 set UDEFRAG_LIB_PATH=..\..\lib\amd64
+rem update manifests...
+call make-manifests.cmd amd64
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
@@ -84,6 +88,8 @@ call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre 64 WNET
 popd
 set BUILD_DEFAULT=-nmake -i -g -P
 set UDEFRAG_LIB_PATH=..\..\lib\ia64
+rem update manifests...
+call make-manifests.cmd ia64
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
