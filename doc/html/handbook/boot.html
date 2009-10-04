@@ -138,6 +138,16 @@
 			<tr>
 			<td class="code">exit</td><td>Break the boot time program execution.</td>
 			</tr>
+			<tr>
+			<td class="code">boot-on</td><td>Enables the boot time defragger. For execution  
+			at every boot. Sorry, this command actually fails when <span class="code">shutdown</span> or <span class="code">reboot</span> 
+			commands are executed after it.</td>
+			</tr>
+			<tr>
+			<td class="code">boot-off</td><td>Disables the boot time defragger. It will be never executed 
+			at next reboots. Until you will enable them manually through Configurator program or <span class="code">boot-on.cmd</span> script. 
+			Sorry, this command actually fails when <span class="code">shutdown</span> or <span class="code">reboot</span> commands are executed after it.</td>
+			</tr>
 		</tbody></table>
 		<p> Any other commands will be ignored. When the defragger encounters the wrong syntax 
 		it shows the appropriate message and continues the script execution.</p>

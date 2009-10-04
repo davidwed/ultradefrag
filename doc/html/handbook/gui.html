@@ -10,24 +10,6 @@
 	<link rel="start" href="index.html" title="Ultra Defragmenter Handbook" />
 	<link rel="prev" href="console.html" title="Chapter 3. Console interface" />
 	<link rel="next" href="boot.html" title="Chapter 5. Boot time defragmentation" />
-	<style type="text/css">
-	<!--
-	/* for color boxes */
-	.cb {
-		position: absolute;
-		width: 8pt;
-		height: 8pt;
-		border: 1px solid;
-		font-size: 6pt; /* specially for IE */
-	}
-
-	/* for static text */
-	.st {
-		position: absolute;
-		font-size: 11pt;
-	}
-	-->
-	</style>
 </head>
 
 <body bgcolor="white" text="black" alink="#0000ff" link="#0000ff" vlink="#840084">
@@ -80,7 +62,7 @@
 		<p>The windows application is a simple application with one main
 		form of fixed size and an about box. An illustration of the window as well
 		as an explanation of their functionality is below:</p>
-		<p><div align="center"><img src="vista_b2_theme_main_window.png" alt="Main window" align="bottom" border="0"></div></p>
+		<p><div align="center"><img src="vista_b2_theme_main_window-3.2.1.png" alt="Main window" align="bottom" border="0"></div></p>
 		<ol>
 		<li>
 		<p><span class="guimenuitem">List of volumes</span> This list all drives on the machine that you can scan. 
@@ -135,17 +117,21 @@
 			Exactly what it says.</p>
 			</li>
 			<li>
+			<p><span class="guimenuitem">Settings (Ctrl+T)</span> This button starts 
+			the <a href="gui.html#config">UltraDefrag GUI Configurator</a> program.</p>
+			</li>
+			<li>
 			<p><span class="guimenuitem">Compact (Ctrl+C)</span> Moves
 			all files to the beginning of the partition, defragmenting them if
 			possible. The compact command does not work on volumes with the FAT
 			filesystem because you cannot move directories on them.</p>
 			</li>
-			<li>
+<!--			<li>
 			<p><span class="guimenuitem">Pause (Ctrl+P)</span> 
 			Stops the currently	running analyze or defrag operation. This behavior is 
 			the same as stop.</p>
 			</li>
-			<li>
+-->			<li>
 			<p><span class="guimenuitem">Stop (Ctrl+S)</span> Stops the currently
 			running analyze or defrag operation.</p>
 			</li>
@@ -156,14 +142,26 @@
 			UltraDefrag generate it.</p>
 			</li>
 			<li>
-			<p><span class="guimenuitem">Settings (Ctrl+T)</span> This button starts 
-			the <a href="gui.html#config">UltraDefrag GUI Configurator</a> program.</p>
-			</li>
-			<li>
 			<p><span class="guimenuitem">About (F1)</span> Displays the simple about box 
 			containing copyright notice and links to most important information about program.</p>
 			</li>
 		</ul>
+		</li>
+		<li>
+		<p><span class="guimenuitem">Shut down PC after a job</span>
+		Check this box if you wish to automatically shut down the PC after a job. Note that your 
+		system and hardware configurations must support shutdown and power off, otherwise 
+		Windows may reboot your PC or even do quite nothing. So, test this mode before 
+		using it at regular basis.</p>
+		<p>Instead of the system shutdown you may specify the hibernation. 
+		Click <span class="guimenuitem">Settings</span> button to open the Configurator. 
+		Click <span class="guimenuitem">Options</span> button inside a 
+		<span class="guimenuitem">Graphical interface</span> section and set 
+		<span class="code">hibernate_instead_of_shutdown = 1</span>	as described below. 
+		Note that your system must support hibernation and it must be 
+		turned on. Otherwise Windows will display a message box containing brief error description 
+		and system will not be switched to hibernation mode.
+		</p>
 		</li>
 		<li>
 		<p><span class="guimenuitem">Progress bar</span> 
@@ -184,7 +182,7 @@
 		<p>To configure <span class="application">UltraDefrag</span> push 
 		<span class="guimenuitem">Settings</span> button on	the main GUI window. This action 
 		opens the UltraDefrag GUI Configurator:</p>
-		<p><div align="center"><img src="vista_b2_theme_config_window.png" alt="Main window" align="bottom" border="0"></div></p>
+		<p><div align="center"><img src="vista_b2_theme_config_window-3.2.1.png" alt="Main window" align="bottom" border="0"></div></p>
 		
 		<p>Configurator's window contains three sections:
 		<ol>
@@ -214,6 +212,11 @@ sizelimit = "25M"
 refresh_interval = 100
 disable_reports = 0
 dbgprint_level = "PARANOID"
+
+-- set this parameter to 1 if you prefer to hibernate system
+-- after a job instead of shutting them down, otherwise set it to 0
+
+hibernate_instead_of_shutdown = 1
 
 </pre>
 		 </p>

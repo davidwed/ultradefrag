@@ -5,7 +5,9 @@ HISTORY
   Version 3.2.1 (41.0)   2009-10-
   ------------------------------------------------------------------------------
     - shutdown after a job feature was added to GUI
+    - hibernate after a job feature was added to GUI
     - `boot-on` and `boot-off` commands were added to boot time defragger
+    - Scheduler has been translated into Spanish (AR) language
 
 
   Version 3.2.0 (41.0)   2009-09-29
