@@ -97,7 +97,8 @@ Section "Ultra Defrag core files (required)" SecCore
   AddSize 44 /* for the components installed in system directories */
   
   DetailPrint "Uninstall the previous version..."
-  ExecWait '"$INSTDIR\uninstall.exe" /S'
+  /* waiting fails here => manual deinstallation preferred */
+  ;;; ExecWait '"$INSTDIR\uninstall.exe" /S'
 
   DetailPrint "Install core files..."
   ${DisableX64FSRedirection}
@@ -122,6 +123,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
+  File "hibernate.exe"
 
   DetailPrint "Write driver settings..."
   ${WriteDriverAndDbgSettings}
@@ -192,6 +194,7 @@ Section "Uninstall"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\zenwinx.dll"
+  Delete "$SYSDIR\hibernate.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"

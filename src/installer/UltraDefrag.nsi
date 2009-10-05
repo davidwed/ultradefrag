@@ -335,6 +335,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
+  File "hibernate.exe"
 
   DetailPrint "Register file extensions..."
   ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
@@ -695,6 +696,7 @@ Section "Uninstall"
   Delete "$SYSDIR\wgx.dll"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\udefrag-scheduler.exe"
+  Delete "$SYSDIR\hibernate.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"

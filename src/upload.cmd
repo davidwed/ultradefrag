@@ -34,6 +34,16 @@ echo put ultradefrag-micro-edition-%ULTRADFGVER%.bin.ia64.exe >> update
 echo put ultradefrag-%ULTRADFGVER%.MD5SUMS >> update
 echo quit >> update
 
-psftp -b update -bc -2 frs.sourceforge.net
+mkdir HibernateForWindows-1.0.0.bin
+mkdir HibernateForWindows-1.0.0.bin\amd64
+mkdir HibernateForWindows-1.0.0.bin\ia64
+copy ..\bin\hibernate.exe .\HibernateForWindows-1.0.0.bin\
+copy ..\bin\amd64\hibernate.exe .\HibernateForWindows-1.0.0.bin\amd64\
+copy ..\bin\ia64\hibernate.exe .\HibernateForWindows-1.0.0.bin\ia64\
+copy ..\hibernate\readme.txt .\HibernateForWindows-1.0.0.bin\
+zip -r -m -9 -X HibernateForWindows-1.0.0.bin.zip HibernateForWindows-1.0.0.bin
+
+rem this method is not working now
+rem psftp -b update -bc -2 frs.sourceforge.net
 
 cd ..

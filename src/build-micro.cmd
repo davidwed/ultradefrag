@@ -28,11 +28,15 @@ mkdir bin\ia64
 
 xcopy /I /Y /Q    .\driver  .\obj\driver
 xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
+xcopy /I /Y /Q    .\hibernate .\obj\hibernate
 xcopy /I /Y /Q    .\console .\obj\console
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
+xcopy /I /Y /Q    .\share .\obj\share
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
+
+copy /Y .\obj\share\*.c .\obj\console\
 
 rem xcopy /I /Y /Q /S source destination
 
@@ -201,6 +205,7 @@ rd /s /q ia64
 del /s /q *.*
 cd ..\obj
 rd /s /q bootexctrl
+rd /s /q hibernate
 rd /s /q console
 rd /s /q driver
 rd /s /q gui

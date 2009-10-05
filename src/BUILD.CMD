@@ -27,6 +27,7 @@ mkdir bin\ia64
 
 xcopy /I /Y /Q    .\driver  .\obj\driver
 xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
+xcopy /I /Y /Q    .\hibernate .\obj\hibernate
 xcopy /I /Y /Q    .\console .\obj\console
 xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
@@ -206,6 +207,7 @@ set SRC_PKG_PATH=.\src_package\ultradefrag-%ULTRADFGVER%
 mkdir %SRC_PKG_PATH%\src
 xcopy /I /Y /Q    .\driver %SRC_PKG_PATH%\src\driver
 xcopy /I /Y /Q    .\bootexctrl %SRC_PKG_PATH%\src\bootexctrl
+xcopy /I /Y /Q    .\hibernate %SRC_PKG_PATH%\src\hibernate
 xcopy /I /Y /Q    .\console %SRC_PKG_PATH%\src\console
 xcopy /I /Y /Q /S .\gui %SRC_PKG_PATH%\src\gui
 xcopy /I /Y /Q    .\gui-launcher %SRC_PKG_PATH%\src\gui-launcher
@@ -299,6 +301,7 @@ rd /s /q ia64
 del /s /q *.*
 cd ..\obj
 rd /s /q bootexctrl
+rd /s /q hibernate
 rd /s /q console
 rd /s /q driver
 rd /s /q gui

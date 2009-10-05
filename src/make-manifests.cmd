@@ -3,6 +3,14 @@ REM suggested by Kerem Gumrukcu (http://entwicklung.junetz.de/).
 
 if "%1" equ "" goto failure
 
+type manifest.part1 > .\obj\hibernate\hibernate.manifest
+echo version="1.0.0.0" name="hibernate" processorArchitecture="%1" >> .\obj\hibernate\hibernate.manifest
+type manifest.part2 >> .\obj\hibernate\hibernate.manifest
+echo Hibernate for Windows >> .\obj\hibernate\hibernate.manifest
+type manifest.part3 >> .\obj\hibernate\hibernate.manifest
+echo processorArchitecture="%1" >> .\obj\hibernate\hibernate.manifest
+type manifest.part4 >> .\obj\hibernate\hibernate.manifest
+
 type manifest.part1 > .\obj\console\defrag.manifest
 echo version="%ULTRADFGVER%.0" name="udefrag" processorArchitecture="%1" >> .\obj\console\defrag.manifest
 type manifest.part2 >> .\obj\console\defrag.manifest
@@ -63,6 +71,7 @@ type manifest.part5 >> .\obj\lua5.1\lua.manifest
 
 rem update manifests in working copy of sources
 if "%1" neq "X86" goto L1
+copy /Y .\obj\hibernate\hibernate.manifest .\hibernate\hibernate.manifest
 copy /Y .\obj\console\defrag.manifest .\console\defrag.manifest
 copy /Y .\obj\gui\res\dfrg.manifest .\gui\res\dfrg.manifest
 copy /Y .\obj\gui-launcher\udefrag-gui.manifest .\gui-launcher\udefrag-gui.manifest

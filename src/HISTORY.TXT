@@ -8,6 +8,7 @@ HISTORY
     - hibernate after a job feature was added to GUI
     - `boot-on` and `boot-off` commands were added to boot time defragger
     - Scheduler has been translated into Spanish (AR) language
+    - Hibernate command line tool was added
 
 
   Version 3.2.0 (41.0)   2009-09-29
