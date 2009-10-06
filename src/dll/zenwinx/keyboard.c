@@ -45,7 +45,7 @@ int __stdcall kb_open(short *kb_device_name)
 
 	/* try to open specified device */
 	RtlInitUnicodeString(&uStr,kb_device_name);
-	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
+	InitializeObjectAttributes(&ObjectAttributes,&uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
 	Status = NtCreateFile(&hKbDevice,
 				GENERIC_READ | FILE_RESERVE_OPFILTER | FILE_READ_ATTRIBUTES/*0x80100080*/,
 			    &ObjectAttributes,&IoStatusBlock,NULL,FILE_ATTRIBUTE_NORMAL/*0x80*/,

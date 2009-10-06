@@ -62,7 +62,9 @@ void display_help(void)
 				"  reboot       - reboot the PC\n"
 				"  shutdown     - shut down the PC\n"
 				"  boot-on      - enable boot time defragger\n"
+				"                 lose its effect before shutdown/reboot\n"
 				"  boot-off     - disable boot time defragger\n"
+				"                 lose its effect before shutdown/reboot\n"
 				"  help         - display this help screen\n"
 				);
 }

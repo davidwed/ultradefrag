@@ -85,7 +85,10 @@ int __stdcall winx_init(void *peb)
 	for(i = 0; i < 20; i++){
 		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
 		status = kb_open(kb_device_name);
-		if(status >= 0) return status;
+		if(status >= 0){
+			winx_printf("Keyboard device found: %ws.\n\n",kb_device_name);
+			return status;
+		}
 	}
 	
 	winx_printf("Wait 15 seconds for USB keyboard initialization...\n");
@@ -94,7 +97,10 @@ int __stdcall winx_init(void *peb)
 	for(i = 0; i < 100; i++){
 		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
 		status = kb_open(kb_device_name);
-		if(status >= 0) break;
+		if(status >= 0){
+			winx_printf("Keyboard device found: %ws.\n\n",kb_device_name);
+			return status;
+		}
 	}
 	return status;
 }

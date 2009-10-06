@@ -43,6 +43,7 @@ LARGE_INTEGER ByteOffset;
 KBD_RECORD kbd_rec;
 
 void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
+void __stdcall kb_close(void);
 
 /* internal functions */
 /****if* zenwinx.stdio/winx_print
@@ -248,6 +249,10 @@ int __cdecl winx_kbhit(int msec)
 				/*
 				* FIXME: handle this error.
 				*/
+				winx_raise_error("E: NtCancelIoFile(hKbDevice,...) failed: %x!",
+					(UINT)Status);
+				kb_close();
+				return (-1);
 			}
 			/*winx_raise_error("N: winx_kbhit() timeout!");*/
 			return (-1);
@@ -326,6 +331,7 @@ int __cdecl winx_getch(void)
 	}
 repeate_attempt:
 	ByteOffset.QuadPart = 0;
+	///winx_printf("hKbDevice=%p,hKbEvent=%p\n",hKbDevice,hKbEvent);
 	Status = NtReadFile(hKbDevice,hKbEvent,NULL,NULL,
 		&iosb,&kbd,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
 	/* wait in case operation is pending */
@@ -398,6 +404,7 @@ int __cdecl winx_gets(char *string,int n)
 	for(i = 0; i < n; i ++){
 repeate_attempt:
 		ch = winx_getche();
+/*winx_printf("Character = %u\n",ch);*/
 		if(ch == -1) { string[i] = 0; return (-1); }
 		if(ch == 0) goto repeate_attempt;
 		if(ch == 13) { winx_putch('\n'); string[i] = 0; return (i+1); }

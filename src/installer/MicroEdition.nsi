@@ -123,7 +123,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
-  File "hibernate.exe"
+  File "hibernate.exe" /oname="hibernate4win.exe"
 
   DetailPrint "Write driver settings..."
   ${WriteDriverAndDbgSettings}
@@ -194,7 +194,7 @@ Section "Uninstall"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\zenwinx.dll"
-  Delete "$SYSDIR\hibernate.exe"
+  Delete "$SYSDIR\hibernate4win.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
