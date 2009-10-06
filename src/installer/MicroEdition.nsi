@@ -123,7 +123,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
-  File /oname="hibernate4win.exe" "hibernate.exe"
+  File /oname=hibernate4win.exe "hibernate.exe"
 
   DetailPrint "Write driver settings..."
   ${WriteDriverAndDbgSettings}
