@@ -335,7 +335,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
-  File "hibernate.exe" /oname="hibernate4win.exe"
+  File /oname="hibernate4win.exe" "hibernate.exe"
 
   DetailPrint "Register file extensions..."
   ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
