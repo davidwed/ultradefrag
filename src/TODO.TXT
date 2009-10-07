@@ -1,0 +1,28 @@
+;-------------------------------------------------------------------------------
+;
+; Plans for future:
+;
+;-------------------------------------------------------------------------------
+
+1. Add UD_FRAGMENTS_THRESHOLD filter parameter.
+2. Improve filters by excluding more files.
+3. Add full support for USB keyboards and PS/2 keyboards on x64 systems.
+
+After these 3 steps program goes into maintenance mode. New releases will 
+contain new language packs, bugfixes (when some bugs will be reported) and 
+improvements (when something interesting will be suggested). Also we will 
+continue to provide technical support to program users.
+
+All the features non listed above but suggested by users are in our opinion 
+optional features. Their implementation seems to be too difficult though 
+the result seems to be not so great. Maybe we will implement some things 
+in future, but this is not a main goal for next days.
+
+We have one better thing to do in future: UltraDefrag for DOS seems to be 
+a really cool software, useful for these gamers who prefers old good games 
+written especially for DOS.
+
+To get more information about UltraDefrag for DOS check out the /src/DOS 
+subdirectory contents of our SVN repository.
+
+Thanks for comprehension.
