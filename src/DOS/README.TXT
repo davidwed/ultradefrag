@@ -19,5 +19,6 @@ Development techniques:
 1. Write it entirely in assembler.
 2. Use BIOS calls when possible (OS independent code).
 3. Use direct access to disc through reading/writing sectors.
+4. Use program size optimization. The program must be as small as possible.
 
 Project has been started at 7 October 2009.
