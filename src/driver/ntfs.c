@@ -977,6 +977,7 @@ PFILENAME FindFileListEntryForTheAttribute(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *f
 	pfn->is_fragm = FALSE;
 	pfn->is_compressed = FALSE;
 	pfn->is_dirty = TRUE;
+	pfn->is_filtered = FALSE; /* initial state */
 	return pfn;
 }
 
@@ -1010,9 +1011,10 @@ void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMA
 		filesize = pfn->clusters_total * dx->bytes_per_cluster;
 		if(dx->sizelimit && filesize > dx->sizelimit) pfn->is_overlimit = TRUE;
 		else pfn->is_overlimit = FALSE;
+		/* mark some files as filtered out */
+		CHECK_FOR_FRAGLIMIT(dx,pfn);
 		/* 1.3 detect temporary files and other unwanted stuff */
 		if(TemporaryStuffDetected(dx,pmfi)) pfn->is_filtered = TRUE;
-		else pfn->is_filtered = FALSE;
 		/* 1.4 detect sparse files */
 		if(pmfi->Flags & FILE_ATTRIBUTE_SPARSE_FILE)
 			DebugPrint("-Ultradfg- Sparse file found %ws\n",pfn->name.Buffer);
@@ -1113,7 +1115,6 @@ void BuildPaths(UDEFRAG_DEVICE_EXTENSION *dx)
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
 		BuildPath2(dx,pfn);
 		if(UnwantedStuffDetected(dx,pfn)) pfn->is_filtered = TRUE;
-		else pfn->is_filtered = FALSE;
 		MarkSpace(dx,pfn,SYSTEM_SPACE);
 		/* skip here filtered out and big files and reparse points */
 		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){

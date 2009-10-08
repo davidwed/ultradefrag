@@ -51,7 +51,8 @@ extern WINX_FILE *f_ud;
 #define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
 short in_filter[MAX_FILTER_SIZE + 1] = L"";
 short ex_filter[MAX_FILTER_SIZE + 1] = L"";
-ULONGLONG sizelimit  = 0;
+ULONGLONG sizelimit = 0;
+ULONGLONG fraglimit = 0;
 int refresh_interval  = 500;
 ULONG disable_reports = FALSE;
 ULONG dbgprint_level = DBG_NORMAL;
@@ -74,7 +75,7 @@ int __stdcall udefrag_load_settings()
 	
 	/* reset all parameters */
 	in_filter[0] = ex_filter[0] = 0;
-	sizelimit = 0;
+	sizelimit = fraglimit = 0;
 	disable_reports = FALSE;
 	dbgprint_level = DBG_NORMAL;
 
@@ -90,6 +91,8 @@ int __stdcall udefrag_load_settings()
 		buf[sizeof(buf) - 1] = 0;
 		winx_dfbsize(buf,&sizelimit);
 	}
+
+	if(query_env_variable(L"UD_FRAGMENTS_THRESHOLD")) fraglimit = (ULONGLONG)_wtol(env_buffer);
 
 	if(query_env_variable(L"UD_REFRESH_INTERVAL")) refresh_interval = _wtoi(env_buffer);
 
@@ -119,6 +122,9 @@ int __stdcall udefrag_apply_settings()
 	/* set sizelimit */
 	if(winx_ioctl(f_ud,IOCTL_SET_SIZELIMIT,"Size limit setup",
 		&sizelimit,sizeof(ULONGLONG),NULL,0,NULL) < 0) return (-1);
+	/* set fraglimit */
+	if(winx_ioctl(f_ud,IOCTL_SET_FRAGLIMIT,"Fragments threshold setup",
+		&fraglimit,sizeof(ULONGLONG),NULL,0,NULL) < 0) return (-1);
 	/* set report state */
 	if(winx_ioctl(f_ud,IOCTL_SET_REPORT_STATE,"Report state setup",
 		&disable_reports,sizeof(ULONG),NULL,0,NULL) < 0) return (-1);

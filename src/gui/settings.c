@@ -34,6 +34,7 @@ extern int user_defined_column_widths[];
 char in_filter[4096] = {0};
 char ex_filter[4096] = {0};
 char sizelimit[64] = {0};
+int fraglimit;
 int refresh_interval;
 int disable_reports;
 char dbgprint_level[32] = {0};
@@ -46,6 +47,7 @@ void DeleteEnvironmentVariables(void)
 	(void)SetEnvironmentVariable("UD_IN_FILTER",NULL);
 	(void)SetEnvironmentVariable("UD_EX_FILTER",NULL);
 	(void)SetEnvironmentVariable("UD_SIZELIMIT",NULL);
+	(void)SetEnvironmentVariable("UD_FRAGMENTS_THRESHOLD",NULL);
 	(void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",NULL);
 	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",NULL);
 	(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",NULL);
@@ -61,6 +63,10 @@ void SetEnvironmentVariables(void)
 		(void)SetEnvironmentVariable("UD_EX_FILTER",ex_filter);
 	if(sizelimit[0])
 		(void)SetEnvironmentVariable("UD_SIZELIMIT",sizelimit);
+	if(fraglimit){
+		sprintf(buffer,"%i",fraglimit);
+		(void)SetEnvironmentVariable("UD_FRAGMENTS_THRESHOLD",buffer);
+	}
 	if(refresh_interval){
 		sprintf(buffer,"%i",refresh_interval);
 		(void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",buffer);
@@ -90,6 +96,7 @@ void GetPrefs(void)
 	
 	win_rc.left = win_rc.top = 0;
 	in_filter[0] = ex_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
+	fraglimit = 0;
 	refresh_interval = 0;
 	disable_reports = 0;
 
@@ -140,6 +147,7 @@ void GetPrefs(void)
 		}
 		lua_pop(L, 1);
 
+		fraglimit = getint(L,"fragments_threshold");
 		refresh_interval = getint(L,"refresh_interval");
 		disable_reports = getint(L,"disable_reports");
 
@@ -186,6 +194,7 @@ void SavePrefs(void)
 		"in_filter = \"%s\"\n"
 		"ex_filter = \"%s\"\n"
 		"sizelimit = \"%s\"\n"
+		"fragments_threshold = %i\n"
 		"refresh_interval = %i\n"
 		"disable_reports = %i\n"
 		"dbgprint_level = \"%s\"\n\n"
@@ -202,6 +211,7 @@ void SavePrefs(void)
 		in_filter,
 		ex_filter,
 		sizelimit,
+		fraglimit,
 		refresh_interval,
 		disable_reports,
 		dbgprint_level,

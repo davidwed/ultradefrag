@@ -616,6 +616,16 @@ NTSTATUS NTAPI DeviceControlRoutine(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		DebugPrint("-Ultradfg- Sizelimit = %I64u\n",dx->sizelimit);
 		BytesTxd = in_len;
 		break;
+	case IOCTL_SET_FRAGLIMIT:
+		DebugPrint("-Ultradfg- IOCTL_SET_FRAGLIMIT\n");
+		if(in_len != sizeof(ULONGLONG)){
+			status = STATUS_INVALID_PARAMETER;
+			break;
+		}
+		dx->fraglimit = *((ULONGLONG *)Irp->AssociatedIrp.SystemBuffer);
+		DebugPrint("-Ultradfg- Fragments threshold = %I64u\n",dx->fraglimit);
+		BytesTxd = in_len;
+		break;
 	/* Invalid request */
 	default: status = STATUS_INVALID_DEVICE_REQUEST;
 	}

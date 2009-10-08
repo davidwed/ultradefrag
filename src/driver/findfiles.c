@@ -220,6 +220,9 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 	filesize = pfn->clusters_total * dx->bytes_per_cluster;
 	if(dx->sizelimit && filesize > dx->sizelimit) pfn->is_overlimit = TRUE;
 	else pfn->is_overlimit = FALSE;
+	
+	/* mark some files as filtered out */
+	CHECK_FOR_FRAGLIMIT(dx,pfn);
 
 	if(wcsstr(path,L"largefile"))
 		DbgPrint("SIZE = %I64u\n", filesize); /* shows approx. 1.6 Gb instead of 3.99 Gb */

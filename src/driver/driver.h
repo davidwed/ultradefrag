@@ -291,19 +291,20 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	FILTER in_filter;
 	FILTER ex_filter;
 	HANDLE hVol;
- 	/*
-	* End of the data with initial zero state.
-	*/
-	MARKER z0_end;
+	ULONGLONG sizelimit;
+	ULONGLONG fraglimit;
 	UCHAR current_operation;
 	UCHAR letter;
+	BOOLEAN compact_flag;
+	ULONG disable_reports;
 	ULONGLONG bytes_per_cluster;
 	ULONG bytes_per_sector;
 	ULONG sectors_per_cluster;
 	ULONG FatCountOfClusters; /* FAT specific */
-	ULONGLONG sizelimit;
-	BOOLEAN compact_flag;
-	ULONG disable_reports;
+ 	/*
+	* End of the data with initial zero state.
+	*/
+	MARKER z0_end;
 	/* nt 4.0 specific */
 	ULONGLONG nextLcn;
 	ULONGLONG *pnextLcn;
@@ -686,5 +687,9 @@ if(!CheckIrp(Irp)){ \
 #include "globals.h"
 
 wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
+
+#define CHECK_FOR_FRAGLIMIT(dx,pfn) { \
+	if(dx->fraglimit && pfn->n_fragments < dx->fraglimit) pfn->is_filtered = TRUE; \
+}
 
 #endif /* _DRIVER_H_ */

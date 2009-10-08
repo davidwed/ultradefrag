@@ -582,7 +582,7 @@ BOOLEAN InsertFileToFileList(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCH
 
 	if(UnwantedStuffOnFatDetected(dx,Path)) pfn->is_filtered = TRUE;
 	else pfn->is_filtered = FALSE;
-
+	
 	/* Dump the file. */
 	DumpFatFile(dx,DirEntry,pfn);
 
@@ -654,6 +654,8 @@ void DumpFatFile(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,PFILENAME pfn)
 	} while(ClusterNumber < FatEOC);
 
 	if(pfn->n_fragments > 1) pfn->is_fragm = TRUE;
+	/* mark some files as filtered out */
+	CHECK_FOR_FRAGLIMIT(dx,pfn);
 	return;
 
 fail:

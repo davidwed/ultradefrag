@@ -2,6 +2,12 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 3.2.2 (41.0)   2009-10-
+  ------------------------------------------------------------------------------
+    - fragments threshold filter parameter was added
+    - few little bugs were fixed
+
+
   Version 3.2.1 (41.0)   2009-10-06
   ------------------------------------------------------------------------------
     - shutdown after a job feature was added to GUI
