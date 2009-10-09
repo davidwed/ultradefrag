@@ -698,7 +698,7 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 	switch(pnr_attr->Attribute.AttributeType){
 	case AttributeAttributeList: /* always nonresident? */
 		DebugPrint("Nonresident AttributeList found!\n");
-		DebugPrint("Wait for the next UltraDefrag v3.2.1 to handle it.\n");
+		//DebugPrint("Wait for the next UltraDefrag v3.2.1 to handle it.\n");
 		NonResidentAttrListFound = TRUE;
 		default_attr_name = L"$ATTRIBUTE_LIST";
 		break;
@@ -774,8 +774,12 @@ void AnalyseNonResidentAttribute(UDEFRAG_DEVICE_EXTENSION *dx,PNONRESIDENT_ATTRI
 		/*DbgPrint("WARNING: %ws file found! Run CheckDisk program!\n",full_path);*/
 	} else {
 		/* skip all filtered out attributes */
-		//if(AttributeNeedsToBeDefragmented(dx,full_path,pnr_attr->DataSize,pmfi))
-			ProcessRunList(dx,full_path,pnr_attr,pmfi);
+	//if(AttributeNeedsToBeDefragmented(dx,full_path,pnr_attr->DataSize,pmfi)){
+		if(NonResidentAttrListFound)
+			ProcessRunList(dx,full_path,pnr_attr,pmfi,TRUE);
+		else
+			ProcessRunList(dx,full_path,pnr_attr,pmfi,FALSE);
+	//}
 	}
 
 	/* free allocated memory */
@@ -812,7 +816,9 @@ ULONGLONG RunCount(PUCHAR run)
 }
 
 /* Saves information about VCN/LCN pairs of the attribute specified by full_path parameter. */
-void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi)
+void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,
+					PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi,
+					BOOLEAN is_attr_list)
 {
 	PUCHAR run;
 	ULONGLONG lcn, vcn, length;
@@ -851,6 +857,99 @@ void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,PNONRESIDENT_A
 		run += RunLength(run);
 		vcn += length;
 	}
+	
+	/* analyze nonresident attribute lists */
+	if(is_attr_list) AnalyseNonResidentAttributeList(dx,pfn,pmfi,pnr_attr->InitializedSize);
+}
+
+void AnalyseNonResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULONGLONG size)
+{
+	ULONGLONG bytes_to_read = size;
+	ULONGLONG entries_per_cluster;
+	char *cluster;
+	PBLOCKMAP block;
+	ULONGLONG lsn;
+	NTSTATUS status;
+	PATTRIBUTE_LIST attr_list_entry;
+	int i,j;
+	
+	DebugPrint("-Ultradfg- Allocated size = %I64u bytes.\n",size);
+	
+	if(size > dx->bytes_per_cluster && (dx->bytes_per_cluster % sizeof(ATTRIBUTE_LIST))){
+		DebugPrint("-Ultradfg- Cluster size is not an integral of ATTRIBUTE_LIST size!\n");
+		i = sizeof(ATTRIBUTE_LIST);
+		DebugPrint("-Ultradfg- Cluster size = %I64u, ATTRIBUTE_LIST size = %u.\n",
+			dx->bytes_per_cluster,i);
+		return;
+	}
+	
+	/* allocate memory for a single cluster */
+	cluster = (char *)AllocatePool(NonPagedPool,dx->bytes_per_cluster);
+	if(!cluster){
+		DebugPrint("-Ultradfg- Cannot allocate %I64u bytes of memory for AnalyseNonResidentAttributeList()!\n",
+			dx->bytes_per_cluster);
+		return;
+	}
+	
+	entries_per_cluster = dx->bytes_per_cluster / sizeof(ATTRIBUTE_LIST);
+	
+	/* loop through all blocks of file */
+	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+		/* loop through clusters of the current block */
+		for(i = 0; i < block->length; i++){
+			/* read current cluster */
+			lsn = (block->lcn + i) * dx->sectors_per_cluster;
+			status = ReadSectors(dx,lsn,cluster,dx->bytes_per_cluster);
+			if(!NT_SUCCESS(status)){
+				DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
+					lsn,(UINT)status);
+				goto scan_done;
+			}
+			/* loop through ATTRIBUTE_LIST structures */
+			for(j = 0; j < entries_per_cluster; j++){
+				/* should we read it? */
+				if(bytes_to_read < sizeof(ATTRIBUTE_LIST)){
+					DebugPrint("-Ultradfg- AnalyseNonResidentAttributeList() finished,\n");
+					DebugPrint("-Ultradfg- though %I64u superfluous bytes are still not processed.\n",
+						bytes_to_read);
+					goto scan_done;
+				}
+				/* analyze current entry */
+				attr_list_entry = (PATTRIBUTE_LIST)((char *)cluster + sizeof(ATTRIBUTE_LIST) * j);
+				/* is it a valid attribute */
+				if(attr_list_entry->AttributeType == 0xffffffff) goto scan_done;
+				if(attr_list_entry->AttributeType == 0x0) goto scan_done;
+				if(attr_list_entry->Length == 0) goto scan_done;
+				AnalyseAttributeFromAttributeList(dx,attr_list_entry,pmfi);
+				/* decrement number of bytes to read */
+				bytes_to_read -= sizeof(ATTRIBUTE_LIST);
+			}
+		}
+		if(block->next_ptr == pfn->blockmap) break;
+	}
+
+scan_done:	
+	/* free allocated resources */
+	Nt_ExFreePool(cluster);
+	
+#if 0	
+	ULONG n_entries;
+	PATTRIBUTE_LIST attr_list_entry;
+	
+	attr_list_entry = (PATTRIBUTE_LIST)((char *)pr_attr + pr_attr->ValueOffset);
+	n_entries = pr_attr->ValueLength / sizeof(ATTRIBUTE_LIST);
+	while(n_entries){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+		n_entries --;
+		/* is it a valid attribute */
+		if(attr_list_entry->AttributeType == 0xffffffff) break;
+		if(attr_list_entry->AttributeType == 0x0) break;
+		if(attr_list_entry->Length == 0) break;
+		AnalyseAttributeFromAttributeList(dx,attr_list_entry,pmfi);
+		/* go to the next attribute list entry */
+		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + sizeof(ATTRIBUTE_LIST));
+	}
+#endif
 }
 
 /*------------------------ Defragmentation related code ------------------------------*/
