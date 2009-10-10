@@ -74,7 +74,7 @@ int __stdcall winx_init(void *peb)
 {
 	PRTL_USER_PROCESS_PARAMETERS pp;
 	int status;
-	int i;
+	int i, j, k;
 	short kb_device_name[32];
 
 	/* 1. Normalize and get the Process Parameters */
@@ -86,19 +86,61 @@ int __stdcall winx_init(void *peb)
 		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
 		status = kb_open(kb_device_name);
 		if(status >= 0){
-			winx_printf("Keyboard device found: %ws.\n\n",kb_device_name);
-			return status;
+			winx_printf("Keyboard device found: %ws.\n",kb_device_name);
+			winx_printf("Hit any key to ensure that it is physically connected...  ");
+			for(j = 0; j < 10; j++){
+				if(winx_kbhit(1000) >= 0) {
+					winx_printf("\n\n");
+					winx_printf("Keyboard initialized, wait 3 seconds...\n\n");
+					for(k = 0; k < 60; k++)
+						winx_kbhit(50); /* cleanup keyboard buffer */
+					return status;
+				}
+				winx_printf("%u ",10 - j);
+			}
+			winx_printf("\n\n");
+			/* no key has been pressed, try another keyboard */
+			kb_close();
+			continue;
 		}
 	}
 	
-	winx_printf("Wait 15 seconds for USB keyboard initialization...\n");
+	winx_printf("\nWait 15 seconds for USB keyboard initialization...\n\n");
 	winx_sleep(15000);
 	
 	for(i = 0; i < 100; i++){
 		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
 		status = kb_open(kb_device_name);
 		if(status >= 0){
+			winx_printf("Keyboard device found: %ws.\n",kb_device_name);
+			winx_printf("Hit any key to ensure that it is physically connected...  ");
+			for(j = 0; j < 10; j++){
+				if(winx_kbhit(1000) >= 0){
+					winx_printf("\n\n");
+					winx_printf("Keyboard initialized, wait 3 seconds...\n\n");
+					for(k = 0; k < 60; k++)
+						winx_kbhit(50); /* cleanup keyboard buffer */
+					return status;
+				}
+				winx_printf("%u ",10 - j);
+			}
+			winx_printf("\n\n");
+			/* no key has been pressed, try another keyboard */
+			kb_close();
+			continue;
+		}
+	}
+	
+	winx_printf("Preparing for automatic keyboard detection...\n\n");
+
+	for(i = 0; i < 100; i++){
+		_snwprintf(kb_device_name,32,L"\\Device\\KeyboardClass%u",i);
+		status = kb_open(kb_device_name);
+		if(status >= 0){
 			winx_printf("Keyboard device found: %ws.\n\n",kb_device_name);
+			winx_printf("Keyboard initialized, wait 3 seconds...\n\n");
+			for(k = 0; k < 60; k++)
+				winx_kbhit(50); /* cleanup keyboard buffer */
 			return status;
 		}
 	}
