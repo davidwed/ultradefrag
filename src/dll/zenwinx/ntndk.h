@@ -22,6 +22,10 @@
 
 #include <winioctl.h>
 
+#if defined(__POCC__)
+#pragma ftol(inlined)
+#endif
+
 /* define base types */
 #define ULONG_PTR unsigned long*
 typedef int BOOL;

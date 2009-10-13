@@ -20,6 +20,13 @@
 #include "lauxlib.h"
 #include "lualib.h"
 
+#if defined(__POCC__)
+void * __cdecl crt_signal(int, void*);
+void (__cdecl * __cdecl signal(int i, void (__cdecl * func)(int)))(int)
+{
+	return crt_signal(i, func);
+}
+#endif
 
 
 static lua_State *globalL = NULL;

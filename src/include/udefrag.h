@@ -26,6 +26,10 @@
 
 #include "ultradfg.h"
 
+#if defined(__POCC__)
+#pragma ftol(inlined)
+#endif
+
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think that's enough. */
 
@@ -45,7 +49,7 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
 int __stdcall udefrag_get_map(char *buffer,int size);
 char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
 
-int __stdcall udefrag_reload_settings();
+int __stdcall udefrag_reload_settings(void);
 
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);

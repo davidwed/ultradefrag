@@ -1,6 +1,39 @@
 ;-------------------------------------------------------------------------------
 ;
-; Plans for future:
+; one additional note (11 October 2009):
+;
+;-------------------------------------------------------------------------------
+
+x64 compiler included in Windows Server 2003 DDK sometimes produces 
+wrong code. We need to find better replacement for it.
+
+;-------------------------------------------------------------------------------
+;
+; Updated plans for future (8 October 2009):
+;
+;-------------------------------------------------------------------------------
+
+DOS version development is a little bit difficult due to the missing universal 
+sectors reading function in this operating system. Therefore we will develop it 
+under an experimental basis when we will have free time enough for that. I'm 
+not sure that it will be particularly useful.
+
+Instead of working on separate DOS version of the program I plan to complete 
+the final 3.2.x Windows version. This point will be achieved for educational 
+purposes: the final version of the driver will be helpful for all the people 
+who are interested in Windows Kernel architecture.
+
+After achieving this final point I'll work on a driver replacement. All kernel 
+mode code will be ported to a single native DLL. This gives us the following 
+advantages: better support for modern versions of Windows regards to solving 
+a driver signing problem, better reliability and more simplified code.
+
+First of all I will port all defragmenter's code to a single udefrag-kernel.dll.
+Later I'll perform full set of tests to compare it with driver.
+
+;-------------------------------------------------------------------------------
+;
+; Plans for future (7 October 2009):
 ;
 ;-------------------------------------------------------------------------------
 

@@ -41,7 +41,6 @@
 /*
 * FIXME: 
 * 1. Volume ditry flag?
-* 2. Reading non resident AttributeLists from disk.
 */
 
 /*---------------------------------- NTFS related code -------------------------------------*/
@@ -884,7 +883,7 @@ void AnalyseNonResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 	}
 	
 	/* allocate memory for a single cluster */
-	cluster = (char *)AllocatePool(NonPagedPool,dx->bytes_per_cluster);
+	cluster = (char *)AllocatePool(NonPagedPool,(SIZE_T)dx->bytes_per_cluster);
 	if(!cluster){
 		DebugPrint("-Ultradfg- Cannot allocate %I64u bytes of memory for AnalyseNonResidentAttributeList()!\n",
 			dx->bytes_per_cluster);
@@ -899,7 +898,7 @@ void AnalyseNonResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,
 		for(i = 0; i < block->length; i++){
 			/* read current cluster */
 			lsn = (block->lcn + i) * dx->sectors_per_cluster;
-			status = ReadSectors(dx,lsn,cluster,dx->bytes_per_cluster);
+			status = ReadSectors(dx,lsn,cluster,(ULONG)dx->bytes_per_cluster);
 			if(!NT_SUCCESS(status)){
 				DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
 					lsn,(UINT)status);

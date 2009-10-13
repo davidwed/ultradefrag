@@ -43,6 +43,7 @@ micro_edition = 0
 ddk_cmd = "build.exe"
 msvc_cmd = "nmake.exe /NOLOGO /A /f"
 mingw_cmd = "mingw32-make --always-make -f Makefile.mingw"
+pellesc_cmd = "pomake.exe"
 
 -- common subroutines
 function copy(src, dst)
@@ -92,6 +93,16 @@ function produce_ddk_makefile()
 
 	f:write("TARGETNAME=", name, "\n")
 	f:write("TARGETPATH=obj\n")
+
+	-- x64 C compiler included in Windows Server 2003 DDK
+	-- produces sometimes wrong code, therefore we must
+	-- disable all optimizations for 64-bit platforms
+	-- f:write("AMD64_OPTIMIZATION=/Od\n")
+	-- f:write("IA64_OPTIMIZATION=/Od\n\n")
+	-- on x86 systems I have never encounered such problems
+	-- f:write("386_OPTIMIZATION=/Ot /Og\n") -- never tested!!!
+	-- P.S.: This workaround eliminates some wrong compiled code,
+	-- but generates wrong instructions in other places.
 
 	if     target_type == "console" then t = "PROGRAM"; umt = "console"
 	elseif target_type == "gui"     then t = "PROGRAM"; umt = "windows"
@@ -415,6 +426,158 @@ function produce_mingw_makefile()
 	f:close()
 end
 
+-- Pelles C backend
+function produce_pellesc_makefile()
+	local adlibs_libs = {}
+	local adlibs_paths = {}
+	local pos, j
+
+	local winddk_base = assert(os.getenv("WINDDKBASE"))
+	if os.execute("cd > curdir") ~= 0 then
+		error("Cannot retrieve the current directory!")
+	end
+	local current_dir = ""
+	for line in io.lines("curdir") do
+		if current_dir == "" then
+			current_dir = line
+		end
+	end
+
+	local f = assert(io.open(".\\makefile","w"))
+	
+	-- -Zl option is requred to fix unresolved _fltused (ntdll) external call
+	f:write("POCC_FLAGS=", " -Gz -Go -Ot -X -Ze -Zl ") -- stdcall convention required (-Gz)
+	if micro_edition ~= 0 then
+		f:write("-DMICRO_EDITION ")
+	end
+	f:write("-D_MSC_VER=1300 -D__w64 -W0 ") -- to be compatible with DDK headers
+	f:write("-DUSE_WINDDK ") -- to be compatible with DDK headers
+	f:write("/I", winddk_base, "\\inc\\crt ")
+	f:write("/I", winddk_base, "\\inc\\wnet ")
+	f:write("/I", winddk_base, "\\inc\\ddk\\wnet ")
+ 	if arch == "amd64" then
+		f:write("-D_AMD64_ ")
+		f:write("/Tamd64-coff ")
+	else
+		f:write("-D_X86_ ")
+		f:write("/Tx86-coff ")
+	end
+	f:write("\n\n")
+	
+	f:write("PORC_FLAGS=", "/L1033 ")
+	if micro_edition ~= 0 then
+		f:write("-DMICRO_EDITION ")
+	end
+	f:write("/I", winddk_base, "\\inc\\crt ")
+	f:write("/I", winddk_base, "\\inc\\wnet ")
+	f:write("/I", winddk_base, "\\inc\\ddk\\wnet ")
+	f:write("\n\n")
+
+	f:write("POLINK_FLAGS=", "/NODEFAULTLIB /RELEASE /ALTERNATENAME:_errno=_errno ")
+	f:write("/ALTERNATENAME:__iob=__iob /ALTERNATENAME:__pctype=__pctype ")
+	f:write("/ALTERNATENAME:__HUGE=__HUGE ")
+	f:write("/ALTERNATENAME:___mb_cur_max=___mb_cur_max ")
+	f:write("/ALTERNATENAME:_crt_signal=_signal ")
+	if target_type == "console" then
+		f:write("/SUBSYSTEM:CONSOLE ")
+	elseif target_type == "gui" then
+		f:write("/SUBSYSTEM:WINDOWS ")
+	elseif target_type == "native" then
+		f:write("/SUBSYSTEM:NATIVE ")
+		f:write("/ENTRY:_NtProcessStartup\@4 ")
+	elseif target_type == "driver" then
+		f:write("/SUBSYSTEM:NATIVE ")
+		f:write("/BASE:0x10000 ")
+		--f:write("/DEF:", name, "-mingw.def ")
+		f:write("/DRIVER ")
+		f:write("/ENTRY:_DriverEntry\@8 ")
+	elseif target_type == "dll" then
+		f:write("/SUBSYSTEM:CONSOLE ")
+		f:write("/DEF:", deffile, " ")
+		f:write("/DLL ")
+		f:write("/ENTRY:_DllMain\@12 ")
+	else error("Unknown target type: " .. target_type .. "!")
+	end
+	local dirs = 0
+	for dir in string.gmatch(current_dir, "[^\\]+\\") do
+		--print(dir)
+		dirs = dirs + 1
+	end
+	local path = ""
+	for dir in string.gmatch(current_dir, "[^\\]+\\") do
+		if dirs <= 1 then break end
+		path = path .. dir
+		dirs = dirs - 1
+	end
+	--print(path)
+	if arch == "i386" then
+		f:write("/LIBPATH:",path,"lib ")
+	else
+		f:write("/LIBPATH:",path,"lib\\",arch," ")
+	end
+	if arch == "i386" then
+		f:write("/LIBPATH:", winddk_base, "\\lib\\crt\\i386 ")
+		f:write("/LIBPATH:", winddk_base, "\\lib\\wnet\\i386 ")
+		f:write("/MACHINE:X86 ")
+	else
+		f:write("/LIBPATH:", winddk_base, "\\lib\\crt\\amd64 ")
+		f:write("/LIBPATH:", winddk_base, "\\lib\\wnet\\amd64 ")
+		f:write("/MACHINE:AMD64 ")
+	end
+	for i, v in ipairs(libs) do
+		f:write(v, ".lib ")
+	end
+	j = 1
+	for i, v in ipairs(adlibs) do
+		pos = 0
+		repeat
+			pos = string.find(v,"\\",pos + 1,true)
+			--FIXME: pos == nil ??? it's unusual, but ...
+		until string.find(v,"\\",pos + 1,true) == nil
+		adlibs_libs[j] = string.sub(v,pos + 1)
+		adlibs_paths[j] = string.sub(v,0,pos - 1)
+		j = j + 1
+	end
+	for i, v in ipairs(adlibs_libs) do
+		f:write(v, ".lib ")
+	end
+	--for i, v in ipairs(adlibs_paths) do
+	--	f:write("/LIBPATH:", v, " ")
+	--end
+	f:write("\n\n")
+	
+	f:write(target_name .. ": ")
+	for i, v in ipairs(src) do
+		f:write(string.gsub(v,"%.c","%.obj"), " ")
+	end
+	for i, v in ipairs(rc) do
+		f:write(string.gsub(v,"%.rc","%.res"), " ")
+	end
+	f:write("\n")
+	f:write("\tpolink ${POLINK_FLAGS} -out:" .. target_name .. " ")
+	for i, v in ipairs(src) do
+		f:write(string.gsub(v,"%.c","%.obj"), " ")
+	end
+	for i, v in ipairs(rc) do
+		f:write(string.gsub(v,"%.rc","%.res"), " ")
+	end
+	f:write("\n\n")
+
+	for i, v in ipairs(src) do
+		f:write(string.gsub(v,"%.c","%.obj"), ": ", v, "\n")
+		f:write("\tpocc ${POCC_FLAGS} ", v)
+		f:write("\n\n")
+	end
+
+	for i, v in ipairs(rc) do
+		f:write(string.gsub(v,"%.rc","%.res"), ": ", v, "\n")
+		f:write("\tporc ${PORC_FLAGS} ", v)
+		f:write("\n\n")
+	end
+	
+	f:close()
+end
+
 -- frontend
 input_filename = arg[1]
 if input_filename == nil then
@@ -463,6 +626,37 @@ if os.getenv("BUILD_ENV") == "winddk" then
 		else
 			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. name .. ".lib",
 				 "..\\..\\lib\\" .. arch .. "\\" .. name .. ".lib")
+		end
+	end
+elseif os.getenv("BUILD_ENV") == "pellesc" then
+	arch = "i386"
+	if os.getenv("AMD64") ~= nil then arch = "amd64" end
+	if os.getenv("IA64") ~= nil then
+		arch = "ia64"
+		print("IA64 target is not supported yet...\n")
+	elseif os.getenv("ARM") ~= nil then
+		arch = "arm"
+		print("ARM target is not supported yet...\n")
+	else
+		if obsolete(input_filename, "makefile") then
+			produce_pellesc_makefile()
+		end
+		print(input_filename .. " Pelles C build performing...\n")
+		pellesc_cmd = pellesc_cmd .. " /A"
+		if os.execute(pellesc_cmd) ~= 0 then
+			error("Can't build the target!")
+		end
+		if arch == "i386" then
+			copy(target_name, "..\\..\\bin\\")
+		else
+			copy(target_name, "..\\..\\bin\\" .. arch .. "\\")
+		end
+		if target_type == "dll" then
+			if arch == "i386" then
+				copy(name .. ".lib", "..\\..\\lib\\")
+			else
+				copy(name .. ".lib", "..\\..\\lib\\" .. arch .. "\\")
+			end
 		end
 	end
 elseif os.getenv("BUILD_ENV") == "msvc" then

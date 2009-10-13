@@ -63,6 +63,7 @@ goto ddk_build
 :parse_first_parameter
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
+if "%1" equ "--use-pellesc" goto pellesc_build
 
 :ddk_build
 
@@ -104,6 +105,50 @@ set BUILD_DEFAULT=-nmake -i -g -P
 set UDEFRAG_LIB_PATH=..\..\lib\ia64
 rem update manifests...
 call make-manifests.cmd ia64
+call blditems.cmd
+if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
+goto build_scheduler
+
+:pellesc_build
+
+set BUILD_ENV=pellesc
+
+echo --------- Target is x86 ---------
+set AMD64=
+set IA64=
+set ARM=
+set Path=%path%;%PELLESC_BASE%\Bin
+set UDEFRAG_LIB_PATH=..\..\lib
+rem update manifests...
+call make-manifests.cmd X86
+call blditems.cmd
+if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
+goto build_scheduler
+
+echo --------- Target is x64 ---------
+set IA64=
+set AMD64=1
+set ARM=
+set Path=%path%;%PELLESC_BASE%\Bin
+set UDEFRAG_LIB_PATH=..\..\lib\amd64
+rem update manifests...
+call make-manifests.cmd amd64
+call blditems.cmd
+if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
+echo --------- Target is ARM ---------
+set IA64=
+set AMD64=
+set ARM=1
+set Path=%path%;%PELLESC_BASE%\Bin
+set UDEFRAG_LIB_PATH=..\..\lib\amd64
+rem update manifests...
+call make-manifests.cmd amd64
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
@@ -187,6 +232,7 @@ cd amd64
 if %errorlevel% neq 0 goto fail
 
 cd..
+if "%1" equ "--use-pellesc" goto build_source_package
 rem copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
 copy /Y ..\installer\UltraDefrag.nsh .\ia64\
@@ -333,7 +379,10 @@ echo.
 echo Synopsis:
 echo     build              - perform the build using default options
 echo     build --install    - run installer silently after the build
-echo     build [--use-winddk or --use-mingw or --use-msvc] [--install]
-echo                        - specify your favorite compiler
+echo     build [compiler] [--install] - specify your favorite compiler:
+echo                        --use-winddk
+echo                        --use-mingw
+echo                        --use-msvc 
+echo                        --use-pellesc
 echo     build --clean      - perform full cleanup instead of the build
 echo     build --help       - show this help message

@@ -35,3 +35,22 @@ ULONGLONG __umoddi3(ULONGLONG u, ULONGLONG v)
 	return _aullrem(u,v);
 }
 #endif
+
+#if defined(__POCC__)
+ULONGLONG __cdecl __ulldiv(ULONGLONG n, ULONGLONG d)
+{
+	return _aulldiv(n,d);
+}
+LONGLONG __cdecl __lldiv(LONGLONG u, LONGLONG v)
+{
+	return _alldiv(u,v);
+}
+LONGLONG __cdecl __llmul(LONGLONG n, LONGLONG d)
+{
+	return _allmul(n,d);
+}
+ULONGLONG __cdecl __ullmod(ULONGLONG u, ULONGLONG v)
+{
+	return _allrem(u,v);
+}
+#endif

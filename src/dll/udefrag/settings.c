@@ -150,7 +150,7 @@ int __stdcall udefrag_apply_settings()
 * EXAMPLE
 *    udefrag_reload_settings();
 ******/
-int __stdcall udefrag_reload_settings()
+int __stdcall udefrag_reload_settings(void)
 {
 	udefrag_load_settings();
 	return udefrag_apply_settings();

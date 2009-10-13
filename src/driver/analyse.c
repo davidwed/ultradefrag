@@ -55,11 +55,15 @@ ULONGLONG _rdtsc(void)
 /* in milliseconds */
 ULONGLONG _rdtsc(void)
 {
+#if defined(__POCC__)
+	return 0;
+#else
 	LARGE_INTEGER i;
 	
 	/* ugly implementation, but... */
 	KeQueryTickCount(&i);
 	return (ULONGLONG)i.QuadPart * KeQueryTimeIncrement() * 100 / 1000000;
+#endif
 }
 
 /* in nanoseconds */

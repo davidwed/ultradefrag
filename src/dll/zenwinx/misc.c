@@ -28,6 +28,13 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+#if defined(__POCC__)
+LONGLONG __cdecl __llmul(LONGLONG n, LONGLONG d)
+{
+	return _allmul(n,d);
+}
+#endif
+
 NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
 
 /****f* zenwinx.misc/winx_sleep

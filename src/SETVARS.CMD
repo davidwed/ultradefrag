@@ -13,3 +13,4 @@ set NSISDIR=D:\Software\Tools\NSIS
 set SEVENZIP_PATH=C:\Program Files\7-Zip
 set MSVSBIN=D:\Software\Microsoft Visual Studio\VC98\Bin
 set DDKINCDIR=D:\MyDocs\ReactOS030\include
+set PELLESC_BASE=D:\Software\PellesC
