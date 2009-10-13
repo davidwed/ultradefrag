@@ -61,10 +61,10 @@ void display_help(void)
 				"  exit         - continue Windows boot\n"
 				"  reboot       - reboot the PC\n"
 				"  shutdown     - shut down the PC\n"
-				"  boot-on      - enable boot time defragger\n"
-				"                 lose its effect before shutdown/reboot\n"
-				"  boot-off     - disable boot time defragger\n"
-				"                 lose its effect before shutdown/reboot\n"
+				"  boot-on      - enable boot time defragger;\n"
+				"                 loses its effect before shutdown/reboot\n"
+				"  boot-off     - disable boot time defragger;\n"
+				"                 loses its effect before shutdown/reboot\n"
 				"  help         - display this help screen\n"
 				);
 }
@@ -410,10 +410,11 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_exit(1);
 	}
 	/* 6b. Prompt to exit */
-	winx_printf("Press any key to exit...  ");
-	for(i = 0; i < 3; i++){
+	winx_printf("\nPress any key to exit ");
+	for(i = 0; i < 10; i++){
 		if(winx_kbhit(1000) >= 0){ winx_printf("\n"); Exit(0); }
-		winx_printf("%c ",(char)('0' + 3 - i));
+		//winx_printf("%c ",(char)('0' + 10 - i));
+		winx_printf(".");
 	}
 	winx_printf("\n\n");
 	/* 7. Initialize the ultradfg device */

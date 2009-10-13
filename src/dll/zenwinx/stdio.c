@@ -33,17 +33,8 @@
 
 #define INTERNAL_BUFFER_SIZE 2048
 
-extern HANDLE hKbDevice;
-extern HANDLE hKbEvent;
-
-/* global variables for winx_kbhit function */
-KEYBOARD_INPUT_DATA kbd;
-IO_STATUS_BLOCK iosb;
-LARGE_INTEGER ByteOffset;
-KBD_RECORD kbd_rec;
-
+int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout);
 void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
-void __stdcall kb_close(void);
 
 /* internal functions */
 /****if* zenwinx.stdio/winx_print
@@ -206,63 +197,20 @@ int __cdecl winx_printf(const char *format, ...)
 *        winx_printf("%c ",(char)('0' + 3 - i));
 *    }
 * NOTES
-*    If msec is INFINITE, the function's
-*    time-out interval never elapses.
-* BUGS
-*    The erroneous situation, when we have
-*    timeout for read request but
-*    the next NtCancelIoFile() call is
-*    unsuccessful, is not handled.
+*    1. If msec is INFINITE, the function's
+*       time-out interval never elapses.
+*    2. This call may terminate the program
+*       if NtCancelIoFile() fails for one 
+*       of the existing keyboard devices.
 * SEE ALSO
 *    winx_breakhit
 ******/
 int __cdecl winx_kbhit(int msec)
 {
-	NTSTATUS Status;
-	LARGE_INTEGER interval;
+	KEYBOARD_INPUT_DATA kbd;
+	KBD_RECORD kbd_rec;
 
-	if(!hKbDevice){
-		winx_raise_error("E: winx_kbhit(): the keyboard is not opened!");
-		return (-1);
-	}
-	if(msec != INFINITE)
-		interval.QuadPart = -((signed long)msec * 10000);
-	else
-		interval.QuadPart = MAX_WAIT_INTERVAL;
-	ByteOffset.QuadPart = 0;
-	Status = NtReadFile(hKbDevice,hKbEvent,NULL,NULL,
-		&iosb,&kbd,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
-	/* wait in case operation is pending */
-	if(Status == STATUS_PENDING){
-		Status = NtWaitForSingleObject(hKbEvent,FALSE,&interval);
-		if(Status == STATUS_TIMEOUT){ 
-			/* 
-			* If we have timeout we should cancel read operation
-			* to empty keyboard pending operations queue.
-			*/
-			Status = NtCancelIoFile(hKbDevice,&iosb);
-			if(!NT_SUCCESS(Status)){
-				/*
-				* This is a hard error because the next read request
-				* fill global kbd record instead of the special one.
-				*/
-				/*
-				* FIXME: handle this error.
-				*/
-				winx_raise_error("E: NtCancelIoFile(hKbDevice,...) failed: %x!",
-					(UINT)Status);
-				kb_close();
-				return (-1);
-			}
-			/*winx_raise_error("N: winx_kbhit() timeout!");*/
-			return (-1);
-		}
-		if(NT_SUCCESS(Status)) Status = iosb.Status;
-	}
-	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: winx_kbhit(): can't read the keyboard: %x!",(UINT)Status);
-		return (-1);
-	}
+	if(kb_read(&kbd,msec) < 0) return (-1);
 	IntTranslateKey(&kbd,&kbd_rec);
 	if(!kbd_rec.bKeyDown){
 		/*winx_raise_error("N: winx_kbhit(): The key was released!");*/
@@ -291,17 +239,19 @@ int __cdecl winx_kbhit(int msec)
 *        winx_exit(0);
 *    }
 * NOTES
-*    If msec is INFINITE, the function's
-*    time-out interval never elapses.
-* BUGS
-*    This function is based on winx_kbhit(),
-*    so look at bugs of them.
+*    1. If msec is INFINITE, the function's
+*       time-out interval never elapses.
+*    2. This call may terminate the program
+*       if NtCancelIoFile() fails for one 
+*       of the existing keyboard devices.
 * SEE ALSO
 *    winx_kbhit
 ******/
 int __cdecl winx_breakhit(int msec)
 {
-	if(winx_kbhit(msec) == -1) return (-1);
+	KEYBOARD_INPUT_DATA kbd;
+
+	if(kb_read(&kbd,msec) < 0) return (-1);
 	if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d)) return 0;
 	/*winx_raise_error("N: winx_breakhit(): Other key was pressed.");*/
 	return (-1);
@@ -314,37 +264,22 @@ int __cdecl winx_breakhit(int msec)
 *    character = winx_getch();
 * FUNCTION
 *    CRT getch() native equivalent.
+* NOTES
+*    This call may terminate the program
+*    if NtCancelIoFile() fails for one 
+*    of the existing keyboard devices.
 * SEE ALSO
 *    winx_getche,winx_gets
 ******/
 int __cdecl winx_getch(void)
 {
 	KEYBOARD_INPUT_DATA kbd;
-	IO_STATUS_BLOCK iosb;
-	LARGE_INTEGER ByteOffset;
 	KBD_RECORD kbd_rec;
-	NTSTATUS Status;
 
-	if(!hKbDevice){
-		winx_raise_error("E: winx_getch(): the keyboard is not opened!");
-		return (-1);
-	}
-repeate_attempt:
-	ByteOffset.QuadPart = 0;
-	///winx_printf("hKbDevice=%p,hKbEvent=%p\n",hKbDevice,hKbEvent);
-	Status = NtReadFile(hKbDevice,hKbEvent,NULL,NULL,
-		&iosb,&kbd,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
-	/* wait in case operation is pending */
-	if(Status == STATUS_PENDING){
-		Status = NtWaitForSingleObject(hKbEvent,FALSE,NULL);
-		if(NT_SUCCESS(Status)) Status = iosb.Status;
-	}
-	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: winx_getch(): can't read the keyboard: %x!",(UINT)Status);
-		return (-1);
-	}
-	IntTranslateKey(&kbd,&kbd_rec);
-	if(!kbd_rec.bKeyDown) goto repeate_attempt;
+	do{
+		if(kb_read(&kbd,INFINITE) < 0) return (-1);
+		IntTranslateKey(&kbd,&kbd_rec);
+	} while(!kbd_rec.bKeyDown);
 	return (int)kbd_rec.AsciiChar;
 }
 
@@ -355,6 +290,10 @@ repeate_attempt:
 *    character = winx_getche();
 * FUNCTION
 *    CRT getche() native equivalent.
+* NOTES
+*    This call may terminate the program
+*    if NtCancelIoFile() fails for one 
+*    of the existing keyboard devices.
 * BUGS
 *    Does not recognize special characters
 *    such as 'backspace'.
@@ -385,6 +324,10 @@ int __cdecl winx_getche(void)
 * RESULT
 *    nonnegative value for number of characters including term. zero,
 *    -1 for error.
+* NOTES
+*    This call may terminate the program
+*    if NtCancelIoFile() fails for one 
+*    of the existing keyboard devices.
 * BUGS
 *    Does not recognize special characters
 *    such as 'backspace'.
