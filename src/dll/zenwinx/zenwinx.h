@@ -33,7 +33,7 @@
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
-#define ERR_MSG_SIZE 1024
+#define ERR_MSG_SIZE 1024 /* must be no more than 4096 - sizeof(ULONG) */
 
 typedef struct _WINX_FILE {
 	HANDLE hFile;
@@ -114,9 +114,13 @@ int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length
 int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber);
 
 int __stdcall winx_create_event(short *name,int type,HANDLE *phandle);
+int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle);
 void __stdcall winx_destroy_event(HANDLE h);
 
 int __stdcall winx_register_boot_exec_command(short *command);
 int __stdcall winx_unregister_boot_exec_command(short *command);
+
+void __cdecl winx_dbg_print(char *format, ...);
+int __stdcall winx_debug_print(char *string);
 
 #endif /* _ZENWINX_H_ */

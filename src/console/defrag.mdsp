@@ -93,4 +93,4 @@ extraResourceOptions=
 ..\share\getopt.c,21934
 ..\include\udefrag.h,1358
 ..\include\ultradfg.h,0
-defrag.c,14636
+defrag.c,12786

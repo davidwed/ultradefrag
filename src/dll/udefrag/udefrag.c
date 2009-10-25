@@ -34,6 +34,8 @@
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
 
+#include "../../include/udefrag-kernel.h"
+
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
 #ifndef __FUNCTION__
@@ -47,6 +49,10 @@
 }
 
 /* global variables */
+
+BOOL kernel_mode_driver = TRUE;
+long cluster_map_size = 0;
+
 char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
 HANDLE init_event = NULL;
@@ -74,6 +80,11 @@ void __stdcall DefragErrorHandler(short *msg)
 		eh(L"NTFS volumes with cluster size greater than 4 kb\n"
 		   L"cannot be defragmented on Windows 2000.");
 	else eh(msg);
+}
+
+void __stdcall LoadDriverErrorHandler(short *msg)
+{
+	winx_dbg_print("%ws\n",msg);
 }
 
 /* functions */
@@ -119,6 +130,14 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 ******/
 int __stdcall udefrag_init(long map_size)
 {
+//	short event_name[32];
+//	int device_number = 0;
+
+//	UNICODE_STRING uStr;
+//	OBJECT_ATTRIBUTES ObjectAttributes;
+//	HANDLE hKbEvent = NULL;
+//	NTSTATUS Status;
+
 	/* 1. Enable neccessary privileges */
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) return (-1)*/
 	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) return (-1);
@@ -132,6 +151,14 @@ int __stdcall udefrag_init(long map_size)
 //		PowerSystemHibernate,
 //		0
 //		);
+//	_snwprintf(event_name,32,L"\\kb_event%u",device_number);
+//	RtlInitUnicodeString(&uStr,event_name);
+//	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
+//	Status = NtCreateEvent(&hKbEvent,STANDARD_RIGHTS_ALL | 0x1ff/*0x1f01ff*/,
+//		&ObjectAttributes,SynchronizationEvent,FALSE);
+//	if(!NT_SUCCESS(Status)){
+//		winx_raise_error("E: Can't create kb_event%u: %x!",device_number,(UINT)Status);
+//	}
 
 	/* 2. only one instance of the program ! */
 	/* create init_event - this must be after privileges enabling */
@@ -141,8 +168,19 @@ int __stdcall udefrag_init(long map_size)
 		return (-1);
 	}
 	winx_set_error_handler(eh);
+
 	/* 3. Load the driver */
-	if(winx_load_driver(L"ultradfg") < 0) return (-1);
+	eh = winx_set_error_handler(LoadDriverErrorHandler);
+	if(winx_load_driver(L"ultradfg__") < 0){
+		winx_set_error_handler(eh);
+		/* it seems that we are running on Vista or Win7 */
+		kernel_mode_driver = FALSE;
+		cluster_map_size = map_size;
+		return 0;
+	}
+	winx_set_error_handler(eh);
+	kernel_mode_driver = TRUE;
+	
 	/* 4. Open our device */
 	f_ud = winx_fopen("\\Device\\UltraDefrag","w");
 	if(!f_ud) goto init_fail;
@@ -192,26 +230,52 @@ int __stdcall udefrag_unload(void)
 
 	/* close events */
 	winx_destroy_event(init_event); init_event = NULL;
-	/* close device handle */
-	if(f_ud) winx_fclose(f_ud);
-	if(f_map) winx_fclose(f_map);
-	if(f_stat) winx_fclose(f_stat);
-	if(f_stop) winx_fclose(f_stop);
-	/* unload the driver */
-	winx_unload_driver(L"ultradfg");
+
+	if(kernel_mode_driver){
+		/* close device handle */
+		if(f_ud) winx_fclose(f_ud);
+		if(f_map) winx_fclose(f_map);
+		if(f_stat) winx_fclose(f_stat);
+		if(f_stop) winx_fclose(f_stop);
+		/* unload the driver */
+		winx_unload_driver(L"ultradfg");
+	}
 	return 0;
 }
 
 int udefrag_send_command(unsigned char command,unsigned char letter)
 {
 	char cmd[4];
+	UDEFRAG_JOB_TYPE job_type;
 
 	eh = winx_set_error_handler(DefragErrorHandler);
-	cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-	if(winx_fwrite(cmd,strlen(cmd),1,f_ud)){
-		winx_set_error_handler(eh);
-		return 0;
+
+	if(kernel_mode_driver){
+		cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
+		if(winx_fwrite(cmd,strlen(cmd),1,f_ud)){
+			winx_set_error_handler(eh);
+			return 0;
+		}
+	} else {
+		cmd[0] = letter; cmd[1] = 0;
+		switch(command){
+		case 'a':
+		case 'A':
+			job_type = ANALYSE_JOB;
+			break;
+		case 'd':
+		case 'D':
+			job_type = DEFRAG_JOB;
+			break;
+		default:
+			job_type = OPTIMIZE_JOB;
+		}
+		if(udefrag_kernel_start(cmd,job_type,cluster_map_size) >= 0){
+			winx_set_error_handler(eh);
+			return 0;
+		}
 	}
+
 	winx_set_error_handler(eh);
 	winx_raise_error("E: Can't execute driver command \'%c\' for volume %c!",
 		command,letter);
@@ -317,7 +381,11 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 int __stdcall udefrag_stop(void)
 {
 	CHECK_INIT_EVENT();
-	if(winx_fwrite("s",1,1,f_stop)) return 0;
+	if(kernel_mode_driver){
+		if(winx_fwrite("s",1,1,f_stop)) return 0;
+	} else {
+		if(udefrag_kernel_stop() >= 0) return 0;
+	}
 	winx_raise_error("E: Stop request failed!");
 	return (-1);
 }
@@ -347,9 +415,16 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	
 	CHECK_INIT_EVENT();
 
-	if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
-		winx_raise_error("E: Statistical data unavailable!");
-		return (-1);
+	if(kernel_mode_driver){
+		if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
+			winx_raise_error("E: Statistical data unavailable!");
+			return (-1);
+		}
+	} else {
+		if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
+			winx_raise_error("E: Statistical data unavailable!");
+			return (-1);
+		}
 	}
 
 	if(percentage){ /* calculate percentage only if we have such request */
@@ -382,7 +457,14 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 int __stdcall udefrag_get_map(char *buffer,int size)
 {
 	CHECK_INIT_EVENT();
-	if(winx_fread(buffer,size,1,f_map)) return 0;
+	
+	if(kernel_mode_driver){
+		if(winx_fread(buffer,size,1,f_map)) return 0;
+	} else {
+		if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) >= 0)
+			return 0;
+	}
+				
 	winx_raise_error("E: Cluster map unavailable!");
 	return (-1);
 }

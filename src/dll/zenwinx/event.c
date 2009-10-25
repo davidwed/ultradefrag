@@ -45,7 +45,7 @@
 * EXAMPLE
 *    winx_create_event(L"\\xyz_event",SynchronizationEvent,&hEvent);
 * SEE ALSO
-*    winx_destroy_event
+*    winx_open_event,winx_destroy_event
 ******/
 int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 {
@@ -85,6 +85,54 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 	return 0;
 }
 
+/****f* zenwinx.event/winx_open_event
+* NAME
+*    winx_open_event
+* SYNOPSIS
+*    error = winx_open_event(name, flags, phandle);
+* FUNCTION
+*    Opens the specified event.
+* INPUTS
+*    name    - event name
+*    flags   - the same as dwDesiredAccess parameter
+*              of the OpenEvent() Win32 function
+*    phandle - pointer to event handle
+* RESULT
+*    If the function succeeds, the return value is zero.
+*    Otherwise - negative value and phandle == NULL.
+* EXAMPLE
+*    winx_open_event(L"\\xyz_event",EVENT_MODIFY_STATE,&hEvent);
+* SEE ALSO
+*    winx_create_event,winx_destroy_event
+******/
+int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle)
+{
+	UNICODE_STRING us;
+	NTSTATUS Status;
+	OBJECT_ATTRIBUTES oa;
+
+	if(!phandle){
+		winx_raise_error("E: winx_open_event() invalid phandle!");
+		return (-1);
+	}
+	*phandle = NULL;
+
+	if(!name){
+		winx_raise_error("E: winx_open_event() invalid name!");
+		return (-1);
+	}
+
+	RtlInitUnicodeString(&us,name);
+	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+	Status = NtOpenEvent(phandle,flags,&oa);
+	if(!NT_SUCCESS(Status)){
+		winx_raise_error("E: Can't open %ws: %x!",name,(UINT)Status);
+		*phandle = NULL;
+		return (-1);
+	}
+	return 0;
+}
+
 /****f* zenwinx.event/winx_destroy_event
 * NAME
 *    winx_destroy_event
@@ -99,7 +147,7 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 * EXAMPLE
 *    winx_destroy_event(hEvent); hEvent = NULL;
 * SEE ALSO
-*    winx_create_event
+*    winx_create_event,winx_open_event
 ******/
 void __stdcall winx_destroy_event(HANDLE h)
 {

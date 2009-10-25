@@ -97,7 +97,7 @@ function produce_ddk_makefile()
 	-- x64 C compiler included in Windows Server 2003 DDK
 	-- produces sometimes wrong code, therefore we must
 	-- disable all optimizations for 64-bit platforms
-	-- f:write("AMD64_OPTIMIZATION=/Od\n")
+	f:write("AMD64_OPTIMIZATION=/O1\n")
 	-- f:write("IA64_OPTIMIZATION=/Od\n\n")
 	-- on x86 systems I have never encounered such problems
 	-- f:write("386_OPTIMIZATION=/Ot /Og\n") -- never tested!!!
@@ -684,7 +684,10 @@ elseif os.getenv("BUILD_ENV") == "mingw" then
 	if target_type == "dll" then
 		copy("lib" .. target_name .. ".a","..\\..\\lib\\")
 	end
-else error("\%BUILD_ENV\% has wrong value: " .. os.getenv("BUILD_ENV") .. "!")
+elseif os.getenv("BUILD_ENV") == "mingw_x64" then
+	error("MinGW x64 environment is not supported yet!")
+else
+	error("\%BUILD_ENV\% has wrong value: " .. os.getenv("BUILD_ENV") .. "!")
 end
 
 print(input_filename .. " " .. os.getenv("BUILD_ENV") .. " build was successful.\n")

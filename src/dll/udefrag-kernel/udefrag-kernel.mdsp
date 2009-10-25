@@ -1,5 +1,5 @@
 [Project]
-name=udefrag
+name=udefrag-kernel
 type=2
 defaultConfig=1
 
@@ -7,8 +7,8 @@ defaultConfig=1
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=../../obj/udefrag
-outputFilesDirectory=../../obj/udefrag
+intermediateFilesDirectory=../../obj/udefrag-kernel
+outputFilesDirectory=../../obj/udefrag-kernel
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -26,9 +26,9 @@ optimizeLevel=0
 
 // linker
 libraryPath=
-outputFilename=../../bin/udefrag.dll
-libraries=ntdll,zenwinx,udefrag-kernel
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+outputFilename=../../bin/udefrag-kernel.dll
+libraries=ntdll,zenwinx
+extraLinkerOptions=udefrag-kernel-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -45,8 +45,8 @@ extraResourceOptions=
 // compiler 
 workingDirectory=
 arguments=
-intermediateFilesDirectory=../../obj/udefrag
-outputFilesDirectory=../../obj/udefrag
+intermediateFilesDirectory=../../obj/udefrag-kernel
+outputFilesDirectory=../../obj/udefrag-kernel
 compilerPreprocessor=
 extraCompilerOptions=
 compilerIncludeDirectory=
@@ -64,9 +64,9 @@ optimizeLevel=2
 
 // linker
 libraryPath=..\..\lib
-outputFilename=../../bin/udefrag.dll
-libraries=ntdll,zenwinx,udefrag-kernel
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+outputFilename=../../bin/udefrag-kernel.dll
+libraries=ntdll,zenwinx
+extraLinkerOptions=udefrag-kernel-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -80,19 +80,14 @@ resourceIncludeDirectory=
 extraResourceOptions=
 
 [Source]
-1=misc.c
-2=settings.c
-3=sfuncs.c
-4=udefrag.c
-5=volume.c
+1=udefrag-kernel.c
 [Header]
+1=..\..\include\udefrag-kernel.h
 [Resource]
-1=udefrag.rc
+1=udefrag-kernel.rc
 [Other]
 [History]
-misc.c,0
-volume.c,2356
 ..\..\include\ultradfg.h,3163
-settings.c,4796
-udefrag.c,12823
-..\..\include\udefrag.h,1544
+..\..\include\udefrag-kernel.h,1389
+udefrag-kernel.rc,1514
+udefrag-kernel.c,1459

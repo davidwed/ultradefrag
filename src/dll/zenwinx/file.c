@@ -96,6 +96,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 		winx_raise_error("W: Can't open %s: %x!",filename,(UINT)status);
 		return NULL;
 	}
+	/* FIXME: hFile == NULL */
 	f = (WINX_FILE *)winx_virtual_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);

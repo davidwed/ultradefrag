@@ -113,7 +113,12 @@ extraResourceOptions=
 1=ultradfg.rc
 [Other]
 [History]
-driver.h,23430
-ultradfg.c,23548
-filter.c,1684
-ntfs.c,23145
+int64.c,1396
+analyse.c,1923
+ntfs.h,8221
+ultradfg.c,4948
+..\include\ultradfg.h,2753
+fat.c,15213
+findfiles.c,8156
+ntfs.c,29197
+driver.h,8564

@@ -1,0 +1,17 @@
+-- this is the UltraDefrag User Mode Driver build options
+
+name        = "udefrag-kernel"
+target_type = "dll"
+nativedll   = 1
+
+src = {
+	"udefrag-kernel.c"
+}
+
+rc = { "udefrag-kernel.rc" }
+
+deffile  = "udefrag-kernel.def"
+baseaddr = "0x01700000"
+
+libs = { "ntdll" }
+adlibs = { "$(UDEFRAG_LIB_PATH)\\zenwinx" }

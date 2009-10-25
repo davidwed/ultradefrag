@@ -1,0 +1,6 @@
+LIBRARY udefrag-kernel.dll
+
+EXPORTS
+	udefrag_kernel_start
+	udefrag_kernel_stop
+	udefrag_kernel_get_statistic

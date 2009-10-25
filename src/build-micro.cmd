@@ -33,6 +33,7 @@ xcopy /I /Y /Q    .\console .\obj\console
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\share .\obj\share
+xcopy /I /Y /Q    .\dll\udefrag-kernel .\obj\udefrag-kernel
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 
@@ -54,6 +55,7 @@ goto ddk_build
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
 if "%1" equ "--use-pellesc" goto pellesc_build
+if "%1" equ "--use-mingw-x64" goto mingw_x64_build
 
 :ddk_build
 
@@ -162,6 +164,21 @@ set Path=%OLD_PATH%
 
 goto build_scheduler
 
+:mingw_x64_build
+
+set path=%MINGWBASEx64%\bin;%path%
+
+set BUILD_ENV=mingw_x64
+set UDEFRAG_LIB_PATH=..\..\lib
+rem update manifests...
+call make-manifests.cmd X86
+call blditems.cmd
+if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
+goto build_scheduler
+
+
 :mingw_build
 
 rem if "%MINGW_ENV%" neq "" goto start_mingw_build
@@ -259,6 +276,7 @@ rd /s /q include
 rd /s /q native
 rd /s /q dll
 rd /s /q zenwinx
+rd /s /q udefrag-kernel
 rd /s /q udefrag
 rd /s /q lua5.1
 del /s /q *.*
@@ -284,5 +302,6 @@ echo                              --use-winddk
 echo                              --use-mingw
 echo                              --use-msvc 
 echo                              --use-pellesc
+echo                              --use-mingw-x64
 echo     build-micro --clean      - perform full cleanup instead of the build
 echo     build-micro --help       - show this help message

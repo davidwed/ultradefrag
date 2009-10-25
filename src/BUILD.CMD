@@ -39,6 +39,7 @@ xcopy /I /Y /Q    .\scheduler\C\res .\obj\udefrag-scheduler\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\share .\obj\share
+xcopy /I /Y /Q    .\dll\udefrag-kernel .\obj\udefrag-kernel
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
@@ -64,6 +65,7 @@ goto ddk_build
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
 if "%1" equ "--use-pellesc" goto pellesc_build
+if "%1" equ "--use-mingw-x64" goto mingw_x64_build
 
 :ddk_build
 
@@ -173,6 +175,21 @@ if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
 
 goto build_scheduler
+
+:mingw_x64_build
+
+set path=%MINGWBASEx64%\bin;%path%
+
+set BUILD_ENV=mingw_x64
+set UDEFRAG_LIB_PATH=..\..\lib
+rem update manifests...
+call make-manifests.cmd X86
+call blditems.cmd
+if %errorlevel% neq 0 goto fail
+set Path=%OLD_PATH%
+
+goto build_scheduler
+
 
 :mingw_build
 
@@ -302,6 +319,8 @@ copy /Y ..\doc\html\handbook\*.* %SRC_PKG_PATH%\doc\html\handbook\
 
 copy .\*.* %SRC_PKG_PATH%\src\
 
+rd /s /q %SRC_PKG_PATH%\src\dll\udefrag-kernel\doxy-doc
+rd /s /q %SRC_PKG_PATH%\src\dll\udefrag-kernel\robo-doc
 rd /s /q %SRC_PKG_PATH%\src\dll\udefrag\doxy-doc
 rd /s /q %SRC_PKG_PATH%\src\dll\udefrag\robo-doc
 rd /s /q %SRC_PKG_PATH%\src\dll\zenwinx\robo-doc
@@ -358,6 +377,7 @@ rd /s /q share
 rd /s /q native
 rd /s /q dll
 rd /s /q zenwinx
+rd /s /q udefrag-kernel
 rd /s /q udefrag
 rd /s /q lua5.1
 rd /s /q wgx
@@ -384,5 +404,6 @@ echo                        --use-winddk
 echo                        --use-mingw
 echo                        --use-msvc 
 echo                        --use-pellesc
+echo                        --use-mingw-x64
 echo     build --clean      - perform full cleanup instead of the build
 echo     build --help       - show this help message
