@@ -36,8 +36,15 @@
 int  __stdcall kb_open(short *kb_device_name);
 void __stdcall kb_close(void);
 
+void winx_create_global_heap(void);
+void winx_destroy_global_heap(void);
+
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
+	if(dwReason == DLL_PROCESS_ATTACH)
+		winx_create_global_heap();
+	else if(dwReason == DLL_PROCESS_DETACH)
+		winx_destroy_global_heap();
 	return 1;
 }
 

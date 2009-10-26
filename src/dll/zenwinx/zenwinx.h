@@ -51,6 +51,8 @@ void __stdcall winx_shutdown(void);
 
 void * __stdcall winx_virtual_alloc(ULONGLONG size);
 void   __stdcall winx_virtual_free(void *addr,ULONGLONG size);
+void * __stdcall winx_heap_alloc(ULONGLONG size);
+void   __stdcall winx_heap_free(void *addr);
 
 int __cdecl winx_putch(int ch);
 int __cdecl winx_puts(const char *string);

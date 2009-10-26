@@ -28,6 +28,8 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc call */
+
 /****ix* zenwinx.internals/long_type_on_x64
 * NAME
 *   long data type on x64 system
@@ -55,6 +57,8 @@
 *   To suppress this mistake we are using since 2.1.0 version
 *   of the Ultra Defragmenter the following form:
 *   winx_virtual_alloc(ULONGLONG size);
+*
+*   P.S.: It seems to be the x64 compiler's bug.
 ******/
 
 /****f* zenwinx.memory/winx_virtual_alloc
@@ -85,7 +89,7 @@
 *    2. Memory protection for the region of
 *       pages to be allocated is PAGE_READWRITE.
 * SEE ALSO
-*    winx_virtual_free
+*    winx_virtual_free,winx_heap_alloc,winx_heap_free
 ******/
 void * __stdcall winx_virtual_alloc(ULONGLONG size)
 {
@@ -118,10 +122,71 @@ void * __stdcall winx_virtual_alloc(ULONGLONG size)
 *    After this call you must not refer
 *    to the specified memory again.
 * SEE ALSO
-*    winx_virtual_alloc
+*    winx_virtual_alloc,winx_heap_alloc,winx_heap_free
 ******/
 void __stdcall winx_virtual_free(void *addr,ULONGLONG size)
 {
 	NtFreeVirtualMemory(NtCurrentProcess(),&addr,
 		(PULONG)(PVOID)&size,MEM_RELEASE);
+}
+
+/****f* zenwinx.memory/winx_heap_alloc
+* NAME
+*    winx_heap_alloc
+* SYNOPSIS
+*    addr = winx_heap_alloc(size);
+* FUNCTION
+*    Allocate requested number of bytes
+*    from the global growable heap.
+* INPUTS
+*    size - size of the region of memory, in bytes.
+* RESULT
+*    If the function succeeds, the return value is
+*    the base address of the allocated memory.
+*    If the function fails, the return value is NULL.
+* NOTES
+*    1. Memory allocated by this function
+*       is automatically initialized to zero?
+* SEE ALSO
+*    winx_heap_free,winx_virtual_alloc,winx_virtual_free
+******/
+void * __stdcall winx_heap_alloc(ULONGLONG size)
+{
+	if(hGlobalHeap == NULL) return NULL;
+	return RtlAllocateHeap(hGlobalHeap,0/*HEAP_ZERO_MEMORY*/,(ULONG)size);
+}
+
+/****f* zenwinx.memory/winx_heap_free
+* NAME
+*    winx_heap_free
+* SYNOPSIS
+*    winx_heap_free(addr);
+* FUNCTION
+*    Release a specified region of memory.
+* INPUTS
+*    addr - pointer to the base address
+*           of memory to be freed.
+* RESULT
+*    This function does not return a value.
+* NOTES
+*    After this call you must not refer
+*    to the specified memory again.
+* SEE ALSO
+*    winx_heap_alloc,winx_virtual_alloc,winx_virtual_free
+******/
+void __stdcall winx_heap_free(void *addr)
+{
+	RtlFreeHeap(hGlobalHeap,0,addr);
+}
+
+/* internal code */
+void winx_create_global_heap(void)
+{
+	/* create growable heap with initial size of 100 kb */
+	hGlobalHeap = RtlCreateHeap(0,NULL,0,100 * 1024,NULL,NULL);
+}
+
+void winx_destroy_global_heap(void)
+{
+	if(hGlobalHeap) RtlDestroyHeap(hGlobalHeap);
 }

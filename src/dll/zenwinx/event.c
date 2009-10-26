@@ -44,6 +44,8 @@
 *    Otherwise - negative value and phandle == NULL.
 * EXAMPLE
 *    winx_create_event(L"\\xyz_event",SynchronizationEvent,&hEvent);
+* NOTES
+*    The initial state of the successfully created event is signaled.
 * SEE ALSO
 *    winx_open_event,winx_destroy_event
 ******/

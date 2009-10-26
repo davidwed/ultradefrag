@@ -5,7 +5,8 @@ target_type = "dll"
 nativedll   = 1
 
 src = {
-	"udefrag-kernel.c"
+	"udefrag-kernel.c", "filter.c", "globals.c", "map.c",
+	"options.c", "list.c"
 }
 
 rc = { "udefrag-kernel.rc" }

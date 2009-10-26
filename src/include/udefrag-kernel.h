@@ -28,8 +28,6 @@
 #pragma ftol(inlined)
 #endif
 
-#define DebugPrint winx_dbg_print
-
 typedef enum {
 	ANALYSE_JOB,
 	DEFRAG_JOB,

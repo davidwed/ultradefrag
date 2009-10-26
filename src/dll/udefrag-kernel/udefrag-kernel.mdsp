@@ -81,13 +81,24 @@ extraResourceOptions=
 
 [Source]
 1=udefrag-kernel.c
+2=globals.c
+3=map.c
+4=options.c
+5=filter.c
+6=list.c
 [Header]
 1=..\..\include\udefrag-kernel.h
+2=globals.h
 [Resource]
 1=udefrag-kernel.rc
 [Other]
 [History]
+udefrag-kernel.c,2417
+..\..\include\udefrag-kernel.h,1037
 ..\..\include\ultradfg.h,3163
-..\..\include\udefrag-kernel.h,1389
-udefrag-kernel.rc,1514
-udefrag-kernel.c,1459
+globals.c,1986
+globals.h,4693
+options.c,1658
+filter.c,1934
+list.c,2318
+map.c,2583

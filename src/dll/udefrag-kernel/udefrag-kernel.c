@@ -21,26 +21,16 @@
 * User mode driver.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-#include <winioctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h> /* for toupper() on mingw */
-#include "../../include/ntndk.h"
-#include "../../include/udefrag.h"
-#include "../../include/ultradfg.h"
-#include "../zenwinx/zenwinx.h"
-#include "../../include/udefrag-kernel.h"
+#include "globals.h"
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
-//eh(L"NTFS volumes with cluster size greater than 4 kb\n"
-//   L"cannot be defragmented on Windows 2000.");
-
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
+	if(dwReason == DLL_PROCESS_ATTACH)
+		InitDriverResources();
+	else if(dwReason == DLL_PROCESS_DETACH)
+		FreeDriverResources();
 	return 1;
 }
 
@@ -51,9 +41,47 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 */
 int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size)
 {
-	DebugPrint("-Udkernel- Start, volume = %s, job = %u, map size = %u\n",
-		volume_name,job_type,cluster_map_size);
+	char *action = "analyzing";
+	LARGE_INTEGER interval;
+	NTSTATUS Status;
+	
+	/* 0a. check for synchronization objects */
+	if(CheckForSynchObjects() < 0){
+		winx_raise_error("E: Synchronization objects aren't available!");
+		return (-1);
+	}
+	/* 0b. synchronize with other requests */
+	interval.QuadPart = (-1); /* 100 nsec */
+	Status = NtWaitForSingleObject(hSynchEvent,FALSE,&interval);
+	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
+		winx_raise_error("E: Driver is busy because the previous request was not completed!\n");
+		return (-1);
+	}
+	
+	/* 1. print header */
+	if(job_type == DEFRAG_JOB) action = "defragmenting";
+	if(job_type == OPTIMIZE_JOB) action = "optimizing";
+	DebugPrint("Start %s volume %s\n",action,volume_name);
+	
+	/* 2. allocate cluster map */
+	if(AllocateMap(cluster_map_size) < 0){
+		winx_raise_error("E: Cannot allocate cluster map!");
+		goto failure;
+	}
+	
+	/* 3. read options from environment variables */
+	InitializeOptions();
+	
+	/* FreeMap(); - NEVER CALL IT HERE */
+	
+	NtSetEvent(hSynchEvent,NULL);
+	NtClearEvent(hStopEvent);
 	return 0;
+	
+failure:
+	NtSetEvent(hSynchEvent,NULL);
+	NtClearEvent(hStopEvent);
+	return (-1);
 }
 
 /*
@@ -63,7 +91,12 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 */
 int __stdcall udefrag_kernel_stop(void)
 {
-	DebugPrint("-Udkernel- Stop\n");
+	DebugPrint("Stop\n");
+	if(CheckForSynchObjects() < 0){
+		winx_raise_error("E: Synchronization objects aren't available!");
+		return (-1);
+	}
+	NtSetEvent(hStopEvent,NULL);
 	return 0;
 }
 
@@ -74,6 +107,8 @@ int __stdcall udefrag_kernel_stop(void)
 */
 int __stdcall udefrag_kernel_get_statistic(STATISTIC *stat, char *map, int map_size)
 {
-	DebugPrint("-Udkernel- Get Statistic\n");
+	DebugPrint2("Get Statistic\n");
+	if(stat) memcpy(stat,&Stat,sizeof(STATISTIC));
+	if(map) GetMap(map,map_size);
 	return 0;
 }

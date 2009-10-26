@@ -69,6 +69,7 @@ ERRORHANDLERPROC eh;
 
 void __stdcall ErrorHandler(short *msg)
 {
+	if(!eh) return;
 	if(wcsstr(msg, L"c0000035")) /* STATUS_OBJECT_NAME_COLLISION */
 		eh(L"You can run only one instance of UltraDefrag!");
 	else eh(msg);
@@ -76,6 +77,7 @@ void __stdcall ErrorHandler(short *msg)
 
 void __stdcall DefragErrorHandler(short *msg)
 {
+	if(!eh) return;
 	if(wcsstr(msg, L"c0000002")) /* STATUS_NOT_IMPLEMENTED */
 		eh(L"NTFS volumes with cluster size greater than 4 kb\n"
 		   L"cannot be defragmented on Windows 2000.");
@@ -84,7 +86,9 @@ void __stdcall DefragErrorHandler(short *msg)
 
 void __stdcall LoadDriverErrorHandler(short *msg)
 {
+	winx_dbg_print("------------------------------------------------------------\n");
 	winx_dbg_print("%ws\n",msg);
+	winx_dbg_print("------------------------------------------------------------\n");
 }
 
 /* functions */
