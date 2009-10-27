@@ -134,7 +134,7 @@ BOOLEAN CheckForStopEvent(void)
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
 
-	interval.QuadPart = (-1); /* 100 nsec */
+	interval.QuadPart = 0; /* check as fast as possible */
 	Status = NtWaitForSingleObject(hStopEvent,FALSE,&interval);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status))	return FALSE;
 	NtSetEvent(hStopEvent,NULL);

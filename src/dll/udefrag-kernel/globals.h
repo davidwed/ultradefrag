@@ -39,12 +39,6 @@
 #include "../../include/udefrag-kernel.h"
 #include "../../include/ultradfgver.h"
 
-#if defined(__GNUC__)
-ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
-ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
-ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
-#endif
-
 #define DebugPrint winx_dbg_print
 #define DebugPrint1 if(dbgprint_level < 1) {} else DebugPrint
 #define DebugPrint2 if(dbgprint_level < 2) {} else DebugPrint

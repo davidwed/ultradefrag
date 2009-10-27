@@ -47,6 +47,12 @@ typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
 #endif
 #endif
 
+#if defined(__GNUC__)
+ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
+ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
+#endif
+
 /* define status codes */
 /* ifndef directives are used to prevent warnings when gcc on mingw is used */
 typedef LONG NTSTATUS;
