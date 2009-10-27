@@ -21,6 +21,8 @@
 * Universal code for both main and micro edition installers.
 */
 
+Var AtLeastXP
+
 !macro CheckWinVersion
 
   ${Unless} ${IsNT}
@@ -30,6 +32,12 @@
      /SD IDOK
     Abort
   ${EndUnless}
+  
+  ${If} ${AtLeastWinXP}
+    StrCpy $AtLeastXP 1
+  ${Else}
+    StrCpy $AtLeastXP 0
+  ${EndIf}
 
   /* this idea was suggested by bender647 at users.sourceforge.net */
   push $R0
@@ -79,10 +87,14 @@
 
 !macro SetContextMenuHandler
 
-  WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
-  WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
+  ${If} $AtLeastXP == "1"
+    WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+    ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+    ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
+    WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
+  ${Else}
+    DeleteRegKey HKCR "Drive\shell\udefrag"
+  ${EndIf}
 
   WriteRegStr HKCR "Folder\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
   WriteRegStr HKCR "Folder\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
