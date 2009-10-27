@@ -778,6 +778,64 @@ typedef struct _KEYBOARD_INDICATOR_PARAMETERS {
 #define KEYBOARD_NUM_LOCK_ON      2
 #define KEYBOARD_SCROLL_LOCK_ON   1
 
+typedef enum _FILE_INFORMATION_CLASS {
+    FileDirectoryInformation = 1,
+    FileFullDirectoryInformation,
+    FileBothDirectoryInformation,
+    FileBasicInformation,
+    FileStandardInformation,
+    FileInternalInformation,
+    FileEaInformation,
+    FileAccessInformation,
+    FileNameInformation,
+    FileRenameInformation,
+    FileLinkInformation,
+    FileNamesInformation,
+    FileDispositionInformation,
+    FilePositionInformation,
+    FileFullEaInformation,
+    FileModeInformation,
+    FileAlignmentInformation,
+    FileAllInformation,
+    FileAllocationInformation,
+    FileEndOfFileInformation,
+    FileAlternateNameInformation,
+    FileStreamInformation,
+    FilePipeInformation,
+    FilePipeLocalInformation,
+    FilePipeRemoteInformation,
+    FileMailslotQueryInformation,
+    FileMailslotSetInformation,
+    FileCompressionInformation,
+    FileObjectIdInformation,
+    FileCompletionInformation,
+    FileMoveClusterInformation,
+    FileQuotaInformation,
+    FileReparsePointInformation,
+    FileNetworkOpenInformation,
+    FileAttributeTagInformation,
+    FileTrackingInformation,
+    FileMaximumInformation
+} FILE_INFORMATION_CLASS, *PFILE_INFORMATION_CLASS;
+
+typedef struct _FILE_BOTH_DIRECTORY_INFORMATION {
+    ULONG               NextEntryOffset;
+    ULONG               FileIndex;
+    LARGE_INTEGER       CreationTime;
+    LARGE_INTEGER       LastAccessTime;
+    LARGE_INTEGER       LastWriteTime;
+    LARGE_INTEGER       ChangeTime;
+    LARGE_INTEGER       EndOfFile;
+    LARGE_INTEGER       AllocationSize;
+    ULONG               FileAttributes;
+    ULONG               FileNameLength;
+    ULONG               EaSize;
+    CHAR                ShortNameLength;
+    WCHAR               ShortName[12];
+    WCHAR               FileName[ANYSIZE_ARRAY];
+} FILE_BOTH_DIRECTORY_INFORMATION, *PFILE_BOTH_DIRECTORY_INFORMATION,
+  FILE_BOTH_DIR_INFORMATION, *PFILE_BOTH_DIR_INFORMATION;
+
 typedef enum _SECTION_INHERIT {
     ViewShare = 1,
     ViewUnmap = 2
@@ -846,6 +904,9 @@ HANDLE		NTAPI	RtlCreateHeap(ULONG,PVOID,SIZE_T,SIZE_T,PVOID,PRTL_HEAP_DEFINITION
 HANDLE		NTAPI	RtlDestroyHeap(HANDLE);
 PVOID		NTAPI	RtlAllocateHeap(HANDLE,ULONG,SIZE_T);
 BOOLEAN		NTAPI	RtlFreeHeap(HANDLE,ULONG,PVOID);
+NTSTATUS	NTAPI	NtQueryPerformanceCounter(PLARGE_INTEGER,PLARGE_INTEGER);
+BOOLEAN		NTAPI	RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);
+NTSTATUS	NTAPI	NtQueryDirectoryFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,ULONG,FILE_INFORMATION_CLASS,BOOLEAN,PUNICODE_STRING,BOOLEAN);
 
 /*
 typedef enum _LATENCY_TIME {
@@ -876,5 +937,35 @@ typedef enum {
 	PowerActionWarmEject
 } POWER_ACTION, *PPOWER_ACTION;
 */
+
+/*
+* This is the definition for the data structure that is passed in to
+* FSCTL_MOVE_FILE
+*/
+#ifndef _WIN64
+typedef struct {
+     HANDLE            FileHandle; 
+     ULONG             Reserved;   
+     LARGE_INTEGER     StartVcn; 
+     LARGE_INTEGER     TargetLcn;
+     ULONG             NumVcns; 
+     ULONG             Reserved1;	
+} MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
+#else
+typedef struct {
+     HANDLE            FileHandle; 
+     LARGE_INTEGER     StartVcn; 
+     LARGE_INTEGER     TargetLcn;
+     ULONGLONG         NumVcns; 
+} MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
+#endif
+
+#ifndef TAG
+#define TAG(A, B, C, D) (ULONG)(((A)<<0) + ((B)<<8) + ((C)<<16) + ((D)<<24))
+#endif
+
+#ifndef STATUS_BUFFER_OVERFLOW
+#define STATUS_BUFFER_OVERFLOW	((NTSTATUS)0x80000005)
+#endif
 
 #endif /* _NTNDK_H_ */

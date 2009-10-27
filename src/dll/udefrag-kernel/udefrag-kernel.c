@@ -21,6 +21,8 @@
 * User mode driver.
 */
 
+/* FIXME: Better error handling! */
+
 #include "globals.h"
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
@@ -44,7 +46,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	char *action = "analyzing";
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
-	
+
 	/* 0a. check for synchronization objects */
 	if(CheckForSynchObjects() < 0){
 		winx_raise_error("E: Synchronization objects aren't available!");
@@ -72,13 +74,30 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	/* 3. read options from environment variables */
 	InitializeOptions();
 	
+	/* 4. prepare for job */
+	_strupr(volume_name);
+	volume_letter = volume_name[0];
+	RemoveReportFromDisk(volume_name);
+	if(job_type == OPTIMIZE_JOB) optimize_flag = TRUE;
+	else optimize_flag = FALSE;
+	
+	/* 5. analyse volume */
+	if(Analyze(volume_name) < 0) goto failure;
+	
+	/* 6. save report */
+	SaveReportToDisk(volume_name);
+	
 	/* FreeMap(); - NEVER CALL IT HERE */
 	
+	DestroyLists();
+	CloseVolume();
 	NtSetEvent(hSynchEvent,NULL);
 	NtClearEvent(hStopEvent);
 	return 0;
 	
 failure:
+	DestroyLists();
+	CloseVolume();
 	NtSetEvent(hSynchEvent,NULL);
 	NtClearEvent(hStopEvent);
 	return (-1);

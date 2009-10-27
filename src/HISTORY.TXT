@@ -6,6 +6,9 @@ HISTORY
   ------------------------------------------------------------------------------
     - fragments threshold filter parameter was added
     - few little bugs were fixed
+    - NOTE FOR PROGRAMMERS: to successfully compile the user mode driver run 
+      configure.lua script, check 'Apply patch to MinGW' box and click OK 
+      once again
 
 
   Version 3.2.1 (41.0)   2009-10-06

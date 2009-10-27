@@ -922,7 +922,10 @@ __isascii
 __iscsym
 __iscsymf
 __toascii
+_alldiv@16
 _atoi64
+_aulldiv@16
+_aullrem@16
 _itoa
 _itow
 _ltoa

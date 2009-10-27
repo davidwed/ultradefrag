@@ -33,8 +33,33 @@ BOOLEAN context_menu_handler = FALSE;
 
 HANDLE hSynchEvent = NULL;
 HANDLE hStopEvent = NULL;
+HANDLE hMapEvent = NULL;
 
 STATISTIC Stat;
+
+PFREEBLOCKMAP free_space_map = NULL;
+PFILENAME filelist = NULL;
+PFRAGMENTED fragmfileslist = NULL;
+
+WINX_FILE *fVolume = NULL;
+
+unsigned char volume_letter = 0;
+
+ULONGLONG bytes_per_cluster = 0;
+ULONG bytes_per_sector = 0;
+ULONG sectors_per_cluster = 0;
+ULONGLONG total_space = 0;
+ULONGLONG free_space = 0; /* in bytes */
+ULONGLONG clusters_total = 0;
+ULONGLONG clusters_per_256k = 0;
+
+unsigned char partition_type = UNKNOWN_PARTITION;
+
+ULONGLONG mft_size = 0;
+ULONG ntfs_record_size = 0;
+ULONGLONG max_mft_entries = 0;
+
+BOOLEAN optimize_flag = FALSE;
 
 void InitSynchObjects(void);
 void DestroySynchObjects(void);
@@ -70,6 +95,8 @@ void FreeDriverResources(void)
 	FreeMap();
 	DestroyFilter();
 	DestroySynchObjects();
+	DestroyLists();
+	CloseVolume();
 }
 
 void __stdcall InitSynchObjectsErrorHandler(short *msg)
@@ -87,19 +114,53 @@ void InitSynchObjects(void)
 		SynchronizationEvent,&hSynchEvent);
 	winx_create_event(L"\\udefrag_stop_event",
 		NotificationEvent,&hStopEvent);
+	winx_create_event(L"\\udefrag_map_event",
+		SynchronizationEvent,&hMapEvent);
 	winx_set_error_handler(eh);
 	
 	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
 	if(hStopEvent) NtClearEvent(hStopEvent);
+	if(hMapEvent) NtSetEvent(hMapEvent,NULL);
 }
 
 int CheckForSynchObjects(void)
 {
-	if(!hSynchEvent || !hStopEvent) return (-1);
+	if(!hSynchEvent || !hStopEvent || !hMapEvent) return (-1);
 	return 0;
+}
+
+BOOLEAN CheckForStopEvent(void)
+{
+	LARGE_INTEGER interval;
+	NTSTATUS Status;
+
+	interval.QuadPart = (-1); /* 100 nsec */
+	Status = NtWaitForSingleObject(hStopEvent,FALSE,&interval);
+	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status))	return FALSE;
+	NtSetEvent(hStopEvent,NULL);
+	return TRUE;
 }
 
 void DestroySynchObjects(void)
 {
 	winx_destroy_event(hSynchEvent);
+	winx_destroy_event(hStopEvent);
+	winx_destroy_event(hMapEvent);
+}
+
+void DestroyLists(void)
+{
+	PFILENAME pfn;
+	
+	pfn = filelist;
+	if(pfn){
+		do {
+			DestroyList((PLIST *)&pfn->blockmap);
+			RtlFreeUnicodeString(&pfn->name);
+			pfn = pfn->next_ptr;
+		} while(pfn != filelist);
+		DestroyList((PLIST *)(void *)&filelist);
+	}
+	DestroyList((PLIST *)(void *)&free_space_map);
+	DestroyList((PLIST *)(void *)&fragmfileslist);
 }

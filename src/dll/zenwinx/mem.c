@@ -176,14 +176,14 @@ void * __stdcall winx_heap_alloc(ULONGLONG size)
 ******/
 void __stdcall winx_heap_free(void *addr)
 {
-	RtlFreeHeap(hGlobalHeap,0,addr);
+	if(hGlobalHeap && addr) RtlFreeHeap(hGlobalHeap,0,addr);
 }
 
 /* internal code */
 void winx_create_global_heap(void)
 {
 	/* create growable heap with initial size of 100 kb */
-	hGlobalHeap = RtlCreateHeap(0,NULL,0,100 * 1024,NULL,NULL);
+	hGlobalHeap = RtlCreateHeap(HEAP_GROWABLE,NULL,0,100 * 1024,NULL,NULL);
 }
 
 void winx_destroy_global_heap(void)
