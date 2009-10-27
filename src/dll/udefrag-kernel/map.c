@@ -57,7 +57,7 @@ int AllocateMap(int size)
 	if(new_cluster_map) FreeMap();
 	if(!size){
 		NtSetEvent(hMapEvent,NULL);
-		return (-1);
+		return 0; /* console/native apps may work without cluster map */
 	}
 	buffer_size = NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG);
 	new_cluster_map = winx_virtual_alloc(buffer_size);

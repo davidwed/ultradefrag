@@ -8,7 +8,7 @@ src = {
 	"udefrag-kernel.c", "filter.c", "globals.c", "map.c",
 	"options.c", "list.c", "analyse.c", "filedump.c",
 	"findfiles.c", "freespace.c", "int64.c", "ntfs.c",
-	"report.c", "volume.c"
+	"report.c", "volume.c", "defrag.c", "optimize.c"
 }
 
 rc = { "udefrag-kernel.rc" }

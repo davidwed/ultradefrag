@@ -211,14 +211,21 @@ BOOLEAN CheckForStopEvent(void);
 wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
 
 NTSTATUS FillFreeSpaceMap(void);
+void ProcessFreeBlock(ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
 void InsertFreeSpaceBlock(ULONGLONG start,ULONGLONG length,UCHAR old_space_state);
 FREEBLOCKMAP *InsertLastFreeBlock(ULONGLONG start,ULONGLONG length);
 void CleanupFreeSpaceList(ULONGLONG start,ULONGLONG len);
+void TruncateFreeSpaceBlock(ULONGLONG start,ULONGLONG length);
 
 void GenerateFragmentedFilesList(void);
 BOOLEAN FindFiles(WCHAR *ParentDirectoryPath);
 BOOLEAN InsertFragmentedFile(PFILENAME pfn);
+NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
 BOOLEAN DumpFile(PFILENAME pfn);
+void UpdateFragmentedFilesList(void);
+
+NTSTATUS MovePartOfFile(HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters);
+NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn);
 
 /*--------------------------------------------------------------------
  *       F S C T L  S P E C I F I C   T Y P E D E F S  

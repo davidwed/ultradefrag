@@ -84,7 +84,25 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	/* 5. analyse volume */
 	if(Analyze(volume_name) < 0) goto failure;
 	
-	/* 6. save report */
+	/* 6. defragment/optimize volume */
+	if(job_type == ANALYSE_JOB) goto success;
+	if(CheckForStopEvent()) goto success;
+	/*
+	* NTFS volumes with cluster size greater than 4 kb
+	* cannot be defragmented on Windows 2000.
+	* This is a well known limitation of Windows Defrag API.
+	*/
+	if(1/*partition_type == NTFS_PARTITION && bytes_per_cluster > 4096 && w2k_system*/){
+		winx_raise_error("E: Cannot defragment NTFS volumes with\n"
+						 "cluster size greater than 4 kb\n"
+						 "on Windows 2000 (read docs for details).");
+		goto failure;
+	}
+	if(job_type == DEFRAG_JOB) Defragment(volume_name);
+	else Optimize(volume_name);
+
+success:		
+	/* 7. save report */
 	SaveReportToDisk(volume_name);
 	
 	/* FreeMap(); - NEVER CALL IT HERE */
