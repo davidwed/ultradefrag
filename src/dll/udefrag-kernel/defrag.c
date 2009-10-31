@@ -42,11 +42,13 @@ BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target);
 *    first one may take few hours... :)
 */
 
+/* returns -1 if no files were defragmented, zero otherwise */
 int Defragment(char *volume_name)
 {
 	PFRAGMENTED pf, plargest;
 	PFREEBLOCKMAP block;
 	ULONGLONG length;
+	ULONGLONG defragmented = 0;
 
 	DebugPrint("----- Defragmentation of %s: -----\n",volume_name);
 
@@ -84,6 +86,8 @@ int Defragment(char *volume_name)
 			}
 			if(pf->pfn->clusters_total <= block->length){
 				if(pf->pfn->clusters_total > length){
+					/* skip locked files here to prevent skipping the current free space block */
+					/* an appropriate check was moved to Analyze() function */
 					plargest = pf;
 					length = pf->pfn->clusters_total;
 				}
@@ -93,10 +97,12 @@ int Defragment(char *volume_name)
 		}
 		if(!plargest) goto L1; /* current block is too small */
 		/* move file */
-		if(MoveTheFile(plargest->pfn,block->lcn))
+		if(MoveTheFile(plargest->pfn,block->lcn)){
 			DebugPrint("Defrag success for %ws\n",plargest->pfn->name.Buffer);
-		else
+			defragmented++;
+		} else {
 			DebugPrint("Defrag error for %ws\n",plargest->pfn->name.Buffer);
+		}
 		Stat.processed_clusters += plargest->pfn->clusters_total;
 		UpdateFragmentedFilesList();
 		if(CheckForStopEvent()) break;
@@ -105,7 +111,7 @@ int Defragment(char *volume_name)
 	L1:
 		if(block->next_ptr == free_space_map) break;
 	}
-	return 0;
+	return (defragmented == 0) ? (-1) : (0);
 }
 
 NTSTATUS MovePartOfFile(HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)

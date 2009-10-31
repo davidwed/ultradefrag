@@ -56,6 +56,10 @@
   Page custom LangShow LangLeave ""
 !macroend
 
+!macro DRIVER_PAGE
+  Page custom DriverShow DriverLeave ""
+!macroend
+
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'
 Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
@@ -92,6 +96,7 @@ ReserveFile "lang.ini"
   !insertmacro MUI_PAGE_COMPONENTS
 ;  !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro LANG_PAGE
+  !insertmacro DRIVER_PAGE
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
@@ -107,6 +112,7 @@ ReserveFile "lang.ini"
   Page components
 ;  Page directory
   !insertmacro LANG_PAGE
+  !insertmacro DRIVER_PAGE
   Page instfiles
 
   UninstPage uninstConfirm
@@ -118,6 +124,55 @@ ReserveFile "lang.ini"
 Var IsInstalled
 Var ShowBootsplash
 Var LanguagePack
+Var UserModeDriver
+
+;-----------------------------------------
+
+Function DriverShow
+
+  push $R0
+
+!ifdef MODERN_UI
+  !insertmacro MUI_HEADER_TEXT "Preferred Driver" \
+      "Select which driver do you prefer."
+!endif
+  ;;InitPluginsDir
+  SetOutPath $PLUGINSDIR
+  File "driver.ini"
+
+  ClearErrors
+  ReadRegStr $R0 HKLM "Software\UltraDefrag" "UserModeDriver"
+  ${Unless} ${Errors}
+    WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" $R0
+  ${EndUnless}
+
+  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\driver.ini"
+  pop $R0
+  InstallOptions::show
+  pop $R0
+
+  pop $R0
+  Abort
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function DriverLeave
+
+  push $R0
+
+  ReadINIStr $R0 "$PLUGINSDIR\driver.ini" "Settings" "State"
+  ${If} $R0 != "0"
+    pop $R0
+    Abort
+  ${EndIf}
+
+  ReadINIStr $UserModeDriver "$PLUGINSDIR\driver.ini" "Field 1" "State"
+  WriteRegStr HKLM "Software\UltraDefrag" "UserModeDriver" $UserModeDriver
+  pop $R0
+
+FunctionEnd
 
 ;-----------------------------------------
 
@@ -311,8 +366,12 @@ Section "Ultra Defrag core files (required)" SecCore
   ; install LanguagePack
   call install_langpack
 
-  SetOutPath "$SYSDIR\Drivers"
-  File "ultradfg.sys"
+  ${If} $UserModeDriver == '1'
+    Delete "$SYSDIR\Drivers\ultradfg.sys"
+  ${Else}
+    SetOutPath "$SYSDIR\Drivers"
+    File "ultradfg.sys"
+  ${EndIf}
 
   SetOutPath "$SYSDIR"
   File "dfrg.exe"
@@ -595,6 +654,12 @@ Function .onInit
   /* variables initialization */
   StrCpy $IsInstalled 0
   StrCpy $ShowBootsplash 1
+  StrCpy $UserModeDriver 1
+  ClearErrors
+  ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
+  ${Unless} ${Errors}
+    StrCpy $UserModeDriver $R1
+  ${EndUnless}
   StrCpy $LanguagePack "English (US)"
   ClearErrors
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"

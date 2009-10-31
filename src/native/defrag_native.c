@@ -424,6 +424,9 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		Exit(1);
 	}
 
+	if(udefrag_kernel_mode()) winx_printf("(Kernel Mode)\n\n");
+	else winx_printf("(User Mode)\n\n");
+
 	/* 8a. Batch script processing */
 	/* open script file */
 	if(winx_get_windows_directory(filename,MAX_PATH) < 0)

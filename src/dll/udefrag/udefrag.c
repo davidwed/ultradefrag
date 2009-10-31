@@ -175,7 +175,7 @@ int __stdcall udefrag_init(long map_size)
 
 	/* 3. Load the driver */
 	eh = winx_set_error_handler(LoadDriverErrorHandler);
-	if(winx_load_driver(L"ultradfg__") < 0){
+	if(winx_load_driver(L"ultradfg") < 0){
 		winx_set_error_handler(eh);
 		/* it seems that we are running on Vista or Win7 */
 		kernel_mode_driver = FALSE;
@@ -206,6 +206,24 @@ int __stdcall udefrag_init(long map_size)
 init_fail:
 	/*if(init_event)*/ udefrag_unload();
 	return (-1);
+}
+
+/****f* udefrag.common/udefrag_kernel_mode
+* NAME
+*    udefrag_kernel_mode
+* SYNOPSIS
+*    kernel_mode = udefrag_kernel_mode();
+* FUNCTION
+*    Defines is kernel mode driver loaded or not.
+* INPUTS
+*    Nothing.
+* RESULT
+*    If kernel mode driver is loaded returns TRUE,
+*    otherwise FALSE.
+******/
+int __stdcall udefrag_kernel_mode(void)
+{
+	return (int)kernel_mode_driver;
 }
 
 /****f* udefrag.common/udefrag_unload
@@ -252,14 +270,14 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 	char cmd[4];
 	UDEFRAG_JOB_TYPE job_type;
 
-	eh = winx_set_error_handler(DefragErrorHandler);
-
 	if(kernel_mode_driver){
 		cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
+		eh = winx_set_error_handler(DefragErrorHandler);
 		if(winx_fwrite(cmd,strlen(cmd),1,f_ud)){
 			winx_set_error_handler(eh);
 			return 0;
 		}
+		winx_set_error_handler(eh);
 	} else {
 		cmd[0] = letter; cmd[1] = 0;
 		switch(command){
@@ -274,13 +292,10 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 		default:
 			job_type = OPTIMIZE_JOB;
 		}
-		if(udefrag_kernel_start(cmd,job_type,cluster_map_size) >= 0){
-			winx_set_error_handler(eh);
+		if(udefrag_kernel_start(cmd,job_type,cluster_map_size) >= 0)
 			return 0;
-		}
 	}
 
-	winx_set_error_handler(eh);
 	winx_raise_error("E: Can't execute driver command \'%c\' for volume %c!",
 		command,letter);
 	return (-1);
@@ -291,7 +306,7 @@ DWORD WINAPI send_command(LPVOID unused)
 {
 	cmd_status = udefrag_send_command(c,lett);
 	done_flag = TRUE;
-	winx_exit_thread();
+	winx_exit_thread(); /* 8k/12k memory leak here? */
 	return 0;
 }
 

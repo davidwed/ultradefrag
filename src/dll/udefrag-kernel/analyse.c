@@ -44,11 +44,16 @@ int Analyze(char *volume_name)
 	short path[] = L"\\??\\A:\\";
 	NTSTATUS Status;
 	ULONGLONG tm, time;
-
+	PFILENAME pfn;
+	HANDLE hFile;
+	
 	DebugPrint("----- Analyze of %s: -----\n",volume_name);
 	
 	/* initialize cluster map */
 	MarkAllSpaceAsSystem0();
+	
+	/* reset file lists */
+	DestroyLists();
 	
 	/* reset statistics */
 	memset(&Stat,0,sizeof(STATISTIC));
@@ -59,7 +64,7 @@ int Analyze(char *volume_name)
 
 	/* get drive geometry */
 	if(GetDriveGeometry(volume_name) < 0) return (-1);
-
+//DebugPrint("fuck!\n");
 	/* update map representation */
 	MarkAllSpaceAsSystem1();
 	
@@ -113,9 +118,43 @@ int Analyze(char *volume_name)
 	DebugPrint("Fragmented files: %u\n",Stat.fragmfilecounter);
 
 	GenerateFragmentedFilesList();
+	
+	/* all locked files are in unknown state, right? */
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(CheckForStopEvent()) break;
+		Status = OpenTheFile(pfn,&hFile);
+		if(Status != STATUS_SUCCESS){
+			DebugPrint("Can't open %ws file: %x\n",pfn->name.Buffer,(UINT)Status);
+			/* we need to destroy the block map to avoid infinite loops */
+			DeleteBlockmap(pfn); /* file is locked by other application, so its state is unknown */
+		} else {
+			NtCloseSafe(hFile);
+		}
+		if(pfn->next_ptr == filelist) break;
+	}
 
 	/* Save state */
 	//ApplyFilter(dx);
+	return 0;
+}
+
+int AnalyzeFreeSpace(char *volume_name)
+{
+	NTSTATUS Status;
+
+	DebugPrint("----- Analyze free space of %s: -----\n",volume_name);
+	
+	CloseVolume();
+	DestroyList((PLIST *)(void *)&free_space_map);
+
+	/* reopen the volume */
+	if(OpenVolume(volume_name) < 0) return (-1);
+	/* scan volume for free space areas */
+	Status = FillFreeSpaceMap();
+	if(!NT_SUCCESS(Status)){
+		winx_raise_error("E: FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
+		return (-1);
+	}
 	return 0;
 }
 

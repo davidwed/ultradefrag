@@ -97,6 +97,7 @@ void FreeDriverResources(void)
 	DestroySynchObjects();
 	DestroyLists();
 	CloseVolume();
+	DebugPrint("User mode driver unloaded successfully\n");
 }
 
 void __stdcall InitSynchObjectsErrorHandler(short *msg)

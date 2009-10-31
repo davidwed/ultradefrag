@@ -197,7 +197,9 @@ int Analyze(char *volume_name);
 int Defragment(char *volume_name);
 int Optimize(char *volume_name);
 
+int AnalyzeFreeSpace(char *volume_name);
 void DestroyLists(void);
+void DbgPrintFreeSpaceList(void);
 
 BOOLEAN ScanMFT(void);
 void CheckForNtfsPartition(void);

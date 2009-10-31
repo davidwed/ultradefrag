@@ -18,7 +18,7 @@
  */
 
 /*
-* Volume information getting.
+* Volume information related code.
 */
 
 #include "driver.h"
@@ -35,6 +35,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	NTSTATUS status;
 
 	/* open volume */
+	CloseVolume(dx);
 	path[4] = (short)(dx->letter);
 	RtlInitUnicodeString(&us,path);
 	if(nt4_system){

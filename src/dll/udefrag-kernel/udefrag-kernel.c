@@ -60,6 +60,9 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 		return (-1);
 	}
 	
+	/* FIXME: stop request will fail when completes before this point */
+	NtClearEvent(hStopEvent);
+	
 	/* 1. print header */
 	if(job_type == DEFRAG_JOB) action = "defragmenting";
 	if(job_type == OPTIMIZE_JOB) action = "optimizing";
@@ -92,7 +95,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	* cannot be defragmented on Windows 2000.
 	* This is a well known limitation of Windows Defrag API.
 	*/
-	if(1/*partition_type == NTFS_PARTITION && bytes_per_cluster > 4096 && w2k_system*/){
+	if(partition_type == NTFS_PARTITION && bytes_per_cluster > 4096 && w2k_system){
 		winx_raise_error("E: Cannot defragment NTFS volumes with\n"
 						 "cluster size greater than 4 kb\n"
 						 "on Windows 2000 (read docs for details).");

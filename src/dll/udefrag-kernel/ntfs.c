@@ -1174,7 +1174,14 @@ void BuildPaths(void)
 
 	/* prepare data for fast binary search */
 	mf_allocated = FALSE;
-	n_entries = Stat.filecounter;
+	/*n_entries = Stat.filecounter;*/
+	/* more accurately */
+	n_entries = 0;
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		n_entries++;
+		if(pfn->next_ptr == filelist) break;
+	}
+	
 	if(n_entries){
 		mf = (PMY_FILE_ENTRY)winx_heap_alloc(n_entries * sizeof(MY_FILE_ENTRY));
 		if(mf != NULL) mf_allocated = TRUE;
@@ -1187,7 +1194,11 @@ void BuildPaths(void)
 		for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 			mf[i].mft_id = pfn->BaseMftId;
 			mf[i].pfn = pfn;
-			if(i == (n_entries - 1)) break;
+			if(i == (n_entries - 1)){ 
+				if(pfn->next_ptr != filelist)
+					DebugPrint("BuildPaths(): ??\?!\n");
+				break;
+			}
 			i++;
 			if(pfn->next_ptr == filelist) break;
 		}
@@ -1264,7 +1275,7 @@ void BuildPath2(PFILENAME pfn)
 
 	parent_mft_id = pfn->ParentDirectoryMftId;
 	while(parent_mft_id != FILE_root){
-		if(CheckForStopEvent()) break;
+		if(CheckForStopEvent()) goto build_path_done;
 		mft_id = parent_mft_id;
 		FullPathRetrieved = GetFileNameAndParentMftId(mft_id,&parent_mft_id,buffer2,MAX_NTFS_PATH);
 		if(buffer2[0] == 0){

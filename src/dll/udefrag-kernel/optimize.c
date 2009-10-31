@@ -27,15 +27,82 @@ void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,
 		ULONGLONG targetLcn,ULONGLONG n_clusters);
 void DefragmentFreeSpaceRTL(void);
 void DefragmentFreeSpaceLTR(void);
-void MoveAllFilesRTL(void);
+int  MoveAllFilesRTL(void);
+int  OptimizationRoutine(char *volume_name);
+
+ULONGLONG StartingPoint = 0;
+int pass_number = 0;
+
+int Optimize(char *volume_name)
+{
+	PFREEBLOCKMAP freeblock;
+	ULONGLONG threshold;
+	ULONGLONG FragmentedClustersBeforeStartingPoint = 0;
+	PFILENAME pfn;
+	PBLOCKMAP block;
+	HANDLE hFile;
+
+	/* define threshold */
+	threshold = clusters_total / 200; /* 0.5% */
+	if(threshold < 2) threshold = 2;
+	/* define starting point */
+	StartingPoint = 0; /* start moving from the beginning of the volume */
+	pass_number = 1;
+	for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
+		if(freeblock->next_ptr == free_space_map) return 0;
+		/* is block larger than 0.5% of the volume space? */
+		if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
+			StartingPoint = freeblock->lcn;
+			break;
+		}
+	}
+	/* validate StartingPoint */
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(pfn->is_reparse_point == FALSE && pfn->is_fragm){
+			/* skip system files */
+			if(OpenTheFile(pfn,&hFile) == STATUS_SUCCESS){
+				NtCloseSafe(hFile);
+				for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+					if((block->lcn + block->length) <= StartingPoint)
+						FragmentedClustersBeforeStartingPoint += block->length;
+					if(block->next_ptr == pfn->blockmap) break;
+				}
+			}
+		}
+		if(pfn->next_ptr == filelist) break;
+	}
+	if(FragmentedClustersBeforeStartingPoint >= threshold) StartingPoint = 0;
+
+	do {
+		DebugPrint("Optimization pass #%u, StartingPoint = %I64u\n",pass_number,StartingPoint);
+		/* call optimization routine */
+		if(OptimizationRoutine(volume_name) < 0) return (-1);
+		if(CheckForStopEvent()) return 0;
+		/* if(!movings) return 0; */
+		pass_number ++;
+		/* redefine starting point */
+		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
+			if(freeblock->next_ptr == free_space_map) return 0;
+			/* is block larger than 0.5% of the volume space? */
+			if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
+				StartingPoint = freeblock->lcn;
+				break;
+			}
+		}
+	} while (1);
+	return 0;
+}
 
 /*
 * NOTE: Algorithm is effective only 
 * if optimized volume has a lot of free space.
 */
-int Optimize(char *volume_name)
+/* returns -1 if no files were defragmented or optimized, zero otherwise */
+int OptimizationRoutine(char *volume_name)
 {
 	PFREEBLOCKMAP freeblock;
+	int defragmenter_result = 0;
+	int optimizer_result = 0;
 
 	DebugPrint("----- Optimization of %s: -----\n",volume_name);
 
@@ -43,14 +110,14 @@ int Optimize(char *volume_name)
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
 	if(free_space_map){
 		for(freeblock = free_space_map->prev_ptr; 1; freeblock = freeblock->prev_ptr){
-			Stat.clusters_to_process += freeblock->length;
+			if(freeblock->lcn >= StartingPoint) Stat.clusters_to_process += freeblock->length;
 			if(freeblock->prev_ptr == free_space_map) break;
 		}
 	}
 	Stat.current_operation = 'C';
 	
 	/* On FAT volumes it increase distance between dir & files inside it. */
-	if(partition_type != NTFS_PARTITION) return 0;
+	if(partition_type != NTFS_PARTITION) return (-1);
 	
 	/*
 	* First of all - free the leading part of the volume.
@@ -65,19 +132,24 @@ int Optimize(char *volume_name)
 	*/
 	DebugPrint("----- Second step of optimization of %s: -----\n",volume_name);
 	Analyze(volume_name);
-	Defragment(volume_name);
+	///DbgPrintFreeSpaceList();
+	defragmenter_result = Defragment(volume_name);
+	///DbgPrintFreeSpaceList();
 
 	/*
 	* Final step - move all files to the leading part of the volume.
 	*/
 	DebugPrint("----- Third step of optimization of %s: -----\n",volume_name);
-	MoveAllFilesRTL();
+	///AnalyzeFreeSpace(volume_name); /* refresh free space map */
+	optimizer_result = MoveAllFilesRTL();
 	
 optimization_done:	
 	/* Analyse volume again to update fragmented files list. */
 	NtClearEvent(hStopEvent);
 	Analyze(volume_name);
-	return 0;
+	
+	if(defragmenter_result >= 0 || optimizer_result >= 0) return 0;
+	return (-1);
 }
 
 /*
@@ -93,6 +165,8 @@ optimization_done:
 * 5. We cannot update a number of fragmented files during the 
 * optimization process.
 */
+
+/* Starting point takes no effect here */
 void DefragmentFreeSpaceRTL(void)
 {
 	PFILENAME pfn, lastpfn;
@@ -150,6 +224,7 @@ void DefragmentFreeSpaceRTL(void)
 	}
 }
 
+/* Starting point works here */
 void DefragmentFreeSpaceLTR(void)
 {
 	PFILENAME pfn, firstpfn;
@@ -160,12 +235,12 @@ void DefragmentFreeSpaceLTR(void)
 	ULONGLONG movings;
 	
 	while(1){
-		/* 1. Find the first file block on the volume. */
+		/* 1. Find the first file block on the volume: AFTER StartingPoint. */
 		firstblock = NULL; firstpfn = NULL; minlcn = (clusters_total - 1);
 		for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 			if(pfn->is_reparse_point == FALSE){
 				for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-					if(block->lcn < minlcn){
+					if(block->lcn < minlcn && block->lcn >= StartingPoint){
 						firstblock = block;
 						firstpfn = pfn;
 						minlcn = block->lcn;
@@ -210,7 +285,7 @@ void DefragmentFreeSpaceLTR(void)
 	}
 }
 
-/* For defragmenter only, not for optimizer! */
+/* For optimizer only, not for defragmenter! */
 BOOLEAN MoveTheUnfragmentedFile(PFILENAME pfn,ULONGLONG target)
 {
 	NTSTATUS Status;
@@ -246,17 +321,20 @@ BOOLEAN MoveTheUnfragmentedFile(PFILENAME pfn,ULONGLONG target)
 	return TRUE;
 }
 
-void MoveAllFilesRTL(void)
+/* returns -1 if no files were moved, zero otherwise */
+int MoveAllFilesRTL(void)
 {
 	PFREEBLOCKMAP block;
 	PFILENAME pfn, plargest;
 	ULONGLONG length;
+	ULONGLONG movings = 0;
 
 	/* Reinitialize progress counters. */
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(pfn->blockmap && !pfn->is_reparse_point)
-			Stat.clusters_to_process += pfn->clusters_total;
+			if(pfn->blockmap->lcn >= StartingPoint)
+				Stat.clusters_to_process += pfn->clusters_total;
 		if(pfn->next_ptr == filelist) break;
 	}
 	Stat.current_operation = 'C';
@@ -264,12 +342,13 @@ void MoveAllFilesRTL(void)
 	for(block = free_space_map; block != NULL; block = block->next_ptr){
 	L0:
 		if(block->length <= 1) goto L1; /* skip 1 cluster blocks and zero length blocks */
+		//if(block->lcn < StartingPoint) goto L1; /* skip blocks before StartingPoint */
 		/* find largest unfragmented file that can be stored here */
 		plargest = NULL; length = 0;
 		for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 			if(pfn->is_reparse_point == FALSE){
 				if(pfn->blockmap && pfn->clusters_total <= block->length){
-					if(pfn->clusters_total > length){
+					if(pfn->clusters_total > length && pfn->blockmap->lcn >= StartingPoint){
 						plargest = pfn;
 						length = pfn->clusters_total;
 					}
@@ -278,11 +357,17 @@ void MoveAllFilesRTL(void)
 			if(pfn->next_ptr == filelist) break;
 		}
 		if(!plargest) goto L1; /* current block is too small */
+		/* skip fragmented files */
+		///if(plargest->is_fragm) goto L1; /* never do it!!! */
+		/* if uncomment the previous line file moving will never be ahieved, because free blocks 
+		 will be always skipped by this instruction */
 		/* move file */
-		if(MoveTheUnfragmentedFile(plargest,block->lcn))
+		if(MoveTheUnfragmentedFile(plargest,block->lcn)){
 			DebugPrint("Moving success for %ws\n",plargest->name.Buffer);
-		else
+			movings++;
+		} else {
 			DebugPrint("Moving error for %ws\n",plargest->name.Buffer);
+		}
 		Stat.processed_clusters += plargest->clusters_total;
 		if(CheckForStopEvent()) break;
 		/* after file moving continue from the first free space block */
@@ -290,6 +375,7 @@ void MoveAllFilesRTL(void)
 	L1:
 		if(block->next_ptr == free_space_map) break;
 	}
+	return (movings == 0) ? (-1) : (0);
 }
 
 void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,

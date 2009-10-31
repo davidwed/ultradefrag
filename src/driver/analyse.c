@@ -18,7 +18,7 @@
  */
 
 /*
-* Fragmentation analyse engine.
+* Fragmentation analysis engine.
 */
 
 /*
@@ -79,6 +79,8 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	short path[] = L"\\??\\A:\\";
 	NTSTATUS Status;
 	ULONGLONG tm, time;
+	PFILENAME pfn;
+	HANDLE hFile;
 
 	DebugPrint("-Ultradfg- ----- Analyse of %c: -----\n",dx->letter);
 	
@@ -142,8 +144,44 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	GenerateFragmentedFilesList(dx);
 
+	/* all locked files are in unknown state, right? */
+	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+		Status = OpenTheFile(pfn,&hFile);
+		if(Status != STATUS_SUCCESS){
+			DebugPrint("Can't open %ws file: %x\n",pfn->name.Buffer,(UINT)Status);
+			/* we need to destroy the block map to avoid infinite loops */
+			DeleteBlockmap(pfn); /* file is locked by other application, so its state is unknown */
+		} else {
+			ZwCloseSafe(hFile);
+		}
+		if(pfn->next_ptr == dx->filelist) break;
+	}
+
 	/* Save state */
 	//ApplyFilter(dx);
+	return STATUS_SUCCESS;
+}
+
+NTSTATUS AnalyseFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx)
+{
+	NTSTATUS Status;
+	
+	DebugPrint("-Ultradfg- ----- Analyse free space of %c: -----\n",dx->letter);
+
+	CloseVolume(dx);
+	DestroyList((PLIST *)&dx->free_space_map);
+
+	Status = OpenVolume(dx);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- OpenVolume() failed: %x!\n",(UINT)Status);
+		return Status;
+	}
+	Status = FillFreeSpaceMap(dx);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("-Ultradfg- FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
+		return Status;
+	}
 	return STATUS_SUCCESS;
 }
 

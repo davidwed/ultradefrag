@@ -194,8 +194,15 @@ try_again:
 void InitMainWindow(void)
 {
 	short lng_file_path[MAX_PATH];
+	char title[128];
 	int dx,dy;
 	RECT rc;
+	
+	/* update window title */
+	GetWindowText(hWindow,title,64);
+	if(udefrag_kernel_mode()) strcat(title," (Kernel Mode)");
+	else strcat(title," (User Mode)");
+	SetWindowText(hWindow,title);
 
 	WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	GetWindowsDirectoryW(lng_file_path,MAX_PATH);

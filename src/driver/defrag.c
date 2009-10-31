@@ -42,13 +42,15 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 *    first one may take few hours... :)
 */
 
-void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
+/* returns -1 if no files were defragmented, zero otherwise */
+int Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	static KSPIN_LOCK spin_lock;
 	static KIRQL oldIrql;
 	PFRAGMENTED pf, plargest;
 	PFREEBLOCKMAP block;
 	ULONGLONG length;
+	ULONGLONG defragmented = 0;
 
 	DebugPrint("-Ultradfg- ----- Defragmentation of %c: -----\n",dx->letter);
 
@@ -89,6 +91,8 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 			}
 			if(pf->pfn->clusters_total <= block->length){
 				if(pf->pfn->clusters_total > length){
+					/* skip locked files here to prevent skipping the current free space block */
+					/* an appropriate check was moved to Analyse() function */
 					plargest = pf;
 					length = pf->pfn->clusters_total;
 				}
@@ -98,10 +102,12 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 		}
 		if(!plargest) goto L1; /* current block is too small */
 		/* move file */
-		if(MoveTheFile(dx,plargest->pfn,block->lcn))
+		if(MoveTheFile(dx,plargest->pfn,block->lcn)){
 			DebugPrint("-Ultradfg- Defrag success for %ws\n",plargest->pfn->name.Buffer);
-		else
+			defragmented++;
+		} else {
 			DebugPrint("-Ultradfg- Defrag error for %ws\n",plargest->pfn->name.Buffer);
+		}
 		dx->processed_clusters += plargest->pfn->clusters_total;
 		UpdateFragmentedFilesList(dx);
 		if(KeReadStateEvent(&stop_event)) break;
@@ -110,6 +116,7 @@ void Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 	L1:
 		if(block->next_ptr == dx->free_space_map) break;
 	}
+	return (defragmented == 0) ? (-1) : (0);
 }
 
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
@@ -141,9 +148,9 @@ NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 	/* If the operation is pending, wait for it to finish */
 	if(status == STATUS_PENDING){
 		if(nt4_system)
-			NtWaitForSingleObject(hFile,FALSE,NULL);
+			NtWaitForSingleObject(dx->hVol/*hFile*/,FALSE,NULL);
 		else
-			ZwWaitForSingleObject(hFile,FALSE,NULL);
+			ZwWaitForSingleObject(dx->hVol/*hFile*/,FALSE,NULL);
 		status = ioStatus.Status;
 	}
 	if(!NT_SUCCESS(status)) return status;

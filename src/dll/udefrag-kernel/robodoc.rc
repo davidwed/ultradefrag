@@ -1,0 +1,18 @@
+options:
+    --src .
+    --doc ./robo-doc
+    --html
+    --multidoc
+    --sections
+    --tell
+    --toc
+    --index
+    --css robodoc_strong.css
+    --documenttitle "Udefrag-kernel.dll Documentation"
+ignore files:
+    CVS .svn doxy-doc *.css
+accept files:
+    *.c *.h
+headertypes:
+    x  "Undocumented Windows" robo_undoc_win
+	N  "Installation Notes"   robo_inst_notes

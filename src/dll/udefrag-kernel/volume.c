@@ -29,6 +29,7 @@ int OpenVolume(char *volume_name)
 	char flags[2];
 	#define FLAG 'r'
 	
+	CloseVolume();
 	_snprintf(path,64,"\\??\\%s:",volume_name);
 	path[63] = 0;
 #if FLAG != 'r'

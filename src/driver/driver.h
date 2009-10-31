@@ -170,7 +170,7 @@ typedef struct {
 /* UltraDefrag device extension and other internal structures */
 
 /*
-* NOTE! NEXT_PTR MUST BE FIRST MEMBER OF THESE STRUCTURES!
+* NOTE! NEXT_PTR MUST BE THE FIRST MEMBER OF THESE STRUCTURES!
 * PREV_PTR MUST BE THE SECOND MEMBER!
 */
 /* generic LIST structure definition */
@@ -320,7 +320,7 @@ void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx);
 void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx);
 void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
 void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
-void Defragment(UDEFRAG_DEVICE_EXTENSION *dx);
+int  Defragment(UDEFRAG_DEVICE_EXTENSION *dx);
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx);
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx);
 void DestroyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -359,6 +359,7 @@ ULONGLONG _rdtsc_1(void);
 
 NTSTATUS AllocateMap(ULONG size);
 NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx);
+NTSTATUS AnalyseFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx);
 NTSTATUS MoveBlocksOfFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,HANDLE hFile,ULONGLONG target);
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters);

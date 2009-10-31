@@ -741,6 +741,9 @@ int __cdecl main(int argc, char **argv)
 		if(udefrag_init(map_rows * map_symbols_per_line) < 0) Exit(2);
 	}
 
+	if(udefrag_kernel_mode()) printf("(Kernel Mode)\n\n");
+	else printf("(User Mode)\n\n");
+
 	if(m_flag){ /* prepare console buffer for map */
 		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %u/%u",
 			letter,"analyse:  ",0,0,0);

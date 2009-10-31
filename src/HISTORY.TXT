@@ -4,6 +4,7 @@ HISTORY
 
   Version 3.2.2 (41.0)   2009-10-
   ------------------------------------------------------------------------------
+    - volume optimization algorithm was highly improved
     - fragments threshold filter parameter was added
     - few little bugs were fixed
     - NOTE FOR PROGRAMMERS: to successfully compile the user mode driver run 

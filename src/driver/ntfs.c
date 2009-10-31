@@ -1191,7 +1191,13 @@ void BuildPaths(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	/* prepare data for fast binary search */
 	mf_allocated = FALSE;
-	n_entries = dx->filecounter;
+	/*n_entries = dx->filecounter;*/
+	/* more accurately */
+	n_entries = 0;
+	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
+		n_entries++;
+		if(pfn->next_ptr == dx->filelist) break;
+	}
 	if(n_entries){
 		mf = (PMY_FILE_ENTRY)AllocatePool(PagedPool,n_entries * sizeof(MY_FILE_ENTRY));
 		if(mf != NULL) mf_allocated = TRUE;
@@ -1204,7 +1210,11 @@ void BuildPaths(UDEFRAG_DEVICE_EXTENSION *dx)
 		for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
 			mf[i].mft_id = pfn->BaseMftId;
 			mf[i].pfn = pfn;
-			if(i == (n_entries - 1)) break;
+			if(i == (n_entries - 1)){
+				if(pfn->next_ptr != dx->filelist)
+					DebugPrint("BuildPaths(): ??\?!\n");
+				break;
+			}
 			i++;
 			if(pfn->next_ptr == dx->filelist) break;
 		}
@@ -1281,7 +1291,7 @@ void BuildPath2(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 
 	parent_mft_id = pfn->ParentDirectoryMftId;
 	while(parent_mft_id != FILE_root){
-		if(KeReadStateEvent(&stop_event) == 0x1) break;
+		if(KeReadStateEvent(&stop_event) == 0x1) goto build_path_done;
 		mft_id = parent_mft_id;
 		FullPathRetrieved = GetFileNameAndParentMftId(dx,mft_id,&parent_mft_id,buffer2,MAX_NTFS_PATH);
 		if(buffer2[0] == 0){
