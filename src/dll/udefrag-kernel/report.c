@@ -28,6 +28,7 @@ void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered);
 void RemoveReportFromDisk(char *volume_name)
 {
 	char path[64];
+	ERRORHANDLERPROC eh;
 	
 #ifndef MICRO_EDITION
 	_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
@@ -36,7 +37,9 @@ void RemoveReportFromDisk(char *volume_name)
 #endif
 	path[63] = 0;
 //	DebugPrint("%s\n",path);
+	eh = winx_set_error_handler(NULL);
 	winx_delete_file(path);
+	winx_set_error_handler(eh);
 }
 
 #ifndef MICRO_EDITION

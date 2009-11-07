@@ -25,7 +25,7 @@
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
-#include <winioctl.h>
+///#include <winioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../../include/ntndk.h"
@@ -46,6 +46,8 @@
 /* global variables */
 extern HANDLE init_event;
 extern WINX_FILE *f_ud;
+
+extern BOOL kernel_mode_driver;
 
 #define MAX_FILTER_SIZE 4096
 #define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
@@ -153,5 +155,6 @@ int __stdcall udefrag_apply_settings()
 int __stdcall udefrag_reload_settings(void)
 {
 	udefrag_load_settings();
+	if(!kernel_mode_driver) return 0;
 	return udefrag_apply_settings();
 }

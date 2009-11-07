@@ -60,8 +60,8 @@ int GetDriveGeometry(char *volume_name)
 	bytes_per_cluster = 0;
 	bytes_per_sector = 0;
 	sectors_per_cluster = 0;
-	total_space = 0;
-	free_space = 0;
+	Stat.total_space = 0;
+	Stat.free_space = 0;
 	clusters_total = 0;
 	clusters_per_256k = 0;
 	
@@ -91,8 +91,8 @@ int GetDriveGeometry(char *volume_name)
 	sectors_per_cluster = FileFsSize.SectorsPerAllocationUnit;
 	bytes_per_cluster = bpc;
 	bytes_per_sector = FileFsSize.BytesPerSector;
-	total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
-	free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
+	Stat.total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
+	Stat.free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
 	clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
 	if(bytes_per_cluster) clusters_per_256k = _256K / bytes_per_cluster;
 	DebugPrint("Total clusters: %I64u\n",clusters_total);

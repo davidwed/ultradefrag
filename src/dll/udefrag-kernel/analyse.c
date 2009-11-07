@@ -89,6 +89,25 @@ int Analyze(char *volume_name)
 	switch(partition_type){
 	case NTFS_PARTITION:
 		/* Experimental support of retrieving information directly from MFT. */
+		/* Experimental support of retrieving information directly from MFT. */
+		/*
+		* ScanMFT() causes BSOD on NT 4.0, even in user mode!
+		* It seems that NTFS driver is imperfect in this system
+		* and ScanMFT() breaks something inside it.
+		* Sometimes BSOD appears after an analysis after volume optimization,
+		* sometimes it appears immediately during the first analysis.
+		* Examples:
+		* 1. kmd compact ntfs nt4 -> BSOD 0xa (0x48, 0xFF, 0x0, 0x80101D5D)
+		* immediately after last analysis
+		* 2. user mode - optimize - BSOD during the second analysis
+		* 0x50 (0xB51CA820,0,0,2) or 0x1E (0xC...5,0x8013A7B6,0,0x20)
+		* 3. kmd - nt4 - gui - optimize - chkdsk /F for ntfs - bsod
+		*/
+		/*if(nt4_system){
+			DebugPrint("Ultrafast NTFS scan is not avilable on NT 4.0\n");
+			DebugPrint("due to ntfs.sys driver imperfectness.\n");
+			goto universal_scan;
+		}*/
 		ScanMFT();
 		break;
 	/*case FAT12_PARTITION:
@@ -101,6 +120,7 @@ int Analyze(char *volume_name)
 		ScanFat32Partition(dx);
 		break;*/
 	default: /* UDF, Ext2 and so on... */
+/*universal_scan:*/
 		/* Find files */
 		tm = _rdtsc();
 		path[4] = (short)volume_letter;

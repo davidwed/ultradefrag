@@ -69,11 +69,64 @@ VIAddVersionKey "FileDescription" "Ultra Defragmenter Micro Edition Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
+ReserveFile "driver.ini"
+
 Page license
+Page custom DriverShow DriverLeave ""
 Page instfiles
 
 UninstPage uninstConfirm
 UninstPage instfiles
+
+Var UserModeDriver
+
+;-----------------------------------------
+
+Function DriverShow
+
+  push $R0
+
+  SetOutPath $PLUGINSDIR
+  File "driver.ini"
+
+!if ${ULTRADFGARCH} != 'amd64'
+  ClearErrors
+  ReadRegStr $R0 HKLM "Software\UltraDefrag" "UserModeDriver"
+  ${Unless} ${Errors}
+    WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" $R0
+  ${EndUnless}
+!else
+  WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" "1"
+  WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "Flags" "DISABLED"
+!endif
+
+  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\driver.ini"
+  pop $R0
+  InstallOptions::show
+  pop $R0
+
+  pop $R0
+  Abort
+
+FunctionEnd
+
+;-----------------------------------------
+
+Function DriverLeave
+
+  push $R0
+
+  ReadINIStr $R0 "$PLUGINSDIR\driver.ini" "Settings" "State"
+  ${If} $R0 != "0"
+    pop $R0
+    Abort
+  ${EndIf}
+
+  ReadINIStr $UserModeDriver "$PLUGINSDIR\driver.ini" "Field 1" "State"
+  WriteRegStr HKLM "Software\UltraDefrag" "UserModeDriver" $UserModeDriver
+  pop $R0
+
+FunctionEnd
 
 ;-----------------------------------------
 
@@ -81,7 +134,20 @@ Function .onInit
 
   ${CheckWinVersion}
 
+  ${EnableX64FSRedirection}
+  InitPluginsDir
+
   ${DisableX64FSRedirection}
+  StrCpy $UserModeDriver 1
+
+!if ${ULTRADFGARCH} == 'i386'
+  ClearErrors
+  ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
+  ${Unless} ${Errors}
+    StrCpy $UserModeDriver $R1
+  ${EndUnless}
+!endif
+
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   ${EnableX64FSRedirection}
 
@@ -108,8 +174,12 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\HISTORY.TXT"
   File "${ROOTDIR}\src\README.TXT"
 
-  SetOutPath "$SYSDIR\Drivers"
-  File "ultradfg.sys"
+  ${If} $UserModeDriver == '1'
+    Delete "$SYSDIR\Drivers\ultradfg.sys"
+  ${Else}
+    SetOutPath "$SYSDIR\Drivers"
+    File /nonfatal "ultradfg.sys"
+  ${EndIf}
 
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"

@@ -87,6 +87,7 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
 ReserveFile "lang.ini"
+ReserveFile "driver.ini"
 
 !ifdef MODERN_UI
   !define MUI_COMPONENTSPAGE_SMALLDESC
@@ -136,15 +137,19 @@ Function DriverShow
   !insertmacro MUI_HEADER_TEXT "Preferred Driver" \
       "Select which driver do you prefer."
 !endif
-  ;;InitPluginsDir
   SetOutPath $PLUGINSDIR
   File "driver.ini"
 
+!if ${ULTRADFGARCH} != 'amd64'
   ClearErrors
   ReadRegStr $R0 HKLM "Software\UltraDefrag" "UserModeDriver"
   ${Unless} ${Errors}
     WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" $R0
   ${EndUnless}
+!else
+  WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" "1"
+  WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "Flags" "DISABLED"
+!endif
 
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\driver.ini"
   pop $R0
@@ -184,7 +189,6 @@ Function LangShow
   !insertmacro MUI_HEADER_TEXT "Language Packs" \
       "Choose which language pack you want to install."
 !endif
-  ;;InitPluginsDir
   SetOutPath $PLUGINSDIR
   File "lang.ini"
 
@@ -230,7 +234,6 @@ Function ShowBootSplash
   ${AndUnless} $ShowBootsplash == "0"
     push $R0
     ${EnableX64FSRedirection}
-    InitPluginsDir
     SetOutPath $PLUGINSDIR
     File "${ROOTDIR}\src\installer\*.bmp"
     advsplash::show 2000 400 0 -1 "$PLUGINSDIR\$R1"
@@ -370,7 +373,7 @@ Section "Ultra Defrag core files (required)" SecCore
     Delete "$SYSDIR\Drivers\ultradfg.sys"
   ${Else}
     SetOutPath "$SYSDIR\Drivers"
-    File "ultradfg.sys"
+    File /nonfatal "ultradfg.sys"
   ${EndIf}
 
   SetOutPath "$SYSDIR"
@@ -647,6 +650,9 @@ Function .onInit
 
   ${CheckWinVersion}
 
+  ${EnableX64FSRedirection}
+  InitPluginsDir
+
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   push $R1
@@ -654,12 +660,16 @@ Function .onInit
   /* variables initialization */
   StrCpy $IsInstalled 0
   StrCpy $ShowBootsplash 1
+
   StrCpy $UserModeDriver 1
+!if ${ULTRADFGARCH} == 'i386'
   ClearErrors
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
   ${Unless} ${Errors}
     StrCpy $UserModeDriver $R1
   ${EndUnless}
+!endif
+
   StrCpy $LanguagePack "English (US)"
   ClearErrors
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
@@ -696,6 +706,7 @@ Function .onInit
 
 !ifdef MODERN_UI
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
+  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "driver.ini"
 !endif
   pop $R1
   ${EnableX64FSRedirection}

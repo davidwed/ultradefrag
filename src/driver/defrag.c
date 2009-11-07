@@ -122,7 +122,7 @@ int Defragment(UDEFRAG_DEVICE_EXTENSION *dx)
 NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile, 
 		    ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)
 {
-	ULONG status;
+	NTSTATUS status;
 	IO_STATUS_BLOCK ioStatus;
 
 	DebugPrint("-Ultradfg- sVcn: %I64u,tLcn: %I64u,n: %u\n",

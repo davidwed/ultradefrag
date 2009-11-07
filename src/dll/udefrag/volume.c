@@ -24,7 +24,7 @@
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
-#include <winioctl.h>
+///#include <winioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h> /* for toupper() function for mingw */

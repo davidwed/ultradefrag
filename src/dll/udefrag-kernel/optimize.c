@@ -33,6 +33,10 @@ int  OptimizationRoutine(char *volume_name);
 ULONGLONG StartingPoint = 0;
 int pass_number = 0;
 
+/*
+* NOTE: Algorithm is effective always,
+* even if optimized volume has low amount of free space.
+*/
 int Optimize(char *volume_name)
 {
 	PFREEBLOCKMAP freeblock;
@@ -49,12 +53,12 @@ int Optimize(char *volume_name)
 	StartingPoint = 0; /* start moving from the beginning of the volume */
 	pass_number = 1;
 	for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-		if(freeblock->next_ptr == free_space_map) return 0;
 		/* is block larger than 0.5% of the volume space? */
 		if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
 			StartingPoint = freeblock->lcn;
 			break;
 		}
+		if(freeblock->next_ptr == free_space_map) return 0;
 	}
 	/* validate StartingPoint */
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
@@ -82,21 +86,17 @@ int Optimize(char *volume_name)
 		pass_number ++;
 		/* redefine starting point */
 		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-			if(freeblock->next_ptr == free_space_map) return 0;
 			/* is block larger than 0.5% of the volume space? */
 			if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
 				StartingPoint = freeblock->lcn;
 				break;
 			}
+			if(freeblock->next_ptr == free_space_map) return 0;
 		}
 	} while (1);
 	return 0;
 }
 
-/*
-* NOTE: Algorithm is effective only 
-* if optimized volume has a lot of free space.
-*/
 /* returns -1 if no files were defragmented or optimized, zero otherwise */
 int OptimizationRoutine(char *volume_name)
 {

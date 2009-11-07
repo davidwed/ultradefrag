@@ -33,6 +33,10 @@ int  OptimizationRoutine(UDEFRAG_DEVICE_EXTENSION *dx);
 ULONGLONG StartingPoint = 0;
 int pass_number = 0;
 
+/*
+* NOTE: Algorithm is effective always,
+* even if optimized volume has low amount of free space.
+*/
 void Optimize(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	PFREEBLOCKMAP freeblock;
@@ -49,12 +53,12 @@ void Optimize(UDEFRAG_DEVICE_EXTENSION *dx)
 	StartingPoint = 0; /* start moving from the beginning of the volume */
 	pass_number = 1;
 	for(freeblock = dx->free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-		if(freeblock->next_ptr == dx->free_space_map) return;
 		/* is block larger than 0.5% of the volume space? */
 		if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
 			StartingPoint = freeblock->lcn;
 			break;
 		}
+		if(freeblock->next_ptr == dx->free_space_map) return;
 	}
 	/* validate StartingPoint */
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
@@ -81,20 +85,16 @@ void Optimize(UDEFRAG_DEVICE_EXTENSION *dx)
 		pass_number ++;
 		/* redefine starting point */
 		for(freeblock = dx->free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-			if(freeblock->next_ptr == dx->free_space_map) return;
 			/* is block larger than 0.5% of the volume space? */
 			if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
 				StartingPoint = freeblock->lcn;
 				break;
 			}
+			if(freeblock->next_ptr == dx->free_space_map) return;
 		}
 	} while (1);
 }
 
-/*
-* NOTE: Algorithm is effective only 
-* if optimized volume has a lot of free space.
-*/
 /* returns -1 if no files were defragmented or optimized, zero otherwise */
 int OptimizationRoutine(UDEFRAG_DEVICE_EXTENSION *dx)
 {

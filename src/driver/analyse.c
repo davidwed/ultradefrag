@@ -114,6 +114,24 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	switch(dx->partition_type){
 	case NTFS_PARTITION:
 		/* Experimental support of retrieving information directly from MFT. */
+		/*
+		* ScanMFT() causes BSOD on NT 4.0, even in user mode!
+		* It seems that NTFS driver is imperfect in this system
+		* and ScanMFT() breaks something inside it.
+		* Sometimes BSOD appears after an analysis after volume optimization,
+		* sometimes it appears immediately during the first analysis.
+		* Examples:
+		* 1. kmd compact ntfs nt4 -> BSOD 0xa (0x48, 0xFF, 0x0, 0x80101D5D)
+		* immediately after last analysis
+		* 2. user mode - optimize - BSOD during the second analysis
+		* 0x50 (0xB51CA820,0,0,2) or 0x1E (0xC...5,0x8013A7B6,0,0x20)
+		* 3. kmd - nt4 - gui - optimize - chkdsk /F for ntfs - bsod
+		*/
+		/*if(nt4_system){
+			DebugPrint("-Ultradfg- Ultrafast NTFS scan is not avilable on NT 4.0\n");
+			DebugPrint("-Ultradfg- due to ntfs.sys driver imperfectness.\n");
+			goto universal_scan;
+		}*/
 		ScanMFT(dx);
 		break;
 	/*case FAT12_PARTITION:
@@ -126,6 +144,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		ScanFat32Partition(dx);
 		break;*/
 	default: /* UDF, Ext2 and so on... */
+/*universal_scan:*/
 		/* Find files */
 		tm = _rdtsc();
 		path[4] = (short)dx->letter;
@@ -149,7 +168,7 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
 		Status = OpenTheFile(pfn,&hFile);
 		if(Status != STATUS_SUCCESS){
-			DebugPrint("Can't open %ws file: %x\n",pfn->name.Buffer,(UINT)Status);
+			DebugPrint("-Ultradfg- Can't open %ws file: %x\n",pfn->name.Buffer,(UINT)Status);
 			/* we need to destroy the block map to avoid infinite loops */
 			DeleteBlockmap(pfn); /* file is locked by other application, so its state is unknown */
 		} else {

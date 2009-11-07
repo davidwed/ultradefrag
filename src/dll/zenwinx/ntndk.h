@@ -20,7 +20,9 @@
 #ifndef _NTNDK_H_
 #define _NTNDK_H_
 
-#include <winioctl.h>
+/* Note: this file also replaces standard winioctl.h header. */
+
+///#include <winioctl.h>
 
 #if defined(__POCC__)
 #pragma ftol(inlined)
@@ -101,6 +103,10 @@ typedef LONG NTSTATUS;
 #define NT_SUCCESS(x) ((x)>=0)
 #endif
 
+#ifndef STATUS_WAIT_0
+#define STATUS_WAIT_0                 ((NTSTATUS)0x00000000)
+#endif
+
 #if defined(__GNUC__)
 #define MAX_WAIT_INTERVAL -0x7FFFFFFFFFFFFFFFLL
 #else
@@ -154,6 +160,10 @@ typedef struct _OBJECT_ATTRIBUTES {
         (p)->SecurityDescriptor = s; \
         (p)->SecurityQualityOfService = NULL; \
     } while (0)
+	
+#ifndef FILE_NO_INTERMEDIATE_BUFFERING
+#define FILE_NO_INTERMEDIATE_BUFFERING  0x00000008
+#endif
 
 typedef struct _IO_STATUS_BLOCK {
     NTSTATUS Status;
@@ -750,6 +760,84 @@ typedef struct _KEYBOARD_INDICATOR_PARAMETERS {
   USHORT  LedFlags;
 } KEYBOARD_INDICATOR_PARAMETERS, *PKEYBOARD_INDICATOR_PARAMETERS;
 
+/* replacement for winioctl.h which has encumbering ntfs related definitions */
+#define DEVICE_TYPE DWORD
+
+#define FILE_DEVICE_BEEP                0x00000001
+#define FILE_DEVICE_CD_ROM              0x00000002
+#define FILE_DEVICE_CD_ROM_FILE_SYSTEM  0x00000003
+#define FILE_DEVICE_CONTROLLER          0x00000004
+#define FILE_DEVICE_DATALINK            0x00000005
+#define FILE_DEVICE_DFS                 0x00000006
+#define FILE_DEVICE_DISK                0x00000007
+#define FILE_DEVICE_DISK_FILE_SYSTEM    0x00000008
+#define FILE_DEVICE_FILE_SYSTEM         0x00000009
+#define FILE_DEVICE_INPORT_PORT         0x0000000a
+#define FILE_DEVICE_KEYBOARD            0x0000000b
+#define FILE_DEVICE_MAILSLOT            0x0000000c
+#define FILE_DEVICE_MIDI_IN             0x0000000d
+#define FILE_DEVICE_MIDI_OUT            0x0000000e
+#define FILE_DEVICE_MOUSE               0x0000000f
+#define FILE_DEVICE_MULTI_UNC_PROVIDER  0x00000010
+#define FILE_DEVICE_NAMED_PIPE          0x00000011
+#define FILE_DEVICE_NETWORK             0x00000012
+#define FILE_DEVICE_NETWORK_BROWSER     0x00000013
+#define FILE_DEVICE_NETWORK_FILE_SYSTEM 0x00000014
+#define FILE_DEVICE_NULL                0x00000015
+#define FILE_DEVICE_PARALLEL_PORT       0x00000016
+#define FILE_DEVICE_PHYSICAL_NETCARD    0x00000017
+#define FILE_DEVICE_PRINTER             0x00000018
+#define FILE_DEVICE_SCANNER             0x00000019
+#define FILE_DEVICE_SERIAL_MOUSE_PORT   0x0000001a
+#define FILE_DEVICE_SERIAL_PORT         0x0000001b
+#define FILE_DEVICE_SCREEN              0x0000001c
+#define FILE_DEVICE_SOUND               0x0000001d
+#define FILE_DEVICE_STREAMS             0x0000001e
+#define FILE_DEVICE_TAPE                0x0000001f
+#define FILE_DEVICE_TAPE_FILE_SYSTEM    0x00000020
+#define FILE_DEVICE_TRANSPORT           0x00000021
+#define FILE_DEVICE_UNKNOWN             0x00000022
+#define FILE_DEVICE_VIDEO               0x00000023
+#define FILE_DEVICE_VIRTUAL_DISK        0x00000024
+#define FILE_DEVICE_WAVE_IN             0x00000025
+#define FILE_DEVICE_WAVE_OUT            0x00000026
+#define FILE_DEVICE_8042_PORT           0x00000027
+#define FILE_DEVICE_NETWORK_REDIRECTOR  0x00000028
+#define FILE_DEVICE_BATTERY             0x00000029
+#define FILE_DEVICE_BUS_EXTENDER        0x0000002a
+#define FILE_DEVICE_MODEM               0x0000002b
+#define FILE_DEVICE_VDM                 0x0000002c
+#define FILE_DEVICE_MASS_STORAGE        0x0000002d
+#define FILE_DEVICE_SMB                 0x0000002e
+#define FILE_DEVICE_KS                  0x0000002f
+#define FILE_DEVICE_CHANGER             0x00000030
+#define FILE_DEVICE_SMARTCARD           0x00000031
+#define FILE_DEVICE_ACPI                0x00000032
+#define FILE_DEVICE_DVD                 0x00000033
+#define FILE_DEVICE_FULLSCREEN_VIDEO    0x00000034
+#define FILE_DEVICE_DFS_FILE_SYSTEM     0x00000035
+#define FILE_DEVICE_DFS_VOLUME          0x00000036
+#define FILE_DEVICE_SERENUM             0x00000037
+#define FILE_DEVICE_TERMSRV             0x00000038
+#define FILE_DEVICE_KSEC                0x00000039
+#define FILE_DEVICE_FIPS                0x0000003A
+#define FILE_DEVICE_INFINIBAND          0x0000003B
+
+#define CTL_CODE( DeviceType, Function, Method, Access ) (                 \
+    ((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method) \
+)
+
+#define METHOD_BUFFERED                 0
+#define METHOD_IN_DIRECT                1
+#define METHOD_OUT_DIRECT               2
+#define METHOD_NEITHER                  3
+
+#define FILE_ANY_ACCESS                 0
+#define FILE_SPECIAL_ACCESS             (FILE_ANY_ACCESS)
+#define FILE_READ_ACCESS                ( 0x0001 )    // file & pipe
+#define FILE_WRITE_ACCESS               ( 0x0002 )    // file & pipe
+
+
 //
 // NtDeviceIoControlFile IoControlCode values for the keyboard device.
 //
@@ -783,6 +871,28 @@ typedef struct _KEYBOARD_INDICATOR_PARAMETERS {
 #define KEYBOARD_CAPS_LOCK_ON     4
 #define KEYBOARD_NUM_LOCK_ON      2
 #define KEYBOARD_SCROLL_LOCK_ON   1
+
+#define FSCTL_GET_NTFS_VOLUME_DATA      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 25, METHOD_BUFFERED, FILE_ANY_ACCESS) // NTFS_VOLUME_DATA_BUFFER
+#define FSCTL_GET_NTFS_FILE_RECORD      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 26, METHOD_BUFFERED, FILE_ANY_ACCESS) // NTFS_FILE_RECORD_INPUT_BUFFER, NTFS_FILE_RECORD_OUTPUT_BUFFER
+#define FSCTL_GET_VOLUME_BITMAP         CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 27,  METHOD_NEITHER, FILE_ANY_ACCESS) // STARTING_LCN_INPUT_BUFFER, VOLUME_BITMAP_BUFFER
+#define FSCTL_GET_RETRIEVAL_POINTERS    CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 28,  METHOD_NEITHER, FILE_ANY_ACCESS) // STARTING_VCN_INPUT_BUFFER, RETRIEVAL_POINTERS_BUFFER
+#define FSCTL_MOVE_FILE                 CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 29, METHOD_BUFFERED, FILE_SPECIAL_ACCESS) // MOVE_FILE_DATA,
+#define FSCTL_IS_VOLUME_DIRTY           CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 30, METHOD_BUFFERED, FILE_ANY_ACCESS)
+
+typedef struct _PARTITION_INFORMATION {
+    LARGE_INTEGER StartingOffset;
+    LARGE_INTEGER PartitionLength;
+    DWORD HiddenSectors;
+    DWORD PartitionNumber;
+    BYTE  PartitionType;
+    BOOLEAN BootIndicator;
+    BOOLEAN RecognizedPartition;
+    BOOLEAN RewritePartition;
+} PARTITION_INFORMATION, *PPARTITION_INFORMATION;
+
+#define IOCTL_DISK_BASE                 FILE_DEVICE_DISK
+#define IOCTL_DISK_GET_DRIVE_GEOMETRY   CTL_CODE(IOCTL_DISK_BASE, 0x0000, METHOD_BUFFERED, FILE_ANY_ACCESS)
+#define IOCTL_DISK_GET_PARTITION_INFO   CTL_CODE(IOCTL_DISK_BASE, 0x0001, METHOD_BUFFERED, FILE_READ_ACCESS)
 
 typedef enum _FILE_INFORMATION_CLASS {
     FileDirectoryInformation = 1,

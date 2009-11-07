@@ -65,9 +65,7 @@ type manifest.part2 >> .\obj\lua5.1\lua.manifest
 echo Lua Console >> .\obj\lua5.1\lua.manifest
 type manifest.part3 >> .\obj\lua5.1\lua.manifest
 echo processorArchitecture="%1" >> .\obj\lua5.1\lua.manifest
-type manifest.part4a >> .\obj\lua5.1\lua.manifest
-echo processorArchitecture="%1" >> .\obj\lua5.1\lua.manifest
-type manifest.part5 >> .\obj\lua5.1\lua.manifest
+type manifest.part4 >> .\obj\lua5.1\lua.manifest
 
 rem update manifests in working copy of sources
 if "%1" neq "X86" goto L1

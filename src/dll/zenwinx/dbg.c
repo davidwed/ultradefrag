@@ -129,7 +129,7 @@ int __stdcall winx_debug_print(char *string)
 	if(!NT_SUCCESS(Status)) goto failure;
 	SectionOffset.QuadPart = 0;
 	Status = NtMapViewOfSection(hSection,NtCurrentProcess(),
-		&BaseAddress,0,0,&SectionOffset,&ViewSize,ViewShare,
+		&BaseAddress,0,0,&SectionOffset,(SIZE_T *)&ViewSize,ViewShare,
 		0,PAGE_READWRITE);
 	if(!NT_SUCCESS(Status)) goto failure;
 	
@@ -145,7 +145,7 @@ int __stdcall winx_debug_print(char *string)
 	dbuffer = (DBG_OUTPUT_DEBUG_STRING_BUFFER *)BaseAddress;
 
 	/* write the process id into the buffer */
-	dbuffer->ProcessId = (DWORD)(NtCurrentTeb()->ClientId.UniqueProcess);
+	dbuffer->ProcessId = (DWORD)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess);
 
 	strncpy(dbuffer->Msg,string,4096-sizeof(ULONG));
 	dbuffer->Msg[4096-sizeof(ULONG)-1] = 0;

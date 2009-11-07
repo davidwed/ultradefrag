@@ -25,7 +25,7 @@
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
-#include <winioctl.h>
+///#include <winioctl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h> /* for toupper() on mingw */
@@ -88,6 +88,8 @@ void __stdcall LoadDriverErrorHandler(short *msg)
 {
 	winx_dbg_print("------------------------------------------------------------\n");
 	winx_dbg_print("%ws\n",msg);
+	winx_dbg_print("UltraDefrag kernel mode driver is not installed\n");
+	winx_dbg_print("or Windows denies it.\n");
 	winx_dbg_print("------------------------------------------------------------\n");
 }
 
@@ -180,6 +182,7 @@ int __stdcall udefrag_init(long map_size)
 		/* it seems that we are running on Vista or Win7 */
 		kernel_mode_driver = FALSE;
 		cluster_map_size = map_size;
+		(void)udefrag_reload_settings(); /* reload udefrag.dll specific options */
 		return 0;
 	}
 	winx_set_error_handler(eh);

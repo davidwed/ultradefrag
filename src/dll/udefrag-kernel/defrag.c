@@ -116,7 +116,7 @@ int Defragment(char *volume_name)
 
 NTSTATUS MovePartOfFile(HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)
 {
-	ULONG status;
+	NTSTATUS status;
 	IO_STATUS_BLOCK ioStatus;
 	MOVEFILE_DESCRIPTOR moveFile;
 

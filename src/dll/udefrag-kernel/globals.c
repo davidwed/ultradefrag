@@ -48,14 +48,11 @@ unsigned char volume_letter = 0;
 ULONGLONG bytes_per_cluster = 0;
 ULONG bytes_per_sector = 0;
 ULONG sectors_per_cluster = 0;
-ULONGLONG total_space = 0;
-ULONGLONG free_space = 0; /* in bytes */
 ULONGLONG clusters_total = 0;
 ULONGLONG clusters_per_256k = 0;
 
 unsigned char partition_type = UNKNOWN_PARTITION;
 
-ULONGLONG mft_size = 0;
 ULONG ntfs_record_size = 0;
 ULONGLONG max_mft_entries = 0;
 

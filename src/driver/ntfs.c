@@ -573,21 +573,24 @@ void CheckReparsePointResident(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE 
 /* Analyse attributes of the current file packed in another mft records. */
 void AnalyseResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 {
-	ULONG n_entries;
 	PATTRIBUTE_LIST attr_list_entry;
+	USHORT length;
 	
 	attr_list_entry = (PATTRIBUTE_LIST)((char *)pr_attr + pr_attr->ValueOffset);
-	n_entries = pr_attr->ValueLength / sizeof(ATTRIBUTE_LIST);
-	while(n_entries){
+
+	while(TRUE){
+		if( ((char *)attr_list_entry + sizeof(ATTRIBUTE_LIST) - sizeof(attr_list_entry->AlignmentOrReserved)) > 
+			((char *)pr_attr + pr_attr->ValueOffset + pr_attr->ValueLength) ) break;
 		if(KeReadStateEvent(&stop_event) == 0x1) break;
-		n_entries --;
 		/* is it a valid attribute */
 		if(attr_list_entry->AttributeType == 0xffffffff) break;
 		if(attr_list_entry->AttributeType == 0x0) break;
 		if(attr_list_entry->Length == 0) break;
+		///DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
 		AnalyseAttributeFromAttributeList(dx,attr_list_entry,pmfi);
 		/* go to the next attribute list entry */
-		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + sizeof(ATTRIBUTE_LIST));
+		length = attr_list_entry->Length;
+		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + length);
 	}
 }
 
@@ -863,92 +866,66 @@ void ProcessRunList(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *full_path,
 
 void AnalyseNonResidentAttributeList(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULONGLONG size)
 {
-	ULONGLONG bytes_to_read = size;
-	ULONGLONG entries_per_cluster;
+	ULONGLONG clusters_to_read;
 	char *cluster;
+	char *current_cluster;
 	PBLOCKMAP block;
 	ULONGLONG lsn;
 	NTSTATUS status;
 	PATTRIBUTE_LIST attr_list_entry;
-	int i,j;
+	int i;
+	USHORT length;
 	
 	DebugPrint("-Ultradfg- Allocated size = %I64u bytes.\n",size);
 	
-	if(size > dx->bytes_per_cluster && (dx->bytes_per_cluster % sizeof(ATTRIBUTE_LIST))){
-		DebugPrint("-Ultradfg- Cluster size is not an integral of ATTRIBUTE_LIST size!\n");
-		i = sizeof(ATTRIBUTE_LIST);
-		DebugPrint("-Ultradfg- Cluster size = %I64u, ATTRIBUTE_LIST size = %u.\n",
-			dx->bytes_per_cluster,i);
-		return;
-	}
-	
-	/* allocate memory for a single cluster */
-	cluster = (char *)AllocatePool(NonPagedPool,(SIZE_T)dx->bytes_per_cluster);
+	/* allocate memory for an integral number of cluster to hold a whole AttributeList */
+	clusters_to_read = size / dx->bytes_per_cluster;
+	if(size % dx->bytes_per_cluster) clusters_to_read ++;
+	cluster = (char *)AllocatePool(NonPagedPool,(SIZE_T)(dx->bytes_per_cluster * clusters_to_read));
 	if(!cluster){
 		DebugPrint("-Ultradfg- Cannot allocate %I64u bytes of memory for AnalyseNonResidentAttributeList()!\n",
-			dx->bytes_per_cluster);
+			dx->bytes_per_cluster * clusters_to_read);
 		return;
 	}
 	
-	entries_per_cluster = dx->bytes_per_cluster / sizeof(ATTRIBUTE_LIST);
-	
 	/* loop through all blocks of file */
+	current_cluster = cluster;
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
 		/* loop through clusters of the current block */
 		for(i = 0; i < block->length; i++){
 			/* read current cluster */
 			lsn = (block->lcn + i) * dx->sectors_per_cluster;
-			status = ReadSectors(dx,lsn,cluster,(ULONG)dx->bytes_per_cluster);
+			status = ReadSectors(dx,lsn,current_cluster,(ULONG)dx->bytes_per_cluster);
 			if(!NT_SUCCESS(status)){
 				DebugPrint("-Ultradfg- cannot read the %I64u sector: %x!\n",
 					lsn,(UINT)status);
 				goto scan_done;
 			}
-			/* loop through ATTRIBUTE_LIST structures */
-			for(j = 0; j < entries_per_cluster; j++){
-				/* should we read it? */
-				if(bytes_to_read < sizeof(ATTRIBUTE_LIST)){
-					DebugPrint("-Ultradfg- AnalyseNonResidentAttributeList() finished,\n");
-					DebugPrint("-Ultradfg- though %I64u superfluous bytes are still not processed.\n",
-						bytes_to_read);
-					goto scan_done;
-				}
-				/* analyze current entry */
-				attr_list_entry = (PATTRIBUTE_LIST)((char *)cluster + sizeof(ATTRIBUTE_LIST) * j);
-				/* is it a valid attribute */
-				if(attr_list_entry->AttributeType == 0xffffffff) goto scan_done;
-				if(attr_list_entry->AttributeType == 0x0) goto scan_done;
-				if(attr_list_entry->Length == 0) goto scan_done;
-				AnalyseAttributeFromAttributeList(dx,attr_list_entry,pmfi);
-				/* decrement number of bytes to read */
-				bytes_to_read -= sizeof(ATTRIBUTE_LIST);
-			}
+			current_cluster += dx->bytes_per_cluster;
 		}
 		if(block->next_ptr == pfn->blockmap) break;
+	}
+
+	attr_list_entry = (PATTRIBUTE_LIST)cluster;
+
+	while(TRUE){
+		if( ((char *)attr_list_entry + sizeof(ATTRIBUTE_LIST) - sizeof(attr_list_entry->AlignmentOrReserved)) > 
+			((char *)cluster + size) ) break;
+		if(KeReadStateEvent(&stop_event) == 0x1) break;
+		/* is it a valid attribute */
+		if(attr_list_entry->AttributeType == 0xffffffff) break;
+		if(attr_list_entry->AttributeType == 0x0) break;
+		if(attr_list_entry->Length == 0) break;
+		///DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
+		AnalyseAttributeFromAttributeList(dx,attr_list_entry,pmfi);
+		/* go to the next attribute list entry */
+		length = attr_list_entry->Length;
+		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + length);
 	}
 
 scan_done:	
 	/* free allocated resources */
 	Nt_ExFreePool(cluster);
-	
-#if 0	
-	ULONG n_entries;
-	PATTRIBUTE_LIST attr_list_entry;
-	
-	attr_list_entry = (PATTRIBUTE_LIST)((char *)pr_attr + pr_attr->ValueOffset);
-	n_entries = pr_attr->ValueLength / sizeof(ATTRIBUTE_LIST);
-	while(n_entries){
-		if(KeReadStateEvent(&stop_event) == 0x1) break;
-		n_entries --;
-		/* is it a valid attribute */
-		if(attr_list_entry->AttributeType == 0xffffffff) break;
-		if(attr_list_entry->AttributeType == 0x0) break;
-		if(attr_list_entry->Length == 0) break;
-		AnalyseAttributeFromAttributeList(dx,attr_list_entry,pmfi);
-		/* go to the next attribute list entry */
-		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + sizeof(ATTRIBUTE_LIST));
-	}
-#endif
 }
 
 /*------------------------ Defragmentation related code ------------------------------*/
@@ -1092,6 +1069,8 @@ void UpdateClusterMapAndStatistics(UDEFRAG_DEVICE_EXTENSION *dx,PMY_FILE_INFORMA
 		pfn->is_dirty = FALSE;
 		/* 1. fill all members of pfn */
 		/* 1.1 set flags in pfn ??? */
+		/* Note, FILE_ATTR_DIRECTORY is not considered valid in NT.  It is
+		   reserved for the DOS SUBDIRECTORY flag. */
 		/* always sets is_dir flag to FALSE */
 		/*if(pmfi->Flags & FILE_ATTRIBUTE_DIRECTORY) pfn->is_dir = TRUE;
 		else pfn->is_dir = FALSE;

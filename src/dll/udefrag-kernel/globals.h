@@ -27,7 +27,7 @@
 #define WIN32_NO_STATUS
 #define NOMINMAX
 #include <windows.h>
-#include <winioctl.h>
+///#include <winioctl.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -176,6 +176,7 @@ typedef struct {
 								   * for compressed and sparse files. */
 	ULONGLONG InitializedSize;    /* The size, in bytes, of the initialized portion of the attribute value. */
 	ULONGLONG CompressedSize;     /* The size, in bytes, of the attribute value after compression. */
+	                              /* is presented only when the attribute is really compressed */
 } NONRESIDENT_ATTRIBUTE, *PNONRESIDENT_ATTRIBUTE;
 
 typedef struct {
@@ -251,6 +252,7 @@ typedef struct {
 	UCHAR ReparseData[1];
 } REPARSE_POINT, *PREPARSE_POINT;
 
+/* the following structure may have variable length! */
 typedef struct {
 	ATTRIBUTE_TYPE AttributeType;  /* The type of the attribute. */
 	USHORT Length;                 /* The size, in bytes, of the attribute list entry. */
@@ -260,7 +262,7 @@ typedef struct {
 	ULONGLONG FileReferenceNumber; /* The FRN of the MFT entry containing the NONRESIDENT_ATTRIBUTE structure for this portion 
 									* of the attribute value. */
 	USHORT AttributeNumber;        /* A numeric identifier for the instance of the attribute. */
-	USHORT AlignmentOrReserved[3];
+	USHORT AlignmentOrReserved[3]; /* optional? */
 } ATTRIBUTE_LIST, *PATTRIBUTE_LIST;
 
 /* this constant must be equal or larger than MAX_PATH */
