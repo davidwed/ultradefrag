@@ -24,15 +24,8 @@
 #ifndef _UDEFRAG_KERNEL_GLOBALS_H_
 #define _UDEFRAG_KERNEL_GLOBALS_H_
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-///#include <winioctl.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h> /* for toupper() on mingw */
 #include "../../include/ntndk.h"
+
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
@@ -42,6 +35,8 @@
 #define DebugPrint winx_dbg_print
 #define DebugPrint1 if(dbgprint_level < 1) {} else DebugPrint
 #define DebugPrint2 if(dbgprint_level < 2) {} else DebugPrint
+
+#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
 
 /* UltraDefrag internal structures */
 

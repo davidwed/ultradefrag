@@ -10,6 +10,11 @@ set OLD_PATH=%path%
 call SETVARS.CMD
 if "%1" equ "--clean" goto clean
 
+rem DELETE ALL PREVIOUSLY COMPILED FILES
+call BUILD.CMD --clean
+set OLD_PATH=%path%
+call SETVARS.CMD
+
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
@@ -178,12 +183,15 @@ goto build_scheduler
 
 :mingw_x64_build
 
-set path=%MINGWBASEx64%\bin;%path%
+echo --------- Target is x64 ---------
+set AMD64=1
+
+set path=%MINGWx64BASE%\bin;%path%
 
 set BUILD_ENV=mingw_x64
-set UDEFRAG_LIB_PATH=..\..\lib
+set UDEFRAG_LIB_PATH=..\..\lib\amd64
 rem update manifests...
-call make-manifests.cmd X86
+call make-manifests.cmd amd64
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
@@ -223,6 +231,8 @@ copy /Y ..\installer\UltraDefrag.nsh .\
 copy /Y ..\installer\lang.ini .\
 copy /Y ..\installer\driver.ini .\
 
+if "%1" equ "--use-mingw-x64" goto build_x64_installer
+
 rem echo Build the gui launcher program
 rem copy /Y ..\installer\udefrag-gui.nsi .\
 rem %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% udefrag-gui.nsi
@@ -241,6 +251,8 @@ if %errorlevel% neq 0 goto fail
 
 if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
+
+:build_x64_installer
 rem copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
 copy /Y ..\installer\UltraDefrag.nsh .\amd64\
@@ -252,6 +264,7 @@ if %errorlevel% neq 0 goto fail
 
 cd..
 if "%1" equ "--use-pellesc" goto build_source_package
+if "%1" equ "--use-mingw-x64" goto build_source_package
 rem copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
 copy /Y ..\installer\UltraDefrag.nsh .\ia64\

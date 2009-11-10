@@ -41,6 +41,7 @@ iup.SetLanguage("ENGLISH")
 -- initialize parameters
 apply_patch = 0
 udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc = "","","","","","","","",""
+mingw64base = ""
 
 -- make a backup copy of the file
 f = assert(io.open("./SETVARS.BK","w"))
@@ -61,6 +62,7 @@ for line in io.lines("./SETVARS.CMD") do
 		elseif string.find(k, "SEVENZIP_PATH") then ziproot = v
 		elseif string.find(k, "MSVSBIN") then vsbinpath = v
 		elseif string.find(k, "DDKINCDIR") then rosinc = v
+		elseif string.find(k, "MINGWx64BASE") then mingw64base = v
 		end
 	end
 end
@@ -90,12 +92,12 @@ function param_action(dialog, param_index)
 			; colors = { "255 255 0", "255 0 0" }
 		}
 		dialog.icon = icon
-		dialog.size = "400x203"
+		dialog.size = "400x218"
 	end
 	return 1
 end
 
-ret, udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc, apply_patch = 
+ret, udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc, mingw64base, apply_patch = 
 	iup.GetParam("UltraDefrag build configurator",param_action,
 		"UltraDefrag version: %s\n"..
 		"ZenWINX version: %s\n"..
@@ -106,8 +108,9 @@ ret, udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, 
 		"7-Zip root path: %s\n"..
 		"Visual Studio bin path: %s\n"..
 		"ReactOS include path: %s\n"..
+		"MinGW x64 base path: %s\n"..
 		"Apply patch to MinGW: %b[No,Yes]\n",
-		udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc, apply_patch
+		udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc, mingw64base, apply_patch
 		)
 if ret == 1 then
 	-- save options
@@ -125,6 +128,7 @@ if ret == 1 then
 	f:write("set ZENWINXVER=", winxver, "\n")
 	f:write("set WINDDKBASE=", ddkbase, "\n")
 	f:write("set MINGWBASE=", mingwbase, "\n")
+	f:write("set MINGWx64BASE=", mingw64base, "\n")
 	f:write("set NETRUNTIMEPATH=", netpath, "\n")
 	f:write("set NSISDIR=", nsisroot, "\n")
 	f:write("set SEVENZIP_PATH=", ziproot, "\n")
@@ -134,7 +138,7 @@ if ret == 1 then
 	print("SETVARS.CMD script was successfully updated.")
 	if apply_patch == 1 then
 		print("Apply MinGW patch option was selected.")
-		if os.execute("cmd.exe /C mingw_patch.cmd " .. mingwbase) ~= 0 then
+		if os.execute("cmd.exe /C mingw_patch.cmd " .. mingwbase .. " " .. mingw64base) ~= 0 then
 			error("Cannot apply patch to MinGW!")
 		end
 	end

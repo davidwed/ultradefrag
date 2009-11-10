@@ -25,8 +25,6 @@
 
 #include "globals.h"
 
-#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
-
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	if(dwReason == DLL_PROCESS_ATTACH)

@@ -149,7 +149,7 @@ void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 BOOLEAN SaveReportToDisk(char *volume_name)
 {
 	short unicode_buffer[256];
-	short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
+	unsigned short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
 	char path[64];
 	WINX_FILE *f;
 	
@@ -187,8 +187,8 @@ void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 	PFRAGMENTED pf;
 	ANSI_STRING as;
 	UNICODE_STRING us;
-	short e1[] = L"\t";
-	short e2[] = L"\r\n";
+	unsigned short e1[] = L"\t";
+	unsigned short e2[] = L"\r\n";
 
 	pf = fragmfileslist; if(!pf) return;
 	do {

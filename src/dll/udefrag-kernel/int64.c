@@ -22,6 +22,7 @@
 #include "globals.h"
 
 #if defined(__GNUC__)
+#ifndef _WIN64
 ULONGLONG __udivdi3(ULONGLONG n, ULONGLONG d)
 {
 	return _aulldiv(n,d);
@@ -34,6 +35,7 @@ ULONGLONG __umoddi3(ULONGLONG u, ULONGLONG v)
 {
 	return _aullrem(u,v);
 }
+#endif
 #endif
 
 #if defined(__POCC__)

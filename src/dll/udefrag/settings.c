@@ -22,13 +22,8 @@
 * functions for program settings manipulations.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-///#include <winioctl.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "../../include/ntndk.h"
+
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
@@ -51,8 +46,8 @@ extern BOOL kernel_mode_driver;
 
 #define MAX_FILTER_SIZE 4096
 #define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
-short in_filter[MAX_FILTER_SIZE + 1] = L"";
-short ex_filter[MAX_FILTER_SIZE + 1] = L"";
+unsigned short in_filter[MAX_FILTER_SIZE + 1] = L"";
+unsigned short ex_filter[MAX_FILTER_SIZE + 1] = L"";
 ULONGLONG sizelimit = 0;
 ULONGLONG fraglimit = 0;
 int refresh_interval  = 500;

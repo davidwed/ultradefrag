@@ -8,6 +8,7 @@ set ULTRADFGVER=3.3.0
 set ZENWINXVER=1.0.0
 set WINDDKBASE=D:\WINDDK\3790~1.183
 set MINGWBASE=D:\Software\MinGWStudio\MinGW
+set MINGWx64BASE=D:\Software\mingw64
 set NETRUNTIMEPATH=C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727
 set NSISDIR=D:\Software\Tools\NSIS
 set SEVENZIP_PATH=C:\Program Files\7-Zip

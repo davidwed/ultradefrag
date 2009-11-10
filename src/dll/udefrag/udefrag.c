@@ -22,14 +22,8 @@
 * driver interaction functions.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-///#include <winioctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h> /* for toupper() on mingw */
 #include "../../include/ntndk.h"
+
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"

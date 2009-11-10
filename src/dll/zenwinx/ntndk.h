@@ -22,7 +22,14 @@
 
 /* Note: this file also replaces standard winioctl.h header. */
 
-///#include <winioctl.h>
+#define WIN32_NO_STATUS
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <ctype.h> /* for toupper() on mingw */
 
 #if defined(__POCC__)
 #pragma ftol(inlined)
@@ -34,11 +41,15 @@ typedef int BOOL;
 typedef const char *PCSZ;
 
 #ifndef USE_WINDDK
+
+#if !defined(__MINGW_EXTENSION)
 #define LONG_PTR  signed long*
 typedef ULONG_PTR KAFFINITY;
 typedef KAFFINITY *PKAFFINITY;
-typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
 #endif
+
+typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
+#endif /* USE_WINDDK */
 
 #ifndef NOMINMAX
 #ifndef max

@@ -41,7 +41,7 @@
 
 int Analyze(char *volume_name)
 {
-	short path[] = L"\\??\\A:\\";
+	unsigned short path[] = L"\\??\\A:\\";
 	NTSTATUS Status;
 	ULONGLONG tm, time;
 	PFILENAME pfn;

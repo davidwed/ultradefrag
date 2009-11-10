@@ -32,12 +32,8 @@
 
 #ifdef PERL_SUPPORT
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "../../include/ntndk.h"
+
 #include "../../include/udefrag.h"
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"

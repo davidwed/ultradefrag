@@ -21,14 +21,6 @@
 * zenwinx.dll functions to get information about disk volumes.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-///#include <winioctl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 #include "ntndk.h"
 #include "zenwinx.h"
 
@@ -188,7 +180,7 @@ int __stdcall winx_get_drive_type(char letter)
 	UNICODE_STRING uStr;
 	HANDLE hFile;
 	HANDLE hLink;
-	short link_name[] = L"\\??\\A:";
+	unsigned short link_name[] = L"\\??\\A:";
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK iosb;
 	FILE_FS_DEVICE_INFORMATION ffdi;
@@ -442,7 +434,7 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 {
 	NTSTATUS Status;
-	short rootpath[] = L"\\??\\A:\\";
+	unsigned short rootpath[] = L"\\??\\A:\\";
 	UNICODE_STRING uStr;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;

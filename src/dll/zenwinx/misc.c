@@ -21,10 +21,6 @@
 * zenwinx.dll miscellaneous system functions.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-
 #include "ntndk.h"
 #include "zenwinx.h"
 

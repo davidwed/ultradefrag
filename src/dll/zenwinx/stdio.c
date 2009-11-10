@@ -21,13 +21,6 @@
 * zenwinx.dll console i/o functions.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-#include <stdarg.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "ntndk.h"
 #include "zenwinx.h"
 

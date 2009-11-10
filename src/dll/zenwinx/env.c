@@ -21,10 +21,6 @@
 * zenwinx.dll functions for Environment manipulations.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-
 #include "ntndk.h"
 #include "zenwinx.h"
 

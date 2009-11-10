@@ -21,13 +21,8 @@
 * UltraDefrag native interface.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-
 #include "../include/ntndk.h"
+
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 #include "../dll/zenwinx/zenwinx.h"

@@ -29,10 +29,6 @@
 
 /* Modified by Dmitri Arkhangelski, 2007. */ 
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-#include <stdio.h>
 #include "ntndk.h"
 
 typedef struct _SCANTOASCII {

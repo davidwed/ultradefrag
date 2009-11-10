@@ -21,12 +21,6 @@
 * zenwinx.dll error handling routines.
 */
 
-#define WIN32_NO_STATUS
-#define NOMINMAX
-#include <windows.h>
-#include <stdio.h>
-#include <stdarg.h>
-
 #include "ntndk.h"
 #include "zenwinx.h"
 
