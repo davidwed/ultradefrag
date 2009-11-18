@@ -287,6 +287,7 @@ Function PortableRun
     ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
     Delete "$INSTDIR\uninstall.exe"
     RMDir "$INSTDIR"
+    DeleteRegKey HKLM "Software\UltraDefrag"
   ${EndUnless}
 
 FunctionEnd
@@ -530,6 +531,7 @@ Section /o "Portable UltraDefrag package" SecPortable
 
   WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
   WriteINIStr "$R0\PORTABLE.X" "i18n" "Language" $LanguagePack
+  WriteINIStr "$R0\PORTABLE.X" "Driver" "UserMode" $UserModeDriver
   WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
     "Put this directory contents to your USB drive and enjoy!"
   ${EnableX64FSRedirection}
@@ -686,6 +688,7 @@ Function .onInit
   ${If} ${FileExists} "$EXEDIR\PORTABLE.X"
     ReadINIStr $ShowBootsplash "$EXEDIR\PORTABLE.X" "Bootsplash" "Show"
     ReadINIStr $LanguagePack "$EXEDIR\PORTABLE.X" "i18n" "Language"
+    ReadINIStr $UserModeDriver "$EXEDIR\PORTABLE.X" "Driver" "UserMode"
     ${Unless} ${Silent}
       StrCpy $R1 "PortableUltraDefrag"
       call ShowBootSplash
@@ -788,7 +791,6 @@ Section "Uninstall"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
-  ;DeleteRegKey HKLM "Software\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Control\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Control\UltraDefrag"

@@ -95,7 +95,7 @@ void UpdateProgress()
 				winx_putch('-'); /* 100 % of previous operation */
 		} else {
 			if(stat.current_operation != 'A'){
-				winx_printf("\nA: ");
+				winx_printf("\nAnalyse : ");
 				for(k = 0; k < 50; k++)
 					winx_putch('-');
 			}

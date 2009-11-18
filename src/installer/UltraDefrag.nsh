@@ -121,7 +121,8 @@ Function WriteDriverAndDbgSettings
     WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
     WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
 
-    WriteRegDWORD HKLM "$R0\Control\CrashControl" "AutoReboot" 0x0
+    ; not acceptable by the running server systems
+    ;;;WriteRegDWORD HKLM "$R0\Control\CrashControl" "AutoReboot" 0x0
   ${EndIf}
   pop $R3
   pop $R2

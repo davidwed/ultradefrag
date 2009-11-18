@@ -42,6 +42,11 @@ void RemoveReportFromDisk(char *volume_name)
 	winx_set_error_handler(eh);
 }
 
+void __stdcall ReportErrorHandler(short *msg)
+{
+	winx_dbg_print("%ws\n",msg);
+}
+
 #ifndef MICRO_EDITION
 
 BOOLEAN SaveReportToDisk(char *volume_name)
@@ -49,14 +54,18 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	char buffer[512];
 	char path[64];
 	WINX_FILE *f;
+	ERRORHANDLERPROC eh;
 	
 	if(disable_reports) return TRUE;
+
+	eh = winx_set_error_handler(ReportErrorHandler);
 
 	_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
 		winx_raise_error("E: Can't create %s file!\n",path);
+		winx_set_error_handler(eh);
 		return FALSE;
 	}
 	
@@ -76,7 +85,8 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	winx_fwrite(buffer,1,strlen(buffer),f);
 
 	winx_fclose(f);
-	
+	winx_set_error_handler(eh);
+
 	DebugPrint("-Ultradfg- Report saved to %s\n",path);
 	return TRUE;
 }
@@ -152,14 +162,18 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	unsigned short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
 	char path[64];
 	WINX_FILE *f;
+	ERRORHANDLERPROC eh;
 	
 	if(disable_reports) return TRUE;
+
+	eh = winx_set_error_handler(ReportErrorHandler);
 
 	_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
 		winx_raise_error("E: Can't create %s file!\n",path);
+		winx_set_error_handler(eh);
 		return FALSE;
 	}
 	
@@ -176,6 +190,7 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	WriteReportBody(f,TRUE);
 
 	winx_fclose(f);
+	winx_set_error_handler(eh);
 	
 	DebugPrint("-Ultradfg- Report saved to %s\n",path);
 	return TRUE;
