@@ -46,7 +46,12 @@
 //#define DETAILED_LOGGING
 
 /* extracts low 48 bits of File Reference Number */
+/* LL suffix is not supported by MSVC 6.0 ! */
+#ifndef USE_MSVC
 #define GetMftIdFromFRN(n) ((n) & 0xffffffffffffLL)
+#else
+#define GetMftIdFromFRN(n) ((n) & 0xffffffffffff)
+#endif
 
 #pragma pack(push, 1)
 //#if defined(__GNUC__)

@@ -22,8 +22,12 @@
 
 /* Note: this file also replaces standard winioctl.h header. */
 
+#define _CRT_SECURE_NO_WARNINGS /* for Windows Server 2008 SDK compiler */
+
 #define WIN32_NO_STATUS
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #define NOMINMAX
 #include <windows.h>
 #include <stdio.h>
@@ -41,7 +45,7 @@ typedef int BOOL;
 typedef const char *PCSZ;
 
 #ifndef USE_WINDDK
-
+#ifndef USE_WINSDK
 #if !defined(__MINGW_EXTENSION)
 #define LONG_PTR  signed long*
 typedef ULONG_PTR KAFFINITY;
@@ -49,6 +53,7 @@ typedef KAFFINITY *PKAFFINITY;
 #endif
 
 typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
+#endif /* USE_WINSDK */
 #endif /* USE_WINDDK */
 
 #ifndef NOMINMAX
@@ -64,6 +69,32 @@ typedef ULONG (NTAPI *PTHREAD_START_ROUTINE)(PVOID Parameter);
 ULONGLONG __stdcall _aulldiv(ULONGLONG n, ULONGLONG d);
 ULONGLONG __stdcall _alldiv(ULONGLONG n, ULONGLONG d);
 ULONGLONG __stdcall _aullrem(ULONGLONG u, ULONGLONG v);
+#endif
+
+#ifdef USE_MSVC
+typedef enum _POWER_ACTION
+{
+  PowerActionNone = 0, 
+  PowerActionReserved, 
+  PowerActionSleep, 
+  PowerActionHibernate, 
+  PowerActionShutdown, 
+  PowerActionShutdownReset, 
+  PowerActionShutdownOff, 
+  PowerActionWarmEject
+} POWER_ACTION, *PPOWER_ACTION;
+typedef enum _SYSTEM_POWER_STATE
+{
+  PowerSystemUnspecified = 0, 
+  PowerSystemWorking = 1, 
+  PowerSystemSleeping1 = 2, 
+  PowerSystemSleeping2 = 3, 
+  PowerSystemSleeping3 = 4, 
+  PowerSystemHibernate = 5, 
+  PowerSystemShutdown = 6, 
+  PowerSystemMaximum = 7
+} SYSTEM_POWER_STATE, *PSYSTEM_POWER_STATE;
+#define DWORD_PTR DWORD*
 #endif
 
 /* define status codes */
@@ -1021,7 +1052,7 @@ NTSTATUS	NTAPI	LdrGetDllHandle(ULONG,ULONG,const UNICODE_STRING*,HMODULE*);
 NTSTATUS	NTAPI	LdrGetProcedureAddress(PVOID,PANSI_STRING,ULONG,PVOID *);
 NTSTATUS	NTAPI	NtAllocateVirtualMemory(HANDLE,PVOID*,ULONG,PULONG,ULONG,ULONG);
 NTSTATUS	NTAPI	NtFreeVirtualMemory(HANDLE,PVOID*,PULONG,ULONG);
-NTSTATUS	NTAPI	NtSetSystemPowerState(IN POWER_ACTION SystemAction,IN SYSTEM_POWER_STATE MinSystemState,IN ULONG Flags);
+NTSTATUS	NTAPI	NtSetSystemPowerState(POWER_ACTION SystemAction,SYSTEM_POWER_STATE MinSystemState,ULONG Flags);
 NTSTATUS	NTAPI	NtOpenSection(HANDLE*,ACCESS_MASK,const OBJECT_ATTRIBUTES*);
 NTSTATUS	NTAPI	NtMapViewOfSection(HANDLE,HANDLE,PVOID*,ULONG,SIZE_T,const LARGE_INTEGER*,SIZE_T*,SECTION_INHERIT,ULONG,ULONG);
 NTSTATUS	NTAPI	NtUnmapViewOfSection(HANDLE,PVOID);

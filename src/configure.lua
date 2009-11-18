@@ -42,6 +42,15 @@ iup.SetLanguage("ENGLISH")
 apply_patch = 0
 udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc = "","","","","","","","",""
 mingw64base = ""
+winsdkbase = ""
+
+show_obsolete_options = 0
+
+if arg[1] ~= nil then
+	if arg[1] == "--all" then
+		show_obsolete_options = 1
+	end
+end
 
 -- make a backup copy of the file
 f = assert(io.open("./SETVARS.BK","w"))
@@ -63,6 +72,7 @@ for line in io.lines("./SETVARS.CMD") do
 		elseif string.find(k, "MSVSBIN") then vsbinpath = v
 		elseif string.find(k, "DDKINCDIR") then rosinc = v
 		elseif string.find(k, "MINGWx64BASE") then mingw64base = v
+		elseif string.find(k, "WINSDKBASE") then winsdkbase = v
 		end
 	end
 end
@@ -92,26 +102,46 @@ function param_action(dialog, param_index)
 			; colors = { "255 255 0", "255 0 0" }
 		}
 		dialog.icon = icon
-		dialog.size = "400x218"
+		if show_obsolete_options == 1 then
+			dialog.size = "400x234"
+		else
+			dialog.size = "400x173"
+		end
 	end
 	return 1
 end
 
-ret, udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc, mingw64base, apply_patch = 
-	iup.GetParam("UltraDefrag build configurator",param_action,
-		"UltraDefrag version: %s\n"..
-		"ZenWINX version: %s\n"..
-		"MinGW base path: %s\n"..
-		"Windows DDK base path: %s\n"..
-		".NET runtime path: %s\n"..
-		"NSIS root path: %s\n"..
-		"7-Zip root path: %s\n"..
-		"Visual Studio bin path: %s\n"..
-		"ReactOS include path: %s\n"..
-		"MinGW x64 base path: %s\n"..
-		"Apply patch to MinGW: %b[No,Yes]\n",
-		udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc, mingw64base, apply_patch
-		)
+if show_obsolete_options == 1 then
+	ret, udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, netpath, vsbinpath, rosinc, apply_patch = 
+		iup.GetParam("UltraDefrag build configurator",param_action,
+			"UltraDefrag version: %s\n"..
+			"ZenWINX version: %s\n"..
+			"Windows SDK base path: %s\n"..
+			"MinGW base path: %s\n"..
+			"NSIS root path: %s\n"..
+			"7-Zip root path: %s\n"..
+			"MinGW x64 base path: %s\n"..
+			"Windows DDK base path: %s\n"..
+			".NET runtime path: %s\n"..
+			"Visual Studio bin path: %s\n"..
+			"ReactOS include path: %s\n"..
+			"Apply patch to MinGW: %b[No,Yes]\n",
+			udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, netpath, vsbinpath, rosinc, apply_patch
+			)
+else
+	ret, udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, apply_patch = 
+		iup.GetParam("UltraDefrag build configurator",param_action,
+			"UltraDefrag version: %s\n"..
+			"ZenWINX version: %s\n"..
+			"Windows SDK base path: %s\n"..
+			"MinGW base path: %s\n"..
+			"NSIS root path: %s\n"..
+			"7-Zip root path: %s\n"..
+			"MinGW x64 base path: %s\n"..
+			"Apply patch to MinGW: %b[No,Yes]\n",
+			udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, apply_patch
+			)
+end
 if ret == 1 then
 	-- save options
 	f = assert(io.open("./SETVARS.CMD","w"))
@@ -127,6 +157,7 @@ if ret == 1 then
 	f:write("set ULTRADFGVER=", udver, "\n")
 	f:write("set ZENWINXVER=", winxver, "\n")
 	f:write("set WINDDKBASE=", ddkbase, "\n")
+	f:write("set WINSDKBASE=", winsdkbase, "\n")
 	f:write("set MINGWBASE=", mingwbase, "\n")
 	f:write("set MINGWx64BASE=", mingw64base, "\n")
 	f:write("set NETRUNTIMEPATH=", netpath, "\n")

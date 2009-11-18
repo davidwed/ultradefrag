@@ -98,7 +98,7 @@ function produce_ddk_makefile()
 	-- x64 C compiler included in Windows Server 2003 DDK
 	-- produces sometimes wrong code, therefore we must
 	-- disable all optimizations for 64-bit platforms
-	f:write("AMD64_OPTIMIZATION=/O1\n")
+	f:write("AMD64_OPTIMIZATION=/Od /Og /Oi /Ot /Oy /Ob2 /Gs /GF /Gy\n")
 	-- f:write("IA64_OPTIMIZATION=/Od\n\n")
 	-- on x86 systems I have never encounered such problems
 	-- f:write("386_OPTIMIZATION=/Ot /Og\n") -- never tested!!!
@@ -190,8 +190,20 @@ function produce_msvc_makefile()
 	f:write("!ENDIF\n\n")
 	--]]
 
-	cl_flags = "CPP_PROJ=/nologo /W3 /O2 /D \"WIN32\" /D \"NDEBUG\" /D \"_MBCS\" "
+	if os.getenv("BUILD_ENV") == "winsdk" then
+		cl_flags = "CPP_PROJ=/nologo /W3 /Od /D \"WIN32\" /D \"NDEBUG\" /D \"_MBCS\" "
+	else
+		cl_flags = "CPP_PROJ=/nologo /W3 /O2 /D \"WIN32\" /D \"NDEBUG\" /D \"_MBCS\" "
+	end
+	
 	upname = string.upper(name) .. "_EXPORTS"
+
+	if os.getenv("BUILD_ENV") == "winsdk" then
+		cl_flags = cl_flags .. "/D \"USE_WINSDK\" /GS- /arch:SSE2 "
+	else
+		cl_flags = cl_flags .. "/D \"USE_MSVC\" "
+	end
+
 	if target_type == "console" then
 		cl_flags = cl_flags .. "/D \"_CONSOLE\" "
 		s = "console"
@@ -213,8 +225,17 @@ function produce_msvc_makefile()
 		cl_flags = cl_flags .. "/D \"MICRO_EDITION\" "
 	end
 	
-	if nativedll == 0 then
+	-- the following check eliminates need of msvcr90.dll when compiles with SDK
+	if nativedll == 0 and os.getenv("BUILD_ENV") ~= "winsdk" then
 		cl_flags = cl_flags .. "/MD "
+	end
+	
+	if arch == "i386" then
+		cl_flags = cl_flags .. " "
+	elseif arch == "amd64" then
+		cl_flags = cl_flags .. " "
+	elseif arch == "ia64" then
+		cl_flags = cl_flags .. " "
 	end
 
 	f:write("ALL : \"", name, ".", target_ext, "\"\n\n")
@@ -235,11 +256,18 @@ function produce_msvc_makefile()
 	for i, v in ipairs(adlibs) do
 		link_flags = link_flags .. v .. ".lib "
 	end
-	if nativedll == 0 then
+	if nativedll == 0 and target_type ~= "native" then
 		-- DLL for console/gui environment
-		link_flags = link_flags .. "/nologo /incremental:no /machine:I386 "
+		link_flags = link_flags .. "/nologo /incremental:no "
 	else
-		link_flags = link_flags .. "/nologo /incremental:no /machine:I386 /nodefaultlib "
+		link_flags = link_flags .. "/nologo /incremental:no /nodefaultlib "
+	end
+	if arch == "i386" then
+		link_flags = link_flags .. "/machine:I386 "
+	elseif arch == "amd64" then
+		link_flags = link_flags .. "/machine:AMD64 "
+	elseif arch == "ia64" then
+		link_flags = link_flags .. "/machine:IA64 "
 	end
 	link_flags = link_flags .. "/subsystem:" .. s .. " "
 	if target_type == "dll" then
@@ -596,7 +624,7 @@ function produce_mingw_x64_makefile()
 		f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64\n")
 		f:write("RCFLAGS = \n")
 	else
-		f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION -m64\n")
+		f:write("CFLAGS = -pipe  -Wall -g0 -DMICRO_EDITION -m64\n")
 		f:write("RCFLAGS = -DMICRO_EDITION \n")
 	end
 	
@@ -742,6 +770,34 @@ if os.getenv("BUILD_ENV") == "winddk" then
 		else
 			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. name .. ".lib",
 				 "..\\..\\lib\\" .. arch .. "\\" .. name .. ".lib")
+		end
+	end
+elseif os.getenv("BUILD_ENV") == "winsdk" then
+	if target_type == "driver" then
+		print("Driver compilation is not supported by Windows SDK.\n")
+	else
+		if obsolete(input_filename, name .. ".mak") then
+			produce_msvc_makefile()
+		end
+		print(input_filename .. " windows sdk build performing...\n")
+		arch = "i386"
+		if os.getenv("AMD64") ~= nil then arch = "amd64" end
+		if os.getenv("IA64") ~= nil then arch = "ia64" end
+		msvc_cmd = msvc_cmd .. name .. ".mak"
+		if os.execute(msvc_cmd) ~= 0 then
+			error("Can't build the target!")
+		end
+		if arch == "i386" then
+			copy(target_name, "..\\..\\bin\\")
+		else
+			copy(target_name, "..\\..\\bin\\" .. arch .. "\\")
+		end
+		if target_type == "dll" then
+			if arch == "i386" then
+				copy(name .. ".lib", "..\\..\\lib\\")
+			else
+				copy(name .. ".lib", "..\\..\\lib\\" .. arch .. "\\")
+			end
 		end
 	end
 elseif os.getenv("BUILD_ENV") == "pellesc" then
