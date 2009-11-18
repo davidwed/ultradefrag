@@ -1,7 +1,7 @@
 @echo off
 
 echo Build script for the UltraDefrag Micro Edition project.
-echo Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+echo Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
 if "%1" equ "--help" goto usage
 
@@ -9,13 +9,10 @@ echo Set environment variables...
 set UD_MICRO_EDITION=1
 set OLD_PATH=%path%
 call SETVARS.CMD
-if "%1" equ "--clean" goto clean
 
 rem DELETE ALL PREVIOUSLY COMPILED FILES
-call BUILD.CMD --clean
-set UD_MICRO_EDITION=1
-set OLD_PATH=%path%
-call SETVARS.CMD
+call cleanup.cmd
+if "%1" equ "--clean" goto end
 
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
@@ -52,156 +49,8 @@ mkdir obj\dll\zenwinx
 copy /Y obj\zenwinx\ntndk.h obj\dll\zenwinx\
 copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\
 
-
-if "%1" neq "" goto parse_first_parameter
-echo No parameters specified, use defaults.
-goto ddk_build
-
-:parse_first_parameter
-if "%1" equ "--use-msvc" goto msvc_build
-if "%1" equ "--use-mingw" goto mingw_build
-if "%1" equ "--use-pellesc" goto pellesc_build
-if "%1" equ "--use-mingw-x64" goto mingw_x64_build
-
-:ddk_build
-
-set BUILD_ENV=winddk
-
-echo --------- Target is x86 ---------
-set AMD64=
-set IA64=
-pushd ..
-call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre WNET
-popd
-set BUILD_DEFAULT=-nmake -i -g -P
-set UDEFRAG_LIB_PATH=..\..\lib
-rem update manifests...
-call make-manifests.cmd X86
-call blditems.cmd
+call build-targets.cmd %1
 if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-echo --------- Target is x64 ---------
-set IA64=
-pushd ..
-call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre AMD64 WNET
-popd
-set BUILD_DEFAULT=-nmake -i -g -P
-set UDEFRAG_LIB_PATH=..\..\lib\amd64
-rem update manifests...
-call make-manifests.cmd amd64
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-echo --------- Target is ia64 ---------
-set AMD64=
-pushd ..
-call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre 64 WNET
-popd
-set BUILD_DEFAULT=-nmake -i -g -P
-set UDEFRAG_LIB_PATH=..\..\lib\ia64
-rem update manifests...
-call make-manifests.cmd ia64
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-goto build_scheduler
-
-:pellesc_build
-
-set BUILD_ENV=pellesc
-
-echo --------- Target is x86 ---------
-set AMD64=
-set IA64=
-set ARM=
-set Path=%path%;%PELLESC_BASE%\Bin
-set UDEFRAG_LIB_PATH=..\..\lib
-rem update manifests...
-call make-manifests.cmd X86
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-goto build_scheduler
-
-echo --------- Target is x64 ---------
-set IA64=
-set AMD64=1
-set ARM=
-set Path=%path%;%PELLESC_BASE%\Bin
-set UDEFRAG_LIB_PATH=..\..\lib\amd64
-rem update manifests...
-call make-manifests.cmd amd64
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-echo --------- Target is ARM ---------
-set IA64=
-set AMD64=
-set ARM=1
-set Path=%path%;%PELLESC_BASE%\Bin
-set UDEFRAG_LIB_PATH=..\..\lib\amd64
-rem update manifests...
-call make-manifests.cmd amd64
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-goto build_scheduler
-
-:msvc_build
-
-rem if "%MSVC_ENV%" neq "" goto start_msvc_build
-
-call "%MSVSBIN%\vcvars32.bat"
-
-rem set MSVC_ENV=ok
-rem :start_msvc_build
-
-set BUILD_ENV=msvc
-set UDEFRAG_LIB_PATH=..\..\lib
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-goto build_scheduler
-
-:mingw_x64_build
-
-echo --------- Target is x64 ---------
-set AMD64=1
-
-set path=%MINGWx64BASE%\bin;%path%
-
-set BUILD_ENV=mingw_x64
-set UDEFRAG_LIB_PATH=..\..\lib\amd64
-rem update manifests...
-call make-manifests.cmd amd64
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
-
-goto build_scheduler
-
-
-:mingw_build
-
-rem if "%MINGW_ENV%" neq "" goto start_mingw_build
-
-set path=%MINGWBASE%\bin;%path%
-
-rem set MINGW_ENV=ok
-rem :start_mingw_build
-
-set BUILD_ENV=mingw
-set UDEFRAG_LIB_PATH=..\..\lib
-call blditems.cmd
-if %errorlevel% neq 0 goto fail
-set Path=%OLD_PATH%
 
 
 :build_scheduler
@@ -262,63 +111,17 @@ echo Install success!
 goto end
 :fail_inst
 echo Install error!
-
-:end
-set UD_MICRO_EDITION=
-set OLD_PATH=
-exit /B
+goto end
 
 :fail
 echo.
 echo Build error (code %ERRORLEVEL%)!
+
+:end
 set UD_MICRO_EDITION=
 set Path=%OLD_PATH%
 set OLD_PATH=
 exit /B
 
-:clean
-call SETVARS.CMD
-echo Delete all intermediate files...
-cd bin
-rd /s /q amd64
-rd /s /q ia64
-del /s /q *.*
-cd ..\obj
-rd /s /q bootexctrl
-rd /s /q hibernate
-rd /s /q console
-rd /s /q driver
-rd /s /q gui
-rd /s /q include
-rd /s /q native
-rd /s /q dll
-rd /s /q zenwinx
-rd /s /q udefrag-kernel
-rd /s /q udefrag
-rd /s /q lua5.1
-del /s /q *.*
-cd ..
-call BLDSCHED.CMD --clean
-cd lib
-del /s /q *.*
-rd /s /q amd64
-rd /s /q ia64
-cd ..
-echo Done.
-set UD_MICRO_EDITION=
-set OLD_PATH=
-exit /B
-
 :usage
-echo.
-echo Synopsis:
-echo     build-micro              - perform the build using default options
-echo     build-micro --install    - run installer silently after the build
-echo     build-micro [compiler] [--install] - specify your favorite compiler:
-echo                              --use-winddk
-echo                              --use-mingw
-echo                              --use-msvc 
-echo                              --use-pellesc
-echo                              --use-mingw-x64
-echo     build-micro --clean      - perform full cleanup instead of the build
-echo     build-micro --help       - show this help message
+call build-modules.cmd --help build-micro
