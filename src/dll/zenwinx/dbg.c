@@ -24,6 +24,31 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+HANDLE hSynchEvent = NULL;
+
+/* internal calls */
+void __stdcall InitSynchObjectsErrorHandler(short *msg)
+{
+	winx_dbg_print("------------------------------------------------------------\n");
+	winx_dbg_print("%ws\n",msg);
+	winx_dbg_print("------------------------------------------------------------\n");
+}
+
+void winx_init_synch_objects(void)
+{
+	ERRORHANDLERPROC eh;
+	eh = winx_set_error_handler(InitSynchObjectsErrorHandler);
+	winx_create_event(L"\\winx_dbgprint_synch_event",
+		SynchronizationEvent,&hSynchEvent);
+	winx_set_error_handler(eh);
+	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
+}
+
+void winx_destroy_synch_objects(void)
+{
+	winx_destroy_event(hSynchEvent);
+}
+
 typedef struct _DBG_OUTPUT_DEBUG_STRING_BUFFER {
     ULONG ProcessId;
     UCHAR Msg[4096-sizeof(ULONG)];
@@ -110,7 +135,12 @@ int __stdcall winx_debug_print(char *string)
 	DBG_OUTPUT_DEBUG_STRING_BUFFER *dbuffer;
 	int length;
 	
-	/* FIXME: synchronize with other threads */
+	/* 0. synchronize with other threads */
+	if(hSynchEvent){
+		interval.QuadPart = -(11000 * 10000); /* 11 sec */
+		Status = NtWaitForSingleObject(hSynchEvent,FALSE,&interval);
+		if(Status != WAIT_OBJECT_0) return (-1);
+	}
 	
 	/* 1. Open debugger's objects. */
 	if(winx_open_event(L"\\BaseNamedObjects\\DBWIN_BUFFER_READY",SYNCHRONIZE,
@@ -139,7 +169,15 @@ int __stdcall winx_debug_print(char *string)
 	dbuffer = (DBG_OUTPUT_DEBUG_STRING_BUFFER *)BaseAddress;
 
 	/* write the process id into the buffer */
+	#if defined(__GNUC__)
+	#ifndef _WIN64
 	dbuffer->ProcessId = (DWORD)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess);
+	#else
+	dbuffer->ProcessId = 0xFFFF; /* eliminates need of NtCurrentTeb() */
+	#endif
+	#else /* not defined(__GNUC__) */
+	dbuffer->ProcessId = (DWORD)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess);
+	#endif
 
 	strncpy(dbuffer->Msg,string,4096-sizeof(ULONG));
 	dbuffer->Msg[4096-sizeof(ULONG)-1] = 0;
@@ -162,6 +200,7 @@ int __stdcall winx_debug_print(char *string)
 	if(BaseAddress)
 		NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
 	NtCloseSafe(hSection);
+	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
 	return 0;
 
 failure:
@@ -170,5 +209,6 @@ failure:
 	if(BaseAddress)
 		NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
 	NtCloseSafe(hSection);
+	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
 	return (-1);
 }

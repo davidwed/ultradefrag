@@ -33,13 +33,18 @@ void __stdcall kb_close(void);
 
 void winx_create_global_heap(void);
 void winx_destroy_global_heap(void);
+void winx_init_synch_objects(void);
+void winx_destroy_synch_objects(void);
 
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
-	if(dwReason == DLL_PROCESS_ATTACH)
+	if(dwReason == DLL_PROCESS_ATTACH){
 		winx_create_global_heap();
-	else if(dwReason == DLL_PROCESS_DETACH)
+		winx_init_synch_objects();
+	} else if(dwReason == DLL_PROCESS_DETACH){
 		winx_destroy_global_heap();
+		winx_destroy_synch_objects();
+	}
 	return 1;
 }
 
