@@ -81,6 +81,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	RemoveReportFromDisk(volume_name);
 	if(job_type == OPTIMIZE_JOB) optimize_flag = TRUE;
 	else optimize_flag = FALSE;
+	JobType = job_type;
 	
 	/* 5. analyse volume */
 	if(Analyze(volume_name) < 0) goto failure;

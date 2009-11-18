@@ -301,6 +301,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 	ULONG bytes_per_sector;
 	ULONG sectors_per_cluster;
 	ULONG FatCountOfClusters; /* FAT specific */
+	BOOLEAN AnalysisJob;
  	/*
 	* End of the data with initial zero state.
 	*/

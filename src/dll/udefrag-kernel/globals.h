@@ -129,6 +129,8 @@ extern HANDLE hMapEvent;
 
 extern STATISTIC Stat;
 
+extern UDEFRAG_JOB_TYPE JobType;
+
 extern PFREEBLOCKMAP free_space_map;
 extern PFILENAME filelist;
 extern PFRAGMENTED fragmfileslist;

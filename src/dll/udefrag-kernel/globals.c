@@ -37,6 +37,8 @@ HANDLE hMapEvent = NULL;
 
 STATISTIC Stat;
 
+UDEFRAG_JOB_TYPE JobType = ANALYSE_JOB;
+
 PFREEBLOCKMAP free_space_map = NULL;
 PFILENAME filelist = NULL;
 PFRAGMENTED fragmfileslist = NULL;

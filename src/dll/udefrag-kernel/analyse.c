@@ -139,6 +139,8 @@ int Analyze(char *volume_name)
 
 	GenerateFragmentedFilesList();
 	
+	if(JobType == ANALYSE_JOB) return 0;
+	
 	/* all locked files are in unknown state, right? */
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(CheckForStopEvent()) break;

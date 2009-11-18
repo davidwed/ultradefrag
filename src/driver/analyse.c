@@ -37,6 +37,9 @@
 * FAT16 scan may be 40% faster.
 */
 
+/* changes in v3.3.0: waiting for vol handle in moving, closing vol before analysis,
+(char *) in universal directory scan. */
+
 #include "driver.h"
 #if 0
 ULONGLONG _rdtsc(void)
@@ -162,6 +165,8 @@ NTSTATUS Analyse(UDEFRAG_DEVICE_EXTENSION *dx)
 	DebugPrint("-Ultradfg- Fragmented files: %u\n",dx->fragmfilecounter);
 
 	GenerateFragmentedFilesList(dx);
+	
+	if(dx->AnalysisJob) return STATUS_SUCCESS;
 
 	/* all locked files are in unknown state, right? */
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){

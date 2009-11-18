@@ -434,6 +434,9 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 		DebugPrint("-Ultradfg- is busy (sync_event, Write_IRPhandler)!\n");
 		return CompleteIrp(Irp,STATUS_DEVICE_BUSY,0);
 	}
+	
+	if(cmd[0] == 'a' || cmd[0] == 'A') dx->AnalysisJob = TRUE;
+	else dx->AnalysisJob = FALSE;
 
 	dx->compact_flag = FALSE;
 	switch(cmd[0]){
