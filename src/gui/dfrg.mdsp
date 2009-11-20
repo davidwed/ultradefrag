@@ -103,5 +103,5 @@ main.h,4490
 i18n.c,3315
 statbar.c,0
 about.c,1903
-main.c,3530
-settings.c,1723
+settings.c,1662
+main.c,1931

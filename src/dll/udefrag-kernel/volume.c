@@ -71,6 +71,7 @@ int GetDriveGeometry(char *volume_name)
 #if FLAG != 'r'
 #error Root directory must be opened for read access!
 #endif
+	///DbgBreakPoint();
 	flags[0] = FLAG; flags[1] = 0;
 	fRoot = winx_fopen(path,flags);
 	if(!fRoot){

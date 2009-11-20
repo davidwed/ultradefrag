@@ -124,4 +124,4 @@ set OLD_PATH=
 exit /B
 
 :usage
-call build-modules.cmd --help build-micro
+call build-targets.cmd --help build-micro

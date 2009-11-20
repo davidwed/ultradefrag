@@ -180,6 +180,7 @@ int __stdcall kb_open_internal(int device_number)
 	* call NtCreateEvent
 	* ; of course, it fails :-)))
 	* ; due to this fucked compiler's bug.
+	* ; This bug exists always, with any optimizations enabled/disabled.
 	*/
 
 	_snwprintf(event_name,32,L"\\kb_event%u",device_number);

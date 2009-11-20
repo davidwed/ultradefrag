@@ -22,12 +22,14 @@ echo Synopsis:
 echo     build              - perform the build using default options
 echo     build --install    - run installer silently after the build
 echo     build [compiler] [--install] - specify your favorite compiler:
-echo                        --use-winddk    (default)
-echo                        --use-winsdk
+echo.
 echo                        --use-mingw
-echo                        --use-msvc
-echo                        --use-pellesc   (experimental)
-echo                        --use-mingw-x64 (experimental)
+echo.
+echo                        --use-msvc      (obsolete)
+echo                        --use-winsdk    (obsolete, produces wrong x64 code)
+echo                        --use-winddk    (obsolete, produces wrong x64 code)
+echo                        --use-pellesc   (experimental, produces wrong code)
+echo                        --use-mingw-x64 (experimental, produces wrong x64 code)
 echo     build --clean      - perform full cleanup instead of the build
 echo     build --help       - show this help message
 exit /B 0
@@ -38,12 +40,18 @@ echo Synopsis:
 echo     build-micro              - perform the build using default options
 echo     build-micro --install    - run installer silently after the build
 echo     build-micro [compiler] [--install] - specify your favorite compiler:
-echo                              --use-winddk    (default)
-echo                              --use-winsdk
+echo.
 echo                              --use-mingw
-echo                              --use-msvc
-echo                              --use-pellesc   (experimental)
-echo                              --use-mingw-x64 (experimental)
+echo.
+echo                              --use-msvc (obsolete)
+echo                              --use-winsdk
+echo                                   (obsolete, produces wrong x64 code)
+echo                              --use-winddk
+echo                                   (obsolete, produces wrong x64 code)
+echo                              --use-pellesc
+echo                                   (experimental, produces wrong code)
+echo                              --use-mingw-x64
+echo                                   (experimental, produces wrong x64 code)
 echo     build-micro --clean      - perform full cleanup instead of the build
 echo     build-micro --help       - show this help message
 exit /B 0
@@ -198,12 +206,7 @@ goto success
 
 :msvc_build
 
-rem if "%MSVC_ENV%" neq "" goto start_msvc_build
-
 call "%MSVSBIN%\vcvars32.bat"
-
-rem set MSVC_ENV=ok
-rem :start_msvc_build
 
 set BUILD_ENV=msvc
 set UDEFRAG_LIB_PATH=..\..\lib
@@ -235,12 +238,7 @@ goto success
 
 :mingw_build
 
-rem if "%MINGW_ENV%" neq "" goto start_mingw_build
-
 set path=%MINGWBASE%\bin;%path%
-
-rem set MINGW_ENV=ok
-rem :start_mingw_build
 
 set BUILD_ENV=mingw
 set UDEFRAG_LIB_PATH=..\..\lib

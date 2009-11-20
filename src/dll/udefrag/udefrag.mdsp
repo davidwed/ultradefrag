@@ -91,8 +91,10 @@ extraResourceOptions=
 [Other]
 [History]
 misc.c,0
-volume.c,2356
+volume.c,2342
 ..\..\include\ultradfg.h,3163
-settings.c,4796
-udefrag.c,12823
-..\..\include\udefrag.h,1544
+settings.c,4871
+..\..\include\udefrag.h,1379
+udefrag-mingw.def,549
+udefrag.def,507
+udefrag.c,5251

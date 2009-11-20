@@ -79,6 +79,10 @@ L01:
 		cmp	byte ptr [di+1], ':'
 		jne	not_a_drive_letter
 		mov	al, byte ptr [di]
+		cmp	al, 'Z'
+		jle	save_letter
+		sub	al, 'z' - 'Z' ; convert to uppercase
+save_letter:
 		mov	byte ptr drive_letter, al
 not_a_drive_letter:
 		cmp	byte ptr [di], '-'
@@ -104,7 +108,7 @@ option_found:
 		mov	al, byte ptr [di]
 		cmp	al, 'Z'
 		jle	test_letter
-		sub	al, 'z' - 'Z' ; convert to lowercase
+		sub	al, 'z' - 'Z' ; convert to uppercase
 
 test_letter:
 		; test for command
@@ -210,7 +214,9 @@ cmd_scanned:
 		show_r	ax
 		mov	dx, offset crlf
 		call	print
-		
+
+		; do our job
+		call	volume_analysis
 
 		; exit program
 		mov	ax, 4C00h
@@ -377,6 +383,11 @@ show_usage:
 		int	21h
 
 ;------------------------------------------------------------------------------
+; volume analysis procedures
+;------------------------------------------------------------------------------
+		include ANALYSE.INC
+		
+;------------------------------------------------------------------------------
 ; data block
 ;------------------------------------------------------------------------------
 
@@ -419,6 +430,11 @@ msg4          db "Size threshold: 0x$"
 msg5          db "Fragments threshold: 0x$"
 msg6          db "Progress refresh interval: 0x$"
 crlf          db 13,10,'$'
+
+get_drive_info_failed db "GetDriveInfo (36h int21h) failed!",13,10,'$'
+sec_per_clus_36_21   dw 0
+bytes_per_sec_36_21  dw 0
+clus_per_drive_36_21 dw 0
 
 in_filter     db FILTER_LEN+1 dup (?)
 ex_filter     db FILTER_LEN+1 dup (?)

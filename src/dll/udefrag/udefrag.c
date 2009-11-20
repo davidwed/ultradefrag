@@ -101,6 +101,14 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 */	return 1;
 }
 
+/* forces fucked compiler to properly reinitialize registers */
+/*int Fucked_MS__Workaround(void *a,void *b,void *c,void *d)
+{
+	int x = (int)(DWORD)(DWORD_PTR)(((char *)a - (char *)b) + ((char *)c - (char *)d));
+	winx_raise_error("N: %u!",x);
+	return x;
+}*/
+
 /****f* udefrag.common/udefrag_init
 * NAME
 *    udefrag_init
@@ -130,14 +138,14 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 ******/
 int __stdcall udefrag_init(long map_size)
 {
-//	short event_name[32];
-//	int device_number = 0;
+/*	short event_name[32];
+	int device_number = 0;
 
-//	UNICODE_STRING uStr;
-//	OBJECT_ATTRIBUTES ObjectAttributes;
-//	HANDLE hKbEvent = NULL;
-//	NTSTATUS Status;
-
+	UNICODE_STRING uStr;
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	HANDLE hKbEvent = NULL;
+	NTSTATUS Status;
+*/
 	/* 1. Enable neccessary privileges */
 	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) return (-1)*/
 	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) return (-1);
@@ -151,6 +159,7 @@ int __stdcall udefrag_init(long map_size)
 //		PowerSystemHibernate,
 //		0
 //		);
+
 //	_snwprintf(event_name,32,L"\\kb_event%u",device_number);
 //	RtlInitUnicodeString(&uStr,event_name);
 //	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);

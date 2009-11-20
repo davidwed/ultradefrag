@@ -926,6 +926,7 @@ _alldiv@16
 _atoi64
 _aulldiv@16
 _aullrem@16
+_fltused
 _itoa
 _itow
 _ltoa
