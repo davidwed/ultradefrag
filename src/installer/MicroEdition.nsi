@@ -187,7 +187,6 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\installer\boot-on.cmd"
   File "bootexctrl.exe"
   File "defrag_native.exe"
-  File "${ROOTDIR}\src\installer\ud-config.cmd"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
   File "${ROOTDIR}\src\installer\udctxhandler.cmd"
   File "udefrag-kernel.dll"
@@ -259,7 +258,9 @@ Section "Uninstall"
   Delete "$SYSDIR\boot-on.cmd"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
-  Delete "$SYSDIR\ud-config.cmd"
+
+  Delete "$SYSDIR\ud-config.cmd" ; obsolete
+
   Delete "$SYSDIR\ud-help.cmd"
   Delete "$SYSDIR\udctxhandler.cmd"
   Delete "$SYSDIR\udefrag-kernel.dll"
