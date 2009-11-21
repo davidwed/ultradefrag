@@ -193,7 +193,7 @@ try_again:
 
 void InitMainWindow(void)
 {
-	short lng_file_path[MAX_PATH];
+//	short lng_file_path[MAX_PATH];
 	char title[128];
 	int dx,dy;
 	RECT rc;
@@ -205,9 +205,9 @@ void InitMainWindow(void)
 	SetWindowText(hWindow,title);
 
 	WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
-	GetWindowsDirectoryW(lng_file_path,MAX_PATH);
-	wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
-	if(WgxBuildResourceTable(i18n_table,lng_file_path))
+//	GetWindowsDirectoryW(lng_file_path,MAX_PATH);
+//	wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
+	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"/*lng_file_path*/))
 		WgxApplyResourceTable(i18n_table,hWindow);
 	if(hibernate_instead_of_shutdown){
 		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
@@ -318,12 +318,41 @@ void ShowFragmented()
 {
 	char path[] = "C:\\fraglist.luar";
 	PVOLUME_LIST_ENTRY vl;
+#ifdef UDEFRAG_PORTABLE
+	char cmd[MAX_PATH];
+	char buffer[MAX_PATH + 64];
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+#endif
 
 	vl = VolListGetSelectedEntry();
 	if(vl->VolumeName == NULL || vl->Status == STAT_CLEAR) return;
 
 	path[0] = vl->VolumeName[0];
+#ifndef UDEFRAG_PORTABLE
 	ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
+#else
+	strcpy(cmd,".\\lua5.1a_gui.exe");
+	strcpy(buffer,cmd);
+	strcat(buffer," .\\scripts\\udreportcnv.lua ");
+	strcat(buffer,path);
+	strcat(buffer," null -v");
+
+	ZeroMemory(&si,sizeof(si));
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_SHOW;
+	ZeroMemory(&pi,sizeof(pi));
+
+	if(!CreateProcess(cmd,buffer,
+		NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+	    MessageBox(NULL,"Can't execute lua5.1a_gui.exe program!",
+			"Error",MB_OK | MB_ICONHAND);
+	    return;
+	}
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+#endif
 }
 
 DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
@@ -336,8 +365,9 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	/* window coordinates must be accessible by configurator */
 	SavePrefs();
 	
-	GetWindowsDirectory(path,MAX_PATH);
-	strcat(path,"\\System32\\udefrag-gui-config.exe");
+	//GetWindowsDirectory(path,MAX_PATH);
+	//strcat(path,"\\System32\\udefrag-gui-config.exe");
+	strcpy(path,".\\udefrag-gui-config.exe");
 	
 	/* the configurator must know when it should reposition its window */
 	strcpy(buffer,path);

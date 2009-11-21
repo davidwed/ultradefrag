@@ -26,14 +26,16 @@ assert(arg[1],"Lua Report file name must be specified!")
 assert(arg[2],"Path to the Windows directory\nmust be specified as second parameter!")
 
 -- read options
-dofile(arg[2] .. "\\UltraDefrag\\options\\udreportopts.lua")
+if arg[2] ~= "null" then
+	dofile(arg[2] .. "\\UltraDefrag\\options\\udreportopts.lua")
+else
+	dofile(".\\options\\udreportopts.lua")
+end
 
 -- source file reading
 dofile(arg[1])
 
-
 -- common functions
-
 function write_ansi(f, ...)
 	for i, v in ipairs(arg) do f:write(v) end
 end
@@ -180,7 +182,12 @@ function produce_html_output()
 
 	if(enable_sorting == 1) then
 		-- read udsorting.js file contents
-		local f2 = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udsorting.js", "r"))
+		local f2
+		if arg[2] ~= "null" then
+			f2 = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udsorting.js", "r"))
+		else
+			f2 = assert(io.open(".\\scripts\\udsorting.js", "r"))
+		end
 	    js = f2:read("*all")
 	    f2:close()
 	else

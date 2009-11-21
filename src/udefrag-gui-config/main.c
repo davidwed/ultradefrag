@@ -57,7 +57,7 @@ extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 LOGFONT lf;
 HFONT hFont = NULL;
 
-char buffer[MAX_PATH];
+//char buffer[MAX_PATH];
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -94,15 +94,20 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		hWindow = hWnd;
-		GetWindowsDirectoryW(path,MAX_PATH);
-		wcscat(path,L"\\UltraDefrag\\ud_config_i18n.lng");
-		if(WgxBuildResourceTable(i18n_table,path))
+//		GetWindowsDirectoryW(path,MAX_PATH);
+//		wcscat(path,L"\\UltraDefrag\\ud_config_i18n.lng");
+		if(WgxBuildResourceTable(i18n_table,L".\\ud_config_i18n.lng"/*path*/))
 			WgxApplyResourceTable(i18n_table,hWindow);
 		WgxSetIcon(hInstance,hWindow,IDI_CONFIG);
+		#ifndef UDEFRAG_PORTABLE
 		if(GetBootExecuteRegistrationStatus())
 			SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_CHECKED,0);
 		else
 			SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_UNCHECKED,0);
+		#else
+		SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_UNCHECKED,0);
+		WgxDisableWindows(hWindow,IDC_ENABLE,IDC_BOOT_SCRIPT,0);
+		#endif
 		InitFont();
 		break;
 	case WM_COMMAND:
@@ -126,14 +131,15 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//GetWindowsDirectoryW(path,MAX_PATH);
 			//wcscat(path,L"\\System32\\udefrag-gui.cmd");
 			//ShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
-			GetWindowsDirectoryW(path,MAX_PATH);
-			wcscat(path,L"\\UltraDefrag\\options\\guiopts.lua");
-			ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
+			//GetWindowsDirectoryW(path,MAX_PATH);
+			//wcscat(path,L"\\UltraDefrag\\options\\guiopts.lua");
+			ShellExecuteW(hWindow,L"open",L".\\options\\guiopts.lua"/*path*/,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_GUI_HELP:
 			OpenWebPage("gui.html");
 			break;
 		case IDC_ENABLE:
+			#ifndef UDEFRAG_PORTABLE
 			GetWindowsDirectoryW(path,MAX_PATH);
 			check_state = SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_GETCHECK,0,0);
 			if(check_state == BST_CHECKED)
@@ -141,6 +147,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			else
 				wcscat(path,L"\\System32\\boot-off.cmd");
 			ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_HIDE);
+			#endif
 			break;
 		case IDC_BOOT_SCRIPT:
 			GetWindowsDirectoryW(path,MAX_PATH);
@@ -151,9 +158,9 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			OpenWebPage("boot.html");
 			break;
 		case IDC_REPORT_OPTIONS:
-			GetWindowsDirectoryW(path,MAX_PATH);
-			wcscat(path,L"\\UltraDefrag\\options\\udreportopts.lua");
-			ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
+			//GetWindowsDirectoryW(path,MAX_PATH);
+			//wcscat(path,L"\\UltraDefrag\\options\\udreportopts.lua");
+			ShellExecuteW(hWindow,L"open",L".\\options\\udreportopts.lua"/*path*/,NULL,NULL,SW_SHOW);
 			break;
 		case IDC_REPORT_HELP:
 			OpenWebPage("reports.html");
@@ -172,8 +179,9 @@ void OpenWebPage(char *page)
 	char path[MAX_PATH];
 	HINSTANCE hApp;
 	
-	GetWindowsDirectory(path,MAX_PATH);
-	strcat(path,"\\UltraDefrag\\handbook\\");
+	//GetWindowsDirectory(path,MAX_PATH);
+	//strcat(path,"\\UltraDefrag\\handbook\\");
+	strcpy(path,".\\handbook\\");
 	strcat(path,page);
 	hApp = ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
 	if((int)(LONG_PTR)hApp <= 32){
@@ -263,9 +271,9 @@ void InitFont(void)
 	lf.lfHeight = -12;
 	
 	/* load saved font settings */
-	GetWindowsDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	if(!WgxGetLogFontStructureFromFile(buffer,&lf)) return;
+	//GetWindowsDirectory(buffer,MAX_PATH);
+	//strcat(buffer,"\\UltraDefrag\\options\\font.lua");
+	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua"/*buffer*/,&lf)) return;
 	
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);
@@ -284,9 +292,9 @@ void InitFont(void)
 		lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
 		luaL_openlibs(L);  /* open libraries */
 		lua_gc(L, LUA_GCRESTART, 0);
-		GetWindowsDirectory(buffer,MAX_PATH);
-		strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
-		status = luaL_dofile(L,buffer);
+		//GetWindowsDirectory(buffer,MAX_PATH);
+		//strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+		status = luaL_dofile(L,".\\options\\guiopts.lua"/*buffer*/);
 		if(!status){ /* successful */
 			x = getint(L,"x");
 			y = getint(L,"y");
@@ -308,7 +316,7 @@ void InitFont(void)
 
 void SaveFontSettings(void)
 {
-	GetWindowsDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	WgxSaveLogFontStructureToFile(buffer,&lf);
+	//GetWindowsDirectory(buffer,MAX_PATH);
+	//strcat(buffer,"\\UltraDefrag\\options\\font.lua");
+	WgxSaveLogFontStructureToFile(".\\options\\font.lua"/*buffer*/,&lf);
 }

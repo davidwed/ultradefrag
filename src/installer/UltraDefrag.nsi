@@ -377,12 +377,14 @@ Section "Ultra Defrag core files (required)" SecCore
     File /nonfatal "ultradfg.sys"
   ${EndIf}
 
-  SetOutPath "$SYSDIR"
+  ; install GUI apps to program's directory
+  SetOutPath "$INSTDIR"
   File "dfrg.exe"
-  Delete "$SYSDIR\ultradefrag.exe"
-  Rename "$SYSDIR\dfrg.exe" "$SYSDIR\ultradefrag.exe"
-  File "wgx.dll"
+  Delete "$INSTDIR\ultradefrag.exe"
+  Rename "$INSTDIR\dfrg.exe" "$INSTDIR\ultradefrag.exe"
+  File "udefrag-gui-config.exe"
 
+  SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
   File "${ROOTDIR}\src\installer\boot-off.cmd"
   File "${ROOTDIR}\src\installer\boot-on.cmd"
@@ -393,12 +395,12 @@ Section "Ultra Defrag core files (required)" SecCore
   File "lua5.1a_gui.exe"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
   File "${ROOTDIR}\src\installer\udctxhandler.cmd"
-  File "udefrag-gui-config.exe"
   File "udefrag-kernel.dll"
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
   File /oname=hibernate4win.exe "hibernate.exe"
+  File "wgx.dll"
 
   DetailPrint "Register file extensions..."
   ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
@@ -454,16 +456,19 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$SYSDIR\udefrag-gui.exe"
   Delete "$SYSDIR\udefrag-gui.cmd"
+  Delete "$SYSDIR\ultradefrag.exe"
+  Delete "$SYSDIR\udefrag-gui-config.exe"
+  Delete "$SYSDIR\udefrag-scheduler.exe"
   RMDir /r "$INSTDIR\logs"
 
-  ; create boot time and gui startup scripts if they doesn't exist
+  ; create boot time script if it doesn't exists
   SetOutPath "$SYSDIR"
   ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
     File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
   ${EndUnless}
   
   ; write default GUI settings to guiopts.lua file
-  ExecWait '"$SYSDIR\ultradefrag.exe" --setup'
+  ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
 
   ${EnableX64FSRedirection}
   pop $R0
@@ -497,7 +502,7 @@ Section /o "Scheduler" SecScheduler
 
   DetailPrint "Install Scheduler..."
   ${DisableX64FSRedirection}
-  SetOutPath $SYSDIR
+  SetOutPath "$INSTDIR"
   File "udefrag-scheduler.exe"
   ${EnableX64FSRedirection}
 
@@ -567,27 +572,13 @@ Section /o "Shortcuts" SecShortcuts
 
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
-;  CreateDirectory "$R0\Boot time options"
-;  CreateDirectory "$R0\Preferences"
   CreateDirectory "$R0\Documentation"
 
-/*  CreateShortCut "$R0\Boot time options\Enable boot time scan.lnk" \
-   "$SYSDIR\bootexctrl.exe" "/r defrag_native"
-  CreateShortCut "$R0\Boot time options\Disable boot time scan.lnk" \
-   "$SYSDIR\bootexctrl.exe" "/u defrag_native"
-  CreateShortCut "$R0\Boot time options\Edit boot time script.lnk" \
-   "$SYSDIR\notepad.exe" "$SYSDIR\ud-boot-time.cmd"
-
-  CreateShortCut "$R0\Preferences\Edit report options.lnk" \
-   "$SYSDIR\notepad.exe" "$INSTDIR\options\udreportopts.lua"
-  CreateShortCut "$R0\Preferences\Edit GUI preferences.lnk" \
-   "$SYSDIR\notepad.exe" "$SYSDIR\udefrag-gui.cmd"
-*/
   CreateShortCut "$R0\UltraDefrag.lnk" \
-   "$SYSDIR\ultradefrag.exe"
+   "$INSTDIR\ultradefrag.exe"
 
   CreateShortCut "$R0\Preferences.lnk" \
-   "$SYSDIR\udefrag-gui-config.exe"
+   "$INSTDIR\udefrag-gui-config.exe"
 
   CreateShortCut "$R0\Documentation\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"
@@ -600,9 +591,9 @@ Section /o "Shortcuts" SecShortcuts
   ${EndIf}
 */
   Delete "$R0\Scheduler.NET.lnk"
-  ${If} ${FileExists} "$SYSDIR\udefrag-scheduler.exe"
+  ${If} ${FileExists} "$INSTDIR\udefrag-scheduler.exe"
     CreateShortCut "$R0\Scheduler.lnk" \
-     "$SYSDIR\udefrag-scheduler.exe"
+     "$INSTDIR\udefrag-scheduler.exe"
   ${EndIf}
 
   ${If} ${FileExists} "$INSTDIR\handbook\index.html"
@@ -618,28 +609,15 @@ Section /o "Shortcuts" SecShortcuts
    "$INSTDIR\uninstall.exe"
 
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
-   "$SYSDIR\ultradefrag.exe"
+   "$INSTDIR\ultradefrag.exe"
   CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
-   "$SYSDIR\ultradefrag.exe"
+   "$INSTDIR\ultradefrag.exe"
 
   ${If} ${FileExists} "$INSTDIR\portable_${ULTRADFGARCH}_package\PORTABLE.X"
     CreateShortCut "$R0\Portable package.lnk" \
      "$INSTDIR\portable_${ULTRADFGARCH}_package"
   ${EndIf}
 
-/*  CreateDirectory "$R0\Debugging information"
-  CreateShortCut "$R0\Debugging information\Log files.lnk" \
-   "$INSTDIR\logs"
-  CreateShortCut "$R0\Debugging information\Mini Crash Dump files.lnk" \
-   "$WINDIR\MiniDump"
-  ${If} ${FileExists} "$INSTDIR\handbook\reporting_bugs.html"
-    WriteINIStr "$R0\Debugging information\How to use it.url" "InternetShortcut" "URL" \
-     "file://$INSTDIR\handbook\reporting_bugs.html"
-  ${Else}
-    WriteINIStr "$R0\Debugging information\How to use it.url" "InternetShortcut" "URL" \
-     "http://ultradefrag.sourceforge.net/handbook/reporting_bugs.html"
-  ${EndIf}
-*/
   ${EnableX64FSRedirection}
   pop $R0
 
@@ -739,6 +717,9 @@ Section "Uninstall"
   Delete "$INSTDIR\HISTORY.TXT"
   Delete "$INSTDIR\README.TXT"
   ;Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
+  Delete "$INSTDIR\ultradefrag.exe"
+  Delete "$INSTDIR\udefrag-gui-config.exe"
+  Delete "$INSTDIR\udefrag-scheduler.exe"
   Delete "$INSTDIR\uninstall.exe"
 
   ; delete files from previous installations
@@ -771,11 +752,8 @@ Section "Uninstall"
   Delete "$SYSDIR\udefrag-kernel.dll"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\udefrag.exe"
-  Delete "$SYSDIR\udefrag-gui-config.exe"
-  Delete "$SYSDIR\ultradefrag.exe"
   Delete "$SYSDIR\wgx.dll"
   Delete "$SYSDIR\zenwinx.dll"
-  Delete "$SYSDIR\udefrag-scheduler.exe"
   Delete "$SYSDIR\hibernate4win.exe"
 
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"

@@ -14,6 +14,11 @@ rem DELETE ALL PREVIOUSLY COMPILED FILES
 call cleanup.cmd
 if "%1" equ "--clean" goto end
 
+set UDEFRAG_PORTABLE=
+if "%2" neq "--portable" goto not_portable
+set UDEFRAG_PORTABLE=1
+:not_portable 
+
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
@@ -58,6 +63,8 @@ rem The scheduler is not included in Micro Edition.
 
 
 :build_installer
+
+if "%2" equ "--portable" goto end
 
 echo Build installer...
 cd .\bin
@@ -111,17 +118,23 @@ echo Install success!
 goto end
 :fail_inst
 echo Install error!
-goto end
+goto end_1
 
 :fail
 echo.
 echo Build error (code %ERRORLEVEL%)!
 
+:end_1
+set UD_MICRO_EDITION=
+set Path=%OLD_PATH%
+set OLD_PATH=
+exit /B 1
+
 :end
 set UD_MICRO_EDITION=
 set Path=%OLD_PATH%
 set OLD_PATH=
-exit /B
+exit /B 0
 
 :usage
 call build-targets.cmd --help build-micro

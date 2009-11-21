@@ -100,7 +100,7 @@ extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 LOGFONT lf;
 HFONT hFont = NULL;
 
-char buffer[MAX_PATH];
+//char buffer[MAX_PATH];
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -129,7 +129,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 /*---------------- Main Dialog Callback ---------------------*/
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	short path[MAX_PATH];
+//	short path[MAX_PATH];
 //	LRESULT check_state;
 
 	switch(msg){
@@ -137,9 +137,9 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		/* Window Initialization */
 		hWindow = hWnd;
 		hDrives = GetDlgItem(hWindow,IDC_DRIVES);
-		GetWindowsDirectoryW(path,MAX_PATH);
-		wcscat(path,L"\\UltraDefrag\\ud_scheduler_i18n.lng");
-		if(WgxBuildResourceTable(i18n_table,path))
+//		GetWindowsDirectoryW(path,MAX_PATH);
+//		wcscat(path,L"\\UltraDefrag\\ud_scheduler_i18n.lng");
+		if(WgxBuildResourceTable(i18n_table,L".\\ud_scheduler_i18n.lng"/*path*/))
 			WgxApplyResourceTable(i18n_table,hWindow);
 		WgxSetIcon(hInstance,hWindow,IDI_SCHEDULER);
 		InitFont();
@@ -181,9 +181,9 @@ void InitFont(void)
 	lf.lfHeight = -12;
 	
 	/* load saved font settings */
-	GetWindowsDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	if(!WgxGetLogFontStructureFromFile(buffer,&lf)) return;
+//	GetWindowsDirectory(buffer,MAX_PATH);
+//	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
+	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua"/*buffer*/,&lf)) return;
 	
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);

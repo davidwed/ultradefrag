@@ -118,13 +118,23 @@ function produce_ddk_makefile()
 		f:write("DLLDEF=", deffile, "\n\n")
 	end
 
-	if micro_edition == 0 then
-		f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		if micro_edition == 0 then
+			f:write("USER_C_FLAGS=/DUSE_WINDDK /DUDEFRAG_PORTABLE\n\n")
+			f:write("RCOPTIONS=/d UDEFRAG_PORTABLE\n\n")
+		else
+			f:write("USER_C_FLAGS=/DUSE_WINDDK /DUDEFRAG_PORTABLE /DMICRO_EDITION\n\n")
+			f:write("RCOPTIONS=/d MICRO_EDITION /d UDEFRAG_PORTABLE\n\n")
+		end
 	else
-		f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n\n")
-		f:write("RCOPTIONS=/d MICRO_EDITION\n\n")
+		if micro_edition == 0 then
+			f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
+		else
+			f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n\n")
+			f:write("RCOPTIONS=/d MICRO_EDITION\n\n")
+		end
 	end
-
+	
 	if target_type == "console" or target_type == "gui" then
 		f:write("CFLAGS=\$(CFLAGS) /MT\n\n")
 	end
@@ -224,6 +234,10 @@ function produce_msvc_makefile()
 	if micro_edition == 1 then
 		cl_flags = cl_flags .. "/D \"MICRO_EDITION\" "
 	end
+
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		cl_flags = cl_flags .. "/D \"UDEFRAG_PORTABLE\" "
+	end
 	
 	-- the following check eliminates need of msvcr90.dll when compiles with SDK
 	if nativedll == 0 and os.getenv("BUILD_ENV") ~= "winsdk" then
@@ -244,6 +258,9 @@ function produce_msvc_makefile()
 	rsc_flags = "RSC_PROJ=/l 0x409 /d \"NDEBUG\" "
 	if micro_edition == 1 then
 		rsc_flags = rsc_flags .. "/d \"MICRO_EDITION\" "
+	end
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		rsc_flags = rsc_flags .. "/d \"UDEFRAG_PORTABLE\" "
 	end
 	f:write(rsc_flags, " \n")
 	
@@ -353,12 +370,22 @@ function produce_mingw_makefile()
 	
 	f:write("TARGET = ", target_name, "\n")
 	
-	if micro_edition == 0 then
-		f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
-		f:write("RCFLAGS = \n")
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		if micro_edition == 0 then
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DUDEFRAG_PORTABLE\n")
+			f:write("RCFLAGS = -DUDEFRAG_PORTABLE \n")
+		else
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION -DUDEFRAG_PORTABLE\n")
+			f:write("RCFLAGS = -DMICRO_EDITION -DUDEFRAG_PORTABLE \n")
+		end
 	else
-		f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION\n")
-		f:write("RCFLAGS = -DMICRO_EDITION \n")
+		if micro_edition == 0 then
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
+			f:write("RCFLAGS = \n")
+		else
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION\n")
+			f:write("RCFLAGS = -DMICRO_EDITION \n")
+		end
 	end
 	
 	f:write("C_INCLUDE_DIRS = \n")
@@ -479,6 +506,9 @@ function produce_pellesc_makefile()
 	if micro_edition ~= 0 then
 		f:write("-DMICRO_EDITION ")
 	end
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		f:write("-DUDEFRAG_PORTABLE ")
+	end
 	f:write("-D_MSC_VER=1300 -D__w64 -W0 ") -- to be compatible with DDK headers
 	f:write("-DUSE_WINDDK ") -- to be compatible with DDK headers
 	f:write("/I", winddk_base, "\\inc\\crt ")
@@ -496,6 +526,9 @@ function produce_pellesc_makefile()
 	f:write("PORC_FLAGS=", "/L1033 ")
 	if micro_edition ~= 0 then
 		f:write("-DMICRO_EDITION ")
+	end
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		f:write("-DUDEFRAG_PORTABLE ")
 	end
 	f:write("/I", winddk_base, "\\inc\\crt ")
 	f:write("/I", winddk_base, "\\inc\\wnet ")
@@ -620,12 +653,22 @@ function produce_mingw_x64_makefile()
 	
 	f:write("TARGET = ", target_name, "\n")
 	
-	if micro_edition == 0 then
-		f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64\n")
-		f:write("RCFLAGS = \n")
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		if micro_edition == 0 then
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64 -DUDEFRAG_PORTABLE\n")
+			f:write("RCFLAGS = -DUDEFRAG_PORTABLE \n")
+		else
+			f:write("CFLAGS = -pipe  -Wall -g0 -DMICRO_EDITION -m64 -DUDEFRAG_PORTABLE\n")
+			f:write("RCFLAGS = -DMICRO_EDITION -DUDEFRAG_PORTABLE \n")
+		end
 	else
-		f:write("CFLAGS = -pipe  -Wall -g0 -DMICRO_EDITION -m64\n")
-		f:write("RCFLAGS = -DMICRO_EDITION \n")
+		if micro_edition == 0 then
+			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64\n")
+			f:write("RCFLAGS = \n")
+		else
+			f:write("CFLAGS = -pipe  -Wall -g0 -DMICRO_EDITION -m64\n")
+			f:write("RCFLAGS = -DMICRO_EDITION \n")
+		end
 	end
 	
 	f:write("C_INCLUDE_DIRS = \n")

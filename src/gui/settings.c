@@ -108,9 +108,9 @@ void GetPrefs(void)
 	luaL_openlibs(L);  /* open libraries */
 	lua_gc(L, LUA_GCRESTART, 0);
 
-	GetWindowsDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
-	status = luaL_dofile(L,buffer);
+	//GetWindowsDirectory(buffer,MAX_PATH);
+	//strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+	status = luaL_dofile(L,".\\options\\guiopts.lua"/*buffer*/);
 	if(!status){ /* successful */
 		win_rc.left = (long)getint(L,"x");
 		win_rc.top = (long)getint(L,"y");
@@ -172,8 +172,8 @@ void SavePrefs(void)
 	FILE *pf;
 	int result;
 	
-	GetWindowsDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
+	GetCurrentDirectory(MAX_PATH,buffer);
+	strcat(buffer,"\\options\\guiopts.lua");
 	pf = fopen(buffer,"wt");
 	if(!pf){
 		_snprintf(err_msg,sizeof(err_msg) - 1,
@@ -248,9 +248,9 @@ void InitFont(void)
 	lf.lfHeight = -12;
 	
 	/* load saved font settings */
-	GetWindowsDirectory(buffer,MAX_PATH);
-	strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	if(!WgxGetLogFontStructureFromFile(buffer,&lf)) return;
+	//GetWindowsDirectory(buffer,MAX_PATH);
+	//strcat(buffer,"\\UltraDefrag\\options\\font.lua");
+	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua"/*buffer*/,&lf)) return;
 
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);

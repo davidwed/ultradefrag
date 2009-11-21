@@ -1,4 +1,26 @@
 ;-------------------------------------------------------------------------------
+; 
+; one month later: 21 November 2009
+;
+;-------------------------------------------------------------------------------
+
+They were tested Windows DDK with all available optimization keys (including /Od), 
+latest Windows SDK, Pelles C compiler and MinGW x64. Unfortunately each of them 
+produces wrong x64 code. Therefore we cannot provide 64-bit native binaries 
+at this moment.
+
+Since the 3.3.0 release we'll provide two different forms of binaries:
+ - full featured 32-bit packages (with kernel mode driver and boot time interface)
+ - portable packages
+
+Portable packages will be native 32-bit, therefore kernel mode driver and boot 
+time interface will not be available on 64-bit systems. On the other hand, 
+all remaining features of the program will be well supported. In addition, 
+portable packages will not require installation, which is another advantage over 
+an old portable packages.
+
+
+;-------------------------------------------------------------------------------
 ;
 ; one additional note (11 October 2009):
 ;
