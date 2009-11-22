@@ -18,21 +18,22 @@
  */
 
 /*
- *  Installer + portable launcher source.
- */
+* Installer source.
+*/
 
 /*
- *  NOTE: The following symbols should be defined
- *        through makensis command line:
- *  ULTRADFGVER=<version number in form x.y.z>
- *  ULTRADFGARCH=<i386 | amd64 | ia64>
- */
+*  NOTE: The following symbols should be defined
+*        through makensis command line:
+*  ULTRADFGVER=<version number in form x.y.z>
+*  ULTRADFGARCH=<i386 | amd64 | ia64>
+*/
 
 !ifndef ULTRADFGVER | ULTRADFGARCH
 !error "One of the predefined symbols missing!"
 !endif
 
-!include "Sections.nsh"
+!define MODERN_UI
+
 !include "WinVer.nsh"
 !include "x64.nsh"
 
@@ -44,9 +45,11 @@
 
 !include ".\UltraDefrag.nsh"
 
-;-----------------------------------------
+!ifndef MODERN_UI
+!system 'move /Y lang-classical.ini lang.ini'
+!endif
 
-!define MODERN_UI
+;-----------------------------------------
 
 !ifdef MODERN_UI
   !include "MUI.nsh"
@@ -87,6 +90,7 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
 ReserveFile "lang.ini"
+
 ReserveFile "driver.ini"
 
 !ifdef MODERN_UI
@@ -122,7 +126,6 @@ ReserveFile "driver.ini"
 
 ;-----------------------------------------
 
-Var IsInstalled
 Var ShowBootsplash
 Var LanguagePack
 Var UserModeDriver
@@ -191,6 +194,9 @@ Function LangShow
 !endif
   SetOutPath $PLUGINSDIR
   File "lang.ini"
+!ifdef MODERN_UI
+  File "LanguageSelectorSmall.bmp"
+!endif
 
   ClearErrors
   ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
@@ -235,59 +241,12 @@ Function ShowBootSplash
     push $R0
     ${EnableX64FSRedirection}
     SetOutPath $PLUGINSDIR
-    File "${ROOTDIR}\src\installer\*.bmp"
-    advsplash::show 2000 400 0 -1 "$PLUGINSDIR\$R1"
+    File "${ROOTDIR}\src\installer\UltraDefrag.bmp"
+    advsplash::show 2000 400 0 -1 "$PLUGINSDIR\UltraDefrag.bmp"
     pop $R0
     Delete "$PLUGINSDIR\*.bmp"
     ${DisableX64FSRedirection}
     pop $R0
-  ${EndUnless}
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function PortableRun
-
-  ${DisableX64FSRedirection}
-  ; make a backup copy of all installed configuration files
-  Rename "$INSTDIR\ud_i18n.lng" "$INSTDIR\ud_i18n.lng.bak"
-  Rename "$INSTDIR\ud_config_i18n.lng" "$INSTDIR\ud_config_i18n.lng.bak"
-  Rename "$INSTDIR\ud_scheduler_i18n.lng" "$INSTDIR\ud_scheduler_i18n.lng.bak"
-  Rename "$INSTDIR\options\guiopts.lua" "$INSTDIR\options\guiopts.lua.bak"
-  Rename "$INSTDIR\options\font.lua" "$INSTDIR\options\font.lua.bak"
-  Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.bak"
-  ; perform silent installation
-  ExecWait '"$EXEPATH" /S'
-  ; replace configuration files with files contained in portable directory
-  CopyFiles /SILENT "$EXEDIR\guiopts.lua" "$INSTDIR\options"
-  CopyFiles /SILENT "$EXEDIR\font.lua" "$INSTDIR\options"
-  CopyFiles /SILENT "$EXEDIR\udreportopts.lua" "$INSTDIR\options"
-  ; start ultradefrag gui
-  ExecWait "$SYSDIR\ultradefrag.exe"
-  ; move configuration files to portable directory
-  Delete "$EXEDIR\guiopts.lua"
-  Delete "$EXEDIR\font.lua"
-  Delete "$EXEDIR\udreportopts.lua"
-  Rename "$INSTDIR\options\guiopts.lua" "$EXEDIR\guiopts.lua"
-  Rename "$INSTDIR\options\font.lua" "$EXEDIR\font.lua"
-  Rename "$INSTDIR\options\udreportopts.lua" "$EXEDIR\udreportopts.lua"
-  ; restore all original configuration files
-  Rename "$INSTDIR\options\guiopts.lua.bak" "$INSTDIR\options\guiopts.lua"
-  Rename "$INSTDIR\options\font.lua.bak" "$INSTDIR\options\font.lua"
-  Rename "$INSTDIR\options\udreportopts.lua.bak" "$INSTDIR\options\udreportopts.lua"
-  Delete "$INSTDIR\ud_i18n.lng"
-  Rename "$INSTDIR\ud_i18n.lng.bak" "$INSTDIR\ud_i18n.lng"
-  Delete "$INSTDIR\ud_config_i18n.lng"
-  Rename "$INSTDIR\ud_config_i18n.lng.bak" "$INSTDIR\ud_config_i18n.lng"
-  Delete "$INSTDIR\ud_scheduler_i18n.lng"
-  Rename "$INSTDIR\ud_scheduler_i18n.lng.bak" "$INSTDIR\ud_scheduler_i18n.lng"
-  ; uninstall if necessary
-  ${Unless} $IsInstalled == '1'
-    ExecWait '"$INSTDIR\uninstall.exe" /S _?=$INSTDIR'
-    Delete "$INSTDIR\uninstall.exe"
-    RMDir "$INSTDIR"
-    DeleteRegKey HKLM "Software\UltraDefrag"
   ${EndUnless}
 
 FunctionEnd
@@ -460,6 +419,7 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$SYSDIR\udefrag-gui-config.exe"
   Delete "$SYSDIR\udefrag-scheduler.exe"
   RMDir /r "$INSTDIR\logs"
+  RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
 
   ; create boot time script if it doesn't exists
   SetOutPath "$SYSDIR"
@@ -468,6 +428,7 @@ Section "Ultra Defrag core files (required)" SecCore
   ${EndUnless}
   
   ; write default GUI settings to guiopts.lua file
+  SetOutPath "$INSTDIR"
   ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
 
   ${EnableX64FSRedirection}
@@ -498,7 +459,7 @@ SectionEnd
 
 SectionEnd
 */
-Section /o "Scheduler" SecScheduler
+Section "Scheduler" SecScheduler
 
   DetailPrint "Install Scheduler..."
   ${DisableX64FSRedirection}
@@ -508,49 +469,13 @@ Section /o "Scheduler" SecScheduler
 
 SectionEnd
 
-Section /o "Portable UltraDefrag package" SecPortable
-
-  push $R0
-  
-  DetailPrint "Build portable package..."
-  ${DisableX64FSRedirection}
-  StrCpy $R0 "$INSTDIR\portable_${ULTRADFGARCH}_package"
-  CreateDirectory $R0
-  
-  ; delete old versions of the installer
-  Delete "$R0\ultradefrag*.exe"
-  
-  CopyFiles /SILENT $EXEPATH $R0 265
-
-  ; never replace existing files -- why ???
-  ;${Unless} ${FileExists} "$R0\font.lua"
-    CopyFiles /SILENT "$INSTDIR\options\font.lua" $R0
-  ;${EndUnless}
-  ;${Unless} ${FileExists} "$R0\guiopts.lua"
-    CopyFiles /SILENT "$INSTDIR\options\guiopts.lua" $R0
-  ;${EndUnless}
-  ;${Unless} ${FileExists} "$R0\udreportopts.lua"
-    CopyFiles /SILENT "$INSTDIR\options\udreportopts.lua" $R0
-  ;${EndUnless}
-
-  WriteINIStr "$R0\PORTABLE.X" "Bootsplash" "Show" "1"
-  WriteINIStr "$R0\PORTABLE.X" "i18n" "Language" $LanguagePack
-  WriteINIStr "$R0\PORTABLE.X" "Driver" "UserMode" $UserModeDriver
-  WriteINIStr "$R0\NOTES.TXT" "General" "Usage" \
-    "Put this directory contents to your USB drive and enjoy!"
-  ${EnableX64FSRedirection}
-
-  pop $R0
-
-SectionEnd
-
-Section /o "Context menu handler" SecContextMenuHandler
+Section "Context menu handler" SecContextMenuHandler
 
   ${SetContextMenuHandler}
   
 SectionEnd
 
-Section /o "Shortcuts" SecShortcuts
+Section "Shortcuts" SecShortcuts
 
   push $R0
   AddSize 5
@@ -565,6 +490,7 @@ Section /o "Shortcuts" SecShortcuts
   Delete "$SMPROGRAMS\UltraDefrag\Documentation\FAQ.lnk"
   Delete "$SMPROGRAMS\UltraDefrag\Documentation\User manual.url"
   Delete "$SMPROGRAMS\UltraDefrag\UltraDefrag (Debug mode).lnk"
+  Delete "$SMPROGRAMS\UltraDefrag\Portable package.lnk"
 
   RMDir /r "$SMPROGRAMS\UltraDefrag\Boot time options"
   RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
@@ -613,11 +539,6 @@ Section /o "Shortcuts" SecShortcuts
   CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
    "$INSTDIR\ultradefrag.exe"
 
-  ${If} ${FileExists} "$INSTDIR\portable_${ULTRADFGARCH}_package\PORTABLE.X"
-    CreateShortCut "$R0\Portable package.lnk" \
-     "$INSTDIR\portable_${ULTRADFGARCH}_package"
-  ${EndIf}
-
   ${EnableX64FSRedirection}
   pop $R0
 
@@ -637,7 +558,6 @@ Function .onInit
   push $R1
 
   /* variables initialization */
-  StrCpy $IsInstalled 0
   StrCpy $ShowBootsplash 1
 
   StrCpy $UserModeDriver 1
@@ -656,33 +576,7 @@ Function .onInit
     StrCpy $LanguagePack $R1
   ${EndUnless}
 
-  /* is already installed? */
-  ${If} ${FileExists} "$SYSDIR\defrag_native.exe"
-    StrCpy $IsInstalled 1
-  ${EndIf}
-
-  /* portable package? */
-  ${If} ${FileExists} "$EXEDIR\PORTABLE.X"
-    ReadINIStr $ShowBootsplash "$EXEDIR\PORTABLE.X" "Bootsplash" "Show"
-    ReadINIStr $LanguagePack "$EXEDIR\PORTABLE.X" "i18n" "Language"
-    ReadINIStr $UserModeDriver "$EXEDIR\PORTABLE.X" "Driver" "UserMode"
-    ${Unless} ${Silent}
-      StrCpy $R1 "PortableUltraDefrag"
-      call ShowBootSplash
-      call PortableRun
-      pop $R1
-      ${EnableX64FSRedirection}
-      Abort
-    ${EndUnless}
-  ${Else}
-    ;!insertmacro SelectSection ${SecSchedNET}
-    !insertmacro SelectSection ${SecScheduler}
-    !insertmacro SelectSection ${SecPortable}
-    !insertmacro SelectSection ${SecContextMenuHandler}
-    !insertmacro SelectSection ${SecShortcuts}
-    StrCpy $R1 "UltraDefrag"
-    call ShowBootSplash
-  ${EndIf}
+  call ShowBootSplash
 
 !ifdef MODERN_UI
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
@@ -764,6 +658,7 @@ Section "Uninstall"
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
   ; this is important for portable application
+  ; and from "anything related to the program should be cleaned up" point of view
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
@@ -792,7 +687,6 @@ SectionEnd
   ;!insertmacro MUI_DESCRIPTION_TEXT ${SecSchedNET} "Small and useful scheduler.$\nNET Framework 2.0 required."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecScheduler} "Small handy scheduler."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "Handbook."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecPortable} "Build portable package to place them on USB drive."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenuHandler} "Defragment your volumes from their context menu."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END

@@ -34,7 +34,24 @@ copy /Y scripts\udsorting.js %PORTABLE_DIR%\scripts\
 mkdir %PORTABLE_DIR%\options
 copy /Y scripts\udreportopts.lua %PORTABLE_DIR%\options\
 
+mkdir %PORTABLE_DIR%\i18n
+mkdir %PORTABLE_DIR%\i18n\gui
+mkdir %PORTABLE_DIR%\i18n\gui-config
+copy /Y gui\i18n\*.lng %PORTABLE_DIR%\i18n\gui\
+copy /Y udefrag-gui-config\i18n\*.lng %PORTABLE_DIR%\i18n\gui-config\
+
+copy /Y installer\LanguageSelector.nsi bin\
+copy /Y installer\lang.ini bin\
+copy /Y installer\LanguageSelectorSmall.bmp bin\
+copy /Y installer\LanguageSelector.ico bin\
+
 cd bin
+
+call setvars.cmd
+%NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
+if %errorlevel% neq 0 goto fail
+
+copy /Y LanguageSelector.exe ultradefrag-portable-%ULTRADFGVER%\
 
 cd ultradefrag-portable-%ULTRADFGVER%
 .\ultradefrag.exe --setup

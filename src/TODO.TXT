@@ -19,6 +19,9 @@ all remaining features of the program will be well supported. In addition,
 portable packages will not require installation, which is another advantage over 
 an old portable packages.
 
+After resolving x64 compilation problems the following tests must be performed:
+ - boot time interface: USB and PS/2 keyboards at startup and in interactive mode
+ - gui accelerators
 
 ;-------------------------------------------------------------------------------
 ;
