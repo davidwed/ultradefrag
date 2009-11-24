@@ -8,11 +8,13 @@ HISTORY
     - fragments threshold filter parameter was added
     - portable version was highly improved
     - few little bugs were fixed
+    - now the program is much more compatible with Vista and later versions 
+      of Windows; this is achieved by adding the User Mode Driver to it
 
     - since this version native 64-bit binaries aren't available
       due to the C compilers internal bugs (Windows DDK, Windows SDK, Pelles C, 
       MinGW x64 were tested); portable UltraDefrag can be used now on all of the  
-      64-bit systems instead of the native 64-bit packages.
+      64-bit systems instead of the native 64-bit packages
 
     - NOTE FOR PROGRAMMERS: to successfully compile the user mode driver run 
       configure.lua script, check 'Apply patch to MinGW' box and click OK 

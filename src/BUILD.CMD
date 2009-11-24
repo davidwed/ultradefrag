@@ -14,7 +14,9 @@ call cleanup.cmd
 if "%1" equ "--clean" goto end
 
 set UDEFRAG_PORTABLE=
+if "%1" equ "--portable" goto portable
 if "%2" neq "--portable" goto not_portable
+:portable
 set UDEFRAG_PORTABLE=1
 :not_portable 
 
@@ -74,6 +76,7 @@ rem call BLDSCHED.CMD
 
 :build_installer
 
+if "%1" equ "--portable" goto end
 if "%2" equ "--portable" goto end
 
 echo Build installer...

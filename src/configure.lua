@@ -105,41 +105,39 @@ function param_action(dialog, param_index)
 		if show_obsolete_options == 1 then
 			dialog.size = "400x234"
 		else
-			dialog.size = "400x173"
+			dialog.size = "350x143"
 		end
 	end
 	return 1
 end
 
 if show_obsolete_options == 1 then
-	ret, udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, netpath, vsbinpath, rosinc, apply_patch = 
+	ret, udver, winxver, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, winsdkbase, netpath, vsbinpath, rosinc, apply_patch = 
 		iup.GetParam("UltraDefrag build configurator",param_action,
 			"UltraDefrag version: %s\n"..
 			"ZenWINX version: %s\n"..
-			"Windows SDK base path: %s\n"..
 			"MinGW base path: %s\n"..
 			"NSIS root path: %s\n"..
 			"7-Zip root path: %s\n"..
 			"MinGW x64 base path: %s\n"..
 			"Windows DDK base path: %s\n"..
+			"Windows SDK base path: %s\n"..
 			".NET runtime path: %s\n"..
 			"Visual Studio bin path: %s\n"..
 			"ReactOS include path: %s\n"..
 			"Apply patch to MinGW: %b[No,Yes]\n",
-			udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, netpath, vsbinpath, rosinc, apply_patch
+			udver, winxver, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, winsdkbase, netpath, vsbinpath, rosinc, apply_patch
 			)
 else
-	ret, udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, apply_patch = 
+	ret, udver, winxver, mingwbase, nsisroot, ziproot, apply_patch = 
 		iup.GetParam("UltraDefrag build configurator",param_action,
 			"UltraDefrag version: %s\n"..
 			"ZenWINX version: %s\n"..
-			"Windows SDK base path: %s\n"..
 			"MinGW base path: %s\n"..
 			"NSIS root path: %s\n"..
 			"7-Zip root path: %s\n"..
-			"MinGW x64 base path: %s\n"..
 			"Apply patch to MinGW: %b[No,Yes]\n",
-			udver, winxver, winsdkbase, mingwbase, nsisroot, ziproot, mingw64base, apply_patch
+			udver, winxver, mingwbase, nsisroot, ziproot, apply_patch
 			)
 end
 if ret == 1 then

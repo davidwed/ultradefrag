@@ -31,6 +31,11 @@
 -- Due to OS version independent driver code the nt4 specific issues were removed
 -- in 2.1.0 version.
 
+-- When you are using Windows SDK don't forget about the following:
+-- ntdll.lib are missing - copy them from DDK
+-- SSE2 processor is required to run produced binaries
+-- kernel mode driver cannot be compiled
+
 name, deffile, baseaddr, nativedll, umentry = "", "", "", 0, ""
 src, rc, libs, adlibs = {}, {}, {}, {}
 

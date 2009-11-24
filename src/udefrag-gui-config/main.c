@@ -133,7 +133,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			//ShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
 			//GetWindowsDirectoryW(path,MAX_PATH);
 			//wcscat(path,L"\\UltraDefrag\\options\\guiopts.lua");
+			#ifndef UDEFRAG_PORTABLE
 			ShellExecuteW(hWindow,L"open",L".\\options\\guiopts.lua"/*path*/,NULL,NULL,SW_SHOW);
+			#else
+			ShellExecuteW(hWindow,L"open",L"notepad.exe"/*path*/,L".\\options\\guiopts.lua",NULL,SW_SHOW);
+			#endif
 			break;
 		case IDC_GUI_HELP:
 			OpenWebPage("gui.html");
@@ -160,7 +164,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case IDC_REPORT_OPTIONS:
 			//GetWindowsDirectoryW(path,MAX_PATH);
 			//wcscat(path,L"\\UltraDefrag\\options\\udreportopts.lua");
+			#ifndef UDEFRAG_PORTABLE
 			ShellExecuteW(hWindow,L"open",L".\\options\\udreportopts.lua"/*path*/,NULL,NULL,SW_SHOW);
+			#else
+			ShellExecuteW(hWindow,L"open",L"notepad.exe"/*path*/,L".\\options\\udreportopts.lua",NULL,SW_SHOW);
+			#endif
 			break;
 		case IDC_REPORT_HELP:
 			OpenWebPage("reports.html");

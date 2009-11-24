@@ -19,16 +19,6 @@ editions of Windows.
 
 You must have administrative rights to install and use Ultra Defragmenter. 
 
-To install Ultra Defragmenter on Windows Vista or Windows Server 2008 
-operating systems follow steps described here:
-
-	http://ultradefrag.sourceforge.net/vista
-
-Or install the program, use [Start -> Programs -> UltraDefrag ->
-Documentation -> Handbook] menu to access the local copy of documentation 
-and read carefully [Special notes for Windows Vista users] section of the 
-handbook.
-
 
 Web Resources
 -------------

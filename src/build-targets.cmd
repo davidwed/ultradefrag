@@ -5,10 +5,10 @@ rem for all of the supported targets.
 rem Usage:
 rem     build-targets [<compiler>]
 rem Available <compiler> values:
-rem     --use-winddk (default)
-rem     --use-winsdk
-rem     --use-mingw
+rem     --use-mingw (default)
 rem     --use-msvc
+rem     --use-winddk
+rem     --use-winsdk
 rem     --use-pellesc (experimental)
 rem     --use-mingw-x64 (experimental)
 
@@ -23,7 +23,7 @@ echo     build              - perform the build using default options
 echo     build --install    - run installer silently after the build
 echo     build [compiler] [--install] - specify your favorite compiler:
 echo.
-echo                        --use-mingw
+echo                        --use-mingw     (default)
 echo.
 echo                        --use-msvc      (obsolete)
 echo                        --use-winsdk    (obsolete, produces wrong x64 code)
@@ -41,9 +41,9 @@ echo     build-micro              - perform the build using default options
 echo     build-micro --install    - run installer silently after the build
 echo     build-micro [compiler] [--install] - specify your favorite compiler:
 echo.
-echo                              --use-mingw
+echo                              --use-mingw (default)
 echo.
-echo                              --use-msvc (obsolete)
+echo                              --use-msvc  (obsolete)
 echo                              --use-winsdk
 echo                                   (obsolete, produces wrong x64 code)
 echo                              --use-winddk
@@ -57,11 +57,15 @@ echo     build-micro --help       - show this help message
 exit /B 0
 
 :build
+if "%1" equ "--portable" goto default_build
 if "%1" neq "" goto parse_first_parameter
+
+:default_build
 echo No parameters specified, use defaults.
-goto ddk_build
+goto mingw_build
 
 :parse_first_parameter
+if "%1" equ "--use-winddk" goto ddk_build
 if "%1" equ "--use-msvc" goto msvc_build
 if "%1" equ "--use-mingw" goto mingw_build
 if "%1" equ "--use-pellesc" goto pellesc_build
