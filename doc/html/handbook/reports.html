@@ -78,7 +78,8 @@
 		<p>To open the file fragmentation report click <span class="guimenuitem">Fragmented</span> 
 		button in GUI application. Also you can view these reports outside the GUI 
 		program: just click <span class="code">fraglist.luar</span> icon in Explorer. You will find 
-		these files in root directory of each analysed volume.</p>
+		these files in root directory of each analysed volume. Note that this method works only with 
+		a full-featured installation, portable package gives you no such ability at this moment.</p>
 	</div>
 
 	<div class="sect1" lang="en">
@@ -93,9 +94,8 @@
 		<span class="guimenuitem">Reports</span> section.
 		</p>
 		<p>File fragmentation report options are stored in <span class="code">udreportopts.lua</span> file located in 
-		<span class="code">%windir%\UltraDefrag\options</span> 
-		directory. This is just a simple text file (in ANSI encoding) with comments and 
-		parameter-value pairs. However it's a real program written in 
+		<span class="code">options</span> subdirectory of the folder where the program is installed. This is just a 
+		simple text file (in ANSI encoding) with comments and parameter-value pairs. However it's a real program written in 
 		<a href="http://www.lua.org/">Lua</a> language.
 		</p>
 		<p>The strings with -- character sequence in the beginning are comments. Here is 

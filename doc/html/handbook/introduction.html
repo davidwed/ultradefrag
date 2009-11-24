@@ -92,30 +92,24 @@
 		</div>
 		<p><span class="application">UltraDefrag</span> has the following features:</p>
 		<ul type="disc">
-		<li>Ultra fast NTFS analysis. The program reads Master File Table (MFT) directly and analyze them 
-		to retrieve detailed information about all the files containing on the selected volume. As a result 
-		NTFS analysis becomes approximately 25 times faster now.</li>
-		<li>Defragmentation of additional streams attached to NTFS files.</li>
-		<li>Very fast defragmentation, the work is done via a kernel mode 
-		driver which has an optimal defraging algorithm.</li>
-		<li>Ability to defragment system files.</li>
-		<li>Single file or directory defragmentation: select any object
-		in Explorer and choose the appropriate context menu item to defragment them.</li>
-		<li>Very small engine written in pure C.</li>
-		<li>Nice graphical interface - compact, functional and easy to use.</li>
-		<li>Ability to automatically shutdown or hibernate PC after a job.</li>
-		<li>Powerful command line interface.</li>
-		<li>Ability to hibernate PC through command line.</li>
-		<li>Safety, because the file moving is accomplished with Microsoft's own Defrag API.</li>
-		<li>Simple to use.</li>
-		<li>Ability to generate html reports of fragmentation status.</li>
-		<li>Ability to include/exclude files based on simple filters.</li>
-		<li>Native x64 support.</li>
-		<li>Portable UltraDefrag can be installed on demand which can be carried around 
-		in USB storage devices and used without any installation.</li>
-		<li>Many GUI translations available.</li>
-		<li>Easy to use Scheduler.</li>
-		<li>Free: Distributed with full source code under the GNU General Public License.</li>
+		<li>system files defragmentation (registry, pagefiles etc.)</li>
+		<li>ultra fast NTFS analysis</li>
+		<li>fast defragmentation algorithm</li>
+		<li>effective volume optimization algorithm</li>
+		<li>safety, it can never damage processed files</li>
+		<li>simplicity, it can be used without reading the documentation</li>
+		<li>ability to defragment single file/directory from the context menu in Explorer</li>
+		<li>ability to defragment additional streams attached to NTFS files</li>
+		<li>ability to exclude any unimportant fiiles based on flexible filters</li>
+		<li>well readable HTML reports</li>
+		<li>powerful command line interface</li>
+		<li>ability to automatically hibernate/shutdown PC after a job</li>
+		<li>small handy scheduler</li>
+		<li>multilingual graphical interface</li>
+		<li>little binaries (less than 1 Mb)</li>
+		<li>portable version requires no installation</li>
+		<li>native 64-bit support on source code level</li>
+		<li>open source code licensed under GPL</li>
 		</ul>
 	</div>
 
@@ -136,14 +130,15 @@
 		defragment floppies, although doing so is not particularly useful.</p>
 		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
 			<h3 class="title">Notes</h3>
+			<p><span style="color: darkred">Don't try to analyze/defragment NTFS v1.2 formatted volumes 
+			under NT4.0! This version of NTFS has beta status and its driver may crash your system some day. 
+			You may ignore this advice but know, you was forewarned.</p>
 			<p><span style="color: darkred">Directories on FAT volumes cannot be moved.</span> 
-			This is a well known fastfat.sys 
-			system driver mistake, it cannot be fixed. Most of other defraggers have the same 
-			restriction.</p>
+			This is a well known fastfat.sys system driver mistake, it cannot be fixed. 
+			Most of other defraggers have the same restriction.</p>
 			<p><span style="color: darkred"><b>$MFT</b>, <b>$Bitmap</b> and another <b>internal NTFS files</b> 
-			cannot be defragmented at this moment.</span> 
-			Because NTFS driver provided by Microsoft is very imperfect. Such 
-			internal files defragmentation support may be added in future versions of 
+			cannot be defragmented at this moment.</span> Because NTFS driver provided by Microsoft is very 
+			imperfect. Such internal files defragmentation support may be added in future versions of 
 			<span class="application">UltraDefrag</span>.</p>
 			<p><span class="application">UltraDefrag</span> cannot defragment volumes containing 
 			more than 4.294.967.295 clusters.</p>
@@ -200,11 +195,21 @@
 					files successfully moved at the previous step.</li>
 					<li>Final analysis. This operation updates all information.</li>
 				</ul>
-				<p>Note that Volume Optimization is very effective only when processed volume has a lot of 
-				free space. This is not a program's mistake, this is a cause of the Windows 
-				Defragmentation	API imperfectness.</p>
+				
+				<p>Since the 3.3.0 version of the program this sequence of optimization steps will repeat 
+				few times until the end of the volume will be reached. The starting point of an optimization 
+				moves forward before repeating the sequence to skip already optimized part of the volume. 
+				This highly improves the optimization by making it very effective.</p>
+				
+				<p>In spite of this multipass optimization strategy it takes relatively small amount 
+				of time.</p>
+				
+				<p>Note that Volume Optimization is very effective always, even when processed volume has a 
+				small amount of free space.</p>
+				
 				<p>Volume optimization algorithm works only on NTFS volumes, because FAT directories 
 				aren't moveable.</p>
+				
 				<p>NTFS file system is very imperfect. We cannot move internal files, such as $MFT,
 				$Bitmap and other internal files with a '$' sign in the begginning of their names. This is 
 				a well known ntfs.sys driver's bug. Free space may be splitted  
@@ -218,14 +223,12 @@
 					<li>The second way requires an additional software: 
 					<a href="http://gparted.sourceforge.net/">GParted Live CD</a> (open source 
 					program) or <a href="http://en.wikipedia.org/wiki/PartitionMagic">Partition Magic</a> 
-					(commercial software). First of all - reduce the 
-					selected volume size as much as possible. This 
-					operation will move all data to the beginning of the 
-					volume. All system files will be moved too (including $MFT, $Bitmap and so on). Next step - restore size of the 
+					(commercial software). First of all - reduce the selected volume size as much as possible. 
+					This operation will move all data to the beginning of the volume. All system files will 
+					be moved too (including $MFT, $Bitmap and so on). Next step - restore size of the 
 					selected volume. After this step we will have large contignuous free space area at 
-					the end of the volume. Final step - make a 
-					<a href="boot.html">boot time defragmentation</a> of the volume 
-					using <span class="application">UltraDefrag</span>.
+					the end of the volume. Final step - make a <a href="boot.html">boot time defragmentation</a> 
+					of the volume using <span class="application">UltraDefrag</span>.
 					</li>
 				</ul>
 				</p>

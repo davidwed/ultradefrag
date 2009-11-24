@@ -10,6 +10,7 @@
 	<link rel="start" href="index.html" title="Ultra Defragmenter Handbook" />
 	<link rel="prev" href="credits.html" title="Chapter 12. Credits and License" />
 	<link rel="next" href="design_notes.html" title="Design Notes" />
+	<script type="text/javascript" src="handbook.js"></script>
 </head>
 
 <body bgcolor="white" text="black" alink="#0000ff" link="#0000ff" vlink="#840084">
@@ -55,49 +56,95 @@
 			</div></div>
 		</div>
 		<h4>1. Software requirements</h4>
+		
+		<table border="0" width="300"><tbody>
+		
+		<tr><td>1. <a href="http://www.mingw.org/">GNU C Compiler</a></td>
+		<td><font size="-1">
+		[<a href="http://ultradefrag.sourceforge.net/devtools/MinGWStudioFullSetup-2.05.exe">download</a>] 
+		</font></td>
+		</tr>
+		
+		<tr><td>2. <a href="http://nsis.sourceforge.net/">NSIS compiler</a></td>
+		<td> <font size="-1">
+		[<a href="http://ultradefrag.sourceforge.net/devtools/nsis-2.28-setup.exe">download</a>] 
+		</font></td>
+		</tr>
 
-		<h5>1.1 Compilation with Windows Server 2003 DDK</h5>
+		<tr><td>3. <a href="http://luabinaries.luaforge.net/">Lua</a>, 
+		<a href="http://sourceforge.net/projects/iup/files/">IUP</a>, 
+		<a href="http://sourceforge.net/projects/canvasdraw/files/">CD</a></td>
+		<td> <font size="-1">
+		[<a href="http://ultradefrag.sourceforge.net/devtools/Lua51_iup30rc2_cd52.7z">download</a>] 
+		</font></td>
+		</tr>
 
-		<p>The best way to build UltraDefrag is to use the Windows Server 2003 Driver
-		Development Kit (DDK). You can simply download it from one of the locations
-		that can be found using any web search system (e.g. 
-		<a href="http://www.google.com">Google</a>).</p>
+		<tr><td>4. <a href="http://www.7-zip.org/">7-zip file archiver</a></td>
+		<td> <font size="-1">
+		[<a href="http://ultradefrag.sourceforge.net/devtools/7z442.exe">download</a>] 
+		</font></td>
+		</tr>
+		
+		<tr><td>5. <a href="http://www.info-zip.org/">Zip file archiver</a></td>
+		<td> <font size="-1">
+		[<a href="http://ultradefrag.sourceforge.net/devtools/zip232xN.zip">download</a>] 
+		</font></td>
+		</tr>
+		
+		</tbody></table>
+		
+		<p>In case when the installer is provided for an appropriate tool, just install it. Otherwise 
+		unpack provided archive into any directory, specified in your <span class="code">%PATH%</span> 
+		environment variable. If you are in trouble, just unpack archives to <span class="code">C:\WINDOWS</span>, 
+		in other words, in folder where you have Windows installed.</p>
+		
+		<font size="-1"><table border="0"><tbody><tr><td width="18pt" align="left" valign="center">
+		<a href="javascript:show_section('gcc','img0')"><img id="img0" border="0" src="closed.gif" /></a></td>
+		<td>Why GCC is the best choice for us?
+		</td></tr></tbody></table></font>
 
-		<p>The only disadvantage of this method is that the Windows DDK is a really 
-		big package (about 230 Mb). However, if you have an internet connection with 
-		a good download rate, its should not be a large problem.</p>
+		<div id="gcc" style="display: none; padding-left: 30pt">
+		
+		<p>The best C compiler for Windows I ever seen is GCC (GNU C Compiler). It produces 
+		a very stable code, strongly checks sources for stadards compatibility and also has 
+		a huge number of optimization keys. Another compilers have no advantages over GCC,
+		therefore I strongly suggest to use it for UltraDefrag building.</p>
+		
+		<p>GCC can be obtained as a part of <a href="http://www.mingw.org">MinGW</a> project, 
+		though it is recommended to download 
+		<a href="http://ultradefrag.sourceforge.net/devtools/MinGWStudioFullSetup-2.05.exe">MinGW Developer Studio</a> 
+		instead which is more compatible with UltraDefrag sources.</p>
+		
+		<p>At this moment there is only one important disadvantage of GCC - it cannot produce correct 
+		binaries for 64-bit targets. We have tested latest binaries provided by MinGW x64 project team, 
+		but the result was unsuccessful.</p>
+		
+		<p>You may ask, why not to use Microsoft C compiler to produce 64-bit binaries. Very reasonable question,
+		but unfortunately Microsoft C compiler produces wrong 64-bit binaries too, even the latest version included 
+		in Windows 7 SDK. We have used Windows Server 2003 DDK for a long time until we had noticed that compiled 
+		x64 binaries are wrong.</p>
+		
+		<p>Also we have tested Pelles C compiler, but without any success, even in 32-bit mode.</p>
+		
+		<p>Therefore at this moment we have no free C compiler which can produce right 64-bit binaries. We should wait 
+		until it will be available for us. To partially resolve this problem, we will release a special Portable version 
+		of the program which can be executed on 64-bit Windows under WOW64 emulator.</p>
 
-		<h5>1.2 Compilation with MinGW</h5>
-
-		<p>Other interesting way to produce UltraDefrag package is to do so using MinGW.
-		GNU C Compiler (GCC) has one important advantage over the Microsoft C
-		compiler, it produces many useful warnings for code that is not completely
-		within the C standard. I have removed hundreds of small bugs from UltraDefrag
-		thanks to the warnings produced by GCC. The biggest disadvantage of gcc is that 
-		it produces larger executables than the microsoft compiler, e.g. a driver
-		produced by DDK may have 22.0 Kb size, but the same driver produced by GCC is
-		only about 32.0 kb.</p>
-
-		<p>You can either download MinGW from 
-		<a href="http://www.mingw.org">mingw.org</a> or download	MinGW Developer Studio 
-		from <a href="http://www.parinyasoft.com">parinyasoft.com</a> (about 25 Mb).</p>
-
-		<p>Note that the MinGW build system can only build i386 binaries.</p>
-
-		<p><b><font size="-1">VERY IMPORTANT NOTE:</font></b> If you build the dynamic libraries from the MinGW
+		<p><font size="-1"><b>NOTE:</b> When you build dynamic libraries from the MinGW
 		Developer Studio, the resulting *.a files are invalid. This is because I don't
-		know how to specify linker options in Developer Studio's project file. Use
-		makefiles instead:
-<pre class="screen"><strong class="userinput"><code>mingw32-make Makefile.mingw</code></strong></pre>
-		</p>
+		know how to specify linker options properly in Developer Studio's project files.</font></p>
+		
+		</div>
+		
+		<font size="-1"><table border="0"><tbody><tr><td width="18pt" align="left" valign="center">
+		<a href="javascript:show_section('msvc','img1')"><img id="img1" border="0" src="closed.gif" /></a></td>
+		<td>You may also use Microsoft Visual Studio 6.0 
+		instead of the GCC, though this method of UltraDefrag building is much more complicated.
+		</td></tr></tbody></table></font>
 
-		<h5>1.3 Compilation with Microsoft Visual Studio 6.0</h5>
-
-		<p>This is another method for building UltraDefrag. It does not require the
-		DDK. You can use Microsoft C compiler included in MS Visual Studio version 6.0
-		or later.</p>
-
-		<p>To use this method you will need to obtain a copy of ReactOS source code
+		<div id="msvc" style="display: none; padding-left: 30pt"><font size="-1">
+		
+		<p>To use Microsoft Visual Studio 6.0 you will also need to obtain a copy of ReactOS source code
 		from <a href="http://www.reactos.org">ReactOS website</a> for special header files 
 		used to build the driver.</p>
 
@@ -107,7 +154,7 @@
 		(included in KmdKit package). 
 		Put these files to lib subdirectory of your Visual Studio installation.</p>
 
-		<p><b><font size="-1">VERY IMPORTANT NOTE:</font></b> The winnt.h file in visual studio 6.0 
+		<p><b>VERY IMPORTANT NOTE:</b> The winnt.h file in visual studio 6.0 
 		contains an incorrect definition of the NtCurrentTeb function. Therefore replace the
 		following lines:
 
@@ -132,51 +179,38 @@ __stdcall NtCurrentTeb(void);
 		reactos header paths are properly set.</p>
 
 		<p>Note that currently only i386 binaries can be produced using this way.</p>
-
-
-		<h5><a name="required_tools"></a>1.4 Common tools</h5>
-
-		<p>There are a few other tools that you should have installed on your PC to
-		perform a full-featured build:</p>
-
-		<ul>
-
-		<li><a href="http://nsis.sourceforge.net">NSIS compiler</a> (v2.28) is required 
-		to produce installers.</li>
-
-		<li><a href="http://www.7-zip.org">7-zip file archiver</a> is used to produce 
-		the source code package. It gives us better compression ratio in comparison with 
-		other tools.</li>
-
-		<li><a href="http://luabinaries.luaforge.net/">Lua</a> language binaries are used 
-		to execute build scripts. Install it in some folder on your %PATH% and rename 
-		lua5.1.exe to lua.exe. Also it is highly recommended to install 
-		<a href="http://sourceforge.net/projects/iup/files/">IUP</a> and 
-		<a href="http://sourceforge.net/projects/canvasdraw/files/">CD</a> libraries. If you 
-		are on 32-bit system, download <span class="code">iup3_0_rc2_Win32_dll6_lib.zip</span> and 
-		<span class="code">cd5_2_Win32_dll6_lib.zip</span> archives, unpack them and copy all 
-		DLL's to the same folder where you have Lua binaries installed.</li>
-
-		<li><a href="http://www.etree.org/md5com.html">md5sum</a> tool is used to generate 
-		file ultradefrag-x.y.z.MD5SUMS that	gives you an ability to check downloaded packages 
-		integrity.</li>
-
-		</ul>
 		
+		<p>As you can see, this way of compilation is much more complicated in comparison
+		with MinGW compilation, therefore it may be treated as obsolete and no particularly useful.</p>
+		
+		</font></div>
+
+		<font size="-1"><table border="0"><tbody><tr><td width="18pt" align="left" valign="center">
+		<a href="javascript:show_section('optional_tools','img2')"><img id="img2" border="0" src="closed.gif" /></a></td>
+		<td>There are also few optional tools which aren't 
+		required for build purposes, but may be useful for debugging or better understanding program's internal structure.
+		</td></tr></tbody></table></font>
+
+		<div id="optional_tools" style="display: none; padding-left: 30pt">
+
 		<p>The following tools are optional though useful for debugging purposes:</p>
 		
 		<ul>
 		
+		<li><a href="http://www.etree.org/md5com.html">md5sum</a> tool is used to generate 
+		file ultradefrag-x.y.z.MD5SUMS that	gives us an ability to check downloaded packages 
+		integrity.</li>
+
 		<li><a href="http://www.doxygen.org">Doxygen</a> is used to produce a special kind of 
 		documentation from project's source files. It contains descriptions 
 		of functions and global variables dependencies and may be used e.g. for
 		removing unnecessary data fields from program's internal structures.
 		Also it is helpful for any other program code cleanup.
-		So, if you are programmer, this tool is highly recommended for you.</li>
+		So, if you are a programmer, this tool is highly recommended for you.</li>
 
 		<li><a href="http://www.xs4all.nl/~rfsber/Robo/robodoc.html">ROBODoc</a> is used to 
 		build interface documentation, that you should use as main developer
-		manual. You will find here all descriptions of functions exported by 
+		manual. You will find there all descriptions of functions exported by 
 		UltraDefrag and ZenWINX (that is a part of the Ultra Defragmenter)
 		libraries, important notes about undocumented windows functions usage
 		and many other aspects of the Ultra Defragmenter development.
@@ -214,64 +248,58 @@ __stdcall NtCurrentTeb(void);
 		to be compressed effectively. Also UPX was used to compress an installer as described in NSIS manual, 
 		but <span class="code">SetCompressor /SOLID lzma</span> command seems to be much effective.</span></li>
 
-
 		</font></ul>
-
-		<h5>1.5 Software recommended for debugging purposes</h5>
-
-		<p>Read <a href="reporting_bugs.html">Reporting bugs</a> chapter for details.</p>
-
-		<h5>1.6 Especially for Mr. Random Newbe (Some notes for the beginners)</h5>
-
-		<p>Many of described tools have small size, and you don't need high-speed
-		internet connection to download their latest versions. Simply do it.</p>
-
-		<p>If you will place tools executables in one of the directories, specified 
-		in your PATH environment variable, the command execution will be very easy 
-		process, because you can type commands without paths in the command prompt.</p>
+		
+		<p>Read also carefully the <a href="reporting_bugs.html">Reporting bugs</a> chapter of this document 
+		to understand better specific debugging techniques and to learn more about tools required for it.</p>
+		
+		</div>
 
 		<h4>2. Building and installation</h4>
 
-		<ol>
-		<li>Download source archive and unpack it somewhere. <b><font size="-1">NOTE:</font></b> 
-		Currently path must not contain spaces. 
-		If you have some ideas how to fix that send your suggestion to the authors, please.</li>
-		<li>Configure build options by typing the following command:
+		<p>First of all, download source archive and unpack it somewhere. Note that currently path must not 
+		contain spaces. If you have some ideas how to fix that send your suggestion to the authors, please.</p>
+
+		<p>Configure build options by typing the following command:</p>
 
 <pre class="screen"><strong class="userinput"><code>lua configure.lua</code></strong></pre>
 
-		<p>This tool has a graphical interface. Enter the paths to prerequisite
-		libraries and other options. If you prefer to use MinGW, check 
+		<p>Enter the paths to development tools and other options here. If you prefer to use MinGW, check also
 		<span class="guimenuitem">Apply patch to MinGW</span> box and click 
 		<span class="guimenuitem">OK</span> to replace some libraries included in MinGW
 		(libntdll.a and libntoskrnl.a) with more adequate versions. Old libraries
-		will be saved in files with additional suffix '.orig'.</p>
+		will be saved in files with an additional suffix '.orig'.</p>
 
 		<center><img src="config.lua.png" /></center><br />
 		
-		<p>Though <span class="code">configure.pl</span> script works fine too, it is obsolete. Lua 
-		language gives us better performance and requires much less disk space itself. Note that 
-		you must have IUP and CD libraries installed as described 
-		<a href="development.html#required_tools">above</a> to run this tool.</p>
+		<p>The screenshot above represents only the actual options which gives us the best 
+		compilation result. To configure all available options, including obsolete and experimental, type:</p>
 		
-		</li>
+<pre class="screen"><strong class="userinput"><code>lua configure.lua --all</code></strong></pre>
 
-		<li>To build UltraDefrag use the BUILD.CMD script:
-<pre class="screen"><strong class="userinput"><code>build              - perform the build using default options
-build --install    - run installer silently after the build
-build [--use-winddk or --use-mingw or --use-msvc] [--install]
-                   - specify your favorite compiler
-build --clean      - perform full cleanup instead of the build
-build --help       - show help message
-</code></strong></pre>
-		</li>
-
-		<li>To build UltraDefrag Micro Edition package use the build-micro.cmd scipt.
-		It has the same options that build.cmd has. After a successfull 
-		compilation you will have ready to use binary packages, but the source 
-		code archive will not be produced (to increase the compilation speed).
-		To make an archive of sources run build.cmd script.</li>
+		<p>Though <span class="code">configure.pl</span> script works fine too, it is obsolete. Lua 
+		language gives us better performance and requires much less disk space itself.</p>
+		
+		<p>There are four different build commands:</p>
+		
+		<ol type="disc">
+		<li><span class="code">BUILD</span> for full-featured installer and sources package</li>
+		<li><span class="code">BUILD-MICRO</span> for Micro Edition installer</li>
+		<li><span class="code">BUILD-PORTABLE</span> for UltraDefrag Portable package</li>
+		<li><span class="code">BUILD-MICRO-PORTABLE</span> for portable Micro Edition package</li>
 		</ol>
+		
+		<p>To build UltraDefrag type:</p>
+
+<pre class="screen"><strong class="userinput"><code>build</code></strong></pre>
+
+		<p>To display list of available build options type:</p>
+
+<pre class="screen"><strong class="userinput"><code>build --help</code></strong></pre>
+
+		<p>If you have any questions regarding details of the build process, just look at 
+		appropriate script contents. Sure you'll find an answer.</p>
+
 	</div>
 </div>
 

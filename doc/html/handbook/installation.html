@@ -10,6 +10,7 @@
 	<link rel="start" href="index.html" title="Ultra Defragmenter Handbook" />
 	<link rel="prev" href="introduction.html" title="Chapter 1. Introduction" />
 	<link rel="next" href="console.html" title="Chapter 3. Console interface" />
+	<script type="text/javascript" src="handbook.js"></script>
 </head>
 
 <body bgcolor="white" text="black" alink="#0000ff" link="#0000ff" vlink="#840084">
@@ -38,65 +39,36 @@
 		</div></div>
 	</div>
 
-	<div class="toc">
-		<p><b>Table of Contents</b></p>
-		<dl>
-				<dt><span class="sect1"><a href="installation.html#requirements">Software requirements</a></span></dt>
-				<dt><span class="sect1"><a href="installation.html#vista">Special notes for Windows Vista users</a></span></dt>
-				<dt><span class="sect1"><a href="installation.html#binaries">Precompiled binaries</a></span></dt>
-				<dt><span class="sect1"><a href="installation.html#sources">Compilation from sources</a></span></dt>
-		</dl>
-	</div>
-	
 	<div class="sect1" lang="en">
-		<div class="titlepage">
-			<div><div>
-				<h2 class="title" style="clear: both"><a name="requirements"></a>
-				Software requirements</h2>
-			</div></div>
-		</div>
-		<ul type="disc">
-		<li><b>Minimal</b>
-		<ul type="disc">
-		<li>Windows NT 4.0 or later operating system.</li>
-		</ul>
-		<ul type="disc">
-		<li>Text editor with Unicode (UTF-16) support. Built-in Notepad editor can be used.</li>
-		</ul>
-		</li>
-		<li><b>Advanced</b>
-		<ul type="disc">
-		<li>Web browser (at least IE 3.0). With enabled JavaScript. The best choice is 
-		<a href="http://www.mozilla.com/">Mozilla Firefox</a> browser, though other popular 
-		browsers (Safari, Opera, Sea Monkey, Lynx, Internet Explorer) were tested too for 
-		compatibility.</li>
-		</ul>
-		<ul type="disc">
-		<li><a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> program 
-		or <a href="http://alter.org.ua/en/soft/win/dbgdump/">DbgPrint Logger</a>.</li>
-		</ul>
-		</li>
-		</ul>
-		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
-			<h3 class="title">Notes</h3>
-			<ul type="disc">
-			<li><span style="color: darkred; font-weight: bolder">You must be an administrator to install and run 
-			<span class="application">UltraDefrag</span>.</span> You need admin rights to 
-			load the defragmenter's driver.</li>
-			<li><span style="color: darkred; font-weight: bolder">You must disable your virus detection software 
-			before using <span class="application">UltraDefrag</span>.</span> Any virus scanner 
-			running during the defragmentation extremely slows down this process.</li>
-			</ul>
-		</div>
-	</div>
+		<p>To obtain the latest version of the program visit please the 
+		<a href="http://sourceforge.net/projects/ultradefrag/files/">project's download page</a>.</p>
+		<p>Unfortunately we cannot provide native 64-bit binaries at this moment, because we have 
+		no free C compiler which can produce them correctly. To partially resolve this problem we are 
+		providing two different types of binaries:</p>
+		
+		<ol type="disc">
+		<li>Full-featured installers. They contain all of the program features, but can be used on 
+		32-bit versions of Windows only.</li>
+		<li>Portable packages. The boot time defragmenter is missing there. On the other hand, you can 
+		use the portable packages on any version of Windows.</li>
+		</ol>
 
-	<div class="sect1" lang="en">
-		<div class="titlepage">
-			<div><div>
-				<h2 class="title" style="clear: both"><a name="vista"></a>
-				Special notes for Windows Vista users</h2>
-			</div></div>
-		</div>
+		<p style="color: darkred;">You must be an administrator to install and run 
+		<span class="application">UltraDefrag</span>.</p>
+		<p style="color: darkred;">You must disable your virus detection software 
+		before using <span class="application">UltraDefrag</span>. Any virus scanner 
+		running during the defragmentation extremely slows down this process.</p>
+		
+		<font size="-1"><table border="0"><tbody><tr><td width="18pt" align="left" valign="center">
+		<a href="javascript:show_section('__vista','img0')"><img id="img0" border="0" src="closed.gif" /></a></td>
+		<td><a name="vista"></a>Special notes for Windows Vista users (also applies to any later versions of Windows).
+		</td></tr></tbody></table></font>
+		
+		<div id="__vista" style="display: none; padding-left: 30pt">
+		
+		<p style="color: darkred;">Read this section carefully if you have decided to use kernel mode 
+		driver of the program on 32-bit Vista or any later 32-bit version of Windows.</p>
+		
 		<p>The new versions of Windows are stupid enough: they have few important bugs that 
 		reduce your control over your software and even your hardware...</p>
 		<p>First of all, to install and use <span class="application">UltraDefrag</span> you must 
@@ -118,71 +90,26 @@
 		signature verification</span> menu item. You should do these steps after each reboot to have 
 		an ability to load the <span class="application">UltraDefrag</span> driver. The next solution 
 		automates this job.</li>
-<!--
-		<li>Install the <a href="http://citadel.x10hosting.com/readydriverplus/index.php">ReadyDriver 
-		Plus</a> program. It will automate F8 key pressing on Windows startup and so on.</li>
--->
 		<li>Install the <a href="http://www.citadelindustries.net/readydriverplus/index.php">ReadyDriver 
 		Plus</a> program. It will automate F8 key pressing on Windows startup and so on.</li>
 
 		<li>Use the <a href="http://www.ngohq.com/home.php?page=dseo">Driver Signature Enforcement 
 		Overrider</a> program to digitally sign our driver <span class="code">ultradfg.sys</span>.</li>
 		</ul>
-		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
-			<h3 class="title">Note</h3>
-			<p style="color: darkred">You must do all steps described in this section. To fix most 
-			important Vista bugs. Otherwise you will not be able to use the 
-			Ultra Defragmenter.</p>
+		
+		<p>Read <a href="http://ultradefrag.sourceforge.net/vista">UltraDefrag Installation Guide for Vista</a> 
+		for more details.</a></p>
+
 		</div>
-	</div>
 
-	<div class="sect1" lang="en">
-		<div class="titlepage">
-			<div><div>
-				<h2 class="title" style="clear: both"><a name="binaries"></a>Precompiled binaries</h2>
-			</div></div>
-		</div>
-		<p>You can download the latest binary package for <span class="application">UltraDefrag</span> at the 
-		<a href="http://ultradefrag.sourceforge.net/">project homepage</a>. 
-		Simply download and run the installer. No reboot is required.</p>
-		<p>You can use precompiled packages on the following processor architectures:</p>
-		<table cellpadding="5" style="width: 570px; padding: 0px; text-align: center;" border="1" align="center">
-		<tbody>
-
-		<tr style="color: rgb(255, 255, 255);" bgcolor="#000000">
-		<td style="width: 89px;">Processor architecture</td>
-		<td style="width: 160px;">Processor types</td>
-		<td style="width: 99px;">Binary package suffix</td>
-		</tr>
-
-		<tr bgcolor="#00ffff"><td>i386</td><td>Intel 80486, Intel Pentium etc.</td><td>i386</td></tr>
-		<tr bgcolor="#ffff00"><td>AMD64</td><td>AMD Athlon etc.</td><td>amd64</td></tr>
-		<tr bgcolor="#ffff00"><td>IA64</td><td>Intel Itanium</td><td>ia64</td></tr>
-		<tr bgcolor="#ffff00"><td>EM64T</td><td>Intel Core Duo etc.</td><td>amd64</td></tr>
-
-		</tbody>
-		</table>
-		<div class="note" style="margin-left: 0.5in; margin-right: 0.5in;">
-			<h3 class="title">Note</h3>
-			<p style="color: darkred">You can use <b>i386</b> package on any <b>32-bit</b> versions of 
-			Windows. For <b>amd64</b> and <b>ia64</b> packages you need have a <b>64-bit</b> Windows 
-			installed.</p>
-		</div>
 		<p>You can install UltraDefrag in silent mode by adding <span class="code">/S</span> key to the installer's command 
 		in command prompt. In this case no dialogs will be shown and the program will be installed 
 		to your hard drive completely with all the features enabled. There is also silent mode in 
 		ununstaller program. Type in comand prompt <span class="code">%windir%\UltraDefrag\uninstall.exe /S'</span>  
 		to remove the program from your hard drive automatically without any graphical dialogs.</p>
+
 	</div>
 
-	<div class="sect1" lang="en">
-		<div class="titlepage">
-			<div><div>
-				<h2 class="title" style="clear: both"><a name="sources"></a>Compilation from sources</h2>
-			</div></div>
-		</div>
-		<p>Detailed instructions are <a href="development.html#compilation">here</a>.</p>
-	</div>
 </div>
 
 <div style="color: black; margin-top: 20px; margin-left: 20px; margin-right: 20px;">

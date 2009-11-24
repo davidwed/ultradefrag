@@ -38,57 +38,15 @@
 		</div></div>
 	</div>
 
-	<div class="toc">
-		<p><b>Table of Contents</b></p>
-		<dl>
-				<dt><span class="sect1"><a href="portable.html#overview">Overview</a></span></dt>
-				<dt><span class="sect1"><a href="portable.html#config">Configuring</a></span></dt>
-		</dl>
-	</div>
-	
 	<div class="sect1" lang="en">
-		<div class="titlepage">
-			<div><div>
-				<h2 class="title" style="clear: both"><a name="overview"></a>
-				Overview</h2>
-			</div></div>
-		</div>
-		<p>Portable package was made especially for people who wants to launch UltraDefrag from USB-flash without 
-		an installation. If you have selected a portable app to be installed, the installer will write all needed files 
-		into one directory on your hard drive. To get access to that directory use shortcut <br />
-		<span class="guimenuitem">Start > Programs > UltraDefrag > Portable package</span>. 
-		Or find it manually in <span class="code">%windir%\UltraDefrag</span>. Place all files contained there 
-		on any removable media, p.a. on your USB-flash. Than you can run UltraDefrag on any compatible 
-		computer without an installation. <a href="http://en.wikipedia.org/wiki/Portable_application">Here</a> 
+		<p>Portable packages were made especially for people who wants to launch UltraDefrag from USB-flash without 
+		an installation. <a href="http://en.wikipedia.org/wiki/Portable_application">Here</a> 
 		is more information about portable applications.</p>
-	</div>
 
-	<div class="sect1" lang="en">
-		<div class="titlepage">
-			<div><div>
-				<h2 class="title" style="clear: both"><a name="config"></a>
-				Configuring</h2>
-			</div></div>
-		</div>
-		<p>There is one configuration file used by portable application. Here you can specify some options, 
-		most useful is a language selection. The file has a <span class="code">PORTABLE.X</span> name. The 
-		complete example is here:</p>
-<pre style="border: 1px solid black; color: black; 
-background-color: #ffffe1; font-size: 10pt;">
-[Bootsplash]
-Show=1
-[i18n]
-Language=Hungarian
-</pre>
-		<p>Set <span class="code">Show=0</span> in the <span class="code">[Bootsplash]</span> section to 
-		disable bootsplash on startup.</p>
-
-		<p>Set <span class="code">Language=LanguageName</span> to choose your preferred language to be used by 
-		portable GUI. Available languages are: <span class="code">Catala, Chinese (Simplified), 
-		Chinese (Traditional), Czech, Danish, Dutch,
-		English (US), Farsi, French (FR), German, Greek, Hungarian, Italian, Japanese, Korean, Latvian, Polish,
-		Portuguese, Portuguese (BR), Russian, Slovak, Slovenian, Spanish (AR), Swedish, 
-		Thai, Turkish</span>.</p>
+		<p>To configure portable package run <span class="code">LanguageSelector.exe</span> tool and select 
+		your preferred language:</p>
+		
+		<center><img src="language-selector.jpg" border="0" /></center>
 	</div>
 </div>
 

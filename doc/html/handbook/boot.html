@@ -63,6 +63,11 @@
 		or applications. Native <span class="application">UltraDefrag</span> runs before any file 
 		locking, therefore it can process them as an ordinary files.</p>
 		<p><div align="center"><img src="ud-boot-time.png" alt="Boot time defragmenter" align="bottom" border="0"></div></p>
+
+		<p style="color: darkred;">Unfortunately we cannot provide 64-bit native binaries of the 
+		boot time defragmenter. Therefore currently it cannot be used on 64-bit versions of Windows. 
+		In future this problem will be resolved, of course.</p>
+
 		<p>If the boot time defragmenter is enabled, you will see such picture at every reboot. Note 
 		that you will have a chance to exit safely without a driver loading, just press any key when 
 		the appropriate prompt will be shown. If no key will be pressed during this phase, the boot 
@@ -93,7 +98,7 @@
 		button in <a href="gui.html#config">UltraDefrag GUI Configurator</a>.
 		</p>
 		<p>The script contains defragmentation related commands and comments. To understand better 
-		commands used here, read please carefully the <a href="console">console interface</a> 
+		commands used here, read please carefully the <a href="console.html">console interface</a> 
 		section of this document.</p>
 		<p>The strings with a semicolon (<span class="code">;</span>) or # characters 
 		in the beginning are comments.</p>
@@ -116,13 +121,13 @@
 			<tr>
 			<td class="code">set</td>
 			<td>Set specified environment variable. The usage is the same as described in 
-			<a href="#console">console application</a> section of this document.
+			<a href="console.html">console application</a> section of this document.
 			</td>
 			</tr>
 			<tr>
 			<td class="code">udefrag</td>
 			<td>
-			This command has the same options as the <a href="#console">console interface</a>.
+			This command has the same options as the <a href="console.html">console interface</a>.
 			</td>
 			</tr>
 			<tr>

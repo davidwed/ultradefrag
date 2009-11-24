@@ -43,6 +43,7 @@
 		<dl>
 			<dt><span class="sect1"><a href="reporting_bugs.html#intro">Introduction</a></span></dt>
 			<dt><span class="sect1"><a href="reporting_bugs.html#driver">Kernel mode driver debugging</a></span></dt>
+			<dt><span class="sect1"><a href="reporting_bugs.html#user_mode_driver">User mode driver debugging</a></span></dt>
 			<dt><span class="sect1"><a href="reporting_bugs.html#gui">Which info must contain a report about GUI bug?</a></span></dt>
 		</dl>
 	</div>
@@ -103,6 +104,8 @@
 		<li><a href="http://alter.org.ua/en/soft/win/dbgdump/">DbgPrint Logger by Alexander Telyatnikov</a></li>
 		</ul>
 		</p>
+		<p style="color: darkred;">Note that you cannot use both loggers at the same time, otherwise debugging 
+		information may be partially losed.</p>
 		<h5>How can I use DbgView program?</h5>
 		<center><img src="debugview.png" alt="DbgView main window sreenshot" /></center>
 		<p>First of all, if you are using Windows NT 4.0, you must download one of the earlier versions of 
@@ -222,8 +225,8 @@
 		encountering BSOD, write on paper numbers shown on your screen. To be able to attach these numbers to your 
 		bug report.</p>
 		<center><img src="bsod.png" alt="One screenshot of the Blue Screen Of Death" /></center>
-		<p>Note that BSOD showing feature itself is disabled by default in Windows. <span class="application">UltraDefrag</span> 
-		installer enables them by setting the following system registry value to 0x0 state:
+		<p>Note that BSOD showing feature itself is disabled by default in Windows. You should enable them manually 
+		by setting the following system registry value to 0x0 state:
 <pre class="screen"><strong class="userinput"><code>HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\CrashControl\AutoReboot
 </code></strong></pre>
 		</p>
@@ -264,7 +267,7 @@
 		</ol>
 		</p>
 		
-		<p>So, if you have encoutered the Blue Screen, don't forget to attach a Small Memory Dump file to your report. Or, at least, 
+		<p>So, if you have encountered the Blue Screen, don't forget to attach a Small Memory Dump file to your report. Or, at least, 
 		attach please numbers shown on your screen. Sending debugging messages saved by DbgView program is very appreciated too.</p>
 
 		<h5>Which tests can I additionally perform to speed up bug fixing?</h5>
@@ -286,6 +289,23 @@
 			<img src="verifier6.png" alt="" /><br /><br />
 			<img src="verifier7.png" alt="" /><br />
 		</center>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="user_mode_driver"></a>
+				User mode driver debugging</h2>
+			</div></div>
+		</div>
+		<p>The principles here are the same as in kernel mode driver debugging. Just don't forget to check 
+		the <span class="guimenuitem">Capture Win32</span> item in <span class="guimenuitem">Capture</span> menu
+		of DbgView program before.</p>
+		<p>Note also that unfortunately both described DbgPrint loggers cannot capture debugging output 
+		at boot time which makes the boot time interface of the program debugging much more complicated.</p>
+		<p>Additionally keep in mind that user mode driver usually cannot cause BSOD. We know only a single 
+		exception for this rule - when you are trying to analyze/defragment NTFS formatted volume under NT4.0 
+		anything may happen.</p>
 	</div>
 
 	<div class="sect1" lang="en">
