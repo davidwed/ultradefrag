@@ -65,31 +65,33 @@
 		<p><div align="center"><img src="vista_b2_theme_main_window-3.2.1.png" alt="Main window" align="bottom" border="0"></div></p>
 		<ol>
 		<li>
-		<p><span class="guimenuitem">List of volumes</span> This list all drives on the machine that you can scan. 
+		<span class="guimenuitem">List of volumes</span> This list all drives on the machine that you can scan. 
 		CDROM's and other drives that cannot be defragmented are excluded from list automatically.
 		If the <span class="guimenuitem">Skip removable media</span> box is checked, also floppies 
-		and other similar devices will be excluded. This list has the following fields:</p>
+		and other similar devices will be excluded. This list has the following fields:
 		<ul type="disc">
+		 <li style="visibility: hidden"></li>
 			<li>
-			<p><span class="guimenuitem">Volume</span> - drive letter plus file system type in square brackets. There are used 
+			<span class="guimenuitem">Volume</span> - drive letter plus file system type in square brackets. There are used 
 			two types of icons in this field: 
 			<img src="fixed.ico" alt="fixed" border="0" height="16" width="16" /> for fixed drives and 
-			<img src="removable.ico" alt="removable" border="0" height="16" width="16" /> for removable media.</p>
+			<img src="removable.ico" alt="removable" border="0" height="16" width="16" /> for removable media.
 			</li>
 			<li>
-			<p><span class="guimenuitem">Status</span> - a description of the action
-			being performed.</p>
+			<span class="guimenuitem">Status</span> - a description of the action
+			being performed.
 			</li>
-			<li><p><span class="guimenuitem">Total space</span></p></li>
-			<li><p><span class="guimenuitem">Free space</span></p></li>
-			<li><p><span class="guimenuitem">Percentage</span> - percent free.</p></li>
+			<li><span class="guimenuitem">Total space</span></li>
+			<li><span class="guimenuitem">Free space</span></li>
+			<li><span class="guimenuitem">Percentage</span> - percent free.</li>
+		 <li style="visibility: hidden"></li>
 		</ul>
 		</li>
-		<li><p><span class="guimenuitem">Skip Removeable Media Checkbox</span></p></li>
+		<li><span class="guimenuitem">Skip Removeable Media Checkbox</span><p></p></li>
 		<li>
-		<p><span class="guimenuitem"><a name="map"></a>Cluster Map</span>
+		<span class="guimenuitem"><a name="map"></a>Cluster Map</span>
 		This is a color coded representation of all drives. 
-		Here is colors explaination:</p>
+		Here is colors explaination:<br />
 		
 		<img src="legend.png" alt="&lt;legend&gt;" border="1" \>
 
@@ -100,31 +102,32 @@
 		</p>
 		</li>
 		<li>
-		<p><span class="guimenuitem">Rescan Drives (Ctrl+R)</span> This
+		<span class="guimenuitem">Rescan Drives (Ctrl+R)</span> This
 		button will recheck all volumes in the system to see if some were added
-		or removed.</p>
+		or removed.<p></p>
 		</li>
 		<li>
-		<p><span class="guimenuitem">Buttons</span>	The following section explains the buttons 
-		along with listing their shortcut keys.</p>
+		<span class="guimenuitem">Buttons</span>	The following section explains the buttons 
+		along with listing their shortcut keys.
 		<ul type="disc">
+		 <li style="visibility: hidden"></li>
 			<li>
-			<p><span class="guimenuitem">Analyze (Ctrl+A)</span> 
-			Scans the currently selected drive to determine how fragmented it is.</p>
+			<span class="guimenuitem">Analyze (Ctrl+A)</span> 
+			Scans the currently selected drive to determine how fragmented it is.
 			</li>
 			<li>
-			<p><span class="guimenuitem">Defrag (Ctrl+D)</span> 
-			Exactly what it says.</p>
+			<span class="guimenuitem">Defrag (Ctrl+D)</span> 
+			Exactly what it says.
 			</li>
 			<li>
-			<p><span class="guimenuitem">Settings (Ctrl+T)</span> This button starts 
-			the <a href="gui.html#config">UltraDefrag GUI Configurator</a> program.</p>
+			<span class="guimenuitem">Settings (Ctrl+T)</span> This button starts 
+			the <a href="gui.html#config">UltraDefrag GUI Configurator</a> program.
 			</li>
 			<li>
-			<p><span class="guimenuitem">Compact (Ctrl+C)</span> Moves
+			<span class="guimenuitem">Compact (Ctrl+C)</span> Moves
 			all files to the beginning of the partition, defragmenting them if
 			possible. The compact command does not work on volumes with the FAT
-			filesystem because you cannot move directories on them.</p>
+			filesystem because you cannot move directories on them.
 			</li>
 <!--			<li>
 			<p><span class="guimenuitem">Pause (Ctrl+P)</span> 
@@ -132,18 +135,18 @@
 			the same as stop.</p>
 			</li>
 -->			<li>
-			<p><span class="guimenuitem">Stop (Ctrl+S)</span> Stops the currently
-			running analyze or defrag operation.</p>
+			<span class="guimenuitem">Stop (Ctrl+S)</span> Stops the currently
+			running analyze or defrag operation.
 			</li>
 			<li>
-			<p><span class="guimenuitem">Fragmented (Ctrl+F)</span> Display
+			<span class="guimenuitem">Fragmented (Ctrl+F)</span> Display
 			a report of all fragmented files on the volume. This report is very
 			small but useful. It is generated by the driver, so all versions of
-			UltraDefrag generate it.</p>
+			UltraDefrag generate it.
 			</li>
 			<li>
-			<p><span class="guimenuitem">About (F1)</span> Displays the simple about box 
-			containing copyright notice and links to most important information about program.</p>
+			<span class="guimenuitem">About (F1)</span> Displays the simple about box 
+			containing copyright notice and links to most important information about program.
 			</li>
 		</ul>
 		</li>
@@ -164,10 +167,10 @@
 		</p>
 		</li>
 		<li>
-		<p><span class="guimenuitem">Progress bar</span> 
+		<span class="guimenuitem">Progress bar</span> 
 		This displays the progress of the currently running analyze, compact or
 		defrag task. Note that selecting a different volume will cause this bar
-		to disappear.</p>
+		to disappear.
 		</li>
 		</ol>
 	</div>
@@ -189,20 +192,21 @@
 		<li><span class="guimenuitem">Graphical interface</span> Buttons in this section 
 		provides an access to GUI related options.
 		 <ul type="disc">
-		 <li><p><span class="guimenuitem">Font</span> Opens the font selection dialog. Choose 
+		 <li style="visibility: hidden"></li>
+		 <li><span class="guimenuitem">Font</span> Opens the font selection dialog. Choose 
 		 your preferred font for GUI application rendering. The default font is 
 		<span style="color: darkgreen">Courier New, 9</span>
-		 </p></li>
-		 <li><p><span class="guimenuitem">Options</span> Opens the <span class="code">guiopts.lua</span> 
+		 </li>
+		 <li><span class="guimenuitem">Options</span> Opens the <span class="code">guiopts.lua</span> 
 		 file for editing. Note that Portable GUI Configurator always uses Notepad to open it. 
 		 To understand meaning of GUI options read please carefully 
 		 the <a href="console.html">console application</a> section of this document. 
 		 GUI options have the same meaning as environment variables accepted by console 
-		 interface.</p>
+		 interface.
 		 <p>Note that you must specify paths in filters with double back slashes instead of the single. 
 		 Par example:</p>
 		 <p><span class="code">ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"</span></p>
-		 <p>Here is the complete example of the script:
+		 <p>Here is the complete example of the script:</p>
 <pre width="80pt" style="border: 1px solid black; color: black; 
 background-color: #ffffe1; font-size: 10pt;">
 -- UltraDefrag GUI options
@@ -221,32 +225,35 @@ dbgprint_level = "PARANOID"
 hibernate_instead_of_shutdown = 1
 
 </pre>
-		 </p>
 		 </li>
-		 <li><p><span class="guimenuitem">Help</span> button opens this section of the Handbook. 
+		 <li><span class="guimenuitem">Help</span> button opens this section of the Handbook. 
 		 If you have a local copy of documentation installed, the Configurator will use it. 
 		 Otherwise the same page will be loaded from the project's web site.
-		 </p></li>
+		 </li>
+		 <li style="visibility: hidden"></li>
 		 </ul>
 		</li>
 		<li><span class="guimenuitem">Windows boot time scan</span> This section contains options 
 		of the <a href="boot.html">boot time defragmenter</a>. It is disabled in portable version of the program.
 		 <ul type="disc">
-		 <li><p><span class="guimenuitem">Enable</span> checkbox gives you an ability to turn on/off
-		 the boot time defragmenter by one click.</p></li>
-		 <li><p><span class="guimenuitem">Script</span> button opens the 
-		 <a href="boot.html#script">boot time script</a> in text editor.</p></li>
-		 <li><p><span class="guimenuitem">Help</span> button opens the 
-		 <a href="boot.html#script">Boot time script</a> section of the Handbook.</p></li>
+		 <li style="visibility: hidden"></li>
+		 <li><span class="guimenuitem">Enable</span> checkbox gives you an ability to turn on/off
+		 the boot time defragmenter by one click.</li>
+		 <li><span class="guimenuitem">Script</span> button opens the 
+		 <a href="boot.html#script">boot time script</a> in text editor.</li>
+		 <li><span class="guimenuitem">Help</span> button opens the 
+		 <a href="boot.html#script">Boot time script</a> section of the Handbook.</li>
+		 <li style="visibility: hidden"></li>
 		 </ul>
 		</li>
 		<li><span class="guimenuitem">Reports</span> section contains fragmentation report related 
 		settings.
 		 <ul type="disc">
-		 <li><p><span class="guimenuitem">Options</span> button opens the 
-		 <a href="reports.html#config">report options script</a> in text editor.</p></li>
-		 <li><p><span class="guimenuitem">Help</span> button opens the 
-		 <a href="reports.html#config">Reports configuring</a> section of the Handbook.</p></li>
+		 <li style="visibility: hidden"></li>
+		 <li><span class="guimenuitem">Options</span> button opens the 
+		 <a href="reports.html#config">report options script</a> in text editor.</li>
+		 <li><span class="guimenuitem">Help</span> button opens the 
+		 <a href="reports.html#config">Reports configuring</a> section of the Handbook.</li>
 		 </ul>
 		</li>
 		</ol>
