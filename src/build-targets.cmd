@@ -12,6 +12,10 @@ rem     --use-winsdk
 rem     --use-pellesc (experimental)
 rem     --use-mingw-x64 (experimental)
 
+rem NOTE: IA-64 targeting binaries were never tested by the authors 
+rem due to missing appropriate hardware and appropriate 64-bit version 
+rem of Windows.
+
 if "%1" neq "--help" goto build
 if "%2" equ "build" goto display_build_options
 if "%2" equ "build-micro" goto display_build_micro_options
@@ -58,6 +62,7 @@ exit /B 0
 
 :build
 if "%1" equ "--portable" goto default_build
+if "%1" equ "--install" goto default_build
 if "%1" neq "" goto parse_first_parameter
 
 :default_build
