@@ -75,8 +75,11 @@ int __stdcall update_stat(int df)
 	if(err_flag) eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_progress(pst,&percentage) >= 0){
 		UpdateStatusBar(pst);
-		sprintf(progress_msg,"%c %u %%",
-			current_operation = pst->current_operation,(int)percentage);
+		current_operation = pst->current_operation;
+		if(current_operation)
+			sprintf(progress_msg,"%c %u %%",current_operation,(int)percentage);
+		else
+			sprintf(progress_msg,"A %u %%",(int)percentage);
 		SetProgress(progress_msg,(int)percentage);
 	} else {
 		err_flag = TRUE;
@@ -139,7 +142,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		VolListUpdateSelectedStatusField(STAT_DFRG);
 
 	ShowProgress();
-	SetProgress("0 %",0);
+	SetProgress("A 0 %",0);
 	err_flag = err_flag2 = FALSE;
 	switch(command){
 	case 'a':

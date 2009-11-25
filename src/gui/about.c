@@ -47,7 +47,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		else
 			SetWindowPos(hWnd,0,
 				win_rc.left + ((win_rc.right - win_rc.left) - (rc.right - rc.left)) / 2,
-				win_rc.top + ((win_rc.bottom - win_rc.top) - (rc.bottom - rc.top)) / 2,
+				win_rc.top + ((win_rc.bottom - win_rc.top) - (rc.bottom - rc.top)) / 2 + 5,
 				0,0,SWP_NOSIZE
 			);
 		SetText(hWnd,L"ABOUT_WIN_TITLE");
