@@ -74,9 +74,9 @@ BEGIN
     PUSHBUTTON      "Fragmented",IDC_SHOWFRAGMENTED,202,189,74,10,NOT 
                     WS_TABSTOP
     PUSHBUTTON      "About",IDC_ABOUT,281,189,63,10,NOT WS_TABSTOP
-    LTEXT           "A 0 %",IDC_PROGRESSMSG,7,201,29,8
+    LTEXT           "A 0 %",IDC_PROGRESSMSG,7,200,29,8
     CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
-                    WS_BORDER,38,202,305,6
+                    WS_BORDER,38,201,305,5
 END
 
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
