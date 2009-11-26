@@ -442,10 +442,6 @@ Section "Documentation" SecDocs
   ${DisableX64FSRedirection}
   SetOutPath "$INSTDIR\handbook"
   File "${ROOTDIR}\doc\html\handbook\*.*"
-  ;File "${ROOTDIR}\doc\html\handbook\*.html"
-  ;File "${ROOTDIR}\doc\html\handbook\*.css"
-  ;File "${ROOTDIR}\doc\html\handbook\*.png"
-  ;File "${ROOTDIR}\doc\html\handbook\*.ico"
   ${EnableX64FSRedirection}
 
 SectionEnd
