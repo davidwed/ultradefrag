@@ -77,8 +77,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
-		if(!ex_filter[0])
-			strcpy(ex_filter,"system volume information;temp;recycler");
+		if(!ex_filter[0] || !strcmp(ex_filter,"system volume information;temp;recycler"))
+			strcpy(ex_filter,"system volume information;temp;recycler;recycled");
 		SavePrefs();
 		DeleteEnvironmentVariables();
 		return 0;
