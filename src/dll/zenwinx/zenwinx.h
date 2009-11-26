@@ -123,6 +123,9 @@ int __stdcall winx_register_boot_exec_command(short *command);
 int __stdcall winx_unregister_boot_exec_command(short *command);
 
 void __cdecl winx_dbg_print(char *format, ...);
-int __stdcall winx_debug_print(char *string);
+int  __stdcall winx_debug_print(char *string);
+
+ULONGLONG __stdcall winx_str2time(char *string);
+int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);
 
 #endif /* _ZENWINX_H_ */

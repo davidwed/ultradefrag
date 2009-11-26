@@ -96,6 +96,8 @@ extraResourceOptions=
 14=env.c
 15=event.c
 16=dbg.c
+17=time.c
+18=int64.c
 [Header]
 1=ntndk.h
 2=version.h

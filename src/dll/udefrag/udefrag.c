@@ -54,6 +54,7 @@ WINX_FILE *f_ud = NULL;
 WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
 
 extern int refresh_interval;
+extern ULONGLONG time_limit;
 
 unsigned char c, lett;
 BOOL done_flag;
@@ -346,6 +347,8 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 	WINX_FILE *f;
 	char volume[] = "\\??\\A:";
 	HANDLE hThread;
+	ULONGLONG t = 0;
+	int use_limit = 0;
 
 	CHECK_INIT_EVENT();
 
@@ -363,10 +366,10 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 		winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	}
 
-	if(!sproc){
+	//if(!sproc){
 		/* send command directly and return */
-		return udefrag_send_command(command,letter);
-	}
+	//	return udefrag_send_command(command,letter);
+	//}
 	done_flag = FALSE;
 	/* create a thread for driver command processing */
 	cmd_status = 0;
@@ -378,11 +381,23 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 	* Call specified callback 
 	* every (settings.refresh_interval) milliseconds.
 	*/
+	if(time_limit){
+		use_limit = 1;
+		t = time_limit * 1000;
+	}
 	do {
 		winx_sleep(refresh_interval);
-		sproc(FALSE);
+		if(sproc) sproc(FALSE);
+		if(use_limit){
+			if(t <= refresh_interval){
+				winx_dbg_print("*UltraDefrag* Time limit exceeded!\n");
+				udefrag_stop();
+			} else {
+				t -= refresh_interval;
+			}
+		}
 	} while(!done_flag);
-	sproc(TRUE);
+	if(sproc) sproc(TRUE);
 
 	return cmd_status;
 }

@@ -51,6 +51,10 @@ unsigned short ex_filter[MAX_FILTER_SIZE + 1] = L"";
 ULONGLONG sizelimit = 0;
 ULONGLONG fraglimit = 0;
 int refresh_interval  = 500;
+
+/* http://sourceforge.net/tracker/index.php?func=detail&aid=2886353&group_id=199532&atid=969873 */
+ULONGLONG time_limit = 0;
+
 ULONG disable_reports = FALSE;
 ULONG dbgprint_level = DBG_NORMAL;
 
@@ -68,11 +72,12 @@ BOOL query_env_variable(short *name)
 /* load settings: always successful */
 int __stdcall udefrag_load_settings()
 {
-	char buf[64];
+	char buf[256];
 	
 	/* reset all parameters */
 	in_filter[0] = ex_filter[0] = 0;
 	sizelimit = fraglimit = 0;
+	time_limit = 0;
 	disable_reports = FALSE;
 	dbgprint_level = DBG_NORMAL;
 
@@ -89,9 +94,16 @@ int __stdcall udefrag_load_settings()
 		winx_dfbsize(buf,&sizelimit);
 	}
 
-	if(query_env_variable(L"UD_FRAGMENTS_THRESHOLD")) fraglimit = (ULONGLONG)_wtol(env_buffer);
+	if(query_env_variable(L"UD_FRAGMENTS_THRESHOLD")) fraglimit = _wtoi64(env_buffer);
+	if(query_env_variable(L"UD_TIME_LIMIT")){
+		_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
+		buf[sizeof(buf) - 1] = 0;
+		time_limit = winx_str2time(buf);
+	}
+	winx_dbg_print("*UltraDefrag* Time limit = %I64u seconds\n",time_limit);
 
 	if(query_env_variable(L"UD_REFRESH_INTERVAL")) refresh_interval = _wtoi(env_buffer);
+	winx_dbg_print("*UltraDefrag* Refresh interval = %u msec\n",refresh_interval);
 
 	if(query_env_variable(L"UD_DISABLE_REPORTS")) {
 		if(!wcscmp(env_buffer,L"1")) disable_reports = TRUE;

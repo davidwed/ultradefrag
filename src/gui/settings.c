@@ -34,6 +34,7 @@ extern int user_defined_column_widths[];
 char in_filter[4096] = {0};
 char ex_filter[4096] = {0};
 char sizelimit[64] = {0};
+char timelimit[256] = {0};
 int fraglimit;
 int refresh_interval;
 int disable_reports;
@@ -51,6 +52,7 @@ void DeleteEnvironmentVariables(void)
 	(void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",NULL);
 	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",NULL);
 	(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",NULL);
+	(void)SetEnvironmentVariable("UD_TIME_LIMIT",NULL);
 }
 
 void SetEnvironmentVariables(void)
@@ -63,6 +65,8 @@ void SetEnvironmentVariables(void)
 		(void)SetEnvironmentVariable("UD_EX_FILTER",ex_filter);
 	if(sizelimit[0])
 		(void)SetEnvironmentVariable("UD_SIZELIMIT",sizelimit);
+	if(timelimit[0])
+		(void)SetEnvironmentVariable("UD_TIME_LIMIT",timelimit);
 	if(fraglimit){
 		sprintf(buffer,"%i",fraglimit);
 		(void)SetEnvironmentVariable("UD_FRAGMENTS_THRESHOLD",buffer);
@@ -147,6 +151,14 @@ void GetPrefs(void)
 		}
 		lua_pop(L, 1);
 
+		lua_getglobal(L, "time_limit");
+		string = (char *)lua_tostring(L, lua_gettop(L));
+		if(string){
+			strncpy(timelimit,string,sizeof(timelimit));
+			timelimit[sizeof(timelimit) - 1] = 0;
+		}
+		lua_pop(L, 1);
+
 		fraglimit = getint(L,"fragments_threshold");
 		refresh_interval = getint(L,"refresh_interval");
 		disable_reports = getint(L,"disable_reports");
@@ -196,6 +208,7 @@ void SavePrefs(void)
 		"sizelimit = \"%s\"\n"
 		"fragments_threshold = %i\n"
 		"refresh_interval = %i\n"
+		"time_limit = \"%s\"\n\n"
 		"disable_reports = %i\n"
 		"dbgprint_level = \"%s\"\n\n"
 		"-- set this parameter to 1 if you prefer to hibernate system\n"
@@ -213,6 +226,7 @@ void SavePrefs(void)
 		sizelimit,
 		fraglimit,
 		refresh_interval,
+		timelimit,
 		disable_reports,
 		dbgprint_level,
 		hibernate_instead_of_shutdown,

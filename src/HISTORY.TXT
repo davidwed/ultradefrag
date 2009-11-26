@@ -6,6 +6,7 @@ HISTORY
   ------------------------------------------------------------------------------
     - volume optimization algorithm was highly improved
     - fragments threshold filter parameter was added
+    - UD_TIME_LIMIT option was added
     - portable version was highly improved
     - few little bugs were fixed
     - now the program is much more compatible with Vista and later versions 
