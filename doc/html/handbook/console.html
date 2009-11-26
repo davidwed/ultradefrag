@@ -274,6 +274,18 @@ C:\>_
 		</tr>
 
 		<tr>
+		<td class="code" align="center">UD_TIME_LIMIT</td>
+		<td>
+		Specify the time limit for the defragmentation process. When specified interval 
+		elapses volume defragmentation/optimization job will be stopped. 
+		Time interval must be specified in the following form: <span class="code">Ay Bd Ch Dm Es</span>. Here 
+		<span class="code">A,B,C,D,E </span> represents any integer numbers; <span class="code">y,d,h,m,s</span> 
+		suffixes are used for years, days, hours, minutes and seconds. Par example, 20 minutes 5 seconds will 
+		be represented as <span class="code">20m 5s</span>. The default value is an empty string which means: no time limit exists.
+		</td>
+		</tr>
+
+		<tr>
 		<td class="code" align="center">UD_REFRESH_INTERVAL</td>
 		<td>
 		Specify the progress indicator refresh interval in milliseconds. 
@@ -365,6 +377,23 @@ udefrag e: >> c:\ud.log
 </code></strong></pre>
 		<p>The command <span class="code">set UD_IN_FILTER=</span> destroys the specified variable. The 
 		appropriate option will have the default value after this command.</p>
+		
+		<p>The following example demonstrates flexibility of filters which 
+		allow you to perform a very effective defragmentation:</p>
+		
+<pre class="screen"><strong class="userinput"><code>@echo off
+
+rem defragment small files
+set UD_SIZELIMIT=50Mb
+udefrag c:
+
+rem defragment large files 
+rem which have at least 5 fragments
+set UD_SIZELIMIT=
+set UD_FRAGMENTS_THRESHOLD=5
+udefrag c:
+</code></strong></pre>
+
 		<p>
 		Batch files are powerful enough, try to insert commands to play sounds after 
 		each defragmentation. If you doubt that your volumes are in good state then add 
