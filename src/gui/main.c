@@ -57,6 +57,7 @@ void InitFont(void);
 void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
 
+/* Display critical errors only. */
 void __stdcall ErrorHandler(short *msg)
 {
 	/* ignore notifications and warnings */

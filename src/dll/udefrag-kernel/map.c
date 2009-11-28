@@ -48,7 +48,7 @@ int AllocateMap(int size)
 	interval.QuadPart = (-1 * 10000 * 1000); /* 1 sec */
 	Status = NtWaitForSingleObject(hMapEvent,FALSE,&interval);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		winx_raise_error("E: NtWaitForSingleObject(hMapEvent,...) failed: %x!",
+		DebugPrint("NtWaitForSingleObject(hMapEvent,...) failed: %x!",
 			(UINT)Status);
 		return (-1);
 	}
@@ -62,7 +62,7 @@ int AllocateMap(int size)
 	buffer_size = NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG);
 	new_cluster_map = winx_virtual_alloc(buffer_size);
 	if(!new_cluster_map){
-		winx_raise_error("E: Cannot allocate %u bytes of memory for cluster map!",
+		DebugPrint("Cannot allocate %u bytes of memory for cluster map!",
 			buffer_size);
 		NtSetEvent(hMapEvent,NULL);
 		return (-1);
@@ -147,7 +147,7 @@ void MarkAllSpaceAsSystem1(void)
 		cells_per_cluster = map_size / clusters_total;
 		cells_per_last_cluster = cells_per_cluster + \
 			(map_size - cells_per_cluster * clusters_total);
-		DebugPrint("-Ultradfg- opposite order %I64u:%I64u:%I64u\n", \
+		DebugPrint("Opposite order %I64u:%I64u:%I64u\n", \
 			clusters_total,cells_per_cluster,cells_per_last_cluster);
 	}
 }

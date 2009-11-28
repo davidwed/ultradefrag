@@ -66,7 +66,7 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 	if(!NT_SUCCESS(Status)){
 		winx_raise_error("N: Can't query %ws environment variable: %x!",
 				name,(UINT)Status);
-		return -1;
+		return (-1);
 	}
 	return 0;
 }
@@ -111,7 +111,7 @@ int __stdcall winx_set_env_variable(short *name, short *value)
 	if(!NT_SUCCESS(status)){
 		winx_raise_error("E: Can't set %ws environment variable: %x!",
 				name,(UINT)status);
-		return -1;
+		return (-1);
 	}
 	return 0;
 }

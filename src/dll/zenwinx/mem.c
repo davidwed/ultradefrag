@@ -26,6 +26,8 @@
 
 HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc call */
 
+/* never call winx_raise_error() from these functions! */
+
 /****ix* zenwinx.internals/long_type_on_x64
 * NAME
 *   long data type on x64 system

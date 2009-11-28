@@ -283,7 +283,6 @@ static void VolListAddItem(int index, volume_info *v)
 
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 {
-	ERRORHANDLERPROC eh;
 	volume_info *v;
 	int i;
 	RECT rc;
@@ -301,12 +300,10 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	HideProgress();
 
 	SendMessage(hList,LVM_DELETEALLITEMS,0,0);
-	eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
 		for(i = 0; v[i].letter != 0; i++)
 			VolListAddItem(i,&v[i]);
 	}
-	udefrag_set_error_handler(eh);
 	/* adjust columns widths */
 	GetClientRect(hList,&rc);
 	dx = rc.right - rc.left;
@@ -457,7 +454,6 @@ void VolListGetColumnWidths(void)
 /* TODO: optimize */
 void VolListRefreshSelectedItem(void)
 {
-	ERRORHANDLERPROC eh;
 	LRESULT SelectedItem;
 	PVOLUME_LIST_ENTRY vl;
 	volume_info *v;
@@ -465,7 +461,6 @@ void VolListRefreshSelectedItem(void)
 
 	vl = VolListGetSelectedEntry();
 	if(vl->VolumeName == NULL) return;
-	eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
 		for(i = 0; v[i].letter != 0; i++){
 			if(v[i].letter == vl->VolumeName[0]){
@@ -476,5 +471,4 @@ void VolListRefreshSelectedItem(void)
 			}
 		}
 	}
-	udefrag_set_error_handler(eh);
 }

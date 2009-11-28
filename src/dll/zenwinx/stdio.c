@@ -44,6 +44,7 @@ void winx_print(char *string)
 	UNICODE_STRING uStr;
 	int i, len;
 
+	/* never call winx_raise_error() here */
 	if(!string) return;
 	RtlInitAnsiString(&aStr,string);
 	if(RtlAnsiStringToUnicodeString(&uStr,&aStr,TRUE) == STATUS_SUCCESS){
@@ -76,6 +77,7 @@ int __cdecl winx_putch(int ch)
 	UNICODE_STRING uStr;
 	short s[2];
 
+	/* never call winx_raise_error() here */
 	s[0] = (short)ch; s[1] = 0;
 	RtlInitUnicodeString(&uStr,s);
 	NtDisplayString(&uStr);
@@ -121,6 +123,8 @@ int __cdecl winx_printf(const char *format, ...)
 	char small_buffer[INTERNAL_BUFFER_SIZE];
 	char *big_buffer = NULL;
 	int size = INTERNAL_BUFFER_SIZE * 2;
+	
+	/* never call winx_raise_error() here */
 
 	if(!format) return 0;
 	/* if we have just one argument then call winx_print directly */

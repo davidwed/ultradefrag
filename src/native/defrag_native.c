@@ -64,6 +64,7 @@ void display_help(void)
 				);
 }
 
+/* Display warnings and errors only. */
 void __stdcall ErrorHandler(short *msg)
 {
 	/* ignore notifications */
@@ -144,7 +145,6 @@ void DisplayAvailableVolumes(int skip_removable)
 	volume_info *v;
 	int n;
 
-	winx_set_error_handler(NULL);
 	winx_printf("Available drive letters:   ");
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
 		for(n = 0;;n++){
@@ -153,7 +153,6 @@ void DisplayAvailableVolumes(int skip_removable)
 		}
 	}
 	winx_printf("\r\n");
-	winx_set_error_handler(ErrorHandler);
 }
 
 void ProcessVolume(char letter,char _command)

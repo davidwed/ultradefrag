@@ -48,7 +48,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("E: Can't open %s! No enough memory!",filename);
+		winx_raise_error("W: Can't open %s! No enough memory!",filename);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -95,7 +95,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	f = (WINX_FILE *)winx_virtual_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		winx_raise_error("E: Can't open %s! No enough memory!",filename);
+		winx_raise_error("W: Can't open %s! No enough memory!",filename);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -129,7 +129,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		return 0;
 	}
 	if(status != STATUS_SUCCESS){
-		winx_raise_error("E: Can't read from a file: %x!",(UINT)status);
+		winx_raise_error("W: Can't read from a file: %x!",(UINT)status);
 		return 0;
 	}
 
@@ -164,7 +164,7 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status != STATUS_SUCCESS/* || (iosb.Information < size)*/){
-		winx_raise_error("E: Can't write to a file: %x!",(UINT)status);
+		winx_raise_error("W: Can't write to a file: %x!",(UINT)status);
 		return 0;
 	}
 
@@ -207,9 +207,9 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	}
 	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){
 		if(description)
-			winx_raise_error("E: %s failed: %x!",description,(UINT)Status);
+			winx_raise_error("W: %s failed: %x!",description,(UINT)Status);
 		else
-			winx_raise_error("E: Ioctl %u failed: %x!",code,(UINT)Status);
+			winx_raise_error("W: Ioctl %u failed: %x!",code,(UINT)Status);
 		return (-1);
 	}
 	if(pbytes_returned) *pbytes_returned = iosb.Information;
@@ -257,7 +257,7 @@ int __stdcall winx_create_directory(const char *path)
 
 	RtlInitAnsiString(&as,path);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("E: Can't create %s! No enough memory!",path);
+		winx_raise_error("W: Can't create %s! No enough memory!",path);
 		return (-1);
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -281,7 +281,7 @@ int __stdcall winx_create_directory(const char *path)
 	}
 	/* if it already exists then return success */
 	if(status == STATUS_OBJECT_NAME_COLLISION) return 0;
-	winx_raise_error("E: Can't create %s: %x!",path,(UINT)status);
+	winx_raise_error("W: Can't create %s: %x!",path,(UINT)status);
 	return (-1);
 }
 
@@ -299,7 +299,7 @@ int __stdcall winx_delete_file(const char *filename)
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("E: Can't delete %s! No enough memory!",filename);
+		winx_raise_error("W: Can't delete %s! No enough memory!",filename);
 		return (-1);
 	}
 

@@ -140,12 +140,12 @@ int __stdcall winx_get_windows_directory(char *buffer, int length)
 	us.MaximumLength = MAX_PATH * sizeof(short);
 	Status = RtlQueryEnvironmentVariable_U(NULL,&name,&us);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: Can't query SystemRoot variable: %x!",(UINT)Status);
+		winx_raise_error("W: Can't query SystemRoot variable: %x!",(UINT)Status);
 		return (-1);
 	}
 
 	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("E: winx_get_windows_directory() no enough memory!");
+		winx_raise_error("W: winx_get_windows_directory() no enough memory!");
 		return (-1);
 	}
 
@@ -240,7 +240,7 @@ int __stdcall winx_load_driver(short *driver_name)
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtLoadDriver(&us);
 	if(!NT_SUCCESS(Status) && Status != STATUS_IMAGE_ALREADY_LOADED){
-		winx_raise_error("E: Can't load %ws driver: %x!",driver_name,(UINT)Status);
+		winx_raise_error("N: Can't load %ws driver: %x!",driver_name,(UINT)Status);
 		return (-1);
 	}
 	return 0;
@@ -287,7 +287,7 @@ int __stdcall winx_unload_driver(short *driver_name)
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtUnloadDriver(&us);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: Can't unload %ws driver: %x!",driver_name,(UINT)Status);
+		winx_raise_error("N: Can't unload %ws driver: %x!",driver_name,(UINT)Status);
 		return (-1);
 	}
 	return 0;

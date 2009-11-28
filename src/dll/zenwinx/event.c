@@ -76,8 +76,8 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 		Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,
 			&oa,NotificationEvent,TRUE);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: Can't create %ws: %x!",name,(UINT)Status);
 		*phandle = NULL;
+		winx_raise_error("W: Can't create %ws: %x!",name,(UINT)Status);
 		return (-1);
 	}
 	return 0;
@@ -124,8 +124,8 @@ int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle)
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
 	Status = NtOpenEvent(phandle,flags,&oa);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: Can't open %ws: %x!",name,(UINT)Status);
 		*phandle = NULL;
+		winx_raise_error("W: Can't open %ws: %x!",name,(UINT)Status);
 		return (-1);
 	}
 	return 0;

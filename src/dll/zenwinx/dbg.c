@@ -36,11 +36,8 @@ void __stdcall InitSynchObjectsErrorHandler(short *msg)
 
 void winx_init_synch_objects(void)
 {
-	ERRORHANDLERPROC eh;
-	eh = winx_set_error_handler(InitSynchObjectsErrorHandler);
 	winx_create_event(L"\\winx_dbgprint_synch_event",
 		SynchronizationEvent,&hSynchEvent);
-	winx_set_error_handler(eh);
 	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
 }
 
@@ -56,7 +53,6 @@ typedef struct _DBG_OUTPUT_DEBUG_STRING_BUFFER {
 
 #define BUFFER_SIZE (4096-sizeof(ULONG))
 
-BOOL firstcall = TRUE;
 BOOL err_flag = FALSE;
 
 /****f* zenwinx.debug/winx_dbg_print
@@ -72,13 +68,14 @@ void __cdecl winx_dbg_print(char *format, ...)
 	char *buffer = NULL;
 	va_list arg;
 	int length;
-	ERRORHANDLERPROC eh = NULL;
+	
+	/* never call winx_raise_error() here! */
 	
 	buffer = winx_virtual_alloc(BUFFER_SIZE);
 	if(!buffer){
 		if(!err_flag){
-			winx_raise_error("W: Cannot allocate %u bytes "
-				"of memory for winx_dbg_print()!",BUFFER_SIZE);
+			winx_debug_print(">UltraDefrag< Cannot allocate memory "
+							 "for winx_dbg_print()!");
 			err_flag = TRUE;
 		}
 		return;
@@ -92,12 +89,9 @@ void __cdecl winx_dbg_print(char *format, ...)
 	va_end(arg);
 
 	/* 1b. send resulting ANSI string to the debugger */
-	if(!firstcall) eh = winx_set_error_handler(NULL);
 	winx_debug_print(buffer);
-	if(!firstcall) winx_set_error_handler(eh);
 	
 	winx_virtual_free(buffer,BUFFER_SIZE);
-	firstcall = FALSE;
 }
 
 /****f* zenwinx.debug/winx_debug_print
@@ -134,7 +128,9 @@ int __stdcall winx_debug_print(char *string)
 	
 	DBG_OUTPUT_DEBUG_STRING_BUFFER *dbuffer;
 	int length;
-	
+
+	/* never call winx_raise_error() here! */
+
 	/* 0. synchronize with other threads */
 	if(hSynchEvent){
 		interval.QuadPart = -(11000 * 10000); /* 11 sec */
@@ -143,10 +139,16 @@ int __stdcall winx_debug_print(char *string)
 	}
 	
 	/* 1. Open debugger's objects. */
-	if(winx_open_event(L"\\BaseNamedObjects\\DBWIN_BUFFER_READY",SYNCHRONIZE,
-		&hEvtBufferReady) < 0) goto failure;
-	if(winx_open_event(L"\\BaseNamedObjects\\DBWIN_DATA_READY",EVENT_MODIFY_STATE,
-		&hEvtDataReady) < 0) goto failure;
+	RtlInitUnicodeString(&us,L"\\BaseNamedObjects\\DBWIN_BUFFER_READY");
+	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+	Status = NtOpenEvent(&hEvtBufferReady,SYNCHRONIZE,&oa);
+	if(!NT_SUCCESS(Status)) goto failure;
+	
+	RtlInitUnicodeString(&us,L"\\BaseNamedObjects\\DBWIN_DATA_READY");
+	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+	Status = NtOpenEvent(&hEvtDataReady,EVENT_MODIFY_STATE,&oa);
+	if(!NT_SUCCESS(Status)) goto failure;
+
 	RtlInitUnicodeString(&us,L"\\BaseNamedObjects\\DBWIN_BUFFER");
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
 	Status = NtOpenSection(&hSection,SECTION_ALL_ACCESS,&oa);

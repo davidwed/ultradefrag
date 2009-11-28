@@ -11,6 +11,8 @@ HISTORY
     - few little bugs were fixed
     - now the program is much more compatible with Vista and later versions 
       of Windows; this is achieved by adding the User Mode Driver to it
+    - program's reliability increased by removing error handlers caused 
+      infinite loops
 
     - since this version native 64-bit binaries aren't available
       due to the C compilers internal bugs (Windows DDK, Windows SDK, Pelles C, 

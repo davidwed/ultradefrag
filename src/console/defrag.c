@@ -86,11 +86,9 @@ int show_vollist(void)
 
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("Volumes available for defragmentation:\n\n");
-	udefrag_set_error_handler(NULL);
 
 	if(udefrag_get_avail_volumes(&v,la_flag ? FALSE : TRUE) < 0){
 		if(!b_flag) settextcolor(console_attr);
-		udefrag_set_error_handler(ErrorHandler);
 		return 1;
 	} else {
 		for(n = 0;;n++){
@@ -107,7 +105,6 @@ int show_vollist(void)
 	}
 
 	if(!b_flag) settextcolor(console_attr);
-	udefrag_set_error_handler(ErrorHandler);
 	return 0;
 }
 
@@ -120,13 +117,14 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 	return TRUE;
 }
 
+/* Display errors only. */
 void __stdcall ErrorHandler(short *msg)
 {
 	char oem_buffer[1024]; /* see zenwinx.h ERR_MSG_SIZE */
 	WORD color = FOREGROUND_RED | FOREGROUND_INTENSITY;
 
-	/* ignore notifications */
-	if((short *)wcsstr(msg,L"N: ") == msg) return;
+	/* ignore notifications and warnings */
+	if((short *)wcsstr(msg,L"N: ") == msg || (short *)wcsstr(msg,L"W: ") == msg) return;
 	
 	if(!b_flag){
 		if((short *)wcsstr(msg,L"W: ") == msg)
@@ -257,7 +255,6 @@ int __stdcall ProgressCallback(int done_flag)
 	STATISTIC stat;
 	char op; char *op_name = ""/*, *last_op_name*/;
 	double percentage;
-	ERRORHANDLERPROC eh = NULL;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD cursor_pos;
 	
@@ -289,8 +286,7 @@ int __stdcall ProgressCallback(int done_flag)
 		}
 	}
 	
-	/* show error message no more than once */
-	if(err_flag) eh = udefrag_set_error_handler(NULL);
+	/* this function never raises warnings or errors */
 	if(udefrag_get_progress(&stat,&percentage) >= 0){
 		op = stat.current_operation;
 		if(op == 'A' || op == 'a')      op_name = "analyse:  ";
@@ -309,7 +305,6 @@ int __stdcall ProgressCallback(int done_flag)
 	} else {
 		err_flag = TRUE;
 	}
-	if(eh) udefrag_set_error_handler(eh);
 	
 	if(err_flag) return 0;
 
@@ -321,13 +316,12 @@ int __stdcall ProgressCallback(int done_flag)
 	
 	if(m_flag){ /* display cluster map */
 		/* show error message no more than once */
-		if(err_flag2) eh = udefrag_set_error_handler(NULL);
+		/* FIXME: */
 		if(udefrag_get_map(cluster_map,map_rows * map_symbols_per_line) >= 0){
 			RedrawMap();
 		} else {
 			err_flag2 = TRUE;
 		}
-		if(eh) udefrag_set_error_handler(eh);
 	}
 	
 	return 0;
@@ -751,7 +745,17 @@ int __cdecl main(int argc, char **argv)
 	if(l_flag){ exit(show_vollist()); }
 	/* validate driveletter */
 	if(!letter)	HandleError("Drive letter should be specified!",1);
-	if(udefrag_validate_volume(letter,FALSE) < 0) Exit(1);
+	if(udefrag_validate_volume(letter,FALSE) < 0){
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("The specified volume cannot be processed.\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		printf("Possible reasons are:\n");
+		printf(" - remote/cdrom/missing volume specified\n");
+		printf(" - volume letter is assigned by \'subst\' command\n\n");
+		printf("Run DbgView program for more information.\n");
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		Exit(1);
+	}
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* do our job */
 	if(!m_flag){

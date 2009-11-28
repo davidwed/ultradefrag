@@ -28,7 +28,6 @@ void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered);
 void RemoveReportFromDisk(char *volume_name)
 {
 	char path[64];
-	ERRORHANDLERPROC eh;
 	
 #ifndef MICRO_EDITION
 	_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
@@ -37,9 +36,7 @@ void RemoveReportFromDisk(char *volume_name)
 #endif
 	path[63] = 0;
 //	DebugPrint("%s\n",path);
-	eh = winx_set_error_handler(NULL);
 	winx_delete_file(path);
-	winx_set_error_handler(eh);
 }
 
 void __stdcall ReportErrorHandler(short *msg)
@@ -54,18 +51,14 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	char buffer[512];
 	char path[64];
 	WINX_FILE *f;
-	ERRORHANDLERPROC eh;
 	
 	if(disable_reports) return TRUE;
-
-	eh = winx_set_error_handler(ReportErrorHandler);
 
 	_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
-		winx_raise_error("E: Can't create %s file!\n",path);
-		winx_set_error_handler(eh);
+		DebugPrint("Can't create %s file!\n",path);
 		return FALSE;
 	}
 	
@@ -79,13 +72,12 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	winx_fwrite(buffer,1,strlen(buffer),f);
 
 	WriteReportBody(f,FALSE);
-	WriteReportBody(f,TRUE);
+	//WriteReportBody(f,TRUE);
 
 	strcpy(buffer,"}\r\n");
 	winx_fwrite(buffer,1,strlen(buffer),f);
 
 	winx_fclose(f);
-	winx_set_error_handler(eh);
 
 	DebugPrint("-Ultradfg- Report saved to %s\n",path);
 	return TRUE;
@@ -166,14 +158,11 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	
 	if(disable_reports) return TRUE;
 
-	eh = winx_set_error_handler(ReportErrorHandler);
-
 	_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
-		winx_raise_error("E: Can't create %s file!\n",path);
-		winx_set_error_handler(eh);
+		DebugPrint("Can't create %s file!\n",path);
 		return FALSE;
 	}
 	
@@ -187,10 +176,9 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 
 	WriteReportBody(f,FALSE);
 	winx_fwrite(line,2,wcslen(line),f);
-	WriteReportBody(f,TRUE);
+	//WriteReportBody(f,TRUE);
 
 	winx_fclose(f);
-	winx_set_error_handler(eh);
 	
 	DebugPrint("-Ultradfg- Report saved to %s\n",path);
 	return TRUE;

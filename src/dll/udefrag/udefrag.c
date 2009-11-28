@@ -148,9 +148,9 @@ int __stdcall udefrag_init(long map_size)
 	NTSTATUS Status;
 */
 	/* 1. Enable neccessary privileges */
-	/*if(!EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)) return (-1)*/
-	if(winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE) < 0) return (-1);
-	if(winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE) < 0) return (-1); /* required by GUI client */
+	/*(void)EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)); */
+	(void)winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE);
+	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE); /* required by GUI client */
 	
 	/* for testing */
 	//winx_unregister_boot_exec_command(L"defrag_native");
@@ -171,7 +171,7 @@ int __stdcall udefrag_init(long map_size)
 //	}
 
 	/* 2. only one instance of the program ! */
-	/* create init_event - this must be after privileges enabling */
+	/* create init_event - this must be after privileges enabling (?) */
 	eh = winx_set_error_handler(ErrorHandler);
 	if(winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event) < 0){
 		winx_set_error_handler(eh);
@@ -212,6 +212,8 @@ int __stdcall udefrag_init(long map_size)
 	return 0;
 init_fail:
 	/*if(init_event)*/ udefrag_unload();
+	winx_raise_error("E: Cannot initialize the kernel mode driver!\n"
+					 "Run DbgView program for more information.");
 	return (-1);
 }
 
@@ -275,7 +277,23 @@ int __stdcall udefrag_unload(void)
 int udefrag_send_command(unsigned char command,unsigned char letter)
 {
 	char cmd[4];
+	char *cmd_description = "OPTIMIZE";
 	UDEFRAG_JOB_TYPE job_type;
+
+	switch(command){
+	case 'a':
+	case 'A':
+		job_type = ANALYSE_JOB;
+		cmd_description = "ANALYSE";
+		break;
+	case 'd':
+	case 'D':
+		job_type = DEFRAG_JOB;
+		cmd_description = "DEFRAG";
+		break;
+	default:
+		job_type = OPTIMIZE_JOB;
+	}
 
 	if(kernel_mode_driver){
 		cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
@@ -287,24 +305,12 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 		winx_set_error_handler(eh);
 	} else {
 		cmd[0] = letter; cmd[1] = 0;
-		switch(command){
-		case 'a':
-		case 'A':
-			job_type = ANALYSE_JOB;
-			break;
-		case 'd':
-		case 'D':
-			job_type = DEFRAG_JOB;
-			break;
-		default:
-			job_type = OPTIMIZE_JOB;
-		}
 		if(udefrag_kernel_start(cmd,job_type,cluster_map_size) >= 0)
 			return 0;
 	}
 
-	winx_raise_error("E: Can't execute driver command \'%c\' for volume %c!",
-		command,letter);
+	winx_raise_error("E: Cannot execute %s command for volume %c:!",
+		cmd_description,(char)toupper((int)letter));
 	return (-1);
 }
 
@@ -457,12 +463,12 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 
 	if(kernel_mode_driver){
 		if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
-			winx_raise_error("E: Statistical data unavailable!");
+			winx_raise_error("N: Statistical data unavailable!");
 			return (-1);
 		}
 	} else {
 		if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
-			winx_raise_error("E: Statistical data unavailable!");
+			winx_raise_error("N: Statistical data unavailable!");
 			return (-1);
 		}
 	}
@@ -505,7 +511,7 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 			return 0;
 	}
 				
-	winx_raise_error("E: Cluster map unavailable!");
+	winx_raise_error("N: Cluster map unavailable!");
 	return (-1);
 }
 

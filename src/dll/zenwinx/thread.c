@@ -143,37 +143,29 @@ void __stdcall winx_exit_thread(void)
 	/* TODO: error handling and exit with specified status */
 	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: Can't terminate thread: %x!",(UINT)Status);
+		winx_raise_error("W: Can't terminate thread: %x!",(UINT)Status);
 	}
 }
 
 /* internal functions */
 int FindCreateThread(void)
 {
-	ERRORHANDLERPROC eh;
-	
 	if(CreateThreadState == CreateThreadUndefined){
-		eh = winx_set_error_handler(NULL);
 		if(winx_get_proc_address(L"kernel32.dll","CreateThread",(void *)&func_CreateThread) == 0)
 			CreateThreadState = CreateThreadFound;
 		else
 			CreateThreadState = CreateThreadNotFound;
-		winx_set_error_handler(eh);
 	}
 	return (CreateThreadState == CreateThreadFound) ? TRUE : FALSE;
 }
 
 int FindGetLastError(void)
 {
-	ERRORHANDLERPROC eh;
-	
 	if(GetLastErrorState == GetLastErrorUndefined){
-		eh = winx_set_error_handler(NULL);
 		if(winx_get_proc_address(L"kernel32.dll","GetLastError",(void *)&func_GetLastError) == 0)
 			GetLastErrorState = GetLastErrorFound;
 		else
 			GetLastErrorState = GetLastErrorNotFound;
-		winx_set_error_handler(eh);
 	}
 	return (GetLastErrorState == GetLastErrorFound) ? TRUE : FALSE;
 }

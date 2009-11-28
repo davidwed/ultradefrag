@@ -236,18 +236,15 @@ void SchedulerAddJob(void)
 
 void InitDrivesList(void)
 {
-	ERRORHANDLERPROC eh;
 	volume_info *v;
 	int i;
 	char buffer[64];
 
-	eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_avail_volumes(&v,TRUE) >= 0){ /* skip removable media */
 		for(i = 0; v[i].letter != 0; i++){
 			sprintf(buffer,"%c:\\",v[i].letter);
 			SendMessage(hDrives,CB_ADDSTRING,0,(LPARAM)(LPCTSTR)buffer);
 		}
 	}
-	udefrag_set_error_handler(eh);
 	SendMessage(hDrives,CB_SETCURSEL,0,0);
 }

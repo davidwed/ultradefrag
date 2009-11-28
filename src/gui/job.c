@@ -30,7 +30,6 @@ DWORD thr_id;
 BOOL busy_flag = 0;
 char current_operation;
 BOOL stop_pressed, exit_pressed = FALSE;
-BOOL err_flag = FALSE, err_flag2 = FALSE;
 
 extern int shutdown_flag;
 
@@ -61,7 +60,6 @@ int __stdcall update_stat(int df)
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
-	ERRORHANDLERPROC eh = NULL;
 
 	/* due to the following line of code we have obsolete statistics when we have stopped */
 	if(stop_pressed) return 0; /* it's neccessary: see comment in main.h file */
@@ -71,8 +69,6 @@ int __stdcall update_stat(int df)
 
 	pst = &(vl->Statistics);
 
-	/* show error message no more than once */
-	if(err_flag) eh = udefrag_set_error_handler(NULL);
 	if(udefrag_get_progress(pst,&percentage) >= 0){
 		UpdateStatusBar(pst);
 		current_operation = pst->current_operation;
@@ -81,20 +77,14 @@ int __stdcall update_stat(int df)
 		else
 			sprintf(progress_msg,"A %u %%",(int)percentage);
 		SetProgress(progress_msg,(int)percentage);
-	} else {
-		err_flag = TRUE;
 	}
-	if(eh) udefrag_set_error_handler(eh);
 
 	/* show error message no more than once */
-	if(err_flag2) eh = udefrag_set_error_handler(NULL);
+	/* FIXME: */
 	if(udefrag_get_map(global_cluster_map,N_BLOCKS) >= 0){
 		FillBitMap(global_cluster_map);
 		RedrawMap();
-	} else {
-		err_flag2 = TRUE;
 	}
-	if(eh) udefrag_set_error_handler(eh);
 	
 	if(df == FALSE) return 0;
 	if(!stop_pressed){
@@ -143,7 +133,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 	ShowProgress();
 	SetProgress("A 0 %",0);
-	err_flag = err_flag2 = FALSE;
 	switch(command){
 	case 'a':
 		status = udefrag_analyse(letter,update_stat);

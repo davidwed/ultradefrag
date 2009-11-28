@@ -24,6 +24,13 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+/*
+* winx_raise_error() global rules:
+*   raise error if function's parameter check fails, also with other critical errors
+*   raise warning when appropriate information should be displayed in native app
+*   raise notification in all remaining cases
+*/
+
 //extern long malloc_free_delta;
 
 //unsigned long __cdecl DbgPrint(char *format, ...);

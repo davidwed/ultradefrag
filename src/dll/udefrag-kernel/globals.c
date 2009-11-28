@@ -99,24 +99,14 @@ void FreeDriverResources(void)
 	DebugPrint("User mode driver unloaded successfully\n");
 }
 
-void __stdcall InitSynchObjectsErrorHandler(short *msg)
-{
-	winx_dbg_print("------------------------------------------------------------\n");
-	winx_dbg_print("%ws\n",msg);
-	winx_dbg_print("------------------------------------------------------------\n");
-}
-
 void InitSynchObjects(void)
 {
-	ERRORHANDLERPROC eh;
-	eh = winx_set_error_handler(InitSynchObjectsErrorHandler);
 	winx_create_event(L"\\udefrag_synch_event",
 		SynchronizationEvent,&hSynchEvent);
 	winx_create_event(L"\\udefrag_stop_event",
 		NotificationEvent,&hStopEvent);
 	winx_create_event(L"\\udefrag_map_event",
 		SynchronizationEvent,&hMapEvent);
-	winx_set_error_handler(eh);
 	
 	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
 	if(hStopEvent) NtClearEvent(hStopEvent);

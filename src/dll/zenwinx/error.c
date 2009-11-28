@@ -173,15 +173,13 @@ void __cdecl winx_raise_error(char *format, ...)
 	char buffer[ERR_MSG_SIZE];
 	short desc[256];
 	short resulting_message[ERR_MSG_SIZE];
+	short *s;
 	va_list arg;
 	int length;
 	char *p;
 	UINT iStatus = 0;
 	NTSTATUS Status;
 	ULONG err_code;
-
-	/* 0. if ErrorHandler is not set return */
-	if(!ErrorHandler) return;
 
 	/* 1. store resulting ANSI string into buffer */
 	va_start(arg,format);
@@ -197,9 +195,7 @@ void __cdecl winx_raise_error(char *format, ...)
 status_code_missing:
 		_snwprintf(resulting_message,ERR_MSG_SIZE - 1,L"%hs",buffer);
 		resulting_message[ERR_MSG_SIZE - 1] = 0;
-		/* call ErrorHandler and return */
-		ErrorHandler(resulting_message);
-		return;
+		goto send_message;
 	}
 	/* b). skip ':' and spaces */
 	p ++;
@@ -225,22 +221,42 @@ status_code_missing:
 	_snwprintf(resulting_message,ERR_MSG_SIZE - 1,L"%hs\r\n%ws",buffer,desc);
 	resulting_message[ERR_MSG_SIZE - 1] = 0;
 
+send_message:
 	/* 4. call ErrorHandler and return */
-	ErrorHandler(resulting_message);
+	if(ErrorHandler) ErrorHandler(resulting_message);
+	/* 5. send message to the debugger */
+	s = resulting_message;
+	if(s[wcslen(s) - 1] == '\n'){
+		if(s[0] == 'N' || s[0] == 'W' || s[0] == 'E'){
+			if(s[1] == ':' && s[2] == 0x20){
+				winx_dbg_print("%ws",s + 3);
+			} else {
+				winx_dbg_print("%ws",s);
+			}
+		} else {
+			winx_dbg_print("%ws",s);
+		}
+	} else {
+		if(s[0] == 'N' || s[0] == 'W' || s[0] == 'E'){
+			if(s[1] == ':' && s[2] == 0x20){
+				winx_dbg_print("%ws\n",s + 3);
+			} else {
+				winx_dbg_print("%ws\n",s);
+			}
+		} else {
+			winx_dbg_print("%ws\n",s);
+		}
+	}
 	return;
 }
 
 int FindFormatMessage(void)
 {
-	ERRORHANDLERPROC eh;
-	
 	if(FormatMessageState == FormatMessageUndefined){
-		eh = winx_set_error_handler(NULL);
 		if(winx_get_proc_address(L"kernel32.dll","FormatMessageW",(void *)&func_FormatMessageW) == 0)
 			FormatMessageState = FormatMessageFound;
 		else
 			FormatMessageState = FormatMessageNotFound;
-		winx_set_error_handler(eh);
 	}
 	return (FormatMessageState == FormatMessageFound) ? TRUE : FALSE;
 }
