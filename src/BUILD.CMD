@@ -41,7 +41,6 @@ xcopy /I /Y /Q    .\hibernate .\obj\hibernate
 xcopy /I /Y /Q    .\console .\obj\console
 xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
-xcopy /I /Y /Q    .\gui-launcher .\obj\gui-launcher
 xcopy /I /Y /Q    .\udefrag-gui-config .\obj\udefrag-gui-config
 xcopy /I /Y /Q    .\udefrag-gui-config\res .\obj\udefrag-gui-config\res
 xcopy /I /Y /Q    .\scheduler\C .\obj\udefrag-scheduler
