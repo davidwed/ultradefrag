@@ -1188,7 +1188,9 @@ void BuildPaths(void)
 		if(UnwantedStuffDetected(pfn)) pfn->is_filtered = TRUE;
 		MarkSpace(pfn,SYSTEM_SPACE);
 		/* skip here filtered out and big files and reparse points */
-		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
+		if(pfn->is_fragm && !pfn->is_reparse_point &&
+			((!pfn->is_filtered && !pfn->is_overlimit) || optimize_flag)
+			){
 			Stat.fragmfilecounter ++;
 			Stat.fragmcounter += pfn->n_fragments;
 		} else {

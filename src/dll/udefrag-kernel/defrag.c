@@ -80,7 +80,7 @@ int Defragment(char *volume_name)
 			if(!pf->pfn->blockmap) goto L2; /* skip fragmented files with unknown state */
 			if(!optimize_flag){
 				if(pf->pfn->is_overlimit) goto L2; /* skip fragmented but filtered out files */
-				//if(pf->pfn->is_filtered) goto L2; /* since v3.2.0 fragmfileslist never contains such entries */
+				if(pf->pfn->is_filtered) goto L2; /* in v3.2.0 fragmfileslist never contained such entries */
 				/* skip fragmented directories on FAT/UDF partitions */
 				if(pf->pfn->is_dir && partition_type != NTFS_PARTITION) goto L2;
 			}

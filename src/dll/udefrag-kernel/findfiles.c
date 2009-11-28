@@ -226,7 +226,9 @@ BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	if(pfn->is_dir) Stat.dircounter ++;
 	if(pfn->is_compressed) Stat.compressedcounter ++;
 	/* skip here filtered out and big files and reparse points */
-	if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
+	if(pfn->is_fragm && !pfn->is_reparse_point &&
+	  ((!pfn->is_filtered && !pfn->is_overlimit) || optimize_flag)
+	  ){
 		Stat.fragmfilecounter ++;
 		Stat.fragmcounter += pfn->n_fragments;
 	} else {
