@@ -30,6 +30,7 @@
 #include "../include/ultradfgver.h"
 
 int h_flag = 0, r_flag = 0, u_flag = 0;
+int silent = 0;
 int invalid_opts = 0;
 char cmd[MAX_PATH + 1] = "";
 
@@ -37,8 +38,9 @@ void show_help(void)
 {
 	MessageBox(0,
 		"Usage:\n"
-		"bootexctrl /r command - register command\n"
-		"bootexctrl /u command - unregister command"
+		"bootexctrl /r [/s] command - register command\n"
+		"bootexctrl /u [/s] command - unregister command\n"
+		"Specify /s option to run the program in silent mode."
 		,
 		"BootExecute Control",
 		MB_OK
@@ -52,27 +54,27 @@ int open_smss_key(HKEY *phkey)
 			0,
 			KEY_QUERY_VALUE | KEY_SET_VALUE,
 			phkey) != ERROR_SUCCESS){
-		MessageBox(0,"Cannot open SMSS key!","Error",MB_OK | MB_ICONHAND);
+		if(!silent) MessageBox(0,"Cannot open SMSS key!","Error",MB_OK | MB_ICONHAND);
 		return 0;
 	}
 	return 1;
 }
 
-void register_cmd(void)
+int register_cmd(void)
 {
 	HKEY hKey;
 	DWORD type, size;
 	char *data, *curr_pos;
 	DWORD i, length, curr_len;
 
-	if(!open_smss_key(&hKey)) return;
+	if(!open_smss_key(&hKey)) return 3;
 	type = REG_MULTI_SZ;
 	RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
 	data = malloc(size + strlen(cmd) + 10);
 	if(!data){
 		RegCloseKey(hKey);
-		MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
-		return;
+		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
+		return 4;
 	}
 
 	type = REG_MULTI_SZ;
@@ -80,8 +82,8 @@ void register_cmd(void)
 			data,&size) != ERROR_SUCCESS){
 		RegCloseKey(hKey);
 		free(data);
-		MessageBox(0,"Cannot query BootExecute value!","Error",MB_OK | MB_ICONHAND);
-		return;
+		if(!silent) MessageBox(0,"Cannot query BootExecute value!","Error",MB_OK | MB_ICONHAND);
+		return 5;
 	}
 
 	length = size - 1;
@@ -100,29 +102,30 @@ void register_cmd(void)
 			data,length) != ERROR_SUCCESS){
 		RegCloseKey(hKey);
 		free(data);
-		MessageBox(0,"Cannot set BootExecute value!","Error",MB_OK | MB_ICONHAND);
-		return;
+		if(!silent) MessageBox(0,"Cannot set BootExecute value!","Error",MB_OK | MB_ICONHAND);
+		return 6;
 	}
 done:
 	RegCloseKey(hKey);
 	free(data);
+	return 0;
 }
 
-void unregister_cmd(void)
+int unregister_cmd(void)
 {
 	HKEY hKey;
 	DWORD type, size;
 	char *data, *new_data, *curr_pos;
 	DWORD i, length, new_length, curr_len;
 
-	if(!open_smss_key(&hKey)) return;
+	if(!open_smss_key(&hKey)) return 7;
 	type = REG_MULTI_SZ;
 	RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
 	data = malloc(size + strlen(cmd) + 10);
 	if(!data){
 		RegCloseKey(hKey);
-		MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
-		return;
+		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
+		return 8;
 	}
 
 	type = REG_MULTI_SZ;
@@ -130,16 +133,16 @@ void unregister_cmd(void)
 			data,&size) != ERROR_SUCCESS){
 		RegCloseKey(hKey);
 		free(data);
-		MessageBox(0,"Cannot query BootExecute value!","Error",MB_OK | MB_ICONHAND);
-		return;
+		if(!silent) MessageBox(0,"Cannot query BootExecute value!","Error",MB_OK | MB_ICONHAND);
+		return 9;
 	}
 
 	new_data = malloc(size);
 	if(!new_data){
 		RegCloseKey(hKey);
 		free(data);
-		MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
-		return;
+		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
+		return 10;
 	}
 
 	/*
@@ -165,16 +168,17 @@ void unregister_cmd(void)
 		RegCloseKey(hKey);
 		free(data);
 		free(new_data);
-		MessageBox(0,"Cannot set BootExecute value!","Error",MB_OK | MB_ICONHAND);
-		return;
+		if(!silent) MessageBox(0,"Cannot set BootExecute value!","Error",MB_OK | MB_ICONHAND);
+		return 11;
 	}
 
 	RegCloseKey(hKey);
 	free(data);
 	free(new_data);
+	return 0;
 }
 
-void parse_cmdline(void)
+int parse_cmdline(void)
 {
 	int argc;
 	short **argv;
@@ -182,12 +186,12 @@ void parse_cmdline(void)
 	short *param;
 
 	argv = (short **)CommandLineToArgvW(GetCommandLineW(),&argc);
-	if(!argv) return;
+	if(!argv) return (-1);
 
 	if(argc < 3){
 		h_flag = 1;
 		GlobalFree(argv);
-		return;
+		return 0;
 	}
 	for(i = 1; i < argc; i++){
 		param = argv[i];
@@ -196,24 +200,26 @@ void parse_cmdline(void)
 		else if(!wcscmp(param,L"/u")) u_flag = 1;
 		else if(!wcscmp(param,L"/h")) h_flag = 1;
 		else if(!wcscmp(param,L"/?")) h_flag = 1;
+		else if(!wcscmp(param,L"/s")) silent = 1;
 		else {
 			if(wcslen(param) > MAX_PATH){
 				invalid_opts = 1;
-				MessageBox(0,"Command name is too long!","Error",MB_OK | MB_ICONHAND);
+				if(!silent) MessageBox(0,"Command name is too long!","Error",MB_OK | MB_ICONHAND);
 			} else _snprintf(cmd,MAX_PATH,"%ws",param);
 		}
 	}
 	cmd[MAX_PATH] = 0;
 	GlobalFree(argv);
+	return 0;
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	parse_cmdline();
+	if(parse_cmdline() < 0) return 2;
 	if(invalid_opts) return 1;
 	if(h_flag || !cmd[0]) show_help();
-	else if(r_flag) register_cmd();
-	else if(u_flag) unregister_cmd();
+	else if(r_flag) return register_cmd();
+	else if(u_flag) return unregister_cmd();
 	else show_help();
 	return 0;
 }

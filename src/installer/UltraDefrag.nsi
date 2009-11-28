@@ -600,7 +600,11 @@ Section "Uninstall"
   Delete "$QUICKLAUNCH\UltraDefrag.lnk"
 
   /* remove useless registry settings */
+  ${Unless} ${Silent}
   ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
+  ${Else}
+  ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
+  ${EndUnless}
 
   DetailPrint "Remove program files..."
   Delete "$INSTDIR\LICENSE.TXT"
