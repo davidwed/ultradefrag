@@ -320,11 +320,11 @@ Writing log to DbgPrint4.log</div>
 				User mode driver debugging</h2>
 			</div></div>
 		</div>
-		<p>The principles here are the same as in kernel mode driver debugging. Just don't forget to check 
-		the <span class="guimenuitem">Capture Win32</span> item in <span class="guimenuitem">Capture</span> menu
-		of DbgView program before.</p>
-		<p>Note also that unfortunately both described DbgPrint loggers cannot capture debugging output 
-		at boot time which makes the boot time interface of the program debugging much more complicated.</p>
+		<p>Use DbgView program or DbgPrint Logger as described above to understand better what happens when something 
+		goes wrong in the defragmentation process. Just don't forget to check the <span class="guimenuitem">Capture Win32</span> 
+		item in <span class="guimenuitem">Capture</span> menu of DbgView program before.</p>
+		<p>Note also that unfortunately both described DbgPrint loggers cannot capture debugging output of the 
+		user mode driver at boot time which makes its debugging much more complicated.</p>
 		<p>Additionally keep in mind that user mode driver usually cannot cause BSOD. We know only a single 
 		exception for this rule - when you are trying to analyze/defragment NTFS formatted volume under NT4.0 
 		anything may happen.</p>

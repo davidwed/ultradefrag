@@ -98,6 +98,13 @@
 		environment variable. If you are in trouble, just unpack archives to <span class="code">C:\WINDOWS</span>, 
 		in other words, in folder where you have Windows installed.</p>
 		
+		<p>If you are using the latest version of MinGW, don't be surprised when 
+		<span class="code">'undefined reference to __strtod'</span> error message appears during the 
+		compilation. This is because the following 
+		<a href="http://sourceforge.net/tracker/index.php?func=detail&aid=1956337&group_id=2435&atid=302435">patch</a> 
+		applied to MinGW is incompatible with <span class="code">msvcrt.dll</span> library which is used by the Ultra 
+		Defragmenter. We hope this mistake will be resolved in future by MinGW team.</p>
+		
 		<font size="-1"><table border="0"><tbody><tr><td width="18pt" align="left" valign="center">
 		<a href="javascript:show_section('gcc','img0')"><img id="img0" border="0" src="closed.gif" /></a></td>
 		<td>Why GCC is the best choice for us?
