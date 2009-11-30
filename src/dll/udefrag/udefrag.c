@@ -179,6 +179,7 @@ int __stdcall udefrag_init(long map_size)
 	}
 	winx_set_error_handler(eh);
 
+#ifndef UDEFRAG_PORTABLE
 	/* 3. Load the driver */
 	eh = winx_set_error_handler(LoadDriverErrorHandler);
 	if(winx_load_driver(L"ultradfg") < 0){
@@ -191,7 +192,13 @@ int __stdcall udefrag_init(long map_size)
 	}
 	winx_set_error_handler(eh);
 	kernel_mode_driver = TRUE;
-	
+#else
+	kernel_mode_driver = FALSE;
+	cluster_map_size = map_size;
+	(void)udefrag_reload_settings(); /* reload udefrag.dll specific options */
+	return 0;
+#endif
+
 	/* 4. Open our device */
 	f_ud = winx_fopen("\\Device\\UltraDefrag","w");
 	if(!f_ud) goto init_fail;

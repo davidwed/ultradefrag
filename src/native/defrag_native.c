@@ -23,6 +23,8 @@
 
 #include "../include/ntndk.h"
 
+#include "../include/ultradfg.h"
+#include "../include/udefrag-kernel.h"
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 #include "../dll/zenwinx/zenwinx.h"
@@ -41,6 +43,9 @@ short line_buffer[32768];
 short name_buffer[128];
 short value_buffer[4096];
 short *command;
+
+UDEFRAG_JOB_TYPE job_type;
+ULONG pass_number;
 
 #define NAME_BUF_SIZE (sizeof(name_buffer) / sizeof(short))
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
@@ -87,6 +92,7 @@ void UpdateProgress()
 {
 	STATISTIC stat;
 	double percentage;
+	char s[64];
 
 	if(udefrag_get_progress(&stat,&percentage) < 0) return;
 
@@ -94,6 +100,11 @@ void UpdateProgress()
 		if(last_op){
 			for(k = i; k < 50; k++)
 				winx_putch('-'); /* 100 % of previous operation */
+			if(stat.pass_number != 0xffffffff && stat.pass_number > pass_number){
+				pass_number = stat.pass_number;
+				_itoa(pass_number,s,10);
+				winx_printf("\n\nPass %s ...\n",s);
+			}
 		} else {
 			if(stat.current_operation != 'A'){
 				winx_printf("\nAnalyse : ");
@@ -167,15 +178,20 @@ void ProcessVolume(char letter,char _command)
 	winx_printf("\nPreparing to ");
 	switch(_command){
 	case 'a':
+		job_type = ANALYSE_JOB;
 		winx_printf("analyse %c: ...\n",letter);
 		status = udefrag_analyse(letter,update_stat);
 		break;
 	case 'd':
+		job_type = DEFRAG_JOB;
 		winx_printf("defragment %c: ...\n",letter);
 		status = udefrag_defragment(letter,update_stat);
 		break;
 	case 'c':
+		job_type = OPTIMIZE_JOB;
+		pass_number = 0;
 		winx_printf("optimize %c: ...\n",letter);
+		winx_printf("\nPass 0 ...\n");
 		status = udefrag_optimize(letter,update_stat);
 		break;
 	}

@@ -367,6 +367,7 @@ NTSTATUS NTAPI Read_IRPhandler(IN PDEVICE_OBJECT fdo, IN PIRP Irp)
 		st->current_operation = main_dx->current_operation;
 		st->clusters_to_process = main_dx->clusters_to_process;
 		st->processed_clusters = main_dx->processed_clusters;
+		st->pass_number = dx->pass_number;
 		goto success;
 	}
 success:
@@ -437,6 +438,8 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	
 	if(cmd[0] == 'a' || cmd[0] == 'A') dx->AnalysisJob = TRUE;
 	else dx->AnalysisJob = FALSE;
+	
+	dx->pass_number = 0;
 
 	dx->compact_flag = FALSE;
 	switch(cmd[0]){
@@ -493,6 +496,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	SaveFragmFilesListToDisk(dx);
 	/* free all buffers, free the volume handle (bug #1794336 fixup) */
 	FreeAllBuffers(dx);
+	dx->pass_number = 0xffffffff;
 	KeSetEvent(&sync_event,IO_NO_INCREMENT,FALSE);
 	/*
 	* If the operation was aborted by user or 
@@ -504,6 +508,7 @@ NTSTATUS NTAPI Write_IRPhandler(IN PDEVICE_OBJECT fdo,IN PIRP Irp)
 	return CompleteIrp(Irp,request_status,0);
 
 invalid_request:
+	dx->pass_number = 0xffffffff;
 	KeSetEvent(&sync_event,IO_NO_INCREMENT,FALSE);
 	return CompleteIrp(Irp,STATUS_INVALID_PARAMETER,0);
 }

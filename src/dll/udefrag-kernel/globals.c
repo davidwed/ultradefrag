@@ -85,6 +85,7 @@ void InitDriverResources(void)
 	InitSynchObjects();
 	
 	memset(&Stat,0,sizeof(STATISTIC));
+	Stat.pass_number = 0xffffffff;
 	
 	DebugPrint("User mode driver loaded successfully\n");
 }

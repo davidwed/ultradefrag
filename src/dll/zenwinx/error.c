@@ -146,6 +146,9 @@ static char * __stdcall winx_get_error_description(unsigned long code)
 	case STATUS_NO_MEDIA_IN_DEVICE:
 		msg = "No media in device";
 		break;
+	case STATUS_UNRECOGNIZED_VOLUME:
+		msg = "Cannot recognize file system";
+		break;
 	}
 	return msg;
 }

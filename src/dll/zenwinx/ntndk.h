@@ -145,6 +145,10 @@ typedef LONG NTSTATUS;
 #define NT_SUCCESS(x) ((x)>=0)
 #endif
 
+#ifndef STATUS_UNRECOGNIZED_VOLUME
+#define STATUS_UNRECOGNIZED_VOLUME    ((NTSTATUS)0xC000014F)
+#endif
+
 #ifndef STATUS_WAIT_0
 #define STATUS_WAIT_0                 ((NTSTATUS)0x00000000)
 #endif

@@ -46,6 +46,7 @@ int Analyze(char *volume_name)
 	ULONGLONG tm, time;
 	PFILENAME pfn;
 	HANDLE hFile;
+	ULONG pass_number;
 	
 	DebugPrint("----- Analyze of %s: -----\n",volume_name);
 	
@@ -56,8 +57,10 @@ int Analyze(char *volume_name)
 	DestroyLists();
 	
 	/* reset statistics */
+	pass_number = Stat.pass_number;
 	memset(&Stat,0,sizeof(STATISTIC));
 	Stat.current_operation = 'A';
+	Stat.pass_number = pass_number;
 	
 	/* open the volume */
 	if(OpenVolume(volume_name) < 0) return (-1);

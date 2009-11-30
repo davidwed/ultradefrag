@@ -94,6 +94,7 @@ typedef struct _STATISTIC {
 	UCHAR		current_operation;
 	ULONGLONG	clusters_to_process;
 	ULONGLONG	processed_clusters;
+	ULONG		pass_number; /* for volume optimizer */
 } STATISTIC, *PSTATISTIC;
 
 #endif /* _ULTRADFG_H_ */

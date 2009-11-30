@@ -64,7 +64,11 @@ BOOLEAN context_menu_handler = FALSE;
 /* Partial Device Extension initialization */
 void InitDX(UDEFRAG_DEVICE_EXTENSION *dx)
 {
+	ULONG pass_number;
+	
+	pass_number = dx->pass_number;
 	memset(&dx->z_start,0,(LONG_PTR)&(dx->z_end) - (LONG_PTR)&(dx->z_start));
+	dx->pass_number = pass_number;
 	dx->hVol = NULL;
 	dx->bytes_per_cluster = 0;
 	dx->bytes_per_sector = 0;
@@ -80,6 +84,7 @@ void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx)
 	KeInitializeEvent(&stop_event,NotificationEvent,FALSE);
 	KeInitializeEvent(&unload_event,NotificationEvent,FALSE);
 	memset(&dx->z_start,0,(LONG_PTR)&(dx->z0_end) - (LONG_PTR)&(dx->z_start));
+	dx->pass_number = 0xffffffff;
 	dx->current_operation = 'A';
 	dx->disable_reports = FALSE;
 	dx->pnextLcn = &dx->nextLcn;

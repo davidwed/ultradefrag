@@ -51,7 +51,7 @@ int Optimize(char *volume_name)
 	if(threshold < 2) threshold = 2;
 	/* define starting point */
 	StartingPoint = 0; /* start moving from the beginning of the volume */
-	pass_number = 1;
+	pass_number = 0;
 	for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
 		/* is block larger than 0.5% of the volume space? */
 		if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
@@ -79,6 +79,7 @@ int Optimize(char *volume_name)
 
 	do {
 		DebugPrint("Optimization pass #%u, StartingPoint = %I64u\n",pass_number,StartingPoint);
+		Stat.pass_number = pass_number;
 		/* call optimization routine */
 		if(OptimizationRoutine(volume_name) < 0) return (-1);
 		if(CheckForStopEvent()) return 0;

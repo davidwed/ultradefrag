@@ -58,7 +58,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 		return (-1);
 	}
 	
-	/* FIXME: stop request will fail when completes before this point */
+	/* stop request will fail when completes before this point :-) */
 	NtClearEvent(hStopEvent);
 	
 	/* 1. print header */
@@ -82,6 +82,8 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	if(job_type == OPTIMIZE_JOB) optimize_flag = TRUE;
 	else optimize_flag = FALSE;
 	JobType = job_type;
+	
+	Stat.pass_number = 0;
 	
 	/* 5. analyse volume */
 	if(Analyze(volume_name) < 0) goto failure;
@@ -111,6 +113,7 @@ success:
 	
 	DestroyLists();
 	CloseVolume();
+	Stat.pass_number = 0xffffffff;
 	NtSetEvent(hSynchEvent,NULL);
 	NtClearEvent(hStopEvent);
 	return 0;
@@ -118,6 +121,7 @@ success:
 failure:
 	DestroyLists();
 	CloseVolume();
+	Stat.pass_number = 0xffffffff;
 	NtSetEvent(hSynchEvent,NULL);
 	NtClearEvent(hStopEvent);
 	return (-1);
