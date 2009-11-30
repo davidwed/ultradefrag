@@ -99,6 +99,7 @@ if %errorlevel% neq 0 goto fail
 if "%1" equ "--use-msvc" goto build_source_package
 if "%1" equ "--use-mingw" goto build_source_package
 if "%1" equ "--install" goto build_source_package
+if "%1" equ "" goto build_source_package
 
 :build_x64_installer
 rem copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
