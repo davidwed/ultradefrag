@@ -1,3 +1,58 @@
+;===============================================================================
+;
+; This file will contain developer's diary, in other words, plans for future,
+; current development status and so on.
+;
+;===============================================================================
+
+
+
+;-------------------------------------------------------------------------------
+; 
+; 1 December 2009 - the following notes were found somewhere, they were written
+; approx. two years ago and I forgot about them
+;
+;-------------------------------------------------------------------------------
+
+Part I:
+
+- In version 1.2.4 and later versions cluster map for very small volumes
+   can be very inaccurate. P.a., one strange disk contains just 500 clusters.
+   But internally they are represented (in 1.2.4 version of program) 
+   by 728 blocks. Therefore we have one block (728 / 500) per cluster 
+   plus 229 blocks for the last one. 
+   So, the bottom part of the cluster map is invalid.
+
+- Project targets are:
+   - for end users: simplicity, high speed processing, nice gui
+   - for developers: windows hacking
+
+- Udefrag.dll and zenwinx.dll are components critical for
+    windows boot process. If one of them is missing and boot time defrag is
+    enabled, you will see BSOD at boot time, and Last Known Good configuration 
+    will be not helpful. Currently I don't know how make our software absolutely
+    safe.
+
+- Rxvt (from MSYS; tested version is 2.7.2) terminates udefrag.exe when 
+    you press Ctrl + C without special message sending (for CtrlHandlerRoutine).
+    Therefore, unload function will never executed, 
+    and driver will not be unloaded.
+    This is a bug of rxvt.
+
+- If you terminate dfrg.exe or udefrag.exe (using task manager or rxvt) then 
+    you will have small memory leak (16 bytes) from the nonpaged pool.
+    Reboot is required to free this memory.
+
+Part II:
+
+User's wishes for the next releases:
+
+- website translated into several foreign languages
+- make screensaver
+- defragment volumes that doesn't have any letter assigned
+- implement partially defragmentation
+- process hard ntfs links correctly
+
 ;-------------------------------------------------------------------------------
 ; 
 ; one month later: 21 November 2009
