@@ -171,6 +171,8 @@ cmd_scanned:
 		mov	dx, offset msg2
 		call	print
 		mov	di, offset in_filter
+		;int 3
+		;mov byte ptr [di], 0h
 		mov	cx, FILTER_LEN
 		xor	ax, ax
 		repne	scasb
@@ -197,21 +199,21 @@ cmd_scanned:
 		mov	dx, offset msg4
 		call	print
 		mov	ax, word ptr size_threshold+2
-		show_r	ax
+		show_ax
 		mov	ax, word ptr size_threshold
-		show_r	ax
+		show_ax
 		mov	dx, offset crlf
 		call	print
 		mov	dx, offset msg5
 		call	print
 		mov	ax, word ptr frag_threshold
-		show_r	ax
+		show_ax
 		mov	dx, offset crlf
 		call	print
 		mov	dx, offset msg6
 		call	print
 		mov	ax, word ptr refresh_int
-		show_r	ax
+		show_ax
 		mov	dx, offset crlf
 		call	print
 
@@ -355,6 +357,44 @@ break2:
 		retn
 
 ;------------------------------------------------------------------------------
+; displays ax register contents as a hexadecimal value
+;------------------------------------------------------------------------------
+show_ax_proc:
+		push	ax
+
+		mov	al, ah
+		shr	al, 1		
+		shr	al, 1		
+		shr	al, 1		
+		shr	al, 1		
+		hex_out
+
+		pop	ax
+		push	ax
+
+		mov	al, ah
+		and	al, 01111b
+		hex_out
+
+		pop	ax
+		push	ax
+
+		shr	al, 1		
+		shr	al, 1		
+		shr	al, 1		
+		shr	al, 1		
+		hex_out
+
+		pop	ax
+		push	ax
+
+		and	al, 01111b
+		hex_out
+
+		pop	ax
+		retn
+
+;------------------------------------------------------------------------------
 ; print - prints string pointed by dx, modifies ax
 ;------------------------------------------------------------------------------
 print:
@@ -431,13 +471,8 @@ msg5          db "Fragments threshold: 0x$"
 msg6          db "Progress refresh interval: 0x$"
 crlf          db 13,10,'$'
 
-get_drive_info_failed db "GetDriveInfo (36h int21h) failed!",13,10,'$'
-sec_per_clus_36_21   dw 0
-bytes_per_sec_36_21  dw 0
-clus_per_drive_36_21 dw 0
-
-in_filter     db FILTER_LEN+1 dup (?)
-ex_filter     db FILTER_LEN+1 dup (?)
+in_filter     db FILTER_LEN+1 dup (0) ; not initialized data fails on XP
+ex_filter     db FILTER_LEN+1 dup (0)
 
 program_length equ $-START
 

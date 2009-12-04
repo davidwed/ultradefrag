@@ -35,40 +35,6 @@ hex_out	MACRO
 		int	29h
 ENDM
 
-show_r	MACRO	register:REQ
-		push	register
-
-		IFDIFI	<register>,<ax>
-			mov	ax, register
-		ENDIF
-		mov	al, ah
-		shr	al, 1		
-		shr	al, 1		
-		shr	al, 1		
-		shr	al, 1		
-		hex_out
-
-		pop	ax
-		push	ax
-
-		mov	al, ah
-		and	al, 01111b
-		hex_out
-
-		pop	ax
-		push	ax
-
-		shr	al, 1		
-		shr	al, 1		
-		shr	al, 1		
-		shr	al, 1		
-		hex_out
-
-		pop	ax
-		push	ax
-
-		and	al, 01111b
-		hex_out
-
-		pop	register
+show_ax	MACRO
+		call show_ax_proc
 ENDM

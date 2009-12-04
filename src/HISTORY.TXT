@@ -2,7 +2,7 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 3.3.0 (65.5)   2009-12-
+  Version 3.3.0 (66.0)   2009-12-04
   ------------------------------------------------------------------------------
     - volume optimization algorithm was highly improved
     - fragments threshold filter parameter was added
@@ -13,6 +13,8 @@ HISTORY
       of Windows; this is achieved by adding the User Mode Driver to it
     - program's reliability increased by removing error handlers caused 
       infinite loops
+    - now the program can be used in Windows Safe Mode when the user mode 
+      driver is enabled
 
     - since this version native 64-bit binaries aren't available
       due to the C compilers internal bugs (Windows DDK, Windows SDK, Pelles C, 

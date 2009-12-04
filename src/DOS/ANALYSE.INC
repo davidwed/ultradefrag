@@ -29,6 +29,11 @@ volume_analysis:
 		mesg3 db 13,10,"Clusters per drive:  0x$"
 		mesg4 db 13,10,'$'
 		
+		get_drive_info_failed db "GetDriveInfo (36h int21h) failed!",13,10,'$'
+		sec_per_clus_36_21   dw 0
+		bytes_per_sec_36_21  dw 0
+		clus_per_drive_36_21 dw 0
+
 volume_analysis_proc:
 		call	get_drive_info_36_21
 		
@@ -36,15 +41,15 @@ volume_analysis_proc:
 		mov	dx, offset mesg1
 		call	print
 		mov	ax, word ptr sec_per_clus_36_21
-		show_r ax
+		show_ax
 		mov	dx, offset mesg2
 		call	print
 		mov	ax, word ptr bytes_per_sec_36_21
-		show_r ax
+		show_ax
 		mov	dx, offset mesg3
 		call	print
 		mov	ax, word ptr clus_per_drive_36_21
-		show_r ax
+		show_ax
 		mov	dx, offset mesg4
 		call	print
 

@@ -90,5 +90,5 @@ extraResourceOptions=
 [History]
 i18n.c,1232
 resource.h,1342
-udefrag-gui-config.rc,1909
-main.c,5024
+udefrag-gui-config.rc,1631
+main.c,5456
