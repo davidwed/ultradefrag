@@ -5,7 +5,48 @@
 ;
 ;===============================================================================
 
+;-------------------------------------------------------------------------------
+; 
+; 15 December 2009
+;
+;-------------------------------------------------------------------------------
 
+Great news! I have found the x64 compilation problem's cause. It was not 
+compiler's bug, but my own mistake. NtCreateEvent function prototype was 
+wrong. I've fixed it and now compiled code is right.
+
+The next 3.3.1 release will be the first which have all modules compiled 
+properly.
+
+;-------------------------------------------------------------------------------
+; 
+; 7 December 2009
+;
+;-------------------------------------------------------------------------------
+
+
+I. Few thoughts about autodefrag feature.
+
+Is autodefrag feature really useful or not? I mean a special mode when program 
+is running all the time performing defragmentation during the system idle. In 
+my opinion this is not a great idea because such programs have a tendency to 
+heavily load the system in the most unexpected moments. Therefore we have no 
+motivation to implement the discussed feature. Why make the program less 
+attractive?
+
+If anyone really needs something likewise he could use system scheduler with 
+command line defragmenter or something like that to run defragmentation job 
+periodically.
+
+2. Why not implement complex disk optimization strategies like in JkDefrag?
+
+Of course, this is not difficult to add more optimization strategies to the 
+program, but they have one important disadvantage - any complex method takes a 
+lot of time. On the other hand, UltraDefrag was designed especially to be as 
+fast as possible to reduce time period required for disk defragmentation. 
+Therefore it uses only the simplest algorithms. Therefore complicated methods 
+of disk optimization will break the spirit of the program. Therefore they will 
+be never implemented.
 
 ;-------------------------------------------------------------------------------
 ; 
@@ -27,15 +68,9 @@ Part I:
    - for end users: simplicity, high speed processing, nice gui
    - for developers: windows hacking
 
-- Udefrag.dll and zenwinx.dll are components critical for
-    windows boot process. If one of them is missing and boot time defrag is
-    enabled, you will see BSOD at boot time, and Last Known Good configuration 
-    will be not helpful. Currently I don't know how make our software absolutely
-    safe.
-
 - Rxvt (from MSYS; tested version is 2.7.2) terminates udefrag.exe when 
     you press Ctrl + C without special message sending (for CtrlHandlerRoutine).
-    Therefore, unload function will never executed, 
+    Therefore, unload function will never be executed, 
     and driver will not be unloaded.
     This is a bug of rxvt.
 
@@ -48,9 +83,9 @@ Part II:
 User's wishes for the next releases:
 
 - website translated into several foreign languages
-- make screensaver
+- screensaver
 - defragment volumes that doesn't have any letter assigned
-- implement partially defragmentation
+- partially defragmentation of highly fragmented files
 - process hard ntfs links correctly
 
 ;-------------------------------------------------------------------------------
