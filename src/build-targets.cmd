@@ -29,9 +29,9 @@ echo     build [compiler] [--install] - specify your favorite compiler:
 echo.
 echo                        --use-mingw     (default)
 echo.
+echo                        --use-winddk
+echo                        --use-winsdk
 echo                        --use-msvc      (obsolete)
-echo                        --use-winsdk    (obsolete, produces wrong x64 code)
-echo                        --use-winddk    (obsolete, produces wrong x64 code)
 echo                        --use-pellesc   (experimental, produces wrong code)
 echo                        --use-mingw-x64 (experimental, produces wrong x64 code)
 echo     build --clean      - perform full cleanup instead of the build
@@ -47,11 +47,9 @@ echo     build-micro [compiler] [--install] - specify your favorite compiler:
 echo.
 echo                              --use-mingw (default)
 echo.
-echo                              --use-msvc  (obsolete)
-echo                              --use-winsdk
-echo                                   (obsolete, produces wrong x64 code)
 echo                              --use-winddk
-echo                                   (obsolete, produces wrong x64 code)
+echo                              --use-winsdk
+echo                              --use-msvc  (obsolete)
 echo                              --use-pellesc
 echo                                   (experimental, produces wrong code)
 echo                              --use-mingw-x64

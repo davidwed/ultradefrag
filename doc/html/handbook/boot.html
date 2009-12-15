@@ -64,10 +64,6 @@
 		locking, therefore it can process them as an ordinary files.</p>
 		<p><div align="center"><img src="ud-boot-time.png" alt="Boot time defragmenter" align="bottom" border="0"></div></p>
 
-		<p style="color: darkred;">Unfortunately we cannot provide 64-bit native binaries of the 
-		boot time defragmenter. Therefore currently it cannot be used on 64-bit versions of Windows. 
-		In future this problem will be resolved, of course.</p>
-
 		<p>If the boot time defragmenter is enabled, you will see such picture at every reboot. Note 
 		that you will have a chance to exit safely without a driver loading, just press any key when 
 		the appropriate prompt will be shown. If no key will be pressed during this phase, the boot 
@@ -84,6 +80,15 @@
 		The boot time defragmenter can also be enabled by <span class="code">boot-on</span> command 
 		typed in the command line. To disable them use the <span class="code">boot-off</span> command. 
 		</p>
+		
+		<p style="color: darkred;">Note that when boot time defragmenter is enabled the following 
+		modules becomes critical for the Windows boot process: <span class="code">udefrag.dll, udefrag-kernel.dll, 
+		zenwinx.dll</span>. They are located in <span class="code">%windir%\system32</span> directory. If one of them 
+		is missing during the boot time defragmentation attempt, Windows may crash with BSOD. This is not a program's bug, 
+		this is one of the Windows internal mistakes. To disable the boot time interface on broken system use 
+		<a href="http://en.wikipedia.org/wiki/BartPE">BartPE</a> or other system recovery disk and delete 
+		<span class="code">%windir%\system32\defrag_native.exe</span> file on your system.</p>
+		
 	</div>
 
 	<div class="sect1" lang="en">

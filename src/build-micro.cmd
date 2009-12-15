@@ -24,6 +24,7 @@ set UDEFRAG_PORTABLE=1
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
+echo #define VERSIONINTITLE_PORTABLE "UltraDefrag v%ULTRADFGVER% Portable" >> .\include\ultradfgver.h
 echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
 
 echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\dll\zenwinx\zenwinxver.h

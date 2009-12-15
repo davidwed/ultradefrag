@@ -365,7 +365,7 @@ C:\>_
 		</p>
 <pre class="screen"><strong class="userinput"><code>@echo off
 
-set UD_EX_FILTER=system volume information;temp;recycler
+set UD_EX_FILTER=system volume information;temp;recycler;.zip;.7z;.rar
 set UD_SIZELIMIT=50Mb
 udefrag c: > c:\ud.log
 
@@ -376,7 +376,11 @@ set UD_IN_FILTER=
 udefrag e: >> c:\ud.log
 </code></strong></pre>
 		<p>The command <span class="code">set UD_IN_FILTER=</span> destroys the specified variable. The 
-		appropriate option will have the default value after this command.</p>
+		appropriate option will have default value after this command.</p>
+		
+		<p>Note that archives are excluded from the defragmentation in script above. This is 
+		because archives are usually rarely accessed, therefore may be leaved fragmented without 
+		noticeable performance degradation.</p>
 		
 		<p>The following example demonstrates flexibility of filters which 
 		allow you to perform a very effective defragmentation:</p>

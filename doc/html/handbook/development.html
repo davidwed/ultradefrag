@@ -126,16 +126,8 @@
 		binaries for 64-bit targets. We have tested latest binaries provided by MinGW x64 project team, 
 		but the result was unsuccessful.</p>
 		
-		<p>You may ask, why not to use Microsoft C compiler to produce 64-bit binaries. Very reasonable question,
-		but unfortunately Microsoft C compiler produces wrong 64-bit binaries too, even the latest version included 
-		in Windows 7 SDK. We have used Windows Server 2003 DDK for a long time until we had noticed that compiled 
-		x64 binaries are wrong.</p>
-		
-		<p>Also we have tested Pelles C compiler, but without any success, even in 32-bit mode.</p>
-		
-		<p>Therefore at this moment we have no free C compiler which can produce right 64-bit binaries. We should wait 
-		until it will be available for us. To partially resolve this problem, we will release a special Portable version 
-		of the program which can be executed on 64-bit Windows under WOW64 emulator.</p>
+		<p>Therefore we are using Microsoft C compiler (from the Windows Server 2003 DDK) 
+		to produce 64-bit binaries. Another advantage of MS C compiler - it produces more compact code.</p>
 
 		<p><font size="-1"><b>NOTE:</b> When you build dynamic libraries from the MinGW
 		Developer Studio, the resulting *.a files are invalid. This is because I don't

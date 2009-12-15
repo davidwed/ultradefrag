@@ -102,14 +102,6 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 */	return 1;
 }
 
-/* forces fucked compiler to properly reinitialize registers */
-/*int Fucked_MS__Workaround(void *a,void *b,void *c,void *d)
-{
-	int x = (int)(DWORD)(DWORD_PTR)(((char *)a - (char *)b) + ((char *)c - (char *)d));
-	winx_raise_error("N: %u!",x);
-	return x;
-}*/
-
 /****f* udefrag.common/udefrag_init
 * NAME
 *    udefrag_init
@@ -139,37 +131,11 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 ******/
 int __stdcall udefrag_init(long map_size)
 {
-/*	short event_name[32];
-	int device_number = 0;
-
-	UNICODE_STRING uStr;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	HANDLE hKbEvent = NULL;
-	NTSTATUS Status;
-*/
 	/* 1. Enable neccessary privileges */
 	/*(void)EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)); */
 	(void)winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE);
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE); /* required by GUI client */
 	
-	/* for testing */
-	//winx_unregister_boot_exec_command(L"defrag_native");
-	//winx_register_boot_exec_command(L"defrag_native");
-//	NtSetSystemPowerState(
-//		PowerActionHibernate, /* constants defined in winnt.h */
-//		PowerSystemHibernate,
-//		0
-//		);
-
-//	_snwprintf(event_name,32,L"\\kb_event%u",device_number);
-//	RtlInitUnicodeString(&uStr,event_name);
-//	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
-//	Status = NtCreateEvent(&hKbEvent,STANDARD_RIGHTS_ALL | 0x1ff/*0x1f01ff*/,
-//		&ObjectAttributes,SynchronizationEvent,FALSE);
-//	if(!NT_SUCCESS(Status)){
-//		winx_raise_error("E: Can't create kb_event%u: %x!",device_number,(UINT)Status);
-//	}
-
 	/* 2. only one instance of the program ! */
 	/* create init_event - this must be after privileges enabling (?) */
 	eh = winx_set_error_handler(ErrorHandler);

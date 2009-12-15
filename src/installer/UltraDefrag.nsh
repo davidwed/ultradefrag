@@ -62,26 +62,18 @@ Var AtLeastXP
     ${EndIf}
     ${If} $R0 == "amd64"
     ${AndIf} ${ULTRADFGARCH} != "amd64"
-/*      MessageBox MB_OK|MB_ICONEXCLAMATION \
+      MessageBox MB_OK|MB_ICONEXCLAMATION \
        "This installer cannot be used on x64 version of Windows!$\n \
        Download the amd64 version from http://ultradefrag.sourceforge.net/" \
-       /SD IDOK
-*/      MessageBox MB_OK|MB_ICONEXCLAMATION \
-       "This installer cannot be used on x64 version of Windows!$\n \
-       Download the UltraDefrag Portable version from http://ultradefrag.sourceforge.net/" \
        /SD IDOK
       pop $R0
       Abort
     ${EndIf}
     ${If} $R0 == "ia64"
     ${AndIf} ${ULTRADFGARCH} != "ia64"
-/*      MessageBox MB_OK|MB_ICONEXCLAMATION \
+      MessageBox MB_OK|MB_ICONEXCLAMATION \
        "This installer cannot be used on IA-64 version of Windows!$\n \
        Download the ia64 version from http://ultradefrag.sourceforge.net/" \
-       /SD IDOK
-*/      MessageBox MB_OK|MB_ICONEXCLAMATION \
-       "This installer cannot be used on IA-64 version of Windows!$\n \
-       Download the UltraDefrag Portable version from http://ultradefrag.sourceforge.net/" \
        /SD IDOK
       pop $R0
       Abort

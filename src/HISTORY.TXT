@@ -2,6 +2,15 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
+  Version 3.3.1 (43.0)   2009-12-
+  ------------------------------------------------------------------------------
+    - extremely important x64 bugs were fixed
+    - program is available again for all 64-bit targets
+    - translations submitting is available again through project's forum 
+      which works much better that MediaWiki service used before
+    - one little portable version bug was fixed
+
+
   Version 3.3.0 (66.0)   2009-12-04
   ------------------------------------------------------------------------------
     - volume optimization algorithm was highly improved

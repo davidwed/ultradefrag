@@ -164,25 +164,6 @@ int __stdcall kb_open_internal(int device_number)
 	}
 	
 	/* create a special event object for internal use */
-
-	/*
-	* x64 compiler bug (in Windows Server 2003 DDK):
-	* 
-	* xor	r9d, r9d
-	* ...
-	* call _snwprintf
-	* ; r9 register contains trash now!!!
-	* ...
-	* mov r9b, 1 ; SynchronizationEvent flag
-	* ; the whole r9 register contains trash, only the first byte 
-	* ; of it has valid data
-	* ...
-	* call NtCreateEvent
-	* ; of course, it fails :-)))
-	* ; due to this fucked compiler's bug.
-	* ; This bug exists always, with any optimizations enabled/disabled.
-	*/
-
 	_snwprintf(event_name,32,L"\\kb_event%u",device_number);
 	RtlInitUnicodeString(&uStr,event_name);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);

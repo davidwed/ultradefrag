@@ -89,16 +89,11 @@ Function DriverShow
   SetOutPath $PLUGINSDIR
   File "driver.ini"
 
-!if ${ULTRADFGARCH} != 'amd64'
   ClearErrors
   ReadRegStr $R0 HKLM "Software\UltraDefrag" "UserModeDriver"
   ${Unless} ${Errors}
     WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" $R0
   ${EndUnless}
-!else
-  WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" "1"
-  WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "Flags" "DISABLED"
-!endif
 
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\driver.ini"
   pop $R0
@@ -139,14 +134,11 @@ Function .onInit
 
   ${DisableX64FSRedirection}
   StrCpy $UserModeDriver 1
-
-!if ${ULTRADFGARCH} == 'i386'
   ClearErrors
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
   ${Unless} ${Errors}
     StrCpy $UserModeDriver $R1
   ${EndUnless}
-!endif
 
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   ${EnableX64FSRedirection}
@@ -162,7 +154,7 @@ Section "Ultra Defrag core files (required)" SecCore
   SectionIn RO
   AddSize 44 /* for the components installed in system directories */
   
-  DetailPrint "Uninstall the previous version..."
+  ;;;DetailPrint "Uninstall the previous version..."
   /* waiting fails here => manual deinstallation preferred */
   ;;; ExecWait '"$INSTDIR\uninstall.exe" /S'
 

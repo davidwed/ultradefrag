@@ -105,7 +105,7 @@ function param_action(dialog, param_index)
 		if show_obsolete_options == 1 then
 			dialog.size = "400x234"
 		else
-			dialog.size = "350x143"
+			dialog.size = "350x157"
 		end
 	end
 	return 1
@@ -129,15 +129,16 @@ if show_obsolete_options == 1 then
 			udver, winxver, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, winsdkbase, netpath, vsbinpath, rosinc, apply_patch
 			)
 else
-	ret, udver, winxver, mingwbase, nsisroot, ziproot, apply_patch = 
+	ret, udver, winxver, mingwbase, nsisroot, ziproot, ddkbase, apply_patch = 
 		iup.GetParam("UltraDefrag build configurator",param_action,
 			"UltraDefrag version: %s\n"..
 			"ZenWINX version: %s\n"..
 			"MinGW base path: %s\n"..
 			"NSIS root path: %s\n"..
 			"7-Zip root path: %s\n"..
+			"Windows DDK base path: %s\n"..
 			"Apply patch to MinGW: %b[No,Yes]\n",
-			udver, winxver, mingwbase, nsisroot, ziproot, apply_patch
+			udver, winxver, mingwbase, nsisroot, ziproot, ddkbase, apply_patch
 			)
 end
 if ret == 1 then
