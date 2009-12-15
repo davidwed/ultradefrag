@@ -23,30 +23,65 @@
 
 #include "globals.h"
 
-void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered);
+/*
+* Standard Edition of the program will generate lua reports,
+* Micro Edition - text reports,
+* Portable Edition - both reports.
+*/
 
+/* function prototypes */
+void RemoveLuaReportFromDisk(char *volume_name);
+void RemoveTextReportFromDisk(char *volume_name);
+BOOLEAN SaveLuaReportToDisk(char *volume_name);
+BOOLEAN SaveTextReportToDisk(char *volume_name);
+void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered);
+void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered);
+
+/* reports cleanup */
 void RemoveReportFromDisk(char *volume_name)
+{
+	RemoveTextReportFromDisk(volume_name);
+	RemoveLuaReportFromDisk(volume_name);
+}
+
+void RemoveLuaReportFromDisk(char *volume_name)
 {
 	char path[64];
 	
-#ifndef MICRO_EDITION
 	_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
-#else
-	_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
-#endif
 	path[63] = 0;
-//	DebugPrint("%s\n",path);
 	winx_delete_file(path);
 }
 
-void __stdcall ReportErrorHandler(short *msg)
+void RemoveTextReportFromDisk(char *volume_name)
 {
-	winx_dbg_print("%ws\n",msg);
+	char path[64];
+	
+	_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
+	path[63] = 0;
+	winx_delete_file(path);
 }
 
-#ifndef MICRO_EDITION
-
+/* reports saving */
 BOOLEAN SaveReportToDisk(char *volume_name)
+{
+#ifndef UDEFRAG_PORTABLE
+	#ifdef MICRO_EDITION
+	return SaveTextReportToDisk(volume_name);
+	#else
+	return SaveLuaReportToDisk(volume_name);
+	#endif
+#else /* UDEFRAG_PORTABLE */
+	if(!SaveTextReportToDisk(volume_name)) return FALSE;
+	#ifdef MICRO_EDITION
+	return TRUE;
+	#else
+	return SaveLuaReportToDisk(volume_name);
+	#endif
+#endif
+}
+
+BOOLEAN SaveLuaReportToDisk(char *volume_name)
 {
 	char buffer[512];
 	char path[64];
@@ -71,8 +106,8 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 	winx_fwrite(buffer,1,strlen(buffer),f);
 
-	WriteReportBody(f,FALSE);
-	//WriteReportBody(f,TRUE);
+	WriteLuaReportBody(f,FALSE);
+	//WriteLuaReportBody(f,TRUE);
 
 	strcpy(buffer,"}\r\n");
 	winx_fwrite(buffer,1,strlen(buffer),f);
@@ -83,7 +118,7 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	return TRUE;
 }
 
-void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered)
+void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 {
 	char buffer[256];
 	PFRAGMENTED pf;
@@ -146,15 +181,12 @@ void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 	} while(pf != fragmfileslist);
 }
 
-#else /* MICRO_EDITION */
-
-BOOLEAN SaveReportToDisk(char *volume_name)
+BOOLEAN SaveTextReportToDisk(char *volume_name)
 {
 	short unicode_buffer[256];
-	unsigned short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
+	//unsigned short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
 	char path[64];
 	WINX_FILE *f;
-	ERRORHANDLERPROC eh;
 	
 	if(disable_reports) return TRUE;
 
@@ -174,9 +206,9 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	unicode_buffer[sizeof(unicode_buffer)/sizeof(short) - 1] = 0;
 	winx_fwrite(unicode_buffer,2,wcslen(unicode_buffer),f);
 
-	WriteReportBody(f,FALSE);
-	winx_fwrite(line,2,wcslen(line),f);
-	//WriteReportBody(f,TRUE);
+	WriteTextReportBody(f,FALSE);
+	//winx_fwrite(line,2,wcslen(line),f);
+	//WriteTextReportBody(f,TRUE);
 
 	winx_fclose(f);
 	
@@ -184,7 +216,7 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	return TRUE;
 }
 
-void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered)
+void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 {
 	char buffer[128];
 	PFRAGMENTED pf;
@@ -217,5 +249,3 @@ void WriteReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		pf = pf->next_ptr;
 	} while(pf != fragmfileslist);
 }
-
-#endif /* MICRO_EDITION */
