@@ -54,7 +54,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 2;
 	}
 	
-	small_window = TRUE;
+	if(strstr(lpCmdLine,"--small-window")) small_window = TRUE;
 
 	memset(&wcx,0,sizeof(WNDCLASSEX));
 	wcx.cbSize = sizeof(WNDCLASSEX);
