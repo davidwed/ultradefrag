@@ -20,6 +20,10 @@ cd ..\udefrag
 lua ..\..\tools\mkmod.lua udefrag.build
 if %errorlevel% neq 0 goto end
 
+cd ..\udefrag-next-generation
+lua ..\..\tools\mkmod.lua udefrag-nextgen.build
+if %errorlevel% neq 0 goto end
+
 rem skip lua when building the micro edition
 if "%UD_MICRO_EDITION%" equ "1" goto skip_lua
 

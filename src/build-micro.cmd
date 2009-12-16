@@ -26,6 +26,7 @@ echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE_PORTABLE "UltraDefrag v%ULTRADFGVER% Portable" >> .\include\ultradfgver.h
 echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
+echo #define NGVERSIONINTITLE "UltraDefrag Next Generation v%ULTRADFGVER%" >> .\include\ultradfgver.h
 
 echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\dll\zenwinx\zenwinxver.h
 echo #define ZENWINX_VERSION2 %ZENWINX_VERSION2% >> .\dll\zenwinx\zenwinxver.h
@@ -47,6 +48,8 @@ xcopy /I /Y /Q    .\share .\obj\share
 xcopy /I /Y /Q    .\dll\udefrag-kernel .\obj\udefrag-kernel
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
+xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
+xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
 
 copy /Y .\obj\share\*.c .\obj\console\
 

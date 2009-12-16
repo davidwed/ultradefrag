@@ -8,6 +8,7 @@ HISTORY
     - program is available again for all 64-bit targets
     - translations submitting is available again through project's forum 
       which works much better that MediaWiki service used before
+    - UltraDefrag Next Generation graphical interface was added
     - one little portable version bug was fixed
 
 

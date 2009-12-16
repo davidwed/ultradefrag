@@ -59,6 +59,14 @@ type manifest.part3 >> .\obj\bootexctrl\bootexctrl.manifest
 echo processorArchitecture="%1" >> .\obj\bootexctrl\bootexctrl.manifest
 type manifest.part4 >> .\obj\bootexctrl\bootexctrl.manifest
 
+type manifest.part1 > .\obj\udefrag-next-generation\udefrag-nextgen.manifest
+echo version="%ULTRADFGVER%.0" name="udefrag-nextgen" processorArchitecture="%1" >> .\obj\udefrag-next-generation\udefrag-nextgen.manifest
+type manifest.part2 >> .\obj\udefrag-next-generation\udefrag-nextgen.manifest
+echo UltraDefrag Next Generation >> .\obj\udefrag-next-generation\udefrag-nextgen.manifest
+type manifest.part3 >> .\obj\udefrag-next-generation\udefrag-nextgen.manifest
+echo processorArchitecture="%1" >> .\obj\udefrag-next-generation\udefrag-nextgen.manifest
+type manifest.part4 >> .\obj\udefrag-next-generation\udefrag-nextgen.manifest
+
 type manifest.part1 > .\obj\lua5.1\lua.manifest
 echo version="5.1.2.0" name="Lua" processorArchitecture="%1" >> .\obj\lua5.1\lua.manifest
 type manifest.part2 >> .\obj\lua5.1\lua.manifest
@@ -75,6 +83,7 @@ copy /Y .\obj\gui\res\dfrg.manifest .\gui\res\dfrg.manifest
 copy /Y .\obj\gui-launcher\udefrag-gui.manifest .\gui-launcher\udefrag-gui.manifest
 copy /Y .\obj\udefrag-gui-config\res\config.manifest .\udefrag-gui-config\res\config.manifest
 copy /Y .\obj\bootexctrl\bootexctrl.manifest .\bootexctrl\bootexctrl.manifest
+copy /Y .\obj\udefrag-next-generation\udefrag-nextgen.manifest .\udefrag-next-generation\udefrag-nextgen.manifest
 copy /Y .\obj\lua5.1\lua.manifest .\lua5.1\lua.manifest
 
 :L1
