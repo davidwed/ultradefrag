@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <shellapi.h>
 
-#include "../include/version.h"
+#include "../include/ultradfgver.h"
 #include "resource.h"
 
 BOOL small_window = FALSE;
@@ -187,7 +187,7 @@ LRESULT WINAPI WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 					164,350,70,25,hwnd,(HMENU)IDC_EXIT,hInst,NULL);
 		}
 
-		SendMessage(hBtnScenario,WM_SETFOCUS,0,0);
+		//SendMessage(hBtnScenario,WM_SETFOCUS,0,0);
 		memset(&lf,0,sizeof(LOGFONT));
 		/* default font should be Courier New 9pt */
 		strcpy(lf.lfFaceName,"Courier New");
@@ -218,7 +218,12 @@ LRESULT WINAPI WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
-	case WM_LBUTTONDOWN:
+/*	case WM_KEYDOWN:
+		if(wParam == VK_TAB){
+			SendMessage(hBtnStart,WM_SETFOCUS,0,0);
+		}
+		break;
+*/	case WM_LBUTTONDOWN:
 		/* make our window think that the user moves the caption bar */
 		SendMessage(hwnd,WM_NCLBUTTONDOWN,HTCAPTION,lParam);
         break;
