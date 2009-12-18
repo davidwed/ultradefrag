@@ -62,6 +62,7 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	* Works only on MBR-formatted disks. To retrieve information about 
 	* GPT-formatted disks use IOCTL_DISK_GET_PARTITION_INFO_EX.
 	*/
+	RtlZeroMemory(&part_info,sizeof(PARTITION_INFORMATION));
 	status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
 				&part_info, sizeof(PARTITION_INFORMATION));
@@ -88,6 +89,7 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	* on GPT disks and when partition type is 0x27
 	* FSCTL_GET_NTFS_VOLUME_DATA request can be used.
 	*/
+	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
@@ -121,6 +123,7 @@ NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx)
 	NTSTATUS status;
 	ULONGLONG mft_len;
 
+	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
@@ -323,6 +326,7 @@ NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 
 	nfrib.FileReferenceNumber = mft_id;
 
+	RtlZeroMemory(pnfrob,nfrob_size);
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 			FSCTL_GET_NTFS_FILE_RECORD, \
 			&nfrib,sizeof(nfrib), \

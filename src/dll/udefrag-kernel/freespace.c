@@ -42,6 +42,7 @@ NTSTATUS FillFreeSpaceMap(void)
 	bitMappings = (PBITMAP_DESCRIPTOR)BitMap;
 	nextLcn = 0; cluster = LLINVALID;
 	do {
+		RtlZeroMemory(bitMappings,BITMAPSIZE);
 		status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,0,&ioStatus,
 			FSCTL_GET_VOLUME_BITMAP,&nextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
 		if(status == STATUS_PENDING){

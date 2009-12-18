@@ -194,6 +194,7 @@ int __stdcall winx_get_drive_type(char letter)
 		return (-1);
 	}
 	/* this call is applicable only for w2k and later versions */
+	RtlZeroMemory(&pdi,sizeof(PROCESS_DEVICEMAP_INFORMATION));
 	Status = NtQueryInformationProcess(NtCurrentProcess(),
 					ProcessDeviceMap,
 					&pdi,sizeof(PROCESS_DEVICEMAP_INFORMATION),
@@ -252,6 +253,7 @@ int __stdcall winx_get_drive_type(char letter)
 	*/
 	if(!internal_open_rootdir(letter,&hFile))
 		return (-1);
+	RtlZeroMemory(&ffdi,sizeof(FILE_FS_DEVICE_INFORMATION));
 	Status = NtQueryVolumeInformationFile(hFile,&iosb,
 					&ffdi,sizeof(FILE_FS_DEVICE_INFORMATION),
 					FileFsDeviceInformation);
@@ -336,8 +338,8 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 		winx_raise_error("W: winx_get_volume_size(): no enough memory!");
 		return (-1);
 	}
-	/* now we have zero filled space pointed by pffs */
 
+	/* now we have zero filled space pointed by pffs */
 	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pffs,
 				sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	NtClose(hRoot);
@@ -406,6 +408,7 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 	buffer[0] = 0;
 	if(!internal_open_rootdir(letter,&hRoot)) return (-1);
 	pFileFsAttribute = (PFILE_FS_ATTRIBUTE_INFORMATION)buf;
+	RtlZeroMemory(pFileFsAttribute,FS_ATTRIBUTE_BUFFER_SIZE);
 	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pFileFsAttribute,
 				FS_ATTRIBUTE_BUFFER_SIZE,FileFsAttributeInformation);
 	NtClose(hRoot);

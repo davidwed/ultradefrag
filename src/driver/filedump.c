@@ -59,6 +59,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 	fileMappings = (PGET_RETRIEVAL_DESCRIPTOR)(dx->FileMap);
 	counter = 0;
 	do {
+		RtlZeroMemory(fileMappings,FILEMAPSIZE * sizeof(LARGE_INTEGER));
 		Status = ZwFsControlFile(hFile, NULL, NULL, 0, &ioStatus, \
 						FSCTL_GET_RETRIEVAL_POINTERS, \
 						dx->pstartVcn, sizeof(ULONGLONG), \

@@ -23,13 +23,24 @@
 /* Note: this file also replaces standard winioctl.h header. */
 
 /*
-* Extremely important note for the 64-bit compilation.
+* Extremely important notes for the 64-bit compilation.
 *
-* The following function prototype causes wrong compiled code:
-* NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,BOOLEAN,BOOLEAN);
+* 1. The following function prototype causes wrong compiled code:
+*    NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,BOOLEAN,BOOLEAN);
 *
-* Right prototype does not contain BOOLEAN keywords:
-* NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,ULONG,ULONG);
+*    Right prototype does not contain BOOLEAN keywords:
+*    NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,ULONG,ULONG);
+*
+* 2. Always fill output buffer with zeros before the following system calls:
+*    NtDeviceIoControlFile        (?)
+*    NtFsControlFile              (!)
+*    NtQueryInformationProcess    (?)
+*    NtQueryValueKey              (?)
+*    NtQueryVolumeInformationFile (!)
+*    NtQueryDirectoryFile         (?)
+*    NtQuerySystemInformation     (!?)
+*
+*    Otherwise Windows may trash stack during these calls.
 */
 
 #define _CRT_SECURE_NO_WARNINGS /* for Windows Server 2008 SDK compiler */

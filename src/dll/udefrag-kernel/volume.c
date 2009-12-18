@@ -51,7 +51,7 @@ int GetDriveGeometry(char *volume_name)
 	WINX_FILE *fRoot;
 	#define FLAG 'r'
 
-	FILE_FS_SIZE_INFORMATION FileFsSize;
+	FILE_FS_SIZE_INFORMATION *pFileFsSize;
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS status;
 	ULONGLONG bpc; /* bytes per cluster */
@@ -78,23 +78,39 @@ int GetDriveGeometry(char *volume_name)
 		winx_raise_error("E: Cannot open the root directory %s!",path);
 		return (-1);
 	}
+
+	/*
+	* Oh, you fucked ms c x64 compiler :(((
+	* FILE_FS_SIZE_INFORMATION structure needs to be filled by zeros
+	* before system call. But x64 compiler doesn't allow to do this.
+	* Therefore we must allocate memory...
+	*/
+	pFileFsSize = winx_virtual_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
+	if(!pFileFsSize){
+		winx_fclose(fRoot);
+		winx_raise_error("W: winx_get_volume_size(): no enough memory!");
+		return (-1);
+	}
+
+	/* now we have zero filled space pointed by pFileFsSize */
 	/* get logical geometry */
-	status = NtQueryVolumeInformationFile(winx_fileno(fRoot),&iosb,&FileFsSize,
+	status = NtQueryVolumeInformationFile(winx_fileno(fRoot),&iosb,pFileFsSize,
 			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	winx_fclose(fRoot);
 	if(status != STATUS_SUCCESS){
+		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
 		winx_raise_error("E: FileFsSizeInformation() request failed for %s: %x!",
 			path,(UINT)status);
 		return (-1);
 	}
 
-	bpc = FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
-	sectors_per_cluster = FileFsSize.SectorsPerAllocationUnit;
+	bpc = pFileFsSize->SectorsPerAllocationUnit * pFileFsSize->BytesPerSector;
+	sectors_per_cluster = pFileFsSize->SectorsPerAllocationUnit;
 	bytes_per_cluster = bpc;
-	bytes_per_sector = FileFsSize.BytesPerSector;
-	Stat.total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
-	Stat.free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
-	clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
+	bytes_per_sector = pFileFsSize->BytesPerSector;
+	Stat.total_space = pFileFsSize->TotalAllocationUnits.QuadPart * bpc;
+	Stat.free_space = pFileFsSize->AvailableAllocationUnits.QuadPart * bpc;
+	clusters_total = (ULONGLONG)(pFileFsSize->TotalAllocationUnits.QuadPart);
 	if(bytes_per_cluster) clusters_per_256k = _256K / bytes_per_cluster;
 	DebugPrint("Total clusters: %I64u\n",clusters_total);
 	DebugPrint("Cluster size: %I64u\n",bytes_per_cluster);
@@ -105,9 +121,11 @@ int GetDriveGeometry(char *volume_name)
 	
 	/* validate geometry */
 	if(!clusters_total || !bytes_per_cluster){
+		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
 		winx_raise_error("E: Wrong volume geometry!");
 		return (-1);
 	}
+	winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
 	return 0;
 }
 

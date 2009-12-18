@@ -75,6 +75,7 @@ BOOLEAN DumpFile(PFILENAME pfn)
 	fileMappings = (PGET_RETRIEVAL_DESCRIPTOR)(FileMap);
 	counter = 0;
 	do {
+		RtlZeroMemory(fileMappings,FILEMAPSIZE * sizeof(LARGE_INTEGER));
 		Status = NtFsControlFile(hFile, NULL, NULL, 0, &ioStatus, \
 						FSCTL_GET_RETRIEVAL_POINTERS, \
 						&startVcn, sizeof(ULONGLONG), \

@@ -80,6 +80,7 @@ BOOLEAN FindFiles(WCHAR *ParentDirectoryPath)
 		} else {
 			pFileInfo = (PVOID)((char *)(ULONG_PTR)pFileInfoFirst + sizeof(PFILE_BOTH_DIR_INFORMATION));
 			pFileInfo->FileIndex = 0;
+			RtlZeroMemory(pFileInfo,FIND_DATA_SIZE);
 			Status = NtQueryDirectoryFile(DirectoryHandle,NULL,NULL,NULL,
 									&IoStatusBlock,(PVOID)pFileInfo,
 									FIND_DATA_SIZE,

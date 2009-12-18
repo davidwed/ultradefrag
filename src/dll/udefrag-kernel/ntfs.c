@@ -62,6 +62,7 @@ void CheckForNtfsPartition(void)
 	* Works only on MBR-formatted disks. To retrieve information about 
 	* GPT-formatted disks use IOCTL_DISK_GET_PARTITION_INFO_EX.
 	*/
+	RtlZeroMemory(&part_info,sizeof(PARTITION_INFORMATION));
 	status = NtDeviceIoControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
 				&part_info, sizeof(PARTITION_INFORMATION));
@@ -85,6 +86,7 @@ void CheckForNtfsPartition(void)
 	* on GPT disks and when partition type is 0x27
 	* FSCTL_GET_NTFS_VOLUME_DATA request can be used.
 	*/
+	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
 	status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
@@ -115,6 +117,7 @@ NTSTATUS GetMftLayout(void)
 	NTSTATUS status;
 	ULONGLONG mft_len;
 
+	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
 	status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
@@ -312,6 +315,7 @@ NTSTATUS GetMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 
 	nfrib.FileReferenceNumber = mft_id;
 
+	RtlZeroMemory(pnfrob,nfrob_size); /* required by x64 system, otherwise it trashes stack */
 	status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 			FSCTL_GET_NTFS_FILE_RECORD, \
 			&nfrib,sizeof(nfrib), \

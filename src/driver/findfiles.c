@@ -85,6 +85,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 		} else {
 			pFileInfo = (PVOID)((char *)(ULONG_PTR)pFileInfoFirst + sizeof(PFILE_BOTH_DIR_INFORMATION));
 			pFileInfo->FileIndex = 0;
+			RtlZeroMemory(pFileInfo,FIND_DATA_SIZE);
 			Status = ZwQueryDirectoryFile(DirectoryHandle,NULL,NULL,NULL,
 									&IoStatusBlock,(PVOID)pFileInfo,
 									FIND_DATA_SIZE,

@@ -193,6 +193,8 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 		return (-1);
 	}
 	
+	if(out_buffer) RtlZeroMemory(out_buffer,out_size);
+	
 	if(pbytes_returned) *pbytes_returned = 0;
 	if((code >> 16) == FILE_DEVICE_FILE_SYSTEM){ /* on x64? */
 		Status = NtFsControlFile(f->hFile,NULL,NULL,NULL,

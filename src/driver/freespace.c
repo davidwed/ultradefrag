@@ -39,6 +39,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 	bitMappings = (PBITMAP_DESCRIPTOR)(dx->BitMap);
 	*dx->pnextLcn = 0; cluster = LLINVALID;
 	do {
+		RtlZeroMemory(bitMappings,BITMAPSIZE);
 		status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
 			FSCTL_GET_VOLUME_BITMAP,
 			dx->pnextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);

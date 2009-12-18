@@ -202,7 +202,7 @@ int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 
 	kip.LedFlags = LedFlags;
 	kip.UnitId = 0;
-	
+
 	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
 			&iosb,IOCTL_KEYBOARD_SET_INDICATORS,
 			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS),NULL,0);
@@ -225,6 +225,7 @@ int __stdcall kb_check(HANDLE hKbDevice)
 	int i;
 	
 	/* try to get LED flags */
+	RtlZeroMemory(&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS));
 	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
 			&iosb,IOCTL_KEYBOARD_QUERY_INDICATORS,NULL,0,
 			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS));

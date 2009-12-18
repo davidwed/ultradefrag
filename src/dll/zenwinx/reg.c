@@ -227,7 +227,7 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 		return (-1);
 	}
 	data_size += additional_space_size;
-	data_buffer = winx_virtual_alloc(data_size);
+	data_buffer = winx_virtual_alloc(data_size); /* allocates zero filled buffer */
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			data_buffer,data_size,&data_size2);
 	if(status != STATUS_SUCCESS){

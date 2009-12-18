@@ -97,6 +97,7 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 
 	/* get logical geometry */
+	RtlZeroMemory((void *)&FileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
 	status = ZwQueryVolumeInformationFile(hFile,&iosb,&FileFsSize,
 			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	ZwClose(hFile);
