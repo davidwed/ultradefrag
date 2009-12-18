@@ -100,15 +100,9 @@ function produce_ddk_makefile()
 	f:write("TARGETNAME=", name, "\n")
 	f:write("TARGETPATH=obj\n")
 
-	-- x64 C compiler included in Windows Server 2003 DDK
-	-- produces sometimes wrong code, therefore we must
-	-- disable all optimizations for 64-bit platforms
 	-- f:write("AMD64_OPTIMIZATION=/Od\n")
 	-- f:write("IA64_OPTIMIZATION=/Od\n\n")
-	-- on x86 systems I have never encounered such problems
 	-- f:write("386_OPTIMIZATION=/Ot /Og\n") -- never tested!!!
-	-- P.S.: This workaround eliminates some wrong compiled code (???),
-	-- but generates wrong instructions in other places.
 
 	if     target_type == "console" then t = "PROGRAM"; umt = "console"
 	elseif target_type == "gui"     then t = "PROGRAM"; umt = "windows"

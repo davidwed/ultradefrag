@@ -92,7 +92,6 @@ int Analyze(char *volume_name)
 	switch(partition_type){
 	case NTFS_PARTITION:
 		/* Experimental support of retrieving information directly from MFT. */
-		/* Experimental support of retrieving information directly from MFT. */
 		/*
 		* ScanMFT() causes BSOD on NT 4.0, even in user mode!
 		* It seems that NTFS driver is imperfect in this system
