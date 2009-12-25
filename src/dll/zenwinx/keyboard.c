@@ -24,6 +24,8 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+char * __stdcall winx_get_error_description(unsigned long code);
+
 #define MAX_NUM_OF_KEYBOARDS 100
 
 typedef struct _KEYBOARD {
@@ -150,15 +152,21 @@ int __stdcall kb_open_internal(int device_number)
 			    &ObjectAttributes,&IoStatusBlock,NULL,FILE_ATTRIBUTE_NORMAL/*0x80*/,
 			    0,FILE_OPEN/*1*/,FILE_DIRECTORY_FILE/*1*/,NULL,0);
 	if(!NT_SUCCESS(Status)){
-		if(device_number < 2)
-			winx_raise_error("W: Can't open the keyboard %ws: %x!",
+		if(device_number < 2){
+			winx_dbg_print_ex("Can't open the keyboard %ws: %x!",
 				device_name,(UINT)Status);
+			winx_printf("\nCan't open the keyboard %ws: %x!\n",
+				device_name,(UINT)Status);
+			winx_printf("%s\n",winx_get_error_description((ULONG)Status));
+		}
 		return (-1);
 	}
 	
 	/* ensure that we have opened a really connected keyboard */
 	if(kb_check(hKbDevice) < 0){
-		winx_raise_error("W: Invalid keyboard device %ws: %x!",device_name,(UINT)Status);
+		winx_dbg_print_ex("Invalid keyboard device %ws: %x!",device_name,(UINT)Status);
+		winx_printf("\nInvalid keyboard device %ws: %x!\n",device_name,(UINT)Status);
+		winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 		NtCloseSafe(hKbDevice);
 		return (-1);
 	}
@@ -171,7 +179,9 @@ int __stdcall kb_open_internal(int device_number)
 		&ObjectAttributes,SynchronizationEvent,FALSE);
 	if(!NT_SUCCESS(Status)){
 		NtCloseSafe(hKbDevice);
-		winx_raise_error("E: Can't create kb_event%u: %x!",device_number,(UINT)Status);
+		winx_dbg_print_ex("Can't create kb_event%u: %x!",device_number,(UINT)Status);
+		winx_printf("\nCan't create kb_event%u: %x!\n",device_number,(UINT)Status);
+		winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 		return (-1);
 	}
 	
@@ -187,7 +197,7 @@ int __stdcall kb_open_internal(int device_number)
 		}
 	}
 
-	winx_raise_error("E: kb array is full!");
+	winx_printf("\nkb array is full!\n");
 	return (-1);
 }
 
@@ -277,8 +287,11 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 				* This is a hard error because the next read request
 				* may destroy stack where pKID pointed data may be allocated.
 				*/
-				winx_raise_error("E: NtCancelIoFile for KeyboadClass%u failed: %x!",
+				winx_dbg_print_ex("E: NtCancelIoFile for KeyboadClass%u failed: %x!",
 					kb[kb_index].device_number,(UINT)Status);
+				winx_printf("\nNtCancelIoFile for KeyboadClass%u failed: %x!\n",
+					kb[kb_index].device_number,(UINT)Status);
+				winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 				/* Terminate the program! */
 				winx_exit(1000);
 				return (-1);
@@ -289,8 +302,11 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: Cannot read the KeyboadClass%u device: %x!",
+		winx_dbg_print_ex("Cannot read the KeyboadClass%u device: %x!",
 			kb[kb_index].device_number,(UINT)Status);
+		winx_printf("\nCannot read the KeyboadClass%u device: %x!\n",
+			kb[kb_index].device_number,(UINT)Status);
+		winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 		return (-1);
 	}
 	return 0;

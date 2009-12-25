@@ -37,6 +37,9 @@
 #define IDI_REMOVABLE                   130
 
 #define IDR_ACCELERATOR2                131
+#define IDD_INIT_ERROR                  132
+#define IDD_STOP_ERROR                  133
+#define IDD_JOB_ERROR                   134
 
 #define IDM_STATUSBAR                   500
 
@@ -62,14 +65,5 @@
 #define IDC_PIC1                        1059
 
 #define IDC_SHUTDOWN                    1060
-
-// Next default values for new objects
-// 
-#ifdef APSTUDIO_INVOKED
-#ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        133
-#define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1062
-#define _APS_NEXT_SYMED_VALUE           101
-#endif
-#endif
+#define IDC_PIC2                        1061
+#define IDC_DBGVIEW_HELP                1062

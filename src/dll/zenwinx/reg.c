@@ -70,7 +70,7 @@ int __stdcall winx_register_boot_exec_command(short *command)
 	}
 	
 	if(data->Type != REG_MULTI_SZ){
-		winx_raise_error("E: BootExecute value has wrong type 0x%x!",
+		winx_dbg_print("BootExecute value has wrong type 0x%x!",
 				data->Type);
 		winx_virtual_free((void *)data,size);
 		NtCloseSafe(hKey);
@@ -81,7 +81,7 @@ int __stdcall winx_register_boot_exec_command(short *command)
 	length = (data->DataLength >> 1) - 1;
 	for(i = 0; i < length;){
 		pos = value + i;
-		//winx_raise_error("%ws",pos);
+		//winx_dbg_print("%ws",pos);
 		len = wcslen(pos) + 1;
 		if(!wcscmp(pos,command)) goto done;
 		i += len;
@@ -140,7 +140,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	}
 	
 	if(data->Type != REG_MULTI_SZ){
-		winx_raise_error("E: BootExecute value has wrong type 0x%x!",
+		winx_dbg_print("BootExecute value has wrong type 0x%x!",
 				data->Type);
 		winx_virtual_free((void *)data,size);
 		NtCloseSafe(hKey);
@@ -153,7 +153,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	new_value_size = (length + 1) << 1;
 	new_value = winx_virtual_alloc(new_value_size);
 	if(!new_value){
-		winx_raise_error("E: Cannot allocate %u bytes of memory"
+		winx_dbg_print("Cannot allocate %u bytes of memory"
 						 "for new BootExecute value!",new_value_size);
 		winx_virtual_free((void *)data,size);
 		NtCloseSafe(hKey);
@@ -164,7 +164,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	new_length = 0;
 	for(i = 0; i < length;){
 		pos = value + i;
-		//winx_raise_error("%ws",pos);
+		//winx_dbg_print("%ws",pos);
 		len = wcslen(pos) + 1;
 		if(wcscmp(pos,command)){
 			wcscpy(new_value + new_length,pos);
@@ -201,7 +201,7 @@ static int __stdcall open_smss_key(HANDLE *pKey)
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
 	status = NtOpenKey(pKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&oa);
 	if(status != STATUS_SUCCESS){
-		winx_raise_error("E: Can't open %ws: %x!",
+		winx_dbg_print_ex("Can't open %ws: %x!",
 			us.Buffer,(UINT)status);
 		return (-1);
 	}
@@ -222,7 +222,7 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			NULL,0,&data_size);
 	if(status != STATUS_BUFFER_TOO_SMALL){
-		winx_raise_error("E: Cannot query BootExecute value size: %x!",
+		winx_dbg_print_ex("Cannot query BootExecute value size: %x!",
 				(UINT)status);
 		return (-1);
 	}
@@ -231,7 +231,7 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			data_buffer,data_size,&data_size2);
 	if(status != STATUS_SUCCESS){
-		winx_raise_error("E: Cannot query BootExecute value: %x!",
+		winx_dbg_print_ex("Cannot query BootExecute value: %x!",
 				(UINT)status);
 		winx_virtual_free(data_buffer,data_size);
 		return (-1);
@@ -250,7 +250,7 @@ static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 	RtlInitUnicodeString(&us,L"BootExecute");
 	status = NtSetValueKey(hKey,&us,0,REG_MULTI_SZ,data,size);
 	if(status != STATUS_SUCCESS){
-		winx_raise_error("E: Cannot set BootExecute value: %x!",
+		winx_dbg_print_ex("Cannot set BootExecute value: %x!",
 				(UINT)status);
 		return (-1);
 	}
@@ -264,6 +264,6 @@ static void __stdcall flush_smss_key(HANDLE hKey)
 	
 	status = NtFlushKey(hKey);
 	if(status != STATUS_SUCCESS)
-		winx_raise_error("E: Cannot update Session Manager "
+		winx_dbg_print_ex("Cannot update Session Manager "
 				"registry key on disk: %x!",(UINT)status);
 }

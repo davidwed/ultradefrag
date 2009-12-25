@@ -32,6 +32,7 @@
 /* function prototypes */
 void RemoveLuaReportFromDisk(char *volume_name);
 void RemoveTextReportFromDisk(char *volume_name);
+void RemoveHtmlReportFromDisk(char *volume_name);
 BOOLEAN SaveLuaReportToDisk(char *volume_name);
 BOOLEAN SaveTextReportToDisk(char *volume_name);
 void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered);
@@ -42,6 +43,7 @@ void RemoveReportFromDisk(char *volume_name)
 {
 	RemoveTextReportFromDisk(volume_name);
 	RemoveLuaReportFromDisk(volume_name);
+	RemoveHtmlReportFromDisk(volume_name);
 }
 
 void RemoveLuaReportFromDisk(char *volume_name)
@@ -58,6 +60,15 @@ void RemoveTextReportFromDisk(char *volume_name)
 	char path[64];
 	
 	_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
+	path[63] = 0;
+	winx_delete_file(path);
+}
+
+void RemoveHtmlReportFromDisk(char *volume_name)
+{
+	char path[64];
+	
+	_snprintf(path,64,"\\??\\%s:\\fraglist.htm",volume_name);
 	path[63] = 0;
 	winx_delete_file(path);
 }

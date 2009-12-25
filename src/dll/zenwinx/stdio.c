@@ -44,7 +44,7 @@ void winx_print(char *string)
 	UNICODE_STRING uStr;
 	int i, len;
 
-	/* never call winx_raise_error() here */
+	/* never call winx_dbg_print_ex() here */
 	if(!string) return;
 	RtlInitAnsiString(&aStr,string);
 	if(RtlAnsiStringToUnicodeString(&uStr,&aStr,TRUE) == STATUS_SUCCESS){
@@ -77,7 +77,7 @@ int __cdecl winx_putch(int ch)
 	UNICODE_STRING uStr;
 	short s[2];
 
-	/* never call winx_raise_error() here */
+	/* never call winx_dbg_print_ex() here */
 	s[0] = (short)ch; s[1] = 0;
 	RtlInitUnicodeString(&uStr,s);
 	NtDisplayString(&uStr);
@@ -124,7 +124,7 @@ int __cdecl winx_printf(const char *format, ...)
 	char *big_buffer = NULL;
 	int size = INTERNAL_BUFFER_SIZE * 2;
 	
-	/* never call winx_raise_error() here */
+	/* never call winx_dbg_print_ex() here */
 
 	if(!format) return 0;
 	/* if we have just one argument then call winx_print directly */
@@ -210,7 +210,7 @@ int __cdecl winx_kbhit(int msec)
 	if(kb_read(&kbd,msec) < 0) return (-1);
 	IntTranslateKey(&kbd,&kbd_rec);
 	if(!kbd_rec.bKeyDown){
-		/*winx_raise_error("N: winx_kbhit(): The key was released!");*/
+		/*winx_printf("\nwinx_kbhit(): The key was released!\n");*/
 		return (-1);
 	}
 	return (int)kbd_rec.AsciiChar;
@@ -250,7 +250,7 @@ int __cdecl winx_breakhit(int msec)
 
 	if(kb_read(&kbd,msec) < 0) return (-1);
 	if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d)) return 0;
-	/*winx_raise_error("N: winx_breakhit(): Other key was pressed.");*/
+	/*winx_printf("\nwinx_breakhit(): Other key was pressed.\n");*/
 	return (-1);
 }
 
@@ -337,7 +337,7 @@ int __cdecl winx_gets(char *string,int n)
 	int ch;
 
 	if(!string){
-		winx_raise_error("E: winx_gets() invalid string!");
+		winx_printf("\nwinx_gets() invalid string!\n");
 		return (-1);
 	}
 	
@@ -350,7 +350,7 @@ repeate_attempt:
 		if(ch == 13) { winx_putch('\n'); string[i] = 0; return (i+1); }
 		string[i] = (char)ch;
 	}
-	winx_raise_error("W: winx_gets() buffer overflow!");
+	winx_printf("\nwinx_gets() buffer overflow!\n");
 	string[n-1] = 0;
 	return n;
 }

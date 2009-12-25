@@ -142,17 +142,17 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 	type = winx_get_drive_type(letter);
 	if(type < 0) return (-1);
 	if(type == DRIVE_CDROM || type == DRIVE_REMOTE){
-		winx_raise_error("W: Volume must be on non-cdrom local drive, but it's %u!",type);
+		winx_dbg_print("Volume %c: must be on non-cdrom local drive, but it's %u!",letter,type);
 		return (-1);
 	}
 	if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
-		winx_raise_error("W: It seems that volume letter is assigned by \'subst\' command!");
+		winx_dbg_print("It seems that %c: volume letter is assigned by \'subst\' command!",letter);
 		return (-1);
 	}
 	if(type == DRIVE_REMOVABLE){
 		*is_removable = TRUE;
 		if(skip_removable){
-			winx_raise_error("W: It's removable volume!");
+			winx_dbg_print("%c: It's removable volume!",letter);
 			return (-1);
 		}
 	}

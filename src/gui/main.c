@@ -25,7 +25,7 @@
 
 /* Global variables */
 HINSTANCE hInstance;
-HWND hWindow;
+HWND hWindow = NULL;
 HWND hMap;
 signed int delta_h = 0;
 HFONT hFont = NULL;
@@ -57,6 +57,7 @@ void InitFont(void);
 void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
 
+#if 0
 /* Display critical errors only. */
 void __stdcall ErrorHandler(short *msg)
 {
@@ -68,6 +69,75 @@ void __stdcall ErrorHandler(short *msg)
 	else
 		MessageBoxW(NULL,msg,L"Error!",MB_OK | MB_ICONHAND);
 }
+#endif
+
+void OpenWebPage(char *page)
+{
+	char path[MAX_PATH];
+	HINSTANCE hApp;
+	
+	//GetWindowsDirectory(path,MAX_PATH);
+	//strcat(path,"\\UltraDefrag\\handbook\\");
+	strcpy(path,".\\handbook\\");
+	strcat(path,page);
+	hApp = ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
+	if((int)(LONG_PTR)hApp <= 32){
+		strcpy(path,"http://ultradefrag.sourceforge.net/handbook/");
+		strcat(path,page);
+		ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
+	}
+}
+
+BOOL CALLBACK ErrorDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+	HICON hIcon;
+	HWND hChild;
+
+	switch(msg){
+	case WM_INITDIALOG:
+		hIcon = LoadIcon(NULL,IDI_ERROR);
+		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
+		if(hIcon) DeleteObject(hIcon);
+		if(hFont){
+			SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
+			hChild = GetWindow(hWnd,GW_CHILD);
+			while(hChild){
+				SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
+				hChild = GetWindow(hChild,GW_HWNDNEXT);
+			}
+		}
+		return FALSE;
+	case WM_COMMAND:
+		switch(LOWORD(wParam)){
+		case IDC_DBGVIEW_HELP:
+			OpenWebPage("reporting_bugs.html");
+			break;
+		case IDOK:
+			EndDialog(hWnd,1);
+			break;
+		}
+		break;
+	case WM_CLOSE:
+		EndDialog(hWnd,1);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+void InitFailure_Handler(void)
+{
+	DialogBox(hInstance,MAKEINTRESOURCE(IDD_INIT_ERROR),hWindow,(DLGPROC)ErrorDlgProc);
+}
+
+void StopFailure_Handler(void)
+{
+	DialogBox(hInstance,MAKEINTRESOURCE(IDD_STOP_ERROR),hWindow,(DLGPROC)ErrorDlgProc);
+}
+
+void JobFailure_Handler(void)
+{
+	DialogBox(hInstance,MAKEINTRESOURCE(IDD_JOB_ERROR),hWindow,(DLGPROC)ErrorDlgProc);
+}
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
@@ -76,6 +146,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 //	int requests_counter = 0;
 	LPVOID error_message;
 	
+	hInstance = GetModuleHandle(NULL);
+
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
 		if(!ex_filter[0] || !strcmp(ex_filter,"system volume information;temp;recycler"))
@@ -87,14 +159,16 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	GetPrefs();
 
-	udefrag_set_error_handler(ErrorHandler);
+	//udefrag_set_error_handler(ErrorHandler);
+	//StopFailure_Handler();
+	//return 0;
+	
 	if(udefrag_init(N_BLOCKS) < 0){
-		udefrag_unload();
+		InitFailure_Handler();
+		(void)udefrag_unload();
 		DeleteEnvironmentVariables();
 		return 2;
 	}
-
-	hInstance = GetModuleHandle(NULL);
 
 	/*
 	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
@@ -308,7 +382,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 		exit_pressed = TRUE;
 		stop();
-		udefrag_unload();
+		(void)udefrag_unload();
 		EndDialog(hWnd,0);
 		return TRUE;
 	}
@@ -393,8 +467,11 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	/* reinitialize GUI */
 	GetPrefs();
 	stop();
-	udefrag_unload();
-	if(udefrag_init(N_BLOCKS) < 0) udefrag_unload();
+	(void)udefrag_unload();
+	if(udefrag_init(N_BLOCKS) < 0){
+		InitFailure_Handler();
+		(void)udefrag_unload();
+	}
 	InitFont();
 	SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
 	if(hibernate_instead_of_shutdown)

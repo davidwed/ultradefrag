@@ -80,7 +80,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	DWORD ErrorCode;
 
 	if(!start_addr){
-		winx_raise_error("E: winx_create_thread() invalid start_addr (NULL)!");
+		winx_debug_print("winx_create_thread() invalid start_addr (NULL)!");
 		return (-1);
 	}
 
@@ -89,15 +89,19 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	* antivirus or internet security stuff on x64 systems.
 	* The following solution was suggested by 
 	* Parvez Reza (parvez_ku_00@yahoo.com).
+	*
+	* 22 Dec 2009. More realistic cause - wrong prototype of
+	* RtlCreateUserThread() with BOOLEAN keyword, now replaced 
+	* by ULONG, therefore should work.
 	*/
 	if(FindCreateThread()){
 		hThread = func_CreateThread(NULL,0,start_addr,NULL,0,&id);
 		if(!hThread){ /* failure */
 			if(FindGetLastError()){
 				ErrorCode = func_GetLastError();
-				winx_raise_error("E: CreateThread() failed, error code = 0x%x!",ErrorCode);
+				winx_dbg_print("CreateThread() failed, error code = 0x%x!",ErrorCode);
 			} else {
-				winx_raise_error("E: CreateThread() failed!");
+				winx_debug_print("CreateThread() failed!");
 			}
 			return (-1);
 		}
@@ -112,7 +116,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 		Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
 						0,0,0,start_addr,NULL,ph,NULL);
 		if(!NT_SUCCESS(Status)){
-			winx_raise_error("E: Can't create thread: %x!",(UINT)Status);
+			winx_dbg_print_ex("Can't create thread: %x!",(UINT)Status);
 			return (-1);
 		}
 		/*NtCloseSafe(*ph);*/
@@ -143,7 +147,7 @@ void __stdcall winx_exit_thread(void)
 	/* TODO: error handling and exit with specified status */
 	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: Can't terminate thread: %x!",(UINT)Status);
+		winx_dbg_print_ex("Can't terminate thread: %x!",(UINT)Status);
 	}
 }
 

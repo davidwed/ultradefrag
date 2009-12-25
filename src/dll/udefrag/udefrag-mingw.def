@@ -23,4 +23,4 @@ EXPORTS
 
 	udefrag_fbsize@20
 	udefrag_dfbsize@8
-	udefrag_set_error_handler@4
+;	udefrag_set_error_handler@4

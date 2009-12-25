@@ -42,6 +42,7 @@
 		<p><b>Table of Contents</b></p>
 		<dl>
 			<dt><span class="sect1"><a href="reporting_bugs.html#intro">Introduction</a></span></dt>
+			<dt><span class="sect1"><a href="reporting_bugs.html#intro2">Common errors</a></span></dt>
 			<dt><span class="sect1"><a href="reporting_bugs.html#driver">Kernel mode driver debugging</a></span></dt>
 			<dt><span class="sect1"><a href="reporting_bugs.html#user_mode_driver">User mode driver debugging</a></span></dt>
 			<dt><span class="sect1"><a href="reporting_bugs.html#gui">Which info must contain a report about GUI bug?</a></span></dt>
@@ -65,6 +66,47 @@
 		<a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">bug tracker</a>.
 		Don't forget to register on <a href="http://sourceforge.net">sourceforge.net</a> before. 
 		As an alternative you can send your report directly to the authors by email.</p>
+	</div>
+
+	<div class="sect1" lang="en">
+		<div class="titlepage">
+			<div><div>
+				<h2 class="title" style="clear: both"><a name="intro2"></a>
+				Common errors</h2>
+			</div></div>
+		</div>
+		
+		<p>There are few types of errors you can encounter on any operating system. 
+		Let's explain them in details.</p>
+		
+		<p>First of all, when you are launching the program the following message box may appear:</p>
+		
+		<center><img src="init-error.png" alt="Initialization failed!" width="374" height="131" /></center>
+		
+		<p>This message usually appears when you are trying to launch more than 
+		a single instance of the program. Ensure that you are running a single instance. 
+		If this not helps, run <a href="reporting_bugs.html#dbgview">DbgView</a> program to recognize 
+		exactly what happens.</p>
+		
+		<p>Another common error may occur when you are trying to analyse or defragment something:</p>
+
+		<center><img src="defrag-error.png" alt="Analysis/Defragmentation failed!" width="496" height="131" /></center>
+		
+		<p>This box usually appears when you have selected volume which cannot be defragmented due to 
+		Windows restrictions. It may be cdrom, network drive, missing removable media, volume assigned by 
+		<span class="code">subst</span> command or volume with file system which does not have defragmentation 
+		support (ext2 for example). Also this message may appear when you are trying to defragment corrupted 
+		volume. Or even when specified volume has clusters greater than 4Kb and your system is Windows 2000. 
+		To recognize exactly what happens run <a href="reporting_bugs.html#dbgview">DbgView</a> program.</p>
+		
+		<p>Finally, the following message may appear when you are trying to stop defragmentation:</p>
+		
+		<center><img src="stop-error.png" alt="Defragmentation cannot be stopped!" width="452" height="140" /></center>
+		
+		<p>This message tells you that you have encountered some unknown program's bug. Run 
+		<a href="reporting_bugs.html#dbgview">DbgView</a> program and try to reproduce this error to recognize 
+		exactly what happens. We'll very appreciate if you will send us detailed report.</p>
+		
 	</div>
 
 	<div class="sect1" lang="en">
@@ -106,13 +148,19 @@
 		</p>
 		<p style="color: darkred;">Note that you cannot use both loggers at the same time, otherwise debugging 
 		information may be partially losed.</p>
+		<a name="dbgview"></a>
 		<h5>How can I use DbgView program?</h5>
 		<center><img src="debugview.png" alt="DbgView main window sreenshot" /></center>
 		<p>First of all, if you are using Windows NT 4.0, you must download one of the earlier versions of 
 		DbgView that supports it. You may download the 4.05 version 
-		<a href="http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/freeware/debugview.shtml">here</a>.</p>
+		<a href="http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/freeware/debugview.shtml">here</a>. 
+		The latest version of DbgView for modern versions of Windows can be obtained 
+		<a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">here</a>.
+		</p>
+		
 		<p>DbgView is a nice graphical application which has very easy to use design. Run it and select 
-		<span class="guimenuitem">Capture Kernel</span> item in <span class="guimenuitem">Capture</span> menu. 
+		<span class="guimenuitem">Capture Kernel</span> and <span class="guimenuitem">Capture Win32</span> items
+		in <span class="guimenuitem">Capture</span> menu. 
 		If you wish to debug the <span class="application">UltraDefrag</span> boot time (native) interface, check also 
 		<span class="guimenuitem">Log Boot</span> menu item. Now you can see all debugging information in application's 
 		window. Yes, it is empty at this moment, because <span class="application">UltraDefrag</span> is still not running. 

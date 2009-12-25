@@ -26,38 +26,12 @@
 
 HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc call */
 
-/* never call winx_raise_error() from these functions! */
+/* never call winx_dbg_print_ex() and winx_dbg_print() from these functions! */
 
-/****ix* zenwinx.internals/long_type_on_x64
-* NAME
-*   long data type on x64 system
-* NOTES
-*   If we are using winx_virtual_alloc(long size) then
-*   x64 MS C compiler generates the following commands:
-*
-*   mov  dword ptr [rsp+8], ecx ; ecx contains size
-*   sub  rsp, 0x40
-*   lea  r9, [rsp+0x50]
-*   ...
-*   call NtAllocateVirtualMemory
-*
-*   Low part of r9 register contains size, high part - TRASH!
-*   Because MS C compiler assumes that 'long' data type is always
-*   32-bit long.
-*
-*   On the other hand, NtAllocateVirtualMemory() system call
-*   is compatible with ISO C standard, it uses all 64-bits of it's 
-*   argument.
-*
-*   Therefore NtAllocateVirtualMemory always has trash in 
-*   'size' parameter. Therefore it fails.
-*
-*   To suppress this mistake we are using since 2.1.0 version
-*   of the Ultra Defragmenter the following form:
-*   winx_virtual_alloc(ULONGLONG size);
-*
-*   P.S.: It seems to be the x64 compiler's bug.
-******/
+/*
+* winx_virtual_alloc, winx_virtual_free - ULONGLONG is 
+* equal to SIZE_T on x64 systems.
+*/
 
 /****f* zenwinx.memory/winx_virtual_alloc
 * NAME
@@ -95,7 +69,7 @@ void * __stdcall winx_virtual_alloc(ULONGLONG size)
 	NTSTATUS Status;
 
 	Status = NtAllocateVirtualMemory(NtCurrentProcess(),&addr,0,
-		(PULONG)(PVOID)&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
+		(SIZE_T *)(PVOID)&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
 	return (NT_SUCCESS(Status)) ? addr : NULL;
 }
 
@@ -125,7 +99,7 @@ void * __stdcall winx_virtual_alloc(ULONGLONG size)
 void __stdcall winx_virtual_free(void *addr,ULONGLONG size)
 {
 	NtFreeVirtualMemory(NtCurrentProcess(),&addr,
-		(PULONG)(PVOID)&size,MEM_RELEASE);
+		(SIZE_T *)(PVOID)&size,MEM_RELEASE);
 }
 
 /****f* zenwinx.memory/winx_heap_alloc

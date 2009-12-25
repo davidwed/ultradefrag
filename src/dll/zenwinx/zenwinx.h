@@ -68,12 +68,11 @@ int __cdecl winx_gets(char *string,int n);
 int __cdecl winx_kbhit(int msec);
 int __cdecl winx_breakhit(int msec);
 
-#ifndef _UDEFRAG_H_
+/*#ifndef _UDEFRAG_H_
 typedef void (__stdcall *ERRORHANDLERPROC)(short *msg);
 #endif
 ERRORHANDLERPROC __stdcall winx_set_error_handler(ERRORHANDLERPROC ehproc);
-void __cdecl winx_raise_error(char *format, ...);
-
+*/
 void __stdcall winx_sleep(int msec);
 int  __stdcall winx_get_os_version(void);
 int  __stdcall winx_get_windows_directory(char *buffer, int length);
@@ -124,6 +123,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command);
 
 void __cdecl winx_dbg_print(char *format, ...);
 int  __stdcall winx_debug_print(char *string);
+void __cdecl winx_dbg_print_ex(char *format, ...);
 
 ULONGLONG __stdcall winx_str2time(char *string);
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);

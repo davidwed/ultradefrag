@@ -61,7 +61,7 @@ BOOL err_flag = FALSE;
 * FUNCTION
 *    DbgPrint analog.
 * SEE ALSO
-*    winx_debug_print
+*    winx_debug_print, winx_dbg_print_ex
 ******/
 void __cdecl winx_dbg_print(char *format, ...)
 {
@@ -69,7 +69,7 @@ void __cdecl winx_dbg_print(char *format, ...)
 	va_list arg;
 	int length;
 	
-	/* never call winx_raise_error() here! */
+	/* never call winx_dbg_print_ex() here! */
 	
 	buffer = winx_virtual_alloc(BUFFER_SIZE);
 	if(!buffer){
@@ -109,7 +109,7 @@ void __cdecl winx_dbg_print(char *format, ...)
 * EXAMPLE
 *    winx_debug_print("Hello!\n");
 * SEE ALSO
-*    winx_dbg_print
+*    winx_dbg_print, winx_dbg_print_ex
 ******/
 
 int __stdcall winx_debug_print(char *string)
@@ -129,7 +129,7 @@ int __stdcall winx_debug_print(char *string)
 	DBG_OUTPUT_DEBUG_STRING_BUFFER *dbuffer;
 	int length;
 
-	/* never call winx_raise_error() here! */
+	/* never call winx_dbg_print_ex() here! */
 
 	/* 0. synchronize with other threads */
 	if(hSynchEvent){
@@ -194,7 +194,7 @@ int __stdcall winx_debug_print(char *string)
 		}
 	}
 
-	/* signal that the data contains meaningful data and can be read */
+	/* signal that the buffer contains meaningful data and can be read */
 	NtSetEvent(hEvtDataReady,NULL);
 	
 	NtCloseSafe(hEvtBufferReady);

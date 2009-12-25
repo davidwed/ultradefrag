@@ -32,6 +32,8 @@ int FormatMessageState = FormatMessageUndefined;
 DWORD (WINAPI *func_FormatMessageW)(DWORD,PVOID,DWORD,DWORD,LPWSTR,DWORD,va_list*);
 int FindFormatMessage(void);
 
+
+#if 0
 void (__stdcall *ErrorHandler)(short *msg) = NULL;
 
 /****f* zenwinx.error/winx_set_error_handler
@@ -50,7 +52,7 @@ void (__stdcall *ErrorHandler)(short *msg) = NULL;
 * EXAMPLE
 *    winx_set_error_handler(ErrorHandlerFunction);
 * SEE ALSO
-*    winx_raise_error, winx_get_error_description
+*    winx_dbg_print_ex, winx_get_error_description
 ******/
 ERRORHANDLERPROC __stdcall winx_set_error_handler(ERRORHANDLERPROC handler)
 {
@@ -58,6 +60,8 @@ ERRORHANDLERPROC __stdcall winx_set_error_handler(ERRORHANDLERPROC handler)
 	ErrorHandler = handler;
 	return h;
 }
+#endif
+
 
 /****f* zenwinx.error/winx_get_error_description
 * NAME
@@ -78,9 +82,9 @@ ERRORHANDLERPROC __stdcall winx_set_error_handler(ERRORHANDLERPROC handler)
 *    known codes. Otherwise it returns predefined
 *    "Unknown error; send report to the authors" message.
 * SEE ALSO
-*    winx_raise_error, winx_set_error_handler
+*    winx_dbg_print_ex, winx_set_error_handler
 ******/
-static char * __stdcall winx_get_error_description(unsigned long code)
+char * __stdcall winx_get_error_description(unsigned long code)
 {
 	NTSTATUS Status;
 	char *msg = "Unknown error; send report to the authors";
@@ -153,25 +157,27 @@ static char * __stdcall winx_get_error_description(unsigned long code)
 	return msg;
 }
 
-/****f* zenwinx.error/winx_raise_error
+/****f* zenwinx.error/winx_dbg_print_ex
 * NAME
-*    winx_raise_error
+*    winx_dbg_print_ex
 * SYNOPSIS
-*    winx_raise_error(format, ...);
+*    winx_dbg_print_ex(format, ...);
 * FUNCTION
-*    Delivers error message to the ErrorHandler.
+*    This function is equal to winx_dbg_print,
+*    but displays also an error description 
+*    if available for an appropriate status code.
 * INPUTS
 *    format - format string
 *    ...    - parameters
 * RESULT
 *    This function does not return a value.
 * EXAMPLE
-*    winx_raise_error("W: Can't open %s file: %x!",
+*    winx_dbg_print_ex("Can't open %s file: %x!",
 *            filename, (UINT)Status);
 * SEE ALSO
-*    winx_get_error_description, winx_set_error_handler
+*    winx_get_error_description, winx_dbg_print, winx_debug_print
 ******/
-void __cdecl winx_raise_error(char *format, ...)
+void __cdecl winx_dbg_print_ex(char *format, ...)
 {
 	char buffer[ERR_MSG_SIZE];
 	short desc[256];
@@ -225,30 +231,32 @@ status_code_missing:
 	resulting_message[ERR_MSG_SIZE - 1] = 0;
 
 send_message:
+
 	/* 4. call ErrorHandler and return */
-	if(ErrorHandler) ErrorHandler(resulting_message);
+	/*if(ErrorHandler) ErrorHandler(resulting_message);*/
+
 	/* 5. send message to the debugger */
 	s = resulting_message;
 	if(s[wcslen(s) - 1] == '\n'){
-		if(s[0] == 'N' || s[0] == 'W' || s[0] == 'E'){
+		/*if(s[0] == 'N' || s[0] == 'W' || s[0] == 'E'){
 			if(s[1] == ':' && s[2] == 0x20){
 				winx_dbg_print("%ws",s + 3);
 			} else {
 				winx_dbg_print("%ws",s);
 			}
-		} else {
+		} else {*/
 			winx_dbg_print("%ws",s);
-		}
+		/*}*/
 	} else {
-		if(s[0] == 'N' || s[0] == 'W' || s[0] == 'E'){
+		/*if(s[0] == 'N' || s[0] == 'W' || s[0] == 'E'){
 			if(s[1] == ':' && s[2] == 0x20){
 				winx_dbg_print("%ws\n",s + 3);
 			} else {
 				winx_dbg_print("%ws\n",s);
 			}
-		} else {
+		} else {*/
 			winx_dbg_print("%ws\n",s);
-		}
+		/*}*/
 	}
 	return;
 }

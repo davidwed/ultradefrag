@@ -126,11 +126,11 @@ int __stdcall winx_get_windows_directory(char *buffer, int length)
 	short buf[MAX_PATH + 1];
 
 	if(!buffer){
-		winx_raise_error("E: winx_get_windows_directory() invalid buffer!");
+		winx_debug_print("winx_get_windows_directory() invalid buffer!");
 		return (-1);
 	}
 	if(length <= 0){
-		winx_raise_error("E: winx_get_windows_directory() invalid length == %i!",length);
+		winx_dbg_print("winx_get_windows_directory() invalid length == %i!",length);
 		return (-1);
 	}
 
@@ -140,12 +140,12 @@ int __stdcall winx_get_windows_directory(char *buffer, int length)
 	us.MaximumLength = MAX_PATH * sizeof(short);
 	Status = RtlQueryEnvironmentVariable_U(NULL,&name,&us);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: Can't query SystemRoot variable: %x!",(UINT)Status);
+		winx_dbg_print_ex("Can't query SystemRoot variable: %x!",(UINT)Status);
 		return (-1);
 	}
 
 	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("W: winx_get_windows_directory() no enough memory!");
+		winx_debug_print("winx_get_windows_directory() no enough memory!");
 		return (-1);
 	}
 
@@ -191,7 +191,7 @@ int __stdcall winx_set_system_error_mode(unsigned int mode)
 					(PVOID)&mode,
 					sizeof(int));
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: Can't set system error mode %u: %x!",mode,(UINT)Status);
+		winx_dbg_print_ex("Can't set system error mode %u: %x!",mode,(UINT)Status);
 		return (-1);
 	}
 	return 0;
@@ -227,20 +227,20 @@ int __stdcall winx_load_driver(short *driver_name)
 	NTSTATUS Status;
 
 	if(!driver_name){
-		winx_raise_error("E: winx_load_driver() invalid driver_name (NULL)!");
+		winx_debug_print("winx_load_driver() invalid driver_name (NULL)!");
 		return (-1);
 	}
 
 	wcscpy(driver_key,L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\");
 	if(wcslen(driver_name) > (128 - wcslen(driver_key) - 1)){
-		winx_raise_error("E: Driver name %ws is too long!", driver_name);
+		winx_dbg_print("Driver name %ws is too long!", driver_name);
 		return (-1);
 	}
 	wcscat(driver_key,driver_name);
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtLoadDriver(&us);
 	if(!NT_SUCCESS(Status) && Status != STATUS_IMAGE_ALREADY_LOADED){
-		winx_raise_error("N: Can't load %ws driver: %x!",driver_name,(UINT)Status);
+		winx_dbg_print_ex("Can't load %ws driver: %x!",driver_name,(UINT)Status);
 		return (-1);
 	}
 	return 0;
@@ -274,20 +274,20 @@ int __stdcall winx_unload_driver(short *driver_name)
 	NTSTATUS Status;
 
 	if(!driver_name){
-		winx_raise_error("E: winx_unload_driver() invalid driver_name (NULL)!");
+		winx_debug_print("winx_unload_driver() invalid driver_name (NULL)!");
 		return (-1);
 	}
 
 	wcscpy(driver_key,L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\");
 	if(wcslen(driver_name) > (128 - wcslen(driver_key) - 1)){
-		winx_raise_error("E: Driver name %ws is too long!", driver_name);
+		winx_dbg_print("Driver name %ws is too long!", driver_name);
 		return (-1);
 	}
 	wcscat(driver_key,driver_name);
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtUnloadDriver(&us);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("N: Can't unload %ws driver: %x!",driver_name,(UINT)Status);
+		winx_dbg_print_ex("Can't unload %ws driver: %x!",driver_name,(UINT)Status);
 		return (-1);
 	}
 	return 0;

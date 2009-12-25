@@ -113,10 +113,20 @@ BOOL stop_flag = FALSE;
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
 	stop_flag = TRUE;
-	udefrag_stop();
+	if(udefrag_stop() < 0){
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("\nDefragmentation cannot be stopped!\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		printf("Some unknown internal bug has been encountered.\n");
+		printf("You can kill ultradefrag.exe process in task manager\n");
+		printf("(press Ctrl + Alt + Delete to launch it).\n");
+		printf("Run DbgView program for more information.\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	}
 	return TRUE;
 }
 
+#if 0
 /* Display errors only. */
 void __stdcall ErrorHandler(short *msg)
 {
@@ -139,6 +149,7 @@ void __stdcall ErrorHandler(short *msg)
 	printf("%s\n",oem_buffer);
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
+#endif
 
 void RunScreenSaver(void)
 {
@@ -503,8 +514,7 @@ void show_help(void)
 		"                                      author when an error is encountered.\n"
 		"                                      Select PARANOID in extraordinary cases.\n"
 		"                                      The default value is NORMAL. Logs can be\n"
-		"                                      found in %%windir%%\\Ultradefrag\\logs\n"
-		"                                      directory.\n"
+		"                                      accessed through DbgView program.\n"
 		);
 	Exit(0);
 }
@@ -700,6 +710,8 @@ int __cdecl main(int argc, char **argv)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	STATISTIC stat;
+	int init_error = 0;
+	int job_error = 0;
 
 	/* analyse command line */
 	parse_cmdline(argc,argv);
@@ -739,7 +751,7 @@ int __cdecl main(int argc, char **argv)
 					"Use environment variables instead!",1);
 
 	/* set udefrag.dll ErrorHandler */
-	udefrag_set_error_handler(ErrorHandler);
+	//udefrag_set_error_handler(ErrorHandler);
 	
 	/* show list of volumes if requested */
 	if(l_flag){ exit(show_vollist()); }
@@ -759,9 +771,19 @@ int __cdecl main(int argc, char **argv)
 	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
 	/* do our job */
 	if(!m_flag){
-		if(udefrag_init(0) < 0) Exit(2);
+		if(udefrag_init(0) < 0) init_error = 1;
 	} else {
-		if(udefrag_init(map_rows * map_symbols_per_line) < 0) Exit(2);
+		if(udefrag_init(map_rows * map_symbols_per_line) < 0) init_error = 1;
+	}
+	if(init_error){
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("\nInitialization failed!\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		printf("Another instance of the program is running\n");
+		printf("or unknown internal bug encountered.\n");
+		printf("DbgView program could help you to recognize.\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		Exit(2);
 	}
 
 	if(udefrag_kernel_mode()) printf("(Kernel Mode)\n\n");
@@ -776,20 +798,29 @@ int __cdecl main(int argc, char **argv)
 	if(!p_flag){
 		if(a_flag) {
 			//printf("Preparing to analyse volume %c: ...\n\n",letter);
-			if(udefrag_analyse(letter,ProgressCallback) < 0) Exit(3);
+			if(udefrag_analyse(letter,ProgressCallback) < 0) job_error = 1;
 		}
 		else if(o_flag) {
 			//printf("Preparing to optimize volume %c: ...\n\n",letter);
-			if(udefrag_optimize(letter,ProgressCallback) < 0) Exit(3);
+			if(udefrag_optimize(letter,ProgressCallback) < 0) job_error = 1;
 		}
 		else { 
 			//printf("Preparing to defragment volume %c: ...\n\n",letter);
-			if(udefrag_defragment(letter,ProgressCallback) < 0) Exit(3);
+			if(udefrag_defragment(letter,ProgressCallback) < 0) job_error = 1;
 		}
 	} else {
-		if(a_flag) { if(udefrag_analyse(letter,NULL) < 0) Exit(3); }
-		else if(o_flag) { if(udefrag_optimize(letter,NULL) < 0) Exit(3); }
-		else { if(udefrag_defragment(letter,NULL) < 0) Exit(3); }
+		if(a_flag) { if(udefrag_analyse(letter,NULL) < 0) job_error = 1; }
+		else if(o_flag) { if(udefrag_optimize(letter,NULL) < 0) job_error = 1; }
+		else { if(udefrag_defragment(letter,NULL) < 0) job_error = 1; }
+	}
+	if(job_error){
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("\nAnalysis/Defragmentation failure!\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		printf("System disallows it or unknown internal bug encountered.\n");
+		printf("DbgView and ChkDsk programs could help you to recognize.\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		Exit(3);
 	}
 
 	/* display results and exit */

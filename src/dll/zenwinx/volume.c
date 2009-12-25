@@ -190,7 +190,7 @@ int __stdcall winx_get_drive_type(char letter)
 
 	letter = (unsigned char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
-		winx_raise_error("E: winx_get_drive_type() invalid letter %c!",letter);
+		winx_dbg_print("winx_get_drive_type() invalid letter %c!",letter);
 		return (-1);
 	}
 	/* this call is applicable only for w2k and later versions */
@@ -201,7 +201,7 @@ int __stdcall winx_get_drive_type(char letter)
 					NULL);
 	if(!NT_SUCCESS(Status)){
 		if(Status != STATUS_INVALID_INFO_CLASS){
-			winx_raise_error("E: winx_get_drive_type(): can't get drive map: %x!",(UINT)Status);
+			winx_dbg_print_ex("winx_get_drive_type(): can't get drive map: %x!",(UINT)Status);
 			return (-1);
 		}
 		nt4_system = TRUE;
@@ -221,7 +221,7 @@ int __stdcall winx_get_drive_type(char letter)
 	Status = NtOpenSymbolicLinkObject(&hLink,SYMBOLIC_LINK_QUERY,
 		&ObjectAttributes);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("N: winx_get_drive_type(): can't open symbolic link %ls: %x!",
+		winx_dbg_print_ex("winx_get_drive_type(): can't open symbolic link %ls: %x!",
 			link_name,(UINT)Status);
 		return (-1);
 	}
@@ -232,7 +232,7 @@ int __stdcall winx_get_drive_type(char letter)
 	Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
 	NtClose(hLink);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: winx_get_drive_type(): can't query symbolic link %ls: %x!",
+		winx_dbg_print_ex("winx_get_drive_type(): can't query symbolic link %ls: %x!",
 			link_name,(UINT)Status);
 		return (-1);
 	}
@@ -259,7 +259,7 @@ int __stdcall winx_get_drive_type(char letter)
 					FileFsDeviceInformation);
 	NtClose(hFile);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: winx_get_drive_type(): can't get volume type for \'%c\': %x!",
+		winx_dbg_print_ex("winx_get_drive_type(): can't get volume type for \'%c\': %x!",
 			letter,(UINT)Status);
 		return (-1);
 	}
@@ -313,29 +313,28 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 	
 	letter = (char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
-		winx_raise_error("E: winx_get_volume_size() invalid letter %c!",letter);
+		winx_dbg_print("winx_get_volume_size() invalid letter %c!",letter);
 		return (-1);
 	}
 	if(!ptotal){
-		winx_raise_error("E: winx_get_volume_size() invalid ptotal (NULL)!");
+		winx_debug_print("winx_get_volume_size() invalid ptotal (NULL)!");
 		return (-1);
 	}
 	if(!pfree){
-		winx_raise_error("E: winx_get_volume_size() invalid pfree (NULL)!");
+		winx_debug_print("winx_get_volume_size() invalid pfree (NULL)!");
 		return (-1);
 	}
 
 	if(!internal_open_rootdir(letter,&hRoot)) return (-1);
 
 	/*
-	* Oh, you fucked ms c x64 compiler :(((
 	* FILE_FS_SIZE_INFORMATION structure needs to be filled by zeros
 	* before system call. But x64 compiler doesn't allow to do this.
 	* Therefore we must allocate memory...
 	*/
 	pffs = winx_virtual_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
 	if(!pffs){
-		winx_raise_error("W: winx_get_volume_size(): no enough memory!");
+		winx_debug_print("winx_get_volume_size(): no enough memory!");
 		return (-1);
 	}
 
@@ -344,7 +343,7 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 				sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	NtClose(hRoot);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: winx_get_volume_size(): can't get size of volume \'%c\': %x!",
+		winx_dbg_print_ex("winx_get_volume_size(): can't get size of volume \'%c\': %x!",
 			letter,(UINT)Status);
 		winx_virtual_free(pffs,sizeof(FILE_FS_SIZE_INFORMATION));
 		return (-1);
@@ -393,15 +392,15 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 	
 	letter = (char)toupper((int)letter);
 	if(letter < 'A' || letter > 'Z'){
-		winx_raise_error("E: winx_get_filesystem_name() invalid letter %c!",letter);
+		winx_dbg_print("winx_get_filesystem_name() invalid letter %c!",letter);
 		return (-1);
 	}
 	if(!buffer){
-		winx_raise_error("E: winx_get_filesystem_name() invalid buffer!");
+		winx_debug_print("winx_get_filesystem_name() invalid buffer!");
 		return (-1);
 	}
 	if(length <= 0){
-		winx_raise_error("E: winx_get_filesystem_name() invalid length == %i!",length);
+		winx_dbg_print("winx_get_filesystem_name() invalid length == %i!",length);
 		return (-1);
 	}
 
@@ -413,7 +412,7 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 				FS_ATTRIBUTE_BUFFER_SIZE,FileFsAttributeInformation);
 	NtClose(hRoot);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: Can't get file system name for \'%c\': %x!",letter,(UINT)Status);
+		winx_dbg_print_ex("Can't get file system name for \'%c\': %x!",letter,(UINT)Status);
 		return (-1);
 	}
 
@@ -451,7 +450,7 @@ BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: Can't open %ls: %x!",rootpath,(UINT)Status);
+		winx_dbg_print_ex("Can't open %ls: %x!",rootpath,(UINT)Status);
 		return FALSE;
 	}
 	return TRUE;

@@ -50,11 +50,11 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 	NTSTATUS Status;
 	
 	if(!name){
-		winx_raise_error("E: winx_query_env_variable() invalid name!");
+		winx_debug_print("winx_query_env_variable() invalid name!");
 		return (-1);
 	}
 	if(!buffer){
-		winx_raise_error("E: winx_query_env_variable() invalid buffer!");
+		winx_debug_print("winx_query_env_variable() invalid buffer!");
 		return (-1);
 	}
 
@@ -64,7 +64,7 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 	v.MaximumLength = length * sizeof(short);
 	Status = RtlQueryEnvironmentVariable_U(NULL,&n,&v);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("N: Can't query %ws environment variable: %x!",
+		winx_dbg_print_ex("Can't query %ws environment variable: %x!",
 				name,(UINT)Status);
 		return (-1);
 	}
@@ -97,7 +97,7 @@ int __stdcall winx_set_env_variable(short *name, short *value)
 	NTSTATUS status;
 
 	if(!name){
-		winx_raise_error("E: winx_set_env_variable() invalid name!");
+		winx_debug_print("winx_set_env_variable() invalid name!");
 		return (-1);
 	}
 
@@ -109,7 +109,7 @@ int __stdcall winx_set_env_variable(short *name, short *value)
 		status = RtlSetEnvironmentVariable(NULL,&n,NULL);
 	}
 	if(!NT_SUCCESS(status)){
-		winx_raise_error("E: Can't set %ws environment variable: %x!",
+		winx_dbg_print_ex("Can't set %ws environment variable: %x!",
 				name,(UINT)status);
 		return (-1);
 	}

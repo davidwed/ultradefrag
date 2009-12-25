@@ -40,7 +40,7 @@ int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber)
 }
 
 /* winx_set_error_handler() equivalent */
-ERRORHANDLERPROC __stdcall udefrag_set_error_handler(ERRORHANDLERPROC handler)
+/*ERRORHANDLERPROC __stdcall udefrag_set_error_handler(ERRORHANDLERPROC handler)
 {
 	return winx_set_error_handler(handler);
-}
+}*/

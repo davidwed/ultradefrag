@@ -52,17 +52,17 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 	OBJECT_ATTRIBUTES oa;
 
 	if(!phandle){
-		winx_raise_error("E: winx_create_event() invalid phandle!");
+		winx_debug_print("winx_create_event() invalid phandle!");
 		return (-1);
 	}
 	*phandle = NULL;
 
 	if(!name){
-		winx_raise_error("E: winx_create_event() invalid name!");
+		winx_debug_print("winx_create_event() invalid name!");
 		return (-1);
 	}
 	if(type != SynchronizationEvent && type != NotificationEvent){
-		winx_raise_error("E: winx_create_event() invalid type!");
+		winx_debug_print("winx_create_event() invalid type!");
 		return (-1);
 	}
 
@@ -77,7 +77,7 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 			&oa,NotificationEvent,TRUE);
 	if(!NT_SUCCESS(Status)){
 		*phandle = NULL;
-		winx_raise_error("W: Can't create %ws: %x!",name,(UINT)Status);
+		winx_dbg_print_ex("Can't create %ws: %x!",name,(UINT)Status);
 		return (-1);
 	}
 	return 0;
@@ -110,13 +110,13 @@ int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle)
 	OBJECT_ATTRIBUTES oa;
 
 	if(!phandle){
-		winx_raise_error("E: winx_open_event() invalid phandle!");
+		winx_debug_print("winx_open_event() invalid phandle!");
 		return (-1);
 	}
 	*phandle = NULL;
 
 	if(!name){
-		winx_raise_error("E: winx_open_event() invalid name!");
+		winx_debug_print("winx_open_event() invalid name!");
 		return (-1);
 	}
 
@@ -125,7 +125,7 @@ int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle)
 	Status = NtOpenEvent(phandle,flags,&oa);
 	if(!NT_SUCCESS(Status)){
 		*phandle = NULL;
-		winx_raise_error("W: Can't open %ws: %x!",name,(UINT)Status);
+		winx_dbg_print_ex("Can't open %ws: %x!",name,(UINT)Status);
 		return (-1);
 	}
 	return 0;

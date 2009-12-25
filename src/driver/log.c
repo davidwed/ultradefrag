@@ -28,23 +28,34 @@
 
 char buffer[1024];
 
-#ifndef MICRO_EDITION
 void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	short p[] = L"\\??\\A:\\fraglist.luar";
+	short p1[] = L"\\??\\A:\\fraglist.txt";
+	short p2[] = L"\\??\\A:\\fraglist.htm";
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	NTSTATUS status;
 
 	p[4] = (short)dx->letter;
 	RtlInitUnicodeString(&dx->log_path,p);
-	InitializeObjectAttributes(&ObjectAttributes,
-			&dx->log_path,
-			OBJ_CASE_INSENSITIVE,
-			NULL,
-			NULL
-			);
+	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,
+			OBJ_CASE_INSENSITIVE,NULL,NULL);
 	status = ZwDeleteFile(&ObjectAttributes);
 	DebugPrint1("-Ultradfg- Report %ws was deleted with status %x\n",p,(UINT)status);
+
+	p1[4] = (short)dx->letter;
+	RtlInitUnicodeString(&dx->log_path,p1);
+	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,
+			OBJ_CASE_INSENSITIVE,NULL,NULL);
+	status = ZwDeleteFile(&ObjectAttributes);
+	DebugPrint1("-Ultradfg- Report %ws was deleted with status %x\n",p1,(UINT)status);
+
+	p2[4] = (short)dx->letter;
+	RtlInitUnicodeString(&dx->log_path,p2);
+	InitializeObjectAttributes(&ObjectAttributes,&dx->log_path,
+			OBJ_CASE_INSENSITIVE,NULL,NULL);
+	status = ZwDeleteFile(&ObjectAttributes);
+	DebugPrint1("-Ultradfg- Report %ws was deleted with status %x\n",p2,(UINT)status);
 }
 
 void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
@@ -63,6 +74,7 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 	}
 }
 
+#ifndef MICRO_EDITION
 void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 				  BOOLEAN is_filtered)
 {
@@ -156,7 +168,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			FILE_ATTRIBUTE_NORMAL,
 			FILE_SHARE_READ,
 			FILE_OVERWRITE_IF,
-			FILE_SYNCHRONOUS_IO_NONALERT,
+			FILE_SYNCHRONOUS_IO_NONALERT/* | FILE_WRITE_THROUGH*/,
 			NULL,
 			0
 			);
@@ -195,40 +207,6 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 * This code was designed especially for Micro Edition.
 * It saves report in plain text format.
 */
-void DeleteLogFile(UDEFRAG_DEVICE_EXTENSION *dx)
-{
-	short p[] = L"\\??\\A:\\fraglist.txt";
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	NTSTATUS status;
-
-	p[4] = (short)dx->letter;
-	RtlInitUnicodeString(&dx->log_path,p);
-	InitializeObjectAttributes(&ObjectAttributes,
-			&dx->log_path,
-			OBJ_CASE_INSENSITIVE,
-			NULL,
-			NULL
-			);
-	status = ZwDeleteFile(&ObjectAttributes);
-	DebugPrint1("-Ultradfg- Report %ws was deleted with status %x\n",p,(UINT)status);
-}
-
-void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
-{
-	IO_STATUS_BLOCK ioStatus;
-	NTSTATUS Status;
-
-	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
-	if(Status == STATUS_PENDING){
-		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.");
-		if(nt4_system)
-			Status = NtWaitForSingleObject(hFile,FALSE,NULL);
-		else
-			Status = ZwWaitForSingleObject(hFile,FALSE,NULL);
-		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
-	}
-}
-
 void WriteLogBody(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 				  BOOLEAN is_filtered)
 {
@@ -295,7 +273,7 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			FILE_ATTRIBUTE_NORMAL,
 			FILE_SHARE_READ,
 			FILE_OVERWRITE_IF,
-			FILE_SYNCHRONOUS_IO_NONALERT,
+			FILE_SYNCHRONOUS_IO_NONALERT/* | FILE_WRITE_THROUGH*/,
 			NULL,
 			0
 			);

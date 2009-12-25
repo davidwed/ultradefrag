@@ -84,9 +84,9 @@ int __stdcall scheduler_get_avail_letters(char *letters);
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);
 
-#ifndef _ZENWINX_H_
+/*#ifndef _ZENWINX_H_
 typedef void (__stdcall *ERRORHANDLERPROC)(short *msg);
 #endif
 ERRORHANDLERPROC __stdcall udefrag_set_error_handler(ERRORHANDLERPROC handler);
-
+*/
 #endif /* _UDEFRAG_H_ */

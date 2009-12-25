@@ -54,30 +54,30 @@ int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_ad
 	NTSTATUS Status;
 	HMODULE base_addr;
 
-	/* never call winx_raise_error() from this function! */
+	/* never call winx_dbg_print_ex() from this function! */
 	if(!libname){
-		winx_dbg_print("E: winx_get_proc_address() invalid libname!");
+		winx_debug_print("winx_get_proc_address() invalid libname!");
 		return (-1);
 	}
 	if(!funcname){
-		winx_dbg_print("E: winx_get_proc_address() invalid funcname!");
+		winx_debug_print("winx_get_proc_address() invalid funcname!");
 		return (-1);
 	}
 	if(!proc_addr){
-		winx_dbg_print("E: winx_get_proc_address() invalid proc_addr!");
+		winx_debug_print("winx_get_proc_address() invalid proc_addr!");
 		return (-1);
 	}
 
 	RtlInitUnicodeString(&uStr,libname);
 	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print("N: Can't get %ls handle: %x!",libname,(UINT)Status);
+		winx_dbg_print("Can't get %ls handle: %x!",libname,(UINT)Status);
 		return (-1);
 	}
 	RtlInitAnsiString(&aStr,funcname);
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print("N: Can't get address for %s: %x!",funcname,(UINT)Status);
+		winx_dbg_print("Can't get address for %s: %x!",funcname,(UINT)Status);
 		*proc_addr = NULL;
 		return (-1);
 	}

@@ -47,14 +47,14 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 
 	/* 0a. check for synchronization objects */
 	if(CheckForSynchObjects() < 0){
-		winx_raise_error("E: Synchronization objects aren't available!");
+		winx_debug_print("Synchronization objects aren't available!");
 		return (-1);
 	}
 	/* 0b. synchronize with other requests */
 	interval.QuadPart = (-1); /* 100 nsec */
 	Status = NtWaitForSingleObject(hSynchEvent,FALSE,&interval);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)){
-		winx_raise_error("E: Driver is busy because the previous request was not completed!\n");
+		winx_debug_print("Driver is busy because the previous request was not completed!\n");
 		return (-1);
 	}
 	
@@ -68,7 +68,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	
 	/* 2. allocate cluster map */
 	if(AllocateMap(cluster_map_size) < 0){
-		winx_raise_error("E: Cannot allocate cluster map!");
+		winx_debug_print("Cannot allocate cluster map!");
 		goto failure;
 	}
 	
@@ -97,7 +97,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	* This is a well known limitation of Windows Defrag API.
 	*/
 	if(partition_type == NTFS_PARTITION && bytes_per_cluster > 4096 && w2k_system){
-		winx_raise_error("E: Cannot defragment NTFS volumes with\n"
+		winx_debug_print("Cannot defragment NTFS volumes with\n"
 						 "cluster size greater than 4 kb\n"
 						 "on Windows 2000 (read docs for details).");
 		goto failure;
@@ -136,7 +136,7 @@ int __stdcall udefrag_kernel_stop(void)
 {
 	DebugPrint("Stop\n");
 	if(CheckForSynchObjects() < 0){
-		winx_raise_error("E: Synchronization objects aren't available!");
+		winx_debug_print("Synchronization objects aren't available!");
 		return (-1);
 	}
 	NtSetEvent(hStopEvent,NULL);

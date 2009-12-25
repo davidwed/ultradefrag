@@ -69,6 +69,7 @@ void display_help(void)
 				);
 }
 
+#if 0
 /* Display warnings and errors only. */
 void __stdcall ErrorHandler(short *msg)
 {
@@ -80,6 +81,7 @@ void __stdcall ErrorHandler(short *msg)
 	else
 		winx_printf("\n%ws\n",msg);
 }
+#endif
 
 void Exit(int exit_code)
 {
@@ -140,7 +142,9 @@ void UpdateProgress()
 int __stdcall update_stat(int df)
 {
 	if(winx_breakhit(100) >= 0){
-		udefrag_stop();
+		if(udefrag_stop() < 0){
+			winx_printf("\nStop request failed!\n");
+		}
 		abort_flag = 1;
 	}
 	UpdateProgress();
@@ -156,14 +160,14 @@ void DisplayAvailableVolumes(int skip_removable)
 	volume_info *v;
 	int n;
 
-	winx_printf("Available drive letters:   ");
 	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
+		winx_printf("\nAvailable drive letters:   ");
 		for(n = 0;;n++){
 			if(v[n].letter == 0) break;
 			winx_printf("%c   ",v[n].letter);
 		}
 	}
-	winx_printf("\r\n");
+	winx_printf("\n\n");
 }
 
 void ProcessVolume(char letter,char _command)
@@ -195,7 +199,11 @@ void ProcessVolume(char letter,char _command)
 		status = udefrag_optimize(letter,update_stat);
 		break;
 	}
-	if(status < 0) return;
+	if(status < 0){
+		winx_printf("\nYou are trying to defragment cdrom/network/missing volume\n");
+		winx_printf("or system disallows this or unknown internal bug encountered.\n");
+		return;
+	}
 
 	if(udefrag_get_progress(&stat,NULL) >= 0)
 		winx_printf("\n%s\n\n",udefrag_get_default_formatted_results(&stat));
@@ -406,7 +414,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	NtInitializeRegistry(FALSE); /* saves boot log etc. */
 #endif
 	/* 4. Display Copyright */
-	winx_set_error_handler(ErrorHandler);
+	//winx_set_error_handler(ErrorHandler);
 	if(winx_get_os_version() < 51) winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007-2009.\n\n"
@@ -429,6 +437,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_printf("\n\n");
 	/* 7. Initialize the ultradfg device */
 	if(udefrag_init(0) < 0){
+		winx_printf("\nInitialization failed!\n");
 		winx_printf("Wait 10 seconds ...\n");
 		winx_sleep(10000); /* show error message at least 10 seconds */
 		Exit(1);

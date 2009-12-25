@@ -9,6 +9,8 @@ HISTORY
     - translations submitting is available again through project's forum 
       which works much better that MediaWiki service used before
     - UltraDefrag Next Generation graphical interface was added
+    - USB keyboards support at Windows boot time was added
+    - error handling was improved
     - one little portable version bug was fixed
 
 

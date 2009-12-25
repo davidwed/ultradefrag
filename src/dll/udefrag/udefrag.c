@@ -37,7 +37,7 @@
 #endif
 #define CHECK_INIT_EVENT() { \
 	if(!init_event){ \
-		winx_raise_error("E: %s call without initialization!", __FUNCTION__); \
+		winx_dbg_print("%s call without initialization!", __FUNCTION__); \
 		return -1; \
 	} \
 }
@@ -60,8 +60,7 @@ unsigned char c, lett;
 BOOL done_flag;
 int cmd_status;
 
-ERRORHANDLERPROC eh;
-
+#if 0
 void __stdcall ErrorHandler(short *msg)
 {
 	if(!eh) return;
@@ -78,15 +77,7 @@ void __stdcall DefragErrorHandler(short *msg)
 		   L"cannot be defragmented on Windows 2000.");
 	else eh(msg);
 }
-
-void __stdcall LoadDriverErrorHandler(short *msg)
-{
-	winx_dbg_print("------------------------------------------------------------\n");
-	winx_dbg_print("%ws\n",msg);
-	winx_dbg_print("UltraDefrag kernel mode driver is not installed\n");
-	winx_dbg_print("or Windows denies it.\n");
-	winx_dbg_print("------------------------------------------------------------\n");
-}
+#endif
 
 /* functions */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
@@ -138,25 +129,22 @@ int __stdcall udefrag_init(long map_size)
 	
 	/* 2. only one instance of the program ! */
 	/* create init_event - this must be after privileges enabling (?) */
-	eh = winx_set_error_handler(ErrorHandler);
-	if(winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event) < 0){
-		winx_set_error_handler(eh);
+	if(winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event) < 0)
 		return (-1);
-	}
-	winx_set_error_handler(eh);
 
 #ifndef UDEFRAG_PORTABLE
 	/* 3. Load the driver */
-	eh = winx_set_error_handler(LoadDriverErrorHandler);
 	if(winx_load_driver(L"ultradfg") < 0){
-		winx_set_error_handler(eh);
+		winx_dbg_print("------------------------------------------------------------\n");
+		winx_dbg_print("UltraDefrag kernel mode driver is not installed\n");
+		winx_dbg_print("or Windows denies it.\n");
+		winx_dbg_print("------------------------------------------------------------\n");
 		/* it seems that we are running on Vista or Win7 */
 		kernel_mode_driver = FALSE;
 		cluster_map_size = map_size;
 		(void)udefrag_reload_settings(); /* reload udefrag.dll specific options */
 		return 0;
 	}
-	winx_set_error_handler(eh);
 	kernel_mode_driver = TRUE;
 #else
 	kernel_mode_driver = FALSE;
@@ -185,8 +173,8 @@ int __stdcall udefrag_init(long map_size)
 	return 0;
 init_fail:
 	/*if(init_event)*/ udefrag_unload();
-	winx_raise_error("E: Cannot initialize the kernel mode driver!\n"
-					 "Run DbgView program for more information.");
+	winx_debug_print("Cannot initialize the kernel mode driver!\n");
+					 /*"Run DbgView program for more information.");*/
 	return (-1);
 }
 
@@ -270,19 +258,14 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 
 	if(kernel_mode_driver){
 		cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-		eh = winx_set_error_handler(DefragErrorHandler);
-		if(winx_fwrite(cmd,strlen(cmd),1,f_ud)){
-			winx_set_error_handler(eh);
-			return 0;
-		}
-		winx_set_error_handler(eh);
+		if(winx_fwrite(cmd,strlen(cmd),1,f_ud)) return 0;
 	} else {
 		cmd[0] = letter; cmd[1] = 0;
 		if(udefrag_kernel_start(cmd,job_type,cluster_map_size) >= 0)
 			return 0;
 	}
 
-	winx_raise_error("E: Cannot execute %s command for volume %c:!",
+	winx_dbg_print("Cannot execute %s command for volume %c:!",
 		cmd_description,(char)toupper((int)letter));
 	return (-1);
 }
@@ -405,7 +388,7 @@ int __stdcall udefrag_stop(void)
 	} else {
 		if(udefrag_kernel_stop() >= 0) return 0;
 	}
-	winx_raise_error("E: Stop request failed!");
+	winx_debug_print("Stop request failed!");
 	return (-1);
 }
 
@@ -436,12 +419,12 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 
 	if(kernel_mode_driver){
 		if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
-			winx_raise_error("N: Statistical data unavailable!");
+			winx_debug_print("Statistical data unavailable!");
 			return (-1);
 		}
 	} else {
 		if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
-			winx_raise_error("N: Statistical data unavailable!");
+			winx_debug_print("Statistical data unavailable!");
 			return (-1);
 		}
 	}
@@ -484,7 +467,7 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 			return 0;
 	}
 				
-	winx_raise_error("N: Cluster map unavailable!");
+	winx_debug_print("Cluster map unavailable!");
 	return (-1);
 }
 

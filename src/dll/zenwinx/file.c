@@ -38,17 +38,17 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	WINX_FILE *f;
 
 	if(!filename){
-		winx_raise_error("E: winx_fopen() invalid filename!");
+		winx_debug_print("winx_fopen() invalid filename!");
 		return NULL;
 	}
 	if(!mode){
-		winx_raise_error("E: winx_fopen() invalid mode (NULL)!");
+		winx_debug_print("winx_fopen() invalid mode (NULL)!");
 		return NULL;
 	}
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("W: Can't open %s! No enough memory!",filename);
+		winx_dbg_print("Can't open %s! No enough memory!",filename);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -82,20 +82,20 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 			FILE_ATTRIBUTE_NORMAL,
 			FILE_SHARE_READ | FILE_SHARE_WRITE,
 			disposition,
-			FILE_SYNCHRONOUS_IO_NONALERT,
+			FILE_SYNCHRONOUS_IO_NONALERT/* | FILE_WRITE_THROUGH*/,
 			NULL,
 			0
 			);
 	RtlFreeUnicodeString(&us);
 	if(status != STATUS_SUCCESS){
-		winx_raise_error("W: Can't open %s: %x!",filename,(UINT)status);
+		winx_dbg_print_ex("Can't open %s: %x!",filename,(UINT)status);
 		return NULL;
 	}
 	/* FIXME: hFile == NULL */
 	f = (WINX_FILE *)winx_virtual_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		winx_raise_error("W: Can't open %s! No enough memory!",filename);
+		winx_dbg_print("Can't open %s! No enough memory!",filename);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -110,11 +110,11 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 	IO_STATUS_BLOCK iosb;
 	
 	if(!buffer){
-		winx_raise_error("E: winx_fread() invalid buffer!");
+		winx_debug_print("winx_fread() invalid buffer!");
 		return 0;
 	}
 	if(!f){
-		winx_raise_error("E: winx_fread() invalid f (NULL)!");
+		winx_debug_print("winx_fread() invalid f (NULL)!");
 		return 0;
 	}
 
@@ -129,7 +129,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		return 0;
 	}
 	if(status != STATUS_SUCCESS){
-		winx_raise_error("W: Can't read from a file: %x!",(UINT)status);
+		winx_dbg_print_ex("Can't read from a file: %x!",(UINT)status);
 		return 0;
 	}
 
@@ -149,22 +149,26 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 	IO_STATUS_BLOCK iosb;
 	
 	if(!buffer){
-		winx_raise_error("E: winx_fwrite() invalid buffer!");
+		winx_debug_print("winx_fwrite() invalid buffer!");
 		return 0;
 	}
 	if(!f){
-		winx_raise_error("E: winx_fwrite() invalid f (NULL)!");
+		winx_debug_print("winx_fwrite() invalid f (NULL)!");
 		return 0;
 	}
 
+//winx_dbg_print("**** %u **** %u ****\n",size,count);
+//	winx_sleep(10);
 	status = NtWriteFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 (void *)buffer,size * count,&f->woffset,NULL);
+//winx_dbg_print("!!!!!! %x!",(UINT)status);
 	if(status == STATUS_PENDING){
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status != STATUS_SUCCESS/* || (iosb.Information < size)*/){
-		winx_raise_error("W: Can't write to a file: %x!",(UINT)status);
+		winx_dbg_print_ex("Can't write to a file: %x!",(UINT)status);
+//winx_dbg_print("^^^^ %u ^^^^ %u ^^^^\n",size,count);
 		return 0;
 	}
 
@@ -189,7 +193,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	NTSTATUS Status;
 
 	if(!f){
-		winx_raise_error("E: winx_ioctl() invalid f (NULL)!");
+		winx_debug_print("winx_ioctl() invalid f (NULL)!");
 		return (-1);
 	}
 	
@@ -209,9 +213,9 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	}
 	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){
 		if(description)
-			winx_raise_error("W: %s failed: %x!",description,(UINT)Status);
+			winx_dbg_print_ex("%s failed: %x!",description,(UINT)Status);
 		else
-			winx_raise_error("W: Ioctl %u failed: %x!",code,(UINT)Status);
+			winx_dbg_print_ex("Ioctl %u failed: %x!",code,(UINT)Status);
 		return (-1);
 	}
 	if(pbytes_returned) *pbytes_returned = iosb.Information;
@@ -224,13 +228,13 @@ int __stdcall winx_fflush(WINX_FILE *f)
 	IO_STATUS_BLOCK iosb;
 	
 	if(!f){
-		winx_raise_error("E: winx_fflush() invalid f (NULL)!");
+		winx_debug_print("winx_fflush() invalid f (NULL)!");
 		return (-1);
 	}
 
 	Status = NtFlushBuffersFile(f->hFile,&iosb);
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("W: NtFlushBuffersFile() failed: %x!",(UINT)Status);
+		winx_dbg_print_ex("NtFlushBuffersFile() failed: %x!",(UINT)Status);
 		return (-1);
 	}
 	return 0;
@@ -253,13 +257,13 @@ int __stdcall winx_create_directory(const char *path)
 	IO_STATUS_BLOCK iosb;
 
 	if(!path){
-		winx_raise_error("E: winx_create_directory() invalid path!");
+		winx_debug_print("winx_create_directory() invalid path!");
 		return (-1);
 	}
 
 	RtlInitAnsiString(&as,path);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("W: Can't create %s! No enough memory!",path);
+		winx_dbg_print("Can't create %s! No enough memory!",path);
 		return (-1);
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -283,7 +287,7 @@ int __stdcall winx_create_directory(const char *path)
 	}
 	/* if it already exists then return success */
 	if(status == STATUS_OBJECT_NAME_COLLISION) return 0;
-	winx_raise_error("W: Can't create %s: %x!",path,(UINT)status);
+	winx_dbg_print_ex("Can't create %s: %x!",path,(UINT)status);
 	return (-1);
 }
 
@@ -295,13 +299,13 @@ int __stdcall winx_delete_file(const char *filename)
 	OBJECT_ATTRIBUTES oa;
 
 	if(!filename){
-		winx_raise_error("E: winx_delete_file() invalid filename!");
+		winx_debug_print("winx_delete_file() invalid filename!");
 		return (-1);
 	}
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_raise_error("W: Can't delete %s! No enough memory!",filename);
+		winx_dbg_print("Can't delete %s! No enough memory!",filename);
 		return (-1);
 	}
 
@@ -310,7 +314,7 @@ int __stdcall winx_delete_file(const char *filename)
 	RtlFreeUnicodeString(&us);
 
 	if(!NT_SUCCESS(status)){
-		winx_raise_error("W: Can't delete %s: %x!",filename,(UINT)status);
+		winx_dbg_print_ex("Can't delete %s: %x!",filename,(UINT)status);
 		return (-1);
 	}
 	return 0;

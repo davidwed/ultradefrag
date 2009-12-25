@@ -82,7 +82,7 @@ int Analyze(char *volume_name)
 	/* scan volume for free space areas */
 	Status = FillFreeSpaceMap();
 	if(!NT_SUCCESS(Status)){
-		winx_raise_error("E: FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
+		winx_dbg_print_ex("FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
 		return (-1);
 	}
 	//DebugPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
@@ -175,7 +175,7 @@ int Analyze(char *volume_name)
 //	/* scan volume for free space areas */
 //	Status = FillFreeSpaceMap();
 //	if(!NT_SUCCESS(Status)){
-//		winx_raise_error("E: FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
+//		winx_dbg_print_ex("FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
 //		return (-1);
 //	}
 //	return 0;

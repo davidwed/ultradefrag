@@ -33,7 +33,7 @@
 #endif
 #define CHECK_INIT_EVENT() { \
 	if(!init_event){ \
-		winx_raise_error("E: %s call without initialization!", __FUNCTION__); \
+		winx_dbg_print("%s call without initialization!", __FUNCTION__); \
 		return -1; \
 	} \
 }

@@ -34,6 +34,8 @@ BOOL stop_pressed, exit_pressed = FALSE;
 extern int shutdown_flag;
 
 DWORD WINAPI ThreadProc(LPVOID);
+void StopFailure_Handler(void);
+void JobFailure_Handler(void);
 
 void analyse(void)
 {
@@ -79,8 +81,6 @@ int __stdcall update_stat(int df)
 		SetProgress(progress_msg,(int)percentage);
 	}
 
-	/* show error message no more than once */
-	/* FIXME: */
 	if(udefrag_get_map(global_cluster_map,N_BLOCKS) >= 0){
 		FillBitMap(global_cluster_map);
 		RedrawMap();
@@ -144,6 +144,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		status = udefrag_optimize(letter,update_stat);
 	}
 	if(status < 0 && !exit_pressed){
+		JobFailure_Handler();
 		VolListUpdateSelectedStatusField(STAT_CLEAR);
 		ClearMap();
 	}
@@ -173,5 +174,5 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 void stop(void)
 {
 	stop_pressed = TRUE;
-	udefrag_stop();
+	if(udefrag_stop() < 0) StopFailure_Handler();
 }

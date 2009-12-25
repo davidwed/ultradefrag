@@ -17,6 +17,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
+/*
+* Windows NT Native Development Kit.
+* The main header file.
+*/
+
 #ifndef _NTNDK_H_
 #define _NTNDK_H_
 
@@ -30,6 +35,8 @@
 *
 *    Right prototype does not contain BOOLEAN keywords:
 *    NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,ULONG,ULONG);
+*
+*    http://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=519510
 *
 * 2. Always fill output buffer with zeros before the following system calls:
 *    NtDeviceIoControlFile        (?)
@@ -761,6 +768,10 @@ typedef enum _EVENT_TYPE {
 #define FILE_DIRECTORY_FILE		0x00000001
 #define FILE_RESERVE_OPFILTER	0x00100000
 
+#ifndef FILE_WRITE_THROUGH
+#define FILE_WRITE_THROUGH      0x00000002
+#endif
+
 /*
 * DriveMap member must be declared as unsigned int and alignment must be 1 
 * because without that it don't works on Windows XP x64 !!!
@@ -1075,8 +1086,10 @@ NTSTATUS	NTAPI	RtlQueryEnvironmentVariable_U(PWSTR,PUNICODE_STRING,PUNICODE_STRI
 NTSTATUS	NTAPI	RtlSetEnvironmentVariable(PWSTR,PUNICODE_STRING,PUNICODE_STRING);
 NTSTATUS	NTAPI	LdrGetDllHandle(ULONG,ULONG,const UNICODE_STRING*,HMODULE*);
 NTSTATUS	NTAPI	LdrGetProcedureAddress(PVOID,PANSI_STRING,ULONG,PVOID *);
-NTSTATUS	NTAPI	NtAllocateVirtualMemory(HANDLE,PVOID*,ULONG,PULONG,ULONG,ULONG);
-NTSTATUS	NTAPI	NtFreeVirtualMemory(HANDLE,PVOID*,PULONG,ULONG);
+
+NTSTATUS	NTAPI	NtAllocateVirtualMemory(HANDLE,PVOID*,ULONG,SIZE_T *,ULONG,ULONG);
+NTSTATUS	NTAPI	NtFreeVirtualMemory(HANDLE,PVOID*,SIZE_T *,ULONG);
+
 NTSTATUS	NTAPI	NtSetSystemPowerState(POWER_ACTION SystemAction,SYSTEM_POWER_STATE MinSystemState,ULONG Flags);
 NTSTATUS	NTAPI	NtOpenSection(HANDLE*,ACCESS_MASK,const OBJECT_ATTRIBUTES*);
 NTSTATUS	NTAPI	NtMapViewOfSection(HANDLE,HANDLE,PVOID*,ULONG,SIZE_T,const LARGE_INTEGER*,SIZE_T*,SECTION_INHERIT,ULONG,ULONG);

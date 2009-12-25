@@ -38,7 +38,7 @@ int OpenVolume(char *volume_name)
 	flags[0] = FLAG; flags[1] = 0;
 	fVolume = winx_fopen(path,flags);
 	if(!fVolume){
-		winx_raise_error("E: Cannot open volume %s!",path);
+		winx_dbg_print("Cannot open volume %s!\n",path);
 		return (-1);
 	}
 	return 0;
@@ -75,12 +75,11 @@ int GetDriveGeometry(char *volume_name)
 	flags[0] = FLAG; flags[1] = 0;
 	fRoot = winx_fopen(path,flags);
 	if(!fRoot){
-		winx_raise_error("E: Cannot open the root directory %s!",path);
+		winx_dbg_print("Cannot open the root directory %s!\n",path);
 		return (-1);
 	}
 
 	/*
-	* Oh, you fucked ms c x64 compiler :(((
 	* FILE_FS_SIZE_INFORMATION structure needs to be filled by zeros
 	* before system call. But x64 compiler doesn't allow to do this.
 	* Therefore we must allocate memory...
@@ -88,7 +87,7 @@ int GetDriveGeometry(char *volume_name)
 	pFileFsSize = winx_virtual_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
 	if(!pFileFsSize){
 		winx_fclose(fRoot);
-		winx_raise_error("W: winx_get_volume_size(): no enough memory!");
+		winx_debug_print("udefrag-kernel.dll GetDriveGeometry(): no enough memory!");
 		return (-1);
 	}
 
@@ -99,7 +98,7 @@ int GetDriveGeometry(char *volume_name)
 	winx_fclose(fRoot);
 	if(status != STATUS_SUCCESS){
 		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
-		winx_raise_error("E: FileFsSizeInformation() request failed for %s: %x!",
+		winx_dbg_print_ex("FileFsSizeInformation() request failed for %s: %x!",
 			path,(UINT)status);
 		return (-1);
 	}
@@ -122,7 +121,7 @@ int GetDriveGeometry(char *volume_name)
 	/* validate geometry */
 	if(!clusters_total || !bytes_per_cluster){
 		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
-		winx_raise_error("E: Wrong volume geometry!");
+		winx_debug_print("Wrong volume geometry!");
 		return (-1);
 	}
 	winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
