@@ -50,7 +50,7 @@ LINK32=link.exe
 # SUBTRACT LINK32 /pdb:none
 # Begin Special Build Tool
 SOURCE="$(InputPath)"
-PostBuild_Cmds=REL.CMD
+PostBuild_Cmds=
 # End Special Build Tool
 # Begin Target
 
@@ -65,6 +65,10 @@ SOURCE=.\defrag_native.c
 # Begin Source File
 
 SOURCE=.\defrag_native.rc
+# End Source File
+# Begin Source File
+
+SOURCE=.\script.c
 # End Source File
 # End Group
 # Begin Group "Header Files"

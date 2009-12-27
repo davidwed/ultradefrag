@@ -18,7 +18,7 @@
  */
 
 /*
-* UltraDefrag Next Generation code.
+* UltraDefrag Next Generation GUI code.
 */
 
 #define WIN32_NO_STATUS
