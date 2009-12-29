@@ -21,3 +21,10 @@ To use UltraDefrag Next Generation GUI follow these steps:
 
  http://nl.wikipedia.org/wiki/Jheronimus_Bosch
 ============================================================
+
+System requirements for the best GUI performance:
+
+1. Screen resolution at least 1280x1024
+2. Screen color depth 32-bit
+
+============================================================

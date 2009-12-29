@@ -299,6 +299,23 @@ __stdcall NtCurrentTeb(void);
 		<p>If you have any questions regarding details of the build process, just look at 
 		appropriate script contents. Sure you'll find an answer.</p>
 
+		<h4>3. Development notes</h4>
+		
+		<p>UltraDefrag contains few modules which must be running during the Windows boot process. 
+		Therefore the program utilizes a lot of undocumented Windows functions, primary exported by ntdll.dll 
+		library. Please read carefully comments in the beginning of 
+		<span class="code"><a href="http://ultradefrag.svn.sourceforge.net/viewvc/ultradefrag/src/dll/zenwinx/ntndk.h?view=markup">/src/dll/zenwinx/ntndk.h</a></span> 
+		file before using such functions. Because they often requires something unexpected and without corresponding 
+		to these rules they may simply crash your application.</p>
+		
+		<p>Another important note concerns GUI development. When some program uses MessageBox() 
+		calls it must contain also InitCommonControls() call in the beginning of its main() 
+		function. To be compatible with manifest file which defines comctl32.dll dependency for 
+		Windows visual styles support. Otherwise message boxes will never appear on the screen. 
+		This undocumented behavior was discovered on 32-bit XP system.</li>
+		</li>
+		</ol>
+		
 	</div>
 </div>
 
