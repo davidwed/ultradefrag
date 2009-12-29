@@ -45,7 +45,7 @@ RANGE_SMALL             RGN                     "res/BackgroundSmall.rgn"
 IDB_BACKGROUND_SMALL    BITMAP  DISCARDABLE     "res/BackgroundSmall.bmp"
 
 /* manifests for all targets produces make-manifests.cmd script */
-1 24 "udefrag-nextgen.manifest"
+//1 24 "udefrag-nextgen.manifest"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VERSION
