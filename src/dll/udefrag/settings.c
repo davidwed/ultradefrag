@@ -50,7 +50,7 @@ unsigned short in_filter[MAX_FILTER_SIZE + 1] = L"";
 unsigned short ex_filter[MAX_FILTER_SIZE + 1] = L"";
 ULONGLONG sizelimit = 0;
 ULONGLONG fraglimit = 0;
-int refresh_interval  = 500;
+int refresh_interval  = DEFAULT_REFRESH_INTERVAL;
 
 /* http://sourceforge.net/tracker/index.php?func=detail&aid=2886353&group_id=199532&atid=969873 */
 ULONGLONG time_limit = 0;

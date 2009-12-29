@@ -30,6 +30,8 @@
 #pragma ftol(inlined)
 #endif
 
+#define DEFAULT_REFRESH_INTERVAL 500
+
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think that's enough. */
 

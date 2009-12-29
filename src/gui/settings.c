@@ -101,7 +101,7 @@ void GetPrefs(void)
 	win_rc.left = win_rc.top = 0;
 	in_filter[0] = ex_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
 	fraglimit = 0;
-	refresh_interval = 0;
+	refresh_interval = DEFAULT_REFRESH_INTERVAL;
 	disable_reports = 0;
 
 	DeleteEnvironmentVariables();
@@ -161,6 +161,7 @@ void GetPrefs(void)
 
 		fraglimit = getint(L,"fragments_threshold");
 		refresh_interval = getint(L,"refresh_interval");
+		if(!refresh_interval) refresh_interval = DEFAULT_REFRESH_INTERVAL;
 		disable_reports = getint(L,"disable_reports");
 
 		lua_getglobal(L, "dbgprint_level");
