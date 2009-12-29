@@ -100,9 +100,7 @@ CAPTION "Initialization failed!"
 FONT 9, "Courier New"
 BEGIN
     CONTROL         108,IDC_PIC2,"Static",SS_ICON,5,8,32,32
-    LTEXT           "Another instance of the program is running\n"
-					"or unknown internal bug encountered.\n"
-					"DbgView program could help you to recognize.",
+    LTEXT           "Another instance of the program is running\nor unknown internal bug encountered.\nDbgView program could help you to recognize.",
 					IDC_STATIC,30,6,180,32
     PUSHBUTTON      "OK",IDOK,35,38,65,11,WS_GROUP
     PUSHBUTTON      "Help",IDC_DBGVIEW_HELP,110,38,65,11,NOT WS_TABSTOP
@@ -114,10 +112,7 @@ CAPTION "Defragmentation cannot be stopped!"
 FONT 9, "Courier New"
 BEGIN
     CONTROL         108,IDC_PIC2,"Static",SS_ICON,5,14,32,32
-    LTEXT           "Some unknown internal bug has been encountered.\n"
-					"You can kill ultradefrag.exe process in task manager\n"
-					"(press Ctrl + Alt + Delete to launch it).\n"
-					"DbgView program could help you to get more information.",
+    LTEXT           "Some unknown internal bug has been encountered.\nYou can kill ultradefrag.exe process in task manager\n(press Ctrl + Alt + Delete to launch it).\nDbgView program could help you to get more information.",
 					IDC_STATIC,30,6,220,32
     PUSHBUTTON      "OK",IDOK,57,43,65,11,WS_GROUP
     PUSHBUTTON      "Help",IDC_DBGVIEW_HELP,132,43,65,11,NOT WS_TABSTOP
@@ -129,9 +124,7 @@ CAPTION "Analysis/Defragmentation failed!"
 FONT 9, "Courier New"
 BEGIN
     CONTROL         108,IDC_PIC2,"Static",SS_ICON,5,8,32,32
-    LTEXT           "You are trying to defragment cdrom/network/missing volume\n"
-					"or system disallows this or unknown internal bug encountered.\n"
-					"DbgView and ChkDsk programs could help you to recognize.",
+    LTEXT           "You are trying to defragment cdrom/network/missing volume\nor system disallows this or unknown internal bug encountered.\nDbgView and ChkDsk programs could help you to recognize.",
 					IDC_STATIC,30,6,250,32
     PUSHBUTTON      "OK",IDOK,70,38,65,11,WS_GROUP
     PUSHBUTTON      "Help",IDC_DBGVIEW_HELP,145,38,65,11,NOT WS_TABSTOP

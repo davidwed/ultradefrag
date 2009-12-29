@@ -393,7 +393,9 @@ void ShowFragmented()
 {
 	char path[] = "C:\\fraglist.luar";
 	PVOLUME_LIST_ENTRY vl;
-#ifdef UDEFRAG_PORTABLE
+#ifndef UDEFRAG_PORTABLE
+	HINSTANCE hApp;
+#else
 	char cmd[MAX_PATH];
 	char buffer[MAX_PATH + 64];
 	STARTUPINFO si;
@@ -405,7 +407,14 @@ void ShowFragmented()
 
 	path[0] = vl->VolumeName[0];
 #ifndef UDEFRAG_PORTABLE
-	ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
+	hApp = ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
+	if((int)(LONG_PTR)hApp <= 32){
+		MessageBox(hWindow,"Cannot open lua report file.\n"
+						   "Maybe you have installed\n"
+						   "both full and micro editions\n"
+						   "of the program.\n",
+						   "Error",MB_OK | MB_ICONHAND);
+	}
 #else
 	strcpy(cmd,".\\lua5.1a_gui.exe");
 	strcpy(buffer,cmd);
