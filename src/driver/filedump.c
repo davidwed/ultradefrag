@@ -65,7 +65,7 @@ BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 						dx->pstartVcn, sizeof(ULONGLONG), \
 						fileMappings, FILEMAPSIZE * sizeof(LARGE_INTEGER));
 		counter ++;
-		if(Status == STATUS_PENDING){
+		if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
 			if(nt4_system)
 				NtWaitForSingleObject(hFile,FALSE,NULL);
 			else

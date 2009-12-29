@@ -48,6 +48,24 @@
 *    NtQuerySystemInformation     (!?)
 *
 *    Otherwise Windows may trash stack during these calls.
+*
+* 3. If you are waiting on file handle for NtWriteFile request completion,
+*    don't check for STATUS_PENDING code. Instead of that wait immediately.
+*    ReactOS has wrong implementation of WriteFile() function, the following
+*    works much better:
+*
+*    Status = NtWriteFile(...);
+*    if(NT_SUCCESS(Status)){
+*        Status = NtWaitForSingleObject(hFile,FALSE,NULL);
+*        if(NT_SUCCESS(status)) status = iosb.Status;
+*    }
+*
+*    If you wait only in case when STATUS_PENDING is returned, NtWriteFile()
+*    returns immediately and than, when memory allocated for IoStatusBlock() is 
+*    reallocated for something else, Windows may decide to write there. Therefore 
+*    stack will be corrupted.
+*
+*    http://blogs.msdn.com/johnsheehan/archive/2007/12/19/when-idle-threads-bugcheck.aspx
 */
 
 #define _CRT_SECURE_NO_WARNINGS /* for Windows Server 2008 SDK compiler */

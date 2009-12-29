@@ -26,7 +26,7 @@
 /* Dumps all the free clusters on the volume */
 NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	ULONG status;
+	NTSTATUS status;
 	PBITMAP_DESCRIPTOR bitMappings;
 	ULONGLONG cluster,startLcn;
 	IO_STATUS_BLOCK ioStatus;
@@ -43,7 +43,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 		status = ZwFsControlFile(dx->hVol,NULL,NULL,0,&ioStatus,
 			FSCTL_GET_VOLUME_BITMAP,
 			dx->pnextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
-		if(status == STATUS_PENDING){
+		if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 			if(nt4_system)
 				NtWaitForSingleObject(dx->hVol,FALSE,NULL);
 			else

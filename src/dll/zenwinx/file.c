@@ -82,7 +82,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 			FILE_ATTRIBUTE_NORMAL,
 			FILE_SHARE_READ | FILE_SHARE_WRITE,
 			disposition,
-			FILE_SYNCHRONOUS_IO_NONALERT/* | FILE_WRITE_THROUGH*/,
+			FILE_SYNCHRONOUS_IO_NONALERT,
 			NULL,
 			0
 			);
@@ -120,7 +120,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 
 	status = NtReadFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 buffer,size * count,&f->roffset,NULL);
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)){
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
@@ -157,18 +157,14 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 		return 0;
 	}
 
-//winx_dbg_print("**** %u **** %u ****\n",size,count);
-//	winx_sleep(10);
 	status = NtWriteFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 (void *)buffer,size * count,&f->woffset,NULL);
-//winx_dbg_print("!!!!!! %x!",(UINT)status);
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)){
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status != STATUS_SUCCESS/* || (iosb.Information < size)*/){
 		winx_dbg_print_ex("Can't write to a file: %x!",(UINT)status);
-//winx_dbg_print("^^^^ %u ^^^^ %u ^^^^\n",size,count);
 		return 0;
 	}
 
@@ -207,11 +203,11 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 		Status = NtDeviceIoControlFile(f->hFile,NULL,NULL,NULL,
 			&iosb,code,in_buffer,in_size,out_buffer,out_size);
 	}
-	if(Status == STATUS_PENDING){
+	if(NT_SUCCESS(Status)){
 		Status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
-	if(!NT_SUCCESS(Status) || Status == STATUS_PENDING){
+	if(!NT_SUCCESS(Status)/* || Status == STATUS_PENDING*/){
 		if(description)
 			winx_dbg_print_ex("%s failed: %x!",description,(UINT)Status);
 		else

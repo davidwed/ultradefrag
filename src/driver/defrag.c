@@ -146,7 +146,7 @@ NTSTATUS MovePartOfFile(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,
 						NULL,0);
 
 	/* If the operation is pending, wait for it to finish */
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol/*hFile*/,FALSE,NULL);
 		else

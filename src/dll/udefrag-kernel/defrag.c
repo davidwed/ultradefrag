@@ -141,7 +141,7 @@ NTSTATUS MovePartOfFile(HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, UL
 						NULL,0);
 
 	/* If the operation is pending, wait for it to finish */
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		/* FIXME: winx_fileno(fVolume) ??? */
 		NtWaitForSingleObject(winx_fileno(fVolume)/*hFile*/,FALSE,NULL);
 		status = ioStatus.Status;

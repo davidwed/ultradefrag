@@ -34,13 +34,8 @@
 */
 
 /*
-* Extremely important note for the 64-bit compilation.
-*
-* The following function prototype causes wrong compiled code:
-* NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,BOOLEAN,BOOLEAN);
-*
-* Right prototype does not contain BOOLEAN keywords:
-* NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,ULONG,ULONG);
+* Extremely important notes for the 64-bit compilation:
+* Read carefully comments in /src/dll/zenwinx/ntndk.h file.
 */
 
 /* compiler specific definitions */

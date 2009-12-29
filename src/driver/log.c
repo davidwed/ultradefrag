@@ -64,8 +64,8 @@ void Write(UDEFRAG_DEVICE_EXTENSION *dx,HANDLE hFile,PVOID buf,ULONG length)
 	NTSTATUS Status;
 
 	Status = ZwWriteFile(hFile,NULL,NULL,NULL,&ioStatus,buf,length,NULL,NULL);
-	if(Status == STATUS_PENDING){
-		DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
+	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
+		//DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
 		if(nt4_system)
 			Status = NtWaitForSingleObject(hFile,FALSE,NULL);
 		else
@@ -161,14 +161,14 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			NULL
 			);
 	Status = ZwCreateFile(&hFile,
-			/*FILE_GENERIC_WRITE*/FILE_APPEND_DATA | SYNCHRONIZE,
+			FILE_APPEND_DATA | SYNCHRONIZE,
 			&ObjectAttributes,
 			&ioStatus,
 			NULL,
 			FILE_ATTRIBUTE_NORMAL,
 			FILE_SHARE_READ,
 			FILE_OVERWRITE_IF,
-			FILE_SYNCHRONOUS_IO_NONALERT/* | FILE_WRITE_THROUGH*/,
+			FILE_SYNCHRONOUS_IO_NONALERT,
 			NULL,
 			0
 			);
@@ -266,14 +266,14 @@ BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx)
 			NULL
 			);
 	Status = ZwCreateFile(&hFile,
-			/*FILE_GENERIC_WRITE*/FILE_APPEND_DATA | SYNCHRONIZE,
+			FILE_APPEND_DATA | SYNCHRONIZE,
 			&ObjectAttributes,
 			&ioStatus,
 			NULL,
 			FILE_ATTRIBUTE_NORMAL,
 			FILE_SHARE_READ,
 			FILE_OVERWRITE_IF,
-			FILE_SYNCHRONOUS_IO_NONALERT/* | FILE_WRITE_THROUGH*/,
+			FILE_SYNCHRONOUS_IO_NONALERT,
 			NULL,
 			0
 			);

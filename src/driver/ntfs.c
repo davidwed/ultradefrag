@@ -66,7 +66,7 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
 				&part_info, sizeof(PARTITION_INFORMATION));
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
 		else
@@ -93,7 +93,7 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
 		else
@@ -127,7 +127,7 @@ NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx)
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
 		else
@@ -331,7 +331,7 @@ NTSTATUS GetMftRecord(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_FILE_RECORD_OUTPUT_BUFF
 			FSCTL_GET_NTFS_FILE_RECORD, \
 			&nfrib,sizeof(nfrib), \
 			pnfrob, nfrob_size);
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
 		else

@@ -66,7 +66,7 @@ void CheckForNtfsPartition(void)
 	status = NtDeviceIoControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
 				&part_info, sizeof(PARTITION_INFORMATION));
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
@@ -90,7 +90,7 @@ void CheckForNtfsPartition(void)
 	status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
@@ -121,7 +121,7 @@ NTSTATUS GetMftLayout(void)
 	status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
@@ -320,7 +320,7 @@ NTSTATUS GetMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 			FSCTL_GET_NTFS_FILE_RECORD, \
 			&nfrib,sizeof(nfrib), \
 			pnfrob, nfrob_size);
-	if(status == STATUS_PENDING){
+	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
@@ -1437,7 +1437,7 @@ NTSTATUS ReadSectors(ULONGLONG lsn,PVOID buffer,ULONG length)
 
 	offset.QuadPart = lsn * bytes_per_sector;
 	Status = NtReadFile(winx_fileno(fVolume),NULL,NULL,NULL,&ioStatus,buffer,length,&offset,NULL);
-	if(Status == STATUS_PENDING){
+	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
 		///DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
 		Status = NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;

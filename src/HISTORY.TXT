@@ -4,7 +4,7 @@ HISTORY
 
   Version 3.3.1 (43.0)   2009-12-
   ------------------------------------------------------------------------------
-    - extremely important x64 bugs were fixed
+    - extremely important x64 and x86 bugs were fixed
     - program is available again for all 64-bit targets
     - translations submitting is available again through project's forum 
       which works much better that MediaWiki service used before
@@ -12,6 +12,20 @@ HISTORY
     - USB keyboards support at Windows boot time was added
     - error handling was improved
     - one little portable version bug was fixed
+    - few important GUI bugs were fixed; now all graphical programs are 
+      much more compatible with their manifests
+
+
+  Beta Stage
+  ------------------------------------------------------------------------------
+    All versions listed below were treated as stable and so on, but actually 
+    they were highly unreliable. Program's internal structure is very complex, 
+    it uses a lot of undocumented Windows calls. Therefore bug hunting was
+    always extremely hard, especially in early days when an author had 
+    no enough experience.
+
+    In other words, all versions prior to 3.3.1 must be treated as products 
+    of the beta stage of program's development.
 
 
   Version 3.3.0 (66.0)   2009-12-04
@@ -76,7 +90,7 @@ HISTORY
 
   Version 3.1.0 (33.0)   2009-05-13
   ------------------------------------------------------------------------------
-    - this is the first really stable release
+    - this is the most stable release at this moment
     - graphical interface was completely rewritten
     - gui program was translated into the following languages:
 
@@ -293,9 +307,14 @@ HISTORY
     - initial public release
     - basic documentation was added
     - source code cleanup
-    - build.cmd tool and makefiles
+    - build.cmd tool and makefiles were added
 
                                     ***
+
+  Alpha Stage
+  ------------------------------------------------------------------------------
+    Releases listed below were never published.
+
 
   Version 0.6.0 (21.1)   2007-06-07
   ------------------------------------------------------------------------------
@@ -356,4 +375,4 @@ HISTORY
 
   Version 0.0.1	(11.3)   2007-04-13
   ------------------------------------------------------------------------------
-    - first stable release for NT 5.1 & 5.2
+    - first release for NT 5.1 & 5.2

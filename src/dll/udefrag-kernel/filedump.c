@@ -29,12 +29,16 @@ NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK ioStatus;
+	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
 
 	if(!pfn || !phFile) return STATUS_INVALID_PARAMETER;
+	
+	if(pfn->is_dir) flags |= FILE_OPEN_FOR_BACKUP_INTENT;
+	else flags |= FILE_NO_INTERMEDIATE_BUFFERING;
+	
 	InitializeObjectAttributes(&ObjectAttributes,&pfn->name,0,NULL,NULL);
-	return NtCreateFile(phFile,FILE_GENERIC_READ,&ObjectAttributes,&ioStatus,
-			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,
-			  pfn->is_dir ? FILE_OPEN_FOR_BACKUP_INTENT : FILE_NO_INTERMEDIATE_BUFFERING,
+	return NtCreateFile(phFile,FILE_GENERIC_READ | SYNCHRONIZE,&ObjectAttributes,&ioStatus,
+			  NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,flags,
 			  NULL,0);
 }
 
@@ -81,7 +85,7 @@ BOOLEAN DumpFile(PFILENAME pfn)
 						&startVcn, sizeof(ULONGLONG), \
 						fileMappings, FILEMAPSIZE * sizeof(LARGE_INTEGER));
 		counter ++;
-		if(Status == STATUS_PENDING){
+		if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
 			NtWaitForSingleObject(hFile,FALSE,NULL);
 			Status = ioStatus.Status;
 		}

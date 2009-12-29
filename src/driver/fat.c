@@ -155,7 +155,7 @@ NTSTATUS ReadSectors(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG lsn,PVOID buffer,ULO
 
 	offset.QuadPart = lsn * dx->bytes_per_sector;
 	Status = ZwReadFile(dx->hVol,NULL,NULL,NULL,&ioStatus,buffer,length,&offset,NULL);
-	if(Status == STATUS_PENDING){
+	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
 		///DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
 		if(nt4_system)
 			Status = NtWaitForSingleObject(dx->hVol,FALSE,NULL);

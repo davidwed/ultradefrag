@@ -28,7 +28,7 @@ char BitMap[BITMAPSIZE * sizeof(UCHAR)];
 /* Dumps all the free clusters on the volume */
 NTSTATUS FillFreeSpaceMap(void)
 {
-	ULONG status;
+	NTSTATUS status;
 	PBITMAP_DESCRIPTOR bitMappings;
 	ULONGLONG cluster,startLcn;
 	IO_STATUS_BLOCK ioStatus;
@@ -45,7 +45,7 @@ NTSTATUS FillFreeSpaceMap(void)
 		RtlZeroMemory(bitMappings,BITMAPSIZE);
 		status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,0,&ioStatus,
 			FSCTL_GET_VOLUME_BITMAP,&nextLcn,sizeof(cluster),bitMappings,BITMAPSIZE);
-		if(status == STATUS_PENDING){
+		if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 			NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 			status = ioStatus.Status;
 		}

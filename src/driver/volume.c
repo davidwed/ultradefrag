@@ -43,9 +43,9 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 	} else {
 		InitializeObjectAttributes(&ObjectAttributes,&us,OBJ_KERNEL_HANDLE,NULL,NULL);
 	}
-	status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA/* | SYNCHRONIZE*/,
+	status = ZwCreateFile(&dx->hVol,FILE_GENERIC_READ | FILE_WRITE_DATA | SYNCHRONIZE,
 				&ObjectAttributes,&iosb,
-				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
+				NULL,0,FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,FILE_SYNCHRONOUS_IO_NONALERT,
 				NULL,0);
 	if(status != STATUS_SUCCESS){
 		DebugPrint("-Ultradfg- Can't open volume %x\n",(UINT)status);
