@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <commctrl.h>
 
 #define lua_c
 
@@ -411,6 +412,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	char **argv;
 	int ret;
 	
+	InitCommonControls(); /* strongly required! to be compatible with manifest */
+
 	/*
 	* To disable the sand glass on the cursor
 	* we must show a window on startup.

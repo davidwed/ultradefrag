@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=..\lib
 outputFilename=../bin/bootexctrl.exe
-libraries=msvcrt
+libraries=msvcrt,comctl32
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -65,7 +65,7 @@ optimizeLevel=2
 // linker
 libraryPath=..\lib
 outputFilename=../bin/bootexctrl.exe
-libraries=msvcrt
+libraries=msvcrt,comctl32
 extraLinkerOptions=-mwindows -Wl,--strip-all
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -86,4 +86,5 @@ extraResourceOptions=
 1=bootexctrl.rc
 [Other]
 [History]
-bootexctrl.c,4673
+bootexctrl.rc,0
+bootexctrl.c,5596

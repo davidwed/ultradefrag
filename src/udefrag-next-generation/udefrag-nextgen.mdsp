@@ -87,5 +87,6 @@ extraResourceOptions=
 1=udefrag-nextgen.rc
 [Other]
 [History]
-resource.h,874
-main.c,4954
+resource.h,1160
+udefrag-nextgen.rc,1890
+main.c,1097

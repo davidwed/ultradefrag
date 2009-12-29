@@ -6,7 +6,7 @@ target_type = "gui"
 src = { "lua_gui.c" }
 rc = { "lua_gui.rc" }
 
-libs = { "msvcrt", "kernel32", "user32" }
+libs = { "msvcrt", "kernel32", "user32", "comctl32" }
 adlibs = { "$(UDEFRAG_LIB_PATH)\\lua5.1a" }
 
 umentry = "winmain"

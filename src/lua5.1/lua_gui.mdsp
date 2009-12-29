@@ -6,7 +6,7 @@ defaultConfig=0
 [Debug]
 // compiler 
 workingDirectory=
-arguments=
+arguments=-v
 intermediateFilesDirectory=../obj/lua5.1
 outputFilesDirectory=../obj/lua5.1
 compilerPreprocessor=
@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=..\lib
 outputFilename=../bin/lua5.1a_gui.exe
-libraries=lua5.1a
+libraries=lua5.1a,comctl32
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -65,7 +65,7 @@ optimizeLevel=2
 // linker
 libraryPath=..\lib
 outputFilename=../bin/lua5.1a_gui.exe
-libraries=lua5.1a
+libraries=lua5.1a,comctl32
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -86,5 +86,5 @@ extraResourceOptions=
 1=lua_gui.rc
 [Other]
 [History]
-lua_gui.rc,0
-lua_gui.c,9244
+lua_gui.rc,293
+lua_gui.c,9375

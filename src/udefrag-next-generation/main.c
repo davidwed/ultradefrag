@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <shellapi.h>
+#include <commctrl.h>
 
 #include "../include/ultradfgver.h"
 #include "resource.h"
@@ -45,6 +46,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	HBRUSH hBrush;
 	MSG	msg;
 	int screen_width, screen_height;
+
+	InitCommonControls(); /* strongly required! to be compatible with manifest */
 
 	screen_width = GetSystemMetrics(SM_CXSCREEN);
 	screen_height = GetSystemMetrics(SM_CYSCREEN);

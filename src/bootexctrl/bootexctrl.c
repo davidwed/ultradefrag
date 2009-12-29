@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <commctrl.h>
 
 #include "../include/ultradfgver.h"
 
@@ -215,6 +216,8 @@ int parse_cmdline(void)
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	InitCommonControls(); /* strongly required! to be compatible with manifest */
+
 	if(parse_cmdline() < 0) return 2;
 	if(invalid_opts) return 1;
 	if(h_flag || !cmd[0]) show_help();
