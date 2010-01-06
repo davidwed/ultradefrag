@@ -5,14 +5,6 @@ EXPORTS
 	udefrag_unload
 	udefrag_kernel_mode
 	udefrag_reload_settings
-
-;	udefrag_s_analyse
-;	udefrag_s_defragment
-;	udefrag_s_optimize
-;	udefrag_s_get_map
-;	udefrag_s_get_avail_volumes
-;	scheduler_get_avail_letters
-
 	udefrag_send_command_ex
 	udefrag_stop
 	udefrag_get_progress
@@ -20,7 +12,5 @@ EXPORTS
 	udefrag_get_default_formatted_results
 	udefrag_get_avail_volumes
 	udefrag_validate_volume
-
-	udefrag_fbsize
-	udefrag_dfbsize
-;	udefrag_set_error_handler
+	udefrag_fbsize=winx_fbsize
+	udefrag_dfbsize=winx_dfbsize

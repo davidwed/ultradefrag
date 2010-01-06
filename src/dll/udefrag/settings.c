@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,10 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* udefrag.dll - middle layer between driver and user interfaces:
-* functions for program settings manipulations.
-*/
+/**
+ * @file settings.c
+ * @brief UltraDefrag settings code.
+ * @addtogroup Settings
+ * @{
+ */
 
 #include "../../include/ntndk.h"
 
@@ -28,40 +30,41 @@
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
 
-#ifndef __FUNCTION__
-#define __FUNCTION__ "udefrag_xxx"
-#endif
-#define CHECK_INIT_EVENT() { \
+#define DbgCheckInitEvent(f) { \
 	if(!init_event){ \
-		winx_dbg_print("%s call without initialization!", __FUNCTION__); \
-		return -1; \
+		DebugPrint(f " call without initialization!"); \
+		return (-1); \
 	} \
 }
 
 /* global variables */
-extern HANDLE init_event;
-extern WINX_FILE *f_ud;
-
-extern BOOL kernel_mode_driver;
-
 #define MAX_FILTER_SIZE 4096
-#define MAX_FILTER_BYTESIZE (MAX_FILTER_SIZE * sizeof(short))
-unsigned short in_filter[MAX_FILTER_SIZE + 1] = L"";
-unsigned short ex_filter[MAX_FILTER_SIZE + 1] = L"";
+short in_filter[MAX_FILTER_SIZE + 1] = L"";
+short ex_filter[MAX_FILTER_SIZE + 1] = L"";
 ULONGLONG sizelimit = 0;
 ULONGLONG fraglimit = 0;
 int refresh_interval  = DEFAULT_REFRESH_INTERVAL;
 
-/* http://sourceforge.net/tracker/index.php?func=detail&aid=2886353&group_id=199532&atid=969873 */
+/*
+* http://sourceforge.net/tracker/index.php?func=
+* detail&aid=2886353&group_id=199532&atid=969873
+*/
 ULONGLONG time_limit = 0;
 
 ULONG disable_reports = FALSE;
 ULONG dbgprint_level = DBG_NORMAL;
 
 short env_buffer[8192];
-
 #define ENV_BUF_SIZE (sizeof(env_buffer) / sizeof(short))
 
+extern HANDLE init_event;
+extern WINX_FILE *f_ud;
+extern BOOL kernel_mode_driver;
+
+/**
+ * @brief Queries an environment variable.
+ * @note Internal use only.
+ */
 BOOL query_env_variable(short *name)
 {
 	if(winx_query_env_variable(name,env_buffer,ENV_BUF_SIZE) >= 0)
@@ -69,8 +72,11 @@ BOOL query_env_variable(short *name)
 	return FALSE;
 }
 
-/* load settings: always successful */
-int __stdcall udefrag_load_settings()
+/**
+ * @brief Retrieves all settings from the environment.
+ * @note Internal use only.
+ */
+void __stdcall udefrag_load_settings(void)
 {
 	char buf[256];
 	
@@ -81,10 +87,6 @@ int __stdcall udefrag_load_settings()
 	disable_reports = FALSE;
 	dbgprint_level = DBG_NORMAL;
 
-	/*
-	* Since 2.0.0 version all options will be received 
-	* from the Environment.
-	*/
 	if(query_env_variable(L"UD_IN_FILTER"))	wcsncpy(in_filter,env_buffer,MAX_FILTER_SIZE);
 	if(query_env_variable(L"UD_EX_FILTER"))	wcsncpy(ex_filter,env_buffer,MAX_FILTER_SIZE);
 	
@@ -100,10 +102,10 @@ int __stdcall udefrag_load_settings()
 		buf[sizeof(buf) - 1] = 0;
 		time_limit = winx_str2time(buf);
 	}
-	winx_dbg_print("*UltraDefrag* Time limit = %I64u seconds\n",time_limit);
+	DebugPrint("Time limit = %I64u seconds\n",time_limit);
 
 	if(query_env_variable(L"UD_REFRESH_INTERVAL")) refresh_interval = _wtoi(env_buffer);
-	winx_dbg_print("*UltraDefrag* Refresh interval = %u msec\n",refresh_interval);
+	DebugPrint("Refresh interval = %u msec\n",refresh_interval);
 
 	if(query_env_variable(L"UD_DISABLE_REPORTS")) {
 		if(!wcscmp(env_buffer,L"1")) disable_reports = TRUE;
@@ -118,12 +120,16 @@ int __stdcall udefrag_load_settings()
 		else if(!wcscmp(env_buffer,L"NORMAL"))
 			dbgprint_level = DBG_NORMAL;
 	}
-	return 0;
 }
 
-int __stdcall udefrag_apply_settings()
+/**
+ * @brief Delivers all settings to the driver.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
+int __stdcall udefrag_apply_settings(void)
 {
-	CHECK_INIT_EVENT();
+	DbgCheckInitEvent("udefrag_apply_settings");
 
 	/* set debug print level */
 	if(winx_ioctl(f_ud,IOCTL_SET_DBGPRINT_LEVEL,"Debug print level setup",
@@ -145,23 +151,15 @@ int __stdcall udefrag_apply_settings()
 	return 0;
 }
 
-/****f* udefrag.settings/udefrag_reload_settings
-* NAME
-*    udefrag_reload_settings
-* SYNOPSIS
-*    error = udefrag_reload_settings();
-* FUNCTION
-*    Reloads settings and applies them.
-* INPUTS
-*    Nothing.
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    udefrag_reload_settings();
-******/
+/**
+ * @brief Reloads all settings and delivers them to the driver.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_reload_settings(void)
 {
 	udefrag_load_settings();
 	if(!kernel_mode_driver) return 0;
 	return udefrag_apply_settings();
 }
+
+/** @} */

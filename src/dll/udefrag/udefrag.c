@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,10 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* udefrag.dll - middle layer between driver and user interfaces:
-* driver interaction functions.
-*/
+/**
+ * @file udefrag.c
+ * @brief Driver interaction code.
+ * @addtogroup Driver
+ * @{
+ */
 
 #include "../../include/ntndk.h"
 
@@ -30,28 +32,23 @@
 
 #include "../../include/udefrag-kernel.h"
 
-#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
-
-#ifndef __FUNCTION__
-#define __FUNCTION__ "udefrag_xxx"
-#endif
-#define CHECK_INIT_EVENT() { \
+#define DbgCheckInitEvent(f) { \
 	if(!init_event){ \
-		winx_dbg_print("%s call without initialization!", __FUNCTION__); \
-		return -1; \
+		DebugPrint(f " call without initialization!"); \
+		return (-1); \
 	} \
 }
 
 /* global variables */
-
 BOOL kernel_mode_driver = TRUE;
 long cluster_map_size = 0;
-
-char result_msg[4096]; /* buffer for the default formatted result message */
 char user_mode_buffer[65536]; /* for nt 4.0 */
+
 HANDLE init_event = NULL;
 WINX_FILE *f_ud = NULL;
 WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
+
+char result_msg[4096]; /* buffer for the default formatted result message */
 
 extern int refresh_interval;
 extern ULONGLONG time_limit;
@@ -60,85 +57,38 @@ unsigned char c, lett;
 BOOL done_flag;
 int cmd_status;
 
-#if 0
-void __stdcall ErrorHandler(short *msg)
-{
-	if(!eh) return;
-	if(wcsstr(msg, L"c0000035")) /* STATUS_OBJECT_NAME_COLLISION */
-		eh(L"You can run only one instance of UltraDefrag!");
-	else eh(msg);
-}
-
-void __stdcall DefragErrorHandler(short *msg)
-{
-	if(!eh) return;
-	if(wcsstr(msg, L"c0000002")) /* STATUS_NOT_IMPLEMENTED */
-		eh(L"NTFS volumes with cluster size greater than 4 kb\n"
-		   L"cannot be defragmented on Windows 2000.");
-	else eh(msg);
-}
-#endif
-
-/* functions */
+/**
+ * @brief udefrag.dll entry point.
+ */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
-	/*
-	* This code was commented 20 mar 2009, because it is 
-	* a little bit dangerous:
-	* GUI can restart itself and than unload the driver.
-	*/
-	/* here we have last chance to unload the driver */
-/*	if(dwReason == DLL_PROCESS_DETACH)
-		udefrag_unload();
-*/	return 1;
+	return 1;
 }
 
-/****f* udefrag.common/udefrag_init
-* NAME
-*    udefrag_init
-* SYNOPSIS
-*    error = udefrag_init(mapsize);
-* FUNCTION
-*    Ultra Defragmenter initialization procedure.
-* INPUTS
-*    mapsize - cluster map size, may be zero
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    int main(int argc, char **argv)
-*    {
-*        if(udefrag_init(0) < 0){
-*            printf("udefrag_init() call unsuccessful!");
-*            exit(1);
-*        }
-*        // your program code here
-*        // ...
-*    }
-* NOTES
-*    You must call this function before any other interaction
-*    with driver attempts.
-* SEE ALSO
-*    udefrag_unload
-******/
+/**
+ * @brief Initializes the UltraDefrag driver.
+ * @param[in] map_size the cluster map size,
+ *                     in bytes. May be zero.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_init(long map_size)
 {
 	/* 1. Enable neccessary privileges */
-	/*(void)EnablePrivilege(UserToken,SE_MANAGE_VOLUME_PRIVILEGE)); */
+	/*(void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE); */
 	(void)winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE);
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE); /* required by GUI client */
 	
-	/* 2. only one instance of the program ! */
-	/* create init_event - this must be after privileges enabling (?) */
+	/* 2. only a single instance of the program ! */
 	if(winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event) < 0)
 		return (-1);
 
 #ifndef UDEFRAG_PORTABLE
 	/* 3. Load the driver */
 	if(winx_load_driver(L"ultradfg") < 0){
-		winx_dbg_print("------------------------------------------------------------\n");
-		winx_dbg_print("UltraDefrag kernel mode driver is not installed\n");
-		winx_dbg_print("or Windows denies it.\n");
-		winx_dbg_print("------------------------------------------------------------\n");
+		DebugPrint("------------------------------------------------------------\n");
+		DebugPrint("UltraDefrag kernel mode driver is not installed\n");
+		DebugPrint("or Windows denies it.\n");
+		DebugPrint("------------------------------------------------------------\n");
 		/* it seems that we are running on Vista or Win7 */
 		kernel_mode_driver = FALSE;
 		cluster_map_size = map_size;
@@ -162,65 +112,37 @@ int __stdcall udefrag_init(long map_size)
 	if(!f_stat) goto init_fail;
 	f_stop = winx_fopen("\\Device\\UltraDefragStop","w");
 	if(!f_stop) goto init_fail;
-	/* 6. Set user mode buffer - nt 4.0 specific */
+	/* 5. Set user mode buffer - nt 4.0 specific */
 	if(winx_ioctl(f_ud,IOCTL_SET_USER_MODE_BUFFER,"User mode buffer setup",
 		user_mode_buffer,0,NULL,0,NULL) < 0) goto init_fail;
-	/* 7. Set cluster map size */
+	/* 6. Set cluster map size */
 	if(winx_ioctl(f_ud,IOCTL_SET_CLUSTER_MAP_SIZE,"Cluster map buffer setup",
 		&map_size,sizeof(long),NULL,0,NULL) < 0) goto init_fail;
-	/* 8. Load settings */
+	/* 7. Load settings */
 	if(udefrag_reload_settings() < 0) goto init_fail;
 	return 0;
 init_fail:
-	/*if(init_event)*/ udefrag_unload();
-	winx_debug_print("Cannot initialize the kernel mode driver!\n");
-					 /*"Run DbgView program for more information.");*/
+	udefrag_unload();
+	DebugPrint("Cannot initialize the kernel mode driver!\n");
 	return (-1);
 }
 
-/****f* udefrag.common/udefrag_kernel_mode
-* NAME
-*    udefrag_kernel_mode
-* SYNOPSIS
-*    kernel_mode = udefrag_kernel_mode();
-* FUNCTION
-*    Defines is kernel mode driver loaded or not.
-* INPUTS
-*    Nothing.
-* RESULT
-*    If kernel mode driver is loaded returns TRUE,
-*    otherwise FALSE.
-******/
+/**
+ * @brief Defines is kernel mode driver loaded or not.
+ * @return TRUE if kernel mode driver is loaded, FALSE otherwise.
+ */
 int __stdcall udefrag_kernel_mode(void)
 {
 	return (int)kernel_mode_driver;
 }
 
-/****f* udefrag.common/udefrag_unload
-* NAME
-*    udefrag_unload
-* SYNOPSIS
-*    error = udefrag_unload();
-* FUNCTION
-*    Unloads the Ultra Defragmenter driver.
-* INPUTS
-*    Nothing.
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    udefrag_unload();
-* NOTES
-*    You must call this function before terminating
-*    the calling process to free allocated resources.
-* SEE ALSO
-*    udefrag_init
-******/
+/**
+ * @brief Unloads the UltraDefrag driver.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_unload(void)
 {
-	//CHECK_INIT_EVENT();
 	if(!init_event) return 0;
-
-	/* close events */
 	winx_destroy_event(init_event); init_event = NULL;
 
 	if(kernel_mode_driver){
@@ -235,6 +157,13 @@ int __stdcall udefrag_unload(void)
 	return 0;
 }
 
+/**
+ * @brief Delivers a disk defragmentation command to the driver.
+ * @param[in] command the command to be delivered.
+ * @param[in] letter the volume letter.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 int udefrag_send_command(unsigned char command,unsigned char letter)
 {
 	char cmd[4];
@@ -265,12 +194,18 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 			return 0;
 	}
 
-	winx_dbg_print("Cannot execute %s command for volume %c:!",
+	DebugPrint("Cannot execute %s command for volume %c:!",
 		cmd_description,(char)toupper((int)letter));
 	return (-1);
 }
 
-/* you can send only one command at the same time */
+/**
+ * @brief Thread procedure delivering a disk 
+ *        defragmentation command to the driver.
+ * @note
+ * - Only a single command may be sent at the same time.
+ * - Internal use only.
+ */
 DWORD WINAPI send_command(LPVOID unused)
 {
 	cmd_status = udefrag_send_command(c,lett);
@@ -279,32 +214,20 @@ DWORD WINAPI send_command(LPVOID unused)
 	return 0;
 }
 
-/****f* udefrag.common/udefrag_send_command_ex
-* NAME
-*    udefrag_send_command_ex
-* SYNOPSIS
-*    error = udefrag_send_command_ex(cmd, letter, callback);
-* FUNCTION
-*    Sends the 'Analyse | Defragment | Optimize' 
-*    command to the driver.
-* INPUTS
-*    cmd      - command: 'a' for Analyse, 'd' for Defragmentation,
-*               'c' for Optimization
-*    letter   - volume letter
-*    callback - address of the callback function;
-*               see prototype in udefrag.h header;
-*               this parameter may be NULL
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    if(udefrag_analyse('C',callback_proc) < 0){
-*        printf("udefrag_analyse() call unsuccessful!");
-*    }
-* NOTES
-*    Use udefrag_analyse, udefrag_defragment, udefrag_optimize
-*    macro definitions instead.
-******/
-int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc)
+/**
+ * @brief Delivers a disk defragmentation command to the driver
+ *        in a separate thread.
+ * @param[in] command the command to be delivered.
+ * @param[in] letter the volume letter.
+ * @param[in] sproc an address of the callback procedure
+ *                  to be called periodically during
+ *                  the running disk defragmentation job.
+ *                  This parameter may be NULL.
+ * @return Zero for success, negative value otherwise.
+ * @note udefrag_analyse, udefrag_defragment, udefrag_optimize
+ *       macro definitions may be used instead of this function.
+ */
+int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sproc)
 {
 	WINX_FILE *f;
 	char volume[] = "\\??\\A:";
@@ -312,7 +235,7 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 	ULONGLONG t = 0;
 	int use_limit = 0;
 
-	CHECK_INIT_EVENT();
+	DbgCheckInitEvent("udefrag_send_command_ex");
 
 	/*
 	* Here we can flush all file buffers. We cannot do it 
@@ -328,12 +251,8 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 		winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	}
 
-	//if(!sproc){
-		/* send command directly and return */
-	//	return udefrag_send_command(command,letter);
-	//}
+	/* create a separate thread for driver command processing */
 	done_flag = FALSE;
-	/* create a thread for driver command processing */
 	cmd_status = 0;
 	c = command; lett = letter;
 	if(winx_create_thread(send_command,&hThread) < 0)
@@ -352,7 +271,7 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 		if(sproc) sproc(FALSE);
 		if(use_limit){
 			if(t <= refresh_interval){
-				winx_dbg_print("*UltraDefrag* Time limit exceeded!\n");
+				DebugPrint("Time limit exceeded!\n");
 				udefrag_stop();
 			} else {
 				t -= refresh_interval;
@@ -364,67 +283,44 @@ int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter
 	return cmd_status;
 }
 
-/****f* udefrag.common/udefrag_stop
-* NAME
-*    udefrag_stop
-* SYNOPSIS
-*    error = udefrag_stop();
-* FUNCTION
-*    Stops the current operation.
-* INPUTS
-*    Nothing.
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    udefrag_stop();
-* SEE ALSO
-*    udefrag_send_command_ex
-******/
+/**
+ * @brief Stops the running disk defragmentation job.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_stop(void)
 {
-	CHECK_INIT_EVENT();
+	DbgCheckInitEvent("udefrag_stop");
 	if(kernel_mode_driver){
 		if(winx_fwrite("s",1,1,f_stop)) return 0;
 	} else {
 		if(udefrag_kernel_stop() >= 0) return 0;
 	}
-	winx_debug_print("Stop request failed!");
+	DebugPrint("Stop request failed!");
 	return (-1);
 }
 
-/****f* udefrag.common/udefrag_get_progress
-* NAME
-*    udefrag_get_progress
-* SYNOPSIS
-*    error = udefrag_get_progress(pstat, percentage);
-* FUNCTION
-*    Retrieves the progress of current operation.
-* INPUTS
-*    pstat      - pointer to STATISTIC structure,
-*                 defined in ultradfg.h header
-*    percentage - pointer to variable of double type
-*                 to store progress percentage
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    udefrag_get_progress(&stat,&p);
-* SEE ALSO
-*    udefrag_send_command_ex
-******/
+/**
+ * @brief Retrieves the progress information
+ *        of the running disk defragmentation job.
+ * @param[out] pstat pointer to the STATISTIC structure.
+ * @param[out] percentage pointer to the variable 
+ *                        receiving progress percentage.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 {
 	double x, y;
 	
-	CHECK_INIT_EVENT();
+	DbgCheckInitEvent("udefrag_get_progress");
 
 	if(kernel_mode_driver){
 		if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
-			winx_debug_print("Statistical data unavailable!");
+			DebugPrint("Statistical data unavailable!");
 			return (-1);
 		}
 	} else {
 		if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
-			winx_debug_print("Statistical data unavailable!");
+			DebugPrint("Statistical data unavailable!");
 			return (-1);
 		}
 	}
@@ -439,26 +335,16 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	return 0;
 }
 
-/****f* udefrag.common/udefrag_get_map
-* NAME
-*    udefrag_get_map
-* SYNOPSIS
-*    error = udefrag_get_map(buffer, size);
-* FUNCTION
-*    Retrieves the cluster map.
-* INPUTS
-*    buffer - pointer to the map buffer
-*    size   - size of the specified buffer
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    udefrag_get_map(map,sizeof(map));
-* SEE ALSO
-*    udefrag_send_command_ex
-******/
+/**
+ * @brief Retrieves the cluster map
+ *        of the currently processing volume.
+ * @param[out] buffer pointer to the map buffer.
+ * @param[in] size the buffer size, in bytes.
+ * @return Zero for success, negative value otherwise. 
+ */
 int __stdcall udefrag_get_map(char *buffer,int size)
 {
-	CHECK_INIT_EVENT();
+	DbgCheckInitEvent("udefrag_get_map");
 	
 	if(kernel_mode_driver){
 		if(winx_fread(buffer,size,1,f_map)) return 0;
@@ -467,32 +353,20 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 			return 0;
 	}
 				
-	winx_debug_print("Cluster map unavailable!");
+	DebugPrint("Cluster map unavailable!");
 	return (-1);
 }
 
-/****f* udefrag.common/udefrag_get_default_formatted_results
-* NAME
-*    udefrag_get_default_formatted_results
-* SYNOPSIS
-*    msg = udefrag_get_default_formatted_results(pstat);
-* FUNCTION
-*    Retrieves default formatted results.
-* INPUTS
-*    pstat - pointer to STATISTIC structure,
-*            defined in ultradfg.h header
-* RESULT
-*    msg - string containing default formatted result
-*          of operation defined in pstat.
-* EXAMPLE
-*   udefrag_analyse('C',NULL);
-*   udefrag_get_progress(&pstat,&p);
-*   printf("%s\n", udefrag_get_default_formatted_results(&pstat));
-* NOTES
-*    Useful for native and console applications.
-* SEE ALSO
-*    udefrag_send_command_ex
-******/
+/**
+ * @brief Retrieves the default formatted results of the 
+ *        completed disk defragmentation job.
+ * @param[in] pstat pointer to the STATISTIC structure,
+ *                  filled by udefrag_get_progress() call.
+ * @return A string containing default formatted results of the
+ *         disk defragmentation job defined in passed structure.
+ * @note This function may be useful for console
+ *       and native applications.
+ */
 char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 {
 	char total_space[68];
@@ -522,3 +396,5 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 	result_msg[sizeof(result_msg) - 1] = 0;
 	return result_msg;
 }
+
+/** @} */

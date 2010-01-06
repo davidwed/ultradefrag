@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* Volume validation routines.
-*/
+/**
+ * @file volume.c
+ * @brief Disk validation code.
+ * @addtogroup Disks
+ * @{
+ */
 
 #include "../../include/ntndk.h"
 
@@ -30,40 +33,33 @@
 volume_info v[MAX_DOS_DRIVES + 1];
 
 int internal_validate_volume(unsigned char letter,int skip_removable,
-							  int *is_removable,char *fsname,
-							  LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree);
+		int *is_removable,char *fsname,LARGE_INTEGER *ptotal,LARGE_INTEGER *pfree);
 
-/****f* udefrag.volume/udefrag_get_avail_volumes
-* NAME
-*    udefrag_get_avail_volumes
-* SYNOPSIS
-*    error = udefrag_get_avail_volumes(ppvol_info, skip_removable);
-* FUNCTION
-*    Retrieves the list of available volumes.
-* INPUTS
-*    ppvol_info     - pointer to variable of volume_info* type
-*    skip_removable - true if we need to skip removable drives,
-*                     false otherwise
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    volume_info *v;
-*    char buffer[ERR_MSG_SIZE];
-*    int i;
-*
-*    if(udefrag_get_avail_volumes(&v,TRUE) >= 0){
-*        for(i = 0;;i++){
-*            if(!v[i].letter) break;
-*            // ...
-*        }
-*    }
-* NOTES
-*    if(skip_removable == FALSE && you have 
-*      floppy drive without floppy disk)
-*       then you will hear noise :))
-* SEE ALSO
-*    udefrag_validate_volume
-******/
+/**
+ * @brief Retrieves a list of volumes
+ *        available for defragmentation.
+ * @param[in] vol_info pointer to variable receiving
+ *                     the volume list array address.
+ * @param[in] skip_removable the boolean value defining
+ *                           must removable drives
+ *                           be skipped or not.
+ * @return Zero for success, negative value otherwise.
+ * @note if(skip_removable == FALSE && you have a
+ *       floppy drive without floppy disk)
+ *       then you will hear noise :))
+ * @par Example:
+ * @code
+ * volume_info *v;
+ * int i;
+ *
+ * if(udefrag_get_avail_volumes(&v,TRUE) >= 0){
+ *     for(i = 0;;i++){
+ *         if(!v[i].letter) break;
+ *         // ...
+ *     }
+ * }
+ * @endcode
+ */
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable)
 {
 	ULONG i, index;
@@ -89,29 +85,16 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 	return 0;
 }
 
-/****f* udefrag.volume/udefrag_validate_volume
-* NAME
-*    udefrag_validate_volume
-* SYNOPSIS
-*    error = udefrag_validate_volume(letter, skip_removable);
-* FUNCTION
-*    Checks specified volume to be valid for defragmentation.
-* INPUTS
-*    letter         - volume letter
-*    skip_removable - true if we need to skip removable drives,
-*                     false otherwise
-* RESULT
-*    error - zero for success; negative value otherwise.
-* EXAMPLE
-*    if(udefrag_validate_volume("C",TRUE) < 0)
-*        // handle error
-* NOTES
-*    if(skip_removable == FALSE && you want 
-*      to validate floppy drive without floppy disk)
-*       then you will hear noise :))
-* SEE ALSO
-*    udefrag_get_avail_volumes
-******/
+/**
+ * @brief Checks a volume for the defragmentation possibility.
+ * @param[in] letter the volume letter.
+ * @param[in] skip_removable the boolean value defining
+ *                           must removable drives be skipped or not.
+ * @return Zero for success, negative value otherwise.
+ * @note if(skip_removable == FALSE && you want 
+ *       to validate a floppy drive without floppy disk)
+ *       then you will hear noise :))
+ */
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
 	int is_removable;
@@ -132,27 +115,53 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 	return 0;
 }
 
+/**
+ * @brief Retrieves a volume parameters.
+ * @param[in] letter the volume letter.
+ * @param[in] skip_removable the boolean value defining
+ *                           must removable drives be treated
+ *                           as invalid or not.
+ * @param[out] is_removable pointer to the variable receiving
+ *                          boolean value defining is volume
+ *                          removable or not.
+ * @param[out] fsname pointer to the buffer receiving
+ *                    the name of the filesystem
+ *                    containing on the volume.
+ * @param[out] ptotal pointer to a variable receiving
+ *                    a size of the volume.
+ * @param[out] pfree pointer to a variable receiving
+ *                   the amount of free space.
+ * @return Zero for success, negative value otherwise.
+ * @note
+ * - Internal use only.
+ * - if(skip_removable == FALSE && you want 
+ *   to validate a floppy drive without floppy disk)
+ *   then you will hear noise :))
+ */
 int internal_validate_volume(unsigned char letter,int skip_removable,
-							  int *is_removable,char *fsname,
-							  LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree)
+		int *is_removable,char *fsname,LARGE_INTEGER *ptotal,LARGE_INTEGER *pfree)
 {
 	int type;
 
 	*is_removable = FALSE;
 	type = winx_get_drive_type(letter);
 	if(type < 0) return (-1);
-	if(type == DRIVE_CDROM || type == DRIVE_REMOTE){
-		winx_dbg_print("Volume %c: must be on non-cdrom local drive, but it's %u!",letter,type);
+	if(type == DRIVE_CDROM){
+		DebugPrint("Volume %c: is on cdrom drive.",letter);
+		return (-1);
+	}
+	if(type == DRIVE_REMOTE){
+		DebugPrint("Volume %c: is on remote drive.",letter);
 		return (-1);
 	}
 	if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
-		winx_dbg_print("It seems that %c: volume letter is assigned by \'subst\' command!",letter);
+		DebugPrint("It seems that %c: volume letter is assigned by \'subst\' command.",letter);
 		return (-1);
 	}
 	if(type == DRIVE_REMOVABLE){
 		*is_removable = TRUE;
 		if(skip_removable){
-			winx_dbg_print("%c: It's removable volume!",letter);
+			DebugPrint("Volume %c: is on removable media.",letter);
 			return (-1);
 		}
 	}
@@ -167,3 +176,5 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 	}
 	return 0;
 }
+
+/** @} */

@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,30 +17,34 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- *  udefrag.dll - middle layer between driver and user interfaces:
- *  miscellaneous functions.
+/**
+ * @mainpage udefrag.dll
+ * @author Dmitri Arkhangelski (dmitriar@users.sourceforge.net).
+ *
+ * <h2>Introduction</h2>
+ * udefrag.dll is a middle layer between UltraDefrag driver 
+ * and user interfaces which highly simplifies interaction between them.
+ *
+ * <h2>License</h2>
+ * UltraDefrag is a <a href="http://www.gnu.org/copyleft/gpl.html">GPL</a>-
+ * licensed product. Feel free to redistribute it under certain
+ * conditions.
  */
 
-#include "../../include/ntndk.h"
+/**
+ * @defgroup Disks Disks
+ * @{
+ */
+/** @} */
 
-#include "../../include/udefrag.h"
-#include "../zenwinx/zenwinx.h"
+/**
+ * @defgroup Driver Driver
+ * @{
+ */
+/** @} */
 
-/* winx_fbsize() equivalent */
-int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length)
-{
-	return winx_fbsize(number,digits,buffer,length);
-}
-
-/* winx_dfbsize() equivalent */
-int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber)
-{
-	return winx_dfbsize(string,pnumber);
-}
-
-/* winx_set_error_handler() equivalent */
-/*ERRORHANDLERPROC __stdcall udefrag_set_error_handler(ERRORHANDLERPROC handler)
-{
-	return winx_set_error_handler(handler);
-}*/
+/**
+ * @defgroup Settings Settings
+ * @{
+ */
+/** @} */
