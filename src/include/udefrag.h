@@ -60,24 +60,10 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 
 /*
 * This callback procedure was designed especially 
-* to refresh progress indicator during defragmentation process.
+* to refresh progress indicator during the defragmentation process.
 */
 typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
-int __stdcall udefrag_send_command_ex(unsigned char command,unsigned char letter,STATUPDATEPROC sproc);
-
-/* interface for scripting languages */
-/*char * __stdcall udefrag_s_get_map(int size);
-char * __stdcall udefrag_s_get_avail_volumes(int skip_removable);
-*/
-/*
-* because perl/Tk is incompatible with threads 
-* we should provide callback functions
-*/
-/*int __stdcall udefrag_s_analyse(unsigned char letter,STATUPDATEPROC sproc);
-int __stdcall udefrag_s_defragment(unsigned char letter,STATUPDATEPROC sproc);
-int __stdcall udefrag_s_optimize(unsigned char letter,STATUPDATEPROC sproc);
-int __stdcall scheduler_get_avail_letters(char *letters);
-*/
+int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sproc);
 
 #define udefrag_analyse(letter,sproc) udefrag_send_command_ex('a',letter,sproc)
 #define udefrag_defragment(letter,sproc) udefrag_send_command_ex('d',letter,sproc)
@@ -86,9 +72,4 @@ int __stdcall scheduler_get_avail_letters(char *letters);
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);
 
-/*#ifndef _ZENWINX_H_
-typedef void (__stdcall *ERRORHANDLERPROC)(short *msg);
-#endif
-ERRORHANDLERPROC __stdcall udefrag_set_error_handler(ERRORHANDLERPROC handler);
-*/
 #endif /* _UDEFRAG_H_ */

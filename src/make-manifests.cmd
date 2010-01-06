@@ -27,14 +27,6 @@ type manifest.part3 >> .\obj\gui\res\dfrg.manifest
 echo processorArchitecture="%1" >> .\obj\gui\res\dfrg.manifest
 type manifest.part4 >> .\obj\gui\res\dfrg.manifest
 
-type manifest.part1 > .\obj\gui-launcher\udefrag-gui.manifest
-echo version="%ULTRADFGVER%.0" name="udefrag-gui" processorArchitecture="%1" >> .\obj\gui-launcher\udefrag-gui.manifest
-type manifest.part2 >> .\obj\gui-launcher\udefrag-gui.manifest
-echo UltraDefrag GUI launcher >> .\obj\gui-launcher\udefrag-gui.manifest
-type manifest.part3 >> .\obj\gui-launcher\udefrag-gui.manifest
-echo processorArchitecture="%1" >> .\obj\gui-launcher\udefrag-gui.manifest
-type manifest.part4 >> .\obj\gui-launcher\udefrag-gui.manifest
-
 type manifest.part1 > .\obj\udefrag-gui-config\res\config.manifest
 echo version="%ULTRADFGVER%.0" name="udefrag-gui-config" processorArchitecture="%1" >> .\obj\udefrag-gui-config\res\config.manifest
 type manifest.part2 >> .\obj\udefrag-gui-config\res\config.manifest

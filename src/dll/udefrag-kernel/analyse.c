@@ -82,7 +82,7 @@ int Analyze(char *volume_name)
 	/* scan volume for free space areas */
 	Status = FillFreeSpaceMap();
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
+		DebugPrintEx(Status,"FillFreeSpaceMap() failed");
 		return (-1);
 	}
 	//DebugPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
@@ -144,6 +144,7 @@ int Analyze(char *volume_name)
 	if(JobType == ANALYSE_JOB) return 0;
 	
 	/* all locked files are in unknown state, right? */
+	/* note: these checks takes a lot of time */
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(CheckForStopEvent()) break;
 		Status = OpenTheFile(pfn,&hFile);
@@ -175,7 +176,7 @@ int Analyze(char *volume_name)
 //	/* scan volume for free space areas */
 //	Status = FillFreeSpaceMap();
 //	if(!NT_SUCCESS(Status)){
-//		winx_dbg_print_ex("FillFreeSpaceMap() failed: %x!\n",(UINT)Status);
+//		DebugPrintEx(Status,"FillFreeSpaceMap() failed");
 //		return (-1);
 //	}
 //	return 0;

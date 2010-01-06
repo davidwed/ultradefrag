@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -42,17 +42,7 @@
 #define UNKNOWN_SPACE FRAGM_SPACE
 
 #define NUM_OF_SPACE_STATES         13
-/*
-#define IOCTL_GET_STATISTIC CTL_CODE( \
-	FILE_DEVICE_UNKNOWN, 0x801, METHOD_BUFFERED, FILE_ANY_ACCESS)
 
-#define IOCTL_GET_CLUSTER_MAP CTL_CODE(\
-	FILE_DEVICE_UNKNOWN, 0x802, METHOD_BUFFERED, FILE_ANY_ACCESS)
-
-#define IOCTL_ULTRADEFRAG_STOP CTL_CODE(\
-	FILE_DEVICE_UNKNOWN, 0x803, METHOD_BUFFERED, FILE_ANY_ACCESS)
-
-*/
 #define IOCTL_SET_INCLUDE_FILTER CTL_CODE(\
 	FILE_DEVICE_UNKNOWN, 0x804, METHOD_BUFFERED, FILE_ANY_ACCESS)
 

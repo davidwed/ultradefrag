@@ -39,7 +39,7 @@ void InitializeFilter(void)
 	/* allocate memory */
 	env_buffer = winx_virtual_alloc(ENV_BUFFER_SIZE * sizeof(short));
 	if(!env_buffer){
-		winx_dbg_print("Cannot allocate %u bytes for InitializeOptions()\n",
+		DebugPrint("Cannot allocate %u bytes for InitializeOptions()\n",
 			ENV_BUFFER_SIZE * sizeof(short));
 		return;
 	}

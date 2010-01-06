@@ -32,7 +32,9 @@
 #include "../../include/udefrag-kernel.h"
 #include "../../include/ultradfgver.h"
 
+#ifndef DebugPrint
 #define DebugPrint winx_dbg_print
+#endif
 #define DebugPrint1 if(dbgprint_level < 1) {} else DebugPrint
 #define DebugPrint2 if(dbgprint_level < 2) {} else DebugPrint
 

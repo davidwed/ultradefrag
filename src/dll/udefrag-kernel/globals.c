@@ -69,7 +69,7 @@ void InitDriverResources(void)
 	int mj, mn;
 	
 	/* print driver version */
-	winx_dbg_print("------------------------------------------------------------\n");
+	DebugPrint("------------------------------------------------------------\n");
 	DebugPrint("%s\n",VERSIONINTITLE);
 
 	/* get windows version */

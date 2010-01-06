@@ -38,7 +38,7 @@ int OpenVolume(char *volume_name)
 	flags[0] = FLAG; flags[1] = 0;
 	fVolume = winx_fopen(path,flags);
 	if(!fVolume){
-		winx_dbg_print("Cannot open volume %s!\n",path);
+		DebugPrint("Cannot open volume %s!\n",path);
 		return (-1);
 	}
 	return 0;
@@ -75,7 +75,7 @@ int GetDriveGeometry(char *volume_name)
 	flags[0] = FLAG; flags[1] = 0;
 	fRoot = winx_fopen(path,flags);
 	if(!fRoot){
-		winx_dbg_print("Cannot open the root directory %s!\n",path);
+		DebugPrint("Cannot open the root directory %s!\n",path);
 		return (-1);
 	}
 
@@ -87,7 +87,7 @@ int GetDriveGeometry(char *volume_name)
 	pFileFsSize = winx_virtual_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
 	if(!pFileFsSize){
 		winx_fclose(fRoot);
-		winx_debug_print("udefrag-kernel.dll GetDriveGeometry(): no enough memory!");
+		DebugPrint("udefrag-kernel.dll GetDriveGeometry(): no enough memory!");
 		return (-1);
 	}
 
@@ -98,8 +98,7 @@ int GetDriveGeometry(char *volume_name)
 	winx_fclose(fRoot);
 	if(status != STATUS_SUCCESS){
 		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
-		winx_dbg_print_ex("FileFsSizeInformation() request failed for %s: %x!",
-			path,(UINT)status);
+		DebugPrintEx(status,"FileFsSizeInformation() request failed for %s",path);
 		return (-1);
 	}
 
@@ -121,7 +120,7 @@ int GetDriveGeometry(char *volume_name)
 	/* validate geometry */
 	if(!clusters_total || !bytes_per_cluster){
 		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
-		winx_debug_print("Wrong volume geometry!");
+		DebugPrint("Wrong volume geometry!");
 		return (-1);
 	}
 	winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
