@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll thread manipulation functions.
-*/
+/**
+ * @file thread.c
+ * @brief Threads code.
+ * @addtogroup Threads
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -41,36 +44,24 @@ int GetLastErrorState = GetLastErrorUndefined;
 DWORD (WINAPI *func_GetLastError)(void);
 int FindGetLastError(void);
 
-/****f* zenwinx.thread/winx_create_thread
-* NAME
-*    winx_create_thread
-* SYNOPSIS
-*    error = winx_create_thread(start_addr,phandle);
-* FUNCTION
-*    Creates a thread to execute within the virtual
-*    address space of the calling process.
-* INPUTS
-*    start_addr - starting address of the thread.
-*    phandle    - address of memory to store a handle
-*                 to the new thread.
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    DWORD WINAPI thread_proc(LPVOID parameter)
-*    {
-*        // do something
-*        winx_exit_thread();
-*        return 0;
-*    }
-*
-*    create_thread(thread_proc,param1);
-* NOTES
-*    Thread's function must have the following prototype:
-*    DWORD WINAPI thread_proc(LPVOID parameter);
-* SEE ALSO
-*    winx_exit_thread
-******/
+/**
+ * @brief Creates a thread and starts them.
+ * @param[in] start_addr the starting address of the thread.
+ * @param[out] phandle the thread handle pointer. May be NULL.
+ * @return Zero for success, negative value otherwise.
+ * @note Look at the following example for the 
+ *       thread function prototype.
+ * @par Example:
+ * @code
+ * DWORD WINAPI thread_proc(LPVOID parameter)
+ * {
+ *     // do something
+ *     winx_exit_thread();
+ *     return 0;
+ * }
+ * winx_create_thread(thread_proc,NULL);
+ * @endcode
+ */
 int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle)
 {
 	NTSTATUS Status;
@@ -79,10 +70,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	DWORD id;
 	DWORD ErrorCode;
 
-	if(!start_addr){
-		winx_debug_print("winx_create_thread() invalid start_addr (NULL)!");
-		return (-1);
-	}
+	DbgCheck1(start_addr,"winx_create_thread",-1);
 
 	/*
 	* RtlCreateUserThread() call is incompatible with some 
@@ -99,9 +87,9 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 		if(!hThread){ /* failure */
 			if(FindGetLastError()){
 				ErrorCode = func_GetLastError();
-				winx_dbg_print("CreateThread() failed, error code = 0x%x!",ErrorCode);
+				DebugPrint("CreateThread() failed, error code = 0x%x!",ErrorCode);
 			} else {
-				winx_debug_print("CreateThread() failed!");
+				DebugPrint("CreateThread() failed!");
 			}
 			return (-1);
 		}
@@ -116,7 +104,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 		Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
 						0,0,0,start_addr,NULL,ph,NULL);
 		if(!NT_SUCCESS(Status)){
-			winx_dbg_print_ex("Can't create thread: %x!",(UINT)Status);
+			DebugPrintEx(Status,"Cannot create thread");
 			return (-1);
 		}
 		/*NtCloseSafe(*ph);*/
@@ -124,34 +112,23 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	return 0;
 }
 
-/****f* zenwinx.thread/winx_exit_thread
-* NAME
-*    winx_exit_thread
-* SYNOPSIS
-*    winx_exit_thread();
-* FUNCTION
-*    Ends the current thread with zero exit code.
-* INPUTS
-*    Nothing.
-* RESULT
-*    Nothing.
-* EXAMPLE
-*    See an example for the winx_create_thread() function.
-* NOTES
-*    If the function succeeds it will never return. (?)
-* SEE ALSO
-*    winx_create_thread
-******/
+/**
+ * @brief Terminates the current thread.
+ * @details The exit code is always zero.
+ */
 void __stdcall winx_exit_thread(void)
 {
 	/* TODO: error handling and exit with specified status */
 	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("Can't terminate thread: %x!",(UINT)Status);
+		DebugPrintEx(Status,"Cannot terminate thread");
 	}
 }
 
-/* internal functions */
+/**
+ * @brief Searches for the Win32 CreateThread() call.
+ * @note Internal use only.
+ */
 int FindCreateThread(void)
 {
 	if(CreateThreadState == CreateThreadUndefined){
@@ -163,6 +140,10 @@ int FindCreateThread(void)
 	return (CreateThreadState == CreateThreadFound) ? TRUE : FALSE;
 }
 
+/**
+ * @brief Searches for the Win32 GetLastError() call.
+ * @note Internal use only.
+ */
 int FindGetLastError(void)
 {
 	if(GetLastErrorState == GetLastErrorUndefined){
@@ -173,3 +154,5 @@ int FindGetLastError(void)
 	}
 	return (GetLastErrorState == GetLastErrorFound) ? TRUE : FALSE;
 }
+
+/** @} */

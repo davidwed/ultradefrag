@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll miscellaneous system functions.
-*/
+/**
+ * @file misc.c
+ * @brief Miscellaneous system functions code.
+ * @addtogroup Miscellaneous
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -33,24 +36,12 @@ LONGLONG __cdecl __llmul(LONGLONG n, LONGLONG d)
 
 NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
 
-/****f* zenwinx.misc/winx_sleep
-* NAME
-*    winx_sleep
-* SYNOPSIS
-*    winx_sleep(msec);
-* FUNCTION
-*    Suspends the execution of the current thread
-*    for a specified interval.
-* INPUTS
-*    msec - time interval, in milliseconds.
-* RESULT
-*    This function does not return a value.
-* EXAMPLE
-*    winx_sleep(1000); // wait one second
-* NOTES
-*    If msec is INFINITE, the function's
-*    time-out interval never elapses.
-******/
+/**
+ * @brief Suspends the execution of the current thread.
+ * @param[in] msec the time interval, in milliseconds.
+ *                 If an INFINITE constant is passed, the
+ *                 time-out interval never elapses.
+ */
 void __stdcall winx_sleep(int msec)
 {
 	LARGE_INTEGER Interval;
@@ -65,30 +56,18 @@ void __stdcall winx_sleep(int msec)
 	NtDelayExecution(FALSE,&Interval);
 }
 
-/****f* zenwinx.misc/winx_get_os_version
-* NAME
-*    winx_get_os_version
-* SYNOPSIS
-*    ver = winx_get_os_version();
-* FUNCTION
-*    Returns the version of Windows.
-* INPUTS
-*    Nothing.
-* RESULT
-*    40 - nt 4.0
-*    50 - w2k
-*    51 - XP
-*    52 - server 2003
-*    60 - Vista
-* EXAMPLE
-*    if(winx_get_os_version() >= 51){
-*        // we have at least xp system; but
-*        // unfortunately it may be incompatible
-*        // with xp itself :(
-*    }
-* NOTES
-*    For nt 4.0 and later systems only.
-******/
+/**
+ * @brief Returns the version of Windows.
+ * @return major_version_number * 10 + minor_version_number.
+ * @note Works fine on NT 4.0 and later systems. Otherwise 
+ *       always returns 40.
+ * @par Example:
+ * @code 
+ * if(winx_get_os_version() >= 51){
+ *     // we are running on XP or later system
+ * }
+ * @endcode
+ */
 int __stdcall winx_get_os_version(void)
 {
 	OSVERSIONINFOW ver;
@@ -99,89 +78,90 @@ int __stdcall winx_get_os_version(void)
 	return (ver.dwMajorVersion * 10 + ver.dwMinorVersion);
 }
 
-/****f* zenwinx.misc/winx_get_windows_directory
-* NAME
-*    winx_get_windows_directory
-* SYNOPSIS
-*    error = winx_get_windows_directory(buffer, length);
-* FUNCTION
-*    Returns %windir% path. In native form, as follows: \??\C:\WINDOWS
-* INPUTS
-*    buffer - pointer to the buffer to receive
-*             the null-terminated path.
-*    length - length of the buffer, usually equal to MAX_PATH.
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    winx_get_windows_directory(buffer,sizeof(buffer));
-* NOTES
-*    Buffer should be at least MAX_PATH characters long.
-******/
+/**
+ * @brief Retrieves the path of the Windows directory.
+ * @param[out] buffer pointer to the buffer to receive
+ *                    the null-terminated path.
+ * @param[in]  length the length of the buffer, in characters.
+ * @return Zero for success, negative value otherwise.
+ * @note This function retrieves a native path, like this 
+ *       \\??\\C:\\WINDOWS
+ */
 int __stdcall winx_get_windows_directory(char *buffer, int length)
 {
-	NTSTATUS Status;
-	UNICODE_STRING name, us;
-	ANSI_STRING as;
 	short buf[MAX_PATH + 1];
 
-	if(!buffer){
-		winx_debug_print("winx_get_windows_directory() invalid buffer!");
-		return (-1);
-	}
-	if(length <= 0){
-		winx_dbg_print("winx_get_windows_directory() invalid length == %i!",length);
-		return (-1);
-	}
-
-	RtlInitUnicodeString(&name,L"SystemRoot");
-	us.Buffer = buf;
-	us.Length = 0;
-	us.MaximumLength = MAX_PATH * sizeof(short);
-	Status = RtlQueryEnvironmentVariable_U(NULL,&name,&us);
-	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("Can't query SystemRoot variable: %x!",(UINT)Status);
-		return (-1);
-	}
-
-	if(RtlUnicodeStringToAnsiString(&as,&us,TRUE) != STATUS_SUCCESS){
-		winx_debug_print("winx_get_windows_directory() no enough memory!");
-		return (-1);
-	}
-
-	strcpy(buffer,"\\??\\");
-	strncat(buffer,as.Buffer,length - strlen(buffer) - 1);
+	DbgCheck2(buffer,(length > 0),"winx_get_windows_directory",-1);
+	
+	if(winx_query_env_variable(L"SystemRoot",buf,MAX_PATH) < 0) return (-1);
+	_snprintf(buffer,length - 1,"\\??\\%ws",buf);
 	buffer[length - 1] = 0; /* important ? */
-	RtlFreeAnsiString(&as);
 	return 0;
 }
 
-/****f* zenwinx.misc/winx_set_system_error_mode
-* NAME
-*    winx_set_system_error_mode
-* SYNOPSIS
-*    error = winx_set_system_error_mode(mode);
-* FUNCTION
-*    SetErrorMode() native analog.
-* INPUTS
-*    mode - process error mode.
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS);
-* NOTES
-*    1. Mode constants aren't the same as in SetErrorMode() call.
-*    2. Use INTERNAL_SEM_FAILCRITICALERRORS constant to 
-*    disable the critical-error-handler message box. After that
-*    you can p.a. try to read a missing floppy disk without any 
-*    popup windows displaying error messages.
-*    3. winx_set_system_error_mode(1) call is equal
-*    to SetErrorMode(0).
-*    4. Other mode constants can be found in ReactOS source 
-*    code. They needs to be tested before including into this 
-*    documentation to ensure that they are doing what expected.
-******/
+/**
+ * @brief Queries a symbolic link.
+ * @param[in]  name   the name of symbolic link.
+ * @param[out] buffer pointer to the buffer to receive
+ *                    the null-terminated target.
+ * @param[in]  length of the buffer, in characters.
+ * @return Zero for success, negative value otherwise.
+ * @par Example:
+ * @code
+ * winx_query_symbolic_link(L"\\??\\C:",buffer,BUFFER_LENGTH);
+ * // now the buffer may contain \Device\HarddiskVolume1 or something like that
+ * @endcode
+ */
+int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length)
+{
+	OBJECT_ATTRIBUTES oa;
+	UNICODE_STRING uStr;
+	NTSTATUS Status;
+	HANDLE hLink;
+	ULONG size;
+
+	DbgCheck3(name,buffer,(length > 0),"winx_query_symbolic_link",-1);
+	
+	RtlInitUnicodeString(&uStr,name);
+	InitializeObjectAttributes(&oa,&uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
+	Status = NtOpenSymbolicLinkObject(&hLink,SYMBOLIC_LINK_QUERY,&oa);
+	if(!NT_SUCCESS(Status)){
+		DebugPrintEx(Status,"Cannot open symbolic link %ls",name);
+		return (-1);
+	}
+	uStr.Buffer = buffer;
+	uStr.Length = 0;
+	uStr.MaximumLength = length * sizeof(short);
+	size = 0;
+	Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
+	NtClose(hLink);
+	if(!NT_SUCCESS(Status)){
+		DebugPrintEx(Status,"Cannot query symbolic link %ls",name);
+		return (-1);
+	}
+	buffer[length - 1] = 0;
+	return 0;
+}
+
+/**
+ * @brief Sets a system error mode.
+ * @param[in] mode the process error mode.
+ * @return Zero for success, negative value otherwise.
+ * @note 
+ * - Mode constants aren't the same as in Win32 SetErrorMode() call.
+ * - Use INTERNAL_SEM_FAILCRITICALERRORS constant to 
+ *   disable the critical-error-handler message box. After that
+ *   you can for example try to read a missing floppy disk without 
+ *   any popup windows displaying error messages.
+ * - winx_set_system_error_mode(1) call is equal to SetErrorMode(0).
+ * - Other mode constants can be found in ReactOS sources, but
+ *   they needs to be tested meticulously because they were never
+ *   officially documented.
+ * @par Example:
+ * @code
+ * winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS);
+ * @endcode
+ */
 int __stdcall winx_set_system_error_mode(unsigned int mode)
 {
 	NTSTATUS Status;
@@ -191,104 +171,64 @@ int __stdcall winx_set_system_error_mode(unsigned int mode)
 					(PVOID)&mode,
 					sizeof(int));
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("Can't set system error mode %u: %x!",mode,(UINT)Status);
+		DebugPrintEx(Status,"Cannot set system error mode %u",mode);
 		return (-1);
 	}
 	return 0;
 }
 
-/****f* zenwinx.misc/winx_load_driver
-* NAME
-*    winx_load_driver
-* SYNOPSIS
-*    error = winx_load_driver(driver_name);
-* FUNCTION
-*    Loads the specified driver.
-* INPUTS
-*    driver_name - name of the driver
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    if(winx_load_driver(L"ultradfg") < 0){
-*        // the UltraDefrag driver cannot be loaded,
-*        // handle error here
-*    }
-* NOTES
-*    If the specified driver is already loaded,
-*    this function returns success.
-* SEE ALSO
-*    winx_unload_driver
-******/
+/**
+ * @brief Loads a driver.
+ * @param[in] driver_name the name of the driver exactly
+ *                        as written in system registry.
+ * @return Zero for success, negative value otherwise.
+ * @note When the driver is already loaded this function returns
+ *       success.
+ */
 int __stdcall winx_load_driver(short *driver_name)
 {
 	UNICODE_STRING us;
 	short driver_key[128]; /* enough for any driver registry path */
 	NTSTATUS Status;
 
-	if(!driver_name){
-		winx_debug_print("winx_load_driver() invalid driver_name (NULL)!");
-		return (-1);
-	}
+	DbgCheck1(driver_name,"winx_load_driver",-1);
 
-	wcscpy(driver_key,L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\");
-	if(wcslen(driver_name) > (128 - wcslen(driver_key) - 1)){
-		winx_dbg_print("Driver name %ws is too long!", driver_name);
-		return (-1);
-	}
-	wcscat(driver_key,driver_name);
+	_snwprintf(driver_key,127,L"%ls%ls",
+			L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\",driver_name);
+	driver_key[127] = 0;
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtLoadDriver(&us);
 	if(!NT_SUCCESS(Status) && Status != STATUS_IMAGE_ALREADY_LOADED){
-		winx_dbg_print_ex("Can't load %ws driver: %x!",driver_name,(UINT)Status);
+		DebugPrintEx(Status,"Cannot load %ws driver",driver_name);
 		return (-1);
 	}
 	return 0;
 }
 
-/****f* zenwinx.misc/winx_unload_driver
-* NAME
-*    winx_unload_driver
-* SYNOPSIS
-*    error = winx_unload_driver(driver_name);
-* FUNCTION
-*    Unloads the specified driver.
-* INPUTS
-*    driver_name - name of the driver
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    if(winx_unload_driver(L"ultradfg") < 0){
-*        winx_pop_error(buffer,sizeof(buffer));
-*        // the UltraDefrag driver cannot be unloaded,
-*        // handle error here
-*    }
-* SEE ALSO
-*    winx_load_driver
-******/
+/**
+ * @brief Unloads a driver.
+ * @param[in] driver_name the name of the driver exactly
+ *                        as written in system registry.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall winx_unload_driver(short *driver_name)
 {
 	UNICODE_STRING us;
 	short driver_key[128]; /* enough for any driver registry path */
 	NTSTATUS Status;
 
-	if(!driver_name){
-		winx_debug_print("winx_unload_driver() invalid driver_name (NULL)!");
-		return (-1);
-	}
+	DbgCheck1(driver_name,"winx_unload_driver",-1);
 
-	wcscpy(driver_key,L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\");
-	if(wcslen(driver_name) > (128 - wcslen(driver_key) - 1)){
-		winx_dbg_print("Driver name %ws is too long!", driver_name);
-		return (-1);
-	}
-	wcscat(driver_key,driver_name);
+	_snwprintf(driver_key,127,L"%ls%ls",
+			L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\",driver_name);
+	driver_key[127] = 0;
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtUnloadDriver(&us);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("Can't unload %ws driver: %x!",driver_name,(UINT)Status);
+		DebugPrintEx(Status,"Cannot unload %ws driver",driver_name);
 		return (-1);
 	}
 	return 0;
 }
+
+/** @} */

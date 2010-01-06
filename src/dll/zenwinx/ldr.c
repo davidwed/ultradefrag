@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,36 +17,27 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll GetProcAddress() and other related stuff.
-*/
+/**
+ * @file ldr.c
+ * @brief GetProcAddress() code.
+ * @addtogroup Loader
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
 
-/****f* zenwinx.loader/winx_get_proc_address
-* NAME
-*    winx_get_proc_address
-* SYNOPSIS
-*    error = winx_get_proc_address(libname,funcname,paddr);
-* FUNCTION
-*    Retrieves the address of an exported function or variable
-*    from the specified dynamic-link library.
-* INPUTS
-*    libname  - name of the library.
-*    funcname - name of the function or variable.
-*    paddr    - address of memory to store retrieved address into.
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    if(winx_get_proc_address(L"ntdll.dll","RtlGetVersion",
-*            (void *)&func_RtlGetVersion) < 0){
-*        // it seems that we have nt 4.0 system without RtlGetVersion()
-*    }
-* NOTES
-*    Specified dynamic-link library must be loaded before this call.
-******/
+/**
+ * @brief Retrieves the address of an exported function or variable 
+ *        from the specified dynamic-link library (DLL).
+ * @param[in] libname the name of the library.
+ * @param[in] funcname the name of the function or variable.
+ * @param[out] proc_addr the address of memory to store 
+ *                       retrieved address into.
+ * @return Zero for success, negative value otherwise.
+ * @note The specified dynamic-link library 
+ *       must be loaded before this call.
+ */
 int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr)
 {
 	UNICODE_STRING uStr;
@@ -55,32 +46,22 @@ int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_ad
 	HMODULE base_addr;
 
 	/* never call winx_dbg_print_ex() from this function! */
-	if(!libname){
-		winx_debug_print("winx_get_proc_address() invalid libname!");
-		return (-1);
-	}
-	if(!funcname){
-		winx_debug_print("winx_get_proc_address() invalid funcname!");
-		return (-1);
-	}
-	if(!proc_addr){
-		winx_debug_print("winx_get_proc_address() invalid proc_addr!");
-		return (-1);
-	}
-
+	DbgCheck3(libname,funcname,proc_addr,"winx_get_proc_address",-1);
+	
 	RtlInitUnicodeString(&uStr,libname);
 	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print("Can't get %ls handle: %x!",libname,(UINT)Status);
+		DebugPrint("Cannot get %ls handle: %x!",libname,(UINT)Status);
 		return (-1);
 	}
 	RtlInitAnsiString(&aStr,funcname);
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print("Can't get address for %s: %x!",funcname,(UINT)Status);
+		DebugPrint("Cannot get address for %s: %x!",funcname,(UINT)Status);
 		*proc_addr = NULL;
 		return (-1);
 	}
 	return 0;
 }
 
+/** @} */

@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll console i/o functions.
-*/
+/**
+ * @file stdio.c
+ * @brief Console I/O code.
+ * @addtogroup Console
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -29,15 +32,11 @@
 int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout);
 void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
 
-/* internal functions */
-/****if* zenwinx.stdio/winx_print
-* NAME
-*    winx_print
-* SYNOPSIS
-*    winx_print(string);
-* FUNCTION
-*    Display the ANSI string on the screen.
-******/
+/**
+ * @brief Displays ANSI string on the screen.
+ * @param[in] string the string to be displayed.
+ * @note Internal use only.
+ */
 void winx_print(char *string)
 {
 	ANSI_STRING aStr;
@@ -58,20 +57,11 @@ void winx_print(char *string)
 
 }
 
-/* ansi functions */
-/****f* zenwinx.stdio/winx_putch
-* NAME
-*    winx_putch
-* SYNOPSIS
-*    winx_putch(character);
-* FUNCTION
-*    CRT putch() native equivalent.
-* BUGS
-*    Does not recognize special characters
-*    such as 'backspace'.
-* SEE ALSO
-*    winx_puts,winx_printf
-******/
+/**
+ * @brief putch() native equivalent.
+ * @bug Does not recognize special characters
+ *      such as 'backspace'.
+ */
 int __cdecl winx_putch(int ch)
 {
 	UNICODE_STRING uStr;
@@ -84,38 +74,22 @@ int __cdecl winx_putch(int ch)
 	return ch;
 }
 
-/****f* zenwinx.stdio/winx_puts
-* NAME
-*    winx_puts
-* SYNOPSIS
-*    winx_puts(string);
-* FUNCTION
-*    CRT puts() native equivalent.
-* BUGS
-*    Does not recognize special characters
-*    such as 'backspace'.
-* SEE ALSO
-*    winx_putch,winx_printf
-******/
+/**
+ * @brief puts() native equivalent.
+ * @bug Does not recognize special characters
+ *      such as 'backspace'.
+ */
 int __cdecl winx_puts(const char *string)
 {
 	if(!string) return -1;
 	return winx_printf("%s\n",string) ? 0 : -1;
 }
 
-/****f* zenwinx.stdio/winx_printf
-* NAME
-*    winx_printf
-* SYNOPSIS
-*    winx_printf("%s %x!",string,number);
-* FUNCTION
-*    CRT printf() native equivalent.
-* BUGS
-*    Does not recognize special characters
-*    such as 'backspace'.
-* SEE ALSO
-*    winx_putch,winx_puts
-******/
+/**
+ * @brief printf() native equivalent.
+ * @bug Does not recognize special characters
+ *      such as 'backspace'.
+ */
 int __cdecl winx_printf(const char *format, ...)
 {
 	va_list arg;
@@ -127,23 +101,9 @@ int __cdecl winx_printf(const char *format, ...)
 	/* never call winx_dbg_print_ex() here */
 
 	if(!format) return 0;
-	/* if we have just one argument then call winx_print directly */
-	va_start(arg,format);
-	if(!va_arg(arg,int)){
-		winx_print((char *)format);
-		return strlen(format);
-	}
-	va_end(arg);
+
 	/* prepare for _vsnprintf call */
 	va_start(arg,format);
-	/****ix* zenwinx.internals/_vsnprintf
-	* NAME
-	*    _vsnprintf undocumented behaviour
-	* NOTES
-	*    Undocumented requirement: buffer specified 
-	*    by the first parameter must be filled
-	*    with zero characters before _vsnprintf() call!
-	******/
 	memset(small_buffer,0,INTERNAL_BUFFER_SIZE);
 	done = _vsnprintf(small_buffer,INTERNAL_BUFFER_SIZE,format,arg);
 	if(done == -1 || done == INTERNAL_BUFFER_SIZE){
@@ -169,39 +129,19 @@ int __cdecl winx_printf(const char *format, ...)
 	return done;
 }
 
-/****f* zenwinx.stdio/winx_kbhit
-* NAME
-*    winx_kbhit
-* SYNOPSIS
-*    result = winx_kbhit(msec);
-* FUNCTION
-*    Read a character from the keyboard
-*    waiting a specified time interval.
-* INPUTS
-*    msec - the time interval, in milliseconds.
-* RESULT
-*    If any key was pressed, the return value is
-*    the ascii character or zero for the control keys.
-*    Otherwise, the return value is -1.
-* EXAMPLE
-*    // Prompt to exit.
-*    winx_printf("Press any key to exit...  ");
-*    for(i = 0; i < 3; i++){
-*        if(winx_kbhit(1000) != -1){
-*            winx_printf("\nGood bye ...\n");
-*            winx_exit(0);
-*        }
-*        winx_printf("%c ",(char)('0' + 3 - i));
-*    }
-* NOTES
-*    1. If msec is INFINITE, the function's
-*       time-out interval never elapses.
-*    2. This call may terminate the program
-*       if NtCancelIoFile() fails for one 
-*       of the existing keyboard devices.
-* SEE ALSO
-*    winx_breakhit
-******/
+/**
+ * @brief Checks the console for keyboard input.
+ * @details Waits for an input during the specified time interval.
+ * @param[in] msec the time interval, in milliseconds.
+ * @return If any key was pressed, the return value is
+ *         the ascii character or zero for the control keys.
+ *         Negative value indicates failure.
+ * @note
+ * - If an INFINITE time constant is passed, the
+ *   time-out interval never elapses.
+ * - This call may terminate the program if NtCancelIoFile() 
+ *   fails for one of the existing keyboard devices.
+ */
 int __cdecl winx_kbhit(int msec)
 {
 	KEYBOARD_INPUT_DATA kbd;
@@ -216,34 +156,19 @@ int __cdecl winx_kbhit(int msec)
 	return (int)kbd_rec.AsciiChar;
 }
 
-/****f* zenwinx.stdio/winx_breakhit
-* NAME
-*    winx_breakhit
-* SYNOPSIS
-*    result = winx_breakhit(msec);
-* FUNCTION
-*    A special variant of winx_kbhit() function.
-* INPUTS
-*    msec - the time interval, in milliseconds.
-* RESULT
-*    If 'Break' key was pressed, the return value is zero.
-*    Otherwise, the return value is -1.
-* EXAMPLE
-*    // Prompt to exit.
-*    winx_printf("Press 'Break' key to exit...  ");
-*    if(winx_breakhit(1000) != -1){
-*        winx_printf("\nGood bye ...\n");
-*        winx_exit(0);
-*    }
-* NOTES
-*    1. If msec is INFINITE, the function's
-*       time-out interval never elapses.
-*    2. This call may terminate the program
-*       if NtCancelIoFile() fails for one 
-*       of the existing keyboard devices.
-* SEE ALSO
-*    winx_kbhit
-******/
+/**
+ * @brief Checks the console for the 'Break' character on 
+ *        the keyboard input.
+ * @details Waits for an input during the specified time interval.
+ * @param[in] msec the time interval, in milliseconds.
+ * @return If the 'Break' key was pressed, the return value is zero.
+ *         Otherwise it returns negative value.
+ * @note
+ * - If an INFINITE time constant is passed, the
+ *   time-out interval never elapses.
+ * - This call may terminate the program if NtCancelIoFile() 
+ *   fails for one of the existing keyboard devices.
+ */
 int __cdecl winx_breakhit(int msec)
 {
 	KEYBOARD_INPUT_DATA kbd;
@@ -254,20 +179,11 @@ int __cdecl winx_breakhit(int msec)
 	return (-1);
 }
 
-/****f* zenwinx.stdio/winx_getch
-* NAME
-*    winx_getch
-* SYNOPSIS
-*    character = winx_getch();
-* FUNCTION
-*    CRT getch() native equivalent.
-* NOTES
-*    This call may terminate the program
-*    if NtCancelIoFile() fails for one 
-*    of the existing keyboard devices.
-* SEE ALSO
-*    winx_getche,winx_gets
-******/
+/**
+ * @brief getch() native equivalent.
+ * @note This call may terminate the program if NtCancelIoFile() 
+ *       fails for one of the existing keyboard devices.
+ */
 int __cdecl winx_getch(void)
 {
 	KEYBOARD_INPUT_DATA kbd;
@@ -280,23 +196,13 @@ int __cdecl winx_getch(void)
 	return (int)kbd_rec.AsciiChar;
 }
 
-/****f* zenwinx.stdio/winx_getche
-* NAME
-*    winx_getche
-* SYNOPSIS
-*    character = winx_getche();
-* FUNCTION
-*    CRT getche() native equivalent.
-* NOTES
-*    This call may terminate the program
-*    if NtCancelIoFile() fails for one 
-*    of the existing keyboard devices.
-* BUGS
-*    Does not recognize special characters
-*    such as 'backspace'.
-* SEE ALSO
-*    winx_getch,winx_gets
-******/
+/**
+ * @brief getche() native equivalent.
+ * @note This call may terminate the program if NtCancelIoFile() 
+ *       fails for one of the existing keyboard devices.
+ * @bug Does not recognize special characters
+ *      such as 'backspace'.
+ */
 int __cdecl winx_getche(void)
 {
 	int ch;
@@ -306,31 +212,18 @@ int __cdecl winx_getche(void)
 	return ch;
 }
 
-/****f* zenwinx.stdio/winx_gets
-* NAME
-*    winx_gets
-* SYNOPSIS
-*    result = winx_gets(buffer, n);
-* FUNCTION
-*    CRT gets() native equivalent, but with
-*    limited number of characters to read.
-* INPUTS
-*    buffer - storage location for input string.
-*    n      - the maximum number of characters to read
-*             (buffer size in characters).
-* RESULT
-*    nonnegative value for number of characters including term. zero,
-*    -1 for error.
-* NOTES
-*    This call may terminate the program
-*    if NtCancelIoFile() fails for one 
-*    of the existing keyboard devices.
-* BUGS
-*    Does not recognize special characters
-*    such as 'backspace'.
-* SEE ALSO
-*    winx_getch,winx_getche
-******/
+/**
+ * @brief gets() native equivalent with limited number of 
+ *        characters to read.
+ * @param[out] string the storage for the input string.
+ * @param[in] n the maximum number of characters to read.
+ * @return Number of characters read including terminal zero.
+ *         Negative value indicates failure.
+ * @note This call may terminate the program if NtCancelIoFile() 
+ *       fails for one of the existing keyboard devices.
+ * @bug Does not recognize special characters
+ *      such as 'backspace'.
+ */
 int __cdecl winx_gets(char *string,int n)
 {
 	int i;
@@ -344,13 +237,21 @@ int __cdecl winx_gets(char *string,int n)
 	for(i = 0; i < n; i ++){
 repeate_attempt:
 		ch = winx_getche();
-/*winx_printf("Character = %u\n",ch);*/
-		if(ch == -1) { string[i] = 0; return (-1); }
+		if(ch == -1){
+			string[i] = 0;
+			return (-1);
+		}
 		if(ch == 0) goto repeate_attempt;
-		if(ch == 13) { winx_putch('\n'); string[i] = 0; return (i+1); }
+		if(ch == 13){
+			winx_putch('\n');
+			string[i] = 0;
+			return (i+1);
+		}
 		string[i] = (char)ch;
 	}
 	winx_printf("\nwinx_gets() buffer overflow!\n");
 	string[n-1] = 0;
 	return n;
 }
+
+/** @} */

@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll functions to allocate and free memory.
-*/
+/**
+ * @file mem.c
+ * @brief Memory allocation code.
+ * @addtogroup Memory
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -33,36 +36,16 @@ HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc call */
 * equal to SIZE_T on x64 systems.
 */
 
-/****f* zenwinx.memory/winx_virtual_alloc
-* NAME
-*    winx_virtual_alloc
-* SYNOPSIS
-*    addr = winx_virtual_alloc(size);
-* FUNCTION
-*    Commit a region of pages in the virtual 
-*    address space of the calling process.
-* INPUTS
-*    size - size of the region, in bytes.
-* RESULT
-*    If the function succeeds, the return value is
-*    the base address of the allocated region of pages.
-*    If the function fails, the return value is NULL.
-* EXAMPLE
-*    buffer = winx_virtual_alloc(1024);
-*    if(!buffer){
-*        winx_printf("Can't allocate 1024 bytes of memory!\n");
-*        winx_exit(2); // exit with code 2
-*    }
-*    // ...
-*    winx_virtual_free(buffer, 1024);
-* NOTES
-*    1. Memory allocated by this function
-*       is automatically initialized to zero.
-*    2. Memory protection for the region of
-*       pages to be allocated is PAGE_READWRITE.
-* SEE ALSO
-*    winx_virtual_free,winx_heap_alloc,winx_heap_free
-******/
+/**
+ * @brief Allocates a block of virtual memory.
+ * @param[in] size the size of the block to be allocated, in bytes.
+ *                 Note that the allocated block may be bigger than
+ *                 the requested size.
+ * @return A pointer to the allocated block. NULL indicates failure.
+ * @note
+ * - Allocated memory is automatically initialized to zero.
+ * - Memory protection for the allocated pages is PAGE_READWRITE.
+ */
 void * __stdcall winx_virtual_alloc(ULONGLONG size)
 {
 	void *addr = NULL;
@@ -73,79 +56,32 @@ void * __stdcall winx_virtual_alloc(ULONGLONG size)
 	return (NT_SUCCESS(Status)) ? addr : NULL;
 }
 
-/****f* zenwinx.memory/winx_virtual_free
-* NAME
-*    winx_virtual_free
-* SYNOPSIS
-*    winx_virtual_free(addr, size);
-* FUNCTION
-*    Release a region of pages within the
-*    virtual address space of the calling process.
-* INPUTS
-*    addr - pointer to the base address
-*           of the region of pages to be freed.
-*    size - size of the region of memory
-*           to be freed, in bytes.
-* RESULT
-*    This function does not return a value.
-* EXAMPLE
-*    See an example for the winx_virtual_alloc() function.
-* NOTES
-*    After this call you must not refer
-*    to the specified memory again.
-* SEE ALSO
-*    winx_virtual_alloc,winx_heap_alloc,winx_heap_free
-******/
+/**
+ * @brief Releases a block of virtual memory.
+ * @param[in] addr the memory block pointer.
+ * @param[in] size the size of the block to be released, in bytes.
+ */
 void __stdcall winx_virtual_free(void *addr,ULONGLONG size)
 {
 	NtFreeVirtualMemory(NtCurrentProcess(),&addr,
 		(SIZE_T *)(PVOID)&size,MEM_RELEASE);
 }
 
-/****f* zenwinx.memory/winx_heap_alloc
-* NAME
-*    winx_heap_alloc
-* SYNOPSIS
-*    addr = winx_heap_alloc(size);
-* FUNCTION
-*    Allocate requested number of bytes
-*    from the global growable heap.
-* INPUTS
-*    size - size of the region of memory, in bytes.
-* RESULT
-*    If the function succeeds, the return value is
-*    the base address of the allocated memory.
-*    If the function fails, the return value is NULL.
-* NOTES
-*    1. Memory allocated by this function
-*       is automatically initialized to zero?
-* SEE ALSO
-*    winx_heap_free,winx_virtual_alloc,winx_virtual_free
-******/
+/**
+ * @brief Allocates a block of memory from the global growable heap.
+ * @param size the size of the block to be allocated, in bytes.
+ * @return A pointer to the allocated block. NULL indicates failure.
+ */
 void * __stdcall winx_heap_alloc(ULONGLONG size)
 {
 	if(hGlobalHeap == NULL) return NULL;
 	return RtlAllocateHeap(hGlobalHeap,0/*HEAP_ZERO_MEMORY*/,(ULONG)size);
 }
 
-/****f* zenwinx.memory/winx_heap_free
-* NAME
-*    winx_heap_free
-* SYNOPSIS
-*    winx_heap_free(addr);
-* FUNCTION
-*    Release a specified region of memory.
-* INPUTS
-*    addr - pointer to the base address
-*           of memory to be freed.
-* RESULT
-*    This function does not return a value.
-* NOTES
-*    After this call you must not refer
-*    to the specified memory again.
-* SEE ALSO
-*    winx_heap_alloc,winx_virtual_alloc,winx_virtual_free
-******/
+/**
+ * @brief Frees a previously allocated memory block. 
+ * @param[in] addr the memory block pointer.
+ */
 void __stdcall winx_heap_free(void *addr)
 {
 	if(hGlobalHeap && addr) RtlFreeHeap(hGlobalHeap,0,addr);
@@ -162,3 +98,5 @@ void winx_destroy_global_heap(void)
 {
 	if(hGlobalHeap) RtlDestroyHeap(hGlobalHeap);
 }
+
+/** @} */

@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,11 +17,17 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll registry functions.
-*/
+/**
+ * @file reg.c
+ * @brief System registry manipulation code.
+ * @addtogroup Registry
+ * @{
+ */
 
-/* Use standard RtlXxx functions instead of writing specialized versions of them. */
+/*
+* Use standard RtlXxx functions instead of writing 
+* specialized versions of them.
+*/
 
 #include "ntndk.h"
 #include "zenwinx.h"
@@ -33,27 +39,15 @@ static void __stdcall flush_smss_key(HANDLE hKey);
 
 /* The following two functions replaces bootexctrl in native mode. */
 
-/****f* zenwinx.registry/winx_register_boot_exec_command
-* NAME
-*    winx_register_boot_exec_command
-* SYNOPSIS
-*    error = winx_register_boot_exec_command(command);
-* FUNCTION
-*    Registers a specified command to be executed during 
-*    Windows boot process.
-* INPUTS
-*    command    - command name, without extension
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    (void)winx_register_boot_exec_command(L"defrag_native");
-* NOTES
-*    Specified command's executable must be placed inside 
-*    a system32 directory to be executed successfully.
-* SEE ALSO
-*    winx_unregister_boot_exec_command
-******/
+/**
+ * @brief Registers command to be executed during the Windows
+ *        boot process.
+ * @param[in] command the name of the command's executable, without 
+ *                    an extension
+ * @return Zero for success, negative value otherwise.
+ * @note Command's executable must be placed inside 
+ *       a system32 directory to be executed successfully.
+ */
 int __stdcall winx_register_boot_exec_command(short *command)
 {
 	HANDLE hKey;
@@ -70,7 +64,7 @@ int __stdcall winx_register_boot_exec_command(short *command)
 	}
 	
 	if(data->Type != REG_MULTI_SZ){
-		winx_dbg_print("BootExecute value has wrong type 0x%x!",
+		DebugPrint("BootExecute value has wrong type 0x%x!",
 				data->Type);
 		winx_virtual_free((void *)data,size);
 		NtCloseSafe(hKey);
@@ -81,7 +75,7 @@ int __stdcall winx_register_boot_exec_command(short *command)
 	length = (data->DataLength >> 1) - 1;
 	for(i = 0; i < length;){
 		pos = value + i;
-		//winx_dbg_print("%ws",pos);
+		//DebugPrint("%ws",pos);
 		len = wcslen(pos) + 1;
 		if(!wcscmp(pos,command)) goto done;
 		i += len;
@@ -103,24 +97,13 @@ done:
 	return 0;
 }
 
-/****f* zenwinx.registry/winx_unregister_boot_exec_command
-* NAME
-*    winx_unregister_boot_exec_command
-* SYNOPSIS
-*    error = winx_unregister_boot_exec_command(command);
-* FUNCTION
-*    Deregisters a specified command from being executed during 
-*    Windows boot process.
-* INPUTS
-*    command    - command name, without extension
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    (void)winx_unregister_boot_exec_command(L"defrag_native");
-* SEE ALSO
-*    winx_register_boot_exec_command
-******/
+/**
+ * @brief Deregisters command from being executed during the Windows
+ *        boot process.
+ * @param[in] command the name of the command's executable, without 
+ *                    an extension
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall winx_unregister_boot_exec_command(short *command)
 {
 	HANDLE hKey;
@@ -140,7 +123,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	}
 	
 	if(data->Type != REG_MULTI_SZ){
-		winx_dbg_print("BootExecute value has wrong type 0x%x!",
+		DebugPrint("BootExecute value has wrong type 0x%x!",
 				data->Type);
 		winx_virtual_free((void *)data,size);
 		NtCloseSafe(hKey);
@@ -153,7 +136,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	new_value_size = (length + 1) << 1;
 	new_value = winx_virtual_alloc(new_value_size);
 	if(!new_value){
-		winx_dbg_print("Cannot allocate %u bytes of memory"
+		DebugPrint("Cannot allocate %u bytes of memory"
 						 "for new BootExecute value!",new_value_size);
 		winx_virtual_free((void *)data,size);
 		NtCloseSafe(hKey);
@@ -164,7 +147,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	new_length = 0;
 	for(i = 0; i < length;){
 		pos = value + i;
-		//winx_dbg_print("%ws",pos);
+		//DebugPrint("%ws",pos);
 		len = wcslen(pos) + 1;
 		if(wcscmp(pos,command)){
 			wcscpy(new_value + new_length,pos);
@@ -189,7 +172,12 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	return 0;
 }
 
-/* internal functions */
+/**
+ * @brief Opens the SMSS registry key.
+ * @param[out] pKey pointer to the key handle.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 static int __stdcall open_smss_key(HANDLE *pKey)
 {
 	UNICODE_STRING us;
@@ -201,14 +189,20 @@ static int __stdcall open_smss_key(HANDLE *pKey)
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
 	status = NtOpenKey(pKey,KEY_QUERY_VALUE | KEY_SET_VALUE,&oa);
 	if(status != STATUS_SUCCESS){
-		winx_dbg_print_ex("Can't open %ws: %x!",
-			us.Buffer,(UINT)status);
+		DebugPrintEx(status,"Cannot open %ws",us.Buffer);
 		return (-1);
 	}
 	return 0;
 }
 
-/* third parameter - in bytes */
+/**
+ * @brief Queries the BootExecute value of the SMSS registry key.
+ * @param[in] hKey the key handle.
+ * @param[out] data pointer to a buffer that receives the value.
+ * @param[in,out] size the size of buffer, in bytes.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 {
 	void *data_buffer = NULL;
@@ -222,8 +216,7 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			NULL,0,&data_size);
 	if(status != STATUS_BUFFER_TOO_SMALL){
-		winx_dbg_print_ex("Cannot query BootExecute value size: %x!",
-				(UINT)status);
+		DebugPrintEx(status,"Cannot query BootExecute value size");
 		return (-1);
 	}
 	data_size += additional_space_size;
@@ -231,8 +224,7 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			data_buffer,data_size,&data_size2);
 	if(status != STATUS_SUCCESS){
-		winx_dbg_print_ex("Cannot query BootExecute value: %x!",
-				(UINT)status);
+		DebugPrintEx(status,"Cannot query BootExecute value");
 		winx_virtual_free(data_buffer,data_size);
 		return (-1);
 	}
@@ -242,6 +234,14 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 	return 0;
 }
 
+/**
+ * @brief Sets the BootExecute value of the SMSS registry key.
+ * @param[in] hKey the key handle.
+ * @param[in] data pointer to a buffer containing the value.
+ * @param[in] size the size of buffer, in bytes.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 {
 	UNICODE_STRING us;
@@ -250,20 +250,25 @@ static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 	RtlInitUnicodeString(&us,L"BootExecute");
 	status = NtSetValueKey(hKey,&us,0,REG_MULTI_SZ,data,size);
 	if(status != STATUS_SUCCESS){
-		winx_dbg_print_ex("Cannot set BootExecute value: %x!",
-				(UINT)status);
+		DebugPrintEx(status,"Cannot set BootExecute value");
 		return (-1);
 	}
 	
 	return 0;
 }
 
+/**
+ * @brief Flushes the SMSS registry key.
+ * @param[in] hKey the key handle.
+ * @note Internal use only.
+ */
 static void __stdcall flush_smss_key(HANDLE hKey)
 {
 	NTSTATUS status;
 	
 	status = NtFlushKey(hKey);
 	if(status != STATUS_SUCCESS)
-		winx_dbg_print_ex("Cannot update Session Manager "
-				"registry key on disk: %x!",(UINT)status);
+		DebugPrintEx(status,"Cannot update Session Manager registry key on disk");
 }
+
+/** @} */

@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,7 +17,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* int64.c - 64-bit integer functions for mingw */
+/**
+ * @file int64.c
+ * @brief 64-bit integer support code.
+ * @{
+ */
 
 #include "ntndk.h"
 
@@ -56,3 +60,5 @@ ULONGLONG __cdecl __ullmod(ULONGLONG u, ULONGLONG v)
 	return _allrem(u,v);
 }
 #endif
+
+/** @} */

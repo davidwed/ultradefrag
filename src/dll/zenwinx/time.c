@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,28 +17,22 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll time related procedures.
-*/
+/**
+ * @file time.c
+ * @brief Time conversion code.
+ * @addtogroup Time
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
 
-/****f* zenwinx.time/winx_str2time
-* NAME
-*    winx_str2time
-* SYNOPSIS
-*    time = winx_str2time(string);
-* FUNCTION
-*    Converts formatted string to time value in seconds.
-* INPUTS
-*    string - formatted string to be converted
-*             Format example: 3y 12d 4h 8m 37s. 
-* RESULT
-*    Time interval in seconds.
-* SEE ALSO
-*    winx_time2str
-******/
+/**
+ * @brief Converts a formatted string to the time value in seconds.
+ * @param[in] string the formatted string to be converted.
+ *                   Format example: 3y 12d 4h 8m 37s.
+ * @return Time interval in seconds.
+ */
 ULONGLONG __stdcall winx_str2time(char *string)
 {
 	ULONGLONG time = 0;
@@ -84,22 +78,13 @@ ULONGLONG __stdcall winx_str2time(char *string)
 	return time;
 }
 
-/****f* zenwinx.time/winx_time2str
-* NAME
-*    winx_time2str
-* SYNOPSIS
-*    result = winx_time2str(time,buffer,size);
-* FUNCTION
-*    Converts time value in seconds to formatted string.
-* INPUTS
-*    time   - interval in seconds
-*    buffer - storage for the resulting string
-*    size   - length of the buffer
-* RESULT
-*    The number of characters stored.
-* SEE ALSO
-*    winx_str2time
-******/
+/**
+ * @brief Converts a time value in seconds to the formatted string.
+ * @param[in]  time   the time interval, in seconds.
+ * @param[out] buffer the storage for the resulting string.
+ * @param[in]  size   the length of the buffer, in characters.
+ * @return The number of characters stored.
+ */
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
 {
 	ULONGLONG y,d,h,m,s;
@@ -122,3 +107,5 @@ int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
 	buffer[size - 1] = 0;
 	return result;
 }
+
+/** @} */

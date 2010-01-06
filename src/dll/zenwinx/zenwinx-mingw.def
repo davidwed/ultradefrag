@@ -17,7 +17,6 @@ EXPORTS
 	winx_gets
 	winx_kbhit
 	winx_breakhit
-	;winx_set_error_handler@4
 	winx_sleep@4
 	winx_get_os_version@0
 	winx_get_windows_directory@8
@@ -41,6 +40,7 @@ EXPORTS
 	winx_delete_file@4
 	winx_query_env_variable@12
 	winx_set_env_variable@8
+	winx_query_symbolic_link@12
 	winx_fbsize@20
 	winx_dfbsize@8
 	winx_create_event@12
@@ -50,6 +50,5 @@ EXPORTS
 	winx_unregister_boot_exec_command@4
 	winx_dbg_print
 	winx_dbg_print_ex
-	winx_debug_print@4
 	winx_str2time@4
 	winx_time2str@16

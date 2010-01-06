@@ -27,7 +27,14 @@
  * NB: Hardcoded to US keyboard
  */
 
-/* Modified by Dmitri Arkhangelski, 2007. */ 
+/* Modified by Dmitri Arkhangelski, 2007. */
+
+/**
+ * @file keytrans.c
+ * @brief Keyboard codes translation.
+ * @addtogroup Keyboard
+ * @{
+ */
 
 #include "ntndk.h"
 
@@ -184,3 +191,5 @@ void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec)
 
 	kbd_rec->AsciiChar = IntAsciiFromInput(InputData,kbd_rec->dwControlKeyState);
 }
+
+/** @} */

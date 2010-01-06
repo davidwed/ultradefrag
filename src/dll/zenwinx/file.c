@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,14 +17,20 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll crt's file functions analogs.
-*/
+/**
+ * @file file.c
+ * @brief File I/O code.
+ * @addtogroup File
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
 
-/* only r, w, a, r+, w+, a+ modes are supported */
+/**
+ * @brief fopen() native equivalent.
+ * @note Only r, w, a, r+, w+, a+ modes are supported.
+ */
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 {
 	ANSI_STRING as;
@@ -37,18 +43,11 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	ULONG disposition = FILE_OPEN;
 	WINX_FILE *f;
 
-	if(!filename){
-		winx_debug_print("winx_fopen() invalid filename!");
-		return NULL;
-	}
-	if(!mode){
-		winx_debug_print("winx_fopen() invalid mode (NULL)!");
-		return NULL;
-	}
+	DbgCheck2(filename,mode,"winx_fopen",NULL);
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_dbg_print("Can't open %s! No enough memory!",filename);
+		DebugPrint("Cannot open %s! No enough memory!",filename);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -88,14 +87,13 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 			);
 	RtlFreeUnicodeString(&us);
 	if(status != STATUS_SUCCESS){
-		winx_dbg_print_ex("Can't open %s: %x!",filename,(UINT)status);
+		DebugPrintEx(status,"Cannot open %s",filename);
 		return NULL;
 	}
-	/* FIXME: hFile == NULL */
 	f = (WINX_FILE *)winx_virtual_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		winx_dbg_print("Can't open %s! No enough memory!",filename);
+		DebugPrint("Cannot open %s! No enough memory!",filename);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -104,19 +102,15 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	return f;
 }
 
+/**
+ * @brief fread() native equivalent.
+ */
 size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 {
 	NTSTATUS status;
 	IO_STATUS_BLOCK iosb;
 	
-	if(!buffer){
-		winx_debug_print("winx_fread() invalid buffer!");
-		return 0;
-	}
-	if(!f){
-		winx_debug_print("winx_fread() invalid f (NULL)!");
-		return 0;
-	}
+	DbgCheck2(buffer,f,"winx_fread",0);
 
 	status = NtReadFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 buffer,size * count,&f->roffset,NULL);
@@ -124,38 +118,27 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
-	if(status == STATUS_END_OF_FILE/* || (iosb.Information < size)*/){
-		/*winx_raise_error("N: EOF!");*/
-		return 0;
-	}
 	if(status != STATUS_SUCCESS){
-		winx_dbg_print_ex("Can't read from a file: %x!",(UINT)status);
+		DebugPrintEx(status,"Cannot read from a file");
 		return 0;
 	}
-
-	/* FIXME: iosb.Information may be zero though a read call was successful */
-	if(iosb.Information < size){
+	if(iosb.Information == 0){ /* encountered on x64 XP */
 		f->roffset.QuadPart += size * count;
 		return count;
 	}
-
-	f->roffset.QuadPart += iosb.Information;//size * count;
-	return (iosb.Information / size);//count;
+	f->roffset.QuadPart += iosb.Information;
+	return (iosb.Information / size);
 }
 
+/**
+ * @brief fwrite() native equivalent.
+ */
 size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f)
 {
 	NTSTATUS status;
 	IO_STATUS_BLOCK iosb;
 	
-	if(!buffer){
-		winx_debug_print("winx_fwrite() invalid buffer!");
-		return 0;
-	}
-	if(!f){
-		winx_debug_print("winx_fwrite() invalid f (NULL)!");
-		return 0;
-	}
+	DbgCheck2(buffer,f,"winx_fwrite",0);
 
 	status = NtWriteFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 (void *)buffer,size * count,&f->woffset,NULL);
@@ -163,22 +146,33 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
-	if(status != STATUS_SUCCESS/* || (iosb.Information < size)*/){
-		winx_dbg_print_ex("Can't write to a file: %x!",(UINT)status);
+	if(status != STATUS_SUCCESS){
+		DebugPrintEx(status,"Cannot write to a file");
 		return 0;
 	}
-
-	/* FIXME: iosb.Information may be zero though a write call was successful */
-	if(iosb.Information < size){
+	if(iosb.Information == 0){ /* encountered on x64 XP */
 		f->woffset.QuadPart += size * count;
 		return count;
 	}
-
-	f->woffset.QuadPart += iosb.Information;//size * count;
-	return (iosb.Information / size);//count;
+	f->woffset.QuadPart += iosb.Information;
+	return (iosb.Information / size);
 }
 
-/* 0 on success, -1 otherwise */
+/**
+ * @brief Sends an I/O control code to the specified device.
+ * @param[in] f the file handle.
+ * @param[in] code the IOCTL code.
+ * @param[in] description the string explaining the meaning of the
+ *                        request, used by error handling code.
+ * @param[in] in_buffer the input buffer pointer.
+ * @param[in] in_size the input buffer size, in bytes.
+ * @param[out] out_buffer the output buffer pointer.
+ * @param[in] out_size the output buffer size, in bytes.
+ * @param[out] pbytes_returned pointer to the variable receiving
+ *                             the number of bytes written to the
+ *                             output buffer.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall winx_ioctl(WINX_FILE *f,
                          int code,char *description,
                          void *in_buffer,int in_size,
@@ -188,10 +182,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS Status;
 
-	if(!f){
-		winx_debug_print("winx_ioctl() invalid f (NULL)!");
-		return (-1);
-	}
+	DbgCheck1(f,"winx_ioctl",-1);
 	
 	if(out_buffer) RtlZeroMemory(out_buffer,out_size);
 	
@@ -209,33 +200,37 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	}
 	if(!NT_SUCCESS(Status)/* || Status == STATUS_PENDING*/){
 		if(description)
-			winx_dbg_print_ex("%s failed: %x!",description,(UINT)Status);
+			DebugPrintEx(Status,"%s failed",description);
 		else
-			winx_dbg_print_ex("Ioctl %u failed: %x!",code,(UINT)Status);
+			DebugPrintEx(Status,"Ioctl %u failed",code);
 		return (-1);
 	}
 	if(pbytes_returned) *pbytes_returned = iosb.Information;
 	return 0;
 }
 
+/**
+ * @brief fflush() native equivalent.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall winx_fflush(WINX_FILE *f)
 {
 	NTSTATUS Status;
 	IO_STATUS_BLOCK iosb;
 	
-	if(!f){
-		winx_debug_print("winx_fflush() invalid f (NULL)!");
-		return (-1);
-	}
+	DbgCheck1(f,"winx_fflush",-1);
 
 	Status = NtFlushBuffersFile(f->hFile,&iosb);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("NtFlushBuffersFile() failed: %x!",(UINT)Status);
+		DebugPrintEx(Status,"NtFlushBuffersFile() failed");
 		return (-1);
 	}
 	return 0;
 }
 
+/**
+ * @brief fclose() native equivalent.
+ */
 void __stdcall winx_fclose(WINX_FILE *f)
 {
 	if(!f) return;
@@ -243,6 +238,13 @@ void __stdcall winx_fclose(WINX_FILE *f)
 	winx_virtual_free(f,sizeof(WINX_FILE));
 }
 
+/**
+ * @brief Creates a directory.
+ * @param[in] path the native path to the directory.
+ * @return Zero for success, negative value otherwise.
+ * @note If the requested directory already exists this function
+ *       returns success.
+ */
 int __stdcall winx_create_directory(const char *path)
 {
 	ANSI_STRING as;
@@ -252,14 +254,11 @@ int __stdcall winx_create_directory(const char *path)
 	OBJECT_ATTRIBUTES oa;
 	IO_STATUS_BLOCK iosb;
 
-	if(!path){
-		winx_debug_print("winx_create_directory() invalid path!");
-		return (-1);
-	}
+	DbgCheck1(path,"winx_create_directory",-1);
 
 	RtlInitAnsiString(&as,path);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_dbg_print("Can't create %s! No enough memory!",path);
+		DebugPrint("Cannot create %s! No enough memory!",path);
 		return (-1);
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -283,10 +282,15 @@ int __stdcall winx_create_directory(const char *path)
 	}
 	/* if it already exists then return success */
 	if(status == STATUS_OBJECT_NAME_COLLISION) return 0;
-	winx_dbg_print_ex("Can't create %s: %x!",path,(UINT)status);
+	DebugPrintEx(status,"Cannot create %s",path);
 	return (-1);
 }
 
+/**
+ * @brief Deletes a file.
+ * @param[in] filename the native path to the file.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall winx_delete_file(const char *filename)
 {
 	ANSI_STRING as;
@@ -294,14 +298,11 @@ int __stdcall winx_delete_file(const char *filename)
 	NTSTATUS status;
 	OBJECT_ATTRIBUTES oa;
 
-	if(!filename){
-		winx_debug_print("winx_delete_file() invalid filename!");
-		return (-1);
-	}
+	DbgCheck1(filename,"winx_delete_file",-1);
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		winx_dbg_print("Can't delete %s! No enough memory!",filename);
+		DebugPrint("Cannot delete %s! No enough memory!",filename);
 		return (-1);
 	}
 
@@ -310,8 +311,10 @@ int __stdcall winx_delete_file(const char *filename)
 	RtlFreeUnicodeString(&us);
 
 	if(!NT_SUCCESS(status)){
-		winx_dbg_print_ex("Can't delete %s: %x!",filename,(UINT)status);
+		DebugPrintEx(status,"Cannot delete %s",filename);
 		return (-1);
 	}
 	return 0;
 }
+
+/** @} */

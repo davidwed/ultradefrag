@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,14 +17,17 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll keyboard input procedures.
-*/
+/**
+ * @file keyboard.c
+ * @brief Keyboard input code.
+ * @addtogroup Keyboard
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
 
-char * __stdcall winx_get_error_description(unsigned long code);
+char * __stdcall winx_get_error_description(unsigned long status);
 
 #define MAX_NUM_OF_KEYBOARDS 100
 
@@ -43,7 +46,11 @@ int  __stdcall kb_check(HANDLE hKbDevice);
 int __stdcall kb_open_internal(int device_number);
 int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INTEGER pInterval);
 
-/* opens all existing keyboards */
+/**
+ * @brief Opens all existing keyboards.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 int __stdcall kb_open(short *kb_device_name)
 {
 	int i;
@@ -69,7 +76,10 @@ int __stdcall kb_open(short *kb_device_name)
 	else return (-1);
 }
 
-/* closes all opened keyboards */
+/**
+ * @brief Closes all opened keyboards.
+ * @note Internal use only.
+ */
 void __stdcall kb_close(void)
 {
 	int i;
@@ -85,10 +95,15 @@ void __stdcall kb_close(void)
 
 #define MAX_LATENCY 100 /* msec */
 
-/*
-* Tries to read keyboards until msec_timeout expires.
-* Returns zero when some key was pressed, -1 otherwise.
-*/
+/**
+ * @brief Checks the console for keyboard input.
+ * @details Tries to read from all keyboard devices 
+ *          until specified time-out expires.
+ * @param[out] pKID pointer to the structure receiving keyboard input.
+ * @param[in] msec_timeout time-out interval in milliseconds.
+ * @return Zero if some key was pressed, negative value otherwise.
+ * @note Internal use only.
+ */
 int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 {
 	int delay;
@@ -131,7 +146,12 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 **************************************************************
 */
 
-/* tries to open specified keyboard */
+/**
+ * @brief Opens the keyboard.
+ * @param[in] device_number the number of the keyboard device.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 int __stdcall kb_open_internal(int device_number)
 {
 	short device_name[32];
@@ -153,9 +173,8 @@ int __stdcall kb_open_internal(int device_number)
 			    0,FILE_OPEN/*1*/,FILE_DIRECTORY_FILE/*1*/,NULL,0);
 	if(!NT_SUCCESS(Status)){
 		if(device_number < 2){
-			winx_dbg_print_ex("Can't open the keyboard %ws: %x!",
-				device_name,(UINT)Status);
-			winx_printf("\nCan't open the keyboard %ws: %x!\n",
+			DebugPrintEx(Status,"Cannot open the keyboard %ws",device_name);
+			winx_printf("\nCannot open the keyboard %ws: %x!\n",
 				device_name,(UINT)Status);
 			winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 		}
@@ -164,7 +183,7 @@ int __stdcall kb_open_internal(int device_number)
 	
 	/* ensure that we have opened a really connected keyboard */
 	if(kb_check(hKbDevice) < 0){
-		winx_dbg_print_ex("Invalid keyboard device %ws: %x!",device_name,(UINT)Status);
+		DebugPrintEx(Status,"Invalid keyboard device %ws",device_name);
 		winx_printf("\nInvalid keyboard device %ws: %x!\n",device_name,(UINT)Status);
 		winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 		NtCloseSafe(hKbDevice);
@@ -179,8 +198,8 @@ int __stdcall kb_open_internal(int device_number)
 		&ObjectAttributes,SynchronizationEvent,FALSE);
 	if(!NT_SUCCESS(Status)){
 		NtCloseSafe(hKbDevice);
-		winx_dbg_print_ex("Can't create kb_event%u: %x!",device_number,(UINT)Status);
-		winx_printf("\nCan't create kb_event%u: %x!\n",device_number,(UINT)Status);
+		DebugPrintEx(Status,"Cannot create kb_event%u",device_number);
+		winx_printf("\nCannot create kb_event%u: %x!\n",device_number,(UINT)Status);
 		winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 		return (-1);
 	}
@@ -203,7 +222,14 @@ int __stdcall kb_open_internal(int device_number)
 
 #define LIGHTING_REPEAT_COUNT 0x5
 
-/* 0 for success, -1 otherwise */
+/**
+ * @brief Light up the keyboard indicators.
+ * @param[in] hKbDevice the handle of the keyboard device.
+ * @param[in] LedFlags the flags specifying which indicators
+ *                     must be lighten up.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 {
 	NTSTATUS Status;
@@ -216,7 +242,7 @@ int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
 			&iosb,IOCTL_KEYBOARD_SET_INDICATORS,
 			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS),NULL,0);
-	if(Status == STATUS_PENDING){
+	if(Status == STATUS_PENDING){ // FIXME ???
 		Status = NtWaitForSingleObject(hKbDevice,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
@@ -225,7 +251,12 @@ int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 	return 0;
 }
 
-/* internal function; returns -1 for invalid device, 0 otherwise */
+/**
+ * @brief Checks the keyboard for an existence.
+ * @param[in] hKbDevice the handle of the keyboard device.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
 int __stdcall kb_check(HANDLE hKbDevice)
 {
 	USHORT LedFlags;
@@ -239,7 +270,7 @@ int __stdcall kb_check(HANDLE hKbDevice)
 	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
 			&iosb,IOCTL_KEYBOARD_QUERY_INDICATORS,NULL,0,
 			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS));
-	if(Status == STATUS_PENDING){
+	if(Status == STATUS_PENDING){ // FIXME ???
 		Status = NtWaitForSingleObject(hKbDevice,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
@@ -261,6 +292,15 @@ int __stdcall kb_check(HANDLE hKbDevice)
 	return 0;
 }
 
+/**
+ * @brief Checks the keyboard for an input.
+ * @param[in] kb_index the index of the keyboard to be checked.
+ * @param[out] pKID pointer to the structure receiving keyboard input.
+ * @param[in] pInterval pointer to the variable
+ *                      holding the time-out interval.
+ * @return Zero if some key was pressed, negative value otherwise.
+ * @note Internal use only.
+ */
 int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INTEGER pInterval)
 {
 	LARGE_INTEGER ByteOffset;
@@ -274,7 +314,7 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 	Status = NtReadFile(kb[kb_index].hKbDevice,kb[kb_index].hKbEvent,NULL,NULL,
 		&iosb,pKID,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
 	/* wait in case operation is pending */
-	if(Status == STATUS_PENDING){
+	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
 		Status = NtWaitForSingleObject(kb[kb_index].hKbEvent,FALSE,pInterval);
 		if(Status == STATUS_TIMEOUT){ 
 			/* 
@@ -287,8 +327,8 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 				* This is a hard error because the next read request
 				* may destroy stack where pKID pointed data may be allocated.
 				*/
-				winx_dbg_print_ex("E: NtCancelIoFile for KeyboadClass%u failed: %x!",
-					kb[kb_index].device_number,(UINT)Status);
+				DebugPrintEx(Status,"NtCancelIoFile for KeyboadClass%u failed",
+					kb[kb_index].device_number);
 				winx_printf("\nNtCancelIoFile for KeyboadClass%u failed: %x!\n",
 					kb[kb_index].device_number,(UINT)Status);
 				winx_printf("%s\n",winx_get_error_description((ULONG)Status));
@@ -302,8 +342,8 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("Cannot read the KeyboadClass%u device: %x!",
-			kb[kb_index].device_number,(UINT)Status);
+		DebugPrintEx(Status,"Cannot read the KeyboadClass%u device",
+			kb[kb_index].device_number);
 		winx_printf("\nCannot read the KeyboadClass%u device: %x!\n",
 			kb[kb_index].device_number,(UINT)Status);
 		winx_printf("%s\n",winx_get_error_description((ULONG)Status));
@@ -311,3 +351,5 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 	}
 	return 0;
 }
+
+/** @} */

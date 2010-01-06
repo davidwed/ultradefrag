@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -66,6 +66,10 @@
 *    stack will be corrupted.
 *
 *    http://blogs.msdn.com/johnsheehan/archive/2007/12/19/when-idle-threads-bugcheck.aspx
+*
+* 4. When you are using _vsnprintf() don't forget to fill buffer 
+*    passed as first parameter by zeros before the call. Otherwise
+*    it will fail.
 */
 
 #define _CRT_SECURE_NO_WARNINGS /* for Windows Server 2008 SDK compiler */
@@ -194,7 +198,9 @@ typedef LONG NTSTATUS;
 #ifndef STATUS_UNRECOGNIZED_VOLUME
 #define STATUS_UNRECOGNIZED_VOLUME    ((NTSTATUS)0xC000014F)
 #endif
-
+#ifndef STATUS_VARIABLE_NOT_FOUND
+#define STATUS_VARIABLE_NOT_FOUND     ((NTSTATUS)0xC0000100)
+#endif
 #ifndef STATUS_WAIT_0
 #define STATUS_WAIT_0                 ((NTSTATUS)0x00000000)
 #endif

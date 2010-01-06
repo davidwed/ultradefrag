@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,8 +32,41 @@
 #endif
 
 #define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
+#define DebugPrint winx_dbg_print
+#define DebugPrintEx winx_dbg_print_ex
 
-#define ERR_MSG_SIZE 1024 /* must be no more than 4096 - sizeof(ULONG) */
+#define DbgCheck1(c,f,r) { \
+	if(!(c)) {           \
+		DebugPrint("The first parameter of " f " is invalid!"); \
+		return (r);      \
+	}                    \
+}
+
+#define DbgCheck2(c1,c2,f,r) { \
+	if(!(c1)) {              \
+		DebugPrint("The first parameter of " f " is invalid!"); \
+		return (r);          \
+	}                        \
+	if(!(c2)) {              \
+		DebugPrint("The second parameter of " f " is invalid!"); \
+		return (r);          \
+	}                        \
+}
+
+#define DbgCheck3(c1,c2,c3,f,r) { \
+	if(!(c1)) {              \
+		DebugPrint("The first parameter of " f " is invalid!"); \
+		return (r);          \
+	}                        \
+	if(!(c2)) {              \
+		DebugPrint("The second parameter of " f " is invalid!"); \
+		return (r);          \
+	}                        \
+	if(!(c3)) {              \
+		DebugPrint("The third parameter of " f " is invalid!"); \
+		return (r);          \
+	}                        \
+}
 
 typedef struct _WINX_FILE {
 	HANDLE hFile;
@@ -111,6 +144,8 @@ int __stdcall winx_delete_file(const char *filename);
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);
 
+int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length);
+
 int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber);
 
@@ -122,8 +157,7 @@ int __stdcall winx_register_boot_exec_command(short *command);
 int __stdcall winx_unregister_boot_exec_command(short *command);
 
 void __cdecl winx_dbg_print(char *format, ...);
-int  __stdcall winx_debug_print(char *string);
-void __cdecl winx_dbg_print_ex(char *format, ...);
+void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
 
 ULONGLONG __stdcall winx_str2time(char *string);
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);

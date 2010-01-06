@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,29 +17,27 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* zenwinx.dll - user privileges manipulation functions.
-*/
+/**
+ * @file privilege.c
+ * @brief User privileges managing code.
+ * @addtogroup Privileges
+ * @{
+ */
 
 #include "ntndk.h"
 #include "zenwinx.h"
 
-/****f* zenwinx.privilege/winx_enable_privilege
-* NAME
-*    winx_enable_privilege
-* SYNOPSIS
-*    error = winx_enable_privilege(token,privilege_id);
-* FUNCTION
-*    Enables specified privilege for the specified token.
-* INPUTS
-*    token        - process / thread token.
-*    privilege_id - one of the privilege codes from ntndk.h
-* RESULT
-*    If the function succeeds, the return value is zero.
-*    Otherwise - negative value.
-* EXAMPLE
-*    winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-******/
+/**
+ * @brief Enables a user privilege for the current process.
+ * @param[in] luid identifier of the requested privilege, 
+ *                 ntndk.h file contains definitions of
+ *                 various privileges.
+ * @return Zero for success, negative value otherwise.
+ * @par Example:
+ * @code
+ * winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+ * @endcode
+ */
 int __stdcall winx_enable_privilege(unsigned long luid)
 {
 	HANDLE hToken = NULL;
@@ -49,8 +47,7 @@ int __stdcall winx_enable_privilege(unsigned long luid)
 
 	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&hToken);
 	if(!NT_SUCCESS(Status)){
-		winx_dbg_print_ex("Can't enable privilege %x! Open token failure: %x!",
-				(UINT)luid,(UINT)Status);
+		DebugPrintEx(Status,"Cannot enable privilege %x! Open token failure",(UINT)luid);
 		return (-1);
 	}
 
@@ -63,9 +60,10 @@ int __stdcall winx_enable_privilege(unsigned long luid)
 									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
 	NtCloseSafe(hToken);
 	if(Status == STATUS_NOT_ALL_ASSIGNED || !NT_SUCCESS(Status)){
-		winx_dbg_print_ex("Can't enable privilege %x: %x!",
-				(UINT)luid,(UINT)Status);
+		DebugPrintEx(Status,"Cannot enable privilege 0x%x",(UINT)luid);
 		return (-1);
 	}
 	return 0;
 }
+
+/** @} */
