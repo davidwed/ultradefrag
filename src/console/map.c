@@ -187,7 +187,7 @@ int __stdcall ProgressCallback(int done_flag)
 		if(op == 'A' || op == 'a')      op_name = "analyse:  ";
 		else if(op == 'D' || op == 'd') op_name = "defrag:   ";
 		else                            op_name = "optimize: ";
-		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %lu/%lu",
+		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %lu/%lu     ", /* FIXME! */
 			letter,op_name,(int)percentage,stat.fragmfilecounter,stat.filecounter);
 	} else {
 		err_flag = TRUE;
@@ -196,7 +196,7 @@ int __stdcall ProgressCallback(int done_flag)
 	if(err_flag) return 0;
 
 	if(done_flag && !stop_flag){ /* set progress indicator to 100% state */
-		fprintf(stderr,"\r%c: %s100%% complete, fragmented/total = %lu/%lu",
+		fprintf(stderr,"\r%c: %s100%% complete, fragmented/total = %lu/%lu     ", /* FIXME! */
 			letter,op_name,stat.fragmfilecounter,stat.filecounter);
 		if(!m_flag) fprintf(stderr,"\n");
 	}

@@ -22,22 +22,17 @@
  *
  * <h2>Software requirements</h2>
  * - <a href="http://www.mingw.org/">GNU C Compiler</a>
- * [<a href="http://ultradefrag.sourceforge.net/devtools/MinGWStudioFullSetup-2.05.exe">download</a>]
  * - <a href="http://nsis.sourceforge.net/">NSIS compiler</a>
- * [<a href="http://ultradefrag.sourceforge.net/devtools/nsis-2.28-setup.exe">download</a>]
  * - <a href="http://luabinaries.luaforge.net/">Lua</a>, 
  * <a href="http://sourceforge.net/projects/iup/files/">IUP</a>, 
  * <a href="http://sourceforge.net/projects/canvasdraw/files/">CD</a>
- * [<a href="http://ultradefrag.sourceforge.net/devtools/Lua51_iup30rc2_cd52.7z">download</a>]
  * - <a href="http://www.7-zip.org/">7-zip file archiver</a>
- * [<a href="http://ultradefrag.sourceforge.net/devtools/7z442.exe">download</a>]
  * - <a href="http://www.info-zip.org/">Zip file archiver</a>
- * [<a href="http://ultradefrag.sourceforge.net/devtools/zip232xN.zip">download</a>]
  * - <a href="http://www.doxygen.org/">Doxygen</a>
- * [<a href="http://ultradefrag.sourceforge.net/devtools/doxygen-1.6.2.7z">download</a>]
  * - <a href="http://www.etree.org/md5com.html">md5sum tool</a>
- * [<a href="http://ultradefrag.sourceforge.net/devtools/md5sum-1.22.zip">download</a>]
  *
+ * You may download all listed tools from 
+ * <a href="http://ultradefrag.sourceforge.net/devtools/">this location</a>.
  * In case when the installer is provided for an appropriate tool, 
  * just install it. Otherwise unpack provided archive into any directory, 
  * specified in your path environment variable. If you are in trouble, 

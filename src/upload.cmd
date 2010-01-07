@@ -11,6 +11,8 @@ copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\archive\
 copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\archive\
 copy .\src_package\ultradefrag-%ULTRADFGVER%.src.7z .\archive\
 
+goto skip_nextgen
+
 rem Build the UltraDefrag Next Generation packages
 mkdir .\bin\ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.i386
 mkdir .\bin\amd64\ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.amd64
@@ -49,6 +51,8 @@ copy .\bin\ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.i386.zip .\archive\
 copy .\bin\amd64\ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.amd64.zip .\archive\
 copy .\bin\ia64\ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.ia64.zip .\archive\
 
+:skip_nextgen
+
 call build-micro.cmd --use-winddk
 copy .\bin\ultradefrag-micro-edition-%ULTRADFGVER%.bin.i386.exe .\archive\
 copy .\bin\amd64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.amd64.exe .\archive\
@@ -67,7 +71,7 @@ copy .\bin\ia64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip .\archive\
 cd archive
 
 md5sum ultradefrag-%ULTRADFGVER%.bin.* > ultradefrag-%ULTRADFGVER%.MD5SUMS
-md5sum ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.* > ultradefrag-%ULTRADFGVER%.MD5SUMS
+rem md5sum ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.* > ultradefrag-%ULTRADFGVER%.MD5SUMS
 md5sum ultradefrag-micro-edition-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
 md5sum ultradefrag-portable-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
 md5sum ultradefrag-micro-portable-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS

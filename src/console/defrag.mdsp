@@ -91,10 +91,10 @@ extraResourceOptions=
 [Other]
 [History]
 ..\include\ultradfg.h,0
-..\include\udefrag.h,2165
+..\include\udefrag.h,2104
 ..\share\getopt.c,21934
 ..\share\getopt1.c,4720
 ..\include\getopt.h,0
 options.c,15353
-map.c,5131
-defrag.c,7133
+defrag.c,3893
+map.c,5850

@@ -2,7 +2,7 @@ HISTORY
 
 [Version x.y.z (x86 w2k driver size in Kbytes)   release date]
 
-  Version 3.3.1 (43.0)   2009-12-
+  Version 3.3.1 (43.0)   2010-01-
   ------------------------------------------------------------------------------
     - extremely important x64 and x86 bugs were fixed
     - program is available again for all 64-bit targets
@@ -10,10 +10,12 @@ HISTORY
       which works much better that MediaWiki service used before
     - UltraDefrag Next Generation graphical interface was added
     - USB keyboards support at Windows boot time was added
-    - error handling was improved
+    - error handling was highly improved
     - one little portable version bug was fixed
     - few important GUI bugs were fixed; now all graphical programs are 
       much more compatible with their manifests
+    - a lot of bugs were fixed in all the program modules
+    - all important program sources were well documented
 
 
   Beta Stage

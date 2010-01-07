@@ -88,7 +88,7 @@ extraResourceOptions=
 1=udefrag-gui-config.rc
 [Other]
 [History]
-i18n.c,1232
-resource.h,1342
+main.c,6933
 udefrag-gui-config.rc,1631
-main.c,5456
+resource.h,1342
+i18n.c,1232

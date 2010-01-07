@@ -103,6 +103,8 @@ Alexander A. Telyatnikov (http://alter.org.ua/en/)
 
 Mumtaz Zaheer (http://www.codeproject.com/Members/Mumtaz-Zaheer)
 
+Giovanni Di Sirio (http://chibios.sourceforge.net/)
+
 -------------------------------------------------------------------------------------
 Also many thanks to all the people who helped us improve UltraDefrag.
 --------------------------------------------------------------------------------------
