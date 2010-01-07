@@ -1,0 +1,97 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Compilation Compilation
+ *
+ * <h2>Software requirements</h2>
+ * - <a href="http://www.mingw.org/">GNU C Compiler</a>
+ * [<a href="http://ultradefrag.sourceforge.net/devtools/MinGWStudioFullSetup-2.05.exe">download</a>]
+ * - <a href="http://nsis.sourceforge.net/">NSIS compiler</a>
+ * [<a href="http://ultradefrag.sourceforge.net/devtools/nsis-2.28-setup.exe">download</a>]
+ * - <a href="http://luabinaries.luaforge.net/">Lua</a>, 
+ * <a href="http://sourceforge.net/projects/iup/files/">IUP</a>, 
+ * <a href="http://sourceforge.net/projects/canvasdraw/files/">CD</a>
+ * [<a href="http://ultradefrag.sourceforge.net/devtools/Lua51_iup30rc2_cd52.7z">download</a>]
+ * - <a href="http://www.7-zip.org/">7-zip file archiver</a>
+ * [<a href="http://ultradefrag.sourceforge.net/devtools/7z442.exe">download</a>]
+ * - <a href="http://www.info-zip.org/">Zip file archiver</a>
+ * [<a href="http://ultradefrag.sourceforge.net/devtools/zip232xN.zip">download</a>]
+ * - <a href="http://www.doxygen.org/">Doxygen</a>
+ * [<a href="http://ultradefrag.sourceforge.net/devtools/doxygen-1.6.2.7z">download</a>]
+ * - <a href="http://www.etree.org/md5com.html">md5sum tool</a>
+ * [<a href="http://ultradefrag.sourceforge.net/devtools/md5sum-1.22.zip">download</a>]
+ *
+ * In case when the installer is provided for an appropriate tool, 
+ * just install it. Otherwise unpack provided archive into any directory, 
+ * specified in your path environment variable. If you are in trouble, 
+ * just unpack archives to C:\\WINDOWS, in other words, in folder where 
+ * you have Windows installed.
+ *
+ * If you are using the latest version of MinGW, don't be surprised when 
+ * <b>undefined reference to __strtod</b> error message appears during the 
+ * compilation. This is because the following 
+ * <a href="http://sourceforge.net/tracker/index.php?func=detail&aid=1956337&group_id=2435&atid=302435">patch</a>
+ * applied to MinGW is incompatible with msvcrt.dll library which is used by the Ultra 
+ * Defragmenter. We hope this mistake will be resolved in future by MinGW team.
+ *
+ * A primary use of GCC is conditioned by its stability. For 64-bit compilation
+ * we are using the Microsoft C compiler included in Windows Server 2003 DDK.
+ *
+ * When you build dynamic libraries from the MinGW Developer Studio, note that the resulting 
+ * *.a files are invalid. This is because I don't know how to specify linker options properly
+ * in Developer Studio's project files.
+ *
+ * You can also use the Microsoft Visual Studio 6.0 for the compilation, though
+ * this way is obsolete and much more complicated. Download UltraDefrag sources
+ * for some earlier version (approx. 3.3.0) to find detailed instructions there.
+ *
+ * <h2>Building and installation</h2>
+ * First of all, download sources archive and unpack it somewhere 
+ * (path must not contain spaces). Than configure the build options by typing
+ * the following command:
+ * @code lua configure.lua @endcode
+ * Enter the paths to development tools and other options here. If you prefer 
+ * to use MinGW, check also the Apply patch to MinGW box and click OK
+ * to replace libntdll.a and libntoskrnl.a libraries included in MinGW
+ * with more adequate versions. Replaced files will be saved with an additional
+ * suffix '.orig'.
+ *
+ * @image html config.lua.png
+ *
+ * The screenshot above represents only the actual options which gives us the best 
+ * compilation result. To configure all available options, including obsolete and
+ * experimental, type:
+ * @code lua configure.lua --all @endcode
+ *
+ * There are four different build commands:
+ * - <b>build</b> for a full-featured installers and sources package
+ * - <b>build-micro</b> for the Micro Edition installer
+ * - <b>build-portable</b> for the UltraDefrag Portable package
+ * - <b>build-micro-portable</b> for the Portable Micro Edition package
+ *
+ * To build UltraDefrag type:
+ * @code build @endcode
+ *
+ * To display list of available build options type:
+ * @code build --help @endcode
+ *
+ * If you have any questions regarding details of the build process, just look at 
+ * appropriate script contents. Sure you'll find an answer.
+ */

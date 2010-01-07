@@ -150,6 +150,11 @@ mkdir ..\src_package
 
 xcopy /I /Y /Q /S /EXCLUDE:exclude-from-sources.lst . %SRC_PKG_PATH%\src
 
+call build-docs.cmd
+if %errorlevel% neq 0 goto fail
+xcopy /I /Y /Q /S .\doxy-doc %SRC_PKG_PATH%\src\doxy-doc
+xcopy /I /Y /Q /S .\dll\zenwinx\doxy-doc %SRC_PKG_PATH%\src\dll\zenwinx\doxy-doc
+
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
 mkdir %SRC_PKG_PATH%\doc\html\handbook

@@ -1,0 +1,86 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Debug Kernel mode driver debugging
+ *
+ * <h2>Introduction</h2>
+ * There are two possible types of the kernel mode driver bugs:
+ * - Something goes wrong, but Windows is still working.
+ * - Windows dies showing a well known Blue Screen Of Death (BSOD).
+ *
+ * Before starting the debugging process ensure that your hardware 
+ * is working properly. Faulty RAM or overclocked CPU often causes 
+ * the blue screens. Try one of the many free programs available 
+ * for testing hardware (e.g. <a href="http://www.memtest86.org/">Memtest86+</a>).
+ *
+ * <h2>Algorithmic errors debugging</h2>
+ * Algorithmic errors usually expresses themselves in file moving
+ * failures and other lightweight mistakes during the defragmentation process.
+ * To understand exactly what happens run
+ * <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a>
+ * program or <a href="http://alter.org.ua/en/soft/win/dbgdump/">DbgPrint Logger</a>.
+ * The latest version of DbgView cannot be used on NT 4.0, check 
+ * <a href="http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/freeware/debugview.shtml">this page</a> 
+ * for an earlier version of it. Note that you cannot use both DbgView and DbgPrint Logger at the same time,
+ * otherwise debugging information may be partially losed.
+ *
+ * Don't forget to check the Capture Kernel item of the Capture menu
+ * in DbgView program. Check also Capture Win32 to collect information
+ * from another UltraDefrag modules. Check Log Boot item if you will
+ * debug the boot time defragmenter.
+ *
+ * There are also few other tools which may help to collect more
+ * debugging information:
+ * - <a href="http://www.osr.com">PoolTag</a> program included in Windows DDK
+ *   shows the amount of memory allocated by driver. The UltraDefrag driver's tag is 'ULTR'.
+ * - <a href="http://www.freewebs.com/four-f/index.htm">StatusToError</a> tool included 
+ *   in KmdKit translates the NTSTATUS codes to their readable explainations.
+ * - <a href="http://www.sysinternals.com">Sysinternals</a> tools, including 
+ *   <a href="http://technet.microsoft.com/en-us/sysinternals/bb896657.aspx">WinObj</a>,
+ *   <a href="http://technet.microsoft.com/en-us/sysinternals/bb896645.aspx">Process Monitor</a> and
+ *   <a href="http://technet.microsoft.com/en-us/sysinternals/bb896653.aspx">Process Explorer</a>.
+ *   These tools are very useful for debugging purposes.
+ *
+ * <h2>Fatal errors debugging</h2>
+ * Fatal driver errors usually crashes your system. When Windows decides that something 
+ * may damage your system, it stops any running processes and shows you the blue screen with 
+ * a brief description of the encountered problem. It is a very good practice to have always 
+ * a small piece of paper and a pencil near your machine. When you are encountering BSOD, 
+ * write on paper numbers shown on your screen. Or just remember them ;)
+ *
+ * @image html bsod.png
+ *
+ * The blue screen may never appear if you have the following registry value set to 0x1:
+ * HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\CrashControl\\AutoReboot
+ * Set this parameter to 0x0 to disable an automatic reboot.
+ * 
+ * Also it is a very good idea to enable a crash memory dumps, at least small. You can
+ * do it under the MyComputer > Properties > Advanced > Startup and Recovery Settings
+ * control. Crash memory dumps are very useful for drivers debugging.
+ *
+ * Finally, there is one another interesting tool which helps to understand better
+ * which part of the driver fails. Press WindowsKey+R to open the run box, type 
+ * verifier.exe and click OK button. Select standard settings to be applied to 
+ * ultradfg.sys driver. After a reboot try to reporoduce an error. After a crash
+ * the memory dump will contain more detailed information about a failure.
+ */
+
+ /* How to use the DbgPrint Logger: */ 
+ /* DbgPrintLog.exe --full -T DTN -wd c:\ --drv:inst 1 --svc:inst A --drv:opt DoNotPassMessagesDown 1 udefrag.log */
