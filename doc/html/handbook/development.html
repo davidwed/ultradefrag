@@ -91,6 +91,18 @@
 		</font></td>
 		</tr>
 		
+		<tr><td>6. <a href="http://www.doxygen.org/">Doxygen</a></td>
+		<td> <font size="-1">
+		[<a href="http://ultradefrag.sourceforge.net/devtools/doxygen-1.6.2.7z">download</a>] 
+		</font></td>
+		</tr>
+		
+		<tr><td>7. <a href="http://www.etree.org/md5com.html">md5sum tool</a></td>
+		<td> <font size="-1">
+		[<a href="http://ultradefrag.sourceforge.net/devtools/md5sum-1.22.zip">download</a>] 
+		</font></td>
+		</tr>
+		
 		</tbody></table>
 		
 		<p>In case when the installer is provided for an appropriate tool, just install it. Otherwise 
@@ -184,76 +196,6 @@ __stdcall NtCurrentTeb(void);
 		
 		</font></div>
 
-		<font size="-1"><table border="0"><tbody><tr><td width="18pt" align="left" valign="center">
-		<a href="javascript:show_section('optional_tools','img2')"><img id="img2" border="0" src="closed.gif" /></a></td>
-		<td>There are also few optional tools which aren't 
-		required for build purposes, but may be useful for debugging or better understanding program's internal structure.
-		</td></tr></tbody></table></font>
-
-		<div id="optional_tools" style="display: none; padding-left: 30pt">
-
-		<p>The following tools are optional though useful for debugging purposes:</p>
-		
-		<ul>
-		
-		<li><a href="http://www.etree.org/md5com.html">md5sum</a> tool is used to generate 
-		file ultradefrag-x.y.z.MD5SUMS that	gives us an ability to check downloaded packages 
-		integrity.</li>
-
-		<li><a href="http://www.doxygen.org">Doxygen</a> is used to produce a special kind of 
-		documentation from project's source files. It contains descriptions 
-		of functions and global variables dependencies and may be used e.g. for
-		removing unnecessary data fields from program's internal structures.
-		Also it is helpful for any other program code cleanup.
-		So, if you are a programmer, this tool is highly recommended for you.</li>
-
-		<li><a href="http://www.xs4all.nl/~rfsber/Robo/robodoc.html">ROBODoc</a> is used to 
-		build interface documentation, that you should use as main developer
-		manual. You will find there all descriptions of functions exported by 
-		UltraDefrag and ZenWINX (that is a part of the Ultra Defragmenter)
-		libraries, important notes about undocumented windows functions usage
-		and many other aspects of the Ultra Defragmenter development.
-		To build a basic version of docs, simply type:
-
-<pre class="screen"><strong class="userinput"><code>robodoc</code></strong></pre>
-
-		To produce more detailed developer manual, type:
-
-<pre class="screen"><strong class="userinput"><code>robodoc --internal</code></strong></pre>
-		</li>
-		
-		</ul>
-		
-		<p>There are also few optional tools that were used to develop previous versions 
-		of the program. Since v3.2.0 they aren't required anymore:</p>
-		
-		<ul><font size="-1">
-		
-		<li>.NET framework v2.0.50727 or later was used to compile the 
-		UltraDefrag Scheduler.NET application. <span style="color:darkred;">Since 3.2.0 version of 
-		the program this component is optional, because Scheduler itself has been rewritten in C 
-		language using Windows API. If you aren't C# developer, feel free to deinstall NET framework 
-		from your system.</span></li>
-
-		<li><a href="http://www.activestate.com">Perl</a> language package for Windows (v5.8.6). 
-		It was used to execute configure.pl script and to develop an experimental Modern User Interface.
-		<span style="color:darkred">Since 3.2.0 version of the program Perl package is an optional component. 
-		Build configurator was rewritten in Lua using IUP toolkit. Modern User Interface could be rewritten too, 
-		though we have no motivation for this.</span>
-		</li>
-
-		<li><a href="http://upx.sf.net">Ultimate Packer for eXecutables (upx)</a> (version 2.03w). 
-		<span style="color:darkred">Optional component, because compiled binaries are too small 
-		to be compressed effectively. Also UPX was used to compress an installer as described in NSIS manual, 
-		but <span class="code">SetCompressor /SOLID lzma</span> command seems to be much effective.</span></li>
-
-		</font></ul>
-		
-		<p>Read also carefully the <a href="reporting_bugs.html">Reporting bugs</a> chapter of this document 
-		to understand better specific debugging techniques and to learn more about tools required for it.</p>
-		
-		</div>
-
 		<h4>2. Building and installation</h4>
 
 		<p>First of all, download source archive and unpack it somewhere. Note that currently path must not 
@@ -276,9 +218,6 @@ __stdcall NtCurrentTeb(void);
 		
 <pre class="screen"><strong class="userinput"><code>lua configure.lua --all</code></strong></pre>
 
-		<p>Though <span class="code">configure.pl</span> script works fine too, it is obsolete. Lua 
-		language gives us better performance and requires much less disk space itself.</p>
-		
 		<p>There are four different build commands:</p>
 		
 		<ol type="disc">

@@ -69,49 +69,10 @@
 		The portable version of the program uses this driver, because it requires no system modifications like 
 		writing something to registry and copying files to system directories.</p>
 		
-		<font size="-1"><table border="0"><tbody><tr><td width="18pt" align="left" valign="center">
-		<a href="javascript:show_section('__vista','img0')"><img id="img0" border="0" src="closed.gif" /></a></td>
-		<td><a name="vista"></a>Special notes for Windows Vista users (also applies to any later versions of Windows).
-		</td></tr></tbody></table></font>
+		<p><a name="vista"></a>If you have strongly decided to use the kernel mode driver, check also 
+		<a href="http://ultradefrag.sourceforge.net/doxy-doc/driver/html/index.html">this</a> page for 
+		the Vista installation guide and the kernel mode driver debugging information.</p>
 		
-		<div id="__vista" style="display: none; padding-left: 30pt">
-		
-		<p style="color: darkred;">Read this section carefully if you have decided to use kernel mode 
-		driver of the program on 32-bit Vista or any later 32-bit version of Windows.</p>
-		
-		<p>The new versions of Windows are stupid enough: they have few important bugs that 
-		reduce your control over your software and even your hardware...</p>
-		<p>First of all, to install and use <span class="application">UltraDefrag</span> you must 
-		disable User Account Control (UAC). This "Windows feature" is one of the most known Vista bugs. 
-		Just disable them to fix the problem. You will have no security leaks and mistakes without UAC. 
-		Additionally you will be able to install and use many other Open Source programs!</p>
-		<p>Also you must execute both installer and <span class="application">UltraDefrag</span> GUI 
-		only in "Run as administrator" mode. Click right mouse button on the installer icon and choose 
-		the appropriate context menu item. Click right mouse button on the <span class="application">UltraDefrag</span> 
-		GUI shortcut on your desktop and select properties. Check  
-		<span class="guimenuitem">Run as administrator</span> item.</p>
-		<p>Finally, you must disable the "Driver signature verification" feature of Windows. This 
-		"feature" is one of the most important bugs of the latest Windows versions. Due to them you 
-		have no chance to try unsigned drivers, p.a. drivers for your old hardware components! And 
-		you cannot try the most powerful Open Source software using it's own drivers. There are at 
-		least three ways to resolve this problem:</p>
-		<ul type="disc">
-		<li>Press F8 button on Windows startup and choose <span class="guimenuitem">Disable driver 
-		signature verification</span> menu item. You should do these steps after each reboot to have 
-		an ability to load the <span class="application">UltraDefrag</span> driver. The next solution 
-		automates this job.</li>
-		<li>Install the <a href="http://www.citadelindustries.net/readydriverplus/index.php">ReadyDriver 
-		Plus</a> program. It will automate F8 key pressing on Windows startup and so on.</li>
-
-		<li>Use the <a href="http://www.ngohq.com/home.php?page=dseo">Driver Signature Enforcement 
-		Overrider</a> program to digitally sign our driver <span class="code">ultradfg.sys</span>.</li>
-		</ul>
-		
-		<p>Read <a href="http://ultradefrag.sourceforge.net/vista">UltraDefrag Installation Guide for Vista</a> 
-		for more details.</a></p>
-
-		</div>
-
 		<p>You can install UltraDefrag in silent mode by adding <span class="code">/S</span> key to the installer's command 
 		in command prompt. In this case no dialogs will be shown and the program will be installed 
 		to your hard drive completely with all the features enabled. There is also silent mode in 
