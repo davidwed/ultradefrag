@@ -278,6 +278,21 @@ h1, h2, h3, h4, h5, h6 {
   padding: 5px; 
 } 
 
+.fragment {
+	font-family: monospace, fixed;
+	font-size: 105%;
+}
+
+pre.fragment {
+	border: 1px solid #CCCCCC;
+	background-color: #f5f5f5;
+	padding: 4px 6px;
+	margin: 4px 8px 4px 2px;
+	overflow: auto;
+	word-wrap: break-word;
+	font-size:  9pt;
+	line-height: 125%;
+}
 
 /* This one is set in inches because the admonitions are set in inches
    and they're more difficult to change.  We can live with it in here, 

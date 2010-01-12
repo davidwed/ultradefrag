@@ -71,6 +71,7 @@
 				Command line switches</h2>
 			</div></div>
 		</div>
+
 		<p>Usage:<br /><br /> <span class="code">udefrag [command] [options] [volumeletter:]</span></p>
 
 		<table width="100%" border="0" cellspacing="0" cellpadding="0" bgcolor="#EEEED4"><tbody><tr><td>
@@ -363,7 +364,8 @@ C:\>_
 		Here is the complete example. To try them store the code into <span class="code">ud-example.cmd</span> 
 		file and click it's icon.
 		</p>
-<pre class="screen"><strong class="userinput"><code>@echo off
+<div class="fragment">
+<pre class="fragment">@echo off
 
 set UD_EX_FILTER=system volume information;temp;recycler;.zip;.7z;.rar
 set UD_SIZELIMIT=50Mb
@@ -374,7 +376,7 @@ udefrag d: >> c:\ud.log
 
 set UD_IN_FILTER=
 udefrag e: >> c:\ud.log
-</code></strong></pre>
+</pre></div>
 		<p>The command <span class="code">set UD_IN_FILTER=</span> destroys the specified variable. The 
 		appropriate option will have default value after this command.</p>
 		
@@ -385,7 +387,8 @@ udefrag e: >> c:\ud.log
 		<p>The following example demonstrates flexibility of filters which 
 		allow you to perform a very effective defragmentation:</p>
 		
-<pre class="screen"><strong class="userinput"><code>@echo off
+<div class="fragment">
+<pre class="fragment">@echo off
 
 rem defragment small files
 set UD_SIZELIMIT=50Mb
@@ -396,7 +399,7 @@ rem which have at least 5 fragments
 set UD_SIZELIMIT=
 set UD_FRAGMENTS_THRESHOLD=5
 udefrag c:
-</code></strong></pre>
+</pre></div>
 
 		<p>
 		Batch files are powerful enough, try to insert commands to play sounds after 

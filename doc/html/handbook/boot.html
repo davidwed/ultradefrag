@@ -174,11 +174,12 @@
 		<span class="code">exit</span> command in script to leave the program to be running after 
 		the last command execution.</p>
 		<p>In interactive mode program shows a prompt like this:</p>
-<pre width="80pt" class="screen"><strong class="userinput"><code>Interactive mode:
+<div class="fragment">
+<pre class="fragment">Interactive mode:
 Type 'help' for list of supported commands.
 
 #
-</code></strong></pre>
+</pre></div>
 		<p>Currently there are just few simple commands supported in this mode. Of course, in future 
 		this mistake will be reclaimed :) To show list of supported commands type 
 		<span class="code">help</span>. To continue the Windows	Boot Process 
@@ -194,9 +195,8 @@ Type 'help' for list of supported commands.
 		</div>
 		<p>The complete example, installed by default:
 		</p>
-<pre width="80pt" style="border: 1px solid black; color: black; 
-background-color: #ffffe1; font-size: 10pt;">
-;--------------------------------------------------------------------
+<div class="fragment">
+<pre class="fragment">;--------------------------------------------------------------------
 ;                UltraDefrag Boot Time Shell Script
 ;--------------------------------------------------------------------
 ; !!! NOTE: THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING !!!
@@ -208,8 +208,7 @@ set UD_EX_FILTER=temp
 udefrag c:
 
 exit
-
-</pre>
+</pre></div>
 		<p><b>Note:</b> If there is no <span class="code">exit</span> command 
 		specified, the program will run in <a href="boot.html#interactive">interactive mode</a> 
 		after the last script command execution.</p>
