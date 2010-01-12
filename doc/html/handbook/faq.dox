@@ -1,0 +1,62 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page FAQ Frequently Asked Questions
+ * <h3>Why configuration files editing is better than one settings window with tabs?</h3>
+ * It is much easier and reliable to use 
+ * standard Notepad application for
+ * configuration files editing.
+ *
+ * <h3>How can I disable the boot time defragmenter manually?</h3>
+ * If something goes wrong and the boot-off script does not work properly, remove the 
+ * defrag_native entry from the following system registry parameter manually:
+ *
+@verbatim
+HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
+@endverbatim
+ *
+ * <h3>How many differences are between the Ultra Defragmenter and well known JkDefrag application?</h3>
+ * The volume analysis algorithm was generally the same prior to 3.2.0 version of the program. 
+ * Since the 3.2.0 version UltraDefrag uses the Ultra Fast NTFS Analysis algorithm. It reads MFT
+ * directly and analyzes them to retrieve detailed information about all the files contained
+ * on the volume. This algorithm is much faster (approximately 25 times faster).
+ *
+ * Defragmentation is done in different ways. JkDefrag tries to optimize files placement
+ * using original algorithm that is complex enough. On the other hand, UltraDefragmenter
+ * was designed to be as fast as possible, therefore it simply tries to move all fragmented
+ * files to free space areas. Nothing more. The volume optimization command was added primarily 
+ * to enlarge the free space area in the terminal part of the volume for future defragmentation
+ * success.
+ *
+ * The best advantages of UltraDefrag are an ability to defragment system files at
+ * boot time and well readable reports. Also UltraDefrag has a handy graphical interface.
+ * And is licensed under GPL, and always will be an open source software.
+ *
+ * The main disadvantage of both applications (UltraDefrag and JkDefrag) is that they
+ * are based on MS defragmenting interface that has very ugly implementation. We cannot
+ * change them because it is a part of the filesystem drivers (ntfs.sys, fastfat.sys)
+ * that are too complex and not open source to modify or replace them.
+ *
+ * <h3>The progress bar updates irregularly. Why is this?</h3>
+ * The progress bar measures disk space, not the number of files. So when few 
+ * big files are analysed, the progress bar will increase very fast. 
+ * Conversely, when a thousands of small files are analysed, progress will 
+ * be relatively slow.
+ */

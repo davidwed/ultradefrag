@@ -1,0 +1,182 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Introduction Introduction
+ *
+ * UltraDefrag is the first open source disk defragmenter for
+ * Windows which supports defragmentation of system locked files
+ * by running during the Windows boot process. Actually all files
+ * including registry hives and pagefile can be defragmented
+ * at Windows boot time.
+ *
+ * UltraDefrag has the following features:
+ * - system files defragmentation (registry, pagefiles...)
+ * - ultra fast NTFS analysis
+ * - fast defragmentation algorithm
+ * - effective volume optimization algorithm
+ * - safety, it can never damage processed files
+ * - simplicity, it can be used without reading the documentation
+ * - ability to defragment single file/directory from the context menu in Explorer
+ * - ability to defragment additional streams attached to NTFS files
+ * - ability to exclude any unimportant fiiles based on flexible filters
+ * - ability to defragment files which have number of fragments above specified threshold
+ * - ability to automatically break defragmentation when the specified time interval elapses
+ * - ability to defragmet all drives by clicking a single button in UltraDefrag Next Generation GUI
+ * - well readable HTML reports
+ * - powerful command line interface
+ * - ability to automatically hibernate/shutdown PC after a job
+ * - small handy scheduler
+ * - multilingual graphical interface
+ * - little binaries (less than 500 kb)
+ * - portable version available which requires no installation
+ * - native 64-bit support
+ * - open source code licensed under GPL
+ *
+ * UltraDefrag runs on Windows NT 4.0, Windows 2000, Windows XP,
+ * Windows Server 2003, Windows Vista, Windows Server 2008
+ * and Vindows 7, including all 64 bit versions of Windows.
+ * NT 4.0 Alpha is not supported currently. ReactOS and Wine
+ * aren't supported yet because they have no defragmentation
+ * API implemented at this moment.
+ *
+ * <h1>Supported filesystems</h1>
+ * The following filesystems can be defragmented by UltraDefrag:
+ * FAT12/16/32, NTFS; UDF (on Vista and later systems).
+ *
+ * There are few system restrictions which applies to the disk
+ * defragmentation. Unfortunately UltraDefrag cannot walk away
+ * these restrictions:
+ * - Directories on FAT volumes cannot be moved. This is a well
+ *   known FAT driver mistake, it cannot be fixed.
+ * - $MFT, $Bitmap and other internal NTFS files cannot be
+ *   defragmented on Windows versions prior to Windows 7. Because
+ *   NTFS system driver prevents accessing them.
+ * - NTFS volumes with cluster size greater than 4 kilobytes
+ *   cannot be defragmented on Windows 2000.
+ * - UltraDefrag cannot defragment volumes containing more
+ *   than 4.294.967.295 clusters.
+ *
+ * Never try to run UltraDefrag on NTFS v1.2 formatted volumes
+ * under Windows NT 4.0, because this may crash your system.
+ * NTFS 1.2 had a beta status and an appropriate system driver
+ * was not reliable.
+ *
+ * <h1>Tips and tricks</h1>
+ * The use of disk defragmentation is not recommended on
+ * <a href="http://en.wikipedia.org/wiki/Flash_memory">flash memory</a>
+ * or <a href="http://en.wikipedia.org/wiki/Solid-state_drive">solid-state drives</a>
+ * (SSD), as it may reduce the lifespan of the drive. As flash memory does not rely
+ * on physical movement to read the drive, random file access is much faster
+ * than a mechanical hard drive, so defragmentation is not necessary.
+ *
+ * Floppy drives defragmentation is not recommended because it
+ * always reduces the lifespan of the floppies.
+ *
+ * It is recommended to exclude from defragmentation as much files
+ * as possible - this will dramatically decrease the defragmentation
+ * time. Temporary files and archives usually are rarely accessed and
+ * may be left fragmented without a noticeable system performance
+ * degradation.
+ *
+ * It is also highly recommended to disable the Windows paging file.
+ * It expands RAM, but works much slower therefore highly decreases
+ * the system performance. If more RAM is needed than physically
+ * installed, setting up additional RAM modules always gives the best
+ * result.
+ *
+ * <h1>Defragmentation algorithm</h1>
+ * UltraDefrag uses the following three algorithms:
+ * - During the volume analysis UltraDefrag scans the complete
+ * filesystem contained on the volume. To define exactly where
+ * free space is located and which files are fragmented.
+ * - During the defragmentation UltraDefrag fills free space areas
+ * in the beginning of the volume by moving parts of fragmented files
+ * thitherward. Thus files become unfragmented.
+ * - Volume optimization process is more complex. It consists of the
+ * following six steps:
+ * <ol>
+ * <li>During the initial analysis UltraDefrag collects detailed
+ * information about all files contained on the volume.</li>
+ * <li>On the first optimization step UltraDefrag tries to 
+ * make a single large free space area in the beginning of the
+ * volume by moving all files to the terminal part of the volume.</li>
+ * <li>The second analysis updates all information.</li>
+ * <li>On the next step UltraDefrag defragments all fragmented
+ * files as described above.</li>
+ * <li>On the second optimization phase UltraDefrag moves all
+ * remaining files from the terminal part of the volume to the
+ * beginning.</li>
+ * <li>The final analysis updates all information.</li>
+ * </ol>
+ * This sequence repeats until the end of the volume is reached.
+ * The starting point of the optimization moves forward before
+ * repeating the sequence to skip already optimized part of the
+ * volume.
+ *
+ * The multipass disk optimization algorithm is very effective,
+ * even on disks which have a low amount of free space.
+ *
+ * Another advantage of the described optimization algorithm
+ * over more complicated algorithms is taking relatively small
+ * amount of time.
+ *
+ * Unfortunately the volume optimization algorithm works only
+ * on NTFS volumes, because FAT directories are not moveable.
+ *
+ * On the other hand, NTFS volumes are often logically splitted
+ * to few parts by files which cannot be moved ($MFT and others).
+ * Therefore it may be sometimes impossible to become a very large
+ * continuous free space area for, let's imagine, pagefile
+ * defragmentation. For such cases there are two workarounds
+ * available:
+ * - Move all files to other disk, reformat the volume and move
+ * all back. This causes the perfect volume optimization.
+ * - Run <a href="http://gparted.sourceforge.net/">GParted</a> or
+ * <a href="http://en.wikipedia.org/wiki/PartitionMagic">Partition
+ * Magic</a> to manually reduce the volume size as much as possible.
+ * This operation will move all files including system to the
+ * beginning of the volume. After restoring an original size you
+ * will have a large continuous free space area in the terminal
+ * part of the volume. This space may be used hereafter to
+ * defragment large files.
+ *
+ * <h1>Web resources</h1>
+ * The Ultra Defragmenter's home page is at:
+ * http://ultradefrag.sourceforge.net
+ *
+ * Please be sure to visit this site for information,
+ * documentation, tutorials, news, etc. All UltraDefrag
+ * related things are available from there.
+ *
+ * For help requests visit our forum:
+ * http://ultradefrag.sourceforge.net/forum
+ *
+ * Please report all problems and bugs via our bug tracker:
+ * http://ultradefrag.sourceforge.net/bugs
+ *
+ * The most recent version of this handbook can be obtained
+ * from program's <a href="http://ultradefrag.svn.sourceforge.net/viewvc/ultradefrag/doc/html/handbook.tar.gz?view=tar">SVN repository</a>. 
+ * Download an archive, unpack it somewhere, run
+ * <a href="http://www.doxygen.org/">Doxygen</a> tool and
+ * copy all files from the /rsc subdirectory to
+ * /doxy-doc/html. After these steps open in your browser
+ * /doxy-doc/html/index.html to view the latest version of
+ * the documentation.
+ */

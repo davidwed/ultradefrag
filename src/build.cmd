@@ -79,6 +79,9 @@ rem call BLDSCHED.CMD
 
 :build_installer
 
+call build-docs.cmd
+if %errorlevel% neq 0 goto fail
+
 if "%1" equ "--portable" goto end
 if "%2" equ "--portable" goto end
 
@@ -89,7 +92,6 @@ copy /Y ..\installer\UltraDefrag.nsh .\
 copy /Y ..\installer\lang.ini .\
 copy /Y ..\installer\lang-classical.ini .\
 copy /Y ..\installer\driver.ini .\
-copy /Y ..\installer\LanguageSelectorSmall.bmp .\
 
 if "%1" equ "--use-mingw-x64" goto build_x64_installer
 
@@ -112,7 +114,6 @@ copy /Y ..\installer\UltraDefrag.nsh .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
 copy /Y ..\installer\lang-classical.ini .\amd64\
 copy /Y ..\installer\driver.ini .\amd64\
-copy /Y ..\installer\LanguageSelectorSmall.bmp .\amd64\
 
 cd amd64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
@@ -127,7 +128,6 @@ copy /Y ..\installer\UltraDefrag.nsh .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
 copy /Y ..\installer\lang-classical.ini .\ia64\
 copy /Y ..\installer\driver.ini .\ia64\
-copy /Y ..\installer\LanguageSelectorSmall.bmp .\ia64\
 cd ia64
 %NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
@@ -149,16 +149,13 @@ rmdir /s /q ..\src_package
 mkdir ..\src_package
 
 xcopy /I /Y /Q /S /EXCLUDE:exclude-from-sources.lst . %SRC_PKG_PATH%\src
-
-call build-docs.cmd
-if %errorlevel% neq 0 goto fail
 xcopy /I /Y /Q /S .\doxy-doc %SRC_PKG_PATH%\src\doxy-doc
 xcopy /I /Y /Q /S .\dll\zenwinx\doxy-doc %SRC_PKG_PATH%\src\dll\zenwinx\doxy-doc
 
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
 mkdir %SRC_PKG_PATH%\doc\html\handbook
-copy /Y ..\doc\html\handbook\*.* %SRC_PKG_PATH%\doc\html\handbook\
+copy /Y ..\doc\html\handbook\doxy-doc\html\*.* %SRC_PKG_PATH%\doc\html\handbook\
 
 cd ..\src_package
 REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .

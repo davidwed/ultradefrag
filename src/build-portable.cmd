@@ -25,7 +25,7 @@ copy /Y bin\udefrag-gui-config.exe %PORTABLE_DIR%\
 copy /Y bin\wgx.dll %PORTABLE_DIR%\
 
 mkdir %PORTABLE_DIR%\handbook
-copy /Y ..\doc\html\handbook\*.* %PORTABLE_DIR%\handbook\
+copy /Y ..\doc\html\handbook\doxy-doc\html\*.* %PORTABLE_DIR%\handbook\
 
 mkdir %PORTABLE_DIR%\scripts
 copy /Y scripts\udreportcnv.lua %PORTABLE_DIR%\scripts\
@@ -42,7 +42,6 @@ copy /Y udefrag-gui-config\i18n\*.lng %PORTABLE_DIR%\i18n\gui-config\
 
 copy /Y installer\LanguageSelector.nsi bin\
 copy /Y installer\lang.ini bin\
-copy /Y installer\LanguageSelectorSmall.bmp bin\
 copy /Y installer\LanguageSelector.ico bin\
 
 cd bin
@@ -85,7 +84,7 @@ copy /Y amd64\udefrag-gui-config.exe %PORTABLE_DIR%\
 copy /Y amd64\wgx.dll %PORTABLE_DIR%\
 
 mkdir %PORTABLE_DIR%\handbook
-copy /Y ..\..\doc\html\handbook\*.* %PORTABLE_DIR%\handbook\
+copy /Y ..\..\doc\html\handbook\doxy-doc\html\*.* %PORTABLE_DIR%\handbook\
 
 mkdir %PORTABLE_DIR%\scripts
 copy /Y ..\scripts\udreportcnv.lua %PORTABLE_DIR%\scripts\
@@ -138,7 +137,7 @@ copy /Y ia64\udefrag-gui-config.exe %PORTABLE_DIR%\
 copy /Y ia64\wgx.dll %PORTABLE_DIR%\
 
 mkdir %PORTABLE_DIR%\handbook
-copy /Y ..\..\doc\html\handbook\*.* %PORTABLE_DIR%\handbook\
+copy /Y ..\..\doc\html\handbook\doxy-doc\html\*.* %PORTABLE_DIR%\handbook\
 
 mkdir %PORTABLE_DIR%\scripts
 copy /Y ..\scripts\udreportcnv.lua %PORTABLE_DIR%\scripts\

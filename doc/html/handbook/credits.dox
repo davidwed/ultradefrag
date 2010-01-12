@@ -1,0 +1,112 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Credits Credits and License
+ *
+ * <b>Program and Documentation Copyright (c) 2007-2008</b>
+ * 
+ * - Dmitri Arkhangelski (dmitriar@users.sourceforge.net),\n
+ * - Justin Dearing (zippy1981@users.sourceforge.net).
+ *
+ * <b>Program and Documentation Copyright (c) 2009-2010</b>
+ * 
+ * - Dmitri Arkhangelski (dmitriar@users.sourceforge.net)
+ *
+ * <b>Web Design Copyright (c) 2009</b>
+ *
+ * - Sayem Chaklader (gearspec@viperprogrammers.net).
+ *
+ * <b>Translations Copyright (c) 2008, 2009</b>
+ *
+ * - Catala          - Illes Balears\n
+ * - Chinese         - muzuiget\n
+ * - Czech           - David Horak /Dave MacBlack/\n
+ * - Danish          - Patrick Paludan-Muller\n
+ * - Dutch           - Wim Kerstens\n
+ * - Farsi           - Ali Jafari\n
+ * - French          - Pascal Crozet\n
+ * - German          - Stefan Geuken\n
+ * - Greek           - Konstantinos Kapoukranidis\n
+ * - Hungarian       - Nagy Zsolt\n
+ * - Italian         - Paolo Loggia\n
+ * - Japanese        - ao3 at users.sourceforge.net\n
+ * - Korean          - Alex Han\n
+ * - Latvian         - Vladislav Stuzhnev\n
+ * - Polish          - Andrzej Rudnik\n
+ * - Portuguese      - Ricardo A. Garcia\n
+ * - Portuguese (BR) - Depeo da Masol\n
+ * - Russian         - Dmitri Arkhangelski\n
+ * - Slovak          - Milan Cerovsky /Milanbb55/\n
+ * - Slovenian       - Miha Mlakar\n
+ * - Spanish (AR)    - Daniel Testa\n
+ * - Swedish         - Magnus Rostedt\n
+ * - Thai            - Pat Taweewat\n
+ * - Turkish         - Huseyin Kozan\n
+ *
+ * Special thanks for strong testing to (in alphabetical order):
+ *
+ * - Andrei Maksimov
+ * - Jeff Cubillos
+ * - Kerem Gumrukcu
+ * - Leslie Trenholm
+ * - Markus Elfring
+ * - Nagy Zsolt
+ * - Stefan Pendl
+ *
+ * Special thanks for good suggestions to (in alphabetical order):
+ *
+ * - Alexander Vedyakin - Volume type detection improvements. More effective
+ * defragmenting algorithms.
+ * - Andrei Maksimov - GUI improvements.
+ * - Bryan Kirk - Better GUI appearance (new list of drives).
+ *   Autodefrag feature (not implemented yet).
+ * - Christopher Naegel - Driver loading on Vista problem's partial solution.
+ * - Dario Raparelli - NT 4.0 support.
+ * - Jan Loncik - x64 native support. Better filter presets.
+ * - Jim Laski - System fonts and visual styles for graphical interface.
+ * - Kerem Gumrukcu - Manifests for Vista User Account Control (UAC).
+ * - Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
+ * - Markus Elfring - Strong error handling.
+ * - Mike Braca - Reducing driver's memory usage (new cluster map internal representation).
+ * - Nagy Zsolt - Interesting ideas about translation. Installer improvements.
+ * - Parvez Reza - Various interesting programming tricks.
+ * - Stefan Pendl - Boot time defragmenter improvements.
+ *
+ * Also special thanks to:
+ * - <a href="http://www.gr-oborona.ru">Egor Letov</a>
+ * - <a href="http://www.sysinternals.com">Mark Russinovich</a>
+ * - <a href="http://www.soldatov.net">V. Soldatov</a>
+ * - <a href="http://free.pages.at/blumetools/">blume1975</a>
+ * - <a href="http://www.reactos.org">ReactOS Team</a>
+ * - <a href="http://nsis.sourceforge.net">NSIS developers</a>
+ * - <a href="http://upx.sf.net">Markus Oberhumer, Laszlo Molnar & John Reiser</a>
+ * - <a href="http://www.mingw.org">MinGW Team</a>
+ * - <a href="http://alter.org.ua/en/">Alexander A. Telyatnikov</a>
+ * - <a href="http://www.codeproject.com/Members/Mumtaz-Zaheer">Mumtaz Zaheer</a>
+ * - <a href="http://chibios.sourceforge.net/">Giovanni Di Sirio</a>
+ *
+ * Also many thanks to all the people who helped us improve UltraDefrag.
+ *
+ * This documentation is licensed under the terms of the 
+ * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/FDL.html">GNU Free Documentation License</a>.
+ *
+ * The program is licensed under the terms of the 
+ * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/GPL.html">GNU General Public License</a>.
+ */

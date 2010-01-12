@@ -1,0 +1,153 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Boot Boot Time Defragmentation
+ *
+ * UltraDefrag also includes a new mode that allows you to run it
+ * at boot time in a manner similar to chkdsk. This is known as a
+ * native application. It provides an ability to defragment any
+ * system files. Including page file, registry hives, hiberfil.sys
+ * file, another files locked by system or applications. Native
+ * UltraDefrag runs before any file locking, therefore it can
+ * process them as an ordinary files.
+ * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/Screenshots.html">View screenshots...</a>
+ *
+ * If the boot time defragmenter is enabled, it will run
+ * at every reboot. Note that you will have a chance
+ * to exit immediately, just press any key when the appropriate
+ * prompt will be shown. If no key will be pressed during this
+ * phase, the boot time script will be interpreted and executed.
+ *
+ * The only restriction on boot time scans is that you may not
+ * scan encrypted volumes. This is because lsass.exe, the component
+ * of the operating system that reads encrypted volumes, is loaded
+ * after the native executable runs.
+ *
+ * To enable the boot time defragmenter open UltraDefrag GUI
+ * Configurator and check the Enable box in the Boot time scan
+ * section. The boot time defragmenter can also be enabled by
+ * typing the boot-on in command prompt. To disable them the
+ * boot-off command may be used.
+ *
+ * Note that when boot time defragmenter is enabled the following
+ * modules becomes critical for the Windows boot process: udefrag.dll,
+ * udefrag-kernel.dll, zenwinx.dll. They are located in 
+ * \%windir\%\\system32 directory. If one of them is missing during the
+ * boot time defragmentation attempt, Windows may crash with BSOD.
+ * This is not a program's bug, this is one of the Windows internal
+ * mistakes. To disable the boot time interface on broken system use
+ * <a href="http://en.wikipedia.org/wiki/BartPE">BartPE</a> or other
+ * system recovery disk and delete \%windir\%\\system32\\defrag_native.exe
+ * file on your system.
+ *
+ * <h1>Boot time script</h1>
+ * The boot time script consists of the disk defragmentation commands,
+ * ancillary commands and comments (with a semicolon (;) or # characters
+ * in the beginning). Its location is \%windir\%\\system32\\ud-boot-time.cmd.
+ * To edit this file type in command prompt boot-config or simply click
+ * the Script button in UltraDefrag GUI Configurator.
+ *
+ * The following commands are accepted:
+ * <dl>
+ * <dt>\@echo on</dt>
+ * <dd>Show commands on the screen. This is the default behaviour.</dd>
+ * <dt>\@echo off</dt>
+ * <dd>Disable showing commands on the screen.</dd>
+ * <dt>set</dt>
+ * <dd>Set an environment variable. This is a native equivalent of the
+ * appropriate Windows command.</dd>
+ * <dt>udefrag</dt>
+ * <dd>This is a native equivalent of the UltraDefrag command line tool.</dd>
+ * <dt>pause</dt>
+ * <dd>Pause the script execution for the specified time interval (in milliseconds).
+ * For example, the command pause 1000 will pause execution for one second.</dd>
+ * <dt>shutdown</dt>
+ * <dd>Halt the computer.</dd>
+ * <dt>reboot</dt>
+ * <dd>Reboot the computer.</dd>
+ * <dt>exit</dt>
+ * <dd>Break the boot time program execution.</dd>
+ * <dt>boot-on</dt>
+ * <dd>Turn on the boot time defragmentation to be executed at every boot.
+ * Unfortunately, this command fails when shutdown or reboot commands are
+ * executed after it.</dd>
+ * <dt>boot-off</dt>
+ * <dd>Turn off the boot time defragmentation. It prevents them from being
+ * executed at next reboots. Until you will enable them manually through
+ * Configurator program or boot-on.cmd script. Unfortunately, this command
+ * fails when shutdown or reboot commands are executed after it.</dd>
+ * </dl>
+ *
+ * When UltraDefrag encounters the wrong syntax it shows the appropriate
+ * message on the screen and continues the script execution.
+ *
+ * <h1>Boot time script examples</h1>
+ * The following script is used by default:
+ * @code
+ * ;--------------------------------------------------------------------
+ * ;                UltraDefrag Boot Time Shell Script
+ * ;--------------------------------------------------------------------
+ * ; !!! NOTE: THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING !!!
+ * ;--------------------------------------------------------------------
+ *
+ * set UD_IN_FILTER=windows;winnt;ntuser;pagefile;hiberfil
+ * set UD_EX_FILTER=temp
+ *
+ * udefrag c:
+ *
+ * exit
+ * @endcode
+ *
+ * The boot time script simplifies also the use of the UltraDefrag on
+ * computers running Windows 98. After installing Windows XP as a second
+ * operating system the UltraDefrag may be installed too. After adding the
+ * shutdown command to the boot time script you may simply boot XP system
+ * (which requires much less resources at boot time!) and leave safely your
+ * computer. It will be shut down automatically after a job completion.
+ *
+ * <h1>Interactive mode</h1>
+ * When the exit command is missing in the boot time script UltraDefrag
+ * runs in interactive mode after the last script command execution. In
+ * this case UltraDefrag displays the following command prompt and waits
+ * for the user input:
+ * @verbatim
+ * Interactive mode:
+ * Type 'help' for list of supported commands.
+ *
+ * #
+ * @endverbatim
+ *
+ * Currently there are just few simple commands supported in this mode.
+ * To show a full list of the commands type help. To continue the
+ * Windows boot process type exit.
+ */
+
+ /*
+ * To defragment files normally locked by system
+ * (registry hives, paging file etc.) UltraDefrag
+ * runs during the Windows boot process in a manner
+ * similar to ChkDsk or Partition Magic. It runs
+ * before any file locking therefore 
+ * defragment system files like other ordinary files.
+ *
+ * When the boot time defragmenter is enabled, at
+ * every reboot it will execute commands from a
+ * special script file.
+ */

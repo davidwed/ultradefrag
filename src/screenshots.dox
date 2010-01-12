@@ -1,0 +1,39 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Screenshots Screenshots
+ *
+ * @image html vista_b2_theme_main_window-3.3.0.png "UltraDefrag GUI - the main window"
+ * \n
+ * @image html vista_b2_theme_config_window-3.3.0.png "UltraDefrag GUI Configurator"
+ * \n
+ * @image html vista_b2_theme_scheduler.png "UltraDefrag Scheduler"
+ * \n
+ * @anchor Screenshots_Boot
+ * @image html ud-boot-time.png "UltraDefrag runs during the Windows boot process"
+ * \n
+ * @anchor Screenshots_Console
+ * @image html console1.png "UltraDefrag command line tool performs a volume analysis"
+ * \n
+ * @image html console2.png "UltraDefrag command line tool displays a list of volumes"
+ * \n
+ * @image html console3.png "UltraDefrag command line tool displays a cluster map"
+ * \n
+ */

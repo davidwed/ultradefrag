@@ -1,0 +1,42 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Scheduler UltraDefrag Scheduler
+ * The command line version of UltraDefrag may be run out of
+ * <a href="http://en.wikipedia.org/wiki/Task_Scheduler">system scheduled tasks</a>.
+ * The process of adding a scheduled task instance of UltraDefrag is simplified
+ * throuth a utility called UltraDefrag Scheduler.
+ * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/Screenshots.html">View screenshots...</a>
+ *
+ * The simple gui has 4 settings:
+ * - Whether to run Ultra Defrag every day (Daily) or only certain days of the week (Weekly).
+ * - The time of day to run the task.
+ * - The letter of the drive to defragment.
+ * - Days of the week to defrag if Weekly is selected.
+ *
+ * Scheduler can be launched from the Start menu. Use Start > Programs > UltraDefrag > Scheduler
+ * shortcut. To browse list of all scheduled tasks use the following menu:
+ * Start > Settings > Control Panel > Scheduled Tasks.
+ *
+ * UltraDefrag Scheduler requires comctl32.dll module version 4.70 or higher to run, therefore
+ * you will be able to execute it on Windows 2000 and later systems.
+ *
+ * Currently Scheduler is not included in the portable version of the program.
+ */

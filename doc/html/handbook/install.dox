@@ -1,0 +1,69 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page Installation Installation
+ *
+ * To obtain the latest version of the program visit please the 
+ * <a href="http://sourceforge.net/projects/ultradefrag/files/">project's download page</a>.
+ *
+ * There are two different types of binaries available for download:
+ * - Full-featured installers. They contain all of the program features,
+ * but requires an installation therefore cannot be used directly from the USB sticks.
+ * - Portable packages. Download it, unpack it somewhere and use without an installation. 
+ * Write it on your USB stick and you will be able to use UltraDefrag everywhere by simply
+ * running it from there. Note that boot time defragmenter is missing in the portable 
+ * packages, but the most remaining features are working fine there. To configure the portable
+ * package run the LanguageSelector.exe tool and select your preferred language.
+ * <a href="http://en.wikipedia.org/wiki/Portable_application">Here</a> is more information
+ * about portable applications.
+ *
+ * <span style="color: darkred">
+ * You must have a 64-bit version of Windows to run the
+ * 64-bit versions of the program. IA-64 version was never tested by the authors. 
+ * It requires Intel Itanium processor and an appropriate 64-bit edition of Windows.
+ * </span>
+ *
+ * <span style="color: darkred">
+ * You must be an administrator to install and run UltraDefrag
+ * </span>
+ *
+ * <span style="color: darkred">
+ * You must disable your virus detection software 
+ * before using UltraDefrag. Any virus scanner 
+ * running during the defragmentation extremely slows down this process.
+ * </span>
+ *
+ * It is highly recommended to check Prefer new user mode driver box 
+ * during an installation. Though old kernel mode driver is a little bit faster, the new driver is 
+ * much more reliable and also may be used on any latest version of Windows without any additional hacking. 
+ * The portable version of the program uses this driver, because it requires no system modifications like 
+ * writing something to registry and copying files to system directories. If you have strongly decided to
+ * use the kernel mode driver, check also <a href="http://ultradefrag.sourceforge.net/doxy-doc/driver/html/index.html">this</a>
+ * page for the Vista installation guide and the kernel mode driver debugging information.
+ *
+ * The UltraDefrag Micro Edition is a lightweight version of the program containing only the command line tool
+ * and the boot time defragmenter.
+ * 
+ * UltraDefrag can be installed in silent mode by adding /S key to the installer's command 
+ * in command prompt. In this case no dialogs will be shown and the program will be installed 
+ * to the hard drive completely with all the features enabled. There is also silent mode in the
+ * ununstaller program. Type in comand prompt %windir%\UltraDefrag\uninstall.exe /S
+ * to remove the program from the hard drive automatically without any graphical dialogs.
+ */

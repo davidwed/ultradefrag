@@ -1,0 +1,36 @@
+/*
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+/**
+ * @page ReportingBugs Reporting Bugs
+ *
+ * If you have encountered some bug please submit your report via the
+ * <a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">bug tracker</a>.
+ * The following additional information is always very appreciated:
+ *
+ * - screenshots (required for all GUI-related bugs)
+ * - debugging information collected by <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> program
+ *
+ * Don't forget to check the Capture Kernel and Capture Win32 items of the Capture menu in DbgView program.
+ * Check the Log Boot item if you will debug the boot time defragmenter.
+ *
+ * Note that DbgView cannot capture information from the user mode driver during the Windows boot process.
+ * This is a well known DbgView limitation. The latest version of DbgView cannot also be used on NT 4.0,
+ * check <a href="http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/freeware/debugview.shtml">this page</a> for an earlier version.
+ */

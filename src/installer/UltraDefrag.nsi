@@ -1,6 +1,6 @@
 /*
  *  ULTRADEFRAG - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by D. Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by D. Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -189,9 +189,6 @@ Function LangShow
 !endif
   SetOutPath $PLUGINSDIR
   File "lang.ini"
-!ifdef MODERN_UI
-  File "LanguageSelectorSmall.bmp"
-!endif
 
   ClearErrors
   ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
@@ -237,9 +234,9 @@ Function ShowBootSplash
     ${EnableX64FSRedirection}
     SetOutPath $PLUGINSDIR
     File "${ROOTDIR}\src\installer\UltraDefrag.bmp"
-    advsplash::show 2000 400 0 -1 "$PLUGINSDIR\UltraDefrag.bmp"
+    advsplash::show 2000 400 0 -1 "$PLUGINSDIR\UltraDefrag"
     pop $R0
-    Delete "$PLUGINSDIR\*.bmp"
+    Delete "$PLUGINSDIR\UltraDefrag.bmp"
     ${DisableX64FSRedirection}
     pop $R0
   ${EndUnless}
@@ -436,7 +433,7 @@ Section "Documentation" SecDocs
   DetailPrint "Install documentation..."
   ${DisableX64FSRedirection}
   SetOutPath "$INSTDIR\handbook"
-  File "${ROOTDIR}\doc\html\handbook\*.*"
+  File "${ROOTDIR}\doc\html\handbook\doxy-doc\html\*.*"
   ${EnableX64FSRedirection}
 
 SectionEnd
