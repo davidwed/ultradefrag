@@ -25,7 +25,6 @@
 #include "../include/version.h"
 #include "resource.h"
 
-//IDI_MAIN                ICON    DISCARDABLE     "res/icon1.ico"
 IDI_APP                 ICON    DISCARDABLE     "res/app.ico"
 IDI_DIR                 ICON    DISCARDABLE     "res/dir.ico"
 IDI_UNFRAGM             ICON    DISCARDABLE     "res/unfragm.ico"
@@ -36,8 +35,7 @@ IDI_MFT                 ICON    DISCARDABLE     "res/mft.ico"
 IDI_FIXED               ICON    DISCARDABLE     "res/fixed.ico"
 IDI_REMOVABLE           ICON    DISCARDABLE     "res/removable.ico"
 
-/* these images were highly improved by Sayem Chaklader */
-//IDB_SETTINGS_PICTURE    BITMAP  DISCARDABLE     "res/config.bmp"
+/* this image was highly improved by Sayem Chaklader */
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/t3.bmp"
 
 IDD_MAIN DIALOGEX 0, 0, 351, 220 //218 /*315, 218*/

@@ -1,6 +1,6 @@
 /*
  *  ULTRADEFRAG - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by D. Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by D. Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -131,9 +131,6 @@ Function LangShow
 !endif
   SetOutPath $PLUGINSDIR
   File "lang.ini"
-!ifdef MODERN_UI
-  File "LanguageSelectorSmall.bmp"
-!endif
 
   WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "Title" "UltraDefrag Language Selector v${ULTRADFGVER}"
   WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "NextButtonText" "OK"

@@ -40,12 +40,12 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
  *        available for defragmentation.
  * @param[in] vol_info pointer to variable receiving
  *                     the volume list array address.
- * @param[in] skip_removable the boolean value defining
+ * @param[in] skip_removable the boolean value defining,
  *                           must removable drives
  *                           be skipped or not.
  * @return Zero for success, negative value otherwise.
- * @note if(skip_removable == FALSE && you have a
- *       floppy drive without floppy disk)
+ * @note if skip_removable is equal to FALSE and you have a
+ *       floppy drive without a floppy disk
  *       then you will hear noise :))
  * @par Example:
  * @code
@@ -88,11 +88,11 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 /**
  * @brief Checks a volume for the defragmentation possibility.
  * @param[in] letter the volume letter.
- * @param[in] skip_removable the boolean value defining
+ * @param[in] skip_removable the boolean value defining,
  *                           must removable drives be skipped or not.
  * @return Zero for success, negative value otherwise.
- * @note if(skip_removable == FALSE && you want 
- *       to validate a floppy drive without floppy disk)
+ * @note if skip_removable is equal to FALSE and you want 
+ *       to validate a floppy drive without a floppy disk
  *       then you will hear noise :))
  */
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
@@ -118,7 +118,7 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 /**
  * @brief Retrieves a volume parameters.
  * @param[in] letter the volume letter.
- * @param[in] skip_removable the boolean value defining
+ * @param[in] skip_removable the boolean value defining,
  *                           must removable drives be treated
  *                           as invalid or not.
  * @param[out] is_removable pointer to the variable receiving
@@ -134,8 +134,8 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
  * @return Zero for success, negative value otherwise.
  * @note
  * - Internal use only.
- * - if(skip_removable == FALSE && you want 
- *   to validate a floppy drive without floppy disk)
+ * - if skip_removable is equal to FALSE and you want 
+ *   to validate a floppy drive without a floppy disk
  *   then you will hear noise :))
  */
 int internal_validate_volume(unsigned char letter,int skip_removable,
