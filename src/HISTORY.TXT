@@ -1,8 +1,6 @@
 HISTORY
 
-[Version x.y.z (x86 w2k driver size in Kbytes)   release date]
-
-  Version 3.3.1 (43.0)   2010-01-
+  Version 3.3.1  2010-01-
   ------------------------------------------------------------------------------
     - few extremely important bugs were fixed
     - program is available again for all 64-bit targets
@@ -26,7 +24,7 @@ HISTORY
     of the beta stage of program's development.
 
 
-  Version 3.3.0 (66.0)   2009-12-04
+  Version 3.3.0  2009-12-04
   ------------------------------------------------------------------------------
     - volume optimization algorithm was highly improved
     - fragments threshold filter parameter was added
@@ -50,7 +48,7 @@ HISTORY
       once again
 
 
-  Version 3.2.1 (41.0)   2009-10-06
+  Version 3.2.1  2009-10-06
   ------------------------------------------------------------------------------
     - shutdown after a job feature was added to GUI
     - hibernate after a job feature was added to GUI
@@ -60,7 +58,7 @@ HISTORY
     - few bugs were fixed
 
 
-  Version 3.2.0 (41.0)   2009-09-29
+  Version 3.2.0  2009-09-29
   ------------------------------------------------------------------------------
     - Ultra Fast NTFS scanning feature was added, NTFS analysis becomes 
       approximately 25 times faster now
@@ -86,7 +84,7 @@ HISTORY
       configure.pl script and click 'Apply patch to MinGW' button once again
 
 
-  Version 3.1.0 (33.0)   2009-05-13
+  Version 3.1.0  2009-05-13
   ------------------------------------------------------------------------------
     - this is the most stable release at this moment
     - graphical interface was completely rewritten
@@ -98,7 +96,7 @@ HISTORY
     - very important driver bugs were fixed
 
 
-  Version 3.0.0 (29.5)   2009-03-15
+  Version 3.0.0  2009-03-15
   ------------------------------------------------------------------------------
     - defragmentation algorithm was completely rewritten to be more effective
     - free space optimization algorithm was completely rewritten 
@@ -107,12 +105,12 @@ HISTORY
 
                                     ***
 
-  Version 2.1.2 (30.0)   2009-02-18
+  Version 2.1.2  2009-02-18
   ------------------------------------------------------------------------------
     - few important bugs were fixed
 
 
-  Version 2.1.1 (30.0)   2009-02-16
+  Version 2.1.1  2009-02-16
   ------------------------------------------------------------------------------
     - Japanese translation was made
     - column widths in GUI are now adjustable
@@ -120,7 +118,7 @@ HISTORY
     - most known bugs were fixed
 
 
-  Version 2.1.0 (30.0)   2009-02-09
+  Version 2.1.0  2009-02-09
   ------------------------------------------------------------------------------
     - debug logging feature was added
     - website was completely redesigned
@@ -139,7 +137,7 @@ HISTORY
     - winx_fopen: a, a+ modes were added
 
 
-  Version 2.0.0 (24.0)   2008-11-13
+  Version 2.0.0  2008-11-13
   ------------------------------------------------------------------------------
     - scripting support for boot time interface was added
     - program options were moved to environment variables
@@ -160,7 +158,7 @@ HISTORY
 
                                     ***
 
-  Version 1.4.0 (22.5)   2008-10-02
+  Version 1.4.0  2008-10-02
   ------------------------------------------------------------------------------
     - i18n support was added
     - gui program was translated into Hungarian and Russian languages
@@ -171,28 +169,28 @@ HISTORY
     - many significant bugs were fixed (possible buffer overflows)
 
 
-  Version 1.3.4 (22.5)   2008-03-09
+  Version 1.3.4  2008-03-09
   ------------------------------------------------------------------------------
     - new installation location: %windir%\UltraDefrag
     - driver code was simplified
     - most stable release at this moment
 
-  Version 1.3.3 (22.5)   2008-03-07
+  Version 1.3.3  2008-03-07
   ------------------------------------------------------------------------------
     - one important driver bug was fixed
     - few x64 installation bugs were fixed
 
-  Version 1.3.2 (22.5)   2008-03-03
+  Version 1.3.2  2008-03-03
   ------------------------------------------------------------------------------
     - few important bugs were fixed
 
-  Version 1.3.1 (22.5)   2008-03-02
+  Version 1.3.1  2008-03-02
   ------------------------------------------------------------------------------
     - SCSI and RAID volumes support was added
     - some significant bugs were fixed
     - new installation location: %windir%\system32\UltraDefrag
 
-  Version 1.3.0 (22.5)   2008-02-06
+  Version 1.3.0  2008-02-06
   ------------------------------------------------------------------------------
     - driver code was completely rewritten (to improve reliability)
     - highly configurable reports feature was added
@@ -206,7 +204,7 @@ HISTORY
     - coding style was changed to improve readability
 
 
-  Version 1.2.4 (23.0)   2007-12-22
+  Version 1.2.4  2007-12-22
   ------------------------------------------------------------------------------
     - big modern volumes support was added (by reducing memory requirements)
     - context menu handler for volumes in Explorer was added
@@ -217,14 +215,14 @@ HISTORY
     - configure.pl script was created
 
 
-  Version 1.2.3 (22.0)   2007-12-04
+  Version 1.2.3  2007-12-04
   ------------------------------------------------------------------------------
     - two gui bugs (#1833605 and #1839755) were fixed
     - localized error descriptions were added
     - small driver optimization was performed
 
 
-  Version 1.2.2 (22.5)   2007-11-16
+  Version 1.2.2  2007-11-16
   ------------------------------------------------------------------------------
     - all modules were internally completely redesigned
     - full NTFS junctions (reparse points) support!
@@ -237,12 +235,12 @@ HISTORY
     - console program was improved with new useful options
 
 
-  Version 1.2.1 (22.5)   2007-10-08
+  Version 1.2.1  2007-10-08
   ------------------------------------------------------------------------------
     - bug #1807912 was fixed (Boot time defrag BSOD on w2k)
 
 
-  Version 1.2.0 (22.5)   2007-10-04
+  Version 1.2.0  2007-10-04
   ------------------------------------------------------------------------------
     - full NT 4.0 support
     - boot time defragmentation for 64-bit systems
@@ -256,7 +254,7 @@ HISTORY
 
 
 
-  Version 1.1.0 (22.5)   2007-09-05
+  Version 1.1.0  2007-09-05
   ------------------------------------------------------------------------------
     - BOOT TIME DEFRAGMENTATION WAS ADDED
     - filter presets were added
@@ -267,7 +265,7 @@ HISTORY
 
 
 
-  Version 1.0.5 (21.0)   2007-08-03
+  Version 1.0.5  2007-08-03
   ------------------------------------------------------------------------------
     - 120 DPI bug was fixed
     - small console bug was fixed
@@ -275,32 +273,32 @@ HISTORY
     - most stable 1.0.x release
 
 
-  Version 1.0.4 (21.0)   2007-07-27
+  Version 1.0.4  2007-07-27
   ------------------------------------------------------------------------------
     - fatal buffer overflow bug was fixed
     - small gui bug was fixed
 
 
-  Version 1.0.3 (21.5)   2007-07-22
+  Version 1.0.3  2007-07-22
   ------------------------------------------------------------------------------
     - progress bar in gui
     - more settings
     - few small bugs were fixed
 
 
-  Version 1.0.2 (20.5)   2007-07-17
+  Version 1.0.2  2007-07-17
   ------------------------------------------------------------------------------
     - FULL x64 SUPPORT
     - significant bugs were fixed
     - Windows DDK support for compilation [partially]
 
 
-  Version 1.0.1 (22.8)   2007-07-11
+  Version 1.0.1  2007-07-11
   ------------------------------------------------------------------------------
     - 'stop' function and some other significant bugs were fixed
 
 
-  Version 1.0.0 (22.7)   2007-07-05
+  Version 1.0.0  2007-07-05
   ------------------------------------------------------------------------------
     - initial public release
     - basic documentation was added
@@ -314,42 +312,42 @@ HISTORY
     Releases listed below were never published.
 
 
-  Version 0.6.0 (21.1)   2007-06-07
+  Version 0.6.0  2007-06-07
   ------------------------------------------------------------------------------
     - include & exclude filters were added
     - UTF-16/ASCII report format option
 
 
-  Version 0.5.0 (19.0)   2007-06-05
+  Version 0.5.0  2007-06-05
   ------------------------------------------------------------------------------
     - fragmented files list generation (in HTML) was added
     - cluster map in progress displaying
     - significant bugs were fixed
 
 
-  Version 0.4.3 (16.3)   2007-06-02
+  Version 0.4.3  2007-06-02
   ------------------------------------------------------------------------------
     - optimization and bug fixes
 
 
-  Version 0.4.2 (16.5)   2007-05-19
+  Version 0.4.2  2007-05-19
   ------------------------------------------------------------------------------
     - very significant optimization
     - source code cleanup
 
 
-  Version 0.4.1 (17.9)   2007-05-18
+  Version 0.4.1  2007-05-18
   ------------------------------------------------------------------------------
     - some optimization and small bug fixes
 
 
-  Version 0.4.0 (17.9)   2007-05-17
+  Version 0.4.0  2007-05-17
   ------------------------------------------------------------------------------
     - free space optimization command for NTFS-volumes
     - some fatal bugs were fixed
 
 
-  Version 0.3.0 (17.0)   2007-05-08
+  Version 0.3.0  2007-05-08
   ------------------------------------------------------------------------------
     - NT4.0 [in theory] & 5.0 [practically] support in defragmentation algorithm
     - full support for files compressed by NTFS
@@ -358,19 +356,19 @@ HISTORY
     - some bugs were fixed
 
 
-  Version 0.2.0 (12.6)   2007-04-26
+  Version 0.2.0  2007-04-26
   ------------------------------------------------------------------------------
     - exclude defragmentation of fat directories (because not possible)
     - new design of gui interface - better cluster map visualization
 
 
-  Version 0.1.0 (12.6)   2007-04-25
+  Version 0.1.0  2007-04-25
   ------------------------------------------------------------------------------
     - defragmentation of ntfs directories
     - some bugs were fixed
     - mft and directories displaying in cluster map
 
 
-  Version 0.0.1	(11.3)   2007-04-13
+  Version 0.0.1	 2007-04-13
   ------------------------------------------------------------------------------
     - first release for NT 5.1 & 5.2

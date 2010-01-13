@@ -46,7 +46,7 @@ For help requests visit our forum:
 Copyright
 ---------
 
-Copyright (c) 2007-2009 Ultra Defragmenter Development Team.
+Copyright (c) 2007-2010 Ultra Defragmenter Development Team.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
