@@ -27,7 +27,7 @@
  * - Full-featured installers. They contain all of the program features,
  * but requires an installation therefore cannot be used directly from the USB sticks.
  * - Portable packages. Download it, unpack it somewhere and use without an installation. 
- * Write it on your USB stick and you will be able to use UltraDefrag everywhere by simply
+ * Write it on USB stick and you will be able to use UltraDefrag everywhere by simply
  * running it from there. Note that boot time defragmenter is missing in the portable 
  * packages, but the most remaining features are working fine there. To configure the portable
  * package run the LanguageSelector.exe tool and select your preferred language.
@@ -64,6 +64,6 @@
  * UltraDefrag can be installed in silent mode by adding /S key to the installer's command 
  * in command prompt. In this case no dialogs will be shown and the program will be installed 
  * to the hard drive completely with all the features enabled. There is also silent mode in the
- * ununstaller program. Type in comand prompt %windir%\UltraDefrag\uninstall.exe /S
+ * ununstaller program. Type in comand prompt \%windir\%\\UltraDefrag\\uninstall.exe /S
  * to remove the program from the hard drive automatically without any graphical dialogs.
  */
