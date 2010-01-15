@@ -57,6 +57,14 @@
  * this way is obsolete and much more complicated. Download UltraDefrag sources
  * for some earlier version (approx. 3.3.0) to find detailed instructions there.
  *
+ * To achieve better compression we are using also <a href="http://upx.sf.net/">UPX</a> to
+ * compress an installer by adding the following line to nsisconf.nsh file:
+@verbatim
+!packhdr temp.dat '"C:\WINDOWS\upx" -9 -q temp.dat'
+@endverbatim
+ *
+ * This command is optional, but it really reduces the size of the installer.
+ *
  * <h2>Building and installation</h2>
  * First of all, download sources archive and unpack it somewhere 
  * (path must not contain spaces). Than configure the build options by typing

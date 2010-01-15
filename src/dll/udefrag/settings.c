@@ -38,28 +38,29 @@
 }
 
 /* global variables */
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 #define MAX_FILTER_SIZE 4096
 short in_filter[MAX_FILTER_SIZE + 1] = L"";
 short ex_filter[MAX_FILTER_SIZE + 1] = L"";
 ULONGLONG sizelimit = 0;
 ULONGLONG fraglimit = 0;
-int refresh_interval  = DEFAULT_REFRESH_INTERVAL;
+ULONG disable_reports = FALSE;
+ULONG dbgprint_level = DBG_NORMAL;
+extern WINX_FILE *f_ud;
+extern BOOL kernel_mode_driver;
+#endif
 
 /*
 * http://sourceforge.net/tracker/index.php?func=
 * detail&aid=2886353&group_id=199532&atid=969873
 */
 ULONGLONG time_limit = 0;
-
-ULONG disable_reports = FALSE;
-ULONG dbgprint_level = DBG_NORMAL;
+int refresh_interval  = DEFAULT_REFRESH_INTERVAL;
 
 short env_buffer[8192];
 #define ENV_BUF_SIZE (sizeof(env_buffer) / sizeof(short))
 
 extern HANDLE init_event;
-extern WINX_FILE *f_ud;
-extern BOOL kernel_mode_driver;
 
 /**
  * @brief Queries an environment variable.
@@ -72,6 +73,7 @@ BOOL query_env_variable(short *name)
 	return FALSE;
 }
 
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 /**
  * @brief Retrieves all settings from the environment.
  * @note Internal use only.
@@ -86,6 +88,7 @@ void __stdcall udefrag_load_settings(void)
 	time_limit = 0;
 	disable_reports = FALSE;
 	dbgprint_level = DBG_NORMAL;
+	refresh_interval  = DEFAULT_REFRESH_INTERVAL;
 
 	if(query_env_variable(L"UD_IN_FILTER"))	wcsncpy(in_filter,env_buffer,MAX_FILTER_SIZE);
 	if(query_env_variable(L"UD_EX_FILTER"))	wcsncpy(ex_filter,env_buffer,MAX_FILTER_SIZE);
@@ -161,5 +164,38 @@ int __stdcall udefrag_reload_settings(void)
 	if(!kernel_mode_driver) return 0;
 	return udefrag_apply_settings();
 }
+
+#else /* KERNEL_MODE_DRIVER_SUPPORT */
+
+void __stdcall udefrag_load_settings(void)
+{
+	char buf[256];
+	ULONGLONG i;
+	
+	/* reset all parameters */
+	refresh_interval  = DEFAULT_REFRESH_INTERVAL;
+	time_limit = 0;
+
+	if(query_env_variable(L"UD_TIME_LIMIT")){
+		_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
+		buf[sizeof(buf) - 1] = 0;
+		time_limit = winx_str2time(buf);
+	}
+	DebugPrint("Time limit = %I64u seconds\n",time_limit);
+
+	if(query_env_variable(L"UD_REFRESH_INTERVAL")) refresh_interval = _wtoi(env_buffer);
+	DebugPrint("Refresh interval = %u msec\n",refresh_interval);
+	
+	strcpy(buf,"");
+	winx_dfbsize(buf,&i); /* to force MinGW export udefrag_dfbsize */
+	(void)i;
+}
+
+int __stdcall udefrag_reload_settings(void)
+{
+	udefrag_load_settings();
+	return 0;
+}
+#endif /* KERNEL_MODE_DRIVER_SUPPORT */
 
 /** @} */

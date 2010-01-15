@@ -21,6 +21,8 @@
 * Universal code for both main and micro edition installers.
 */
 
+;!define INCLUDE_KERNEL_MODE_DRIVER
+
 Var AtLeastXP
 
 !macro CheckWinVersion
@@ -104,6 +106,7 @@ Var AtLeastXP
 
 !macroend
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
 ;-----------------------------------------
 
 Function WriteDriverAndDbgSettings
@@ -147,7 +150,69 @@ FunctionEnd
 !macroend
 
 ;-----------------------------------------
+!define WriteDriverAndDbgSettings "!insertmacro WriteDriverAndDbgSettingsMacro"
+!endif /* INCLUDE_KERNEL_MODE_DRIVER */
+
+!macro RemoveObsoleteFilesMacro
+
+  ; remove files of previous installations
+  DeleteRegKey HKLM "SYSTEM\UltraDefrag"
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
+  DeleteRegKey HKLM "SYSTEM\ControlSet001\Control\UltraDefrag"
+  DeleteRegKey HKLM "SYSTEM\ControlSet002\Control\UltraDefrag"
+  DeleteRegKey HKLM "SYSTEM\ControlSet003\Control\UltraDefrag"
+
+  RMDir /r "$SYSDIR\UltraDefrag"
+  Delete "$SYSDIR\udefrag-gui-dbg.cmd"
+  Delete "$SYSDIR\udefrag-gui.exe"
+  Delete "$SYSDIR\udefrag-gui.cmd"
+  Delete "$SYSDIR\ultradefrag.exe"
+  Delete "$SYSDIR\udefrag-gui-config.exe"
+  Delete "$SYSDIR\udefrag-scheduler.exe"
+  Delete "$SYSDIR\ud-config.cmd"
+
+  RMDir /r "$INSTDIR\doc"
+  RMDir /r "$INSTDIR\presets"
+  RMDir /r "$INSTDIR\logs"
+  RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
+
+  Delete "$INSTDIR\scripts\udctxhandler.lua"
+  Delete "$INSTDIR\dfrg.exe"
+  Delete "$INSTDIR\INSTALL.TXT"
+  Delete "$INSTDIR\FAQ.TXT"
+  Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
+  Delete "$INSTDIR\boot_on.cmd"
+  Delete "$INSTDIR\boot_off.cmd"
+  Delete "$INSTDIR\ud_i18n.dll"
+
+  ; remove shortcuts of any previous version of the program
+  SetShellVarContext all
+  RMDir /r "$SMPROGRAMS\DASoft"
+  Delete "$SMPROGRAMS\UltraDefrag\Documentation\FAQ.lnk"
+  Delete "$SMPROGRAMS\UltraDefrag\Documentation\User manual.url"
+  Delete "$SMPROGRAMS\UltraDefrag\UltraDefrag (Debug mode).lnk"
+  Delete "$SMPROGRAMS\UltraDefrag\Portable package.lnk"
+
+  RMDir /r "$SMPROGRAMS\UltraDefrag\Boot time options"
+  RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
+  RMDir /r "$SMPROGRAMS\UltraDefrag\Debugging information"
+  
+!ifndef INCLUDE_KERNEL_MODE_DRIVER
+  Delete "$SYSDIR\Drivers\ultradfg.sys"
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
+  DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
+  DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
+  DeleteRegKey HKLM "SYSTEM\ControlSet003\Services\ultradfg"
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
+!endif
+
+!macroend
+
+;-----------------------------------------
 
 !define CheckWinVersion "!insertmacro CheckWinVersion"
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
-!define WriteDriverAndDbgSettings "!insertmacro WriteDriverAndDbgSettingsMacro"
+!define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFilesMacro"

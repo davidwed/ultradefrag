@@ -24,9 +24,11 @@
  *
  * @image html udscheme.png
  *
- * At the bottom level we have two drivers. Kernel mode driver which is 
- * obsolete and user mode driver. Both modules does the same job, though 
- * we have no plans to add new algorithms to the old driver in future.
+ * At the bottom level we have two drivers. The old kernel mode driver
+ * is retired to reduce the codebase and therefore reduce the bugs.
+ * The new user mode driver has few advantages over it: more reliability
+ * (by definition), ability to load without any hacking on modern versions
+ * of Windows.
  *
  * Udefrag.dll library is a thin middle layer between drivers and user
  * interfaces. A little set of functions contained there highly simplifies

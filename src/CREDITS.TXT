@@ -79,6 +79,7 @@ Mike Braca         - Reducing driver's memory usage (new cluster map
 Nagy Zsolt         - Interesting ideas about translation.
                      Installer improvements.
 Parvez Reza        - Various interesting programming tricks.
+Stefan Pendl       - Boot time defragmenter improvements.
 
 --------------------------------------------------------------------------------
 Also special thanks to:

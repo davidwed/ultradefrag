@@ -42,12 +42,14 @@
 /* global variables */
 BOOL kernel_mode_driver = TRUE;
 long cluster_map_size = 0;
-char user_mode_buffer[65536]; /* for nt 4.0 */
 
-HANDLE init_event = NULL;
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
+char user_mode_buffer[65536]; /* for nt 4.0 */
 WINX_FILE *f_ud = NULL;
 WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
+#endif
 
+HANDLE init_event = NULL;
 char result_msg[4096]; /* buffer for the default formatted result message */
 
 extern int refresh_interval;
@@ -75,13 +77,16 @@ int __stdcall udefrag_init(long map_size)
 {
 	/* 1. Enable neccessary privileges */
 	/*(void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE); */
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 	(void)winx_enable_privilege(SE_LOAD_DRIVER_PRIVILEGE);
+#endif
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE); /* required by GUI client */
 	
 	/* 2. only a single instance of the program ! */
 	if(winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event) < 0)
 		return (-1);
 
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 #ifndef UDEFRAG_PORTABLE
 	/* 3. Load the driver */
 	if(winx_load_driver(L"ultradfg") < 0){
@@ -102,7 +107,14 @@ int __stdcall udefrag_init(long map_size)
 	(void)udefrag_reload_settings(); /* reload udefrag.dll specific options */
 	return 0;
 #endif
+#else
+	kernel_mode_driver = FALSE;
+	cluster_map_size = map_size;
+	(void)udefrag_reload_settings(); /* reload udefrag.dll specific options */
+	return 0;
+#endif /* KERNEL_MODE_DRIVER_SUPPORT */
 
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 	/* 4. Open our device */
 	f_ud = winx_fopen("\\Device\\UltraDefrag","w");
 	if(!f_ud) goto init_fail;
@@ -125,6 +137,7 @@ init_fail:
 	udefrag_unload();
 	DebugPrint("Cannot initialize the kernel mode driver!\n");
 	return (-1);
+#endif
 }
 
 /**
@@ -145,6 +158,7 @@ int __stdcall udefrag_unload(void)
 	if(!init_event) return 0;
 	winx_destroy_event(init_event); init_event = NULL;
 
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 	if(kernel_mode_driver){
 		/* close device handle */
 		if(f_ud) winx_fclose(f_ud);
@@ -154,6 +168,7 @@ int __stdcall udefrag_unload(void)
 		/* unload the driver */
 		winx_unload_driver(L"ultradfg");
 	}
+#endif
 	return 0;
 }
 
@@ -185,6 +200,7 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 		job_type = OPTIMIZE_JOB;
 	}
 
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 	if(kernel_mode_driver){
 		cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
 		if(winx_fwrite(cmd,strlen(cmd),1,f_ud)) return 0;
@@ -193,6 +209,11 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
 		if(udefrag_kernel_start(cmd,job_type,cluster_map_size) >= 0)
 			return 0;
 	}
+#else
+	cmd[0] = letter; cmd[1] = 0;
+	if(udefrag_kernel_start(cmd,job_type,cluster_map_size) >= 0)
+		return 0;
+#endif
 
 	DebugPrint("Cannot execute %s command for volume %c:!",
 		cmd_description,(char)toupper((int)letter));
@@ -290,11 +311,15 @@ int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sp
 int __stdcall udefrag_stop(void)
 {
 	DbgCheckInitEvent("udefrag_stop");
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 	if(kernel_mode_driver){
 		if(winx_fwrite("s",1,1,f_stop)) return 0;
 	} else {
 		if(udefrag_kernel_stop() >= 0) return 0;
 	}
+#else
+	if(udefrag_kernel_stop() >= 0) return 0;
+#endif
 	DebugPrint("Stop request failed!");
 	return (-1);
 }
@@ -313,6 +338,7 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	
 	DbgCheckInitEvent("udefrag_get_progress");
 
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 	if(kernel_mode_driver){
 		if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
 			DebugPrint("Statistical data unavailable!");
@@ -324,6 +350,12 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 			return (-1);
 		}
 	}
+#else
+	if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
+		DebugPrint("Statistical data unavailable!");
+		return (-1);
+	}
+#endif
 
 	if(percentage){ /* calculate percentage only if we have such request */
 		/* FIXME: do it more accurate */
@@ -346,13 +378,18 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 {
 	DbgCheckInitEvent("udefrag_get_map");
 	
+#ifdef  KERNEL_MODE_DRIVER_SUPPORT
 	if(kernel_mode_driver){
 		if(winx_fread(buffer,size,1,f_map)) return 0;
 	} else {
 		if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) >= 0)
 			return 0;
 	}
-				
+#else
+	if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) >= 0)
+		return 0;
+#endif
+
 	DebugPrint("Cluster map unavailable!");
 	return (-1);
 }

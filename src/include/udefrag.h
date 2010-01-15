@@ -24,6 +24,8 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
+//#define KERNEL_MODE_DRIVER_SUPPORT
+
 #include "ultradfg.h"
 
 #if defined(__POCC__)

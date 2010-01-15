@@ -7,6 +7,18 @@
 
 ;-------------------------------------------------------------------------------
 ; 
+; 14 January 2010
+;
+;-------------------------------------------------------------------------------
+
+http://en.wikipedia.org/wiki/Software_quality
+
+A lot of unneccessary stuff was removed from the program.
+The handbook was rewritten completely to be much clearer.
+The next desired point - a perfect error handling.
+
+;-------------------------------------------------------------------------------
+; 
 ; 15 December 2009
 ;
 ;-------------------------------------------------------------------------------

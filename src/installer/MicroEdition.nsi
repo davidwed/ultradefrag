@@ -69,15 +69,20 @@ VIAddVersionKey "FileDescription" "Ultra Defragmenter Micro Edition Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
 ReserveFile "driver.ini"
+!endif
 
 Page license
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
 Page custom DriverShow DriverLeave ""
+!endif
 Page instfiles
 
 UninstPage uninstConfirm
 UninstPage instfiles
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
 Var UserModeDriver
 
 ;-----------------------------------------
@@ -123,6 +128,8 @@ Function DriverLeave
 
 FunctionEnd
 
+!endif /* INCLUDE_KERNEL_MODE_DRIVER */
+
 ;-----------------------------------------
 
 Function .onInit
@@ -133,12 +140,15 @@ Function .onInit
   InitPluginsDir
 
   ${DisableX64FSRedirection}
+
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   StrCpy $UserModeDriver 1
   ClearErrors
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
   ${Unless} ${Errors}
     StrCpy $UserModeDriver $R1
   ${EndUnless}
+!endif
 
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   ${EnableX64FSRedirection}
@@ -166,12 +176,14 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\HISTORY.TXT"
   File "${ROOTDIR}\src\README.TXT"
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   ${If} $UserModeDriver == '1'
     Delete "$SYSDIR\Drivers\ultradfg.sys"
   ${Else}
     SetOutPath "$SYSDIR\Drivers"
     File /nonfatal "ultradfg.sys"
   ${EndIf}
+!endif
 
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
@@ -187,8 +199,10 @@ Section "Ultra Defrag core files (required)" SecCore
   File "zenwinx.dll"
   File /oname=hibernate4win.exe "hibernate.exe"
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   DetailPrint "Write driver settings..."
   ${WriteDriverAndDbgSettings}
+!endif
 
   DetailPrint "Write the uninstall keys..."
   SetOutPath "$INSTDIR"
@@ -199,13 +213,7 @@ Section "Ultra Defrag core files (required)" SecCore
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
 
-  ; remove files of previous 1.3.1-1.3.3 installation
-  RMDir /r "$SYSDIR\UltraDefrag"
-  RMDir /r "$INSTDIR\presets"
-  Delete "$INSTDIR\INSTALL.TXT"
-  Delete "$INSTDIR\FAQ.TXT"
-  DeleteRegKey HKLM "SYSTEM\UltraDefrag"
-  RMDir /r "$INSTDIR\logs"
+  ${RemoveObsoleteFiles}
   
   ; create boot time script if it doesn't exist
   SetOutPath "$SYSDIR"
@@ -240,22 +248,18 @@ Section "Uninstall"
   Delete "$INSTDIR\HISTORY.TXT"
   Delete "$INSTDIR\README.TXT"
 
-  ; delete two scripts from the 1.4.0 version
-  Delete "$INSTDIR\boot_on.cmd"
-  Delete "$INSTDIR\boot_off.cmd"
-  
   Delete "$INSTDIR\uninstall.exe"
   RMDir "$INSTDIR\options"
   RMDir $INSTDIR
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   Delete "$SYSDIR\Drivers\ultradfg.sys"
+!endif
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\boot-on.cmd"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
-
-  Delete "$SYSDIR\ud-config.cmd" ; obsolete
 
   Delete "$SYSDIR\ud-help.cmd"
   Delete "$SYSDIR\udctxhandler.cmd"
@@ -265,13 +269,22 @@ Section "Uninstall"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\hibernate4win.exe"
 
+  DetailPrint "Clear registry..."
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Services\ultradfg"
 
-  DetailPrint "Clear registry..."
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+  ; this is important for portable application
+  ; and from "anything related to the program should be cleaned up" point of view
+  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
+  DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
+!endif
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"

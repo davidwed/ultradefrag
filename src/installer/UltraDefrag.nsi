@@ -59,9 +59,11 @@
   Page custom LangShow LangLeave ""
 !macroend
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
 !macro DRIVER_PAGE
   Page custom DriverShow DriverLeave ""
 !macroend
+!endif
 
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'
@@ -91,7 +93,9 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 
 ReserveFile "lang.ini"
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
 ReserveFile "driver.ini"
+!endif
 
 !ifdef MODERN_UI
   !define MUI_COMPONENTSPAGE_SMALLDESC
@@ -101,7 +105,9 @@ ReserveFile "driver.ini"
   !insertmacro MUI_PAGE_COMPONENTS
 ;  !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro LANG_PAGE
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   !insertmacro DRIVER_PAGE
+!endif
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
@@ -117,7 +123,9 @@ ReserveFile "driver.ini"
   Page components
 ;  Page directory
   !insertmacro LANG_PAGE
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   !insertmacro DRIVER_PAGE
+!endif
   Page instfiles
 
   UninstPage uninstConfirm
@@ -128,9 +136,12 @@ ReserveFile "driver.ini"
 
 Var ShowBootsplash
 Var LanguagePack
-Var UserModeDriver
 
 ;-----------------------------------------
+
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
+
+Var UserModeDriver
 
 Function DriverShow
 
@@ -176,6 +187,8 @@ Function DriverLeave
   pop $R0
 
 FunctionEnd
+
+!endif /* INCLUDE_KERNEL_MODE_DRIVER */
 
 ;-----------------------------------------
 
@@ -301,7 +314,7 @@ Section "Ultra Defrag core files (required)" SecCore
   push $R0
 
   SectionIn RO
-  AddSize 24 /* for the components installed in system directories (driver) */
+  ;AddSize 24 /* for the components installed in system directories (driver) */
 
   DetailPrint "Install core files..."
   ${DisableX64FSRedirection}
@@ -321,12 +334,14 @@ Section "Ultra Defrag core files (required)" SecCore
   ; install LanguagePack
   call install_langpack
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   ${If} $UserModeDriver == '1'
     Delete "$SYSDIR\Drivers\ultradfg.sys"
   ${Else}
     SetOutPath "$SYSDIR\Drivers"
     File /nonfatal "ultradfg.sys"
   ${EndIf}
+!endif
 
   ; install GUI apps to program's directory
   SetOutPath "$INSTDIR"
@@ -382,8 +397,10 @@ Section "Ultra Defrag core files (required)" SecCore
     WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
   ${EndIf}
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   DetailPrint "Write driver settings..."
   ${WriteDriverAndDbgSettings}
+!endif
 
   DetailPrint "Write the uninstall keys..."
   SetOutPath "$INSTDIR"
@@ -394,24 +411,7 @@ Section "Ultra Defrag core files (required)" SecCore
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
   
-  ; remove files of previous installations
-  RMDir /r "$SYSDIR\UltraDefrag"
-  RMDir /r "$INSTDIR\doc"
-  RMDir /r "$INSTDIR\presets"
-  Delete "$INSTDIR\dfrg.exe"
-  Delete "$INSTDIR\INSTALL.TXT"
-  Delete "$INSTDIR\FAQ.TXT"
-  Delete "$INSTDIR\scripts\udctxhandler.lua"
-  Delete "$SYSDIR\udefrag-gui-dbg.cmd"
-  DeleteRegKey HKLM "SYSTEM\UltraDefrag"
-  Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
-  Delete "$SYSDIR\udefrag-gui.exe"
-  Delete "$SYSDIR\udefrag-gui.cmd"
-  Delete "$SYSDIR\ultradefrag.exe"
-  Delete "$SYSDIR\udefrag-gui-config.exe"
-  Delete "$SYSDIR\udefrag-scheduler.exe"
-  RMDir /r "$INSTDIR\logs"
-  RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
+  ${RemoveObsoleteFiles}
 
   ; create boot time script if it doesn't exists
   SetOutPath "$SYSDIR"
@@ -432,22 +432,14 @@ Section "Documentation" SecDocs
 
   DetailPrint "Install documentation..."
   ${DisableX64FSRedirection}
+  ; remove the old handbook
+  RMDir /r "$INSTDIR\handbook"
   SetOutPath "$INSTDIR\handbook"
   File "${ROOTDIR}\doc\html\handbook\doxy-doc\html\*.*"
   ${EnableX64FSRedirection}
 
 SectionEnd
 
-/*Section /o "Scheduler.NET" SecSchedNET
-
-  DetailPrint "Install Scheduler.NET..."
-  ${DisableX64FSRedirection}
-  SetOutPath $INSTDIR
-  File "UltraDefragScheduler.NET.exe"
-  ${EnableX64FSRedirection}
-
-SectionEnd
-*/
 Section "Scheduler" SecScheduler
 
   DetailPrint "Install Scheduler..."
@@ -474,17 +466,6 @@ Section "Shortcuts" SecShortcuts
   SetShellVarContext all
   SetOutPath $INSTDIR
 
-  ; remove shortcuts of any previous version of the program
-  RMDir /r "$SMPROGRAMS\DASoft"
-  Delete "$SMPROGRAMS\UltraDefrag\Documentation\FAQ.lnk"
-  Delete "$SMPROGRAMS\UltraDefrag\Documentation\User manual.url"
-  Delete "$SMPROGRAMS\UltraDefrag\UltraDefrag (Debug mode).lnk"
-  Delete "$SMPROGRAMS\UltraDefrag\Portable package.lnk"
-
-  RMDir /r "$SMPROGRAMS\UltraDefrag\Boot time options"
-  RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
-  RMDir /r "$SMPROGRAMS\UltraDefrag\Debugging information"
-
   StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
   CreateDirectory $R0
   CreateDirectory "$R0\Documentation"
@@ -500,11 +481,6 @@ Section "Shortcuts" SecShortcuts
   CreateShortCut "$R0\Documentation\README.lnk" \
    "$INSTDIR\README.TXT"
 
-/*  ${If} ${FileExists} "$INSTDIR\UltraDefragScheduler.NET.exe"
-    CreateShortCut "$R0\Scheduler.NET.lnk" \
-     "$INSTDIR\UltraDefragScheduler.NET.exe"
-  ${EndIf}
-*/
   Delete "$R0\Scheduler.NET.lnk"
   ${If} ${FileExists} "$INSTDIR\udefrag-scheduler.exe"
     CreateShortCut "$R0\Scheduler.lnk" \
@@ -549,12 +525,14 @@ Function .onInit
   /* variables initialization */
   StrCpy $ShowBootsplash 1
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   StrCpy $UserModeDriver 1
   ClearErrors
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
   ${Unless} ${Errors}
     StrCpy $UserModeDriver $R1
   ${EndUnless}
+!endif
 
   StrCpy $LanguagePack "English (US)"
   ClearErrors
@@ -567,7 +545,9 @@ Function .onInit
 
 !ifdef MODERN_UI
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "driver.ini"
+!endif
 !endif
   pop $R1
   ${EnableX64FSRedirection}
@@ -584,8 +564,6 @@ Section "Uninstall"
   DetailPrint "Remove shortcuts..."
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\UltraDefrag"
-  ; remove shortcuts of any previous version of the program
-  RMDir /r "$SMPROGRAMS\DASoft"
   Delete "$DESKTOP\UltraDefrag.lnk"
   Delete "$QUICKLAUNCH\UltraDefrag.lnk"
 
@@ -607,23 +585,18 @@ Section "Uninstall"
   Delete "$INSTDIR\udefrag-scheduler.exe"
   Delete "$INSTDIR\uninstall.exe"
 
-  ; delete files from previous installations
-  Delete "$INSTDIR\boot_on.cmd"
-  Delete "$INSTDIR\boot_off.cmd"
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
   Delete "$INSTDIR\ud_scheduler_i18n.lng"
-  Delete "$INSTDIR\ud_i18n.dll"
-  RMDir /r "$INSTDIR\presets"
-  Delete "$SYSDIR\ud-config.cmd"
 
   RMDir /r "$INSTDIR\scripts"
   RMDir /r "$INSTDIR\handbook"
-  RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
   RMDir "$INSTDIR\options"
   RMDir $INSTDIR
 
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   Delete "$SYSDIR\Drivers\ultradfg.sys"
+!endif
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\boot-on.cmd"
@@ -641,23 +614,22 @@ Section "Uninstall"
   Delete "$SYSDIR\zenwinx.dll"
   Delete "$SYSDIR\hibernate4win.exe"
 
+  DetailPrint "Clear registry..."
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+
+!ifdef INCLUDE_KERNEL_MODE_DRIVER
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Services\ultradfg"
 
-  DetailPrint "Clear registry..."
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
   ; this is important for portable application
   ; and from "anything related to the program should be cleaned up" point of view
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Control\UltraDefrag"
-  DeleteRegKey HKLM "SYSTEM\ControlSet001\Control\UltraDefrag"
-  DeleteRegKey HKLM "SYSTEM\ControlSet002\Control\UltraDefrag"
-  DeleteRegKey HKLM "SYSTEM\ControlSet003\Control\UltraDefrag"
+!endif
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"

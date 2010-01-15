@@ -35,6 +35,9 @@
  * prompt will be shown. If no key will be pressed during this
  * phase, the boot time script will be interpreted and executed.
  *
+ * You can always stop the volume analysis/defragmentation by pressing
+ * the Pause/Break key on the keyboard.
+ *
  * The only restriction on boot time scans is that you may not
  * scan encrypted volumes. This is because lsass.exe, the component
  * of the operating system that reads encrypted volumes, is loaded

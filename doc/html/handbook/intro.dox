@@ -38,7 +38,6 @@
  * - ability to exclude any unimportant fiiles based on flexible filters
  * - ability to defragment files which have number of fragments above specified threshold
  * - ability to automatically break defragmentation when the specified time interval elapses
- * - ability to defragmet all drives by clicking a single button in UltraDefrag Next Generation GUI
  * - well readable HTML reports
  * - powerful command line interface
  * - ability to automatically hibernate/shutdown PC after a job

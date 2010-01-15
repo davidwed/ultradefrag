@@ -45,5 +45,6 @@ doxygen
 if %errorlevel% neq 0 exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
 del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
+del /Q .\doxy-doc\html\*.dox
 
 exit /B 0

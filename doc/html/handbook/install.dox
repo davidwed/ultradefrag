@@ -34,6 +34,9 @@
  * <a href="http://en.wikipedia.org/wiki/Portable_application">Here</a> is more information
  * about portable applications.
  *
+ * The UltraDefrag Micro Edition is a lightweight version of the program containing only the command line tool
+ * and the boot time defragmenter.
+ * 
  * <span style="color: darkred">
  * You must have a 64-bit version of Windows to run the
  * 64-bit versions of the program. IA-64 version was never tested by the authors. 
@@ -50,17 +53,6 @@
  * running during the defragmentation extremely slows down this process.
  * </span>
  *
- * It is highly recommended to check Prefer new user mode driver box 
- * during an installation. Though old kernel mode driver is a little bit faster, the new driver is 
- * much more reliable and also may be used on any latest version of Windows without any additional hacking. 
- * The portable version of the program uses this driver, because it requires no system modifications like 
- * writing something to registry and copying files to system directories. If you have strongly decided to
- * use the kernel mode driver, check also <a href="http://ultradefrag.sourceforge.net/doxy-doc/driver/html/index.html">this</a>
- * page for the Vista installation guide and the kernel mode driver debugging information.
- *
- * The UltraDefrag Micro Edition is a lightweight version of the program containing only the command line tool
- * and the boot time defragmenter.
- * 
  * UltraDefrag can be installed in silent mode by adding /S key to the installer's command 
  * in command prompt. In this case no dialogs will be shown and the program will be installed 
  * to the hard drive completely with all the features enabled. There is also silent mode in the
