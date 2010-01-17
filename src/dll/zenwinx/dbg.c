@@ -45,9 +45,9 @@ int  __stdcall winx_debug_print(char *string);
  */
 void winx_init_synch_objects(void)
 {
-	winx_create_event(L"\\winx_dbgprint_synch_event",
+	(void)winx_create_event(L"\\winx_dbgprint_synch_event",
 		SynchronizationEvent,&hSynchEvent);
-	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
+	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
 }
 
 /**
@@ -85,6 +85,7 @@ void __cdecl winx_dbg_print(char *format, ...)
 	va_start(arg,format);
 	memset(buffer,0,DBG_BUFFER_SIZE);
 	length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
+	(void)length;
 	buffer[DBG_BUFFER_SIZE - 1] = 0;
 	va_end(arg);
 
@@ -147,7 +148,7 @@ int __stdcall winx_debug_print(char *string)
 		0,PAGE_READWRITE);
 	if(!NT_SUCCESS(Status)) goto failure;
 	
-	/* 2. Send message. */
+	/* 2. Send a message. */
 	/*
 	* wait a maximum of 10 seconds for the debug monitor 
 	* to finish processing the shared buffer
@@ -169,9 +170,9 @@ int __stdcall winx_debug_print(char *string)
 	dbuffer->ProcessId = (DWORD)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess);
 	#endif
 
-	strncpy(dbuffer->Msg,string,4096-sizeof(ULONG));
+	(void)strncpy(dbuffer->Msg,string,4096-sizeof(ULONG));
 	dbuffer->Msg[4096-sizeof(ULONG)-1] = 0;
-	/* ensure that buffer has new line character */
+	/* ensure that the buffer has new line character */
 	length = strlen(dbuffer->Msg);
 	if(dbuffer->Msg[length-1] != '\n'){
 		if(length == (4096-sizeof(ULONG)-1)){
@@ -183,23 +184,23 @@ int __stdcall winx_debug_print(char *string)
 	}
 
 	/* signal that the buffer contains meaningful data and can be read */
-	NtSetEvent(hEvtDataReady,NULL);
+	(void)NtSetEvent(hEvtDataReady,NULL);
 	
 	NtCloseSafe(hEvtBufferReady);
 	NtCloseSafe(hEvtDataReady);
 	if(BaseAddress)
-		NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
+		(void)NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
 	NtCloseSafe(hSection);
-	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
+	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
 	return 0;
 
 failure:
 	NtCloseSafe(hEvtBufferReady);
 	NtCloseSafe(hEvtDataReady);
 	if(BaseAddress)
-		NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
+		(void)NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
 	NtCloseSafe(hSection);
-	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
+	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
 	return (-1);
 }
 
@@ -307,6 +308,7 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
 	va_start(arg,format);
 	memset(buffer,0,ERR_MSG_LENGTH);
 	length = _vsnprintf(buffer,ERR_MSG_LENGTH - 1,format,arg);
+	(void)length;
 	buffer[ERR_MSG_LENGTH - 1] = 0;
 	DebugPrint("%s: 0x%x! %s.\n",buffer,(unsigned int)status,
 			winx_get_error_description(status));

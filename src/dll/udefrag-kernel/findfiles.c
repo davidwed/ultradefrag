@@ -28,7 +28,7 @@ BOOLEAN UnwantedStuffOnFatOrUdfDetected(PFILE_BOTH_DIR_INFORMATION pFileInfo,PFI
 BOOLEAN ConsoleUnwantedStuffDetected(WCHAR *Path,ULONG *InsideFlag);
 
 /* FindFiles() - recursive search of all files on specified path. */
-BOOLEAN FindFiles(WCHAR *ParentDirectoryPath)
+int FindFiles(WCHAR *ParentDirectoryPath)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	PFILE_BOTH_DIR_INFORMATION pFileInfoFirst = NULL, pFileInfo;
@@ -47,13 +47,13 @@ BOOLEAN FindFiles(WCHAR *ParentDirectoryPath)
 		FIND_DATA_SIZE + sizeof(PFILE_BOTH_DIR_INFORMATION));
 	if(!pFileInfoFirst){
 		DebugPrint("Cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n");
-		return FALSE;
+		return UDEFRAG_NO_MEM;
 	}
 	Path = (WCHAR *)winx_heap_alloc(PATH_BUFFER_LENGTH * sizeof(WCHAR));
 	if(Path == NULL){
 		DebugPrint("Cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n");
 		winx_heap_free(pFileInfoFirst);
-		return FALSE;
+		return UDEFRAG_NO_MEM;
 	}
 
 	/* open directory */
@@ -67,7 +67,7 @@ BOOLEAN FindFiles(WCHAR *ParentDirectoryPath)
 	if(Status != STATUS_SUCCESS){
 		DebugPrint1("Cannot open directory: %ws: %x\n",ParentDirectoryPath,(UINT)Status);
 		DirectoryHandle = NULL;	winx_heap_free(pFileInfoFirst); winx_heap_free(Path);
-		return FALSE;
+		return (-1);
 	}
 
 	/* Query information about files */
@@ -146,7 +146,7 @@ BOOLEAN FindFiles(WCHAR *ParentDirectoryPath)
 			DebugPrint("-Ultradfg- Compressed directory found %ws\n",Path);
 		*/
 
-		if(IS_DIR(pFileInfo)) FindFiles(Path);
+		if(IS_DIR(pFileInfo)) (void)FindFiles(Path);
 		else if(!pFileInfo->EndOfFile.QuadPart) continue; /* file is empty */
 		
 		/* skip parent directories in context menu handler */
@@ -157,14 +157,14 @@ BOOLEAN FindFiles(WCHAR *ParentDirectoryPath)
 			NtClose(DirectoryHandle);
 			winx_heap_free(pFileInfoFirst);
 			winx_heap_free(Path);
-			return FALSE;
+			return UDEFRAG_NO_MEM;
 		}
 	}
 
 	NtClose(DirectoryHandle);
 	winx_heap_free(pFileInfoFirst);
 	winx_heap_free(Path);
-    return TRUE;
+    return 0;
 }
 
 /* inserts the new FILENAME structure to filelist */
@@ -175,13 +175,13 @@ BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	ULONGLONG filesize;
 
 	/* Add a file only if we need to have its information cached. */
-	pfn = (PFILENAME)InsertItem((PLIST *)(void *)&filelist,NULL,sizeof(FILENAME));
+	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
 	if(pfn == NULL) return FALSE;
 	
 	/* Initialize pfn->name field. */
 	if(!RtlCreateUnicodeString(&pfn->name,path)){
 		DebugPrint2("No enough memory for pfn->name initialization!\n");
-		RemoveItem((PLIST *)(void *)&filelist,(LIST *)pfn);
+		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		return FALSE;
 	}
 
@@ -208,7 +208,7 @@ BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	if(!DumpFile(pfn)){
 		/* skip files with unknown state */
 		RtlFreeUnicodeString(&pfn->name);
-		RemoveItem((PLIST *)(void *)&filelist,(LIST *)pfn);
+		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		return TRUE;
 	}
 
@@ -243,7 +243,7 @@ BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	/* 7. Destroy useless data. */
 	DeleteBlockmap(pfn);
 	RtlFreeUnicodeString(&pfn->name);
-	RemoveItem((PLIST *)(void *)&filelist,(LIST *)pfn);
+	winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 	return TRUE;
 }
 
@@ -264,7 +264,7 @@ BOOLEAN InsertFragmentedFile(PFILENAME pfn)
 		}
 	}
 
-	pf = (PFRAGMENTED)InsertItem((PLIST *)(void *)&fragmfileslist,(PLIST)prev_pf,sizeof(FRAGMENTED));
+	pf = (PFRAGMENTED)winx_list_insert_item((list_entry **)(void *)&fragmfileslist,(list_entry *)prev_pf,sizeof(FRAGMENTED));
 	if(!pf){
 		DebugPrint2("Cannot allocate memory for InsertFragmentedFile()!\n");
 		return FALSE;
@@ -282,7 +282,7 @@ void UpdateFragmentedFilesList(void)
 	for(pf = fragmfileslist; pf != NULL;){
 		next_pf = pf->next_ptr;
 		if(!pf->pfn->is_fragm){
-			RemoveItem((PLIST *)(void *)&fragmfileslist,(PLIST)pf);
+			winx_list_remove_item((list_entry **)(void *)&fragmfileslist,(list_entry *)pf);
 			if(fragmfileslist == NULL) break;
 			if(fragmfileslist != head){
 				head = fragmfileslist;

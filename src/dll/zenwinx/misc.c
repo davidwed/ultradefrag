@@ -27,13 +27,6 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-#if defined(__POCC__)
-LONGLONG __cdecl __llmul(LONGLONG n, LONGLONG d)
-{
-	return _allmul(n,d);
-}
-#endif
-
 NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
 
 /**
@@ -53,7 +46,11 @@ void __stdcall winx_sleep(int msec)
 		/* Approximately 292000 years hence */
 		Interval.QuadPart = MAX_WAIT_INTERVAL;
 	}
-	NtDelayExecution(FALSE,&Interval);
+	/*
+	* The next call is undocumented, therefore
+	* we are not checking its result.
+	*/
+	(void)NtDelayExecution(FALSE,&Interval);
 }
 
 /**
@@ -94,8 +91,8 @@ int __stdcall winx_get_windows_directory(char *buffer, int length)
 	DbgCheck2(buffer,(length > 0),"winx_get_windows_directory",-1);
 	
 	if(winx_query_env_variable(L"SystemRoot",buf,MAX_PATH) < 0) return (-1);
-	_snprintf(buffer,length - 1,"\\??\\%ws",buf);
-	buffer[length - 1] = 0; /* important ? */
+	(void)_snprintf(buffer,length - 1,"\\??\\%ws",buf);
+	buffer[length - 1] = 0;
 	return 0;
 }
 
@@ -134,7 +131,7 @@ int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length)
 	uStr.MaximumLength = length * sizeof(short);
 	size = 0;
 	Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
-	NtClose(hLink);
+	(void)NtClose(hLink);
 	if(!NT_SUCCESS(Status)){
 		DebugPrintEx(Status,"Cannot query symbolic link %ls",name);
 		return (-1);
@@ -193,7 +190,7 @@ int __stdcall winx_load_driver(short *driver_name)
 
 	DbgCheck1(driver_name,"winx_load_driver",-1);
 
-	_snwprintf(driver_key,127,L"%ls%ls",
+	(void)_snwprintf(driver_key,127,L"%ls%ls",
 			L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\",driver_name);
 	driver_key[127] = 0;
 	RtlInitUnicodeString(&us,driver_key);
@@ -219,7 +216,7 @@ int __stdcall winx_unload_driver(short *driver_name)
 
 	DbgCheck1(driver_name,"winx_unload_driver",-1);
 
-	_snwprintf(driver_key,127,L"%ls%ls",
+	(void)_snwprintf(driver_key,127,L"%ls%ls",
 			L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\",driver_name);
 	driver_key[127] = 0;
 	RtlInitUnicodeString(&us,driver_key);

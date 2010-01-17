@@ -90,7 +90,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 		DebugPrintEx(status,"Cannot open %s",filename);
 		return NULL;
 	}
-	f = (WINX_FILE *)winx_virtual_alloc(sizeof(WINX_FILE));
+	f = (WINX_FILE *)winx_heap_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
 		DebugPrint("Cannot open %s! No enough memory!",filename);
@@ -235,7 +235,7 @@ void __stdcall winx_fclose(WINX_FILE *f)
 {
 	if(!f) return;
 	if(f->hFile) NtClose(f->hFile);
-	winx_virtual_free(f,sizeof(WINX_FILE));
+	winx_heap_free(f);
 }
 
 /**
@@ -309,7 +309,6 @@ int __stdcall winx_delete_file(const char *filename)
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
 	status = NtDeleteFile(&oa);
 	RtlFreeUnicodeString(&us);
-
 	if(!NT_SUCCESS(status)){
 		DebugPrintEx(status,"Cannot delete %s",filename);
 		return (-1);

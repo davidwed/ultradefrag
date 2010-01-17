@@ -91,7 +91,7 @@ void SetFilter(PFILTER pf,short *buffer)
 	
 	if(pf->buffer){
 		winx_heap_free((void *)pf->buffer);
-		DestroyList((PLIST *)pf->offsets);
+		winx_list_destroy((list_entry **)pf->offsets);
 	}
 	pf->buffer = NULL;
 	pf->offsets = NULL;
@@ -109,7 +109,7 @@ void SetFilter(PFILTER pf,short *buffer)
 	_wcslwr(buffer);
 
 	/* replace double quotes and semicolons with zeros */
-	poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));
+	poffset = (POFFSET)winx_list_insert_item((list_entry **)&pf->offsets,NULL,sizeof(OFFSET));
 	if(!poffset) return;
 	if(length > 1 && buffer[0] == 0x0022) poffset->offset = 1; /* skip leading double quote */
 	else poffset->offset = 0;
@@ -118,7 +118,7 @@ void SetFilter(PFILTER pf,short *buffer)
 		if(buffer[i] == 0x0022) { buffer[i] = 0; continue; } /* replace all double quotes with zeros */
 		if(buffer[i] == 0x003b){
 			buffer[i] = 0;
-			poffset = (POFFSET)InsertItem((PLIST *)&pf->offsets,NULL,sizeof(OFFSET));
+			poffset = (POFFSET)winx_list_insert_item((list_entry **)&pf->offsets,NULL,sizeof(OFFSET));
 			if(!poffset) break;
 			if(buffer[i + 1] == 0x0022) poffset->offset = i + 2; /* safe, because we always have null terminated buffer */
 			else poffset->offset = i + 1;
@@ -173,8 +173,8 @@ void DestroyFilter(void)
 		winx_heap_free(ex_filter.buffer);
 		ex_filter.buffer = NULL;
 	}
-	DestroyList((PLIST *)&in_filter.offsets);
-	DestroyList((PLIST *)&ex_filter.offsets);
+	winx_list_destroy((list_entry **)&in_filter.offsets);
+	winx_list_destroy((list_entry **)&ex_filter.offsets);
 }
 
 /*	1. wcsstr(L"AGTENTLEPSE.SDFGSDFSDFSRG",L"AGTENTLEPSE"); x 1 mln. times = 63 ms

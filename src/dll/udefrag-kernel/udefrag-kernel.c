@@ -17,14 +17,18 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver.
-*/
-
-/* FIXME: Better error handling! */
+/**
+ * @file udefrag-kernel.c
+ * @brief Library interface code.
+ * @addtogroup Interface
+ * @{
+ */
 
 #include "globals.h"
 
+/**
+ * @brief udefrag-kernel.dll entry point.
+ */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	if(dwReason == DLL_PROCESS_ATTACH)
@@ -34,16 +38,19 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	return 1;
 }
 
-/*
-* Start the job.
-*
-* Return value: -1 indicates error, zero otherwise.
-*/
+/**
+ * @brief Starts a disk defragmentation/analysis/optimization job.
+ * @param[in] volume_name the name of the volume.
+ * @param[in] job_type the type of the job.
+ * @param[in] cluster_map_size the size of the cluster map, in bytes.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size)
 {
 	char *action = "analyzing";
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
+	int error_code = 0;
 
 	/* 0a. check for synchronization objects */
 	if(CheckForSynchObjects() < 0){
@@ -58,8 +65,8 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 		return (-1);
 	}
 	
-	/* stop request will fail when completes before this point :-) */
-	NtClearEvent(hStopEvent);
+	/* FIXME: stop request will fail when completes before this point :-) */
+	(void)NtClearEvent(hStopEvent);
 	
 	/* 1. print header */
 	if(job_type == DEFRAG_JOB) action = "defragmenting";
@@ -69,6 +76,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	/* 2. allocate cluster map */
 	if(AllocateMap(cluster_map_size) < 0){
 		DebugPrint("Cannot allocate cluster map!");
+		error_code = UDEFRAG_NO_MEM;
 		goto failure;
 	}
 	
@@ -76,7 +84,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	InitializeOptions();
 	
 	/* 4. prepare for job */
-	_strupr(volume_name);
+	(void)_strupr(volume_name);
 	volume_letter = volume_name[0];
 	RemoveReportFromDisk(volume_name);
 	if(job_type == OPTIMIZE_JOB) optimize_flag = TRUE;
@@ -86,7 +94,8 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	Stat.pass_number = 0;
 	
 	/* 5. analyse volume */
-	if(Analyze(volume_name) < 0) goto failure;
+	error_code = Analyze(volume_name);
+	if(error_code < 0) goto failure;
 	
 	/* 6. defragment/optimize volume */
 	if(job_type == ANALYSE_JOB) goto success;
@@ -100,38 +109,38 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 		DebugPrint("Cannot defragment NTFS volumes with\n"
 						 "cluster size greater than 4 kb\n"
 						 "on Windows 2000 (read docs for details).");
+		error_code = UDEFRAG_W2K_4KB_CLUSTERS;
 		goto failure;
 	}
-	if(job_type == DEFRAG_JOB) Defragment(volume_name);
-	else Optimize(volume_name);
+	if(job_type == DEFRAG_JOB) (void)Defragment(volume_name);
+	else (void)Optimize(volume_name);
 
 success:		
 	/* 7. save report */
-	SaveReportToDisk(volume_name);
+	(void)SaveReportToDisk(volume_name);
 	
 	/* FreeMap(); - NEVER CALL IT HERE */
 	
 	DestroyLists();
 	CloseVolume();
 	Stat.pass_number = 0xffffffff;
-	NtSetEvent(hSynchEvent,NULL);
-	NtClearEvent(hStopEvent);
+	(void)NtSetEvent(hSynchEvent,NULL);
+	(void)NtClearEvent(hStopEvent);
 	return 0;
 	
 failure:
 	DestroyLists();
 	CloseVolume();
 	Stat.pass_number = 0xffffffff;
-	NtSetEvent(hSynchEvent,NULL);
-	NtClearEvent(hStopEvent);
-	return (-1);
+	(void)NtSetEvent(hSynchEvent,NULL);
+	(void)NtClearEvent(hStopEvent);
+	return error_code;
 }
 
-/*
-* Stop the job.
-*
-* Return value: -1 indicates error, zero otherwise.
-*/
+/**
+ * @brief Terminates the running disk defragmentation/analysis/optimization job.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_kernel_stop(void)
 {
 	DebugPrint("Stop\n");
@@ -139,19 +148,28 @@ int __stdcall udefrag_kernel_stop(void)
 		DebugPrint("Synchronization objects aren't available!");
 		return (-1);
 	}
-	NtSetEvent(hStopEvent,NULL);
+	(void)NtSetEvent(hStopEvent,NULL);
 	return 0;
 }
 
-/*
-* Retrieve statistics.
-*
-* Return value: -1 indicates error, zero otherwise.
-*/
+/**
+ * @brief Retrieves the disk defragmentation statistics.
+ * @param[out] stat pointer to a variable receiving
+ *                  statistical data.
+ * @param[out] map pointer to buffer receiving the
+ *                 cluster map.
+ * @param[in] map_size the size of the cluster map,
+ *                     in bytes.
+ * @return Zero for success, negative value otherwise.
+ */
 int __stdcall udefrag_kernel_get_statistic(STATISTIC *stat, char *map, int map_size)
 {
 	DebugPrint2("Get Statistic\n");
 	if(stat) memcpy(stat,&Stat,sizeof(STATISTIC));
-	if(map) GetMap(map,map_size);
+	if(map){
+		if(GetMap(map,map_size) < 0) return (-1);
+	}
 	return 0;
 }
+
+/** @} */

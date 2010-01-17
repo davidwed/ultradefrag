@@ -50,13 +50,12 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
  * @brief Opens all existing keyboards.
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
+ * @todo Test is 10 seconds delay really needed or not.
  */
-int __stdcall kb_open(short *kb_device_name)
+int __stdcall kb_open(void)
 {
 	int i;
 
-	(void)kb_device_name;
-	
 	/* initialize kb array */
 	memset((void *)kb,0,sizeof(kb));
 	number_of_keyboards = 0;
@@ -164,7 +163,8 @@ int __stdcall kb_open_internal(int device_number)
 	HANDLE hKbEvent = NULL;
 	int i;
 
-	_snwprintf(device_name,32,L"\\Device\\KeyboardClass%u",device_number);
+	(void)_snwprintf(device_name,32,L"\\Device\\KeyboardClass%u",device_number);
+	device_name[31] = 0;
 	RtlInitUnicodeString(&uStr,device_name);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
 	Status = NtCreateFile(&hKbDevice,
@@ -191,7 +191,8 @@ int __stdcall kb_open_internal(int device_number)
 	}
 	
 	/* create a special event object for internal use */
-	_snwprintf(event_name,32,L"\\kb_event%u",device_number);
+	(void)_snwprintf(event_name,32,L"\\kb_event%u",device_number);
+	event_name[31] = 0;
 	RtlInitUnicodeString(&uStr,event_name);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
 	Status = NtCreateEvent(&hKbEvent,STANDARD_RIGHTS_ALL | 0x1ff/*0x1f01ff*/,
@@ -270,7 +271,7 @@ int __stdcall kb_check(HANDLE hKbDevice)
 	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
 			&iosb,IOCTL_KEYBOARD_QUERY_INDICATORS,NULL,0,
 			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS));
-	if(Status == STATUS_PENDING){ // FIXME ???
+	if(NT_SUCCESS(Status)/*Status == STATUS_PENDING*/){
 		Status = NtWaitForSingleObject(hKbDevice,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
@@ -280,15 +281,15 @@ int __stdcall kb_check(HANDLE hKbDevice)
 	
 	/* light up LED's */
 	for(i = 0; i < LIGHTING_REPEAT_COUNT; i++){
-		kb_light_up_indicators(hKbDevice,KEYBOARD_NUM_LOCK_ON);
+		(void)kb_light_up_indicators(hKbDevice,KEYBOARD_NUM_LOCK_ON);
 		winx_sleep(100);
-		kb_light_up_indicators(hKbDevice,KEYBOARD_CAPS_LOCK_ON);
+		(void)kb_light_up_indicators(hKbDevice,KEYBOARD_CAPS_LOCK_ON);
 		winx_sleep(100);
-		kb_light_up_indicators(hKbDevice,KEYBOARD_SCROLL_LOCK_ON);
+		(void)kb_light_up_indicators(hKbDevice,KEYBOARD_SCROLL_LOCK_ON);
 		winx_sleep(100);
 	}
 
-	kb_light_up_indicators(hKbDevice,LedFlags);
+	(void)kb_light_up_indicators(hKbDevice,LedFlags);
 	return 0;
 }
 
@@ -333,7 +334,7 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 					kb[kb_index].device_number,(UINT)Status);
 				winx_printf("%s\n",winx_get_error_description((ULONG)Status));
 				/* Terminate the program! */
-				winx_exit(1000);
+				winx_exit(1000); /* exit code is equal to 1000, it was randomly selected :) */
 				return (-1);
 			}
 			/* Timeout - this is a normal situation. */

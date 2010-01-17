@@ -34,8 +34,11 @@
  *            SynchronizationEvent or NotificationEvent.
  * @param[out] phandle pointer to the handle of the event
  * @return Zero for success, negative value otherwise.
- * @note The initial state of the successfully 
- *       created event is signaled.
+ * @note
+ * - The initial state of the successfully created
+ *   event is signaled.
+ * - If an event already exists this function returns
+ *   STATUS_OBJECT_NAME_COLLISION defined in ntndk.h file.
  */
 int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 {
@@ -50,6 +53,12 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 	RtlInitUnicodeString(&us,name);
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
 	Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,&oa,type,TRUE);
+	if(Status == STATUS_OBJECT_NAME_COLLISION){
+		*phandle = NULL;
+		DebugPrint("Event %ws already exists!",name);
+		/* useful for allowing a single instance of the program */
+		return (signed int)(STATUS_OBJECT_NAME_COLLISION);
+	}
 	if(!NT_SUCCESS(Status)){
 		*phandle = NULL;
 		DebugPrintEx(Status,"Cannot create %ws",name);

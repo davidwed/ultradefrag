@@ -79,7 +79,7 @@ int AllocateMap(int size)
 	return 0;
 }
 
-void GetMap(char *dest,int cluster_map_size)
+int GetMap(char *dest,int cluster_map_size)
 {
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
@@ -89,7 +89,7 @@ void GetMap(char *dest,int cluster_map_size)
 	/* synchronize with map reallocation */
 	interval.QuadPart = (-1); /* 100 nsec */
 	Status = NtWaitForSingleObject(hMapEvent,FALSE,&interval);
-	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)) return;
+	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)) return 0;
 	
 	/* copy data */
 	if(!new_cluster_map) goto cleanup;
@@ -113,7 +113,7 @@ void GetMap(char *dest,int cluster_map_size)
 	}
 cleanup:
 	NtSetEvent(hMapEvent,NULL);
-	return;
+	return 0;
 }
 
 /* marks all space as system with 1 cluster per cell */

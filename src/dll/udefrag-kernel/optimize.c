@@ -214,7 +214,7 @@ void DefragmentFreeSpaceRTL(void)
 				freeblock->lcn += length;
 				lastblock->length -= length;
 				if(!lastblock->length){
-					RemoveItem((PLIST *)&lastpfn->blockmap,(PLIST)lastblock);
+					winx_list_remove_item((list_entry **)&lastpfn->blockmap,(list_entry *)lastblock);
 					break;
 				}
 			}
@@ -275,7 +275,7 @@ void DefragmentFreeSpaceLTR(void)
 				firstblock->lcn += length;
 				firstblock->length -= length;
 				if(!firstblock->length){
-					RemoveItem((PLIST *)&firstpfn->blockmap,(PLIST)firstblock);
+					winx_list_remove_item((list_entry **)&firstpfn->blockmap,(list_entry *)firstblock);
 					break;
 				}
 			}

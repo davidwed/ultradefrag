@@ -146,8 +146,8 @@ void InsertFreeSpaceBlockInternal(ULONGLONG start,ULONGLONG length)
 		}
 	}
 	
-	block = (PFREEBLOCKMAP)InsertItem((PLIST *)(void *)&free_space_map,
-		(PLIST)prev_block,sizeof(FREEBLOCKMAP));
+	block = (PFREEBLOCKMAP)winx_list_insert_item((list_entry **)(void *)&free_space_map,
+		(list_entry *)prev_block,sizeof(FREEBLOCKMAP));
 	if(!block) return;
 	
 	block->lcn = start;
@@ -160,8 +160,8 @@ FREEBLOCKMAP *InsertLastFreeBlock(ULONGLONG start,ULONGLONG length)
 	PFREEBLOCKMAP block, lastblock = NULL;
 	
 	if(free_space_map) lastblock = free_space_map->prev_ptr;
-	block = (PFREEBLOCKMAP)InsertItem((PLIST *)(void *)&free_space_map,
-		(PLIST)lastblock,sizeof(FREEBLOCKMAP));
+	block = (PFREEBLOCKMAP)winx_list_insert_item((list_entry **)(void *)&free_space_map,
+		(list_entry *)lastblock,sizeof(FREEBLOCKMAP));
 	if(block){
 		block->lcn = start;
 		block->length = length;

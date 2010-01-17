@@ -108,16 +108,15 @@ SCANTOASCII ScanToAscii[] = {
 };
 
 
-static void
-IntUpdateControlKeyState(LPDWORD State, PKEYBOARD_INPUT_DATA InputData)
+static void IntUpdateControlKeyState(LPDWORD State, PKEYBOARD_INPUT_DATA InputData)
 {
 	DWORD Value = 0;
 
-	if (InputData->Flags & KEY_E1) /* Only the pause key has E1 */
+	if(InputData->Flags & KEY_E1) /* Only the pause key has E1 */
 		return;
 
-	if (!(InputData->Flags & KEY_E0)) {
-		switch (InputData->MakeCode) {
+	if(!(InputData->Flags & KEY_E0)){
+		switch(InputData->MakeCode){
 			case 0x2a:
 			case 0x36:
 				Value = SHIFT_PRESSED;
@@ -137,7 +136,7 @@ IntUpdateControlKeyState(LPDWORD State, PKEYBOARD_INPUT_DATA InputData)
 				return;
 		}
 	} else {
-		switch (InputData->MakeCode) {
+		switch(InputData->MakeCode){
 			case 0x1d:
 				Value = RIGHT_CTRL_PRESSED;
 				break;
@@ -149,22 +148,19 @@ IntUpdateControlKeyState(LPDWORD State, PKEYBOARD_INPUT_DATA InputData)
 		}
 	}
 
-	if (InputData->Flags & KEY_BREAK)
+	if(InputData->Flags & KEY_BREAK)
 		*State &= ~Value;
 	else
 		*State |= Value;
 }
 
-static UCHAR
-IntAsciiFromInput(PKEYBOARD_INPUT_DATA InputData, DWORD KeyState)
+static UCHAR IntAsciiFromInput(PKEYBOARD_INPUT_DATA InputData, DWORD KeyState)
 {
 	UINT Counter = 0;
 
-	while (ScanToAscii[Counter].ScanCode != 0)
-	{
-		if(ScanToAscii[Counter].ScanCode == InputData->MakeCode)
-		{
-			if (KeyState & SHIFT_PRESSED)
+	while(ScanToAscii[Counter].ScanCode != 0){
+		if(ScanToAscii[Counter].ScanCode == InputData->MakeCode){
+			if(KeyState & SHIFT_PRESSED)
 				return ScanToAscii[Counter].Shift;
 			return ScanToAscii[Counter].Normal;
 		}

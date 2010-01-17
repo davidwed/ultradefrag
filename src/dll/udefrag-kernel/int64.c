@@ -17,7 +17,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/* int64.c - 64-bit integer functions for mingw */
+/**
+ * @file int64.c
+ * @brief 64-bit integer support code.
+ * @{
+ */
 
 #include "globals.h"
 
@@ -56,3 +60,5 @@ ULONGLONG __cdecl __ullmod(ULONGLONG u, ULONGLONG v)
 	return _allrem(u,v);
 }
 #endif
+
+/** @} */

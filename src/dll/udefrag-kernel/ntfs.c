@@ -868,7 +868,7 @@ void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULO
 	/* allocate memory for an integral number of cluster to hold a whole AttributeList */
 	clusters_to_read = size / bytes_per_cluster;
 	if(size % bytes_per_cluster) clusters_to_read ++;
-	cluster = (char *)winx_heap_alloc(bytes_per_cluster * clusters_to_read);
+	cluster = (char *)winx_heap_alloc((SIZE_T)(bytes_per_cluster * clusters_to_read));
 	if(!cluster){
 		DebugPrint("Cannot allocate %I64u bytes of memory for AnalyseNonResidentAttributeList()!\n",
 			bytes_per_cluster * clusters_to_read);
@@ -980,7 +980,7 @@ void ProcessRun(WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
 */
 	/* add information to blockmap member of specified pfn structure */
 	if(pfn->blockmap) prev_block = pfn->blockmap->prev_ptr;
-	block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)prev_block,sizeof(BLOCKMAP));
+	block = (PBLOCKMAP)winx_list_insert_item((list_entry **)&pfn->blockmap,(list_entry *)prev_block,sizeof(BLOCKMAP));
 	if(!block) return;
 	
 	block->vcn = vcn;
@@ -1021,13 +1021,13 @@ PFILENAME FindFileListEntryForTheAttribute(WCHAR *full_path,PMY_FILE_INFORMATION
 		if(pfn->next_ptr == filelist) break;
 	}
 	
-	pfn = (PFILENAME)InsertItem((PLIST *)(void *)&filelist,NULL,sizeof(FILENAME));
+	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
 	if(pfn == NULL) return NULL;
 	
 	/* fill a name member of the created structure */
 	if(!RtlCreateUnicodeString(&pfn->name,full_path)){
 		DebugPrint2("No enough memory for pfn->name initialization!\n");
-		RemoveItem((PLIST *)(void *)&filelist,(LIST *)pfn);
+		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		return NULL;
 	}
 	pfn->blockmap = NULL; /* !!! */
@@ -1349,7 +1349,7 @@ void AddResidentDirectoryToFileList(PMY_FILE_INFORMATION pmfi)
 {
 	PFILENAME pfn;
 	
-	pfn = (PFILENAME)InsertItem((PLIST *)(void *)&filelist,NULL,sizeof(FILENAME));
+	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
 	if(pfn == NULL){
 		DebugPrint2("No enough memory for AddResidentDirectoryToFileList()!\n");
 		return;
@@ -1359,7 +1359,7 @@ void AddResidentDirectoryToFileList(PMY_FILE_INFORMATION pmfi)
 	if(!RtlCreateUnicodeString(&pfn->name,pmfi->Name)){
 		DebugPrint2("AddResidentDirectoryToFileList():\n");
 		DebugPrint2("no enough memory for pfn->name initialization!\n");
-		RemoveItem((PLIST *)(void *)&filelist,(LIST *)pfn);
+		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		return;
 	}
 	pfn->blockmap = NULL; /* !!! */

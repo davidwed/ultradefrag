@@ -66,7 +66,7 @@ int __stdcall winx_register_boot_exec_command(short *command)
 	if(data->Type != REG_MULTI_SZ){
 		DebugPrint("BootExecute value has wrong type 0x%x!",
 				data->Type);
-		winx_virtual_free((void *)data,size);
+		winx_heap_free((void *)data);
 		NtCloseSafe(hKey);
 		return (-1);
 	}
@@ -85,14 +85,14 @@ int __stdcall winx_register_boot_exec_command(short *command)
 
 	value_size = (i + wcslen(command) + 1 + 1) * sizeof(short);
 	if(write_boot_exec_value(hKey,(void *)(data->Data),value_size) < 0){
-		winx_virtual_free((void *)data,size);
+		winx_heap_free((void *)data);
 		NtCloseSafe(hKey);
 		return (-1);
 	}
 
 done:	
-	winx_virtual_free((void *)data,size);
-	flush_smss_key(hKey); /* required by native app before shutdown */
+	winx_heap_free((void *)data);
+	flush_smss_key(hKey);
 	NtCloseSafe(hKey);
 	return 0;
 }
@@ -125,7 +125,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	if(data->Type != REG_MULTI_SZ){
 		DebugPrint("BootExecute value has wrong type 0x%x!",
 				data->Type);
-		winx_virtual_free((void *)data,size);
+		winx_heap_free((void *)data);
 		NtCloseSafe(hKey);
 		return (-1);
 	}
@@ -134,11 +134,11 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	length = (data->DataLength >> 1) - 1;
 	
 	new_value_size = (length + 1) << 1;
-	new_value = winx_virtual_alloc(new_value_size);
+	new_value = winx_heap_alloc(new_value_size);
 	if(!new_value){
 		DebugPrint("Cannot allocate %u bytes of memory"
 						 "for new BootExecute value!",new_value_size);
-		winx_virtual_free((void *)data,size);
+		winx_heap_free((void *)data);
 		NtCloseSafe(hKey);
 		return (-1);
 	}
@@ -159,14 +159,14 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	
 	if(write_boot_exec_value(hKey,(void *)new_value,
 	  (new_length + 1) * sizeof(short)) < 0){
-		winx_virtual_free((void *)new_value,new_value_size);
-		winx_virtual_free((void *)data,size);
+		winx_heap_free((void *)new_value);
+		winx_heap_free((void *)data);
 		NtCloseSafe(hKey);
 		return (-1);
 	}
 
-	winx_virtual_free((void *)new_value,new_value_size);
-	winx_virtual_free((void *)data,size);
+	winx_heap_free((void *)new_value);
+	winx_heap_free((void *)data);
 	flush_smss_key(hKey); /* required by native app before shutdown */
 	NtCloseSafe(hKey);
 	return 0;
@@ -199,7 +199,12 @@ static int __stdcall open_smss_key(HANDLE *pKey)
  * @brief Queries the BootExecute value of the SMSS registry key.
  * @param[in] hKey the key handle.
  * @param[out] data pointer to a buffer that receives the value.
- * @param[in,out] size the size of buffer, in bytes.
+ * @param[in,out] size This paramenter must contain before the call
+ *                     a number of bytes which must be allocated
+ *                     additionally to the size of the BootExecute
+ *                     value. After the call this parameter contains
+ *                     size of the allocated buffer containing the
+ *                     queried value, in bytes.
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
@@ -220,12 +225,13 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 		return (-1);
 	}
 	data_size += additional_space_size;
-	data_buffer = winx_virtual_alloc(data_size); /* allocates zero filled buffer */
+	data_buffer = winx_heap_alloc(data_size);
+	RtlZeroMemory(data_buffer,data_size);
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			data_buffer,data_size,&data_size2);
 	if(status != STATUS_SUCCESS){
 		DebugPrintEx(status,"Cannot query BootExecute value");
-		winx_virtual_free(data_buffer,data_size);
+		winx_heap_free(data_buffer);
 		return (-1);
 	}
 	
@@ -260,7 +266,10 @@ static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 /**
  * @brief Flushes the SMSS registry key.
  * @param[in] hKey the key handle.
- * @note Internal use only.
+ * @note
+ * - Internal use only.
+ * - Takes no effect in native apps before 
+ * the system shutdown/reboot :-)
  */
 static void __stdcall flush_smss_key(HANDLE hKey)
 {

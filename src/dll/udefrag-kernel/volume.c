@@ -88,7 +88,7 @@ int GetDriveGeometry(char *volume_name)
 	if(!pFileFsSize){
 		winx_fclose(fRoot);
 		DebugPrint("udefrag-kernel.dll GetDriveGeometry(): no enough memory!");
-		return (-1);
+		return UDEFRAG_NO_MEM;
 	}
 
 	/* now we have zero filled space pointed by pFileFsSize */

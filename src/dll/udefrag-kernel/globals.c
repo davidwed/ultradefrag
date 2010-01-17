@@ -146,12 +146,12 @@ void DestroyLists(void)
 	pfn = filelist;
 	if(pfn){
 		do {
-			DestroyList((PLIST *)&pfn->blockmap);
+			winx_list_destroy((list_entry **)&pfn->blockmap);
 			RtlFreeUnicodeString(&pfn->name);
 			pfn = pfn->next_ptr;
 		} while(pfn != filelist);
-		DestroyList((PLIST *)(void *)&filelist);
+		winx_list_destroy((list_entry **)(void *)&filelist);
 	}
-	DestroyList((PLIST *)(void *)&free_space_map);
-	DestroyList((PLIST *)(void *)&fragmfileslist);
+	winx_list_destroy((list_entry **)(void *)&free_space_map);
+	winx_list_destroy((list_entry **)(void *)&fragmfileslist);
 }

@@ -82,9 +82,9 @@ void __stdcall winx_exit(int exit_code);
 void __stdcall winx_reboot(void);
 void __stdcall winx_shutdown(void);
 
-void * __stdcall winx_virtual_alloc(ULONGLONG size);
-void   __stdcall winx_virtual_free(void *addr,ULONGLONG size);
-void * __stdcall winx_heap_alloc(ULONGLONG size);
+void * __stdcall winx_virtual_alloc(SIZE_T size);
+void   __stdcall winx_virtual_free(void *addr,SIZE_T size);
+void * __stdcall winx_heap_alloc(SIZE_T size);
 void   __stdcall winx_heap_free(void *addr);
 
 int __cdecl winx_putch(int ch);
@@ -101,11 +101,6 @@ int __cdecl winx_gets(char *string,int n);
 int __cdecl winx_kbhit(int msec);
 int __cdecl winx_breakhit(int msec);
 
-/*#ifndef _UDEFRAG_H_
-typedef void (__stdcall *ERRORHANDLERPROC)(short *msg);
-#endif
-ERRORHANDLERPROC __stdcall winx_set_error_handler(ERRORHANDLERPROC ehproc);
-*/
 void __stdcall winx_sleep(int msec);
 int  __stdcall winx_get_os_version(void);
 int  __stdcall winx_get_windows_directory(char *buffer, int length);
@@ -161,5 +156,17 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
 
 ULONGLONG __stdcall winx_str2time(char *string);
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);
+
+/**
+ * @brief Generic structure describing double linked list entry.
+ */
+typedef struct _list_entry {
+	struct _list_entry *n; /* pointer to next entry */
+	struct _list_entry *p; /* pointer to previous entry */
+} list_entry;
+
+list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev,long size);
+void         __stdcall winx_list_remove_item(list_entry **phead,list_entry *item);
+void         __stdcall winx_list_destroy    (list_entry **phead);
 
 #endif /* _ZENWINX_H_ */

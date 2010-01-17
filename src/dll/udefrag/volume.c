@@ -98,6 +98,7 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
 	int is_removable;
+	int error_code;
 	/*
 	* The following parameters are required 
 	* to exclude missing floppies.
@@ -108,8 +109,9 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 	/* set error mode to ignore missing removable drives */
 	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
 		return (-1);
-	if(internal_validate_volume(letter,skip_removable,&is_removable,
-		fsname,&total,&free) < 0) return (-1);
+	error_code = internal_validate_volume(letter,skip_removable,&is_removable,
+		fsname,&total,&free);
+	if(error_code < 0) return error_code;
 	/* try to restore error mode to default state */
 	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	return 0;
@@ -148,21 +150,21 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 	if(type < 0) return (-1);
 	if(type == DRIVE_CDROM){
 		DebugPrint("Volume %c: is on cdrom drive.",letter);
-		return (-1);
+		return UDEFRAG_CDROM;
 	}
 	if(type == DRIVE_REMOTE){
 		DebugPrint("Volume %c: is on remote drive.",letter);
-		return (-1);
+		return UDEFRAG_REMOTE;
 	}
 	if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
 		DebugPrint("It seems that %c: volume letter is assigned by \'subst\' command.",letter);
-		return (-1);
+		return UDEFRAG_ASSIGNED_BY_SUBST;
 	}
 	if(type == DRIVE_REMOVABLE){
 		*is_removable = TRUE;
 		if(skip_removable){
 			DebugPrint("Volume %c: is on removable media.",letter);
-			return (-1);
+			return UDEFRAG_REMOVABLE;
 		}
 	}
 	/* get volume information */

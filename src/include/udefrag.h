@@ -32,6 +32,16 @@
 #pragma ftol(inlined)
 #endif
 
+/* UltraDefrag error codes */
+#define UDEFRAG_UNKNOWN_ERROR     (-1)
+#define UDEFRAG_ALREADY_RUNNING   (-2)
+#define UDEFRAG_W2K_4KB_CLUSTERS  (-3)
+#define UDEFRAG_NO_MEM            (-4)
+#define UDEFRAG_CDROM             (-5)
+#define UDEFRAG_REMOTE            (-6)
+#define UDEFRAG_ASSIGNED_BY_SUBST (-7)
+#define UDEFRAG_REMOVABLE         (-8)
+
 #define DEFAULT_REFRESH_INTERVAL 500
 
 #define MAX_DOS_DRIVES 26

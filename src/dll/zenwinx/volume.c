@@ -117,8 +117,8 @@ int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber)
 	ULONGLONG m = 1;
 
 	if(strlen(string) > 63) return (-1);
-	strcpy(t,string);
-	_strupr(t);
+	(void)strcpy(t,string);
+	(void)_strupr(t);
 	for(i = 0; i < sizeof(symbols); i++)
 		if(strchr(t,symbols[i])) break;
 	if(i < sizeof(symbols)) /* suffix found */

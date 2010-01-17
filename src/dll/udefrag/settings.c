@@ -94,14 +94,14 @@ void __stdcall udefrag_load_settings(void)
 	if(query_env_variable(L"UD_EX_FILTER"))	wcsncpy(ex_filter,env_buffer,MAX_FILTER_SIZE);
 	
 	if(query_env_variable(L"UD_SIZELIMIT")){
-		_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
+		(void)_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
 		buf[sizeof(buf) - 1] = 0;
-		winx_dfbsize(buf,&sizelimit);
+		(void)winx_dfbsize(buf,&sizelimit);
 	}
 
 	if(query_env_variable(L"UD_FRAGMENTS_THRESHOLD")) fraglimit = _wtoi64(env_buffer);
 	if(query_env_variable(L"UD_TIME_LIMIT")){
-		_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
+		(void)_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
 		buf[sizeof(buf) - 1] = 0;
 		time_limit = winx_str2time(buf);
 	}
@@ -115,7 +115,7 @@ void __stdcall udefrag_load_settings(void)
 	}
 
 	if(query_env_variable(L"UD_DBGPRINT_LEVEL")){
-		_wcsupr(env_buffer);
+		(void)_wcsupr(env_buffer);
 		if(!wcscmp(env_buffer,L"DETAILED"))
 			dbgprint_level = DBG_DETAILED;
 		else if(!wcscmp(env_buffer,L"PARANOID"))
@@ -177,7 +177,7 @@ void __stdcall udefrag_load_settings(void)
 	time_limit = 0;
 
 	if(query_env_variable(L"UD_TIME_LIMIT")){
-		_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
+		(void)_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
 		buf[sizeof(buf) - 1] = 0;
 		time_limit = winx_str2time(buf);
 	}
@@ -186,8 +186,8 @@ void __stdcall udefrag_load_settings(void)
 	if(query_env_variable(L"UD_REFRESH_INTERVAL")) refresh_interval = _wtoi(env_buffer);
 	DebugPrint("Refresh interval = %u msec\n",refresh_interval);
 	
-	strcpy(buf,"");
-	winx_dfbsize(buf,&i); /* to force MinGW export udefrag_dfbsize */
+	(void)strcpy(buf,"");
+	(void)winx_dfbsize(buf,&i); /* to force MinGW export udefrag_dfbsize */
 	(void)i;
 }
 

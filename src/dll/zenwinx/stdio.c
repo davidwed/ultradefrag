@@ -81,8 +81,8 @@ int __cdecl winx_putch(int ch)
  */
 int __cdecl winx_puts(const char *string)
 {
-	if(!string) return -1;
-	return winx_printf("%s\n",string) ? 0 : -1;
+	if(!string) return (-1);
+	return winx_printf("%s\n",string) ? 0 : (-1);
 }
 
 /**
@@ -109,19 +109,29 @@ int __cdecl winx_printf(const char *format, ...)
 	if(done == -1 || done == INTERNAL_BUFFER_SIZE){
 		/* buffer is too small; try to allocate two times larger */
 		do {
-			big_buffer = winx_virtual_alloc((unsigned long)size);
-			if(!big_buffer) { va_end(arg); return 0; }
+			big_buffer = winx_heap_alloc((SIZE_T)size);
+			if(!big_buffer){
+				DebugPrint("No enough memory for winx_printf()!\n");
+				winx_print("\nNo enough memory for winx_printf()!\n");
+				va_end(arg);
+				return 0;
+			}
 			memset(big_buffer,0,size);
 			done = _vsnprintf(big_buffer,size,format,arg);
 			if(done != -1 && done != size) break;
-			winx_virtual_free(big_buffer,(unsigned long)size);
+			winx_heap_free(big_buffer);
 			size = size << 1;
-			if(!size) { va_end(arg); return 0; }
+			if(!size){
+				DebugPrint("winx_printf() failed!\n");
+				winx_print("\nwinx_printf() failed!\n");
+				va_end(arg);
+				return 0;
+			}
 		} while(1);
 	}
 	if(big_buffer){
 		winx_print(big_buffer);
-		winx_virtual_free(big_buffer,(unsigned long)size);
+		winx_heap_free(big_buffer);
 	} else {
 		winx_print(small_buffer);
 	}
@@ -235,13 +245,13 @@ int __cdecl winx_gets(char *string,int n)
 	}
 	
 	for(i = 0; i < n; i ++){
-repeate_attempt:
-		ch = winx_getche();
-		if(ch == -1){
-			string[i] = 0;
-			return (-1);
-		}
-		if(ch == 0) goto repeate_attempt;
+		do {
+			ch = winx_getche();
+			if(ch == -1){
+				string[i] = 0;
+				return (-1);
+			}
+		} while(ch == 0);
 		if(ch == 13){
 			winx_putch('\n');
 			string[i] = 0;

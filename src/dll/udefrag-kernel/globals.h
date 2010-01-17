@@ -46,11 +46,6 @@
 * NOTE! NEXT_PTR MUST BE THE FIRST MEMBER OF THESE STRUCTURES!
 * PREV_PTR MUST BE THE SECOND MEMBER!
 */
-/* generic LIST structure definition */
-typedef struct _LIST {
-	struct _LIST *next_ptr;
-	struct _LIST *prev_ptr;
-} LIST, *PLIST;
 
 /* structure to store information about blocks of file */
 typedef struct _tagBLOCKMAP {
@@ -166,7 +161,7 @@ void FreeDriverResources(void);
 
 int AllocateMap(int size);
 void FreeMap(void);
-void GetMap(char *dest,int cluster_map_size);
+int GetMap(char *dest,int cluster_map_size);
 void MarkAllSpaceAsSystem0(void);
 void MarkAllSpaceAsSystem1(void);
 unsigned char GetSpaceState(PFILENAME pfn);
@@ -178,10 +173,6 @@ void InitializeFilter(void);
 void DestroyFilter(void);
 BOOLEAN IsStringInFilter(short *str,PFILTER pf);
 BOOLEAN CheckForContextMenuHandler(void);
-
-LIST * NTAPI InsertItem(PLIST *phead,PLIST prev,ULONG size);
-void NTAPI RemoveItem(PLIST *phead,PLIST item);
-void NTAPI DestroyList(PLIST *phead);
 
 int CheckForSynchObjects(void);
 
@@ -219,7 +210,7 @@ void CleanupFreeSpaceList(ULONGLONG start,ULONGLONG len);
 void TruncateFreeSpaceBlock(ULONGLONG start,ULONGLONG length);
 
 void GenerateFragmentedFilesList(void);
-BOOLEAN FindFiles(WCHAR *ParentDirectoryPath);
+int FindFiles(WCHAR *ParentDirectoryPath);
 BOOLEAN InsertFragmentedFile(PFILENAME pfn);
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
 BOOLEAN DumpFile(PFILENAME pfn);
@@ -315,6 +306,6 @@ typedef struct {
 #define IS_NOT_CONTENT_INDEXED(pFileInfo) \
 (((pFileInfo)->FileAttributes & FILE_ATTRIBUTE_NOT_CONTENT_INDEXED) ? TRUE : FALSE)
 
-#define DeleteBlockmap(pfn) DestroyList((PLIST *)&(pfn)->blockmap)
+#define DeleteBlockmap(pfn) winx_list_destroy((list_entry **)&(pfn)->blockmap)
 
 #endif /* _UDEFRAG_KERNEL_GLOBALS_H_ */

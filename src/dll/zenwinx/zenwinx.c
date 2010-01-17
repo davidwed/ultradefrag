@@ -27,7 +27,7 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-int  __stdcall kb_open(short *kb_device_name);
+int  __stdcall kb_open(void);
 void __stdcall kb_close(void);
 
 void winx_create_global_heap(void);
@@ -75,7 +75,7 @@ int __stdcall winx_init(void *peb)
 	/* 2. Breakpoint if we were requested to do so */
 	if(pp->DebugFlags) DbgBreakPoint();
 	/* 3. Open keyboard */
-	status = kb_open(NULL);
+	status = kb_open();
 	return status;
 }
 
@@ -88,7 +88,11 @@ int __stdcall winx_init(void *peb)
 void __stdcall winx_exit(int exit_code)
 {
 	kb_close();
-	NtTerminateProcess(NtCurrentProcess(),exit_code);
+	/*
+	* The next call is undocumented, therefore
+	* we are not checking its result.
+	*/
+	(void)NtTerminateProcess(NtCurrentProcess(),exit_code);
 }
 
 /**
@@ -100,8 +104,12 @@ void __stdcall winx_exit(int exit_code)
 void __stdcall winx_reboot(void)
 {
 	kb_close();
-	winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	NtShutdownSystem(ShutdownReboot);
+	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+	/*
+	* The next call is undocumented, therefore
+	* we are not checking its result.
+	*/
+	(void)NtShutdownSystem(ShutdownReboot);
 }
 
 /**
@@ -113,8 +121,12 @@ void __stdcall winx_reboot(void)
 void __stdcall winx_shutdown(void)
 {
 	kb_close();
-	winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	NtShutdownSystem(ShutdownNoReboot);
+	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+	/*
+	* The next call is undocumented, therefore
+	* we are not checking its result.
+	*/
+	(void)NtShutdownSystem(ShutdownNoReboot);
 }
 
 /** @} */

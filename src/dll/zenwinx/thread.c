@@ -115,20 +115,16 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 /**
  * @brief Terminates the current thread.
  * @details The exit code is always zero.
+ * @todo Add exit code parameter.
  */
 void __stdcall winx_exit_thread(void)
 {
-	/* TODO: error handling and exit with specified status */
 	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
 	if(!NT_SUCCESS(Status)){
 		DebugPrintEx(Status,"Cannot terminate thread");
 	}
 }
 
-/**
- * @brief Searches for the Win32 CreateThread() call.
- * @note Internal use only.
- */
 int FindCreateThread(void)
 {
 	if(CreateThreadState == CreateThreadUndefined){
@@ -140,10 +136,6 @@ int FindCreateThread(void)
 	return (CreateThreadState == CreateThreadFound) ? TRUE : FALSE;
 }
 
-/**
- * @brief Searches for the Win32 GetLastError() call.
- * @note Internal use only.
- */
 int FindGetLastError(void)
 {
 	if(GetLastErrorState == GetLastErrorUndefined){

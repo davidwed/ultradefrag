@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - fragmentation analysis engine.
-*/
+/**
+ * @file analyse.c
+ * @brief Volume analysis code.
+ * @addtogroup Analysis
+ * @{
+ */
 
 /*
 * NOTE: the following file systems will be analysed 
@@ -31,14 +34,27 @@
 * standard is too complicated (http://www.osta.org/specs/).
 * Therefore it will be analysed through standard Windows API.
 *
-* Why a special code?
-* It works faster:
-* NTFS ultra fast scan may be 25 times faster than universal scan,
-* FAT16 scan may be 40% faster.
+* - Why a special code?
+* - It works faster:
+*   * NTFS ultra fast scan may be 25 times faster than universal scan
+*   * FAT16 scan may be 40% faster.
+*
+* P.S.: We decided to avoid direct FAT scan in this driver,
+* because it works slower than the universal scan. Due to the
+* file system caching Windows feature.
 */
 
 #include "globals.h"
 
+/**
+ * @brief Performs a volume analysis.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero for success, negative value otherwise.
+ * @bug Crashes the NT 4.0 system during the NTFS v1.2 
+ * volumes analysis.
+ * @todo Remove a system files checking which takes
+ * a lot of time.
+ */
 int Analyze(char *volume_name)
 {
 	unsigned short path[] = L"\\??\\A:\\";
@@ -47,6 +63,7 @@ int Analyze(char *volume_name)
 	PFILENAME pfn;
 	HANDLE hFile;
 	ULONG pass_number;
+	int error_code;
 	
 	DebugPrint("----- Analyze of %s: -----\n",volume_name);
 	
@@ -63,11 +80,13 @@ int Analyze(char *volume_name)
 	Stat.pass_number = pass_number;
 	
 	/* open the volume */
-	if(OpenVolume(volume_name) < 0) return (-1);
+	error_code = OpenVolume(volume_name);
+	if(error_code < 0) return error_code;
 
 	/* get drive geometry */
-	if(GetDriveGeometry(volume_name) < 0) return (-1);
-//DebugPrint("fuck!\n");
+	error_code = GetDriveGeometry(volume_name);
+	if(error_code < 0) return error_code;
+
 	/* update map representation */
 	MarkAllSpaceAsSystem1();
 	
@@ -83,6 +102,7 @@ int Analyze(char *volume_name)
 	Status = FillFreeSpaceMap();
 	if(!NT_SUCCESS(Status)){
 		DebugPrintEx(Status,"FillFreeSpaceMap() failed");
+		if(Status == STATUS_NO_MEMORY) return UDEFRAG_NO_MEM;
 		return (-1);
 	}
 	//DebugPrint("FillFreeSpaceMap() time: %I64u mln.\n",(_rdtsc() - tm) / 1000000);
@@ -91,16 +111,15 @@ int Analyze(char *volume_name)
 
 	switch(partition_type){
 	case NTFS_PARTITION:
-		/* Experimental support of retrieving information directly from MFT. */
 		/*
 		* ScanMFT() causes BSOD on NT 4.0, even in user mode!
 		* It seems that NTFS driver is imperfect in this system
 		* and ScanMFT() breaks something inside it.
-		* Sometimes BSOD appears after an analysis after volume optimization,
+		* Sometimes BSOD appears during an analysis after volume optimization,
 		* sometimes it appears immediately during the first analysis.
 		* Examples:
 		* 1. kmd compact ntfs nt4 -> BSOD 0xa (0x48, 0xFF, 0x0, 0x80101D5D)
-		* immediately after last analysis
+		* immediately after the last analysis
 		* 2. user mode - optimize - BSOD during the second analysis
 		* 0x50 (0xB51CA820,0,0,2) or 0x1E (0xC...5,0x8013A7B6,0,0x20)
 		* 3. kmd - nt4 - gui - optimize - chkdsk /F for ntfs - bsod
@@ -110,31 +129,32 @@ int Analyze(char *volume_name)
 			DebugPrint("due to ntfs.sys driver imperfectness.\n");
 			goto universal_scan;
 		}*/
-		ScanMFT();
+		(void)ScanMFT();
 		break;
 	/*case FAT12_PARTITION:
-		ScanFat12Partition(dx);
+		(void)ScanFat12Partition();
 		break;
 	case FAT16_PARTITION:
-		ScanFat16Partition(dx);
+		(void)ScanFat16Partition();
 		break;
 	case FAT32_PARTITION:
-		ScanFat32Partition(dx);
+		(void)ScanFat32Partition();
 		break;*/
 	default: /* UDF, Ext2 and so on... */
 /*universal_scan:*/
 		/* Find files */
 		tm = _rdtsc();
 		path[4] = (short)volume_letter;
-		if(!FindFiles(path)){
+		error_code = FindFiles(path);
+		if(error_code < 0){
 			DebugPrint("FindFiles() failed!\n");
-			return (-1);//STATUS_NO_MORE_FILES;
+			return error_code;
 		}
 		time = _rdtsc() - tm;
 		DebugPrint("An universal scan needs %I64u ms\n",time);
 	}
 	
-	///if(dx->partition_type == FAT16_PARTITION) ScanFat16Partition(dx);
+	/* if(partition_type == FAT16_PARTITION) (void)ScanFat16Partition(); */
 
 	DebugPrint("Files found: %u\n",Stat.filecounter);
 	DebugPrint("Fragmented files: %u\n",Stat.fragmfilecounter);
@@ -156,10 +176,58 @@ int Analyze(char *volume_name)
 		}
 		if(pfn->next_ptr == filelist) break;
 	}
-
-	/* Save state */
-	//ApplyFilter(dx);
 	return 0;
+}
+
+/**
+ * @brief Produces a list of fragmented files.
+ */
+void GenerateFragmentedFilesList(void)
+{
+	PFILENAME pfn;
+
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(pfn->is_fragm && /* !pfn->is_filtered && */!pfn->is_reparse_point)
+			InsertFragmentedFile(pfn);
+		if(pfn->next_ptr == filelist) break;
+	}
+}
+
+/**
+ * @brief Returns the current time in milliseconds since...
+ * @return Time, in milliseconds.
+ * @note
+ * - Useful for the performance measures.
+ * - Has no physical meaning.
+ */
+ULONGLONG _rdtsc(void)
+{
+	return _rdtsc_1() / 1000 / 1000;
+}
+
+/**
+ * @brief Returns the current time in nanoseconds since...
+ * @return Time, in nanoseconds. Zero indicates failure.
+ * @note
+ * - Useful for the performance measures.
+ * - Has no physical meaning.
+ */
+ULONGLONG _rdtsc_1(void)
+{
+	NTSTATUS Status;
+	LARGE_INTEGER frequency;
+	LARGE_INTEGER counter;
+	
+	Status = NtQueryPerformanceCounter(&counter,&frequency);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("NtQueryPerformanceCounter() failed: %x!\n",(UINT)Status);
+		return 0;
+	}
+	if(!frequency.QuadPart){
+		DebugPrint("Your hardware has no support for High Resolution timer!\n");
+		return 0;
+	}
+	return ((1000 * 1000 * 1000) / frequency.QuadPart) * counter.QuadPart;
 }
 
 //int AnalyzeFreeSpace(char *volume_name)
@@ -182,38 +250,4 @@ int Analyze(char *volume_name)
 //	return 0;
 //}
 
-void GenerateFragmentedFilesList(void)
-{
-	PFILENAME pfn;
-
-	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
-		if(pfn->is_fragm && /*!pfn->is_filtered && */!pfn->is_reparse_point)
-			InsertFragmentedFile(pfn);
-		if(pfn->next_ptr == filelist) break;
-	}
-}
-
-/* in milliseconds */
-ULONGLONG _rdtsc(void)
-{
-	return _rdtsc_1() / 1000 / 1000;
-}
-
-/* in nanoseconds */
-ULONGLONG _rdtsc_1(void)
-{
-	NTSTATUS Status;
-	LARGE_INTEGER frequency;
-	LARGE_INTEGER counter;
-	
-	Status = NtQueryPerformanceCounter(&counter,&frequency);
-	if(!NT_SUCCESS(Status)){
-		DebugPrint("NtQueryPerformanceCounter() failed: %x!\n",(UINT)Status);
-		return 0;
-	}
-	if(!frequency.QuadPart){
-		DebugPrint("Your hardware has no support for High Resolution timer!\n");
-		return 0;
-	}
-	return ((1000 * 1000 * 1000) / frequency.QuadPart) * counter.QuadPart;
-}
+/** @} */

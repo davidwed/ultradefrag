@@ -126,7 +126,7 @@ BOOLEAN DumpFile(PFILENAME pfn)
 				goto next_run;
 			}
 			
-			block = (PBLOCKMAP)InsertItem((PLIST *)&pfn->blockmap,(PLIST)block,sizeof(BLOCKMAP));
+			block = (PBLOCKMAP)winx_list_insert_item((list_entry **)&pfn->blockmap,(list_entry *)block,sizeof(BLOCKMAP));
 			if(!block) goto dump_fail;
 			block->lcn = fileMappings->Pair[i].Lcn;
 			block->length = fileMappings->Pair[i].Vcn - startVcn;
