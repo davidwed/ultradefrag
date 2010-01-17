@@ -55,8 +55,9 @@ xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
 xcopy /I /Y /Q    .\dll\wgx .\obj\wgx
-xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
-xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
+
+rem xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
+rem xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
 
 copy /Y .\obj\share\*.c .\obj\console\
 
@@ -155,7 +156,12 @@ xcopy /I /Y /Q /S .\dll\zenwinx\doxy-doc %SRC_PKG_PATH%\src\dll\zenwinx\doxy-doc
 mkdir %SRC_PKG_PATH%\doc
 mkdir %SRC_PKG_PATH%\doc\html
 mkdir %SRC_PKG_PATH%\doc\html\handbook
-copy /Y ..\doc\html\handbook\doxy-doc\html\*.* %SRC_PKG_PATH%\doc\html\handbook\
+mkdir %SRC_PKG_PATH%\doc\html\handbook\rsc
+mkdir %SRC_PKG_PATH%\doc\html\handbook\doxy-doc
+mkdir %SRC_PKG_PATH%\doc\html\handbook\doxy-doc\html
+copy /Y ..\doc\html\handbook\doxy-doc\html\*.* %SRC_PKG_PATH%\doc\html\handbook\doxy-doc\html\
+copy /Y ..\doc\html\handbook\rsc\*.* %SRC_PKG_PATH%\doc\html\handbook\rsc\
+copy /Y ..\doc\html\handbook\*.* %SRC_PKG_PATH%\doc\html\handbook\
 
 cd ..\src_package
 REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .
