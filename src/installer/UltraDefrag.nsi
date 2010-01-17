@@ -647,7 +647,6 @@ SectionEnd
 !ifdef MODERN_UI
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag.$\nIncluding console interface."
-  ;!insertmacro MUI_DESCRIPTION_TEXT ${SecSchedNET} "Small and useful scheduler.$\nNET Framework 2.0 required."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecScheduler} "Small handy scheduler."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "Handbook."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenuHandler} "Defragment your volumes from their context menu."

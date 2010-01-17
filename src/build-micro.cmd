@@ -48,8 +48,9 @@ xcopy /I /Y /Q    .\share .\obj\share
 xcopy /I /Y /Q    .\dll\udefrag-kernel .\obj\udefrag-kernel
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
-xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
-xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
+
+rem xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
+rem xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
 
 copy /Y .\obj\share\*.c .\obj\console\
 
