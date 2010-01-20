@@ -959,23 +959,23 @@ ULONGLONG ProcessMftSpace(UDEFRAG_DEVICE_EXTENSION *dx,PNTFS_DATA nd)
 	else
 		len = 0;
 	DebugPrint("-Ultradfg- $MFT       :%I64u :%I64u\n",start,len);
-	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
-	CleanupFreeSpaceList(dx,start,len);
+	RemarkBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
+	RemoveFreeSpaceBlock(dx,start,len);
 	mft_len += len;
 
 	/* $MFT2 */
 	start = nd->MftZoneStart.QuadPart;
 	len = nd->MftZoneEnd.QuadPart - nd->MftZoneStart.QuadPart;
 	DebugPrint("-Ultradfg- $MFT2      :%I64u :%I64u\n",start,len);
-	ProcessBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
-	CleanupFreeSpaceList(dx,start,len);
+	RemarkBlock(dx,start,len,MFT_SPACE,SYSTEM_SPACE);
+	RemoveFreeSpaceBlock(dx,start,len);
 	mft_len += len;
 
 	/* $MFTMirror */
 	start = nd->Mft2StartLcn.QuadPart;
 	DebugPrint("-Ultradfg- $MFTMirror :%I64u :1\n",start);
-	ProcessBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
-	CleanupFreeSpaceList(dx,start,1);
+	RemarkBlock(dx,start,1,MFT_SPACE,SYSTEM_SPACE);
+	RemoveFreeSpaceBlock(dx,start,1);
 	mft_len ++;
 	
 	return mft_len;
@@ -1206,7 +1206,7 @@ void BuildPaths(UDEFRAG_DEVICE_EXTENSION *dx)
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
 		BuildPath2(dx,pfn);
 		if(UnwantedStuffDetected(dx,pfn)) pfn->is_filtered = TRUE;
-		MarkSpace(dx,pfn,SYSTEM_SPACE);
+		MarkFileSpace(dx,pfn,SYSTEM_SPACE);
 		/* skip here filtered out and big files and reparse points */
 		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_overlimit && !pfn->is_reparse_point){
 			dx->fragmfilecounter ++;

@@ -29,3 +29,81 @@
  * licensed product. Feel free to redistribute it under certain
  * conditions.
  */
+
+/**
+ * @defgroup Interface Interface
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Analysis Analysis
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Defrag Defragmentation
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Optimizer Optimization
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup FreeSpace Free Space Scan
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup NTFS Fast NTFS Scan
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup UniversalFileSystemScan Universal Scan
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup FileDump File Dumping
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Options Options
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Filter Filters
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup ClusterMap Cluster Map
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Reports Reports
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Volume Volume
+ * @{
+ */
+/** @} */

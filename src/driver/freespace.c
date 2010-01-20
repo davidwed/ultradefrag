@@ -23,6 +23,8 @@
 
 #include "driver.h"
 
+static FREEBLOCKMAP *AddLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
+
 /* Dumps all the free clusters on the volume */
 NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 {
@@ -66,7 +68,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 				if(cluster != LLINVALID){
 					len = startLcn + i - cluster;
 					DebugPrint2("-Ultradfg- start: %I64u len: %I64u\n",cluster,len);
-					if(!InsertLastFreeBlock(dx,cluster,len))
+					if(!AddLastFreeBlock(dx,cluster,len))
 						return STATUS_NO_MEMORY;
 					dx->processed_clusters += len;
 					cluster = LLINVALID;
@@ -80,7 +82,7 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(cluster != LLINVALID){
 		len = startLcn + i - cluster;
 		DebugPrint2("-Ultradfg- start: %I64u len: %I64u\n",cluster,len);
-		if(!InsertLastFreeBlock(dx,cluster,len))
+		if(!AddLastFreeBlock(dx,cluster,len))
 			return STATUS_NO_MEMORY;
 		dx->processed_clusters += len;
 	}
@@ -91,27 +93,22 @@ NTSTATUS FillFreeSpaceMap(UDEFRAG_DEVICE_EXTENSION *dx)
 * On FAT partitions after file moving filesystem driver marks
 * previously allocated clusters as free immediately.
 * But on NTFS they are always allocated by system, not free, never free.
-* Only the next analyse frees them.
+* Only the next analysis frees them.
 */
-void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
+void ProcessFreedBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 					  ULONGLONG len,UCHAR old_space_state)
 {
-	if(dx->partition_type == NTFS_PARTITION) /* Mark clusters as no-checked */
-		ProcessBlock(dx,start,len,NO_CHECKED_SPACE,old_space_state);
-	else InsertFreeSpaceBlock(dx,start,len,old_space_state);
+	if(dx->partition_type == NTFS_PARTITION){
+		/* mark clusters as temporarily allocated by system */
+		RemarkBlock(dx,start,len,TEMPORARY_SYSTEM_SPACE,old_space_state);
+	} else {
+		RemarkBlock(dx,start,len,FREE_SPACE,old_space_state);
+		AddFreeSpaceBlock(dx,start,len);
+	}
 }
 
-void InsertFreeSpaceBlockInternal(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
-
-void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
-			  ULONGLONG start,ULONGLONG length,UCHAR old_space_state)
-{
-	ProcessBlock(dx,start,length,FREE_SPACE,old_space_state);
-	InsertFreeSpaceBlockInternal(dx,start,length);
-}
-			  
 /* inserts any block in free space map */
-void InsertFreeSpaceBlockInternal(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length)
+void AddFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length)
 {
 	PFREEBLOCKMAP block, prev_block = NULL, next_block;
 	
@@ -158,7 +155,7 @@ void InsertFreeSpaceBlockInternal(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,U
 }
 
 /* inserts last block in free space map: used in analysis process only */
-FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
+static FREEBLOCKMAP *AddLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 				 ULONGLONG start,ULONGLONG length)
 {
 	PFREEBLOCKMAP block, lastblock = NULL;
@@ -172,7 +169,7 @@ FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 	}
 
 	/* mark space */
-	ProcessBlock(dx,start,length,FREE_SPACE,SYSTEM_SPACE);
+	RemarkBlock(dx,start,length,FREE_SPACE,SYSTEM_SPACE);
 	return block;
 }
 
@@ -199,7 +196,7 @@ void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,
 }
 
 /* Removes specified range of clusters from the free space list. */
-void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len)
+void RemoveFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len)
 {
 	PFREEBLOCKMAP block;
 	ULONGLONG new_lcn, new_length;
@@ -243,7 +240,7 @@ void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG
 			new_lcn = start + len;
 			new_length = block->lcn + block->length - (start + len);
 			block->length = start - block->lcn;
-			InsertFreeSpaceBlockInternal(dx,new_lcn,new_length);
+			AddFreeSpaceBlock(dx,new_lcn,new_length);
 			goto next_block;
 		}
 

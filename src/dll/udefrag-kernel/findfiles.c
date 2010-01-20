@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,17 +17,28 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - FindFiles() and related functions.
-*/
+/**
+ * @file findfiles.c
+ * @brief Universal file system scanning code.
+ * @addtogroup UniversalFileSystemScan
+ * @{
+ */
 
 #include "globals.h"
 
-BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo);
+BOOLEAN AddFile(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo);
 BOOLEAN UnwantedStuffOnFatOrUdfDetected(PFILE_BOTH_DIR_INFORMATION pFileInfo,PFILENAME pfn);
 BOOLEAN ConsoleUnwantedStuffDetected(WCHAR *Path,ULONG *InsideFlag);
 
-/* FindFiles() - recursive search of all files on specified path. */
+/**
+ * @brief Searches recursively for files on the path.
+ * @param[in] ParentDirectoryPath the full path of the
+ *            directory which must be scanned.
+ * @return Zero for success, negative value otherwise.
+ * @note Here we are skipping as much files as
+ * possible, because this dramatically descreases
+ * the volume analysis time.
+ */
 int FindFiles(WCHAR *ParentDirectoryPath)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
@@ -94,22 +105,22 @@ int FindFiles(WCHAR *ParentDirectoryPath)
 		FileNameLength = (USHORT)(pFileInfo->FileNameLength / sizeof(WCHAR));
 		if(FileNameLength > (MAX_PATH - 1)) continue; /* really it must be no longer than 255 characters */
 
-		/* here we can use FileName variable */
-		wcsncpy(FileName,pFileInfo->FileName,FileNameLength);
+		/* here we can use the FileName variable */
+		(void)wcsncpy(FileName,pFileInfo->FileName,FileNameLength);
 		FileName[FileNameLength] = 0;
 		
 		/* skip . and .. */
 		if(wcscmp(FileName,L".") == 0 || wcscmp(FileName,L"..") == 0) continue;
 
-		/* store into Path buffer retrieved file name appended to ParentDirectoryPath */
+		/* Path = ParentDirectoryPath + FileName */
 		if(ParentDirectoryPath[wcslen(ParentDirectoryPath) - 1] == '\\'){
 			/* rootdir contains closing backslash, other directories aren't enclosed */
-			_snwprintf(Path,PATH_BUFFER_LENGTH,L"%s%s",ParentDirectoryPath,FileName);
+			(void)_snwprintf(Path,PATH_BUFFER_LENGTH,L"%s%s",ParentDirectoryPath,FileName);
 		} else {
-			_snwprintf(Path,PATH_BUFFER_LENGTH,L"%s\\%s",ParentDirectoryPath,FileName);
+			(void)_snwprintf(Path,PATH_BUFFER_LENGTH,L"%s\\%s",ParentDirectoryPath,FileName);
 		}
 		Path[PATH_BUFFER_LENGTH - 1] = 0;
-		/* and here we cannot use FileName variable! */
+		/* and here we cannot use the FileName variable! */
 
 		/* VERY IMPORTANT: skip reparse points */
 		/* FIXME: what is reparse point? How to detect these that represents another volumes? */
@@ -138,7 +149,7 @@ int FindFiles(WCHAR *ParentDirectoryPath)
 		}
 
 		if(ConsoleUnwantedStuffDetected(Path,&inside_flag)){
-			///DbgPrint("excluded = %ws\n",dx->tmp_buf);
+			//DbgPrint("excluded = %ws\n",dx->tmp_buf);
 			continue;
 		}
 
@@ -146,13 +157,13 @@ int FindFiles(WCHAR *ParentDirectoryPath)
 			DebugPrint("-Ultradfg- Compressed directory found %ws\n",Path);
 		*/
 
-		if(IS_DIR(pFileInfo)) (void)FindFiles(Path);
-		else if(!pFileInfo->EndOfFile.QuadPart) continue; /* file is empty */
+		if(IS_DIR(pFileInfo)) (void)FindFiles(Path);      /* directory found */
+		else if(!pFileInfo->EndOfFile.QuadPart) continue; /* empty file found */
 		
 		/* skip parent directories in context menu handler */
 		if(context_menu_handler && !inside_flag) continue;
 
-		if(!InsertFileName(Path,pFileInfo)){
+		if(!AddFile(Path,pFileInfo)){
 			DebugPrint("InsertFileName failed for %ws\n",Path);
 			NtClose(DirectoryHandle);
 			winx_heap_free(pFileInfoFirst);
@@ -167,14 +178,19 @@ int FindFiles(WCHAR *ParentDirectoryPath)
     return 0;
 }
 
-/* inserts the new FILENAME structure to filelist */
-/* Returns TRUE on success and FALSE if no enough memory */
-BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
+/**
+ * @brief Adds a file to the file list.
+ * @param[in] path the full path of the file.
+ * @param[in] pFileInfo pointer to the structure
+ * containing a file attributes.
+ * @return Boolean value: TRUE for success, FALSE otherwise.
+ * @note Adds a file only if its information needs to be cached.
+ */
+BOOLEAN AddFile(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 {
 	PFILENAME pfn;
 	ULONGLONG filesize;
 
-	/* Add a file only if we need to have its information cached. */
 	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
 	if(pfn == NULL) return FALSE;
 	
@@ -219,8 +235,9 @@ BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	/* mark some files as filtered out */
 	CHECK_FOR_FRAGLIMIT(pfn);
 
+	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb */
 	if(wcsstr(path,L"largefile"))
-		DebugPrint("SIZE = %I64u\n", filesize); /* shows approx. 1.6 Gb instead of 3.99 Gb */
+		DebugPrint("SIZE = %I64u\n", filesize);
 
 	/* Update statistics and cluster map. */
 	Stat.filecounter ++;
@@ -236,7 +253,7 @@ BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 		Stat.fragmcounter ++;
 	}
 	Stat.processed_clusters += pfn->clusters_total;
-	MarkSpace(pfn,SYSTEM_SPACE);
+	MarkFileSpace(pfn,SYSTEM_SPACE);
 
 	if(optimize_flag || pfn->is_fragm) return TRUE;
 
@@ -247,9 +264,12 @@ BOOLEAN InsertFileName(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	return TRUE;
 }
 
-/* inserts the new structure to list of fragmented files */
-/* Returns TRUE on success and FALSE if no enough memory */
-BOOLEAN InsertFragmentedFile(PFILENAME pfn)
+/**
+ * @brief Adds a file to the list of fragmented files.
+ * @param[in] pfn pointer to the structure describing the file.
+ * @return Boolean value: TRUE for success, FALSE otherwise.
+ */
+BOOLEAN AddFileToFragmented(PFILENAME pfn)
 {
 	PFRAGMENTED pf, prev_pf = NULL;
 	
@@ -273,7 +293,9 @@ BOOLEAN InsertFragmentedFile(PFILENAME pfn)
 	return TRUE;
 }
 
-/* removes unfragmented files from the list of fragmented files */
+/**
+ * @brief Removes all unfragmented files from the list of fragmented files.
+ */
 void UpdateFragmentedFilesList(void)
 {
 	PFRAGMENTED pf, next_pf, head;
@@ -295,6 +317,15 @@ void UpdateFragmentedFilesList(void)
 	}
 }
 
+/**
+ * @brief Checks, must file be skipped or not.
+ * @param[in] pFileInfo pointer to the structure
+ * containing a file attributes.
+ * @param[in] pfn pointer to the structure
+ * describing the file.
+ * @return Boolean value. TRUE indicates that
+ * the file must be skipped, FALSE indicates contrary.
+ */
 BOOLEAN UnwantedStuffOnFatOrUdfDetected(PFILE_BOTH_DIR_INFORMATION pFileInfo,PFILENAME pfn)
 {
 	UNICODE_STRING us;
@@ -310,7 +341,7 @@ BOOLEAN UnwantedStuffOnFatOrUdfDetected(PFILE_BOTH_DIR_INFORMATION pFileInfo,PFI
 		DebugPrint2("Cannot allocate memory for UnwantedStuffDetected()!\n");
 		return FALSE;
 	}
-	_wcslwr(us.Buffer);
+	(void)_wcslwr(us.Buffer);
 
 	if(in_filter.buffer){
 		if(!IsStringInFilter(us.Buffer,&in_filter)){
@@ -328,19 +359,23 @@ BOOLEAN UnwantedStuffOnFatOrUdfDetected(PFILE_BOTH_DIR_INFORMATION pFileInfo,PFI
 	return FALSE;
 }
 
-/*
-* If we don't need to redraw a cluster map and the next operation
-* will not be the volume optimization, we can skip all filtered out files!
-*/
-/*
-* InsideFlag is applicable only for context menu handler.
-* TRUE indicates that we are inside the selected directory
-* and we need to save information about specified file.
-* FALSE indicates that we are going in right direction
-* and we must scan specified parent directory for files,
-* but we don't need to save information about 
-* this parent directory itself.
-*/
+/**
+ * @brief Checks, must file be skipped or not
+ *        in case when cluster map is not used.
+ * @param[in] Path the full path of the file.
+ * @param[out] InsideFlag a boolean value
+ * indicating are we inside the directory 
+ * the context menu handler is running for, or not.
+ * @return Boolean value. TRUE indicates that
+ * the file must be skipped, FALSE indicates contrary.
+ * @note InsideFlag is applicable only for context menu handler.
+ * TRUE indicates that we are inside the selected directory
+ * and we need to save information about the file.
+ * FALSE indicates that we are going in right direction
+ * and we must scan specified parent directory for files,
+ * but we don't need to save information about 
+ * this parent directory itself.
+ */
 BOOLEAN ConsoleUnwantedStuffDetected(WCHAR *Path,ULONG *InsideFlag)
 {
 	WCHAR *lpath = NULL;
@@ -359,10 +394,10 @@ BOOLEAN ConsoleUnwantedStuffDetected(WCHAR *Path,ULONG *InsideFlag)
 		DebugPrint("Cannot allocate memory for ConsoleUnwantedStuffDetected()!\n");
 		return FALSE;
 	}
-	wcscpy(lpath,Path);
-	_wcslwr(lpath);
+	(void)wcscpy(lpath,Path);
+	(void)_wcslwr(lpath);
 	
-	/* USE THE FOLLOWING CODE ONLY FOR CONTEXT MENU HANDLER: */
+	/* USE THE FOLLOWING CODE ONLY FOR THE CONTEXT MENU HANDLER: */
 	if(context_menu_handler){
 		/* is the current file placed in directory selected in context menu? */
 		/* in other words: are we inside the selected folder? */
@@ -393,3 +428,5 @@ BOOLEAN ConsoleUnwantedStuffDetected(WCHAR *Path,ULONG *InsideFlag)
 	winx_heap_free(lpath);
 	return FALSE;
 }
+
+/** @} */

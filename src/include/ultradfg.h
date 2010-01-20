@@ -37,7 +37,7 @@
 #define DIR_OVERLIMIT_SPACE         9
 #define COMPRESSED_SPACE            10
 #define COMPRESSED_OVERLIMIT_SPACE  11
-#define NO_CHECKED_SPACE            12
+#define TEMPORARY_SYSTEM_SPACE      12
 
 #define UNKNOWN_SPACE FRAGM_SPACE
 

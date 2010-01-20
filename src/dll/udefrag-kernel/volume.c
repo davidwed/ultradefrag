@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,12 +17,20 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - volume information related code.
-*/
+/**
+ * @file volume.c
+ * @brief Volume parameters retrieving code.
+ * @addtogroup Volume
+ * @{
+ */
 
 #include "globals.h"
 
+/**
+ * @brief Opens the volume handle.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero for success, negative value otherwise.
+ */
 int OpenVolume(char *volume_name)
 {
 	char path[64];
@@ -30,7 +38,7 @@ int OpenVolume(char *volume_name)
 	#define FLAG 'r'
 	
 	CloseVolume();
-	_snprintf(path,64,"\\??\\%s:",volume_name);
+	(void)_snprintf(path,64,"\\??\\%s:",volume_name);
 	path[63] = 0;
 #if FLAG != 'r'
 #error Volume must be opened for read access!
@@ -44,6 +52,11 @@ int OpenVolume(char *volume_name)
 	return 0;
 }
 
+/**
+ * @brief Retrieves the volume geometry.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero for success, negative value otherwise.
+ */
 int GetDriveGeometry(char *volume_name)
 {
 	char path[64];
@@ -66,12 +79,11 @@ int GetDriveGeometry(char *volume_name)
 	clusters_per_256k = 0;
 	
 	/* get drive geometry */
-	_snprintf(path,64,"\\??\\%s:\\",volume_name);
+	(void)_snprintf(path,64,"\\??\\%s:\\",volume_name);
 	path[63] = 0;
 #if FLAG != 'r'
 #error Root directory must be opened for read access!
 #endif
-	///DbgBreakPoint();
 	flags[0] = FLAG; flags[1] = 0;
 	fRoot = winx_fopen(path,flags);
 	if(!fRoot){
@@ -81,7 +93,7 @@ int GetDriveGeometry(char *volume_name)
 
 	/*
 	* FILE_FS_SIZE_INFORMATION structure needs to be filled by zeros
-	* before system call. But x64 compiler doesn't allow to do this.
+	* before system call. But x64 compiler doesn't allow doing that.
 	* Therefore we must allocate memory...
 	*/
 	pFileFsSize = winx_virtual_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
@@ -127,8 +139,13 @@ int GetDriveGeometry(char *volume_name)
 	return 0;
 }
 
+/**
+ * @brief Closes the volume handle.
+ */
 void CloseVolume(void)
 {
 	winx_fclose(fVolume);
 	fVolume = NULL;
 }
+
+/** @} */

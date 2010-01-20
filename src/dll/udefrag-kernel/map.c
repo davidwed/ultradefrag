@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - cluster map related code.
-*/
+/**
+ * @file map.c
+ * @brief Cluster map code.
+ * @addtogroup ClusterMap
+ * @{
+ */
 
 #include "globals.h"
 
@@ -37,7 +40,11 @@ BOOLEAN opposite_order = FALSE; /* if true then number of clusters is less than 
 ULONGLONG cells_per_cluster = 0;
 ULONGLONG cells_per_last_cluster = 0;
 
-/* zero for success, -1 otherwise */
+/**
+ * @brief Allocates the cluster map.
+ * @param[in] size the number of map cells.
+ * @return Zero for success, negative value otherwise.
+ */
 int AllocateMap(int size)
 {
 	LARGE_INTEGER interval;
@@ -56,15 +63,15 @@ int AllocateMap(int size)
 	DebugPrint("Map size = %u\n",size);
 	if(new_cluster_map) FreeMap();
 	if(!size){
-		NtSetEvent(hMapEvent,NULL);
+		(void)NtSetEvent(hMapEvent,NULL);
 		return 0; /* console/native apps may work without cluster map */
 	}
 	buffer_size = NUM_OF_SPACE_STATES * size * sizeof(ULONGLONG);
-	new_cluster_map = winx_virtual_alloc(buffer_size);
+	new_cluster_map = winx_heap_alloc(buffer_size);
 	if(!new_cluster_map){
 		DebugPrint("Cannot allocate %u bytes of memory for cluster map!",
 			buffer_size);
-		NtSetEvent(hMapEvent,NULL);
+		(void)NtSetEvent(hMapEvent,NULL);
 		return (-1);
 	}
 	map_size = size;
@@ -75,10 +82,18 @@ int AllocateMap(int size)
 	opposite_order = FALSE;
 	cells_per_cluster = 0;
 	cells_per_last_cluster = 0;
-	NtSetEvent(hMapEvent,NULL);
+	(void)NtSetEvent(hMapEvent,NULL);
 	return 0;
 }
 
+/**
+ * @brief Retrieves the cluster map.
+ * @param[out] dest pointer to buffer
+ *                  receiving the map.
+ * @param[in] cluster_map_size the 
+ *                  number of map cells.
+ * @return Zero for success, negative value otherwise.
+ */
 int GetMap(char *dest,int cluster_map_size)
 {
 	LARGE_INTEGER interval;
@@ -89,14 +104,18 @@ int GetMap(char *dest,int cluster_map_size)
 	/* synchronize with map reallocation */
 	interval.QuadPart = (-1); /* 100 nsec */
 	Status = NtWaitForSingleObject(hMapEvent,FALSE,&interval);
-	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)) return 0;
+	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status)) return (-1);
 	
 	/* copy data */
-	if(!new_cluster_map) goto cleanup;
+	if(!new_cluster_map){
+		(void)NtSetEvent(hMapEvent,NULL);
+		return (-1);
+	}
 	if(cluster_map_size != map_size){
 		DebugPrint2("Map size is wrong: %u != %u!\n",
 			cluster_map_size,map_size);
-		goto cleanup;
+		(void)NtSetEvent(hMapEvent,NULL);
+		return (-1);
 	}
 	for(i = 0; i < map_size; i++){
 		maximum = new_cluster_map[i][0];
@@ -104,19 +123,22 @@ int GetMap(char *dest,int cluster_map_size)
 		for(k = 1; k < NUM_OF_SPACE_STATES; k++){
 			n = new_cluster_map[i][k];
 			/* >= is very important: mft and free */
-			if(n > maximum || (n == maximum && k != NO_CHECKED_SPACE)){
+			if(n > maximum || (n == maximum && k != TEMPORARY_SYSTEM_SPACE)){
 				maximum = n;
 				index = k;
 			}
 		}
 		dest[i] = (char)index;
 	}
-cleanup:
-	NtSetEvent(hMapEvent,NULL);
+	(void)NtSetEvent(hMapEvent,NULL);
 	return 0;
 }
 
-/* marks all space as system with 1 cluster per cell */
+/**
+ * @brief Marks all space in cluster map as system.
+ * @details All cells of the map are marked as
+ * containing a single cluster.
+ */
 void MarkAllSpaceAsSystem0(void)
 {
 	ULONG i;
@@ -127,7 +149,11 @@ void MarkAllSpaceAsSystem0(void)
 		new_cluster_map[i][SYSTEM_SPACE] = 1;
 }
 
-/* corrects number of clusters per cell set by MarkAllSpaceAsSystem0() */
+/**
+ * @brief Marks all space in cluster map as system.
+ * @details All cells of the map are marked as
+ * containing a real number of clusters per cell.
+ */
 void MarkAllSpaceAsSystem1(void)
 {
 	ULONG i;
@@ -152,8 +178,13 @@ void MarkAllSpaceAsSystem1(void)
 	}
 }
 
-/* returns current space state for the specified file */
-unsigned char GetSpaceState(PFILENAME pfn)
+/**
+ * @brief Retrieves a space state of the file.
+ * @param[in] pfn pointer to the FILENAME structure
+ * containing information about the file.
+ * @return A space state of the file.
+ */
+unsigned char GetFileSpaceState(PFILENAME pfn)
 {
 	UCHAR space_states[] = {UNFRAGM_SPACE,UNFRAGM_OVERLIMIT_SPACE, \
 			      COMPRESSED_SPACE,COMPRESSED_OVERLIMIT_SPACE, \
@@ -177,21 +208,31 @@ unsigned char GetSpaceState(PFILENAME pfn)
 	return state;
 }
 
-/* marks space allocated by specified file */
-void MarkSpace(PFILENAME pfn,int old_space_state)
+/**
+ * @brief Remarks a range of clusters belonging to the file in the cluster map.
+ * @param[in] pfn pointer to the FILENAME structure containing information about the file.
+ * @param[in] old_space_state the previous state of the marked space.
+ */
+void MarkFileSpace(PFILENAME pfn,int old_space_state)
 {
 	PBLOCKMAP block;
 	UCHAR state;
 	
-	state = GetSpaceState(pfn);
+	state = GetFileSpaceState(pfn);
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		ProcessBlock(block->lcn,block->length,state,old_space_state);
+		RemarkBlock(block->lcn,block->length,state,old_space_state);
 		if(block->next_ptr == pfn->blockmap) break;
 	}
 }
 
-/* applies clusters block data to cluster map */
-void ProcessBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_state)
+/**
+ * @brief Remarks a range of clusters in the cluster map.
+ * @param[in] start the starting cluster of the block.
+ * @param[in] len the length of the block, in clusters.
+ * @param[in] space_state the new state of the marked space.
+ * @param[in] old_space_state the previous state of the marked space.
+ */
+void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_state)
 {
 	ULONGLONG cell, offset, n;
 	ULONGLONG ncells, i, j;
@@ -257,14 +298,16 @@ void ProcessBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_st
 	}
 }
 
+/**
+ * @brief Frees the cluster map.
+ */
 void FreeMap(void)
 {
-	int buffer_size;
-	
 	if(new_cluster_map){
-		buffer_size = NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG);
-		winx_virtual_free(new_cluster_map,buffer_size);
+		winx_heap_free(new_cluster_map);
 		new_cluster_map = NULL;
 	}
 	map_size = 0;
 }
+
+/** @} */

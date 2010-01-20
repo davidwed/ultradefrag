@@ -208,9 +208,9 @@ void DefragmentFreeSpaceRTL(UDEFRAG_DEVICE_EXTENSION *dx)
 				MovePartOfFileBlock(dx,lastpfn,vcn,freeblock->lcn,length);
 				movings ++;
 				dx->processed_clusters += length;
-				ProcessBlock(dx,freeblock->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
-				ProcessBlock(dx,lastblock->lcn + (lastblock->length - length),length,
-					FREE_SPACE,GetSpaceState(lastpfn));
+				RemarkBlock(dx,freeblock->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
+				RemarkBlock(dx,lastblock->lcn + (lastblock->length - length),length,
+					FREE_SPACE,GetFileSpaceState(lastpfn));
 				freeblock->length -= length;
 				freeblock->lcn += length;
 				lastblock->length -= length;
@@ -268,9 +268,9 @@ void DefragmentFreeSpaceLTR(UDEFRAG_DEVICE_EXTENSION *dx)
 					freeblock->lcn + (freeblock->length - length),length);
 				movings ++;
 				dx->processed_clusters += length;
-				ProcessBlock(dx,freeblock->lcn + (freeblock->length - length),length,
+				RemarkBlock(dx,freeblock->lcn + (freeblock->length - length),length,
 					UNKNOWN_SPACE,FREE_SPACE);
-				ProcessBlock(dx,firstblock->lcn,length,FREE_SPACE,GetSpaceState(firstpfn));
+				RemarkBlock(dx,firstblock->lcn,length,FREE_SPACE,GetFileSpaceState(firstpfn));
 				freeblock->length -= length;
 				firstblock->vcn += length;
 				firstblock->lcn += length;
@@ -310,12 +310,12 @@ BOOLEAN MoveTheUnfragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONG
 	ZwClose(hFile);
 	
 	/* first of all: remove target space from free space pool */
-	ProcessBlock(dx,target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
+	RemarkBlock(dx,target,pfn->clusters_total,GetFileSpaceState(pfn),FREE_SPACE);
 	TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
 
 	/* free previously allocated space (after TruncateFreeSpaceBlock() call!) */
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		ProcessFreeBlock(dx,block->lcn,block->length,FRAGM_SPACE/*old_state*/);
+		ProcessFreedBlock(dx,block->lcn,block->length,FRAGM_SPACE/*old_state*/);
 		if(block->next_ptr == pfn->blockmap) break;
 	}
 

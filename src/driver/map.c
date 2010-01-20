@@ -62,7 +62,7 @@ NTSTATUS AllocateMap(ULONG size)
 }
 
 /* returns current space state for the specified file */
-unsigned char GetSpaceState(PFILENAME pfn)
+unsigned char GetFileSpaceState(PFILENAME pfn)
 {
 #ifndef MICRO_EDITION
 	UCHAR space_states[] = {UNFRAGM_SPACE,UNFRAGM_OVERLIMIT_SPACE, \
@@ -91,22 +91,22 @@ unsigned char GetSpaceState(PFILENAME pfn)
 }
 
 /* marks space allocated by specified file */
-void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
+void MarkFileSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state)
 {
 #ifndef MICRO_EDITION
 	PBLOCKMAP block;
 	UCHAR state;
 	
-	state = GetSpaceState(pfn);
+	state = GetFileSpaceState(pfn);
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		ProcessBlock(dx,block->lcn,block->length,state,old_space_state);
+		RemarkBlock(dx,block->lcn,block->length,state,old_space_state);
 		if(block->next_ptr == pfn->blockmap) break;
 	}
 #endif
 }
 
 /* applies clusters block data to cluster map */
-void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
+void RemarkBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,
 				  ULONGLONG len,int space_state,int old_space_state)
 {
 #ifndef MICRO_EDITION
@@ -228,7 +228,7 @@ void GetMap(char *dest)
 		for(k = 1; k < NUM_OF_SPACE_STATES; k++){
 			n = new_cluster_map[i][k];
 			/* >= is very important: mft and free */
-			if(n > maximum || (n == maximum && k != NO_CHECKED_SPACE)){
+			if(n > maximum || (n == maximum && k != TEMPORARY_SYSTEM_SPACE)){
 				maximum = n;
 				index = k;
 			}

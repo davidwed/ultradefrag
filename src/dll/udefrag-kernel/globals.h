@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -23,6 +23,10 @@
 
 #ifndef _UDEFRAG_KERNEL_GLOBALS_H_
 #define _UDEFRAG_KERNEL_GLOBALS_H_
+
+#if defined(__POCC__)
+#pragma ftol(inlined)
+#endif
 
 #include "../../include/ntndk.h"
 
@@ -164,9 +168,9 @@ void FreeMap(void);
 int GetMap(char *dest,int cluster_map_size);
 void MarkAllSpaceAsSystem0(void);
 void MarkAllSpaceAsSystem1(void);
-unsigned char GetSpaceState(PFILENAME pfn);
-void MarkSpace(PFILENAME pfn,int old_space_state);
-void ProcessBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_state);
+unsigned char GetFileSpaceState(PFILENAME pfn);
+void MarkFileSpace(PFILENAME pfn,int old_space_state);
+void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_state);
 
 void InitializeOptions(void);
 void InitializeFilter(void);
@@ -187,7 +191,6 @@ int Analyze(char *volume_name);
 int Defragment(char *volume_name);
 int Optimize(char *volume_name);
 
-int AnalyzeFreeSpace(char *volume_name);
 void DestroyLists(void);
 void DbgPrintFreeSpaceList(void);
 
@@ -203,15 +206,14 @@ BOOLEAN CheckForStopEvent(void);
 wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
 
 NTSTATUS FillFreeSpaceMap(void);
-void ProcessFreeBlock(ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
-void InsertFreeSpaceBlock(ULONGLONG start,ULONGLONG length,UCHAR old_space_state);
-FREEBLOCKMAP *InsertLastFreeBlock(ULONGLONG start,ULONGLONG length);
-void CleanupFreeSpaceList(ULONGLONG start,ULONGLONG len);
+void ProcessFreedBlock(ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
+void AddFreeSpaceBlock(ULONGLONG start,ULONGLONG length);
+void RemoveFreeSpaceBlock(ULONGLONG start,ULONGLONG len);
 void TruncateFreeSpaceBlock(ULONGLONG start,ULONGLONG length);
 
 void GenerateFragmentedFilesList(void);
 int FindFiles(WCHAR *ParentDirectoryPath);
-BOOLEAN InsertFragmentedFile(PFILENAME pfn);
+BOOLEAN AddFileToFragmented(PFILENAME pfn);
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
 BOOLEAN DumpFile(PFILENAME pfn);
 void UpdateFragmentedFilesList(void);

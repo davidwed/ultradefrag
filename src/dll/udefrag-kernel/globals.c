@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,11 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - global objects and ancillary routines.
-*/
+/**
+ * @file globals.c
+ * @brief Ancillary routines code.
+ * @{
+ */
 
 #include "globals.h"
 
@@ -63,6 +65,10 @@ BOOLEAN optimize_flag = FALSE;
 void InitSynchObjects(void);
 void DestroySynchObjects(void);
 
+/**
+ * @brief Initializes the library.
+ * @bug Does not contain Windows 9x checking.
+ */
 void InitDriverResources(void)
 {
 	int os_version;
@@ -90,6 +96,9 @@ void InitDriverResources(void)
 	DebugPrint("User mode driver loaded successfully\n");
 }
 
+/**
+ * @brief Frees resources allocated by the library.
+ */
 void FreeDriverResources(void)
 {
 	FreeMap();
@@ -100,38 +109,61 @@ void FreeDriverResources(void)
 	DebugPrint("User mode driver unloaded successfully\n");
 }
 
+/**
+ * @brief Initializes synchronization events.
+ */
 void InitSynchObjects(void)
 {
-	winx_create_event(L"\\udefrag_synch_event",
+	(void)winx_create_event(L"\\udefrag_synch_event",
 		SynchronizationEvent,&hSynchEvent);
-	winx_create_event(L"\\udefrag_stop_event",
+	(void)winx_create_event(L"\\udefrag_stop_event",
 		NotificationEvent,&hStopEvent);
-	winx_create_event(L"\\udefrag_map_event",
+	(void)winx_create_event(L"\\udefrag_map_event",
 		SynchronizationEvent,&hMapEvent);
 	
-	if(hSynchEvent) NtSetEvent(hSynchEvent,NULL);
-	if(hStopEvent) NtClearEvent(hStopEvent);
-	if(hMapEvent) NtSetEvent(hMapEvent,NULL);
+	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
+	if(hStopEvent) (void)NtClearEvent(hStopEvent);
+	if(hMapEvent) (void)NtSetEvent(hMapEvent,NULL);
 }
 
+/**
+ * @brief Checks for synchronization events existence.
+ * @return Zero for success, negative value otherwise.
+ */
 int CheckForSynchObjects(void)
 {
 	if(!hSynchEvent || !hStopEvent || !hMapEvent) return (-1);
 	return 0;
 }
 
+/**
+ * @brief Checks for the signaled stop event.
+ * @return Boolean value. TRUE indicates that
+ * the stop event is in signaled state, FALSE
+ * indicates contrary.
+ */
 BOOLEAN CheckForStopEvent(void)
 {
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
+	
+	/*
+	* In case when the stop event does not exists,
+	* it seems to be safer to indicate that it is
+	* signaled.
+	*/
+	if(!hStopEvent) return TRUE;
 
 	interval.QuadPart = 0; /* check as fast as possible */
 	Status = NtWaitForSingleObject(hStopEvent,FALSE,&interval);
 	if(Status == STATUS_TIMEOUT || !NT_SUCCESS(Status))	return FALSE;
-	NtSetEvent(hStopEvent,NULL);
+	(void)NtSetEvent(hStopEvent,NULL);
 	return TRUE;
 }
 
+/**
+ * @brief Destroys synchronization events.
+ */
 void DestroySynchObjects(void)
 {
 	winx_destroy_event(hSynchEvent);
@@ -139,6 +171,10 @@ void DestroySynchObjects(void)
 	winx_destroy_event(hMapEvent);
 }
 
+/**
+ * @brief Destroys the free space list, the file list
+ * and the list of the fragmented files.
+ */
 void DestroyLists(void)
 {
 	PFILENAME pfn;
@@ -155,3 +191,5 @@ void DestroyLists(void)
 	winx_list_destroy((list_entry **)(void *)&free_space_map);
 	winx_list_destroy((list_entry **)(void *)&fragmfileslist);
 }
+
+/** @} */

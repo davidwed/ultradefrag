@@ -23,7 +23,7 @@
 
 #include "driver.h"
 
-BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
+BOOLEAN AddFile(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo);
 BOOLEAN UnwantedStuffOnFatOrUdfDetected(UDEFRAG_DEVICE_EXTENSION *dx,
 		PFILE_BOTH_DIR_INFORMATION pFileInfo,PFILENAME pfn);
@@ -157,7 +157,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 		/* skip parent directories in context menu handler */
 		if(context_menu_handler && !inside_flag) continue;
 
-		if(!InsertFileName(dx,Path,pFileInfo)){
+		if(!AddFile(dx,Path,pFileInfo)){
 			DebugPrint("-Ultradfg- InsertFileName failed for %ws\n",Path);
 			ZwClose(DirectoryHandle);
 			ExFreePoolSafe(pFileInfoFirst);
@@ -174,7 +174,7 @@ BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath)
 
 /* inserts the new FILENAME structure to filelist */
 /* Returns TRUE on success and FALSE if no enough memory */
-BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
+BOOLEAN AddFile(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 					   PFILE_BOTH_DIR_INFORMATION pFileInfo)
 {
 	PFILENAME pfn;
@@ -240,7 +240,7 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 		dx->fragmcounter ++;
 	}
 	dx->processed_clusters += pfn->clusters_total;
-	MarkSpace(dx,pfn,SYSTEM_SPACE);
+	MarkFileSpace(dx,pfn,SYSTEM_SPACE);
 
 	if(dx->compact_flag || pfn->is_fragm) return TRUE;
 
@@ -253,7 +253,7 @@ BOOLEAN InsertFileName(UDEFRAG_DEVICE_EXTENSION *dx,short *path,
 
 /* inserts the new structure to list of fragmented files */
 /* Returns TRUE on success and FALSE if no enough memory */
-BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
+BOOLEAN AddFileToFragmented(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn)
 {
 	PFRAGMENTED pf, prev_pf = NULL;
 	

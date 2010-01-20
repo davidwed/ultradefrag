@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - fragmentation report related code.
-*/
+/**
+ * @file report.c
+ * @brief File fragmentation reports code.
+ * @addtogroup Reports
+ * @{
+ */
 
 #include "globals.h"
 
@@ -30,15 +33,18 @@
 */
 
 /* function prototypes */
-void RemoveLuaReportFromDisk(char *volume_name);
-void RemoveTextReportFromDisk(char *volume_name);
-void RemoveHtmlReportFromDisk(char *volume_name);
-BOOLEAN SaveLuaReportToDisk(char *volume_name);
-BOOLEAN SaveTextReportToDisk(char *volume_name);
-void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered);
-void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered);
+static void RemoveLuaReportFromDisk(char *volume_name);
+static void RemoveTextReportFromDisk(char *volume_name);
+static void RemoveHtmlReportFromDisk(char *volume_name);
+static BOOLEAN SaveLuaReportToDisk(char *volume_name);
+static BOOLEAN SaveTextReportToDisk(char *volume_name);
+static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered);
+static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered);
 
-/* reports cleanup */
+/**
+ * @brief Removes all file fragmentation reports from the volume.
+ * @param[in] volume_name the name of the volume.
+ */
 void RemoveReportFromDisk(char *volume_name)
 {
 	RemoveTextReportFromDisk(volume_name);
@@ -46,34 +52,37 @@ void RemoveReportFromDisk(char *volume_name)
 	RemoveHtmlReportFromDisk(volume_name);
 }
 
-void RemoveLuaReportFromDisk(char *volume_name)
+static void RemoveLuaReportFromDisk(char *volume_name)
 {
 	char path[64];
 	
-	_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
+	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
 	path[63] = 0;
-	winx_delete_file(path);
+	(void)winx_delete_file(path);
 }
 
-void RemoveTextReportFromDisk(char *volume_name)
+static void RemoveTextReportFromDisk(char *volume_name)
 {
 	char path[64];
 	
-	_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
+	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
 	path[63] = 0;
-	winx_delete_file(path);
+	(void)winx_delete_file(path);
 }
 
-void RemoveHtmlReportFromDisk(char *volume_name)
+static void RemoveHtmlReportFromDisk(char *volume_name)
 {
 	char path[64];
 	
-	_snprintf(path,64,"\\??\\%s:\\fraglist.htm",volume_name);
+	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.htm",volume_name);
 	path[63] = 0;
-	winx_delete_file(path);
+	(void)winx_delete_file(path);
 }
 
-/* reports saving */
+/**
+ * @brief Saves a file fragmentation report on the volume.
+ * @param[in] volume_name the name of the volume.
+ */
 BOOLEAN SaveReportToDisk(char *volume_name)
 {
 #ifndef UDEFRAG_PORTABLE
@@ -92,7 +101,11 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 #endif
 }
 
-BOOLEAN SaveLuaReportToDisk(char *volume_name)
+/**
+ * @brief Saves a Lua file fragmentation report on the volume.
+ * @param[in] volume_name the name of the volume.
+ */
+static BOOLEAN SaveLuaReportToDisk(char *volume_name)
 {
 	char buffer[512];
 	char path[64];
@@ -100,7 +113,7 @@ BOOLEAN SaveLuaReportToDisk(char *volume_name)
 	
 	if(disable_reports) return TRUE;
 
-	_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
+	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
@@ -108,20 +121,20 @@ BOOLEAN SaveLuaReportToDisk(char *volume_name)
 		return FALSE;
 	}
 	
-	_snprintf(buffer,sizeof(buffer),
+	(void)_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %s:\r\n\r\n"
 		"volume_letter = \"%s\"\r\n\r\n"
 		"files = {\r\n",
 		volume_name, volume_name
 		);
 	buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-	winx_fwrite(buffer,1,strlen(buffer),f);
+	(void)winx_fwrite(buffer,1,strlen(buffer),f);
 
 	WriteLuaReportBody(f,FALSE);
 	//WriteLuaReportBody(f,TRUE);
 
-	strcpy(buffer,"}\r\n");
-	winx_fwrite(buffer,1,strlen(buffer),f);
+	(void)strcpy(buffer,"}\r\n");
+	(void)winx_fwrite(buffer,1,strlen(buffer),f);
 
 	winx_fclose(f);
 
@@ -129,7 +142,7 @@ BOOLEAN SaveLuaReportToDisk(char *volume_name)
 	return TRUE;
 }
 
-void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
+static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 {
 	char buffer[256];
 	PFRAGMENTED pf;
@@ -146,7 +159,7 @@ void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		else if(pf->pfn->is_overlimit) comment = "[OVR]";
 		else if(pf->pfn->is_compressed) comment = "[CMP]";
 		else comment = " - ";
-		_snprintf(buffer, sizeof(buffer),
+		(void)_snprintf(buffer, sizeof(buffer),
 			"\t{fragments = %u,size = %I64u,filtered = %u,"
 			"comment = \"%s\",name = [[",
 			(UINT)pf->pfn->n_fragments,
@@ -155,7 +168,7 @@ void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 			comment
 			);
 		buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-		winx_fwrite(buffer,1,strlen(buffer),f);
+		(void)winx_fwrite(buffer,1,strlen(buffer),f);
 
 		if(RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE) == STATUS_SUCCESS){
 			/* replace square brackets with <> !!! */
@@ -166,33 +179,37 @@ void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 			
 			/* skip \??\ sequence in the beginning */
 			if(as.Length > 0x4)
-				winx_fwrite((void *)((char *)(as.Buffer) + 0x4),1,as.Length - 0x4,f);
+				(void)winx_fwrite((void *)((char *)(as.Buffer) + 0x4),1,as.Length - 0x4,f);
 			else
-				winx_fwrite(as.Buffer,1,as.Length,f);
+				(void)winx_fwrite(as.Buffer,1,as.Length,f);
 			
 			RtlFreeAnsiString(&as);
 		} else {
 			DebugPrint("No enough memory for WriteReportBody()!\n");
 		}
-		strcpy(buffer,"]],uname = {");
-		winx_fwrite(buffer,1,strlen(buffer),f);
+		(void)strcpy(buffer,"]],uname = {");
+		(void)winx_fwrite(buffer,1,strlen(buffer),f);
 		p = (char *)pf->pfn->name.Buffer;
 		/* skip \??\ sequence in the beginning */
 		if(pf->pfn->name.Length > 0x8) offset = 0x8;
 		else offset = 0x0;
 		for(i = offset; i < (pf->pfn->name.Length - offset); i++){
-			_snprintf(buffer,sizeof(buffer),/*"%03u,"*/"%u,",(UINT)p[i]);
+			(void)_snprintf(buffer,sizeof(buffer),/*"%03u,"*/"%u,",(UINT)p[i]);
 			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-			winx_fwrite(buffer,1,strlen(buffer),f);
+			(void)winx_fwrite(buffer,1,strlen(buffer),f);
 		}
-		strcpy(buffer,"}},\r\n");
-		winx_fwrite(buffer,1,strlen(buffer),f);
+		(void)strcpy(buffer,"}},\r\n");
+		(void)winx_fwrite(buffer,1,strlen(buffer),f);
 	next_item:
 		pf = pf->next_ptr;
 	} while(pf != fragmfileslist);
 }
 
-BOOLEAN SaveTextReportToDisk(char *volume_name)
+/**
+ * @brief Saves a PlainText file fragmentation report on the volume.
+ * @param[in] volume_name the name of the volume.
+ */
+static BOOLEAN SaveTextReportToDisk(char *volume_name)
 {
 	short unicode_buffer[256];
 	//unsigned short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
@@ -201,7 +218,7 @@ BOOLEAN SaveTextReportToDisk(char *volume_name)
 	
 	if(disable_reports) return TRUE;
 
-	_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
+	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
@@ -209,13 +226,13 @@ BOOLEAN SaveTextReportToDisk(char *volume_name)
 		return FALSE;
 	}
 	
-	_snwprintf(unicode_buffer,sizeof(unicode_buffer),
+	(void)_snwprintf(unicode_buffer,sizeof(unicode_buffer),
 		L"\r\nFragmented files on %hs:\r\n\r\n",
 		volume_name
 		);
 	/* to be sure that the buffer is terminated by zero */
 	unicode_buffer[sizeof(unicode_buffer)/sizeof(short) - 1] = 0;
-	winx_fwrite(unicode_buffer,2,wcslen(unicode_buffer),f);
+	(void)winx_fwrite(unicode_buffer,2,wcslen(unicode_buffer),f);
 
 	WriteTextReportBody(f,FALSE);
 	//winx_fwrite(line,2,wcslen(line),f);
@@ -227,7 +244,7 @@ BOOLEAN SaveTextReportToDisk(char *volume_name)
 	return TRUE;
 }
 
-void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
+static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 {
 	char buffer[128];
 	PFRAGMENTED pf;
@@ -241,22 +258,24 @@ void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		if(pf->pfn->is_filtered != is_filtered)
 			goto next_item;
 		/* because on NT 4.0 we don't have _itow: */
-		_itoa(pf->pfn->n_fragments,buffer,10);
+		(void)_itoa(pf->pfn->n_fragments,buffer,10);
 		RtlInitAnsiString(&as,buffer);
 		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
 			DebugPrint("No enough memory for WriteReportBody()!\n");
 			return;
 		}
-		winx_fwrite(us.Buffer,1,us.Length,f);
+		(void)winx_fwrite(us.Buffer,1,us.Length,f);
 		RtlFreeUnicodeString(&us);
-		winx_fwrite(e1,2,wcslen(e1),f);
+		(void)winx_fwrite(e1,2,wcslen(e1),f);
 		/* skip \??\ sequence in the beginning */
 		if(pf->pfn->name.Length > 0x8)
-			winx_fwrite((void *)((char *)(pf->pfn->name.Buffer) + 0x8),1,pf->pfn->name.Length - 0x8,f);
+			(void)winx_fwrite((void *)((char *)(pf->pfn->name.Buffer) + 0x8),1,pf->pfn->name.Length - 0x8,f);
 		else
-			winx_fwrite(pf->pfn->name.Buffer,1,pf->pfn->name.Length,f);
-		winx_fwrite(e2,2,wcslen(e2),f);
+			(void)winx_fwrite(pf->pfn->name.Buffer,1,pf->pfn->name.Length,f);
+		(void)winx_fwrite(e2,2,wcslen(e2),f);
 	next_item:
 		pf = pf->next_ptr;
 	} while(pf != fragmfileslist);
 }
+
+/** @} */

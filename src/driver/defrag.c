@@ -251,13 +251,13 @@ BOOLEAN MoveTheFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,ULONGLONG target)
 		dx->fragmcounter -= (pfn->n_fragments - 1);
 		pfn->is_fragm = FALSE; /* before GetSpaceState() call */
 	}
-	ProcessBlock(dx,target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
+	RemarkBlock(dx,target,pfn->clusters_total,GetFileSpaceState(pfn),FREE_SPACE);
 	TruncateFreeSpaceBlock(dx,target,pfn->clusters_total);
 
 	if(Status == STATUS_SUCCESS){
 		/* free previously allocated space (after TruncateFreeSpaceBlock() call!) */
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-			ProcessFreeBlock(dx,block->lcn,block->length,FRAGM_SPACE/*old_state*/);
+			ProcessFreedBlock(dx,block->lcn,block->length,FRAGM_SPACE/*old_state*/);
 			if(block->next_ptr == pfn->blockmap) break;
 		}
 	} else {

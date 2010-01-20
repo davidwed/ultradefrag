@@ -32,6 +32,12 @@
 @verbatim
 #define KERNEL_MODE_DRIVER_SUPPORT
 @endverbatim
+ * - Uncomment the following lines in /src/blditems.cmd
+@verbatim
+cd ..\driver
+lua ..\..\tools\mkmod.lua ultradfg.build
+if %errorlevel% neq 0 goto end
+@endverbatim
  *
  * After program's recompiling run the installer and uncheck the <b>Prefer 
  * new user mode driver</b> box during an installation.

@@ -364,9 +364,9 @@ void UpdateMaxMftEntriesNumber(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,ULONG nfro
 
 void GetFileNameAndParentMftIdFromMftRecord(ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length);
 
-ULONG RunLength(PUCHAR run);
-LONGLONG RunLCN(PUCHAR run);
-ULONGLONG RunCount(PUCHAR run);
+static ULONG RunLength(PUCHAR run);
+static LONGLONG RunLCN(PUCHAR run);
+static ULONGLONG RunCount(PUCHAR run);
 void ProcessRunList(WCHAR *full_path,PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi,BOOLEAN is_attr_list);
 void ProcessRun(WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
 				PFILENAME pfn,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn);

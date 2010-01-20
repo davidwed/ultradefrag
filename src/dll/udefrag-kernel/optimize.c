@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - volume optimization routines.
-*/
+/**
+ * @file optimize.c
+ * @brief Volume optimization code.
+ * @addtogroup Optimizer
+ * @{
+ */
 
 #include "globals.h"
 
@@ -33,10 +36,17 @@ int  OptimizationRoutine(char *volume_name);
 ULONGLONG StartingPoint = 0;
 int pass_number = 0;
 
-/*
-* NOTE: Algorithm is effective always,
-* even if optimized volume has low amount of free space.
-*/
+/**
+ * @brief Performs a volume optimization job.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero for success, negative value otherwise.
+ * @note
+ * - The algorithm used here is effective. Even
+ * when the volume to be optimized has a low amount
+ * of free space.
+ * - We cannot update a number of fragmented files
+ * during the volume optimization process.
+ */
 int Optimize(char *volume_name)
 {
 	PFREEBLOCKMAP freeblock;
@@ -98,7 +108,12 @@ int Optimize(char *volume_name)
 	return 0;
 }
 
-/* returns -1 if no files were defragmented or optimized, zero otherwise */
+/**
+ * @brief Performs a single pass of the volume optimization.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero if at least one file has been
+ * defragmented or optimized, negative value otherwise.
+ */
 int OptimizationRoutine(char *volume_name)
 {
 	PFREEBLOCKMAP freeblock;
@@ -132,7 +147,7 @@ int OptimizationRoutine(char *volume_name)
 	* Large files will be moved to the beginning of the volume.
 	*/
 	DebugPrint("----- Second step of optimization of %s: -----\n",volume_name);
-	Analyze(volume_name);
+	if(Analyze(volume_name) < 0) return (-1);
 	///DbgPrintFreeSpaceList();
 	defragmenter_result = Defragment(volume_name);
 	///DbgPrintFreeSpaceList();
@@ -146,28 +161,20 @@ int OptimizationRoutine(char *volume_name)
 	
 optimization_done:	
 	/* Analyse volume again to update fragmented files list. */
-	NtClearEvent(hStopEvent);
-	Analyze(volume_name);
+	(void)NtClearEvent(hStopEvent);
+	if(Analyze(volume_name) < 0) return (-1);
 	
 	if(defragmenter_result >= 0 || optimizer_result >= 0) return 0;
 	return (-1);
 }
 
-/*
-* NOTES:
-* 1. On FAT it's bad idea, because dirs aren't moveable.
-* 2. On NTFS cycle of attempts is a bad solution,
-* because it increases processing time. Also on NTFS all 
-* space freed during the defragmentation is still temporarily
-* allocated by system for a long time.
-* 3. It makes an analysis after each volume optimization to 
-* update list of fragmented files.
-* 4. Usually this function increases a number of fragmented files.
-* 5. We cannot update a number of fragmented files during the 
-* optimization process.
-*/
-
-/* Starting point takes no effect here */
+/**
+ * @brief Defragments the free space by moving
+ * all files to the beginning part of the volume.
+ * @note
+ * - StartingPoint takes no effect here.
+ * - Usually this function increases a number of fragmented files.
+ */
 void DefragmentFreeSpaceRTL(void)
 {
 	PFILENAME pfn, lastpfn;
@@ -207,9 +214,9 @@ void DefragmentFreeSpaceRTL(void)
 				MovePartOfFileBlock(lastpfn,vcn,freeblock->lcn,length);
 				movings ++;
 				Stat.processed_clusters += length;
-				ProcessBlock(freeblock->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
-				ProcessBlock(lastblock->lcn + (lastblock->length - length),length,
-					FREE_SPACE,GetSpaceState(lastpfn));
+				RemarkBlock(freeblock->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
+				RemarkBlock(lastblock->lcn + (lastblock->length - length),length,
+					FREE_SPACE,GetFileSpaceState(lastpfn));
 				freeblock->length -= length;
 				freeblock->lcn += length;
 				lastblock->length -= length;
@@ -225,7 +232,13 @@ void DefragmentFreeSpaceRTL(void)
 	}
 }
 
-/* Starting point works here */
+/**
+ * @brief Defragments the free space by moving
+ * all files to the terminal part of the volume.
+ * @note
+ * - StartingPoint works here.
+ * - Usually this function increases a number of fragmented files.
+ */
 void DefragmentFreeSpaceLTR(void)
 {
 	PFILENAME pfn, firstpfn;
@@ -267,9 +280,9 @@ void DefragmentFreeSpaceLTR(void)
 					freeblock->lcn + (freeblock->length - length),length);
 				movings ++;
 				Stat.processed_clusters += length;
-				ProcessBlock(freeblock->lcn + (freeblock->length - length),length,
+				RemarkBlock(freeblock->lcn + (freeblock->length - length),length,
 					UNKNOWN_SPACE,FREE_SPACE);
-				ProcessBlock(firstblock->lcn,length,FREE_SPACE,GetSpaceState(firstpfn));
+				RemarkBlock(firstblock->lcn,length,FREE_SPACE,GetFileSpaceState(firstpfn));
 				freeblock->length -= length;
 				firstblock->vcn += length;
 				firstblock->lcn += length;
@@ -286,7 +299,16 @@ void DefragmentFreeSpaceLTR(void)
 	}
 }
 
-/* For optimizer only, not for defragmenter! */
+/**
+ * @brief Moves a file containing a single fragment.
+ * @details Updates the global statistics and map.
+ * @param[in] pfn pointer to the structure describing the file.
+ * @param[in] target the starting logical cluster number
+ * defining position of target space on the volume.
+ * @return Boolean value. TRUE indicates success,
+ * FALSE indicates failure.
+ * @note For optimizer only, not for defragmenter!
+ */
 BOOLEAN MoveTheUnfragmentedFile(PFILENAME pfn,ULONGLONG target)
 {
 	NTSTATUS Status;
@@ -309,12 +331,12 @@ BOOLEAN MoveTheUnfragmentedFile(PFILENAME pfn,ULONGLONG target)
 	NtClose(hFile);
 	
 	/* first of all: remove target space from free space pool */
-	ProcessBlock(target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
+	RemarkBlock(target,pfn->clusters_total,GetFileSpaceState(pfn),FREE_SPACE);
 	TruncateFreeSpaceBlock(target,pfn->clusters_total);
 
 	/* free previously allocated space (after TruncateFreeSpaceBlock() call!) */
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		ProcessFreeBlock(block->lcn,block->length,FRAGM_SPACE/*old_state*/);
+		ProcessFreedBlock(block->lcn,block->length,FRAGM_SPACE/*old_state*/);
 		if(block->next_ptr == pfn->blockmap) break;
 	}
 
@@ -322,7 +344,11 @@ BOOLEAN MoveTheUnfragmentedFile(PFILENAME pfn,ULONGLONG target)
 	return TRUE;
 }
 
-/* returns -1 if no files were moved, zero otherwise */
+/**
+ * @brief Moves all files to the beginning part of the volume.
+ * @return Zero if at least one file has been
+ * moved, negative value otherwise.
+ */
 int MoveAllFilesRTL(void)
 {
 	PFREEBLOCKMAP block;
@@ -359,10 +385,10 @@ int MoveAllFilesRTL(void)
 		}
 		if(!plargest) goto L1; /* current block is too small */
 		/* skip fragmented files */
-		///if(plargest->is_fragm) goto L1; /* never do it!!! */
-		/* if uncomment the previous line file moving will never be ahieved, because free blocks 
-		 will be always skipped by this instruction */
-		/* move file */
+		//if(plargest->is_fragm) goto L1; /* never do it!!! */
+		/* if uncomment the previous line the file moving will never start,
+		   because free blocks will be always skipped by this instruction */
+		/* move the file */
 		if(MoveTheUnfragmentedFile(plargest,block->lcn)){
 			DebugPrint("Moving success for %ws\n",plargest->name.Buffer);
 			movings++;
@@ -379,6 +405,18 @@ int MoveAllFilesRTL(void)
 	return (movings == 0) ? (-1) : (0);
 }
 
+/**
+ * @brief Moves a part of file.
+ * @param[in] pfn pointer to the structure describing the file.
+ * @param[in] startVcn the starting virtual cluster number
+ *                     defining position inside the file.
+ * @param[in] targetLcn the starting logical cluster number
+ *                      defining position of target space
+ *                      on the volume.
+ * @param[in] n_clusters the number of clusters to move.
+ * @note On NT 4.0 this function has no size limit
+ * for the part of file to be moved, unlike the MovePartOfFile().
+ */
 void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,
 		ULONGLONG targetLcn,ULONGLONG n_clusters)
 {
@@ -407,3 +445,5 @@ void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,
 
 	NtClose(hFile);
 }
+
+/** @} */

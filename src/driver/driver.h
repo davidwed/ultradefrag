@@ -325,7 +325,7 @@ typedef struct _UDEFRAG_DEVICE_EXTENSION
 void ApplyFilter(UDEFRAG_DEVICE_EXTENSION *dx);
 void CheckForFatPartition(UDEFRAG_DEVICE_EXTENSION *dx);
 void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx);
-void CleanupFreeSpaceList(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
+void RemoveFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len);
 void CloseVolume(UDEFRAG_DEVICE_EXTENSION *dx);
 int  Defragment(UDEFRAG_DEVICE_EXTENSION *dx);
 void DefragmentFreeSpace(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -337,13 +337,13 @@ void GenerateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
 void GetMap(char *dest);
 void InitDX(UDEFRAG_DEVICE_EXTENSION *dx);
 void InitDX_0(UDEFRAG_DEVICE_EXTENSION *dx);
-void InsertFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length,UCHAR old_space_state);
+void AddFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 void MarkAllSpaceAsSystem0(UDEFRAG_DEVICE_EXTENSION *dx);
 void MarkAllSpaceAsSystem1(UDEFRAG_DEVICE_EXTENSION *dx);
-void MarkSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state);
+void MarkFileSpace(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn,int old_space_state);
 void Optimize(UDEFRAG_DEVICE_EXTENSION *dx);
-void ProcessBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state,int old_space_state);
-void ProcessFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
+void RemarkBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len, int space_state,int old_space_state);
+void ProcessFreedBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG len,UCHAR old_space_state);
 void TruncateFreeSpaceBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
 void UpdateFilter(UDEFRAG_DEVICE_EXTENSION *dx,PFILTER pf,short *buffer,int length);
 void UpdateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -353,7 +353,7 @@ BOOLEAN ConsoleUnwantedStuffDetected(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *Path,UL
 BOOLEAN DefragmentFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 BOOLEAN DumpFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 BOOLEAN FindFiles(UDEFRAG_DEVICE_EXTENSION *dx,WCHAR *ParentDirectoryPath);
-BOOLEAN InsertFragmentedFile(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
+BOOLEAN AddFileToFragmented(UDEFRAG_DEVICE_EXTENSION *dx,PFILENAME pfn);
 BOOLEAN IsStringInFilter(short *str,PFILTER pf);
 BOOLEAN SaveFragmFilesListToDisk(UDEFRAG_DEVICE_EXTENSION *dx);
 BOOLEAN ScanFat12Partition(UDEFRAG_DEVICE_EXTENSION *dx);
@@ -381,9 +381,7 @@ void NTAPI DestroyList(PLIST *phead);
 PVOID KernelGetModuleBase(PCHAR pModuleName);
 PVOID KernelGetProcAddress(PVOID ModuleBase,PCHAR pFunctionName);
 
-FREEBLOCKMAP *InsertLastFreeBlock(UDEFRAG_DEVICE_EXTENSION *dx,ULONGLONG start,ULONGLONG length);
-
-unsigned char GetSpaceState(PFILENAME pfn);
+unsigned char GetFileSpaceState(PFILENAME pfn);
 
 void stop_all_requests(void);
 

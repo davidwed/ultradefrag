@@ -597,7 +597,7 @@ BOOLEAN InsertFileToFileList(UDEFRAG_DEVICE_EXTENSION *dx,DIRENTRY *DirEntry,WCH
 		dx->fragmcounter ++;
 	}
 	dx->processed_clusters += pfn->clusters_total;
-	MarkSpace(dx,pfn,SYSTEM_SPACE);
+	MarkFileSpace(dx,pfn,SYSTEM_SPACE);
 
 	if(dx->compact_flag || pfn->is_fragm) return TRUE;
 

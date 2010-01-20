@@ -215,7 +215,7 @@ void GenerateFragmentedFilesList(UDEFRAG_DEVICE_EXTENSION *dx)
 
 	for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(pfn->is_fragm && !pfn->is_filtered && !pfn->is_reparse_point)
-			InsertFragmentedFile(dx,pfn);
+			AddFileToFragmented(dx,pfn);
 		if(pfn->next_ptr == dx->filelist) break;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,21 +17,15 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - NTFS related code.
-*/
+/**
+ * @file ntfs.c
+ * @brief Fast NTFS analysis code.
+ * @addtogroup NTFS
+ * @{
+ */
 
 #include "globals.h"
 #include "ntfs.h"
-
-/*
-* We should exclude here as many files as possible.
-* All temporary files (in large meaning) 
-* may be left fragmented ;-)
-*
-* Better is to include all files in full list.
-* Because this method has simplest implementation ;-)
-*/
 
 /*
 * FIXME: add data consistency checks everywhere,
@@ -49,7 +43,11 @@ UINT MftScanDirection = MFT_SCAN_RTL;
 BOOLEAN MaxMftEntriesNumberUpdated = FALSE;
 BOOLEAN ResidentDirectory;
 
-/* sets global partition_type variable */
+/**
+ * @brief Retrieves a type of the file system 
+ *        containing on the volume.
+ * @details Sets the global partition_type variable.
+ */
 void CheckForNtfsPartition(void)
 {
 	PARTITION_INFORMATION part_info;
@@ -67,7 +65,7 @@ void CheckForNtfsPartition(void)
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
 				&part_info, sizeof(PARTITION_INFORMATION));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
-		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
+		(void)NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
 	if(NT_SUCCESS(status)){
@@ -91,7 +89,7 @@ void CheckForNtfsPartition(void)
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
-		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
+		(void)NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
 	if(NT_SUCCESS(status)){
@@ -110,6 +108,10 @@ void CheckForNtfsPartition(void)
 	DebugPrint("NTFS not found\n");
 }
 
+/**
+ * @brief Retrieves some basic information about MFT.
+ * @return An appropriate NTSTATUS code.
+ */
 NTSTATUS GetMftLayout(void)
 {
 	IO_STATUS_BLOCK iosb;
@@ -122,7 +124,7 @@ NTSTATUS GetMftLayout(void)
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
 				&ntfs_data, sizeof(NTFS_DATA));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
-		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
+		(void)NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
 	if(!NT_SUCCESS(status)){
@@ -146,6 +148,11 @@ NTSTATUS GetMftLayout(void)
 	return STATUS_SUCCESS;
 }
 
+/**
+ * @brief Scans the entire MFT retrieving information
+ * about each file contained on the volume.
+ * @return Boolean value. TRUE indicates success.
+ */
 BOOLEAN ScanMFT(void)
 {
 	PMY_FILE_INFORMATION pmfi;
@@ -163,7 +170,7 @@ BOOLEAN ScanMFT(void)
 	if(!NT_SUCCESS(status)){
 		DebugPrint("ProcessMFT() failed!\n");
 		DebugPrint("MFT scan finished!\n");
-		return FALSE; /* FIXME: better error handling */
+		return FALSE;
 	}
 
 	/* allocate memory for NTFS record */
@@ -198,7 +205,7 @@ BOOLEAN ScanMFT(void)
 		winx_heap_free(pnfrob);
 		winx_heap_free(pmfi);
 		//DestroyMftBlockmap();
-		return FALSE; /* FIXME: better error handling */
+		return FALSE;
 	}
 
 	/* Is MFT size an integral of NTFS record size? */
@@ -254,6 +261,12 @@ BOOLEAN ScanMFT(void)
 	return TRUE;
 }
 
+/**
+ * @brief Defines exactly how many entries has the MFT.
+ * @param[in] pnfrob pointer to the buffer receiving a
+ * single NTFS record for the internal computations.
+ * @param[in] nfrob_size the size of the buffer, in bytes.
+ */
 void UpdateMaxMftEntriesNumber(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,ULONG nfrob_size)
 {
 	NTSTATUS status;
@@ -285,11 +298,15 @@ void UpdateMaxMftEntriesNumber(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,ULONG nfro
 	EnumerateAttributes(pfrh,UpdateMaxMftEntriesNumberCallback,NULL);
 }
 
-/* pmfi == NULL */
+/**
+ */
 void __stdcall UpdateMaxMftEntriesNumberCallback(PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
 {
 	PNONRESIDENT_ATTRIBUTE pnr_attr;
 
+	/* here pmfi == NULL always */
+	(void)pmfi;
+	
 	if(pattr->Nonresident && pattr->AttributeType == AttributeData){
 		pnr_attr = (PNONRESIDENT_ATTRIBUTE)pattr;
 		if(ntfs_record_size){
@@ -305,7 +322,14 @@ void __stdcall UpdateMaxMftEntriesNumberCallback(PATTRIBUTE pattr,PMY_FILE_INFOR
 	}
 }
 
-/* it seems that Win API works very slow here?? */
+/**
+ * @brief Retrieves a single MFT record.
+ * @param[out] pnfrob pointer to the buffer
+ * receiving the MFT record.
+ * @param[in] nfrob_size the size of the buffer, in bytes.
+ * @param[in] mft_id the MFT record number.
+ * @return An appropriate NTSTATUS code.
+ */
 NTSTATUS GetMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 					  ULONG nfrob_size,ULONGLONG mft_id)
 {
@@ -321,12 +345,20 @@ NTSTATUS GetMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 			&nfrib,sizeof(nfrib), \
 			pnfrob, nfrob_size);
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
-		NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
+		(void)NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
 	return status;
 }
 
+/**
+ * @brief Analyzes the MFT record.
+ * @param[out] pnfrob pointer to the buffer
+ * containing the MFT record.
+ * @param[in] nfrob_size the size of the buffer, in bytes.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file containing in MFT record.
+ */
 void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 					  ULONG nfrob_size,PMY_FILE_INFORMATION pmfi)
 {
@@ -386,7 +418,16 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	#endif
 }
 
-/* dx->ntfs_record_size must be initialized before */
+/**
+ * @brief Enumerates attributes contained in MFT record.
+ * @param[in] pfrh pointer to the file record header.
+ * @param[in] ahp pointer to the callback procedure
+ * to be called once for each attribute found.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file containing in MFT record.
+ * @note The ntfs_record_size global variable must be
+ * initialized before this call.
+ */
 void EnumerateAttributes(PFILE_RECORD_HEADER pfrh,
 						 ATTRHANDLER_PROC ahp,PMY_FILE_INFORMATION pmfi)
 {
@@ -423,30 +464,42 @@ void EnumerateAttributes(PFILE_RECORD_HEADER pfrh,
 	}
 }
 
+/**
+ */
 void __stdcall AnalyseAttributeCallback(PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
 {
 	if(pattr->AttributeType != AttributeAttributeList)
 		AnalyseAttribute(pattr,pmfi);
 }
 
+/**
+ */
 void __stdcall AnalyseAttributeListCallback(PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
 {
 	if(pattr->AttributeType == AttributeAttributeList)
 		AnalyseAttribute(pattr,pmfi);
 }
 
+/**
+ * @brief Analyzes a file attribute.
+ */
 void AnalyseAttribute(PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
 {
 	if(pattr->Nonresident) AnalyseNonResidentAttribute((PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
 	else AnalyseResidentAttribute((PRESIDENT_ATTRIBUTE)pattr,pmfi);
 }
 
-/*
-* Resident attributes never contain fragmented data,
-* because they are placed in MFT record entirely.
-* We analyse resident attributes only if we need some
-* information stored in them.
-*/
+/**
+ * @brief Analyzes a resident attribute of the file.
+ * @param[in] pr_attr pointer to the structure
+ * describing the resident attribute of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file containing in MFT record.
+ * @note Resident attributes never contain fragmented data,
+ * because they are placed in MFT record entirely.
+ * We analyze resident attributes only if we need some
+ * information stored in them.
+ */
 void AnalyseResidentAttribute(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 {
 	if(pr_attr->ValueOffset == 0 || pr_attr->ValueLength == 0) return;
@@ -478,6 +531,13 @@ void AnalyseResidentAttribute(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION p
 	}
 }
 
+/**
+ * @brief Retrieves a flags of the file.
+ * @param[in] pr_attr pointer to the structure
+ * describing the resident attribute of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ */
 void GetFileFlags(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 {
 	PSTANDARD_INFORMATION psi;
@@ -488,7 +548,14 @@ void GetFileFlags(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 	pmfi->Flags = Flags;
 }
 
-/* MY_FILE_INFORMATION structure MUST be initialized before! */
+/**
+ * @brief Retrieves a name of the file.
+ * @param[in] pr_attr pointer to the structure
+ * describing the resident attribute of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ * @note The pmfi pointed structure MUST be initialized before!
+ */
 void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 {
 	PFILENAME_ATTRIBUTE pfn_attr;
@@ -507,7 +574,7 @@ void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 	}
 
 	if(pfn_attr->NameLength){
-		wcsncpy(name,pfn_attr->Name,pfn_attr->NameLength);
+		(void)wcsncpy(name,pfn_attr->Name,pfn_attr->NameLength);
 		name[pfn_attr->NameLength] = 0;
 		//DbgPrint("-Ultradfg- Filename = %ws, parent id = %I64u\n",name,parent_mft_id);
 		/* update pmfi members */
@@ -521,17 +588,31 @@ void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 	winx_heap_free(name);
 }
 
+/**
+ * @brief Updates a name of the file.
+ * @details Replaces a DOS name by WINDOWS name,
+ * WINDOWS name by POSIX when available.
+ * @param[in,out] pmfi pointer to the structure
+ * containing information about the file.
+ * @param[in] name the name of the file.
+ * @param[in] name_type the type of the file name.
+ */
 void UpdateFileName(PMY_FILE_INFORMATION pmfi,WCHAR *name,UCHAR name_type)
 {
 	/* compare name type with type of saved name */
 	if(pmfi->Name[0] == 0 || pmfi->NameType == FILENAME_DOS || \
 	  ((pmfi->NameType & FILENAME_WIN32) && (name_type == FILENAME_POSIX))){
-		wcsncpy(pmfi->Name,name,MAX_NTFS_PATH);
+		(void)wcsncpy(pmfi->Name,name,MAX_NTFS_PATH);
 		pmfi->Name[MAX_NTFS_PATH-1] = 0;
 		pmfi->NameType = name_type;
 	}
 }
 
+/**
+ * @brief Retrieves some filesystem information.
+ * @param[in] pr_attr pointer to the structure
+ * describing the resident attribute of the file.
+ */
 void GetVolumeInformationData(PRESIDENT_ATTRIBUTE pr_attr)
 {
 	PVOLUME_INFORMATION pvi;
@@ -546,6 +627,13 @@ void GetVolumeInformationData(PRESIDENT_ATTRIBUTE pr_attr)
 	if(dirty_flag) DebugPrint("Volume is dirty!\n");
 }
 
+/**
+ * @brief Retrieves an information about the reparse point.
+ * @param[in] pr_attr pointer to the structure
+ * describing the resident attribute of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ */
 void CheckReparsePointResident(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 {
 	PREPARSE_POINT prp;
@@ -558,7 +646,15 @@ void CheckReparsePointResident(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION 
 	pmfi->IsReparsePoint = TRUE;
 }
 
-/* Analyse attributes of the current file packed in another mft records. */
+/**
+ * @brief Analyzes a resident attribute list.
+ * @details Analyzes attributes of the current file
+ * packed in another MFT records.
+ * @param[in] pr_attr pointer to the structure
+ * describing the resident attribute of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ */
 void AnalyseResidentAttributeList(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 {
 	PATTRIBUTE_LIST attr_list_entry;
@@ -574,7 +670,7 @@ void AnalyseResidentAttributeList(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATI
 		if(attr_list_entry->AttributeType == 0xffffffff) break;
 		if(attr_list_entry->AttributeType == 0x0) break;
 		if(attr_list_entry->Length == 0) break;
-		///DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
+		//DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
 		AnalyseAttributeFromAttributeList(attr_list_entry,pmfi);
 		/* go to the next attribute list entry */
 		length = attr_list_entry->Length;
@@ -582,6 +678,12 @@ void AnalyseResidentAttributeList(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATI
 	}
 }
 
+/**
+ * @brief Analyzes a file attribute from the attribute list.
+ * @param[in] attr_list_entry pointer to the attribute list entry.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ */
 void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_INFORMATION pmfi)
 {
 	PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob = NULL;
@@ -648,18 +750,25 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
 	winx_heap_free(pnfrob);
 }
 
+/**
+ */
 void __stdcall AnalyseAttributeFromAttributeListCallback(PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
 {
 	if(pattr->Nonresident) AnalyseNonResidentAttribute((PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
 }
 
-/*
-* These attributes may contain fragmented data.
-* 
-* Standard Information and File Name are resident and 
-* always before nonresident attributes. So we will always have 
-* file flags and name before this call.
-*/
+/**
+ * @brief Analyzes a nonresident attribute of the file.
+ * @param[in] pnr_attr pointer to the structure
+ * describing the nonresident attribute of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ * @note
+ * - Nonresident attributes may contain fragmented data.
+ * - Standard Information and File Name are resident and 
+ * always before nonresident attributes. So we will always have 
+ * file flags and a name before this call.
+ */
 void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi)
 {
 	WCHAR *default_attr_name = NULL;
@@ -735,21 +844,21 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	if(pnr_attr->Attribute.NameLength){
 		/* append a name of attribute to filename */
 		/* NameLength is always less than MAX_PATH :) */
-		wcsncpy(attr_name,(short *)((char *)pnr_attr + pnr_attr->Attribute.NameOffset),
+		(void)wcsncpy(attr_name,(short *)((char *)pnr_attr + pnr_attr->Attribute.NameOffset),
 			pnr_attr->Attribute.NameLength);
 		attr_name[pnr_attr->Attribute.NameLength] = 0;
 		if(wcscmp(attr_name,L"$I30") != 0){
-			_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
+			(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
 		} else {
-			wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
+			(void)wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
 			ResidentDirectory = FALSE;
 		}
 	} else {
 		/* append default name of attribute to filename */
 		if(wcscmp(default_attr_name,L"$DATA")){
-			_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,default_attr_name);
+			(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,default_attr_name);
 		} else {
-			wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
+			(void)wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
 			ResidentDirectory = FALSE; /* let's assume that */
 		}
 	}
@@ -776,12 +885,16 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	winx_heap_free(full_path);
 }
 
-ULONG RunLength(PUCHAR run)
+/**
+ */
+static ULONG RunLength(PUCHAR run)
 {
 	return (*run & 0xf) + ((*run >> 4) & 0xf) + 1;
 }
 
-LONGLONG RunLCN(PUCHAR run)
+/**
+ */
+static LONGLONG RunLCN(PUCHAR run)
 {
 	LONG i;
 	UCHAR n1 = *run & 0xf;
@@ -793,7 +906,9 @@ LONGLONG RunLCN(PUCHAR run)
 	return lcn;
 }
 
-ULONGLONG RunCount(PUCHAR run)
+/**
+ */
+static ULONGLONG RunCount(PUCHAR run)
 {
 	ULONG i;
 	UCHAR n = *run & 0xf;
@@ -804,7 +919,16 @@ ULONGLONG RunCount(PUCHAR run)
 	return count;
 }
 
-/* Saves information about VCN/LCN pairs of the attribute specified by full_path parameter. */
+/**
+ * @brief Retrieves VCN/LCN pairs of the attribute.
+ * @param[in] full_path the full path of the attribute.
+ * @param[in] pnr_attr pointer to the structure
+ * describing the nonresident attribute of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ * @param[in] is_attr_list boolean value indicating, is
+ * attribute list to be analysed or not.
+ */
 void ProcessRunList(WCHAR *full_path,
 					PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi,
 					BOOLEAN is_attr_list)
@@ -851,6 +975,14 @@ void ProcessRunList(WCHAR *full_path,
 	if(is_attr_list) AnalyseNonResidentAttributeList(pfn,pmfi,pnr_attr->InitializedSize);
 }
 
+/**
+ * @brief Analyzes a nonresident attribute list.
+ * @param[out] pfn pointer to the structure containing
+ * information about the attribute list file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file.
+ * @param[in] size the size of the attribute list file, in bytes.
+ */
 void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULONGLONG size)
 {
 	ULONGLONG clusters_to_read;
@@ -903,7 +1035,7 @@ void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULO
 		if(attr_list_entry->AttributeType == 0xffffffff) break;
 		if(attr_list_entry->AttributeType == 0x0) break;
 		if(attr_list_entry->Length == 0) break;
-		///DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
+		//DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
 		AnalyseAttributeFromAttributeList(attr_list_entry,pmfi);
 		/* go to the next attribute list entry */
 		length = attr_list_entry->Length;
@@ -917,7 +1049,14 @@ scan_done:
 
 /*------------------------ Defragmentation related code ------------------------------*/
 
-/* returns complete MFT length, in clusters */
+/**
+ * @brief Retrieves MFT position and size
+ * and applies them to the cluster map.
+ * @param[in] nd pointer to the structure
+ * containing all information needed for
+ * computations.
+ * @return The complete MFT length, in clusters.
+ */
 ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 {
 	ULONGLONG start,len,mft_len = 0;
@@ -942,23 +1081,23 @@ ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 	else
 		len = 0;
 	DebugPrint("$MFT       :%I64u :%I64u\n",start,len);
-	ProcessBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
-	CleanupFreeSpaceList(start,len);
+	RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
+	RemoveFreeSpaceBlock(start,len);
 	mft_len += len;
 
 	/* $MFT2 */
 	start = nd->MftZoneStart.QuadPart;
 	len = nd->MftZoneEnd.QuadPart - nd->MftZoneStart.QuadPart;
 	DebugPrint("$MFT2      :%I64u :%I64u\n",start,len);
-	ProcessBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
-	CleanupFreeSpaceList(start,len);
+	RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
+	RemoveFreeSpaceBlock(start,len);
 	mft_len += len;
 
 	/* $MFTMirror */
 	start = nd->Mft2StartLcn.QuadPart;
 	DebugPrint("$MFTMirror :%I64u :1\n",start);
-	ProcessBlock(start,1,MFT_SPACE,SYSTEM_SPACE);
-	CleanupFreeSpaceList(start,1);
+	RemarkBlock(start,1,MFT_SPACE,SYSTEM_SPACE);
+	RemoveFreeSpaceBlock(start,1);
 	mft_len ++;
 	
 	return mft_len;
@@ -969,6 +1108,18 @@ ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 * for(pfn = dx->filelist; pfn != NULL; pfn = pfn->next_ptr) for each file
 */
 
+/**
+ * @brief Adds information about a single VCN/LCN pair
+ * to the structure describing the file.
+ * @param[in] full_path the full path of the file.
+ * @param[out] pmfi pointer to the structure receiving
+ * information about the file. 
+ * @param[in,out] pfn pointer to the structure receiving
+ * information about the file.
+ * @param[in] vcn the virtual cluster number.
+ * @param[in] length the length of the block.
+ * @param[in] lcn the logical cluster number.
+ */
 void ProcessRun(WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
 				PFILENAME pfn,ULONGLONG vcn,ULONGLONG length,ULONGLONG lcn)
 {
@@ -978,6 +1129,8 @@ void ProcessRun(WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
 		DbgPrint("VCN %I64u : LEN %I64u : LCN %I64u\n",vcn,length,lcn);
 	}
 */
+	(void)pmfi;
+	
 	/* add information to blockmap member of specified pfn structure */
 	if(pfn->blockmap) prev_block = pfn->blockmap->prev_ptr;
 	block = (PBLOCKMAP)winx_list_insert_item((list_entry **)&pfn->blockmap,(list_entry *)prev_block,sizeof(BLOCKMAP));
@@ -998,6 +1151,15 @@ void ProcessRun(WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
 		pfn->is_fragm = TRUE;
 }
 
+/**
+ * @brief Searches for the file list
+ * entry describing the file.
+ * @param[in] full_path the full path of the file.
+ * @param[in] pmfi pointer to the structure containing
+ * information about the file. 
+ * @return A pointer to the structure describing the file.
+ * NULL indicates failure.
+ */
 PFILENAME FindFileListEntryForTheAttribute(WCHAR *full_path,PMY_FILE_INFORMATION pmfi)
 {
 	PFILENAME pfn;
@@ -1043,6 +1205,12 @@ PFILENAME FindFileListEntryForTheAttribute(WCHAR *full_path,PMY_FILE_INFORMATION
 	return pfn;
 }
 
+/**
+ * @brief Applies information about the file
+ * to the cluster map and statistics.
+ * @param[in] pmfi pointer to the structure containing
+ * information about the file.
+ */
 void UpdateClusterMapAndStatistics(PMY_FILE_INFORMATION pmfi)
 {
 	PFILENAME pfn;
@@ -1108,6 +1276,13 @@ void UpdateClusterMapAndStatistics(PMY_FILE_INFORMATION pmfi)
 	}
 }
 
+/**
+ * @brief Defines, is a file temporary or not.
+ * @param[in] pmfi pointer to the structure containing
+ * information about the file.
+ * @return Boolean value. TRUE indicates that the file
+ * is temporary.
+ */
 BOOLEAN TemporaryStuffDetected(PMY_FILE_INFORMATION pmfi)
 {
 	/* skip temporary files ;-) */
@@ -1119,6 +1294,13 @@ BOOLEAN TemporaryStuffDetected(PMY_FILE_INFORMATION pmfi)
 }
 
 /* that's unbelievable, but this function runs fast */
+/**
+ * @brief Checks, must file be skipped or not.
+ * @param[in] pfn pointer to the variable
+ * containing information about the file.
+ * @return Boolean value. TRUE indicates that
+ * the file must be skipped, FALSE indicates contrary.
+ */
 BOOLEAN UnwantedStuffDetected(PFILENAME pfn)
 {
 	UNICODE_STRING us;
@@ -1128,7 +1310,7 @@ BOOLEAN UnwantedStuffDetected(PFILENAME pfn)
 		DebugPrint2("Cannot allocate memory for UnwantedStuffDetected()!\n");
 		return FALSE;
 	}
-	_wcslwr(us.Buffer);
+	(void)_wcslwr(us.Buffer);
 
 	if(in_filter.buffer){
 		if(!IsStringInFilter(us.Buffer,&in_filter)){
@@ -1150,6 +1332,10 @@ PMY_FILE_ENTRY mf = NULL; /* pointer to array of MY_FILE_ENTRY structures */
 ULONG n_entries;
 BOOLEAN mf_allocated = FALSE;
 
+/**
+ * @brief Builds a full paths of all files
+ * contained on the volume.
+ */
 void BuildPaths(void)
 {
 	PFILENAME pfn;
@@ -1190,7 +1376,7 @@ void BuildPaths(void)
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		BuildPath2(pfn);
 		if(UnwantedStuffDetected(pfn)) pfn->is_filtered = TRUE;
-		MarkSpace(pfn,SYSTEM_SPACE);
+		MarkFileSpace(pfn,SYSTEM_SPACE);
 		/* skip here filtered out and big files and reparse points */
 		if(pfn->is_fragm && !pfn->is_reparse_point &&
 			((!pfn->is_filtered && !pfn->is_overlimit) || optimize_flag)
@@ -1207,6 +1393,11 @@ void BuildPaths(void)
 	if(mf_allocated) winx_heap_free(mf);
 }
 
+/**
+ * @brief Builds a full path of the file.
+ * @param[in,out] pfn pointer to the structure
+ * containing information about the file.
+ */
 void BuildPath2(PFILENAME pfn)
 {
 	WCHAR *buffer1;
@@ -1247,7 +1438,7 @@ void BuildPath2(PFILENAME pfn)
 	}
 
 	offset -= (name_length - 1);
-	wcsncpy(buffer1 + offset,pfn->name.Buffer,name_length);
+	(void)wcsncpy(buffer1 + offset,pfn->name.Buffer,name_length);
 
 	if(offset == 0) goto path_is_too_long;
 	offset --;
@@ -1272,7 +1463,7 @@ void BuildPath2(PFILENAME pfn)
 		name_length = wcslen(buffer2);
 		if(offset < (name_length - 1)) goto path_is_too_long;
 		offset -= (name_length - 1);
-		wcsncpy(buffer1 + offset,buffer2,name_length);
+		(void)wcsncpy(buffer1 + offset,buffer2,name_length);
 		
 		if(FullPathRetrieved) goto update_filename;
 		
@@ -1289,7 +1480,7 @@ void BuildPath2(PFILENAME pfn)
 	name_length = wcslen(header);
 	if(offset < (name_length - 1)) goto path_is_too_long;
 	offset -= (name_length - 1);
-	wcsncpy(buffer1 + offset,header,name_length);
+	(void)wcsncpy(buffer1 + offset,header,name_length);
 
 update_filename:	
 	/* replace pfn->name contents with full path */
@@ -1320,6 +1511,20 @@ path_is_too_long:
 	winx_heap_free(buffer2);
 }
 
+/**
+ * @brief Retrieves a file name and a parent MFT
+ * identifier for the MFT record.
+ * @param[in] mft_id the MFT record number.
+ * @param[out] parent_mft_id pointer to the
+ * variable receiving the parent MFT identifier.
+ * @param[out] buffer pointer to buffer receiving
+ * a file name.
+ * @param[in] length the length of the buffer,
+ * in characters.
+ * @return Boolean value. TRUE indicates that
+ * the full path has been retrieved, FALSE
+ * indicates that it was retrieved just partially.
+ */
 BOOLEAN GetFileNameAndParentMftId(ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHAR *buffer,ULONG length)
 {
 	PFILENAME pfn;
@@ -1339,12 +1544,17 @@ BOOLEAN GetFileNameAndParentMftId(ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHA
 	
 	/* update data */
 	*parent_mft_id = pfn->ParentDirectoryMftId;
-	wcsncpy(buffer,pfn->name.Buffer,length);
+	(void)wcsncpy(buffer,pfn->name.Buffer,length);
 	buffer[length-1] = 0;
 	FullPathRetrieved = pfn->PathBuilt;
 	return FullPathRetrieved;
 }
 
+/**
+ * @brief Adds a resident directory to the file list.
+ * @param[in] pmfi pointer to the structure describing
+ * the directory.
+ */
 void AddResidentDirectoryToFileList(PMY_FILE_INFORMATION pmfi)
 {
 	PFILENAME pfn;
@@ -1377,6 +1587,12 @@ void AddResidentDirectoryToFileList(PMY_FILE_INFORMATION pmfi)
 	pfn->is_dirty = TRUE;
 }
 
+/**
+ * @brief Searches for a directory by its MFT identifier.
+ * @param[in] mft_id the MFT identifier of the directory.
+ * @return A pointer to the structure describing the
+ * directory. NULL indicates failure.
+ */
 PFILENAME FindDirectoryByMftId(ULONGLONG mft_id)
 {
 	PFILENAME pfn;
@@ -1427,8 +1643,18 @@ PFILENAME FindDirectoryByMftId(ULONGLONG mft_id)
 	}
 }
 
-/* LSN, buffer, length must be valid before this call! */
-/* Length MUST BE an integral of sector size */
+/**
+ * @brief Reads sectors from disk.
+ * @param[in] lsn the logical sector number.
+ * @param[out] buffer pointer to the buffer
+ * receiving sector data.
+ * @param[in] length the length of the buffer,
+ * in bytes.
+ * @return An appropriate NTSTATUS code.
+ * @note
+ * - LSN, buffer, length must be valid before this call!
+ * - Length MUST BE an integral of the sector size.
+ */
 NTSTATUS ReadSectors(ULONGLONG lsn,PVOID buffer,ULONG length)
 {
 	IO_STATUS_BLOCK ioStatus;
@@ -1438,10 +1664,12 @@ NTSTATUS ReadSectors(ULONGLONG lsn,PVOID buffer,ULONG length)
 	offset.QuadPart = lsn * bytes_per_sector;
 	Status = NtReadFile(winx_fileno(fVolume),NULL,NULL,NULL,&ioStatus,buffer,length,&offset,NULL);
 	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
-		///DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
+		//DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
 		Status = NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
 	/* FIXME: number of bytes actually read check? */
 	return Status;
 }
+
+/** @} */

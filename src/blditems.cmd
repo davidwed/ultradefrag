@@ -1,12 +1,12 @@
 @echo off
 
-pushd obj\driver
-lua ..\..\tools\mkmod.lua ultradfg.build
-if %errorlevel% neq 0 goto end
-
-cd ..\zenwinx
+pushd obj\zenwinx
 lua ..\..\tools\mkmod.lua zenwinx.build
 if %errorlevel% neq 0 goto end
+
+rem cd ..\driver
+rem lua ..\..\tools\mkmod.lua ultradfg.build
+rem if %errorlevel% neq 0 goto end
 
 cd ..\hibernate
 lua ..\..\tools\mkmod.lua hibernate.build

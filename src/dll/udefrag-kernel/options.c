@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,19 +17,25 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - options initialization routine.
-*/
+/**
+ * @file options.c
+ * @brief Defragmentation related options reading code.
+ * @addtogroup Options
+ * @{
+ */
 
 #include "globals.h"
 
+/**
+ * @brief Retrieves all defragmentation related options from the environment.
+ */
 void InitializeOptions(void)
 {
 	short *env_buffer;
 	#define ENV_BUFFER_SIZE 8192
 	
 	/* allocate memory */
-	env_buffer = winx_virtual_alloc(ENV_BUFFER_SIZE * sizeof(short));
+	env_buffer = winx_heap_alloc(ENV_BUFFER_SIZE * sizeof(short));
 	if(!env_buffer){
 		DebugPrint("Cannot allocate %u bytes for InitializeOptions()\n",
 			ENV_BUFFER_SIZE * sizeof(short));
@@ -45,7 +51,7 @@ void InitializeOptions(void)
 		if(!wcscmp(env_buffer,L"1")) disable_reports = TRUE;
 	}
 	if(winx_query_env_variable(L"UD_DBGPRINT_LEVEL",env_buffer,ENV_BUFFER_SIZE) >= 0){
-		_wcsupr(env_buffer);
+		(void)_wcsupr(env_buffer);
 		if(!wcscmp(env_buffer,L"DETAILED"))
 			dbgprint_level = DBG_DETAILED;
 		else if(!wcscmp(env_buffer,L"PARANOID"))
@@ -65,5 +71,7 @@ void InitializeOptions(void)
 	DebugPrint("dbg_level=%u\n",dbgprint_level);
 	
 	/* free memory */
-	winx_virtual_free(env_buffer,ENV_BUFFER_SIZE * sizeof(short));
+	winx_heap_free(env_buffer);
 }
+
+/** @} */

@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,14 +17,23 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - functions for file dump manipulations.
-*/
+/**
+ * @file filedump.c
+ * @brief File cluster chains dumping code.
+ * @addtogroup FileDump
+ * @{
+ */
 
 #include "globals.h"
 
-ULONGLONG FileMap[FILEMAPSIZE];
-
+/**
+ * @brief Opens a file.
+ * @param[in] pfn pointer to the FILENAME structure
+ * containing information about the file.
+ * @param[out] phFile pointer to a variable receiving
+ * the handle of the opened file.
+ * @return An appropriate NTSTATUS code.
+ */
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile)
 {
 	OBJECT_ATTRIBUTES ObjectAttributes;
@@ -42,16 +51,22 @@ NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile)
 			  NULL,0);
 }
 
-/*
-* NOTES: 
-* 1. On NTFS volumes files smaller then 1 kb are placed in MFT.
-*    And we exclude their from defragmenting process.
-* 2. On NTFS we skip 0-filled virtual clusters of compressed files.
-* 3. This function must fill pfn->blockmap list, nothing more.
-*/
-
+/**
+ * @brief Dumps a cluster chains of the file.
+ * @param[in] pfn pointer to the FILENAME structure
+ * containing information about the file.
+ * @return Boolean value indicating the file dumping
+ * result: TRUE for success, FALSE otherwise.
+ * @note
+ * - On NTFS volumes all files smaller then 1 kb are placed in MFT.
+ *   We are excluding them from the defragmentation process.
+ * - On NTFS we are skipping the 0-filled virtual clusters
+ *   of the compressed files.
+ * - This function must never modify global statistical counters.
+ */
 BOOLEAN DumpFile(PFILENAME pfn)
 {
+	ULONGLONG *FileMap;
 	IO_STATUS_BLOCK ioStatus;
 	PGET_RETRIEVAL_DESCRIPTOR fileMappings;
 	NTSTATUS Status;
@@ -72,6 +87,13 @@ BOOLEAN DumpFile(PFILENAME pfn)
 	if(Status != STATUS_SUCCESS){
 		DebugPrint("System file found: %ws: %x\n",pfn->name.Buffer,(UINT)Status);
 		return FALSE; /* File has unknown state! */
+	}
+	
+	/* allocate memory */
+	FileMap = winx_heap_alloc(FILEMAPSIZE * sizeof(ULONGLONG));
+	if(FileMap == NULL){
+		DebugPrint("Cannot allocate memory for DumpFile()!\n");
+		return FALSE;
 	}
 
 	/* Start dumping the mapping information. Go until we hit the end of the file. */
@@ -111,7 +133,7 @@ BOOLEAN DumpFile(PFILENAME pfn)
 		/* Loop through the buffer of number/cluster pairs. */
 		startVcn = fileMappings->StartVcn;
 		for(i = 0; i < (ULONGLONG) fileMappings->NumberOfPairs;	i++){
-			/* Infinite loop here will cause BSOD. */
+			/* Infinite loop here will cause BSOD (in kernel mode driver only, of course). */
 
 			/*
 			* A compressed virtual run (0-filled) is
@@ -153,6 +175,7 @@ BOOLEAN DumpFile(PFILENAME pfn)
 	/* Skip small directories placed in MFT (tested on 32-bit XP system). */
 	if(pfn->blockmap){
 		NtClose(hFile);
+		winx_heap_free(FileMap);
 		return TRUE; /* success */
 	}
 
@@ -161,6 +184,8 @@ dump_fail:
 	pfn->clusters_total = pfn->n_fragments = 0;
 	pfn->is_fragm = FALSE;
 	NtClose(hFile);
+	winx_heap_free(FileMap);
 	return FALSE;
 }
 
+/** @} */

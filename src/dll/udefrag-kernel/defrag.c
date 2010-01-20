@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - defragmenter's engine / Kernel of the defragmenter /.
-*/
+/**
+ * @file defrag.c
+ * @brief Volume defragmentation code.
+ * @addtogroup Defrag
+ * @{
+ */
 
 #include "globals.h"
 
@@ -34,15 +37,20 @@ BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target);
 *    defragmentation by an additional analysis.
 * 3. We cannot use NtNotifyChangeDirectoryFile() function in kernel mode.
 *    It always returns 0xc0000005 error code (tested in XP 32-bit). It seems
-*    that it's arguments must be in user memory space.
-* 4. Filesystem data is cached by Windows, therefore second analysis will be
+*    that its arguments must be in the user memory space.
+* 4. Filesystem data is cached by Windows, therefore the second analysis will be
 *    always much faster (at least on modern versions of Windows - tested on XP)
 *    than the first attempt.
-* 5. On very large FAT volumes the second analysis may take few minutes. Well, the 
+* 5. On a very large FAT volumes the second analysis may take few minutes. Well, the 
 *    first one may take few hours... :)
 */
 
-/* returns -1 if no files were defragmented, zero otherwise */
+/**
+ * @brief Performs a volume defragmentation.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero if at least one file has been
+ * defragmented, negative value otherwise.
+ */
 int Defragment(char *volume_name)
 {
 	PFRAGMENTED pf, plargest;
@@ -114,6 +122,19 @@ int Defragment(char *volume_name)
 	return (defragmented == 0) ? (-1) : (0);
 }
 
+/**
+ * @brief Moves a range of clusters belonging to the file.
+ * @param[in] hFile handle of the file.
+ * @param[in] startVcn the starting virtual cluster number
+ *                     defining position inside the file.
+ * @param[in] targetLcn the starting logical cluster number
+ *                      defining position of target space
+ *                      on the volume.
+ * @param[in] n_clusters the number of clusters to move.
+ * @return An appropriate NTSTATUS code.
+ * @note On NT 4.0 this function can move
+ * no more than 256 kilobytes once.
+ */
 NTSTATUS MovePartOfFile(HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, ULONGLONG n_clusters)
 {
 	NTSTATUS status;
@@ -150,7 +171,15 @@ NTSTATUS MovePartOfFile(HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, UL
 	return STATUS_SUCCESS; /* it means: the result is unknown */
 }
 
-/* Tries to move the file entirely. */
+/**
+ * @brief Moves a file entirely.
+ * @param[in] pfn pointer to the structure
+ *                describing the file.
+ * @param[in] hFile handle of the file.
+ * @param[in] targetLcn the starting logical cluster number
+ * defining position of target space on the volume.
+ * @return An appropriate NTSTATUS code.
+ */
 NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn)
 {
 	PBLOCKMAP block;
@@ -181,6 +210,10 @@ NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn)
 	return STATUS_SUCCESS;
 }
 
+/**
+ * @brief Prints sequently information about all blocks of the file.
+ * @param[in] blockmap pointer to the list representing blocks of file.
+ */
 void DbgPrintBlocksOfFile(PBLOCKMAP blockmap)
 {
 	PBLOCKMAP block;
@@ -192,7 +225,15 @@ void DbgPrintBlocksOfFile(PBLOCKMAP blockmap)
 	}
 }
 
-/* For defragmenter only, not for optimizer! */
+/**
+ * @brief Moves a file and updates the global statistics and map.
+ * @param[in] pfn pointer to the structure describing the file.
+ * @param[in] target the starting logical cluster number
+ * defining position of target space on the volume.
+ * @return Boolean value. TRUE indicates success,
+ * FALSE indicates failure.
+ * @note For defragmenter only, not for optimizer!
+ */
 BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target)
 {
 	NTSTATUS Status;
@@ -237,19 +278,19 @@ BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target)
 		}
 	}
 
-	/* first of all: remove target space from free space pool */
+	/* first of all: remove target space from the free space list */
 	if(Status == STATUS_SUCCESS){
 		Stat.fragmfilecounter --;
 		Stat.fragmcounter -= (pfn->n_fragments - 1);
 		pfn->is_fragm = FALSE; /* before GetSpaceState() call */
 	}
-	ProcessBlock(target,pfn->clusters_total,GetSpaceState(pfn),FREE_SPACE);
+	RemarkBlock(target,pfn->clusters_total,GetFileSpaceState(pfn),FREE_SPACE);
 	TruncateFreeSpaceBlock(target,pfn->clusters_total);
 
 	if(Status == STATUS_SUCCESS){
 		/* free previously allocated space (after TruncateFreeSpaceBlock() call!) */
 		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-			ProcessFreeBlock(block->lcn,block->length,FRAGM_SPACE/*old_state*/);
+			ProcessFreedBlock(block->lcn,block->length,FRAGM_SPACE/*old_state*/);
 			if(block->next_ptr == pfn->blockmap) break;
 		}
 	} else {
@@ -258,3 +299,5 @@ BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target)
 	DeleteBlockmap(pfn); /* because we don't need this info after file moving */
 	return (!pfn->is_fragm);
 }
+
+/** @} */

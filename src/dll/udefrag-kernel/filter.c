@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - filter related routines.
-*/
+/**
+ * @file filter.c
+ * @brief File names filtering code.
+ * @addtogroup Filter
+ * @{
+ */
 
 #include "globals.h"
 
@@ -30,6 +33,9 @@ ULONGLONG fraglimit = 0;
 
 void SetFilter(PFILTER pf,short *buffer);
 
+/**
+ * @brief Initializes all the filters.
+ */
 void InitializeFilter(void)
 {
 	char buf[64];
@@ -66,9 +72,9 @@ void InitializeFilter(void)
 	}
 
 	if(winx_query_env_variable(L"UD_SIZELIMIT",env_buffer,ENV_BUFFER_SIZE) >= 0){
-		_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
+		(void)_snprintf(buf,sizeof(buf) - 1,"%ws",env_buffer);
 		buf[sizeof(buf) - 1] = 0;
-		winx_dfbsize(buf,&sizelimit);
+		(void)winx_dfbsize(buf,&sizelimit);
 	}
 
 	if(winx_query_env_variable(L"UD_FRAGMENTS_THRESHOLD",env_buffer,ENV_BUFFER_SIZE) >= 0)
@@ -82,6 +88,12 @@ void InitializeFilter(void)
 	winx_virtual_free(env_buffer,ENV_BUFFER_SIZE * sizeof(short));
 }
 
+/**
+ * @brief Initializes the including/excluding filter.
+ * @param[in] pf pointer to the head of the list 
+ * representing the appropriate filter.
+ * @param[in] buffer the null-terminated filter string.
+ */
 void SetFilter(PFILTER pf,short *buffer)
 {
 	POFFSET poffset;
@@ -106,7 +118,7 @@ void SetFilter(PFILTER pf,short *buffer)
 	}
 
 	buffer[length - 1] = 0;
-	_wcslwr(buffer);
+	(void)_wcslwr(buffer);
 
 	/* replace double quotes and semicolons with zeros */
 	poffset = (POFFSET)winx_list_insert_item((list_entry **)&pf->offsets,NULL,sizeof(OFFSET));
@@ -135,6 +147,14 @@ void SetFilter(PFILTER pf,short *buffer)
 	}
 }
 
+/**
+ * @brief Checks the string for an occurrence in the filter.
+ * @param[in] str the null-terminated string to search for.
+ * @param[in] pf pointer to the head of the list 
+ * representing the filter to search in.
+ * @return Boolean value. TRUE indicates that the string
+ * has been found in the filter, FALSE indicates contrary.
+ */
 BOOLEAN IsStringInFilter(short *str,PFILTER pf)
 {
 	POFFSET po;
@@ -148,6 +168,12 @@ BOOLEAN IsStringInFilter(short *str,PFILTER pf)
 	return FALSE;
 }
 
+/**
+ * @brief Checks for the Explorer's context menu handler.
+ * @return Boolean value. TRUE indicates that the Explorer's
+ * context menu handler sent the disk defragmentation request,
+ * FALSE indicates contrary.
+ */
 BOOLEAN CheckForContextMenuHandler(void)
 {
 	POFFSET po;
@@ -163,6 +189,9 @@ BOOLEAN CheckForContextMenuHandler(void)
 	return TRUE;
 }
 
+/**
+ * @brief Destroys all the lists representing filters.
+ */
 void DestroyFilter(void)
 {
 	if(in_filter.buffer){
@@ -188,7 +217,9 @@ void DestroyFilter(void)
 	DbgPrint("AAAA %I64u ms\n",_rdtsc() - t);
 */
 
-/* case insensitive version of wcsstr() */
+/**
+ * @brief Case insensitive version of wcsstr().
+ */
 wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 {
 	wchar_t *cp = (wchar_t *)wcs1;
@@ -207,3 +238,5 @@ wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 	
 	return NULL;
 }
+
+/** @} */

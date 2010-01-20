@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,17 +17,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* User mode driver - functions for free space manipulations.
-*/
+/**
+ * @file freespace.c
+ * @brief Volume free space dumping code.
+ * @addtogroup FreeSpace
+ * @{
+ */
 
 #include "globals.h"
 
-char BitMap[BITMAPSIZE * sizeof(UCHAR)];
+static FREEBLOCKMAP *AddLastFreeBlock(ULONGLONG start,ULONGLONG length);
 
-/* Dumps all the free clusters on the volume */
+/**
+ * @brief Dumps the free space on the volume.
+ * @return An appropriate NTSTATUS code.
+ * @todo This function should return common error
+ * codes instead of the status codes.
+ */
 NTSTATUS FillFreeSpaceMap(void)
 {
+	char *BitMap;
 	NTSTATUS status;
 	PBITMAP_DESCRIPTOR bitMappings;
 	ULONGLONG cluster,startLcn;
@@ -37,8 +46,15 @@ NTSTATUS FillFreeSpaceMap(void)
 	/* Bit shifting array for efficient processing of the bitmap */
 	UCHAR BitShift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
 	ULONGLONG nextLcn;
+	
+	/* allocate memory */
+	BitMap = winx_heap_alloc(BITMAPSIZE * sizeof(UCHAR));
+	if(BitMap == NULL){
+		DebugPrint("Cannot allocate memory for FillFreeSpaceMap()!\n");
+		return STATUS_NO_MEMORY;
+	}
 
-	/* Start scanning */
+	/* start scanning */
 	bitMappings = (PBITMAP_DESCRIPTOR)BitMap;
 	nextLcn = 0; cluster = LLINVALID;
 	do {
@@ -51,6 +67,7 @@ NTSTATUS FillFreeSpaceMap(void)
 		}
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
 			DebugPrint("Get Volume Bitmap Error: %x!\n",(UINT)status);
+			winx_heap_free(BitMap);
 			return status;
 		}
 		/* Scan through the returned bitmap info. */
@@ -65,8 +82,10 @@ NTSTATUS FillFreeSpaceMap(void)
 				if(cluster != LLINVALID){
 					len = startLcn + i - cluster;
 					DebugPrint2("start: %I64u len: %I64u\n",cluster,len);
-					if(!InsertLastFreeBlock(cluster,len))
+					if(!AddLastFreeBlock(cluster,len)){
+						winx_heap_free(BitMap);
 						return STATUS_NO_MEMORY;
+					}
 					Stat.processed_clusters += len;
 					cluster = LLINVALID;
 				}
@@ -79,36 +98,52 @@ NTSTATUS FillFreeSpaceMap(void)
 	if(cluster != LLINVALID){
 		len = startLcn + i - cluster;
 		DebugPrint2("start: %I64u len: %I64u\n",cluster,len);
-		if(!InsertLastFreeBlock(cluster,len))
+		if(!AddLastFreeBlock(cluster,len)){
+			winx_heap_free(BitMap);
 			return STATUS_NO_MEMORY;
+		}
 		Stat.processed_clusters += len;
 	}
+	winx_heap_free(BitMap);
 	return STATUS_SUCCESS;
 }
 
-/*
-* On FAT partitions after file moving filesystem driver marks
-* previously allocated clusters as free immediately.
-* But on NTFS they are always allocated by system, not free, never free.
-* Only the next analyse frees them.
-*/
-void ProcessFreeBlock(ULONGLONG start,ULONGLONG len,UCHAR old_space_state)
+/**
+ * @brief Processes a space block freed by file moving routines.
+ * @details Remarks the cluster map and adds the block to the
+ * free space map if it is really free.
+ * @param[in] start the starting cluster of the block.
+ * @param[in] len the length of the block, in clusters.
+ * @param[in] old_space_state the state of the block which it has
+ *                            before the freedom.
+ * @note On NTFS volumes the freed block is always marked
+ * as temporarily allocated by system because on NTFS the volume
+ * checkpoints mechanism exists which really frees the space only during
+ * the next volume analysis.
+ */
+void ProcessFreedBlock(ULONGLONG start,ULONGLONG len,UCHAR old_space_state)
 {
-	if(partition_type == NTFS_PARTITION) /* Mark clusters as no-checked */
-		ProcessBlock(start,len,NO_CHECKED_SPACE,old_space_state);
-	else InsertFreeSpaceBlock(start,len,old_space_state);
+	/*
+	* On FAT partitions after file moving filesystem driver marks
+	* previously allocated clusters as free immediately.
+	* But on NTFS they are always allocated by system, not free, never free.
+	* Only the next volume analysis frees them.
+	*/
+	if(partition_type == NTFS_PARTITION){
+		/* mark clusters as temporarily allocated by system  */
+		RemarkBlock(start,len,TEMPORARY_SYSTEM_SPACE,old_space_state);
+	} else {
+		RemarkBlock(start,len,FREE_SPACE,old_space_state);
+		AddFreeSpaceBlock(start,len);
+	}
 }
 
-void InsertFreeSpaceBlockInternal(ULONGLONG start,ULONGLONG length);
-
-void InsertFreeSpaceBlock(ULONGLONG start,ULONGLONG length,UCHAR old_space_state)
-{
-	ProcessBlock(start,length,FREE_SPACE,old_space_state);
-	InsertFreeSpaceBlockInternal(start,length);
-}
-			  
-/* inserts any block in free space map */
-void InsertFreeSpaceBlockInternal(ULONGLONG start,ULONGLONG length)
+/**
+ * @brief Adds a free space block to the free space map.
+ * @param[in] start the starting cluster of the block.
+ * @param[in] length the length of the block, in clusters.
+ */
+void AddFreeSpaceBlock(ULONGLONG start,ULONGLONG length)
 {
 	PFREEBLOCKMAP block, prev_block = NULL, next_block;
 	
@@ -154,8 +189,14 @@ void InsertFreeSpaceBlockInternal(ULONGLONG start,ULONGLONG length)
 	block->length = length;
 }
 
-/* inserts last block in free space map: used in analysis process only */
-FREEBLOCKMAP *InsertLastFreeBlock(ULONGLONG start,ULONGLONG length)
+/**
+ * @brief Inserts the last free space block to the free space map.
+ * @param[in] start the starting cluster of the block.
+ * @param[in] length the length of the block, in clusters.
+ * @return Pointer to the inserted block. NULL indicates failure.
+ * @note Internal use only.
+ */
+static FREEBLOCKMAP *AddLastFreeBlock(ULONGLONG start,ULONGLONG length)
 {
 	PFREEBLOCKMAP block, lastblock = NULL;
 	
@@ -168,14 +209,18 @@ FREEBLOCKMAP *InsertLastFreeBlock(ULONGLONG start,ULONGLONG length)
 	}
 
 	/* mark space */
-	ProcessBlock(start,length,FREE_SPACE,SYSTEM_SPACE);
+	RemarkBlock(start,length,FREE_SPACE,SYSTEM_SPACE);
 	return block;
 }
 
-/*
-* Cuts the left side of the free block. If length is equal 
-* to free block length it marks them as zero length block.
-*/
+/**
+ * @brief Cuts the left side of the free space block.
+ * @param[in] start the starting cluster of the block.
+ * @param[in] length the length of the cluster chain
+ *                   to be cut, in clusters.
+ * @note If length parameter is equal to the free space block
+ * length this function marks the block as zero length block.
+ */
 void TruncateFreeSpaceBlock(ULONGLONG start,ULONGLONG length)
 {
 	PFREEBLOCKMAP block;
@@ -193,8 +238,12 @@ void TruncateFreeSpaceBlock(ULONGLONG start,ULONGLONG length)
 	DebugPrint("TruncateFreeSpaceBlock() failed: Lcn=%I64u!\n",start);
 }
 
-/* Removes specified range of clusters from the free space list. */
-void CleanupFreeSpaceList(ULONGLONG start,ULONGLONG len)
+/**
+ * @brief Removes a range of clusters from the free space list.
+ * @param[in] start the starting cluster of the block.
+ * @param[in] len the length of the block, in clusters.
+ */
+void RemoveFreeSpaceBlock(ULONGLONG start,ULONGLONG len)
 {
 	PFREEBLOCKMAP block;
 	ULONGLONG new_lcn, new_length;
@@ -238,7 +287,7 @@ void CleanupFreeSpaceList(ULONGLONG start,ULONGLONG len)
 			new_lcn = start + len;
 			new_length = block->lcn + block->length - (start + len);
 			block->length = start - block->lcn;
-			InsertFreeSpaceBlockInternal(new_lcn,new_length);
+			AddFreeSpaceBlock(new_lcn,new_length);
 			goto next_block;
 		}
 
@@ -247,6 +296,9 @@ next_block:
 	}
 }
 
+/**
+ * @brief Prints sequenly all the entries of the free space list.
+ */
 void DbgPrintFreeSpaceList(void)
 {
 	PFREEBLOCKMAP block;
@@ -256,3 +308,5 @@ void DbgPrintFreeSpaceList(void)
 		if(block->next_ptr == free_space_map) break;
 	}
 }
+
+/** @} */
