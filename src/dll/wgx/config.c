@@ -1,6 +1,6 @@
 /*
  *  WGX - Windows GUI Extended Library.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* Reading/writing config files related stuff.
-*/
+/**
+ * @file config.c
+ * @brief Configuration files I/O code.
+ * @addtogroup Config
+ * @{
+ */
 
 #define WIN32_NO_STATUS
 #include <windows.h>
@@ -45,24 +48,29 @@ static int getint(lua_State *L, char *variable)
 	return ret;
 }
 
-/*
-* File format example:
-*
-* height = -12
-* width = 0
-* escapement = 0
-* orientation = 0
-* weight = 400
-* italic = 0
-* underline = 0
-* strikeout = 0
-* charset = 0
-* outprecision = 3
-* clipprecision = 2
-* quality = 1
-* pitchandfamily = 34
-* facename = "Arial Black"
-*/
+/**
+ * @brief Retrieves a LOGFONT structure from a file.
+ * @param[in] path the path to the configuration file.
+ * @param[out] lp pointer to the LOGFONT structure.
+ * @return Boolean value. TRUE indicates success.
+ * @par File contents example:
+@verbatim
+height = -12
+width = 0
+escapement = 0
+orientation = 0
+weight = 400
+italic = 0
+underline = 0
+strikeout = 0
+charset = 0
+outprecision = 3
+clipprecision = 2
+quality = 1
+pitchandfamily = 34
+facename = "Arial Black"
+@endverbatim
+ */
 BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
 {
 	lua_State *L;
@@ -93,7 +101,7 @@ BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
 		lua_getglobal(L, "facename");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
-			strncpy(lf->lfFaceName,string,LF_FACESIZE);
+			(void)strncpy(lf->lfFaceName,string,LF_FACESIZE);
 			lf->lfFaceName[LF_FACESIZE - 1] = 0;
 		}
 		lua_pop(L, 1);
@@ -102,8 +110,15 @@ BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
 	return TRUE;
 }
 
-/* NOTE: it shows a message box if some error has been occured. */
-/* NOTE: not thread safe. */
+/**
+ * @brief Saves a LOGFONT structure to a file.
+ * @param[in] path the path to the configuration file.
+ * @param[out] lp pointer to the LOGFONT structure.
+ * @return Boolean value. TRUE indicates success.
+ * @note This function shows a message box in case when
+ * some error has been occured.
+ * @bug This function is not thread safe.
+ */
 BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
 {
 	FILE *pf;
@@ -111,7 +126,7 @@ BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
 
 	pf = fopen(path,"wt");
 	if(!pf){
-		_snprintf(err_msg,sizeof(err_msg) - 1,
+		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Can't save font preferences to %s!\n%s",
 			path,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
@@ -151,7 +166,7 @@ BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
 		);
 	fclose(pf);
 	if(result < 0){
-		_snprintf(err_msg,sizeof(err_msg) - 1,
+		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Can't write gui preferences to %s!\n%s",
 			path,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
@@ -160,3 +175,5 @@ BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
 	}
 	return TRUE;
 }
+
+/** @} */

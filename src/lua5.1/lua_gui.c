@@ -396,11 +396,11 @@ BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	switch(msg){
 	case WM_INITDIALOG:
 		/* kill our window before showing them :) */
-		EndDialog(hWnd,1);
+		(void)EndDialog(hWnd,1);
 		return FALSE;
 	case WM_CLOSE:
 		/* this code - for extraordinary cases */
-		EndDialog(hWnd,1);
+		(void)EndDialog(hWnd,1);
 		return TRUE;
 	}
 	return FALSE;
@@ -418,9 +418,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	* To disable the sand glass on the cursor
 	* we must show a window on startup.
 	*/
-	DialogBox(hInst,MAKEINTRESOURCE(100),NULL,(DLGPROC)EmptyDlgProc);
+	(void)DialogBox(hInst,MAKEINTRESOURCE(100),NULL,(DLGPROC)EmptyDlgProc);
 	argv = CommandLineToArgvA(GetCommandLineA(),&argc);
 	ret = internal_main(argc,argv);
-	if(argv) GlobalFree(argv);
+	if(argv) (void)GlobalFree(argv);
 	return ret;
 }

@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2009-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,5 +47,5 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 
 void SetText(HWND hWnd, short *key)
 {
-	SetWindowTextW(hWnd,WgxGetResourceString(i18n_table,key));
+	(void)SetWindowTextW(hWnd,WgxGetResourceString(i18n_table,key));
 }

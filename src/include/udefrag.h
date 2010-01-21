@@ -58,6 +58,8 @@ typedef struct _volume_info {
 int __stdcall udefrag_init(long map_size);
 int __stdcall udefrag_unload(void);
 
+char * __stdcall udefrag_get_error_description(int error_code);
+
 int __stdcall udefrag_kernel_mode(void);
 
 int __stdcall udefrag_stop(void);

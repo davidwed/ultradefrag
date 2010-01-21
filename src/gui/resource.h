@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,9 +36,6 @@
 #define IDI_REMOVABLE                   130
 
 #define IDR_ACCELERATOR2                131
-#define IDD_INIT_ERROR                  132
-#define IDD_STOP_ERROR                  133
-#define IDD_JOB_ERROR                   134
 
 #define IDM_STATUSBAR                   500
 
@@ -64,5 +61,3 @@
 #define IDC_PIC1                        1059
 
 #define IDC_SHUTDOWN                    1060
-#define IDC_PIC2                        1061
-#define IDC_DBGVIEW_HELP                1062

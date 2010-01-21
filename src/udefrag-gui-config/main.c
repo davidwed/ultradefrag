@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,14 +57,33 @@ extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 LOGFONT lf;
 HFONT hFont = NULL;
 
-//char buffer[MAX_PATH];
-
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void OpenWebPage(char *page);
 BOOL GetBootExecuteRegistrationStatus(void);
 void InitFont(void);
 void SaveFontSettings(void);
+
+void DisplayLastError(char *caption)
+{
+	LPVOID lpMsgBuf;
+	char buffer[128];
+	DWORD error = GetLastError();
+
+	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&lpMsgBuf,0,NULL)){
+				(void)_snprintf(buffer,sizeof(buffer),
+						"Error code = 0x%x",(UINT)error);
+				buffer[sizeof(buffer) - 1] = 0;
+				MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
+				return;
+	} else {
+		MessageBoxA(NULL,(LPCTSTR)lpMsgBuf,caption,MB_OK | MB_ICONHAND);
+		LocalFree(lpMsgBuf);
+	}
+}
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
@@ -76,8 +95,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	* Because the first function is just a stub on xp.
 	*/
 	InitCommonControls();
-	DialogBox(hInstance, MAKEINTRESOURCE(IDD_CONFIG),NULL,(DLGPROC)DlgProc);
-	if(hFont) DeleteObject(hFont);
+	if(DialogBox(hInstance, MAKEINTRESOURCE(IDD_CONFIG),NULL,(DLGPROC)DlgProc) == (-1)){
+		DisplayLastError("Cannot create the main window!");
+		return 1;
+	}
+	if(hFont) (void)DeleteObject(hFont);
 	WgxDestroyResourceTable(i18n_table);
 	return 0;
 }
@@ -94,18 +116,16 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		hWindow = hWnd;
-//		GetWindowsDirectoryW(path,MAX_PATH);
-//		wcscat(path,L"\\UltraDefrag\\ud_config_i18n.lng");
 		if(WgxBuildResourceTable(i18n_table,L".\\ud_config_i18n.lng"/*path*/))
 			WgxApplyResourceTable(i18n_table,hWindow);
 		WgxSetIcon(hInstance,hWindow,IDI_CONFIG);
 		#ifndef UDEFRAG_PORTABLE
 		if(GetBootExecuteRegistrationStatus())
-			SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_CHECKED,0);
+			(void)SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_CHECKED,0);
 		else
-			SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_UNCHECKED,0);
+			(void)SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_UNCHECKED,0);
 		#else
-		SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_UNCHECKED,0);
+		(void)SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_SETCHECK,BST_UNCHECKED,0);
 		WgxDisableWindows(hWindow,IDC_ENABLE,IDC_BOOT_SCRIPT,0);
 		#endif
 		InitFont();
@@ -121,22 +141,17 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(ChooseFont(&cf)){
 				hNewFont = WgxSetFont(hWindow,&lf);
 				if(hNewFont){
-					if(hFont) DeleteObject(hFont);
+					if(hFont) (void)DeleteObject(hFont);
 					hFont = hNewFont;
 					SaveFontSettings();
 				}
 			}
 			break;
 		case IDC_GUI_SCRIPT:
-			//GetWindowsDirectoryW(path,MAX_PATH);
-			//wcscat(path,L"\\System32\\udefrag-gui.cmd");
-			//ShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
-			//GetWindowsDirectoryW(path,MAX_PATH);
-			//wcscat(path,L"\\UltraDefrag\\options\\guiopts.lua");
 			#ifndef UDEFRAG_PORTABLE
-			ShellExecuteW(hWindow,L"open",L".\\options\\guiopts.lua"/*path*/,NULL,NULL,SW_SHOW);
+			(void)WgxShellExecuteW(hWindow,L"open",L".\\options\\guiopts.lua",NULL,NULL,SW_SHOW);
 			#else
-			ShellExecuteW(hWindow,L"open",L"notepad.exe"/*path*/,L".\\options\\guiopts.lua",NULL,SW_SHOW);
+			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\guiopts.lua",NULL,SW_SHOW);
 			#endif
 			break;
 		case IDC_GUI_HELP:
@@ -144,30 +159,34 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_ENABLE:
 			#ifndef UDEFRAG_PORTABLE
-			GetWindowsDirectoryW(path,MAX_PATH);
-			check_state = SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_GETCHECK,0,0);
-			if(check_state == BST_CHECKED)
-				wcscat(path,L"\\System32\\boot-on.cmd");
-			else
-				wcscat(path,L"\\System32\\boot-off.cmd");
-			ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_HIDE);
+			if(!GetWindowsDirectoryW(path,MAX_PATH)){
+				DisplayLastError("Cannot retrieve the Windows directory path!");
+			} else {
+				check_state = SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_GETCHECK,0,0);
+				if(check_state == BST_CHECKED)
+					(void)wcscat(path,L"\\System32\\boot-on.cmd");
+				else
+					(void)wcscat(path,L"\\System32\\boot-off.cmd");
+				(void)WgxShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_HIDE);
+			}
 			#endif
 			break;
 		case IDC_BOOT_SCRIPT:
-			GetWindowsDirectoryW(path,MAX_PATH);
-			wcscat(path,L"\\System32\\ud-boot-time.cmd");
-			ShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
+			if(!GetWindowsDirectoryW(path,MAX_PATH)){
+				DisplayLastError("Cannot retrieve the Windows directory path!");
+			} else {
+				(void)wcscat(path,L"\\System32\\ud-boot-time.cmd");
+				(void)WgxShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
+			}
 			break;
 		case IDC_BOOT_HELP:
 			OpenWebPage("boot.html");
 			break;
 		case IDC_REPORT_OPTIONS:
-			//GetWindowsDirectoryW(path,MAX_PATH);
-			//wcscat(path,L"\\UltraDefrag\\options\\udreportopts.lua");
 			#ifndef UDEFRAG_PORTABLE
-			ShellExecuteW(hWindow,L"open",L".\\options\\udreportopts.lua"/*path*/,NULL,NULL,SW_SHOW);
+			(void)WgxShellExecuteW(hWindow,L"open",L".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
 			#else
-			ShellExecuteW(hWindow,L"open",L"notepad.exe"/*path*/,L".\\options\\udreportopts.lua",NULL,SW_SHOW);
+			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\udreportopts.lua",NULL,SW_SHOW);
 			#endif
 			break;
 		case IDC_REPORT_HELP:
@@ -176,7 +195,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_CLOSE:
-		EndDialog(hWnd,0);
+		(void)EndDialog(hWnd,0);
 		return TRUE;
 	}
 	return FALSE;
@@ -184,18 +203,17 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 void OpenWebPage(char *page)
 {
-	char path[MAX_PATH];
+	short path[MAX_PATH];
 	HINSTANCE hApp;
 	
-	//GetWindowsDirectory(path,MAX_PATH);
-	//strcat(path,"\\UltraDefrag\\handbook\\");
-	strcpy(path,".\\handbook\\");
-	strcat(path,page);
-	hApp = ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
+	(void)_snwprintf(path,MAX_PATH,L".\\handbook\\%hs",page);
+	path[MAX_PATH - 1] = 0;
+
+	hApp = ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
 	if((int)(LONG_PTR)hApp <= 32){
-		strcpy(path,"http://ultradefrag.sourceforge.net/handbook/");
-		strcat(path,page);
-		ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
+		(void)_snwprintf(path,MAX_PATH,L"http://ultradefrag.sourceforge.net/handbook/%hs",page);
+		path[MAX_PATH - 1] = 0;
+		(void)WgxShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
 	}
 }
 
@@ -211,15 +229,15 @@ BOOL GetBootExecuteRegistrationStatus(void)
 			0,
 			KEY_QUERY_VALUE,
 			&hKey) != ERROR_SUCCESS){
-		MessageBox(0,"Cannot open SMSS key!","Error",MB_OK | MB_ICONHAND);
+		DisplayLastError("Cannot open SMSS key!");
 		return FALSE;
 	}
 
 	type = REG_MULTI_SZ;
-	RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
+	(void)RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
 	data = malloc(size + 10);
 	if(!data){
-		RegCloseKey(hKey);
+		(void)RegCloseKey(hKey);
 		MessageBox(0,"No enough memory for GetBootExecuteRegistrationStatus()!",
 			"Error",MB_OK | MB_ICONHAND);
 		return FALSE;
@@ -228,9 +246,9 @@ BOOL GetBootExecuteRegistrationStatus(void)
 	type = REG_MULTI_SZ;
 	if(RegQueryValueEx(hKey,"BootExecute",NULL,&type,
 			data,&size) != ERROR_SUCCESS){
-		RegCloseKey(hKey);
+		DisplayLastError("Cannot query BootExecute value!");
+		(void)RegCloseKey(hKey);
 		free(data);
-		MessageBox(0,"Cannot query BootExecute value!","Error",MB_OK | MB_ICONHAND);
 		return FALSE;
 	}
 
@@ -240,14 +258,14 @@ BOOL GetBootExecuteRegistrationStatus(void)
 		curr_len = strlen(curr_pos) + 1;
 		/* if the command is yet registered then exit */
 		if(!strcmp(curr_pos,"defrag_native")){
-			RegCloseKey(hKey);
+			(void)RegCloseKey(hKey);
 			free(data);
 			return TRUE;
 		}
 		i += curr_len;
 	}
 
-	RegCloseKey(hKey);
+	(void)RegCloseKey(hKey);
 	free(data);
 	return FALSE;
 }
@@ -275,18 +293,17 @@ void InitFont(void)
 	/* initialize LOGFONT structure */
 	memset(&lf,0,sizeof(LOGFONT));
 	/* default font should be Courier New 9pt */
-	strcpy(lf.lfFaceName,"Courier New");
+	(void)strcpy(lf.lfFaceName,"Courier New");
 	lf.lfHeight = -12;
 	
 	/* load saved font settings */
-	//GetWindowsDirectory(buffer,MAX_PATH);
-	//strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua"/*buffer*/,&lf)) return;
+	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua",&lf))
+		return;
 	
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);
 	if(hNewFont){
-		if(hFont) DeleteObject(hFont);
+		if(hFont) (void)DeleteObject(hFont);
 		hFont = hNewFont;
 	}
 
@@ -300,23 +317,22 @@ void InitFont(void)
 		lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
 		luaL_openlibs(L);  /* open libraries */
 		lua_gc(L, LUA_GCRESTART, 0);
-		//GetWindowsDirectory(buffer,MAX_PATH);
-		//strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
-		status = luaL_dofile(L,".\\options\\guiopts.lua"/*buffer*/);
+		status = luaL_dofile(L,".\\options\\guiopts.lua");
 		if(!status){ /* successful */
 			x = getint(L,"x");
 			y = getint(L,"y");
 			width = getint(L,"width");
 			height = getint(L,"height");
-			GetWindowRect(hWindow,&rc);
-			if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
-				SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
-			else
-				SetWindowPos(hWindow,0,
-					x + (width - (rc.right - rc.left)) / 2,
-					y + (height - (rc.bottom - rc.top)) / 2,
-					0,0,SWP_NOSIZE
-				);
+			if(GetWindowRect(hWindow,&rc)){
+				if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
+					(void)SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
+				else
+					(void)SetWindowPos(hWindow,0,
+						x + (width - (rc.right - rc.left)) / 2,
+						y + (height - (rc.bottom - rc.top)) / 2,
+						0,0,SWP_NOSIZE
+					);
+			}
 		}
 		lua_close(L);
 	}
@@ -324,7 +340,5 @@ void InitFont(void)
 
 void SaveFontSettings(void)
 {
-	//GetWindowsDirectory(buffer,MAX_PATH);
-	//strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	WgxSaveLogFontStructureToFile(".\\options\\font.lua"/*buffer*/,&lf);
+	(void)WgxSaveLogFontStructureToFile(".\\options\\font.lua",&lf);
 }

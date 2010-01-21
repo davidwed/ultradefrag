@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,20 +35,20 @@ void InitProgress(void)
 
 void ShowProgress(void)
 {
-	ShowWindow(hProgressMsg,SW_SHOWNORMAL);
-	ShowWindow(hProgressBar,SW_SHOWNORMAL);
+	(void)ShowWindow(hProgressMsg,SW_SHOWNORMAL);
+	(void)ShowWindow(hProgressBar,SW_SHOWNORMAL);
 }
 
 void HideProgress(void)
 {
-	ShowWindow(hProgressMsg,SW_HIDE);
-	ShowWindow(hProgressBar,SW_HIDE);
-	SetWindowText(hProgressMsg,"A 0 %");
-	SendMessage(hProgressBar,PBM_SETPOS,0,0);
+	(void)ShowWindow(hProgressMsg,SW_HIDE);
+	(void)ShowWindow(hProgressBar,SW_HIDE);
+	(void)SetWindowText(hProgressMsg,"A 0 %");
+	(void)SendMessage(hProgressBar,PBM_SETPOS,0,0);
 }
 
 void SetProgress(char *message, int percentage)
 {
-	SetWindowText(hProgressMsg,message);
-	SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
+	(void)SetWindowText(hProgressMsg,message);
+	(void)SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 }

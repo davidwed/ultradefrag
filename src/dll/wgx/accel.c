@@ -1,6 +1,6 @@
 /*
  *  WGX - Windows GUI Extended Library.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI Accelerators related routines.
-*/
+/**
+ * @file accel.c
+ * @brief GUI accelerators code.
+ * @addtogroup Accelerators
+ * @{
+ */
 
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
@@ -68,7 +71,7 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			message.pt.x = message.pt.y = 0;
 			message.time = 0;
 			/* TranslateAcceleratorW ? */
-			TranslateAccelerator(win[i].hMainWindow,win[i].hAccelerator,&message);
+			(void)TranslateAccelerator(win[i].hMainWindow,win[i].hAccelerator,&message);
 		}
 		if(win[i].isWindowUnicode)
 			return CallWindowProcW(win[i].OldWindowProcedure,hWnd,iMsg,wParam,lParam);
@@ -83,10 +86,17 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	return 0;
 }
 
-/*
-* Loads the specified accelerator table and adds them to the specified 
-* window and all its children.
-*/
+/**
+ * @brief Loads an accelerator table and applies
+ * them to a single window and all its children.
+ * @param[in] hInstance handle to an instance
+ * of the module whose executable file contains
+ * the accelerator table to load.
+ * @param[in] hWindow handle to the window.
+ * @param[in] AccelId resource identifier
+ * of the accelerator table.
+ * @return Boolean value. TRUE indicates success.
+ */
 BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId)
 {
 	HACCEL hAccel;
@@ -134,3 +144,5 @@ BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId)
 	
 	return TRUE;
 }
+
+/** @} */

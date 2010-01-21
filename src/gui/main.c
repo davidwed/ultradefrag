@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -57,94 +57,78 @@ void InitFont(void);
 void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
 
-#if 0
-/* Display critical errors only. */
-void __stdcall ErrorHandler(short *msg)
-{
-	/* ignore notifications and warnings */
-	if((short *)wcsstr(msg,L"N: ") == msg || (short *)wcsstr(msg,L"W: ") == msg) return;
-	/* skip E: labels */
-	if((short *)wcsstr(msg,L"E: ") == msg)
-		MessageBoxW(NULL,msg + 3,L"Error!",MB_OK | MB_ICONHAND);
-	else
-		MessageBoxW(NULL,msg,L"Error!",MB_OK | MB_ICONHAND);
-}
-#endif
-
 void OpenWebPage(char *page)
 {
-	char path[MAX_PATH];
+	short path[MAX_PATH];
 	HINSTANCE hApp;
 	
-	//GetWindowsDirectory(path,MAX_PATH);
-	//strcat(path,"\\UltraDefrag\\handbook\\");
-	strcpy(path,".\\handbook\\");
-	strcat(path,page);
-	hApp = ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
+	(void)_snwprintf(path,MAX_PATH,L".\\handbook\\%hs",page);
+	path[MAX_PATH - 1] = 0;
+
+	hApp = ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
 	if((int)(LONG_PTR)hApp <= 32){
-		strcpy(path,"http://ultradefrag.sourceforge.net/handbook/");
-		strcat(path,page);
-		ShellExecute(hWindow,"open",path,NULL,NULL,SW_SHOW);
+		(void)_snwprintf(path,MAX_PATH,L"http://ultradefrag.sourceforge.net/handbook/%hs",page);
+		path[MAX_PATH - 1] = 0;
+		(void)WgxShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
 	}
 }
 
-BOOL CALLBACK ErrorDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+void DisplayLastError(char *caption)
 {
-	HICON hIcon;
-	HWND hChild;
+	LPVOID lpMsgBuf;
+	char buffer[128];
+	DWORD error = GetLastError();
 
-	switch(msg){
-	case WM_INITDIALOG:
-		hIcon = LoadIcon(NULL,IDI_ERROR);
-		SendMessage(hWnd,WM_SETICON,1,(LRESULT)hIcon);
-		if(hIcon) DeleteObject(hIcon);
-		if(hFont){
-			SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-			hChild = GetWindow(hWnd,GW_CHILD);
-			while(hChild){
-				SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-				hChild = GetWindow(hChild,GW_HWNDNEXT);
-			}
-		}
-		return FALSE;
-	case WM_COMMAND:
-		switch(LOWORD(wParam)){
-		case IDC_DBGVIEW_HELP:
-			OpenWebPage("reporting_bugs.html");
-			break;
-		case IDOK:
-			EndDialog(hWnd,1);
-			break;
-		}
-		break;
-	case WM_CLOSE:
-		EndDialog(hWnd,1);
-		return TRUE;
+	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&lpMsgBuf,0,NULL)){
+				(void)_snprintf(buffer,sizeof(buffer),
+						"Error code = 0x%x",(UINT)error);
+				buffer[sizeof(buffer) - 1] = 0;
+				MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
+				return;
+	} else {
+		MessageBoxA(NULL,(LPCTSTR)lpMsgBuf,caption,MB_OK | MB_ICONHAND);
+		LocalFree(lpMsgBuf);
 	}
-	return FALSE;
 }
 
-void InitFailure_Handler(void)
+void DisplayDefragError(int error_code,char *caption)
 {
-	DialogBox(hInstance,MAKEINTRESOURCE(IDD_INIT_ERROR),hWindow,(DLGPROC)ErrorDlgProc);
+	char buffer[512];
+	
+	if(error_code == UDEFRAG_ALREADY_RUNNING){
+		MessageBoxA(NULL,udefrag_get_error_description(error_code),
+				caption,MB_OK | MB_ICONHAND);
+	} else {
+		(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
+				udefrag_get_error_description(error_code),
+				"Use DbgView program to get more information.");
+		buffer[sizeof(buffer) - 1] = 0;
+		MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
+	}
 }
 
-void StopFailure_Handler(void)
+void DisplayStopDefragError(int error_code,char *caption)
 {
-	DialogBox(hInstance,MAKEINTRESOURCE(IDD_STOP_ERROR),hWindow,(DLGPROC)ErrorDlgProc);
-}
-
-void JobFailure_Handler(void)
-{
-	DialogBox(hInstance,MAKEINTRESOURCE(IDD_JOB_ERROR),hWindow,(DLGPROC)ErrorDlgProc);
+	char buffer[512];
+	
+	(void)_snprintf(buffer,sizeof(buffer),"%s\n%s\n%s\n%s",
+			udefrag_get_error_description(error_code),
+			"Kill ultradefrag.exe program in task manager",
+			"[press Ctrl + Alt + Delete to launch it].",
+			"Use DbgView program to get more information.");
+	buffer[sizeof(buffer) - 1] = 0;
+	MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
 }
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	int error_code;
 //	DWORD error;
 //	int requests_counter = 0;
-	LPVOID error_message;
 	
 	hInstance = GetModuleHandle(NULL);
 
@@ -159,12 +143,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	GetPrefs();
 
-	//udefrag_set_error_handler(ErrorHandler);
-	//StopFailure_Handler();
+	//DisplayStopDefragError(-1,"Error!");
 	//return 0;
-	
-	if(udefrag_init(N_BLOCKS) < 0){
-		InitFailure_Handler();
+
+	error_code = udefrag_init(N_BLOCKS);
+	if(error_code < 0){
+		DisplayDefragError(error_code,"Initialization failed!");
 		(void)udefrag_unload();
 		DeleteEnvironmentVariables();
 		return 2;
@@ -177,11 +161,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	*/
 	InitCommonControls();
 	
-	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc);
+	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
+		DisplayLastError("Cannot create the main window!");
+		(void)udefrag_unload();
+		DeleteEnvironmentVariables();
+		return 3;
+	}
+	
 	/* delete all created gdi objects */
 	FreeVolListResources();
 	DeleteMaps();
-	if(hFont) DeleteObject(hFont);
+	if(hFont) (void)DeleteObject(hFont);
 	/* save settings */
 	SavePrefs();
 	WgxDestroyResourceTable(i18n_table);
@@ -193,20 +183,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		if(hibernate_instead_of_shutdown){
 			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
 			if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
-				/* format message and display it on the screen */
-				if(FormatMessage( 
-					FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-					FORMAT_MESSAGE_FROM_SYSTEM | 
-					FORMAT_MESSAGE_IGNORE_INSERTS,
-					NULL,
-					GetLastError(),
-					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-					(LPTSTR) &error_message,
-					0,
-					NULL )){
-						MessageBox(NULL,(LPCTSTR)error_message,"Error",MB_OK | MB_ICONINFORMATION);
-						LocalFree(error_message);
-				}
+				DisplayLastError("Cannot hibernate the computer!");
 			}
 			return 0;
 		}
@@ -227,38 +204,12 @@ try_again:
 					Sleep(60 * 1000);
 					goto try_again;
 				}
-				/* format message and display it on the screen */
-				if(FormatMessage( 
-					FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-					FORMAT_MESSAGE_FROM_SYSTEM | 
-					FORMAT_MESSAGE_IGNORE_INSERTS,
-					NULL,
-					error,
-					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-					(LPTSTR) &error_message,
-					0,
-					NULL )){
-						MessageBox(NULL,(LPCTSTR)error_message,"Error",MB_OK | MB_ICONINFORMATION);
-						LocalFree(error_message);
-				}
+				DisplayLastError("Cannot shut down the computer!");
 		}
 #else
 		if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
-			SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
-				/* format message and display it on the screen */
-				if(FormatMessage( 
-					FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-					FORMAT_MESSAGE_FROM_SYSTEM | 
-					FORMAT_MESSAGE_IGNORE_INSERTS,
-					NULL,
-					GetLastError(),
-					MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
-					(LPTSTR) &error_message,
-					0,
-					NULL )){
-						MessageBox(NULL,(LPCTSTR)error_message,"Error",MB_OK | MB_ICONINFORMATION);
-						LocalFree(error_message);
-				}
+		  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
+			DisplayLastError("Cannot shut down the computer!");
 		}
 #endif	
 	}
@@ -268,31 +219,32 @@ try_again:
 
 void InitMainWindow(void)
 {
-//	short lng_file_path[MAX_PATH];
-	char title[128];
 	int dx,dy;
 	RECT rc;
 	
-	/* update window title */
-	GetWindowText(hWindow,title,64);
-	if(udefrag_kernel_mode()) strcat(title," (Kernel Mode)");
-	else strcat(title," (User Mode)");
-	SetWindowText(hWindow,title);
+//#ifdef KERNEL_MODE_DRIVER_SUPPORT
+	char title[128];
 
-	WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
-//	GetWindowsDirectoryW(lng_file_path,MAX_PATH);
-//	wcscat(lng_file_path,L"\\UltraDefrag\\ud_i18n.lng");
+	/* update window title */
+	if(GetWindowText(hWindow,title,64)){
+		if(udefrag_kernel_mode()) strcat(title," (Kernel Mode)");
+		else strcat(title," (User Mode)");
+		(void)SetWindowText(hWindow,title);
+	}
+//#endif
+
+	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"/*lng_file_path*/))
 		WgxApplyResourceTable(i18n_table,hWindow);
 	if(hibernate_instead_of_shutdown){
-		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
+		(void)SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
 	}
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
 
 	if(skip_removable)
-		SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
+		(void)SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
 	else
-		SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
+		(void)SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
 
 	InitVolList(); /* before map! */
 	InitProgress();
@@ -303,10 +255,11 @@ void InitMainWindow(void)
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
 
-	GetWindowRect(hWindow,&rc);
-	dx = rc.right - rc.left;
-	dy = rc.bottom - rc.top + delta_h;
-	SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
+	if(GetWindowRect(hWindow,&rc)){
+		dx = rc.right - rc.left;
+		dy = rc.bottom - rc.top + delta_h;
+		SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
+	}
 
 	UpdateVolList();
 	InitFont();
@@ -343,7 +296,9 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			optimize();
 			break;
 		case IDC_ABOUT:
-			DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc);
+			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1)){
+				DisplayLastError("Cannot create the About window!");
+			}
 			break;
 		case IDC_SETTINGS:
 			if(!busy_flag) CallGUIConfigurator();
@@ -366,24 +321,27 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_MOVE:
-		GetWindowRect(hWnd,&rc);
-		if((HIWORD(rc.bottom)) != 0xffff){
-			rc.bottom -= delta_h;
-			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
+		if(GetWindowRect(hWnd,&rc)){
+			if((HIWORD(rc.bottom)) != 0xffff){
+				rc.bottom -= delta_h;
+				memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
+			}
 		}
 		break;
 	case WM_CLOSE:
-		GetWindowRect(hWnd,&rc);
-		if((HIWORD(rc.bottom)) != 0xffff){
-			rc.bottom -= delta_h;
-			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
+		if(GetWindowRect(hWnd,&rc)){
+			if((HIWORD(rc.bottom)) != 0xffff){
+				rc.bottom -= delta_h;
+				memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
+			}
 		}
+		
 		VolListGetColumnWidths();
 
 		exit_pressed = TRUE;
 		stop();
 		(void)udefrag_unload();
-		EndDialog(hWnd,0);
+		(void)EndDialog(hWnd,0);
 		return TRUE;
 	}
 	return FALSE;
@@ -391,11 +349,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 
 void ShowFragmented()
 {
-	char path[] = "C:\\fraglist.luar";
 	PVOLUME_LIST_ENTRY vl;
 #ifndef UDEFRAG_PORTABLE
-	HINSTANCE hApp;
+	short l_path[] = L"C:\\fraglist.luar";
 #else
+	char path[] = "C:\\fraglist.luar";
 	char cmd[MAX_PATH];
 	char buffer[MAX_PATH + 64];
 	STARTUPINFO si;
@@ -405,22 +363,16 @@ void ShowFragmented()
 	vl = VolListGetSelectedEntry();
 	if(vl->VolumeName == NULL || vl->Status == STAT_CLEAR) return;
 
-	path[0] = vl->VolumeName[0];
 #ifndef UDEFRAG_PORTABLE
-	hApp = ShellExecute(hWindow,"view",path,NULL,NULL,SW_SHOW);
-	if((int)(LONG_PTR)hApp <= 32){
-		MessageBox(hWindow,"Cannot open lua report file.\n"
-						   "Maybe you have installed\n"
-						   "both full and micro editions\n"
-						   "of the program.\n",
-						   "Error",MB_OK | MB_ICONHAND);
-	}
+	l_path[0] = (short)(vl->VolumeName[0]);
+	(void)WgxShellExecuteW(hWindow,L"view",l_path,NULL,NULL,SW_SHOW);
 #else
-	strcpy(cmd,".\\lua5.1a_gui.exe");
-	strcpy(buffer,cmd);
-	strcat(buffer," .\\scripts\\udreportcnv.lua ");
-	strcat(buffer,path);
-	strcat(buffer," null -v");
+	path[0] = vl->VolumeName[0];
+	(void)strcpy(cmd,".\\lua5.1a_gui.exe");
+	(void)strcpy(buffer,cmd);
+	(void)strcat(buffer," .\\scripts\\udreportcnv.lua ");
+	(void)strcat(buffer,path);
+	(void)strcat(buffer," null -v");
 
 	ZeroMemory(&si,sizeof(si));
 	si.cb = sizeof(si);
@@ -429,9 +381,8 @@ void ShowFragmented()
 	ZeroMemory(&pi,sizeof(pi));
 
 	if(!CreateProcess(cmd,buffer,
-		NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-	    MessageBox(NULL,"Can't execute lua5.1a_gui.exe program!",
-			"Error",MB_OK | MB_ICONHAND);
+	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+	    DisplayLastError("Cannot execute lua5.1a_gui.exe program!");
 	    return;
 	}
 	CloseHandle(pi.hProcess);
@@ -445,17 +396,15 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	char buffer[MAX_PATH + 64];
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
+	int error_code;
 
 	/* window coordinates must be accessible by configurator */
 	SavePrefs();
 	
-	//GetWindowsDirectory(path,MAX_PATH);
-	//strcat(path,"\\System32\\udefrag-gui-config.exe");
-	strcpy(path,".\\udefrag-gui-config.exe");
-	
+	(void)strcpy(path,".\\udefrag-gui-config.exe");
 	/* the configurator must know when it should reposition its window */
-	strcpy(buffer,path);
-	strcat(buffer," CalledByGUI");
+	(void)strcpy(buffer,path);
+	(void)strcat(buffer," CalledByGUI");
 
 	ZeroMemory(&si,sizeof(si));
 	si.cb = sizeof(si);
@@ -464,12 +413,11 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	ZeroMemory(&pi,sizeof(pi));
 
 	if(!CreateProcess(path,buffer,
-		NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-	    MessageBox(NULL,"Can't execute udefrag-gui-config.exe program!",
-			"Error",MB_OK | MB_ICONHAND);
+	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+	    DisplayLastError("Cannot execute udefrag-gui-config.exe program!");
 	    return 0;
 	}
-	WaitForSingleObject(pi.hProcess,INFINITE);
+	(void)WaitForSingleObject(pi.hProcess,INFINITE);
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
 	
@@ -477,12 +425,13 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	GetPrefs();
 	stop();
 	(void)udefrag_unload();
-	if(udefrag_init(N_BLOCKS) < 0){
-		InitFailure_Handler();
+	error_code = udefrag_init(N_BLOCKS);
+	if(error_code < 0){
+		DisplayDefragError(error_code,"Initialization failed!");
 		(void)udefrag_unload();
 	}
 	InitFont();
-	SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
+	(void)SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
 	if(hibernate_instead_of_shutdown)
 		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
 	else
@@ -497,5 +446,7 @@ void CallGUIConfigurator(void)
 	DWORD id;
 	
 	h = create_thread(ConfigThreadProc,NULL,&id);
+	if(h == NULL)
+		DisplayLastError("Cannot create thread starting the Configurator program!");
 	if(h) CloseHandle(h);
 }

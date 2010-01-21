@@ -23,6 +23,15 @@ del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
 xcopy /I /Y /Q /S .\doxy-doc\html ..\..\doxy-doc\udefrag.dll\html
 cd ..\..
 
+cd dll\wgx
+rd /s /q doxy-doc
+doxygen
+if %errorlevel% neq 0 cd ..\.. && exit /B 1
+copy /Y .\rsc\*.* .\doxy-doc\html\
+del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
+xcopy /I /Y /Q /S .\doxy-doc\html ..\..\doxy-doc\wgx\html
+cd ..\..
+
 cd dll\zenwinx
 rd /s /q doxy-doc
 doxygen

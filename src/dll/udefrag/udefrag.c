@@ -406,4 +406,39 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 	return result_msg;
 }
 
+/**
+ * @brief Retrieves a human readable error description
+ * for the error codes defined in udefrag.h header file.
+ * @param[in] error_code the error code.
+ * @return A pointer to zero-terminated ANSI string 
+ * containing detailed error description.
+ */
+char * __stdcall udefrag_get_error_description(int error_code)
+{
+	switch(error_code){
+	case UDEFRAG_UNKNOWN_ERROR:
+		return "Some unknown internal bug or some\n"
+		       "rarely arising error has been encountered.";
+	case UDEFRAG_ALREADY_RUNNING:
+		return "You can run only one instance of UltraDefrag!";
+	case UDEFRAG_W2K_4KB_CLUSTERS:
+		return "NTFS volumes with cluster size greater than 4 kb\n"
+		       "cannot be defragmented on Windows 2000.";
+	case UDEFRAG_NO_MEM:
+		return "No enough memory.";
+	case UDEFRAG_CDROM:
+		return "It is impossible to defragment CDROM drive.";
+	case UDEFRAG_REMOTE:
+		return "It is impossible to defragment remote volume.";
+	case UDEFRAG_ASSIGNED_BY_SUBST:
+		return "It is impossible to defragment volumes\n"
+		       "assigned by \'subst\' command.";
+	case UDEFRAG_REMOVABLE:
+		return "You are trying to defragment removable volume.\n"
+		       "If the volume type was wrong identified, send\n"
+			   "a bug report to the author, please.";
+	}
+	return "";
+}
+
 /** @} */

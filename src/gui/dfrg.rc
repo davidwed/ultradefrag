@@ -92,42 +92,6 @@ BEGIN
                     161,12,BS_FLAT
 END
 
-IDD_INIT_ERROR DIALOG DISCARDABLE  0, 0, 210, 56
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Initialization failed!"
-FONT 9, "Courier New"
-BEGIN
-    CONTROL         108,IDC_PIC2,"Static",SS_ICON,5,8,32,32
-    LTEXT           "Another instance of the program is running\nor unknown internal bug encountered.\nDbgView program could help you to recognize.",
-					IDC_STATIC,30,6,180,32
-    PUSHBUTTON      "OK",IDOK,35,38,65,11,WS_GROUP
-    PUSHBUTTON      "Help",IDC_DBGVIEW_HELP,110,38,65,11,NOT WS_TABSTOP
-END
-
-IDD_STOP_ERROR DIALOG DISCARDABLE  0, 0, 255, 61
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Defragmentation cannot be stopped!"
-FONT 9, "Courier New"
-BEGIN
-    CONTROL         108,IDC_PIC2,"Static",SS_ICON,5,14,32,32
-    LTEXT           "Some unknown internal bug has been encountered.\nYou can kill ultradefrag.exe process in task manager\n(press Ctrl + Alt + Delete to launch it).\nDbgView program could help you to get more information.",
-					IDC_STATIC,30,6,220,32
-    PUSHBUTTON      "OK",IDOK,57,43,65,11,WS_GROUP
-    PUSHBUTTON      "Help",IDC_DBGVIEW_HELP,132,43,65,11,NOT WS_TABSTOP
-END
-
-IDD_JOB_ERROR DIALOG DISCARDABLE  0, 0, 280, 56
-STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Analysis/Defragmentation failed!"
-FONT 9, "Courier New"
-BEGIN
-    CONTROL         108,IDC_PIC2,"Static",SS_ICON,5,8,32,32
-    LTEXT           "You are trying to defragment cdrom/network/missing volume\nor system disallows this or unknown internal bug encountered.\nDbgView and ChkDsk programs could help you to recognize.",
-					IDC_STATIC,30,6,250,32
-    PUSHBUTTON      "OK",IDOK,70,38,65,11,WS_GROUP
-    PUSHBUTTON      "Help",IDC_DBGVIEW_HELP,145,38,65,11,NOT WS_TABSTOP
-END
-
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
 BEGIN
     "A",            IDC_ANALYSE,            VIRTKEY, CONTROL, NOINVERT

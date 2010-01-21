@@ -3,6 +3,7 @@ LIBRARY udefrag.dll
 EXPORTS
 	udefrag_init@4
 	udefrag_unload@0
+	udefrag_get_error_description@4
 	udefrag_kernel_mode@0
 	udefrag_reload_settings@0
 	udefrag_send_command_ex@12

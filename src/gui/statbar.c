@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ void SetIcon(int part,int id)
 	HANDLE hImg;
 
 	hImg = LoadImage(hInstance,(LPCSTR)(size_t)id,IMAGE_ICON,16,16,LR_VGACOLOR|LR_SHARED);
-	SendMessage(hStatus,SB_SETICON,part,(LPARAM)hImg);
-	DestroyIcon(hImg);
+	(void)SendMessage(hStatus,SB_SETICON,part,(LPARAM)hImg);
+	(void)DestroyIcon(hImg);
 }
 
 BOOL CreateStatusBar()
@@ -50,15 +50,16 @@ BOOL CreateStatusBar()
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
 									"0 dirs", hWindow, IDM_STATUSBAR);
 	if(hStatus){
-		GetClientRect(hStatus,&rc);
-		width = rc.right - rc.left;
-		for(i = 0; i < N_OF_STATUSBAR_PARTS-1; i++)
-			a[i] = width * x[i] / 560;
-		a[N_OF_STATUSBAR_PARTS-1] = width;
-		SendMessage(hStatus,SB_SETPARTS,N_OF_STATUSBAR_PARTS + 1,(LPARAM)a);
-		SetIcon(0,IDI_DIR); SetIcon(1,IDI_UNFRAGM);
-		SetIcon(2,IDI_FRAGM); SetIcon(3,IDI_CMP);
-		SetIcon(4,IDI_MFT);
+		if(GetClientRect(hStatus,&rc)){
+			width = rc.right - rc.left;
+			for(i = 0; i < N_OF_STATUSBAR_PARTS-1; i++)
+				a[i] = width * x[i] / 560;
+			a[N_OF_STATUSBAR_PARTS-1] = width;
+			(void)SendMessage(hStatus,SB_SETPARTS,N_OF_STATUSBAR_PARTS + 1,(LPARAM)a);
+		}
+		(void)SetIcon(0,IDI_DIR); (void)SetIcon(1,IDI_UNFRAGM);
+		(void)SetIcon(2,IDI_FRAGM); (void)SetIcon(3,IDI_CMP);
+		(void)SetIcon(4,IDI_MFT);
 		return TRUE;
 	}
 	return FALSE;
@@ -72,24 +73,29 @@ void UpdateStatusBar(STATISTIC *pst)
 
 	if(!hStatus) return;
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->dircounter,WgxGetResourceString(i18n_table,L"DIRS"));
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->dircounter,
+			WgxGetResourceString(i18n_table,L"DIRS"));
 	bf[BFSIZE - 1] = 0;
-	SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
+	(void)SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->filecounter,WgxGetResourceString(i18n_table,L"FILES"));
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->filecounter,
+			WgxGetResourceString(i18n_table,L"FILES"));
 	bf[BFSIZE - 1] = 0;
-	SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
+	(void)SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->fragmfilecounter,WgxGetResourceString(i18n_table,L"FRAGMENTED"));
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->fragmfilecounter,
+			WgxGetResourceString(i18n_table,L"FRAGMENTED"));
 	bf[BFSIZE - 1] = 0;
-	SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
+	(void)SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
 
-	_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->compressedcounter,WgxGetResourceString(i18n_table,L"COMPRESSED"));
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->compressedcounter,
+			WgxGetResourceString(i18n_table,L"COMPRESSED"));
 	bf[BFSIZE - 1] = 0;
-	SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
+	(void)SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 
-	udefrag_fbsize(pst->mft_size,2,s,sizeof(s));
-	_snwprintf(bf,BFSIZE - 1,L"%S %s",s,WgxGetResourceString(i18n_table,L"MFT"));
+	(void)udefrag_fbsize(pst->mft_size,2,s,sizeof(s));
+	(void)_snwprintf(bf,BFSIZE - 1,L"%S %s",s,
+			WgxGetResourceString(i18n_table,L"MFT"));
 	bf[BFSIZE - 1] = 0;
-	SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
+	(void)SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
 }

@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -43,6 +43,8 @@ char dbgprint_level[32] = {0};
 extern HWND hWindow;
 extern HFONT hFont;
 
+void DisplayLastError(char *caption);
+
 void DeleteEnvironmentVariables(void)
 {
 	(void)SetEnvironmentVariable("UD_IN_FILTER",NULL);
@@ -68,14 +70,14 @@ void SetEnvironmentVariables(void)
 	if(timelimit[0])
 		(void)SetEnvironmentVariable("UD_TIME_LIMIT",timelimit);
 	if(fraglimit){
-		sprintf(buffer,"%i",fraglimit);
+		(void)sprintf(buffer,"%i",fraglimit);
 		(void)SetEnvironmentVariable("UD_FRAGMENTS_THRESHOLD",buffer);
 	}
 	if(refresh_interval){
-		sprintf(buffer,"%i",refresh_interval);
+		(void)sprintf(buffer,"%i",refresh_interval);
 		(void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",buffer);
 	}
-	sprintf(buffer,"%i",disable_reports);
+	(void)sprintf(buffer,"%i",disable_reports);
 	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",buffer);
 	if(dbgprint_level[0])
 		(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",dbgprint_level);
@@ -112,9 +114,7 @@ void GetPrefs(void)
 	luaL_openlibs(L);  /* open libraries */
 	lua_gc(L, LUA_GCRESTART, 0);
 
-	//GetWindowsDirectory(buffer,MAX_PATH);
-	//strcat(buffer,"\\UltraDefrag\\options\\guiopts.lua");
-	status = luaL_dofile(L,".\\options\\guiopts.lua"/*buffer*/);
+	status = luaL_dofile(L,".\\options\\guiopts.lua");
 	if(!status){ /* successful */
 		win_rc.left = (long)getint(L,"x");
 		win_rc.top = (long)getint(L,"y");
@@ -130,7 +130,7 @@ void GetPrefs(void)
 		lua_getglobal(L, "in_filter");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
-			strncpy(in_filter,string,sizeof(in_filter));
+			(void)strncpy(in_filter,string,sizeof(in_filter));
 			in_filter[sizeof(in_filter) - 1] = 0;
 		}
 		lua_pop(L, 1);
@@ -138,7 +138,7 @@ void GetPrefs(void)
 		lua_getglobal(L, "ex_filter");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
-			strncpy(ex_filter,string,sizeof(ex_filter));
+			(void)strncpy(ex_filter,string,sizeof(ex_filter));
 			ex_filter[sizeof(ex_filter) - 1] = 0;
 		}
 		lua_pop(L, 1);
@@ -146,7 +146,7 @@ void GetPrefs(void)
 		lua_getglobal(L, "sizelimit");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
-			strncpy(sizelimit,string,sizeof(sizelimit));
+			(void)strncpy(sizelimit,string,sizeof(sizelimit));
 			sizelimit[sizeof(sizelimit) - 1] = 0;
 		}
 		lua_pop(L, 1);
@@ -154,7 +154,7 @@ void GetPrefs(void)
 		lua_getglobal(L, "time_limit");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
-			strncpy(timelimit,string,sizeof(timelimit));
+			(void)strncpy(timelimit,string,sizeof(timelimit));
 			timelimit[sizeof(timelimit) - 1] = 0;
 		}
 		lua_pop(L, 1);
@@ -167,7 +167,7 @@ void GetPrefs(void)
 		lua_getglobal(L, "dbgprint_level");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
-			strncpy(dbgprint_level,string,sizeof(dbgprint_level));
+			(void)strncpy(dbgprint_level,string,sizeof(dbgprint_level));
 			dbgprint_level[sizeof(dbgprint_level) - 1] = 0;
 		}
 		lua_pop(L, 1);
@@ -185,11 +185,14 @@ void SavePrefs(void)
 	FILE *pf;
 	int result;
 	
-	GetCurrentDirectory(MAX_PATH,buffer);
-	strcat(buffer,"\\options\\guiopts.lua");
+	if(!GetCurrentDirectory(MAX_PATH,buffer)){
+		DisplayLastError("Cannot retrieve the current directory path!");
+		return;
+	}
+	(void)strcat(buffer,"\\options\\guiopts.lua");
 	pf = fopen(buffer,"wt");
 	if(!pf){
-		_snprintf(err_msg,sizeof(err_msg) - 1,
+		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Can't save gui preferences to %s!\n%s",
 			buffer,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
@@ -243,7 +246,7 @@ void SavePrefs(void)
 		);
 	fclose(pf);
 	if(result < 0){
-		_snprintf(err_msg,sizeof(err_msg) - 1,
+		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Can't write gui preferences to %s!\n%s",
 			buffer,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
@@ -259,18 +262,17 @@ void InitFont(void)
 	/* initialize LOGFONT structure */
 	memset(&lf,0,sizeof(LOGFONT));
 	/* default font should be Courier New 9pt */
-	strcpy(lf.lfFaceName,"Courier New");
+	(void)strcpy(lf.lfFaceName,"Courier New");
 	lf.lfHeight = -12;
 	
 	/* load saved font settings */
-	//GetWindowsDirectory(buffer,MAX_PATH);
-	//strcat(buffer,"\\UltraDefrag\\options\\font.lua");
-	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua"/*buffer*/,&lf)) return;
+	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua",&lf))
+		return;
 
 	/* apply font to application's window */
 	hNewFont = WgxSetFont(hWindow,&lf);
 	if(hNewFont){
-		if(hFont) DeleteObject(hFont);
+		if(hFont) (void)DeleteObject(hFont);
 		hFont = hNewFont;
 	}
 }

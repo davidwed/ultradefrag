@@ -1,6 +1,6 @@
 /*
  *  WGX - Windows GUI Extended Library.
- *  Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* Internationalization routines.
-*/
+/**
+ * @file i18n.c
+ * @brief Internationalization code.
+ * @addtogroup Internationalization
+ * @{
+ */
 
 #define WIN32_NO_STATUS
 #include <windows.h>
@@ -79,25 +82,28 @@ void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,short *line_buffer)
 	value_len = (int)/*(LONG_PTR)*/(line_buffer + wcslen(line_buffer) - eq_pos - 1);
 	ExtractToken(param_buffer,line_buffer,param_len);
 	ExtractToken(value_buffer,eq_pos + 1,value_len);
-	_wcsupr(param_buffer);
+	(void)_wcsupr(param_buffer);
 
 	/* search for table entry */
 	for(i = 0;; i++){
 		if(table[i].Key == NULL) break;
 		if(!wcscmp(table[i].Key,param_buffer)){
 			table[i].LoadedString = malloc((wcslen(value_buffer) + 1) * sizeof(short));
-			if(table[i].LoadedString) wcscpy(table[i].LoadedString, value_buffer);
+			if(table[i].LoadedString) (void)wcscpy(table[i].LoadedString, value_buffer);
 			/* break; // the same text may be used for few GUI controls */
 		}
 	}
 	free(param_buffer); free(value_buffer);
 }
 
-/*
-* Fills LoadedString members of structures in the specified table
-* with strings from the specified lng file.
-* All lines in lng file must be no longer than 8189 characters.
-*/
+/**
+ * @brief Adds localization strings from the file to the table.
+ * @param[in,out] table pointer to the i18n table.
+ * @param[in] lng_file_path the path of the i18n file.
+ * @return Boolean value. TRUE indicates success.
+ * @note All lines in i18n file must be no longer than 8189 characters.
+ * Otherwise they will be truncated before an analysis.
+ */
 BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_file_path)
 {
 	FILE *f;
@@ -122,7 +128,11 @@ BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_f
 	return TRUE;
 }
 
-/* Applies a i18n table to the specified dialog window. */
+/**
+ * @brief Applies a i18n table to the dialog window.
+ * @param[in] table pointer to the i18n table.
+ * @param[in] hWindow handle to the window.
+ */
 void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow)
 {
 	int i;
@@ -133,11 +143,18 @@ void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow
 	for(i = 0;; i++){
 		if(table[i].Key == NULL) break;
 		hChild = GetDlgItem(hWindow,table[i].ControlID);
-		if(table[i].LoadedString) SetWindowTextW(hChild,table[i].LoadedString);
-		else SetWindowTextW(hChild,table[i].DefaultString);
+		if(table[i].LoadedString) (void)SetWindowTextW(hChild,table[i].LoadedString);
+		else (void)SetWindowTextW(hChild,table[i].DefaultString);
 	}
 }
 
+/**
+ * @brief Retrieves a localization string.
+ * @param[in] table pointer to the i18n table.
+ * @param[in] key pointer to the key string.
+ * @return A pointer to the localized string if
+ * available or to the default string otherwise.
+ */
 short * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,short *key)
 {
 	int i;
@@ -154,6 +171,10 @@ short * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,short *key
 	return NULL;
 }
 
+/**
+ * @brief Destroys an i18n table.
+ * @param[in] table pointer to the i18n table.
+ */
 void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table)
 {
 	int i;
@@ -165,3 +186,5 @@ void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table)
 		if(table[i].LoadedString) free(table[i].LoadedString);
 	}
 }
+
+/** @} */

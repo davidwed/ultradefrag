@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -34,24 +34,31 @@ BOOL stop_pressed, exit_pressed = FALSE;
 extern int shutdown_flag;
 
 DWORD WINAPI ThreadProc(LPVOID);
-void StopFailure_Handler(void);
-void JobFailure_Handler(void);
+void DisplayLastError(char *caption);
+void DisplayDefragError(int error_code,char *caption);
+void DisplayStopDefragError(int error_code,char *caption);
 
 void analyse(void)
 {
 	HANDLE h = create_thread(ThreadProc,(DWORD)'a',&thr_id);
+	if(h == NULL)
+		DisplayLastError("Cannot create thread starting volume analysis!");
 	if(h) CloseHandle(h);
 }
 
 void defragment(void)
 {
 	HANDLE h = create_thread(ThreadProc,(DWORD)'d',&thr_id);
+	if(h == NULL)
+		DisplayLastError("Cannot create thread starting volume defragmentation!");
 	if(h) CloseHandle(h);
 }
 
 void optimize(void)
 {
 	HANDLE h = create_thread(ThreadProc,(DWORD)'c',&thr_id);
+	if(h == NULL)
+		DisplayLastError("Cannot create thread starting volume optimization!");
 	if(h) CloseHandle(h);
 }
 
@@ -75,9 +82,9 @@ int __stdcall update_stat(int df)
 		UpdateStatusBar(pst);
 		current_operation = pst->current_operation;
 		if(current_operation)
-			sprintf(progress_msg,"%c %u %%",current_operation,(int)percentage);
+			(void)sprintf(progress_msg,"%c %u %%",current_operation,(int)percentage);
 		else
-			sprintf(progress_msg,"A %u %%",(int)percentage);
+			(void)sprintf(progress_msg,"A %u %%",(int)percentage);
 		SetProgress(progress_msg,(int)percentage);
 	}
 
@@ -88,7 +95,7 @@ int __stdcall update_stat(int df)
 	
 	if(df == FALSE) return 0;
 	if(!stop_pressed){
-		sprintf(progress_msg,"%c 100 %%",current_operation);
+		(void)sprintf(progress_msg,"%c 100 %%",current_operation);
 		SetProgress(progress_msg,100);
 	}
 	return 0;
@@ -98,7 +105,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
 	PVOLUME_LIST_ENTRY vl;
 	UCHAR command;
-	int status;
+	int error_code;
 	char letter;
 
 	/* return immediately if we are busy */
@@ -135,16 +142,16 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	SetProgress("A 0 %",0);
 	switch(command){
 	case 'a':
-		status = udefrag_analyse(letter,update_stat);
+		error_code = udefrag_analyse(letter,update_stat);
 		break;
 	case 'd':
-		status = udefrag_defragment(letter,update_stat);
+		error_code = udefrag_defragment(letter,update_stat);
 		break;
 	default:
-		status = udefrag_optimize(letter,update_stat);
+		error_code = udefrag_optimize(letter,update_stat);
 	}
-	if(status < 0 && !exit_pressed){
-		JobFailure_Handler();
+	if(error_code < 0 && !exit_pressed){
+		DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
 		VolListUpdateSelectedStatusField(STAT_CLEAR);
 		ClearMap();
 	}
@@ -164,7 +171,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),
 			BM_GETCHECK,0,0) == BST_CHECKED){
 				shutdown_flag = TRUE;
-				SendMessage(hWindow,WM_CLOSE,0,0);
+				(void)SendMessage(hWindow,WM_CLOSE,0,0);
 		}
 	}
 	
@@ -173,6 +180,11 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 void stop(void)
 {
+	int error_code;
+	
 	stop_pressed = TRUE;
-	if(udefrag_stop() < 0) StopFailure_Handler();
+	error_code = udefrag_stop();
+	if(error_code < 0)
+		DisplayStopDefragError(error_code,
+			"Analysis/Defragmentation cannot be stopped!");
 }
