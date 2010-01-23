@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -45,7 +45,6 @@ void display_help(void)
 				"  analyse X:   - volume analysis\n"
 				"  defrag X:    - volume defragmentation\n"
 				"  optimize X:  - volume optimization\n"
-				"  batch        - not implemented yet\n"
 				"  drives       - displays list of available volumes\n"
 				"  exit         - continue Windows boot\n"
 				"  reboot       - reboot the PC\n"
@@ -60,18 +59,19 @@ void display_help(void)
 
 void __stdcall NtProcessStartup(PPEB Peb)
 {
+	int error_code;
 	char cmd[33], arg[5];
 	char buffer[256];
 	int i;
 
 	/* 1. Initialization */
 #ifdef USE_INSTEAD_SMSS
-	NtInitializeRegistry(FALSE); /* saves boot log etc. */
+	(void)NtInitializeRegistry(FALSE); /* saves boot log etc. */
 #endif
 	/* 2. Display Copyright */
 	if(winx_get_os_version() < 51) winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
-		"Copyright (c) Dmitri Arkhangelski, 2007-2009.\n\n"
+		"Copyright (c) Dmitri Arkhangelski, 2007-2010.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
 		"If something is wrong, hit F8 on startup\n"
 		"and select 'Last Known Good Configuration'.\n"
@@ -94,13 +94,14 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_printf("\n\n");
 
 	/* 4. Initialize UltraDefrag driver */
-	if(udefrag_init(0) < 0){
+	error_code = udefrag_init(0);
+	if(error_code < 0){
 		winx_printf("\nInitialization failed!\n");
-		winx_printf("Send report to the author please.\n");
+		winx_printf("%s\n",udefrag_get_error_description(error_code));
 		winx_printf("Wait 10 seconds ...\n");
 		winx_sleep(10000); /* show error message at least 10 seconds */
 		winx_printf("Good bye ...\n");
-		udefrag_unload();
+		(void)udefrag_unload();
 		winx_exit(1);
 	}
 
@@ -117,20 +118,17 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_printf("# ");
 		if(winx_gets(buffer,sizeof(buffer) - 1) < 0) break;
 		cmd[0] = arg[0] = 0;
-		sscanf(buffer,"%32s %4s",cmd,arg);
+		(void)sscanf(buffer,"%32s %4s",cmd,arg);
 
 		if(!strcmp(cmd,"shutdown")){
 			winx_printf("Shutdown ...");
-			udefrag_unload();
+			(void)udefrag_unload();
 			winx_shutdown();
 			continue;
 		} else if(!strcmp(cmd,"reboot")){
 			winx_printf("Reboot ...");
-			udefrag_unload();
+			(void)udefrag_unload();
 			winx_reboot();
-			continue;
-		} else if(!strcmp(cmd,"batch")){
-			winx_printf("Prepare to batch processing ...\n");
 			continue;
 		} else if(!strcmp(cmd,"exit")){
 			break;
@@ -163,7 +161,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		}
 	}
 	winx_printf("Good bye ...\n");
-	udefrag_unload();
+	(void)udefrag_unload();
 	winx_exit(0);
 	return;
 }

@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -61,8 +61,9 @@ void UpdateProgress()
 				winx_putch('-'); /* 100 % of previous operation */
 			if(stat.pass_number != 0xffffffff && stat.pass_number > pass_number){
 				pass_number = stat.pass_number;
-				_itoa(pass_number,s,10);
+				(void)_itoa(pass_number,s,10);
 				winx_printf("\n\nPass %s ...\n",s);
+				winx_printf("Use Pause/Break key to abort the process.\n");
 			}
 		} else {
 			if(stat.current_operation != 'A'){
@@ -98,9 +99,13 @@ void UpdateProgress()
 
 int __stdcall update_stat(int df)
 {
+	int error_code;
+	
 	if(winx_breakhit(100) >= 0){
-		if(udefrag_stop() < 0){
+		error_code = udefrag_stop();
+		if(error_code < 0){
 			winx_printf("\nStop request failed!\n");
+			winx_printf("%s\n",udefrag_get_error_description(error_code));
 		}
 		abort_flag = 1;
 	}
@@ -117,7 +122,7 @@ void ProcessVolume(char letter,char defrag_command)
 	STATISTIC stat;
 	int status = 0;
 
-	udefrag_reload_settings();
+	(void)udefrag_reload_settings();
 	
 	i = j = 0;
 	last_op = 0;
@@ -126,24 +131,27 @@ void ProcessVolume(char letter,char defrag_command)
 	case 'a':
 		job_type = ANALYSE_JOB;
 		winx_printf("analyse %c: ...\n",letter);
+		winx_printf("Use Pause/Break key to abort the process.\n");
 		status = udefrag_analyse(letter,update_stat);
 		break;
 	case 'd':
 		job_type = DEFRAG_JOB;
 		winx_printf("defragment %c: ...\n",letter);
+		winx_printf("Use Pause/Break key to abort the process.\n");
 		status = udefrag_defragment(letter,update_stat);
 		break;
 	case 'c':
 		job_type = OPTIMIZE_JOB;
 		pass_number = 0;
 		winx_printf("optimize %c: ...\n",letter);
+		winx_printf("Use Pause/Break key to abort the process.\n");
 		winx_printf("\nPass 0 ...\n");
 		status = udefrag_optimize(letter,update_stat);
 		break;
 	}
 	if(status < 0){
-		winx_printf("\nYou are trying to defragment cdrom/network/missing volume\n");
-		winx_printf("or system disallows this or unknown internal bug encountered.\n");
+		winx_printf("\nAnalysis/Defragmentation failed!\n");
+		winx_printf("%s\n",udefrag_get_error_description(status));
 		return;
 	}
 
@@ -186,13 +194,15 @@ void SetEnvVariable()
 	value_len = (int)(LONG_PTR)(command + wcslen(command) - eq_pos - 1);
 	ExtractToken(name_buffer,command + wcslen(L"set"),min(name_len,NAME_BUF_SIZE - 1));
 	ExtractToken(value_buffer,eq_pos + 1,min(value_len,VALUE_BUF_SIZE - 1));
-	_wcsupr(name_buffer);
+	(void)_wcsupr(name_buffer);
 	if(!name_buffer[0]){
 		winx_printf("\nVariable name is not specified!\n\n");
 		return;
 	}
 	if(!value_buffer[0]) val = NULL;
-	winx_set_env_variable(name_buffer,val);
+	if(winx_set_env_variable(name_buffer,val) < 0){
+		winx_printf("\nCannot set environment variable.\n\n");
+	}
 }
 
 void PauseExecution()
@@ -208,13 +218,15 @@ void PauseExecution()
 /* enables boot time defragmentation */
 void EnableNativeDefragger(void)
 {
-	(void)winx_register_boot_exec_command(L"defrag_native");
+	if(winx_register_boot_exec_command(L"defrag_native") < 0)
+		winx_printf("\nCannot enable the boot time defragmenter.\n\n");
 }
 
 /* disables boot time defragmentation */
 void DisableNativeDefragger(void)
 {
-	(void)winx_unregister_boot_exec_command(L"defrag_native");
+	if(winx_unregister_boot_exec_command(L"defrag_native") < 0)
+		winx_printf("\nCannot disable the boot time defragmenter.\n\n");
 }
 
 void Hibernate(void)
@@ -294,21 +306,21 @@ void ParseCommand()
 	if((short *)wcsstr(command,L"exit") == command){
 break_execution:
 		winx_printf("Good bye ...\n");
-		udefrag_unload();
+		(void)udefrag_unload();
 		winx_exit(0);
 		return;
 	}
 	/* handle shutdown command */
 	if((short *)wcsstr(command,L"shutdown") == command){
 		winx_printf("Shutdown ...");
-		udefrag_unload();
+		(void)udefrag_unload();
 		winx_shutdown();
 		return;
 	}
 	/* handle reboot command */
 	if((short *)wcsstr(command,L"reboot") == command){
 		winx_printf("Reboot ...");
-		udefrag_unload();
+		(void)udefrag_unload();
 		winx_reboot();
 		return;
 	}
@@ -363,18 +375,27 @@ void ProcessScript(void)
 	unsigned short ch;
 
 	/* open script file */
-	if(winx_get_windows_directory(filename,MAX_PATH) < 0) return;
-	strncat(filename,"\\system32\\ud-boot-time.cmd",
+	if(winx_get_windows_directory(filename,MAX_PATH) < 0){
+		winx_printf("\nCannot retrieve the Windows directory path!\n\n");
+		return;
+	}
+	(void)strncat(filename,"\\system32\\ud-boot-time.cmd",
 			MAX_PATH - strlen(filename) - 1);
 	f = winx_fopen(filename,"r");
-	if(!f) return;
+	if(!f){
+		winx_printf("\nCannot open the boot time script!\n\n");
+		return;
+	}
 	/* read contents */
 	filesize = winx_fread(file_buffer,sizeof(short),
 			(sizeof(file_buffer) / sizeof(short)) - 1,f);
 	/* close file */
 	winx_fclose(f);
 	/* read commands and interpret them */
-	if(!filesize) return;
+	if(!filesize){
+		winx_printf("\nCannot read the boot time script!\n\n");
+		return;
+	}
 	file_buffer[filesize] = 0;
 	line_buffer[0] = 0;
 	cnt = 0;
