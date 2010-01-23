@@ -8,7 +8,7 @@ HISTORY
       which works much better that MediaWiki service used before
     - USB keyboards support at Windows boot time was added
     - error handling was highly improved
-    - kernel mode driver was retired and removed
+    - kernel mode driver was removed as a component less reliable by definition
     - handbook was rewritten to be much clearer
     - all important program sources were well documented
 

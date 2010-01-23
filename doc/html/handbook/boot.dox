@@ -130,15 +130,15 @@
  * runs in interactive mode after the last script command execution. In
  * this case UltraDefrag displays the following command prompt and waits
  * for the user input:
- * @verbatim
- * Interactive mode:
- * Type 'help' for list of supported commands.
- *
- * #
- * @endverbatim
+@verbatim
+Interactive mode:
+Type 'help' for list of supported commands.
+
+#
+@endverbatim
  *
  * Currently there are just few simple commands supported in this mode.
- * To show a full list of the commands type help. To continue the
+ * To show a full list of commands type help. To continue the
  * Windows boot process type exit.
  */
 

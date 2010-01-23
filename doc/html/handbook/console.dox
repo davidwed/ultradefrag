@@ -21,7 +21,7 @@
  * @page Console Console Interface
  *
  * UltraDefrag command line tool <b>udefrag.exe</b> the installer
- * places to your system32 directory. Therefore you may run it
+ * places to the system32 directory. Therefore it may be run
  * without specifying the full path.
  * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/Screenshots.html">View screenshots...</a>
  *
@@ -68,7 +68,7 @@
  * <dd>Set a character used for the map drawing. There are two accepted formats:
  * a character may be typed directly, or its hexadecimal number may be used. For 
  * example, --map-symbol=0x1 forces UltraDefrag to use a smile character for the
- * map drawing.</dd>
+ * map drawing. Valid numbers are in range 0x1 - 0xFF. The \% symbol is used by default.</dd>
  * <dt>--map-rows=n</dt>
  * <dd>Number of rows in cluster map. Default value is 10.</dd>
  * <dt>--map-symbols-per-line=n</dt>
@@ -94,7 +94,7 @@
  * Here A,B,C,D,E  represent any integer numbers, y,d,h,m,s - suffixes
  * used for years, days, hours, minutes and seconds.</dd>
  * <dt>UD_REFRESH_INTERVAL</dt>
- * <dd>Progress refresh interval, in milliseconds.</dd>
+ * <dd>Progress refresh interval, in milliseconds. The default value is 500.</dd>
  * <dt>UD_DISABLE_REPORTS</dt>
  * <dd>If this environment variable is set to 1 (one), no 
  * file fragmentation reports will be generated.</dd>
