@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
-#define settextcolor(c) SetConsoleTextAttribute(hOut,c)
+#define settextcolor(c) (void)SetConsoleTextAttribute(hOut,c)
 
 /* global variables */
 HANDLE hOut;
@@ -57,12 +57,66 @@ int __stdcall ProgressCallback(int done_flag);
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 void display_error(char *string);
+void DisplayLastError(char *caption);
+
+/* fills the current line with spaces */
+void clear_line(FILE *f)
+{
+	char *line;
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	COORD cursor_pos;
+	int n;
+	
+	if(!GetConsoleScreenBufferInfo(hOut,&csbi))
+		return; /* impossible to determine the screen width */
+	n = (int)csbi.dwSize.X;
+	line = malloc(n + 1);
+	if(!line) return;
+	
+	memset(line,0x20,n);
+	line[n] = 0;
+	fprintf(f,"\r%s",line);
+	free(line);
+	
+	/* move cursor back to the previous line */
+	cursor_pos.X = 0;
+	cursor_pos.Y = csbi.dwCursorPosition.Y;
+	if(!SetConsoleCursorPosition(hOut,cursor_pos))
+		DisplayLastError("Cannot set cursor position!");
+}
 
 /* prints specified string in red, than restores green/default color */
 void display_error(char *string)
 {
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 	printf("%s",string);
+	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+}
+
+void DisplayLastError(char *caption)
+{
+	LPVOID lpMsgBuf;
+	DWORD error = GetLastError();
+
+	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&lpMsgBuf,0,NULL)){
+				printf("\n%s\nError code = 0x%x\n\n",caption,(UINT)error);
+				return;
+	} else {
+		printf("\n%s\n%s\n",caption,(char *)lpMsgBuf);
+		LocalFree(lpMsgBuf);
+	}
+}
+
+void DisplayDefragError(int error_code,char *caption)
+{
+	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+	printf("\n%s\n\n",caption);
+	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	printf("%s\n\n",udefrag_get_error_description(error_code));
+	if(error_code == UDEFRAG_UNKNOWN_ERROR) printf("Use DbgView program to get more information.\n\n");
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
@@ -101,23 +155,28 @@ int show_vollist(void)
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
+	int error_code;
+	
 	stop_flag = TRUE;
-	if(udefrag_stop() < 0){
-		display_error("\nDefragmentation cannot be stopped!\n\n"
-					  "Some unknown internal bug has been encountered.\n"
-					  "You can kill ultradefrag.exe process in task manager\n"
-					  "(press Ctrl + Alt + Delete to launch it).\n"
-					  "Run DbgView program for more information.\n\n"
-					  );
+	error_code = udefrag_stop();
+	if(error_code < 0){
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("\nDefragmentation cannot be stopped!\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		printf("%s\n",udefrag_get_error_description(error_code));
+		printf("Kill ultradefrag.exe program in task manager\n");
+		printf("[press Ctrl + Alt + Delete to launch it].\n\n");
+		if(error_code == UDEFRAG_UNKNOWN_ERROR) printf("Use DbgView program to get more information.\n\n");
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	}
 	return TRUE;
 }
 
 void cleanup(void)
 {
-	udefrag_unload();
+	(void)udefrag_unload();
 	FreeClusterMap();
-	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
 	if(!b_flag) settextcolor(console_attr);
 }
 
@@ -132,7 +191,7 @@ int __cdecl main(int argc, char **argv)
 	STATISTIC stat;
 	STATUPDATEPROC stat_callback = NULL;
 	long map_size = 0;
-	int job_error = 0;
+	int error_code = 0;
 
 	/* analyse command line */
 	parse_cmdline(argc,argv);
@@ -141,6 +200,12 @@ int __cdecl main(int argc, char **argv)
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(hOut,&csbi))
 		console_attr = csbi.wAttributes;
+
+/*	fprintf(stderr,"I have a propension to listen music.");
+	clear_line(stderr);
+	fprintf(stderr,"\rWindows is a bug.");
+	return 0;
+*/
 	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	
 	/* handle help request */
@@ -152,7 +217,7 @@ int __cdecl main(int argc, char **argv)
 
 	/* display copyright */
 	printf(VERSIONINTITLE ", "
-		   "Copyright (c) Dmitri Arkhangelski, 2007-2009.\n"
+		   "Copyright (c) Dmitri Arkhangelski, 2007-2010.\n"
 		   "UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
 		   "and you are welcome to redistribute it under certain conditions.\n\n");
 
@@ -175,13 +240,9 @@ int __cdecl main(int argc, char **argv)
 		if(!b_flag) settextcolor(console_attr);
 		return 1;
 	}
-	if(udefrag_validate_volume(letter,FALSE) < 0){
-		display_error("The specified volume cannot be processed.\n\n"
-					  "Possible reasons are:\n"
-					  " - remote/cdrom/missing volume specified\n"
-					  " - volume letter is assigned by \'subst\' command\n\n"
-					  "Run DbgView program for more information.\n"
-					  );
+	error_code = udefrag_validate_volume(letter,FALSE);
+	if(error_code < 0){
+		DisplayDefragError(error_code,"The volume cannot be processed.");
 		if(!b_flag) settextcolor(console_attr);
 		return 1;
 	}
@@ -198,14 +259,12 @@ int __cdecl main(int argc, char **argv)
 	}
 
 	/* do our job */
-	SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE);
+	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
+		DisplayLastError("Cannot set Ctrl + C handler!");
 	if(m_flag) map_size = map_rows * map_symbols_per_line;
-	if(udefrag_init(map_size) < 0){
-		display_error("\nInitialization failed!\n\n"
-					  "Another instance of the program is running\n"
-					  "or unknown internal bug encountered.\n"
-					  "DbgView program could help you to recognize.\n\n"
-					  );
+	error_code = udefrag_init(map_size);
+	if(error_code < 0){
+		DisplayDefragError(error_code,"Initialization failed!");
 		cleanup();
 		return 2;
 	}
@@ -214,20 +273,23 @@ int __cdecl main(int argc, char **argv)
 	else printf("(User Mode)\n\n");
 
 	if(m_flag){ /* prepare console buffer for map */
+		clear_line(stderr);
 		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %u/%u",
 			letter,"analyse:  ",0,0,0);
 		RedrawMap();
 	}
 	
 	if(!p_flag) stat_callback = ProgressCallback;
-	if(a_flag) { if(udefrag_analyse(letter,stat_callback) < 0) job_error = 1; }
-	else if(o_flag) { if(udefrag_optimize(letter,stat_callback) < 0) job_error = 1; }
-	else { if(udefrag_defragment(letter,stat_callback) < 0) job_error = 1; }
-	if(job_error){
-		display_error("\nAnalysis/Defragmentation failure!\n\n"
-					  "System disallows it or unknown internal bug encountered.\n"
-					  "DbgView and ChkDsk programs could help you to recognize.\n\n"
-					  );
+
+	if(a_flag){
+		error_code = udefrag_analyse(letter,stat_callback);
+	} else if(o_flag){
+		error_code = udefrag_optimize(letter,stat_callback);
+	} else {
+		error_code = udefrag_defragment(letter,stat_callback);
+	}
+	if(error_code < 0){
+		DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
 		cleanup();
 		return 3;
 	}

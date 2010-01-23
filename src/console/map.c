@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
-#define settextcolor(c) SetConsoleTextAttribute(hOut,c)
+#define settextcolor(c) (void)SetConsoleTextAttribute(hOut,c)
 
 #define BLOCKS_PER_HLINE  68//60//79
 #define BLOCKS_PER_VLINE  10//8//16
@@ -70,6 +70,9 @@ short map_border_color = BORDER_COLOR;
 char map_symbol = MAP_SYMBOL;
 int map_rows = BLOCKS_PER_VLINE;
 int map_symbols_per_line = BLOCKS_PER_HLINE;
+
+void DisplayLastError(char *caption);
+void clear_line(FILE *f);
 
 void AllocateClusterMap(void)
 {
@@ -164,19 +167,19 @@ int __stdcall ProgressCallback(int done_flag)
 		* Ultra fast ntfs analysis contains one piece of code 
 		* that heavily loads CPU for one-two seconds.
 		*/
-		SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
+		(void)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
 		first_run = FALSE;
 	}
 	
 	if(map_completed){
 		if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
-			display_error("\nCannot retrieve cursor position!\n");
+			DisplayLastError("Cannot retrieve cursor position!");
 			return 0;
 		}
 		cursor_pos.X = 0;
 		cursor_pos.Y = csbi.dwCursorPosition.Y - map_rows - 3 - 2;
 		if(!SetConsoleCursorPosition(hOut,cursor_pos)){
-			display_error("\nCannot set cursor position!\n");
+			DisplayLastError("Cannot set cursor position!");
 			return 0;
 		}
 	}
@@ -187,7 +190,8 @@ int __stdcall ProgressCallback(int done_flag)
 		if(op == 'A' || op == 'a')      op_name = "analyse:  ";
 		else if(op == 'D' || op == 'd') op_name = "defrag:   ";
 		else                            op_name = "optimize: ";
-		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %lu/%lu     ", /* FIXME! */
+		clear_line(stderr);
+		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %lu/%lu",
 			letter,op_name,(int)percentage,stat.fragmfilecounter,stat.filecounter);
 	} else {
 		err_flag = TRUE;
@@ -196,7 +200,8 @@ int __stdcall ProgressCallback(int done_flag)
 	if(err_flag) return 0;
 
 	if(done_flag && !stop_flag){ /* set progress indicator to 100% state */
-		fprintf(stderr,"\r%c: %s100%% complete, fragmented/total = %lu/%lu     ", /* FIXME! */
+		clear_line(stderr);
+		fprintf(stderr,"\r%c: %s100%% complete, fragmented/total = %lu/%lu",
 			letter,op_name,stat.fragmfilecounter,stat.filecounter);
 		if(!m_flag) fprintf(stderr,"\n");
 	}

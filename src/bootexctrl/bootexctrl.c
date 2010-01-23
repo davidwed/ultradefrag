@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -48,6 +48,27 @@ void show_help(void)
 		);
 }
 
+void DisplayLastError(char *caption)
+{
+	LPVOID lpMsgBuf;
+	char buffer[128];
+	DWORD error = GetLastError();
+
+	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&lpMsgBuf,0,NULL)){
+				(void)_snprintf(buffer,sizeof(buffer),
+						"Error code = 0x%x",(UINT)error);
+				buffer[sizeof(buffer) - 1] = 0;
+				MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
+				return;
+	} else {
+		MessageBoxA(NULL,(LPCTSTR)lpMsgBuf,caption,MB_OK | MB_ICONHAND);
+		LocalFree(lpMsgBuf);
+	}
+}
+
 int open_smss_key(HKEY *phkey)
 {
 	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
@@ -55,7 +76,7 @@ int open_smss_key(HKEY *phkey)
 			0,
 			KEY_QUERY_VALUE | KEY_SET_VALUE,
 			phkey) != ERROR_SUCCESS){
-		if(!silent) MessageBox(0,"Cannot open SMSS key!","Error",MB_OK | MB_ICONHAND);
+		if(!silent) DisplayLastError("Cannot open SMSS key!");
 		return 0;
 	}
 	return 1;
@@ -70,20 +91,20 @@ int register_cmd(void)
 
 	if(!open_smss_key(&hKey)) return 3;
 	type = REG_MULTI_SZ;
-	RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
+	(void)RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
 	data = malloc(size + strlen(cmd) + 10);
 	if(!data){
-		RegCloseKey(hKey);
 		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
+		(void)RegCloseKey(hKey);
 		return 4;
 	}
 
 	type = REG_MULTI_SZ;
 	if(RegQueryValueEx(hKey,"BootExecute",NULL,&type,
 			data,&size) != ERROR_SUCCESS){
-		RegCloseKey(hKey);
+		if(!silent) DisplayLastError("Cannot query BootExecute value!");
+		(void)RegCloseKey(hKey);
 		free(data);
-		if(!silent) MessageBox(0,"Cannot query BootExecute value!","Error",MB_OK | MB_ICONHAND);
 		return 5;
 	}
 
@@ -95,19 +116,19 @@ int register_cmd(void)
 		if(!strcmp(curr_pos,cmd)) goto done;
 		i += curr_len;
 	}
-	strcpy(data + i,cmd);
+	(void)strcpy(data + i,cmd);
 	data[i + strlen(cmd) + 1] = 0;
 	length += strlen(cmd) + 1 + 1;
 
 	if(RegSetValueEx(hKey,"BootExecute",0,REG_MULTI_SZ,
 			data,length) != ERROR_SUCCESS){
-		RegCloseKey(hKey);
+		if(!silent) DisplayLastError("Cannot set BootExecute value!");
+		(void)RegCloseKey(hKey);
 		free(data);
-		if(!silent) MessageBox(0,"Cannot set BootExecute value!","Error",MB_OK | MB_ICONHAND);
 		return 6;
 	}
 done:
-	RegCloseKey(hKey);
+	(void)RegCloseKey(hKey);
 	free(data);
 	return 0;
 }
@@ -121,28 +142,28 @@ int unregister_cmd(void)
 
 	if(!open_smss_key(&hKey)) return 7;
 	type = REG_MULTI_SZ;
-	RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
+	(void)RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
 	data = malloc(size + strlen(cmd) + 10);
 	if(!data){
-		RegCloseKey(hKey);
 		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
+		(void)RegCloseKey(hKey);
 		return 8;
 	}
 
 	type = REG_MULTI_SZ;
 	if(RegQueryValueEx(hKey,"BootExecute",NULL,&type,
 			data,&size) != ERROR_SUCCESS){
-		RegCloseKey(hKey);
+		if(!silent) DisplayLastError("Cannot query BootExecute value!");
+		(void)RegCloseKey(hKey);
 		free(data);
-		if(!silent) MessageBox(0,"Cannot query BootExecute value!","Error",MB_OK | MB_ICONHAND);
 		return 9;
 	}
 
 	new_data = malloc(size);
 	if(!new_data){
-		RegCloseKey(hKey);
+		if(!silent) DisplayLastError("No enough memory!");
+		(void)RegCloseKey(hKey);
 		free(data);
-		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
 		return 10;
 	}
 
@@ -157,7 +178,7 @@ int unregister_cmd(void)
 		curr_pos = data + i;
 		curr_len = strlen(curr_pos) + 1;
 		if(strcmp(curr_pos,cmd)){
-			strcpy(new_data + new_length,curr_pos);
+			(void)strcpy(new_data + new_length,curr_pos);
 			new_length += curr_len;
 		}
 		i += curr_len;
@@ -166,14 +187,14 @@ int unregister_cmd(void)
 
 	if(RegSetValueEx(hKey,"BootExecute",0,REG_MULTI_SZ,
 			new_data,new_length + 1) != ERROR_SUCCESS){
-		RegCloseKey(hKey);
+		if(!silent) DisplayLastError("Cannot set BootExecute value!");
+		(void)RegCloseKey(hKey);
 		free(data);
 		free(new_data);
-		if(!silent) MessageBox(0,"Cannot set BootExecute value!","Error",MB_OK | MB_ICONHAND);
 		return 11;
 	}
 
-	RegCloseKey(hKey);
+	(void)RegCloseKey(hKey);
 	free(data);
 	free(new_data);
 	return 0;
@@ -191,12 +212,12 @@ int parse_cmdline(void)
 
 	if(argc < 3){
 		h_flag = 1;
-		GlobalFree(argv);
+		(void)GlobalFree(argv);
 		return 0;
 	}
 	for(i = 1; i < argc; i++){
 		param = argv[i];
-		_wcslwr(param);
+		(void)_wcslwr(param);
 		if(!wcscmp(param,L"/r")) r_flag = 1;
 		else if(!wcscmp(param,L"/u")) u_flag = 1;
 		else if(!wcscmp(param,L"/h")) h_flag = 1;
@@ -206,11 +227,11 @@ int parse_cmdline(void)
 			if(wcslen(param) > MAX_PATH){
 				invalid_opts = 1;
 				if(!silent) MessageBox(0,"Command name is too long!","Error",MB_OK | MB_ICONHAND);
-			} else _snprintf(cmd,MAX_PATH,"%ws",param);
+			} else (void)_snprintf(cmd,MAX_PATH,"%ws",param);
 		}
 	}
 	cmd[MAX_PATH] = 0;
-	GlobalFree(argv);
+	(void)GlobalFree(argv);
 	return 0;
 }
 

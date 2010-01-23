@@ -27,6 +27,8 @@
 #define WIN32_NO_STATUS
 #include <windows.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <shellapi.h>
 
 #include "wgx.h"
 
@@ -167,7 +169,7 @@ BOOL __stdcall WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
 		error_description = "The specified path was not found.";
 		break;
 	case ERROR_BAD_FORMAT:
-		error_description = "The .exe file is invalid (non-Microsoft Win32® .exe or error in .exe image).";
+		error_description = "The .exe file is invalid (non-Microsoft Win32 .exe or error in .exe image).";
 		break;
 	case SE_ERR_ACCESSDENIED:
 		error_description = "The operating system denied access to the specified file.";
