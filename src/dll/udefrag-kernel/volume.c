@@ -91,25 +91,20 @@ int GetDriveGeometry(char *volume_name)
 		return (-1);
 	}
 
-	/*
-	* FILE_FS_SIZE_INFORMATION structure needs to be filled by zeros
-	* before system call. But x64 compiler doesn't allow doing that.
-	* Therefore we must allocate memory...
-	*/
-	pFileFsSize = winx_virtual_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
+	pFileFsSize = winx_heap_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
 	if(!pFileFsSize){
 		winx_fclose(fRoot);
 		DebugPrint("udefrag-kernel.dll GetDriveGeometry(): no enough memory!");
 		return UDEFRAG_NO_MEM;
 	}
 
-	/* now we have zero filled space pointed by pFileFsSize */
 	/* get logical geometry */
+	RtlZeroMemory(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
 	status = NtQueryVolumeInformationFile(winx_fileno(fRoot),&iosb,pFileFsSize,
 			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	winx_fclose(fRoot);
 	if(status != STATUS_SUCCESS){
-		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
+		winx_heap_free(pFileFsSize);
 		DebugPrintEx(status,"FileFsSizeInformation() request failed for %s",path);
 		return (-1);
 	}
@@ -131,11 +126,11 @@ int GetDriveGeometry(char *volume_name)
 	
 	/* validate geometry */
 	if(!clusters_total || !bytes_per_cluster){
-		winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
+		winx_heap_free(pFileFsSize);
 		DebugPrint("Wrong volume geometry!");
 		return (-1);
 	}
-	winx_virtual_free(pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
+	winx_heap_free(pFileFsSize);
 	return 0;
 }
 

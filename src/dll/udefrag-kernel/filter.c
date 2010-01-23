@@ -43,12 +43,13 @@ void InitializeFilter(void)
 	#define ENV_BUFFER_SIZE 8192
 	
 	/* allocate memory */
-	env_buffer = winx_virtual_alloc(ENV_BUFFER_SIZE * sizeof(short));
+	env_buffer = winx_heap_alloc(ENV_BUFFER_SIZE * sizeof(short));
 	if(!env_buffer){
 		DebugPrint("Cannot allocate %u bytes for InitializeOptions()\n",
 			ENV_BUFFER_SIZE * sizeof(short));
 		return;
 	}
+	RtlZeroMemory(env_buffer,ENV_BUFFER_SIZE * sizeof(short));
 
 	/* reset filter */
 	sizelimit = 0; fraglimit = 0;
@@ -85,7 +86,7 @@ void InitializeFilter(void)
 	DebugPrint("Fragments threshold = %I64u\n",fraglimit);
 	
 	/* free memory */
-	winx_virtual_free(env_buffer,ENV_BUFFER_SIZE * sizeof(short));
+	winx_heap_free(env_buffer);
 }
 
 /**
