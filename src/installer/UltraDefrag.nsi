@@ -34,6 +34,8 @@
 
 !define MODERN_UI
 
+;!define SHOW_BOOTSPLASH
+
 !include "WinVer.nsh"
 !include "x64.nsh"
 
@@ -98,6 +100,8 @@ ReserveFile "driver.ini"
 !endif
 
 !ifdef MODERN_UI
+  !define MUI_WELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
+  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
   !define MUI_COMPONENTSPAGE_SMALLDESC
 
   !insertmacro MUI_PAGE_WELCOME
@@ -241,6 +245,7 @@ FunctionEnd
 
 Function ShowBootSplash
 
+!ifdef SHOW_BOOTSPLASH
   ${Unless} ${Silent}
   ${AndUnless} $ShowBootsplash == "0"
     push $R0
@@ -253,6 +258,7 @@ Function ShowBootSplash
     ${DisableX64FSRedirection}
     pop $R0
   ${EndUnless}
+!endif
 
 FunctionEnd
 
