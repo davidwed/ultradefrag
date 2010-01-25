@@ -47,7 +47,7 @@
 #define IDC_MAP                         1007
 #define IDC_RESCAN                      1008
 #define IDC_SKIPREMOVABLE               1009
-#define IDC_COMPACT                     1010
+#define IDC_OPTIMIZE                    1010
 #define IDC_SETTINGS                    1011
 #define IDC_ABOUT                       1012
 #define IDC_SHOWFRAGMENTED              1013

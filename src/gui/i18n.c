@@ -29,10 +29,10 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{IDC_CL_MAP_STATIC, L"CLUSTER_MAP",          L"Cluster map:",             NULL},
 	{IDC_ANALYSE,       L"ANALYSE",              L"Analyse",                  NULL},
 	{IDC_DEFRAGM,       L"DEFRAGMENT",           L"Defragment",               NULL},
-	{IDC_COMPACT,       L"COMPACT",              L"Compact",                  NULL},
+	{IDC_OPTIMIZE,      L"OPTIMIZE",             L"Optimize",                 NULL},
 	{IDC_PAUSE,         L"PAUSE",                L"Pause",                    NULL},
 	{IDC_STOP,          L"STOP",                 L"Stop",                     NULL},
-	{IDC_SHOWFRAGMENTED,L"REPORT",               L"Fragmented",               NULL},
+	{IDC_SHOWFRAGMENTED,L"REPORT",               L"Report",                   NULL},
 	{IDC_SETTINGS,      L"SETTINGS",             L"Settings",                 NULL},
 	{IDC_ABOUT,         L"ABOUT",                L"About",                    NULL},
 

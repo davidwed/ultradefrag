@@ -304,7 +304,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int h,y,height,delta;
 	
 	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
-		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,0);
+		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
 	HideProgress();
 
 	(void)SendMessage(hList,LVM_DELETEALLITEMS,0,0);
@@ -363,7 +363,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	UpdateStatusBar(&(volume_list[0].Statistics));
 	
 	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
-		IDC_DEFRAGM,IDC_COMPACT,IDC_SHOWFRAGMENTED,0);
+		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
 	return 0;
 }
 

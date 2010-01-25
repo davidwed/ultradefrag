@@ -292,7 +292,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case IDC_DEFRAGM:
 			defragment();
 			break;
-		case IDC_COMPACT:
+		case IDC_OPTIMIZE:
 			optimize();
 			break;
 		case IDC_ABOUT:
