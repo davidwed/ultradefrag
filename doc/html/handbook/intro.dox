@@ -26,6 +26,9 @@
  * including registry hives and pagefile can be defragmented
  * at Windows boot time.
  *
+ * Also one of the primary goals of the UltraDefrag design is
+ * doing the job as fast as possible.
+ *
  * UltraDefrag has the following features:
  * - system files defragmentation (registry, pagefiles...)
  * - ultra fast NTFS analysis
