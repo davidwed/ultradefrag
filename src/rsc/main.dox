@@ -32,6 +32,19 @@
  * - @ref Design
  * - @ref Devnotes
  *
+ * <h2>Technical reference</h2>
+ * - <a href="../driver/html/index.html">Kernel Mode Driver</a>
+ * - <a href="../udefrag-kernel/html/index.html">User Mode Driver</a>
+ * - <a href="../udefrag.dll/html/index.html">Udefrag.dll Library</a>
+ * - <a href="../wgx/html/index.html">Windows GUI Extended (WGX) Library</a>
+ * - <a href="http://zenwinx.sourceforge.net/">ZenWINX Library</a>
+ *
+ * <h2>Links</h2>
+ * - <a href="https://ultradefrag.svn.sourceforge.net/svnroot/ultradefrag/">SVN repository base address</a>
+ * - <a href="http://ultradefrag.svn.sourceforge.net/viewvc/ultradefrag/">SVN repository browser</a>
+ * - <a href="http://www.ohloh.net/p/UltraDefrag">UltraDefrag development statistics on Ohloh.net</a>
+ * - <a href="http://www.koders.com/info.aspx?c=ProjectInfo&pid=VTYF93C32MAWVGA46C4FQHE1AG">UltraDefrag on Koders.com (obsolete)</a>
+ *
  * <h2>License</h2>
  * UltraDefrag is a <a href="http://www.gnu.org/copyleft/gpl.html">GPL</a>-
  * licensed product. Feel free to redistribute it under certain

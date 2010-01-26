@@ -3,13 +3,15 @@ HISTORY
   Version 3.3.1  2010-01-
   ------------------------------------------------------------------------------
     - few extremely important bugs were fixed
-    - program is available again for all 64-bit targets
-    - translations submitting is available again through project's forum 
-      which works much better that MediaWiki service used before
-    - USB keyboards support at Windows boot time was added
     - error handling was highly improved
-    - kernel mode driver was removed as a component less reliable by definition
-    - handbook was rewritten to be much clearer
+    - program is available again for all 64-bit targets
+    - documentation was rewritten to be much clearer
+    - kernel mode driver was removed as a component
+      less reliable by definition
+    - translations submitting is available again through 
+      http://ultradefrag.wikispaces.com/ which works much better
+      than SF.net MediaWiki service used before
+    - USB keyboards support at Windows boot time was added
     - all important program sources were well documented
 
 
