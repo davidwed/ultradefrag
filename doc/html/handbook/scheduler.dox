@@ -23,7 +23,7 @@
  * <a href="http://en.wikipedia.org/wiki/Task_Scheduler">system scheduled tasks</a>.
  * The process of adding a scheduled task instance of UltraDefrag is simplified
  * throuth a utility called UltraDefrag Scheduler.
- * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/Screenshots.html">View screenshots...</a>
+ * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
  * The simple gui has 4 settings:
  * - Whether to run Ultra Defrag every day (Daily) or only certain days of the week (Weekly).

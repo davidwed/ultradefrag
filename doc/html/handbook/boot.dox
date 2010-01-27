@@ -27,7 +27,7 @@
  * file, another files locked by system or applications. Native
  * UltraDefrag runs before any file locking, therefore it can
  * process them as an ordinary files.
- * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/Screenshots.html">View screenshots...</a>
+ * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
  * If the boot time defragmenter is enabled, it will run
  * at every reboot. Note that you will have a chance

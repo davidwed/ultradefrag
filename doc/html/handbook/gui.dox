@@ -21,7 +21,7 @@
  * @page GUI Graphical Interface
  *
  * The UltraDefrag GUI consists of a single fixed-size window.
- * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/Screenshots.html">View screenshots...</a>
+ * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
  * <b>List of Volumes</b>\n
  * The top part of the window contains a full list of volumes
@@ -55,7 +55,7 @@
  * <b>Disk Defragmentation Control</b>\n
  * Click Analyse button or type Ctrl+A to start the volume analysis. 
  * Click Defragment button or type Ctrl+D to start the volume defragmentation.
- * Click Compact button or type Ctrl+C to start the volume optimization.
+ * Click Optimize button or type Ctrl+C to start the volume optimization.
  * Use Stop button or Ctrl+S hotkeys to stop the currently running disk
  * defragmentation/analysis job.
  *
@@ -64,7 +64,7 @@
  * Note that selecting a different volume
  * will cause the progress bar to disappear.
 
- * Click Fragmented button or type (Ctrl+F) to open the file
+ * Click Report button or type (Ctrl+F) to open the file
  * fragmentation report. Click Settings button or type Ctrl+T to open
  * the UltraDefrag GUI Configurator. About button (hotkey - F1) opens
  * a little window containing the most important information about the program.

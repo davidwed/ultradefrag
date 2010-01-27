@@ -23,7 +23,7 @@
  * UltraDefrag command line tool <b>udefrag.exe</b> the installer
  * places to the system32 directory. Therefore it may be run
  * without specifying the full path.
- * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/Screenshots.html">View screenshots...</a>
+ * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
  * <h1>Command line options</h1>
  * Usage:
