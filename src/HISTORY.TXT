@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 3.3.1  2010-01-
+  Version 4.0.0  2010-02-
   ------------------------------------------------------------------------------
     - few extremely important bugs were fixed
     - error handling was highly improved
@@ -9,8 +9,7 @@ HISTORY
     - kernel mode driver was removed as a component
       less reliable by definition
     - translations submitting is available again through 
-      http://ultradefrag.wikispaces.com/ which works much better
-      than SF.net MediaWiki service used before
+      http://ultradefrag.wikispaces.com/
     - USB keyboards support at Windows boot time was added
     - all important program sources were well documented
 

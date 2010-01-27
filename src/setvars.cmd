@@ -1,10 +1,10 @@
 @echo off
 echo Set common environment variables...
-set VERSION=3,3,1,0
-set VERSION2="3, 3, 1, 0\0"
+set VERSION=4,0,0,0
+set VERSION2="4, 0, 0, 0\0"
 set ZENWINX_VERSION=1,1,0,0
 set ZENWINX_VERSION2="1, 1, 0, 0\0"
-set ULTRADFGVER=3.3.1
+set ULTRADFGVER=4.0.0
 set ZENWINXVER=1.1.0
 set WINDDKBASE=D:\WINDDK\3790~1.183
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v6.1
