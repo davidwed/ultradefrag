@@ -1,7 +1,7 @@
 @echo off
 
 echo Build script producing the UltraDefrag Portable package.
-echo Copyright (c) 2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+echo Copyright (c) 2009-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
 call build.cmd %1 --portable
 

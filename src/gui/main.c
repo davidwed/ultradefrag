@@ -222,7 +222,7 @@ void InitMainWindow(void)
 	int dx,dy;
 	RECT rc;
 	
-//#ifdef KERNEL_MODE_DRIVER_SUPPORT
+#ifdef KERNEL_MODE_DRIVER_SUPPORT
 	char title[128];
 
 	/* update window title */
@@ -231,7 +231,7 @@ void InitMainWindow(void)
 		else strcat(title," (User Mode)");
 		(void)SetWindowText(hWindow,title);
 	}
-//#endif
+#endif
 
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"/*lng_file_path*/))

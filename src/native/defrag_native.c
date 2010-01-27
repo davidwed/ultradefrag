@@ -105,8 +105,10 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_exit(1);
 	}
 
+#ifdef KERNEL_MODE_DRIVER_SUPPORT
 	if(udefrag_kernel_mode()) winx_printf("(Kernel Mode)\n\n");
 	else winx_printf("(User Mode)\n\n");
+#endif
 
 	/* 5. Batch script processing */
 	ProcessScript();

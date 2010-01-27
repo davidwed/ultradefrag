@@ -1,7 +1,7 @@
 @echo off
 
 echo Build script for the UltraDefrag Micro Edition project.
-echo Copyright (c) 2007-2009 by Dmitri Arkhangelski (dmitriar@gmail.com).
+echo Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
 if "%1" equ "--help" goto usage
 
@@ -23,10 +23,10 @@ set UDEFRAG_PORTABLE=1
 
 echo #define VERSION %VERSION% > .\include\ultradfgver.h
 echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
-echo #define VERSIONINTITLE "UltraDefrag v%ULTRADFGVER%" >> .\include\ultradfgver.h
-echo #define VERSIONINTITLE_PORTABLE "UltraDefrag v%ULTRADFGVER% Portable" >> .\include\ultradfgver.h
+echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER%" >> .\include\ultradfgver.h
+echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\include\ultradfgver.h
 echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
-echo #define NGVERSIONINTITLE "UltraDefrag Next Generation v%ULTRADFGVER%" >> .\include\ultradfgver.h
+rem echo #define NGVERSIONINTITLE "UltraDefrag Next Generation v%ULTRADFGVER%" >> .\include\ultradfgver.h
 
 echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\dll\zenwinx\zenwinxver.h
 echo #define ZENWINX_VERSION2 %ZENWINX_VERSION2% >> .\dll\zenwinx\zenwinxver.h

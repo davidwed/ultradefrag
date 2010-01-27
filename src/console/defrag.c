@@ -269,8 +269,10 @@ int __cdecl main(int argc, char **argv)
 		return 2;
 	}
 
+#ifdef KERNEL_MODE_DRIVER_SUPPORT
 	if(udefrag_kernel_mode()) printf("(Kernel Mode)\n\n");
 	else printf("(User Mode)\n\n");
+#endif
 
 	if(m_flag){ /* prepare console buffer for map */
 		clear_line(stderr);
