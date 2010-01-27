@@ -1,52 +1,37 @@
 The Ultra Defragmenter Version 3.3.1
 ------------------------------------
 
-Ultra Defragmenter is a powerful Open Source defragmentation utility for 
-Windows NT 4.0 and later operating systems. It is very fast, because the 
-defragmenting is done by kernel-mode driver. They are three interfaces to 
-them: graphical, console and native. The GUI is very useful, because 
-visually represents your filesystem as a color coded cluster map. The 
-console is another option for those that prefer the command line. It is
-also benificial in that it can be run in the task scheduler. Finally, 
-the native executable will run at boot time in a manner similar to chkdsk.
+UltraDefrag is a powerful disk defragmentation tool for Windows.
+It is the first open source defragmenter with full support of
+system locked files defragmentation. Actually all files including
+registry hives and paging file can be processed by UltraDefrag
+during the Windows boot process.
 
-The design of Ultra Defragmenter is very simple. There are no skins and other 
-unnecessary stuff. It is a small and powerful program!
+Also one of the primary goals of the UltraDefrag design
+is doing the job as fast as possible.
 
-It can be used on Windows NT 4.0, Windows 2000, Windows XP, Windows Server 
-2003, Windows Vista, Windows Server 2008, Windows 7 and all of the 64-bit 
-editions of Windows.
+UltraDefrag is fully compatible with Windows NT 4.0, Windows 2000,
+Windows XP, Windows Server 2003, Windows Vista, Windows Server 2008,
+Windows 7 and all of the 64-bit editions of Windows.
 
-You must have administrative rights to install and use Ultra Defragmenter. 
+You must have administrative rights to install and use UltraDefrag.
 
 
 Web Resources
 -------------
 
-The Ultra Defragmenter's home page is at:
+The project's home page is at:
 
 	http://ultradefrag.sourceforge.net
 
 Please be sure to visit this site for information, documentation, tutorials,
-news, etc.  All Ultra Defragmenter related things are available from there.
-
-
-Reporting Bugs
---------------
-
-Please report all problems and bugs via our bug tracker:
-
-	http://ultradefrag.sourceforge.net/bugs
-
-For help requests visit our forum:
-
-	http://ultradefrag.sourceforge.net/forum
+news, etc.  All UltraDefrag related things are available from there.
 
 
 Copyright
 ---------
 
-Copyright (c) 2007-2010 Ultra Defragmenter Development Team.
+Copyright (c) 2007-2010 UltraDefrag Development Team.
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
