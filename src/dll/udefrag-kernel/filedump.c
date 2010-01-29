@@ -101,11 +101,11 @@ BOOLEAN DumpFile(PFILENAME pfn)
 	fileMappings = (PGET_RETRIEVAL_DESCRIPTOR)(FileMap);
 	counter = 0;
 	do {
-		RtlZeroMemory(fileMappings,FILEMAPSIZE * sizeof(LARGE_INTEGER));
+		RtlZeroMemory(fileMappings,FILEMAPSIZE * sizeof(ULONGLONG));
 		Status = NtFsControlFile(hFile, NULL, NULL, 0, &ioStatus, \
 						FSCTL_GET_RETRIEVAL_POINTERS, \
 						&startVcn, sizeof(ULONGLONG), \
-						fileMappings, FILEMAPSIZE * sizeof(LARGE_INTEGER));
+						fileMappings, FILEMAPSIZE * sizeof(ULONGLONG));
 		counter ++;
 		if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
 			NtWaitForSingleObject(hFile,FALSE,NULL);

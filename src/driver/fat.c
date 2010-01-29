@@ -197,6 +197,7 @@ BOOLEAN ScanFatRootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 	USHORT RootDirEntries;
 	DIRENTRY *RootDir = NULL;
 	DIRENTRY RootDirEntry;
+	UCHAR *SName;
 	NTSTATUS Status;
 	USHORT i;
 	WCHAR Path[] = L"\\??\\A:\\";
@@ -212,7 +213,19 @@ BOOLEAN ScanFatRootDirectory(UDEFRAG_DEVICE_EXTENSION *dx)
 	* as any other directory.
 	*/
 	if(dx->partition_type == FAT32_PARTITION){
-		memset(&RootDirEntry,0,sizeof(DIRENTRY));
+		memset(&RootDirEntry,0,sizeof(DIRENTRY)); /* may fail on x64 because of a local variable */
+		SName = RootDirEntry.ShortName;
+		RtlZeroMemory(SName,11);
+		RootDirEntry.Attr = 0;
+		RootDirEntry.NtReserved = 0;
+		RootDirEntry.CrtTimeTenth = 0;
+		RootDirEntry.CrtTime = 0;
+		RootDirEntry.CrtDate = 0;
+		RootDirEntry.LstAccDate = 0;
+		RootDirEntry.WrtTime = 0;
+		RootDirEntry.WrtDate = 0;
+		RootDirEntry.FileSize = 0;
+		
 		RootDirEntry.FirstClusterLO = (USHORT)(Bpb.Fat32.BPB_RootClus & 0xFFFF);
 		RootDirEntry.FirstClusterHI = (USHORT)(Bpb.Fat32.BPB_RootClus >> 16);
 		ScanFatDirectory(dx,&RootDirEntry,PathForFat32,L"");

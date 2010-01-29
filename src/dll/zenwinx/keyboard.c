@@ -196,7 +196,7 @@ int __stdcall kb_open_internal(int device_number)
 	RtlInitUnicodeString(&uStr,event_name);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,0,NULL,NULL);
 	Status = NtCreateEvent(&hKbEvent,STANDARD_RIGHTS_ALL | 0x1ff/*0x1f01ff*/,
-		&ObjectAttributes,SynchronizationEvent,FALSE);
+		&ObjectAttributes,SynchronizationEvent,0/*FALSE*/);
 	if(!NT_SUCCESS(Status)){
 		NtCloseSafe(hKbDevice);
 		DebugPrintEx(Status,"Cannot create kb_event%u",device_number);
@@ -243,7 +243,7 @@ int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
 			&iosb,IOCTL_KEYBOARD_SET_INDICATORS,
 			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS),NULL,0);
-	if(Status == STATUS_PENDING){ // FIXME ???
+	if(NT_SUCCESS(Status)){
 		Status = NtWaitForSingleObject(hKbDevice,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
@@ -271,7 +271,7 @@ int __stdcall kb_check(HANDLE hKbDevice)
 	Status = NtDeviceIoControlFile(hKbDevice,NULL,NULL,NULL,
 			&iosb,IOCTL_KEYBOARD_QUERY_INDICATORS,NULL,0,
 			&kip,sizeof(KEYBOARD_INDICATOR_PARAMETERS));
-	if(NT_SUCCESS(Status)/*Status == STATUS_PENDING*/){
+	if(NT_SUCCESS(Status)){
 		Status = NtWaitForSingleObject(hKbDevice,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
@@ -315,7 +315,7 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 	Status = NtReadFile(kb[kb_index].hKbDevice,kb[kb_index].hKbEvent,NULL,NULL,
 		&iosb,pKID,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
 	/* wait in case operation is pending */
-	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
+	if(NT_SUCCESS(Status)){
 		Status = NtWaitForSingleObject(kb[kb_index].hKbEvent,FALSE,pInterval);
 		if(Status == STATUS_TIMEOUT){ 
 			/* 
@@ -323,6 +323,11 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 			* to empty keyboard pending operations queue.
 			*/
 			Status = NtCancelIoFile(kb[kb_index].hKbDevice,&iosb);
+			if(NT_SUCCESS(Status)){
+				/* this waiting is very important */
+				Status = NtWaitForSingleObject(kb[kb_index].hKbEvent,FALSE,NULL);
+				if(NT_SUCCESS(Status)) Status = iosb.Status;
+			}
 			if(!NT_SUCCESS(Status)){
 				/*
 				* This is a hard error because the next read request

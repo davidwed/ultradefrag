@@ -62,6 +62,23 @@ void optimize(void)
 	if(h) CloseHandle(h);
 }
 
+void DisplayInvalidVolumeError(int error_code)
+{
+	char buffer[512];
+
+	if(error_code == UDEFRAG_UNKNOWN_ERROR){
+		MessageBoxA(NULL,"Volume is missing or some error has been encountered.\n"
+		                 "Use DbgView program to get more information.",
+		                 "The volume cannot be processed!",MB_OK | MB_ICONHAND);
+	} else {
+		(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
+				udefrag_get_error_description(error_code),
+				"Use DbgView program to get more information.");
+		buffer[sizeof(buffer) - 1] = 0;
+		MessageBoxA(NULL,buffer,"The volume cannot be processed!",MB_OK | MB_ICONHAND);
+	}
+}
+
 /* callback function */
 int __stdcall update_stat(int df)
 {
@@ -140,22 +157,31 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 	ShowProgress();
 	SetProgress("A 0 %",0);
-	switch(command){
-	case 'a':
-		error_code = udefrag_analyse(letter,update_stat);
-		break;
-	case 'd':
-		error_code = udefrag_defragment(letter,update_stat);
-		break;
-	default:
-		error_code = udefrag_optimize(letter,update_stat);
-	}
-	if(error_code < 0 && !exit_pressed){
-		DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
-		VolListUpdateSelectedStatusField(STAT_CLEAR);
-		ClearMap();
-	}
 
+	/* validate the volume before any processing */
+	error_code = udefrag_validate_volume(letter,FALSE);
+	if(error_code < 0){
+		/* handle error */
+		DisplayInvalidVolumeError(error_code);
+	} else {
+		/* process the volume */
+		switch(command){
+		case 'a':
+			error_code = udefrag_analyse(letter,update_stat);
+			break;
+		case 'd':
+			error_code = udefrag_defragment(letter,update_stat);
+			break;
+		default:
+			error_code = udefrag_optimize(letter,update_stat);
+		}
+		if(error_code < 0 && !exit_pressed){
+			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
+			VolListUpdateSelectedStatusField(STAT_CLEAR);
+			ClearMap();
+		}
+	}
+	
 	if(!exit_pressed){
 		WgxEnableWindows(hWindow,IDC_ANALYSE,
 			IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,

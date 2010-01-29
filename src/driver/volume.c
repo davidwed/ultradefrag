@@ -69,7 +69,7 @@ NTSTATUS OpenVolume(UDEFRAG_DEVICE_EXTENSION *dx)
 NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	unsigned short path[] = L"\\??\\A:\\";
-	FILE_FS_SIZE_INFORMATION FileFsSize;
+	FILE_FS_SIZE_INFORMATION *pFileFsSize;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK iosb;
 	UNICODE_STRING us;
@@ -77,6 +77,12 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 	NTSTATUS status = STATUS_SUCCESS;
 	ULONGLONG bpc; /* bytes per cluster */
 
+	pFileFsSize = AllocatePool(NonPagedPool,sizeof(FILE_FS_SIZE_INFORMATION));
+	if(!pFileFsSize){
+		DebugPrint("-Ultradfg- GetDriveGeometry(): no enough memory!");
+		return STATUS_NO_MEMORY;
+	}
+	
 	/* open the root directory */
 	path[4] = (unsigned short)dx->letter;
 	RtlInitUnicodeString(&us,path);
@@ -93,27 +99,29 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 		DebugPrint("-Ultradfg- Can't open the root directory %ws: %x!\n",
 			path,(UINT)status);
 		hFile = NULL;
+		Nt_ExFreePool(pFileFsSize);
 		return status;
 	}
 
 	/* get logical geometry */
-	RtlZeroMemory((void *)&FileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
-	status = ZwQueryVolumeInformationFile(hFile,&iosb,&FileFsSize,
+	RtlZeroMemory((void *)pFileFsSize,sizeof(FILE_FS_SIZE_INFORMATION));
+	status = ZwQueryVolumeInformationFile(hFile,&iosb,pFileFsSize,
 			  sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	ZwClose(hFile);
 	if(status != STATUS_SUCCESS){
 		DebugPrint("-Ultradfg- FileFsSizeInformation() request failed for %ws: %x!\n",
 			path,(UINT)status);
+		Nt_ExFreePool(pFileFsSize);
 		return status;
 	}
 
-	bpc = FileFsSize.SectorsPerAllocationUnit * FileFsSize.BytesPerSector;
-	dx->sectors_per_cluster = FileFsSize.SectorsPerAllocationUnit;
+	bpc = pFileFsSize->SectorsPerAllocationUnit * pFileFsSize->BytesPerSector;
+	dx->sectors_per_cluster = pFileFsSize->SectorsPerAllocationUnit;
 	dx->bytes_per_cluster = bpc;
-	dx->bytes_per_sector = FileFsSize.BytesPerSector;
-	dx->total_space = FileFsSize.TotalAllocationUnits.QuadPart * bpc;
-	dx->free_space = FileFsSize.AvailableAllocationUnits.QuadPart * bpc;
-	dx->clusters_total = (ULONGLONG)(FileFsSize.TotalAllocationUnits.QuadPart);
+	dx->bytes_per_sector = pFileFsSize->BytesPerSector;
+	dx->total_space = pFileFsSize->TotalAllocationUnits.QuadPart * bpc;
+	dx->free_space = pFileFsSize->AvailableAllocationUnits.QuadPart * bpc;
+	dx->clusters_total = (ULONGLONG)(pFileFsSize->TotalAllocationUnits.QuadPart);
 	if(dx->bytes_per_cluster)
 		dx->clusters_per_256k = _256K / dx->bytes_per_cluster;
 	DebugPrint("-Ultradfg- total clusters: %I64u\n",dx->clusters_total);
@@ -126,8 +134,10 @@ NTSTATUS GetVolumeGeometry(UDEFRAG_DEVICE_EXTENSION *dx)
 	/* validate geometry */
 	if(!dx->clusters_total || !dx->bytes_per_cluster){
 		DebugPrint("-Ultradfg- wrong volume geometry!\n");
+		Nt_ExFreePool(pFileFsSize);
 		return STATUS_WRONG_VOLUME;
 	}
+	Nt_ExFreePool(pFileFsSize);
 	return STATUS_SUCCESS;
 }
 

@@ -122,6 +122,17 @@ void ProcessVolume(char letter,char defrag_command)
 	STATISTIC stat;
 	int status = 0;
 
+	/* validate the volume before any processing */
+	status = udefrag_validate_volume(letter,FALSE);
+	if(status < 0){
+		winx_printf("\nThe volume cannot be processed!\n");
+		if(status == UDEFRAG_UNKNOWN_ERROR)
+			winx_printf("Volume is missing or some error has been encountered.\n");
+		else
+			winx_printf("%s\n",udefrag_get_error_description(status));
+		return;
+	}
+	
 	(void)udefrag_reload_settings();
 	
 	i = j = 0;

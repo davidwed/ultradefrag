@@ -248,8 +248,10 @@ int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sp
 	done_flag = FALSE;
 	cmd_status = 0;
 	c = command; lett = letter;
-	if(winx_create_thread(send_command,&hThread) < 0)
+	if(winx_create_thread(send_command,&hThread) < 0){
+		//winx_printf("\nFUCKED!\n\n");
 		return (-1);
+	}
 	NtCloseSafe(hThread);
 	/*
 	* Call specified callback 

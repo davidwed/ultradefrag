@@ -94,13 +94,20 @@ int __cdecl winx_printf(const char *format, ...)
 {
 	va_list arg;
 	int done;
-	char small_buffer[INTERNAL_BUFFER_SIZE];
+	char *small_buffer;
 	char *big_buffer = NULL;
 	int size = INTERNAL_BUFFER_SIZE * 2;
 	
 	/* never call winx_dbg_print_ex() here */
 
 	if(!format) return 0;
+	
+	small_buffer = winx_heap_alloc(INTERNAL_BUFFER_SIZE);
+	if(!small_buffer){
+		DebugPrint("No enough memory for winx_printf()!\n");
+		winx_print("\nNo enough memory for winx_printf()!\n");
+		return 0;
+	}
 
 	/* prepare for _vsnprintf call */
 	va_start(arg,format);
@@ -114,6 +121,7 @@ int __cdecl winx_printf(const char *format, ...)
 				DebugPrint("No enough memory for winx_printf()!\n");
 				winx_print("\nNo enough memory for winx_printf()!\n");
 				va_end(arg);
+				winx_heap_free(small_buffer);
 				return 0;
 			}
 			memset(big_buffer,0,size);
@@ -125,6 +133,7 @@ int __cdecl winx_printf(const char *format, ...)
 				DebugPrint("winx_printf() failed!\n");
 				winx_print("\nwinx_printf() failed!\n");
 				va_end(arg);
+				winx_heap_free(small_buffer);
 				return 0;
 			}
 		} while(1);
@@ -136,6 +145,7 @@ int __cdecl winx_printf(const char *format, ...)
 		winx_print(small_buffer);
 	}
 	va_end(arg);
+	winx_heap_free(small_buffer);
 	return done;
 }
 

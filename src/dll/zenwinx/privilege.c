@@ -56,7 +56,7 @@ int __stdcall winx_enable_privilege(unsigned long luid)
 	tp.PrivilegeCount = 1;
 	tp.Privileges[0].Luid = luid_struct;
 	tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-	Status = NtAdjustPrivilegesToken(hToken,FALSE,&tp,sizeof(TOKEN_PRIVILEGES),
+	Status = NtAdjustPrivilegesToken(hToken,0/*FALSE*/,&tp,sizeof(TOKEN_PRIVILEGES),
 									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
 	NtCloseSafe(hToken);
 	if(Status == STATUS_NOT_ALL_ASSIGNED || !NT_SUCCESS(Status)){

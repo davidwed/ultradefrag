@@ -67,8 +67,8 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	NTSTATUS Status;
 	HANDLE hThread;
 	HANDLE *ph;
-	DWORD id;
-	DWORD ErrorCode;
+//	DWORD id;
+//	DWORD ErrorCode;
 
 	DbgCheck1(start_addr,"winx_create_thread",-1);
 
@@ -82,6 +82,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 	* RtlCreateUserThread() with BOOLEAN keyword, now replaced 
 	* by ULONG, therefore should work.
 	*/
+#if 0
 	if(FindCreateThread()){
 		hThread = func_CreateThread(NULL,0,start_addr,NULL,0,&id);
 		if(!hThread){ /* failure */
@@ -94,17 +95,20 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandl
 			return (-1);
 		}
 		if(phandle) *phandle = hThread; /* success */
-	} else { /* we are in native mode or kernel32.dll is not loaded */
+	} else
+#endif
+	 { /* we are in native mode or kernel32.dll is not loaded */
 		/*
 		* Implementation is very easy, because we have required call
 		* on all of the supported versions of Windows.
 		*/
 		if(phandle) ph = phandle;
 		else ph = &hThread;
-		Status = RtlCreateUserThread(NtCurrentProcess(),NULL,FALSE,
-						0,0,0,start_addr,NULL,ph,NULL);
+		Status = RtlCreateUserThread(NtCurrentProcess(),NULL,
+						0,0,0,0,start_addr,NULL,ph,NULL);
 		if(!NT_SUCCESS(Status)){
 			DebugPrintEx(Status,"Cannot create thread");
+			//winx_printf("\nFUCKED 0x%x\n\n",(UINT)Status);
 			return (-1);
 		}
 		/*NtCloseSafe(*ph);*/

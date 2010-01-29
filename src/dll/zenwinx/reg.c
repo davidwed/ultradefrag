@@ -226,6 +226,12 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 	}
 	data_size += additional_space_size;
 	data_buffer = winx_heap_alloc(data_size);
+	if(data_buffer == NULL){
+		DebugPrint("Cannot allocate %u bytes of memory for read_boot_exec_value()!",
+				data_size);
+		return (-1);
+	}
+	
 	RtlZeroMemory(data_buffer,data_size);
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			data_buffer,data_size,&data_size2);

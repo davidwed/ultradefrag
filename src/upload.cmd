@@ -6,6 +6,7 @@ rem to simplify binary packages uploading.
 mkdir archive
 
 call build.cmd --use-winddk
+if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe .\archive\
 copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\archive\
 copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\archive\
@@ -54,16 +55,19 @@ copy .\bin\ia64\ultradefrag-next-generation-gui-%ULTRADFGVER%.bin.ia64.zip .\arc
 :skip_nextgen
 
 call build-micro.cmd --use-winddk
+if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-micro-edition-%ULTRADFGVER%.bin.i386.exe .\archive\
 copy .\bin\amd64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.amd64.exe .\archive\
 copy .\bin\ia64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.ia64.exe .\archive\
 
 call build-portable.cmd --use-winddk
+if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip .\archive\
 copy .\bin\amd64\ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip .\archive\
 copy .\bin\ia64\ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip .\archive\
 
 call build-micro-portable.cmd --use-winddk
+if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip .\archive\
 copy .\bin\amd64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip .\archive\
 copy .\bin\ia64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip .\archive\
@@ -112,6 +116,8 @@ cd ..
 
 :Lf
 cd ..
+
+:build_failed
 echo.
 echo Release building error!
 exit /B 1

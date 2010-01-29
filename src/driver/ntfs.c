@@ -52,20 +52,35 @@ BOOLEAN ResidentDirectory;
 /* sets dx->partition_type member */
 void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 {
-	PARTITION_INFORMATION part_info;
-	NTFS_DATA ntfs_data;
+	PARTITION_INFORMATION *part_info;
+	NTFS_DATA *ntfs_data;
 	NTSTATUS status;
 	IO_STATUS_BLOCK iosb;
 
+	/* allocate memory */
+	part_info = AllocatePool(NonPagedPool,sizeof(PARTITION_INFORMATION));
+	if(!part_info){
+		DebugPrint("-Ultradfg- Cannot allocate memory for CheckForNtfsPartition()!\n");
+		dx->partition_type = FAT32_PARTITION;
+		return;
+	}
+	ntfs_data = AllocatePool(NonPagedPool,sizeof(NTFS_DATA));
+	if(!ntfs_data){
+		Nt_ExFreePool(part_info);
+		DebugPrint("-Ultradfg- Cannot allocate memory for CheckForNtfsPartition()!\n");
+		dx->partition_type = FAT32_PARTITION;
+		return;
+	}
+	
 	/*
 	* Try to get fs type through IOCTL_DISK_GET_PARTITION_INFO request.
 	* Works only on MBR-formatted disks. To retrieve information about 
 	* GPT-formatted disks use IOCTL_DISK_GET_PARTITION_INFO_EX.
 	*/
-	RtlZeroMemory(&part_info,sizeof(PARTITION_INFORMATION));
+	RtlZeroMemory(part_info,sizeof(PARTITION_INFORMATION));
 	status = ZwDeviceIoControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
-				&part_info, sizeof(PARTITION_INFORMATION));
+				part_info, sizeof(PARTITION_INFORMATION));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
@@ -74,10 +89,12 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 		status = iosb.Status;
 	}
 	if(NT_SUCCESS(status)){
-		DebugPrint("-Ultradfg- partition type: %u\n",part_info.PartitionType);
-		if(part_info.PartitionType == 0x7){
+		DebugPrint("-Ultradfg- partition type: %u\n",part_info->PartitionType);
+		if(part_info->PartitionType == 0x7){
 			DebugPrint("-Ultradfg- NTFS found\n");
 			dx->partition_type = NTFS_PARTITION;
+			Nt_ExFreePool(part_info);
+			Nt_ExFreePool(ntfs_data);
 			return;
 		}
 	} else {
@@ -89,10 +106,10 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	* on GPT disks and when partition type is 0x27
 	* FSCTL_GET_NTFS_VOLUME_DATA request can be used.
 	*/
-	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
+	RtlZeroMemory(ntfs_data,sizeof(NTFS_DATA));
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
-				&ntfs_data, sizeof(NTFS_DATA));
+				ntfs_data, sizeof(NTFS_DATA));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
@@ -103,6 +120,8 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	if(NT_SUCCESS(status)){
 		DebugPrint("-Ultradfg- NTFS found\n");
 		dx->partition_type = NTFS_PARTITION;
+		Nt_ExFreePool(part_info);
+		Nt_ExFreePool(ntfs_data);
 		return;
 	} else {
 		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",status);
@@ -114,19 +133,28 @@ void CheckForNtfsPartition(UDEFRAG_DEVICE_EXTENSION *dx)
 	*/
 	dx->partition_type = FAT32_PARTITION;
 	DebugPrint("-Ultradfg- NTFS not found\n");
+	Nt_ExFreePool(part_info);
+	Nt_ExFreePool(ntfs_data);
 }
 
 NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx)
 {
 	IO_STATUS_BLOCK iosb;
-	NTFS_DATA ntfs_data;
+	NTFS_DATA *ntfs_data;
 	NTSTATUS status;
 	ULONGLONG mft_len;
 
-	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
+	/* allocate memory */
+	ntfs_data = AllocatePool(NonPagedPool,sizeof(NTFS_DATA));
+	if(!ntfs_data){
+		DebugPrint("-Ultradfg- Cannot allocate memory for GetMftLayout()!\n");
+		return STATUS_NO_MEMORY;
+	}
+
+	RtlZeroMemory(ntfs_data,sizeof(NTFS_DATA));
 	status = ZwFsControlFile(dx->hVol,NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
-				&ntfs_data, sizeof(NTFS_DATA));
+				ntfs_data, sizeof(NTFS_DATA));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		if(nt4_system)
 			NtWaitForSingleObject(dx->hVol,FALSE,NULL);
@@ -136,15 +164,16 @@ NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx)
 	}
 	if(!NT_SUCCESS(status)){
 		DebugPrint("-Ultradfg- Can't get ntfs info: %x!\n",status);
+		Nt_ExFreePool(ntfs_data);
 		return status;
 	}
 
-	mft_len = ProcessMftSpace(dx,&ntfs_data);
+	mft_len = ProcessMftSpace(dx,ntfs_data);
 
 	dx->mft_size = mft_len * dx->bytes_per_cluster;
 	DebugPrint("-Ultradfg- MFT size = %I64u bytes\n",dx->mft_size);
 
-	dx->ntfs_record_size = ntfs_data.BytesPerFileRecordSegment;
+	dx->ntfs_record_size = ntfs_data->BytesPerFileRecordSegment;
 	DebugPrint("-Ultradfg- NTFS record size = %u bytes\n",dx->ntfs_record_size);
 
 	dx->max_mft_entries = dx->mft_size / dx->ntfs_record_size;
@@ -152,6 +181,7 @@ NTSTATUS GetMftLayout(UDEFRAG_DEVICE_EXTENSION *dx)
 		dx->max_mft_entries);
 	
 	//DbgPrintFreeSpaceList(dx);
+	Nt_ExFreePool(ntfs_data);
 	return STATUS_SUCCESS;
 }
 

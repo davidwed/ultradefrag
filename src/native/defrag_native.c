@@ -66,7 +66,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 
 	/* 1. Initialization */
 #ifdef USE_INSTEAD_SMSS
-	(void)NtInitializeRegistry(FALSE); /* saves boot log etc. */
+	(void)NtInitializeRegistry(0/*FALSE*/); /* saves boot log etc. */
 #endif
 	/* 2. Display Copyright */
 	if(winx_get_os_version() < 51) winx_printf("\n\n");

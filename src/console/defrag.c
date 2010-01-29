@@ -79,8 +79,12 @@ void clear_line(FILE *f)
 	free(line);
 	
 	/* move cursor back to the previous line */
+	if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
+		DisplayLastError("Cannot retrieve cursor position!");
+		return; /* impossible to determine the current cursor position  */
+	}
 	cursor_pos.X = 0;
-	cursor_pos.Y = csbi.dwCursorPosition.Y;
+	cursor_pos.Y = csbi.dwCursorPosition.Y - 1;
 	if(!SetConsoleCursorPosition(hOut,cursor_pos))
 		DisplayLastError("Cannot set cursor position!");
 }
@@ -117,6 +121,22 @@ void DisplayDefragError(int error_code,char *caption)
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("%s\n\n",udefrag_get_error_description(error_code));
 	if(error_code == UDEFRAG_UNKNOWN_ERROR) printf("Use DbgView program to get more information.\n\n");
+	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+}
+
+void DisplayInvalidVolumeError(int error_code)
+{
+	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+	printf("The volume cannot be processed.\n\n");
+	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+	if(error_code == UDEFRAG_UNKNOWN_ERROR){
+		printf("Volume is missing or some error has been encountered.\n");
+		printf("Use DbgView program to get more information.\n\n");
+	} else {
+		printf("%s\n\n",udefrag_get_error_description(error_code));
+	}
+
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
@@ -242,7 +262,7 @@ int __cdecl main(int argc, char **argv)
 	}
 	error_code = udefrag_validate_volume(letter,FALSE);
 	if(error_code < 0){
-		DisplayDefragError(error_code,"The volume cannot be processed.");
+		DisplayInvalidVolumeError(error_code);
 		if(!b_flag) settextcolor(console_attr);
 		return 1;
 	}

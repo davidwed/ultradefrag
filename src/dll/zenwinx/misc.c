@@ -50,7 +50,7 @@ void __stdcall winx_sleep(int msec)
 	* The next call is undocumented, therefore
 	* we are not checking its result.
 	*/
-	(void)NtDelayExecution(FALSE,&Interval);
+	(void)NtDelayExecution(0/*FALSE*/,&Interval);
 }
 
 /**

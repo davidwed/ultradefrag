@@ -52,7 +52,7 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
 
 	RtlInitUnicodeString(&us,name);
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,&oa,type,TRUE);
+	Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,&oa,type,1/*TRUE*/);
 	if(Status == STATUS_OBJECT_NAME_COLLISION){
 		*phandle = NULL;
 		DebugPrint("Event %ws already exists!",name);

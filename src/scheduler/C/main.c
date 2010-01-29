@@ -186,7 +186,7 @@ void InitFont(void)
 	HFONT hNewFont;
 
 	/* initialize LOGFONT structure */
-	memset(&lf,0,sizeof(LOGFONT));
+	memset(&lf,0,sizeof(LOGFONT)); /* FIXME: may fail on x64? */
 	/* default font should be Courier New 9pt */
 	(void)strcpy(lf.lfFaceName,"Courier New");
 	lf.lfHeight = -12;

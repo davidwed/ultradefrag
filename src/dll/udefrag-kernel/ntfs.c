@@ -50,29 +50,46 @@ BOOLEAN ResidentDirectory;
  */
 void CheckForNtfsPartition(void)
 {
-	PARTITION_INFORMATION part_info;
-	NTFS_DATA ntfs_data;
+	PARTITION_INFORMATION *part_info;
+	NTFS_DATA *ntfs_data;
 	NTSTATUS status;
 	IO_STATUS_BLOCK iosb;
 
+	/* allocate memory */
+	part_info = winx_heap_alloc(sizeof(PARTITION_INFORMATION));
+	if(part_info == NULL){
+		DebugPrint("Cannot allocate memory for CheckForNtfsPartition()!\n");
+		partition_type = FAT32_PARTITION;
+		return;
+	}
+	ntfs_data = winx_heap_alloc(sizeof(NTFS_DATA));
+	if(ntfs_data == NULL){
+		winx_heap_free(part_info);
+		DebugPrint("Cannot allocate memory for CheckForNtfsPartition()!\n");
+		partition_type = FAT32_PARTITION;
+		return;
+	}
+	
 	/*
 	* Try to get fs type through IOCTL_DISK_GET_PARTITION_INFO request.
 	* Works only on MBR-formatted disks. To retrieve information about 
 	* GPT-formatted disks use IOCTL_DISK_GET_PARTITION_INFO_EX.
 	*/
-	RtlZeroMemory(&part_info,sizeof(PARTITION_INFORMATION));
+	RtlZeroMemory(part_info,sizeof(PARTITION_INFORMATION));
 	status = NtDeviceIoControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				IOCTL_DISK_GET_PARTITION_INFO,NULL,0, \
-				&part_info, sizeof(PARTITION_INFORMATION));
+				part_info, sizeof(PARTITION_INFORMATION));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		(void)NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
 	if(NT_SUCCESS(status)){
-		DebugPrint("Partition type: %u\n",part_info.PartitionType);
-		if(part_info.PartitionType == 0x7){
+		DebugPrint("Partition type: %u\n",part_info->PartitionType);
+		if(part_info->PartitionType == 0x7){
 			DebugPrint("NTFS found\n");
 			partition_type = NTFS_PARTITION;
+			winx_heap_free(part_info);
+			winx_heap_free(ntfs_data);
 			return;
 		}
 	} else {
@@ -84,10 +101,10 @@ void CheckForNtfsPartition(void)
 	* on GPT disks and when partition type is 0x27
 	* FSCTL_GET_NTFS_VOLUME_DATA request can be used.
 	*/
-	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
+	RtlZeroMemory(ntfs_data,sizeof(NTFS_DATA));
 	status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
-				&ntfs_data, sizeof(NTFS_DATA));
+				ntfs_data, sizeof(NTFS_DATA));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		(void)NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
@@ -95,6 +112,8 @@ void CheckForNtfsPartition(void)
 	if(NT_SUCCESS(status)){
 		DebugPrint("NTFS found\n");
 		partition_type = NTFS_PARTITION;
+		winx_heap_free(part_info);
+		winx_heap_free(ntfs_data);
 		return;
 	} else {
 		DebugPrint("Can't get ntfs info: %x!\n",status);
@@ -106,6 +125,8 @@ void CheckForNtfsPartition(void)
 	*/
 	partition_type = FAT32_PARTITION;
 	DebugPrint("NTFS not found\n");
+	winx_heap_free(part_info);
+	winx_heap_free(ntfs_data);
 }
 
 /**
@@ -115,29 +136,36 @@ void CheckForNtfsPartition(void)
 NTSTATUS GetMftLayout(void)
 {
 	IO_STATUS_BLOCK iosb;
-	NTFS_DATA ntfs_data;
+	NTFS_DATA *ntfs_data;
 	NTSTATUS status;
 	ULONGLONG mft_len;
 
-	RtlZeroMemory(&ntfs_data,sizeof(NTFS_DATA));
+	ntfs_data = winx_heap_alloc(sizeof(NTFS_DATA));
+	if(ntfs_data == NULL){
+		DebugPrint("Cannot allocate memory for GetMftLayout()!\n");
+		return STATUS_NO_MEMORY;
+	}
+
+	RtlZeroMemory(ntfs_data,sizeof(NTFS_DATA));
 	status = NtFsControlFile(winx_fileno(fVolume),NULL,NULL,NULL,&iosb, \
 				FSCTL_GET_NTFS_VOLUME_DATA,NULL,0, \
-				&ntfs_data, sizeof(NTFS_DATA));
+				ntfs_data, sizeof(NTFS_DATA));
 	if(NT_SUCCESS(status)/* == STATUS_PENDING*/){
 		(void)NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
 		status = iosb.Status;
 	}
 	if(!NT_SUCCESS(status)){
 		DebugPrint("Can't get ntfs info: %x!\n",status);
+		winx_heap_free(ntfs_data);
 		return status;
 	}
 
-	mft_len = ProcessMftSpace(&ntfs_data);
+	mft_len = ProcessMftSpace(ntfs_data);
 
 	Stat.mft_size = mft_len * bytes_per_cluster;
 	DebugPrint("MFT size = %I64u bytes\n",Stat.mft_size);
 
-	ntfs_record_size = ntfs_data.BytesPerFileRecordSegment;
+	ntfs_record_size = ntfs_data->BytesPerFileRecordSegment;
 	DebugPrint("NTFS record size = %u bytes\n",ntfs_record_size);
 
 	max_mft_entries = Stat.mft_size / ntfs_record_size;
@@ -145,6 +173,7 @@ NTSTATUS GetMftLayout(void)
 		max_mft_entries);
 	
 	//DbgPrintFreeSpaceList();
+	winx_heap_free(ntfs_data);
 	return STATUS_SUCCESS;
 }
 
