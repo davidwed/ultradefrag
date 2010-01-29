@@ -88,7 +88,7 @@ RequestExecutionLevel admin
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
 VIAddVersionKey "CompanyName" "UltraDefrag Development Team"
-VIAddVersionKey "LegalCopyright" "Copyright © 2007-2009 UltraDefrag Development Team"
+VIAddVersionKey "LegalCopyright" "Copyright © 2007-2010 UltraDefrag Development Team"
 VIAddVersionKey "FileDescription" "Ultra Defragmenter Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------

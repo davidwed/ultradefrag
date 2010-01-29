@@ -22,7 +22,7 @@ HISTORY
     always extremely hard, especially in early days when an author had 
     no enough experience.
 
-    In other words, all versions prior to 3.3.1 must be treated as products 
+    In other words, all versions prior to 4.0.0 must be treated as products 
     of the beta stage of program's development.
 
 

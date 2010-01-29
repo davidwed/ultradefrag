@@ -1,6 +1,6 @@
 /*
  *  ULTRADEFRAG - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2009 by D. Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by D. Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ RequestExecutionLevel admin
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
 VIAddVersionKey "CompanyName" "UltraDefrag Development Team"
-VIAddVersionKey "LegalCopyright" "Copyright © 2007-2009 UltraDefrag Development Team"
+VIAddVersionKey "LegalCopyright" "Copyright © 2007-2010 UltraDefrag Development Team"
 VIAddVersionKey "FileDescription" "Ultra Defragmenter Micro Edition Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------

@@ -159,6 +159,14 @@
  * part of the volume. This space may be used hereafter to
  * defragment large files.
  *
+ * Note that UltraDefrag always skips files living directly in MFT
+ * records (these files usually have size below 1kb), because they are
+ * actually a part of MFT. Also files which have no content are skipped,
+ * because actually there are no clusters on disk belonging to them.
+ * Additionally, UltraDefrag never tries to defragment files marked as
+ * temporary by applications which created them. Because such files
+ * will be deleted soon, therefore they will not decrease a system performance.
+ *
  * <h1>Web resources</h1>
  * The Ultra Defragmenter's home page is at:
  * http://ultradefrag.sourceforge.net

@@ -133,7 +133,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_FONT:
-			memset(&cf,0,sizeof(cf));
+			memset(&cf,0,sizeof(cf)); /* FIXME: may fail on x64? */
 			cf.lStructSize = sizeof(CHOOSEFONT);
 			cf.lpLogFont = &lf;
 			cf.Flags = CF_SCREENFONTS | CF_FORCEFONTEXIST | CF_INITTOLOGFONTSTRUCT;
@@ -291,7 +291,7 @@ void InitFont(void)
 	RECT rc;
 
 	/* initialize LOGFONT structure */
-	memset(&lf,0,sizeof(LOGFONT));
+	memset(&lf,0,sizeof(LOGFONT)); /* FIXME: may fail on x64? */
 	/* default font should be Courier New 9pt */
 	(void)strcpy(lf.lfFaceName,"Courier New");
 	lf.lfHeight = -12;
