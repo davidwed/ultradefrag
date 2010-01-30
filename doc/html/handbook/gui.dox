@@ -64,7 +64,7 @@
  * Note that selecting a different volume
  * will cause the progress bar to disappear.
 
- * Click Report button or type (Ctrl+F) to open the file
+ * Click Report button or type Ctrl+F to open the file
  * fragmentation report. Click Settings button or type Ctrl+T to open
  * the UltraDefrag GUI Configurator. About button (hotkey - F1) opens
  * a little window containing the most important information about the program.

@@ -1,9 +1,9 @@
 HISTORY
 
-  Version 4.0.0  2010-02-
+  Version 4.0.0  2010-01-30
   ------------------------------------------------------------------------------
-    - few extremely important bugs were fixed
-    - error handling was highly improved
+    - a lot of extremely important bugs were fixed
+    - the strongest error handling was added to all program modules
     - program is available again for all 64-bit targets
     - documentation was rewritten to be much clearer
     - kernel mode driver was removed as a component

@@ -33,7 +33,7 @@
  *
  * UltraDefrag saves all reports to the root directories of
  * the processed volumes. To open LuaReport click fraglist.luar
- * icon in Explorer or simply click the Fragmented button in
+ * icon in Explorer or simply click the Report button in
  * UltraDefrag GUI after a disk defragmentation/analysis job
  * completion. To open the PlainText report click fraglist.txt
  * icon in Explorer.

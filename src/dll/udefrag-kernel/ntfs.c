@@ -1028,7 +1028,8 @@ void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULO
 	
 	/* allocate memory for an integral number of cluster to hold a whole AttributeList */
 	clusters_to_read = size / bytes_per_cluster;
-	if(size % bytes_per_cluster) clusters_to_read ++;
+	/* the following check is a little bit complicated, because _aulldvrm() call is missing on w2k */
+	if(size - clusters_to_read * bytes_per_cluster/*size % bytes_per_cluster*/) clusters_to_read ++;
 	cluster = (char *)winx_heap_alloc((SIZE_T)(bytes_per_cluster * clusters_to_read));
 	if(!cluster){
 		DebugPrint("Cannot allocate %I64u bytes of memory for AnalyseNonResidentAttributeList()!\n",

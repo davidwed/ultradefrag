@@ -89,6 +89,6 @@ extraResourceOptions=
 [Other]
 [History]
 resource.h,1516
-i18n.c,69
+i18n.c,1702
 scheduler.rc,2724
-main.c,7396
+main.c,5281

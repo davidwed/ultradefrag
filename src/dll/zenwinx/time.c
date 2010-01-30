@@ -84,14 +84,16 @@ ULONGLONG __stdcall winx_str2time(char *string)
  * @param[out] buffer the storage for the resulting string.
  * @param[in]  size   the length of the buffer, in characters.
  * @return The number of characters stored.
+ * @note The time interval should not exceed 140 years
+ * (0xFFFFFFFF seconds), otherwise it will be truncated.
  */
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
 {
-	ULONGLONG y,d,h,m,s;
-	ULONGLONG t;
+	ULONG y,d,h,m,s;
+	ULONG t;
 	int result;
 	
-	t = time;
+	t = (ULONG)time; /* because w2k has no _aulldvrm() call in ntdll.dll */
 	y = t / (3600 * 24 * 356);
 	t = t % (3600 * 24 * 356);
 	d = t / (3600 * 24);
@@ -102,7 +104,7 @@ int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
 	s = t % 60;
 	
 	result = _snprintf(buffer,size - 1,
-		"%I64uy %I64ud %I64uh %I64um %I64us",
+		"%uy %ud %uh %um %us",
 		y,d,h,m,s);
 	buffer[size - 1] = 0;
 	return result;
