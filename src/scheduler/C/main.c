@@ -126,13 +126,19 @@ void DisplayLastError(char *caption)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	INITCOMMONCONTROLSEX icc;
+	
 	hInstance = GetModuleHandle(NULL);
 	/*
-	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
-	* but InitCommonControlsEx() needs about 90000 tacts.
-	* Because the first function is just a stub on xp.
+	* A date and time picker control requires
+	* comctl32.dll version 4.70 or later.
 	*/
-	InitCommonControls();
+	icc.dwSize = sizeof(INITCOMMONCONTROLSEX);
+	icc.dwICC = ICC_DATE_CLASSES;
+	if(!InitCommonControlsEx(&icc)){
+		DisplayLastError("InitCommonControlsEx() failed!");
+		return 2;
+	}
 	if(DialogBox(hInstance, MAKEINTRESOURCE(IDD_SCHEDULER),NULL,(DLGPROC)DlgProc) == (-1)){
 		DisplayLastError("Cannot create the main window!");
 		return 1;
