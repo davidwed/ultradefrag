@@ -21,6 +21,15 @@ Web designer:
 	Sayem Chaklader
 
 ----------------------------------------
+	Translation Managers:
+----------------------------------------
+
+	Stefan Pendl
+
+	Nagy Zsolt     (in the past)
+	Justin Dearing (in the past)
+
+----------------------------------------
 	Translators:
 ----------------------------------------
 Catala          - Illes Balears

@@ -7,6 +7,23 @@
 
 ;-------------------------------------------------------------------------------
 ; 
+; 6 February 2010
+;
+;-------------------------------------------------------------------------------
+
+The new 4.0.0 release is dramatically more reliable:
+
+* A lot of extremely important bugs were fixed.
+* The strongest error handling was added to all program modules.
+* Kernel mode driver was removed as a component less reliable by definition.
+* Documentation was rewritten completely to be much clearer.
+* Website was cleaned up to get better navigation and faster access to all important information.
+
+The next target - minor 4.0.1 upgrade with better reliablity and updated
+translations.
+
+;-------------------------------------------------------------------------------
+; 
 ; 14 January 2010
 ;
 ;-------------------------------------------------------------------------------

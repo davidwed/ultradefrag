@@ -1,5 +1,15 @@
 HISTORY
 
+  Version 4.0.1  2010-02-
+  ------------------------------------------------------------------------------
+    - one little bug preventing the Scheduler running on Windows 2000 was fixed
+    - the following translations were updated:
+
+      Polish, 
+
+    - volume status messages were improved in UltraDefrag GUI
+
+
   Version 4.0.0  2010-01-30
   ------------------------------------------------------------------------------
     - a lot of extremely important bugs were fixed
