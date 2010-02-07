@@ -101,10 +101,13 @@
 #define BLOCKS_PER_VLINE  14 /*16*/
 #define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
 
-#define STAT_CLEAR	0
-//#define STAT_WORK	1
-#define STAT_AN		2
-#define STAT_DFRG	3
+enum {
+	STATUS_UNDEFINED,
+	STATUS_RUNNING,
+	STATUS_ANALYSED,
+	STATUS_DEFRAGMENTED,
+	STATUS_OPTIMIZED
+};
 
 #define create_thread(func,param,ph) \
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)

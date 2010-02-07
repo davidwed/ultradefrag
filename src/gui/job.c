@@ -124,6 +124,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	UCHAR command;
 	int error_code;
 	char letter;
+	int Status = STATUS_UNDEFINED;
 
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
@@ -139,7 +140,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	/* refresh selected volume information (bug #2036873) */
 	VolListRefreshSelectedItem();
 	
-	//VolListUpdateSelectedStatusField(STAT_WORK);
 	WgxDisableWindows(hWindow,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,
 		IDC_RESCAN,IDC_SETTINGS,0);
@@ -150,10 +150,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	command = (UCHAR)(LONG_PTR)lpParameter;
 	letter = vl->VolumeName[0];
 
-	if(command == 'a')
-		VolListUpdateSelectedStatusField(STAT_AN);
-	else
-		VolListUpdateSelectedStatusField(STAT_DFRG);
+	VolListUpdateSelectedStatusField(STATUS_RUNNING);
 
 	ShowProgress();
 	SetProgress("A 0 %",0);
@@ -168,19 +165,24 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		switch(command){
 		case 'a':
 			error_code = udefrag_analyse(letter,update_stat);
+			Status = STATUS_ANALYSED;
 			break;
 		case 'd':
 			error_code = udefrag_defragment(letter,update_stat);
+			Status = STATUS_DEFRAGMENTED;
 			break;
 		default:
 			error_code = udefrag_optimize(letter,update_stat);
+			Status = STATUS_OPTIMIZED;
 		}
 		if(error_code < 0 && !exit_pressed){
 			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
-			VolListUpdateSelectedStatusField(STAT_CLEAR);
+			VolListUpdateSelectedStatusField(STATUS_UNDEFINED);
 			ClearMap();
 		}
 	}
+	
+	VolListUpdateSelectedStatusField(Status);
 	
 	if(!exit_pressed){
 		WgxEnableWindows(hWindow,IDC_ANALYSE,

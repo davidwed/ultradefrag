@@ -361,7 +361,7 @@ void ShowFragmented()
 #endif
 
 	vl = VolListGetSelectedEntry();
-	if(vl->VolumeName == NULL || vl->Status == STAT_CLEAR) return;
+	if(vl->VolumeName == NULL || vl->Status == STATUS_UNDEFINED) return;
 
 #ifndef UDEFRAG_PORTABLE
 	l_path[0] = (short)(vl->VolumeName[0]);

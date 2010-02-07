@@ -46,6 +46,11 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"ANALYSE_STATUS",       L"Analyse",                  NULL},
 	{0,                 L"DEFRAG_STATUS",        L"Defrag",                   NULL},
 
+	{0,                 L"STATUS_RUNNING",       L"Running",                  NULL},
+	{0,                 L"STATUS_ANALYSED",      L"Analysed",                 NULL},
+	{0,                 L"STATUS_DEFRAGMENTED",  L"Defragmented",             NULL},
+	{0,                 L"STATUS_OPTIMIZED",     L"Optimized",                NULL},
+
 	{0,                 L"DIRS",                 L"dirs",                     NULL},
 	{0,                 L"FILES",                L"files",                    NULL},
 	{0,                 L"FRAGMENTED",           L"fragmented",               NULL},

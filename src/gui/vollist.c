@@ -231,9 +231,9 @@ static void AddCapacityInformation(int index, volume_info *v)
 	double d;
 	int p;
 
-	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
+	lvi.mask = LVIF_TEXT/* | LVIF_IMAGE*/;
 	lvi.iItem = index;
-	lvi.iImage = v->is_removable ? 1 : 0;
+	//lvi.iImage = v->is_removable ? 1 : 0;
 
 	(void)udefrag_fbsize((ULONGLONG)(v->total_space.QuadPart),2,s,sizeof(s));
 	lvi.iSubItem = 2;
@@ -255,11 +255,38 @@ static void AddCapacityInformation(int index, volume_info *v)
 	(void)SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 }
 
+static void VolListUpdateStatusField(int index,int Status)
+{
+	LV_ITEMW lviw;
+
+	lviw.mask = LVIF_TEXT;
+	lviw.iItem = index;
+	lviw.iSubItem = 1;
+	
+	switch(Status){
+	case STATUS_RUNNING:
+		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_RUNNING");
+		break;
+	case STATUS_ANALYSED:
+		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
+		break;
+	case STATUS_DEFRAGMENTED:
+		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
+		break;
+	case STATUS_OPTIMIZED:
+		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
+		break;
+	default:
+		lviw.pszText = L"";
+	}
+
+	(void)SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
+}
+
 static void VolListAddItem(int index, volume_info *v)
 {
 	PVOLUME_LIST_ENTRY pv;
 	LV_ITEM lvi;
-	LV_ITEMW lviw;
 	char s[32];
 
 	(void)sprintf(s,"%c: [%s]",v->letter,v->fsname);
@@ -271,21 +298,7 @@ static void VolListAddItem(int index, volume_info *v)
 	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
 
 	pv = AddVolumeListEntry(s);
-
-	lviw.mask = LVIF_TEXT | LVIF_IMAGE;
-	lviw.iItem = index;
-	lviw.iSubItem = 1;
-
-	if(pv->Status == STAT_AN){
-		lviw.pszText = WgxGetResourceString(i18n_table,L"ANALYSE_STATUS");
-	} else if(pv->Status == STAT_DFRG){
-		lviw.pszText = WgxGetResourceString(i18n_table,L"DEFRAG_STATUS");
-	} else {
-		lviw.pszText = L"";
-	}
-
-	(void)SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
-
+	VolListUpdateStatusField(index,pv->Status);
 	AddCapacityInformation(index,v);
 }
 
@@ -391,27 +404,13 @@ void VolListUpdateSelectedStatusField(int Status)
 {
 	PVOLUME_LIST_ENTRY vl;
 	LRESULT SelectedItem;
-	LV_ITEMW lviw;
 
 	vl = VolListGetSelectedEntry();
 	if(vl->VolumeName) vl->Status = Status;
 
 	SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
-	if(SelectedItem != -1){
-		lviw.mask = LVIF_TEXT;
-		lviw.iItem = (int)SelectedItem;
-		lviw.iSubItem = 1;
-	
-		if(Status == STAT_AN){
-			lviw.pszText = WgxGetResourceString(i18n_table,L"ANALYSE_STATUS");
-		} else if(Status == STAT_DFRG){
-			lviw.pszText = WgxGetResourceString(i18n_table,L"DEFRAG_STATUS");
-		} else {
-			lviw.pszText = L"";
-		}
-	
-		(void)SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
-	}
+	if(SelectedItem != -1)
+		VolListUpdateStatusField((int)SelectedItem,Status);
 }
 
 void VolListNotifyHandler(LPARAM lParam)
