@@ -215,7 +215,7 @@ void RedrawMap()
 
 	vl = VolListGetSelectedEntry();
 	if(vl->VolumeName != NULL){
-		if(vl->Status > 1 && vl->hDC){
+		if(vl->Status > STATUS_UNDEFINED && vl->hDC){
 			hdc = GetDC(hMap);
 			(void)BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,vl->hDC,0,0,SRCCOPY);
 			(void)ReleaseDC(hMap,hdc);
