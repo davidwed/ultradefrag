@@ -75,6 +75,8 @@
  * <dd>Number of map symbols containing in each row of the map. Default value is 68.</dd>
  * </dl>
  *
+ * Specifying just the volume letter will cause UltraDefrag to defragment the volume.
+ *
  * <h1>Environment variables</h1>
  * <dl>
  * <dt>UD_IN_FILTER</dt>
