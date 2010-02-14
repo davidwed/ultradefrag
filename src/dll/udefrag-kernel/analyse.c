@@ -165,6 +165,11 @@ int Analyze(char *volume_name)
 	
 	/* all locked files are in unknown state, right? */
 	/* note: these checks takes a lot of time */
+	DebugPrint("File checking started...\n");
+	DebugPrint("UltraDefrag will try to open all files sequentially...\n");
+	DebugPrint("to ensure that they are not locked.\n");
+	DebugPrint("This may take few minutes if there are many files on the disk.\n");
+	tm = _rdtsc();
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(CheckForStopEvent()) break;
 		Status = OpenTheFile(pfn,&hFile);
@@ -176,6 +181,8 @@ int Analyze(char *volume_name)
 		}
 		if(pfn->next_ptr == filelist) break;
 	}
+	time = _rdtsc() - tm;
+	DebugPrint("File checking completed in %I64u ms.\n",time);
 	return 0;
 }
 
