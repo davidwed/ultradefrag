@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
- <assemblyIdentity version="4.0.1.0" name="bootexctrl" processorArchitecture="X86" 
-type="win32"/><description>BootExecute Control Program 
+ <assemblyIdentity version="0.0.0.1" name="utf8-16" processorArchitecture="X86" 
+type="win32"/><description>UTF-8 to UTF-16 converter 
 </description>
 <dependency>
   <dependentAssembly>

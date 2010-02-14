@@ -79,6 +79,7 @@ rem update manifests in working copy of sources
 if "%1" neq "X86" goto L1
 copy /Y .\obj\hibernate\hibernate.manifest .\hibernate\hibernate.manifest
 copy /Y .\obj\console\defrag.manifest .\console\defrag.manifest
+copy /Y .\obj\utf8-16\utf8-16.manifest .\utf8-16\utf8-16.manifest
 copy /Y .\obj\gui\res\dfrg.manifest .\gui\res\dfrg.manifest
 copy /Y .\obj\gui-launcher\udefrag-gui.manifest .\gui-launcher\udefrag-gui.manifest
 copy /Y .\obj\udefrag-gui-config\res\config.manifest .\udefrag-gui-config\res\config.manifest
