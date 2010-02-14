@@ -116,7 +116,8 @@ BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_f
 	if(!line_buffer) return FALSE;
 	
 	/* open lng file */
-	f = _wfopen(lng_file_path,L"rb");
+	/* opening in text mode allows the use of CR endings instead of CRLF */
+	f = _wfopen(lng_file_path,L"rt");
 	if(!f){ free(line_buffer); return FALSE; }
 
 	/* read lines and applies them to specified table */

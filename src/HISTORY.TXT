@@ -2,11 +2,22 @@ HISTORY
 
   Version 4.0.1  2010-02-
   ------------------------------------------------------------------------------
+    - few bugs in driver were fixed
     - one little bug preventing the Scheduler running on Windows 2000 was fixed
+    - the following translations were added:
+
+      Belarusian, Bulgarian, Croatian, Filipino (Tagalog), Finnish, Icelandic,
+      Macedonian, Norwegian, Romanian, Serbian, Ukrainian, Yiddish
+
     - the following translations were updated:
 
-      Polish, 
+      Catalan, Chinese(Simplified), Chinese(Traditional), Czech, Danish,
+      Dutch, Farsi, French(FR), German, Greek, Hungarian, Italian,
+      Japanese, Korean, Latvian, Polish, Portuguese(BR), Portuguese,
+      Russian, Slovak, Slovenian, Spanish(AR), Swedish, Thai, Turkish
 
+    - Unix style formatted language packs support was added
+      (CR can be used safely instead of CRLF to terminate lines)
     - volume status messages were improved in UltraDefrag GUI
 
 
