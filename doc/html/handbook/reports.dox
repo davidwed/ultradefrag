@@ -64,8 +64,8 @@
  * /options subfolder of the program's directory.
  *
  * To open this file for editing click its icon in Explorer
- * or simply click an appropriate button in UltraDefrag GUI
- * Configurator program.
+ * or simply click an appropriate button in UltraDefrag 
+ * Configuration dialog.
  *
  * The udreportopts.lua file contains a parameter-value pairs
  * and comments (they are starting with double dashes).

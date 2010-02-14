@@ -19,7 +19,7 @@
  */
 
 /*
-* GUI Configurator resources description.
+* UltraDefrag Configuration dialog resources description.
 */
 
 #include "../include/version.h"
@@ -42,9 +42,9 @@ IDD_CONFIG DIALOGEX 0, 0, 295, 121
 STYLE DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 #ifndef UDEFRAG_PORTABLE
-CAPTION "UltraDefrag GUI Configurator"
+CAPTION "UltraDefrag Configuration"
 #else
-CAPTION "UltraDefrag Portable GUI Configurator"
+CAPTION "UltraDefrag Portable Configuration"
 #endif
 FONT 9, "Courier New", 0, 0, 0x1
 BEGIN
@@ -88,9 +88,9 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "UltraDefrag Development Team\0"
 		#ifndef UDEFRAG_PORTABLE
-            VALUE "FileDescription", "UltraDefrag GUI Configurator\0"
+            VALUE "FileDescription", "UltraDefrag Configuration\0"
 		#else
-			VALUE "FileDescription", "UltraDefrag Portable GUI Configurator\0"
+			VALUE "FileDescription", "UltraDefrag Portable Configuration\0"
 		#endif
             VALUE "FileVersion", VERSION2
             VALUE "InternalName", "udefrag-gui-config\0"

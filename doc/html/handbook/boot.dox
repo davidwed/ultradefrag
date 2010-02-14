@@ -43,8 +43,8 @@
  * of the operating system that reads encrypted volumes, is loaded
  * after the native executable runs.
  *
- * To enable the boot time defragmenter open UltraDefrag GUI
- * Configurator and check the Enable box in the Boot time scan
+ * To enable the boot time defragmenter open the UltraDefrag 
+ * Configuration dialog and check the Enable box in the Boot time scan
  * section. The boot time defragmenter can also be enabled by
  * typing the boot-on in command prompt. To disable them the
  * boot-off command may be used.
@@ -65,7 +65,7 @@
  * ancillary commands and comments (with a semicolon (;) or # characters
  * in the beginning). Its location is \%windir\%\\system32\\ud-boot-time.cmd.
  * To edit this file type in command prompt boot-config or simply click
- * the Script button in UltraDefrag GUI Configurator.
+ * the Script button in UltraDefrag Configuration dialog.
  *
  * The following commands are accepted:
  * <dl>
@@ -94,7 +94,8 @@
  * <dt>boot-off</dt>
  * <dd>Turn off the boot time defragmentation. It prevents them from being
  * executed at next reboots. Until you will enable them manually through
- * Configurator program or boot-on.cmd script. Unfortunately, this command
+ * UltraDefrag Configuration dialog or boot-on.cmd script. Unfortunately, 
+ * this command
  * fails when shutdown or reboot commands are executed after it.</dd>
  * </dl>
  *

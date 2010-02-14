@@ -66,7 +66,7 @@
 
  * Click Report button or type Ctrl+F to open the file
  * fragmentation report. Click Settings button or type Ctrl+T to open
- * the UltraDefrag GUI Configurator. About button (hotkey - F1) opens
+ * the UltraDefrag Configuration dialog. About button (hotkey - F1) opens
  * a little window containing the most important information about the program.
  *
  * <b>Shutting Down or Hibernating the Computer after a Job</b>\n
@@ -78,18 +78,20 @@
  * at regular basis.
  *
  * Instead of an automatic shutdown, an automatic hibernation
- * may be used. Open the Configurator, click Options button
- * inside the Graphical interface section and set
+ * may be used. Open the UltraDefrag Configuration dialog, click 
+ * Options button inside the Graphical interface section and set
  * hibernate_instead_of_shutdown = 1. Note that your system must
  * support hibernation and it must be turned on. Otherwise Windows
  * will display a message box containing a brief error description
  * and system will not be switched to hibernation mode.
  *
  * <h1>Configuring</h1>
- * Click the Settings button in UltraDefrag GUI to open the Configurator.
+ * Click the Settings button in UltraDefrag GUI to open 
+ * the UltraDefrag Configuration dialog.
  * Also it can be launched from the Start menu. 
  * Use Start > Programs > UltraDefrag > Preferences shortcut.
- * A single Configurator's window is logically divided into three sections.
+ * A single UltraDefrag Configuration dialog is logically divided
+ * into three sections.
  *
  * <b>Graphical Interface</b>\n
  * Click Font button to select a font for GUI applications rendering.
@@ -97,7 +99,7 @@
  * guiopts.lua placed in /options subfolder of the program's directory.
  * The Help button opens this section of the handbook.
  * If you have a local copy of documentation installed, the
- * Configurator will use it. Otherwise the same page will be
+ * program will use it. Otherwise the same page will be
  * loaded from the project's web site.
  *
  * GUI options have the same meaning as environment variables

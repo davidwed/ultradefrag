@@ -18,7 +18,7 @@
  */
 
 /*
-* GUI Configurator - i18n information.
+* UltraDefrag Configuration dialog - the i18n information.
 */
 
 #define WIN32_NO_STATUS

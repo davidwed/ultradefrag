@@ -18,7 +18,7 @@
  */
 
 /*
-* GUI Configurator - main window code.
+* UltraDefrag Configuration dialog - the main window code.
 */
 
 #define WIN32_NO_STATUS
