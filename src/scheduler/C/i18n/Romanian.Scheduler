@@ -1,0 +1,29 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag Scheduler Romanian Language Pack.
+; Copyright (C) 2010 by Stefan Pendl.
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+MONDAY    = Luni
+TUESDAY   = Marţi
+WEDNESDAY = Miercuri
+THURSDAY  = Joi
+FRIDAY    = Vineri
+SATURDAY  = Sîmbătă
+SUNDAY    = Duminică
+
+DAILY     = Daily
+WEEKLY    = Săptămînal
+
+OK        = OK
+
+; END OF FILE
+
+[[code]]

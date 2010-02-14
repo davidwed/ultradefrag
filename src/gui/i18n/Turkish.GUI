@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI US Turkish Language Pack.
+; Copyright (C) 2008 by Huseyin Kozan
+; Revised Feb. 14, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Sürücüleri Tara
+SKIP_REMOVABLE_MEDIA  = Çıkarılabilir sürücüleri atla
+CLUSTER_MAP           = Küme Hatirası:
+ANALYSE               = Analiz Et
+DEFRAGMENT            = Birleştir
+OPTIMIZE              = Sinyali
+PAUSE                 = Beklet
+STOP                  = Durdur
+REPORT                = Rapor
+SETTINGS              = Ayarlar
+ABOUT                 = Hakkında
+SHUTDOWN_PC_AFTER_A_JOB  = Kapanmasında PC ne zaman kaldı
+HIBERNATE_PC_AFTER_A_JOB = Kış Uykusuna Yatılmadığını PC ne zaman kaldı
+
+; Drives list items.
+
+VOLUME                = Birim
+STATUS                = Durum
+FILESYSTEM            = Dosya Sistemi
+TOTAL                 = Toplam Alan
+FREE                  = Boş Alan
+PERCENT               = Yüzde
+
+; Status messages
+
+STATUS_RUNNING        = Çalıştırılıyor
+STATUS_ANALYSED       = Analiz
+STATUS_DEFRAGMENTED   = Birleştirilmiş
+STATUS_OPTIMIZED      = Aktarılması
+
+; Status bar messages.
+
+DIRS                  = klasör
+FILES                 = dosya
+FRAGMENTED            = parçalanmış
+COMPRESSED            = sıkıştırılmış
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Ultra Defragmenter Hakkında
+CREDITS               = Hazırlayanlar
+LICENSE               = Lisans
+
+; END OF FILE
+
+[[code]]

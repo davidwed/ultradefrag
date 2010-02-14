@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Farsi Language Pack.
+; Copyright (C) 2008 by Ali Jafari.
+; Revised Feb. 13, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES            = اسكن دوباره درايو
+SKIP_REMOVABLE_MEDIA     = رد كردن مدياي قابل حذف
+CLUSTER_MAP              = :نقشه كلاستر
+ANALYSE                  = آناليز
+DEFRAGMENT               = وصل كردن
+OPTIMIZE                 = بهينهساختن‌ است
+PAUSE                    = ايستادن
+STOP                     = توقف
+REPORT                   = گزارش
+SETTINGS                 = تنظيمات
+ABOUT                    = درباره
+SHUTDOWN_PC_AFTER_A_JOB  = هنگامي كه كامپيوتر غنى سازى انجام نداده است
+HIBERNATE_PC_AFTER_A_JOB = بخواب‌ زمستاني‌ رفتن‌ هنگامي كه انجام شده است
+
+; Drives list items.
+
+VOLUME                = نام درايو
+STATUS                = وضعيت
+FILESYSTEM            = سيستم فايل
+TOTAL                 = فضاي كل
+FREE                  = فضاي آزاد
+PERCENT               = درصد
+
+; Status messages
+
+STATUS_RUNNING        = سخن می گویید
+STATUS_ANALYSED       = بررسي شود
+STATUS_DEFRAGMENTED   = است
+STATUS_OPTIMIZED      = بهينه‌ شده‌ است
+
+; Status bar messages.
+
+DIRS                  = فولدرها
+FILES                 = فايلها
+FRAGMENTED            = تكه شده
+COMPRESSED            = فشرده شده
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = درباره اين برنامه
+CREDITS               = اعتبارات
+LICENSE               = جواز
+
+; END OF FILE
+
+[[code]]

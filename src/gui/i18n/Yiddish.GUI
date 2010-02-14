@@ -1,0 +1,63 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Yiddish Language Pack.
+; Copyright (C) 2010 by Dmitri Arkhangelski.
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Derfrishn
+SKIP_REMOVABLE_MEDIA  = Tsunemen disk hopken
+CLUSTER_MAP           = Knoyl karte:
+ANALYSE               = Analizirn
+DEFRAGMENT            = Defragmentirn
+OPTIMIZE              = Optimizirn
+PAUSE                 = Poyze
+STOP                  = Haltn
+REPORT                = Meldung
+SETTINGS              = Breyren
+ABOUT                 = Dervegn
+SHUTDOWN_PC_AFTER_A_JOB  = Opshteln PC shpeter arbet
+HIBERNATE_PC_AFTER_A_JOB = Shlofn PC shpeter arbet
+
+; Drives list items.
+
+VOLUME                = Disk
+STATUS                = Matsev
+FILESYSTEM            = File System
+TOTAL                 = Gants ort
+FREE                  = Fray ort
+PERCENT               = Protsent
+
+; Status messages
+
+STATUS_RUNNING        = Gang
+STATUS_ANALYSED       = Analizirt
+STATUS_DEFRAGMENTED   = Defragmentirt
+STATUS_OPTIMIZED      = Optimizirt
+
+; Status bar messages.
+
+DIRS                  = teke
+FILES                 = fayl
+FRAGMENTED            = fragmented
+COMPRESSED            = compressed
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Vegn Ultra Defragmenter
+CREDITS               = Mekhaber
+LICENSE               = Litsents
+
+; END OF FILE
+
+[[code]]

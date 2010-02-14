@@ -1,0 +1,29 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag Scheduler Japanese Language Pack.
+; Copyright (C) 2010 by Stefan Pendl.
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+MONDAY    = 月曜日
+TUESDAY   = 火曜日
+WEDNESDAY = 水曜日
+THURSDAY  = 木曜日
+FRIDAY    = 金曜日
+SATURDAY  = 土曜日
+SUNDAY    = 日曜日
+
+DAILY     = 日毎に
+WEEKLY    = 週間
+
+OK        = OK
+
+; END OF FILE
+
+[[code]]

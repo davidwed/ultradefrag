@@ -1,0 +1,70 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Latvian Language Pack.
+; Copyright (C) 2009 by Sevelyr
+; Revised Feb. 14, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Disku meklēšana
+SKIP_REMOVABLE_MEDIA  = Izlaist maināmus datu nesējus
+CLUSTER_MAP           = Diska karte
+ANALYSE               = Analizēt
+DEFRAGMENT            = Defragmentēt
+OPTIMIZE              = Optimizēt
+PAUSE                 = Pauze
+STOP                  = Apturēt
+REPORT                = Atskaite
+SETTINGS              = Uzstādījumi
+ABOUT                 = Par programmu
+SHUTDOWN_PC_AFTER_A_JOB  = Shutdown PC kad izdarīts
+HIBERNATE_PC_AFTER_A_JOB = Pārziemot PC kad izdarīts
+
+; Drives list items.
+
+VOLUME                = Sējums
+STATUS                = Statuss
+FILESYSTEM            = Failu sistēma
+TOTAL                 = Kopā
+FREE                  = Brīvs
+PERCENT               = Procentos
+
+; Status messages
+
+STATUS_RUNNING        = Izpildes
+STATUS_ANALYSED       = Analīze
+STATUS_DEFRAGMENTED   = Defragmented
+STATUS_OPTIMIZED      = Optimizēta
+
+; Status bar messages.
+
+DIRS                  = Mapes
+FILES                 = Faili
+FRAGMENTED            = Fragmentēti
+COMPRESSED            = Saspiesti
+MFT                   = MFT
+
+; Settings window.
+
+EDIT_MAIN_OPTS        = Galvenie uzstādījumi
+EDIT_REPORT_OPTS      = Atskaites parametri
+READ_USER_MANUAL      = Lietotāja instrukcija
+
+; About window.
+
+ABOUT_WIN_TITLE       = Par programmu Ultra Defragmenter
+CREDITS               = Autori
+LICENSE               = Licence
+
+; END OF FILE
+
+[[code]]

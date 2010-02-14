@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Greek Language Pack.
+; Copyright (C) 2008 by Konstantinos Kapoukranidis
+; Revised Feb. 13, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Επανεξέταση δίσκων
+SKIP_REMOVABLE_MEDIA  = Παράλειψη αφαιρ. συσκ.
+CLUSTER_MAP           = Χάρτης συστοιχίας:
+ANALYSE               = Ανάλυση
+DEFRAGMENT            = Ανασυγκρότηση
+OPTIMIZE              = Βελτιστοποίηση
+PAUSE                 = Παύση
+STOP                  = Διακοπή
+REPORT                = Αναφορά
+SETTINGS              = Ρυθμίσεις
+ABOUT                 = Σχετικά
+SHUTDOWN_PC_AFTER_A_JOB  = Τερματισμός του Η/Υ μετά την ολοκλήρωση
+HIBERNATE_PC_AFTER_A_JOB = Αδρανοποίηση του Η/Υ μετά την ολοκλήρωση
+
+; Drives list items.
+
+VOLUME                = Μονάδα
+STATUS                = Κατάσταση
+FILESYSTEM            = Σύστημα αρχείων
+TOTAL                 = Σύνολο χώρου
+FREE                  = Ελεύθερος χώρος
+PERCENT               = Ποσοστό
+
+; Status messages
+
+STATUS_RUNNING        = Εκτέλεσης
+STATUS_ANALYSED       = Αναλύονται
+STATUS_DEFRAGMENTED   = Ανασυγκροτηθεί
+STATUS_OPTIMIZED      = Βελτιστοποιηθεί
+
+; Status bar messages.
+
+DIRS                  = κατάλογοι
+FILES                 = αρχεία
+FRAGMENTED            = κατακερματισμένα
+COMPRESSED            = συμπιεσμένα
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Σχετικά με το Ultra Defragmenter
+CREDITS               = Αναγνώριση
+LICENSE               = Άδεια
+
+; END OF FILE
+
+[[code]]

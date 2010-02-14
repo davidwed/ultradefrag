@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Danish Language Pack.
+; Copyright (C) 2009 by Patrick Paludan-Müller.
+; Revised Feb. 13, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Opdater drevlisten
+SKIP_REMOVABLE_MEDIA  = Kun faste drev
+CLUSTER_MAP           = Klyngeoversigt:
+ANALYSE               = Analyser
+DEFRAGMENT            = Defragmenter
+OPTIMIZE              = Optimere
+PAUSE                 = Pause
+STOP                  = Stop
+REPORT                = Rapport
+SETTINGS              = Indstillinger
+ABOUT                 = Om
+SHUTDOWN_PC_AFTER_A_JOB  = Shutdown PC når udfaerdiget
+HIBERNATE_PC_AFTER_A_JOB = Hibernate PC når udfaerdiget
+
+; Drives list items.
+
+VOLUME                = Logisk drev
+STATUS                = Tilstand
+FILESYSTEM            = Filsystem
+TOTAL                 = Kapacitet
+FREE                  = Ledig plads
+PERCENT               = Procent
+
+; Status messages
+
+STATUS_RUNNING        = Kører
+STATUS_ANALYSED       = Analyseres
+STATUS_DEFRAGMENTED   = Defragmenteret
+STATUS_OPTIMIZED      = Optimeret
+
+; Status bar messages.
+
+DIRS                  = mapper
+FILES                 = filer
+FRAGMENTED            = fragmenterede
+COMPRESSED            = komprimerede
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Om Ultra Defragmenter
+CREDITS               = Credits
+LICENSE               = Licens
+
+; END OF FILE
+
+[[code]]

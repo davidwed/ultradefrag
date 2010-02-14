@@ -37,8 +37,8 @@ copy /Y scripts\udreportopts.lua %PORTABLE_DIR%\options\
 mkdir %PORTABLE_DIR%\i18n
 mkdir %PORTABLE_DIR%\i18n\gui
 mkdir %PORTABLE_DIR%\i18n\gui-config
-copy /Y gui\i18n\*.lng %PORTABLE_DIR%\i18n\gui\
-copy /Y udefrag-gui-config\i18n\*.lng %PORTABLE_DIR%\i18n\gui-config\
+copy /Y gui\i18n\*.GUI %PORTABLE_DIR%\i18n\gui\
+copy /Y udefrag-gui-config\i18n\*.Config %PORTABLE_DIR%\i18n\gui-config\
 
 copy /Y installer\LanguageSelector.nsi bin\
 copy /Y installer\lang.ini bin\
@@ -96,8 +96,8 @@ copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
 mkdir %PORTABLE_DIR%\i18n
 mkdir %PORTABLE_DIR%\i18n\gui
 mkdir %PORTABLE_DIR%\i18n\gui-config
-copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\gui\
-copy /Y ..\udefrag-gui-config\i18n\*.lng %PORTABLE_DIR%\i18n\gui-config\
+copy /Y ..\gui\i18n\*.GUI %PORTABLE_DIR%\i18n\gui\
+copy /Y ..\udefrag-gui-config\i18n\*.Config %PORTABLE_DIR%\i18n\gui-config\
 
 copy /Y .\LanguageSelector.exe %PORTABLE_DIR%\
 
@@ -149,8 +149,8 @@ copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
 mkdir %PORTABLE_DIR%\i18n
 mkdir %PORTABLE_DIR%\i18n\gui
 mkdir %PORTABLE_DIR%\i18n\gui-config
-copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\gui\
-copy /Y ..\udefrag-gui-config\i18n\*.lng %PORTABLE_DIR%\i18n\gui-config\
+copy /Y ..\gui\i18n\*.GUI %PORTABLE_DIR%\i18n\gui\
+copy /Y ..\udefrag-gui-config\i18n\*.Config %PORTABLE_DIR%\i18n\gui-config\
 
 copy /Y .\LanguageSelector.exe %PORTABLE_DIR%\
 

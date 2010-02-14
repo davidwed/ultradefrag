@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Swedish Language Pack.
+; Copyright (C) 2009 by Magnus Rostedt.
+; Revised Feb. 14, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Uppdatera enhetslistan
+SKIP_REMOVABLE_MEDIA  = Hoppa över flyttbara media
+CLUSTER_MAP           = Klusterkarta:
+ANALYSE               = Analysera
+DEFRAGMENT            = Defragmentera
+OPTIMIZE              = Optimera
+PAUSE                 = Pausa
+STOP                  = Stoppa
+REPORT                = Rapport
+SETTINGS              = Inställningar
+ABOUT                 = Om
+SHUTDOWN_PC_AFTER_A_JOB  = Stängningen PC när gjort
+HIBERNATE_PC_AFTER_A_JOB = Övervintra PC när gjort
+
+; Drives list items.
+
+VOLUME                = Volym
+STATUS                = Status
+FILESYSTEM            = Filsystem
+TOTAL                 = Totalt utrymme
+FREE                  = Ledigt utrymme
+PERCENT               = Procent
+
+; Status messages
+
+STATUS_RUNNING        = Utförande
+STATUS_ANALYSED       = Analyserat
+STATUS_DEFRAGMENTED   = Defragmenterad
+STATUS_OPTIMIZED      = Optimerat
+
+; Status bar messages.
+
+DIRS                  = mappar
+FILES                 = filer
+FRAGMENTED            = fragmenterade
+COMPRESSED            = komprimerade
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Om Ultra Defragmenter
+CREDITS               = Erkännanden
+LICENSE               = Licens
+
+; END OF FILE
+
+[[code]]

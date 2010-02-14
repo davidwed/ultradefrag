@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Thai Language Pack
+; Copyright (C) 2009 by Pat Taweewat.
+; Revised Feb. 14, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES            = ตรวจหาไดรฟ์อีกครั้ง
+SKIP_REMOVABLE_MEDIA     = ยกเว้นไดรฟ์ไม่ถาวร
+CLUSTER_MAP              = แผนที่ คลัสเตอร์:
+ANALYSE                  = วิเคราะห์
+DEFRAGMENT               = Defragement
+OPTIMIZE                 = เพิ่ม ประสิทธิภาพ
+PAUSE                    = หยุดชั่วคราว
+STOP                     = หยุดทำงาน
+REPORT                   = รายงาน
+SETTINGS                 = การตั้งค่า
+ABOUT                    = เี่กี่ยวกับ
+SHUTDOWN_PC_AFTER_A_JOB  = ปิดเครื่อง PC เมื่อทำ
+HIBERNATE_PC_AFTER_A_JOB = จำศีลเครื่อง PC เมื่อทำ
+
+; Drives list items.
+
+VOLUME                = ปริมาณ
+STATUS                = สถานะ
+FILESYSTEM            = ระบบแฟ้ม
+TOTAL                 = เนื้อที่ทั้งหมด
+FREE                  = เนื้อที่ว่าง
+PERCENT               = ร้อยละ
+
+; Status messages
+
+STATUS_RUNNING        = เรียกใช้
+STATUS_ANALYSED       = วิเคราะห์
+STATUS_DEFRAGMENTED   = Defragmented
+STATUS_OPTIMIZED      = เหมาะ
+
+; Status bar messages.
+
+DIRS                  = โฟลเดอร์
+FILES                 = ไฟล์
+FRAGMENTED            = กระจาย
+COMPRESSED            = บีบอัด
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = เกี่ยวกับ Ultra Defragmenter
+CREDITS               = เครดิต
+LICENSE               = ใบอนุญาตได้
+
+; END OF FILE
+
+[[code]]

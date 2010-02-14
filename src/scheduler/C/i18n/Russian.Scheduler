@@ -1,0 +1,29 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag Scheduler Russian Language Pack.
+; Copyright (C) 2010 by Dmitri Arkhangelski.
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+MONDAY    = Понедельник
+TUESDAY   = Вторник
+WEDNESDAY = Среда
+THURSDAY  = Четверг
+FRIDAY    = Пятница
+SATURDAY  = Суббота
+SUNDAY    = Воскресенье
+
+DAILY     = Ежедневно
+WEEKLY    = Еженедельно
+
+OK        = OK
+
+; END OF FILE
+
+[[code]]

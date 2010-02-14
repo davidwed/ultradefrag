@@ -27,7 +27,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{IDC_RESCAN,        L"RESCAN_DRIVES",        L"Rescan drives",            NULL},
 	{IDC_SKIPREMOVABLE, L"SKIP_REMOVABLE_MEDIA", L"Skip removable media",     NULL},
 	{IDC_CL_MAP_STATIC, L"CLUSTER_MAP",          L"Cluster map:",             NULL},
-	{IDC_ANALYSE,       L"ANALYSE",              L"Analyse",                  NULL},
+	{IDC_ANALYSE,       L"ANALYSE",              L"Analyze",                  NULL},
 	{IDC_DEFRAGM,       L"DEFRAGMENT",           L"Defragment",               NULL},
 	{IDC_OPTIMIZE,      L"OPTIMIZE",             L"Optimize",                 NULL},
 	{IDC_PAUSE,         L"PAUSE",                L"Pause",                    NULL},
@@ -43,11 +43,11 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"FREE",                 L"Free space",               NULL},
 	{0,                 L"PERCENT",              L"Percentage",               NULL},
 	
-	{0,                 L"ANALYSE_STATUS",       L"Analyse",                  NULL},
+	{0,                 L"ANALYSE_STATUS",       L"Analyze",                  NULL},
 	{0,                 L"DEFRAG_STATUS",        L"Defrag",                   NULL},
 
 	{0,                 L"STATUS_RUNNING",       L"Running",                  NULL},
-	{0,                 L"STATUS_ANALYSED",      L"Analysed",                 NULL},
+	{0,                 L"STATUS_ANALYSED",      L"Analyzed",                 NULL},
 	{0,                 L"STATUS_DEFRAGMENTED",  L"Defragmented",             NULL},
 	{0,                 L"STATUS_OPTIMIZED",     L"Optimized",                NULL},
 

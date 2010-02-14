@@ -88,33 +88,32 @@ Var LanguagePack
 Function install_langpack
 
   push $R0
-  push $R1
 
   Delete "$EXEDIR\ud_i18n.lng"
   Delete "$EXEDIR\ud_config_i18n.lng"
   Delete "$EXEDIR\ud_scheduler_i18n.lng"
 
   ${If} $LanguagePack != "English (US)"
-    StrCpy $R1 $LanguagePack
-    StrCpy $R0 "$R1.lng"
+    StrCpy $R0 $LanguagePack
     ${Select} $LanguagePack
       ${Case} "Chinese (Simplified)"
-        StrCpy $R0 "Chinese(Simp).lng"
+        StrCpy $R0 "Chinese(Simplified)"
       ${Case} "Chinese (Traditional)"
-        StrCpy $R0 "Chinese(Trad).lng"
+        StrCpy $R0 "Chinese(Traditional)"
+      ${Case} "Filipino (Tagalog)"
+        StrCpy $R0 "Filipino(Tagalog)"
       ${Case} "French (FR)"
-        StrCpy $R0 "French(FR).lng"
+        StrCpy $R0 "French(FR)"
       ${Case} "Portuguese (BR)"
-        StrCpy $R0 "Portuguese(BR).lng"
+        StrCpy $R0 "Portuguese(BR)"
       ${Case} "Spanish (AR)"
-        StrCpy $R0 "Spanish(AR).lng"
+        StrCpy $R0 "Spanish(AR)"
     ${EndSelect}
     
-    CopyFiles /SILENT "$EXEDIR\i18n\gui\$R0" "$EXEDIR\ud_i18n.lng"
-    CopyFiles /SILENT "$EXEDIR\i18n\gui-config\$R0" "$EXEDIR\ud_config_i18n.lng"
+    CopyFiles /SILENT "$EXEDIR\i18n\gui\$R0.GUI" "$EXEDIR\ud_i18n.lng"
+    CopyFiles /SILENT "$EXEDIR\i18n\gui-config\$R0.Config" "$EXEDIR\ud_config_i18n.lng"
   ${EndIf}
 
-  pop $R1
   pop $R0
 
 FunctionEnd

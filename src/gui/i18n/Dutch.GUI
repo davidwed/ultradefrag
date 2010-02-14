@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Dutch Language Pack.
+; Copyright (C) 2008 by Wim Kerstens.
+; Revised Feb. 13, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Hercontroleer
+SKIP_REMOVABLE_MEDIA  = Sla verwijderbare media over
+CLUSTER_MAP           = Cluster kaart:
+ANALYSE               = Analyseer
+DEFRAGMENT            = Defragmenteer
+OPTIMIZE              = Optimaliseer
+PAUSE                 = Pauze
+STOP                  = Einde
+REPORT                = Rapport
+SETTINGS              = Instellingen
+ABOUT                 = Over
+SHUTDOWN_PC_AFTER_A_JOB  = PC van de sluiting wanneer gedaan
+HIBERNATE_PC_AFTER_A_JOB = PC van Hibernate wanneer gedaan
+
+; Drives list items.
+
+VOLUME                = Volume
+STATUS                = Status
+FILESYSTEM            = Bestandssysteem
+TOTAL                 = Totale plaats
+FREE                  = Beschikbare plaats
+PERCENT               = Percentage
+
+; Status messages
+
+STATUS_RUNNING        = Uitvoeren
+STATUS_ANALYSED       = Geanalyseerd
+STATUS_DEFRAGMENTED   = Gedefragmenteerd
+STATUS_OPTIMIZED      = Geoptimaliseerd
+
+; Status bar messages.
+
+DIRS                  = mappen
+FILES                 = bestanden
+FRAGMENTED            = gefragmenteerd
+COMPRESSED            = gecomprimeerd
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Over Ultra Defragmenter
+CREDITS               = Credits
+LICENSE               = Licentie
+
+; END OF FILE
+
+[[code]]

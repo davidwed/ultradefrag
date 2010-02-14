@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Japanese Language Pack.
+; Copyright (C) 2009 by ao3.
+; Revised Feb. 14, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = ドライブを再読込み
+SKIP_REMOVABLE_MEDIA  = リムーバブルメディアは除外
+CLUSTER_MAP           = クラスタマップ:
+ANALYSE               = 解析
+DEFRAGMENT            = デブラグ
+OPTIMIZE              = 最大限に活用しなさい
+PAUSE                 = 一時停止
+STOP                  = 停止
+REPORT                = レポート
+SETTINGS              = 設定
+ABOUT                 = について
+SHUTDOWN_PC_AFTER_A_JOB  = された場合操業停止のPC
+HIBERNATE_PC_AFTER_A_JOB = されたときPCは冬眠する
+
+; Drives list items.
+
+VOLUME                = ボリューム
+STATUS                = 状態
+FILESYSTEM            = ファイルシステム
+TOTAL                 = 容量
+FREE                  = 空き容量
+PERCENT               = パーセント
+
+; Status messages
+
+STATUS_RUNNING        = を実行する
+STATUS_ANALYSED       = を分析した
+STATUS_DEFRAGMENTED   = 最適化
+STATUS_OPTIMIZED      = 最適化された
+
+; Status bar messages.
+
+DIRS                  = ﾃﾞｨﾚｸﾄﾘ
+FILES                 = ﾌｧｲﾙ
+FRAGMENTED            = 断片化
+COMPRESSED            = 圧縮
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Ultra Defragmenter について
+CREDITS               = クレジット
+LICENSE               = ライセンス
+
+; END OF FILE
+
+[[code]]

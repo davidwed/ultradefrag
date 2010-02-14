@@ -1,0 +1,63 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Ukrainian Language Pack.
+; Copyright (C) 2010 by Dmitri Arkhangelski.
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Оновити
+SKIP_REMOVABLE_MEDIA  = Перейти знімних носіїв
+CLUSTER_MAP           = Кластер карті:
+ANALYSE               = Аналіз
+DEFRAGMENT            = Дефрагментація
+OPTIMIZE              = Оптимізація
+PAUSE                 = Пауза
+STOP                  = Стоп
+REPORT                = Звіт
+SETTINGS              = Налаштування
+ABOUT                 = Про програму
+SHUTDOWN_PC_AFTER_A_JOB  = Виключення PC після роботи
+HIBERNATE_PC_AFTER_A_JOB = Спати PC після роботи
+
+; Drives list items.
+
+VOLUME                = Диск
+STATUS                = Статус
+FILESYSTEM            = Файлова система
+TOTAL                 = Загальна простір
+FREE                  = Вільний простір
+PERCENT               = Процент
+
+; Status messages
+
+STATUS_RUNNING        = Виконується
+STATUS_ANALYSED       = Аналізовані
+STATUS_DEFRAGMENTED   = Дефрагментувати
+STATUS_OPTIMIZED      = Оптимізована
+
+; Status bar messages.
+
+DIRS                  = папок
+FILES                 = файлів
+FRAGMENTED            = fragmented
+COMPRESSED            = compressed
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Про Ultra Defragmenter
+CREDITS               = Автори
+LICENSE               = Ліцензія
+
+; END OF FILE
+
+[[code]]

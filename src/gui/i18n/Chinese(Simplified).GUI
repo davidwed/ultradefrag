@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Simplified Chinese Language Pack.
+; Copyright (C) 2008 by muzuiget.
+; Revised Feb. 12, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = 重新扫描
+SKIP_REMOVABLE_MEDIA  = 忽略可移动介质
+CLUSTER_MAP           = 磁盘簇图:
+ANALYSE               = 分析
+DEFRAGMENT            = 整理
+OPTIMIZE              = 优化
+PAUSE                 = 暂停
+STOP                  = 停止
+REPORT                = 报告
+SETTINGS              = 设置
+ABOUT                 = 关于
+SHUTDOWN_PC_AFTER_A_JOB  = 完成后关闭电脑
+HIBERNATE_PC_AFTER_A_JOB = 完成后电脑休眠
+
+; Drive's list items.
+
+VOLUME                = 卷
+STATUS                = 状态
+FILESYSTEM            = 文件系统
+TOTAL                 = 总空间
+FREE                  = 空闲空间
+PERCENT               = 空闲比
+
+; Status messages
+
+STATUS_RUNNING        = 运行
+STATUS_ANALYSED       = 分析
+STATUS_DEFRAGMENTED   = 碎片整理
+STATUS_OPTIMIZED      = 优化
+
+; Status bar messages.
+
+DIRS                  = 目录
+FILES                 = 文件
+FRAGMENTED            = 碎片
+COMPRESSED            = 已压缩
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = 关于 Ultra Defragmenter
+CREDITS               = 致谢
+LICENSE               = 许可证
+
+; END OF FILE
+
+[[code]]

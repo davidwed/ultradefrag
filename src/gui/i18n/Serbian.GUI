@@ -1,0 +1,63 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Serbian Language Pack.
+; Copyright (C) 2010 by Dmitri Arkhangelski.
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Освежи
+SKIP_REMOVABLE_MEDIA  = Прескочите преносивим медијумима
+CLUSTER_MAP           = Кластер карта:
+ANALYSE               = Анализирајте
+DEFRAGMENT            = Дефрагментирај
+OPTIMIZE              = Оптимизирајте
+PAUSE                 = Пауза
+STOP                  = Стоп
+REPORT                = Извештај
+SETTINGS              = Подешавања
+ABOUT                 = О програму
+SHUTDOWN_PC_AFTER_A_JOB  = Гашење PC после служба
+HIBERNATE_PC_AFTER_A_JOB = Спавати PC после служба
+
+; Drives list items.
+
+VOLUME                = Диск
+STATUS                = Статус
+FILESYSTEM            = Фајл систем
+TOTAL                 = Сва места
+FREE                  = Слободан места
+PERCENT               = Проценат
+
+; Status messages
+
+STATUS_RUNNING        = Обработени
+STATUS_ANALYSED       = Анализировано
+STATUS_DEFRAGMENTED   = Дефрагментировано
+STATUS_OPTIMIZED      = Оптимизовано
+
+; Status bar messages.
+
+DIRS                  = фолдери
+FILES                 = датотека
+FRAGMENTED            = fragmented
+COMPRESSED            = compressed
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = О Ultra Defragmenter
+CREDITS               = Аутори
+LICENSE               = Лиценца
+
+; END OF FILE
+
+[[code]]

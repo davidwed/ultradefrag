@@ -1,0 +1,29 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag Scheduler AR Spanish Language Pack.
+; Copyright (C) 2009 by Daniel Testa
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+MONDAY    = Lunes
+TUESDAY   = Martes
+WEDNESDAY = Miércoles
+THURSDAY  = Jueves
+FRIDAY    = Viernes
+SATURDAY  = Sábado
+SUNDAY    = Domingo
+
+DAILY     = Diariamente
+WEEKLY    = Semanalmente
+
+OK        = Aceptar
+
+; END OF FILE
+
+[[code]]

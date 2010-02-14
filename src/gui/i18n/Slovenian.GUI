@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Slovenian Language Pack.
+; Copyright (C) 2008 by Miha Mlakar.
+; Revised Feb. 12, 2010 by Dmitri Arkhangelski
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Osveži
+SKIP_REMOVABLE_MEDIA  = Preskoči odstranljive medije
+CLUSTER_MAP           = Cluster mapa:
+ANALYSE               = Analiza
+DEFRAGMENT            = Defrag
+OPTIMIZE              = Optimize
+PAUSE                 = Pavza
+STOP                  = Stop
+REPORT                = Poročilo
+SETTINGS              = Nastavitve
+ABOUT                 = O programu
+SHUTDOWN_PC_AFTER_A_JOB  = Ugasnite PC po službo
+HIBERNATE_PC_AFTER_A_JOB = Spati PC po službo
+
+; Drives list items.
+
+VOLUME                = Pogon
+STATUS                = Status
+FILESYSTEM            = Datotečni sistem
+TOTAL                 = Skupaj prostora
+FREE                  = Nezasedeni prostor
+PERCENT               = Odstotek
+
+; Status messages
+
+STATUS_RUNNING        = Izvedene
+STATUS_ANALYSED       = Analizirali
+STATUS_DEFRAGMENTED   = Defragmentirano
+STATUS_OPTIMIZED      = Optimirano
+
+; Status bar messages.
+
+DIRS                  = dir
+FILES                 = datotek
+FRAGMENTED            = fragmentirano
+COMPRESSED            = skompresirano
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = O Programu Ultra Defragmenter
+CREDITS               = Krediti
+LICENSE               = Licenca
+
+; END OF FILE
+
+[[code]]

@@ -1,0 +1,63 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Icelandic Language Pack.
+; Copyright (C) 2010 by Stefan Pendl.
+; Revised {Date [Example: Jan. 01, 1900]} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Rifta ökuferð
+SKIP_REMOVABLE_MEDIA  = Sleppa færanlegur frá miðöldum
+CLUSTER_MAP           = Þyrping landakort:
+ANALYSE               = Greindu
+DEFRAGMENT            = Defragment
+OPTIMIZE              = Bjartsýni
+PAUSE                 = Stansa
+STOP                  = Stöðva
+REPORT                = Skýrsla
+SETTINGS              = Stillingar
+ABOUT                 = Um
+SHUTDOWN_PC_AFTER_A_JOB  = Lokun PC hvenær
+HIBERNATE_PC_AFTER_A_JOB = Dvala PC hvenær
+
+; Drives list items.
+
+VOLUME                = Bindi
+STATUS                = Staða
+FILESYSTEM            = Skrá Kerfi
+TOTAL                 = Alger Rúm
+FREE                  = Frjáls Rúm
+PERCENT               = Prósentur
+
+; Status messages
+
+STATUS_RUNNING        = Framkvæmd
+STATUS_ANALYSED       = Greindu
+STATUS_DEFRAGMENTED   = Defragmented
+STATUS_OPTIMIZED      = Bjartsýni
+
+; Status bar messages.
+
+DIRS                  = mappa
+FILES                 = skrá
+FRAGMENTED            = slitin
+COMPRESSED            = þjappað
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Um Ultra Defragmenter
+CREDITS               = Trúnaður
+LICENSE               = Leyfisveitandi
+
+; END OF FILE
+
+[[code]]

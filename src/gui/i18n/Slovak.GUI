@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Slovak Language Pack.
+; Copyright (C) 2008 by Milan Cerovský.
+; Revised Feb. 12, 2010 by Dmitri Arkhangelski
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Obnov
+SKIP_REMOVABLE_MEDIA  = Preskoč vymeniteľné média
+CLUSTER_MAP           = Mapa jednotky:
+ANALYSE               = Analyzovať
+DEFRAGMENT            = Defragmentovať
+OPTIMIZE              = Optimalizovať
+PAUSE                 = Pauza
+STOP                  = Stop
+REPORT                = Správa
+SETTINGS              = Nastavenia
+ABOUT                 = O programe
+SHUTDOWN_PC_AFTER_A_JOB  = Vypnúť PC po dokončení
+HIBERNATE_PC_AFTER_A_JOB = Uspať PC po dokončení
+
+; Drives list items.
+
+VOLUME                = Jednotka
+STATUS                = Status
+FILESYSTEM            = Súborový systém
+TOTAL                 = Celková veľkosť
+FREE                  = Voľná veľkosť
+PERCENT               = Voľné miesto
+
+; Status messages
+
+STATUS_RUNNING        = Vykonané
+STATUS_ANALYSED       = Analyzoval
+STATUS_DEFRAGMENTED   = Defragmentoval
+STATUS_OPTIMIZED      = Optimalizoval
+
+; Status bar messages.
+
+DIRS                  = priečinkov
+FILES                 = súborov
+FRAGMENTED            = fragmentované
+COMPRESSED            = komprimované
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = O Ultra Defragmenter
+CREDITS               = Autori
+LICENSE               = Licencia
+
+; END OF FILE
+
+[[code]]

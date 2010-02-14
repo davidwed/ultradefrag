@@ -1,0 +1,67 @@
+ 
+[[code format="text"]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI German Language Pack.
+; Copyright (C) 2008 by Stefan Geuken.
+; Revised Jan. 31, 2010 by Latino
+; Revised Feb. 06, 2010 by Stefan Pendl.
+; Revised Feb. 13, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+ 
+ 
+; Main window controls.
+ 
+RESCAN_DRIVES         = Laufwerke aktualisieren
+SKIP_REMOVABLE_MEDIA  = Wechselmedien ignorieren
+CLUSTER_MAP           = Zuordnungseinheiten:
+ANALYSE               = Analysieren
+DEFRAGMENT            = Defragmentieren
+OPTIMIZE              = Optimieren
+PAUSE                 = Unterbrechen
+STOP                  = Abbrechen
+REPORT                = Bericht
+SETTINGS              = Einstellungen
+ABOUT                 = Über
+SHUTDOWN_PC_AFTER_A_JOB  = Nach Abschluss herunterfahren
+HIBERNATE_PC_AFTER_A_JOB = Nach Abschluss in den Ruhezustand
+ 
+; Drives list items.
+ 
+VOLUME                = Laufwerk
+STATUS                = Status
+FILESYSTEM            = Dateisystem
+TOTAL                 = Gesamtgröße
+FREE                  = Freier Speicher
+PERCENT               = Prozent
+ 
+; Status messages
+ 
+STATUS_RUNNING        = Ausführend
+STATUS_ANALYSED       = Analysiert
+STATUS_DEFRAGMENTED   = Defragmentiert
+STATUS_OPTIMIZED      = Optimiert
+
+; Status bar messages.
+ 
+DIRS                  = Verzeichnisse
+FILES                 = Dateien
+FRAGMENTED            = fragmentiert
+COMPRESSED            = komprimiert
+MFT                   = MFT
+ 
+; About window.
+ 
+ABOUT_WIN_TITLE       = Über Ultra Defragmenter
+CREDITS               = Danksagungen
+LICENSE               = Lizenz
+ 
+; END OF FILE
+ 
+[[code]]

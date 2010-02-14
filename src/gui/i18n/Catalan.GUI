@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Catalan Language Pack.
+; Copyright (C) 2008 by IllesBalears traducció català.
+; Revised Feb. 12, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Reanalitza
+SKIP_REMOVABLE_MEDIA  = Salta unitats extraïbles
+CLUSTER_MAP           = Mapa de clusters:
+ANALYSE               = Analitza
+DEFRAGMENT            = Defragmenta
+OPTIMIZE              = Optimitzar
+PAUSE                 = Pausa
+STOP                  = Atura
+REPORT                = Informe
+SETTINGS              = Configuració
+ABOUT                 = Quan a
+SHUTDOWN_PC_AFTER_A_JOB  = PC apagat quan es fa
+HIBERNATE_PC_AFTER_A_JOB = PC hibernació quan es fa
+
+; Drive's list items.
+
+VOLUME                = Volum
+STATUS                = Estat
+FILESYSTEM            = Sistema d'arxius
+TOTAL                 = Total
+FREE                  = Lliure
+PERCENT               = Percentatge
+
+; Status messages
+
+STATUS_RUNNING        = Execució
+STATUS_ANALYSED       = Analitzat
+STATUS_DEFRAGMENTED   = Desfragmentar
+STATUS_OPTIMIZED      = Optimitzat
+
+; Status bar messages.
+
+DIRS                  = Carpetes
+FILES                 = Arxius
+FRAGMENTED            = fragmentats
+COMPRESSED            = comprimits
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Quan a Ultra Defragmenter
+CREDITS               = Crèdits
+LICENSE               = Llicència
+
+; END OF FILE
+
+[[code]]

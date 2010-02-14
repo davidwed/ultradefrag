@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Korean Language Pack.
+; Copyright (C) 2008 by Alex Han
+; Revised Feb. 14, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = 드라이브 재검색
+SKIP_REMOVABLE_MEDIA  = 이동식디시크 제외
+CLUSTER_MAP           = 클러스터 맵
+ANALYSE               = 분석
+DEFRAGMENT            = 조각모음
+OPTIMIZE              = 낙관하십시오
+PAUSE                 = 일시중시
+STOP                  = 취소
+REPORT                = 신고
+SETTINGS              = 설정
+ABOUT                 = 도움말
+SHUTDOWN_PC_AFTER_A_JOB  = 종료되면 PC 다
+HIBERNATE_PC_AFTER_A_JOB = 최대 절전 모드 PC에 완료되면
+
+; Drives list items.
+
+VOLUME                = 볼륨
+STATUS                = 상태
+FILESYSTEM            = 파일시스템
+TOTAL                 = 용량
+FREE                  = 사용 가능한 공간
+PERCENT               = 비율
+
+; Status messages
+
+STATUS_RUNNING        = 실행
+STATUS_ANALYSED       = 분석했다
+STATUS_DEFRAGMENTED   = 조각 모음을 수행
+STATUS_OPTIMIZED      = 최적화된
+
+; Status bar messages.
+
+DIRS                  = 폴더
+FILES                 = 파일
+FRAGMENTED            = 단편화
+COMPRESSED            = 압축
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Ultra Defragmenter 정보
+CREDITS               = 크레딧
+LICENSE               = 라이센스
+
+; END OF FILE
+
+[[code]]

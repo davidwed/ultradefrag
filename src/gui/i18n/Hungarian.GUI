@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI Hungarian Language Pack.
+; Copyright (C) 2008 by Nagy Zsolt.
+; Revised Feb. 13, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Frissítés
+SKIP_REMOVABLE_MEDIA  = Hordozható meghajtó kihagyása
+CLUSTER_MAP           = Kluszter térkép:
+ANALYSE               = Analízis
+DEFRAGMENT            = Indítás
+OPTIMIZE              = Optimalizálni
+PAUSE                 = Szünet
+STOP                  = Megáll
+REPORT                = Jelentést
+SETTINGS              = Beállítások
+ABOUT                 = Súgó
+SHUTDOWN_PC_AFTER_A_JOB  = Leállítás PC amikor kelt
+HIBERNATE_PC_AFTER_A_JOB = Hibernálás PC amikor kelt
+
+; Drives list items.
+
+VOLUME                = Meghajtó
+STATUS                = Állapot
+FILESYSTEM            = File rendszer
+TOTAL                 = Kapacitás
+FREE                  = Szabad terület
+PERCENT               = Százalék
+
+; Status messages
+
+STATUS_RUNNING        = Végrehajtó
+STATUS_ANALYSED       = Elemzett
+STATUS_DEFRAGMENTED   = Töredezettségmentes
+STATUS_OPTIMIZED      = Optimalizálva
+
+; Status bar messages.
+
+DIRS                  = könyvtárak
+FILES                 = file-ok
+FRAGMENTED            = töredezett
+COMPRESSED            = tömörített
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = Ultra Defragmenter súgó
+CREDITS               = Készítők
+LICENSE               = Licensz
+
+; END OF FILE
+
+[[code]]

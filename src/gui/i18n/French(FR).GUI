@@ -1,0 +1,64 @@
+[[code]]
+;------------------------------------------------------------------------------
+; UltraDefrag GUI FR French Language Pack.
+; Copyright (C) 2008 by Pascal Crozet.
+; Revised Feb. 13, 2010 by Stefan Pendl
+; Revised {Date} by {Full Name of Reviser}
+;------------------------------------------------------------------------------
+
+; Please keep the header and comments in English,
+; so everyone understands them
+
+; THIS FILE MUST BE SAVED IN UNICODE (UTF-16) ENCODING
+; Use \n as a newline character in strings.
+
+
+; Main window controls.
+
+RESCAN_DRIVES         = Actualiser
+SKIP_REMOVABLE_MEDIA  = Exclure les supports amovibles
+CLUSTER_MAP           = Carte du disque
+ANALYSE               = Analyse
+DEFRAGMENT            = Défragmente
+OPTIMIZE              = Optimiser
+PAUSE                 = Pause
+STOP                  = Arrêt
+REPORT                = Rapport
+SETTINGS              = Paramètres
+ABOUT                 = A propos
+SHUTDOWN_PC_AFTER_A_JOB  = Eteindre le PC une fois terminé
+HIBERNATE_PC_AFTER_A_JOB = Mettre en veille le PC une fois terminé
+
+; Drives list items.
+
+VOLUME                = Volume
+STATUS                = État
+FILESYSTEM            = Système de fichiers
+TOTAL                 = Espace total
+FREE                  = Espace libre
+PERCENT               = Pourcent.
+
+; Status messages
+
+STATUS_RUNNING        = D'exécution
+STATUS_ANALYSED       = Analysées
+STATUS_DEFRAGMENTED   = Défragmenté
+STATUS_OPTIMIZED      = Optimisées
+
+; Status bar messages.
+
+DIRS                  = répertoires
+FILES                 = fichiers
+FRAGMENTED            = fragmenté
+COMPRESSED            = compressé
+MFT                   = MFT
+
+; About window.
+
+ABOUT_WIN_TITLE       = A propos de Ultra Défragmenteur
+CREDITS               = Crédits
+LICENSE               = Licence
+
+; END OF FILE
+
+[[code]]
