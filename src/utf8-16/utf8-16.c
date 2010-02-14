@@ -30,7 +30,7 @@
 
 int convert_file(char *path);
 
-int main(int argc, char **argv)
+int __cdecl main(int argc, char **argv)
 {
 	int i;
 
@@ -77,7 +77,7 @@ int convert_file(char *path)
 		printf("Cannot open the file: %s!\n",strerror(errno));
 		return (-1);
 	}
-	if(_fstat(fileno(f),&stat) != 0){
+	if(_fstat(_fileno(f),&stat) != 0){
 		printf("Cannot retrieve the file statistics: %s!\n",strerror(errno));
 		(void)fclose(f);
 		return (-1);

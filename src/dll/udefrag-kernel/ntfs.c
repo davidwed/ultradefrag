@@ -638,11 +638,16 @@ void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 		(void)wcsncpy(name,pfn_attr->Name,pfn_attr->NameLength);
 		name[pfn_attr->NameLength] = 0;
 		//DbgPrint("-Ultradfg- Filename = %ws, parent id = %I64u\n",name,parent_mft_id);
-		/* update pmfi members */
-		pmfi->ParentDirectoryMftId = parent_mft_id;
-		/* save filename */
-		name_type = pfn_attr->NameType;
-		UpdateFileName(pmfi,name,name_type);
+		if(name[0] == 0) DebugPrint("Empty filename found ;)\n");
+		if(parent_mft_id == pmfi->BaseMftId && pmfi->BaseMftId != FILE_root)
+			DebugPrint("Recursion found - file identifies themselves as a parent ;)\n");
+		if(name[0] && (parent_mft_id != pmfi->BaseMftId || pmfi->BaseMftId == FILE_root)){
+			/* update pmfi members */
+			pmfi->ParentDirectoryMftId = parent_mft_id;
+			/* save filename */
+			name_type = pfn_attr->NameType;
+			UpdateFileName(pmfi,name,name_type);
+		}
 		winx_heap_free(name);
 	}// else DebugPrint("-Ultradfg- File has no name\n");
 }
@@ -1418,10 +1423,12 @@ BOOLEAN mf_allocated = FALSE;
  */
 void BuildPaths(void)
 {
+	ULONGLONG tm, time;
 	PFILENAME pfn;
 	ULONG i;
 	
 	DebugPrint("BuildPaths() started...\n");
+	tm = _rdtsc();
 
 	/* prepare data for fast binary search */
 	mf_allocated = FALSE;
@@ -1476,7 +1483,8 @@ void BuildPaths(void)
 	
 	/* free allocated resources */
 	if(mf_allocated) winx_heap_free(mf);
-	DebugPrint("BuildPaths() finished...\n");
+	time = _rdtsc() - tm;
+	DebugPrint("BuildPaths() completed in %I64u ms.\n",time);
 }
 
 /**
