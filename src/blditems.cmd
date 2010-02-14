@@ -43,6 +43,10 @@ cd ..\console
 lua ..\..\tools\mkmod.lua defrag.build
 if %errorlevel% neq 0 goto end
 
+cd ..\utf8-16
+lua ..\..\tools\mkmod.lua utf8-16.build
+if %errorlevel% neq 0 goto end
+
 if "%UD_MICRO_EDITION%" equ "1" goto skip_gui
 
 cd ..\wgx

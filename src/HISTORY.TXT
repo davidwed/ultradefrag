@@ -17,9 +17,6 @@ HISTORY
       Japanese, Korean, Latvian, Polish, Portuguese(BR), Portuguese,
       Russian, Slovak, Slovenian, Spanish(AR), Swedish, Thai, Turkish
 
-    - Unix style formatted language packs support was added
-      (CR can be used safely instead of CRLF to terminate lines)
-
 
   Version 4.0.0  2010-01-30
   ------------------------------------------------------------------------------

@@ -11,6 +11,14 @@ type manifest.part3 >> .\obj\hibernate\hibernate.manifest
 echo processorArchitecture="%1" >> .\obj\hibernate\hibernate.manifest
 type manifest.part4 >> .\obj\hibernate\hibernate.manifest
 
+type manifest.part1 > .\obj\utf8-16\utf8-16.manifest
+echo version="0.0.0.1" name="utf8-16" processorArchitecture="%1" >> .\obj\utf8-16\utf8-16.manifest
+type manifest.part2 >> .\obj\utf8-16\utf8-16.manifest
+echo UTF-8 to UTF-16 converter >> .\obj\utf8-16\utf8-16.manifest
+type manifest.part3 >> .\obj\utf8-16\utf8-16.manifest
+echo processorArchitecture="%1" >> .\obj\utf8-16\utf8-16.manifest
+type manifest.part4 >> .\obj\utf8-16\utf8-16.manifest
+
 type manifest.part1 > .\obj\console\defrag.manifest
 echo version="%ULTRADFGVER%.0" name="udefrag" processorArchitecture="%1" >> .\obj\console\defrag.manifest
 type manifest.part2 >> .\obj\console\defrag.manifest
