@@ -28,7 +28,7 @@
 #include "ntfs.h"
 
 /*
-* FIXME: add data consistency checks everywhere,
+* Add data consistency checks everywhere,
 * because NTFS volumes often have invalid data in MFT entries.
 */
 
@@ -167,7 +167,12 @@ NTSTATUS GetMftLayout(void)
 
 	ntfs_record_size = ntfs_data->BytesPerFileRecordSegment;
 	DebugPrint("NTFS record size = %u bytes\n",ntfs_record_size);
-
+	if(ntfs_record_size == 0){
+		DebugPrint("NTFS record size is equal to zero!\n");
+		winx_heap_free(ntfs_data);
+		return STATUS_UNSUCCESSFUL;
+	}
+	
 	max_mft_entries = Stat.mft_size / ntfs_record_size;
 	DebugPrint("MFT contains no more than %I64u records\n",
 		max_mft_entries);
@@ -237,6 +242,7 @@ BOOLEAN ScanMFT(void)
 		return FALSE;
 	}
 
+	DebugPrint("MFT records scanning loop begins...\n");
 	/* Is MFT size an integral of NTFS record size? */
 	/*if(MftClusters == 0 || \
 	  (MftClusters * (ULONGLONG)dx->bytes_per_cluster % (ULONGLONG)dx->ntfs_record_size) || \
@@ -268,8 +274,14 @@ BOOLEAN ScanMFT(void)
 			AnalyseMftRecord(pnfrob,nfrob_size,pmfi);
 			
 			/* go to the next record */
-			if(ret_mft_id == 0) break;
-			mft_id = ret_mft_id - 1;
+			if(ret_mft_id == 0 || mft_id == 0) break;
+			if(ret_mft_id > mft_id){
+				/* avoid infinite loops */
+				DebugPrint("Returned MFT record ID is above expected!\n");
+				mft_id --;
+			} else {
+				mft_id = ret_mft_id - 1;
+			}
 		}
 	}/* else {
 		DebugPrint("-Ultradfg- MFT size is an integral of NTFS record size :-D\n");
@@ -314,7 +326,7 @@ void UpdateMaxMftEntriesNumber(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,ULONG nfro
 
 	/* Find DATA attribute. */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
-	if(pfrh->Ntfs.Type != TAG('F','I','L','E')){
+	if(!IsFileRecord(pfrh)){
 		DebugPrint("UpdateMaxMftEntriesNumber() failed - FILE_MFT record has invalid type %u.\n",
 			pfrh->Ntfs.Type);
 		return;
@@ -399,7 +411,7 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	/* analyse record's header */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
 
-	if(pfrh->Ntfs.Type != TAG('F','I','L','E')) return;
+	if(!IsFileRecord(pfrh)) return;
 	if(!(pfrh->Flags & 0x1)) return; /* skip free records */
 	
 	/* analyse file record */
@@ -482,6 +494,19 @@ void EnumerateAttributes(PFILE_RECORD_HEADER pfrh,
 		/* is an attribute inside a record bounds? */
 		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
 			attr_offset + pattr->Length > ntfs_record_size) break;
+		
+		/* is an attribute length valid? */
+		if(pattr->Nonresident){
+			if(pattr->Length < (sizeof(NONRESIDENT_ATTRIBUTE) - sizeof(ULONGLONG))){
+				DebugPrint("Nonresident attribute length is invalid!\n");
+				break;
+			}
+		} else {
+			if(pattr->Length < sizeof(RESIDENT_ATTRIBUTE)){
+				DebugPrint("Resident attribute length is invalid!\n");
+				break;
+			}
+		}
 
 		/* call specified callback procedure */
 		ahp(pattr,pmfi);
@@ -573,8 +598,12 @@ void GetFileFlags(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 	ULONG Flags;
 	
 	psi = (PSTANDARD_INFORMATION)((char *)pr_attr + pr_attr->ValueOffset);
-	Flags = psi->FileAttributes;
-	pmfi->Flags = Flags;
+	if(pr_attr->ValueLength < 48){ /* 48 = size of the shortest STANDARD_INFORMATION structure */
+		DebugPrint("STANDARD_INFORMATION attribute is too short!\n");
+	} else {
+		Flags = psi->FileAttributes;
+		pmfi->Flags = Flags;
+	}
 }
 
 /**
@@ -593,16 +622,19 @@ void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 	ULONGLONG parent_mft_id;
 	
 	pfn_attr = (PFILENAME_ATTRIBUTE)((char *)pr_attr + pr_attr->ValueOffset);
-	parent_mft_id = GetMftIdFromFRN(pfn_attr->DirectoryFileReferenceNumber);
-	
-	/* allocate memory */
-	name = (short *)winx_heap_alloc((MAX_PATH + 1) * sizeof(short));
-	if(!name){
-		DebugPrint("Cannot allocate memory for GetFileName()!\n");
+	if(pr_attr->ValueLength < sizeof(FILENAME_ATTRIBUTE)){
+		DebugPrint("FILENAME_ATTRIBUTE is too short!\n");
 		return;
 	}
-
+	
+	parent_mft_id = GetMftIdFromFRN(pfn_attr->DirectoryFileReferenceNumber);
+	
 	if(pfn_attr->NameLength){
+		name = (short *)winx_heap_alloc((pfn_attr->NameLength + 1) * sizeof(short));
+		if(!name){
+			DebugPrint("Cannot allocate memory for GetFileName()!\n");
+			return;
+		}
 		(void)wcsncpy(name,pfn_attr->Name,pfn_attr->NameLength);
 		name[pfn_attr->NameLength] = 0;
 		//DbgPrint("-Ultradfg- Filename = %ws, parent id = %I64u\n",name,parent_mft_id);
@@ -611,10 +643,8 @@ void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 		/* save filename */
 		name_type = pfn_attr->NameType;
 		UpdateFileName(pmfi,name,name_type);
+		winx_heap_free(name);
 	}// else DebugPrint("-Ultradfg- File has no name\n");
-
-	/* free allocated memory */
-	winx_heap_free(name);
 }
 
 /**
@@ -649,6 +679,11 @@ void GetVolumeInformationData(PRESIDENT_ATTRIBUTE pr_attr)
 	BOOLEAN dirty_flag = FALSE;
 	
 	pvi = (PVOLUME_INFORMATION)((char *)pr_attr + pr_attr->ValueOffset);
+	if(pr_attr->ValueLength < sizeof(VOLUME_INFORMATION)){
+		DebugPrint("VOLUME_INFORMATION is too short!\n");
+		return;
+	}
+	
 	mj_ver = (ULONG)pvi->MajorVersion;
 	mn_ver = (ULONG)pvi->MinorVersion;
 	if(pvi->Flags & 0x1) dirty_flag = TRUE;
@@ -669,8 +704,12 @@ void CheckReparsePointResident(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION 
 	ULONG tag;
 	
 	prp = (PREPARSE_POINT)((char *)pr_attr + pr_attr->ValueOffset);
-	tag = prp->ReparseTag;
-	DebugPrint("Reparse tag = 0x%x\n",tag);
+	if(pr_attr->ValueLength >= sizeof(ULONG)){
+		tag = prp->ReparseTag;
+		DebugPrint("Reparse tag = 0x%x\n",tag);
+	} else {
+		DebugPrint("REPARSE_POINT is too short!\n");
+	}
 	
 	pmfi->IsReparsePoint = TRUE;
 }
@@ -753,7 +792,7 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
 
 	/* Analyse all nonresident attributes. */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
-	if(pfrh->Ntfs.Type != TAG('F','I','L','E')){
+	if(!IsFileRecord(pfrh)){
 		DebugPrint("AnalyseAttributeFromAttributeList() failed - %I64u record has invalid type %u.\n",
 			child_record_mft_id,pfrh->Ntfs.Type);
 		winx_heap_free(pnfrob);
@@ -870,6 +909,11 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 
 	/* do not append $I30 attributes - required by GetFileNameAndParentMftId() */
 	
+	/*
+	* The ResidentDirectory global flag has TRUE initial value.
+	* But when either $I30 or $DATA nonresident attributes are found
+	* we are setting this flag to FALSE.
+	*/
 	if(pnr_attr->Attribute.NameLength){
 		/* append a name of attribute to filename */
 		/* NameLength is always less than MAX_PATH :) */
@@ -988,7 +1032,7 @@ void ProcessRunList(WCHAR *full_path,
 		/* skip virtual runs */
 		if(RunLCN(run)){
 			/* check for data consistency */
-			if((lcn + length) > clusters_total){
+			if(!CheckBlock(lcn,length)){
 				DebugPrint("Error in MFT found, run Check Disk program!\n");
 				break;
 			}
@@ -1111,24 +1155,30 @@ ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 	else
 		len = 0;
 	DebugPrint("$MFT       :%I64u :%I64u\n",start,len);
-	RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
-	RemoveFreeSpaceBlock(start,len);
-	mft_len += len;
+	if(CheckBlock(start,len)){
+		RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
+		RemoveFreeSpaceBlock(start,len);
+		mft_len += len;
+	}
 
 	/* $MFT2 */
 	start = nd->MftZoneStart.QuadPart;
 	len = nd->MftZoneEnd.QuadPart - nd->MftZoneStart.QuadPart;
 	DebugPrint("$MFT2      :%I64u :%I64u\n",start,len);
-	RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
-	RemoveFreeSpaceBlock(start,len);
-	mft_len += len;
+	if(CheckBlock(start,len)){
+		RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
+		RemoveFreeSpaceBlock(start,len);
+		mft_len += len;
+	}
 
 	/* $MFTMirror */
 	start = nd->Mft2StartLcn.QuadPart;
 	DebugPrint("$MFTMirror :%I64u :1\n",start);
-	RemarkBlock(start,1,MFT_SPACE,SYSTEM_SPACE);
-	RemoveFreeSpaceBlock(start,1);
-	mft_len ++;
+	if(CheckBlock(start,1)){
+		RemarkBlock(start,1,MFT_SPACE,SYSTEM_SPACE);
+		RemoveFreeSpaceBlock(start,1);
+		mft_len ++;
+	}
 	
 	return mft_len;
 }
@@ -1370,6 +1420,8 @@ void BuildPaths(void)
 {
 	PFILENAME pfn;
 	ULONG i;
+	
+	DebugPrint("BuildPaths() started...\n");
 
 	/* prepare data for fast binary search */
 	mf_allocated = FALSE;
@@ -1395,12 +1447,15 @@ void BuildPaths(void)
 			mf[i].pfn = pfn;
 			if(i == (n_entries - 1)){ 
 				if(pfn->next_ptr != filelist)
-					DebugPrint("BuildPaths(): ??\?!\n");
+					DebugPrint("BuildPaths(): ???\n");
 				break;
 			}
 			i++;
 			if(pfn->next_ptr == filelist) break;
 		}
+		DebugPrint("Fast binary search will be used.\n");
+	} else {
+		DebugPrint("Slow linear search will be used.\n");
 	}
 	
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
@@ -1421,6 +1476,7 @@ void BuildPaths(void)
 	
 	/* free allocated resources */
 	if(mf_allocated) winx_heap_free(mf);
+	DebugPrint("BuildPaths() finished...\n");
 }
 
 /**

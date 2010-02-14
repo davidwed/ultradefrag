@@ -39,7 +39,7 @@
 */
 
 /*
-+ Control an amount of debugging information 
+* Control an amount of debugging information 
 * through this parameter.
 * NOTE: Designed especially for development stage.
 */
@@ -51,6 +51,10 @@
 #define GetMftIdFromFRN(n) ((n) & 0xffffffffffffLL)
 #else
 #define GetMftIdFromFRN(n) ((n) & 0xffffffffffff)
+#endif
+
+#ifndef TAG
+#define TAG(A, B, C, D) (ULONG)(((A)<<0) + ((B)<<8) + ((C)<<16) + ((D)<<24))
 #endif
 
 #pragma pack(push, 1)
@@ -131,6 +135,8 @@ typedef struct {
 								 * this member contains the FRN of the base entry; otherwise it contains zero. */
 	USHORT NextAttributeNumber; /* The number that will be assigned to the next attribute added to the MFT entry. */
 } FILE_RECORD_HEADER, *PFILE_RECORD_HEADER;
+
+#define IsFileRecord(pFileRecordHeader) ((pFileRecordHeader)->Ntfs.Type == TAG('F','I','L','E'))
 
 /* MFT entry consists of FILE_RECORD_HEADER followed by a sequence of attributes. */
 
@@ -282,7 +288,7 @@ typedef struct {
 	BOOLEAN IsDirectory;
 	BOOLEAN IsReparsePoint;
 	UCHAR NameType;
-	BOOLEAN PathBuilt; /* not used by new optimized code */
+	//BOOLEAN PathBuilt; /* not used by new optimized code */
 	WCHAR Name[MAX_NTFS_PATH];
 } MY_FILE_INFORMATION, *PMY_FILE_INFORMATION;
 

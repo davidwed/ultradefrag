@@ -310,4 +310,12 @@ typedef struct {
 
 #define DeleteBlockmap(pfn) winx_list_destroy((list_entry **)&(pfn)->blockmap)
 
+#define CheckBlock(start,len) ( \
+ ( \
+   (start) < (clusters_total) \
+ ) && ( \
+   ((start) + (len)) <= (clusters_total) \
+ ) \
+)
+
 #endif /* _UDEFRAG_KERNEL_GLOBALS_H_ */
