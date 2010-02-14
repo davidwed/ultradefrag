@@ -162,7 +162,7 @@ BOOLEAN DumpFile(PFILENAME pfn)
 			pfn->n_fragments ++;
 			/*
 			* Sometimes normal file has more than one fragment, 
-			* but is not fragmented yet! *CRAZY* 
+			* but is not fragmented yet! 8-) 
 			*/
 			if(block != pfn->blockmap && \
 			  block->lcn != (block->prev_ptr->lcn + block->prev_ptr->length))
