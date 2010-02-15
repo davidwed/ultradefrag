@@ -200,12 +200,12 @@ void SavePrefs(void)
 		return;
 	}
 
-	/* save main window size for configurator's initialization */
+	/* save main window size for configuraton initialization */
 	result = fprintf(pf,
 		"-- UltraDefrag GUI options\n\n"
 		"-- Note that you must specify paths in filters\n"
-		"-- with double back slashes instead of the single.\n"
-		"-- Par example:\n"
+		"-- with double back slashes instead of the single ones.\n"
+		"-- For example:\n"
 		"-- ex_filter = \"MyDocs\\\\Music\\\\mp3\\\\Red_Hot_Chili_Peppers\"\n\n"
 		"in_filter = \"%s\"\n"
 		"ex_filter = \"%s\"\n"
@@ -213,10 +213,12 @@ void SavePrefs(void)
 		"fragments_threshold = %i\n"
 		"refresh_interval = %i\n"
 		"time_limit = \"%s\"\n\n"
-		"disable_reports = %i\n"
+		"disable_reports = %i\n\n"
+		"-- set dbgprint_level to DETAILED for reporting a bug,\n"
+		"-- for normal operation set it to NORMAL or an empty string\n"
 		"dbgprint_level = \"%s\"\n\n"
-		"-- set this parameter to 1 if you prefer to hibernate system\n"
-		"-- after a job instead of shutting them down, otherwise set it to 0\n\n"
+		"-- set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system\n"
+		"-- after a job is done instead of shutting it down, otherwise set it to 0\n\n"
 		"hibernate_instead_of_shutdown = %u\n\n"
 		"-- window coordinates etc.\n"
 		"x = %i\ny = %i\n"
