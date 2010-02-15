@@ -43,15 +43,12 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"FREE",                 L"Free space",               NULL},
 	{0,                 L"PERCENT",              L"Percentage",               NULL},
 	
-	{0,                 L"ANALYSE_STATUS",       L"Analyze",                  NULL},
-	{0,                 L"DEFRAG_STATUS",        L"Defrag",                   NULL},
-
-	{0,                 L"STATUS_RUNNING",       L"Running",                  NULL},
+	{0,                 L"STATUS_RUNNING",       L"Executing",                NULL},
 	{0,                 L"STATUS_ANALYSED",      L"Analyzed",                 NULL},
 	{0,                 L"STATUS_DEFRAGMENTED",  L"Defragmented",             NULL},
 	{0,                 L"STATUS_OPTIMIZED",     L"Optimized",                NULL},
 
-	{0,                 L"DIRS",                 L"dirs",                     NULL},
+	{0,                 L"DIRS",                 L"folders",                  NULL},
 	{0,                 L"FILES",                L"files",                    NULL},
 	{0,                 L"FRAGMENTED",           L"fragmented",               NULL},
 	{0,                 L"COMPRESSED",           L"compressed",               NULL},
@@ -61,8 +58,8 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{IDC_CREDITS,       L"CREDITS",              L"Credits",                  NULL},
 	{IDC_LICENSE,       L"LICENSE",              L"License",                  NULL},
 	
-	{IDC_SHUTDOWN,      L"SHUTDOWN_PC_AFTER_A_JOB", L"Shut down PC after a job", NULL},
-	{0,                 L"HIBERNATE_PC_AFTER_A_JOB", L"Hibernate PC after a job", NULL},
+	{IDC_SHUTDOWN,      L"SHUTDOWN_PC_AFTER_A_JOB",  L"Shutdown PC when done",  NULL},
+	{0,                 L"HIBERNATE_PC_AFTER_A_JOB", L"Hibernate PC when done", NULL},
 
 	{0,                 NULL,                    NULL,                        NULL}
 };
