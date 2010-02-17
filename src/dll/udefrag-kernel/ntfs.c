@@ -447,6 +447,11 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	/* analyse AttributeList attributes */
 	EnumerateAttributes(pfrh,AnalyseAttributeListCallback,pmfi);
 	
+	/* just for debugging */
+	if(wcsistr(pmfi->Name,L"Scratch"))
+		DebugPrint("@@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
+			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
+
 	/* add resident directories to filelist - required by BuildPaths() */
 	if(pmfi->IsDirectory && ResidentDirectory)
 		AddResidentDirectoryToFileList(pmfi);
@@ -925,6 +930,12 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 		(void)wcsncpy(attr_name,(short *)((char *)pnr_attr + pnr_attr->Attribute.NameOffset),
 			pnr_attr->Attribute.NameLength);
 		attr_name[pnr_attr->Attribute.NameLength] = 0;
+
+		/* just for debugging */
+		if(wcsistr(pmfi->Name,L"Scratch")){
+			DebugPrint("@@@@ ATTRIBUTE NAME = %ws\n",attr_name);
+		}
+
 		if(wcscmp(attr_name,L"$I30") != 0){
 			(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
 		} else {
@@ -941,6 +952,14 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 		}
 	}
 	full_path[MAX_NTFS_PATH - 1] = 0;
+
+	/* just for debugging */
+	if(wcsistr(pmfi->Name,L"Scratch")){
+		DebugPrint("@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
+			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
+		DebugPrint("@@@@ FULL ATTRIBUTE NAME = %ws, DEFAULT ATTR NAME = %ws\n",
+			full_path,default_attr_name);
+	}
 
 	if(NonResidentAttrListFound) DebugPrint("%ws\n",full_path);
 	
