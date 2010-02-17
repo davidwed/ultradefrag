@@ -53,9 +53,18 @@
  * running during the defragmentation extremely slows down this process.
  * </span>
  *
- * UltraDefrag can be installed in silent mode by adding /S key to the installer's command 
+ * Note that UltraDefrag installs to the Windows directory. This is caused by design,
+ * because it highly simlifies the program development.
+ * Moreover, this is impossible to run the boot time defragmenter without having its
+ * files inside the system32 directory.
+ *
+ * UltraDefrag can be installed in silent mode by adding the /S key to the installer's command 
  * in command prompt. In this case no dialogs will be shown and the program will be installed 
- * to the hard drive completely with all the features enabled. There is also silent mode in the
+ * to the hard drive completely with all the features enabled. 
+ * The /LANG option allows to select the language pack to be installed. For example, 
+ * use /LANG=German to install the German language pack.
+ *
+ * There is also a silent mode in the
  * ununstaller program. Type in comand prompt \%windir\%\\UltraDefrag\\uninstall.exe /S
  * to remove the program from the hard drive automatically without any graphical dialogs.
  */

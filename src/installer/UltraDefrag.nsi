@@ -1,6 +1,7 @@
 /*
- *  ULTRADEFRAG - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2010 by D. Arkhangelski (dmitriar@gmail.com).
+ *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2010 by Stefan Pendl (stefanpe@users.sourceforge.net).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -38,6 +39,11 @@
 
 !include "WinVer.nsh"
 !include "x64.nsh"
+
+; --- support command line parsing
+!include "FileFunc.nsh"
+!insertmacro GetParameters
+!insertmacro GetOptions
 
 !if ${ULTRADFGARCH} == 'i386'
 !define ROOTDIR "..\.."
@@ -199,6 +205,8 @@ FunctionEnd
 Function LangShow
 
   push $R0
+  push $R1
+  push $R2
   
 !ifdef MODERN_UI
   !insertmacro MUI_HEADER_TEXT "Language Packs" \
@@ -207,17 +215,28 @@ Function LangShow
   SetOutPath $PLUGINSDIR
   File "lang.ini"
 
+  ; --- get language from registry
   ClearErrors
   ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
   ${Unless} ${Errors}
     WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
   ${EndUnless}
 
+  ; --- get language from command line
+  ${GetParameters} $R1
+  ClearErrors
+  ${GetOptions} $R1 /LANG= $R2
+  ${Unless} ${Errors}
+    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R2
+  ${EndUnless}
+
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
   pop $R0
   InstallOptions::show
   pop $R0
-
+  
+  pop $R2
+  pop $R1
   pop $R0
   Abort
 
@@ -526,6 +545,7 @@ Function .onInit
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   push $R1
+  push $R2
 
   /* variables initialization */
   StrCpy $ShowBootsplash 1
@@ -540,10 +560,21 @@ Function .onInit
 !endif
 
   StrCpy $LanguagePack "English (US)"
+
+  ; --- get language from registry
   ClearErrors
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
   ${Unless} ${Errors}
     StrCpy $LanguagePack $R1
+  ${EndUnless}
+
+  ; --- get language from command line
+  ; --- allows silent installation with: installer.exe /S /LANG="German"
+  ${GetParameters} $R1
+  ClearErrors
+  ${GetOptions} $R1 /LANG= $R2
+  ${Unless} ${Errors}
+    StrCpy $LanguagePack $R2
   ${EndUnless}
 
   call ShowBootSplash
@@ -554,6 +585,7 @@ Function .onInit
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "driver.ini"
 !endif
 !endif
+  pop $R2
   pop $R1
   ${EnableX64FSRedirection}
 

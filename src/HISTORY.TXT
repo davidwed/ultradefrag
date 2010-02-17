@@ -17,6 +17,8 @@ HISTORY
       Japanese, Korean, Latvian, Polish, Portuguese(BR), Portuguese,
       Russian, Slovak, Slovenian, Spanish(AR), Swedish, Thai, Turkish
 
+    - /LANG command line option was added to the installer
+
 
   Version 4.0.0  2010-01-30
   ------------------------------------------------------------------------------

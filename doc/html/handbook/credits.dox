@@ -70,6 +70,7 @@
  *
  * - Andrei Maksimov
  * - Jeff Cubillos
+ * - Kalle Koseck
  * - Kerem Gumrukcu
  * - Leslie Trenholm
  * - Markus Elfring
@@ -93,7 +94,7 @@
  * - Mike Braca - Reducing driver's memory usage (new cluster map internal representation).
  * - Nagy Zsolt - Interesting ideas about translation. Installer improvements.
  * - Parvez Reza - Various interesting programming tricks.
- * - Stefan Pendl - Boot time defragmenter improvements.
+ * - Stefan Pendl - Boot time defragmenter improvements. Installer improvements.
  *
  * Also special thanks to:
  * - <a href="http://www.gr-oborona.ru">Egor Letov</a>
