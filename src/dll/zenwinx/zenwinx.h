@@ -31,7 +31,7 @@
 #define min(a,b) ((a)<(b)?(a):(b))
 #endif
 
-#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
+#define NtCloseSafe(h) { if(h) { NtClose(h); h = NULL; } }
 #define DebugPrint winx_dbg_print
 #define DebugPrintEx winx_dbg_print_ex
 
@@ -131,7 +131,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
                          int code,char *description,
                          void *in_buffer,int in_size,
                          void *out_buffer,int out_size,
-						 int *pbytes_returned);
+                         int *pbytes_returned);
 int __stdcall winx_fflush(WINX_FILE *f);
 int __stdcall winx_create_directory(const char *path);
 int __stdcall winx_delete_file(const char *filename);

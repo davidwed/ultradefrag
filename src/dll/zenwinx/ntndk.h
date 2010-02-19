@@ -206,10 +206,10 @@ typedef LONG NTSTATUS;
 #endif
 
 #if defined(__GNUC__)
-#define MAX_WAIT_INTERVAL -0x7FFFFFFFFFFFFFFFLL
+#define MAX_WAIT_INTERVAL (-0x7FFFFFFFFFFFFFFFLL)
 #else
 /* c compiler from ms visual studio 6.0 don't supports LL suffix */
-#define MAX_WAIT_INTERVAL -0x7FFFFFFFFFFFFFFF
+#define MAX_WAIT_INTERVAL (-0x7FFFFFFFFFFFFFFF)
 #endif
 
 /* define base nt structures */
@@ -789,8 +789,8 @@ typedef enum _EVENT_TYPE {
   SynchronizationEvent
 } EVENT_TYPE, *PEVENT_TYPE;
 
-#define FILE_DIRECTORY_FILE		0x00000001
-#define FILE_RESERVE_OPFILTER	0x00100000
+#define FILE_DIRECTORY_FILE     0x00000001
+#define FILE_RESERVE_OPFILTER   0x00100000
 
 #ifndef FILE_WRITE_THROUGH
 #define FILE_WRITE_THROUGH      0x00000002
@@ -844,10 +844,10 @@ typedef LPOSVERSIONINFOW PRTL_OSVERSIONINFOW;
 
 /* keyboard related structures */
 /* KEYBOARD_INPUT_DATA.Flags constants */
-#define KEY_MAKE                          0
-#define KEY_BREAK                         1
-#define KEY_E0                            2
-#define KEY_E1                            4
+#define KEY_MAKE     0
+#define KEY_BREAK    1
+#define KEY_E0       2
+#define KEY_E1       4
 
 typedef struct _KEYBOARD_INPUT_DATA {
   USHORT  UnitId;

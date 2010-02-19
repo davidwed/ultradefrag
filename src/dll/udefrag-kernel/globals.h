@@ -42,7 +42,7 @@
 #define DebugPrint1 if(dbgprint_level < 1) {} else DebugPrint
 #define DebugPrint2 if(dbgprint_level < 2) {} else DebugPrint
 
-#define NtCloseSafe(h) if(h) { NtClose(h); h = NULL; }
+#define NtCloseSafe(h) { if(h) { NtClose(h); h = NULL; } }
 
 /* UltraDefrag internal structures */
 
