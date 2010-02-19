@@ -41,7 +41,6 @@
 
 UINT MftScanDirection = MFT_SCAN_RTL;
 BOOLEAN MaxMftEntriesNumberUpdated = FALSE;
-BOOLEAN ResidentDirectory;
 
 /**
  * @brief Retrieves a type of the file system 
@@ -407,6 +406,8 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	#ifdef DETAILED_LOGGING
 	USHORT Flags;
 	#endif
+	PFILENAME pfn;
+	BOOLEAN DirectoryAdded;
 	
 	/* analyse record's header */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
@@ -439,8 +440,6 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	pmfi->NameType = 0x0; /* Assume FILENAME_POSIX */
 	memset(pmfi->Name,0,MAX_NTFS_PATH);
 
-	ResidentDirectory = TRUE; /* let's assume that we have a resident directory */
-	
 	/* skip AttributeList attributes */
 	EnumerateAttributes(pfrh,AnalyseAttributeCallback,pmfi);
 	
@@ -453,8 +452,27 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
 
 	/* add resident directories to filelist - required by BuildPaths() */
-	if(pmfi->IsDirectory && ResidentDirectory)
-		AddResidentDirectoryToFileList(pmfi);
+	if(pmfi->IsDirectory){
+		/* is directory already added? */
+		DirectoryAdded = FALSE;
+		for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+			/*
+			* we scan mft from the end to the beginning (RTL)
+			* and we add new records to the left side of the file list...
+			*/
+			if(MftScanDirection == MFT_SCAN_RTL){
+				if(pfn->BaseMftId > pmfi->BaseMftId) break; /* we have no chance to find record in list */
+			} else {
+				if(pfn->BaseMftId < pmfi->BaseMftId) break;
+			}
+			if(!wcscmp(pfn->name.Buffer,pmfi->Name) && \
+			  (pfn->ParentDirectoryMftId == pmfi->ParentDirectoryMftId) && \
+			  (pfn->BaseMftId == pmfi->BaseMftId))
+				DirectoryAdded = TRUE;
+			if(pfn->next_ptr == filelist) break;
+		}
+		if(!DirectoryAdded) AddResidentDirectoryToFileList(pmfi);
+	}
 	
 	/* update cluster map and statistics */
 	UpdateClusterMapAndStatistics(pmfi);
@@ -853,6 +871,13 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	short *attr_name;
 	short *full_path;
 	BOOLEAN NonResidentAttrListFound = FALSE;
+	
+	/* skip invalid files which have no name */
+	if(pmfi->Name[0] == 0){
+		DebugPrint("AnalyseNonResidentAttribute: Invalid entry found: file has no name!\n");
+		DebugPrint("AnalyseNonResidentAttribute: MFT ID = %I64u\n",pmfi->BaseMftId);
+		return;
+	}
 
 	/* allocate memory */
 	attr_name = (short *)winx_heap_alloc((MAX_NTFS_PATH + 1) * sizeof(short));
@@ -871,10 +896,10 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 //	DebugPrint("-Ultradfg- type = 0x%x NonResident\n",pattr->AttributeType);
 //	if(pnr_attr->Attribute.Flags & 0x1) DebugPrint("-Ultradfg- Compressed\n");
 	
+	/* get default name of the attribute */
 	switch(pnr_attr->Attribute.AttributeType){
 	case AttributeAttributeList: /* always nonresident? */
 		DebugPrint("Nonresident AttributeList found!\n");
-		//DebugPrint("Wait for the next UltraDefrag v3.2.1 to handle it.\n");
 		NonResidentAttrListFound = TRUE;
 		default_attr_name = L"$ATTRIBUTE_LIST";
 		break;
@@ -912,46 +937,47 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	}
 	
 	if(default_attr_name == NULL){
+		DebugPrint("Nonresident attribute of unknown type 0x%x found!\n",
+			(UINT)pnr_attr->Attribute.AttributeType);
 		winx_heap_free(attr_name);
 		winx_heap_free(full_path);
 		return;
 	}
 
-	/* do not append $I30 attributes - required by GetFileNameAndParentMftId() */
+	/* ------------------------------------------------------------------------- */
+	/*          concatenate the file name and the attribute name                 */
+	/* ------------------------------------------------------------------------- */
 	
-	/*
-	* The ResidentDirectory global flag has TRUE initial value.
-	* But when either $I30 or $DATA nonresident attributes are found
-	* we are setting this flag to FALSE.
-	*/
+	attr_name[0] = 0;
 	if(pnr_attr->Attribute.NameLength){
-		/* append a name of attribute to filename */
-		/* NameLength is always less than MAX_PATH :) */
+		/* NameLength is always less than MAX_PATH! */
 		(void)wcsncpy(attr_name,(short *)((char *)pnr_attr + pnr_attr->Attribute.NameOffset),
 			pnr_attr->Attribute.NameLength);
 		attr_name[pnr_attr->Attribute.NameLength] = 0;
+	}
+	
+	if(attr_name[0] == 0){
+		(void)wcsncpy(attr_name,default_attr_name,MAX_NTFS_PATH);
+		attr_name[MAX_NTFS_PATH - 1] = 0;
+	}
 
-		/* just for debugging */
-		if(wcsistr(pmfi->Name,L"Scratch")){
-			DebugPrint("@@@@ ATTRIBUTE NAME = %ws\n",attr_name);
-		}
-
-		if(wcscmp(attr_name,L"$I30") != 0){
-			(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
-		} else {
-			(void)wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
-			ResidentDirectory = FALSE;
-		}
+	/* never append $DATA attribute name */
+	if(wcscmp(attr_name,L"$DATA") == 0) attr_name[0] = 0;
+	
+	/* do not append $I30 attribute name - required by GetFileNameAndParentMftId() */
+	if(wcscmp(attr_name,L"$I30") == 0) attr_name[0] = 0;
+	if(wcscmp(attr_name,L"$INDEX_ALLOCATION") == 0) attr_name[0] = 0;
+	
+	if(attr_name[0]){
+		(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
 	} else {
-		/* append default name of attribute to filename */
-		if(wcscmp(default_attr_name,L"$DATA")){
-			(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,default_attr_name);
-		} else {
-			(void)wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
-			ResidentDirectory = FALSE; /* let's assume that */
-		}
+		(void)wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
 	}
 	full_path[MAX_NTFS_PATH - 1] = 0;
+
+	/* ------------------------------------------------------------------------- */
+	/*     now we have the full name of the attribute including the file name    */
+	/* ------------------------------------------------------------------------- */
 
 	/* just for debugging */
 	if(wcsistr(pmfi->Name,L"Scratch")){
@@ -1238,7 +1264,10 @@ void ProcessRun(WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
 	/* add information to blockmap member of specified pfn structure */
 	if(pfn->blockmap) prev_block = pfn->blockmap->prev_ptr;
 	block = (PBLOCKMAP)winx_list_insert_item((list_entry **)&pfn->blockmap,(list_entry *)prev_block,sizeof(BLOCKMAP));
-	if(!block) return;
+	if(!block){
+		DebugPrint2("Cannot allocate %u bytes of memory for ProcessRun()!\n",sizeof(BLOCKMAP));
+		return;
+	}
 	
 	block->vcn = vcn;
 	block->length = length;
@@ -1288,7 +1317,10 @@ PFILENAME FindFileListEntryForTheAttribute(WCHAR *full_path,PMY_FILE_INFORMATION
 	}
 	
 	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
-	if(pfn == NULL) return NULL;
+	if(pfn == NULL){
+		DebugPrint2("Cannot allocate %u bytes of memory for FindFileListEntryForTheAttribute()!\n",sizeof(FILENAME));
+		return NULL;
+	}
 	
 	/* fill a name member of the created structure */
 	if(!RtlCreateUnicodeString(&pfn->name,full_path)){
@@ -1522,6 +1554,13 @@ void BuildPath2(PFILENAME pfn)
 	BOOLEAN FullPathRetrieved = FALSE;
 	UNICODE_STRING us;
 	
+	/* skip invalid files which have no name */
+	if(pfn->name.Buffer[0] == 0){
+		DebugPrint("BuildPath2: Invalid entry found: file has no name!\n");
+		DebugPrint("BuildPath2: MFT ID = %I64u\n",pfn->BaseMftId);
+		return;
+	}
+
 	/* allocate memory */
 	buffer1 = (WCHAR *)winx_heap_alloc((MAX_NTFS_PATH) * sizeof(short));
 	if(!buffer1){
@@ -1540,7 +1579,7 @@ void BuildPath2(PFILENAME pfn)
 	buffer1[offset] = 0; /* terminating zero */
 	offset --;
 	
-	/* copy filename to the right side of buffer1 */
+	/* copy filename to the right side of the buffer1 */
 	name_length = wcslen(pfn->name.Buffer);
 	if(offset < (name_length - 1)){
 		DebugPrint("BuildPath2(): %ws filename is too long (%u characters)\n",
@@ -1558,6 +1597,8 @@ void BuildPath2(PFILENAME pfn)
 	
 	/* add backslash */
 	buffer1[offset] = '\\';
+
+	if(offset == 0) goto path_is_too_long;
 	offset --;
 	
 	if(offset == 0) goto path_is_too_long;
@@ -1582,9 +1623,13 @@ void BuildPath2(PFILENAME pfn)
 		
 		if(offset == 0) goto path_is_too_long;
 		offset --;
+
 		/* add backslash */
 		buffer1[offset] = '\\';
+
+		if(offset == 0) goto path_is_too_long;
 		offset --;
+
 		if(offset == 0) goto path_is_too_long;
 	}
 	
@@ -1660,6 +1705,12 @@ BOOLEAN GetFileNameAndParentMftId(ULONGLONG mft_id,ULONGLONG *parent_mft_id,WCHA
 	(void)wcsncpy(buffer,pfn->name.Buffer,length);
 	buffer[length-1] = 0;
 	FullPathRetrieved = pfn->PathBuilt;
+
+	if(buffer[0] == 0){
+		DebugPrint("GetFileNameAndParentMftId: Invalid entry found: file has no name!\n");
+		DebugPrint("GetFileNameAndParentMftId: MFT ID = %I64u\n",mft_id);
+	}
+	
 	return FullPathRetrieved;
 }
 
@@ -1672,9 +1723,15 @@ void AddResidentDirectoryToFileList(PMY_FILE_INFORMATION pmfi)
 {
 	PFILENAME pfn;
 	
+	if(pmfi->Name[0] == 0){
+		DebugPrint("AddResidentDirectoryToFileList: Invalid entry found: file has no name!\n");
+		DebugPrint("AddResidentDirectoryToFileList: MFT ID = %I64u\n",pmfi->BaseMftId);
+		return;
+	}
+
 	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
 	if(pfn == NULL){
-		DebugPrint2("No enough memory for AddResidentDirectoryToFileList()!\n");
+		DebugPrint2("Cannot allocate %u bytes of memory for AddResidentDirectoryToFileList()!\n",sizeof(FILENAME));
 		return;
 	}
 	
