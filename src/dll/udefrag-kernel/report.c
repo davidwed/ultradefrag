@@ -40,6 +40,7 @@ static BOOLEAN SaveLuaReportToDisk(char *volume_name);
 static BOOLEAN SaveTextReportToDisk(char *volume_name);
 static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered);
 static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered);
+static BOOLEAN SaveReportToDiskInternal(char *volume_name);
 
 /**
  * @brief Removes all file fragmentation reports from the volume.
@@ -84,6 +85,21 @@ static void RemoveHtmlReportFromDisk(char *volume_name)
  * @param[in] volume_name the name of the volume.
  */
 BOOLEAN SaveReportToDisk(char *volume_name)
+{
+	ULONGLONG tm, time;
+	BOOLEAN result;
+	
+	DebugPrint("SaveReportToDisk() started...\n");
+	tm = _rdtsc();
+
+	result = SaveReportToDiskInternal(volume_name);
+	
+	time = _rdtsc() - tm;
+	DebugPrint("SaveReportToDisk() completed in %I64u ms.\n",time);
+	return result;
+}
+
+static BOOLEAN SaveReportToDiskInternal(char *volume_name)
 {
 #ifndef UDEFRAG_PORTABLE
 	#ifdef MICRO_EDITION
