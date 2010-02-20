@@ -27,7 +27,7 @@ hr {height:1px;border-style:none;color:#d0d0d0;margin:10px 0;background:#c0c0c0}
 #right_side a {background:inherit;text-decoration:none}
 #right_side h3 {color:#949494;font:bold 1.2em Arial,Sans-Serif;margin-top:10px}
 #left_side {background:inherit;margin-bottom:10px;width:650px}
-#left_side .intro {height:80px;background:#616161;color:#fff;overflow:hidden}
+#left_side .intro {height:90px;background:#616161;color:#fff;overflow:hidden}
 #left_side .intro .pad {padding:18px 0 0}
 #left_side .intro a {color:#b4e04a;text-decoration:none}
 #left_side .intro a:hover {color:#cdff56;text-decoration:underline}
