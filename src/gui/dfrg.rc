@@ -1,7 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
  *  Copyright (c) 2007 - 2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
- *  Copyright (c) 2009 by Sayem Chaklader (gearspec@viperprogrammers.net).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,8 +34,7 @@ IDI_MFT                 ICON    DISCARDABLE     "res/mft.ico"
 IDI_FIXED               ICON    DISCARDABLE     "res/fixed.ico"
 IDI_REMOVABLE           ICON    DISCARDABLE     "res/removable.ico"
 
-/* this image was highly improved by Sayem Chaklader */
-IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/t3.bmp"
+IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/ship.bmp"
 
 IDD_MAIN DIALOGEX 0, 0, 351, 220 //218 /*315, 218*/
 STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
