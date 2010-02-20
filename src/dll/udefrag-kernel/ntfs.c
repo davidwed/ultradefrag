@@ -256,6 +256,7 @@ BOOLEAN ScanMFT(void)
 					DebugPrint("FSCTL_GET_NTFS_FILE_RECORD failed: %x!\n",status);
 					winx_heap_free(pnfrob);
 					winx_heap_free(pmfi);
+					DebugPrint("MFT records scanning loop completed!\n");
 					DebugPrint("MFT scan finished!\n");
 					//DestroyMftBlockmap();
 					return FALSE;
@@ -291,6 +292,7 @@ BOOLEAN ScanMFT(void)
 	winx_heap_free(pnfrob);
 	winx_heap_free(pmfi);
 	//DestroyMftBlockmap();
+	DebugPrint("MFT records scanning loop completed!\n");
 	
 	/* Build paths. */
 	BuildPaths();
@@ -854,6 +856,40 @@ void __stdcall AnalyseAttributeFromAttributeListCallback(PATTRIBUTE pattr,PMY_FI
 }
 
 /**
+ * @brief Array containing default names of the attributes.
+ */
+ATTRIBUTE_NAME default_attribute_names[] = {
+	{AttributeAttributeList,       L"$ATTRIBUTE_LIST"       },
+	{AttributeEA,                  L"$EA"                   },
+	{AttributeEAInformation,       L"$EA_INFORMATION"       },
+	{AttributeSecurityDescriptor,  L"$SECURITY_DESCRIPTOR"  },
+	{AttributeData,                L"$DATA"                 },
+	{AttributeIndexRoot,           L"$INDEX_ROOT"           },
+	{AttributeIndexAllocation,     L"$INDEX_ALLOCATION"     },
+	{AttributeBitmap,              L"$BITMAP"               },
+	{AttributeReparsePoint,        L"$REPARSE_POINT"        },
+	{AttributeLoggedUtulityStream, L"$LOGGED_UTILITY_STREAM"}, /* used by EFS */
+	{0,                            NULL                     }
+};
+
+/**
+ * @brief Retrieves the default name of the attribute.
+ * @param[in] attr_type the type of the attribute.
+ * @return The default name of the attribute.
+ * NULL indicates that the attribute has unknown type.
+ */
+short *GetDefaultAttributeName(ATTRIBUTE_TYPE attr_type)
+{
+	int i;
+	
+	for(i = 0;; i++){
+		if(default_attribute_names[i].AttributeName == NULL) break;
+		if(default_attribute_names[i].AttributeType == attr_type) break;
+	}
+	return default_attribute_names[i].AttributeName;
+}
+
+/**
  * @brief Analyzes a nonresident attribute of the file.
  * @param[in] pnr_attr pointer to the structure
  * describing the nonresident attribute of the file.
@@ -867,15 +903,30 @@ void __stdcall AnalyseAttributeFromAttributeListCallback(PATTRIBUTE pattr,PMY_FI
  */
 void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi)
 {
+	ATTRIBUTE_TYPE attr_type;
 	WCHAR *default_attr_name = NULL;
 	short *attr_name;
 	short *full_path;
 	BOOLEAN NonResidentAttrListFound = FALSE;
 	
+	/* print characteristics of the attribute */
+//	DebugPrint("-Ultradfg- type = 0x%x NonResident\n",pattr->AttributeType);
+//	if(pnr_attr->Attribute.Flags & 0x1) DebugPrint("-Ultradfg- Compressed\n");
+
 	/* skip invalid files which have no name */
 	if(pmfi->Name[0] == 0){
 		DebugPrint("AnalyseNonResidentAttribute: Invalid entry found: file has no name!\n");
 		DebugPrint("AnalyseNonResidentAttribute: MFT ID = %I64u\n",pmfi->BaseMftId);
+		return;
+	}
+
+	/* get default name of the attribute */
+	attr_type = pnr_attr->Attribute.AttributeType;
+	default_attr_name = GetDefaultAttributeName(attr_type);
+	
+	/* skip attributes of unknown type */
+	if(default_attr_name == NULL){
+		DebugPrint("Nonresident attribute of unknown type 0x%x found!\n",(UINT)attr_type);
 		return;
 	}
 
@@ -892,58 +943,15 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 		return;
 	}
 	
-	/* print characteristics of the attribute */
-//	DebugPrint("-Ultradfg- type = 0x%x NonResident\n",pattr->AttributeType);
-//	if(pnr_attr->Attribute.Flags & 0x1) DebugPrint("-Ultradfg- Compressed\n");
-	
-	/* get default name of the attribute */
-	switch(pnr_attr->Attribute.AttributeType){
-	case AttributeAttributeList: /* always nonresident? */
+	/* additional checks */
+	if(attr_type == AttributeAttributeList){ 
 		DebugPrint("Nonresident AttributeList found!\n");
 		NonResidentAttrListFound = TRUE;
-		default_attr_name = L"$ATTRIBUTE_LIST";
-		break;
-    case AttributeEA:
-		default_attr_name = L"$EA";
-		break;
-    case AttributeEAInformation:
-		default_attr_name = L"$EA_INFORMATION";
-		break;
-    case AttributeSecurityDescriptor:
-		default_attr_name = L"$SECURITY_DESCRIPTOR";
-		break;
-	case AttributeData:
-		default_attr_name = L"$DATA";
-		break;
-	case AttributeIndexRoot:
-		default_attr_name = L"$INDEX_ROOT";
-		break;
-	case AttributeIndexAllocation:
-		default_attr_name = L"$INDEX_ALLOCATION";
-		break;
-	case AttributeBitmap:
-		default_attr_name = L"$BITMAP";
-		break;
-	case AttributeReparsePoint:
-		pmfi->IsReparsePoint = TRUE;
-		default_attr_name = L"$REPARSE_POINT";
-		break;
-	case AttributeLoggedUtulityStream:
-		/* used by EFS */
-		default_attr_name = L"$LOGGED_UTILITY_STREAM";
-		break;
-	default:
-		break;
-	}
-	
-	if(default_attr_name == NULL){
-		DebugPrint("Nonresident attribute of unknown type 0x%x found!\n",
-			(UINT)pnr_attr->Attribute.AttributeType);
-		winx_heap_free(attr_name);
-		winx_heap_free(full_path);
-		return;
 	}
 
+	if(attr_type == AttributeReparsePoint)
+		pmfi->IsReparsePoint = TRUE;
+	
 	/* ------------------------------------------------------------------------- */
 	/*          concatenate the file name and the attribute name                 */
 	/* ------------------------------------------------------------------------- */
@@ -968,11 +976,11 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	if(wcscmp(attr_name,L"$I30") == 0) attr_name[0] = 0;
 	if(wcscmp(attr_name,L"$INDEX_ALLOCATION") == 0) attr_name[0] = 0;
 	
-	if(attr_name[0]){
+	if(attr_name[0])
 		(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
-	} else {
+	else
 		(void)wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
-	}
+
 	full_path[MAX_NTFS_PATH - 1] = 0;
 
 	/* ------------------------------------------------------------------------- */
@@ -994,13 +1002,7 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 		/* on my system this file always exists, even after chkdsk execution */
 		/*DbgPrint("WARNING: %ws file found! Run CheckDisk program!\n",full_path);*/
 	} else {
-		/* skip all filtered out attributes */
-	//if(AttributeNeedsToBeDefragmented(dx,full_path,pnr_attr->DataSize,pmfi)){
-		if(NonResidentAttrListFound)
-			ProcessRunList(full_path,pnr_attr,pmfi,TRUE);
-		else
-			ProcessRunList(full_path,pnr_attr,pmfi,FALSE);
-	//}
+		ProcessRunList(full_path,pnr_attr,pmfi,NonResidentAttrListFound);
 	}
 
 	/* free allocated memory */

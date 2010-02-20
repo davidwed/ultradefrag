@@ -321,6 +321,7 @@ typedef struct _NTFS_DATA {
 #define FSCTL_GET_NTFS_FILE_RECORD      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 26, METHOD_BUFFERED, FILE_ANY_ACCESS)
 #endif
 
+/* my own structures; they are missing on disk */
 typedef enum {
 	MFT_SCAN_RTL,
 	MFT_SCAN_LTR,
@@ -330,6 +331,11 @@ typedef struct {
 	ULONGLONG mft_id;
 	FILENAME *pfn;
 } MY_FILE_ENTRY, *PMY_FILE_ENTRY; /* for binary search */
+
+typedef struct {
+	ATTRIBUTE_TYPE AttributeType; /* The type of the attribute. */
+	short *AttributeName;  /* The default name of the attribute. */
+} ATTRIBUTE_NAME, *PATTRIBUTE_NAME;
 
 /* internal functions prototypes */
 NTSTATUS GetMftLayout(void);
