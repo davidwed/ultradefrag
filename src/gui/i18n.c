@@ -41,7 +41,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"FILESYSTEM",           L"File system",              NULL},
 	{0,                 L"TOTAL",                L"Total space",              NULL},
 	{0,                 L"FREE",                 L"Free space",               NULL},
-	{0,                 L"PERCENT",              L"Percentage",               NULL},
+	{0,                 L"PERCENT",              L"% free",                   NULL},
 	
 	{0,                 L"STATUS_RUNNING",       L"Executing",                NULL},
 	{0,                 L"STATUS_ANALYSED",      L"Analyzed",                 NULL},
