@@ -365,6 +365,8 @@ void AnalyseResidentAttribute(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION p
 void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi);
 void AnalyseResidentAttributeList(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
 void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_INFORMATION pmfi);
+void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,short *attr_name,PMY_FILE_INFORMATION pmfi);
+void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,ATTRIBUTE_TYPE attr_type,short *attr_name,PMY_FILE_INFORMATION pmfi);
 void GetFileFlags(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
 void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi);
 void UpdateFileName(PMY_FILE_INFORMATION pmfi,WCHAR *name,UCHAR name_type);

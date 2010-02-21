@@ -194,7 +194,7 @@ BOOLEAN ScanMFT(void)
 	ULONGLONG mft_id, ret_mft_id;
 	NTSTATUS status;
 	
-	ULONGLONG tm, time;
+	ULONGLONG tm, time, tm2, time2;
 	
 	DebugPrint("MFT scan started!\n");
 
@@ -241,7 +241,10 @@ BOOLEAN ScanMFT(void)
 		return FALSE;
 	}
 
-	DebugPrint("MFT records scanning loop begins...\n");
+	DebugPrint("+-------------------------------------------------------+\n");
+	DebugPrint("|          MFT records scanning loop begins...          |\n");
+	DebugPrint("+-------------------------------------------------------+\n");
+	tm2 = _rdtsc();
 	/* Is MFT size an integral of NTFS record size? */
 	/*if(MftClusters == 0 || \
 	  (MftClusters * (ULONGLONG)dx->bytes_per_cluster % (ULONGLONG)dx->ntfs_record_size) || \
@@ -292,14 +295,14 @@ BOOLEAN ScanMFT(void)
 	winx_heap_free(pnfrob);
 	winx_heap_free(pmfi);
 	//DestroyMftBlockmap();
-	DebugPrint("MFT records scanning loop completed!\n");
+	time2 = _rdtsc() - tm2;
+	DebugPrint("MFT records scanning loop completed in %I64u ms.\n",time2);
 	
 	/* Build paths. */
 	BuildPaths();
 
-	DebugPrint("MFT scan finished!\n");
 	time = _rdtsc() - tm;
-	DebugPrint("MFT scan needs %I64u ms\n",time);
+	DebugPrint("MFT scan completed in %I64u ms.\n",time);
 	return TRUE;
 }
 
@@ -581,7 +584,19 @@ void AnalyseAttribute(PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
  */
 void AnalyseResidentAttribute(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 {
-	if(pr_attr->ValueOffset == 0 || pr_attr->ValueLength == 0) return;
+	if(pr_attr->ValueOffset == 0 || pr_attr->ValueLength == 0){
+		/*DebugPrint("AnalyseResidentAttribute: Invalid attribute, "
+			"MFT ID = %I64u, Attribute Type = 0x%x, ValueOffset = %u, ValueLength = %u\n",
+			pmfi->BaseMftId,(UINT)pr_attr->Attribute.AttributeType,
+			(UINT)pr_attr->ValueOffset,(UINT)pr_attr->ValueLength);
+		*/
+		/*
+		* This is an ordinary case when some attribute data was truncated.
+		* For example, when some large file becomes empty its $DATA attribute
+		* becomes resident and its ValueLength becomes to be equal to zero.
+		*/
+		return;
+	}
 	
 	switch(pr_attr->Attribute.AttributeType){
 	case AttributeStandardInformation: /* always resident */
@@ -674,7 +689,7 @@ void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 			UpdateFileName(pmfi,name,name_type);
 		}
 		winx_heap_free(name);
-	}// else DebugPrint("-Ultradfg- File has no name\n");
+	} else DebugPrint("GetFileName: Empty name found, MFT ID = %I64u\n",pmfi->BaseMftId);
 }
 
 /**
@@ -784,65 +799,123 @@ void AnalyseResidentAttributeList(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATI
  */
 void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_INFORMATION pmfi)
 {
+	ULONGLONG child_record_mft_id;
+	ATTRIBUTE_TYPE attr_type;
+	UCHAR name_length = 0;
+	short *attr_name = NULL;
+
+	/*
+	* 21 Feb 2010
+	* The right implementation must analyze a single
+	* specific attribute from the MFT record pointed
+	* by the attribute list entry.
+	*/
+
+	/* 1. save the name of the attribute */
+	name_length = attr_list_entry->NameLength;
+	if(attr_list_entry->NameOffset && name_length){
+		attr_name = winx_heap_alloc((name_length + 1) * sizeof(short));
+		if(attr_name == NULL){
+			DebugPrint("Cannot allocate %u bytes of memory for AnalyseAttributeFromAttributeList()!\n",
+				(name_length + 1) * sizeof(short));
+			return;
+		}
+		memcpy(attr_name,
+			(char *)attr_list_entry + attr_list_entry->NameOffset,
+			name_length * sizeof(short));
+		attr_name[name_length] = 0;
+		if(attr_name[0] == 0){
+			winx_heap_free(attr_name);
+			attr_name = NULL;
+		}
+	}
+	/* attr_name is NULL here for empty names */
+	
+	/* 2. save the attribute type */
+	attr_type = attr_list_entry->AttributeType;
+	
+	/* 3. save the identifier of the child record containing the attribute */
+	child_record_mft_id = GetMftIdFromFRN(attr_list_entry->FileReferenceNumber);
+	
+	/* 3b. FIXME: what means AttributeNumber member? */
+	
+	/* 4. analyze a single attribute */
+	AnalyseAttributeFromMftRecord(child_record_mft_id,attr_type,attr_name,pmfi);
+	
+	/* 5. free resources */
+	if(attr_name) winx_heap_free(attr_name);
+}
+
+/**
+ * @brief Analyzes a single attribute from the MFT record.
+ * @param[in] mft_id the MFT record identifier.
+ * @param[in] attr_type the attribute type.
+ * @param[in] attr_name the name of the attribute.
+ * @param[in] pointer to the structure containing
+ * information about the file.
+ * @note The attr_name paramter is equal to NULL for empty names.
+ */
+void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,short *attr_name,PMY_FILE_INFORMATION pmfi)
+{
 	PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob = NULL;
 	ULONG nfrob_size;
-	ULONGLONG child_record_mft_id;
 	NTSTATUS status;
 	PFILE_RECORD_HEADER pfrh;
 	
-	/* skip entries describing attributes stored in base mft record */
-	if(GetMftIdFromFRN(attr_list_entry->FileReferenceNumber) == pmfi->BaseMftId){
-		//DebugPrint("Resident attribute found, type = 0x%x\n",attr_list_entry->AttributeType);
+	/*
+	* Skip attributes stored in the base mft record,
+	* because they will be scanned anyway.
+	*/
+	if(mft_id == pmfi->BaseMftId){
+		//DebugPrint("Attribute list entry points to 0x%x attribute of the base record.\n",(UINT)attr_type);
 		return;
 	}
 	
-	/* allocate memory for another mft record */
+	/* allocate memory for a single mft record */
 	nfrob_size = sizeof(NTFS_FILE_RECORD_OUTPUT_BUFFER) + ntfs_record_size - 1;
 	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)winx_heap_alloc(nfrob_size);
 	if(!pnfrob){
-		DebugPrint("AnalyseAttributeFromAttributeList():\n");
+		DebugPrint("AnalyseAttributeFromMftRecord():\n");
 		DebugPrint("No enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
 		return;
 	}
 
-	/* get another mft record */
-	child_record_mft_id = GetMftIdFromFRN(attr_list_entry->FileReferenceNumber);
-	status = GetMftRecord(pnfrob,nfrob_size,child_record_mft_id);
+	/* get specified mft record */
+	status = GetMftRecord(pnfrob,nfrob_size,mft_id);
 	if(!NT_SUCCESS(status)){
-		DebugPrint("AnalyseAttributeFromAttributeList(): FSCTL_GET_NTFS_FILE_RECORD failed: %x!\n",status);
+		DebugPrint("AnalyseAttributeFromMftRecord(): FSCTL_GET_NTFS_FILE_RECORD failed: %x!\n",status);
 		winx_heap_free(pnfrob);
 		return;
 	}
-	if(GetMftIdFromFRN(pnfrob->FileReferenceNumber) != child_record_mft_id){
-		DebugPrint("AnalyseAttributeFromAttributeList() failed - unable to get %I64u record.\n",
-			child_record_mft_id);
+	if(GetMftIdFromFRN(pnfrob->FileReferenceNumber) != mft_id){
+		DebugPrint("AnalyseAttributeFromAttributeList() failed - unable to get %I64u record.\n",mft_id);
 		winx_heap_free(pnfrob);
 		return;
 	}
 
-	/* Analyse all nonresident attributes. */
+	/* validate the record header */
 	pfrh = (PFILE_RECORD_HEADER)pnfrob->FileRecordBuffer;
 	if(!IsFileRecord(pfrh)){
-		DebugPrint("AnalyseAttributeFromAttributeList() failed - %I64u record has invalid type %u.\n",
-			child_record_mft_id,pfrh->Ntfs.Type);
+		DebugPrint("AnalyseAttributeFromMftRecord() failed - %I64u record has invalid type %u.\n",
+			mft_id,pfrh->Ntfs.Type);
 		winx_heap_free(pnfrob);
 		return;
 	}
 	if(!(pfrh->Flags & 0x1)){
-		DebugPrint("AnalyseAttributeFromAttributeList() failed\n");
-		DebugPrint("%I64u record marked as free.\n",child_record_mft_id);
+		DebugPrint("AnalyseAttributeFromMftRecord() failed\n");
+		DebugPrint("%I64u record marked as free.\n",mft_id);
 		winx_heap_free(pnfrob);
 		return; /* skip free records */
 	}
 
 	if(pfrh->BaseFileRecord == 0){
-		DebugPrint("AnalyseAttributeFromAttributeList() failed - %I64u is not a child record.\n",
-			child_record_mft_id);
+		DebugPrint("AnalyseAttributeFromMftRecord() failed - %I64u is not a child record.\n",mft_id);
 		winx_heap_free(pnfrob);
 		return;
 	}
-	
-	EnumerateAttributes(pfrh,AnalyseAttributeFromAttributeListCallback,pmfi);
+
+	/* search for a specified attribute */
+	AnalyseSingleAttribute(mft_id,pfrh,attr_type,attr_name,pmfi);
 
 	/* free allocated memory */
 	winx_heap_free(pnfrob);
@@ -850,9 +923,80 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
 
 /**
  */
-void __stdcall AnalyseAttributeFromAttributeListCallback(PATTRIBUTE pattr,PMY_FILE_INFORMATION pmfi)
+void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,ATTRIBUTE_TYPE attr_type,short *attr_name,PMY_FILE_INFORMATION pmfi)
 {
-	if(pattr->Nonresident) AnalyseNonResidentAttribute((PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
+	int name_length;
+	PATTRIBUTE pattr;
+	ULONG attr_length;
+	USHORT attr_offset;
+	short *name = NULL;
+	BOOLEAN attribute_found = FALSE;
+
+	attr_offset = pfrh->AttributeOffset;
+	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
+
+	while(pattr){
+		if(CheckForStopEvent()) break;
+
+		/* is an attribute header inside a record bounds? */
+		if(attr_offset + sizeof(ATTRIBUTE) > pfrh->BytesInUse || \
+			attr_offset + sizeof(ATTRIBUTE) > ntfs_record_size)	break;
+		
+		/* is it a valid attribute */
+		if(pattr->AttributeType == 0xffffffff) break;
+		if(pattr->AttributeType == 0x0) break;
+		if(pattr->Length == 0) break;
+
+		/* is an attribute inside a record bounds? */
+		if(attr_offset + pattr->Length > pfrh->BytesInUse || \
+			attr_offset + pattr->Length > ntfs_record_size) break;
+		
+		/* is an attribute length valid? */
+		if(pattr->Nonresident){
+			if(pattr->Length < (sizeof(NONRESIDENT_ATTRIBUTE) - sizeof(ULONGLONG))){
+				DebugPrint("Nonresident attribute length is invalid!\n");
+				break;
+			}
+		} else {
+			if(pattr->Length < sizeof(RESIDENT_ATTRIBUTE)){
+				DebugPrint("Resident attribute length is invalid!\n");
+				break;
+			}
+		}
+
+		/* do we have found the specified attribute? */
+		if(pattr->AttributeType == attr_type){
+			if(pattr->NameOffset && pattr->NameLength){
+				name = (short *)((char *)pattr + pattr->NameOffset);
+				if(name[0] == 0) name = NULL;
+			}
+			if(attr_name == NULL){
+				if(name == NULL) attribute_found = TRUE;
+			} else {
+				if(name != NULL){
+					name_length = wcslen(attr_name);
+					if(name_length == pattr->NameLength){
+						if(memcmp((void *)attr_name,(void *)name,name_length * sizeof(short)) == 0)
+							attribute_found = TRUE;
+					}
+				}
+			}
+		}
+		
+		if(attribute_found){
+			DebugPrint("An attribute pointed by the attribute list entry found...\n");
+			DebugPrint("Base MftId = %I64u, MftId = %I64u, Attribute Type = 0x%x\n",
+				pmfi->BaseMftId,mft_id,(UINT)attr_type);
+			if(pattr->Nonresident) AnalyseNonResidentAttribute((PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
+			else AnalyseResidentAttribute((PRESIDENT_ATTRIBUTE)pattr,pmfi);
+			return;
+		}
+		
+		/* go to the next attribute */
+		attr_length = pattr->Length;
+		attr_offset += (USHORT)(attr_length);
+		pattr = (PATTRIBUTE)((char *)pattr + attr_length);
+	}
 }
 
 /**
@@ -1374,7 +1518,7 @@ void UpdateClusterMapAndStatistics(PMY_FILE_INFORMATION pmfi)
 		else pfn->is_compressed = FALSE;
 		*/
 		if((pmfi->Flags & FILE_ATTRIBUTE_REPARSE_POINT) || pmfi->IsReparsePoint){
-			DebugPrint("-Ultradfg- Reparse point found %ws\n",pfn->name.Buffer);
+			DebugPrint("Reparse point found %ws\n",pfn->name.Buffer);
 			pfn->is_reparse_point = TRUE;
 		} else pfn->is_reparse_point = FALSE;
 		/* 1.2 calculate size of attribute data */
