@@ -41,6 +41,7 @@
 
 UINT MftScanDirection = MFT_SCAN_RTL;
 BOOLEAN MaxMftEntriesNumberUpdated = FALSE;
+int number_of_processed_attr_list_entries = 0;
 
 /**
  * @brief Retrieves a type of the file system 
@@ -197,6 +198,7 @@ BOOLEAN ScanMFT(void)
 	ULONGLONG tm, time, tm2, time2;
 	
 	DebugPrint("MFT scan started!\n");
+	number_of_processed_attr_list_entries = 0;
 
 	/* Get information about MFT */
 	status = GetMftLayout();
@@ -301,6 +303,8 @@ BOOLEAN ScanMFT(void)
 	/* Build paths. */
 	BuildPaths();
 
+	DebugPrint("%u attribute lists entries totally processed.\n",
+		number_of_processed_attr_list_entries);
 	time = _rdtsc() - tm;
 	DebugPrint("MFT scan completed in %I64u ms.\n",time);
 	return TRUE;
@@ -801,6 +805,7 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
 {
 	ULONGLONG child_record_mft_id;
 	ATTRIBUTE_TYPE attr_type;
+	USHORT attr_number;
 	UCHAR name_length = 0;
 	short *attr_name = NULL;
 
@@ -837,12 +842,13 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
 	/* 3. save the identifier of the child record containing the attribute */
 	child_record_mft_id = GetMftIdFromFRN(attr_list_entry->FileReferenceNumber);
 	
-	/* 3b. FIXME: what means AttributeNumber member? */
+	/* 4. save the AttributeNumber */
+	attr_number = attr_list_entry->AttributeNumber;
 	
-	/* 4. analyze a single attribute */
-	AnalyseAttributeFromMftRecord(child_record_mft_id,attr_type,attr_name,pmfi);
+	/* 5. analyze a single attribute */
+	AnalyseAttributeFromMftRecord(child_record_mft_id,attr_type,attr_name,attr_number,pmfi);
 	
-	/* 5. free resources */
+	/* 6. free resources */
 	if(attr_name) winx_heap_free(attr_name);
 }
 
@@ -855,7 +861,8 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
  * information about the file.
  * @note The attr_name paramter is equal to NULL for empty names.
  */
-void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,short *attr_name,PMY_FILE_INFORMATION pmfi)
+void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,
+		short *attr_name,USHORT attr_number,PMY_FILE_INFORMATION pmfi)
 {
 	PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob = NULL;
 	ULONG nfrob_size;
@@ -915,7 +922,7 @@ void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,sho
 	}
 
 	/* search for a specified attribute */
-	AnalyseSingleAttribute(mft_id,pfrh,attr_type,attr_name,pmfi);
+	AnalyseSingleAttribute(mft_id,pfrh,attr_type,attr_name,attr_number,pmfi);
 
 	/* free allocated memory */
 	winx_heap_free(pnfrob);
@@ -923,7 +930,8 @@ void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,sho
 
 /**
  */
-void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,ATTRIBUTE_TYPE attr_type,short *attr_name,PMY_FILE_INFORMATION pmfi)
+void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,
+		ATTRIBUTE_TYPE attr_type,short *attr_name,USHORT attr_number,PMY_FILE_INFORMATION pmfi)
 {
 	int name_length;
 	PATTRIBUTE pattr;
@@ -976,8 +984,10 @@ void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,ATTRIBUTE_
 				if(name != NULL){
 					name_length = wcslen(attr_name);
 					if(name_length == pattr->NameLength){
-						if(memcmp((void *)attr_name,(void *)name,name_length * sizeof(short)) == 0)
-							attribute_found = TRUE;
+						if(memcmp((void *)attr_name,(void *)name,name_length * sizeof(short)) == 0){
+							if(pattr->AttributeNumber == attr_number)
+								attribute_found = TRUE;
+						}
 					}
 				}
 			}
@@ -985,10 +995,11 @@ void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,ATTRIBUTE_
 		
 		if(attribute_found){
 			DebugPrint("An attribute pointed by the attribute list entry found...\n");
-			DebugPrint("Base MftId = %I64u, MftId = %I64u, Attribute Type = 0x%x\n",
-				pmfi->BaseMftId,mft_id,(UINT)attr_type);
+			DebugPrint("Base MftId = %I64u, MftId = %I64u, Attribute Type = 0x%x, Attribute Number = %u, Nonresident = %u\n",
+				pmfi->BaseMftId,mft_id,(UINT)attr_type,(UINT)attr_number,(UINT)pattr->Nonresident);
 			if(pattr->Nonresident) AnalyseNonResidentAttribute((PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
 			else AnalyseResidentAttribute((PRESIDENT_ATTRIBUTE)pattr,pmfi);
+			number_of_processed_attr_list_entries ++;
 			return;
 		}
 		
