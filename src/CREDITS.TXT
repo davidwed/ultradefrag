@@ -105,6 +105,19 @@
     Stefan Pendl       - Boot time defragmenter improvements. Installer improvements.
 
 --------------------------------------------------------------------------------
+    Special thanks for correcting and updating translations (in alphabetical order):
+--------------------------------------------------------------------------------
+    Ali Jafari
+    Connection
+    Dave MacBlack
+    Dmitri Arkhangelski
+    José Carlos Taveira de Souza
+    José Luis Farías
+    jtl
+    Latino
+    Stefan Pendl
+
+--------------------------------------------------------------------------------
     Also special thanks to:
 --------------------------------------------------------------------------------
     Egor Letov (http://www.gr-oborona.ru)

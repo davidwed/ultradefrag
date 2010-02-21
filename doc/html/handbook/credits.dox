@@ -93,7 +93,7 @@
  * Special thanks for good suggestions to (in alphabetical order):
  *
  * - Alexander Vedyakin - Volume type detection improvements. More effective
- * defragmenting algorithms.
+ *   defragmenting algorithms.
  * - Andrei Maksimov - GUI improvements.
  * - Bryan Kirk - Better GUI appearance (new list of drives).
  *   Autodefrag feature (not implemented yet).
@@ -108,6 +108,18 @@
  * - Nagy Zsolt - Interesting ideas about translation. Installer improvements.
  * - Parvez Reza - Various interesting programming tricks.
  * - Stefan Pendl - Boot time defragmenter improvements. Installer improvements.
+ *
+ * Special thanks for correcting and updating translations (in alphabetical order):
+ *
+ * - Ali Jafari
+ * - Connection
+ * - Dave MacBlack
+ * - Dmitri Arkhangelski
+ * - José Carlos Taveira de Souza
+ * - José Luis Farías
+ * - jtl
+ * - Latino
+ * - Stefan Pendl
  *
  * Also special thanks to:
  * - <a href="http://www.gr-oborona.ru">Egor Letov</a>
