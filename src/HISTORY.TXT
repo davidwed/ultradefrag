@@ -5,6 +5,7 @@ HISTORY
     - few bugs in driver were fixed
     - one little bug preventing the Scheduler running on Windows 2000 was fixed
     - volume status messages were improved in UltraDefrag GUI
+    - the report saving speedup was performed
     - the following translations were added:
 
       Belarusian, Bulgarian, Croatian, Filipino (Tagalog), Finnish, Icelandic,

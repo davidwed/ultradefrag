@@ -166,7 +166,7 @@ static BOOLEAN SaveLuaReportToDisk(char *volume_name)
 	
 	winx_fclose(f);
 
-	DebugPrint("-Ultradfg- Report saved to %s\n",path);
+	DebugPrint("Report saved to %s\n",path);
 	return TRUE;
 }
 
@@ -274,7 +274,7 @@ static BOOLEAN SaveTextReportToDisk(char *volume_name)
 	
 	winx_fclose(f);
 	
-	DebugPrint("-Ultradfg- Report saved to %s\n",path);
+	DebugPrint("Report saved to %s\n",path);
 	return TRUE;
 }
 
