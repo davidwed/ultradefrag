@@ -406,8 +406,9 @@ NTSTATUS GetMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
  * containing the attribute name.
  * @param[in] pmfi pointer to structure
  * containing the name of the file.
+ * @return Zero for success, negative value otherwise.
  */
-void UpdateAttributeName(PFILENAME pfn,PMY_FILE_INFORMATION pmfi)
+int UpdateAttributeName(PFILENAME pfn,PMY_FILE_INFORMATION pmfi)
 {
 	short *buffer;
 	UNICODE_STRING us;
@@ -416,22 +417,25 @@ void UpdateAttributeName(PFILENAME pfn,PMY_FILE_INFORMATION pmfi)
 	if(pmfi->Name[0] == 0){
 		DebugPrint("MftRecord has empty filename, MftId = %I64u, Parent MftId = %I64u\n",
 			pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
-		return;
+		return (-1);
 	}
 
 	/* if file name is not empty, append them */
 	buffer = winx_heap_alloc(MAX_NTFS_PATH * sizeof(short));
 	if(buffer == NULL){
 		DebugPrint("Cannot allocate memory for buffer in UpdateAttributeName()!\n");
-		return;
+		return (-1);
 	}
-	(void)_snwprintf(buffer,MAX_NTFS_PATH,L"%s%s",pmfi->Name,pfn->name.Buffer);
+	if(pfn->name.Buffer[0])
+		(void)_snwprintf(buffer,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,pfn->name.Buffer);
+	else
+		(void)wcsncpy(buffer,pmfi->Name,MAX_NTFS_PATH);
 	buffer[MAX_NTFS_PATH - 1] = 0;
 
 	if(!RtlCreateUnicodeString(&us,buffer)){
 		DebugPrint("UpdateAttributeName: Cannot allocate memory for new name!\n");
 		winx_heap_free(buffer);
-		return;
+		return (-1);
 	}
 
 	RtlFreeUnicodeString(&(pfn->name));
@@ -442,6 +446,7 @@ void UpdateAttributeName(PFILENAME pfn,PMY_FILE_INFORMATION pmfi)
 	/*DebugPrint("UpdateAttributeName: %ws, MftId = %I64u, Parent MftId = %I64u\n",
 		pfn->name.Buffer,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);*/
 	winx_heap_free(buffer);
+	return 0;
 }
 
 /**
@@ -459,7 +464,7 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	#ifdef DETAILED_LOGGING
 	USHORT Flags;
 	#endif
-	PFILENAME pfn;
+	PFILENAME pfn, next_pfn, head;
 	BOOLEAN DirectoryAdded;
 	
 	/* analyse record's header */
@@ -499,22 +504,29 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	/* analyse AttributeList attributes */
 	EnumerateAttributes(pfrh,AnalyseAttributeListCallback,pmfi);
 	
-	/* append the filename to the file attributes */
-	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+	/* append the filename to attributes */
+	head = filelist;
+	for(pfn = filelist; pfn != NULL;){
 		if(MftScanDirection == MFT_SCAN_RTL){
 			if(pfn->BaseMftId > pmfi->BaseMftId) break; /* we have no chance to find record in list */
 		} else {
 			if(pfn->BaseMftId < pmfi->BaseMftId) break;
 		}
+		next_pfn = pfn->next_ptr;
 		if(pfn->ParentDirectoryMftId == pmfi->ParentDirectoryMftId && \
 		  pfn->BaseMftId == pmfi->BaseMftId){
-			if(pfn->name.Buffer[0] == 0 || pfn->name.Buffer[0] == ':'){
-				UpdateAttributeName(pfn,pmfi);
-			} else {
-				DebugPrint("What's fucked situation: an attribute already has filename appended!\n");
+			if(UpdateAttributeName(pfn,pmfi) < 0){
+				winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
+				if(filelist == NULL) break;
+				if(filelist != head){
+					head = filelist;
+					pfn = next_pfn;
+					continue;
+				}
 			}
 		}
-		if(pfn->next_ptr == filelist) break;
+		pfn = next_pfn;
+		if(pfn == head) break;
 	}
 	
 	/* just for debugging */
@@ -1125,7 +1137,6 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	ATTRIBUTE_TYPE attr_type;
 	WCHAR *default_attr_name = NULL;
 	short *attr_name;
-	short *full_path;
 	BOOLEAN NonResidentAttrListFound = FALSE;
 	
 	/* get default name of the attribute */
@@ -1142,12 +1153,6 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	attr_name = (short *)winx_heap_alloc((MAX_NTFS_PATH + 1) * sizeof(short));
 	if(!attr_name){
 		DebugPrint("Cannot allocate memory for attr_name in AnalyseNonResidentAttribute()!\n");
-		return;
-	}
-	full_path = (short *)winx_heap_alloc((MAX_NTFS_PATH + 1) * sizeof(short));
-	if(!full_path){
-		DebugPrint("Cannot allocate memory for full_path in AnalyseNonResidentAttribute()!\n");
-		winx_heap_free(attr_name);
 		return;
 	}
 	
@@ -1184,13 +1189,6 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	if(wcscmp(attr_name,L"$I30") == 0) attr_name[0] = 0;
 	if(wcscmp(attr_name,L"$INDEX_ALLOCATION") == 0) attr_name[0] = 0;
 	
-	if(attr_name[0])
-		(void)_snwprintf(full_path,MAX_NTFS_PATH,L":%s",attr_name);
-	else
-		full_path[0] = 0;
-
-	full_path[MAX_NTFS_PATH - 1] = 0;
-
 	/* ------------------------------------------------------------------------- */
 	/*                   now we have the name of the attribute                   */
 	/* ------------------------------------------------------------------------- */
@@ -1199,23 +1197,22 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	if(wcsistr(pmfi->Name,L"Scratch")){
 		DebugPrint("@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
 			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
-		DebugPrint("@@@@ FULL ATTRIBUTE NAME = %ws%ws, DEFAULT ATTR NAME = %ws\n",
-			pmfi->Name,full_path,default_attr_name);
+		DebugPrint("@@@@ FULL ATTRIBUTE NAME = %ws:%ws, DEFAULT ATTR NAME = %ws\n",
+			pmfi->Name,attr_name,default_attr_name);
 	}
 
-	if(NonResidentAttrListFound) DebugPrint("%ws%ws\n",pmfi->Name,full_path);
+	if(NonResidentAttrListFound) DebugPrint("%ws:%ws\n",pmfi->Name,attr_name);
 	
 	/* skip $BadClus file which may have wrong number of clusters */
-	if(/*wcsistr(full_path,L"$BadClus") || */wcsistr(pmfi->Name,L"$BadClus")){
+	if(/*wcsistr(attr_name,L"$BadClus") || */wcsistr(pmfi->Name,L"$BadClus")){
 		/* on my system this file always exists, even after chkdsk execution */
-		/*DebugPrint("WARNING: %ws%ws file found! Run CheckDisk program!\n",pmfi->Name,full_path);*/
+		/*DebugPrint("WARNING: %ws:%ws file found! Run CheckDisk program!\n",pmfi->Name,attr_name);*/
 	} else {
-		ProcessRunList(full_path,pnr_attr,pmfi,NonResidentAttrListFound);
+		ProcessRunList(attr_name,pnr_attr,pmfi,NonResidentAttrListFound);
 	}
 
 	/* free allocated memory */
 	winx_heap_free(attr_name);
-	winx_heap_free(full_path);
 }
 
 /**
