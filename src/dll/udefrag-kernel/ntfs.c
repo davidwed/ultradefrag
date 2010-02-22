@@ -1054,7 +1054,8 @@ void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,
 				if(name[0] == 0) name = NULL;
 			}
 			if(attr_name == NULL){
-				if(name == NULL) attribute_found = TRUE;
+				if(name == NULL && pattr->AttributeNumber == attr_number)
+					attribute_found = TRUE;
 			} else {
 				if(name != NULL){
 					name_length = wcslen(attr_name);
