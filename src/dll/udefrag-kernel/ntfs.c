@@ -401,6 +401,50 @@ NTSTATUS GetMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 }
 
 /**
+ * @brief Appends the file name to the attribute name.
+ * @param[in,out] pfn pointer to structure
+ * containing the attribute name.
+ * @param[in] pmfi pointer to structure
+ * containing the name of the file.
+ */
+void UpdateAttributeName(PFILENAME pfn,PMY_FILE_INFORMATION pmfi)
+{
+	short *buffer;
+	UNICODE_STRING us;
+
+	/* if file name is empty, we should do nothing */
+	if(pmfi->Name[0] == 0){
+		DebugPrint("MftRecord has empty filename, MftId = %I64u, Parent MftId = %I64u\n",
+			pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
+		return;
+	}
+
+	/* if file name is not empty, append them */
+	buffer = winx_heap_alloc(MAX_NTFS_PATH * sizeof(short));
+	if(buffer == NULL){
+		DebugPrint("Cannot allocate memory for buffer in UpdateAttributeName()!\n");
+		return;
+	}
+	(void)_snwprintf(buffer,MAX_NTFS_PATH,L"%s%s",pmfi->Name,pfn->name.Buffer);
+	buffer[MAX_NTFS_PATH - 1] = 0;
+
+	if(!RtlCreateUnicodeString(&us,buffer)){
+		DebugPrint("UpdateAttributeName: Cannot allocate memory for new name!\n");
+		winx_heap_free(buffer);
+		return;
+	}
+
+	RtlFreeUnicodeString(&(pfn->name));
+	pfn->name.Buffer = us.Buffer;
+	pfn->name.Length = us.Length;
+	pfn->name.MaximumLength = us.MaximumLength;
+
+	/*DebugPrint("UpdateAttributeName: %ws, MftId = %I64u, Parent MftId = %I64u\n",
+		pfn->name.Buffer,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);*/
+	winx_heap_free(buffer);
+}
+
+/**
  * @brief Analyzes the MFT record.
  * @param[out] pnfrob pointer to the buffer
  * containing the MFT record.
@@ -454,6 +498,24 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	
 	/* analyse AttributeList attributes */
 	EnumerateAttributes(pfrh,AnalyseAttributeListCallback,pmfi);
+	
+	/* append the filename to the file attributes */
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(MftScanDirection == MFT_SCAN_RTL){
+			if(pfn->BaseMftId > pmfi->BaseMftId) break; /* we have no chance to find record in list */
+		} else {
+			if(pfn->BaseMftId < pmfi->BaseMftId) break;
+		}
+		if(pfn->ParentDirectoryMftId == pmfi->ParentDirectoryMftId && \
+		  pfn->BaseMftId == pmfi->BaseMftId){
+			if(pfn->name.Buffer[0] == 0 || pfn->name.Buffer[0] == ':'){
+				UpdateAttributeName(pfn,pmfi);
+			} else {
+				DebugPrint("What's fucked situation: an attribute already has filename appended!\n");
+			}
+		}
+		if(pfn->next_ptr == filelist) break;
+	}
 	
 	/* just for debugging */
 	if(wcsistr(pmfi->Name,L"Scratch"))
@@ -939,6 +1001,7 @@ void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,
 	USHORT attr_offset;
 	short *name = NULL;
 	BOOLEAN attribute_found = FALSE;
+	char *resident_status = "";
 
 	attr_offset = pfrh->AttributeOffset;
 	pattr = (PATTRIBUTE)((char *)pfrh + attr_offset);
@@ -994,9 +1057,11 @@ void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,
 		}
 		
 		if(attribute_found){
-			DebugPrint("An attribute pointed by the attribute list entry found...\n");
-			DebugPrint("Base MftId = %I64u, MftId = %I64u, Attribute Type = 0x%x, Attribute Number = %u, Nonresident = %u\n",
-				pmfi->BaseMftId,mft_id,(UINT)attr_type,(UINT)attr_number,(UINT)pattr->Nonresident);
+			if(pattr->Nonresident) resident_status = "Nonresident";
+			else resident_status = "Resident";
+			//DebugPrint("An attribute pointed by the attribute list entry found...\n");
+			DebugPrint("AttrListEntry: Base MftId = %I64u, MftId = %I64u, Attribute Type = 0x%x, Attribute Number = %u, %s\n",
+				pmfi->BaseMftId,mft_id,(UINT)attr_type,(UINT)attr_number,resident_status);
 			if(pattr->Nonresident) AnalyseNonResidentAttribute((PNONRESIDENT_ATTRIBUTE)pattr,pmfi);
 			else AnalyseResidentAttribute((PRESIDENT_ATTRIBUTE)pattr,pmfi);
 			number_of_processed_attr_list_entries ++;
@@ -1052,9 +1117,8 @@ short *GetDefaultAttributeName(ATTRIBUTE_TYPE attr_type)
  * information about the file.
  * @note
  * - Nonresident attributes may contain fragmented data.
- * - Standard Information and File Name are resident and 
- * always before nonresident attributes. So we will always have 
- * file flags and a name before this call.
+ * - Never use a name of the file here, because
+ *   it may be not available yet.
  */
 void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORMATION pmfi)
 {
@@ -1064,17 +1128,6 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	short *full_path;
 	BOOLEAN NonResidentAttrListFound = FALSE;
 	
-	/* print characteristics of the attribute */
-//	DebugPrint("-Ultradfg- type = 0x%x NonResident\n",pattr->AttributeType);
-//	if(pnr_attr->Attribute.Flags & 0x1) DebugPrint("-Ultradfg- Compressed\n");
-
-	/* skip invalid files which have no name */
-	if(pmfi->Name[0] == 0){
-		DebugPrint("AnalyseNonResidentAttribute: Invalid entry found: file has no name!\n");
-		DebugPrint("AnalyseNonResidentAttribute: MFT ID = %I64u\n",pmfi->BaseMftId);
-		return;
-	}
-
 	/* get default name of the attribute */
 	attr_type = pnr_attr->Attribute.AttributeType;
 	default_attr_name = GetDefaultAttributeName(attr_type);
@@ -1108,8 +1161,8 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 		pmfi->IsReparsePoint = TRUE;
 	
 	/* ------------------------------------------------------------------------- */
-	/*          concatenate the file name and the attribute name                 */
-	/* ------------------------------------------------------------------------- */
+	/*                          get the attribute name                           */
+ 	/* ------------------------------------------------------------------------- */
 	
 	attr_name[0] = 0;
 	if(pnr_attr->Attribute.NameLength){
@@ -1132,30 +1185,30 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	if(wcscmp(attr_name,L"$INDEX_ALLOCATION") == 0) attr_name[0] = 0;
 	
 	if(attr_name[0])
-		(void)_snwprintf(full_path,MAX_NTFS_PATH,L"%s:%s",pmfi->Name,attr_name);
+		(void)_snwprintf(full_path,MAX_NTFS_PATH,L":%s",attr_name);
 	else
-		(void)wcsncpy(full_path,pmfi->Name,MAX_NTFS_PATH);
+		full_path[0] = 0;
 
 	full_path[MAX_NTFS_PATH - 1] = 0;
 
 	/* ------------------------------------------------------------------------- */
-	/*     now we have the full name of the attribute including the file name    */
+	/*                   now we have the name of the attribute                   */
 	/* ------------------------------------------------------------------------- */
 
 	/* just for debugging */
 	if(wcsistr(pmfi->Name,L"Scratch")){
 		DebugPrint("@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
 			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
-		DebugPrint("@@@@ FULL ATTRIBUTE NAME = %ws, DEFAULT ATTR NAME = %ws\n",
-			full_path,default_attr_name);
+		DebugPrint("@@@@ FULL ATTRIBUTE NAME = %ws%ws, DEFAULT ATTR NAME = %ws\n",
+			pmfi->Name,full_path,default_attr_name);
 	}
 
-	if(NonResidentAttrListFound) DebugPrint("%ws\n",full_path);
+	if(NonResidentAttrListFound) DebugPrint("%ws%ws\n",pmfi->Name,full_path);
 	
 	/* skip $BadClus file which may have wrong number of clusters */
-	if(wcsistr(full_path,L"$BadClus")){
+	if(/*wcsistr(full_path,L"$BadClus") || */wcsistr(pmfi->Name,L"$BadClus")){
 		/* on my system this file always exists, even after chkdsk execution */
-		/*DbgPrint("WARNING: %ws file found! Run CheckDisk program!\n",full_path);*/
+		/*DebugPrint("WARNING: %ws%ws file found! Run CheckDisk program!\n",pmfi->Name,full_path);*/
 	} else {
 		ProcessRunList(full_path,pnr_attr,pmfi,NonResidentAttrListFound);
 	}
