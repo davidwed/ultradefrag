@@ -332,7 +332,7 @@ char *rsb = NULL;
  * @brief Offset of the free portion
  * of the report saving buffer.
  */
-int offset = 0;
+unsigned int offset = 0;
 
 /**
  * @brief The descriptor of the report file.
