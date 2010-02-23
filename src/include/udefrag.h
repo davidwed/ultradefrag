@@ -42,7 +42,7 @@
 #define UDEFRAG_ASSIGNED_BY_SUBST (-7)
 #define UDEFRAG_REMOVABLE         (-8)
 
-#define DEFAULT_REFRESH_INTERVAL 500
+#define DEFAULT_REFRESH_INTERVAL 100
 
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think that's enough. */

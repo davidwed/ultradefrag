@@ -96,7 +96,7 @@
  * Here A,B,C,D,E  represent any integer numbers, y,d,h,m,s - suffixes
  * used for years, days, hours, minutes and seconds.</dd>
  * <dt>UD_REFRESH_INTERVAL</dt>
- * <dd>Progress refresh interval, in milliseconds. The default value is 500.</dd>
+ * <dd>Progress refresh interval, in milliseconds. The default value is 100.</dd>
  * <dt>UD_DISABLE_REPORTS</dt>
  * <dd>If this environment variable is set to 1 (one), no 
  * file fragmentation reports will be generated.</dd>

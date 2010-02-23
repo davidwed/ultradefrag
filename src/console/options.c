@@ -145,7 +145,7 @@ void show_help(void)
 		"\n"
 		"  UD_REFRESH_INTERVAL                 Progress refresh interval,\n"
 		"                                      in milliseconds.\n"
-		"                                      The default value is 500.\n"
+		"                                      The default value is 100.\n"
 		"\n"
 		"  UD_DISABLE_REPORTS                  If this environment variable is set\n"
 		"                                      to 1 (one), no file fragmentation\n"

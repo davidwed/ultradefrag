@@ -118,18 +118,26 @@ ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"
 @verbatim
 -- UltraDefrag GUI options
 
+-- Note that you must specify paths in filters
+-- with double back slashes instead of the single ones.
+-- For example:
+-- ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"
+
 in_filter = ""
 ex_filter = "system volume information;temp;recycler;recycled"
 sizelimit = ""
 fragments_threshold = 0
-refresh_interval = 500
+refresh_interval = 100
 time_limit = ""
 
 disable_reports = 0
-dbgprint_level = ""
 
--- set this parameter to 1 if you prefer to hibernate system
--- after a job instead of shutting them down, otherwise set it to 0
+-- set dbgprint_level to DETAILED for reporting a bug,
+-- for normal operation set it to NORMAL or an empty string
+dbgprint_level = "NORMAL"
+
+-- set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system
+-- after a job is done instead of shutting it down, otherwise set it to 0
 
 hibernate_instead_of_shutdown = 0
 @endverbatim
