@@ -116,6 +116,7 @@
     jtl
     Ken Choy
     Latino
+    Patrick Paludan-Müller
     Stefan Pendl
 
 --------------------------------------------------------------------------------
