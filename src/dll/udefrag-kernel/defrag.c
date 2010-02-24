@@ -59,9 +59,13 @@ int Defragment(char *volume_name)
 	ULONGLONG defragmented = 0;
 
 	DebugPrint("----- Defragmentation of %s: -----\n",volume_name);
-
+	
 	/* Initialize progress counters. */
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
+	Stat.current_operation = 'D';
+	
+	/* skip all locked files */
+	CheckAllFragmentedFiles();
 
 	for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(!pf->pfn->blockmap) goto next_item; /* skip fragmented files with unknown state */
@@ -76,8 +80,6 @@ int Defragment(char *volume_name)
 		if(pf->next_ptr == fragmfileslist) break;
 	}
 
-	Stat.current_operation = 'D';
-	
 	/* Fill free space areas. */
 	for(block = free_space_map; block != NULL; block = block->next_ptr){
 	L0:

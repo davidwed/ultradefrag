@@ -60,8 +60,6 @@ int Analyze(char *volume_name)
 	unsigned short path[] = L"\\??\\A:\\";
 	NTSTATUS Status;
 	ULONGLONG tm, time;
-	PFILENAME pfn;
-	HANDLE hFile;
 	ULONG pass_number;
 	int error_code;
 	
@@ -154,36 +152,104 @@ int Analyze(char *volume_name)
 		DebugPrint("An universal scan needs %I64u ms\n",time);
 	}
 	
-	/* if(partition_type == FAT16_PARTITION) (void)ScanFat16Partition(); */
-
 	DebugPrint("Files found: %u\n",Stat.filecounter);
 	DebugPrint("Fragmented files: %u\n",Stat.fragmfilecounter);
 
 	GenerateFragmentedFilesList();
+	return 0;
+}
+
+/**
+ * @brief Checks is file locked or not.
+ * @param[in,out] pfn pointer to structure
+ * describing the file.
+ * @return Boolean value indicating is file
+ * locked or not.
+ * @note 
+ * - Side effect: pfn->blockmap becomes
+ * to be equal to NULL if the file is locked.
+ * - Kalle Koseck (http://dosbatchsubs.sourceforge.net/)
+ * suggested me to move all file checking to defragmenter/optimizer
+ * to dramatically speed up an analysis. Thus this function born.
+ */
+BOOLEAN IsFileLocked(PFILENAME pfn)
+{
+	NTSTATUS Status;
+	HANDLE hFile;
+
+	/* is the file already checked? */
+	if(pfn->blockmap == NULL) return TRUE;
+
+	/* check the file */
+	Status = OpenTheFile(pfn,&hFile);
+	if(Status == STATUS_SUCCESS){
+		NtCloseSafe(hFile);
+		return FALSE;
+	}
+
+	DebugPrintEx(Status,"Cannot open %ws",pfn->name.Buffer);
 	
-	if(JobType == ANALYSE_JOB) return 0;
-	
-	/* all locked files are in unknown state, right? */
-	/* note: these checks takes a lot of time */
-	DebugPrint("File checking started...\n");
-	DebugPrint("UltraDefrag will try to open all files sequentially...\n");
-	DebugPrint("to ensure that they are not locked.\n");
-	DebugPrint("This may take few minutes if there are many files on the disk.\n");
+	/* file is locked by other application, so its state is unknown */
+	DeleteBlockmap(pfn);
+	return TRUE;
+}
+
+/**
+ * @brief Checks all fragmented files,
+ * are they locked or not.
+ * @note Works slow.
+ */
+void CheckAllFragmentedFiles(void)
+{
+	ULONGLONG tm, time;
+	PFRAGMENTED pf;
+
+	DebugPrint("+-------------------------------------------------------+\n");
+	DebugPrint("|          Fragmented files checking started...         |\n");
+	DebugPrint("+-------------------------------------------------------+\n");
+	DebugPrint("UltraDefrag will try to open them to ensure that they are not locked.\n");
+	DebugPrint("This may take few minutes if there are many fragmented files on the disk.\n");
+	DebugPrint("\n");
 	tm = _rdtsc();
+
+	for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
+		(void)IsFileLocked(pf->pfn);
+		if(pf->next_ptr == fragmfileslist) break;
+	}
+
+	time = _rdtsc() - tm;
+	DebugPrint("---------------------------------------------------------\n");
+	DebugPrint("Fragmented files checking completed in %I64u ms.\n",  time);
+	DebugPrint("---------------------------------------------------------\n");
+}
+
+/**
+ * @brief Checks all files,
+ * are they locked or not.
+ * @note Works slow.
+ */
+void CheckAllFiles(void)
+{
+	ULONGLONG tm, time;
+	PFILENAME pfn;
+
+	DebugPrint("+-------------------------------------------------------+\n");
+	DebugPrint("|               Files checking started...               |\n");
+	DebugPrint("+-------------------------------------------------------+\n");
+	DebugPrint("UltraDefrag will try to open them to ensure that they are not locked.\n");
+	DebugPrint("This may take few minutes if there are many files on the disk.\n");
+	DebugPrint("\n");
+	tm = _rdtsc();
+
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
-		if(CheckForStopEvent()) break;
-		Status = OpenTheFile(pfn,&hFile);
-		if(Status != STATUS_SUCCESS){
-			DebugPrint("Can't open %ws file: %x\n",pfn->name.Buffer,(UINT)Status);
-			DeleteBlockmap(pfn); /* file is locked by other application, so its state is unknown */
-		} else {
-			NtCloseSafe(hFile);
-		}
+		(void)IsFileLocked(pfn);
 		if(pfn->next_ptr == filelist) break;
 	}
+
 	time = _rdtsc() - tm;
-	DebugPrint("File checking completed in %I64u ms.\n",time);
-	return 0;
+	DebugPrint("---------------------------------------------------------\n");
+	DebugPrint("Files checking completed in %I64u ms.\n",  time);
+	DebugPrint("---------------------------------------------------------\n");
 }
 
 /**
@@ -236,25 +302,5 @@ ULONGLONG _rdtsc_1(void)
 	}
 	return ((1000 * 1000 * 1000) / frequency.QuadPart) * counter.QuadPart;
 }
-
-//int AnalyzeFreeSpace(char *volume_name)
-//{
-//	NTSTATUS Status;
-//
-//	DebugPrint("----- Analyze free space of %s: -----\n",volume_name);
-//	
-//	CloseVolume();
-//	DestroyList((PLIST *)(void *)&free_space_map);
-//
-//	/* reopen the volume */
-//	if(OpenVolume(volume_name) < 0) return (-1);
-//	/* scan volume for free space areas */
-//	Status = FillFreeSpaceMap();
-//	if(!NT_SUCCESS(Status)){
-//		DebugPrintEx(Status,"FillFreeSpaceMap() failed");
-//		return (-1);
-//	}
-//	return 0;
-//}
 
 /** @} */

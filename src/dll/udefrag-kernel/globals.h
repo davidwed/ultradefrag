@@ -215,6 +215,9 @@ void GenerateFragmentedFilesList(void);
 int FindFiles(WCHAR *ParentDirectoryPath);
 BOOLEAN AddFileToFragmented(PFILENAME pfn);
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
+BOOLEAN IsFileLocked(PFILENAME pfn);
+void CheckAllFiles(void);
+void CheckAllFragmentedFiles(void);
 BOOLEAN DumpFile(PFILENAME pfn);
 void UpdateFragmentedFilesList(void);
 

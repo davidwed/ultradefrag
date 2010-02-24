@@ -54,7 +54,9 @@ int Optimize(char *volume_name)
 	ULONGLONG FragmentedClustersBeforeStartingPoint = 0;
 	PFILENAME pfn;
 	PBLOCKMAP block;
-	HANDLE hFile;
+
+	Stat.clusters_to_process = Stat.processed_clusters = 0;
+	Stat.current_operation = 'C';
 
 	/* define threshold */
 	threshold = clusters_total / 200; /* 0.5% */
@@ -70,17 +72,17 @@ int Optimize(char *volume_name)
 		}
 		if(freeblock->next_ptr == free_space_map) return 0;
 	}
+
+	/* skip all locked files */
+	CheckAllFiles();
+	
 	/* validate StartingPoint */
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(pfn->is_reparse_point == FALSE && pfn->is_fragm){
-			/* skip system files */
-			if(OpenTheFile(pfn,&hFile) == STATUS_SUCCESS){
-				NtCloseSafe(hFile);
-				for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-					if((block->lcn + block->length) <= StartingPoint)
-						FragmentedClustersBeforeStartingPoint += block->length;
-					if(block->next_ptr == pfn->blockmap) break;
-				}
+			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+				if((block->lcn + block->length) <= StartingPoint)
+					FragmentedClustersBeforeStartingPoint += block->length;
+				if(block->next_ptr == pfn->blockmap) break;
 			}
 		}
 		if(pfn->next_ptr == filelist) break;
@@ -124,13 +126,13 @@ int OptimizationRoutine(char *volume_name)
 
 	/* Initialize progress counters. */
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
+	Stat.current_operation = 'C';
 	if(free_space_map){
 		for(freeblock = free_space_map->prev_ptr; 1; freeblock = freeblock->prev_ptr){
 			if(freeblock->lcn >= StartingPoint) Stat.clusters_to_process += freeblock->length;
 			if(freeblock->prev_ptr == free_space_map) break;
 		}
 	}
-	Stat.current_operation = 'C';
 	
 	/* On FAT volumes it increase distance between dir & files inside it. */
 	if(partition_type != NTFS_PARTITION) return (-1);
@@ -183,6 +185,9 @@ void DefragmentFreeSpaceRTL(void)
 	ULONGLONG maxlcn;
 	ULONGLONG vcn, length;
 	ULONGLONG movings;
+	
+	/* skip all locked files */
+	CheckAllFiles();
 	
 	while(1){
 		/* 1. Find the latest file block on the volume. */
@@ -247,6 +252,9 @@ void DefragmentFreeSpaceLTR(void)
 	ULONGLONG minlcn;
 	ULONGLONG vcn, length;
 	ULONGLONG movings;
+	
+	/* skip all locked files */
+	CheckAllFiles();
 	
 	while(1){
 		/* 1. Find the first file block on the volume: AFTER StartingPoint. */
@@ -356,15 +364,19 @@ int MoveAllFilesRTL(void)
 	ULONGLONG length;
 	ULONGLONG movings = 0;
 
-	/* Reinitialize progress counters. */
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
+	Stat.current_operation = 'C';
+
+	/* skip all locked files */
+	CheckAllFiles();
+	
+	/* Reinitialize progress counters. */
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(pfn->blockmap && !pfn->is_reparse_point)
 			if(pfn->blockmap->lcn >= StartingPoint)
 				Stat.clusters_to_process += pfn->clusters_total;
 		if(pfn->next_ptr == filelist) break;
 	}
-	Stat.current_operation = 'C';
 
 	for(block = free_space_map; block != NULL; block = block->next_ptr){
 	L0:
