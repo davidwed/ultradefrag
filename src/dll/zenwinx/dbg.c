@@ -239,6 +239,10 @@ NT_STATUS_DESCRIPTION status_descriptions[] = {
 	{ STATUS_NO_MEDIA_IN_DEVICE,     "No media in device"             },
 	{ STATUS_UNRECOGNIZED_VOLUME,    "Cannot recognize file system"   },
 	{ STATUS_VARIABLE_NOT_FOUND,     "Environment variable not found" },
+	
+	/* A file cannot be opened because the share access flags are incompatible. */
+	{ STATUS_SHARING_VIOLATION,      "File is locked by another process"},
+	
 	{ 0xffffffff,                    NULL                             }
 };
 

@@ -204,6 +204,9 @@ typedef LONG NTSTATUS;
 #ifndef STATUS_WAIT_0
 #define STATUS_WAIT_0                 ((NTSTATUS)0x00000000)
 #endif
+#ifndef STATUS_SHARING_VIOLATION
+#define STATUS_SHARING_VIOLATION      ((NTSTATUS)0xC0000043)
+#endif
 
 #if defined(__GNUC__)
 #define MAX_WAIT_INTERVAL (-0x7FFFFFFFFFFFFFFFLL)
