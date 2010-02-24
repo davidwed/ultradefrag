@@ -94,6 +94,7 @@
     Dario Raparelli    - NT 4.0 support.
     Jan Loncik         - x64 native support. Better 'system' filter preset.
     Jim Laski          - System fonts and visual styles for graphical interface
+    Kalle Koseck       - The volume analysis speedup.
     Kerem Gümrükcü     - Manifests for Vista User Account Control (UAC)
     Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
     Markus Elfring     - Strong error handling.
