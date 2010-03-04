@@ -141,7 +141,7 @@ static BOOLEAN SaveLuaReportToDisk(char *volume_name)
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
-		DebugPrint("Can't create %s file!\n",path);
+		DebugPrint("Cannot create %s file!\n",path);
 		return FALSE;
 	}
 	
@@ -214,6 +214,7 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 			RtlFreeAnsiString(&as);
 		} else {
 			DebugPrint("No enough memory for WriteReportBody()!\n");
+			out_of_memory_condition_counter ++;
 		}
 		(void)strcpy(buffer,"]],uname = {");
 		(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
@@ -252,7 +253,7 @@ static BOOLEAN SaveTextReportToDisk(char *volume_name)
 	path[63] = 0;
 	f = winx_fopen(path,"w");
 	if(f == NULL){
-		DebugPrint("Can't create %s file!\n",path);
+		DebugPrint("Cannot create %s file!\n",path);
 		return FALSE;
 	}
 	
@@ -296,6 +297,7 @@ static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		RtlInitAnsiString(&as,buffer);
 		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
 			DebugPrint("No enough memory for WriteReportBody()!\n");
+			out_of_memory_condition_counter ++;
 			return;
 		}
 		(void)WriteToReportSavingBuffer(us.Buffer,1,us.Length,f);

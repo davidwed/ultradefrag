@@ -51,6 +51,7 @@ NTSTATUS FillFreeSpaceMap(void)
 	BitMap = winx_heap_alloc(BITMAPSIZE * sizeof(UCHAR));
 	if(BitMap == NULL){
 		DebugPrint("Cannot allocate memory for FillFreeSpaceMap()!\n");
+		out_of_memory_condition_counter ++;
 		return STATUS_NO_MEMORY;
 	}
 

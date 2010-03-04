@@ -71,6 +71,7 @@ int AllocateMap(int size)
 	if(!new_cluster_map){
 		DebugPrint("Cannot allocate %u bytes of memory for cluster map!",
 			buffer_size);
+		out_of_memory_condition_counter ++;
 		(void)NtSetEvent(hMapEvent,NULL);
 		return (-1);
 	}
@@ -112,7 +113,7 @@ int GetMap(char *dest,int cluster_map_size)
 		return (-1);
 	}
 	if(cluster_map_size != map_size){
-		DebugPrint2("Map size is wrong: %u != %u!\n",
+		DebugPrint("Map size is wrong: %u != %u!\n",
 			cluster_map_size,map_size);
 		(void)NtSetEvent(hMapEvent,NULL);
 		return (-1);

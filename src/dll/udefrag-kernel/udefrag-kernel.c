@@ -51,7 +51,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
 	int error_code = 0;
-
+	
 	/* 0a. check for synchronization objects */
 	if(CheckForSynchObjects() < 0){
 		DebugPrint("Synchronization objects aren't available!");
@@ -72,6 +72,9 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	if(job_type == DEFRAG_JOB) action = "defragmenting";
 	if(job_type == OPTIMIZE_JOB) action = "optimizing";
 	DebugPrint("Start %s volume %s\n",action,volume_name);
+	
+	/* reset out_of_memory_condition_counter */
+	out_of_memory_condition_counter = 0;
 	
 	/* 2. allocate cluster map */
 	if(AllocateMap(cluster_map_size) < 0){
@@ -126,6 +129,11 @@ success:
 	Stat.pass_number = 0xffffffff;
 	(void)NtSetEvent(hSynchEvent,NULL);
 	(void)NtClearEvent(hStopEvent);
+	if(out_of_memory_condition_counter){
+		DebugPrint("The out of memory condition has been occured %I64u times.\n",
+			out_of_memory_condition_counter);
+		DebugPrint("Therefore the disk defragmentation may be incomplete.\n");
+	}
 	return 0;
 	
 failure:
@@ -134,6 +142,11 @@ failure:
 	Stat.pass_number = 0xffffffff;
 	(void)NtSetEvent(hSynchEvent,NULL);
 	(void)NtClearEvent(hStopEvent);
+	if(out_of_memory_condition_counter){
+		DebugPrint("The out of memory condition has been occured %I64u times.\n",
+			out_of_memory_condition_counter);
+		DebugPrint("Therefore the disk defragmentation may be incomplete.\n");
+	}
 	return error_code;
 }
 

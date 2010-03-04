@@ -47,6 +47,7 @@ void InitializeFilter(void)
 	if(!env_buffer){
 		DebugPrint("Cannot allocate %u bytes for InitializeOptions()\n",
 			ENV_BUFFER_SIZE * sizeof(short));
+		out_of_memory_condition_counter ++;
 		return;
 	}
 	RtlZeroMemory(env_buffer,ENV_BUFFER_SIZE * sizeof(short));
@@ -115,6 +116,7 @@ void SetFilter(PFILTER pf,short *buffer)
 	pf->buffer = winx_heap_alloc(length * sizeof(short));
 	if(!pf->buffer){
 		DebugPrint("Cannot allocate memory for pf->buffer in SetFilter()!\n");
+		out_of_memory_condition_counter ++;
 		return;
 	}
 

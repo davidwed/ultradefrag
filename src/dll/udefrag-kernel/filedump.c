@@ -93,6 +93,7 @@ BOOLEAN DumpFile(PFILENAME pfn)
 	FileMap = winx_heap_alloc(FILEMAPSIZE * sizeof(ULONGLONG));
 	if(FileMap == NULL){
 		DebugPrint("Cannot allocate memory for DumpFile()!\n");
+		out_of_memory_condition_counter ++;
 		return FALSE;
 	}
 

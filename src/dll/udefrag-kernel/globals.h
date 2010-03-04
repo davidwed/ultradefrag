@@ -159,6 +159,8 @@ extern ULONG map_size;
 
 extern BOOLEAN optimize_flag;
 
+extern ULONGLONG out_of_memory_condition_counter;
+
 /*************** Functions prototypes ******************/
 void InitDriverResources(void);
 void FreeDriverResources(void);

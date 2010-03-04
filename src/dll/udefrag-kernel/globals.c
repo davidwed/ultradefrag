@@ -62,6 +62,8 @@ ULONGLONG max_mft_entries = 0;
 
 BOOLEAN optimize_flag = FALSE;
 
+ULONGLONG out_of_memory_condition_counter = 0;
+
 void InitSynchObjects(void);
 void DestroySynchObjects(void);
 

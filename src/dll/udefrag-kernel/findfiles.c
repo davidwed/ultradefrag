@@ -58,11 +58,13 @@ int FindFiles(WCHAR *ParentDirectoryPath)
 		FIND_DATA_SIZE + sizeof(PFILE_BOTH_DIR_INFORMATION));
 	if(!pFileInfoFirst){
 		DebugPrint("Cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n");
+		out_of_memory_condition_counter ++;
 		return UDEFRAG_NO_MEM;
 	}
 	Path = (WCHAR *)winx_heap_alloc(PATH_BUFFER_LENGTH * sizeof(WCHAR));
 	if(Path == NULL){
 		DebugPrint("Cannot allocate memory for FILE_BOTH_DIR_INFORMATION structure!\n");
+		out_of_memory_condition_counter ++;
 		winx_heap_free(pFileInfoFirst);
 		return UDEFRAG_NO_MEM;
 	}
@@ -76,7 +78,7 @@ int FindFiles(WCHAR *ParentDirectoryPath)
 				FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_OPEN_FOR_BACKUP_INTENT,
 				NULL,0);
 	if(Status != STATUS_SUCCESS){
-		DebugPrint1("Cannot open directory: %ws: %x\n",ParentDirectoryPath,(UINT)Status);
+		DebugPrint("Cannot open directory: %ws: %x\n",ParentDirectoryPath,(UINT)Status);
 		DirectoryHandle = NULL;	winx_heap_free(pFileInfoFirst); winx_heap_free(Path);
 		return (-1);
 	}
@@ -164,7 +166,7 @@ int FindFiles(WCHAR *ParentDirectoryPath)
 		if(context_menu_handler && !inside_flag) continue;
 
 		if(!AddFile(Path,pFileInfo)){
-			DebugPrint("InsertFileName failed for %ws\n",Path);
+			DebugPrint("AddFile failed for %ws\n",Path);
 			NtClose(DirectoryHandle);
 			winx_heap_free(pFileInfoFirst);
 			winx_heap_free(Path);
@@ -196,8 +198,9 @@ BOOLEAN AddFile(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	
 	/* Initialize pfn->name field. */
 	if(!RtlCreateUnicodeString(&pfn->name,path)){
-		DebugPrint2("No enough memory for pfn->name initialization!\n");
+		DebugPrint("No enough memory for pfn->name initialization!\n");
 		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
+		out_of_memory_condition_counter ++;
 		return FALSE;
 	}
 
@@ -286,7 +289,8 @@ BOOLEAN AddFileToFragmented(PFILENAME pfn)
 
 	pf = (PFRAGMENTED)winx_list_insert_item((list_entry **)(void *)&fragmfileslist,(list_entry *)prev_pf,sizeof(FRAGMENTED));
 	if(!pf){
-		DebugPrint2("Cannot allocate memory for InsertFragmentedFile()!\n");
+		DebugPrint("Cannot allocate memory for InsertFragmentedFile()!\n");
+		out_of_memory_condition_counter ++;
 		return FALSE;
 	}
 	pf->pfn = pfn;
@@ -338,7 +342,8 @@ BOOLEAN UnwantedStuffOnFatOrUdfDetected(PFILE_BOTH_DIR_INFORMATION pFileInfo,PFI
 	
 	/* skip all unwanted files by user defined patterns */
 	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
-		DebugPrint2("Cannot allocate memory for UnwantedStuffDetected()!\n");
+		DebugPrint("Cannot allocate memory for UnwantedStuffDetected()!\n");
+		out_of_memory_condition_counter ++;
 		return FALSE;
 	}
 	(void)_wcslwr(us.Buffer);
@@ -392,6 +397,7 @@ BOOLEAN ConsoleUnwantedStuffDetected(WCHAR *Path,ULONG *InsideFlag)
 	lpath = (WCHAR *)winx_heap_alloc((path_length + 1) * sizeof(WCHAR));
 	if(lpath == NULL){
 		DebugPrint("Cannot allocate memory for ConsoleUnwantedStuffDetected()!\n");
+		out_of_memory_condition_counter ++;
 		return FALSE;
 	}
 	(void)wcscpy(lpath,Path);

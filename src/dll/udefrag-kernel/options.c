@@ -39,6 +39,7 @@ void InitializeOptions(void)
 	if(!env_buffer){
 		DebugPrint("Cannot allocate %u bytes for InitializeOptions()\n",
 			ENV_BUFFER_SIZE * sizeof(short));
+		out_of_memory_condition_counter ++;
 		return;
 	}
 

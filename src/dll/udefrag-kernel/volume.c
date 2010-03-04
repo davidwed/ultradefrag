@@ -95,6 +95,7 @@ int GetDriveGeometry(char *volume_name)
 	if(!pFileFsSize){
 		winx_fclose(fRoot);
 		DebugPrint("udefrag-kernel.dll GetDriveGeometry(): no enough memory!");
+		out_of_memory_condition_counter ++;
 		return UDEFRAG_NO_MEM;
 	}
 
