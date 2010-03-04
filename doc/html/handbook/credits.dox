@@ -23,7 +23,7 @@
  * <b>Program and Documentation Copyright (c) 2007-2008</b>
  * 
  * - Dmitri Arkhangelski (dmitriar@users.sourceforge.net),\n
- * - Justin Dearing (zippy1981@users.sourceforge.net).
+ * - Justin Dearing      (zippy1981@users.sourceforge.net).
  *
  * <b>Program and Documentation Copyright (c) 2009-2010</b>
  * 
@@ -31,7 +31,7 @@
  *
  * <b>Web Design Copyright (c) 2009</b>
  *
- * - Sayem Chaklader (gearspec@viperprogrammers.net).
+ * - Sayem Chaklader     (gearspec@viperprogrammers.net).
  *
  * <b>Translations Copyright (c) 2008 - 2010</b>
  *
@@ -75,8 +75,8 @@
  *
  * <b>Tanslation managers:</b>
  *
- * - Stefan Pendl (stefanpe@users.sourceforge.net)
- * - Nagy Zsolt (in the past)
+ * - Stefan Pendl   (stefanpe@users.sourceforge.net)
+ * - Nagy Zsolt     (in the past)
  * - Justin Dearing (in the past)
  *
  * Special thanks for strong testing to (in alphabetical order):
@@ -94,22 +94,22 @@
  * Special thanks for good suggestions to (in alphabetical order):
  *
  * - Alexander Vedyakin - Volume type detection improvements. More effective
- *   defragmenting algorithms.
- * - Andrei Maksimov - GUI improvements.
- * - Bryan Kirk - Better GUI appearance (new list of drives).
- *   Autodefrag feature (not implemented yet).
+ *                        defragmenting algorithms.
+ * - Andrei Maksimov    - GUI improvements.
+ * - Bryan Kirk         - Better GUI appearance (new list of drives).
+ *                        Autodefrag feature (not implemented yet).
  * - Christopher Naegel - Driver loading on Vista problem's partial solution.
- * - Dario Raparelli - NT 4.0 support.
- * - Jan Loncik - x64 native support. Better filter presets.
- * - Jim Laski - System fonts and visual styles for graphical interface.
- * - Kalle Koseck - The volume analysis speedup.
- * - Kerem Gumrukcu - Manifests for Vista User Account Control (UAC).
+ * - Dario Raparelli    - NT 4.0 support.
+ * - Jan Loncik         - x64 native support. Better filter presets.
+ * - Jim Laski          - System fonts and visual styles for graphical interface.
+ * - Kalle Koseck       - The volume analysis speedup.
+ * - Kerem Gumrukcu     - Manifests for Vista User Account Control (UAC).
  * - Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
- * - Markus Elfring - Strong error handling.
- * - Mike Braca - Reducing driver's memory usage (new cluster map internal representation).
- * - Nagy Zsolt - Interesting ideas about translation. Installer improvements.
- * - Parvez Reza - Various interesting programming tricks.
- * - Stefan Pendl - Boot time defragmenter improvements. Installer improvements.
+ * - Markus Elfring     - Strong error handling.
+ * - Mike Braca         - Reducing driver's memory usage (new cluster map internal representation).
+ * - Nagy Zsolt         - Interesting ideas about translation. Installer improvements.
+ * - Parvez Reza        - Various interesting programming tricks.
+ * - Stefan Pendl       - Boot time defragmenter improvements. Installer improvements.
  *
  * Special thanks for correcting and updating translations (in alphabetical order):
  *
