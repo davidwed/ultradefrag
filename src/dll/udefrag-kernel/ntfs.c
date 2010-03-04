@@ -59,6 +59,7 @@ void CheckForNtfsPartition(void)
 	part_info = winx_heap_alloc(sizeof(PARTITION_INFORMATION));
 	if(part_info == NULL){
 		DebugPrint("Cannot allocate memory for CheckForNtfsPartition()!\n");
+		out_of_memory_condition_counter ++;
 		partition_type = FAT32_PARTITION;
 		return;
 	}
@@ -66,6 +67,7 @@ void CheckForNtfsPartition(void)
 	if(ntfs_data == NULL){
 		winx_heap_free(part_info);
 		DebugPrint("Cannot allocate memory for CheckForNtfsPartition()!\n");
+		out_of_memory_condition_counter ++;
 		partition_type = FAT32_PARTITION;
 		return;
 	}
@@ -143,6 +145,7 @@ NTSTATUS GetMftLayout(void)
 	ntfs_data = winx_heap_alloc(sizeof(NTFS_DATA));
 	if(ntfs_data == NULL){
 		DebugPrint("Cannot allocate memory for GetMftLayout()!\n");
+		out_of_memory_condition_counter ++;
 		return STATUS_NO_MEMORY;
 	}
 
@@ -155,7 +158,7 @@ NTSTATUS GetMftLayout(void)
 		status = iosb.Status;
 	}
 	if(!NT_SUCCESS(status)){
-		DebugPrint("Can't get ntfs info: %x!\n",status);
+		DebugPrint("Cannot get ntfs info: %x!\n",status);
 		winx_heap_free(ntfs_data);
 		return status;
 	}
@@ -214,6 +217,7 @@ BOOLEAN ScanMFT(void)
 	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)winx_heap_alloc(nfrob_size);
 	if(!pnfrob){
 		DebugPrint("No enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
+		out_of_memory_condition_counter ++;
 		DebugPrint("MFT scan finished!\n");
 		return FALSE;
 	}
@@ -222,6 +226,7 @@ BOOLEAN ScanMFT(void)
 	pmfi = (PMY_FILE_INFORMATION)winx_heap_alloc(sizeof(MY_FILE_INFORMATION));
 	if(!pmfi){
 		DebugPrint("No enough memory for MY_FILE_INFORMATION structure!\n");
+		out_of_memory_condition_counter ++;
 		winx_heap_free(pnfrob);
 		DebugPrint("MFT scan finished!\n");
 		return FALSE;
@@ -424,6 +429,7 @@ int UpdateAttributeName(PFILENAME pfn,PMY_FILE_INFORMATION pmfi)
 	buffer = winx_heap_alloc(MAX_NTFS_PATH * sizeof(short));
 	if(buffer == NULL){
 		DebugPrint("Cannot allocate memory for buffer in UpdateAttributeName()!\n");
+		out_of_memory_condition_counter ++;
 		return (-1);
 	}
 	if(pfn->name.Buffer[0])
@@ -434,6 +440,7 @@ int UpdateAttributeName(PFILENAME pfn,PMY_FILE_INFORMATION pmfi)
 
 	if(!RtlCreateUnicodeString(&us,buffer)){
 		DebugPrint("UpdateAttributeName: Cannot allocate memory for new name!\n");
+		out_of_memory_condition_counter ++;
 		winx_heap_free(buffer);
 		return (-1);
 	}
@@ -530,9 +537,9 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	}
 	
 	/* just for debugging */
-	if(wcsistr(pmfi->Name,L"Scratch"))
+	/*if(wcsistr(pmfi->Name,L"Scratch"))
 		DebugPrint("@@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
-			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
+			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);*/
 
 	/* add resident directories to filelist - required by BuildPaths() */
 	if(pmfi->IsDirectory){
@@ -751,6 +758,7 @@ void GetFileName(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATION pmfi)
 		name = (short *)winx_heap_alloc((pfn_attr->NameLength + 1) * sizeof(short));
 		if(!name){
 			DebugPrint("Cannot allocate memory for GetFileName()!\n");
+			out_of_memory_condition_counter ++;
 			return;
 		}
 		(void)wcsncpy(name,pfn_attr->Name,pfn_attr->NameLength);
@@ -897,6 +905,7 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
 		if(attr_name == NULL){
 			DebugPrint("Cannot allocate %u bytes of memory for AnalyseAttributeFromAttributeList()!\n",
 				(name_length + 1) * sizeof(short));
+			out_of_memory_condition_counter ++;
 			return;
 		}
 		memcpy(attr_name,
@@ -958,6 +967,7 @@ void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,
 	if(!pnfrob){
 		DebugPrint("AnalyseAttributeFromMftRecord():\n");
 		DebugPrint("No enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
+		out_of_memory_condition_counter ++;
 		return;
 	}
 
@@ -1154,6 +1164,7 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	attr_name = (short *)winx_heap_alloc((MAX_NTFS_PATH + 1) * sizeof(short));
 	if(!attr_name){
 		DebugPrint("Cannot allocate memory for attr_name in AnalyseNonResidentAttribute()!\n");
+		out_of_memory_condition_counter ++;
 		return;
 	}
 	
@@ -1195,12 +1206,12 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	/* ------------------------------------------------------------------------- */
 
 	/* just for debugging */
-	if(wcsistr(pmfi->Name,L"Scratch")){
+	/*if(wcsistr(pmfi->Name,L"Scratch")){
 		DebugPrint("@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
 			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
 		DebugPrint("@@@@ FULL ATTRIBUTE NAME = %ws:%ws, DEFAULT ATTR NAME = %ws\n",
 			pmfi->Name,attr_name,default_attr_name);
-	}
+	}*/
 
 	if(NonResidentAttrListFound) DebugPrint("%ws:%ws\n",pmfi->Name,attr_name);
 	
@@ -1327,6 +1338,10 @@ void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULO
 	USHORT length;
 	
 	DebugPrint("Allocated size = %I64u bytes.\n",size);
+	if(size == 0){
+		DebugPrint("Empty nonresident attribute list found.\n");
+		return;
+	}
 	
 	/* allocate memory for an integral number of cluster to hold a whole AttributeList */
 	clusters_to_read = size / bytes_per_cluster;
@@ -1336,6 +1351,7 @@ void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULO
 	if(!cluster){
 		DebugPrint("Cannot allocate %I64u bytes of memory for AnalyseNonResidentAttributeList()!\n",
 			bytes_per_cluster * clusters_to_read);
+		out_of_memory_condition_counter ++;
 		return;
 	}
 	
@@ -1352,11 +1368,26 @@ void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULO
 					lsn,(UINT)status);
 				goto scan_done;
 			}
+			clusters_to_read --;
+			if(clusters_to_read == 0){
+				/* is it the last cluster of the file? */
+				if(i < (block->length - 1) || block->next_ptr != pfn->blockmap)
+					DebugPrint("The attribute list has more clusters than expected.\n");
+				goto analyze_list;
+			}
 			current_cluster += bytes_per_cluster;
 		}
 		if(block->next_ptr == pfn->blockmap) break;
 	}
 
+analyze_list:
+	if(clusters_to_read){
+		DebugPrint("The attribute list has less number of clusters than expected.\n");
+		DebugPrint("Therefore it will be skipped, because anyway we don\'t know its exact size.\n");
+		goto scan_done;
+	}
+
+	DebugPrint("Attribute list analysis started...\n");
 	attr_list_entry = (PATTRIBUTE_LIST)cluster;
 
 	while(TRUE){
@@ -1373,6 +1404,7 @@ void AnalyseNonResidentAttributeList(PFILENAME pfn,PMY_FILE_INFORMATION pmfi,ULO
 		length = attr_list_entry->Length;
 		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + length);
 	}
+	DebugPrint("Attribute list analysis completed.\n");
 
 scan_done:	
 	/* free allocated resources */
@@ -1473,7 +1505,8 @@ void ProcessRun(WCHAR *full_path,PMY_FILE_INFORMATION pmfi,
 	if(pfn->blockmap) prev_block = pfn->blockmap->prev_ptr;
 	block = (PBLOCKMAP)winx_list_insert_item((list_entry **)&pfn->blockmap,(list_entry *)prev_block,sizeof(BLOCKMAP));
 	if(!block){
-		DebugPrint2("Cannot allocate %u bytes of memory for ProcessRun()!\n",sizeof(BLOCKMAP));
+		DebugPrint("Cannot allocate %u bytes of memory for ProcessRun()!\n",sizeof(BLOCKMAP));
+		out_of_memory_condition_counter ++;
 		return;
 	}
 	
@@ -1526,13 +1559,15 @@ PFILENAME FindFileListEntryForTheAttribute(WCHAR *full_path,PMY_FILE_INFORMATION
 	
 	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
 	if(pfn == NULL){
-		DebugPrint2("Cannot allocate %u bytes of memory for FindFileListEntryForTheAttribute()!\n",sizeof(FILENAME));
+		DebugPrint("Cannot allocate %u bytes of memory for FindFileListEntryForTheAttribute()!\n",sizeof(FILENAME));
+		out_of_memory_condition_counter ++;
 		return NULL;
 	}
 	
 	/* fill a name member of the created structure */
 	if(!RtlCreateUnicodeString(&pfn->name,full_path)){
-		DebugPrint2("No enough memory for pfn->name initialization!\n");
+		DebugPrint("No enough memory for pfn->name initialization!\n");
+		out_of_memory_condition_counter ++;
 		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		return NULL;
 	}
@@ -1596,7 +1631,7 @@ void UpdateClusterMapAndStatistics(PMY_FILE_INFORMATION pmfi)
 			DebugPrint("Sparse file found %ws\n",pfn->name.Buffer);
 		/* 1.5 detect encrypted files */
 		if(pmfi->Flags & FILE_ATTRIBUTE_ENCRYPTED){
-			DebugPrint1("Encrypted file found %ws\n",pfn->name.Buffer);
+			DebugPrint2("Encrypted file found %ws\n",pfn->name.Buffer);
 		}
 		/* 2. redraw cluster map */
 //		MarkSpace(dx,pfn,SYSTEM_SPACE);
@@ -1651,7 +1686,8 @@ BOOLEAN UnwantedStuffDetected(PFILENAME pfn)
 
 	/* skip all unwanted files by user defined patterns */
 	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
-		DebugPrint2("Cannot allocate memory for UnwantedStuffDetected()!\n");
+		DebugPrint("Cannot allocate memory for UnwantedStuffDetected()!\n");
+		out_of_memory_condition_counter ++;
 		return FALSE;
 	}
 	(void)_wcslwr(us.Buffer);
@@ -1773,11 +1809,13 @@ void BuildPath2(PFILENAME pfn)
 	buffer1 = (WCHAR *)winx_heap_alloc((MAX_NTFS_PATH) * sizeof(short));
 	if(!buffer1){
 		DebugPrint("BuildPath2(): cannot allocate memory for buffer1\n");
+		out_of_memory_condition_counter ++;
 		return;
 	}
 	buffer2 = (WCHAR *)winx_heap_alloc((MAX_NTFS_PATH) * sizeof(short));
 	if(!buffer2){
 		DebugPrint("BuildPath2(): cannot allocate memory for buffer2\n");
+		out_of_memory_condition_counter ++;
 		winx_heap_free(buffer1);
 		return;
 	}
@@ -1853,7 +1891,8 @@ update_filename:
 	//wcsncpy(pmfi->Name,buffer1 + offset,MAX_NTFS_PATH);
 	//pmfi->Name[MAX_NTFS_PATH - 1] = 0;
 	if(!RtlCreateUnicodeString(&us,buffer1 + offset)){
-		DebugPrint2("Cannot allocate memory for BuildPath2()!\n");
+		DebugPrint("Cannot allocate memory for BuildPath2()!\n");
+		out_of_memory_condition_counter ++;
 	} else {
 		RtlFreeUnicodeString(&(pfn->name));
 		pfn->name.Buffer = us.Buffer;
@@ -1939,14 +1978,16 @@ void AddResidentDirectoryToFileList(PMY_FILE_INFORMATION pmfi)
 
 	pfn = (PFILENAME)winx_list_insert_item((list_entry **)(void *)&filelist,NULL,sizeof(FILENAME));
 	if(pfn == NULL){
-		DebugPrint2("Cannot allocate %u bytes of memory for AddResidentDirectoryToFileList()!\n",sizeof(FILENAME));
+		DebugPrint("Cannot allocate %u bytes of memory for AddResidentDirectoryToFileList()!\n",sizeof(FILENAME));
+		out_of_memory_condition_counter ++;
 		return;
 	}
 	
 	/* fill a name member of the created structure */
 	if(!RtlCreateUnicodeString(&pfn->name,pmfi->Name)){
-		DebugPrint2("AddResidentDirectoryToFileList():\n");
-		DebugPrint2("no enough memory for pfn->name initialization!\n");
+		DebugPrint("AddResidentDirectoryToFileList():\n");
+		DebugPrint("no enough memory for pfn->name initialization!\n");
+		out_of_memory_condition_counter ++;
 		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		return;
 	}
@@ -2038,12 +2079,16 @@ NTSTATUS ReadSectors(ULONGLONG lsn,PVOID buffer,ULONG length)
 	IO_STATUS_BLOCK ioStatus;
 	LARGE_INTEGER offset;
 	NTSTATUS Status;
+	ULONGLONG tm, time;
 
 	offset.QuadPart = lsn * bytes_per_sector;
 	Status = NtReadFile(winx_fileno(fVolume),NULL,NULL,NULL,&ioStatus,buffer,length,&offset,NULL);
 	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
-		//DebugPrint("-Ultradfg- Is waiting for write to logfile request completion.\n");
+		DebugPrint("ReadSectors waiting started...\n");
+		tm = _rdtsc();
 		Status = NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
+		time = _rdtsc() - tm;
+		DebugPrint("ReadSectors waiting completed in %I64u ms.\n", time);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}
 	/* FIXME: number of bytes actually read check? */
