@@ -195,7 +195,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 //	if(exit_pressed) EndDialog(hWindow,0);
 	
 	/* check the shutdown after a job box state */
-	if(!exit_pressed){
+	if(!exit_pressed && !stop_pressed){
 		if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),
 			BM_GETCHECK,0,0) == BST_CHECKED){
 				shutdown_flag = TRUE;

@@ -1,9 +1,10 @@
 HISTORY
 
-  Version 4.0.1  2010-02-
+  Version 4.1.0  2010-03-
   ------------------------------------------------------------------------------
     - few bugs in driver were fixed
     - a huge analysis speedup performed
+    - one bug in GUI (#2964309) was fixed
     - one little bug preventing the Scheduler running on Windows 2000 was fixed
     - volume status messages were improved in UltraDefrag GUI
     - the report saving speedup was performed
