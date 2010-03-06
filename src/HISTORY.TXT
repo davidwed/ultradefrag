@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 4.1.0  2010-03-
+  Version 4.1.0  2010-03-06
   ------------------------------------------------------------------------------
     - few bugs in driver were fixed
     - a huge analysis speedup performed

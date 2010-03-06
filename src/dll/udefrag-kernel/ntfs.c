@@ -29,7 +29,8 @@
 
 /*
 * Add data consistency checks everywhere,
-* because NTFS volumes often have invalid data in MFT entries.
+* because NTFS volumes often have invalid
+* data in MFT entries.
 */
 
 /*

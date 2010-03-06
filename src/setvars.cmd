@@ -1,11 +1,11 @@
 @echo off
 echo Set common environment variables...
-set VERSION=4,0,1,0
-set VERSION2="4, 0, 1, 0\0"
-set ZENWINX_VERSION=2,0,0,0
-set ZENWINX_VERSION2="2, 0, 0, 0\0"
-set ULTRADFGVER=4.0.1
-set ZENWINXVER=2.0.0
+set VERSION=4,1,0,0
+set VERSION2="4, 1, 0, 0\0"
+set ZENWINX_VERSION=2,1,0,0
+set ZENWINX_VERSION2="2, 1, 0, 0\0"
+set ULTRADFGVER=4.1.0
+set ZENWINXVER=2.1.0
 set WINDDKBASE=D:\WINDDK\3790~1.183
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v6.1
 set MINGWBASE=D:\Software\MinGWStudio\MinGW
