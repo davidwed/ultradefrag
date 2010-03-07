@@ -77,7 +77,8 @@
  * <dd>Set an environment variable. This is a native equivalent of the
  * appropriate Windows command.</dd>
  * <dt>udefrag</dt>
- * <dd>This is a native equivalent of the UltraDefrag command line tool.</dd>
+ * <dd>This is a native equivalent of the UltraDefrag command line tool.
+ * The commandline options -la, -l, -a and -o are currently supported.</dd>
  * <dt>pause</dt>
  * <dd>Pause the script execution for the specified time interval (in milliseconds).
  * For example, the command pause 1000 will pause execution for one second.</dd>
@@ -119,7 +120,7 @@
  * exit
  * @endcode
  *
- * The boot time script simplifies also the use of the UltraDefrag on
+ * The boot time script simplifies also the use of UltraDefrag on
  * computers running Windows 98. After installing Windows XP as a second
  * operating system the UltraDefrag may be installed too. After adding the
  * shutdown command to the boot time script you may simply boot XP system
