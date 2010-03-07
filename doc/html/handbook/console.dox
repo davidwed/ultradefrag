@@ -75,7 +75,17 @@
  * <dd>Number of map symbols containing in each row of the map. Default value is 68.</dd>
  * </dl>
  *
- * Specifying just the volume letter will cause UltraDefrag to defragment the volume.
+ * Volume letter:
+ *
+ * - Specifying just the volume letter will cause UltraDefrag to defragment the volume.
+ * - It is possible to specify multiple volume letters. Like this: udefrag c: d: x:
+ * - Also the following keys can be used instead of the volume letter:
+ * <dl>
+ * <dt>--all</dt>
+ * <dd>Process all available volumes.</dd>
+ * <dt>--all-fixed</dt>
+ * <dd>Process all volumes except removable.</dd>
+ * </dl>
  *
  * <h1>Environment variables</h1>
  * <dl>

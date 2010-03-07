@@ -25,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <process.h>
 
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
@@ -42,6 +43,9 @@ int m_flag = 0;
 int obsolete_option = 0;
 char letter = 0;
 int screensaver_mode = 0;
+int all_flag = 0;
+int all_fixed_flag = 0;
+char letters[MAX_DOS_DRIVES] = {0};
 
 BOOL stop_flag = FALSE;
 
@@ -152,24 +156,19 @@ int show_vollist(void)
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("Volumes available for defragmentation:\n\n");
 
-	if(udefrag_get_avail_volumes(&v,la_flag ? FALSE : TRUE) < 0){
-		if(!b_flag) settextcolor(console_attr);
-		return 1;
-	} else {
-		for(n = 0;;n++){
-			if(v[n].letter == 0) break;
-			udefrag_fbsize((ULONGLONG)(v[n].total_space.QuadPart),2,s,sizeof(s));
-			d = (double)(signed __int64)(v[n].free_space.QuadPart);
-			/* 0.1 constant is used to exclude divide by zero error */
-			d /= ((double)(signed __int64)(v[n].total_space.QuadPart) + 0.1);
-			p = (int)(100 * d);
-			if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-			printf("%c:  %8s %12s %8u %%\n",
-				v[n].letter,v[n].fsname,s,p);
-		}
-	}
+	if(udefrag_get_avail_volumes(&v,la_flag ? FALSE : TRUE) < 0) return 1;
 
-	if(!b_flag) settextcolor(console_attr);
+	for(n = 0;;n++){
+		if(v[n].letter == 0) break;
+		udefrag_fbsize((ULONGLONG)(v[n].total_space.QuadPart),2,s,sizeof(s));
+		d = (double)(signed __int64)(v[n].free_space.QuadPart);
+		/* 0.1 constant is used to exclude divide by zero error */
+		d /= ((double)(signed __int64)(v[n].total_space.QuadPart) + 0.1);
+		p = (int)(100 * d);
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		printf("%c:  %8s %12s %8u %%\n",
+			v[n].letter,v[n].fsname,s,p);
+	}
 	return 0;
 }
 
@@ -196,8 +195,6 @@ void cleanup(void)
 {
 	(void)udefrag_unload();
 	FreeClusterMap();
-	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-	if(!b_flag) settextcolor(console_attr);
 }
 
 void RunScreenSaver(void)
@@ -205,65 +202,21 @@ void RunScreenSaver(void)
 	printf("Hello!\n");
 }
 
-int __cdecl main(int argc, char **argv)
+int process_single_volume(void)
 {
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	STATISTIC stat;
 	STATUPDATEPROC stat_callback = NULL;
 	long map_size = 0;
 	int error_code = 0;
 
-	/* analyse command line */
-	parse_cmdline(argc,argv);
-
-	/* prepare console */
-	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	if(GetConsoleScreenBufferInfo(hOut,&csbi))
-		console_attr = csbi.wAttributes;
-
-/*	fprintf(stderr,"I have a propension to listen music.");
-	clear_line(stderr);
-	fprintf(stderr,"\rWindows is a bug.");
-	return 0;
-*/
-	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	
-	/* handle help request */
-	if(h_flag){
-		show_help();
-		if(!b_flag) settextcolor(console_attr);
-		return 0;
-	}
-
-	/* display copyright */
-	printf(VERSIONINTITLE ", "
-		   "Copyright (c) Dmitri Arkhangelski, 2007-2010.\n"
-		   "UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
-		   "and you are welcome to redistribute it under certain conditions.\n\n");
-
-	/* handle obsolete options */
-	if(obsolete_option){
-		display_error("The -i, -e, -s, -d options are oblolete.\n"
-					  "Use environment variables instead!\n"
-					  );
-		if(!b_flag) settextcolor(console_attr);
-		return 1;
-	}
-
-	/* show list of volumes if requested */
-	if(l_flag)
-		return show_vollist();
-
 	/* validate driveletter */
 	if(!letter){
 		display_error("Drive letter should be specified!\n");
-		if(!b_flag) settextcolor(console_attr);
 		return 1;
 	}
 	error_code = udefrag_validate_volume(letter,FALSE);
 	if(error_code < 0){
 		DisplayInvalidVolumeError(error_code);
-		if(!b_flag) settextcolor(console_attr);
 		return 1;
 	}
 
@@ -274,13 +227,10 @@ int __cdecl main(int argc, char **argv)
 	if(screensaver_mode){
 		RunScreenSaver();
 		FreeClusterMap();
-		if(!b_flag) settextcolor(console_attr);
 		return 0;
 	}
 
 	/* do our job */
-	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
-		DisplayLastError("Cannot set Ctrl + C handler!");
 	if(m_flag) map_size = map_rows * map_symbols_per_line;
 	error_code = udefrag_init(map_size);
 	if(error_code < 0){
@@ -302,6 +252,7 @@ int __cdecl main(int argc, char **argv)
 	}
 	
 	if(!p_flag) stat_callback = ProgressCallback;
+	stop_flag = FALSE;
 
 	if(a_flag){
 		error_code = udefrag_analyse(letter,stat_callback);
@@ -324,4 +275,106 @@ int __cdecl main(int argc, char **argv)
 
 	cleanup();
 	return 0;
+}
+
+int process_multiple_volumes(void)
+{
+	volume_info *v;
+	int i;
+	
+	/* process volumes specified on the command line */
+	if(letters[1]){
+		for(i = 0; i < MAX_DOS_DRIVES; i++){
+			if(!letters[i]) break;
+			if(stop_flag) break;
+			/**/
+			//printf("%c:\n",letters[i]);
+			letter = letters[i];
+			(void)process_single_volume();
+		}
+	}
+	
+	if(stop_flag) return 0;
+	
+	/* process all volumes if requested */
+	if(all_flag || all_fixed_flag){
+		if(udefrag_get_avail_volumes(&v,all_fixed_flag ? TRUE : FALSE) < 0) return 1;
+		for(i = 0;;i++){
+			if(v[i].letter == 0) break;
+			if(stop_flag) break;
+			/**/
+			//printf("%c:\n",v[i].letter);
+			letter = v[i].letter;
+			(void)process_single_volume();
+		}
+	}
+	
+	return 0;
+}
+
+int check_for_obsolete_options(void)
+{
+	if(obsolete_option){
+		display_error("The -i, -e, -s, -d options are oblolete.\n"
+					  "Use environment variables instead!\n"
+					  );
+		return 1;
+	} else return 0;
+}
+
+void display_copyright(void)
+{
+	printf(VERSIONINTITLE ", "
+		   "Copyright (c) Dmitri Arkhangelski, 2007-2010.\n"
+		   "UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
+		   "and you are welcome to redistribute it under certain conditions.\n\n");
+}
+
+int __cdecl main(int argc, char **argv)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	int error_code;
+
+	/* analyse command line */
+	parse_cmdline(argc,argv);
+
+	/* prepare console */
+	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(GetConsoleScreenBufferInfo(hOut,&csbi))
+		console_attr = csbi.wAttributes;
+	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	
+	/* handle help request */
+	if(h_flag){
+		show_help();
+		error_code = 0; goto done;
+	}
+
+	/* display copyright */
+	display_copyright();
+
+	/* handle obsolete options */
+	if(check_for_obsolete_options()){
+		error_code = 1; goto done;
+	}
+
+	/* show list of volumes if requested */
+	if(l_flag){
+		error_code = show_vollist(); goto done;
+	}
+	
+	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
+		DisplayLastError("Cannot set Ctrl + C handler!");
+
+	/* process multiple volumes if requested */
+	if(letters[1] || all_flag || all_fixed_flag)
+		error_code = process_multiple_volumes();
+	else
+		error_code = process_single_volume();
+
+	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+
+done:
+	if(!b_flag) settextcolor(console_attr);
+	return error_code;
 }

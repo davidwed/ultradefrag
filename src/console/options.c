@@ -50,6 +50,10 @@ extern int map_symbols_per_line;
 
 extern int screensaver_mode;
 
+extern int all_flag;
+extern int all_fixed_flag;
+extern char letters[MAX_DOS_DRIVES];
+
 void show_help(void)
 {
 	printf(
@@ -118,6 +122,13 @@ void show_help(void)
 		"                                      containing in each row of the map.\n"
 		"                                      Default value is 68.\n"
 		"\n"
+		"Volume letter:\n"
+		"  It is possible to specify multiple volume letters, like this:\n\n"
+		"  udefrag c: d: x:\n\n"
+		"  Also the following keys can be used instead of the volume letter:\n\n"
+		"  --all                               Process all available volumes.\n"
+		"  --all-fixed                         Process all volumes except removable.\n"
+		"\n"
 		"Accepted environment variables:\n"
 		"\n"
 		"  UD_IN_FILTER                        List of files to be included\n"
@@ -167,6 +178,8 @@ static struct option long_options_[] = {
 	{ "analyze",                     no_argument,       0, 'a' },
 	{ "defragment",                  no_argument,       0,  0  },
 	{ "optimize",                    no_argument,       0, 'o' },
+	{ "all",                         no_argument,       0,  0  },
+	{ "all-fixed",                   no_argument,       0,  0  },
 	
 	/*
 	* Volume listing options.
@@ -213,6 +226,11 @@ void parse_cmdline(int argc, char **argv)
 	int dark_color_flag = 0;
 	int map_symbol_number = 0;
 	int rows = 0, symbols_per_line = 0;
+	int letter_index;
+	char ch;
+	
+	memset(&letters,0,sizeof(letters));
+	letter_index = 0;
 	
 	if(argc < 2) h_flag = 1;
 	while(1){
@@ -287,6 +305,12 @@ void parse_cmdline(int argc, char **argv)
 				symbols_per_line = atoi(optarg);
 				if(symbols_per_line > 0) map_symbols_per_line = symbols_per_line;
 			}
+			else if(!strcmp(long_option_name,"all")){
+				all_flag = 1;
+			}
+			else if(!strcmp(long_option_name,"all-fixed")){
+				all_fixed_flag = 1;
+			}
 			break;
 		case 'a':
 			a_flag = 1;
@@ -336,13 +360,21 @@ void parse_cmdline(int argc, char **argv)
 			//printf("%s ", argv[optind]);
 			if(argv[optind][0]){
 				/* next check supports UltraDefrag context menu handler */
-				if(argv[optind][1] == ':')
-					letter = argv[optind][0];
+				if(argv[optind][1] == ':'){
+					ch = argv[optind][0];
+					if(letter_index > (MAX_DOS_DRIVES - 1)){
+						printf("Too many letters specified on the command line.\n");
+					} else {
+						letters[letter_index] = ch;
+						letter_index ++;
+					}
+				}
 			}
 			optind++;
 		}
 		//printf("\n");
 	}
 	
-	if(!l_flag && !letter) h_flag = 1;
+	letter = letters[0];
+	if(!l_flag && !all_flag && !all_fixed_flag && !letter) h_flag = 1;
 }
