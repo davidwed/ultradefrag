@@ -41,6 +41,8 @@ int i = 0,j = 0,k; /* number of '-' */
 UDEFRAG_JOB_TYPE job_type;
 ULONG pass_number;
 
+BOOLEAN scripting_mode = TRUE;
+
 #define NAME_BUF_SIZE (sizeof(name_buffer) / sizeof(short))
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
@@ -255,13 +257,17 @@ void Hibernate(void)
 	*/
 }
 
-void ParseCommand()
+void ParseCommand(void)
 {
 	int echo_cmd = 0;
 	int comment_flag = 0;
 	int a_flag = 0, o_flag = 0;
+	int all_flag = 0, all_fixed_flag = 0;
 	char letter = 0, cmd = 'd';
-	short *pos;
+	char letters[MAX_DOS_DRIVES];
+	int n_letters;
+	int i, length;
+	volume_info *v;
 	
 	/* supported commands: @echo, set, udefrag, exit, shutdown, reboot, pause */
 	/* skip leading spaces and tabs */
@@ -289,6 +295,7 @@ void ParseCommand()
 	}
 	/* handle udefrag command */
 	if((short *)wcsstr(command,L"udefrag") == command){
+		/* handle drives listing request */
 		if(wcsstr(command,L"-la")){
 			DisplayAvailableVolumes(FALSE);
 			return;
@@ -297,25 +304,68 @@ void ParseCommand()
 			DisplayAvailableVolumes(TRUE);
 			return;
 		}
+		
+		/* get flags */
 		if(wcsstr(command,L"-a")) a_flag = 1;
 		if(wcsstr(command,L"-o")) o_flag = 1;
-		/* find volume letter */
-		pos = (short *)wcschr(command,':');
-		if(pos > command) letter = (char)pos[-1];
-		if(!letter){
+		if(wcsstr(command,L"--all")) all_flag = 1;
+		if(wcsstr(command,L"--all-fixed")) all_fixed_flag = 1;
+		if(a_flag) cmd = 'a';
+		else if(o_flag) cmd = 'c';
+
+		/* find volume letters */
+		length = wcslen(command);
+		n_letters = 0;
+		for(i = 0; i < length; i++){
+			if(command[i] == ':' && i > 0){
+				if(n_letters > (MAX_DOS_DRIVES - 1)){
+					winx_printf("Too many letters specified on the command line.\n");
+				} else {
+					letters[n_letters] = (char)command[i - 1];
+					n_letters ++;
+				}
+			}
+		}
+
+		if(!n_letters && !all_flag && !all_fixed_flag){
 			winx_printf("\nNo volume letter specified!\n\n");
 			return;
 		}
-		if(a_flag) cmd = 'a';
-		else if(o_flag) cmd = 'c';
-		ProcessVolume(letter,cmd);
-		/* if an operation was aborted then exit */
-		if(abort_flag) goto break_execution;
+		
+		/*
+		* In scripting mode the abort_flag has initial value 0.
+		* The Break key sets them to 1 => disables any further
+		* defragmentation jobs.
+		* On the other hand, in interactive mode we are setting
+		* this flag to 0 before any defragmentation job. This
+		* technique breaks only the current job.
+		*/
+		if(!scripting_mode) abort_flag = 0;
+		
+		/* process volumes specified on the command line */
+		for(i = 0; i < n_letters; i++){
+			if(abort_flag) break;
+			letter = letters[i];
+			ProcessVolume(letter,cmd);
+		}
+		
+		if(abort_flag) return;
+		
+		/* process all volumes if requested */
+		if(all_flag || all_fixed_flag){
+			if(udefrag_get_avail_volumes(&v,all_fixed_flag ? TRUE : FALSE) < 0) return;
+			for(i = 0;;i++){
+				if(v[i].letter == 0) break;
+				if(abort_flag) break;
+				letter = v[i].letter;
+				ProcessVolume(letter,cmd);
+			}
+		}
+		
 		return;
 	}
 	/* handle exit command */
 	if((short *)wcsstr(command,L"exit") == command){
-break_execution:
 		winx_printf("Good bye ...\n");
 		(void)udefrag_unload();
 		winx_exit(0);
@@ -384,6 +434,8 @@ void ProcessScript(void)
 	char filename[MAX_PATH];
 	int filesize,j,cnt;
 	unsigned short ch;
+	
+	scripting_mode = TRUE;
 
 	/* open script file */
 	if(winx_get_windows_directory(filename,MAX_PATH) < 0){

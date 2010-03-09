@@ -1,5 +1,13 @@
 HISTORY
 
+  Version 4.2.0  2010-03-
+  ------------------------------------------------------------------------------
+    - --all, --all-fixed command line keys added to the console interface
+      and to the boot time defragmenter
+    - boot time interface interactive mode commands set changed to be the same
+      as in scripting mode
+
+
   Version 4.1.0  2010-03-06
   ------------------------------------------------------------------------------
     - few bugs in driver were fixed

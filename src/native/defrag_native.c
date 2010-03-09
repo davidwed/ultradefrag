@@ -32,7 +32,11 @@
 /* uncomment it if you want to replace smss.exe by this program */
 //#define USE_INSTEAD_SMSS
 
+extern short line_buffer[32768];
+extern BOOLEAN scripting_mode;
+
 void ProcessScript(void);
+void ParseCommand(void);
 void EnableNativeDefragger(void);
 void DisableNativeDefragger(void);
 void Hibernate(void);
@@ -42,26 +46,29 @@ void ProcessVolume(char letter,char _command);
 void display_help(void)
 {
 	winx_printf("Interactive mode commands:\n"
-				"  analyse X:   - volume analysis\n"
-				"  defrag X:    - volume defragmentation\n"
-				"  optimize X:  - volume optimization\n"
-				"  drives       - displays list of available volumes\n"
-				"  exit         - continue Windows boot\n"
-				"  reboot       - reboot the PC\n"
-				"  shutdown     - shut down the PC\n"
-				"  boot-on      - enable boot time defragger;\n"
-				"                 loses its effect before shutdown/reboot\n"
-				"  boot-off     - disable boot time defragger;\n"
-				"                 loses its effect before shutdown/reboot\n"
-				"  help         - display this help screen\n"
+				"  udefrag -a X: - volume analysis\n"
+				"  udefrag X:    - volume defragmentation\n"
+				"  udefrag -o X: - volume optimization\n\n"
+				"  Multiple volume letters allowed,\n"
+				"  --all, --all-fixed keys are supported here too.\n\n"
+				"  udefrag -l    - displays list of volumes except removable\n"
+				"  udefrag -la   - displays list of all available volumes\n"
+				"  exit          - continue Windows boot\n"
+				"  reboot        - reboot the PC\n"
+				"  shutdown      - shut down the PC\n"
+				"  boot-on       - enable boot time defragger;\n"
+				"                  loses its effect before shutdown/reboot\n"
+				"  boot-off      - disable boot time defragger;\n"
+				"                  loses its effect before shutdown/reboot\n"
+				"  help          - display this help screen\n"
 				);
 }
 
 void __stdcall NtProcessStartup(PPEB Peb)
 {
 	int error_code;
-	char cmd[33], arg[5];
 	char buffer[256];
+	int result;
 	int i;
 
 	/* 1. Initialization */
@@ -114,54 +121,29 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	ProcessScript();
 
 	/* 6. Command Loop */
-	winx_printf("\nInteractive mode:\n"
-				"Type 'help' for list of supported commands.\n\n");
+	winx_printf("\nInteractive mode:\nType 'help' for list of supported commands.\n\n");
+	scripting_mode = FALSE;
 	while(1){
+		/* display prompt */
 		winx_printf("# ");
+		/* get user input */
 		if(winx_gets(buffer,sizeof(buffer) - 1) < 0) break;
-		cmd[0] = arg[0] = 0;
-		(void)sscanf(buffer,"%32s %4s",cmd,arg);
-
-		if(!strcmp(cmd,"shutdown")){
-			winx_printf("Shutdown ...");
-			(void)udefrag_unload();
-			winx_shutdown();
-			continue;
-		} else if(!strcmp(cmd,"reboot")){
-			winx_printf("Reboot ...");
-			(void)udefrag_unload();
-			winx_reboot();
-			continue;
-		} else if(!strcmp(cmd,"exit")){
-			break;
-		} else if(!strcmp(cmd,"analyse")){
-			ProcessVolume(arg[0],'a');
-			continue;
-		} else if(!strcmp(cmd,"defrag")){
-			ProcessVolume(arg[0],'d');
-			continue;
-		} else if(!strcmp(cmd,"optimize")){
-			ProcessVolume(arg[0],'c');
-			continue;
-		} else if(!strcmp(cmd,"drives")){
-			DisplayAvailableVolumes(FALSE);
-			continue;
-		} else if(!strcmp(cmd,"help")){
+		/* check for help command */
+		if(!strcmp(buffer,"help")){
 			display_help();
 			continue;
-		} else if(!strcmp(cmd,"boot-on")){
-			EnableNativeDefragger();
-			continue;
-		} else if(!strcmp(cmd,"boot-off")){
-			DisableNativeDefragger();
-			continue;
-		} else if(!strcmp(cmd,"hibernate")){
-			Hibernate();
-			continue;
-		} else {
-			winx_printf("Unknown command!\n");
 		}
+		/* execute command */
+		result = _snwprintf(line_buffer,sizeof(line_buffer) / sizeof(short),L"%hs",buffer);
+		if(result < 0){
+			winx_printf("Command line is too long!\n");
+			continue;
+		}
+		line_buffer[sizeof(line_buffer) / sizeof(short) - 1] = 0;
+		ParseCommand();
+		if(!strcmp(buffer,"exit")) break;
 	}
+
 	winx_printf("Good bye ...\n");
 	(void)udefrag_unload();
 	winx_exit(0);
