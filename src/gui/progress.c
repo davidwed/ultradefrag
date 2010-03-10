@@ -43,7 +43,7 @@ void HideProgress(void)
 {
 	(void)ShowWindow(hProgressMsg,SW_HIDE);
 	(void)ShowWindow(hProgressBar,SW_HIDE);
-	(void)SetWindowText(hProgressMsg,"A 0 %");
+	(void)SetWindowText(hProgressMsg,"A 0.00 %");
 	(void)SendMessage(hProgressBar,PBM_SETPOS,0,0);
 }
 

@@ -52,6 +52,7 @@ int Optimize(char *volume_name)
 	PFREEBLOCKMAP freeblock;
 	ULONGLONG threshold;
 	ULONGLONG FragmentedClustersBeforeStartingPoint = 0;
+	ULONGLONG ClustersBeforeStartingPoint;
 	PFILENAME pfn;
 	PBLOCKMAP block;
 
@@ -74,17 +75,23 @@ int Optimize(char *volume_name)
 	}
 
 	/* skip all locked files */
-	CheckAllFiles();
+	//CheckAllFiles();
 	
 	/* validate StartingPoint */
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(pfn->is_reparse_point == FALSE && pfn->is_fragm){
+			ClustersBeforeStartingPoint = 0;
 			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
 				if((block->lcn + block->length) <= StartingPoint)
-					FragmentedClustersBeforeStartingPoint += block->length;
+					ClustersBeforeStartingPoint += block->length;
 				if(block->next_ptr == pfn->blockmap) break;
 			}
+			if(ClustersBeforeStartingPoint){
+				if(!IsFileLocked(pfn)) /* TODO: speedup here? */
+					FragmentedClustersBeforeStartingPoint += ClustersBeforeStartingPoint;
+			}
 		}
+		if(FragmentedClustersBeforeStartingPoint >= threshold) break;
 		if(pfn->next_ptr == filelist) break;
 	}
 	if(FragmentedClustersBeforeStartingPoint >= threshold) StartingPoint = 0;
@@ -187,7 +194,7 @@ void DefragmentFreeSpaceRTL(void)
 	ULONGLONG movings;
 	
 	/* skip all locked files */
-	CheckAllFiles();
+	//CheckAllFiles();
 	
 	while(1){
 		/* 1. Find the latest file block on the volume. */
@@ -206,6 +213,7 @@ void DefragmentFreeSpaceRTL(void)
 			if(pfn->next_ptr == filelist) break;
 		}
 		if(!lastblock) break;
+		if(IsFileLocked(lastpfn)) continue;
 		DebugPrint("Last block = %ws: Lcn:%I64u Length:%I64u\n",lastpfn->name.Buffer,
 			lastblock->lcn,lastblock->length);
 		if(CheckForStopEvent()) break;
@@ -218,7 +226,7 @@ void DefragmentFreeSpaceRTL(void)
 				vcn = lastblock->vcn + (lastblock->length - length);
 				MovePartOfFileBlock(lastpfn,vcn,freeblock->lcn,length);
 				movings ++;
-				Stat.processed_clusters += length;
+				/*Stat.processed_clusters += length;*/
 				RemarkBlock(freeblock->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
 				RemarkBlock(lastblock->lcn + (lastblock->length - length),length,
 					FREE_SPACE,GetFileSpaceState(lastpfn));
@@ -254,7 +262,7 @@ void DefragmentFreeSpaceLTR(void)
 	ULONGLONG movings;
 	
 	/* skip all locked files */
-	CheckAllFiles();
+	//CheckAllFiles();
 	
 	while(1){
 		/* 1. Find the first file block on the volume: AFTER StartingPoint. */
@@ -273,6 +281,7 @@ void DefragmentFreeSpaceLTR(void)
 			if(pfn->next_ptr == filelist) break;
 		}
 		if(!firstblock) break;
+		if(IsFileLocked(firstpfn)) continue;
 		DebugPrint("First block = %ws: Lcn:%I64u Length:%I64u\n",firstpfn->name.Buffer,
 			firstblock->lcn,firstblock->length);
 		if(CheckForStopEvent()) break;
@@ -287,7 +296,7 @@ void DefragmentFreeSpaceLTR(void)
 				MovePartOfFileBlock(firstpfn,vcn,
 					freeblock->lcn + (freeblock->length - length),length);
 				movings ++;
-				Stat.processed_clusters += length;
+				/*Stat.processed_clusters += length;*/
 				RemarkBlock(freeblock->lcn + (freeblock->length - length),length,
 					UNKNOWN_SPACE,FREE_SPACE);
 				RemarkBlock(firstblock->lcn,length,FREE_SPACE,GetFileSpaceState(firstpfn));
@@ -362,13 +371,14 @@ int MoveAllFilesRTL(void)
 	PFREEBLOCKMAP block;
 	PFILENAME pfn, plargest;
 	ULONGLONG length;
+	ULONGLONG locked_clusters;
 	ULONGLONG movings = 0;
 
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
 	Stat.current_operation = 'C';
 
 	/* skip all locked files */
-	CheckAllFiles();
+	//CheckAllFiles();
 	
 	/* Reinitialize progress counters. */
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
@@ -396,6 +406,12 @@ int MoveAllFilesRTL(void)
 			if(pfn->next_ptr == filelist) break;
 		}
 		if(!plargest) goto L1; /* current block is too small */
+		locked_clusters = 0;
+		if(plargest->blockmap) locked_clusters = plargest->clusters_total;
+		if(IsFileLocked(plargest)){
+			Stat.processed_clusters += locked_clusters;
+			goto L0;
+		}
 		/* skip fragmented files */
 		//if(plargest->is_fragm) goto L1; /* never do it!!! */
 		/* if uncomment the previous line the file moving will never start,
@@ -407,7 +423,7 @@ int MoveAllFilesRTL(void)
 		} else {
 			DebugPrint("Moving error for %ws\n",plargest->name.Buffer);
 		}
-		Stat.processed_clusters += plargest->clusters_total;
+		/*Stat.processed_clusters += plargest->clusters_total;*/
 		if(CheckForStopEvent()) break;
 		/* after file moving continue from the first free space block */
 		block = free_space_map; if(!block) break; else goto L0;
@@ -415,47 +431,6 @@ int MoveAllFilesRTL(void)
 		if(block->next_ptr == free_space_map) break;
 	}
 	return (movings == 0) ? (-1) : (0);
-}
-
-/**
- * @brief Moves a part of file.
- * @param[in] pfn pointer to the structure describing the file.
- * @param[in] startVcn the starting virtual cluster number
- *                     defining position inside the file.
- * @param[in] targetLcn the starting logical cluster number
- *                      defining position of target space
- *                      on the volume.
- * @param[in] n_clusters the number of clusters to move.
- * @note On NT 4.0 this function has no size limit
- * for the part of file to be moved, unlike the MovePartOfFile().
- */
-void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,
-		ULONGLONG targetLcn,ULONGLONG n_clusters)
-{
-	HANDLE hFile;
-	ULONGLONG target;
-	ULONGLONG j,n,r;
-	NTSTATUS Status;
-
-	Status = OpenTheFile(pfn,&hFile);
-	if(Status) return;
-
-	target = targetLcn;
-	n = n_clusters / clusters_per_256k;
-	for(j = 0; j < n; j++){
-		Status = MovePartOfFile(hFile,startVcn + j * clusters_per_256k, \
-			target,clusters_per_256k);
-		if(Status){ NtClose(hFile); return; }
-		target += clusters_per_256k;
-	}
-	r = n_clusters % clusters_per_256k;
-	if(r){
-		Status = MovePartOfFile(hFile,startVcn + j * clusters_per_256k, \
-			target,r);
-		if(Status){ NtClose(hFile); return; }
-	}
-
-	NtClose(hFile);
 }
 
 /** @} */

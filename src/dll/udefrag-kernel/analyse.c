@@ -194,6 +194,7 @@ BOOLEAN IsFileLocked(PFILENAME pfn)
 	return TRUE;
 }
 
+#if 0
 /**
  * @brief Checks all fragmented files,
  * are they locked or not.
@@ -251,6 +252,7 @@ void CheckAllFiles(void)
 	DebugPrint("Files checking completed in %I64u ms.\n",  time);
 	DebugPrint("---------------------------------------------------------\n");
 }
+#endif
 
 /**
  * @brief Produces a list of fragmented files.

@@ -148,6 +148,14 @@ void RedrawMap(void)
 	map_completed = TRUE;
 }
 
+void InitializeMapDisplay(void)
+{
+	clear_line(stderr);
+	fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %u/%u",
+		letter,"analyze:  ",0.00,0,0);
+	RedrawMap();
+}
+
 BOOL first_run = TRUE;
 BOOL err_flag = FALSE;
 BOOL err_flag2 = FALSE;
@@ -187,12 +195,12 @@ int __stdcall ProgressCallback(int done_flag)
 	/* this function never raises warnings or errors */
 	if(udefrag_get_progress(&stat,&percentage) >= 0){
 		op = stat.current_operation;
-		if(op == 'A' || op == 'a')      op_name = "analyse:  ";
+		if(op == 'A' || op == 'a')      op_name = "analyze:  ";
 		else if(op == 'D' || op == 'd') op_name = "defrag:   ";
 		else                            op_name = "optimize: ";
 		clear_line(stderr);
-		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %lu/%lu",
-			letter,op_name,(int)percentage,stat.fragmfilecounter,stat.filecounter);
+		fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
+			letter,op_name,percentage,stat.fragmfilecounter,stat.filecounter);
 	} else {
 		err_flag = TRUE;
 	}
@@ -201,7 +209,7 @@ int __stdcall ProgressCallback(int done_flag)
 
 	if(done_flag && !stop_flag){ /* set progress indicator to 100% state */
 		clear_line(stderr);
-		fprintf(stderr,"\r%c: %s100%% complete, fragmented/total = %lu/%lu",
+		fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
 			letter,op_name,stat.fragmfilecounter,stat.filecounter);
 		if(!m_flag) fprintf(stderr,"\n");
 	}

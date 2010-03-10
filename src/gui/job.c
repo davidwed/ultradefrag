@@ -99,9 +99,9 @@ int __stdcall update_stat(int df)
 		UpdateStatusBar(pst);
 		current_operation = pst->current_operation;
 		if(current_operation)
-			(void)sprintf(progress_msg,"%c %u %%",current_operation,(int)percentage);
+			(void)sprintf(progress_msg,"%c %6.2lf %%",current_operation,percentage);
 		else
-			(void)sprintf(progress_msg,"A %u %%",(int)percentage);
+			(void)sprintf(progress_msg,"A %6.2lf %%",percentage);
 		SetProgress(progress_msg,(int)percentage);
 	}
 
@@ -112,7 +112,7 @@ int __stdcall update_stat(int df)
 	
 	if(df == FALSE) return 0;
 	if(!stop_pressed){
-		(void)sprintf(progress_msg,"%c 100 %%",current_operation);
+		(void)sprintf(progress_msg,"%c 100.00 %%",current_operation);
 		SetProgress(progress_msg,100);
 	}
 	return 0;
@@ -153,7 +153,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	VolListUpdateSelectedStatusField(STATUS_RUNNING);
 
 	ShowProgress();
-	SetProgress("A 0 %",0);
+	SetProgress("A 0.00 %",0);
 
 	/* validate the volume before any processing */
 	error_code = udefrag_validate_volume(letter,FALSE);

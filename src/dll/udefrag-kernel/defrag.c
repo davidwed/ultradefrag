@@ -56,6 +56,7 @@ int Defragment(char *volume_name)
 	PFRAGMENTED pf, plargest;
 	PFREEBLOCKMAP block;
 	ULONGLONG length;
+	ULONGLONG locked_clusters;
 	ULONGLONG defragmented = 0;
 
 	DebugPrint("----- Defragmentation of %s: -----\n",volume_name);
@@ -65,7 +66,7 @@ int Defragment(char *volume_name)
 	Stat.current_operation = 'D';
 	
 	/* skip all locked files */
-	CheckAllFragmentedFiles();
+	//CheckAllFragmentedFiles();
 
 	for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		if(!pf->pfn->blockmap) goto next_item; /* skip fragmented files with unknown state */
@@ -97,7 +98,6 @@ int Defragment(char *volume_name)
 			if(pf->pfn->clusters_total <= block->length){
 				if(pf->pfn->clusters_total > length){
 					/* skip locked files here to prevent skipping the current free space block */
-					/* an appropriate check was moved to Analyze() function */
 					plargest = pf;
 					length = pf->pfn->clusters_total;
 				}
@@ -106,6 +106,12 @@ int Defragment(char *volume_name)
 			if(pf->next_ptr == fragmfileslist) break;
 		}
 		if(!plargest) goto L1; /* current block is too small */
+		locked_clusters = 0;
+		if(plargest->pfn->blockmap) locked_clusters = plargest->pfn->clusters_total;
+		if(IsFileLocked(plargest->pfn)){
+			Stat.processed_clusters += locked_clusters;
+			goto L0;
+		}
 		/* move file */
 		if(MoveTheFile(plargest->pfn,block->lcn)){
 			DebugPrint("Defrag success for %ws\n",plargest->pfn->name.Buffer);
@@ -113,7 +119,7 @@ int Defragment(char *volume_name)
 		} else {
 			DebugPrint("Defrag error for %ws\n",plargest->pfn->name.Buffer);
 		}
-		Stat.processed_clusters += plargest->pfn->clusters_total;
+		/*Stat.processed_clusters += plargest->pfn->clusters_total;*/
 		UpdateFragmentedFilesList();
 		if(CheckForStopEvent()) break;
 		/* after file moving continue from the first free space block */
@@ -123,6 +129,10 @@ int Defragment(char *volume_name)
 	}
 	return (defragmented == 0) ? (-1) : (0);
 }
+
+/* ------------------------------------------------------------------------- */
+/*                   The following function moves clusters.                  */
+/* ------------------------------------------------------------------------- */
 
 /**
  * @brief Moves a range of clusters belonging to the file.
@@ -173,6 +183,11 @@ NTSTATUS MovePartOfFile(HANDLE hFile,ULONGLONG startVcn, ULONGLONG targetLcn, UL
 	return STATUS_SUCCESS; /* it means: the result is unknown */
 }
 
+/* ------------------------------------------------------------------------- */
+/*        The following 2 functions are drivers for MovePartOfFile().        */
+/*        They must update Stat.processed_clusters correctly.                */
+/* ------------------------------------------------------------------------- */
+
 /**
  * @brief Moves a file entirely.
  * @param[in] pfn pointer to the structure
@@ -188,7 +203,9 @@ NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn)
 	ULONGLONG curr_target;
 	ULONGLONG j,n,r;
 	NTSTATUS Status;
+	ULONGLONG clusters_to_process;
 
+	clusters_to_process = pfn->clusters_total;
 	curr_target = targetLcn;
 	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
 		/* try to move current block */
@@ -196,7 +213,12 @@ NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn)
 		for(j = 0; j < n; j++){
 			Status = MovePartOfFile(hFile,block->vcn + j * clusters_per_256k, \
 				curr_target,clusters_per_256k);
-			if(Status) return Status;
+			if(Status != STATUS_SUCCESS){ /* failure */
+				Stat.processed_clusters += clusters_to_process;
+				return Status;
+			}
+			Stat.processed_clusters += clusters_per_256k;
+			clusters_to_process -= clusters_per_256k;
 			curr_target += clusters_per_256k;
 		}
 		/* try to move rest of block */
@@ -204,12 +226,75 @@ NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn)
 		if(r){
 			Status = MovePartOfFile(hFile,block->vcn + j * clusters_per_256k, \
 				curr_target,r);
-			if(Status) return Status;
+			if(Status != STATUS_SUCCESS){ /* failure */
+				Stat.processed_clusters += clusters_to_process;
+				return Status;
+			}
+			Stat.processed_clusters += r;
+			clusters_to_process -= r;
 			curr_target += r;
 		}
 		if(block->next_ptr == pfn->blockmap) break;
 	}
 	return STATUS_SUCCESS;
+}
+
+/**
+ * @brief Moves a part of file.
+ * @param[in] pfn pointer to the structure describing the file.
+ * @param[in] startVcn the starting virtual cluster number
+ *                     defining position inside the file.
+ * @param[in] targetLcn the starting logical cluster number
+ *                      defining position of target space
+ *                      on the volume.
+ * @param[in] n_clusters the number of clusters to move.
+ * @note On NT 4.0 this function has no size limit
+ * for the part of file to be moved, unlike the MovePartOfFile().
+ */
+void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,
+		ULONGLONG targetLcn,ULONGLONG n_clusters)
+{
+	HANDLE hFile;
+	ULONGLONG target;
+	ULONGLONG j,n,r;
+	NTSTATUS Status;
+	ULONGLONG clusters_to_process;
+
+	clusters_to_process = n_clusters;
+	Status = OpenTheFile(pfn,&hFile);
+	if(Status != STATUS_SUCCESS){
+		Stat.processed_clusters += clusters_to_process;
+		return;
+	}
+
+	target = targetLcn;
+	n = n_clusters / clusters_per_256k;
+	for(j = 0; j < n; j++){
+		Status = MovePartOfFile(hFile,startVcn + j * clusters_per_256k, \
+			target,clusters_per_256k);
+		if(Status != STATUS_SUCCESS){ /* failure */
+			Stat.processed_clusters += clusters_to_process;
+			NtClose(hFile);
+			return;
+		}
+		Stat.processed_clusters += clusters_per_256k;
+		clusters_to_process -= clusters_per_256k;
+		target += clusters_per_256k;
+	}
+	r = n_clusters % clusters_per_256k;
+	if(r){
+		Status = MovePartOfFile(hFile,startVcn + j * clusters_per_256k, \
+			target,r);
+		if(Status != STATUS_SUCCESS){ /* failure */
+			Stat.processed_clusters += clusters_to_process;
+			NtClose(hFile);
+			return;
+		}
+		Stat.processed_clusters += r;
+		clusters_to_process -= r;
+	}
+
+	NtClose(hFile);
 }
 
 /**

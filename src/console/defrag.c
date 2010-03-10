@@ -57,6 +57,7 @@ void show_help(void);
 void AllocateClusterMap(void);
 void FreeClusterMap(void);
 void RedrawMap(void);
+void InitializeMapDisplay(void);
 int __stdcall ProgressCallback(int done_flag);
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
@@ -244,12 +245,8 @@ int process_single_volume(void)
 	else printf("(User Mode)\n\n");
 #endif
 
-	if(m_flag){ /* prepare console buffer for map */
-		clear_line(stderr);
-		fprintf(stderr,"\r%c: %s%3u%% complete, fragmented/total = %u/%u",
-			letter,"analyse:  ",0,0,0);
-		RedrawMap();
-	}
+	if(m_flag) /* prepare console buffer for map */
+		InitializeMapDisplay();
 	
 	if(!p_flag) stat_callback = ProgressCallback;
 	stop_flag = FALSE;
