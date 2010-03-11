@@ -221,12 +221,12 @@ LUA_API int  (lua_status) (lua_State *L);
 ** garbage-collection function and options
 */
 
-#define LUA_GCSTOP		0
+#define LUA_GCSTOP		    0
 #define LUA_GCRESTART		1
 #define LUA_GCCOLLECT		2
-#define LUA_GCCOUNT		3
+#define LUA_GCCOUNT		    3
 #define LUA_GCCOUNTB		4
-#define LUA_GCSTEP		5
+#define LUA_GCSTEP		    5
 #define LUA_GCSETPAUSE		6
 #define LUA_GCSETSTEPMUL	7
 
@@ -309,7 +309,7 @@ LUA_API void lua_setallocf (lua_State *L, lua_Alloc f, void *ud);
 ** Event codes
 */
 #define LUA_HOOKCALL	0
-#define LUA_HOOKRET	1
+#define LUA_HOOKRET		1
 #define LUA_HOOKLINE	2
 #define LUA_HOOKCOUNT	3
 #define LUA_HOOKTAILRET 4
@@ -319,7 +319,7 @@ LUA_API void lua_setallocf (lua_State *L, lua_Alloc f, void *ud);
 ** Event masks
 */
 #define LUA_MASKCALL	(1 << LUA_HOOKCALL)
-#define LUA_MASKRET	(1 << LUA_HOOKRET)
+#define LUA_MASKRET	    (1 << LUA_HOOKRET)
 #define LUA_MASKLINE	(1 << LUA_HOOKLINE)
 #define LUA_MASKCOUNT	(1 << LUA_HOOKCOUNT)
 
