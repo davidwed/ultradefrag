@@ -47,7 +47,7 @@ copy /Y installer\LanguageSelector.ico bin\
 cd bin
 
 call setvars.cmd
-%NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
 if %errorlevel% neq 0 goto fail
 
 copy /Y LanguageSelector.exe ultradefrag-portable-%ULTRADFGVER%.i386\

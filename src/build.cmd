@@ -37,25 +37,25 @@ mkdir bin
 mkdir bin\amd64
 mkdir bin\ia64
 
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\driver  .\obj\driver
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\bootexctrl .\obj\bootexctrl
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\hibernate .\obj\hibernate
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\console .\obj\console
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\utf8-16 .\obj\utf8-16
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\gui     .\obj\gui
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\gui\res .\obj\gui\res
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\udefrag-gui-config .\obj\udefrag-gui-config
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\udefrag-gui-config\res .\obj\udefrag-gui-config\res
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\scheduler\C .\obj\udefrag-scheduler
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\scheduler\C\res .\obj\udefrag-scheduler\res
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\native  .\obj\native
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\include .\obj\include
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\share .\obj\share
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\dll\udefrag-kernel .\obj\udefrag-kernel
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\dll\udefrag .\obj\udefrag
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\dll\zenwinx .\obj\zenwinx
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\lua5.1  .\obj\lua5.1
-xcopy /I /Y /Q /EXCLUDE:exclude-from-build.lst   .\dll\wgx .\obj\wgx
+xcopy /I /Y /Q    .\driver  .\obj\driver
+xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
+xcopy /I /Y /Q    .\hibernate .\obj\hibernate
+xcopy /I /Y /Q    .\console .\obj\console
+xcopy /I /Y /Q    .\utf8-16 .\obj\utf8-16
+xcopy /I /Y /Q    .\gui     .\obj\gui
+xcopy /I /Y /Q    .\gui\res .\obj\gui\res
+xcopy /I /Y /Q    .\udefrag-gui-config .\obj\udefrag-gui-config
+xcopy /I /Y /Q    .\udefrag-gui-config\res .\obj\udefrag-gui-config\res
+xcopy /I /Y /Q    .\scheduler\C .\obj\udefrag-scheduler
+xcopy /I /Y /Q    .\scheduler\C\res .\obj\udefrag-scheduler\res
+xcopy /I /Y /Q    .\native  .\obj\native
+xcopy /I /Y /Q    .\include .\obj\include
+xcopy /I /Y /Q    .\share .\obj\share
+xcopy /I /Y /Q    .\dll\udefrag-kernel .\obj\udefrag-kernel
+xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
+xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
+xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
+xcopy /I /Y /Q    .\dll\wgx .\obj\wgx
 
 rem xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
 rem xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
@@ -101,7 +101,7 @@ rem Executables are too small to use upx.
 rem upx udefrag.exe
 rem if %errorlevel% neq 0 goto fail
 
-%NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 UltraDefrag.nsi
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 
 if "%1" equ "--use-msvc" goto build_source_package
@@ -118,7 +118,7 @@ copy /Y ..\installer\lang-classical.ini .\amd64\
 copy /Y ..\installer\driver.ini .\amd64\
 
 cd amd64
-%NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 
 cd..
@@ -131,7 +131,7 @@ copy /Y ..\installer\lang.ini .\ia64\
 copy /Y ..\installer\lang-classical.ini .\ia64\
 copy /Y ..\installer\driver.ini .\ia64\
 cd ia64
-%NSISDIR%\makensis.exe /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 
 cd..
