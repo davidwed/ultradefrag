@@ -61,7 +61,7 @@ BEGIN
     PUSHBUTTON      "Stop",IDC_STOP,215,174,62,11,WS_DISABLED | NOT 
                     WS_TABSTOP
     PUSHBUTTON      "Report",IDC_SHOWFRAGMENTED,281,174,62,11,NOT WS_TABSTOP
-    CONTROL         "Shut down PC after a job",IDC_SHUTDOWN,"Button",
+    CONTROL         "Shut down PC when done",IDC_SHUTDOWN,"Button",
                     BS_AUTOCHECKBOX /*| BS_RIGHTBUTTON | BS_RIGHT | BS_CENTER*/ | NOT WS_TABSTOP,
 					7,189,192,10
     PUSHBUTTON      "Settings",IDC_SETTINGS,215,189,62,10,NOT WS_TABSTOP
