@@ -2,7 +2,9 @@ HISTORY
 
   Version 4.2.0  2010-03-
   ------------------------------------------------------------------------------
+    - multiple drives selection feature was added to GUI
     - progress indication was improved to be more detailed and smooth
+    - defragmentation and optimization speedup performed
     - --all, --all-fixed command line keys added to the console interface
       and to the boot time defragmenter
     - boot time interface interactive mode commands set changed to be the same

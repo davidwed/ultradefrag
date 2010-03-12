@@ -47,7 +47,7 @@ CAPTION VERSIONINTITLE_PORTABLE
 FONT 9, "Courier New", 0, 0, 0x1
 BEGIN
     CONTROL         "",IDC_VOLUMES,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
+                    /*LVS_SINGLESEL |*/ LVS_SHOWSELALWAYS | LVS_NOSORTHEADER | 
                     WS_BORDER | WS_GROUP | WS_TABSTOP,7,7,337,66
     PUSHBUTTON      "Rescan drives",IDC_RESCAN,246,80,98,10,WS_GROUP
     CONTROL         "Skip removable media",IDC_SKIPREMOVABLE,"Button",

@@ -30,8 +30,8 @@ HWND hMap;
 signed int delta_h = 0;
 HFONT hFont = NULL;
 extern HWND hStatus;
+extern HWND hList;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
-extern VOLUME_LIST_ENTRY volume_list[];
 extern RECT win_rc; /* coordinates of main window */
 extern int skip_removable;
 
@@ -47,11 +47,19 @@ extern int disable_reports;
 extern char dbgprint_level[];
 
 extern BOOL busy_flag, exit_pressed;
+extern NEW_VOLUME_LIST_ENTRY vlist[MAX_DOS_DRIVES + 1];
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
-void ShowFragmented();
+void ShowReports();
+void ShowSingleReport(NEW_VOLUME_LIST_ENTRY *v_entry);
 void VolListGetColumnWidths(void);
+NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void);
+NEW_VOLUME_LIST_ENTRY * vlist_get_entry(char *name);
+void InitVolList(void);
+void FreeVolListResources(void);
+void UpdateVolList(void);
+void VolListNotifyHandler(LPARAM lParam);
 
 void InitFont(void);
 void CallGUIConfigurator(void);
@@ -267,7 +275,7 @@ void InitMainWindow(void)
 	
 	/* status bar will always have default font */
 	CreateStatusBar();
-	UpdateStatusBar(&(volume_list[0].Statistics));
+	UpdateStatusBar(&(vlist[0].stat)); /* can be initialized here by any entry */
 }
 
 /*---------------- Main Dialog Callback ---------------------*/
@@ -311,7 +319,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				);
 			break;
 		case IDC_SHOWFRAGMENTED:
-			if(!busy_flag) ShowFragmented();
+			if(!busy_flag) ShowReports();
 			break;
 		case IDC_PAUSE:
 		case IDC_STOP:
@@ -348,9 +356,34 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	return FALSE;
 }
 
-void ShowFragmented()
+void ShowReports()
 {
-	PVOLUME_LIST_ENTRY vl;
+	NEW_VOLUME_LIST_ENTRY *v_entry;
+	LRESULT SelectedItem;
+	LV_ITEM lvi;
+	char buffer[128];
+	int index;
+	
+	index = -1;
+	while(1){
+		SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_SELECTED);
+		if(SelectedItem == -1 || SelectedItem == index) break;
+		lvi.iItem = (int)SelectedItem;
+		lvi.iSubItem = 0;
+		lvi.mask = LVIF_TEXT;
+		lvi.pszText = buffer;
+		lvi.cchTextMax = 127;
+		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
+			buffer[2] = 0;
+			v_entry = vlist_get_entry(buffer);
+			ShowSingleReport(v_entry);
+		}
+		index = (int)SelectedItem;
+	}
+}
+
+void ShowSingleReport(NEW_VOLUME_LIST_ENTRY *v_entry)
+{
 #ifndef UDEFRAG_PORTABLE
 	short l_path[] = L"C:\\fraglist.luar";
 #else
@@ -361,14 +394,14 @@ void ShowFragmented()
 	PROCESS_INFORMATION pi;
 #endif
 
-	vl = VolListGetSelectedEntry();
-	if(vl->VolumeName == NULL || vl->Status == STATUS_UNDEFINED) return;
+	if(v_entry == NULL) return;
+	if(!v_entry->name[0] || v_entry->status == STATUS_UNDEFINED) return;
 
 #ifndef UDEFRAG_PORTABLE
-	l_path[0] = (short)(vl->VolumeName[0]);
+	l_path[0] = (short)(v_entry->name[0]);
 	(void)WgxShellExecuteW(hWindow,L"view",l_path,NULL,NULL,SW_SHOW);
 #else
-	path[0] = vl->VolumeName[0];
+	path[0] = v_entry->name[0];
 	(void)strcpy(cmd,".\\lua5.1a_gui.exe");
 	(void)strcpy(buffer,cmd);
 	(void)strcat(buffer," .\\scripts\\udreportcnv.lua ");

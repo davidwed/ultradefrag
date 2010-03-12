@@ -112,14 +112,17 @@ enum {
 #define create_thread(func,param,ph) \
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)
 
-typedef struct _VOLUME_LIST_ENTRY {
-	char *VolumeName;
-	int Status;
-	STATISTIC Statistics;
-	HDC hDC;
-	HBITMAP hBitmap;
-} VOLUME_LIST_ENTRY, *PVOLUME_LIST_ENTRY;
+#define MAX_VNAME_LEN  31
+#define MAX_FSNAME_LEN 31
 
+typedef struct {
+	char name[MAX_VNAME_LEN + 1];
+	char fsname[MAX_FSNAME_LEN + 1];
+	int status;
+	STATISTIC stat;
+	HDC hdc;
+	HBITMAP hbitmap;
+} NEW_VOLUME_LIST_ENTRY, *PNEW_VOLUME_LIST_ENTRY;
 		
 void analyse(void);
 void defragment(void);
@@ -138,9 +141,7 @@ void InitMap(void);
 void CalculateBlockSize();
 void DeleteMaps();
 
-BOOL FillBitMap(char *);
-
-void RedrawMap();
+void RedrawMap(NEW_VOLUME_LIST_ENTRY *v_entry);
 void ClearMap();
 
 /* dialog procedures */
@@ -155,15 +156,6 @@ void InitProgress(void);
 void ShowProgress(void);
 void HideProgress(void);
 void SetProgress(char *message, int percentage);
-
-/* volume list manipulations */
-void InitVolList(void);
-void FreeVolListResources(void);
-void UpdateVolList(void);
-PVOLUME_LIST_ENTRY VolListGetSelectedEntry(void);
-void VolListUpdateSelectedStatusField(int Status);
-void VolListRefreshSelectedItem(void);
-void VolListNotifyHandler(LPARAM lParam);
 
 /* window procedures */
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);

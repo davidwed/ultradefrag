@@ -43,6 +43,7 @@ int iMAP_HEIGHT = 0x8c;
 int iBLOCK_SIZE = 0x9;   /* in pixels */
 
 extern HWND hWindow,hMap,hList;
+extern NEW_VOLUME_LIST_ENTRY *processed_entry;
 
 HDC hGridDC = NULL;
 HBITMAP hGridBitmap = NULL;
@@ -50,6 +51,7 @@ WNDPROC OldRectangleWndProc;
 BOOL isRectangleUnicode = FALSE;
 
 static BOOL CreateBitMapGrid(void);
+NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void);
 
 void InitMap(void)
 {
@@ -87,7 +89,7 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 
 	if(iMsg == WM_PAINT){
 		(void)BeginPaint(hWnd,&ps); /* (void)? */
-		RedrawMap();
+		RedrawMap(processed_entry);
 		EndPaint(hWnd,&ps);
 	}
 	if(isRectangleUnicode)
@@ -171,18 +173,16 @@ static BOOL CreateBitMapGrid(void)
 	return TRUE;
 }
 
-BOOL FillBitMap(char *cluster_map)
+BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry)
 {
-	PVOLUME_LIST_ENTRY vl;
 	HDC hdc;
 	HBRUSH hOldBrush;
 	RECT block_rc;
 	int i, j;
 
-	vl = VolListGetSelectedEntry();
-	if(vl->VolumeName == NULL) return FALSE;
+	if(v_entry == NULL) return FALSE;
 
-	hdc = vl->hDC;
+	hdc = v_entry->hdc;
 	if(!hdc) return FALSE;
 	
 	hOldBrush = SelectObject(hdc,hBrushes[0]);
@@ -208,16 +208,14 @@ void ClearMap()
 	(void)ReleaseDC(hMap,hdc);
 }
 
-void RedrawMap()
+void RedrawMap(NEW_VOLUME_LIST_ENTRY *v_entry)
 {
-	PVOLUME_LIST_ENTRY vl;
 	HDC hdc;
 
-	vl = VolListGetSelectedEntry();
-	if(vl->VolumeName != NULL){
-		if(vl->Status > STATUS_UNDEFINED && vl->hDC){
+	if(v_entry != NULL){
+		if(v_entry->status > STATUS_UNDEFINED && v_entry->hdc){
 			hdc = GetDC(hMap);
-			(void)BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,vl->hDC,0,0,SRCCOPY);
+			(void)BitBlt(hdc,0,0,iMAP_WIDTH,iMAP_HEIGHT,v_entry->hdc,0,0,SRCCOPY);
 			(void)ReleaseDC(hMap,hdc);
 			return;
 		}
