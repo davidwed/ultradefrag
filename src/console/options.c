@@ -375,6 +375,9 @@ void parse_cmdline(int argc, char **argv)
 		//printf("\n");
 	}
 	
+	/* --all-fixed flag has more precedence */
+	if(all_fixed_flag) all_flag = 0;
+	
 	letter = letters[0];
 	if(!l_flag && !all_flag && !all_fixed_flag && !letter) h_flag = 1;
 }
