@@ -296,20 +296,20 @@ void ParseCommand(void)
 	/* handle udefrag command */
 	if((short *)wcsstr(command,L"udefrag") == command){
 		/* handle drives listing request */
-		if(wcsstr(command,L"-la")){
+		if(wcsstr(command,L" -la")){
 			DisplayAvailableVolumes(FALSE);
 			return;
 		}
-		if(wcsstr(command,L"-l")){
+		if(wcsstr(command,L" -l")){
 			DisplayAvailableVolumes(TRUE);
 			return;
 		}
 		
 		/* get flags */
-		if(wcsstr(command,L"-a")) a_flag = 1;
-		if(wcsstr(command,L"-o")) o_flag = 1;
-		if(wcsstr(command,L"--all")) all_flag = 1;
-		if(wcsstr(command,L"--all-fixed")) all_fixed_flag = 1;
+		if(wcsstr(command,L" -a")) a_flag = 1;
+		if(wcsstr(command,L" -o")) o_flag = 1;
+		if(wcsstr(command,L" --all")) all_flag = 1;
+		if(wcsstr(command,L" --all-fixed")) all_fixed_flag = 1;
 		if(a_flag) cmd = 'a';
 		else if(o_flag) cmd = 'c';
 
