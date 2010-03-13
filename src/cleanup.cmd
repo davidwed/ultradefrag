@@ -11,6 +11,7 @@ rd /s /q bin
 rd /s /q lib
 rd /s /q obj
 rd /s /q doxy-doc
+rd /s /q src_package
 
 if "%1" equ "--clean" goto end
 mkdir bin

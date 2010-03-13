@@ -68,7 +68,7 @@ BEGIN
     PUSHBUTTON      "About",IDC_ABOUT,281,189,62,10,NOT WS_TABSTOP
     LTEXT           "A 0.00 %",IDC_PROGRESSMSG,7,200,49,8
     CONTROL         "",IDC_PROGRESS1,"msctls_progress32",PBS_SMOOTH | 
-                    WS_BORDER,58,201,285,5
+                    WS_BORDER,58,201,285,6
 END
 
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93

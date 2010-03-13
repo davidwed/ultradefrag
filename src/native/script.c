@@ -308,10 +308,10 @@ void ParseCommand(void)
 		/* get flags */
 		if(wcsstr(command,L" -a")) a_flag = 1;
 		if(wcsstr(command,L" -o")) o_flag = 1;
-		if(wcsstr(command,L" --all")) all_flag = 1;
-		if(wcsstr(command,L" --all-fixed")){
-			all_fixed_flag = 1; all_flag = 0;
-		}
+		
+		if(wcsstr(command,L" --all-fixed")) all_fixed_flag = 1;
+		else if(wcsstr(command,L" --all")) all_flag = 1;
+		
 		if(a_flag) cmd = 'a';
 		else if(o_flag) cmd = 'c';
 
