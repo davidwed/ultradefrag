@@ -6,14 +6,16 @@ rem by removing all intermediate files.
 echo Delete all intermediate files...
 rem call SETVARS.CMD
 rem call BLDSCHED.CMD --clean
-rem Recreate bin, obj, lib, doxy-doc directories
 rd /s /q bin
 rd /s /q lib
 rd /s /q obj
 rd /s /q doxy-doc
 rd /s /q src_package
+rd /s /q pre-release
 
 if "%1" equ "--clean" goto end
+
+rem Recreate bin, obj, lib, doxy-doc directories
 mkdir bin
 mkdir lib
 mkdir obj
