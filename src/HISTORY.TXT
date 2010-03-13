@@ -9,6 +9,10 @@ HISTORY
       and to the boot time defragmenter
     - boot time interface interactive mode commands set changed to be the same
       as in scripting mode
+    - the following translations were updated:
+
+      Dutch, Swedish
+
     - one little bug causing a wrong progress bar appearance on Windows XP
       default theme was fixed
 
