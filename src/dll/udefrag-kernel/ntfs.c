@@ -941,7 +941,9 @@ void AnalyseAttributeFromAttributeList(PATTRIBUTE_LIST attr_list_entry,PMY_FILE_
  * @param[in] mft_id the MFT record identifier.
  * @param[in] attr_type the attribute type.
  * @param[in] attr_name the name of the attribute.
- * @param[in] pointer to the structure containing
+ * @param[in] attr_number the numeric identifier of
+ * the instance of the attribute.
+ * @param[in] pmfi pointer to the structure containing
  * information about the file.
  * @note The attr_name paramter is equal to NULL for empty names.
  */

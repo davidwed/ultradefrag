@@ -51,7 +51,7 @@ static int getint(lua_State *L, char *variable)
 /**
  * @brief Retrieves a LOGFONT structure from a file.
  * @param[in] path the path to the configuration file.
- * @param[out] lp pointer to the LOGFONT structure.
+ * @param[out] lf pointer to the LOGFONT structure.
  * @return Boolean value. TRUE indicates success.
  * @par File contents example:
 @verbatim
@@ -113,7 +113,7 @@ BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
 /**
  * @brief Saves a LOGFONT structure to a file.
  * @param[in] path the path to the configuration file.
- * @param[out] lp pointer to the LOGFONT structure.
+ * @param[out] lf pointer to the LOGFONT structure.
  * @return Boolean value. TRUE indicates success.
  * @note This function shows a message box in case when
  * some error has been occured.

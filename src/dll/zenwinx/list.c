@@ -71,7 +71,7 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
  * @details Frees memory allocated for an item to be removed.
  * @param[in,out] phead pointer to a variable pointing
  *                      to the list head.
- * @param[in]     prev  pointer to an item which must
+ * @param[in]     item  pointer to an item which must
  *                      be removed.
  */
 void __stdcall winx_list_remove_item(list_entry **phead,list_entry *item)
