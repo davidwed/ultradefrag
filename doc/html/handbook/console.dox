@@ -86,6 +86,8 @@
  * <dt>--all-fixed</dt>
  * <dd>Process all volumes except removable.</dd>
  * </dl>
+ * Note that --all-fixed key has more precedence, if both keys are specified
+ * UltraDefrag will process fixed drives only.
  *
  * <h1>Environment variables</h1>
  * <dl>

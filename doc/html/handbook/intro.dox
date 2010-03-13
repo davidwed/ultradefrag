@@ -38,9 +38,10 @@
  * - simplicity, it can be used without reading the documentation
  * - ability to defragment single file/directory from the context menu in Explorer
  * - ability to defragment additional streams attached to NTFS files
- * - ability to exclude any unimportant fiiles based on flexible filters
+ * - ability to exclude any unimportant files based on flexible filters
  * - ability to defragment files which have number of fragments above specified threshold
  * - ability to automatically break defragmentation when the specified time interval elapses
+ * - ability to select multiple volumes for defragmentation
  * - well readable HTML reports
  * - powerful command line interface
  * - ability to automatically hibernate/shutdown PC after a job

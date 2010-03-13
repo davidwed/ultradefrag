@@ -37,6 +37,10 @@
  * Check the Skip removable media box to prevent removable disks like floppies and USB-sticks
  * from being displayed in the list.
  *
+ * Multiple volumes can be selected in the list. In this case UltraDefrag
+ * will process them in series. The rules of the selection are the same as
+ * in Windows Explorer.
+ *
  * <b>Cluster Map</b>\n
  * It represents the volume clusters by a little colored squares.
  * Colors have the following meaning:
