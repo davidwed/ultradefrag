@@ -296,13 +296,13 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_ANALYSE:
-			analyse();
+			DoJob('a');
 			break;
 		case IDC_DEFRAGM:
-			defragment();
+			DoJob('d');
 			break;
 		case IDC_OPTIMIZE:
-			optimize();
+			DoJob('c');
 			break;
 		case IDC_ABOUT:
 			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1)){

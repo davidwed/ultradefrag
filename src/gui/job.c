@@ -46,27 +46,22 @@ void VolListUpdateStatusField(NEW_VOLUME_LIST_ENTRY *v_entry,int status);
 void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry);
 BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry);
 
-void analyse(void)
+void DoJob(char job_type)
 {
-	HANDLE h = create_thread(ThreadProc,(DWORD)'a',&thr_id);
-	if(h == NULL)
-		DisplayLastError("Cannot create thread starting volume analysis!");
-	if(h) CloseHandle(h);
-}
-
-void defragment(void)
-{
-	HANDLE h = create_thread(ThreadProc,(DWORD)'d',&thr_id);
-	if(h == NULL)
-		DisplayLastError("Cannot create thread starting volume defragmentation!");
-	if(h) CloseHandle(h);
-}
-
-void optimize(void)
-{
-	HANDLE h = create_thread(ThreadProc,(DWORD)'c',&thr_id);
-	if(h == NULL)
-		DisplayLastError("Cannot create thread starting volume optimization!");
+	HANDLE h = create_thread(ThreadProc,(LPVOID)job_type,&thr_id);
+	if(h == NULL){
+		switch(job_type){
+		case 'a':
+			DisplayLastError("Cannot create thread starting volume analysis!");
+			break;
+		case 'd':
+			DisplayLastError("Cannot create thread starting volume defragmentation!");
+			break;
+		default:
+			DisplayLastError("Cannot create thread starting volume optimization!");
+		}
+		
+	}
 	if(h) CloseHandle(h);
 }
 

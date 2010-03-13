@@ -124,9 +124,7 @@ typedef struct {
 	HBITMAP hbitmap;
 } NEW_VOLUME_LIST_ENTRY, *PNEW_VOLUME_LIST_ENTRY;
 		
-void analyse(void);
-void defragment(void);
-void optimize(void);
+void DoJob(char job_type);
 void stop(void);
 
 /* settings related functions */
