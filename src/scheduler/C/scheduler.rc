@@ -47,17 +47,17 @@ BEGIN
     CONTROL         "&Wednesday",IDC_WEDNESDAY,"Button",BS_AUTOCHECKBOX,80,29,62,10
     CONTROL         "T&hursday",IDC_THURSDAY,"Button",BS_AUTOCHECKBOX,80,40,62,10
     CONTROL         "&Friday",IDC_FRIDAY,"Button",BS_AUTOCHECKBOX,80,51,62,10
-    CONTROL         "&Saturday",IDC_SATURDAY,"Button",BS_AUTOCHECKBOX,80,61,62,10
-    CONTROL         "S&unday",IDC_SUNDAY,"Button",BS_AUTOCHECKBOX,80,71,62,10
+    CONTROL         "&Saturday",IDC_SATURDAY,"Button",BS_AUTOCHECKBOX,80,62,62,10
+    CONTROL         "S&unday",IDC_SUNDAY,"Button",BS_AUTOCHECKBOX,80,73,62,10
     CONTROL         "Daily",IDC_DAILY,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
-                    WS_TABSTOP,80,89,63,10
-    CONTROL         "Weekly",IDC_WEEKLY,"Button",BS_AUTORADIOBUTTON,149,89,63,10
+                    WS_TABSTOP,146,63,63,10
+    CONTROL         "Weekly",IDC_WEEKLY,"Button",BS_AUTORADIOBUTTON,146,73,63,10
     CONTROL         "DateTimePicker1",IDC_DATETIMEPICKER1,"SysDateTimePick32",
                     DTS_RIGHTALIGN | DTS_UPDOWN | WS_GROUP | WS_TABSTOP | 
                     0x8,5,88,62,13
     LISTBOX         IDC_DRIVES,146,9,63,51,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
                     LBS_EXTENDEDSEL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "OK",IDOK,146,70,64,11,WS_GROUP
+    PUSHBUTTON      "OK",IDOK,80,89,130,11,WS_GROUP
 END
 
 /* manifests for all targets produces make-manifests.cmd script */
