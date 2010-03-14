@@ -214,9 +214,10 @@ void SchedulerAddJob(void)
 	SYSTEMTIME st;
 	AT_INFO ati;
 	WCHAR drive[32];
-	WCHAR cmd[64];
+	WCHAR cmd[256];
 	DWORD JobId;
-	int index;
+	int SelectedItems[MAX_DOS_DRIVES];
+	int n, i, index;
 	NET_API_STATUS status;
 	
 	if(SendMessage(GetDlgItem(hWindow,IDC_DATETIMEPICKER1),DTM_GETSYSTEMTIME,
@@ -225,34 +226,39 @@ void SchedulerAddJob(void)
 		return;
 	}
 	
-	index = (int)(DWORD_PTR)SendMessage(hDrives,CB_GETCURSEL,0,0);
-	if(index != CB_ERR){
-		if(SendMessageW(hDrives,CB_GETLBTEXT,(WPARAM)index,(LPARAM)drive) != CB_ERR){
-			(void)swprintf(cmd,L"udefrag %s",drive);
+	n = (int)(DWORD_PTR)SendMessage(hDrives,LB_GETSELITEMS,MAX_DOS_DRIVES,(LPARAM)SelectedItems);
+	if(n != LB_ERR && n <= MAX_DOS_DRIVES){
+		(void)wcscpy(cmd,L"udefrag ");
+		for(i = 0; i < n; i++){
+			index = SelectedItems[i];
+			if(SendMessageW(hDrives,LB_GETTEXT,(WPARAM)index,(LPARAM)drive) != LB_ERR){
+				(void)wcscat(cmd,drive);
+				(void)wcscat(cmd,L" ");
+			}
+		}
 			  
-			ati.JobTime = (st.wHour * 60 * 60 * 1000) + (st.wMinute * 60 * 1000) + (st.wSecond * 1000);
-			ati.DaysOfMonth = 0;
-			ati.DaysOfWeek = 0;
-			ati.Flags = JOB_RUN_PERIODICALLY | JOB_NONINTERACTIVE;
-			ati.Command = cmd;
-			
-			if(SendMessage(GetDlgItem(hWindow,IDC_DAILY),BM_GETCHECK,0,0) == BST_CHECKED)
-				ati.DaysOfWeek = 0x7F;
-			else {
-				if(SendMessage(GetDlgItem(hWindow,IDC_MONDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x1;
-				if(SendMessage(GetDlgItem(hWindow,IDC_TUESDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x2;
-				if(SendMessage(GetDlgItem(hWindow,IDC_WEDNESDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x4;
-				if(SendMessage(GetDlgItem(hWindow,IDC_THURSDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x8;
-				if(SendMessage(GetDlgItem(hWindow,IDC_FRIDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x10;
-				if(SendMessage(GetDlgItem(hWindow,IDC_SATURDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x20;
-				if(SendMessage(GetDlgItem(hWindow,IDC_SUNDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x40;
-			}
-			
-			status = NetScheduleJobAdd(NULL,(LPBYTE)&ati,&JobId);
-			if(status != NERR_Success){
-				SetLastError((DWORD)status);
-				DisplayLastError("Cannot add a specified job!");
-			}
+		ati.JobTime = (st.wHour * 60 * 60 * 1000) + (st.wMinute * 60 * 1000) + (st.wSecond * 1000);
+		ati.DaysOfMonth = 0;
+		ati.DaysOfWeek = 0;
+		ati.Flags = JOB_RUN_PERIODICALLY | JOB_NONINTERACTIVE;
+		ati.Command = cmd;
+		
+		if(SendMessage(GetDlgItem(hWindow,IDC_DAILY),BM_GETCHECK,0,0) == BST_CHECKED)
+			ati.DaysOfWeek = 0x7F;
+		else {
+			if(SendMessage(GetDlgItem(hWindow,IDC_MONDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x1;
+			if(SendMessage(GetDlgItem(hWindow,IDC_TUESDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x2;
+			if(SendMessage(GetDlgItem(hWindow,IDC_WEDNESDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x4;
+			if(SendMessage(GetDlgItem(hWindow,IDC_THURSDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x8;
+			if(SendMessage(GetDlgItem(hWindow,IDC_FRIDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x10;
+			if(SendMessage(GetDlgItem(hWindow,IDC_SATURDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x20;
+			if(SendMessage(GetDlgItem(hWindow,IDC_SUNDAY),BM_GETCHECK,0,0) == BST_CHECKED) ati.DaysOfWeek |= 0x40;
+		}
+		
+		status = NetScheduleJobAdd(NULL,(LPBYTE)&ati,&JobId);
+		if(status != NERR_Success){
+			SetLastError((DWORD)status);
+			DisplayLastError("Cannot add a specified job!");
 		}
 	}
 }
@@ -266,8 +272,8 @@ void InitDrivesList(void)
 	if(udefrag_get_avail_volumes(&v,TRUE) >= 0){ /* skip removable media */
 		for(i = 0; v[i].letter != 0; i++){
 			(void)sprintf(buffer,"%c:\\",v[i].letter);
-			(void)SendMessage(hDrives,CB_ADDSTRING,0,(LPARAM)(LPCTSTR)buffer);
+			(void)SendMessage(hDrives,LB_ADDSTRING,0,(LPARAM)(LPCTSTR)buffer);
 		}
 	}
-	(void)SendMessage(hDrives,CB_SETCURSEL,0,0);
+	(void)SendMessage(hDrives,LB_SETCURSEL,0,0);
 }

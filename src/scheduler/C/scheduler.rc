@@ -34,39 +34,30 @@ IDI_SCHEDULER           ICON    DISCARDABLE     "res/Clock2.ico"
 IDB_SCHEDULER_PICTURE   BITMAP  DISCARDABLE     "res/scheduler.bmp"
 
 
-IDD_SCHEDULER DIALOGEX 0, 0, 219, 89
-STYLE DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | 
-    WS_SYSMENU
+IDD_SCHEDULER DIALOGEX 0, 0, 219, 107
+STYLE DS_MODALFRAME | DS_CENTER | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
 EXSTYLE WS_EX_APPWINDOW
 CAPTION "UltraDefrag Scheduler"
 FONT 9, "Courier New"
 BEGIN
-    CONTROL         103,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,5,8,
-                    66,74
-    CONTROL         "&Monday",IDC_MONDAY,"Button",BS_AUTOCHECKBOX | 
-                    WS_GROUP | WS_TABSTOP,80,7,62,10
-    CONTROL         "&Tuesday",IDC_TUESDAY,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,80,18,62,10
-    CONTROL         "&Wednesday",IDC_WEDNESDAY,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,80,29,62,10
-    CONTROL         "T&hursday",IDC_THURSDAY,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,80,40,62,10
-    CONTROL         "&Friday",IDC_FRIDAY,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,80,51,62,10
-    CONTROL         "&Saturday",IDC_SATURDAY,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,80,61,62,10
-    CONTROL         "S&unday",IDC_SUNDAY,"Button",BS_AUTOCHECKBOX | 
-                    NOT WS_TABSTOP,80,71,62,10
-    CONTROL         "Daily",IDC_DAILY,"Button",BS_AUTORADIOBUTTON | 
-                    WS_GROUP | WS_TABSTOP,148,7,63,10
-    CONTROL         "Weekly",IDC_WEEKLY,"Button",BS_AUTORADIOBUTTON | 
-                    NOT WS_TABSTOP,148,18,63,10
+    CONTROL         103,IDC_STATIC,"Static",SS_BITMAP | SS_CENTERIMAGE,5,8,66,74
+    CONTROL         "&Monday",IDC_MONDAY,"Button",BS_AUTOCHECKBOX | WS_GROUP | 
+                    WS_TABSTOP,80,7,62,10
+    CONTROL         "&Tuesday",IDC_TUESDAY,"Button",BS_AUTOCHECKBOX,80,18,62,10
+    CONTROL         "&Wednesday",IDC_WEDNESDAY,"Button",BS_AUTOCHECKBOX,80,29,62,10
+    CONTROL         "T&hursday",IDC_THURSDAY,"Button",BS_AUTOCHECKBOX,80,40,62,10
+    CONTROL         "&Friday",IDC_FRIDAY,"Button",BS_AUTOCHECKBOX,80,51,62,10
+    CONTROL         "&Saturday",IDC_SATURDAY,"Button",BS_AUTOCHECKBOX,80,61,62,10
+    CONTROL         "S&unday",IDC_SUNDAY,"Button",BS_AUTOCHECKBOX,80,71,62,10
+    CONTROL         "Daily",IDC_DAILY,"Button",BS_AUTORADIOBUTTON | WS_GROUP | 
+                    WS_TABSTOP,80,89,63,10
+    CONTROL         "Weekly",IDC_WEEKLY,"Button",BS_AUTORADIOBUTTON,149,89,63,10
     CONTROL         "DateTimePicker1",IDC_DATETIMEPICKER1,"SysDateTimePick32",
-                    DTS_RIGHTALIGN | DTS_UPDOWN | WS_GROUP | WS_TABSTOP | 0x8,
-                    148,32,62,13
-    COMBOBOX        IDC_DRIVES,148,53,62,30,CBS_DROPDOWNLIST | CBS_SORT | 
-                    WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "OK",IDOK,147,70,64,11,WS_GROUP | WS_TABSTOP
+                    DTS_RIGHTALIGN | DTS_UPDOWN | WS_GROUP | WS_TABSTOP | 
+                    0x8,5,88,62,13
+    LISTBOX         IDC_DRIVES,146,9,63,51,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    LBS_EXTENDEDSEL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
+    PUSHBUTTON      "OK",IDOK,146,70,64,11,WS_GROUP
 END
 
 /* manifests for all targets produces make-manifests.cmd script */
