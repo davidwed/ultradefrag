@@ -31,6 +31,10 @@
  * - The letter of the drive to defragment.
  * - Days of the week to defrag if Weekly is selected.
  *
+ * Multiple volumes can be selected in the list. In this case UltraDefrag
+ * will process them in series. The rules of the selection are the same as
+ * in Windows Explorer.
+ *
  * Scheduler can be launched from the Start menu. Use Start > Programs > UltraDefrag > Scheduler
  * shortcut. To browse list of all scheduled tasks use the following menu:
  * Start > Settings > Control Panel > Scheduled Tasks.
