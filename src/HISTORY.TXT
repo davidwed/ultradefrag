@@ -13,6 +13,8 @@ HISTORY
 
       Dutch, Swedish
 
+    - a bug preventing true Unicode paths from being displayed 
+      in file fragmentation reports was fixed
     - one little bug causing a wrong progress bar appearance on Windows XP
       default theme was fixed
 

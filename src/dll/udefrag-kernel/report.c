@@ -174,7 +174,7 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 {
 	char buffer[256];
 	PFRAGMENTED pf;
-	char *p;
+	unsigned char *p;
 	int i, offset;
 	char *comment;
 	ANSI_STRING as;
@@ -218,12 +218,12 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		}
 		(void)strcpy(buffer,"]],uname = {");
 		(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
-		p = (char *)pf->pfn->name.Buffer;
+		p = (unsigned char *)pf->pfn->name.Buffer;
 		/* skip \??\ sequence in the beginning */
 		if(pf->pfn->name.Length > 0x8) offset = 0x8;
 		else offset = 0x0;
 		for(i = offset; i < (pf->pfn->name.Length - offset); i++){
-			(void)_snprintf(buffer,sizeof(buffer),/*"%03u,"*/"%u,",(UINT)p[i]);
+			(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)p[i]);
 			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 			(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
 		}
