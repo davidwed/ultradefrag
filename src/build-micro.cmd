@@ -9,6 +9,7 @@ echo Set environment variables...
 set UD_MICRO_EDITION=1
 set OLD_PATH=%path%
 call SETVARS.CMD
+if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
 
 rem DELETE ALL PREVIOUSLY COMPILED FILES
 call cleanup.cmd

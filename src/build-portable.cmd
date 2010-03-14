@@ -47,6 +47,8 @@ copy /Y installer\LanguageSelector.ico bin\
 cd bin
 
 call setvars.cmd
+if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
 if %errorlevel% neq 0 goto fail
 

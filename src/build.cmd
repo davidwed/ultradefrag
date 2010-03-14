@@ -8,6 +8,7 @@ if "%1" equ "--help" goto usage
 echo Set environment variables...
 set OLD_PATH=%path%
 call SETVARS.CMD
+if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
 
 rem DELETE ALL PREVIOUSLY COMPILED FILES
 call cleanup.cmd %1
