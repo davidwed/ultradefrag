@@ -57,7 +57,7 @@ BEGIN
                     0x8,5,88,62,13
     LISTBOX         IDC_DRIVES,146,9,63,51,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
                     LBS_EXTENDEDSEL | WS_VSCROLL | WS_GROUP | WS_TABSTOP
-    PUSHBUTTON      "OK",IDOK,80,89,130,11,WS_GROUP
+    PUSHBUTTON      "Create Task",IDOK,80,89,130,11,WS_GROUP
 END
 
 /* manifests for all targets produces make-manifests.cmd script */

@@ -29,20 +29,20 @@
 #include "../../dll/wgx/wgx.h"
 
 WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
-	{IDC_MONDAY,    L"MONDAY",    L"Monday",    NULL},
-	{IDC_TUESDAY,   L"TUESDAY",   L"Tuesday",   NULL},
-	{IDC_WEDNESDAY, L"WEDNESDAY", L"Wednesday", NULL},
-	{IDC_THURSDAY,  L"THURSDAY",  L"Thursday",  NULL},
-	{IDC_FRIDAY,    L"FRIDAY",    L"Friday",    NULL},
-	{IDC_SATURDAY,  L"SATURDAY",  L"Saturday",  NULL},
-	{IDC_SUNDAY,    L"SUNDAY",    L"Sunday",    NULL},
+	{IDC_MONDAY,    L"MONDAY",      L"Monday",      NULL},
+	{IDC_TUESDAY,   L"TUESDAY",     L"Tuesday",     NULL},
+	{IDC_WEDNESDAY, L"WEDNESDAY",   L"Wednesday",   NULL},
+	{IDC_THURSDAY,  L"THURSDAY",    L"Thursday",    NULL},
+	{IDC_FRIDAY,    L"FRIDAY",      L"Friday",      NULL},
+	{IDC_SATURDAY,  L"SATURDAY",    L"Saturday",    NULL},
+	{IDC_SUNDAY,    L"SUNDAY",      L"Sunday",      NULL},
 
-	{IDC_DAILY,     L"DAILY",     L"Daily",     NULL},
-	{IDC_WEEKLY,    L"WEEKLY",    L"Weekly",    NULL},
+	{IDC_DAILY,     L"DAILY",       L"Daily",       NULL},
+	{IDC_WEEKLY,    L"WEEKLY",      L"Weekly",      NULL},
 
-	{IDOK,          L"OK",        L"OK",        NULL},
+	{IDOK,          L"CREATE_TASK", L"Create Task", NULL},
 
-	{0,             NULL,         NULL,         NULL}
+	{0,             NULL,           NULL,           NULL}
 };
 
 void SetText(HWND hWnd, short *key)
