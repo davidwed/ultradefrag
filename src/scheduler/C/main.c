@@ -275,5 +275,5 @@ void InitDrivesList(void)
 			(void)SendMessage(hDrives,LB_ADDSTRING,0,(LPARAM)(LPCTSTR)buffer);
 		}
 	}
-	(void)SendMessage(hDrives,LB_SETCURSEL,0,0);
+	(void)SendMessage(hDrives,LB_SETSEL,(WPARAM)TRUE,0);
 }
