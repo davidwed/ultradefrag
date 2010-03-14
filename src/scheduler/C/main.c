@@ -232,6 +232,7 @@ void SchedulerAddJob(void)
 		for(i = 0; i < n; i++){
 			index = SelectedItems[i];
 			if(SendMessageW(hDrives,LB_GETTEXT,(WPARAM)index,(LPARAM)drive) != LB_ERR){
+				drive[2] = 0; /* remove trailing backslash */
 				(void)wcscat(cmd,drive);
 				(void)wcscat(cmd,L" ");
 			}
