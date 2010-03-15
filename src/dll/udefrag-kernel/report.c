@@ -222,7 +222,7 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		/* skip \??\ sequence in the beginning */
 		if(pf->pfn->name.Length > 0x8) offset = 0x8;
 		else offset = 0x0;
-		for(i = offset; i < (pf->pfn->name.Length - offset); i++){
+		for(i = offset; i < pf->pfn->name.Length; i++){
 			(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)p[i]);
 			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 			(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
