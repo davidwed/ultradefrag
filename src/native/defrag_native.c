@@ -81,8 +81,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		"Copyright (c) Dmitri Arkhangelski, 2007-2010.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
 		"If something is wrong, hit F8 on startup\n"
-		"and select 'Last Known Good Configuration'.\n"
-		"Use Break key to abort defragmentation.\n\n");
+		"and select 'Last Known Good Configuration'.\n\n");
 	if(winx_init(Peb) < 0){
 		winx_printf("Wait 10 seconds ...\n");
 		winx_sleep(10000);
