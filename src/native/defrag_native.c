@@ -76,7 +76,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	(void)NtInitializeRegistry(0/*FALSE*/); /* saves boot log etc. */
 #endif
 	/* 2. Display Copyright */
-	if(winx_get_os_version() < 51) winx_printf("\n\n");
+	/* if(winx_get_os_version() < 51) */
+	winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007-2010.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
