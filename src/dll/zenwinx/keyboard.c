@@ -60,7 +60,7 @@ int __stdcall kb_open(void)
 	memset((void *)kb,0,sizeof(kb));
 	number_of_keyboards = 0;
 	
-	/* required for USB devices? */
+	/* required for wireless devices */
 	winx_printf("Wait 10 seconds for keyboard initialization ");
 	for(i = 0; i < 10; i++){
 		winx_sleep(1000);
