@@ -21,7 +21,37 @@
 #define PI (3.14159265358979323846)
 #define RADIANS_PER_DEGREE (PI/180.0)
 
+/*
+* The following bitwise operations were added especially for UltraDefrag.
+* Copyright (c) 2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+*
+* All functions are designed to be used with integer 32-bit numbers.
+*/
 
+static int math_band (lua_State *L) {
+  unsigned int a = (unsigned int)luaL_checknumber(L, 1);
+  unsigned int b = (unsigned int)luaL_checknumber(L, 2);
+  lua_pushnumber(L, (a & b));
+  return 1;
+}
+
+static int math_bor (lua_State *L) {
+  unsigned int a = (unsigned int)luaL_checknumber(L, 1);
+  unsigned int b = (unsigned int)luaL_checknumber(L, 2);
+  lua_pushnumber(L, (a | b));
+  return 1;
+}
+
+static int math_rshift (lua_State *L) {
+  unsigned int a = (unsigned int)luaL_checknumber(L, 1);
+  unsigned int b = (unsigned int)luaL_checknumber(L, 2);
+  lua_pushnumber(L, (a >> b));
+  return 1;
+}
+
+/*
+* End of bitwise operations.
+*/
 
 static int math_abs (lua_State *L) {
   lua_pushnumber(L, fabs(luaL_checknumber(L, 1)));
@@ -241,6 +271,9 @@ static const luaL_Reg mathlib[] = {
   {"sqrt",  math_sqrt},
   {"tanh",   math_tanh},
   {"tan",   math_tan},
+  {"band",   math_band},
+  {"bor",   math_bor},
+  {"rshift",   math_rshift},
   {NULL, NULL}
 };
 
