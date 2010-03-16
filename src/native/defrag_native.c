@@ -90,7 +90,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	/* 3. Prompt to exit */
 	winx_printf("\nPress any key to exit ");
-	for(i = 0; i < 10; i++){
+	for(i = 0; i < 5; i++){
 		if(winx_kbhit(1000) >= 0){
 			winx_printf("\nGood bye ...\n");
 			winx_exit(0);
