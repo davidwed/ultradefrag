@@ -61,14 +61,17 @@ int __stdcall kb_open(void)
 	number_of_keyboards = 0;
 	
 	/* required for wireless devices */
-	winx_printf("Wait 10 seconds for keyboard initialization ");
-	for(i = 0; i < 10; i++){
-		winx_sleep(1000);
-		winx_printf(".");
+	if (kb_open_internal(0) == -1) {
+		winx_printf("Wait 10 seconds for keyboard initialization ");
+		for(i = 0; i < 10; i++){
+			winx_sleep(1000);
+			winx_printf(".");
+		}
+		winx_printf("\n\n");
+		(void)kb_open_internal(0);
 	}
-	winx_printf("\n\n");
 	
-	for(i = 0; i < MAX_NUM_OF_KEYBOARDS; i++)
+	for(i = 1; i < MAX_NUM_OF_KEYBOARDS; i++)
 		(void)kb_open_internal(i);
 	
 	if(kb[0].hKbDevice) return 0; /* success, at least one keyboard found */
