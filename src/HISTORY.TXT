@@ -9,6 +9,7 @@ HISTORY
       and to the boot time defragmenter
     - boot time interface interactive mode commands set changed to be the same
       as in scripting mode
+    - plain text reports were improved to be more readable
     - the following translations were updated:
 
       Dutch, Swedish

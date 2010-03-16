@@ -27,9 +27,8 @@
 #include "globals.h"
 
 /*
-* Standard Edition of the program will generate lua reports,
-* Micro Edition - text reports,
-* Portable Edition - both reports.
+* Micro Edition generates text reports only,
+* all other editions - both reports.
 */
 
 /* function prototypes */
@@ -38,11 +37,8 @@ static void RemoveTextReportFromDisk(char *volume_name);
 static void RemoveHtmlReportFromDisk(char *volume_name);
 static BOOLEAN SaveLuaReportToDisk(char *volume_name);
 static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered);
-
-#if defined(UDEFRAG_PORTABLE) || defined(MICRO_EDITION)
 static BOOLEAN SaveTextReportToDisk(char *volume_name);
 static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered);
-#endif
 
 static BOOLEAN SaveReportToDiskInternal(char *volume_name);
 
@@ -86,6 +82,10 @@ static void RemoveHtmlReportFromDisk(char *volume_name)
 	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.htm",volume_name);
 	path[63] = 0;
 	(void)winx_delete_file(path);
+
+	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.html",volume_name);
+	path[63] = 0;
+	(void)winx_delete_file(path);
 }
 
 /**
@@ -109,21 +109,15 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 
 static BOOLEAN SaveReportToDiskInternal(char *volume_name)
 {
-#ifndef UDEFRAG_PORTABLE
-	#ifdef MICRO_EDITION
-	return SaveTextReportToDisk(volume_name);
-	#else
-	return SaveLuaReportToDisk(volume_name);
-	#endif
-#else /* UDEFRAG_PORTABLE */
 	if(!SaveTextReportToDisk(volume_name)) return FALSE;
-	#ifdef MICRO_EDITION
+#ifdef MICRO_EDITION
 	return TRUE;
-	#else
+#else
 	return SaveLuaReportToDisk(volume_name);
-	#endif
 #endif
 }
+
+#ifndef MICRO_EDITION
 
 /**
  * @brief Saves a Lua file fragmentation report on the volume.
@@ -234,7 +228,7 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 	} while(pf != fragmfileslist);
 }
 
-#if defined(UDEFRAG_PORTABLE) || defined(MICRO_EDITION)
+#endif /* MICRO_EDITION */
 
 /**
  * @brief Saves a PlainText file fragmentation report on the volume.
@@ -242,10 +236,10 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
  */
 static BOOLEAN SaveTextReportToDisk(char *volume_name)
 {
-	short unicode_buffer[256];
-	//unsigned short line[] = L"\r\n;-----------------------------------------------------------------\r\n\r\n";
 	char path[64];
 	WINX_FILE *f;
+	short buffer[256];
+	int length = sizeof(buffer) / sizeof(short);
 	
 	if(disable_reports) return TRUE;
 
@@ -258,63 +252,65 @@ static BOOLEAN SaveTextReportToDisk(char *volume_name)
 	}
 	
 	InitializeReportSavingBuffer();
+	
+	wcscpy(buffer,L";---------------------------------------------------------------------------------------------\r\n");
+	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
 
-	(void)_snwprintf(unicode_buffer,sizeof(unicode_buffer),
-		L"\r\nFragmented files on %hs:\r\n\r\n",
-		volume_name
-		);
-	/* to be sure that the buffer is terminated by zero */
-	unicode_buffer[sizeof(unicode_buffer)/sizeof(short) - 1] = 0;
-	(void)WriteToReportSavingBuffer(unicode_buffer,2,wcslen(unicode_buffer),f);
+	(void)_snwprintf(buffer,length,L"; Fragmented files on %hs:\r\n;\r\n",volume_name);
+	buffer[length - 1] = 0;
+	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
 
+	(void)_snwprintf(buffer,length,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");
+	buffer[length - 1] = 0;
+	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+
+	wcscpy(buffer,L";---------------------------------------------------------------------------------------------\r\n");
+	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+	
 	WriteTextReportBody(f,FALSE);
-	//WriteToReportSavingBuffer(line,2,wcslen(line),f);
 	//WriteTextReportBody(f,TRUE);
 
 	DestroyReportSavingBuffer();
 	
 	winx_fclose(f);
-	
+
 	DebugPrint("Report saved to %s\n",path);
 	return TRUE;
 }
 
 static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 {
-	char buffer[128];
 	PFRAGMENTED pf;
-	ANSI_STRING as;
-	UNICODE_STRING us;
-	unsigned short e1[] = L"\t";
-	unsigned short e2[] = L"\r\n";
+	short buffer[256];
+	int length = sizeof(buffer) / sizeof(short);
+	char *comment;
+	int offset;
 
 	pf = fragmfileslist; if(!pf) return;
 	do {
 		if(pf->pfn->is_filtered != is_filtered)
 			goto next_item;
-		/* because on NT 4.0 we don't have _itow: */
-		(void)_itoa(pf->pfn->n_fragments,buffer,10);
-		RtlInitAnsiString(&as,buffer);
-		if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-			DebugPrint("No enough memory for WriteReportBody()!\n");
-			out_of_memory_condition_counter ++;
-			return;
-		}
-		(void)WriteToReportSavingBuffer(us.Buffer,1,us.Length,f);
-		RtlFreeUnicodeString(&us);
-		(void)WriteToReportSavingBuffer(e1,2,wcslen(e1),f);
-		/* skip \??\ sequence in the beginning */
-		if(pf->pfn->name.Length > 0x8)
-			(void)WriteToReportSavingBuffer((void *)((char *)(pf->pfn->name.Buffer) + 0x8),1,pf->pfn->name.Length - 0x8,f);
-		else
-			(void)WriteToReportSavingBuffer(pf->pfn->name.Buffer,1,pf->pfn->name.Length,f);
-		(void)WriteToReportSavingBuffer(e2,2,wcslen(e2),f);
+		if(pf->pfn->is_dir) comment = "[DIR]";
+		else if(pf->pfn->is_overlimit) comment = "[OVR]";
+		else if(pf->pfn->is_compressed) comment = "[CMP]";
+		else comment = " - ";
+		
+		(void)_snwprintf(buffer,length,L"\r\n%11u%21I64u%9hs    ",
+			(UINT)pf->pfn->n_fragments,
+			pf->pfn->clusters_total * bytes_per_cluster,
+			comment);
+		buffer[length - 1] = 0;
+		(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+		
+		/* skip \??\ sequence in the beginning of the path */
+		if(pf->pfn->name.Length > 0x8) offset = 0x8;
+		else offset = 0x0;
+		(void)WriteToReportSavingBuffer((char *)pf->pfn->name.Buffer + offset,1,pf->pfn->name.Length - offset,f);
+
 	next_item:
 		pf = pf->next_ptr;
 	} while(pf != fragmfileslist);
 }
-
-#endif
 
 /* ------------------------------------------------------------------------- */
 /*                 this code speeds up the report saving                     */
