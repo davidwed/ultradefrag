@@ -1,0 +1,46 @@
+/*
+* This stylesheet controls a style of UltraDefrag reports.
+*/
+
+body {
+	text-align: center;
+}
+
+h3 {
+	font-family: monospace;
+}
+
+a {
+	color: #0000FF;
+}
+
+#main_table {
+	color: #FFAA55;
+}
+
+td {
+	font-family: monospace;
+	font-size: 10pt;
+}
+
+.links_toolbar {
+}
+
+.left {
+	text-align: left;
+}
+
+.c, .center {
+	text-align: center;
+}
+
+.right {
+	text-align: right;
+}
+
+/* table cells with filtered out items (currently not used) */
+
+.f {
+	background-color: #000000;
+	color: #FFFFFF;
+}

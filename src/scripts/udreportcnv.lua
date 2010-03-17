@@ -2,7 +2,7 @@
 --[[
   udreportcnv.lua - UltraDefrag report converter.
   Converts lua reports to HTML and other formats.
-  Copyright (c) 2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+  Copyright (c) 2008-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -21,6 +21,252 @@
 
 -- USAGE: lua udreportcnv.lua <luar file with full path> <path to Windows directory> [-v]
 
+webpage_name = ""
+
+-------------------------------------------------------------------------------
+-- Ancillary Procedures
+-------------------------------------------------------------------------------
+
+function write_unicode_character(f,c)
+	local b1, b2, b3
+	
+	--- we'll convert a character to UTF-8 encoding
+	if c < 0x80 then
+		f:write(string.char(math.band(c,0xFF)))
+		return
+	end
+	if c < 0x800 then -- 0x80 - 0x7FF: 2 bytes
+		b2 = math.bor(0x80,math.band(c,0x3F))
+		c = math.rshift(c,6)
+		b1 = math.bor(0xC0,c)
+		f:write(string.char(b1))
+		f:write(string.char(b2))
+		return
+	end
+	-- 0x800 - 0xFFFF: 3 bytes
+	b3 = math.bor(0x80,math.band(c,0x3F))
+	c = math.rshift(c,6)
+	b2 = math.bor(0x80,math.band(c,0x3F))
+	c = math.rshift(c,6)
+	b1 = math.bor(0xE0,c)
+	f:write(string.char(b1))
+	f:write(string.char(b2))
+	f:write(string.char(b3))
+	return
+end
+
+function write_unicode_name_splitted(f,name)
+	local name_length = table.maxn(name)
+	local parts = {}
+	local n_parts = 1
+	local index = 1
+	local part_length
+	local chars_to_write
+	
+	-- write short names directly
+	if name_length <= max_chars_per_line or max_chars_per_line == 0 or max_chars_per_line == nil then
+		for j, b in ipairs(name) do
+			write_unicode_character(f,b)
+		end
+		return
+	end
+	
+	-- split a name to parts
+	parts[1] = {}
+	for j, b in ipairs(name) do
+		parts[n_parts][index] = b
+		if b == 0x5C then -- \ character
+			n_parts = n_parts + 1
+			parts[n_parts] = {}
+			index = 1
+		else
+			index = index + 1
+		end
+	end
+	
+	chars_to_write = max_chars_per_line
+	for j, part in pairs(parts) do
+		part_len = table.maxn(part)
+		if part_len == 0 then return end
+		if part_len > chars_to_write then
+			if j ~= 1 then
+				f:write("<br>")
+				chars_to_write = max_chars_per_line
+			end
+		end
+		if part_len <= chars_to_write then
+			for k, b in ipairs(part) do
+				write_unicode_character(f,b)
+			end
+			chars_to_write = chars_to_write - part_len
+		else -- current part is too long
+			for k, b in ipairs(part) do
+				write_unicode_character(f,b)
+				chars_to_write = chars_to_write - 1
+				if chars_to_write == 0 then
+					f:write("<br>")
+					chars_to_write = max_chars_per_line
+				end
+			end
+		end
+	end
+end
+
+function write_unicode_name(f,name)
+	if split_long_names == 1 then
+		write_unicode_name_splitted(f,name)
+	else
+		for j, b in ipairs(name) do
+			write_unicode_character(f,b)
+		end
+	end
+end
+
+function get_javascript()
+	local js = "", f
+	if(enable_sorting == 1) then
+		-- read udsorting.js file contents
+		if arg[2] ~= "null" then
+			f = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udsorting.js", "r"))
+		else
+			f = assert(io.open(".\\scripts\\udsorting.js", "r"))
+		end
+	    js = f:read("*all")
+	    f:close()
+	end
+	if js == nil or js == "" then
+		js = "function init_sorting_engine(){}\nfunction sort_items(criteria){}\n"
+	end
+	return js
+end
+
+function get_css()
+	local css = "", f
+	-- read udreport.css file contents
+	if arg[2] ~= "null" then
+		f = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udreport.css", "r"))
+	else
+		f = assert(io.open(".\\scripts\\udreport.css", "r"))
+	end
+	css = f:read("*all")
+	f:close()
+	if css == nil then
+		css = ""
+	end
+	return css
+end
+
+-------------------------------------------------------------------------------
+-- HTML Output Procedures
+-------------------------------------------------------------------------------
+
+links_x1 = [[
+<table class="links_toolbar" width="100%"><tbody>
+<tr>
+<td class="left"><a href="http://ultradefrag.sourceforge.net">Visit our Homepage</a></td>
+<td class="center"><a href="file:///
+]]
+
+links_x2 = [[
+\UltraDefrag\options\udreportopts.lua">View report options</a></td>
+<td class="right">
+<a href="http://www.lua.org/">Powered by Lua</a>
+</td>
+</tr>
+</tbody></table>
+
+]]
+
+table_header = [[
+<tr>
+<td class="c"><a href="javascript:sort_items('fragments')"># fragments</a></td>
+<td class="c"><a href="javascript:sort_items('name')">filename</a></td>
+<td class="c"><a href="javascript:sort_items('comment')">comment</a></td>
+</tr>
+]]
+
+function write_web_page_header(f,js,css)
+	local links_toolbar = links_x1 .. arg[2] .. links_x2
+
+	f:write("<html>\n",
+		"<head>\n",
+			"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">\n",
+			"<title>Fragmented files on ", volume_letter, ":</title>\n",
+			"<style type=\"text/css\">\n", css, "</style>\n",
+			"<script language=\"javascript\">\n", js, "</script>\n",
+		"</head>\n",
+		"<body>\n",
+			"<h3 class=\"title\">Fragmented files on ", volume_letter, ":</h3>\n",
+			links_toolbar,
+			"<div id=\"for_msie\">\n",
+				"<table id=\"main_table\" border=\"1\" cellspacing=\"0\" width=\"100%\">\n"
+	)
+end
+
+function write_web_page_footer(f)
+	local links_toolbar = links_x1 .. arg[2] .. links_x2
+
+	f:write("</table>\n",
+		"</div>\n",
+		links_toolbar,
+		"<script type=\"text/javascript\">init_sorting_engine();</script>\n",
+		"</body></html>\n"
+	)
+end
+
+function write_main_table_body(f)
+	for i, file in ipairs(files) do
+		local class
+		if file.filtered == 1 then class = "f" else class = "u" end
+		f:write("<tr class=\"", class, "\"><td class=\"c\">", file.fragments,"</td><td>")
+		write_unicode_name(f,file.uname)
+		f:write("</td><td class=\"c\">", file.comment, "</td></tr>\n")
+	end
+end
+
+function build_web_page()
+	local filename
+	local pos = 0
+	local js, css
+
+	repeat
+		pos = string.find(arg[1],"\\",pos + 1,true)
+		if pos == nil then filename = "fraglist.html" ; break end
+	until string.find(arg[1],"\\",pos + 1,true) == nil
+	filename = string.sub(arg[1],1,pos) .. "fraglist.html"
+
+	-- note that 'b' flag is needed for utf-16 files
+	local f = assert(io.open(filename,"wb"))
+
+	-- get JavaScript and CSS
+	js = get_javascript()
+	css = get_css()
+	
+	-- write a web page header
+	write_web_page_header(f,js,css)
+	
+	-- write a main table
+	f:write(table_header)
+	write_main_table_body(f)
+	
+	-- write a web page footer
+	write_web_page_footer(f)
+
+	f:close()
+	return filename
+end
+
+function display_web_page(name)
+	if os.shellexec ~= nil then
+		os.shellexec(name,"open")
+	else
+		os.execute("cmd.exe /C " .. name)
+	end
+end
+
+-------------------------------------------------------------------------------
+-- Main Code
+-------------------------------------------------------------------------------
 -- parse command line
 assert(arg[1],"Lua Report file name must be specified!")
 assert(arg[2],"Path to the Windows directory\nmust be specified as second parameter!")
@@ -35,233 +281,15 @@ end
 -- source file reading
 dofile(arg[1])
 
--- common functions
-function write_ansi(f, ...)
-	for i, v in ipairs(arg) do f:write(v) end
+-- check the report format version
+if format_version == nil or format_version ~= 2 then
+	error("Reports produced by old versions of UltraDefrag are no more supported.\nUpdate the program at least to the 4.2.0 RC4 version.")
 end
 
-function write_unicode(f, ...)
-	local b, j
-	for i, v in ipairs(arg) do
-		j = 1
-		while true do
-			b = string.byte(v, j)
-			if b == nil then break end
-			f:write(string.char(b), "\0")
-			j = j + 1
-		end
-	end
-end
+-- build a web page containing a file fragmentation report
+webpage_name = build_web_page()
 
--- write filename to html table; maximum 50 characters per line
-function write_ansi_name(f, name)
-	local i, j, k, n, len
-	local N = max_chars_per_line
-	len = string.len(name)
-	i = 1
-	while len > 0 do
-		if len <= N then f:write(string.sub(name,i,i + len - 1)) ; break end 
-		j = string.find(name,"\\",i,true)
-		if j == nil or j > (i + N) then
-			n = N
-		else
-			k = j
-			while true do
-				k = string.find(name,"\\",k + 1,true)
-				if k == nil then break end
-				if k <= (i + N) then j = k else break end
-			end
-			n = j - i + 1
-		end
-		f:write(string.sub(name,i,i + n - 1), "<br />")
-		if n == 0 then break end -- erroneous situation
-		i = i + n
-		len = len - n
-	end
-end
-
-function write_chars(f, chars, i, j)
-	local k
-	for k=i,j do f:write(chars[k]) end
-end
-
-function find_char(chars, ch, i)
-	local k = i
-	local result = nil
-	while chars[k] ~= nil do
-		if chars[k] == ch and chars[k + 1] == '\0' then
-			result = k ; break
-		end
-		k = k + 1
-	end
-	return result
-end
-
-function write_unicode_name(f, chars, len)
-	local i, j, k, n
-	local N = max_chars_per_line * 2
-	i = 1
-	while len > 0 do
-		if len <= N then write_chars(f,chars,i,i + len - 1) ; break end 
-		j = find_char(chars,'\\',i)
-		if j == nil or j > (i + N) then
-			n = N
-		else
-			k = j
-			while true do
-				k = find_char(chars,'\\',k + 1)
-				if k == nil then break end
-				if k <= (i + N) then j = k else break end
-			end
-			n = j - i + 1 + 1 -- because unicode backslash is '\\\0'
-		end
-		write_chars(f,chars,i,i + n - 1)
-		write_unicode(f,"<br />")
-		if n == 0 then break end -- erroneous situation
-		i = i + n
-		len = len - n
-	end
-end
-
--- converters
-
-table_head = [[
-<tr>
-<td class="c"><a href="javascript:sort_items('fragments')" style="color: #0000FF"># fragments</a></td>
-<td class="c"><a href="javascript:sort_items('name')" style="color: #0000FF">filename</a></td>
-<td class="c"><a href="javascript:sort_items('comment')" style="color: #0000FF">comment</a></td>
-</tr>
-]]
-
-end_of_page = [[
-</center>
-<script type="text/javascript">
-init_sorting_engine();
-</script>
-</body></html>
-]]
-
-links_x1 = [[
-<table width="100%"><tbody>
-<tr>
-<td style="text-align: left"><a href="http://ultradefrag.sourceforge.net" style="color: #0000FF">Visit our Homepage</a></td>
-<td style="text-align: center"><a 
-]]
-
-links_x2 = [[
-style="color: #0000FF">View report options</a></td>
-<td style="text-align: right">
-<a href="http://www.lua.org/" style="color: #0000FF">Powered by Lua</a>
-</td>
-</tr>
-</tbody></table>
-]]
-
-function produce_html_output()
-	local filename
-	local pos = 0
-	local js
-	local links = links_x1 .. "href=\"file:///" .. arg[2]
-	links = links .. "\\UltraDefrag\\options\\udreportopts.lua\" " .. links_x2
-
-	repeat
-		pos = string.find(arg[1],"\\",pos + 1,true)
-		if pos == nil then filename = "fraglist.htm" ; break end
-	until string.find(arg[1],"\\",pos + 1,true) == nil
-	filename = string.sub(arg[1],1,pos) .. "fraglist.htm"
-
-	-- note that 'b' flag is needed for utf-16 files
-	local f = assert(io.open(filename,"wb"))
-
-	local write_data
-	if use_utf16 == 0 then
-		write_data = write_ansi
-	else
-		write_data = write_unicode
-	end
-
-	if(enable_sorting == 1) then
-		-- read udsorting.js file contents
-		local f2
-		if arg[2] ~= "null" then
-			f2 = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udsorting.js", "r"))
-		else
-			f2 = assert(io.open(".\\scripts\\udsorting.js", "r"))
-		end
-	    js = f2:read("*all")
-	    f2:close()
-	else
-		js = "function init_sorting_engine(){}\nfunction sort_items(criteria){}\n"
-	end
-	write_data(f,
-		"<html><head><title>Fragmented files on ", volume_letter,
-		":</title>\n", style,
-		"<script language=\"javascript\">\n", js,
-		"</script>\n</head>\n",
-		"<body>\n<center>\n", title_tags.open,
-		"Fragmented files on ", volume_letter,
-		":", title_tags.close,
-		"\n", links, "\n",
-		"<div id=\"for_msie\">\n",
-		"<table id=\"main_table\" ", table_style, ">\n",
-		table_head
-		)
-	for i, v in ipairs(files) do
-		local class
-		if v.filtered == 1 then class = "f" else class = "u" end
-		write_data(f,
-			"<tr class=\"", class, "\"><td class=\"c\">", v.fragments,
-			"</td><td>"
-			)
-		if use_utf16 == 0 then
-			-- each <> brackets must be replaced with square brackets
-			local tmp = string.gsub(v.name,"<","[")
-			tmp = string.gsub(tmp,">","]")
-			if split_long_names == 1 then
-				write_ansi_name(f,tmp)
-			else
-				f:write(tmp)
-			end
-		else
-			if split_long_names == 1 then
-				local chars = {}
-				local i = 1
-				for j, b in ipairs(v.uname) do
-					chars[i] = string.char(b)
-					i = i + 1
-				end
-				write_unicode_name(f,chars,i - 1)
-			else
-				for j, b in ipairs(v.uname) do
-					f:write(string.char(b))
-				end
-			end
-		end
-		write_data(f,
-			"</td><td class=\"c\">", v.comment,
-			"</td></tr>\n"
-			)
-	end
-	write_data(f,
-		--table_head,
-		"</table>\n</div>\n", links, "\n"
-		)
-	write_data(f,end_of_page)
-	f:close()
-	
-	-- if option -v is specified, open report in default web browser
-	if arg[3] == "-v" then
-		if os.shellexec ~= nil then
-			os.shellexec(filename,"open")
-		else
-			os.execute("cmd.exe /C " .. filename)
-		end
-	end
-end
-
-
--- main source code
--- convertion to other (readable) formats
-if produce_html == 1 then
-	produce_html_output()
+-- display a web page if requested
+if arg[3] == "-v" then
+	display_web_page(webpage_name)
 end

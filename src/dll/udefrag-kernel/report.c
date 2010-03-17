@@ -143,6 +143,7 @@ static BOOLEAN SaveLuaReportToDisk(char *volume_name)
 	
 	(void)_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %s:\r\n\r\n"
+		"format_version = 2\r\n\r\n"
 		"volume_letter = \"%s\"\r\n\r\n"
 		"files = {\r\n",
 		volume_name, volume_name
@@ -168,10 +169,8 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 {
 	char buffer[256];
 	PFRAGMENTED pf;
-	unsigned char *p;
-	int i, offset;
 	char *comment;
-	ANSI_STRING as;
+	int i, offset, name_length;
 
 	pf = fragmfileslist; if(!pf) return;
 	do {
@@ -183,7 +182,7 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		else comment = " - ";
 		(void)_snprintf(buffer, sizeof(buffer),
 			"\t{fragments = %u,size = %I64u,filtered = %u,"
-			"comment = \"%s\",name = [[",
+			"comment = \"%s\",uname = {",
 			(UINT)pf->pfn->n_fragments,
 			pf->pfn->clusters_total * bytes_per_cluster,
 			(UINT)(pf->pfn->is_filtered & 0x1),
@@ -192,35 +191,16 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 		(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
 
-		if(RtlUnicodeStringToAnsiString(&as,&pf->pfn->name,TRUE) == STATUS_SUCCESS){
-			/* replace square brackets with <> !!! */
-			for(i = 0; i < as.Length; i++){
-				if(as.Buffer[i] == '[') as.Buffer[i] = '<';
-				else if(as.Buffer[i] == ']') as.Buffer[i] = '>';
-			}
-			
-			/* skip \??\ sequence in the beginning */
-			if(as.Length > 0x4)
-				(void)WriteToReportSavingBuffer((void *)((char *)(as.Buffer) + 0x4),1,as.Length - 0x4,f);
-			else
-				(void)WriteToReportSavingBuffer(as.Buffer,1,as.Length,f);
-			
-			RtlFreeAnsiString(&as);
-		} else {
-			DebugPrint("No enough memory for WriteReportBody()!\n");
-			out_of_memory_condition_counter ++;
-		}
-		(void)strcpy(buffer,"]],uname = {");
-		(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
-		p = (unsigned char *)pf->pfn->name.Buffer;
-		/* skip \??\ sequence in the beginning */
-		if(pf->pfn->name.Length > 0x8) offset = 0x8;
-		else offset = 0x0;
-		for(i = offset; i < pf->pfn->name.Length; i++){
-			(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)p[i]);
+		/* skip \??\ sequence in the beginning of the path */
+		name_length = pf->pfn->name.Length / sizeof(short);
+		if(name_length > 4) offset = 4;	else offset = 0;
+		
+		for(i = offset; i < name_length; i++){
+			(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)pf->pfn->name.Buffer[i]);
 			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
 			(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
 		}
+
 		(void)strcpy(buffer,"}},\r\n");
 		(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
 	next_item:
