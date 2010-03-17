@@ -278,7 +278,7 @@ else
 	dofile(".\\options\\udreportopts.lua")
 end
 
--- source file reading
+-- read source file
 dofile(arg[1])
 
 -- check the report format version
