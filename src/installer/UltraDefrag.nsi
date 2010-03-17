@@ -350,9 +350,17 @@ Section "Ultra Defrag core files (required)" SecCore
   SetOutPath "$INSTDIR\scripts"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
+  ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css"
+    File "${ROOTDIR}\src\scripts\udreport.css"
+  ${EndUnless}
   SetOutPath "$INSTDIR\options"
   ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua"
     File "${ROOTDIR}\src\scripts\udreportopts.lua"
+  ${Else}
+    ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua.old"
+      Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.old"
+      File "${ROOTDIR}\src\scripts\udreportopts.lua"
+    ${EndUnless}
   ${EndUnless}
 
   ; install LanguagePack
