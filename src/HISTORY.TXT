@@ -4,11 +4,14 @@ HISTORY
   ------------------------------------------------------------------------------
     - multiple drives selection feature was added to GUI
     - progress indication was improved to be more detailed and smooth
-    - defragmentation and optimization speedup performed
+    - defragmentation and optimization speedup was performed
     - --all, --all-fixed command line keys added to the console interface
       and to the boot time defragmenter
+    - boot time interface initialization speedup was performed
     - boot time interface interactive mode commands set changed to be the same
       as in scripting mode
+    - HTML reports encoding was changed to UTF-8 which renders nicely
+      in all popular web browsers including Internet Explorer
     - plain text reports were improved to be more readable
     - the following translations were updated:
 
