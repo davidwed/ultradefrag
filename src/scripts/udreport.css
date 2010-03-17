@@ -14,17 +14,12 @@ a {
 	color: #0000FF;
 }
 
-#main_table {
-	color: #FFAA55;
-}
-
 td {
 	font-family: monospace;
 	font-size: 10pt;
 }
 
-.links_toolbar {
-}
+/* ancillary definitions */
 
 .left {
 	text-align: left;
