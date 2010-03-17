@@ -30,6 +30,7 @@ copy /Y ..\doc\html\handbook\doxy-doc\html\*.* %PORTABLE_DIR%\handbook\
 mkdir %PORTABLE_DIR%\scripts
 copy /Y scripts\udreportcnv.lua %PORTABLE_DIR%\scripts\
 copy /Y scripts\udsorting.js %PORTABLE_DIR%\scripts\
+copy /Y scripts\udreport.css %PORTABLE_DIR%\scripts\
 
 mkdir %PORTABLE_DIR%\options
 copy /Y scripts\udreportopts.lua %PORTABLE_DIR%\options\
@@ -91,6 +92,7 @@ copy /Y ..\..\doc\html\handbook\doxy-doc\html\*.* %PORTABLE_DIR%\handbook\
 mkdir %PORTABLE_DIR%\scripts
 copy /Y ..\scripts\udreportcnv.lua %PORTABLE_DIR%\scripts\
 copy /Y ..\scripts\udsorting.js %PORTABLE_DIR%\scripts\
+copy /Y ..\scripts\udreport.css %PORTABLE_DIR%\scripts\
 
 mkdir %PORTABLE_DIR%\options
 copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
@@ -144,6 +146,7 @@ copy /Y ..\..\doc\html\handbook\doxy-doc\html\*.* %PORTABLE_DIR%\handbook\
 mkdir %PORTABLE_DIR%\scripts
 copy /Y ..\scripts\udreportcnv.lua %PORTABLE_DIR%\scripts\
 copy /Y ..\scripts\udsorting.js %PORTABLE_DIR%\scripts\
+copy /Y ..\scripts\udreport.css %PORTABLE_DIR%\scripts\
 
 mkdir %PORTABLE_DIR%\options
 copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
