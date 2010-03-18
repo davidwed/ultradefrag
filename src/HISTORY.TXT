@@ -15,7 +15,7 @@ HISTORY
     - plain text reports were improved to be more readable
     - the following translations were updated:
 
-      Dutch, Swedish
+      Dutch, Swedish, Japanese
 
     - a bug preventing true Unicode paths from being displayed 
       in file fragmentation reports was fixed
