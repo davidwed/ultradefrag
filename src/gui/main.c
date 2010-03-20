@@ -283,6 +283,8 @@ void InitMainWindow(void)
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	RECT rc;
+	char buffer[256];
+	char caption[128];
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -327,6 +329,21 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_RESCAN:
 			if(!busy_flag) UpdateVolList();
+			break;
+		case IDC_SHUTDOWN:
+			if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_GETCHECK,0,0) == BST_CHECKED){
+				(void)strcpy(caption,"Please Confirm");
+				caption[sizeof(caption) - 1] = 0;
+				
+				if(hibernate_instead_of_shutdown)
+					(void)strcpy(buffer,"Do you really want to hibernate when done?");
+				else
+					(void)strcpy(buffer,"Do you really want to shutdown when done?");
+					
+				buffer[sizeof(buffer) - 1] = 0;
+				if(MessageBox(NULL,buffer,caption,MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_ICONEXCLAMATION) == IDNO)
+					SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_SETCHECK,(WPARAM)BST_UNCHECKED,0);
+			}
 		}
 		break;
 	case WM_MOVE:
