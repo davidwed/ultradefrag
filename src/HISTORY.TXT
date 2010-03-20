@@ -5,7 +5,7 @@ HISTORY
     - multiple drives selection feature was added to GUI
     - progress indication was improved to be more detailed and smooth
     - defragmentation and optimization speedup was performed
-    - --all, --all-fixed command line keys added to the console interface
+    - --all, --all-fixed command line switches added to the console interface
       and to the boot time defragmenter
     - boot time interface initialization speedup was performed
     - boot time interface interactive mode commands set changed to be the same
@@ -15,7 +15,7 @@ HISTORY
     - plain text reports were improved to be more readable
     - the following translations were updated:
 
-      Dutch, Swedish, Japanese
+      Dutch, Swedish, Japanese, Polish
 
     - a bug preventing true Unicode paths from being displayed 
       in file fragmentation reports was fixed
