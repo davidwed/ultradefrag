@@ -96,7 +96,7 @@ BEGIN
     CONTROL         IDI_SHUTDOWN,IDC_SHUTDOWN_ICON,"Static",SS_ICON | SS_CENTERIMAGE | SS_REALSIZEIMAGE,5,4,62,78
     CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,72,6,161,12
     CTEXT           "10",IDC_COUNTDOWN,72,22,20,12
-    CTEXT           "Seconds till shutdown",IDC_DELAY_MSG,102,22,131,12
+    CTEXT           "seconds till shutdown",IDC_DELAY_MSG,102,22,131,12
     PUSHBUTTON      "Yes",IDC_YES_BUTTON,72,53,70,10
     PUSHBUTTON      "No",IDC_NO_BUTTON,153,53,70,10
 END

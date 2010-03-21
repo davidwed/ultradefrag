@@ -57,7 +57,7 @@ BOOL CALLBACK ConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		else
 			SetText(GetDlgItem(hWnd,IDC_MESSAGE),   L"REALLY_SHUTDOWN_WHEN_DONE");
 
-			SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
+		SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
 		SetText(GetDlgItem(hWnd,IDC_NO_BUTTON), L"NO");
 		SetText(GetDlgItem(hWnd,IDC_DELAY_MSG), L"SECONDS_TILL_SHUTDOWN");
 		
