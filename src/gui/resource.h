@@ -23,6 +23,7 @@
 
 #define IDD_MAIN                        101
 #define IDD_ABOUT                       102
+#define IDD_SHUTDOWN                    103
 #define IDI_APP                         108
 #define IDI_DIR                         109
 #define IDI_UNFRAGM                     110
@@ -36,6 +37,8 @@
 #define IDI_REMOVABLE                   130
 
 #define IDR_ACCELERATOR2                131
+
+#define IDI_SHUTDOWN                    140
 
 #define IDM_STATUSBAR                   500
 
@@ -56,6 +59,15 @@
 #define IDC_PROGRESS1                   1025
 #define IDC_PROGRESSMSG                 1026
 #define IDC_HOMEPAGE                    1035
+
+/* Confirm Dialog Constants */
+#define IDC_MESSAGE                     1040
+#define IDC_YES_BUTTON                  1041
+#define IDC_NO_BUTTON                   1042
+#define IDC_COUNTDOWN                   1043
+#define IDC_DELAY_MSG                   1044
+#define IDC_SHUTDOWN_ICON               1045
+
 #define IDC_CL_MAP_STATIC               1057
 
 #define IDC_PIC1                        1059

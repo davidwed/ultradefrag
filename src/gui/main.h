@@ -144,6 +144,7 @@ void ClearMap();
 
 /* dialog procedures */
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK ConfirmDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 /* status bar procedures */
 BOOL CreateStatusBar();

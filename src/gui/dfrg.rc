@@ -34,6 +34,8 @@ IDI_MFT                 ICON    DISCARDABLE     "res/mft.ico"
 IDI_FIXED               ICON    DISCARDABLE     "res/fixed.ico"
 IDI_REMOVABLE           ICON    DISCARDABLE     "res/removable.ico"
 
+IDI_SHUTDOWN            ICON    DISCARDABLE     "res/shutdown.ico"
+
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/ship.bmp"
 
 IDD_MAIN DIALOGEX 0, 0, 351, 220 //218 /*315, 218*/
@@ -76,7 +78,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Ultra Defragmenter"
 FONT 9, "Courier New"
 BEGIN
-    CONTROL         128,IDC_PIC1,"Static",SS_BITMAP | SS_CENTERIMAGE,5,4,62,78
+    CONTROL         IDB_ABOUTBOX_PICTURE,IDC_PIC1,"Static",SS_BITMAP | SS_CENTERIMAGE,5,4,62,78
     CTEXT           ABOUT_VERSION,IDC_STATIC,72,6,161,12
     CTEXT           "Copyright (C) 2007-2010",IDC_STATIC,72,22,161,12
     CTEXT           "UltraDefrag Development Team",IDC_STATIC,72,38,161,12
@@ -84,6 +86,19 @@ BEGIN
     PUSHBUTTON      "License",IDC_LICENSE,153,53,80,10
     PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
                     161,12,BS_FLAT
+END
+
+IDD_SHUTDOWN DIALOG DISCARDABLE  0, 0, 239, 93
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Please Confirm"
+FONT 9, "Courier New"
+BEGIN
+    CONTROL         IDI_SHUTDOWN,IDC_SHUTDOWN_ICON,"Static",SS_ICON | SS_CENTERIMAGE | SS_REALSIZEIMAGE,5,4,62,78
+    CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,72,6,161,12
+    CTEXT           "10",IDC_COUNTDOWN,72,22,20,12
+    CTEXT           "Seconds till shutdown",IDC_DELAY_MSG,102,22,131,12
+    PUSHBUTTON      "Yes",IDC_YES_BUTTON,72,53,70,10
+    PUSHBUTTON      "No",IDC_NO_BUTTON,153,53,70,10
 END
 
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 
