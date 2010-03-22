@@ -196,11 +196,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* check for shutdown request */
 	if(shutdown_flag){
 		if(seconds_for_shutdown_rejection){
-			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),hWindow,(DLGPROC)ShutdownConfirmDlgProc) == 0)
+			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0)
 				return 0;
 			/* in case of errors we'll shutdown anyway */
 			/* to avoid situation when pc works a long time without any control */
 		}
+		return 0;
 		
 		/* SE_SHUTDOWN privilege is set by udefrag_init() called before */
 		if(hibernate_instead_of_shutdown){
