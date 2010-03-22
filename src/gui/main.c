@@ -37,6 +37,7 @@ extern int skip_removable;
 
 int shutdown_flag = FALSE;
 extern int hibernate_instead_of_shutdown;
+extern int show_shutdown_check_confirmation_dialog;
 
 /* they have the same effect as environment variables for console program */
 extern char in_filter[];
@@ -64,6 +65,8 @@ void VolListNotifyHandler(LPARAM lParam);
 void InitFont(void);
 void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
+BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
+BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 
 void OpenWebPage(char *page)
 {
@@ -139,6 +142,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 //	int requests_counter = 0;
 	
 	hInstance = GetModuleHandle(NULL);
+	//MessageBox(0,"Do you really want to hibernate when done?","Please Confirm",MB_OKCANCEL | MB_ICONEXCLAMATION);
+	//DialogBox(hInstance,MAKEINTRESOURCE(IDD_CHECK_CONFIRM),hWindow,(DLGPROC)CheckConfirmDlgProc);
+	//return 0;
 
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
@@ -283,8 +289,6 @@ void InitMainWindow(void)
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	RECT rc;
-	char buffer[256];
-	char caption[128];
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -331,18 +335,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(!busy_flag) UpdateVolList();
 			break;
 		case IDC_SHUTDOWN:
-			if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_GETCHECK,0,0) == BST_CHECKED){
-				(void)strcpy(caption,"Please Confirm");
-				caption[sizeof(caption) - 1] = 0;
-				
-				if(hibernate_instead_of_shutdown)
-					(void)strcpy(buffer,"Do you really want to hibernate when done?");
-				else
-					(void)strcpy(buffer,"Do you really want to shutdown when done?");
-					
-				buffer[sizeof(buffer) - 1] = 0;
-				if(MessageBox(NULL,buffer,caption,MB_YESNO | MB_DEFBUTTON2 | MB_TOPMOST | MB_ICONEXCLAMATION) == IDNO)
-					SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_SETCHECK,(WPARAM)BST_UNCHECKED,0);
+			if(show_shutdown_check_confirmation_dialog){
+				if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_GETCHECK,0,0) == BST_CHECKED){
+					if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_CHECK_CONFIRM),hWindow,(DLGPROC)CheckConfirmDlgProc) == 0)
+						SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_SETCHECK,(WPARAM)BST_UNCHECKED,0);
+				}
 			}
 		}
 		break;

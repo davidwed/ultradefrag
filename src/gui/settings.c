@@ -40,6 +40,9 @@ int refresh_interval;
 int disable_reports;
 char dbgprint_level[32] = {0};
 
+int show_shutdown_check_confirmation_dialog = 1;
+int seconds_for_shutdown_rejection = 60;
+
 extern HWND hWindow;
 extern HFONT hFont;
 
@@ -174,6 +177,18 @@ void GetPrefs(void)
 		
 		hibernate_instead_of_shutdown = getint(L,
 				"hibernate_instead_of_shutdown");
+
+		lua_getglobal(L, "show_shutdown_check_confirmation_dialog");
+		if(!lua_isnil(L, lua_gettop(L))){
+			show_shutdown_check_confirmation_dialog = (int)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		}
+
+		lua_getglobal(L, "seconds_for_shutdown_rejection");
+		if(!lua_isnil(L, lua_gettop(L))){
+			seconds_for_shutdown_rejection = (int)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		}
 	}
 	lua_close(L);
 
@@ -219,7 +234,9 @@ void SavePrefs(void)
 		"dbgprint_level = \"%s\"\n\n"
 		"-- set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system\n"
 		"-- after a job is done instead of shutting it down, otherwise set it to 0\n\n"
-		"hibernate_instead_of_shutdown = %u\n\n"
+		"hibernate_instead_of_shutdown = %u\n"
+		"show_shutdown_check_confirmation_dialog = %u\n"
+		"seconds_for_shutdown_rejection = %u\n\n"
 		"-- window coordinates etc.\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
@@ -236,6 +253,8 @@ void SavePrefs(void)
 		disable_reports,
 		dbgprint_level,
 		hibernate_instead_of_shutdown,
+		show_shutdown_check_confirmation_dialog,
+		seconds_for_shutdown_rejection,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),

@@ -28,8 +28,64 @@ extern HWND hWindow;
 extern RECT win_rc;
 extern HFONT hFont;
 extern int hibernate_instead_of_shutdown;
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
-BOOL CALLBACK ConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+//	HWND hChild;
+	RECT rc;
+
+	switch(msg){
+	case WM_INITDIALOG:
+		/* Window Initialization */
+		/* WgxCenterWindow(HWND hWindow,HWND hParent); */
+		/* WgxCenterWindowRect(LPRECT WinRc,LPRECT ParentRc); */
+		if(GetWindowRect(hWnd,&rc)){
+			if((win_rc.right - win_rc.left) < (rc.right - rc.left) || 
+			  (win_rc.bottom - win_rc.top) < (rc.bottom - rc.top))
+				(void)SetWindowPos(hWnd,0,win_rc.left + 158,win_rc.top + 160,0,0,SWP_NOSIZE);
+			else
+				(void)SetWindowPos(hWnd,0,
+					win_rc.left + ((win_rc.right - win_rc.left) - (rc.right - rc.left)) / 2,
+					win_rc.top + ((win_rc.bottom - win_rc.top) - (rc.bottom - rc.top)) / 2 + 5,
+					0,0,SWP_NOSIZE
+				);
+		}
+		SetText(hWnd,L"PLEASE_CONFIRM");
+		if(hibernate_instead_of_shutdown)
+			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_HIBERNATE_WHEN_DONE");
+		else
+			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_SHUTDOWN_WHEN_DONE");
+		SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
+		SetText(GetDlgItem(hWnd,IDC_NO_BUTTON), L"NO");
+
+		/*if(hFont){
+			(void)SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
+			hChild = GetWindow(hWnd,GW_CHILD);
+			while(hChild){
+				(void)SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
+				hChild = GetWindow(hChild,GW_HWNDNEXT);
+			}
+		}*/
+		return FALSE;
+	case WM_COMMAND:
+		switch(LOWORD(wParam)){
+		case IDC_YES_BUTTON:
+			(void)EndDialog(hWnd,1);
+			break;
+		case IDC_NO_BUTTON:
+			(void)EndDialog(hWnd,0);
+			break;
+		}
+		return TRUE;
+	case WM_CLOSE:
+		(void)EndDialog(hWnd,0);
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	HWND hChild;
 	RECT rc;
@@ -75,6 +131,7 @@ BOOL CALLBACK ConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case IDC_YES_BUTTON:
 			break;
 		case IDC_NO_BUTTON:
+			break;
 		}
 		if(LOWORD(wParam) != IDOK)
 			return FALSE;

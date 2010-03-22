@@ -48,7 +48,7 @@ BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry);
 
 void DoJob(char job_type)
 {
-	HANDLE h = create_thread(ThreadProc,(LPVOID)job_type,&thr_id);
+	HANDLE h = create_thread(ThreadProc,(LPVOID)(DWORD)job_type,&thr_id);
 	if(h == NULL){
 		switch(job_type){
 		case 'a':
