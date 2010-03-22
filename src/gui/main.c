@@ -38,6 +38,7 @@ extern int skip_removable;
 int shutdown_flag = FALSE;
 extern int hibernate_instead_of_shutdown;
 extern int show_shutdown_check_confirmation_dialog;
+extern int seconds_for_shutdown_rejection;
 
 /* they have the same effect as environment variables for console program */
 extern char in_filter[];
@@ -143,7 +144,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	hInstance = GetModuleHandle(NULL);
 	//MessageBox(0,"Do you really want to hibernate when done?","Please Confirm",MB_OKCANCEL | MB_ICONEXCLAMATION);
-	//DialogBox(hInstance,MAKEINTRESOURCE(IDD_CHECK_CONFIRM),hWindow,(DLGPROC)CheckConfirmDlgProc);
+	//DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),hWindow,(DLGPROC)ShutdownConfirmDlgProc);
 	//return 0;
 
 	if(strstr(lpCmdLine,"--setup")){
@@ -194,6 +195,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	/* check for shutdown request */
 	if(shutdown_flag){
+		if(seconds_for_shutdown_rejection){
+			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),hWindow,(DLGPROC)ShutdownConfirmDlgProc) == 0)
+				return 0;
+			/* in case of errors we'll shutdown anyway */
+			/* to avoid situation when pc works a long time without any control */
+		}
+		
 		/* SE_SHUTDOWN privilege is set by udefrag_init() called before */
 		if(hibernate_instead_of_shutdown){
 			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */

@@ -62,9 +62,10 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"HIBERNATE_PC_AFTER_A_JOB", L"Hibernate PC when done", NULL},
 
 	{0,                 L"PLEASE_CONFIRM",             L"Please Confirm",        NULL},
-	{IDC_MESSAGE,       L"REALLY_SHUTDOWN_WHEN_DONE",  L"Do you really want to shutdown when done?", NULL},
+	{0,                 L"REALLY_SHUTDOWN_WHEN_DONE",  L"Do you really want to shutdown when done?", NULL},
 	{0,                 L"REALLY_HIBERNATE_WHEN_DONE", L"Do you really want to hibernate when done?", NULL},
-	{IDC_DELAY_MSG,     L"SECONDS_TILL_SHUTDOWN",      L"seconds till shutdown", NULL},
+	{0,                 L"SECONDS_TILL_SHUTDOWN",      L"seconds till shutdown", NULL},
+	{0,                 L"SECONDS_TILL_HIBERNATION",   L"seconds till hibernation", NULL},
 	{IDC_YES_BUTTON,    L"YES",                        L"Yes",                   NULL},
 	{IDC_NO_BUTTON,     L"NO",                         L"No",                    NULL},
 
