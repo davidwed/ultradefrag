@@ -88,16 +88,16 @@ BEGIN
                     161,12,BS_FLAT
 END
 
-IDD_SHUTDOWN DIALOG DISCARDABLE  0, 0, 188, 58
+IDD_SHUTDOWN DIALOG DISCARDABLE  0, 0, 188, 70
 STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Please Confirm"
 FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         IDI_SHUTDOWN,IDC_SHUTDOWN_ICON,"Static",SS_ICON | SS_CENTERIMAGE,0,0,32,32
-    CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,140,12
-    CTEXT           "seconds till shutdown",IDC_DELAY_MSG,32,22,140,12
-    PUSHBUTTON      "Yes",IDC_YES_BUTTON,42,37,50,15
-    PUSHBUTTON      "No",IDC_NO_BUTTON,96,37,50,15
+    CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,140,24
+    CTEXT           "seconds till shutdown",IDC_DELAY_MSG,32,34,140,12
+    PUSHBUTTON      "Yes",IDC_YES_BUTTON,42,49,50,15
+    PUSHBUTTON      "No",IDC_NO_BUTTON,96,49,50,15
 END
 
 IDD_CHECK_CONFIRM DIALOG DISCARDABLE  0, 0, 188, 58
@@ -106,7 +106,7 @@ CAPTION "Please Confirm"
 FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         IDI_SHUTDOWN,IDC_SHUTDOWN_ICON,"Static",SS_ICON | SS_CENTERIMAGE,0,0,32,32
-    CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,140,12
+    CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,140,24
     PUSHBUTTON      "Yes",IDC_YES_BUTTON,42,37,50,15
     PUSHBUTTON      "No",IDC_NO_BUTTON,96,37,50,15
 END
