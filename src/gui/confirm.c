@@ -90,7 +90,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 {
 //	HWND hChild;
 	RECT rc;
-	static UINT timer;
+	static UINT_PTR timer;
 	static UINT counter;
 	#define TIMER_ID 0x16748382
 	static short buffer[128];
@@ -139,7 +139,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 		counter = seconds_for_shutdown_rejection;
 		if(counter == 0)
 			(void)EndDialog(hWnd,1);
-		timer = SetTimer(hWnd,TIMER_ID,1000,NULL);
+		timer = (UINT_PTR)SetTimer(hWnd,TIMER_ID,1000,NULL);
 		if(timer == 0){
 			//MessageBox(hWindow,"SetTimer failed!","Error!",MB_OK | MB_ICONHAND);
 			// the code above will prevent shutdown which is dangerous
