@@ -9,6 +9,13 @@
         Dmitri Arkhangelski
 
 
+    Translation manager,
+    Programmer,
+    Documentation Writer:
+
+        Stefan Pendl
+
+
     Boot time defragmentation idea author,
     Documentation Writer,
     Scheduler author:
