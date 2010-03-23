@@ -65,9 +65,8 @@
 #define IDC_MESSAGE                     1040
 #define IDC_YES_BUTTON                  1041
 #define IDC_NO_BUTTON                   1042
-#define IDC_COUNTDOWN                   1043
-#define IDC_DELAY_MSG                   1044
-#define IDC_SHUTDOWN_ICON               1045
+#define IDC_DELAY_MSG                   1043
+#define IDC_SHUTDOWN_ICON               1044
 
 #define IDC_CL_MAP_STATIC               1057
 
