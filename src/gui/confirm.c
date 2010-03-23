@@ -22,6 +22,7 @@
 */
 
 #include "main.h"
+#include <wchar.h>
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
@@ -93,8 +94,8 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 	static UINT_PTR timer;
 	static UINT counter;
 	#define TIMER_ID 0x16748382
-	static short buffer[128];
-	static short *message;
+	static wchar_t buffer[128];
+	static wchar_t *message;
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -120,8 +121,8 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 			message = WgxGetResourceString(i18n_table,L"SECONDS_TILL_SHUTDOWN");
 			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_SHUTDOWN_WHEN_DONE");
 		}
-		_snwprintf(buffer,128,L"%u %ls",seconds_for_shutdown_rejection,message);
-		buffer[127] = 0;
+		_snwprintf(buffer,sizeof(buffer),L"%u %ls",seconds_for_shutdown_rejection,message);
+		buffer[sizeof(buffer) - 1] = 0;
 		SetWindowTextW(GetDlgItem(hWnd,IDC_DELAY_MSG),buffer);
 		SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
 		SetText(GetDlgItem(hWnd,IDC_NO_BUTTON), L"NO");
@@ -149,8 +150,8 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 		return FALSE;
 	case WM_TIMER:
 		counter --;
-		_snwprintf(buffer,128,L"%u %ls",counter,message);
-		buffer[127] = 0;
+		_snwprintf(buffer,sizeof(buffer),L"%u %ls",counter,message);
+		buffer[sizeof(buffer) - 1] = 0;
 		SetWindowTextW(GetDlgItem(hWnd,IDC_DELAY_MSG),buffer);
 		if(counter == 0){
 			(void)KillTimer(hWnd,TIMER_ID);
