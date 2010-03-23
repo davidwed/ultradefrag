@@ -40,7 +40,7 @@ iup.SetLanguage("ENGLISH")
 
 -- initialize parameters
 apply_patch = 0
-udver, winxver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc = "","","","","","","","",""
+udver, mingwbase, ddkbase, netpath, nsisroot, ziproot, vsbinpath, rosinc = "","","","","","","","",""
 mingw64base = ""
 winsdkbase = ""
 
@@ -63,7 +63,6 @@ for line in io.lines("./SETVARS.CMD") do
 		-- print(k, v)
 		-- f:write(k,"=",v,"\n")
 		if string.find(k, "ULTRADFGVER") then udver = v
-		elseif string.find(k, "ZENWINXVER") then winxver = v
 		elseif string.find(k, "WINDDKBASE") then ddkbase = v
 		elseif string.find(k, "MINGWBASE") then mingwbase = v
 		elseif string.find(k, "NETRUNTIMEPATH") then netpath = v
@@ -103,19 +102,18 @@ function param_action(dialog, param_index)
 		}
 		dialog.icon = icon
 		if show_obsolete_options == 1 then
-			dialog.size = "400x234"
+			dialog.size = "400x220"
 		else
-			dialog.size = "350x157"
+			dialog.size = "350x144"
 		end
 	end
 	return 1
 end
 
 if show_obsolete_options == 1 then
-	ret, udver, winxver, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, winsdkbase, netpath, vsbinpath, rosinc, apply_patch = 
+	ret, udver, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, winsdkbase, netpath, vsbinpath, rosinc, apply_patch = 
 		iup.GetParam("UltraDefrag build configurator",param_action,
 			"UltraDefrag version: %s\n"..
-			"ZenWINX version: %s\n"..
 			"MinGW base path: %s\n"..
 			"NSIS root path: %s\n"..
 			"7-Zip root path: %s\n"..
@@ -126,19 +124,18 @@ if show_obsolete_options == 1 then
 			"Visual Studio bin path: %s\n"..
 			"ReactOS include path: %s\n"..
 			"Apply patch to MinGW: %b[No,Yes]\n",
-			udver, winxver, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, winsdkbase, netpath, vsbinpath, rosinc, apply_patch
+			udver, mingwbase, nsisroot, ziproot, mingw64base, ddkbase, winsdkbase, netpath, vsbinpath, rosinc, apply_patch
 			)
 else
-	ret, udver, winxver, mingwbase, nsisroot, ziproot, ddkbase, apply_patch = 
+	ret, udver, mingwbase, nsisroot, ziproot, ddkbase, apply_patch = 
 		iup.GetParam("UltraDefrag build configurator",param_action,
 			"UltraDefrag version: %s\n"..
-			"ZenWINX version: %s\n"..
 			"MinGW base path: %s\n"..
 			"NSIS root path: %s\n"..
 			"7-Zip root path: %s\n"..
 			"Windows DDK base path: %s\n"..
 			"Apply patch to MinGW: %b[No,Yes]\n",
-			udver, winxver, mingwbase, nsisroot, ziproot, ddkbase, apply_patch
+			udver, mingwbase, nsisroot, ziproot, ddkbase, apply_patch
 			)
 end
 if ret == 1 then
@@ -149,12 +146,7 @@ if ret == 1 then
 		f:write("set VERSION=", i, ",", j, ",", k, ",0\n")
 		f:write("set VERSION2=\"", i, ", ", j, ", ", k, ", 0\\0\"\n")
 	end
-	for i, j, k in string.gmatch(winxver,"(%d+).(%d+).(%d+)") do
-		f:write("set ZENWINX_VERSION=", i, ",", j, ",", k, ",0\n")
-		f:write("set ZENWINX_VERSION2=\"", i, ", ", j, ", ", k, ", 0\\0\"\n")
-	end
 	f:write("set ULTRADFGVER=", udver, "\n")
-	f:write("set ZENWINXVER=", winxver, "\n")
 	f:write("set WINDDKBASE=", ddkbase, "\n")
 	f:write("set WINSDKBASE=", winsdkbase, "\n")
 	f:write("set MINGWBASE=", mingwbase, "\n")
