@@ -66,10 +66,8 @@ void display_help(void)
 
 void __stdcall NtProcessStartup(PPEB Peb)
 {
-	int error_code;
+	int safe_mode, error_code, result, i;
 	char buffer[256];
-	int result;
-	int i;
 
 	/* 1. Initialization */
 #ifdef USE_INSTEAD_SMSS
@@ -83,6 +81,26 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
 		"If something is wrong, hit F8 on startup\n"
 		"and select 'Last Known Good Configuration'.\n\n");
+		
+	/*
+	* In Windows Safe Mode the boot time defragmenter
+	* is absolutely useless, because it cannot display
+	* text on the screen in this mode.
+	*/
+	safe_mode = winx_windows_in_safe_mode();
+	/*
+	* In case of errors we'll assume that we're running in Safe Mode.
+	* To avoid a very unpleasant situation when ultradefrag works
+	* in background and nothing happens on the black screen.
+	*/
+	if(safe_mode > 0 || safe_mode < 0){
+		/* display yet a message, for debugging purposes */
+		winx_printf("In Windows Safe Mode this program is useless!\n");
+		/* if someone will see the message, a little delay will help him to read it */
+		winx_sleep(3000);
+		winx_exit(0);
+	}
+		
 	if(winx_init(Peb) < 0){
 		winx_printf("Wait 10 seconds ...\n");
 		winx_sleep(10000);

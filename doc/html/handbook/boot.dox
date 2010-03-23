@@ -49,6 +49,11 @@
  * typing the boot-on in command prompt. To disable them the
  * boot-off command may be used.
  *
+ * The boot time defragmenter cannot be used in Windows Safe Mode,
+ * because it cannot display text on the screen in this mode. 
+ * UltraDefrag checks for boot options and returns immediately if
+ * Safe Mode flag has been found.
+ *
  * Note that when boot time defragmenter is enabled the following
  * modules becomes critical for the Windows boot process: udefrag.dll,
  * udefrag-kernel.dll, zenwinx.dll. They are located in 

@@ -228,4 +228,79 @@ int __stdcall winx_unload_driver(short *driver_name)
 	return 0;
 }
 
+/**
+ * @brief Determines whether WIndows is in Safe Mode or not.
+ * @return Positive value indicates the presence of the Safe Mode.
+ * Zero value indicates a normal boot. Negative value indicates
+ * indeterminism caused by impossibility of an appropriate check.
+ */
+int __stdcall winx_windows_in_safe_mode(void)
+{
+	UNICODE_STRING us;
+	OBJECT_ATTRIBUTES oa;
+	NTSTATUS status;
+	HANDLE hKey;
+	KEY_VALUE_PARTIAL_INFORMATION *data;
+	short *data_buffer = NULL;
+	DWORD data_size = 0;
+	DWORD data_size2 = 0;
+	DWORD data_length;
+	int safe_boot = 0;
+	
+	/* 1. open HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control registry key */
+	RtlInitUnicodeString(&us,L"\\Registry\\Machine\\SYSTEM\\"
+							 L"CurrentControlSet\\Control");
+	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
+	status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&oa);
+	if(status != STATUS_SUCCESS){
+		DebugPrintEx(status,"Cannot open %ws",us.Buffer);
+		winx_printf("Cannot open %ls: %x!\n\n",us.Buffer,(UINT)status);
+		return (-1);
+	}
+	
+	/* 2. read SystemStartOptions value */
+	RtlInitUnicodeString(&us,L"SystemStartOptions");
+	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
+			NULL,0,&data_size);
+	if(status != STATUS_BUFFER_TOO_SMALL){
+		DebugPrintEx(status,"Cannot query SystemStartOptions value size");
+		winx_printf("Cannot query SystemStartOptions value size: %x!\n\n",(UINT)status);
+		return (-1);
+	}
+	data_size += sizeof(short);
+	data = winx_heap_alloc(data_size);
+	if(data == NULL){
+		DebugPrint("Cannot allocate %u bytes of memory for winx_windows_in_safe_mode()!",
+				data_size);
+		winx_printf("Cannot allocate %u bytes of memory for winx_windows_in_safe_mode()!\n\n",
+				data_size);
+		return (-1);
+	}
+	
+	RtlZeroMemory(data,data_size);
+	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
+			data,data_size,&data_size2);
+	if(status != STATUS_SUCCESS){
+		DebugPrintEx(status,"Cannot query SystemStartOptions value");
+		winx_printf("Cannot query SystemStartOptions value: %x!\n\n",(UINT)status);
+		winx_heap_free(data);
+		return (-1);
+	}
+	data_buffer = (short *)(data->Data);
+	data_length = data->DataLength >> 1;
+	if(data_length == 0){ /* value is empty */
+		winx_heap_free(data);
+		return 0;
+	}
+	data_buffer[data_length - 1] = 0;
+	
+	/* 3. search for SAFEBOOT */
+	_wcsupr(data_buffer);
+	if(wcsstr(data_buffer,L"SAFEBOOT")) safe_boot = 1;
+	DebugPrint("%ls - %u\n\n",data_buffer,data_size);
+	//winx_printf("%ls - %u\n\n",data_buffer,data_size);
+	winx_heap_free(data);
+
+	return safe_boot;
+}
 /** @} */

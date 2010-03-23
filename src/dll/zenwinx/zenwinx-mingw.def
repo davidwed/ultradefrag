@@ -55,3 +55,4 @@ EXPORTS
 	winx_list_insert_item@12
 	winx_list_remove_item@8
 	winx_list_destroy@4
+	winx_windows_in_safe_mode@0

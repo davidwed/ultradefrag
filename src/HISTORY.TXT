@@ -19,6 +19,9 @@ HISTORY
 
     - a bug preventing true Unicode paths from being displayed 
       in file fragmentation reports was fixed
+    - shutdown confirmation dialogs were added to GUI
+    - one additional check preventing the boot time defragmenter from
+      running in Windows Safe Mode was added
     - one little bug causing a wrong progress bar appearance on Windows XP
       default theme was fixed
 
