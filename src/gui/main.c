@@ -190,18 +190,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(hFont) (void)DeleteObject(hFont);
 	/* save settings */
 	SavePrefs();
-	WgxDestroyResourceTable(i18n_table);
 	DeleteEnvironmentVariables();
 	
+	if(shutdown_flag && seconds_for_shutdown_rejection){
+		if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0){
+			WgxDestroyResourceTable(i18n_table);
+			return 0;
+		}
+		/* in case of errors we'll shutdown anyway */
+		/* to avoid situation when pc works a long time without any control */
+	}
+	WgxDestroyResourceTable(i18n_table);
+
 	/* check for shutdown request */
 	if(shutdown_flag){
-		if(seconds_for_shutdown_rejection){
-			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0)
-				return 0;
-			/* in case of errors we'll shutdown anyway */
-			/* to avoid situation when pc works a long time without any control */
-		}
-		
 		/* SE_SHUTDOWN privilege is set by udefrag_init() called before */
 		if(hibernate_instead_of_shutdown){
 			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
