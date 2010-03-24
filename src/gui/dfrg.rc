@@ -88,8 +88,10 @@ BEGIN
                     161,12,BS_FLAT
 END
 
+/* this dialog should be centered on the screen, because the main window is closed anyway */
 IDD_SHUTDOWN DIALOG DISCARDABLE  0, 0, 228, 58
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOPMOST
 CAPTION "Please Confirm"
 FONT 8, "MS Shell Dlg"
 BEGIN
@@ -97,7 +99,7 @@ BEGIN
     CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,180,12
     CTEXT           "seconds till shutdown",IDC_DELAY_MSG,32,22,180,12
     PUSHBUTTON      "Yes",IDC_YES_BUTTON,62,37,50,15
-    PUSHBUTTON      "No",IDC_NO_BUTTON,116,37,50,15
+    PUSHBUTTON      "No",IDC_NO_BUTTON,116,37,50,15,BS_DEFPUSHBUTTON
 END
 
 IDD_CHECK_CONFIRM DIALOG DISCARDABLE  0, 0, 228, 58
@@ -107,7 +109,7 @@ FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         IDI_SHUTDOWN,IDC_SHUTDOWN_ICON,"Static",SS_ICON | SS_CENTERIMAGE,0,0,32,32
     CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,180,12
-    PUSHBUTTON      "Yes",IDC_YES_BUTTON,62,37,50,15
+    PUSHBUTTON      "Yes",IDC_YES_BUTTON,62,37,50,15,BS_DEFPUSHBUTTON
     PUSHBUTTON      "No",IDC_NO_BUTTON,116,37,50,15
 END
 

@@ -60,6 +60,8 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_SHUTDOWN_WHEN_DONE");
 		SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
 		SetText(GetDlgItem(hWnd,IDC_NO_BUTTON), L"NO");
+		/* shutdown will be confirmed by pressing the space key */
+		(void)SetFocus(GetDlgItem(hWnd,IDC_YES_BUTTON));
 
 		/*if(hFont){
 			(void)SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
@@ -90,7 +92,7 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 //	HWND hChild;
-	RECT rc;
+//	RECT rc;
 	static UINT_PTR timer;
 	static UINT counter;
 	#define TIMER_ID 0x16748382
@@ -102,7 +104,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 		/* Window Initialization */
 		/* WgxCenterWindow(HWND hWindow,HWND hParent); */
 		/* WgxCenterWindowRect(LPRECT WinRc,LPRECT ParentRc); */
-		if(GetWindowRect(hWnd,&rc)){
+/*		if(GetWindowRect(hWnd,&rc)){
 			if((win_rc.right - win_rc.left) < (rc.right - rc.left) || 
 			  (win_rc.bottom - win_rc.top) < (rc.bottom - rc.top))
 				(void)SetWindowPos(hWnd,0,win_rc.left + 158,win_rc.top + 160,0,0,SWP_NOSIZE);
@@ -113,6 +115,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 					0,0,SWP_NOSIZE
 				);
 		}
+*/
 		SetText(hWnd,L"PLEASE_CONFIRM");
 		if(hibernate_instead_of_shutdown){
 			message = WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATION");
@@ -126,6 +129,8 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 		SetWindowTextW(GetDlgItem(hWnd,IDC_DELAY_MSG),buffer);
 		SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
 		SetText(GetDlgItem(hWnd,IDC_NO_BUTTON), L"NO");
+		/* shutdown will be rejected by pressing the space key */
+		(void)SetFocus(GetDlgItem(hWnd,IDC_NO_BUTTON));
 
 		/*if(hFont){
 			(void)SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
