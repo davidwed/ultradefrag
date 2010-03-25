@@ -10,7 +10,7 @@ HISTORY
     - boot time interface initialization speedup was performed
     - boot time interface interactive mode commands set changed to be the same
       as in scripting mode
-    - HTML reports encoding was changed to UTF-8 which renders nicely
+    - HTML reports encoding was changed to UTF-8, which renders nicely
       in all popular web browsers including Internet Explorer
     - plain text reports were improved to be more readable
     - the following translations were updated:
