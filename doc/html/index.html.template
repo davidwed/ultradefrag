@@ -146,19 +146,32 @@ wikispaces_color_fontsize = "83%";
 		</div>
 	</div>
 	<div class="mpart">
-		<h3>Latest News - UltraDefrag 4.0 has been finally released!</h3>
+		<!-- pre-release announcement -->
+		<!-- <h3>Latest News - UltraDefrag x.x RCx is available for download.</h3>
         <h2>&nbsp;</h2> 
-        <p>The new release is dramatically more reliable. We have done the following to reach this target:</p>
+		<p>The latest release candidate includes the following improvements:</p>
 		<ul>
-		<li>A lot of extremely important bugs were fixed.</li>
-		<li>The strongest error handling was added to all program modules.</li>
-		<li>Kernel mode driver was removed as a component less reliable by definition.</li>
-		<li>Documentation was rewritten completely to be much clearer.</li>
-		<li>Website was cleaned up to get better navigation and faster access to all important information.</li>
+		<li></li>
+		</ul>
+        <h2>&nbsp;</h2> -->
+		<!-- release announcement -->
+		<h3>News - UltraDefrag x.x has been finally released!</h3>
+        <h2>&nbsp;</h2> 
+        <p>The new release includes the following improvements:</p>
+		<ul>
+		<li></li>
 		</ul>
 		<p><a href="../HISTORY.TXT">Here</a> is a full list of changes.</p>
-		<!--UltraDefrag team now brings its new 3.2.1 release in to action. Some improvements have been made which makes it even better than ever and loaded with enhancements and features.-->
         <h2>&nbsp;</h2> 
+		<!-- preview announcement -->
+		<!-- <h3>Preview - UltraDefrag x.x, what you can expect.</h3>
+        <h2>&nbsp;</h2> 
+		<p>The next release will include the following improvements:</p>
+		<ul>
+		<li></li>
+		</ul>
+        <h2>&nbsp;</h2> -->
+		<!-- Overview -->
 		<a name="overview"></a>
 		<p>UltraDefrag is a powerful disk defragmentation tool for Windows. It is the first open source defragmenter with
 		full support of system locked files defragmentation. Actually all files including registry hives and paging file
