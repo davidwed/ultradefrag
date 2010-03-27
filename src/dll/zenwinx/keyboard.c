@@ -48,9 +48,11 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 
 /**
  * @brief Opens all existing keyboards.
+ * @details If checking of first keyboard fails
+ *          wait ten seconds for the initialization.
+ *          This is needed for wireless devices.
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
- * @todo Test is 10 seconds delay really needed or not.
  */
 int __stdcall kb_open(void)
 {
