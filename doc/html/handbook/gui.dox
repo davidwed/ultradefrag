@@ -144,6 +144,14 @@ dbgprint_level = "NORMAL"
 -- after a job is done instead of shutting it down, otherwise set it to 0
 
 hibernate_instead_of_shutdown = 0
+
+-- set show_shutdown_check_confirmation_dialog to 1 to display the confirmation dialog
+-- for shutdown or hibernate, otherwise set it to 0
+show_shutdown_check_confirmation_dialog = 1
+
+-- seconds_for_shutdown_rejection sets the delay for the user to cancel
+-- the shutdown or hibernate execution, default is 60 seconds
+seconds_for_shutdown_rejection = 60
 @endverbatim
  *
  * <b>Windows Boot Time Scan</b>\n
