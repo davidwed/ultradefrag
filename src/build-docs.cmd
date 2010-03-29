@@ -14,6 +14,7 @@ mkdir doxy-doc
 cd driver
 rd /s /q doxy-doc
 lua ..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
+if %errorlevel% neq 0 cd .. && exit /B 1
 doxygen
 if %errorlevel% neq 0 cd .. && exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
@@ -24,6 +25,7 @@ cd ..
 cd dll\udefrag
 rd /s /q doxy-doc
 lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
+if %errorlevel% neq 0 cd ..\.. && exit /B 1
 doxygen
 if %errorlevel% neq 0 cd ..\.. && exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
@@ -34,6 +36,7 @@ cd ..\..
 cd dll\wgx
 rd /s /q doxy-doc
 lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
+if %errorlevel% neq 0 cd ..\.. && exit /B 1
 doxygen
 if %errorlevel% neq 0 cd ..\.. && exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
@@ -44,6 +47,7 @@ cd ..\..
 cd dll\zenwinx
 rd /s /q doxy-doc
 lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
+if %errorlevel% neq 0 cd ..\.. && exit /B 1
 doxygen
 if %errorlevel% neq 0 cd ..\.. && exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
@@ -54,6 +58,7 @@ cd ..\..
 cd dll\udefrag-kernel
 rd /s /q doxy-doc
 lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
+if %errorlevel% neq 0 cd ..\.. && exit /B 1
 doxygen
 if %errorlevel% neq 0 cd ..\.. && exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
@@ -64,6 +69,7 @@ cd ..\..
 cd ..\doc\html\handbook
 rd /s /q doxy-doc
 lua ..\..\..\src\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
+if %errorlevel% neq 0 cd ..\..\..\src && exit /B 1
 doxygen
 if %errorlevel% neq 0 cd ..\..\..\src && exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
@@ -79,6 +85,7 @@ cd ..\..\..\src
 
 rem finally build the main docs
 lua .\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
+if %errorlevel% neq 0 exit /B 1
 doxygen
 if %errorlevel% neq 0 exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
