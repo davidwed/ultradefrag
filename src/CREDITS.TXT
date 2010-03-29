@@ -119,7 +119,7 @@
 --------------------------------------------------------------------------------
     Ali Jafari
     Connection
-	Christoffer Ekberg
+    Christoffer Ekberg
     Dave MacBlack
     Dmitri Arkhangelski
     José Carlos Taveira de Souza
@@ -128,7 +128,7 @@
     Ken Choy
     Klaas Nekeman
     Latino
-	Masao Kajiwara
+    Masao Kajiwara
     Patrick Paludan-Müller
     Per-Eric Jenshagen
     Stefan Pendl
