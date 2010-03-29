@@ -1,0 +1,16 @@
+new RC:
+1. run build-pre-release.cmd
+2. upload files through sf.net file manager
+3. update website
+4. submit news
+5. close bugs and requests
+
+new release:
+1. update version in readme file
+2. add date to history.txt file
+3. run build-release.cmd
+4. upload files through file manager
+5. update website, handbook, dev docs, zenwinx docs
+6. submit news
+7. close bugs and requests
+8. update project info
