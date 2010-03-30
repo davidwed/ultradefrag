@@ -27,7 +27,6 @@
 #include "../../include/ntndk.h"
 
 #include "../../include/udefrag.h"
-#include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
 
 volume_info v[MAX_DOS_DRIVES + 1];

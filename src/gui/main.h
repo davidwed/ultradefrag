@@ -91,7 +91,6 @@
 #include "../lua5.1/lualib.h"
 
 #include "../include/udefrag.h"
-#include "../include/ultradfg.h"
 #include "resource.h"
 
 #include "../dll/wgx/wgx.h"

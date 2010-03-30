@@ -30,6 +30,44 @@ typedef enum {
 	OPTIMIZE_JOB
 } UDEFRAG_JOB_TYPE;
 
+typedef enum {
+	FREE_SPACE = 0,
+	SYSTEM_SPACE,
+	SYSTEM_OVERLIMIT_SPACE,
+	FRAGM_SPACE,
+	FRAGM_OVERLIMIT_SPACE,
+	UNFRAGM_SPACE,
+	UNFRAGM_OVERLIMIT_SPACE,
+	MFT_SPACE,
+	DIR_SPACE,
+	DIR_OVERLIMIT_SPACE,
+	COMPRESSED_SPACE,
+	COMPRESSED_OVERLIMIT_SPACE,
+	TEMPORARY_SYSTEM_SPACE
+} VOLUME_SPACE_STATE;
+
+#define UNKNOWN_SPACE FRAGM_SPACE
+#define NUM_OF_SPACE_STATES (TEMPORARY_SYSTEM_SPACE - FREE_SPACE + 1)
+
+#define DBG_NORMAL     0
+#define DBG_DETAILED   1
+#define DBG_PARANOID   2
+
+typedef struct _STATISTIC {
+	ULONG		filecounter;
+	ULONG		dircounter;
+	ULONG		compressedcounter;
+	ULONG		fragmfilecounter;
+	ULONG		fragmcounter;
+	ULONGLONG	total_space;
+	ULONGLONG	free_space; /* in bytes */
+	ULONGLONG	mft_size;
+	UCHAR		current_operation;
+	ULONGLONG	clusters_to_process;
+	ULONGLONG	processed_clusters;
+	ULONG		pass_number; /* for volume optimizer */
+} STATISTIC, *PSTATISTIC;
+
 int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size);
 int __stdcall udefrag_kernel_get_statistic(STATISTIC *stat, char *map, int map_size);
 int __stdcall udefrag_kernel_stop(void);

@@ -24,7 +24,6 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
-#include "ultradfg.h"
 #include "udefrag-kernel.h"
 
 #if defined(__POCC__)

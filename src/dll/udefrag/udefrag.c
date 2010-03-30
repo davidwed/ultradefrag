@@ -27,7 +27,6 @@
 #include "../../include/ntndk.h"
 
 #include "../../include/udefrag.h"
-#include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
 
 #define DbgCheckInitEvent(f) { \
@@ -61,9 +60,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 }
 
 /**
- * @brief Initializes the UltraDefrag driver.
- * @param[in] map_size the cluster map size,
- *                     in bytes. May be zero.
+ * @brief Initializes the UltraDefrag engine.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall udefrag_init(void)
@@ -85,7 +82,7 @@ int __stdcall udefrag_init(void)
 }
 
 /**
- * @brief Unloads the UltraDefrag driver.
+ * @brief Unloads the UltraDefrag engine.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall udefrag_unload(void)
@@ -130,7 +127,7 @@ int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cl
 	ULONGLONG t = 0;
 	int use_limit = 0;
 
-	DbgCheckInitEvent("udefrag_send_command_ex");
+	DbgCheckInitEvent("udefrag_start");
 	
 	/* reload time_limit and refresh_interval variables */
 	udefrag_reload_settings();

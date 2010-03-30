@@ -18,7 +18,7 @@
  */
 
 /*
-* Driver interface header.
+* Kernel mode driver interface header.
 */
 
 #ifndef _ULTRADFG_H_

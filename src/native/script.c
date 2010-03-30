@@ -23,7 +23,6 @@
 
 #include "../include/ntndk.h"
 
-#include "../include/ultradfg.h"
 #include "../include/udefrag-kernel.h"
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
