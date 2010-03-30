@@ -53,6 +53,25 @@ int OpenVolume(char *volume_name)
 }
 
 /**
+ * @brief Flushes all file buffers.
+ * @param[in] volume_name the name of the volume.
+ */
+void FlushAllFileBuffers(char *volume_name)
+{
+	char path[64];
+	WINX_FILE *f;
+	
+	(void)_snprintf(path,64,"\\??\\%s:",volume_name);
+	path[63] = 0;
+
+	f = winx_fopen(path,"r+");
+	if(f){
+		(void)winx_fflush(f);
+		winx_fclose(f);
+	}
+}
+
+/**
  * @brief Retrieves the volume geometry.
  * @param[in] volume_name the name of the volume.
  * @return Zero for success, negative value otherwise.

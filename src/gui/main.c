@@ -162,7 +162,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	//DisplayStopDefragError(-1,"Error!");
 	//return 0;
 
-	error_code = udefrag_init(N_BLOCKS);
+	error_code = udefrag_init();
 	if(error_code < 0){
 		DisplayDefragError(error_code,"Initialization failed!");
 		(void)udefrag_unload();
@@ -483,7 +483,7 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	GetPrefs();
 	stop();
 	(void)udefrag_unload();
-	error_code = udefrag_init(N_BLOCKS);
+	error_code = udefrag_init();
 	if(error_code < 0){
 		DisplayDefragError(error_code,"Initialization failed!");
 		(void)udefrag_unload();

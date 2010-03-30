@@ -190,6 +190,7 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 	char letter;
 	int error_code;
 	int Status = STATUS_UNDEFINED;
+	char volume_name[2];
 
 	if(v_entry == NULL) return;
 
@@ -198,6 +199,7 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 	
 	ClearMap();
 	letter = v_entry->name[0];
+	volume_name[0] = letter; volume_name[1] = 0;
 
 	VolListUpdateStatusField(v_entry,STATUS_RUNNING);
 
@@ -214,15 +216,15 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 		processed_entry = v_entry;
 		switch(command){
 		case 'a':
-			error_code = udefrag_analyse(letter,update_stat);
+			error_code = udefrag_start(volume_name,ANALYSE_JOB,N_BLOCKS,update_stat);
 			Status = STATUS_ANALYSED;
 			break;
 		case 'd':
-			error_code = udefrag_defragment(letter,update_stat);
+			error_code = udefrag_start(volume_name,DEFRAG_JOB,N_BLOCKS,update_stat);
 			Status = STATUS_DEFRAGMENTED;
 			break;
 		default:
-			error_code = udefrag_optimize(letter,update_stat);
+			error_code = udefrag_start(volume_name,OPTIMIZE_JOB,N_BLOCKS,update_stat);
 			Status = STATUS_OPTIMIZED;
 		}
 		if(error_code < 0 && !exit_pressed){

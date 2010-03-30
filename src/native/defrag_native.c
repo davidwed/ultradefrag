@@ -119,7 +119,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_printf("\n\n");
 
 	/* 4. Initialize UltraDefrag driver */
-	error_code = udefrag_init(0);
+	error_code = udefrag_init();
 	if(error_code < 0){
 		winx_printf("\nInitialization failed!\n");
 		winx_printf("%s\n",udefrag_get_error_description(error_code));

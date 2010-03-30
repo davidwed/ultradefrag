@@ -24,9 +24,8 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
-//#define KERNEL_MODE_DRIVER_SUPPORT
-
 #include "ultradfg.h"
+#include "udefrag-kernel.h"
 
 #if defined(__POCC__)
 #pragma ftol(inlined)
@@ -55,19 +54,15 @@ typedef struct _volume_info {
 	int is_removable;
 } volume_info;
 
-int __stdcall udefrag_init(long map_size);
+int __stdcall udefrag_init(void);
 int __stdcall udefrag_unload(void);
 
 char * __stdcall udefrag_get_error_description(int error_code);
-
-int __stdcall udefrag_kernel_mode(void);
 
 int __stdcall udefrag_stop(void);
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
 int __stdcall udefrag_get_map(char *buffer,int size);
 char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
-
-int __stdcall udefrag_reload_settings(void);
 
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
@@ -77,11 +72,7 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 * to refresh progress indicator during the defragmentation process.
 */
 typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
-int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sproc);
-
-#define udefrag_analyse(letter,sproc) udefrag_send_command_ex('a',letter,sproc)
-#define udefrag_defragment(letter,sproc) udefrag_send_command_ex('d',letter,sproc)
-#define udefrag_optimize(letter,sproc) udefrag_send_command_ex('c',letter,sproc)
+int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc);
 
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);

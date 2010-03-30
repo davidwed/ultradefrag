@@ -114,7 +114,7 @@ int  __stdcall winx_set_system_error_mode(unsigned int mode);
 int __stdcall winx_load_driver(short *driver_name);
 int __stdcall winx_unload_driver(short *driver_name);
 
-int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,HANDLE *phandle);
+int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle);
 void __stdcall winx_exit_thread(void);
 
 int  __stdcall winx_enable_privilege(unsigned long luid);

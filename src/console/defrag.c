@@ -209,6 +209,7 @@ int process_single_volume(void)
 	STATUPDATEPROC stat_callback = NULL;
 	long map_size = 0;
 	int error_code = 0;
+	char volume_name[2];
 
 	/* validate driveletter */
 	if(!letter){
@@ -233,17 +234,12 @@ int process_single_volume(void)
 
 	/* do our job */
 	if(m_flag) map_size = map_rows * map_symbols_per_line;
-	error_code = udefrag_init(map_size);
+	error_code = udefrag_init();
 	if(error_code < 0){
 		DisplayDefragError(error_code,"Initialization failed!");
 		cleanup();
 		return 2;
 	}
-
-#ifdef KERNEL_MODE_DRIVER_SUPPORT
-	if(udefrag_kernel_mode()) printf("(Kernel Mode)\n\n");
-	else printf("(User Mode)\n\n");
-#endif
 
 	if(m_flag) /* prepare console buffer for map */
 		InitializeMapDisplay();
@@ -251,12 +247,13 @@ int process_single_volume(void)
 	if(!p_flag) stat_callback = ProgressCallback;
 	stop_flag = FALSE;
 
+	volume_name[0] = letter; volume_name[1] = 0;
 	if(a_flag){
-		error_code = udefrag_analyse(letter,stat_callback);
+		error_code = udefrag_start(volume_name,ANALYSE_JOB,map_size,stat_callback);
 	} else if(o_flag){
-		error_code = udefrag_optimize(letter,stat_callback);
+		error_code = udefrag_start(volume_name,OPTIMIZE_JOB,map_size,stat_callback);
 	} else {
-		error_code = udefrag_defragment(letter,stat_callback);
+		error_code = udefrag_start(volume_name,DEFRAG_JOB,map_size,stat_callback);
 	}
 	if(error_code < 0){
 		DisplayDefragError(error_code,"Analysis/Defragmentation failed!");

@@ -158,6 +158,7 @@ extern ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];
 extern ULONG map_size;
 
 extern BOOLEAN optimize_flag;
+extern BOOLEAN initial_analysis;
 
 extern ULONGLONG out_of_memory_condition_counter;
 
@@ -168,7 +169,7 @@ void FreeDriverResources(void);
 int AllocateMap(int size);
 void FreeMap(void);
 int GetMap(char *dest,int cluster_map_size);
-void MarkAllSpaceAsSystem0(void);
+void MarkAllSpaceAsFree0(void);
 void MarkAllSpaceAsSystem1(void);
 unsigned char GetFileSpaceState(PFILENAME pfn);
 void MarkFileSpace(PFILENAME pfn,int old_space_state);
@@ -188,6 +189,7 @@ void RemoveReportFromDisk(char *volume_name);
 int  OpenVolume(char *volume_name);
 void CloseVolume(void);
 int GetDriveGeometry(char *volume_name);
+void FlushAllFileBuffers(char *volume_name);
 
 int Analyze(char *volume_name);
 int Defragment(char *volume_name);

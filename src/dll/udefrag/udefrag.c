@@ -30,8 +30,6 @@
 #include "../../include/ultradfg.h"
 #include "../zenwinx/zenwinx.h"
 
-#include "../../include/udefrag-kernel.h"
-
 #define DbgCheckInitEvent(f) { \
 	if(!init_event){ \
 		DebugPrint(f " call without initialization!"); \
@@ -39,27 +37,20 @@
 	} \
 }
 
-/* global variables */
-BOOL kernel_mode_driver = TRUE;
-long cluster_map_size = 0;
+struct kernel_start_parameters {
+	char *volume_name;
+	UDEFRAG_JOB_TYPE job_type;
+	int cluster_map_size;
+	int cmd_status;
+	BOOL done_flag;
+};
 
+/* global variables */
 HANDLE init_event = NULL;
 char result_msg[4096]; /* buffer for the default formatted result message */
-
 extern int refresh_interval;
 extern ULONGLONG time_limit;
-
-unsigned char c, lett;
-BOOL done_flag;
-int cmd_status;
-
-int __stdcall kmd_init(long map_size);
-int __stdcall kmd_unload(void);
-void __stdcall udefrag_load_settings(void);
-#ifdef KERNEL_MODE_DRIVER_SUPPORT
-WINX_FILE *f_ud = NULL;
-WINX_FILE *f_map = NULL, *f_stat = NULL, *f_stop = NULL;
-#endif
+void udefrag_reload_settings(void);
 
 /**
  * @brief udefrag.dll entry point.
@@ -75,7 +66,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
  *                     in bytes. May be zero.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall udefrag_init(long map_size)
+int __stdcall udefrag_init(void)
 {
 	int error_code;
 	
@@ -90,26 +81,7 @@ int __stdcall udefrag_init(long map_size)
 		return (-1);
 	}
 
-#if !defined(UDEFRAG_PORTABLE) && defined(KERNEL_MODE_DRIVER_SUPPORT)
-	if(kmd_init(map_size) >= 0){
-		kernel_mode_driver = TRUE;
-		return 0;
-	}
-#endif
-
-	kernel_mode_driver = FALSE;
-	cluster_map_size = map_size;
-	(void)udefrag_load_settings(); /* reload udefrag.dll specific options */
 	return 0;
-}
-
-/**
- * @brief Defines is kernel mode driver loaded or not.
- * @return TRUE if kernel mode driver is loaded, FALSE otherwise.
- */
-int __stdcall udefrag_kernel_mode(void)
-{
-	return (int)kernel_mode_driver;
 }
 
 /**
@@ -118,75 +90,8 @@ int __stdcall udefrag_kernel_mode(void)
  */
 int __stdcall udefrag_unload(void)
 {
-	if(!init_event) return 0;
-	winx_destroy_event(init_event);
-	init_event = NULL;
-	(void)kmd_unload();
+	NtCloseSafe(init_event);
 	return 0;
-}
-
-/**
- * @brief Delivers a disk defragmentation command to the driver.
- * @param[in] command the command to be delivered.
- * @param[in] letter the volume letter.
- * @return Zero for success, negative value otherwise.
- * @note Internal use only.
- */
-int udefrag_send_command(unsigned char command,unsigned char letter)
-{
-	char cmd[4];
-	char *cmd_description = "OPTIMIZE";
-	UDEFRAG_JOB_TYPE job_type;
-	int error_code;
-
-	switch(command){
-	case 'a':
-	case 'A':
-		job_type = ANALYSE_JOB;
-		cmd_description = "ANALYSE";
-		break;
-	case 'd':
-	case 'D':
-		job_type = DEFRAG_JOB;
-		cmd_description = "DEFRAG";
-		break;
-	default:
-		job_type = OPTIMIZE_JOB;
-	}
-
-#ifdef  KERNEL_MODE_DRIVER_SUPPORT
-	if(kernel_mode_driver){
-		cmd[0] = command; cmd[1] = letter; cmd[2] = 0;
-		if(winx_fwrite(cmd,strlen(cmd),1,f_ud)){
-			return 0;
-		} else {
-			DebugPrint("Cannot execute %s command for volume %c:!",
-				cmd_description,(char)toupper((int)letter));
-			return (-1);
-		}
-	} else {
-		cmd[0] = letter; cmd[1] = 0;
-		error_code = udefrag_kernel_start(cmd,job_type,cluster_map_size);
-		if(error_code >= 0){
-			return 0;
-		} else {
-			DebugPrint("Cannot execute %s command for volume %c:!",
-				cmd_description,(char)toupper((int)letter));
-			return (-1);
-		}
-	}
-#else
-	cmd[0] = letter; cmd[1] = 0;
-	error_code = udefrag_kernel_start(cmd,job_type,cluster_map_size);
-	if(error_code >= 0){
-		return 0;
-	} else {
-		DebugPrint("Cannot execute %s command for volume %c:!",
-			cmd_description,(char)toupper((int)letter));
-		return (-1);
-	}
-#endif
-	return (-1); /* this point will never be reached */
 }
 
 /**
@@ -196,10 +101,13 @@ int udefrag_send_command(unsigned char command,unsigned char letter)
  * - Only a single command may be sent at the same time.
  * - Internal use only.
  */
-DWORD WINAPI send_command(LPVOID unused)
+DWORD WINAPI engine_start(LPVOID p)
 {
-	cmd_status = udefrag_send_command(c,lett);
-	done_flag = TRUE;
+	struct kernel_start_parameters *pksp;
+	
+	pksp = (struct kernel_start_parameters *)p;
+	pksp->cmd_status = udefrag_kernel_start(pksp->volume_name,pksp->job_type,pksp->cluster_map_size);
+	pksp->done_flag = TRUE;
 	winx_exit_thread(); /* 8k/12k memory leak here? */
 	return 0;
 }
@@ -207,55 +115,42 @@ DWORD WINAPI send_command(LPVOID unused)
 /**
  * @brief Delivers a disk defragmentation command to the driver
  *        in a separate thread.
- * @param[in] command the command to be delivered.
- * @param[in] letter the volume letter.
+ * @param[in] volume_name the name of the volume.
+ * @param[in] job_type the type of the job.
+ * @param[in] cluster_map_size the size of the cluster map, in bytes.
  * @param[in] sproc an address of the callback procedure
  *                  to be called periodically during
  *                  the running disk defragmentation job.
  *                  This parameter may be NULL.
  * @return Zero for success, negative value otherwise.
- * @note udefrag_analyse, udefrag_defragment, udefrag_optimize
- *       macro definitions may be used instead of this function.
  */
-int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sproc)
+int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc)
 {
-	WINX_FILE *f;
-	char volume[] = "\\??\\A:";
-	HANDLE hThread;
+	struct kernel_start_parameters ksp;
 	ULONGLONG t = 0;
 	int use_limit = 0;
 
 	DbgCheckInitEvent("udefrag_send_command_ex");
+	
+	/* reload time_limit and refresh_interval variables */
+	udefrag_reload_settings();
 
-	/*
-	* Here we can flush all file buffers. We cannot do it 
-	* in driver due to te following two reasons:
-	* 1. There is no NtFlushBuffersFile() call in kernel mode.
-	* 2. IRP_MJ_FLUSH_BUFFERS request causes BSOD on NT 4.0
-	* (at least under MS Virtual PC 2004).
-	*/
-	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) >= 0){
-		volume[4] = letter;
-		f = winx_fopen(volume,"r+");
-		if(f){
-			(void)winx_fflush(f);
-			winx_fclose(f);
-		}
-		(void)winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-	}
-
-	/* create a separate thread for driver command processing */
-	done_flag = FALSE;
-	cmd_status = 0;
-	c = command; lett = letter;
-	if(winx_create_thread(send_command,&hThread) < 0){
+	/* initialize kernel_start_parameters structure */
+	ksp.volume_name = volume_name;
+	ksp.job_type = job_type;
+	ksp.cluster_map_size = cluster_map_size;
+	ksp.cmd_status = 0;
+	ksp.done_flag = FALSE;
+	
+	/* create a separate thread for the command processing */
+	if(winx_create_thread(engine_start,(PVOID)&ksp,NULL) < 0){
 		//winx_printf("\nFUCKED!\n\n");
 		return (-1);
 	}
-	NtCloseSafe(hThread);
+
 	/*
 	* Call specified callback 
-	* every (settings.refresh_interval) milliseconds.
+	* every refresh_interval milliseconds.
 	*/
 	if(time_limit){
 		use_limit = 1;
@@ -272,10 +167,13 @@ int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sp
 				t -= refresh_interval;
 			}
 		}
-	} while(!done_flag);
+	} while(!ksp.done_flag);
 	if(sproc) sproc(TRUE);
 
-	return cmd_status;
+	if(ksp.cmd_status < 0)
+		DebugPrint("udefrag_start(%s,%u,%u,0x%p) failed!\n",
+			volume_name,job_type,cluster_map_size,sproc);
+	return ksp.cmd_status;
 }
 
 /**
@@ -285,15 +183,7 @@ int __stdcall udefrag_send_command_ex(char command,char letter,STATUPDATEPROC sp
 int __stdcall udefrag_stop(void)
 {
 	DbgCheckInitEvent("udefrag_stop");
-#ifdef  KERNEL_MODE_DRIVER_SUPPORT
-	if(kernel_mode_driver){
-		if(winx_fwrite("s",1,1,f_stop)) return 0;
-	} else {
-		if(udefrag_kernel_stop() >= 0) return 0;
-	}
-#else
 	if(udefrag_kernel_stop() >= 0) return 0;
-#endif
 	DebugPrint("Stop request failed!");
 	return (-1);
 }
@@ -312,24 +202,10 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 	
 	DbgCheckInitEvent("udefrag_get_progress");
 
-#ifdef  KERNEL_MODE_DRIVER_SUPPORT
-	if(kernel_mode_driver){
-		if(!winx_fread(pstat,sizeof(STATISTIC),1,f_stat)){
-			DebugPrint("Statistical data unavailable!");
-			return (-1);
-		}
-	} else {
-		if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
-			DebugPrint("Statistical data unavailable!");
-			return (-1);
-		}
-	}
-#else
 	if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
 		DebugPrint("Statistical data unavailable!");
 		return (-1);
 	}
-#endif
 
 	if(percentage){ /* calculate percentage only if we have such request */
 		/* FIXME: do it more accurate */
@@ -352,17 +228,8 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 {
 	DbgCheckInitEvent("udefrag_get_map");
 	
-#ifdef  KERNEL_MODE_DRIVER_SUPPORT
-	if(kernel_mode_driver){
-		if(winx_fread(buffer,size,1,f_map)) return 0;
-	} else {
-		if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) >= 0)
-			return 0;
-	}
-#else
 	if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) >= 0)
 		return 0;
-#endif
 
 	DebugPrint("Cluster map unavailable!");
 	return (-1);

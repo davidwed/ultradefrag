@@ -136,18 +136,18 @@ int GetMap(char *dest,int cluster_map_size)
 }
 
 /**
- * @brief Marks all space in cluster map as system.
+ * @brief Marks all space in cluster map as free.
  * @details All cells of the map are marked as
  * containing a single cluster.
  */
-void MarkAllSpaceAsSystem0(void)
+void MarkAllSpaceAsFree0(void)
 {
 	ULONG i;
 	
 	if(!new_cluster_map) return;
 	memset(new_cluster_map,0,NUM_OF_SPACE_STATES * map_size * sizeof(ULONGLONG));
 	for(i = 0; i < map_size; i++)
-		new_cluster_map[i][SYSTEM_SPACE] = 1;
+		new_cluster_map[i][FREE_SPACE] = 1;
 }
 
 /**

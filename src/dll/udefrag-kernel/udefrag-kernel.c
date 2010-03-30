@@ -96,11 +96,17 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	
 	Stat.pass_number = 0;
 	
-	/* 5. analyse volume */
+	/* 5. flush all file buffers */
+	/*DebugPrint("Flush all file buffers!\n");
+	FlushAllFileBuffers(volume_name);*/
+
+	/* 6. analyse volume */
+	initial_analysis = TRUE;
 	error_code = Analyze(volume_name);
+	initial_analysis = FALSE;
 	if(error_code < 0) goto failure;
 	
-	/* 6. defragment/optimize volume */
+	/* 7. defragment/optimize volume */
 	if(job_type == ANALYSE_JOB) goto success;
 	if(CheckForStopEvent()) goto success;
 	/*
@@ -119,7 +125,7 @@ int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type,
 	else (void)Optimize(volume_name);
 
 success:		
-	/* 7. save report */
+	/* 8. save report */
 	(void)SaveReportToDisk(volume_name);
 	
 	/* FreeMap(); - NEVER CALL IT HERE */

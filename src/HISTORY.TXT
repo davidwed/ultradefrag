@@ -1,5 +1,11 @@
 HISTORY
 
+  Version 4.3.0  2010-04-
+  ------------------------------------------------------------------------------
+    - sources were cleaned up by removing the obsolete 
+      kernel mode driver support at all
+
+
   Version 4.2.0  2010-03-30
   ------------------------------------------------------------------------------
     - multiple drives selection feature was added to GUI and Scheduler

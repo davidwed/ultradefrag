@@ -24,7 +24,7 @@ EXPORTS
 	winx_set_system_error_mode@4
 	winx_load_driver@4
 	winx_unload_driver@4
-	winx_create_thread@8
+	winx_create_thread@12
 	winx_exit_thread@0
 	winx_enable_privilege@4
 	winx_get_drive_type@4

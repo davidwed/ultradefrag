@@ -66,7 +66,7 @@ int Analyze(char *volume_name)
 	DebugPrint("----- Analyze of %s: -----\n",volume_name);
 	
 	/* initialize cluster map */
-	MarkAllSpaceAsSystem0();
+	MarkAllSpaceAsFree0();
 	
 	/* reset file lists */
 	DestroyLists();
@@ -80,6 +80,12 @@ int Analyze(char *volume_name)
 	/* open the volume */
 	error_code = OpenVolume(volume_name);
 	if(error_code < 0) return error_code;
+	
+	/* flush all file buffers */
+	if(initial_analysis){
+		DebugPrint("Flush all file buffers!\n");
+		FlushAllFileBuffers(volume_name);
+	}
 
 	/* get drive geometry */
 	error_code = GetDriveGeometry(volume_name);

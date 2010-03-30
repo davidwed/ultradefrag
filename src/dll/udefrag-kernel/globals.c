@@ -61,6 +61,7 @@ ULONG ntfs_record_size = 0;
 ULONGLONG max_mft_entries = 0;
 
 BOOLEAN optimize_flag = FALSE;
+BOOLEAN initial_analysis = FALSE;
 
 ULONGLONG out_of_memory_condition_counter = 0;
 

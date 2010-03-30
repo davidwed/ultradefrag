@@ -123,6 +123,7 @@ void ProcessVolume(char letter,char defrag_command)
 {
 	STATISTIC stat;
 	int status = 0;
+	char volume_name[2];
 
 	/* validate the volume before any processing */
 	status = udefrag_validate_volume(letter,FALSE);
@@ -135,23 +136,22 @@ void ProcessVolume(char letter,char defrag_command)
 		return;
 	}
 	
-	(void)udefrag_reload_settings();
-	
 	i = j = 0;
 	last_op = 0;
+	volume_name[0] = letter; volume_name[1] = 0;
 	winx_printf("\nPreparing to ");
 	switch(defrag_command){
 	case 'a':
 		job_type = ANALYSE_JOB;
 		winx_printf("analyse %c: ...\n",letter);
 		winx_printf("Use Pause/Break key to abort the process.\n");
-		status = udefrag_analyse(letter,update_stat);
+		status = udefrag_start(volume_name,ANALYSE_JOB,0,update_stat);
 		break;
 	case 'd':
 		job_type = DEFRAG_JOB;
 		winx_printf("defragment %c: ...\n",letter);
 		winx_printf("Use Pause/Break key to abort the process.\n");
-		status = udefrag_defragment(letter,update_stat);
+		status = udefrag_start(volume_name,DEFRAG_JOB,0,update_stat);
 		break;
 	case 'c':
 		job_type = OPTIMIZE_JOB;
@@ -159,7 +159,7 @@ void ProcessVolume(char letter,char defrag_command)
 		winx_printf("optimize %c: ...\n",letter);
 		winx_printf("Use Pause/Break key to abort the process.\n");
 		winx_printf("\nPass 0 ...\n");
-		status = udefrag_optimize(letter,update_stat);
+		status = udefrag_start(volume_name,OPTIMIZE_JOB,0,update_stat);
 		break;
 	}
 	if(status < 0){
