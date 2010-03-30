@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 4.2.0  2010-03-
+  Version 4.2.0  2010-03-30
   ------------------------------------------------------------------------------
     - multiple drives selection feature was added to GUI and Scheduler
     - progress indication was improved to be more detailed and smooth
