@@ -247,19 +247,8 @@ void InitMainWindow(void)
 	int dx,dy;
 	RECT rc;
 	
-#ifdef KERNEL_MODE_DRIVER_SUPPORT
-	char title[128];
-
-	/* update window title */
-	if(GetWindowText(hWindow,title,64)){
-		if(udefrag_kernel_mode()) strcat(title," (Kernel Mode)");
-		else strcat(title," (User Mode)");
-		(void)SetWindowText(hWindow,title);
-	}
-#endif
-
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
-	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"/*lng_file_path*/))
+	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
 		WgxApplyResourceTable(i18n_table,hWindow);
 	if(hibernate_instead_of_shutdown){
 		(void)SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
