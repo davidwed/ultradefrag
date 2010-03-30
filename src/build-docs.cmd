@@ -11,17 +11,6 @@ if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%U
 rd /s /q doxy-doc
 mkdir doxy-doc
 
-cd driver
-rd /s /q doxy-doc
-lua ..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
-if %errorlevel% neq 0 cd .. && exit /B 1
-doxygen
-if %errorlevel% neq 0 cd .. && exit /B 1
-copy /Y .\rsc\*.* .\doxy-doc\html\
-del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
-xcopy /I /Y /Q /S .\doxy-doc\html ..\doxy-doc\driver\html
-cd ..
-
 cd dll\udefrag
 rd /s /q doxy-doc
 lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%

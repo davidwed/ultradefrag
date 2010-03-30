@@ -4,10 +4,6 @@ pushd obj\zenwinx
 lua ..\..\tools\mkmod.lua zenwinx.build
 if %errorlevel% neq 0 goto end
 
-rem cd ..\driver
-rem lua ..\..\tools\mkmod.lua ultradfg.build
-rem if %errorlevel% neq 0 goto end
-
 cd ..\hibernate
 lua ..\..\tools\mkmod.lua hibernate.build
 if %errorlevel% neq 0 goto end
@@ -19,10 +15,6 @@ if %errorlevel% neq 0 goto end
 cd ..\udefrag
 lua ..\..\tools\mkmod.lua udefrag.build
 if %errorlevel% neq 0 goto end
-
-rem cd ..\udefrag-next-generation
-rem lua ..\..\tools\mkmod.lua udefrag-nextgen.build
-rem if %errorlevel% neq 0 goto end
 
 rem skip lua when building the micro edition
 if "%UD_MICRO_EDITION%" equ "1" goto skip_lua

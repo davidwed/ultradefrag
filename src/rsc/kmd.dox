@@ -21,27 +21,6 @@
  * @page KMD Kernel Mode Driver
  *
  * The UltraDefrag Kernel Mode Driver is retired. If you need it for
- * experimental or educational purposes, you should recompile the
- * program with the following modifications in the source code:
- *
- * - Uncomment this line in /src/installer/UltraDefrag.nsh
-@verbatim
-!define INCLUDE_KERNEL_MODE_DRIVER
-@endverbatim
- * - Uncomment this line in /src/include/udefrag.h
-@verbatim
-#define KERNEL_MODE_DRIVER_SUPPORT
-@endverbatim
- * - Uncomment the following lines in /src/blditems.cmd
-@verbatim
-cd ..\driver
-lua ..\..\tools\mkmod.lua ultradfg.build
-if %errorlevel% neq 0 goto end
-@endverbatim
- *
- * After program's recompiling run the installer and uncheck the <b>Prefer 
- * new user mode driver</b> box during an installation.
- *
- * <a href="../driver/html/index.html">Read more about UltraDefrag kernel
- * mode driver...</a>
+ * experimental or educational purposes, download 4.2.0 sources and
+ * follow instructions from /src/rsc/kmd.dox
  */
