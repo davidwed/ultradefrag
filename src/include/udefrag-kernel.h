@@ -68,6 +68,8 @@ typedef struct _STATISTIC {
 	ULONG		pass_number; /* for volume optimizer */
 } STATISTIC, *PSTATISTIC;
 
+void __stdcall udefrag_kernel_native_init(void);
+void __stdcall udefrag_kernel_native_unload(void);
 int __stdcall udefrag_kernel_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size);
 int __stdcall udefrag_kernel_get_statistic(STATISTIC *stat, char *map, int map_size);
 int __stdcall udefrag_kernel_stop(void);

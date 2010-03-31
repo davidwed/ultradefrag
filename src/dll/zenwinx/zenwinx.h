@@ -82,6 +82,9 @@ void __stdcall winx_exit(int exit_code);
 void __stdcall winx_reboot(void);
 void __stdcall winx_shutdown(void);
 
+void __stdcall zenwinx_native_init(void);
+void __stdcall zenwinx_native_unload(void);
+
 void * __stdcall winx_virtual_alloc(SIZE_T size);
 void   __stdcall winx_virtual_free(void *addr,SIZE_T size);
 void * __stdcall winx_heap_alloc(SIZE_T size);

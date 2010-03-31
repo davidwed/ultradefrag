@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007,2008 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -53,18 +53,11 @@ typedef struct _volume_info {
 	int is_removable;
 } volume_info;
 
+void __stdcall udefrag_monolithic_native_app_init(void);
+void __stdcall udefrag_monolithic_native_app_unload(void);
+
 int __stdcall udefrag_init(void);
 int __stdcall udefrag_unload(void);
-
-char * __stdcall udefrag_get_error_description(int error_code);
-
-int __stdcall udefrag_stop(void);
-int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
-int __stdcall udefrag_get_map(char *buffer,int size);
-char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
-
-int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
-int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 
 /*
 * This callback procedure was designed especially 
@@ -72,6 +65,14 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 */
 typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
 int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc);
+int __stdcall udefrag_stop(void);
+int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
+int __stdcall udefrag_get_map(char *buffer,int size);
+char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
+char * __stdcall udefrag_get_error_description(int error_code);
+
+int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
+int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);

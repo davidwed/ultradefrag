@@ -3,6 +3,8 @@ LIBRARY udefrag.dll
 EXPORTS
 	udefrag_init@0
 	udefrag_unload@0
+	udefrag_monolithic_native_app_init@0
+	udefrag_monolithic_native_app_unload@0
 	udefrag_get_error_description@4
 	udefrag_start@16
 	udefrag_stop@0

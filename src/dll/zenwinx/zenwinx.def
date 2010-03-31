@@ -56,3 +56,5 @@ EXPORTS
 	winx_list_remove_item
 	winx_list_destroy
 	winx_windows_in_safe_mode
+	zenwinx_native_init
+	zenwinx_native_unload

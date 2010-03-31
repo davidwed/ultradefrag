@@ -60,6 +60,33 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 }
 
 /**
+ * @brief Initializes all libraries required 
+ * for the native application.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ * Call this routine in the beginning of NtProcessStartup() code.
+ */
+void __stdcall udefrag_monolithic_native_app_init(void)
+{
+	zenwinx_native_init();
+	udefrag_kernel_native_init();
+}
+
+/**
+ * @brief Frees resources of all libraries required 
+ * for the native application.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ * Don't call it before winx_shutdown() and winx_reboot(),
+ * but call always before winx_exit().
+ */
+void __stdcall udefrag_monolithic_native_app_unload(void)
+{
+	udefrag_kernel_native_unload();
+	zenwinx_native_unload();
+}
+
+/**
  * @brief Initializes the UltraDefrag engine.
  * @return Zero for success, negative value otherwise.
  */
@@ -77,7 +104,6 @@ int __stdcall udefrag_init(void)
 		if(error_code == STATUS_OBJECT_NAME_COLLISION) return UDEFRAG_ALREADY_RUNNING;
 		return (-1);
 	}
-
 	return 0;
 }
 
@@ -225,11 +251,11 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 {
 	DbgCheckInitEvent("udefrag_get_map");
 	
-	if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) >= 0)
-		return 0;
-
-	DebugPrint("Cluster map unavailable!");
-	return (-1);
+	if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) < 0){
+		DebugPrint("Cluster map unavailable!");
+		return (-1);
+	}
+	return 0;
 }
 
 /**

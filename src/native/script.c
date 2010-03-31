@@ -369,6 +369,7 @@ void ParseCommand(void)
 	if((short *)wcsstr(command,L"exit") == command){
 		winx_printf("Good bye ...\n");
 		(void)udefrag_unload();
+		udefrag_monolithic_native_app_unload();
 		winx_exit(0);
 		return;
 	}

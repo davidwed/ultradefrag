@@ -72,6 +72,15 @@ void __stdcall NtProcessStartup(PPEB Peb)
 #ifdef USE_INSTEAD_SMSS
 	(void)NtInitializeRegistry(0/*FALSE*/); /* saves boot log etc. */
 #endif
+
+	/*
+	* Since v4.3.0 this app is monolithic
+	* to reach the highest level of reliability.
+	* It was not reliable before because crashed
+	* the system in case of missing DLL's.
+	*/
+	udefrag_monolithic_native_app_init();
+
 	/* 2. Display Copyright */
 	/* if(winx_get_os_version() < 51) */
 	winx_printf("\n\n");
@@ -97,12 +106,14 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_printf("In Windows Safe Mode this program is useless!\n");
 		/* if someone will see the message, a little delay will help him to read it */
 		winx_sleep(3000);
+		udefrag_monolithic_native_app_unload();
 		winx_exit(0);
 	}
 		
 	if(winx_init(Peb) < 0){
 		winx_printf("Wait 10 seconds ...\n");
 		winx_sleep(10000);
+		udefrag_monolithic_native_app_unload();
 		winx_exit(1);
 	}
 	/* 3. Prompt to exit */
@@ -110,6 +121,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	for(i = 0; i < 5; i++){
 		if(winx_kbhit(1000) >= 0){
 			winx_printf("\nGood bye ...\n");
+			udefrag_monolithic_native_app_unload();
 			winx_exit(0);
 		}
 		//winx_printf("%c ",(char)('0' + 10 - i));
@@ -126,6 +138,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_sleep(10000); /* show error message at least 10 seconds */
 		winx_printf("Good bye ...\n");
 		(void)udefrag_unload();
+		udefrag_monolithic_native_app_unload();
 		winx_exit(1);
 	}
 
@@ -158,6 +171,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 
 	winx_printf("Good bye ...\n");
 	(void)udefrag_unload();
+	udefrag_monolithic_native_app_unload();
 	winx_exit(0);
 	return;
 }

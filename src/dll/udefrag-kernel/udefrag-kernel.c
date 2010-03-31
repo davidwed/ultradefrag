@@ -39,6 +39,26 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 }
 
 /**
+ * @brief Initializes the driver.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ */
+void __stdcall udefrag_kernel_native_init(void)
+{
+	InitDriverResources();
+}
+
+/**
+ * @brief Frees driver resources.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ */
+void __stdcall udefrag_kernel_native_unload(void)
+{
+	FreeDriverResources();
+}
+
+/**
  * @brief Starts a disk defragmentation/analysis/optimization job.
  * @param[in] volume_name the name of the volume.
  * @param[in] job_type the type of the job.

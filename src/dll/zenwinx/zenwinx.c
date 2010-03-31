@@ -48,6 +48,28 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 }
 
 /**
+ * @brief Initializes the library.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ */
+void __stdcall zenwinx_native_init(void)
+{
+	winx_create_global_heap();
+	winx_init_synch_objects();
+}
+
+/**
+ * @brief Frees library resources.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ */
+void __stdcall zenwinx_native_unload(void)
+{
+	winx_destroy_global_heap();
+	winx_destroy_synch_objects();
+}
+
+/**
  * @brief Initializes the native application.
  * @details This routine prepares keyboards for working 
  *          with user input related procedures.
