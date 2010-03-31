@@ -51,6 +51,7 @@ extern int refresh_interval;
 extern ULONGLONG time_limit;
 void udefrag_reload_settings(void);
 
+#ifndef STATIC_LIB
 /**
  * @brief udefrag.dll entry point.
  */
@@ -58,6 +59,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	return 1;
 }
+#endif
 
 /**
  * @brief Initializes all libraries required 

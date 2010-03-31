@@ -7,4 +7,8 @@ src = { "defrag_native.c", "script.c" }
 rc = { "defrag_native.rc" }
 
 libs = { "ntdll" }
-adlibs = { "$(UDEFRAG_LIB_PATH)\\udefrag", "$(UDEFRAG_LIB_PATH)\\zenwinx" }
+adlibs = { 
+	"$(UDEFRAG_LIB_PATH)\\zenwinx",
+	"$(UDEFRAG_LIB_PATH)\\udefrag-kernel",
+	"$(UDEFRAG_LIB_PATH)\\udefrag"
+}

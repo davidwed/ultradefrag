@@ -43,6 +43,10 @@ input_filename = ""
 target_type, target_ext, target_name = "", "", ""
 arch = ""
 
+-- Note: Only DDK compiler can compile native executable 
+-- with static zenwinx, udefrag, udefrag-kernel libraries.
+static_lib = 0
+
 micro_edition = 0
 
 ddk_cmd = "build.exe"
@@ -111,6 +115,10 @@ function produce_ddk_makefile()
 	elseif target_type == "dll"     then t = "DYNLINK"; umt = "console"
 	else   error("Unknown target type: " .. target_type .. "!")
 	end
+	
+	if static_lib == 1 then
+		t = "LIBRARY"
+	end
 
 	f:write("TARGETTYPE=", t, "\n\n")
 	if target_type == "dll" then
@@ -132,6 +140,10 @@ function produce_ddk_makefile()
 			f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n\n")
 			f:write("RCOPTIONS=/d MICRO_EDITION\n\n")
 		end
+	end
+	
+	if static_lib == 1 then
+		f:write("USER_C_FLAGS=\$(USER_C_FLAGS) /DSTATIC_LIB\n\n")
 	end
 	
 	if target_type == "console" or target_type == "gui" then
@@ -357,6 +369,26 @@ define compile_source
 endef
 
 ]]
+
+static_lib_mingw_rules = [[
+define build_target
+@echo Linking...
+@ar rc lib$(TARGET).a $(SRC_OBJS)
+@ranlib lib$(TARGET).a
+endef
+
+define compile_resource
+@echo Compiling $<
+@$(WINDRES) $(RCFLAGS) $(RC_PREPROC) $(RC_INCLUDE_DIRS) -O COFF -i "$<" -o "$@"
+endef
+
+define compile_source
+@echo Compiling $<
+@$(CC) $(CFLAGS) $(C_PREPROC) $(C_INCLUDE_DIRS) -c "$<" -o "$@"
+endef
+
+]]
+
 function produce_mingw_makefile()
 	local adlibs_libs = {}
 	local adlibs_paths = {}
@@ -369,23 +401,26 @@ function produce_mingw_makefile()
 	
 	f:write("TARGET = ", target_name, "\n")
 	
+	f:write("CFLAGS = -pipe  -Wall -g0 -O2")
 	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
-		if micro_edition == 0 then
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DUDEFRAG_PORTABLE\n")
-			f:write("RCFLAGS = -DUDEFRAG_PORTABLE \n")
-		else
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION -DUDEFRAG_PORTABLE\n")
-			f:write("RCFLAGS = -DMICRO_EDITION -DUDEFRAG_PORTABLE \n")
-		end
-	else
-		if micro_edition == 0 then
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
-			f:write("RCFLAGS = \n")
-		else
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -DMICRO_EDITION\n")
-			f:write("RCFLAGS = -DMICRO_EDITION \n")
-		end
+		f:write(" -DUDEFRAG_PORTABLE")
 	end
+	if micro_edition ~= 0 then
+		f:write(" -DMICRO_EDITION")
+	end
+--	if static_lib == 1 then
+--		f:write(" -DSTATIC_LIB")
+--	end
+	f:write("\n")
+
+	f:write("RCFLAGS = ")
+	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
+		f:write("-DUDEFRAG_PORTABLE ")
+	end
+	if micro_edition ~= 0 then
+		f:write("-DMICRO_EDITION ")
+	end
+	f:write("\n")
 	
 	f:write("C_INCLUDE_DIRS = \n")
 	f:write("C_PREPROC = \n")
@@ -447,7 +482,11 @@ function produce_mingw_makefile()
 	end
 	f:write("\n\n")
 
-	f:write(main_mingw_rules)
+	--if static_lib == 0 then
+		f:write(main_mingw_rules)
+	--else
+	--	f:write(static_lib_mingw_rules)
+	--end
 	
 	f:write(".PHONY: print_header\n\n")
 	f:write("\$(TARGET): print_header \$(RSRC_OBJS) \$(SRC_OBJS)\n")
@@ -773,6 +812,12 @@ print(input_filename .. " Preparing to makefile generation...\n")
 
 dofile(input_filename)
 
+if arg[2] ~= nil then
+	if arg[2] == "static-lib" then
+		static_lib = 1
+	end
+end
+
 if target_type == "console" or target_type == "gui" or target_type == "native" then
 	target_ext = "exe"
 elseif target_type == "dll" then
@@ -800,11 +845,13 @@ if os.getenv("BUILD_ENV") == "winddk" then
 	if os.execute(ddk_cmd) ~= 0 then
 		error("Can't build the target!")
 	end
-	if arch == "i386" then
-		copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
-	else
-		copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. target_name,
-			"..\\..\\bin\\" .. arch .. "\\")
+	if static_lib == 0 then
+		if arch == "i386" then
+			copy("objfre_wnet_x86\\i386\\" .. target_name,"..\\..\\bin\\")
+		else
+			copy("objfre_wnet_" .. arch .. "\\" .. arch .. "\\" .. target_name,
+				"..\\..\\bin\\" .. arch .. "\\")
+		end
 	end
 	if target_type == "dll" then
 		if arch == "i386" then
@@ -829,10 +876,12 @@ elseif os.getenv("BUILD_ENV") == "winsdk" then
 		if os.execute(msvc_cmd) ~= 0 then
 			error("Can't build the target!")
 		end
-		if arch == "i386" then
-			copy(target_name, "..\\..\\bin\\")
-		else
-			copy(target_name, "..\\..\\bin\\" .. arch .. "\\")
+		if static_lib == 0 then
+			if arch == "i386" then
+				copy(target_name, "..\\..\\bin\\")
+			else
+				copy(target_name, "..\\..\\bin\\" .. arch .. "\\")
+			end
 		end
 		if target_type == "dll" then
 			if arch == "i386" then
@@ -861,10 +910,12 @@ elseif os.getenv("BUILD_ENV") == "pellesc" then
 		if os.execute(pellesc_cmd) ~= 0 then
 			error("Can't build the target!")
 		end
-		if arch == "i386" then
-			copy(target_name, "..\\..\\bin\\")
-		else
-			copy(target_name, "..\\..\\bin\\" .. arch .. "\\")
+		if static_lib == 0 then
+			if arch == "i386" then
+				copy(target_name, "..\\..\\bin\\")
+			else
+				copy(target_name, "..\\..\\bin\\" .. arch .. "\\")
+			end
 		end
 		if target_type == "dll" then
 			if arch == "i386" then
@@ -883,7 +934,9 @@ elseif os.getenv("BUILD_ENV") == "msvc" then
 	if os.execute(msvc_cmd) ~= 0 then
 		error("Can't build the target!")
 	end
-	copy(target_name,"..\\..\\bin\\")
+	if static_lib == 0 then
+		copy(target_name,"..\\..\\bin\\")
+	end
 	if target_type == "dll" then
 		copy(name .. ".lib","..\\..\\lib\\")
 	end
@@ -895,7 +948,9 @@ elseif os.getenv("BUILD_ENV") == "mingw" then
 	if os.execute(mingw_cmd) ~= 0 then
 		error("Can't build the target!")
 	end
-	copy(target_name,"..\\..\\bin\\")
+	if static_lib == 0 then
+		copy(target_name,"..\\..\\bin\\")
+	end
 	if target_type == "dll" then
 		copy("lib" .. target_name .. ".a","..\\..\\lib\\")
 	end
@@ -911,7 +966,9 @@ elseif os.getenv("BUILD_ENV") == "mingw_x64" then
 		if os.execute(mingw_x64_cmd) ~= 0 then
 			error("Can't build the target!")
 		end
-		copy(target_name,"..\\..\\bin\\amd64\\")
+		if static_lib == 0 then
+			copy(target_name,"..\\..\\bin\\amd64\\")
+		end
 		if target_type == "dll" then
 			copy("lib" .. target_name .. ".a","..\\..\\lib\\amd64\\")
 		end

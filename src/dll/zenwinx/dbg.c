@@ -34,7 +34,7 @@ typedef struct _DBG_OUTPUT_DEBUG_STRING_BUFFER {
 
 #define DBG_BUFFER_SIZE (4096-sizeof(ULONG))
 
-HANDLE hSynchEvent = NULL;
+HANDLE hDbgSynchEvent = NULL;
 
 int  __stdcall winx_debug_print(char *string);
 
@@ -46,8 +46,8 @@ int  __stdcall winx_debug_print(char *string);
 void winx_init_synch_objects(void)
 {
 	(void)winx_create_event(L"\\winx_dbgprint_synch_event",
-		SynchronizationEvent,&hSynchEvent);
-	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
+		SynchronizationEvent,&hDbgSynchEvent);
+	if(hDbgSynchEvent) (void)NtSetEvent(hDbgSynchEvent,NULL);
 }
 
 /**
@@ -57,7 +57,7 @@ void winx_init_synch_objects(void)
  */
 void winx_destroy_synch_objects(void)
 {
-	winx_destroy_event(hSynchEvent);
+	winx_destroy_event(hDbgSynchEvent);
 }
 
 /**
@@ -121,9 +121,9 @@ int __stdcall winx_debug_print(char *string)
 	/* never call winx_dbg_print_ex() here! */
 
 	/* 0. synchronize with other threads */
-	if(hSynchEvent){
+	if(hDbgSynchEvent){
 		interval.QuadPart = -(11000 * 10000); /* 11 sec */
-		Status = NtWaitForSingleObject(hSynchEvent,FALSE,&interval);
+		Status = NtWaitForSingleObject(hDbgSynchEvent,FALSE,&interval);
 		if(Status != WAIT_OBJECT_0) return (-1);
 	}
 	
@@ -191,7 +191,7 @@ int __stdcall winx_debug_print(char *string)
 	if(BaseAddress)
 		(void)NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
 	NtCloseSafe(hSection);
-	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
+	if(hDbgSynchEvent) (void)NtSetEvent(hDbgSynchEvent,NULL);
 	return 0;
 
 failure:
@@ -200,7 +200,7 @@ failure:
 	if(BaseAddress)
 		(void)NtUnmapViewOfSection(NtCurrentProcess(),BaseAddress);
 	NtCloseSafe(hSection);
-	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
+	if(hDbgSynchEvent) (void)NtSetEvent(hDbgSynchEvent,NULL);
 	return (-1);
 }
 

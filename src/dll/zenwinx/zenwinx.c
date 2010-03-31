@@ -35,6 +35,7 @@ void winx_destroy_global_heap(void);
 void winx_init_synch_objects(void);
 void winx_destroy_synch_objects(void);
 
+#ifndef STATIC_LIB
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	if(dwReason == DLL_PROCESS_ATTACH){
@@ -46,6 +47,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	}
 	return 1;
 }
+#endif
 
 /**
  * @brief Initializes the library.

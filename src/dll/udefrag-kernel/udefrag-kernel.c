@@ -26,6 +26,7 @@
 
 #include "globals.h"
 
+#ifndef STATIC_LIB
 /**
  * @brief udefrag-kernel.dll entry point.
  */
@@ -37,6 +38,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 		FreeDriverResources();
 	return 1;
 }
+#endif
 
 /**
  * @brief Initializes the driver.
