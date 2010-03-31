@@ -89,7 +89,6 @@
     Leslie Trenholm
     Markus Elfring
     Nagy Zsolt
-	Pavel Kinkor
     Stefan Pendl
 
 --------------------------------------------------------------------------------
@@ -132,6 +131,7 @@
     Masao Kajiwara
     Patrick Paludan-Müller
     Per-Eric Jenshagen
+	Pavel Kinkor
     Stefan Pendl
 
 --------------------------------------------------------------------------------
