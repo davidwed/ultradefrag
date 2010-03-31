@@ -45,9 +45,11 @@ int  __stdcall winx_debug_print(char *string);
  */
 void winx_init_synch_objects(void)
 {
-	(void)winx_create_event(L"\\winx_dbgprint_synch_event",
-		SynchronizationEvent,&hDbgSynchEvent);
-	if(hDbgSynchEvent) (void)NtSetEvent(hDbgSynchEvent,NULL);
+	if(hDbgSynchEvent == NULL){
+		(void)winx_create_event(L"\\winx_dbgprint_synch_event",
+			SynchronizationEvent,&hDbgSynchEvent);
+		if(hDbgSynchEvent) (void)NtSetEvent(hDbgSynchEvent,NULL);
+	}
 }
 
 /**

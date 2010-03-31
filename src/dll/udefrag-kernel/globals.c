@@ -117,12 +117,18 @@ void FreeDriverResources(void)
  */
 void InitSynchObjects(void)
 {
-	(void)winx_create_event(L"\\udefrag_synch_event",
-		SynchronizationEvent,&hSynchEvent);
-	(void)winx_create_event(L"\\udefrag_stop_event",
-		NotificationEvent,&hStopEvent);
-	(void)winx_create_event(L"\\udefrag_map_event",
-		SynchronizationEvent,&hMapEvent);
+	if(hSynchEvent == NULL){
+		(void)winx_create_event(L"\\udefrag_synch_event",
+			SynchronizationEvent,&hSynchEvent);
+	}
+	if(hStopEvent == NULL){
+		(void)winx_create_event(L"\\udefrag_stop_event",
+			NotificationEvent,&hStopEvent);
+	}
+	if(hMapEvent == NULL){
+		(void)winx_create_event(L"\\udefrag_map_event",
+			SynchronizationEvent,&hMapEvent);
+	}
 	
 	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
 	if(hStopEvent) (void)NtClearEvent(hStopEvent);

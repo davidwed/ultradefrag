@@ -88,7 +88,9 @@ void __stdcall winx_heap_free(void *addr)
 void winx_create_global_heap(void)
 {
 	/* create growable heap with initial size of 100 kb */
-	hGlobalHeap = RtlCreateHeap(HEAP_GROWABLE,NULL,0,100 * 1024,NULL,NULL);
+	if(hGlobalHeap == NULL){
+		hGlobalHeap = RtlCreateHeap(HEAP_GROWABLE,NULL,0,100 * 1024,NULL,NULL);
+	}
 	if(hGlobalHeap == NULL){
 		DebugPrint("Cannot create global memory heap!\n");
 		winx_printf("\nCannot create global memory heap!\n");
