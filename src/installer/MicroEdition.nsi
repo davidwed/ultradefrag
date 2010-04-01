@@ -69,66 +69,11 @@ VIAddVersionKey "FileDescription" "Ultra Defragmenter Micro Edition Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-ReserveFile "driver.ini"
-!endif
-
 Page license
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-Page custom DriverShow DriverLeave ""
-!endif
 Page instfiles
 
 UninstPage uninstConfirm
 UninstPage instfiles
-
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-Var UserModeDriver
-
-;-----------------------------------------
-
-Function DriverShow
-
-  push $R0
-
-  SetOutPath $PLUGINSDIR
-  File "driver.ini"
-
-  ClearErrors
-  ReadRegStr $R0 HKLM "Software\UltraDefrag" "UserModeDriver"
-  ${Unless} ${Errors}
-    WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" $R0
-  ${EndUnless}
-
-  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\driver.ini"
-  pop $R0
-  InstallOptions::show
-  pop $R0
-
-  pop $R0
-  Abort
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function DriverLeave
-
-  push $R0
-
-  ReadINIStr $R0 "$PLUGINSDIR\driver.ini" "Settings" "State"
-  ${If} $R0 != "0"
-    pop $R0
-    Abort
-  ${EndIf}
-
-  ReadINIStr $UserModeDriver "$PLUGINSDIR\driver.ini" "Field 1" "State"
-  WriteRegStr HKLM "Software\UltraDefrag" "UserModeDriver" $UserModeDriver
-  pop $R0
-
-FunctionEnd
-
-!endif /* INCLUDE_KERNEL_MODE_DRIVER */
 
 ;-----------------------------------------
 
@@ -138,18 +83,7 @@ Function .onInit
 
   ${EnableX64FSRedirection}
   InitPluginsDir
-
   ${DisableX64FSRedirection}
-
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  StrCpy $UserModeDriver 1
-  ClearErrors
-  ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
-  ${Unless} ${Errors}
-    StrCpy $UserModeDriver $R1
-  ${EndUnless}
-!endif
-
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   ${EnableX64FSRedirection}
 
@@ -176,15 +110,6 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\HISTORY.TXT"
   File "${ROOTDIR}\src\README.TXT"
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  ${If} $UserModeDriver == '1'
-    Delete "$SYSDIR\Drivers\ultradfg.sys"
-  ${Else}
-    SetOutPath "$SYSDIR\Drivers"
-    File /nonfatal "ultradfg.sys"
-  ${EndIf}
-!endif
-
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
   File "${ROOTDIR}\src\installer\boot-off.cmd"
@@ -198,11 +123,6 @@ Section "Ultra Defrag core files (required)" SecCore
   File "udefrag.exe"
   File "zenwinx.dll"
   File /oname=hibernate4win.exe "hibernate.exe"
-
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  DetailPrint "Write driver settings..."
-  ${WriteDriverAndDbgSettings}
-!endif
 
   DetailPrint "Write the uninstall keys..."
   SetOutPath "$INSTDIR"
@@ -252,9 +172,6 @@ Section "Uninstall"
   RMDir "$INSTDIR\options"
   RMDir $INSTDIR
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  Delete "$SYSDIR\Drivers\ultradfg.sys"
-!endif
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\boot-on.cmd"
@@ -271,20 +188,6 @@ Section "Uninstall"
 
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
-  DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
-  DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
-  DeleteRegKey HKLM "SYSTEM\ControlSet003\Services\ultradfg"
-
-  ; this is important for portable application
-  ; and from "anything related to the program should be cleaned up" point of view
-  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
-!endif
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"

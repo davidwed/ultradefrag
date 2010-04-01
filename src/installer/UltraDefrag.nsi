@@ -67,12 +67,6 @@
   Page custom LangShow LangLeave ""
 !macroend
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-!macro DRIVER_PAGE
-  Page custom DriverShow DriverLeave ""
-!macroend
-!endif
-
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'
 Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
@@ -101,10 +95,6 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 
 ReserveFile "lang.ini"
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-ReserveFile "driver.ini"
-!endif
-
 !ifdef MODERN_UI
   !define MUI_WELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
   !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
@@ -115,9 +105,6 @@ ReserveFile "driver.ini"
   !insertmacro MUI_PAGE_COMPONENTS
 ;  !insertmacro MUI_PAGE_DIRECTORY
   !insertmacro LANG_PAGE
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  !insertmacro DRIVER_PAGE
-!endif
   !insertmacro MUI_PAGE_INSTFILES
   !insertmacro MUI_PAGE_FINISH
 
@@ -133,9 +120,6 @@ ReserveFile "driver.ini"
   Page components
 ;  Page directory
   !insertmacro LANG_PAGE
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  !insertmacro DRIVER_PAGE
-!endif
   Page instfiles
 
   UninstPage uninstConfirm
@@ -146,59 +130,6 @@ ReserveFile "driver.ini"
 
 Var ShowBootsplash
 Var LanguagePack
-
-;-----------------------------------------
-
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-
-Var UserModeDriver
-
-Function DriverShow
-
-  push $R0
-
-!ifdef MODERN_UI
-  !insertmacro MUI_HEADER_TEXT "Preferred Driver" \
-      "Select which driver do you prefer."
-!endif
-  SetOutPath $PLUGINSDIR
-  File "driver.ini"
-
-  ClearErrors
-  ReadRegStr $R0 HKLM "Software\UltraDefrag" "UserModeDriver"
-  ${Unless} ${Errors}
-    WriteINIStr "$PLUGINSDIR\driver.ini" "Field 1" "State" $R0
-  ${EndUnless}
-
-  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\driver.ini"
-  pop $R0
-  InstallOptions::show
-  pop $R0
-
-  pop $R0
-  Abort
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function DriverLeave
-
-  push $R0
-
-  ReadINIStr $R0 "$PLUGINSDIR\driver.ini" "Settings" "State"
-  ${If} $R0 != "0"
-    pop $R0
-    Abort
-  ${EndIf}
-
-  ReadINIStr $UserModeDriver "$PLUGINSDIR\driver.ini" "Field 1" "State"
-  WriteRegStr HKLM "Software\UltraDefrag" "UserModeDriver" $UserModeDriver
-  pop $R0
-
-FunctionEnd
-
-!endif /* INCLUDE_KERNEL_MODE_DRIVER */
 
 ;-----------------------------------------
 
@@ -366,15 +297,6 @@ Section "Ultra Defrag core files (required)" SecCore
   ; install LanguagePack
   call install_langpack
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  ${If} $UserModeDriver == '1'
-    Delete "$SYSDIR\Drivers\ultradfg.sys"
-  ${Else}
-    SetOutPath "$SYSDIR\Drivers"
-    File /nonfatal "ultradfg.sys"
-  ${EndIf}
-!endif
-
   ; install GUI apps to program's directory
   SetOutPath "$INSTDIR"
   File "dfrg.exe"
@@ -428,11 +350,6 @@ Section "Ultra Defrag core files (required)" SecCore
     WriteRegStr HKCR "LanguagePack\DefaultIcon" "" "shell32.dll,0"
     WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
   ${EndIf}
-
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  DetailPrint "Write driver settings..."
-  ${WriteDriverAndDbgSettings}
-!endif
 
   DetailPrint "Write the uninstall keys..."
   SetOutPath "$INSTDIR"
@@ -558,15 +475,6 @@ Function .onInit
   /* variables initialization */
   StrCpy $ShowBootsplash 1
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  StrCpy $UserModeDriver 1
-  ClearErrors
-  ReadRegStr $R1 HKLM "Software\UltraDefrag" "UserModeDriver"
-  ${Unless} ${Errors}
-    StrCpy $UserModeDriver $R1
-  ${EndUnless}
-!endif
-
   StrCpy $LanguagePack "English (US)"
 
   ; --- get language from registry
@@ -589,9 +497,6 @@ Function .onInit
 
 !ifdef MODERN_UI
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "driver.ini"
-!endif
 !endif
   pop $R2
   pop $R1
@@ -639,9 +544,6 @@ Section "Uninstall"
   RMDir "$INSTDIR\options"
   RMDir $INSTDIR
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  Delete "$SYSDIR\Drivers\ultradfg.sys"
-!endif
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\boot-on.cmd"
@@ -661,20 +563,6 @@ Section "Uninstall"
 
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
-  DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
-  DeleteRegKey HKLM "SYSTEM\ControlSet002\Services\ultradfg"
-  DeleteRegKey HKLM "SYSTEM\ControlSet003\Services\ultradfg"
-
-  ; this is important for portable application
-  ; and from "anything related to the program should be cleaned up" point of view
-  DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
-  DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
-!endif
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"

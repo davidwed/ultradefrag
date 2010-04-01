@@ -21,8 +21,6 @@
 * Universal code for both main and micro edition installers.
 */
 
-;!define INCLUDE_KERNEL_MODE_DRIVER
-
 Var AtLeastXP
 
 !macro CheckWinVersion
@@ -113,53 +111,6 @@ Var AtLeastXP
 
 !macroend
 
-!ifdef INCLUDE_KERNEL_MODE_DRIVER
-;-----------------------------------------
-
-Function WriteDriverAndDbgSettings
-
-  push $R2
-  push $R3
-  ; write settings only if control set exists
-  StrCpy $R3 0
-  EnumRegKey $R2 HKLM $R0 $R3
-  ${If} $R2 != ""
-  ${OrIf} $R0 == "SYSTEM\CurrentControlSet"
-    WriteRegStr HKLM "$R0\Services\ultradfg" "DisplayName" "ultradfg"
-    WriteRegDWORD HKLM "$R0\Services\ultradfg" "ErrorControl" 0x0
-    WriteRegExpandStr HKLM "$R0\Services\ultradfg" "ImagePath" "System32\DRIVERS\ultradfg.sys"
-    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Start" 0x3
-    WriteRegDWORD HKLM "$R0\Services\ultradfg" "Type" 0x1
-
-    ; not acceptable by the running server systems
-    ;;;WriteRegDWORD HKLM "$R0\Control\CrashControl" "AutoReboot" 0x0
-  ${EndIf}
-  pop $R3
-  pop $R2
-
-FunctionEnd
-
-;-----------------------------------------
-
-!macro WriteDriverAndDbgSettingsMacro
-
-  push $R0
-  StrCpy $R0 "SYSTEM\CurrentControlSet"
-  call WriteDriverAndDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet001"
-  call WriteDriverAndDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet002"
-  call WriteDriverAndDbgSettings
-  StrCpy $R0 "SYSTEM\ControlSet003"
-  call WriteDriverAndDbgSettings
-  pop $R0
-
-!macroend
-
-;-----------------------------------------
-!define WriteDriverAndDbgSettings "!insertmacro WriteDriverAndDbgSettingsMacro"
-!endif /* INCLUDE_KERNEL_MODE_DRIVER */
-
 !macro RemoveObsoleteFilesMacro
 
   ; remove files of previous installations
@@ -204,7 +155,6 @@ FunctionEnd
   RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
   RMDir /r "$SMPROGRAMS\UltraDefrag\Debugging information"
   
-!ifndef INCLUDE_KERNEL_MODE_DRIVER
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Services\ultradfg"
@@ -214,7 +164,6 @@ FunctionEnd
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Enum\Root\LEGACY_ULTRADFG"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Enum\Root\LEGACY_ULTRADFG"
-!endif
 
 !macroend
 
