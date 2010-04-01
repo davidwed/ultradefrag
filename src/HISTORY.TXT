@@ -2,11 +2,15 @@ HISTORY
 
   Version 4.3.0  2010-04-
   ------------------------------------------------------------------------------
+    - more reliable monolithic boot time defragmenter was made
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
     - the following translations were updated:
 
       Czech, Finnish
+
+    - for programmers: winx_create_thread improved, udefrag.dll interface
+      optimized (function prototypes changed!)
 
 
   Version 4.2.0  2010-03-30
