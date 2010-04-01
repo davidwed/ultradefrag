@@ -115,7 +115,9 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\installer\boot-off.cmd"
   File "${ROOTDIR}\src\installer\boot-on.cmd"
   File "bootexctrl.exe"
-  File "defrag_native.exe"
+
+  ${InstallNativeDefragmenter}
+
   File "${ROOTDIR}\src\installer\ud-help.cmd"
   File "${ROOTDIR}\src\installer\udctxhandler.cmd"
   File "udefrag-kernel.dll"

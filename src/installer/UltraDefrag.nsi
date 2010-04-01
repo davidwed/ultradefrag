@@ -309,7 +309,9 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\installer\boot-off.cmd"
   File "${ROOTDIR}\src\installer\boot-on.cmd"
   File "bootexctrl.exe"
-  File "defrag_native.exe"
+
+  ${InstallNativeDefragmenter}
+
   File "lua5.1a.dll"
   File "lua5.1a.exe"
   File "lua5.1a_gui.exe"

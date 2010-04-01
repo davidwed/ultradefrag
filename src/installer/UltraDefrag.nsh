@@ -92,6 +92,31 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
+!macro InstallNativeDefragmenter
+
+  ; always the latest version of the native app must be used
+  ClearErrors
+  Delete "$SYSDIR\defrag_native.exe"
+  ${If} ${Errors}
+      MessageBox MB_OK|MB_ICONSTOP \
+       "Cannot update $SYSDIR\defrag_native.exe file!" \
+       /SD IDOK
+      ; try to recover the problem
+      ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
+      ; the second attempt, just for safety
+      ${EnableX64FSRedirection}
+      SetOutPath $PLUGINSDIR
+      File "bootexctrl.exe"
+      ExecWait '"$PLUGINSDIR\bootexctrl.exe" /u defrag_native'
+      ; abort an installation
+      Abort
+  ${EndIf}
+  File "defrag_native.exe"
+
+!macroend
+
+;-----------------------------------------
+
 !macro SetContextMenuHandler
 
   ${If} $AtLeastXP == "1"
@@ -110,6 +135,8 @@ Var AtLeastXP
   WriteRegStr HKCR "*\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
 
 !macroend
+
+;-----------------------------------------
 
 !macro RemoveObsoleteFilesMacro
 
@@ -172,3 +199,4 @@ Var AtLeastXP
 !define CheckWinVersion "!insertmacro CheckWinVersion"
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
 !define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFilesMacro"
+!define InstallNativeDefragmenter "!insertmacro InstallNativeDefragmenter"
