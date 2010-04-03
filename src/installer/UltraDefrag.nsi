@@ -351,6 +351,8 @@ Section "Ultra Defrag core files (required)" SecCore
   SetOutPath "$INSTDIR"
   StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
   WriteRegStr HKLM  $R0 "DisplayName" "Ultra Defragmenter"
+  WriteRegStr HKLM  $R0 "DisplayVersion" "${ULTRADFGVER}"
+  WriteRegStr HKLM  $R0 "Publisher" "UltraDefrag Development Team"
   WriteRegStr HKLM $R0 "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegDWORD HKLM $R0 "NoModify" 1
   WriteRegDWORD HKLM $R0 "NoRepair" 1
