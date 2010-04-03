@@ -2,6 +2,10 @@ HISTORY
 
   Version 4.3.0  2010-04-
   ------------------------------------------------------------------------------
+    - UltraDefrag Scheduler has been retired as a component less functional
+      than standard Windows Task Scheduler;
+      visit http://ultradefrag.wikispaces.com/ for tutorials on scheduling
+      disk defragmentation tasks through Windows Task Scheduler
     - more reliable monolithic boot time defragmenter was made
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
