@@ -139,13 +139,8 @@ void DisplayStopDefragError(int error_code,char *caption)
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	int error_code;
-//	DWORD error;
-//	int requests_counter = 0;
 	
 	hInstance = GetModuleHandle(NULL);
-	//MessageBox(0,"Do you really want to hibernate when done?","Please Confirm",MB_OKCANCEL | MB_ICONEXCLAMATION);
-	//DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),hWindow,(DLGPROC)ShutdownConfirmDlgProc);
-	//return 0;
 
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
@@ -158,9 +153,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	}
 	
 	GetPrefs();
-
-	//DisplayStopDefragError(-1,"Error!");
-	//return 0;
 
 	error_code = udefrag_init();
 	if(error_code < 0){
@@ -210,35 +202,17 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 			if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
 				DisplayLastError("Cannot hibernate the computer!");
 			}
-			return 0;
-		}
-		
-/* the following code works fine but doesn't power off the pc */
-#if 0
-try_again:
-		if(!InitiateSystemShutdown(NULL,
-			"System shutdown was scheduled by UltraDefrag application.",
-			60,
-			FALSE, /* ask user to close apps with unsaved data */
-			FALSE  /* shutdown without reboot */
-			)){
-				error = GetLastError();
-				if(error == ERROR_NOT_READY && requests_counter < 3){
-					/* wait 1 minute and try again (2 times) */
-					requests_counter ++;
-					Sleep(60 * 1000);
-					goto try_again;
-				}
+		} else {
+			/*
+			* InitiateSystemShutdown() works fine
+			* but doesn't power off the pc.
+			*/
+			if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
+			  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
 				DisplayLastError("Cannot shut down the computer!");
+			}
 		}
-#else
-		if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
-		  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
-			DisplayLastError("Cannot shut down the computer!");
-		}
-#endif	
 	}
-
 	return 0;
 }
 
