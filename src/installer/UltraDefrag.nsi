@@ -370,6 +370,11 @@ Section "Ultra Defrag core files (required)" SecCore
   SetOutPath "$INSTDIR"
   ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
 
+  ; set the uninstall size value
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $0 "0x%08X" $0
+  WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
+
   ${EnableX64FSRedirection}
   pop $R0
 
@@ -432,7 +437,7 @@ Section "Shortcuts" SecShortcuts
 
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
    "$INSTDIR\ultradefrag.exe"
-  CreateShortcut "$QUICKLAUNCH\UltraDefrag.lnk" \
+  CreateShortCut "$QUICKLAUNCH\UltraDefrag.lnk" \
    "$INSTDIR\ultradefrag.exe"
 
   ${EnableX64FSRedirection}

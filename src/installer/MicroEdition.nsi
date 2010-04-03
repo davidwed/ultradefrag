@@ -148,6 +148,11 @@ Section "Ultra Defrag core files (required)" SecCore
   ; register context menu handler
   ${SetContextMenuHandler}
 
+  ; set the uninstall size value
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $0 "0x%08X" $0
+  WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
+
   ${EnableX64FSRedirection}
 
   pop $R0
