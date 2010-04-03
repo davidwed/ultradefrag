@@ -42,7 +42,6 @@ mkdir bin
 mkdir bin\amd64
 mkdir bin\ia64
 
-xcopy /I /Y /Q    .\driver  .\obj\driver
 xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
 xcopy /I /Y /Q    .\hibernate .\obj\hibernate
 xcopy /I /Y /Q    .\console .\obj\console
@@ -53,9 +52,6 @@ xcopy /I /Y /Q    .\share .\obj\share
 xcopy /I /Y /Q    .\dll\udefrag-kernel .\obj\udefrag-kernel
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
-
-rem xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
-rem xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
 
 copy /Y .\obj\share\*.c .\obj\console\
 
@@ -71,9 +67,6 @@ if %errorlevel% neq 0 goto fail
 
 
 :build_scheduler
-rem The scheduler is not included in Micro Edition.
-
-
 :build_installer
 
 if "%1" equ "--portable" goto end
@@ -83,7 +76,6 @@ echo Build installer...
 cd .\bin
 copy /Y ..\installer\MicroEdition.nsi .\
 copy /Y ..\installer\UltraDefrag.nsh .\
-copy /Y ..\installer\driver.ini .\
 
 if "%1" equ "--use-mingw-x64" goto build_x64_installer
 
@@ -98,7 +90,6 @@ if "%1" equ "" goto build_source_package
 :build_x64_installer
 copy /Y ..\installer\MicroEdition.nsi .\amd64\
 copy /Y ..\installer\UltraDefrag.nsh .\amd64\
-copy /Y ..\installer\driver.ini .\amd64\
 cd amd64
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
@@ -108,7 +99,6 @@ if "%1" equ "--use-pellesc" goto build_source_package
 if "%1" equ "--use-mingw-x64" goto build_source_package
 copy /Y ..\installer\MicroEdition.nsi .\ia64\
 copy /Y ..\installer\UltraDefrag.nsh .\ia64\
-copy /Y ..\installer\driver.ini .\ia64\
 cd ia64
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail

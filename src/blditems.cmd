@@ -75,10 +75,6 @@ cd ..\udefrag-gui-config
 lua ..\..\tools\mkmod.lua udefrag-gui-config.build
 if %errorlevel% neq 0 goto end
 
-cd ..\udefrag-scheduler
-lua ..\..\tools\mkmod.lua udefrag-scheduler.build
-if %errorlevel% neq 0 goto end
-
 :skip_gui
 
 cd ..\bootexctrl

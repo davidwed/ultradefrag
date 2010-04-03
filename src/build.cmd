@@ -41,7 +41,6 @@ mkdir bin
 mkdir bin\amd64
 mkdir bin\ia64
 
-xcopy /I /Y /Q    .\driver  .\obj\driver
 xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
 xcopy /I /Y /Q    .\hibernate .\obj\hibernate
 xcopy /I /Y /Q    .\console .\obj\console
@@ -50,8 +49,6 @@ xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
 xcopy /I /Y /Q    .\udefrag-gui-config .\obj\udefrag-gui-config
 xcopy /I /Y /Q    .\udefrag-gui-config\res .\obj\udefrag-gui-config\res
-xcopy /I /Y /Q    .\scheduler\C .\obj\udefrag-scheduler
-xcopy /I /Y /Q    .\scheduler\C\res .\obj\udefrag-scheduler\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\share .\obj\share
@@ -60,9 +57,6 @@ xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 xcopy /I /Y /Q    .\lua5.1  .\obj\lua5.1
 xcopy /I /Y /Q    .\dll\wgx .\obj\wgx
-
-rem xcopy /I /Y /Q    .\udefrag-next-generation     .\obj\udefrag-next-generation
-rem xcopy /I /Y /Q    .\udefrag-next-generation\res .\obj\udefrag-next-generation\res
 
 copy /Y .\obj\share\*.c .\obj\console\
 
@@ -79,10 +73,6 @@ call build-targets.cmd %1
 if %errorlevel% neq 0 goto fail
 
 :build_scheduler
-rem Since 3.2.0 version of the program we are using native Scheduler application
-rem call BLDSCHED.CMD
-
-
 :build_installer
 
 call build-docs.cmd
@@ -97,7 +87,6 @@ copy /Y ..\installer\UltraDefrag.nsi .\
 copy /Y ..\installer\UltraDefrag.nsh .\
 copy /Y ..\installer\lang.ini .\
 copy /Y ..\installer\lang-classical.ini .\
-copy /Y ..\installer\driver.ini .\
 
 if "%1" equ "--use-mingw-x64" goto build_x64_installer
 
@@ -114,12 +103,10 @@ if "%1" equ "--install" goto build_source_package
 if "%1" equ "" goto build_source_package
 
 :build_x64_installer
-rem copy /Y .\UltraDefragScheduler.NET.exe .\amd64\
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
 copy /Y ..\installer\UltraDefrag.nsh .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
 copy /Y ..\installer\lang-classical.ini .\amd64\
-copy /Y ..\installer\driver.ini .\amd64\
 
 cd amd64
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
@@ -128,12 +115,10 @@ if %errorlevel% neq 0 goto fail
 cd..
 if "%1" equ "--use-pellesc" goto build_source_package
 if "%1" equ "--use-mingw-x64" goto build_source_package
-rem copy /Y .\UltraDefragScheduler.NET.exe .\ia64\
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
 copy /Y ..\installer\UltraDefrag.nsh .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
 copy /Y ..\installer\lang-classical.ini .\ia64\
-copy /Y ..\installer\driver.ini .\ia64\
 cd ia64
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail

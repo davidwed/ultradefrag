@@ -91,7 +91,6 @@ Function install_langpack
 
   Delete "$EXEDIR\ud_i18n.lng"
   Delete "$EXEDIR\ud_config_i18n.lng"
-  Delete "$EXEDIR\ud_scheduler_i18n.lng"
 
   ${If} $LanguagePack != "English (US)"
     StrCpy $R0 $LanguagePack

@@ -19,8 +19,5 @@ if %errorlevel% neq 0 cd .. && exit /B 1
 utf8-16 ..\udefrag-gui-config\i18n\*.Config
 if %errorlevel% neq 0 cd .. && exit /B 1
 
-utf8-16 ..\scheduler\C\i18n\*.Scheduler
-if %errorlevel% neq 0 cd .. && exit /B 1
-
 cd ..
 exit /B 0

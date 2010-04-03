@@ -221,7 +221,6 @@ Function install_langpack
   SetOutPath $INSTDIR
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
-  Delete "$INSTDIR\ud_scheduler_i18n.lng"
 
   ${If} $LanguagePack != "English (US)"
     StrCpy $R0 $LanguagePack
@@ -249,11 +248,6 @@ Function install_langpack
     Rename "$R0.Config" "ud_config_i18n.bk"
     Delete "$INSTDIR\*.Config"
 
-    File "${ROOTDIR}\src\scheduler\C\i18n\*.Scheduler"
-    Rename "$R0.Scheduler" "ud_scheduler_i18n.bk"
-    Delete "$INSTDIR\*.Scheduler"
-
-    Rename "ud_scheduler_i18n.bk" "ud_scheduler_i18n.lng"
     Rename "ud_config_i18n.bk" "ud_config_i18n.lng"
     Rename "ud_i18n.bk" "ud_i18n.lng"
   ${EndIf}
@@ -391,16 +385,6 @@ Section "Documentation" SecDocs
 
 SectionEnd
 
-Section "Scheduler" SecScheduler
-
-  DetailPrint "Install Scheduler..."
-  ${DisableX64FSRedirection}
-  SetOutPath "$INSTDIR"
-  File "udefrag-scheduler.exe"
-  ${EnableX64FSRedirection}
-
-SectionEnd
-
 Section "Context menu handler" SecContextMenuHandler
 
   ${SetContextMenuHandler}
@@ -431,12 +415,6 @@ Section "Shortcuts" SecShortcuts
    "$INSTDIR\LICENSE.TXT"
   CreateShortCut "$R0\Documentation\README.lnk" \
    "$INSTDIR\README.TXT"
-
-  Delete "$R0\Scheduler.NET.lnk"
-  ${If} ${FileExists} "$INSTDIR\udefrag-scheduler.exe"
-    CreateShortCut "$R0\Scheduler.lnk" \
-     "$INSTDIR\udefrag-scheduler.exe"
-  ${EndIf}
 
   ${If} ${FileExists} "$INSTDIR\handbook\index.html"
     WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\index.html"
@@ -531,15 +509,12 @@ Section "Uninstall"
   Delete "$INSTDIR\CREDITS.TXT"
   Delete "$INSTDIR\HISTORY.TXT"
   Delete "$INSTDIR\README.TXT"
-  ;Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
   Delete "$INSTDIR\ultradefrag.exe"
   Delete "$INSTDIR\udefrag-gui-config.exe"
-  Delete "$INSTDIR\udefrag-scheduler.exe"
   Delete "$INSTDIR\uninstall.exe"
 
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
-  Delete "$INSTDIR\ud_scheduler_i18n.lng"
 
   RMDir /r "$INSTDIR\scripts"
   RMDir /r "$INSTDIR\handbook"
@@ -582,7 +557,6 @@ SectionEnd
 !ifdef MODERN_UI
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore} "The core files required to use UltraDefrag.$\nIncluding console interface."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecScheduler} "Small handy scheduler."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDocs} "Handbook."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenuHandler} "Defragment your volumes from their context menu."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts} "Adds icons to your start menu and your desktop for easy access."

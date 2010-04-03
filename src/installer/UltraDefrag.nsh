@@ -170,6 +170,9 @@ Var AtLeastXP
   Delete "$INSTDIR\boot_off.cmd"
   Delete "$INSTDIR\ud_i18n.dll"
 
+  Delete "$INSTDIR\udefrag-scheduler.exe"
+  Delete "$INSTDIR\ud_scheduler_i18n.lng"
+
   ; remove shortcuts of any previous version of the program
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\DASoft"
@@ -177,6 +180,8 @@ Var AtLeastXP
   Delete "$SMPROGRAMS\UltraDefrag\Documentation\User manual.url"
   Delete "$SMPROGRAMS\UltraDefrag\UltraDefrag (Debug mode).lnk"
   Delete "$SMPROGRAMS\UltraDefrag\Portable package.lnk"
+  Delete "$SMPROGRAMS\UltraDefrag\Scheduler.NET.lnk"
+  Delete "$SMPROGRAMS\UltraDefrag\Scheduler.lnk"
 
   RMDir /r "$SMPROGRAMS\UltraDefrag\Boot time options"
   RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
