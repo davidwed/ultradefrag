@@ -45,7 +45,7 @@
  * - well readable HTML reports
  * - powerful command line interface
  * - ability to automatically hibernate/shutdown PC after a job
- * - small handy scheduler
+ * - ability to make an automatic effective defragmentation through Windows Task Scheduler
  * - multilingual graphical interface
  * - little binaries (less than 500 kb)
  * - portable version available which requires no installation
@@ -54,7 +54,7 @@
  *
  * UltraDefrag runs on Windows NT 4.0, Windows 2000, Windows XP,
  * Windows Server 2003, Windows Vista, Windows Server 2008
- * and Vindows 7, including all 64 bit versions of Windows.
+ * and Windows 7, including all 64 bit versions of Windows.
  * NT 4.0 Alpha is not supported currently. ReactOS and Wine
  * aren't supported yet because they have no defragmentation
  * API implemented at this moment.

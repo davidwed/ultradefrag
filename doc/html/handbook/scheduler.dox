@@ -18,29 +18,35 @@
  */
 
 /**
- * @page Scheduler UltraDefrag Scheduler
- * The command line version of UltraDefrag may be run out of
- * <a href="http://en.wikipedia.org/wiki/Task_Scheduler">system scheduled tasks</a>.
- * The process of adding a scheduled task instance of UltraDefrag is simplified
- * throuth a utility called UltraDefrag Scheduler.
- * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
+ * @page Schedule Defragmentation Schedule
  *
- * The simple gui has 4 settings:
- * - Whether to run Ultra Defrag every day (Daily) or only certain days of the week (Weekly).
- * - The time of day to run the task.
- * - The letter of the drive to defragment.
- * - Days of the week to defrag if Weekly is selected.
+ * The completely automatic disk defragmentation can be easily set
+ * through standard <a href="http://en.wikipedia.org/wiki/Task_Scheduler">Windows Task Scheduler</a>.
  *
- * Multiple volumes can be selected in the list. In this case UltraDefrag
- * will process them in series. The rules of the selection are the same as
- * in Windows Explorer.
+ * The following schedule I'm using personally on my system:
  *
- * Scheduler can be launched from the Start menu. Use Start > Programs > UltraDefrag > Scheduler
- * shortcut. To browse list of all scheduled tasks use the following menu:
- * Start > Settings > Control Panel > Scheduled Tasks.
+ * - Every 30 minutes:
+ * @code
+ * cmd.exe /C "set UD_IN_FILTER="%userprofile%\Local Settings\Application Data\Mozilla" && udefrag %userprofile%"
+ * @endcode
  *
- * UltraDefrag Scheduler requires comctl32.dll module version 4.70 or higher to run, therefore
- * you will be able to execute it on Windows 2000 and later systems.
+ * - Every day:
+ * @code
+ * cmd.exe /C "set UD_IN_FILTER="%userprofile%\Local Settings\Application Data\Google\GoogleEarth" && udefrag %userprofile%"
+ * @endcode
  *
- * Currently Scheduler is not included in the portable version of the program.
+ * - Every week:
+ * @code
+ * cmd.exe /C "set UD_IN_FILTER="%often_accessed_folders%" && udefrag --all-fixed"
+ * @endcode
+ *
+ * - Every two months:
+ * @code
+ * cmd.exe /C "udefrag --all-fixed"
+ * @endcode
+ *
+ * This scheme runs automatically and saves a lot of my time.
+ *
+ * Visit <a href="http://ultradefrag.wikispaces.com/">ultradefrag.wikispaces.com</a> 
+ * for tutorials and more examples.
  */
