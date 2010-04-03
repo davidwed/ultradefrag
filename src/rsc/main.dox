@@ -23,9 +23,11 @@
  *
  * <h2>Introduction</h2>
  * This document contains technical information about the Ultra
- * Defragmenter. Compilation instructions, internal interfaces,
- * kernel mode driver reference and other aspects of the 
- * development.
+ * Defragmenter. Compilation instructions, internal interfaces 
+ * and other aspects of the development.
+ *
+ * The main target of UltraDefrag development is reaching the highest
+ * level of reliability. Another target, good set of functions, is reached yet.
  *
  * <h2>Related pages</h2>
  * - @ref Compilation

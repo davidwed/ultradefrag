@@ -24,13 +24,9 @@
  *
  * @image html udscheme.png
  *
- * At the bottom level we have two drivers. The old kernel mode driver
- * is retired to reduce the codebase and therefore reduce the bugs.
- * The new user mode driver has few advantages over it: more reliability
- * (by definition), ability to load without any hacking on modern versions
- * of Windows.
+ * At the bottom level we have an engine (driver).
  *
- * Udefrag.dll library is a thin middle layer between drivers and user
+ * Udefrag.dll library is a thin middle layer between the driver and user
  * interfaces. A little set of functions contained there highly simplifies
  * development.
  *
@@ -47,8 +43,7 @@
  *
  * Also UltraDefrag contains one special library which simplifies graphical
  * interfaces development. Its name is WGX (Windows GUI Extended).
- * GUI Configurator and Scheduler are another two programs which utilizes the 
- * WGX library.
+ * GUI Configurator is another program which utilizes the WGX library.
  *
  * UltraDefrag installer is written in NSIS.
  */
