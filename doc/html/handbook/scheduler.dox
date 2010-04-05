@@ -18,21 +18,21 @@
  */
 
 /**
- * @page Schedule Defragmentation Schedule
+ * @page Scheduled Defragmentation
  *
  * The completely automatic disk defragmentation can be easily set
  * through standard <a href="http://en.wikipedia.org/wiki/Task_Scheduler">Windows Task Scheduler</a>.
  *
- * The following schedule I'm using personally on my system:
+ * I'm using the following scheduled tasks personally on my system:
  *
  * - Every 30 minutes:
  * @code
- * cmd.exe /C "set UD_IN_FILTER="%userprofile%\Local Settings\Application Data\Mozilla" && udefrag %userprofile%"
+ * cmd.exe /C "set UD_IN_FILTER="%APPDATA%\Mozilla" && udefrag %APPDATA%"
  * @endcode
  *
  * - Every day:
  * @code
- * cmd.exe /C "set UD_IN_FILTER="%userprofile%\Local Settings\Application Data\Google\GoogleEarth" && udefrag %userprofile%"
+ * cmd.exe /C "set UD_IN_FILTER="%APPDATA%\Google\GoogleEarth" && udefrag %APPDATA%"
  * @endcode
  *
  * - Every week:
