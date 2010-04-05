@@ -42,15 +42,39 @@
  * in Windows Explorer.
  *
  * <b>Cluster Map</b>\n
- * It represents the volume clusters by a little colored squares.
+ * It represents the volume clusters by little colored squares.
  * Colors have the following meaning:
  *
- * @image html legend.png
+ * <CENTER>
+ *  <TABLE BORDER="0">
+ *    <TR>
+ *      <TD><img src="Fragmented.png"></TD><TD>Fragmented</TD>
+ *      <TD STYLE="padding: 10px"></TD>
+ *      <TD><img src="NotFragmented.png"></TD><TD>Not Fragmented</TD>
+ *      <TD STYLE="padding: 10px"></TD>
+ *      <TD><img src="Compressed.png"></TD><TD>Compressed</TD>
+ *    </TR>
+ *    <TR>
+ *      <TD><img src="Directory.png"></TD><TD>Directory</TD>
+ *      <TD STYLE="padding: 10px"></TD>
+ *      <TD><img src="System.png"></TD><TD>System</TD>
+ *      <TD STYLE="padding: 10px"></TD>
+ *      <TD><img src="MFT.png"></TD><TD>MFT</TD>
+ *    </TR>
+ *    <TR>
+ *      <TD><img src="Temporary.png"></TD><TD>Temporary</TD>
+ *      <TD STYLE="padding: 10px"></TD>
+ *      <TD></TD><TD></TD>
+ *      <TD STYLE="padding: 10px"></TD>
+ *      <TD><img src="FreeSpace.png"></TD><TD>Free Space</TD>
+ *    </TR>
+ *  </TABLE>
+ * </CENTER>
  *
- * When they are two colors assigned to the same item, the
- * darker one marks objects above the size threshold if one
+ * When there are two different colors assigned to the same item, the
+ * darker one marks objects above the size threshold, if one
  * is set. The cyan color represents space temporarily allocated
- * by system. 
+ * by UltraDefrag. 
  *
  * Note that files excluded from the defragmentation process
  * are never treated as fragmented. Because trash should not
