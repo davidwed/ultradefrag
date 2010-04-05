@@ -56,6 +56,9 @@
  * are never treated as fragmented. Because trash should not
  * take an attention.
  *
+ * The MFT size reported includes used and free MFT space,
+ * so it is much higher than the MFT size reported by other programs.
+ *
  * <b>Disk Defragmentation Control</b>\n
  * Click Analyse button or type Ctrl+A to start the volume analysis. 
  * Click Defragment button or type Ctrl+D to start the volume defragmentation.

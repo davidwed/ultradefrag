@@ -17,6 +17,7 @@ HISTORY
       optimized (function prototypes changed!)
     - Installer was updated to include publisher, version, estimated size
       and support link in uninstall information
+	- Hint about reported MFT size differences was added to the handbook
 
 
   Version 4.2.0  2010-03-30

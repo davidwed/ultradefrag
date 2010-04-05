@@ -59,4 +59,8 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * big files are analysed, the progress bar will increase very fast. 
  * Conversely, when a thousands of small files are analysed, progress will 
  * be relatively slow.
+ *
+ * <h3>Why is UltraDefrag reporting a much bigger MFT size, than other programs?</h3>
+ * UltraDefrag not only reports the used MFT size, but the entire MFT size including
+ * not currently used MFT space. 
  */
