@@ -45,7 +45,7 @@
  * It represents the volume clusters by little colored squares.
  * Colors have the following meaning:
  *
- * <CENTER>
+ * @htmlonly
  *  <TABLE BORDER="0">
  *    <TR>
  *      <TD><img src="Fragmented.png"></TD><TD>Fragmented</TD>
@@ -69,12 +69,12 @@
  *      <TD><img src="FreeSpace.png"></TD><TD>Free Space</TD>
  *    </TR>
  *  </TABLE>
- * </CENTER>
+ * @endhtmlonly
  *
  * When there are two different colors assigned to the same item, the
  * darker one marks objects above the size threshold, if one
  * is set. The cyan color represents space temporarily allocated
- * by UltraDefrag. 
+ * by Windows. 
  *
  * Note that files excluded from the defragmentation process
  * are never treated as fragmented. Because trash should not
