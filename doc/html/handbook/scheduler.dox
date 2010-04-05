@@ -45,7 +45,8 @@
  * cmd.exe /C "udefrag --all-fixed"
  * @endcode
  *
- * This scheme runs automatically and saves a lot of my time.
+ * This scheme runs automatically and saves a lot of my time, because I have
+ * no need to start defragmenter manually anymore.
  *
  * Visit <a href="http://ultradefrag.wikispaces.com/">ultradefrag.wikispaces.com</a> 
  * for tutorials and more examples.
