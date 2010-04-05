@@ -34,7 +34,7 @@ COLORREF colors[NUM_OF_SPACE_STATES] =
 	RGB(128,0,128),                /* mft */
 	RGB(255,255,0),RGB(238,221,0), /* directories */
 	RGB(185,185,0),RGB(93,93,0),   /* compressed */
-	RGB(0,255,255)                 /* no checked space */
+	RGB(0,255,255)                 /* not checked (temporary) */
 };
 HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 
