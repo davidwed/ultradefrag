@@ -227,6 +227,23 @@ void MarkFileSpace(PFILENAME pfn,int old_space_state)
 }
 
 /**
+ * @brief Remarks a range of clusters belonging to the file as system clusters in the cluster map.
+ * @param[in] pfn pointer to the FILENAME structure containing information about the file.
+ */
+void RemarkFileSpaceAsSystem(PFILENAME pfn)
+{
+	PBLOCKMAP block;
+	UCHAR state, new_state;
+	
+	state = GetFileSpaceState(pfn);
+	new_state = pfn->is_overlimit ? SYSTEM_OVERLIMIT_SPACE : SYSTEM_SPACE;
+	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+		RemarkBlock(block->lcn,block->length,new_state,state);
+		if(block->next_ptr == pfn->blockmap) break;
+	}
+}
+
+/**
  * @brief Remarks a range of clusters in the cluster map.
  * @param[in] start the starting cluster of the block.
  * @param[in] len the length of the block, in clusters.

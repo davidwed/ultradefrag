@@ -172,6 +172,7 @@ void MarkAllSpaceAsFree0(void);
 void MarkAllSpaceAsSystem1(void);
 unsigned char GetFileSpaceState(PFILENAME pfn);
 void MarkFileSpace(PFILENAME pfn,int old_space_state);
+void RemarkFileSpaceAsSystem(PFILENAME pfn);
 void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_state);
 
 void InitializeOptions(void);
@@ -219,6 +220,7 @@ int FindFiles(WCHAR *ParentDirectoryPath);
 BOOLEAN AddFileToFragmented(PFILENAME pfn);
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
 BOOLEAN IsFileLocked(PFILENAME pfn);
+void RemarkWellKnownLockedFiles(void);
 void CheckAllFiles(void);
 void CheckAllFragmentedFiles(void);
 BOOLEAN DumpFile(PFILENAME pfn);

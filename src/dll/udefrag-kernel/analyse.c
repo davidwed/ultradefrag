@@ -160,6 +160,9 @@ int Analyze(char *volume_name)
 	
 	DebugPrint("Files found: %u\n",Stat.filecounter);
 	DebugPrint("Fragmented files: %u\n",Stat.fragmfilecounter);
+	
+	/* remark space belonging to well known locked files as system */
+	RemarkWellKnownLockedFiles();
 
 	GenerateFragmentedFilesList();
 	return 0;
@@ -195,9 +198,131 @@ BOOLEAN IsFileLocked(PFILENAME pfn)
 
 	DebugPrintEx(Status,"Cannot open %ws",pfn->name.Buffer);
 	
+	/* locked file found, remark space belonging to it! */
+	RemarkFileSpaceAsSystem(pfn);
+
 	/* file is locked by other application, so its state is unknown */
 	DeleteBlockmap(pfn);
 	return TRUE;
+}
+
+/*
+* Minimal name lengths!
+* Lowercase!
+*/
+#if 0
+short *known_locked_files[] = {
+	L"pagefile.sys",
+	L"hiberfil.sys",
+	L"ntuser.dat",
+	/*L"system vol",*/ /* system volume information gives a lot of false detection */
+	/*L"em32\\config",*/ /* the same cause */
+	NULL
+};
+#endif
+
+/**
+ * @brief Checks is file a well known system file or not.
+ * @param[in] pfn pointer to structure describing the file.
+ * @return Boolean value indicating is file
+ * a well known system file or not.
+ * @note Optimized for speed.
+ */
+BOOLEAN IsWellKnownSystemFile(PFILENAME pfn)
+{
+	UNICODE_STRING us;
+	/*int i;*/
+	short *pos;
+	short config_sign[] = L"em32\\config\\";
+	
+	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
+		DebugPrint("Cannot allocate memory for IsWellKnownSystemFile()!\n");
+		out_of_memory_condition_counter ++;
+		return FALSE;
+	}
+	(void)_wcslwr(us.Buffer);
+	
+	/* search for NTFS internal files */
+	if(us.Length >= 9 * sizeof(short)){ /* to ensure that we have at least \??\X:\$x */
+		/* skip \??\X:\$mft and \??\X:\$mftmirr */
+		if(us.Buffer[7] == '$' && us.Buffer[8] == 'm'){
+			if(wcsstr(us.Buffer,L":\\$mft") && !wcsstr(us.Buffer,L":\\$mft:"))
+				goto not_found;
+			if(wcsstr(us.Buffer,L":\\$mftmirr") && !wcsstr(us.Buffer,L":\\$mftmirr:"))
+				goto not_found;
+		}
+		if(us.Buffer[7] == '$') goto found;
+	}
+	
+	/* search for big files usually locked by Windows */
+	/*for(i = 0;; i++){
+		if(known_locked_files[i] == NULL) goto not_found;
+		if(wcsstr(us.Buffer,known_locked_files[i])) goto found;
+	}*/
+	if(wcsstr(us.Buffer,L"pagefile.sys")) goto found;
+	if(wcsstr(us.Buffer,L"hiberfil.sys")) goto found;
+	if(wcsstr(us.Buffer,L"ntuser.dat")) goto found;
+	pos = wcsstr(us.Buffer,config_sign);
+	if(pos){
+		/* skip sub directories */
+		pos += (sizeof(config_sign) / sizeof(short)) - 1;
+		if(!wcschr(pos,'\\') && !pfn->is_dir) goto found;
+	}
+	
+	/*
+	* Other system files will be detected during the defragmentation,
+	* because otherwise this will take a lot of time.
+	*/
+	goto not_found;
+
+found:
+	RtlFreeUnicodeString(&us);
+	return TRUE;
+
+not_found:
+	RtlFreeUnicodeString(&us);
+	return FALSE;
+}
+
+/**
+ * @brief Remarks space belonging to well known
+ * locked files as system.
+ * @todo Speedup desired.
+ */
+void RemarkWellKnownLockedFiles(void)
+{
+	ULONGLONG tm, time;
+	PFILENAME pfn;
+	NTSTATUS Status;
+	HANDLE hFile;
+
+	DebugPrint("Well known locked files search started...\n");
+	tm = _rdtsc();
+
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(pfn->is_reparse_point == FALSE && pfn->blockmap){
+			if(IsWellKnownSystemFile(pfn)){
+				Status = OpenTheFile(pfn,&hFile);
+				if(Status == STATUS_SUCCESS){
+					NtCloseSafe(hFile);
+					/* possibility of this case must be reduced */
+					DebugPrint("False detection %ws!\n",pfn->name.Buffer);
+				} else {
+					DebugPrintEx(Status,"Cannot open %ws",pfn->name.Buffer);
+					
+					/* locked file found, remark space belonging to it! */
+					RemarkFileSpaceAsSystem(pfn);
+					
+					/* file is locked by other application, so its state is unknown */
+					DeleteBlockmap(pfn);
+				}
+			}
+		}
+		if(pfn->next_ptr == filelist) break;
+	}
+
+	time = _rdtsc() - tm;
+	DebugPrint("Well known locked files search completed in %I64u ms.\n", time);
 }
 
 #if 0
