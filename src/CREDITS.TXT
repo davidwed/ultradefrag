@@ -131,7 +131,7 @@
     Masao Kajiwara
     Patrick Paludan-Müller
     Per-Eric Jenshagen
-	Pavel Kinkor
+    Pavel Kinkor
     Stefan Pendl
 
 --------------------------------------------------------------------------------

@@ -15,8 +15,8 @@ HISTORY
 
     - for programmers: winx_create_thread improved, udefrag.dll interface
       optimized (function prototypes changed!)
-	- Installer was updated to show publisher, version and estimated size
-	  in the Add/Remove Programs dialog of Vista and higher
+    - Installer was updated to show publisher, version and estimated size
+      in the Add/Remove Programs dialog of Vista and higher
 
 
   Version 4.2.0  2010-03-30
