@@ -18,7 +18,7 @@
  */
 
 /**
- * @page Scheduled Defragmentation
+ * @page Schedule Scheduled Defragmentation
  *
  * The completely automatic disk defragmentation can be easily set
  * through standard <a href="http://en.wikipedia.org/wiki/Task_Scheduler">Windows Task Scheduler</a>.
