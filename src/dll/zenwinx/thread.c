@@ -30,6 +30,7 @@
 /**
  * @brief Creates a thread and starts them.
  * @param[in] start_addr the starting address of the thread.
+ * @param[in] parameter pointer to data passed to thread routine.
  * @param[out] phandle the thread handle pointer. May be NULL.
  * @return Zero for success, negative value otherwise.
  * @note Look at the following example for the 
