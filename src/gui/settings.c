@@ -29,6 +29,9 @@ int hibernate_instead_of_shutdown = FALSE;
 char buffer[MAX_PATH];
 char err_msg[1024];
 extern int user_defined_column_widths[];
+extern int map_block_size;
+BOOLEAN map_block_size_loaded = FALSE;
+int reloaded_map_block_size = 0;
 
 /* they have the same effect as environment variables for console program */
 char in_filter[4096] = {0};
@@ -205,6 +208,14 @@ void GetPrefs(void)
 			seconds_for_shutdown_rejection = (int)lua_tointeger(L, lua_gettop(L));
 			lua_pop(L, 1);
 		}
+		
+		/* load the size of the cluster map block only if it is not already loaded */
+		reloaded_map_block_size = getint(L,"map_block_size");
+		if(map_block_size_loaded == FALSE){
+			map_block_size = reloaded_map_block_size;
+			if(map_block_size == 0) map_block_size = DEFAULT_MAP_BLOCK_SIZE;
+			map_block_size_loaded = TRUE;
+		}
 	}
 	lua_close(L);
 
@@ -262,6 +273,9 @@ void SavePrefs(void)
 		"-- seconds_for_shutdown_rejection sets the delay for the user to cancel\n"
 		"-- the shutdown or hibernate execution, default is 60 seconds\n"
 		"seconds_for_shutdown_rejection = %u\n\n"
+		"-- cluster map options (restart required to take effect):\n"
+		"-- the size of the block, in pixels; default value is %i\n"
+		"map_block_size = %i\n\n"
 		"-- window coordinates etc.\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
@@ -280,6 +294,8 @@ void SavePrefs(void)
 		hibernate_instead_of_shutdown,
 		show_shutdown_check_confirmation_dialog,
 		seconds_for_shutdown_rejection,
+		DEFAULT_MAP_BLOCK_SIZE,
+		reloaded_map_block_size ? reloaded_map_block_size : map_block_size,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),

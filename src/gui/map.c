@@ -23,7 +23,7 @@
 
 #include "main.h"
 
-int map_block_size = 8;
+int map_block_size = DEFAULT_MAP_BLOCK_SIZE;
 
 int map_blocks_per_line = 145; //65
 int map_lines = 32; //14
