@@ -265,7 +265,7 @@ void SavePrefs(void)
 		"-- for normal operation set it to NORMAL or an empty string\n"
 		"dbgprint_level = \"%s\"\n\n"
 		"-- set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system\n"
-		"-- after a job is done instead of shutting it down, otherwise set it to 0\n\n"
+		"-- after a job is done instead of shutting it down, otherwise set it to 0\n"
 		"hibernate_instead_of_shutdown = %u\n\n"
 		"-- set show_shutdown_check_confirmation_dialog to 1 to display the confirmation dialog\n"
 		"-- for shutdown or hibernate, otherwise set it to 0\n"
