@@ -10,6 +10,10 @@ HISTORY
     - hint about reported MFT size differences was added to the handbook
     - one little bug preventing displaying system files in green color
       on NTFS volumes was fixed
+    - cluster map appearance in GUI was improved and made absolutely
+      independent from the screen DPI
+    - cluster map block size was made customizable in GUI through
+      map_block_size parameter added to guiopts.lua configuration file
     - the following translations were updated:
 
       Czech, Finnish
