@@ -24,8 +24,6 @@
 #ifndef _DFRG_MAIN_H_
 #define _DFRG_MAIN_H_
 
-#define GRID_COLOR RGB(200,200,200)
-
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
 * to make a valid subclassing:
@@ -97,11 +95,6 @@
 
 #include "../dll/wgx/wgx.h"
 
-/* application defined constants */
-#define BLOCKS_PER_HLINE  65 /*52*/ /*60*/
-#define BLOCKS_PER_VLINE  14 /*16*/
-#define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
-
 enum {
 	STATUS_UNDEFINED,
 	STATUS_RUNNING,
@@ -137,7 +130,6 @@ void SetText(HWND hWnd, short *key);
 
 /* map manipulation functions */
 void InitMap(void);
-void CalculateBlockSize();
 void DrawBitMapGrid(HDC hdc);
 void DeleteMaps();
 

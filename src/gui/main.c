@@ -264,7 +264,7 @@ void InitMainWindow(void)
 		SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
 	}
 
-	UpdateVolList();
+	UpdateVolList(); /* after a map initialization! */
 	InitFont();
 	
 	/* status bar will always have default font */

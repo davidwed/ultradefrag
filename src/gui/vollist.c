@@ -27,10 +27,11 @@ extern HINSTANCE hInstance;
 extern HWND hWindow;
 extern BOOL busy_flag;
 extern int skip_removable;
-extern int iMAP_WIDTH;
-extern int iMAP_HEIGHT;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern NEW_VOLUME_LIST_ENTRY *processed_entry;
+
+extern int map_width;
+extern int map_height;
 
 HWND hList;
 WNDPROC OldListProc;
@@ -110,7 +111,7 @@ static int vlist_add_item(char *name,char *fsname,ULONGLONG total,ULONGLONG free
 	
 	hMainDC = GetDC(hWindow);
 	hDC = CreateCompatibleDC(hMainDC);
-	hBitmap = CreateCompatibleBitmap(hMainDC,iMAP_WIDTH,iMAP_HEIGHT);
+	hBitmap = CreateCompatibleBitmap(hMainDC,map_width,map_height);
 	(void)ReleaseDC(hWindow,hMainDC);
 	
 	if(hBitmap == NULL){

@@ -27,7 +27,10 @@ extern HWND hWindow;
 extern HWND hList;
 extern int shutdown_flag;
 
-char global_cluster_map[N_BLOCKS];
+extern int map_blocks_per_line;
+extern int map_lines;
+
+extern char *global_cluster_map;
 DWORD thr_id;
 BOOL busy_flag = 0;
 char current_operation;
@@ -108,7 +111,7 @@ int __stdcall update_stat(int df)
 		SetProgress(progress_msg,(int)percentage);
 	}
 
-	if(udefrag_get_map(global_cluster_map,N_BLOCKS) >= 0){
+	if(udefrag_get_map(global_cluster_map,map_blocks_per_line * map_lines) >= 0){
 		FillBitMap(global_cluster_map,v_entry);
 		RedrawMap(v_entry);
 	}
@@ -216,15 +219,18 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 		processed_entry = v_entry;
 		switch(command){
 		case 'a':
-			error_code = udefrag_start(volume_name,ANALYSE_JOB,N_BLOCKS,update_stat);
+			error_code = udefrag_start(volume_name,ANALYSE_JOB,
+					map_blocks_per_line * map_lines,update_stat);
 			Status = STATUS_ANALYSED;
 			break;
 		case 'd':
-			error_code = udefrag_start(volume_name,DEFRAG_JOB,N_BLOCKS,update_stat);
+			error_code = udefrag_start(volume_name,DEFRAG_JOB,
+					map_blocks_per_line * map_lines,update_stat);
 			Status = STATUS_DEFRAGMENTED;
 			break;
 		default:
-			error_code = udefrag_start(volume_name,OPTIMIZE_JOB,N_BLOCKS,update_stat);
+			error_code = udefrag_start(volume_name,OPTIMIZE_JOB,
+					map_blocks_per_line * map_lines,update_stat);
 			Status = STATUS_OPTIMIZED;
 		}
 		if(error_code < 0 && !exit_pressed){
