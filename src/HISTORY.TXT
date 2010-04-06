@@ -7,17 +7,19 @@ HISTORY
       visit http://ultradefrag.wikispaces.com/ for tutorials on scheduling
       disk defragmentation tasks through Windows Task Scheduler
     - more reliable monolithic boot time defragmenter was made
-    - sources were cleaned up by removing the obsolete 
-      kernel mode driver support at all
+    - hint about reported MFT size differences was added to the handbook
+    - one little bug preventing displaying system files in green color
+      on NTFS volumes was fixed
     - the following translations were updated:
 
       Czech, Finnish
 
+    - installer was updated to include publisher, version, estimated size
+      and support link in uninstall information
+    - sources were cleaned up by removing the obsolete 
+      kernel mode driver support at all
     - for programmers: winx_create_thread improved, udefrag.dll interface
       optimized (function prototypes changed!)
-    - Installer was updated to include publisher, version, estimated size
-      and support link in uninstall information
-	- Hint about reported MFT size differences was added to the handbook
 
 
   Version 4.2.0  2010-03-30
