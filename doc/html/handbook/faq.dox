@@ -62,5 +62,6 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  *
  * <h3>Why is UltraDefrag reporting a much bigger MFT size, than other programs?</h3>
  * UltraDefrag not only reports the used MFT size, but the entire MFT size including
- * not currently used MFT space. 
+ * reserved MFT space.\n
+ * See <A HREF="http://support.microsoft.com/kb/174619" TARGET="_BLANK">How NTFS reserves space for its Master File Table (MFT)</A>
  */

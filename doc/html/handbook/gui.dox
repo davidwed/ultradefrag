@@ -80,8 +80,9 @@
  * are never treated as fragmented. Because trash should not
  * take an attention.
  *
- * The MFT size reported includes used and free MFT space,
- * so it is much higher than the MFT size reported by other programs.
+ * The MFT size reported includes used and reserved MFT space,
+ * so it is much higher than the MFT size reported by other programs.\n
+ * See <A HREF="http://support.microsoft.com/kb/174619" TARGET="_BLANK">How NTFS reserves space for its Master File Table (MFT)</A>
  *
  * <b>Disk Defragmentation Control</b>\n
  * Click Analyse button or type Ctrl+A to start the volume analysis. 
@@ -186,7 +187,7 @@ seconds_for_shutdown_rejection = 60
 -- cluster map options (restart required to take effect):
 -- the size of the block, in pixels; default value is 8
 
-map_block_size = 6
+map_block_size = 8
 @endverbatim
  *
  * <b>Windows Boot Time Scan</b>\n
