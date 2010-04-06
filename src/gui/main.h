@@ -24,6 +24,8 @@
 #ifndef _DFRG_MAIN_H_
 #define _DFRG_MAIN_H_
 
+#define GRID_COLOR RGB(200,200,200)
+
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
 * to make a valid subclassing:
@@ -136,6 +138,7 @@ void SetText(HWND hWnd, short *key);
 /* map manipulation functions */
 void InitMap(void);
 void CalculateBlockSize();
+void DrawBitMapGrid(HDC hdc);
 void DeleteMaps();
 
 void RedrawMap(NEW_VOLUME_LIST_ENTRY *v_entry);

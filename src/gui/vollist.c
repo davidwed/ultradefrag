@@ -126,8 +126,11 @@ static int vlist_add_item(char *name,char *fsname,ULONGLONG total,ULONGLONG free
 
 	(void)SelectObject(hDC,hBitmap);
 	(void)SetBkMode(hDC,TRANSPARENT);
+	DrawBitMapGrid(hDC);
 	entry->hdc = hDC;
 	entry->hbitmap = hBitmap;
+	
+	/* draw grid */
 
 	return 0;
 }

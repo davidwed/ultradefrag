@@ -23,8 +23,6 @@
 
 #include "main.h"
 
-#define GRID_COLOR                  RGB(0,0,0)
-
 COLORREF colors[NUM_OF_SPACE_STATES] = 
 {
 	RGB(255,255,255),              /* free */
@@ -136,9 +134,7 @@ static BOOL CreateBitMapGrid(void)
 {
 	HDC hMainDC;
 	HBRUSH hBrush, hOldBrush;
-	HPEN hPen, hOldPen;
 	RECT rc;
-	int i;
 
 	hMainDC = GetDC(hWindow);
 	hGridDC = CreateCompatibleDC(hMainDC);
@@ -148,7 +144,7 @@ static BOOL CreateBitMapGrid(void)
 	(void)SelectObject(hGridDC,hGridBitmap);
 	(void)SetBkMode(hGridDC,TRANSPARENT);
 	
-	/* draw grid */
+	/* draw white field */
 	rc.top = rc.left = 0;
 	rc.bottom = iMAP_HEIGHT;
 	rc.right = iMAP_WIDTH;
@@ -158,19 +154,28 @@ static BOOL CreateBitMapGrid(void)
 	(void)SelectObject(hGridDC,hOldBrush);
 	(void)DeleteObject(hBrush);
 
+	/* draw grid */
+	DrawBitMapGrid(hGridDC);
+	return TRUE;
+}
+
+void DrawBitMapGrid(HDC hdc)
+{
+	HPEN hPen, hOldPen;
+	int i;
+
 	hPen = CreatePen(PS_SOLID,1,GRID_COLOR);
-	hOldPen = SelectObject(hGridDC,hPen);
+	hOldPen = SelectObject(hdc,hPen);
 	for(i = 0; i < BLOCKS_PER_HLINE + 1; i++){
-		(void)MoveToEx(hGridDC,(iBLOCK_SIZE + 1) * i,0,NULL);
-		(void)LineTo(hGridDC,(iBLOCK_SIZE + 1) * i,iMAP_HEIGHT);
+		(void)MoveToEx(hdc,(iBLOCK_SIZE + 1) * i,0,NULL);
+		(void)LineTo(hdc,(iBLOCK_SIZE + 1) * i,iMAP_HEIGHT);
 	}
 	for(i = 0; i < BLOCKS_PER_VLINE + 1; i++){
-		(void)MoveToEx(hGridDC,0,(iBLOCK_SIZE + 1) * i,NULL);
-		(void)LineTo(hGridDC,iMAP_WIDTH,(iBLOCK_SIZE + 1) * i);
+		(void)MoveToEx(hdc,0,(iBLOCK_SIZE + 1) * i,NULL);
+		(void)LineTo(hdc,iMAP_WIDTH,(iBLOCK_SIZE + 1) * i);
 	}
-	(void)SelectObject(hGridDC,hOldPen);
+	(void)SelectObject(hdc,hOldPen);
 	(void)DeleteObject(hPen);
-	return TRUE;
 }
 
 BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry)
@@ -185,6 +190,7 @@ BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry)
 	hdc = v_entry->hdc;
 	if(!hdc) return FALSE;
 	
+	/* draw squares */
 	hOldBrush = SelectObject(hdc,hBrushes[0]);
 	for(i = 0; i < BLOCKS_PER_VLINE; i++){
 		for(j = 0; j < BLOCKS_PER_HLINE; j++){
