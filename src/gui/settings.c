@@ -102,6 +102,7 @@ void GetPrefs(void)
 	lua_State *L;
 	int status;
 	char *string;
+	BOOLEAN coord_undefined = TRUE;
 	
 	win_rc.left = win_rc.top = 0;
 	in_filter[0] = ex_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
@@ -119,8 +120,23 @@ void GetPrefs(void)
 
 	status = luaL_dofile(L,".\\options\\guiopts.lua");
 	if(!status){ /* successful */
-		win_rc.left = (long)getint(L,"x");
-		win_rc.top = (long)getint(L,"y");
+		/* get main window coordinates */
+		coord_undefined = FALSE;
+		lua_getglobal(L, "x");
+		if(!lua_isnil(L, lua_gettop(L))){
+			win_rc.left = (long)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		} else {
+			coord_undefined = TRUE;
+		}
+		lua_getglobal(L, "y");
+		if(!lua_isnil(L, lua_gettop(L))){
+			win_rc.top = (long)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		} else {
+			coord_undefined = TRUE;
+		}
+
 		win_rc.right = win_rc.left + (long)getint(L,"width");
 		win_rc.bottom = win_rc.top + (long)getint(L,"height");
 		skip_removable = getint(L,"skip_removable");
@@ -191,6 +207,11 @@ void GetPrefs(void)
 		}
 	}
 	lua_close(L);
+
+	/* center main window on the screen if coordinates aren't defined */
+	if(coord_undefined){
+		win_rc.left = win_rc.top = UNDEFINED_COORD;
+	}
 
 	SetEnvironmentVariables();
 }

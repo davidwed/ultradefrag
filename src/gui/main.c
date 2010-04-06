@@ -220,6 +220,8 @@ void InitMainWindow(void)
 {
 	int dx,dy;
 	RECT rc;
+	BOOLEAN coord_undefined = FALSE;
+	int s_width, s_height;
 	
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
@@ -238,6 +240,8 @@ void InitMainWindow(void)
 	InitProgress();
 	InitMap();
 
+	if(win_rc.left == UNDEFINED_COORD || win_rc.top == UNDEFINED_COORD)
+		coord_undefined = TRUE;
 	WgxCheckWindowCoordinates(&win_rc,130,50);
 
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
@@ -246,6 +250,17 @@ void InitMainWindow(void)
 	if(GetWindowRect(hWindow,&rc)){
 		dx = rc.right - rc.left;
 		dy = rc.bottom - rc.top + delta_h;
+		if(coord_undefined){
+			/* center window on the screen */
+			s_width = GetSystemMetrics(SM_CXSCREEN);
+			s_height = GetSystemMetrics(SM_CYSCREEN);
+			if(s_width < dx || s_height < dy){
+				win_rc.left = win_rc.top = 0;
+			} else {
+				win_rc.left = (s_width - dx) / 2;
+				win_rc.top = (s_height - dy) / 2;
+			}
+		}
 		SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
 	}
 
