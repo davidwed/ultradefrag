@@ -222,6 +222,39 @@ short *known_locked_files[] = {
 #endif
 
 /**
+ * @brief Checks whether the file is $MFT or not.
+ * @param[in] pfn pointer to structure describing the file.
+ * @return Boolean value indicating whether the file is $MFT or not.
+ * @note Optimized for speed.
+ */
+BOOLEAN IsMft(PFILENAME pfn)
+{
+	short mft_path[] = L"\\??\\C:\\$MFT";
+	UNICODE_STRING us;
+	BOOLEAN result;
+	
+	if(pfn->name.Length < 9 * sizeof(short)) /* ensure that we have at least \??\X:\$x */
+		return FALSE;
+	if(pfn->name.Buffer[7] != '$')
+		return FALSE;
+
+	mft_path[4] = (short)volume_letter;
+	(void)_wcslwr(mft_path);
+
+	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
+		DebugPrint("Cannot allocate memory for IsMft()!\n");
+		out_of_memory_condition_counter ++;
+		return FALSE;
+	}
+	(void)_wcslwr(us.Buffer);
+
+	result = (wcscmp(us.Buffer,mft_path) == 0) ? TRUE : FALSE;
+	
+	RtlFreeUnicodeString(&us);
+	return result;
+}
+
+/**
  * @brief Checks is file a well known system file or not.
  * @param[in] pfn pointer to structure describing the file.
  * @return Boolean value indicating is file
@@ -233,7 +266,7 @@ BOOLEAN IsWellKnownSystemFile(PFILENAME pfn)
 	UNICODE_STRING us;
 	/*int i;*/
 	short *pos;
-	short config_sign[] = L"em32\\config\\";
+	short config_sign[] = L"\\system32\\config\\";
 	
 	if(!RtlCreateUnicodeString(&us,pfn->name.Buffer)){
 		DebugPrint("Cannot allocate memory for IsWellKnownSystemFile()!\n");
@@ -244,12 +277,9 @@ BOOLEAN IsWellKnownSystemFile(PFILENAME pfn)
 	
 	/* search for NTFS internal files */
 	if(us.Length >= 9 * sizeof(short)){ /* to ensure that we have at least \??\X:\$x */
-		/* skip \??\X:\$mft and \??\X:\$mftmirr */
+		/* skip \??\X:\$mft */
 		if(us.Buffer[7] == '$' && us.Buffer[8] == 'm'){
-			if(wcsstr(us.Buffer,L":\\$mft") && !wcsstr(us.Buffer,L":\\$mft:"))
-				goto not_found;
-			if(wcsstr(us.Buffer,L":\\$mftmirr") && !wcsstr(us.Buffer,L":\\$mftmirr:"))
-				goto not_found;
+			if(IsMft(pfn)) goto not_found;
 		}
 		if(us.Buffer[7] == '$') goto found;
 	}

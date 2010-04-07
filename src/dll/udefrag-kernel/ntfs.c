@@ -366,6 +366,7 @@ void __stdcall UpdateMaxMftEntriesNumberCallback(PATTRIBUTE pattr,PMY_FILE_INFOR
 		pnr_attr = (PNONRESIDENT_ATTRIBUTE)pattr;
 		if(ntfs_record_size){
 			max_mft_entries = pnr_attr->DataSize / ntfs_record_size;
+			Stat.mft_size = pnr_attr->DataSize;
 			//MftClusters = 0;
 			//MftBlockmap = NULL;
 			//ProcessMFTRunList(dx,pnr_attr);
@@ -1426,7 +1427,7 @@ scan_done:
  */
 ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 {
-	ULONGLONG start,len,mft_len = 0;
+	ULONGLONG start,len,mft_len = 0,mirror_size;
 
 	/*
 	* MFT space must be excluded from the free space list.
@@ -1439,7 +1440,7 @@ ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 	* Don't increment dx->processed_clusters here, 
 	* because some parts of MFT are really free.
 	*/
-	DebugPrint("MFT_file   : start : length\n");
+	DebugPrint("MFT part   : start : length\n");
 
 	/* $MFT */
 	start = nd->MftStartLcn.QuadPart;
@@ -1449,28 +1450,36 @@ ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 		len = 0;
 	DebugPrint("$MFT       :%I64u :%I64u\n",start,len);
 	if(CheckBlock(start,len)){
-		RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
+		/* remark space as reserved */
+		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_SPACE);
 		RemoveFreeSpaceBlock(start,len);
 		mft_len += len;
 	}
 
-	/* $MFT2 */
+	/* MFT Zone */
 	start = nd->MftZoneStart.QuadPart;
 	len = nd->MftZoneEnd.QuadPart - nd->MftZoneStart.QuadPart;
-	DebugPrint("$MFT2      :%I64u :%I64u\n",start,len);
+	DebugPrint("MFT Zone   :%I64u :%I64u\n",start,len);
 	if(CheckBlock(start,len)){
-		RemarkBlock(start,len,MFT_SPACE,SYSTEM_SPACE);
+		/* remark space as reserved */
+		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_SPACE);
 		RemoveFreeSpaceBlock(start,len);
-		mft_len += len;
 	}
 
 	/* $MFTMirror */
 	start = nd->Mft2StartLcn.QuadPart;
-	DebugPrint("$MFTMirror :%I64u :1\n",start);
-	if(CheckBlock(start,1)){
-		RemarkBlock(start,1,MFT_SPACE,SYSTEM_SPACE);
-		RemoveFreeSpaceBlock(start,1);
-		mft_len ++;
+	len = 1;
+	mirror_size = nd->BytesPerFileRecordSegment * 4;
+	if(nd->BytesPerCluster && mirror_size > nd->BytesPerCluster){
+		len = mirror_size / nd->BytesPerCluster;
+		if(mirror_size - len * nd->BytesPerCluster)
+			len ++;
+	}
+	DebugPrint("$MFTMirror :%I64u :%I64u\n",start,len);
+	if(CheckBlock(start,len)){
+		/* remark space as reserved */
+		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_SPACE);
+		RemoveFreeSpaceBlock(start,len);
 	}
 	
 	return mft_len;

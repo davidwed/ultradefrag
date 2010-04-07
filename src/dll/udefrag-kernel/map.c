@@ -123,8 +123,7 @@ int GetMap(char *dest,int cluster_map_size)
 		index = 0;
 		for(k = 1; k < NUM_OF_SPACE_STATES; k++){
 			n = new_cluster_map[i][k];
-			/* >= is very important: mft and free */
-			if(n > maximum || (n == maximum && k != TEMPORARY_SYSTEM_SPACE)){
+			if(n >= maximum){ /* support of colors precedence  */
 				maximum = n;
 				index = k;
 			}
@@ -193,7 +192,21 @@ unsigned char GetFileSpaceState(PFILENAME pfn)
 			      DIR_OVERLIMIT_SPACE};
 	int d,c,o;
 	unsigned char state;
+	PBLOCKMAP block;
+	int i;
 
+	/* show $MFT file in dark magenta color */
+	if(IsMft(pfn)){
+		i = 0;
+		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+			DebugPrint("MFT part #%u start: %I64u, length: %I64u\n",
+				i,block->lcn,block->length);
+			i ++;
+			if(block->next_ptr == pfn->blockmap) break;
+		}
+		return MFT_SPACE;
+	}
+	
 	/*
 	* Show filtered out stuff and files above size threshold
 	* and reparse points as unfragmented.

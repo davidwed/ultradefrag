@@ -220,6 +220,7 @@ int FindFiles(WCHAR *ParentDirectoryPath);
 BOOLEAN AddFileToFragmented(PFILENAME pfn);
 NTSTATUS OpenTheFile(PFILENAME pfn,HANDLE *phFile);
 BOOLEAN IsFileLocked(PFILENAME pfn);
+BOOLEAN IsMft(PFILENAME pfn);
 void RemarkWellKnownLockedFiles(void);
 void CheckAllFiles(void);
 void CheckAllFragmentedFiles(void);
