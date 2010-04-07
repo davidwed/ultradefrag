@@ -73,16 +73,13 @@
  *
  * When there are two different colors assigned to the same item, the
  * darker one marks objects above the size threshold, if one
- * is set. The cyan color represents space temporarily allocated
- * by Windows. 
+ * is set. Dark magenta represents the master file table (MFT),
+ * light magenta - space reserved for the <a href="http://support.microsoft.com/kb/174619">MFT expansion</a>.
+ * The cyan color represents space temporarily allocated by Windows. 
  *
  * Note that files excluded from the defragmentation process
  * are never treated as fragmented. Because trash should not
  * take an attention.
- *
- * The MFT size reported includes used and reserved MFT space,
- * so it is much higher than the MFT size reported by other programs.\n
- * See <A HREF="http://support.microsoft.com/kb/174619" TARGET="_BLANK">How NTFS reserves space for its Master File Table (MFT)</A>
  *
  * <b>Disk Defragmentation Control</b>\n
  * Click Analyse button or type Ctrl+A to start the volume analysis. 

@@ -7,7 +7,7 @@ HISTORY
       visit http://ultradefrag.wikispaces.com/ for tutorials on scheduling
       disk defragmentation tasks through Windows Task Scheduler
     - more reliable monolithic boot time defragmenter was made
-    - hint about reported MFT size differences was added to the handbook
+    - few bugs preventing the correct MFT displaying were fixed in driver
     - one little bug preventing displaying system files in green color
       on NTFS volumes was fixed
     - cluster map appearance in GUI was improved and made absolutely
