@@ -24,7 +24,7 @@
 #include "main.h"
 
 int map_block_size = DEFAULT_MAP_BLOCK_SIZE;
-int grid_line_width = DEFAULT_GRID_LINE_WIDTH;
+int grid_line_width = DEFAULT_GRID_LINE_WIDTH; //10; //50;
 
 int map_blocks_per_line = 145; //65
 int map_lines = 32; //14
@@ -38,7 +38,8 @@ COLORREF grid_color = RGB(0,0,0); //RGB(200,200,200)
 COLORREF colors[NUM_OF_SPACE_STATES] = 
 {
 	RGB(255,255,255),              /* free */
-	RGB(0,180,60),RGB(0,90,30),    /* system */
+	/*RGB(0,180,60),RGB(0,90,30),*/ /* dark green is too dark here... */
+	RGB(67,210,144),RGB(4,164,0),  /* system */
 	RGB(255,0,0),RGB(128,0,0),     /* fragmented */
 	RGB(0,0,255),RGB(0,0,128),     /* unfragmented */
 	RGB(128,0,128),                /* mft */
