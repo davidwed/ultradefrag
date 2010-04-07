@@ -24,7 +24,8 @@
 #ifndef _DFRG_MAIN_H_
 #define _DFRG_MAIN_H_
 
-#define DEFAULT_MAP_BLOCK_SIZE 8 //6 //84
+#define DEFAULT_MAP_BLOCK_SIZE  8 //6 //84
+#define DEFAULT_GRID_LINE_WIDTH 1
 
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much

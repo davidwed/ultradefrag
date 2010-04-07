@@ -24,6 +24,7 @@
 #include "main.h"
 
 int map_block_size = DEFAULT_MAP_BLOCK_SIZE;
+int grid_line_width = DEFAULT_GRID_LINE_WIDTH;
 
 int map_blocks_per_line = 145; //65
 int map_lines = 32; //14
@@ -121,10 +122,10 @@ static void CalculateBitMapDimensions(void)
 	if(GetClientRect(hMap,&rc)){
 		if(MapWindowPoints(hMap,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)))){
 			/* calculate number of blocks and a real size of the map control */
-			map_blocks_per_line = (rc.right - rc.left - 1) / (map_block_size + 1);
-			map_width = (map_block_size + 1) * map_blocks_per_line + 1;
-			map_lines = (rc.bottom - rc.top - 1) / (map_block_size + 1);
-			map_height = (map_block_size + 1) * map_lines + 1;
+			map_blocks_per_line = (rc.right - rc.left - grid_line_width) / (map_block_size + grid_line_width);
+			map_width = (map_block_size + grid_line_width) * map_blocks_per_line + grid_line_width;
+			map_lines = (rc.bottom - rc.top - grid_line_width) / (map_block_size + grid_line_width);
+			map_height = (map_block_size + grid_line_width) * map_lines + grid_line_width;
 			/* center the map control */
 			dx = (rc.right - rc.left - map_width) / 2;
 			dy = (rc.bottom - rc.top - map_height) / 2;
@@ -173,17 +174,24 @@ static BOOL CreateBitMapGrid(void)
 void DrawBitMapGrid(HDC hdc)
 {
 	HPEN hPen, hOldPen;
-	int i;
+	int i, j;
 
+	if(grid_line_width == 0) return;
 	hPen = CreatePen(PS_SOLID,1,grid_color);
 	hOldPen = SelectObject(hdc,hPen);
+	/* draw vertical lines */
 	for(i = 0; i < map_blocks_per_line + 1; i++){
-		(void)MoveToEx(hdc,(map_block_size + 1) * i,0,NULL);
-		(void)LineTo(hdc,(map_block_size + 1) * i,map_height);
+		for(j = 0; j < grid_line_width; j++){
+			(void)MoveToEx(hdc,(map_block_size + grid_line_width) * i + j,0,NULL);
+			(void)LineTo(hdc,(map_block_size + grid_line_width) * i + j,map_height);
+		}
 	}
+	/* draw horizontal lines */
 	for(i = 0; i < map_lines + 1; i++){
-		(void)MoveToEx(hdc,0,(map_block_size + 1) * i,NULL);
-		(void)LineTo(hdc,map_width,(map_block_size + 1) * i);
+		for(j = 0; j < grid_line_width; j++){
+			(void)MoveToEx(hdc,0,(map_block_size + grid_line_width) * i + j,NULL);
+			(void)LineTo(hdc,map_width,(map_block_size + grid_line_width) * i + j);
+		}
 	}
 	(void)SelectObject(hdc,hOldPen);
 	(void)DeleteObject(hPen);
@@ -206,8 +214,8 @@ BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry)
 	hOldBrush = SelectObject(hdc,hBrushes[0]);
 	for(i = 0; i < map_lines; i++){
 		for(j = 0; j < map_blocks_per_line; j++){
-			block_rc.top = (map_block_size + 1) * i + 1;
-			block_rc.left = (map_block_size + 1) * j + 1;
+			block_rc.top = (map_block_size + grid_line_width) * i + grid_line_width;
+			block_rc.left = (map_block_size + grid_line_width) * j + grid_line_width;
 			block_rc.right = block_rc.left + map_block_size;
 			block_rc.bottom = block_rc.top + map_block_size;
 			(void)FillRect(hdc,&block_rc,hBrushes[(int)cluster_map[i * map_blocks_per_line + j]]);
