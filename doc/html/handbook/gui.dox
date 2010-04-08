@@ -182,9 +182,9 @@ show_shutdown_check_confirmation_dialog = 1
 seconds_for_shutdown_rejection = 60
 
 -- cluster map options (restart required to take effect):
--- the size of the block, in pixels; default value is 8
+-- the size of the block, in pixels; default value is 6
 
-map_block_size = 8
+map_block_size = 6
 @endverbatim
  *
  * <b>Windows Boot Time Scan</b>\n
