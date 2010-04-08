@@ -96,16 +96,16 @@ int __stdcall udefrag_init(void)
 {
 	int error_code;
 	
-	/* enable neccessary privileges */
-	/*(void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE); */
-	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE); /* required by GUI client */
-	
 	/* only a single instance of the program ! */
 	error_code = winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event);
 	if(error_code < 0){
 		if(error_code == STATUS_OBJECT_NAME_COLLISION) return UDEFRAG_ALREADY_RUNNING;
 		return (-1);
 	}
+
+	/* enable neccessary privileges */
+	/*(void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE); */
+	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE); /* required by GUI client */
 	return 0;
 }
 

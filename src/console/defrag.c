@@ -46,6 +46,7 @@ int screensaver_mode = 0;
 int all_flag = 0;
 int all_fixed_flag = 0;
 char letters[MAX_DOS_DRIVES] = {0};
+int wait_flag = 0;
 
 BOOL stop_flag = FALSE;
 
@@ -234,11 +235,18 @@ int process_single_volume(void)
 
 	/* do our job */
 	if(m_flag) map_size = map_rows * map_symbols_per_line;
-	error_code = udefrag_init();
-	if(error_code < 0){
-		DisplayDefragError(error_code,"Initialization failed!");
-		cleanup();
-		return 2;
+	while(1){
+		error_code = udefrag_init();
+		if(error_code >= 0) break; /* initialization succeded */
+		if(error_code == UDEFRAG_ALREADY_RUNNING && wait_flag){
+			/* wait one second and try again */
+			Sleep(1000);
+			continue;
+		} else {
+			DisplayDefragError(error_code,"Initialization failed!");
+			cleanup();
+			return 2;
+		}
 	}
 
 	if(m_flag) /* prepare console buffer for map */

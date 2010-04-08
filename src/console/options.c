@@ -54,6 +54,8 @@ extern int all_flag;
 extern int all_fixed_flag;
 extern char letters[MAX_DOS_DRIVES];
 
+extern int wait_flag;
+
 void show_help(void)
 {
 	printf(
@@ -121,6 +123,10 @@ void show_help(void)
 		"       --map-symbols-per-line=n       Number of map symbols\n"
 		"                                      containing in each row of the map.\n"
 		"                                      Default value is 68.\n"
+		"       --wait                         Wait until already running instance\n"
+		"                                      of UltraDefrag completes before\n"
+		"                                      starting the job (useful for\n"
+		"                                      the scheduled defragmentation).\n"
 		"\n"
 		"Volume letter:\n"
 		"  It is possible to specify multiple volume letters, like this:\n\n"
@@ -212,6 +218,11 @@ static struct option long_options_[] = {
 	*/
 	{ "screensaver",                 no_argument,       0,  0  },
 	
+	/*
+	* Miscellaneous options.
+	*/
+	{ "wait",                        no_argument,       0,  0  },
+	
 	{ 0,                             0,                 0,  0  }
 };
 
@@ -294,6 +305,9 @@ void parse_cmdline(int argc, char **argv)
 			}
 			else if(!strcmp(long_option_name,"screensaver")){
 				screensaver_mode = 1;
+			}
+			else if(!strcmp(long_option_name,"wait")){
+				wait_flag = 1;
 			}
 			else if(!strcmp(long_option_name,"map-rows")){
 				if(!optarg) break;

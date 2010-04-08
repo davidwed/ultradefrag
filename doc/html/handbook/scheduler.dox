@@ -37,12 +37,12 @@
  *
  * - Every week:
  * @code
- * cmd.exe /C "set UD_IN_FILTER="%often_accessed_folders%" && udefrag --all-fixed"
+ * cmd.exe /C "set UD_IN_FILTER="%often_accessed_folders%" && udefrag --wait --all-fixed"
  * @endcode
  *
  * - Every two months:
  * @code
- * cmd.exe /C "set UD_EX_FILTER="system volume information;temp;recycler;.zip;.7z;.rar" && set UD_SIZELIMIT=100M && udefrag --all-fixed"
+ * cmd.exe /C "set UD_EX_FILTER="system volume information;temp;recycler;.zip;.7z;.rar" && set UD_SIZELIMIT=100M && udefrag --wait --all-fixed"
  * @endcode
  *
  * This scheme runs automatically and saves a lot of my time, because I have

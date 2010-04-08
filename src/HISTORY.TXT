@@ -6,6 +6,8 @@ HISTORY
       than standard Windows Task Scheduler;
       visit http://ultradefrag.wikispaces.com/ for tutorials on scheduling
       disk defragmentation tasks through Windows Task Scheduler
+    - --wait option was added to the command line interface to make scheduled
+      defragmentation more flexible
     - more reliable monolithic boot time defragmenter was made
     - few bugs preventing the correct MFT displaying were fixed in driver
     - one little bug preventing displaying system files in green color
