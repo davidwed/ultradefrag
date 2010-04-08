@@ -32,6 +32,9 @@ extern int user_defined_column_widths[];
 extern int map_block_size;
 BOOLEAN map_block_size_loaded = FALSE;
 int reloaded_map_block_size = 0;
+extern int grid_line_width;
+BOOLEAN grid_line_width_loaded = FALSE;
+int reloaded_grid_line_width = 0;
 
 /* they have the same effect as environment variables for console program */
 char in_filter[4096] = {0};
@@ -216,6 +219,19 @@ void GetPrefs(void)
 			if(map_block_size == 0) map_block_size = DEFAULT_MAP_BLOCK_SIZE;
 			map_block_size_loaded = TRUE;
 		}
+
+		/* load the grid line width only if it is not already loaded */
+		lua_getglobal(L, "grid_line_width");
+		if(!lua_isnil(L, lua_gettop(L))){
+			reloaded_grid_line_width = (int)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		} else {
+			reloaded_grid_line_width = DEFAULT_GRID_LINE_WIDTH;
+		}
+		if(grid_line_width_loaded == FALSE){
+			grid_line_width = reloaded_grid_line_width;
+			grid_line_width_loaded = TRUE;
+		}
 	}
 	lua_close(L);
 
@@ -275,7 +291,9 @@ void SavePrefs(void)
 		"seconds_for_shutdown_rejection = %u\n\n"
 		"-- cluster map options (restart required to take effect):\n"
 		"-- the size of the block, in pixels; default value is %i\n"
-		"map_block_size = %i\n\n"
+		"map_block_size = %i\n"
+		"-- the grid line width, in pixels; default value is %i\n"
+		"grid_line_width = %i\n\n"
 		"-- window coordinates etc.\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
@@ -296,6 +314,8 @@ void SavePrefs(void)
 		seconds_for_shutdown_rejection,
 		DEFAULT_MAP_BLOCK_SIZE,
 		reloaded_map_block_size ? reloaded_map_block_size : map_block_size,
+		DEFAULT_GRID_LINE_WIDTH,
+		reloaded_grid_line_width ? reloaded_grid_line_width : grid_line_width,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),

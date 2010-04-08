@@ -183,8 +183,9 @@ seconds_for_shutdown_rejection = 60
 
 -- cluster map options (restart required to take effect):
 -- the size of the block, in pixels; default value is 6
-
 map_block_size = 6
+-- the grid line width, in pixels; default value is 1
+grid_line_width = 1
 @endverbatim
  *
  * <b>Windows Boot Time Scan</b>\n
