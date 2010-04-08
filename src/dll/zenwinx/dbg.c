@@ -45,9 +45,19 @@ int  __stdcall winx_debug_print(char *string);
  */
 void winx_init_synch_objects(void)
 {
+	short event_name[64];
+	
+	/*
+	* Attach process ID to the event name
+	* to make it safe for execution
+	* by many parallel processes.
+	*/
+	_snwprintf(event_name,64,L"\\winx_dbgprint_synch_event_%u",
+		(unsigned int)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess));
+	event_name[63] = 0;
+	
 	if(hDbgSynchEvent == NULL){
-		(void)winx_create_event(L"\\winx_dbgprint_synch_event",
-			SynchronizationEvent,&hDbgSynchEvent);
+		(void)winx_create_event(event_name,SynchronizationEvent,&hDbgSynchEvent);
 		if(hDbgSynchEvent) (void)NtSetEvent(hDbgSynchEvent,NULL);
 	}
 }
@@ -162,15 +172,7 @@ int __stdcall winx_debug_print(char *string)
 	dbuffer = (DBG_OUTPUT_DEBUG_STRING_BUFFER *)BaseAddress;
 
 	/* write the process id into the buffer */
-	#if defined(__GNUC__)
-	#ifndef _WIN64
 	dbuffer->ProcessId = (DWORD)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess);
-	#else
-	dbuffer->ProcessId = 0xFFFF; /* eliminates need of NtCurrentTeb() */
-	#endif
-	#else /* not defined(__GNUC__) */
-	dbuffer->ProcessId = (DWORD)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess);
-	#endif
 
 	(void)strncpy(dbuffer->Msg,string,4096-sizeof(ULONG));
 	dbuffer->Msg[4096-sizeof(ULONG)-1] = 0;

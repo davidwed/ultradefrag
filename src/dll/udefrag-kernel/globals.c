@@ -117,17 +117,30 @@ void FreeDriverResources(void)
  */
 void InitSynchObjects(void)
 {
+	short event_name[64];
+	
+	/*
+	* Attach process ID to the event names
+	* to make the code safe for execution
+	* by many parallel processes.
+	*/
 	if(hSynchEvent == NULL){
-		(void)winx_create_event(L"\\udefrag_synch_event",
-			SynchronizationEvent,&hSynchEvent);
+		_snwprintf(event_name,64,L"\\udefrag_synch_event_%u",
+			(unsigned int)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess));
+		event_name[63] = 0;
+		(void)winx_create_event(event_name,SynchronizationEvent,&hSynchEvent);
 	}
 	if(hStopEvent == NULL){
-		(void)winx_create_event(L"\\udefrag_stop_event",
-			NotificationEvent,&hStopEvent);
+		_snwprintf(event_name,64,L"\\udefrag_stop_event_%u",
+			(unsigned int)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess));
+		event_name[63] = 0;
+		(void)winx_create_event(event_name,NotificationEvent,&hStopEvent);
 	}
 	if(hMapEvent == NULL){
-		(void)winx_create_event(L"\\udefrag_map_event",
-			SynchronizationEvent,&hMapEvent);
+		_snwprintf(event_name,64,L"\\udefrag_map_event_%u",
+			(unsigned int)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess));
+		event_name[63] = 0;
+		(void)winx_create_event(event_name,SynchronizationEvent,&hMapEvent);
 	}
 	
 	if(hSynchEvent) (void)NtSetEvent(hSynchEvent,NULL);
