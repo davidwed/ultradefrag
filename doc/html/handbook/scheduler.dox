@@ -42,7 +42,7 @@
  *
  * - Every two months:
  * @code
- * cmd.exe /C "udefrag --all-fixed"
+ * cmd.exe /C "set UD_EX_FILTER="system volume information;temp;recycler;.zip;.7z;.rar" && set UD_SIZELIMIT=100M && udefrag --all-fixed"
  * @endcode
  *
  * This scheme runs automatically and saves a lot of my time, because I have
