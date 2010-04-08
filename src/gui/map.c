@@ -39,10 +39,10 @@ COLORREF colors[NUM_OF_SPACE_STATES] =
 {
 	RGB(255,255,255),               /* free */
 	/*RGB(0,180,60),RGB(0,90,30),*/ /* dark green is too dark here... */
-	RGB(67,210,144),RGB(4,164,0),   /* system */
+	RGB(0,215,32),RGB(4,164,0),     /* system */
 	RGB(255,0,0),RGB(128,0,0),      /* fragmented */
 	RGB(0,0,255),RGB(0,0,128),      /* unfragmented */
-	RGB(212,16,210),RGB(128,0,128), /* mft zone; mft itself */
+	RGB(211,0,255),RGB(128,0,128),  /* mft zone; mft itself */
 	RGB(255,255,0),RGB(238,221,0),  /* directories */
 	RGB(185,185,0),RGB(93,93,0),    /* compressed */
 	RGB(0,255,255)                  /* not checked (temporary) */
