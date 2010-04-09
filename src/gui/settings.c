@@ -291,7 +291,7 @@ void SavePrefs(void)
 		"seconds_for_shutdown_rejection = %u\n\n"
 		"-- cluster map options (restart required to take effect):\n"
 		"-- the size of the block, in pixels; default value is %i\n"
-		"map_block_size = %i\n"
+		"map_block_size = %i\n\n"
 		"-- the grid line width, in pixels; default value is %i\n"
 		"grid_line_width = %i\n\n"
 		"-- window coordinates etc.\n"
