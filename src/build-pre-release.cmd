@@ -18,9 +18,9 @@ cd /D %script_dir%
 
 mkdir pre-release
 echo.
-copy .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe .\pre-release\ultradefrag-%ULTRADFGVER%-RC%ULTRADFGRC%.bin.i386.exe
-copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\pre-release\ultradefrag-%ULTRADFGVER%-RC%ULTRADFGRC%.bin.amd64.exe
-copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\pre-release\ultradefrag-%ULTRADFGVER%-RC%ULTRADFGRC%.bin.ia64.exe
+copy /b /y /v .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe        .\pre-release\ultradefrag-%ULTRADFGVER%-RC%ULTRADFGRC%.bin.i386.exe
+copy /b /y /v .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\pre-release\ultradefrag-%ULTRADFGVER%-RC%ULTRADFGRC%.bin.amd64.exe
+copy /b /y /v .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe   .\pre-release\ultradefrag-%ULTRADFGVER%-RC%ULTRADFGRC%.bin.ia64.exe
 
 cd ..
 echo.
