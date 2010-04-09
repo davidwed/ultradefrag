@@ -183,10 +183,18 @@ seconds_for_shutdown_rejection = 60
 
 -- cluster map options (restart required to take effect):
 -- the size of the block, in pixels; default value is 6
+
 map_block_size = 6
+
 -- the grid line width, in pixels; default value is 1
+
 grid_line_width = 1
 @endverbatim
+ *
+ * It does make sense to set <b>grid_line_width = 0</b>,
+ * if you set <b>map_block_size = 1</b> to be able to use the whole
+ * size of the cluster map.\n
+ * This is especially useful, if you have drives of sizes of 500GB and more.
  *
  * <b>Windows Boot Time Scan</b>\n
  * This section controls the boot time defragmenter. It is disabled
