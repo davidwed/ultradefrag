@@ -808,7 +808,7 @@ input_filename = arg[1]
 if input_filename == nil then
 	error("Filename must be specified!")
 end
-print(input_filename .. " Preparing to makefile generation...\n")
+print(input_filename .. " Preparing the makefile generation...\n")
 
 dofile(input_filename)
 
