@@ -12,7 +12,7 @@ rc = { "dfrg.rc" }
 
 libs = {
 	"kernel32", "user32", "gdi32", "comctl32",
-	"shell32", "msvcrt", "comdlg32", "wininet"
+	"shell32", "msvcrt", "comdlg32", "urlmon"
 }
 adlibs = { 
 	"$(UDEFRAG_LIB_PATH)\\udefrag", 
