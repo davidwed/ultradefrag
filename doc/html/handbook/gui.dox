@@ -189,6 +189,12 @@ map_block_size = 6
 -- the grid line width, in pixels; default value is 1
 
 grid_line_width = 1
+
+-- set disable_latest_version_check parameter to 1
+-- to disable the automatic check for the latest available
+-- version of the program during startup
+
+disable_latest_version_check = 0
 @endverbatim
  *
  * It does make sense to set <b>grid_line_width = 0</b>,
