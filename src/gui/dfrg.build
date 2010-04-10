@@ -1,7 +1,7 @@
 -- this is the UltraDefrag GUI build options
 
 name        = "dfrg"
-target_type ="gui"
+target_type = "gui"
 
 src = {
 	"main.c", "map.c", "settings.c", "i18n.c", "about.c",
