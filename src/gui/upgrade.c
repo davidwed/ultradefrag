@@ -22,7 +22,7 @@
 */
 
 #include "main.h"
-#include "../include/version.h"
+#include "../include/ultradfgver.h"
 
 extern HWND hWindow;
 
@@ -34,14 +34,15 @@ char error_msg[256];
 #define MAX_ANNOUNCEMENT_LEN 128
 short announcement[MAX_ANNOUNCEMENT_LEN];
 
-#define IBindStatusCallback LPVOID
+int disable_latest_version_check = 0;
+
 typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
-	LPUNKNOWN,
-	LPCSTR,
-	LPTSTR,
-	DWORD,
-	DWORD,
-	IBindStatusCallback
+	/* LPUNKNOWN */ void *lpUnkcaller,
+	LPCSTR szURL,
+	LPTSTR szFileName,
+	DWORD cchFileName,
+	DWORD dwReserved,
+	/*IBindStatusCallback*/ void *pBSC
 );
 URLMON_PROCEDURE pURLDownloadToCacheFile;
 
@@ -151,7 +152,7 @@ short *GetNewVersionAnnouncement(void)
 	lv = GetLatestVersion();
 	if(lv == NULL) return NULL;
 	
-	//lv[2] = '4';
+	lv[2] = '4';
 	if(sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li) != 3) return NULL;
 	if(sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci) != 3) return NULL;
 	
@@ -173,6 +174,8 @@ void CheckForTheNewVersion(void)
 {
 	HANDLE h;
 	DWORD id;
+	
+	if(disable_latest_version_check) return;
 	
 	h = create_thread(CheckForTheNewVersionThreadProc,NULL,&id);
 	if(h == NULL)

@@ -35,6 +35,7 @@ int reloaded_map_block_size = 0;
 extern int grid_line_width;
 BOOLEAN grid_line_width_loaded = FALSE;
 int reloaded_grid_line_width = 0;
+extern int disable_latest_version_check;
 
 /* they have the same effect as environment variables for console program */
 char in_filter[4096] = {0};
@@ -232,6 +233,9 @@ void GetPrefs(void)
 			grid_line_width = reloaded_grid_line_width;
 			grid_line_width_loaded = TRUE;
 		}
+
+		disable_latest_version_check = getint(L,
+				"disable_latest_version_check");
 	}
 	lua_close(L);
 
@@ -294,6 +298,10 @@ void SavePrefs(void)
 		"map_block_size = %i\n\n"
 		"-- the grid line width, in pixels; default value is %i\n"
 		"grid_line_width = %i\n\n"
+		"-- set disable_latest_version_check parameter to 1\n"
+		"-- to disable an automatic check for the latest available\n"
+		"-- version of the program during the startup\n"
+		"disable_latest_version_check = %i\n\n"
 		"-- window coordinates etc.\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
@@ -316,6 +324,7 @@ void SavePrefs(void)
 		reloaded_map_block_size ? reloaded_map_block_size : map_block_size,
 		DEFAULT_GRID_LINE_WIDTH,
 		reloaded_grid_line_width ? reloaded_grid_line_width : grid_line_width,
+		disable_latest_version_check,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),

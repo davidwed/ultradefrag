@@ -152,9 +152,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 0;
 	}
 	
-	/* check for the new version of the program */
-	CheckForTheNewVersion();
-
 	GetPrefs();
 
 	error_code = udefrag_init();
@@ -164,6 +161,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		DeleteEnvironmentVariables();
 		return 2;
 	}
+
+	/* check for the new version of the program */
+	CheckForTheNewVersion();
 
 	/*
 	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
