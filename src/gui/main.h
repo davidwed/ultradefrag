@@ -128,6 +128,8 @@ void stop(void);
 void GetPrefs(void);
 void SavePrefs(void);
 
+short *GetNewVersionAnnouncement(void);
+
 /* i18n related functions */
 void SetText(HWND hWnd, short *key);
 

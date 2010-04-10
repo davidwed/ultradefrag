@@ -22,6 +22,7 @@
 */
 
 #include "main.h"
+#include "../include/version.h"
 
 #define VERSION_URL "http://ultradefrag.sourceforge.net/version.ini"
 char version_ini_path[MAX_PATH + 1];
@@ -63,11 +64,11 @@ void DbgDisplayLastError(char *caption)
 }
 
 /**
-* @brief Retrieves the current version number from the project's website.
+* @brief Retrieves the latest version number from the project's website.
 * @return Version number string. NULL indicates failure.
 * @note Based on http://msdn.microsoft.com/en-us/library/ms775122(VS.85).aspx
 */
-char *GetCurrentVersion(void)
+char *GetLatestVersion(void)
 {
 	HMODULE hUrlmonDLL = NULL;
 	HRESULT result;
@@ -120,4 +121,30 @@ char *GetCurrentVersion(void)
 	
 	version_number[MAX_VERSION_FILE_LEN] = 0;
 	return version_number;
+}
+
+/**
+ * @brief Defines whether new version is available for download or not.
+ * @return A string containing an announcement. NULL indicates that
+ * there is no new version available.
+ */
+short *GetNewVersionAnnouncement(void)
+{
+	char *lv;
+	char *cv = VERSIONINTITLE;
+	int lmj, lmn, li; /* latest version numbers */
+	int cmj, cmn, ci; /* current version numbers */
+
+	lv = GetLatestVersion();
+	if(lv == NULL) return NULL;
+	
+	lv[2] = '4';
+	if(sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li) != 3) return NULL;
+	if(sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci) != 3) return NULL;
+	
+	if(lmj > cmj || (lmj == cmj && lmn > cmn) || (lmj == cmj && lmn == cmn && li > ci)){
+		return L"FUCK off!";
+	}
+	
+	return NULL;
 }

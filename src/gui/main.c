@@ -135,17 +135,15 @@ void DisplayStopDefragError(int error_code,char *caption)
 	MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
 }
 
-char *GetCurrentVersion(void);
-
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	int error_code;
-	char *v;
+	short *v;
 	
 	hInstance = GetModuleHandle(NULL);
-	v = GetCurrentVersion();
-	if(v) MessageBox(0,v,0,0);
+	v = GetNewVersionAnnouncement();
+	if(v) MessageBoxW(0,v,0,0);
 
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
