@@ -28,6 +28,8 @@ echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\i
 echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
 rem echo #define NGVERSIONINTITLE "UltraDefrag Next Generation v%ULTRADFGVER%" >> .\include\ultradfgver.h
 
+echo %ULTRADFGVER% > ..\doc\html\version.ini
+
 rem force zenwinx version to be the same as ultradefrag version
 rem echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\dll\zenwinx\zenwinxver.h
 rem echo #define ZENWINX_VERSION2 %ZENWINX_VERSION2% >> .\dll\zenwinx\zenwinxver.h
