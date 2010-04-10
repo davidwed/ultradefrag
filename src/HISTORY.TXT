@@ -18,7 +18,7 @@ HISTORY
       map_block_size parameter added to guiopts.lua configuration file
     - the following translations were updated:
 
-      Czech, Finnish, Japanese, Spanish (AR)
+      Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR)
 
     - installer was updated to include publisher, version, estimated size
       and support link in uninstall information
