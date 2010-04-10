@@ -34,14 +34,14 @@ char error_msg[256];
 #define MAX_ANNOUNCEMENT_LEN 128
 short announcement[MAX_ANNOUNCEMENT_LEN];
 
-#define IBindStatusCallback void
+#define IBindStatusCallback LPVOID
 typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
-	LPUNKNOWN lpUnkcaller,
-	LPCSTR szURL,
-	LPTSTR szFileName,
-	DWORD cchFileName,
-	DWORD dwReserved,
-	IBindStatusCallback *pBSC
+	LPUNKNOWN,
+	LPCSTR,
+	LPTSTR,
+	DWORD,
+	DWORD,
+	IBindStatusCallback
 );
 URLMON_PROCEDURE pURLDownloadToCacheFile;
 
