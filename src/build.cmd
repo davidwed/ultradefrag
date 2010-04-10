@@ -127,6 +127,8 @@ if %errorlevel% neq 0 goto fail
 
 cd..
 
+if "%2" equ "--pre-release" goto end
+
 :build_source_package
 
 echo Build source code package...
