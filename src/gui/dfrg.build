@@ -5,13 +5,14 @@ target_type ="gui"
 
 src = {
 	"main.c", "map.c", "settings.c", "i18n.c", "about.c",
-	"progress.c", "statbar.c", "vollist.c", "job.c", "confirm.c"
+	"progress.c", "statbar.c", "vollist.c", "job.c", "confirm.c",
+	"upgrade.c"
 }
 rc = { "dfrg.rc" }
 
 libs = {
 	"kernel32", "user32", "gdi32", "comctl32",
-	"shell32", "msvcrt", "comdlg32"
+	"shell32", "msvcrt", "comdlg32", "wininet"
 }
 adlibs = { 
 	"$(UDEFRAG_LIB_PATH)\\udefrag", 
