@@ -24,11 +24,15 @@
 #include "main.h"
 #include "../include/version.h"
 
+extern HWND hWindow;
+
 #define VERSION_URL "http://ultradefrag.sourceforge.net/version.ini"
 char version_ini_path[MAX_PATH + 1];
 #define MAX_VERSION_FILE_LEN 32
 char version_number[MAX_VERSION_FILE_LEN + 1];
 char error_msg[256];
+#define MAX_ANNOUNCEMENT_LEN 128
+short announcement[MAX_ANNOUNCEMENT_LEN];
 
 #define IBindStatusCallback void
 typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
@@ -40,6 +44,8 @@ typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 	IBindStatusCallback *pBSC
 );
 URLMON_PROCEDURE pURLDownloadToCacheFile;
+
+DWORD WINAPI CheckForTheNewVersionThreadProc(LPVOID lpParameter);
 
 void DbgDisplayLastError(char *caption)
 {
@@ -74,6 +80,7 @@ char *GetLatestVersion(void)
 	HRESULT result;
 	FILE *f;
 	int res;
+	int i;
 	
 	/* load urlmon.dll library */
 	hUrlmonDLL = LoadLibrary("urlmon.dll");
@@ -119,7 +126,13 @@ char *GetLatestVersion(void)
 		return NULL;
 	}
 	
-	version_number[MAX_VERSION_FILE_LEN] = 0;
+	/* remove trailing \r \n characters if they exists */
+	version_number[res] = 0;
+	for(i = res - 1; i >= 0; i--){
+		if(version_number[i] != '\r' && version_number[i] != '\n') break;
+		version_number[i] = 0;
+	}
+	
 	return version_number;
 }
 
@@ -143,8 +156,39 @@ short *GetNewVersionAnnouncement(void)
 	if(sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci) != 3) return NULL;
 	
 	if(lmj > cmj || (lmj == cmj && lmn > cmn) || (lmj == cmj && lmn == cmn && li > ci)){
-		return L"FUCK off!";
+		_snwprintf(announcement,MAX_ANNOUNCEMENT_LEN,L"%hs%ws",
+			lv,L" release is available for download!");
+		announcement[MAX_ANNOUNCEMENT_LEN - 1] = 0;
+		return announcement;
 	}
 	
 	return NULL;
+}
+
+/**
+ * @brief Checks for the new version available for download.
+ * @note Runs in a separate thread to speedup the GUI window displaying.
+ */
+void CheckForTheNewVersion(void)
+{
+	HANDLE h;
+	DWORD id;
+	
+	h = create_thread(CheckForTheNewVersionThreadProc,NULL,&id);
+	if(h == NULL)
+		DisplayLastError("Cannot create thread checking the latest version of the program!");
+	if(h) CloseHandle(h);
+}
+
+DWORD WINAPI CheckForTheNewVersionThreadProc(LPVOID lpParameter)
+{
+	short *s;
+	
+	s = GetNewVersionAnnouncement();
+	if(s){
+		if(MessageBoxW(hWindow,s,L"You can upgrade me ^-^",MB_OKCANCEL | MB_ICONINFORMATION) == IDOK)
+			(void)WgxShellExecuteW(hWindow,L"open",L"http://ultradefrag.sourceforge.net",NULL,NULL,SW_SHOW);
+	}
+	
+	return 0;
 }

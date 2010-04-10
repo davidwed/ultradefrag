@@ -121,6 +121,8 @@ typedef struct {
 	HBITMAP hbitmap;
 } NEW_VOLUME_LIST_ENTRY, *PNEW_VOLUME_LIST_ENTRY;
 		
+void DisplayLastError(char *caption);
+
 void DoJob(char job_type);
 void stop(void);
 
@@ -128,7 +130,7 @@ void stop(void);
 void GetPrefs(void);
 void SavePrefs(void);
 
-short *GetNewVersionAnnouncement(void);
+void CheckForTheNewVersion(void);
 
 /* i18n related functions */
 void SetText(HWND hWnd, short *key);

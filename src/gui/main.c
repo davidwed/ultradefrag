@@ -139,12 +139,9 @@ void DisplayStopDefragError(int error_code,char *caption)
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	int error_code;
-	short *v;
 	
 	hInstance = GetModuleHandle(NULL);
-	v = GetNewVersionAnnouncement();
-	if(v) MessageBoxW(0,v,0,0);
-
+	
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
 		if(!ex_filter[0] || !strcmp(ex_filter,"system volume information;temp;recycler"))
@@ -155,6 +152,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 0;
 	}
 	
+	/* check for the new version of the program */
+	CheckForTheNewVersion();
+
 	GetPrefs();
 
 	error_code = udefrag_init();
