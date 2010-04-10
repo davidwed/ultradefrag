@@ -151,7 +151,7 @@ short *GetNewVersionAnnouncement(void)
 	lv = GetLatestVersion();
 	if(lv == NULL) return NULL;
 	
-	lv[2] = '4';
+	//lv[2] = '4';
 	if(sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li) != 3) return NULL;
 	if(sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci) != 3) return NULL;
 	
