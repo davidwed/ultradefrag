@@ -22,6 +22,7 @@ HISTORY
 
     - installer was updated to include publisher, version, estimated size
       and support link in uninstall information
+	- update check was added to the GUI
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
     - for programmers: winx_create_thread improved, udefrag.dll interface
