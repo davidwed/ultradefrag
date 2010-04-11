@@ -27,9 +27,9 @@
 #ifndef WINVER
 #define WINVER 0x0400
 #endif
-#ifndef RT_MANIFEST
+
 #include <winresrc.h>
-#endif
+
 #ifdef IDC_STATIC
 #undef IDC_STATIC
 #endif
