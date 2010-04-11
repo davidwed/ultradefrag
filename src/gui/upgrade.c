@@ -120,6 +120,7 @@ char *GetLatestVersion(void)
 	/* read version string */
 	res = fread(version_number,1,MAX_VERSION_FILE_LEN,f);
 	(void)fclose(f);
+	(void)remove(version_ini_path);
 	if(res == 0){
 		OutputDebugString("UltraDefrag: version.ini file reading failed! ");
 		OutputDebugString(version_ini_path);
