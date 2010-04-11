@@ -154,7 +154,7 @@ short *GetNewVersionAnnouncement(void)
 	lv = GetLatestVersion();
 	if(lv == NULL) return NULL;
 	
-	lv[2] = '4';
+	/*lv[2] = '4';*/
 	res = sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li);
 	if(res != 3){
 		OutputDebugString("UltraDefrag: GetNewVersionAnnouncement: the first sscanf call returned ");
