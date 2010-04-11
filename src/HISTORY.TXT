@@ -14,16 +14,15 @@ HISTORY
       on NTFS volumes was fixed
     - cluster map appearance in GUI was improved and made absolutely
       independent from the screen DPI
-    - cluster map block size was made customizable in GUI through
-      map_block_size parameter added to guiopts.lua configuration file
+    - cluster map block size was made customizable in GUI through map_block_size
+      and grid_line_width parameters added to guiopts.lua configuration file
     - the following translations were updated:
 
       Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR)
 
+    - update check was added to the GUI
     - installer was updated to include publisher, version, estimated size,
       custom icon and support link in uninstall information
-	- installer was updated to include custom icon
-	- update check was added to the GUI
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
     - for programmers: winx_create_thread improved, udefrag.dll interface
