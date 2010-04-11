@@ -61,6 +61,7 @@
 
 !ifdef MODERN_UI
   !include "MUI.nsh"
+  !define MUI_ICON "UltraDefrag.ico"
 !endif
 
 !macro LANG_PAGE
@@ -81,6 +82,8 @@ LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 ShowInstDetails show
 ShowUninstDetails show
 SetCompressor /SOLID lzma
+
+Icon "UltraDefrag.ico"
 
 XPStyle on
 RequestExecutionLevel admin
@@ -355,6 +358,7 @@ Section "Ultra Defrag core files (required)" SecCore
   WriteRegStr   HKLM $R0 "Publisher"       "UltraDefrag Development Team"
   WriteRegStr   HKLM $R0 "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"
   WriteRegStr   HKLM $R0 "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr   HKLM $R0 "DisplayIcon"     '"$INSTDIR\uninstall.exe"'
   WriteRegDWORD HKLM $R0 "NoModify" 1
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
