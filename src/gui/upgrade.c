@@ -119,7 +119,7 @@ char *GetLatestVersion(void)
 	
 	/* read version string */
 	res = fread(version_number,1,MAX_VERSION_FILE_LEN,f);
-	fclose(f);
+	(void)fclose(f);
 	if(res == 0){
 		OutputDebugString("UltraDefrag: version.ini file reading failed! ");
 		OutputDebugString(version_ini_path);
@@ -148,13 +148,29 @@ short *GetNewVersionAnnouncement(void)
 	char *cv = VERSIONINTITLE;
 	int lmj, lmn, li; /* latest version numbers */
 	int cmj, cmn, ci; /* current version numbers */
+	int res;
+	char buf[32];
 
 	lv = GetLatestVersion();
 	if(lv == NULL) return NULL;
 	
-	//lv[2] = '4';
-	if(sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li) != 3) return NULL;
-	if(sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci) != 3) return NULL;
+	lv[2] = '4';
+	res = sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li);
+	if(res != 3){
+		OutputDebugString("UltraDefrag: GetNewVersionAnnouncement: the first sscanf call returned ");
+		(void)_itoa(res,buf,10);
+		OutputDebugString(buf);
+		OutputDebugString("\n");
+		return NULL;
+	}
+	res = sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci);
+	if(res != 3){
+		OutputDebugString("UltraDefrag: GetNewVersionAnnouncement: the second sscanf call returned ");
+		(void)_itoa(res,buf,10);
+		OutputDebugString(buf);
+		OutputDebugString("\n");
+		return NULL;
+	}
 	
 	if(lmj > cmj || (lmj == cmj && lmn > cmn) || (lmj == cmj && lmn == cmn && li > ci)){
 		_snwprintf(announcement,MAX_ANNOUNCEMENT_LEN,L"%hs%ws",
