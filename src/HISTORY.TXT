@@ -20,8 +20,9 @@ HISTORY
 
       Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR)
 
-    - installer was updated to include publisher, version, estimated size
-      and support link in uninstall information
+    - installer was updated to include publisher, version, estimated size,
+      custom icon and support link in uninstall information
+	- installer was updated to include custom icon
 	- update check was added to the GUI
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
