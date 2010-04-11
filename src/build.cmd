@@ -87,6 +87,7 @@ echo Build installer...
 cd .\bin
 copy /Y ..\installer\UltraDefrag.nsi .\
 copy /Y ..\installer\UltraDefrag.nsh .\
+copy /Y ..\installer\UltraDefrag.ico .\
 copy /Y ..\installer\lang.ini .\
 copy /Y ..\installer\lang-classical.ini .\
 
@@ -107,6 +108,7 @@ if "%1" equ "" goto build_source_package
 :build_x64_installer
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
 copy /Y ..\installer\UltraDefrag.nsh .\amd64\
+copy /Y ..\installer\UltraDefrag.ico .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
 copy /Y ..\installer\lang-classical.ini .\amd64\
 
@@ -119,6 +121,7 @@ if "%1" equ "--use-pellesc" goto build_source_package
 if "%1" equ "--use-mingw-x64" goto build_source_package
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
 copy /Y ..\installer\UltraDefrag.nsh .\ia64\
+copy /Y ..\installer\UltraDefrag.ico .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
 copy /Y ..\installer\lang-classical.ini .\ia64\
 cd ia64
