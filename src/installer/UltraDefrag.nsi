@@ -61,7 +61,8 @@
 
 !ifdef MODERN_UI
   !include "MUI.nsh"
-  !define MUI_ICON "UltraDefrag.ico"
+  !define MUI_ICON "udefrag-install.ico"
+  !define MUI_UNICON "udefrag-uninstall.ico"
 !endif
 
 !macro LANG_PAGE
@@ -83,7 +84,7 @@ ShowInstDetails show
 ShowUninstDetails show
 SetCompressor /SOLID lzma
 
-Icon "UltraDefrag.ico"
+Icon "udefrag-install.ico"
 
 XPStyle on
 RequestExecutionLevel admin
