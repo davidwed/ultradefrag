@@ -101,7 +101,7 @@ char *GetLatestVersion(void)
 	result = pURLDownloadToCacheFile(NULL,VERSION_URL,version_ini_path,MAX_PATH,0,NULL);
 	version_ini_path[MAX_PATH] = 0;
 	if(result != S_OK){
-		if(result == E_OUTOFMEMORY) OutputDebugString("UltraDefrag: no enough memory for URLDownloadToCacheFile!");
+		if(result == E_OUTOFMEMORY) OutputDebugString("UltraDefrag: not enough memory for URLDownloadToCacheFile!");
 		else OutputDebugString("UltraDefrag: URLDownloadToCacheFile failed!");
 		return NULL;
 	}
@@ -173,10 +173,15 @@ short *GetNewVersionAnnouncement(void)
 		return NULL;
 	}
 	
-	if(lmj > cmj || (lmj == cmj && lmn > cmn) || (lmj == cmj && lmn == cmn && li > ci)){
+	if(lmj > cmj || lmn > cmn || li > ci){
 		_snwprintf(announcement,MAX_ANNOUNCEMENT_LEN,L"%hs%ws",
 			lv,L" release is available for download!");
 		announcement[MAX_ANNOUNCEMENT_LEN - 1] = 0;
+		
+		_snprintf(buf, sizeof(buf), "Upgrade to %s !",lv);
+		OutputDebugString(buf);
+		OutputDebugString("\n");
+		
 		return announcement;
 	}
 	
