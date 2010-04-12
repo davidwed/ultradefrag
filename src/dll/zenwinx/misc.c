@@ -67,7 +67,9 @@ void __stdcall winx_sleep(int msec)
  */
 int __stdcall winx_get_os_version(void)
 {
-	OSVERSIONINFOW ver;
+	RTL_OSVERSIONINFOW ver;
+	
+	ver.dwOSVersionInfoSize = sizeof(ver);
 
 	if(winx_get_proc_address(L"ntdll.dll","RtlGetVersion",
 	  (void *)&func_RtlGetVersion) < 0) return 40;
