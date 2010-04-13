@@ -50,6 +50,12 @@
 /** @} */
 
 /**
+ * @defgroup WebAnalytics Web Analytics API
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Misc Miscellaneous
  * @{
  */

@@ -30,6 +30,8 @@
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
+void __stdcall IncreaseWebAnalyticsCounterAsynch(char *url);
+
 #define settextcolor(c) (void)SetConsoleTextAttribute(hOut,c)
 
 /* global variables */
@@ -346,6 +348,9 @@ int __cdecl main(int argc, char **argv)
 		console_attr = csbi.wAttributes;
 	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	
+	/* collect statistics about the UltraDefrag command line client use */
+	IncreaseWebAnalyticsCounterAsynch("http://ultradefrag.sourceforge.net/appstat/console.html");
+
 	/* handle help request */
 	if(h_flag){
 		show_help();

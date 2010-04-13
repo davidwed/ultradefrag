@@ -4,7 +4,7 @@ name        = "wgx"
 target_type = "dll"
 
 src = {
-	"accel.c", "i18n.c", "misc.c", "wgx.c", "config.c"
+	"accel.c", "i18n.c", "misc.c", "wgx.c", "config.c", "web-analytics.c"
 }
 
 rc = { "wgx.rc" }

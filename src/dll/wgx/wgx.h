@@ -73,4 +73,6 @@ BOOL __stdcall WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
 BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf);
 BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf);
 
+BOOL __stdcall IncreaseWebAnalyticsCounter(char *url);
+void __stdcall IncreaseWebAnalyticsCounterAsynch(char *url);
 #endif /* _WGX_H_ */

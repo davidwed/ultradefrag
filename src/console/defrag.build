@@ -3,8 +3,14 @@ name        = "udefrag"
 target_type = "console"
 
 -- getopt* files will be copied by build.cmd command to obj\console directory
+-- web-analytics.c and wgx.h will be copied from dll\wgx directory
+-- we cannot link directly to wgx.dll, because it depends on Lua missing
+-- in Micro Edition
 
-src = { "defrag.c", "getopt.c", "getopt1.c", "options.c", "map.c" }
+src = {
+	"defrag.c", "getopt.c", "getopt1.c", "options.c", "map.c",
+	"web-analytics.c"
+}
 rc = { "defrag.rc" }
 
 libs = { "kernel32", "msvcrt" }

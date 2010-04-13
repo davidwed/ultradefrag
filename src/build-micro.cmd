@@ -55,6 +55,10 @@ xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 
 copy /Y .\obj\share\*.c .\obj\console\
 
+rem we cannot link directly to wgx.dll, because it depends on Lua missing in Micro Edition
+copy /Y .\obj\wgx\web-analytics.c .\obj\console\
+copy /Y .\obj\wgx\wgx.h .\obj\console\
+
 rem xcopy /I /Y /Q /S source destination
 
 mkdir obj\dll
