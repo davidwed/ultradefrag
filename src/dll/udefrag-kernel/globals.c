@@ -83,13 +83,13 @@ void InitDriverResources(void)
 
 	/* get windows version */
 	os_version = winx_get_os_version();
-	mj = os_version / 10;
-	mn = os_version % 10;
+	mj = os_version / 100;
+	mn = os_version % 100;
 	/* FIXME: windows 9x? */
 	DebugPrint("Windows NT %u.%u\n",mj,mn);
 	/*dx->xp_compatible = (((mj << 6) + mn) > ((5 << 6) + 0));*/
 	nt4_system = (mj == 4) ? 1 : 0;
-	w2k_system = (os_version == 50) ? 1 : 0;
+	w2k_system = (os_version == 500) ? 1 : 0;
 	
 	InitSynchObjects();
 	

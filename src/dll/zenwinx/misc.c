@@ -55,12 +55,12 @@ void __stdcall winx_sleep(int msec)
 
 /**
  * @brief Returns the version of Windows.
- * @return major_version_number * 10 + minor_version_number.
+ * @return major_version_number * 100 + minor_version_number.
  * @note Works fine on NT 4.0 and later systems. Otherwise 
- *       always returns 40.
+ *       always returns 400.
  * @par Example:
  * @code 
- * if(winx_get_os_version() >= 51){
+ * if(winx_get_os_version() >= 501){
  *     // we are running on XP or later system
  * }
  * @endcode
@@ -69,12 +69,12 @@ int __stdcall winx_get_os_version(void)
 {
 	RTL_OSVERSIONINFOW ver;
 	
-	ver.dwOSVersionInfoSize = sizeof(ver);
+	ver.dwOSVersionInfoSize = sizeof(RTL_OSVERSIONINFOW);
 
 	if(winx_get_proc_address(L"ntdll.dll","RtlGetVersion",
-	  (void *)&func_RtlGetVersion) < 0) return 40;
+	  (void *)&func_RtlGetVersion) < 0) return 400;
 	func_RtlGetVersion(&ver);
-	return (ver.dwMajorVersion * 10 + ver.dwMinorVersion);
+	return (ver.dwMajorVersion * 100 + ver.dwMinorVersion);
 }
 
 /**
