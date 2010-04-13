@@ -68,6 +68,7 @@ void DbgDisplayLastError(char *caption)
 		OutputDebugString((LPCTSTR)lpMsgBuf);
 		LocalFree(lpMsgBuf);
 	}
+	OutputDebugString("\n");
 }
 
 /**
@@ -86,14 +87,14 @@ char *GetLatestVersion(void)
 	/* load urlmon.dll library */
 	hUrlmonDLL = LoadLibrary("urlmon.dll");
 	if(hUrlmonDLL == NULL){
-		DbgDisplayLastError("UltraDefrag: LoadLibrary(urlmon.dll) failed! ");
+		DbgDisplayLastError("GetLatestVersion: LoadLibrary(urlmon.dll) failed! ");
 		return NULL;
 	}
 	
 	/* get an address of procedure downloading a file */
 	pURLDownloadToCacheFile = (URLMON_PROCEDURE)GetProcAddress(hUrlmonDLL,"URLDownloadToCacheFileA");
 	if(pURLDownloadToCacheFile == NULL){
-		DbgDisplayLastError("UltraDefrag: URLDownloadToCacheFile not found in urlmon.dll! ");
+		DbgDisplayLastError("GetLatestVersion: URLDownloadToCacheFile not found in urlmon.dll! ");
 		return NULL;
 	}
 	
@@ -101,8 +102,9 @@ char *GetLatestVersion(void)
 	result = pURLDownloadToCacheFile(NULL,VERSION_URL,version_ini_path,MAX_PATH,0,NULL);
 	version_ini_path[MAX_PATH] = 0;
 	if(result != S_OK){
-		if(result == E_OUTOFMEMORY) OutputDebugString("UltraDefrag: not enough memory for URLDownloadToCacheFile!");
-		else OutputDebugString("UltraDefrag: URLDownloadToCacheFile failed!");
+		if(result == E_OUTOFMEMORY) OutputDebugString("GetLatestVersion: Not enough memory for URLDownloadToCacheFile!");
+		else OutputDebugString("GetLatestVersion: URLDownloadToCacheFile failed!");
+		OutputDebugString("\n");
 		return NULL;
 	}
 	
@@ -110,7 +112,7 @@ char *GetLatestVersion(void)
 	f = fopen(version_ini_path,"rb");
 	if(f == NULL){
 		(void)_snprintf(error_msg,sizeof(error_msg) - 1,
-			"Cannot open %s! %s",
+			"Cannot open %s! %s\n",
 			version_ini_path,_strerror(NULL));
 		error_msg[sizeof(error_msg) - 1] = 0;
 		OutputDebugString(error_msg);
@@ -120,11 +122,13 @@ char *GetLatestVersion(void)
 	/* read version string */
 	res = fread(version_number,1,MAX_VERSION_FILE_LEN,f);
 	(void)fclose(f);
-	(void)remove(version_ini_path); /* remove cached data */
+	/* remove cached data, otherwise it may not be loaded next time */
+	(void)remove(version_ini_path);
 	if(res == 0){
-		OutputDebugString("UltraDefrag: version.ini file reading failed! ");
+		OutputDebugString("GetLatestVersion: version.ini file reading failed! ");
 		OutputDebugString(version_ini_path);
 		if(feof(f)) OutputDebugString(" File seems to be empty.");
+		OutputDebugString("\n");
 		return NULL;
 	}
 	
@@ -158,7 +162,7 @@ short *GetNewVersionAnnouncement(void)
 	/*lv[2] = '4';*/
 	res = sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li);
 	if(res != 3){
-		OutputDebugString("UltraDefrag: GetNewVersionAnnouncement: the first sscanf call returned ");
+		OutputDebugString("GetNewVersionAnnouncement: the first sscanf call returned ");
 		(void)_itoa(res,buf,10);
 		OutputDebugString(buf);
 		OutputDebugString("\n");
@@ -166,7 +170,7 @@ short *GetNewVersionAnnouncement(void)
 	}
 	res = sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci);
 	if(res != 3){
-		OutputDebugString("UltraDefrag: GetNewVersionAnnouncement: the second sscanf call returned ");
+		OutputDebugString("GetNewVersionAnnouncement: the second sscanf call returned ");
 		(void)_itoa(res,buf,10);
 		OutputDebugString(buf);
 		OutputDebugString("\n");
@@ -202,7 +206,7 @@ void CheckForTheNewVersion(void)
 	
 	h = create_thread(CheckForTheNewVersionThreadProc,NULL,&id);
 	if(h == NULL)
-		DisplayLastError("Cannot create thread checking the latest version of the program!");
+		DbgDisplayLastError("Cannot create thread checking the latest version of the program! ");
 	if(h) CloseHandle(h);
 }
 
