@@ -178,7 +178,8 @@ short *GetNewVersionAnnouncement(void)
 			lv,L" release is available for download!");
 		announcement[MAX_ANNOUNCEMENT_LEN - 1] = 0;
 		
-		_snprintf(buf, sizeof(buf), "Upgrade to %s !",lv);
+		_snprintf(buf, sizeof(buf), "Upgrade to %s!",lv);
+		buf[sizeof(buf) - 1] = 0;
 		OutputDebugString(buf);
 		OutputDebugString("\n");
 		
