@@ -82,7 +82,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	udefrag_monolithic_native_app_init();
 
 	/* 2. Display Copyright */
-	/* if(winx_get_os_version() < 501) */
+	/* if(winx_get_os_version() < 51) */
 	winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007-2010.\n\n"

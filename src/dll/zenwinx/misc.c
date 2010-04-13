@@ -55,12 +55,15 @@ void __stdcall winx_sleep(int msec)
 
 /**
  * @brief Returns the version of Windows.
- * @return major_version_number * 100 + minor_version_number.
- * @note Works fine on NT 4.0 and later systems. Otherwise 
- *       always returns 400.
+ * @return major_version_number * 10 + minor_version_number.
+ * @note
+ * - Works fine on NT 4.0 and later systems. Otherwise always returns 40.
+ * - Useless on Windows 9x. Though, the complete zenwinx library is useless
+ * there since there are many required calls missing in ntdll library 
+ * on windows 9x.
  * @par Example:
  * @code 
- * if(winx_get_os_version() >= 501){
+ * if(winx_get_os_version() >= 51){
  *     // we are running on XP or later system
  * }
  * @endcode
@@ -72,9 +75,9 @@ int __stdcall winx_get_os_version(void)
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
 
 	if(winx_get_proc_address(L"ntdll.dll","RtlGetVersion",
-	  (void *)&func_RtlGetVersion) < 0) return 400;
+	  (void *)&func_RtlGetVersion) < 0) return 40;
 	func_RtlGetVersion(&ver);
-	return (ver.dwMajorVersion * 100 + ver.dwMinorVersion);
+	return (ver.dwMajorVersion * 10 + ver.dwMinorVersion);
 }
 
 /**
