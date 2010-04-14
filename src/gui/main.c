@@ -156,6 +156,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	/* collect statistics about the UltraDefrag GUI client use */
 	IncreaseWebAnalyticsCounterAsynch("http://ultradefrag.sourceforge.net/appstat/gui.html");
+#ifdef _WIN64
+	IncreaseWebAnalyticsCounterAsynch("http://ultradefrag.sourceforge.net/appstat/gui64.html");
+#endif
 
 	error_code = udefrag_init();
 	if(error_code < 0){

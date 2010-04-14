@@ -350,6 +350,9 @@ int __cdecl main(int argc, char **argv)
 	
 	/* collect statistics about the UltraDefrag command line client use */
 	IncreaseWebAnalyticsCounterAsynch("http://ultradefrag.sourceforge.net/appstat/console.html");
+#ifdef _WIN64
+	IncreaseWebAnalyticsCounterAsynch("http://ultradefrag.sourceforge.net/appstat/console64.html");
+#endif
 
 	/* handle help request */
 	if(h_flag){
