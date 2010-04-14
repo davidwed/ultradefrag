@@ -18,5 +18,5 @@ EXPORTS
 	WgxGetLogFontStructureFromFile@8
 	WgxSaveLogFontStructureToFile@8
 
-	IncreaseWebAnalyticsCounter@4
-	IncreaseWebAnalyticsCounterAsynch@4
+	IncreaseGoogleAnalyticsCounter@12
+	IncreaseGoogleAnalyticsCounterAsynch@12

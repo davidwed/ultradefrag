@@ -27,8 +27,12 @@
 #define WIN32_NO_STATUS
 #include <windows.h>
 #include <stdio.h>
+#include <time.h>
 
 #include "wgx.h"
+
+#define MAX_GA_REQUEST_LENGTH 1024
+char ga_request[MAX_GA_REQUEST_LENGTH];
 
 typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 	/* LPUNKNOWN */ void *lpUnkcaller,
@@ -41,64 +45,36 @@ typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 URLMON_PROCEDURE pURLDownloadToCacheFile;
 
 void DbgDisplayLastError(char *caption);
-DWORD WINAPI IncreaseWebAnalyticsCounterThreadProc(LPVOID lpParameter);
+DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter);
 
 /**
- * @brief Increases a Google Analytics counter
- * by loading the specified page.
- * @param[in] url the address of the page.
- * @return Boolean value indicating the status of
- * the operation. TRUE means success, FALSE - failure.
- * @note This function is designed especially to
- * collect statistics about the use of the program,
- * or about the frequency of some error, or about
- * similar things through Google Analytics service.
- *
- * How it works. It loads the specified page which
- * contains a Google Analytics counter code inside.
- * Thus it translates the frequency of some event
- * inside your application to the frequency of an 
- * access to some predefined webpage. Therefore
- * you will have a handy nice looking report of
- * application events frequencies. And moreover,
- * it will represent statistics globally, collected
- * from all instances of the program.
- *
- * It is not supposed to increase counters of your
- * website though! If you'll try to use it for 
- * illegal purposes, remember - you are forewarned
- * and we have no responsibility for your illegal 
- * actions.
- * @par Example 1:
- * @code
- * // collect statistics about the UltraDefrag GUI client use
- * IncreaseWebAnalyticsCounter("http://ultradefrag.sourceforge.net/appstat/gui.html");
- * @endcode
- * @par Example 2:
- * @code
- * if(cannot_define_windows_version){
- *     // collect statistics about this error frequency
- *     IncreaseWebAnalyticsCounter("http://ultradefrag.sourceforge.net/appstat/errors/winver.html");
- * }
- * @endcode
  */
-BOOL __stdcall IncreaseWebAnalyticsCounter(char *url)
+static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 {
 	HMODULE hUrlmonDLL = NULL;
 	HRESULT result;
 	char path[MAX_PATH + 1];
 	
+	if(url == NULL){
+		OutputDebugString("SendWebAnalyticsRequest: invalid URL (NULL)!\n");
+		return FALSE;
+	}
+	
+	OutputDebugString("SendWebAnalyticsRequest: URL = ");
+	OutputDebugString(url);
+	OutputDebugString("\n");
+	
 	/* load urlmon.dll library */
 	hUrlmonDLL = LoadLibrary("urlmon.dll");
 	if(hUrlmonDLL == NULL){
-		DbgDisplayLastError("IncreaseWebAnalyticsCounter: LoadLibrary(urlmon.dll) failed! ");
+		DbgDisplayLastError("SendWebAnalyticsRequest: LoadLibrary(urlmon.dll) failed! ");
 		return FALSE;
 	}
 	
 	/* get an address of procedure downloading a file */
 	pURLDownloadToCacheFile = (URLMON_PROCEDURE)GetProcAddress(hUrlmonDLL,"URLDownloadToCacheFileA");
 	if(pURLDownloadToCacheFile == NULL){
-		DbgDisplayLastError("IncreaseWebAnalyticsCounter: URLDownloadToCacheFile not found in urlmon.dll! ");
+		DbgDisplayLastError("SendWebAnalyticsRequest: URLDownloadToCacheFile not found in urlmon.dll! ");
 		return FALSE;
 	}
 	
@@ -106,8 +82,8 @@ BOOL __stdcall IncreaseWebAnalyticsCounter(char *url)
 	result = pURLDownloadToCacheFile(NULL,url,path,MAX_PATH,0,NULL);
 	path[MAX_PATH] = 0;
 	if(result != S_OK){
-		if(result == E_OUTOFMEMORY) OutputDebugString("Not enough memory for IncreaseWebAnalyticsCounter!");
-		else OutputDebugString("IncreaseWebAnalyticsCounter: URLDownloadToCacheFile failed!");
+		if(result == E_OUTOFMEMORY) OutputDebugString("Not enough memory for SendWebAnalyticsRequest!");
+		else OutputDebugString("SendWebAnalyticsRequest: URLDownloadToCacheFile failed!");
 		OutputDebugString("\n");
 		return FALSE;
 	}
@@ -119,25 +95,22 @@ BOOL __stdcall IncreaseWebAnalyticsCounter(char *url)
 
 /**
  */
-DWORD WINAPI IncreaseWebAnalyticsCounterThreadProc(LPVOID lpParameter)
+DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter)
 {
-	(void)IncreaseWebAnalyticsCounter((char *)lpParameter);
+	(void)SendWebAnalyticsRequest((char *)lpParameter);
 	return 0;
 }
 
 /**
- * @brief An asynchronous equivalent 
- * of IncreaseWebAnalyticsCounter.
- * @note Runs in a separate thread.
  */
-void __stdcall IncreaseWebAnalyticsCounterAsynch(char *url)
+static void __stdcall SendWebAnalyticsRequestAsynch(char *url)
 {
 	HANDLE h;
 	DWORD id;
 	
-	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)IncreaseWebAnalyticsCounterThreadProc,(void *)url,0,&id);
+	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)SendWebAnalyticsRequestThreadProc,(void *)url,0,&id);
 	if(h == NULL)
-		DbgDisplayLastError("Cannot create thread for IncreaseWebAnalyticsCounterAsynch!" );
+		DbgDisplayLastError("Cannot create thread for SendWebAnalyticsRequestAsynch!" );
 	if(h) CloseHandle(h);
 }
 
@@ -164,6 +137,96 @@ void DbgDisplayLastError(char *caption)
 		LocalFree(lpMsgBuf);
 	}
 	OutputDebugString("\n");
+}
+
+/**
+ * @note Based on http://www.vdgraaf.info/google-analytics-without-javascript.html
+ * and http://code.google.com/apis/analytics/docs/tracking/gaTrackingTroubleshooting.html
+ */
+static char * __stdcall build_ga_request(char *hostname,char *path,char *account)
+{
+	int utmn, utmhid, cookie, random;
+	__int64 today;
+	
+	srand((unsigned int)time(NULL));
+	utmn = (rand() << 16) + rand();
+	utmhid = (rand() << 16) + rand();
+	cookie = (rand() << 16) + rand();
+	random = (rand() << 16) + rand();
+	today = (__int64)time(NULL);
+	
+	(void)_snprintf(ga_request,MAX_GA_REQUEST_LENGTH,
+		"http://www.google-analytics.com/__utm.gif?utmwv=4.6.5"
+		"&utmn=%u"
+		"&utmhn=%s"
+		"&utmhid=%u"
+		"&utmr=-"
+		"&utmp=%s"
+		"&utmac=%s"
+		"&utmcc=__utma%%3D%u.%u.%I64u.%I64u.%I64u.50%%3B%%2B__utmz%%3D%u.%I64u.27.2.utmcsr%%3Dgoogle.com%%7Cutmccn%%3D(referral)%%7Cutmcmd%%3Dreferral%%7Cutmcct%%3D%%2F%3B",
+		utmn,hostname,utmhid,path,account,
+		cookie,random,today,today,today,cookie,today
+		);
+	ga_request[MAX_GA_REQUEST_LENGTH - 1] = 0;
+	return ga_request;
+}
+
+/**
+ * @brief Increases a Google Analytics counter
+ * by sending the request directly to the service.
+ * @param[in] hostname the name of the host.
+ * @param[in] path the relative path of the page.
+ * @param[in] account the account string.
+ * @return Boolean value indicating the status of
+ * the operation. TRUE means success, FALSE - failure.
+ * @note This function is designed especially to
+ * collect statistics about the use of the program,
+ * or about the frequency of some error, or about
+ * similar things through Google Analytics service.
+ *
+ * How it works. It sends a request to Google 
+ * Analytics service as described here: 
+ * http://code.google.com/apis/analytics/docs/
+ * (see Troubleshooting section).
+ * Thus it translates the frequency of some event
+ * inside your application to the frequency of an 
+ * access to some predefined webpage. Therefore
+ * you will have a handy nice looking report of
+ * application events frequencies. And moreover,
+ * it will represent statistics globally, collected
+ * from all instances of the program.
+ *
+ * It is not supposed to increase counters of your
+ * website though! If you'll try to use it for 
+ * illegal purposes, remember - you are forewarned
+ * and we have no responsibility for your illegal 
+ * actions.
+ * @par Example 1:
+ * @code
+ * // collect statistics about the UltraDefrag GUI client use
+ * IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui.html","UA-13022964-1");
+ * @endcode
+ * @par Example 2:
+ * @code
+ * if(cannot_define_windows_version){
+ *     // collect statistics about this error frequency
+ *     IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/errors/winver.html","UA-13022964-1");
+ * }
+ * @endcode
+ */
+BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account)
+{
+	return SendWebAnalyticsRequest(build_ga_request(hostname,path,account));
+}
+
+/**
+ * @brief An asynchronous equivalent 
+ * of IncreaseGoogleAnalyticsCounter.
+ * @note Runs in a separate thread.
+ */
+void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account)
+{
+	SendWebAnalyticsRequestAsynch(build_ga_request(hostname,path,account));
 }
 
 /** @} */
