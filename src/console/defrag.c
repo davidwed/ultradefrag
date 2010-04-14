@@ -30,7 +30,7 @@
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
-void __stdcall IncreaseWebAnalyticsCounterAsynch(char *url);
+void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
 
 #define settextcolor(c) (void)SetConsoleTextAttribute(hOut,c)
 
@@ -349,9 +349,9 @@ int __cdecl main(int argc, char **argv)
 	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	
 	/* collect statistics about the UltraDefrag command line client use */
-	IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console.html","UA-13022964-1");
+	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console.html","UA-13022964-1");
 #ifdef _WIN64
-	IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console64.html","UA-13022964-1");
+	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console64.html","UA-13022964-1");
 #endif
 
 	/* handle help request */
