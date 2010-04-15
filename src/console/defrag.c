@@ -349,8 +349,9 @@ int __cdecl main(int argc, char **argv)
 	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	
 	/* collect statistics about the UltraDefrag command line client use */
-	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console.html","UA-13022964-1");
-#ifdef _WIN64
+#ifndef _WIN64
+	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console32.html","UA-13022964-1");
+#else
 	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console64.html","UA-13022964-1");
 #endif
 
