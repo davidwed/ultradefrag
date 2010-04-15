@@ -198,7 +198,7 @@ BOOLEAN AddFile(short *path,PFILE_BOTH_DIR_INFORMATION pFileInfo)
 	
 	/* Initialize pfn->name field. */
 	if(!RtlCreateUnicodeString(&pfn->name,path)){
-		DebugPrint("No enough memory for pfn->name initialization!\n");
+		DebugPrint("Not enough memory for pfn->name initialization!\n");
 		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		out_of_memory_condition_counter ++;
 		return FALSE;

@@ -94,7 +94,7 @@ int register_cmd(void)
 	(void)RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
 	data = malloc(size + strlen(cmd) + 10);
 	if(!data){
-		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
+		if(!silent) MessageBox(0,"Not enough memory!","Error",MB_OK | MB_ICONHAND);
 		(void)RegCloseKey(hKey);
 		return 4;
 	}
@@ -145,7 +145,7 @@ int unregister_cmd(void)
 	(void)RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
 	data = malloc(size + strlen(cmd) + 10);
 	if(!data){
-		if(!silent) MessageBox(0,"No enough memory!","Error",MB_OK | MB_ICONHAND);
+		if(!silent) MessageBox(0,"Not enough memory!","Error",MB_OK | MB_ICONHAND);
 		(void)RegCloseKey(hKey);
 		return 8;
 	}
@@ -161,7 +161,7 @@ int unregister_cmd(void)
 
 	new_data = malloc(size);
 	if(!new_data){
-		if(!silent) DisplayLastError("No enough memory!");
+		if(!silent) DisplayLastError("Not enough memory!");
 		(void)RegCloseKey(hKey);
 		free(data);
 		return 10;

@@ -227,7 +227,7 @@ NT_STATUS_DESCRIPTION status_descriptions[] = {
 	{ STATUS_OBJECT_PATH_SYNTAX_BAD, "Bad syntax in path"             },
 	{ STATUS_BUFFER_TOO_SMALL,       "Buffer is too small"            },
 	{ STATUS_ACCESS_DENIED,          "Access denied"                  },
-	{ STATUS_NO_MEMORY,              "No enough memory"               },
+	{ STATUS_NO_MEMORY,              "Not enough memory"              },
 	{ STATUS_UNSUCCESSFUL,           "Operation failed"               },
 	{ STATUS_NOT_IMPLEMENTED,        "Not implemented"                },
 	{ STATUS_INVALID_INFO_CLASS,     "Invalid info class"             },

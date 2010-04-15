@@ -217,7 +217,7 @@ BOOLEAN ScanMFT(void)
 	tm = _rdtsc();
 	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)winx_heap_alloc(nfrob_size);
 	if(!pnfrob){
-		DebugPrint("No enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
+		DebugPrint("Not enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
 		out_of_memory_condition_counter ++;
 		DebugPrint("MFT scan finished!\n");
 		return FALSE;
@@ -226,7 +226,7 @@ BOOLEAN ScanMFT(void)
 	/* allocate memory for MY_FILE_INFORMATION structure */
 	pmfi = (PMY_FILE_INFORMATION)winx_heap_alloc(sizeof(MY_FILE_INFORMATION));
 	if(!pmfi){
-		DebugPrint("No enough memory for MY_FILE_INFORMATION structure!\n");
+		DebugPrint("Not enough memory for MY_FILE_INFORMATION structure!\n");
 		out_of_memory_condition_counter ++;
 		winx_heap_free(pnfrob);
 		DebugPrint("MFT scan finished!\n");
@@ -970,7 +970,7 @@ void AnalyseAttributeFromMftRecord(ULONGLONG mft_id,ATTRIBUTE_TYPE attr_type,
 	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)winx_heap_alloc(nfrob_size);
 	if(!pnfrob){
 		DebugPrint("AnalyseAttributeFromMftRecord():\n");
-		DebugPrint("No enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
+		DebugPrint("Not enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
 		out_of_memory_condition_counter ++;
 		return;
 	}
@@ -1578,7 +1578,7 @@ PFILENAME FindFileListEntryForTheAttribute(WCHAR *full_path,PMY_FILE_INFORMATION
 	
 	/* fill a name member of the created structure */
 	if(!RtlCreateUnicodeString(&pfn->name,full_path)){
-		DebugPrint("No enough memory for pfn->name initialization!\n");
+		DebugPrint("Not enough memory for pfn->name initialization!\n");
 		out_of_memory_condition_counter ++;
 		winx_list_remove_item((list_entry **)(void *)&filelist,(list_entry *)pfn);
 		return NULL;

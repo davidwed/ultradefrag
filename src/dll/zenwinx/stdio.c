@@ -104,8 +104,8 @@ int __cdecl winx_printf(const char *format, ...)
 	
 	small_buffer = winx_heap_alloc(INTERNAL_BUFFER_SIZE);
 	if(!small_buffer){
-		DebugPrint("No enough memory for winx_printf()!\n");
-		winx_print("\nNo enough memory for winx_printf()!\n");
+		DebugPrint("Not enough memory for winx_printf()!\n");
+		winx_print("\nNot enough memory for winx_printf()!\n");
 		return 0;
 	}
 
@@ -118,8 +118,8 @@ int __cdecl winx_printf(const char *format, ...)
 		do {
 			big_buffer = winx_heap_alloc((SIZE_T)size);
 			if(!big_buffer){
-				DebugPrint("No enough memory for winx_printf()!\n");
-				winx_print("\nNo enough memory for winx_printf()!\n");
+				DebugPrint("Not enough memory for winx_printf()!\n");
+				winx_print("\nNot enough memory for winx_printf()!\n");
 				va_end(arg);
 				winx_heap_free(small_buffer);
 				return 0;

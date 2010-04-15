@@ -238,7 +238,7 @@ BOOL GetBootExecuteRegistrationStatus(void)
 	data = malloc(size + 10);
 	if(!data){
 		(void)RegCloseKey(hKey);
-		MessageBox(0,"No enough memory for GetBootExecuteRegistrationStatus()!",
+		MessageBox(0,"Not enough memory for GetBootExecuteRegistrationStatus()!",
 			"Error",MB_OK | MB_ICONHAND);
 		return FALSE;
 	}

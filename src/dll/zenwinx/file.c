@@ -47,7 +47,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("Cannot open %s! No enough memory!",filename);
+		DebugPrint("Cannot open %s! Not enough memory!",filename);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -93,7 +93,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	f = (WINX_FILE *)winx_heap_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		DebugPrint("Cannot open %s! No enough memory!",filename);
+		DebugPrint("Cannot open %s! Not enough memory!",filename);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -258,7 +258,7 @@ int __stdcall winx_create_directory(const char *path)
 
 	RtlInitAnsiString(&as,path);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("Cannot create %s! No enough memory!",path);
+		DebugPrint("Cannot create %s! Not enough memory!",path);
 		return (-1);
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -302,7 +302,7 @@ int __stdcall winx_delete_file(const char *filename)
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("Cannot delete %s! No enough memory!",filename);
+		DebugPrint("Cannot delete %s! Not enough memory!",filename);
 		return (-1);
 	}
 

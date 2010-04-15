@@ -319,7 +319,7 @@ char * __stdcall udefrag_get_error_description(int error_code)
 		return "NTFS volumes with cluster size greater than 4 kb\n"
 		       "cannot be defragmented on Windows 2000.";
 	case UDEFRAG_NO_MEM:
-		return "No enough memory.";
+		return "Not enough memory.";
 	case UDEFRAG_CDROM:
 		return "It is impossible to defragment CDROM drive.";
 	case UDEFRAG_REMOTE:

@@ -212,7 +212,7 @@ BOOL __stdcall WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
 
 	error_msg = malloc(buffer_length * sizeof(short));
 	if(error_msg == NULL){
-		MessageBoxW(hwnd,L"No enough memory!",L"Error!",MB_OK | MB_ICONHAND);
+		MessageBoxW(hwnd,L"Not enough memory!",L"Error!",MB_OK | MB_ICONHAND);
 		return FALSE;
 	}
 	
