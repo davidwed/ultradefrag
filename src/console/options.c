@@ -56,6 +56,9 @@ extern char letters[MAX_DOS_DRIVES];
 
 extern int wait_flag;
 
+extern int use_entire_window;
+void CalculateClusterMapDimensions(void);
+
 void show_help(void)
 {
 	printf(
@@ -123,6 +126,8 @@ void show_help(void)
 		"       --map-symbols-per-line=n       Number of map symbols\n"
 		"                                      containing in each row of the map.\n"
 		"                                      Default value is 68.\n"
+		"       --use-entire-window            Expand cluster map to use entire\n"
+		"                                      console window.\n" 
 		"       --wait                         Wait until already running instance\n"
 		"                                      of UltraDefrag completes before\n"
 		"                                      starting the job (useful for\n"
@@ -207,6 +212,7 @@ static struct option long_options_[] = {
 	{ "map-symbol",                  required_argument, 0,  0  },
 	{ "map-rows",                    required_argument, 0,  0  },
 	{ "map-symbols-per-line",        required_argument, 0,  0  },
+	{ "use-entire-window",           no_argument,       0,  0  },
 	
 	/*
 	* Help.
@@ -309,6 +315,9 @@ void parse_cmdline(int argc, char **argv)
 			else if(!strcmp(long_option_name,"wait")){
 				wait_flag = 1;
 			}
+			else if(!strcmp(long_option_name,"use-entire-window")){
+				use_entire_window = 1;
+			}
 			else if(!strcmp(long_option_name,"map-rows")){
 				if(!optarg) break;
 				rows = atoi(optarg);
@@ -394,4 +403,7 @@ void parse_cmdline(int argc, char **argv)
 	
 	letter = letters[0];
 	if(!l_flag && !all_flag && !all_fixed_flag && !letter) h_flag = 1;
+	
+	/* calculate map dimensions if --use-entire-window flag is set */
+	if(use_entire_window) CalculateClusterMapDimensions();
 }

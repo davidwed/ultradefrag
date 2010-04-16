@@ -289,7 +289,7 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 			  "  Free space                   = %s\r\n\r\n"
 			  "  Total number of files        = %u\r\n"
 			  "  Number of fragmented files   = %u\r\n"
-			  "  Fragments per file           = %u.%02u\r\n",
+			  "  Fragments per file           = %u.%02u\r\n\r\n",
 			  total_space,
 			  free_space,
 			  pstat->filecounter,

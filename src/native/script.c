@@ -168,7 +168,7 @@ void ProcessVolume(char letter,char defrag_command)
 	}
 
 	if(udefrag_get_progress(&stat,NULL) >= 0)
-		winx_printf("\n%s\n\n",udefrag_get_default_formatted_results(&stat));
+		winx_printf("\n%s\n",udefrag_get_default_formatted_results(&stat));
 }
 
 /* various commands */

@@ -71,9 +71,36 @@ short map_border_color = BORDER_COLOR;
 char map_symbol = MAP_SYMBOL;
 int map_rows = BLOCKS_PER_VLINE;
 int map_symbols_per_line = BLOCKS_PER_HLINE;
+int use_entire_window = 0;
+extern int v_flag;
 
 void DisplayLastError(char *caption);
 void clear_line(FILE *f);
+
+/* adjust map dimensions to fill entire screen */
+void CalculateClusterMapDimensions(void)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	HANDLE h;
+	SMALL_RECT sr;
+
+	h = GetStdHandle(STD_OUTPUT_HANDLE);
+	if(GetConsoleScreenBufferInfo(h,&csbi)){
+		map_symbols_per_line = csbi.srWindow.Right - csbi.srWindow.Left - 2;
+		if(v_flag == 0)
+			map_rows = csbi.srWindow.Bottom - csbi.srWindow.Top - 10;
+		else
+			map_rows = csbi.srWindow.Bottom - csbi.srWindow.Top - 20;
+		/* scroll buffer one line up */
+		if(csbi.srWindow.Top > 0){
+			sr.Top = sr.Bottom = -1;
+			sr.Left = sr.Right = 0;
+			(void)SetConsoleWindowInfo(h,FALSE,&sr);
+		}
+	} else {
+		printf("CalculateClusterMapDimensions() failed!\n\n");
+	}
+}
 
 void AllocateClusterMap(void)
 {
@@ -151,10 +178,33 @@ void RedrawMap(void)
 
 void InitializeMapDisplay(void)
 {
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	COORD cursor_pos;
+
 	clear_line(stderr);
 	fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %u/%u",
 		letter,"analyze:  ",0.00,0,0);
 	RedrawMap();
+
+	if(use_entire_window){
+		/* reserve a single line for the next command prompt */
+		if(v_flag == 0)
+			printf("\n");
+		else
+			printf("\n\n\n\n\n\n\n\n\n\n\n");
+		/* move cursor back to the previous line */
+		if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
+			DisplayLastError("Cannot retrieve cursor position!");
+			return; /* impossible to determine the current cursor position  */
+		}
+		cursor_pos.X = 0;
+		if(v_flag == 0)
+			cursor_pos.Y = csbi.dwCursorPosition.Y - 1;
+		else
+			cursor_pos.Y = csbi.dwCursorPosition.Y - 11;
+		if(!SetConsoleCursorPosition(hOut,cursor_pos))
+			DisplayLastError("Cannot set cursor position!");
+	}
 }
 
 BOOL first_run = TRUE;

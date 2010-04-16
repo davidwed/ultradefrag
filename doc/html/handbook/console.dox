@@ -73,6 +73,8 @@
  * <dd>Number of rows in cluster map. Default value is 10.</dd>
  * <dt>--map-symbols-per-line=n</dt>
  * <dd>Number of map symbols containing in each row of the map. Default value is 68.</dd>
+ * <dt>--use-entire-window</dt>
+ * <dd>Expand cluster map to use entire console window.</dd>
  * <dt>--wait</dt>
  * <dd>Wait until already running instance of UltraDefrag completes before 
  * starting the job (useful for the scheduled defragmentation).</dd>
