@@ -350,9 +350,13 @@ int __cdecl main(int argc, char **argv)
 	
 	/* collect statistics about the UltraDefrag command line client use */
 #ifndef _WIN64
-	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console32.html","UA-13022964-1");
+	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-x86.html","UA-13022964-1");
 #else
-	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console64.html","UA-13022964-1");
+	#if defined(_IA64_)
+		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-ia64.html","UA-13022964-1");
+	#else
+		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-x64.html","UA-13022964-1");
+	#endif
 #endif
 
 	/* handle help request */
