@@ -205,13 +205,13 @@ static char * __stdcall build_ga_request(char *hostname,char *path,char *account
  * @par Example 1:
  * @code
  * // collect statistics about the UltraDefrag GUI client use
- * IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui.html","UA-13022964-1");
+ * IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui.html","UA-15890458-1");
  * @endcode
  * @par Example 2:
  * @code
  * if(cannot_define_windows_version){
  *     // collect statistics about this error frequency
- *     IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/errors/winver.html","UA-13022964-1");
+ *     IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/errors/winver.html","UA-15890458-1");
  * }
  * @endcode
  */
