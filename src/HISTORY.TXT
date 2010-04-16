@@ -20,7 +20,7 @@ HISTORY
       and grid_line_width parameters added to guiopts.lua configuration file
     - the following translations were updated:
 
-      Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR)
+      Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR), Korean
 
     - update check was added to the GUI
     - installer was updated to include publisher, version, estimated size,
