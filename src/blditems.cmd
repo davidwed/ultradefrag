@@ -61,6 +61,7 @@ cd ..\utf8-16
 lua ..\..\tools\mkmod.lua utf8-16.build
 if %errorlevel% neq 0 goto end
 
+rem skip GUI when building the micro edition
 if "%UD_MICRO_EDITION%" equ "1" goto skip_gui
 
 cd ..\wgx
