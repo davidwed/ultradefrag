@@ -30,9 +30,9 @@ td.cell_3 {
 <div class="content">
   <div id="top">
 	<div id="icons">
-	<a href="index.html" title="Home page"><img src="../images/home.gif" alt="Home" /></a>
-	<a href="../images/msg.jpg" title="UltraDefrag Authors" rel="lightbox"><img src="../images/contact.gif" alt="Contact" /></a>
-	<a href="index.html" title="Sitemap"><img src="../images/sitemap.gif" alt="Sitemap" /></a>
+	<a href="index.html" title="Home page"><img src="../images/home.gif" alt="Home" width="40" height="40" /></a>
+	<a href="../images/msg.jpg" title="UltraDefrag Authors" rel="lightbox"><img src="../images/contact.gif" alt="Contact" width="40" height="40" /></a>
+	<a href="index.html" title="Sitemap"><img src="../images/sitemap.gif" alt="Sitemap" width="40" height="40" /></a>
 	<a href="http://sourceforge.net/export/rss2_projnews.php?group_id=199532&amp;rss_fulltext=1" title="RSS News Feed"><img src="../images/rss.gif" alt="RSS News Feed" width="40" height="40" /></a>
 	</div> 
 	<h1>ULTRADEFRAG</h1>
@@ -54,12 +54,13 @@ td.cell_3 {
  <div id="main">
    <div id="right_side">
 	 <div class="pad">
-		 <img src="../images/ultra_defrag.gif" alt="" />
+		 <img src="../images/ultra_defrag.gif" alt="" width="196" height="158" />
 		 
 		 <div align="right" style="margin-right: 8px">
-			 <a href="../index.html"><img src="../flags/gif/us.gif" alt="English(US)" border="0" title="English(US)" /></a>
-			 <a href="../ru/index.html"><img src="../flags/gif/ru.gif" alt="Russian" border="0" title="Русский" /></a>
-			 <a href="../de/index.html"><img src="../flags/gif/de.gif" alt="German" border="0" title="Deutsch" /></a>
+			 <a href="../index.html"><img src="../flags/gif/us.gif" alt="English(US)" border="0" title="English(US)" width="16" height="11" /></a>
+			 <a href="../ru/index.html"><img src="../flags/gif/ru.gif" alt="Russian" border="0" title="Русский" width="16" height="11" /></a>
+			 <a href="../de/index.html"><img src="../flags/gif/de.gif" alt="German" border="0" title="Deutsch" width="16" height="11" /></a>
+			 <a href="../fa/index.html"><img src="../flags/gif/ir.gif" alt="Persian" border="0" title="فارسی" width="16" height="11" /></a>
 		 </div>
 		 
 		 <h3>ULTRA DEFRAG</h3>
@@ -114,8 +115,8 @@ wikispaces_color_fontsize = "83%";
 
 		 <hr />
 
-<p><a href="http://sourceforge.net/export/rss2_keepsake.php?group_id=199532"><img src="../images/feedIcon16.png" alt="" /> - Subscribe to News</a></p>
-<p><a href="http://sourceforge.net/api/file/index/project-id/199532/mtime/desc/rss"><img src="../images/feedIcon16.png" alt="" /> - Subscribe to New Releases</a></p>
+<p><a href="http://sourceforge.net/export/rss2_keepsake.php?group_id=199532"><img src="../images/feedIcon16.png" alt="" width="16" height="16" /> - Subscribe to News</a></p>
+<p><a href="http://sourceforge.net/api/file/index/project-id/199532/mtime/desc/rss"><img src="../images/feedIcon16.png" alt="" width="16" height="16" /> - Subscribe to New Releases</a></p>
 
 		 <hr />
 
