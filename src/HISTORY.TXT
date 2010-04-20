@@ -25,6 +25,7 @@ HISTORY
     - update check was added to the GUI
     - installer was updated to include publisher, version, estimated size,
       custom icon and support link in uninstall information
+    - few wrong prototypes in /src/dll/zenwinx/ntndk.h file were fixed
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
     - for programmers: winx_create_thread improved, udefrag.dll interface
