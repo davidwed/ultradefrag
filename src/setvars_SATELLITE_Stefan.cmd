@@ -1,7 +1,7 @@
 @echo off
 echo Set Stefans' environment variables...
-set WINDDKBASE=C:\WinDDK\7600.16385.1
-:: set WINDDKBASE=C:\WinDDK\3790.1830
+:: set WINDDKBASE=C:\WinDDK\7600.16385.1
+set WINDDKBASE=C:\WinDDK\3790.1830
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v7.0
 set MINGWBASE=
 set MINGWx64BASE=
