@@ -44,7 +44,7 @@ char last_operation = 0;
 int progress_bar_length = 0;
 
 UDEFRAG_JOB_TYPE job_type;
-ULONG pass_number;
+int pass_number;
 
 BOOLEAN scripting_mode = TRUE;
 
