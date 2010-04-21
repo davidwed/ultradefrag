@@ -28,6 +28,9 @@
 #include "../include/ultradfgver.h"
 #include "../dll/zenwinx/zenwinx.h"
 
+#define PROGRESS_BAR_LENGTH 50
+#define PROGRESS_BAR_SYMBOL '-'
+
 short file_buffer[32768];
 short line_buffer[32768];
 short name_buffer[128];
@@ -35,8 +38,11 @@ short value_buffer[4096];
 short *command;
 int echo_flag = 1;
 int abort_flag = 0;
-char last_op = 0;
-int i = 0,j = 0,k; /* number of '-' */
+
+/* progress bar related stuff */
+char last_operation = 0;
+int progress_bar_length = 0;
+
 UDEFRAG_JOB_TYPE job_type;
 ULONG pass_number;
 
@@ -47,55 +53,79 @@ BOOLEAN scripting_mode = TRUE;
 
 void ExtractToken(short *dest, short *src, int max_chars);
 
-/* Volume defragmentation code */
+void PrintOperationHeader(char operation)
+{
+	switch(operation){
+	case 'a':
+	case 'A':
+		winx_printf("\nAnalyse : ");
+		break;
+	case 'd':
+	case 'D':
+		winx_printf("\nDefrag  : ");
+		break;
+	case 'c':
+	case 'C':
+		winx_printf("\nOptimize: ");
+		break;
+	}
+}
+
+void IncreaseProgressBar(int new_length)
+{
+	int i;
+	
+	for(i = progress_bar_length; i < new_length; i++)
+		winx_putch(PROGRESS_BAR_SYMBOL);
+	progress_bar_length = new_length;
+}
+
+void PrintOptimizerPassNumber(int n)
+{
+	char s[64];
+
+	if(n != 0xffffffff && n > pass_number){
+		pass_number = n;
+		(void)_itoa(pass_number,s,10);
+		winx_printf("\n\nPass %s ...\n",s);
+		winx_printf("Use Pause/Break key to abort the process.\n");
+	}
+}
+
 void UpdateProgress()
 {
 	STATISTIC stat;
 	double percentage;
-	char s[64];
 
+	/* get current progress counters */
 	if(udefrag_get_progress(&stat,&percentage) < 0) return;
 
-	if(stat.current_operation != last_op){
-		if(last_op){
-			for(k = i; k < 50; k++)
-				winx_putch('-'); /* 100 % of previous operation */
-			if(stat.pass_number != 0xffffffff && stat.pass_number > pass_number){
-				pass_number = stat.pass_number;
-				(void)_itoa(pass_number,s,10);
-				winx_printf("\n\nPass %s ...\n",s);
-				winx_printf("Use Pause/Break key to abort the process.\n");
-			}
-		} else {
-			if(stat.current_operation != 'A'){
-				winx_printf("\nAnalyse : ");
-				for(k = 0; k < 50; k++)
-					winx_putch('-');
-			}
+	/* check wheter we have a new operation or the last one is not completed yet */
+	if(stat.current_operation != last_operation){
+		/* sure, we have a new operation */
+		
+		/* complete the last operation draw */
+		if(last_operation)
+			IncreaseProgressBar(PROGRESS_BAR_LENGTH);
+		
+		/* print pass number (works only with optimizer running) */
+		PrintOptimizerPassNumber(stat.pass_number);
+		
+		/* insert an initial volume analysis bar if we have jumped over it */
+		if(last_operation == 0 && stat.current_operation != 'A'){
+			PrintOperationHeader('A');
+			progress_bar_length = 0;
+			IncreaseProgressBar(PROGRESS_BAR_LENGTH);
 		}
-		i = 0; /* new operation */
-		//winx_printf("\n%c: ",stat.current_operation);
-		switch(stat.current_operation){
-		case 'a':
-		case 'A':
-			winx_printf("\nAnalyse : ");
-			break;
-		case 'd':
-		case 'D':
-			winx_printf("\nDefrag  : ");
-			break;
-		case 'c':
-		case 'C':
-			winx_printf("\nOptimize: ");
-			break;
-		}
-		last_op = stat.current_operation;
+		
+		/* start the new operation draw */
+		PrintOperationHeader(stat.current_operation);
+		last_operation = stat.current_operation;
+		progress_bar_length = 0;
 	}
-	j = (int)percentage / 2;
-	for(k = i; k < j; k++)
-		winx_putch('-');
-	i = j;
-	return;
+	
+	/* draw the progress increment */
+	IncreaseProgressBar((int)percentage * PROGRESS_BAR_LENGTH / 100);
 }
 
 int __stdcall update_stat(int df)
@@ -113,7 +143,7 @@ int __stdcall update_stat(int df)
 	UpdateProgress();
 	if(df == TRUE){
 		if(!abort_flag) /* set progress to 100 % */
-			for(k = i; k < 50; k++)	winx_putch('-');
+			IncreaseProgressBar(PROGRESS_BAR_LENGTH);
 	}
 	return 0;
 }
@@ -135,8 +165,8 @@ void ProcessVolume(char letter,char defrag_command)
 		return;
 	}
 	
-	i = j = 0;
-	last_op = 0;
+	last_operation = 0;
+	progress_bar_length = 0;
 	volume_name[0] = letter; volume_name[1] = 0;
 	winx_printf("\nPreparing to ");
 	switch(defrag_command){
