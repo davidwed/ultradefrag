@@ -38,6 +38,7 @@ short value_buffer[4096];
 short *command;
 int echo_flag = 1;
 int abort_flag = 0;
+int debug_print = DBG_NORMAL;
 
 /* progress bar related stuff */
 char last_operation = 0;
@@ -52,6 +53,21 @@ BOOLEAN scripting_mode = TRUE;
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
 void ExtractToken(short *dest, short *src, int max_chars);
+
+void GetDebugLevel()
+{
+	short *val = value_buffer;
+	
+	if(winx_query_env_variable(L"UD_DBGPRINT_LEVEL",value_buffer,sizeof(value_buffer)) >= 0){
+		(void)_wcsupr(value_buffer);
+		if(!wcscmp(value_buffer,L"DETAILED"))
+			debug_print = DBG_DETAILED;
+		else if(!wcscmp(value_buffer,L"PARANOID"))
+			debug_print = DBG_PARANOID;
+		else if(!wcscmp(value_buffer,L"NORMAL"))
+			debug_print = DBG_NORMAL;
+	}
+}
 
 void PrintOperationHeader(char operation)
 {
@@ -103,6 +119,10 @@ void UpdateProgress()
 	/* check wheter we have a new operation or the last one is not completed yet */
 	if(stat.current_operation != last_operation){
 		/* sure, we have a new operation */
+		if (debug_print > DBG_NORMAL) {
+			winx_printf("\n\nLast Operation ...... %c,", last_operation ? last_operation : '-');
+			winx_printf(" Current Operation ... %c\n", stat.current_operation);
+		}
 		
 		/* complete the last operation draw */
 		if(last_operation)
@@ -373,11 +393,14 @@ void ParseCommand(void)
 		*/
 		if(!scripting_mode) abort_flag = 0;
 		
+		GetDebugLevel();
+		
 		/* process volumes specified on the command line */
 		for(i = 0; i < n_letters; i++){
 			if(abort_flag) break;
 			letter = letters[i];
 			ProcessVolume(letter,cmd);
+			if (debug_print > DBG_NORMAL) winx_sleep(5000);
 		}
 		
 		if(abort_flag) return;
@@ -390,6 +413,7 @@ void ParseCommand(void)
 				if(abort_flag) break;
 				letter = v[i].letter;
 				ProcessVolume(letter,cmd);
+				if (debug_print > DBG_NORMAL) winx_sleep(5000);
 			}
 		}
 		
