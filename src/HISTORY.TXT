@@ -11,7 +11,7 @@ HISTORY
     - --use-entire-window option was added to the command line interface
     - more reliable monolithic boot time defragmenter was made
     - few bugs preventing the correct MFT displaying were fixed in driver
-	- fixed a bug preventing OS version check to work on later Windows versions
+    - fixed a bug preventing OS version check to work on later Windows versions
     - one little bug preventing displaying system files in green color
       on NTFS volumes was fixed
     - cluster map appearance in GUI was improved and made absolutely

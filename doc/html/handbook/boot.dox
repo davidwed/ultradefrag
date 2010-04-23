@@ -54,17 +54,6 @@
  * UltraDefrag checks for boot options and returns immediately if
  * Safe Mode flag has been found.
  *
- * Note that when boot time defragmenter is enabled the following
- * modules becomes critical for the Windows boot process: udefrag.dll,
- * udefrag-kernel.dll, zenwinx.dll. They are located in 
- * \%windir\%\\system32 directory. If one of them is missing during the
- * boot time defragmentation attempt, Windows may crash with BSOD.
- * This is not a program's bug, this is one of the Windows internal
- * mistakes. To disable the boot time interface on broken system use
- * <a href="http://en.wikipedia.org/wiki/BartPE">BartPE</a> or other
- * system recovery disk and delete \%windir\%\\system32\\defrag_native.exe
- * file on your system.
- *
  * <h1>Boot time script</h1>
  * The boot time script consists of the disk defragmentation commands,
  * ancillary commands and comments (with a semicolon (;) or # characters
