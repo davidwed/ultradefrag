@@ -31,6 +31,15 @@
 /* uncomment it if you want to replace smss.exe by this program */
 //#define USE_INSTEAD_SMSS
 
+/*
+* We're releasing this module as a monolithic thing to
+* prevent BSOD in case of missing UltraDefrag native libraries.
+* Otherwise the following modules becomes critical for the Windows
+* boot process: udefrag.dll, udefrag-kernel.dll, zenwinx.dll.
+* We don't know how to build monolithic app on MinGW,
+* but on Windows DDK this works fine.
+*/
+
 extern short line_buffer[32768];
 extern BOOLEAN scripting_mode;
 

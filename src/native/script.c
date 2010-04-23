@@ -56,8 +56,6 @@ void ExtractToken(short *dest, short *src, int max_chars);
 
 void GetDebugLevel()
 {
-	short *val = value_buffer;
-	
 	if(winx_query_env_variable(L"UD_DBGPRINT_LEVEL",value_buffer,sizeof(value_buffer)) >= 0){
 		(void)_wcsupr(value_buffer);
 		if(!wcscmp(value_buffer,L"DETAILED"))
@@ -161,10 +159,8 @@ int __stdcall update_stat(int df)
 		abort_flag = 1;
 	}
 	UpdateProgress();
-	if(df == TRUE){
-		if(!abort_flag) /* set progress to 100 % */
-			IncreaseProgressBar(PROGRESS_BAR_LENGTH);
-	}
+	if(df && !abort_flag) /* set progress to 100 % */
+		IncreaseProgressBar(PROGRESS_BAR_LENGTH);
 	return 0;
 }
 
