@@ -53,6 +53,8 @@ int progress_line_length = 0;
 #define NAME_BUF_SIZE (sizeof(name_buffer) / sizeof(short))
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
+#define BREAK_MESSAGE "Use Pause/Break key to abort the process.\n\n"
+
 void ExtractToken(short *dest, short *src, int max_chars);
 
 void GetDebugLevel()
@@ -147,19 +149,19 @@ void ProcessVolume(char letter,char defrag_command)
 	case 'a':
 		job_type = ANALYSE_JOB;
 		winx_printf("analyse %c: ...\n",letter);
-		winx_printf("Use Pause/Break key to abort the process.\n\n");
+		winx_printf(BREAK_MESSAGE);
 		status = udefrag_start(volume_name,ANALYSE_JOB,0,update_stat);
 		break;
 	case 'd':
 		job_type = DEFRAG_JOB;
 		winx_printf("defragment %c: ...\n",letter);
-		winx_printf("Use Pause/Break key to abort the process.\n\n");
+		winx_printf(BREAK_MESSAGE);
 		status = udefrag_start(volume_name,DEFRAG_JOB,0,update_stat);
 		break;
 	case 'c':
 		job_type = OPTIMIZE_JOB;
 		winx_printf("optimize %c: ...\n",letter);
-		winx_printf("Use Pause/Break key to abort the process.\n\n");
+		winx_printf(BREAK_MESSAGE);
 		status = udefrag_start(volume_name,OPTIMIZE_JOB,0,update_stat);
 		break;
 	}
