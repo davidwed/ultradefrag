@@ -228,7 +228,8 @@ int __cdecl winx_getche(void)
 	int ch;
 
 	ch = winx_getch();
-	if(ch != -1 && ch != 0) winx_putch(ch);
+	if(ch != -1 && ch != 0 && ch != 0x08) /* skip backspace */
+		winx_putch(ch);
 	return ch;
 }
 
@@ -261,7 +262,7 @@ int __cdecl winx_gets(char *string,int n)
 				string[i] = 0;
 				return (-1);
 			}
-		} while(ch == 0);
+		} while(ch == 0 || ch == 0x08); /* skip backspace */
 		if(ch == 13){
 			winx_putch('\n');
 			string[i] = 0;
