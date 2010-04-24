@@ -44,7 +44,6 @@ int abort_flag = 0;
 int debug_print = DBG_NORMAL;
 
 UDEFRAG_JOB_TYPE job_type;
-char volume_letter = 0;
 BOOLEAN scripting_mode = TRUE;
 
 /* for the progress draw speedup */
@@ -142,7 +141,6 @@ void ProcessVolume(char letter,char defrag_command)
 	}
 	
 	volume_name[0] = letter; volume_name[1] = 0;
-	volume_letter = letter;
 	progress_line_length = 0;
 	winx_printf("\nPreparing to ");
 	switch(defrag_command){
