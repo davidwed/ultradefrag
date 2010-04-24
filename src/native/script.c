@@ -87,7 +87,8 @@ void UpdateProgress(int completed)
 		op = stat.current_operation;
 		if(op == 'A' || op == 'a')      op_name = "Analyze:  ";
 		else if(op == 'D' || op == 'd') op_name = "Defrag:   ";
-		else                            op_name = "Optimize: ";
+		else if(op == 'C' || op == 'c') op_name = "Optimize: ";
+		else                            op_name = "          ";
 		if(!completed){
 			p1 = (int)(percentage * 100.00);
 			p2 = p1 % 100;
