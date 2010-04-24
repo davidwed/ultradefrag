@@ -85,7 +85,7 @@ void UpdateProgress(int completed)
 		else if(op == 'D' || op == 'd') op_name = "Defrag:   ";
 		else if(op == 'C' || op == 'c') op_name = "Optimize: ";
 		else                            op_name = "          ";
-		if(!completed){
+		if(!completed || abort_flag){
 			p1 = (int)(percentage * 100.00);
 			p2 = p1 % 100;
 			p1 = p1 / 100;
@@ -97,7 +97,8 @@ void UpdateProgress(int completed)
 			n = (stat.pass_number == 0xffffffff) ? 0 : stat.pass_number;
 			_snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed",n,op_name,p1,p2);
 		} else {
-			_snprintf(s,sizeof(s),"%s%3u.%02u%% completed",op_name,p1,p2);
+			if (abort_flag) _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted",op_name,p1,p2);
+			else _snprintf(s,sizeof(s),"%s%3u.%02u%% completed",op_name,p1,p2);
 		}
 		s[sizeof(s) - 1] = 0;
 		_snprintf(format,sizeof(format),"\r%%-%us",progress_line_length);
