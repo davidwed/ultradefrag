@@ -47,6 +47,9 @@ UDEFRAG_JOB_TYPE job_type;
 char volume_letter = 0;
 BOOLEAN scripting_mode = TRUE;
 
+/* for the progress draw speedup */
+int progress_line_length = 0;
+
 #define NAME_BUF_SIZE (sizeof(name_buffer) / sizeof(short))
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
@@ -65,24 +68,16 @@ void GetDebugLevel()
 	}
 }
 
-void clear_line(void)
-{
-	int i;
-	
-	winx_putch('\r');
-	for(i = 0; i < 60; i++) /* FIXME: define exactly line width */
-		winx_putch(0x20); /* fill by spaces */
-	winx_putch('\r');
-}
-
 void UpdateProgress(int completed)
 {
 	STATISTIC stat;
 	double percentage;
 	int p1, p2, n;
 	char op; char *op_name = "";
+	char s[64];
+	char format[16];
 
-	/* TODO: optimize for speed to make a draw nicer */
+	/* TODO: optimize for speed to make redraw faster */
 	if(udefrag_get_progress(&stat,&percentage) >= 0){
 		op = stat.current_operation;
 		if(op == 'A' || op == 'a')      op_name = "Analyze:  ";
@@ -97,13 +92,17 @@ void UpdateProgress(int completed)
 			p1 = 100;
 			p2 = 0;
 		}
-		clear_line();
 		if(job_type == OPTIMIZE_JOB){
 			n = (stat.pass_number == 0xffffffff) ? 0 : stat.pass_number;
-			winx_printf("\rPass %u:  %s%3u.%02u%% completed",n,op_name,p1,p2);
+			_snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed",n,op_name,p1,p2);
 		} else {
-			winx_printf("\r%s%3u.%02u%% completed",op_name,p1,p2);
+			_snprintf(s,sizeof(s),"%s%3u.%02u%% completed",op_name,p1,p2);
 		}
+		s[sizeof(s) - 1] = 0;
+		_snprintf(format,sizeof(format),"\r%%-%us",progress_line_length);
+		format[sizeof(format) - 1] = 0;
+		winx_printf(format,s);
+		progress_line_length = strlen(s);
 	}
 }
 
@@ -142,6 +141,7 @@ void ProcessVolume(char letter,char defrag_command)
 	
 	volume_name[0] = letter; volume_name[1] = 0;
 	volume_letter = letter;
+	progress_line_length = 0;
 	winx_printf("\nPreparing to ");
 	switch(defrag_command){
 	case 'a':
