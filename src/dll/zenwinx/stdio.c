@@ -254,6 +254,10 @@ int __cdecl winx_gets(char *string,int n)
 		winx_printf("\nwinx_gets() invalid string!\n");
 		return (-1);
 	}
+	if(n <= 0){
+		winx_printf("\nwinx_gets() invalid string length %d!\n",n);
+		return (-1);
+	}
 	
 	for(i = 0; i < n; i ++){
 		do {
@@ -273,6 +277,120 @@ int __cdecl winx_gets(char *string,int n)
 	winx_printf("\nwinx_gets() buffer overflow!\n");
 	string[n-1] = 0;
 	return n;
+}
+
+/**
+ * @brief Displays prompt on the screen and waits for
+ * the user input. When user presses the return key
+ * fills the string pointed by the second parameter 
+ * by characters read.
+ * @param[in] prompt the string to be printed as prompt.
+ * @param[out] string the storage for the input string.
+ * @param[in] n the maximum number of characters to read.
+ * @return Number of characters read including terminal zero.
+ *         Negative value indicates failure.
+ * @note
+ * - Recognizes properly both backslash and escape keys.
+ * - The sentence above works fine only when user input
+ * stands in a single line of the screen.
+ * - This call may terminate the program if NtCancelIoFile() 
+ * fails for one of the existing keyboard devices.
+ */
+int __cdecl winx_prompt(char *prompt,char *string,int n)
+{
+	KEYBOARD_INPUT_DATA kbd;
+	KBD_RECORD kbd_rec;
+	char *buffer;
+	int buffer_length;
+	char format[16];
+	int i, ch, line_length;
+
+	if(!string){
+		winx_printf("\nwinx_prompt() invalid string!\n");
+		return (-1);
+	}
+	if(n <= 0){
+		winx_printf("\nwinx_prompt() invalid string length %d!\n",n);
+		return (-1);
+	}
+	
+	if(!prompt)	prompt = "";
+	buffer_length = strlen(prompt) + n;
+	buffer = winx_heap_alloc(buffer_length);
+	if(buffer == NULL){
+		winx_printf("\nNot enough memory for winx_prompt()!\n");
+		return (-1);
+	}
+	
+	winx_printf("%s",prompt);
+	
+	/* keep string always null terminated */
+	RtlZeroMemory(string,n);
+	for(i = 0; i < (n - 1); i ++){
+		/* read keyboard until an ordinary character appearance */
+		do {
+			do{
+				if(kb_read(&kbd,INFINITE) < 0) goto fail;
+				IntTranslateKey(&kbd,&kbd_rec);
+			} while(!kbd_rec.bKeyDown);
+			ch = (int)kbd_rec.AsciiChar;
+			/* truncate the string if either backspace or escape pressed */
+			if(ch == 0x08 || kbd_rec.wVirtualScanCode == 0x1){
+				line_length = strlen(prompt) + strlen(string);
+				if(kbd_rec.wVirtualScanCode == 0x1){
+					/* truncate the string if escape pressed */
+					string[0] = 0;
+					i = 0;
+				}
+				if(ch == 0x08){
+					/*
+					* make the string one character shorter
+					* if backspace pressed
+					*/
+					if(i > 0){
+						i--;
+						string[i] = 0;
+					}
+				}
+				/* redraw the prompt */
+				_snprintf(buffer,buffer_length,"%s%s",prompt,string);
+				buffer[buffer_length - 1] = 0;
+				_snprintf(format,sizeof(format),"\r%%-%us",line_length);
+				format[sizeof(format) - 1] = 0;
+				winx_printf(format,buffer);
+				/*
+				* redraw the prompt again to set carriage position
+				* exactly behind the string printed
+				*/
+				line_length = strlen(prompt) + strlen(string);
+				_snprintf(format,sizeof(format),"\r%%-%us",line_length);
+				format[sizeof(format) - 1] = 0;
+				winx_printf(format,buffer);
+				continue;
+			}
+		} while(ch == 0 || ch == 0x08 || kbd_rec.wVirtualScanCode == 0x1);
+		
+		/* print a character read */
+		winx_putch(ch);
+
+		/* return when \r character appears */
+		if(ch == '\r'){
+			winx_putch('\n');
+			goto done;
+		}
+
+		/* we have an ordinary character, append it to the string */
+		string[i] = (char)ch;
+	}
+	winx_printf("\nwinx_prompt() buffer overflow!\n");
+
+done:
+	winx_heap_free(buffer);
+	return (i+1);
+	
+fail:
+	winx_heap_free(buffer);
+	return (-1);
 }
 
 /** @} */

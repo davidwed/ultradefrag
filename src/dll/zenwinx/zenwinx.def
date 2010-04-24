@@ -15,6 +15,7 @@ EXPORTS
 	winx_getch
 	winx_getche
 	winx_gets
+	winx_prompt
 	winx_kbhit
 	winx_breakhit
 	winx_sleep

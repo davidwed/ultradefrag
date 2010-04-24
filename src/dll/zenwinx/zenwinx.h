@@ -97,6 +97,8 @@ int __cdecl winx_printf(const char *format, ...);
 int __cdecl winx_getch(void);
 int __cdecl winx_getche(void);
 int __cdecl winx_gets(char *string,int n);
+int __cdecl winx_prompt(char *prompt,char *string,int n);
+
 /*
 * Note: winx_scanf() can not be implemented;
 * use winx_gets() and sscanf() instead.

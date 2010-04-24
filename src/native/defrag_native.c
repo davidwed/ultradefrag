@@ -75,7 +75,11 @@ void display_help(void)
 void __stdcall NtProcessStartup(PPEB Peb)
 {
 	int safe_mode, error_code, result, i;
-	char buffer[256];
+	/*
+	* 60 characters long to ensure that escape and backspace
+	* keys will work properly with winx_prompt() function.
+	*/
+	char buffer[60];
 
 	/* 1. Initialization */
 #ifdef USE_INSTEAD_SMSS
@@ -158,10 +162,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_printf("\nInteractive mode:\nType 'help' for list of supported commands.\n\n");
 	scripting_mode = FALSE;
 	while(1){
-		/* display prompt */
-		winx_printf("# ");
 		/* get user input */
-		if(winx_gets(buffer,sizeof(buffer) - 1) < 0) break;
+		if(winx_prompt("# ",buffer,sizeof(buffer) - 1) < 0) break;
 		/* check for help command */
 		if(!strcmp(buffer,"help")){
 			display_help();

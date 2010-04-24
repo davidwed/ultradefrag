@@ -18,6 +18,8 @@ HISTORY
       independent from the screen DPI
     - cluster map block size was made customizable in GUI through map_block_size
       and grid_line_width parameters added to guiopts.lua configuration file
+    - progress indication was improved in the boot time interface
+    - backspace and escape keys handling added to the boot time interactive mode
     - the following translations were updated:
 
       Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR), Korean
@@ -28,8 +30,9 @@ HISTORY
     - few wrong prototypes in /src/dll/zenwinx/ntndk.h file were fixed
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
-    - for programmers: winx_create_thread improved, udefrag.dll interface
-      optimized (function prototypes changed!)
+    - for programmers: winx_create_thread improved, winx_getche and winx_gets
+      improved, winx_prompt added, udefrag.dll interface optimized
+      (function prototypes changed!)
 
 
   Version 4.2.0  2010-03-30
