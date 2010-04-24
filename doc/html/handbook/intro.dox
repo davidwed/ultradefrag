@@ -104,6 +104,9 @@
  * installed, setting up additional RAM modules always gives the best
  * result.
  *
+ * On highly fragmented volumes you will have to defragment several
+ * times until you will see any improvement.
+ *
  * <h1>Defragmentation algorithm</h1>
  * UltraDefrag uses the following three algorithms:
  * - During the volume analysis UltraDefrag scans the complete
