@@ -95,7 +95,8 @@ void UpdateProgress(int completed)
 		}
 		if(job_type == OPTIMIZE_JOB){
 			n = (stat.pass_number == 0xffffffff) ? 0 : stat.pass_number;
-			_snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed",n,op_name,p1,p2);
+			if (abort_flag) _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% aborted",n,op_name,p1,p2);
+			else _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed",n,op_name,p1,p2);
 		} else {
 			if (abort_flag) _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted",op_name,p1,p2);
 			else _snprintf(s,sizeof(s),"%s%3u.%02u%% completed",op_name,p1,p2);
