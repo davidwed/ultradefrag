@@ -20,6 +20,7 @@ HISTORY
       and grid_line_width parameters added to guiopts.lua configuration file
     - progress indication was improved in the boot time interface
     - backspace and escape keys handling added to the boot time interactive mode
+    - one little bug preventing the root directory from being defragmented fixed
     - the following translations were updated:
 
       Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR), Korean

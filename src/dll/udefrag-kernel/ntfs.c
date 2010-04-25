@@ -1891,13 +1891,23 @@ void BuildPath2(PFILENAME pfn)
 		if(offset == 0) goto path_is_too_long;
 	}
 	
+	/*
+	* the root directory must not contain trailing dot,
+	* otherwise it cannot be opened for moving
+	*/
+	if(offset == ((MAX_NTFS_PATH - 1) - 3) && buffer1[offset + 1] == '\\'
+	  && buffer1[offset + 2] == '.'){
+		DebugPrint("Root directory detected, its trailing dot will be removed.\n");
+		buffer1[offset + 2] = 0;
+	}
+
 	/* append volume letter */
 	header[4] = volume_letter;
 	name_length = wcslen(header);
 	if(offset < (name_length - 1)) goto path_is_too_long;
 	offset -= (name_length - 1);
 	(void)wcsncpy(buffer1 + offset,header,name_length);
-
+	
 update_filename:	
 	/* replace pfn->name contents with full path */
 	//wcsncpy(pmfi->Name,buffer1 + offset,MAX_NTFS_PATH);
