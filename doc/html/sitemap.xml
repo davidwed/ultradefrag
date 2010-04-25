@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <urlset
       xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -7,27 +7,22 @@
 <url>
   <loc>http://ultradefrag.sourceforge.net/</loc>
   <priority>1.00</priority>
-  <changefreq>monthly</changefreq>
+  <changefreq>weekly</changefreq>
 </url>
 <url>
   <loc>http://ultradefrag.sourceforge.net/index.html</loc>
   <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
+  <changefreq>weekly</changefreq>
 </url>
 <url>
   <loc>http://ultradefrag.sourceforge.net/download.html</loc>
   <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
+  <changefreq>never</changefreq>
 </url>
 <url>
-  <loc>http://ultradefrag.sourceforge.net/overview.html</loc>
+  <loc>http://ultradefrag.sourceforge.net/screenshots.html</loc>
   <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/development.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
+  <changefreq>weekly</changefreq>
 </url>
 <url>
   <loc>http://ultradefrag.sourceforge.net/handbook/</loc>
@@ -35,128 +30,18 @@
   <changefreq>monthly</changefreq>
 </url>
 <url>
+  <loc>http://ultradefrag.sourceforge.net/handbook/FAQ.html</loc>
+  <priority>0.80</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
+  <loc>http://ultradefrag.sourceforge.net/handbook/Credits.html</loc>
+  <priority>0.80</priority>
+  <changefreq>monthly</changefreq>
+</url>
+<url>
   <loc>http://ultradefrag.sourceforge.net/about.html</loc>
   <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/faq.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/disclaimer.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/credits.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/links.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/artgallery.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/installation.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/logos_web.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/i18n.html</loc>
-  <priority>0.80</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/introduction.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/console.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/gui.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/boot.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/reports.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/scheduler.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/portable.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/micro_edition.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/reporting_bugs.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/development.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/design_notes.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/WISH.TXT</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/ln.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/index.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/fdl-license.html</loc>
-  <priority>0.64</priority>
-  <changefreq>monthly</changefreq>
-</url>
-<url>
-  <loc>http://ultradefrag.sourceforge.net/handbook/gpl-license.html</loc>
-  <priority>0.64</priority>
   <changefreq>monthly</changefreq>
 </url>
 <url>
