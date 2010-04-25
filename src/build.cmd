@@ -163,7 +163,7 @@ copy /Y ..\doc\html\handbook\*.* %SRC_PKG_PATH%\doc\html\handbook\
 
 cd ..\src_package
 REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-%ULTRADFGVER%.src.7z *
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-%ULTRADFGVER%.src.7z *
 if %errorlevel% neq 0 goto fail
 rd /s /q ultradefrag-%ULTRADFGVER%
 cd ..\src

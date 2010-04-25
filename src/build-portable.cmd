@@ -64,7 +64,7 @@ copy /Y ultradefrag-portable-%ULTRADFGVER%.i386\options\guiopts.lua .\
 rem copy /Y ultradefrag-portable-%ULTRADFGVER%.i386\options\font.lua .\
 
 rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-portable-%ULTRADFGVER%.i386
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-portable-%ULTRADFGVER%.i386
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-portable-%ULTRADFGVER%.i386
 if %errorlevel% neq 0 goto fail
 
 :X64
@@ -113,7 +113,7 @@ rem copy /Y .\font.lua %PORTABLE_DIR%\options\
 cd amd64
 
 rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-portable-%ULTRADFGVER%.amd64
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-portable-%ULTRADFGVER%.amd64
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-portable-%ULTRADFGVER%.amd64
 if %errorlevel% neq 0 goto Lf
 cd ..
 goto IA64
@@ -168,7 +168,7 @@ rem copy /Y .\font.lua %PORTABLE_DIR%\options\
 cd ia64
 
 rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-portable-%ULTRADFGVER%.ia64
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-portable-%ULTRADFGVER%.ia64
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-portable-%ULTRADFGVER%.ia64
 if %errorlevel% neq 0 goto Lf2
 cd ..
 goto success

@@ -19,7 +19,7 @@ copy /Y bin\zenwinx.dll %PORTABLE_DIR%\
 
 cd bin
 rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-micro-portable-%ULTRADFGVER%.i386
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-micro-portable-%ULTRADFGVER%.i386
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-micro-portable-%ULTRADFGVER%.i386
 if %errorlevel% neq 0 goto fail
 
 :X64
@@ -38,7 +38,7 @@ copy /Y amd64\zenwinx.dll %PORTABLE_DIR%\
 
 cd amd64
 rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-micro-portable-%ULTRADFGVER%.amd64
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-micro-portable-%ULTRADFGVER%.amd64
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-micro-portable-%ULTRADFGVER%.amd64
 if %errorlevel% neq 0 goto Lf
 cd ..
 goto IA64
@@ -63,7 +63,7 @@ copy /Y ia64\zenwinx.dll %PORTABLE_DIR%\
 
 cd ia64
 rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-micro-portable-%ULTRADFGVER%.ia64
-"%SEVENZIP_PATH%\7z.exe" a ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-micro-portable-%ULTRADFGVER%.ia64
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-micro-portable-%ULTRADFGVER%.ia64
 if %errorlevel% neq 0 goto Lf2
 cd ..
 goto success
