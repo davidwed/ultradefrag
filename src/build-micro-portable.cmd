@@ -5,6 +5,8 @@ echo Copyright (c) 2009-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
 call build-micro.cmd %* --portable
 
+if %UD_BLD_FLG_BUILD_X86% EQU 0 goto X64
+
 mkdir bin\ultradefrag-micro-portable-%ULTRADFGVER%.i386
 set PORTABLE_DIR=bin\ultradefrag-micro-portable-%ULTRADFGVER%.i386
 copy /Y CREDITS.TXT %PORTABLE_DIR%\
@@ -23,7 +25,8 @@ rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip ultrad
 if %errorlevel% neq 0 goto fail
 
 :X64
-if not exist amd64\udefrag.exe goto success
+if %UD_BLD_FLG_BUILD_AMD64% equ 0 goto IA64
+
 mkdir amd64\ultradefrag-micro-portable-%ULTRADFGVER%.amd64
 set PORTABLE_DIR=amd64\ultradefrag-micro-portable-%ULTRADFGVER%.amd64
 copy /Y ..\CREDITS.TXT %PORTABLE_DIR%\
@@ -48,7 +51,8 @@ cd ..
 goto fail
 
 :IA64
-if not exist ia64\udefrag.exe goto success
+if %UD_BLD_FLG_BUILD_IA64% equ 0 goto success
+
 mkdir ia64\ultradefrag-micro-portable-%ULTRADFGVER%.ia64
 set PORTABLE_DIR=ia64\ultradefrag-micro-portable-%ULTRADFGVER%.ia64
 copy /Y ..\CREDITS.TXT %PORTABLE_DIR%\

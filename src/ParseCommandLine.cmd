@@ -3,6 +3,10 @@
 :: which are changed by the command line switches described
 :: in "build-targets.cmd"
 
+echo.
+echo %~n0 %*
+echo.
+
 :: set to 1 to debug parameter checking
 set UD_BLD_FLG_PARSER_DEBUG=0
 
