@@ -4,6 +4,7 @@ rem This script builds all binaries for UltraDefrag project
 rem for all of the supported targets.
 rem Usage:
 rem     build-targets [<compiler>]
+rem
 rem Available <compiler> values:
 rem     --use-mingw (default)
 rem     --use-msvc
@@ -11,14 +12,20 @@ rem     --use-winddk
 rem     --use-winsdk
 rem     --use-pellesc (experimental)
 rem     --use-mingw-x64 (experimental)
+rem
+rem Skip any processor architecture to reduce compile time
+rem     --no-x86
+rem     --no-amd64
+rem     --no-ia64
 
 rem NOTE: IA-64 targeting binaries were never tested by the authors 
 rem due to missing appropriate hardware and appropriate 64-bit version 
 rem of Windows.
 
-if "%1" neq "--help" goto build
-if "%2" equ "build" goto display_build_options
-if "%2" equ "build-micro" goto display_build_micro_options
+call ParseCommandLine.cmd %*
+
+if %UD_BLD_FLG_DIPLAY_HELP% equ 0 goto build
+if %UD_BLD_FLG_IS_MICRO% equ 1 goto display_build_micro_options
 
 :display_build_options
 echo.
@@ -36,6 +43,10 @@ echo                        --use-pellesc   (experimental, produces wrong code)
 echo                        --use-mingw-x64 (experimental, produces wrong x64 code)
 echo     build --clean      - perform full cleanup instead of the build
 echo     build --help       - show this help message
+echo.
+echo     build [compiler] [--install] [--no-{arch}] - skip any processor architecture:
+echo.
+echo                        --no-x86, --no-amd64, --no-ia64
 exit /B 0
 
 :display_build_micro_options
@@ -56,28 +67,33 @@ echo                              --use-mingw-x64
 echo                                   (experimental, produces wrong x64 code)
 echo     build-micro --clean      - perform full cleanup instead of the build
 echo     build-micro --help       - show this help message
+echo.
+echo     build-micro [compiler] [--install] [--no-{arch}] - skip any processor architecture:
+echo.
+echo                        --no-x86, --no-amd64, --no-ia64
 exit /B 0
 
 :build
-if "%1" equ "--portable" goto default_build
-if "%1" equ "--install" goto default_build
-if "%1" neq "" goto parse_first_parameter
+if %UD_BLD_FLG_USE_COMPILER% equ 0 goto default_build
+goto parse_first_parameter
 
 :default_build
-echo No parameters specified, use defaults.
+echo No parameters specified, using defaults.
 goto mingw_build
 
 :parse_first_parameter
-if "%1" equ "--use-winddk" goto ddk_build
-if "%1" equ "--use-msvc" goto msvc_build
-if "%1" equ "--use-mingw" goto mingw_build
-if "%1" equ "--use-pellesc" goto pellesc_build
-if "%1" equ "--use-mingw-x64" goto mingw_x64_build
-if "%1" equ "--use-winsdk" goto winsdk_build
+if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK%  goto ddk_build
+if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MSVC%    goto msvc_build
+if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW%   goto mingw_build
+if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_PELLESC% goto pellesc_build
+if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW64% goto mingw_x64_build
+if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 
 :ddk_build
 
 set BUILD_ENV=winddk
+
+if %UD_BLD_FLG_BUILD_X86% equ 0 goto ddk_build_amd64
 
 echo --------- Target is x86 ---------
 set AMD64=
@@ -93,6 +109,9 @@ call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
 
+:ddk_build_amd64
+if %UD_BLD_FLG_BUILD_AMD64% equ 0 goto ddk_build_ia64
+
 echo --------- Target is x64 ---------
 set IA64=
 pushd ..
@@ -105,6 +124,9 @@ call make-manifests.cmd amd64
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
+
+:ddk_build_ia64
+if %UD_BLD_FLG_BUILD_IA64% equ 0 goto success
 
 echo --------- Target is ia64 ---------
 set AMD64=
@@ -125,6 +147,8 @@ goto success
 
 set BUILD_ENV=winsdk
 
+if %UD_BLD_FLG_BUILD_X86% equ 0 goto winsdk_build_amd64
+
 echo --------- Target is x86 ---------
 set AMD64=
 set IA64=
@@ -138,6 +162,9 @@ call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
 
+:winsdk_build_amd64
+if %UD_BLD_FLG_BUILD_AMD64% equ 0 goto winsdk_build_ia64
+
 echo --------- Target is x64 ---------
 set IA64=
 set AMD64=1
@@ -150,6 +177,9 @@ call make-manifests.cmd amd64
 call blditems.cmd
 if %errorlevel% neq 0 goto fail
 set Path=%OLD_PATH%
+
+:winsdk_build_ia64
+if %UD_BLD_FLG_BUILD_IA64% equ 0 goto success
 
 echo --------- Target is ia64 ---------
 set AMD64=
