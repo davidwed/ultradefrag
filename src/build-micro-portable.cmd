@@ -3,7 +3,7 @@
 echo Build script producing the UltraDefrag Portable - Micro Edition package.
 echo Copyright (c) 2009-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
-call build-micro.cmd %1 --portable
+call build-micro.cmd %* --portable
 
 mkdir bin\ultradefrag-micro-portable-%ULTRADFGVER%.i386
 set PORTABLE_DIR=bin\ultradefrag-micro-portable-%ULTRADFGVER%.i386
@@ -18,7 +18,8 @@ copy /Y bin\udefrag-kernel.dll %PORTABLE_DIR%\
 copy /Y bin\zenwinx.dll %PORTABLE_DIR%\
 
 cd bin
-zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-micro-portable-%ULTRADFGVER%.i386
+rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-micro-portable-%ULTRADFGVER%.i386
+"%SEVENZIP_PATH%\7z.exe" a ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-micro-portable-%ULTRADFGVER%.i386
 if %errorlevel% neq 0 goto fail
 
 :X64
@@ -36,7 +37,8 @@ copy /Y amd64\udefrag-kernel.dll %PORTABLE_DIR%\
 copy /Y amd64\zenwinx.dll %PORTABLE_DIR%\
 
 cd amd64
-zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-micro-portable-%ULTRADFGVER%.amd64
+rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-micro-portable-%ULTRADFGVER%.amd64
+"%SEVENZIP_PATH%\7z.exe" a ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-micro-portable-%ULTRADFGVER%.amd64
 if %errorlevel% neq 0 goto Lf
 cd ..
 goto IA64
@@ -60,7 +62,8 @@ copy /Y ia64\udefrag-kernel.dll %PORTABLE_DIR%\
 copy /Y ia64\zenwinx.dll %PORTABLE_DIR%\
 
 cd ia64
-zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-micro-portable-%ULTRADFGVER%.ia64
+rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-micro-portable-%ULTRADFGVER%.ia64
+"%SEVENZIP_PATH%\7z.exe" a ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-micro-portable-%ULTRADFGVER%.ia64
 if %errorlevel% neq 0 goto Lf2
 cd ..
 goto success

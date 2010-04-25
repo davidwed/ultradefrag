@@ -3,7 +3,7 @@
 echo Build script producing the UltraDefrag Portable package.
 echo Copyright (c) 2009-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
-call build.cmd %1 --portable
+call build.cmd %* --portable
 
 mkdir bin\ultradefrag-portable-%ULTRADFGVER%.i386
 set PORTABLE_DIR=bin\ultradefrag-portable-%ULTRADFGVER%.i386
@@ -48,6 +48,7 @@ copy /Y installer\LanguageSelector.ico bin\
 cd bin
 
 call setvars.cmd
+if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
 
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
@@ -62,7 +63,8 @@ cd..
 copy /Y ultradefrag-portable-%ULTRADFGVER%.i386\options\guiopts.lua .\
 rem copy /Y ultradefrag-portable-%ULTRADFGVER%.i386\options\font.lua .\
 
-zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-portable-%ULTRADFGVER%.i386
+rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-portable-%ULTRADFGVER%.i386
+"%SEVENZIP_PATH%\7z.exe" a ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-portable-%ULTRADFGVER%.i386
 if %errorlevel% neq 0 goto fail
 
 :X64
@@ -110,7 +112,8 @@ rem copy /Y .\font.lua %PORTABLE_DIR%\options\
 
 cd amd64
 
-zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-portable-%ULTRADFGVER%.amd64
+rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-portable-%ULTRADFGVER%.amd64
+"%SEVENZIP_PATH%\7z.exe" a ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip ultradefrag-portable-%ULTRADFGVER%.amd64
 if %errorlevel% neq 0 goto Lf
 cd ..
 goto IA64
@@ -164,7 +167,8 @@ rem copy /Y .\font.lua %PORTABLE_DIR%\options\
 
 cd ia64
 
-zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-portable-%ULTRADFGVER%.ia64
+rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-portable-%ULTRADFGVER%.ia64
+"%SEVENZIP_PATH%\7z.exe" a ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip ultradefrag-portable-%ULTRADFGVER%.ia64
 if %errorlevel% neq 0 goto Lf2
 cd ..
 goto success
