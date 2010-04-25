@@ -34,6 +34,7 @@
 
 !include "x64.nsh"
 !include "WinVer.nsh"
+!include "FileFunc.nsh"
 
 !if ${ULTRADFGARCH} == 'i386'
 !define ROOTDIR "..\.."
