@@ -11,7 +11,7 @@ if "%ULTRADFGRC%" == "" set ULTRADFGRC=1
 set script_dir=%~dp0
 
 echo.
-call build.cmd --use-winddk --pre-release
+call build.cmd --use-winddk --pre-release %*
 if %errorlevel% neq 0 goto build_failed
 
 cd /D %script_dir%
