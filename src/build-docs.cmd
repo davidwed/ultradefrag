@@ -1,10 +1,12 @@
 @echo off
+
 echo Build UltraDefrag development docs...
 echo.
 
 rem Set environment variables if they aren't already set.
 if "%ULTRADFGVER%" neq "" goto build_docs
 call SETVARS.CMD
+if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
 
 :build_docs
