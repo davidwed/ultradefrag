@@ -1,10 +1,10 @@
 @echo off
-:: This file is used to set the initial build defaults,
+:: This script is used to set the initial build defaults,
 :: which are changed by the command line switches described
-:: in "build-targets.cmd"
+:: in "build-targets.cmd --help [build | build-micro]"
 
 echo.
-echo %~n0 %*
+echo %~n0 ... %*
 echo.
 
 :: set to 1 to debug parameter checking
