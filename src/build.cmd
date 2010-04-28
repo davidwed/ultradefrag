@@ -1,9 +1,9 @@
 @echo off
 
-call ParseCommandLine.cmd %*
-
 echo Build script for the UltraDefrag project.
 echo Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+
+call ParseCommandLine.cmd %*
 
 if %UD_BLD_FLG_DIPLAY_HELP% equ 1 goto usage
 
@@ -210,4 +210,4 @@ set OLD_PATH=
 exit /B 0
 
 :usage
-call build-targets.cmd --help build
+call build-help.cmd "%~n0"

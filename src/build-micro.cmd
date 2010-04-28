@@ -160,4 +160,4 @@ set OLD_PATH=
 exit /B 0
 
 :usage
-call build-targets.cmd --help build-micro
+call build-help.cmd "%~n0"

@@ -3,6 +3,10 @@
 echo Build script producing the UltraDefrag Portable - Micro Edition package.
 echo Copyright (c) 2009-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
+call ParseCommandLine.cmd %*
+
+if %UD_BLD_FLG_DIPLAY_HELP% equ 1 goto usage
+
 call build-micro.cmd %* --portable
 
 if %UD_BLD_FLG_BUILD_X86% EQU 0 goto X64
@@ -92,3 +96,6 @@ echo Build error (code %ERRORLEVEL%)!
 cd ..
 set PORTABLE_DIR=
 exit /B 1
+
+:usage
+call build-help.cmd "%~n0"

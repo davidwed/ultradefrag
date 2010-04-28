@@ -24,55 +24,6 @@ rem of Windows.
 
 call ParseCommandLine.cmd %*
 
-if %UD_BLD_FLG_DIPLAY_HELP% equ 0 goto build
-if %UD_BLD_FLG_IS_MICRO% equ 1 goto display_build_micro_options
-
-:display_build_options
-echo.
-echo Synopsis:
-echo     build              - perform the build using default options
-echo     build --install    - run installer silently after the build
-echo     build [compiler] [--install] - specify your favorite compiler:
-echo.
-echo                        --use-mingw     (default)
-echo.
-echo                        --use-winddk
-echo                        --use-winsdk
-echo                        --use-msvc      (obsolete)
-echo                        --use-pellesc   (experimental, produces wrong code)
-echo                        --use-mingw-x64 (experimental, produces wrong x64 code)
-echo     build --clean      - perform full cleanup instead of the build
-echo     build --help       - show this help message
-echo.
-echo     build [compiler] [--install] [--no-{arch}] - skip any processor architecture:
-echo.
-echo                        --no-x86, --no-amd64, --no-ia64
-exit /B 0
-
-:display_build_micro_options
-echo.
-echo Synopsis:
-echo     build-micro              - perform the build using default options
-echo     build-micro --install    - run installer silently after the build
-echo     build-micro [compiler] [--install] - specify your favorite compiler:
-echo.
-echo                              --use-mingw (default)
-echo.
-echo                              --use-winddk
-echo                              --use-winsdk
-echo                              --use-msvc  (obsolete)
-echo                              --use-pellesc
-echo                                   (experimental, produces wrong code)
-echo                              --use-mingw-x64
-echo                                   (experimental, produces wrong x64 code)
-echo     build-micro --clean      - perform full cleanup instead of the build
-echo     build-micro --help       - show this help message
-echo.
-echo     build-micro [compiler] [--install] [--no-{arch}] - skip any processor architecture:
-echo.
-echo                        --no-x86, --no-amd64, --no-ia64
-exit /B 0
-
 :build
 if %UD_BLD_FLG_USE_COMPILER% equ 0 goto default_build
 goto parse_first_parameter
