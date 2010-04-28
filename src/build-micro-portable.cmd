@@ -9,6 +9,8 @@ if %UD_BLD_FLG_DIPLAY_HELP% equ 1 goto usage
 
 call build-micro.cmd %* --portable
 
+if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 goto :EOF
+
 if %UD_BLD_FLG_BUILD_X86% EQU 0 goto X64
 
 mkdir bin\ultradefrag-micro-portable-%ULTRADFGVER%.i386
