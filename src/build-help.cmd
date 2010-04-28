@@ -1,4 +1,4 @@
-@echo on
+@echo off
 
 rem script to display help about command line switches
 
@@ -27,7 +27,6 @@ if %UD_BLD_HELP_SPACE% EQU 1 set UD_BLD_HELP_SPACE_STR=%UD_BLD_HELP_SPACE_STR_1:
 if %UD_BLD_HELP_SPACE% EQU 2 set UD_BLD_HELP_SPACE_STR=%UD_BLD_HELP_SPACE_STR_1:~1,9%
 if %UD_BLD_HELP_SPACE% EQU 3 set UD_BLD_HELP_SPACE_STR=%UD_BLD_HELP_SPACE_STR_1:~1,15%
 
-@echo off
 echo.
 echo Synopsis:
 echo     %~1              - perform the build using default options
