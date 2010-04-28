@@ -223,6 +223,60 @@ unsigned char GetFileSpaceState(PFILENAME pfn)
 }
 
 /**
+ * @brief Checks whether a range of clusters is outside MFT or not.
+ */
+static BOOLEAN IsOutsideMft(ULONGLONG start,ULONGLONG len)
+{
+	if(mft_end == 0 || (start + len) <= mft_start || start > mft_end) return TRUE;
+	return FALSE;
+}
+
+/**
+ * @brief Checks whether a range of clusters is outside MFT Zone or not.
+ */
+static BOOLEAN IsOutsideMftZone(ULONGLONG start,ULONGLONG len)
+{
+	if(mftzone_end == 0 || (start + len) <= mftzone_start || start > mftzone_end) return TRUE;
+	return FALSE;
+}
+
+/**
+ * @brief Checks whether a range of clusters is outside MFT Mirror or not.
+ */
+static BOOLEAN IsOutsideMftMirr(ULONGLONG start,ULONGLONG len)
+{
+	if(mftmirr_end == 0 || (start + len) <= mftmirr_start || start > mftmirr_end) return TRUE;
+	return FALSE;
+}
+
+/**
+ * @brief Checks whether a range of clusters is inside MFT or not.
+ */
+static BOOLEAN IsInsideMft(ULONGLONG start,ULONGLONG len)
+{
+	if(mft_end != 0 && start >= mft_start && (start + len) <= (mft_end + 1)) return TRUE;
+	return FALSE;
+}
+
+/**
+ * @brief Checks whether a range of clusters is inside MFT Zone or not.
+ */
+static BOOLEAN IsInsideMftZone(ULONGLONG start,ULONGLONG len)
+{
+	if(mftzone_end != 0 && start >= mftzone_start && (start + len) <= (mftzone_end + 1)) return TRUE;
+	return FALSE;
+}
+
+/**
+ * @brief Checks whether a range of clusters is inside MFT Mirror or not.
+ */
+static BOOLEAN IsInsideMftMirr(ULONGLONG start,ULONGLONG len)
+{
+	if(mftmirr_end != 0 && start >= mftmirr_start && (start + len) <= (mftmirr_end + 1)) return TRUE;
+	return FALSE;
+}
+
+/**
  * @brief Remarks a range of clusters belonging to the file in the cluster map.
  * @param[in] pfn pointer to the FILENAME structure containing information about the file.
  * @param[in] old_space_state the previous state of the marked space.
@@ -230,12 +284,53 @@ unsigned char GetFileSpaceState(PFILENAME pfn)
 void MarkFileSpace(PFILENAME pfn,int old_space_state)
 {
 	PBLOCKMAP block;
-	UCHAR state;
+	UCHAR new_space_state;
+	BOOLEAN outside_mft, outside_mftzone, outside_mftmirr;
+	BOOLEAN inside_mft, inside_mftzone, inside_mftmirr;
+	ULONGLONG i;
+
+	/* define the new space state */
+	new_space_state = GetFileSpaceState(pfn);
 	
-	state = GetFileSpaceState(pfn);
-	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-		RemarkBlock(block->lcn,block->length,state,old_space_state);
-		if(block->next_ptr == pfn->blockmap) break;
+	/* if old space state is undefined, scan and remark it sequentially */
+	switch(old_space_state){
+	case SYSTEM_OR_MFT_ZONE_SPACE:
+		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+			/* check whether current block is outside mft zones */
+			outside_mft = IsOutsideMft(block->lcn,block->length);
+			outside_mftzone = IsOutsideMftZone(block->lcn,block->length);
+			outside_mftmirr = IsOutsideMftMirr(block->lcn,block->length);
+			if(outside_mft && outside_mftzone && outside_mftmirr){
+				RemarkBlock(block->lcn,block->length,new_space_state,SYSTEM_SPACE);
+			} else {
+				/* check whether current block is completely inside mft zone */
+				inside_mft = IsInsideMft(block->lcn,block->length);
+				inside_mftzone = IsInsideMftZone(block->lcn,block->length);
+				inside_mftmirr = IsInsideMftMirr(block->lcn,block->length);
+				if(inside_mft || inside_mftzone || inside_mftmirr){
+					RemarkBlock(block->lcn,block->length,new_space_state,MFT_ZONE_SPACE);
+				} else {
+					/* block is partially inside mft zone */
+					/* this case is rare, it may encounter mo more than 6 times */
+					/* therefore we can handle it easy, without optimizing the code for speed */
+					for(i = block->lcn; i < block->lcn + block->length; i++){
+						if((i < mft_start || i > mft_end) && (i < mftzone_start || i > mftzone_end) && 
+						  (i < mftmirr_start || i > mftmirr_end))
+							RemarkBlock(i,1,new_space_state,SYSTEM_SPACE);
+						else
+							RemarkBlock(i,1,new_space_state,MFT_ZONE_SPACE);
+					}
+				}
+			}
+			if(block->next_ptr == pfn->blockmap) break;
+		}
+		break;
+	default:
+		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+			RemarkBlock(block->lcn,block->length,new_space_state,old_space_state);
+			if(block->next_ptr == pfn->blockmap) break;
+		}
+		break;
 	}
 }
 
@@ -267,14 +362,46 @@ void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_sta
 {
 	ULONGLONG cell, offset, n;
 	ULONGLONG ncells, i, j;
+	ULONGLONG *c;
+	PFREEBLOCKMAP block;
+	ULONGLONG current_cluster, clusters_to_process, length;
 
 	/* return if we don't need cluster map */
 	if(!new_cluster_map) return;
 	
 	/* check parameters */
 	if(space_state < 0 || space_state >= NUM_OF_SPACE_STATES) return;
-	if(old_space_state < 0 || old_space_state >= NUM_OF_SPACE_STATES) return;
+	if(old_space_state < 0 || (old_space_state >= NUM_OF_SPACE_STATES && old_space_state != SYSTEM_OR_FREE_SPACE)) return;
 	if(start + len > clusters_total) return;
+
+	if(old_space_state == SYSTEM_OR_FREE_SPACE){
+		current_cluster = start;
+		clusters_to_process = len;
+		for(block = free_space_map; block != NULL; block = block->next_ptr){
+			/* break if current block follows the target */
+			if(block->lcn >= start + len){
+				if(clusters_to_process)
+					RemarkBlock(current_cluster,clusters_to_process,space_state,SYSTEM_SPACE);
+				break;
+			}
+			/* skip preceding blocks */
+			if(block->lcn >= current_cluster){
+				if(block->lcn > current_cluster){
+					length = block->lcn - current_cluster;
+					RemarkBlock(current_cluster,length,space_state,SYSTEM_SPACE);
+					current_cluster += length;
+					clusters_to_process -= length;
+				}
+				/* now block->lcn is equal to current_block always */
+				length = min(block->length,clusters_to_process);
+				RemarkBlock(current_cluster,length,space_state,FREE_SPACE);
+				current_cluster += length;
+				clusters_to_process -= length;
+			}
+			if(block->next_ptr == free_space_map) break;
+		}
+		return;
+	}
 
 	if(!opposite_order){
 		if(!clusters_per_cell) return;
@@ -289,10 +416,8 @@ void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_sta
 		while((cell < (map_size - 1)) && len){
 			n = min(len,clusters_per_cell - offset);
 			new_cluster_map[cell][space_state] += n;
-			if(new_cluster_map[cell][old_space_state] >= n)
-				new_cluster_map[cell][old_space_state] -= n;
-			else
-				new_cluster_map[cell][old_space_state] = 0;
+			c = &new_cluster_map[cell][old_space_state];
+			if(*c >= n) *c -= n; else *c = 0;
 			len -= n;
 			cell ++;
 			offset = 0;
@@ -304,16 +429,8 @@ void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_sta
 		if(len){
 			n = min(len,clusters_per_last_cell - offset);
 			new_cluster_map[cell][space_state] += n;
-			/*
-			* Some space is identified as free and mft allocated at the same time;
-			* therefore this check is required;
-			* Because in space states enum mft has number above free space number,
-			* these blocks will be displayed as mft blocks.
-			*/
-			if(new_cluster_map[cell][old_space_state] >= n)
-				new_cluster_map[cell][old_space_state] -= n;
-			else
-				new_cluster_map[cell][old_space_state] = 0;
+			c = &new_cluster_map[cell][old_space_state];
+			if(*c >= n) *c -= n; else *c = 0;
 		}
 	} else { /* dx->opposite_order */
 		cell = start * cells_per_cluster;

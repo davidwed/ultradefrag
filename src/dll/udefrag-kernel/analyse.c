@@ -76,6 +76,10 @@ int Analyze(char *volume_name)
 	memset(&Stat,0,sizeof(STATISTIC));
 	Stat.current_operation = 'A';
 	Stat.pass_number = pass_number;
+
+	/* reset coordinates of mft zones */
+	mft_start = 0, mft_end = 0, mftzone_start = 0, mftzone_end = 0;
+	mftmirr_start = 0, mftmirr_end = 0;
 	
 	/* open the volume */
 	error_code = OpenVolume(volume_name);

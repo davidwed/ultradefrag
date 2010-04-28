@@ -59,6 +59,8 @@ unsigned char partition_type = UNKNOWN_PARTITION;
 
 ULONG ntfs_record_size = 0;
 ULONGLONG max_mft_entries = 0;
+ULONGLONG mft_start = 0, mft_end = 0, mftzone_start = 0, mftzone_end = 0;
+ULONGLONG mftmirr_start = 0, mftmirr_end = 0;
 
 BOOLEAN optimize_flag = FALSE;
 BOOLEAN initial_analysis = FALSE;
@@ -70,7 +72,6 @@ void DestroySynchObjects(void);
 
 /**
  * @brief Initializes the library.
- * @bug Does not contain Windows 9x checking.
  */
 void InitDriverResources(void)
 {

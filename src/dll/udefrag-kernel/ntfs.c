@@ -168,6 +168,11 @@ NTSTATUS GetMftLayout(void)
 
 	Stat.mft_size = mft_len * bytes_per_cluster;
 	DebugPrint("MFT size = %I64u bytes\n",Stat.mft_size);
+	if(mft_len == 0){
+		DebugPrint("MFT size is equal to zero!\n");
+		winx_heap_free(ntfs_data);
+		return STATUS_UNSUCCESSFUL;
+	}
 
 	ntfs_record_size = ntfs_data->BytesPerFileRecordSegment;
 	DebugPrint("NTFS record size = %u bytes\n",ntfs_record_size);
@@ -1451,19 +1456,21 @@ ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 	DebugPrint("$MFT       :%I64u :%I64u\n",start,len);
 	if(CheckBlock(start,len)){
 		/* remark space as reserved */
-		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_SPACE);
+		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_OR_FREE_SPACE);
 		RemoveFreeSpaceBlock(start,len);
+		mft_start = start; mft_end = start + len - 1;
 		mft_len += len;
 	}
 
 	/* MFT Zone */
 	start = nd->MftZoneStart.QuadPart;
-	len = nd->MftZoneEnd.QuadPart - nd->MftZoneStart.QuadPart;
+	len = nd->MftZoneEnd.QuadPart - nd->MftZoneStart.QuadPart + 1;
 	DebugPrint("MFT Zone   :%I64u :%I64u\n",start,len);
 	if(CheckBlock(start,len)){
 		/* remark space as reserved */
-		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_SPACE);
+		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_OR_FREE_SPACE);
 		RemoveFreeSpaceBlock(start,len);
+		mftzone_start = start; mftzone_end = start + len - 1;
 	}
 
 	/* $MFTMirror */
@@ -1478,8 +1485,9 @@ ULONGLONG ProcessMftSpace(PNTFS_DATA nd)
 	DebugPrint("$MFTMirror :%I64u :%I64u\n",start,len);
 	if(CheckBlock(start,len)){
 		/* remark space as reserved */
-		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_SPACE);
+		RemarkBlock(start,len,MFT_ZONE_SPACE,SYSTEM_OR_FREE_SPACE);
 		RemoveFreeSpaceBlock(start,len);
+		mftmirr_start = start; mftmirr_end = start + len - 1;
 	}
 	
 	return mft_len;
@@ -1775,7 +1783,7 @@ void BuildPaths(void)
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		BuildPath2(pfn);
 		if(UnwantedStuffDetected(pfn)) pfn->is_filtered = TRUE;
-		MarkFileSpace(pfn,SYSTEM_SPACE);
+		MarkFileSpace(pfn,SYSTEM_OR_MFT_ZONE_SPACE);
 		/* skip here filtered out and big files and reparse points */
 		if(pfn->is_fragm && !pfn->is_reparse_point &&
 			((!pfn->is_filtered && !pfn->is_overlimit) || optimize_flag)

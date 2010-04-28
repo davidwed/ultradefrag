@@ -43,6 +43,10 @@
 
 #define NtCloseSafe(h) { if(h) { NtClose(h); h = NULL; } }
 
+/* some volume space states, for internal use only */
+#define SYSTEM_OR_MFT_ZONE_SPACE  100 /* for MarkFileSpace only */
+#define SYSTEM_OR_FREE_SPACE      101 /* for RemarkBlock only */
+
 /* UltraDefrag internal structures */
 
 /*
@@ -152,6 +156,8 @@ extern unsigned char partition_type;
 extern ULONGLONG mft_size;
 extern ULONG ntfs_record_size;
 extern ULONGLONG max_mft_entries;
+extern ULONGLONG mft_start, mft_end, mftzone_start, mftzone_end;
+extern ULONGLONG mftmirr_start, mftmirr_end;
 
 extern ULONGLONG (*new_cluster_map)[NUM_OF_SPACE_STATES];
 extern ULONG map_size;
