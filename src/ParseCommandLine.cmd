@@ -1,7 +1,7 @@
 @echo off
 :: This script is used to set the initial build defaults,
 :: which are changed by the command line switches described
-:: in "build-targets.cmd --help [build | build-micro]"
+:: in "build-help.cmd"
 
 echo.
 echo %~n0 ... %*
@@ -18,17 +18,17 @@ set UD_BLD_FLG_USE_PELLESC=4
 set UD_BLD_FLG_USE_WINDDK=5
 set UD_BLD_FLG_USE_WINSDK=6
 
-:: set defaults, if not already defined
-if not defined UD_BLD_FLG_USE_COMPILER   set UD_BLD_FLG_USE_COMPILER=0
-if not defined UD_BLD_FLG_DO_INSTALL     set UD_BLD_FLG_DO_INSTALL=0
-if not defined UD_BLD_FLG_ONLY_CLEANUP   set UD_BLD_FLG_ONLY_CLEANUP=0
-if not defined UD_BLD_FLG_DIPLAY_HELP    set UD_BLD_FLG_DIPLAY_HELP=0
-if not defined UD_BLD_FLG_IS_MICRO       set UD_BLD_FLG_IS_MICRO=0
-if not defined UD_BLD_FLG_IS_PORTABLE    set UD_BLD_FLG_IS_PORTABLE=0
-if not defined UD_BLD_FLG_IS_PRE_RELEASE set UD_BLD_FLG_IS_PRE_RELEASE=0
-if not defined UD_BLD_FLG_BUILD_X86      set UD_BLD_FLG_BUILD_X86=1
-if not defined UD_BLD_FLG_BUILD_AMD64    set UD_BLD_FLG_BUILD_AMD64=0
-if not defined UD_BLD_FLG_BUILD_IA64     set UD_BLD_FLG_BUILD_IA64=0
+:: set defaults
+set UD_BLD_FLG_USE_COMPILER=0
+set UD_BLD_FLG_DO_INSTALL=0
+set UD_BLD_FLG_ONLY_CLEANUP=0
+set UD_BLD_FLG_DIPLAY_HELP=0
+set UD_BLD_FLG_IS_MICRO=0
+set UD_BLD_FLG_IS_PORTABLE=0
+set UD_BLD_FLG_IS_PRE_RELEASE=0
+set UD_BLD_FLG_BUILD_X86=1
+set UD_BLD_FLG_BUILD_AMD64=0
+set UD_BLD_FLG_BUILD_IA64=0
 
 :ParseArgs
 if "%1" == "--use-mingw" (
@@ -77,8 +77,6 @@ if "%1" == "--no-x86"        set UD_BLD_FLG_BUILD_X86=0
 if "%1" == "--no-amd64"      set UD_BLD_FLG_BUILD_AMD64=0
 if "%1" == "--no-ia64"       set UD_BLD_FLG_BUILD_IA64=0
 
-if "%1" == "build"           set UD_BLD_FLG_IS_MICRO=0
-if "%1" == "build-micro"     set UD_BLD_FLG_IS_MICRO=1
 shift
 if not "%1" == "" goto :ParseArgs
 
