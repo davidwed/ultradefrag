@@ -229,7 +229,7 @@ void DefragmentFreeSpaceRTL(void)
 				/*Stat.processed_clusters += length;*/
 				RemarkBlock(freeblock->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
 				RemarkBlock(lastblock->lcn + (lastblock->length - length),length,
-					FREE_SPACE,GetFileSpaceState(lastpfn));
+					FREE_OR_MFT_ZONE_SPACE,GetFileSpaceState(lastpfn));
 				freeblock->length -= length;
 				freeblock->lcn += length;
 				lastblock->length -= length;
@@ -299,7 +299,7 @@ void DefragmentFreeSpaceLTR(void)
 				/*Stat.processed_clusters += length;*/
 				RemarkBlock(freeblock->lcn + (freeblock->length - length),length,
 					UNKNOWN_SPACE,FREE_SPACE);
-				RemarkBlock(firstblock->lcn,length,FREE_SPACE,GetFileSpaceState(firstpfn));
+				RemarkBlock(firstblock->lcn,length,FREE_OR_MFT_ZONE_SPACE,GetFileSpaceState(firstpfn));
 				freeblock->length -= length;
 				firstblock->vcn += length;
 				firstblock->lcn += length;

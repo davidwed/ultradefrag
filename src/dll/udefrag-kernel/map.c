@@ -277,6 +277,69 @@ static BOOLEAN IsInsideMftMirr(ULONGLONG start,ULONGLONG len)
 }
 
 /**
+ * @brief Remarks a range of clusters, respecting
+ * whether they are inside mft zones or not.
+ * @param[in] start the starting cluster of the block.
+ * @param[in] len the length of the block, in clusters.
+ * @param[in] new_space_state the new state of the marked space.
+ * @param[in] old_space_state the previous state of the marked space.
+ * @param[in] adjust_new_space_state boolean value indicating whether
+ * the procedure must adjust the new space state or the old one.
+ * @note The parameter representing space state to be adjusted
+ * must contain default space state to be used when clusters are
+ * outside mft zones.
+ */
+static void RemarkBlockRespectToMftZones(ULONGLONG start,ULONGLONG len,
+		int new_space_state,int old_space_state,
+		BOOLEAN adjust_new_space_state)
+{
+	BOOLEAN outside_mft, outside_mftzone, outside_mftmirr;
+	BOOLEAN inside_mft, inside_mftzone, inside_mftmirr;
+	ULONGLONG i;
+	int default_space_state,adjusted_space_state;
+	
+	if(adjust_new_space_state) default_space_state = new_space_state;
+	else default_space_state = old_space_state;
+
+	/* check whether the block is outside mft zones */
+	outside_mft = IsOutsideMft(start,len);
+	outside_mftzone = IsOutsideMftZone(start,len);
+	outside_mftmirr = IsOutsideMftMirr(start,len);
+	if(outside_mft && outside_mftzone && outside_mftmirr){
+		if(adjust_new_space_state)
+			RemarkBlock(start,len,default_space_state,old_space_state);
+		else
+			RemarkBlock(start,len,new_space_state,default_space_state);
+	} else {
+		/* check whether the block is completely inside mft zone */
+		inside_mft = IsInsideMft(start,len);
+		inside_mftzone = IsInsideMftZone(start,len);
+		inside_mftmirr = IsInsideMftMirr(start,len);
+		if(inside_mft || inside_mftzone || inside_mftmirr){
+			if(adjust_new_space_state)
+				RemarkBlock(start,len,MFT_ZONE_SPACE,old_space_state);
+			else
+				RemarkBlock(start,len,new_space_state,MFT_ZONE_SPACE);
+		} else {
+			/* block is partially inside mft zone */
+			/* this case is rare, it may encounter mo more than 6 times */
+			/* therefore we can handle it easy, without optimizing the code for speed */
+			for(i = start; i < start + len; i++){
+				if((i < mft_start || i > mft_end) && (i < mftzone_start || i > mftzone_end) && 
+				  (i < mftmirr_start || i > mftmirr_end))
+					adjusted_space_state = default_space_state;
+				else
+					adjusted_space_state = MFT_ZONE_SPACE;
+				if(adjust_new_space_state)
+					RemarkBlock(i,1,adjusted_space_state,old_space_state);
+				else
+					RemarkBlock(i,1,new_space_state,adjusted_space_state);
+			}
+		}
+	}
+}
+
+/**
  * @brief Remarks a range of clusters belonging to the file in the cluster map.
  * @param[in] pfn pointer to the FILENAME structure containing information about the file.
  * @param[in] old_space_state the previous state of the marked space.
@@ -285,52 +348,11 @@ void MarkFileSpace(PFILENAME pfn,int old_space_state)
 {
 	PBLOCKMAP block;
 	UCHAR new_space_state;
-	BOOLEAN outside_mft, outside_mftzone, outside_mftmirr;
-	BOOLEAN inside_mft, inside_mftzone, inside_mftmirr;
-	ULONGLONG i;
 
-	/* define the new space state */
 	new_space_state = GetFileSpaceState(pfn);
-	
-	/* if old space state is undefined, scan and remark it sequentially */
-	switch(old_space_state){
-	case SYSTEM_OR_MFT_ZONE_SPACE:
-		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-			/* check whether current block is outside mft zones */
-			outside_mft = IsOutsideMft(block->lcn,block->length);
-			outside_mftzone = IsOutsideMftZone(block->lcn,block->length);
-			outside_mftmirr = IsOutsideMftMirr(block->lcn,block->length);
-			if(outside_mft && outside_mftzone && outside_mftmirr){
-				RemarkBlock(block->lcn,block->length,new_space_state,SYSTEM_SPACE);
-			} else {
-				/* check whether current block is completely inside mft zone */
-				inside_mft = IsInsideMft(block->lcn,block->length);
-				inside_mftzone = IsInsideMftZone(block->lcn,block->length);
-				inside_mftmirr = IsInsideMftMirr(block->lcn,block->length);
-				if(inside_mft || inside_mftzone || inside_mftmirr){
-					RemarkBlock(block->lcn,block->length,new_space_state,MFT_ZONE_SPACE);
-				} else {
-					/* block is partially inside mft zone */
-					/* this case is rare, it may encounter mo more than 6 times */
-					/* therefore we can handle it easy, without optimizing the code for speed */
-					for(i = block->lcn; i < block->lcn + block->length; i++){
-						if((i < mft_start || i > mft_end) && (i < mftzone_start || i > mftzone_end) && 
-						  (i < mftmirr_start || i > mftmirr_end))
-							RemarkBlock(i,1,new_space_state,SYSTEM_SPACE);
-						else
-							RemarkBlock(i,1,new_space_state,MFT_ZONE_SPACE);
-					}
-				}
-			}
-			if(block->next_ptr == pfn->blockmap) break;
-		}
-		break;
-	default:
-		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-			RemarkBlock(block->lcn,block->length,new_space_state,old_space_state);
-			if(block->next_ptr == pfn->blockmap) break;
-		}
-		break;
+	for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+		RemarkBlock(block->lcn,block->length,new_space_state,old_space_state);
+		if(block->next_ptr == pfn->blockmap) break;
 	}
 }
 
@@ -370,8 +392,9 @@ void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_sta
 	if(!new_cluster_map) return;
 	
 	/* check parameters */
-	if(space_state < 0 || space_state >= NUM_OF_SPACE_STATES) return;
-	if(old_space_state < 0 || (old_space_state >= NUM_OF_SPACE_STATES && old_space_state != SYSTEM_OR_FREE_SPACE)) return;
+	if(space_state < 0 || (space_state >= NUM_OF_SPACE_STATES && space_state != FREE_OR_MFT_ZONE_SPACE)) return;
+	if(old_space_state < 0 || (old_space_state >= NUM_OF_SPACE_STATES && 
+		old_space_state != SYSTEM_OR_FREE_SPACE && old_space_state != SYSTEM_OR_MFT_ZONE_SPACE)) return;
 	if(start + len > clusters_total) return;
 
 	if(old_space_state == SYSTEM_OR_FREE_SPACE){
@@ -400,6 +423,16 @@ void RemarkBlock(ULONGLONG start,ULONGLONG len,int space_state,int old_space_sta
 			}
 			if(block->next_ptr == free_space_map) break;
 		}
+		return;
+	}
+	
+	if(old_space_state == SYSTEM_OR_MFT_ZONE_SPACE){
+		RemarkBlockRespectToMftZones(start,len,space_state,SYSTEM_SPACE,FALSE);
+		return;
+	}
+	
+	if(space_state == FREE_OR_MFT_ZONE_SPACE){
+		RemarkBlockRespectToMftZones(start,len,FREE_SPACE,old_space_state,TRUE);
 		return;
 	}
 

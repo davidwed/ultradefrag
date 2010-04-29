@@ -44,8 +44,9 @@
 #define NtCloseSafe(h) { if(h) { NtClose(h); h = NULL; } }
 
 /* some volume space states, for internal use only */
-#define SYSTEM_OR_MFT_ZONE_SPACE  100 /* for MarkFileSpace only */
-#define SYSTEM_OR_FREE_SPACE      101 /* for RemarkBlock only */
+#define SYSTEM_OR_MFT_ZONE_SPACE  100
+#define SYSTEM_OR_FREE_SPACE      101
+#define FREE_OR_MFT_ZONE_SPACE    102
 
 /* UltraDefrag internal structures */
 
