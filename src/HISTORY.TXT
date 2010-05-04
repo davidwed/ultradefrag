@@ -23,7 +23,7 @@ HISTORY
     - one little bug preventing the root directory from being defragmented fixed
     - the following translations were updated:
 
-      Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR), Korean
+      Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR), Korean, Hungarian
 
     - update check was added to the GUI
     - installer was updated to include publisher, version, estimated size,
