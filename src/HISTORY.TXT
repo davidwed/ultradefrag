@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 4.3.0  2010-04-
+  Version 4.3.0  2010-05-
   ------------------------------------------------------------------------------
     - UltraDefrag Scheduler has been retired as a component less functional
       than standard Windows Task Scheduler;
