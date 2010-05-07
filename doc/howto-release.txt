@@ -1,9 +1,10 @@
 new RC:
-1. run build-pre-release.cmd
-2. upload files through sf.net file manager
-3. update website
-4. submit news
-5. close bugs and requests
+1. prepare website (index) and history.txt for pre-release
+2. run build-pre-release.cmd
+3. upload files through sf.net file manager
+4. update website
+5. submit news
+6. close bugs and requests
 
 new release:
 1. update version in readme file
