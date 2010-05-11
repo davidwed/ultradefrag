@@ -31,11 +31,12 @@ echo     13 ... Build Micro ............ with Custom Switches
 echo     14 ... Build Micro Portable ... with Custom Switches
 echo.
 echo     15 ... Build Test Release for Stefan
+echo     16 ... Build Test Installation for Stefan
 echo.
 echo      0 ... EXIT
 
 :: this value holds the number of the last menu entry
-set UD_BLD_MENU_MAX_ENTRIES=15
+set UD_BLD_MENU_MAX_ENTRIES=16
 
 :AskSelection
 echo.
@@ -138,6 +139,11 @@ call build-pre-release.cmd --no-ia64 --install
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
+goto finished
+
+:16
+call build-pre-release.cmd --no-ia64 --no-x86 --install
+
 goto finished
 
 :finished
