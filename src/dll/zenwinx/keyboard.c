@@ -56,25 +56,30 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
  */
 int __stdcall kb_open(void)
 {
-	int i;
+	int i, j;
 
 	/* initialize kb array */
 	memset((void *)kb,0,sizeof(kb));
 	number_of_keyboards = 0;
 	
-	/* required for wireless devices */
-	if (kb_open_internal(0) == -1) {
-		winx_printf("Wait 10 seconds for keyboard initialization ");
-		for(i = 0; i < 10; i++){
-			winx_sleep(1000);
-			winx_printf(".");
-		}
-		winx_printf("\n\n");
-		(void)kb_open_internal(0);
+	/* check all the keyboards and wait ten seconds
+       for any keyboard that fails detection.
+       required for USB devices, which can change ports */
+	for(i = 0; i < MAX_NUM_OF_KEYBOARDS; i++) {
+        if (kb_open_internal(i) == -1) {
+            if (i < 2) {
+                winx_printf("Wait 10 seconds for keyboard initialization ");
+                
+                for(j = 0; j < 10; j++){
+                    winx_sleep(1000);
+                    winx_printf(".");
+                }
+                winx_printf("\n\n");
+
+                (void)kb_open_internal(i);
+            }
+        }
 	}
-	
-	for(i = 1; i < MAX_NUM_OF_KEYBOARDS; i++)
-		(void)kb_open_internal(i);
 	
 	if(kb[0].hKbDevice) return 0; /* success, at least one keyboard found */
 	else return (-1);
