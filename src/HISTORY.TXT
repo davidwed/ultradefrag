@@ -6,6 +6,7 @@ HISTORY
     - native keyboard check was enhanced to add a delay if one of the first two
       keyboards fail detection
     RC3:
+    - driver was improved to better distinguish between free space and MFT zone
     - progress indication was improved in the boot time interface
     - backspace and escape keys handling added to the boot time interactive mode
     - one little bug preventing the root directory from being defragmented fixed
