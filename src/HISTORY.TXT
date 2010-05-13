@@ -2,33 +2,39 @@ HISTORY
 
   Version 4.3.0  2010-05-
   ------------------------------------------------------------------------------
+    RC4:
+    - native keyboard check was enhanced to add a delay if one of the first two
+      keyboards fail detection
+    RC3:
+    - progress indication was improved in the boot time interface
+    - backspace and escape keys handling added to the boot time interactive mode
+    - one little bug preventing the root directory from being defragmented fixed
+    RC2:
+    - --use-entire-window option was added to the command line interface
+    - fixed a bug preventing OS version check to work on later Windows versions
+    - update check was added to the GUI
+    - few wrong prototypes in /src/dll/zenwinx/ntndk.h file were fixed
+    RC1:
     - UltraDefrag Scheduler has been retired as a component less functional
       than standard Windows Task Scheduler;
       visit http://ultradefrag.wikispaces.com/ for tutorials on scheduling
       disk defragmentation tasks through Windows Task Scheduler
     - --wait option was added to the command line interface to make scheduled
       defragmentation more flexible
-    - --use-entire-window option was added to the command line interface
     - more reliable monolithic boot time defragmenter was made
     - few bugs preventing the correct MFT displaying were fixed in driver
-    - fixed a bug preventing OS version check to work on later Windows versions
     - one little bug preventing displaying system files in green color
       on NTFS volumes was fixed
     - cluster map appearance in GUI was improved and made absolutely
       independent from the screen DPI
     - cluster map block size was made customizable in GUI through map_block_size
       and grid_line_width parameters added to guiopts.lua configuration file
-    - progress indication was improved in the boot time interface
-    - backspace and escape keys handling added to the boot time interactive mode
-    - one little bug preventing the root directory from being defragmented fixed
     - the following translations were updated:
 
       Czech, Finnish, Japanese, Spanish (AR), Portuguese (BR), Korean, Hungarian
 
-    - update check was added to the GUI
     - installer was updated to include publisher, version, estimated size,
       custom icon and support link in uninstall information
-    - few wrong prototypes in /src/dll/zenwinx/ntndk.h file were fixed
     - sources were cleaned up by removing the obsolete 
       kernel mode driver support at all
     - for programmers: winx_create_thread improved, winx_getche and winx_gets
