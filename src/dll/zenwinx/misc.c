@@ -235,12 +235,12 @@ int __stdcall winx_unload_driver(short *driver_name)
 
 /**
  * @brief Retrieves the Windows boot options.
- * @param[out] buffer pointer to the buffer to receive
- * the null-terminated string containing the Windows boot options.
- * @param[in] length the length of the buffer, in characters.
- * @return Zero for success, negative value otherwise.
+ * @return Pointer to Unicode string containing all Windows
+ * boot options. NULL indicates failure.
+ * @note After a use of returned string it should be freed
+ * by winx_heap_free() call.
  */
-int __stdcall winx_get_windows_boot_options(short *buffer,int length)
+short * __stdcall winx_get_windows_boot_options(void)
 {
 	UNICODE_STRING us;
 	OBJECT_ATTRIBUTES oa;
@@ -251,9 +251,10 @@ int __stdcall winx_get_windows_boot_options(short *buffer,int length)
 	DWORD data_size = 0;
 	DWORD data_size2 = 0;
 	DWORD data_length;
+	BOOLEAN empty_value = FALSE;
+	short *boot_options;
+	int buffer_size;
 	
-	DbgCheck2(buffer,length,"winx_get_windows_boot_options",-1);
-
 	/* 1. open HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control registry key */
 	RtlInitUnicodeString(&us,L"\\Registry\\Machine\\SYSTEM\\"
 							 L"CurrentControlSet\\Control");
@@ -262,7 +263,7 @@ int __stdcall winx_get_windows_boot_options(short *buffer,int length)
 	if(status != STATUS_SUCCESS){
 		DebugPrintEx(status,"Cannot open %ws",us.Buffer);
 		winx_printf("Cannot open %ls: %x!\n\n",us.Buffer,(UINT)status);
-		return (-1);
+		return NULL;
 	}
 	
 	/* 2. read SystemStartOptions value */
@@ -272,7 +273,7 @@ int __stdcall winx_get_windows_boot_options(short *buffer,int length)
 	if(status != STATUS_BUFFER_TOO_SMALL){
 		DebugPrintEx(status,"Cannot query SystemStartOptions value size");
 		winx_printf("Cannot query SystemStartOptions value size: %x!\n\n",(UINT)status);
-		return (-1);
+		return NULL;
 	}
 	data_size += sizeof(short);
 	data = winx_heap_alloc(data_size);
@@ -281,7 +282,7 @@ int __stdcall winx_get_windows_boot_options(short *buffer,int length)
 				data_size);
 		winx_printf("Cannot allocate %u bytes of memory for winx_get_windows_boot_options()!\n\n",
 				data_size);
-		return (-1);
+		return NULL;
 	}
 	
 	RtlZeroMemory(data,data_size);
@@ -291,24 +292,39 @@ int __stdcall winx_get_windows_boot_options(short *buffer,int length)
 		DebugPrintEx(status,"Cannot query SystemStartOptions value");
 		winx_printf("Cannot query SystemStartOptions value: %x!\n\n",(UINT)status);
 		winx_heap_free(data);
-		return (-1);
+		return NULL;
 	}
 	data_buffer = (short *)(data->Data);
 	data_length = data->DataLength >> 1;
-	if(data_length == 0){ /* value is empty */
-		winx_heap_free(data);
-		buffer[0] = 0;
-		return 0;
-	}
-	data_buffer[data_length - 1] = 0;
+	if(data_length == 0) empty_value = TRUE;
 	
-	/* copy boot options to destination buffer */
-	wcsncpy(buffer,data_buffer,length);
-	buffer[length - 1] = 0;
-	DebugPrint("%ls - %u\n\n",data_buffer,data_size);
-	//winx_printf("%ls - %u\n\n",data_buffer,data_size);
+	if(!empty_value){
+		data_buffer[data_length - 1] = 0;
+		buffer_size = data_length * sizeof(short);
+	} else {
+		buffer_size = 1 * sizeof(short);
+	}
+
+	boot_options = winx_heap_alloc(buffer_size);
+	if(!boot_options){
+		DebugPrint("Cannot allocate %u bytes of memory for winx_get_windows_boot_options()!",
+				buffer_size);
+		winx_printf("Cannot allocate %u bytes of memory for winx_get_windows_boot_options()!\n\n",
+				buffer_size);
+		winx_heap_free(data);
+		return NULL;
+	}
+
+	if(!empty_value){
+		memcpy((void *)boot_options,(void *)data_buffer,buffer_size);
+		DebugPrint("%ls - %u\n\n",data_buffer,data_size);
+		//winx_printf("%ls - %u\n\n",data_buffer,data_size);
+	} else {
+		boot_options[0] = 0;
+	}
+	
 	winx_heap_free(data);
-	return 0;
+	return boot_options;
 }
 
 /**
@@ -322,22 +338,8 @@ int __stdcall winx_windows_in_safe_mode(void)
 	short *boot_options;
 	int safe_boot = 0;
 	
-	/*
-	* I don't know how long it could be, so I decided to allocate 32k buffer.
-	*/
-	boot_options = winx_heap_alloc(32768 * sizeof(short));
-	if(!boot_options){
-		DebugPrint("Cannot allocate %u bytes of memory for winx_windows_in_safe_mode()!",
-				32768 * sizeof(short));
-		winx_printf("Cannot allocate %u bytes of memory for winx_windows_in_safe_mode()!\n\n",
-				32768 * sizeof(short));
-		return (-1);
-	}
-
-	if(winx_get_windows_boot_options(boot_options,32768) < 0){
-		winx_heap_free(boot_options);
-		return (-1);
-	}
+	boot_options = winx_get_windows_boot_options();
+	if(!boot_options) return (-1);
 	
 	/* search for SAFEBOOT */
 	_wcsupr(boot_options);

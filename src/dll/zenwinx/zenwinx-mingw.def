@@ -56,7 +56,7 @@ EXPORTS
 	winx_list_insert_item@12
 	winx_list_remove_item@8
 	winx_list_destroy@4
-	winx_get_windows_boot_options@8
+	winx_get_windows_boot_options@0
 	winx_windows_in_safe_mode@0
 	zenwinx_native_init@0
 	zenwinx_native_unload@0
