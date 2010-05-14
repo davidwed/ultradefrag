@@ -108,6 +108,7 @@ int __cdecl winx_breakhit(int msec);
 
 void __stdcall winx_sleep(int msec);
 int  __stdcall winx_get_os_version(void);
+int __stdcall winx_get_windows_boot_options(short *buffer,int length);
 int __stdcall winx_windows_in_safe_mode(void);
 int  __stdcall winx_get_windows_directory(char *buffer, int length);
 int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
