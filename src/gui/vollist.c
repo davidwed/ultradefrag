@@ -55,17 +55,18 @@ static void VolListUpdateStatusFieldInternal(int index,int Status);
 
 NEW_VOLUME_LIST_ENTRY vlist[MAX_DOS_DRIVES + 1];
 
-static int vlist_init(void)
+int vlist_init(void)
 {
 	memset(&vlist,0,sizeof(vlist));
 	return 0;
 }
 
-static int vlist_destroy(void)
+int vlist_destroy(void)
 {
 	NEW_VOLUME_LIST_ENTRY *entry;
 	int i;
-	
+
+	processed_entry = NULL;
 	for(i = 0; i < (MAX_DOS_DRIVES + 1); i++){
 		entry = &vlist[i];
 		if(entry->name[0] == 0) break;
@@ -454,7 +455,7 @@ void VolListGetColumnWidths(void)
 	}
 }
 
-void MakeVolListNiceLooking(void)
+void VolListAdjustColumnWidths(void)
 {
 	RECT rc;
 	int dx;
@@ -506,6 +507,11 @@ void MakeVolListNiceLooking(void)
 			}
 		}
 	}
+}
+
+void MakeVolListNiceLooking(void)
+{
+	VolListAdjustColumnWidths();
 }
 
 

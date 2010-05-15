@@ -57,8 +57,8 @@ HBITMAP hGridBitmap = NULL;
 WNDPROC OldRectangleWndProc;
 BOOL isRectangleUnicode = FALSE;
 
-static void CalculateBitMapDimensions(void);
-static BOOL CreateBitMapGrid(void);
+void CalculateBitMapDimensions(void);
+BOOL CreateBitMapGrid(void);
 NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void);
 
 void InitMap(void)
@@ -76,14 +76,6 @@ void InitMap(void)
 
 	CalculateBitMapDimensions();
 	
-	/* reallocate cluster map buffer */
-	if(global_cluster_map) free(global_cluster_map);
-	global_cluster_map = malloc(map_blocks_per_line * map_lines);
-	if(!global_cluster_map){
-		MessageBox(hWindow,"Cannot allocate memory for the cluster map!",
-				"Error",MB_OK | MB_ICONEXCLAMATION);
-	}
-
 	isRectangleUnicode = IsWindowUnicode(hMap);
 	if(isRectangleUnicode)
 		OldRectangleWndProc = (WNDPROC)SetWindowLongPtrW(hMap,GWLP_WNDPROC,
@@ -114,7 +106,7 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		return CallWindowProc(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
 }
 
-static void CalculateBitMapDimensions(void)
+void CalculateBitMapDimensions(void)
 {
 	RECT rc;
 	long dx, dy;
@@ -140,10 +132,18 @@ static void CalculateBitMapDimensions(void)
 		}
 	}
 	(void)InvalidateRect(hMap,NULL,TRUE);
+
+	/* reallocate cluster map buffer */
+	if(global_cluster_map) free(global_cluster_map);
+	global_cluster_map = malloc(map_blocks_per_line * map_lines);
+	if(!global_cluster_map){
+		MessageBox(hWindow,"Cannot allocate memory for the cluster map!",
+				"Error",MB_OK | MB_ICONEXCLAMATION);
+	}
 }
 
 /* Since v3.1.0 it supports all screen color depths. */
-static BOOL CreateBitMapGrid(void)
+BOOL CreateBitMapGrid(void)
 {
 	HDC hMainDC;
 	HBRUSH hBrush, hOldBrush;

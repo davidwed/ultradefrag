@@ -3,6 +3,7 @@ HISTORY
   Version 4.3.0  2010-05-
   ------------------------------------------------------------------------------
     RC4:
+    - GUI window resizing feature was added
     - native keyboard check was enhanced to add a delay if one of the first two
       keyboards fail detection
     RC3:

@@ -24,6 +24,7 @@
 #include "main.h"
 
 RECT win_rc; /* coordinates of main window */
+int restore_default_window_size = 0;
 int skip_removable = TRUE;
 int hibernate_instead_of_shutdown = FALSE;
 char buffer[MAX_PATH];
@@ -146,6 +147,7 @@ void GetPrefs(void)
 
 		win_rc.right = win_rc.left + (long)getint(L,"width");
 		win_rc.bottom = win_rc.top + (long)getint(L,"height");
+		restore_default_window_size = getint(L,"restore_default_window_size");
 		skip_removable = getint(L,"skip_removable");
 		user_defined_column_widths[0] = getint(L,"column1_width");
 		user_defined_column_widths[1] = getint(L,"column2_width");
@@ -302,7 +304,10 @@ void SavePrefs(void)
 		"-- to disable the automatic check for the latest available\n"
 		"-- version of the program during startup\n"
 		"disable_latest_version_check = %i\n\n"
-		"-- window coordinates etc.\n"
+		"-- window coordinates etc.\n\n"
+		"-- set restore_default_window_size parameter to 1\n"
+		"-- to restore default window size on the next startup\n"
+		"restore_default_window_size = %i\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
 		"skip_removable = %i\n\n"
@@ -325,6 +330,7 @@ void SavePrefs(void)
 		DEFAULT_GRID_LINE_WIDTH,
 		reloaded_grid_line_width ? reloaded_grid_line_width : grid_line_width,
 		disable_latest_version_check,
+		restore_default_window_size,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),

@@ -20,7 +20,7 @@
 /**
  * @page GUI Graphical Interface
  *
- * The UltraDefrag GUI consists of a single fixed-size window.
+ * The UltraDefrag GUI consists of a single resizable window.
  * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
  * <b>List of Volumes</b>\n
@@ -195,6 +195,12 @@ grid_line_width = 1
 -- version of the program during startup
 
 disable_latest_version_check = 0
+
+-- window coordinates etc.
+
+-- set restore_default_window_size parameter to 1
+-- to restore default window size on the next startup
+restore_default_window_size = 0
 @endverbatim
  *
  * It does make sense to set <b>grid_line_width = 0</b>,

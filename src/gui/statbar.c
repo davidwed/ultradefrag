@@ -40,15 +40,13 @@ void SetIcon(int part,int id)
 	(void)DestroyIcon(hImg);
 }
 
-BOOL CreateStatusBar()
+void SetStatusBarParts(void)
 {
 	RECT rc;
 	int width, i;
 	int x[N_OF_STATUSBAR_PARTS-1] = {110,210,345,465};
 	int a[N_OF_STATUSBAR_PARTS];
 
-	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
-									"0 dirs", hWindow, IDM_STATUSBAR);
 	if(hStatus){
 		if(GetClientRect(hStatus,&rc)){
 			width = rc.right - rc.left;
@@ -60,9 +58,15 @@ BOOL CreateStatusBar()
 		(void)SetIcon(0,IDI_DIR); (void)SetIcon(1,IDI_UNFRAGM);
 		(void)SetIcon(2,IDI_FRAGM); (void)SetIcon(3,IDI_CMP);
 		(void)SetIcon(4,IDI_MFT);
-		return TRUE;
 	}
-	return FALSE;
+}
+
+BOOL CreateStatusBar()
+{
+	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
+									"0 dirs", hWindow, IDM_STATUSBAR);
+	SetStatusBarParts();
+	return (hStatus) ? TRUE : FALSE;
 }
 
 void UpdateStatusBar(STATISTIC *pst)

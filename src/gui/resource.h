@@ -21,13 +21,6 @@
  *  Resource header for graphical interface.
  */
 
-#define UD_GUI_HEIGHT_OFFSET            100
-#define UD_DEFAULT_GUI_HEIGHT           225 + UD_GUI_HEIGHT_OFFSET
-#define UD_DEFAULT_MAP_HEIGHT            77 + UD_GUI_HEIGHT_OFFSET
-#define UD_BUTTON_TOP_ROW               179 + UD_GUI_HEIGHT_OFFSET
-#define UD_BUTTON_BOTTOM_ROW            194 + UD_GUI_HEIGHT_OFFSET
-#define UD_PROGRESS_ROW                 205 + UD_GUI_HEIGHT_OFFSET
-
 #define IDD_MAIN                        101
 #define IDD_ABOUT                       102
 #define IDD_SHUTDOWN                    103

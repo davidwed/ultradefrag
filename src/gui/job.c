@@ -131,6 +131,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	LV_ITEM lvi;
 	char buffer[128];
 	int index;
+	LONG_PTR main_win_style;
 	
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
@@ -148,6 +149,15 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,
 		IDC_RESCAN,IDC_SETTINGS,0);
 	WgxEnableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
+	
+	/* make the main window not resizable */
+	main_win_style = GetWindowLongPtr(hWindow,GWL_STYLE);
+	main_win_style &= ~WS_MAXIMIZEBOX;
+	main_win_style &= ~WS_THICKFRAME;
+	SetWindowLongPtr(hWindow,GWL_STYLE,main_win_style);
+	/* find better solution of changing maximize button look! */
+	//ShowWindow(hWindow,SW_HIDE);
+	//ShowWindow(hWindow,SW_SHOW);
 
 	/* process all selected volumes */
 	index = -1;
@@ -176,6 +186,13 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 			IDC_RESCAN,IDC_SETTINGS,0);
 		WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	}
+
+	/* make the main window resizable again */
+	main_win_style |= WS_MAXIMIZEBOX;
+	main_win_style |= WS_THICKFRAME;
+	SetWindowLongPtr(hWindow,GWL_STYLE,main_win_style);
+	//ShowWindow(hWindow,SW_HIDE);
+	//ShowWindow(hWindow,SW_SHOW);
 
 	/* check the shutdown after a job box state */
 	if(!exit_pressed && !stop_pressed){
