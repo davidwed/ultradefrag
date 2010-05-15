@@ -149,6 +149,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 		if(timer == 0){
 			//MessageBox(hWindow,"SetTimer failed!","Error!",MB_OK | MB_ICONHAND);
 			// the code above will prevent shutdown which is dangerous
+			OutputDebugString("SetTimer failed in ShutdownConfirmDlgProc()!\n");
 			/* force shutdown to avoid situation when pc works a long time without any control */
 			(void)EndDialog(hWnd,1);
 		}
