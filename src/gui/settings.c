@@ -307,7 +307,7 @@ void SavePrefs(void)
 		"-- window coordinates etc.\n\n"
 		"-- set restore_default_window_size parameter to 1\n"
 		"-- to restore default window size on the next startup\n"
-		"restore_default_window_size = %i\n"
+		"restore_default_window_size = %i\n\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n\n"
 		"skip_removable = %i\n\n"
