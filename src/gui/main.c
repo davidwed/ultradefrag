@@ -309,7 +309,7 @@ void InitMainWindow(void)
 
 	/* maximize window if required */
 	if(init_maximized_window)
-		SendMessage(hWindow,WM_USER,0,0);
+		SendMessage(hWindow,WM_USER + 1,0,0);
 }
 
 static RECT prev_rc = {0,0,0,0};
@@ -614,7 +614,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		else
 			OutputDebugString("Wrong window dimensions on WM_SIZE message!\n");
 		break;
-	case WM_USER:
+	case (WM_USER + 1):
 		ShowWindow(hWnd,SW_MAXIMIZE);
 		break;
 /*	case WM_NCHITTEST:
