@@ -34,6 +34,8 @@ extern HWND hList;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern RECT win_rc; /* coordinates of main window */
 extern int restore_default_window_size;
+extern int maximized_window;
+extern int init_maximized_window;
 extern int skip_removable;
 extern NEW_VOLUME_LIST_ENTRY *processed_entry;
 
@@ -69,7 +71,7 @@ void UpdateVolList(void);
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter);
 void VolListNotifyHandler(LPARAM lParam);
 
-void RepositionMainWindowControls(void);
+void RepositionMainWindowControls(BOOL asynch_vlist_update);
 void VolListAdjustColumnWidths(void);
 void SetStatusBarParts(void);
 void CalculateBitMapDimensions(void);
@@ -296,22 +298,27 @@ void InitMainWindow(void)
 		dy = win_rc.bottom - win_rc.top + delta_h;
 		SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
 	}
-
+	
 	UpdateVolList(); /* after a map initialization! */
 	InitFont();
 	
 	/* status bar will always have default font */
 	CreateStatusBar();
 	UpdateStatusBar(&(vlist[0].stat)); /* can be initialized here by any entry */
-	RepositionMainWindowControls();
+	RepositionMainWindowControls(FALSE);
+
+	/* maximize window if required */
+	if(init_maximized_window)
+		SendMessage(hWindow,WM_USER,0,0);
 }
+
+static RECT prev_rc = {0,0,0,0};
 
 /**
  * @brief Adjust positions of controls
  * in accordance with main window dimensions.
- * @todo Try to invalidate rectangles after all movings.
  */
-void RepositionMainWindowControls(void)
+void RepositionMainWindowControls(BOOL asynch_vlist_update)
 {
 	int vlist_height, cmap_height, button_height;
 	int progress_height, sbar_height;
@@ -350,6 +357,11 @@ void RepositionMainWindowControls(void)
 	cw = w - padding_x * 2;
 	offset_y = padding_y;
 
+	/* prevent resizing if the current size is equal to previous */
+	if((prev_rc.right - prev_rc.left == w) && (prev_rc.bottom - prev_rc.top == h))
+		return; /* this usually encounters when user minimizes window and then restores it */
+	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
+
 	button_width = 114;
 	button_height = 19;
 	
@@ -364,12 +376,10 @@ void RepositionMainWindowControls(void)
 	cmap_label_width = 156;
 	skip_media_width = 243;
 	rescan_btn_width = 170;
-#if 1
 	if(cmap_label_width + skip_media_width + rescan_btn_width > cw){
 		/* put volume list related controls firstly, then the cluster map label */
 		offset_x = padding_x;
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),0,offset_x,offset_y,skip_media_width,button_height,0);
-		(void)InvalidateRect(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),NULL,TRUE);
 		offset_x += skip_media_width;
 		if(offset_x + rescan_btn_width > padding_x + cw){
 			offset_x = padding_x;
@@ -378,24 +388,20 @@ void RepositionMainWindowControls(void)
 			offset_x = padding_x + cw - rescan_btn_width;
 		}
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_RESCAN),0,offset_x,offset_y,rescan_btn_width,button_height,0);
-		(void)InvalidateRect(GetDlgItem(hWindow,IDC_RESCAN),NULL,TRUE);
 		offset_x = padding_x;
 		offset_y += button_height + spacing;
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),0,offset_x,offset_y,cmap_label_width,button_height,0);
-		(void)InvalidateRect(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),NULL,TRUE);
 		offset_y += button_height + spacing;
 	} else {
 		/* put the cluster map label, then volume list related controls */
 		offset_x = padding_x;
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),0,offset_x,offset_y,cmap_label_width,button_height,0);
-		(void)InvalidateRect(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),NULL,TRUE);
 		offset_x += cmap_label_width;
 		if(offset_x + skip_media_width > padding_x + cw){
 			offset_x = padding_x;
 			offset_y += button_height + spacing;
 		}
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),0,offset_x,offset_y,skip_media_width,button_height,0);
-		(void)InvalidateRect(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),NULL,TRUE);
 		offset_x += skip_media_width;
 		if(offset_x + rescan_btn_width > padding_x + cw){
 			offset_x = padding_x;
@@ -404,22 +410,8 @@ void RepositionMainWindowControls(void)
 			offset_x = padding_x + cw - rescan_btn_width;
 		}
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_RESCAN),0,offset_x,offset_y,rescan_btn_width,button_height,0);
-		(void)InvalidateRect(GetDlgItem(hWindow,IDC_RESCAN),NULL,TRUE);
 		offset_y += button_height + spacing;
 	}
-#else
-	offset_x = padding_x;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_RESCAN),0,offset_x,offset_y,rescan_btn_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_RESCAN),NULL,TRUE);
-	offset_x += rescan_btn_width + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),0,offset_x,offset_y,skip_media_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),NULL,TRUE);
-	offset_x = padding_x;
-	offset_y += button_height + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),0,offset_x,offset_y,cmap_label_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),NULL,TRUE);
-	offset_y += button_height + spacing;
-#endif
 
 	/* save cluster map offset */
 	cmap_offset = offset_y;
@@ -443,48 +435,15 @@ void RepositionMainWindowControls(void)
 	offset_x = padding_x;
 	progress_label_width = 85;
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_PROGRESSMSG),0,offset_x,offset_y,progress_label_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_PROGRESSMSG),NULL,TRUE);
 	offset_x += progress_label_width + spacing;
 	progress_width = cw - progress_label_width - spacing;
 	progress_height = 11;
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_PROGRESS1),0,offset_x,
 		offset_y + (button_height - progress_height) / 2,progress_width,
 		progress_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_PROGRESS1),NULL,TRUE);
 	offset_y -= spacing;
 	
 	/* set buttons above the progress indicator */
-#if 0
-	offset_y -= button_height;
-	offset_x = padding_x;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SHUTDOWN),0,offset_x,offset_y,
-		button_width * 3 + spacing * 2,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_SHUTDOWN),NULL,TRUE);
-	offset_x += button_width * 3 + spacing * 2 + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SETTINGS),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_SETTINGS),NULL,TRUE);
-	offset_x += button_width + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_ABOUT),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_ABOUT),NULL,TRUE);
-
-	offset_y -= button_height + spacing;
-	offset_x = padding_x;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_ANALYSE),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_ANALYSE),NULL,TRUE);
-	offset_x += button_width + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_DEFRAGM),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_DEFRAGM),NULL,TRUE);
-	offset_x += button_width + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_OPTIMIZE),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_OPTIMIZE),NULL,TRUE);
-	offset_x += button_width + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_STOP),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_STOP),NULL,TRUE);
-	offset_x += button_width + spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SHOWFRAGMENTED),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_SHOWFRAGMENTED),NULL,TRUE);
-	offset_y -= spacing;
-#else
 	lines = 1;
 	lw = cw;
 	/* for the first 7 buttons */
@@ -501,49 +460,42 @@ void RepositionMainWindowControls(void)
 	buttons_offset = offset_y;
 	offset_x = padding_x;
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_ANALYSE),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_ANALYSE),NULL,TRUE);
 	offset_x += button_width + spacing;
 	if(offset_x + button_width > padding_x + cw){
 		offset_x = padding_x;
 		offset_y += button_height + spacing;
 	}
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_DEFRAGM),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_DEFRAGM),NULL,TRUE);
 	offset_x += button_width + spacing;
 	if(offset_x + button_width > padding_x + cw){
 		offset_x = padding_x;
 		offset_y += button_height + spacing;
 	}
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_OPTIMIZE),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_OPTIMIZE),NULL,TRUE);
 	offset_x += button_width + spacing;
 	if(offset_x + button_width > padding_x + cw){
 		offset_x = padding_x;
 		offset_y += button_height + spacing;
 	}
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_STOP),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_STOP),NULL,TRUE);
 	offset_x += button_width + spacing;
 	if(offset_x + button_width > padding_x + cw){
 		offset_x = padding_x;
 		offset_y += button_height + spacing;
 	}
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SHOWFRAGMENTED),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_SHOWFRAGMENTED),NULL,TRUE);
 	offset_x += button_width + spacing;
 	if(offset_x + button_width > padding_x + cw){
 		offset_x = padding_x;
 		offset_y += button_height + spacing;
 	}
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SETTINGS),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_SETTINGS),NULL,TRUE);
 	offset_x += button_width + spacing;
 	if(offset_x + button_width > padding_x + cw){
 		offset_x = padding_x;
 		offset_y += button_height + spacing;
 	}
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_ABOUT),0,offset_x,offset_y,button_width,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_ABOUT),NULL,TRUE);
 	offset_x += button_width + spacing;
 	if(offset_x + button_width * 3 + spacing * 2 > padding_x + cw){
 		offset_x = padding_x;
@@ -551,15 +503,12 @@ void RepositionMainWindowControls(void)
 	}
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SHUTDOWN),0,offset_x,offset_y,
 		button_width * 3 + spacing * 2,button_height,0);
-	(void)InvalidateRect(GetDlgItem(hWindow,IDC_SHUTDOWN),NULL,TRUE);
-#endif
 
 	/* adjust cluster map */
 	cmap_width = cw;
 	cmap_height = buttons_offset - cmap_offset - spacing;
 	if(cmap_height < 0) cmap_height = 0;
 	(void)SetWindowPos(hMap,0,padding_x,cmap_offset,cmap_width,cmap_height,0);
-	(void)InvalidateRect(hMap,NULL,TRUE);
 	/* resize map */
 	processed_entry = NULL; /* to prevent map redraw during resizing */
 	CalculateBitMapDimensions();
@@ -569,10 +518,15 @@ void RepositionMainWindowControls(void)
 	/* resize bitmaps belonging to individual volumes */
 	vlist_destroy();
 	vlist_init();
-	//UpdateVolList();
-	(void)RescanDrivesThreadProc(NULL); /* call directly to be synchronous */
+	if(asynch_vlist_update)
+		UpdateVolList();
+	else
+		(void)RescanDrivesThreadProc(NULL);
 	/* reset map */
 	ClearMap();
+	
+	(void)InvalidateRect(hWindow,NULL,TRUE);
+	(void)UpdateWindow(hWindow);
 }
 
 /**
@@ -596,6 +550,9 @@ BOOL UpdateMainWindowCoordinates(void)
 
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
+//	LRESULT res;
+	MINMAXINFO *mmi;
+	
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
@@ -650,10 +607,36 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_SIZE:
+		if(wParam == SIZE_MAXIMIZED) maximized_window = 1;
+		else if(wParam != SIZE_MINIMIZED) maximized_window = 0;
 		if(UpdateMainWindowCoordinates())
-			RepositionMainWindowControls();
+			RepositionMainWindowControls(FALSE);
 		else
 			OutputDebugString("Wrong window dimensions on WM_SIZE message!\n");
+		break;
+	case WM_USER:
+		ShowWindow(hWnd,SW_MAXIMIZE);
+		break;
+/*	case WM_NCHITTEST:
+		res = DefWindowProc(hWnd,msg,wParam,lParam);
+		switch(res){
+		case HTBOTTOM:
+		case HTBOTTOMLEFT:
+		case HTBOTTOMRIGHT:
+		case HTLEFT:
+		case HTRIGHT:
+		case HTTOP:
+		case HTTOPLEFT:
+		case HTTOPRIGHT:
+			break;
+		}
+		break;
+*/	case WM_GETMINMAXINFO:
+		mmi = (MINMAXINFO *)lParam;
+		if(busy_flag){
+			mmi->ptMinTrackSize.x = mmi->ptMaxTrackSize.x = win_rc.right - win_rc.left;
+			mmi->ptMinTrackSize.y = mmi->ptMaxTrackSize.y = win_rc.bottom - win_rc.top + delta_h;
+		}
 		break;
 	case WM_MOVE:
 		(void)UpdateMainWindowCoordinates();

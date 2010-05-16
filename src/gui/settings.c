@@ -25,6 +25,8 @@
 
 RECT win_rc; /* coordinates of main window */
 int restore_default_window_size = 0;
+int maximized_window = 0;
+int init_maximized_window = 0;
 int skip_removable = TRUE;
 int hibernate_instead_of_shutdown = FALSE;
 char buffer[MAX_PATH];
@@ -147,6 +149,7 @@ void GetPrefs(void)
 
 		win_rc.right = win_rc.left + (long)getint(L,"width");
 		win_rc.bottom = win_rc.top + (long)getint(L,"height");
+		maximized_window = init_maximized_window = getint(L,"maximized");
 		restore_default_window_size = getint(L,"restore_default_window_size");
 		skip_removable = getint(L,"skip_removable");
 		user_defined_column_widths[0] = getint(L,"column1_width");
@@ -311,7 +314,8 @@ void SavePrefs(void)
 		"-- the settings below are not changable by the user,\n"
 		"-- they are always overwritten when the program ends\n"
 		"x = %i\ny = %i\n"
-		"width = %i\nheight = %i\n\n"
+		"width = %i\nheight = %i\n"
+		"maximized = %i\n\n"
 		"skip_removable = %i\n\n"
 		"column1_width = %i\ncolumn2_width = %i\n"
 		"column3_width = %i\ncolumn4_width = %i\n"
@@ -336,6 +340,7 @@ void SavePrefs(void)
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),
+		maximized_window,
 		skip_removable,
 		user_defined_column_widths[0],
 		user_defined_column_widths[1],
