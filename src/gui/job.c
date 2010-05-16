@@ -153,11 +153,8 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	/* make the main window not resizable */
 	main_win_style = GetWindowLongPtr(hWindow,GWL_STYLE);
 	main_win_style &= ~WS_MAXIMIZEBOX;
-	main_win_style &= ~WS_THICKFRAME;
 	SetWindowLongPtr(hWindow,GWL_STYLE,main_win_style);
-	/* find better solution of changing maximize button look! */
-	//ShowWindow(hWindow,SW_HIDE);
-	//ShowWindow(hWindow,SW_SHOW);
+	SetWindowPos(hWindow,0,0,0,0,0,SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
 
 	/* process all selected volumes */
 	index = -1;
@@ -189,10 +186,8 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 
 	/* make the main window resizable again */
 	main_win_style |= WS_MAXIMIZEBOX;
-	main_win_style |= WS_THICKFRAME;
 	SetWindowLongPtr(hWindow,GWL_STYLE,main_win_style);
-	//ShowWindow(hWindow,SW_HIDE);
-	//ShowWindow(hWindow,SW_SHOW);
+	SetWindowPos(hWindow,0,0,0,0,0,SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
 
 	/* check the shutdown after a job box state */
 	if(!exit_pressed && !stop_pressed){
