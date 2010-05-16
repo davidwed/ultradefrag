@@ -309,7 +309,7 @@ void InitMainWindow(void)
 
 	/* maximize window if required */
 	if(init_maximized_window)
-		SendMessage(hWindow,WM_USER + 1,0,0);
+		SendMessage(hWindow,(WM_USER + 1),0,0);
 }
 
 static RECT prev_rc = {0,0,0,0};
@@ -550,7 +550,7 @@ BOOL UpdateMainWindowCoordinates(void)
 
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-//	LRESULT res;
+	LRESULT res;
 	MINMAXINFO *mmi;
 	
 	switch(msg){
@@ -617,23 +617,33 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case (WM_USER + 1):
 		ShowWindow(hWnd,SW_MAXIMIZE);
 		break;
-/*	case WM_NCHITTEST:
-		res = DefWindowProc(hWnd,msg,wParam,lParam);
-		switch(res){
-		case HTBOTTOM:
-		case HTBOTTOMLEFT:
-		case HTBOTTOMRIGHT:
-		case HTLEFT:
-		case HTRIGHT:
-		case HTTOP:
-		case HTTOPLEFT:
-		case HTTOPRIGHT:
-			break;
+	case WM_NCHITTEST:
+		if(busy_flag){
+			res = DefWindowProc(hWnd,msg,wParam,lParam);
+			/* make borders not responsible for resizing */
+			switch(res){
+			case HTBOTTOM:
+			case HTBOTTOMLEFT:
+			case HTBOTTOMRIGHT:
+			case HTLEFT:
+			case HTRIGHT:
+			case HTTOP:
+			case HTTOPLEFT:
+			case HTTOPRIGHT:
+				return TRUE;
+			}
 		}
 		break;
-*/	case WM_GETMINMAXINFO:
+	case WM_NCLBUTTONDBLCLK:
+		if(busy_flag){
+			/* prevent restoring window by clicking on its caption */
+			if(wParam == HTCAPTION) return TRUE;
+		}
+		break;
+	case WM_GETMINMAXINFO:
 		mmi = (MINMAXINFO *)lParam;
 		if(busy_flag){
+			/* disable resizing */
 			mmi->ptMinTrackSize.x = mmi->ptMaxTrackSize.x = win_rc.right - win_rc.left;
 			mmi->ptMinTrackSize.y = mmi->ptMaxTrackSize.y = win_rc.bottom - win_rc.top + delta_h;
 		}
