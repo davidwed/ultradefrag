@@ -88,6 +88,8 @@
  * Use Stop button or Ctrl+S hotkeys to stop the currently running disk
  * defragmentation/analysis job.
  *
+ * Note that window cannot be resized during the volume processing.
+ *
  * The progress and status bars located in the bottom part of the
  * window are displaying the progress of the currently running job.
  * Note that selecting a different volume

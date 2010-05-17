@@ -131,7 +131,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	LV_ITEM lvi;
 	char buffer[128];
 	int index;
-	LONG_PTR main_win_style;
+	LONG main_win_style;
 	
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
@@ -151,11 +151,13 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	WgxEnableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	
 	/* make the main window not resizable */
-	main_win_style = GetWindowLongPtr(hWindow,GWL_STYLE);
+	/* this obvious code fails on fucked x64 editions of Windows */
+#ifndef _WIN64
+	main_win_style = GetWindowLong(hWindow,GWL_STYLE);
 	main_win_style &= ~WS_MAXIMIZEBOX;
-	SetWindowLongPtr(hWindow,GWL_STYLE,main_win_style);
+	SetWindowLong(hWindow,GWL_STYLE,main_win_style);
 	SetWindowPos(hWindow,0,0,0,0,0,SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
-
+#endif
 	/* process all selected volumes */
 	index = -1;
 	while(1){
@@ -185,10 +187,12 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	}
 
 	/* make the main window resizable again */
+	/* this obvious code fails on fucked x64 editions of Windows */
+#ifndef _WIN64
 	main_win_style |= WS_MAXIMIZEBOX;
-	SetWindowLongPtr(hWindow,GWL_STYLE,main_win_style);
+	SetWindowLong(hWindow,GWL_STYLE,main_win_style);
 	SetWindowPos(hWindow,0,0,0,0,0,SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
-
+#endif
 	/* check the shutdown after a job box state */
 	if(!exit_pressed && !stop_pressed){
 		if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),

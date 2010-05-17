@@ -639,8 +639,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			case HTTOP:
 			case HTTOPLEFT:
 			case HTTOPRIGHT:
+			case HTSIZE:
 				return TRUE;
 			}
+			/* make maximize button not responsible */
+			if(res == HTMAXBUTTON) return TRUE;
 		}
 		break;
 	case WM_NCLBUTTONDBLCLK:
