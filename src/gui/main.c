@@ -33,6 +33,7 @@ extern HWND hStatus;
 extern HWND hList;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern RECT win_rc; /* coordinates of main window */
+extern RECT r_rc;
 extern int restore_default_window_size;
 extern int maximized_window;
 extern int init_maximized_window;
@@ -270,9 +271,9 @@ void InitMainWindow(void)
 	InitProgress();
 	InitMap();
 
-	if(win_rc.left == UNDEFINED_COORD || win_rc.top == UNDEFINED_COORD)
+	if(r_rc.left == UNDEFINED_COORD || r_rc.top == UNDEFINED_COORD)
 		coord_undefined = TRUE;
-	WgxCheckWindowCoordinates(&win_rc,130,50);
+	WgxCheckWindowCoordinates(&r_rc,130,50);
 
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
@@ -285,19 +286,22 @@ void InitMainWindow(void)
 			s_width = GetSystemMetrics(SM_CXSCREEN);
 			s_height = GetSystemMetrics(SM_CYSCREEN);
 			if(s_width < dx || s_height < dy){
-				win_rc.left = win_rc.top = 0;
+				r_rc.left = r_rc.top = 0;
 			} else {
-				win_rc.left = (s_width - dx) / 2;
-				win_rc.top = (s_height - dy) / 2;
+				r_rc.left = (s_width - dx) / 2;
+				r_rc.top = (s_height - dy) / 2;
 			}
-			SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
+			r_rc.right = r_rc.left + dx;
+			r_rc.bottom = r_rc.top + dy - delta_h;
+			SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
 		}
 		restore_default_window_size = 0; /* because already done */
 	} else {
-		dx = win_rc.right - win_rc.left;
-		dy = win_rc.bottom - win_rc.top + delta_h;
-		SetWindowPos(hWindow,0,win_rc.left,win_rc.top,dx,dy,0);
+		dx = r_rc.right - r_rc.left;
+		dy = r_rc.bottom - r_rc.top + delta_h;
+		SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
 	}
+	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
 	
 	UpdateVolList(); /* after a map initialization! */
 	InitFont();
@@ -552,6 +556,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	LRESULT res;
 	MINMAXINFO *mmi;
+	BOOL size_changed;
+	RECT rc;
 	
 	switch(msg){
 	case WM_INITDIALOG:
@@ -609,10 +615,13 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_SIZE:
 		if(wParam == SIZE_MAXIMIZED) maximized_window = 1;
 		else if(wParam != SIZE_MINIMIZED) maximized_window = 0;
-		if(UpdateMainWindowCoordinates())
+		if(UpdateMainWindowCoordinates()){
+			if(!maximized_window)
+				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 			RepositionMainWindowControls(FALSE);
-		else
+		} else {
 			OutputDebugString("Wrong window dimensions on WM_SIZE message!\n");
+		}
 		break;
 	case (WM_USER + 1):
 		ShowWindow(hWnd,SW_MAXIMIZE);
@@ -649,10 +658,23 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_MOVE:
+		size_changed = TRUE;
+		if(GetWindowRect(hWindow,&rc)){
+			if((HIWORD(rc.bottom)) != 0xffff){
+				rc.bottom -= delta_h;
+				if((rc.right - rc.left == win_rc.right - win_rc.left) &&
+					(rc.bottom - rc.top == win_rc.bottom - win_rc.top))
+						size_changed = FALSE;
+			}
+		}
 		(void)UpdateMainWindowCoordinates();
+		if(!maximized_window && !size_changed)
+			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 		break;
 	case WM_CLOSE:
 		(void)UpdateMainWindowCoordinates();
+		if(!maximized_window)
+			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 		VolListGetColumnWidths();
 		exit_pressed = TRUE;
 		stop();

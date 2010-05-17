@@ -24,6 +24,7 @@
 #include "main.h"
 
 RECT win_rc; /* coordinates of main window */
+RECT r_rc; /* coordinates of restored window */
 int restore_default_window_size = 0;
 int maximized_window = 0;
 int init_maximized_window = 0;
@@ -113,6 +114,7 @@ void GetPrefs(void)
 	int status;
 	char *string;
 	BOOLEAN coord_undefined = TRUE;
+	BOOLEAN restored_coord_undefined = TRUE;
 	
 	win_rc.left = win_rc.top = 0;
 	in_filter[0] = ex_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
@@ -151,6 +153,27 @@ void GetPrefs(void)
 		win_rc.bottom = win_rc.top + (long)getint(L,"height");
 		maximized_window = init_maximized_window = getint(L,"maximized");
 		restore_default_window_size = getint(L,"restore_default_window_size");
+
+		/* get restored main window coordinates */
+		restored_coord_undefined = FALSE;
+		lua_getglobal(L, "rx");
+		if(!lua_isnil(L, lua_gettop(L))){
+			r_rc.left = (long)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		} else {
+			restored_coord_undefined = TRUE;
+		}
+		lua_getglobal(L, "ry");
+		if(!lua_isnil(L, lua_gettop(L))){
+			r_rc.top = (long)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		} else {
+			restored_coord_undefined = TRUE;
+		}
+
+		r_rc.right = r_rc.left + (long)getint(L,"rwidth");
+		r_rc.bottom = r_rc.top + (long)getint(L,"rheight");
+
 		skip_removable = getint(L,"skip_removable");
 		user_defined_column_widths[0] = getint(L,"column1_width");
 		user_defined_column_widths[1] = getint(L,"column2_width");
@@ -248,6 +271,9 @@ void GetPrefs(void)
 	if(coord_undefined){
 		win_rc.left = win_rc.top = UNDEFINED_COORD;
 	}
+	if(restored_coord_undefined){
+		r_rc.left = r_rc.top = UNDEFINED_COORD;
+	}
 
 	SetEnvironmentVariables();
 }
@@ -315,6 +341,8 @@ void SavePrefs(void)
 		"-- they are always overwritten when the program ends\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n"
+		"rx = %i\nry = %i\n"
+		"rwidth = %i\nrheight = %i\n"
 		"maximized = %i\n\n"
 		"skip_removable = %i\n\n"
 		"column1_width = %i\ncolumn2_width = %i\n"
@@ -340,6 +368,9 @@ void SavePrefs(void)
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
 		(int)(win_rc.bottom - win_rc.top),
+		(int)r_rc.left, (int)r_rc.top,
+		(int)(r_rc.right - r_rc.left),
+		(int)(r_rc.bottom - r_rc.top),
 		maximized_window,
 		skip_removable,
 		user_defined_column_widths[0],
