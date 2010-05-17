@@ -249,9 +249,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 void InitMainWindow(void)
 {
 	int dx,dy;
-	RECT rc;
 	BOOLEAN coord_undefined = FALSE;
 	int s_width, s_height;
+	#define DEFAULT_WIDTH  658
+	#define DEFAULT_HEIGHT 513
 	
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
@@ -278,23 +279,28 @@ void InitMainWindow(void)
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
 
+	//UpdateVolList(); /* after a map initialization! */
+	InitFont();
+	
+	/* status bar will always have default font */
+	CreateStatusBar();
+	UpdateStatusBar(&(vlist[0].stat)); /* can be initialized here by any entry */
+
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
-		if(GetWindowRect(hWindow,&rc)){
-			dx = rc.right - rc.left;
-			dy = rc.bottom - rc.top + delta_h;
-			s_width = GetSystemMetrics(SM_CXSCREEN);
-			s_height = GetSystemMetrics(SM_CYSCREEN);
-			if(s_width < dx || s_height < dy){
-				r_rc.left = r_rc.top = 0;
-			} else {
-				r_rc.left = (s_width - dx) / 2;
-				r_rc.top = (s_height - dy) / 2;
-			}
-			r_rc.right = r_rc.left + dx;
-			r_rc.bottom = r_rc.top + dy - delta_h;
-			SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
+		dx = DEFAULT_WIDTH;
+		dy = DEFAULT_HEIGHT + delta_h;
+		s_width = GetSystemMetrics(SM_CXSCREEN);
+		s_height = GetSystemMetrics(SM_CYSCREEN);
+		if(s_width < dx || s_height < dy){
+			r_rc.left = r_rc.top = 0;
+		} else {
+			r_rc.left = (s_width - dx) / 2;
+			r_rc.top = (s_height - dy) / 2;
 		}
+		r_rc.right = r_rc.left + dx;
+		r_rc.bottom = r_rc.top + dy - delta_h;
+		SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
 		restore_default_window_size = 0; /* because already done */
 	} else {
 		dx = r_rc.right - r_rc.left;
@@ -303,12 +309,6 @@ void InitMainWindow(void)
 	}
 	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
 	
-	UpdateVolList(); /* after a map initialization! */
-	InitFont();
-	
-	/* status bar will always have default font */
-	CreateStatusBar();
-	UpdateStatusBar(&(vlist[0].stat)); /* can be initialized here by any entry */
 	RepositionMainWindowControls(FALSE);
 
 	/* maximize window if required */
@@ -655,6 +655,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			/* disable resizing */
 			mmi->ptMinTrackSize.x = mmi->ptMaxTrackSize.x = win_rc.right - win_rc.left;
 			mmi->ptMinTrackSize.y = mmi->ptMaxTrackSize.y = win_rc.bottom - win_rc.top + delta_h;
+		} else {
+			/* set min size to avoid overlaying controls */
+			/* TODO: make it more flexible to allow more different layouts of controls */
+			mmi->ptMinTrackSize.x = 500;//200;
+			mmi->ptMinTrackSize.y = 400;//300;
 		}
 		break;
 	case WM_MOVE:
