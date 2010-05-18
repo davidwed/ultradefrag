@@ -184,9 +184,9 @@ show_shutdown_check_confirmation_dialog = 1
 seconds_for_shutdown_rejection = 60
 
 -- cluster map options (restart required to take effect):
--- the size of the block, in pixels; default value is 6
+-- the size of the block, in pixels; default value is 4
 
-map_block_size = 6
+map_block_size = 4
 
 -- the grid line width, in pixels; default value is 1
 
