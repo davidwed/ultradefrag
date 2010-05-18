@@ -652,6 +652,9 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			if(wParam == HTCAPTION) return TRUE;
 		}
 		break;
+	case WM_SYSCOMMAND:
+		if(busy_flag && wParam == SC_MAXIMIZE) return TRUE;
+		break;
 	case WM_GETMINMAXINFO:
 		mmi = (MINMAXINFO *)lParam;
 		if(busy_flag){
