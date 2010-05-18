@@ -361,6 +361,7 @@ Section "Ultra Defrag core files (required)" SecCore
   WriteRegStr   HKLM $R0 "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"
   WriteRegStr   HKLM $R0 "UninstallString" '"$INSTDIR\uninstall.exe"'
   WriteRegStr   HKLM $R0 "DisplayIcon"     '"$INSTDIR\uninstall.exe"'
+  WriteRegStr   HKLM $R0 "InstallLocation" '"$INSTDIR"'
   WriteRegDWORD HKLM $R0 "NoModify" 1
   WriteRegDWORD HKLM $R0 "NoRepair" 1
   WriteUninstaller "uninstall.exe"
@@ -381,7 +382,6 @@ Section "Ultra Defrag core files (required)" SecCore
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
   IntFmt $0 "0x%08X" $0
   WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
-  WriteRegDWORD HKLM $R0 "Size" "$0"
 
   ${EnableX64FSRedirection}
   pop $R0
