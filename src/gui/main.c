@@ -39,6 +39,7 @@ extern int maximized_window;
 extern int init_maximized_window;
 extern int skip_removable;
 extern NEW_VOLUME_LIST_ENTRY *processed_entry;
+SIZE g_defaultWinSize;
 
 int shutdown_flag = FALSE;
 extern int hibernate_instead_of_shutdown;
@@ -251,8 +252,15 @@ void InitMainWindow(void)
 	int dx,dy;
 	BOOLEAN coord_undefined = FALSE;
 	int s_width, s_height;
-	#define DEFAULT_WIDTH  658
-	#define DEFAULT_HEIGHT 513
+	RECT rc;
+    
+    if (GetWindowRect(hWindow,&rc)){
+        g_defaultWinSize.cx = rc.right - rc.left;
+        g_defaultWinSize.cy = rc.bottom - rc.top;
+    } else {
+        g_defaultWinSize.cx = 658;
+        g_defaultWinSize.cy = 513;
+    }
 	
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
@@ -288,8 +296,8 @@ void InitMainWindow(void)
 
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
-		dx = DEFAULT_WIDTH;
-		dy = DEFAULT_HEIGHT + delta_h;
+		dx = g_defaultWinSize.cx;
+		dy = g_defaultWinSize.cy + delta_h;
 		s_width = GetSystemMetrics(SM_CXSCREEN);
 		s_height = GetSystemMetrics(SM_CYSCREEN);
 		if(s_width < dx || s_height < dy){
@@ -664,8 +672,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		} else {
 			/* set min size to avoid overlaying controls */
 			/* TODO: make it more flexible to allow more different layouts of controls */
-			mmi->ptMinTrackSize.x = 500;//200;
-			mmi->ptMinTrackSize.y = 400;//300;
+			mmi->ptMinTrackSize.x = g_defaultWinSize.cx;//200;
+			mmi->ptMinTrackSize.y = g_defaultWinSize.cy;//300;
 		}
 		break;
 	case WM_MOVE:
