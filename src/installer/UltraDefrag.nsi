@@ -390,13 +390,23 @@ SectionEnd
 
 Section "Documentation" SecDocs
 
+  push $R0
+
   DetailPrint "Install documentation..."
   ${DisableX64FSRedirection}
   ; remove the old handbook
   RMDir /r "$INSTDIR\handbook"
   SetOutPath "$INSTDIR\handbook"
   File "${ROOTDIR}\doc\html\handbook\doxy-doc\html\*.*"
+
+  ; update the uninstall size value
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $0 "0x%08X" $0
+  StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+  WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
+
   ${EnableX64FSRedirection}
+  pop $R0
 
 SectionEnd
 
