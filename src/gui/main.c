@@ -408,19 +408,9 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 		/* put the cluster map label, then volume list related controls */
 		offset_x = padding_x;
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),0,offset_x,offset_y,cmap_label_width,button_height,0);
-		offset_x += cmap_label_width;
-		if(offset_x + skip_media_width > padding_x + cw){
-			offset_x = padding_x;
-			offset_y += button_height + spacing;
-		}
+		offset_x = padding_x + cw - rescan_btn_width - skip_media_width;
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),0,offset_x,offset_y,skip_media_width,button_height,0);
-		offset_x += skip_media_width;
-		if(offset_x + rescan_btn_width > padding_x + cw){
-			offset_x = padding_x;
-			offset_y += button_height + spacing;
-		} else {
-			offset_x = padding_x + cw - rescan_btn_width;
-		}
+		offset_x = padding_x + cw - rescan_btn_width;
 		(void)SetWindowPos(GetDlgItem(hWindow,IDC_RESCAN),0,offset_x,offset_y,rescan_btn_width,button_height,0);
 		offset_y += button_height + spacing;
 	}
