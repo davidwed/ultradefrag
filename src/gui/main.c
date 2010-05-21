@@ -23,6 +23,30 @@
 
 #include "main.h"
 
+/* Main window layout constants (in pixels for 96 DPI). */
+#define DEFAULT_WIDTH         658 /* default window width */
+#define DEFAULT_HEIGHT        513 /* default window height */
+#define MIN_WIDTH             500 /* minimal window width */
+#define MIN_HEIGHT            400 /* minimal window height */
+#define SPACING               7   /* spacing between controls */
+#define PADDING_X             14  /* horizontal padding between borders and controls */
+#define PADDING_Y             14  /* vertical padding between top border and controls */
+#define BUTTON_WIDTH          114 /* button width */
+#define BUTTON_HEIGHT         19  /* button height, applied also to text labels and check boxes */
+#define VLIST_HEIGHT          130 /* volume list height */
+#define CMAP_LABEL_WIDTH      156 /* cluster map label width */
+#define SKIP_MEDIA_WIDTH      243 /* skip removable media check box width */
+#define RESCAN_BTN_WIDTH      170 /* rescan drives button width */
+#define PROGRESS_LABEL_WIDTH  85  /* progress text label width */
+#define PROGRESS_HEIGHT       11  /* progress bar height */
+
+/* This macro converts pixels from 96 DPI to the current one. */
+/* FIXME: not implemented yet */
+#define PIX_PER_DIALOG_UNIT_96DPI 1.74
+#define DPI(x) ((int)((double)x * pix_per_dialog_unit / PIX_PER_DIALOG_UNIT_96DPI))
+
+double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
+
 /* Global variables */
 HINSTANCE hInstance;
 HWND hWindow = NULL;
@@ -39,7 +63,6 @@ extern int maximized_window;
 extern int init_maximized_window;
 extern int skip_removable;
 extern NEW_VOLUME_LIST_ENTRY *processed_entry;
-SIZE g_defaultWinSize;
 
 int shutdown_flag = FALSE;
 extern int hibernate_instead_of_shutdown;
@@ -254,14 +277,6 @@ void InitMainWindow(void)
 	int s_width, s_height;
 	RECT rc;
     
-    if (GetWindowRect(hWindow,&rc)){
-        g_defaultWinSize.cx = rc.right - rc.left;
-        g_defaultWinSize.cy = rc.bottom - rc.top;
-    } else {
-        g_defaultWinSize.cx = 658;
-        g_defaultWinSize.cy = 513;
-    }
-	
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
 		WgxApplyResourceTable(i18n_table,hWindow);
@@ -294,10 +309,15 @@ void InitMainWindow(void)
 	CreateStatusBar();
 	UpdateStatusBar(&(vlist[0].stat)); /* can be initialized here by any entry */
 
+	rc.top = rc.left = 0;
+	rc.right = rc.bottom = 100;
+	if(MapDialogRect(hWindow,&rc))
+		pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
+	
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
-		dx = g_defaultWinSize.cx;
-		dy = g_defaultWinSize.cy + delta_h;
+		dx = DEFAULT_WIDTH;
+		dy = DEFAULT_HEIGHT + delta_h;
 		s_width = GetSystemMetrics(SM_CXSCREEN);
 		s_height = GetSystemMetrics(SM_CYSCREEN);
 		if(s_width < dx || s_height < dy){
@@ -339,9 +359,9 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	int cmap_label_width, skip_media_width, rescan_btn_width;
 	int button_width, progress_label_width, progress_width, sbar_width;
 	
-	int spacing = 7;
-	int padding_x = 14;
-	int padding_y = 14;
+	int spacing;
+	int padding_x;
+	int padding_y;
 	
 	RECT rc;
 	int w, h;
@@ -357,6 +377,22 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	* to prevent problems with cluster map resizing.
 	*/
 	if(busy_flag) return;
+	
+	/*
+	* Assign layout variables by layout constants
+	* with the amendment to the current DPI.
+	*/
+	spacing = DPI(SPACING);
+	padding_x = DPI(PADDING_X);
+	padding_y = DPI(PADDING_Y);
+	button_width = DPI(BUTTON_WIDTH);
+	button_height = DPI(BUTTON_HEIGHT);
+	vlist_height = DPI(VLIST_HEIGHT);
+	cmap_label_width = DPI(CMAP_LABEL_WIDTH);
+	skip_media_width = DPI(SKIP_MEDIA_WIDTH);
+	rescan_btn_width = DPI(RESCAN_BTN_WIDTH);
+	progress_label_width = DPI(PROGRESS_LABEL_WIDTH);
+	progress_height = DPI(PROGRESS_HEIGHT);
 	
 	/* get dimensions of the client area of the main window */
 	if(!GetClientRect(hWindow,&rc)){
@@ -374,20 +410,13 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 		return; /* this usually encounters when user minimizes window and then restores it */
 	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
 
-	button_width = 114;
-	button_height = 19;
-	
 	/* reposition the volume list */
-	vlist_height = 130;
 	vlist_width = cw;
 	(void)SetWindowPos(hList,0,padding_x,offset_y,vlist_width,vlist_height,0);
 	VolListAdjustColumnWidths();
 	offset_y += vlist_height + spacing;
 	
 	/* redraw controls below the volume list */
-	cmap_label_width = 156;
-	skip_media_width = 243;
-	rescan_btn_width = 170;
 	if(cmap_label_width + skip_media_width + rescan_btn_width > cw){
 		/* put volume list related controls firstly, then the cluster map label */
 		offset_x = padding_x;
@@ -435,11 +464,9 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	/* set progress indicator coordinates */
 	offset_y -= button_height;
 	offset_x = padding_x;
-	progress_label_width = 85;
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_PROGRESSMSG),0,offset_x,offset_y,progress_label_width,button_height,0);
 	offset_x += progress_label_width + spacing;
 	progress_width = cw - progress_label_width - spacing;
-	progress_height = 11;
 	(void)SetWindowPos(GetDlgItem(hWindow,IDC_PROGRESS1),0,offset_x,
 		offset_y + (button_height - progress_height) / 2,progress_width,
 		progress_height,0);
@@ -662,8 +689,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		} else {
 			/* set min size to avoid overlaying controls */
 			/* TODO: make it more flexible to allow more different layouts of controls */
-			mmi->ptMinTrackSize.x = g_defaultWinSize.cx;//200;
-			mmi->ptMinTrackSize.y = g_defaultWinSize.cy;//300;
+			mmi->ptMinTrackSize.x = MIN_WIDTH;
+			mmi->ptMinTrackSize.y = MIN_HEIGHT;
 		}
 		break;
 	case WM_MOVE:

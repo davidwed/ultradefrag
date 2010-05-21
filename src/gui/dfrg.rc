@@ -38,6 +38,12 @@ IDI_SHUTDOWN            ICON    DISCARDABLE     "res/shutdown.ico"
 
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/ship.bmp"
 
+
+/*
+* Coordinates of the main window controls
+* defined here take no effect, they may be
+* even random.
+*/
 IDD_MAIN DIALOGEX 0, 0, 351, 220 //218 /*315, 218*/
 STYLE DS_MODALFRAME | WS_OVERLAPPEDWINDOW 
 EXSTYLE WS_EX_APPWINDOW
