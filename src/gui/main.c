@@ -316,8 +316,8 @@ void InitMainWindow(void)
 	
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
-		dx = DEFAULT_WIDTH;
-		dy = DEFAULT_HEIGHT + delta_h;
+		dx = DPI(DEFAULT_WIDTH);
+		dy = DPI(DEFAULT_HEIGHT) + delta_h;
 		s_width = GetSystemMetrics(SM_CXSCREEN);
 		s_height = GetSystemMetrics(SM_CYSCREEN);
 		if(s_width < dx || s_height < dy){
@@ -689,8 +689,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		} else {
 			/* set min size to avoid overlaying controls */
 			/* TODO: make it more flexible to allow more different layouts of controls */
-			mmi->ptMinTrackSize.x = MIN_WIDTH;
-			mmi->ptMinTrackSize.y = MIN_HEIGHT;
+			mmi->ptMinTrackSize.x = DPI(MIN_WIDTH);
+			mmi->ptMinTrackSize.y = DPI(MIN_HEIGHT);
 		}
 		break;
 	case WM_MOVE:
