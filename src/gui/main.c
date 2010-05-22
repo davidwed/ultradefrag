@@ -409,6 +409,7 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
 
 	/* reposition the volume list */
+    if(cmap_label_width + skip_media_width + rescan_btn_width > cw) vlist_height = vlist_height / 2;
 	vlist_width = cw;
 	(void)SetWindowPos(hList,0,padding_x,offset_y,vlist_width,vlist_height,0);
 	VolListAdjustColumnWidths();
