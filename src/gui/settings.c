@@ -25,6 +25,8 @@
 
 RECT win_rc; /* coordinates of main window */
 RECT r_rc; /* coordinates of restored window */
+extern double pix_per_dialog_unit;
+int scale_by_dpi = 0;
 int restore_default_window_size = 0;
 int maximized_window = 0;
 int init_maximized_window = 0;
@@ -153,6 +155,7 @@ void GetPrefs(void)
 		win_rc.bottom = win_rc.top + (long)getint(L,"height");
 		maximized_window = init_maximized_window = getint(L,"maximized");
 		restore_default_window_size = getint(L,"restore_default_window_size");
+		scale_by_dpi = getint(L,"scale_by_dpi");
 
 		/* get restored main window coordinates */
 		restored_coord_undefined = FALSE;
@@ -334,6 +337,10 @@ void SavePrefs(void)
 		"-- version of the program during startup\n"
 		"disable_latest_version_check = %i\n\n"
 		"-- window coordinates etc.\n\n"
+		"-- set scale_by_dpi parameter to 1\n"
+		"-- to scale the buttons and text according to the\n"
+		"-- screens DPI settings\n"
+		"scale_by_dpi = %i\n\n"
 		"-- set restore_default_window_size parameter to 1\n"
 		"-- to restore default window size on the next startup\n"
 		"restore_default_window_size = %i\n\n"
@@ -364,6 +371,7 @@ void SavePrefs(void)
 		DEFAULT_GRID_LINE_WIDTH,
 		reloaded_grid_line_width ? reloaded_grid_line_width : grid_line_width,
 		disable_latest_version_check,
+        scale_by_dpi,
 		restore_default_window_size,
 		(int)win_rc.left, (int)win_rc.top,
 		(int)(win_rc.right - win_rc.left),
@@ -398,7 +406,7 @@ void InitFont(void)
 	memset(&lf,0,sizeof(LOGFONT)); /* FIXME: may fail on x64? */
 	/* default font should be Courier New 9pt */
 	(void)strcpy(lf.lfFaceName,"Courier New");
-	lf.lfHeight = -12;
+	lf.lfHeight = DPI(-12);
 	
 	/* load saved font settings */
 	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua",&lf))

@@ -40,10 +40,6 @@
 #define PROGRESS_LABEL_WIDTH  85  /* progress text label width */
 #define PROGRESS_HEIGHT       11  /* progress bar height */
 
-/* This macro converts pixels from 96 DPI to the current one. */
-#define PIX_PER_DIALOG_UNIT_96DPI 1.74
-#define DPI(x) ((int)((double)x * pix_per_dialog_unit / PIX_PER_DIALOG_UNIT_96DPI))
-
 double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 
 /* Global variables */
@@ -58,6 +54,7 @@ extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern RECT win_rc; /* coordinates of main window */
 extern RECT r_rc;
 extern int restore_default_window_size;
+extern int scale_by_dpi;
 extern int maximized_window;
 extern int init_maximized_window;
 extern int skip_removable;
@@ -301,6 +298,13 @@ void InitMainWindow(void)
 	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
 	if(delta_h < 0) delta_h = 0;
 
+    if (scale_by_dpi) {
+        rc.top = rc.left = 0;
+        rc.right = rc.bottom = 100;
+        if(MapDialogRect(hWindow,&rc))
+            pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
+    }
+	
 	//UpdateVolList(); /* after a map initialization! */
 	InitFont();
 	
@@ -308,11 +312,6 @@ void InitMainWindow(void)
 	CreateStatusBar();
 	UpdateStatusBar(&(vlist[0].stat)); /* can be initialized here by any entry */
 
-	rc.top = rc.left = 0;
-	rc.right = rc.bottom = 100;
-	if(MapDialogRect(hWindow,&rc))
-		pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
-	
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
 		dx = DPI(DEFAULT_WIDTH);
