@@ -176,4 +176,8 @@ LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
 
 #define UNDEFINED_COORD (-10000)
 
+/* This macro converts pixels from 96 DPI to the current one. */
+#define PIX_PER_DIALOG_UNIT_96DPI 1.74
+#define DPI(x) ((int)((double)x * pix_per_dialog_unit / PIX_PER_DIALOG_UNIT_96DPI))
+
 #endif /* _DFRG_MAIN_H_ */
