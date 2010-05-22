@@ -4,6 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     RC4:
     - GUI window resizing feature was added
+    - scaling according to the screens DPI settings added
     - native keyboard check was enhanced to add a delay if one of the first two
       keyboards fail detection
     RC3:
