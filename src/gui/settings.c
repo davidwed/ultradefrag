@@ -26,7 +26,7 @@
 RECT win_rc; /* coordinates of main window */
 RECT r_rc; /* coordinates of restored window */
 extern double pix_per_dialog_unit;
-int scale_by_dpi = 0;
+int scale_by_dpi = 1;
 int restore_default_window_size = 0;
 int maximized_window = 0;
 int init_maximized_window = 0;
@@ -155,7 +155,12 @@ void GetPrefs(void)
 		win_rc.bottom = win_rc.top + (long)getint(L,"height");
 		maximized_window = init_maximized_window = getint(L,"maximized");
 		restore_default_window_size = getint(L,"restore_default_window_size");
-		scale_by_dpi = getint(L,"scale_by_dpi");
+        
+		lua_getglobal(L, "scale_by_dpi");
+		if(!lua_isnil(L, lua_gettop(L))){
+			scale_by_dpi = (int)lua_tointeger(L, lua_gettop(L));
+			lua_pop(L, 1);
+		}
 
 		/* get restored main window coordinates */
 		restored_coord_undefined = FALSE;
@@ -337,8 +342,8 @@ void SavePrefs(void)
 		"-- version of the program during startup\n"
 		"disable_latest_version_check = %i\n\n"
 		"-- window coordinates etc.\n\n"
-		"-- set scale_by_dpi parameter to 1\n"
-		"-- to scale the buttons and text according to the\n"
+		"-- set scale_by_dpi parameter to 0\n"
+		"-- to not scale the buttons and text according to the\n"
 		"-- screens DPI settings\n"
 		"scale_by_dpi = %i\n\n"
 		"-- set restore_default_window_size parameter to 1\n"
