@@ -110,6 +110,36 @@ static int getint(lua_State *L, char *variable)
 	return ret;
 }
 
+/* returns default value def if variable is not defined */
+static int getintdef(lua_State *L, char *variable, int def)
+{
+	int ret;
+	
+    lua_getglobal(L, variable);
+    if(!lua_isnil(L, lua_gettop(L))){
+        ret = (int)lua_tointeger(L, lua_gettop(L));
+        lua_pop(L, 1);
+        return ret;
+    } else {
+        return def;
+    }
+}
+
+/* returns value of coordinate or sets undefined to TRUE */
+static long getcoord(lua_State *L, char *variable, BOOLEAN *undefined)
+{
+	long ret = 0;
+	
+    lua_getglobal(L, variable);
+    if(!lua_isnil(L, lua_gettop(L))){
+        ret = (long)lua_tointeger(L, lua_gettop(L));
+        lua_pop(L, 1);
+    } else {
+        *undefined = TRUE;
+    }
+    return ret;
+}
+
 void GetPrefs(void)
 {
 	lua_State *L;
@@ -136,48 +166,20 @@ void GetPrefs(void)
 	if(!status){ /* successful */
 		/* get main window coordinates */
 		coord_undefined = FALSE;
-		lua_getglobal(L, "x");
-		if(!lua_isnil(L, lua_gettop(L))){
-			win_rc.left = (long)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		} else {
-			coord_undefined = TRUE;
-		}
-		lua_getglobal(L, "y");
-		if(!lua_isnil(L, lua_gettop(L))){
-			win_rc.top = (long)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		} else {
-			coord_undefined = TRUE;
-		}
+		win_rc.left = getcoord(L, "x", &coord_undefined);
+        win_rc.top = getcoord(L, "y", &coord_undefined);
 
 		win_rc.right = win_rc.left + (long)getint(L,"width");
 		win_rc.bottom = win_rc.top + (long)getint(L,"height");
 		maximized_window = init_maximized_window = getint(L,"maximized");
 		restore_default_window_size = getint(L,"restore_default_window_size");
         
-		lua_getglobal(L, "scale_by_dpi");
-		if(!lua_isnil(L, lua_gettop(L))){
-			scale_by_dpi = (int)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		}
+        scale_by_dpi = getintdef(L, "scale_by_dpi", scale_by_dpi);
 
 		/* get restored main window coordinates */
 		restored_coord_undefined = FALSE;
-		lua_getglobal(L, "rx");
-		if(!lua_isnil(L, lua_gettop(L))){
-			r_rc.left = (long)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		} else {
-			restored_coord_undefined = TRUE;
-		}
-		lua_getglobal(L, "ry");
-		if(!lua_isnil(L, lua_gettop(L))){
-			r_rc.top = (long)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		} else {
-			restored_coord_undefined = TRUE;
-		}
+		r_rc.left = getcoord(L, "rx", &restored_coord_undefined);
+		r_rc.top = getcoord(L, "ry", &restored_coord_undefined);
 
 		r_rc.right = r_rc.left + (long)getint(L,"rwidth");
 		r_rc.bottom = r_rc.top + (long)getint(L,"rheight");
@@ -222,8 +224,7 @@ void GetPrefs(void)
 		lua_pop(L, 1);
 
 		fraglimit = getint(L,"fragments_threshold");
-		refresh_interval = getint(L,"refresh_interval");
-		if(!refresh_interval) refresh_interval = DEFAULT_REFRESH_INTERVAL;
+		refresh_interval = getintdef(L,"refresh_interval",DEFAULT_REFRESH_INTERVAL);
 		disable_reports = getint(L,"disable_reports");
 
 		lua_getglobal(L, "dbgprint_level");
@@ -234,20 +235,13 @@ void GetPrefs(void)
 		}
 		lua_pop(L, 1);
 		
-		hibernate_instead_of_shutdown = getint(L,
-				"hibernate_instead_of_shutdown");
+		hibernate_instead_of_shutdown = getint(L, "hibernate_instead_of_shutdown");
 
-		lua_getglobal(L, "show_shutdown_check_confirmation_dialog");
-		if(!lua_isnil(L, lua_gettop(L))){
-			show_shutdown_check_confirmation_dialog = (int)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		}
+        show_shutdown_check_confirmation_dialog = getintdef(L,
+            "show_shutdown_check_confirmation_dialog", show_shutdown_check_confirmation_dialog);
 
-		lua_getglobal(L, "seconds_for_shutdown_rejection");
-		if(!lua_isnil(L, lua_gettop(L))){
-			seconds_for_shutdown_rejection = (int)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		}
+        seconds_for_shutdown_rejection = getintdef(L,
+            "seconds_for_shutdown_rejection", seconds_for_shutdown_rejection);
 		
 		/* load the size of the cluster map block only if it is not already loaded */
 		reloaded_map_block_size = getint(L,"map_block_size");
@@ -270,8 +264,7 @@ void GetPrefs(void)
 			grid_line_width_loaded = TRUE;
 		}
 
-		disable_latest_version_check = getint(L,
-				"disable_latest_version_check");
+		disable_latest_version_check = getint(L, "disable_latest_version_check");
 	}
 	lua_close(L);
 
