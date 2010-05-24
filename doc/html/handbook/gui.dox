@@ -200,6 +200,11 @@ disable_latest_version_check = 0
 
 -- window coordinates etc.
 
+-- set scale_by_dpi parameter to 0
+-- to not scale the buttons and text according to the
+-- screens DPI settings
+scale_by_dpi = 1
+
 -- set restore_default_window_size parameter to 1
 -- to restore default window size on the next startup
 restore_default_window_size = 0
