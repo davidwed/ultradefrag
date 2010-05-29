@@ -159,42 +159,71 @@ wikispaces_color_fontsize = "83%";
 	</div>
 	<div class="mpart">
 		<!-- pre-release announcement -->
+<!--
 		<h3>Schlagzeile - UltraDefrag 4.3 RC4 ist verfügbar.</h3>
         <h2>&nbsp;</h2> 
 		<p>Der neueste Freigabekandidat enthält folgende Verbesserungen:</p>
-<!--
 		<ul>
-		<li>UltraDefrag Scheduler wurde aufgelassen, da er weniger funktional als der Windows Task Scheduler war;
-            auf <a href="http://ultradefrag.wikispaces.com/"><u>UltraDefrag.WikiSpaces.com</u></a> gibt es Anleitungen,
-            wie Defragmentierungsaufgaben mit Windows Task Scheduler geplant werden können</li>
 		<li>Startzeit Defragmentierer wurde monolitisch aufgebaut, um ihn zuverlässiger zu machen.</li>
-		<li>Probleme im Defragmentierungstreiber wurden behoben, um die MFT-Anzeige richtig zu stellen.</li>
-		<li><b>wait</b> Option wurde dem Kommandozeilenprogramm hinzugefügt, um geplante Defragmentierungen zu erleichtern.</li>
-		<li>Die Zuordnungseinheitentabelle der Benutzeroberfläche ist nun anpassbar, um die aktuelle Laufwerksbelegung besser darzustellen.</li>
-		<li>Kleinere Probleme wurden behoben.</li>
-		<li><b>use-entire-window</b> Option wurde dem Kommandozeilenprogramm hinzugefügt, damit die Zuordnungseinheitentabelle das ganze Fenster ausfüllt.</li>
-        <li>Treiber wurde verbessert um besser zwischen freiem Speicher und MFT Zone unterscheiden zu können.</li>
-        <li>Ein Problem wurde behoben, dass verhinderte ein Laufwerk zu defragmentieren, wenn der Hauptordner fragmentiert war.</li>
-		</ul>
--->
-		<ul>
-        <li>Es ist nun möglich die Größe des Programmfensters anzupassen.</li>
-        <li>Text und Fensterelemente werden an die aktuelle DPI Einstellung des Bildschirms angepasst.</li>
 		</ul>
         <h2>&nbsp;</h2>
+-->
 		<!-- release announcement -->
-		<h3>Neuigkeiten - UltraDefrag 4.2 wurde endlich freigegeben!</h3>
+		<h3>Neuigkeiten - UltraDefrag 4.3 wurde endlich freigegeben!</h3>
+        
+        <p>Wir möchten Euch die neueste Version von UltraDefrag vorstellen, welche viele Verbesserungen gegenüber
+        vorherigen stabilen Versionen enthält. Wir haben die letzten zwei Monate gemeinsam daran gearbeitet,
+        deshalb danken wir an dieser Stelle allen Benutzern welche die vier Freigabekandidaten getestet haben und
+        uns über Probleme und fehlende Funktionen berichtet haben. Herzlichen Dank Freunde, durch unsere gemeinsame
+        Anstrengung ist es möglich ein qualitativ hochwertiges Produkt zu schaffen, welches unsere Welt etwas besser
+        macht.</p>
+        
         <h2>&nbsp;</h2> 
         <p>Die neue Version enthält folgende Verbesserungen:</p>
-		<ul>
-		<li>Defragmentierung und Optimierung wurden beschleunigt.</li>
-		<li>Initialisieren der Boot-Defragmentierung wurde beschleunigt.</li>
-		<li>Auswahl mehrerer Laufwerke wurde zu GUI und Scheduler hinzugefügt.</li>
-		<li><b>--all, --all-fixed</b> Kommandozeilenargumente wurden zur Konsolenanwendung und Boot-Defragmentierung hinzugefügt.</li>
-		<li>Bestätigungsdialoge für das Herunterfahren wurden dem GUI hinzugefügt. Bitte <a href="http://ultradefrag.wikispaces.com/"><u>UltraDefrag.WikiSpaces.com</u></a> besuchen und die Übersetzung überarbeiten.</li>
-		<li>Ein Problem das die Darstellung von Unicode Pfaden in den Berichten verhinderte wurde behoben.</li>
-		</ul>
-		<p><a href="../HISTORY.TXT">Hier</a> ist eine Liste aller Änderungen.</p>
+        
+        <p><a href=""><b>GUI:</b></a></p>
+        <ul>
+        <li>Es ist nun möglich die Größe des Programmfensters anzupassen.</li>
+        <li>Text und Fensterelemente werden an die aktuelle DPI Einstellung des Bildschirms angepasst.</li>
+		<li>Die Zuordnungseinheitentabelle ist nun über die Einstellungen in guiopts.lua anpassbar.</li>
+        <li>Überprüfung auf Aktualisierungen wurde hinzugefügt.</li>
+        </ul>
+
+        <p><a href=""><b>Treiber:</b></a></p>
+        <ul>
+        <li>Das Problem ein Laufwerk mit fragmentiertem Hauptordner zu defragmentieren wurde behoben.</li>
+		<li>Probleme mit der MFT-Anzeige wurden behoben.</li>
+        <li>Unterscheidung zwischen freiem Speicher und MFT Zone wurde verbessert.</li>
+        <li>System Dateien auf NTFS Festplatten werden nun korrekt in Grün dargestellt.</li>
+        </ul>
+        
+        <p><a href=""><b>Startzeitoberfläche:</b></a></p>
+        <ul>
+        <li>Fortschrittsanzeige wurde verbessert.</li>
+        <li>Backspace und Escape Tastenbehandlung wurde dem interaktiven Modus hinzugefügt.</li>
+		<li>Kleinere Probleme wurden behoben.</li>
+        </ul>
+        
+        <p><a href=""><b>Kommandozeilenwerkzeug:</b></a></p>
+        <ul>
+		<li><b>--wait</b> Option wurde hinzugefügt, um geplante Defragmentierungen zu erleichtern.</li>
+		<li><b>--use-entire-window</b> Option wurde hinzugefügt.</li>
+        </ul>
+        
+        <p><a href=""><b>Aufgabenplaner:</b></a></p>
+        <ul>
+		<li>UltraDefrag Scheduler wurde aufgelassen, da er weniger funktional als der Windows Task Scheduler war;
+        auf <a href="http://ultradefrag.wikispaces.com/"><u>UltraDefrag.WikiSpaces.com</u></a> gibt es Anleitungen,
+        wie Defragmentierungsaufgaben mit Windows Task Scheduler geplant werden können</li>
+        </ul>
+        
+        <p><a href=""><b>Übersetzungen:</b></a></p>
+        <ul>
+        <li>Folgende Übersetzungen wurden aktualisiert: <br/><b>Tschechisch</b>, <b>Finnisch</b>, <b>Japanisch</b>, 
+        <b>Spanisch (AR)</b>, <b>Portugisisch (BR)</b>, <b>Koreanisch</b>, <b>Ungarisch</b>.</li>
+        </ul>
+
+        <p><a href="../HISTORY.TXT">Hier</a> ist eine Liste aller Änderungen.</p>
         <h2>&nbsp;</h2> 
 		<!-- preview announcement -->
 <!--
