@@ -118,7 +118,7 @@
     Special thanks for correcting and updating translations (in alphabetical order):
 --------------------------------------------------------------------------------
     Ali Jafari
-	Áron Hegedüs
+    Áron Hegedüs
     Connection
     Christoffer Ekberg
     Dave MacBlack

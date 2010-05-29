@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 4.3.0  2010-05-
+  Version 4.3.0  2010-05-29
   ------------------------------------------------------------------------------
     RC4:
     - GUI window resizing feature was added

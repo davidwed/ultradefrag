@@ -164,41 +164,66 @@ wikispaces_color_fontsize = "83%";
 	</div>
 	<div class="mpart">
 		<!-- pre-release announcement -->
-		<h3>Latest News - UltraDefrag 4.3 RC4 is available for download.</h3>
+<!--		<h3>Latest News - UltraDefrag 4.3 RC4 is available for download.</h3>
         <h2>&nbsp;</h2> 
 		<p>The latest release candidate has the following improvements:</p>
-<!--
-		<ul>
-		<li>UltraDefrag Scheduler has been retired as a component less functional than standard Windows Task Scheduler;
-            visit <a href="http://ultradefrag.wikispaces.com/"><u>UltraDefrag.WikiSpaces.com</u></a> for tutorials on scheduling
-            disk defragmentation tasks through Windows Task Scheduler</li>
-		<li>more reliable monolithic boot time defragmenter was made.</li>
-		<li>few bugs preventing the correct MFT displaying were fixed in driver.</li>
-		<li><b>wait</b> option was added to the command line interface to make scheduled defragmentation more flexible.</li>
-		<li>GUI cluster map was reworked to be customizable to give better feedback of the current drive usage.</li>
-        <li>Few bugs were fixed.</li>
-        <li><b>use-entire-window</b> option was added to the command line interface.</li>
-        <li>Driver was improved to better distinguish between free space and MFT zone.</li>
-        <li>A bug was fixed, which prevented a drive from being defragmented, if the root folder was fragmented.</li>
-		</ul>
--->
     <ul>
     <li>The ability to resize the window has been added.</li>
     <li>Text and controls are now scaled to the current DPI settings of the screen.</li>
     </ul>
         <h2>&nbsp;</h2>
-		<!-- release announcement -->
-		<h3>News - UltraDefrag 4.2 has been finally released!</h3>
+-->		<!-- release announcement -->
+		<h3>Latest News - UltraDefrag 4.3 has been finally released!</h3>
         <h2>&nbsp;</h2> 
-        <p>The new release includes the following improvements:</p>
+        <p>We'd like to present you the newest release of UltraDefrag which has a lot of
+        great improvements over the previous stable release. We worked together on it during the 
+        last two months, so we'd like to return thanks to everyone who tested four release candidates
+        and reported us about bugs and missing features. Thank you very much, friends, together we are
+        a power, we are really able to produce a high quality software making our world a little bit better.</p>
+        <p>The new 4.3 release has the following major improvements:</p>
+
+    <p><a href=""><b>GUI:</b></a></p>
 		<ul>
-		<li>Defragmentation and optimization speedup was performed.</li>
-		<li>Boot time interface initialization speedup was performed.</li>
-		<li>Multiple drives selection feature was added to GUI and Scheduler.</li>
-		<li><b>--all, --all-fixed</b> command line switches added to the console interface and to the boot time defragmenter.</li>
-		<li>Shutdown confirmation dialogs were added to the GUI. Please visit <a href="http://ultradefrag.wikispaces.com/"><u>UltraDefrag.WikiSpaces.com</u></a> and update the translations.</li>
-		<li>A bug preventing true Unicode paths from being displayed in file fragmentation reports was fixed.</li>
-		</ul>
+    <li>The ability to resize the main window has been added.</li>
+    <li>Text and controls are now scaled to the current DPI settings of the screen.</li>
+    <li>Cluster map customization is possible now through guiopts.lua configuration file editing.</li>
+    <li>Update check was added.</li>
+    </ul>
+
+    <p><a href=""><b>Driver:</b></a></p>
+    <ul>
+    <li>One little bug preventing the root directory from being defragmented fixed.</li>
+    <li>Few bugs preventing the correct MFT displaying were fixed.</li>
+    <li>Driver was improved to better distinguish between free space and MFT zone.</li>
+    <li>One little bug preventing displaying system files in green color on NTFS volumes was fixed.</li>
+    </ul>
+    
+    <p><a href=""><b>Boot time interface:</b></a></p>
+    <ul>
+    <li>Progress indication was improved.</li>
+    <li>Backspace and escape keys handling added to the interactive mode.</li>
+    <li>Few bugs were fixed.</li>
+    </ul>
+    
+    <p><a href=""><b>Command line tool:</b></a></p>
+    <ul>
+    <li><b>--wait</b> option was added to make scheduled defragmentation more flexible.</li>
+    <li><b>--use-entire-window</b> option was added.</li>
+    </ul>
+    
+    <p><a href=""><b>Scheduler:</b></a></p>
+    <ul>
+    <li>UltraDefrag Scheduler has been retired as a component less functional than standard Windows Task Scheduler;
+    visit <a href="http://ultradefrag.wikispaces.com/">http://ultradefrag.wikispaces.com/</a>
+    for tutorials on scheduling disk defragmentation tasks through Windows Task Scheduler.</li>
+    </ul>
+    
+    <p><a href=""><b>Translations:</b></a></p>
+    <ul>
+    <li>The following translations were updated: <b>Czech</b>, <b>Finnish</b>, <b>Japanese</b>, 
+    <b>Spanish (AR)</b>, <b>Portuguese (BR)</b>, <b>Korean</b>, <b>Hungarian</b>.</li>
+    </ul>
+
 		<p><a href="HISTORY.TXT">Here</a> is a full list of changes.</p>
         <h2>&nbsp;</h2> 
 		<!-- preview announcement -->

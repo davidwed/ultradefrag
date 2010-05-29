@@ -1,4 +1,4 @@
-The Ultra Defragmenter Version 4.2.0
+The Ultra Defragmenter Version 4.3.0
 ------------------------------------
 
 UltraDefrag is a powerful disk defragmentation tool for Windows.
