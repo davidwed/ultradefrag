@@ -201,6 +201,7 @@ void FlushAllFileBuffers(char *volume_name);
 int Analyze(char *volume_name);
 int Defragment(char *volume_name);
 int Optimize(char *volume_name);
+int AnalyzeForced(char *volume_name);
 
 void DestroyLists(void);
 void DbgPrintFreeSpaceList(void);

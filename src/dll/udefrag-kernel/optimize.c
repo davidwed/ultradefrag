@@ -71,6 +71,7 @@ int Optimize(char *volume_name)
 			StartingPoint = freeblock->lcn;
 			break;
 		}
+		DebugPrint("No blocks larger than 0.5%% of the volume found!\n");
 		if(freeblock->next_ptr == free_space_map) return 0;
 	}
 
@@ -100,9 +101,9 @@ int Optimize(char *volume_name)
 		DebugPrint("Optimization pass #%u, StartingPoint = %I64u\n",pass_number,StartingPoint);
 		Stat.pass_number = pass_number;
 		/* call optimization routine */
-		if(OptimizationRoutine(volume_name) < 0) return (-1);
-		if(CheckForStopEvent()) return 0;
-		/* if(!movings) return 0; */
+		if(OptimizationRoutine(volume_name) < 0) break;
+		if(CheckForStopEvent()) break;
+		/* if(!movings) goto done; */
 		pass_number ++;
 		/* redefine starting point */
 		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
@@ -111,14 +112,15 @@ int Optimize(char *volume_name)
 				StartingPoint = freeblock->lcn;
 				break;
 			}
-			if(freeblock->next_ptr == free_space_map) return 0;
+			if(freeblock->next_ptr == free_space_map) goto part_defrag;
 		}
 	} while (1);
-	
+
+part_defrag:
 	/* perform a partial defragmentation of all files still fragmented */
 	
-	
-	return 0;
+	/* Analyse volume again to update fragmented files list. */
+	return AnalyzeForced(volume_name);
 }
 
 /**
@@ -132,8 +134,6 @@ int OptimizationRoutine(char *volume_name)
 	PFREEBLOCKMAP freeblock;
 	int defragmenter_result = 0;
 	int optimizer_result = 0;
-	BOOLEAN stop_event_signaled;
-	int result;
 
 	DebugPrint("----- Optimization of %s: -----\n",volume_name);
 
@@ -176,11 +176,7 @@ int OptimizationRoutine(char *volume_name)
 	
 optimization_done:	
 	/* Analyse volume again to update fragmented files list. */
-	stop_event_signaled = CheckForStopEvent();
-	(void)NtClearEvent(hStopEvent);
-	result = Analyze(volume_name);
-	if(stop_event_signaled) (void)NtSetEvent(hStopEvent,NULL);
-	if(result < 0) return (-1);
+	if(Analyze(volume_name) < 0) return (-1);
 	
 	if(defragmenter_result >= 0 || optimizer_result >= 0) return 0;
 	return (-1);

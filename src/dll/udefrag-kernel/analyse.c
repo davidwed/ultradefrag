@@ -173,6 +173,24 @@ int Analyze(char *volume_name)
 }
 
 /**
+ * @brief Performs a volume analysis even 
+ * when stop signal already received.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero for success, negative value otherwise.
+ */
+int AnalyzeForced(char *volume_name)
+{
+	BOOLEAN stop_event_signaled;
+	int result;
+
+	stop_event_signaled = CheckForStopEvent();
+	(void)NtClearEvent(hStopEvent);
+	result = Analyze(volume_name);
+	if(stop_event_signaled) (void)NtSetEvent(hStopEvent,NULL);
+	return result;
+}
+
+/**
  * @brief Checks is file locked or not.
  * @param[in,out] pfn pointer to structure
  * describing the file.
