@@ -41,9 +41,15 @@ if %errorlevel% neq 0 goto end
 rem skip lua when building the micro edition
 if "%UD_MICRO_EDITION%" equ "1" goto skip_lua
 
+rem workaround for WDK 7
+rem set IGNORE_LINKLIB_ABUSE=1
+
 cd ..\lua5.1
 lua ..\..\tools\mkmod.lua lua5.1a_dll.build
 if %errorlevel% neq 0 goto end
+
+rem workaround for WDK 7
+rem set IGNORE_LINKLIB_ABUSE=
 
 lua ..\..\tools\mkmod.lua lua5.1a_exe.build
 if %errorlevel% neq 0 goto end
@@ -64,9 +70,15 @@ if %errorlevel% neq 0 goto end
 rem skip GUI when building the micro edition
 if "%UD_MICRO_EDITION%" equ "1" goto skip_gui
 
+rem workaround for WDK 7
+rem set IGNORE_LINKLIB_ABUSE=1
+
 cd ..\wgx
 lua ..\..\tools\mkmod.lua wgx.build
 if %errorlevel% neq 0 goto end
+
+rem workaround for WDK 7
+rem set IGNORE_LINKLIB_ABUSE=
 
 cd ..\gui
 lua ..\..\tools\mkmod.lua dfrg.build
@@ -86,5 +98,8 @@ popd
 exit /B 0
 
 :end
+rem workaround for WDK 7
+rem set IGNORE_LINKLIB_ABUSE=
+
 popd
 exit /B 1

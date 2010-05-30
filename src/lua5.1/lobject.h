@@ -355,7 +355,8 @@ typedef struct Table {
 #define lmod(s,size) \
 	(check_exp((size&(size-1))==0, (cast(int, (s) & ((size)-1)))))
 
-
+/* cast to size_t for WDK 7 */
+// #define twoto(x)	(size_t)(1<<(x))
 #define twoto(x)	(1<<(x))
 #define sizenode(t)	(twoto((t)->lsizenode))
 

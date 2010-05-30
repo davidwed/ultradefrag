@@ -159,7 +159,11 @@ function produce_ddk_makefile()
 		f:write("USE_MSVCRT=1\n")
 	end
 	if target_type == "native" then
-		f:write("USE_NTDLL=1\n")
+		f:write("USE_NTDLL=1\n\n")
+        
+        -- workaround for WDK 7
+        -- f:write("MINWIN_SDK_LIB_PATH=\$(SDK_LIB_PATH)\n")
+        -- f:write("USER_C_FLAGS=\$(USER_C_FLAGS) /QIfist\n")
 	end
 	if target_type == "dll" then
 		if nativedll == 1 then
