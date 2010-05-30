@@ -1,5 +1,15 @@
 HISTORY
 
+  Version 4.4.0  2010-06-
+  ------------------------------------------------------------------------------
+    RC1:
+    - partial defragmentation was added to decrease number of fragments
+      even when there are no free space on disk
+      to hold all fragments of file together
+    - one little bug preventing optimization from being stopped was fixed
+      in driver
+
+
   Version 4.3.0  2010-05-29
   ------------------------------------------------------------------------------
     RC4:

@@ -114,6 +114,10 @@ int Optimize(char *volume_name)
 			if(freeblock->next_ptr == free_space_map) return 0;
 		}
 	} while (1);
+	
+	/* perform a partial defragmentation of all files still fragmented */
+	
+	
 	return 0;
 }
 
@@ -128,6 +132,8 @@ int OptimizationRoutine(char *volume_name)
 	PFREEBLOCKMAP freeblock;
 	int defragmenter_result = 0;
 	int optimizer_result = 0;
+	BOOLEAN stop_event_signaled;
+	int result;
 
 	DebugPrint("----- Optimization of %s: -----\n",volume_name);
 
@@ -170,8 +176,11 @@ int OptimizationRoutine(char *volume_name)
 	
 optimization_done:	
 	/* Analyse volume again to update fragmented files list. */
+	stop_event_signaled = CheckForStopEvent();
 	(void)NtClearEvent(hStopEvent);
-	if(Analyze(volume_name) < 0) return (-1);
+	result = Analyze(volume_name);
+	if(stop_event_signaled) (void)NtSetEvent(hStopEvent,NULL);
+	if(result < 0) return (-1);
 	
 	if(defragmenter_result >= 0 || optimizer_result >= 0) return 0;
 	return (-1);
