@@ -22,6 +22,7 @@
 */
 
 #include "main.h"
+#include "../include/ultradfgver.h"
 
 extern HWND hWindow;
 extern HWND hList;
@@ -92,6 +93,7 @@ int __stdcall update_stat(int df)
 	STATISTIC *pst;
 	double percentage;
 	char progress_msg[32];
+    char WindowCaption[256];
 
 	/* due to the following line of code we have obsolete statistics when we have stopped */
 	if(stop_pressed) return 0; /* it's neccessary: see comment in main.h file */
@@ -109,6 +111,9 @@ int __stdcall update_stat(int df)
 		else
 			(void)sprintf(progress_msg,"A %6.2lf %%",percentage);
 		SetProgress(progress_msg,(int)percentage);
+        
+        (void)sprintf(WindowCaption, "%s - %s", VERSIONINTITLE, progress_msg);
+        (void)SetWindowText(hWindow, WindowCaption);
 	}
 
 	if(udefrag_get_map(global_cluster_map,map_blocks_per_line * map_lines) >= 0){
@@ -120,6 +125,8 @@ int __stdcall update_stat(int df)
 	if(!stop_pressed){
 		(void)sprintf(progress_msg,"%c 100.00 %%",current_operation);
 		SetProgress(progress_msg,100);
+        
+        (void)SetWindowText(hWindow, VERSIONINTITLE);
 	}
 	return 0;
 }

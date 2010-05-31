@@ -8,6 +8,8 @@ HISTORY
       to hold all fragments of file together
     - one little bug preventing optimization from being stopped was fixed
       in driver
+    - progress is now added to the GUI window caption,
+      so it is displayed in the tooltip of the taskbar icon
     - the following translations were updated:
 
       Dutch, 
