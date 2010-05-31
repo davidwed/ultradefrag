@@ -8,6 +8,9 @@ HISTORY
       to hold all fragments of file together
     - one little bug preventing optimization from being stopped was fixed
       in driver
+    - the following translations were updated:
+
+      Dutch, 
 
 
   Version 4.3.0  2010-05-29
