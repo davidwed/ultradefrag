@@ -32,8 +32,10 @@ void DefragmentFreeSpaceRTL(void);
 void DefragmentFreeSpaceLTR(void);
 int  MoveAllFilesRTL(void);
 int  OptimizationRoutine(char *volume_name);
+int  MoveRestOfFilesRTL(char *volume_name);
 
 ULONGLONG StartingPoint = 0;
+ULONGLONG threshold;
 int pass_number = 0;
 
 /**
@@ -50,15 +52,18 @@ int pass_number = 0;
 int Optimize(char *volume_name)
 {
 	PFREEBLOCKMAP freeblock;
-	ULONGLONG threshold;
 	ULONGLONG FragmentedClustersBeforeStartingPoint = 0;
 	ULONGLONG ClustersBeforeStartingPoint;
 	PFILENAME pfn;
 	PBLOCKMAP block;
+	BOOLEAN optimization_completed = FALSE;
 
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
 	Stat.current_operation = 'C';
 
+	/* On FAT volumes it increase distance between dir & files inside it. */
+	if(partition_type != NTFS_PARTITION) return (-1);
+	
 	/* define threshold */
 	threshold = clusters_total / 200; /* 0.5% */
 	if(threshold < 2) threshold = 2;
@@ -103,7 +108,7 @@ int Optimize(char *volume_name)
 		/* call optimization routine */
 		if(OptimizationRoutine(volume_name) < 0) break;
 		if(CheckForStopEvent()) break;
-		/* if(!movings) goto done; */
+		/* if(!movings) break; */
 		pass_number ++;
 		/* redefine starting point */
 		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
@@ -112,14 +117,23 @@ int Optimize(char *volume_name)
 				StartingPoint = freeblock->lcn;
 				break;
 			}
-			if(freeblock->next_ptr == free_space_map) goto part_defrag;
+			if(freeblock->next_ptr == free_space_map){
+				optimization_completed = TRUE;
+				break;
+			}
 		}
+		if(optimization_completed) break;
 	} while (1);
+		
+	/* here StartingPoint points to the last processed part of the volume */
 
-part_defrag:
 	/* perform a partial defragmentation of all files still fragmented */
-	
-	/* Analyse volume again to update fragmented files list. */
+	if(CheckForStopEvent()) return AnalyzeForced(volume_name); /* update fragmented files list */
+	if(Analyze(volume_name) < 0) return (-1);
+	if(MoveRestOfFilesRTL(volume_name) < 0){
+		AnalyzeForced(volume_name);
+		return (-1);
+	}
 	return AnalyzeForced(volume_name);
 }
 
@@ -146,9 +160,6 @@ int OptimizationRoutine(char *volume_name)
 			if(freeblock->prev_ptr == free_space_map) break;
 		}
 	}
-	
-	/* On FAT volumes it increase distance between dir & files inside it. */
-	if(partition_type != NTFS_PARTITION) return (-1);
 	
 	/*
 	* First of all - free the leading part of the volume.
@@ -436,6 +447,119 @@ int MoveAllFilesRTL(void)
 		if(block->next_ptr == free_space_map) break;
 	}
 	return (movings == 0) ? (-1) : (0);
+}
+
+/**
+ * @brief Moves all files to the beginning of the volume
+ * regardless of their fragmentation status.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero for success, negative value otherwise.
+ * @note It is assumed that moved files become less
+ * fragmented after the routine completion.
+ */
+int MoveRestOfFilesRTL(char *volume_name)
+{
+	PFILENAME pfn, plargest;
+	PBLOCKMAP block;
+	PFREEBLOCKMAP fb;
+	ULONGLONG length;
+	ULONGLONG vcn;
+	BOOLEAN found;
+	
+	DebugPrint("----- MoveRestOfFilesRTL() started for %s: -----\n",volume_name);
+	DebugPrint("/* cleanup of the terminal part of the volume begins... */\n");
+	
+	Stat.clusters_to_process = Stat.processed_clusters = 0;
+	Stat.current_operation = 'C';
+	
+	/* actualize StartingPoint */
+	for(fb = free_space_map; fb != NULL; fb = fb->next_ptr){
+		if(fb->lcn + fb->length >= StartingPoint && fb->length >= threshold){
+			StartingPoint = fb->lcn;
+			break;
+		}
+		if(fb->next_ptr == free_space_map){
+			DebugPrint("There are no large free space areas after the starting point!\n");
+			return 0;
+		}
+	}
+	DebugPrint("StartingPoint = %I64u\n",StartingPoint);
+
+	/* Reinitialize progress counters. */
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(!pfn->is_reparse_point){
+			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+				if(block->lcn >= StartingPoint)
+					Stat.clusters_to_process += block->length;
+				if(block->next_ptr == pfn->blockmap) break;
+			}
+		}
+		if(pfn->next_ptr == filelist) break;
+	}
+	
+	/*
+	* Move all files having clusters after a starting point
+	* to the free space pointed by StartingPoint.
+	*/
+	for(fb = free_space_map; fb != NULL; fb = fb->next_ptr){
+		if(fb->lcn == StartingPoint) break;
+		if(fb->next_ptr == free_space_map){
+			DebugPrint("MoveRestOfFilesRTL: unexpected condition encountered!\n");
+			return 0;
+		}
+	}
+	while(1){
+		/* search for a largest file having clusters after fb->lcn */
+		plargest = NULL; length = 0;
+		for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+			if(pfn->is_reparse_point == FALSE){
+				found = FALSE;
+				for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+					if(block->lcn > fb->lcn){
+						found = TRUE;
+						break;
+					}
+					if(block->next_ptr == pfn->blockmap) break;
+				}
+				if(found && pfn->clusters_total > length){
+					plargest = pfn;
+					length = pfn->clusters_total;
+				}
+			}
+			if(pfn->next_ptr == filelist) break;
+		}
+		if(!plargest) /* there are no more blocks after fb->lcn */
+			return 0;
+		/* fill free space starting from fb->lcn with plargest file contents */
+		for(block = plargest->blockmap; block != NULL; block = block->next_ptr){
+			if(block->lcn > StartingPoint){
+				/* move the block entirely to the beginning of the volume */
+				while(block->length){
+					length = min(fb->length,block->length);
+					vcn = block->vcn;
+					MovePartOfFileBlock(plargest,vcn,fb->lcn,length);
+					RemarkBlock(fb->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
+					RemarkBlock(block->lcn,length,TEMPORARY_SYSTEM_SPACE/*FREE_OR_MFT_ZONE_SPACE*/,GetFileSpaceState(plargest));
+					fb->lcn += length;
+					fb->length -= length;
+					block->vcn += length;
+					block->lcn += length;
+					block->length -= length;
+					/* skip small free blocks */
+					while(1){
+						if(fb->length >= threshold) break;
+						/* if there are no more free blocks available then return */
+						if(fb->next_ptr == free_space_map)
+							return 0;
+						fb = fb->next_ptr;
+					}
+				}
+			}
+			if(block->next_ptr == plargest->blockmap) break;
+		}
+		DeleteBlockmap(plargest);
+	}
+	return 0;
 }
 
 /** @} */
