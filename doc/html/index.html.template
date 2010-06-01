@@ -159,30 +159,57 @@ wikispaces_color_fontsize = "83%";
 	</div>
 	<div class="mpart">
 		<!-- pre-release announcement -->
-		<!-- <h3>Latest News - UltraDefrag x.x RCx is available for download.</h3>
-        <h2>&nbsp;</h2> 
-		<p>The latest release candidate includes the following improvements:</p>
-		<ul>
-		<li></li>
-		</ul>
-        <h2>&nbsp;</h2> -->
+		<!--
+            <h3>Latest News - UltraDefrag x.x RCx is available for download.</h3>
+            <h2>&nbsp;</h2> 
+            <p>The latest release candidate includes the following improvements:</p>
+            <ul>
+            <li></li>
+            </ul>
+            <h2>&nbsp;</h2>
+        -->
 		<!-- release announcement -->
 		<h3>News - UltraDefrag x.x has been finally released!</h3>
         <h2>&nbsp;</h2> 
         <p>The new release includes the following improvements:</p>
-		<ul>
-		<li></li>
-		</ul>
+
+        <p><a href=""><b>GUI:</b></a></p>
+        <ul>
+        <li></li>
+        </ul>
+
+        <p><a href=""><b>Driver:</b></a></p>
+        <ul>
+        <li></li>
+        </ul>
+        
+        <p><a href=""><b>Boot time interface:</b></a></p>
+        <ul>
+        <li></li>
+        </ul>
+        
+        <p><a href=""><b>Command line tool:</b></a></p>
+        <ul>
+        <li></li>
+        </ul>
+        
+        <p><a href=""><b>Translations:</b></a></p>
+        <ul>
+        <li>The following translations were updated:<br/> <b></b>.</li>
+        </ul>
+
 		<p><a href="../HISTORY.TXT">Here</a> is a full list of changes.</p>
         <h2>&nbsp;</h2> 
 		<!-- preview announcement -->
-		<!-- <h3>Preview - UltraDefrag next release, what you can expect.</h3>
-        <h2>&nbsp;</h2> 
-		<p>The next release will include the following improvements:</p>
-		<ul>
-		<li></li>
-		</ul>
-        <h2>&nbsp;</h2> -->
+		<!--
+            <h3>Preview - UltraDefrag next release, what you can expect.</h3>
+            <h2>&nbsp;</h2> 
+            <p>The next release will include the following improvements:</p>
+            <ul>
+            <li></li>
+            </ul>
+            <h2>&nbsp;</h2>
+        -->
 		<!-- Overview -->
 		<a name="overview"></a>
 		<p>UltraDefrag is a powerful disk defragmentation tool for Windows. It is the first open source defragmenter with
