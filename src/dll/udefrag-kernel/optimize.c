@@ -76,8 +76,10 @@ int Optimize(char *volume_name)
 			StartingPoint = freeblock->lcn;
 			break;
 		}
-		DebugPrint("No blocks larger than 0.5%% of the volume found!\n");
-		if(freeblock->next_ptr == free_space_map) return 0;
+		if(freeblock->next_ptr == free_space_map){
+			DebugPrint("No blocks larger than 0.5%% of the volume found!\n");
+			goto part_defrag;
+		}
 	}
 
 	/* skip all locked files */
@@ -127,6 +129,7 @@ int Optimize(char *volume_name)
 		
 	/* here StartingPoint points to the last processed part of the volume */
 
+part_defrag:
 	/* perform a partial defragmentation of all files still fragmented */
 	if(CheckForStopEvent()) return AnalyzeForced(volume_name); /* update fragmented files list */
 	if(Analyze(volume_name) < 0) return (-1);
@@ -465,6 +468,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 	ULONGLONG length;
 	ULONGLONG vcn;
 	BOOLEAN found;
+	ULONGLONG part_defrag_threshold;
 	
 	DebugPrint("----- MoveRestOfFilesRTL() started for %s: -----\n",volume_name);
 	DebugPrint("/* cleanup of the terminal part of the volume begins... */\n");
@@ -472,9 +476,11 @@ int MoveRestOfFilesRTL(char *volume_name)
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
 	Stat.current_operation = 'C';
 	
+	part_defrag_threshold = max(threshold / 10, 100); /* 0.05% of the volume or 100 clusters */
+	
 	/* actualize StartingPoint */
 	for(fb = free_space_map; fb != NULL; fb = fb->next_ptr){
-		if(fb->lcn + fb->length >= StartingPoint && fb->length >= threshold){
+		if(fb->lcn + fb->length >= StartingPoint && fb->length >= part_defrag_threshold){
 			StartingPoint = fb->lcn;
 			break;
 		}
@@ -546,12 +552,14 @@ int MoveRestOfFilesRTL(char *volume_name)
 					block->lcn += length;
 					block->length -= length;
 					/* skip small free blocks */
-					while(1){
-						if(fb->length >= threshold) break;
-						/* if there are no more free blocks available then return */
-						if(fb->next_ptr == free_space_map)
-							return 0;
-						fb = fb->next_ptr;
+					if(fb->length == 0){
+						while(1){
+							if(fb->length >= part_defrag_threshold) break;
+							/* if there are no more free blocks available then return */
+							if(fb->next_ptr == free_space_map)
+								return 0;
+							fb = fb->next_ptr;
+						}
 					}
 				}
 			}
