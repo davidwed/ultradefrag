@@ -99,6 +99,7 @@
  *
  * Special thanks for good suggestions to (in alphabetical order):
  *
+ * - Alexander Peter Kowalski - Process priority control.
  * - Alexander Vedyakin - Volume type detection improvements. More effective
  *                        defragmenting algorithms.
  * - Andrei Maksimov    - GUI improvements.
@@ -116,6 +117,8 @@
  * - Nagy Zsolt         - Interesting ideas about translation. Installer improvements.
  * - Parvez Reza        - Various interesting programming tricks.
  * - Stefan Pendl       - Boot time defragmenter improvements. Installer improvements.
+ * - Vasily Smirnov     - FAT directories defragmentation algorithm.
+ *                        Various important GUI improvements.
  *
  * Special thanks for correcting and updating translations (in alphabetical order):
  *
