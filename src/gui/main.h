@@ -87,6 +87,7 @@
 #include <shellapi.h>
 #include <math.h>
 #include <process.h>
+#include <wchar.h>
 
 #define lua_c
 #include "../lua5.1/lua.h"
@@ -155,7 +156,7 @@ void UpdateStatusBar(STATISTIC *pst);
 void InitProgress(void);
 void ShowProgress(void);
 void HideProgress(void);
-void SetProgress(char *message, int percentage);
+void SetProgress(wchar_t *message, int percentage);
 
 /* window procedures */
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);

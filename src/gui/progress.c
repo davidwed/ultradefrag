@@ -22,6 +22,7 @@
 */
 
 #include "main.h"
+#include <wchar.h>
 
 extern HWND hWindow;
 HWND hProgressMsg,hProgressBar;
@@ -47,8 +48,8 @@ void HideProgress(void)
 	(void)SendMessage(hProgressBar,PBM_SETPOS,0,0);
 }
 
-void SetProgress(char *message, int percentage)
+void SetProgress(wchar_t *message, int percentage)
 {
-	(void)SetWindowText(hProgressMsg,message);
+	(void)SetWindowTextW(hProgressMsg,message);
 	(void)SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 }

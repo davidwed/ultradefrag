@@ -10,6 +10,8 @@ HISTORY
       in driver
     - progress is now added to the GUI window caption,
       so it is displayed in the tooltip of the taskbar icon
+    - cryptic single character progress label was replaced
+      by the localized operation names
     - the following translations were updated:
 
       Dutch, Danish, French, Russian

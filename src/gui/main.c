@@ -37,7 +37,7 @@
 #define CMAP_LABEL_WIDTH      156 /* cluster map label width */
 #define SKIP_MEDIA_WIDTH      243 /* skip removable media check box width */
 #define RESCAN_BTN_WIDTH      170 /* rescan drives button width */
-#define PROGRESS_LABEL_WIDTH  85  /* progress text label width */
+#define PROGRESS_LABEL_WIDTH  185 /* progress text label width */
 #define PROGRESS_HEIGHT       11  /* progress bar height */
 
 double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;

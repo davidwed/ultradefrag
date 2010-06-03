@@ -20,13 +20,14 @@
 /*
 * GUI - analyse/defrag job code.
 */
-
 #include "main.h"
 #include "../include/ultradfgver.h"
+#include <wchar.h>
 
 extern HWND hWindow;
 extern HWND hList;
 extern int shutdown_flag;
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 extern int map_blocks_per_line;
 extern int map_lines;
@@ -55,14 +56,14 @@ void DoJob(char job_type)
 	HANDLE h = create_thread(ThreadProc,(LPVOID)(DWORD_PTR)job_type,&thr_id);
 	if(h == NULL){
 		switch(job_type){
-		case 'a':
-			DisplayLastError("Cannot create thread starting volume analysis!");
-			break;
-		case 'd':
-			DisplayLastError("Cannot create thread starting volume defragmentation!");
-			break;
-		default:
-			DisplayLastError("Cannot create thread starting volume optimization!");
+            case 'a':
+                DisplayLastError("Cannot create thread starting volume analysis!");
+                break;
+            case 'd':
+                DisplayLastError("Cannot create thread starting volume defragmentation!");
+                break;
+            default:
+                DisplayLastError("Cannot create thread starting volume optimization!");
 		}
 		
 	}
@@ -92,7 +93,8 @@ int __stdcall update_stat(int df)
 	NEW_VOLUME_LIST_ENTRY *v_entry;
 	STATISTIC *pst;
 	double percentage;
-	char progress_msg[32];
+	static wchar_t progress_msg[128];
+    static wchar_t *ProcessCaption;
     char WindowCaption[256];
 
 	/* due to the following line of code we have obsolete statistics when we have stopped */
@@ -110,13 +112,26 @@ int __stdcall update_stat(int df)
 	if(udefrag_get_progress(pst,&percentage) >= 0){
 		UpdateStatusBar(pst);
 		current_operation = pst->current_operation;
-		if(current_operation)
-			(void)sprintf(progress_msg,"%c %6.2lf %%",current_operation,percentage);
-		else
-			(void)sprintf(progress_msg,"A %6.2lf %%",percentage);
+        if(current_operation == 'C') current_operation = 'O';
+        
+        ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
+            
+		if(current_operation) {
+            switch(current_operation){
+                case 'D':
+                    ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
+                    break;
+                case 'O':
+                    ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
+            }
+        }
+            
+        _snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,percentage);
+        progress_msg[sizeof(progress_msg) - 1] = 0;
+        
 		SetProgress(progress_msg,(int)percentage);
         
-        (void)sprintf(WindowCaption, "UD - %s", progress_msg);
+        (void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, percentage);
         (void)SetWindowText(hWindow, WindowCaption);
 	}
 
@@ -127,7 +142,21 @@ int __stdcall update_stat(int df)
 	
 	if(df == FALSE) return 0;
 	if(!stop_pressed){
-		(void)sprintf(progress_msg,"%c 100.00 %%",current_operation);
+        ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
+            
+		if(current_operation) {
+            switch(current_operation){
+                case 'D':
+                    ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
+                    break;
+                case 'O':
+                    ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
+            }
+        }
+            
+		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls 100.00 %%",ProcessCaption);
+        progress_msg[sizeof(progress_msg) - 1] = 0;
+
 		SetProgress(progress_msg,100);
         
         (void)SetWindowText(hWindow, VERSIONINTITLE);
@@ -234,7 +263,7 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 	VolListUpdateStatusField(v_entry,STATUS_RUNNING);
 
 	ShowProgress();
-	SetProgress("A 0.00 %",0);
+	SetProgress(L"A 0.00 %",0);
 
 	/* validate the volume before any processing */
 	error_code = udefrag_validate_volume(letter,FALSE);
