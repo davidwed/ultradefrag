@@ -39,6 +39,47 @@ ULONGLONG threshold;
 int pass_number = 0;
 
 /**
+ * @brief Updates the global threshold variable
+ * defining the minimal size of the free block
+ * accepted to move files into.
+ */
+void UpdateFreeBlockThreshold(void)
+{
+	PFREEBLOCKMAP freeblock;
+	ULONGLONG largest_free_block_length = 0;
+
+	if(Stat.total_space / Stat.free_space <= 10){
+		/*
+		* We have at least 10% of free space on the volume, so
+		* it seems to be reasonable to put all data together
+		* even if the free space is split to many little pieces.
+		*/
+		DebugPrint("UpdateFreeBlockThreshold -> Strategy #1 because of at least 10%% of free space on the volume.\n");
+		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
+			if(freeblock->length > largest_free_block_length)
+				largest_free_block_length = freeblock->length;
+			if(freeblock->next_ptr == free_space_map) break;
+		}
+		if(largest_free_block_length == 0){
+			threshold = 0;
+			return;
+		}
+		/* Threshold = 0.5% of the volume or a half of the largest free space block. */
+		threshold = min(clusters_total / 200, largest_free_block_length / 2);
+	} else {
+		/*
+		* On volumes with less than 10% of free space
+		* we're searching for the free space block
+		* at least 0.5% long.
+		*/
+		DebugPrint("UpdateFreeBlockThreshold -> Strategy #2 because of less than 10%% of free space on the volume.\n");
+		threshold = clusters_total / 200;
+	}
+	if(threshold < 2) threshold = 2;
+	DebugPrint("Free block threshold = %I64u clusters.\n",threshold);
+}
+
+/**
  * @brief Performs a volume optimization job.
  * @param[in] volume_name the name of the volume.
  * @return Zero for success, negative value otherwise.
@@ -65,19 +106,23 @@ int Optimize(char *volume_name)
 	if(partition_type != NTFS_PARTITION) return (-1);
 	
 	/* define threshold */
-	threshold = clusters_total / 200; /* 0.5% */
-	if(threshold < 2) threshold = 2;
+	UpdateFreeBlockThreshold();
+	if(threshold == 0){
+		DebugPrint("There are no free space areas on the volume: optimization impossible!\n");
+		return 0;
+	}
+
 	/* define starting point */
 	StartingPoint = 0; /* start moving from the beginning of the volume */
 	pass_number = 0;
 	for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-		/* is block larger than 0.5% of the volume space? */
+		/* is block larger than the threshold calculated before? */
 		if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
 			StartingPoint = freeblock->lcn;
 			break;
 		}
 		if(freeblock->next_ptr == free_space_map){
-			DebugPrint("No blocks larger than 0.5%% of the volume found!\n");
+			DebugPrint("No free blocks larger than %I64u clusters found!\n",threshold);
 			goto part_defrag;
 		}
 	}
@@ -476,7 +521,12 @@ int MoveRestOfFilesRTL(char *volume_name)
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
 	Stat.current_operation = 'C';
 	
-	part_defrag_threshold = max(threshold / 10, 100); /* 0.05% of the volume or 100 clusters */
+	/*
+	* Set free block threshold to probable
+	* reduce the number of file fragments.
+	*/
+	part_defrag_threshold = max(clusters_total / 2000, 100); /* 0.05% of the volume or 100 clusters */
+	DebugPrint("Free block threshold = %I64u clusters.\n",part_defrag_threshold);
 	
 	/* actualize StartingPoint */
 	for(fb = free_space_map; fb != NULL; fb = fb->next_ptr){
