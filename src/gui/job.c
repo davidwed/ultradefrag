@@ -96,7 +96,11 @@ int __stdcall update_stat(int df)
     char WindowCaption[256];
 
 	/* due to the following line of code we have obsolete statistics when we have stopped */
-	if(stop_pressed) return 0; /* it's neccessary: see comment in main.h file */
+	if(stop_pressed) {
+        (void)SetWindowText(hWindow, VERSIONINTITLE);
+
+        return 0; /* it's neccessary: see comment in main.h file */
+    }
 	
 	v_entry = processed_entry;
 	if(v_entry == NULL) return 0;
@@ -112,7 +116,7 @@ int __stdcall update_stat(int df)
 			(void)sprintf(progress_msg,"A %6.2lf %%",percentage);
 		SetProgress(progress_msg,(int)percentage);
         
-        (void)sprintf(WindowCaption, "%s - %s", VERSIONINTITLE, progress_msg);
+        (void)sprintf(WindowCaption, "UD - %s", progress_msg);
         (void)SetWindowText(hWindow, WindowCaption);
 	}
 
