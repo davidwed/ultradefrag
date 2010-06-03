@@ -12,7 +12,7 @@ HISTORY
       so it is displayed in the tooltip of the taskbar icon
     - the following translations were updated:
 
-      Dutch, Danish, 
+      Dutch, Danish, French, 
 
 
   Version 4.3.0  2010-05-29
