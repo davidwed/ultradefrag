@@ -80,6 +80,31 @@ void UpdateFreeBlockThreshold(void)
 }
 
 /**
+ * @brief Checks whether we have a moveable contents
+ * after a starting point or not.
+ * @return Boolean value representing checked condition.
+ */
+BOOL CheckForMoveableContentsAfterSP(void)
+{
+	PFILENAME pfn;
+	PBLOCKMAP block;
+
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		if(!pfn->is_reparse_point && pfn->blockmap){
+			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+				if(block->lcn > StartingPoint){
+					if(!IsFileLocked(pfn))
+						return TRUE;
+				}
+				if(block->next_ptr == pfn->blockmap) break;
+			}
+		}
+		if(pfn->next_ptr == filelist) break;
+	}
+	return FALSE;
+}
+
+/**
  * @brief Performs a volume optimization job.
  * @param[in] volume_name the name of the volume.
  * @return Zero for success, negative value otherwise.
@@ -150,6 +175,11 @@ int Optimize(char *volume_name)
 	if(FragmentedClustersBeforeStartingPoint >= threshold) StartingPoint = 0;
 
 	do {
+		/* do we have moveable content after a starting point? */
+		if(!CheckForMoveableContentsAfterSP()){
+			DebugPrint("No more moveable content after a starting point detected!\n");
+			break;
+		}		
 		DebugPrint("Optimization pass #%u, StartingPoint = %I64u\n",pass_number,StartingPoint);
 		Stat.pass_number = pass_number;
 		/* call optimization routine */

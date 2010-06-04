@@ -6,6 +6,8 @@ HISTORY
     - partial defragmentation was added to decrease number of fragments
       even when there are no free space on disk
       to hold all fragments of file together
+    - volume optimization algorithm was improved to prevent useless
+      additional optimization passes
     - one little bug preventing optimization from being stopped was fixed
       in driver
     - progress is now added to the GUI window caption,
