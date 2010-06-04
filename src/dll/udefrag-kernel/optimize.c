@@ -159,7 +159,7 @@ int Optimize(char *volume_name)
 		pass_number ++;
 		/* redefine starting point */
 		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-			/* is block larger than 0.5% of the volume space? */
+			/* is block larger than the free block threshold calculated before? */
 			if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
 				StartingPoint = freeblock->lcn;
 				break;
@@ -424,7 +424,8 @@ BOOLEAN MoveTheUnfragmentedFile(PFILENAME pfn,ULONGLONG target)
 	DeleteBlockmap(pfn); /* because we don't need this info after file moving */
 	
 	/* move starting point to avoid unwanted additional optimization passes */
-	StartingPoint = target + pfn->clusters_total - 1;
+	if(target + pfn->clusters_total - 1 > StartingPoint)
+		StartingPoint = target + pfn->clusters_total - 1;
 	return TRUE;
 }
 

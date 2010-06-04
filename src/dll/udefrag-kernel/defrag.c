@@ -411,7 +411,8 @@ BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target)
 	DeleteBlockmap(pfn); /* because we don't need this info after file moving */
 	
 	/* move starting point to avoid unwanted additional optimization passes */
-	StartingPoint = target + pfn->clusters_total - 1;
+	if(target + pfn->clusters_total - 1 > StartingPoint)
+		StartingPoint = target + pfn->clusters_total - 1;
 	return (!pfn->is_fragm);
 }
 
