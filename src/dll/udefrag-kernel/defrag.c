@@ -32,7 +32,9 @@
 *
 * 1. Detect FAT formatted volumes before attempting to
 *    defragment them.
-* 2. Handle a special case of directories on FAT in
+* 2. Lock the volume to prevent modification of the
+*    currently moving directory.
+* 3. Handle a special case of directories on FAT in
 *    MovePartOfFile() procedure:
 * A. Create a temporary file on the volume with size
 *    equal to directory size.
@@ -40,11 +42,14 @@
 * C. Copy directory contents to the file.
 * D. Copy directory information to the FAT entry of the file.
 * E. Mark old FAT entry as free.
+* 4. Unlock the volume.
 *
-* 3. The best practice would be to get free space in the
+* 5. The best practice would be to get free space in the
 *    beginning of the volume to hold all directories together.
 *    Then we'll move all directories and then - all files thereafter.
 */
+
+extern ULONGLONG StartingPoint; /* it's a part of the volume optimizer */
 
 BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target);
 
@@ -404,6 +409,9 @@ BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target)
 		DebugPrint("MoveFile error: %x\n",(UINT)Status);
 	}
 	DeleteBlockmap(pfn); /* because we don't need this info after file moving */
+	
+	/* move starting point to avoid unwanted additional optimization passes */
+	StartingPoint = target + pfn->clusters_total;
 	return (!pfn->is_fragm);
 }
 

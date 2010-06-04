@@ -422,6 +422,9 @@ BOOLEAN MoveTheUnfragmentedFile(PFILENAME pfn,ULONGLONG target)
 	}
 
 	DeleteBlockmap(pfn); /* because we don't need this info after file moving */
+	
+	/* move starting point to avoid unwanted additional optimization passes */
+	StartingPoint = target + pfn->clusters_total;
 	return TRUE;
 }
 
