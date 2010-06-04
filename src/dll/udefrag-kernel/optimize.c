@@ -208,11 +208,14 @@ part_defrag:
 	/* perform a partial defragmentation of all files still fragmented */
 	if(CheckForStopEvent()) return AnalyzeForced(volume_name); /* update fragmented files list */
 	if(Analyze(volume_name) < 0) return (-1);
-	if(MoveRestOfFilesRTL(volume_name) < 0){
-		AnalyzeForced(volume_name);
-		return (-1);
+	if(MoveRestOfFilesRTL(volume_name) == 0){
+		/*
+		* Some files were moved, repeat an analysis 
+		* to update the list of fragmented files.
+		*/
+		return AnalyzeForced(volume_name);
 	}
-	return AnalyzeForced(volume_name);
+	return 0;
 }
 
 /**
@@ -535,7 +538,8 @@ int MoveAllFilesRTL(void)
  * @brief Moves all files to the beginning of the volume
  * regardless of their fragmentation status.
  * @param[in] volume_name the name of the volume.
- * @return Zero for success, negative value otherwise.
+ * @return Zero if at least one file has been
+ * defragmented, negative value otherwise.
  * @note It is assumed that moved files become less
  * fragmented after the routine completion.
  */
@@ -548,6 +552,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 	ULONGLONG vcn;
 	BOOLEAN found;
 	ULONGLONG part_defrag_threshold;
+	ULONGLONG moved = 0;
 	
 	DebugPrint("----- MoveRestOfFilesRTL() started for %s: -----\n",volume_name);
 	DebugPrint("/* cleanup of the terminal part of the volume begins... */\n");
@@ -570,7 +575,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 		}
 		if(fb->next_ptr == free_space_map){
 			DebugPrint("There are no large free space areas after the starting point!\n");
-			return 0;
+			goto done;
 		}
 	}
 	DebugPrint("StartingPoint = %I64u\n",StartingPoint);
@@ -595,7 +600,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 		if(fb->lcn == StartingPoint) break;
 		if(fb->next_ptr == free_space_map){
 			DebugPrint("MoveRestOfFilesRTL: unexpected condition encountered!\n");
-			return 0;
+			goto done;
 		}
 	}
 	while(1){
@@ -619,7 +624,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 			if(pfn->next_ptr == filelist) break;
 		}
 		if(!plargest) /* there are no more blocks after fb->lcn */
-			return 0;
+			goto done;
 		/* fill free space starting from fb->lcn with plargest file contents */
 		for(block = plargest->blockmap; block != NULL; block = block->next_ptr){
 			if(block->lcn > StartingPoint){
@@ -628,6 +633,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 					length = min(fb->length,block->length);
 					vcn = block->vcn;
 					MovePartOfFileBlock(plargest,vcn,fb->lcn,length);
+					moved ++;
 					RemarkBlock(fb->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
 					RemarkBlock(block->lcn,length,TEMPORARY_SYSTEM_SPACE/*FREE_OR_MFT_ZONE_SPACE*/,GetFileSpaceState(plargest));
 					fb->lcn += length;
@@ -641,7 +647,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 							if(fb->length >= part_defrag_threshold) break;
 							/* if there are no more free blocks available then return */
 							if(fb->next_ptr == free_space_map)
-								return 0;
+								goto done;
 							fb = fb->next_ptr;
 						}
 					}
@@ -651,7 +657,9 @@ int MoveRestOfFilesRTL(char *volume_name)
 		}
 		DeleteBlockmap(plargest);
 	}
-	return 0;
+	
+done:
+	return (moved == 0) ? (-1) : (0);
 }
 
 /** @} */
