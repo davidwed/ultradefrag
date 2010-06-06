@@ -16,7 +16,7 @@ HISTORY
       by the localized operation names
     - the following translations were updated:
 
-      Dutch, Danish, French, Russian
+      Dutch, Danish, French, Russian, Turkish, 
 
 
   Version 4.3.0  2010-05-29
