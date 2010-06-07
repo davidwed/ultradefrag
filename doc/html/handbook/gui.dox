@@ -155,7 +155,7 @@ ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"
 -- ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"
 
 in_filter = ""
-ex_filter = "system volume information;temp;recycler;recycled"
+ex_filter = "system volume information;temp;recycle"
 sizelimit = ""
 fragments_threshold = 0
 refresh_interval = 100

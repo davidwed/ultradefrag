@@ -180,8 +180,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	if(strstr(lpCmdLine,"--setup")){
 		GetPrefs();
-		if(!ex_filter[0] || !strcmp(ex_filter,"system volume information;temp;recycler"))
-			strcpy(ex_filter,"system volume information;temp;recycler;recycled");
+		if(!ex_filter[0] || !strcmp(ex_filter,"system volume information;temp;recycle"))
+			strcpy(ex_filter,"system volume information;temp;recycle");
 		refresh_interval = DEFAULT_REFRESH_INTERVAL; /* nice looking 100 ms */
 		SavePrefs();
 		DeleteEnvironmentVariables();
