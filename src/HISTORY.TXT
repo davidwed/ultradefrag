@@ -14,6 +14,8 @@ HISTORY
       so it is displayed in the tooltip of the taskbar icon
     - cryptic single character progress label was replaced
       by the localized operation names
+    - fixed a problem where the case of the names of the help pages
+      launched from the configuration dialog did not match
     - the following translations were updated:
 
       Dutch, Danish, French, Russian, Turkish, 

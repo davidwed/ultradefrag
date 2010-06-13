@@ -155,7 +155,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			#endif
 			break;
 		case IDC_GUI_HELP:
-			OpenWebPage("gui.html");
+			OpenWebPage("GUI.html");
 			break;
 		case IDC_ENABLE:
 			#ifndef UDEFRAG_PORTABLE
@@ -180,7 +180,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			}
 			break;
 		case IDC_BOOT_HELP:
-			OpenWebPage("boot.html");
+			OpenWebPage("Boot.html");
 			break;
 		case IDC_REPORT_OPTIONS:
 			#ifndef UDEFRAG_PORTABLE
@@ -190,7 +190,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			#endif
 			break;
 		case IDC_REPORT_HELP:
-			OpenWebPage("reports.html");
+			OpenWebPage("Reports.html");
 			break;
 		}
 		break;

@@ -101,6 +101,7 @@
     Bryan Kirk         - Better GUI appearance (new list of drives).
                          Autodefrag feature.
     Christopher Naegel - Driver loading on Vista problem's partial solution.
+    Craig Oakes        - Hint about case mismatch of configuration dialog help files
     Dario Raparelli    - NT 4.0 support.
     Jan Loncik         - x64 native support. Better 'system' filter preset.
     Jim Laski          - System fonts and visual styles for graphical interface
