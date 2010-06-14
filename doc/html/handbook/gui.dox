@@ -30,8 +30,8 @@
  * an amount of free space and, finally, a percent of free space
  * on the volume.
  *
- * Fixed drives are marked by @htmlonly <img src="fixed.ico"> @endhtmlonly,
- * removable drives - by @htmlonly <img src="removable.ico"> @endhtmlonly.
+ * Fixed drives are marked by @htmlonly <img src="fixed.png"> @endhtmlonly,
+ * removable drives - by @htmlonly <img src="removable.png"> @endhtmlonly.
  *
  * Click Rescan drives button or type Ctrl+R to refresh the list of volumes.
  * Check the Skip removable media box to prevent removable disks like floppies and USB-sticks
