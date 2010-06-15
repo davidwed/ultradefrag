@@ -336,10 +336,18 @@ Section "Ultra Defrag core files (required)" SecCore
   ClearErrors
   ReadRegStr $R0 HKCR ".lua" ""
   ${If} ${Errors}
-    WriteRegStr HKCR ".lua" "" "Lua"
-    WriteRegStr HKCR "Lua" "" "Lua Program"
-    WriteRegStr HKCR "Lua\shell\open" "" "Open"
-    WriteRegStr HKCR "Lua\shell\open\command" "" "notepad.exe %1"
+    WriteRegStr HKCR ".lua" "" "Lua.Script"
+    WriteRegStr HKCR "Lua.Script" "" "Lua Script File"
+    WriteRegStr HKCR "Lua.Script\shell\Edit" "" "Edit Script"
+    WriteRegStr HKCR "Lua.Script\shell\Edit\command" "" "notepad.exe %1"
+  ${Else}
+    StrCpy $0 $R0
+    ClearErrors
+    ReadRegStr $R0 HKCR "$0\shell\Edit" ""
+    ${If} ${Errors}
+      WriteRegStr HKCR "$0\shell\Edit" "" "Edit Script"
+      WriteRegStr HKCR "$0\shell\Edit\command" "" "notepad.exe %1"
+    ${EndIf}
   ${EndIf}
 
   ClearErrors

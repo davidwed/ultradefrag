@@ -149,7 +149,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_GUI_SCRIPT:
 			#ifndef UDEFRAG_PORTABLE
-			(void)WgxShellExecuteW(hWindow,L"open",L".\\options\\guiopts.lua",NULL,NULL,SW_SHOW);
+			(void)WgxShellExecuteW(hWindow,L"Edit",L".\\options\\guiopts.lua",NULL,NULL,SW_SHOW);
 			#else
 			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\guiopts.lua",NULL,SW_SHOW);
 			#endif
@@ -184,7 +184,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_REPORT_OPTIONS:
 			#ifndef UDEFRAG_PORTABLE
-			(void)WgxShellExecuteW(hWindow,L"open",L".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
+			(void)WgxShellExecuteW(hWindow,L"Edit",L".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
 			#else
 			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\udreportopts.lua",NULL,SW_SHOW);
 			#endif
