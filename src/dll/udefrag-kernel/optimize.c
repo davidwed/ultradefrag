@@ -95,6 +95,8 @@ BOOL CheckForMoveableContentsAfterSP(void)
 				if(block->lcn > StartingPoint){
 					if(!IsFileLocked(pfn))
 						return TRUE;
+					else
+						break; /* locked files have no more block map here */
 				}
 				if(block->next_ptr == pfn->blockmap) break;
 			}
@@ -663,3 +665,4 @@ done:
 }
 
 /** @} */
+
