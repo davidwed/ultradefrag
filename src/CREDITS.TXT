@@ -127,6 +127,7 @@
     Benny Stütz
     Connection
     Christoffer Ekberg
+    Damjan Daljevic
     Dave MacBlack
     Dmitri Arkhangelski
     Erwin Dokter

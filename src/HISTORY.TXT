@@ -20,7 +20,7 @@ HISTORY
       if "Lua for Windows" was installed
     - the following translations were updated:
 
-      Dutch, Danish, French, Russian, Turkish, 
+      Dutch, Danish, French, Russian, Turkish, Serbian, 
 
 
   Version 4.3.0  2010-05-29
