@@ -111,4 +111,12 @@ max_chars_per_line = 50
  * If you have problems with configuration files editing, use the
  * Tools > Folder options > File types menu in Explorer to
  * associate the lua extension with your preferred text editor. 
+ *
+ * <HR>
+ *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *    <TR>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Boot</TD>
+ *      <TD STYLE="text-align: right; width: 50%;">Next: @ref FAQ</TD>
+ *    </TR>
+ *  </TABLE>
  */

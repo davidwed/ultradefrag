@@ -226,4 +226,12 @@ restore_default_window_size = 0
  *
  * <b>Reports</b>\n
  * This section controls the file fragmentation reports options.
+ *
+ * <HR>
+ *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *    <TR>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Schedule</TD>
+ *      <TD STYLE="text-align: right; width: 50%;">Next: @ref Boot</TD>
+ *    </TR>
+ *  </TABLE>
  */

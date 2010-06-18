@@ -60,4 +60,11 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * Conversely, when a thousands of small files are analysed, progress will 
  * be relatively slow.
  *
+ * <HR>
+ *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *    <TR>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Reports</TD>
+ *      <TD STYLE="text-align: right; width: 50%;">Next: @ref ReportingBugs</TD>
+ *    </TR>
+ *  </TABLE>
  */

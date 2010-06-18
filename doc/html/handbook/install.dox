@@ -67,4 +67,12 @@
  * There is also a silent mode in the
  * ununstaller program. Type in comand prompt \%windir\%\\UltraDefrag\\uninstall.exe /S
  * to remove the program from the hard drive automatically without any graphical dialogs.
+ *
+ * <HR>
+ *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *    <TR>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Introduction</TD>
+ *      <TD STYLE="text-align: right; width: 50%;">Next: @ref Console</TD>
+ *    </TR>
+ *  </TABLE>
  */

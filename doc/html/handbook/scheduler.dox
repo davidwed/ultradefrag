@@ -50,4 +50,12 @@
  *
  * Visit <a href="http://ultradefrag.wikispaces.com/">ultradefrag.wikispaces.com</a> 
  * for tutorials and more examples.
+ *
+ * <HR>
+ *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *    <TR>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Console</TD>
+ *      <TD STYLE="text-align: right; width: 50%;">Next: @ref GUI</TD>
+ *    </TR>
+ *  </TABLE>
  */
