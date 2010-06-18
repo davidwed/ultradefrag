@@ -98,6 +98,8 @@
  * When UltraDefrag encounters the wrong syntax it shows the appropriate
  * message on the screen and continues the script execution.
  *
+ * For further information about the command switches and variables consult the @ref Console page.
+ *
  * <h1>Boot time script examples</h1>
  * The following script is used by default:
  * @code
@@ -137,6 +139,14 @@ Type 'help' for list of supported commands.
  * Currently there are just few simple commands supported in this mode.
  * To show a full list of commands type help. To continue the
  * Windows boot process type exit.
+ *
+ * <HR>
+ *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *    <TR>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref GUI</TD>
+ *      <TD STYLE="text-align: right; width: 50%;">Next: @ref Reports</TD>
+ *    </TR>
+ *  </TABLE>
  */
 
  /*
