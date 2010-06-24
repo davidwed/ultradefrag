@@ -89,6 +89,10 @@
  * on physical movement to read the drive, random file access is much faster
  * than a mechanical hard drive, so defragmentation is not necessary.
  *
+ * On the other hand, flash drives defragmentation
+ * increases their potential for recovery as mentioned
+ * <a href="http://sourceforge.net/projects/ultradefrag/forums/forum/709672/topic/3750353">in our forum</a>.
+ *
  * Floppy drives defragmentation is not recommended because it
  * always reduces the lifespan of the floppies.
  *
