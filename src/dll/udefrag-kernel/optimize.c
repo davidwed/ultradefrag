@@ -92,6 +92,8 @@ BOOL AdjustStartingPoint(void)
 	ULONGLONG lim, i;
 	ULONGLONG fragmented_clusters, n;
 	PFREEBLOCKMAP freeblock;
+	PFILENAME pfn;
+	PBLOCKMAP block;
 	
 	/*
 	* Check whether the StartingPoint hits the end of the volume.
@@ -138,6 +140,21 @@ BOOL AdjustStartingPoint(void)
 	}
 	
 	if(StartingPoint == InitialSP + 1) StartingPoint = InitialSP;
+	
+	/*
+	* StartingPoint must be on a block boundary.
+	* So we're searching for the file block it belongs.
+	*/
+	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
+		for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
+			if(StartingPoint >= block->lcn && StartingPoint < block->lcn + block->length){
+				StartingPoint = block->lcn;
+				return TRUE;
+			}
+			if(block->next_ptr == pfn->blockmap) break;
+		}
+		if(pfn->next_ptr == filelist) break;
+	}
 	return TRUE;
 }
 
