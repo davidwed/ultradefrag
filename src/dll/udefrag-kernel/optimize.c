@@ -26,6 +26,7 @@
 
 #include "globals.h"
 
+ULONGLONG GetNumberOfFragmentedClusters(ULONGLONG FirstLCN, ULONGLONG LastLCN);
 void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,
 		ULONGLONG targetLcn,ULONGLONG n_clusters);
 void DefragmentFreeSpaceRTL(void);
@@ -80,6 +81,106 @@ void UpdateFreeBlockThreshold(void)
 }
 
 /**
+ * @brief Defines a point between already optimized part
+ * of the volume and a part which needs to be optimized.
+ * @return Boolean value indicating whether we have found
+ * desired point or not.
+ */
+BOOL AdjustStartingPoint(void)
+{
+	ULONGLONG InitialSP = StartingPoint;
+	ULONGLONG lim, i;
+	ULONGLONG fragmented_clusters, n;
+	PFREEBLOCKMAP freeblock;
+	
+	/*
+	* Check whether the StartingPoint hits the end of the volume.
+	*/
+	if(StartingPoint >= (clusters_total - 1)){
+		DebugPrint("Starting point hits the end of the volume.\n");
+		return FALSE;
+	}
+	
+	/*
+	* Skip already optimized data.
+	*/
+	/* 1. Search for the first large free space gap after SP. */
+	for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
+		/* is block larger than the threshold calculated before? */
+		if(freeblock->lcn >= StartingPoint && freeblock->length >= threshold){
+			StartingPoint = freeblock->lcn;
+			break;
+		}
+		if(freeblock->next_ptr == free_space_map){
+			DebugPrint("No free blocks larger than %I64u clusters found!\n",threshold);
+			return FALSE;
+		}
+	}
+	/* 2. Move StartingPoint back to release heavily fragmented data. */
+	fragmented_clusters = GetNumberOfFragmentedClusters(InitialSP,StartingPoint);
+	if(fragmented_clusters < threshold)
+		return TRUE;
+	/*
+	* Fast binary search allows to find quickly a proper part 
+	* of the volume which is heavily fragmented.
+	* Based on bsearch() algorithm copyrighted by DJ Delorie (1994).
+	*/
+	i = InitialSP;
+	for(lim = StartingPoint - InitialSP; lim != 0; lim >>= 1){
+		StartingPoint = i + (lim >> 1);
+		n = GetNumberOfFragmentedClusters(InitialSP,StartingPoint);
+		if(n >= threshold){
+			/* move left */
+		} else {
+			/* move right */
+			i = StartingPoint + 1; lim --;
+		}
+	}
+	
+	if(StartingPoint == InitialSP + 1) StartingPoint = InitialSP;
+	return TRUE;
+}
+
+/**
+ * @brief Returns the number of fragmented clusters
+ * belonging to the specified part of the volume.
+ */
+ULONGLONG GetNumberOfFragmentedClusters(ULONGLONG FirstLCN, ULONGLONG LastLCN)
+{
+	PFRAGMENTED pf;
+	ULONGLONG clusters_in_range, total_clusters, i, j;
+	PBLOCKMAP block;
+	
+	if(FirstLCN >= (clusters_total - 1) || LastLCN >= (clusters_total - 1)){
+		DebugPrint("GetNumberOfFragmentedClusters: Unexpected condition!\n");
+		return 0;
+	}
+	
+	total_clusters = 0;
+	
+	for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
+		if(!pf->pfn->is_reparse_point){
+			clusters_in_range = 0;
+			for(block = pf->pfn->blockmap; block != NULL; block = block->next_ptr){
+				if((block->lcn + block->length >= FirstLCN + 1) && block->lcn <= LastLCN){
+					if(block->lcn > FirstLCN) i = block->lcn; else i = FirstLCN;
+					if(block->lcn + block->length < LastLCN + 1) j = block->lcn + block->length; else j = LastLCN + 1;
+					clusters_in_range += (j - i);
+				}
+				if(block->next_ptr == pf->pfn->blockmap) break;
+			}
+			if(clusters_in_range){
+				if(!IsFileLocked(pf->pfn)) /* TODO: speedup here? */
+					total_clusters += clusters_in_range;
+			}
+		}
+		if(pf->next_ptr == fragmfileslist) break;
+	}
+	
+	return total_clusters;
+}
+
+/**
  * @brief Checks whether we have a moveable contents
  * after a starting point or not.
  * @return Boolean value representing checked condition.
@@ -119,13 +220,9 @@ BOOL CheckForMoveableContentsAfterSP(void)
  */
 int Optimize(char *volume_name)
 {
-	PFREEBLOCKMAP freeblock;
-	ULONGLONG FragmentedClustersBeforeStartingPoint = 0;
-	ULONGLONG ClustersBeforeStartingPoint;
-	PFILENAME pfn;
-	PBLOCKMAP block;
-	BOOLEAN optimization_completed = FALSE;
-
+	ULONGLONG OldStartingPoint;
+	int counter;
+	
 	Stat.clusters_to_process = Stat.processed_clusters = 0;
 	Stat.current_operation = 'C';
 
@@ -142,41 +239,10 @@ int Optimize(char *volume_name)
 	/* define starting point */
 	StartingPoint = 0; /* start moving from the beginning of the volume */
 	pass_number = 0;
-	for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-		/* is block larger than the threshold calculated before? */
-		if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
-			StartingPoint = freeblock->lcn;
-			break;
-		}
-		if(freeblock->next_ptr == free_space_map){
-			DebugPrint("No free blocks larger than %I64u clusters found!\n",threshold);
-			goto part_defrag;
-		}
-	}
-
-	/* skip all locked files */
-	//CheckAllFiles();
+	counter = 0;
 	
-	/* validate StartingPoint */
-	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
-		if(pfn->is_reparse_point == FALSE && pfn->is_fragm){
-			ClustersBeforeStartingPoint = 0;
-			for(block = pfn->blockmap; block != NULL; block = block->next_ptr){
-				if((block->lcn + block->length) <= StartingPoint)
-					ClustersBeforeStartingPoint += block->length;
-				if(block->next_ptr == pfn->blockmap) break;
-			}
-			if(ClustersBeforeStartingPoint){
-				if(!IsFileLocked(pfn)) /* TODO: speedup here? */
-					FragmentedClustersBeforeStartingPoint += ClustersBeforeStartingPoint;
-			}
-		}
-		if(FragmentedClustersBeforeStartingPoint >= threshold) break;
-		if(pfn->next_ptr == filelist) break;
-	}
-	if(FragmentedClustersBeforeStartingPoint >= threshold) StartingPoint = 0;
-
 	do {
+		if(!AdjustStartingPoint()) break;
 		/* do we have moveable content after a starting point? */
 		if(!CheckForMoveableContentsAfterSP()){
 			DebugPrint("No more moveable content after a starting point detected!\n");
@@ -185,28 +251,24 @@ int Optimize(char *volume_name)
 		DebugPrint("Optimization pass #%u, StartingPoint = %I64u\n",pass_number,StartingPoint);
 		Stat.pass_number = pass_number;
 		/* call optimization routine */
+		OldStartingPoint = StartingPoint;
 		if(OptimizationRoutine(volume_name) < 0) break;
 		if(CheckForStopEvent()) break;
 		/* if(!movings) break; */
-		pass_number ++;
-		/* redefine starting point */
-		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
-			/* is block larger than the free block threshold calculated before? */
-			if(freeblock->lcn > StartingPoint && freeblock->length >= threshold){
-				StartingPoint = freeblock->lcn;
-				break;
-			}
-			if(freeblock->next_ptr == free_space_map){
-				optimization_completed = TRUE;
-				break;
-			}
+		/* ensure that the new starting point is after the previous one */
+		if(StartingPoint <= OldStartingPoint){
+			/* no files were moved to the space after SP */
+			if(counter > 0)
+				break; /* allow no more than a single repeat */
+			counter ++;
+		} else {
+			counter = 0;
 		}
-		if(optimization_completed) break;
+		pass_number ++;
 	} while (1);
 		
-	/* here StartingPoint points to the last processed part of the volume */
+	/* here StartingPoint points to the latest processed cluster */
 
-part_defrag:
 	/* perform a partial defragmentation of all files still fragmented */
 	if(CheckForStopEvent()) return AnalyzeForced(volume_name); /* update fragmented files list */
 	if(Analyze(volume_name) < 0) return (-1);
@@ -254,6 +316,8 @@ int OptimizationRoutine(char *volume_name)
 	/*
 	* Second step - defragment files.
 	* Large files will be moved to the beginning of the volume.
+	* We're making the defragmentation firstly to reduce the file
+	* fragmentation even when the volume cannot be fully optimized.
 	*/
 	DebugPrint("----- Second step of optimization of %s: -----\n",volume_name);
 	if(Analyze(volume_name) < 0) return (-1);
@@ -570,6 +634,8 @@ int MoveRestOfFilesRTL(char *volume_name)
 	DebugPrint("Free block threshold = %I64u clusters.\n",part_defrag_threshold);
 	
 	/* actualize StartingPoint */
+	/* StartingPoint is defined correctly here because we're searching */
+	/* for the free space areas large enough to hold parts of fragmented files */
 	for(fb = free_space_map; fb != NULL; fb = fb->next_ptr){
 		if(fb->lcn + fb->length >= StartingPoint && fb->length >= part_defrag_threshold){
 			StartingPoint = fb->lcn;

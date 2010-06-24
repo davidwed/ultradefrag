@@ -10,6 +10,8 @@ HISTORY
       additional optimization passes
     - one little bug preventing optimization from being stopped was fixed
       in driver
+    - volume optimization algorithm was improved to prevent skipping
+      heavily fragmented parts of the processed volume
     - progress is now added to the GUI window caption,
       so it is displayed in the tooltip of the taskbar icon
     - cryptic single character progress label was replaced
