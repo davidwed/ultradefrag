@@ -32,8 +32,8 @@ cls
 echo.
 echo The values are based on volumes of 1GB in size
 echo.
-echo 1 ...  4%% of free Space
-echo 2 ...  8%% of free Space
+echo 1 ...  5%% of free Space
+echo 2 ...  9%% of free Space
 echo 3 ... 13%% of free Space
 
 set maxAnswers=3
