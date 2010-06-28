@@ -20,6 +20,7 @@ HISTORY
       launched from the configuration dialog did not match
     - fixed a problem, where .lua files would get executed instead of edited,
       if "Lua for Windows" was installed
+    - 10 seconds delay is skiped on boot time scan, if only one keyboard is present
     - the following translations were updated:
 
       Dutch, Danish, French, Russian, Turkish, Serbian, 
