@@ -187,6 +187,8 @@ int __stdcall kb_open_internal(int device_number)
 			winx_printf("\nCannot open the keyboard %ws: %x!\n",
 				device_name,(UINT)Status);
 			winx_printf("%s\n",winx_get_error_description((ULONG)Status));
+            
+            if (Status == STATUS_OBJECT_NAME_NOT_FOUND) return (-2);
 		}
 		return (-1);
 	}
