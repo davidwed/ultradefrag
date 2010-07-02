@@ -9,6 +9,10 @@
 :: the percentage of free space is based on volumes of 1GB in size
 ::
 
+:: the following must be set to the character representing "YES"
+:: this is needed to run the format utility without user interaction
+set YES=J
+
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
 set ProcessVolumes=O: P:
@@ -57,6 +61,8 @@ goto :DisplayMenu
 :StartProcess
 set /a InitialSize="23 - answer"
 
+set ex_type=X
+
 rem FAT volumes
 for %%L in ( %ProcessVolumes% ) do call :FragmentDrive "%%~L"
 
@@ -67,15 +73,24 @@ pause
 goto :EOF
 
 :FragmentDrive
-	echo.
-	title Deleting Test Files on "%~1" ...
-	if %DryRun% == 0 del /f /q "%~1\*.*"
+	set EnableDelay=0
+	call :delay
+	set EnableDelay=1
+	
+    if %ex_type% == FAT set ex_type=FAT32
+    if %ex_type% == X   set ex_type=FAT
+	
+	call :answers >"%TMP%\answers.txt"
+	
+	title Formatting Drive "%~1" ...
+	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type% /X
+	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type% /X <"%TMP%\answers.txt"
 	
 	call :delay
 	
-	echo.
 	title Checking Drive "%~1" ...
-	if %DryRun% == 0 chkdsk %~1 /r /f /x
+	echo Executing ... chkdsk %~1 /r /f /x
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
 	
 	call :delay
 	
@@ -84,7 +99,6 @@ goto :EOF
     set count=0
     set total=0
 	
-	echo.
 	title Creating Fragmented Files on Drive "%~1" ...
 	echo Creating Fragmented Files on Drive "%~1" ...
 	echo.
@@ -96,20 +110,23 @@ goto :EOF
 	if ERRORLEVEL 1 (
 		echo.
 		echo Operation failed ...
-		echo.
 	) else (
-		echo Operation succeeded ...
 		echo.
+		echo Operation succeeded ...
 	)
 	
 	call :delay
 	
 	title Checking Drive "%~1" ...
-	if %DryRun% == 0 chkdsk %~1 /r /f /x
-	echo.
-	echo --------------------------------------------
+	echo Executing ... chkdsk %~1 /r /f /x
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
 	
 	call :delay
+goto :EOF
+
+:answers
+	echo TEST%ex_type%
+	echo %YES%
 goto :EOF
 
 :doit
@@ -120,7 +137,14 @@ goto :EOF
 goto :EOF
 
 :delay
-	for /L %%N in (0,1,100000) do set delay=%%N
+	echo.
+	if %EnableDelay% == 0 (
+		echo ============================================
+	) else (
+		echo --------------------------------------------
+		for /L %%N in (0,1,100000) do set delay=%%N
+	)
+	echo.
 goto :EOF
 
 :increment

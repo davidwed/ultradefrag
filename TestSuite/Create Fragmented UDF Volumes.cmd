@@ -9,12 +9,13 @@
 :: the percentage of free space is based on volumes of 1GB in size
 ::
 
+:: the following must be set to the character representing "YES"
+:: this is needed to run the format utility without user interaction
+set YES=J
+
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
 set ProcessVolumes=T:
-
-:: specify volume that should include compressed and regular files
-set MixedVolume=
 
 echo.
 set /p answer="Enable DryRun (Y/[N])? "
@@ -60,7 +61,7 @@ goto :DisplayMenu
 :StartProcess
 set /a InitialSize="23 - answer"
 
-rem NTFS volumes
+rem UDF volumes
 for %%L in ( %ProcessVolumes% ) do call :FragmentDrive "%%~L"
 
 title Operation Completed ...
@@ -70,15 +71,23 @@ pause
 goto :EOF
 
 :FragmentDrive
-	echo.
-	title Deleting Test Files on "%~1" ...
-	if %DryRun% == 0 del /f /q "%~1\*.*"
+	set EnableDelay=0
+	call :delay
+	set EnableDelay=1
+	
+    set ex_type=UDF
+
+	call :answers >"%TMP%\answers.txt"
+	
+	title Formatting Drive "%~1" ...
+	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type% /X
+	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type% /X <"%TMP%\answers.txt"
 	
 	call :delay
 	
-	echo.
 	title Checking Drive "%~1" ...
-	if %DryRun% == 0 chkdsk %~1 /r /v /f /x
+	echo Executing ... chkdsk %~1 /r /f /x
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
 	
 	call :delay
     
@@ -87,7 +96,6 @@ goto :EOF
     set count=0
     set total=0
 	
-	echo.
 	title Creating Fragmented Files on Drive "%~1" ...
 	echo Creating Fragmented Files on Drive "%~1" ...
 	echo.
@@ -99,43 +107,46 @@ goto :EOF
 	if ERRORLEVEL 1 (
 		echo.
 		echo Operation failed ...
-		echo.
 	) else (
-		echo Operation succeeded ...
 		echo.
+		echo Operation succeeded ...
 	)
 	
 	call :delay
 	
 	title Checking Drive "%~1" ...
-	if %DryRun% == 0 chkdsk %~1 /r /v /f /x
-	echo.
-	echo --------------------------------------------
+	echo Executing ... chkdsk %~1 /r /f /x
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
 	
 	call :delay
+goto :EOF
+
+:answers
+	echo Test%ex_type%
+	echo %YES%
 goto :EOF
 
 :doit
     set /a total+=size
     
-    if %DryRun% == 0 (
-        "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" >NUL
-        if /i "%~1" == "%MixedVolume%" if %rest3% EQU 0 compact /c "%~1\file_%~2.bin" >NUL
-    )
-    if %DryRun% == 1 (
-        echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" ... Total Usage: %total% kB
-        if /i "%~1" == "%MixedVolume%" if %rest3% EQU 0 echo compact /c "%~1\file_%~2.bin"
-    )
+    if %DryRun% == 0 "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" >NUL
+    if %DryRun% == 1 echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" ... Total Usage: %total% kB
 goto :EOF
 
 :delay
-	for /L %%N in (0,1,100000) do set delay=%%N
+	echo.
+	if %EnableDelay% == 0 (
+		echo ============================================
+	) else (
+		echo --------------------------------------------
+		for /L %%N in (0,1,100000) do set delay=%%N
+	)
+	echo.
 goto :EOF
 
 :increment
     set /a rest1="count %% 9"
     set /a rest2="count %% 8"
-    set /a rest3="count %% 5"
     
     if %rest1% EQU 0 set /a size="size * 2"
     if %rest2% EQU 0 set /a fragments+=2
