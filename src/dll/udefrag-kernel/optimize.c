@@ -25,6 +25,7 @@
  */
 
 #include "globals.h"
+#include "partition.h"
 
 ULONGLONG GetNumberOfFragmentedClusters(ULONGLONG FirstLCN, ULONGLONG LastLCN);
 void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,

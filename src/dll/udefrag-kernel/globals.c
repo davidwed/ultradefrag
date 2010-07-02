@@ -24,6 +24,7 @@
  */
 
 #include "globals.h"
+#include "partition.h"
 
 int nt4_system = 0;
 int w2k_system = 0;

@@ -45,6 +45,7 @@
 */
 
 #include "globals.h"
+#include "partition.h"
 
 /**
  * @brief Performs a volume analysis.
@@ -99,7 +100,8 @@ int Analyze(char *volume_name)
 	MarkAllSpaceAsSystem1();
 	
 	/* define file system */
-	CheckForNtfsPartition();
+	//CheckForNtfsPartition();
+	partition_type = GetFileSystemType();
 	
 	/* update progress counters */
 	tm = _rdtsc();

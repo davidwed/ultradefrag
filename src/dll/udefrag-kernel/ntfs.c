@@ -44,10 +44,14 @@ UINT MftScanDirection = MFT_SCAN_RTL;
 BOOLEAN MaxMftEntriesNumberUpdated = FALSE;
 int number_of_processed_attr_list_entries = 0;
 
+#if 0
 /**
  * @brief Retrieves a type of the file system 
  *        containing on the volume.
  * @details Sets the global partition_type variable.
+ * @note This routine is not reliable because it may
+ * detect NTFS_PARTITION while the partition 
+ * is actually UDF-formatted.
  */
 void CheckForNtfsPartition(void)
 {
@@ -131,6 +135,7 @@ void CheckForNtfsPartition(void)
 	winx_heap_free(part_info);
 	winx_heap_free(ntfs_data);
 }
+#endif
 
 /**
  * @brief Retrieves some basic information about MFT.

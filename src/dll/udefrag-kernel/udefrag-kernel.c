@@ -25,6 +25,7 @@
  */
 
 #include "globals.h"
+#include "partition.h"
 
 #ifndef STATIC_LIB
 /**

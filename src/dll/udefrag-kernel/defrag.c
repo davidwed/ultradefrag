@@ -25,6 +25,7 @@
  */
 
 #include "globals.h"
+#include "partition.h"
 
 /*
 * How to move directories on FAT.

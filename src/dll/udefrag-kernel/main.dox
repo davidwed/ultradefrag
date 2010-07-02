@@ -103,6 +103,12 @@
 /** @} */
 
 /**
+ * @defgroup Partition Partition
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Volume Volume
  * @{
  */

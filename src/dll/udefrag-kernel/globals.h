@@ -293,13 +293,6 @@ typedef struct {
 #define _256K (256 * 1024)
 #define FIND_DATA_SIZE	(16*1024)
 
-#define FAT12_PARTITION        0x0 /* really not defined */
-#define FAT16_PARTITION        0x6
-#define NTFS_PARTITION         0x7
-#define FAT32_PARTITION        0xB
-#define UDF_PARTITION          0xC /* really not defined */
-#define UNKNOWN_PARTITION      0xF /* really not defined */
-
 #define CHECK_FOR_FRAGLIMIT(pfn) { \
 	if(fraglimit && pfn->n_fragments < fraglimit) pfn->is_filtered = TRUE; \
 }

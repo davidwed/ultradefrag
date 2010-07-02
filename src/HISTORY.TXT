@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 4.4.0  2010-06-
+  Version 4.4.0  2010-07-
   ------------------------------------------------------------------------------
     RC1:
     - partial defragmentation was added to decrease number of fragments
@@ -16,6 +16,8 @@ HISTORY
       so it is displayed in the tooltip of the taskbar icon
     - cryptic single character progress label was replaced
       by the localized operation names
+    - file system type detection was rewritten to be more reliable
+      and detect UDF-formatted volumes properly
     - fixed a problem where the case of the names of the help pages
       launched from the configuration dialog did not match
     - fixed a problem, where .lua files would get executed instead of edited,
