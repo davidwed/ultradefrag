@@ -56,7 +56,7 @@ ULONG sectors_per_cluster = 0;
 ULONGLONG clusters_total = 0;
 ULONGLONG clusters_per_256k = 0;
 
-unsigned char partition_type = UNKNOWN_PARTITION;
+int partition_type = UNKNOWN_PARTITION;
 
 ULONG ntfs_record_size = 0;
 ULONGLONG max_mft_entries = 0;

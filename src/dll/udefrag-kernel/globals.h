@@ -152,7 +152,7 @@ extern ULONGLONG free_space; /* in bytes */
 extern ULONGLONG clusters_total;
 extern ULONGLONG clusters_per_256k;
 
-extern unsigned char partition_type;
+extern int partition_type;
 
 extern ULONGLONG mft_size;
 extern ULONG ntfs_record_size;
