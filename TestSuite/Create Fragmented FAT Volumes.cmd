@@ -81,10 +81,15 @@ goto :EOF
     if %ex_type% == X   set ex_type=FAT
 	
 	call :answers >"%TMP%\answers.txt"
+    
+	title Setting Volume Label of "%~1" ...
+	echo Executing ... label %~1 TEST%ex_type%
+    echo.
+    if %DryRun% == 0 label %~1 TEST%ex_type%
 	
 	title Formatting Drive "%~1" ...
-	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type% /X
-	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type% /X <"%TMP%\answers.txt"
+	echo Executing ... format %~1 /FS:%ex_type% /V:TEST%ex_type% /X
+	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:TEST%ex_type% /X <"%TMP%\answers.txt"
 	
 	call :delay
 	
@@ -98,11 +103,13 @@ goto :EOF
     set fragments=0
     set count=0
     set total=0
+    set dest=%~1
 	
 	title Creating Fragmented Files on Drive "%~1" ...
 	echo Creating Fragmented Files on Drive "%~1" ...
 	echo.
-	for /L %%C in (0,1,100) do (
+    
+	for /L %%C in (1,1,101) do (
         call :increment
         call :doit "%~1" %%C
     )
@@ -132,8 +139,14 @@ goto :EOF
 :doit
     set /a total+=size
     
-    if %DryRun% == 0 "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" >NUL
-    if %DryRun% == 1 echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" ... Total Usage: %total% kB
+    if %count% EQU 1 goto :skip
+        if %rest4% EQU 0 set dest=%~1\folder_%total%
+        if %rest4% EQU 0 echo mkdir "%dest%"
+        if %DryRun% == 0 if %rest4% EQU 0 mkdir "%dest%"
+    :skip
+    
+    if %DryRun% == 0 "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" >NUL
+    if %DryRun% == 1 echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" ... Total Usage: %total% kB
 goto :EOF
 
 :delay
@@ -142,7 +155,7 @@ goto :EOF
 		echo ============================================
 	) else (
 		echo --------------------------------------------
-		for /L %%N in (0,1,100000) do set delay=%%N
+		if %DryRun% == 0 for /L %%N in (0,1,100000) do set delay=%%N
 	)
 	echo.
 goto :EOF
@@ -150,9 +163,11 @@ goto :EOF
 :increment
     set /a rest1="count %% 9"
     set /a rest2="count %% 8"
+    set /a rest3="count %% 5"
+    set /a rest4="count %% 10"
     
     if %rest1% EQU 0 set /a size="size * 2"
     if %rest2% EQU 0 set /a fragments+=2
-    
+
     set /a count+=1
 goto :EOF

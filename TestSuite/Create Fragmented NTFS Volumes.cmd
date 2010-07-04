@@ -42,9 +42,9 @@ cls
 echo.
 echo The values are based on volumes of 1GB in size
 echo.
-echo 1 ...  4%% of free Space
-echo 2 ...  8%% of free Space
-echo 3 ... 13%% of free Space
+echo 1 ...  6%% of free Space
+echo 2 ... 10%% of free Space
+echo 3 ... 14%% of free Space
 
 set maxAnswers=3
 
@@ -65,7 +65,7 @@ pause
 goto :DisplayMenu
 
 :StartProcess
-set /a InitialSize="23 - answer"
+set /a InitialSize="22 - answer"
 
 rem NTFS volumes
 for %%L in ( %ProcessVolumes% ) do call :FragmentDrive "%%~L"
@@ -89,6 +89,11 @@ goto :EOF
 
 	call :answers >"%TMP%\answers.txt"
 	
+    title Setting Volume Label of "%~1" ...
+	echo Executing ... label %~1 TestNTFS%ex_type%
+    echo.
+    if %DryRun% == 0 label %~1 TestNTFS%ex_type%
+	
 	title Formatting Drive "%~1" ...
 	echo Executing ... format %~1 /FS:NTFS /V:TestNTFS%ex_type% %c_switch% /X
 	if %DryRun% == 0 echo. & format %~1 /FS:NTFS /V:TestNTFS%ex_type% %c_switch% /X <"%TMP%\answers.txt"
@@ -105,11 +110,13 @@ goto :EOF
     set fragments=0
     set count=0
     set total=0
+    set dest=%~1
 	
 	title Creating Fragmented Files on Drive "%~1" ...
 	echo Creating Fragmented Files on Drive "%~1" ...
 	echo.
-	for /L %%C in (0,1,100) do (
+    
+	for /L %%C in (1,1,101) do (
         call :increment
         call :doit "%~1" %%C
     )
@@ -139,13 +146,19 @@ goto :EOF
 :doit
     set /a total+=size
     
+    if %count% EQU 1 goto :skip
+        if %rest4% EQU 0 set dest=%~1\folder_%total%
+        if %rest4% EQU 0 echo mkdir "%dest%"
+        if %DryRun% == 0 if %rest4% EQU 0 mkdir "%dest%"
+    :skip
+    
     if %DryRun% == 0 (
-        "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" >NUL
-        if /i "%~1" == "%MixedVolume%" if %rest3% EQU 0 compact /c "%~1\file_%~2.bin" >NUL
+        "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" >NUL
+        if /i "%~1" == "%MixedVolume%" if %rest3% EQU 0 compact /c "%dest%\file_%~2.bin" >NUL
     )
     if %DryRun% == 1 (
-        echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" ... Total Usage: %total% kB
-        if /i "%~1" == "%MixedVolume%" if %rest3% EQU 0 echo compact /c "%~1\file_%~2.bin"
+        echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" ... Total Usage: %total% kB
+        if /i "%~1" == "%MixedVolume%" if %rest3% EQU 0 echo compact /c "%dest%\file_%~2.bin"
     )
 goto :EOF
 
@@ -155,7 +168,7 @@ goto :EOF
 		echo ============================================
 	) else (
 		echo --------------------------------------------
-		for /L %%N in (0,1,100000) do set delay=%%N
+		if %DryRun% == 0 for /L %%N in (0,1,100000) do set delay=%%N
 	)
 	echo.
 goto :EOF
@@ -164,6 +177,7 @@ goto :EOF
     set /a rest1="count %% 9"
     set /a rest2="count %% 8"
     set /a rest3="count %% 5"
+    set /a rest4="count %% 10"
     
     if %rest1% EQU 0 set /a size="size * 2"
     if %rest2% EQU 0 set /a fragments+=2
