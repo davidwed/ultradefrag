@@ -15,7 +15,7 @@ set YES=J
 
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
-set ProcessVolumes=T:
+set ProcessVolumes=T: U: V: W: X:
 
 echo.
 set /p answer="Enable DryRun (Y/[N])? "
@@ -61,6 +61,9 @@ goto :DisplayMenu
 :StartProcess
 set /a InitialSize="23 - answer"
 
+set ex_type=UDF
+set fs_ver=X
+
 rem UDF volumes
 for %%L in ( %ProcessVolumes% ) do call :FragmentDrive "%%~L"
 
@@ -75,13 +78,21 @@ goto :EOF
 	call :delay
 	set EnableDelay=1
 	
-    set ex_type=UDF
+    if %fs_ver% == 2.01 set fs_ver=2.50 & set fs_ver_txt=250
+    if %fs_ver% == 2.00 set fs_ver=2.01 & set fs_ver_txt=201
+    if %fs_ver% == 1.50 set fs_ver=2.00 & set fs_ver_txt=200
+    if %fs_ver% == 1.02 set fs_ver=1.50 & set fs_ver_txt=150
+    if %fs_ver% == X    set fs_ver=1.02 & set fs_ver_txt=102
 
 	call :answers >"%TMP%\answers.txt"
 	
+    title Setting Volume Label of "%~1" ...
+	echo Executing ... label %~1 Test%ex_type%v%fs_ver_txt%
+    if %DryRun% == 0 label %~1 Test%ex_type%v%fs_ver_txt%
+	
 	title Formatting Drive "%~1" ...
-	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type% /X
-	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type% /X <"%TMP%\answers.txt"
+	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver%
+	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% <"%TMP%\answers.txt"
 	
 	call :delay
 	
@@ -122,7 +133,7 @@ goto :EOF
 goto :EOF
 
 :answers
-	echo Test%ex_type%
+	echo Test%ex_type%v%fs_ver_txt%
 	echo %YES%
 goto :EOF
 
@@ -139,7 +150,7 @@ goto :EOF
 		echo ============================================
 	) else (
 		echo --------------------------------------------
-		for /L %%N in (0,1,100000) do set delay=%%N
+		if %DryRun% == 0 for /L %%N in (0,1,100000) do set delay=%%N
 	)
 	echo.
 goto :EOF
@@ -147,6 +158,7 @@ goto :EOF
 :increment
     set /a rest1="count %% 9"
     set /a rest2="count %% 8"
+    set /a rest3="count %% 5"
     
     if %rest1% EQU 0 set /a size="size * 2"
     if %rest2% EQU 0 set /a fragments+=2
