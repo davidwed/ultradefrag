@@ -36,8 +36,8 @@ cls
 echo.
 echo The values are based on volumes of 1GB in size
 echo.
-echo 1 ...  4%% of free Space
-echo 2 ...  8%% of free Space
+echo 1 ...  5%% of free Space
+echo 2 ... 10%% of free Space
 echo 3 ... 13%% of free Space
 
 set maxAnswers=3
@@ -88,6 +88,7 @@ goto :EOF
 	
     title Setting Volume Label of "%~1" ...
 	echo Executing ... label %~1 Test%ex_type%v%fs_ver_txt%
+    echo.
     if %DryRun% == 0 label %~1 Test%ex_type%v%fs_ver_txt%
 	
 	title Formatting Drive "%~1" ...
@@ -106,11 +107,13 @@ goto :EOF
     set fragments=0
     set count=0
     set total=0
+    set dest=%~1
 	
 	title Creating Fragmented Files on Drive "%~1" ...
 	echo Creating Fragmented Files on Drive "%~1" ...
 	echo.
-	for /L %%C in (0,1,100) do (
+    
+	for /L %%C in (1,1,101) do (
         call :increment
         call :doit "%~1" %%C
     )
@@ -140,8 +143,14 @@ goto :EOF
 :doit
     set /a total+=size
     
-    if %DryRun% == 0 "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" >NUL
-    if %DryRun% == 1 echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%~1\file_%~2.bin" ... Total Usage: %total% kB
+    if %count% EQU 1 goto :skip
+        if %rest4% EQU 0 set dest=%~1\folder_%total%
+        if %rest4% EQU 0 echo mkdir "%dest%"
+        if %DryRun% == 0 if %rest4% EQU 0 mkdir "%dest%"
+    :skip
+    
+    if %DryRun% == 0 "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" >NUL
+    if %DryRun% == 1 echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" ... Total Usage: %total% kB
 goto :EOF
 
 :delay
@@ -159,6 +168,7 @@ goto :EOF
     set /a rest1="count %% 9"
     set /a rest2="count %% 8"
     set /a rest3="count %% 5"
+    set /a rest4="count %% 10"
     
     if %rest1% EQU 0 set /a size="size * 2"
     if %rest2% EQU 0 set /a fragments+=2
