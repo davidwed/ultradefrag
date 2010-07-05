@@ -47,6 +47,12 @@
 * 5. The best practice would be to get free space in the
 *    beginning of the volume to hold all directories together.
 *    Then we'll move all directories and then - all files thereafter.
+* 6. DOS boot files must be skipped to prevent breaking the system.
+*    These files are: IO.SYS, MSDOS.SYS, IBMBIO.COM, IBMDOS.COM
+* 7. Also many old programs rely on positions of their files on disk
+*    (especially security software, boot loaders and similar stuff),
+*    so such files should be skipped. Anyway, customers must be forewarned
+*    before the FAT-formatted volume optimization.
 */
 
 extern ULONGLONG StartingPoint; /* it's a part of the volume optimizer */
