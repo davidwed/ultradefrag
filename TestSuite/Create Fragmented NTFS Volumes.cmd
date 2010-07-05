@@ -42,9 +42,9 @@ cls
 echo.
 echo The values are based on volumes of 1GB in size
 echo.
-echo 1 ...  6%% of free Space
-echo 2 ... 10%% of free Space
-echo 3 ... 14%% of free Space
+echo 1 ...  4%% of free Space
+echo 2 ...  8%% of free Space
+echo 3 ... 13%% of free Space
 
 set maxAnswers=3
 
@@ -65,7 +65,7 @@ pause
 goto :DisplayMenu
 
 :StartProcess
-set /a InitialSize="22 - answer"
+set /a InitialSize="23 - answer"
 
 rem NTFS volumes
 for %%L in ( %ProcessVolumes% ) do call :FragmentDrive "%%~L"
