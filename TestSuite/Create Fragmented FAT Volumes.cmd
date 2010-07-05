@@ -155,7 +155,7 @@ goto :EOF
 		echo ============================================
 	) else (
 		echo --------------------------------------------
-		if %DryRun% == 0 for /L %%N in (0,1,100000) do set delay=%%N
+		if %DryRun% == 0 ping -n 2 localhost >NUL
 	)
 	echo.
 goto :EOF
