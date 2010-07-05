@@ -13,7 +13,11 @@ General Information:
         3) Q: ... NTFS
         4) R: ... NTFS with compression enabled
         5) S: ... NTFS with 25% of compressed files, which mimics a regular system disk
-        6) T: ... UDF
+        6) T: ... UDF v1.02
+        7) U: ... UDF v1.50
+        8) V: ... UDF v2.00
+        9) W: ... UDF v2.01
+       10) X: ... UDF v2.50
 
     The fragmentation utility from http://www.mydefrag.com/ is used to create
     fragmented files.
@@ -45,6 +49,8 @@ Setup:
            which contains a drive letter (Example: I:).
            If you do not like to create a mixed drive change the line to read:
                 set MixedVolume=
+
+		c) UDF volumes are only supported on Vista and higher
 
     3) CHKDSK is executed before and after the fragmented files creation process,
        to make sure the volume is consistent.
