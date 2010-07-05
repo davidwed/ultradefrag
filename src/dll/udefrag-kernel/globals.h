@@ -115,6 +115,9 @@ typedef struct _FILTER
 } FILTER, *PFILTER;
 
 /***************** Global variables ********************/
+extern BOOLEAN AllowDirDefrag;
+extern BOOLEAN AllowOptimize;
+
 extern int nt4_system;
 extern int w2k_system;
 

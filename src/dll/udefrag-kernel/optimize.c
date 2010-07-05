@@ -25,7 +25,6 @@
  */
 
 #include "globals.h"
-#include "partition.h"
 
 ULONGLONG GetNumberOfFragmentedClusters(ULONGLONG FirstLCN, ULONGLONG LastLCN);
 void MovePartOfFileBlock(PFILENAME pfn,ULONGLONG startVcn,
@@ -259,7 +258,7 @@ int Optimize(char *volume_name)
 	Stat.current_operation = 'C';
 
 	/* On FAT volumes it increase distance between dir & files inside it. */
-	if(partition_type != NTFS_PARTITION) return (-1);
+	if(!AllowOptimize) return (-1);
 	
 	/* define threshold */
 	UpdateFreeBlockThreshold();

@@ -25,7 +25,6 @@
  */
 
 #include "globals.h"
-#include "partition.h"
 
 /*
 * How to move directories on FAT.
@@ -101,7 +100,7 @@ int Defragment(char *volume_name)
 			//if(pf->pfn->is_filtered) goto next_item; /* since v3.2.0 fragmfileslist never contains such entries */
 		}
 		/* skip fragmented directories on FAT/UDF partitions */
-		if(pf->pfn->is_dir && partition_type != NTFS_PARTITION) goto next_item;
+		if(pf->pfn->is_dir && !AllowDirDefrag) goto next_item;
 		Stat.clusters_to_process += pf->pfn->clusters_total;
 	next_item:
 		if(pf->next_ptr == fragmfileslist) break;
@@ -120,7 +119,7 @@ int Defragment(char *volume_name)
 				if(pf->pfn->is_filtered) goto L2; /* in v3.2.0 fragmfileslist never contained such entries */
 			}
 			/* skip fragmented directories on FAT/UDF partitions */
-			if(pf->pfn->is_dir && partition_type != NTFS_PARTITION) goto L2;
+			if(pf->pfn->is_dir && !AllowDirDefrag) goto L2;
 			if(pf->pfn->clusters_total <= block->length){
 				if(pf->pfn->clusters_total > length){
 					/* skip locked files here to prevent skipping the current free space block */

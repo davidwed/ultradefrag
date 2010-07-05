@@ -26,6 +26,27 @@
 #include "globals.h"
 #include "partition.h"
 
+/**
+ * @brief Defines whether directories
+ * should be skipped or not
+ * in defragmentation algorithms.
+ * @note Currently this variable holds
+ * FALSE value (skip directories) for
+ * FAT-formatted volumes only, because
+ * directories there aren't moveable.
+ */
+BOOLEAN AllowDirDefrag = FALSE;
+
+/**
+ * @brief Defines whether the disk
+ * optimization is allowed or not.
+ * @note Currently it isn't allowed
+ * for FAT-formatted volumes since
+ * we have no way to move directories
+ * there.
+ */
+BOOLEAN AllowOptimize = FALSE;
+
 int nt4_system = 0;
 int w2k_system = 0;
 

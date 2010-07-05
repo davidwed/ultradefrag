@@ -103,6 +103,25 @@ int Analyze(char *volume_name)
 	//CheckForNtfsPartition();
 	partition_type = GetFileSystemType();
 	
+	/* define whether some actions are allowed or not */
+	switch(partition_type){
+	case FAT12_PARTITION:
+	case FAT16_PARTITION:
+	case FAT32_PARTITION:
+	case FAT32_UNRECOGNIZED_PARTITION:
+		AllowDirDefrag = FALSE;
+		AllowOptimize = FALSE;
+		break;
+	default:
+		AllowDirDefrag = TRUE;
+		AllowOptimize = TRUE;
+		break;
+	}
+	if(AllowDirDefrag) DebugPrint("Directory defragmentation is allowed.\n");
+	else DebugPrint("Directory defragmentation is denied (because not possible).\n");
+	if(AllowOptimize) DebugPrint("Volume optimization is allowed.\n");
+	else DebugPrint("Volume optimization is denied (because not possible).\n");
+	
 	/* update progress counters */
 	tm = _rdtsc();
 	Stat.clusters_to_process = clusters_total;
