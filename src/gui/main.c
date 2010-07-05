@@ -105,22 +105,6 @@ void DeleteEnvironmentVariables(void);
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 
-void OpenWebPage(char *page)
-{
-	short path[MAX_PATH];
-	HINSTANCE hApp;
-	
-	(void)_snwprintf(path,MAX_PATH,L".\\handbook\\%hs",page);
-	path[MAX_PATH - 1] = 0;
-
-	hApp = ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
-	if((int)(LONG_PTR)hApp <= 32){
-		(void)_snwprintf(path,MAX_PATH,L"http://ultradefrag.sourceforge.net/handbook/%hs",page);
-		path[MAX_PATH - 1] = 0;
-		(void)WgxShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
-	}
-}
-
 void DisplayLastError(char *caption)
 {
 	LPVOID lpMsgBuf;
