@@ -227,9 +227,10 @@ Function install_langpack
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
 
-  ${If} $LanguagePack != "English (US)"
     StrCpy $R0 $LanguagePack
     ${Select} $LanguagePack
+      ${Case} "English (US)"
+        StrCpy $R0 "English(US)"
       ${Case} "Chinese (Simplified)"
         StrCpy $R0 "Chinese(Simplified)"
       ${Case} "Chinese (Traditional)"
@@ -244,18 +245,13 @@ Function install_langpack
         StrCpy $R0 "Spanish(AR)"
     ${EndSelect}
 
+    SetOutPath "$INSTDIR\i18n\gui"
     File "${ROOTDIR}\src\gui\i18n\*.GUI"
-    Rename "$R0.GUI" "ud_i18n.bk"
-    Delete "$INSTDIR\*.GUI"
-    ;;;Rename "ud_i18n.bk" "ud_i18n.lng"
+    CopyFiles /SILENT "$INSTDIR\i18n\gui\$R0.GUI" "$INSTDIR\ud_i18n.lng"
 
+    SetOutPath "$INSTDIR\i18n\gui-config"
     File "${ROOTDIR}\src\udefrag-gui-config\i18n\*.Config"
-    Rename "$R0.Config" "ud_config_i18n.bk"
-    Delete "$INSTDIR\*.Config"
-
-    Rename "ud_config_i18n.bk" "ud_config_i18n.lng"
-    Rename "ud_i18n.bk" "ud_i18n.lng"
-  ${EndIf}
+    CopyFiles /SILENT "$INSTDIR\i18n\gui-config\$R0.Config" "$INSTDIR\ud_config_i18n.lng"
 
   pop $R0
   
@@ -302,6 +298,7 @@ Section "Ultra Defrag core files (required)" SecCore
   Delete "$INSTDIR\ultradefrag.exe"
   Rename "$INSTDIR\dfrg.exe" "$INSTDIR\ultradefrag.exe"
   File "udefrag-gui-config.exe"
+  File "LanguageSelector.exe"
 
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
@@ -444,6 +441,9 @@ Section "Shortcuts" SecShortcuts
   CreateShortCut "$R0\Preferences.lnk" \
    "$INSTDIR\udefrag-gui-config.exe"
 
+  CreateShortCut "$R0\Select Language.lnk" \
+   "$INSTDIR\LanguageSelector.exe"
+
   CreateShortCut "$R0\Documentation\LICENSE.lnk" \
    "$INSTDIR\LICENSE.TXT"
   CreateShortCut "$R0\Documentation\README.lnk" \
@@ -545,12 +545,16 @@ Section "Uninstall"
   Delete "$INSTDIR\ultradefrag.exe"
   Delete "$INSTDIR\udefrag-gui-config.exe"
   Delete "$INSTDIR\uninstall.exe"
+  Delete "$INSTDIR\LanguageSelector.exe"
 
   Delete "$INSTDIR\ud_i18n.lng"
   Delete "$INSTDIR\ud_config_i18n.lng"
 
   RMDir /r "$INSTDIR\scripts"
   RMDir /r "$INSTDIR\handbook"
+  RMDir /r "$INSTDIR\i18n\gui"
+  RMDir /r "$INSTDIR\i18n\gui-config"
+  RMDir /r "$INSTDIR\i18n"
   RMDir "$INSTDIR\options"
   RMDir $INSTDIR
 

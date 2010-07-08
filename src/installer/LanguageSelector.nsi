@@ -57,7 +57,9 @@ OutFile "LanguageSelector.exe"
 SetCompressor /SOLID lzma
 
 XPStyle on
-;RequestExecutionLevel admin
+!ifndef ISPORTABLE
+RequestExecutionLevel admin
+!endif
 
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey "ProductName" "Ultra Defragmenter"
@@ -92,9 +94,10 @@ Function install_langpack
   Delete "$EXEDIR\ud_i18n.lng"
   Delete "$EXEDIR\ud_config_i18n.lng"
 
-  ${If} $LanguagePack != "English (US)"
     StrCpy $R0 $LanguagePack
     ${Select} $LanguagePack
+      ${Case} "English (US)"
+        StrCpy $R0 "English(US)"
       ${Case} "Chinese (Simplified)"
         StrCpy $R0 "Chinese(Simplified)"
       ${Case} "Chinese (Traditional)"
@@ -111,7 +114,6 @@ Function install_langpack
     
     CopyFiles /SILENT "$EXEDIR\i18n\gui\$R0.GUI" "$EXEDIR\ud_i18n.lng"
     CopyFiles /SILENT "$EXEDIR\i18n\gui-config\$R0.Config" "$EXEDIR\ud_config_i18n.lng"
-  ${EndIf}
 
   pop $R0
 
@@ -132,7 +134,17 @@ Function LangShow
 
   WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "Title" "UltraDefrag Language Selector v${ULTRADFGVER}"
   WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "NextButtonText" "OK"
+
+!ifdef ISPORTABLE
   WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $LanguagePack
+!else
+  ; --- get language from registry
+  ClearErrors
+  ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
+  ${Unless} ${Errors}
+    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
+  ${EndUnless}
+!endif
 
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
   pop $R0
@@ -157,7 +169,11 @@ Function LangLeave
   ${EndIf}
 
   ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
+!ifdef ISPORTABLE
   WriteINIStr "$EXEDIR\PORTABLE.X" "i18n" "Language" $LanguagePack
+!else
+  WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
+!endif
   call install_langpack
   pop $R0
 
@@ -171,12 +187,26 @@ Function .onInit
   InitPluginsDir
   ${DisableX64FSRedirection}
   StrCpy $LanguagePack "English (US)"
+  push $R1
+  
+!ifdef ISPORTABLE
   ${If} ${FileExists} "$EXEDIR\PORTABLE.X"
     ReadINIStr $LanguagePack "$EXEDIR\PORTABLE.X" "i18n" "Language"
   ${EndIf}
+!else
+  ; --- get language from registry
+  ClearErrors
+  ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
+  ${Unless} ${Errors}
+    StrCpy $LanguagePack $R1
+  ${EndUnless}
+!endif
+
 !ifdef MODERN_UI
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
 !endif
+
+  pop $R1
   ${EnableX64FSRedirection}
 
 FunctionEnd

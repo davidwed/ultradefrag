@@ -96,10 +96,14 @@ copy /Y ..\installer\UltraDefrag.nsh .\
 copy /Y ..\installer\*.ico .\
 copy /Y ..\installer\lang.ini .\
 copy /Y ..\installer\lang-classical.ini .\
+copy /Y ..\installer\LanguageSelector.nsi .\
 
 rem Executables are too small to use upx.
 rem upx udefrag.exe
 rem if %errorlevel% neq 0 goto fail
+
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
+if %errorlevel% neq 0 goto fail
 
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
@@ -112,8 +116,12 @@ copy /Y ..\installer\UltraDefrag.nsh .\amd64\
 copy /Y ..\installer\*.ico .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
 copy /Y ..\installer\lang-classical.ini .\amd64\
+copy /Y ..\installer\LanguageSelector.nsi .\amd64\
 
 cd amd64
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
+if %errorlevel% neq 0 goto fail
+
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 cd..
@@ -126,7 +134,12 @@ copy /Y ..\installer\UltraDefrag.nsh .\ia64\
 copy /Y ..\installer\*.ico .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
 copy /Y ..\installer\lang-classical.ini .\ia64\
+copy /Y ..\installer\LanguageSelector.nsi .\ia64\
+
 cd ia64
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
+if %errorlevel% neq 0 goto fail
+
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
 cd..

@@ -23,6 +23,7 @@ HISTORY
     - fixed a problem, where .lua files would get executed instead of edited,
       if "Lua for Windows" was installed
     - 10 seconds delay is skiped on boot time scan, if only one keyboard is present
+    - added language selector to the GUI package
     - the following translations were updated:
 
       Dutch, Danish, French, Russian, Turkish, Serbian, 

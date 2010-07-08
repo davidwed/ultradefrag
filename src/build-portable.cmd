@@ -59,7 +59,7 @@ call setvars.cmd
 if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
 
-"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
+"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DISPORTABLE=1 LanguageSelector.nsi
 if %errorlevel% neq 0 goto fail
 
 copy /Y LanguageSelector.exe ultradefrag-portable-%ULTRADFGVER%.i386\
