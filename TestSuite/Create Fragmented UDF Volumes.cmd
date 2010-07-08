@@ -98,8 +98,8 @@ goto :EOF
 	call :delay
 	
 	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f /x
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
+	echo Executing ... chkdsk %~1 /r /f
+	if %DryRun% == 0 echo. & echo n | chkdsk %~1 /r /f
 	
 	call :delay
     
@@ -129,8 +129,8 @@ goto :EOF
 	call :delay
 	
 	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f /x
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
+	echo Executing ... chkdsk %~1 /r /f
+	if %DryRun% == 0 echo. & echo n | chkdsk %~1 /r /f
 	
 	call :delay
 goto :EOF
