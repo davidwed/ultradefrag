@@ -105,20 +105,27 @@ int Analyze(char *volume_name)
 	
 	/* define whether some actions are allowed or not */
 	switch(partition_type){
-	case FAT12_PARTITION:
-	case FAT16_PARTITION:
-	case FAT32_PARTITION:
-	case FAT32_UNRECOGNIZED_PARTITION:
-		AllowDirDefrag = FALSE;
-		AllowOptimize = FALSE;
-		break;
-	default:
-		AllowDirDefrag = TRUE;
-		AllowOptimize = TRUE;
-		break;
+        case FAT12_PARTITION:
+        case FAT16_PARTITION:
+        case FAT32_PARTITION:
+        case FAT32_UNRECOGNIZED_PARTITION:
+            AllowDirDefrag = FALSE;
+            AllowOptimize = FALSE;
+            break;
+        case NTFS_PARTITION:
+            AllowDirDefrag = TRUE;
+            AllowOptimize = TRUE;
+            break;
+        default:
+            AllowDirDefrag = FALSE;
+            AllowOptimize = FALSE;
+            /* AllowDirDefrag = TRUE;
+            AllowOptimize = TRUE; */
+            break;
 	}
 	if(AllowDirDefrag) DebugPrint("Directory defragmentation is allowed.\n");
 	else DebugPrint("Directory defragmentation is denied (because not possible).\n");
+    
 	if(AllowOptimize) DebugPrint("Volume optimization is allowed.\n");
 	else DebugPrint("Volume optimization is denied (because not possible).\n");
 	
@@ -139,48 +146,48 @@ int Analyze(char *volume_name)
 	if(CheckForStopEvent()) return 0;
 
 	switch(partition_type){
-	case NTFS_PARTITION:
-		/*
-		* ScanMFT() causes BSOD on NT 4.0, even in user mode!
-		* It seems that NTFS driver is imperfect in this system
-		* and ScanMFT() breaks something inside it.
-		* Sometimes BSOD appears during an analysis after volume optimization,
-		* sometimes it appears immediately during the first analysis.
-		* Examples:
-		* 1. kmd compact ntfs nt4 -> BSOD 0xa (0x48, 0xFF, 0x0, 0x80101D5D)
-		* immediately after the last analysis
-		* 2. user mode - optimize - BSOD during the second analysis
-		* 0x50 (0xB51CA820,0,0,2) or 0x1E (0xC...5,0x8013A7B6,0,0x20)
-		* 3. kmd - nt4 - gui - optimize - chkdsk /F for ntfs - bsod
-		*/
-		/*if(nt4_system){
-			DebugPrint("Ultrafast NTFS scan is not avilable on NT 4.0\n");
-			DebugPrint("due to ntfs.sys driver imperfectness.\n");
-			goto universal_scan;
-		}*/
-		(void)ScanMFT();
-		break;
-	/*case FAT12_PARTITION:
-		(void)ScanFat12Partition();
-		break;
-	case FAT16_PARTITION:
-		(void)ScanFat16Partition();
-		break;
-	case FAT32_PARTITION:
-		(void)ScanFat32Partition();
-		break;*/
-	default: /* UDF, Ext2 and so on... */
-/*universal_scan:*/
-		/* Find files */
-		tm = _rdtsc();
-		path[4] = (short)volume_letter;
-		error_code = FindFiles(path);
-		if(error_code < 0){
-			DebugPrint("FindFiles() failed!\n");
-			return error_code;
-		}
-		time = _rdtsc() - tm;
-		DebugPrint("An universal scan needs %I64u ms\n",time);
+        case NTFS_PARTITION:
+            /*
+            * ScanMFT() causes BSOD on NT 4.0, even in user mode!
+            * It seems that NTFS driver is imperfect in this system
+            * and ScanMFT() breaks something inside it.
+            * Sometimes BSOD appears during an analysis after volume optimization,
+            * sometimes it appears immediately during the first analysis.
+            * Examples:
+            * 1. kmd compact ntfs nt4 -> BSOD 0xa (0x48, 0xFF, 0x0, 0x80101D5D)
+            * immediately after the last analysis
+            * 2. user mode - optimize - BSOD during the second analysis
+            * 0x50 (0xB51CA820,0,0,2) or 0x1E (0xC...5,0x8013A7B6,0,0x20)
+            * 3. kmd - nt4 - gui - optimize - chkdsk /F for ntfs - bsod
+            */
+            /*if(nt4_system){
+                DebugPrint("Ultrafast NTFS scan is not avilable on NT 4.0\n");
+                DebugPrint("due to ntfs.sys driver imperfectness.\n");
+                goto universal_scan;
+            }*/
+            (void)ScanMFT();
+            break;
+        /*case FAT12_PARTITION:
+            (void)ScanFat12Partition();
+            break;
+        case FAT16_PARTITION:
+            (void)ScanFat16Partition();
+            break;
+        case FAT32_PARTITION:
+            (void)ScanFat32Partition();
+            break;*/
+        default: /* UDF, Ext2 and so on... */
+    /*universal_scan:*/
+            /* Find files */
+            tm = _rdtsc();
+            path[4] = (short)volume_letter;
+            error_code = FindFiles(path);
+            if(error_code < 0){
+                DebugPrint("FindFiles() failed!\n");
+                return error_code;
+            }
+            time = _rdtsc() - tm;
+            DebugPrint("An universal scan needs %I64u ms\n",time);
 	}
 	
 	DebugPrint("Files found: %u\n",Stat.filecounter);
