@@ -185,9 +185,10 @@ Section "Uninstall"
   Delete "$INSTDIR\README.TXT"
 
   Delete "$INSTDIR\uninstall.exe"
-  RMDir "$INSTDIR\options"
+  RMDir /r "$INSTDIR\options"
   RMDir $INSTDIR
 
+  Delete "$SYSDIR\ud-boot-time.cmd"
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\boot-on.cmd"

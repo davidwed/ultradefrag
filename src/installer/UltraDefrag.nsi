@@ -245,10 +245,12 @@ Function install_langpack
         StrCpy $R0 "Spanish(AR)"
     ${EndSelect}
 
+    RMDir /r "$INSTDIR\i18n\gui"
     SetOutPath "$INSTDIR\i18n\gui"
     File "${ROOTDIR}\src\gui\i18n\*.GUI"
     CopyFiles /SILENT "$INSTDIR\i18n\gui\$R0.GUI" "$INSTDIR\ud_i18n.lng"
 
+    RMDir /r "$INSTDIR\i18n\gui-config"
     SetOutPath "$INSTDIR\i18n\gui-config"
     File "${ROOTDIR}\src\udefrag-gui-config\i18n\*.Config"
     CopyFiles /SILENT "$INSTDIR\i18n\gui-config\$R0.Config" "$INSTDIR\ud_config_i18n.lng"
@@ -552,12 +554,11 @@ Section "Uninstall"
 
   RMDir /r "$INSTDIR\scripts"
   RMDir /r "$INSTDIR\handbook"
-  RMDir /r "$INSTDIR\i18n\gui"
-  RMDir /r "$INSTDIR\i18n\gui-config"
   RMDir /r "$INSTDIR\i18n"
-  RMDir "$INSTDIR\options"
+  RMDir /r "$INSTDIR\options"
   RMDir $INSTDIR
 
+  Delete "$SYSDIR\ud-boot-time.cmd"
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\boot-off.cmd"
   Delete "$SYSDIR\boot-on.cmd"
@@ -577,6 +578,7 @@ Section "Uninstall"
 
   DetailPrint "Clear registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+  DeleteRegKey HKLM "Software\UltraDefrag"
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"
