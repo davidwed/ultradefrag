@@ -165,7 +165,7 @@ Function LangShow
   ${Unless} ${Errors}
     WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R2
   ${EndUnless}
-
+  
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
   pop $R0
   InstallOptions::show
@@ -191,7 +191,7 @@ Function LangLeave
   ${EndIf}
 
   ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
-  WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
+
   pop $R0
 
 FunctionEnd
@@ -255,6 +255,8 @@ Function install_langpack
     File "${ROOTDIR}\src\udefrag-gui-config\i18n\*.Config"
     CopyFiles /SILENT "$INSTDIR\i18n\gui-config\$R0.Config" "$INSTDIR\ud_config_i18n.lng"
 
+    WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
+    
   pop $R0
   
 FunctionEnd
