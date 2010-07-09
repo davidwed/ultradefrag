@@ -415,6 +415,7 @@ void DefragmentFreeSpaceRTL(void)
 		movings = 0;
 		for(freeblock = free_space_map; freeblock != NULL; freeblock = freeblock->next_ptr){
 			if(freeblock->lcn < lastblock->lcn && freeblock->length){
+				if(CheckForStopEvent()) break;
 				/* fill block with lastblock contents */
 				length = min(freeblock->length,lastblock->length);
 				vcn = lastblock->vcn + (lastblock->length - length);
@@ -432,10 +433,10 @@ void DefragmentFreeSpaceRTL(void)
 					break;
 				}
 			}
-			if(CheckForStopEvent()) break;
 			if(freeblock->next_ptr == free_space_map) break;
 		}
 		if(!movings) break;
+		if(CheckForStopEvent()) break;
 	}
 }
 
@@ -484,6 +485,7 @@ void DefragmentFreeSpaceLTR(void)
 		if(!free_space_map) break;
 		for(freeblock = free_space_map->prev_ptr; 1; freeblock = freeblock->prev_ptr){
 			if(freeblock->lcn > firstblock->lcn && freeblock->length){
+				if(CheckForStopEvent()) break;
 				/* fill block with firstblock contents */
 				length = min(freeblock->length,firstblock->length);
 				vcn = firstblock->vcn;
@@ -503,10 +505,10 @@ void DefragmentFreeSpaceLTR(void)
 					break;
 				}
 			}
-			if(CheckForStopEvent()) break;
 			if(freeblock->prev_ptr == free_space_map->prev_ptr) break;
 		}
 		if(!movings) break;
+		if(CheckForStopEvent()) break;
 	}
 }
 
@@ -703,6 +705,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 		}
 	}
 	while(1){
+		if(CheckForStopEvent()) break;
 		/* search for a largest file having clusters after fb->lcn */
 		plargest = NULL; length = 0;
 		for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
@@ -729,6 +732,7 @@ int MoveRestOfFilesRTL(char *volume_name)
 			if(block->lcn > StartingPoint){
 				/* move the block entirely to the beginning of the volume */
 				while(block->length){
+					if(CheckForStopEvent()) goto done;
 					length = min(fb->length,block->length);
 					vcn = block->vcn;
 					MovePartOfFileBlock(plargest,vcn,fb->lcn,length);

@@ -491,6 +491,7 @@ int DefragmentPartially(char *volume_name)
 	* starting from the largest file.
 	*/
 	while(1){
+		if(CheckForStopEvent()) break;
 		/* search for a largest fragmented file */
 		plargest = NULL; length = 0;
 		for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
@@ -524,6 +525,7 @@ int DefragmentPartially(char *volume_name)
 		/* fill free space with plargest file contents */
 		for(block = plargest->pfn->blockmap; block != NULL; block = block->next_ptr){
 			while(block->length){
+				if(CheckForStopEvent()) goto done;
 				length = min(fb->length,block->length);
 				vcn = block->vcn;
 				MovePartOfFileBlock(plargest->pfn,vcn,fb->lcn,length);
