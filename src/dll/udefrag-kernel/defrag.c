@@ -58,6 +58,7 @@
 extern ULONGLONG StartingPoint; /* it's a part of the volume optimizer */
 
 BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target);
+int DefragmentPartially(char *volume_name);
 
 /*
 * Why analysis repeats before each defragmentation attempt (v2.1.2)?
@@ -89,6 +90,7 @@ int Defragment(char *volume_name)
 	ULONGLONG length;
 	ULONGLONG locked_clusters;
 	ULONGLONG defragmented = 0;
+	int result;
 
 	DebugPrint("----- Defragmentation of %s: -----\n",volume_name);
 	
@@ -158,7 +160,26 @@ int Defragment(char *volume_name)
 	L1:
 		if(block->next_ptr == free_space_map) break;
 	}
-	return (defragmented == 0) ? (-1) : (0);
+	
+	/*
+	* No more files can be defragmented entirely,
+	* so we're trying to apply a partial defragmentation
+	* to reduce the number of fragments.
+	*/
+	result = (defragmented == 0) ? (-1) : (0);
+	if(!optimize_flag){
+		if(CheckForStopEvent()) return result;
+		if(Analyze(volume_name) < 0) return result;
+		if(DefragmentPartially(volume_name) == 0){
+			/*
+			* Some files were moved, repeat an analysis 
+			* to update the list of fragmented files.
+			*/
+			(void)AnalyzeForced(volume_name);
+			return 0; /* at least one file has been defragmented */
+		}
+	}	
+	return result;
 }
 
 /* ------------------------------------------------------------------------- */
@@ -420,6 +441,119 @@ BOOLEAN MoveTheFile(PFILENAME pfn,ULONGLONG target)
 	if(target + pfn->clusters_total - 1 > StartingPoint)
 		StartingPoint = target + pfn->clusters_total - 1;
 	return (!pfn->is_fragm);
+}
+
+/**
+ * @brief Defragments all fragmented files partially.
+ * @param[in] volume_name the name of the volume.
+ * @return Zero if at least one file has been
+ * defragmented, negative value otherwise.
+ * @note
+ * - It is intended to be used after a regular
+ * defragmentation to reduce the number of fragments
+ * when there are no space blocks to keep files
+ * entirely.
+ * - This routine is similar to MoveRestOfFilesRTL(),
+ * but they are few important differencies between.
+ */
+int DefragmentPartially(char *volume_name)
+{
+	PFRAGMENTED pf, plargest;
+	PBLOCKMAP block;
+	PFREEBLOCKMAP fb;
+	ULONGLONG length;
+	ULONGLONG vcn;
+	ULONGLONG part_defrag_threshold;
+	ULONGLONG moved = 0;
+	
+	DebugPrint("----- Partial defragmentation started for %s: -----\n",volume_name);
+	DebugPrint("/* intended to reduce the number of fragments in case of free space deficit */\n");
+	
+	Stat.clusters_to_process = Stat.processed_clusters = 0;
+	Stat.current_operation = 'D';
+	
+	/* Reinitialize progress counters. */
+	for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
+		if(!pf->pfn->blockmap) goto next_item; /* skip fragmented files with unknown state */
+		if(!optimize_flag){
+			if(pf->pfn->is_overlimit) goto next_item; /* skip fragmented but filtered out files */
+			//if(pf->pfn->is_filtered) goto next_item; /* since v3.2.0 fragmfileslist never contains such entries */
+		}
+		/* skip fragmented directories on FAT/UDF partitions */
+		if(pf->pfn->is_dir && !AllowDirDefrag) goto next_item;
+		Stat.clusters_to_process += pf->pfn->clusters_total;
+	next_item:
+		if(pf->next_ptr == fragmfileslist) break;
+	}
+
+	/*
+	* Defragment all fragmented files partially,
+	* starting from the largest file.
+	*/
+	while(1){
+		/* search for a largest fragmented file */
+		plargest = NULL; length = 0;
+		for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
+			if(!pf->pfn->blockmap) goto L2; /* skip fragmented files with unknown state */
+			if(!optimize_flag){
+				if(pf->pfn->is_overlimit) goto L2; /* skip fragmented but filtered out files */
+				if(pf->pfn->is_filtered) goto L2; /* in v3.2.0 fragmfileslist never contained such entries */
+			}
+			/* skip fragmented directories on FAT/UDF partitions */
+			if(pf->pfn->is_dir && !AllowDirDefrag) goto L2;
+			if(pf->pfn->clusters_total > length){
+				plargest = pf;
+				length = pf->pfn->clusters_total;
+			}
+		L2:
+			if(pf->next_ptr == fragmfileslist) break;
+		}
+		if(!plargest) /* there are no more fragmented files not processed yet */
+			goto done;
+		/* define free block threshold as a value which should guaranty reducing the number of fragments */
+		part_defrag_threshold = plargest->pfn->clusters_total / (plargest->pfn->n_fragments - 1);
+		DebugPrint("Free block threshold for %ws = %I64u clusters.\n",plargest->pfn->name.Buffer,part_defrag_threshold);
+		/* search for the first free block which can be accepted */
+		for(fb = free_space_map; fb != NULL; fb = fb->next_ptr){
+			if(fb->length >= part_defrag_threshold)	break;
+			if(fb->next_ptr == free_space_map){
+				DebugPrint("There are no free space areas to reduce the number of fragments!\n");
+				goto next_file;
+			}
+		}
+		/* fill free space with plargest file contents */
+		for(block = plargest->pfn->blockmap; block != NULL; block = block->next_ptr){
+			while(block->length){
+				length = min(fb->length,block->length);
+				vcn = block->vcn;
+				MovePartOfFileBlock(plargest->pfn,vcn,fb->lcn,length);
+				moved ++;
+				RemarkBlock(fb->lcn,length,UNKNOWN_SPACE,FREE_SPACE);
+				RemarkBlock(block->lcn,length,TEMPORARY_SYSTEM_SPACE/*FREE_OR_MFT_ZONE_SPACE*/,GetFileSpaceState(plargest->pfn));
+				fb->lcn += length;
+				fb->length -= length;
+				block->vcn += length;
+				block->lcn += length;
+				block->length -= length;
+				/* skip small free blocks */
+				if(fb->length == 0){
+					while(1){
+						if(fb->length >= part_defrag_threshold) break;
+						/* if there are no more free blocks available then process the next file */
+						if(fb->next_ptr == free_space_map)
+							goto next_file;
+						fb = fb->next_ptr;
+					}
+				}
+			}
+			if(block->next_ptr == plargest->pfn->blockmap) break;
+		}
+next_file:
+		DeleteBlockmap(plargest->pfn);
+	}
+	
+done:
+	return (moved == 0) ? (-1) : (0);
 }
 
 /** @} */
