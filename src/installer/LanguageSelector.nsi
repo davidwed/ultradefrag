@@ -115,6 +115,12 @@ Function install_langpack
     CopyFiles /SILENT "$EXEDIR\i18n\gui\$R0.GUI" "$EXEDIR\ud_i18n.lng"
     CopyFiles /SILENT "$EXEDIR\i18n\gui-config\$R0.Config" "$EXEDIR\ud_config_i18n.lng"
 
+    !ifdef ISPORTABLE
+      WriteINIStr "$EXEDIR\PORTABLE.X" "i18n" "Language" $LanguagePack
+    !else
+      WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
+    !endif
+
   pop $R0
 
 FunctionEnd
@@ -169,12 +175,9 @@ Function LangLeave
   ${EndIf}
 
   ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
-!ifdef ISPORTABLE
-  WriteINIStr "$EXEDIR\PORTABLE.X" "i18n" "Language" $LanguagePack
-!else
-  WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
-!endif
+
   call install_langpack
+  
   pop $R0
 
 FunctionEnd
