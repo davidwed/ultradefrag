@@ -28,7 +28,7 @@
 */
 
 !ifndef ULTRADFGVER
-!error "One of the predefined symbols missing!"
+!error "ULTRADFGVER parameter must be specified on the command line!"
 !endif
 
 ; designed especially for modern interface
@@ -37,7 +37,6 @@
 !ifdef MODERN_UI
   !include "MUI.nsh"
   !define MUI_ICON "LanguageSelector.ico"
-  ;;!define MUI_BGCOLOR "000000"
 !endif
 
 !include "x64.nsh"
