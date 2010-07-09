@@ -28,8 +28,12 @@
  *  ULTRADFGARCH=<i386 | amd64 | ia64>
  */
 
-!ifndef ULTRADFGVER | ULTRADFGARCH
-!error "One of the predefined symbols missing!"
+!ifndef ULTRADFGVER
+!error "ULTRADFGVER parameter must be specified on the command line!"
+!endif
+
+!ifndef ULTRADFGARCH
+!error "ULTRADFGARCH parameter must be specified on the command line!"
 !endif
 
 !include "x64.nsh"
@@ -42,6 +46,7 @@
 !define ROOTDIR "..\..\.."
 !endif
 
+!define MICRO_EDITION
 !include ".\UltraDefrag.nsh"
 
 ;-----------------------------------------
@@ -103,7 +108,7 @@ Section "Ultra Defrag core files (required)" SecCore
   AddSize 44 /* for the components installed in system directories */
   
   ;;;DetailPrint "Uninstall the previous version..."
-  /* waiting fails here => manual deinstallation preferred */
+  /* waiting fails here => upgrade without deinstallation is preferred */
   ;;; ExecWait '"$INSTDIR\uninstall.exe" /S'
 
   DetailPrint "Install core files..."
@@ -145,14 +150,7 @@ Section "Ultra Defrag core files (required)" SecCore
   WriteUninstaller "uninstall.exe"
 
   ${RemoveObsoleteFiles}
-  
-  ; create boot time script if it doesn't exist
-  SetOutPath "$SYSDIR"
-  ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
-    File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
-  ${EndUnless}
-
-  ; register context menu handler
+  ${InstallConfigFiles}
   ${SetContextMenuHandler}
 
   ; set the uninstall size value
@@ -168,50 +166,7 @@ SectionEnd
 
 Section "Uninstall"
 
-  ${DisableX64FSRedirection}
-  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
-
-  /* remove useless registry settings */
-  ${Unless} ${Silent}
-  ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
-  ${Else}
-  ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
-  ${EndUnless}
-
-  DetailPrint "Remove program files..."
-  Delete "$INSTDIR\LICENSE.TXT"
-  Delete "$INSTDIR\CREDITS.TXT"
-  Delete "$INSTDIR\HISTORY.TXT"
-  Delete "$INSTDIR\README.TXT"
-
-  Delete "$INSTDIR\uninstall.exe"
-  RMDir /r "$INSTDIR\options"
-  RMDir $INSTDIR
-
-  Delete "$SYSDIR\ud-boot-time.cmd"
-  Delete "$SYSDIR\boot-config.cmd"
-  Delete "$SYSDIR\boot-off.cmd"
-  Delete "$SYSDIR\boot-on.cmd"
-  Delete "$SYSDIR\bootexctrl.exe"
-  Delete "$SYSDIR\defrag_native.exe"
-
-  Delete "$SYSDIR\ud-help.cmd"
-  Delete "$SYSDIR\udctxhandler.cmd"
-  Delete "$SYSDIR\udefrag-kernel.dll"
-  Delete "$SYSDIR\udefrag.dll"
-  Delete "$SYSDIR\udefrag.exe"
-  Delete "$SYSDIR\zenwinx.dll"
-  Delete "$SYSDIR\hibernate4win.exe"
-
-  DetailPrint "Clear registry..."
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-
-  DetailPrint "Uninstall the context menu handler..."
-  DeleteRegKey HKCR "Drive\shell\udefrag"
-  DeleteRegKey HKCR "Folder\shell\udefrag"
-  DeleteRegKey HKCR "*\shell\udefrag"
-
-  ${EnableX64FSRedirection}
+  ${UninstallTheProgram}
 
 SectionEnd
 

@@ -29,8 +29,12 @@
 *  ULTRADFGARCH=<i386 | amd64 | ia64>
 */
 
-!ifndef ULTRADFGVER | ULTRADFGARCH
-!error "One of the predefined symbols missing!"
+!ifndef ULTRADFGVER
+!error "ULTRADFGVER parameter must be specified on the command line!"
+!endif
+
+!ifndef ULTRADFGARCH
+!error "ULTRADFGARCH parameter must be specified on the command line!"
 !endif
 
 !define MODERN_UI
@@ -280,18 +284,6 @@ Section "Ultra Defrag core files (required)" SecCore
   SetOutPath "$INSTDIR\scripts"
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
-  ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css"
-    File "${ROOTDIR}\src\scripts\udreport.css"
-  ${EndUnless}
-  SetOutPath "$INSTDIR\options"
-  ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua"
-    File "${ROOTDIR}\src\scripts\udreportopts.lua"
-  ${Else}
-    ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua.old"
-      Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.old"
-      File "${ROOTDIR}\src\scripts\udreportopts.lua"
-    ${EndUnless}
-  ${EndUnless}
 
   ; install LanguagePack
   call install_langpack
@@ -376,16 +368,7 @@ Section "Ultra Defrag core files (required)" SecCore
   WriteUninstaller "uninstall.exe"
 
   ${RemoveObsoleteFiles}
-
-  ; create boot time script if it doesn't exists
-  SetOutPath "$SYSDIR"
-  ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
-    File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
-  ${EndUnless}
-  
-  ; write default GUI settings to guiopts.lua file
-  SetOutPath "$INSTDIR"
-  ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
+  ${InstallConfigFiles}
 
   ; set the uninstall size value
   ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
@@ -525,71 +508,7 @@ FunctionEnd
 
 Section "Uninstall"
 
-  ${DisableX64FSRedirection}
-  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
-
-  DetailPrint "Remove shortcuts..."
-  SetShellVarContext all
-  RMDir /r "$SMPROGRAMS\UltraDefrag"
-  Delete "$DESKTOP\UltraDefrag.lnk"
-  Delete "$QUICKLAUNCH\UltraDefrag.lnk"
-
-  /* remove useless registry settings */
-  ${Unless} ${Silent}
-  ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
-  ${Else}
-  ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
-  ${EndUnless}
-
-  DetailPrint "Remove program files..."
-  Delete "$INSTDIR\LICENSE.TXT"
-  Delete "$INSTDIR\CREDITS.TXT"
-  Delete "$INSTDIR\HISTORY.TXT"
-  Delete "$INSTDIR\README.TXT"
-  Delete "$INSTDIR\ultradefrag.exe"
-  Delete "$INSTDIR\udefrag-gui-config.exe"
-  Delete "$INSTDIR\uninstall.exe"
-  Delete "$INSTDIR\LanguageSelector.exe"
-
-  Delete "$INSTDIR\ud_i18n.lng"
-  Delete "$INSTDIR\ud_config_i18n.lng"
-
-  RMDir /r "$INSTDIR\scripts"
-  RMDir /r "$INSTDIR\handbook"
-  RMDir /r "$INSTDIR\i18n"
-  RMDir /r "$INSTDIR\options"
-  RMDir $INSTDIR
-
-  Delete "$SYSDIR\ud-boot-time.cmd"
-  Delete "$SYSDIR\boot-config.cmd"
-  Delete "$SYSDIR\boot-off.cmd"
-  Delete "$SYSDIR\boot-on.cmd"
-  Delete "$SYSDIR\bootexctrl.exe"
-  Delete "$SYSDIR\defrag_native.exe"
-  Delete "$SYSDIR\lua5.1a.dll"
-  Delete "$SYSDIR\lua5.1a.exe"
-  Delete "$SYSDIR\lua5.1a_gui.exe"
-  Delete "$SYSDIR\ud-help.cmd"
-  Delete "$SYSDIR\udctxhandler.cmd"
-  Delete "$SYSDIR\udefrag-kernel.dll"
-  Delete "$SYSDIR\udefrag.dll"
-  Delete "$SYSDIR\udefrag.exe"
-  Delete "$SYSDIR\wgx.dll"
-  Delete "$SYSDIR\zenwinx.dll"
-  Delete "$SYSDIR\hibernate4win.exe"
-
-  DetailPrint "Clear registry..."
-  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-  DeleteRegKey HKLM "Software\UltraDefrag"
-
-  DetailPrint "Uninstall the context menu handler..."
-  DeleteRegKey HKCR "Drive\shell\udefrag"
-  DeleteRegKey HKCR "Folder\shell\udefrag"
-  DeleteRegKey HKCR "*\shell\udefrag"
-
-  DeleteRegKey HKCR "LuaReport"
-  DeleteRegKey HKCR ".luar"
-  ${EnableX64FSRedirection}
+  ${UninstallTheProgram}
 
 SectionEnd
 

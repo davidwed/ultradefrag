@@ -138,7 +138,7 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
-!macro RemoveObsoleteFilesMacro
+!macro RemoveObsoleteFiles
 
   ; remove files of previous installations
   DeleteRegKey HKLM "SYSTEM\UltraDefrag"
@@ -201,7 +201,117 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
+/**
+ * This procedure installs all configuration
+ * files and upgrades already existing files
+ * if they are in obsolete format.
+ */
+!macro InstallConfigFiles
+
+  ; 1. install default boot time script if it is not installed yet
+  SetOutPath "$SYSDIR"
+  ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
+    File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
+  ${EndUnless}
+  
+  ; 2. install GUI related config files
+!ifndef MICRO_EDITION
+  ; A. install default CSS for file fragmentation reports
+  SetOutPath "$INSTDIR\scripts"
+  ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css"
+    File "${ROOTDIR}\src\scripts\udreport.css"
+  ${EndUnless}
+  ; B. install default report options
+  SetOutPath "$INSTDIR\options"
+  ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua"
+    File "${ROOTDIR}\src\scripts\udreportopts.lua"
+  ${Else}
+    ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua.old"
+      ; this sequence ensures that we have the file in recent format
+      Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.old"
+      File "${ROOTDIR}\src\scripts\udreportopts.lua"
+    ${EndUnless}
+  ${EndUnless}
+  ; C. write default GUI settings to guiopts.lua file
+  SetOutPath "$INSTDIR"
+  ; the options subdirectory must be already existing here
+  ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
+!endif
+
+!macroend
+
+;-----------------------------------------
+
+!macro UninstallTheProgram
+
+  ${DisableX64FSRedirection}
+  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
+  
+!ifndef MICRO_EDITION
+  DetailPrint "Remove shortcuts..."
+  SetShellVarContext all
+  RMDir /r "$SMPROGRAMS\UltraDefrag"
+  Delete "$DESKTOP\UltraDefrag.lnk"
+  Delete "$QUICKLAUNCH\UltraDefrag.lnk"
+!endif
+
+  DetailPrint "Deregister boot time defragmenter..."
+  ${Unless} ${Silent}
+  ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
+  ${Else}
+  ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
+  ${EndUnless}
+
+  DetailPrint "Remove installation directory..."
+  RMDir /r $INSTDIR
+
+  DetailPrint "Cleanup system directory..."
+  Delete "$SYSDIR\boot-config.cmd"
+  Delete "$SYSDIR\boot-off.cmd"
+  Delete "$SYSDIR\boot-on.cmd"
+  Delete "$SYSDIR\ud-boot-time.cmd"
+  Delete "$SYSDIR\ud-help.cmd"
+  Delete "$SYSDIR\udctxhandler.cmd"
+
+  Delete "$SYSDIR\bootexctrl.exe"
+  Delete "$SYSDIR\defrag_native.exe"
+  Delete "$SYSDIR\hibernate4win.exe"
+  Delete "$SYSDIR\udefrag.exe"
+
+  Delete "$SYSDIR\udefrag.dll"
+  Delete "$SYSDIR\udefrag-kernel.dll"
+  Delete "$SYSDIR\zenwinx.dll"
+
+!ifndef MICRO_EDITION
+  Delete "$SYSDIR\lua5.1a.dll"
+  Delete "$SYSDIR\lua5.1a.exe"
+  Delete "$SYSDIR\lua5.1a_gui.exe"
+  Delete "$SYSDIR\wgx.dll"
+!endif
+
+  DetailPrint "Cleanup registry..."
+  DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+  DeleteRegKey HKLM "Software\UltraDefrag"
+
+  DetailPrint "Uninstall the context menu handler..."
+  DeleteRegKey HKCR "Drive\shell\udefrag"
+  DeleteRegKey HKCR "Folder\shell\udefrag"
+  DeleteRegKey HKCR "*\shell\udefrag"
+
+!ifndef MICRO_EDITION
+  DetailPrint "Deregister .luar file extension..."
+  DeleteRegKey HKCR "LuaReport"
+  DeleteRegKey HKCR ".luar"
+!endif
+  ${EnableX64FSRedirection}
+
+!macroend
+
+;-----------------------------------------
+
 !define CheckWinVersion "!insertmacro CheckWinVersion"
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
-!define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFilesMacro"
+!define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFiles"
+!define InstallConfigFiles "!insertmacro InstallConfigFiles"
 !define InstallNativeDefragmenter "!insertmacro InstallNativeDefragmenter"
+!define UninstallTheProgram "!insertmacro UninstallTheProgram"
