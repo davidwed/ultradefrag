@@ -144,7 +144,7 @@ goto :EOF
     set /a total+=size
     
     if %count% EQU 1 goto :skip
-        if %rest4% EQU 0 set dest=%~1\folder_%total%
+        if %rest4% EQU 0 set dest=%~1\folder_%size%
         if %rest4% EQU 0 echo mkdir "%dest%"
         if %DryRun% == 0 if %rest4% EQU 0 mkdir "%dest%"
     :skip
