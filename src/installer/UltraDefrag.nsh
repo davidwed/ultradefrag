@@ -94,10 +94,16 @@ Var AtLeastXP
 
 !macro InstallNativeDefragmenter
 
-  ; always the latest version of the native app must be used
   ClearErrors
   Delete "$SYSDIR\defrag_native.exe"
   ${If} ${Errors}
+      /*
+      * If the native app depends from native DLL's
+      * it may cause BSOD in case of inconsistency
+      * between their versions. Therefore, we must
+      * force upgrade to the latest monolythic native
+      * defragmenter.
+      */
       MessageBox MB_OK|MB_ICONSTOP \
        "Cannot update $SYSDIR\defrag_native.exe file!" \
        /SD IDOK
@@ -309,9 +315,63 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
+!macro WriteTheUninstaller
+
+  push $R0
+
+  DetailPrint "Write the uninstall keys..."
+  SetOutPath "$INSTDIR"
+  StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+!ifdef MICRO_EDITION
+  WriteRegStr   HKLM $R0 "DisplayName"     "Ultra Defragmenter Micro Edition"
+!else
+  WriteRegStr   HKLM $R0 "DisplayName"     "Ultra Defragmenter"
+!endif
+  WriteRegStr   HKLM $R0 "DisplayVersion"  "${ULTRADFGVER}"
+  WriteRegStr   HKLM $R0 "Publisher"       "UltraDefrag Development Team"
+  WriteRegStr   HKLM $R0 "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"
+  WriteRegStr   HKLM $R0 "UninstallString" '"$INSTDIR\uninstall.exe"'
+  WriteRegStr   HKLM $R0 "DisplayIcon"     '"$INSTDIR\uninstall.exe"'
+  WriteRegStr   HKLM $R0 "InstallLocation" '"$INSTDIR"'
+  WriteRegDWORD HKLM $R0 "NoModify" 1
+  WriteRegDWORD HKLM $R0 "NoRepair" 1
+  WriteUninstaller "uninstall.exe"
+  
+  ${UpdateUninstallSizeValue}
+  
+  pop $R0
+
+!macroend
+
+;-----------------------------------------
+
+!macro UpdateUninstallSizeValue
+
+  push $R0
+  push $0
+  push $1
+  push $2
+
+  ; update the uninstall size value
+  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
+  IntFmt $0 "0x%08X" $0
+  StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+  WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
+  
+  pop $2
+  pop $1
+  pop $0
+  pop $R0
+
+!macroend
+
+;-----------------------------------------
+
 !define CheckWinVersion "!insertmacro CheckWinVersion"
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
 !define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFiles"
 !define InstallConfigFiles "!insertmacro InstallConfigFiles"
 !define InstallNativeDefragmenter "!insertmacro InstallNativeDefragmenter"
 !define UninstallTheProgram "!insertmacro UninstallTheProgram"
+!define WriteTheUninstaller "!insertmacro WriteTheUninstaller"
+!define UpdateUninstallSizeValue "!insertmacro UpdateUninstallSizeValue"

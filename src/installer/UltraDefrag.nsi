@@ -352,28 +352,10 @@ Section "Ultra Defrag core files (required)" SecCore
     WriteRegStr HKCR "LanguagePack\DefaultIcon" "" "shell32.dll,0"
     WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
   ${EndIf}
-
-  DetailPrint "Write the uninstall keys..."
-  SetOutPath "$INSTDIR"
-  StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-  WriteRegStr   HKLM $R0 "DisplayName"     "Ultra Defragmenter"
-  WriteRegStr   HKLM $R0 "DisplayVersion"  "${ULTRADFGVER}"
-  WriteRegStr   HKLM $R0 "Publisher"       "UltraDefrag Development Team"
-  WriteRegStr   HKLM $R0 "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"
-  WriteRegStr   HKLM $R0 "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr   HKLM $R0 "DisplayIcon"     '"$INSTDIR\uninstall.exe"'
-  WriteRegStr   HKLM $R0 "InstallLocation" '"$INSTDIR"'
-  WriteRegDWORD HKLM $R0 "NoModify" 1
-  WriteRegDWORD HKLM $R0 "NoRepair" 1
-  WriteUninstaller "uninstall.exe"
-
+  
+  ${WriteTheUninstaller}
   ${RemoveObsoleteFiles}
   ${InstallConfigFiles}
-
-  ; set the uninstall size value
-  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
-  IntFmt $0 "0x%08X" $0
-  WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
 
   ${EnableX64FSRedirection}
   pop $R0
@@ -383,19 +365,16 @@ SectionEnd
 Section "Documentation" SecDocs
 
   push $R0
+  ${DisableX64FSRedirection}
 
   DetailPrint "Install documentation..."
-  ${DisableX64FSRedirection}
-  ; remove the old handbook
+  ; update the handbook
   RMDir /r "$INSTDIR\handbook"
   SetOutPath "$INSTDIR\handbook"
   File "${ROOTDIR}\doc\html\handbook\doxy-doc\html\*.*"
 
   ; update the uninstall size value
-  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
-  IntFmt $0 "0x%08X" $0
-  StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-  WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
+  ${UpdateUninstallSizeValue}
 
   ${EnableX64FSRedirection}
   pop $R0

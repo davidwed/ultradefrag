@@ -135,29 +135,10 @@ Section "Ultra Defrag core files (required)" SecCore
   File "zenwinx.dll"
   File /oname=hibernate4win.exe "hibernate.exe"
 
-  DetailPrint "Write the uninstall keys..."
-  SetOutPath "$INSTDIR"
-  StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-  WriteRegStr   HKLM $R0 "DisplayName"     "Ultra Defragmenter Micro Edition"
-  WriteRegStr   HKLM $R0 "DisplayVersion"  "${ULTRADFGVER}"
-  WriteRegStr   HKLM $R0 "Publisher"       "UltraDefrag Development Team"
-  WriteRegStr   HKLM $R0 "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"
-  WriteRegStr   HKLM $R0 "UninstallString" '"$INSTDIR\uninstall.exe"'
-  WriteRegStr   HKLM $R0 "DisplayIcon"     '"$INSTDIR\uninstall.exe"'
-  WriteRegStr   HKLM $R0 "InstallLocation" '"$INSTDIR"'
-  WriteRegDWORD HKLM $R0 "NoModify" 1
-  WriteRegDWORD HKLM $R0 "NoRepair" 1
-  WriteUninstaller "uninstall.exe"
-
+  ${WriteTheUninstaller}
   ${RemoveObsoleteFiles}
   ${InstallConfigFiles}
   ${SetContextMenuHandler}
-
-  ; set the uninstall size value
-  ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
-  IntFmt $0 "0x%08X" $0
-  WriteRegDWORD HKLM $R0 "EstimatedSize" "$0"
-
   ${EnableX64FSRedirection}
 
   pop $R0
