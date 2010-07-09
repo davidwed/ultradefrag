@@ -50,7 +50,7 @@
  * we are using the Microsoft C compiler included in Windows Server 2003 DDK.
  *
  * When you build dynamic libraries from the MinGW Developer Studio, note that the resulting 
- * *.a files are invalid. This is because I don't know how to specify linker options properly
+ * *.a files are invalid. This is because we don't know how to specify linker options properly
  * in Developer Studio's project files.
  *
  * You can also use the Microsoft Visual Studio 6.0 for the compilation, though
@@ -60,7 +60,7 @@
  * To achieve better compression we are using also <a href="http://upx.sf.net/">UPX</a> to
  * compress an installer by adding the following line to nsisconf.nsh file:
 @verbatim
-!packhdr temp.dat '"C:\WINDOWS\upx" -9 -q temp.dat'
+!packhdr temp.dat '"C:\WINDOWS\upx" --best -q temp.dat'
 @endverbatim
  *
  * This command is optional, but it really reduces the size of the installer.
