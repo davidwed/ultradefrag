@@ -92,8 +92,10 @@ Function .onInit
 
   ${EnableX64FSRedirection}
   InitPluginsDir
+
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
+
   ${EnableX64FSRedirection}
 
 FunctionEnd
@@ -103,16 +105,16 @@ FunctionEnd
 Section "Ultra Defrag core files (required)" SecCore
 
   push $R0
+  ${DisableX64FSRedirection}
 
   SectionIn RO
-  AddSize 44 /* for the components installed in system directories */
+  ;AddSize 44 /* for the components installed in system directories */
   
   ;;;DetailPrint "Uninstall the previous version..."
   /* waiting fails here => upgrade without deinstallation is preferred */
   ;;; ExecWait '"$INSTDIR\uninstall.exe" /S'
 
   DetailPrint "Install core files..."
-  ${DisableX64FSRedirection}
   SetOutPath $INSTDIR
   File "${ROOTDIR}\src\LICENSE.TXT"
   File "${ROOTDIR}\src\CREDITS.TXT"
@@ -139,8 +141,8 @@ Section "Ultra Defrag core files (required)" SecCore
   ${RemoveObsoleteFiles}
   ${InstallConfigFiles}
   ${SetContextMenuHandler}
-  ${EnableX64FSRedirection}
 
+  ${EnableX64FSRedirection}
   pop $R0
 
 SectionEnd

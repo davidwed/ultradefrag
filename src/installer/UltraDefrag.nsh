@@ -144,6 +144,55 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
+!macro RegisterFileExtensions
+
+  push $R0
+  push $0
+
+  DetailPrint "Register file extensions..."
+  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
+  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
+
+  WriteRegStr HKCR ".luar" "" "LuaReport"
+  WriteRegStr HKCR "LuaReport" "" "Lua Report"
+  WriteRegStr HKCR "LuaReport\DefaultIcon" "" "lua5.1a_gui.exe,1"
+  WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $WINDIR -v"
+
+  ClearErrors
+  ReadRegStr $R0 HKCR ".lua" ""
+  ${If} ${Errors}
+    WriteRegStr HKCR ".lua" "" "Lua.Script"
+    WriteRegStr HKCR "Lua.Script" "" "Lua Script File"
+    WriteRegStr HKCR "Lua.Script\shell\Edit" "" "Edit Script"
+    WriteRegStr HKCR "Lua.Script\shell\Edit\command" "" "notepad.exe %1"
+  ${Else}
+    StrCpy $0 $R0
+    ClearErrors
+    ReadRegStr $R0 HKCR "$0\shell\Edit" ""
+    ${If} ${Errors}
+      WriteRegStr HKCR "$0\shell\Edit" "" "Edit Script"
+      WriteRegStr HKCR "$0\shell\Edit\command" "" "notepad.exe %1"
+    ${EndIf}
+  ${EndIf}
+
+  ClearErrors
+  ReadRegStr $R0 HKCR ".lng" ""
+  ${If} ${Errors}
+    WriteRegStr HKCR ".lng" "" "LanguagePack"
+    WriteRegStr HKCR "LanguagePack" "" "Language Pack"
+    WriteRegStr HKCR "LanguagePack\shell\open" "" "Open"
+    WriteRegStr HKCR "LanguagePack\DefaultIcon" "" "shell32.dll,0"
+    WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
+  ${EndIf}
+  
+  pop $0
+  pop $R0
+
+!macroend
+
+;-----------------------------------------
+
 !macro RemoveObsoleteFiles
 
   ; remove files of previous installations
@@ -269,6 +318,7 @@ Var AtLeastXP
   ${EndUnless}
 
   DetailPrint "Remove installation directory..."
+  ; safe, because installation directory is predefined
   RMDir /r $INSTDIR
 
   DetailPrint "Cleanup system directory..."
@@ -371,6 +421,7 @@ Var AtLeastXP
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
 !define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFiles"
 !define InstallConfigFiles "!insertmacro InstallConfigFiles"
+!define RegisterFileExtensions "!insertmacro RegisterFileExtensions"
 !define InstallNativeDefragmenter "!insertmacro InstallNativeDefragmenter"
 !define UninstallTheProgram "!insertmacro UninstallTheProgram"
 !define WriteTheUninstaller "!insertmacro WriteTheUninstaller"

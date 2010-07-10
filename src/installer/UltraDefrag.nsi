@@ -270,12 +270,12 @@ FunctionEnd
 Section "Ultra Defrag core files (required)" SecCore
 
   push $R0
+  ${DisableX64FSRedirection}
 
   SectionIn RO
   ;AddSize 24 /* for the components installed in system directories (driver) */
 
   DetailPrint "Install core files..."
-  ${DisableX64FSRedirection}
   SetOutPath $INSTDIR
   File "${ROOTDIR}\src\LICENSE.TXT"
   File "${ROOTDIR}\src\CREDITS.TXT"
@@ -290,9 +290,8 @@ Section "Ultra Defrag core files (required)" SecCore
 
   ; install GUI apps to program's directory
   SetOutPath "$INSTDIR"
-  File "dfrg.exe"
   Delete "$INSTDIR\ultradefrag.exe"
-  Rename "$INSTDIR\dfrg.exe" "$INSTDIR\ultradefrag.exe"
+  File /oname=ultradefrag.exe "dfrg.exe"
   File "udefrag-gui-config.exe"
   File "LanguageSelector.exe"
 
@@ -316,43 +315,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File /oname=hibernate4win.exe "hibernate.exe"
   File "wgx.dll"
 
-  DetailPrint "Register file extensions..."
-  ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-  ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
-
-  WriteRegStr HKCR ".luar" "" "LuaReport"
-  WriteRegStr HKCR "LuaReport" "" "Lua Report"
-  WriteRegStr HKCR "LuaReport\DefaultIcon" "" "lua5.1a_gui.exe,1"
-  WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $WINDIR -v"
-
-  ClearErrors
-  ReadRegStr $R0 HKCR ".lua" ""
-  ${If} ${Errors}
-    WriteRegStr HKCR ".lua" "" "Lua.Script"
-    WriteRegStr HKCR "Lua.Script" "" "Lua Script File"
-    WriteRegStr HKCR "Lua.Script\shell\Edit" "" "Edit Script"
-    WriteRegStr HKCR "Lua.Script\shell\Edit\command" "" "notepad.exe %1"
-  ${Else}
-    StrCpy $0 $R0
-    ClearErrors
-    ReadRegStr $R0 HKCR "$0\shell\Edit" ""
-    ${If} ${Errors}
-      WriteRegStr HKCR "$0\shell\Edit" "" "Edit Script"
-      WriteRegStr HKCR "$0\shell\Edit\command" "" "notepad.exe %1"
-    ${EndIf}
-  ${EndIf}
-
-  ClearErrors
-  ReadRegStr $R0 HKCR ".lng" ""
-  ${If} ${Errors}
-    WriteRegStr HKCR ".lng" "" "LanguagePack"
-    WriteRegStr HKCR "LanguagePack" "" "Language Pack"
-    WriteRegStr HKCR "LanguagePack\shell\open" "" "Open"
-    WriteRegStr HKCR "LanguagePack\DefaultIcon" "" "shell32.dll,0"
-    WriteRegStr HKCR "LanguagePack\shell\open\command" "" "notepad.exe %1"
-  ${EndIf}
-  
+  ${RegisterFileExtensions}
   ${WriteTheUninstaller}
   ${RemoveObsoleteFiles}
   ${InstallConfigFiles}
