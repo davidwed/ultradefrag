@@ -19,7 +19,7 @@
  */
 
 /*
-* Installer source.
+* UltraDefrag regular installer.
 */
 
 /*
@@ -38,40 +38,21 @@
 !endif
 
 !define MODERN_UI
-
 ;!define SHOW_BOOTSPLASH
 
 !include "WinVer.nsh"
 !include "x64.nsh"
-
-; --- support command line parsing
-!include "FileFunc.nsh"
-!insertmacro GetParameters
-!insertmacro GetOptions
-
-!if ${ULTRADFGARCH} == 'i386'
-!define ROOTDIR "..\.."
-!else
-!define ROOTDIR "..\..\.."
-!endif
-
-!include ".\UltraDefrag.nsh"
-
-!ifndef MODERN_UI
-!system 'move /Y lang-classical.ini lang.ini'
-!endif
-
-;-----------------------------------------
-
 !ifdef MODERN_UI
   !include "MUI.nsh"
   !define MUI_ICON "udefrag-install.ico"
   !define MUI_UNICON "udefrag-uninstall.ico"
 !endif
 
-!macro LANG_PAGE
-  Page custom LangShow LangLeave ""
-!macroend
+!if ${ULTRADFGARCH} == 'i386'
+!define ROOTDIR "..\.."
+!else
+!define ROOTDIR "..\..\.."
+!endif
 
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'
@@ -102,7 +83,10 @@ VIAddVersionKey "FileDescription" "Ultra Defragmenter Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
-ReserveFile "lang.ini"
+!include ".\UltraDefrag.nsh"
+!include ".\LanguageSelector.nsh"
+
+;-----------------------------------------
 
 !ifdef MODERN_UI
   !define MUI_WELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
@@ -138,69 +122,6 @@ ReserveFile "lang.ini"
 ;-----------------------------------------
 
 Var ShowBootsplash
-Var LanguagePack
-
-;-----------------------------------------
-
-Function LangShow
-
-  push $R0
-  push $R1
-  push $R2
-  
-!ifdef MODERN_UI
-  !insertmacro MUI_HEADER_TEXT "Language Packs" \
-      "Choose which language pack you want to install."
-!endif
-  SetOutPath $PLUGINSDIR
-  File "lang.ini"
-
-  ; --- get language from registry
-  ClearErrors
-  ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
-  ${Unless} ${Errors}
-    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
-  ${EndUnless}
-
-  ; --- get language from command line
-  ${GetParameters} $R1
-  ClearErrors
-  ${GetOptions} $R1 /LANG= $R2
-  ${Unless} ${Errors}
-    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R2
-  ${EndUnless}
-  
-  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
-  pop $R0
-  InstallOptions::show
-  pop $R0
-  
-  pop $R2
-  pop $R1
-  pop $R0
-  Abort
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function LangLeave
-
-  push $R0
-
-  ReadINIStr $R0 "$PLUGINSDIR\lang.ini" "Settings" "State"
-  ${If} $R0 != "0"
-    pop $R0
-    Abort
-  ${EndIf}
-
-  ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
-
-  pop $R0
-
-FunctionEnd
-
-;-----------------------------------------
 
 Function ShowBootSplash
 
@@ -219,50 +140,6 @@ Function ShowBootSplash
   ${EndUnless}
 !endif
 
-FunctionEnd
-
-;-----------------------------------------
-
-Function install_langpack
-
-  push $R0
-
-  SetOutPath $INSTDIR
-  Delete "$INSTDIR\ud_i18n.lng"
-  Delete "$INSTDIR\ud_config_i18n.lng"
-
-    StrCpy $R0 $LanguagePack
-    ${Select} $LanguagePack
-      ${Case} "English (US)"
-        StrCpy $R0 "English(US)"
-      ${Case} "Chinese (Simplified)"
-        StrCpy $R0 "Chinese(Simplified)"
-      ${Case} "Chinese (Traditional)"
-        StrCpy $R0 "Chinese(Traditional)"
-      ${Case} "Filipino (Tagalog)"
-        StrCpy $R0 "Filipino(Tagalog)"
-      ${Case} "French (FR)"
-        StrCpy $R0 "French(FR)"
-      ${Case} "Portuguese (BR)"
-        StrCpy $R0 "Portuguese(BR)"
-      ${Case} "Spanish (AR)"
-        StrCpy $R0 "Spanish(AR)"
-    ${EndSelect}
-
-    RMDir /r "$INSTDIR\i18n\gui"
-    SetOutPath "$INSTDIR\i18n\gui"
-    File "${ROOTDIR}\src\gui\i18n\*.GUI"
-    CopyFiles /SILENT "$INSTDIR\i18n\gui\$R0.GUI" "$INSTDIR\ud_i18n.lng"
-
-    RMDir /r "$INSTDIR\i18n\gui-config"
-    SetOutPath "$INSTDIR\i18n\gui-config"
-    File "${ROOTDIR}\src\udefrag-gui-config\i18n\*.Config"
-    CopyFiles /SILENT "$INSTDIR\i18n\gui-config\$R0.Config" "$INSTDIR\ud_config_i18n.lng"
-
-    WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
-    
-  pop $R0
-  
 FunctionEnd
 
 ;------------------------------------------
@@ -285,8 +162,7 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
 
-  ; install LanguagePack
-  call install_langpack
+  ${InstallLanguagePack}
 
   ; install GUI apps to program's directory
   SetOutPath "$INSTDIR"
@@ -411,37 +287,12 @@ Function .onInit
 
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
-  push $R1
-  push $R2
 
-  /* variables initialization */
+  ${InitLanguageSelector}
+  
   StrCpy $ShowBootsplash 1
-
-  StrCpy $LanguagePack "English (US)"
-
-  ; --- get language from registry
-  ClearErrors
-  ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
-  ${Unless} ${Errors}
-    StrCpy $LanguagePack $R1
-  ${EndUnless}
-
-  ; --- get language from command line
-  ; --- allows silent installation with: installer.exe /S /LANG="German"
-  ${GetParameters} $R1
-  ClearErrors
-  ${GetOptions} $R1 /LANG= $R2
-  ${Unless} ${Errors}
-    StrCpy $LanguagePack $R2
-  ${EndUnless}
-
   call ShowBootSplash
 
-!ifdef MODERN_UI
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
-!endif
-  pop $R2
-  pop $R1
   ${EnableX64FSRedirection}
 
 FunctionEnd

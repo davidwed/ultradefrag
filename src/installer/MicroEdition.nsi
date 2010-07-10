@@ -18,7 +18,7 @@
  */
 
 /*
- *  UltraDefrag Micro Edition Installer.
+ *  UltraDefrag Micro Edition installer.
  */
 
 /*

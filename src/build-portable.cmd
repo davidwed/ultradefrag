@@ -50,6 +50,7 @@ copy /Y gui\i18n\*.GUI %PORTABLE_DIR%\i18n\gui\
 copy /Y udefrag-gui-config\i18n\*.Config %PORTABLE_DIR%\i18n\gui-config\
 
 copy /Y installer\LanguageSelector.nsi bin\
+copy /Y installer\LanguageSelector.nsh bin\
 copy /Y installer\lang.ini bin\
 copy /Y installer\LanguageSelector.ico bin\
 

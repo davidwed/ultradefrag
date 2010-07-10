@@ -92,7 +92,7 @@ cd .\bin
 if %UD_BLD_FLG_BUILD_X86% EQU 0 goto build_amd64_installer
 
 copy /Y ..\installer\UltraDefrag.nsi .\
-copy /Y ..\installer\UltraDefrag.nsh .\
+copy /Y ..\installer\*.nsh .\
 copy /Y ..\installer\*.ico .\
 copy /Y ..\installer\lang.ini .\
 copy /Y ..\installer\lang-classical.ini .\
@@ -112,7 +112,7 @@ if %errorlevel% neq 0 goto fail
 if %UD_BLD_FLG_BUILD_AMD64% equ 0 goto build_ia64_installer
 
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
-copy /Y ..\installer\UltraDefrag.nsh .\amd64\
+copy /Y ..\installer\*.nsh .\amd64\
 copy /Y ..\installer\*.ico .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
 copy /Y ..\installer\lang-classical.ini .\amd64\
@@ -130,7 +130,7 @@ cd..
 if %UD_BLD_FLG_BUILD_IA64% equ 0 goto build_source_package
 
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
-copy /Y ..\installer\UltraDefrag.nsh .\ia64\
+copy /Y ..\installer\*.nsh .\ia64\
 copy /Y ..\installer\*.ico .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
 copy /Y ..\installer\lang-classical.ini .\ia64\

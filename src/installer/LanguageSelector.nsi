@@ -18,7 +18,7 @@
  */
 
 /*
-* Language Selector source.
+* UltraDefrag Language Selector.
 */
 
 /*
@@ -38,16 +38,7 @@
   !include "MUI.nsh"
   !define MUI_ICON "LanguageSelector.ico"
 !endif
-
 !include "x64.nsh"
-
-!macro LANG_PAGE
-  Page custom LangShow LangLeave ""
-!macroend
-
-!ifndef MODERN_UI
-!system 'move /Y lang-classical.ini lang.ini'
-!endif
 
 ;-----------------------------------------
 Name "UltraDefrag Language Selector v${ULTRADFGVER}"
@@ -68,147 +59,24 @@ VIAddVersionKey "FileDescription" "UltraDefrag Language Selector"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
-ReserveFile "lang.ini"
+!define LANGUAGE_SELECTOR
+!include ".\LanguageSelector.nsh"
+
+;-----------------------------------------
+
+; the Language Selector consists of a single page
+!insertmacro LANG_PAGE
 
 !ifdef MODERN_UI
-  !insertmacro LANG_PAGE
-  ;!insertmacro MUI_PAGE_FINISH
-
   !insertmacro MUI_LANGUAGE "English"
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-!else
-  !insertmacro LANG_PAGE
 !endif
 
 ;-----------------------------------------
-
-Var LanguagePack
-
-;-----------------------------------------
-
-Function install_langpack
-
-  push $R0
-
-  Delete "$EXEDIR\ud_i18n.lng"
-  Delete "$EXEDIR\ud_config_i18n.lng"
-
-    StrCpy $R0 $LanguagePack
-    ${Select} $LanguagePack
-      ${Case} "English (US)"
-        StrCpy $R0 "English(US)"
-      ${Case} "Chinese (Simplified)"
-        StrCpy $R0 "Chinese(Simplified)"
-      ${Case} "Chinese (Traditional)"
-        StrCpy $R0 "Chinese(Traditional)"
-      ${Case} "Filipino (Tagalog)"
-        StrCpy $R0 "Filipino(Tagalog)"
-      ${Case} "French (FR)"
-        StrCpy $R0 "French(FR)"
-      ${Case} "Portuguese (BR)"
-        StrCpy $R0 "Portuguese(BR)"
-      ${Case} "Spanish (AR)"
-        StrCpy $R0 "Spanish(AR)"
-    ${EndSelect}
-    
-    CopyFiles /SILENT "$EXEDIR\i18n\gui\$R0.GUI" "$EXEDIR\ud_i18n.lng"
-    CopyFiles /SILENT "$EXEDIR\i18n\gui-config\$R0.Config" "$EXEDIR\ud_config_i18n.lng"
-
-    !ifdef ISPORTABLE
-      WriteINIStr "$EXEDIR\PORTABLE.X" "i18n" "Language" $LanguagePack
-    !else
-      WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
-    !endif
-
-  pop $R0
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function LangShow
-
-  push $R0
-
-!ifdef MODERN_UI
-  !insertmacro MUI_HEADER_TEXT "Language Selector" \
-      "Choose which language you want to use with Ultra Defragmenter."
-!endif
-  SetOutPath $PLUGINSDIR
-  File "lang.ini"
-
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "Title" "UltraDefrag Language Selector v${ULTRADFGVER}"
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "NextButtonText" "OK"
-
-!ifdef ISPORTABLE
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $LanguagePack
-!else
-  ; --- get language from registry
-  ClearErrors
-  ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
-  ${Unless} ${Errors}
-    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
-  ${EndUnless}
-!endif
-
-  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
-  pop $R0
-  InstallOptions::show
-  pop $R0
-
-  pop $R0
-  Abort
-
-FunctionEnd
-
-;-----------------------------------------
-
-Function LangLeave
-
-  push $R0
-
-  ReadINIStr $R0 "$PLUGINSDIR\lang.ini" "Settings" "State"
-  ${If} $R0 != "0"
-    pop $R0
-    Abort
-  ${EndIf}
-
-  ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
-
-  call install_langpack
-  
-  pop $R0
-
-FunctionEnd
-
-;----------------------------------------------
 
 Function .onInit
 
-  ${EnableX64FSRedirection}
-  InitPluginsDir
-  ${DisableX64FSRedirection}
-  StrCpy $LanguagePack "English (US)"
-  push $R1
-  
-!ifdef ISPORTABLE
-  ${If} ${FileExists} "$EXEDIR\PORTABLE.X"
-    ReadINIStr $LanguagePack "$EXEDIR\PORTABLE.X" "i18n" "Language"
-  ${EndIf}
-!else
-  ; --- get language from registry
-  ClearErrors
-  ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
-  ${Unless} ${Errors}
-    StrCpy $LanguagePack $R1
-  ${EndUnless}
-!endif
-
-!ifdef MODERN_UI
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
-!endif
-
-  pop $R1
+  ${InitLanguageSelector}
   ${EnableX64FSRedirection}
 
 FunctionEnd
