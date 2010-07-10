@@ -18,7 +18,20 @@
  */
 
 /*
-* Universal code for both main and micro edition installers.
+* Universal code for both regular and micro edition installers.
+*/
+
+!ifndef _ULTRA_DEFRAG_NSH_
+!define _ULTRA_DEFRAG_NSH_
+
+/*
+* 1. ${DisableX64FSRedirection} is required before
+*    all macro except of CheckWinVersion,
+*    SetContextMenuHandler, UninstallTheProgram.
+* 2. The most macro requires $INSTDIR variable
+*    to be set and plugins directory to be initialized.
+*    It is safe to do both initialization actions
+*    in .onInit function.
 */
 
 Var AtLeastXP
@@ -417,12 +430,6 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
-/*
-* ${DisableX64FSRedirection} is required before
-* all macroses except of CheckWinVersion,
-* SetContextMenuHandler, UninstallTheProgram.
-*/
-
 !define CheckWinVersion "!insertmacro CheckWinVersion"
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
 !define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFiles"
@@ -432,3 +439,5 @@ Var AtLeastXP
 !define UninstallTheProgram "!insertmacro UninstallTheProgram"
 !define WriteTheUninstaller "!insertmacro WriteTheUninstaller"
 !define UpdateUninstallSizeValue "!insertmacro UpdateUninstallSizeValue"
+
+!endif /* _ULTRA_DEFRAG_NSH_ */
