@@ -8,16 +8,17 @@ General Information:
 
     The following volumes are used:
 
-        1) O: ... FAT
-        2) P: ... FAT32
-        3) Q: ... NTFS
-        4) R: ... NTFS with compression enabled
-        5) S: ... NTFS with 25% of compressed files, which mimics a regular system disk
-        6) T: ... UDF v1.02
-        7) U: ... UDF v1.50
-        8) V: ... UDF v2.00
-        9) W: ... UDF v2.01
-       10) X: ... UDF v2.50
+        1) L: ... FAT
+        2) M: ... FAT32
+        3) O: ... NTFS
+        4) P: ... NTFS with compression enabled
+        5) Q: ... NTFS with 25% of compressed files, which mimics a regular system disk
+        6) R: ... UDF v1.02
+        7) S: ... UDF v1.50
+        8) T: ... UDF v2.00
+        9) U: ... UDF v2.01
+       10) V: ... UDF v2.50
+       11) W: ... UDF v2.50 with duplicated metadata
 
     The fragmentation utility from http://www.mydefrag.com/ is used to create
     fragmented files.
@@ -48,9 +49,9 @@ Setup:
            This is done by changing the definition of the "MixedVolume" variable,
            which contains a drive letter (Example: I:).
            If you do not like to create a mixed drive change the line to read:
-                set MixedVolume=
+           set MixedVolume=
 
-		c) UDF volumes are only supported on Vista and higher
+	c) UDF volumes are only supported on Vista and higher
 
     3) CHKDSK is executed before and after the fragmented files creation process,
        to make sure the volume is consistent.

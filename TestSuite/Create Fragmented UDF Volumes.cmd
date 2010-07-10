@@ -15,7 +15,7 @@ set YES=J
 
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
-set ProcessVolumes=T: U: V: W: X:
+set ProcessVolumes=R: S: T: U: V: W:
 
 echo.
 set /p answer="Enable DryRun (Y/[N])? "
@@ -78,6 +78,9 @@ goto :EOF
 	call :delay
 	set EnableDelay=1
 	
+	set mirror=
+	
+    if %fs_ver% == 2.50 set fs_ver=2.50 & set fs_ver_txt=250 & set mirror=/D
     if %fs_ver% == 2.01 set fs_ver=2.50 & set fs_ver_txt=250
     if %fs_ver% == 2.00 set fs_ver=2.01 & set fs_ver_txt=201
     if %fs_ver% == 1.50 set fs_ver=2.00 & set fs_ver_txt=200
@@ -92,8 +95,8 @@ goto :EOF
     if %DryRun% == 0 label %~1 Test%ex_type%v%fs_ver_txt%
 	
 	title Formatting Drive "%~1" ...
-	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver%
-	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% <"%TMP%\answers.txt"
+	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% %mirror%
+	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% %mirror% <"%TMP%\answers.txt"
 	
 	call :delay
 	

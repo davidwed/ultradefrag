@@ -15,13 +15,13 @@ set YES=J
 
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
-set ProcessVolumes=Q: R: S:
+set ProcessVolumes=O: P: Q:
 
 :: specify volume that should be compressed
-set CompressedVolume=R:
+set CompressedVolume=P:
 
 :: specify volume that should include compressed and regular files
-set MixedVolume=S:
+set MixedVolume=Q:
 
 echo.
 set /p answer="Enable DryRun (Y/[N])? "

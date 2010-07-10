@@ -15,7 +15,7 @@ set YES=J
 
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
-set ProcessVolumes=O: P:
+set ProcessVolumes=L: M:
 
 echo.
 set /p answer="Enable DryRun (Y/[N])? "
