@@ -45,13 +45,15 @@ Setup:
            which takes a list of drives separated by spaces (Example: G: H: I:)
 
         b) In the NTFS batch script you can additionally specify the drive for the mixed
-           files, regular and compressed.
+           files (regular and compressed).
            This is done by changing the definition of the "MixedVolume" variable,
            which contains a drive letter (Example: I:).
            If you do not like to create a mixed drive change the line to read:
            set MixedVolume=
+           
+           It is also possible to create a fully compressed NTFS volume, see "set CompressedVolume="
 
-	c) UDF volumes are only supported on Vista and higher
+        c) UDF volumes are only supported on Vista and higher
 
     3) CHKDSK is executed before and after the fragmented files creation process,
        to make sure the volume is consistent.
@@ -59,4 +61,4 @@ Setup:
     4) The volume is formated to the correct file system to always start with a fresh volume,
        so do not use volumes with existing data, since the data will be lost.
        In addition do only use volumes of 1GB in size, since quick format is not used, which
-       would only clear the file allocation table.
+       would only clear the file allocation table and would not detect bad clusters.
