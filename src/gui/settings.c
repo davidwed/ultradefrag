@@ -404,7 +404,7 @@ void InitFont(void)
 	memset(&lf,0,sizeof(LOGFONT)); /* FIXME: may fail on x64? */
 	/* default font should be Courier New 9pt */
 	(void)strcpy(lf.lfFaceName,"Courier New");
-	lf.lfHeight = DPI(-11);
+	lf.lfHeight = DPI(-12);
 	
 	/* load saved font settings */
 	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua",&lf))
