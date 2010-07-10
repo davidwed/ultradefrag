@@ -105,6 +105,31 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
+/**
+ * @note Disables the x64 file system redirection.
+ */
+!macro ShowBootSplash
+
+  ${Unless} ${Silent}
+    push $R0
+
+    ${EnableX64FSRedirection}
+    SetOutPath $PLUGINSDIR
+    File "${ROOTDIR}\src\installer\UltraDefrag.bmp"
+
+    advsplash::show 2000 400 0 -1 "$PLUGINSDIR\UltraDefrag"
+    pop $R0
+
+    Delete "$PLUGINSDIR\UltraDefrag.bmp"
+    ${DisableX64FSRedirection}
+
+    pop $R0
+  ${EndUnless}
+
+!macroend
+
+;-----------------------------------------
+
 !macro InstallNativeDefragmenter
 
   ClearErrors
@@ -431,6 +456,7 @@ Var AtLeastXP
 ;-----------------------------------------
 
 !define CheckWinVersion "!insertmacro CheckWinVersion"
+!define ShowBootSplash "!insertmacro ShowBootSplash"
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
 !define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFiles"
 !define InstallConfigFiles "!insertmacro InstallConfigFiles"
