@@ -28,7 +28,13 @@ if /i "%answer%" == "Y" (
 
 for /d %%D in ( "%ProgramFiles%\MyDefrag*" ) do set MyDefragDir=%%~D
 
-if %DryRun% == 0 if "%MyDefragDir%" == "" goto :EOF
+if %DryRun% == 0 if "%MyDefragDir%" == "" (
+    echo.
+    echo MyDefrag not installed ... aborting!
+    echo.
+    pause
+    goto :EOF
+)
 
 :DisplayMenu
 title UltraDefrag - Test Volume Fragmentation Creator
