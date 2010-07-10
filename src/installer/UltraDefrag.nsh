@@ -417,6 +417,12 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
+/*
+* ${DisableX64FSRedirection} is required before
+* all macroses except of CheckWinVersion,
+* SetContextMenuHandler, UninstallTheProgram.
+*/
+
 !define CheckWinVersion "!insertmacro CheckWinVersion"
 !define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
 !define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFiles"
