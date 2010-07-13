@@ -83,9 +83,7 @@ pause
 goto :EOF
 
 :FragmentDrive
-	set EnableDelay=0
-	call :delay
-	set EnableDelay=1
+	call :delay 0
 	
     set ex_type=
 	set c_switch=
@@ -104,13 +102,13 @@ goto :EOF
 	echo Executing ... format %~1 /FS:NTFS /V:TestNTFS%ex_type% %c_switch% /X
 	if %DryRun% == 0 echo. & format %~1 /FS:NTFS /V:TestNTFS%ex_type% %c_switch% /X <"%TMP%\answers.txt"
 	
-	call :delay
+	call :delay 5
 	
 	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f /x /v
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x /v
+	echo Executing ... chkdsk %~1 /r /f /v
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /v
 	
-	call :delay
+	call :delay 2
     
     set size=%InitialSize%
     set fragments=0
@@ -135,13 +133,13 @@ goto :EOF
 		echo Operation succeeded ...
 	)
 	
-	call :delay
+	call :delay 5
 	
 	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f /x /v
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x /v
+	echo Executing ... chkdsk %~1 /r /f /v
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /v
 	
-	call :delay
+	call :delay 2
 goto :EOF
 
 :answers
@@ -169,12 +167,13 @@ goto :EOF
 goto :EOF
 
 :delay
+    set /a seconds="%1 + 1"
 	echo.
-	if %EnableDelay% == 0 (
+	if %seconds% == 1 (
 		echo ============================================
 	) else (
 		echo --------------------------------------------
-		if %DryRun% == 0 ping -n 2 localhost >NUL
+		if %DryRun% == 0 ping -n %seconds% localhost >NUL
 	)
 	echo.
 goto :EOF

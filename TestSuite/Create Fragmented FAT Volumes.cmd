@@ -65,7 +65,7 @@ pause
 goto :DisplayMenu
 
 :StartProcess
-set /a InitialSize="23 - answer"
+set /a InitialSize="22 - answer"
 
 set ex_type=X
 
@@ -79,9 +79,7 @@ pause
 goto :EOF
 
 :FragmentDrive
-	set EnableDelay=0
-	call :delay
-	set EnableDelay=1
+	call :delay 0
 	
     if %ex_type% == FAT set ex_type=FAT32
     if %ex_type% == X   set ex_type=FAT
@@ -97,13 +95,13 @@ goto :EOF
 	echo Executing ... format %~1 /FS:%ex_type% /V:TEST%ex_type% /X
 	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:TEST%ex_type% /X <"%TMP%\answers.txt"
 	
-	call :delay
+	call :delay 5
 	
 	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f /x
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
+	echo Executing ... chkdsk %~1 /r /f
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f
 	
-	call :delay
+	call :delay 2
 	
     set size=%InitialSize%
     set fragments=0
@@ -128,13 +126,13 @@ goto :EOF
 		echo Operation succeeded ...
 	)
 	
-	call :delay
+	call :delay 5
 	
 	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f /x
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f /x
+	echo Executing ... chkdsk %~1 /r /f
+	if %DryRun% == 0 echo. & chkdsk %~1 /r /f
 	
-	call :delay
+	call :delay 2
 goto :EOF
 
 :answers
@@ -156,12 +154,13 @@ goto :EOF
 goto :EOF
 
 :delay
+    set /a seconds="%1 + 1"
 	echo.
-	if %EnableDelay% == 0 (
+	if %seconds% == 1 (
 		echo ============================================
 	) else (
 		echo --------------------------------------------
-		if %DryRun% == 0 ping -n 2 localhost >NUL
+		if %DryRun% == 0 ping -n %seconds% localhost >NUL
 	)
 	echo.
 goto :EOF
