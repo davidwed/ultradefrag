@@ -139,6 +139,7 @@
     jtl
     Ken Choy
     Klaas Nekeman
+    Krzysztof Świderski
     Latino
     Masao Kajiwara
     Patrick Paludan-Müller
