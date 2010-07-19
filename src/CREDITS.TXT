@@ -129,6 +129,7 @@
     Christoffer Ekberg
     Damjan Daljevic
     Dave MacBlack
+    Denis Jeličić
     Dmitri Arkhangelski
     Erwin Dokter
     Felipe
