@@ -48,7 +48,7 @@
  * This scheme runs automatically and saves a lot of my time, because I have
  * no need to start defragmenter manually anymore.
  *
- * The variable %often_accessed_folders% is just a placeholder.
+ * The variable <b>often_accessed_folders</b> is just a placeholder.
  * It must be created by yourself or replaced by a list of folders.
  * Example: documents;pictures;music
  *
