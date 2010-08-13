@@ -140,6 +140,7 @@
     jtl
     Ken Choy
     Klaas Nekeman
+    Konstantinos Kapoukranidis
     Krzysztof Świderski
     Latino
     Masao Kajiwara

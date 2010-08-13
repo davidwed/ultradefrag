@@ -26,7 +26,7 @@ HISTORY
     - added language selector to the GUI package
     - the following translations were updated:
 
-      Dutch, Danish, French, Russian, Turkish, Serbian, Polish, Croatian, 
+      Dutch, Danish, French, Russian, Turkish, Serbian, Polish, Croatian, Greek, 
 
 
   Version 4.3.0  2010-05-29
