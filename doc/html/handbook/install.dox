@@ -54,7 +54,7 @@
  * </span>
  *
  * Note that UltraDefrag installs to the Windows directory. This is caused by design,
- * because it highly simlifies the program development.
+ * because it highly simplifies the program development.
  * Moreover, this is impossible to run the boot time defragmenter without having its
  * files inside the system32 directory.
  *
