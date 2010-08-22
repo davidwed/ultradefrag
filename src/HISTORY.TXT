@@ -30,7 +30,8 @@ HISTORY
 
     - the following translations were updated:
 
-      Dutch, Danish, French, Russian, Turkish, Serbian, Polish, Croatian, Greek, 
+      Croatian, Danish, Dutch, French, Greek, Polish, Russian, Serbian,
+      Swedish, Turkish
 
 
   Version 4.3.0  2010-05-29

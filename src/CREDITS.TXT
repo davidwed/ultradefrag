@@ -145,6 +145,7 @@
     Krzysztof Świderski
     Latino
     Masao Kajiwara
+    Patrick Palm
     Patrick Paludan-Müller
     Per-Eric Jenshagen
     Pavel Kinkor
