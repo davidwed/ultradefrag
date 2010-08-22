@@ -54,6 +54,7 @@
     French          - Pascal Crozet, Stefan Pendl
     German          - Stefan Geuken, Stefan Pendl
     Greek           - Konstantinos Kapoukranidis, Stefan Pendl
+    Hindi           - Gaurav Chatterjee
     Hungarian       - Nagy Zsolt, Stefan Pendl
     Icelandic       - Stefan Pendl
     Italian         - Paolo Loggia, Stefan Pendl

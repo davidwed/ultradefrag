@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 4.4.0  2010-07-
+  Version 4.4.0  2010-09-
   ------------------------------------------------------------------------------
     RC1:
     - partial defragmentation was added to decrease number of fragments
@@ -24,6 +24,10 @@ HISTORY
       if "Lua for Windows" was installed
     - 10 seconds delay is skiped on boot time scan, if only one keyboard is present
     - added language selector to the GUI package
+    - the following translations were added:
+
+      Hindi
+
     - the following translations were updated:
 
       Dutch, Danish, French, Russian, Turkish, Serbian, Polish, Croatian, Greek, 
