@@ -75,8 +75,8 @@
  * The following keys are supported: -la, -l, -a, -o, --all, --all-fixed.
  * Multiple drive letters on a single command line are allowed.</dd>
  * <dt>pause</dt>
- * <dd>Pause the script execution for the specified time interval (in milliseconds).
- * For example, the command pause 1000 will pause execution for one second.</dd>
+ * <dd>Pause the script execution for the specified time interval (in milliseconds, 2147483647 maximum).
+ * For example, the command <b>pause 1000</b> will pause execution for one second.</dd>
  * <dt>shutdown</dt>
  * <dd>Halt the computer.</dd>
  * <dt>reboot</dt>
