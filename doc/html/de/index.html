@@ -171,59 +171,40 @@ wikispaces_color_fontsize = "83%";
         <h2>&nbsp;</h2>
 -->
 		<!-- release announcement -->
-		<h3>Neuigkeiten - UltraDefrag 4.3 wurde endlich freigegeben!</h3>
+		<h3>Neuigkeiten - UltraDefrag 4.4 RC1 wurde endlich freigegeben!</h3>
         <h2>&nbsp;</h2> 
         
-        <p>Wir möchten Euch die neueste Version von UltraDefrag vorstellen, welche viele Verbesserungen gegenüber
-        vorherigen stabilen Versionen enthält. Wir haben die letzten zwei Monate gemeinsam daran gearbeitet,
-        deshalb danken wir an dieser Stelle allen Benutzern welche die vier Freigabekandidaten getestet haben und
-        uns über Probleme und fehlende Funktionen berichtet haben. Herzlichen Dank Freunde, durch unsere gemeinsame
-        Anstrengung ist es möglich ein qualitativ hochwertiges Produkt zu schaffen, welches unsere Welt etwas besser
-        macht.</p>
-        
-        <h2>&nbsp;</h2> 
-        <p>Die neue Version enthält folgende Verbesserungen:</p>
+        <p>Wir möchten Euch den ersten Freigabekandidat von UltraDefrag 4.4 vorstellen, welcher viele Verbesserungen gegenüber
+        vorherigen stabilen Versionen enthält:</p>
         
         <p><a href=""><b>GUI:</b></a></p>
         <ul>
-        <li>Es ist nun möglich die Größe des Programmfensters anzupassen.</li>
-        <li>Text und Fensterelemente werden an die aktuelle DPI Einstellung des Bildschirms angepasst.</li>
-		<li>Die Zuordnungseinheitentabelle ist nun über die Einstellungen in guiopts.lua anpassbar.</li>
-        <li>Überprüfung auf Aktualisierungen wurde hinzugefügt.</li>
+        <li>Die Fortschritsanzeige wurde der Titelleiste hinzugefügt, damit sie auch im Tooltip des Taskbar-Icons sichtbar ist.</li>
+        <li>Der ein Zeichen lange Operationsname der Fortschritsanzeige wurde durch die ausgeschriebene Variante ersetzt.</li>
         </ul>
 
         <p><a href=""><b>Treiber:</b></a></p>
         <ul>
-        <li>Das Problem ein Laufwerk mit fragmentiertem Hauptordner zu defragmentieren wurde behoben.</li>
-		<li>Probleme mit der MFT-Anzeige wurden behoben.</li>
-        <li>Unterscheidung zwischen freiem Speicher und MFT Zone wurde verbessert.</li>
-        <li>System Dateien auf NTFS Festplatten werden nun korrekt in Grün dargestellt.</li>
+        <li>Teilweises Defragmentieren wurde hinzugefügt, um die Anzahl der Fragmente zu verringern,
+        falls nicht genügend freier Speicher für das Zusammenhängen der Datei vorhanden ist.</li>
+		<li>Der Festplattenoptimierungsalgorythmus wurde verbessert um unnötige zusätzliche Durchläufe zu verhindern.</li>
+        <li>Ein kleines Problem wurde beseitigt, welches verhinderte die Optimierung zu unterbrechen.</li>
+        <li>Der Festplattenoptimierungsalgorythmus wurde verbessert um zu verhindern,
+        dass stark fragmentierte Bereiche übersprungen werden.</li>
         </ul>
         
         <p><a href=""><b>Startzeitoberfläche:</b></a></p>
         <ul>
-        <li>Fortschrittsanzeige wurde verbessert.</li>
-        <li>Backspace und Escape Tastenbehandlung wurde dem interaktiven Modus hinzugefügt.</li>
-		<li>Kleinere Probleme wurden behoben.</li>
-        </ul>
-        
-        <p><a href=""><b>Kommandozeilenwerkzeug:</b></a></p>
-        <ul>
-		<li><b>--wait</b> Option wurde hinzugefügt, um geplante Defragmentierungen zu erleichtern.</li>
-		<li><b>--use-entire-window</b> Option wurde hinzugefügt.</li>
-        </ul>
-        
-        <p><a href=""><b>Aufgabenplaner:</b></a></p>
-        <ul>
-		<li>UltraDefrag Scheduler wurde aufgelassen, da er weniger funktional als der Windows Task Scheduler war;
-        auf <a href="http://ultradefrag.wikispaces.com/"><u>UltraDefrag.WikiSpaces.com</u></a> gibt es Anleitungen,
-        wie Defragmentierungsaufgaben mit Windows Task Scheduler geplant werden können</li>
+        <li>Falls nur eine Tastatur vorhanden ist, wird die 10 Sekunden Pause übersprungen.</li>
         </ul>
         
         <p><a href=""><b>Übersetzungen:</b></a></p>
         <ul>
-        <li>Folgende Übersetzungen wurden aktualisiert:<br/> <b>Tschechisch</b>, <b>Finnisch</b>, <b>Japanisch</b>, 
-        <b>Spanisch (AR)</b>, <b>Portugisisch (BR)</b>, <b>Koreanisch</b>, <b>Ungarisch</b>.</li>
+        <li>Es ist nun möglich die Sprache nachträglich ohne Neuinstallation zu ändern.</li>
+        <li><b>Hindi</b> wurde hinzugefügt.</li>
+        <li>Folgende Übersetzungen wurden aktualisiert:<br/> <b>Kroatisch</b>, <b>Dänisch</b>, <b>Niederländisch</b>, 
+        <b>Französisch</b>, <b>Griechisch</b>, <b>Polnisch</b>, <b>Russisch</b>, <b>Serbisch</b>, <b>Schwedisch</b>,
+        <b>Türkisch</b>.</li>
         </ul>
 
         <p><a href="../HISTORY.TXT">Hier</a> ist eine Liste aller Änderungen.</p>
