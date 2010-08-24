@@ -34,6 +34,7 @@ void winx_create_global_heap(void);
 void winx_destroy_global_heap(void);
 void winx_init_synch_objects(void);
 void winx_destroy_synch_objects(void);
+void __stdcall MarkWindowsBootAsSuccessful(void);
 
 #ifndef STATIC_LIB
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
@@ -41,6 +42,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	if(dwReason == DLL_PROCESS_ATTACH){
 		winx_create_global_heap();
 		winx_init_synch_objects();
+		MarkWindowsBootAsSuccessful();
 	} else if(dwReason == DLL_PROCESS_DETACH){
 		winx_destroy_global_heap();
 		winx_destroy_synch_objects();
@@ -128,6 +130,7 @@ void __stdcall winx_exit(int exit_code)
 void __stdcall winx_reboot(void)
 {
 	kb_close();
+	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
 	/*
 	* The next call is undocumented, therefore
@@ -145,6 +148,7 @@ void __stdcall winx_reboot(void)
 void __stdcall winx_shutdown(void)
 {
 	kb_close();
+	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
 	/*
 	* The next call is undocumented, therefore

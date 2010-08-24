@@ -348,4 +348,43 @@ int __stdcall winx_windows_in_safe_mode(void)
 
 	return safe_boot;
 }
+
+/**
+ * @brief Marks Windows boot as successful.
+ * @note
+ * - Based on http://www.osronline.com/showthread.cfm?link=185567
+ * - Is used internally by winx_shutdown and winx_reboot.
+ */
+void __stdcall MarkWindowsBootAsSuccessful(void)
+{
+	char bootstat_file_path[MAX_PATH];
+	WINX_FILE *f_bootstat;
+	char boot_success_flag = 1;
+	
+	/*
+	* We have decided to avoid the use of related RtlXxx calls,
+	* since they're undocumented (as usually), therefore may
+	* bring us a lot of surprises.
+	*/
+	if(winx_get_windows_directory(bootstat_file_path,MAX_PATH) < 0){
+		DebugPrint("MarkWindowsBootAsSuccessful(): Cannot retrieve the Windows directory path!");
+		winx_printf("\nMarkWindowsBootAsSuccessful(): Cannot retrieve the Windows directory path!\n\n");
+		winx_sleep(3000);
+		return;
+	}
+	(void)strncat(bootstat_file_path,"\\bootstat.dat",
+			MAX_PATH - strlen(bootstat_file_path) - 1);
+	/* open the bootstat.dat file */
+	f_bootstat = winx_fopen(bootstat_file_path,"r+");
+	if(f_bootstat == NULL){
+		/* it seems that we have system prior to XP SP2 */
+		return;
+	}
+	/* write 0x1 at 0xa offset */
+	f_bootstat->woffset.QuadPart = 0xa;
+	(void)winx_fwrite(&boot_success_flag,sizeof(char),1,f_bootstat);
+	/* close the file */
+	winx_fclose(f_bootstat);
+}
+
 /** @} */

@@ -1195,4 +1195,14 @@ typedef struct {
 #define STATUS_BUFFER_OVERFLOW	((NTSTATUS)0x80000005)
 #endif
 
+/* Based on http://www.osronline.com/showthread.cfm?link=185567 */
+typedef struct {
+	DWORD	dwSize;              /* the size of the structure, in bytes; 12 on NT 5.1, 32 on NT 6.1 */
+	DWORD	NtProductType;       /* NtProductWinNt, NtProductLanManNt, NtProductServer */
+	UCHAR	RecoveryFlag;        /* Defines whether "Time to display recovery options when needed" is checked or not. */
+	UCHAR	RecoveryMenuTimeout; /* Timeout, in seconds, of the recovery menu. */
+	UCHAR	BootSuccessFlag;     /* Set to 1 on successful boot. */
+	UCHAR	OrderlyShutdownFlag; /* Set to 1 on orderly shutdown. */
+} BOOT_STATUS_DATA, *PBOOT_STATUS_DATA;
+
 #endif /* _NTNDK_H_ */
