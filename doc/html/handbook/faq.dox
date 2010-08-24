@@ -19,6 +19,21 @@
 
 /**
  * @page FAQ Frequently Asked Questions
+ * <h3>How frequently to defragment?</h3>
+ * Defragment your system volume only when you notice system slowdown -
+ * approximately on a monthly basis, not frequently. Data drives have even less
+ * need to be defragmented, especially if they contain primarily music, 
+ * pictures and video materials.
+ *
+ * Optimization is reasonable when you have free space heavily fragmented
+ * on system volume. To determine whether to run optimizer or not execute
+ * an analysis and look at the cluster map. If you see a white space
+ * heavily scattered around the disc - it's time for an optimization.
+ *
+ * And, once again, don't crave to defrag/optimize data files -
+ * music/video has no need to be continues on disk, other files have
+ * tendency for temporary living on the disk.
+ *
  * <h3>Why configuration files editing is better than one settings window with tabs?</h3>
  * It is much easier and reliable to use 
  * standard Notepad application for
