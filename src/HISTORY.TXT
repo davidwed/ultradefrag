@@ -24,10 +24,7 @@ HISTORY
       if "Lua for Windows" was installed
     - 10 seconds delay is skiped on boot time scan, if only one keyboard is present
     - added language selector to the GUI package
-    - the following translations were added:
-
-      Hindi
-
+    - Hindi translation was added
     - the following translations were updated:
 
       Croatian, Danish, Dutch, French, Greek, Polish, Russian, Serbian,
