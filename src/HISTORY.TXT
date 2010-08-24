@@ -2,6 +2,8 @@ HISTORY
 
   Version 4.4.0  2010-09-
   ------------------------------------------------------------------------------
+    RC2:
+    - clearing of the failed boot flag added for reboot and shutdown at boot time
     RC1:
     - partial defragmentation was added to decrease number of fragments
       even when there are no free space on disk
