@@ -140,6 +140,14 @@
  * repeating the sequence to skip already optimized part of the
  * volume.
  *
+ * After completion of the described defragmentation
+ * algorithms the program (since v4.4.0 RC1) tries to reduce the
+ * number of fragments of still fragmented files by moving their
+ * contents to large continuous free space areas. In case of
+ * the volume optimization file moves are making always to the
+ * beginning of the volume to free as much space as possible in the
+ * terminal part as mentioned before.
+ *
  * The multipass disk optimization algorithm is very effective,
  * even on disks which have a low amount of free space.
  *
