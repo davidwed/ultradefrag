@@ -374,15 +374,18 @@ void __stdcall MarkWindowsBootAsSuccessful(void)
 	}
 	(void)strncat(bootstat_file_path,"\\bootstat.dat",
 			MAX_PATH - strlen(bootstat_file_path) - 1);
+
 	/* open the bootstat.dat file */
 	f_bootstat = winx_fopen(bootstat_file_path,"r+");
 	if(f_bootstat == NULL){
-		/* it seems that we have system prior to XP SP2 */
+		/* it seems that we have system prior to XP */
 		return;
 	}
-	/* write 0x1 at 0xa offset */
+
+	/* set BootSuccessFlag to 0x1 (look at BOOT_STATUS_DATA definition in ntndk.h for details) */
 	f_bootstat->woffset.QuadPart = 0xa;
 	(void)winx_fwrite(&boot_success_flag,sizeof(char),1,f_bootstat);
+	
 	/* close the file */
 	winx_fclose(f_bootstat);
 }
