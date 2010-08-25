@@ -69,7 +69,8 @@ void display_help(void)
 		"  boot-off      - disable boot time defragger",
 		"  reboot        - reboot the PC",
 		"  shutdown      - halt the PC",
-		"  exit          - continue Windows boot"
+		"  exit          - continue Windows boot",
+		""
 	};
                 
 	for(i = 0; i < sizeof(help_message)/sizeof(char *); i++){
