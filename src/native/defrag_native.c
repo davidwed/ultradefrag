@@ -1,6 +1,7 @@
 /*
  *  UltraDefrag - powerful defragmentation tool for Windows NT.
  *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2010 by Stefan Pendl (stefanpe@users.sourceforge.net).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -47,42 +48,39 @@ int ExecPendingBootOff(void);
 void display_help(void)
 {
     int i;
-    char help_message[][128] = {
-                            "Interactive mode commands:\n",
-                            "\n",
-                            "  help          - display this help screen\n",
-                            "  @echo on      - enable command line display\n",
-                            "  @echo off     - disable command line display\n",
-                            "  set           - set environment variable\n",
-                            "\n",
-                            "  udefrag -l    - displays list of volumes except removable\n",
-                            "  udefrag -la   - displays list of all available volumes\n",
-                            "  udefrag -a X: - volume analysis\n",
-                            "  udefrag X:    - volume defragmentation\n",
-                            "  udefrag -o X: - volume optimization\n",
-                            "\n",
-                            "    Multiple volume letters allowed,\n",
-                            "    --all, --all-fixed keys are supported here too.\n",
-                            "\n",
-                            "  boot-on       - enable boot time defragger\n",
-                            "  boot-off      - disable boot time defragger\n",
-                            "  reboot        - reboot the PC\n",
-                            "  shutdown      - halt the PC\n",
-                            "  exit          - continue Windows boot\n"
-                            };
+    char *help_message[] = {
+		"Interactive mode commands:",
+		"",
+		"  help          - display this help screen",
+		"  @echo on      - enable command line display",
+		"  @echo off     - disable command line display",
+		"  set           - set environment variable",
+		"",
+		"  udefrag -l    - displays list of volumes except removable",
+		"  udefrag -la   - displays list of all available volumes",
+		"  udefrag -a X: - volume analysis",
+		"  udefrag X:    - volume defragmentation",
+		"  udefrag -o X: - volume optimization",
+		"",
+		"    Multiple volume letters allowed,",
+		"    --all, --all-fixed keys are supported here too.",
+		"",
+		"  boot-on       - enable boot time defragger",
+		"  boot-off      - disable boot time defragger",
+		"  reboot        - reboot the PC",
+		"  shutdown      - halt the PC",
+		"  exit          - continue Windows boot"
+	};
                 
-	for(i = 0; i < sizeof(help_message)/sizeof(help_message[0]); i++){
-        winx_printf(help_message[i]);
+	for(i = 0; i < sizeof(help_message)/sizeof(char *); i++){
+        winx_printf("%s\n",help_message[i]);
         
         /* maximum boot screen height is 24 rows */
-        
         if((i > 0) && ((i % HELP_DISPLAY_ROWS) == 0)){
             winx_printf("\n      Hit any key to display next page...\n");
-            
             while(1){
                 if(winx_kbhit(100) >= 0) break;
             }
-            
             winx_printf("\n");
         }
     }
@@ -114,7 +112,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	/* if(winx_get_os_version() < 51) */
 	winx_printf("\n\n");
 	winx_printf(VERSIONINTITLE " native interface\n"
-		"Copyright (c) Dmitri Arkhangelski, 2007-2010.\n\n"
+		"Copyright (c) Dmitri Arkhangelski, 2007-2010.\n"
+		"Copyright (c) Stefan Pendl, 2010.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
 		"If something is wrong, hit F8 on startup\n"
 		"and select 'Last Known Good Configuration'.\n\n");
