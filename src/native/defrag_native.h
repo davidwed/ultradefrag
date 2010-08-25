@@ -34,6 +34,9 @@
 /* uncomment it if you want to replace smss.exe by this program */
 //#define USE_INSTEAD_SMSS
 
+/* define how many lines to display for each help page */
+#define HELP_DISPLAY_ROWS 14
+
 #define short_dbg_delay() winx_sleep(3000)
 #define long_dbg_delay()  winx_sleep(10000)
 
