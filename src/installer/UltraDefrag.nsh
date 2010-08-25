@@ -354,11 +354,12 @@ Var AtLeastXP
   ${Else}
   ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
   ${EndUnless}
+  Delete "$WINDIR\pending-boot-off"
 
   DetailPrint "Remove installation directory..."
   ; safe, because installation directory is predefined
   RMDir /r $INSTDIR
-
+  
   DetailPrint "Cleanup system directory..."
   Delete "$SYSDIR\boot-config.cmd"
   Delete "$SYSDIR\boot-off.cmd"

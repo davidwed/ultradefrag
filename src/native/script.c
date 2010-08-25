@@ -21,12 +21,7 @@
 * UltraDefrag native interface - scripting support code.
 */
 
-#include "../include/ntndk.h"
-
-#include "../include/udefrag-kernel.h"
-#include "../include/udefrag.h"
-#include "../include/ultradfgver.h"
-#include "../dll/zenwinx/zenwinx.h"
+#include "defrag_native.h"
 
 /*
 * Old dash based progress indication has wrong
@@ -53,6 +48,16 @@ int progress_line_length = 0;
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
 #define BREAK_MESSAGE "Use Pause/Break key to abort the process.\n\n"
+
+/*
+* boot-off command modifies registry, 
+* but shutdown\reboot commands releases its effect,
+* because all registry modifications becomes lost.
+* Therefore we track pending boot-off request through
+* a special pending-boot-off file in windows directory.
+*/
+int pending_boot_off = 0;
+void SavePendingBootOffState(void);
 
 void ExtractToken(short *dest, short *src, int max_chars);
 
@@ -232,17 +237,23 @@ void PauseExecution()
 }
 
 /* enables boot time defragmentation */
-void EnableNativeDefragger(void)
+int EnableNativeDefragger(void)
 {
-	if(winx_register_boot_exec_command(L"defrag_native") < 0)
+	if(winx_register_boot_exec_command(L"defrag_native") < 0){
 		winx_printf("\nCannot enable the boot time defragmenter.\n\n");
+		return (-1);
+	}
+	return 0;
 }
 
 /* disables boot time defragmentation */
-void DisableNativeDefragger(void)
+int DisableNativeDefragger(void)
 {
-	if(winx_unregister_boot_exec_command(L"defrag_native") < 0)
+	if(winx_unregister_boot_exec_command(L"defrag_native") < 0){
 		winx_printf("\nCannot disable the boot time defragmenter.\n\n");
+		return (-1);
+	}
+	return 0;
 }
 
 void Hibernate(void)
@@ -258,6 +269,68 @@ void Hibernate(void)
 	* It seems that hibernation is impossible at 
 	* windows boot time. At least on XP and earlier systems.
 	*/
+}
+
+/**
+ * @brief Executes pending boot-off command.
+ * @return Boolean value indicating whether
+ * pending boot-off command was detected or not.
+ */
+int ExecPendingBootOff(void)
+{
+	char path[MAX_PATH];
+	WINX_FILE *f;
+
+	if(winx_get_windows_directory(path,MAX_PATH) < 0){
+		DebugPrint("ExecPendingBootOff(): Cannot retrieve the Windows directory path!");
+		winx_printf("\nExecPendingBootOff(): Cannot retrieve the Windows directory path!\n\n");
+		short_dbg_delay();
+		return 0;
+	}
+	(void)strncat(path,"\\pending-boot-off",
+			MAX_PATH - strlen(path) - 1);
+
+	f = winx_fopen(path,"r");
+	if(f == NULL) return 0;
+
+	winx_fclose(f);
+	if(DisableNativeDefragger() < 0){
+		short_dbg_delay();
+	}
+	if(winx_delete_file(path) < 0){
+		DebugPrint("ExecPendingBootOff(): Cannot delete %%windir%%\\pending-boot-off file!");
+		winx_printf("\nExecPendingBootOff(): Cannot delete %%windir%%\\pending-boot-off file!\n\n");
+		short_dbg_delay();
+	}
+	winx_printf("\nPending boot-off command execution completed.\n");
+	return 1;
+}
+
+void SavePendingBootOffState(void)
+{
+	char path[MAX_PATH];
+	WINX_FILE *f;
+	char *comment = "UltraDefrag boot-off command is pending.";
+	
+	if(!pending_boot_off) return;
+
+	if(winx_get_windows_directory(path,MAX_PATH) < 0){
+		DebugPrint("SavePendingBootOffState(): Cannot retrieve the Windows directory path!");
+		winx_printf("\nSavePendingBootOffState(): Cannot retrieve the Windows directory path!\n\n");
+		short_dbg_delay();
+		return;
+	}
+	(void)strncat(path,"\\pending-boot-off",
+			MAX_PATH - strlen(path) - 1);
+	f = winx_fopen(path,"w");
+	if(f == NULL){
+		DebugPrint("%%windir%%\\pending-boot-off file creation failed!");
+		winx_printf("\n%%windir%%\\pending-boot-off file creation failed!\n\n");
+		short_dbg_delay();
+		return;
+	}
+	(void)winx_fwrite(comment,sizeof(char),sizeof(comment)/sizeof(char) - 1,f);
+	winx_fclose(f);
 }
 
 void ParseCommand(void)
@@ -385,6 +458,7 @@ void ParseCommand(void)
 	if((short *)wcsstr(command,L"shutdown") == command){
 		winx_printf("Shutdown ...");
 		(void)udefrag_unload();
+		SavePendingBootOffState();
 		winx_shutdown();
 		return;
 	}
@@ -392,6 +466,7 @@ void ParseCommand(void)
 	if((short *)wcsstr(command,L"reboot") == command){
 		winx_printf("Reboot ...");
 		(void)udefrag_unload();
+		SavePendingBootOffState();
 		winx_reboot();
 		return;
 	}
@@ -400,11 +475,13 @@ void ParseCommand(void)
 		return;
 	}
 	if((short *)wcsstr(command,L"boot-on") == command){
-		EnableNativeDefragger();
+		(void)EnableNativeDefragger();
+		pending_boot_off = 0;
 		return;
 	}
 	if((short *)wcsstr(command,L"boot-off") == command){
-		DisableNativeDefragger();
+		(void)DisableNativeDefragger();
+		pending_boot_off = 1;
 		return;
 	}
 	if((short *)wcsstr(command,L"hibernate") == command){

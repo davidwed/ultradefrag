@@ -21,15 +21,7 @@
 * UltraDefrag native interface.
 */
 
-#include "../include/ntndk.h"
-
-#include "../include/udefrag-kernel.h"
-#include "../include/udefrag.h"
-#include "../include/ultradfgver.h"
-#include "../dll/zenwinx/zenwinx.h"
-
-/* uncomment it if you want to replace smss.exe by this program */
-//#define USE_INSTEAD_SMSS
+#include "defrag_native.h"
 
 /*
 * We're releasing this module as a monolithic thing to
@@ -50,6 +42,7 @@ void DisableNativeDefragger(void);
 void Hibernate(void);
 void DisplayAvailableVolumes(int skip_removable);
 void ProcessVolume(char letter,char _command);
+int ExecPendingBootOff(void);
 
 void display_help(void)
 {
@@ -118,14 +111,26 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		/* display yet a message, for debugging purposes */
 		winx_printf("In Windows Safe Mode this program is useless!\n");
 		/* if someone will see the message, a little delay will help him to read it */
-		winx_sleep(3000);
+		short_dbg_delay();
 		udefrag_monolithic_native_app_unload();
 		winx_exit(0);
+	}
+	
+	/*
+	* Check for the pending boot-off command.
+	*/
+	if(ExecPendingBootOff()){
+#ifndef USE_INSTEAD_SMSS
+		winx_printf("Good bye ...\n");
+		short_dbg_delay();
+		udefrag_monolithic_native_app_unload();
+		winx_exit(0);
+#endif
 	}
 		
 	if(winx_init(Peb) < 0){
 		winx_printf("Wait 10 seconds ...\n");
-		winx_sleep(10000);
+		long_dbg_delay();
 		udefrag_monolithic_native_app_unload();
 		winx_exit(1);
 	}
@@ -148,7 +153,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_printf("\nInitialization failed!\n");
 		winx_printf("%s\n",udefrag_get_error_description(error_code));
 		winx_printf("Wait 10 seconds ...\n");
-		winx_sleep(10000); /* show error message at least 10 seconds */
+		long_dbg_delay(); /* show error message at least 10 seconds */
 		winx_printf("Good bye ...\n");
 		(void)udefrag_unload();
 		udefrag_monolithic_native_app_unload();
