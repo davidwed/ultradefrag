@@ -77,18 +77,18 @@
  * <dt>pause</dt>
  * <dd>Pause the script execution for the specified time interval (in milliseconds, 2147483647 maximum).
  * For example, the command <b>pause 1000</b> will pause execution for one second.</dd>
- * <dt>shutdown</dt>
- * <dd>Halt the computer.</dd>
- * <dt>reboot</dt>
- * <dd>Reboot the computer.</dd>
- * <dt>exit</dt>
- * <dd>Break the boot time program execution.</dd>
  * <dt>boot-on</dt>
  * <dd>Turn on the boot time defragmentation to be executed at every boot.</dd>
  * <dt>boot-off</dt>
  * <dd>Turn off the boot time defragmentation. It prevents them from being
  * executed at next reboots. Until you will enable them manually through
  * UltraDefrag Configuration dialog or boot-on.cmd script.</dd>
+ * <dt>shutdown</dt>
+ * <dd>Halt the computer.</dd>
+ * <dt>reboot</dt>
+ * <dd>Reboot the computer.</dd>
+ * <dt>exit</dt>
+ * <dd>Break the boot time program execution.</dd>
  * </dl>
  *
  * When UltraDefrag encounters the wrong syntax it shows the appropriate
@@ -106,7 +106,7 @@
  * ;--------------------------------------------------------------------
  *
  * set UD_IN_FILTER=windows;winnt;ntuser;pagefile;hiberfil
- * set UD_EX_FILTER=temp
+ * set UD_EX_FILTER=temp;recycle;system volume information
  *
  * udefrag c:
  *

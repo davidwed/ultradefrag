@@ -345,7 +345,7 @@ void ParseCommand(void)
 	int i, length;
 	volume_info *v;
 	
-	/* supported commands: @echo, set, udefrag, exit, shutdown, reboot, pause */
+	/* supported commands: @echo, set, udefrag, pause, boot-on, boot-off, reboot, shutdown, exit */
 	/* skip leading spaces and tabs */
 	command = line_buffer;
 	while(*command == 0x20 || *command == '\t'){
