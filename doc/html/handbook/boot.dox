@@ -84,15 +84,11 @@
  * <dt>exit</dt>
  * <dd>Break the boot time program execution.</dd>
  * <dt>boot-on</dt>
- * <dd>Turn on the boot time defragmentation to be executed at every boot.
- * Unfortunately, this command fails when shutdown or reboot commands are
- * executed after it.</dd>
+ * <dd>Turn on the boot time defragmentation to be executed at every boot.</dd>
  * <dt>boot-off</dt>
  * <dd>Turn off the boot time defragmentation. It prevents them from being
  * executed at next reboots. Until you will enable them manually through
- * UltraDefrag Configuration dialog or boot-on.cmd script. Unfortunately, 
- * this command
- * fails when shutdown or reboot commands are executed after it.</dd>
+ * UltraDefrag Configuration dialog or boot-on.cmd script.</dd>
  * </dl>
  *
  * When UltraDefrag encounters the wrong syntax it shows the appropriate

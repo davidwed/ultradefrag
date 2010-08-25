@@ -4,6 +4,8 @@ HISTORY
   ------------------------------------------------------------------------------
     RC2:
     - clearing of the failed boot flag added for reboot and shutdown at boot time
+    - pending boot-off boot time script command support added,
+      this removes the limitation of boot-on/off not working before reboot/shutdown
     RC1:
     - partial defragmentation was added to decrease number of fragments
       even when there are no free space on disk
