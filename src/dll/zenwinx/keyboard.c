@@ -123,11 +123,13 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 	
 	if(number_of_keyboards == 0) return (-1);
 	
-	delay = (MAX_LATENCY / number_of_keyboards) + 1;
+	delay = (MAX_LATENCY / number_of_keyboards);
 	if(msec_timeout != INFINITE)
-		attempts = (msec_timeout / MAX_LATENCY) + 1;
+		attempts = (msec_timeout / MAX_LATENCY / number_of_keyboards);
 	interval.QuadPart = -((signed long)delay * 10000);
 	
+    // winx_printf("mSec ... %d, Delay ... %d, Attempts ... %d\n", msec_timeout, delay, attempts);
+    
 	if(msec_timeout != INFINITE){
 		for(i = 0; i < attempts; i++){
 			/* loop through all keyboards */
