@@ -544,7 +544,7 @@ void ProcessScript(void)
 	char filename[MAX_PATH];
 	int filesize,j,cnt;
 	unsigned short ch;
-	/*KBD_RECORD kbd_rec;*/
+	KBD_RECORD kbd_rec;
 	
 	scripting_mode = TRUE;
 
@@ -585,15 +585,10 @@ void ProcessScript(void)
 			ParseCommand();
 			/* check for escape key hits */
 			if(escape_flag) return;
-			/*
-			* The following code extremely slows down 
-			* the script execution, at least on XP 
-			* virtual machine.
-			*/
-			/*if(winx_kb_read(&kbd_rec,1) == 0){
+			if(winx_kb_read(&kbd_rec,0) == 0){
 				if(kbd_rec.wVirtualScanCode == 0x1)
 					return;
-			}*/
+			}
 		} else {
 			line_buffer[cnt] = ch;
 			cnt++;
