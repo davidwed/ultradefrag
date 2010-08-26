@@ -102,6 +102,7 @@ void __stdcall kb_close(void)
 	}
 }
 
+/* latency of 100 ms used before results in a noticeable delay */
 #define MAX_LATENCY 10 /* msec */
 
 /**
