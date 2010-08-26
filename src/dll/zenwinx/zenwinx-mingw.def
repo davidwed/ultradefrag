@@ -18,6 +18,7 @@ EXPORTS
 	winx_prompt
 	winx_kbhit
 	winx_breakhit
+	winx_kb_read
 	winx_sleep@4
 	winx_get_os_version@0
 	winx_get_windows_directory@8

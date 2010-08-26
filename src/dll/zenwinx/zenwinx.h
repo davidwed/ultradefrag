@@ -105,6 +105,7 @@ int __cdecl winx_prompt(char *prompt,char *string,int n);
 */
 int __cdecl winx_kbhit(int msec);
 int __cdecl winx_breakhit(int msec);
+int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec);
 
 void __stdcall winx_sleep(int msec);
 int  __stdcall winx_get_os_version(void);

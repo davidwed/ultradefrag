@@ -164,16 +164,35 @@ int __cdecl winx_printf(const char *format, ...)
  */
 int __cdecl winx_kbhit(int msec)
 {
-	KEYBOARD_INPUT_DATA kbd;
 	KBD_RECORD kbd_rec;
 
+	return winx_kb_read(&kbd_rec,msec);
+}
+
+/**
+ * @brief Low level winx_kbhit() equivalent.
+ * @param[in] kbd_rec pointer to structure receiving key information.
+ * @param[in] msec the timeout interval, in milliseconds.
+ * @return If any key was pressed, the return value is
+ *         the ascii character or zero for the control keys.
+ *         Negative value indicates failure.
+ * @note
+ * - If an INFINITE time constant is passed, the
+ *   time-out interval never elapses.
+ * - This call may terminate the program if NtCancelIoFile() 
+ *   fails for one of the existing keyboard devices.
+ */
+int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
+{
+	KEYBOARD_INPUT_DATA kbd;
+
 	if(kb_read(&kbd,msec) < 0) return (-1);
-	IntTranslateKey(&kbd,&kbd_rec);
-	if(!kbd_rec.bKeyDown){
-		/*winx_printf("\nwinx_kbhit(): The key was released!\n");*/
+	IntTranslateKey(&kbd,kbd_rec);
+	if(!kbd_rec->bKeyDown){
+		/*winx_printf("\nwinx_kb_read(): The key was released!\n");*/
 		return (-1);
 	}
-	return (int)kbd_rec.AsciiChar;
+	return (int)kbd_rec->AsciiChar;
 }
 
 /**
