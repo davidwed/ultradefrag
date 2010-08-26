@@ -47,7 +47,7 @@ int ExecPendingBootOff(void);
 
 void display_help(void)
 {
-    int i;
+    int i, page_limit, row_count;
     char *help_message[] = {
 		"Interactive mode commands:",
 		"",
@@ -72,12 +72,17 @@ void display_help(void)
 		"  exit          - continue Windows boot",
 		""
 	};
+    
+    row_count = sizeof(help_message)/sizeof(char *);
+    
+    /* if there are more then HELP_DISPLAY_ROWS to display,
+    we must further reduce the page limit */
+    page_limit = (row_count > HELP_DISPLAY_ROWS) ? HELP_DISPLAY_ROWS-3 : HELP_DISPLAY_ROWS;
                 
-	for(i = 0; i < sizeof(help_message)/sizeof(char *); i++){
+	for(i = 0; i < row_count; i++){
         winx_printf("%s\n",help_message[i]);
         
-        /* maximum boot screen height is 24 rows */
-        if((i > 0) && ((i % HELP_DISPLAY_ROWS) == 0)){
+        if((i > 0) && ((i % page_limit) == 0)){
             winx_printf("\n      Hit any key to display next page...\n");
             while(1){
                 if(winx_kbhit(100) >= 0) break;
