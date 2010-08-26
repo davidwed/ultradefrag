@@ -102,7 +102,7 @@ void __stdcall kb_close(void)
 	}
 }
 
-#define MAX_LATENCY 100 /* msec */
+#define MAX_LATENCY 10 /* msec */
 
 /**
  * @brief Checks the console for keyboard input.
