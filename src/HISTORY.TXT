@@ -9,6 +9,7 @@ HISTORY
     - interactive mode at boot time now displays help split into pages
     - escape key handling added to break the boot time script execution
     - winx_kb_read() call added to zenwinx library
+    - corrected cluttered progress display if console output was redirected
     RC1:
     - partial defragmentation was added to decrease number of fragments
       even when there are no free space on disk
