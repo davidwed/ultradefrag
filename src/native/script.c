@@ -36,7 +36,12 @@ short name_buffer[128];
 short value_buffer[4096];
 short *command;
 int echo_flag = 1;
+
+/* indicates whether the defragmentation must be aborted or not */
 int abort_flag = 0;
+/* indicates whether the script execution must be aborted or not */
+int escape_flag = 0;
+
 int debug_print = DBG_NORMAL;
 
 UDEFRAG_JOB_TYPE job_type;
@@ -117,15 +122,32 @@ void UpdateProgress(int completed)
 
 int __stdcall update_stat(int df)
 {
+	KBD_RECORD kbd_rec;
 	int error_code;
+	int escape_detected = 0;
+	int break_detected = 0;
 	
-	if(winx_breakhit(100) >= 0){
-		error_code = udefrag_stop();
-		if(error_code < 0){
-			winx_printf("\nStop request failed!\n");
-			winx_printf("%s\n",udefrag_get_error_description(error_code));
+	/* check for escape and break key hits */
+	if(winx_kb_read(&kbd_rec,100) >= 0){
+		/* check for escape */
+		if(kbd_rec.wVirtualScanCode == 0x1){
+			escape_detected = 1;
+			escape_flag = 1;
+		} else if(kbd_rec.wVirtualScanCode == 0x1d){
+			/* distinguish between control keys and break key */
+			if(!(kbd_rec.dwControlKeyState & LEFT_CTRL_PRESSED) && \
+			  !(kbd_rec.dwControlKeyState & RIGHT_CTRL_PRESSED)){
+				break_detected = 1;
+			}
 		}
-		abort_flag = 1;
+		if(escape_detected || break_detected){
+			error_code = udefrag_stop();
+			if(error_code < 0){
+				winx_printf("\nStop request failed!\n");
+				winx_printf("%s\n",udefrag_get_error_description(error_code));
+			}
+			abort_flag = 1;
+		}
 	}
 	UpdateProgress(df);
 	return 0;
@@ -522,6 +544,7 @@ void ProcessScript(void)
 	char filename[MAX_PATH];
 	int filesize,j,cnt;
 	unsigned short ch;
+	/*KBD_RECORD kbd_rec;*/
 	
 	scripting_mode = TRUE;
 
@@ -560,6 +583,17 @@ void ProcessScript(void)
 			cnt = 0;
 			/* parse line buffer contents */
 			ParseCommand();
+			/* check for escape key hits */
+			if(escape_flag) return;
+			/*
+			* The following code extremely slows down 
+			* the script execution, at least on XP 
+			* virtual machine.
+			*/
+			/*if(winx_kb_read(&kbd_rec,1) == 0){
+				if(kbd_rec.wVirtualScanCode == 0x1)
+					return;
+			}*/
 		} else {
 			line_buffer[cnt] = ch;
 			cnt++;
