@@ -387,7 +387,8 @@ void ParseCommand(void)
 	}
 	if(echo_flag && !echo_cmd) winx_printf("%ws\n", command);
 	if(echo_cmd || comment_flag) return;
-	/* check for set command */
+    
+	/* handle set command */
 	if((short *)wcsstr(command,L"set") == command){
 		SetEnvVariable();
 		return;
@@ -493,20 +494,24 @@ void ParseCommand(void)
 		winx_reboot();
 		return;
 	}
+	/* handle pause command */
 	if((short *)wcsstr(command,L"pause") == command){
 		PauseExecution();
 		return;
 	}
+	/* handle boot-on command */
 	if((short *)wcsstr(command,L"boot-on") == command){
 		(void)EnableNativeDefragger();
 		pending_boot_off = 0;
 		return;
 	}
+	/* handle boot-off command */
 	if((short *)wcsstr(command,L"boot-off") == command){
 		(void)DisableNativeDefragger();
 		pending_boot_off = 1;
 		return;
 	}
+	/* handle hibernate command */
 	if((short *)wcsstr(command,L"hibernate") == command){
 		Hibernate();
 		return;
