@@ -218,6 +218,10 @@ int __stdcall ProgressCallback(int done_flag)
 	double percentage;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD cursor_pos;
+    
+    /* reset stat elements to prevent cluttered display */
+    stat.fragmfilecounter = 0;
+    stat.filecounter = 0;
 	
 	if(err_flag || err_flag2) return 0;
 	
