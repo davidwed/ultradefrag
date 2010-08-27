@@ -102,8 +102,18 @@ void __stdcall kb_close(void)
 	}
 }
 
-/* latency of 100 ms used before results in a noticeable delay */
-#define MAX_LATENCY 10 /* msec */
+/*
+* Latency of 100 ms gives less delay error (prolongation)
+* in comparison with shorter latencies. This parameter
+* is used primarily when the program checks for key hits.
+*/
+#define MAX_LATENCY 100     /* msec */
+/*
+* This delay affects primarily text typing
+* speed when winx_prompt() is used to get
+* user input.
+*/
+#define MAX_TYPING_DELAY 10 /* msec */
 
 /**
  * @brief Checks the console for keyboard input.
@@ -119,18 +129,28 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 	int delay;
 	int attempts = 0;
 	LARGE_INTEGER interval;
+	ULONGLONG xtime;
 	int i,j;
 	
 	if(number_of_keyboards == 0) return (-1);
 	
-	delay = (MAX_LATENCY / number_of_keyboards);
-	if(msec_timeout != INFINITE)
-		attempts = (msec_timeout / MAX_LATENCY / number_of_keyboards);
-	interval.QuadPart = -((signed long)delay * 10000);
-	
     // winx_printf("mSec ... %d, Delay ... %d, Attempts ... %d\n", msec_timeout, delay, attempts);
     
 	if(msec_timeout != INFINITE){
+		/*
+		* Here we have a fixed time interval,
+		* and we should not exceed them.
+		*/
+		if(msec_timeout <= MAX_LATENCY){
+			delay = msec_timeout / number_of_keyboards;
+			attempts = 1;
+		} else {
+			delay = (MAX_LATENCY / number_of_keyboards) + 1;
+			attempts = (msec_timeout / MAX_LATENCY) + 1;
+		}
+		interval.QuadPart = -((signed long)delay * 10000);
+
+		xtime = winx_xtime();
 		for(i = 0; i < attempts; i++){
 			/* loop through all keyboards */
 			for(j = 0; j < number_of_keyboards; j++){
@@ -138,8 +158,28 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 					return 0;
 			}
 			if(number_of_keyboards == 0) return (-1);
+			if(i == (attempts - 1)) return (-1);
+			/*
+			* Because delay prolongation occurs always
+			* due to the Windows imperfectness, we're
+			* trying to check directly whether time interval
+			* exceeds or not.
+			*/
+			if(xtime){
+				if(winx_xtime() - xtime >= msec_timeout)
+					return (-1);
+			}
 		}
 	} else {
+		/*
+		* Here the time interval is unlimited,
+		* so we can query keyboards more quickly
+		* to reach more comfortable speed of
+		* text typing for which this mode 
+		* is typically used.
+		*/
+		delay = (MAX_TYPING_DELAY / number_of_keyboards) + 1;
+		interval.QuadPart = -((signed long)delay * 10000);
 		while(1){
 			/* loop through all keyboards */
 			for(j = 0; j < number_of_keyboards; j++){
