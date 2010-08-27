@@ -144,16 +144,3 @@ Type 'help' for list of supported commands.
  *    </TR>
  *  </TABLE>
  */
-
- /*
- * To defragment files normally locked by system
- * (registry hives, paging file etc.) UltraDefrag
- * runs during the Windows boot process in a manner
- * similar to ChkDsk or Partition Magic. It runs
- * before any file locking therefore 
- * defragment system files like other ordinary files.
- *
- * When the boot time defragmenter is enabled, at
- * every reboot it will execute commands from a
- * special script file.
- */
