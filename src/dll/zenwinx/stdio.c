@@ -299,6 +299,77 @@ int __cdecl winx_gets(char *string,int n)
 }
 
 /**
+ * @brief Initializes commands history.
+ * @param[in] h pointer to structure holding
+ * the commands history.
+ */
+void __cdecl winx_init_history(winx_history *h)
+{
+	if(h == NULL){
+		DebugPrint("winx_init_history(): h = NULL!");
+		return;
+	}
+	h->head = h->current = NULL;
+	h->n_entries = 0;
+}
+
+/**
+ * @brief Destroys commands history.
+ * @param[in] h pointer to structure holding
+ * the commands history.
+ */
+void __cdecl winx_destroy_history(winx_history *h)
+{
+	winx_history_entry *entry;
+	
+	if(h == NULL){
+		DebugPrint("winx_destroy_history(): h = NULL!");
+		return;
+	}
+
+	for(entry = h->head; entry != NULL; entry = entry->next_ptr){
+		if(entry->string) winx_heap_free(entry->string);
+		if(entry->next_ptr == h->head) break;
+	}
+	winx_list_destroy((list_entry **)(void *)&h->head);
+	h->current = NULL;
+	h->n_entries = 0;
+}
+
+/**
+ * @brief Adds an entry to commands history list.
+ * @note Internal use only.
+ */
+static void winx_add_history_entry(winx_history *h,char *string)
+{
+	winx_history_entry *entry, *last_entry = NULL;
+	int length;
+	
+	if(h == NULL || string == NULL) return;
+	
+	if(h->head) last_entry = h->head->prev_ptr;
+	entry = (winx_history_entry *)winx_list_insert_item((list_entry **)(void *)&h->head,
+		(list_entry *)last_entry,sizeof(winx_history_entry));
+	if(entry == NULL){
+		DebugPrint("Not enough memory for winx_add_winx_history_entry()!");
+		winx_printf("\nNot enough memory for winx_add_winx_history_entry()!\n");
+		return;
+	}
+	
+	length = strlen(string) + 1;
+	entry->string = (char *)winx_heap_alloc(length);
+	if(entry->string == NULL){
+		DebugPrint("Cannot allocate %u bytes of memory for winx_add_winx_history_entry()!",length);
+		winx_printf("\nCannot allocate %u bytes of memory for winx_add_winx_history_entry()!\n",length);
+		winx_list_remove_item((list_entry **)(void *)&h->head,(list_entry *)entry);
+	} else {
+		strcpy(entry->string,string);
+		h->n_entries ++;
+		h->current = entry;
+	}
+}
+
+/**
  * @brief Displays prompt on the screen and waits for
  * the user input. When user presses the return key
  * fills the string pointed by the second parameter 
@@ -306,16 +377,19 @@ int __cdecl winx_gets(char *string,int n)
  * @param[in] prompt the string to be printed as prompt.
  * @param[out] string the storage for the input string.
  * @param[in] n the maximum number of characters to read.
+ * @param[in,out] h pointer to structure holding
+ * the commands history. May be NULL.
  * @return Number of characters read including terminal zero.
- *         Negative value indicates failure.
+ * Negative value indicates failure.
  * @note
  * - Recognizes properly both backslash and escape keys.
  * - The sentence above works fine only when user input
  * stands in a single line of the screen.
+ * - Recognizes arrow keys to walk through commands history.
  * - This call may terminate the program if NtCancelIoFile() 
  * fails for one of the existing keyboard devices.
  */
-int __cdecl winx_prompt(char *prompt,char *string,int n)
+int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 {
 	KEYBOARD_INPUT_DATA kbd;
 	KBD_RECORD kbd_rec;
@@ -325,11 +399,11 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 	int i, ch, line_length;
 
 	if(!string){
-		winx_printf("\nwinx_prompt() invalid string!\n");
+		winx_printf("\nwinx_prompt_ex() invalid string!\n");
 		return (-1);
 	}
 	if(n <= 0){
-		winx_printf("\nwinx_prompt() invalid string length %d!\n",n);
+		winx_printf("\nwinx_prompt_ex() invalid string length %d!\n",n);
 		return (-1);
 	}
 	
@@ -337,7 +411,7 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 	buffer_length = strlen(prompt) + n;
 	buffer = winx_heap_alloc(buffer_length);
 	if(buffer == NULL){
-		winx_printf("\nNot enough memory for winx_prompt()!\n");
+		winx_printf("\nNot enough memory for winx_prompt_ex()!\n");
 		return (-1);
 	}
 	
@@ -353,14 +427,20 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 				IntTranslateKey(&kbd,&kbd_rec);
 			} while(!kbd_rec.bKeyDown);
 			ch = (int)kbd_rec.AsciiChar;
-			/* truncate the string if either backspace or escape pressed */
-			if(ch == 0x08 || kbd_rec.wVirtualScanCode == 0x1){
+			/*
+			* Truncate the string if either backspace or escape pressed.
+			* Walk through history if one of arrow keys pressed.
+			*/
+			if(ch == 0x08 || kbd_rec.wVirtualScanCode == 0x1 || \
+			  kbd_rec.wVirtualScanCode == 0x48 || kbd_rec.wVirtualScanCode == 0x50){
 				line_length = strlen(prompt) + strlen(string);
+				/* handle escape key */
 				if(kbd_rec.wVirtualScanCode == 0x1){
 					/* truncate the string if escape pressed */
 					string[0] = 0;
 					i = 0;
 				}
+				/* handle backspace key */
 				if(ch == 0x08){
 					/*
 					* make the string one character shorter
@@ -369,6 +449,29 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 					if(i > 0){
 						i--;
 						string[i] = 0;
+					}
+				}
+				/* handle arrow keys */
+				if(h){
+					if(h->head && h->current){
+						if(kbd_rec.wVirtualScanCode == 0x48){
+							/* list history back */
+							if(h->current != h->head)
+								h->current = h->current->prev_ptr;
+							if(h->current->string){
+								strcpy(string,h->current->string);
+								i = strlen(string);
+							}
+						} else if(kbd_rec.wVirtualScanCode == 0x50){
+							/* list history forward */
+							if(h->current->next_ptr != h->head){
+								h->current = h->current->next_ptr;
+								if(h->current->string){
+									strcpy(string,h->current->string);
+									i = strlen(string);
+								}
+							}
+						}
 					}
 				}
 				/* redraw the prompt */
@@ -387,7 +490,8 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 				winx_printf(format,buffer);
 				continue;
 			}
-		} while(ch == 0 || ch == 0x08 || kbd_rec.wVirtualScanCode == 0x1);
+		} while(ch == 0 || ch == 0x08 || kbd_rec.wVirtualScanCode == 0x1 || \
+			  kbd_rec.wVirtualScanCode == 0x48 || kbd_rec.wVirtualScanCode == 0x50);
 		
 		/* print a character read */
 		winx_putch(ch);
@@ -401,15 +505,28 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 		/* we have an ordinary character, append it to the string */
 		string[i] = (char)ch;
 	}
-	winx_printf("\nwinx_prompt() buffer overflow!\n");
+	winx_printf("\nwinx_prompt_ex() buffer overflow!\n");
 
 done:
 	winx_heap_free(buffer);
+	/* add nonempty strings to the history */
+	if(string[0]){
+		winx_add_history_entry(h,string);
+	}
 	return (i+1);
 	
 fail:
 	winx_heap_free(buffer);
 	return (-1);
+}
+
+/**
+ * @brief Simplified analog of winx_prompt_ex() call.
+ * Has no support of commands history.
+ */
+int __cdecl winx_prompt(char *prompt,char *string,int n)
+{
+	return winx_prompt_ex(prompt,string,n,NULL);
 }
 
 /** @} */

@@ -99,6 +99,22 @@ int __cdecl winx_getche(void);
 int __cdecl winx_gets(char *string,int n);
 int __cdecl winx_prompt(char *prompt,char *string,int n);
 
+typedef struct _winx_history_entry {
+	struct _winx_history_entry *next_ptr;
+	struct _winx_history_entry *prev_ptr;
+	char *string;
+} winx_history_entry;
+
+typedef struct _winx_history {
+	winx_history_entry *head;
+	winx_history_entry *current;
+	int n_entries;
+} winx_history;
+
+void __cdecl winx_init_history(winx_history *h);
+int  __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h);
+void __cdecl winx_destroy_history(winx_history *h);
+
 /*
 * Note: winx_scanf() can not be implemented;
 * use winx_gets() and sscanf() instead.

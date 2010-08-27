@@ -92,6 +92,49 @@ void display_help(void)
     }
 }
 
+void display_history(winx_history *h)
+{
+	winx_history_entry *entry;
+    int i, page_limit, row_count;
+	
+	if(h == NULL) return;
+	if(h->head == NULL) return;
+
+    row_count = h->n_entries + 3;
+    /* if there are more then HELP_DISPLAY_ROWS to display,
+    we must further reduce the page limit */
+    page_limit = (row_count > HELP_DISPLAY_ROWS) ? HELP_DISPLAY_ROWS-3 : HELP_DISPLAY_ROWS;
+  
+	entry = h->head;
+	for(i = 0; i < row_count; i++){
+		switch(i){
+		case 0:
+			winx_printf("\n");
+			break;
+		case 1:
+			winx_printf("Typed commands history:\n");
+			break;
+		case 2:
+			winx_printf("\n");
+			break;
+		default:
+			if(entry->string)
+				winx_printf("%s\n",entry->string);
+			entry = entry->next_ptr;
+			if(entry == h->head) return;
+			break;
+		}
+        
+        if((i > 0) && ((i % page_limit) == 0)){
+            winx_printf("\n      Hit any key to display next page...\n");
+            while(1){
+                if(winx_kbhit(100) >= 0) break;
+            }
+            winx_printf("\n");
+        }
+    }
+}
+
 void __stdcall NtProcessStartup(PPEB Peb)
 {
 	int safe_mode, error_code, result, i;
@@ -100,6 +143,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	* keys will work properly with winx_prompt() function.
 	*/
 	char buffer[60];
+	winx_history h;
 
 	/* 1. Initialization */
 #ifdef USE_INSTEAD_SMSS
@@ -195,14 +239,22 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_printf("\nInteractive mode:\nType 'help' for a list of supported commands.\n");
 	winx_printf("\nOnly the English keyboard layout is available.\n\n");
 	scripting_mode = FALSE;
+	winx_init_history(&h);
 	while(1){
 		/* get user input */
-		if(winx_prompt("# ",buffer,sizeof(buffer) - 1) < 0) break;
-		/* check for help command */
+		if(winx_prompt_ex("# ",buffer,sizeof(buffer) - 1,&h) < 0) break;
+		/* handle help command */
 		if(!strcmp(buffer,"help")){
 			display_help();
 			continue;
 		}
+		/* handle history command */
+		if(!strcmp(buffer,"history")){
+			display_history(&h);
+			continue;
+		}
+		/* handle exit command */
+		if(!strcmp(buffer,"exit")) break;
 		/* execute command */
 		result = _snwprintf(line_buffer,sizeof(line_buffer) / sizeof(short),L"%hs",buffer);
 		if(result < 0){
@@ -211,10 +263,10 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		}
 		line_buffer[sizeof(line_buffer) / sizeof(short) - 1] = 0;
 		ParseCommand();
-		if(!strcmp(buffer,"exit")) break;
 	}
 
 	winx_printf("Good bye ...\n");
+	winx_destroy_history(&h);
 	(void)udefrag_unload();
 	udefrag_monolithic_native_app_unload();
 	winx_exit(0);

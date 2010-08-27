@@ -16,6 +16,9 @@ EXPORTS
 	winx_getche
 	winx_gets
 	winx_prompt
+	winx_prompt_ex
+	winx_init_history
+	winx_destroy_history
 	winx_kbhit
 	winx_breakhit
 	winx_kb_read
