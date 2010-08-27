@@ -98,11 +98,11 @@ BOOLEAN SaveReportToDisk(char *volume_name)
 	BOOLEAN result;
 	
 	DebugPrint("SaveReportToDisk() started...\n");
-	tm = _rdtsc();
+	tm = winx_xtime();
 
 	result = SaveReportToDiskInternal(volume_name);
 	
-	time = _rdtsc() - tm;
+	time = winx_xtime() - tm;
 	DebugPrint("SaveReportToDisk() completed in %I64u ms.\n",time);
 	return result;
 }

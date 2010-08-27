@@ -19,7 +19,7 @@
 
 /**
  * @file time.c
- * @brief Time conversion code.
+ * @brief Time conversion and performance measures code.
  * @addtogroup Time
  * @{
  */
@@ -108,6 +108,35 @@ int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
 		y,d,h,m,s);
 	buffer[size - 1] = 0;
 	return result;
+}
+
+/**
+ * @brief Returns time interval since 
+ * some abstract unique event in the past.
+ * @return Time, in milliseconds.
+ * Zero indicates failure.
+ * @note
+ * - Useful for performance measures.
+ * - Has no physical meaning.
+ */
+ULONGLONG __stdcall winx_xtime(void)
+{
+	NTSTATUS Status;
+	LARGE_INTEGER frequency;
+	LARGE_INTEGER counter;
+	
+	Status = NtQueryPerformanceCounter(&counter,&frequency);
+	if(!NT_SUCCESS(Status)){
+		DebugPrint("NtQueryPerformanceCounter() failed: %x!\n",(UINT)Status);
+		return 0;
+	}
+	if(!frequency.QuadPart){
+		DebugPrint("Your hardware has no support for High Resolution timer!\n");
+		return 0;
+	}
+	/*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***\n",frequency.QuadPart,counter.QuadPart);*/
+	/* TODO: make calculation more accurately to ensure that overflow is impossible */
+	return ((1000 * counter.QuadPart) / frequency.QuadPart);
 }
 
 /** @} */

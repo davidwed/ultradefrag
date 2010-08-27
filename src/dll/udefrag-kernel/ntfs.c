@@ -224,7 +224,7 @@ BOOLEAN ScanMFT(void)
 
 	/* allocate memory for NTFS record */
 	nfrob_size = sizeof(NTFS_FILE_RECORD_OUTPUT_BUFFER) + ntfs_record_size - 1;
-	tm = _rdtsc();
+	tm = winx_xtime();
 	pnfrob = (PNTFS_FILE_RECORD_OUTPUT_BUFFER)winx_heap_alloc(nfrob_size);
 	if(!pnfrob){
 		DebugPrint("Not enough memory for NTFS_FILE_RECORD_OUTPUT_BUFFER!\n");
@@ -262,7 +262,7 @@ BOOLEAN ScanMFT(void)
 	DebugPrint("+-------------------------------------------------------+\n");
 	DebugPrint("|          MFT records scanning loop begins...          |\n");
 	DebugPrint("+-------------------------------------------------------+\n");
-	tm2 = _rdtsc();
+	tm2 = winx_xtime();
 	/* Is MFT size an integral of NTFS record size? */
 	/*if(MftClusters == 0 || \
 	  (MftClusters * (ULONGLONG)dx->bytes_per_cluster % (ULONGLONG)dx->ntfs_record_size) || \
@@ -313,7 +313,7 @@ BOOLEAN ScanMFT(void)
 	winx_heap_free(pnfrob);
 	winx_heap_free(pmfi);
 	//DestroyMftBlockmap();
-	time2 = _rdtsc() - tm2;
+	time2 = winx_xtime() - tm2;
 	DebugPrint("MFT records scanning loop completed in %I64u ms.\n",time2);
 	
 	/* Build paths. */
@@ -321,7 +321,7 @@ BOOLEAN ScanMFT(void)
 
 	DebugPrint("%u attribute lists entries totally processed.\n",
 		number_of_processed_attr_list_entries);
-	time = _rdtsc() - tm;
+	time = winx_xtime() - tm;
 	DebugPrint("MFT scan completed in %I64u ms.\n",time);
 	return TRUE;
 }
@@ -1748,7 +1748,7 @@ void BuildPaths(void)
 	ULONG i;
 	
 	DebugPrint("BuildPaths() started...\n");
-	tm = _rdtsc();
+	tm = winx_xtime();
 
 	/* prepare data for fast binary search */
 	mf_allocated = FALSE;
@@ -1803,7 +1803,7 @@ void BuildPaths(void)
 	
 	/* free allocated resources */
 	if(mf_allocated) winx_heap_free(mf);
-	time = _rdtsc() - tm;
+	time = winx_xtime() - tm;
 	DebugPrint("BuildPaths() completed in %I64u ms.\n",time);
 }
 
@@ -2120,9 +2120,9 @@ NTSTATUS ReadSectors(ULONGLONG lsn,PVOID buffer,ULONG length)
 	Status = NtReadFile(winx_fileno(fVolume),NULL,NULL,NULL,&ioStatus,buffer,length,&offset,NULL);
 	if(NT_SUCCESS(Status)/* == STATUS_PENDING*/){
 		DebugPrint("ReadSectors waiting started...\n");
-		tm = _rdtsc();
+		tm = winx_xtime();
 		Status = NtWaitForSingleObject(winx_fileno(fVolume),FALSE,NULL);
-		time = _rdtsc() - tm;
+		time = winx_xtime() - tm;
 		DebugPrint("ReadSectors waiting completed in %I64u ms.\n", time);
 		if(NT_SUCCESS(Status)) Status = ioStatus.Status;
 	}

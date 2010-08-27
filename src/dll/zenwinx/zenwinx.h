@@ -164,6 +164,8 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
 
 ULONGLONG __stdcall winx_str2time(char *string);
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);
+ULONGLONG __stdcall winx_xtime(void);
+#define winx_xtime_nsec() (winx_xtime() * 1000 * 1000)
 
 /**
  * @brief Generic structure describing double linked list entry.

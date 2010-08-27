@@ -130,7 +130,7 @@ int Analyze(char *volume_name)
 	else DebugPrint("Volume optimization is denied (because not possible).\n");
 	
 	/* update progress counters */
-	tm = _rdtsc();
+	tm = winx_xtime();
 	Stat.clusters_to_process = clusters_total;
 	Stat.processed_clusters = 0;
 	
@@ -179,14 +179,14 @@ int Analyze(char *volume_name)
         default: /* UDF, Ext2 and so on... */
     /*universal_scan:*/
             /* Find files */
-            tm = _rdtsc();
+            tm = winx_xtime();
             path[4] = (short)volume_letter;
             error_code = FindFiles(path);
             if(error_code < 0){
                 DebugPrint("FindFiles() failed!\n");
                 return error_code;
             }
-            time = _rdtsc() - tm;
+            time = winx_xtime() - tm;
             DebugPrint("An universal scan needs %I64u ms\n",time);
 	}
 	
@@ -377,7 +377,7 @@ void RemarkWellKnownLockedFiles(void)
 	HANDLE hFile;
 
 	DebugPrint("Well known locked files search started...\n");
-	tm = _rdtsc();
+	tm = winx_xtime();
 
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		if(pfn->is_reparse_point == FALSE && pfn->blockmap){
@@ -401,7 +401,7 @@ void RemarkWellKnownLockedFiles(void)
 		if(pfn->next_ptr == filelist) break;
 	}
 
-	time = _rdtsc() - tm;
+	time = winx_xtime() - tm;
 	DebugPrint("Well known locked files search completed in %I64u ms.\n", time);
 }
 
@@ -422,14 +422,14 @@ void CheckAllFragmentedFiles(void)
 	DebugPrint("UltraDefrag will try to open them to ensure that they are not locked.\n");
 	DebugPrint("This may take few minutes if there are many fragmented files on the disk.\n");
 	DebugPrint("\n");
-	tm = _rdtsc();
+	tm = winx_xtime();
 
 	for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
 		(void)IsFileLocked(pf->pfn);
 		if(pf->next_ptr == fragmfileslist) break;
 	}
 
-	time = _rdtsc() - tm;
+	time = winx_xtime() - tm;
 	DebugPrint("---------------------------------------------------------\n");
 	DebugPrint("Fragmented files checking completed in %I64u ms.\n",  time);
 	DebugPrint("---------------------------------------------------------\n");
@@ -451,14 +451,14 @@ void CheckAllFiles(void)
 	DebugPrint("UltraDefrag will try to open them to ensure that they are not locked.\n");
 	DebugPrint("This may take few minutes if there are many files on the disk.\n");
 	DebugPrint("\n");
-	tm = _rdtsc();
+	tm = winx_xtime();
 
 	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
 		(void)IsFileLocked(pfn);
 		if(pfn->next_ptr == filelist) break;
 	}
 
-	time = _rdtsc() - tm;
+	time = winx_xtime() - tm;
 	DebugPrint("---------------------------------------------------------\n");
 	DebugPrint("Files checking completed in %I64u ms.\n",  time);
 	DebugPrint("---------------------------------------------------------\n");
@@ -477,43 +477,6 @@ void GenerateFragmentedFilesList(void)
 			AddFileToFragmented(pfn);
 		if(pfn->next_ptr == filelist) break;
 	}
-}
-
-/**
- * @brief Returns the current time in milliseconds since...
- * @return Time, in milliseconds.
- * @note
- * - Useful for the performance measures.
- * - Has no physical meaning.
- */
-ULONGLONG _rdtsc(void)
-{
-	return _rdtsc_1() / 1000 / 1000;
-}
-
-/**
- * @brief Returns the current time in nanoseconds since...
- * @return Time, in nanoseconds. Zero indicates failure.
- * @note
- * - Useful for the performance measures.
- * - Has no physical meaning.
- */
-ULONGLONG _rdtsc_1(void)
-{
-	NTSTATUS Status;
-	LARGE_INTEGER frequency;
-	LARGE_INTEGER counter;
-	
-	Status = NtQueryPerformanceCounter(&counter,&frequency);
-	if(!NT_SUCCESS(Status)){
-		DebugPrint("NtQueryPerformanceCounter() failed: %x!\n",(UINT)Status);
-		return 0;
-	}
-	if(!frequency.QuadPart){
-		DebugPrint("Your hardware has no support for High Resolution timer!\n");
-		return 0;
-	}
-	return ((1000 * 1000 * 1000) / frequency.QuadPart) * counter.QuadPart;
 }
 
 /** @} */

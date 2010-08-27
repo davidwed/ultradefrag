@@ -213,9 +213,6 @@ BOOLEAN ScanMFT(void);
 void CheckForNtfsPartition(void);
 NTSTATUS ReadSectors(ULONGLONG lsn,PVOID buffer,ULONG length);
 
-ULONGLONG _rdtsc(void);
-ULONGLONG _rdtsc_1(void);
-
 BOOLEAN CheckForStopEvent(void);
 
 wchar_t * __cdecl wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);

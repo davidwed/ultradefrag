@@ -54,6 +54,7 @@ EXPORTS
 	winx_dbg_print_ex
 	winx_str2time@4
 	winx_time2str@16
+	winx_xtime@0
 	winx_list_insert_item@12
 	winx_list_remove_item@8
 	winx_list_destroy@4

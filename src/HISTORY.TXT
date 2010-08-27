@@ -8,7 +8,7 @@ HISTORY
       this removes the limitation of boot-on/off not working before reboot/shutdown
     - interactive mode at boot time now displays help split into pages
     - escape key handling added to break the boot time script execution
-    - winx_kb_read() call added to zenwinx library
+    - winx_kb_read(), winx_xtime() calls added to zenwinx library
     - corrected cluttered progress display if console output was redirected
     - optimized timeout for waiting for a keyboard event
     RC1:
