@@ -100,7 +100,9 @@ void display_history(winx_history *h)
 	if(h == NULL) return;
 	if(h->head == NULL) return;
 
-    row_count = h->n_entries + 3;
+	winx_printf("\n");
+
+    row_count = h->n_entries + 2;
     /* if there are more then HELP_DISPLAY_ROWS to display,
     we must further reduce the page limit */
     page_limit = (row_count > HELP_DISPLAY_ROWS) ? HELP_DISPLAY_ROWS-3 : HELP_DISPLAY_ROWS;
@@ -109,12 +111,9 @@ void display_history(winx_history *h)
 	for(i = 0; i < row_count; i++){
 		switch(i){
 		case 0:
-			winx_printf("\n");
-			break;
-		case 1:
 			winx_printf("Typed commands history:\n");
 			break;
-		case 2:
+		case 1:
 			winx_printf("\n");
 			break;
 		default:
