@@ -437,7 +437,7 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 				/* handle escape key */
 				if(kbd_rec.wVirtualScanCode == 0x1){
 					/* truncate the string if escape pressed */
-					string[0] = 0;
+					RtlZeroMemory(string,n);
 					i = 0;
 				}
 				/* handle backspace key */
@@ -459,6 +459,7 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 							if(h->current != h->head)
 								h->current = h->current->prev_ptr;
 							if(h->current->string){
+								RtlZeroMemory(string,n);
 								strcpy(string,h->current->string);
 								i = strlen(string);
 							}
@@ -467,6 +468,7 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 							if(h->current->next_ptr != h->head){
 								h->current = h->current->next_ptr;
 								if(h->current->string){
+									RtlZeroMemory(string,n);
 									strcpy(string,h->current->string);
 									i = strlen(string);
 								}
