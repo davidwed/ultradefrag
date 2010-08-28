@@ -397,6 +397,7 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 	int buffer_length;
 	char format[16];
 	int i, ch, line_length;
+	int history_listed_to_the_last_entry = 0;
 
 	if(!string){
 		winx_printf("\nwinx_prompt_ex() invalid string!\n");
@@ -456,8 +457,15 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 					if(h->head && h->current){
 						if(kbd_rec.wVirtualScanCode == 0x48){
 							/* list history back */
-							if(h->current != h->head)
-								h->current = h->current->prev_ptr;
+							if(h->current == h->head->prev_ptr && \
+							  !history_listed_to_the_last_entry){
+								/* set the flag and don't list back */
+								history_listed_to_the_last_entry = 1;
+							} else {
+								if(h->current != h->head)
+									h->current = h->current->prev_ptr;
+								history_listed_to_the_last_entry = 0;
+							}
 							if(h->current->string){
 								RtlZeroMemory(string,n);
 								strcpy(string,h->current->string);
@@ -472,10 +480,19 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 									strcpy(string,h->current->string);
 									i = strlen(string);
 								}
+								if(h->current == h->head->prev_ptr)
+									history_listed_to_the_last_entry = 1;
+								else
+									history_listed_to_the_last_entry = 0;
 							}
 						}
 					}
 				}
+				
+				/* clear history_listed_to_the_last_entry flag */
+				if(ch != 0 || kbd_rec.wVirtualScanCode == 0x1)
+					history_listed_to_the_last_entry = 0;
+				
 				/* redraw the prompt */
 				_snprintf(buffer,buffer_length,"%s%s",prompt,string);
 				buffer[buffer_length - 1] = 0;
