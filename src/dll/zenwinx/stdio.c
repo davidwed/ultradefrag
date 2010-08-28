@@ -490,7 +490,7 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 				}
 				
 				/* clear history_listed_to_the_last_entry flag */
-				if(ch != 0 || kbd_rec.wVirtualScanCode == 0x1)
+				if(ch == 0x08 || kbd_rec.wVirtualScanCode == 0x1)
 					history_listed_to_the_last_entry = 0;
 				
 				/* redraw the prompt */
@@ -520,9 +520,12 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 			winx_putch('\n');
 			goto done;
 		}
-
+		
 		/* we have an ordinary character, append it to the string */
 		string[i] = (char)ch;
+		
+		/* clear the flag in case of ordinary characters typed */
+		history_listed_to_the_last_entry = 0;
 	}
 	winx_printf("\nwinx_prompt_ex() buffer overflow!\n");
 
