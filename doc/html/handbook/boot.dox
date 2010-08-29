@@ -121,6 +121,9 @@
  * (which requires much less resources at boot time!) and leave safely your
  * computer. It will be shut down automatically after a job completion.
  *
+ * To abort the script execution and enter the interactive mode immediately
+ * hit <b>ESC</b> at any time during boot script processing.
+ *
  * <h1>Interactive mode</h1>
  * When the exit command is missing in the boot time script UltraDefrag
  * runs in interactive mode after the last script command execution. In
@@ -133,11 +136,16 @@ Type 'help' for list of supported commands.
 #
 @endverbatim
  *
- * Currently there are just few simple commands supported in this mode.
- * To show a full list of commands type help. To continue the
- * Windows boot process type exit.
- * To abort the script execution and enter the interactive mode immediately
- * hit <b>ESC</b> at any time during boot script processing.
+ * The following commands are accepted:
+ * <dl>
+ * <dt>help</dt>
+ * <dd>Show a list of all available commands.</dd>
+ * <dt>history</dt>
+ * <dd>Show a list of all manually entered commands.
+ * To cycle through the commands use the up/down arrow/cursor keys.</dd>
+ * <dt>All boot script commands</dt>
+ * <dd>See the list above.</dd>
+ * </dl>
  *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 100%;">
