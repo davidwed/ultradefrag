@@ -69,7 +69,8 @@
  * <dd>Disable showing commands on the screen.</dd>
  * <dt>set</dt>
  * <dd>Set an environment variable. This is a native equivalent of the
- * appropriate Windows command.</dd>
+ * appropriate Windows command.
+ * For further information about the variables consult the @ref Console page.</dd>
  * <dt>udefrag</dt>
  * <dd>This is a native equivalent of the UltraDefrag command line tool.
  * The following keys are supported: -la, -l, -a, -o, --all, --all-fixed.
@@ -135,6 +136,8 @@ Type 'help' for list of supported commands.
  * Currently there are just few simple commands supported in this mode.
  * To show a full list of commands type help. To continue the
  * Windows boot process type exit.
+ * To abort the script execution and enter the interactive mode immediately
+ * hit <b>ESC</b> at any time during boot script processing.
  *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 100%;">
