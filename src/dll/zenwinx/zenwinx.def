@@ -41,6 +41,7 @@ EXPORTS
 	winx_fwrite
 	winx_ioctl
 	winx_fflush
+	winx_fsize
 	winx_fclose
 	winx_create_directory
 	winx_delete_file

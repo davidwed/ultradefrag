@@ -154,6 +154,7 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length);
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
 size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
+ULONGLONG __stdcall winx_fsize(WINX_FILE *f);
 void   __stdcall winx_fclose(WINX_FILE *f);
 int __stdcall winx_ioctl(WINX_FILE *f,
                          int code,char *description,

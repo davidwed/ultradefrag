@@ -229,6 +229,30 @@ int __stdcall winx_fflush(WINX_FILE *f)
 }
 
 /**
+ * @brief Retrieves the size of the file.
+ * @param[in] f pointer to structure returned
+ * by winx_fopen() call.
+ * @return The size of the file, in bytes.
+ */
+ULONGLONG __stdcall winx_fsize(WINX_FILE *f)
+{
+	NTSTATUS status;
+	IO_STATUS_BLOCK iosb;
+	FILE_STANDARD_INFORMATION fsi;
+
+	DbgCheck1(f,"winx_fsize",0);
+
+	status = NtQueryInformationFile(f->hFile,&iosb,
+		&fsi,sizeof(FILE_STANDARD_INFORMATION),
+		FileStandardInformation);
+	if(!NT_SUCCESS(status)){
+		DebugPrintEx(status,"NtQueryInformationFile(FileStandardInformation) failed");
+		return 0;
+	}
+	return fsi.EndOfFile.QuadPart;
+}
+
+/**
  * @brief fclose() native equivalent.
  */
 void __stdcall winx_fclose(WINX_FILE *f)
