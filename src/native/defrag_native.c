@@ -178,7 +178,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	* 60 characters long to ensure that escape and backspace
 	* keys will work properly with winx_prompt() function.
 	*/
-	char buffer[60];
+	char buffer[MAX_LINE_WIDTH + 1];
 	winx_history h;
 
 	/* 1. Initialization */
@@ -291,7 +291,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		}
 		/* handle test command */
 		if(!strcmp(buffer,"test")){
-			winx_print_array_of_strings(strings,59,HELP_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,1);
+			winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
+				HELP_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,1);
 			continue;
 		}
 		/* handle exit command */

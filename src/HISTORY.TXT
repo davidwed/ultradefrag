@@ -6,12 +6,13 @@ HISTORY
     - history of typed commands added to the boot time interactive mode;
       navigation is possible by arrow keys, 'history' command can be used
       to list all typed commands
+    - type command added to the boot time interface
     - clearing of the failed boot flag added for reboot and shutdown at boot time
     - pending boot-off boot time script command support added,
       this removes the limitation of boot-on/off not working before reboot/shutdown
     - interactive mode at boot time now displays help split into pages
     - escape key handling added to break the boot time script execution
-    - winx_kb_read(), winx_xtime(), winx_prompt_ex(),
+    - winx_fsize(), winx_kb_read(), winx_xtime(), winx_prompt_ex(),
       winx_print_array_of_strings() calls added to zenwinx library
     - corrected cluttered progress display if console output was redirected
     - optimized timeout for waiting for a keyboard event
