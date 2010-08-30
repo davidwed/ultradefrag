@@ -24,6 +24,8 @@
 #ifndef _ZENWINX_H_
 #define _ZENWINX_H_
 
+#define DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page..."
+
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif

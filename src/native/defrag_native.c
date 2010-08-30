@@ -87,7 +87,7 @@ void display_help(void)
         winx_printf("%s\n",help_message[i]);
         
         if((i > 0) && ((i % page_limit) == 0)){
-            winx_printf("\n      Hit any key to display next page...\n");
+            winx_printf("\n%s\n", DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY);
             while(1){
                 if(winx_kbhit(100) >= 0) break;
             }
@@ -129,7 +129,7 @@ void display_history(winx_history *h)
 		}
         
         if((i > 0) && ((i % page_limit) == 0)){
-            winx_printf("\n      Hit any key to display next page...\n");
+            winx_printf("\n%s\n", DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY);
             while(1){
                 if(winx_kbhit(100) >= 0) break;
             }
@@ -291,7 +291,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		}
 		/* handle test command */
 		if(!strcmp(buffer,"test")){
-			winx_print_array_of_strings(strings,59,HELP_DISPLAY_ROWS,"    Hit any key to continue...",1);
+			winx_print_array_of_strings(strings,59,HELP_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,1);
 			continue;
 		}
 		/* handle exit command */

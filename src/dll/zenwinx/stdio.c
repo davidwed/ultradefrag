@@ -551,7 +551,6 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 	return winx_prompt_ex(prompt,string,n,NULL);
 }
 
-#define DEFAULT_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page..."
 #define DEFAULT_TAB_WIDTH 2
 
 /* returns 1 if break or escape was pressed, zero otherwise */
@@ -641,7 +640,7 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 		DebugPrint("winx_print_array_of_strings(): max_rows = 0!\n");
 		return (-1);
 	}
-	if(prompt == NULL) prompt = DEFAULT_PROMPT_TO_HIT_ANY_KEY;
+	if(prompt == NULL) prompt = DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY;
 	
 	/* allocate space for prompt on the screen */
 	max_rows -= 3;
