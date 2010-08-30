@@ -19,6 +19,7 @@ EXPORTS
 	winx_prompt_ex
 	winx_init_history
 	winx_destroy_history
+	winx_print_array_of_strings
 	winx_kbhit
 	winx_breakhit
 	winx_kb_read

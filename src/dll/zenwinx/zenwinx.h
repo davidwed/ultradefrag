@@ -115,6 +115,8 @@ void __cdecl winx_init_history(winx_history *h);
 int  __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h);
 void __cdecl winx_destroy_history(winx_history *h);
 
+int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages);
+
 /*
 * Note: winx_scanf() can not be implemented;
 * use winx_gets() and sscanf() instead.

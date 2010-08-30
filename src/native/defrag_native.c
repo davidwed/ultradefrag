@@ -138,6 +138,39 @@ void display_history(winx_history *h)
     }
 }
 
+char *strings[] = {
+	"Sherlock Holmes took his bottle from the corner of the mantelpiece, "
+	"and his hypodermic syringe from its neat morocco case. With his long, "
+	"white, nervous fingers he adjusted the delicate needle and rolled back "
+	"his left shirtcuff. For some little time his eyes rested thoughtfully "
+	"upon the sinewy forearm and wrist, all dotted and scarred with innumerable "
+	"puncture-marks. Finally, he thrust the sharp point home, pressed down the tiny "
+	"piston, and sank back into the velvet-lined armchair with a long sigh of satisfaction.",
+	"",
+	"Three times a day for many months I had witnessed this performance, "
+	"but custom had not reconciled my mind to it. On the contrary, from "
+	"day to day I had become more irritable at the sight, and my conscience "
+	"swelled nightly within me at the thought that I had lacked the courage "
+	"to protest. Again and again I had registered a vow that I should deliver "
+	"my soul upon the subject; but there was that in the cool, nonchalant air "
+	"of my companion which made him the last man with whom one would care to "
+	"take anything approaching to a liberty. His great powers, his masterly manner, "
+	"and the experience which I had had of his many extraordinary qualities, all "
+	"made me diffident and backward in crossing him. ",
+	"",
+	"Yet upon that afternoon, whether it was the Beaune which I had taken with "
+	"my lunch or the additional exasperation produced by the extreme deliberation "
+	"of his manner, I suddenly felt that I could hold out no longer. ",
+	"",
+	"this_is_a_very_very_long_word_qwertyuiop[]asdfghjkl;'zxcvbnm,./1234567890~!@#$#$#%$^%$^%&^&(*&(**)(*",
+	"",
+	"first line \rsecond\nthird\r\n4th\n\r5th\n",
+	"",
+	"before_tab\tafter_tab\t\tafter_two_tabs",
+	"",
+	NULL
+};
+
 void __stdcall NtProcessStartup(PPEB Peb)
 {
 	int safe_mode, error_code, result, i;
@@ -254,6 +287,11 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		/* handle history command */
 		if(!strcmp(buffer,"history")){
 			display_history(&h);
+			continue;
+		}
+		/* handle test command */
+		if(!strcmp(buffer,"test")){
+			winx_print_array_of_strings(strings,59,HELP_DISPLAY_ROWS,"    Hit any key to continue...",1);
 			continue;
 		}
 		/* handle exit command */

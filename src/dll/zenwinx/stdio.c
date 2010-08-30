@@ -551,4 +551,197 @@ int __cdecl winx_prompt(char *prompt,char *string,int n)
 	return winx_prompt_ex(prompt,string,n,NULL);
 }
 
+#define DEFAULT_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page..."
+#define DEFAULT_TAB_WIDTH 2
+
+/* returns 1 if break or escape was pressed, zero otherwise */
+static int print_line(char *line_buffer,char *prompt,int max_rows,int *rows_printed,int last_line)
+{
+	KBD_RECORD kbd_rec;
+	int escape_detected = 0;
+	int break_detected = 0;
+
+	winx_printf("%s\n",line_buffer);
+	(*rows_printed) ++;
+	
+	if(*rows_printed == max_rows && !last_line){
+		*rows_printed = 0;
+		winx_printf("\n%s\n",prompt);
+		/* wait for any key */
+		while(winx_kb_read(&kbd_rec,100) < 0){}
+		/* check for escape */
+		if(kbd_rec.wVirtualScanCode == 0x1){
+			escape_detected = 1;
+		} else if(kbd_rec.wVirtualScanCode == 0x1d){
+			/* distinguish between control keys and break key */
+			if(!(kbd_rec.dwControlKeyState & LEFT_CTRL_PRESSED) && \
+			  !(kbd_rec.dwControlKeyState & RIGHT_CTRL_PRESSED)){
+				break_detected = 1;
+			}
+		}
+		winx_printf("\n");
+		if(escape_detected || break_detected) return 1;
+	}
+	return 0;
+}
+
+/**
+ * @brief Displays text on the screen,
+ * divided to pages if requested so.
+ * Accepts array of strings as an input.
+ * @param[in] strings - array of strings
+ * to be displayed. Last entry of it
+ * must be NULL to indicate the end of
+ * array.
+ * @param[in] line_width - maximum line
+ * width, in characters.
+ * @param[in] max_rows - maximum number
+ * of lines on the screen.
+ * @param[in] prompt - the string to be
+ * displayed as a prompt to hit any key
+ * to list forward.
+ * @param[in] divide_to_pages - boolean
+ * value indicating whether the text
+ * must be divided to pages or not.
+ * If this parameter is zero, all others,
+ * except of the first one, will be
+ * ignored.
+ * @note If user hits Escape or Pause
+ * at the prompt, text listing breaks
+ * immediately.
+ * @return Zero for success, negative
+ * value otherwise.
+ */
+int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages)
+{
+	int i, j, k, index, length;
+	char *line_buffer, *second_buffer;
+	int n, r;
+	int rows_printed;
+	
+	/* check the main parameter for correctness */
+	if(!strings){
+		DebugPrint("winx_print_array_of_strings(): strings = NULL!\n");
+		return (-1);
+	}
+	
+	/* handle situation when text must be displayed entirely */
+	if(!divide_to_pages){
+		for(i = 0; strings[i] != NULL; i++)
+			winx_printf("%s\n",strings[i]);
+		return 0;
+	}
+
+	/* check other parameters */
+	if(!line_width){
+		DebugPrint("winx_print_array_of_strings(): line_width = 0!\n");
+		return (-1);
+	}
+	if(!max_rows){
+		DebugPrint("winx_print_array_of_strings(): max_rows = 0!\n");
+		return (-1);
+	}
+	if(prompt == NULL) prompt = DEFAULT_PROMPT_TO_HIT_ANY_KEY;
+	
+	/* allocate space for prompt on the screen */
+	max_rows -= 3;
+	
+	/* allocate memory for line buffer */
+	line_buffer = winx_heap_alloc(line_width + 1);
+	if(!line_buffer){
+		DebugPrint("Cannot allocate %u bytes of memory for winx_print_array_of_strings()!",
+			line_width + 1);
+		return (-1);
+	}
+	/* allocate memory for second ancillary buffer */
+	second_buffer = winx_heap_alloc(line_width + 1);
+	if(!second_buffer){
+		DebugPrint("Cannot allocate %u bytes of memory for winx_print_array_of_strings()!",
+			line_width + 1);
+		winx_heap_free(line_buffer);
+		return (-1);
+	}
+	
+	/* start to display strings */
+	rows_printed = 0;
+	for(i = 0; strings[i] != NULL; i++){
+		line_buffer[0] = 0;
+		index = 0;
+		length = strlen(strings[i]);
+		for(j = 0; j < length; j++){
+			/* handle \n, \r, \r\n, \n\r sequencies */
+			n = r = 0;
+			if(strings[i][j] == '\n') n = 1;
+			else if(strings[i][j] == '\r') r = 1;
+			if(n || r){
+				/* print buffer */
+				line_buffer[index] = 0;
+				if(print_line(line_buffer,prompt,max_rows,&rows_printed,0))
+					goto cleanup;
+				/* reset buffer */
+				line_buffer[0] = 0;
+				index = 0;
+				/* skip sequence */
+				j++;
+				if(j == length) goto print_rest_of_string;
+				if((strings[i][j] == '\n' && r) || (strings[i][j] == '\r' && n)){
+					continue;
+				} else {
+					/* we have an ordinary character or tabulation -> process them */
+				}
+			}
+			/* handle horizontal tabulation by replacing it by DEFAULT_TAB_WIDTH spaces */
+			if(strings[i][j] == '\t'){
+				for(k = 0; k < DEFAULT_TAB_WIDTH; k++){
+					line_buffer[index] = 0x20;
+					index ++;
+					if(index == line_width){
+						if(j == length - 1) goto print_rest_of_string;
+						line_buffer[index] = 0;
+						if(print_line(line_buffer,prompt,max_rows,&rows_printed,0))
+							goto cleanup;
+						line_buffer[0] = 0;
+						index = 0;
+						break;
+					}
+				}
+				continue;
+			}
+			/* handle ordinary characters */
+			line_buffer[index] = strings[i][j];
+			index ++;
+			if(index == line_width){
+				if(j == length - 1) goto print_rest_of_string;
+				line_buffer[index] = 0;
+				/* break line between words, if possible */
+				for(k = index - 1; k > 0; k--){
+					if(line_buffer[k] == 0x20) break;
+				}
+				if(line_buffer[k] == 0x20){ /* space character found */
+					strcpy(second_buffer,line_buffer + k + 1);
+					line_buffer[k] = 0;
+					if(print_line(line_buffer,prompt,max_rows,&rows_printed,0))
+						goto cleanup;
+					strcpy(line_buffer,second_buffer);
+					index = strlen(line_buffer);
+				} else {
+					if(print_line(line_buffer,prompt,max_rows,&rows_printed,0))
+						goto cleanup;
+					line_buffer[0] = 0;
+					index = 0;
+				}
+			}
+		}
+print_rest_of_string:
+		line_buffer[index] = 0;
+		if(print_line(line_buffer,prompt,max_rows,&rows_printed,
+			(strings[i+1] == NULL) ? 1 : 0)) goto cleanup;
+	}
+
+cleanup:
+	winx_heap_free(line_buffer);
+	winx_heap_free(second_buffer);
+	return 0;
+}
+
 /** @} */
