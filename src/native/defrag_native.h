@@ -45,6 +45,9 @@
 
 /* define how many characters may be
    printed on line after a prompt */
-#define MAX_LINE_WIDTH 60
+#define MAX_LINE_WIDTH 70
+
+/* message to terminate volume processing */
+#define BREAK_MESSAGE "Use Pause/Break key to abort the process.\n\n"
 
 #endif /* _DEFRAG_NATIVE_H_ */
