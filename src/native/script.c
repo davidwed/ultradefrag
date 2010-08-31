@@ -356,6 +356,95 @@ void SavePendingBootOffState(void)
 	winx_fclose(f);
 }
 
+void HandleTypeCommand()
+{
+	short *filename;
+	char path[MAX_PATH];
+	WINX_FILE *f;
+	ULONGLONG size;
+	unsigned int length, n;
+	unsigned char *buffer, *second_buffer;
+	int unicode_detected;
+	char *strings[] = { NULL, NULL };
+	
+	/* extract filename */
+	filename = command + wcslen(L"type");
+	while(filename[0] == 0x20 || filename[0] == '\t')
+		filename ++;
+	
+	/* display boot time script if filename is missing */
+	if(filename[0] == 0){
+		if(winx_get_windows_directory(path,MAX_PATH) < 0){
+			winx_printf("\nCannot retrieve the Windows directory path!\n\n");
+			return;
+		}
+		(void)strncat(path,"\\system32\\ud-boot-time.cmd",
+				MAX_PATH - strlen(path) - 1);
+	} else {
+		(void)_snprintf(path,MAX_PATH - 1,"\\??\\%ws",filename);
+		path[MAX_PATH - 1] = 0;
+	}
+	
+	/* open the file */
+	f = winx_fopen(path,"r");
+	if(f == NULL){
+		winx_printf("\nCannot open %s file!\n\n",path);
+		return;
+	}
+	
+	/* read the file entirely and display its contents */
+	size = winx_fsize(f);
+	if(size == 0) goto cleanup;
+	if(size > 0xFFFFFFFF){
+		winx_printf("\nFiles larger than ~4Gb aren't supported!\n\n");
+		goto cleanup;
+	}
+	length = (unsigned int)size;
+	buffer = winx_heap_alloc(length + 1);
+	if(buffer == NULL){
+		winx_printf("\nCannot allocate %u bytes of memory!\n\n",length + 1);
+		goto cleanup;
+	}
+	n = winx_fread(buffer,1,length,f);
+	if(n == 0 || n > length){
+		winx_heap_free(buffer);
+		goto cleanup;
+	}
+	buffer[n] = 0;
+	length = n;
+	/* check for UTF-16 signature which exists in files edited in Notepad */
+	unicode_detected = 0;
+	if(length >= 2){
+		if(buffer[0] == 0xFF && buffer[1] == 0xFE)
+			unicode_detected = 1;
+	}
+	if(unicode_detected){
+		second_buffer = winx_heap_alloc(length + 1);
+		if(second_buffer == NULL){
+			winx_printf("\nCannot allocate %u bytes of memory!\n\n",length + 1);
+			winx_heap_free(buffer);
+			goto cleanup;
+		}
+		(void)_snprintf(second_buffer,length + 1,"%ws",(short *)(buffer + 2));
+		second_buffer[length] = 0;
+		strings[0] = second_buffer;
+		winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
+			HELP_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,
+			(scripting_mode == TRUE) ? 0 : 1);
+		winx_heap_free(second_buffer);
+	} else {
+		strings[0] = buffer;
+		winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
+			HELP_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,
+			(scripting_mode == TRUE) ? 0 : 1);
+	}
+	winx_heap_free(buffer);
+	
+cleanup:	
+	/* close the file */
+	winx_fclose(f);
+}
+
 void ParseCommand(void)
 {
 	int echo_cmd = 0;
@@ -391,6 +480,11 @@ void ParseCommand(void)
 	/* handle set command */
 	if((short *)wcsstr(command,L"set") == command){
 		SetEnvVariable();
+		return;
+	}
+	/* handle type command */
+	if((short *)wcsstr(command,L"type") == command){
+		HandleTypeCommand();
 		return;
 	}
 	/* handle udefrag command */
