@@ -53,8 +53,6 @@ int progress_line_length = 0;
 #define NAME_BUF_SIZE (sizeof(name_buffer) / sizeof(short))
 #define VALUE_BUF_SIZE (sizeof(value_buffer) / sizeof(short))
 
-#define BREAK_MESSAGE "Use Pause/Break key to abort the process.\n\n"
-
 /*
 * boot-off command modifies registry, 
 * but shutdown\reboot commands releases its effect,
