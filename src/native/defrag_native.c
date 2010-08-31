@@ -164,7 +164,7 @@ char *strings[] = {
 	"",
 	"this_is_a_very_very_long_word_qwertyuiop[]asdfghjkl;'zxcvbnm,./1234567890~!@#$#$#%$^%$^%&^&(*&(**)(*",
 	"",
-	"first line \rsecond\nthird\r\n4th\n\r5th\n",
+	"first line \rsecond\nthird\r\n4th\n\r5th\n\n\n8th",
 	"",
 	"before_tab\tafter_tab\t\tafter_two_tabs",
 	"",

@@ -686,6 +686,11 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 				if((strings[i][j] == '\n' && r) || (strings[i][j] == '\r' && n)){
 					continue;
 				} else {
+					if(strings[i][j] == '\n' || strings[i][j] == '\r'){
+						/* process repeating new lines */
+						j--;
+						continue;
+					}
 					/* we have an ordinary character or tabulation -> process them */
 				}
 			}

@@ -33,7 +33,7 @@ char *strings[] = {
 	"",
 	"this_is_a_very_very_long_word_qwertyuiop[]asdfghjkl;'zxcvbnm,./1234567890~!@#$#$#%$^%$^%&^&(*&(**)(*",
 	"",
-	"first line \rsecond\nthird\r\n4th\n\r5th\n",
+	"first line \rsecond\nthird\r\n4th\n\r5th\n\n\n8th",
 	"",
 	"before_tab\tafter_tab\t\tafter_two_tabs",
 	"",
@@ -129,6 +129,11 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 				if((strings[i][j] == '\n' && r) || (strings[i][j] == '\r' && n)){
 					continue;
 				} else {
+					if(strings[i][j] == '\n' || strings[i][j] == '\r'){
+						/* process repeating new lines */
+						j--;
+						continue;
+					}
 					/* we have an ordinary character or tabulation -> process them */
 				}
 			}
