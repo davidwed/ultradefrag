@@ -186,12 +186,10 @@ int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
 {
 	KEYBOARD_INPUT_DATA kbd;
 
-	if(kb_read(&kbd,msec) < 0) return (-1);
-	IntTranslateKey(&kbd,kbd_rec);
-	if(!kbd_rec->bKeyDown){
-		/*winx_printf("\nwinx_kb_read(): The key was released!\n");*/
-		return (-1);
-	}
+	do{
+		if(kb_read(&kbd,msec) < 0) return (-1);
+		IntTranslateKey(&kbd,kbd_rec);
+	} while(!kbd_rec->bKeyDown); /* skip key up events */
 	return (int)kbd_rec->AsciiChar;
 }
 
@@ -211,8 +209,12 @@ int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
 int __cdecl winx_breakhit(int msec)
 {
 	KEYBOARD_INPUT_DATA kbd;
+	KBD_RECORD kbd_rec;
 
-	if(kb_read(&kbd,msec) < 0) return (-1);
+	do{
+		if(kb_read(&kbd,msec) < 0) return (-1);
+		IntTranslateKey(&kbd,&kbd_rec);
+	} while(!kbd_rec.bKeyDown); /* skip key up events */
 	if((kbd.Flags & KEY_E1) && (kbd.MakeCode == 0x1d)) return 0;
 	/*winx_printf("\nwinx_breakhit(): Other key was pressed.\n");*/
 	return (-1);
