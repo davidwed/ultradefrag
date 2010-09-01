@@ -569,7 +569,9 @@ static int print_line(char *line_buffer,char *prompt,int max_rows,int *rows_prin
 		*rows_printed = 0;
 		winx_printf("\n%s\n",prompt);
 		/* wait for any key */
-		while(winx_kb_read(&kbd_rec,100) < 0){}
+		if(winx_kb_read(&kbd_rec,INFINITE) < 0){
+			return 1; /* break in case of errors */
+		}
 		/* check for escape */
 		if(kbd_rec.wVirtualScanCode == 0x1){
 			escape_detected = 1;
