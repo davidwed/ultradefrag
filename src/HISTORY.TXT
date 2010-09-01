@@ -18,7 +18,7 @@ HISTORY
     - optimized timeout for waiting for a keyboard event
     - the following translations were updated:
 
-      Portuguese, 
+      Portuguese, Chinese (Traditional)
     RC1:
     - partial defragmentation was added to decrease number of fragments
       even when there are no free space on disk
