@@ -13,6 +13,7 @@ HISTORY
     - interactive mode at boot time now displays help split into pages
     - escape key handling added to break the boot time script execution
     - winx_fsize(), winx_kb_read(), winx_xtime(), winx_prompt_ex(),
+      winx_get_file_contents(), winx_release_file_contents(),
       winx_print_array_of_strings() calls added to zenwinx library
     - corrected cluttered progress display if console output was redirected
     - optimized timeout for waiting for a keyboard event

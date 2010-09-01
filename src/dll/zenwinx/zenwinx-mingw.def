@@ -45,6 +45,8 @@ EXPORTS
 	winx_fclose@4
 	winx_create_directory@4
 	winx_delete_file@4
+	winx_get_file_contents@8
+	winx_release_file_contents@4
 	winx_query_env_variable@12
 	winx_set_env_variable@8
 	winx_query_symbolic_link@12

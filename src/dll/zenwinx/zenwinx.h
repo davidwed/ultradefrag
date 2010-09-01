@@ -164,6 +164,8 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 int __stdcall winx_fflush(WINX_FILE *f);
 int __stdcall winx_create_directory(const char *path);
 int __stdcall winx_delete_file(const char *filename);
+void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read);
+void __stdcall winx_release_file_contents(void *contents);
 
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);

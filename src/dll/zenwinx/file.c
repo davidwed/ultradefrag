@@ -340,4 +340,75 @@ int __stdcall winx_delete_file(const char *filename)
 	return 0;
 }
 
+/**
+ * @brief Reads file entirely and returns
+ * pointer to data read.
+ * @param[in] filename the native path to the file.
+ * @param[out] bytes_read number of bytes read.
+ * @return Pointer to data, NULL indicates failure.
+ * @note Returned buffer is two bytes larger than
+ * the file contents. This allows to add terminal
+ * zero easily.
+ */
+void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read)
+{
+	WINX_FILE *f;
+	ULONGLONG size;
+	size_t length, n_read;
+	void *contents;
+	
+	if(bytes_read) *bytes_read = 0;
+	
+	DbgCheck1(filename,"winx_get_file_contents",NULL);
+	
+	f = winx_fopen(filename,"r");
+	if(f == NULL){
+		winx_printf("\nCannot open %s file!\n\n",filename);
+		return NULL;
+	}
+	
+	size = winx_fsize(f);
+	if(size == 0){
+		winx_fclose(f);
+		return NULL;
+	}
+	
+#ifndef _WIN64
+	if(size > 0xFFFFFFFF){
+		winx_printf("\n%s: Files larger than ~4Gb aren't supported!\n\n",
+			filename);
+		winx_fclose(f);
+		return NULL;
+	}
+#endif
+	length = (size_t)size;
+	
+	contents = winx_heap_alloc(length + 2);
+	if(contents == NULL){
+		winx_printf("\n%s: Cannot allocate %u bytes of memory!\n\n",
+			filename,length + 2);
+		winx_fclose(f);
+		return NULL;
+	}
+	
+	n_read = winx_fread(contents,1,length,f);
+	if(n_read == 0 || n_read > length){
+		winx_heap_free(contents);
+		winx_fclose(f);
+		return NULL;
+	}
+	
+	if(bytes_read) *bytes_read = n_read;
+	return contents;
+}
+
+/**
+ * @brief Releases memory allocated
+ * by winx_get_file_contents().
+ */
+void __stdcall winx_release_file_contents(void *contents)
+{
+	if(contents) winx_heap_free(contents);
+}
+
 /** @} */
