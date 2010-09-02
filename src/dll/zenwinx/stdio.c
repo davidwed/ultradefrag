@@ -319,6 +319,8 @@ void __cdecl winx_init_history(winx_history *h)
  * @brief Destroys commands history.
  * @param[in] h pointer to structure holding
  * the commands history.
+ * @note There is no need to call winx_init_history()
+ * after this call to reinitialize the structure.
  */
 void __cdecl winx_destroy_history(winx_history *h)
 {
