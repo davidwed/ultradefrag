@@ -117,7 +117,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	*/
 	char buffer[MAX_LINE_WIDTH + 1];
 	short wbuffer[MAX_LINE_WIDTH + 1];
-	int i, error_code;
+	int i;
 
 	/* initialize the program */
 	NativeAppInit();
@@ -165,19 +165,6 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_printf(".");
 	}
 	winx_printf("\n\n");
-
-	/* initialize UltraDefrag driver */
-	error_code = udefrag_init();
-	if(error_code < 0){
-		winx_printf("\nInitialization failed!\n");
-		winx_printf("%s\n",udefrag_get_error_description(error_code));
-		winx_printf("Wait 10 seconds ...\n");
-		long_dbg_delay(); /* show error message at least 10 seconds */
-		winx_printf("Good bye ...\n");
-		(void)udefrag_unload();
-		udefrag_monolithic_native_app_unload();
-		winx_exit(1);
-	}
 
 	/* process boot time script */
 	ProcessScript();

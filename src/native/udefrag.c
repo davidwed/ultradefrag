@@ -229,6 +229,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	char letter;
 	volume_info *v;
 	int debug_level;
+	int error_code;
 	
 	(void)envp;
 	
@@ -301,6 +302,15 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 
 	debug_level = GetDebugLevel();
 	
+	/* initialize ultradefrag engine */
+	error_code = udefrag_init();
+	if(error_code < 0){
+		winx_printf("\n%ws: Initialization failed!\n",argv[0]);
+		winx_printf("%s\n",udefrag_get_error_description(error_code));
+		(void)udefrag_unload();
+		return (-1);
+	}
+	
 	/* process volumes specified on the command line */
 	for(i = 0; i < n_letters; i++){
 		if(abort_flag) break;
@@ -309,13 +319,16 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		if(debug_level > DBG_NORMAL) winx_sleep(5000);
 	}
 
-	if(abort_flag)
+	if(abort_flag){
+		(void)udefrag_unload();
 		return 0;
+	}
 	
 	/* process all volumes if requested */
 	if(all_flag || all_fixed_flag){
 		if(udefrag_get_avail_volumes(&v,all_fixed_flag ? TRUE : FALSE) < 0){
 			winx_printf("\n%ws: udefrag_get_avail_volumes() failed!\n\n",argv[0]);
+			(void)udefrag_unload();
 			return (-1);
 		}
 		for(i = 0;;i++){
@@ -326,5 +339,6 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			if(debug_level > DBG_NORMAL) winx_sleep(5000);
 		}
 	}
+	(void)udefrag_unload();
 	return 0;
 }

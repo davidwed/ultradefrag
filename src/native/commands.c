@@ -392,6 +392,7 @@ int __cdecl boot_on_handler(int argc,short **argv,short **envp)
 
 /**
  * @brief boot-off command handler.
+ * @note May be used without parameters.
  */
 int __cdecl boot_off_handler(int argc,short **argv,short **envp)
 {
@@ -418,7 +419,6 @@ int __cdecl shutdown_handler(int argc,short **argv,short **envp)
 	(void)envp;
 	
 	winx_printf("Shutdown ...");
-	(void)udefrag_unload();
 	SavePendingBootOffState();
 	winx_shutdown();
 	winx_printf("\nShutdown your computer manually.\n");
@@ -435,7 +435,6 @@ int __cdecl reboot_handler(int argc,short **argv,short **envp)
 	(void)envp;
 	
 	winx_printf("Reboot ...");
-	(void)udefrag_unload();
 	SavePendingBootOffState();
 	winx_reboot();
 	winx_printf("\nReboot your computer manually.\n");
@@ -467,6 +466,7 @@ int __cdecl hibernate_handler(int argc,short **argv,short **envp)
 
 /**
  * @brief exit command handler.
+ * @note May be used without parameters.
  */
 int __cdecl exit_handler(int argc,short **argv,short **envp)
 {
@@ -484,7 +484,6 @@ int __cdecl exit_handler(int argc,short **argv,short **envp)
 	
 	winx_printf("Good bye ...\n");
 	winx_destroy_history(&history);
-	(void)udefrag_unload();
 	udefrag_monolithic_native_app_unload();
 	winx_exit(exit_code);
 	return 0;
