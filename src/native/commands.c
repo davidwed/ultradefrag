@@ -283,8 +283,86 @@ int __cdecl type_handler(int argc,short **argv,short **envp)
  */
 int __cdecl set_handler(int argc,short **argv,short **envp)
 {
-	winx_printf("\nset command is not implemented yet!\n\n");
-	return (-1);
+	int name_length = 0, value_length = 0;
+	short *name = NULL, *value = NULL;
+	int i, j, n, result;
+	
+	/*
+	* Check whether environment variables
+	* listing is requested or not.
+	*/
+	if(argc < 2){
+		/* list all environment variables */
+	} else {
+		/* the first parameter must contain '=' character */
+		if(!wcschr(argv[1],'=')){
+			winx_printf("\n%ws: invalid syntax!\n\n",argv[0]);
+			return (-1);
+		}
+		/* calculate name and value lengths */
+		n = wcslen(argv[1]);
+		for(i = 0; i < n; i++){
+			if(argv[1][i] == '='){
+				name_length = i;
+				value_length = n - i - 1;
+				break;
+			}
+		}
+		/* validate '=' character position */
+		if(name_length == 0 || (value_length == 0 && argc >= 3)){
+			winx_printf("\n%ws: invalid syntax!\n\n",argv[0]);
+			return (-1);
+		}
+		/* append all remaining parts of the value string */
+		for(i = 2; i < argc; i++)
+			value_length += 1 + wcslen(argv[i]);
+		/* allocate memory */
+		name = winx_heap_alloc((name_length + 1) * sizeof(short));
+		if(name == NULL){
+			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n",
+				argv[0],(name_length + 1) * sizeof(short));
+			return (-1);
+		}
+		if(value_length){
+			value = winx_heap_alloc((value_length + 1) * sizeof(short));
+			if(value == NULL){
+				winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n",
+					argv[0],(value_length + 1) * sizeof(short));
+				winx_heap_free(name);
+				return (-1);
+			}
+		}
+		/* extract name and value */
+		n = wcslen(argv[1]);
+		for(i = 0; i < n; i++){
+			if(argv[1][i] == '=') break;
+			name[i] = argv[1][i];
+		}
+		name[i] = 0;
+		if(value_length){
+			for(i++, j = 0; i < n; i++){
+				value[j] = argv[1][i];
+				j++;
+			}
+			value[j] = 0;
+			for(i = 2; i < argc; i++){
+				wcscat(value,L" ");
+				wcscat(value,argv[i]);
+			}
+		}
+		if(value_length){
+			/* set environment variable */
+			result = winx_set_env_variable(name,value);
+			winx_heap_free(value);
+		} else {
+			/* clear environment variable */
+			result = winx_set_env_variable(name,NULL);
+		}
+		winx_heap_free(name);
+		return result;
+	}
+	
+	return 0;
 }
 
 /**
