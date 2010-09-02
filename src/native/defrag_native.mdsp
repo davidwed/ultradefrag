@@ -82,6 +82,8 @@ extraResourceOptions=
 [Source]
 1=defrag_native.c
 2=script.c
+3=commands.c
+4=udefrag.c
 [Header]
 1=..\dll\zenwinx\ntndk.h
 2=defrag_native.h
@@ -89,7 +91,8 @@ extraResourceOptions=
 1=defrag_native.rc
 [Other]
 [History]
-defrag_native.c,2860
-..\dll\zenwinx\ntndk.h,41780
+script.c,0
 ..\include\udefrag-kernel.h,1135
-script.c,3141
+..\dll\zenwinx\ntndk.h,23553
+defrag_native.h,1527
+defrag_native.c,3312

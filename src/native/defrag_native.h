@@ -38,10 +38,10 @@
 #define short_dbg_delay() winx_sleep(3000)
 #define long_dbg_delay()  winx_sleep(10000)
 
-/* define how many lines to display for each help page,
+/* define how many lines to display for each text page,
    smallest boot screen height is 24 rows,
    which must be reduced by two rows for the prompt */
-#define HELP_DISPLAY_ROWS 22
+#define MAX_DISPLAY_ROWS 22
 
 /* define how many characters may be
    printed on line after a prompt */
@@ -49,5 +49,11 @@
 
 /* message to terminate volume processing */
 #define BREAK_MESSAGE "Use Pause/Break key to abort the process.\n\n"
+
+/* define whether @echo is on by default or not */
+#define DEFAULT_ECHO_FLAG 1
+
+/* message to be shown when pause command is used without parameters */
+#define PAUSE_MESSAGE "Hit any key to continue..."
 
 #endif /* _DEFRAG_NATIVE_H_ */
