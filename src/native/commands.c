@@ -160,17 +160,17 @@ static int __cdecl echo_handler(int argc,short **argv,short **envp)
 		return 0;
 	}
 	
-	/* check whether @echo status is requested */
+	/* check whether echo status is requested */
 	if(argc < 2){
 		if(echo_flag)
-			winx_printf("@echo is on\n");
+			winx_printf("echo is on\n");
 		else
-			winx_printf("@echo is off\n");
+			winx_printf("echo is off\n");
 		return 0;
 	}
 	
-	/* handle @echo command */
-	if(!wcscmp(argv[0],L"@echo")){
+	/* handle on and off keys */
+	if(argc == 2){
 		if(!wcscmp(argv[1],L"on")){
 			echo_flag = 1;
 			return 0;
@@ -178,7 +178,6 @@ static int __cdecl echo_handler(int argc,short **argv,short **envp)
 			echo_flag = 0;
 			return 0;
 		}
-		/* treat as simple echo */
 	}
 	
 	/* handle echo command */
@@ -645,7 +644,6 @@ static int __cdecl test_handler(int argc,short **argv,short **envp)
  * @brief List of supported commands.
  */
 cmd_table_entry cmd_table[] = {
-	{ L"@echo", echo_handler },
 	{ L"boot-off", boot_off_handler },
 	{ L"boot-on", boot_on_handler },
 	{ L"echo", echo_handler },
@@ -673,6 +671,7 @@ cmd_table_entry cmd_table[] = {
 int parse_command(short *cmdline)
 {
 	int i, j, n, argc;
+	int at_detected = 0;
 	int arg_detected;
 	short *cmdline_copy;
 	short **argv;
@@ -696,10 +695,18 @@ int parse_command(short *cmdline)
 	}
 	
 	/*
+	* Skip @ in the beginning of the line.
+	*/
+	if(cmdline[0] == '@'){
+		at_detected = 1;
+		cmdline ++;
+	}
+	
+	/*
 	* Handle empty lines and comments.
 	*/
 	if(cmdline[0] == 0 || cmdline[0] == ';' || cmdline[0] == '#'){
-		if(echo_flag)
+		if(echo_flag && !at_detected)
 			winx_printf("%ws\n",cmdline);
 		return 0;
 	}
@@ -778,13 +785,14 @@ int parse_command(short *cmdline)
 	}
 	
 	/*
-	* Print command line if @echo is on.
-	* Skip this if either @echo or echo
-	* commands are executed.
+	* Print command line if echo is on
+	* and the name of the command is not
+	* preceeding by the at sign.
+	* Don't print also if echo command
+	* is executed.
 	*/
-	if(echo_flag && wcscmp(argv[0],L"@echo") && \
-	  wcscmp(argv[0],L"echo") && wcscmp(argv[0],L"echo."))
-		winx_printf("%ws\n",cmdline);
+	if(echo_flag && !at_detected && wcscmp(argv[0],L"echo") && \
+		wcscmp(argv[0],L"echo.")) winx_printf("%ws\n",cmdline);
 	
 	/*
 	* Check whether the command 
