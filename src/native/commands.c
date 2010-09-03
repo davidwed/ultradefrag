@@ -350,9 +350,9 @@ static int list_environment_variables(int argc,short **argv,short **envp)
 	
 	if(argc > 1)
 		filter_strings = 1;
-
+	
 	/* convert envp to array of ANSI strings */
-	for(n = 0; envp[n] != 0; n++) {}
+	for(n = 0; envp[n] != NULL; n++) {}
 	strings = winx_heap_alloc((n + 1) * sizeof(char *));
 	if(strings == NULL){
 		winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
@@ -832,22 +832,26 @@ int parse_command(short *cmdline)
 				/* build array of unicode strings */
 				string = peb->ProcessParameters->Environment;
 				for(n = 0; ; n++){
+					/* empty line indicates the end of environment */
+					if(string[0] == 0) break;
 					length = wcslen(string);
 					string += length + 1;
-					if(string[0] == 0) break;
 				}
-				envp = winx_heap_alloc((n + 1) * sizeof(short *));
-				if(envp == NULL){
-					winx_printf("\nCannot allocate %u bytes of memory for %ws command!\n\n",
-						(n + 1) * sizeof(short *),cmdline);
-				} else {
-					RtlZeroMemory((void *)envp,(n + 1) * sizeof(short *));
-					string = peb->ProcessParameters->Environment;
-					for(i = 0; i < n; i++){
-						envp[i] = string;
-						length = wcslen(string);
-						string += length + 1;
-						if(string[0] == 0) break;
+				if(n > 0){
+					envp = winx_heap_alloc((n + 1) * sizeof(short *));
+					if(envp == NULL){
+						winx_printf("\nCannot allocate %u bytes of memory for %ws command!\n\n",
+							(n + 1) * sizeof(short *),cmdline);
+					} else {
+						RtlZeroMemory((void *)envp,(n + 1) * sizeof(short *));
+						string = peb->ProcessParameters->Environment;
+						for(i = 0; i < n; i++){
+							/* empty line indicates the end of environment */
+							if(string[0] == 0) break;
+							envp[i] = string;
+							length = wcslen(string);
+							string += length + 1;
+						}
 					}
 				}
 			}
