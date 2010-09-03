@@ -21,7 +21,7 @@ HISTORY
       Portuguese, Chinese (Traditional)
 
     - winx_fsize(), winx_kb_read(), winx_xtime(), winx_prompt_ex(),
-      winx_get_file_contents(), winx_release_file_contents(),
+      winx_get_file_contents(), winx_release_file_contents(), winx_wcsistr(),
       winx_print_array_of_strings() calls were added to zenwinx library
     - one little bug in winx_kbhit(), winx_breakhit() was fixed
     RC1:

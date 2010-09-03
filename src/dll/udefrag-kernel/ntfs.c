@@ -549,7 +549,7 @@ void AnalyseMftRecord(PNTFS_FILE_RECORD_OUTPUT_BUFFER pnfrob,
 	}
 	
 	/* just for debugging */
-	/*if(wcsistr(pmfi->Name,L"Scratch"))
+	/*if(winx_wcsistr(pmfi->Name,L"Scratch"))
 		DebugPrint("@@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
 			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);*/
 
@@ -1220,7 +1220,7 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	/* ------------------------------------------------------------------------- */
 
 	/* just for debugging */
-	/*if(wcsistr(pmfi->Name,L"Scratch")){
+	/*if(winx_wcsistr(pmfi->Name,L"Scratch")){
 		DebugPrint("@@@@ %ws DIRECTORY FOUND, MFT_ID = %I64u, PARENT ID = %I64u\n",
 			pmfi->Name,pmfi->BaseMftId,pmfi->ParentDirectoryMftId);
 		DebugPrint("@@@@ FULL ATTRIBUTE NAME = %ws:%ws, DEFAULT ATTR NAME = %ws\n",
@@ -1230,7 +1230,7 @@ void AnalyseNonResidentAttribute(PNONRESIDENT_ATTRIBUTE pnr_attr,PMY_FILE_INFORM
 	if(NonResidentAttrListFound) DebugPrint("%ws:%ws\n",pmfi->Name,attr_name);
 	
 	/* skip $BadClus file which may have wrong number of clusters */
-	if(/*wcsistr(attr_name,L"$BadClus") || */wcsistr(pmfi->Name,L"$BadClus")){
+	if(/*winx_wcsistr(attr_name,L"$BadClus") || */winx_wcsistr(pmfi->Name,L"$BadClus")){
 		/* on my system this file always exists, even after chkdsk execution */
 		/*DebugPrint("WARNING: %ws:%ws file found! Run CheckDisk program!\n",pmfi->Name,attr_name);*/
 	} else {

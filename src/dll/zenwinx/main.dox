@@ -142,6 +142,12 @@
 /** @} */
 
 /**
+ * @defgroup String String
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Threads Threads
  * @{
  */

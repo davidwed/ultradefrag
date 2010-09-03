@@ -69,3 +69,4 @@ EXPORTS
 	winx_windows_in_safe_mode@0
 	zenwinx_native_init@0
 	zenwinx_native_unload@0
+	winx_wcsistr
