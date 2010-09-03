@@ -34,6 +34,11 @@
 */
 
 /**
+ * @brief Process Environment Block.
+ */
+PEB *peb = NULL;
+
+/**
  * @brief History of commands
  * typed in interactive mode.
  */
@@ -120,6 +125,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	int i;
 
 	/* initialize the program */
+	peb = Peb;
 	NativeAppInit();
 	
 	/* display copyrights */

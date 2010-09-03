@@ -75,6 +75,7 @@ char *help_message[] = {
 	NULL
 };
 
+extern PEB *peb;
 extern winx_history history;
 extern int exit_flag;
 
@@ -89,7 +90,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp);
 /**
  * @brief help command handler.
  */
-int __cdecl help_handler(int argc,short **argv,short **envp)
+static int __cdecl help_handler(int argc,short **argv,short **envp)
 {
 	(void)argc;
 	(void)argv;
@@ -104,7 +105,7 @@ int __cdecl help_handler(int argc,short **argv,short **envp)
 /**
  * @brief history command handler.
  */
-int __cdecl history_handler(int argc,short **argv,short **envp)
+static int __cdecl history_handler(int argc,short **argv,short **envp)
 {
 	winx_history_entry *entry;
 	char **strings;
@@ -147,7 +148,7 @@ int __cdecl history_handler(int argc,short **argv,short **envp)
 /**
  * @brief echo command handler.
  */
-int __cdecl echo_handler(int argc,short **argv,short **envp)
+static int __cdecl echo_handler(int argc,short **argv,short **envp)
 {
 	int i;
 	
@@ -193,7 +194,7 @@ int __cdecl echo_handler(int argc,short **argv,short **envp)
 /**
  * @brief type command handler.
  */
-int __cdecl type_handler(int argc,short **argv,short **envp)
+static int __cdecl type_handler(int argc,short **argv,short **envp)
 {
 	char path[MAX_PATH];
 	short *filename;
@@ -202,6 +203,7 @@ int __cdecl type_handler(int argc,short **argv,short **envp)
 	unsigned char *buffer, *second_buffer;
 	int unicode_detected;
 	char *strings[] = { NULL, NULL };
+	int result;
 	
 	(void)envp;
 	
@@ -262,26 +264,82 @@ int __cdecl type_handler(int argc,short **argv,short **envp)
 		(void)_snprintf(second_buffer,filesize + 1,"%ws",(short *)(buffer + 2));
 		second_buffer[filesize] = 0;
 		strings[0] = second_buffer;
-		winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
+		result = winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
 			MAX_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,
 			scripting_mode ? 0 : 1);
 		winx_heap_free(second_buffer);
 	} else {
 		strings[0] = buffer;
-		winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
+		result = winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
 			MAX_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,
 			scripting_mode ? 0 : 1);
 	}
 	
 	/* cleanup */
 	winx_release_file_contents(buffer);
-	return 0;
+	return result;
+}
+
+/**
+ * @brief Displays list of all environment variables.
+ */
+static int list_environment_variables(int argc,short **argv,short **envp)
+{
+	char **strings;
+	int i, n, length;
+	int result;
+	
+	if(envp == NULL)
+		return (-1);
+	
+	if(envp[0] == NULL)
+		return 0; /* nothing to print */
+
+	/* convert envp to array of ANSI strings */
+	for(n = 0; envp[n] != 0; n++) {}
+	strings = winx_heap_alloc((n + 1) * sizeof(char *));
+	if(strings == NULL){
+		winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+			argv[0],(n + 1) * sizeof(char *));
+		return (-1);
+	}
+	RtlZeroMemory((void *)strings,(n + 1) * sizeof(char *));
+	for(i = 0; i < n; i++){
+		length = wcslen(envp[i]);
+		strings[i] = winx_heap_alloc((length + 1) * sizeof(char));
+		if(strings[i] == NULL){
+			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+				argv[0],(length + 1) * sizeof(char));
+			goto fail;
+		}
+		(void)_snprintf(strings[i],length + 1,"%ws",envp[i]);
+		strings[i][length] = 0;
+	}
+	/* print strings */
+	result = winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
+		MAX_DISPLAY_ROWS,DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,
+		scripting_mode ? 0 : 1);
+	/* cleanup */
+	for(i = 0; i < n; i++){
+		if(strings[i])
+			winx_heap_free(strings[i]);
+	}
+	winx_heap_free(strings);
+	return result;
+
+fail:
+	for(i = 0; i < n; i++){
+		if(strings[i])
+			winx_heap_free(strings[i]);
+	}
+	winx_heap_free(strings);
+	return (-1);
 }
 
 /**
  * @brief set command handler.
  */
-int __cdecl set_handler(int argc,short **argv,short **envp)
+static int __cdecl set_handler(int argc,short **argv,short **envp)
 {
 	int name_length = 0, value_length = 0;
 	short *name = NULL, *value = NULL;
@@ -293,6 +351,7 @@ int __cdecl set_handler(int argc,short **argv,short **envp)
 	*/
 	if(argc < 2){
 		/* list all environment variables */
+		return list_environment_variables(argc,argv,envp);
 	} else {
 		/* the first parameter must contain '=' character */
 		if(!wcschr(argv[1],'=')){
@@ -368,7 +427,7 @@ int __cdecl set_handler(int argc,short **argv,short **envp)
 /**
  * @brief pause command handler.
  */
-int __cdecl pause_handler(int argc,short **argv,short **envp)
+static int __cdecl pause_handler(int argc,short **argv,short **envp)
 {
 	int msec;
 
@@ -423,7 +482,7 @@ int ExecPendingBootOff(void)
 	return 1;
 }
 
-void SavePendingBootOffState(void)
+static void SavePendingBootOffState(void)
 {
 	char path[MAX_PATH];
 	WINX_FILE *f;
@@ -453,7 +512,7 @@ void SavePendingBootOffState(void)
 /**
  * @brief boot-on command handler.
  */
-int __cdecl boot_on_handler(int argc,short **argv,short **envp)
+static int __cdecl boot_on_handler(int argc,short **argv,short **envp)
 {
 	(void)argc;
 	(void)argv;
@@ -490,7 +549,7 @@ int __cdecl boot_off_handler(int argc,short **argv,short **envp)
 /**
  * @brief shutdown command handler.
  */
-int __cdecl shutdown_handler(int argc,short **argv,short **envp)
+static int __cdecl shutdown_handler(int argc,short **argv,short **envp)
 {
 	(void)argc;
 	(void)argv;
@@ -506,7 +565,7 @@ int __cdecl shutdown_handler(int argc,short **argv,short **envp)
 /**
  * @brief reboot command handler.
  */
-int __cdecl reboot_handler(int argc,short **argv,short **envp)
+static int __cdecl reboot_handler(int argc,short **argv,short **envp)
 {
 	(void)argc;
 	(void)argv;
@@ -522,7 +581,7 @@ int __cdecl reboot_handler(int argc,short **argv,short **envp)
 /**
  * @brief hibernate command handler.
  */
-int __cdecl hibernate_handler(int argc,short **argv,short **envp)
+static int __cdecl hibernate_handler(int argc,short **argv,short **envp)
 {
 	(void)argc;
 	(void)argv;
@@ -572,7 +631,7 @@ int __cdecl exit_handler(int argc,short **argv,short **envp)
  * @details Paste here any code
  * which needs to be tested.
  */
-int __cdecl test_handler(int argc,short **argv,short **envp)
+static int __cdecl test_handler(int argc,short **argv,short **envp)
 {
 	(void)argc;
 	(void)argv;
@@ -618,6 +677,8 @@ int parse_command(short *cmdline)
 	short *cmdline_copy;
 	short **argv;
 	short **envp;
+	short *string;
+	int length;
 	int result;
 	
 	/*
@@ -688,6 +749,33 @@ int parse_command(short *cmdline)
 	}
 	/* e. build environment */
 	envp = NULL;
+	if(peb){
+		if(peb->ProcessParameters){
+			if(peb->ProcessParameters->Environment){
+				/* build array of unicode strings */
+				string = peb->ProcessParameters->Environment;
+				for(n = 0; ; n++){
+					length = wcslen(string);
+					string += length + 1;
+					if(string[0] == 0) break;
+				}
+				envp = winx_heap_alloc((n + 1) * sizeof(short *));
+				if(envp == NULL){
+					winx_printf("\nCannot allocate %u bytes of memory for %ws command!\n\n",
+						(n + 1) * sizeof(short *),cmdline);
+				} else {
+					RtlZeroMemory((void *)envp,(n + 1) * sizeof(short *));
+					string = peb->ProcessParameters->Environment;
+					for(i = 0; i < n; i++){
+						envp[i] = string;
+						length = wcslen(string);
+						string += length + 1;
+						if(string[0] == 0) break;
+					}
+				}
+			}
+		}
+	}
 	
 	/*
 	* Print command line if @echo is on.
@@ -711,6 +799,8 @@ int parse_command(short *cmdline)
 	if(cmd_table[i].cmd_handler == NULL){
 		winx_printf("\nUnknown command %ws!\n\n",argv[0]);
 		winx_heap_free(argv);
+		if(envp)
+			winx_heap_free(envp);
 		winx_heap_free(cmdline_copy);
 		return 0;
 	}
@@ -720,6 +810,8 @@ int parse_command(short *cmdline)
 	*/
 	result = cmd_table[i].cmd_handler(argc,argv,envp);
 	winx_heap_free(argv);
+	if(envp)
+		winx_heap_free(envp);
 	winx_heap_free(cmdline_copy);
 	return result;
 }
