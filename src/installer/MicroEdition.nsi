@@ -121,6 +121,10 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\HISTORY.TXT"
   File "${ROOTDIR}\src\README.TXT"
 
+  ; install manual pages for the boot time interface
+  SetOutPath "$INSTDIR\man"
+  File "${ROOTDIR}\src\man\*.*"
+
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
   File "${ROOTDIR}\src\installer\boot-off.cmd"

@@ -84,8 +84,45 @@ typedef struct {
 	short *cmd_name;
 	cmd_handler_proc cmd_handler;
 } cmd_table_entry;
-int __cdecl boot_off_handler(int argc,short **argv,short **envp);
+static int __cdecl boot_off_handler(int argc,short **argv,short **envp);
+static int __cdecl type_handler(int argc,short **argv,short **envp);
 int __cdecl udefrag_handler(int argc,short **argv,short **envp);
+
+/**
+ * @brief man command handler.
+ */
+static int __cdecl man_handler(int argc,short **argv,short **envp)
+{
+	short *type_argv[2];
+	char path[MAX_PATH + 1];
+	short wpath[MAX_PATH + 1];
+	int native_prefix_length;
+	
+	(void)envp;
+	
+	if(argc < 2){
+		winx_printf("\n%ws: argument is missing!\n\n",argv[0]);
+		return (-1);
+	}
+	
+	/* build path to requested manual page */
+	if(winx_get_windows_directory(path,MAX_PATH) < 0){
+		winx_printf("\n%ws: Cannot retrieve the Windows directory path!\n\n",argv[0]);
+		return (-1);
+	}
+	_snwprintf(wpath,MAX_PATH,L"%hs\\UltraDefrag\\man\\%ws.man",path,argv[1]);
+	wpath[MAX_PATH] = 0;
+
+	/* build argv for type command handler */
+	type_argv[0] = L"man";
+	/* skip native prefix in path */
+	native_prefix_length = wcslen(L"\\??\\");
+	if(wcslen(wpath) >= native_prefix_length)
+		type_argv[1] = wpath + native_prefix_length;
+	else
+		type_argv[1] = wpath;
+	return type_handler(2,type_argv,envp);
+}
 
 /**
  * @brief help command handler.
@@ -96,6 +133,10 @@ static int __cdecl help_handler(int argc,short **argv,short **envp)
 	(void)argv;
 	(void)envp;
 
+	/* check for individual command's help */
+	if(argc > 1)
+		return man_handler(argc,argv,envp);
+	
 	return winx_print_array_of_strings(help_message,
 		MAX_LINE_WIDTH,MAX_DISPLAY_ROWS,
 		DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,
@@ -664,6 +705,7 @@ cmd_table_entry cmd_table[] = {
 	{ L"help", help_handler },
 	{ L"hibernate", hibernate_handler },
 	{ L"history", history_handler },
+	{ L"man", man_handler },
 	{ L"pause", pause_handler },
 	{ L"reboot", reboot_handler },
 	{ L"set", set_handler },

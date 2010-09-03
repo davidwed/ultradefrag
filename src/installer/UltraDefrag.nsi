@@ -139,6 +139,10 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\scripts\udreportcnv.lua"
   File "${ROOTDIR}\src\scripts\udsorting.js"
 
+  ; install manual pages for the boot time interface
+  SetOutPath "$INSTDIR\man"
+  File "${ROOTDIR}\src\man\*.*"
+
   ${InstallLanguagePack}
 
   ; install GUI apps to program's directory
