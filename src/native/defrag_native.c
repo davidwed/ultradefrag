@@ -42,7 +42,7 @@ PEB *peb = NULL;
  * @brief History of commands
  * typed in interactive mode.
  */
-winx_history history = {};
+winx_history history = {0};
 
 /**
  * @brief Defines whether the program
