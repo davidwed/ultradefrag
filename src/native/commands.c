@@ -132,6 +132,9 @@ static int __cdecl help_handler(int argc,short **argv,short **envp)
 	(void)argc;
 	(void)argv;
 	(void)envp;
+	
+	if(argc < 1)
+		return (-1);
 
 	/* check for individual command's help */
 	if(argc > 1)
@@ -156,6 +159,9 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
 	(void)argv;
 	(void)envp;
 	
+	if(argc < 1)
+		return (-1);
+
 	if(scripting_mode || history.head == NULL)
 		return 0;
 	
@@ -195,6 +201,9 @@ static int __cdecl echo_handler(int argc,short **argv,short **envp)
 	
 	(void)envp;
 	
+	if(argc < 1)
+		return (-1);
+
 	/* check whether an empty line is requested */
 	if(!wcscmp(argv[0],L"echo.")){
 		winx_printf("\n");
@@ -247,6 +256,9 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 	
 	(void)envp;
 	
+	if(argc < 1)
+		return (-1);
+
 	/* display boot time script if filename is missing */
 	if(argc < 2){
 		if(winx_get_windows_directory(path,MAX_PATH) < 0){
@@ -330,7 +342,7 @@ static int list_environment_variables(int argc,short **argv,short **envp)
 	int result;
 	int filter_strings = 0;
 	
-	if(envp == NULL)
+	if(argc < 1 || envp == NULL)
 		return (-1);
 	
 	if(envp[0] == NULL)
@@ -392,6 +404,9 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 	short *name = NULL, *value = NULL;
 	int i, j, n, result;
 	
+	if(argc < 1)
+		return (-1);
+
 	/*
 	* Check whether environment variables
 	* listing is requested or not.
@@ -485,6 +500,9 @@ static int __cdecl pause_handler(int argc,short **argv,short **envp)
 
 	(void)envp;
 	
+	if(argc < 1)
+		return (-1);
+
 	/* check whether "Hit any key to continue..." prompt is requested */
 	if(argc < 2){
 		winx_printf("%s",PAUSE_MESSAGE);
@@ -661,8 +679,6 @@ int __cdecl exit_handler(int argc,short **argv,short **envp)
 {
 	int exit_code = 0;
 	
-	(void)argc;
-	(void)argv;
 	(void)envp;
 	
 	if(!scripting_mode)
