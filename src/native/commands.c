@@ -285,14 +285,18 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 static int list_environment_variables(int argc,short **argv,short **envp)
 {
 	char **strings;
-	int i, n, length;
+	int i, j, n, length;
 	int result;
+	int filter_strings = 0;
 	
 	if(envp == NULL)
 		return (-1);
 	
 	if(envp[0] == NULL)
 		return 0; /* nothing to print */
+	
+	if(argc > 1)
+		filter_strings = 1;
 
 	/* convert envp to array of ANSI strings */
 	for(n = 0; envp[n] != 0; n++) {}
@@ -303,16 +307,19 @@ static int list_environment_variables(int argc,short **argv,short **envp)
 		return (-1);
 	}
 	RtlZeroMemory((void *)strings,(n + 1) * sizeof(char *));
-	for(i = 0; i < n; i++){
+	for(i = 0, j = 0; i < n; i++){
+		if(filter_strings && winx_wcsistr(envp[i],argv[1]) != (wchar_t *)envp[i])
+			continue;
 		length = wcslen(envp[i]);
-		strings[i] = winx_heap_alloc((length + 1) * sizeof(char));
-		if(strings[i] == NULL){
+		strings[j] = winx_heap_alloc((length + 1) * sizeof(char));
+		if(strings[j] == NULL){
 			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
 				argv[0],(length + 1) * sizeof(char));
 			goto fail;
 		}
-		(void)_snprintf(strings[i],length + 1,"%ws",envp[i]);
-		strings[i][length] = 0;
+		(void)_snprintf(strings[j],length + 1,"%ws",envp[i]);
+		strings[j][length] = 0;
+		j++;
 	}
 	/* print strings */
 	result = winx_print_array_of_strings(strings,MAX_LINE_WIDTH,
@@ -352,10 +359,15 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 		/* list all environment variables */
 		return list_environment_variables(argc,argv,envp);
 	} else {
-		/* the first parameter must contain '=' character */
+		/* check whether the first parameter contains '=' character */
 		if(!wcschr(argv[1],'=')){
-			winx_printf("\n%ws: invalid syntax!\n\n",argv[0]);
-			return (-1);
+			//winx_printf("\n%ws: invalid syntax!\n\n",argv[0]);
+			//return (-1);
+			/*
+			* List variables containing argv[1] string
+			* in the beginning of their names.
+			*/
+			return list_environment_variables(argc,argv,envp);
 		}
 		/* calculate name and value lengths */
 		n = wcslen(argv[1]);
