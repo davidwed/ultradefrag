@@ -27,8 +27,7 @@ HISTORY
     - one little bug in winx_kbhit(), winx_breakhit() was fixed
     RC1:
     - partial defragmentation was added to decrease number of fragments
-      even when there are no free space on disk
-      to hold all fragments of file together
+      even when there is no free space on disk to hold all fragments of the file together
     - volume optimization algorithm was improved to prevent useless
       additional optimization passes
     - one little bug preventing optimization from being stopped was fixed
@@ -36,7 +35,7 @@ HISTORY
     - volume optimization algorithm was improved to prevent skipping
       heavily fragmented parts of the processed volume
     - progress is now added to the GUI window caption,
-      so it is displayed in the tooltip of the taskbar icon
+      so it is displayed in the tool-tip of the task-bar icon
     - cryptic single character progress label was replaced
       by the localized operation names
     - file system type detection was rewritten to be more reliable
@@ -45,7 +44,7 @@ HISTORY
       launched from the configuration dialog did not match
     - fixed a problem, where .lua files would get executed instead of edited,
       if "Lua for Windows" was installed
-    - 10 seconds delay is skiped on boot time scan, if only one keyboard is present
+    - 10 seconds delay is skipped on boot time scan, if only one keyboard is present
     - added language selector to the GUI package
     - Hindi translation was added
     - the following translations were updated:
@@ -212,7 +211,7 @@ HISTORY
   ------------------------------------------------------------------------------
     - Ultra Fast NTFS scanning feature was added, NTFS analysis becomes 
       approximately 25 times faster now
-    - defragmentaion of additional streams attached to NTFS files was added 
+    - defragmentation of additional streams attached to NTFS files was added 
     - information about trash (temporary files) excluded from reports,
       statistics and cluster map; these files are completely ignored now
     - a lot of new options were added to the console program
@@ -296,7 +295,7 @@ HISTORY
 
     - gui program was translated into the following languages:
 
-      Catala, Chinese (Simplified), Chinese (Traditional), Dutch, 
+      Catalan, Chinese (Simplified), Chinese (Traditional), Dutch, 
       French (FR), German, Greek, Italian, Portuguese, Slovak, Slovenian
 
     - boot-on, boot-off, ud-config scripts were added
@@ -514,9 +513,9 @@ HISTORY
 
   Version 0.1.0  2007-04-25
   ------------------------------------------------------------------------------
-    - defragmentation of ntfs directories
+    - defragmentation of NTFS directories
     - some bugs were fixed
-    - mft and directories displaying in cluster map
+    - MFT and directories displaying in cluster map
 
 
   Version 0.0.1	 2007-04-13
