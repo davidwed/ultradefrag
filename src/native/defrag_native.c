@@ -53,7 +53,7 @@ int exit_flag = 0;
 extern int scripting_mode;
 
 int parse_command(short *cmdline);
-void ProcessScript(void);
+int ProcessScript(short *filename);
 int ExecPendingBootOff(void);
 int __cdecl exit_handler(int argc,short **argv,short **envp);
 
@@ -172,8 +172,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 	winx_printf("\n\n");
 
-	/* process boot time script */
-	ProcessScript();
+	/* process default boot time script */
+	ProcessScript(NULL);
 
 	/* start interactive mode */
 	winx_printf("\nInteractive mode:\nType 'help' for a list of supported commands.\n");

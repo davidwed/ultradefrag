@@ -36,8 +36,13 @@ int parse_command(short *cmdline);
 
 /**
  * @brief Processes the boot time script.
+ * @param[in] filename the name of file,
+ * with full path. If NULL is passed,
+ * default boot time script will be used.
+ * @return Zero for success, negative
+ * value otherwise.
  */
-void ProcessScript(void)
+int ProcessScript(short *filename)
 {
 	char path[MAX_PATH];
 	unsigned short *buffer;
@@ -48,20 +53,26 @@ void ProcessScript(void)
 	scripting_mode = 1;
 
 	/* read script file entirely */
-	if(winx_get_windows_directory(path,MAX_PATH) < 0){
-		winx_printf("\nProcessScript(): Cannot retrieve the Windows directory path!\n\n");
-		return;
+	if(filename == NULL){
+		if(winx_get_windows_directory(path,MAX_PATH) < 0){
+			winx_printf("\nProcessScript(): Cannot retrieve the Windows directory path!\n\n");
+			return (-1);
+		}
+		(void)strncat(path,"\\system32\\ud-boot-time.cmd",
+				MAX_PATH - strlen(path) - 1);
+	} else {
+		(void)_snprintf(path,MAX_PATH - 1,"\\??\\%ws",filename);
+		path[MAX_PATH - 1] = 0;
 	}
-	(void)strncat(path,"\\system32\\ud-boot-time.cmd",
-			MAX_PATH - strlen(path) - 1);
+
 	buffer = winx_get_file_contents(path,&filesize);
 	if(buffer == NULL)
-		return; /* file is empty or some error */
+		return 0; /* file is empty or some error */
 
 	/* get file size, in characters */
 	n = filesize / sizeof(short);
 	if(n == 0)
-		goto cleanup;
+		goto cleanup; /* file has no valuable contents */
 
 	/* terminate buffer */
 	buffer[n] = 0;
@@ -97,4 +108,5 @@ void ProcessScript(void)
 
 cleanup:
 	winx_release_file_contents(buffer);
+	return 0;
 }

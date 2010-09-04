@@ -87,6 +87,7 @@ typedef struct {
 static int __cdecl boot_off_handler(int argc,short **argv,short **envp);
 static int __cdecl type_handler(int argc,short **argv,short **envp);
 int __cdecl udefrag_handler(int argc,short **argv,short **envp);
+int ProcessScript(short *filename);
 
 /**
  * @brief man command handler.
@@ -98,7 +99,8 @@ static int __cdecl man_handler(int argc,short **argv,short **envp)
 	short wpath[MAX_PATH + 1];
 	size_t native_prefix_length;
 	
-	(void)envp;
+	if(argc < 1)
+		return (-1);
 	
 	if(argc < 2){
 		winx_printf("\n%ws: argument is missing!\n\n",argv[0]);
@@ -129,10 +131,6 @@ static int __cdecl man_handler(int argc,short **argv,short **envp)
  */
 static int __cdecl help_handler(int argc,short **argv,short **envp)
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-	
 	if(argc < 1)
 		return (-1);
 
@@ -155,10 +153,6 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
 	char **strings;
 	int i, result;
 
-	(void)argc;
-	(void)argv;
-	(void)envp;
-	
 	if(argc < 1)
 		return (-1);
 
@@ -198,8 +192,6 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
 static int __cdecl echo_handler(int argc,short **argv,short **envp)
 {
 	int i;
-	
-	(void)envp;
 	
 	if(argc < 1)
 		return (-1);
@@ -253,8 +245,6 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 	int unicode_detected;
 	char *strings[] = { NULL, NULL };
 	int result;
-	
-	(void)envp;
 	
 	if(argc < 1)
 		return (-1);
@@ -498,8 +488,6 @@ static int __cdecl pause_handler(int argc,short **argv,short **envp)
 {
 	int msec;
 
-	(void)envp;
-	
 	if(argc < 1)
 		return (-1);
 
@@ -584,10 +572,6 @@ static void SavePendingBootOffState(void)
  */
 static int __cdecl boot_on_handler(int argc,short **argv,short **envp)
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-
 	pending_boot_off = 0;
 	
 	if(winx_register_boot_exec_command(L"defrag_native") < 0){
@@ -599,14 +583,9 @@ static int __cdecl boot_on_handler(int argc,short **argv,short **envp)
 
 /**
  * @brief boot-off command handler.
- * @note May be used without parameters.
  */
 int __cdecl boot_off_handler(int argc,short **argv,short **envp)
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-
 	pending_boot_off = 1;
 	
 	if(winx_unregister_boot_exec_command(L"defrag_native") < 0){
@@ -621,10 +600,6 @@ int __cdecl boot_off_handler(int argc,short **argv,short **envp)
  */
 static int __cdecl shutdown_handler(int argc,short **argv,short **envp)
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-	
 	winx_printf("Shutdown ...");
 	SavePendingBootOffState();
 	winx_shutdown();
@@ -637,10 +612,6 @@ static int __cdecl shutdown_handler(int argc,short **argv,short **envp)
  */
 static int __cdecl reboot_handler(int argc,short **argv,short **envp)
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-	
 	winx_printf("Reboot ...");
 	SavePendingBootOffState();
 	winx_reboot();
@@ -653,10 +624,6 @@ static int __cdecl reboot_handler(int argc,short **argv,short **envp)
  */
 static int __cdecl hibernate_handler(int argc,short **argv,short **envp)
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-	
 	winx_printf("Hibernation ...");
 	NtSetSystemPowerState(
 		PowerActionHibernate, /* constants defined in winnt.h */
@@ -673,13 +640,10 @@ static int __cdecl hibernate_handler(int argc,short **argv,short **envp)
 
 /**
  * @brief exit command handler.
- * @note May be used without parameters.
  */
 int __cdecl exit_handler(int argc,short **argv,short **envp)
 {
 	int exit_code = 0;
-	
-	(void)envp;
 	
 	if(!scripting_mode)
 		exit_flag = 1;
@@ -695,16 +659,53 @@ int __cdecl exit_handler(int argc,short **argv,short **envp)
 }
 
 /**
+ * @brief call command handler.
+ */
+static int __cdecl call_handler(int argc,short **argv,short **envp)
+{
+	short *filename;
+	int i, length;
+	int result;
+	int old_scripting_mode;
+	
+	if(argc < 1)
+		return (-1);
+
+	old_scripting_mode = scripting_mode;
+	
+	if(argc < 2){
+		result = ProcessScript(NULL);
+	} else {
+		length = 0;
+		for(i = 1; i < argc; i++)
+			length += wcslen(argv[i]) + 1;
+		filename = winx_heap_alloc(length * sizeof(short));
+		if(filename == NULL){
+			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+				argv[0],length * sizeof(short));
+			return (-1);
+		}
+		filename[0] = 0;
+		for(i = 1; i < argc; i++){
+			wcscat(filename,argv[i]);
+			if(i != argc - 1)
+				wcscat(filename,L" ");
+		}
+		result = ProcessScript(filename);
+		winx_heap_free(filename);
+	}
+
+	scripting_mode = old_scripting_mode;
+	return result;
+}
+
+/**
  * @brief test command handler.
  * @details Paste here any code
  * which needs to be tested.
  */
 static int __cdecl test_handler(int argc,short **argv,short **envp)
 {
-	(void)argc;
-	(void)argv;
-	(void)envp;
-	
 	winx_printf("Hi, I'm here ;-)\n");
 	return 0;
 }
@@ -715,6 +716,7 @@ static int __cdecl test_handler(int argc,short **argv,short **envp)
 cmd_table_entry cmd_table[] = {
 	{ L"boot-off",  boot_off_handler },
 	{ L"boot-on",   boot_on_handler },
+	{ L"call",      call_handler },
 	{ L"echo",      echo_handler },
 	{ L"echo.",     echo_handler },
 	{ L"exit",      exit_handler },
@@ -729,7 +731,7 @@ cmd_table_entry cmd_table[] = {
 	{ L"test",      test_handler },
 	{ L"type",      type_handler },
 	{ L"udefrag",   udefrag_handler },
-	{ L"", NULL }
+	{ L"",          NULL }
 };
 
 /**
