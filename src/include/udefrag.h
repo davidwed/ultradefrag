@@ -69,6 +69,7 @@ int __stdcall udefrag_stop(void);
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
 int __stdcall udefrag_get_map(char *buffer,int size);
 char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
+void __stdcall udefrag_release_default_formatted_results(char *results);
 char * __stdcall udefrag_get_error_description(int error_code);
 
 int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);

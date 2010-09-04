@@ -11,6 +11,7 @@ EXPORTS
 	udefrag_get_progress
 	udefrag_get_map
 	udefrag_get_default_formatted_results
+	udefrag_release_default_formatted_results
 	udefrag_get_avail_volumes
 	udefrag_validate_volume
 	udefrag_fbsize=winx_fbsize

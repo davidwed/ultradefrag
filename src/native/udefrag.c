@@ -153,6 +153,7 @@ void ProcessVolume(char letter)
 	STATISTIC stat;
 	int status;
 	char volume_name[2];
+	char *results;
 
 	/* validate the volume before any processing */
 	status = udefrag_validate_volume(letter,FALSE);
@@ -187,8 +188,13 @@ void ProcessVolume(char letter)
 		return;
 	}
 
-	if(udefrag_get_progress(&stat,NULL) >= 0)
-		winx_printf("\n\n%s\n",udefrag_get_default_formatted_results(&stat));
+	if(udefrag_get_progress(&stat,NULL) >= 0){
+		results = udefrag_get_default_formatted_results(&stat);
+		if(results){
+			winx_printf("\n\n%s\n",results);
+			udefrag_release_default_formatted_results(results);
+		}
+	}
 }
 
 /**

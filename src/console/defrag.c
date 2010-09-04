@@ -213,6 +213,7 @@ int process_single_volume(void)
 	long map_size = 0;
 	int error_code = 0;
 	char volume_name[2];
+	char *results;
 
 	/* validate driveletter */
 	if(!letter){
@@ -273,8 +274,16 @@ int process_single_volume(void)
 
 	/* display results and exit */
 	if(v_flag){
-		if(udefrag_get_progress(&stat,NULL) >= 0)
-			printf("\n%s",udefrag_get_default_formatted_results(&stat));
+		if(udefrag_get_progress(&stat,NULL) >= 0){
+			results = udefrag_get_default_formatted_results(&stat);
+			if(results){
+				printf("\n%s",results);
+				udefrag_release_default_formatted_results(results);
+			} else {
+				printf("\nudefrag_get_default_formatted_results() call failed!\n");
+				printf("Use DbgView program to get more information.\n\n");
+			}
+		}
 	}
 
 	cleanup();

@@ -51,7 +51,6 @@ struct udefrag_options {
 
 /* global variables */
 HANDLE init_event = NULL;
-char result_msg[4096]; /* buffer for the default formatted result message */
 
 #ifndef STATIC_LIB
 /**
@@ -290,21 +289,34 @@ int __stdcall udefrag_get_map(char *buffer,int size)
 }
 
 /**
- * @brief Retrieves the default formatted results of the 
- *        completed disk defragmentation job.
+ * @brief Retrieves the default formatted results 
+ * of the completed disk defragmentation job.
  * @param[in] pstat pointer to the STATISTIC structure,
- *                  filled by udefrag_get_progress() call.
- * @return A string containing default formatted results of the
- *         disk defragmentation job defined in passed structure.
- * @note This function may be useful for console
- *       and native applications.
+ * filled by udefrag_get_progress() call.
+ * @return A string containing default formatted results
+ * of the disk defragmentation job defined in passed structure.
+ * Returned NULL indicates failure.
+ * @note This function may be useful for console and native applications.
  */
 char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 {
+	#define MSG_LENGTH 4095
+	char *msg;
 	char total_space[68];
 	char free_space[68];
 	double p;
 	unsigned int ip;
+	
+	/* allocate memory */
+	msg = winx_heap_alloc(MSG_LENGTH + 1);
+	if(msg == NULL){
+		DebugPrint("Cannot allocate %u bytes of memory for "
+			"udefrag_get_default_formatted_results()!",
+			MSG_LENGTH + 1);
+		winx_printf("\nCannot allocate %u bytes of memory!\n\n",
+			MSG_LENGTH + 1);
+		return NULL;
+	}
 
 	(void)winx_fbsize(pstat->total_space,2,total_space,sizeof(total_space));
 	(void)winx_fbsize(pstat->free_space,2,free_space,sizeof(free_space));
@@ -312,7 +324,7 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 	else p = (double)(pstat->fragmcounter)/((double)(pstat->filecounter));
 	ip = (unsigned int)(p * 100.00);
 	if(ip < 100) ip = 100; /* fix round off error */
-	(void)_snprintf(result_msg,sizeof(result_msg) - 1,
+	(void)_snprintf(msg,MSG_LENGTH,
 			  "Volume information:\r\n\r\n"
 			  "  Volume size                  = %s\r\n"
 			  "  Free space                   = %s\r\n\r\n"
@@ -325,8 +337,19 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 			  pstat->fragmfilecounter,
 			  ip / 100, ip % 100
 			 );
-	result_msg[sizeof(result_msg) - 1] = 0;
-	return result_msg;
+	msg[MSG_LENGTH] = 0;
+	return msg;
+}
+
+/**
+ * @brief Releases memory allocated
+ * by udefrag_get_default_formatted_results.
+ * @param[in] results the string to be released.
+ */
+void __stdcall udefrag_release_default_formatted_results(char *results)
+{
+	if(results)
+		winx_heap_free(results);
 }
 
 /**
