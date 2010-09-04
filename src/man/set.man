@@ -1,7 +1,7 @@
 SET(1)              Ultradefrag Development Team               SET(1)
 
 NAME
-        set - manual page for set
+        set - manual page for set v4.4.0
 
 SYNOPSIS
         set [OPTION]

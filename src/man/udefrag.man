@@ -1,7 +1,7 @@
 UDEFRAG(1)          Ultradefrag Development Team           UDEFRAG(1)
 
 NAME
-        udefrag - manual page for udefrag
+        udefrag - manual page for udefrag v4.2.0
 
 SYNOPSIS
         udefrag [OPTION]...
