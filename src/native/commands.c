@@ -713,22 +713,22 @@ static int __cdecl test_handler(int argc,short **argv,short **envp)
  * @brief List of supported commands.
  */
 cmd_table_entry cmd_table[] = {
-	{ L"boot-off", boot_off_handler },
-	{ L"boot-on", boot_on_handler },
-	{ L"echo", echo_handler },
-	{ L"echo.", echo_handler },
-	{ L"exit", exit_handler },
-	{ L"help", help_handler },
+	{ L"boot-off",  boot_off_handler },
+	{ L"boot-on",   boot_on_handler },
+	{ L"echo",      echo_handler },
+	{ L"echo.",     echo_handler },
+	{ L"exit",      exit_handler },
+	{ L"help",      help_handler },
 	{ L"hibernate", hibernate_handler },
-	{ L"history", history_handler },
-	{ L"man", man_handler },
-	{ L"pause", pause_handler },
-	{ L"reboot", reboot_handler },
-	{ L"set", set_handler },
-	{ L"shutdown", shutdown_handler },
-	{ L"test", test_handler },
-	{ L"type", type_handler },
-	{ L"udefrag", udefrag_handler },
+	{ L"history",   history_handler },
+	{ L"man",       man_handler },
+	{ L"pause",     pause_handler },
+	{ L"reboot",    reboot_handler },
+	{ L"set",       set_handler },
+	{ L"shutdown",  shutdown_handler },
+	{ L"test",      test_handler },
+	{ L"type",      type_handler },
+	{ L"udefrag",   udefrag_handler },
 	{ L"", NULL }
 };
 
