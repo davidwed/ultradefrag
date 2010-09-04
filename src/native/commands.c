@@ -96,7 +96,7 @@ static int __cdecl man_handler(int argc,short **argv,short **envp)
 	short *type_argv[2];
 	char path[MAX_PATH + 1];
 	short wpath[MAX_PATH + 1];
-	int native_prefix_length;
+	size_t native_prefix_length;
 	
 	(void)envp;
 	
