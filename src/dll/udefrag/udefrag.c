@@ -44,11 +44,14 @@ struct kernel_start_parameters {
 	BOOL done_flag;
 };
 
+struct udefrag_options {
+	ULONGLONG time_limit;
+	int refresh_interval;
+};
+
 /* global variables */
 HANDLE init_event = NULL;
 char result_msg[4096]; /* buffer for the default formatted result message */
-
-void udefrag_reload_settings(ULONGLONG *time_limit,int *refresh_interval);
 
 #ifndef STATIC_LIB
 /**
@@ -115,6 +118,36 @@ int __stdcall udefrag_unload(void)
 }
 
 /**
+ * @brief Reloads udefrag.dll specific options.
+ */
+static void udefrag_reload_settings(struct udefrag_options *udo)
+{
+	#define ENV_BUFFER_LENGTH 128
+	short env_buffer[ENV_BUFFER_LENGTH];
+	char buf[ENV_BUFFER_LENGTH];
+	ULONGLONG i;
+	
+	/* reset all parameters */
+	udo->refresh_interval  = DEFAULT_REFRESH_INTERVAL;
+	udo->time_limit = 0;
+
+	if(winx_query_env_variable(L"UD_TIME_LIMIT",env_buffer,ENV_BUFFER_LENGTH) >= 0){
+		(void)_snprintf(buf,ENV_BUFFER_LENGTH - 1,"%ws",env_buffer);
+		buf[ENV_BUFFER_LENGTH - 1] = 0;
+		udo->time_limit = winx_str2time(buf);
+	}
+	DebugPrint("Time limit = %I64u seconds\n",udo->time_limit);
+
+	if(winx_query_env_variable(L"UD_REFRESH_INTERVAL",env_buffer,ENV_BUFFER_LENGTH) >= 0)
+		udo->refresh_interval = _wtoi(env_buffer);
+	DebugPrint("Refresh interval = %u msec\n",udo->refresh_interval);
+	
+	(void)strcpy(buf,"");
+	(void)winx_dfbsize(buf,&i); /* to force MinGW export udefrag_dfbsize */
+	(void)i;
+}
+
+/**
  * @brief Thread procedure delivering a disk 
  *        defragmentation command to the driver.
  * @note
@@ -146,21 +179,14 @@ DWORD WINAPI engine_start(LPVOID p)
  */
 int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc)
 {
-	/*
-	* http://sourceforge.net/tracker/index.php?func=
-	* detail&aid=2886353&group_id=199532&atid=969873
-	*/
-	ULONGLONG time_limit = 0;
-
-	int refresh_interval  = DEFAULT_REFRESH_INTERVAL;
 	struct kernel_start_parameters ksp;
+	struct udefrag_options udo;
 	ULONGLONG t = 0;
 	int use_limit = 0;
 
 	DbgCheckInitEvent("udefrag_start");
 	
-	/* reload time_limit and refresh_interval variables */
-	udefrag_reload_settings(&time_limit,&refresh_interval);
+	udefrag_reload_settings(&udo);
 
 	/* initialize kernel_start_parameters structure */
 	ksp.volume_name = volume_name;
@@ -176,22 +202,23 @@ int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cl
 	}
 
 	/*
-	* Call specified callback 
-	* every refresh_interval milliseconds.
+	* Call specified callback every refresh_interval milliseconds.
+	* http://sourceforge.net/tracker/index.php?func=
+	* detail&aid=2886353&group_id=199532&atid=969873
 	*/
-	if(time_limit){
+	if(udo.time_limit){
 		use_limit = 1;
-		t = time_limit * 1000;
+		t = udo.time_limit * 1000;
 	}
 	do {
-		winx_sleep(refresh_interval);
+		winx_sleep(udo.refresh_interval);
 		if(sproc) sproc(FALSE);
 		if(use_limit){
-			if(t <= refresh_interval){
+			if(t <= udo.refresh_interval){
 				DebugPrint("Time limit exceeded!\n");
 				(void)udefrag_stop();
 			} else {
-				t -= refresh_interval;
+				t -= udo.refresh_interval;
 			}
 		}
 	} while(!ksp.done_flag);
