@@ -102,10 +102,6 @@ int __stdcall udefrag_init(void)
 		if(error_code == STATUS_OBJECT_NAME_COLLISION) return UDEFRAG_ALREADY_RUNNING;
 		return (-1);
 	}
-
-	/* enable neccessary privileges */
-	/*(void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE); */
-	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE); /* required by GUI client */
 	return 0;
 }
 

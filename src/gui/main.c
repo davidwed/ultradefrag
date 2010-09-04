@@ -158,6 +158,8 @@ void DisplayStopDefragError(int error_code,char *caption)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	HANDLE hToken; 
+	TOKEN_PRIVILEGES tkp; 
 	int error_code;
 	
 	hInstance = GetModuleHandle(NULL);
@@ -228,7 +230,21 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 
 	/* check for shutdown request */
 	if(shutdown_flag){
-		/* SE_SHUTDOWN privilege is set by udefrag_init() called before */
+		/* set SE_SHUTDOWN privilege */
+		if(!OpenProcessToken(GetCurrentProcess(), 
+		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,&hToken)){
+			DisplayLastError("Cannot open process token!");
+			return 4;
+		}
+		
+		LookupPrivilegeValue(NULL,SE_SHUTDOWN_NAME,&tkp.Privileges[0].Luid);
+		tkp.PrivilegeCount = 1;  // one privilege to set    
+		tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; 
+		AdjustTokenPrivileges(hToken,FALSE,&tkp,0,(PTOKEN_PRIVILEGES)NULL,0); 		
+		if(GetLastError() != ERROR_SUCCESS){
+			DisplayLastError("Cannot set shutdown privilege!");
+			return 5;
+		}
 		if(hibernate_instead_of_shutdown){
 			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
 			if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
