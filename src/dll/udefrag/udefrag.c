@@ -47,9 +47,8 @@ struct kernel_start_parameters {
 /* global variables */
 HANDLE init_event = NULL;
 char result_msg[4096]; /* buffer for the default formatted result message */
-extern int refresh_interval;
-extern ULONGLONG time_limit;
-void udefrag_reload_settings(void);
+
+void udefrag_reload_settings(ULONGLONG *time_limit,int *refresh_interval);
 
 #ifndef STATIC_LIB
 /**
@@ -147,6 +146,13 @@ DWORD WINAPI engine_start(LPVOID p)
  */
 int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc)
 {
+	/*
+	* http://sourceforge.net/tracker/index.php?func=
+	* detail&aid=2886353&group_id=199532&atid=969873
+	*/
+	ULONGLONG time_limit = 0;
+
+	int refresh_interval  = DEFAULT_REFRESH_INTERVAL;
 	struct kernel_start_parameters ksp;
 	ULONGLONG t = 0;
 	int use_limit = 0;
@@ -154,7 +160,7 @@ int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cl
 	DbgCheckInitEvent("udefrag_start");
 	
 	/* reload time_limit and refresh_interval variables */
-	udefrag_reload_settings();
+	udefrag_reload_settings(&time_limit,&refresh_interval);
 
 	/* initialize kernel_start_parameters structure */
 	ksp.volume_name = volume_name;

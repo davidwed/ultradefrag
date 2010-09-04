@@ -29,38 +29,34 @@
 #include "../../include/udefrag.h"
 #include "../zenwinx/zenwinx.h"
 
-/*
-* http://sourceforge.net/tracker/index.php?func=
-* detail&aid=2886353&group_id=199532&atid=969873
-*/
-ULONGLONG time_limit = 0;
-int refresh_interval  = DEFAULT_REFRESH_INTERVAL;
-
 /**
  * @brief Reloads udefrag.dll specific options.
  * @note Internal use only.
  */
-void udefrag_reload_settings(void)
+void udefrag_reload_settings(ULONGLONG *time_limit,int *refresh_interval)
 {
 	#define ENV_BUFFER_LENGTH 128
 	short env_buffer[ENV_BUFFER_LENGTH];
 	char buf[ENV_BUFFER_LENGTH];
 	ULONGLONG i;
 	
+	if(time_limit == NULL || refresh_interval == NULL)
+		return;
+	
 	/* reset all parameters */
-	refresh_interval  = DEFAULT_REFRESH_INTERVAL;
-	time_limit = 0;
+	*refresh_interval  = DEFAULT_REFRESH_INTERVAL;
+	*time_limit = 0;
 
 	if(winx_query_env_variable(L"UD_TIME_LIMIT",env_buffer,ENV_BUFFER_LENGTH) >= 0){
 		(void)_snprintf(buf,ENV_BUFFER_LENGTH - 1,"%ws",env_buffer);
 		buf[ENV_BUFFER_LENGTH - 1] = 0;
-		time_limit = winx_str2time(buf);
+		*time_limit = winx_str2time(buf);
 	}
-	DebugPrint("Time limit = %I64u seconds\n",time_limit);
+	DebugPrint("Time limit = %I64u seconds\n",*time_limit);
 
 	if(winx_query_env_variable(L"UD_REFRESH_INTERVAL",env_buffer,ENV_BUFFER_LENGTH) >= 0)
-		refresh_interval = _wtoi(env_buffer);
-	DebugPrint("Refresh interval = %u msec\n",refresh_interval);
+		*refresh_interval = _wtoi(env_buffer);
+	DebugPrint("Refresh interval = %u msec\n",*refresh_interval);
 	
 	(void)strcpy(buf,"");
 	(void)winx_dfbsize(buf,&i); /* to force MinGW export udefrag_dfbsize */
