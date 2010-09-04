@@ -29,10 +29,9 @@
 #include "../../include/udefrag.h"
 #include "../zenwinx/zenwinx.h"
 
-volume_info v[MAX_DOS_DRIVES + 1];
+volume_info global_v[MAX_DOS_DRIVES + 1];
 
-int internal_validate_volume(unsigned char letter,int skip_removable,
-		int *is_removable,char *fsname,LARGE_INTEGER *ptotal,LARGE_INTEGER *pfree);
+static int internal_validate_volume(unsigned char letter,int skip_removable,volume_info *v);
 
 /**
  * @brief Retrieves a list of volumes
@@ -63,20 +62,18 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 	char letter;
 
 	/* get full list of volumes */
-	*vol_info = v;
+	*vol_info = global_v;
 	/* set error mode to ignore missing removable drives */
 	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
 		return (-1);
 	index = 0;
 	for(i = 0; i < MAX_DOS_DRIVES; i++){
 		letter = 'A' + (char)i;
-		if(internal_validate_volume(letter, skip_removable,
-			 &(v[index].is_removable), v[index].fsname,
-			 &(v[index].total_space), &(v[index].free_space)) < 0) continue;
-		v[index].letter = letter;
+		if(internal_validate_volume(letter, skip_removable,&(global_v[index])) < 0)
+			continue;
 		index ++;
 	}
-	v[index].letter = 0;
+	global_v[index].letter = 0;
 	/* try to restore error mode to default state */
 	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
 	return 0;
@@ -94,20 +91,13 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
  */
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
-	int is_removable;
+	volume_info v;
 	int error_code;
-	/*
-	* The following parameters are required 
-	* to exclude missing floppies.
-	*/
-	char fsname[MAXFSNAME];
-	LARGE_INTEGER total, free;
 
 	/* set error mode to ignore missing removable drives */
 	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
 		return (-1);
-	error_code = internal_validate_volume(letter,skip_removable,&is_removable,
-		fsname,&total,&free);
+	error_code = internal_validate_volume(letter,skip_removable,&v);
 	if(error_code < 0) return error_code;
 	/* try to restore error mode to default state */
 	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
@@ -119,14 +109,8 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
  * @param[in] letter the volume letter.
  * @param[in] skip_removable the boolean value defining,
  * must removable drives be treated as invalid or not.
- * @param[out] is_removable pointer to the variable receiving
- * boolean value defining is volume removable or not.
- * @param[out] fsname pointer to the buffer receiving
- * the name of the filesystem containing on the volume.
- * @param[out] ptotal pointer to a variable receiving
- * a size of the volume.
- * @param[out] pfree pointer to a variable receiving
- * the amount of free space.
+ * @param[out] v pointer to structure receiving volume
+ * parameters.
  * @return Zero for success, negative value otherwise.
  * @note
  * - Internal use only.
@@ -134,12 +118,15 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
  *   to validate a floppy drive without a floppy disk
  *   then you will hear noise :))
  */
-int internal_validate_volume(unsigned char letter,int skip_removable,
-		int *is_removable,char *fsname,LARGE_INTEGER *ptotal,LARGE_INTEGER *pfree)
+static int internal_validate_volume(unsigned char letter,int skip_removable,volume_info *v)
 {
 	int type;
+	
+	if(v == NULL)
+		return (-1);
 
-	*is_removable = FALSE;
+	v->letter = letter;
+	v->is_removable = FALSE;
 	type = winx_get_drive_type(letter);
 	if(type < 0) return (-1);
 	if(type == DRIVE_CDROM){
@@ -155,21 +142,20 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 		return UDEFRAG_ASSIGNED_BY_SUBST;
 	}
 	if(type == DRIVE_REMOVABLE){
-		*is_removable = TRUE;
+		v->is_removable = TRUE;
 		if(skip_removable){
 			DebugPrint("Volume %c: is on removable media.",letter);
 			return UDEFRAG_REMOVABLE;
 		}
 	}
-	/* get volume information */
-	if(ptotal && pfree){
-		if(winx_get_volume_size(letter,ptotal,pfree) < 0)
-			return (-1);
-	}
-	if(fsname){
-		if(winx_get_filesystem_name(letter,fsname,MAXFSNAME) < 0)
-			return (-1);
-	}
+	/*
+	* Get volume information; it is strongly 
+	* required to exclude missing floppies.
+	*/
+	if(winx_get_volume_size(letter,&v->total_space,&v->free_space) < 0)
+		return (-1);
+	if(winx_get_filesystem_name(letter,v->fsname,MAXFSNAME) < 0)
+		return (-1);
 	return 0;
 }
 
