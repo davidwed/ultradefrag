@@ -149,7 +149,9 @@ void GetPrefs(void)
 	BOOLEAN restored_coord_undefined = TRUE;
 	
 	win_rc.left = win_rc.top = 0;
-	in_filter[0] = ex_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
+	in_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
+	/* default value for ex_filter is more advanced to reduce volume processing time */
+	strcpy(ex_filter,"system volume information;temp;recycle");
 	fraglimit = 0;
 	refresh_interval = DEFAULT_REFRESH_INTERVAL;
 	disable_reports = 0;
@@ -204,6 +206,8 @@ void GetPrefs(void)
 		if(string){
 			(void)strncpy(ex_filter,string,sizeof(ex_filter));
 			ex_filter[sizeof(ex_filter) - 1] = 0;
+		} else {
+			ex_filter[0] = 0;
 		}
 		lua_pop(L, 1);
 

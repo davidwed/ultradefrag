@@ -163,10 +163,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	hInstance = GetModuleHandle(NULL);
 	
 	if(strstr(lpCmdLine,"--setup")){
+		/* create default guiopts.lua file */
 		GetPrefs();
-		if(!ex_filter[0] || !strcmp(ex_filter,"system volume information;temp;recycle"))
-			strcpy(ex_filter,"system volume information;temp;recycle");
-		refresh_interval = DEFAULT_REFRESH_INTERVAL; /* nice looking 100 ms */
 		SavePrefs();
 		DeleteEnvironmentVariables();
 		return 0;
