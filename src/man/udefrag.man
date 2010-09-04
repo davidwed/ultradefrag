@@ -1,1 +1,66 @@
-This is an empty manual page for native udefrag command.
+UDEFRAG(1)           Ultradefrag Development Team           UDEFRAG(1)
+
+NAME
+        udefrag - manual page for udefrag
+
+SYNOPSIS
+        udefrag [OPTION]...
+
+DESCRIPTION
+        'udefrag' lists, analyzes, defragments and optimizes drives.
+        The default action is to defragment the supplied drives.
+
+OPTIONS
+        -l
+                list all available drives excluding removeable ones
+                can not be used with any other option
+        
+        -la
+                list all available drives including removeable ones
+                can not be used with any other option
+        
+        -a
+                only analyze the drives
+                can not be used with the '-o' option
+        
+        -o
+                optimize the drives
+                can not be used with the '-a' option
+        
+        {drive letter}:
+                one or more drives separated by spaces
+                can be omited if one of the --all... options is used
+
+        --all
+                perform action for all available drives including
+                removeable ones
+        
+        --all-fixed
+                Perform action for all available drives excluding
+                removeable ones
+                If the '--all' option is specified too, this option
+                takes precedance
+
+EXAMPLES
+        udefrag C:
+                Defragment drive C:
+        
+        udefrag -la
+                List all available drives
+        
+        udefrag -a --all-fixed
+                Analyze all drives excluding removeable ones
+        
+        udefrag E: K: -o
+                optimize drives E: and K:
+
+AUTHOR
+        Written by Ultradefrag Development Team
+
+COPYRIGHT
+        Copyright (C) 2010 Ultradefrag Development Team
+        This is free software; see the source for copying conditions.
+        There is NO warranty; not even for MERCHANTABILITY
+        or FITNESS FOR A PARTICULAR PURPOSE.
+
+udefrag                        September 2010                        1
