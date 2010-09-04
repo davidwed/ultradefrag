@@ -69,9 +69,8 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 	index = 0;
 	for(i = 0; i < MAX_DOS_DRIVES; i++){
 		letter = 'A' + (char)i;
-		if(internal_validate_volume(letter, skip_removable,&(global_v[index])) < 0)
-			continue;
-		index ++;
+		if(internal_validate_volume(letter, skip_removable,&(global_v[index])) >= 0)
+			index ++;
 	}
 	global_v[index].letter = 0;
 	/* try to restore error mode to default state */
