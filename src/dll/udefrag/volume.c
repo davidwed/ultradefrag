@@ -36,16 +36,14 @@ int internal_validate_volume(unsigned char letter,int skip_removable,
 
 /**
  * @brief Retrieves a list of volumes
- *        available for defragmentation.
- * @param[in] vol_info pointer to variable receiving
- *                     the volume list array address.
+ * available for defragmentation.
+ * @param[in] vol_info pointer to variable 
+ * receiving the volume list array address.
  * @param[in] skip_removable the boolean value defining,
- *                           must removable drives
- *                           be skipped or not.
+ * must removable drives be skipped or not.
  * @return Zero for success, negative value otherwise.
  * @note if skip_removable is equal to FALSE and you have a
- *       floppy drive without a floppy disk
- *       then you will hear noise :))
+ * floppy drive without a floppy disk then you will hear noise :))
  * @par Example:
  * @code
  * volume_info *v;
@@ -87,12 +85,12 @@ int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removabl
 /**
  * @brief Checks a volume for the defragmentation possibility.
  * @param[in] letter the volume letter.
- * @param[in] skip_removable the boolean value defining,
- *                           must removable drives be skipped or not.
+ * @param[in] skip_removable the boolean value 
+ * defining, must removable drives be skipped or not.
  * @return Zero for success, negative value otherwise.
  * @note if skip_removable is equal to FALSE and you want 
- *       to validate a floppy drive without a floppy disk
- *       then you will hear noise :))
+ * to validate a floppy drive without a floppy disk
+ * then you will hear noise :))
  */
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 {
@@ -120,18 +118,15 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
  * @brief Retrieves a volume parameters.
  * @param[in] letter the volume letter.
  * @param[in] skip_removable the boolean value defining,
- *                           must removable drives be treated
- *                           as invalid or not.
+ * must removable drives be treated as invalid or not.
  * @param[out] is_removable pointer to the variable receiving
- *                          boolean value defining is volume
- *                          removable or not.
+ * boolean value defining is volume removable or not.
  * @param[out] fsname pointer to the buffer receiving
- *                    the name of the filesystem
- *                    containing on the volume.
+ * the name of the filesystem containing on the volume.
  * @param[out] ptotal pointer to a variable receiving
- *                    a size of the volume.
+ * a size of the volume.
  * @param[out] pfree pointer to a variable receiving
- *                   the amount of free space.
+ * the amount of free space.
  * @return Zero for success, negative value otherwise.
  * @note
  * - Internal use only.

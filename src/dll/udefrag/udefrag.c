@@ -165,15 +165,14 @@ DWORD WINAPI engine_start(LPVOID p)
 }
 
 /**
- * @brief Delivers a disk defragmentation command to the driver
- *        in a separate thread.
+ * @brief Delivers a disk defragmentation command
+ * to the driver in a separate thread.
  * @param[in] volume_name the name of the volume.
  * @param[in] job_type the type of the job.
  * @param[in] cluster_map_size the size of the cluster map, in bytes.
  * @param[in] sproc an address of the callback procedure
- *                  to be called periodically during
- *                  the running disk defragmentation job.
- *                  This parameter may be NULL.
+ * to be called periodically during the running disk
+ * defragmentation job. This parameter may be NULL.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc)
@@ -243,10 +242,10 @@ int __stdcall udefrag_stop(void)
 
 /**
  * @brief Retrieves the progress information
- *        of the running disk defragmentation job.
+ * of the running disk defragmentation job.
  * @param[out] pstat pointer to the STATISTIC structure.
  * @param[out] percentage pointer to the variable 
- *                        receiving progress percentage.
+ * receiving progress percentage.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
@@ -272,7 +271,7 @@ int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
 
 /**
  * @brief Retrieves the cluster map
- *        of the currently processing volume.
+ * of the currently processing volume.
  * @param[out] buffer pointer to the map buffer.
  * @param[in] size the buffer size, in bytes.
  * @return Zero for success, negative value otherwise. 
