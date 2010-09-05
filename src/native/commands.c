@@ -667,11 +667,17 @@ static int __cdecl call_handler(int argc,short **argv,short **envp)
 	
 	if(argc < 1)
 		return (-1);
+        
+    if(GetDebugLevel() > DBG_NORMAL)
+        winx_printf("\n%d arguments for %ws\n", argc - 1, argv[0]);
 
 	old_scripting_mode = scripting_mode;
 	
 	if(argc < 2){
 		result = ProcessScript(NULL);
+        if(GetDebugLevel() > DBG_NORMAL)
+            winx_printf("\n%ws: processing default script returned %u!\n\n",
+				argv[0],result);
 	} else {
 		length = 0;
 		for(i = 1; i < argc; i++)
