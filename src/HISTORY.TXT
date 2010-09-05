@@ -6,7 +6,7 @@ HISTORY
     - history of typed commands added to the boot time interactive mode;
       navigation is possible by arrow keys, 'history' command can be used
       to list all typed commands
-    - man and type commands added to the boot time shell
+    - call, man and type commands added to the boot time shell
     - echo, exit, pause and set commands of the boot time shell improved
     - clearing of the failed boot flag added for reboot and shutdown at boot time
     - pending boot-off boot time script command support added,
