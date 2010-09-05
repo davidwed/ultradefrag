@@ -399,6 +399,7 @@ void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read)
 	}
 	
 	if(bytes_read) *bytes_read = n_read;
+    winx_fclose(f);
 	return contents;
 }
 
