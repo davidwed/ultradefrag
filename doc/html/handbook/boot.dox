@@ -63,20 +63,24 @@
  *
  * The following commands are accepted:
  * <dl>
- * <dt>\@echo on</dt>
- * <dd>Show commands on the screen. This is the default behaviour.</dd>
- * <dt>\@echo off</dt>
- * <dd>Disable showing commands on the screen.</dd>
+ * <dt>\@</dt>
+ * <dd>Do not show the command line preceeded by the at-sign on the screen.
+ * By default the command line is displayed on the screen.</dd>
+ * <dt>echo</dt>
+ * <dd>Display a message, empty line, enable/disable showing the command line on the screen
+ * or display the status of showing the command line. This is the native equivalent of the
+ * appropriate Windows command.</dd>
  * <dt>set</dt>
- * <dd>Set an environment variable. This is a native equivalent of the
+ * <dd>List, set and clear environment variables. This is the native equivalent of the
  * appropriate Windows command.
- * For further information about the variables consult the @ref Console page.</dd>
+ * For further information about the supported variables consult the @ref Console page.</dd>
  * <dt>udefrag</dt>
  * <dd>This is a native equivalent of the UltraDefrag command line tool.
  * The following keys are supported: -la, -l, -a, -o, --all, --all-fixed.
  * Multiple drive letters on a single command line are allowed.</dd>
  * <dt>pause</dt>
- * <dd>Pause the script execution for the specified time interval (in milliseconds, 2147483647 maximum).
+ * <dd>Pause the script execution for the specified time interval (in milliseconds, 2147483647 maximum)
+ * or till a key is pressed.
  * For example, the command <b>pause 1000</b> will pause execution for one second.</dd>
  * <dt>boot-on</dt>
  * <dd>Turn on the boot time defragmentation to be executed at every boot.</dd>
@@ -89,7 +93,7 @@
  * <dt>reboot</dt>
  * <dd>Reboot the computer.</dd>
  * <dt>exit</dt>
- * <dd>Break the boot time program execution.</dd>
+ * <dd>Break the boot time program execution and return the specified error code or zero.</dd>
  * </dl>
  *
  * When UltraDefrag encounters the wrong syntax it shows the appropriate
@@ -140,6 +144,12 @@ Type 'help' for list of supported commands.
  * <dl>
  * <dt>help</dt>
  * <dd>Show a list of all available commands.</dd>
+ * <dt>man</dt>
+ * <dd>Show detailed help for the specified command.</dd>
+ * <dt>call</dt>
+ * <dd>Execute a command script, the default is the boot time script.</dd>
+ * <dt>type</dt>
+ * <dd>Display the contents of a file, the default is the boot time script.</dd>
  * <dt>history</dt>
  * <dd>Show a list of all manually entered commands.
  * To cycle through the commands use the up/down arrow/cursor keys.</dd>
