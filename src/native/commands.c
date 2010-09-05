@@ -157,13 +157,15 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
 		return 0;
 	
 	/* convert list of strings to array */
-	strings = winx_heap_alloc((history.n_entries + 1) * sizeof(char *));
+	strings = winx_heap_alloc((history.n_entries + 3) * sizeof(char *));
 	if(strings == NULL){
 		winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
-			argv[0],(history.n_entries + 1) * sizeof(char *));
+			argv[0],(history.n_entries + 3) * sizeof(char *));
 		return (-1);
 	}
-	i = 0;
+    strings[0] = "Typed commands history:";
+    strings[1] = "";
+	i = 2;
 	for(entry = history.head; i < history.n_entries; entry = entry->next_ptr){
 		if(entry->string){
 			strings[i] = entry->string;
@@ -173,10 +175,10 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
 	}
 	strings[i] = NULL;
 	
-	winx_printf("\nTyped commands history:\n\n");
+	winx_printf("\n");
 
 	result = winx_print_array_of_strings(strings,
-		MAX_LINE_WIDTH,MAX_DISPLAY_ROWS - 2,
+		MAX_LINE_WIDTH,MAX_DISPLAY_ROWS,
 		DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY,1);
 
 	winx_heap_free(strings);
