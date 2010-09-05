@@ -40,8 +40,8 @@
 
 /* define how many lines to display for each text page,
    smallest boot screen height is 24 rows,
-   which must be reduced by two rows for the prompt */
-#define MAX_DISPLAY_ROWS 22
+   which must be reduced by one row for the prompt */
+#define MAX_DISPLAY_ROWS 23
 
 /* define how many characters may be
    printed on line after a prompt */
@@ -55,5 +55,7 @@
 
 /* message to be shown when pause command is used without parameters */
 #define PAUSE_MESSAGE "Hit any key to continue..."
+
+int GetDebugLevel();
 
 #endif /* _DEFRAG_NATIVE_H_ */
