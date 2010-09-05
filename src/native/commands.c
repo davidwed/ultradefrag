@@ -81,10 +81,54 @@ typedef struct {
 	short *cmd_name;
 	cmd_handler_proc cmd_handler;
 } cmd_table_entry;
-static int __cdecl boot_off_handler(int argc,short **argv,short **envp);
-static int __cdecl type_handler(int argc,short **argv,short **envp);
 int __cdecl udefrag_handler(int argc,short **argv,short **envp);
 int ProcessScript(short *filename);
+
+/* forward declarations */
+extern cmd_table_entry cmd_table[];
+static int __cdecl boot_off_handler(int argc,short **argv,short **envp);
+static int __cdecl type_handler(int argc,short **argv,short **envp);
+
+static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
+{
+	char windir[MAX_PATH + 1];
+	char path[MAX_PATH + 1];
+	WINX_FILE *f;
+	int i, column, max_columns;
+	
+	if(argc < 1)
+		return (-1);
+	
+	/* cycle through names of existing commands */
+	max_columns = (MAX_LINE_WIDTH - 1) / 15;
+	column = 0;
+	for(i = 0; cmd_table[i].cmd_handler != NULL; i++){
+		/* build path to the manual page */
+		if(winx_get_windows_directory(windir,MAX_PATH) < 0){
+			winx_printf("\n%ws: Cannot retrieve the Windows directory path!\n\n",argv[0]);
+			return (-1);
+		}
+		_snprintf(path,MAX_PATH,"%s\\UltraDefrag\\man\\%ws.man",windir,cmd_table[i].cmd_name);
+		path[MAX_PATH] = 0;
+		/* check for the page existence */
+		f = winx_fopen(path,"r");
+		if(f != NULL){
+			winx_fclose(f);
+			/* display man page filename on the screen */
+			_snprintf(path,MAX_PATH,"%ws.man",cmd_table[i].cmd_name);
+			path[MAX_PATH] = 0;
+			winx_printf("%-15s",path);
+			column ++;
+			if(column >= max_columns){
+				winx_printf("\n");
+				column = 0;
+			}
+		}
+	}
+
+	winx_printf("\n");
+	return 0;
+}
 
 /**
  * @brief man command handler.
@@ -100,8 +144,8 @@ static int __cdecl man_handler(int argc,short **argv,short **envp)
 		return (-1);
 	
 	if(argc < 2){
-		winx_printf("\n%ws: argument is missing!\n\n",argv[0]);
-		return (-1);
+		/* installed man pages listing is requested */
+		return list_installed_man_pages(argc,argv,envp);
 	}
 	
 	/* build path to requested manual page */
