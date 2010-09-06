@@ -23,7 +23,7 @@
  * UltraDefrag is the first open source disk defragmenter for
  * Windows which supports defragmentation of system locked files
  * by running during the Windows boot process. Actually all files
- * including registry hives and pagefile can be defragmented
+ * including registry hives and page-file can be defragmented
  * at Windows boot time.
  *
  * Also one of the primary goals of the UltraDefrag design is
@@ -148,7 +148,7 @@
  * beginning of the volume to free as much space as possible in the
  * terminal part as mentioned before.
  *
- * The multipass disk optimization algorithm is very effective,
+ * The multi-pass disk optimization algorithm is very effective,
  * even on disks which have a low amount of free space.
  *
  * Another advantage of the described optimization algorithm
@@ -156,9 +156,9 @@
  * amount of time.
  *
  * Unfortunately the volume optimization algorithm works only
- * on NTFS volumes, because FAT directories are not moveable.
+ * on NTFS volumes, because FAT directories are not movable.
  *
- * On the other hand, NTFS volumes are often logically splitted
+ * On the other hand, NTFS volumes are often logically split
  * to few parts by files which cannot be moved ($MFT and others).
  * Therefore it may be sometimes impossible to become a very large
  * continuous free space area for, let's imagine, pagefile

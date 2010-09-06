@@ -39,7 +39,7 @@
  * <dd>Defragment volume. This key is optional. Specifying just 
  * the volume letter will cause UltraDefrag  to defragment the volume.</dd>
  * <dt>-o, --optimize</dt>
- * <dd>Optimize volume space by moving all files to the begining of the volume.</dd>
+ * <dd>Optimize volume space by moving all files to the beginning of the volume.</dd>
  * <dt>-l, --list-available-volumes</dt>
  * <dd>List all volumes available for defragmentation, except removable. Each line of
  * output contains volume letter, filesystem name, total space and amount of 

@@ -28,7 +28,7 @@
  * Optimization is reasonable when you have free space heavily fragmented
  * on system volume. To determine whether to run optimizer or not execute
  * an analysis and look at the cluster map. If you see a white space
- * heavily scattered around the disc - it's time for an optimization.
+ * heavily scattered around the disk - it's time for an optimization.
  *
  * And, once again, don't crave to defrag/optimize data files -
  * music/video has no need to be continues on disk, other files have
@@ -71,8 +71,8 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  *
  * <h3>The progress bar updates irregularly. Why is this?</h3>
  * The progress bar measures disk space, not the number of files. So when few 
- * big files are analysed, the progress bar will increase very fast. 
- * Conversely, when a thousands of small files are analysed, progress will 
+ * big files are analyzed, the progress bar will increase very fast. 
+ * Conversely, when a thousands of small files are analyzed, progress will 
  * be relatively slow.
  *
  * <HR>

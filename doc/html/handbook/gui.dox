@@ -20,7 +20,7 @@
 /**
  * @page GUI Graphical Interface
  *
- * The UltraDefrag GUI consists of a single resizable window.
+ * The UltraDefrag GUI consists of a single re-sizable window.
  * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
  * <b>List of Volumes</b>\n
@@ -82,7 +82,7 @@
  * take an attention.
  *
  * <b>Disk Defragmentation Control</b>\n
- * Click Analyse button or type Ctrl+A to start the volume analysis. 
+ * Click Analyze button or type Ctrl+A to start the volume analysis. 
  * Click Defragment button or type Ctrl+D to start the volume defragmentation.
  * Click Optimize button or type Ctrl+C to start the volume optimization.
  * Use Stop button or Ctrl+S hotkeys to stop the currently running disk
@@ -127,7 +127,7 @@
  * <b>Graphical Interface</b>\n
  * Click Font button to select a font for GUI applications rendering.
  * The default font is Courier New, 9. The Options button opens the 
- * guiopts.lua placed in /options subfolder of the program's directory.
+ * guiopts.lua placed in /options sub-folder of the program's directory.
  * The Help button opens this section of the handbook.
  * If you have a local copy of documentation installed, the
  * program will use it. Otherwise the same page will be

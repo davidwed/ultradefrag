@@ -64,7 +64,7 @@
  * The following commands are accepted:
  * <dl>
  * <dt>\@</dt>
- * <dd>Do not show the command line preceeded by the at-sign on the screen.
+ * <dd>Do not show the command line preceded by the at-sign on the screen.
  * By default the command line is displayed on the screen.</dd>
  * <dt>echo</dt>
  * <dd>Display a message, empty line, enable/disable showing the command line on the screen

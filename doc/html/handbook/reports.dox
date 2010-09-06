@@ -20,13 +20,13 @@
 /**
  * @page Reports File Fragmentation Reports
  *
- * Everytime you run volume analysis, defragmentation or
+ * Every time you run volume analysis, defragmentation or
  * optimization, UltraDefrag produces the file fragmentation
  * report with full list of fragmented files contained on the
  * volume.
  *
  * UltraDefrag saves file fragmentation reports in the
- * following two formats: LuaReport and PlainText. The first
+ * following two formats: LuaReport and Plain Text. The first
  * is used by full-featured versions of the program only, the
  * second format is used everywhere to ensure that the report will 
  * be accessible even on machines without any web browser installed.
@@ -35,7 +35,7 @@
  * the processed volumes. To open LuaReport click fraglist.luar
  * icon in Explorer or simply click the Report button in
  * UltraDefrag GUI after a disk defragmentation/analysis job
- * completion. To open the PlainText report click fraglist.txt
+ * completion. To open the Plain Text report click fraglist.txt
  * icon in Explorer.
  *
  * When you are opening the LuaReport a single HTML page
@@ -51,7 +51,7 @@
  * process (~350 lines/sec on 1.8GHz CPU). Sorting
  * implemented in JavaScript is slow, but very reliable.
  *
- * Each line of the PlainText report consists of
+ * Each line of the Plain Text report consists of
  * the number of fragments, the file size, the comment 
  * and the name of the file.
  *
@@ -62,7 +62,7 @@
  * <h1>Configuring</h1>
  * All options related to file fragmentation reports are
  * contained in a single udreportopts.lua file inside an
- * /options subfolder of the program's directory.
+ * /options sub-folder of the program's directory.
  *
  * To open this file for editing click its icon in Explorer
  * or simply click an appropriate button in UltraDefrag 
@@ -87,13 +87,13 @@
 
 -------------------------------------------------------------------------------
 -- Set enable_sorting to zero if your web browser is too old
--- and you have error messages about ivalid javascript code.
+-- and you have error messages about invalid javascript code.
 -------------------------------------------------------------------------------
 enable_sorting = 1
 
 -------------------------------------------------------------------------------
--- Set this parameter to 1 if you prefer to look at filenames splitted
--- into few short lines. If you prefer to use fullscreen mode of your
+-- Set this parameter to 1 if you prefer to look at filenames split
+-- into few short lines. If you prefer to use full-screen mode of your
 -- web browser then set this parameter to zero.
 -------------------------------------------------------------------------------
 split_long_names = 0

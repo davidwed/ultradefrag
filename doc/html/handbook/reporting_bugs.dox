@@ -24,7 +24,7 @@
  * <a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">bug tracker</a>.
  * The following additional information is always very appreciated:
  *
- * - screenshots (required for all GUI-related bugs)
+ * - screen-shots (required for all GUI-related bugs)
  * - debugging information collected by <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> program
  *
  * Don't forget to check the Capture Kernel and Capture Win32 items of the Capture menu in DbgView program.
