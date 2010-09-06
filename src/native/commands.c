@@ -57,7 +57,7 @@ char *help_message[] = {
 	"  exit          - continue Windows boot",
 	"  help          - display this help screen",
 	"  history       - display the list of typed commands",
-	"  man           - display detailed help about a command",
+	"  man           - list or display available man pages",
 	"  pause         - halt the execution for the specified timeout",
 	"                  or till a key is pressed",
 	"  reboot        - reboot the PC",
