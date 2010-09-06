@@ -119,6 +119,7 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
  */
 static int internal_validate_volume(unsigned char letter,int skip_removable,volume_info *v)
 {
+	winx_volume_information volume_info;
 	int type;
 	
 	if(v == NULL)
@@ -147,14 +148,19 @@ static int internal_validate_volume(unsigned char letter,int skip_removable,volu
 			return UDEFRAG_REMOVABLE;
 		}
 	}
+
 	/*
 	* Get volume information; it is strongly 
 	* required to exclude missing floppies.
 	*/
-	if(winx_get_volume_size(letter,&v->total_space,&v->free_space) < 0)
+	volume_info.volume_letter = letter;
+	if(winx_get_volume_information(&volume_info) < 0)
 		return (-1);
-	if(winx_get_filesystem_name(letter,v->fsname,MAXFSNAME) < 0)
-		return (-1);
+	
+	v->total_space.QuadPart = volume_info.total_bytes;
+	v->free_space.QuadPart = volume_info.free_bytes;
+	strncpy(v->fsname,volume_info.fs_name,MAXFSNAME - 1);
+	v->fsname[MAXFSNAME - 1] = 0;
 	return 0;
 }
 
