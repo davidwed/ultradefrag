@@ -145,7 +145,7 @@ Type 'help' for list of supported commands.
  * <dt>help</dt>
  * <dd>Show a list of all available commands.</dd>
  * <dt>man</dt>
- * <dd>Show detailed help for the specified command.</dd>
+ * <dd>List or display available manual pages.</dd>
  * <dt>call</dt>
  * <dd>Execute a command script, the default is the boot time script.</dd>
  * <dt>type</dt>
