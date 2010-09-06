@@ -27,8 +27,6 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-static BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile);
-
 /**
  * @brief Converts the 64-bit number
  * of bytes to a human readable format.
@@ -128,6 +126,36 @@ int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber)
 }
 
 /**
+ * @brief Opens a root directory of the volume.
+ * @param[in] volume_letter the volume letter.
+ * @return File handle, NULL indicates failure.
+ * @note Internal use only.
+ */
+static HANDLE OpenRootDirectory(unsigned char volume_letter)
+{
+	unsigned short rootpath[] = L"\\??\\A:\\";
+	HANDLE hRoot;
+	NTSTATUS Status;
+	UNICODE_STRING uStr;
+	OBJECT_ATTRIBUTES ObjectAttributes;
+	IO_STATUS_BLOCK IoStatusBlock;
+
+	rootpath[4] = (short)volume_letter;
+	RtlInitUnicodeString(&uStr,rootpath);
+	InitializeObjectAttributes(&ObjectAttributes,&uStr,
+				   FILE_READ_ATTRIBUTES,NULL,NULL); /* ?? */
+	Status = NtCreateFile(&hRoot,FILE_GENERIC_READ,
+				&ObjectAttributes,&IoStatusBlock,NULL,0,
+				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
+				NULL,0);
+	if(!NT_SUCCESS(Status)){
+		DebugPrintEx(Status,"Cannot open %ls",rootpath);
+		return NULL;
+	}
+	return hRoot;
+}
+
+/**
  * @brief Win32 GetDriveType() native equivalent.
  * @param[in] letter the volume letter
  * @return A drive type, negative value indicates failure.
@@ -142,7 +170,7 @@ int __stdcall winx_get_drive_type(char letter)
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS Status;
 	int drive_type;
-	HANDLE hFile;
+	HANDLE hRoot;
 
 	/* An additional checks for DFS were suggested by Stefan Pendl (pendl2megabit@yahoo.de). */
 	/* DFS shares have DRIVE_NO_ROOT_DIR type though they are actually remote. */
@@ -211,16 +239,17 @@ int __stdcall winx_get_drive_type(char letter)
 	
 	/* try to define exactly again which type has a specified drive (nt4+) */
 	/* note that the drive motor can be powered on during this check */
-	if(!internal_open_rootdir(letter,&hFile)){
+	hRoot = OpenRootDirectory(letter);
+	if(hRoot == NULL){
 		winx_heap_free(ppdi);
 		winx_heap_free(pffdi);
 		return (-1);
 	}
 	RtlZeroMemory(pffdi,sizeof(FILE_FS_DEVICE_INFORMATION));
-	Status = NtQueryVolumeInformationFile(hFile,&iosb,
+	Status = NtQueryVolumeInformationFile(hRoot,&iosb,
 					pffdi,sizeof(FILE_FS_DEVICE_INFORMATION),
 					FileFsDeviceInformation);
-	NtClose(hFile);
+	NtClose(hRoot);
 	if(!NT_SUCCESS(Status)){
 		DebugPrintEx(Status,"winx_get_drive_type(): cannot get volume type for \'%c\'",letter);
 		winx_heap_free(ppdi);
@@ -312,7 +341,8 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 		return (-1);
 	}
 
-	if(!internal_open_rootdir(letter,&hRoot)){
+	hRoot = OpenRootDirectory(letter);
+	if(hRoot == NULL){
 		winx_heap_free(pffs);
 		return (-1);
 	}
@@ -376,7 +406,8 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 		return(-1);
 	}
 	
-	if(!internal_open_rootdir(letter,&hRoot)){
+	hRoot = OpenRootDirectory(letter);
+	if(hRoot == NULL){
 		winx_heap_free(buf);
 		return (-1);
 	}
@@ -406,36 +437,6 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
 	}
 	winx_heap_free(buf);
 	return 0;
-}
-
-/**
- * @brief Opens a root directory of the volume.
- * @param[in] letter the volume letter.
- * @param[out] phFile pointer to the file handle.
- * @return TRUE for success, FALSE indicates failure.
- * @note Internal use only.
- */
-static BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile)
-{
-	NTSTATUS Status;
-	unsigned short rootpath[] = L"\\??\\A:\\";
-	UNICODE_STRING uStr;
-	OBJECT_ATTRIBUTES ObjectAttributes;
-	IO_STATUS_BLOCK IoStatusBlock;
-
-	rootpath[4] = (short)letter;
-	RtlInitUnicodeString(&uStr,rootpath);
-	InitializeObjectAttributes(&ObjectAttributes,&uStr,
-				   FILE_READ_ATTRIBUTES,NULL,NULL); /* ?? */
-	Status = NtCreateFile(phFile,FILE_GENERIC_READ,
-				&ObjectAttributes,&IoStatusBlock,NULL,0,
-				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
-				NULL,0);
-	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot open %ls",rootpath);
-		return FALSE;
-	}
-	return TRUE;
 }
 
 /** @} */
