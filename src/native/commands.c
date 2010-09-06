@@ -57,7 +57,7 @@ char *help_message[] = {
 	"  exit          - continue Windows boot",
 	"  help          - display this help screen",
 	"  history       - display the list of typed commands",
-	"  man           - list or display available man pages",
+	"  man           - list or display available manual pages",
 	"  pause         - halt the execution for the specified timeout",
 	"                  or till a key is pressed",
 	"  reboot        - reboot the PC",
@@ -67,7 +67,7 @@ char *help_message[] = {
     "                  the specified file",
 	"  udefrag       - list, analyze, defrag or optimize volumes",
 	"",
-	"    For further help execute 'man {command}'.",
+	"    For detailed information execute 'man {command}'.",
 	"",
 	NULL
 };
@@ -714,16 +714,10 @@ static int __cdecl call_handler(int argc,short **argv,short **envp)
 	if(argc < 1)
 		return (-1);
         
-    if(GetDebugLevel() > DBG_NORMAL)
-        winx_printf("\n%d arguments for %ws\n", argc - 1, argv[0]);
-
 	old_scripting_mode = scripting_mode;
 	
 	if(argc < 2){
 		result = ProcessScript(NULL);
-        if(GetDebugLevel() > DBG_NORMAL)
-            winx_printf("\n%ws: processing default script returned %u!\n\n",
-				argv[0],result);
 	} else {
 		length = 0;
 		for(i = 1; i < argc; i++)

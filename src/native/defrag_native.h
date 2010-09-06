@@ -56,6 +56,7 @@
 /* message to be shown when pause command is used without parameters */
 #define PAUSE_MESSAGE "Hit any key to continue..."
 
+/* Returns current debug level, declared in udefrag.c */
 int GetDebugLevel();
 
 #endif /* _DEFRAG_NATIVE_H_ */

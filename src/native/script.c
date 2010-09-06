@@ -65,9 +65,6 @@ int ProcessScript(short *filename)
 		path[MAX_PATH - 1] = 0;
 	}
 
-    if(GetDebugLevel() > DBG_NORMAL)
-        winx_printf("\nProcessing script: %ls !\n\n",path);
-
     buffer = winx_get_file_contents(path,&filesize);
 	if(buffer == NULL)
 		return 0; /* file is empty or some error */

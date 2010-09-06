@@ -322,7 +322,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		if(abort_flag) break;
 		letter = letters[i];
 		ProcessVolume(letter);
-		if(debug_level > DBG_NORMAL) winx_sleep(5000);
+		if(debug_level > DBG_NORMAL) short_dbg_delay();
 	}
 
 	if(abort_flag){
@@ -342,7 +342,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			if(abort_flag) break;
 			letter = v[i].letter;
 			ProcessVolume(letter);
-			if(debug_level > DBG_NORMAL) winx_sleep(5000);
+			if(debug_level > DBG_NORMAL) short_dbg_delay();
 		}
 	}
 	(void)udefrag_unload();
