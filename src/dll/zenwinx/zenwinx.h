@@ -157,16 +157,16 @@ int __stdcall winx_get_drive_type(char letter);
 #define MAX_FS_NAME_LENGTH 31
 
 typedef struct _winx_volume_information {
-	char volume_letter;                       /* must be set by caller! */
+	char volume_letter;                    /* must be set by caller! */
 	char fs_name[MAX_FS_NAME_LENGTH + 1];  /* the name of the file system */
-	ULONG fat32_mj_version;                   /* major number of FAT32 version */
-	ULONG fat32_mn_version;                   /* minor number of FAT32 version */
-	ULONGLONG total_bytes;                    /* total volume size, in bytes */
-	ULONGLONG free_bytes;                     /* amount of free space, in bytes */
-	ULONGLONG total_clusters;                 /* total number of clusters */
-	ULONGLONG bytes_per_cluster;              /* cluster size, in bytes */
-	ULONG sectors_per_cluster;                /* number of sectors in each cluster */
-	ULONG bytes_per_sector;                   /* sector size, in bytes */
+	ULONG fat32_mj_version;                /* major number of FAT32 version */
+	ULONG fat32_mn_version;                /* minor number of FAT32 version */
+	ULONGLONG total_bytes;                 /* total volume size, in bytes */
+	ULONGLONG free_bytes;                  /* amount of free space, in bytes */
+	ULONGLONG total_clusters;              /* total number of clusters */
+	ULONGLONG bytes_per_cluster;           /* cluster size, in bytes */
+	ULONG sectors_per_cluster;             /* number of sectors in each cluster */
+	ULONG bytes_per_sector;                /* sector size, in bytes */
 } winx_volume_information;
 
 int __stdcall winx_get_volume_information(winx_volume_information *v);
