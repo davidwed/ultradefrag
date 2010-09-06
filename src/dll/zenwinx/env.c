@@ -29,9 +29,9 @@
 
 /**
  * @brief Queries an environment variable.
- * @param[in]  name   the name of environment variable.
+ * @param[in] name the name of environment variable.
  * @param[out] buffer pointer to the buffer to receive
- *                    the null-terminated value string.
+ * the null-terminated value string.
  * @param[in]  length the length of the buffer, in characters.
  * @return Zero for success, negative value otherwise.
  */
@@ -56,9 +56,9 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 
 /**
  * @brief Sets an environment variable.
- * @param[in] name  the name of the environment variable.
- * @param[in] value the null-terminated value string. Note that
- *                  passing NULL here causes a variable deletion.
+ * @param[in] name the name of the environment variable.
+ * @param[in] value the null-terminated value string.
+ * NULL pointer causes a variable deletion.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall winx_set_env_variable(short *name, short *value)

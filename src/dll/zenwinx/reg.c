@@ -40,13 +40,13 @@ static void __stdcall flush_smss_key(HANDLE hKey);
 /* The following two functions replaces bootexctrl in native mode. */
 
 /**
- * @brief Registers command to be executed during the Windows
- *        boot process.
- * @param[in] command the name of the command's executable, without 
- *                    an extension
+ * @brief Registers command to be executed
+ * during the Windows boot process.
+ * @param[in] command the name of the command's
+ * executable, without an extension.
  * @return Zero for success, negative value otherwise.
  * @note Command's executable must be placed inside 
- *       a system32 directory to be executed successfully.
+ * a system32 directory to be executed successfully.
  */
 int __stdcall winx_register_boot_exec_command(short *command)
 {
@@ -98,10 +98,10 @@ done:
 }
 
 /**
- * @brief Deregisters command from being executed during the Windows
- *        boot process.
- * @param[in] command the name of the command's executable, without 
- *                    an extension
+ * @brief Deregisters command from being executed
+ * during the Windows boot process.
+ * @param[in] command the name of the command's
+ * executable, without an extension.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall winx_unregister_boot_exec_command(short *command)
@@ -196,15 +196,14 @@ static int __stdcall open_smss_key(HANDLE *pKey)
 }
 
 /**
- * @brief Queries the BootExecute value of the SMSS registry key.
+ * @brief Queries the BootExecute
+ * value of the SMSS registry key.
  * @param[in] hKey the key handle.
  * @param[out] data pointer to a buffer that receives the value.
  * @param[in,out] size This paramenter must contain before the call
- *                     a number of bytes which must be allocated
- *                     additionally to the size of the BootExecute
- *                     value. After the call this parameter contains
- *                     size of the allocated buffer containing the
- *                     queried value, in bytes.
+ * a number of bytes which must be allocated additionally to the size
+ * of the BootExecute value. After the call this parameter contains
+ * size of the allocated buffer containing the queried value, in bytes.
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */

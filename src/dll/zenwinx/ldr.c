@@ -28,15 +28,15 @@
 #include "zenwinx.h"
 
 /**
- * @brief Retrieves the address of an exported function or variable 
- *        from the specified dynamic-link library (DLL).
+ * @brief Retrieves the address of an exported function
+ * or variable from the specified dynamic-link library (DLL).
  * @param[in] libname the name of the library.
  * @param[in] funcname the name of the function or variable.
- * @param[out] proc_addr the address of memory to store 
- *                       retrieved address into.
+ * @param[out] proc_addr the address of memory
+ * to store retrieved address into.
  * @return Zero for success, negative value otherwise.
  * @note The specified dynamic-link library 
- *       must be loaded before this call.
+ * must be loaded before this call.
  */
 int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr)
 {

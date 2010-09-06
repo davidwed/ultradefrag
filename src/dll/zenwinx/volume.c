@@ -27,24 +27,23 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile);
+static BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile);
 
 /**
- * @brief Converts the 64-bit number of bytes 
- *        to a human readable format.
- * @details This function supports the following 
- *          suffixes: Kb, Mb, Gb, Tb, Pb, Eb.
+ * @brief Converts the 64-bit number
+ * of bytes to a human readable format.
+ * @details This function supports
+ * the following suffixes: Kb, Mb, Gb, Tb, Pb, Eb.
  * @param[in] number a number to be converted.
  * @param[in] digits a number of digits after a dot.
  * @param[out] buffer pointer to the buffer for a resulting string.
  * @param[in] length the length of the buffer, in characters.
  * @return A number of characters stored, not counting the 
- *         terminating null character. If the number of characters
- *         required to store the data exceeds length, then length 
- *         characters are stored in buffer and a negative value 
- *         is returned.
+ * terminating null character. If the number of characters
+ * required to store the data exceeds length, then length 
+ * characters are stored in buffer and a negative value is returned.
  * @note The prototype of this function was StrFormatByteSize()
- *       from shlwapi.dll implementation included in ReactOS.
+ * from shlwapi.dll implementation included in ReactOS.
  */
 int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length)
 {
@@ -279,10 +278,10 @@ int __stdcall winx_get_drive_type(char letter)
 /**
  * @brief Retrieves a size and a free space amount of the volume.
  * @param[in] letter the volume letter.
- * @param[out] ptotal pointer to a variable receiving
- *                    a size of the volume.
- * @param[out] pfree pointer to a variable receiving 
- *                   the amount of free space.
+ * @param[out] ptotal pointer to a variable
+ * receiving a size of the volume.
+ * @param[out] pfree pointer to a variable
+ * receiving the amount of free space.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree)
@@ -416,7 +415,7 @@ int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length)
  * @return TRUE for success, FALSE indicates failure.
  * @note Internal use only.
  */
-BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile)
+static BOOLEAN internal_open_rootdir(unsigned char letter,HANDLE *phFile)
 {
 	NTSTATUS Status;
 	unsigned short rootpath[] = L"\\??\\A:\\";

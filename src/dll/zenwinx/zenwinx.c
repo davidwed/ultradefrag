@@ -75,8 +75,8 @@ void __stdcall zenwinx_native_unload(void)
 
 /**
  * @brief Initializes the native application.
- * @details This routine prepares keyboards for working 
- *          with user input related procedures.
+ * @details This routine prepares keyboards
+ * for work with user input related procedures.
  * @param[in] peb the Process Environment Block pointer.
  * @result Zero for success, negative value otherwise.
  * @par Example:
@@ -107,8 +107,8 @@ int __stdcall winx_init(void *peb)
 
 /**
  * @brief Terminates the calling native process.
- * @details This routine releases all resources used
- *          by zenwinx library before the process termination.
+ * @details This routine releases all resources
+ * used by zenwinx library before the process termination.
  * @param[in] exit_code the exit status.
  */
 void __stdcall winx_exit(int exit_code)

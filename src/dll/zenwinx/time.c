@@ -30,7 +30,7 @@
 /**
  * @brief Converts a formatted string to the time value in seconds.
  * @param[in] string the formatted string to be converted.
- *                   Format example: 3y 12d 4h 8m 37s.
+ * Format example: 3y 12d 4h 8m 37s.
  * @return Time interval in seconds.
  */
 ULONGLONG __stdcall winx_str2time(char *string)
@@ -80,9 +80,9 @@ ULONGLONG __stdcall winx_str2time(char *string)
 
 /**
  * @brief Converts a time value in seconds to the formatted string.
- * @param[in]  time   the time interval, in seconds.
+ * @param[in] time the time interval, in seconds.
  * @param[out] buffer the storage for the resulting string.
- * @param[in]  size   the length of the buffer, in characters.
+ * @param[in] size the length of the buffer, in characters.
  * @return The number of characters stored.
  * @note The time interval should not exceed 140 years
  * (0xFFFFFFFF seconds), otherwise it will be truncated.

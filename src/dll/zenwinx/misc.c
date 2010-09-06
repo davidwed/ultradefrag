@@ -32,8 +32,8 @@ NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformatio
 /**
  * @brief Suspends the execution of the current thread.
  * @param[in] msec the time interval, in milliseconds.
- *                 If an INFINITE constant is passed, the
- *                 time-out interval never elapses.
+ * If an INFINITE constant is passed, the time-out
+ * interval never elapses.
  */
 void __stdcall winx_sleep(int msec)
 {
@@ -82,9 +82,9 @@ int __stdcall winx_get_os_version(void)
 
 /**
  * @brief Retrieves the path of the Windows directory.
- * @param[out] buffer pointer to the buffer to receive
- *                    the null-terminated path.
- * @param[in]  length the length of the buffer, in characters.
+ * @param[out] buffer pointer to the buffer
+ * receiving the null-terminated path.
+ * @param[in] length the length of the buffer, in characters.
  * @return Zero for success, negative value otherwise.
  * @note This function retrieves a native path, like this 
  *       \\??\\C:\\WINDOWS
@@ -103,10 +103,10 @@ int __stdcall winx_get_windows_directory(char *buffer, int length)
 
 /**
  * @brief Queries a symbolic link.
- * @param[in]  name   the name of symbolic link.
- * @param[out] buffer pointer to the buffer to receive
- *                    the null-terminated target.
- * @param[in]  length of the buffer, in characters.
+ * @param[in] name the name of symbolic link.
+ * @param[out] buffer pointer to the buffer
+ * receiving the null-terminated target.
+ * @param[in] length of the buffer, in characters.
  * @return Zero for success, negative value otherwise.
  * @par Example:
  * @code
@@ -181,11 +181,11 @@ int __stdcall winx_set_system_error_mode(unsigned int mode)
 
 /**
  * @brief Loads a driver.
- * @param[in] driver_name the name of the driver exactly
- *                        as written in system registry.
+ * @param[in] driver_name the name of the driver,
+ * exactly as written in system registry.
  * @return Zero for success, negative value otherwise.
- * @note When the driver is already loaded this function returns
- *       success.
+ * @note When the driver is already loaded this function
+ * completes successfully.
  */
 int __stdcall winx_load_driver(short *driver_name)
 {
@@ -209,8 +209,8 @@ int __stdcall winx_load_driver(short *driver_name)
 
 /**
  * @brief Unloads a driver.
- * @param[in] driver_name the name of the driver exactly
- *                        as written in system registry.
+ * @param[in] driver_name the name of the driver,
+ * exactly as written in system registry.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall winx_unload_driver(short *driver_name)

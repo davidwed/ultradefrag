@@ -49,8 +49,8 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 /**
  * @brief Opens all existing keyboards.
  * @details If checking of first keyboard fails
- *          wait ten seconds for the initialization.
- *          This is needed for wireless devices.
+ * it waits ten seconds for the initialization.
+ * This is needed for wireless devices.
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
@@ -118,7 +118,7 @@ void __stdcall kb_close(void)
 /**
  * @brief Checks the console for keyboard input.
  * @details Tries to read from all keyboard devices 
- *          until specified time-out expires.
+ * until specified time-out expires.
  * @param[out] pKID pointer to the structure receiving keyboard input.
  * @param[in] msec_timeout time-out interval in milliseconds.
  * @return Zero if some key was pressed, negative value otherwise.
@@ -281,8 +281,8 @@ int __stdcall kb_open_internal(int device_number)
 /**
  * @brief Light up the keyboard indicators.
  * @param[in] hKbDevice the handle of the keyboard device.
- * @param[in] LedFlags the flags specifying which indicators
- *                     must be lighten up.
+ * @param[in] LedFlags the flags specifying
+ * which indicators must be lighten up.
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
@@ -352,8 +352,7 @@ int __stdcall kb_check(HANDLE hKbDevice)
  * @brief Checks the keyboard for an input.
  * @param[in] kb_index the index of the keyboard to be checked.
  * @param[out] pKID pointer to the structure receiving keyboard input.
- * @param[in] pInterval pointer to the variable
- *                      holding the time-out interval.
+ * @param[in] pInterval pointer to the variable holding the time-out interval.
  * @return Zero if some key was pressed, negative value otherwise.
  * @note Internal use only.
  */

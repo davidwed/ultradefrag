@@ -33,8 +33,7 @@
  * @param[in] parameter pointer to data passed to thread routine.
  * @param[out] phandle the thread handle pointer. May be NULL.
  * @return Zero for success, negative value otherwise.
- * @note Look at the following example for the 
- *       thread function prototype.
+ * @note Look at the following example for the thread function prototype.
  * @par Example:
  * @code
  * DWORD WINAPI thread_proc(LPVOID parameter)

@@ -37,8 +37,7 @@ HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc call */
 /**
  * @brief Allocates a block of virtual memory.
  * @param[in] size the size of the block to be allocated, in bytes.
- *                 Note that the allocated block may be bigger than
- *                 the requested size.
+ * Note that the allocated block may be bigger than the requested size.
  * @return A pointer to the allocated block. NULL indicates failure.
  * @note
  * - Allocated memory is automatically initialized to zero.

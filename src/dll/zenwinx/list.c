@@ -30,15 +30,11 @@
 /**
  * @brief Inserts an item to double linked list.
  * @details Allocates memory for an item to be inserted.
- * @param[in,out] phead pointer to a variable pointing
- *                      to the list head.
- * @param[in]     prev  pointer to an item which must
- *                      preceed to the new item.
- *                      If this parameter is NULL, the new
- *                      head will be inserted.
- * @param[in]     size  the size of an item to be inserted.
- * @return Pointer to the inserted list item. NULL indicates
- *         failure.
+ * @param[in,out] phead pointer to a variable pointing to the list head.
+ * @param[in] prev pointer to an item  preceeding to the new item.
+ * If this parameter is NULL, the new head will be inserted.
+ * @param[in] size the size of an item to be inserted, in bytes.
+ * @return Pointer to the inserted list item. NULL indicates failure.
  */
 list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev,long size)
 {
@@ -69,10 +65,8 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
 /**
  * @brief Removes an item from double linked list.
  * @details Frees memory allocated for an item to be removed.
- * @param[in,out] phead pointer to a variable pointing
- *                      to the list head.
- * @param[in]     item  pointer to an item which must
- *                      be removed.
+ * @param[in,out] phead pointer to a variable pointing to the list head.
+ * @param[in] item pointer to an item which must be removed.
  */
 void __stdcall winx_list_remove_item(list_entry **phead,list_entry *item)
 {
@@ -101,8 +95,8 @@ void __stdcall winx_list_remove_item(list_entry **phead,list_entry *item)
 /**
  * @brief Destroys a double linked list.
  * @details Frees memory allocated for all list items.
- * @param[in,out] phead pointer to a variable pointing
- *                      to the list head.
+ * @param[in,out] phead pointer to a variable
+ * pointing to the list head.
  */
 void __stdcall winx_list_destroy(list_entry **phead)
 {

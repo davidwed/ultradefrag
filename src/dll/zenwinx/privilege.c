@@ -30,8 +30,7 @@
 /**
  * @brief Enables a user privilege for the current process.
  * @param[in] luid identifier of the requested privilege, 
- *                 ntndk.h file contains definitions of
- *                 various privileges.
+ * ntndk.h file contains definitions of various privileges.
  * @return Zero for success, negative value otherwise.
  * @par Example:
  * @code

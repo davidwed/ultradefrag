@@ -39,8 +39,8 @@ HANDLE hDbgSynchEvent = NULL;
 int  __stdcall winx_debug_print(char *string);
 
 /**
- * @brief Initializes the synchronization objects
- *        used in the debugging routines.
+ * @brief Initializes the synchronization 
+ * objects used in the debugging routines.
  * @note Internal use only.
  */
 void winx_init_synch_objects(void)
@@ -63,8 +63,8 @@ void winx_init_synch_objects(void)
 }
 
 /**
- * @brief Destroys the synchronization objects
- *        used in the debugging routines.
+ * @brief Destroys the synchronization
+ * objects used in the debugging routines.
  * @note Internal use only.
  */
 void winx_destroy_synch_objects(void)
@@ -74,9 +74,9 @@ void winx_destroy_synch_objects(void)
 
 /**
  * @brief DbgPrint() native equivalent.
- * @note DbgPrint() exported by ntdll library cannot be
- *       captured by DbgPrint loggers, therefore we are
- *       using our own routine for debugging purposes.
+ * @note DbgPrint() exported by ntdll library cannot
+ * be captured by DbgPrint loggers, therefore we are
+ * using our own routine for debugging purposes.
  */
 void __cdecl winx_dbg_print(char *format, ...)
 {
@@ -251,12 +251,14 @@ NT_STATUS_DESCRIPTION status_descriptions[] = {
 };
 
 /**
- * @brief Retrieves a human readable explaination 
- *        of the NT status code.
+ * @brief Retrieves a human readable
+ * explanation of the NT status code.
  * @param[in] status the NT status code.
- * @return A pointer to string containing the status explaination.
- * @note This function returns explainations only for well
- *       known codes. Otherwise it returns an empty string.
+ * @return A pointer to string containing
+ * the status explanation.
+ * @note This function returns explanations
+ * only for well known codes. Otherwise 
+ * it returns an empty string.
  * @par Example:
  * @code
  * printf("%s\n",winx_get_error_description(STATUS_ACCESS_VIOLATION));
@@ -276,9 +278,10 @@ char * __stdcall winx_get_error_description(unsigned long status)
 }
 
 /**
- * @brief Delivers an error message to the DbgView program.
- * @details The error message includes NT status
- *          and its explaination.
+ * @brief Delivers an error message
+ * to the DbgView program.
+ * @details The error message includes 
+ * NT status and its explanation.
  * @param[in] status the NT status code.
  * @param[in] format the format string.
  * @param[in] ... the parameters.

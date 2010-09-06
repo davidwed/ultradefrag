@@ -59,8 +59,8 @@ void winx_print(char *string)
 
 /**
  * @brief putch() native equivalent.
- * @bug Does not recognize special characters
- *      such as 'backspace'.
+ * @bug Does not recognize special
+ * characters such as 'backspace'.
  */
 int __cdecl winx_putch(int ch)
 {
@@ -76,8 +76,8 @@ int __cdecl winx_putch(int ch)
 
 /**
  * @brief puts() native equivalent.
- * @bug Does not recognize special characters
- *      such as 'backspace'.
+ * @bug Does not recognize special
+ * characters such as 'backspace'.
  */
 int __cdecl winx_puts(const char *string)
 {
@@ -87,8 +87,8 @@ int __cdecl winx_puts(const char *string)
 
 /**
  * @brief printf() native equivalent.
- * @bug Does not recognize special characters
- *      such as 'backspace'.
+ * @bug Does not recognize special
+ * characters such as 'backspace'.
  */
 int __cdecl winx_printf(const char *format, ...)
 {
@@ -154,8 +154,8 @@ int __cdecl winx_printf(const char *format, ...)
  * @details Waits for an input during the specified time interval.
  * @param[in] msec the time interval, in milliseconds.
  * @return If any key was pressed, the return value is
- *         the ascii character or zero for the control keys.
- *         Negative value indicates failure.
+ * the ascii character or zero for the control keys.
+ * Negative value indicates failure.
  * @note
  * - If an INFINITE time constant is passed, the
  *   time-out interval never elapses.
@@ -174,8 +174,8 @@ int __cdecl winx_kbhit(int msec)
  * @param[in] kbd_rec pointer to structure receiving key information.
  * @param[in] msec the timeout interval, in milliseconds.
  * @return If any key was pressed, the return value is
- *         the ascii character or zero for the control keys.
- *         Negative value indicates failure.
+ * the ascii character or zero for the control keys.
+ * Negative value indicates failure.
  * @note
  * - If an INFINITE time constant is passed, the
  *   time-out interval never elapses.
@@ -194,12 +194,12 @@ int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
 }
 
 /**
- * @brief Checks the console for the 'Break' character on 
- *        the keyboard input.
+ * @brief Checks the console for the 'Break'
+ * character on the keyboard input.
  * @details Waits for an input during the specified time interval.
  * @param[in] msec the time interval, in milliseconds.
  * @return If the 'Break' key was pressed, the return value is zero.
- *         Otherwise it returns negative value.
+ * Otherwise it returns negative value.
  * @note
  * - If an INFINITE time constant is passed, the
  *   time-out interval never elapses.
@@ -223,7 +223,7 @@ int __cdecl winx_breakhit(int msec)
 /**
  * @brief getch() native equivalent.
  * @note This call may terminate the program if NtCancelIoFile() 
- *       fails for one of the existing keyboard devices.
+ * fails for one of the existing keyboard devices.
  */
 int __cdecl winx_getch(void)
 {
@@ -240,9 +240,8 @@ int __cdecl winx_getch(void)
 /**
  * @brief getche() native equivalent.
  * @note This call may terminate the program if NtCancelIoFile() 
- *       fails for one of the existing keyboard devices.
- * @bug Does not recognize special characters
- *      such as 'backspace'.
+ * fails for one of the existing keyboard devices.
+ * @bug Does not recognize special characters such as 'backspace'.
  */
 int __cdecl winx_getche(void)
 {
@@ -255,16 +254,16 @@ int __cdecl winx_getche(void)
 }
 
 /**
- * @brief gets() native equivalent with limited number of 
- *        characters to read.
+ * @brief gets() native equivalent
+ * with limited number of characters to read.
  * @param[out] string the storage for the input string.
  * @param[in] n the maximum number of characters to read.
  * @return Number of characters read including terminal zero.
- *         Negative value indicates failure.
+ * Negative value indicates failure.
  * @note This call may terminate the program if NtCancelIoFile() 
- *       fails for one of the existing keyboard devices.
+ * fails for one of the existing keyboard devices.
  * @bug Does not recognize special characters
- *      such as 'backspace'.
+ * such as 'backspace'.
  */
 int __cdecl winx_gets(char *string,int n)
 {

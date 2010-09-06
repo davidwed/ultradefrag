@@ -162,15 +162,14 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
  * @brief Sends an I/O control code to the specified device.
  * @param[in] f the file handle.
  * @param[in] code the IOCTL code.
- * @param[in] description the string explaining the meaning of the
- *                        request, used by error handling code.
+ * @param[in] description the string explaining
+ * the meaning of the request, used by error handling code.
  * @param[in] in_buffer the input buffer pointer.
  * @param[in] in_size the input buffer size, in bytes.
  * @param[out] out_buffer the output buffer pointer.
  * @param[in] out_size the output buffer size, in bytes.
  * @param[out] pbytes_returned pointer to the variable receiving
- *                             the number of bytes written to the
- *                             output buffer.
+ * the number of bytes written to the output buffer.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall winx_ioctl(WINX_FILE *f,
@@ -266,8 +265,8 @@ void __stdcall winx_fclose(WINX_FILE *f)
  * @brief Creates a directory.
  * @param[in] path the native path to the directory.
  * @return Zero for success, negative value otherwise.
- * @note If the requested directory already exists this function
- *       returns success.
+ * @note If the requested directory already exists
+ * this function completes successfully.
  */
 int __stdcall winx_create_directory(const char *path)
 {
