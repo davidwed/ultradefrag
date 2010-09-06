@@ -303,7 +303,7 @@ void SavePrefs(void)
 		return;
 	}
 
-	/* save main window size for configuraton initialization */
+	/* save main window size for configuration initialization */
 	result = fprintf(pf,
 		"-- UltraDefrag GUI options\n\n"
 		"-- Note that you must specify paths in filters\n"
@@ -346,7 +346,7 @@ void SavePrefs(void)
 		"-- set restore_default_window_size parameter to 1\n"
 		"-- to restore default window size on the next startup\n"
 		"restore_default_window_size = %i\n\n"
-		"-- the settings below are not changable by the user,\n"
+		"-- the settings below are not changeable by the user,\n"
 		"-- they are always overwritten when the program ends\n"
 		"x = %i\ny = %i\n"
 		"width = %i\nheight = %i\n"
