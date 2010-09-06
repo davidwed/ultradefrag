@@ -3,8 +3,12 @@ rem This script will install the Ultradefrag Boot Time Defrag Test Suite on your
 
 cd /D %~dp0
 
-set default_editor=notepad
+rem For Windows XP x64 Edition we need to force notepad.
+rem For Windows Vista and higher x64 Editions
+rem there is the SysNative workaround for Notepad++
 set force_default_editor=0
+
+set default_editor=notepad
 set boot_time_scripts=ud-boot-time.cmd "%SystemRoot%\System32\ud-boot-time.cmd"
 
 for /F "tokens=2 delims=[]" %%V in ('ver') do for /F "tokens=2" %%R in ( 'echo %%V' ) do set win_ver=%%R
