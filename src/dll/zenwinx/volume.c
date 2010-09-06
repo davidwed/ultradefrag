@@ -26,6 +26,7 @@
 
 #include "ntndk.h"
 #include "zenwinx.h"
+#include "partition.h"
 
 /**
  * @brief Converts the 64-bit number
@@ -305,6 +306,327 @@ int __stdcall winx_get_drive_type(char letter)
 }
 
 /**
+ * @brief Retrieves drive geometry.
+ * @param[in] hRoot handle to the
+ * root directory.
+ * @param[out] pointer to the structure
+ * receiving drive geometry.
+ * @return Zero for success, negative
+ * value otherwise.
+ * @note Internal use only.
+ */
+static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
+{
+	FILE_FS_SIZE_INFORMATION *pffs;
+	IO_STATUS_BLOCK IoStatusBlock;
+	NTSTATUS Status;
+	
+	/* allocate memory */
+	pffs = winx_heap_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
+	if(pffs == NULL){
+		DebugPrint("winx_get_volume_information(): cannot allocate %u bytes of memory!",
+			sizeof(FILE_FS_SIZE_INFORMATION));
+		return (-1);
+	}
+	RtlZeroMemory(pffs,sizeof(FILE_FS_SIZE_INFORMATION));
+
+	/* get drive geometry */
+	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pffs,
+				sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
+	if(!NT_SUCCESS(Status)){
+		DebugPrintEx(Status,"winx_get_volume_information(): cannot get geometry of drive %c:",
+			v->volume_letter);
+		winx_heap_free(pffs);
+		return (-1);
+	}
+	
+	/* fill all geometry related fields of the output structure */
+	v->total_bytes = (ULONGLONG)pffs->TotalAllocationUnits.QuadPart * \
+		pffs->SectorsPerAllocationUnit * pffs->BytesPerSector;
+	v->free_bytes = (ULONGLONG)pffs->AvailableAllocationUnits.QuadPart * \
+		pffs->SectorsPerAllocationUnit * pffs->BytesPerSector;
+	v->total_clusters = (ULONGLONG)pffs->TotalAllocationUnits.QuadPart;
+	v->bytes_per_cluster = pffs->SectorsPerAllocationUnit * pffs->BytesPerSector;
+	v->sectors_per_cluster = pffs->SectorsPerAllocationUnit;
+	v->bytes_per_sector = pffs->BytesPerSector;
+
+	/* cleanup */
+	winx_heap_free(pffs);
+	return 0;
+}
+
+/**
+ * @brief Defines whether bios parameter block
+ * belongs to the FAT-formatted partition or not.
+ * Updates file system type related information
+ * in structure pointed by the second parameter.
+ * @return Zero if FAT is detected, negative value
+ * otherwise.
+ */
+static int IsFatPartition(BPB *bpb,winx_volume_information *v)
+{
+	char signature[9];
+	BOOL fat_found = FALSE;
+	ULONG RootDirSectors; /* USHORT ? */
+	ULONG FatSectors;
+	ULONG TotalSectors;
+	ULONG DataSectors;
+	ULONG CountOfClusters;
+
+	/* search for FAT signatures */
+	signature[8] = 0;
+	memcpy((void *)signature,(void *)bpb->Fat1x.BS_FilSysType,8);
+	if(strstr(signature,"FAT")) fat_found = TRUE;
+	else {
+		memcpy((void *)signature,(void *)bpb->Fat32.BS_FilSysType,8);
+		if(strstr(signature,"FAT")) fat_found = TRUE;
+	}
+	if(!fat_found)
+		return (-1);
+
+	/* determine which type of FAT we have */
+	RootDirSectors = ((bpb->RootDirEnts * 32) + (bpb->BytesPerSec - 1)) / bpb->BytesPerSec;
+
+	if(bpb->FAT16sectors) FatSectors = (ULONG)(bpb->FAT16sectors);
+	else FatSectors = bpb->Fat32.FAT32sectors;
+	
+	if(bpb->FAT16totalsectors) TotalSectors = bpb->FAT16totalsectors;
+	else TotalSectors = bpb->FAT32totalsectors;
+	
+	DataSectors = TotalSectors - (bpb->ReservedSectors + (bpb->NumFATs * FatSectors) + RootDirSectors);
+	CountOfClusters = DataSectors / bpb->SecPerCluster;
+	
+	if(CountOfClusters < 4085) {
+		/* Volume is FAT12 */
+		strcpy(v->fs_name,"FAT12");
+		return 0;
+	} else if(CountOfClusters < 65525) {
+		/* Volume is FAT16 */
+		strcpy(v->fs_name,"FAT16");
+		return 0;
+	} else {
+		/* Volume is FAT32 */
+		strcpy(v->fs_name,"FAT32");
+	}
+	
+	/* save FAT32 version */
+	v->fat32_mj_version = (ULONG)((bpb->Fat32.BPB_FSVer >> 8) & 0xFF);
+	v->fat32_mn_version = (ULONG)(bpb->Fat32.BPB_FSVer & 0xFF);
+	return 0;
+}
+
+/**
+ * @brief Defines whether bios parameter block
+ * belongs to the NTFS-formatted partition or not.
+ * Updates file system type related information
+ * in structure pointed by the second parameter.
+ * @return Zero if NTFS is detected, negative value
+ * otherwise.
+ */
+static int IsNtfsPartition(BPB *bpb,winx_volume_information *v)
+{
+	char signature[9];
+
+	/* search for NTFS signature */
+	signature[8] = 0;
+	memcpy((void *)signature,(void *)bpb->OemName,8);
+	if(strcmp(signature,"NTFS    ") == 0){
+		strcpy(v->fs_name,"NTFS");
+		return 0;
+	}
+	
+	return (-1);
+}
+
+/**
+ * @brief Reads the first sector
+ * of the volume into memory.
+ * @param[out] buffer pointer
+ * to the output buffer.
+ * The size of the buffer must be
+ * no less than sector size.
+ * @param[in] v pointer to structure
+ * containing drive geometry.
+ * @return Zero for sucsess, negative
+ * value otherwise.
+ * @note Internal use only.
+ */
+static int read_first_sector(void *buffer,winx_volume_information *v)
+{
+	char path[64];
+	char flags[2];
+	#define FLAG 'r'
+	WINX_FILE *f;
+	size_t n_read;
+
+	/* open the volume */
+	(void)_snprintf(path,64,"\\??\\%c:",v->volume_letter);
+	path[63] = 0;
+#if FLAG != 'r'
+#error Volume must be opened for read access!
+#endif
+	flags[0] = FLAG; flags[1] = 0;
+	f = winx_fopen(path,flags);
+	if(f == NULL)
+		return (-1);
+
+	/* read the first sector */
+	n_read = winx_fread(buffer,1,(size_t)v->bytes_per_sector,f);
+	if(n_read == 0 || n_read > (size_t)v->bytes_per_sector){
+		winx_fclose(f);
+		return (-1);
+	}
+	
+	/* cleanup */
+	winx_fclose(f);
+	return 0;
+}
+
+/**
+ * @brief Retrieves the name of file system.
+ * @param[in] hRoot handle to the
+ * root directory.
+ * @param[out] pointer to the structure
+ * receiving the filesystem name and version
+ * of FAT32 if an appropriate filesystem
+ * is detected.
+ * @return Zero for success, negative
+ * value otherwise.
+ * @note Call it after get_drive_geometry.
+ * Internal use only.
+ */
+static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
+{
+	FILE_FS_ATTRIBUTE_INFORMATION *pfa;
+	int fs_attr_info_size;
+	IO_STATUS_BLOCK IoStatusBlock;
+	NTSTATUS Status;
+	short fs_name[MAX_FS_NAME_LENGTH + 1];
+	int length;
+	void *first_sector;
+	BPB *bpb;
+
+	/*
+	* We're using a low level analysis
+	* of the first sector firstly, because
+	* this method is able to detect exactly
+	* the type of the file system. Also,
+	* it well distinguishes different
+	* editions of FAT.
+	*/
+	if(v->bytes_per_sector >= sizeof(BPB)){
+		/* allocate memory */
+		first_sector = winx_heap_alloc(v->bytes_per_sector);
+		if(first_sector == NULL){
+			DebugPrint("winx_get_volume_information(): cannot allocate %u bytes of memory!",
+				v->bytes_per_sector);
+		} else {
+			if(read_first_sector(first_sector,v) < 0){
+				winx_heap_free(first_sector);
+			} else {
+				bpb = (BPB *)first_sector;
+				if(IsNtfsPartition(bpb,v) >= 0){
+					winx_heap_free(first_sector);
+					return 0;
+				}
+				if(IsFatPartition(bpb,v) >= 0){
+					winx_heap_free(first_sector);
+					return 0;
+				}
+				winx_heap_free(first_sector);
+			}
+		}
+	}
+	
+	/*
+	* If direct sector analysis failed,
+	* then get file system name through
+	* FILE_FS_ATTRIBUTE_INFORMATION.
+	*/
+	fs_attr_info_size = MAX_PATH * sizeof(WCHAR) + sizeof(FILE_FS_ATTRIBUTE_INFORMATION);
+	pfa = winx_heap_alloc(fs_attr_info_size);
+	if(pfa == NULL){
+		DebugPrint("winx_get_volume_information(): cannot allocate %u bytes of memory!",
+			fs_attr_info_size);
+		return(-1);
+	}
+	
+	RtlZeroMemory(pfa,fs_attr_info_size);
+	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pfa,
+				fs_attr_info_size,FileFsAttributeInformation);
+	if(!NT_SUCCESS(Status)){
+		DebugPrintEx(Status,"winx_get_volume_information(): cannot get file system name of drive %c:",
+			v->volume_letter);
+		winx_heap_free(pfa);
+		return (-1);
+	}
+	
+	/*
+	* pfa->FileSystemName.Buffer may be not NULL terminated
+	* (theoretically), so name extraction is more tricky
+	* than it should be.
+	*/
+	length = min(MAX_FS_NAME_LENGTH,pfa->FileSystemNameLength / sizeof(short));
+	wcsncpy(fs_name,pfa->FileSystemName,length);
+	fs_name[length] = 0;
+	_snprintf(v->fs_name,MAX_FS_NAME_LENGTH,"%ws",fs_name);
+	v->fs_name[MAX_FS_NAME_LENGTH] = 0;
+
+	/* cleanup */
+	winx_heap_free(pfa);
+	return 0;
+}
+
+/**
+ * @brief Retrieves detailed information
+ * about disk volume.
+ * @param[in,out] v pointer to structure
+ * receiving the volume information.
+ * volume_letter field of the structure
+ * must be set before the call.
+ * @return Zero for success, negative
+ * value otherwise.
+ */
+int __stdcall winx_get_volume_information(winx_volume_information *v)
+{
+	char c, letter;
+	HANDLE hRoot;
+	
+	/* check input data correctness */
+	if(v == NULL)
+		return (-1);
+
+	c = (char)toupper((int)v->volume_letter);
+	if(c == 0 || c < 'A' || c > 'Z')
+		return (-1);
+	
+	/* reset all fields of the structure, except of volume_letter */
+	letter = v->volume_letter;
+	memset(v,0,sizeof(winx_volume_information));
+	v->volume_letter = letter;
+	
+	/* open root directory */
+	hRoot = OpenRootDirectory(letter);
+	if(hRoot == NULL)
+		return (-1);
+	
+	/* get drive geometry */
+	if(get_drive_geometry(hRoot,v) < 0){
+		NtClose(hRoot);
+		return (-1);
+	}
+	
+	/* get the name of contained file system */
+	if(get_filesystem_name(hRoot,v) < 0){
+		NtClose(hRoot);
+		return (-1);
+	}
+	
+	return 0;
+}
+
+/* TODO */
+/**
  * @brief Retrieves a size and a free space amount of the volume.
  * @param[in] letter the volume letter.
  * @param[out] ptotal pointer to a variable
@@ -316,6 +638,7 @@ int __stdcall winx_get_drive_type(char letter)
 int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree)
 {
 	HANDLE hRoot;
+
 	NTSTATUS Status;
 	IO_STATUS_BLOCK IoStatusBlock;
 	FILE_FS_SIZE_INFORMATION *pffs;
@@ -338,8 +661,10 @@ int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INT
 	pffs = winx_heap_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
 	if(!pffs){
 		DebugPrint("Cannot allocate memory for winx_get_volume_size()!\n");
+
 		return (-1);
 	}
+
 
 	hRoot = OpenRootDirectory(letter);
 	if(hRoot == NULL){

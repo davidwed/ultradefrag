@@ -34,6 +34,7 @@ EXPORTS
 	winx_exit_thread
 	winx_enable_privilege
 	winx_get_drive_type
+	winx_get_volume_information
 	winx_get_volume_size
 	winx_get_filesystem_name
 	winx_fopen

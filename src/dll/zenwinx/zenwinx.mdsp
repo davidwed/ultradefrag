@@ -103,6 +103,7 @@ extraResourceOptions=
 1=ntndk.h
 2=version.h
 3=zenwinx.h
+4=partition.h
 [Resource]
 1=zenwinx.rc
 [Other]

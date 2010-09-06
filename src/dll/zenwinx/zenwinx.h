@@ -148,6 +148,30 @@ int  __stdcall winx_enable_privilege(unsigned long luid);
 
 #define DRIVE_ASSIGNED_BY_SUBST_COMMAND 1200
 int __stdcall winx_get_drive_type(char letter);
+
+/*
+* Maximal length of the file system name.
+* Specified length is more than enough
+* to hold all known names.
+*/
+#define MAX_FS_NAME_LENGTH 31
+
+typedef struct _winx_volume_information {
+	char volume_letter;                       /* must be set by caller! */
+	char fs_name[MAX_FS_NAME_LENGTH + 1];  /* the name of the file system */
+	ULONG fat32_mj_version;                   /* major number of FAT32 version */
+	ULONG fat32_mn_version;                   /* minor number of FAT32 version */
+	ULONGLONG total_bytes;                    /* total volume size, in bytes */
+	ULONGLONG free_bytes;                     /* amount of free space, in bytes */
+	ULONGLONG total_clusters;                 /* total number of clusters */
+	ULONGLONG bytes_per_cluster;              /* cluster size, in bytes */
+	ULONG sectors_per_cluster;                /* number of sectors in each cluster */
+	ULONG bytes_per_sector;                   /* sector size, in bytes */
+} winx_volume_information;
+
+int __stdcall winx_get_volume_information(winx_volume_information *v);
+
+/* TODO */
 int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree);
 int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length);
 
