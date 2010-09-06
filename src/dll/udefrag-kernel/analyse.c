@@ -93,6 +93,7 @@ int Analyze(char *volume_name)
 	}
 
 	/* get volume information */
+	v.volume_letter = volume_letter;
 	if(winx_get_volume_information(&v) < 0){
 		return (-1);
 	} else {
