@@ -171,10 +171,6 @@ typedef struct _winx_volume_information {
 
 int __stdcall winx_get_volume_information(winx_volume_information *v);
 
-/* TODO */
-int __stdcall winx_get_volume_size(char letter, LARGE_INTEGER *ptotal, LARGE_INTEGER *pfree);
-int __stdcall winx_get_filesystem_name(char letter, char *buffer, int length);
-
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
 size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
