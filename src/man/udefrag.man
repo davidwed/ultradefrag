@@ -8,6 +8,9 @@ SYNOPSIS
 
 DESCRIPTION
         'udefrag' lists, analyzes, defragments and optimizes drives.
+        It supports additional configuration through environment
+        variables, to display a full description of them use:
+            'man variables'
         The default action is to defragment the supplied drives.
 
 OPTIONS
