@@ -45,7 +45,6 @@
 */
 
 #include "globals.h"
-#include "partition.h"
 
 /**
  * @brief Performs a volume analysis.
@@ -63,6 +62,7 @@ int Analyze(char *volume_name)
 	ULONGLONG tm, time;
 	ULONG pass_number;
 	int error_code;
+	winx_volume_information v;
 	
 	DebugPrint("----- Analyze of %s: -----\n",volume_name);
 	
@@ -92,16 +92,56 @@ int Analyze(char *volume_name)
 		FlushAllFileBuffers(volume_name);
 	}
 
-	/* get drive geometry */
-	error_code = GetDriveGeometry(volume_name);
-	if(error_code < 0) return error_code;
-
+	/* get volume information */
+	if(winx_get_volume_information(&v) < 0){
+		return (-1);
+	} else {
+		/* update global variables holding drive geometry */
+		sectors_per_cluster = v.sectors_per_cluster;
+		bytes_per_cluster = v.bytes_per_cluster;
+		bytes_per_sector = v.bytes_per_sector;
+		Stat.total_space = v.total_bytes;
+		Stat.free_space = v.free_bytes;
+		clusters_total = v.total_clusters;
+		if(bytes_per_cluster) clusters_per_256k = _256K / bytes_per_cluster;
+		DebugPrint("Total clusters: %I64u\n",clusters_total);
+		DebugPrint("Cluster size: %I64u\n",bytes_per_cluster);
+		if(!clusters_per_256k){
+			DebugPrint("Clusters are larger than 256 kbytes!\n");
+			clusters_per_256k ++;
+		}
+		/* validate geometry */
+		if(!clusters_total || !bytes_per_cluster){
+			DebugPrint("Wrong volume geometry!");
+			return (-1);
+		}
+		/* check partition type */
+		DebugPrint("%s partition detected!\n",v.fs_name);
+		if(!strcmp(v.fs_name,"NTFS")){
+			partition_type = NTFS_PARTITION;
+		} else if(!strcmp(v.fs_name,"FAT12")){
+			partition_type = FAT12_PARTITION;
+		} else if(!strcmp(v.fs_name,"FAT16")){
+			partition_type = FAT16_PARTITION;
+		} else if(!strcmp(v.fs_name,"FAT32")){
+			/* check FAT32 version */
+			if(v.fat32_mj_version > 0 || v.fat32_mn_version > 0){
+				DebugPrint("Cannot recognize FAT32 version %u.%u!\n",
+					v.fat32_mj_version,v.fat32_mn_version);
+				/* for safe low level access in future releases */
+				partition_type = FAT32_UNRECOGNIZED_PARTITION;
+			} else {
+				partition_type = FAT32_PARTITION;
+			}
+		} else {
+			DebugPrint("File system type is not recognized.\n");
+			DebugPrint("Type independent routines will be used to defragment it.\n");
+			partition_type = UNKNOWN_PARTITION;
+		}
+	}
+	
 	/* update map representation */
 	MarkAllSpaceAsSystem1();
-	
-	/* define file system */
-	//CheckForNtfsPartition();
-	partition_type = GetFileSystemType();
 	
 	/* define whether some actions are allowed or not */
 	switch(partition_type){

@@ -48,6 +48,16 @@
 #define SYSTEM_OR_FREE_SPACE      101
 #define FREE_OR_MFT_ZONE_SPACE    102
 
+/* Named constants for file system types. */
+typedef enum {
+	FAT12_PARTITION,
+	FAT16_PARTITION,
+	FAT32_PARTITION,
+	FAT32_UNRECOGNIZED_PARTITION,
+	NTFS_PARTITION,
+	UNKNOWN_PARTITION /* including UDF and Ext2 */
+} FILE_SYSTEM_TYPE;
+
 /* UltraDefrag internal structures */
 
 /*
@@ -198,7 +208,6 @@ void RemoveReportFromDisk(char *volume_name);
 
 int  OpenVolume(char *volume_name);
 void CloseVolume(void);
-int GetDriveGeometry(char *volume_name);
 void FlushAllFileBuffers(char *volume_name);
 
 int Analyze(char *volume_name);
@@ -210,7 +219,6 @@ void DestroyLists(void);
 void DbgPrintFreeSpaceList(void);
 
 BOOLEAN ScanMFT(void);
-void CheckForNtfsPartition(void);
 NTSTATUS ReadSectors(ULONGLONG lsn,PVOID buffer,ULONG length);
 
 BOOLEAN CheckForStopEvent(void);

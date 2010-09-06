@@ -25,7 +25,6 @@
  */
 
 #include "globals.h"
-#include "partition.h"
 
 static FREEBLOCKMAP *AddLastFreeBlock(ULONGLONG start,ULONGLONG length);
 

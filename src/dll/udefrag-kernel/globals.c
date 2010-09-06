@@ -24,7 +24,6 @@
  */
 
 #include "globals.h"
-#include "partition.h"
 
 /**
  * @brief Defines whether directories
