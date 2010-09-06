@@ -126,7 +126,7 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 		}
 	}
 
-	winx_printf("\n");
+	winx_printf("%-15s\n","variables.man");
 	return 0;
 }
 
