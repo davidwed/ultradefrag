@@ -71,9 +71,13 @@
 }
 
 typedef struct _WINX_FILE {
-	HANDLE hFile;
-	LARGE_INTEGER roffset;
-	LARGE_INTEGER woffset;
+	HANDLE hFile;             /* file handle */
+	LARGE_INTEGER roffset;    /* offset for read requests */
+	LARGE_INTEGER woffset;    /* offset for write requests */
+	void *io_buffer;          /* for buffered i/o */
+	size_t io_buffer_size;    /* size of the buffer, in bytes */
+	size_t io_buffer_offset;  /* current offset inside io_buffer */
+	LARGE_INTEGER wboffset;   /* offset for write requests in buffered mode */
 } WINX_FILE, *PWINX_FILE;
 
 #define winx_fileno(f) ((f)->hFile)
@@ -182,6 +186,9 @@ int __stdcall winx_ioctl(WINX_FILE *f,
                          void *out_buffer,int out_size,
                          int *pbytes_returned);
 int __stdcall winx_fflush(WINX_FILE *f);
+WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);
+size_t __stdcall winx_fbwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
+void   __stdcall winx_fbclose(WINX_FILE *f);
 int __stdcall winx_create_directory(const char *path);
 int __stdcall winx_delete_file(const char *filename);
 void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read);

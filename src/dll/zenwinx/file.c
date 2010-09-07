@@ -99,6 +99,10 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	f->hFile = hFile;
 	f->roffset.QuadPart = 0;
 	f->woffset.QuadPart = 0;
+	f->io_buffer = NULL;
+	f->io_buffer_size = 0;
+	f->io_buffer_offset = 0;
+	f->wboffset.QuadPart = 0;
 	return f;
 }
 
@@ -259,6 +263,126 @@ void __stdcall winx_fclose(WINX_FILE *f)
 	if(!f) return;
 	if(f->hFile) NtClose(f->hFile);
 	winx_heap_free(f);
+}
+
+/* Buffered file I/O routines. */
+
+/**
+ * @brief winx_fopen analog, but
+ * allocates a buffer to speedup
+ * sequential write requests.
+ * @details The last parameter specifies
+ * the buffer size, in bytes. Returns
+ * NULL if buffer allocation failed.
+ * @note Use winx_fbclose
+ * to close the file.
+ */
+WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size)
+{
+	WINX_FILE *f;
+	
+	/* open the file */
+	f = winx_fopen(filename,mode);
+	if(f == NULL)
+		return NULL;
+	
+	if(buffer_size == 0)
+		return f;
+	
+	/* allocate memory */
+	f->io_buffer = winx_heap_alloc(buffer_size);
+	if(f->io_buffer == NULL){
+		DebugPrint("winx_fbopen: cannot allocate %u bytes of memory!\n",buffer_size);
+		winx_fclose(f);
+		return NULL;
+	}
+	
+	f->io_buffer_size = buffer_size;
+	return f;
+}
+
+/**
+ * @brief winx_fwrite analog,
+ * but writes buffered data.
+ * @note Should not be mixed
+ * with winx_fwrite calls.
+ */
+size_t __stdcall winx_fbwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f)
+{
+	LARGE_INTEGER nwd_offset; /* offset of data not written yet, in file */
+	LARGE_INTEGER new_offset; /* current f->woffset */
+	size_t bytes, result;
+	
+	if(f == NULL)
+		return 0;
+	
+	/*
+	* Check whether the file was
+	* opened for buffered access or not.
+	*/
+	bytes = size * count;
+	if(f->io_buffer == NULL || f->io_buffer_size == 0){
+		f->io_buffer_offset = 0;
+		f->wboffset.QuadPart += bytes;
+		return winx_fwrite(buffer,size,count,f);
+	}
+
+	/* check whether file pointer has been adjusted or not */
+	nwd_offset.QuadPart = f->wboffset.QuadPart - f->io_buffer_offset;
+	new_offset.QuadPart = f->woffset.QuadPart;
+	if(new_offset.QuadPart != nwd_offset.QuadPart){
+		/* flush buffer */
+		f->woffset.QuadPart = nwd_offset.QuadPart;
+		result = winx_fwrite(f->io_buffer,1,f->io_buffer_offset,f);
+		f->io_buffer_offset = 0;
+		/* update file pointer */
+		f->wboffset.QuadPart = f->woffset.QuadPart = new_offset.QuadPart;
+		if(result == 0){
+			/* write request failed */
+			return 0;
+		}
+	}
+
+	/* check whether the buffer is full or not */
+	if(bytes > f->io_buffer_size - f->io_buffer_offset && f->io_buffer_offset){
+		/* flush buffer */
+		result = winx_fwrite(f->io_buffer,1,f->io_buffer_offset,f);
+		f->io_buffer_offset = 0;
+		if(result == 0){
+			/* write request failed */
+			return 0;
+		}
+	}
+	
+	/* check whether the buffer has sufficient size or not */
+	if(bytes >= f->io_buffer_size){
+		f->wboffset.QuadPart += bytes;
+		return winx_fwrite(buffer,size,count,f);
+	}
+	
+	/* append new data to the buffer */
+	memcpy(f->io_buffer + f->io_buffer_offset,buffer,bytes);
+	f->io_buffer_offset += bytes;
+	f->wboffset.QuadPart += bytes;
+	return count;
+}
+
+/**
+ * @brief Closes the file
+ * opened for buffered access.
+ */
+void   __stdcall winx_fbclose(WINX_FILE *f)
+{
+	if(f == NULL)
+		return;
+	
+	if(f->io_buffer){
+		/* write the rest of the data */
+		if(f->io_buffer_offset)
+			winx_fwrite(f->io_buffer,1,f->io_buffer_offset,f);
+		winx_heap_free(f->io_buffer);
+	}
+	winx_fclose(f);
 }
 
 /**

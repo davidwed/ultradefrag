@@ -42,6 +42,9 @@ EXPORTS
 	winx_fflush
 	winx_fsize
 	winx_fclose
+	winx_fbopen
+	winx_fbwrite
+	winx_fbclose
 	winx_create_directory
 	winx_delete_file
 	winx_get_file_contents
