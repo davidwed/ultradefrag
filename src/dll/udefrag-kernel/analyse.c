@@ -25,23 +25,14 @@
  */
 
 /*
-* NOTE: the following file systems will be analysed 
-* through reading their structures directly from disk
-* and interpreting them: NTFS, FAT12, FAT16, FAT32.
-* This cool idea was suggested by Parvez Reza (parvez_ku_00@yahoo.com).
-*
-* UDF filesystem is missing in this list, because its
-* standard is too complicated (http://www.osta.org/specs/).
-* Therefore it will be analysed through standard Windows API.
-*
-* - Why a special code?
-* - It works faster:
-*   * NTFS ultra fast scan may be 25 times faster than universal scan
-*   * FAT16 scan may be 40% faster.
-*
-* P.S.: We decided to avoid direct FAT scan in this driver,
-* because it works slower than the universal scan. Due to the
-* file system caching Windows feature.
+* NTFS is analysed directly through reading
+* MFT records, because this highly (25 times)
+* speed up an analysis. For FAT we have noticed
+* no speedup (even slowdown) while trying
+* to walk trough FAT entries. This is because
+* Windows file cache makes access even faster.
+* UDF has been never tested in direct mode
+* because of its highly complicated standard.
 */
 
 #include "globals.h"
@@ -189,36 +180,18 @@ int Analyze(char *volume_name)
 	switch(partition_type){
         case NTFS_PARTITION:
             /*
-            * ScanMFT() causes BSOD on NT 4.0, even in user mode!
-            * It seems that NTFS driver is imperfect in this system
-            * and ScanMFT() breaks something inside it.
-            * Sometimes BSOD appears during an analysis after volume optimization,
-            * sometimes it appears immediately during the first analysis.
-            * Examples:
-            * 1. kmd compact ntfs nt4 -> BSOD 0xa (0x48, 0xFF, 0x0, 0x80101D5D)
-            * immediately after the last analysis
-            * 2. user mode - optimize - BSOD during the second analysis
-            * 0x50 (0xB51CA820,0,0,2) or 0x1E (0xC...5,0x8013A7B6,0,0x20)
-            * 3. kmd - nt4 - gui - optimize - chkdsk /F for ntfs - bsod
-            */
-            /*if(nt4_system){
-                DebugPrint("Ultrafast NTFS scan is not avilable on NT 4.0\n");
-                DebugPrint("due to ntfs.sys driver imperfectness.\n");
-                goto universal_scan;
-            }*/
+			* NTFS formatted volumes cannot be safely accessed
+			* in NT4, as mentioned in program's handbook.
+			* On our test machines NTFS access caused blue
+			* screens regardless of whether we accessed it
+			* from kernel mode or user mode.
+			* Though, this fact should be tested again,
+			* because there was lots of improvements in code
+			* since time of the tests.
+			*/
             (void)ScanMFT();
             break;
-        /*case FAT12_PARTITION:
-            (void)ScanFat12Partition();
-            break;
-        case FAT16_PARTITION:
-            (void)ScanFat16Partition();
-            break;
-        case FAT32_PARTITION:
-            (void)ScanFat32Partition();
-            break;*/
-        default: /* UDF, Ext2 and so on... */
-    /*universal_scan:*/
+        default:
             /* Find files */
             tm = winx_xtime();
             path[4] = (short)volume_letter;
@@ -445,66 +418,6 @@ void RemarkWellKnownLockedFiles(void)
 	time = winx_xtime() - tm;
 	DebugPrint("Well known locked files search completed in %I64u ms.\n", time);
 }
-
-#if 0
-/**
- * @brief Checks all fragmented files,
- * are they locked or not.
- * @note Works slow.
- */
-void CheckAllFragmentedFiles(void)
-{
-	ULONGLONG tm, time;
-	PFRAGMENTED pf;
-
-	DebugPrint("+-------------------------------------------------------+\n");
-	DebugPrint("|          Fragmented files checking started...         |\n");
-	DebugPrint("+-------------------------------------------------------+\n");
-	DebugPrint("UltraDefrag will try to open them to ensure that they are not locked.\n");
-	DebugPrint("This may take few minutes if there are many fragmented files on the disk.\n");
-	DebugPrint("\n");
-	tm = winx_xtime();
-
-	for(pf = fragmfileslist; pf != NULL; pf = pf->next_ptr){
-		(void)IsFileLocked(pf->pfn);
-		if(pf->next_ptr == fragmfileslist) break;
-	}
-
-	time = winx_xtime() - tm;
-	DebugPrint("---------------------------------------------------------\n");
-	DebugPrint("Fragmented files checking completed in %I64u ms.\n",  time);
-	DebugPrint("---------------------------------------------------------\n");
-}
-
-/**
- * @brief Checks all files,
- * are they locked or not.
- * @note Works slow.
- */
-void CheckAllFiles(void)
-{
-	ULONGLONG tm, time;
-	PFILENAME pfn;
-
-	DebugPrint("+-------------------------------------------------------+\n");
-	DebugPrint("|               Files checking started...               |\n");
-	DebugPrint("+-------------------------------------------------------+\n");
-	DebugPrint("UltraDefrag will try to open them to ensure that they are not locked.\n");
-	DebugPrint("This may take few minutes if there are many files on the disk.\n");
-	DebugPrint("\n");
-	tm = winx_xtime();
-
-	for(pfn = filelist; pfn != NULL; pfn = pfn->next_ptr){
-		(void)IsFileLocked(pfn);
-		if(pfn->next_ptr == filelist) break;
-	}
-
-	time = winx_xtime() - tm;
-	DebugPrint("---------------------------------------------------------\n");
-	DebugPrint("Files checking completed in %I64u ms.\n",  time);
-	DebugPrint("---------------------------------------------------------\n");
-}
-#endif
 
 /**
  * @brief Produces a list of fragmented files.
