@@ -361,7 +361,7 @@ size_t __stdcall winx_fbwrite(const void *buffer,size_t size,size_t count,WINX_F
 	}
 	
 	/* append new data to the buffer */
-	memcpy(f->io_buffer + f->io_buffer_offset,buffer,bytes);
+	memcpy((size_t*)f->io_buffer + f->io_buffer_offset,buffer,bytes);
 	f->io_buffer_offset += bytes;
 	f->wboffset.QuadPart += bytes;
 	return count;
