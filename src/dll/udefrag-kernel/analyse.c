@@ -96,6 +96,7 @@ int Analyze(char *volume_name)
 		Stat.free_space = v.free_bytes;
 		clusters_total = v.total_clusters;
 		if(bytes_per_cluster) clusters_per_256k = _256K / bytes_per_cluster;
+		else clusters_per_256k = 0;
 		DebugPrint("Total clusters: %I64u\n",clusters_total);
 		DebugPrint("Cluster size: %I64u\n",bytes_per_cluster);
 		if(!clusters_per_256k){
