@@ -42,7 +42,6 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	if(dwReason == DLL_PROCESS_ATTACH){
 		winx_create_global_heap();
 		winx_init_synch_objects();
-		MarkWindowsBootAsSuccessful();
 	} else if(dwReason == DLL_PROCESS_DETACH){
 		winx_destroy_global_heap();
 		winx_destroy_synch_objects();
