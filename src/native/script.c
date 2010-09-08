@@ -55,7 +55,7 @@ int ProcessScript(short *filename)
 	/* read script file entirely */
 	if(filename == NULL){
 		if(winx_get_windows_directory(path,MAX_PATH) < 0){
-			winx_printf("\nProcessScript(): Cannot retrieve the Windows directory path!\n\n");
+			winx_printf("\nProcessScript: cannot get %%windir%% path\n\n");
 			return (-1);
 		}
 		(void)strncat(path,"\\system32\\ud-boot-time.cmd",

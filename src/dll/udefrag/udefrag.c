@@ -223,7 +223,7 @@ int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cl
 	if(sproc) sproc(TRUE);
 
 	if(ksp.cmd_status < 0)
-		DebugPrint("udefrag_start(%s,%u,%u,0x%p) failed!\n",
+		DebugPrint("udefrag_start(%s,%u,%u,0x%p) failed\n",
 			volume_name,job_type,cluster_map_size,sproc);
 	return ksp.cmd_status;
 }
@@ -309,8 +309,7 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 	/* allocate memory */
 	msg = winx_heap_alloc(MSG_LENGTH + 1);
 	if(msg == NULL){
-		DebugPrint("Cannot allocate %u bytes of memory for "
-			"udefrag_get_default_formatted_results()!",
+		DebugPrint("udefrag_get_default_formatted_results: cannot allocate %u bytes of memory\n",
 			MSG_LENGTH + 1);
 		winx_printf("\nCannot allocate %u bytes of memory!\n\n",
 			MSG_LENGTH + 1);

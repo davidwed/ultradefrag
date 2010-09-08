@@ -105,7 +105,7 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 	for(i = 0; cmd_table[i].cmd_handler != NULL; i++){
 		/* build path to the manual page */
 		if(winx_get_windows_directory(windir,MAX_PATH) < 0){
-			winx_printf("\n%ws: Cannot retrieve the Windows directory path!\n\n",argv[0]);
+			winx_printf("\n%ws: cannot get %%windir%% path\n\n",argv[0]);
 			return (-1);
 		}
 		_snprintf(path,MAX_PATH,"%s\\UltraDefrag\\man\\%ws.man",windir,cmd_table[i].cmd_name);
@@ -150,7 +150,7 @@ static int __cdecl man_handler(int argc,short **argv,short **envp)
 	
 	/* build path to requested manual page */
 	if(winx_get_windows_directory(path,MAX_PATH) < 0){
-		winx_printf("\n%ws: Cannot retrieve the Windows directory path!\n\n",argv[0]);
+		winx_printf("\n%ws: cannot get %%windir%% path\n\n",argv[0]);
 		return (-1);
 	}
 	_snwprintf(wpath,MAX_PATH,L"%hs\\UltraDefrag\\man\\%ws.man",path,argv[1]);
@@ -203,7 +203,7 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
 	/* convert list of strings to array */
 	strings = winx_heap_alloc((history.n_entries + 3) * sizeof(char *));
 	if(strings == NULL){
-		winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+		winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
 			argv[0],(history.n_entries + 3) * sizeof(char *));
 		return (-1);
 	}
@@ -295,7 +295,7 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 	/* display boot time script if filename is missing */
 	if(argc < 2){
 		if(winx_get_windows_directory(path,MAX_PATH) < 0){
-			winx_printf("\n%ws: Cannot retrieve the Windows directory path!\n\n",argv[0]);
+			winx_printf("\n%ws: cannot get %%windir%% path\n\n",argv[0]);
 			return (-1);
 		}
 		(void)strncat(path,"\\system32\\ud-boot-time.cmd",
@@ -306,7 +306,7 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 			length += wcslen(argv[i]) + 1;
 		filename = winx_heap_alloc(length * sizeof(short));
 		if(filename == NULL){
-			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+			winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
 				argv[0],length * sizeof(short));
 			return (-1);
 		}
@@ -341,7 +341,7 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 	if(unicode_detected){
 		second_buffer = winx_heap_alloc(filesize + 1);
 		if(second_buffer == NULL){
-			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+			winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
 				argv[0],filesize + 1);
 			winx_release_file_contents(buffer);
 			return (-1);
@@ -388,7 +388,7 @@ static int list_environment_variables(int argc,short **argv,short **envp)
 	for(n = 0; envp[n] != NULL; n++) {}
 	strings = winx_heap_alloc((n + 1) * sizeof(char *));
 	if(strings == NULL){
-		winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+		winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
 			argv[0],(n + 1) * sizeof(char *));
 		return (-1);
 	}
@@ -399,7 +399,7 @@ static int list_environment_variables(int argc,short **argv,short **envp)
 		length = wcslen(envp[i]);
 		strings[j] = winx_heap_alloc((length + 1) * sizeof(char));
 		if(strings[j] == NULL){
-			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+			winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
 				argv[0],(length + 1) * sizeof(char));
 			goto fail;
 		}
@@ -469,7 +469,7 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 		}
 		/* validate '=' character position */
 		if(name_length == 0 || (value_length == 0 && argc >= 3)){
-			winx_printf("\n%ws: invalid syntax!\n\n",argv[0]);
+			winx_printf("\n%ws: invalid syntax\n\n",argv[0]);
 			return (-1);
 		}
 		/* append all remaining parts of the value string */
@@ -478,14 +478,14 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 		/* allocate memory */
 		name = winx_heap_alloc((name_length + 1) * sizeof(short));
 		if(name == NULL){
-			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n",
+			winx_printf("\n%ws: cannot allocate %u bytes of memory\n",
 				argv[0],(name_length + 1) * sizeof(short));
 			return (-1);
 		}
 		if(value_length){
 			value = winx_heap_alloc((value_length + 1) * sizeof(short));
 			if(value == NULL){
-				winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n",
+				winx_printf("\n%ws: cannot allocate %u bytes of memory\n",
 					argv[0],(value_length + 1) * sizeof(short));
 				winx_heap_free(name);
 				return (-1);
@@ -559,8 +559,8 @@ int ExecPendingBootOff(void)
 	WINX_FILE *f;
 
 	if(winx_get_windows_directory(path,MAX_PATH) < 0){
-		DebugPrint("ExecPendingBootOff(): Cannot retrieve the Windows directory path!");
-		winx_printf("\nExecPendingBootOff(): Cannot retrieve the Windows directory path!\n\n");
+		DebugPrint("ExecPendingBootOff: cannot get %%windir%% path");
+		winx_printf("\nExecPendingBootOff: cannot get %%windir%% path\n\n");
 		short_dbg_delay();
 		return 0;
 	}
@@ -575,8 +575,8 @@ int ExecPendingBootOff(void)
 		short_dbg_delay();
 	}
 	if(winx_delete_file(path) < 0){
-		DebugPrint("ExecPendingBootOff(): Cannot delete %%windir%%\\pending-boot-off file!");
-		winx_printf("\nExecPendingBootOff(): Cannot delete %%windir%%\\pending-boot-off file!\n\n");
+		DebugPrint("ExecPendingBootOff: cannot delete %%windir%%\\pending-boot-off file");
+		winx_printf("\nExecPendingBootOff: cannot delete %%windir%%\\pending-boot-off file\n\n");
 		short_dbg_delay();
 	}
 	winx_printf("\nPending boot-off command execution completed.\n");
@@ -592,8 +592,8 @@ static void SavePendingBootOffState(void)
 	if(!pending_boot_off) return;
 
 	if(winx_get_windows_directory(path,MAX_PATH) < 0){
-		DebugPrint("SavePendingBootOffState(): Cannot retrieve the Windows directory path!");
-		winx_printf("\nSavePendingBootOffState(): Cannot retrieve the Windows directory path!\n\n");
+		DebugPrint("SavePendingBootOffState: cannot get %%windir%% path");
+		winx_printf("\nSavePendingBootOffState: cannot get %%windir%% path\n\n");
 		short_dbg_delay();
 		return;
 	}
@@ -601,8 +601,8 @@ static void SavePendingBootOffState(void)
 			MAX_PATH - strlen(path) - 1);
 	f = winx_fopen(path,"w");
 	if(f == NULL){
-		DebugPrint("%%windir%%\\pending-boot-off file creation failed!");
-		winx_printf("\n%%windir%%\\pending-boot-off file creation failed!\n\n");
+		DebugPrint("%%windir%%\\pending-boot-off file creation failed");
+		winx_printf("\n%%windir%%\\pending-boot-off file creation failed\n\n");
 		short_dbg_delay();
 		return;
 	}
@@ -724,7 +724,7 @@ static int __cdecl call_handler(int argc,short **argv,short **envp)
 			length += wcslen(argv[i]) + 1;
 		filename = winx_heap_alloc(length * sizeof(short));
 		if(filename == NULL){
-			winx_printf("\n%ws: Cannot allocate %u bytes of memory!\n\n",
+			winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
 				argv[0],length * sizeof(short));
 			return (-1);
 		}
@@ -834,8 +834,8 @@ int parse_command(short *cmdline)
 	n = wcslen(cmdline);
 	cmdline_copy = winx_heap_alloc((n + 1) * sizeof(short));
 	if(cmdline_copy == NULL){
-		winx_printf("\nCannot allocate %u bytes of memory for %ws command!\n\n",
-			(n + 1) * sizeof(short),cmdline);
+		winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
+			cmdline,(n + 1) * sizeof(short));
 		return (-1);
 	}
 	wcscpy(cmdline_copy,cmdline);
@@ -851,8 +851,8 @@ int parse_command(short *cmdline)
 	/* c. allocate memory for argv array */
 	argv = winx_heap_alloc(sizeof(short *) * argc);
 	if(argv == NULL){
-		winx_printf("\nCannot allocate %u bytes of memory for %ws command!\n\n",
-			sizeof(short *) * argc,cmdline);
+		winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
+			cmdline,sizeof(short *) * argc);
 		winx_heap_free(cmdline_copy);
 		return (-1);
 	}
@@ -885,8 +885,8 @@ int parse_command(short *cmdline)
 				if(n > 0){
 					envp = winx_heap_alloc((n + 1) * sizeof(short *));
 					if(envp == NULL){
-						winx_printf("\nCannot allocate %u bytes of memory for %ws command!\n\n",
-							(n + 1) * sizeof(short *),cmdline);
+						winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
+							cmdline,(n + 1) * sizeof(short *));
 					} else {
 						RtlZeroMemory((void *)envp,(n + 1) * sizeof(short *));
 						string = peb->ProcessParameters->Environment;

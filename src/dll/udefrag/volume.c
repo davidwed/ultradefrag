@@ -65,7 +65,7 @@ volume_info * __stdcall udefrag_get_vollist(int skip_removable)
 	/* allocate memory */
 	v = winx_heap_alloc((MAX_DOS_DRIVES + 1) * sizeof(volume_info));
 	if(v == NULL){
-		DebugPrint("udefrag_get_vollist: cannot allocate %u bytes of memory!\n",
+		DebugPrint("udefrag_get_vollist: cannot allocate %u bytes of memory\n",
 			(MAX_DOS_DRIVES + 1) * sizeof(volume_info));
 		return NULL;
 	}

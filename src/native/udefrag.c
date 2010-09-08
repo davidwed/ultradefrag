@@ -270,7 +270,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		if(argv[i][0] != 0){
 			if(argv[i][1] == ':'){
 				if(n_letters > (MAX_DOS_DRIVES - 1)){
-					winx_printf("\n%ws: Too many letters specified on the command line.\n\n",
+					winx_printf("\n%ws: too many letters specified on the command line\n\n",
 						argv[0]);
 				} else {
 					letters[n_letters] = (char)argv[i][0];
@@ -280,7 +280,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			}
 		}
 		/* handle unknown options */
-		winx_printf("\n%ws: unknown option \'%ws\' found!\n\n",
+		winx_printf("\n%ws: unknown option \'%ws\' found\n\n",
 			argv[0],argv[i]);
 		return (-1);
 	}
@@ -311,7 +311,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	/* initialize ultradefrag engine */
 	error_code = udefrag_init();
 	if(error_code < 0){
-		winx_printf("\n%ws: Initialization failed!\n",argv[0]);
+		winx_printf("\n%ws: initialization failed\n",argv[0]);
 		winx_printf("%s\n",udefrag_get_error_description(error_code));
 		(void)udefrag_unload();
 		return (-1);
@@ -334,7 +334,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	if(all_flag || all_fixed_flag){
 		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
 		if(v == NULL){
-			winx_printf("\n%ws: udefrag_get_vollist() failed!\n\n",argv[0]);
+			winx_printf("\n%ws: udefrag_get_vollist failed\n\n",argv[0]);
 			(void)udefrag_unload();
 			return (-1);
 		}
