@@ -33,6 +33,8 @@ HISTORY
       were removed from zenwinx library; use more common
       winx_get_volume_information instead
     - one little bug in winx_kbhit, winx_breakhit functions was fixed
+    - udefrag_get_vollist and udefrag_release_vollist calls were added
+      to udefrag library; an obsolete udefrag_get_avail_volumes was removed
     RC1:
     - partial defragmentation was added to decrease number of fragments
       even when there is no free space on disk to hold all fragments of the file together

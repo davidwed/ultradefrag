@@ -317,9 +317,11 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 	/* refill the volume list control */
 	(void)SendMessage(hList,LVM_DELETEALLITEMS,0,0);
-	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
+	v = udefrag_get_vollist(skip_removable);
+	if(v){
 		for(i = 0; v[i].letter != 0; i++)
 			VolListAddItem(i,&v[i]);
+		udefrag_release_vollist(v);
 	}
 
 	MakeVolListNiceLooking();
@@ -557,8 +559,11 @@ void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry)
 	volume_info *v;
 	int i;
 
-	if(v_entry == NULL) return;
-	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
+	if(v_entry == NULL)
+		return;
+
+	v = udefrag_get_vollist(skip_removable);
+	if(v){
 		for(i = 0; v[i].letter != 0; i++){
 			if(v[i].letter == v_entry->name[0]){
 				v_entry->stat.total_space = v[i].total_space.QuadPart;
@@ -584,5 +589,6 @@ void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry)
 				break;
 			}
 		}
+		udefrag_release_vollist(v);
 	}
 }

@@ -208,14 +208,14 @@ void ProcessVolume(char letter)
 static int DisplayAvailableVolumes(int skip_removable)
 {
 	volume_info *v;
-	int n;
+	int i;
 
-	if(udefrag_get_avail_volumes(&v,skip_removable) >= 0){
+	v = udefrag_get_vollist(skip_removable);
+	if(v){
 		winx_printf("\nAvailable drive letters:   ");
-		for(n = 0;;n++){
-			if(v[n].letter == 0) break;
-			winx_printf("%c   ",v[n].letter);
-		}
+		for(i = 0; v[i].letter != 0; i++)
+			winx_printf("%c   ",v[i].letter);
+		udefrag_release_vollist(v);
 		winx_printf("\n\n");
 		return 0;
 	}
@@ -332,18 +332,19 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	
 	/* process all volumes if requested */
 	if(all_flag || all_fixed_flag){
-		if(udefrag_get_avail_volumes(&v,all_fixed_flag ? TRUE : FALSE) < 0){
-			winx_printf("\n%ws: udefrag_get_avail_volumes() failed!\n\n",argv[0]);
+		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
+		if(v == NULL){
+			winx_printf("\n%ws: udefrag_get_vollist() failed!\n\n",argv[0]);
 			(void)udefrag_unload();
 			return (-1);
 		}
-		for(i = 0;;i++){
-			if(v[i].letter == 0) break;
+		for(i = 0; v[i].letter != 0; i++){
 			if(abort_flag) break;
 			letter = v[i].letter;
 			ProcessVolume(letter);
 			if(debug_level > DBG_NORMAL) short_dbg_delay();
 		}
+		udefrag_release_vollist(v);
 	}
 	(void)udefrag_unload();
 	return 0;

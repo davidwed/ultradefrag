@@ -72,7 +72,8 @@ char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
 void __stdcall udefrag_release_default_formatted_results(char *results);
 char * __stdcall udefrag_get_error_description(int error_code);
 
-int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable);
+volume_info * __stdcall udefrag_get_vollist(int skip_removable);
+void __stdcall udefrag_release_vollist(volume_info *v);
 int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);

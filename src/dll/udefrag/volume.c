@@ -29,53 +29,73 @@
 #include "../../include/udefrag.h"
 #include "../zenwinx/zenwinx.h"
 
-volume_info global_v[MAX_DOS_DRIVES + 1];
-
 static int internal_validate_volume(unsigned char letter,int skip_removable,volume_info *v);
 
 /**
  * @brief Retrieves a list of volumes
  * available for defragmentation.
- * @param[in] vol_info pointer to variable 
- * receiving the volume list array address.
- * @param[in] skip_removable the boolean value defining,
- * must removable drives be skipped or not.
- * @return Zero for success, negative value otherwise.
- * @note if skip_removable is equal to FALSE and you have a
- * floppy drive without a floppy disk then you will hear noise :))
+ * @param[in] skip_removable boolean value
+ * indicating whether removable drives
+ * should be skipped or not.
+ * @return Pointer to the list of volumes.
+ * NULL indicates failure.
+ * @note if skip_removable is equal to FALSE
+ * and you have a floppy drive without a disk
+ * inside, then you will hear noise :-)
  * @par Example:
  * @code
  * volume_info *v;
  * int i;
  *
- * if(udefrag_get_avail_volumes(&v,TRUE) >= 0){
- *     for(i = 0;;i++){
- *         if(!v[i].letter) break;
- *         // ...
+ * v = udefrag_get_vollist(TRUE);
+ * if(v != NULL){
+ *     for(i = 0; v[i].letter != 0; i++){
+ *         // process volume list entry
  *     }
+ *     udefrag_release_vollist(v);
  * }
  * @endcode
  */
-int __stdcall udefrag_get_avail_volumes(volume_info **vol_info,int skip_removable)
+volume_info * __stdcall udefrag_get_vollist(int skip_removable)
 {
+	volume_info *v;
 	ULONG i, index;
 	char letter;
+	
+	/* allocate memory */
+	v = winx_heap_alloc((MAX_DOS_DRIVES + 1) * sizeof(volume_info));
+	if(v == NULL){
+		DebugPrint("udefrag_get_vollist: cannot allocate %u bytes of memory!\n",
+			(MAX_DOS_DRIVES + 1) * sizeof(volume_info));
+		return NULL;
+	}
 
-	/* get full list of volumes */
-	*vol_info = global_v;
 	/* set error mode to ignore missing removable drives */
-	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
-		return (-1);
-	index = 0;
-	for(i = 0; i < MAX_DOS_DRIVES; i++){
+	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0){
+		winx_heap_free(v);
+		return NULL;
+	}
+
+	/* cycle through drive letters */
+	for(i = 0, index = 0; i < MAX_DOS_DRIVES; i++){
 		letter = 'A' + (char)i;
-		if(internal_validate_volume(letter, skip_removable,&(global_v[index])) >= 0)
+		if(internal_validate_volume(letter, skip_removable,v + index) >= 0)
 			index ++;
 	}
-	global_v[index].letter = 0;
+	v[index].letter = 0;
+
 	/* try to restore error mode to default state */
 	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-	return 0;
+	return v;
+}
+
+/**
+ * @brief Releases list of volumes
+ * returned by udefrag_get_vollist.
+ */
+void __stdcall udefrag_release_vollist(volume_info *v)
+{
+	if(v) winx_heap_free(v);
 }
 
 /**

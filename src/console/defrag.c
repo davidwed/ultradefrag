@@ -152,7 +152,7 @@ void DisplayInvalidVolumeError(int error_code)
 int show_vollist(void)
 {
 	volume_info *v;
-	int n;
+	int i;
 	char s[32];
 	double d;
 	int p;
@@ -160,19 +160,21 @@ int show_vollist(void)
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("Volumes available for defragmentation:\n\n");
 
-	if(udefrag_get_avail_volumes(&v,la_flag ? FALSE : TRUE) < 0) return 1;
+	v = udefrag_get_vollist(la_flag ? FALSE : TRUE);
+	if(v == NULL)
+		return 1;
 
-	for(n = 0;;n++){
-		if(v[n].letter == 0) break;
-		udefrag_fbsize((ULONGLONG)(v[n].total_space.QuadPart),2,s,sizeof(s));
-		d = (double)(signed __int64)(v[n].free_space.QuadPart);
+	for(i = 0; v[i].letter != 0; i++){
+		udefrag_fbsize((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
+		d = (double)(signed __int64)(v[i].free_space.QuadPart);
 		/* 0.1 constant is used to exclude divide by zero error */
-		d /= ((double)(signed __int64)(v[n].total_space.QuadPart) + 0.1);
+		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
 		p = (int)(100 * d);
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 		printf("%c:  %8s %12s %8u %%\n",
-			v[n].letter,v[n].fsname,s,p);
+			v[i].letter,v[i].fsname,s,p);
 	}
+	udefrag_release_vollist(v);
 	return 0;
 }
 
@@ -311,15 +313,16 @@ int process_multiple_volumes(void)
 	
 	/* process all volumes if requested */
 	if(all_flag || all_fixed_flag){
-		if(udefrag_get_avail_volumes(&v,all_fixed_flag ? TRUE : FALSE) < 0) return 1;
-		for(i = 0;;i++){
-			if(v[i].letter == 0) break;
+		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
+		if(v == NULL)
+			return 1;
+		for(i = 0; v[i].letter != 0; i++){
 			if(stop_flag) break;
-			/**/
 			//printf("%c:\n",v[i].letter);
 			letter = v[i].letter;
 			(void)process_single_volume();
 		}
+		udefrag_release_vollist(v);
 	}
 	
 	return 0;
