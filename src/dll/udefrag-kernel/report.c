@@ -26,6 +26,11 @@
 
 #include "globals.h"
 
+/**
+ * @brief The size of the report saving buffer, in bytes.
+ */
+#define RSB_SIZE (512 * 1024)
+
 /*
 * Micro Edition generates text reports only,
 * all other editions - both reports.
@@ -41,10 +46,6 @@ static BOOLEAN SaveTextReportToDisk(char *volume_name);
 static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered);
 
 static BOOLEAN SaveReportToDiskInternal(char *volume_name);
-
-static int InitializeReportSavingBuffer(void);
-static void DestroyReportSavingBuffer(void);
-static size_t WriteToReportSavingBuffer(const void *buffer,size_t size,size_t count,WINX_FILE *f);
 
 /**
  * @brief Removes all file fragmentation reports from the volume.
@@ -133,13 +134,14 @@ static BOOLEAN SaveLuaReportToDisk(char *volume_name)
 
 	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.luar",volume_name);
 	path[63] = 0;
-	f = winx_fopen(path,"w");
+	f = winx_fbopen(path,"w",RSB_SIZE);
 	if(f == NULL){
-		DebugPrint("Cannot create %s file!\n",path);
-		return FALSE;
+		f = winx_fopen(path,"w");
+		if(f == NULL){
+			DebugPrint("Cannot create %s file!\n",path);
+			return FALSE;
+		}
 	}
-	
-	InitializeReportSavingBuffer();
 	
 	(void)_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %s:\r\n\r\n"
@@ -148,18 +150,15 @@ static BOOLEAN SaveLuaReportToDisk(char *volume_name)
 		"files = {\r\n",
 		volume_name, volume_name
 		);
-	buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-	(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
+	buffer[sizeof(buffer) - 1] = 0;
+	(void)winx_fbwrite(buffer,1,strlen(buffer),f);
 
 	WriteLuaReportBody(f,FALSE);
 	//WriteLuaReportBody(f,TRUE);
 
 	(void)strcpy(buffer,"}\r\n");
-	(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
-
-	DestroyReportSavingBuffer();
-	
-	winx_fclose(f);
+	(void)winx_fbwrite(buffer,1,strlen(buffer),f);
+	winx_fbclose(f);
 
 	DebugPrint("Report saved to %s\n",path);
 	return TRUE;
@@ -188,8 +187,8 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 			(UINT)(pf->pfn->is_filtered & 0x1),
 			comment
 			);
-		buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-		(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
+		buffer[sizeof(buffer) - 1] = 0;
+		(void)winx_fbwrite(buffer,1,strlen(buffer),f);
 
 		/* skip \??\ sequence in the beginning of the path */
 		name_length = pf->pfn->name.Length / sizeof(short);
@@ -197,12 +196,12 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		
 		for(i = offset; i < name_length; i++){
 			(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)pf->pfn->name.Buffer[i]);
-			buffer[sizeof(buffer) - 1] = 0; /* to be sure that the buffer is terminated by zero */
-			(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
+			buffer[sizeof(buffer) - 1] = 0;
+			(void)winx_fbwrite(buffer,1,strlen(buffer),f);
 		}
 
 		(void)strcpy(buffer,"}},\r\n");
-		(void)WriteToReportSavingBuffer(buffer,1,strlen(buffer),f);
+		(void)winx_fbwrite(buffer,1,strlen(buffer),f);
 	next_item:
 		pf = pf->next_ptr;
 	} while(pf != fragmfileslist);
@@ -225,33 +224,32 @@ static BOOLEAN SaveTextReportToDisk(char *volume_name)
 
 	(void)_snprintf(path,64,"\\??\\%s:\\fraglist.txt",volume_name);
 	path[63] = 0;
-	f = winx_fopen(path,"w");
+	f = winx_fbopen(path,"w",RSB_SIZE);
 	if(f == NULL){
-		DebugPrint("Cannot create %s file!\n",path);
-		return FALSE;
+		f = winx_fopen(path,"w");
+		if(f == NULL){
+			DebugPrint("Cannot create %s file!\n",path);
+			return FALSE;
+		}
 	}
 	
-	InitializeReportSavingBuffer();
-	
 	wcscpy(buffer,L";---------------------------------------------------------------------------------------------\r\n");
-	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	(void)_snwprintf(buffer,length,L"; Fragmented files on %hs:\r\n;\r\n",volume_name);
 	buffer[length - 1] = 0;
-	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	(void)_snwprintf(buffer,length,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");
 	buffer[length - 1] = 0;
-	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	wcscpy(buffer,L";---------------------------------------------------------------------------------------------\r\n");
-	(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
 	
 	WriteTextReportBody(f,FALSE);
 	//WriteTextReportBody(f,TRUE);
 
-	DestroyReportSavingBuffer();
-	
 	winx_fclose(f);
 
 	DebugPrint("Report saved to %s\n",path);
@@ -280,105 +278,16 @@ static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 			pf->pfn->clusters_total * bytes_per_cluster,
 			comment);
 		buffer[length - 1] = 0;
-		(void)WriteToReportSavingBuffer(buffer,sizeof(short),wcslen(buffer),f);
+		(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
 		
 		/* skip \??\ sequence in the beginning of the path */
 		if(pf->pfn->name.Length > 0x8) offset = 0x8;
 		else offset = 0x0;
-		(void)WriteToReportSavingBuffer((char *)pf->pfn->name.Buffer + offset,1,pf->pfn->name.Length - offset,f);
+		(void)winx_fbwrite((char *)pf->pfn->name.Buffer + offset,1,pf->pfn->name.Length - offset,f);
 
 	next_item:
 		pf = pf->next_ptr;
 	} while(pf != fragmfileslist);
-}
-
-/* ------------------------------------------------------------------------- */
-/*                 this code speeds up the report saving                     */
-/* ------------------------------------------------------------------------- */
-
-/**
- * @brief The size of the report saving buffer, in bytes.
- */
-#define RSB_SIZE (512 * 1024)
-
-/**
- * @brief Pointer to the report saving buffer.
- */
-char *rsb = NULL;
-
-/**
- * @brief Offset of the free portion
- * of the report saving buffer.
- */
-unsigned int offset = 0;
-
-/**
- * @brief The descriptor of the report file.
- */
-WINX_FILE *f_report = NULL;
-
-/**
- * @brief Initializes the report saving buffer.
- * @return Zero for success, negative value otherwise.
- * @note Call this function after opening the file.
- */
-static int InitializeReportSavingBuffer(void)
-{
-	rsb = winx_virtual_alloc(RSB_SIZE);
-	if(!rsb){
-		DebugPrint("Cannot allocate %u bytes of memory for the report saving buffer!\n",RSB_SIZE);
-		DebugPrint("Slower report saving algorithm will be used.\n");
-		return (-1);
-	}
-	RtlZeroMemory(rsb,RSB_SIZE);
-	offset = 0;
-	f_report = NULL;
-	return 0;
-}
-
-/**
- * @brief Destroys the report saving buffer.
- * @note Call this function before closing the file.
- */
-static void DestroyReportSavingBuffer(void)
-{
-	if(offset && f_report) winx_fwrite(rsb,1,offset,f_report);
-	if(rsb) winx_virtual_free(rsb,RSB_SIZE);
-	offset = 0;
-	f_report = NULL;
-}
-
-/**
- * @brief winx_fwrite equivalent, but writes
- * through the report saving buffer.
- */
-static size_t WriteToReportSavingBuffer(const void *buffer,size_t size,size_t count,WINX_FILE *f)
-{
-	size_t bytes;
-	size_t result;
-	
-	if(rsb == NULL) return winx_fwrite(buffer,size,count,f);
-	
-	bytes = size * count;
-	if(bytes > RSB_SIZE){
-		DebugPrint("WriteToReportSavingBuffer(): attempt to write %u bytes failed!\n",(UINT)bytes);
-		return 0;
-	}
-	
-	f_report = f;
-	result = count;
-	
-	if(bytes > (RSB_SIZE - offset)){
-		winx_fwrite(rsb,1,offset,f);
-		offset = 0;
-	}
-	memcpy(rsb + offset,buffer,bytes);
-	offset += bytes;
-	if(offset >= RSB_SIZE){
-		result = winx_fwrite(rsb,1,RSB_SIZE,f);
-		offset = 0;
-	}
-	return result;
 }
 
 /** @} */
