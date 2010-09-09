@@ -89,7 +89,7 @@ int ProcessScript(short *filename)
 	/* parse lines */
 	line_detected = 0;
 	for(i = 0; i < n; i++){
-		if(buffer[i]){
+		if(buffer[i] != 0){
 			if(!line_detected){
 				(void)parse_command(buffer + i);
 				line_detected = 1;
