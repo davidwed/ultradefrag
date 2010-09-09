@@ -106,8 +106,8 @@ int __cdecl winx_gets(char *string,int n);
 int __cdecl winx_prompt(char *prompt,char *string,int n);
 
 typedef struct _winx_history_entry {
-	struct _winx_history_entry *next_ptr;
-	struct _winx_history_entry *prev_ptr;
+	struct _winx_history_entry *next;
+	struct _winx_history_entry *prev;
 	char *string;
 } winx_history_entry;
 
@@ -218,8 +218,8 @@ void __stdcall winx_release_file_contents(void *contents);
 #define is_fragmented(f)          ((f)->disp.flags & WINX_FILE_DISP_FRAGMENTED)
 
 typedef struct _winx_list_of_fragments {
-	struct _winx_list_of_fragments *next_ptr; /* pointer to the next fragment */
-	struct _winx_list_of_fragments *prev_ptr; /* pointer to the previous fragment */
+	struct _winx_list_of_fragments *next; /* pointer to the next fragment */
+	struct _winx_list_of_fragments *prev; /* pointer to the previous fragment */
 	ULONGLONG vcn;                            /* virtual cluster number - useful for compressed files */
 	ULONGLONG lcn;                            /* logical cluster number */
 	ULONGLONG length;                         /* size of the fragment, in bytes */
@@ -233,8 +233,8 @@ typedef struct _winx_file_disposition {
 } winx_file_disposition;
 
 typedef struct _winx_file_info {
-	struct _winx_file_info *next_ptr;  /* pointer to the next item */
-	struct _winx_file_info *prev_ptr;  /* pointer to the previous item */
+	struct _winx_file_info *next;  /* pointer to the next item */
+	struct _winx_file_info *prev;  /* pointer to the previous item */
 	short *path;                       /* full native path */
 	unsigned long flags;               /* combination of FILE_ATTRIBUTE_xxx flags defined in winnt.h */
 	winx_file_disposition disp;        /* information about file fragments and their disposition */
@@ -273,8 +273,8 @@ ULONGLONG __stdcall winx_xtime(void);
  * @brief Generic structure describing double linked list entry.
  */
 typedef struct _list_entry {
-	struct _list_entry *n; /* pointer to next entry */
-	struct _list_entry *p; /* pointer to previous entry */
+	struct _list_entry *next; /* pointer to next entry */
+	struct _list_entry *prev; /* pointer to previous entry */
 } list_entry;
 
 list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev,long size);

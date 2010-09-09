@@ -330,9 +330,9 @@ void __cdecl winx_destroy_history(winx_history *h)
 		return;
 	}
 
-	for(entry = h->head; entry != NULL; entry = entry->next_ptr){
+	for(entry = h->head; entry != NULL; entry = entry->next){
 		if(entry->string) winx_heap_free(entry->string);
-		if(entry->next_ptr == h->head) break;
+		if(entry->next == h->head) break;
 	}
 	winx_list_destroy((list_entry **)(void *)&h->head);
 	h->current = NULL;
@@ -350,7 +350,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
 	
 	if(h == NULL || string == NULL) return;
 	
-	if(h->head) last_entry = h->head->prev_ptr;
+	if(h->head) last_entry = h->head->prev;
 	entry = (winx_history_entry *)winx_list_insert_item((list_entry **)(void *)&h->head,
 		(list_entry *)last_entry,sizeof(winx_history_entry));
 	if(entry == NULL){
@@ -460,13 +460,13 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 					if(h->head && h->current){
 						if(kbd_rec.wVirtualScanCode == 0x48){
 							/* list history back */
-							if(h->current == h->head->prev_ptr && \
+							if(h->current == h->head->prev && \
 							  !history_listed_to_the_last_entry){
 								/* set the flag and don't list back */
 								history_listed_to_the_last_entry = 1;
 							} else {
 								if(h->current != h->head)
-									h->current = h->current->prev_ptr;
+									h->current = h->current->prev;
 								history_listed_to_the_last_entry = 0;
 							}
 							if(h->current->string){
@@ -476,14 +476,14 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 							}
 						} else if(kbd_rec.wVirtualScanCode == 0x50){
 							/* list history forward */
-							if(h->current->next_ptr != h->head){
-								h->current = h->current->next_ptr;
+							if(h->current->next != h->head){
+								h->current = h->current->next;
 								if(h->current->string){
 									RtlZeroMemory(string,n);
 									strcpy(string,h->current->string);
 									i = strlen(string);
 								}
-								if(h->current == h->head->prev_ptr)
+								if(h->current == h->head->prev)
 									history_listed_to_the_last_entry = 1;
 								else
 									history_listed_to_the_last_entry = 0;

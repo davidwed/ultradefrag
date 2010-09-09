@@ -210,12 +210,12 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
     strings[0] = "Typed commands history:";
     strings[1] = "";
 	i = 2;
-	for(entry = history.head; i < history.n_entries; entry = entry->next_ptr){
+	for(entry = history.head; i < history.n_entries; entry = entry->next){
 		if(entry->string){
 			strings[i] = entry->string;
 			i++;
 		}
-		if(entry->next_ptr == history.head) break;
+		if(entry->next == history.head) break;
 	}
 	strings[i] = NULL;
 	

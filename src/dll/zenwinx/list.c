@@ -44,21 +44,21 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
 	/* is list empty? */
 	if(*phead == NULL){
 		*phead = new_item;
-		new_item->p = new_item->n = new_item;
+		new_item->prev = new_item->next = new_item;
 		return new_item;
 	}
 
 	/* insert as a new head? */
 	if(prev == NULL){
-		prev = (*phead)->p;
+		prev = (*phead)->prev;
 		*phead = new_item;
 	}
 
 	/* insert after an item specified by prev argument */
-	new_item->p = prev;
-	new_item->n = prev->n;
-	new_item->p->n = new_item;
-	new_item->n->p = new_item;
+	new_item->prev = prev;
+	new_item->next = prev->next;
+	new_item->prev->next = new_item;
+	new_item->next->prev = new_item;
 	return new_item;
 }
 
@@ -77,7 +77,7 @@ void __stdcall winx_list_remove_item(list_entry **phead,list_entry *item)
 	if(*phead == NULL) return;
 
 	/* remove alone first item? */
-	if(item == *phead && item->n == *phead){
+	if(item == *phead && item->next == *phead){
 		winx_heap_free(item);
 		*phead = NULL;
 		return;
@@ -85,10 +85,10 @@ void __stdcall winx_list_remove_item(list_entry **phead,list_entry *item)
 	
 	/* remove first item? */
 	if(item == *phead){
-		*phead = (*phead)->n;
+		*phead = (*phead)->next;
 	}
-	item->p->n = item->n;
-	item->n->p = item->p;
+	item->prev->next = item->next;
+	item->next->prev = item->prev;
 	winx_heap_free(item);
 }
 
@@ -109,7 +109,7 @@ void __stdcall winx_list_destroy(list_entry **phead)
 	item = head;
 
 	do {
-		next = item->n;
+		next = item->next;
 		winx_heap_free(item);
 		item = next;
 	} while (next != head);
