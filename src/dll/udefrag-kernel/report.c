@@ -151,14 +151,14 @@ static BOOLEAN SaveLuaReportToDisk(char *volume_name)
 		volume_name, volume_name
 		);
 	buffer[sizeof(buffer) - 1] = 0;
-	(void)winx_fbwrite(buffer,1,strlen(buffer),f);
+	(void)winx_fwrite(buffer,1,strlen(buffer),f);
 
 	WriteLuaReportBody(f,FALSE);
 	//WriteLuaReportBody(f,TRUE);
 
 	(void)strcpy(buffer,"}\r\n");
-	(void)winx_fbwrite(buffer,1,strlen(buffer),f);
-	winx_fbclose(f);
+	(void)winx_fwrite(buffer,1,strlen(buffer),f);
+	winx_fclose(f);
 
 	DebugPrint("Report saved to %s\n",path);
 	return TRUE;
@@ -188,7 +188,7 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 			comment
 			);
 		buffer[sizeof(buffer) - 1] = 0;
-		(void)winx_fbwrite(buffer,1,strlen(buffer),f);
+		(void)winx_fwrite(buffer,1,strlen(buffer),f);
 
 		/* skip \??\ sequence in the beginning of the path */
 		name_length = pf->pfn->name.Length / sizeof(short);
@@ -197,11 +197,11 @@ static void WriteLuaReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 		for(i = offset; i < name_length; i++){
 			(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)pf->pfn->name.Buffer[i]);
 			buffer[sizeof(buffer) - 1] = 0;
-			(void)winx_fbwrite(buffer,1,strlen(buffer),f);
+			(void)winx_fwrite(buffer,1,strlen(buffer),f);
 		}
 
 		(void)strcpy(buffer,"}},\r\n");
-		(void)winx_fbwrite(buffer,1,strlen(buffer),f);
+		(void)winx_fwrite(buffer,1,strlen(buffer),f);
 	next_item:
 		pf = pf->next_ptr;
 	} while(pf != fragmfileslist);
@@ -234,23 +234,23 @@ static BOOLEAN SaveTextReportToDisk(char *volume_name)
 	}
 	
 	wcscpy(buffer,L";---------------------------------------------------------------------------------------------\r\n");
-	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	(void)_snwprintf(buffer,length,L"; Fragmented files on %hs:\r\n;\r\n",volume_name);
 	buffer[length - 1] = 0;
-	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	(void)_snwprintf(buffer,length,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");
 	buffer[length - 1] = 0;
-	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	wcscpy(buffer,L";---------------------------------------------------------------------------------------------\r\n");
-	(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
+	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 	
 	WriteTextReportBody(f,FALSE);
 	//WriteTextReportBody(f,TRUE);
 
-	winx_fbclose(f);
+	winx_fclose(f);
 
 	DebugPrint("Report saved to %s\n",path);
 	return TRUE;
@@ -278,12 +278,12 @@ static void WriteTextReportBody(WINX_FILE *f,BOOLEAN is_filtered)
 			pf->pfn->clusters_total * bytes_per_cluster,
 			comment);
 		buffer[length - 1] = 0;
-		(void)winx_fbwrite(buffer,sizeof(short),wcslen(buffer),f);
+		(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 		
 		/* skip \??\ sequence in the beginning of the path */
 		if(pf->pfn->name.Length > 0x8) offset = 0x8;
 		else offset = 0x0;
-		(void)winx_fbwrite((char *)pf->pfn->name.Buffer + offset,1,pf->pfn->name.Length - offset,f);
+		(void)winx_fwrite((char *)pf->pfn->name.Buffer + offset,1,pf->pfn->name.Length - offset,f);
 
 	next_item:
 		pf = pf->next_ptr;

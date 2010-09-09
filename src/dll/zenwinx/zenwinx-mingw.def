@@ -36,15 +36,13 @@ EXPORTS
 	winx_get_drive_type@4
 	winx_get_volume_information@4
 	winx_fopen@8
+	winx_fbopen@12
 	winx_fread@16
 	winx_fwrite@16
 	winx_ioctl@32
 	winx_fflush@4
 	winx_fsize@4
 	winx_fclose@4
-	winx_fbopen@12
-	winx_fbwrite@16
-	winx_fbclose@4
 	winx_create_directory@4
 	winx_delete_file@4
 	winx_get_file_contents@8

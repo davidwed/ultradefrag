@@ -27,8 +27,7 @@ HISTORY
       winx_get_file_contents, winx_release_file_contents, winx_wcsistr,
       winx_print_array_of_strings, winx_get_volume_information,
       calls were added to zenwinx library
-    - winx_fbopen, winx_fbwrite, winx_fbclose calls added to zenwinx
-      library for buffered file i/o support
+    - winx_fbopen call added to zenwinx library for buffered file i/o support
     - obsolete winx_get_volume_size and winx_get_filesystem_name calls
       were removed from zenwinx library; use more common
       winx_get_volume_information instead
