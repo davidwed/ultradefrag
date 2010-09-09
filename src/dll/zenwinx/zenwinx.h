@@ -176,6 +176,7 @@ typedef struct _winx_volume_information {
 int __stdcall winx_get_volume_information(winx_volume_information *v);
 
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
+WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);
 size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
 size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
 ULONGLONG __stdcall winx_fsize(WINX_FILE *f);
@@ -186,13 +187,64 @@ int __stdcall winx_ioctl(WINX_FILE *f,
                          void *out_buffer,int out_size,
                          int *pbytes_returned);
 int __stdcall winx_fflush(WINX_FILE *f);
-WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);
-size_t __stdcall winx_fbwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
-void   __stdcall winx_fbclose(WINX_FILE *f);
 int __stdcall winx_create_directory(const char *path);
 int __stdcall winx_delete_file(const char *filename);
 void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read);
 void __stdcall winx_release_file_contents(void *contents);
+
+/* winx_ftw flags */
+#define WINX_FTW_RECURSIVE  0x1 /* forces to recursively scan all subdirectories */
+#define WINX_FTW_DUMP_FILES 0x2 /* forces to fill winx_file_disposition structure */
+
+#define is_readonly(f)            ((f)->flags & FILE_ATTRIBUTE_READONLY)
+#define is_hidden(f)              ((f)->flags & FILE_ATTRIBUTE_HIDDEN)
+#define is_system(f)              ((f)->flags & FILE_ATTRIBUTE_SYSTEM)
+#define is_directory(f)           ((f)->flags & FILE_ATTRIBUTE_DIRECTORY)
+#define is_archive(f)             ((f)->flags & FILE_ATTRIBUTE_ARCHIVE)
+#define is_device(f)              ((f)->flags & FILE_ATTRIBUTE_DEVICE)
+#define is_normal(f)              ((f)->flags & FILE_ATTRIBUTE_NORMAL)
+#define is_temporary(f)           ((f)->flags & FILE_ATTRIBUTE_TEMPORARY)
+#define is_sparse(f)              ((f)->flags & FILE_ATTRIBUTE_SPARSE_FILE)
+#define is_reparse_point(f)       ((f)->flags & FILE_ATTRIBUTE_REPARSE_POINT)
+#define is_compressed(f)          ((f)->flags & FILE_ATTRIBUTE_COMPRESSED)
+#define is_offline(f)             ((f)->flags & FILE_ATTRIBUTE_OFFLINE)
+#define is_not_content_indexed(f) ((f)->flags & FILE_ATTRIBUTE_NOT_CONTENT_INDEXED)
+#define is_encrypted(f)           ((f)->flags & FILE_ATTRIBUTE_ENCRYPTED)
+#define are_valid_flags(f)        ((f)->flags & FILE_ATTRIBUTE_VALID_FLAGS)
+#define are_valid_set_flags(f)    ((f)->flags & FILE_ATTRIBUTE_VALID_SET_FLAGS)
+
+#define WINX_FILE_DISP_FRAGMENTED 0x1
+
+#define is_fragmented(f)          ((f)->disp.flags & WINX_FILE_DISP_FRAGMENTED)
+
+typedef struct _winx_list_of_fragments {
+	struct _winx_list_of_fragments *next_ptr; /* pointer to the next fragment */
+	struct _winx_list_of_fragments *prev_ptr; /* pointer to the previous fragment */
+	ULONGLONG vcn;                            /* virtual cluster number - useful for compressed files */
+	ULONGLONG lcn;                            /* logical cluster number */
+	ULONGLONG length;                         /* size of the fragment, in bytes */
+} winx_list_of_fragments;
+
+typedef struct _winx_file_disposition {
+	ULONGLONG clusters;                /* total number of clusters belonging to the file */
+	unsigned long fragments;           /* total number of file fragments */
+	unsigned long flags;               /* combination of WINX_FILE_DISP_xxx flags */
+	winx_list_of_fragments *frag_list; /* list of fragments */
+} winx_file_disposition;
+
+typedef struct _winx_file_info {
+	struct _winx_file_info *next_ptr;  /* pointer to the next item */
+	struct _winx_file_info *prev_ptr;  /* pointer to the previous item */
+	short *path;                       /* full native path */
+	unsigned long flags;               /* combination of FILE_ATTRIBUTE_xxx flags defined in winnt.h */
+	winx_file_disposition disp;        /* information about file fragments and their disposition */
+	unsigned long user_defined_flags;  /* combination of flags defined by the caller */
+} winx_file_info;
+
+typedef int (__stdcall *ftw_callback)(winx_file_info *f);
+
+winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb);
+winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb);
 
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);

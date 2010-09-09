@@ -99,6 +99,7 @@ extraResourceOptions=
 17=int64.c
 18=list.c
 19=string.c
+20=ftw.c
 [Header]
 1=ntndk.h
 2=version.h
