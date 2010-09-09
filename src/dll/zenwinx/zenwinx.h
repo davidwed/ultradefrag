@@ -245,6 +245,8 @@ typedef int (__stdcall *ftw_callback)(winx_file_info *f);
 
 winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb);
 winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb);
+void __stdcall winx_ftw_release(winx_file_info *filelist);
+#define winx_scan_disk_release(f) winx_ftw_release(f)
 
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);

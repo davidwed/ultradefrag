@@ -145,7 +145,7 @@ static int ftw_dump_file(winx_file_info *f)
 			f->disp.clusters = 0;
 			f->disp.fragments = 0;
 			f->disp.flags = 0;
-			winx_list_destroy((list_entry **)&f->disp.blockmap);
+			winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 			winx_heap_free(filemap);
 			NtClose(hFile);
 			return 0; /* file is inside MFT */
@@ -184,7 +184,7 @@ static int ftw_dump_file(winx_file_info *f)
 				f->disp.clusters = 0;
 				f->disp.fragments = 0;
 				f->disp.flags = 0;
-				winx_list_destroy((list_entry **)&f->disp.blockmap);
+				winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 				winx_heap_free(filemap);
 				NtClose(hFile);
 				return (-1);
@@ -473,7 +473,11 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
  * }
  *
  * // list all files on disk c:
- * winx_ftw(L"\\??\\c:\\",0,process_file);
+ * filelist = winx_ftw(L"\\??\\c:\\",0,process_file);
+ * // ...
+ * // process list of files
+ * // ...
+ * winx_ftw_release(filelist);
  * @endcode
  */
 winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb)
@@ -481,7 +485,8 @@ winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb)
 	winx_file_info *filelist = NULL;
 	
 	if(ftw_helper(path,flags,cb,&filelist) == (-1)){
-		/* TODO: destroy list */
+		/* destroy list */
+		winx_ftw_release(filelist);
 		return NULL;
 	}
 		
@@ -509,6 +514,27 @@ winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb)
 winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb)
 {
 	return NULL;
+}
+
+/**
+ * @brief Releases resources
+ * allocated by winx_ftw
+ * or winx_scan_disk.
+ * @param[in] filelist pointer
+ * to list of files.
+ */
+void __stdcall winx_ftw_release(winx_file_info *filelist)
+{
+	winx_file_info *f;
+
+	/* walk through list of files and free allocated memory */
+	for(f = filelist; f != NULL; f = f->next){
+		if(f->path)
+			winx_heap_free(f->path);
+		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+		if(f->next == filelist) break;
+	}
+	winx_list_destroy((list_entry **)(void *)&filelist);
 }
 
 /** @} */
