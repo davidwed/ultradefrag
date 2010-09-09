@@ -251,24 +251,6 @@ NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn);
  *--------------------------------------------------------------------
  */
 
-/* This is the definition for a VCN/LCN (virtual cluster/logical cluster)
- * mapping pair that is returned in the buffer passed to 
- * FSCTL_GET_RETRIEVAL_POINTERS
- */
-typedef struct {
-	ULONGLONG			Vcn;
-	ULONGLONG			Lcn;
-} MAPPING_PAIR, *PMAPPING_PAIR;
-
-/* This is the definition for the buffer that FSCTL_GET_RETRIEVAL_POINTERS
- * returns. It consists of a header followed by mapping pairs
- */
-typedef struct {
-	ULONG				NumberOfPairs;
-	ULONGLONG			StartVcn;
-	MAPPING_PAIR		Pair[1];
-} GET_RETRIEVAL_DESCRIPTOR, *PGET_RETRIEVAL_DESCRIPTOR;
-
 /* This is the definition of the buffer that FSCTL_GET_VOLUME_BITMAP
  * returns. It consists of a header followed by the actual bitmap data
  */

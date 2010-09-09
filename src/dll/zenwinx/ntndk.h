@@ -1196,6 +1196,24 @@ typedef struct {
 } MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
 #endif
 
+/* This is the definition for a VCN/LCN (virtual cluster/logical cluster)
+ * mapping pair that is returned in the buffer passed to 
+ * FSCTL_GET_RETRIEVAL_POINTERS
+ */
+typedef struct {
+	ULONGLONG			Vcn;
+	ULONGLONG			Lcn;
+} MAPPING_PAIR, *PMAPPING_PAIR;
+
+/* This is the definition for the buffer that FSCTL_GET_RETRIEVAL_POINTERS
+ * returns. It consists of a header followed by mapping pairs
+ */
+typedef struct {
+	ULONG				NumberOfPairs;
+	ULONGLONG			StartVcn;
+	MAPPING_PAIR		Pair[1];
+} GET_RETRIEVAL_DESCRIPTOR, *PGET_RETRIEVAL_DESCRIPTOR;
+
 #ifndef TAG
 #define TAG(A, B, C, D) (ULONG)(((A)<<0) + ((B)<<8) + ((C)<<16) + ((D)<<24))
 #endif

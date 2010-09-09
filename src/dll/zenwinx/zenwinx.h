@@ -217,19 +217,19 @@ void __stdcall winx_release_file_contents(void *contents);
 
 #define is_fragmented(f)          ((f)->disp.flags & WINX_FILE_DISP_FRAGMENTED)
 
-typedef struct _winx_list_of_fragments {
-	struct _winx_list_of_fragments *next; /* pointer to the next fragment */
-	struct _winx_list_of_fragments *prev; /* pointer to the previous fragment */
-	ULONGLONG vcn;                            /* virtual cluster number - useful for compressed files */
-	ULONGLONG lcn;                            /* logical cluster number */
-	ULONGLONG length;                         /* size of the fragment, in bytes */
-} winx_list_of_fragments;
+typedef struct _winx_blockmap {
+	struct _winx_blockmap *next; /* pointer to the next fragment */
+	struct _winx_blockmap *prev; /* pointer to the previous fragment */
+	ULONGLONG vcn;               /* virtual cluster number */
+	ULONGLONG lcn;               /* logical cluster number */
+	ULONGLONG length;            /* size of the fragment, in bytes */
+} winx_blockmap;
 
 typedef struct _winx_file_disposition {
 	ULONGLONG clusters;                /* total number of clusters belonging to the file */
 	unsigned long fragments;           /* total number of file fragments */
 	unsigned long flags;               /* combination of WINX_FILE_DISP_xxx flags */
-	winx_list_of_fragments *frag_list; /* list of fragments */
+	winx_blockmap *blockmap;           /* map of blocks <=> list of fragments */
 } winx_file_disposition;
 
 typedef struct _winx_file_info {
