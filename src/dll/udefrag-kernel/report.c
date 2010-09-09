@@ -250,7 +250,7 @@ static BOOLEAN SaveTextReportToDisk(char *volume_name)
 	WriteTextReportBody(f,FALSE);
 	//WriteTextReportBody(f,TRUE);
 
-	winx_fclose(f);
+	winx_fbclose(f);
 
 	DebugPrint("Report saved to %s\n",path);
 	return TRUE;
