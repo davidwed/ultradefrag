@@ -51,6 +51,7 @@ int ProcessScript(short *filename)
 	KBD_RECORD kbd_rec;
 	
 	scripting_mode = 1;
+	escape_flag = 0;
 
 	/* read script file entirely */
 	if(filename == NULL){
@@ -65,7 +66,7 @@ int ProcessScript(short *filename)
 		path[MAX_PATH - 1] = 0;
 	}
 
-    buffer = winx_get_file_contents(path,&filesize);
+	buffer = winx_get_file_contents(path,&filesize);
 	if(buffer == NULL)
 		return 0; /* file is empty or some error */
 
