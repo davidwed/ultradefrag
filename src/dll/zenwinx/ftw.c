@@ -512,7 +512,8 @@ winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb,ftw_te
 {
 	winx_file_info *filelist = NULL;
 	
-	if(ftw_helper(path,flags,cb,t,&filelist) == (-1)){
+	if(ftw_helper(path,flags,cb,t,&filelist) == (-1) && \
+	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);
 		return NULL;
