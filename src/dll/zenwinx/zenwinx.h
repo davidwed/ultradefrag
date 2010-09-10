@@ -242,9 +242,10 @@ typedef struct _winx_file_info {
 } winx_file_info;
 
 typedef int (__stdcall *ftw_callback)(winx_file_info *f);
+typedef int (__stdcall *ftw_terminator)(void);
 
-winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb);
-winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb);
+winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb,ftw_terminator t);
+winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb,ftw_terminator t);
 void __stdcall winx_ftw_release(winx_file_info *filelist);
 #define winx_scan_disk_release(f) winx_ftw_release(f)
 

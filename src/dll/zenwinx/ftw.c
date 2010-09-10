@@ -49,6 +49,20 @@
 #define LLINVALID ((ULONGLONG) -1)
 
 /**
+ * @brief Checks whether the file
+ * tree walk must be terminated or not.
+ * @return Nonzero value indicates that
+ * termination is requested.
+ */
+static int ftw_check_for_termination(ftw_terminator t)
+{
+	if(t == NULL)
+		return 0;
+	
+	return t();
+}
+
+/**
  * @brief Opens the file for dumping.
  * @return Handle to the file, NULL
  * indicates failure.
@@ -88,7 +102,7 @@ static HANDLE ftw_fopen(winx_file_info *f)
  * @return Zero for success,
  * negative value otherwise.
  */
-static int ftw_dump_file(winx_file_info *f)
+static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
 {
 	GET_RETRIEVAL_DESCRIPTOR *filemap;
 	HANDLE hFile;
@@ -150,8 +164,10 @@ static int ftw_dump_file(winx_file_info *f)
 			NtClose(hFile);
 			return 0; /* file is inside MFT */
 		}
-		if(counter > MAX_COUNT){
-			DebugPrint("ftw_dump_file: counter reached the limit");
+
+		if(ftw_check_for_termination(t)){
+			if(counter > MAX_COUNT)
+				DebugPrint("ftw_dump_file: %ws: infinite main loop?",f->path);
 			goto cleanup;
 		}
 		
@@ -220,7 +236,7 @@ static int ftw_dump_file(winx_file_info *f)
  * NULL indicates failure.
  */
 static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
-	ftw_callback cb,winx_file_info **filelist,
+	ftw_callback cb,ftw_terminator t,winx_file_info **filelist,
 	FILE_BOTH_DIR_INFORMATION *file_entry)
 {
 	winx_file_info *f;
@@ -289,7 +305,7 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
-		if(ftw_dump_file(f) < 0){
+		if(ftw_dump_file(f,t) < 0){
 			winx_heap_free(f->path);
 			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
 			winx_heap_free(filename);
@@ -334,7 +350,7 @@ static HANDLE ftw_open_directory(short *path)
  * failure, -2 indicates termination requested
  * by caller.
  */
-static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **filelist)
+static int ftw_helper(short *path,int flags,ftw_callback cb,ftw_terminator t,winx_file_info **filelist)
 {
 	FILE_BOTH_DIR_INFORMATION *file_listing, *file_entry;
 	HANDLE hDir;
@@ -362,7 +378,7 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
 	file_entry = file_listing;
 
 	/* list directory entries */
-	while(1){
+	while(!ftw_check_for_termination(t)){
 		/* get directory entry */
 		if(file_entry->NextEntryOffset){
 			/* go to the next directory entry */
@@ -378,8 +394,12 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
 				NULL,
 				FALSE /* do not restart scan */
 				);
-			if(status != STATUS_SUCCESS)
-				break; /* no more entries to read */
+			if(status != STATUS_SUCCESS){
+				/* no more entries to read */
+				winx_heap_free(file_listing);
+				NtClose(hDir);
+				return 0;
+			}
 			file_entry = file_listing;
 		}
 		
@@ -398,7 +418,7 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
 			continue;
 		
 		/* add entry to the file list */
-		f = ftw_add_entry_to_filelist(path,flags,cb,filelist,file_entry);
+		f = ftw_add_entry_to_filelist(path,flags,cb,t,filelist,file_entry);
 		if(f == NULL){
 			winx_heap_free(file_listing);
 			NtClose(hDir);
@@ -407,23 +427,22 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
 		
 		//DebugPrint("%ws",f->path);
 		
-		/* call the callback routine */
-		skip_children = 0;
-		if(cb != 0){
-			result = cb(f);
-			if(result > 0)
-				skip_children = 1;
-			if(result < 0){
-				DebugPrint("ftw_helper: terminated by user");
-				winx_heap_free(file_listing);
-				NtClose(hDir);
-				return (-2);
-			}
+		/* check for termination */
+		if(ftw_check_for_termination(t)){
+			DebugPrint("ftw_helper: terminated by user");
+			winx_heap_free(file_listing);
+			NtClose(hDir);
+			return (-2);
 		}
 		
+		/* call the callback routine */
+		skip_children = 0;
+		if(cb != NULL)
+			skip_children = cb(f);
+
 		/* scan subdirectories if requested */
 		if(is_directory(f) && (flags & WINX_FTW_RECURSIVE) && !skip_children){
-			result = ftw_helper(f->path,flags,cb,filelist);
+			result = ftw_helper(f->path,flags,cb,t,filelist);
 			if(result < 0){
 				winx_heap_free(file_listing);
 				NtClose(hDir);
@@ -432,10 +451,10 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
 		}
 	}
 	
-	/* cleanup */
+	/* terminated */
 	winx_heap_free(file_listing);
 	NtClose(hDir);
-	return 0;
+	return (-2);
 }
 
 /**
@@ -448,10 +467,14 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
  * of WINX_FTW_xxx flags, defined in zenwinx.h
  * @param[in] cb address of callback routine
  * to be called for each file; if it returns
- * positive value, the current file and all
- * its children will be skipped. Negative
- * value forces the file tree walk to be
- * terminated.
+ * nonzero value, the current file and all
+ * its children will be skipped. Zero value
+ * forces to continue subdirectory scan.
+ * @param[in] t address of procedure to be called
+ * each time when winx_ftw would like to know
+ * whether it must be terminated or not.
+ * Nonzero value, returned by terminator,
+ * forces file tree walk to be terminated.
  * @return List of files, NULL indicates failure.
  * @note 
  * - Optimized for little directories scanning.
@@ -463,28 +486,33 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,winx_file_info **fil
  * @code
  * int __stdcall process_file(winx_file_info *f)
  * {
- *     if(stop_event)
- *         return (-1); // terminate walk
- *
  *     if(skip_directory(f))
  *         return 1;    // skip current directory
  *
  *     return 0; // continue walk
  * }
  *
+ * int __stdcall terminator(void)
+ * {
+ *     if(stop_event)
+ *         return 1; // terminate walk
+ *
+ *     return 0;     // continue walk
+ * }
+ *
  * // list all files on disk c:
- * filelist = winx_ftw(L"\\??\\c:\\",0,process_file);
+ * filelist = winx_ftw(L"\\??\\c:\\",0,process_file,terminator);
  * // ...
  * // process list of files
  * // ...
  * winx_ftw_release(filelist);
  * @endcode
  */
-winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb)
+winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb,ftw_terminator t)
 {
 	winx_file_info *filelist = NULL;
 	
-	if(ftw_helper(path,flags,cb,&filelist) == (-1)){
+	if(ftw_helper(path,flags,cb,t,&filelist) == (-1)){
 		/* destroy list */
 		winx_ftw_release(filelist);
 		return NULL;
@@ -494,24 +522,10 @@ winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb)
 }
 
 /**
- * @brief Returns list of files,
- * contained on the disk.
- * @param[in] volume_letter the volume letter.
- * @param[in] flags combination
- * of WINX_FTW_xxx flags, defined in zenwinx.h
- * @param[in] cb address of callback routine
- * to be called for each file; if it returns
- * positive value, the current file and all
- * its children will be skipped. Negative
- * value forces the file tree walk to be
- * terminated.
- * @return List of files, NULL indicates failure.
- * @note
- * - Optimized for entire disk scanning.
- * - cb parameter may be equal to NULL if no
- *   filtering is needed.
+ * @brief winx_ftw analog, but optimized
+ * for entire disk scanning.
  */
-winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb)
+winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb,ftw_terminator t)
 {
 	return NULL;
 }
