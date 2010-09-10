@@ -66,12 +66,14 @@ if %errorlevel% neq 0 cd ..\..\..\src && exit /B 1
 copy /Y .\rsc\*.* .\doxy-doc\html\
 del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
 echo optimize the handbook...
+del /Q .\doxy-doc\html\pages.html
 del /Q .\doxy-doc\html\doxygen.png
 del /Q .\doxy-doc\html\tabs.css
-del /Q .\doxy-doc\html\tab_b.gif
-del /Q .\doxy-doc\html\tab_l.gif
-del /Q .\doxy-doc\html\tab_r.gif
-del /Q .\doxy-doc\html\pages.html
+del /Q .\doxy-doc\html\tab_*.png
+del /Q .\doxy-doc\html\bc_*.png
+del /Q .\doxy-doc\html\nav_*.png
+del /Q .\doxy-doc\html\open.png
+del /Q .\doxy-doc\html\closed.png
 cd ..\..\..\src
 
 rem finally build the main docs
