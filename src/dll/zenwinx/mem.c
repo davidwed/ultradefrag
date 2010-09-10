@@ -27,7 +27,7 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc call */
+HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc_ex call */
 
 /*
 * NOTE: Never call winx_dbg_print_ex() and
@@ -66,12 +66,14 @@ void __stdcall winx_virtual_free(void *addr,SIZE_T size)
 /**
  * @brief Allocates a block of memory from the global growable heap.
  * @param size the size of the block to be allocated, in bytes.
+ * Note that the allocated block may be bigger than the requested size.
+ * @param flags HEAP_ZERO_MEMORY to initialize memory to zero, zero otherwise.
  * @return A pointer to the allocated block. NULL indicates failure.
  */
-void * __stdcall winx_heap_alloc(SIZE_T size)
+void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
 {
 	if(hGlobalHeap == NULL) return NULL;
-	return RtlAllocateHeap(hGlobalHeap,0/*HEAP_ZERO_MEMORY*/,size); 
+	return RtlAllocateHeap(hGlobalHeap,flags,size); 
 }
 
 /**

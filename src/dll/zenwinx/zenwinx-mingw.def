@@ -7,7 +7,7 @@ EXPORTS
 	winx_shutdown@0
 	winx_virtual_alloc@4
 	winx_virtual_free@8
-	winx_heap_alloc@4
+	winx_heap_alloc_ex@8
 	winx_heap_free@4
 	winx_putch
 	winx_puts

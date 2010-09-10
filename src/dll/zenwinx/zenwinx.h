@@ -93,7 +93,9 @@ void __stdcall zenwinx_native_unload(void);
 
 void * __stdcall winx_virtual_alloc(SIZE_T size);
 void   __stdcall winx_virtual_free(void *addr,SIZE_T size);
-void * __stdcall winx_heap_alloc(SIZE_T size);
+void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags);
+#define winx_heap_alloc(n) winx_heap_alloc_ex(n,0)
+//#define winx_heap_alloc(n) winx_heap_alloc_ex(n,HEAP_ZERO_MEMORY)
 void   __stdcall winx_heap_free(void *addr);
 
 int __cdecl winx_putch(int ch);
