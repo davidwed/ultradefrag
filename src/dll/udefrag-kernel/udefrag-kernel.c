@@ -162,6 +162,7 @@ success:
 			out_of_memory_condition_counter);
 		DebugPrint("Therefore the disk defragmentation may be incomplete.\n");
 	}
+	DebugPrint("----- Processing of %s: finished -----\n",volume_name);
 	return 0;
 	
 failure:
@@ -175,6 +176,7 @@ failure:
 			out_of_memory_condition_counter);
 		DebugPrint("Therefore the disk defragmentation may be incomplete.\n");
 	}
+	DebugPrint("----- Processing of %s: failed -----\n",volume_name);
 	return error_code;
 }
 

@@ -183,6 +183,7 @@ int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cl
 	int use_limit = 0;
 
 	DbgCheckInitEvent("udefrag_start");
+	DebugPrint("----- Processing of %s: started -----\n",volume_name);
 	
 	udefrag_reload_settings(&udo);
 
