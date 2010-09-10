@@ -289,7 +289,9 @@ typedef struct _CURDIR
     PVOID Handle;
 } CURDIR, *PCURDIR;
 
-#define HEAP_ZERO_MEMORY                0x00000008      // winnt
+#ifndef HEAP_ZERO_MEMORY
+#define HEAP_ZERO_MEMORY  0x00000008 // winnt
+#endif
 
 typedef struct _RTL_HEAP_DEFINITION {
     ULONG Length; /* = sizeof(RTL_HEAP_DEFINITION) */
