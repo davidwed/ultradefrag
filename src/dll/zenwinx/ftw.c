@@ -220,7 +220,7 @@ static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
 			*/
 			if(block != f->disp.blockmap && \
 			  block->lcn != (block->prev->lcn + block->prev->length))
-				f->disp.flags &= WINX_FILE_DISP_FRAGMENTED;
+				f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
 		}
 	} while(status != STATUS_SUCCESS);
 
