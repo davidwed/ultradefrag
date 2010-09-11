@@ -63,7 +63,6 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID paramete
 					0,0,0,0,start_addr,parameter,ph,NULL);
 	if(!NT_SUCCESS(Status)){
 		DebugPrintEx(Status,"Cannot create thread");
-		//winx_printf("\nFUCKED 0x%x\n\n",(UINT)Status);
 		return (-1);
 	}
 	if(phandle == NULL) NtCloseSafe(*ph);

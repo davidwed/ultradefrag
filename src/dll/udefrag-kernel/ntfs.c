@@ -788,7 +788,7 @@ void AnalyseResidentAttributeList(PRESIDENT_ATTRIBUTE pr_attr,PMY_FILE_INFORMATI
 		if(attr_list_entry->AttributeType == 0xffffffff) break;
 		if(attr_list_entry->AttributeType == 0x0) break;
 		if(attr_list_entry->Length == 0) break;
-		//DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
+		//DebugPrint("@@@@@@@@@ attr_list_entry Length = %u\n", attr_list_entry->Length);
 		AnalyseAttributeFromAttributeList(attr_list_entry,pmfi);
 		/* go to the next attribute list entry */
 		length = attr_list_entry->Length;
@@ -1319,7 +1319,7 @@ analyze_list:
 		if(attr_list_entry->AttributeType == 0xffffffff) break;
 		if(attr_list_entry->AttributeType == 0x0) break;
 		if(attr_list_entry->Length == 0) break;
-		//DebugPrint("@@@@@@@@@ FUCKED Length = %u\n", attr_list_entry->Length);
+		//DebugPrint("@@@@@@@@@ attr_list_entry Length = %u\n", attr_list_entry->Length);
 		AnalyseAttributeFromAttributeList(attr_list_entry,pmfi);
 		/* go to the next attribute list entry */
 		length = attr_list_entry->Length;
@@ -1936,7 +1936,7 @@ void AddResidentDirectoryToFileList(PMY_FILE_INFORMATION pmfi)
 	pfn->blockmap = NULL; /* !!! */
 	pfn->BaseMftId = pmfi->BaseMftId;
 	pfn->ParentDirectoryMftId = pmfi->ParentDirectoryMftId;
-	pfn->PathBuilt = FALSE; // what's fucked mistake - it was TRUE here;
+	pfn->PathBuilt = FALSE; // what's mistake - it was TRUE here;
 	pfn->n_fragments = 0;
 	pfn->clusters_total = 0;
 	pfn->is_fragm = FALSE;
@@ -1986,7 +1986,7 @@ PFILENAME FindDirectoryByMftId(ULONGLONG mft_id)
 					if(wcsstr(mf[m].pfn->name.Buffer,L":$") == NULL)
 						return mf[m].pfn;
 				}
-				DebugPrint("FUCK 1\n");
+				DebugPrint("FindDirectoryByMftId - Exit 1\n");
 				return NULL;
 			}
 			if(ascending_order){
@@ -1999,7 +1999,7 @@ PFILENAME FindDirectoryByMftId(ULONGLONG mft_id)
 				} /* else move left */
 			}
 		}
-		DebugPrint("FUCK 2\n");
+		DebugPrint("FindDirectoryByMftId - Exit 2\n");
 		return NULL;
 	}
 }

@@ -196,7 +196,6 @@ int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cl
 	
 	/* create a separate thread for the command processing */
 	if(winx_create_thread(engine_start,(PVOID)&ksp,NULL) < 0){
-		//winx_printf("\nFUCKED!\n\n");
 		return (-1);
 	}
 

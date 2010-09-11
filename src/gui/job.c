@@ -191,7 +191,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	WgxEnableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	
 	/* make the main window not resizable */
-	/* this obvious code fails on fucked x64 editions of Windows */
+	/* this obvious code fails on x64 editions of Windows */
 #ifndef _WIN64
 	main_win_style = GetWindowLong(hWindow,GWL_STYLE);
 	main_win_style &= ~WS_MAXIMIZEBOX;
@@ -227,7 +227,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	}
 
 	/* make the main window resizable again */
-	/* this obvious code fails on fucked x64 editions of Windows */
+	/* this obvious code fails on x64 editions of Windows */
 #ifndef _WIN64
 	main_win_style |= WS_MAXIMIZEBOX;
 	SetWindowLong(hWindow,GWL_STYLE,main_win_style);
