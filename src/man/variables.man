@@ -1,7 +1,7 @@
 VARIABLES(1)        Ultradefrag Development Team         VARIABLES(1)
 
 NAME
-        variables - manual page for variables v2.0.0
+        variables - manual page for variables v4.4.0
 
 SYNOPSIS
         [VARIABLE]
