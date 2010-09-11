@@ -580,6 +580,7 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 /**
  * @brief Retrieves detailed information
  * about disk volume.
+ * @param[in] volume_letter the volume letter.
  * @param[in,out] v pointer to structure
  * receiving the volume information.
  * volume_letter field of the structure
@@ -587,7 +588,7 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
  * @return Zero for success, negative
  * value otherwise.
  */
-int __stdcall winx_get_volume_information(winx_volume_information *v)
+int __stdcall winx_get_volume_information(char volume_letter,winx_volume_information *v)
 {
 	char c, letter;
 	HANDLE hRoot;
@@ -596,6 +597,7 @@ int __stdcall winx_get_volume_information(winx_volume_information *v)
 	if(v == NULL)
 		return (-1);
 
+	v->volume_letter = volume_letter;
 	c = (char)toupper((int)v->volume_letter);
 	if(c == 0 || c < 'A' || c > 'Z')
 		return (-1);

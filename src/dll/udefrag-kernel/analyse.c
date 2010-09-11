@@ -84,8 +84,7 @@ int Analyze(char *volume_name)
 	}
 
 	/* get volume information */
-	v.volume_letter = volume_letter;
-	if(winx_get_volume_information(&v) < 0){
+	if(winx_get_volume_information(volume_letter,&v) < 0){
 		return (-1);
 	} else {
 		/* update global variables holding drive geometry */
@@ -190,8 +189,8 @@ int Analyze(char *volume_name)
 			* because there was lots of improvements in code
 			* since time of the tests.
 			*/
-            (void)ScanMFT();
-            break;
+            //(void)ScanMFT();
+            //break;
         default:
             /* Find files */
             tm = winx_xtime();

@@ -173,8 +173,7 @@ static int internal_validate_volume(unsigned char letter,int skip_removable,volu
 	* Get volume information; it is strongly 
 	* required to exclude missing floppies.
 	*/
-	volume_info.volume_letter = letter;
-	if(winx_get_volume_information(&volume_info) < 0)
+	if(winx_get_volume_information(letter,&volume_info) < 0)
 		return (-1);
 	
 	v->total_space.QuadPart = volume_info.total_bytes;

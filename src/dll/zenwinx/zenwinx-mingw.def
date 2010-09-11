@@ -34,7 +34,7 @@ EXPORTS
 	winx_exit_thread@0
 	winx_enable_privilege@4
 	winx_get_drive_type@4
-	winx_get_volume_information@4
+	winx_get_volume_information@8
 	winx_fopen@8
 	winx_fbopen@12
 	winx_fread@16
