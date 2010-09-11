@@ -302,6 +302,9 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
 	f->user_defined_flags = 0;
 	
 	//DebugPrint("%ws",f->path);
+	
+	/* reset file disposition */
+	memset(&f->disp,0,sizeof(winx_file_disposition));
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
@@ -311,9 +314,86 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
 			winx_heap_free(filename);
 			return NULL;
 		}
-	}
+	}	
 	
 	return f;
+}
+
+/**
+ * @brief Adds information about
+ * root directory to file list.
+ */
+static int ftw_add_root_directory(short *path,int flags,
+	ftw_callback cb,ftw_terminator t,winx_file_info **filelist)
+{
+	winx_file_info *f;
+	int length;
+	FILE_BASIC_INFORMATION fbi;
+	HANDLE hDir;
+	IO_STATUS_BLOCK iosb;
+	NTSTATUS status;
+	
+	if(path == NULL)
+		return (-1);
+	
+	if(path[0] == 0){
+		DebugPrint("ftw_add_root_directory: path is empty");
+		return (-1);
+	}
+	
+	/* insert new item to the file list */
+	f = (winx_file_info *)winx_list_insert_item((list_entry **)(void *)filelist,
+		NULL,sizeof(winx_file_info));
+	if(f == NULL){
+		DebugPrint("ftw_add_root_directory: cannot allocate %u bytes of memory",
+			sizeof(winx_file_info));
+		return (-1);
+	}
+	
+	/* build path */
+	length = wcslen(path) + 1;
+	f->path = winx_heap_alloc(length * sizeof(short));
+	if(f->path == NULL){
+		DebugPrint("ftw_add_root_directory: cannot allocate %u bytes of memory",
+			length * sizeof(short));
+		winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
+		return (-1);
+	}
+	wcscpy(f->path,path);
+	
+	/* get file attributes */
+	f->flags |= FILE_ATTRIBUTE_DIRECTORY;
+	hDir = ftw_fopen(f);
+	if(hDir != NULL){
+		memset(&fbi,0,sizeof(FILE_BASIC_INFORMATION));
+		status = NtQueryInformationFile(hDir,&iosb,
+			&fbi,sizeof(FILE_BASIC_INFORMATION),
+			FileBasicInformation);
+		if(!NT_SUCCESS(status)){
+			DebugPrintEx(status,"NtQueryInformationFile(FileBasicInformation) failed");
+		} else {
+			f->flags = fbi.FileAttributes;
+			DebugPrint("Root directory flags: %u",f->flags);
+		}
+		NtClose(hDir);
+	}
+	
+	/* reset user defined flags */
+	f->user_defined_flags = 0;
+	
+	/* reset file disposition */
+	memset(&f->disp,0,sizeof(winx_file_disposition));
+
+	/* get file disposition if requested */
+	if(flags & WINX_FTW_DUMP_FILES){
+		if(ftw_dump_file(f,t) < 0){
+			winx_heap_free(f->path);
+			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
+			return (-1);
+		}
+	}
+	
+	return 0;
 }
 
 /**
@@ -528,7 +608,28 @@ winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb,ftw_te
  */
 winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb,ftw_terminator t)
 {
-	return NULL;
+	winx_file_info *filelist = NULL;
+	short rootpath[] = L"\\??\\A:\\";
+	
+	/* collect information about root directory */
+	rootpath[4] = (short)volume_letter;
+	if(ftw_add_root_directory(rootpath,flags,cb,t,&filelist) == (-1) && \
+	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
+		/* destroy list */
+		winx_ftw_release(filelist);
+		return NULL;
+	}
+
+	/* collect information about entire directory tree */
+	flags |= WINX_FTW_RECURSIVE;
+	if(ftw_helper(rootpath,flags,cb,t,&filelist) == (-1) && \
+	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
+		/* destroy list */
+		winx_ftw_release(filelist);
+		return NULL;
+	}
+
+	return filelist;
 }
 
 /**

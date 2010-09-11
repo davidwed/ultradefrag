@@ -1048,6 +1048,14 @@ typedef enum _FILE_INFORMATION_CLASS {
     FileMaximumInformation
 } FILE_INFORMATION_CLASS, *PFILE_INFORMATION_CLASS;
 
+typedef struct _FILE_BASIC_INFORMATION {
+    LARGE_INTEGER CreationTime;
+    LARGE_INTEGER LastAccessTime;
+    LARGE_INTEGER LastWriteTime;
+    LARGE_INTEGER ChangeTime;
+    ULONG FileAttributes;
+} FILE_BASIC_INFORMATION, *PFILE_BASIC_INFORMATION;
+
 typedef struct _FILE_STANDARD_INFORMATION {
     LARGE_INTEGER AllocationSize;
     LARGE_INTEGER EndOfFile;
