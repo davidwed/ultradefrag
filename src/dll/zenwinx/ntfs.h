@@ -129,7 +129,7 @@ typedef struct {
 	USHORT NextAttributeNumber; /* The number that will be assigned to the next attribute added to the MFT entry. */
 } FILE_RECORD_HEADER, *PFILE_RECORD_HEADER;
 
-#define IsFileRecord(pFileRecordHeader) ((pFileRecordHeader)->Ntfs.Type == TAG('F','I','L','E'))
+#define is_file_record(pFileRecordHeader) ((pFileRecordHeader)->Ntfs.Type == TAG('F','I','L','E'))
 
 /* MFT entry consists of FILE_RECORD_HEADER followed by a sequence of attributes. */
 

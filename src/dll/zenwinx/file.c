@@ -287,6 +287,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 
 	DbgCheck1(f,"winx_ioctl",-1);
 	
+	/* required by x64 system, otherwise it may trash stack */
 	if(out_buffer) RtlZeroMemory(out_buffer,out_size);
 	
 	if(pbytes_returned) *pbytes_returned = 0;

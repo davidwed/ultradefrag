@@ -58,7 +58,7 @@ winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
  * @return Nonzero value indicates that
  * termination is requested.
  */
-static int ftw_check_for_termination(ftw_terminator t)
+int ftw_check_for_termination(ftw_terminator t)
 {
 	if(t == NULL)
 		return 0;
@@ -625,6 +625,7 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callb
 	winx_volume_information v;
 	
 	if(winx_get_volume_information(volume_letter,&v) >= 0){
+		DebugPrint("winx_scan_disk: file system is %s",v.fs_name);
 		if(!strcmp(v.fs_name,"NTFS"))
 			return ntfs_scan_disk(volume_letter,flags,cb,t);
 	}
