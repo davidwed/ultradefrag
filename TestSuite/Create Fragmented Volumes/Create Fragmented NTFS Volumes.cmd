@@ -71,7 +71,7 @@ pause
 goto :DisplayMenu
 
 :StartProcess
-set /a InitialSize="23 - answer"
+set /a InitialSize="22 - answer"
 
 rem NTFS volumes
 for %%L in ( %ProcessVolumes% ) do call :FragmentDrive "%%~L"

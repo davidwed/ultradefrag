@@ -65,7 +65,7 @@ pause
 goto :DisplayMenu
 
 :StartProcess
-set /a InitialSize="22 - answer"
+set /a InitialSize="21 - answer"
 
 set ex_type=X
 
