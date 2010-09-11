@@ -624,7 +624,7 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callb
 	short rootpath[] = L"\\??\\A:\\";
 	winx_volume_information v;
 	
-	if(winx_get_volume_information(&v) >= 0){
+	if(winx_get_volume_information(volume_letter,&v) >= 0){
 		if(!strcmp(v.fs_name,"NTFS"))
 			return ntfs_scan_disk(volume_letter,flags,cb,t);
 	}
