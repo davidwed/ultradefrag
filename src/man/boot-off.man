@@ -10,7 +10,8 @@ DESCRIPTION
         'boot-off' turns boot time defragmentation off.
         In the case, that it is followed by a shutdown or reboot
         command a flag file is created to apply the change at the
-        next boot, since otherwise the change is not applied.
+        next boot, since otherwise the change is not applied due to
+        a limitation of Windows.
 
 OPTIONS
         none
