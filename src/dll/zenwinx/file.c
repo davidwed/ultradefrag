@@ -345,6 +345,7 @@ ULONGLONG __stdcall winx_fsize(WINX_FILE *f)
 
 	DbgCheck1(f,"winx_fsize",0);
 
+	memset(&fsi,0,sizeof(FILE_STANDARD_INFORMATION));
 	status = NtQueryInformationFile(f->hFile,&iosb,
 		&fsi,sizeof(FILE_STANDARD_INFORMATION),
 		FileStandardInformation);
