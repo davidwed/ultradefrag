@@ -20,8 +20,8 @@
 /**
  * @page Console Console Interface
  *
- * UltraDefrag command line tool <b>udefrag.exe</b> the installer
- * places to the system32 directory. Therefore it may be run
+ * The UltraDefrag installer places the command line tool <b>udefrag.exe</b> 
+ * into the System32 directory. Therefore it may be run
  * without specifying the full path.
  * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
@@ -34,45 +34,45 @@
  * Commands:
  * <dl>
  * <dt>-a, --analyze</dt>
- * <dd>Analyze volume.</dd>
+ * <dd>Analyze the volume.</dd>
  * <dt>--defragment</dt>
- * <dd>Defragment volume. This key is optional. Specifying just 
- * the volume letter will cause UltraDefrag  to defragment the volume.</dd>
+ * <dd>Defragment the volume. This key is optional. Specifying just 
+ * the volume letter will cause UltraDefrag to defragment the volume.</dd>
  * <dt>-o, --optimize</dt>
- * <dd>Optimize volume space by moving all files to the beginning of the volume.</dd>
+ * <dd>Optimize the volume space by moving all files to the beginning of the volume.</dd>
  * <dt>-l, --list-available-volumes</dt>
- * <dd>List all volumes available for defragmentation, except removable. Each line of
- * output contains volume letter, filesystem name, total space and amount of 
+ * <dd>List all volumes available for defragmentation, except removable. Each line of the
+ * output contains a volume letter, filesystem name, total space and amount of 
  * free space.</dd>
  * <dt>-la, --list-available-volumes=all</dt>
  * <dd>List all volumes available for defragmentation, including removable.</dd>
  * <dt>-h, -?, --help</dt>
- * <dd>Show help screen. Running UltraDefrag without arguments have the same effect.</dd>
+ * <dd>Show help screen. Running UltraDefrag without arguments has the same effect.</dd>
  * </dl>
  *
  * Options:
  * <dl>
  * <dt>-b, --use-system-color-scheme</dt>
- * <dd>Use system (usually black/white) color scheme instead of the green color.</dd>
+ * <dd>Use system color scheme (usually black/white) instead of the green color.</dd>
  * <dt>-p, --suppress-progress-indicator</dt>
  * <dd>Hide progress indicator.</dd>
  * <dt>-v, --show-volume-information</dt>
- * <dd>Show volume information after a job completion.</dd>
+ * <dd>Show volume information after a job completes.</dd>
  * <dt>-m, --show-cluster-map</dt>
- * <dd>Show map representing clusters on the volume.</dd>
+ * <dd>Show a map representing clusters of the volume.</dd>
  * <dt>--map-border-color=color</dt>
  * <dd>Set cluster map border color. Available values: black, white, red, green,
  * blue, yellow, magenta, cyan, darkred, darkgreen, darkblue, darkyellow, darkmagenta,
  * darkcyan, gray. Yellow color is used by default.</dd>
  * <dt>--map-symbol=x</dt>
- * <dd>Set a character used for the map drawing. There are two accepted formats:
+ * <dd>Set the character used for the map drawing. There are two accepted formats:
  * a character may be typed directly, or its hexadecimal number may be used. For 
  * example, --map-symbol=0x1 forces UltraDefrag to use a smile character for the
- * map drawing. Valid numbers are in range 0x1 - 0xFF. The \% symbol is used by default.</dd>
+ * map drawing. Valid numbers are in the range of 0x1 to 0xFF. The \% symbol is used by default.</dd>
  * <dt>--map-rows=n</dt>
- * <dd>Number of rows in cluster map. Default value is 10.</dd>
+ * <dd>Number of rows of the cluster map. Default value is 10.</dd>
  * <dt>--map-symbols-per-line=n</dt>
- * <dd>Number of map symbols containing in each row of the map. Default value is 68.</dd>
+ * <dd>Number of map symbols contained in each row of the map. Default value is 68.</dd>
  * <dt>--use-entire-window</dt>
  * <dd>Expand cluster map to use entire console window.</dd>
  * <dt>--wait</dt>
@@ -91,7 +91,7 @@
  * <dt>--all-fixed</dt>
  * <dd>Process all volumes except removable.</dd>
  * </dl>
- * Note that --all-fixed key has more precedence, if both keys are specified
+ * Note that --all-fixed key has higher precedence, if both keys are specified
  * UltraDefrag will process fixed drives only.
  *
  * <h1>Environment variables</h1>
@@ -103,20 +103,20 @@
  * <dd>List of files to be excluded from defragmentation process. File names 
  * must be separated by semicolons.</dd>
  * <dt>UD_SIZELIMIT</dt>
- * <dd>Exclude all files larger than specified. The following 
+ * <dd>Exclude all files larger than the specified size. The following 
  * size suffixes are accepted: Kb, Mb, Gb, Tb, Pb, Eb.</dd>
  * <dt>UD_FRAGMENTS_THRESHOLD</dt>
- * <dd>Exclude all files which have less number of fragments than specified.</dd>
+ * <dd>Exclude all files which have less fragments than the specified number.</dd>
  * <dt>UD_TIME_LIMIT</dt>
- * <dd>When the specified time interval elapses the job will be stopped 
+ * <dd>When the specified time interval elapses the job will be terminated 
  * automatically. The following time format is accepted: Ay Bd Ch Dm Es.
- * Here A,B,C,D,E  represent any integer numbers, y,d,h,m,s - suffixes
- * used for years, days, hours, minutes and seconds.</dd>
+ * Here A,B,C,D,E  represent any integer numbers, y,d,h,m,s - suffixes represent
+ * years, days, hours, minutes and seconds.</dd>
  * <dt>UD_REFRESH_INTERVAL</dt>
  * <dd>Progress refresh interval, in milliseconds. The default value is 100.</dd>
  * <dt>UD_DISABLE_REPORTS</dt>
  * <dd>If this environment variable is set to 1 (one), no 
- * file fragmentation reports will be generated.</dd>
+ * file fragmentation report will be generated.</dd>
  * <dt>UD_DBGPRINT_LEVEL</dt>
  * <dd>Control amount of the debugging output. NORMAL is used by default,
  * DETAILED may be used to collect information for the bug report,
@@ -124,16 +124,16 @@
  * </dl>
  *
  * Note that all filters are case insensitive. And currently they cannot exceed
- * the 4096 characters length. Each filter substring represents a pattern,
- * UltraDefrag will search for in a paths. For example, the "temp;tmp" filter
+ * the limit of 4096 characters. Each filter substring represents a pattern,
+ * UltraDefrag will search for it in paths. For example, the "temp;tmp" filter
  * will be applied both to temporary folders and to Internet Explorer's cache.
  *
- * Note that files excluded by filters are shown on a cluster map always as
- * unfragmented. Because trash is unimportant anyway and it should not take
- * an attention.
+ * Note that files excluded by filters are always shown as unfragmented
+ * on the cluster map. Because trash is unimportant anyway and it should not take
+ * our attention.
  *
  * <h1>Example batch scripts</h1>
- * The following example illustrates defragmentation of the few
+ * The following example illustrates defragmentation of a few
  * different volumes in series adjusting parameters separately for
  * each volume.
  * @code
@@ -149,12 +149,12 @@
  * set UD_IN_FILTER=
  * udefrag e: >> c:\ud.log
  * @endcode
- * Notice that we are excluding archives in a script above. Because they
+ * Notice that we are excluding archives in the script above. Because they
  * are usually rarely accessed and may be left fragmented therefore
  * without noticeable system performance degradation.
  *
- * The next example demonstrates how easily the complex disk defragmentation
- * job may be automated.
+ * The next example demonstrates how the complex disk defragmentation
+ * job may be automated easily.
  * @code
  * @echo off
  *
@@ -171,19 +171,19 @@
  * udefrag c:
  * @endcode
  *
- * The following three commands are very useful too
- * in the disk defragmentation scripts:
- * - <b>chkdsk</b> checks volumes for errors
+ * The following three commands are very useful
+ * in disk defragmentation scripts too:
+ * - <b>chkdsk</b> checks volumes for errors and corrects them
  * - <b>shutdown -s -t 00</b> automatically shuts down the computer
  * - <b>hibernate4win now</b> hibernates the computer
  *
- * The last command is included in UltraDefrag package. It was
- * made especially to hibernate the computer through command line
- * after a disk defragmentation which may take a lot of time.
+ * The last command is included in the UltraDefrag package. It was
+ * especially created to hibernate the computer through the command line
+ * after a disk defragmentation, which may take a some time to finish.
  *
  * <h1>Explorer's context menu handler</h1>
  * The UltraDefrag command line tool is also used as an Explorer's context
- * menu handler. When you right click drive/folder/file icon in Explorer
+ * menu handler. When you right click a drive, folder or file icon in Explorer,
  * you can select an appropriate menu item to defragment the
  * selected object.
  *

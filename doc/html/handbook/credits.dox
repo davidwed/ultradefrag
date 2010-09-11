@@ -85,7 +85,7 @@
  * - Nagy Zsolt     (in the past)
  * - Justin Dearing (in the past)
  *
- * Special thanks for strong testing to (in alphabetical order):
+ * Special thanks for strong testing (in alphabetical order):
  *
  * - Andrei Maksimov
  * - Brent Jenkins
@@ -98,7 +98,7 @@
  * - Nagy Zsolt
  * - Stefan Pendl
  *
- * Special thanks for good suggestions to (in alphabetical order):
+ * Special thanks for good suggestions (in alphabetical order):
  *
  * - Alexander Peter Kowalski - Process priority control.
  * - Alexander Vedyakin - Volume type detection improvements. More effective
@@ -157,7 +157,7 @@
  * - Stefan Pendl
  * - Vedat Odabasioglu
  *
- * Also special thanks to:
+ * Also special thanks is going to:
  * - <a href="http://www.gr-oborona.ru">Egor Letov</a>
  * - <a href="http://www.sysinternals.com">Mark Russinovich</a>
  * - <a href="http://www.soldatov.net">V. Soldatov</a>

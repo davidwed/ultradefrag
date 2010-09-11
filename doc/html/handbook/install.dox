@@ -20,27 +20,27 @@
 /**
  * @page Installation Installation
  *
- * To obtain the latest version of the program visit please the 
+ * To obtain the latest version of the program please visit the 
  * <a href="http://sourceforge.net/projects/ultradefrag/files/">project's download page</a>.
  *
  * There are two different types of binaries available for download:
  * - Full-featured installers. They contain all of the program features,
- * but requires an installation therefore cannot be used directly from the USB sticks.
- * - Portable packages. Download it, unpack it somewhere and use without an installation. 
- * Write it on USB stick and you will be able to use UltraDefrag everywhere by simply
- * running it from there. Note that boot time defragmenter is missing in the portable 
- * packages, but the most remaining features are working fine there. To configure the portable
+ * but require installation therefore cannot be used directly from USB sticks.
+ * - Portable packages. Download it, unpack it and use without an installation. 
+ * Copy it on an USB stick and you will be able to use UltraDefrag everywhere by simply
+ * running it from there. Note that boot time defragmenter is missing from the portable 
+ * packages, but all other features are included. To configure the portable
  * package run the LanguageSelector.exe tool and select your preferred language.
- * <a href="http://en.wikipedia.org/wiki/Portable_application">Here</a> is more information
- * about portable applications.
+ * You can find more information about portable applications
+ * <a href="http://en.wikipedia.org/wiki/Portable_application">here</a>.
  *
  * The UltraDefrag Micro Edition is a lightweight version of the program containing only the command line tool
  * and the boot time defragmenter.
  * 
  * <span style="color: darkred">
  * You must have a 64-bit version of Windows to run the
- * 64-bit versions of the program. IA-64 version was never tested by the authors. 
- * It requires Intel Itanium processor and an appropriate 64-bit edition of Windows.
+ * 64-bit versions of the program. The IA-64 version was never tested by the authors. 
+ * It requires the Intel Itanium processor and an appropriate 64-bit edition of Windows.
  * </span>
  *
  * <span style="color: darkred">
@@ -53,19 +53,19 @@
  * running during the defragmentation extremely slows down this process.
  * </span>
  *
- * Note that UltraDefrag installs to the Windows directory. This is caused by design,
+ * Note that UltraDefrag installs into the Windows directory. This is by design,
  * because it highly simplifies the program development.
- * Moreover, this is impossible to run the boot time defragmenter without having its
- * files inside the system32 directory.
+ * Moreover, it is impossible to run the boot time defragmenter without having its
+ * files inside the System32 directory.
  *
- * UltraDefrag can be installed in silent mode by adding the /S key to the installer's command 
- * in command prompt. In this case no dialogs will be shown and the program will be installed 
+ * UltraDefrag can be installed in silent mode by adding the /S key to the installer's command line
+ * at the command prompt. In this case no dialogs will be shown and the program will be installed 
  * to the hard drive completely with all the features enabled. 
  * The /LANG option allows to select the language pack to be installed. For example, 
  * use /LANG=German to install the German language pack.
  *
  * There is also a silent mode in the
- * uninstaller program. Type in command prompt \%windir\%\\UltraDefrag\\uninstall.exe /S
+ * uninstaller program. At the command prompt type \%windir\%\\UltraDefrag\\uninstall.exe /S
  * to remove the program from the hard drive automatically without any graphical dialogs.
  *
  * <HR>

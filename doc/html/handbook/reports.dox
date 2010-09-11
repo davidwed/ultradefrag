@@ -20,9 +20,9 @@
 /**
  * @page Reports File Fragmentation Reports
  *
- * Every time you run volume analysis, defragmentation or
+ * Every time you run a volume analysis, defragmentation or
  * optimization, UltraDefrag produces the file fragmentation
- * report with full list of fragmented files contained on the
+ * report with a full list of fragmented files located on the
  * volume.
  *
  * UltraDefrag saves file fragmentation reports in the
@@ -32,22 +32,22 @@
  * be accessible even on machines without any web browser installed.
  *
  * UltraDefrag saves all reports to the root directories of
- * the processed volumes. To open LuaReport click fraglist.luar
- * icon in Explorer or simply click the Report button in
- * UltraDefrag GUI after a disk defragmentation/analysis job
- * completion. To open the Plain Text report click fraglist.txt
- * icon in Explorer.
+ * the processed volumes. To open LuaReport click the fraglist.luar
+ * file in Explorer or simply click the Report button in the
+ * UltraDefrag GUI after a disk defragmentation/analysis job has
+ * completed. To open the Plain Text report click the fraglist.txt
+ * file in Explorer.
  *
- * When you are opening the LuaReport a single HTML page
- * generates and opens in your default web browser. It contains a
- * list of fragmented files. Each line contains a number of
+ * When you are opening the LuaReport a single HTML page is
+ * generated and opens in your default web browser. It contains a
+ * list of fragmented files. Each line contains the number of
  * fragments, filename and a brief comment: [OVR] for files
  * above the size threshold, [DIR] for directories and [CMP]
  * for NTFS compressed files.
  *
- * By default, all files are sorted by number of fragments
- * in descending order. To change items sorting click top
- * link on the preferred column. Note that it is a slow
+ * By default, all files are sorted by the number of fragments
+ * in descending order. To change the sorting click the column
+ * heading by which to sort the list. Note that it is a slow
  * process (~350 lines/sec on 1.8GHz CPU). Sorting
  * implemented in JavaScript is slow, but very reliable.
  *
@@ -56,21 +56,21 @@
  * and the name of the file.
  *
  * All files excluded from the defragmentation by filters
- * are excluded from reports too. Trash should not take
- * an attention.
+ * are excluded from reports too. Trash should not get
+ * our attention.
  *
  * <h1>Configuring</h1>
  * All options related to file fragmentation reports are
- * contained in a single udreportopts.lua file inside an
+ * contained in the udreportopts.lua file inside the
  * /options sub-folder of the program's directory.
  *
  * To open this file for editing click its icon in Explorer
- * or simply click an appropriate button in UltraDefrag 
+ * or simply click the appropriate button in the UltraDefrag 
  * Configuration dialog.
  *
- * The udreportopts.lua file contains a parameter-value pairs
+ * The udreportopts.lua file contains parameter-value pairs
  * and comments (they are starting with double dashes).
- * However this file is a real program written in
+ * However this file is a real program written in the
  * <a href="http://www.lua.org/">Lua</a> programming language.
  *
  * The following configuration is used by default:
@@ -108,7 +108,7 @@ max_chars_per_line = 50
 -------------------------------------------------------------------------------
 @endverbatim
  *
- * If you have problems with configuration files editing, use the
+ * If you have problems editing configuration files, use the
  * Tools > Folder options > File types menu in Explorer to
  * associate the lua extension with your preferred text editor. 
  *
