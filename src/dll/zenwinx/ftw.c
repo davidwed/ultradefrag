@@ -48,6 +48,10 @@
  */
 #define LLINVALID ((ULONGLONG) -1)
 
+/* external functions prototypes */
+winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
+	int flags,ftw_callback cb,ftw_terminator t);
+
 /**
  * @brief Checks whether the file
  * tree walk must be terminated or not.
@@ -605,11 +609,25 @@ winx_file_info * __stdcall winx_ftw(short *path,int flags,ftw_callback cb,ftw_te
 /**
  * @brief winx_ftw analog, but optimized
  * for entire disk scanning.
+ * @note NTFS is scanned directly through reading
+ * MFT records, because this highly (25 times)
+ * speeds up the scan. For FAT we have noticed
+ * no speedup (even slowdown) while trying
+ * to walk trough FAT entries. This is because
+ * Windows file cache makes access even faster.
+ * UDF has been never tested in direct mode
+ * because of its highly complicated standard.
  */
 winx_file_info * __stdcall winx_scan_disk(char volume_letter,int flags,ftw_callback cb,ftw_terminator t)
 {
 	winx_file_info *filelist = NULL;
 	short rootpath[] = L"\\??\\A:\\";
+	winx_volume_information v;
+	
+	if(winx_get_volume_information(&v) >= 0){
+		if(!strcmp(v.fs_name,"NTFS"))
+			return ntfs_scan_disk(volume_letter,flags,cb,t);
+	}
 	
 	/* collect information about root directory */
 	rootpath[4] = (short)volume_letter;
