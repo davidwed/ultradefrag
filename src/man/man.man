@@ -9,6 +9,9 @@ SYNOPSIS
 DESCRIPTION
         'man' displays the manual page for the specified command.
         The default action is to list all available manual pages.
+        In scripting mode the manuals are displayed without
+        interruption and in interactive mode they are displayed
+        page-wise.
 
 OPTIONS
         {command}

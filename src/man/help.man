@@ -8,6 +8,9 @@ SYNOPSIS
 
 DESCRIPTION
         'help' displays a brief list of all available commands.
+        In scripting mode the list is displayed without
+        interruption and in interactive mode it is displayed
+        page-wise.
 
 OPTIONS
         none

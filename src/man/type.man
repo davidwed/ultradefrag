@@ -10,6 +10,9 @@ DESCRIPTION
         'type' displays the contents of any file.
         The default action is to display the contents of the
         "ud-boot-time.cmd" command script.
+        In scripting mode the contents are displayed without
+        interruption and in interactive mode they are displayed
+        page-wise.
 
 OPTIONS
         {file path}

@@ -10,6 +10,9 @@ DESCRIPTION
         'history' displays the list of all manually entered commands.
         You can reuse previously entered commands in interactive mode
         by using the up/down cursor/arrow keys.
+        In scripting mode the list is empty, since there is no way to
+        enter commands manually.
+        In interactive mode the list is displayed page-wise.
 
 OPTIONS
         none
