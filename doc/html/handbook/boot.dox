@@ -54,15 +54,47 @@
  * UltraDefrag checks for boot options and returns immediately, if the
  * Safe Mode flag has been found.
  *
- * <h1>Boot time script</h1>
- * The boot time script consists of the disk defragmentation commands,
- * ancillary commands and comments (with a semicolon (;) or # character
- * in the beginning). Its location is \%windir\%\\system32\\ud-boot-time.cmd.
+ * <h1>Boot Time Modes</h1>
+ * The boot time defragmenter can be executed in two modes:
+ * <dl>
+ * <dt>Boot time script</dt>
+ * <dd>The boot time script consists of the disk defragmentation commands,
+ * ancillary commands and comments (with a semicolon (;) or # character.
+ * Its location is \%windir\%\\system32\\ud-boot-time.cmd.
  * To edit this file execute boot-config at the command prompt or simply click
  * the Script button of the UltraDefrag Configuration dialog.
  *
- * The following commands are available:
+ * The boot time script simplifies also the use of UltraDefrag on
+ * computers running Windows 98. After installing Windows XP as a second
+ * operating system, UltraDefrag may be installed too. After adding the
+ * shutdown command to the boot time script you may simply boot the XP system
+ * (which requires much less resources at boot time!) and safely leave your
+ * computer. It will be shut down automatically after the job is completed.
+ *
+ * To abort the script execution and enter the interactive mode immediately
+ * hit <b>ESC</b> at any time during boot time script processing.</dd>
+ *
+ * <dt>Interactive mode</dt>
+ * <dd>When the exit command is missing in the boot time script UltraDefrag
+ * runs in interactive mode after the last script command is executed.
+ * UltraDefrag displays the following command prompt and waits
+ * for the users input:
+ *
+@verbatim
+Interactive mode:
+Type 'help' for list of supported commands.
+
+#
+@endverbatim
+ *
+ * All commands displaying lists are splitting them into pages in interactive mode.
+ * </dd>
+ * </dl>
+ *
+ * <h1>Available Boot Time Commands</h1>
  * <dl>
+ * <dt>; or #</dt>
+ * <dd>Lines starting with one of these characters are treated as comments.</dd>
  * <dt>\@</dt>
  * <dd>Do not show the command line preceded by the at-sign on the screen.
  * By default the command line is displayed on the screen.</dd>
@@ -81,7 +113,8 @@
  * Display a message, empty line, enable/disable showing the command line on the screen
  * or display the status of showing the command line.</dd>
  * <dt>exit</dt>
- * <dd>Break the boot time program execution and return the specified error code or zero.</dd>
+ * <dd>Similar to the DOS command.
+ * Break the boot time program execution and return the specified error code or zero.</dd>
  * <dt>help</dt>
  * <dd>Show a list of all available commands.</dd>
  * <dt>history</dt>
@@ -102,19 +135,20 @@
  * <dt>shutdown</dt>
  * <dd>Halt the computer.</dd>
  * <dt>type</dt>
- * <dd>Display the contents of a file, the default is the boot time script.</dd>
+ * <dd>Similar to the DOS command.
+ * Display the contents of a file, the default is the boot time script.</dd>
  * <dt>udefrag</dt>
  * <dd>This is the native equivalent of the UltraDefrag command line tool.
  * The following keys are supported: -la, -l, -a, -o, --all, --all-fixed.
  * Multiple drive letters on a single command line are allowed.</dd>
  * </dl>
  *
- * When UltraDefrag encounters the wrong syntax it shows the appropriate
+ * When UltraDefrag encounters the wrong syntax it shows an appropriate
  * message on the screen and continues the script execution.
  *
  * For further information about the command switches and variables consult the @ref Console page.
  *
- * <h1>Boot time script examples</h1>
+ * <h1>Boot time script example</h1>
  * The following script is used by default:
  * @code
  * ;--------------------------------------------------------------------
@@ -130,28 +164,6 @@
  *
  * exit
  * @endcode
- *
- * The boot time script simplifies also the use of UltraDefrag on
- * computers running Windows 98. After installing Windows XP as a second
- * operating system, UltraDefrag may be installed too. After adding the
- * shutdown command to the boot time script you may simply boot the XP system
- * (which requires much less resources at boot time!) and safely leave your
- * computer. It will be shut down automatically after the job is completed.
- *
- * To abort the script execution and enter the interactive mode immediately
- * hit <b>ESC</b> at any time during boot script processing.
- *
- * <h1>Interactive mode</h1>
- * When the exit command is missing in the boot time script UltraDefrag
- * runs in interactive mode after the last script command is executed. In
- * this case UltraDefrag displays the following command prompt and waits
- * for the users input:
-@verbatim
-Interactive mode:
-Type 'help' for list of supported commands.
-
-#
-@endverbatim
  *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 100%;">
