@@ -189,8 +189,8 @@ int Analyze(char *volume_name)
 			* because there was lots of improvements in code
 			* since time of the tests.
 			*/
-            //(void)ScanMFT();
-            //break;
+            (void)ScanMFT();
+            break;
         default:
             /* Find files */
             tm = winx_xtime();
