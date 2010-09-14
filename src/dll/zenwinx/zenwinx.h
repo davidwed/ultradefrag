@@ -235,13 +235,22 @@ typedef struct _winx_file_disposition {
 	winx_blockmap *blockmap;           /* map of blocks <=> list of fragments */
 } winx_file_disposition;
 
+typedef struct _winx_file_internal_info {
+	ULONGLONG BaseMftId;
+	ULONGLONG ParentDirectoryMftId;
+	BOOLEAN PathBuilt;
+	BOOLEAN IsDirty;
+} winx_file_internal_info;
+
 typedef struct _winx_file_info {
-	struct _winx_file_info *next;  /* pointer to the next item */
-	struct _winx_file_info *prev;  /* pointer to the previous item */
+	struct _winx_file_info *next;      /* pointer to the next item */
+	struct _winx_file_info *prev;      /* pointer to the previous item */
+	short *name;                       /* name of the file */
 	short *path;                       /* full native path */
 	unsigned long flags;               /* combination of FILE_ATTRIBUTE_xxx flags defined in winnt.h */
 	winx_file_disposition disp;        /* information about file fragments and their disposition */
 	unsigned long user_defined_flags;  /* combination of flags defined by the caller */
+	winx_file_internal_info internal;  /* internal information used by ftw_scan_disk support routines */
 } winx_file_info;
 
 typedef int (__stdcall *ftw_callback)(winx_file_info *f);

@@ -244,7 +244,6 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
 	FILE_BOTH_DIR_INFORMATION *file_entry)
 {
 	winx_file_info *f;
-	short *filename;
 	int length;
 	int is_rootdir = 0;
 	
@@ -266,15 +265,15 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
 	}
 	
 	/* extract filename */
-	filename = winx_heap_alloc(file_entry->FileNameLength + sizeof(short));
-	if(filename == NULL){
+	f->name = winx_heap_alloc(file_entry->FileNameLength + sizeof(short));
+	if(f->name == NULL){
 		DebugPrint("ftw_add_entry_to_filelist: cannot allocate %u bytes of memory",
 			file_entry->FileNameLength + sizeof(short));
 		winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
 		return NULL;
 	}
-	memset(filename,0,file_entry->FileNameLength + sizeof(short));
-	memcpy(filename,file_entry->FileName,file_entry->FileNameLength);
+	memset(f->name,0,file_entry->FileNameLength + sizeof(short));
+	memcpy(f->name,file_entry->FileName,file_entry->FileNameLength);
 	
 	/* detect whether we are in root directory or not */
 	length = wcslen(path);
@@ -282,21 +281,21 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
 		is_rootdir = 1; /* only root directory contains trailing backslash */
 	
 	/* build path */
-	length += wcslen(filename) + 1;
+	length += wcslen(f->name) + 1;
 	if(!is_rootdir)
 		length ++;
 	f->path = winx_heap_alloc(length * sizeof(short));
 	if(f->path == NULL){
 		DebugPrint("ftw_add_entry_to_filelist: cannot allocate %u bytes of memory",
 			length * sizeof(short));
+		winx_heap_free(f->name);
 		winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
-		winx_heap_free(filename);
 		return NULL;
 	}
 	if(is_rootdir)
-		(void)_snwprintf(f->path,length,L"%ws%ws",path,filename);
+		(void)_snwprintf(f->path,length,L"%ws%ws",path,f->name);
 	else
-		(void)_snwprintf(f->path,length,L"%ws\\%ws",path,filename);
+		(void)_snwprintf(f->path,length,L"%ws\\%ws",path,f->name);
 	f->path[length - 1] = 0;
 	
 	/* save file attributes */
@@ -307,15 +306,18 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,int flags,
 	
 	//DebugPrint("%ws",f->path);
 	
+	/* reset internal data fields */
+	memset(&f->internal,0,sizeof(winx_file_internal_info));
+	
 	/* reset file disposition */
 	memset(&f->disp,0,sizeof(winx_file_disposition));
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
 		if(ftw_dump_file(f,t) < 0){
+			winx_heap_free(f->name);
 			winx_heap_free(f->path);
 			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
-			winx_heap_free(filename);
 			return NULL;
 		}
 	}	
@@ -365,6 +367,17 @@ static int ftw_add_root_directory(short *path,int flags,
 	}
 	wcscpy(f->path,path);
 	
+	/* save empty filename */
+	f->name = winx_heap_alloc(sizeof(short));
+	if(f->name == NULL){
+		DebugPrint("ftw_add_root_directory: cannot allocate %u bytes of memory",
+			sizeof(short));
+		winx_heap_free(f->path);
+		winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
+		return (-1);
+	}
+	f->name[0] = 0;
+	
 	/* get file attributes */
 	f->flags |= FILE_ATTRIBUTE_DIRECTORY;
 	hDir = ftw_fopen(f);
@@ -385,12 +398,16 @@ static int ftw_add_root_directory(short *path,int flags,
 	/* reset user defined flags */
 	f->user_defined_flags = 0;
 	
+	/* reset internal data fields */
+	memset(&f->internal,0,sizeof(winx_file_internal_info));
+	
 	/* reset file disposition */
 	memset(&f->disp,0,sizeof(winx_file_disposition));
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
 		if(ftw_dump_file(f,t) < 0){
+			winx_heap_free(f->name);
 			winx_heap_free(f->path);
 			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
 			return (-1);
@@ -509,7 +526,7 @@ static int ftw_helper(short *path,int flags,ftw_callback cb,ftw_terminator t,win
 			return (-1);
 		}
 		
-		//DebugPrint("%ws",f->path);
+		DebugPrint("%ws\n%ws",f->name,f->path);
 		
 		/* check for termination */
 		if(ftw_check_for_termination(t)){
@@ -664,6 +681,8 @@ void __stdcall winx_ftw_release(winx_file_info *filelist)
 
 	/* walk through list of files and free allocated memory */
 	for(f = filelist; f != NULL; f = f->next){
+		if(f->name)
+			winx_heap_free(f->name);
 		if(f->path)
 			winx_heap_free(f->path);
 		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
