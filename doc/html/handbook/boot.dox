@@ -87,7 +87,7 @@ Type 'help' for list of supported commands.
 #
 @endverbatim
  *
- * All commands displaying lists are splitting them into pages in interactive mode.
+ * All commands displaying long lists (help, history, man, set, type) are splitting them into pages in interactive mode.
  * </dd>
  * </dl>
  *
