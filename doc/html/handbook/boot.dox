@@ -59,8 +59,8 @@
  * <dl>
  * <dt>Boot time script</dt>
  * <dd>The boot time script consists of the disk defragmentation commands,
- * ancillary commands and comments (with a semicolon (;) or # character.
- * Its location is \%windir\%\\system32\\ud-boot-time.cmd.
+ * ancillary commands and comments.
+ * It is located at \%windir\%\\system32\\ud-boot-time.cmd.
  * To edit this file execute boot-config at the command prompt or simply click
  * the Script button of the UltraDefrag Configuration dialog.
  *
