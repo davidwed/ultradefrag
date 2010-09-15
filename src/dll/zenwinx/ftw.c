@@ -604,7 +604,7 @@ static int ftw_helper(short *path, int flags,
  * - pcb parameter may be equal to NULL.
  * @par Example:
  * @code
- * int __stdcall process_file(winx_file_info *f)
+ * int __stdcall filter(winx_file_info *f)
  * {
  *     if(skip_directory(f))
  *         return 1;    // skip current directory
@@ -628,7 +628,7 @@ static int ftw_helper(short *path, int flags,
  * }
  *
  * // list all files on disk c:
- * filelist = winx_ftw(L"\\??\\c:\\",0,process_file,update_progress,terminator);
+ * filelist = winx_ftw(L"\\??\\c:\\",0,filter,update_progress,terminator);
  * // ...
  * // process list of files
  * // ...
