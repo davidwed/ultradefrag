@@ -668,11 +668,17 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 	winx_file_info *filelist = NULL;
 	short rootpath[] = L"\\??\\A:\\";
 	winx_volume_information v;
+	ULONGLONG time;
+	
+	time = winx_xtime();
+	DebugPrint("----------------- winx_scan_disk started -----------------");
 	
 	if(winx_get_volume_information(volume_letter,&v) >= 0){
 		DebugPrint("winx_scan_disk: file system is %s",v.fs_name);
-		if(!strcmp(v.fs_name,"NTFS"))
-			return ntfs_scan_disk(volume_letter,flags,fcb,pcb,t);
+		if(!strcmp(v.fs_name,"NTFS")){
+			filelist = ntfs_scan_disk(volume_letter,flags,fcb,pcb,t);
+			goto done;
+		}
 	}
 	
 	/* collect information about root directory */
@@ -681,7 +687,8 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);
-		return NULL;
+		filelist = NULL;
+		goto done;
 	}
 
 	/* collect information about entire directory tree */
@@ -690,9 +697,13 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);
-		return NULL;
+		filelist = NULL;
+		goto done;
 	}
 
+done:
+	DebugPrint("------------ winx_scan_disk completed in %I64u ms ------------",
+		winx_xtime() - time);
 	return filelist;
 }
 
