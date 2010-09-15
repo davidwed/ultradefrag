@@ -1022,7 +1022,7 @@ void AnalyseSingleAttribute(ULONGLONG mft_id,PFILE_RECORD_HEADER pfrh,
 /**
  * @brief Array containing default names of the attributes.
  */
-ATTRIBUTE_NAME default_attribute_names[] = {
+ATTRIBUTE_NAME __default_attribute_names[] = {
 	{AttributeAttributeList,       L"$ATTRIBUTE_LIST"       },
 	{AttributeEA,                  L"$EA"                   },
 	{AttributeEAInformation,       L"$EA_INFORMATION"       },
@@ -1047,10 +1047,10 @@ short *GetDefaultAttributeName(ATTRIBUTE_TYPE attr_type)
 	int i;
 	
 	for(i = 0;; i++){
-		if(default_attribute_names[i].AttributeName == NULL) break;
-		if(default_attribute_names[i].AttributeType == attr_type) break;
+		if(__default_attribute_names[i].AttributeName == NULL) break;
+		if(__default_attribute_names[i].AttributeType == attr_type) break;
 	}
-	return default_attribute_names[i].AttributeName;
+	return __default_attribute_names[i].AttributeName;
 }
 
 /**
