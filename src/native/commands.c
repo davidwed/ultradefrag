@@ -93,40 +93,65 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 {
 	char windir[MAX_PATH + 1];
 	char path[MAX_PATH + 1];
+	short wpath[MAX_PATH + 1];
+	winx_file_info *file, *filelist;
 	WINX_FILE *f;
-	int i, column, max_columns;
+	int i, column;
+	int max_columns = (MAX_LINE_WIDTH - 1) / 15;
 	
 	if(argc < 1)
 		return (-1);
-	
-	/* cycle through names of existing commands */
-	max_columns = (MAX_LINE_WIDTH - 1) / 15;
-	column = 0;
-	for(i = 0; cmd_table[i].cmd_handler != NULL; i++){
-		/* build path to the manual page */
-		if(winx_get_windows_directory(windir,MAX_PATH) < 0){
-			winx_printf("\n%ws: cannot get %%windir%% path\n\n",argv[0]);
-			return (-1);
-		}
-		_snprintf(path,MAX_PATH,"%s\\UltraDefrag\\man\\%ws.man",windir,cmd_table[i].cmd_name);
-		path[MAX_PATH] = 0;
-		/* check for the page existence */
-		f = winx_fopen(path,"r");
-		if(f != NULL){
-			winx_fclose(f);
-			/* display man page filename on the screen */
-			_snprintf(path,MAX_PATH,"%ws.man",cmd_table[i].cmd_name);
-			path[MAX_PATH] = 0;
-			winx_printf("%-15s",path);
-			column ++;
-			if(column >= max_columns){
-				winx_printf("\n");
-				column = 0;
-			}
-		}
+
+	/* get %winir% path */
+	if(winx_get_windows_directory(windir,MAX_PATH) < 0){
+		winx_printf("\n%ws: cannot get %%windir%% path\n\n",argv[0]);
+		return (-1);
 	}
 
-	winx_printf("%-15s\n","variables.man");
+	/* try to get list of installed man pages through winx_ftw call */
+	_snwprintf(wpath,MAX_PATH,L"%hs\\UltraDefrag\\man",windir);
+	wpath[MAX_PATH] = 0;
+	filelist = winx_ftw(wpath,0,NULL,NULL,NULL);
+	if(filelist){
+		for(file = filelist->prev, column = 0; file; file = file->prev){
+			/* XXX: skip readme.txt file */
+			_wcslwr(file->name);
+			if(wcscmp(file->name,L"readme.txt")){
+				winx_printf("%-15ws",file->name);
+				column ++;
+				if(column >= max_columns){
+					winx_printf("\n");
+					column = 0;
+				}
+			}
+			if(file->prev == filelist->prev) break;
+		}
+		winx_printf("\n");
+		winx_ftw_release(filelist);
+	} else {
+		/* cycle through names of existing commands */
+		for(i = 0, column = 0; cmd_table[i].cmd_handler != NULL; i++){
+			/* build path to the manual page */
+			_snprintf(path,MAX_PATH,"%s\\UltraDefrag\\man\\%ws.man",windir,cmd_table[i].cmd_name);
+			path[MAX_PATH] = 0;
+			/* check for the page existence */
+			f = winx_fopen(path,"r");
+			if(f != NULL){
+				winx_fclose(f);
+				/* display man page filename on the screen */
+				_snprintf(path,MAX_PATH,"%ws.man",cmd_table[i].cmd_name);
+				path[MAX_PATH] = 0;
+				winx_printf("%-15s",path);
+				column ++;
+				if(column >= max_columns){
+					winx_printf("\n");
+					column = 0;
+				}
+			}
+		}
+		winx_printf("%-15s\n","variables.man");
+	}
+
 	return 0;
 }
 
