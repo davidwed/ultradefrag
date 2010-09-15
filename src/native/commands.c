@@ -113,6 +113,7 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 	wpath[MAX_PATH] = 0;
 	filelist = winx_ftw(wpath,0,NULL,NULL,NULL);
 	if(filelist){
+        winx_printf("Available Manual Pages:\n");
 		for(file = filelist->prev, column = 0; file; file = file->prev){
 			/* XXX: skip readme.txt file */
 			_wcslwr(file->name);
@@ -129,6 +130,7 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 		winx_printf("\n");
 		winx_ftw_release(filelist);
 	} else {
+        winx_printf("Available Command Manuals:\n");
 		/* cycle through names of existing commands */
 		for(i = 0, column = 0; cmd_table[i].cmd_handler != NULL; i++){
 			/* build path to the manual page */
