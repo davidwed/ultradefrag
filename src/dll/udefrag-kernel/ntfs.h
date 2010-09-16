@@ -291,27 +291,6 @@ typedef struct {
 	//BOOLEAN PathBuilt; /* not used by new optimized code */
 	WCHAR Name[MAX_NTFS_PATH];
 } MY_FILE_INFORMATION, *PMY_FILE_INFORMATION;
-
-/*
-* This is the definition for the data structure
-* that is passed in to FSCTL_GET_NTFS_VOLUME_DATA.
-*/
-typedef struct _NTFS_DATA {
-    LARGE_INTEGER VolumeSerialNumber;
-    LARGE_INTEGER NumberSectors;
-    LARGE_INTEGER TotalClusters;
-    LARGE_INTEGER FreeClusters;
-    LARGE_INTEGER TotalReserved;
-    ULONG BytesPerSector;
-    ULONG BytesPerCluster;
-    ULONG BytesPerFileRecordSegment;
-    ULONG ClustersPerFileRecordSegment;
-    LARGE_INTEGER MftValidDataLength;
-    LARGE_INTEGER MftStartLcn;
-    LARGE_INTEGER Mft2StartLcn;
-    LARGE_INTEGER MftZoneStart;
-    LARGE_INTEGER MftZoneEnd;
-} NTFS_DATA, *PNTFS_DATA;
 #pragma pack(pop)
 
 #ifndef FSCTL_GET_NTFS_VOLUME_DATA
