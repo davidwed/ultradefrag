@@ -36,12 +36,25 @@ void winx_init_synch_objects(void);
 void winx_destroy_synch_objects(void);
 void __stdcall MarkWindowsBootAsSuccessful(void);
 
+void test(void)
+{
+	winx_file_info *f;
+	
+	//f = winx_ftw(L"\\??\\c:\\",WINX_FTW_RECURSIVE | WINX_FTW_DUMP_FILES,NULL,NULL);
+	f = winx_scan_disk('L',WINX_FTW_DUMP_FILES,NULL,NULL,NULL);
+	if(f == NULL)
+		DebugPrint("$$$$ winx_scan_disk failed $$$");
+	else
+		winx_ftw_release(f);
+}
+
 #ifndef STATIC_LIB
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	if(dwReason == DLL_PROCESS_ATTACH){
 		winx_create_global_heap();
 		winx_init_synch_objects();
+		//test();
 	} else if(dwReason == DLL_PROCESS_DETACH){
 		winx_destroy_global_heap();
 		winx_destroy_synch_objects();

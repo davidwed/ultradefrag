@@ -663,7 +663,7 @@ winx_file_info * __stdcall winx_ftw(short *path, int flags,
  * because of its highly complicated standard.
  */
 winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
-		ftw_filter_callback fcb,ftw_progress_callback pcb, ftw_terminator t)
+		ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t)
 {
 	winx_file_info *filelist = NULL;
 	short rootpath[] = L"\\??\\A:\\";
