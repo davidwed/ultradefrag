@@ -176,42 +176,35 @@ wikispaces_color_fontsize = "83%";
         <h2>&nbsp;</h2>
 -->
 		<!-- release announcement -->
-		<h3>Latest News - UltraDefrag 4.4 RC1 has been finally released!</h3>
+		<h3>Latest News - UltraDefrag 4.4 RC2 has been released!</h3>
         <h2>&nbsp;</h2> 
-        <p>We'd like to present you the first release candidate of UltraDefrag 4.4 series, which has a lot of
-        interesting improvements over the previous stable release:</p>
-        
-        <p><a href=""><b>GUI:</b></a></p>
-        <ul>
-        <li>Progress is now added to the GUI window caption, so it is displayed in the tooltip of the taskbar icon.</li>
-        <li>Cryptic single character progress label was replaced by the localized operation names.</li>
-        </ul>
-
-        <p><a href=""><b>Driver:</b></a></p>
-        <ul>
-        <li>Partial defragmentation was added to decrease the number of fragments
-        even when there is no free space on disk to concatenate all fragments of the file.</li>
-        <li>Volume optimization algorithm was improved to prevent useless additional optimization passes.</li>
-        <li>One little bug preventing optimization from being stopped was fixed.</li>
-        <li>Volume optimization algorithm was improved to prevent skipping heavily fragmented parts of the volume.</li>
-        </ul>
+        <p>We'd like to present you the latest release candidate of UltraDefrag 4.4 series, which has some
+		interesting improvements, primarily in boot time defragmenter:</p>
         
         <p><a href=""><b>Boot time interface:</b></a></p>
         <ul>
-        <li>10 seconds delay is skiped on boot time scan, if only one keyboard is present.</li>
+        <li><b>call</b>, <b>man</b>, <b>type</b> commands added to the boot time shell.</li>
+		<li><b>echo</b>, <b>exit</b>, <b>pause</b>, <b>set</b> commands improved.</li>
+		<li>History of commands typed in interactive mode added. Use arrow keys for navigation.</li>
+		<li>Escape key handler added to break boot time script execution and fall into
+		interactive mode immediately.</li>
+		<li>Pending boot-off boot time script command support added, this removes the limitation
+		of boot-on/off not working before reboot/shutdown.</li>
+		<li>Clearing of the failed boot flag added for reboot and shutdown at boot time.</li>
         </ul>
+		
+		<p><a href=""><b>Command line interface:</b></a></p>
+		<ul>
+		<li>Corrected cluttered progress display if console output was redirected.</li>
+		</ul>
         
         <p><a href=""><b>Translations:</b></a></p>
         <ul>
-        <li>Added language selector to the GUI package.</li>
-        <li><b>Hindi</b> translation was added.</li>
-        <li>The following translations were updated:<br/> <b>Croatian</b>, <b>Danish</b>, <b>Dutch</b>, 
-        <b>French</b>, <b>Greek</b>, <b>Polish</b>, <b>Russian</b>, <b>Serbian</b>, <b>Swedish</b>, <b>Turkish</b></li>
-        </li>
+        <li><b>Chinese (Traditional)</b> and <b>Portuguese</b> translations were updated.</li>
         </ul>
 
         <p><a href="HISTORY.TXT">Change Log</a> contains a full list of changes.</p>
-        <div class="date"><a href="#" title="#">Posted on</a> 24th Aug 2010</div> 
+        <div class="date"><a href="#" title="#">Posted on</a> 16th Sept 2010</div> 
 		<h3>News - Dice Roll Bug Hunting Contest</h3>
         <h2>&nbsp;</h2>
         <p><a href="http://sourceforge.net/projects/dice-roll/"><img src="http://sourceforge.net/dbimage.php?id=275290" width="100" height="75" alt="dice roll game" border="0" /></a></p>
@@ -284,11 +277,11 @@ wikispaces_color_fontsize = "83%";
 
         <div class="date"><a href="#" title="#">Posted on</a> 30th Mar 2010</div>
         <h2 class="content"><strong>DOWNLOAD ULTRADEFRAG</strong></h2>
-        <p><a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-4.3.0.bin.i386.exe"><img src="images/ud_down.png" alt="Download UltraDefrag 32bit" width="147" height="256" /></a></p>
+        <p><a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-4.4.0-RC2.bin.i386.exe"><img src="images/ud_down.png" alt="Download UltraDefrag 32bit" width="147" height="256" /></a></p>
         <p class="greybox">For 32-bit Windows <br /> NT4.0, 2000, XP, Vista, 7 - Server NT4.0, 2000, 2003, 2008</p>
-        <p><a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-4.3.0.bin.amd64.exe"><img src="images/ud_64.png" alt="Download UltraDefrag 64bit" width="147" height="256" /></a></p>
+        <p><a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-4.4.0-RC2.bin.amd64.exe"><img src="images/ud_64.png" alt="Download UltraDefrag 64bit" width="147" height="256" /></a></p>
         <p class="greybox">For 64-bit Windows <br /> x64 Editions of XP, Vista, 7 - Server 2003, 2008</p>
-        <p><a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-4.3.0.bin.ia64.exe"><img src="images/ud_ia64.png" alt="Download UltraDefrag for IA64" width="147" height="256" /></a></p>
+        <p><a href="http://downloads.sourceforge.net/ultradefrag/ultradefrag-4.4.0-RC2.bin.ia64.exe"><img src="images/ud_ia64.png" alt="Download UltraDefrag for IA64" width="147" height="256" /></a></p>
         <p class="greybox">For 64-bit Windows running on Intel Itanium processor.</p>
         <p>&nbsp;</p>
         <p>&nbsp;</p>
