@@ -28,31 +28,32 @@ echo Select Action for Default Test Suite Boot Time Script
 echo.
 echo 1 ... Replace existing Boot Time Script
 echo 2 ... Edit    existing Boot Time Script
+echo 3 ... Only Copy Test Scripts
 echo.
 echo 0 ... EXIT
 echo.
 set /P answer="Select an Option: "
 echo.
 
-if %answer% LEQ 2 goto %answer%
+if %answer% LEQ 3 goto %answer%
 
 :0
 goto :quit
 
 :1
 copy /b /v /y ud-boot-time.cmd %SystemRoot%\System32
-goto :install_test_scripts
+goto :3
 
 :2
 set editor_cmd=%default_editor%
 
-if %force_default_editor% == 1 goto :install_test_scripts
+if %force_default_editor% == 1 goto :3
 
 set editor_cmd="%ProgramFiles(x86)%\Notepad++\notepad++.exe"
 if not exist %editor_cmd% set editor_cmd="%ProgramFiles%\Notepad++\notepad++.exe"
 if not exist %editor_cmd% set editor_cmd=%default_editor%
 
-:install_test_scripts
+:3
 rem copy test command scripts
 copy /b /v /y ud-boot-time-test-*.cmd C:\
 
