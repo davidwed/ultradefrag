@@ -1072,6 +1072,10 @@ typedef struct _FILE_BOTH_DIRECTORY_INFORMATION {
     LARGE_INTEGER       LastWriteTime;
     LARGE_INTEGER       ChangeTime;
     LARGE_INTEGER       EndOfFile;
+	/*
+	* The next field may hold zero for 3.99 Gb files on FAT32
+	* volumes with 32k cluster size (tested on 32-bit XP SP1).
+	*/
     LARGE_INTEGER       AllocationSize;
     ULONG               FileAttributes;
     ULONG               FileNameLength;
@@ -1225,6 +1229,29 @@ typedef struct {
 	ULONGLONG			StartVcn;
 	MAPPING_PAIR		Pair[1];
 } GET_RETRIEVAL_DESCRIPTOR, *PGET_RETRIEVAL_DESCRIPTOR;
+
+#pragma pack(push, 1)
+/*
+* This is the definition for the data structure
+* that is passed in to FSCTL_GET_NTFS_VOLUME_DATA.
+*/
+typedef struct _NTFS_DATA {
+    LARGE_INTEGER VolumeSerialNumber;
+    LARGE_INTEGER NumberSectors;
+    LARGE_INTEGER TotalClusters;
+    LARGE_INTEGER FreeClusters;
+    LARGE_INTEGER TotalReserved;
+    ULONG BytesPerSector;
+    ULONG BytesPerCluster;
+    ULONG BytesPerFileRecordSegment;
+    ULONG ClustersPerFileRecordSegment;
+    LARGE_INTEGER MftValidDataLength;
+    LARGE_INTEGER MftStartLcn;
+    LARGE_INTEGER Mft2StartLcn;
+    LARGE_INTEGER MftZoneStart;
+    LARGE_INTEGER MftZoneEnd;
+} NTFS_DATA, *PNTFS_DATA;
+#pragma pack(pop)
 
 #ifndef TAG
 #define TAG(A, B, C, D) (ULONG)(((A)<<0) + ((B)<<8) + ((C)<<16) + ((D)<<24))

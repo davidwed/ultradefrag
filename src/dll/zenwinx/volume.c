@@ -439,6 +439,25 @@ static int IsNtfsPartition(BPB *bpb,winx_volume_information *v)
 }
 
 /**
+ * @brief Opens the volume.
+ * @note Internal use only.
+ */
+static WINX_FILE * open_volume(winx_volume_information *v)
+{
+	char path[64];
+	char flags[2];
+	#define FLAG 'r'
+
+	(void)_snprintf(path,64,"\\??\\%c:",v->volume_letter);
+	path[63] = 0;
+#if FLAG != 'r'
+#error Volume must be opened for read access!
+#endif
+	flags[0] = FLAG; flags[1] = 0;
+	return winx_fopen(path,flags);
+}
+
+/**
  * @brief Reads the first sector
  * of the volume into memory.
  * @param[out] buffer pointer
@@ -453,20 +472,11 @@ static int IsNtfsPartition(BPB *bpb,winx_volume_information *v)
  */
 static int read_first_sector(void *buffer,winx_volume_information *v)
 {
-	char path[64];
-	char flags[2];
-	#define FLAG 'r'
 	WINX_FILE *f;
 	size_t n_read;
 
 	/* open the volume */
-	(void)_snprintf(path,64,"\\??\\%c:",v->volume_letter);
-	path[63] = 0;
-#if FLAG != 'r'
-#error Volume must be opened for read access!
-#endif
-	flags[0] = FLAG; flags[1] = 0;
-	f = winx_fopen(path,flags);
+	f = open_volume(v);
 	if(f == NULL)
 		return (-1);
 
@@ -578,6 +588,35 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 }
 
 /**
+ * @brief Retrieves NTFS data for the filesystem.
+ * @param[out] pointer to the structure
+ * receiving the information.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
+static int get_ntfs_data(winx_volume_information *v)
+{
+	WINX_FILE *f;
+	
+	/* open the volume */
+	f = open_volume(v);
+	if(f == NULL)
+		return (-1);
+	
+	/* get ntfs data */
+	if(winx_ioctl(f,FSCTL_GET_NTFS_VOLUME_DATA,
+	  "get_ntfs_data: ntfs data request",
+	  NULL,0,&v->ntfs_data,sizeof(NTFS_DATA),NULL) < 0){
+		winx_fclose(f);
+		return (-1);
+	}
+	
+	/* cleanup */
+	winx_fclose(f);
+	return 0;
+}
+
+/**
  * @brief Retrieves detailed information
  * about disk volume.
  * @param[in] volume_letter the volume letter.
@@ -622,6 +661,15 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 	if(get_filesystem_name(hRoot,v) < 0){
 		NtClose(hRoot);
 		return (-1);
+	}
+	
+	/* get NTFS data */
+	memset(&v->ntfs_data,0,sizeof(NTFS_DATA));
+	if(!strcmp(v->fs_name,"NTFS")){
+		if(get_ntfs_data(v) < 0){
+			DebugPrint("NTFS data is unavailable for %c:",
+				volume_letter);
+		}
 	}
 	
 	return 0;
