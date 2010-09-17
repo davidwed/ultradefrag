@@ -104,10 +104,17 @@ static HANDLE ftw_fopen(winx_file_info *f)
 /**
  * @brief Retrieves information
  * about the file disposition.
+ * @param[out] f pointer to
+ * structure receiving the information.
+ * @param[in] t address of procedure to be called
+ * each time when winx_ftw_dump_file would like
+ * to know whether it must be terminated or not.
+ * Nonzero value, returned by terminator,
+ * forces file dump to be terminated.
  * @return Zero for success,
  * negative value otherwise.
  */
-static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
+int __stdcall winx_ftw_dump_file(winx_file_info *f,ftw_terminator t)
 {
 	GET_RETRIEVAL_DESCRIPTOR *filemap;
 	HANDLE hFile;
@@ -126,6 +133,8 @@ static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
 	f->disp.clusters = 0;
 	f->disp.fragments = 0;
 	f->disp.flags = 0;
+	if(f->disp.blockmap)
+		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 	f->disp.blockmap = NULL;
 	
 	/* open the file */
@@ -136,7 +145,7 @@ static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
 	/* allocate memory */
 	filemap = winx_heap_alloc(FILE_MAP_SIZE);
 	if(filemap == NULL){
-		DebugPrint("ftw_dump_file: cannot allocate %u bytes of memory",
+		DebugPrint("winx_ftw_dump_file: cannot allocate %u bytes of memory",
 			FILE_MAP_SIZE);
 		NtClose(hFile);
 		return (-1);
@@ -159,7 +168,7 @@ static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
 			/* it always returns STATUS_END_OF_FILE for small files placed in MFT */
 			if(status != STATUS_END_OF_FILE)
-				DebugPrintEx(status,"Dump failed for %ws",f->path);
+				DebugPrintEx(status,"dump failed for %ws",f->path);
 		cleanup:
 			f->disp.clusters = 0;
 			f->disp.fragments = 0;
@@ -172,7 +181,7 @@ static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
 
 		if(ftw_check_for_termination(t)){
 			if(counter > MAX_COUNT)
-				DebugPrint("ftw_dump_file: %ws: infinite main loop?",f->path);
+				DebugPrint("winx_ftw_dump_file: %ws: infinite main loop?",f->path);
 			goto cleanup;
 		}
 		
@@ -199,7 +208,7 @@ static int ftw_dump_file(winx_file_info *f,ftw_terminator t)
 			block = (winx_blockmap *)winx_list_insert_item((list_entry **)&f->disp.blockmap,
 				(list_entry *)block,sizeof(winx_blockmap));
 			if(block == NULL){
-				DebugPrint("ftw_dump_file: cannot allocate %u bytes of memory",
+				DebugPrint("winx_ftw_dump_file: cannot allocate %u bytes of memory",
 					sizeof(winx_blockmap));
 				/* cleanup */
 				f->disp.clusters = 0;
@@ -316,7 +325,7 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path, int flags,
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
-		if(ftw_dump_file(f,t) < 0){
+		if(winx_ftw_dump_file(f,t) < 0){
 			winx_heap_free(f->name);
 			winx_heap_free(f->path);
 			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
@@ -410,7 +419,7 @@ static int ftw_add_root_directory(short *path, int flags,
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
-		if(ftw_dump_file(f,t) < 0){
+		if(winx_ftw_dump_file(f,t) < 0){
 			winx_heap_free(f->name);
 			winx_heap_free(f->path);
 			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);

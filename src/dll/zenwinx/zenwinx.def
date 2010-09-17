@@ -46,6 +46,7 @@ EXPORTS
 	winx_ftw
 	winx_scan_disk
 	winx_ftw_release
+	winx_ftw_dump_file
 	winx_create_directory
 	winx_delete_file
 	winx_get_file_contents

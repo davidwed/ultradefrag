@@ -265,6 +265,8 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 void __stdcall winx_ftw_release(winx_file_info *filelist);
 #define winx_scan_disk_release(f) winx_ftw_release(f)
 
+int __stdcall winx_ftw_dump_file(winx_file_info *f,ftw_terminator t);
+
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);
 
