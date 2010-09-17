@@ -602,6 +602,7 @@ static int ftw_helper(short *path, int flags,
  * - fcb parameter may be equal to NULL if no
  *   filtering is needed.
  * - pcb parameter may be equal to NULL.
+ * - Does not recognize NTFS data streams.
  * @par Example:
  * @code
  * int __stdcall filter(winx_file_info *f)

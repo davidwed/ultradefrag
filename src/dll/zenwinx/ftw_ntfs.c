@@ -28,6 +28,12 @@
 #include "ntfs.h"
 #include "zenwinx.h"
 
+/*
+* Add data consistency checks everywhere,
+* because NTFS volumes often have invalid
+* data in MFT entries.
+*/
+
 /* internal structures */
 typedef struct _mft_layout {
 	unsigned long file_record_size;         /* size of mft file record, in bytes */
