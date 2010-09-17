@@ -300,6 +300,20 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
 void         __stdcall winx_list_remove_item(list_entry **phead,list_entry *item);
 void         __stdcall winx_list_destroy    (list_entry **phead);
 
+wchar_t * __cdecl winx_wcsdup(const wchar_t *s);
 wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
+
+#define WINX_PAT_ICASE  0x1 /* compile patterns for case insensitive search */
+
+typedef struct _winx_patlist {
+	int count;
+	short **array;
+	int flags;
+	short *string;
+} winx_patlist;
+
+int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags);
+int __stdcall winx_patfind(short *string,winx_patlist *patterns);
+void __stdcall winx_patfree(winx_patlist *patterns);
 
 #endif /* _ZENWINX_H_ */

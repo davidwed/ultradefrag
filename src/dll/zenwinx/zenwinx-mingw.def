@@ -72,4 +72,8 @@ EXPORTS
 	winx_windows_in_safe_mode@0
 	zenwinx_native_init@0
 	zenwinx_native_unload@0
+	winx_wcsdup
 	winx_wcsistr
+	winx_patcomp@16
+	winx_patfind@8
+	winx_patfree@4

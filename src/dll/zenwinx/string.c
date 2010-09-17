@@ -27,6 +27,20 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+/**
+ * @brief wcsdup equivalent.
+ */
+wchar_t * __cdecl winx_wcsdup(const wchar_t *s)
+{
+	int length;
+	wchar_t *cp;
+	
+	length = wcslen(s);
+	cp = winx_heap_alloc((length + 1) * sizeof(short));
+	if(cp) wcscpy(cp,s);
+	return cp;
+}
+
 /*	1. wcsstr(L"AGTENTLEPSE.SDFGSDFSDFSRG",L"AGTENTLEPSE"); x 1 mln. times = 63 ms
 	2. empty cycle = 0 ms
 	3. wcsistr(L"AGTENTLEPSE.SDFGSDFSDFSRG",L"AGTENTLEPSE"); x 1 mln. times = 340 ms
@@ -39,7 +53,7 @@
 */
 
 /**
- * @brief Case insensitive version of wcsstr().
+ * @brief Case insensitive version of wcsstr.
  */
 wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 {
@@ -58,6 +72,131 @@ wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 	}
 	
 	return NULL;
+}
+
+/*
+* Lightweight alternative for regular expressions.
+*/
+
+/**
+ * @brief Compiles string of patterns
+ * to internal representation.
+ * @param[out] patterns pointer to storage
+ * for a single winx_patlist structure.
+ * @param[in] string the string of patterns.
+ * @param[in] delim the list of delimiters
+ * to be used to split string to individual patterns.
+ * @param[in] flags combination of WINX_PAT_xxx flags.
+ * @return Zero for success, negative value otherwise.
+ */
+int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags)
+{
+	int pattern_detected;
+	int i, j, n;
+	short *s;
+	
+	if(patterns == NULL || string == NULL || delim == NULL)
+		return (-1);
+	
+	/* reset patterns structure */
+	patterns->flags = flags;
+	patterns->count = 0;
+	patterns->array = NULL;
+	patterns->string = NULL;
+	
+	if(string[0] == 0)
+		return 0; /* empty list of patterns */
+	
+	/* make a copy of the string */
+	s = winx_wcsdup(string);
+	if(s == NULL){
+		DebugPrint("winx_patcomp: cannot allocate %u bytes of memory",
+			(wcslen(string) + 1) * sizeof(short));
+		return (-1);
+	}
+	
+	/* TODO: test for speed a case when s is converted to lowercase */
+	
+	/* replace all delimiters by zeros */
+	for(n = 0; s[n]; n++){
+		if(wcschr(delim,s[n]))
+			s[n] = 0;
+	}
+	
+	/* count all patterns */
+	pattern_detected = 0;
+	for(i = 0; i < n; i++){
+		if(s[i] != 0){
+			if(!pattern_detected){
+				patterns->count ++;
+				pattern_detected = 1;
+			}
+		} else {
+			pattern_detected = 0;
+		}
+	}
+	
+	/* build array of patterns */
+	patterns->array = winx_heap_alloc(patterns->count * sizeof(short *));
+	if(patterns->array == NULL){
+		DebugPrint("winx_patcomp: cannot allocate %u bytes of memory",
+			patterns->count * sizeof(short *));
+		winx_heap_free(s);
+		patterns->count = 0;
+		return (-1);
+	}
+	pattern_detected = 0;
+	for(i = j = 0; i < n; i++){
+		if(s[i] != 0){
+			if(!pattern_detected){
+				patterns->array[j] = s + i;
+				j ++;
+				pattern_detected = 1;
+			}
+		} else {
+			pattern_detected = 0;
+		}
+	}
+
+	patterns->string = s;
+	return 0;
+}
+
+/**
+ * @brief Searches for patterns in the string.
+ * @param[in] string the string to search in.
+ * @param[in] patterns the list of patterns
+ * to be searched for.
+ * @return Nonzero value indicates
+ * that at least one pattern has been found.
+ */
+int __stdcall winx_patfind(short *string,winx_patlist *patterns)
+{
+	int i;
+	wchar_t *result;
+	
+	for(i = 0; i < patterns->count; i++){
+		if(patterns->flags & WINX_PAT_ICASE)
+			result = winx_wcsistr(string,patterns->array[i]);
+		else
+			result = wcsstr(string,patterns->array[i]);
+		if(result)
+			return 1; /* pattern found */
+	}
+	/* no patterns found */
+	return 0;
+}
+
+/**
+ * @brief Frees resources allocated by winx_patcomp.
+ * @param[in] patterns the list of patterns.
+ */
+void __stdcall winx_patfree(winx_patlist *patterns)
+{
+	if(patterns->string)
+		winx_heap_free(patterns->string);
+	if(patterns->array)
+		winx_heap_free(patterns->array);
 }
 
 /** @} */

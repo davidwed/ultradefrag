@@ -1,5 +1,17 @@
 HISTORY
 
+  Version 5.0.0  2010-10-
+  ------------------------------------------------------------------------------
+    RC1:
+    - the driver has been completely reworked to increase its reliability
+      and flexibitity; a lot of complicated algorithms were replaced
+      by obvious ones; as a side effect we have a noticeable speedup
+      of the volume analysis
+    - winx_patcomp, winx_patfind, winx_patfree, winx_wcsdup 
+      functions added to zenwinx library
+
+                                    ***
+
   Version 4.4.0  2010-09-18
   ------------------------------------------------------------------------------
     RC2:
