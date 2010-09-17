@@ -622,32 +622,28 @@ static int get_ntfs_data(winx_volume_information *v)
  * @param[in] volume_letter the volume letter.
  * @param[in,out] v pointer to structure
  * receiving the volume information.
- * volume_letter field of the structure
- * must be set before the call.
  * @return Zero for success, negative
  * value otherwise.
  */
 int __stdcall winx_get_volume_information(char volume_letter,winx_volume_information *v)
 {
-	char c, letter;
+	char c;
 	HANDLE hRoot;
 	
 	/* check input data correctness */
 	if(v == NULL)
 		return (-1);
 
+	/* reset all fields of the structure, except of volume_letter */
+	memset(v,0,sizeof(winx_volume_information));
 	v->volume_letter = volume_letter;
-	c = (char)toupper((int)v->volume_letter);
+
+	c = (char)toupper((int)volume_letter);
 	if(c == 0 || c < 'A' || c > 'Z')
 		return (-1);
 	
-	/* reset all fields of the structure, except of volume_letter */
-	letter = v->volume_letter;
-	memset(v,0,sizeof(winx_volume_information));
-	v->volume_letter = letter;
-	
 	/* open root directory */
-	hRoot = OpenRootDirectory(letter);
+	hRoot = OpenRootDirectory(volume_letter);
 	if(hRoot == NULL)
 		return (-1);
 	
