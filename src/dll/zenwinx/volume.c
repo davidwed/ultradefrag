@@ -736,7 +736,7 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 			FSCTL_GET_VOLUME_BITMAP,&next,sizeof(ULONGLONG),
 			bitmap,BITMAPSIZE);
 		if(NT_SUCCESS(status)){
-			NtWaitForSingleObject(f,FALSE,NULL);
+			NtWaitForSingleObject(winx_fileno(f),FALSE,NULL);
 			status = iosb.Status;
 		}
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
