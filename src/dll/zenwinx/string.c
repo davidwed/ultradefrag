@@ -196,10 +196,17 @@ int __stdcall winx_patfind(short *string,winx_patlist *patterns)
  */
 void __stdcall winx_patfree(winx_patlist *patterns)
 {
+	/* free allocated memory */
 	if(patterns->string)
 		winx_heap_free(patterns->string);
 	if(patterns->array)
 		winx_heap_free(patterns->array);
+	
+	/* reset all fields of the structure */
+	patterns->flags = 0;
+	patterns->count = 0;
+	patterns->array = NULL;
+	patterns->string = NULL;
 }
 
 /** @} */
