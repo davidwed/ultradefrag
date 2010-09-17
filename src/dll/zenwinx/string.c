@@ -175,6 +175,9 @@ int __stdcall winx_patfind(short *string,winx_patlist *patterns)
 	int i;
 	wchar_t *result;
 	
+	if(patterns == NULL || string == NULL)
+		return 0;
+	
 	for(i = 0; i < patterns->count; i++){
 		if(patterns->flags & WINX_PAT_ICASE)
 			result = winx_wcsistr(string,patterns->array[i]);
