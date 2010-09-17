@@ -60,6 +60,10 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
  * @param[in] value the null-terminated value string.
  * NULL pointer causes a variable deletion.
  * @return Zero for success, negative value otherwise.
+ * @note value buffer size must not exceed 32767 characters,
+ * including terminal zero, as mentioned in MSDN. This is
+ * because unsigned short data type can hold numbers
+ * less than or equal to 32767.
  */
 int __stdcall winx_set_env_variable(short *name, short *value)
 {

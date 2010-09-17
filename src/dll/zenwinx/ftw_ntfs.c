@@ -526,9 +526,10 @@ static void analyze_single_attribute(ULONGLONG mft_id,FILE_RECORD_HEADER *frh,
 		if(attribute_found){
 			if(attr->Nonresident) resident_status = "Nonresident";
 			else resident_status = "Resident";
-			//DebugPrint("An attribute pointed by the attribute list entry found...");
-			DebugPrint("AttrListEntry: Base MftId = %I64u, MftId = %I64u, Attribute Type = 0x%x, Attribute Number = %u, %s",
+			/* uncomment next lines if you need debugging information on attribute list entries */
+			/*DebugPrint("AttrListEntry: Base MftId = %I64u, MftId = %I64u, Attribute Type = 0x%x, Attribute Number = %u, %s",
 				sp->mfi.BaseMftId,mft_id,(UINT)attr_type,(UINT)attr_number,resident_status);
+			*/
 			if(attr->Nonresident) analyze_non_resident_stream((PNONRESIDENT_ATTRIBUTE)attr,sp);
 			else analyze_resident_stream((PRESIDENT_ATTRIBUTE)attr,sp);
 			sp->processed_attr_list_entries ++;
