@@ -182,7 +182,11 @@ int __stdcall winx_vflush(char volume_letter);
 typedef struct _winx_volume_region {
 	struct _winx_volume_region *next;  /* pointer to the next region */
 	struct _winx_volume_region *prev;  /* pointer to the previous region */
+	ULONGLONG lcn;                     /* logical cluster number */
+	ULONGLONG length;                  /* size of region, in clusters */
 } winx_volume_region;
+
+winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,int flags);
 
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);
@@ -232,7 +236,7 @@ typedef struct _winx_blockmap {
 	struct _winx_blockmap *prev; /* pointer to the previous fragment */
 	ULONGLONG vcn;               /* virtual cluster number */
 	ULONGLONG lcn;               /* logical cluster number */
-	ULONGLONG length;            /* size of the fragment, in bytes */
+	ULONGLONG length;            /* size of the fragment, in clusters */
 } winx_blockmap;
 
 typedef struct _winx_file_disposition {

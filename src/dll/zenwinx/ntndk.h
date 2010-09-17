@@ -1230,6 +1230,15 @@ typedef struct {
 	MAPPING_PAIR		Pair[1];
 } GET_RETRIEVAL_DESCRIPTOR, *PGET_RETRIEVAL_DESCRIPTOR;
 
+/* This is the definition of the buffer that FSCTL_GET_VOLUME_BITMAP
+ * returns. It consists of a header followed by the actual bitmap data
+ */
+typedef struct {
+	ULONGLONG			StartLcn;
+	ULONGLONG			ClustersToEndOfVol;
+	UCHAR				Map[1];
+} BITMAP_DESCRIPTOR, *PBITMAP_DESCRIPTOR; 
+
 #pragma pack(push, 1)
 /*
 * This is the definition for the data structure

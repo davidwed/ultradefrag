@@ -442,13 +442,13 @@ static int IsNtfsPartition(BPB *bpb,winx_volume_information *v)
  * @brief Opens the volume.
  * @note Internal use only.
  */
-static WINX_FILE * open_volume(winx_volume_information *v)
+static WINX_FILE * open_volume(char volume_letter)
 {
 	char path[64];
 	char flags[2];
 	#define FLAG 'r'
 
-	(void)_snprintf(path,64,"\\??\\%c:",v->volume_letter);
+	(void)_snprintf(path,64,"\\??\\%c:",volume_letter);
 	path[63] = 0;
 #if FLAG != 'r'
 #error Volume must be opened for read access!
@@ -476,7 +476,7 @@ static int read_first_sector(void *buffer,winx_volume_information *v)
 	size_t n_read;
 
 	/* open the volume */
-	f = open_volume(v);
+	f = open_volume(v->volume_letter);
 	if(f == NULL)
 		return (-1);
 
@@ -599,7 +599,7 @@ static int get_ntfs_data(winx_volume_information *v)
 	WINX_FILE *f;
 	
 	/* open the volume */
-	f = open_volume(v);
+	f = open_volume(v->volume_letter);
 	if(f == NULL)
 		return (-1);
 	
@@ -688,6 +688,114 @@ int __stdcall winx_vflush(char volume_letter)
 	}
 
 	return result;
+}
+
+/**
+ * @brief Retrieves list of free regions on the volume.
+ * @param[in] volume_name the name of the volume.
+ * @param[in] flags currently not used.
+ * @return List of free regions, NULL indicates that
+ * either disk is full (unlikely) or some error occured.
+ * @todo Add flag disallowing partial results.
+ */
+winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,int flags)
+{
+	winx_volume_region *rlist = NULL, *rgn = NULL;
+	BITMAP_DESCRIPTOR *bitmap;
+	#define LLINVALID   ((ULONGLONG) -1)
+	#define BITMAPBYTES 4096
+	#define BITMAPSIZE  (BITMAPBYTES + 2 * sizeof(ULONGLONG))
+	/* bit shifting array for efficient processing of the bitmap */
+	unsigned char bitshift[] = { 1, 2, 4, 8, 16, 32, 64, 128 };
+	WINX_FILE *f;
+	ULONGLONG i, start, next, free_rgn_start;
+	IO_STATUS_BLOCK iosb;
+	NTSTATUS status;
+	
+	/* allocate memory */
+	bitmap = winx_heap_alloc(BITMAPSIZE);
+	if(bitmap == NULL){
+		DebugPrint("winx_get_free_volume_regions: cannot allocate %u bytes of memory",
+			BITMAPSIZE);
+		return NULL;
+	}
+	
+	/* open volume */
+	f = open_volume(volume_letter);
+	if(f == NULL){
+		winx_heap_free(bitmap);
+		return NULL;
+	}
+	
+	/* get volume bitmap */
+	next = 0, free_rgn_start = LLINVALID;
+	do {
+		/* get next portion of the bitmap */
+		memset(bitmap,0,BITMAPSIZE);
+		status = NtFsControlFile(f,NULL,NULL,0,&iosb,
+			FSCTL_GET_VOLUME_BITMAP,&next,sizeof(ULONGLONG),
+			bitmap,BITMAPSIZE);
+		if(NT_SUCCESS(status)){
+			NtWaitForSingleObject(f,FALSE,NULL);
+			status = iosb.Status;
+		}
+		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
+			DebugPrintEx(status,"winx_get_free_volume_regions: cannot get volume bitmap");
+			winx_fclose(f);
+			winx_heap_free(bitmap);
+			//winx_list_destroy((list_entry **)(void *)&rlist);
+			return NULL;
+		}
+		
+		/* scan through the returned bitmap info */
+		start = bitmap->StartLcn;
+		for(i = 0; i < min(bitmap->ClustersToEndOfVol, 8 * BITMAPBYTES); i++){
+			if(!(bitmap->Map[ i/8 ] & bitshift[ i % 8 ])){
+				/* cluster is free */
+				if(free_rgn_start == LLINVALID)
+					free_rgn_start = start + i;
+			} else {
+				/* cluster isn't free */
+				if(free_rgn_start != LLINVALID){
+					/* add free region to the list */
+					rgn = (winx_volume_region *)winx_list_insert_item((list_entry **)(void *)&rlist,
+						(list_entry *)rgn,sizeof(winx_volume_region));
+					if(rgn == NULL){
+						DebugPrint("winx_get_free_volume_regions: cannot allocate %u bytes of memory",
+							sizeof(winx_volume_region));
+						/* TODO: return if partial results aren't allowed */
+					} else {
+						rgn->lcn = free_rgn_start;
+						rgn->length = start + i - free_rgn_start;
+					}
+					free_rgn_start = LLINVALID;
+				}
+			}
+		}
+		
+		/* go to the next portion of data */
+		next = bitmap->StartLcn + i;
+	} while(status != STATUS_SUCCESS);
+
+	if(free_rgn_start != LLINVALID){
+		/* add free region to the list */
+		rgn = (winx_volume_region *)winx_list_insert_item((list_entry **)(void *)&rlist,
+			(list_entry *)rgn,sizeof(winx_volume_region));
+		if(rgn == NULL){
+			DebugPrint("winx_get_free_volume_regions: cannot allocate %u bytes of memory",
+				sizeof(winx_volume_region));
+			/* TODO: return if partial results aren't allowed */
+		} else {
+			rgn->lcn = free_rgn_start;
+			rgn->length = start + i - free_rgn_start;
+		}
+		free_rgn_start = LLINVALID;
+	}
+	
+	/* cleanup */
+	winx_fclose(f);
+	winx_heap_free(bitmap);
+	return rlist;
 }
 
 /** @} */
