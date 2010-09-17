@@ -36,6 +36,7 @@ EXPORTS
 	winx_get_drive_type
 	winx_get_volume_information
 	winx_get_free_volume_regions
+	winx_release_free_volume_regions
 	winx_vflush
 	winx_fopen
 	winx_fbopen

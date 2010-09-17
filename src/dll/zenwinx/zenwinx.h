@@ -187,6 +187,7 @@ typedef struct _winx_volume_region {
 } winx_volume_region;
 
 winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,int flags);
+void __stdcall winx_release_free_volume_regions(winx_volume_region *rlist);
 
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);

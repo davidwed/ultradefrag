@@ -798,4 +798,13 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 	return rlist;
 }
 
+/**
+ * @brief Frees memory allocated
+ * by winx_get_free_volume_regions.
+ */
+void __stdcall winx_release_free_volume_regions(winx_volume_region *rlist)
+{
+	winx_list_destroy((list_entry **)(void *)&rlist);
+}
+
 /** @} */
