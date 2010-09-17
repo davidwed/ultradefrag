@@ -9,6 +9,9 @@ HISTORY
       of the volume analysis
     - winx_patcomp, winx_patfind, winx_patfree, winx_wcsdup, winx_ftw_dump_file 
       functions added to zenwinx library
+    - the following translations were updated:
+
+      Portuguese(BR)
 
                                     ***
 
