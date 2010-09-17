@@ -177,6 +177,12 @@ typedef struct _winx_volume_information {
 } winx_volume_information;
 
 int __stdcall winx_get_volume_information(char volume_letter,winx_volume_information *v);
+int __stdcall winx_vflush(char volume_letter);
+
+typedef struct _winx_volume_region {
+	struct _winx_volume_region *next;  /* pointer to the next region */
+	struct _winx_volume_region *prev;  /* pointer to the previous region */
+} winx_volume_region;
 
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);

@@ -671,4 +671,23 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 	return 0;
 }
 
+/**
+ * @brief fflush equivalent for entire volume.
+ */
+int __stdcall winx_vflush(char volume_letter)
+{
+	char path[] = "\\??\\A:";
+	WINX_FILE *f;
+	int result = -1;
+	
+	path[4] = volume_letter;
+	f = winx_fopen(path,"r+");
+	if(f){
+		result = winx_fflush(f);
+		winx_fclose(f);
+	}
+
+	return result;
+}
+
 /** @} */
