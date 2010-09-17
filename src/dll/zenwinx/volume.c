@@ -732,7 +732,7 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 	do {
 		/* get next portion of the bitmap */
 		memset(bitmap,0,BITMAPSIZE);
-		status = NtFsControlFile(f,NULL,NULL,0,&iosb,
+		status = NtFsControlFile(winx_fileno(f),NULL,NULL,0,&iosb,
 			FSCTL_GET_VOLUME_BITMAP,&next,sizeof(ULONGLONG),
 			bitmap,BITMAPSIZE);
 		if(NT_SUCCESS(status)){
