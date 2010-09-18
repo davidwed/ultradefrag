@@ -868,12 +868,12 @@ winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
 {
 	winx_volume_region *r;
 	ULONGLONG new_lcn, new_length;
-	int complete = 0;
+	int completed = 0;
 	
 	for(r = rlist; r; r = r->next){
 		/* check whether specified region is inside list entry */
 		if(lcn >= r->lcn && (lcn + length) <= (r->lcn + r->length))
-			complete = 1;
+			completed = 1;
 		if(r->lcn >= lcn && (r->lcn + r->length) <= (lcn + length)){
 			/*
 			* list entry is inside a specified range
@@ -917,7 +917,7 @@ winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
 		}
 		/* if specified range is outside of the region, there is nothing to subtract */
 next_region:
-		if(r->next == rlist || complete) break;
+		if(r->next == rlist || completed) break;
 	}
 	return rlist;
 }
