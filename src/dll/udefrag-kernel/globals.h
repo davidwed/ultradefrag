@@ -251,15 +251,6 @@ NTSTATUS MoveBlocksOfFile(PFILENAME pfn,HANDLE hFile,ULONGLONG targetLcn);
  *--------------------------------------------------------------------
  */
 
-/* This is the definition of the buffer that FSCTL_GET_VOLUME_BITMAP
- * returns. It consists of a header followed by the actual bitmap data
- */
-typedef struct {
-	ULONGLONG			StartLcn;
-	ULONGLONG			ClustersToEndOfVol;
-	UCHAR				Map[1];
-} BITMAP_DESCRIPTOR, *PBITMAP_DESCRIPTOR; 
-
 /* Size of the buffer we read file mapping information into.
  * The buffer is big enough to hold the 16 bytes that 
  * come back at the head of the buffer (the number of entries 
