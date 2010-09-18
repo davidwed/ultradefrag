@@ -39,6 +39,7 @@ EXPORTS
 	winx_add_volume_region
 	winx_sub_volume_region
 	winx_release_free_volume_regions
+	winx_vopen
 	winx_vflush
 	winx_fopen
 	winx_fbopen

@@ -7,8 +7,8 @@ HISTORY
       and flexibitity; a lot of complicated algorithms were replaced
       by obvious ones; as a side effect we have a noticeable speedup
       of the volume analysis
-    - winx_patcomp, winx_patfind, winx_patfree, winx_wcsdup,
-      winx_ftw_dump_file, winx_vflush, winx_get_free_volume_regions,
+    - winx_patcomp, winx_patfind, winx_patfree, winx_wcsdup, winx_vopen,
+      winx_vflush, winx_ftw_dump_file, winx_get_free_volume_regions,
       winx_add_volume_region, winx_sub_volume_region,
       winx_release_free_volume_regions functions added to zenwinx library
     - the following translations were updated:

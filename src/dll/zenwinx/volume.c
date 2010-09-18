@@ -439,17 +439,17 @@ static int IsNtfsPartition(BPB *bpb,winx_volume_information *v)
 }
 
 /**
- * @brief Opens the volume.
- * @note Internal use only.
+ * @brief Opens the volume for read access.
+ * @param[in] volume_letter the volume letter.
+ * @return File descriptor, NULL indicates failure.
  */
-static WINX_FILE * open_volume(char volume_letter)
+WINX_FILE * __stdcall winx_vopen(char volume_letter)
 {
-	char path[64];
+	char path[] = "\\??\\A:";
 	char flags[2];
 	#define FLAG 'r'
 
-	(void)_snprintf(path,64,"\\??\\%c:",volume_letter);
-	path[63] = 0;
+	path[4] = volume_letter;
 #if FLAG != 'r'
 #error Volume must be opened for read access!
 #endif
@@ -476,7 +476,7 @@ static int read_first_sector(void *buffer,winx_volume_information *v)
 	size_t n_read;
 
 	/* open the volume */
-	f = open_volume(v->volume_letter);
+	f = winx_vopen(v->volume_letter);
 	if(f == NULL)
 		return (-1);
 
@@ -599,7 +599,7 @@ static int get_ntfs_data(winx_volume_information *v)
 	WINX_FILE *f;
 	
 	/* open the volume */
-	f = open_volume(v->volume_letter);
+	f = winx_vopen(v->volume_letter);
 	if(f == NULL)
 		return (-1);
 	
@@ -721,7 +721,7 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 	}
 	
 	/* open volume */
-	f = open_volume(volume_letter);
+	f = winx_vopen(volume_letter);
 	if(f == NULL){
 		winx_heap_free(bitmap);
 		return NULL;
