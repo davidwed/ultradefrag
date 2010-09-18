@@ -799,6 +799,126 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 }
 
 /**
+ * @brief Adds a range of clusters to the list of regions.
+ * @param[in,out] rlist the list of volume regions.
+ * @param[in] lcn the logical cluster number of the region to be added.
+ * @param[in] length the size of the region to be added, in clusters.
+ * @return Pointer to updated list of regions.
+ */
+winx_volume_region * __stdcall winx_add_volume_region(winx_volume_region *rlist,
+		ULONGLONG lcn,ULONGLONG length)
+{
+	winx_volume_region *r, *rnext, *rprev = NULL;
+	
+	for(r = rlist; r; r = r->next){
+		if(r->lcn > lcn){
+			if(r != rlist) rprev = r->prev;
+			break;
+		}
+		if(r->next == rlist){
+			rprev = r;
+			break;
+		}
+	}
+
+	/* hits the new region previous one? */
+	if(rprev){
+		if(rprev->lcn + rprev->length == lcn){
+			rprev->length += length;
+			if(rprev->lcn + rprev->length == rprev->next->lcn){
+				rprev->length += rprev->next->length;
+				rprev->next->length = 0;
+			}
+			return rlist;
+		}
+	}
+	
+	/* hits the new region the next one? */
+	if(rlist){
+		if(rprev == NULL) rnext = rlist;
+		else rnext = rprev->next;
+		if(lcn + length == rnext->lcn){
+			rnext->lcn = lcn;
+			rnext->length += length;
+			return rlist;
+		}
+	}
+	
+	r = (winx_volume_region *)winx_list_insert_item((list_entry **)(void *)&rlist,
+		(list_entry *)rprev,sizeof(winx_volume_region));
+	if(r == NULL){
+		/* TODO: better error handling */
+		return rlist;
+	}
+	
+	r->lcn = lcn;
+	r->length = length;
+	return rlist;
+}
+
+/**
+ * @brief Subtracts a range of clusters from the list of regions.
+ * @param[in,out] rlist the list of volume regions.
+ * @param[in] lcn the logical cluster number of the region to be subtracted.
+ * @param[in] length the size of the region to be subtracted, in clusters.
+ * @return Pointer to updated list of regions.
+ */
+winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
+		ULONGLONG lcn,ULONGLONG length)
+{
+	winx_volume_region *r;
+	ULONGLONG new_lcn, new_length;
+	
+	for(r = rlist; r; r = r->next){
+		if(r->lcn >= lcn && (r->lcn + r->length) <= (lcn + length)){
+			/*
+			* list entry is inside a specified range
+			* |--------------------|
+			*        |-r-|
+			*/
+			r->length = 0;
+			goto next_region;
+		}
+		if(r->lcn < lcn && (r->lcn + r->length) > lcn && \
+		  (r->lcn + r->length) <= (lcn + length)){
+			/*
+			* cut the right side of the list entry
+			*     |--------------------|
+			* |----r----|
+			*/
+			r->length = lcn - r->lcn;
+			goto next_region;
+		}
+		if(r->lcn >= lcn && r->lcn < (lcn + length)){
+			/*
+			* cut the left side of the list entry
+			* |--------------------|
+			*                   |----r----|
+			*/
+			r->length = r->lcn + r->length - (lcn + length);
+			r->lcn = lcn + length;
+			goto next_region;
+		}
+		if(r->lcn < lcn && (r->lcn + r->length) > (lcn + length)){
+			/*
+			* specified range is inside list entry
+			*   |----|
+			* |-------r--------|
+			*/
+			new_lcn = lcn + length;
+			new_length = r->lcn + r->length - (lcn + length);
+			r->length = lcn - r->lcn;
+			rlist = winx_add_volume_region(rlist,new_lcn,new_length);
+			goto next_region;
+		}
+		/* if specified range is outside of the region, there is nothing to subtract */
+next_region:
+		if(r->next == rlist) break;
+	}
+	return rlist;
+}
+
+/**
  * @brief Frees memory allocated
  * by winx_get_free_volume_regions.
  */
