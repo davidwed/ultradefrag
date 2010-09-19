@@ -180,6 +180,9 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 WINX_FILE * __stdcall winx_vopen(char volume_letter);
 int         __stdcall winx_vflush(char volume_letter);
 
+/* winx_get_free_volume_regions flags */
+#define WINX_GVR_ALLOW_PARTIAL_SCAN  0x1
+
 typedef struct _winx_volume_region {
 	struct _winx_volume_region *next;  /* pointer to the next region */
 	struct _winx_volume_region *prev;  /* pointer to the previous region */
