@@ -696,6 +696,8 @@ int __stdcall winx_vflush(char volume_letter)
  * @param[in] flags combination of WINX_GVR_xxx flags.
  * @param[in] cb address of procedure to be called
  * each time when the free region is found on the volume.
+ * If callback procedure returns nonzero value,
+ * the scan terminates immediately.
  * @return List of free regions, NULL indicates that
  * either disk is full (unlikely) or some error occured.
  * @todo Add flag disallowing partial results.
@@ -775,8 +777,10 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 					} else {
 						rgn->lcn = free_rgn_start;
 						rgn->length = start + i - free_rgn_start;
-						if(cb != NULL)
-							cb(rgn);
+						if(cb != NULL){
+							if(cb(rgn))
+								goto done;
+						}
 					}
 					free_rgn_start = LLINVALID;
 				}
@@ -800,12 +804,15 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 		} else {
 			rgn->lcn = free_rgn_start;
 			rgn->length = start + i - free_rgn_start;
-			if(cb != NULL)
-				cb(rgn);
+			if(cb != NULL){
+				if(cb(rgn))
+					goto done;
+			}
 		}
 		free_rgn_start = LLINVALID;
 	}
-	
+
+done:	
 	/* cleanup */
 	winx_fclose(f);
 	winx_heap_free(bitmap);
