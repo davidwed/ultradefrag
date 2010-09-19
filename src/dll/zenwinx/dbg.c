@@ -328,4 +328,88 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
 	winx_heap_free(buffer);
 }
 
+/**
+ * @brief Delivers formatted message, decorated by specified
+ * character at both sides, to DbgView program.
+ * @param[in] ch character to be used for decoration.
+ * If zero value is passed, DEFAULT_DBG_PRINT_DECORATION_CHAR is used.
+ * @param[in] width the width of the resulting message, in characters.
+ * If zero value is passed, DEFAULT_DBG_PRINT_HEADER_WIDTH is used.
+ * @param[in] format the format string.
+ * @param[in] ... the parameters.
+ */
+void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...)
+{
+	char *buffer = NULL;
+	va_list arg;
+	int length, left, right;
+	char *s_left = NULL, *s_right = NULL, *s_result = NULL;
+	
+	/* never call winx_dbg_print_ex() here! */
+
+	if(!format) return;
+	buffer = winx_virtual_alloc(DBG_BUFFER_SIZE);
+	if(!buffer){
+		winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+		return;
+	}
+
+	/* store formatted string into buffer */
+	va_start(arg,format);
+	memset(buffer,0,DBG_BUFFER_SIZE);
+	length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
+	buffer[DBG_BUFFER_SIZE - 1] = 0;
+	va_end(arg);
+	
+	if(width == 0)
+		width = DEFAULT_DBG_PRINT_HEADER_WIDTH;
+
+	if(length + 4 > width){
+		/* print string not decorated */
+		winx_debug_print(buffer);
+	} else {
+		/* decorate string */
+		if(ch == 0)
+			ch = DEFAULT_DBG_PRINT_DECORATION_CHAR;
+		right = left = (width - length - 2) / 2;
+		if(width - length - 2 - left * 2)
+			right ++;
+		
+		s_left = winx_heap_alloc(left + 1);
+		if(s_left == NULL){
+			winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+			winx_debug_print(buffer); /* print the string not decorated */
+			goto done;
+		}
+		s_right = winx_heap_alloc(right + 1);
+		if(s_right == NULL){
+			winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+			winx_debug_print(buffer); /* print the string not decorated */
+			goto done;
+		}
+		s_result = winx_heap_alloc(left + right + 2 + length + 1);
+		if(s_result == NULL){
+			winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+			winx_debug_print(buffer); /* print the string not decorated */
+			goto done;
+		}
+		
+		memset(s_left,ch,left);
+		s_left[left] = 0;
+		memset(s_right,ch,right);
+		s_right[right] = 0;
+		
+		_snprintf(s_result,left + right + 2 + length + 1,"%s %s %s",
+			s_left, buffer, s_right);
+		s_result[left + right + 2 + length] = 0;
+		winx_debug_print(s_result);
+	}
+
+done:
+	winx_virtual_free(buffer,DBG_BUFFER_SIZE);
+	if(s_left) winx_heap_free(s_left);
+	if(s_right) winx_heap_free(s_right);
+	if(s_result) winx_heap_free(s_result);
+}
+
 /** @} */

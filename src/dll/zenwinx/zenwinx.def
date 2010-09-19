@@ -69,6 +69,7 @@ EXPORTS
 	winx_unregister_boot_exec_command
 	winx_dbg_print
 	winx_dbg_print_ex
+	winx_dbg_print_header
 	winx_str2time
 	winx_time2str
 	winx_xtime

@@ -298,8 +298,12 @@ void __stdcall winx_destroy_event(HANDLE h);
 int __stdcall winx_register_boot_exec_command(short *command);
 int __stdcall winx_unregister_boot_exec_command(short *command);
 
+#define DEFAULT_DBG_PRINT_DECORATION_CHAR  '-'
+#define DEFAULT_DBG_PRINT_HEADER_WIDTH     64
+
 void __cdecl winx_dbg_print(char *format, ...);
 void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
+void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...);
 
 ULONGLONG __stdcall winx_str2time(char *string);
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);

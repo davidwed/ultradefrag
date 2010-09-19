@@ -681,7 +681,7 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 	ULONGLONG time;
 	
 	time = winx_xtime();
-	DebugPrint("----------------- winx_scan_disk started -----------------");
+	winx_dbg_print_header(0,0,"winx_scan_disk started");
 	
 	if(winx_get_volume_information(volume_letter,&v) >= 0){
 		DebugPrint("winx_scan_disk: file system is %s",v.fs_name);
@@ -712,7 +712,7 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 	}
 
 done:
-	DebugPrint("------------ winx_scan_disk completed in %I64u ms ------------",
+	winx_dbg_print_header(0,0,"winx_scan_disk completed in %I64u ms",
 		winx_xtime() - time);
 	return filelist;
 }
