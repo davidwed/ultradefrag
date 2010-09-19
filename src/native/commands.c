@@ -89,6 +89,19 @@ extern cmd_table_entry cmd_table[];
 static int __cdecl boot_off_handler(int argc,short **argv,short **envp);
 static int __cdecl type_handler(int argc,short **argv,short **envp);
 
+static int __stdcall man_listing_terminator(void)
+{
+	KBD_RECORD kbd_rec;
+
+	/* give user a chance to break a likely hanged man listing */
+	if(winx_kb_read(&kbd_rec,0) == 0){
+		/* check for escape key hits */
+		if(kbd_rec.wVirtualScanCode == 0x1)
+			return 1;
+	}
+	return 0;
+}
+
 static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 {
 	char windir[MAX_PATH + 1];
@@ -111,7 +124,7 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 	/* try to get list of installed man pages through winx_ftw call */
 	_snwprintf(wpath,MAX_PATH,L"%hs\\UltraDefrag\\man",windir);
 	wpath[MAX_PATH] = 0;
-	filelist = winx_ftw(wpath,0,NULL,NULL,NULL);
+	filelist = winx_ftw(wpath,0,NULL,NULL,man_listing_terminator);
 	if(filelist){
         winx_printf("Available Manual Pages:\n");
 		for(file = filelist->prev, column = 0; file; file = file->prev){
