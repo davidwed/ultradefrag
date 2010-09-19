@@ -1648,10 +1648,10 @@ static int ntfs_scan_disk_helper(char volume_letter,
 	}
 	
 	/* call filter callback for each file found */
-	if(pcb != NULL){
+	if(fcb != NULL){
 		for(f = *filelist; f != NULL; f = f->next){
 			if(ftw_ntfs_check_for_termination(&sp)) break;
-			(void)pcb(f);
+			(void)fcb(f);
 			if(f->next == *filelist) break;
 		}
 	}
