@@ -111,6 +111,8 @@ static HANDLE ftw_fopen(winx_file_info *f)
  * to know whether it must be terminated or not.
  * Nonzero value, returned by terminator,
  * forces file dump to be terminated.
+ * @param[in] user_defined_data pointer to data
+ * passed to the registered terminator.
  * @return Zero for success,
  * negative value otherwise.
  */
