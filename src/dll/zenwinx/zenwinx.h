@@ -190,9 +190,10 @@ typedef struct _winx_volume_region {
 	ULONGLONG length;                  /* size of region, in clusters */
 } winx_volume_region;
 
-typedef int  (__stdcall *volume_region_callback)(winx_volume_region *reg);
+typedef int  (__stdcall *volume_region_callback)(winx_volume_region *reg,void *user_defined_data);
 
-winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,int flags,volume_region_callback cb);
+winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,
+		int flags,volume_region_callback cb,void *user_defined_data);
 winx_volume_region * __stdcall winx_add_volume_region(winx_volume_region *rlist,
 		ULONGLONG lcn,ULONGLONG length);
 winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,

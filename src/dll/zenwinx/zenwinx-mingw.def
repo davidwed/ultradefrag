@@ -35,7 +35,7 @@ EXPORTS
 	winx_enable_privilege@4
 	winx_get_drive_type@4
 	winx_get_volume_information@8
-	winx_get_free_volume_regions@12
+	winx_get_free_volume_regions@16
 	winx_add_volume_region@20
 	winx_sub_volume_region@20
 	winx_release_free_volume_regions@4

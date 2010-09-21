@@ -698,13 +698,16 @@ int __stdcall winx_vflush(char volume_letter)
  * each time when the free region is found on the volume.
  * If callback procedure returns nonzero value,
  * the scan terminates immediately.
+ * @param[in] user_defined_data pointer to data
+ * passed to the registered callback.
  * @return List of free regions, NULL indicates that
  * either disk is full (unlikely) or some error occured.
  * @note It is possible to scan disk partially by
  * requesting the scan termination through the callback
  * procedure.
  */
-winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,int flags,volume_region_callback cb)
+winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,
+		int flags, volume_region_callback cb, void *user_defined_data)
 {
 	winx_volume_region *rlist = NULL, *rgn = NULL;
 	BITMAP_DESCRIPTOR *bitmap;
@@ -780,7 +783,7 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 						rgn->lcn = free_rgn_start;
 						rgn->length = start + i - free_rgn_start;
 						if(cb != NULL){
-							if(cb(rgn))
+							if(cb(rgn,user_defined_data))
 								goto done;
 						}
 					}
@@ -807,7 +810,7 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,i
 			rgn->lcn = free_rgn_start;
 			rgn->length = start + i - free_rgn_start;
 			if(cb != NULL){
-				if(cb(rgn))
+				if(cb(rgn,user_defined_data))
 					goto done;
 			}
 		}
