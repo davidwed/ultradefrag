@@ -67,6 +67,7 @@ typedef struct _mft_scan_parameters {
 	ftw_filter_callback fcb;    /**/
 	ftw_progress_callback pcb;  /**/
 	ftw_terminator t;           /* terminator callback */
+	void *user_defined_data;    /* pointer passed to each callback */
 	my_file_information mfi;    /* structure receiving file information */
 	unsigned long processed_attr_list_entries; /* just for debugging purposes */
 	unsigned long errors;       /* number of critical errors preventing gathering complete information */
@@ -105,7 +106,7 @@ static int ftw_ntfs_check_for_termination(mft_scan_parameters *sp)
 	if(sp->t == NULL)
 		return 0;
 	
-	return sp->t();
+	return sp->t(sp->user_defined_data);
 }
 
 /**
@@ -175,9 +176,7 @@ static void enumerate_attributes(FILE_RECORD_HEADER *frh,attribute_handler ah,mf
 	attr_offset = frh->AttributeOffset;
 	pattr = (PATTRIBUTE)((char *)frh + attr_offset);
 
-	while(pattr){
-		if(ftw_ntfs_check_for_termination(sp)) break;
-
+	while(pattr && !ftw_ntfs_check_for_termination(sp)){
 		/* is an attribute header inside a record bounds? */
 		if(attr_offset + sizeof(ATTRIBUTE) > frh->BytesInUse || \
 			attr_offset + sizeof(ATTRIBUTE) > sp->ml.file_record_size) break;
@@ -1292,7 +1291,7 @@ static void analyze_file_record(NTFS_FILE_RECORD_OUTPUT_BUFFER *nfrob,
 			} else {
 				/* call progress callback */
 				if(sp->pcb)
-					sp->pcb(f);
+					sp->pcb(f,sp->user_defined_data);
 			}
 		}
 		f = next;
@@ -1611,7 +1610,7 @@ fail:
 static int ntfs_scan_disk_helper(char volume_letter,
 	int flags, ftw_filter_callback fcb,
 	ftw_progress_callback pcb, ftw_terminator t,
-	winx_file_info **filelist)
+	void *user_defined_data, winx_file_info **filelist)
 {
 	char path[64];
 	char f_flags[2];
@@ -1628,6 +1627,7 @@ static int ntfs_scan_disk_helper(char volume_letter,
 	sp.fcb = fcb;
 	sp.pcb = pcb;
 	sp.t = t;
+	sp.user_defined_data = user_defined_data;
 	
 	/* open volume */
 	(void)_snprintf(path,64,"\\??\\%c:",volume_letter);
@@ -1651,7 +1651,7 @@ static int ntfs_scan_disk_helper(char volume_letter,
 	if(fcb != NULL){
 		for(f = *filelist; f != NULL; f = f->next){
 			if(ftw_ntfs_check_for_termination(&sp)) break;
-			(void)fcb(f);
+			(void)fcb(f,sp.user_defined_data);
 			if(f->next == *filelist) break;
 		}
 	}
@@ -1670,11 +1670,11 @@ static int ntfs_scan_disk_helper(char volume_letter,
  */
 winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
 	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb, 
-	ftw_terminator t)
+	ftw_terminator t, void *user_defined_data)
 {
 	winx_file_info *filelist = NULL;
 	
-	if(ntfs_scan_disk_helper(volume_letter,flags,fcb,pcb,t,&filelist) == (-1) && \
+	if(ntfs_scan_disk_helper(volume_letter,flags,fcb,pcb,t,user_defined_data,&filelist) == (-1) && \
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);

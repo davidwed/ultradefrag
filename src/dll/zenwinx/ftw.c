@@ -51,7 +51,7 @@
 /* external functions prototypes */
 winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
 	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb, 
-	ftw_terminator t);
+	ftw_terminator t, void *user_defined_data);
 
 /**
  * @brief Checks whether the file
@@ -59,12 +59,12 @@ winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
  * @return Nonzero value indicates that
  * termination is requested.
  */
-static int ftw_check_for_termination(ftw_terminator t)
+static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
 {
 	if(t == NULL)
 		return 0;
 	
-	return t();
+	return t(user_defined_data);
 }
 
 /**
@@ -114,7 +114,8 @@ static HANDLE ftw_fopen(winx_file_info *f)
  * @return Zero for success,
  * negative value otherwise.
  */
-int __stdcall winx_ftw_dump_file(winx_file_info *f,ftw_terminator t)
+int __stdcall winx_ftw_dump_file(winx_file_info *f,
+		ftw_terminator t, void *user_defined_data)
 {
 	GET_RETRIEVAL_DESCRIPTOR *filemap;
 	HANDLE hFile;
@@ -179,7 +180,7 @@ int __stdcall winx_ftw_dump_file(winx_file_info *f,ftw_terminator t)
 			return 0; /* file is inside MFT */
 		}
 
-		if(ftw_check_for_termination(t)){
+		if(ftw_check_for_termination(t,user_defined_data)){
 			if(counter > MAX_COUNT)
 				DebugPrint("winx_ftw_dump_file: %ws: infinite main loop?",f->path);
 			goto cleanup;
@@ -249,9 +250,10 @@ int __stdcall winx_ftw_dump_file(winx_file_info *f,ftw_terminator t)
  * @return Address of inserted file list entry,
  * NULL indicates failure.
  */
-static winx_file_info * ftw_add_entry_to_filelist(short *path, int flags,
-	ftw_filter_callback fcb, ftw_progress_callback pcb,
-	ftw_terminator t, winx_file_info **filelist,
+static winx_file_info * ftw_add_entry_to_filelist(short *path,
+	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb,
+	ftw_terminator t, void *user_defined_data,
+	winx_file_info **filelist,
 	FILE_BOTH_DIR_INFORMATION *file_entry)
 {
 	winx_file_info *f;
@@ -325,7 +327,7 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path, int flags,
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
-		if(winx_ftw_dump_file(f,t) < 0){
+		if(winx_ftw_dump_file(f,t,user_defined_data) < 0){
 			winx_heap_free(f->name);
 			winx_heap_free(f->path);
 			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
@@ -342,7 +344,8 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path, int flags,
  */
 static int ftw_add_root_directory(short *path, int flags,
 	ftw_filter_callback fcb, ftw_progress_callback pcb, 
-	ftw_terminator t,winx_file_info **filelist)
+	ftw_terminator t, void *user_defined_data,
+	winx_file_info **filelist)
 {
 	winx_file_info *f;
 	int length;
@@ -419,7 +422,7 @@ static int ftw_add_root_directory(short *path, int flags,
 
 	/* get file disposition if requested */
 	if(flags & WINX_FTW_DUMP_FILES){
-		if(winx_ftw_dump_file(f,t) < 0){
+		if(winx_ftw_dump_file(f,t,user_defined_data) < 0){
 			winx_heap_free(f->name);
 			winx_heap_free(f->path);
 			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
@@ -429,9 +432,9 @@ static int ftw_add_root_directory(short *path, int flags,
 	
 	/* call callbacks */
 	if(pcb != NULL)
-		pcb(f);
+		pcb(f,user_defined_data);
 	if(fcb != NULL)
-		fcb(f);
+		fcb(f,user_defined_data);
 	
 	return 0;
 }
@@ -472,7 +475,8 @@ static HANDLE ftw_open_directory(short *path)
  */
 static int ftw_helper(short *path, int flags,
 		ftw_filter_callback fcb, ftw_progress_callback pcb,
-		ftw_terminator t,winx_file_info **filelist)
+		ftw_terminator t, void *user_defined_data,
+		winx_file_info **filelist)
 {
 	FILE_BOTH_DIR_INFORMATION *file_listing, *file_entry;
 	HANDLE hDir;
@@ -500,7 +504,7 @@ static int ftw_helper(short *path, int flags,
 	file_entry = file_listing;
 
 	/* list directory entries */
-	while(!ftw_check_for_termination(t)){
+	while(!ftw_check_for_termination(t,user_defined_data)){
 		/* get directory entry */
 		if(file_entry->NextEntryOffset){
 			/* go to the next directory entry */
@@ -540,7 +544,8 @@ static int ftw_helper(short *path, int flags,
 			continue;
 		
 		/* add entry to the file list */
-		f = ftw_add_entry_to_filelist(path,flags,fcb,pcb,t,filelist,file_entry);
+		f = ftw_add_entry_to_filelist(path,flags,fcb,pcb,t,
+				user_defined_data,filelist,file_entry);
 		if(f == NULL){
 			winx_heap_free(file_listing);
 			NtClose(hDir);
@@ -550,7 +555,7 @@ static int ftw_helper(short *path, int flags,
 		//DebugPrint("%ws\n%ws",f->name,f->path);
 		
 		/* check for termination */
-		if(ftw_check_for_termination(t)){
+		if(ftw_check_for_termination(t,user_defined_data)){
 			DebugPrint("ftw_helper: terminated by user");
 			winx_heap_free(file_listing);
 			NtClose(hDir);
@@ -559,15 +564,15 @@ static int ftw_helper(short *path, int flags,
 		
 		/* call the callback routines */
 		if(pcb != NULL)
-			pcb(f);
+			pcb(f,user_defined_data);
 		
 		skip_children = 0;
 		if(fcb != NULL)
-			skip_children = fcb(f);
+			skip_children = fcb(f,user_defined_data);
 
 		/* scan subdirectories if requested */
 		if(is_directory(f) && (flags & WINX_FTW_RECURSIVE) && !skip_children){
-			result = ftw_helper(f->path,flags,fcb,pcb,t,filelist);
+			result = ftw_helper(f->path,flags,fcb,pcb,t,user_defined_data,filelist);
 			if(result < 0){
 				winx_heap_free(file_listing);
 				NtClose(hDir);
@@ -603,6 +608,8 @@ static int ftw_helper(short *path, int flags,
  * whether it must be terminated or not.
  * Nonzero value, returned by terminator,
  * forces file tree walk to be terminated.
+ * @param[in] user_defined_data pointer to data
+ * passed to all registered callbacks.
  * @return List of files, NULL indicates failure.
  * @note 
  * - Optimized for little directories scan.
@@ -614,7 +621,7 @@ static int ftw_helper(short *path, int flags,
  * - Does not recognize NTFS data streams.
  * @par Example:
  * @code
- * int __stdcall filter(winx_file_info *f)
+ * int __stdcall filter(winx_file_info *f, void *user_defined_data)
  * {
  *     if(skip_directory(f))
  *         return 1;    // skip current directory
@@ -622,14 +629,14 @@ static int ftw_helper(short *path, int flags,
  *     return 0; // continue walk
  * }
  *
- * void __stdcall update_progress(winx_file_info *f)
+ * void __stdcall update_progress(winx_file_info *f, void *user_defined_data)
  * {
  *     if(is_directory(f))
  *         dir_count ++;
  *     // etc.
  * }
  *
- * int __stdcall terminator(void)
+ * int __stdcall terminator(void *user_defined_data)
  * {
  *     if(stop_event)
  *         return 1; // terminate walk
@@ -638,7 +645,8 @@ static int ftw_helper(short *path, int flags,
  * }
  *
  * // list all files on disk c:
- * filelist = winx_ftw(L"\\??\\c:\\",0,filter,update_progress,terminator);
+ * filelist = winx_ftw(L"\\??\\c:\\",0,filter,update_progress,
+ *     terminator,&user_defined_data);
  * // ...
  * // process list of files
  * // ...
@@ -646,11 +654,12 @@ static int ftw_helper(short *path, int flags,
  * @endcode
  */
 winx_file_info * __stdcall winx_ftw(short *path, int flags,
-		ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t)
+		ftw_filter_callback fcb, ftw_progress_callback pcb,
+		ftw_terminator t, void *user_defined_data)
 {
 	winx_file_info *filelist = NULL;
 	
-	if(ftw_helper(path,flags,fcb,pcb,t,&filelist) == (-1) && \
+	if(ftw_helper(path,flags,fcb,pcb,t,user_defined_data,&filelist) == (-1) && \
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);
@@ -673,7 +682,8 @@ winx_file_info * __stdcall winx_ftw(short *path, int flags,
  * because of its highly complicated standard.
  */
 winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
-		ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t)
+		ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t,
+		void *user_defined_data)
 {
 	winx_file_info *filelist = NULL;
 	short rootpath[] = L"\\??\\A:\\";
@@ -686,14 +696,14 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 	if(winx_get_volume_information(volume_letter,&v) >= 0){
 		DebugPrint("winx_scan_disk: file system is %s",v.fs_name);
 		if(!strcmp(v.fs_name,"NTFS")){
-			filelist = ntfs_scan_disk(volume_letter,flags,fcb,pcb,t);
+			filelist = ntfs_scan_disk(volume_letter,flags,fcb,pcb,t,user_defined_data);
 			goto done;
 		}
 	}
 	
 	/* collect information about root directory */
 	rootpath[4] = (short)volume_letter;
-	if(ftw_add_root_directory(rootpath,flags,fcb,pcb,t,&filelist) == (-1) && \
+	if(ftw_add_root_directory(rootpath,flags,fcb,pcb,t,user_defined_data,&filelist) == (-1) && \
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);
@@ -703,7 +713,7 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 
 	/* collect information about entire directory tree */
 	flags |= WINX_FTW_RECURSIVE;
-	if(ftw_helper(rootpath,flags,fcb,pcb,t,&filelist) == (-1) && \
+	if(ftw_helper(rootpath,flags,fcb,pcb,t,user_defined_data,&filelist) == (-1) && \
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);

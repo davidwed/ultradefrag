@@ -41,7 +41,7 @@ void test(void)
 	winx_file_info *f;
 	
 	//f = winx_ftw(L"\\??\\c:\\",WINX_FTW_RECURSIVE | WINX_FTW_DUMP_FILES,NULL,NULL);
-	f = winx_scan_disk('L',WINX_FTW_DUMP_FILES,NULL,NULL,NULL);
+	f = winx_scan_disk('L',WINX_FTW_DUMP_FILES,NULL,NULL,NULL,NULL);
 	if(f == NULL)
 		DebugPrint("$$$$ winx_scan_disk failed $$$");
 	else
