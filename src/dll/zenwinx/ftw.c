@@ -115,6 +115,8 @@ static HANDLE ftw_fopen(winx_file_info *f)
  * passed to the registered terminator.
  * @return Zero for success,
  * negative value otherwise.
+ * @note Callback procedure should complete as quickly
+ * as possible to avoid slowdown of the scan.
  */
 int __stdcall winx_ftw_dump_file(winx_file_info *f,
 		ftw_terminator t, void *user_defined_data)
@@ -621,6 +623,8 @@ static int ftw_helper(short *path, int flags,
  *   filtering is needed.
  * - pcb parameter may be equal to NULL.
  * - Does not recognize NTFS data streams.
+ * - Callback procedures should complete as quickly
+ *   as possible to avoid slowdown of the scan.
  * @par Example:
  * @code
  * int __stdcall filter(winx_file_info *f, void *user_defined_data)

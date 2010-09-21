@@ -702,9 +702,12 @@ int __stdcall winx_vflush(char volume_letter)
  * passed to the registered callback.
  * @return List of free regions, NULL indicates that
  * either disk is full (unlikely) or some error occured.
- * @note It is possible to scan disk partially by
+ * @note
+ * - It is possible to scan disk partially by
  * requesting the scan termination through the callback
  * procedure.
+ * - Callback procedure should complete as quickly
+ * as possible to avoid slowdown of the scan.
  */
 winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,
 		int flags, volume_region_callback cb, void *user_defined_data)
