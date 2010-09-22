@@ -177,7 +177,8 @@ short *GetNewVersionAnnouncement(void)
 		return NULL;
 	}
 	
-	if(lmj > cmj || lmn > cmn || li > ci){
+	/* 5.0.0 > 4.99.99 */
+	if(lmj * 10000 + lmn * 100 + li > cmj * 10000 + cmn * 100 + ci){
 		_snwprintf(announcement,MAX_ANNOUNCEMENT_LEN,L"%hs%ws",
 			lv,L" release is available for download!");
 		announcement[MAX_ANNOUNCEMENT_LEN - 1] = 0;
