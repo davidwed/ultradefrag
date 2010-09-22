@@ -668,6 +668,7 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 		}
 	}
 	
+	NtClose(hRoot);
 	return 0;
 }
 
