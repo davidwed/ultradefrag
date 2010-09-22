@@ -1,8 +1,8 @@
 @echo off
 echo Set common environment variables...
-set VERSION=4,4,0,0
-set VERSION2="4, 4, 0, 0\0"
-set ULTRADFGVER=4.4.0
+set VERSION=5,0,0,0
+set VERSION2="5, 0, 0, 0\0"
+set ULTRADFGVER=5.0.0
 set WINDDKBASE=D:\WINDDK\3790~1.183
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v6.1
 set MINGWBASE=D:\Software\MinGWStudio\MinGW

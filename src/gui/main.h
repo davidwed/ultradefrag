@@ -117,7 +117,7 @@ typedef struct {
 	char name[MAX_VNAME_LEN + 1];
 	char fsname[MAX_FSNAME_LEN + 1];
 	int status;
-	STATISTIC stat;
+	udefrag_progress_info pi;
 	HDC hdc;
 	HBITMAP hbitmap;
 } NEW_VOLUME_LIST_ENTRY, *PNEW_VOLUME_LIST_ENTRY;
@@ -150,7 +150,7 @@ BOOL CALLBACK ConfirmDlgProc(HWND, UINT, WPARAM, LPARAM);
 
 /* status bar procedures */
 BOOL CreateStatusBar();
-void UpdateStatusBar(STATISTIC *pst);
+void UpdateStatusBar(udefrag_progress_info *pi);
 
 /* progress bar stuff */
 void InitProgress(void);

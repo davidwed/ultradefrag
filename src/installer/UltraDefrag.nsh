@@ -248,6 +248,7 @@ Var AtLeastXP
   Delete "$SYSDIR\udefrag-gui-config.exe"
   Delete "$SYSDIR\udefrag-scheduler.exe"
   Delete "$SYSDIR\ud-config.cmd"
+  Delete "$SYSDIR\udefrag-kernel.dll"
 
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\presets"
@@ -374,7 +375,6 @@ Var AtLeastXP
   Delete "$SYSDIR\udefrag.exe"
 
   Delete "$SYSDIR\udefrag.dll"
-  Delete "$SYSDIR\udefrag-kernel.dll"
   Delete "$SYSDIR\zenwinx.dll"
 
 !ifndef MICRO_EDITION

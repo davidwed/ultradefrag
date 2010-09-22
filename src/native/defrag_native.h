@@ -27,7 +27,6 @@
 
 #include "../include/ntndk.h"
 
-#include "../include/udefrag-kernel.h"
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 #include "../dll/zenwinx/zenwinx.h"

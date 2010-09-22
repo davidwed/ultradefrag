@@ -1,19 +1,12 @@
 LIBRARY udefrag.dll
 
 EXPORTS
-	udefrag_init
-	udefrag_unload
-	udefrag_monolithic_native_app_init
-	udefrag_monolithic_native_app_unload
-	udefrag_get_error_description
-	udefrag_start
-	udefrag_stop
-	udefrag_get_progress
-	udefrag_get_map
-	udefrag_get_default_formatted_results
-	udefrag_release_default_formatted_results
 	udefrag_get_vollist
 	udefrag_release_vollist
 	udefrag_validate_volume
 	udefrag_fbsize=winx_fbsize
 	udefrag_dfbsize=winx_dfbsize
+	udefrag_start_job
+	udefrag_get_default_formatted_results
+	udefrag_release_default_formatted_results
+	udefrag_get_error_description

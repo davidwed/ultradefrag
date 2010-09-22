@@ -165,7 +165,6 @@ Section "Ultra Defrag core files (required)" SecCore
   File "lua5.1a_gui.exe"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
   File "${ROOTDIR}\src\installer\udctxhandler.cmd"
-  File "udefrag-kernel.dll"
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"

@@ -19,184 +19,282 @@
 
 /**
  * @file udefrag.c
- * @brief Driver interaction code.
- * @addtogroup Driver
+ * @brief UltraDefrag engine entry point.
+ * @addtogroup Engine
  * @{
  */
 
-#include "../../include/ntndk.h"
+#include "udefrag-internals.h"
 
-#include "../../include/udefrag.h"
-#include "../zenwinx/zenwinx.h"
+/**
+ */
+static void dbg_print_header(udefrag_job_parameters *jp)
+{
+	int os_version;
+	int mj, mn;
 
-#define DbgCheckInitEvent(f) { \
-	if(!init_event){ \
-		DebugPrint(f " call without initialization!"); \
-		return (-1); \
-	} \
+	/* print driver version */
+	winx_dbg_print_header(0,0,"*");
+	winx_dbg_print_header(0x20,0,"%s",VERSIONINTITLE);
+
+	/* print windows version */
+	os_version = winx_get_os_version();
+	mj = os_version / 10;
+	mn = os_version % 10;
+	winx_dbg_print_header(0x20,0,"Windows NT %u.%u",mj,mn);
+	winx_dbg_print_header(0,0,"*");
 }
 
-struct kernel_start_parameters {
-	char *volume_name;
-	UDEFRAG_JOB_TYPE job_type;
-	int cluster_map_size;
-	int cmd_status;
-	BOOL done_flag;
-};
-
-struct udefrag_options {
-	ULONGLONG time_limit;
-	int refresh_interval;
-};
-
-/* global variables */
-HANDLE init_event = NULL;
-
-#ifndef STATIC_LIB
 /**
- * @brief udefrag.dll entry point.
  */
-BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
+static void dbg_print_footer(udefrag_job_parameters *jp)
 {
+	winx_dbg_print_header(0,0,"*");
+	winx_dbg_print_header(0,0,"Processing of %c: %s",
+		jp->volume_letter, (jp->pi.completion_status > 0) ? "succeeded" : "failed");
+	winx_dbg_print_header(0,0,"*");
+}
+
+/**
+ * @brief Delivers progress information to the caller.
+ */
+static void deliver_progress_info(udefrag_job_parameters *jp)
+{
+	double x, y;
+	int i, k, index;
+	ULONGLONG maximum, n;
+	
+	if(jp->cb == NULL)
+		return;
+
+	/* calculate progress percentage */
+	/* FIXME: do it more accurate */
+	x = (double)(LONGLONG)jp->pi.processed_clusters;
+	y = (double)(LONGLONG)jp->pi.clusters_to_process;
+	if(y == 0) jp->pi.percentage = 0.00;
+	else jp->pi.percentage = (x / y) * 100.00;
+	
+	/* refill cluster map */
+	if(jp->pi.cluster_map && jp->cluster_map.array \
+	  && jp->pi.cluster_map_size == jp->cluster_map.map_size){
+		for(i = 0; i < jp->cluster_map.map_size; i++){
+			maximum = jp->cluster_map.array[i][0];
+			index = 0;
+			for(k = 1; k < jp->cluster_map.n_colors; k++){
+				n = jp->cluster_map.array[i][k];
+				if(n >= maximum){ /* support of colors precedence  */
+					maximum = n;
+					index = k;
+				}
+			}
+			if(maximum == 0)
+				jp->pi.cluster_map[i] = SYSTEM_SPACE;
+			else
+				jp->pi.cluster_map[i] = (char)index;
+		}
+	}
+	
+	/* deliver information to the caller */
+	jp->cb(&jp->pi);
+	jp->progress_refresh_time = winx_xtime();
+	if(jp->udo.dbgprint_level >= DBG_PARANOID)
+		winx_dbg_print_header(0x20,0,"progress update");
+}
+
+/*
+* This technique forces to refresh progress
+* indication not so smoothly as desired.
+*/
+/**
+ * @brief Delivers progress information to the caller,
+ * no more frequently than specified in UD_REFRESH_INTERVAL
+ * environment variable.
+ */
+void __stdcall progress_router(void *p)
+{
+	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+
+	if(jp->cb){
+		/* ensure that jp->udo.refresh_interval exceeded */
+		if((winx_xtime() - jp->progress_refresh_time) > jp->udo.refresh_interval){
+			deliver_progress_info(jp);
+		} else if(jp->pi.completion_status){
+			/* deliver completed job information anyway */
+			deliver_progress_info(jp);
+		}
+	}
+}
+
+/**
+ * @brief Calls terminator registered by caller.
+ * When time interval specified in UD_TIME_LIMIT
+ * environment variable elapses, it terminates
+ * the job immediately.
+ */
+int __stdcall termination_router(void *p)
+{
+	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+	int result;
+
+	/* check for time limit */
+	if(jp->udo.time_limit){
+		if((winx_xtime() - jp->start_time) / 1000 > jp->udo.time_limit){
+			winx_dbg_print_header(0,0,"@ time limit exceeded @");
+			return 1;
+		}
+	}
+
+	/* ask caller */
+	if(jp->t){
+		result = jp->t();
+		if(result){
+			winx_dbg_print_header(0,0,"*");
+			winx_dbg_print_header(0x20,0,"termination requested by caller");
+			winx_dbg_print_header(0,0,"*");
+		}
+		return result;
+	}
+
+	/* continue */
+	return 0;
+}
+
+/*
+* Another multithreaded technique delivers progress info more smoothly.
+*/
+static int __stdcall terminator(void *p)
+{
+	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+	int result;
+
+	/* ask caller */
+	if(jp->t){
+		result = jp->t();
+		if(result){
+			winx_dbg_print_header(0,0,"*");
+			winx_dbg_print_header(0x20,0,"termination requested by caller");
+			winx_dbg_print_header(0,0,"*");
+		}
+		return result;
+	}
+
+	/* continue */
+	return 0;
+}
+
+static int __stdcall killer(void *p)
+{
+	winx_dbg_print_header(0,0,"*");
+	winx_dbg_print_header(0x20,0,"termination requested by caller");
+	winx_dbg_print_header(0,0,"*");
 	return 1;
 }
-#endif
 
-/**
- * @brief Initializes all libraries required 
- * for the native application.
- * @note Designed especially to replace DllMain
- * functionality in case of monolithic native application.
- * Call this routine in the beginning of NtProcessStartup() code.
- */
-void __stdcall udefrag_monolithic_native_app_init(void)
+static DWORD WINAPI start_job(LPVOID p)
 {
-	zenwinx_native_init();
-	udefrag_kernel_native_init();
-}
+	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+	char *action = "analyzing";
 
-/**
- * @brief Frees resources of all libraries required 
- * for the native application.
- * @note Designed especially to replace DllMain
- * functionality in case of monolithic native application.
- * Don't call it before winx_shutdown() and winx_reboot(),
- * but call always before winx_exit().
- */
-void __stdcall udefrag_monolithic_native_app_unload(void)
-{
-	udefrag_kernel_native_unload();
-	zenwinx_native_unload();
-}
-
-/**
- * @brief Initializes the UltraDefrag engine.
- * @return Zero for success, negative value otherwise.
- */
-int __stdcall udefrag_init(void)
-{
-	int error_code;
-	
-	/* only a single instance of the program ! */
-	error_code = winx_create_event(L"\\udefrag_init",SynchronizationEvent,&init_event);
-	if(error_code < 0){
-		if(error_code == STATUS_OBJECT_NAME_COLLISION) return UDEFRAG_ALREADY_RUNNING;
-		return (-1);
+	/* do the job */
+	if(jp->job_type == DEFRAG_JOB) action = "defragmenting";
+	else if(jp->job_type == OPTIMIZER_JOB) action = "optimizing";
+	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
+	remove_fragmentation_reports(jp);
+	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
+	switch(jp->job_type){
+	case ANALYSIS_JOB:
+		jp->pi.completion_status = analyze(jp);
+		break;
+	case DEFRAG_JOB:
+		// TODO
+		//jp->pi.completion_status = defragment(jp);
+		break;
+	case OPTIMIZER_JOB:
+		// TODO
+		//jp->pi.completion_status = optimize(jp);
+		break;
+	default:
+		jp->pi.completion_status = 0;
+		break;
 	}
-	return 0;
-}
+	if(jp->pi.completion_status == 0)
+		jp->pi.completion_status ++; /* success */
+	(void)save_fragmentation_reports(jp);
 
-/**
- * @brief Unloads the UltraDefrag engine.
- * @return Zero for success, negative value otherwise.
- */
-int __stdcall udefrag_unload(void)
-{
-	NtCloseSafe(init_event);
-	return 0;
-}
-
-/**
- * @brief Reloads udefrag.dll specific options.
- */
-static void udefrag_reload_settings(struct udefrag_options *udo)
-{
-	#define ENV_BUFFER_LENGTH 128
-	short env_buffer[ENV_BUFFER_LENGTH];
-	char buf[ENV_BUFFER_LENGTH];
-	ULONGLONG i;
-	
-	/* reset all parameters */
-	udo->refresh_interval  = DEFAULT_REFRESH_INTERVAL;
-	udo->time_limit = 0;
-
-	if(winx_query_env_variable(L"UD_TIME_LIMIT",env_buffer,ENV_BUFFER_LENGTH) >= 0){
-		(void)_snprintf(buf,ENV_BUFFER_LENGTH - 1,"%ws",env_buffer);
-		buf[ENV_BUFFER_LENGTH - 1] = 0;
-		udo->time_limit = winx_str2time(buf);
-	}
-	DebugPrint("Time limit = %I64u seconds\n",udo->time_limit);
-
-	if(winx_query_env_variable(L"UD_REFRESH_INTERVAL",env_buffer,ENV_BUFFER_LENGTH) >= 0)
-		udo->refresh_interval = _wtoi(env_buffer);
-	DebugPrint("Refresh interval = %u msec\n",udo->refresh_interval);
-	
-	(void)strcpy(buf,"");
-	(void)winx_dfbsize(buf,&i); /* to force MinGW export udefrag_dfbsize */
-	(void)i;
-}
-
-/**
- * @brief Thread procedure delivering a disk 
- *        defragmentation command to the driver.
- * @note
- * - Only a single command may be sent at the same time.
- * - Internal use only.
- */
-DWORD WINAPI engine_start(LPVOID p)
-{
-	struct kernel_start_parameters *pksp;
-	
-	pksp = (struct kernel_start_parameters *)p;
-	pksp->cmd_status = udefrag_kernel_start(pksp->volume_name,pksp->job_type,pksp->cluster_map_size);
-	pksp->done_flag = TRUE;
 	winx_exit_thread(); /* 8k/12k memory leak here? */
 	return 0;
 }
 
 /**
- * @brief Delivers a disk defragmentation command
- * to the driver in a separate thread.
- * @param[in] volume_name the name of the volume.
- * @param[in] job_type the type of the job.
- * @param[in] cluster_map_size the size of the cluster map, in bytes.
- * @param[in] sproc an address of the callback procedure
- * to be called periodically during the running disk
- * defragmentation job. This parameter may be NULL.
- * @return Zero for success, negative value otherwise.
+ * @brief Destroys list of free regions, 
+ * list of files and list of fragmented files.
  */
-int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc)
+void destroy_lists(udefrag_job_parameters *jp)
 {
-	struct kernel_start_parameters ksp;
-	struct udefrag_options udo;
-	ULONGLONG t = 0;
+	winx_scan_disk_release(jp->filelist);
+	winx_release_free_volume_regions(jp->free_regions);
+	winx_list_destroy((list_entry **)(void *)&jp->fragmented_files);
+	jp->filelist = NULL;
+	jp->free_regions = NULL;
+}
+
+/**
+ * @brief Starts disk analysis/defragmentation/optimization job.
+ * @param[in] volume_letter the volume letter.
+ * @param[in] job_type one of the xxx_JOB constants, defined in udefrag.h
+ * @param[in] cluster_map_size size of the cluster map, in cells.
+ * Zero value forces to avoid cluster map use.
+ * @param[in] cb address of procedure to be called each time when
+ * progress information updates, but no more frequently than
+ * specified in UD_REFRESH_INTERVAL environment variable.
+ * @param[in] t address of procedure to be called each time
+ * when requested job would like to know whether it must be terminated or not.
+ * Nonzero value, returned by terminator, forces the job to be terminated.
+ * @return Zero for success, negative value otherwise.
+ * @note [Callback procedures should complete as quickly
+ * as possible to avoid slowdown of the volume processing].
+ */
+int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
+		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t)
+{
+	udefrag_job_parameters jp;
+	ULONGLONG time = 0;
 	int use_limit = 0;
-
-	DbgCheckInitEvent("udefrag_start");
-	DebugPrint("----- Processing of %s: started -----\n",volume_name);
 	
-	udefrag_reload_settings(&udo);
-
-	/* initialize kernel_start_parameters structure */
-	ksp.volume_name = volume_name;
-	ksp.job_type = job_type;
-	ksp.cluster_map_size = cluster_map_size;
-	ksp.cmd_status = 0;
-	ksp.done_flag = FALSE;
+	/* initialize the job */
+	dbg_print_header(&jp);
 	
-	/* create a separate thread for the command processing */
-	if(winx_create_thread(engine_start,(PVOID)&ksp,NULL) < 0){
-		return (-1);
+	/* TEST: may fail on x64? */
+	memset(&jp,0,sizeof(udefrag_job_parameters));
+	
+	jp.volume_letter = volume_letter;
+	jp.job_type = job_type;
+	jp.cb = cb;
+	jp.t = t;
+
+	/*jp.progress_router = progress_router;
+	jp.termination_router = termination_router;*/
+	/* we'll deliver progress info from the current thread */
+	jp.progress_router = NULL;
+	/* we'll decide whether to kill or not from the current thread */
+	jp.termination_router = terminator;
+
+	jp.start_time = winx_xtime();
+	jp.pi.completion_status = 0;
+	
+	if(get_options(&jp) < 0)
+		goto done;
+
+	if(allocate_map(cluster_map_size,&jp) < 0){
+		release_options(&jp);
+		goto done;
+	}
+	
+	/* run the job in separate thread */
+	if(winx_create_thread(start_job,(PVOID)&jp,NULL) < 0){
+		free_map(&jp);
+		release_options(&jp);
+		goto done;
 	}
 
 	/*
@@ -204,100 +302,45 @@ int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cl
 	* http://sourceforge.net/tracker/index.php?func=
 	* detail&aid=2886353&group_id=199532&atid=969873
 	*/
-	if(udo.time_limit){
+	if(jp.udo.time_limit){
 		use_limit = 1;
-		t = udo.time_limit * 1000;
+		time = jp.udo.time_limit * 1000;
 	}
 	do {
-		winx_sleep(udo.refresh_interval);
-		if(sproc) sproc(FALSE);
+		winx_sleep(jp.udo.refresh_interval);
+		deliver_progress_info(&jp);
 		if(use_limit){
-			if(t <= udo.refresh_interval){
-				DebugPrint("Time limit exceeded!\n");
-				(void)udefrag_stop();
+			if(time <= jp.udo.refresh_interval){
+				/* time limit exceeded */
+				jp.termination_router = killer;
 			} else {
-				t -= udo.refresh_interval;
+				time -= jp.udo.refresh_interval;
 			}
 		}
-	} while(!ksp.done_flag);
-	if(sproc) sproc(TRUE);
+	} while(jp.pi.completion_status == 0);
 
-	if(ksp.cmd_status < 0)
-		DebugPrint("udefrag_start(%s,%u,%u,0x%p) failed\n",
-			volume_name,job_type,cluster_map_size,sproc);
-	return ksp.cmd_status;
-}
-
-/**
- * @brief Stops the running disk defragmentation job.
- * @return Zero for success, negative value otherwise.
- */
-int __stdcall udefrag_stop(void)
-{
-	DbgCheckInitEvent("udefrag_stop");
-	if(udefrag_kernel_stop() >= 0) return 0;
-	DebugPrint("Stop request failed!");
-	return (-1);
-}
-
-/**
- * @brief Retrieves the progress information
- * of the running disk defragmentation job.
- * @param[out] pstat pointer to the STATISTIC structure.
- * @param[out] percentage pointer to the variable 
- * receiving progress percentage.
- * @return Zero for success, negative value otherwise.
- */
-int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage)
-{
-	double x, y;
+	/* cleanup */
+	deliver_progress_info(&jp);
+	/*if(jp.progress_router)
+		jp.progress_router(&jp);*/ /* redraw progress */
+	destroy_lists(&jp);
+	free_map(&jp);
+	release_options(&jp);
 	
-	DbgCheckInitEvent("udefrag_get_progress");
-
-	if(udefrag_kernel_get_statistic(pstat,NULL,0) < 0){
-		DebugPrint("Statistical data unavailable!");
-		return (-1);
-	}
-
-	if(percentage){ /* calculate percentage only if we have such request */
-		/* FIXME: do it more accurate */
-		x = (double)(LONGLONG)pstat->processed_clusters;
-		y = (double)(LONGLONG)pstat->clusters_to_process;
-		if(y == 0) *percentage = 0.00;
-		else *percentage = (x / y) * 100.00;
-	}
-	return 0;
-}
-
-/**
- * @brief Retrieves the cluster map
- * of the currently processing volume.
- * @param[out] buffer pointer to the map buffer.
- * @param[in] size the buffer size, in bytes.
- * @return Zero for success, negative value otherwise. 
- */
-int __stdcall udefrag_get_map(char *buffer,int size)
-{
-	DbgCheckInitEvent("udefrag_get_map");
-	
-	if(udefrag_kernel_get_statistic(NULL,buffer,(long)size) < 0){
-		DebugPrint("Cluster map unavailable!");
-		return (-1);
-	}
-	return 0;
+done:
+	dbg_print_footer(&jp);
+	return (jp.pi.completion_status > 0) ? 0 : (-1);
 }
 
 /**
  * @brief Retrieves the default formatted results 
  * of the completed disk defragmentation job.
- * @param[in] pstat pointer to the STATISTIC structure,
- * filled by udefrag_get_progress() call.
+ * @param[in] pi pointer to udefrag_progress_info structure.
  * @return A string containing default formatted results
- * of the disk defragmentation job defined in passed structure.
- * Returned NULL indicates failure.
- * @note This function may be useful for console and native applications.
+ * of the disk defragmentation job. NULL indicates failure.
+ * @note This function is used in console and native applications.
  */
-char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
+char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi)
 {
 	#define MSG_LENGTH 4095
 	char *msg;
@@ -316,12 +359,17 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 		return NULL;
 	}
 
-	(void)winx_fbsize(pstat->total_space,2,total_space,sizeof(total_space));
-	(void)winx_fbsize(pstat->free_space,2,free_space,sizeof(free_space));
-	if(pstat->filecounter == 0) p = 0.00;
-	else p = (double)(pstat->fragmcounter)/((double)(pstat->filecounter));
+	(void)winx_fbsize(pi->total_space,2,total_space,sizeof(total_space));
+	(void)winx_fbsize(pi->free_space,2,free_space,sizeof(free_space));
+
+	if(pi->files == 0)
+		p = 0.00;
+	else
+		p = (double)(pi->fragments)/((double)(pi->files));
 	ip = (unsigned int)(p * 100.00);
-	if(ip < 100) ip = 100; /* fix round off error */
+	if(ip < 100)
+		ip = 100; /* fix round off error */
+
 	(void)_snprintf(msg,MSG_LENGTH,
 			  "Volume information:\r\n\r\n"
 			  "  Volume size                  = %s\r\n"
@@ -331,8 +379,8 @@ char * __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat)
 			  "  Fragments per file           = %u.%02u\r\n\r\n",
 			  total_space,
 			  free_space,
-			  pstat->filecounter,
-			  pstat->fragmfilecounter,
+			  pi->files,
+			  pi->fragmented,
 			  ip / 100, ip % 100
 			 );
 	msg[MSG_LENGTH] = 0;
@@ -351,11 +399,10 @@ void __stdcall udefrag_release_default_formatted_results(char *results)
 }
 
 /**
- * @brief Retrieves a human readable error description
- * for the error codes defined in udefrag.h header file.
+ * @brief Retrieves a human readable error
+ * description for ultradefrag error codes.
  * @param[in] error_code the error code.
- * @return A pointer to zero-terminated ANSI string 
- * containing detailed error description.
+ * @return A human readable description.
  */
 char * __stdcall udefrag_get_error_description(int error_code)
 {
@@ -363,8 +410,6 @@ char * __stdcall udefrag_get_error_description(int error_code)
 	case UDEFRAG_UNKNOWN_ERROR:
 		return "Some unknown internal bug or some\n"
 		       "rarely arising error has been encountered.";
-	case UDEFRAG_ALREADY_RUNNING:
-		return "You can run only one instance of UltraDefrag!";
 	case UDEFRAG_W2K_4KB_CLUSTERS:
 		return "NTFS volumes with cluster size greater than 4 kb\n"
 		       "cannot be defragmented on Windows 2000.";
@@ -384,5 +429,15 @@ char * __stdcall udefrag_get_error_description(int error_code)
 	}
 	return "";
 }
+
+#ifndef STATIC_LIB
+/**
+ * @brief udefrag.dll entry point.
+ */
+BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
+{
+	return 1;
+}
+#endif
 
 /** @} */

@@ -22,7 +22,6 @@ copy /Y README.TXT %PORTABLE_DIR%\
 copy /Y bin\hibernate.exe %PORTABLE_DIR%\hibernate4win.exe
 copy /Y bin\udefrag.dll %PORTABLE_DIR%\
 copy /Y bin\udefrag.exe %PORTABLE_DIR%\
-copy /Y bin\udefrag-kernel.dll %PORTABLE_DIR%\
 copy /Y bin\zenwinx.dll %PORTABLE_DIR%\
 
 cd bin
@@ -42,7 +41,6 @@ copy /Y ..\README.TXT %PORTABLE_DIR%\
 copy /Y amd64\hibernate.exe %PORTABLE_DIR%\hibernate4win.exe
 copy /Y amd64\udefrag.dll %PORTABLE_DIR%\
 copy /Y amd64\udefrag.exe %PORTABLE_DIR%\
-copy /Y amd64\udefrag-kernel.dll %PORTABLE_DIR%\
 copy /Y amd64\zenwinx.dll %PORTABLE_DIR%\
 
 cd amd64
@@ -68,7 +66,6 @@ copy /Y ..\README.TXT %PORTABLE_DIR%\
 copy /Y ia64\hibernate.exe %PORTABLE_DIR%\hibernate4win.exe
 copy /Y ia64\udefrag.dll %PORTABLE_DIR%\
 copy /Y ia64\udefrag.exe %PORTABLE_DIR%\
-copy /Y ia64\udefrag-kernel.dll %PORTABLE_DIR%\
 copy /Y ia64\zenwinx.dll %PORTABLE_DIR%\
 
 cd ia64

@@ -27,7 +27,7 @@
 /**
  * @brief Current defrag job type.
  */
-UDEFRAG_JOB_TYPE current_job;
+udefrag_job_type current_job;
 
 /**
  * @brief Indicates whether the 
@@ -67,43 +67,49 @@ int GetDebugLevel()
  * algorithm not reliable by definition. Therefore
  * it has been replaced by a new single line indicator.
  */
-void RedrawProgress(int completed)
+void RedrawProgress(udefrag_progress_info *pi)
 {
-	STATISTIC stat;
-	double percentage;
 	int p1, p2, n;
 	char op; char *op_name = "";
 	char s[64];
 	char format[16];
+	char *results;
 
 	/* TODO: optimize for speed to make redraw faster */
-	if(udefrag_get_progress(&stat,&percentage) >= 0){
-		op = stat.current_operation;
-		if(op == 'A' || op == 'a')      op_name = "Analyze:  ";
-		else if(op == 'D' || op == 'd') op_name = "Defrag:   ";
-		else if(op == 'C' || op == 'c') op_name = "Optimize: ";
-		else                            op_name = "          ";
-		if(!completed || abort_flag){
-			p1 = (int)(percentage * 100.00);
-			p2 = p1 % 100;
-			p1 = p1 / 100;
-		} else {
-			p1 = 100;
-			p2 = 0;
+	op = pi->current_operation;
+	if(op == 'A' || op == 'a')      op_name = "Analyze:  ";
+	else if(op == 'D' || op == 'd') op_name = "Defrag:   ";
+	else if(op == 'C' || op == 'c') op_name = "Optimize: ";
+	else                            op_name = "          ";
+	if(pi->completion_status == 0 || abort_flag){
+		p1 = (int)(pi->percentage * 100.00);
+		p2 = p1 % 100;
+		p1 = p1 / 100;
+	} else {
+		p1 = 100;
+		p2 = 0;
+	}
+	if(current_job == OPTIMIZER_JOB){
+		n = (pi->pass_number == 0xffffffff) ? 0 : pi->pass_number;
+		if(abort_flag) _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% aborted",n,op_name,p1,p2);
+		else _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed",n,op_name,p1,p2);
+	} else {
+		if(abort_flag) _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted",op_name,p1,p2);
+		else _snprintf(s,sizeof(s),"%s%3u.%02u%% completed",op_name,p1,p2);
+	}
+	s[sizeof(s) - 1] = 0;
+	_snprintf(format,sizeof(format),"\r%%-%us",progress_line_length);
+	format[sizeof(format) - 1] = 0;
+	winx_printf(format,s);
+	progress_line_length = strlen(s);
+
+	if(pi->completion_status != 0){
+		/* print results of the completed job */
+		results = udefrag_get_default_formatted_results(pi);
+		if(results){
+			winx_printf("\n\n%s\n",results);
+			udefrag_release_default_formatted_results(results);
 		}
-		if(current_job == OPTIMIZE_JOB){
-			n = (stat.pass_number == 0xffffffff) ? 0 : stat.pass_number;
-			if(abort_flag) _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% aborted",n,op_name,p1,p2);
-			else _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed",n,op_name,p1,p2);
-		} else {
-			if(abort_flag) _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted",op_name,p1,p2);
-			else _snprintf(s,sizeof(s),"%s%3u.%02u%% completed",op_name,p1,p2);
-		}
-		s[sizeof(s) - 1] = 0;
-		_snprintf(format,sizeof(format),"\r%%-%us",progress_line_length);
-		format[sizeof(format) - 1] = 0;
-		winx_printf(format,s);
-		progress_line_length = strlen(s);
 	}
 }
 
@@ -112,10 +118,9 @@ void RedrawProgress(int completed)
  * on the screen and raises a job termination
  * when Esc\Break keys are pressed.
  */
-int __stdcall update_progress(int df)
+void __stdcall update_progress(udefrag_progress_info *pi)
 {
 	KBD_RECORD kbd_rec;
-	int error_code;
 	int escape_detected = 0;
 	int break_detected = 0;
 	
@@ -132,17 +137,16 @@ int __stdcall update_progress(int df)
 				break_detected = 1;
 			}
 		}
-		if(escape_detected || break_detected){
-			error_code = udefrag_stop();
-			if(error_code < 0){
-				winx_printf("\nStop request failed!\n");
-				winx_printf("%s\n",udefrag_get_error_description(error_code));
-			}
+		if(escape_detected || break_detected)
 			abort_flag = 1;
-		}
 	}
-	RedrawProgress(df);
-	return 0;
+	RedrawProgress(pi);
+}
+
+int __stdcall terminator(void)
+{
+	/* do it as quickly as possible :-) */
+	return abort_flag;
 }
 
 /**
@@ -150,10 +154,7 @@ int __stdcall update_progress(int df)
  */
 void ProcessVolume(char letter)
 {
-	STATISTIC stat;
 	int status;
-	char volume_name[2];
-	char *results;
 
 	/* validate the volume before any processing */
 	status = udefrag_validate_volume(letter,FALSE);
@@ -166,34 +167,25 @@ void ProcessVolume(char letter)
 		return;
 	}
 	
-	volume_name[0] = letter; volume_name[1] = 0;
 	progress_line_length = 0;
 	winx_printf("\nPreparing to ");
 	switch(current_job){
-	case ANALYSE_JOB:
+	case ANALYSIS_JOB:
 		winx_printf("analyse %c: ...\n",letter);
 		break;
 	case DEFRAG_JOB:
 		winx_printf("defragment %c: ...\n",letter);
 		break;
-	case OPTIMIZE_JOB:
+	case OPTIMIZER_JOB:
 		winx_printf("optimize %c: ...\n",letter);
 		break;
 	}
 	winx_printf(BREAK_MESSAGE);
-	status = udefrag_start(volume_name,current_job,0,update_progress);
+	status = udefrag_start_job(letter,current_job,0,update_progress,terminator);
 	if(status < 0){
 		winx_printf("\nAnalysis/Defragmentation failed!\n");
 		winx_printf("%s\n",udefrag_get_error_description(status));
 		return;
-	}
-
-	if(udefrag_get_progress(&stat,NULL) >= 0){
-		results = udefrag_get_default_formatted_results(&stat);
-		if(results){
-			winx_printf("\n\n%s\n",results);
-			udefrag_release_default_formatted_results(results);
-		}
 	}
 }
 
@@ -235,9 +227,6 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	char letter;
 	volume_info *v;
 	int debug_level;
-	int error_code;
-	
-	(void)envp;
 	
 	if(argc < 2){
 		winx_printf("\nNo volume letter specified!\n\n");
@@ -292,8 +281,8 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	}
 	
 	/* set current_job global variable */
-	if(a_flag) current_job = ANALYSE_JOB;
-	else if(o_flag) current_job = OPTIMIZE_JOB;
+	if(a_flag) current_job = ANALYSIS_JOB;
+	else if(o_flag) current_job = OPTIMIZER_JOB;
 	else current_job = DEFRAG_JOB;
 	
 	/*
@@ -308,15 +297,6 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 
 	debug_level = GetDebugLevel();
 	
-	/* initialize ultradefrag engine */
-	error_code = udefrag_init();
-	if(error_code < 0){
-		winx_printf("\n%ws: initialization failed\n",argv[0]);
-		winx_printf("%s\n",udefrag_get_error_description(error_code));
-		(void)udefrag_unload();
-		return (-1);
-	}
-	
 	/* process volumes specified on the command line */
 	for(i = 0; i < n_letters; i++){
 		if(abort_flag) break;
@@ -325,17 +305,14 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		if(debug_level > DBG_NORMAL) short_dbg_delay();
 	}
 
-	if(abort_flag){
-		(void)udefrag_unload();
+	if(abort_flag)
 		return 0;
-	}
 	
 	/* process all volumes if requested */
 	if(all_flag || all_fixed_flag){
 		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
 		if(v == NULL){
 			winx_printf("\n%ws: udefrag_get_vollist failed\n\n",argv[0]);
-			(void)udefrag_unload();
 			return (-1);
 		}
 		for(i = 0; v[i].letter != 0; i++){
@@ -346,6 +323,5 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		}
 		udefrag_release_vollist(v);
 	}
-	(void)udefrag_unload();
 	return 0;
 }

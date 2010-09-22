@@ -36,7 +36,7 @@ extern char *global_cluster_map;
 DWORD thr_id;
 BOOL busy_flag = 0;
 char current_operation;
-BOOL stop_pressed, exit_pressed = FALSE;
+int stop_pressed, exit_pressed = 0;
 
 NEW_VOLUME_LIST_ENTRY *processed_entry = NULL;
 
@@ -88,11 +88,9 @@ void DisplayInvalidVolumeError(int error_code)
 }
 
 /* callback function */
-int __stdcall update_stat(int df)
+void __stdcall update_progress(udefrag_progress_info *pi)
 {
 	NEW_VOLUME_LIST_ENTRY *v_entry;
-	STATISTIC *pst;
-	double percentage;
 	static wchar_t progress_msg[128];
     static wchar_t *ProcessCaption;
     char WindowCaption[256];
@@ -101,46 +99,45 @@ int __stdcall update_stat(int df)
 	if(stop_pressed) {
         (void)SetWindowText(hWindow, VERSIONINTITLE);
 
-        return 0; /* it's neccessary: see comment in main.h file */
+        return; /* it's neccessary: see comment in main.h file */
     }
 	
 	v_entry = processed_entry;
-	if(v_entry == NULL) return 0;
+	if(v_entry == NULL) return;
 
-	pst = &(v_entry->stat);
+	memcpy(&v_entry->pi,pi,sizeof(udefrag_progress_info));
 
-	if(udefrag_get_progress(pst,&percentage) >= 0){
-		UpdateStatusBar(pst);
-		current_operation = pst->current_operation;
-        if(current_operation == 'C') current_operation = 'O';
-        
-        ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
-            
-		if(current_operation) {
-            switch(current_operation){
-                case 'D':
-                    ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
-                    break;
-                case 'O':
-                    ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
-            }
-        }
-            
-        _snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,percentage);
-        progress_msg[sizeof(progress_msg) - 1] = 0;
-        
-		SetProgress(progress_msg,(int)percentage);
-        
-        (void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, percentage);
-        (void)SetWindowText(hWindow, WindowCaption);
+	UpdateStatusBar(pi);
+	current_operation = pi->current_operation;
+	if(current_operation == 'C') current_operation = 'O';
+	
+	ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
+		
+	if(current_operation) {
+		switch(current_operation){
+			case 'D':
+				ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
+				break;
+			case 'O':
+				ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
+		}
 	}
+		
+	_snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
+	progress_msg[sizeof(progress_msg) - 1] = 0;
+	
+	SetProgress(progress_msg,(int)pi->percentage);
+	
+	(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
+	(void)SetWindowText(hWindow, WindowCaption);
 
-	if(udefrag_get_map(global_cluster_map,map_blocks_per_line * map_lines) >= 0){
+	if(pi->cluster_map && pi->cluster_map_size == map_blocks_per_line * map_lines){
+		memcpy(global_cluster_map,pi->cluster_map,pi->cluster_map_size);
 		FillBitMap(global_cluster_map,v_entry);
 		RedrawMap(v_entry);
 	}
 	
-	if(df == FALSE) return 0;
+	if(pi->completion_status == 0) return;
 	if(!stop_pressed){
         ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
             
@@ -161,7 +158,12 @@ int __stdcall update_stat(int df)
         
         (void)SetWindowText(hWindow, VERSIONINTITLE);
 	}
-	return 0;
+	return;
+}
+
+int __stdcall terminator(void)
+{
+	return stop_pressed;
 }
 
 DWORD WINAPI ThreadProc(LPVOID lpParameter)
@@ -176,7 +178,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
 	busy_flag = 1;
-	stop_pressed = FALSE;
+	stop_pressed = 0;
 	
 	/* return immediately if there are no volumes selected */
 	if(SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED) == -1){
@@ -249,7 +251,6 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 	char letter;
 	int error_code;
 	int Status = STATUS_UNDEFINED;
-	char volume_name[2];
 
 	if(v_entry == NULL) return;
 
@@ -258,7 +259,6 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 	
 	ClearMap();
 	letter = v_entry->name[0];
-	volume_name[0] = letter; volume_name[1] = 0;
 
 	VolListUpdateStatusField(v_entry,STATUS_RUNNING);
 
@@ -275,18 +275,21 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 		processed_entry = v_entry;
 		switch(command){
 		case 'a':
-			error_code = udefrag_start(volume_name,ANALYSE_JOB,
-					map_blocks_per_line * map_lines,update_stat);
+			error_code = udefrag_start_job(letter, ANALYSIS_JOB,
+					map_blocks_per_line * map_lines,
+					update_progress, terminator);
 			Status = STATUS_ANALYSED;
 			break;
 		case 'd':
-			error_code = udefrag_start(volume_name,DEFRAG_JOB,
-					map_blocks_per_line * map_lines,update_stat);
+			error_code = udefrag_start_job(letter, DEFRAG_JOB,
+					map_blocks_per_line * map_lines,
+					update_progress, terminator);
 			Status = STATUS_DEFRAGMENTED;
 			break;
 		default:
-			error_code = udefrag_start(volume_name,OPTIMIZE_JOB,
-					map_blocks_per_line * map_lines,update_stat);
+			error_code = udefrag_start_job(letter, OPTIMIZER_JOB,
+					map_blocks_per_line * map_lines,
+					update_progress, terminator);
 			Status = STATUS_OPTIMIZED;
 		}
 		if(error_code < 0 && !exit_pressed){
@@ -301,11 +304,5 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 
 void stop(void)
 {
-	int error_code;
-	
-	stop_pressed = TRUE;
-	error_code = udefrag_stop();
-	if(error_code < 0)
-		DisplayStopDefragError(error_code,
-			"Analysis/Defragmentation cannot be stopped!");
+	stop_pressed = 1;
 }

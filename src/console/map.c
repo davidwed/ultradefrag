@@ -40,8 +40,9 @@ extern HANDLE hOut;
 extern WORD console_attr;
 extern int b_flag;
 extern int m_flag;
+extern int p_flag;
 extern char letter;
-extern BOOL stop_flag;
+extern int stop_flag;
 
 char *cluster_map = NULL;
 
@@ -118,12 +119,17 @@ void FreeClusterMap(void)
 	if(cluster_map) free(cluster_map);
 }
 
-void RedrawMap(void)
+void RedrawMap(udefrag_progress_info *pi)
 {
 	int i,j;
 	WORD color, prev_color = 0x0;
 	char c[2];
 	WORD border_color = map_border_color;
+	
+	if(pi){
+		if(pi->cluster_map && pi->cluster_map_size == map_rows * map_symbols_per_line)
+			memcpy(cluster_map,pi->cluster_map,pi->cluster_map_size);
+	}
 
 	fprintf(stderr,"\n\n");
 	
@@ -184,7 +190,7 @@ void InitializeMapDisplay(void)
 	clear_line(stderr);
 	fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %u/%u",
 		letter,"analyze:  ",0.00,0,0);
-	RedrawMap();
+	RedrawMap(NULL);
 
 	if(use_entire_window){
 		/* reserve a single line for the next command prompt */
@@ -208,73 +214,62 @@ void InitializeMapDisplay(void)
 }
 
 BOOL first_run = TRUE;
-BOOL err_flag = FALSE;
-BOOL err_flag2 = FALSE;
 
-int __stdcall ProgressCallback(int done_flag)
+void __stdcall update_progress(udefrag_progress_info *pi)
 {
-	STATISTIC stat;
 	char op; char *op_name = "";
-	double percentage;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD cursor_pos;
+	char *results;
     
-    /* reset stat elements to prevent cluttered display */
-    stat.fragmfilecounter = 0;
-    stat.filecounter = 0;
-	
-	if(err_flag || err_flag2) return 0;
-	
-	if(first_run){
-		/*
-		* Ultra fast ntfs analysis contains one piece of code 
-		* that heavily loads CPU for one-two seconds.
-		*/
-		(void)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
-		first_run = FALSE;
-	}
-	
-	if(map_completed){
-		if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
-			DisplayLastError("Cannot retrieve cursor position!");
-			return 0;
+	if(!p_flag){
+		if(first_run){
+			/*
+			* Ultra fast ntfs analysis contains one piece of code 
+			* that heavily loads CPU for one-two seconds.
+			*/
+			(void)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
+			first_run = FALSE;
 		}
-		cursor_pos.X = 0;
-		cursor_pos.Y = csbi.dwCursorPosition.Y - map_rows - 3 - 2;
-		if(!SetConsoleCursorPosition(hOut,cursor_pos)){
-			DisplayLastError("Cannot set cursor position!");
-			return 0;
+		
+		if(map_completed){
+			if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
+				DisplayLastError("Cannot retrieve cursor position!");
+				return;
+			}
+			cursor_pos.X = 0;
+			cursor_pos.Y = csbi.dwCursorPosition.Y - map_rows - 3 - 2;
+			if(!SetConsoleCursorPosition(hOut,cursor_pos)){
+				DisplayLastError("Cannot set cursor position!");
+				return;
+			}
 		}
-	}
-	
-	/* this function never raises warnings or errors */
-	if(udefrag_get_progress(&stat,&percentage) >= 0){
-		op = stat.current_operation;
+		
+		op = pi->current_operation;
 		if(op == 'A' || op == 'a')      op_name = "analyze:  ";
 		else if(op == 'D' || op == 'd') op_name = "defrag:   ";
 		else                            op_name = "optimize: ";
 		clear_line(stderr);
 		fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
-			letter,op_name,percentage,stat.fragmfilecounter,stat.filecounter);
-	} else {
-		err_flag = TRUE;
+			letter,op_name,pi->percentage,pi->fragmented,pi->files);
+		
+		if(pi->completion_status != 0 && !stop_flag){ /* set progress indicator to 100% state */
+			clear_line(stderr);
+			fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
+				letter,op_name,pi->fragmented,pi->files);
+			if(!m_flag) fprintf(stderr,"\n");
+		}
+		
+		if(m_flag) /* display cluster map */
+			RedrawMap(pi);
 	}
 	
-	if(err_flag) return 0;
-
-	if(done_flag && !stop_flag){ /* set progress indicator to 100% state */
-		clear_line(stderr);
-		fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
-			letter,op_name,stat.fragmfilecounter,stat.filecounter);
-		if(!m_flag) fprintf(stderr,"\n");
+	if(pi->completion_status != 0 && v_flag){
+		/* print results of the completed job */
+		results = udefrag_get_default_formatted_results(pi);
+		if(results){
+			printf("\n%s",results);
+			udefrag_release_default_formatted_results(results);
+		}
 	}
-	
-	if(m_flag){ /* display cluster map */
-		if(udefrag_get_map(cluster_map,map_rows * map_symbols_per_line) >= 0)
-			RedrawMap();
-		else
-			err_flag2 = TRUE;
-	}
-	
-	return 0;
 }

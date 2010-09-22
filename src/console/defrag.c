@@ -50,7 +50,7 @@ int all_fixed_flag = 0;
 char letters[MAX_DOS_DRIVES] = {0};
 int wait_flag = 0;
 
-BOOL stop_flag = FALSE;
+int stop_flag = 0;
 
 extern int map_rows;
 extern int map_symbols_per_line;
@@ -61,7 +61,7 @@ void AllocateClusterMap(void);
 void FreeClusterMap(void);
 void RedrawMap(void);
 void InitializeMapDisplay(void);
-int __stdcall ProgressCallback(int done_flag);
+void __stdcall update_progress(udefrag_progress_info *pi);
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 void display_error(char *string);
@@ -180,27 +180,14 @@ int show_vollist(void)
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 {
-	int error_code;
-	
-	stop_flag = TRUE;
-	error_code = udefrag_stop();
-	if(error_code < 0){
-		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-		printf("\nDefragmentation cannot be stopped!\n\n");
-		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		printf("%s\n",udefrag_get_error_description(error_code));
-		printf("Kill ultradefrag.exe program in task manager\n");
-		printf("[press Ctrl + Alt + Delete to launch it].\n\n");
-		if(error_code == UDEFRAG_UNKNOWN_ERROR) printf("Use DbgView program to get more information.\n\n");
-		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	}
+	stop_flag = 1;
 	return TRUE;
 }
 
-void cleanup(void)
+int __stdcall terminator(void)
 {
-	(void)udefrag_unload();
-	FreeClusterMap();
+	/* do it as quickly as possible :-) */
+	return stop_flag;
 }
 
 void RunScreenSaver(void)
@@ -210,12 +197,8 @@ void RunScreenSaver(void)
 
 int process_single_volume(void)
 {
-	STATISTIC stat;
-	STATUPDATEPROC stat_callback = NULL;
 	long map_size = 0;
 	int error_code = 0;
-	char volume_name[2];
-	char *results;
 
 	/* validate driveletter */
 	if(!letter){
@@ -240,55 +223,40 @@ int process_single_volume(void)
 
 	/* do our job */
 	if(m_flag) map_size = map_rows * map_symbols_per_line;
-	while(1){
-		error_code = udefrag_init();
-		if(error_code >= 0) break; /* initialization succeded */
-		if(error_code == UDEFRAG_ALREADY_RUNNING && wait_flag){
-			/* wait one second and try again */
-			Sleep(1000);
-			continue;
-		} else {
-			DisplayDefragError(error_code,"Initialization failed!");
-			cleanup();
-			return 2;
-		}
-	}
+	
+	/* TODO: wait until already running task completes */
+//	while(1){
+//		error_code = udefrag_init();
+//		if(error_code >= 0) break; /* initialization succeded */
+//		if(error_code == UDEFRAG_ALREADY_RUNNING && wait_flag){
+//			/* wait one second and try again */
+//			Sleep(1000);
+//			continue;
+//		} else {
+//			DisplayDefragError(error_code,"Initialization failed!");
+//			FreeClusterMap();
+//			return 2;
+//		}
+//	}
 
 	if(m_flag) /* prepare console buffer for map */
 		InitializeMapDisplay();
 	
-	if(!p_flag) stat_callback = ProgressCallback;
-	stop_flag = FALSE;
-
-	volume_name[0] = letter; volume_name[1] = 0;
+	stop_flag = 0;
 	if(a_flag){
-		error_code = udefrag_start(volume_name,ANALYSE_JOB,map_size,stat_callback);
+		error_code = udefrag_start_job(letter,ANALYSIS_JOB,map_size,update_progress,terminator);
 	} else if(o_flag){
-		error_code = udefrag_start(volume_name,OPTIMIZE_JOB,map_size,stat_callback);
+		error_code = udefrag_start_job(letter,OPTIMIZER_JOB,map_size,update_progress,terminator);
 	} else {
-		error_code = udefrag_start(volume_name,DEFRAG_JOB,map_size,stat_callback);
+		error_code = udefrag_start_job(letter,DEFRAG_JOB,map_size,update_progress,terminator);
 	}
 	if(error_code < 0){
 		DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
-		cleanup();
+		FreeClusterMap();
 		return 3;
 	}
 
-	/* display results and exit */
-	if(v_flag){
-		if(udefrag_get_progress(&stat,NULL) >= 0){
-			results = udefrag_get_default_formatted_results(&stat);
-			if(results){
-				printf("\n%s",results);
-				udefrag_release_default_formatted_results(results);
-			} else {
-				printf("\nudefrag_get_default_formatted_results() call failed!\n");
-				printf("Use DbgView program to get more information.\n\n");
-			}
-		}
-	}
-
-	cleanup();
+	FreeClusterMap();
 	return 0;
 }
 

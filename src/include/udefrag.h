@@ -24,15 +24,17 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
-#include "udefrag-kernel.h"
-
 #if defined(__POCC__)
 #pragma ftol(inlined)
 #endif
 
+/* debug print levels */
+#define DBG_NORMAL     0
+#define DBG_DETAILED   1
+#define DBG_PARANOID   2
+
 /* UltraDefrag error codes */
 #define UDEFRAG_UNKNOWN_ERROR     (-1)
-#define UDEFRAG_ALREADY_RUNNING   (-2)
 #define UDEFRAG_W2K_4KB_CLUSTERS  (-3)
 #define UDEFRAG_NO_MEM            (-4)
 #define UDEFRAG_CDROM             (-5)
@@ -43,7 +45,7 @@
 #define DEFAULT_REFRESH_INTERVAL 100
 
 #define MAX_DOS_DRIVES 26
-#define MAXFSNAME      32  /* I think that's enough. */
+#define MAXFSNAME      32  /* I think, that's enough */
 
 typedef struct _volume_info {
 	char letter;
@@ -53,24 +55,24 @@ typedef struct _volume_info {
 	int is_removable;
 } volume_info;
 
-void __stdcall udefrag_monolithic_native_app_init(void);
-void __stdcall udefrag_monolithic_native_app_unload(void);
+/**
+ * @brief Initializes all libraries required 
+ * for the native application.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ * Call this routine in the beginning of NtProcessStartup() code.
+ */
+#define udefrag_monolithic_native_app_init() zenwinx_native_init()
 
-int __stdcall udefrag_init(void);
-int __stdcall udefrag_unload(void);
-
-/*
-* This callback procedure was designed especially 
-* to refresh progress indicator during the defragmentation process.
-*/
-typedef int (__stdcall *STATUPDATEPROC)(int done_flag);
-int __stdcall udefrag_start(char *volume_name, UDEFRAG_JOB_TYPE job_type, int cluster_map_size, STATUPDATEPROC sproc);
-int __stdcall udefrag_stop(void);
-int __stdcall udefrag_get_progress(STATISTIC *pstat, double *percentage);
-int __stdcall udefrag_get_map(char *buffer,int size);
-char *  __stdcall udefrag_get_default_formatted_results(STATISTIC *pstat);
-void __stdcall udefrag_release_default_formatted_results(char *results);
-char * __stdcall udefrag_get_error_description(int error_code);
+/**
+ * @brief Frees resources of all libraries required 
+ * for the native application.
+ * @note Designed especially to replace DllMain
+ * functionality in case of monolithic native application.
+ * Don't call it before winx_shutdown() and winx_reboot(),
+ * but call always before winx_exit().
+ */
+#define udefrag_monolithic_native_app_unload() zenwinx_native_unload()
 
 volume_info * __stdcall udefrag_get_vollist(int skip_removable);
 void __stdcall udefrag_release_vollist(volume_info *v);
@@ -78,5 +80,61 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable);
 
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);
+
+typedef enum {
+	ANALYSIS_JOB = 0,
+	DEFRAG_JOB,
+	OPTIMIZER_JOB
+} udefrag_job_type;
+
+enum {
+	FREE_SPACE = 0,
+	SYSTEM_SPACE,
+	SYSTEM_OVER_LIMIT_SPACE,
+	FRAGM_SPACE,
+	FRAGM_OVER_LIMIT_SPACE,
+	UNFRAGM_SPACE,
+	UNFRAGM_OVER_LIMIT_SPACE,
+	MFT_ZONE_SPACE, /* after free! */
+	MFT_SPACE, /* after mft zone! */
+	DIR_SPACE,
+	DIR_OVER_LIMIT_SPACE,
+	COMPRESSED_SPACE,
+	COMPRESSED_OVER_LIMIT_SPACE,
+	TEMPORARY_SYSTEM_SPACE
+};
+
+#define UNKNOWN_SPACE FRAGM_SPACE
+#define NUM_OF_SPACE_STATES (TEMPORARY_SYSTEM_SPACE - FREE_SPACE + 1)
+
+typedef struct _udefrag_progress_info {
+	unsigned long files;              /* number of files */
+	unsigned long directories;        /* number of directories */
+	unsigned long compressed;         /* number of compressed files */
+	unsigned long fragmented;         /* number of fragmented files */
+	unsigned long fragments;          /* number of fragments */
+	ULONGLONG total_space;            /* volume size, in bytes */
+	ULONGLONG free_space;             /* free space amount, in bytes */
+	ULONGLONG mft_size;               /* mft size, in bytes */
+	unsigned char current_operation;  /* identifier of the currently running job */
+	unsigned long pass_number;        /* the current volume optimizer pass */
+	ULONGLONG clusters_to_process;    /* number of clusters to process */
+	ULONGLONG processed_clusters;     /* number of already processed clusters */
+	double percentage;                /* used to deliver a job completion percentage to the caller */
+	int completion_status;            /* zero for running job, positive value for succeeded, negative for failed */
+	char *cluster_map;                /* pointer to the cluster map buffer */
+	int cluster_map_size;             /* size of the cluster map buffer, in bytes */
+} udefrag_progress_info;
+
+typedef void  (__stdcall *udefrag_progress_callback)(udefrag_progress_info *pi);
+typedef int   (__stdcall *udefrag_terminator)(void);
+
+int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
+		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t);
+
+char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi);
+void __stdcall udefrag_release_default_formatted_results(char *results);
+
+char * __stdcall udefrag_get_error_description(int error_code);
 
 #endif /* _UDEFRAG_H_ */

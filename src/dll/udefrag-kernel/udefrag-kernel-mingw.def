@@ -1,8 +1,0 @@
-LIBRARY udefrag-kernel.dll
-
-EXPORTS
-	udefrag_kernel_native_init@0
-	udefrag_kernel_native_unload@0
-	udefrag_kernel_start@12
-	udefrag_kernel_stop@0
-	udefrag_kernel_get_statistic@12

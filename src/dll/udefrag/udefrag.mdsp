@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=
 outputFilename=../../bin/udefrag.dll
-libraries=ntdll,zenwinx,udefrag-kernel
+libraries=ntdll,zenwinx
 extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
@@ -65,7 +65,7 @@ optimizeLevel=2
 // linker
 libraryPath=..\..\lib
 outputFilename=../../bin/udefrag.dll
-libraries=ntdll,zenwinx,udefrag-kernel
+libraries=ntdll,zenwinx
 extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
@@ -82,17 +82,22 @@ extraResourceOptions=
 [Source]
 1=udefrag.c
 2=volume.c
+3=options.c
+4=int64.c
+5=reports.c
+6=map.c
+7=analyze.c
 [Header]
+1=udefrag-internals.h
 [Resource]
 1=udefrag.rc
 [Other]
 [History]
-..\..\include\udefrag.h,2018
-settings.c,2218
+volume.c,2071
 ..\..\include\udefrag-kernel.h,1346
-udefrag.def,398
-udefrag-mingw.def,433
+udefrag.def,350
+udefrag-mingw.def,375
 rsc\header.html,626
-main.dox,1326
-volume.c,1040
-udefrag.c,2751
+main.dox,1453
+udefrag.c,8962
+..\..\include\udefrag.h,2577

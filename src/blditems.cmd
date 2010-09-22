@@ -6,10 +6,6 @@ pushd obj\zenwinx
 lua ..\..\tools\mkmod.lua zenwinx.build static-lib
 if %errorlevel% neq 0 goto end
 
-cd ..\udefrag-kernel
-lua ..\..\tools\mkmod.lua udefrag-kernel.build static-lib
-if %errorlevel% neq 0 goto end
-
 cd ..\udefrag
 lua ..\..\tools\mkmod.lua udefrag.build static-lib
 if %errorlevel% neq 0 goto end
@@ -22,10 +18,6 @@ echo Compile native DLL's...
 
 cd ..\zenwinx
 lua ..\..\tools\mkmod.lua zenwinx.build
-if %errorlevel% neq 0 goto end
-
-cd ..\udefrag-kernel
-lua ..\..\tools\mkmod.lua udefrag-kernel.build
 if %errorlevel% neq 0 goto end
 
 cd ..\udefrag

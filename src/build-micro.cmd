@@ -52,7 +52,6 @@ xcopy /I /Y /Q    .\utf8-16 .\obj\utf8-16
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\share .\obj\share
-xcopy /I /Y /Q    .\dll\udefrag-kernel .\obj\udefrag-kernel
 xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
 

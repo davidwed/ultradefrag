@@ -73,7 +73,7 @@ extern int refresh_interval;
 extern int disable_reports;
 extern char dbgprint_level[];
 
-extern BOOL busy_flag, exit_pressed;
+extern int busy_flag, exit_pressed;
 extern NEW_VOLUME_LIST_ENTRY vlist[MAX_DOS_DRIVES + 1];
 
 extern HDC hGridDC;
@@ -130,26 +130,8 @@ void DisplayDefragError(int error_code,char *caption)
 {
 	char buffer[512];
 	
-	if(error_code == UDEFRAG_ALREADY_RUNNING){
-		MessageBoxA(NULL,udefrag_get_error_description(error_code),
-				caption,MB_OK | MB_ICONHAND);
-	} else {
-		(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
-				udefrag_get_error_description(error_code),
-				"Use DbgView program to get more information.");
-		buffer[sizeof(buffer) - 1] = 0;
-		MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
-	}
-}
-
-void DisplayStopDefragError(int error_code,char *caption)
-{
-	char buffer[512];
-	
-	(void)_snprintf(buffer,sizeof(buffer),"%s\n%s\n%s\n%s",
+	(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
 			udefrag_get_error_description(error_code),
-			"Kill ultradefrag.exe program in task manager",
-			"[press Ctrl + Alt + Delete to launch it].",
 			"Use DbgView program to get more information.");
 	buffer[sizeof(buffer) - 1] = 0;
 	MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
@@ -160,7 +142,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 {
 	HANDLE hToken; 
 	TOKEN_PRIVILEGES tkp; 
-	int error_code;
 	
 	hInstance = GetModuleHandle(NULL);
 	
@@ -185,14 +166,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	#endif
 #endif
 
-	error_code = udefrag_init();
-	if(error_code < 0){
-		DisplayDefragError(error_code,"Initialization failed!");
-		(void)udefrag_unload();
-		DeleteEnvironmentVariables();
-		return 2;
-	}
-
 	/* check for the new version of the program */
 	CheckForTheNewVersion();
 
@@ -205,7 +178,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
 		DisplayLastError("Cannot create the main window!");
-		(void)udefrag_unload();
 		DeleteEnvironmentVariables();
 		return 3;
 	}
@@ -308,7 +280,7 @@ void InitMainWindow(void)
 	
 	/* status bar will always have default font */
 	CreateStatusBar();
-	UpdateStatusBar(&(vlist[0].stat)); /* can be initialized here by any entry */
+	UpdateStatusBar(&(vlist[0].pi)); /* can be initialized here by any entry */
 
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
@@ -709,9 +681,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		if(!maximized_window)
 			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 		VolListGetColumnWidths();
-		exit_pressed = TRUE;
+		exit_pressed = 1;
 		stop();
-		(void)udefrag_unload();
 		(void)EndDialog(hWnd,0);
 		return TRUE;
 	}
@@ -798,7 +769,6 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	char buffer[MAX_PATH + 64];
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
-	int error_code;
 
 	/* window coordinates must be accessible by configurator */
 	SavePrefs();
@@ -826,12 +796,6 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	/* reinitialize GUI */
 	GetPrefs();
 	stop();
-	(void)udefrag_unload();
-	error_code = udefrag_init();
-	if(error_code < 0){
-		DisplayDefragError(error_code,"Initialization failed!");
-		(void)udefrag_unload();
-	}
 	InitFont();
 	(void)SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
 	if(hibernate_instead_of_shutdown)

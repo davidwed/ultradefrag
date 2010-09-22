@@ -46,17 +46,6 @@ del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
 rem xcopy /I /Y /Q /S .\doxy-doc\html ..\..\doxy-doc\zenwinx\html
 cd ..\..
 
-cd dll\udefrag-kernel
-rd /s /q doxy-doc
-lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-doxygen
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-copy /Y .\rsc\*.* .\doxy-doc\html\
-del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
-xcopy /I /Y /Q /S .\doxy-doc\html ..\..\doxy-doc\udefrag-kernel\html
-cd ..\..
-
 cd ..\doc\html\handbook
 rd /s /q doxy-doc
 lua ..\..\..\src\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%

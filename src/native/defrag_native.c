@@ -28,7 +28,7 @@
 * We're releasing this module as a monolithic thing to
 * prevent BSOD in case of missing UltraDefrag native libraries.
 * Otherwise the following modules becomes critical for the Windows
-* boot process: udefrag.dll, udefrag-kernel.dll, zenwinx.dll.
+* boot process: udefrag.dll, zenwinx.dll.
 * We don't know how to build monolithic app on MinGW,
 * but on Windows DDK this works fine.
 */

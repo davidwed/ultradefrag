@@ -87,8 +87,8 @@ static int vlist_add_item(char *name,char *fsname,ULONGLONG total,ULONGLONG free
 	/* already in list? */
 	for(i = 0; i < (MAX_DOS_DRIVES + 1); i++){
 		if(strcmp(vlist[i].name,name) == 0){
-			vlist[i].stat.total_space = total;
-			vlist[i].stat.free_space = free;
+			vlist[i].pi.total_space = total;
+			vlist[i].pi.free_space = free;
 			return 0;
 		}
 	}
@@ -107,8 +107,8 @@ static int vlist_add_item(char *name,char *fsname,ULONGLONG total,ULONGLONG free
 	(void)strncpy(entry->name,name,MAX_VNAME_LEN);
 	(void)strncpy(entry->fsname,fsname,MAX_FSNAME_LEN);
 	
-	entry->stat.total_space = total;
-	entry->stat.free_space = free;
+	entry->pi.total_space = total;
+	entry->pi.free_space = free;
 	
 	hMainDC = GetDC(hWindow);
 	hDC = CreateCompatibleDC(hMainDC);
@@ -291,7 +291,7 @@ void VolListNotifyHandler(LPARAM lParam)
 		/* redraw indicator */
 		RedrawMap(entry);
 		/* update status bar */
-		if(entry) UpdateStatusBar(&entry->stat);
+		if(entry) UpdateStatusBar(&entry->pi);
 	}
 }
 
@@ -334,7 +334,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 	entry = vlist_get_first_selected_entry();
 	RedrawMap(entry);
-	if(entry) UpdateStatusBar(&entry->stat);
+	if(entry) UpdateStatusBar(&entry->pi);
 	
 	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
@@ -566,8 +566,8 @@ void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry)
 	if(v){
 		for(i = 0; v[i].letter != 0; i++){
 			if(v[i].letter == v_entry->name[0]){
-				v_entry->stat.total_space = v[i].total_space.QuadPart;
-				v_entry->stat.free_space = v[i].free_space.QuadPart;
+				v_entry->pi.total_space = v[i].total_space.QuadPart;
+				v_entry->pi.free_space = v[i].free_space.QuadPart;
 
 				while(1){
 					item = (int)SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_ALL);

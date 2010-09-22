@@ -69,7 +69,7 @@ BOOL CreateStatusBar()
 	return (hStatus) ? TRUE : FALSE;
 }
 
-void UpdateStatusBar(STATISTIC *pst)
+void UpdateStatusBar(udefrag_progress_info *pi)
 {
 	char s[32];
 	#define BFSIZE 128
@@ -77,27 +77,27 @@ void UpdateStatusBar(STATISTIC *pst)
 
 	if(!hStatus) return;
 
-	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->dircounter,
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pi->directories,
 			WgxGetResourceString(i18n_table,L"DIRS"));
 	bf[BFSIZE - 1] = 0;
 	(void)SendMessage(hStatus,SB_SETTEXTW,0,(LPARAM)bf);
 
-	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->filecounter,
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pi->files,
 			WgxGetResourceString(i18n_table,L"FILES"));
 	bf[BFSIZE - 1] = 0;
 	(void)SendMessage(hStatus,SB_SETTEXTW,1,(LPARAM)bf);
 
-	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->fragmfilecounter,
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pi->fragmented,
 			WgxGetResourceString(i18n_table,L"FRAGMENTED"));
 	bf[BFSIZE - 1] = 0;
 	(void)SendMessage(hStatus,SB_SETTEXTW,2,(LPARAM)bf);
 
-	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pst->compressedcounter,
+	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pi->compressed,
 			WgxGetResourceString(i18n_table,L"COMPRESSED"));
 	bf[BFSIZE - 1] = 0;
 	(void)SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 
-	(void)udefrag_fbsize(pst->mft_size,2,s,sizeof(s));
+	(void)udefrag_fbsize(pi->mft_size,2,s,sizeof(s));
 	(void)_snwprintf(bf,BFSIZE - 1,L"%S %s",s,
 			WgxGetResourceString(i18n_table,L"MFT"));
 	bf[BFSIZE - 1] = 0;
