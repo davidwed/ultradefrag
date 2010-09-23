@@ -1586,7 +1586,7 @@ fail:
 		}
 	}
 
-	DebugPrint("%u attribute list entries has been processed totally",
+	DebugPrint("%u attribute list entries have been processed totally",
 		sp->processed_attr_list_entries);
 	DebugPrint("file records scan completed in %I64u ms",
 		winx_xtime() - start_time);

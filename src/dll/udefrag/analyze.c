@@ -180,7 +180,7 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 	* because mft zones are partially
 	* inside already counted free space pool.
 	*/
-	DebugPrint("%-12s: %-20s: %-20s", "mft zone", "start", "length");
+	DebugPrint("%-12s: %-20s: %-20s", "mft section", "start", "length");
 
 	/* $MFT */
 	start = jp->v_info.ntfs_data.MftStartLcn.QuadPart;
@@ -208,7 +208,7 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 		jp->mft_zones.mftzone_start = start; jp->mft_zones.mftzone_end = start + length - 1;
 	}
 
-	/* $MFTMirror */
+	/* $MFT Mirror */
 	start = jp->v_info.ntfs_data.Mft2StartLcn.QuadPart;
 	length = 1;
 	mirror_size = jp->v_info.ntfs_data.BytesPerFileRecordSegment * 4;
@@ -629,7 +629,7 @@ static void produce_list_of_fragmented_files(udefrag_job_parameters *jp)
  * @brief Define whether some
  * actions are allowed or not.
  * @return Zero indicates that
- * requested opearation is allowed,
+ * requested operation is allowed,
  * negative value indicates contrary.
  */
 static int define_allowed_actions(udefrag_job_parameters *jp)
