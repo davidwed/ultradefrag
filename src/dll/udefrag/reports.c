@@ -19,7 +19,7 @@
 
 /**
  * @file reports.c
- * @brief File fragmentation reports managing code.
+ * @brief File fragmentation reports.
  * @addtogroup Reports
  * @{
  */

@@ -19,7 +19,7 @@
 
 /**
  * @file options.c
- * @brief Job options reading code.
+ * @brief Job options.
  * @addtogroup Options
  * @{
  */

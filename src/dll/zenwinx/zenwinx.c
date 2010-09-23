@@ -19,7 +19,7 @@
 
 /**
  * @file zenwinx.c
- * @brief Startup and shutdown code.
+ * @brief Startup and shutdown.
  * @addtogroup StartupAndShutdown
  * @{
  */

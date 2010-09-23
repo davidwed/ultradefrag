@@ -19,7 +19,7 @@
 
 /**
  * @file map.c
- * @brief Cluster map code.
+ * @brief Cluster map.
  * @addtogroup ClusterMap
  * @{
  */

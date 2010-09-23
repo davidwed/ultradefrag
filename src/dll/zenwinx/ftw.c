@@ -19,7 +19,7 @@
 
 /**
  * @file ftw.c
- * @brief File tree walk routines.
+ * @brief File tree walk.
  * @addtogroup File
  * @{
  */

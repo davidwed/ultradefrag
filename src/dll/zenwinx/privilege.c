@@ -19,7 +19,7 @@
 
 /**
  * @file privilege.c
- * @brief User privileges managing code.
+ * @brief User privileges.
  * @addtogroup Privileges
  * @{
  */

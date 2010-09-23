@@ -19,7 +19,7 @@
 
 /**
  * @file file.c
- * @brief File I/O code.
+ * @brief File I/O.
  * @addtogroup File
  * @{
  */

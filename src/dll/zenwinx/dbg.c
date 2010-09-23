@@ -19,7 +19,7 @@
 
 /**
  * @file dbg.c
- * @brief Debugging code.
+ * @brief Debugging.
  * @addtogroup Debug
  * @{
  */

@@ -19,7 +19,7 @@
 
 /**
  * @file env.c
- * @brief Process environment managing code.
+ * @brief Process environment.
  * @addtogroup Environment
  * @{
  */

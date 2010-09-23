@@ -19,7 +19,7 @@
 
 /**
  * @file volume.c
- * @brief Disk validation code.
+ * @brief Disk validation.
  * @addtogroup Disks
  * @{
  */

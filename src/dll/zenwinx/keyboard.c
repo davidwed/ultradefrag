@@ -19,7 +19,7 @@
 
 /**
  * @file keyboard.c
- * @brief Keyboard input code.
+ * @brief Keyboard input.
  * @addtogroup Keyboard
  * @{
  */

@@ -19,7 +19,7 @@
 
 /**
  * @file event.c
- * @brief Events manipulation code.
+ * @brief Events.
  * @addtogroup Events
  * @{
  */

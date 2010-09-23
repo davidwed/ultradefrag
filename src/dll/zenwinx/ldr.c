@@ -19,7 +19,7 @@
 
 /**
  * @file ldr.c
- * @brief GetProcAddress() code.
+ * @brief GetProcAddress.
  * @addtogroup Loader
  * @{
  */

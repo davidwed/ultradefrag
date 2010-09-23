@@ -19,7 +19,7 @@
 
 /**
  * @file string.c
- * @brief String processing routines.
+ * @brief Strings.
  * @addtogroup String
  * @{
  */

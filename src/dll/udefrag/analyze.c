@@ -19,7 +19,7 @@
 
 /**
  * @file analyze.c
- * @brief Volume analysis code.
+ * @brief Volume analysis.
  * @addtogroup Analysis
  * @{
  */

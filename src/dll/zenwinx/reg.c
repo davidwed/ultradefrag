@@ -19,7 +19,7 @@
 
 /**
  * @file reg.c
- * @brief System registry manipulation code.
+ * @brief System registry.
  * @addtogroup Registry
  * @{
  */

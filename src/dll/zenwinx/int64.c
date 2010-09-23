@@ -19,7 +19,7 @@
 
 /**
  * @file int64.c
- * @brief 64-bit integer support code.
+ * @brief 64-bit integer support.
  * @{
  */
 

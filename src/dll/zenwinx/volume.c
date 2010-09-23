@@ -19,7 +19,7 @@
 
 /**
  * @file volume.c
- * @brief Disk volumes managing code.
+ * @brief Disk volumes.
  * @addtogroup Disks
  * @{
  */
@@ -693,7 +693,7 @@ int __stdcall winx_vflush(char volume_letter)
 
 /**
  * @brief Retrieves list of free regions on the volume.
- * @param[in] volume_name the name of the volume.
+ * @param[in] volume_letter the volume letter.
  * @param[in] flags combination of WINX_GVR_xxx flags.
  * @param[in] cb address of procedure to be called
  * each time when the free region is found on the volume.

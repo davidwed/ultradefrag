@@ -19,7 +19,7 @@
 
 /**
  * @file list.c
- * @brief Generic double linked lists code.
+ * @brief Generic double linked lists.
  * @addtogroup Lists
  * @{
  */

@@ -5,7 +5,7 @@ HISTORY
     RC1:
     - ability to run multiple instances simultaneously was added
     - the driver has been completely reworked to increase its reliability
-      and flexibitity; a lot of complicated algorithms were replaced
+      and flexibility; a lot of complicated algorithms were replaced
       by obvious ones; as a side effect we have a noticeable speedup
       of the volume analysis
     - filter patterns length limitation (4096 characters) was removed

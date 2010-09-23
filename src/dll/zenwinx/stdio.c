@@ -19,7 +19,7 @@
 
 /**
  * @file stdio.c
- * @brief Console I/O code.
+ * @brief Console I/O.
  * @addtogroup Console
  * @{
  */

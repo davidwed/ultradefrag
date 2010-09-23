@@ -19,7 +19,7 @@
 
 /**
  * @file misc.c
- * @brief Miscellaneous system functions code.
+ * @brief Miscellaneous system functions.
  * @addtogroup Miscellaneous
  * @{
  */

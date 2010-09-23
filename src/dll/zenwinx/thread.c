@@ -19,7 +19,7 @@
 
 /**
  * @file thread.c
- * @brief Threads code.
+ * @brief Threads.
  * @addtogroup Threads
  * @{
  */

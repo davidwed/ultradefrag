@@ -19,7 +19,7 @@
 
 /**
  * @file time.c
- * @brief Time conversion and performance measures code.
+ * @brief Time and performance.
  * @addtogroup Time
  * @{
  */

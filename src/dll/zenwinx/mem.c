@@ -19,7 +19,7 @@
 
 /**
  * @file mem.c
- * @brief Memory allocation code.
+ * @brief Memory.
  * @addtogroup Memory
  * @{
  */
