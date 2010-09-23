@@ -215,7 +215,7 @@ void InitializeMapDisplay(void)
 
 BOOL first_run = TRUE;
 
-void __stdcall update_progress(udefrag_progress_info *pi)
+void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 {
 	char op; char *op_name = "";
 	CONSOLE_SCREEN_BUFFER_INFO csbi;

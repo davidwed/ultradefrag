@@ -87,6 +87,7 @@
 #include <shellapi.h>
 #include <math.h>
 #include <process.h>
+#include <ctype.h>
 #include <wchar.h>
 
 #define lua_c
@@ -95,6 +96,7 @@
 #include "../lua5.1/lualib.h"
 
 #include "../include/udefrag.h"
+#include "../include/ultradfgver.h"
 #include "resource.h"
 
 #include "../dll/wgx/wgx.h"

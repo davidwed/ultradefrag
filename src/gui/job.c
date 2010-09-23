@@ -17,20 +17,210 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - analyse/defrag job code.
-*/
+/**
+ * @file job.c
+ * @brief Volume processing jobs.
+ * @addtogroup Job
+ * @{
+ */
+
 #include "main.h"
-#include "../include/ultradfgver.h"
-#include <wchar.h>
+
+extern int map_blocks_per_line;
+extern int map_lines;
+
+typedef struct _job_parameters {
+	char volume_letter;
+	udefrag_job_type job_type;
+} job_parameters;
+	
+typedef struct _volume_processing_job {
+	job_parameters jp;
+	int termination_flag;
+	udefrag_progress_info pi;
+} volume_processing_job;
+
+/* each volume letter may have a single job assigned */
+#define NUMBER_OF_JOBS ('z' - 'a' + 1)
+
+volume_processing_job jobs[NUMBER_OF_JOBS];
+
+/**
+ * @brief Initializes structures belonging to all jobs.
+ */
+void init_jobs(void)
+{
+	int i;
+	
+	for(i = 0; i < NUMBER_OF_JOBS; i++){
+		memset(&jobs[i],0,sizeof(volume_processing_job));
+		jobs[i].pi.completion_status = 1; /* not running */
+	}
+}
+
+/**
+ * @brief Get job assigned to volume letter.
+ */
+static volume_processing_job *get_job(char volume_letter)
+{
+	/* validate volume letter */
+	volume_letter = (char)tolower((int)volume_letter);
+	if(volume_letter < 'a' || volume_letter > 'z')
+		return NULL;
+	
+	return &jobs[volume_letter - 'a'];
+}
+
+static void __stdcall _update_progress(udefrag_progress_info *pi, void *p)
+{
+	volume_processing_job *j = (volume_processing_job *)p;
+	
+	if(pi == NULL || j == NULL)
+		return;
+	
+	memcpy(&j->pi,pi,sizeof(udefrag_progress_info));
+}
+
+static int __stdcall _terminator(void *p)
+{
+	volume_processing_job *j = (volume_processing_job *)p;
+	
+	if(j == NULL)
+		return 0;
+	
+	return j->termination_flag;
+}
+
+static DWORD WINAPI run_job(LPVOID lpParameter)
+{
+	job_parameters *jp = (job_parameters *)lpParameter;
+	volume_processing_job *j;
+	int result;
+
+	if(jp == NULL)
+		goto done;
+	
+	j = get_job(jp->volume_letter);
+	if(j == NULL)
+		goto done;
+	
+	/* initialize job */
+	memcpy(&j->jp,jp,sizeof(job_parameters));
+	j->termination_flag = 0;
+	
+	/* start the job */
+	result = udefrag_start_job(j->jp.volume_letter, 
+				j->jp.job_type,	map_blocks_per_line * map_lines,
+				_update_progress, _terminator, (void *)j);
+	if(result < 0){
+		// TODO: display defrag error
+	}
+
+done:	
+	return 0;
+}
+
+/**
+ * @brief Starts the volume processing job.
+ * @return Zero for success, negative value otherwise.
+ */
+int start_job(char volume_letter,udefrag_job_type job_type)
+{
+	volume_processing_job *j = get_job(volume_letter);
+	job_parameters jp;
+	DWORD id;
+
+	if(j == NULL)
+		return (-1);
+	
+	if(j->pi.completion_status == 0)
+		return (-1); /* already running */
+	
+	/* run job in separate thread */
+	jp.volume_letter = volume_letter;
+	jp.job_type = job_type;
+	if(CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)run_job,(void *)&jp,0,&id) == NULL){
+		// TODO: print last error
+		return (-1);
+	}
+	
+	return 0;
+}
+
+/**
+ * @brief Defines whether the job is running or not.
+ */
+int is_job_running(char volume_letter)
+{
+	volume_processing_job *j = get_job(volume_letter);
+	if(j == NULL)
+		return 0;
+	return (j->pi.completion_status == 0) ? 1 : 0;
+}
+
+/**
+ * @brief Stops the running volume processing job.
+ */
+void stop_job(char volume_letter)
+{
+	volume_processing_job *j = get_job(volume_letter);
+	if(j != NULL)
+		j->termination_flag = 1;
+}
+
+/** @} */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 extern HWND hWindow;
 extern HWND hList;
 extern int shutdown_flag;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
-
-extern int map_blocks_per_line;
-extern int map_lines;
 
 extern char *global_cluster_map;
 DWORD thr_id;
@@ -88,7 +278,7 @@ void DisplayInvalidVolumeError(int error_code)
 }
 
 /* callback function */
-void __stdcall update_progress(udefrag_progress_info *pi)
+void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 {
 	NEW_VOLUME_LIST_ENTRY *v_entry;
 	static wchar_t progress_msg[128];
@@ -161,7 +351,7 @@ void __stdcall update_progress(udefrag_progress_info *pi)
 	return;
 }
 
-int __stdcall terminator(void)
+int __stdcall terminator(void *p)
 {
 	return stop_pressed;
 }
@@ -277,19 +467,19 @@ void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
 		case 'a':
 			error_code = udefrag_start_job(letter, ANALYSIS_JOB,
 					map_blocks_per_line * map_lines,
-					update_progress, terminator);
+					update_progress, terminator, NULL);
 			Status = STATUS_ANALYSED;
 			break;
 		case 'd':
 			error_code = udefrag_start_job(letter, DEFRAG_JOB,
 					map_blocks_per_line * map_lines,
-					update_progress, terminator);
+					update_progress, terminator, NULL);
 			Status = STATUS_DEFRAGMENTED;
 			break;
 		default:
 			error_code = udefrag_start_job(letter, OPTIMIZER_JOB,
 					map_blocks_per_line * map_lines,
-					update_progress, terminator);
+					update_progress, terminator, NULL);
 			Status = STATUS_OPTIMIZED;
 		}
 		if(error_code < 0 && !exit_pressed){

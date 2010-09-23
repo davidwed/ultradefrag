@@ -19,7 +19,7 @@
 
 /**
  * @file udefrag.c
- * @brief UltraDefrag engine entry point.
+ * @brief Entry point.
  * @addtogroup Engine
  * @{
  */
@@ -95,7 +95,7 @@ static void deliver_progress_info(udefrag_job_parameters *jp)
 	}
 	
 	/* deliver information to the caller */
-	jp->cb(&jp->pi);
+	jp->cb(&jp->pi,jp->p);
 	jp->progress_refresh_time = winx_xtime();
 	if(jp->udo.dbgprint_level >= DBG_PARANOID)
 		winx_dbg_print_header(0x20,0,"progress update");
@@ -146,7 +146,7 @@ int __stdcall termination_router(void *p)
 
 	/* ask caller */
 	if(jp->t){
-		result = jp->t();
+		result = jp->t(jp->p);
 		if(result){
 			winx_dbg_print_header(0,0,"*");
 			winx_dbg_print_header(0x20,0,"termination requested by caller");
@@ -169,7 +169,7 @@ static int __stdcall terminator(void *p)
 
 	/* ask caller */
 	if(jp->t){
-		result = jp->t();
+		result = jp->t(jp->p);
 		if(result){
 			winx_dbg_print_header(0,0,"*");
 			winx_dbg_print_header(0x20,0,"termination requested by caller");
@@ -250,12 +250,13 @@ void destroy_lists(udefrag_job_parameters *jp)
  * @param[in] t address of procedure to be called each time
  * when requested job would like to know whether it must be terminated or not.
  * Nonzero value, returned by terminator, forces the job to be terminated.
+ * @param[in] p pointer to user defined data to be passed to both callbacks.
  * @return Zero for success, negative value otherwise.
  * @note [Callback procedures should complete as quickly
  * as possible to avoid slowdown of the volume processing].
  */
 int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
-		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t)
+		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p)
 {
 	udefrag_job_parameters jp;
 	ULONGLONG time = 0;
@@ -271,6 +272,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	jp.job_type = job_type;
 	jp.cb = cb;
 	jp.t = t;
+	jp.p = p;
 
 	/*jp.progress_router = progress_router;
 	jp.termination_router = termination_router;*/

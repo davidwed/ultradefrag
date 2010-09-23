@@ -104,6 +104,7 @@ typedef struct _udefrag_job_parameters {
 	udefrag_job_type job_type;                  /* type of requested job */
 	udefrag_progress_callback cb;               /* progress update callback */
 	udefrag_terminator t;                       /* termination callback */
+	void *p;                                    /* pointer to user defined data to be passed to both callbacks */
 	udefrag_progress_router progress_router;        /* address of procedure delivering progress info to the caller */
 	udefrag_termination_router termination_router;  /* address of procedure triggering job termination */
 	ULONGLONG start_time;                       /* time of the job launch */

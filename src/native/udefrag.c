@@ -118,7 +118,7 @@ void RedrawProgress(udefrag_progress_info *pi)
  * on the screen and raises a job termination
  * when Esc\Break keys are pressed.
  */
-void __stdcall update_progress(udefrag_progress_info *pi)
+void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 {
 	KBD_RECORD kbd_rec;
 	int escape_detected = 0;
@@ -143,7 +143,7 @@ void __stdcall update_progress(udefrag_progress_info *pi)
 	RedrawProgress(pi);
 }
 
-int __stdcall terminator(void)
+int __stdcall terminator(void *p)
 {
 	/* do it as quickly as possible :-) */
 	return abort_flag;
@@ -181,7 +181,7 @@ void ProcessVolume(char letter)
 		break;
 	}
 	winx_printf(BREAK_MESSAGE);
-	status = udefrag_start_job(letter,current_job,0,update_progress,terminator);
+	status = udefrag_start_job(letter,current_job,0,update_progress,terminator,NULL);
 	if(status < 0){
 		winx_printf("\nAnalysis/Defragmentation failed!\n");
 		winx_printf("%s\n",udefrag_get_error_description(status));

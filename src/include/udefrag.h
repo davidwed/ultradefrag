@@ -126,11 +126,11 @@ typedef struct _udefrag_progress_info {
 	int cluster_map_size;             /* size of the cluster map buffer, in bytes */
 } udefrag_progress_info;
 
-typedef void  (__stdcall *udefrag_progress_callback)(udefrag_progress_info *pi);
-typedef int   (__stdcall *udefrag_terminator)(void);
+typedef void  (__stdcall *udefrag_progress_callback)(udefrag_progress_info *pi, void *p);
+typedef int   (__stdcall *udefrag_terminator)(void *p);
 
 int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
-		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t);
+		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p);
 
 char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi);
 void __stdcall udefrag_release_default_formatted_results(char *results);

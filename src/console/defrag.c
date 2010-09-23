@@ -61,7 +61,7 @@ void AllocateClusterMap(void);
 void FreeClusterMap(void);
 void RedrawMap(void);
 void InitializeMapDisplay(void);
-void __stdcall update_progress(udefrag_progress_info *pi);
+void __stdcall update_progress(udefrag_progress_info *pi, void *p);
 
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 void display_error(char *string);
@@ -184,7 +184,7 @@ BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
 	return TRUE;
 }
 
-int __stdcall terminator(void)
+int __stdcall terminator(void *p)
 {
 	/* do it as quickly as possible :-) */
 	return stop_flag;
@@ -244,11 +244,11 @@ int process_single_volume(void)
 	
 	stop_flag = 0;
 	if(a_flag){
-		error_code = udefrag_start_job(letter,ANALYSIS_JOB,map_size,update_progress,terminator);
+		error_code = udefrag_start_job(letter,ANALYSIS_JOB,map_size,update_progress,terminator,NULL);
 	} else if(o_flag){
-		error_code = udefrag_start_job(letter,OPTIMIZER_JOB,map_size,update_progress,terminator);
+		error_code = udefrag_start_job(letter,OPTIMIZER_JOB,map_size,update_progress,terminator,NULL);
 	} else {
-		error_code = udefrag_start_job(letter,DEFRAG_JOB,map_size,update_progress,terminator);
+		error_code = udefrag_start_job(letter,DEFRAG_JOB,map_size,update_progress,terminator,NULL);
 	}
 	if(error_code < 0){
 		DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
