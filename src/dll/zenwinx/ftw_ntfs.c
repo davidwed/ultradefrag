@@ -1502,6 +1502,7 @@ static int build_full_paths(mft_scan_parameters *sp)
 	}
 	
 	for(f = *sp->filelist; f != NULL; f = f->next){
+		if(ftw_ntfs_check_for_termination(sp)) break;
 		build_file_path(f,f_array,n_entries,p,sp);
 		if(f->next == *sp->filelist) break;
 	}
