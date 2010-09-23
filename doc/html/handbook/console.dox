@@ -123,8 +123,7 @@
  * PARANOID turns on a really huge amount of debugging information.</dd>
  * </dl>
  *
- * Note that all filters are case insensitive. And currently they cannot exceed
- * the limit of 4096 characters. Each filter substring represents a pattern,
+ * Note that all filters are case insensitive. Each filter substring represents a pattern,
  * UltraDefrag will search for it in paths. For example, the "temp;tmp" filter
  * will be applied both to temporary folders and to Internet Explorer's cache.
  *
