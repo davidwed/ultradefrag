@@ -48,6 +48,7 @@
     Danish          - Patrick Paludan-Müller, Stefan Pendl
     Dutch           - Wim Kerstens, Stefan Pendl
     English (US)    - Dmitri Arkhangelski
+    Estonian        - Olav Mägi
     Farsi           - Ali Jafari
     Filipino        - Stefan Pendl
     Finnish         - Stefan Pendl
