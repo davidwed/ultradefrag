@@ -20,7 +20,7 @@ HISTORY
 
                                     ***
 
-  Version 4.4.0  2010-09-18
+  Version 4.4.0  2010-09-24
   ------------------------------------------------------------------------------
     RC2:
     - history of typed commands added to the boot time interactive mode;

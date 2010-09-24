@@ -184,7 +184,9 @@ static size_t __stdcall winx_fwrite_helper(const void *buffer,size_t size,size_t
 	status = NtWriteFile(f->hFile,NULL,NULL,NULL,&iosb,
 			 (void *)buffer,size * count,&f->woffset,NULL);
 	if(NT_SUCCESS(status)){
+		/*DebugPrint("waiting for %p at %I64u started",f,f->woffset.QuadPart);*/
 		status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
+		/*DebugPrint("waiting for %p at %I64u completed",f,f->woffset.QuadPart);*/
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status != STATUS_SUCCESS){

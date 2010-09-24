@@ -27,8 +27,6 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);
-
 /**
  * @brief Suspends the execution of the current thread.
  * @param[in] msec the time interval, in milliseconds.
@@ -70,6 +68,8 @@ void __stdcall winx_sleep(int msec)
  */
 int __stdcall winx_get_os_version(void)
 {
+	/*NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);*/
+	NTSTATUS (__stdcall *func_RtlGetVersion)(OSVERSIONINFOW *version_info);
 	OSVERSIONINFOW ver;
 	
 	ver.dwOSVersionInfoSize = sizeof(OSVERSIONINFOW);
