@@ -160,25 +160,30 @@ goto finished
 :15
 title Build Test Release for Stefan
 call build-pre-release.cmd --no-ia64 --install
-
+echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
+echo.
+call cleanup.cmd --clean
 goto finished
 
 :16
 title Build Test Installation for Stefan
 call build-pre-release.cmd --no-ia64 --no-x86 --install
-
+echo.
+call cleanup.cmd --clean
 goto finished
 
 :17
 title Build Test x86 for Stefan
 call build-pre-release.cmd --no-ia64 --no-amd64
-
+echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
+echo.
+call cleanup.cmd --clean
 goto finished
 
 :finished
