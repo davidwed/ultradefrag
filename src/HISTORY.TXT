@@ -15,9 +15,9 @@ HISTORY
       winx_release_free_volume_regions, winx_dbg_print_header
       functions added to zenwinx library
     - the following translations were added:
-    
-      Estonian
-      
+
+      Estonian, Vietnamese(VI)
+
     - the following translations were updated:
 
       Portuguese(BR)
