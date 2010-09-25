@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - status bar related stuff.
-*/
+/**
+ * @file statbar.c
+ * @brief Status bar.
+ * @addtogroup StatusBar
+ * @{
+ */
 
 #include "main.h"
 
@@ -103,3 +106,5 @@ void UpdateStatusBar(udefrag_progress_info *pi)
 	bf[BFSIZE - 1] = 0;
 	(void)SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
 }
+
+/** @} */

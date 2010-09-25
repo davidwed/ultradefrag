@@ -17,12 +17,55 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
- *  GUI - common definitions.
- */
+#ifndef _UDEFRAG_GUI_MAIN_H_
+#define _UDEFRAG_GUI_MAIN_H_
 
-#ifndef _DFRG_MAIN_H_
-#define _DFRG_MAIN_H_
+#define WIN32_NO_STATUS
+#include <windows.h>
+/*
+* Next definition is very important for mingw:
+* _WIN32_IE must be no less than 0x0400
+* to include some important constant definitions.
+*/
+#ifndef _WIN32_IE
+#define _WIN32_IE 0x0400
+#endif
+#include <commctrl.h>
+#include <shellapi.h>
+
+#ifndef SHTDN_REASON_MAJOR_OTHER
+#define SHTDN_REASON_MAJOR_OTHER   0x00000000
+#endif
+#ifndef SHTDN_REASON_MINOR_OTHER
+#define SHTDN_REASON_MINOR_OTHER   0x00000000
+#endif
+#ifndef SHTDN_REASON_FLAG_PLANNED
+#define SHTDN_REASON_FLAG_PLANNED  0x80000000
+#endif
+#ifndef EWX_FORCEIFHUNG
+#define EWX_FORCEIFHUNG     0x00000010
+#endif
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <memory.h>
+#include <math.h>
+#include <ctype.h>
+#include <wchar.h>
+#include <process.h>
+
+#define lua_c
+#include "../lua5.1/lua.h"
+#include "../lua5.1/lauxlib.h"
+#include "../lua5.1/lualib.h"
+
+#include "../dll/wgx/wgx.h"
+
+#include "../include/udefrag.h"
+#include "../include/ultradfgver.h"
+
+#include "resource.h"
 
 #define DEFAULT_MAP_BLOCK_SIZE  4 //84
 #define DEFAULT_GRID_LINE_WIDTH 1
@@ -67,39 +110,6 @@
 * But window_proc() is waiting for done flag, that can be set
 * after(!) RedrawMap() call. Therefore we have a deadlock.
 */
-
-#define WIN32_NO_STATUS
-#include <windows.h>
-/*
-* Next definition is very important for mingw:
-* _WIN32_IE must be no less than 0x0400
-* to include some important constant definitions.
-*/
-#ifndef _WIN32_IE
-#define _WIN32_IE 0x0400
-#endif
-#include <commctrl.h>
-
-#include <memory.h>
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <shellapi.h>
-#include <math.h>
-#include <process.h>
-#include <ctype.h>
-#include <wchar.h>
-
-#define lua_c
-#include "../lua5.1/lua.h"
-#include "../lua5.1/lauxlib.h"
-#include "../lua5.1/lualib.h"
-
-#include "../include/udefrag.h"
-#include "../include/ultradfgver.h"
-#include "resource.h"
-
-#include "../dll/wgx/wgx.h"
 
 enum {
 	STATUS_UNDEFINED,
@@ -164,23 +174,10 @@ void SetProgress(wchar_t *message, int percentage);
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
 LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
 
-#ifndef SHTDN_REASON_MAJOR_OTHER
-#define SHTDN_REASON_MAJOR_OTHER   0x00000000
-#endif
-#ifndef SHTDN_REASON_MINOR_OTHER
-#define SHTDN_REASON_MINOR_OTHER   0x00000000
-#endif
-#ifndef SHTDN_REASON_FLAG_PLANNED
-#define SHTDN_REASON_FLAG_PLANNED  0x80000000
-#endif
-#ifndef EWX_FORCEIFHUNG
-#define EWX_FORCEIFHUNG     0x00000010
-#endif
-
 #define UNDEFINED_COORD (-10000)
 
 /* This macro converts pixels from 96 DPI to the current one. */
 #define PIX_PER_DIALOG_UNIT_96DPI 1.74
 #define DPI(x) ((int)((double)x * pix_per_dialog_unit / PIX_PER_DIALOG_UNIT_96DPI))
 
-#endif /* _DFRG_MAIN_H_ */
+#endif /* _UDEFRAG_GUI_MAIN_H_ */
