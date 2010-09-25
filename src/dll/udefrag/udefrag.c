@@ -398,12 +398,12 @@ char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi
 		ip = 100; /* fix round off error */
 
 	(void)_snprintf(msg,MSG_LENGTH,
-			  "Volume information:\r\n\r\n"
-			  "  Volume size                  = %s\r\n"
-			  "  Free space                   = %s\r\n\r\n"
-			  "  Total number of files        = %u\r\n"
-			  "  Number of fragmented files   = %u\r\n"
-			  "  Fragments per file           = %u.%02u\r\n\r\n",
+			  "Volume information:\n\n"
+			  "  Volume size                  = %s\n"
+			  "  Free space                   = %s\n\n"
+			  "  Total number of files        = %u\n"
+			  "  Number of fragmented files   = %u\n"
+			  "  Fragments per file           = %u.%02u\n\n",
 			  total_space,
 			  free_space,
 			  pi->files,
