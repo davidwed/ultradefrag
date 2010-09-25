@@ -122,22 +122,6 @@ FunctionEnd
   push $R0
 
   StrCpy $R0 $LanguagePack
-  ${Select} $LanguagePack
-    ${Case} "English (US)"
-      StrCpy $R0 "English(US)"
-    ${Case} "Chinese (Simplified)"
-      StrCpy $R0 "Chinese(Simplified)"
-    ${Case} "Chinese (Traditional)"
-      StrCpy $R0 "Chinese(Traditional)"
-    ${Case} "Filipino (Tagalog)"
-      StrCpy $R0 "Filipino(Tagalog)"
-    ${Case} "French (FR)"
-      StrCpy $R0 "French(FR)"
-    ${Case} "Portuguese (BR)"
-      StrCpy $R0 "Portuguese(BR)"
-    ${Case} "Spanish (AR)"
-      StrCpy $R0 "Spanish(AR)"
-  ${EndSelect}
 
 !ifndef LANGUAGE_SELECTOR
   ; regular installer copies all language packs to installation subdirectories
