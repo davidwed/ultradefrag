@@ -165,6 +165,7 @@ if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Download
 echo.
 copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
+cd /d %UD_BLD_MENU_DIR%
 call cleanup.cmd --clean
 goto finished
 
@@ -172,6 +173,7 @@ goto finished
 title Build Test Installation for Stefan
 call build-pre-release.cmd --no-ia64 --no-x86 --install
 echo.
+cd /d %UD_BLD_MENU_DIR%
 call cleanup.cmd --clean
 goto finished
 
@@ -183,6 +185,7 @@ if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Download
 echo.
 copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
+cd /d %UD_BLD_MENU_DIR%
 call cleanup.cmd --clean
 goto finished
 
