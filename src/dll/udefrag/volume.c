@@ -29,7 +29,7 @@
 #include "../../include/udefrag.h"
 #include "../zenwinx/zenwinx.h"
 
-static int internal_validate_volume(unsigned char letter,int skip_removable,volume_info *v);
+static int internal_validate_volume(char letter,int skip_removable,volume_info *v);
 
 /**
  * @brief Retrieves a list of volumes
@@ -100,7 +100,7 @@ void __stdcall udefrag_release_vollist(volume_info *v)
 
 /**
  * @brief Checks a volume for the defragmentation possibility.
- * @param[in] letter the volume letter.
+ * @param[in] volume_letter the volume letter.
  * @param[in] skip_removable the boolean value 
  * defining, must removable drives be skipped or not.
  * @return Zero for success, negative value otherwise.
@@ -108,7 +108,7 @@ void __stdcall udefrag_release_vollist(volume_info *v)
  * to validate a floppy drive without a floppy disk
  * then you will hear noise :))
  */
-int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
+int __stdcall udefrag_validate_volume(char volume_letter,int skip_removable)
 {
 	volume_info v;
 	int error_code;
@@ -116,7 +116,7 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
 	/* set error mode to ignore missing removable drives */
 	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
 		return (-1);
-	error_code = internal_validate_volume(letter,skip_removable,&v);
+	error_code = internal_validate_volume(volume_letter,skip_removable,&v);
 	if(error_code < 0) return error_code;
 	/* try to restore error mode to default state */
 	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
@@ -137,7 +137,7 @@ int __stdcall udefrag_validate_volume(unsigned char letter,int skip_removable)
  *   to validate a floppy drive without a floppy disk
  *   then you will hear noise :))
  */
-static int internal_validate_volume(unsigned char letter,int skip_removable,volume_info *v)
+static int internal_validate_volume(char volume_letter,int skip_removable,volume_info *v)
 {
 	winx_volume_information volume_info;
 	int type;
@@ -146,28 +146,28 @@ static int internal_validate_volume(unsigned char letter,int skip_removable,volu
 		return (-1);
 
 	/* convert volume letter to uppercase - needed for w2k */
-	letter = (char)_toupper((int)letter);
+	volume_letter = (char)_toupper((int)volume_letter);
 	
-	v->letter = letter;
+	v->letter = volume_letter;
 	v->is_removable = FALSE;
-	type = winx_get_drive_type(letter);
+	type = winx_get_drive_type(volume_letter);
 	if(type < 0) return (-1);
 	if(type == DRIVE_CDROM){
-		DebugPrint("Volume %c: is on cdrom drive.",letter);
+		DebugPrint("Volume %c: is on cdrom drive.",volume_letter);
 		return UDEFRAG_CDROM;
 	}
 	if(type == DRIVE_REMOTE){
-		DebugPrint("Volume %c: is on remote drive.",letter);
+		DebugPrint("Volume %c: is on remote drive.",volume_letter);
 		return UDEFRAG_REMOTE;
 	}
 	if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
-		DebugPrint("It seems that %c: volume letter is assigned by \'subst\' command.",letter);
+		DebugPrint("It seems that %c: volume letter is assigned by \'subst\' command.",volume_letter);
 		return UDEFRAG_ASSIGNED_BY_SUBST;
 	}
 	if(type == DRIVE_REMOVABLE){
 		v->is_removable = TRUE;
 		if(skip_removable){
-			DebugPrint("Volume %c: is on removable media.",letter);
+			DebugPrint("Volume %c: is on removable media.",volume_letter);
 			return UDEFRAG_REMOVABLE;
 		}
 	}
@@ -176,7 +176,7 @@ static int internal_validate_volume(unsigned char letter,int skip_removable,volu
 	* Get volume information; it is strongly 
 	* required to exclude missing floppies.
 	*/
-	if(winx_get_volume_information(letter,&volume_info) < 0)
+	if(winx_get_volume_information(volume_letter,&volume_info) < 0)
 		return (-1);
 	
 	v->total_space.QuadPart = volume_info.total_bytes;
