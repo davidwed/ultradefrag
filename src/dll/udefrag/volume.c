@@ -125,7 +125,7 @@ int __stdcall udefrag_validate_volume(char volume_letter,int skip_removable)
 
 /**
  * @brief Retrieves a volume parameters.
- * @param[in] letter the volume letter.
+ * @param[in] volume_letter the volume letter.
  * @param[in] skip_removable the boolean value defining,
  * must removable drives be treated as invalid or not.
  * @param[out] v pointer to structure receiving volume
