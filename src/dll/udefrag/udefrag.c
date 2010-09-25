@@ -203,6 +203,7 @@ static DWORD WINAPI start_job(LPVOID p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	char *action = "analyzing";
+	int result = 0;
 
 	/* do the job */
 	if(jp->job_type == DEFRAG_JOB) action = "defragmenting";
@@ -212,23 +213,26 @@ static DWORD WINAPI start_job(LPVOID p)
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
 	switch(jp->job_type){
 	case ANALYSIS_JOB:
-		jp->pi.completion_status = analyze(jp);
+		result = analyze(jp);
 		break;
 	case DEFRAG_JOB:
 		// TODO
-		//jp->pi.completion_status = defragment(jp);
+		//result = defragment(jp);
 		break;
 	case OPTIMIZER_JOB:
 		// TODO
-		//jp->pi.completion_status = optimize(jp);
+		//result = optimize(jp);
 		break;
 	default:
-		jp->pi.completion_status = 0;
+		result = 0;
 		break;
 	}
+	(void)save_fragmentation_reports(jp);
+
+	/* now it is safe to adjust the completion status */
+	jp->pi.completion_status = result;
 	if(jp->pi.completion_status == 0)
 		jp->pi.completion_status ++; /* success */
-	(void)save_fragmentation_reports(jp);
 
 	winx_exit_thread(); /* 8k/12k memory leak here? */
 	return 0;
@@ -280,6 +284,10 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	
 	/* TEST: may fail on x64? */
 	memset(&jp,0,sizeof(udefrag_job_parameters));
+	jp.filelist = NULL;
+	jp.fragmented_files = NULL;
+	jp.free_regions = NULL;
+	jp.progress_refresh_time = 0;
 	
 	jp.volume_letter = volume_letter;
 	jp.job_type = job_type;
