@@ -270,6 +270,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	udefrag_job_parameters jp;
 	ULONGLONG time = 0;
 	int use_limit = 0;
+	int result = -1;
 	
 	/* initialize the job */
 	dbg_print_header(&jp);
@@ -340,7 +341,11 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	
 done:
 	dbg_print_footer(&jp);
-	return (jp.pi.completion_status > 0) ? 0 : (-1);
+	if(jp.pi.completion_status > 0)
+		result = 0;
+	else if(jp.pi.completion_status < 0)
+		result = jp.pi.completion_status;
+	return result;
 }
 
 /**
