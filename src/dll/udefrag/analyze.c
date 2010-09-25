@@ -62,6 +62,8 @@ int get_volume_information(udefrag_job_parameters *jp)
 	jp->pi.clusters_to_process = 0;
 	jp->pi.processed_clusters = 0;
 	
+	jp->fs_type = FS_UNKNOWN;
+	
 	/* reset file lists */
 	destroy_lists(jp);
 	
