@@ -57,9 +57,12 @@ static void dbg_print_footer(udefrag_job_parameters *jp)
 
 /**
  * @brief Delivers progress information to the caller.
+ * @note completion_status parameter delivers to the caller
+ * instead of an appropriate field of jp->pi structure.
  */
-static void deliver_progress_info(udefrag_job_parameters *jp)
+static void deliver_progress_info(udefrag_job_parameters *jp,int completion_status)
 {
+	udefrag_progress_info pi;
 	double x, y;
 	int i, k, index;
 	ULONGLONG maximum, n;
@@ -67,12 +70,18 @@ static void deliver_progress_info(udefrag_job_parameters *jp)
 	if(jp->cb == NULL)
 		return;
 
+	/* make a copy of jp->pi */
+	memcpy(&pi,&jp->pi,sizeof(udefrag_progress_info));
+	
+	/* replace completion status */
+	pi.completion_status = completion_status;
+	
 	/* calculate progress percentage */
 	/* FIXME: do it more accurate */
-	x = (double)(LONGLONG)jp->pi.processed_clusters;
-	y = (double)(LONGLONG)jp->pi.clusters_to_process;
-	if(y == 0) jp->pi.percentage = 0.00;
-	else jp->pi.percentage = (x / y) * 100.00;
+	x = (double)(LONGLONG)pi.processed_clusters;
+	y = (double)(LONGLONG)pi.clusters_to_process;
+	if(y == 0) pi.percentage = 0.00;
+	else pi.percentage = (x / y) * 100.00;
 	
 	/* refill cluster map */
 	if(jp->pi.cluster_map && jp->cluster_map.array \
@@ -95,7 +104,7 @@ static void deliver_progress_info(udefrag_job_parameters *jp)
 	}
 	
 	/* deliver information to the caller */
-	jp->cb(&jp->pi,jp->p);
+	jp->cb(&pi,jp->p);
 	jp->progress_refresh_time = winx_xtime();
 	if(jp->udo.dbgprint_level >= DBG_PARANOID)
 		winx_dbg_print_header(0x20,0,"progress update");
@@ -117,10 +126,10 @@ void __stdcall progress_router(void *p)
 	if(jp->cb){
 		/* ensure that jp->udo.refresh_interval exceeded */
 		if((winx_xtime() - jp->progress_refresh_time) > jp->udo.refresh_interval){
-			deliver_progress_info(jp);
+			deliver_progress_info(jp,jp->pi.completion_status);
 		} else if(jp->pi.completion_status){
 			/* deliver completed job information anyway */
-			deliver_progress_info(jp);
+			deliver_progress_info(jp,jp->pi.completion_status);
 		}
 	}
 }
@@ -310,7 +319,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	}
 	do {
 		winx_sleep(jp.udo.refresh_interval);
-		deliver_progress_info(&jp);
+		deliver_progress_info(&jp,0); /* status = running */
 		if(use_limit){
 			if(time <= jp.udo.refresh_interval){
 				/* time limit exceeded */
@@ -322,7 +331,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	} while(jp.pi.completion_status == 0);
 
 	/* cleanup */
-	deliver_progress_info(&jp);
+	deliver_progress_info(&jp,jp.pi.completion_status);
 	/*if(jp.progress_router)
 		jp.progress_router(&jp);*/ /* redraw progress */
 	destroy_lists(&jp);
