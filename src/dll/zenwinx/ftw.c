@@ -696,6 +696,9 @@ winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
 	winx_volume_information v;
 	ULONGLONG time;
 	
+	/* ensure that it will work on w2k */
+	volume_letter = winx_toupper(volume_letter);
+	
 	time = winx_xtime();
 	winx_dbg_print_header(0,0,"winx_scan_disk started");
 	

@@ -146,7 +146,7 @@ static int internal_validate_volume(char volume_letter,int skip_removable,volume
 		return (-1);
 
 	/* convert volume letter to uppercase - needed for w2k */
-	volume_letter = (char)_toupper((int)volume_letter);
+	volume_letter = winx_toupper(volume_letter);
 	
 	v->letter = volume_letter;
 	v->is_removable = FALSE;

@@ -80,6 +80,8 @@ EXPORTS
 	winx_windows_in_safe_mode
 	zenwinx_native_init
 	zenwinx_native_unload
+	winx_toupper
+	winx_tolower
 	winx_wcsdup
 	winx_wcsistr
 	winx_patcomp

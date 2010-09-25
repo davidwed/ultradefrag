@@ -28,6 +28,44 @@
 #include "zenwinx.h"
 
 /**
+ * @brief Reliable _toupper analog.
+ * @details MSDN states: "In order for toupper to give
+ * the expected results, __isascii and islower must both
+ * return nonzero". winx_toupper has no such limitation.
+ * @note Converts ANSI characters, does not accept other
+ * encodings.
+ */
+char __cdecl winx_toupper(char c)
+{
+	char s[2];
+	
+	s[0] = c;
+	s[1] = 0;
+	(void)_strupr(s);
+
+	return s[0];
+}
+
+/**
+ * @brief Reliable _tolower analog.
+ * @details MSDN states: "In order for tolower to give
+ * the expected results, __isascii and isupper must both
+ * return nonzero". winx_tolower has no such limitation.
+ * @note Converts ANSI characters, does not accept other
+ * encodings.
+ */
+char __cdecl winx_tolower(char c)
+{
+	char s[2];
+	
+	s[0] = c;
+	s[1] = 0;
+	(void)_strlwr(s);
+
+	return s[0];
+}
+
+/**
  * @brief wcsdup equivalent.
  */
 wchar_t * __cdecl winx_wcsdup(const wchar_t *s)

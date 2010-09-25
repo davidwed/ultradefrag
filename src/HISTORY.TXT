@@ -12,8 +12,8 @@ HISTORY
     - winx_patcomp, winx_patfind, winx_patfree, winx_wcsdup, winx_vopen,
       winx_vflush, winx_ftw_dump_file, winx_get_free_volume_regions,
       winx_add_volume_region, winx_sub_volume_region,
-      winx_release_free_volume_regions, winx_dbg_print_header
-      functions added to zenwinx library
+      winx_release_free_volume_regions, winx_dbg_print_header,
+      winx_toupper, winx_tolower functions added to zenwinx library
     - the following translations were added:
 
       Estonian, Vietnamese(VI)

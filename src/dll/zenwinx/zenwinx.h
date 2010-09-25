@@ -328,6 +328,10 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
 void         __stdcall winx_list_remove_item(list_entry **phead,list_entry *item);
 void         __stdcall winx_list_destroy    (list_entry **phead);
 
+/* reliable _toupper and _tolower analogs */
+char __cdecl winx_toupper(char c);
+char __cdecl winx_tolower(char c);
+
 wchar_t * __cdecl winx_wcsdup(const wchar_t *s);
 wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
 

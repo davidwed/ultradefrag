@@ -141,7 +141,7 @@ static HANDLE OpenRootDirectory(unsigned char volume_letter)
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;
 
-	rootpath[4] = (short)volume_letter;
+	rootpath[4] = (short)winx_toupper(volume_letter);
 	RtlInitUnicodeString(&uStr,rootpath);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,
 				   FILE_READ_ATTRIBUTES,NULL,NULL); /* ?? */
@@ -176,7 +176,7 @@ int __stdcall winx_get_drive_type(char letter)
 	/* An additional checks for DFS were suggested by Stefan Pendl (pendl2megabit@yahoo.de). */
 	/* DFS shares have DRIVE_NO_ROOT_DIR type though they are actually remote. */
 
-	letter = (unsigned char)toupper((int)letter);
+	letter = winx_toupper(letter); /* possibly required for w2k */
 	if(letter < 'A' || letter > 'Z'){
 		DebugPrint("winx_get_drive_type() invalid letter %c!",letter);
 		return (-1);
@@ -449,7 +449,7 @@ WINX_FILE * __stdcall winx_vopen(char volume_letter)
 	char flags[2];
 	#define FLAG 'r'
 
-	path[4] = volume_letter;
+	path[4] = winx_toupper(volume_letter);
 #if FLAG != 'r'
 #error Volume must be opened for read access!
 #endif
@@ -627,19 +627,20 @@ static int get_ntfs_data(winx_volume_information *v)
  */
 int __stdcall winx_get_volume_information(char volume_letter,winx_volume_information *v)
 {
-	char c;
 	HANDLE hRoot;
 	
 	/* check input data correctness */
 	if(v == NULL)
 		return (-1);
 
+	/* ensure that it will work on w2k */
+	volume_letter = winx_toupper(volume_letter);
+	
 	/* reset all fields of the structure, except of volume_letter */
 	memset(v,0,sizeof(winx_volume_information));
 	v->volume_letter = volume_letter;
 
-	c = (char)toupper((int)volume_letter);
-	if(c == 0 || c < 'A' || c > 'Z')
+	if(volume_letter == 0 || volume_letter < 'A' || volume_letter > 'Z')
 		return (-1);
 	
 	/* open root directory */
@@ -681,7 +682,7 @@ int __stdcall winx_vflush(char volume_letter)
 	WINX_FILE *f;
 	int result = -1;
 	
-	path[4] = volume_letter;
+	path[4] = winx_toupper(volume_letter);
 	f = winx_fopen(path,"r+");
 	if(f){
 		result = winx_fflush(f);
@@ -724,6 +725,9 @@ winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,
 	ULONGLONG i, start, next, free_rgn_start;
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS status;
+	
+	/* ensure that it will work on w2k */
+	volume_letter = winx_toupper(volume_letter);
 	
 	/* allocate memory */
 	bitmap = winx_heap_alloc(BITMAPSIZE);

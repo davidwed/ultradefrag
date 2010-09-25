@@ -51,7 +51,7 @@ ULONGLONG __stdcall winx_str2time(char *string)
 		}
 
 		k = 0;
-		c = (char)toupper((int)c);
+		c = winx_toupper(c);
 		switch(c){
 		case 'S':
 			k = 1;
