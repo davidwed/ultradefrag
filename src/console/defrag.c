@@ -314,10 +314,29 @@ void display_copyright(void)
 		   "and you are welcome to redistribute it under certain conditions.\n\n");
 }
 
+DWORD WINAPI test_thread(LPVOID p)
+{
+	udefrag_start_job('c',ANALYSIS_JOB,0,NULL,NULL,NULL);
+	return 0;
+}
+
+void test(void)
+{
+	int i;
+	DWORD id;
+	
+	for(i = 0; i < 10; i++)
+		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)test_thread,NULL,0,&id);
+}
+
 int __cdecl main(int argc, char **argv)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	int error_code;
+	
+	//test();
+	//getch();
+	//return 0;
 
 	/* analyse command line */
 	parse_cmdline(argc,argv);
