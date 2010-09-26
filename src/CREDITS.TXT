@@ -41,6 +41,7 @@
 ----------------------------------------
     Belarusian      - Dmitri Arkhangelski
     Bulgarian       - Dmitri Arkhangelski, Stefan Pendl
+    Burmese         - Muhamed Widuya
     Catalan         - Illes Balears, Stefan Pendl
     Chinese         - muzuiget, Stefan Pendl
     Croatian        - Dmitri Arkhangelski, Stefan Pendl
