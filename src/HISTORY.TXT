@@ -16,7 +16,7 @@ HISTORY
       winx_toupper, winx_tolower functions added to zenwinx library
     - the following translations were added:
 
-      Estonian, Vietnamese(VI), Burmese
+      Estonian, Vietnamese(VI), Burmese, Spanish(ES)
 
     - the following translations were updated:
 

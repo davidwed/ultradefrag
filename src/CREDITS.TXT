@@ -74,6 +74,7 @@
     Slovak          - Milan Cerovsky, Dmitri Arkhangelski
     Slovenian       - Miha Mlakar, Dmitri Arkhangelski
     Spanish (AR)    - Daniel Testa
+    Spanish (ES)    - txusti
     Swedish         - Magnus Rostedt, Stefan Pendl
     Thai            - Pat Taweewat, Stefan Pendl
     Turkish         - Huseyin Kozan, Stefan Pendl
