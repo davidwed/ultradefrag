@@ -32,6 +32,7 @@ static void dbg_print_header(udefrag_job_parameters *jp)
 {
 	int os_version;
 	int mj, mn;
+	char ch;
 
 	/* print driver version */
 	winx_dbg_print_header(0,0,"*");
@@ -43,6 +44,10 @@ static void dbg_print_header(udefrag_job_parameters *jp)
 	mn = os_version % 10;
 	winx_dbg_print_header(0x20,0,"Windows NT %u.%u",mj,mn);
 	winx_dbg_print_header(0,0,"*");
+	
+	/* force MinGW to export both udefrag_tolower and udefrag_toupper */
+	ch = 'a';
+	ch = winx_tolower(ch) - winx_toupper(ch);
 }
 
 /**

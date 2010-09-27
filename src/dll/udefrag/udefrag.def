@@ -6,6 +6,8 @@ EXPORTS
 	udefrag_validate_volume
 	udefrag_fbsize=winx_fbsize
 	udefrag_dfbsize=winx_dfbsize
+	udefrag_tolower=winx_tolower
+	udefrag_toupper=winx_toupper
 	udefrag_start_job
 	udefrag_get_default_formatted_results
 	udefrag_release_default_formatted_results

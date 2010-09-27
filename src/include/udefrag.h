@@ -137,4 +137,8 @@ void __stdcall udefrag_release_default_formatted_results(char *results);
 
 char * __stdcall udefrag_get_error_description(int error_code);
 
+/* reliable _toupper and _tolower analogs */
+char __cdecl udefrag_toupper(char c);
+char __cdecl udefrag_tolower(char c);
+
 #endif /* _UDEFRAG_H_ */
