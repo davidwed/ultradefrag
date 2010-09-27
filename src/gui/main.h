@@ -20,7 +20,11 @@
 #ifndef _UDEFRAG_GUI_MAIN_H_
 #define _UDEFRAG_GUI_MAIN_H_
 
-#define WIN32_NO_STATUS
+/*
+* We use STATUS_WAIT_0...
+* #define WIN32_NO_STATUS
+*/
+
 #include <windows.h>
 /*
 * Next definition is very important for mingw:

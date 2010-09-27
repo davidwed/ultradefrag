@@ -323,7 +323,7 @@ void RedrawMap(volume_processing_job *job)
 					maximum = array[j], x = j;
 				}
 			}
-			job->map.scaled_buffer[i] = x;
+			job->map.scaled_buffer[i] = (char)x;
 		}
 		memset(array,0,sizeof(array));
 		for(; k < job->map.size; k++)
@@ -334,7 +334,7 @@ void RedrawMap(volume_processing_job *job)
 				maximum = array[j], x = j;
 			}
 		}
-		job->map.scaled_buffer[i] = x;
+		job->map.scaled_buffer[i] = (char)x;
 	}
 	
 	/* fill bitmap */
