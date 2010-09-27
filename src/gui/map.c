@@ -138,7 +138,7 @@ void ResizeMap(int x, int y, int width, int height)
 {
 	RECT rc;
 	int border_width, border_height;
-	long dx, dy;
+	long dx, dy, threshold;
 	
 	/* get coordinates of the map field, without borders */
 	border_width = GetSystemMetrics(SM_CXEDGE);
@@ -158,8 +158,9 @@ void ResizeMap(int x, int y, int width, int height)
 	dx = (rc.right - rc.left - 1 - map_width) / 2;
 	dy = (rc.bottom - rc.top - 1 - map_height) / 2;
 	// comparison with zero causes more flicker of the map
-	if(dx > 2) rc.left += dx;
-	if(dy > 2) rc.top += dy;
+	threshold = grid_line_width * 2;
+	if(dx > threshold) rc.left += dx;
+	if(dy > threshold) rc.top += dy;
 
 	/* reposition the map control */
 	(void)SetWindowPos(hMap, NULL, 
