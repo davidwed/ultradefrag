@@ -67,14 +67,43 @@
 
 #include "resource.h"
 
-#define DEFAULT_MAP_BLOCK_SIZE  4 //84
-#define DEFAULT_GRID_LINE_WIDTH 1
-
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
 * to make a valid subclassing:
 * http://www.codeproject.com/KB/winsdk/safesubclassing.aspx
 */
+
+typedef struct _udefrag_map {
+	HBITMAP hbitmap;      /* bitmap used to draw map on */
+	HDC hdc;              /* device context of the bitmap */
+	int width;            /* width of the map, in pixels */
+	int height;           /* height of the map, in pixels */
+	char *buffer;         /* internal map representation */
+	int size;             /* size of internal representation, in bytes */
+	char *scaled_buffer;  /* scaled map representation */
+	int scaled_size;      /* size of scaled representation, in bytes */
+} udefrag_map;
+
+typedef struct _volume_processing_job {
+	char volume_letter;
+	udefrag_job_type job_type;
+	int termination_flag;
+	udefrag_progress_info pi;
+	udefrag_map map;
+} volume_processing_job;
+
+/* a type of the job being never executed */
+#define NEVER_EXECUTED_JOB 0x100
+
+/* prototypes */
+int init_jobs(void);
+volume_processing_job *get_job(char volume_letter);
+void release_jobs(void);
+
+
+
+#define DEFAULT_MAP_BLOCK_SIZE  4 //84
+#define DEFAULT_GRID_LINE_WIDTH 1
 
 /*
 * VERY IMPORTANT NOTE: (bug #1839755 cause)
@@ -111,32 +140,12 @@
 * after(!) RedrawMap() call. Therefore we have a deadlock.
 */
 
-enum {
-	STATUS_UNDEFINED,
-	STATUS_RUNNING,
-	STATUS_ANALYSED,
-	STATUS_DEFRAGMENTED,
-	STATUS_OPTIMIZED
-};
-
 #define create_thread(func,param,ph) \
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)
 
-#define MAX_VNAME_LEN  31
-#define MAX_FSNAME_LEN 31
-
-typedef struct {
-	char name[MAX_VNAME_LEN + 1];
-	char fsname[MAX_FSNAME_LEN + 1];
-	int status;
-	udefrag_progress_info pi;
-	HDC hdc;
-	HBITMAP hbitmap;
-} NEW_VOLUME_LIST_ENTRY, *PNEW_VOLUME_LIST_ENTRY;
-		
 void DisplayLastError(char *caption);
 
-void DoJob(char job_type);
+void DoJob(udefrag_job_type job_type);
 void stop(void);
 
 /* settings related functions */
@@ -150,11 +159,9 @@ void SetText(HWND hWnd, short *key);
 
 /* map manipulation functions */
 void InitMap(void);
-void DrawBitMapGrid(HDC hdc);
 void DeleteMaps();
 
-void RedrawMap(NEW_VOLUME_LIST_ENTRY *v_entry);
-void ClearMap();
+void RedrawMap(volume_processing_job *job);
 
 /* dialog procedures */
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);

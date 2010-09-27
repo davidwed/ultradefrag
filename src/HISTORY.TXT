@@ -4,6 +4,8 @@ HISTORY
   ------------------------------------------------------------------------------
     RC1:
     - ability to run multiple instances simultaneously was added
+    - ability to resize GUI window at any time was added;
+      cluster map scales now automatically
     - the driver has been completely reworked to increase its reliability
       and flexibility; many complicated algorithms were replaced
       by obvious ones; as a side effect we have a noticeable speedup

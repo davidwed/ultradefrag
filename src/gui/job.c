@@ -26,6 +26,81 @@
 
 #include "main.h"
 
+/* each volume letter may have a single job assigned */
+#define NUMBER_OF_JOBS ('z' - 'a' + 1)
+
+volume_processing_job jobs[NUMBER_OF_JOBS];
+
+/* synchronizes access to internal map representation */
+HANDLE hMapEvent = NULL;
+
+/**
+ * @brief Initializes structures belonging to all jobs.
+ */
+int init_jobs(void)
+{
+	char event_name[64];
+	int i;
+	
+	_snprintf(event_name,64,"udefrag-gui-%u",(int)GetCurrentProcessId());
+	event_name[63] = 0;
+	hMapEvent = CreateEvent(NULL,FALSE,TRUE,event_name);
+	if(hMapEvent == NULL){
+		// TODO
+		return (-1);
+	}
+	
+	for(i = 0; i < NUMBER_OF_JOBS; i++){
+		memset(&jobs[i],0,sizeof(volume_processing_job));
+		jobs[i].pi.completion_status = 1; /* not running */
+		jobs[i].job_type = NEVER_EXECUTED_JOB;
+		jobs[i].volume_letter = 'a' + i;
+	}
+	return 0;
+}
+
+/**
+ * @brief Get job assigned to volume letter.
+ */
+volume_processing_job *get_job(char volume_letter)
+{
+	/* validate volume letter */
+	volume_letter = udefrag_tolower(volume_letter);
+	if(volume_letter < 'a' || volume_letter > 'z')
+		return NULL;
+	
+	return &jobs[volume_letter - 'a'];
+}
+
+/**
+ * @brief Frees resources allocated for all jobs.
+ */
+void release_jobs(void)
+{
+	volume_processing_job *j;
+	int i;
+	
+	for(i = 0; i < NUMBER_OF_JOBS; i++){
+		j = &jobs[i];
+		if(j->map.hdc)
+			(void)DeleteDC(j->map.hdc);
+		if(j->map.hbitmap)
+			(void)DeleteObject(j->map.hbitmap);
+		if(j->map.buffer)
+			free(j->map.buffer);
+		if(j->map.scaled_buffer)
+			free(j->map.scaled_buffer);
+	}
+	if(hMapEvent)
+		CloseHandle(hMapEvent);
+}
+
+
+
+
+
+
+
 extern int map_blocks_per_line;
 extern int map_lines;
 extern HWND hWindow;
@@ -33,28 +108,25 @@ extern HWND hList;
 extern int shutdown_flag;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
-extern char *global_cluster_map;
-DWORD thr_id;
 BOOL busy_flag = 0;
 char current_operation;
 int stop_pressed, exit_pressed = 0;
 
-NEW_VOLUME_LIST_ENTRY *processed_entry = NULL;
+volume_processing_job *current_job = NULL;
 
 DWORD WINAPI ThreadProc(LPVOID);
 void DisplayLastError(char *caption);
 void DisplayDefragError(int error_code,char *caption);
-void DisplayStopDefragError(int error_code,char *caption);
-NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void);
-NEW_VOLUME_LIST_ENTRY * vlist_get_entry(char *name);
-void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command);
-void VolListUpdateStatusField(NEW_VOLUME_LIST_ENTRY *v_entry,int status);
-void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry);
-BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry);
+void ProcessSingleVolume(volume_processing_job *job);
+void VolListUpdateStatusField(volume_processing_job *job);
+void VolListRefreshItem(volume_processing_job *job);
 
-void DoJob(char job_type)
+extern HANDLE hMapEvent;
+
+void DoJob(udefrag_job_type job_type)
 {
-	HANDLE h = create_thread(ThreadProc,(LPVOID)(DWORD_PTR)job_type,&thr_id);
+	DWORD id;
+	HANDLE h = create_thread(ThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
 	if(h == NULL){
 		switch(job_type){
             case 'a':
@@ -91,22 +163,17 @@ void DisplayInvalidVolumeError(int error_code)
 /* callback function */
 void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 {
-	NEW_VOLUME_LIST_ENTRY *v_entry;
+	volume_processing_job *job;
 	static wchar_t progress_msg[128];
     static wchar_t *ProcessCaption;
     char WindowCaption[256];
 
-	/* due to the following line of code we have obsolete statistics when we have stopped */
-	if(stop_pressed) {
-        (void)SetWindowText(hWindow, VERSIONINTITLE);
+	job = current_job;
+	if(job == NULL) return;
 
-        return; /* it's neccessary: see comment in main.h file */
-    }
+	memcpy(&job->pi,pi,sizeof(udefrag_progress_info));
 	
-	v_entry = processed_entry;
-	if(v_entry == NULL) return;
-
-	memcpy(&v_entry->pi,pi,sizeof(udefrag_progress_info));
+	VolListUpdateStatusField(job);
 
 	UpdateStatusBar(pi);
 	current_operation = pi->current_operation;
@@ -132,11 +199,28 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
 	(void)SetWindowText(hWindow, WindowCaption);
 
-	if(pi->cluster_map && pi->cluster_map_size == map_blocks_per_line * map_lines){
-		memcpy(global_cluster_map,pi->cluster_map,pi->cluster_map_size);
-		FillBitMap(global_cluster_map,v_entry);
-		RedrawMap(v_entry);
+	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
+		// TODO
+		return;
 	}
+	if(pi->cluster_map){
+		if(job->map.buffer == NULL || pi->cluster_map_size != job->map.size){
+			if(job->map.buffer)
+				free(job->map.buffer);
+			job->map.buffer = malloc(pi->cluster_map_size);
+		}
+		if(job->map.buffer == NULL){
+			// TODO
+			job->map.size = 0;
+		} else {
+			job->map.size = pi->cluster_map_size;
+			memcpy(job->map.buffer,pi->cluster_map,pi->cluster_map_size);
+		}
+	}
+	SetEvent(hMapEvent);
+
+	if(pi->cluster_map && job->map.buffer)
+		RedrawMap(job);
 	
 	if(pi->completion_status == 0) return;
 	if(!stop_pressed){
@@ -169,12 +253,12 @@ int __stdcall terminator(void *p)
 
 DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
-	NEW_VOLUME_LIST_ENTRY *v_entry;
+	volume_processing_job *job;
 	LRESULT SelectedItem;
 	LV_ITEM lvi;
 	char buffer[128];
 	int index;
-	LONG main_win_style;
+	udefrag_job_type job_type = (udefrag_job_type)(DWORD_PTR)lpParameter;
 	
 	/* return immediately if we are busy */
 	if(busy_flag) return 0;
@@ -193,14 +277,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		IDC_RESCAN,IDC_SETTINGS,0);
 	WgxEnableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	
-	/* make the main window not resizable */
-	/* this obvious code fails on x64 editions of Windows */
-#ifndef _WIN64
-	main_win_style = GetWindowLong(hWindow,GWL_STYLE);
-	main_win_style &= ~WS_MAXIMIZEBOX;
-	SetWindowLong(hWindow,GWL_STYLE,main_win_style);
-	SetWindowPos(hWindow,0,0,0,0,0,SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
-#endif
 	/* process all selected volumes */
 	index = -1;
 	while(1){
@@ -213,9 +289,11 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		lvi.pszText = buffer;
 		lvi.cchTextMax = 127;
 		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			buffer[2] = 0;
-			v_entry = vlist_get_entry(buffer);
-			ProcessSingleVolume(v_entry,(char)(LONG_PTR)lpParameter);
+			job = get_job(buffer[0]);
+			if(job){
+				job->job_type = job_type;
+				ProcessSingleVolume(job);
+			}
 		}
 		index = (int)SelectedItem;
 	}
@@ -229,13 +307,6 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	}
 
-	/* make the main window resizable again */
-	/* this obvious code fails on x64 editions of Windows */
-#ifndef _WIN64
-	main_win_style |= WS_MAXIMIZEBOX;
-	SetWindowLong(hWindow,GWL_STYLE,main_win_style);
-	SetWindowPos(hWindow,0,0,0,0,0,SWP_FRAMECHANGED | SWP_NOMOVE | SWP_NOSIZE);
-#endif
 	/* check the shutdown after a job box state */
 	if(!exit_pressed && !stop_pressed){
 		if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),
@@ -247,60 +318,36 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	return 0;
 }
 
-void ProcessSingleVolume(NEW_VOLUME_LIST_ENTRY *v_entry,char command)
+void ProcessSingleVolume(volume_processing_job *job)
 {
-	char letter;
 	int error_code;
-	int Status = STATUS_UNDEFINED;
 
-	if(v_entry == NULL) return;
+	if(job == NULL) return;
 
 	/* refresh selected volume information (bug #2036873) */
-	VolListRefreshItem(v_entry);
+	VolListRefreshItem(job);
 	
-	ClearMap();
-	letter = v_entry->name[0];
-
-	VolListUpdateStatusField(v_entry,STATUS_RUNNING);
+	//ClearMap();
 
 	ShowProgress();
 	SetProgress(L"A 0.00 %",0);
 
 	/* validate the volume before any processing */
-	error_code = udefrag_validate_volume(letter,FALSE);
+	error_code = udefrag_validate_volume(job->volume_letter,FALSE);
 	if(error_code < 0){
 		/* handle error */
 		DisplayInvalidVolumeError(error_code);
 	} else {
 		/* process the volume */
-		processed_entry = v_entry;
-		switch(command){
-		case 'a':
-			error_code = udefrag_start_job(letter, ANALYSIS_JOB,
-					map_blocks_per_line * map_lines,
-					update_progress, terminator, NULL);
-			Status = STATUS_ANALYSED;
-			break;
-		case 'd':
-			error_code = udefrag_start_job(letter, DEFRAG_JOB,
-					map_blocks_per_line * map_lines,
-					update_progress, terminator, NULL);
-			Status = STATUS_DEFRAGMENTED;
-			break;
-		default:
-			error_code = udefrag_start_job(letter, OPTIMIZER_JOB,
-					map_blocks_per_line * map_lines,
-					update_progress, terminator, NULL);
-			Status = STATUS_OPTIMIZED;
-		}
+		current_job = job;
+		error_code = udefrag_start_job(job->volume_letter, job->job_type,
+				map_blocks_per_line * map_lines,
+				update_progress, terminator, NULL);
 		if(error_code < 0 && !exit_pressed){
 			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
-			VolListUpdateStatusField(v_entry,STATUS_UNDEFINED);
-			ClearMap();
+			//ClearMap();
 		}
 	}
-	
-	VolListUpdateStatusField(v_entry,Status);
 }
 
 void stop(void)

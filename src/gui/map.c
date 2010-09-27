@@ -31,8 +31,6 @@ int map_lines = 32; //14
 int map_width = 0x209;
 int map_height = 0x8c;
 
-char *global_cluster_map = NULL;
-
 COLORREF grid_color = RGB(0,0,0); //RGB(200,200,200)
 
 COLORREF colors[NUM_OF_SPACE_STATES] = 
@@ -50,16 +48,14 @@ COLORREF colors[NUM_OF_SPACE_STATES] =
 HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 
 extern HWND hWindow,hMap,hList;
-extern NEW_VOLUME_LIST_ENTRY *processed_entry;
+extern volume_processing_job *current_job;
 
-HDC hGridDC = NULL;
-HBITMAP hGridBitmap = NULL;
 WNDPROC OldRectangleWndProc;
 BOOL isRectangleUnicode = FALSE;
 
 void CalculateBitMapDimensions(void);
-BOOL CreateBitMapGrid(void);
-NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void);
+
+extern HANDLE hMapEvent;
 
 void InitMap(void)
 {
@@ -84,7 +80,6 @@ void InitMap(void)
 		OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,
 			(LONG_PTR)RectWndProc);
 
-	CreateBitMapGrid();
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++){
 		/* FIXME: check for success */
 		hBrushes[i] = CreateSolidBrush(colors[i]);
@@ -95,9 +90,12 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 
+	//if(iMsg == WM_ERASEBKGND)
+		//return 1;
+	
 	if(iMsg == WM_PAINT){
 		(void)BeginPaint(hWnd,&ps); /* (void)? */
-		RedrawMap(processed_entry);
+		RedrawMap(current_job);
 		EndPaint(hWnd,&ps);
 	}
 	if(isRectangleUnicode)
@@ -132,50 +130,26 @@ void CalculateBitMapDimensions(void)
 		}
 	}
 	(void)InvalidateRect(hMap,NULL,TRUE);
-
-	/* reallocate cluster map buffer */
-	if(global_cluster_map) free(global_cluster_map);
-	global_cluster_map = malloc(map_blocks_per_line * map_lines);
-	if(!global_cluster_map){
-		MessageBox(hWindow,"Cannot allocate memory for the cluster map!",
-				"Error",MB_OK | MB_ICONEXCLAMATION);
-	}
 }
 
-/* Since v3.1.0 it supports all screen color depths. */
-BOOL CreateBitMapGrid(void)
+/* Since v3.1.0 all screen color depths are supported */
+
+void DrawBitMapGrid(HDC hdc)
 {
-	HDC hMainDC;
+	HPEN hPen, hOldPen;
 	HBRUSH hBrush, hOldBrush;
 	RECT rc;
+	int i, j;
 
-	hMainDC = GetDC(hWindow);
-	hGridDC = CreateCompatibleDC(hMainDC);
-	hGridBitmap = CreateCompatibleBitmap(hMainDC,map_width,map_height);
-	ReleaseDC(hWindow,hMainDC);
-	if(!hGridBitmap) { DeleteDC(hGridDC); hGridDC = NULL; return FALSE; }
-	(void)SelectObject(hGridDC,hGridBitmap);
-	(void)SetBkMode(hGridDC,TRANSPARENT);
-	
 	/* draw white field */
 	rc.top = rc.left = 0;
 	rc.bottom = map_height;
 	rc.right = map_width;
 	hBrush = GetStockObject(WHITE_BRUSH);
-	hOldBrush = SelectObject(hGridDC,hBrush);
-	(void)FillRect(hGridDC,&rc,hBrush);
-	(void)SelectObject(hGridDC,hOldBrush);
+	hOldBrush = SelectObject(hdc,hBrush);
+	(void)FillRect(hdc,&rc,hBrush);
+	(void)SelectObject(hdc,hOldBrush);
 	(void)DeleteObject(hBrush);
-
-	/* draw grid */
-	DrawBitMapGrid(hGridDC);
-	return TRUE;
-}
-
-void DrawBitMapGrid(HDC hdc)
-{
-	HPEN hPen, hOldPen;
-	int i, j;
 
 	if(grid_line_width == 0) return;
 	hPen = CreatePen(PS_SOLID,1,grid_color);
@@ -198,19 +172,13 @@ void DrawBitMapGrid(HDC hdc)
 	(void)DeleteObject(hPen);
 }
 
-BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry)
+BOOL _FillBitMap(volume_processing_job *job)
 {
-	HDC hdc;
+	HDC hdc = job->map.hdc;
 	HBRUSH hOldBrush;
 	RECT block_rc;
 	int i, j;
 
-	if(cluster_map == NULL) return FALSE;
-	if(v_entry == NULL) return FALSE;
-
-	hdc = v_entry->hdc;
-	if(!hdc) return FALSE;
-	
 	/* draw squares */
 	hOldBrush = SelectObject(hdc,hBrushes[0]);
 	for(i = 0; i < map_lines; i++){
@@ -219,43 +187,129 @@ BOOL FillBitMap(char *cluster_map,NEW_VOLUME_LIST_ENTRY *v_entry)
 			block_rc.left = (map_block_size + grid_line_width) * j + grid_line_width;
 			block_rc.right = block_rc.left + map_block_size;
 			block_rc.bottom = block_rc.top + map_block_size;
-			(void)FillRect(hdc,&block_rc,hBrushes[(int)cluster_map[i * map_blocks_per_line + j]]);
+			(void)FillRect(hdc,&block_rc,hBrushes[(int)job->map.scaled_buffer[i * map_blocks_per_line + j]]);
 		}
 	}
 	(void)SelectObject(hdc,hOldBrush);
 	return TRUE;
 }
 
-void ClearMap()
+void RedrawMap(volume_processing_job *job)
 {
 	HDC hdc;
-
-	hdc = GetDC(hMap);
-	(void)BitBlt(hdc,0,0,map_width,map_height,hGridDC,0,0,SRCCOPY);
-	(void)ReleaseDC(hMap,hdc);
-}
-
-void RedrawMap(NEW_VOLUME_LIST_ENTRY *v_entry)
-{
-	HDC hdc;
-
-	if(v_entry != NULL){
-		if(v_entry->status > STATUS_UNDEFINED && v_entry->hdc){
-			hdc = GetDC(hMap);
-			(void)BitBlt(hdc,0,0,map_width,map_height,v_entry->hdc,0,0,SRCCOPY);
-			(void)ReleaseDC(hMap,hdc);
+	HDC hDC, hMainDC;
+	HBITMAP hBitmap;
+	int i, j, k, x, ratio;
+	int array[NUM_OF_SPACE_STATES];
+	int maximum;
+	
+	if(job == NULL)
+		return;
+	
+	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
+		// TODO
+		return;
+	}
+	
+	/* if volume bitmap is empty or have improper size, recreate it */
+	if(job->map.hdc == NULL || job->map.hbitmap == NULL ||
+		job->map.width != map_width || job->map.height != map_height){
+		if(job->map.hdc) (void)DeleteDC(job->map.hdc);
+		if(job->map.hbitmap) (void)DeleteObject(job->map.hbitmap);
+		hMainDC = GetDC(hWindow);
+		hDC = CreateCompatibleDC(hMainDC);
+		hBitmap = CreateCompatibleBitmap(hMainDC,map_width,map_height);
+		(void)ReleaseDC(hWindow,hMainDC);
+		
+		if(hBitmap == NULL){
+			// TODO: debug print here
+			(void)DeleteDC(hDC);
+			SetEvent(hMapEvent);
 			return;
 		}
+	
+		(void)SelectObject(hDC,hBitmap);
+		(void)SetBkMode(hDC,TRANSPARENT);
+		DrawBitMapGrid(hDC);
+		job->map.hdc = hDC;
+		job->map.hbitmap = hBitmap;
+		job->map.width = map_width;
+		job->map.height = map_height;
 	}
-	ClearMap();
+		
+	/* if cluster map does not exist, draw empty bitmap */
+	if(job->map.buffer == NULL)
+		goto redraw;
+	
+	/* scale map */
+	if(job->map.scaled_buffer == NULL \
+		|| job->map.scaled_size != map_blocks_per_line * map_lines){
+		if(job->map.scaled_buffer) free(job->map.scaled_buffer);
+		job->map.scaled_buffer = malloc(map_blocks_per_line * map_lines);
+		if(job->map.scaled_buffer == NULL){
+			// TODO: debug print here
+			job->map.scaled_size = 0;
+			SetEvent(hMapEvent);
+			return;
+		} else {
+			job->map.scaled_size = map_blocks_per_line * map_lines;
+		}
+	}
+	ratio = job->map.scaled_size / job->map.size;
+	if(ratio != 0){
+		/* scale up */
+		for(i = 0, k = 0; i < job->map.size; i++){
+			for(j = 0; j < ratio; j++){
+				job->map.scaled_buffer[k] = job->map.buffer[i];
+				k++;
+			}
+		}
+		for(; k < job->map.scaled_size; k++)
+			job->map.scaled_buffer[k] = job->map.buffer[i - 1];
+	} else {
+		/* scale down */
+		ratio = job->map.size / job->map.scaled_size;
+		for(i = 0, k = 0; i < job->map.scaled_size - 1; i++){
+			memset(array,0,sizeof(array));
+			for(j = 0; j < ratio; j++){
+				// check bounds
+				array[(int)job->map.buffer[k]] ++;
+				k++;
+			}
+			maximum = array[0], x = 0;
+			for(j = 1; j < NUM_OF_SPACE_STATES; j++){
+				if(array[j] >= maximum){
+					maximum = array[j], x = j;
+				}
+			}
+			job->map.scaled_buffer[i] = x;
+		}
+		memset(array,0,sizeof(array));
+		for(; k < job->map.size; k++)
+			array[(int)job->map.buffer[k]] ++;
+		maximum = array[0], x = 0;
+		for(j = 1; j < NUM_OF_SPACE_STATES; j++){
+			if(array[j] >= maximum){
+				maximum = array[j], x = j;
+			}
+		}
+		job->map.scaled_buffer[i] = x;
+	}
+	
+	/* fill bitmap */
+	_FillBitMap(job);
+	
+redraw:
+	hdc = GetDC(hMap);
+	(void)BitBlt(hdc,0,0,map_width,map_height,job->map.hdc,0,0,SRCCOPY);
+	(void)ReleaseDC(hMap,hdc);
+	SetEvent(hMapEvent);
 }
 
 void DeleteMaps()
 {
 	int i;
 
-	if(hGridBitmap) (void)DeleteObject(hGridBitmap);
-	if(hGridDC) (void)DeleteDC(hGridDC);
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++)
 		(void)DeleteObject(hBrushes[i]);
 }

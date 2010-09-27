@@ -58,7 +58,7 @@ extern int scale_by_dpi;
 extern int maximized_window;
 extern int init_maximized_window;
 extern int skip_removable;
-extern NEW_VOLUME_LIST_ENTRY *processed_entry;
+extern volume_processing_job *current_job;
 
 int shutdown_flag = FALSE;
 extern int hibernate_instead_of_shutdown;
@@ -74,7 +74,6 @@ extern int disable_reports;
 extern char dbgprint_level[];
 
 extern int busy_flag, exit_pressed;
-extern NEW_VOLUME_LIST_ENTRY vlist[MAX_DOS_DRIVES + 1];
 
 extern HDC hGridDC;
 extern HBITMAP hGridBitmap;
@@ -82,10 +81,8 @@ extern HBITMAP hGridBitmap;
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void ShowReports();
-void ShowSingleReport(NEW_VOLUME_LIST_ENTRY *v_entry);
+void ShowSingleReport(volume_processing_job *job);
 void VolListGetColumnWidths(void);
-NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void);
-NEW_VOLUME_LIST_ENTRY * vlist_get_entry(char *name);
 void InitVolList(void);
 void FreeVolListResources(void);
 void UpdateVolList(void);
@@ -145,15 +142,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	hInstance = GetModuleHandle(NULL);
 	
+	GetPrefs();
+
 	if(strstr(lpCmdLine,"--setup")){
 		/* create default guiopts.lua file */
-		GetPrefs();
 		SavePrefs();
 		DeleteEnvironmentVariables();
 		return 0;
 	}
-	
-	GetPrefs();
 	
 	/* collect statistics about the UltraDefrag GUI client use */
 #ifndef _WIN64
@@ -176,13 +172,20 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	*/
 	InitCommonControls();
 	
+	if(init_jobs() < 0){
+		DeleteEnvironmentVariables();
+		return 2;
+	}
+	
 	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
 		DisplayLastError("Cannot create the main window!");
 		DeleteEnvironmentVariables();
+		release_jobs();
 		return 3;
 	}
 	
 	/* delete all created gdi objects */
+	release_jobs();
 	FreeVolListResources();
 	DeleteMaps();
 	if(hFont) (void)DeleteObject(hFont);
@@ -242,6 +245,7 @@ void InitMainWindow(void)
 	BOOLEAN coord_undefined = FALSE;
 	int s_width, s_height;
 	RECT rc;
+	udefrag_progress_info pi;
     
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
@@ -280,7 +284,8 @@ void InitMainWindow(void)
 	
 	/* status bar will always have default font */
 	CreateStatusBar();
-	UpdateStatusBar(&(vlist[0].pi)); /* can be initialized here by any entry */
+	memset(&pi,0,sizeof(udefrag_progress_info));
+	UpdateStatusBar(&pi);
 
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
@@ -310,6 +315,8 @@ void InitMainWindow(void)
 	/* maximize window if required */
 	if(init_maximized_window)
 		SendMessage(hWindow,(WM_USER + 1),0,0);
+	
+	UpdateVolList();
 }
 
 static RECT prev_rc = {0,0,0,0};
@@ -339,12 +346,6 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	int buttons_offset;
 	
 	int cw;
-	
-	/*
-	* Never resize window during the running defrag job
-	* to prevent problems with cluster map resizing.
-	*/
-	if(busy_flag) return;
 	
 	/*
 	* Assign layout variables by layout constants
@@ -377,6 +378,8 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	if((prev_rc.right - prev_rc.left == w) && (prev_rc.bottom - prev_rc.top == h))
 		return; /* this usually encounters when user minimizes window and then restores it */
 	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
+	
+	//SendMessage(hWindow,WM_SETREDRAW,FALSE,0);
 
 	/* reposition the volume list */
     if(cmap_label_width + skip_media_width + rescan_btn_width > cw) vlist_height = vlist_height / 2;
@@ -507,22 +510,10 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	cmap_height = buttons_offset - cmap_offset - spacing;
 	if(cmap_height < 0) cmap_height = 0;
 	(void)SetWindowPos(hMap,0,padding_x,cmap_offset,cmap_width,cmap_height,0);
-	/* resize map */
-	processed_entry = NULL; /* to prevent map redraw during resizing */
 	CalculateBitMapDimensions();
-	if(hGridBitmap) (void)DeleteObject(hGridBitmap);
-	if(hGridDC) (void)DeleteDC(hGridDC);
-	(void)CreateBitMapGrid();
-	/* resize bitmaps belonging to individual volumes */
-	vlist_destroy();
-	vlist_init();
-	if(asynch_vlist_update)
-		UpdateVolList();
-	else
-		(void)RescanDrivesThreadProc(NULL);
-	/* reset map */
-	ClearMap();
+	RedrawMap(current_job);
 	
+	//SendMessage(hWindow,WM_SETREDRAW,TRUE,0);
 	(void)InvalidateRect(hWindow,NULL,TRUE);
 	(void)UpdateWindow(hWindow);
 }
@@ -548,7 +539,6 @@ BOOL UpdateMainWindowCoordinates(void)
 
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	LRESULT res;
 	MINMAXINFO *mmi;
 	BOOL size_changed;
 	RECT rc;
@@ -565,13 +555,13 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_ANALYSE:
-			DoJob('a');
+			DoJob(ANALYSIS_JOB);
 			break;
 		case IDC_DEFRAGM:
-			DoJob('d');
+			DoJob(DEFRAG_JOB);
 			break;
 		case IDC_OPTIMIZE:
-			DoJob('c');
+			DoJob(OPTIMIZER_JOB);
 			break;
 		case IDC_ABOUT:
 			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1)){
@@ -620,47 +610,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case (WM_USER + 1):
 		ShowWindow(hWnd,SW_MAXIMIZE);
 		break;
-	case WM_NCHITTEST:
-		if(busy_flag){
-			res = DefWindowProc(hWnd,msg,wParam,lParam);
-			/* make borders not responsible for resizing */
-			switch(res){
-			case HTBOTTOM:
-			case HTBOTTOMLEFT:
-			case HTBOTTOMRIGHT:
-			case HTLEFT:
-			case HTRIGHT:
-			case HTTOP:
-			case HTTOPLEFT:
-			case HTTOPRIGHT:
-			case HTSIZE:
-				return TRUE;
-			}
-			/* make maximize button not responsible */
-			if(res == HTMAXBUTTON) return TRUE;
-		}
-		break;
-	case WM_NCLBUTTONDBLCLK:
-		if(busy_flag){
-			/* prevent restoring window by clicking on its caption */
-			if(wParam == HTCAPTION) return TRUE;
-		}
-		break;
-	case WM_SYSCOMMAND:
-		if(busy_flag && wParam == SC_MAXIMIZE) return TRUE;
-		break;
 	case WM_GETMINMAXINFO:
 		mmi = (MINMAXINFO *)lParam;
-		if(busy_flag){
-			/* disable resizing */
-			mmi->ptMinTrackSize.x = mmi->ptMaxTrackSize.x = win_rc.right - win_rc.left;
-			mmi->ptMinTrackSize.y = mmi->ptMaxTrackSize.y = win_rc.bottom - win_rc.top + delta_h;
-		} else {
-			/* set min size to avoid overlaying controls */
-			/* TODO: make it more flexible to allow more different layouts of controls */
-			mmi->ptMinTrackSize.x = DPI(MIN_WIDTH);
-			mmi->ptMinTrackSize.y = DPI(MIN_HEIGHT);
-		}
+		/* set min size to avoid overlaying controls */
+		mmi->ptMinTrackSize.x = DPI(MIN_WIDTH);
+		mmi->ptMinTrackSize.y = DPI(MIN_HEIGHT);
 		break;
 	case WM_MOVE:
 		size_changed = TRUE;
@@ -694,7 +648,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 */
 void ShowReports()
 {
-	NEW_VOLUME_LIST_ENTRY *v_entry;
+	volume_processing_job *job;
 	LRESULT SelectedItem;
 	LV_ITEM lvi;
 	char buffer[128];
@@ -710,15 +664,15 @@ void ShowReports()
 		lvi.pszText = buffer;
 		lvi.cchTextMax = 127;
 		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			buffer[2] = 0;
-			v_entry = vlist_get_entry(buffer);
-			ShowSingleReport(v_entry);
+			job = get_job(buffer[0]);
+			if(job)
+				ShowSingleReport(job);
 		}
 		index = (int)SelectedItem;
 	}
 }
 
-void ShowSingleReport(NEW_VOLUME_LIST_ENTRY *v_entry)
+void ShowSingleReport(volume_processing_job *job)
 {
 #ifndef UDEFRAG_PORTABLE
 	short l_path[] = L"C:\\fraglist.luar";
@@ -730,14 +684,16 @@ void ShowSingleReport(NEW_VOLUME_LIST_ENTRY *v_entry)
 	PROCESS_INFORMATION pi;
 #endif
 
-	if(v_entry == NULL) return;
-	if(!v_entry->name[0] || v_entry->status == STATUS_UNDEFINED) return;
+	if(job == NULL) return;
+
+	if(job->job_type == NEVER_EXECUTED_JOB)
+		return; /* the job is never launched yet */
 
 #ifndef UDEFRAG_PORTABLE
-	l_path[0] = (short)(v_entry->name[0]);
+	l_path[0] = (short)job->volume_letter;
 	(void)WgxShellExecuteW(hWindow,L"view",l_path,NULL,NULL,SW_SHOW);
 #else
-	path[0] = v_entry->name[0];
+	path[0] = job->volume_letter;
 	(void)strcpy(cmd,".\\lua5.1a_gui.exe");
 	(void)strcpy(buffer,cmd);
 	(void)strcat(buffer," .\\scripts\\udreportcnv.lua ");

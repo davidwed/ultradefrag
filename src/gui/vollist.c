@@ -28,10 +28,7 @@ extern HWND hWindow;
 extern BOOL busy_flag;
 extern int skip_removable;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
-extern NEW_VOLUME_LIST_ENTRY *processed_entry;
-
-extern int map_width;
-extern int map_height;
+extern volume_processing_job *current_job;
 
 HWND hList;
 WNDPROC OldListProc;
@@ -47,126 +44,9 @@ void DestroyImageList(void);
 void MakeVolListNiceLooking(void);
 static void VolListAddItem(int index, volume_info *v);
 static void AddCapacityInformation(int index, volume_info *v);
-static void VolListUpdateStatusFieldInternal(int index,int Status);
+static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *job);
 
-/****************************************************************/
-/*           internal volume list representation                */
-/****************************************************************/
-
-NEW_VOLUME_LIST_ENTRY vlist[MAX_DOS_DRIVES + 1];
-
-int vlist_init(void)
-{
-	memset(&vlist,0,sizeof(vlist));
-	return 0;
-}
-
-int vlist_destroy(void)
-{
-	NEW_VOLUME_LIST_ENTRY *entry;
-	int i;
-
-	processed_entry = NULL;
-	for(i = 0; i < (MAX_DOS_DRIVES + 1); i++){
-		entry = &vlist[i];
-		if(entry->name[0] == 0) break;
-		if(entry->hdc) (void)DeleteDC(entry->hdc);
-		if(entry->hbitmap) (void)DeleteObject(entry->hbitmap);
-	}	
-	memset(&vlist,0,sizeof(vlist));
-	return 0;
-}
-
-static int vlist_add_item(char *name,char *fsname,ULONGLONG total,ULONGLONG free)
-{
-	NEW_VOLUME_LIST_ENTRY *entry = NULL;
-	HDC hDC, hMainDC;
-	HBITMAP hBitmap;
-	int i;
-	
-	/* already in list? */
-	for(i = 0; i < (MAX_DOS_DRIVES + 1); i++){
-		if(strcmp(vlist[i].name,name) == 0){
-			vlist[i].pi.total_space = total;
-			vlist[i].pi.free_space = free;
-			return 0;
-		}
-	}
-
-	/* search for the first empty entry */
-	for(i = 0; i < (MAX_DOS_DRIVES + 1); i++){
-		if(vlist[i].name[0] == 0){
-			entry = &vlist[i];
-			break;
-		}
-	}
-	
-	if(entry == NULL)
-		return (-1);
-	
-	(void)strncpy(entry->name,name,MAX_VNAME_LEN);
-	(void)strncpy(entry->fsname,fsname,MAX_FSNAME_LEN);
-	
-	entry->pi.total_space = total;
-	entry->pi.free_space = free;
-	
-	hMainDC = GetDC(hWindow);
-	hDC = CreateCompatibleDC(hMainDC);
-	hBitmap = CreateCompatibleBitmap(hMainDC,map_width,map_height);
-	(void)ReleaseDC(hWindow,hMainDC);
-	
-	if(hBitmap == NULL){
-		(void)DeleteDC(hDC);
-		if(!error_flag2){ /* show message once */
-			MessageBox(hWindow,"Cannot create bitmap in vlist_add_item()!",
-				"Error",MB_OK | MB_ICONEXCLAMATION);
-			error_flag2 = TRUE;
-		}
-		memset(entry,0,sizeof(NEW_VOLUME_LIST_ENTRY));
-		return (-1);
-	}
-
-	(void)SelectObject(hDC,hBitmap);
-	(void)SetBkMode(hDC,TRANSPARENT);
-	DrawBitMapGrid(hDC);
-	entry->hdc = hDC;
-	entry->hbitmap = hBitmap;
-	
-	/* draw grid */
-
-	return 0;
-}
-
-#if 0
-static int vlist_remove_item(char *name)
-{
-	NEW_VOLUME_LIST_ENTRY *entry;
-	int i;
-	
-	for(i = 0; i < (MAX_DOS_DRIVES + 1); i++){
-		if(strcmp(vlist[i].name,name) == 0){
-			entry = &vlist[i];
-			if(entry->hdc) (void)DeleteDC(entry->hdc);
-			if(entry->hbitmap) (void)DeleteObject(entry->hbitmap);
-			memset(entry,0,sizeof(NEW_VOLUME_LIST_ENTRY));
-			break;
-		}
-	}
-	return 0;
-}
-#endif
-
-NEW_VOLUME_LIST_ENTRY * vlist_get_entry(char *name)
-{
-	int i;
-	
-	for(i = 0; i < (MAX_DOS_DRIVES + 1); i++){
-		if(strcmp(vlist[i].name,name) == 0) return &vlist[i];
-	}
-	return NULL;
-}
-
-NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void)
+volume_processing_job * get_first_selected_job(void)
 {
 	LRESULT SelectedItem;
 	LV_ITEM lvi;
@@ -180,8 +60,7 @@ NEW_VOLUME_LIST_ENTRY * vlist_get_first_selected_entry(void)
 		lvi.pszText = buffer;
 		lvi.cchTextMax = 127;
 		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			buffer[2] = 0;
-			return vlist_get_entry(buffer);
+			return get_job(buffer[0]);
 		}
 	}
 	return NULL;
@@ -197,9 +76,6 @@ void InitVolList(void)
 	RECT rc;
 	int dx;
 	
-	/* initialize the internal representation of the list */
-	(void)vlist_init();
-
 	hList = GetDlgItem(hWindow,IDC_VOLUMES);
 	if(GetClientRect(hList,&rc)){
 		dx = rc.right - rc.left;
@@ -275,23 +151,21 @@ void FreeVolListResources(void)
 {
 	/* free gui resources */
 	DestroyImageList();
-	/* free internal list representation resources */
-	(void)vlist_destroy();
 }
 
 void VolListNotifyHandler(LPARAM lParam)
 {
-	NEW_VOLUME_LIST_ENTRY *entry;
+	volume_processing_job *job;
 	LPNMLISTVIEW lpnm = (LPNMLISTVIEW)lParam;
 
 	if(lpnm->hdr.code == LVN_ITEMCHANGED && lpnm->iItem != (-1)){
-		entry = vlist_get_first_selected_entry();
-		processed_entry = entry;
+		job = get_first_selected_job();
+		current_job = job;
 		HideProgress();
 		/* redraw indicator */
-		RedrawMap(entry);
+		RedrawMap(job);
 		/* update status bar */
-		if(entry) UpdateStatusBar(&entry->pi);
+		if(job) UpdateStatusBar(&job->pi);
 	}
 }
 
@@ -309,7 +183,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	int i;
 	volume_info *v;
 	LV_ITEM lvi;
-	NEW_VOLUME_LIST_ENTRY *entry;
+	volume_processing_job *job;
 	
 	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
@@ -332,9 +206,9 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	lvi.state = LVIS_SELECTED;
 	(void)SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
 
-	entry = vlist_get_first_selected_entry();
-	RedrawMap(entry);
-	if(entry) UpdateStatusBar(&entry->pi);
+	job = get_first_selected_job();
+	RedrawMap(job);
+	if(job) UpdateStatusBar(&job->pi);
 	
 	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
@@ -343,7 +217,7 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 static void VolListAddItem(int index, volume_info *v)
 {
-	NEW_VOLUME_LIST_ENTRY *v_entry;
+	volume_processing_job *job;
 	LV_ITEM lvi;
 	char s[128];
 	char name[32];
@@ -357,9 +231,8 @@ static void VolListAddItem(int index, volume_info *v)
 	lvi.iImage = v->is_removable ? 1 : 0;
 	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
 
-	vlist_add_item(name,v->fsname,v->total_space.QuadPart,v->free_space.QuadPart);
-	v_entry = vlist_get_entry(name);
-	VolListUpdateStatusFieldInternal(index,v_entry->status);
+	job = get_job(v->letter);
+	VolListUpdateStatusFieldInternal(index,job);
 	AddCapacityInformation(index,v);
 }
 
@@ -393,7 +266,7 @@ static void AddCapacityInformation(int index, volume_info *v)
 	(void)SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 }
 
-static void VolListUpdateStatusFieldInternal(int index,int Status)
+static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *job)
 {
 	LV_ITEMW lviw;
 
@@ -401,21 +274,24 @@ static void VolListUpdateStatusFieldInternal(int index,int Status)
 	lviw.iItem = index;
 	lviw.iSubItem = 1;
 	
-	switch(Status){
-	case STATUS_RUNNING:
-		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_RUNNING");
-		break;
-	case STATUS_ANALYSED:
-		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
-		break;
-	case STATUS_DEFRAGMENTED:
-		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
-		break;
-	case STATUS_OPTIMIZED:
-		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
-		break;
-	default:
+	if(job->pi.completion_status < 0){
 		lviw.pszText = L"";
+	} else if(job->pi.completion_status == 0){
+		lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_RUNNING");
+	} else {
+		switch(job->job_type){
+		case ANALYSIS_JOB:
+			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
+			break;
+		case DEFRAG_JOB:
+			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
+			break;
+		case OPTIMIZER_JOB:
+			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
+			break;
+		default:
+			lviw.pszText = L"";
+		}
 	}
 
 	(void)SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
@@ -520,15 +396,14 @@ void MakeVolListNiceLooking(void)
 /****************************************************************/
 /*                         trash                                */
 /****************************************************************/
-void VolListUpdateStatusField(NEW_VOLUME_LIST_ENTRY *v_entry,int status)
+void VolListUpdateStatusField(volume_processing_job *job)
 {
 	LV_ITEM lvi;
 	char buffer[128];
 	int index = -1;
 	int item;
 
-	if(v_entry == NULL) return;
-	v_entry->status = status;
+	if(job == NULL) return;
 
 	while(1){
 		item = (int)SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_ALL);
@@ -540,9 +415,8 @@ void VolListUpdateStatusField(NEW_VOLUME_LIST_ENTRY *v_entry,int status)
 		lvi.pszText = buffer;
 		lvi.cchTextMax = 127;
 		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			buffer[2] = 0;
-			if(strcmp(buffer,v_entry->name) == 0){
-				VolListUpdateStatusFieldInternal(index,status);
+			if(udefrag_tolower(buffer[0]) == udefrag_tolower(job->volume_letter)){
+				VolListUpdateStatusFieldInternal(index,job);
 				return;
 			}
 		}
@@ -550,7 +424,7 @@ void VolListUpdateStatusField(NEW_VOLUME_LIST_ENTRY *v_entry,int status)
 }
 
 /* TODO: optimize */
-void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry)
+void VolListRefreshItem(volume_processing_job *job)
 {
 	LV_ITEM lvi;
 	char buffer[128];
@@ -559,16 +433,13 @@ void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry)
 	volume_info *v;
 	int i;
 
-	if(v_entry == NULL)
+	if(job == NULL)
 		return;
 
 	v = udefrag_get_vollist(skip_removable);
 	if(v){
 		for(i = 0; v[i].letter != 0; i++){
-			if(v[i].letter == v_entry->name[0]){
-				v_entry->pi.total_space = v[i].total_space.QuadPart;
-				v_entry->pi.free_space = v[i].free_space.QuadPart;
-
+			if(udefrag_tolower(v[i].letter) == udefrag_tolower(job->volume_letter)){
 				while(1){
 					item = (int)SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_ALL);
 					if(item == -1 || item == index) break;
@@ -579,8 +450,7 @@ void VolListRefreshItem(NEW_VOLUME_LIST_ENTRY *v_entry)
 					lvi.pszText = buffer;
 					lvi.cchTextMax = 127;
 					if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-						buffer[2] = 0;
-						if(strcmp(buffer,v_entry->name) == 0){
+						if(udefrag_tolower(buffer[0]) == udefrag_tolower(job->volume_letter)){
 							AddCapacityInformation(index,&v[i]);
 							return;
 						}
