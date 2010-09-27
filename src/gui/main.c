@@ -93,14 +93,14 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update);
 void VolListAdjustColumnWidths(void);
 void SetStatusBarParts(void);
 void CalculateBitMapDimensions(void);
-BOOL CreateBitMapGrid(void);
-int vlist_init(void);
-int vlist_destroy(void);
+void ResizeMap(int x, int y, int width, int height);
 void InitFont(void);
 void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
+
+extern int allow_map_redraw;
 
 void DisplayLastError(char *caption)
 {
@@ -260,7 +260,7 @@ void InitMainWindow(void)
 	else
 		(void)SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
 
-	CalculateBitMapDimensions();
+	//CalculateBitMapDimensions();
 	InitVolList(); /* before map! */
 	InitProgress();
 	InitMap();
@@ -279,7 +279,6 @@ void InitMainWindow(void)
             pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
     }
 	
-	//UpdateVolList(); /* after a map initialization! */
 	InitFont();
 	
 	/* status bar will always have default font */
@@ -316,7 +315,7 @@ void InitMainWindow(void)
 	if(init_maximized_window)
 		SendMessage(hWindow,(WM_USER + 1),0,0);
 	
-	UpdateVolList();
+	UpdateVolList(); /* after a complete map initialization! */
 }
 
 static RECT prev_rc = {0,0,0,0};
@@ -346,6 +345,7 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	int buttons_offset;
 	
 	int cw;
+	HWND hChild;
 	
 	/*
 	* Assign layout variables by layout constants
@@ -380,6 +380,7 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
 	
 	//SendMessage(hWindow,WM_SETREDRAW,FALSE,0);
+	allow_map_redraw = 0;
 
 	/* reposition the volume list */
     if(cmap_label_width + skip_media_width + rescan_btn_width > cw) vlist_height = vlist_height / 2;
@@ -509,13 +510,25 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	cmap_width = cw;
 	cmap_height = buttons_offset - cmap_offset - spacing;
 	if(cmap_height < 0) cmap_height = 0;
-	(void)SetWindowPos(hMap,0,padding_x,cmap_offset,cmap_width,cmap_height,0);
-	CalculateBitMapDimensions();
-	RedrawMap(current_job);
+	
+	//(void)SetWindowPos(hMap,0,padding_x,cmap_offset,cmap_width,cmap_height,0);
+	//CalculateBitMapDimensions();
+	ResizeMap(padding_x,cmap_offset,cmap_width,cmap_height);
+	
+	//RedrawMap(current_job);
 	
 	//SendMessage(hWindow,WM_SETREDRAW,TRUE,0);
-	(void)InvalidateRect(hWindow,NULL,TRUE);
-	(void)UpdateWindow(hWindow);
+	//(void)InvalidateRect(hWindow,NULL,TRUE);
+	//(void)UpdateWindow(hWindow);
+	//RedrawWindow(hWindow,NULL,NULL,RDW_ERASENOW | RDW_UPDATENOW | RDW_NOCHILDREN);
+	hChild = GetWindow(hWindow,GW_CHILD);
+	while(hChild){
+		if(hChild != hList && hChild != hMap)
+			(void)InvalidateRect(hChild,NULL,TRUE);
+		hChild = GetWindow(hChild,GW_HWNDNEXT);
+	}
+	
+	allow_map_redraw = 1;
 }
 
 /**

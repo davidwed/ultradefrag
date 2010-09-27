@@ -57,6 +57,8 @@ void CalculateBitMapDimensions(void);
 
 extern HANDLE hMapEvent;
 
+int allow_map_redraw = 1;
+
 void InitMap(void)
 {
 	RECT rc;
@@ -70,7 +72,7 @@ void InitMap(void)
 			rc.bottom - rc.top,SWP_NOMOVE);
 	}
 
-	CalculateBitMapDimensions();
+	//CalculateBitMapDimensions();
 	
 	isRectangleUnicode = IsWindowUnicode(hMap);
 	if(isRectangleUnicode)
@@ -104,32 +106,68 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		return CallWindowProc(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
 }
 
-void CalculateBitMapDimensions(void)
+//void CalculateBitMapDimensions(void)
+//{
+//	RECT rc;
+//	long dx, dy;
+//	int x_edge,y_edge;
+//
+//	if(GetClientRect(hMap,&rc)){
+//		if(MapWindowPoints(hMap,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)))){
+//			/* calculate number of blocks and a real size of the map control */
+//			map_blocks_per_line = (rc.right - rc.left - grid_line_width) / (map_block_size + grid_line_width);
+//			map_width = (map_block_size + grid_line_width) * map_blocks_per_line + grid_line_width;
+//			map_lines = (rc.bottom - rc.top - grid_line_width) / (map_block_size + grid_line_width);
+//			map_height = (map_block_size + grid_line_width) * map_lines + grid_line_width;
+//			/* center the map control */
+//			dx = (rc.right - rc.left - map_width) / 2;
+//			dy = (rc.bottom - rc.top - map_height) / 2;
+//			if(dx > 0) rc.left += dx;
+//			if(dy > 0) rc.top += dy;
+//			/* border width is used because window size = client size + borders */
+//			x_edge = GetSystemMetrics(SM_CXEDGE);
+//			y_edge = GetSystemMetrics(SM_CYEDGE);
+//			(void)SetWindowPos(hMap,NULL,rc.left - y_edge,rc.top - x_edge, 
+//				map_width + 2 * y_edge,map_height + 2 * x_edge,SWP_NOZORDER);
+//		}
+//	}
+//	(void)InvalidateRect(hMap,NULL,TRUE);
+//}
+
+void ResizeMap(int x, int y, int width, int height)
 {
 	RECT rc;
+	int border_width, border_height;
 	long dx, dy;
-	int x_edge,y_edge;
+	
+	/* get coordinates of the map field, without borders */
+	border_width = GetSystemMetrics(SM_CXEDGE);
+	border_height = GetSystemMetrics(SM_CYEDGE);
+	rc.left = x + border_width;
+	rc.right = (x + width - 1) - border_width;
+	rc.top = y + border_height;
+	rc.bottom = (y + height - 1) - border_height;
 
-	if(GetClientRect(hMap,&rc)){
-		if(MapWindowPoints(hMap,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)))){
-			/* calculate number of blocks and a real size of the map control */
-			map_blocks_per_line = (rc.right - rc.left - grid_line_width) / (map_block_size + grid_line_width);
-			map_width = (map_block_size + grid_line_width) * map_blocks_per_line + grid_line_width;
-			map_lines = (rc.bottom - rc.top - grid_line_width) / (map_block_size + grid_line_width);
-			map_height = (map_block_size + grid_line_width) * map_lines + grid_line_width;
-			/* center the map control */
-			dx = (rc.right - rc.left - map_width) / 2;
-			dy = (rc.bottom - rc.top - map_height) / 2;
-			if(dx > 0) rc.left += dx;
-			if(dy > 0) rc.top += dy;
-			/* border width is used because window size = client size + borders */
-			x_edge = GetSystemMetrics(SM_CXEDGE);
-			y_edge = GetSystemMetrics(SM_CYEDGE);
-			(void)SetWindowPos(hMap,NULL,rc.left - y_edge,rc.top - x_edge, \
-				map_width + 2 * y_edge,map_height + 2 * x_edge,SWP_NOZORDER);
-		}
-	}
-	(void)InvalidateRect(hMap,NULL,TRUE);
+	/* calculate number of blocks and a real size of the map control */
+	map_blocks_per_line = (rc.right - rc.left - 1 - grid_line_width) / (map_block_size + grid_line_width);
+	map_width = (map_block_size + grid_line_width) * map_blocks_per_line + grid_line_width;
+	map_lines = (rc.bottom - rc.top - 1 - grid_line_width) / (map_block_size + grid_line_width);
+	map_height = (map_block_size + grid_line_width) * map_lines + grid_line_width;
+
+	/* center the map control */
+	dx = (rc.right - rc.left - 1 - map_width) / 2;
+	dy = (rc.bottom - rc.top - 1 - map_height) / 2;
+	// FIXME: this causes more flicker of the map
+	if(dx > 0) rc.left += dx;
+	if(dy > 0) rc.top += dy;
+
+	/* reposition the map control */
+	(void)SetWindowPos(hMap, NULL, 
+		rc.left - border_width,
+		rc.top - border_height,
+		map_width + 2 * border_width,
+		map_height + 2 * border_height,
+		SWP_NOZORDER);
 }
 
 /* Since v3.1.0 all screen color depths are supported */
@@ -205,6 +243,9 @@ void RedrawMap(volume_processing_job *job)
 	
 	if(job == NULL)
 		return;
+	
+	//if(!allow_map_redraw)
+		//return;
 	
 	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
 		// TODO
