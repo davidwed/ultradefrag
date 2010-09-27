@@ -157,9 +157,9 @@ void ResizeMap(int x, int y, int width, int height)
 	/* center the map control */
 	dx = (rc.right - rc.left - 1 - map_width) / 2;
 	dy = (rc.bottom - rc.top - 1 - map_height) / 2;
-	// FIXME: this causes more flicker of the map
-	if(dx > 0) rc.left += dx;
-	if(dy > 0) rc.top += dy;
+	// comparison with zero causes more flicker of the map
+	if(dx > 2) rc.left += dx;
+	if(dy > 2) rc.top += dy;
 
 	/* reposition the map control */
 	(void)SetWindowPos(hMap, NULL, 
