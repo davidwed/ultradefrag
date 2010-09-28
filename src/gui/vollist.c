@@ -135,14 +135,19 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 int ResizeVolList(int x, int y, int width, int height)
 {
 	int border_height;
+	int border_width;
 	int header_height = 0;
 	int item_height = 0;
 	int n_items;
 	HWND hHeader;
 	RECT rc;
+	int cw[] = {90,90,110,125,90};
+	int total_width = 0;
+	int i;
 
 	/* adjust height of the list */
 	border_height = GetSystemMetrics(SM_CYEDGE);
+	border_width = GetSystemMetrics(SM_CXEDGE);
 	hHeader = (HWND)(LONG_PTR)SendMessage(hList,LVM_GETHEADER,0,0);
 	if(hHeader){
 		if(SendMessage(hHeader,HDM_GETITEMRECT,0,(LRESULT)&rc))
@@ -159,7 +164,25 @@ int ResizeVolList(int x, int y, int width, int height)
 	}
 	(void)SetWindowPos(hList,0,x,y,width,height,0);
 
-	VolListAdjustColumnWidths();
+	/* adjust columns widths */
+	if(GetClientRect(hList,&rc))
+		width = rc.right - rc.left;
+	else
+		width = 586;
+
+	if(user_defined_column_widths[0]){
+		for(i = 0; i < 5; i++)
+			total_width += user_defined_column_widths[i];
+		for(i = 0; i < 5; i++){
+			(void)SendMessage(hList,LVM_SETCOLUMNWIDTH,i,
+				user_defined_column_widths[i] * width / total_width);
+		}
+	} else {
+		for(i = 0; i < 5; i++){
+			(void)SendMessage(hList,LVM_SETCOLUMNWIDTH,i,
+				cw[i] * width / 505);
+		}
+	}
 	return height;
 }
 
@@ -220,8 +243,6 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	lvi.state = LVIS_SELECTED;
 	(void)SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
 	
-	VolListAdjustColumnWidths();
-
 	job = get_first_selected_job();
 	RedrawMap(job);
 	if(job) UpdateStatusBar(&job->pi);
@@ -342,45 +363,6 @@ void VolListGetColumnWidths(void)
 	}
 }
 
-void VolListAdjustColumnWidths(void)
-{
-	RECT rc;
-	int dx;
-	int cw[] = {90,90,110,125,90};
-	int user_defined_widths = 0;
-	int total_width = 0;
-	int i;
-
-	/* due to some reason GetClientRect returns
-	improper coordinates, therefore we're
-	calculating width as right - left instead of
-	right - left + 1, which would be more correct */
-	
-	/* adjust columns widths */
-	if(GetClientRect(hList,&rc))
-		dx = rc.right - rc.left;
-	else
-		dx = 586;
-
-	if(user_defined_column_widths[0])
-		user_defined_widths = 1;
-	for(i = 0; i < 5; i++)
-		total_width += user_defined_column_widths[i];
-	
-	for(i = 0; i < 5; i++){
-		if(user_defined_widths){
-			(void)SendMessage(hList,LVM_SETCOLUMNWIDTH,i,
-				user_defined_column_widths[i] * dx / total_width);
-		}else{
-			(void)SendMessage(hList,LVM_SETCOLUMNWIDTH,i,
-				cw[i] * dx / 505);
-		}
-	}
-}
-
-/****************************************************************/
-/*                         trash                                */
-/****************************************************************/
 void VolListUpdateStatusField(volume_processing_job *job)
 {
 	LV_ITEM lvi;
@@ -408,42 +390,34 @@ void VolListUpdateStatusField(volume_processing_job *job)
 	}
 }
 
-/* TODO: optimize */
 void VolListRefreshItem(volume_processing_job *job)
 {
 	LV_ITEM lvi;
 	char buffer[128];
 	int index = -1;
 	int item;
-	volume_info *v;
-	int i;
+	volume_info v;
 
 	if(job == NULL)
 		return;
 
-	v = udefrag_get_vollist(skip_removable);
-	if(v){
-		for(i = 0; v[i].letter != 0; i++){
-			if(udefrag_tolower(v[i].letter) == udefrag_tolower(job->volume_letter)){
-				while(1){
-					item = (int)SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_ALL);
-					if(item == -1 || item == index) break;
-					index = item;
-					lvi.iItem = index;
-					lvi.iSubItem = 0;
-					lvi.mask = LVIF_TEXT;
-					lvi.pszText = buffer;
-					lvi.cchTextMax = 127;
-					if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-						if(udefrag_tolower(buffer[0]) == udefrag_tolower(job->volume_letter)){
-							AddCapacityInformation(index,&v[i]);
-							return;
-						}
-					}
-				}
-				break;
+	if(udefrag_get_volume_information(job->volume_letter,&v) < 0)
+		return;
+	
+	while(1){
+		item = (int)SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_ALL);
+		if(item == -1 || item == index) break;
+		index = item;
+		lvi.iItem = index;
+		lvi.iSubItem = 0;
+		lvi.mask = LVIF_TEXT;
+		lvi.pszText = buffer;
+		lvi.cchTextMax = 127;
+		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
+			if(udefrag_tolower(buffer[0]) == udefrag_tolower(job->volume_letter)){
+				AddCapacityInformation(index,&v);
+				return;
 			}
 		}
-		udefrag_release_vollist(v);
 	}
 }

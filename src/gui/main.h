@@ -83,6 +83,13 @@
 * http://www.catch22.net/tuts/flicker
 */
 
+/*
+* Due to some reason GetClientRect returns
+* improper coordinates, therefore we're
+* calculating width as right - left instead of
+* right - left + 1, which would be more correct.
+*/
+
 typedef struct _udefrag_map {
 	HBITMAP hbitmap;      /* bitmap used to draw map on */
 	HDC hdc;              /* device context of the bitmap */
