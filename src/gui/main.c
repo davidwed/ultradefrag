@@ -93,13 +93,12 @@ void RepositionMainWindowControls(void);
 void SetStatusBarParts(void);
 void ResizeMap(int x, int y, int width, int height);
 int  ResizeVolList(int x, int y, int width, int height);
+int  ResizeStatusBar(int bottom, int width);
 void InitFont(void);
 void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
-
-void __VolListAdjustColumnWidths(void);
 
 extern int allow_map_redraw;
 
@@ -280,12 +279,9 @@ void InitMainWindow(void)
             pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
     }
 	
-	InitFont();
-	
-	/* status bar will always have default font */
 	CreateStatusBar();
-	memset(&pi,0,sizeof(udefrag_progress_info));
-	UpdateStatusBar(&pi);
+
+	InitFont(); /* applies to the status bar too */
 
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
@@ -325,6 +321,10 @@ void InitMainWindow(void)
 		SendMessage(hWindow,(WM_USER + 1),0,0);
 	
 	UpdateVolList(); /* after a complete map initialization! */
+
+	/* reset status bar */
+	memset(&pi,0,sizeof(udefrag_progress_info));
+	UpdateStatusBar(&pi);
 }
 
 static RECT prev_rc = {0,0,0,0};
@@ -340,7 +340,7 @@ void RepositionMainWindowControls(void)
 	
 	int vlist_width, cmap_width;
 	int cmap_label_width, skip_media_width, rescan_btn_width;
-	int button_width, progress_label_width, progress_width, sbar_width;
+	int button_width, progress_label_width, progress_width;
 	
 	int spacing;
 	int padding_x;
@@ -394,9 +394,6 @@ void RepositionMainWindowControls(void)
 	/* reposition the volume list */
     if(cmap_label_width + skip_media_width + rescan_btn_width > cw) vlist_height = vlist_height / 2;
 	vlist_width = cw;
-	
-	//(void)SetWindowPos(hList,0,padding_x,offset_y,vlist_width,vlist_height,0);
-	//__VolListAdjustColumnWidths();
 	vlist_height = ResizeVolList(padding_x,offset_y,vlist_width,vlist_height);
 	
 	offset_y += vlist_height + spacing;
@@ -434,16 +431,8 @@ void RepositionMainWindowControls(void)
 	
 	/* reposition the status bar */
 	offset_y = h;
-	if(GetClientRect(hStatus,&rc)){
-		if(MapWindowPoints(hStatus,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)))){
-			sbar_height = rc.bottom - rc.top;
-			sbar_width = w;
-			offset_y -= sbar_height;
-			(void)SetWindowPos(hStatus,NULL,0,offset_y,sbar_width,sbar_height,0);
-		}
-	}
-	SetStatusBarParts();
-	//(void)InvalidateRect(hStatus,NULL,TRUE);
+	sbar_height = ResizeStatusBar(h,w);
+	offset_y -= sbar_height;
 	offset_y -= spacing;
 	
 	/* set progress indicator coordinates */
@@ -522,17 +511,9 @@ void RepositionMainWindowControls(void)
 	cmap_width = cw;
 	cmap_height = buttons_offset - cmap_offset - spacing;
 	if(cmap_height < 0) cmap_height = 0;
-	
-	//(void)SetWindowPos(hMap,0,padding_x,cmap_offset,cmap_width,cmap_height,0);
-	//CalculateBitMapDimensions();
 	ResizeMap(padding_x,cmap_offset,cmap_width,cmap_height);
 	
-	//RedrawMap(current_job);
-	
 	//SendMessage(hWindow,WM_SETREDRAW,TRUE,0);
-	//(void)InvalidateRect(hWindow,NULL,TRUE);
-	//(void)UpdateWindow(hWindow);
-	//RedrawWindow(hWindow,NULL,NULL,RDW_ERASENOW | RDW_UPDATENOW | RDW_NOCHILDREN);
 	hChild = GetWindow(hWindow,GW_CHILD);
 	while(hChild){
 		if(hChild != hList && hChild != hMap)

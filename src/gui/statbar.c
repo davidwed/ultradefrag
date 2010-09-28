@@ -26,7 +26,7 @@
 
 #include "main.h"
 
-#define N_OF_STATUSBAR_PARTS  5
+#define STATUS_BAR_PARTS  5
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
@@ -44,35 +44,65 @@ void SetIcon(int part,int id)
 	(void)DestroyIcon(hImg);
 }
 
-void SetStatusBarParts(void)
-{
-	RECT rc;
-	int width, i;
-	int x[N_OF_STATUSBAR_PARTS-1] = {110,210,345,465};
-	int a[N_OF_STATUSBAR_PARTS];
-
-	if(hStatus){
-		if(GetClientRect(hStatus,&rc)){
-			width = rc.right - rc.left;
-			for(i = 0; i < N_OF_STATUSBAR_PARTS-1; i++)
-				a[i] = width * x[i] / 560;
-			a[N_OF_STATUSBAR_PARTS-1] = width;
-			(void)SendMessage(hStatus,SB_SETPARTS,N_OF_STATUSBAR_PARTS + 1,(LPARAM)a);
-		}
-		(void)SetIcon(0,IDI_DIR); (void)SetIcon(1,IDI_UNFRAGM);
-		(void)SetIcon(2,IDI_FRAGM); (void)SetIcon(3,IDI_CMP);
-		(void)SetIcon(4,IDI_MFT);
-	}
-}
-
 BOOL CreateStatusBar()
 {
+	int array[STATUS_BAR_PARTS] = {10,20,30,40,50};
+	
+	/* create status bar and attach it to the main window */
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
 									"0 dirs", hWindow, IDM_STATUSBAR);
-	SetStatusBarParts();
-    if(hStatus && hFont)
-        (void)SendMessage(hStatus, WM_SETFONT, (WPARAM)hFont, (LPARAM)TRUE);
-	return (hStatus) ? TRUE : FALSE;
+	if(hStatus == NULL){
+		// TODO
+		return FALSE;
+	}
+	
+	/* split status bar to parts */
+	(void)SendMessage(hStatus, SB_SETPARTS, STATUS_BAR_PARTS, (LPARAM)array);
+	
+	/* set icons */
+	(void)SetIcon(0,IDI_DIR);
+	(void)SetIcon(1,IDI_UNFRAGM);
+	(void)SetIcon(2,IDI_FRAGM);
+	(void)SetIcon(3,IDI_CMP);
+	(void)SetIcon(4,IDI_MFT);
+
+	return TRUE;
+}
+
+/*
+* Accepts y coordinate of the bottom line
+* and width of the status bar, returns
+* height of the status bar.
+*/
+int ResizeStatusBar(int bottom, int width)
+{
+	RECT rc;
+	int top;
+	int x[STATUS_BAR_PARTS-1] = {110,210,345,465};
+	int a[STATUS_BAR_PARTS];
+	int i, height = 0;
+	
+	if(hStatus == NULL)
+		return 0;
+
+	if(GetClientRect(hStatus,&rc)){
+		if(MapWindowPoints(hStatus,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT))))
+			height = rc.bottom - rc.top;
+	}
+	
+	if(height == 0)
+		return 0;
+
+	top = bottom - height;
+	(void)SetWindowPos(hStatus,NULL,0,top,width,height,0);
+
+	/* adjust widths of parts */
+	for(i = 0; i < STATUS_BAR_PARTS-1; i++)
+		a[i] = width * x[i] / 560;
+	a[STATUS_BAR_PARTS-1] = width;
+	(void)SendMessage(hStatus,SB_SETPARTS,STATUS_BAR_PARTS,(LPARAM)a);
+
+	return height;
 }
 
 void UpdateStatusBar(udefrag_progress_info *pi)
