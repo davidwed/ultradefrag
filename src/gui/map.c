@@ -61,19 +61,9 @@ int allow_map_redraw = 1;
 
 void InitMap(void)
 {
-	RECT rc;
 	int i;
 	
 	hMap = GetDlgItem(hWindow,IDC_MAP);
-	/* increase hight of the map */
-	if(GetWindowRect(hMap,&rc)){
-		rc.bottom ++;
-		SetWindowPos(hMap,0,0,0,rc.right - rc.left,
-			rc.bottom - rc.top,SWP_NOMOVE);
-	}
-
-	//CalculateBitMapDimensions();
-	
 	isRectangleUnicode = IsWindowUnicode(hMap);
 	if(isRectangleUnicode)
 		OldRectangleWndProc = (WNDPROC)SetWindowLongPtrW(hMap,GWLP_WNDPROC,
@@ -92,8 +82,8 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 
-	//if(iMsg == WM_ERASEBKGND)
-		//return 1;
+	if(iMsg == WM_ERASEBKGND)
+		return 1;
 	
 	if(iMsg == WM_PAINT){
 		(void)BeginPaint(hWnd,&ps); /* (void)? */
@@ -105,34 +95,6 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	else
 		return CallWindowProc(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
 }
-
-//void CalculateBitMapDimensions(void)
-//{
-//	RECT rc;
-//	long dx, dy;
-//	int x_edge,y_edge;
-//
-//	if(GetClientRect(hMap,&rc)){
-//		if(MapWindowPoints(hMap,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)))){
-//			/* calculate number of blocks and a real size of the map control */
-//			map_blocks_per_line = (rc.right - rc.left - grid_line_width) / (map_block_size + grid_line_width);
-//			map_width = (map_block_size + grid_line_width) * map_blocks_per_line + grid_line_width;
-//			map_lines = (rc.bottom - rc.top - grid_line_width) / (map_block_size + grid_line_width);
-//			map_height = (map_block_size + grid_line_width) * map_lines + grid_line_width;
-//			/* center the map control */
-//			dx = (rc.right - rc.left - map_width) / 2;
-//			dy = (rc.bottom - rc.top - map_height) / 2;
-//			if(dx > 0) rc.left += dx;
-//			if(dy > 0) rc.top += dy;
-//			/* border width is used because window size = client size + borders */
-//			x_edge = GetSystemMetrics(SM_CXEDGE);
-//			y_edge = GetSystemMetrics(SM_CYEDGE);
-//			(void)SetWindowPos(hMap,NULL,rc.left - y_edge,rc.top - x_edge, 
-//				map_width + 2 * y_edge,map_height + 2 * x_edge,SWP_NOZORDER);
-//		}
-//	}
-//	(void)InvalidateRect(hMap,NULL,TRUE);
-//}
 
 void ResizeMap(int x, int y, int width, int height)
 {
@@ -149,14 +111,14 @@ void ResizeMap(int x, int y, int width, int height)
 	rc.bottom = (y + height - 1) - border_height;
 
 	/* calculate number of blocks and a real size of the map control */
-	map_blocks_per_line = (rc.right - rc.left - 1 - grid_line_width) / (map_block_size + grid_line_width);
+	map_blocks_per_line = (rc.right - rc.left + 1 - grid_line_width) / (map_block_size + grid_line_width);
 	map_width = (map_block_size + grid_line_width) * map_blocks_per_line + grid_line_width;
-	map_lines = (rc.bottom - rc.top - 1 - grid_line_width) / (map_block_size + grid_line_width);
+	map_lines = (rc.bottom - rc.top + 1 - grid_line_width) / (map_block_size + grid_line_width);
 	map_height = (map_block_size + grid_line_width) * map_lines + grid_line_width;
 
 	/* center the map control */
-	dx = (rc.right - rc.left - 1 - map_width) / 2;
-	dy = (rc.bottom - rc.top - 1 - map_height) / 2;
+	dx = (rc.right - rc.left + 1 - map_width) / 2;
+	dy = (rc.bottom - rc.top + 1 - map_height) / 2;
 	// comparison with zero causes more flicker of the map
 	threshold = grid_line_width * 2;
 	if(dx > threshold) rc.left += dx;

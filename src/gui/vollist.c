@@ -41,10 +41,10 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 void DisplayLastError(char *caption);
 void InitImageList(void);
 void DestroyImageList(void);
-void MakeVolListNiceLooking(void);
 static void VolListAddItem(int index, volume_info *v);
 static void AddCapacityInformation(int index, volume_info *v);
 static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *job);
+void VolListAdjustColumnWidths(void);
 
 volume_processing_job * get_first_selected_job(void)
 {
@@ -73,44 +73,29 @@ volume_processing_job * get_first_selected_job(void)
 void InitVolList(void)
 {
 	LV_COLUMNW lvc;
-	RECT rc;
-	int dx;
 	
 	hList = GetDlgItem(hWindow,IDC_VOLUMES);
-	if(GetClientRect(hList,&rc)){
-		dx = rc.right - rc.left;
-	} else {
-		dx = 586;
-	}
 	(void)SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 		(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
 
 	/* create header */
-	lvc.mask = LVCF_TEXT | LVCF_WIDTH;
+	lvc.mask = LVCF_TEXT;
 	lvc.pszText = WgxGetResourceString(i18n_table,L"VOLUME");
-	lvc.cx = 60 * dx / 505;
 	(void)SendMessage(hList,LVM_INSERTCOLUMNW,0,(LRESULT)&lvc);
+
 	lvc.pszText = WgxGetResourceString(i18n_table,L"STATUS");
-	lvc.cx = 60 * dx / 505;
 	(void)SendMessage(hList,LVM_INSERTCOLUMNW,1,(LRESULT)&lvc);
-	lvc.pszText = WgxGetResourceString(i18n_table,L"TOTAL");
+
 	lvc.mask |= LVCF_FMT;
 	lvc.fmt = LVCFMT_RIGHT;
-	lvc.cx = 100 * dx / 505;
+	lvc.pszText = WgxGetResourceString(i18n_table,L"TOTAL");
 	(void)SendMessage(hList,LVM_INSERTCOLUMNW,2,(LRESULT)&lvc);
-	lvc.pszText = WgxGetResourceString(i18n_table,L"FREE");
-	lvc.cx = 100 * dx / 505;
-	(void)SendMessage(hList,LVM_INSERTCOLUMNW,3,(LRESULT)&lvc);
-	lvc.pszText = WgxGetResourceString(i18n_table,L"PERCENT");
-	lvc.cx = 85 * dx / 505;
-	(void)SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
 
-	/* adjust hight of the list view control */
-	if(GetWindowRect(hList,&rc)){
-		rc.bottom += 5; //--; // changed after icons adding
-		(void)SetWindowPos(hList,0,0,0,rc.right - rc.left,
-			rc.bottom - rc.top,SWP_NOMOVE);
-	}
+	lvc.pszText = WgxGetResourceString(i18n_table,L"FREE");
+	(void)SendMessage(hList,LVM_INSERTCOLUMNW,3,(LRESULT)&lvc);
+
+	lvc.pszText = WgxGetResourceString(i18n_table,L"PERCENT");
+	(void)SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
 
 	/* subclassing */
 	isListUnicode = IsWindowUnicode(hList);
@@ -145,6 +130,37 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		return CallWindowProcW(OldListProc,hWnd,iMsg,wParam,lParam);
 	else
 		return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
+}
+
+int ResizeVolList(int x, int y, int width, int height)
+{
+	int border_height;
+	int header_height = 0;
+	int item_height = 0;
+	int n_items;
+	HWND hHeader;
+	RECT rc;
+
+	/* adjust height of the list */
+	border_height = GetSystemMetrics(SM_CYEDGE);
+	hHeader = (HWND)(LONG_PTR)SendMessage(hList,LVM_GETHEADER,0,0);
+	if(hHeader){
+		if(SendMessage(hHeader,HDM_GETITEMRECT,0,(LRESULT)&rc))
+			header_height = rc.bottom - rc.top;
+	}
+	rc.top = 1;
+	rc.left = LVIR_BOUNDS;
+	if(SendMessage(hList,LVM_GETSUBITEMRECT,0,(LRESULT)&rc))
+		item_height = rc.bottom - rc.top;
+	if(header_height && item_height){
+		/* ensure that an integer number of items will be displayed */
+		n_items = (height - 2 * border_height - header_height) / item_height;
+		height = header_height + n_items * item_height + 2 * border_height;
+	}
+	(void)SetWindowPos(hList,0,x,y,width,height,0);
+
+	VolListAdjustColumnWidths();
+	return height;
 }
 
 void FreeVolListResources(void)
@@ -198,13 +214,13 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 		udefrag_release_vollist(v);
 	}
 
-	MakeVolListNiceLooking();
-
 	/* select the first item */
 	lvi.mask = LVIF_STATE;
 	lvi.stateMask = LVIS_SELECTED;
 	lvi.state = LVIS_SELECTED;
 	(void)SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
+	
+	VolListAdjustColumnWidths();
 
 	job = get_first_selected_job();
 	RedrawMap(job);
@@ -319,14 +335,7 @@ void DestroyImageList(void)
 void VolListGetColumnWidths(void)
 {
 	int i;
-	RECT rc;
-	int dx;
 
-	if(GetClientRect(hList,&rc))
-		dx = rc.right - rc.left;
-	else
-		dx = 586;
-	if(!dx) return;
 	for(i = 0; i < 5; i++){
 		user_defined_column_widths[i] = \
 			(int)(LONG_PTR)SendMessage(hList,LVM_GETCOLUMNWIDTH,i,0);
@@ -340,9 +349,13 @@ void VolListAdjustColumnWidths(void)
 	int cw[] = {90,90,110,125,90};
 	int user_defined_widths = 0;
 	int total_width = 0;
-	HWND hHeader;
-	int i,h,y,height,delta;
+	int i;
 
+	/* due to some reason GetClientRect returns
+	improper coordinates, therefore we're
+	calculating width as right - left instead of
+	right - left + 1, which would be more correct */
+	
 	/* adjust columns widths */
 	if(GetClientRect(hList,&rc))
 		dx = rc.right - rc.left;
@@ -363,35 +376,7 @@ void VolListAdjustColumnWidths(void)
 				cw[i] * dx / 505);
 		}
 	}
-	
-	rc.top = 1;
-	rc.left = LVIR_BOUNDS;
-	if(SendMessage(hList,LVM_GETSUBITEMRECT,0,(LRESULT)&rc)){
-		y = rc.bottom - rc.top;
-		
-		hHeader = (HWND)(LONG_PTR)SendMessage(hList,LVM_GETHEADER,0,0);
-		if(hHeader){
-			if(SendMessage(hHeader,HDM_GETITEMRECT,0,(LRESULT)&rc)){
-				h = rc.bottom - rc.top;
-				
-				if(GetWindowRect(hList,&rc)){
-					height = rc.bottom - rc.top;
-					delta = (height - h) % y;
-					rc.bottom -= (delta - 4);
-				
-					(void)SetWindowPos(hList,0,0,0,rc.right - rc.left,
-						rc.bottom - rc.top,SWP_NOMOVE);
-				}
-			}
-		}
-	}
 }
-
-void MakeVolListNiceLooking(void)
-{
-	VolListAdjustColumnWidths();
-}
-
 
 /****************************************************************/
 /*                         trash                                */

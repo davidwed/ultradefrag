@@ -89,16 +89,17 @@ void UpdateVolList(void);
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter);
 void VolListNotifyHandler(LPARAM lParam);
 
-void RepositionMainWindowControls(BOOL asynch_vlist_update);
-void VolListAdjustColumnWidths(void);
+void RepositionMainWindowControls(void);
 void SetStatusBarParts(void);
-void CalculateBitMapDimensions(void);
 void ResizeMap(int x, int y, int width, int height);
+int  ResizeVolList(int x, int y, int width, int height);
 void InitFont(void);
 void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
+
+void __VolListAdjustColumnWidths(void);
 
 extern int allow_map_redraw;
 
@@ -246,6 +247,7 @@ void InitMainWindow(void)
 	int s_width, s_height;
 	RECT rc;
 	udefrag_progress_info pi;
+	LV_ITEM lvi;
     
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
@@ -260,8 +262,7 @@ void InitMainWindow(void)
 	else
 		(void)SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
 
-	//CalculateBitMapDimensions();
-	InitVolList(); /* before map! */
+	InitVolList();
 	InitProgress();
 	InitMap();
 
@@ -309,7 +310,15 @@ void InitMainWindow(void)
 	}
 	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
 	
-	RepositionMainWindowControls(FALSE);
+	/* force list of volumes to be resized properly */
+	lvi.iItem = 0;
+	lvi.iSubItem = 1;
+	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
+	lvi.pszText = "hi";
+	lvi.iImage = 0;
+	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
+	
+	RepositionMainWindowControls();
 
 	/* maximize window if required */
 	if(init_maximized_window)
@@ -324,7 +333,7 @@ static RECT prev_rc = {0,0,0,0};
  * @brief Adjust positions of controls
  * in accordance with main window dimensions.
  */
-void RepositionMainWindowControls(BOOL asynch_vlist_update)
+void RepositionMainWindowControls(void)
 {
 	int vlist_height, cmap_height, button_height;
 	int progress_height, sbar_height;
@@ -385,8 +394,11 @@ void RepositionMainWindowControls(BOOL asynch_vlist_update)
 	/* reposition the volume list */
     if(cmap_label_width + skip_media_width + rescan_btn_width > cw) vlist_height = vlist_height / 2;
 	vlist_width = cw;
-	(void)SetWindowPos(hList,0,padding_x,offset_y,vlist_width,vlist_height,0);
-	VolListAdjustColumnWidths();
+	
+	//(void)SetWindowPos(hList,0,padding_x,offset_y,vlist_width,vlist_height,0);
+	//__VolListAdjustColumnWidths();
+	vlist_height = ResizeVolList(padding_x,offset_y,vlist_width,vlist_height);
+	
 	offset_y += vlist_height + spacing;
 	
 	/* redraw controls below the volume list */
@@ -615,7 +627,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		if(UpdateMainWindowCoordinates()){
 			if(!maximized_window)
 				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-			RepositionMainWindowControls(FALSE);
+			RepositionMainWindowControls();
 		} else {
 			OutputDebugString("Wrong window dimensions on WM_SIZE message!\n");
 		}

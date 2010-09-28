@@ -77,6 +77,12 @@
 * http://www.codeproject.com/KB/winsdk/safesubclassing.aspx
 */
 
+/*
+* The following article ('Flicker Free Drawing')
+* helped us to reduce GUI flicker on window resize:
+* http://www.catch22.net/tuts/flicker
+*/
+
 typedef struct _udefrag_map {
 	HBITMAP hbitmap;      /* bitmap used to draw map on */
 	HDC hdc;              /* device context of the bitmap */
