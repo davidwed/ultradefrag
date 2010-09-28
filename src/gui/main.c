@@ -516,7 +516,7 @@ void RepositionMainWindowControls(void)
 	//SendMessage(hWindow,WM_SETREDRAW,TRUE,0);
 	hChild = GetWindow(hWindow,GW_CHILD);
 	while(hChild){
-		if(hChild != hList && hChild != hMap)
+		if(hChild != hList && hChild != hMap && hChild != hStatus)
 			(void)InvalidateRect(hChild,NULL,TRUE);
 		hChild = GetWindow(hChild,GW_HWNDNEXT);
 	}
