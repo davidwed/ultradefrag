@@ -77,6 +77,7 @@ typedef struct _volume_info {
 volume_info * __stdcall udefrag_get_vollist(int skip_removable);
 void __stdcall udefrag_release_vollist(volume_info *v);
 int __stdcall udefrag_validate_volume(char volume_letter,int skip_removable);
+int __stdcall udefrag_get_volume_information(char volume_letter,volume_info *v);
 
 int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);

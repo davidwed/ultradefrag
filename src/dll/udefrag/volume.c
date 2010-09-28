@@ -99,6 +99,27 @@ void __stdcall udefrag_release_vollist(volume_info *v)
 }
 
 /**
+ * @brief Retrieves volume information.
+ * @param[in] volume_letter the volume letter.
+ * @param[in] v pointer to structure receiving the information.
+ * @return Zero for success, negative value otherwise.
+ */
+int __stdcall udefrag_get_volume_information(char volume_letter,volume_info *v)
+{
+	int result;
+	
+	/* set error mode to ignore missing removable drives */
+	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
+		return (-1);
+
+	result = internal_validate_volume(volume_letter,0,v);
+
+	/* try to restore error mode to default state */
+	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
+	return result;
+}
+
+/**
  * @brief Checks a volume for the defragmentation possibility.
  * @param[in] volume_letter the volume letter.
  * @param[in] skip_removable the boolean value 

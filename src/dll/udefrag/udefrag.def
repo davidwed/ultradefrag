@@ -3,6 +3,7 @@ LIBRARY udefrag.dll
 EXPORTS
 	udefrag_get_vollist
 	udefrag_release_vollist
+	udefrag_get_volume_information
 	udefrag_validate_volume
 	udefrag_fbsize=winx_fbsize
 	udefrag_dfbsize=winx_dfbsize
