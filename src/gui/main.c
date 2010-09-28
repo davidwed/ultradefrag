@@ -443,7 +443,7 @@ void RepositionMainWindowControls(void)
 		}
 	}
 	SetStatusBarParts();
-	(void)InvalidateRect(hStatus,NULL,TRUE);
+	//(void)InvalidateRect(hStatus,NULL,TRUE);
 	offset_y -= spacing;
 	
 	/* set progress indicator coordinates */
