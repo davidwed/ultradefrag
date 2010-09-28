@@ -106,19 +106,19 @@ void ResizeMap(int x, int y, int width, int height)
 	border_width = GetSystemMetrics(SM_CXEDGE);
 	border_height = GetSystemMetrics(SM_CYEDGE);
 	rc.left = x + border_width;
-	rc.right = (x + width - 1) - border_width;
+	rc.right = (x + width) - border_width;
 	rc.top = y + border_height;
-	rc.bottom = (y + height - 1) - border_height;
+	rc.bottom = (y + height) - border_height;
 
 	/* calculate number of blocks and a real size of the map control */
-	map_blocks_per_line = (rc.right - rc.left + 1 - grid_line_width) / (map_block_size + grid_line_width);
+	map_blocks_per_line = (rc.right - rc.left - grid_line_width) / (map_block_size + grid_line_width);
 	map_width = (map_block_size + grid_line_width) * map_blocks_per_line + grid_line_width;
-	map_lines = (rc.bottom - rc.top + 1 - grid_line_width) / (map_block_size + grid_line_width);
+	map_lines = (rc.bottom - rc.top - grid_line_width) / (map_block_size + grid_line_width);
 	map_height = (map_block_size + grid_line_width) * map_lines + grid_line_width;
 
 	/* center the map control */
-	dx = (rc.right - rc.left + 1 - map_width) / 2;
-	dy = (rc.bottom - rc.top + 1 - map_height) / 2;
+	dx = (rc.right - rc.left - map_width) / 2;
+	dy = (rc.bottom - rc.top - map_height) / 2;
 	// comparison with zero causes more flicker of the map
 	threshold = grid_line_width * 2;
 	if(dx > threshold) rc.left += dx;

@@ -6,6 +6,7 @@ HISTORY
     - ability to run multiple instances simultaneously was added
     - ability to resize GUI window at any time was added;
       cluster map scales now automatically
+    - GUI flicker on window resize was reduced
     - the driver has been completely reworked to increase its reliability
       and flexibility; many complicated algorithms were replaced
       by obvious ones; as a side effect we have a noticeable speedup
