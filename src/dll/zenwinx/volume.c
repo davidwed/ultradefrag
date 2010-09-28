@@ -640,7 +640,7 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 	memset(v,0,sizeof(winx_volume_information));
 	v->volume_letter = volume_letter;
 
-	if(volume_letter == 0 || volume_letter < 'A' || volume_letter > 'Z')
+	if(volume_letter < 'A' || volume_letter > 'Z')
 		return (-1);
 	
 	/* open root directory */
