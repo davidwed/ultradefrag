@@ -30,6 +30,7 @@
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
+extern HFONT hFont;
 HWND hStatus;
 
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
@@ -69,6 +70,8 @@ BOOL CreateStatusBar()
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
 									"0 dirs", hWindow, IDM_STATUSBAR);
 	SetStatusBarParts();
+    if(hStatus && hFont)
+        (void)SendMessage(hStatus, WM_SETFONT, (WPARAM)hFont, (LPARAM)TRUE);
 	return (hStatus) ? TRUE : FALSE;
 }
 
