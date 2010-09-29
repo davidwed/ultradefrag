@@ -35,7 +35,6 @@ WNDPROC OldListProc;
 BOOL isListUnicode = FALSE;
 HIMAGELIST hImgList;
 int user_defined_column_widths[] = {0,0,0,0,0};
-BOOL error_flag = FALSE, error_flag2 = FALSE;
 
 DWORD WINAPI RescanDrivesThreadProc(LPVOID);
 void DisplayLastError(char *caption);
@@ -44,7 +43,6 @@ void DestroyImageList(void);
 static void VolListAddItem(int index, volume_info *v);
 static void AddCapacityInformation(int index, volume_info *v);
 static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *job);
-void VolListAdjustColumnWidths(void);
 
 volume_processing_job * get_first_selected_job(void)
 {
@@ -111,19 +109,24 @@ void InitVolList(void)
 
 LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-	if((iMsg == WM_LBUTTONDOWN || iMsg == WM_LBUTTONUP ||
-		iMsg == WM_RBUTTONDOWN || iMsg == WM_RBUTTONUP) && busy_flag)
-		return 0;
-	if(iMsg == WM_KEYDOWN){
-		if(busy_flag){ /* only 'Stop' and 'About' actions are allowed */
-			if(wParam != VK_F1 && wParam != 'S') return 0;
+	switch(iMsg){
+	case WM_LBUTTONDOWN:
+	case WM_LBUTTONUP:
+	case WM_RBUTTONDOWN:
+	case WM_RBUTTONUP:
+		if(busy_flag) return 0;
+		break;
+	case WM_KEYDOWN:
+		if(busy_flag && wParam != VK_F1 && wParam != 'S'){
+			/* only 'Stop' and 'About' actions are allowed */
+			return 0;
 		}
-	}
-
-	/* why? */
-	if(iMsg == WM_VSCROLL){
+		break;
+	case WM_VSCROLL:
+		/* why? */
 		(void)InvalidateRect(hList,NULL,TRUE);
 		(void)UpdateWindow(hList);
+		break;
 	}
 
 	if(isListUnicode)

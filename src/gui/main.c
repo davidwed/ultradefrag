@@ -65,18 +65,7 @@ extern int hibernate_instead_of_shutdown;
 extern int show_shutdown_check_confirmation_dialog;
 extern int seconds_for_shutdown_rejection;
 
-/* they have the same effect as environment variables for console program */
-extern char in_filter[];
-extern char ex_filter[];
-extern char sizelimit[];
-extern int refresh_interval;
-extern int disable_reports;
-extern char dbgprint_level[];
-
 extern int busy_flag, exit_pressed;
-
-extern HDC hGridDC;
-extern HBITMAP hGridBitmap;
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -86,11 +75,9 @@ void VolListGetColumnWidths(void);
 void InitVolList(void);
 void FreeVolListResources(void);
 void UpdateVolList(void);
-DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter);
 void VolListNotifyHandler(LPARAM lParam);
 
 void RepositionMainWindowControls(void);
-void SetStatusBarParts(void);
 void ResizeMap(int x, int y, int width, int height);
 int  ResizeVolList(int x, int y, int width, int height);
 int  ResizeStatusBar(int bottom, int width);
@@ -105,7 +92,7 @@ extern int allow_map_redraw;
 void DisplayLastError(char *caption)
 {
 	LPVOID lpMsgBuf;
-	char buffer[128];
+	char buffer[32];
 	DWORD error = GetLastError();
 
 	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 

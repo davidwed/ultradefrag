@@ -78,7 +78,7 @@
 */
 
 /*
-* The following article ('Flicker Free Drawing')
+* The 'Flicker Free Drawing' article of James Brown
 * helped us to reduce GUI flicker on window resize:
 * http://www.catch22.net/tuts/flicker
 */
