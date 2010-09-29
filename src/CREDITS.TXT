@@ -184,6 +184,8 @@
 
     Giovanni Di Sirio (http://chibios.sourceforge.net/)
 
+    James Brown (http://www.catch22.net/)
+
 -------------------------------------------------------------------------------------
     Also many thanks to all the people who helped us improve UltraDefrag.
 --------------------------------------------------------------------------------------
