@@ -159,7 +159,7 @@ goto finished
 
 :15
 title Build Test Release for Stefan
-call build-pre-release.cmd --no-ia64 --install
+call build-pre-release.cmd --no-ia64
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
