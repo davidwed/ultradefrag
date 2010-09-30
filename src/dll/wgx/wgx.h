@@ -75,4 +75,8 @@ BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf);
 
 BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
 void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
+
+void __cdecl WgxDbgPrintLastError(char *format, ...);
+int  __cdecl WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...);
+
 #endif /* _WGX_H_ */

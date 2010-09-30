@@ -29,6 +29,7 @@ HISTORY
       winx_release_free_volume_regions, winx_dbg_print_header,
       winx_toupper, winx_tolower functions added to zenwinx library
     - udefrag_get_volume_information function added to udefrag library
+    - WgxDbgPrintLastError, WgxDisplayLastError calls added to wgx library
 
                                     ***
 

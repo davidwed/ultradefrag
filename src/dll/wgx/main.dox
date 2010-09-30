@@ -38,25 +38,31 @@
 /** @} */
 
 /**
+ * @defgroup Debug Debugging
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup Fonts Fonts
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Internationalization Internationalization
  * @{
  */
 /** @} */
 
 /**
- * @defgroup Config Configuration Files I/O
+ * @defgroup Misc Miscellaneous
  * @{
  */
 /** @} */
 
 /**
  * @defgroup WebAnalytics Web Analytics API
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Misc Miscellaneous
  * @{
  */
 /** @} */

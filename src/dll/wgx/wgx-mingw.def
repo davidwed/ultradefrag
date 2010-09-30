@@ -20,3 +20,6 @@ EXPORTS
 
 	IncreaseGoogleAnalyticsCounter@12
 	IncreaseGoogleAnalyticsCounterAsynch@12
+
+	WgxDbgPrintLastError
+	WgxDisplayLastError
