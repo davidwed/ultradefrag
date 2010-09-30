@@ -289,7 +289,7 @@ void SavePrefs(void)
 	int result;
 	
 	if(!GetCurrentDirectory(MAX_PATH,buffer)){
-		DisplayLastError("Cannot retrieve the current directory path!");
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot retrieve the current directory path!");
 		return;
 	}
 	(void)strcat(buffer,"\\options\\guiopts.lua");

@@ -203,9 +203,12 @@ void UpdateVolList(void)
 {
 	DWORD thr_id;
 	HANDLE h = create_thread(RescanDrivesThreadProc,NULL,&thr_id);
-	if(h == NULL)
-		DisplayLastError("Cannot create thread starting drives rescan!");
-	if(h) CloseHandle(h);
+	if(h == NULL){
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"UltraDefrag: cannot create thread starting drives rescan!");
+	} else {
+		CloseHandle(h);
+	}
 }
 
 DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)

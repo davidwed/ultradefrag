@@ -115,7 +115,6 @@ int stop_pressed, exit_pressed = 0;
 volume_processing_job *current_job = NULL;
 
 DWORD WINAPI ThreadProc(LPVOID);
-void DisplayLastError(char *caption);
 void DisplayDefragError(int error_code,char *caption);
 void ProcessSingleVolume(volume_processing_job *job);
 void VolListUpdateStatusField(volume_processing_job *job);
@@ -126,21 +125,21 @@ extern HANDLE hMapEvent;
 void DoJob(udefrag_job_type job_type)
 {
 	DWORD id;
-	HANDLE h = create_thread(ThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
+	HANDLE h;
+	char *action = "analysis";
+
+	h = create_thread(ThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
 	if(h == NULL){
-		switch(job_type){
-            case 'a':
-                DisplayLastError("Cannot create thread starting volume analysis!");
-                break;
-            case 'd':
-                DisplayLastError("Cannot create thread starting volume defragmentation!");
-                break;
-            default:
-                DisplayLastError("Cannot create thread starting volume optimization!");
-		}
-		
+		if(job_type == DEFRAG_JOB)
+			action = "defragmentation";
+		else if(job_type == OPTIMIZER_JOB)
+			action = "optimization";
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"UltraDefrag: cannot create thread starting volume %s!",
+			action);
+	} else {
+		CloseHandle(h);
 	}
-	if(h) CloseHandle(h);
 }
 
 void DisplayInvalidVolumeError(int error_code)
@@ -158,6 +157,17 @@ void DisplayInvalidVolumeError(int error_code)
 		buffer[sizeof(buffer) - 1] = 0;
 		MessageBoxA(NULL,buffer,"The volume cannot be processed!",MB_OK | MB_ICONHAND);
 	}
+}
+
+void DisplayDefragError(int error_code,char *caption)
+{
+	char buffer[512];
+	
+	(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
+			udefrag_get_error_description(error_code),
+			"Use DbgView program to get more information.");
+	buffer[sizeof(buffer) - 1] = 0;
+	MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
 }
 
 /* callback function */

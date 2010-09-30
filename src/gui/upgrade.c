@@ -48,29 +48,6 @@ URLMON_PROCEDURE pURLDownloadToCacheFile;
 
 DWORD WINAPI CheckForTheNewVersionThreadProc(LPVOID lpParameter);
 
-void DbgDisplayLastError(char *caption)
-{
-	LPVOID lpMsgBuf;
-	char buffer[128];
-	DWORD error = GetLastError();
-
-	OutputDebugString(caption);
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,0,NULL)){
-				(void)_snprintf(buffer,sizeof(buffer),
-						"Error code = 0x%x",(UINT)error);
-				buffer[sizeof(buffer) - 1] = 0;
-				OutputDebugString(buffer);
-				return;
-	} else {
-		OutputDebugString((LPCTSTR)lpMsgBuf);
-		LocalFree(lpMsgBuf);
-	}
-	OutputDebugString("\n");
-}
-
 /**
 * @brief Retrieves the latest version number from the project's website.
 * @return Version number string. NULL indicates failure.
@@ -87,14 +64,14 @@ char *GetLatestVersion(void)
 	/* load urlmon.dll library */
 	hUrlmonDLL = LoadLibrary("urlmon.dll");
 	if(hUrlmonDLL == NULL){
-		DbgDisplayLastError("GetLatestVersion: LoadLibrary(urlmon.dll) failed! ");
+		WgxDbgPrintLastError("GetLatestVersion: LoadLibrary(urlmon.dll) failed");
 		return NULL;
 	}
 	
 	/* get an address of procedure downloading a file */
 	pURLDownloadToCacheFile = (URLMON_PROCEDURE)GetProcAddress(hUrlmonDLL,"URLDownloadToCacheFileA");
 	if(pURLDownloadToCacheFile == NULL){
-		DbgDisplayLastError("GetLatestVersion: URLDownloadToCacheFile not found in urlmon.dll! ");
+		WgxDbgPrintLastError("GetLatestVersion: URLDownloadToCacheFile not found in urlmon.dll");
 		return NULL;
 	}
 	
@@ -102,20 +79,18 @@ char *GetLatestVersion(void)
 	result = pURLDownloadToCacheFile(NULL,VERSION_URL,version_ini_path,MAX_PATH,0,NULL);
 	version_ini_path[MAX_PATH] = 0;
 	if(result != S_OK){
-		if(result == E_OUTOFMEMORY) OutputDebugString("GetLatestVersion: Not enough memory for URLDownloadToCacheFile!");
-		else OutputDebugString("GetLatestVersion: URLDownloadToCacheFile failed!");
-		OutputDebugString("\n");
+		if(result == E_OUTOFMEMORY)
+			WgxDbgPrint("GetLatestVersion: not enough memory for URLDownloadToCacheFile\n");
+		else
+			WgxDbgPrint("GetLatestVersion: URLDownloadToCacheFile failed\n");
 		return NULL;
 	}
 	
 	/* open the file */
 	f = fopen(version_ini_path,"rb");
 	if(f == NULL){
-		(void)_snprintf(error_msg,sizeof(error_msg) - 1,
-			"Cannot open %s! %s\n",
+		WgxDbgPrint("GetLatestVersion: cannot open %s: %s\n",
 			version_ini_path,_strerror(NULL));
-		error_msg[sizeof(error_msg) - 1] = 0;
-		OutputDebugString(error_msg);
 		return NULL;
 	}
 	
@@ -125,10 +100,9 @@ char *GetLatestVersion(void)
 	/* remove cached data, otherwise it may not be loaded next time */
 	(void)remove(version_ini_path);
 	if(res == 0){
-		OutputDebugString("GetLatestVersion: version.ini file reading failed! ");
-		OutputDebugString(version_ini_path);
-		if(feof(f)) OutputDebugString(" File seems to be empty.");
-		OutputDebugString("\n");
+		WgxDbgPrint("GetLatestVersion: cannot read %s\n",version_ini_path);
+		if(feof(f))
+			WgxDbgPrint("File seems to be empty\n");
 		return NULL;
 	}
 	
@@ -154,7 +128,6 @@ short *GetNewVersionAnnouncement(void)
 	int lmj, lmn, li; /* latest version numbers */
 	int cmj, cmn, ci; /* current version numbers */
 	int res;
-	char buf[32];
 
 	lv = GetLatestVersion();
 	if(lv == NULL) return NULL;
@@ -162,18 +135,12 @@ short *GetNewVersionAnnouncement(void)
 	/*lv[2] = '4';*/
 	res = sscanf(lv,"%u.%u.%u",&lmj,&lmn,&li);
 	if(res != 3){
-		OutputDebugString("GetNewVersionAnnouncement: the first sscanf call returned ");
-		(void)_itoa(res,buf,10);
-		OutputDebugString(buf);
-		OutputDebugString("\n");
+		WgxDbgPrint("GetNewVersionAnnouncement: the first sscanf call returned %u\n",res);
 		return NULL;
 	}
 	res = sscanf(cv,"UltraDefrag %u.%u.%u",&cmj,&cmn,&ci);
 	if(res != 3){
-		OutputDebugString("GetNewVersionAnnouncement: the second sscanf call returned ");
-		(void)_itoa(res,buf,10);
-		OutputDebugString(buf);
-		OutputDebugString("\n");
+		WgxDbgPrint("GetNewVersionAnnouncement: the second sscanf call returned %u\n",res);
 		return NULL;
 	}
 	
@@ -183,11 +150,7 @@ short *GetNewVersionAnnouncement(void)
 			lv,L" release is available for download!");
 		announcement[MAX_ANNOUNCEMENT_LEN - 1] = 0;
 		
-		_snprintf(buf, sizeof(buf), "Upgrade to %s!",lv);
-		buf[sizeof(buf) - 1] = 0;
-		OutputDebugString(buf);
-		OutputDebugString("\n");
-		
+		WgxDbgPrint("GetNewVersionAnnouncement: upgrade to %s\n",lv);
 		return announcement;
 	}
 	
@@ -206,9 +169,12 @@ void CheckForTheNewVersion(void)
 	if(disable_latest_version_check) return;
 	
 	h = create_thread(CheckForTheNewVersionThreadProc,NULL,&id);
-	if(h == NULL)
-		DbgDisplayLastError("Cannot create thread checking the latest version of the program! ");
-	if(h) CloseHandle(h);
+	if(h == NULL){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONWARNING,
+			"UltraDefrag: cannot create thread checking the latest version of the program");
+	} else {
+		CloseHandle(h);
+	}
 }
 
 DWORD WINAPI CheckForTheNewVersionThreadProc(LPVOID lpParameter)

@@ -89,38 +89,6 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 
 extern int allow_map_redraw;
 
-void DisplayLastError(char *caption)
-{
-	LPVOID lpMsgBuf;
-	char buffer[32];
-	DWORD error = GetLastError();
-
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,0,NULL)){
-				(void)_snprintf(buffer,sizeof(buffer),
-						"Error code = 0x%x",(UINT)error);
-				buffer[sizeof(buffer) - 1] = 0;
-				MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
-				return;
-	} else {
-		MessageBoxA(NULL,(LPCTSTR)lpMsgBuf,caption,MB_OK | MB_ICONHAND);
-		LocalFree(lpMsgBuf);
-	}
-}
-
-void DisplayDefragError(int error_code,char *caption)
-{
-	char buffer[512];
-	
-	(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
-			udefrag_get_error_description(error_code),
-			"Use DbgView program to get more information.");
-	buffer[sizeof(buffer) - 1] = 0;
-	MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
-}
-
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
@@ -195,7 +163,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		/* set SE_SHUTDOWN privilege */
 		if(!OpenProcessToken(GetCurrentProcess(), 
 		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,&hToken)){
-			DisplayLastError("Cannot open process token!");
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot open process token!");
 			return 4;
 		}
 		
@@ -204,13 +172,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; 
 		AdjustTokenPrivileges(hToken,FALSE,&tkp,0,(PTOKEN_PRIVILEGES)NULL,0); 		
 		if(GetLastError() != ERROR_SUCCESS){
-			DisplayLastError("Cannot set shutdown privilege!");
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot set shutdown privilege!");
 			return 5;
 		}
 		if(hibernate_instead_of_shutdown){
 			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
 			if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
-				DisplayLastError("Cannot hibernate the computer!");
+				WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot hibernate the computer!");
 			}
 		} else {
 			/*
@@ -219,7 +187,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 			*/
 			if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
 			  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
-				DisplayLastError("Cannot shut down the computer!");
+				WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot shut down the computer!");
 			}
 		}
 	}
@@ -557,9 +525,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			DoJob(OPTIMIZER_JOB);
 			break;
 		case IDC_ABOUT:
-			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1)){
-				DisplayLastError("Cannot create the About window!");
-			}
+			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1))
+				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"UltraDefrag: cannot create the About window!");
 			break;
 		case IDC_SETTINGS:
 			if(!busy_flag) CallGUIConfigurator();
@@ -701,7 +668,7 @@ void ShowSingleReport(volume_processing_job *job)
 
 	if(!CreateProcess(cmd,buffer,
 	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-	    DisplayLastError("Cannot execute lua5.1a_gui.exe program!");
+	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"UltraDefrag: cannot execute lua5.1a_gui.exe program!");
 	    return;
 	}
 	CloseHandle(pi.hProcess);
@@ -735,7 +702,8 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 
 	if(!CreateProcess(path,buffer,
 	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-	    DisplayLastError("Cannot execute udefrag-gui-config.exe program!");
+	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"UltraDefrag: cannot execute udefrag-gui-config.exe program!");
 	    return 0;
 	}
 	(void)WaitForSingleObject(pi.hProcess,INFINITE);
@@ -761,7 +729,10 @@ void CallGUIConfigurator(void)
 	DWORD id;
 	
 	h = create_thread(ConfigThreadProc,NULL,&id);
-	if(h == NULL)
-		DisplayLastError("Cannot create thread starting the Configurator program!");
-	if(h) CloseHandle(h);
+	if(h == NULL){
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"UltraDefrag: cannot create thread opening the Configuration dialog!");
+	} else {
+		CloseHandle(h);
+	}
 }
