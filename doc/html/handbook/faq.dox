@@ -34,6 +34,20 @@
  * music/video has no need to be continues on disk, other files have
  * tendency for temporary living on the disk.
  *
+ * <h3>After defragmentation I see my restore points disappeared, what happens?</h3>
+ * This is a normal situation when restore points disappear after an
+ * intensive disk processing. Windows limits amount of disk space
+ * reserved for restore points. When you perform intensive disk
+ * processing, Windows tracks changes through system restore, therefore
+ * the mentioned limit may be easily exceeded which results in old
+ * restore points deletion.
+ *
+ * We would recommend to avoid the use of restore points for serious
+ * purposes, because Windows can never guarantee that some point saved in
+ * the past will be available in the next moment. Use backup software
+ * instead, Windows already has such a program and there are also lots of
+ * 3-rd party programs of such kind.
+ *
  * <h3>Why configuration files editing is better than one settings window with tabs?</h3>
  * It is much easier and reliable to use the
  * standard Notepad application to edit
