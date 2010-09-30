@@ -36,6 +36,39 @@
 #define DBG_BUFFER_SIZE (4096-sizeof(ULONG))
 
 /**
+ * @brief Sends formatted string to DbgView program.
+ */
+void __cdecl WgxDbgPrint(char *format, ...)
+{
+	char *buffer;
+	va_list arg;
+	int length;
+	
+	if(format == NULL)
+		return;
+
+	buffer = malloc(DBG_BUFFER_SIZE);
+	if(buffer == NULL){
+		OutputDebugString("Cannot allocate memory for WgxDbgPrint!");
+		return;
+	}
+
+	/* store formatted string into buffer */
+	va_start(arg,format);
+	memset(buffer,0,DBG_BUFFER_SIZE);
+	length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
+	(void)length;
+	buffer[DBG_BUFFER_SIZE - 1] = 0;
+	va_end(arg);
+
+	/* send formatted string to the debugger */
+	OutputDebugString(buffer);
+
+	/* cleanup */
+	free(buffer);
+}
+
+/**
  * @brief Sends formatted string to DbgView program,
  * with attached description of the last Win32 error.
  */
@@ -52,7 +85,7 @@ void __cdecl WgxDbgPrintLastError(char *format, ...)
 
 	buffer = malloc(DBG_BUFFER_SIZE);
 	if(buffer == NULL){
-		OutputDebugString("Cannot allocate memory for WgxDbgPrintLastError()!");
+		OutputDebugString("Cannot allocate memory for WgxDbgPrintLastError!");
 		return;
 	}
 
@@ -110,7 +143,7 @@ int __cdecl WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ..
 
 	buffer = malloc(DBG_BUFFER_SIZE);
 	if(buffer == NULL){
-		OutputDebugString("Cannot allocate memory for WgxDbgPrintLastError()!");
+		OutputDebugString("Cannot allocate memory for WgxDisplayLastError!");
 		return 0;
 	}
 
