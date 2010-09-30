@@ -49,11 +49,9 @@ HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 
 extern HWND hWindow,hMap,hList;
 extern volume_processing_job *current_job;
-
 WNDPROC OldRectWndProc;
-
+LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
 extern HANDLE hMapEvent;
-
 int allow_map_redraw = 1;
 
 void InitMap(void)

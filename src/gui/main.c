@@ -86,6 +86,18 @@ void CallGUIConfigurator(void);
 void DeleteEnvironmentVariables(void);
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
+void DoJob(udefrag_job_type job_type);
+void stop(void);
+void GetPrefs(void);
+void SavePrefs(void);
+
+void CheckForTheNewVersion(void);
+void InitMap(void);
+void DeleteMaps();
+
+BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK ConfirmDlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CreateStatusBar();
 
 extern int allow_map_redraw;
 
@@ -207,7 +219,7 @@ void InitMainWindow(void)
 	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
 		WgxApplyResourceTable(i18n_table,hWindow);
 	if(hibernate_instead_of_shutdown){
-		(void)SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
+		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
 	}
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
 
@@ -716,9 +728,9 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	InitFont();
 	(void)SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
 	if(hibernate_instead_of_shutdown)
-		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"HIBERNATE_PC_AFTER_A_JOB");
+		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
 	else
-		SetText(GetDlgItem(hWindow,IDC_SHUTDOWN),L"SHUTDOWN_PC_AFTER_A_JOB");
+		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
 
 	return 0;
 }

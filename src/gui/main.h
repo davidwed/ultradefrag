@@ -71,6 +71,10 @@
 
 #include "resource.h"
 
+/* default GUI preferences */
+#define DEFAULT_MAP_BLOCK_SIZE  4
+#define DEFAULT_GRID_LINE_WIDTH 1
+
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
 * to make a valid subclassing:
@@ -117,13 +121,15 @@ int init_jobs(void);
 volume_processing_job *get_job(char volume_letter);
 void release_jobs(void);
 
-
-
-#define DEFAULT_MAP_BLOCK_SIZE  4 //84
-#define DEFAULT_GRID_LINE_WIDTH 1
+void RedrawMap(volume_processing_job *job);
+void UpdateStatusBar(udefrag_progress_info *pi);
+void InitProgress(void);
+void ShowProgress(void);
+void HideProgress(void);
+void SetProgress(wchar_t *message, int percentage);
 
 /*
-* VERY IMPORTANT NOTE: (bug #1839755 cause)
+* Note:
 * 
 * + You should not wait for one SendMessage handler completion
 *   from another SendMessage handler. Because it will be a deadlock cause.
@@ -159,44 +165,6 @@ void release_jobs(void);
 
 #define create_thread(func,param,ph) \
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)
-
-void DisplayLastError(char *caption);
-
-void DoJob(udefrag_job_type job_type);
-void stop(void);
-
-/* settings related functions */
-void GetPrefs(void);
-void SavePrefs(void);
-
-void CheckForTheNewVersion(void);
-
-/* i18n related functions */
-void SetText(HWND hWnd, short *key);
-
-/* map manipulation functions */
-void InitMap(void);
-void DeleteMaps();
-
-void RedrawMap(volume_processing_job *job);
-
-/* dialog procedures */
-BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK ConfirmDlgProc(HWND, UINT, WPARAM, LPARAM);
-
-/* status bar procedures */
-BOOL CreateStatusBar();
-void UpdateStatusBar(udefrag_progress_info *pi);
-
-/* progress bar stuff */
-void InitProgress(void);
-void ShowProgress(void);
-void HideProgress(void);
-void SetProgress(wchar_t *message, int percentage);
-
-/* window procedures */
-LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
-LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
 
 #define UNDEFINED_COORD (-10000)
 

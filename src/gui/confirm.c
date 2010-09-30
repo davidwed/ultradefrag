@@ -39,13 +39,13 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		WgxCenterWindow(hWnd);
-		SetText(hWnd,L"PLEASE_CONFIRM");
+		WgxSetText(hWnd,i18n_table,L"PLEASE_CONFIRM");
 		if(hibernate_instead_of_shutdown)
-			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_HIBERNATE_WHEN_DONE");
+			WgxSetText(GetDlgItem(hWnd,IDC_MESSAGE),i18n_table,L"REALLY_HIBERNATE_WHEN_DONE");
 		else
-			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_SHUTDOWN_WHEN_DONE");
-		SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
-		SetText(GetDlgItem(hWnd,IDC_NO_BUTTON), L"NO");
+			WgxSetText(GetDlgItem(hWnd,IDC_MESSAGE),i18n_table,L"REALLY_SHUTDOWN_WHEN_DONE");
+		WgxSetText(GetDlgItem(hWnd,IDC_YES_BUTTON),i18n_table,L"YES");
+		WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
 		/* shutdown will be confirmed by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_YES_BUTTON));
 
@@ -87,19 +87,19 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		SetText(hWnd,L"PLEASE_CONFIRM");
+		WgxSetText(hWnd,i18n_table,L"PLEASE_CONFIRM");
 		if(hibernate_instead_of_shutdown){
 			message = WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATION");
-			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_HIBERNATE_WHEN_DONE");
+			WgxSetText(GetDlgItem(hWnd,IDC_MESSAGE),i18n_table,L"REALLY_HIBERNATE_WHEN_DONE");
 		} else {
 			message = WgxGetResourceString(i18n_table,L"SECONDS_TILL_SHUTDOWN");
-			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_SHUTDOWN_WHEN_DONE");
+			WgxSetText(GetDlgItem(hWnd,IDC_MESSAGE),i18n_table,L"REALLY_SHUTDOWN_WHEN_DONE");
 		}
 		_snwprintf(buffer,sizeof(buffer),L"%u %ls",seconds_for_shutdown_rejection,message);
 		buffer[sizeof(buffer) - 1] = 0;
 		SetWindowTextW(GetDlgItem(hWnd,IDC_DELAY_MSG),buffer);
-		SetText(GetDlgItem(hWnd,IDC_YES_BUTTON),L"YES");
-		SetText(GetDlgItem(hWnd,IDC_NO_BUTTON), L"NO");
+		WgxSetText(GetDlgItem(hWnd,IDC_YES_BUTTON),i18n_table,L"YES");
+		WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
 		/* shutdown will be rejected by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_NO_BUTTON));
 

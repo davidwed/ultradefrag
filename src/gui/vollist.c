@@ -42,6 +42,7 @@ void DestroyImageList(void);
 static void VolListAddItem(int index, volume_info *v);
 static void AddCapacityInformation(int index, volume_info *v);
 static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *job);
+LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
 
 volume_processing_job * get_first_selected_job(void)
 {
