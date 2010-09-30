@@ -25,13 +25,11 @@
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
-extern HFONT hFont;
+extern WGX_FONT wgxFont;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	HWND hChild;
-
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
@@ -39,14 +37,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		WgxSetText(hWnd,i18n_table,L"ABOUT_WIN_TITLE");
 		WgxSetText(GetDlgItem(hWnd,IDC_CREDITS),i18n_table,L"CREDITS");
 		WgxSetText(GetDlgItem(hWnd,IDC_LICENSE),i18n_table,L"LICENSE");
-		if(hFont){
-			(void)SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-			hChild = GetWindow(hWnd,GW_CHILD);
-			while(hChild){
-				(void)SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-				hChild = GetWindow(hChild,GW_HWNDNEXT);
-			}
-		}
+		WgxSetFont(hWnd,&wgxFont);
 		(void)WgxAddAccelerators(hInstance,hWnd,IDR_ACCELERATOR2);
 		return FALSE;
 	case WM_COMMAND:

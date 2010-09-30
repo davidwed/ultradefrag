@@ -47,10 +47,12 @@ static int getint(lua_State *L, char *variable)
 }
 
 /**
- * @brief Retrieves a LOGFONT structure from a file.
- * @param[in] path the path to the configuration file.
- * @param[out] lf pointer to the LOGFONT structure.
+ * @brief Creates a font.
+ * @param[in] wgx_font_path the path to the font definition file.
+ * @param[in,out] pFont pointer to structure receiving created font.
  * @return Boolean value. TRUE indicates success.
+ * @note If font definition cannot be retrieved from the file,
+ * this routine uses default font definition passed through pFont structure.
  * @par File contents example:
 @verbatim
 height = -12
@@ -69,70 +71,145 @@ pitchandfamily = 34
 facename = "Arial Black"
 @endverbatim
  */
-BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
+BOOL __stdcall WgxCreateFont(char *wgx_font_path,PWGX_FONT pFont)
 {
 	lua_State *L;
 	int status;
 	char *string;
+	LOGFONT lf;
+	
+	if(pFont == NULL)
+		return FALSE;
+	
+	/* don't reset lf, it may contain default application's font */
+	pFont->hFont = NULL;
+	
+	if(wgx_font_path == NULL)
+		goto use_default_font;
 
 	L = lua_open();  /* create state */
 	if(L == NULL){
-		WgxDbgPrint("WgxGetLogFontStructureFromFile: cannot initialize Lua library\n");
-		return FALSE;
+		WgxDbgPrint("WgxCreateFont: cannot initialize Lua library\n");
+		goto use_default_font;
 	}
 	
 	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
 	luaL_openlibs(L);  /* open libraries */
 	lua_gc(L, LUA_GCRESTART, 0);
 
-	status = luaL_dofile(L,path);
+	status = luaL_dofile(L,wgx_font_path);
 	if(!status){ /* successful */
-		lf->lfHeight = getint(L,"height");
-		lf->lfWidth = getint(L,"width");
-		lf->lfEscapement = getint(L,"escapement");
-		lf->lfOrientation = getint(L,"orientation");
-		lf->lfWeight = getint(L,"weight");
-		lf->lfItalic = (BYTE)getint(L,"italic");
-		lf->lfUnderline = (BYTE)getint(L,"underline");
-		lf->lfStrikeOut = (BYTE)getint(L,"strikeout");
-		lf->lfCharSet = (BYTE)getint(L,"charset");
-		lf->lfOutPrecision = (BYTE)getint(L,"outprecision");
-		lf->lfClipPrecision = (BYTE)getint(L,"clipprecision");
-		lf->lfQuality = (BYTE)getint(L,"quality");
-		lf->lfPitchAndFamily = (BYTE)getint(L,"pitchandfamily");
+		lf.lfHeight = getint(L,"height");
+		lf.lfWidth = getint(L,"width");
+		lf.lfEscapement = getint(L,"escapement");
+		lf.lfOrientation = getint(L,"orientation");
+		lf.lfWeight = getint(L,"weight");
+		lf.lfItalic = (BYTE)getint(L,"italic");
+		lf.lfUnderline = (BYTE)getint(L,"underline");
+		lf.lfStrikeOut = (BYTE)getint(L,"strikeout");
+		lf.lfCharSet = (BYTE)getint(L,"charset");
+		lf.lfOutPrecision = (BYTE)getint(L,"outprecision");
+		lf.lfClipPrecision = (BYTE)getint(L,"clipprecision");
+		lf.lfQuality = (BYTE)getint(L,"quality");
+		lf.lfPitchAndFamily = (BYTE)getint(L,"pitchandfamily");
 		lua_getglobal(L, "facename");
 		string = (char *)lua_tostring(L, lua_gettop(L));
 		if(string){
-			(void)strncpy(lf->lfFaceName,string,LF_FACESIZE);
-			lf->lfFaceName[LF_FACESIZE - 1] = 0;
+			(void)strncpy(lf.lfFaceName,string,LF_FACESIZE);
+			lf.lfFaceName[LF_FACESIZE - 1] = 0;
+		} else {
+			lf.lfFaceName[0] = 0;
 		}
 		lua_pop(L, 1);
+		lua_close(L);
 	} else {
-		WgxDbgPrint("WgxGetLogFontStructureFromFile: cannot interprete %s\n",path);
+		WgxDbgPrint("WgxCreateFont: cannot interprete %s\n",wgx_font_path);
+		lua_close(L);
+		goto use_default_font;
 	}
-	lua_close(L);
+	
+	pFont->hFont = CreateFontIndirect(&lf);
+	if(pFont->hFont == NULL){
+		WgxDbgPrintLastError("WgxCreateFont: CreateFontIndirect for custom font failed");
+use_default_font:
+		/* try to use default font passed through pFont */
+		pFont->hFont = CreateFontIndirect(&pFont->lf);
+		if(pFont->hFont == NULL){
+			WgxDbgPrintLastError("WgxCreateFont: CreateFontIndirect for default font failed");
+			return FALSE;
+		}
+		return TRUE;
+	}
+	
+	memcpy(&pFont->lf,&lf,sizeof(LOGFONT));
 	return TRUE;
 }
 
 /**
- * @brief Saves a LOGFONT structure to a file.
- * @param[in] path the path to the configuration file.
- * @param[out] lf pointer to the LOGFONT structure.
+ * @brief Sets a font for the window and all its children.
+ * @param[in] hWnd handle to the window.
+ * @param[in] pFont pointer to the font definition structure.
+ */
+void __stdcall WgxSetFont(HWND hWnd, PWGX_FONT pFont)
+{
+	HWND hChild;
+	
+	if(pFont == NULL)
+		return;
+	
+	if(pFont->hFont == NULL)
+		return;
+	
+	(void)SendMessage(hWnd,WM_SETFONT,(WPARAM)pFont->hFont,MAKELPARAM(TRUE,0));
+	hChild = GetWindow(hWnd,GW_CHILD);
+	while(hChild){
+		(void)SendMessage(hChild,WM_SETFONT,(WPARAM)pFont->hFont,MAKELPARAM(TRUE,0));
+		hChild = GetWindow(hChild,GW_HWNDNEXT);
+	}
+
+	/* redraw the main window */
+	(void)InvalidateRect(hWnd,NULL,TRUE);
+	(void)UpdateWindow(hWnd);
+}
+
+/**
+ * @brief Destroys font built by WgxCreateFont.
+ */
+void __stdcall WgxDestroyFont(PWGX_FONT pFont)
+{
+	if(pFont){
+		if(pFont->hFont){
+			(void)DeleteObject(pFont->hFont);
+			pFont->hFont = NULL;
+		}
+	}
+}
+
+/**
+ * @brief Saves a font definition to the file.
+ * @param[in] wgx_font_path the path to the font definition file.
+ * @param[out] pFont pointer to structure to be saved.
  * @return Boolean value. TRUE indicates success.
  * @note This function shows a message box in case when
  * some error has been occured.
  */
-BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
+BOOL __stdcall WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont)
 {
+	LOGFONT *lf;
 	FILE *pf;
 	int result;
 	char err_msg[1024];
+	
+	if(wgx_font_path == NULL || pFont == NULL)
+		return FALSE;
+	
+	lf = &pFont->lf;
 
-	pf = fopen(path,"wt");
+	pf = fopen(wgx_font_path,"wt");
 	if(!pf){
 		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Cannot save font preferences to %s!\n%s",
-			path,_strerror(NULL));
+			wgx_font_path,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
 		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
 		return FALSE;
@@ -172,44 +249,12 @@ BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
 	if(result < 0){
 		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
 			"Cannot write font preferences to %s!\n%s",
-			path,_strerror(NULL));
+			wgx_font_path,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
 		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
 		return FALSE;
 	}
 	return TRUE;
-}
-
-/**
- * @brief Sets a font for the window and all its children.
- * @param[in] hWindow handle to the window.
- * @param[in] lplf pointer to the LOGFONT structure
- * describing the font.
- * @return A handle to the font. NULL indicates failure.
- */
-HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf)
-{
-	HFONT hFont;
-	HWND hChild;
-	
-	hFont = CreateFontIndirect(lplf);
-	if(!hFont){
-		WgxDbgPrintLastError("WgxSetFont failed");
-		return NULL;
-	}
-	
-	(void)SendMessage(hWindow,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-	hChild = GetWindow(hWindow,GW_CHILD);
-	while(hChild){
-		(void)SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-		hChild = GetWindow(hChild,GW_HWNDNEXT);
-	}
-
-	/* redraw the main window */
-	(void)InvalidateRect(hWindow,NULL,TRUE);
-	(void)UpdateWindow(hWindow);
-	
-	return hFont;
 }
 
 /** @} */

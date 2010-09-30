@@ -46,7 +46,9 @@ int init_jobs(void)
 	event_name[63] = 0;
 	hMapEvent = CreateEvent(NULL,FALSE,TRUE,event_name);
 	if(hMapEvent == NULL){
-		// TODO
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"UltraDefrag: cannot create %s event",
+			event_name);
 		return (-1);
 	}
 	

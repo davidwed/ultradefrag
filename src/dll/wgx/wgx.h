@@ -53,6 +53,11 @@ typedef struct _WGX_I18N_RESOURCE_ENTRY {
 	short *LoadedString;
 } WGX_I18N_RESOURCE_ENTRY, *PWGX_I18N_RESOURCE_ENTRY;
 
+typedef struct _WGX_FONT {
+	LOGFONT lf;
+	HFONT hFont;
+} WGX_FONT, *PWGX_FONT;
+
 /* wgx routines prototypes */
 BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
 
@@ -74,9 +79,10 @@ LRESULT __stdcall WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM w
 BOOL __stdcall WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
                                LPCWSTR lpParameters,LPCWSTR lpDirectory,INT nShowCmd);
 
-BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf);
-BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf);
-HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf);
+BOOL __stdcall WgxCreateFont(char *wgx_font_path,PWGX_FONT pFont);
+void __stdcall WgxSetFont(HWND hWnd, PWGX_FONT pFont);
+void __stdcall WgxDestroyFont(PWGX_FONT pFont);
+BOOL __stdcall WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont);
 
 BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
 void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);

@@ -55,35 +55,14 @@ HWND hWindow;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 LOGFONT lf;
-HFONT hFont = NULL;
+WGX_FONT wgxFont = {{0},0};
 
 /* Function prototypes */
 BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void OpenWebPage(char *page);
 BOOL GetBootExecuteRegistrationStatus(void);
-void InitFont(void);
-void SaveFontSettings(void);
-
-void DisplayLastError(char *caption)
-{
-	LPVOID lpMsgBuf;
-	char buffer[128];
-	DWORD error = GetLastError();
-
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,0,NULL)){
-				(void)_snprintf(buffer,sizeof(buffer),
-						"Error code = 0x%x",(UINT)error);
-				buffer[sizeof(buffer) - 1] = 0;
-				MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
-				return;
-	} else {
-		MessageBoxA(NULL,(LPCTSTR)lpMsgBuf,caption,MB_OK | MB_ICONHAND);
-		LocalFree(lpMsgBuf);
-	}
-}
+BOOL InitFont(void);
+void CenterWindow(void);
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
@@ -96,10 +75,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	*/
 	InitCommonControls();
 	if(DialogBox(hInstance, MAKEINTRESOURCE(IDD_CONFIG),NULL,(DLGPROC)DlgProc) == (-1)){
-		DisplayLastError("Cannot create the main window!");
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window");
 		return 1;
 	}
-	if(hFont) (void)DeleteObject(hFont);
+	WgxDestroyFont(&wgxFont);
 	WgxDestroyResourceTable(i18n_table);
 	return 0;
 }
@@ -110,7 +89,6 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	short path[MAX_PATH];
 	LRESULT check_state;
 	CHOOSEFONT cf;
-	HFONT hNewFont;
 
 	switch(msg){
 	case WM_INITDIALOG:
@@ -129,21 +107,21 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		WgxDisableWindows(hWindow,IDC_ENABLE,IDC_BOOT_SCRIPT,0);
 		#endif
 		InitFont();
+		CenterWindow();
 		break;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_FONT:
 			memset(&cf,0,sizeof(cf)); /* FIXME: may fail on x64? */
 			cf.lStructSize = sizeof(CHOOSEFONT);
-			cf.lpLogFont = &lf;
+			cf.lpLogFont = &wgxFont.lf;
 			cf.Flags = CF_SCREENFONTS | CF_FORCEFONTEXIST | CF_INITTOLOGFONTSTRUCT;
 			cf.hwndOwner = hWindow;
 			if(ChooseFont(&cf)){
-				hNewFont = WgxSetFont(hWindow,&lf);
-				if(hNewFont){
-					if(hFont) (void)DeleteObject(hFont);
-					hFont = hNewFont;
-					SaveFontSettings();
+				WgxDestroyFont(&wgxFont);
+				if(WgxCreateFont("",&wgxFont)){
+					WgxSetFont(hWindow,&wgxFont);
+					WgxSaveFont(".\\options\\font.lua",&wgxFont);
 				}
 			}
 			break;
@@ -160,7 +138,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		case IDC_ENABLE:
 			#ifndef UDEFRAG_PORTABLE
 			if(!GetWindowsDirectoryW(path,MAX_PATH)){
-				DisplayLastError("Cannot retrieve the Windows directory path!");
+				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot retrieve the Windows directory path");
 			} else {
 				check_state = SendMessage(GetDlgItem(hWindow,IDC_ENABLE),BM_GETCHECK,0,0);
 				if(check_state == BST_CHECKED)
@@ -173,7 +151,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_BOOT_SCRIPT:
 			if(!GetWindowsDirectoryW(path,MAX_PATH)){
-				DisplayLastError("Cannot retrieve the Windows directory path!");
+				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot retrieve the Windows directory path");
 			} else {
 				(void)wcscat(path,L"\\System32\\ud-boot-time.cmd");
 				(void)WgxShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
@@ -229,7 +207,7 @@ BOOL GetBootExecuteRegistrationStatus(void)
 			0,
 			KEY_QUERY_VALUE,
 			&hKey) != ERROR_SUCCESS){
-		DisplayLastError("Cannot open SMSS key!");
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot open SMSS key");
 		return FALSE;
 	}
 
@@ -246,7 +224,7 @@ BOOL GetBootExecuteRegistrationStatus(void)
 	type = REG_MULTI_SZ;
 	if(RegQueryValueEx(hKey,"BootExecute",NULL,&type,
 			data,&size) != ERROR_SUCCESS){
-		DisplayLastError("Cannot query BootExecute value!");
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot query BootExecute value");
 		(void)RegCloseKey(hKey);
 		free(data);
 		return FALSE;
@@ -281,31 +259,27 @@ static int getint(lua_State *L, char *variable)
 	return ret;
 }
 
-void InitFont(void)
+BOOL InitFont(void)
+{
+	BOOL result;
+	
+	memset(&wgxFont.lf,0,sizeof(LOGFONT));
+	/* default font should be Courier New 9pt */
+	(void)strcpy(wgxFont.lf.lfFaceName,"Courier New");
+	wgxFont.lf.lfHeight = -12;
+	
+	result = WgxCreateFont(".\\options\\font.lua",&wgxFont);
+	WgxSetFont(hWindow,&wgxFont);
+	return result;
+}
+
+void CenterWindow(void)
 {
 	lua_State *L;
 	int status;
-	HFONT hNewFont;
 	int x,y,width,height;
 	short *cmdline;
 	RECT rc;
-
-	/* initialize LOGFONT structure */
-	memset(&lf,0,sizeof(LOGFONT)); /* FIXME: may fail on x64? */
-	/* default font should be Courier New 9pt */
-	(void)strcpy(lf.lfFaceName,"Courier New");
-	lf.lfHeight = -12;
-	
-	/* load saved font settings */
-	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua",&lf))
-		return;
-	
-	/* apply font to application's window */
-	hNewFont = WgxSetFont(hWindow,&lf);
-	if(hNewFont){
-		if(hFont) (void)DeleteObject(hFont);
-		hFont = hNewFont;
-	}
 
 	/* set main window position if requested */
 	cmdline = GetCommandLineW();
@@ -336,9 +310,4 @@ void InitFont(void)
 		}
 		lua_close(L);
 	}
-}
-
-void SaveFontSettings(void)
-{
-	(void)WgxSaveLogFontStructureToFile(".\\options\\font.lua",&lf);
 }

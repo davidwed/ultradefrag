@@ -19,9 +19,10 @@ EXPORTS
 
 	WgxShellExecuteW@24
 
-	WgxGetLogFontStructureFromFile@8
-	WgxSaveLogFontStructureToFile@8
+	WgxCreateFont@8
 	WgxSetFont@8
+	WgxDestroyFont@4
+	WgxSaveFont@8
 
 	IncreaseGoogleAnalyticsCounter@12
 	IncreaseGoogleAnalyticsCounterAsynch@12

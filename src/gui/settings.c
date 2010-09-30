@@ -398,26 +398,3 @@ void SavePrefs(void)
 		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
 	}
 }
-
-void InitFont(void)
-{
-	LOGFONT lf;
-	HFONT hNewFont;
-
-	/* initialize LOGFONT structure */
-	memset(&lf,0,sizeof(LOGFONT)); /* FIXME: may fail on x64? */
-	/* default font should be Courier New 9pt */
-	(void)strcpy(lf.lfFaceName,"Courier New");
-	lf.lfHeight = DPI(-12);
-	
-	/* load saved font settings */
-	if(!WgxGetLogFontStructureFromFile(".\\options\\font.lua",&lf))
-		return;
-
-	/* apply font to application's window */
-	hNewFont = WgxSetFont(hWindow,&lf);
-	if(hNewFont){
-		if(hFont) (void)DeleteObject(hFont);
-		hFont = hNewFont;
-	}
-}

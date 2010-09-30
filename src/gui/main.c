@@ -47,7 +47,7 @@ HINSTANCE hInstance;
 HWND hWindow = NULL;
 HWND hMap;
 signed int delta_h = 0;
-HFONT hFont = NULL;
+WGX_FONT wgxFont = {{0},0};
 extern HWND hStatus;
 extern HWND hList;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
@@ -155,7 +155,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	release_jobs();
 	FreeVolListResources();
 	DeleteMaps();
-	if(hFont) (void)DeleteObject(hFont);
+	WgxDestroyFont(&wgxFont);
 	/* save settings */
 	SavePrefs();
 	DeleteEnvironmentVariables();
@@ -248,7 +248,8 @@ void InitMainWindow(void)
 	
 	CreateStatusBar();
 
-	InitFont(); /* applies to the status bar too */
+	InitFont();
+	WgxSetFont(hWindow,&wgxFont);
 
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
@@ -725,7 +726,12 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	/* reinitialize GUI */
 	GetPrefs();
 	stop();
+	
+	WgxDestroyFont(&wgxFont);
 	InitFont();
+	WgxSetFont(hWindow,&wgxFont);
+	WgxSetFont(hStatus,&wgxFont);
+	
 	(void)SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
 	if(hibernate_instead_of_shutdown)
 		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
@@ -747,4 +753,13 @@ void CallGUIConfigurator(void)
 	} else {
 		CloseHandle(h);
 	}
+}
+
+void InitFont(void)
+{
+	memset(&wgxFont.lf,0,sizeof(LOGFONT));
+	/* default font should be Courier New 9pt */
+	(void)strcpy(wgxFont.lf.lfFaceName,"Courier New");
+	wgxFont.lf.lfHeight = DPI(-12);
+	WgxCreateFont(".\\options\\font.lua",&wgxFont);
 }

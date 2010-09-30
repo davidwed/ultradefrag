@@ -43,8 +43,3 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 
 	{0,                 NULL,                   NULL,                      NULL}
 };
-
-void SetText(HWND hWnd, short *key)
-{
-	(void)SetWindowTextW(hWnd,WgxGetResourceString(i18n_table,key));
-}
