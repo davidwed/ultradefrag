@@ -15,6 +15,7 @@ HISTORY
       by obvious ones; as a side effect we have a noticeable speedup
       of the volume analysis
     - filter pattern length limitation (4096 characters) was removed
+    - added hints about using CHKDSK to get a consitent drive
     - the following translations were added:
 
       Estonian, Vietnamese(VI), Burmese(Padauk), Spanish(ES)
