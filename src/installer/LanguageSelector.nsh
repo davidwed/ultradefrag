@@ -66,7 +66,9 @@ ReserveFile "lang.ini"
         SetRegView 64
         WriteRegStr HKLM "Software\UltraDefrag" "Language" $R0
         SetRegView 32
-        DeleteRegKey HKLM "Software\UltraDefrag"
+        ${If} ${RunningX64}
+            DeleteRegKey HKLM "Software\UltraDefrag"
+        ${EndIf}
     ${EndUnless}
     
     pop $R0
