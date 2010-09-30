@@ -84,9 +84,10 @@ extraResourceOptions=
 2=wgx.c
 3=i18n.c
 4=misc.c
-5=config.c
-6=web-analytics.c
-7=dbg.c
+5=web-analytics.c
+6=dbg.c
+7=font.c
+8=shell.c
 [Header]
 1=wgx.h
 [Resource]

@@ -110,21 +110,33 @@ BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_f
 	short *line_buffer;
 	
 	/* parameters validation */
-	if(!table || !lng_file_path) return FALSE;
+	if(table == NULL || lng_file_path == NULL)
+		return FALSE;
 
 	line_buffer = malloc(8192 * sizeof(short));
-	if(!line_buffer) return FALSE;
+	if(line_buffer == NULL){
+		WgxDbgPrint("WgxBuildResourceTable: cannot allocate %u bytes of memory\n",
+			8192 * sizeof(short));
+		return FALSE;
+	}
 	
 	/* open lng file */
 	f = _wfopen(lng_file_path,L"rb"); /* binary mode required! */
-	if(!f){ free(line_buffer); return FALSE; }
+	if(f == NULL){
+		WgxDbgPrint("WgxBuildResourceTable: cannot open %ws: %s\n",
+			lng_file_path,_strerror(NULL));
+		free(line_buffer);
+		return FALSE;
+	}
 
 	/* read lines and applies them to specified table */
 	while(fgetws(line_buffer,8192,f)){
 		line_buffer[8192 - 1] = 0;
 		AddResourceEntry(table,line_buffer);
 	}
-	fclose(f); free(line_buffer);
+
+	fclose(f);
+	free(line_buffer);
 	return TRUE;
 }
 

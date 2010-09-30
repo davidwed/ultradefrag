@@ -35,8 +35,6 @@
 #include "../../lua5.1/lauxlib.h"
 #include "../../lua5.1/lualib.h"
 
-char err_msg[1024];
-
 /* returns 0 if variable is not defined */
 static int getint(lua_State *L, char *variable)
 {
@@ -78,7 +76,11 @@ BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
 	char *string;
 
 	L = lua_open();  /* create state */
-	if(!L) return FALSE;
+	if(L == NULL){
+		WgxDbgPrint("WgxGetLogFontStructureFromFile: cannot initialize Lua library\n");
+		return FALSE;
+	}
+	
 	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
 	luaL_openlibs(L);  /* open libraries */
 	lua_gc(L, LUA_GCRESTART, 0);
@@ -105,6 +107,8 @@ BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
 			lf->lfFaceName[LF_FACESIZE - 1] = 0;
 		}
 		lua_pop(L, 1);
+	} else {
+		WgxDbgPrint("WgxGetLogFontStructureFromFile: cannot interprete %s\n",path);
 	}
 	lua_close(L);
 	return TRUE;
@@ -117,17 +121,17 @@ BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf)
  * @return Boolean value. TRUE indicates success.
  * @note This function shows a message box in case when
  * some error has been occured.
- * @bug This function is not thread safe.
  */
 BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
 {
 	FILE *pf;
 	int result;
+	char err_msg[1024];
 
 	pf = fopen(path,"wt");
 	if(!pf){
 		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
-			"Can't save font preferences to %s!\n%s",
+			"Cannot save font preferences to %s!\n%s",
 			path,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
 		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
@@ -167,7 +171,7 @@ BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf)
 	fclose(pf);
 	if(result < 0){
 		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
-			"Can't write gui preferences to %s!\n%s",
+			"Cannot write font preferences to %s!\n%s",
 			path,_strerror(NULL));
 		err_msg[sizeof(err_msg) - 1] = 0;
 		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
@@ -189,7 +193,10 @@ HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf)
 	HWND hChild;
 	
 	hFont = CreateFontIndirect(lplf);
-	if(!hFont) return NULL;
+	if(!hFont){
+		WgxDbgPrintLastError("WgxSetFont failed");
+		return NULL;
+	}
 	
 	(void)SendMessage(hWindow,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
 	hChild = GetWindow(hWindow,GW_CHILD);

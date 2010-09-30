@@ -58,13 +58,11 @@ static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 	char path[MAX_PATH + 1];
 	
 	if(url == NULL){
-		OutputDebugString("SendWebAnalyticsRequest: invalid URL (NULL)!\n");
+		WgxDbgPrint("SendWebAnalyticsRequest: URL = NULL\n");
 		goto fail;
 	}
 	
-	OutputDebugString("SendWebAnalyticsRequest: URL = ");
-	OutputDebugString(url);
-	OutputDebugString("\n");
+	WgxDbgPrint("SendWebAnalyticsRequest: URL = %s\n",url);
 	
 	/* load urlmon.dll library */
 	hUrlmonDLL = LoadLibrary("urlmon.dll");
@@ -84,9 +82,10 @@ static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 	result = pURLDownloadToCacheFile(NULL,url,path,MAX_PATH,0,NULL);
 	path[MAX_PATH] = 0;
 	if(result != S_OK){
-		if(result == E_OUTOFMEMORY) OutputDebugString("Not enough memory for SendWebAnalyticsRequest!");
-		else OutputDebugString("SendWebAnalyticsRequest: URLDownloadToCacheFile failed!");
-		OutputDebugString("\n");
+		if(result == E_OUTOFMEMORY)
+			WgxDbgPrint("SendWebAnalyticsRequest: not enough memory\n");
+		else
+			WgxDbgPrint("SendWebAnalyticsRequest: URLDownloadToCacheFile failed\n");
 		goto fail;
 	}
 	
@@ -122,7 +121,8 @@ static char * __stdcall build_ga_request(char *hostname,char *path,char *account
 	
 	ga_request = malloc(MAX_GA_REQUEST_LENGTH);
 	if(ga_request == NULL){
-		OutputDebugString("Cannot allocate memory for build_ga_request!\n");
+		WgxDbgPrint("build_ga_request: cannot allocate %u bytes of memory\n",
+			MAX_GA_REQUEST_LENGTH);
 		return NULL;
 	}
 	
@@ -220,7 +220,7 @@ void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,ch
 	
 	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)SendWebAnalyticsRequestThreadProc,(void *)url,0,&id);
 	if(h == NULL){
-		WgxDbgPrintLastError("Cannot create thread for SendWebAnalyticsRequestAsynch");
+		WgxDbgPrintLastError("SendWebAnalyticsRequestAsynch: cannot create thread");
 		free(url);
 		return;
 	}
