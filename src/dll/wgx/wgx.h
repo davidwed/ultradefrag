@@ -64,14 +64,17 @@ void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table);
 
 void __cdecl WgxEnableWindows(HANDLE hMainWindow, ...);
 void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...);
-HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf);
 void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID);
 void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height);
+WNDPROC __stdcall WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc);
+LRESULT __stdcall WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam);
+
 BOOL __stdcall WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
                                LPCWSTR lpParameters,LPCWSTR lpDirectory,INT nShowCmd);
 
 BOOL __stdcall WgxGetLogFontStructureFromFile(char *path,LOGFONT *lf);
 BOOL __stdcall WgxSaveLogFontStructureToFile(char *path,LOGFONT *lf);
+HFONT __stdcall WgxSetFont(HWND hWindow,LPLOGFONT lplf);
 
 BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
 void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);

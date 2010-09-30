@@ -10,13 +10,16 @@ EXPORTS
 
 	WgxEnableWindows
 	WgxDisableWindows
-	WgxSetFont
 	WgxSetIcon
 	WgxCheckWindowCoordinates
+	WgxSafeSubclassWindow
+	WgxSafeCallWndProc
+
 	WgxShellExecuteW
 
 	WgxGetLogFontStructureFromFile
 	WgxSaveLogFontStructureToFile
+	WgxSetFont
 
 	IncreaseGoogleAnalyticsCounter
 	IncreaseGoogleAnalyticsCounterAsynch

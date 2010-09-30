@@ -108,4 +108,30 @@ void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_heigh
 	if(lprc->top >= (cy - min_height)) lprc->top = cy - min_height;
 }
 
+/**
+ * @brief Safe equivalent of SetWindowLongPtr(GWLP_WNDPROC).
+ * @details Works safe regardless of whether the window
+ * is unicode or not.
+ */
+WNDPROC __stdcall WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc)
+{
+    if(IsWindowUnicode(hwnd))
+        return (WNDPROC)SetWindowLongPtrW(hwnd,GWLP_WNDPROC,(LONG_PTR)NewProc);
+    else
+        return (WNDPROC)SetWindowLongPtrA(hwnd,GWLP_WNDPROC,(LONG_PTR)NewProc);
+}
+
+/**
+ * @brief Safe equivalent of CallWindowProc.
+ * @details Works safe regardless of whether
+ * the window is unicode or not.
+ */
+LRESULT __stdcall WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
+{
+    if(IsWindowUnicode(hwnd))
+        return CallWindowProcW(OldProc,hwnd,msg,wParam,lParam);
+    else
+        return CallWindowProcA(OldProc,hwnd,msg,wParam,lParam);
+}
+
 /** @} */
