@@ -161,6 +161,14 @@ void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow
 }
 
 /**
+ * @brief Applies a 18n table to individual GUI control.
+ */
+void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, short *key)
+{
+	(void)SetWindowTextW(hWnd,WgxGetResourceString(table,key));
+}
+
+/**
  * @brief Retrieves a localization string.
  * @param[in] table pointer to the i18n table.
  * @param[in] key pointer to the key string.

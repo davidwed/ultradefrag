@@ -5,6 +5,7 @@ EXPORTS
 
 	WgxBuildResourceTable@8
 	WgxApplyResourceTable@8
+	WgxSetText@12
 	WgxGetResourceString@8
 	WgxDestroyResourceTable@4
 
@@ -12,6 +13,7 @@ EXPORTS
 	WgxDisableWindows
 	WgxSetIcon@12
 	WgxCheckWindowCoordinates@12
+	WgxCenterWindow@4
 	WgxSafeSubclassWindow@8
 	WgxSafeCallWndProc@20
 

@@ -33,7 +33,7 @@ HISTORY
       winx_toupper, winx_tolower functions added to zenwinx library
     - udefrag_get_volume_information function added to udefrag library
     - WgxDbgPrint, WgxDbgPrintLastError, WgxDisplayLastError,
-      WgxSafeSubclassWindow, WgxSafeCallWndProc
+      WgxSafeSubclassWindow, WgxSafeCallWndProc, WgxCenterWindow, WgxSetText
       calls added to wgx library
 
                                     ***

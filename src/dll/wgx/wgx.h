@@ -59,6 +59,7 @@ BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId)
 /* lines in language files are limited by 8191 characters, which is more than enough */
 BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_file_path);
 void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow);
+void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, short *key);
 short * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,short *key);
 void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table);
 
@@ -66,6 +67,7 @@ void __cdecl WgxEnableWindows(HANDLE hMainWindow, ...);
 void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...);
 void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID);
 void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height);
+void __stdcall WgxCenterWindow(HWND hwnd);
 WNDPROC __stdcall WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc);
 LRESULT __stdcall WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam);
 
