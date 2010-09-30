@@ -19,7 +19,7 @@
 
 /**
  * @file i18n.c
- * @brief Internationalization code.
+ * @brief Internationalization.
  * @addtogroup Internationalization
  * @{
  */

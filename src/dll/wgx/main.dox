@@ -32,7 +32,7 @@
  */
 
 /**
- * @defgroup Accelerators GUI Accelerators
+ * @defgroup Accelerators Accelerators
  * @{
  */
 /** @} */
@@ -62,7 +62,13 @@
 /** @} */
 
 /**
- * @defgroup WebAnalytics Web Analytics API
+ * @defgroup Shell Windows Shell
+ * @{
+ */
+/** @} */
+
+/**
+ * @defgroup WebAnalytics Web Analytics
  * @{
  */
 /** @} */

@@ -19,7 +19,7 @@
 
 /**
  * @file web-analytics.c
- * @brief Web Analytics API.
+ * @brief Web Analytics.
  * @addtogroup WebAnalytics
  * @{
  */
@@ -33,7 +33,6 @@
 #include "wgx.h"
 
 #define MAX_GA_REQUEST_LENGTH 1024
-char ga_request[MAX_GA_REQUEST_LENGTH];
 
 typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 	/* LPUNKNOWN */ void *lpUnkcaller,
@@ -43,22 +42,24 @@ typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 	DWORD dwReserved,
 	/*IBindStatusCallback*/ void *pBSC
 );
-URLMON_PROCEDURE pURLDownloadToCacheFile;
 
-void DbgDisplayLastError(char *caption);
+/* forward declaration */
 DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter);
 
 /**
+ * @brief Sends web analytics request.
+ * @note Passed url must be allocated by malloc.
  */
 static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 {
+	URLMON_PROCEDURE pURLDownloadToCacheFile;
 	HMODULE hUrlmonDLL = NULL;
 	HRESULT result;
 	char path[MAX_PATH + 1];
 	
 	if(url == NULL){
 		OutputDebugString("SendWebAnalyticsRequest: invalid URL (NULL)!\n");
-		return FALSE;
+		goto fail;
 	}
 	
 	OutputDebugString("SendWebAnalyticsRequest: URL = ");
@@ -68,15 +69,15 @@ static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 	/* load urlmon.dll library */
 	hUrlmonDLL = LoadLibrary("urlmon.dll");
 	if(hUrlmonDLL == NULL){
-		DbgDisplayLastError("SendWebAnalyticsRequest: LoadLibrary(urlmon.dll) failed! ");
-		return FALSE;
+		WgxDbgPrintLastError("SendWebAnalyticsRequest: LoadLibrary(urlmon.dll) failed");
+		goto fail;
 	}
 	
 	/* get an address of procedure downloading a file */
 	pURLDownloadToCacheFile = (URLMON_PROCEDURE)GetProcAddress(hUrlmonDLL,"URLDownloadToCacheFileA");
 	if(pURLDownloadToCacheFile == NULL){
-		DbgDisplayLastError("SendWebAnalyticsRequest: URLDownloadToCacheFile not found in urlmon.dll! ");
-		return FALSE;
+		WgxDbgPrintLastError("SendWebAnalyticsRequest: URLDownloadToCacheFile not found in urlmon.dll");
+		goto fail;
 	}
 	
 	/* download a file */
@@ -86,12 +87,19 @@ static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 		if(result == E_OUTOFMEMORY) OutputDebugString("Not enough memory for SendWebAnalyticsRequest!");
 		else OutputDebugString("SendWebAnalyticsRequest: URLDownloadToCacheFile failed!");
 		OutputDebugString("\n");
-		return FALSE;
+		goto fail;
 	}
 	
 	/* remove cached data, otherwise it may not be loaded next time */
 	(void)remove(path);
+	
+	/* free previously allocated url */
+	free(url);
 	return TRUE;
+	
+fail:
+	free(url);
+	return FALSE;
 }
 
 /**
@@ -103,44 +111,6 @@ DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter)
 }
 
 /**
- */
-static void __stdcall SendWebAnalyticsRequestAsynch(char *url)
-{
-	HANDLE h;
-	DWORD id;
-	
-	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)SendWebAnalyticsRequestThreadProc,(void *)url,0,&id);
-	if(h == NULL)
-		DbgDisplayLastError("Cannot create thread for SendWebAnalyticsRequestAsynch!" );
-	if(h) CloseHandle(h);
-}
-
-/**
- */
-void DbgDisplayLastError(char *caption)
-{
-	LPVOID lpMsgBuf;
-	char buffer[128];
-	DWORD error = GetLastError();
-
-	OutputDebugString(caption);
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,0,NULL)){
-				(void)_snprintf(buffer,sizeof(buffer),
-						"Error code = 0x%x",(UINT)error);
-				buffer[sizeof(buffer) - 1] = 0;
-				OutputDebugString(buffer);
-				return;
-	} else {
-		OutputDebugString((LPCTSTR)lpMsgBuf);
-		LocalFree(lpMsgBuf);
-	}
-	OutputDebugString("\n");
-}
-
-/**
  * @note Based on http://www.vdgraaf.info/google-analytics-without-javascript.html
  * and http://code.google.com/apis/analytics/docs/tracking/gaTrackingTroubleshooting.html
  */
@@ -148,6 +118,13 @@ static char * __stdcall build_ga_request(char *hostname,char *path,char *account
 {
 	int utmn, utmhid, cookie, random;
 	__int64 today;
+	char *ga_request;
+	
+	ga_request = malloc(MAX_GA_REQUEST_LENGTH);
+	if(ga_request == NULL){
+		OutputDebugString("Cannot allocate memory for build_ga_request!\n");
+		return NULL;
+	}
 	
 	srand((unsigned int)time(NULL));
 	utmn = (rand() << 16) + rand();
@@ -217,7 +194,13 @@ static char * __stdcall build_ga_request(char *hostname,char *path,char *account
  */
 BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account)
 {
-	return SendWebAnalyticsRequest(build_ga_request(hostname,path,account));
+	char *url;
+	
+	url = build_ga_request(hostname,path,account);
+	if(url == NULL)
+		return FALSE;
+	
+	return SendWebAnalyticsRequest(url);
 }
 
 /**
@@ -227,7 +210,22 @@ BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *ac
  */
 void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account)
 {
-	SendWebAnalyticsRequestAsynch(build_ga_request(hostname,path,account));
+	char *url;
+	HANDLE h;
+	DWORD id;
+	
+	url = build_ga_request(hostname,path,account);
+	if(url == NULL)
+		return;
+	
+	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)SendWebAnalyticsRequestThreadProc,(void *)url,0,&id);
+	if(h == NULL){
+		WgxDbgPrintLastError("Cannot create thread for SendWebAnalyticsRequestAsynch");
+		free(url);
+		return;
+	}
+	
+	CloseHandle(h);
 }
 
 /** @} */

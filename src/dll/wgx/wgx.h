@@ -26,7 +26,7 @@
 #ifndef _WGX_H_
 #define _WGX_H_
 
-/* -------- Definitions missing on several development systems. -------- */
+/* definitions missing on several development systems */
 #ifndef USE_WINDDK
 #ifndef SetWindowLongPtr
 #define SetWindowLongPtr SetWindowLong
@@ -45,8 +45,7 @@
 #define LR_VGACOLOR         0x0080
 #endif
 
-/* -------- WGX structures. -------- */
-
+/* wgx structures */
 typedef struct _WGX_I18N_RESOURCE_ENTRY {
 	int ControlID;
 	short *Key;
@@ -54,9 +53,10 @@ typedef struct _WGX_I18N_RESOURCE_ENTRY {
 	short *LoadedString;
 } WGX_I18N_RESOURCE_ENTRY, *PWGX_I18N_RESOURCE_ENTRY;
 
-/* -------- Exported functions prototypes. -------- */
+/* wgx routines prototypes */
 BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
 
+/* lines in language files are limited by 8191 characters, which is more than enough */
 BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_file_path);
 void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow);
 short * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,short *key);

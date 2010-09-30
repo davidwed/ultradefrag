@@ -60,6 +60,7 @@ copy /Y .\obj\share\*.c .\obj\console\
 rem we cannot link directly to wgx.dll, because it depends on Lua missing in Micro Edition
 copy /Y .\dll\wgx\web-analytics.c .\obj\console\
 copy /Y .\dll\wgx\wgx.h .\obj\console\
+copy /Y .\dll\wgx\dbg.c .\obj\console\
 
 rem xcopy /I /Y /Q /S source destination
 

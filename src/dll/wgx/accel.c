@@ -19,7 +19,7 @@
 
 /**
  * @file accel.c
- * @brief GUI accelerators code.
+ * @brief Accelerators.
  * @addtogroup Accelerators
  * @{
  */
@@ -35,6 +35,7 @@
 
 #include "wgx.h"
 
+/* 1024 child windows are more than enough for any serious application */
 #define WIN_ARRAY_SIZE 1024
 
 typedef struct _CHILD_WINDOW {
