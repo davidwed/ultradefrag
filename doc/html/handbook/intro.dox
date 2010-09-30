@@ -82,6 +82,17 @@
  * was not reliable.
  *
  * <h1>Tips and tricks</h1>
+ * Freshly used drives can be defragmented immediately, any drive,
+ * which has been in use for a long time without maintenance, should
+ * be checked for consistency first.
+ * <dl>
+ * <dt>CHKDSK {Drive:} /F /V</dt>
+ * <dd>this checks the drive and repairs it if needed</dd>
+ * <dt>CHKDSK {Drive:} /R /F /V</dt>
+ * <dd>this checks the drive, repairs it and collects lost clusters
+ * if needed (takes quite long, but is the safest)</dd>
+ * </dl>
+ *
  * The use of disk defragmentation is not recommended on
  * <a href="http://en.wikipedia.org/wiki/Flash_memory">flash memory</a>
  * or <a href="http://en.wikipedia.org/wiki/Solid-state_drive">solid-state drives</a>
