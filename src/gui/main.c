@@ -165,7 +165,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	}
 	
 	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
-		DisplayLastError("Cannot create the main window!");
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot create the main window!");
 		DeleteEnvironmentVariables();
 		release_jobs();
 		return 3;

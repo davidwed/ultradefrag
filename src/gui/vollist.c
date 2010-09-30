@@ -31,8 +31,7 @@ extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern volume_processing_job *current_job;
 
 HWND hList;
-WNDPROC OldListProc;
-BOOL isListUnicode = FALSE;
+WNDPROC OldListWndProc;
 HIMAGELIST hImgList;
 int user_defined_column_widths[] = {0,0,0,0,0};
 
@@ -95,14 +94,7 @@ void InitVolList(void)
 	lvc.pszText = WgxGetResourceString(i18n_table,L"PERCENT");
 	(void)SendMessage(hList,LVM_INSERTCOLUMNW,4,(LRESULT)&lvc);
 
-	/* subclassing */
-	isListUnicode = IsWindowUnicode(hList);
-	if(isListUnicode)
-		OldListProc = (WNDPROC)SetWindowLongPtrW(hList,GWLP_WNDPROC,
-			(LONG_PTR)ListWndProc);
-	else
-		OldListProc = (WNDPROC)SetWindowLongPtr(hList,GWLP_WNDPROC,
-			(LONG_PTR)ListWndProc);
+	OldListWndProc = WgxSafeSubclassWindow(hList,ListWndProc);
 	(void)SendMessage(hList,LVM_SETBKCOLOR,0,RGB(255,255,255));
 	InitImageList();
 }
@@ -128,11 +120,7 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		(void)UpdateWindow(hList);
 		break;
 	}
-
-	if(isListUnicode)
-		return CallWindowProcW(OldListProc,hWnd,iMsg,wParam,lParam);
-	else
-		return CallWindowProc(OldListProc,hWnd,iMsg,wParam,lParam);
+	return WgxSafeCallWndProc(OldListWndProc,hWnd,iMsg,wParam,lParam);
 }
 
 int ResizeVolList(int x, int y, int width, int height)

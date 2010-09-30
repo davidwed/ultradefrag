@@ -25,30 +25,16 @@
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
-extern RECT win_rc;
 extern HFONT hFont;
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	HWND hChild;
-	RECT rc;
 
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		/* WgxCenterWindow(HWND hWindow,HWND hParent); */
-		/* WgxCenterWindowRect(LPRECT WinRc,LPRECT ParentRc); */
-		if(GetWindowRect(hWnd,&rc)){
-			if((win_rc.right - win_rc.left) < (rc.right - rc.left) || 
-			  (win_rc.bottom - win_rc.top) < (rc.bottom - rc.top))
-				(void)SetWindowPos(hWnd,0,win_rc.left + 98,win_rc.top + 140,0,0,SWP_NOSIZE);
-			else
-				(void)SetWindowPos(hWnd,0,
-					win_rc.left + ((win_rc.right - win_rc.left) - (rc.right - rc.left)) / 2,
-					win_rc.top + ((win_rc.bottom - win_rc.top) - (rc.bottom - rc.top)) / 2 + 5,
-					0,0,SWP_NOSIZE
-				);
-		}
+		WgxCenterWindow(hWnd);
 		SetText(hWnd,L"ABOUT_WIN_TITLE");
 		SetText(GetDlgItem(hWnd,IDC_CREDITS),L"CREDITS");
 		SetText(GetDlgItem(hWnd,IDC_LICENSE),L"LICENSE");

@@ -26,7 +26,6 @@
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
-extern RECT win_rc;
 extern HFONT hFont;
 extern int hibernate_instead_of_shutdown;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
@@ -35,24 +34,11 @@ extern int seconds_for_shutdown_rejection;
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 //	HWND hChild;
-	RECT rc;
 
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		/* WgxCenterWindow(HWND hWindow,HWND hParent); */
-		/* WgxCenterWindowRect(LPRECT WinRc,LPRECT ParentRc); */
-		if(GetWindowRect(hWnd,&rc)){
-			if((win_rc.right - win_rc.left) < (rc.right - rc.left) || 
-			  (win_rc.bottom - win_rc.top) < (rc.bottom - rc.top))
-				(void)SetWindowPos(hWnd,0,win_rc.left + 158,win_rc.top + 160,0,0,SWP_NOSIZE);
-			else
-				(void)SetWindowPos(hWnd,0,
-					win_rc.left + ((win_rc.right - win_rc.left) - (rc.right - rc.left)) / 2,
-					win_rc.top + ((win_rc.bottom - win_rc.top) - (rc.bottom - rc.top)) / 2 + 5,
-					0,0,SWP_NOSIZE
-				);
-		}
+		WgxCenterWindow(hWnd);
 		SetText(hWnd,L"PLEASE_CONFIRM");
 		if(hibernate_instead_of_shutdown)
 			SetText(GetDlgItem(hWnd,IDC_MESSAGE),L"REALLY_HIBERNATE_WHEN_DONE");
@@ -92,7 +78,6 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 //	HWND hChild;
-//	RECT rc;
 	static UINT_PTR timer;
 	static UINT counter;
 	#define TIMER_ID 0x16748382
@@ -102,20 +87,6 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
-		/* WgxCenterWindow(HWND hWindow,HWND hParent); */
-		/* WgxCenterWindowRect(LPRECT WinRc,LPRECT ParentRc); */
-/*		if(GetWindowRect(hWnd,&rc)){
-			if((win_rc.right - win_rc.left) < (rc.right - rc.left) || 
-			  (win_rc.bottom - win_rc.top) < (rc.bottom - rc.top))
-				(void)SetWindowPos(hWnd,0,win_rc.left + 158,win_rc.top + 160,0,0,SWP_NOSIZE);
-			else
-				(void)SetWindowPos(hWnd,0,
-					win_rc.left + ((win_rc.right - win_rc.left) - (rc.right - rc.left)) / 2,
-					win_rc.top + ((win_rc.bottom - win_rc.top) - (rc.bottom - rc.top)) / 2 + 5,
-					0,0,SWP_NOSIZE
-				);
-		}
-*/
 		SetText(hWnd,L"PLEASE_CONFIRM");
 		if(hibernate_instead_of_shutdown){
 			message = WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATION");

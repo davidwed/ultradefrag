@@ -50,10 +50,7 @@ HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 extern HWND hWindow,hMap,hList;
 extern volume_processing_job *current_job;
 
-WNDPROC OldRectangleWndProc;
-BOOL isRectangleUnicode = FALSE;
-
-void CalculateBitMapDimensions(void);
+WNDPROC OldRectWndProc;
 
 extern HANDLE hMapEvent;
 
@@ -64,13 +61,7 @@ void InitMap(void)
 	int i;
 	
 	hMap = GetDlgItem(hWindow,IDC_MAP);
-	isRectangleUnicode = IsWindowUnicode(hMap);
-	if(isRectangleUnicode)
-		OldRectangleWndProc = (WNDPROC)SetWindowLongPtrW(hMap,GWLP_WNDPROC,
-			(LONG_PTR)RectWndProc);
-	else
-		OldRectangleWndProc = (WNDPROC)SetWindowLongPtr(hMap,GWLP_WNDPROC,
-			(LONG_PTR)RectWndProc);
+	OldRectWndProc = WgxSafeSubclassWindow(hMap,RectWndProc);
 
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++){
 		/* FIXME: check for success */
@@ -90,10 +81,7 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		RedrawMap(current_job);
 		EndPaint(hWnd,&ps);
 	}
-	if(isRectangleUnicode)
-		return CallWindowProcW(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
-	else
-		return CallWindowProc(OldRectangleWndProc,hWnd,iMsg,wParam,lParam);
+	return WgxSafeCallWndProc(OldRectWndProc,hWnd,iMsg,wParam,lParam);
 }
 
 void ResizeMap(int x, int y, int width, int height)
