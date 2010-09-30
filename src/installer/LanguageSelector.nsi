@@ -76,6 +76,10 @@ VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 
 Function .onInit
 
+!ifndef ISPORTABLE
+    ${CorrectLangReg}
+!endif
+
   ${InitLanguageSelector}
   ${EnableX64FSRedirection}
 

@@ -51,6 +51,28 @@
 Var LanguagePack
 ReserveFile "lang.ini"
 
+;-----------------------------------------
+
+/*
+ * This corrects the loaction of the language registry setting
+ */
+!macro CorrectLangReg
+
+    push $R0
+    
+    ClearErrors
+    ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
+    ${Unless} ${Errors}
+        SetRegView 64
+        WriteRegStr HKLM "Software\UltraDefrag" "Language" $R0
+        SetRegView 32
+        DeleteRegKey HKLM "Software\UltraDefrag"
+    ${EndUnless}
+    
+    pop $R0
+
+!macroend
+
 ;-----------------------------------------------------------
 ;         LANG_PAGE macro and support routines
 ;-----------------------------------------------------------
@@ -84,7 +106,9 @@ Function LangShow
 !else
   ; --- get language from registry
   ClearErrors
+  SetRegView 64
   ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
+  SetRegView 32
   ${Unless} ${Errors}
     WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
   ${EndUnless}
@@ -148,7 +172,9 @@ FunctionEnd
 !ifdef ISPORTABLE
   WriteINIStr "$EXEDIR\PORTABLE.X" "i18n" "Language" $LanguagePack
 !else
+  SetRegView 64
   WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
+  SetRegView 32
 !endif
 
   pop $R0
@@ -179,7 +205,9 @@ FunctionEnd
 !else
   ; --- get language from registry
   ClearErrors
+  SetRegView 64
   ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
+  SetRegView 32
   ${Unless} ${Errors}
     StrCpy $LanguagePack $R1
   ${EndUnless}
@@ -207,6 +235,7 @@ FunctionEnd
 
 !define InstallLanguagePack "!insertmacro InstallLanguagePack"
 !define InitLanguageSelector "!insertmacro InitLanguageSelector"
+!define CorrectLangReg "!insertmacro CorrectLangReg"
 
 ;-----------------------------------------------------------
 

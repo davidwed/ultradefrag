@@ -386,7 +386,9 @@ Var AtLeastXP
 
   DetailPrint "Cleanup registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+  SetRegView 64
   DeleteRegKey HKLM "Software\UltraDefrag"
+  SetRegView 32
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"
