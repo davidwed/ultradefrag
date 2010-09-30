@@ -135,7 +135,8 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		"Copyright (c) Stefan Pendl, 2010.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
 		"If something is wrong, hit F8 on startup\n"
-		"and select 'Last Known Good Configuration'.\n\n");
+		"and select 'Last Known Good Configuration\n"
+		"or execute 'CHKDSK {Drive:} /R /F'.\n\n");
 		
 	/* handle safe mode boot */
 	if(HandleSafeModeBoot())
