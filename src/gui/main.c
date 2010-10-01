@@ -29,7 +29,7 @@ double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 HINSTANCE hInstance;
 HWND hWindow = NULL;
 HWND hMap;
-HANDLE ghMutex = NULL;
+// HANDLE ghMutex = NULL;
 signed int delta_h = 0;
 WGX_FONT wgxFont = {{0},0};
 extern HWND hStatus;
@@ -102,15 +102,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	hInstance = GetModuleHandle(NULL);
     
-    /* use mutex to prevent multiple running instances */
-    ghMutex = CreateMutexA(NULL, TRUE, "Global\\MutexUltraDefragGUI");
-    if(GetLastError() != ERROR_SUCCESS){
-        /* TODO: activate current window instead of message display */
-        WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: already running!");
-        (void)CloseHandle(ghMutex);
-        return 99;
-    }
-	
 	GetPrefs();
 
 	if(strstr(lpCmdLine,"--setup")){
@@ -146,10 +137,24 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 2;
 	}
 	
+    /* use mutex to prevent multiple running instances */
+    /*ghMutex = CreateMutexA(NULL, TRUE, "Global\\MutexUltraDefragGUI");
+    if(GetLastError() != ERROR_SUCCESS){
+        // TODO: activate current window instead of message display
+        WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: already running!");
+        (void)CloseHandle(ghMutex);
+        return 99;
+    }
+	*/
 	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot create the main window!");
 		DeleteEnvironmentVariables();
 		release_jobs();
+	
+        /* release the mutex */
+        /*(void)ReleaseMutex(ghMutex);
+        (void)CloseHandle(ghMutex);*/
+    
 		return 3;
 	}
 	
@@ -162,6 +167,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	SavePrefs();
 	DeleteEnvironmentVariables();
 	
+    /* release the mutex */
+    /*(void)ReleaseMutex(ghMutex);
+    (void)CloseHandle(ghMutex);*/
+    
 	if(shutdown_flag && seconds_for_shutdown_rejection){
 		if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0){
 			WgxDestroyResourceTable(i18n_table);
@@ -205,11 +214,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 			}
 		}
 	}
-    
-    /* release the mutex */
-    /* TODO: release mutex at every regular exit */
-    (void)ReleaseMutex(ghMutex);
-    (void)CloseHandle(ghMutex);
     
 	return 0;
 }
@@ -710,7 +714,9 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	SavePrefs();
 	
 	(void)strcpy(path,".\\udefrag-gui-config.exe");
-	sprintf(buffer,"%s",path);
+	sprintf(buffer,"%s %d",path,(ULONG_PTR)hWindow);
+    
+    WgxDbgPrint("UltraDefrag GUI passed window handle as %d\n",(ULONG_PTR)hWindow);
 
 	ZeroMemory(&si,sizeof(si));
 	si.cb = sizeof(si);

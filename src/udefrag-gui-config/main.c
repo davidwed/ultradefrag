@@ -49,10 +49,14 @@
 
 #include "../dll/wgx/wgx.h"
 
+#include "../include/ultradfgver.h"
+
 /* Global variables */
 HINSTANCE hInstance;
 HWND hWindow;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
+
+HWND hParent = NULL;
 
 WGX_FONT wgxFont = {{0},0};
 
@@ -62,14 +66,12 @@ void OpenWebPage(char *page);
 BOOL GetBootExecuteRegistrationStatus(void);
 BOOL InitFont(void);
 
-HWND hParent = NULL;
-
 BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
 {
 	char caption[32];
 	
 	if(GetWindowText(hwnd,caption,sizeof(caption))){
-		if(strstr(caption,"UltraDefrag")){
+		if(strstr(caption,VERSIONINTITLE)){
 			hParent = hwnd;
 			return FALSE;
 		}
@@ -80,10 +82,19 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	hInstance = GetModuleHandle(NULL);
+    int res, hReceived;
 	
+	hInstance = GetModuleHandle(NULL);
+    
 	/* FIXME: this method is not reliable */
-	EnumWindows(EnumWindowsProc,0);
+    res = sscanf(lpCmdLine,"%d",&hReceived);
+    if(res != 1){
+        EnumWindows(EnumWindowsProc,0);
+        WgxDbgPrint("UltraDefrag GUI Config enumerated window handle as %d\n",(ULONG_PTR)hParent);
+    } else {
+        hParent = (HWND)(ULONG_PTR)hReceived;
+        WgxDbgPrint("UltraDefrag GUI Config received window handle as %d\n",(ULONG_PTR)hParent);
+    }
 	
 	/*
 	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
