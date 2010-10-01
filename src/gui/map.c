@@ -57,11 +57,10 @@ COLORREF colors[NUM_OF_SPACE_STATES] =
 };
 HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 
-extern HWND hWindow,hMap,hList;
-extern volume_processing_job *current_job;
 WNDPROC OldRectWndProc;
-extern HANDLE hMapEvent;
 int allow_map_redraw = 1;
+extern volume_processing_job *current_job;
+extern HANDLE hMapEvent;
 
 /* forward declaration */
 LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);

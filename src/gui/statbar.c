@@ -30,10 +30,6 @@
 
 HWND hStatus;
 
-extern HINSTANCE hInstance;
-extern HWND hWindow;
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
-
 static void SetIcon(int part,int id)
 {
 	HANDLE hImg;

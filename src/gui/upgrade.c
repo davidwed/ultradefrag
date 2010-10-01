@@ -28,8 +28,6 @@
 
 int disable_latest_version_check = 0;
 
-extern HWND hWindow;
-
 #define VERSION_URL "http://ultradefrag.sourceforge.net/version.ini"
 #define MAX_VERSION_FILE_LEN 32
 #define MAX_ANNOUNCEMENT_LEN 128

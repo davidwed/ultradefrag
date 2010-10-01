@@ -26,9 +26,6 @@
 
 #include "main.h"
 
-extern HINSTANCE hInstance;
-extern HWND hWindow;
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern int hibernate_instead_of_shutdown;
 extern int seconds_for_shutdown_rejection;
 

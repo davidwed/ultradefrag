@@ -136,14 +136,55 @@ typedef struct _volume_processing_job {
 /* prototypes */
 int init_jobs(void);
 volume_processing_job *get_job(char volume_letter);
+void DoJob(udefrag_job_type job_type);
+void stop_all_jobs(void);
 void release_jobs(void);
 
-void RedrawMap(volume_processing_job *job);
-void UpdateStatusBar(udefrag_progress_info *pi);
 void InitProgress(void);
 void ShowProgress(void);
 void HideProgress(void);
 void SetProgress(wchar_t *message, int percentage);
+
+BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
+BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
+BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+void OpenConfigurationDialog(void);
+void ShowReports();
+
+void InitFont(void);
+
+void InitVolList(void);
+void VolListNotifyHandler(LPARAM lParam);
+void VolListGetColumnWidths(void);
+void UpdateVolList(void);
+void ReleaseVolList(void);
+
+void InitMap(void);
+void RedrawMap(volume_processing_job *job);
+void ReleaseMap(void);
+
+void CreateStatusBar(void);
+void UpdateStatusBar(udefrag_progress_info *pi);
+
+void ResizeMainWindow(void);
+void ResizeMap(int x, int y, int width, int height);
+int  ResizeVolList(int x, int y, int width, int height);
+int  ResizeStatusBar(int bottom, int width);
+
+void GetPrefs(void);
+void SavePrefs(void);
+void DeleteEnvironmentVariables(void);
+
+void CheckForTheNewVersion(void);
+int ShutdownOrHibernate(void);
+
+/* common global variables */
+extern HINSTANCE hInstance;
+extern HWND hWindow;
+extern HWND hList;
+extern HWND hMap;
+extern WGX_FONT wgxFont;
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 /*
 * Note:

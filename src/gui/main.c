@@ -17,84 +17,45 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - main window code.
-*/
+/**
+ * @file main.c
+ * @brief Main window.
+ * @addtogroup MainWindow
+ * @{
+ */
 
 #include "main.h"
 
-double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
-
-/* Global variables */
+/* global variables */
 HINSTANCE hInstance;
 HWND hWindow = NULL;
 HWND hMap;
 // HANDLE ghMutex = NULL;
-signed int delta_h = 0;
+
 WGX_FONT wgxFont = {{0},0};
-extern HWND hStatus;
-extern HWND hList;
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 RECT win_rc; /* coordinates of main window */
 RECT r_rc;   /* coordinates of restored window */
-extern int restore_default_window_size;
+signed int delta_h = 0;
+double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
+
+extern HWND hList;
+extern HWND hStatus;
 extern int scale_by_dpi;
 extern int maximized_window;
 extern int init_maximized_window;
+extern int restore_default_window_size;
 extern int skip_removable;
-
-int shutdown_flag = FALSE;
 extern int hibernate_instead_of_shutdown;
 extern int show_shutdown_check_confirmation_dialog;
 extern int seconds_for_shutdown_rejection;
 
+int shutdown_flag = FALSE;
 extern int busy_flag, exit_pressed;
-
-/* Function prototypes */
-BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
-void ShowReports();
-void ShowSingleReport(volume_processing_job *job);
-void VolListGetColumnWidths(void);
-void InitVolList(void);
-void ReleaseVolList(void);
-void UpdateVolList(void);
-void VolListNotifyHandler(LPARAM lParam);
-
-void RepositionMainWindowControls(void);
-void ResizeMap(int x, int y, int width, int height);
-int  ResizeVolList(int x, int y, int width, int height);
-int  ResizeStatusBar(int bottom, int width);
-void InitFont(void);
-void CallGUIConfigurator(void);
-void DeleteEnvironmentVariables(void);
-BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
-BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
-void DoJob(udefrag_job_type job_type);
-void stop(void);
-void GetPrefs(void);
-void SavePrefs(void);
-
-void CheckForTheNewVersion(void);
-void InitMap(void);
-void ReleaseMap(void);
-
-BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
-BOOL CALLBACK ConfirmDlgProc(HWND, UINT, WPARAM, LPARAM);
-BOOL CreateStatusBar();
-
 extern int allow_map_redraw;
-extern int map_block_size;
-extern int grid_line_width;
 
-extern int last_block_size;
-extern int last_grid_width;
-extern int last_x;
-extern int last_y;
-extern int last_width;
-extern int last_height;
-int ShutdownOrHibernate(void);
-
-/*-------------------- Main Function -----------------------*/
+/**
+ * @brief Entry point.
+ */
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	int result;
@@ -256,7 +217,7 @@ void InitMainWindow(void)
 	lvi.iImage = 0;
 	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
 	
-	RepositionMainWindowControls();
+	ResizeMainWindow();
 
 	/* maximize window if required */
 	if(init_maximized_window)
@@ -275,7 +236,7 @@ static RECT prev_rc = {0,0,0,0};
  * @brief Adjust positions of controls
  * in accordance with main window dimensions.
  */
-void RepositionMainWindowControls(void)
+void ResizeMainWindow(void)
 {
 	int vlist_height, cmap_height, button_height;
 	int progress_height, sbar_height;
@@ -516,7 +477,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"UltraDefrag: cannot create the About window!");
 			break;
 		case IDC_SETTINGS:
-			if(!busy_flag) CallGUIConfigurator();
+			if(!busy_flag)
+				OpenConfigurationDialog();
 			break;
 		case IDC_SKIPREMOVABLE:
 			skip_removable = (
@@ -529,10 +491,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_PAUSE:
 		case IDC_STOP:
-			stop();
+			stop_all_jobs();
 			break;
 		case IDC_RESCAN:
-			if(!busy_flag) UpdateVolList();
+			if(!busy_flag)
+				UpdateVolList();
 			break;
 		case IDC_SHUTDOWN:
 			if(show_shutdown_check_confirmation_dialog){
@@ -549,7 +512,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		if(UpdateMainWindowCoordinates()){
 			if(!maximized_window)
 				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-			RepositionMainWindowControls();
+			ResizeMainWindow();
 		} else {
 			OutputDebugString("Wrong window dimensions on WM_SIZE message!\n");
 		}
@@ -583,164 +546,11 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 		VolListGetColumnWidths();
 		exit_pressed = 1;
-		stop();
+		stop_all_jobs();
 		(void)EndDialog(hWnd,0);
 		return TRUE;
 	}
 	return FALSE;
 }
 
-/*
-* Report button handler.
-*/
-void ShowReports()
-{
-	volume_processing_job *job;
-	LRESULT SelectedItem;
-	LV_ITEM lvi;
-	char buffer[128];
-	int index;
-	
-	index = -1;
-	while(1){
-		SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_SELECTED);
-		if(SelectedItem == -1 || SelectedItem == index) break;
-		lvi.iItem = (int)SelectedItem;
-		lvi.iSubItem = 0;
-		lvi.mask = LVIF_TEXT;
-		lvi.pszText = buffer;
-		lvi.cchTextMax = 127;
-		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			job = get_job(buffer[0]);
-			if(job)
-				ShowSingleReport(job);
-		}
-		index = (int)SelectedItem;
-	}
-}
-
-void ShowSingleReport(volume_processing_job *job)
-{
-#ifndef UDEFRAG_PORTABLE
-	short l_path[] = L"C:\\fraglist.luar";
-#else
-	char path[] = "C:\\fraglist.luar";
-	char cmd[MAX_PATH];
-	char buffer[MAX_PATH + 64];
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-#endif
-
-	if(job == NULL) return;
-
-	if(job->job_type == NEVER_EXECUTED_JOB)
-		return; /* the job is never launched yet */
-
-#ifndef UDEFRAG_PORTABLE
-	l_path[0] = (short)job->volume_letter;
-	(void)WgxShellExecuteW(hWindow,L"view",l_path,NULL,NULL,SW_SHOW);
-#else
-	path[0] = job->volume_letter;
-	(void)strcpy(cmd,".\\lua5.1a_gui.exe");
-	(void)strcpy(buffer,cmd);
-	(void)strcat(buffer," .\\scripts\\udreportcnv.lua ");
-	(void)strcat(buffer,path);
-	(void)strcat(buffer," null -v");
-
-	ZeroMemory(&si,sizeof(si));
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_SHOW;
-	ZeroMemory(&pi,sizeof(pi));
-
-	if(!CreateProcess(cmd,buffer,
-	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"UltraDefrag: cannot execute lua5.1a_gui.exe program!");
-	    return;
-	}
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-#endif
-}
-
-/*
-* Settings button handler.
-*/
-DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
-{
-	char path[MAX_PATH];
-	char buffer[MAX_PATH + 64];
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	SavePrefs();
-	
-	(void)strcpy(path,".\\udefrag-gui-config.exe");
-	sprintf(buffer,"%s %p",path,hWindow);
-    
-    WgxDbgPrint("UltraDefrag GUI passed window handle as %d\n",(ULONG_PTR)hWindow);
-
-	ZeroMemory(&si,sizeof(si));
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_SHOW;
-	ZeroMemory(&pi,sizeof(pi));
-
-	if(!CreateProcess(path,buffer,
-	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"UltraDefrag: cannot execute udefrag-gui-config.exe program!");
-	    return 0;
-	}
-	(void)WaitForSingleObject(pi.hProcess,INFINITE);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-	
-	/* reinitialize GUI */
-	GetPrefs();
-	stop();
-	
-	WgxDestroyFont(&wgxFont);
-	InitFont();
-	WgxSetFont(hWindow,&wgxFont);
-	
-	/* FIXME: it doesn't work, just resets font to default */
-	WgxSetFont(hStatus,&wgxFont);
-	
-	(void)SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
-	if(hibernate_instead_of_shutdown)
-		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
-	else
-		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
-
-	/* if block size or grid line width changed since last redraw, resize map */
-	if(map_block_size != last_block_size  || grid_line_width != last_grid_width){
-		ResizeMap(last_x,last_y,last_width,last_height);
-		InvalidateRect(hMap,NULL,TRUE);
-		UpdateWindow(hMap);
-	}
-	return 0;
-}
-
-void CallGUIConfigurator(void)
-{
-	HANDLE h;
-	DWORD id;
-	
-	h = create_thread(ConfigThreadProc,NULL,&id);
-	if(h == NULL){
-		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"UltraDefrag: cannot create thread opening the Configuration dialog!");
-	} else {
-		CloseHandle(h);
-	}
-}
-
-void InitFont(void)
-{
-	memset(&wgxFont.lf,0,sizeof(LOGFONT));
-	/* default font should be Courier New 9pt */
-	(void)strcpy(wgxFont.lf.lfFaceName,"Courier New");
-	wgxFont.lf.lfHeight = DPI(-12);
-	WgxCreateFont(".\\options\\font.lua",&wgxFont);
-}
+/** @} */

@@ -91,6 +91,7 @@ extraResourceOptions=
 9=job.c
 10=upgrade.c
 11=shutdown.c
+12=reports.c
 [Header]
 1=main.h
 2=resource.h

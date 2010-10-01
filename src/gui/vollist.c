@@ -26,12 +26,9 @@
 
 #include "main.h"
 
-extern HINSTANCE hInstance;
-extern HWND hWindow;
-extern BOOL busy_flag;
-extern int skip_removable;
 extern volume_processing_job *current_job;
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
+extern int skip_removable;
+extern BOOL busy_flag;
 
 HWND hList;
 WNDPROC OldListWndProc;

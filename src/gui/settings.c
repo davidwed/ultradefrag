@@ -59,7 +59,15 @@ extern int user_defined_column_widths[];
 
 extern RECT r_rc;
 extern double pix_per_dialog_unit;
-extern HWND hWindow;
+
+extern int map_block_size;
+extern int grid_line_width;
+extern int last_block_size;
+extern int last_grid_width;
+extern int last_x;
+extern int last_y;
+extern int last_width;
+extern int last_height;
 
 WGX_OPTION options[] = {
 	/* type, value buffer size, name, value, default value */
@@ -222,6 +230,95 @@ void SavePrefs(void)
 	rheight = (int)(r_rc.bottom - r_rc.top);
 	
 	WgxSaveOptions(".\\options\\guiopts.lua",options,SavePrefsCallback);
+}
+
+/**
+ * @brief Initializes default font
+ * and replaces it by a custom one
+ * if an appropriate configuration
+ * file exists.
+ */
+void InitFont(void)
+{
+	memset(&wgxFont.lf,0,sizeof(LOGFONT));
+	/* default font should be Courier New 9pt */
+	(void)strcpy(wgxFont.lf.lfFaceName,"Courier New");
+	wgxFont.lf.lfHeight = DPI(-12);
+	WgxCreateFont(".\\options\\font.lua",&wgxFont);
+}
+
+/**
+ * OpenConfigurationDialog thread procedure.
+ */
+DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
+{
+	char path[MAX_PATH];
+	char buffer[MAX_PATH + 64];
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+
+	/* update configuration file by actual preferences */
+	SavePrefs();
+
+	/* pass window handle to the configuration dialog to center it */
+	(void)strcpy(path,".\\udefrag-gui-config.exe");
+	sprintf(buffer,"%s %p",path,hWindow);
+    WgxDbgPrint("UltraDefrag GUI passed window handle as %p\n",hWindow);
+
+	ZeroMemory(&si,sizeof(si));
+	si.cb = sizeof(si);
+	si.dwFlags = STARTF_USESHOWWINDOW;
+	si.wShowWindow = SW_SHOW;
+	ZeroMemory(&pi,sizeof(pi));
+
+	if(!CreateProcess(path,buffer,
+	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
+	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"Cannot execute udefrag-gui-config.exe program");
+	    return 0;
+	}
+	(void)WaitForSingleObject(pi.hProcess,INFINITE);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+
+	/* stop running jobs */
+	stop_all_jobs();
+
+	/* reinitialize GUI */
+	GetPrefs();
+	WgxDestroyFont(&wgxFont);
+	InitFont();
+	WgxSetFont(hWindow,&wgxFont);
+		
+	if(hibernate_instead_of_shutdown)
+		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
+	else
+		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
+
+	/* if block size or grid line width changed since last redraw, resize map */
+	if(map_block_size != last_block_size  || grid_line_width != last_grid_width){
+		ResizeMap(last_x,last_y,last_width,last_height);
+		InvalidateRect(hMap,NULL,TRUE);
+		UpdateWindow(hMap);
+	}
+	return 0;
+}
+
+/**
+ * @brief Opens configuration dialog.
+ */
+void OpenConfigurationDialog(void)
+{
+	HANDLE h;
+	DWORD id;
+	
+	h = create_thread(ConfigThreadProc,NULL,&id);
+	if(h == NULL){
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"Cannot create thread opening the Configuration dialog");
+	} else {
+		CloseHandle(h);
+	}
 }
 
 /** @} */

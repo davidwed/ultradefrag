@@ -18,7 +18,7 @@
  */
 
 /*
-* Graphical interface resources description.
+* GUI resources.
 */
 
 #include "../include/version.h"

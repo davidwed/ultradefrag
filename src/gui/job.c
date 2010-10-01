@@ -34,6 +34,12 @@ volume_processing_job jobs[NUMBER_OF_JOBS];
 /* synchronizes access to internal map representation */
 HANDLE hMapEvent = NULL;
 
+/* forces to stop all running jobs */
+int stop_pressed;
+
+/* nonzero value indicates that the main window has been closed */
+int exit_pressed = 0;
+
 /**
  * @brief Initializes structures belonging to all jobs.
  */
@@ -75,6 +81,14 @@ volume_processing_job *get_job(char volume_letter)
 }
 
 /**
+ * @brief Stops all running jobs.
+ */
+void stop_all_jobs(void)
+{
+	stop_pressed = 1;
+}
+
+/**
  * @brief Frees resources allocated for all jobs.
  */
 void release_jobs(void)
@@ -105,14 +119,10 @@ void release_jobs(void)
 
 extern int map_blocks_per_line;
 extern int map_lines;
-extern HWND hWindow;
-extern HWND hList;
 extern int shutdown_flag;
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 BOOL busy_flag = 0;
 char current_operation;
-int stop_pressed, exit_pressed = 0;
 
 volume_processing_job *current_job = NULL;
 
@@ -360,11 +370,6 @@ void ProcessSingleVolume(volume_processing_job *job)
 			//ClearMap();
 		}
 	}
-}
-
-void stop(void)
-{
-	stop_pressed = 1;
 }
 
 /** @} */

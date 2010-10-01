@@ -5,7 +5,8 @@ target_type = "gui"
 
 src = {
 	"about.c", "i18n.c", "job.c", "main.c", "map.c", "progress.c",
-	"settings.c", "shutdown.c", "statbar.c", "upgrade.c", "vollist.c"
+	"reports.c", "settings.c", "shutdown.c", "statbar.c", 
+	"upgrade.c", "vollist.c"
 	
 }
 rc = { "dfrg.rc" }

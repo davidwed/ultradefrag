@@ -26,11 +26,6 @@
 
 #include "main.h"
 
-extern HINSTANCE hInstance;
-extern HWND hWindow;
-extern WGX_FONT wgxFont;
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
-
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	switch(msg){
