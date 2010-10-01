@@ -36,18 +36,14 @@ char buffer[MAX_PATH];
 char err_msg[1024];
 extern int user_defined_column_widths[];
 extern int map_block_size;
-BOOLEAN map_block_size_loaded = FALSE;
-int reloaded_map_block_size = 0;
 extern int grid_line_width;
-BOOLEAN grid_line_width_loaded = FALSE;
-int reloaded_grid_line_width = 0;
 extern int disable_latest_version_check;
 
 /* they have the same effect as environment variables for console program */
-char in_filter[4096] = {0};
-char ex_filter[4096] = {0};
-char sizelimit[64] = {0};
-char timelimit[256] = {0};
+char in_filter[32767];
+char ex_filter[32767];
+char sizelimit[128];
+char timelimit[256];
 int fraglimit;
 int refresh_interval;
 int disable_reports;
@@ -59,7 +55,102 @@ int seconds_for_shutdown_rejection = 60;
 extern HWND hWindow;
 extern HFONT hFont;
 
-void DisplayLastError(char *caption);
+int rx = UNDEFINED_COORD, ry = UNDEFINED_COORD;
+int rwidth = 0, rheight = 0;
+
+WGX_OPTION options[] = {
+	/* type, value buffer size, name, value, default value */
+	{WGX_CFG_COMMENT, 0, "UltraDefrag GUI options",                                         NULL, ""},
+	{WGX_CFG_EMPTY,   0, "",                                                                NULL, ""},
+	{WGX_CFG_COMMENT, 0, "Note that you must specify paths in filters",                     NULL, ""},
+	{WGX_CFG_COMMENT, 0, "with double back slashes instead of the single ones.",            NULL, ""},
+	{WGX_CFG_COMMENT, 0, "For example:",                                                    NULL, ""},
+	{WGX_CFG_COMMENT, 0, "ex_filter = \"MyDocs\\\\Music\\\\mp3\\\\Red_Hot_Chili_Peppers\"", NULL, ""},
+	{WGX_CFG_EMPTY,   0, "",                                                                NULL, ""},
+	{WGX_CFG_STRING,  sizeof(in_filter), "in_filter",           in_filter,  ""},
+	/* default value for ex_filter is more advanced to reduce volume processing time */
+	{WGX_CFG_STRING,  sizeof(ex_filter), "ex_filter",           ex_filter,  "system volume information;temp;recycle"},
+	{WGX_CFG_STRING,  sizeof(sizelimit), "sizelimit",           sizelimit,  ""},
+	{WGX_CFG_INT,     0,                 "fragments_threshold", &fraglimit, 0},
+	{WGX_CFG_STRING,  sizeof(timelimit), "time_limit",          timelimit,  ""},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{WGX_CFG_INT,     0, "refresh_interval", &refresh_interval, (void *)DEFAULT_REFRESH_INTERVAL},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	{WGX_CFG_INT,     0, "disable_reports",  &disable_reports,  0},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{WGX_CFG_COMMENT, 0, "set dbgprint_level to DETAILED for reporting a bug,",      NULL, ""},
+	{WGX_CFG_COMMENT, 0, "for normal operation set it to NORMAL or an empty string", NULL, ""},
+	{WGX_CFG_STRING,  sizeof(dbgprint_level), "dbgprint_level", dbgprint_level, ""},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "after a job is done instead of shutting it down, otherwise set it to 0",        NULL, ""},
+	{WGX_CFG_INT,     0, "hibernate_instead_of_shutdown", &hibernate_instead_of_shutdown, 0},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "set show_shutdown_check_confirmation_dialog to 1 to display the confirmation dialog", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "for shutdown or hibernate, otherwise set it to 0",                                    NULL, ""},
+	{WGX_CFG_INT,     0, "show_shutdown_check_confirmation_dialog", &show_shutdown_check_confirmation_dialog, (void *)1},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+		
+	{WGX_CFG_COMMENT, 0, "seconds_for_shutdown_rejection sets the delay for the user to cancel", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "the shutdown or hibernate execution, default is 60 seconds", NULL, ""},
+	{WGX_CFG_INT,     0, "seconds_for_shutdown_rejection", &seconds_for_shutdown_rejection, (void *)60},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "cluster map options (restart required to take effect):", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "the size of the block, in pixels; default value is 4", NULL, ""},
+	{WGX_CFG_INT,     0, "map_block_size", &map_block_size, (void *)DEFAULT_MAP_BLOCK_SIZE},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "the grid line width, in pixels; default value is 1", NULL, ""},
+	{WGX_CFG_INT,     0, "grid_line_width", &grid_line_width, (void *)DEFAULT_GRID_LINE_WIDTH},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{WGX_CFG_COMMENT, 0, "set disable_latest_version_check parameter to 1", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "to disable the automatic check for the latest available", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "version of the program during startup", NULL, ""},
+	{WGX_CFG_INT,     0, "disable_latest_version_check", &disable_latest_version_check, 0},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "window coordinates etc.", NULL, ""},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "set scale_by_dpi parameter to 0", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "to not scale the buttons and text according to the", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "screens DPI settings", NULL, ""},
+	{WGX_CFG_INT,     0, "scale_by_dpi", &scale_by_dpi, (void *)1},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{WGX_CFG_COMMENT, 0, "set restore_default_window_size parameter to 1", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "to restore default window size on the next startup", NULL, ""},
+	{WGX_CFG_INT,     0, "restore_default_window_size", &restore_default_window_size, 0},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "the settings below are not changeable by the user,", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "they are always overwritten when the program ends", NULL, ""},
+	
+	{WGX_CFG_INT,     0, "rx", &rx, (void *)UNDEFINED_COORD},
+	{WGX_CFG_INT,     0, "ry", &ry, (void *)UNDEFINED_COORD},
+	{WGX_CFG_INT,     0, "rwidth",  &rwidth,  (void *)DEFAULT_WIDTH},
+	{WGX_CFG_INT,     0, "rheight", &rheight, (void *)DEFAULT_HEIGHT}, 
+	{WGX_CFG_INT,     0, "maximized", &maximized_window, 0},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{WGX_CFG_INT,     0, "skip_removable", &skip_removable, (void *)1},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{WGX_CFG_INT,     0, "column1_width", &user_defined_column_widths[0], 0},
+	{WGX_CFG_INT,     0, "column2_width", &user_defined_column_widths[1], 0},
+	{WGX_CFG_INT,     0, "column3_width", &user_defined_column_widths[2], 0},
+	{WGX_CFG_INT,     0, "column4_width", &user_defined_column_widths[3], 0},
+	{WGX_CFG_INT,     0, "column5_width", &user_defined_column_widths[4], 0},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{0,               0, NULL, NULL, NULL}
+};
 
 void DeleteEnvironmentVariables(void)
 {
@@ -99,302 +190,33 @@ void SetEnvironmentVariables(void)
 		(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",dbgprint_level);
 }
 
-/* returns 0 if variable is not defined */
-static int getint(lua_State *L, char *variable)
-{
-	int ret;
-	
-	lua_getglobal(L, variable);
-	ret = (int)lua_tointeger(L, lua_gettop(L));
-	lua_pop(L, 1);
-	return ret;
-}
-
-/* returns default value def if variable is not defined */
-static int getintdef(lua_State *L, char *variable, int def)
-{
-	int ret;
-	
-    lua_getglobal(L, variable);
-    if(!lua_isnil(L, lua_gettop(L))){
-        ret = (int)lua_tointeger(L, lua_gettop(L));
-        lua_pop(L, 1);
-        return ret;
-    } else {
-        return def;
-    }
-}
-
-/* returns value of coordinate or sets undefined to TRUE */
-static long getcoord(lua_State *L, char *variable, BOOLEAN *undefined)
-{
-	long ret = 0;
-	
-    lua_getglobal(L, variable);
-    if(!lua_isnil(L, lua_gettop(L))){
-        ret = (long)lua_tointeger(L, lua_gettop(L));
-        lua_pop(L, 1);
-    } else {
-        *undefined = TRUE;
-    }
-    return ret;
-}
-
 void GetPrefs(void)
 {
-	lua_State *L;
-	int status;
-	char *string;
-	BOOLEAN coord_undefined = TRUE;
-	BOOLEAN restored_coord_undefined = TRUE;
+	WgxGetOptions(".\\options\\guiopts.lua",options);
 	
-	win_rc.left = win_rc.top = 0;
-	in_filter[0] = sizelimit[0] = dbgprint_level[0] = 0;
-	/* default value for ex_filter is more advanced to reduce volume processing time */
-	strcpy(ex_filter,"system volume information;temp;recycle");
-	fraglimit = 0;
-	refresh_interval = DEFAULT_REFRESH_INTERVAL;
-	disable_reports = 0;
+	/* get restored main window coordinates */
+	r_rc.left = rx;
+	r_rc.top = ry;
+	r_rc.right = rx + rwidth;
+	r_rc.bottom = ry + rheight;
+	
+	init_maximized_window = maximized_window;
 
 	DeleteEnvironmentVariables();
-	
-	L = lua_open();  /* create state */
-	if(!L) return;
-	lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
-	luaL_openlibs(L);  /* open libraries */
-	lua_gc(L, LUA_GCRESTART, 0);
-
-	status = luaL_dofile(L,".\\options\\guiopts.lua");
-	if(!status){ /* successful */
-		/* get main window coordinates */
-		coord_undefined = FALSE;
-		win_rc.left = getcoord(L, "x", &coord_undefined);
-        win_rc.top = getcoord(L, "y", &coord_undefined);
-
-		win_rc.right = win_rc.left + (long)getint(L,"width");
-		win_rc.bottom = win_rc.top + (long)getint(L,"height");
-		maximized_window = init_maximized_window = getint(L,"maximized");
-		restore_default_window_size = getint(L,"restore_default_window_size");
-        
-        scale_by_dpi = getintdef(L, "scale_by_dpi", scale_by_dpi);
-
-		/* get restored main window coordinates */
-		restored_coord_undefined = FALSE;
-		r_rc.left = getcoord(L, "rx", &restored_coord_undefined);
-		r_rc.top = getcoord(L, "ry", &restored_coord_undefined);
-
-		r_rc.right = r_rc.left + (long)getint(L,"rwidth");
-		r_rc.bottom = r_rc.top + (long)getint(L,"rheight");
-
-		skip_removable = getint(L,"skip_removable");
-		user_defined_column_widths[0] = getint(L,"column1_width");
-		user_defined_column_widths[1] = getint(L,"column2_width");
-		user_defined_column_widths[2] = getint(L,"column3_width");
-		user_defined_column_widths[3] = getint(L,"column4_width");
-		user_defined_column_widths[4] = getint(L,"column5_width");
-
-		lua_getglobal(L, "in_filter");
-		string = (char *)lua_tostring(L, lua_gettop(L));
-		if(string){
-			(void)strncpy(in_filter,string,sizeof(in_filter));
-			in_filter[sizeof(in_filter) - 1] = 0;
-		}
-		lua_pop(L, 1);
-
-		lua_getglobal(L, "ex_filter");
-		string = (char *)lua_tostring(L, lua_gettop(L));
-		if(string){
-			(void)strncpy(ex_filter,string,sizeof(ex_filter));
-			ex_filter[sizeof(ex_filter) - 1] = 0;
-		} else {
-			ex_filter[0] = 0;
-		}
-		lua_pop(L, 1);
-
-		lua_getglobal(L, "sizelimit");
-		string = (char *)lua_tostring(L, lua_gettop(L));
-		if(string){
-			(void)strncpy(sizelimit,string,sizeof(sizelimit));
-			sizelimit[sizeof(sizelimit) - 1] = 0;
-		}
-		lua_pop(L, 1);
-
-		lua_getglobal(L, "time_limit");
-		string = (char *)lua_tostring(L, lua_gettop(L));
-		if(string){
-			(void)strncpy(timelimit,string,sizeof(timelimit));
-			timelimit[sizeof(timelimit) - 1] = 0;
-		}
-		lua_pop(L, 1);
-
-		fraglimit = getint(L,"fragments_threshold");
-		refresh_interval = getintdef(L,"refresh_interval",DEFAULT_REFRESH_INTERVAL);
-		disable_reports = getint(L,"disable_reports");
-
-		lua_getglobal(L, "dbgprint_level");
-		string = (char *)lua_tostring(L, lua_gettop(L));
-		if(string){
-			(void)strncpy(dbgprint_level,string,sizeof(dbgprint_level));
-			dbgprint_level[sizeof(dbgprint_level) - 1] = 0;
-		}
-		lua_pop(L, 1);
-		
-		hibernate_instead_of_shutdown = getint(L, "hibernate_instead_of_shutdown");
-
-        show_shutdown_check_confirmation_dialog = getintdef(L,
-            "show_shutdown_check_confirmation_dialog", show_shutdown_check_confirmation_dialog);
-
-        seconds_for_shutdown_rejection = getintdef(L,
-            "seconds_for_shutdown_rejection", seconds_for_shutdown_rejection);
-		
-		/* load the size of the cluster map block only if it is not already loaded */
-		reloaded_map_block_size = getint(L,"map_block_size");
-		if(map_block_size_loaded == FALSE){
-			map_block_size = reloaded_map_block_size;
-			if(map_block_size == 0) map_block_size = DEFAULT_MAP_BLOCK_SIZE;
-			map_block_size_loaded = TRUE;
-		}
-
-		/* load the grid line width only if it is not already loaded */
-		lua_getglobal(L, "grid_line_width");
-		if(!lua_isnil(L, lua_gettop(L))){
-			reloaded_grid_line_width = (int)lua_tointeger(L, lua_gettop(L));
-			lua_pop(L, 1);
-		} else {
-			reloaded_grid_line_width = DEFAULT_GRID_LINE_WIDTH;
-		}
-		if(grid_line_width_loaded == FALSE){
-			grid_line_width = reloaded_grid_line_width;
-			grid_line_width_loaded = TRUE;
-		}
-
-		disable_latest_version_check = getint(L, "disable_latest_version_check");
-	}
-	lua_close(L);
-
-	/* center main window on the screen if coordinates aren't defined */
-	if(coord_undefined){
-		win_rc.left = win_rc.top = UNDEFINED_COORD;
-	}
-	if(restored_coord_undefined){
-		r_rc.left = r_rc.top = UNDEFINED_COORD;
-	}
-
 	SetEnvironmentVariables();
+}
+
+void __stdcall SavePrefsCallback(char *error)
+{
+	MessageBox(NULL,error,"Warning!",MB_OK | MB_ICONWARNING);
 }
 
 void SavePrefs(void)
 {
-	FILE *pf;
-	int result;
+	rx = (int)r_rc.left;
+	ry = (int)r_rc.top;
+	rwidth = (int)(r_rc.right - r_rc.left);
+	rheight = (int)(r_rc.bottom - r_rc.top);
 	
-	if(!GetCurrentDirectory(MAX_PATH,buffer)){
-		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot retrieve the current directory path!");
-		return;
-	}
-	(void)strcat(buffer,"\\options\\guiopts.lua");
-	pf = fopen(buffer,"wt");
-	if(!pf){
-		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
-			"Can't save gui preferences to %s!\n%s",
-			buffer,_strerror(NULL));
-		err_msg[sizeof(err_msg) - 1] = 0;
-		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
-		return;
-	}
-
-	/* save main window size for configuration initialization */
-	result = fprintf(pf,
-		"-- UltraDefrag GUI options\n\n"
-		"-- Note that you must specify paths in filters\n"
-		"-- with double back slashes instead of the single ones.\n"
-		"-- For example:\n"
-		"-- ex_filter = \"MyDocs\\\\Music\\\\mp3\\\\Red_Hot_Chili_Peppers\"\n\n"
-		"in_filter = \"%s\"\n"
-		"ex_filter = \"%s\"\n"
-		"sizelimit = \"%s\"\n"
-		"fragments_threshold = %i\n"
-		"refresh_interval = %i\n"
-		"time_limit = \"%s\"\n\n"
-		"disable_reports = %i\n\n"
-		"-- set dbgprint_level to DETAILED for reporting a bug,\n"
-		"-- for normal operation set it to NORMAL or an empty string\n"
-		"dbgprint_level = \"%s\"\n\n"
-		"-- set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system\n"
-		"-- after a job is done instead of shutting it down, otherwise set it to 0\n"
-		"hibernate_instead_of_shutdown = %u\n\n"
-		"-- set show_shutdown_check_confirmation_dialog to 1 to display the confirmation dialog\n"
-		"-- for shutdown or hibernate, otherwise set it to 0\n"
-		"show_shutdown_check_confirmation_dialog = %u\n\n"
-		"-- seconds_for_shutdown_rejection sets the delay for the user to cancel\n"
-		"-- the shutdown or hibernate execution, default is 60 seconds\n"
-		"seconds_for_shutdown_rejection = %u\n\n"
-		"-- cluster map options (restart required to take effect):\n"
-		"-- the size of the block, in pixels; default value is %i\n"
-		"map_block_size = %i\n\n"
-		"-- the grid line width, in pixels; default value is %i\n"
-		"grid_line_width = %i\n\n"
-		"-- set disable_latest_version_check parameter to 1\n"
-		"-- to disable the automatic check for the latest available\n"
-		"-- version of the program during startup\n"
-		"disable_latest_version_check = %i\n\n"
-		"-- window coordinates etc.\n\n"
-		"-- set scale_by_dpi parameter to 0\n"
-		"-- to not scale the buttons and text according to the\n"
-		"-- screens DPI settings\n"
-		"scale_by_dpi = %i\n\n"
-		"-- set restore_default_window_size parameter to 1\n"
-		"-- to restore default window size on the next startup\n"
-		"restore_default_window_size = %i\n\n"
-		"-- the settings below are not changeable by the user,\n"
-		"-- they are always overwritten when the program ends\n"
-		"x = %i\ny = %i\n"
-		"width = %i\nheight = %i\n"
-		"rx = %i\nry = %i\n"
-		"rwidth = %i\nrheight = %i\n"
-		"maximized = %i\n\n"
-		"skip_removable = %i\n\n"
-		"column1_width = %i\ncolumn2_width = %i\n"
-		"column3_width = %i\ncolumn4_width = %i\n"
-		"column5_width = %i\n",
-		in_filter,
-		ex_filter,
-		sizelimit,
-		fraglimit,
-		refresh_interval,
-		timelimit,
-		disable_reports,
-		dbgprint_level,
-		hibernate_instead_of_shutdown,
-		show_shutdown_check_confirmation_dialog,
-		seconds_for_shutdown_rejection,
-		DEFAULT_MAP_BLOCK_SIZE,
-		reloaded_map_block_size ? reloaded_map_block_size : map_block_size,
-		DEFAULT_GRID_LINE_WIDTH,
-		reloaded_grid_line_width ? reloaded_grid_line_width : grid_line_width,
-		disable_latest_version_check,
-        scale_by_dpi,
-		restore_default_window_size,
-		(int)win_rc.left, (int)win_rc.top,
-		(int)(win_rc.right - win_rc.left),
-		(int)(win_rc.bottom - win_rc.top),
-		(int)r_rc.left, (int)r_rc.top,
-		(int)(r_rc.right - r_rc.left),
-		(int)(r_rc.bottom - r_rc.top),
-		maximized_window,
-		skip_removable,
-		user_defined_column_widths[0],
-		user_defined_column_widths[1],
-		user_defined_column_widths[2],
-		user_defined_column_widths[3],
-		user_defined_column_widths[4]
-		);
-	fclose(pf);
-	if(result < 0){
-		(void)_snprintf(err_msg,sizeof(err_msg) - 1,
-			"Can't write gui preferences to %s!\n%s",
-			buffer,_strerror(NULL));
-		err_msg[sizeof(err_msg) - 1] = 0;
-		MessageBox(0,err_msg,"Warning!",MB_OK | MB_ICONWARNING);
-	}
+	WgxSaveOptions(".\\options\\guiopts.lua",options,SavePrefsCallback);
 }

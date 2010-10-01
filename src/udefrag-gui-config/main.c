@@ -54,7 +54,6 @@ HINSTANCE hInstance;
 HWND hWindow;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
-LOGFONT lf;
 WGX_FONT wgxFont = {{0},0};
 
 /* Function prototypes */
@@ -62,19 +61,37 @@ BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
 void OpenWebPage(char *page);
 BOOL GetBootExecuteRegistrationStatus(void);
 BOOL InitFont(void);
-void CenterWindow(void);
+
+HWND hParent = NULL;
+
+BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
+{
+	char caption[32];
+	
+	if(GetWindowText(hwnd,caption,sizeof(caption))){
+		if(strstr(caption,"UltraDefrag")){
+			hParent = hwnd;
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	hInstance = GetModuleHandle(NULL);
+	
+	/* FIXME: this method is not reliable */
+	EnumWindows(EnumWindowsProc,0);
+	
 	/*
 	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
 	* but InitCommonControlsEx() needs about 90000 tacts.
 	* Because the first function is just a stub on xp.
 	*/
 	InitCommonControls();
-	if(DialogBox(hInstance, MAKEINTRESOURCE(IDD_CONFIG),NULL,(DLGPROC)DlgProc) == (-1)){
+	if(DialogBox(hInstance, MAKEINTRESOURCE(IDD_CONFIG),hParent,(DLGPROC)DlgProc) == (-1)){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window");
 		return 1;
 	}
@@ -107,7 +124,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		WgxDisableWindows(hWindow,IDC_ENABLE,IDC_BOOT_SCRIPT,0);
 		#endif
 		InitFont();
-		CenterWindow();
+		WgxCenterWindow(hWindow);
 		break;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
@@ -248,17 +265,6 @@ BOOL GetBootExecuteRegistrationStatus(void)
 	return FALSE;
 }
 
-/* returns 0 if variable is not defined */
-static int getint(lua_State *L, char *variable)
-{
-	int ret;
-	
-	lua_getglobal(L, variable);
-	ret = (int)lua_tointeger(L, lua_gettop(L));
-	lua_pop(L, 1);
-	return ret;
-}
-
 BOOL InitFont(void)
 {
 	BOOL result;
@@ -271,43 +277,4 @@ BOOL InitFont(void)
 	result = WgxCreateFont(".\\options\\font.lua",&wgxFont);
 	WgxSetFont(hWindow,&wgxFont);
 	return result;
-}
-
-void CenterWindow(void)
-{
-	lua_State *L;
-	int status;
-	int x,y,width,height;
-	short *cmdline;
-	RECT rc;
-
-	/* set main window position if requested */
-	cmdline = GetCommandLineW();
-	if(cmdline == NULL) return;
-
-	if(wcsstr(cmdline,L"CalledByGUI")){
-		L = lua_open();  /* create state */
-		if(!L) return;
-		lua_gc(L, LUA_GCSTOP, 0);  /* stop collector during initialization */
-		luaL_openlibs(L);  /* open libraries */
-		lua_gc(L, LUA_GCRESTART, 0);
-		status = luaL_dofile(L,".\\options\\guiopts.lua");
-		if(!status){ /* successful */
-			x = getint(L,"x");
-			y = getint(L,"y");
-			width = getint(L,"width");
-			height = getint(L,"height");
-			if(GetWindowRect(hWindow,&rc)){
-				if(width < (rc.right - rc.left) || height < (rc.bottom - rc.top))
-					(void)SetWindowPos(hWindow,0,x + 50,y + 85,0,0,SWP_NOSIZE);
-				else
-					(void)SetWindowPos(hWindow,0,
-						x + (width - (rc.right - rc.left)) / 2,
-						y + (height - (rc.bottom - rc.top)) / 2,
-						0,0,SWP_NOSIZE
-					);
-			}
-		}
-		lua_close(L);
-	}
 }

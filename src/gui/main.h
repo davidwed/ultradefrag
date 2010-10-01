@@ -75,6 +75,23 @@
 #define DEFAULT_MAP_BLOCK_SIZE  4
 #define DEFAULT_GRID_LINE_WIDTH 1
 
+/* Main window layout constants (in pixels for 96 DPI). */
+#define DEFAULT_WIDTH         658 /* default window width */
+#define DEFAULT_HEIGHT        513 /* default window height */
+#define MIN_WIDTH             500 /* minimal window width */
+#define MIN_HEIGHT            400 /* minimal window height */
+#define SPACING               7   /* spacing between controls */
+#define PADDING_X             14  /* horizontal padding between borders and controls */
+#define PADDING_Y             14  /* vertical padding between top border and controls */
+#define BUTTON_WIDTH          114 /* button width */
+#define BUTTON_HEIGHT         19  /* button height, applied also to text labels and check boxes */
+#define VLIST_HEIGHT          130 /* volume list height */
+#define CMAP_LABEL_WIDTH      156 /* cluster map label width */
+#define SKIP_MEDIA_WIDTH      243 /* skip removable media check box width */
+#define RESCAN_BTN_WIDTH      170 /* rescan drives button width */
+#define PROGRESS_LABEL_WIDTH  185 /* progress text label width */
+#define PROGRESS_HEIGHT       11  /* progress bar height */
+
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
 * to make a valid subclassing:

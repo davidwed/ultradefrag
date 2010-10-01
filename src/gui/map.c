@@ -31,6 +31,13 @@ int map_lines = 32; //14
 int map_width = 0x209;
 int map_height = 0x8c;
 
+int last_block_size = 0;
+int last_grid_width = 0;
+int last_x = 0;
+int last_y = 0;
+int last_width = 0;
+int last_height = 0;
+
 COLORREF grid_color = RGB(0,0,0); //RGB(200,200,200)
 
 COLORREF colors[NUM_OF_SPACE_STATES] = 
@@ -109,6 +116,13 @@ void ResizeMap(int x, int y, int width, int height)
 	threshold = grid_line_width * 2;
 	if(dx > threshold) rc.left += dx;
 	if(dy > threshold) rc.top += dy;
+
+	last_block_size = map_block_size;
+	last_grid_width = grid_line_width;
+	last_x = x;
+	last_y = y;
+	last_width = width;
+	last_height = height;
 
 	/* reposition the map control */
 	(void)SetWindowPos(hMap, NULL, 

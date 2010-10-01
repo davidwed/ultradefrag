@@ -23,23 +23,6 @@
 
 #include "main.h"
 
-/* Main window layout constants (in pixels for 96 DPI). */
-#define DEFAULT_WIDTH         658 /* default window width */
-#define DEFAULT_HEIGHT        513 /* default window height */
-#define MIN_WIDTH             500 /* minimal window width */
-#define MIN_HEIGHT            400 /* minimal window height */
-#define SPACING               7   /* spacing between controls */
-#define PADDING_X             14  /* horizontal padding between borders and controls */
-#define PADDING_Y             14  /* vertical padding between top border and controls */
-#define BUTTON_WIDTH          114 /* button width */
-#define BUTTON_HEIGHT         19  /* button height, applied also to text labels and check boxes */
-#define VLIST_HEIGHT          130 /* volume list height */
-#define CMAP_LABEL_WIDTH      156 /* cluster map label width */
-#define SKIP_MEDIA_WIDTH      243 /* skip removable media check box width */
-#define RESCAN_BTN_WIDTH      170 /* rescan drives button width */
-#define PROGRESS_LABEL_WIDTH  185 /* progress text label width */
-#define PROGRESS_HEIGHT       11  /* progress bar height */
-
 double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 
 /* Global variables */
@@ -101,6 +84,15 @@ BOOL CALLBACK ConfirmDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CreateStatusBar();
 
 extern int allow_map_redraw;
+extern int map_block_size;
+extern int grid_line_width;
+
+extern int last_block_size;
+extern int last_grid_width;
+extern int last_x;
+extern int last_y;
+extern int last_width;
+extern int last_height;
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
@@ -715,13 +707,10 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 
-	/* window coordinates must be accessible by configurator */
 	SavePrefs();
 	
 	(void)strcpy(path,".\\udefrag-gui-config.exe");
-	/* the configurator must know when it should reposition its window */
-	(void)strcpy(buffer,path);
-	(void)strcat(buffer," CalledByGUI");
+	sprintf(buffer,"%s",path);
 
 	ZeroMemory(&si,sizeof(si));
 	si.cb = sizeof(si);
@@ -746,6 +735,8 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	WgxDestroyFont(&wgxFont);
 	InitFont();
 	WgxSetFont(hWindow,&wgxFont);
+	
+	/* FIXME: it doesn't work, just resets font to default */
 	WgxSetFont(hStatus,&wgxFont);
 	
 	(void)SendMessage(hStatus,WM_SETFONT,(WPARAM)0,MAKELPARAM(TRUE,0));
@@ -754,6 +745,12 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	else
 		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
 
+	/* if block size or grid line width changed since last redraw, resize map */
+	if(map_block_size != last_block_size  || grid_line_width != last_grid_width){
+		ResizeMap(last_x,last_y,last_width,last_height);
+		InvalidateRect(hMap,NULL,TRUE);
+		UpdateWindow(hMap);
+	}
 	return 0;
 }
 
