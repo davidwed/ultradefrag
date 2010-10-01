@@ -123,6 +123,8 @@ void __stdcall WgxCenterWindow(HWND hwnd)
 
 	//make the window relative to its parent
 	hwndParent = GetParent(hwnd);
+	if(hwndParent == NULL)
+		hwndParent = GetDesktopWindow();
 
 	GetWindowRect(hwnd, &rect);
 	GetWindowRect(hwndParent, &rectP);
