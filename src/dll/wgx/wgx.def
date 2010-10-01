@@ -30,3 +30,6 @@ EXPORTS
 	WgxDbgPrint
 	WgxDbgPrintLastError
 	WgxDisplayLastError
+	
+	WgxGetOptions
+	WgxSaveOptions

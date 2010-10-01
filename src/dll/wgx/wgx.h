@@ -58,6 +58,21 @@ typedef struct _WGX_FONT {
 	HFONT hFont;
 } WGX_FONT, *PWGX_FONT;
 
+enum {
+	WGX_CFG_EMPTY,
+	WGX_CFG_COMMENT,
+	WGX_CFG_INT,
+	WGX_CFG_STRING
+};
+
+typedef struct _WGX_OPTION {
+	int type;             /* one of WGX_CFG_xxx constants */
+	int value_length;     /* length of the value buffer, in bytes (including terminal zero) */
+	char *name;           /* option name, NULL indicates end of options table */
+	void *value;          /* value buffer */
+	void *default_value;  /* default value */
+} WGX_OPTION, *PWGX_OPTION;
+
 /* wgx routines prototypes */
 BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
 
@@ -90,5 +105,10 @@ void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,ch
 void __cdecl WgxDbgPrint(char *format, ...);
 void __cdecl WgxDbgPrintLastError(char *format, ...);
 int  __cdecl WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...);
+
+typedef void (__stdcall *WGX_SAVE_OPTIONS_CALLBACK)(char *error);
+
+BOOL __stdcall WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table);
+BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_SAVE_OPTIONS_CALLBACK cb);
 
 #endif /* _WGX_H_ */

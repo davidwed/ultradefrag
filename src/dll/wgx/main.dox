@@ -38,6 +38,12 @@
 /** @} */
 
 /**
+ * @defgroup Config Configuration
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Debug Debugging
  * @{
  */
