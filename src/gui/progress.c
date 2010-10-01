@@ -17,12 +17,14 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - progress bar stuff.
-*/
+/**
+ * @file progress.c
+ * @brief Progress bar.
+ * @addtogroup ProgressBar
+ * @{
+ */
 
 #include "main.h"
-#include <wchar.h>
 
 extern HWND hWindow;
 HWND hProgressMsg,hProgressBar;
@@ -53,3 +55,5 @@ void SetProgress(wchar_t *message, int percentage)
 	(void)SetWindowTextW(hProgressMsg,message);
 	(void)SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 }
+
+/** @} */

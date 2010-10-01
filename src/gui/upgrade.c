@@ -17,24 +17,26 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - routines designed to check for the latest release.
-*/
+/**
+ * @file upgrade.c
+ * @brief Upgrade.
+ * @addtogroup Upgrade
+ * @{
+ */
 
 #include "main.h"
-#include "../include/ultradfgver.h"
+
+int disable_latest_version_check = 0;
 
 extern HWND hWindow;
 
 #define VERSION_URL "http://ultradefrag.sourceforge.net/version.ini"
-char version_ini_path[MAX_PATH + 1];
 #define MAX_VERSION_FILE_LEN 32
-char version_number[MAX_VERSION_FILE_LEN + 1];
-char error_msg[256];
 #define MAX_ANNOUNCEMENT_LEN 128
-short announcement[MAX_ANNOUNCEMENT_LEN];
 
-int disable_latest_version_check = 0;
+char version_ini_path[MAX_PATH + 1];
+char version_number[MAX_VERSION_FILE_LEN + 1];
+short announcement[MAX_ANNOUNCEMENT_LEN];
 
 typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 	/* LPUNKNOWN */ void *lpUnkcaller,
@@ -44,8 +46,8 @@ typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 	DWORD dwReserved,
 	/*IBindStatusCallback*/ void *pBSC
 );
-URLMON_PROCEDURE pURLDownloadToCacheFile;
 
+/* forward declaration */
 DWORD WINAPI CheckForTheNewVersionThreadProc(LPVOID lpParameter);
 
 /**
@@ -53,8 +55,9 @@ DWORD WINAPI CheckForTheNewVersionThreadProc(LPVOID lpParameter);
 * @return Version number string. NULL indicates failure.
 * @note Based on http://msdn.microsoft.com/en-us/library/ms775122(VS.85).aspx
 */
-char *GetLatestVersion(void)
+static char *GetLatestVersion(void)
 {
+	URLMON_PROCEDURE pURLDownloadToCacheFile;
 	HMODULE hUrlmonDLL = NULL;
 	HRESULT result;
 	FILE *f;
@@ -117,11 +120,11 @@ char *GetLatestVersion(void)
 }
 
 /**
- * @brief Defines whether new version is available for download or not.
+ * @brief Defines whether a new version is available for download or not.
  * @return A string containing an announcement. NULL indicates that
  * there is no new version available.
  */
-short *GetNewVersionAnnouncement(void)
+static short *GetNewVersionAnnouncement(void)
 {
 	char *lv;
 	char *cv = VERSIONINTITLE;
@@ -171,7 +174,7 @@ void CheckForTheNewVersion(void)
 	h = create_thread(CheckForTheNewVersionThreadProc,NULL,&id);
 	if(h == NULL){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONWARNING,
-			"UltraDefrag: cannot create thread checking the latest version of the program");
+			"Cannot create thread checking the latest version of the program");
 	} else {
 		CloseHandle(h);
 	}
@@ -189,3 +192,5 @@ DWORD WINAPI CheckForTheNewVersionThreadProc(LPVOID lpParameter)
 	
 	return 0;
 }
+
+/** @} */

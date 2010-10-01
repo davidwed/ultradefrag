@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - volume list stuff.
-*/
+/**
+ * @file vollist.c
+ * @brief List of volumes.
+ * @addtogroup ListOfVolumes
+ * @{
+ */
 
 #include "main.h"
 
@@ -27,47 +30,23 @@ extern HINSTANCE hInstance;
 extern HWND hWindow;
 extern BOOL busy_flag;
 extern int skip_removable;
-extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern volume_processing_job *current_job;
+extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
 HWND hList;
 WNDPROC OldListWndProc;
 HIMAGELIST hImgList;
 int user_defined_column_widths[] = {0,0,0,0,0};
 
-DWORD WINAPI RescanDrivesThreadProc(LPVOID);
-void DisplayLastError(char *caption);
-void InitImageList(void);
-void DestroyImageList(void);
-static void VolListAddItem(int index, volume_info *v);
-static void AddCapacityInformation(int index, volume_info *v);
-static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *job);
+/* forward declaration */
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);
+volume_processing_job * get_first_selected_job(void);
+static void InitImageList(void);
+static void DestroyImageList(void);
 
-volume_processing_job * get_first_selected_job(void)
-{
-	LRESULT SelectedItem;
-	LV_ITEM lvi;
-	char buffer[128];
-	
-	SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
-	if(SelectedItem != -1){
-		lvi.iItem = (int)SelectedItem;
-		lvi.iSubItem = 0;
-		lvi.mask = LVIF_TEXT;
-		lvi.pszText = buffer;
-		lvi.cchTextMax = 127;
-		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			return get_job(buffer[0]);
-		}
-	}
-	return NULL;
-}
-
-/****************************************************************/
-/*            volume list gui control procedures                */
-/****************************************************************/
-
+/**
+ * @brief Initializes the list of volumes.
+ */
 void InitVolList(void)
 {
 	LV_COLUMNW lvc;
@@ -100,6 +79,9 @@ void InitVolList(void)
 	InitImageList();
 }
 
+/**
+ * @brief Custom window procedure for the list control.
+ */
 LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch(iMsg){
@@ -124,7 +106,10 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	return WgxSafeCallWndProc(OldListWndProc,hWnd,iMsg,wParam,lParam);
 }
 
-void AdjustVolListColumns(void)
+/**
+ * @brief Adjusts widths of the volume list columns.
+ */
+static void AdjustVolListColumns(void)
 {
 	int cw[] = {90,90,110,125,90};
 	int total_width = 0;
@@ -152,6 +137,9 @@ void AdjustVolListColumns(void)
 	}
 }
 
+/**
+ * @brief Resizes the list of volumes.
+ */
 int ResizeVolList(int x, int y, int width, int height)
 {
 	int border_height;
@@ -185,12 +173,17 @@ int ResizeVolList(int x, int y, int width, int height)
 	return height;
 }
 
-void FreeVolListResources(void)
+/**
+ * @brief Frees resources allocated for the list of volumes.
+ */
+void ReleaseVolList(void)
 {
-	/* free gui resources */
 	DestroyImageList();
 }
 
+/**
+ * @brief Handles notifications from the list of volumes.
+ */
 void VolListNotifyHandler(LPARAM lParam)
 {
 	volume_processing_job *job;
@@ -200,84 +193,14 @@ void VolListNotifyHandler(LPARAM lParam)
 		job = get_first_selected_job();
 		current_job = job;
 		HideProgress();
-		/* redraw indicator */
 		RedrawMap(job);
-		/* update status bar */
 		if(job) UpdateStatusBar(&job->pi);
 	}
 }
 
-void UpdateVolList(void)
-{
-	DWORD thr_id;
-	HANDLE h = create_thread(RescanDrivesThreadProc,NULL,&thr_id);
-	if(h == NULL){
-		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"UltraDefrag: cannot create thread starting drives rescan!");
-	} else {
-		CloseHandle(h);
-	}
-}
-
-DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
-{
-	int i;
-	volume_info *v;
-	LV_ITEM lvi;
-	volume_processing_job *job;
-	
-	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
-		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
-	HideProgress();
-
-	/* refill the volume list control */
-	(void)SendMessage(hList,LVM_DELETEALLITEMS,0,0);
-	v = udefrag_get_vollist(skip_removable);
-	if(v){
-		for(i = 0; v[i].letter != 0; i++)
-			VolListAddItem(i,&v[i]);
-		udefrag_release_vollist(v);
-	}
-
-	/* select the first item */
-	lvi.mask = LVIF_STATE;
-	lvi.stateMask = LVIS_SELECTED;
-	lvi.state = LVIS_SELECTED;
-	(void)SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
-	
-	/* scrollbar may appear/disappear after a scan */
-	AdjustVolListColumns();
-	
-	job = get_first_selected_job();
-	RedrawMap(job);
-	if(job) UpdateStatusBar(&job->pi);
-	
-	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
-		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
-	return 0;
-}
-
-static void VolListAddItem(int index, volume_info *v)
-{
-	volume_processing_job *job;
-	LV_ITEM lvi;
-	char s[128];
-	char name[32];
-
-	(void)sprintf(s,"%c: [%s]",v->letter,v->fsname);
-	(void)sprintf(name,"%c:",v->letter);
-	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
-	lvi.iItem = index;
-	lvi.iSubItem = 0;
-	lvi.pszText = s;
-	lvi.iImage = v->is_removable ? 1 : 0;
-	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
-
-	job = get_job(v->letter);
-	VolListUpdateStatusFieldInternal(index,job);
-	AddCapacityInformation(index,v);
-}
-
+/**
+ * @brief Updates volume capacity in the list.
+ */
 static void AddCapacityInformation(int index, volume_info *v)
 {
 	LV_ITEM lvi;
@@ -308,6 +231,9 @@ static void AddCapacityInformation(int index, volume_info *v)
 	(void)SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
 }
 
+/**
+ * @brief Updates volume processing status in the list.
+ */
 static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *job)
 {
 	LV_ITEMW lviw;
@@ -339,25 +265,90 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	(void)SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
 }
 
-/****************************************************************/
-/*                   ancillary procedures                       */
-/****************************************************************/
-
-void InitImageList(void)
+/**
+ * @brief Adds a single volume to the list.
+ */
+static void VolListAddItem(int index, volume_info *v)
 {
-	hImgList = ImageList_Create(16,16,ILC_COLOR8,2,0);
-	if(!hImgList) return;
+	volume_processing_job *job;
+	LV_ITEM lvi;
+	char s[64];
+
+	(void)sprintf(s,"%c: [%s]",v->letter,v->fsname);
+	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
+	lvi.iItem = index;
+	lvi.iSubItem = 0;
+	lvi.pszText = s;
+	lvi.iImage = v->is_removable ? 1 : 0;
+	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
+
+	job = get_job(v->letter);
+	VolListUpdateStatusFieldInternal(index,job);
+	AddCapacityInformation(index,v);
+}
+
+/**
+ * @brief UpdateVolList thread routine.
+ */
+static DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
+{
+	volume_processing_job *job;
+	volume_info *v;
+	LV_ITEM lvi;
+	int i;
 	
-	(void)ImageList_AddIcon(hImgList,LoadIcon(hInstance,MAKEINTRESOURCE(IDI_FIXED)));
-	(void)ImageList_AddIcon(hImgList,LoadIcon(hInstance,MAKEINTRESOURCE(IDI_REMOVABLE)));
-	(void)SendMessage(hList,LVM_SETIMAGELIST,LVSIL_SMALL,(LRESULT)hImgList);
+	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
+		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
+	HideProgress();
+
+	/* refill the volume list control */
+	(void)SendMessage(hList,LVM_DELETEALLITEMS,0,0);
+	v = udefrag_get_vollist(skip_removable);
+	if(v){
+		for(i = 0; v[i].letter != 0; i++)
+			VolListAddItem(i,&v[i]);
+		udefrag_release_vollist(v);
+	}
+
+	/* select the first item */
+	lvi.mask = LVIF_STATE;
+	lvi.stateMask = LVIS_SELECTED;
+	lvi.state = LVIS_SELECTED;
+	(void)SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
+	
+	/* scrollbar may appear/disappear after a scan */
+	AdjustVolListColumns();
+	
+	job = get_first_selected_job();
+	current_job = job;
+	RedrawMap(job);
+	if(job) UpdateStatusBar(&job->pi);
+	
+	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
+		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
+	return 0;
 }
 
-void DestroyImageList(void)
+/**
+ * @brief Updates the list of volumes.
+ */
+void UpdateVolList(void)
 {
-	if(hImgList) (void)ImageList_Destroy(hImgList);
+	DWORD id;
+	HANDLE h;
+
+	h = create_thread(RescanDrivesThreadProc,NULL,&id);
+	if(h == NULL){
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"Cannot create thread starting drives rescan!");
+	} else {
+		CloseHandle(h);
+	}
 }
 
+/**
+ * @brief Saves widths of the volume list columns.
+ */
 void VolListGetColumnWidths(void)
 {
 	int i;
@@ -368,61 +359,112 @@ void VolListGetColumnWidths(void)
 	}
 }
 
-void VolListUpdateStatusField(volume_processing_job *job)
+/**
+ * @brief Retrieves the first job selected in the list.
+ */
+volume_processing_job * get_first_selected_job(void)
 {
+	LRESULT SelectedItem;
 	LV_ITEM lvi;
-	char buffer[128];
-	int index = -1;
-	int item;
-
-	if(job == NULL) return;
-
-	while(1){
-		item = (int)SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_ALL);
-		if(item == -1 || item == index) break;
-		index = item;
-		lvi.iItem = index;
+	char buffer[64];
+	
+	SelectedItem = SendMessage(hList,LVM_GETNEXTITEM,-1,LVNI_SELECTED);
+	if(SelectedItem != -1){
+		lvi.iItem = (int)SelectedItem;
 		lvi.iSubItem = 0;
 		lvi.mask = LVIF_TEXT;
 		lvi.pszText = buffer;
-		lvi.cchTextMax = 127;
+		lvi.cchTextMax = 63;
 		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			if(udefrag_tolower(buffer[0]) == udefrag_tolower(job->volume_letter)){
-				VolListUpdateStatusFieldInternal(index,job);
-				return;
-			}
+			return get_job(buffer[0]);
 		}
 	}
+	return NULL;
 }
 
-void VolListRefreshItem(volume_processing_job *job)
+/**
+ * @brief Retrieves an index of the specified job
+ * as it is listed in the list of volumes.
+ */
+static int get_job_index(volume_processing_job *job)
 {
 	LV_ITEM lvi;
-	char buffer[128];
+	char buffer[64];
 	int index = -1;
 	int item;
-	volume_info v;
 
 	if(job == NULL)
-		return;
+		return (-1);
 
-	if(udefrag_get_volume_information(job->volume_letter,&v) < 0)
-		return;
-	
 	while(1){
 		item = (int)SendMessage(hList,LVM_GETNEXTITEM,(WPARAM)index,LVNI_ALL);
-		if(item == -1 || item == index) break;
+		if(item == -1 || item == index)	break;
 		index = item;
 		lvi.iItem = index;
 		lvi.iSubItem = 0;
 		lvi.mask = LVIF_TEXT;
 		lvi.pszText = buffer;
-		lvi.cchTextMax = 127;
+		lvi.cchTextMax = 63;
 		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
-			if(udefrag_tolower(buffer[0]) == udefrag_tolower(job->volume_letter)){
-				AddCapacityInformation(index,&v);
-				return;
-			}
+			if(udefrag_tolower(buffer[0]) == udefrag_tolower(job->volume_letter))
+				return index;
 		}
 	}
+
+	return (-1);
 }
+
+/**
+ * @brief Updates job processing status in the list.
+ * @details Decides themselves on which position
+ * in list the job locates.
+ */
+void VolListUpdateStatusField(volume_processing_job *job)
+{
+	int index;
+	
+	index = get_job_index(job);
+	if(index != -1)
+		VolListUpdateStatusFieldInternal(index,job);
+}
+
+/**
+ * @brief Updates volume capacity fields in the list.
+ */
+void VolListRefreshItem(volume_processing_job *job)
+{
+	volume_info v;
+	int index;
+	
+	index = get_job_index(job);
+	if(index != -1){
+		if(udefrag_get_volume_information(job->volume_letter,&v) >= 0)
+			AddCapacityInformation(index,&v);
+	}
+}
+
+/**
+ * @brief InitVolList helper.
+ */
+static void InitImageList(void)
+{
+	hImgList = ImageList_Create(16,16,ILC_COLOR8,2,0);
+	if(hImgList == NULL){
+		WgxDbgPrintLastError("InitImageList: ImageList_Create failed");
+	} else {
+		ImageList_AddIcon(hImgList,LoadIcon(hInstance,MAKEINTRESOURCE(IDI_FIXED)));
+		ImageList_AddIcon(hImgList,LoadIcon(hInstance,MAKEINTRESOURCE(IDI_REMOVABLE)));
+		SendMessage(hList,LVM_SETIMAGELIST,LVSIL_SMALL,(LRESULT)hImgList);
+	}
+}
+
+/**
+ * @brief ReleaseVolList helper.
+ */
+static void DestroyImageList(void)
+{
+	if(hImgList)
+		ImageList_Destroy(hImgList);
+}
+
+/** @} */

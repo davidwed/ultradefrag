@@ -57,8 +57,7 @@ int init_maximized_window = 0;
 int skip_removable = TRUE;
 extern int user_defined_column_widths[];
 
-RECT win_rc; /* coordinates of main window */
-RECT r_rc; /* coordinates of restored window */
+extern RECT r_rc;
 extern double pix_per_dialog_unit;
 extern HWND hWindow;
 

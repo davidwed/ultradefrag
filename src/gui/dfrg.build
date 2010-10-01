@@ -4,9 +4,9 @@ name        = "dfrg"
 target_type = "gui"
 
 src = {
-	"main.c", "map.c", "settings.c", "i18n.c", "about.c",
-	"progress.c", "statbar.c", "vollist.c", "job.c", "confirm.c",
-	"upgrade.c"
+	"about.c", "i18n.c", "job.c", "main.c", "map.c", "progress.c",
+	"settings.c", "shutdown.c", "statbar.c", "upgrade.c", "vollist.c"
+	
 }
 rc = { "dfrg.rc" }
 

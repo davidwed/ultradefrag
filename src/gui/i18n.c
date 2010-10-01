@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - i18n information.
-*/
+/**
+ * @file i18n.c
+ * @brief Internationalization.
+ * @addtogroup Internationalization
+ * @{
+ */
 
 #include "main.h"
 
@@ -71,3 +74,5 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 
 	{0,                 NULL,                    NULL,                        NULL}
 };
+
+/** @} */

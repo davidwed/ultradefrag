@@ -28,14 +28,13 @@
 
 #define STATUS_BAR_PARTS  5
 
-extern HINSTANCE hInstance;
-extern HWND hWindow;
-extern HFONT hFont;
 HWND hStatus;
 
+extern HINSTANCE hInstance;
+extern HWND hWindow;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 
-void SetIcon(int part,int id)
+static void SetIcon(int part,int id)
 {
 	HANDLE hImg;
 
@@ -44,7 +43,10 @@ void SetIcon(int part,int id)
 	(void)DestroyIcon(hImg);
 }
 
-BOOL CreateStatusBar()
+/**
+ * @brief Creates status bar.
+ */
+void CreateStatusBar(void)
 {
 	int array[STATUS_BAR_PARTS] = {10,20,30,40,50};
 	
@@ -52,8 +54,8 @@ BOOL CreateStatusBar()
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
 									"0 dirs", hWindow, IDM_STATUSBAR);
 	if(hStatus == NULL){
-		// TODO
-		return FALSE;
+		WgxDbgPrintLastError("CreateStatusWindow failed");
+		return;
 	}
 	
 	/* split status bar to parts */
@@ -65,15 +67,14 @@ BOOL CreateStatusBar()
 	(void)SetIcon(2,IDI_FRAGM);
 	(void)SetIcon(3,IDI_CMP);
 	(void)SetIcon(4,IDI_MFT);
-
-	return TRUE;
 }
 
-/*
-* Accepts y coordinate of the bottom line
-* and width of the status bar, returns
-* height of the status bar.
-*/
+/**
+ * @brief Resizes status bar.
+ * @note Accepts y coordinate of the bottom line
+ * and width of the status bar, returns height
+ * of the status bar.
+ */
 int ResizeStatusBar(int bottom, int width)
 {
 	RECT rc;
@@ -105,6 +106,9 @@ int ResizeStatusBar(int bottom, int width)
 	return height;
 }
 
+/**
+ * @brief Updates status bar.
+ */
 void UpdateStatusBar(udefrag_progress_info *pi)
 {
 	char s[32];

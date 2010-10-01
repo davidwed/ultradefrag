@@ -79,7 +79,7 @@ void InitMap(void)
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++){
 		hBrushes[i] = CreateSolidBrush(colors[i]);
 		if(hBrushes[i] == NULL)
-			WgxDbgPrintLastError("UltraDefrag: CreateSolidBrush failed in InitMap");
+			WgxDbgPrintLastError("InitMap: CreateSolidBrush failed");
 	}
 }
 

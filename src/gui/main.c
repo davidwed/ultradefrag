@@ -35,14 +35,13 @@ WGX_FONT wgxFont = {{0},0};
 extern HWND hStatus;
 extern HWND hList;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
-extern RECT win_rc; /* coordinates of main window */
-extern RECT r_rc;
+RECT win_rc; /* coordinates of main window */
+RECT r_rc;   /* coordinates of restored window */
 extern int restore_default_window_size;
 extern int scale_by_dpi;
 extern int maximized_window;
 extern int init_maximized_window;
 extern int skip_removable;
-extern volume_processing_job *current_job;
 
 int shutdown_flag = FALSE;
 extern int hibernate_instead_of_shutdown;
@@ -57,7 +56,7 @@ void ShowReports();
 void ShowSingleReport(volume_processing_job *job);
 void VolListGetColumnWidths(void);
 void InitVolList(void);
-void FreeVolListResources(void);
+void ReleaseVolList(void);
 void UpdateVolList(void);
 void VolListNotifyHandler(LPARAM lParam);
 
@@ -93,12 +92,12 @@ extern int last_x;
 extern int last_y;
 extern int last_width;
 extern int last_height;
+int ShutdownOrHibernate(void);
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	HANDLE hToken; 
-	TOKEN_PRIVILEGES tkp; 
+	int result;
 	
 	hInstance = GetModuleHandle(NULL);
     
@@ -160,7 +159,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	/* delete all created gdi objects */
 	release_jobs();
-	FreeVolListResources();
+	ReleaseVolList();
 	ReleaseMap();
 	WgxDestroyFont(&wgxFont);
 	/* save settings */
@@ -171,50 +170,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     /*(void)ReleaseMutex(ghMutex);
     (void)CloseHandle(ghMutex);*/
     
-	if(shutdown_flag && seconds_for_shutdown_rejection){
-		if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0){
-			WgxDestroyResourceTable(i18n_table);
-			return 0;
-		}
-		/* in case of errors we'll shutdown anyway */
-		/* to avoid situation when pc works a long time without any control */
-	}
-	WgxDestroyResourceTable(i18n_table);
-
-	/* check for shutdown request */
 	if(shutdown_flag){
-		/* set SE_SHUTDOWN privilege */
-		if(!OpenProcessToken(GetCurrentProcess(), 
-		TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,&hToken)){
-			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot open process token!");
-			return 4;
-		}
-		
-		LookupPrivilegeValue(NULL,SE_SHUTDOWN_NAME,&tkp.Privileges[0].Luid);
-		tkp.PrivilegeCount = 1;  // one privilege to set    
-		tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; 
-		AdjustTokenPrivileges(hToken,FALSE,&tkp,0,(PTOKEN_PRIVILEGES)NULL,0); 		
-		if(GetLastError() != ERROR_SUCCESS){
-			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot set shutdown privilege!");
-			return 5;
-		}
-		if(hibernate_instead_of_shutdown){
-			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
-			if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
-				WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot hibernate the computer!");
-			}
-		} else {
-			/*
-			* InitiateSystemShutdown() works fine
-			* but doesn't power off the pc.
-			*/
-			if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
-			  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
-				WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot shut down the computer!");
-			}
-		}
+		result = ShutdownOrHibernate();
+		WgxDestroyResourceTable(i18n_table);
+		return result;
 	}
     
+	WgxDestroyResourceTable(i18n_table);
 	return 0;
 }
 
