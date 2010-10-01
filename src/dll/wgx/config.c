@@ -158,16 +158,16 @@ BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_
 
 	for(i = 0; opts_table[i].name; i++){
 		if(opts_table[i].type == WGX_CFG_EMPTY){
-			WgxDbgPrint("\n");
+			//WgxDbgPrint("\n");
 			result = fprintf(f,"\n");
 		} else if(opts_table[i].type == WGX_CFG_COMMENT){
-			WgxDbgPrint("-- %s\n",opts_table[i].name);
+			//WgxDbgPrint("-- %s\n",opts_table[i].name);
 			result = fprintf(f,"-- %s\n",opts_table[i].name);
 		} else if(opts_table[i].type == WGX_CFG_INT){
-			WgxDbgPrint("%s = %i\n",opts_table[i].name,*((int *)opts_table[i].value));
+			//WgxDbgPrint("%s = %i\n",opts_table[i].name,*((int *)opts_table[i].value));
 			result = fprintf(f,"%s = %i\n",opts_table[i].name,*((int *)opts_table[i].value));
 		} else if(opts_table[i].type == WGX_CFG_STRING){
-			WgxDbgPrint("%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);
+			//WgxDbgPrint("%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);
 			result = fprintf(f,"%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);
 		}
 		if(result < 0){
