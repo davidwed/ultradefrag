@@ -37,20 +37,15 @@
 
 /**
  * @brief Reads options from configuration file.
- * @details Look at WGX_OPTION structure definition
- * in wgx.h file for details. Configuration files
- * must be written in Lua language to be accepted.
+ * @details Configuration files must be written
+ * in Lua language to be accepted.
  * @return TRUE indicates that configuration file
  * has been successfully processed.
  * @note 
  * - NULL can be passed as first parameter to
  * initialize options by their default values.
  * - Option name equal to NULL inicates the end of the table.
- * - If option type is WGX_CFG_EMPTY, an empty string
- * will be inserted on WgxSaveOptions call. All other
- * fields of WGX_OPTION structure are ignored.
- * - If option type is WGX_CFG_COMMENT, option name
- * is used as a body of comment, all other fields are ignored.
+ * - WGX_CFG_EMPTY and WGX_CFG_COMMENT options are ignored.
  * - If option type is WGX_CFG_INT value buffer must point to
  * variable of type int. Default value is interpreted as
  * integer, not as pointer. value_length field is ignored.
@@ -140,9 +135,14 @@ BOOL __stdcall WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table)
 
 /**
  * @brief Saves options to configuration file.
- * @details Look at WGX_OPTION structure definition
- * in wgx.h file for details. Configuration files
- * produced by this routine are written in Lua language.
+ * Configuration files produced are actually 
+ * Lua programs.
+ * @note
+ * - Option name equal to NULL inicates the end of the table.
+ * - WGX_CFG_EMPTY option forces to insert an empty line.
+ * - WGX_CFG_COMMENT inserts a comment with text passed in option's name.
+ * - WGX_CFG_INT saves an integer number, on which its value points.
+ * - WGX_CFG_STRING saves a string pointed by value field of the structure.
  */
 BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_SAVE_OPTIONS_CALLBACK cb)
 {
