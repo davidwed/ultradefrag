@@ -46,6 +46,7 @@ double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 HINSTANCE hInstance;
 HWND hWindow = NULL;
 HWND hMap;
+HANDLE ghMutex = NULL;
 signed int delta_h = 0;
 WGX_FONT wgxFont = {{0},0};
 extern HWND hStatus;
@@ -108,6 +109,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	TOKEN_PRIVILEGES tkp; 
 	
 	hInstance = GetModuleHandle(NULL);
+    
+    /* use mutex to prevent multiple running instances */
+    ghMutex = CreateMutexA(NULL, TRUE, "Global\\MutexUltraDefragGUI");
+    if(GetLastError() != ERROR_SUCCESS){
+        /* TODO: activate current window instead of message display */
+        WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: already running!");
+        (void)CloseHandle(ghMutex);
+        return 99;
+    }
 	
 	GetPrefs();
 
@@ -203,6 +213,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 			}
 		}
 	}
+    
+    /* release the mutex */
+    /* TODO: release mutex at every regular exit */
+    (void)ReleaseMutex(ghMutex);
+    (void)CloseHandle(ghMutex);
+    
 	return 0;
 }
 
