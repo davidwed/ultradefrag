@@ -212,7 +212,7 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	(void)SetWindowText(hWindow, WindowCaption);
 
 	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
-		// TODO
+		WgxDbgPrintLastError("Wait on hMapEvent failed in update_progress");
 		return;
 	}
 	if(pi->cluster_map){

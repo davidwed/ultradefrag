@@ -17,29 +17,19 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - load/save/change program settings.
-*/
+/**
+ * @file settings.c
+ * @brief Preferences.
+ * @addtogroup Preferences
+ * @{
+ */
 
 #include "main.h"
 
-RECT win_rc; /* coordinates of main window */
-RECT r_rc; /* coordinates of restored window */
-extern double pix_per_dialog_unit;
-int scale_by_dpi = 1;
-int restore_default_window_size = 0;
-int maximized_window = 0;
-int init_maximized_window = 0;
-int skip_removable = TRUE;
-int hibernate_instead_of_shutdown = FALSE;
-char buffer[MAX_PATH];
-char err_msg[1024];
-extern int user_defined_column_widths[];
-extern int map_block_size;
-extern int grid_line_width;
-extern int disable_latest_version_check;
-
-/* they have the same effect as environment variables for console program */
+/*
+* These options have the same effect as environment 
+* variables accepted by the command line interface.
+*/
 char in_filter[32767];
 char ex_filter[32767];
 char sizelimit[128];
@@ -49,14 +39,28 @@ int refresh_interval;
 int disable_reports;
 char dbgprint_level[32] = {0};
 
+/*
+* GUI specific options
+*/
+int hibernate_instead_of_shutdown = FALSE;
 int show_shutdown_check_confirmation_dialog = 1;
 int seconds_for_shutdown_rejection = 60;
-
-extern HWND hWindow;
-extern HFONT hFont;
-
+extern int map_block_size;
+extern int grid_line_width;
+extern int disable_latest_version_check;
+int scale_by_dpi = 1;
+int restore_default_window_size = 0;
 int rx = UNDEFINED_COORD, ry = UNDEFINED_COORD;
 int rwidth = 0, rheight = 0;
+int maximized_window = 0;
+int init_maximized_window = 0;
+int skip_removable = TRUE;
+extern int user_defined_column_widths[];
+
+RECT win_rc; /* coordinates of main window */
+RECT r_rc; /* coordinates of restored window */
+extern double pix_per_dialog_unit;
+extern HWND hWindow;
 
 WGX_OPTION options[] = {
 	/* type, value buffer size, name, value, default value */
@@ -220,3 +224,5 @@ void SavePrefs(void)
 	
 	WgxSaveOptions(".\\options\\guiopts.lua",options,SavePrefsCallback);
 }
+
+/** @} */

@@ -26,15 +26,12 @@
 
 extern HINSTANCE hInstance;
 extern HWND hWindow;
-extern HFONT hFont;
 extern int hibernate_instead_of_shutdown;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern int seconds_for_shutdown_rejection;
 
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-//	HWND hChild;
-
 	switch(msg){
 	case WM_INITDIALOG:
 		/* Window Initialization */
@@ -48,15 +45,7 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 		WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
 		/* shutdown will be confirmed by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_YES_BUTTON));
-
-		/*if(hFont){
-			(void)SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-			hChild = GetWindow(hWnd,GW_CHILD);
-			while(hChild){
-				(void)SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-				hChild = GetWindow(hChild,GW_HWNDNEXT);
-			}
-		}*/
+		/* WgxSetFont(hWnd,&wgxFont);*/
 		return FALSE;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
@@ -77,7 +66,6 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 
 BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-//	HWND hChild;
 	static UINT_PTR timer;
 	static UINT counter;
 	#define TIMER_ID 0x16748382
@@ -102,16 +90,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 		WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
 		/* shutdown will be rejected by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_NO_BUTTON));
-
-		/*if(hFont){
-			(void)SendMessage(hWnd,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-			hChild = GetWindow(hWnd,GW_CHILD);
-			while(hChild){
-				(void)SendMessage(hChild,WM_SETFONT,(WPARAM)hFont,MAKELPARAM(TRUE,0));
-				hChild = GetWindow(hChild,GW_HWNDNEXT);
-			}
-		}*/
-		
+		/* WgxSetFont(hWnd,&wgxFont);*/
 		/* set timer */
 		counter = seconds_for_shutdown_rejection;
 		if(counter == 0)

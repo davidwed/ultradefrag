@@ -66,7 +66,7 @@ void OpenWebPage(char *page);
 BOOL GetBootExecuteRegistrationStatus(void);
 BOOL InitFont(void);
 
-BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
+/*BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
 {
 	char caption[32];
 	
@@ -77,23 +77,21 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
 		}
 	}
 	return TRUE;
-}
+}*/
 
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-    int res, hReceived;
-	
 	hInstance = GetModuleHandle(NULL);
     
 	/* FIXME: this method is not reliable */
-    res = sscanf(lpCmdLine,"%d",&hReceived);
-    if(res != 1){
-        EnumWindows(EnumWindowsProc,0);
-        WgxDbgPrint("UltraDefrag GUI Config enumerated window handle as %d\n",(ULONG_PTR)hParent);
+    if(sscanf(lpCmdLine,"%p",&hParent) != 1){
+		/* no need to center window over its parent when there is no parent */
+        //EnumWindows(EnumWindowsProc,0);
+        //WgxDbgPrint("UltraDefrag GUI Config enumerated window handle as %p\n",hParent);
     } else {
-        hParent = (HWND)(ULONG_PTR)hReceived;
-        WgxDbgPrint("UltraDefrag GUI Config received window handle as %d\n",(ULONG_PTR)hParent);
+		/* works on 32 bit, needs testing on x64, since pointers are 64-bit there */
+        WgxDbgPrint("UltraDefrag GUI Config received window handle as %p\n",hParent);
     }
 	
 	/*

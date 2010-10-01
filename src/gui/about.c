@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - about box source code.
-*/
+/**
+ * @file about.c
+ * @brief About box.
+ * @addtogroup AboutBox
+ * @{
+ */
 
 #include "main.h"
 
@@ -60,3 +63,5 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	}
 	return FALSE;
 }
+
+/** @} */

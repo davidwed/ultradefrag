@@ -17,9 +17,12 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/*
-* GUI - cluster map processing.
-*/
+/**
+ * @file map.c
+ * @brief Cluster map.
+ * @addtogroup ClusterMap
+ * @{
+ */
 
 #include "main.h"
 
@@ -57,10 +60,15 @@ HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 extern HWND hWindow,hMap,hList;
 extern volume_processing_job *current_job;
 WNDPROC OldRectWndProc;
-LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
 extern HANDLE hMapEvent;
 int allow_map_redraw = 1;
 
+/* forward declaration */
+LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
+
+/**
+ * @brief Initializes cluster map.
+ */
 void InitMap(void)
 {
 	int i;
@@ -69,11 +77,15 @@ void InitMap(void)
 	OldRectWndProc = WgxSafeSubclassWindow(hMap,RectWndProc);
 
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++){
-		/* FIXME: check for success */
 		hBrushes[i] = CreateSolidBrush(colors[i]);
+		if(hBrushes[i] == NULL)
+			WgxDbgPrintLastError("UltraDefrag: CreateSolidBrush failed in InitMap");
 	}
 }
 
+/**
+ * @brief Custom cluster map window procedure.
+ */
 LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -89,6 +101,9 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	return WgxSafeCallWndProc(OldRectWndProc,hWnd,iMsg,wParam,lParam);
 }
 
+/**
+ * @brief Resizes cluster map.
+ */
 void ResizeMap(int x, int y, int width, int height)
 {
 	RECT rc;
@@ -133,9 +148,10 @@ void ResizeMap(int x, int y, int width, int height)
 		SWP_NOZORDER);
 }
 
-/* Since v3.1.0 all screen color depths are supported */
-
-void DrawBitMapGrid(HDC hdc)
+/**
+ * @brief Draws grid.
+ */
+static void DrawGrid(HDC hdc)
 {
 	HPEN hPen, hOldPen;
 	HBRUSH hBrush, hOldBrush;
@@ -173,7 +189,10 @@ void DrawBitMapGrid(HDC hdc)
 	(void)DeleteObject(hPen);
 }
 
-BOOL _FillBitMap(volume_processing_job *job)
+/**
+ * @brief Draws cluster map contents.
+ */
+static void FillMap(volume_processing_job *job)
 {
 	HDC hdc = job->map.hdc;
 	HBRUSH hOldBrush;
@@ -192,15 +211,19 @@ BOOL _FillBitMap(volume_processing_job *job)
 		}
 	}
 	(void)SelectObject(hdc,hOldBrush);
-	return TRUE;
 }
 
+/**
+ * @brief Redraws cluster map.
+ * @note Since v3.1.0 all screen
+ * color depths are supported.
+ */
 void RedrawMap(volume_processing_job *job)
 {
 	HDC hdc;
 	HDC hDC, hMainDC;
 	HBITMAP hBitmap;
-	int i, j, k, x, ratio;
+	int i, j, k, x, ratio, color;
 	int array[NUM_OF_SPACE_STATES];
 	int maximum;
 	
@@ -211,7 +234,7 @@ void RedrawMap(volume_processing_job *job)
 		//return;
 	
 	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
-		// TODO
+		WgxDbgPrintLastError("RedrawMap: wait on hMapEvent failed");
 		return;
 	}
 	
@@ -223,18 +246,19 @@ void RedrawMap(volume_processing_job *job)
 		hMainDC = GetDC(hWindow);
 		hDC = CreateCompatibleDC(hMainDC);
 		hBitmap = CreateCompatibleBitmap(hMainDC,map_width,map_height);
-		(void)ReleaseDC(hWindow,hMainDC);
 		
 		if(hBitmap == NULL){
-			// TODO: debug print here
+			WgxDbgPrintLastError("RedrawMap: CreateCompatibleBitmap failed");
+			(void)ReleaseDC(hWindow,hMainDC);
 			(void)DeleteDC(hDC);
 			SetEvent(hMapEvent);
 			return;
 		}
 	
+		(void)ReleaseDC(hWindow,hMainDC);
 		(void)SelectObject(hDC,hBitmap);
 		(void)SetBkMode(hDC,TRANSPARENT);
-		DrawBitMapGrid(hDC);
+		DrawGrid(hDC);
 		job->map.hdc = hDC;
 		job->map.hbitmap = hBitmap;
 		job->map.width = map_width;
@@ -251,7 +275,8 @@ void RedrawMap(volume_processing_job *job)
 		if(job->map.scaled_buffer) free(job->map.scaled_buffer);
 		job->map.scaled_buffer = malloc(map_blocks_per_line * map_lines);
 		if(job->map.scaled_buffer == NULL){
-			// TODO: debug print here
+			WgxDbgPrint("RedrawMap: cannot allocate %u bytes of memory",
+				map_blocks_per_line * map_lines);
 			job->map.scaled_size = 0;
 			SetEvent(hMapEvent);
 			return;
@@ -276,8 +301,9 @@ void RedrawMap(volume_processing_job *job)
 		for(i = 0, k = 0; i < job->map.scaled_size - 1; i++){
 			memset(array,0,sizeof(array));
 			for(j = 0; j < ratio; j++){
-				// check bounds
-				array[(int)job->map.buffer[k]] ++;
+				color = (int)job->map.buffer[k];
+				if(color >= 0 && color < NUM_OF_SPACE_STATES)
+					array[color] ++;
 				k++;
 			}
 			maximum = array[0], x = 0;
@@ -289,8 +315,11 @@ void RedrawMap(volume_processing_job *job)
 			job->map.scaled_buffer[i] = (char)x;
 		}
 		memset(array,0,sizeof(array));
-		for(; k < job->map.size; k++)
-			array[(int)job->map.buffer[k]] ++;
+		for(; k < job->map.size; k++){
+			color = (int)job->map.buffer[k];
+			if(color >= 0 && color < NUM_OF_SPACE_STATES)
+				array[color] ++;
+		}
 		maximum = array[0], x = 0;
 		for(j = 1; j < NUM_OF_SPACE_STATES; j++){
 			if(array[j] >= maximum){
@@ -300,8 +329,8 @@ void RedrawMap(volume_processing_job *job)
 		job->map.scaled_buffer[i] = (char)x;
 	}
 	
-	/* fill bitmap */
-	_FillBitMap(job);
+	/* fill cluster map */
+	FillMap(job);
 	
 redraw:
 	hdc = GetDC(hMap);
@@ -310,10 +339,15 @@ redraw:
 	SetEvent(hMapEvent);
 }
 
-void DeleteMaps()
+/**
+ * @brief Frees all resources allocated for cluster map.
+ */
+void ReleaseMap(void)
 {
 	int i;
 
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++)
 		(void)DeleteObject(hBrushes[i]);
 }
+
+/** @} */

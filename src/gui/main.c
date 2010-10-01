@@ -77,7 +77,7 @@ void SavePrefs(void);
 
 void CheckForTheNewVersion(void);
 void InitMap(void);
-void DeleteMaps();
+void ReleaseMap(void);
 
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
 BOOL CALLBACK ConfirmDlgProc(HWND, UINT, WPARAM, LPARAM);
@@ -161,7 +161,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* delete all created gdi objects */
 	release_jobs();
 	FreeVolListResources();
-	DeleteMaps();
+	ReleaseMap();
 	WgxDestroyFont(&wgxFont);
 	/* save settings */
 	SavePrefs();
@@ -714,7 +714,7 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	SavePrefs();
 	
 	(void)strcpy(path,".\\udefrag-gui-config.exe");
-	sprintf(buffer,"%s %d",path,(ULONG_PTR)hWindow);
+	sprintf(buffer,"%s %p",path,hWindow);
     
     WgxDbgPrint("UltraDefrag GUI passed window handle as %d\n",(ULONG_PTR)hWindow);
 
