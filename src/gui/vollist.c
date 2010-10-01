@@ -124,37 +124,12 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	return WgxSafeCallWndProc(OldListWndProc,hWnd,iMsg,wParam,lParam);
 }
 
-int ResizeVolList(int x, int y, int width, int height)
+void AdjustVolListColumns(void)
 {
-	int border_height;
-	int border_width;
-	int header_height = 0;
-	int item_height = 0;
-	int n_items;
-	HWND hHeader;
-	RECT rc;
 	int cw[] = {90,90,110,125,90};
 	int total_width = 0;
-	int i;
-
-	/* adjust height of the list */
-	border_height = GetSystemMetrics(SM_CYEDGE);
-	border_width = GetSystemMetrics(SM_CXEDGE);
-	hHeader = (HWND)(LONG_PTR)SendMessage(hList,LVM_GETHEADER,0,0);
-	if(hHeader){
-		if(SendMessage(hHeader,HDM_GETITEMRECT,0,(LRESULT)&rc))
-			header_height = rc.bottom - rc.top;
-	}
-	rc.top = 1;
-	rc.left = LVIR_BOUNDS;
-	if(SendMessage(hList,LVM_GETSUBITEMRECT,0,(LRESULT)&rc))
-		item_height = rc.bottom - rc.top;
-	if(header_height && item_height){
-		/* ensure that an integer number of items will be displayed */
-		n_items = (height - 2 * border_height - header_height) / item_height;
-		height = header_height + n_items * item_height + 2 * border_height;
-	}
-	(void)SetWindowPos(hList,0,x,y,width,height,0);
+	int i, width;
+	RECT rc;
 
 	/* adjust columns widths */
 	if(GetClientRect(hList,&rc))
@@ -175,6 +150,38 @@ int ResizeVolList(int x, int y, int width, int height)
 				cw[i] * width / 505);
 		}
 	}
+}
+
+int ResizeVolList(int x, int y, int width, int height)
+{
+	int border_height;
+	int border_width;
+	int header_height = 0;
+	int item_height = 0;
+	int n_items;
+	HWND hHeader;
+	RECT rc;
+
+	/* adjust height of the list */
+	border_height = GetSystemMetrics(SM_CYEDGE);
+	border_width = GetSystemMetrics(SM_CXEDGE);
+	hHeader = (HWND)(LONG_PTR)SendMessage(hList,LVM_GETHEADER,0,0);
+	if(hHeader){
+		if(SendMessage(hHeader,HDM_GETITEMRECT,0,(LRESULT)&rc))
+			header_height = rc.bottom - rc.top;
+	}
+	rc.top = 1;
+	rc.left = LVIR_BOUNDS;
+	if(SendMessage(hList,LVM_GETSUBITEMRECT,0,(LRESULT)&rc))
+		item_height = rc.bottom - rc.top;
+	if(header_height && item_height){
+		/* ensure that an integer number of items will be displayed */
+		n_items = (height - 2 * border_height - header_height) / item_height;
+		height = header_height + n_items * item_height + 2 * border_height;
+	}
+	(void)SetWindowPos(hList,0,x,y,width,height,0);
+
+	AdjustVolListColumns();
 	return height;
 }
 
@@ -237,6 +244,9 @@ DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	lvi.stateMask = LVIS_SELECTED;
 	lvi.state = LVIS_SELECTED;
 	(void)SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
+	
+	/* scrollbar may appear/disappear after a scan */
+	AdjustVolListColumns();
 	
 	job = get_first_selected_job();
 	RedrawMap(job);
