@@ -49,8 +49,6 @@
 
 #include "../dll/wgx/wgx.h"
 
-#include "../include/ultradfgver.h"
-
 /* Global variables */
 HINSTANCE hInstance;
 HWND hWindow;
@@ -66,33 +64,13 @@ void OpenWebPage(char *page);
 BOOL GetBootExecuteRegistrationStatus(void);
 BOOL InitFont(void);
 
-/*BOOL CALLBACK EnumWindowsProc(HWND hwnd,LPARAM lParam)
-{
-	char caption[32];
-	
-	if(GetWindowText(hwnd,caption,sizeof(caption))){
-		if(strstr(caption,VERSIONINTITLE)){
-			hParent = hwnd;
-			return FALSE;
-		}
-	}
-	return TRUE;
-}*/
-
 /*-------------------- Main Function -----------------------*/
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
 	hInstance = GetModuleHandle(NULL);
     
-	/* FIXME: this method is not reliable */
-    if(sscanf(lpCmdLine,"%p",&hParent) != 1){
-		/* no need to center window over its parent when there is no parent */
-        //EnumWindows(EnumWindowsProc,0);
-        //WgxDbgPrint("UltraDefrag GUI Config enumerated window handle as %p\n",hParent);
-    } else {
-		/* works on 32 bit, needs testing on x64, since pointers are 64-bit there */
+    if(sscanf(lpCmdLine,"%p",&hParent) == 1)
         WgxDbgPrint("UltraDefrag GUI Config received window handle as %p\n",hParent);
-    }
 	
 	/*
 	* This call needs on dmitriar's pc (on xp) no more than 550 cpu tacts,
