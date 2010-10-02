@@ -71,7 +71,8 @@ void InitMap(void)
 {
 	int i;
 	
-	hMap = GetDlgItem(hWindow,IDC_MAP);
+	if(hMap == NULL)
+		hMap = GetDlgItem(hWindow,IDC_MAP);
 	OldRectWndProc = WgxSafeSubclassWindow(hMap,RectWndProc);
 
 	for(i = 0; i < NUM_OF_SPACE_STATES; i++){

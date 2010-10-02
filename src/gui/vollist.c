@@ -26,7 +26,6 @@
 
 #include "main.h"
 
-HWND hList;
 WNDPROC OldListWndProc;
 HIMAGELIST hImgList;
 
@@ -42,8 +41,11 @@ static void DestroyImageList(void);
 void InitVolList(void)
 {
 	LV_COLUMNW lvc;
+	LV_ITEM lvi;
 	
-	hList = GetDlgItem(hWindow,IDC_VOLUMES);
+	if(hList == NULL)
+		hList = GetDlgItem(hWindow,IDC_VOLUMES);
+	
 	(void)SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 		(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
 
@@ -69,6 +71,14 @@ void InitVolList(void)
 	OldListWndProc = WgxSafeSubclassWindow(hList,ListWndProc);
 	(void)SendMessage(hList,LVM_SETBKCOLOR,0,RGB(255,255,255));
 	InitImageList();
+
+	/* force list of volumes to be resized properly */
+	lvi.iItem = 0;
+	lvi.iSubItem = 1;
+	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
+	lvi.pszText = "hi";
+	lvi.iImage = 0;
+	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
 }
 
 /**

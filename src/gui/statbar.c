@@ -50,7 +50,12 @@ void CreateStatusBar(void)
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
 									"0 dirs", hWindow, IDM_STATUSBAR);
 	if(hStatus == NULL){
+#ifdef NEW_DESIGN
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"Cannot create status bar control!");
+#else
 		WgxDbgPrintLastError("CreateStatusWindow failed");
+#endif
 		return;
 	}
 	

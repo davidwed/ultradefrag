@@ -29,9 +29,9 @@
 /* global variables */
 HINSTANCE hInstance;
 char class_name[64];
-
 HWND hWindow = NULL;
-HWND hMap;
+HWND hList = NULL;
+HWND hMap = NULL;
 WGX_FONT wgxFont = {{0},0};
 RECT win_rc; /* coordinates of main window */
 RECT r_rc;   /* coordinates of restored window */
@@ -66,7 +66,8 @@ static int RegisterMainWindowClass(void)
 	wc.hIcon         = NULL;
 	wc.hIconSm       = NULL;
 	wc.hCursor       = LoadCursor(NULL,IDC_ARROW);
-	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	/* TODO: do it more accurately */
+	wc.hbrBackground = (HBRUSH)(COLOR_MENU + 1);
 	wc.lpszMenuName  = NULL;
 	wc.lpszClassName = class_name;
 	
@@ -124,6 +125,39 @@ static void InitMainWindowCoordinates(void)
 	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
 }
 
+static RECT prev_rc = {0,0,0,0};
+
+/**
+ * @brief Adjust positions of controls
+ * in accordance with main window dimensions.
+ */
+void new_ResizeMainWindow(void)
+{
+	int vlist_height, sbar_height;
+	int spacing;
+	RECT rc;
+	int w, h;
+	
+	if(!GetClientRect(hWindow,&rc)){
+		WgxDbgPrint("GetClientRect failed in RepositionMainWindowControls()!\n");
+		return;
+	}
+	
+	vlist_height = DPI(VLIST_HEIGHT);
+	spacing = DPI(SPACING);
+	w = rc.right - rc.left;
+	h = rc.bottom - rc.top;
+
+	/* prevent resizing if the current size is equal to previous */
+	if((prev_rc.right - prev_rc.left == w) && (prev_rc.bottom - prev_rc.top == h))
+		return; /* this usually encounters when user minimizes window and then restores it */
+	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
+	
+	vlist_height = ResizeVolList(0,0,w,vlist_height);
+	sbar_height = ResizeStatusBar(h,w);
+	ResizeMap(0,vlist_height,w,h - vlist_height - sbar_height);
+}
+
 /**
  * @brief Creates main window.
  * @return Zero for success,
@@ -134,6 +168,7 @@ int CreateMainWindow(int nShowCmd)
 	char *caption = MAIN_CAPTION;
 	HACCEL hAccelTable;
 	MSG msg;
+	udefrag_progress_info pi;
 	
 	/* register class */
 	if(RegisterMainWindowClass() < 0)
@@ -154,9 +189,64 @@ int CreateMainWindow(int nShowCmd)
 			"Cannot create main window!");
 		return (-1);
 	}
+	
+	/* create menu */
+	
+	/* create toolbar */
+	
+	/* create controls */
+	hList = CreateWindowEx(WS_EX_CLIENTEDGE,
+			"SysListView32","",
+			WS_CHILD | WS_VISIBLE \
+			| LVS_REPORT | LVS_SHOWSELALWAYS \
+			| LVS_NOSORTHEADER,
+			0,0,100,100,
+			hWindow,NULL,hInstance,NULL);
+	if(hList == NULL){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"Cannot create volume list control!");
+		return (-1);
+	}
 
+	hMap = CreateWindowEx(WS_EX_CLIENTEDGE,
+			"Static","",
+			WS_CHILD | WS_VISIBLE | SS_GRAYRECT,
+			0,100,100,100,
+			hWindow,NULL,hInstance,NULL);
+	if(hMap == NULL){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"Cannot create cluster map control!");
+		return (-1);
+	}
+	
+	CreateStatusBar();
+	if(hStatus == NULL)
+		return (-1);
+	
+	/* set font */
+	InitFont();
+	WgxSetFont(hWindow,&wgxFont);
+
+	/* initialize controls */
+	InitVolList();
+	InitMap();
+
+	/* maximize window if required */
+	if(init_maximized_window)
+		SendMessage(hWindow,(WM_USER + 1),0,0);
+	
+	/* resize controls */
+	new_ResizeMainWindow();
+	
+	/* fill list of volumes */
+	UpdateVolList(); /* after a complete map initialization! */
+
+	/* reset status bar */
+	memset(&pi,0,sizeof(udefrag_progress_info));
+	UpdateStatusBar(&pi);
+	
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
-	ShowWindow(hWindow,nShowCmd);
+	ShowWindow(hWindow,init_maximized_window ? SW_MAXIMIZE : nShowCmd);
 	UpdateWindow(hWindow);
 
 	/* load accelerators */
@@ -177,16 +267,94 @@ int CreateMainWindow(int nShowCmd)
 }
 
 /**
+ * @brief Updates the global win_rc structure.
+ * @return Zero for success, negative value otherwise.
+ */
+int UpdateMainWindowCoordinates(void)
+{
+	RECT rc;
+
+	if(GetWindowRect(hWindow,&rc)){
+		if((HIWORD(rc.bottom)) != 0xffff){
+			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
+			return 0;
+		}
+	}
+	return (-1);
+}
+
+/**
  * @brief Main window procedure.
  */
 LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 {
+	MINMAXINFO *mmi;
+	BOOL size_changed;
+	RECT rc;
+
 	switch(uMsg){
 	case WM_CREATE:
+		/* initialize main window */
 		return 0;
+	case WM_NOTIFY:
+		// TODO
+		//VolListNotifyHandler(lParam);
+		return 0;
+	case WM_COMMAND:
+		// TODO
+		switch(LOWORD(wParam)){
+		case IDC_ANALYSE:
+			start_selected_jobs(ANALYSIS_JOB);
+			return 0;
+		}
+		break;
 	case WM_SIZE:
+		/* resize main window and its controls */
+		if(wParam == SIZE_MAXIMIZED)
+			maximized_window = 1;
+		else if(wParam != SIZE_MINIMIZED)
+			maximized_window = 0;
+		if(UpdateMainWindowCoordinates() >= 0){
+			if(!maximized_window)
+				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
+			new_ResizeMainWindow();
+		} else {
+			WgxDbgPrint("Wrong window dimensions on WM_SIZE message!\n");
+		}
+		return 0;
+	case WM_GETMINMAXINFO:
+		/* set min size to avoid overlaying controls */
+		mmi = (MINMAXINFO *)lParam;
+		mmi->ptMinTrackSize.x = DPI(MIN_WIDTH);
+		mmi->ptMinTrackSize.y = DPI(MIN_HEIGHT);
+		return 0;
+	case WM_MOVE:
+		/* update coordinates of the main window */
+		size_changed = TRUE;
+		if(GetWindowRect(hWindow,&rc)){
+			if((HIWORD(rc.bottom)) != 0xffff){
+				if((rc.right - rc.left == win_rc.right - win_rc.left) &&
+					(rc.bottom - rc.top == win_rc.bottom - win_rc.top))
+						size_changed = FALSE;
+			}
+		}
+		UpdateMainWindowCoordinates();
+		if(!maximized_window && !size_changed)
+			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
+		return 0;
+	case (WM_USER + 1):
+		/* maximize window */
+		ShowWindow(hWnd,SW_MAXIMIZE);
 		return 0;
 	case WM_DESTROY:
+		/* cleanup */
+		UpdateMainWindowCoordinates();
+		if(!maximized_window)
+			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
+		// TODO
+		//VolListGetColumnWidths();
+		//exit_pressed = 1;
+		//stop_all_jobs();
 		PostQuitMessage(0);
 		return 0;
 	}
@@ -271,7 +439,6 @@ void InitMainWindow(void)
 	int s_width, s_height;
 	RECT rc;
 	udefrag_progress_info pi;
-	LV_ITEM lvi;
     
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
 	WgxApplyResourceTable(i18n_table,hWindow);
@@ -279,6 +446,8 @@ void InitMainWindow(void)
 		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
 	}
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
+	InitFont();
+	WgxSetFont(hWindow,&wgxFont);
 
 	if(skip_removable)
 		(void)SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
@@ -301,8 +470,7 @@ void InitMainWindow(void)
     }
 	
 	CreateStatusBar();
-	InitFont();
-	WgxSetFont(hWindow,&wgxFont);
+	WgxSetFont(hStatus,&wgxFont);
 
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
@@ -327,14 +495,6 @@ void InitMainWindow(void)
 	}
 	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
 	
-	/* force list of volumes to be resized properly */
-	lvi.iItem = 0;
-	lvi.iSubItem = 1;
-	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
-	lvi.pszText = "hi";
-	lvi.iImage = 0;
-	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
-	
 	ResizeMainWindow();
 
 	/* maximize window if required */
@@ -347,8 +507,6 @@ void InitMainWindow(void)
 	memset(&pi,0,sizeof(udefrag_progress_info));
 	UpdateStatusBar(&pi);
 }
-
-static RECT prev_rc = {0,0,0,0};
 
 /**
  * @brief Adjust positions of controls
@@ -546,22 +704,6 @@ void ResizeMainWindow(void)
 }
 
 /**
- * @brief Updates the global win_rc structure.
- */
-BOOL UpdateMainWindowCoordinates(void)
-{
-	RECT rc;
-
-	if(GetWindowRect(hWindow,&rc)){
-		if((HIWORD(rc.bottom)) != 0xffff){
-			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
-			return TRUE;
-		}
-	}
-	return FALSE;
-}
-
-/**
  * @brief Main window procedure.
  */
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
@@ -629,7 +771,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			maximized_window = 1;
 		else if(wParam != SIZE_MINIMIZED)
 			maximized_window = 0;
-		if(UpdateMainWindowCoordinates()){
+		if(UpdateMainWindowCoordinates() >= 0){
 			if(!maximized_window)
 				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 			ResizeMainWindow();
@@ -655,12 +797,12 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 						size_changed = FALSE;
 			}
 		}
-		(void)UpdateMainWindowCoordinates();
+		UpdateMainWindowCoordinates();
 		if(!maximized_window && !size_changed)
 			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 		break;
 	case WM_CLOSE:
-		(void)UpdateMainWindowCoordinates();
+		UpdateMainWindowCoordinates();
 		if(!maximized_window)
 			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 		VolListGetColumnWidths();
