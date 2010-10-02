@@ -30,28 +30,18 @@
 HINSTANCE hInstance;
 HWND hWindow = NULL;
 HWND hMap;
-// HANDLE ghMutex = NULL;
-
 WGX_FONT wgxFont = {{0},0};
 RECT win_rc; /* coordinates of main window */
 RECT r_rc;   /* coordinates of restored window */
 signed int delta_h = 0;
 double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 
-extern HWND hList;
-extern HWND hStatus;
-extern int scale_by_dpi;
-extern int maximized_window;
-extern int init_maximized_window;
-extern int restore_default_window_size;
-extern int skip_removable;
-extern int hibernate_instead_of_shutdown;
-extern int show_shutdown_check_confirmation_dialog;
-extern int seconds_for_shutdown_rejection;
-
 int shutdown_flag = FALSE;
-extern int busy_flag, exit_pressed;
+extern int init_maximized_window;
 extern int allow_map_redraw;
+
+/* forward declaration */
+static void UpdateWebStatistics(void);
 
 /**
  * @brief Entry point.
@@ -71,18 +61,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 0;
 	}
 	
-	/* collect statistics about the UltraDefrag GUI client use */
-#ifndef _WIN64
-	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-x86.html","UA-15890458-1");
-#else
-	#if defined(_IA64_)
-		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-ia64.html","UA-15890458-1");
-	#else
-		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-x64.html","UA-15890458-1");
-	#endif
-#endif
-
-	/* check for the new version of the program */
+	UpdateWebStatistics();
 	CheckForTheNewVersion();
 
 	/*
@@ -97,40 +76,23 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 2;
 	}
 	
-    /* use mutex to prevent multiple running instances */
-    /*ghMutex = CreateMutexA(NULL, TRUE, "Global\\MutexUltraDefragGUI");
-    if(GetLastError() != ERROR_SUCCESS){
-        // TODO: activate current window instead of message display
-        WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: already running!");
-        (void)CloseHandle(ghMutex);
-        return 99;
-    }
-	*/
 	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
-		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot create the main window!");
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window");
 		DeleteEnvironmentVariables();
 		release_jobs();
-	
-        /* release the mutex */
-        /*(void)ReleaseMutex(ghMutex);
-        (void)CloseHandle(ghMutex);*/
-    
 		return 3;
 	}
 	
-	/* delete all created gdi objects */
+	/* release all resources */
 	release_jobs();
 	ReleaseVolList();
 	ReleaseMap();
 	WgxDestroyFont(&wgxFont);
+
 	/* save settings */
 	SavePrefs();
 	DeleteEnvironmentVariables();
 	
-    /* release the mutex */
-    /*(void)ReleaseMutex(ghMutex);
-    (void)CloseHandle(ghMutex);*/
-    
 	if(shutdown_flag){
 		result = ShutdownOrHibernate();
 		WgxDestroyResourceTable(i18n_table);
@@ -182,7 +144,6 @@ void InitMainWindow(void)
     }
 	
 	CreateStatusBar();
-
 	InitFont();
 	WgxSetFont(hWindow,&wgxFont);
 
@@ -277,7 +238,7 @@ void ResizeMainWindow(void)
 	
 	/* get dimensions of the client area of the main window */
 	if(!GetClientRect(hWindow,&rc)){
-		OutputDebugString("GetClientRect failed in RepositionMainWindowControls()!\n");
+		WgxDbgPrint("GetClientRect failed in RepositionMainWindowControls()!\n");
 		return;
 	}
 	
@@ -444,8 +405,9 @@ BOOL UpdateMainWindowCoordinates(void)
 	return FALSE;
 }
 
-/*---------------- Main Dialog Callback ---------------------*/
-
+/**
+ * @brief Main window procedure.
+ */
 BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	MINMAXINFO *mmi;
@@ -454,7 +416,6 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	
 	switch(msg){
 	case WM_INITDIALOG:
-		/* Window Initialization */
 		hWindow = hWnd;
 		InitMainWindow();
 		break;
@@ -464,13 +425,13 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
 		case IDC_ANALYSE:
-			DoJob(ANALYSIS_JOB);
+			start_selected_jobs(ANALYSIS_JOB);
 			break;
 		case IDC_DEFRAGM:
-			DoJob(DEFRAG_JOB);
+			start_selected_jobs(DEFRAG_JOB);
 			break;
 		case IDC_OPTIMIZE:
-			DoJob(OPTIMIZER_JOB);
+			start_selected_jobs(OPTIMIZER_JOB);
 			break;
 		case IDC_ABOUT:
 			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1))
@@ -487,7 +448,8 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 				);
 			break;
 		case IDC_SHOWFRAGMENTED:
-			if(!busy_flag) ShowReports();
+			if(!busy_flag)
+				ShowReports();
 			break;
 		case IDC_PAUSE:
 		case IDC_STOP:
@@ -507,14 +469,16 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		break;
 	case WM_SIZE:
-		if(wParam == SIZE_MAXIMIZED) maximized_window = 1;
-		else if(wParam != SIZE_MINIMIZED) maximized_window = 0;
+		if(wParam == SIZE_MAXIMIZED)
+			maximized_window = 1;
+		else if(wParam != SIZE_MINIMIZED)
+			maximized_window = 0;
 		if(UpdateMainWindowCoordinates()){
 			if(!maximized_window)
 				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
 			ResizeMainWindow();
 		} else {
-			OutputDebugString("Wrong window dimensions on WM_SIZE message!\n");
+			WgxDbgPrint("Wrong window dimensions on WM_SIZE message!\n");
 		}
 		break;
 	case (WM_USER + 1):
@@ -551,6 +515,22 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		return TRUE;
 	}
 	return FALSE;
+}
+
+/**
+ * @brief Updates web statistics of the program use.
+ */
+static void UpdateWebStatistics(void)
+{
+#ifndef _WIN64
+	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-x86.html","UA-15890458-1");
+#else
+	#if defined(_IA64_)
+		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-ia64.html","UA-15890458-1");
+	#else
+		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-x64.html","UA-15890458-1");
+	#endif
+#endif
 }
 
 /** @} */

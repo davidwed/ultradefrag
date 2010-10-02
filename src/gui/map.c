@@ -59,7 +59,6 @@ HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 
 WNDPROC OldRectWndProc;
 int allow_map_redraw = 1;
-extern volume_processing_job *current_job;
 extern HANDLE hMapEvent;
 
 /* forward declaration */
@@ -274,7 +273,7 @@ void RedrawMap(volume_processing_job *job)
 		if(job->map.scaled_buffer) free(job->map.scaled_buffer);
 		job->map.scaled_buffer = malloc(map_blocks_per_line * map_lines);
 		if(job->map.scaled_buffer == NULL){
-			WgxDbgPrint("RedrawMap: cannot allocate %u bytes of memory",
+			WgxDbgPrint("RedrawMap: cannot allocate %u bytes of memory\n",
 				map_blocks_per_line * map_lines);
 			job->map.scaled_size = 0;
 			SetEvent(hMapEvent);

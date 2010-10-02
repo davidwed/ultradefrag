@@ -26,8 +26,6 @@
 
 #include "main.h"
 
-int disable_latest_version_check = 0;
-
 #define VERSION_URL "http://ultradefrag.sourceforge.net/version.ini"
 #define MAX_VERSION_FILE_LEN 32
 #define MAX_ANNOUNCEMENT_LEN 128

@@ -136,7 +136,7 @@ typedef struct _volume_processing_job {
 /* prototypes */
 int init_jobs(void);
 volume_processing_job *get_job(char volume_letter);
-void DoJob(udefrag_job_type job_type);
+void start_selected_jobs(udefrag_job_type job_type);
 void stop_all_jobs(void);
 void release_jobs(void);
 
@@ -157,6 +157,8 @@ void InitVolList(void);
 void VolListNotifyHandler(LPARAM lParam);
 void VolListGetColumnWidths(void);
 void UpdateVolList(void);
+void VolListUpdateStatusField(volume_processing_job *job);
+void VolListRefreshItem(volume_processing_job *job);
 void ReleaseVolList(void);
 
 void InitMap(void);
@@ -183,8 +185,25 @@ extern HINSTANCE hInstance;
 extern HWND hWindow;
 extern HWND hList;
 extern HWND hMap;
+extern HWND hStatus;
 extern WGX_FONT wgxFont;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
+extern volume_processing_job *current_job;
+extern int busy_flag;
+extern int shutdown_flag;
+extern int exit_pressed;
+
+/* common preferences */
+extern int hibernate_instead_of_shutdown;
+extern int show_shutdown_check_confirmation_dialog;
+extern int seconds_for_shutdown_rejection;
+extern int scale_by_dpi;
+extern int restore_default_window_size;
+extern int maximized_window;
+extern int init_maximized_window;
+extern int skip_removable;
+extern int disable_latest_version_check;
+extern int user_defined_column_widths[];
 
 /*
 * Note:

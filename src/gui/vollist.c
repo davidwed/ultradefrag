@@ -26,14 +26,9 @@
 
 #include "main.h"
 
-extern volume_processing_job *current_job;
-extern int skip_removable;
-extern BOOL busy_flag;
-
 HWND hList;
 WNDPROC OldListWndProc;
 HIMAGELIST hImgList;
-int user_defined_column_widths[] = {0,0,0,0,0};
 
 /* forward declaration */
 LRESULT CALLBACK ListWndProc(HWND, UINT, WPARAM, LPARAM);

@@ -31,14 +31,23 @@
 
 volume_processing_job jobs[NUMBER_OF_JOBS];
 
+/* currently selected job */
+volume_processing_job *current_job = NULL;
+
 /* synchronizes access to internal map representation */
 HANDLE hMapEvent = NULL;
+
+/* nonzero value indicates that some job is running */
+int busy_flag = 0;
 
 /* forces to stop all running jobs */
 int stop_pressed;
 
 /* nonzero value indicates that the main window has been closed */
 int exit_pressed = 0;
+
+extern int map_blocks_per_line;
+extern int map_lines;
 
 /**
  * @brief Initializes structures belonging to all jobs.
@@ -81,79 +90,87 @@ volume_processing_job *get_job(char volume_letter)
 }
 
 /**
- * @brief Stops all running jobs.
+ * @brief Updates progress indicators
+ * for the currently running job.
  */
-void stop_all_jobs(void)
+static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 {
-	stop_pressed = 1;
+	volume_processing_job *job;
+	static wchar_t progress_msg[128];
+    static wchar_t *ProcessCaption = L"";
+    char WindowCaption[256];
+	char current_operation;
+
+	job = current_job;
+
+	if(job == NULL)
+		return;
+
+	memcpy(&job->pi,pi,sizeof(udefrag_progress_info));
+	
+	VolListUpdateStatusField(job);
+	UpdateStatusBar(pi);
+	current_operation = pi->current_operation;
+	if(current_operation == 'C') current_operation = 'O';
+	
+	if(current_operation == 'D')
+		ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
+	else if(current_operation == 'O')
+		ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
+	else
+		ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
+	_snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
+	progress_msg[sizeof(progress_msg) - 1] = 0;
+	SetProgress(progress_msg,(int)pi->percentage);
+	
+	(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
+	(void)SetWindowText(hWindow, WindowCaption);
+
+	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("update_progress: wait on hMapEvent failed");
+		return;
+	}
+	if(pi->cluster_map){
+		if(job->map.buffer == NULL || pi->cluster_map_size != job->map.size){
+			if(job->map.buffer)
+				free(job->map.buffer);
+			job->map.buffer = malloc(pi->cluster_map_size);
+		}
+		if(job->map.buffer == NULL){
+			WgxDbgPrint("update_progress: cannot allocate %u bytes of memory\n",
+				pi->cluster_map_size);
+			job->map.size = 0;
+		} else {
+			job->map.size = pi->cluster_map_size;
+			memcpy(job->map.buffer,pi->cluster_map,pi->cluster_map_size);
+		}
+	}
+	SetEvent(hMapEvent);
+
+	if(pi->cluster_map && job->map.buffer)
+		RedrawMap(job);
+	
+	if(pi->completion_status != 0 && !stop_pressed){
+		/* the job is completed */
+		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls 100.00 %%",ProcessCaption);
+        progress_msg[sizeof(progress_msg) - 1] = 0;
+		SetProgress(progress_msg,100);
+        (void)SetWindowText(hWindow, VERSIONINTITLE);
+	}
 }
 
 /**
- * @brief Frees resources allocated for all jobs.
+ * @brief Terminates currently running job.
  */
-void release_jobs(void)
+static int __stdcall terminator(void *p)
 {
-	volume_processing_job *j;
-	int i;
-	
-	for(i = 0; i < NUMBER_OF_JOBS; i++){
-		j = &jobs[i];
-		if(j->map.hdc)
-			(void)DeleteDC(j->map.hdc);
-		if(j->map.hbitmap)
-			(void)DeleteObject(j->map.hbitmap);
-		if(j->map.buffer)
-			free(j->map.buffer);
-		if(j->map.scaled_buffer)
-			free(j->map.scaled_buffer);
-	}
-	if(hMapEvent)
-		CloseHandle(hMapEvent);
+	return stop_pressed;
 }
 
-
-
-
-
-
-
-extern int map_blocks_per_line;
-extern int map_lines;
-extern int shutdown_flag;
-
-BOOL busy_flag = 0;
-char current_operation;
-
-volume_processing_job *current_job = NULL;
-
-DWORD WINAPI ThreadProc(LPVOID);
-void DisplayDefragError(int error_code,char *caption);
-void ProcessSingleVolume(volume_processing_job *job);
-void VolListUpdateStatusField(volume_processing_job *job);
-void VolListRefreshItem(volume_processing_job *job);
-
-extern HANDLE hMapEvent;
-
-void DoJob(udefrag_job_type job_type)
-{
-	DWORD id;
-	HANDLE h;
-	char *action = "analysis";
-
-	h = create_thread(ThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
-	if(h == NULL){
-		if(job_type == DEFRAG_JOB)
-			action = "defragmentation";
-		else if(job_type == OPTIMIZER_JOB)
-			action = "optimization";
-		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"UltraDefrag: cannot create thread starting volume %s!",
-			action);
-	} else {
-		CloseHandle(h);
-	}
-}
-
+/**
+ * @brief Displays detailed information
+ * about volume validation failure.
+ */
 void DisplayInvalidVolumeError(int error_code)
 {
 	char buffer[512];
@@ -171,6 +188,10 @@ void DisplayInvalidVolumeError(int error_code)
 	}
 }
 
+/**
+ * @brief Displays detailed information
+ * about volume processing failure.
+ */
 void DisplayDefragError(int error_code,char *caption)
 {
 	char buffer[512];
@@ -182,103 +203,49 @@ void DisplayDefragError(int error_code,char *caption)
 	MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
 }
 
-/* callback function */
-void __stdcall update_progress(udefrag_progress_info *pi, void *p)
+/**
+ * @brief Runs job for a single volume.
+ */
+void ProcessSingleVolume(volume_processing_job *job)
 {
-	volume_processing_job *job;
-	static wchar_t progress_msg[128];
-    static wchar_t *ProcessCaption;
-    char WindowCaption[256];
+	int error_code;
 
-	job = current_job;
-	if(job == NULL) return;
-
-	memcpy(&job->pi,pi,sizeof(udefrag_progress_info));
-	
-	VolListUpdateStatusField(job);
-
-	UpdateStatusBar(pi);
-	current_operation = pi->current_operation;
-	if(current_operation == 'C') current_operation = 'O';
-	
-	ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
-		
-	if(current_operation) {
-		switch(current_operation){
-			case 'D':
-				ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
-				break;
-			case 'O':
-				ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
-		}
-	}
-		
-	_snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
-	progress_msg[sizeof(progress_msg) - 1] = 0;
-	
-	SetProgress(progress_msg,(int)pi->percentage);
-	
-	(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
-	(void)SetWindowText(hWindow, WindowCaption);
-
-	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
-		WgxDbgPrintLastError("Wait on hMapEvent failed in update_progress");
+	if(job == NULL)
 		return;
-	}
-	if(pi->cluster_map){
-		if(job->map.buffer == NULL || pi->cluster_map_size != job->map.size){
-			if(job->map.buffer)
-				free(job->map.buffer);
-			job->map.buffer = malloc(pi->cluster_map_size);
-		}
-		if(job->map.buffer == NULL){
-			// TODO
-			job->map.size = 0;
-		} else {
-			job->map.size = pi->cluster_map_size;
-			memcpy(job->map.buffer,pi->cluster_map,pi->cluster_map_size);
-		}
-	}
-	SetEvent(hMapEvent);
 
-	if(pi->cluster_map && job->map.buffer)
-		RedrawMap(job);
-	
-	if(pi->completion_status == 0) return;
-	if(!stop_pressed){
-        ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
-            
-		if(current_operation) {
-            switch(current_operation){
-                case 'D':
-                    ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
-                    break;
-                case 'O':
-                    ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
-            }
-        }
-            
-		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls 100.00 %%",ProcessCaption);
-        progress_msg[sizeof(progress_msg) - 1] = 0;
+	/* refresh capacity information of the volume (bug #2036873) */
+	VolListRefreshItem(job);
+	//ClearMap();
+	ShowProgress();
+	SetProgress(L"A 0.00 %",0);
 
-		SetProgress(progress_msg,100);
-        
-        (void)SetWindowText(hWindow, VERSIONINTITLE);
+	/* validate the volume before any processing */
+	error_code = udefrag_validate_volume(job->volume_letter,FALSE);
+	if(error_code < 0){
+		/* handle error */
+		DisplayInvalidVolumeError(error_code);
+	} else {
+		/* process the volume */
+		current_job = job;
+		error_code = udefrag_start_job(job->volume_letter, job->job_type,
+				map_blocks_per_line * map_lines,
+				update_progress, terminator, NULL);
+		if(error_code < 0 && !exit_pressed){
+			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
+			//ClearMap();
+		}
 	}
-	return;
 }
 
-int __stdcall terminator(void *p)
-{
-	return stop_pressed;
-}
-
-DWORD WINAPI ThreadProc(LPVOID lpParameter)
+/**
+ * @brief start_selected_jobs thread routine.
+ */
+DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 {
 	volume_processing_job *job;
 	LRESULT SelectedItem;
 	LV_ITEM lvi;
-	char buffer[128];
+	char buffer[64];
 	int index;
 	udefrag_job_type job_type = (udefrag_job_type)(DWORD_PTR)lpParameter;
 	
@@ -309,7 +276,7 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 		lvi.iSubItem = 0;
 		lvi.mask = LVIF_TEXT;
 		lvi.pszText = buffer;
-		lvi.cchTextMax = 127;
+		lvi.cchTextMax = 63;
 		if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
 			job = get_job(buffer[0]);
 			if(job){
@@ -340,36 +307,58 @@ DWORD WINAPI ThreadProc(LPVOID lpParameter)
 	return 0;
 }
 
-void ProcessSingleVolume(volume_processing_job *job)
+/**
+ * @brief Runs sequentially all selected jobs.
+ */
+void start_selected_jobs(udefrag_job_type job_type)
 {
-	int error_code;
+	DWORD id;
+	HANDLE h;
+	char *action = "analysis";
 
-	if(job == NULL) return;
-
-	/* refresh selected volume information (bug #2036873) */
-	VolListRefreshItem(job);
-	
-	//ClearMap();
-
-	ShowProgress();
-	SetProgress(L"A 0.00 %",0);
-
-	/* validate the volume before any processing */
-	error_code = udefrag_validate_volume(job->volume_letter,FALSE);
-	if(error_code < 0){
-		/* handle error */
-		DisplayInvalidVolumeError(error_code);
+	h = create_thread(StartJobsThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
+	if(h == NULL){
+		if(job_type == DEFRAG_JOB)
+			action = "defragmentation";
+		else if(job_type == OPTIMIZER_JOB)
+			action = "optimization";
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
+			"UltraDefrag: cannot create thread starting volume %s!",
+			action);
 	} else {
-		/* process the volume */
-		current_job = job;
-		error_code = udefrag_start_job(job->volume_letter, job->job_type,
-				map_blocks_per_line * map_lines,
-				update_progress, terminator, NULL);
-		if(error_code < 0 && !exit_pressed){
-			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
-			//ClearMap();
-		}
+		CloseHandle(h);
 	}
+}
+
+/**
+ * @brief Stops all running jobs.
+ */
+void stop_all_jobs(void)
+{
+	stop_pressed = 1;
+}
+
+/**
+ * @brief Frees resources allocated for all jobs.
+ */
+void release_jobs(void)
+{
+	volume_processing_job *j;
+	int i;
+	
+	for(i = 0; i < NUMBER_OF_JOBS; i++){
+		j = &jobs[i];
+		if(j->map.hdc)
+			(void)DeleteDC(j->map.hdc);
+		if(j->map.hbitmap)
+			(void)DeleteObject(j->map.hbitmap);
+		if(j->map.buffer)
+			free(j->map.buffer);
+		if(j->map.scaled_buffer)
+			free(j->map.scaled_buffer);
+	}
+	if(hMapEvent)
+		CloseHandle(hMapEvent);
 }
 
 /** @} */

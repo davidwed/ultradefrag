@@ -45,23 +45,23 @@ char dbgprint_level[32] = {0};
 int hibernate_instead_of_shutdown = FALSE;
 int show_shutdown_check_confirmation_dialog = 1;
 int seconds_for_shutdown_rejection = 60;
-extern int map_block_size;
-extern int grid_line_width;
-extern int disable_latest_version_check;
 int scale_by_dpi = 1;
 int restore_default_window_size = 0;
-int rx = UNDEFINED_COORD, ry = UNDEFINED_COORD;
-int rwidth = 0, rheight = 0;
 int maximized_window = 0;
 int init_maximized_window = 0;
 int skip_removable = TRUE;
-extern int user_defined_column_widths[];
+int disable_latest_version_check = 0;
+int user_defined_column_widths[] = {0,0,0,0,0};
+
+int rx = UNDEFINED_COORD;
+int ry = UNDEFINED_COORD;
+int rwidth = 0;
+int rheight = 0;
 
 extern RECT r_rc;
-extern double pix_per_dialog_unit;
-
 extern int map_block_size;
 extern int grid_line_width;
+extern double pix_per_dialog_unit;
 extern int last_block_size;
 extern int last_grid_width;
 extern int last_x;

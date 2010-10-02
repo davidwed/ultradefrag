@@ -26,9 +26,6 @@
 
 #include "main.h"
 
-extern int hibernate_instead_of_shutdown;
-extern int seconds_for_shutdown_rejection;
-
 /**
  * @brief Asks user whether he really wants
  * to shutdown/hibernate computer after a job

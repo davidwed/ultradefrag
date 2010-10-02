@@ -26,7 +26,8 @@
 
 #include "main.h"
 
-HWND hProgressMsg, hProgressBar;
+HWND hProgressMsg;
+HWND hProgressBar;
 
 void InitProgress(void)
 {
