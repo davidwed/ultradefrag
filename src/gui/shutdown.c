@@ -158,7 +158,7 @@ int ShutdownOrHibernate(void)
 	/* set SE_SHUTDOWN privilege */
 	if(!OpenProcessToken(GetCurrentProcess(), 
 	TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,&hToken)){
-		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot open process token");
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot open process token!");
 		return 4;
 	}
 	
@@ -167,14 +167,14 @@ int ShutdownOrHibernate(void)
 	tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED; 
 	AdjustTokenPrivileges(hToken,FALSE,&tkp,0,(PTOKEN_PRIVILEGES)NULL,0); 		
 	if(GetLastError() != ERROR_SUCCESS){
-		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot set shutdown privilege");
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot set shutdown privilege!");
 		return 5;
 	}
 	
 	if(hibernate_instead_of_shutdown){
 		/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
 		if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
-			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot hibernate the computer");
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot hibernate the computer!");
 			return 6;
 		}
 	} else {
@@ -184,7 +184,7 @@ int ShutdownOrHibernate(void)
 		*/
 		if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
 		  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
-			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot shut down the computer");
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot shut down the computer!");
 			return 7;
 		}
 	}

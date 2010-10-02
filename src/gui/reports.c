@@ -66,7 +66,7 @@ static void ShowSingleReport(volume_processing_job *job)
 	if(!CreateProcess(cmd,buffer,
 	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
 	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"Cannot execute lua5.1a_gui.exe program");
+			"Cannot execute lua5.1a_gui.exe program!");
 	    return;
 	}
 	CloseHandle(pi.hProcess);

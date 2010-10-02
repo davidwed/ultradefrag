@@ -62,7 +62,7 @@ int init_jobs(void)
 	hMapEvent = CreateEvent(NULL,FALSE,TRUE,event_name);
 	if(hMapEvent == NULL){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
-			"UltraDefrag: cannot create %s event",
+			"Cannot create %s event!",
 			event_name);
 		return (-1);
 	}
@@ -323,7 +323,7 @@ void start_selected_jobs(udefrag_job_type job_type)
 		else if(job_type == OPTIMIZER_JOB)
 			action = "optimization";
 		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"UltraDefrag: cannot create thread starting volume %s!",
+			"Cannot create thread starting volume %s!",
 			action);
 	} else {
 		CloseHandle(h);

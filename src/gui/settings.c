@@ -274,7 +274,7 @@ DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
 	if(!CreateProcess(path,buffer,
 	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
 	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"Cannot execute udefrag-gui-config.exe program");
+			"Cannot execute udefrag-gui-config.exe program!");
 	    return 0;
 	}
 	(void)WaitForSingleObject(pi.hProcess,INFINITE);
@@ -315,7 +315,7 @@ void OpenConfigurationDialog(void)
 	h = create_thread(ConfigThreadProc,NULL,&id);
 	if(h == NULL){
 		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"Cannot create thread opening the Configuration dialog");
+			"Cannot create thread opening the Configuration dialog!");
 	} else {
 		CloseHandle(h);
 	}

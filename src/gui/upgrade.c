@@ -170,7 +170,7 @@ void CheckForTheNewVersion(void)
 	h = create_thread(CheckForTheNewVersionThreadProc,NULL,&id);
 	if(h == NULL){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONWARNING,
-			"Cannot create thread checking the latest version of the program");
+			"Cannot create thread checking the latest version of the program!");
 	} else {
 		CloseHandle(h);
 	}
