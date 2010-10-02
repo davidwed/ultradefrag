@@ -71,6 +71,14 @@
 
 #include "resource.h"
 
+//#define NEW_DESIGN
+
+#ifndef UDEFRAG_PORTABLE
+#define MAIN_CAPTION VERSIONINTITLE
+#else
+#define MAIN_CAPTION VERSIONINTITLE_PORTABLE
+#endif
+
 /* default GUI preferences */
 #define DEFAULT_MAP_BLOCK_SIZE  4
 #define DEFAULT_GRID_LINE_WIDTH 1

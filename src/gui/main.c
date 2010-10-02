@@ -28,20 +28,170 @@
 
 /* global variables */
 HINSTANCE hInstance;
+char class_name[64];
+
 HWND hWindow = NULL;
 HWND hMap;
 WGX_FONT wgxFont = {{0},0};
 RECT win_rc; /* coordinates of main window */
 RECT r_rc;   /* coordinates of restored window */
-signed int delta_h = 0;
 double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 
 int shutdown_flag = FALSE;
 extern int init_maximized_window;
 extern int allow_map_redraw;
 
-/* forward declaration */
+/* forward declarations */
 static void UpdateWebStatistics(void);
+LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+
+/**
+ * @brief Registers main window class.
+ * @return Zero for success, negative value otherwise.
+ */
+static int RegisterMainWindowClass(void)
+{
+	WNDCLASSEX wc;
+	
+	/* make it unique to be able to center configuration dialog over */
+	_snprintf(class_name,sizeof(class_name),"udefrag-gui-%u",(int)GetCurrentProcessId());
+	class_name[sizeof(class_name) - 1] = 0;
+	
+	wc.cbSize        = sizeof(WNDCLASSEX);
+	wc.style         = 0;
+	wc.lpfnWndProc   = MainWindowProc;
+	wc.cbClsExtra    = 0;
+	wc.cbWndExtra    = 0;
+	wc.hInstance     = hInstance;
+	wc.hIcon         = NULL;
+	wc.hIconSm       = NULL;
+	wc.hCursor       = LoadCursor(NULL,IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wc.lpszMenuName  = NULL;
+	wc.lpszClassName = class_name;
+	
+	if(!RegisterClassEx(&wc)){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"RegisterMainWindowClass failed!");
+		return (-1);
+	}
+	return 0;
+}
+
+/**
+ * @brief Defines initial
+ * coordinates of main window.
+ */
+static void InitMainWindowCoordinates(void)
+{
+	int center_on_the_screen = 0;
+	int screen_width, screen_height;
+	int width, height;
+	RECT rc;
+
+    if(scale_by_dpi){
+        rc.top = rc.left = 0;
+        rc.right = rc.bottom = 100;
+        if(MapDialogRect(hWindow,&rc))
+            pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
+    }
+
+	if(r_rc.left == UNDEFINED_COORD)
+		center_on_the_screen = 1;
+	else if(r_rc.top == UNDEFINED_COORD)
+		center_on_the_screen = 1;
+	else if(restore_default_window_size)
+		center_on_the_screen = 1;
+	
+	if(center_on_the_screen){
+		/* center default sized window on the screen */
+		width = DPI(DEFAULT_WIDTH);
+		height = DPI(DEFAULT_HEIGHT);
+		screen_width = GetSystemMetrics(SM_CXSCREEN);
+		screen_height = GetSystemMetrics(SM_CYSCREEN);
+		if(screen_width < width || screen_height < height){
+			r_rc.left = r_rc.top = 0;
+		} else {
+			r_rc.left = (screen_width - width) / 2;
+			r_rc.top = (screen_height - height) / 2;
+		}
+		r_rc.right = r_rc.left + width;
+		r_rc.bottom = r_rc.top + height;
+		restore_default_window_size = 0; /* because already done */
+	}
+
+	WgxCheckWindowCoordinates(&r_rc,130,50);
+	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
+}
+
+/**
+ * @brief Creates main window.
+ * @return Zero for success,
+ * negative value otherwise.
+ */
+int CreateMainWindow(int nShowCmd)
+{
+	char *caption = MAIN_CAPTION;
+	HACCEL hAccelTable;
+	MSG msg;
+	
+	/* register class */
+	if(RegisterMainWindowClass() < 0)
+		return (-1);
+	
+	/* create main window */
+	InitMainWindowCoordinates();
+	hWindow = CreateWindowEx(
+			WS_EX_APPWINDOW,
+			class_name,caption,
+			WS_OVERLAPPEDWINDOW,
+			win_rc.left,win_rc.top,
+			win_rc.right - win_rc.left,
+			win_rc.bottom - win_rc.top,
+			NULL,NULL,hInstance,NULL);
+	if(hWindow == NULL){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"Cannot create main window!");
+		return (-1);
+	}
+
+	WgxSetIcon(hInstance,hWindow,IDI_APP);
+	ShowWindow(hWindow,nShowCmd);
+	UpdateWindow(hWindow);
+
+	/* load accelerators */
+	hAccelTable = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
+	if(hAccelTable == NULL){
+		WgxDbgPrintLastError("CreateMainWindow: accelerators cannot be loaded");
+	}
+	
+	/* go to the message loop */
+	while(GetMessage(&msg,NULL,0,0)){
+		if(!TranslateAccelerator(hWindow,hAccelTable,&msg)){
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+	}
+
+	return 0;
+}
+
+/**
+ * @brief Main window procedure.
+ */
+LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
+{
+	switch(uMsg){
+	case WM_CREATE:
+		return 0;
+	case WM_SIZE:
+		return 0;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		return 0;
+	}
+	return DefWindowProc(hWnd,uMsg,wParam,lParam);
+}
 
 /**
  * @brief Entry point.
@@ -61,6 +211,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 0;
 	}
 	
+	WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng");
 	UpdateWebStatistics();
 	CheckForTheNewVersion();
 
@@ -72,17 +223,27 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	InitCommonControls();
 	
 	if(init_jobs() < 0){
+		WgxDestroyResourceTable(i18n_table);
 		DeleteEnvironmentVariables();
 		return 2;
 	}
-	
-	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
-		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window");
+
+#ifdef NEW_DESIGN
+	if(CreateMainWindow(nShowCmd) < 0){
+		WgxDestroyResourceTable(i18n_table);
 		DeleteEnvironmentVariables();
 		release_jobs();
 		return 3;
 	}
-	
+#else
+	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window!");
+		DeleteEnvironmentVariables();
+		release_jobs();
+		return 3;
+	}
+#endif
+
 	/* release all resources */
 	release_jobs();
 	ReleaseVolList();
@@ -113,8 +274,7 @@ void InitMainWindow(void)
 	LV_ITEM lvi;
     
 	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
-	if(WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng"))
-		WgxApplyResourceTable(i18n_table,hWindow);
+	WgxApplyResourceTable(i18n_table,hWindow);
 	if(hibernate_instead_of_shutdown){
 		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
 	}
@@ -133,9 +293,6 @@ void InitMainWindow(void)
 		coord_undefined = TRUE;
 	WgxCheckWindowCoordinates(&r_rc,130,50);
 
-	delta_h = GetSystemMetrics(SM_CYCAPTION) - 0x13;
-	if(delta_h < 0) delta_h = 0;
-
     if (scale_by_dpi) {
         rc.top = rc.left = 0;
         rc.right = rc.bottom = 100;
@@ -150,7 +307,7 @@ void InitMainWindow(void)
 	if(coord_undefined || restore_default_window_size){
 		/* center default sized window on the screen */
 		dx = DPI(DEFAULT_WIDTH);
-		dy = DPI(DEFAULT_HEIGHT) + delta_h;
+		dy = DPI(DEFAULT_HEIGHT);
 		s_width = GetSystemMetrics(SM_CXSCREEN);
 		s_height = GetSystemMetrics(SM_CYSCREEN);
 		if(s_width < dx || s_height < dy){
@@ -160,12 +317,12 @@ void InitMainWindow(void)
 			r_rc.top = (s_height - dy) / 2;
 		}
 		r_rc.right = r_rc.left + dx;
-		r_rc.bottom = r_rc.top + dy - delta_h;
+		r_rc.bottom = r_rc.top + dy;
 		SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
 		restore_default_window_size = 0; /* because already done */
 	} else {
 		dx = r_rc.right - r_rc.left;
-		dy = r_rc.bottom - r_rc.top + delta_h;
+		dy = r_rc.bottom - r_rc.top;
 		SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
 	}
 	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
@@ -397,7 +554,6 @@ BOOL UpdateMainWindowCoordinates(void)
 
 	if(GetWindowRect(hWindow,&rc)){
 		if((HIWORD(rc.bottom)) != 0xffff){
-			rc.bottom -= delta_h;
 			memcpy((void *)&win_rc,(void *)&rc,sizeof(RECT));
 			return TRUE;
 		}
@@ -435,7 +591,7 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			break;
 		case IDC_ABOUT:
 			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1))
-				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"UltraDefrag: cannot create the About window!");
+				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
 			break;
 		case IDC_SETTINGS:
 			if(!busy_flag)
@@ -494,7 +650,6 @@ BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		size_changed = TRUE;
 		if(GetWindowRect(hWindow,&rc)){
 			if((HIWORD(rc.bottom)) != 0xffff){
-				rc.bottom -= delta_h;
 				if((rc.right - rc.left == win_rc.right - win_rc.left) &&
 					(rc.bottom - rc.top == win_rc.bottom - win_rc.top))
 						size_changed = FALSE;
