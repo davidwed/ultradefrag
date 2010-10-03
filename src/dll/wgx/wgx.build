@@ -5,7 +5,7 @@ target_type = "dll"
 
 src = {
 	"accel.c", "config.c", "dbg.c", "font.c", "i18n.c",
-	"misc.c", "shell.c", "web-analytics.c", "wgx.c" 
+	"menu.c", "misc.c", "shell.c", "web-analytics.c", "wgx.c" 
 }
 
 rc = { "wgx.rc" }

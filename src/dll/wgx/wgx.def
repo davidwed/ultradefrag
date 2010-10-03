@@ -2,6 +2,8 @@ LIBRARY wgx.dll
 
 EXPORTS
 	WgxAddAccelerators
+	WgxBuildMenu
+	WgxBuildPopupMenu
 
 	WgxBuildResourceTable
 	WgxApplyResourceTable

@@ -73,8 +73,17 @@ typedef struct _WGX_OPTION {
 	void *default_value;  /* default value */
 } WGX_OPTION, *PWGX_OPTION;
 
+typedef struct _WGX_MENU {
+	UINT flags;          /* combination of MF_xxx flags (see MSDN for details) */
+	UINT_PTR id;         /* menu item identifier; pointer to another menu table in case of MF_POPUP */
+	wchar_t *text;       /* menu item text in case of MF_STRING */
+} WGX_MENU, *PWGX_MENU;
+
 /* wgx routines prototypes */
 BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
+
+HMENU __stdcall WgxBuildMenu(WGX_MENU *menu_table);
+HMENU __stdcall WgxBuildPopupMenu(WGX_MENU *menu_table);
 
 /* lines in language files are limited by 8191 characters, which is more than enough */
 BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_file_path);
