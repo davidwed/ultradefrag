@@ -26,6 +26,8 @@
 
 #include "main.h"
 
+HMENU hMainMenu;
+
 WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_ANALYZE, L"&Analyze\tF5"   },
 	{MF_STRING | MF_ENABLED,IDM_DEFRAG,  L"&Defragment\tF6"},
@@ -33,7 +35,7 @@ WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_STOP,    L"&Stop\tCtrl+C"  },
 	{MF_SEPARATOR,0,NULL},
 	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA,L"&Ignore removable media\tCtrl+I"},
-	{MF_STRING | MF_ENABLED,IDM_RESCAN,L"&Rescan drives\tCtrl+R"},
+	{MF_STRING | MF_ENABLED,IDM_RESCAN,L"&Rescan drives\tCtrl+D"},
 	{MF_SEPARATOR,0,NULL},
 	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_SHUTDOWN,L"&Shutdown when done\tCtrl+S"},
 	{MF_SEPARATOR,0,NULL},
@@ -138,18 +140,23 @@ WGX_MENU main_menu[] = {
  */
 int CreateMainMenu(void)
 {
-	HMENU hMenu;
-	
 	/* create menu */
-	hMenu = WgxBuildMenu(main_menu);
+	hMainMenu = WgxBuildMenu(main_menu);
 	
 	/* attach menu to the window */
-	if(!SetMenu(hWindow,hMenu)){
+	if(!SetMenu(hWindow,hMainMenu)){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
 			"Cannot set main menu!");
-		DestroyMenu(hMenu);
+		DestroyMenu(hMainMenu);
 		return (-1);
 	}
+	
+	if(skip_removable == 0){
+		CheckMenuItem(hMainMenu,
+			IDM_IGNORE_REMOVABLE_MEDIA,
+			MF_BYCOMMAND | MF_UNCHECKED);
+	}
+	
 	if(!DrawMenuBar(hWindow))
 		WgxDbgPrintLastError("Cannot redraw main menu");
 

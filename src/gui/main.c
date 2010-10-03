@@ -250,11 +250,12 @@ int CreateMainWindow(int nShowCmd)
 	UpdateStatusBar(&pi);
 	
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
+	SetFocus(hList);
 	ShowWindow(hWindow,init_maximized_window ? SW_MAXIMIZE : nShowCmd);
 	UpdateWindow(hWindow);
 
 	/* load accelerators */
-	hAccelTable = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_ACCELERATOR1));
+	hAccelTable = LoadAccelerators(hInstance,MAKEINTRESOURCE(IDR_MAIN_ACCELERATOR));
 	if(hAccelTable == NULL){
 		WgxDbgPrintLastError("CreateMainWindow: accelerators cannot be loaded");
 	}
@@ -268,6 +269,26 @@ int CreateMainWindow(int nShowCmd)
 	}
 
 	return 0;
+}
+
+/**
+ * @brief Opens web page of the handbook,
+ * either from local storage or from the network.
+ */
+static void OpenWebPage(char *page)
+{
+	short path[MAX_PATH];
+	HINSTANCE hApp;
+	
+	(void)_snwprintf(path,MAX_PATH,L".\\handbook\\%hs",page);
+	path[MAX_PATH - 1] = 0;
+
+	hApp = ShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
+	if((int)(LONG_PTR)hApp <= 32){
+		(void)_snwprintf(path,MAX_PATH,L"http://ultradefrag.sourceforge.net/handbook/%hs",page);
+		path[MAX_PATH - 1] = 0;
+		(void)WgxShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_SHOW);
+	}
 }
 
 /**
@@ -295,6 +316,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	MINMAXINFO *mmi;
 	BOOL size_changed;
 	RECT rc;
+	short path[MAX_PATH];
 
 	switch(uMsg){
 	case WM_CREATE:
@@ -304,10 +326,72 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		VolListNotifyHandler(lParam);
 		return 0;
 	case WM_COMMAND:
-		// TODO
 		switch(LOWORD(wParam)){
+		/* Action menu handlers */
 		case IDM_ANALYZE:
 			start_selected_jobs(ANALYSIS_JOB);
+			return 0;
+		case IDM_DEFRAG:
+			start_selected_jobs(DEFRAG_JOB);
+			return 0;
+		case IDM_OPTIMIZE:
+			start_selected_jobs(OPTIMIZER_JOB);
+			return 0;
+		case IDM_STOP:
+			stop_all_jobs();
+			return 0;
+		case IDM_IGNORE_REMOVABLE_MEDIA:
+			if(skip_removable){
+				skip_removable = 0;
+				CheckMenuItem(hMainMenu,
+					IDM_IGNORE_REMOVABLE_MEDIA,
+					MF_BYCOMMAND | MF_UNCHECKED);
+			} else {
+				skip_removable = 1;
+				CheckMenuItem(hMainMenu,
+					IDM_IGNORE_REMOVABLE_MEDIA,
+					MF_BYCOMMAND | MF_CHECKED);
+			}
+		case IDM_RESCAN:
+			if(!busy_flag)
+				UpdateVolList();
+			return 0;
+		case IDM_EXIT:
+			goto done;
+		/* Reports menu handler */
+		case IDM_SHOW_REPORT:
+			if(!busy_flag)
+				ShowReports();
+			return 0;
+		/* Settings menu handlers */
+		case IDM_CFG_BOOT_SCRIPT:
+			if(!GetWindowsDirectoryW(path,MAX_PATH)){
+				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot retrieve the Windows directory path");
+			} else {
+				(void)wcscat(path,L"\\System32\\ud-boot-time.cmd");
+				(void)WgxShellExecuteW(hWindow,L"edit",path,NULL,NULL,SW_SHOW);
+			}
+			return 0;
+		case IDM_CFG_REPORTS:
+			#ifndef UDEFRAG_PORTABLE
+			(void)WgxShellExecuteW(hWindow,L"Edit",L".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
+			#else
+			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\udreportopts.lua",NULL,SW_SHOW);
+			#endif
+			return 0;
+		/* Help menu handlers */
+		case IDM_CONTENTS:
+			OpenWebPage("index.html");
+			return 0;
+		case IDM_BEST_PRACTICE:
+			MessageBox(hWindow,"Ask Stefan for the best practices!","Hi ^_^",MB_OK | MB_ICONINFORMATION);
+			return 0;
+		case IDM_FAQ:
+			OpenWebPage("FAQ.html");
+			return 0;
+		case IDM_ABOUT:
+			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1))
+				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
 			return 0;
 		}
 		break;
@@ -350,17 +434,19 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		ShowWindow(hWnd,SW_MAXIMIZE);
 		return 0;
 	case WM_DESTROY:
-		/* cleanup */
-		UpdateMainWindowCoordinates();
-		if(!maximized_window)
-			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-		VolListGetColumnWidths();
-		exit_pressed = 1;
-		stop_all_jobs();
-		PostQuitMessage(0);
-		return 0;
+		goto done;
 	}
 	return DefWindowProc(hWnd,uMsg,wParam,lParam);
+
+done:
+	UpdateMainWindowCoordinates();
+	if(!maximized_window)
+		memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
+	VolListGetColumnWidths();
+	exit_pressed = 1;
+	stop_all_jobs();
+	PostQuitMessage(0);
+	return 0;
 }
 
 /**
