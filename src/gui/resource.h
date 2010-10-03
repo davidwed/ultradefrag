@@ -40,6 +40,7 @@
 #define IDR_ACCELERATOR2                131
 
 #define IDI_SHUTDOWN                    140
+#define IDR_MAIN_ACCELERATOR            150
 
 #define IDM_STATUSBAR                   500
 
@@ -78,12 +79,11 @@
 #define IDM_ANALYZE                     1110
 #define IDM_DEFRAG                      1120
 #define IDM_OPTIMIZE                    1130
+#define IDM_STOP                        1135
 #define IDM_IGNORE_REMOVABLE_MEDIA      1140
 #define IDM_RESCAN                      1150
 #define IDM_SHUTDOWN                    1160
 #define IDM_EXIT                        1170
-
-#define IDM_STOP                        1200
 
 #define IDM_REPORT                      1300
 #define IDM_SHOW_REPORT                 1310
