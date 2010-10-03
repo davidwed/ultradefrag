@@ -83,7 +83,7 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * change this, because it is part of the filesystem drivers (ntfs.sys, fastfat.sys),
  * which are too complex and not open source to modify or replace them.
  *
- * <h3>The progress bar updates irregularly. Why is this?</h3>
+ * <h3>Why does the progress bar update irregularly?</h3>
  * The progress bar measures disk space, not the number of files. So when few 
  * big files are analyzed, the progress bar will increase very fast. 
  * Conversely, when thousands of small files are analyzed, progress will 
@@ -92,7 +92,7 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 100%;">
  *    <TR>
- *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Reports</TD>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Tips</TD>
  *      <TD STYLE="text-align: right; width: 50%;">Next: @ref ReportingBugs</TD>
  *    </TR>
  *  </TABLE>

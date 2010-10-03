@@ -384,7 +384,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			OpenWebPage("index.html");
 			return 0;
 		case IDM_BEST_PRACTICE:
-			MessageBox(hWindow,"Ask Stefan for the best practices!","Hi ^_^",MB_OK | MB_ICONINFORMATION);
+			OpenWebPage("Tips.html");
 			return 0;
 		case IDM_FAQ:
 			OpenWebPage("FAQ.html");

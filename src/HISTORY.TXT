@@ -18,6 +18,8 @@ HISTORY
     - added hints about using CHKDSK to get a consitent drive
     - installer now adds language registry key to native view on 64-bit
       Windows instead of Wow6432Node branch
+    - "Tips and Tricks" moved to separate handbook page to be accessible
+      from the "Best Practice" help menu item
     - the following translations were added:
 
       Estonian, Vietnamese(VI), Burmese(Padauk), Spanish(ES)
