@@ -71,7 +71,7 @@
 
 #include "resource.h"
 
-//#define NEW_DESIGN
+#define NEW_DESIGN
 
 #ifndef UDEFRAG_PORTABLE
 #define MAIN_CAPTION VERSIONINTITLE
@@ -147,6 +147,9 @@ volume_processing_job *get_job(char volume_letter);
 void start_selected_jobs(udefrag_job_type job_type);
 void stop_all_jobs(void);
 void release_jobs(void);
+
+int CreateMainMenu(void);
+int CreateToolbar(void);
 
 void InitProgress(void);
 void ShowProgress(void);

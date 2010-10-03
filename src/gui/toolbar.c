@@ -26,4 +26,13 @@
 
 #include "main.h"
 
+/**
+ * @brief Creates toolbar for main window.
+ * @return Zero for success, negative value otherwise.
+ */
+int CreateToolbar(void)
+{
+	return 0;
+}
+
 /** @} */

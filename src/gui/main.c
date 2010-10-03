@@ -131,7 +131,7 @@ static RECT prev_rc = {0,0,0,0};
  * @brief Adjust positions of controls
  * in accordance with main window dimensions.
  */
-void new_ResizeMainWindow(void)
+void new_ResizeMainWindow(int force)
 {
 	int vlist_height, sbar_height;
 	int spacing;
@@ -149,7 +149,7 @@ void new_ResizeMainWindow(void)
 	h = rc.bottom - rc.top;
 
 	/* prevent resizing if the current size is equal to previous */
-	if((prev_rc.right - prev_rc.left == w) && (prev_rc.bottom - prev_rc.top == h))
+	if(!force && (prev_rc.right - prev_rc.left == w) && (prev_rc.bottom - prev_rc.top == h))
 		return; /* this usually encounters when user minimizes window and then restores it */
 	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
 	
@@ -191,8 +191,12 @@ int CreateMainWindow(int nShowCmd)
 	}
 	
 	/* create menu */
+	if(CreateMainMenu() < 0)
+		return (-1);
 	
 	/* create toolbar */
+	if(CreateToolbar() < 0)
+		return (-1);
 	
 	/* create controls */
 	hList = CreateWindowEx(WS_EX_CLIENTEDGE,
@@ -236,7 +240,7 @@ int CreateMainWindow(int nShowCmd)
 		SendMessage(hWindow,(WM_USER + 1),0,0);
 	
 	/* resize controls */
-	new_ResizeMainWindow();
+	new_ResizeMainWindow(1);
 	
 	/* fill list of volumes */
 	UpdateVolList(); /* after a complete map initialization! */
@@ -297,13 +301,12 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		/* initialize main window */
 		return 0;
 	case WM_NOTIFY:
-		// TODO
-		//VolListNotifyHandler(lParam);
+		VolListNotifyHandler(lParam);
 		return 0;
 	case WM_COMMAND:
 		// TODO
 		switch(LOWORD(wParam)){
-		case IDC_ANALYSE:
+		case IDM_ANALYZE:
 			start_selected_jobs(ANALYSIS_JOB);
 			return 0;
 		}
@@ -317,7 +320,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		if(UpdateMainWindowCoordinates() >= 0){
 			if(!maximized_window)
 				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-			new_ResizeMainWindow();
+			new_ResizeMainWindow(0);
 		} else {
 			WgxDbgPrint("Wrong window dimensions on WM_SIZE message!\n");
 		}
@@ -351,10 +354,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		UpdateMainWindowCoordinates();
 		if(!maximized_window)
 			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-		// TODO
-		//VolListGetColumnWidths();
-		//exit_pressed = 1;
-		//stop_all_jobs();
+		VolListGetColumnWidths();
+		exit_pressed = 1;
+		stop_all_jobs();
 		PostQuitMessage(0);
 		return 0;
 	}

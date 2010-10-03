@@ -73,3 +73,33 @@
 #define IDC_PIC1                        1059
 
 #define IDC_SHUTDOWN                    1060
+
+#define IDM_ACTION                      1100
+#define IDM_ANALYZE                     1110
+#define IDM_DEFRAG                      1120
+#define IDM_OPTIMIZE                    1130
+#define IDM_IGNORE_REMOVABLE_MEDIA      1140
+#define IDM_RESCAN                      1150
+#define IDM_SHUTDOWN                    1160
+#define IDM_EXIT                        1170
+
+#define IDM_STOP                        1200
+
+#define IDM_REPORT                      1300
+#define IDM_SHOW_REPORT                 1310
+
+#define IDM_SETTINGS                    1400
+#define IDM_LANGUAGE                    1410
+#define IDM_CFG_GUI                     1680
+#define IDM_CFG_GUI_FONT                1681
+#define IDM_CFG_GUI_SETTINGS            1682
+#define IDM_CFG_BOOT                    1685
+#define IDM_CFG_BOOT_ENABLE             1686
+#define IDM_CFG_BOOT_SCRIPT             1687
+#define IDM_CFG_REPORTS                 1690
+
+#define IDM_HELP                        1700
+#define IDM_CONTENTS                    1710
+#define IDM_BEST_PRACTICE               1720
+#define IDM_FAQ                         1730
+#define IDM_ABOUT                       1740
