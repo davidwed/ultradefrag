@@ -27,22 +27,22 @@
 #include "main.h"
 
 WGX_MENU action_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_ANALYZE, L"&Analyze\tF5"},
-	{MF_STRING | MF_ENABLED,IDM_DEFRAG,L"&Defragment\tF6"},
-	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE,L"&Optimize\tF7"},
-	{MF_STRING | MF_ENABLED,IDM_STOP,L"&Stop\tCtrl+C"},
+	{MF_STRING | MF_ENABLED,IDM_ANALYZE, L"&Analyze\tF5"   },
+	{MF_STRING | MF_ENABLED,IDM_DEFRAG,  L"&Defragment\tF6"},
+	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE,L"&Optimize\tF7"  },
+	{MF_STRING | MF_ENABLED,IDM_STOP,    L"&Stop\tCtrl+C"  },
 	{MF_SEPARATOR,0,NULL},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA,L"&Ignore removable media\tCtrl+1"},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA,L"&Ignore removable media\tCtrl+I"},
 	{MF_STRING | MF_ENABLED,IDM_RESCAN,L"&Rescan drives\tCtrl+R"},
 	{MF_SEPARATOR,0,NULL},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_SHUTDOWN,L"&Shutdown when done\tCtrl+2"},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_SHUTDOWN,L"&Shutdown when done\tCtrl+S"},
 	{MF_SEPARATOR,0,NULL},
 	{MF_STRING | MF_ENABLED,IDM_EXIT,L"E&xit\tAlt+F4"},
 	{0,0,NULL}
 };
 
 WGX_MENU report_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT,L"&Show report\tCtrl+F"},
+	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT,L"&Show report\tF8"},
 	{0,0,NULL}
 };
 
@@ -94,14 +94,14 @@ WGX_MENU language_menu[] = {
 };
 
 WGX_MENU gui_config_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_FONT,L"&Font\tCtrl+3"},
-	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS,L"&Settings\tCtrl+4"},
+	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_FONT,L"&Font\tF9"},
+	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS,L"&Settings\tF10"},
 	{0,0,NULL}
 };
 
 WGX_MENU boot_config_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_CFG_BOOT_ENABLE,L"&Enable\tCtrl+5"},
-	{MF_STRING | MF_ENABLED,IDM_CFG_BOOT_SCRIPT,L"&Script\tCtrl+6"},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_CFG_BOOT_ENABLE,L"&Enable\tF11"},
+	{MF_STRING | MF_ENABLED,IDM_CFG_BOOT_SCRIPT,L"&Script\tF12"},
 	{0,0,NULL}
 };
 
@@ -109,7 +109,7 @@ WGX_MENU settings_menu[] = {
 	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)language_menu,L"&Language"},
 	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)gui_config_menu,L"&Graphical interface"},
 	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)boot_config_menu,L"&Boot time scan"},
-	{MF_STRING | MF_ENABLED,IDM_CFG_REPORTS,L"&Reports\tCtrl+7"},
+	{MF_STRING | MF_ENABLED,IDM_CFG_REPORTS,L"&Reports\tCtrl+R"},
 	{0,0,NULL}
 };
 
