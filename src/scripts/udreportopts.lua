@@ -19,11 +19,11 @@ enable_sorting = 1
 -- web browser then set this parameter to zero.
 -------------------------------------------------------------------------------
 split_long_names = 0
+
 -------------------------------------------------------------------------------
 -- Set here maximum number of characters per line in filename cells.
 -------------------------------------------------------------------------------
 max_chars_per_line = 50
-
 
 -------------------------------------------------------------------------------
 -- A web page style can be set through udreport.css style sheet.
