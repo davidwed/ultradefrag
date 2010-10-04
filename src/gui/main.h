@@ -36,6 +36,7 @@
 #endif
 #include <commctrl.h>
 #include <shellapi.h>
+#include <commdlg.h>
 
 #ifndef SHTDN_REASON_MAJOR_OTHER
 #define SHTDN_REASON_MAJOR_OTHER   0x00000000
