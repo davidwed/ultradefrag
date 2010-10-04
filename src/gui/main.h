@@ -189,6 +189,8 @@ void SavePrefs(void);
 void DeleteEnvironmentVariables(void);
 
 void CheckForTheNewVersion(void);
+void StartPrefsChangesTracking();
+void StopPrefsChangesTracking();
 int ShutdownOrHibernate(void);
 
 /* common global variables */
@@ -201,6 +203,7 @@ extern HMENU hMainMenu;
 extern WGX_FONT wgxFont;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern volume_processing_job *current_job;
+extern HANDLE hMapEvent;
 extern int busy_flag;
 extern int shutdown_flag;
 extern int exit_pressed;

@@ -317,6 +317,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	BOOL size_changed;
 	RECT rc;
 	short path[MAX_PATH];
+	CHOOSEFONT cf;
 
 	switch(uMsg){
 	case WM_CREATE:
@@ -364,6 +365,28 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				ShowReports();
 			return 0;
 		/* Settings menu handlers */
+		case IDM_CFG_GUI_FONT:
+			memset(&cf,0,sizeof(cf));
+			cf.lStructSize = sizeof(CHOOSEFONT);
+			cf.lpLogFont = &wgxFont.lf;
+			cf.Flags = CF_SCREENFONTS | CF_FORCEFONTEXIST | CF_INITTOLOGFONTSTRUCT;
+			cf.hwndOwner = hWindow;
+			if(ChooseFont(&cf)){
+				WgxDestroyFont(&wgxFont);
+				if(WgxCreateFont("",&wgxFont)){
+					WgxSetFont(hWindow,&wgxFont);
+					new_ResizeMainWindow(1);
+					WgxSaveFont(".\\options\\font.lua",&wgxFont);
+				}
+			}
+			return 0;
+		case IDM_CFG_GUI_SETTINGS:
+			#ifndef UDEFRAG_PORTABLE
+			(void)WgxShellExecuteW(hWindow,L"Edit",L".\\options\\guiopts.lua",NULL,NULL,SW_SHOW);
+			#else
+			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\guiopts.lua",NULL,SW_SHOW);
+			#endif
+			return 0;
 		case IDM_CFG_BOOT_SCRIPT:
 			if(!GetWindowsDirectoryW(path,MAX_PATH)){
 				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot retrieve the Windows directory path");
@@ -458,15 +481,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	hInstance = GetModuleHandle(NULL);
     
-	GetPrefs();
-
 	if(strstr(lpCmdLine,"--setup")){
 		/* create default guiopts.lua file */
+		GetPrefs();
 		SavePrefs();
 		DeleteEnvironmentVariables();
 		return 0;
 	}
-	
+
+	GetPrefs();
 	WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng");
 	UpdateWebStatistics();
 	CheckForTheNewVersion();
@@ -483,11 +506,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		DeleteEnvironmentVariables();
 		return 2;
 	}
+	
+	/* track changes in guiopts.lua file; synchronized with map redraw */
+	StartPrefsChangesTracking();
 
 #ifdef NEW_DESIGN
 	if(CreateMainWindow(nShowCmd) < 0){
 		WgxDestroyResourceTable(i18n_table);
 		DeleteEnvironmentVariables();
+		StopPrefsChangesTracking();
 		release_jobs();
 		return 3;
 	}
@@ -495,12 +522,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window!");
 		DeleteEnvironmentVariables();
+		StopPrefsChangesTracking();
 		release_jobs();
 		return 3;
 	}
 #endif
 
 	/* release all resources */
+	StopPrefsChangesTracking();
 	release_jobs();
 	ReleaseVolList();
 	ReleaseMap();

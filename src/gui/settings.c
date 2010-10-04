@@ -69,6 +69,9 @@ extern int last_y;
 extern int last_width;
 extern int last_height;
 
+int stop_track_changes = 0;
+int changes_tracking_stopped = 0;
+
 WGX_OPTION options[] = {
 	/* type, value buffer size, name, value, default value */
 	{WGX_CFG_COMMENT, 0, "UltraDefrag GUI options",                                         NULL, ""},
@@ -319,6 +322,114 @@ void OpenConfigurationDialog(void)
 	} else {
 		CloseHandle(h);
 	}
+}
+
+/**
+ * @brief StartPrefsChangesTracking thread routine.
+ */
+DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
+{
+	HANDLE h;
+	DWORD status;
+	RECT rc;
+	int s_maximized, s_init_maximized;
+	int s_skip_removable;
+	int cw[sizeof(user_defined_column_widths) / sizeof(int)];
+	
+	h = FindFirstChangeNotification(".\\options",
+			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
+	if(h == INVALID_HANDLE_VALUE){
+		WgxDbgPrintLastError("PrefsChangesTrackingProc: FindFirstChangeNotification failed");
+		changes_tracking_stopped = 1;
+		return 0;
+	}
+	
+	//WgxDbgPrint("$$$ started $$$\n");
+	
+	while(!stop_track_changes){
+		status = WaitForSingleObject(h,100/*INFINITE*/);
+		//WgxDbgPrint("status = %i\n",status);
+		if(status == WAIT_OBJECT_0){
+			//WgxDbgPrint("$$$ a $$$\n");
+			/* synchronize preferences reload with map redraw */
+			if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
+				WgxDbgPrintLastError("PrefsChangesTrackingProc: wait on hMapEvent failed");
+			} else {
+				//WgxDbgPrint("$$$ b $$$\n");
+				/* save state */
+				memcpy(&rc,&r_rc,sizeof(RECT));
+				s_maximized = maximized_window;
+				s_init_maximized = init_maximized_window;
+				s_skip_removable = skip_removable;
+				memcpy(&cw,&user_defined_column_widths,sizeof(user_defined_column_widths));
+				
+				/* reload preferences */
+				GetPrefs();
+				//WgxDbgPrint("$$$ c $$$\n");
+				
+				/* restore state */
+				memcpy(&r_rc,&rc,sizeof(RECT));
+				maximized_window = s_maximized;
+				init_maximized_window = s_init_maximized;
+				skip_removable = s_skip_removable;
+				memcpy(&user_defined_column_widths,&cw,sizeof(user_defined_column_widths));
+				
+				SetEvent(hMapEvent);
+				//WgxDbgPrint("$$$ d $$$\n");
+
+				// TODO
+				/*if(hibernate_instead_of_shutdown)
+					WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
+				else
+					WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");*/
+
+				/* if block size or grid line width changed since last redraw, resize map */
+				if(map_block_size != last_block_size  || grid_line_width != last_grid_width){
+					ResizeMap(last_x,last_y,last_width,last_height);
+					InvalidateRect(hMap,NULL,TRUE);
+					UpdateWindow(hMap);
+				}
+				//WgxDbgPrint("$$$ e $$$\n");
+			}
+			/* wait for the next notification */
+			if(!FindNextChangeNotification(h)){
+				WgxDbgPrintLastError("PrefsChangesTrackingProc: FindNextChangeNotification failed");
+				break;
+			}
+			//WgxDbgPrint("$$$ f $$$\n");
+		}
+	}
+	
+	/* cleanup */
+	FindCloseChangeNotification(h);
+	changes_tracking_stopped = 1;
+	return 0;
+}
+
+/**
+ * @brief Starts tracking of guiopts.lua changes.
+ */
+void StartPrefsChangesTracking()
+{
+	HANDLE h;
+	DWORD id;
+	
+	h = create_thread(PrefsChangesTrackingProc,NULL,&id);
+	if(h == NULL){
+		WgxDbgPrintLastError("Cannot create thread for guiopts.lua changes tracking");
+	} else {
+		CloseHandle(h);
+	}
+}
+
+/**
+ * @brief Stops tracking of guiopts.lua changes.
+ */
+void StopPrefsChangesTracking()
+{
+	stop_track_changes = 1;
+	while(!changes_tracking_stopped)
+		Sleep(100);
 }
 
 /** @} */
