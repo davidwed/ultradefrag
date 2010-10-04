@@ -59,7 +59,6 @@ HBRUSH hBrushes[NUM_OF_SPACE_STATES];
 
 WNDPROC OldRectWndProc;
 int allow_map_redraw = 1;
-extern HANDLE hMapEvent;
 
 /* forward declaration */
 LRESULT CALLBACK RectWndProc(HWND, UINT, WPARAM, LPARAM);
