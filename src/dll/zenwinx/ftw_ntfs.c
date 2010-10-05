@@ -1448,6 +1448,11 @@ static void build_file_path(winx_file_info *f,file_entry *f_array,
 	//DebugPrint("%ws",f->path);
 }
 
+/**
+ * @todo This procedure eats lots of CPU tacts,
+ * optimize it for speed or run with thread priority
+ * below normal.
+ */
 static int build_full_paths(mft_scan_parameters *sp)
 {
 	path_parts *p;
