@@ -46,7 +46,7 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 		WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
 		/* shutdown will be confirmed by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_YES_BUTTON));
-		/* WgxSetFont(hWnd,&wgxFont);*/
+		WgxSetFont(hWnd,&wgxFont);
 		return FALSE;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
@@ -95,7 +95,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 		WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
 		/* shutdown will be rejected by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_NO_BUTTON));
-		/* WgxSetFont(hWnd,&wgxFont);*/
+		WgxSetFont(hWnd,&wgxFont);
 		/* set timer */
 		counter = seconds_for_shutdown_rejection;
 		if(counter == 0)

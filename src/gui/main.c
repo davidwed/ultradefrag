@@ -580,7 +580,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	release_jobs();
 	ReleaseVolList();
 	ReleaseMap();
-	WgxDestroyFont(&wgxFont);
 
 	/* save settings */
 	SavePrefs();
@@ -588,10 +587,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	if(shutdown_requested){
 		result = ShutdownOrHibernate();
+		WgxDestroyFont(&wgxFont);
 		WgxDestroyResourceTable(i18n_table);
 		return result;
 	}
     
+	WgxDestroyFont(&wgxFont);
 	WgxDestroyResourceTable(i18n_table);
 	return 0;
 }
