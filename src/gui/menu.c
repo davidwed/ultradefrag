@@ -26,7 +26,7 @@
 
 #include "main.h"
 
-HMENU hMainMenu;
+HMENU hMainMenu = NULL;
 
 WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_ANALYZE, L"&Analyze\tF5"   },
@@ -37,7 +37,7 @@ WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA,L"&Ignore removable media\tCtrl+I"},
 	{MF_STRING | MF_ENABLED,IDM_RESCAN,L"&Rescan drives\tCtrl+D"},
 	{MF_SEPARATOR,0,NULL},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_SHUTDOWN,L"&Shutdown when done\tCtrl+S"},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_SHUTDOWN,L"&Shutdown when done\tCtrl+S"},
 	{MF_SEPARATOR,0,NULL},
 	{MF_STRING | MF_ENABLED,IDM_EXIT,L"E&xit\tAlt+F4"},
 	{0,0,NULL}
@@ -102,7 +102,7 @@ WGX_MENU gui_config_menu[] = {
 };
 
 WGX_MENU boot_config_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_CFG_BOOT_ENABLE,L"&Enable\tF11"},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_CFG_BOOT_ENABLE,L"&Enable\tF11"},
 	{MF_STRING | MF_ENABLED,IDM_CFG_BOOT_SCRIPT,L"&Script\tF12"},
 	{0,0,NULL}
 };
@@ -133,6 +133,8 @@ WGX_MENU main_menu[] = {
 	{0,0,NULL}
 };
 
+extern int boot_time_defrag_enabled;
+
 /**
  * @brief Creates main menu.
  * @return Zero for success,
@@ -157,6 +159,19 @@ int CreateMainMenu(void)
 			MF_BYCOMMAND | MF_UNCHECKED);
 	}
 	
+#ifndef UDEFRAG_PORTABLE
+	if(IsBootTimeDefragEnabled()){
+		boot_time_defrag_enabled = 1;
+		CheckMenuItem(hMainMenu,
+			IDM_CFG_BOOT_ENABLE,
+			MF_BYCOMMAND | MF_CHECKED);
+	}
+#else
+	EnableMenuItem(hMainMenu,IDM_CFG_BOOT_ENABLE,MF_BYCOMMAND | MF_GRAYED);
+#endif
+
+	// TODO: handle hibernate instead of shutdown option
+
 	if(!DrawMenuBar(hWindow))
 		WgxDbgPrintLastError("Cannot redraw main menu");
 

@@ -266,6 +266,11 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 		IDC_RESCAN,IDC_SETTINGS,0);
 	WgxEnableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	
+	/* disable menu entries */
+	EnableMenuItem(hMainMenu,IDM_ANALYZE,MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMainMenu,IDM_OPTIMIZE,MF_BYCOMMAND | MF_GRAYED);
+	
 	/* process all selected volumes */
 	index = -1;
 	while(1){
@@ -287,8 +292,9 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 		index = (int)SelectedItem;
 	}
 
-	/* enable buttons */
 	busy_flag = 0;
+
+	/* enable buttons */
 	if(!exit_pressed){
 		WgxEnableWindows(hWindow,IDC_ANALYSE,
 			IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,
@@ -296,13 +302,26 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 		WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
 	}
 
+	/* enable menu entries */
+	EnableMenuItem(hMainMenu,IDM_ANALYZE,MF_BYCOMMAND | MF_ENABLED);
+	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_ENABLED);
+	EnableMenuItem(hMainMenu,IDM_OPTIMIZE,MF_BYCOMMAND | MF_ENABLED);
+	
 	/* check the shutdown after a job box state */
 	if(!exit_pressed && !stop_pressed){
+#ifdef NEW_DESIGN
+		if(shutdown_flag){
+			shutdown_requested = 1;
+			SendMessage(hWindow,WM_COMMAND,IDM_EXIT,0);
+		}
+#else
 		if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),
 			BM_GETCHECK,0,0) == BST_CHECKED){
-				shutdown_flag = TRUE;
+				shutdown_flag = 1;
+				shutdown_requested = 1;
 				(void)SendMessage(hWindow,WM_CLOSE,0,0);
 		}
+#endif
 	}
 	return 0;
 }

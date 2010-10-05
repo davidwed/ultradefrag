@@ -37,7 +37,9 @@ RECT win_rc; /* coordinates of main window */
 RECT r_rc;   /* coordinates of restored window */
 double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 
-int shutdown_flag = FALSE;
+int shutdown_flag = 0;
+int shutdown_requested = 0;
+int boot_time_defrag_enabled = 0;
 extern int init_maximized_window;
 extern int allow_map_redraw;
 
@@ -357,6 +359,27 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			if(!busy_flag)
 				UpdateVolList();
 			return 0;
+		case IDM_SHUTDOWN:
+			if(shutdown_flag){
+				shutdown_flag = 0;
+				CheckMenuItem(hMainMenu,
+					IDM_SHUTDOWN,MF_BYCOMMAND | MF_UNCHECKED);
+			} else {
+				if(show_shutdown_check_confirmation_dialog){
+					if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_CHECK_CONFIRM),
+					  hWindow,(DLGPROC)CheckConfirmDlgProc) != 0)
+					{
+						shutdown_flag = 1;
+						CheckMenuItem(hMainMenu,
+							IDM_SHUTDOWN,MF_BYCOMMAND | MF_CHECKED);
+					}
+				} else {
+					shutdown_flag = 1;
+					CheckMenuItem(hMainMenu,
+						IDM_SHUTDOWN,MF_BYCOMMAND | MF_CHECKED);
+				}
+			}
+			return 0;
 		case IDM_EXIT:
 			goto done;
 		/* Reports menu handler */
@@ -386,6 +409,26 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			#else
 			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\guiopts.lua",NULL,SW_SHOW);
 			#endif
+			return 0;
+		case IDM_CFG_BOOT_ENABLE:
+			if(!GetWindowsDirectoryW(path,MAX_PATH)){
+				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot retrieve the Windows directory path!");
+			} else {
+				if(boot_time_defrag_enabled){
+					boot_time_defrag_enabled = 0;
+					CheckMenuItem(hMainMenu,
+						IDM_CFG_BOOT_ENABLE,
+						MF_BYCOMMAND | MF_UNCHECKED);
+					(void)wcscat(path,L"\\System32\\boot-off.cmd");
+				} else {
+					boot_time_defrag_enabled = 1;
+					CheckMenuItem(hMainMenu,
+						IDM_CFG_BOOT_ENABLE,
+						MF_BYCOMMAND | MF_CHECKED);
+					(void)wcscat(path,L"\\System32\\boot-on.cmd");
+				}
+				(void)WgxShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_HIDE);
+			}
 			return 0;
 		case IDM_CFG_BOOT_SCRIPT:
 			if(!GetWindowsDirectoryW(path,MAX_PATH)){
@@ -509,12 +552,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	/* track changes in guiopts.lua file; synchronized with map redraw */
 	StartPrefsChangesTracking();
+	StartBootExecChangesTracking();
 
 #ifdef NEW_DESIGN
 	if(CreateMainWindow(nShowCmd) < 0){
 		WgxDestroyResourceTable(i18n_table);
 		DeleteEnvironmentVariables();
 		StopPrefsChangesTracking();
+		StopBootExecChangesTracking();
 		release_jobs();
 		return 3;
 	}
@@ -523,6 +568,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window!");
 		DeleteEnvironmentVariables();
 		StopPrefsChangesTracking();
+		StopBootExecChangesTracking();
 		release_jobs();
 		return 3;
 	}
@@ -530,6 +576,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 
 	/* release all resources */
 	StopPrefsChangesTracking();
+	StopBootExecChangesTracking();
 	release_jobs();
 	ReleaseVolList();
 	ReleaseMap();
@@ -539,7 +586,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	SavePrefs();
 	DeleteEnvironmentVariables();
 	
-	if(shutdown_flag){
+	if(shutdown_requested){
 		result = ShutdownOrHibernate();
 		WgxDestroyResourceTable(i18n_table);
 		return result;

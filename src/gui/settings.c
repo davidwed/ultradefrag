@@ -71,6 +71,9 @@ extern int last_height;
 
 int stop_track_changes = 0;
 int changes_tracking_stopped = 0;
+int stop_track_boot_exec = 0;
+int boot_exec_tracking_stopped = 0;
+extern int boot_time_defrag_enabled;
 
 WGX_OPTION options[] = {
 	/* type, value buffer size, name, value, default value */
@@ -344,18 +347,13 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 		return 0;
 	}
 	
-	//WgxDbgPrint("$$$ started $$$\n");
-	
 	while(!stop_track_changes){
-		status = WaitForSingleObject(h,100/*INFINITE*/);
-		//WgxDbgPrint("status = %i\n",status);
+		status = WaitForSingleObject(h,500/*INFINITE*/);
 		if(status == WAIT_OBJECT_0){
-			//WgxDbgPrint("$$$ a $$$\n");
 			/* synchronize preferences reload with map redraw */
 			if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
 				WgxDbgPrintLastError("PrefsChangesTrackingProc: wait on hMapEvent failed");
 			} else {
-				//WgxDbgPrint("$$$ b $$$\n");
 				/* save state */
 				memcpy(&rc,&r_rc,sizeof(RECT));
 				s_maximized = maximized_window;
@@ -365,7 +363,6 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				
 				/* reload preferences */
 				GetPrefs();
-				//WgxDbgPrint("$$$ c $$$\n");
 				
 				/* restore state */
 				memcpy(&r_rc,&rc,sizeof(RECT));
@@ -375,7 +372,6 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				memcpy(&user_defined_column_widths,&cw,sizeof(user_defined_column_widths));
 				
 				SetEvent(hMapEvent);
-				//WgxDbgPrint("$$$ d $$$\n");
 
 				// TODO
 				/*if(hibernate_instead_of_shutdown)
@@ -389,14 +385,12 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 					InvalidateRect(hMap,NULL,TRUE);
 					UpdateWindow(hMap);
 				}
-				//WgxDbgPrint("$$$ e $$$\n");
 			}
 			/* wait for the next notification */
 			if(!FindNextChangeNotification(h)){
 				WgxDbgPrintLastError("PrefsChangesTrackingProc: FindNextChangeNotification failed");
 				break;
 			}
-			//WgxDbgPrint("$$$ f $$$\n");
 		}
 	}
 	
@@ -429,6 +423,155 @@ void StopPrefsChangesTracking()
 {
 	stop_track_changes = 1;
 	while(!changes_tracking_stopped)
+		Sleep(100);
+}
+
+/**
+ * @brief Defines whether the boot time
+ * defragmenter is enabled or not.
+ * @return Nonzero value indicates that
+ * it is enabled.
+ */
+int IsBootTimeDefragEnabled(void)
+{
+	HKEY hKey;
+	DWORD type, size;
+	char *data, *curr_pos;
+	DWORD i, length, curr_len;
+
+	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+			"SYSTEM\\CurrentControlSet\\Control\\Session Manager",
+			0,
+			KEY_QUERY_VALUE,
+			&hKey) != ERROR_SUCCESS){
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot open SMSS key!");
+		return FALSE;
+	}
+
+	type = REG_MULTI_SZ;
+	(void)RegQueryValueEx(hKey,"BootExecute",NULL,&type,NULL,&size);
+	data = malloc(size + 10);
+	if(!data){
+		(void)RegCloseKey(hKey);
+		MessageBox(0,"Not enough memory for IsBootTimeDefragEnabled()!",
+			"Error",MB_OK | MB_ICONHAND);
+		return FALSE;
+	}
+
+	type = REG_MULTI_SZ;
+	if(RegQueryValueEx(hKey,"BootExecute",NULL,&type,
+			data,&size) != ERROR_SUCCESS){
+		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot query BootExecute value!");
+		(void)RegCloseKey(hKey);
+		free(data);
+		return FALSE;
+	}
+
+	length = size - 1;
+	for(i = 0; i < length;){
+		curr_pos = data + i;
+		curr_len = strlen(curr_pos) + 1;
+		/* if the command is yet registered then exit */
+		if(!strcmp(curr_pos,"defrag_native")){
+			(void)RegCloseKey(hKey);
+			free(data);
+			return TRUE;
+		}
+		i += curr_len;
+	}
+
+	(void)RegCloseKey(hKey);
+	free(data);
+	return FALSE;
+}
+
+/**
+ * @brief StartBootExecTracking thread routine.
+ */
+DWORD WINAPI BootExecTrackingProc(LPVOID lpParameter)
+{
+	HKEY hKey;
+	HANDLE hEvent;
+	LONG error;
+
+	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+			"SYSTEM\\CurrentControlSet\\Control\\Session Manager",
+			0,
+			KEY_NOTIFY,
+			&hKey) != ERROR_SUCCESS){
+		WgxDbgPrintLastError("BootExecTrackingProc: cannot open SMSS key");
+		boot_exec_tracking_stopped = 1;
+		return 0;
+	}
+			
+	hEvent = CreateEvent(NULL,FALSE,FALSE,NULL);
+	if(hEvent == NULL){
+		WgxDbgPrintLastError("BootExecTrackingProc: CreateEvent failed");
+		goto done;
+	}
+
+track_again:	
+	error = RegNotifyChangeKeyValue(hKey,FALSE,
+		REG_NOTIFY_CHANGE_LAST_SET,hEvent,TRUE);
+	if(error != ERROR_SUCCESS){
+		WgxDbgPrint("BootExecTrackingProc: RegNotifyChangeKeyValue failed with code 0x%x",(UINT)error);
+		CloseHandle(hEvent);
+		goto done;
+	}
+	
+	while(!stop_track_boot_exec){
+		if(WaitForSingleObject(hEvent,500) == WAIT_OBJECT_0){
+			if(IsBootTimeDefragEnabled()){
+				WgxDbgPrint("Boot time defragmenter enabled (externally)\n");
+				boot_time_defrag_enabled = 1;
+				CheckMenuItem(hMainMenu,
+					IDM_CFG_BOOT_ENABLE,
+					MF_BYCOMMAND | MF_CHECKED);
+			} else {
+				WgxDbgPrint("Boot time defragmenter disabled (externally)\n");
+				boot_time_defrag_enabled = 0;
+				CheckMenuItem(hMainMenu,
+					IDM_CFG_BOOT_ENABLE,
+					MF_BYCOMMAND | MF_UNCHECKED);
+			}
+			goto track_again;
+		}
+	}
+	CloseHandle(hEvent);
+
+done:
+	RegCloseKey(hKey);
+	boot_exec_tracking_stopped = 1;
+	return 0;
+}
+
+/**
+ * @brief Starts tracking of BootExecute registry value changes.
+ */
+void StartBootExecChangesTracking()
+{
+#ifndef UDEFRAG_PORTABLE
+	HANDLE h;
+	DWORD id;
+	
+	h = create_thread(BootExecTrackingProc,NULL,&id);
+	if(h == NULL){
+		WgxDbgPrintLastError("Cannot create thread for BootExecute registry value changes tracking");
+	} else {
+		CloseHandle(h);
+	}
+#else
+	boot_exec_tracking_stopped = 1;
+#endif
+}
+
+/**
+ * @brief Stops tracking of guiopts.lua changes.
+ */
+void StopBootExecChangesTracking()
+{
+	stop_track_boot_exec = 1;
+	while(!boot_exec_tracking_stopped)
 		Sleep(100);
 }
 

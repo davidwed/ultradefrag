@@ -188,10 +188,13 @@ int  ResizeStatusBar(int bottom, int width);
 void GetPrefs(void);
 void SavePrefs(void);
 void DeleteEnvironmentVariables(void);
+int IsBootTimeDefragEnabled(void);
 
 void CheckForTheNewVersion(void);
 void StartPrefsChangesTracking();
 void StopPrefsChangesTracking();
+void StartBootExecChangesTracking();
+void StopBootExecChangesTracking();
 int ShutdownOrHibernate(void);
 
 /* common global variables */
@@ -207,6 +210,7 @@ extern volume_processing_job *current_job;
 extern HANDLE hMapEvent;
 extern int busy_flag;
 extern int shutdown_flag;
+extern int shutdown_requested;
 extern int exit_pressed;
 
 /* common preferences */
