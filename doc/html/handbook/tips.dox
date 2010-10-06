@@ -49,6 +49,32 @@
  * always reduces the lifespan of the floppies.
  *
  * <h1>Performance Considerations</h1>
+ * <h2>Performance of UltraDefrag from best to worst</h2>
+ * <dl>
+ * <dt>Running at Boot Time</dt>
+ * <dd>this is the fastest, since there are no other processes running</dd>
+ * <dt>Running in Safe Mode</dt>
+ * <dd>here are only a limited number of processes running,
+ * which are essential to operate Windows</dd>
+ * <dt>Running with Anti-virus Software disabled</dt>
+ * <dd>read and write operations are not interrupted by the AV process</dd>
+ * <dt>Running when the System is fully used</dt>
+ * <dd>this is the worst and not recommended at all,
+ * since many files are locked by running applications.
+ * You should never use this to process entire volumes.</dd>
+ * </dl>
+ * <span style="color: darkred">
+ * You must disable your virus detection software 
+ * before using UltraDefrag. Any virus scanner 
+ * running during the defragmentation extremely slows down the process.
+ * </span>
+ *
+ * Some Anti-virus programs allow to exclude processes from being
+ * monitored, if your Anti-virus program supports this, you can use
+ * it instead of disabling it completely.
+ * You may still encounter slower performance compared to running UltraDefrag
+ * at boot or in safe mode.
+ *
  * It is recommended to exclude as much files as possible from
  * defragmentation - this will dramatically decrease the defragmentation
  * time. Temporary files and archives are usually rarely accessed and

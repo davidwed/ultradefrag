@@ -47,12 +47,6 @@
  * You must be an administrator to install and run UltraDefrag
  * </span>
  *
- * <span style="color: darkred">
- * You must disable your virus detection software 
- * before using UltraDefrag. Any virus scanner 
- * running during the defragmentation extremely slows down this process.
- * </span>
- *
  * Note that UltraDefrag installs into the Windows directory. This is by design,
  * because it highly simplifies the program development.
  * Moreover, it is impossible to run the boot time defragmenter without having its
