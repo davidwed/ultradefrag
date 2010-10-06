@@ -48,6 +48,31 @@
 Var LanguagePack
 ReserveFile "lang.ini"
 
+/*
+ * This collects the previous language setting
+ */
+!macro CollectOldLang
+
+    push $R0
+    
+    ClearErrors
+    ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
+    ${Unless} ${Errors}
+        WriteINIStr "$INSTDIR\lang.ini" "Language" "Selected" $R0
+    ${EndUnless}
+    
+    SetRegView 64
+    ClearErrors
+    ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
+    ${Unless} ${Errors}
+        WriteINIStr "$INSTDIR\lang.ini" "Language" "Selected" $R0
+    ${EndUnless}
+    SetRegView 32
+    
+    pop $R0
+
+!macroend
+
 ;-----------------------------------------------------------
 ;         LANG_PAGE macro and support routines
 ;-----------------------------------------------------------
@@ -113,9 +138,8 @@ FunctionEnd
 
 ;-----------------------------------------------------------
 
-!define InstallLanguagePack "!insertmacro InstallLanguagePack"
 !define InitLanguageSelector "!insertmacro InitLanguageSelector"
-!define CorrectLangReg "!insertmacro CorrectLangReg"
+!define CollectOldLang "!insertmacro CollectOldLang"
 
 ;-----------------------------------------------------------
 

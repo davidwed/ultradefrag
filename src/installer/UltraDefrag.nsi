@@ -251,6 +251,7 @@ Function .onInit
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
 
+  ${CollectOldLang}
   ${InitLanguageSelector}
 
 !ifdef SHOW_BOOTSPLASH
