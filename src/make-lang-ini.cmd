@@ -4,7 +4,7 @@ REM for the installer to always include the latest translations
 
 set LangList=""
 
-for %%L in ( "%~dp0\gui\i18n\*.GUI" ) do call :CreateLangString "%%~nL"
+for %%L in ( "%~dp0\gui\i18n\*.lng" ) do call :CreateLangString "%%~nL"
 
 echo %LangList% >%TMP%\LangList.tmp
 echo.
