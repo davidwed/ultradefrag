@@ -221,37 +221,12 @@ Section "Shortcuts" SecShortcuts
   ${DisableX64FSRedirection}
   SetShellVarContext all
   SetOutPath $INSTDIR
-
-  StrCpy $R0 "$SMPROGRAMS\UltraDefrag"
-  CreateDirectory $R0
-  CreateDirectory "$R0\Documentation"
-
-  CreateShortCut "$R0\UltraDefrag.lnk" \
+  
+  ; install a single shortcut to the Start menu,
+  ; because all important information can be easily
+  ; accessed from the GUI
+  CreateShortCut "$SMPROGRAMS\UltraDefrag.lnk" \
    "$INSTDIR\ultradefrag.exe"
-
-  CreateShortCut "$R0\Preferences.lnk" \
-   "$INSTDIR\udefrag-gui-config.exe"
-
-  CreateShortCut "$R0\Select Language.lnk" \
-   "$INSTDIR\LanguageSelector.exe"
-
-  CreateShortCut "$R0\Documentation\LICENSE.lnk" \
-   "$INSTDIR\LICENSE.TXT"
-  CreateShortCut "$R0\Documentation\README.lnk" \
-   "$INSTDIR\README.TXT"
-
-  ${If} ${FileExists} "$INSTDIR\handbook\index.html"
-    WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\index.html"
-    WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "file://$INSTDIR\handbook\FAQ.html"
-  ${Else}
-    WriteINIStr "$R0\Documentation\Handbook.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/"
-    WriteINIStr "$R0\Documentation\FAQ.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/handbook/FAQ.html"
-  ${EndIf}
-  WriteINIStr "$R0\Documentation\Homepage.url" "InternetShortcut" "URL" "http://ultradefrag.sourceforge.net/"
-
-  CreateShortCut "$R0\Uninstall UltraDefrag.lnk" \
-   "$INSTDIR\uninstall.exe"
-
   CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
    "$INSTDIR\ultradefrag.exe"
   CreateShortCut "$QUICKLAUNCH\UltraDefrag.lnk" \

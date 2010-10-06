@@ -270,16 +270,7 @@ Var AtLeastXP
   ; remove shortcuts of any previous version of the program
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\DASoft"
-  Delete "$SMPROGRAMS\UltraDefrag\Documentation\FAQ.lnk"
-  Delete "$SMPROGRAMS\UltraDefrag\Documentation\User manual.url"
-  Delete "$SMPROGRAMS\UltraDefrag\UltraDefrag (Debug mode).lnk"
-  Delete "$SMPROGRAMS\UltraDefrag\Portable package.lnk"
-  Delete "$SMPROGRAMS\UltraDefrag\Scheduler.NET.lnk"
-  Delete "$SMPROGRAMS\UltraDefrag\Scheduler.lnk"
-
-  RMDir /r "$SMPROGRAMS\UltraDefrag\Boot time options"
-  RMDir /r "$SMPROGRAMS\UltraDefrag\Preferences"
-  RMDir /r "$SMPROGRAMS\UltraDefrag\Debugging information"
+  RMDir /r "$SMPROGRAMS\UltraDefrag"
   
   Delete "$SYSDIR\Drivers\ultradfg.sys"
   DeleteRegKey HKLM "SYSTEM\CurrentControlSet\Services\ultradfg"
