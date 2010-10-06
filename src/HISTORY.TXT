@@ -21,8 +21,6 @@ HISTORY
       of the volume analysis
     - filter pattern length limitation (4096 characters) was removed
     - added hints about using CHKDSK to get a consitent drive
-    - installer now adds language registry key to native view on 64-bit
-      Windows instead of Wow6432Node branch
     - "Tips and Tricks" moved to separate handbook page to be accessible
       from the "Best Practice" help menu item
     - the following translations were added:
@@ -33,6 +31,7 @@ HISTORY
 
       Portuguese(BR)
 
+    - portable.x file became meaningless for the portable edition
     - winx_patcomp, winx_patfind, winx_patfree, winx_wcsdup, winx_vopen,
       winx_vflush, winx_ftw_dump_file, winx_get_free_volume_regions,
       winx_add_volume_region, winx_sub_volume_region,
