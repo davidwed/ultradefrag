@@ -13,10 +13,7 @@ echo.
 
 cd bin
 
-utf8-16 ..\gui\i18n\*.GUI
-if %errorlevel% neq 0 cd .. && exit /B 1
-
-utf8-16 ..\udefrag-gui-config\i18n\*.Config
+utf8-16 ..\gui\i18n\*.lng
 if %errorlevel% neq 0 cd .. && exit /B 1
 
 cd ..

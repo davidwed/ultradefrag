@@ -64,8 +64,8 @@ ShowInstDetails show
 ShowUninstDetails show
 SetCompressor /SOLID lzma
 
-Icon "udefrag-install.ico"
-UninstallIcon "udefrag-uninstall.ico"
+Icon "${ROOTDIR}\src\installer\udefrag-install.ico"
+UninstallIcon "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
 
 XPStyle on
 RequestExecutionLevel admin

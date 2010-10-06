@@ -51,8 +51,6 @@ xcopy /I /Y /Q    .\console .\obj\console
 xcopy /I /Y /Q    .\utf8-16 .\obj\utf8-16
 xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
-xcopy /I /Y /Q    .\udefrag-gui-config .\obj\udefrag-gui-config
-xcopy /I /Y /Q    .\udefrag-gui-config\res .\obj\udefrag-gui-config\res
 xcopy /I /Y /Q    .\native  .\obj\native
 xcopy /I /Y /Q    .\include .\obj\include
 xcopy /I /Y /Q    .\share .\obj\share
@@ -93,17 +91,12 @@ if %UD_BLD_FLG_BUILD_X86% EQU 0 goto build_amd64_installer
 
 copy /Y ..\installer\UltraDefrag.nsi .\
 copy /Y ..\installer\*.nsh .\
-copy /Y ..\installer\*.ico .\
 copy /Y ..\installer\lang.ini .\
 copy /Y ..\installer\lang-classical.ini .\
-copy /Y ..\installer\LanguageSelector.nsi .\
 
 rem Executables are too small to use upx.
 rem upx udefrag.exe
 rem if %errorlevel% neq 0 goto fail
-
-"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
-if %errorlevel% neq 0 goto fail
 
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
@@ -113,14 +106,10 @@ if %UD_BLD_FLG_BUILD_AMD64% equ 0 goto build_ia64_installer
 
 copy /Y ..\installer\UltraDefrag.nsi .\amd64\
 copy /Y ..\installer\*.nsh .\amd64\
-copy /Y ..\installer\*.ico .\amd64\
 copy /Y ..\installer\lang.ini .\amd64\
 copy /Y ..\installer\lang-classical.ini .\amd64\
-copy /Y ..\installer\LanguageSelector.nsi .\amd64\
 
 cd amd64
-"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
-if %errorlevel% neq 0 goto fail
 
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail
@@ -131,14 +120,10 @@ if %UD_BLD_FLG_BUILD_IA64% equ 0 goto build_source_package
 
 copy /Y ..\installer\UltraDefrag.nsi .\ia64\
 copy /Y ..\installer\*.nsh .\ia64\
-copy /Y ..\installer\*.ico .\ia64\
 copy /Y ..\installer\lang.ini .\ia64\
 copy /Y ..\installer\lang-classical.ini .\ia64\
-copy /Y ..\installer\LanguageSelector.nsi .\ia64\
 
 cd ia64
-"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% LanguageSelector.nsi
-if %errorlevel% neq 0 goto fail
 
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 UltraDefrag.nsi
 if %errorlevel% neq 0 goto fail

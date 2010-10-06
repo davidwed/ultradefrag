@@ -28,7 +28,6 @@ copy /Y bin\dfrg.exe %PORTABLE_DIR%\ultradefrag.exe
 copy /Y bin\lua5.1a.dll %PORTABLE_DIR%\
 copy /Y bin\lua5.1a.exe %PORTABLE_DIR%\
 copy /Y bin\lua5.1a_gui.exe %PORTABLE_DIR%\
-copy /Y bin\udefrag-gui-config.exe %PORTABLE_DIR%\
 copy /Y bin\wgx.dll %PORTABLE_DIR%\
 
 mkdir %PORTABLE_DIR%\handbook
@@ -43,26 +42,13 @@ mkdir %PORTABLE_DIR%\options
 copy /Y scripts\udreportopts.lua %PORTABLE_DIR%\options\
 
 mkdir %PORTABLE_DIR%\i18n
-mkdir %PORTABLE_DIR%\i18n\gui
-mkdir %PORTABLE_DIR%\i18n\gui-config
-copy /Y gui\i18n\*.GUI %PORTABLE_DIR%\i18n\gui\
-copy /Y udefrag-gui-config\i18n\*.Config %PORTABLE_DIR%\i18n\gui-config\
-
-copy /Y installer\LanguageSelector.nsi bin\
-copy /Y installer\LanguageSelector.nsh bin\
-copy /Y installer\lang.ini bin\
-copy /Y installer\LanguageSelector.ico bin\
+copy /Y gui\i18n\*.lng %PORTABLE_DIR%\i18n\
 
 cd bin
 
 call setvars.cmd
 if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
-
-"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DISPORTABLE=1 LanguageSelector.nsi
-if %errorlevel% neq 0 goto fail
-
-copy /Y LanguageSelector.exe ultradefrag-portable-%ULTRADFGVER%.i386\
 
 cd ultradefrag-portable-%ULTRADFGVER%.i386
 .\ultradefrag.exe --setup
@@ -93,7 +79,6 @@ copy /Y amd64\dfrg.exe %PORTABLE_DIR%\ultradefrag.exe
 copy /Y amd64\lua5.1a.dll %PORTABLE_DIR%\
 copy /Y amd64\lua5.1a.exe %PORTABLE_DIR%\
 copy /Y amd64\lua5.1a_gui.exe %PORTABLE_DIR%\
-copy /Y amd64\udefrag-gui-config.exe %PORTABLE_DIR%\
 copy /Y amd64\wgx.dll %PORTABLE_DIR%\
 
 mkdir %PORTABLE_DIR%\handbook
@@ -108,12 +93,7 @@ mkdir %PORTABLE_DIR%\options
 copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
 
 mkdir %PORTABLE_DIR%\i18n
-mkdir %PORTABLE_DIR%\i18n\gui
-mkdir %PORTABLE_DIR%\i18n\gui-config
-copy /Y ..\gui\i18n\*.GUI %PORTABLE_DIR%\i18n\gui\
-copy /Y ..\udefrag-gui-config\i18n\*.Config %PORTABLE_DIR%\i18n\gui-config\
-
-copy /Y .\LanguageSelector.exe %PORTABLE_DIR%\
+copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\
 
 copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
 rem copy /Y .\font.lua %PORTABLE_DIR%\options\
@@ -148,7 +128,6 @@ copy /Y ia64\dfrg.exe %PORTABLE_DIR%\ultradefrag.exe
 copy /Y ia64\lua5.1a.dll %PORTABLE_DIR%\
 copy /Y ia64\lua5.1a.exe %PORTABLE_DIR%\
 copy /Y ia64\lua5.1a_gui.exe %PORTABLE_DIR%\
-copy /Y ia64\udefrag-gui-config.exe %PORTABLE_DIR%\
 copy /Y ia64\wgx.dll %PORTABLE_DIR%\
 
 mkdir %PORTABLE_DIR%\handbook
@@ -163,12 +142,7 @@ mkdir %PORTABLE_DIR%\options
 copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
 
 mkdir %PORTABLE_DIR%\i18n
-mkdir %PORTABLE_DIR%\i18n\gui
-mkdir %PORTABLE_DIR%\i18n\gui-config
-copy /Y ..\gui\i18n\*.GUI %PORTABLE_DIR%\i18n\gui\
-copy /Y ..\udefrag-gui-config\i18n\*.Config %PORTABLE_DIR%\i18n\gui-config\
-
-copy /Y .\LanguageSelector.exe %PORTABLE_DIR%\
+copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\
 
 copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
 rem copy /Y .\font.lua %PORTABLE_DIR%\options\

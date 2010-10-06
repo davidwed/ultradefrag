@@ -42,16 +42,17 @@
 
 !include "WinVer.nsh"
 !include "x64.nsh"
-!ifdef MODERN_UI
-  !include "MUI.nsh"
-  !define MUI_ICON "udefrag-install.ico"
-  !define MUI_UNICON "udefrag-uninstall.ico"
-!endif
 
 !if ${ULTRADFGARCH} == 'i386'
 !define ROOTDIR "..\.."
 !else
 !define ROOTDIR "..\..\.."
+!endif
+
+!ifdef MODERN_UI
+  !include "MUI.nsh"
+  !define MUI_ICON "${ROOTDIR}\src\installer\udefrag-install.ico"
+  !define MUI_UNICON "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
 !endif
 
 ;-----------------------------------------
@@ -69,8 +70,8 @@ ShowInstDetails show
 ShowUninstDetails show
 SetCompressor /SOLID lzma
 
-Icon "udefrag-install.ico"
-UninstallIcon "udefrag-uninstall.ico"
+Icon "${ROOTDIR}\src\installer\udefrag-install.ico"
+UninstallIcon "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
 
 XPStyle on
 RequestExecutionLevel admin
@@ -143,14 +144,14 @@ Section "Ultra Defrag core files (required)" SecCore
   SetOutPath "$INSTDIR\man"
   File "${ROOTDIR}\src\man\*.*"
 
-  ${InstallLanguagePack}
+  ; install all language packs
+  SetOutPath "$INSTDIR\i18n"
+  File /nonfatal "${ROOTDIR}\src\gui\i18n\*.lng"
 
   ; install GUI apps to program's directory
   SetOutPath "$INSTDIR"
   Delete "$INSTDIR\ultradefrag.exe"
   File /oname=ultradefrag.exe "dfrg.exe"
-  File "udefrag-gui-config.exe"
-  File "LanguageSelector.exe"
 
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
@@ -160,6 +161,7 @@ Section "Ultra Defrag core files (required)" SecCore
 
   ${InstallNativeDefragmenter}
 
+  SetOutPath "$SYSDIR"
   File "lua5.1a.dll"
   File "lua5.1a.exe"
   File "lua5.1a_gui.exe"
@@ -248,10 +250,6 @@ Function .onInit
 
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
-
-!ifndef ISPORTABLE
-    ${CorrectLangReg}
-!endif
 
   ${InitLanguageSelector}
 

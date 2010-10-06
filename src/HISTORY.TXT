@@ -3,13 +3,18 @@ HISTORY
   Version 5.0.0  2010-10-
   ------------------------------------------------------------------------------
     RC1:
-    - ability to run multiple instances simultaneously was added
+    - GUI was redesigned to be much more comfortable for daily use
+    - ability to change preferences without the need to restart GUI was added
     - ability to resize GUI window at any time was added;
       cluster map scales now automatically
     - GUI flicker on window resize was reduced
+    - better hotkeys were assigned to GUI actions
     - status-bar now uses user specified font too, which is necessary for
       languages needing a special font to be displayed correctly,
       like Burmese(Padauk)
+    - separate Configuration dialog was retired
+    - Language Selector was retired
+    - ability to run multiple instances simultaneously was added
     - the driver has been completely reworked to increase its reliability
       and flexibility; many complicated algorithms were replaced
       by obvious ones; as a side effect we have a noticeable speedup

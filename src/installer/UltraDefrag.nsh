@@ -239,6 +239,10 @@ Var AtLeastXP
   DeleteRegKey HKLM "SYSTEM\ControlSet001\Control\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\ControlSet002\Control\UltraDefrag"
   DeleteRegKey HKLM "SYSTEM\ControlSet003\Control\UltraDefrag"
+  SetRegView 64
+  DeleteRegKey HKLM "Software\UltraDefrag"
+  SetRegView 32
+  DeleteRegKey HKLM "Software\UltraDefrag"
 
   RMDir /r "$SYSDIR\UltraDefrag"
   Delete "$SYSDIR\udefrag-gui-dbg.cmd"
@@ -254,6 +258,8 @@ Var AtLeastXP
   RMDir /r "$INSTDIR\presets"
   RMDir /r "$INSTDIR\logs"
   RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
+  RMDir /r "$INSTDIR\i18n\gui"
+  RMDir /r "$INSTDIR\i18n\gui-config"
 
   Delete "$INSTDIR\scripts\udctxhandler.lua"
   Delete "$INSTDIR\dfrg.exe"
@@ -265,7 +271,9 @@ Var AtLeastXP
   Delete "$INSTDIR\ud_i18n.dll"
 
   Delete "$INSTDIR\udefrag-scheduler.exe"
-  Delete "$INSTDIR\ud_scheduler_i18n.lng"
+  Delete "$INSTDIR\*.lng"
+  Delete "$INSTDIR\udefrag-gui-config.exe"
+  Delete "$INSTDIR\LanguageSelector.exe"
 
   ; remove shortcuts of any previous version of the program
   SetShellVarContext all
@@ -377,9 +385,6 @@ Var AtLeastXP
 
   DetailPrint "Cleanup registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-  SetRegView 64
-  DeleteRegKey HKLM "Software\UltraDefrag"
-  SetRegView 32
 
   DetailPrint "Uninstall the context menu handler..."
   DeleteRegKey HKCR "Drive\shell\udefrag"

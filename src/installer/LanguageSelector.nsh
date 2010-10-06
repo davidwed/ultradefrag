@@ -20,8 +20,7 @@
 
 /*
 * Language selection routines.
-* Intended both for the regular installer
-* and for the Language Selector.
+* Intended for the regular installer.
 */
 
 !ifndef _LANGUAGE_SELECTOR_NSH_
@@ -31,9 +30,7 @@
 * How to use it:
 * 1. Insert ${InitLanguageSelector}
 *    to .onInit function.
-* 2. Use ${InstallLanguagePack}
-*    to install selected language pack.
-* 3. Use LANG_PAGE macro to add the
+* 2. Use LANG_PAGE macro to add the
 *    language selection page to the
 *    installer.
 */
@@ -51,30 +48,6 @@
 Var LanguagePack
 ReserveFile "lang.ini"
 
-;-----------------------------------------
-
-/*
- * This corrects the loaction of the language registry setting
- */
-!macro CorrectLangReg
-
-    push $R0
-    
-    ClearErrors
-    ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
-    ${Unless} ${Errors}
-        SetRegView 64
-        WriteRegStr HKLM "Software\UltraDefrag" "Language" $R0
-        SetRegView 32
-        ${If} ${RunningX64}
-            DeleteRegKey HKLM "Software\UltraDefrag"
-        ${EndIf}
-    ${EndUnless}
-    
-    pop $R0
-
-!macroend
-
 ;-----------------------------------------------------------
 ;         LANG_PAGE macro and support routines
 ;-----------------------------------------------------------
@@ -91,38 +64,25 @@ Function LangShow
   push $R1
   push $R2
 
-!ifdef MODERN_UI
-  !insertmacro MUI_HEADER_TEXT "Language Selector" \
-      "Choose which language you want to use with Ultra Defragmenter."
-!endif
-  SetOutPath $PLUGINSDIR
-  File "lang.ini"
+  StrCpy $LanguagePack "English (US)"
 
-!ifdef LANGUAGE_SELECTOR
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "Title" "UltraDefrag Language Selector v${ULTRADFGVER}"
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Settings" "NextButtonText" "OK"
-!endif
-
-!ifdef ISPORTABLE
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $LanguagePack
-!else
-  ; --- get language from registry
-  ClearErrors
-  SetRegView 64
-  ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
-  SetRegView 32
-  ${Unless} ${Errors}
-    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R0
-  ${EndUnless}
-!endif
+  ; --- get language from $INSTDIR\lang.ini file
+  ${DisableX64FSRedirection}
+  ${If} ${FileExists} "$INSTDIR\lang.ini"
+    ReadINIStr $LanguagePack "$INSTDIR\lang.ini" "Language" "Selected"
+  ${EndIf}
+  ${EnableX64FSRedirection}
 
   ; --- get language from command line
+  ; --- allows silent installation with: installer.exe /S /LANG="German"
   ${GetParameters} $R1
   ClearErrors
   ${GetOptions} $R1 /LANG= $R2
   ${Unless} ${Errors}
-    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $R2
+    StrCpy $LanguagePack $R2
   ${EndUnless}
+
+  WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $LanguagePack
 
   InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
   pop $R0
@@ -139,97 +99,15 @@ FunctionEnd
 ;-----------------------------------------------------------
 
 /**
- * @note
- * - Requires $INSTDIR to be set.
- * - Requires ${DisableX64FSRedirection} before.
- */
-!macro InstallLanguagePack
-
-  push $R0
-
-  StrCpy $R0 $LanguagePack
-
-!ifndef LANGUAGE_SELECTOR
-  ; regular installer copies all language packs to installation subdirectories
-  ; then it copies the selected pack to the installation directory
-  RMDir /r "$INSTDIR\i18n\gui"
-  SetOutPath "$INSTDIR\i18n\gui"
-  File "${ROOTDIR}\src\gui\i18n\*.GUI"
-  Delete "$INSTDIR\ud_i18n.lng"
-  CopyFiles /SILENT "$INSTDIR\i18n\gui\$R0.GUI" "$INSTDIR\ud_i18n.lng"
-
-  RMDir /r "$INSTDIR\i18n\gui-config"
-  SetOutPath "$INSTDIR\i18n\gui-config"
-  File "${ROOTDIR}\src\udefrag-gui-config\i18n\*.Config"
-  Delete "$INSTDIR\ud_config_i18n.lng"
-  CopyFiles /SILENT "$INSTDIR\i18n\gui-config\$R0.Config" "$INSTDIR\ud_config_i18n.lng"
-!else
-  ; language selector uses preinstalled repository of language packs
-  Delete "$EXEDIR\ud_i18n.lng"
-  Delete "$EXEDIR\ud_config_i18n.lng"
-  CopyFiles /SILENT "$EXEDIR\i18n\gui\$R0.GUI" "$EXEDIR\ud_i18n.lng"
-  CopyFiles /SILENT "$EXEDIR\i18n\gui-config\$R0.Config" "$EXEDIR\ud_config_i18n.lng"
-!endif
-
-!ifdef ISPORTABLE
-  WriteINIStr "$EXEDIR\PORTABLE.X" "i18n" "Language" $LanguagePack
-!else
-  SetRegView 64
-  WriteRegStr HKLM "Software\UltraDefrag" "Language" $LanguagePack
-  SetRegView 32
-!endif
-
-  pop $R0
-
-!macroend
-
-;-----------------------------------------------------------
-
-/**
  * @note Disables the x64 file system redirection.
  */
 !macro InitLanguageSelector
 
-  push $R1
-  push $R2
-
   ${EnableX64FSRedirection}
   InitPluginsDir
-
-  StrCpy $LanguagePack "English (US)"
-
-  ${DisableX64FSRedirection}
-!ifdef ISPORTABLE
-  ; --- get language from the PORTABLE.X file
-  ${If} ${FileExists} "$EXEDIR\PORTABLE.X"
-    ReadINIStr $LanguagePack "$EXEDIR\PORTABLE.X" "i18n" "Language"
-  ${EndIf}
-!else
-  ; --- get language from registry
-  ClearErrors
-  SetRegView 64
-  ReadRegStr $R1 HKLM "Software\UltraDefrag" "Language"
-  SetRegView 32
-  ${Unless} ${Errors}
-    StrCpy $LanguagePack $R1
-  ${EndUnless}
-!endif
-
-  ; --- get language from command line
-  ; --- allows silent installation with: installer.exe /S /LANG="German"
-  ${GetParameters} $R1
-  ClearErrors
-  ${GetOptions} $R1 /LANG= $R2
-  ${Unless} ${Errors}
-    StrCpy $LanguagePack $R2
-  ${EndUnless}
-
 !ifdef MODERN_UI
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
 !endif
-
-  pop $R2
-  pop $R1
 
 !macroend
 
@@ -251,12 +129,9 @@ Function LangLeave
     Abort
   ${EndIf}
 
+  ; save selected language to $INSTDIR\lang.ini file before exit
   ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
-
-!ifdef LANGUAGE_SELECTOR
-  ${InstallLanguagePack}
-!endif
-
+  WriteINIStr "$INSTDIR\lang.ini" "Language" "Selected" $LanguagePack
   pop $R0
 
 FunctionEnd
