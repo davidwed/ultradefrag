@@ -76,10 +76,6 @@ cd ..\gui
 lua ..\..\tools\mkmod.lua dfrg.build
 if %errorlevel% neq 0 goto end
 
-cd ..\udefrag-gui-config
-lua ..\..\tools\mkmod.lua udefrag-gui-config.build
-if %errorlevel% neq 0 goto end
-
 :skip_gui
 
 cd ..\bootexctrl
