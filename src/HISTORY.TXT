@@ -33,6 +33,8 @@ HISTORY
 
       Portuguese(BR)
 
+    - manifest was added to signal Vista and higher that this is a
+      high DPI aware application (http://support.microsoft.com/kb/969789)
     - portable.x file became meaningless for the portable edition
     - winx_patcomp, winx_patfind, winx_patfree, winx_wcsdup, winx_vopen,
       winx_vflush, winx_ftw_dump_file, winx_get_free_volume_regions,
