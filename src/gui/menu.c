@@ -34,17 +34,17 @@ WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE,L"&Optimize\tF7"  },
 	{MF_STRING | MF_ENABLED,IDM_STOP,    L"&Stop\tCtrl+C"  },
 	{MF_SEPARATOR,0,NULL},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA,L"&Ignore removable media\tCtrl+I"},
-	{MF_STRING | MF_ENABLED,IDM_RESCAN,L"&Rescan drives\tCtrl+D"},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA,L"Skip removable &Media\tCtrl+M"},
+	{MF_STRING | MF_ENABLED,IDM_RESCAN,L"&Rescan Drives\tCtrl+D"},
 	{MF_SEPARATOR,0,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_SHUTDOWN,L"&Shutdown when done\tCtrl+S"},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_SHUTDOWN,L"Shutdown &PC when done\tCtrl+S"},
 	{MF_SEPARATOR,0,NULL},
 	{MF_STRING | MF_ENABLED,IDM_EXIT,L"E&xit\tAlt+F4"},
 	{0,0,NULL}
 };
 
 WGX_MENU report_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT,L"&Show report\tF8"},
+	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT,L"&Show Report\tF8"},
 	{0,0,NULL}
 };
 
@@ -97,7 +97,7 @@ WGX_MENU language_menu[] = {
 
 WGX_MENU gui_config_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_FONT,L"&Font\tF9"},
-	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS,L"&Settings\tF10"},
+	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS,L"&Options\tF10"},
 	{0,0,NULL}
 };
 
@@ -109,8 +109,8 @@ WGX_MENU boot_config_menu[] = {
 
 WGX_MENU settings_menu[] = {
 	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)language_menu,L"&Language"},
-	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)gui_config_menu,L"&Graphical interface"},
-	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)boot_config_menu,L"&Boot time scan"},
+	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)gui_config_menu,L"&Graphical Interface"},
+	{MF_STRING | MF_ENABLED | MF_POPUP,(UINT_PTR)boot_config_menu,L"&Boot Time Scan"},
 	{MF_STRING | MF_ENABLED,IDM_CFG_REPORTS,L"&Reports\tCtrl+R"},
 	{0,0,NULL}
 };
@@ -118,7 +118,7 @@ WGX_MENU settings_menu[] = {
 WGX_MENU help_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_CONTENTS,L"&Contents\tF1"},
 	{MF_SEPARATOR,0,NULL},
-	{MF_STRING | MF_ENABLED,IDM_BEST_PRACTICE,L"Best &practice\tF2"},
+	{MF_STRING | MF_ENABLED,IDM_BEST_PRACTICE,L"Best &Practice\tF2"},
 	{MF_STRING | MF_ENABLED,IDM_FAQ,L"&FAQ\tF3"},
 	{MF_SEPARATOR,0,NULL},
 	{MF_STRING | MF_ENABLED,IDM_ABOUT,L"&About\tF4"},
