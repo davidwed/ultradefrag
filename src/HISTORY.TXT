@@ -9,6 +9,8 @@ HISTORY
       cluster map scales now automatically
     - GUI flicker on window resize was reduced
     - better hotkeys were assigned to GUI actions
+    - the process of adding/editing/testing of translations
+      was highly simplified
     - status-bar now uses user specified font too, which is necessary for
       languages needing a special font to be displayed correctly,
       like Burmese(Padauk)
