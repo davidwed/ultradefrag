@@ -88,10 +88,10 @@ BEGIN
     CTEXT           ABOUT_VERSION,IDC_STATIC,72,6,161,12
     CTEXT           "Copyright (C) 2007-2010",IDC_STATIC,72,22,161,12
     CTEXT           "UltraDefrag Development Team",IDC_STATIC,72,38,161,12
-    PUSHBUTTON      "Credits",IDC_CREDITS,72,53,76,10
-    PUSHBUTTON      "License",IDC_LICENSE,153,53,80,10
-    PUSHBUTTON      "http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
-                    161,12,BS_FLAT
+    PUSHBUTTON      "&Credits",IDC_CREDITS,72,53,76,10
+    PUSHBUTTON      "&License",IDC_LICENSE,153,53,80,10
+    PUSHBUTTON      "&http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
+                    161,12,BS_FLAT | BS_DEFPUSHBUTTON
 END
 
 /* this dialog should be centered on the screen, because the main window is closed anyway */
@@ -104,8 +104,8 @@ BEGIN
     CONTROL         IDI_SHUTDOWN,IDC_SHUTDOWN_ICON,"Static",SS_ICON | SS_CENTERIMAGE,0,0,32,32
     CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,200,12
     CTEXT           "seconds till shutdown",IDC_DELAY_MSG,32,22,200,12
-    PUSHBUTTON      "Yes",IDC_YES_BUTTON,72,37,50,15
-    PUSHBUTTON      "No",IDC_NO_BUTTON,126,37,50,15,BS_DEFPUSHBUTTON
+    PUSHBUTTON      "&Yes",IDC_YES_BUTTON,72,37,50,15
+    PUSHBUTTON      "&No",IDC_NO_BUTTON,126,37,50,15,BS_DEFPUSHBUTTON
 END
 
 IDD_CHECK_CONFIRM DIALOG DISCARDABLE  0, 0, 248, 58
@@ -115,8 +115,8 @@ FONT 8, "MS Shell Dlg"
 BEGIN
     CONTROL         IDI_SHUTDOWN,IDC_SHUTDOWN_ICON,"Static",SS_ICON | SS_CENTERIMAGE,0,0,32,32
     CTEXT           "Do you really want to shutdown when done?",IDC_MESSAGE,32,12,200,12
-    PUSHBUTTON      "Yes",IDC_YES_BUTTON,72,37,50,15,BS_DEFPUSHBUTTON
-    PUSHBUTTON      "No",IDC_NO_BUTTON,126,37,50,15
+    PUSHBUTTON      "&Yes",IDC_YES_BUTTON,72,37,50,15,BS_DEFPUSHBUTTON
+    PUSHBUTTON      "&No",IDC_NO_BUTTON,126,37,50,15
 END
 
 IDR_ACCELERATOR1 ACCELERATORS DISCARDABLE 

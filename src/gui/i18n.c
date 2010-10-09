@@ -41,9 +41,9 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 
 	{0,                 L"VOLUME",               L"Volume",                   NULL},
 	{0,                 L"STATUS",               L"Status",                   NULL},
-	{0,                 L"FILESYSTEM",           L"File system",              NULL},
-	{0,                 L"TOTAL",                L"Total space",              NULL},
-	{0,                 L"FREE",                 L"Free space",               NULL},
+	{0,                 L"FILESYSTEM",           L"File System",              NULL},
+	{0,                 L"TOTAL",                L"Total Space",              NULL},
+	{0,                 L"FREE",                 L"Free Space",               NULL},
 	{0,                 L"PERCENT",              L"% free",                   NULL},
 	
 	{0,                 L"STATUS_RUNNING",       L"Executing",                NULL},
@@ -58,8 +58,8 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"MFT",                  L"MFT",                      NULL},
 	
 	{0,                 L"ABOUT_WIN_TITLE",      L"About Ultra Defragmenter", NULL},
-	{IDC_CREDITS,       L"CREDITS",              L"Credits",                  NULL},
-	{IDC_LICENSE,       L"LICENSE",              L"License",                  NULL},
+	{IDC_CREDITS,       L"CREDITS",              L"&Credits",                  NULL},
+	{IDC_LICENSE,       L"LICENSE",              L"&License",                  NULL},
 	
 	{IDC_SHUTDOWN,      L"SHUTDOWN_PC_AFTER_A_JOB",  L"Shutdown PC when done",  NULL},
 	{0,                 L"HIBERNATE_PC_AFTER_A_JOB", L"Hibernate PC when done", NULL},
@@ -69,8 +69,8 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"REALLY_HIBERNATE_WHEN_DONE", L"Do you really want to hibernate when done?", NULL},
 	{0,                 L"SECONDS_TILL_SHUTDOWN",      L"seconds till shutdown",    NULL},
 	{0,                 L"SECONDS_TILL_HIBERNATION",   L"seconds till hibernation", NULL},
-	{IDC_YES_BUTTON,    L"YES",                        L"Yes",                      NULL},
-	{IDC_NO_BUTTON,     L"NO",                         L"No",                       NULL},
+	{IDC_YES_BUTTON,    L"YES",                        L"&Yes",                      NULL},
+	{IDC_NO_BUTTON,     L"NO",                         L"&No",                       NULL},
 
 	{0,                 NULL,                    NULL,                        NULL}
 };
