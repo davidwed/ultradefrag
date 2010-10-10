@@ -147,6 +147,7 @@ Section "Ultra Defrag core files (required)" SecCore
   ; install all language packs
   SetOutPath "$INSTDIR\i18n"
   File /nonfatal "${ROOTDIR}\src\gui\i18n\*.lng"
+  File /nonfatal "${ROOTDIR}\src\gui\i18n\*.template"
 
   ; install GUI apps to program's directory
   SetOutPath "$INSTDIR"

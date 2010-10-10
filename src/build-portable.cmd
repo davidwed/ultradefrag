@@ -43,6 +43,7 @@ copy /Y scripts\udreportopts.lua %PORTABLE_DIR%\options\
 
 mkdir %PORTABLE_DIR%\i18n
 copy /Y gui\i18n\*.lng %PORTABLE_DIR%\i18n\
+copy /Y gui\i18n\*.template %PORTABLE_DIR%\i18n\
 
 cd bin
 
@@ -94,6 +95,7 @@ copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
 
 mkdir %PORTABLE_DIR%\i18n
 copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\
+copy /Y ..\gui\i18n\*.template %PORTABLE_DIR%\i18n\
 
 copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
 rem copy /Y .\font.lua %PORTABLE_DIR%\options\
@@ -143,6 +145,7 @@ copy /Y ..\scripts\udreportopts.lua %PORTABLE_DIR%\options\
 
 mkdir %PORTABLE_DIR%\i18n
 copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\
+copy /Y ..\gui\i18n\*.template %PORTABLE_DIR%\i18n\
 
 copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
 rem copy /Y .\font.lua %PORTABLE_DIR%\options\
