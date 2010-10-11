@@ -72,8 +72,6 @@
 
 #include "resource.h"
 
-#define NEW_DESIGN
-
 #ifndef UDEFRAG_PORTABLE
 #define MAIN_CAPTION VERSIONINTITLE
 #else
@@ -92,14 +90,7 @@
 #define SPACING               7   /* spacing between controls */
 #define PADDING_X             14  /* horizontal padding between borders and controls */
 #define PADDING_Y             14  /* vertical padding between top border and controls */
-#define BUTTON_WIDTH          114 /* button width */
-#define BUTTON_HEIGHT         19  /* button height, applied also to text labels and check boxes */
 #define VLIST_HEIGHT          130 /* volume list height */
-#define CMAP_LABEL_WIDTH      156 /* cluster map label width */
-#define SKIP_MEDIA_WIDTH      243 /* skip removable media check box width */
-#define RESCAN_BTN_WIDTH      170 /* rescan drives button width */
-#define PROGRESS_LABEL_WIDTH  185 /* progress text label width */
-#define PROGRESS_HEIGHT       11  /* progress bar height */
 
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
@@ -145,6 +136,8 @@ typedef struct _volume_processing_job {
 /* prototypes */
 int init_jobs(void);
 volume_processing_job *get_job(char volume_letter);
+int get_job_index(volume_processing_job *job);
+void update_status_of_all_jobs(void);
 void start_selected_jobs(udefrag_job_type job_type);
 void stop_all_jobs(void);
 void release_jobs(void);
@@ -152,15 +145,18 @@ void release_jobs(void);
 int CreateMainMenu(void);
 int CreateToolbar(void);
 
-void InitProgress(void);
+int Init_I18N_Events(void);
+void ApplyLanguagePack(void);
+void BuildLanguageMenu(void);
+void Destroy_I18N_Events(void);
+
+/*void InitProgress(void);
 void ShowProgress(void);
 void HideProgress(void);
 void SetProgress(wchar_t *message, int percentage);
-
-BOOL CALLBACK DlgProc(HWND, UINT, WPARAM, LPARAM);
+*/
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
-void OpenConfigurationDialog(void);
 void ShowReports();
 
 void InitFont(void);
@@ -191,10 +187,16 @@ void DeleteEnvironmentVariables(void);
 int IsBootTimeDefragEnabled(void);
 
 void CheckForTheNewVersion(void);
+
 void StartPrefsChangesTracking();
 void StopPrefsChangesTracking();
 void StartBootExecChangesTracking();
 void StopBootExecChangesTracking();
+void StartLangIniChangesTracking();
+void StopLangIniChangesTracking();
+void StartI18nFolderChangesTracking();
+void StopI18nFolderChangesTracking();
+
 int ShutdownOrHibernate(void);
 
 /* common global variables */
@@ -212,6 +214,8 @@ extern int busy_flag;
 extern int shutdown_flag;
 extern int shutdown_requested;
 extern int exit_pressed;
+extern HANDLE hLangPackEvent;
+extern HANDLE hLangMenuEvent;
 
 /* common preferences */
 extern int hibernate_instead_of_shutdown;

@@ -37,14 +37,17 @@ static void DestroyImageList(void);
 
 /**
  * @brief Initializes the list of volumes.
+ * @todo Return negative value on errors.
  */
 void InitVolList(void)
 {
 	LV_COLUMNW lvc;
 	LV_ITEM lvi;
 	
-	if(hList == NULL)
-		hList = GetDlgItem(hWindow,IDC_VOLUMES);
+	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("InitVolList: wait on hLangPackEvent failed");
+		return;
+	}
 	
 	(void)SendMessage(hList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,
 		(LRESULT)(LVS_EX_GRIDLINES | LVS_EX_FULLROWSELECT));
@@ -79,6 +82,7 @@ void InitVolList(void)
 	lvi.pszText = "hi";
 	lvi.iImage = 0;
 	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
+	SetEvent(hLangPackEvent);
 }
 
 /**
@@ -194,7 +198,7 @@ void VolListNotifyHandler(LPARAM lParam)
 	if(lpnm->hdr.code == LVN_ITEMCHANGED && lpnm->iItem != (-1)){
 		job = get_first_selected_job();
 		current_job = job;
-		HideProgress();
+		///HideProgress();
 		RedrawMap(job);
 		if(job) UpdateStatusBar(&job->pi);
 	}
@@ -240,6 +244,11 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 {
 	LV_ITEMW lviw;
 
+	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("VolListUpdateStatusFieldInternal: wait on hLangPackEvent failed");
+		return;
+	}
+	
 	lviw.mask = LVIF_TEXT;
 	lviw.iItem = index;
 	lviw.iSubItem = 1;
@@ -265,6 +274,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	}
 
 	(void)SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
+	SetEvent(hLangPackEvent);
 }
 
 /**
@@ -299,10 +309,10 @@ static DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	LV_ITEM lvi;
 	int i;
 	
-	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
+/*	WgxDisableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
 	HideProgress();
-
+*/
 	/* refill the volume list control */
 	(void)SendMessage(hList,LVM_DELETEALLITEMS,0,0);
 	v = udefrag_get_vollist(skip_removable);
@@ -326,9 +336,9 @@ static DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	RedrawMap(job);
 	if(job) UpdateStatusBar(&job->pi);
 	
-	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
+/*	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,
 		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,0);
-	return 0;
+*/	return 0;
 }
 
 /**
@@ -388,7 +398,7 @@ volume_processing_job * get_first_selected_job(void)
  * @brief Retrieves an index of the specified job
  * as it is listed in the list of volumes.
  */
-static int get_job_index(volume_processing_job *job)
+int get_job_index(volume_processing_job *job)
 {
 	LV_ITEM lvi;
 	char buffer[64];

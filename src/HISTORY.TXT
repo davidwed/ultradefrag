@@ -3,7 +3,7 @@ HISTORY
   Version 5.0.0  2010-10-
   ------------------------------------------------------------------------------
     RC1:
-    - GUI was redesigned to be much more comfortable for daily use
+    - GUI was redesigned to be much more ergonomic (comfortable for daily use)
     - ability to change preferences without the need to restart GUI was added
     - ability to resize GUI window at any time was added;
       cluster map scales now automatically

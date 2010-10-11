@@ -27,52 +27,400 @@
 #include "main.h"
 
 WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
-	{IDC_RESCAN,        L"RESCAN_DRIVES",        L"Rescan drives",            NULL},
-	{IDC_SKIPREMOVABLE, L"SKIP_REMOVABLE_MEDIA", L"Skip removable media",     NULL},
-	{IDC_CL_MAP_STATIC, L"CLUSTER_MAP",          L"Cluster map:",             NULL},
-	{IDC_ANALYSE,       L"ANALYSE",              L"Analyze",                  NULL},
-	{IDC_DEFRAGM,       L"DEFRAGMENT",           L"Defragment",               NULL},
-	{IDC_OPTIMIZE,      L"OPTIMIZE",             L"Optimize",                 NULL},
-	{IDC_PAUSE,         L"PAUSE",                L"Pause",                    NULL},
-	{IDC_STOP,          L"STOP",                 L"Stop",                     NULL},
-	{IDC_SHOWFRAGMENTED,L"REPORT",               L"Report",                   NULL},
-	{IDC_SETTINGS,      L"SETTINGS",             L"Settings",                 NULL},
-	{IDC_ABOUT,         L"ABOUT",                L"About",                    NULL},
+	/* action menu */
+	{0, L"ACTION",                   L"&Action",                  NULL},
+	{0, L"ANALYSE",                  L"&Analyze",                 NULL},
+	{0, L"DEFRAGMENT",               L"&Defragment",              NULL},
+	{0, L"OPTIMIZE",                 L"&Optimize",                NULL},
+	{0, L"STOP",                     L"&Stop",                    NULL},
+	{0, L"SKIP_REMOVABLE_MEDIA",     L"Skip removable &media",    NULL},
+	{0, L"RESCAN_DRIVES",            L"&Rescan drives",           NULL},
+	{0, L"SHUTDOWN_PC_AFTER_A_JOB",  L"Shutdown &PC when done",   NULL},
+	{0, L"HIBERNATE_PC_AFTER_A_JOB", L"Hibernate &PC when done",  NULL},
+	{0, L"EXIT",                     L"E&xit",                    NULL},
 
-	{0,                 L"VOLUME",               L"Volume",                   NULL},
-	{0,                 L"STATUS",               L"Status",                   NULL},
-	{0,                 L"FILESYSTEM",           L"File System",              NULL},
-	{0,                 L"TOTAL",                L"Total Space",              NULL},
-	{0,                 L"FREE",                 L"Free Space",               NULL},
-	{0,                 L"PERCENT",              L"% free",                   NULL},
-	
-	{0,                 L"STATUS_RUNNING",       L"Executing",                NULL},
-	{0,                 L"STATUS_ANALYSED",      L"Analyzed",                 NULL},
-	{0,                 L"STATUS_DEFRAGMENTED",  L"Defragmented",             NULL},
-	{0,                 L"STATUS_OPTIMIZED",     L"Optimized",                NULL},
+	/* report menu */
+	{0, L"REPORT",                   L"&Report",                  NULL},
+	{0, L"SHOW_REPORT",              L"&Show report",             NULL},
 
-	{0,                 L"DIRS",                 L"folders",                  NULL},
-	{0,                 L"FILES",                L"files",                    NULL},
-	{0,                 L"FRAGMENTED",           L"fragmented",               NULL},
-	{0,                 L"COMPRESSED",           L"compressed",               NULL},
-	{0,                 L"MFT",                  L"MFT",                      NULL},
-	
-	{0,                 L"ABOUT_WIN_TITLE",      L"About Ultra Defragmenter", NULL},
-	{IDC_CREDITS,       L"CREDITS",              L"&Credits",                  NULL},
-	{IDC_LICENSE,       L"LICENSE",              L"&License",                  NULL},
-	
-	{IDC_SHUTDOWN,      L"SHUTDOWN_PC_AFTER_A_JOB",  L"Shutdown PC when done",  NULL},
-	{0,                 L"HIBERNATE_PC_AFTER_A_JOB", L"Hibernate PC when done", NULL},
+	/* settings menu */
+	{0, L"SETTINGS",                 L"&Settings",                NULL},
+	{0, L"LANGUAGE",                 L"&Language",                NULL},
+	{0, L"GRAPHICAL_INTERFACE",      L"&Graphical interface",     NULL},
+	{0, L"FONT",                     L"&Font",                    NULL},
+	{0, L"OPTIONS",                  L"&Options",                 NULL},
+	{0, L"BOOT_TIME_SCAN",           L"&Boot time scan",          NULL},
+	{0, L"ENABLE",                   L"&Enable",                  NULL},
+	{0, L"SCRIPT",                   L"&Script",                  NULL},
+	{0, L"REPORTS",                  L"&Reports",                 NULL},
 
-	{0,                 L"PLEASE_CONFIRM",             L"Please Confirm",           NULL},
+	/* help menu */
+	{0, L"HELP",                     L"&Help",                    NULL},
+	{0, L"CONTENTS",                 L"&Contents",                NULL},
+	{0, L"BEST_PRACTICE",            L"Best &practice",           NULL},
+	{0, L"FAQ",                      L"&FAQ",                     NULL},
+	{0, L"ABOUT",                    L"&About",                   NULL},
+
+	/* volume characteristics */
+	{0, L"VOLUME",                   L"Volume",                   NULL},
+	{0, L"STATUS",                   L"Status",                   NULL},
+	{0, L"TOTAL",                    L"Total Space",              NULL},
+	{0, L"FREE",                     L"Free Space",               NULL},
+	{0, L"PERCENT",                  L"% free",                   NULL},
+
+	/* volume processing status */
+	{0, L"STATUS_RUNNING",           L"Executing",                NULL},
+	{0, L"STATUS_ANALYSED",          L"Analyzed",                 NULL},
+	{0, L"STATUS_DEFRAGMENTED",      L"Defragmented",             NULL},
+	{0, L"STATUS_OPTIMIZED",         L"Optimized",                NULL},
+
+	/* status bar */
+	{0, L"DIRS",                     L"folders",                  NULL},
+	{0, L"FILES",                    L"files",                    NULL},
+	{0, L"FRAGMENTED",               L"fragmented",               NULL},
+	{0, L"COMPRESSED",               L"compressed",               NULL},
+	{0, L"MFT",                      L"MFT",                      NULL},
+
+	/* about box */
+	{0, L"ABOUT_WIN_TITLE",          L"About Ultra Defragmenter", NULL},
+	{0, L"CREDITS",                  L"&Credits",                 NULL},
+	{0, L"LICENSE",                  L"&License",                 NULL},
+
+	/* shutdown confirmation */
+	{0,                 L"PLEASE_CONFIRM",             L"Please Confirm",            NULL},
 	{0,                 L"REALLY_SHUTDOWN_WHEN_DONE",  L"Do you really want to shutdown when done?",  NULL},
 	{0,                 L"REALLY_HIBERNATE_WHEN_DONE", L"Do you really want to hibernate when done?", NULL},
-	{0,                 L"SECONDS_TILL_SHUTDOWN",      L"seconds till shutdown",    NULL},
-	{0,                 L"SECONDS_TILL_HIBERNATION",   L"seconds till hibernation", NULL},
+	{0,                 L"SECONDS_TILL_SHUTDOWN",      L"seconds till shutdown",     NULL},
+	{0,                 L"SECONDS_TILL_HIBERNATION",   L"seconds till hibernation",  NULL},
 	{IDC_YES_BUTTON,    L"YES",                        L"&Yes",                      NULL},
 	{IDC_NO_BUTTON,     L"NO",                         L"&No",                       NULL},
 
-	{0,                 NULL,                    NULL,                        NULL}
+	/* end of the table */
+	{0,                 NULL,                          NULL,                         NULL}
 };
+
+struct menu_item {
+	int id;          /* menu item identifier */
+	short *key;      /* i18n table entry key */
+	char *hotkeys;  /* hotkeys assigned to the item */
+};
+
+/**
+ * @brief Simplifies build of localized menu.
+ */
+struct menu_item menu_items[] = {
+	{IDM_ANALYZE,                 L"ANALYSE",                  "F5"    },
+	{IDM_DEFRAG,                  L"DEFRAGMENT",               "F6"    },
+	{IDM_OPTIMIZE,                L"OPTIMIZE",                 "F7"    },
+	{IDM_STOP,                    L"STOP",                     "Ctrl+C"},
+	{IDM_IGNORE_REMOVABLE_MEDIA,  L"SKIP_REMOVABLE_MEDIA",     "Ctrl+M"},
+	{IDM_RESCAN,                  L"RESCAN_DRIVES",            "Ctrl+D"},
+	{IDM_EXIT,                    L"EXIT",                     "Alt+F4"},
+	{IDM_SHOW_REPORT,             L"SHOW_REPORT",              "F8"    },
+	{IDM_CFG_GUI_FONT,            L"FONT",                     "F9"    },
+	{IDM_CFG_GUI_SETTINGS,        L"OPTIONS",                  "F10"   },
+	{IDM_CFG_BOOT_ENABLE,         L"ENABLE",                   "F11"   },
+	{IDM_CFG_BOOT_SCRIPT,         L"SCRIPT",                   "F12"   },
+	{IDM_CFG_REPORTS,             L"REPORTS",                  "Ctrl+R"},
+	{IDM_CONTENTS,                L"CONTENTS",                 "F1"    },
+	{IDM_BEST_PRACTICE,           L"BEST_PRACTICE",            "F2"    },
+	{IDM_FAQ,                     L"FAQ",                      "F3"    },
+	{IDM_ABOUT,                   L"ABOUT",                    "F4"    },
+	/* submenus */
+	{IDM_LANGUAGE,                L"LANGUAGE",                 NULL},
+	{IDM_CFG_GUI,                 L"GRAPHICAL_INTERFACE",      NULL},
+	{IDM_CFG_BOOT,                L"BOOT_TIME_SCAN",           NULL},
+	{IDM_ACTION,                  L"ACTION",                   NULL},
+	{IDM_REPORT,                  L"REPORT",                   NULL},
+	{IDM_SETTINGS,                L"SETTINGS",                 NULL},
+	{IDM_HELP,                    L"HELP",                     NULL},
+	{0, NULL, NULL}
+};
+
+/**
+ * @brief Synchronization events.
+ */
+HANDLE hLangPackEvent = NULL;
+HANDLE hLangMenuEvent = NULL;
+
+int lang_ini_tracking_stopped = 0;
+int stop_track_lang_ini = 0;
+int i18n_folder_tracking_stopped = 0;
+int stop_track_i18n_folder = 0;
+
+/**
+ * @brief Initializes events needed 
+ * for i18n mechanisms synchronization.
+ * @return Zero for success, negative value otherwise.
+ */
+int Init_I18N_Events(void)
+{
+	hLangPackEvent = CreateEvent(NULL,FALSE,TRUE,NULL);
+	if(hLangPackEvent == NULL){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"Cannot create language pack synchronization event!");
+		return (-1);
+	}
+
+	hLangMenuEvent = CreateEvent(NULL,FALSE,TRUE,NULL);
+	if(hLangMenuEvent == NULL){
+		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
+			"Cannot create language menu synchronization event!");
+		CloseHandle(hLangPackEvent);
+		return (-1);
+	}
+	
+	return 0;
+}
+
+/**
+ * @brief Applies selected language pack to all GUI controls.
+ */
+void ApplyLanguagePack(void)
+{
+	char lang_name[MAX_PATH];
+	wchar_t path[MAX_PATH];
+	udefrag_progress_info pi;
+	MENUITEMINFOW mi;
+	short *s = L"";
+	short buffer[256];
+	int i;
+	LVCOLUMNW lvc;
+	
+	/* synchronize with other threads */
+	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("ApplyLanguagePack: wait on hLangPackEvent failed");
+		return;
+	}
+	
+	/* read lang.ini file */
+	GetPrivateProfileString("Language","Selected","",lang_name,MAX_PATH,".\\lang.ini");
+	if(lang_name[0] == 0){
+		WgxDbgPrint("Selected language name not found in lang.ini file\n");
+		SetEvent(hLangPackEvent);
+		return;
+	}
+	_snwprintf(path,MAX_PATH,L".\\i18n\\%hs.lng",lang_name);
+	path[MAX_PATH - 1] = 0;
+	
+	/* destroy resource table */
+	WgxDestroyResourceTable(i18n_table);
+	
+	/* build new resource table */
+	WgxBuildResourceTable(i18n_table,path);
+	
+	/* apply new strings to the list of volumes */
+	lvc.mask = LVCF_TEXT;
+	lvc.pszText = WgxGetResourceString(i18n_table,L"VOLUME");
+	SendMessage(hList,LVM_SETCOLUMNW,0,(LPARAM)&lvc);
+	lvc.pszText = WgxGetResourceString(i18n_table,L"STATUS");
+	SendMessage(hList,LVM_SETCOLUMNW,1,(LPARAM)&lvc);
+	lvc.pszText = WgxGetResourceString(i18n_table,L"TOTAL");
+	SendMessage(hList,LVM_SETCOLUMNW,2,(LPARAM)&lvc);
+	lvc.pszText = WgxGetResourceString(i18n_table,L"FREE");
+	SendMessage(hList,LVM_SETCOLUMNW,3,(LPARAM)&lvc);
+	lvc.pszText = WgxGetResourceString(i18n_table,L"PERCENT");
+	SendMessage(hList,LVM_SETCOLUMNW,4,(LPARAM)&lvc);
+	
+	/* apply new strings to the main menu */
+	for(i = 0; menu_items[i].id; i++){
+		s = WgxGetResourceString(i18n_table,menu_items[i].key);
+		if(menu_items[i].hotkeys)
+			_snwprintf(buffer,256,L"%ws\t%hs",s,menu_items[i].hotkeys);
+		else
+			_snwprintf(buffer,256,L"%ws",s);
+		buffer[255] = 0;
+		memset(&mi,0,sizeof(MENUITEMINFOW));
+		mi.cbSize = sizeof(MENUITEMINFOW);
+		mi.fMask = MIIM_TYPE;
+		mi.fType = MFT_STRING;
+		mi.dwTypeData = buffer;
+		SetMenuItemInfoW(hMainMenu,menu_items[i].id,FALSE,&mi);
+	}
+	if(hibernate_instead_of_shutdown)
+		s = WgxGetResourceString(i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
+	else
+		s = WgxGetResourceString(i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
+	_snwprintf(buffer,256,L"%ws\tCtrl+S",s);
+	buffer[255] = 0;
+	ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
+	
+	/* end of synchronization */
+	SetEvent(hLangPackEvent);
+	
+	/* redraw main menu */
+	if(!DrawMenuBar(hWindow))
+		WgxDbgPrintLastError("Cannot redraw main menu");
+	
+	/* refresh volume status fields */
+	update_status_of_all_jobs();
+	
+	/* refresh status bar */
+	if(current_job){
+		UpdateStatusBar(&current_job->pi);
+	} else {
+		memset(&pi,0,sizeof(udefrag_progress_info));
+		UpdateStatusBar(&pi);
+	}
+}
+
+/**
+ * @brief Builds Language menu.
+ */
+void BuildLanguageMenu(void)
+{
+	/* synchronize with other threads */
+	if(WaitForSingleObject(hLangMenuEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("BuildLanguageMenu: wait on hLangMenuEvent failed");
+		return;
+	}
+	
+	/* get submenu handle */
+	
+	/* clear MF_POPUP flag */
+	
+	/* destroy submenu */
+	
+	/* build new menu from the list of installed files */
+	
+	/* attach submenu to the Language menu */
+	
+	/* end of synchronization */
+	SetEvent(hLangMenuEvent);
+}
+
+/**
+ * @brief StartLangIniChangesTracking thread routine.
+ */
+DWORD WINAPI LangIniChangesTrackingProc(LPVOID lpParameter)
+{
+	HANDLE h;
+	DWORD status;
+	
+	h = FindFirstChangeNotification(".",
+			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
+	if(h == INVALID_HANDLE_VALUE){
+		WgxDbgPrintLastError("LangIniChangesTrackingProc: FindFirstChangeNotification failed");
+		lang_ini_tracking_stopped = 1;
+		return 0;
+	}
+	
+	while(!stop_track_lang_ini){
+		status = WaitForSingleObject(h,500/*INFINITE*/);
+		if(status == WAIT_OBJECT_0){
+			// TODO: update only if lang.ini changed
+			ApplyLanguagePack();
+			/* wait for the next notification */
+			if(!FindNextChangeNotification(h)){
+				WgxDbgPrintLastError("LangIniChangesTrackingProc: FindNextChangeNotification failed");
+				break;
+			}
+		}
+	}
+	
+	/* cleanup */
+	FindCloseChangeNotification(h);
+	lang_ini_tracking_stopped = 1;
+	return 0;
+}
+
+/**
+ * @brief Starts tracking of lang.ini changes.
+ */
+void StartLangIniChangesTracking()
+{
+	HANDLE h;
+	DWORD id;
+	
+	h = create_thread(LangIniChangesTrackingProc,NULL,&id);
+	if(h == NULL){
+		WgxDbgPrintLastError("Cannot create thread for lang.ini changes tracking");
+	} else {
+		CloseHandle(h);
+	}
+}
+
+/**
+ * @brief Stops tracking of lang.ini changes.
+ */
+void StopLangIniChangesTracking()
+{
+	stop_track_lang_ini = 1;
+	while(!lang_ini_tracking_stopped)
+		Sleep(100);
+}
+
+/**
+ * @brief StartI18nFolderChangesTracking thread routine.
+ */
+DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)
+{
+	HANDLE h;
+	DWORD status;
+	
+	h = FindFirstChangeNotification(".\\i18n",
+			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
+	if(h == INVALID_HANDLE_VALUE){
+		WgxDbgPrintLastError("I18nFolderChangesTrackingProc: FindFirstChangeNotification failed");
+		i18n_folder_tracking_stopped = 1;
+		return 0;
+	}
+	
+	while(!stop_track_i18n_folder){
+		status = WaitForSingleObject(h,500/*INFINITE*/);
+		if(status == WAIT_OBJECT_0){
+			// TODO: update only if current translation updated
+			ApplyLanguagePack();
+			/* wait for the next notification */
+			if(!FindNextChangeNotification(h)){
+				WgxDbgPrintLastError("I18nFolderChangesTrackingProc: FindNextChangeNotification failed");
+				break;
+			}
+		}
+	}
+	
+	/* cleanup */
+	FindCloseChangeNotification(h);
+	i18n_folder_tracking_stopped = 1;
+	return 0;
+}
+
+/**
+ * @brief Starts tracking of i18n folder changes.
+ */
+void StartI18nFolderChangesTracking()
+{
+	HANDLE h;
+	DWORD id;
+	
+	h = create_thread(I18nFolderChangesTrackingProc,NULL,&id);
+	if(h == NULL){
+		WgxDbgPrintLastError("Cannot create thread for i18n folder changes tracking");
+	} else {
+		CloseHandle(h);
+	}
+}
+
+/**
+ * @brief Stops tracking of i18n folder changes.
+ */
+void StopI18nFolderChangesTracking()
+{
+	stop_track_i18n_folder = 1;
+	while(!i18n_folder_tracking_stopped)
+		Sleep(100);
+}
+
+/**
+ * @brief Destroys events needed 
+ * for i18n mechanisms synchronization.
+ */
+void Destroy_I18N_Events(void)
+{
+	if(hLangPackEvent)
+		CloseHandle(hLangPackEvent);
+	if(hLangMenuEvent)
+		CloseHandle(hLangMenuEvent);
+}
 
 /** @} */

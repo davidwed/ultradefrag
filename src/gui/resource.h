@@ -31,7 +31,6 @@
 #define IDI_FRAGM                       111
 #define IDI_CMP                         112
 #define IDI_MFT                         113
-#define IDR_ACCELERATOR1                125
 #define IDB_ABOUTBOX_PICTURE            128
 
 #define IDI_FIXED                       129
@@ -44,22 +43,8 @@
 
 #define IDM_STATUSBAR                   500
 
-#define IDC_VOLUMES                     1002
-#define IDC_ANALYSE                     1003
-#define IDC_DEFRAGM                     1004
-#define IDC_PAUSE                       1005
-#define IDC_STOP                        1006
-#define IDC_MAP                         1007
-#define IDC_RESCAN                      1008
-#define IDC_SKIPREMOVABLE               1009
-#define IDC_OPTIMIZE                    1010
-#define IDC_SETTINGS                    1011
-#define IDC_ABOUT                       1012
-#define IDC_SHOWFRAGMENTED              1013
 #define IDC_CREDITS                     1020
 #define IDC_LICENSE                     1021
-#define IDC_PROGRESS1                   1025
-#define IDC_PROGRESSMSG                 1026
 #define IDC_HOMEPAGE                    1035
 
 /* Confirm Dialog Constants */
@@ -68,11 +53,7 @@
 #define IDC_NO_BUTTON                   1042
 #define IDC_DELAY_MSG                   1043
 #define IDC_SHUTDOWN_ICON               1044
-
-#define IDC_CL_MAP_STATIC               1057
-
 #define IDC_PIC1                        1059
-
 #define IDC_SHUTDOWN                    1060
 
 #define IDM_ACTION                      1100

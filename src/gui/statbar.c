@@ -50,12 +50,8 @@ void CreateStatusBar(void)
 	hStatus = CreateStatusWindow(WS_CHILD | WS_VISIBLE | WS_BORDER, \
 									"0 dirs", hWindow, IDM_STATUSBAR);
 	if(hStatus == NULL){
-#ifdef NEW_DESIGN
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
 			"Cannot create status bar control!");
-#else
-		WgxDbgPrintLastError("CreateStatusWindow failed");
-#endif
 		return;
 	}
 	
@@ -118,6 +114,11 @@ void UpdateStatusBar(udefrag_progress_info *pi)
 
 	if(!hStatus) return;
 
+	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("UpdateStatusBar: wait on hLangPackEvent failed");
+		return;
+	}
+	
 	(void)_snwprintf(bf,BFSIZE - 1,L"%lu %s",pi->directories,
 			WgxGetResourceString(i18n_table,L"DIRS"));
 	bf[BFSIZE - 1] = 0;
@@ -143,6 +144,8 @@ void UpdateStatusBar(udefrag_progress_info *pi)
 			WgxGetResourceString(i18n_table,L"MFT"));
 	bf[BFSIZE - 1] = 0;
 	(void)SendMessage(hStatus,SB_SETTEXTW,4,(LPARAM)bf);
+
+	SetEvent(hLangPackEvent);
 }
 
 /** @} */

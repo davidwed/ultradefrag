@@ -253,6 +253,12 @@ int CreateMainWindow(int nShowCmd)
 	
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
 	SetFocus(hList);
+	
+	/* load i18n resources */
+	ApplyLanguagePack(); // TODO: call it also when user selects another language
+	BuildLanguageMenu(); // TODO: call it also when i18n folder contents becomes changed
+	
+	/* show main window on the screen */
 	ShowWindow(hWindow,init_maximized_window ? SW_MAXIMIZE : nShowCmd);
 	UpdateWindow(hWindow);
 
@@ -533,7 +539,12 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	}
 
 	GetPrefs();
-	WgxBuildResourceTable(i18n_table,L".\\ud_i18n.lng");
+
+	if(Init_I18N_Events() < 0){
+		DeleteEnvironmentVariables();
+		return 1;
+	}
+
 	UpdateWebStatistics();
 	CheckForTheNewVersion();
 
@@ -545,7 +556,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	InitCommonControls();
 	
 	if(init_jobs() < 0){
-		WgxDestroyResourceTable(i18n_table);
+		Destroy_I18N_Events();
 		DeleteEnvironmentVariables();
 		return 2;
 	}
@@ -553,30 +564,26 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* track changes in guiopts.lua file; synchronized with map redraw */
 	StartPrefsChangesTracking();
 	StartBootExecChangesTracking();
+	StartLangIniChangesTracking();
+	StartI18nFolderChangesTracking();
 
-#ifdef NEW_DESIGN
 	if(CreateMainWindow(nShowCmd) < 0){
+		StopPrefsChangesTracking();
+		StopBootExecChangesTracking();
+		StopLangIniChangesTracking();
+		StopI18nFolderChangesTracking();
+		release_jobs();
+		Destroy_I18N_Events();
 		WgxDestroyResourceTable(i18n_table);
 		DeleteEnvironmentVariables();
-		StopPrefsChangesTracking();
-		StopBootExecChangesTracking();
-		release_jobs();
 		return 3;
 	}
-#else
-	if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_MAIN),NULL,(DLGPROC)DlgProc) == (-1)){
-		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"Cannot create the main window!");
-		DeleteEnvironmentVariables();
-		StopPrefsChangesTracking();
-		StopBootExecChangesTracking();
-		release_jobs();
-		return 3;
-	}
-#endif
 
 	/* release all resources */
 	StopPrefsChangesTracking();
 	StopBootExecChangesTracking();
+	StopLangIniChangesTracking();
+	StopI18nFolderChangesTracking();
 	release_jobs();
 	ReleaseVolList();
 	ReleaseMap();
@@ -588,395 +595,15 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(shutdown_requested){
 		result = ShutdownOrHibernate();
 		WgxDestroyFont(&wgxFont);
+		Destroy_I18N_Events();
 		WgxDestroyResourceTable(i18n_table);
 		return result;
 	}
     
 	WgxDestroyFont(&wgxFont);
+	Destroy_I18N_Events();
 	WgxDestroyResourceTable(i18n_table);
 	return 0;
-}
-
-void InitMainWindow(void)
-{
-	int dx,dy;
-	BOOLEAN coord_undefined = FALSE;
-	int s_width, s_height;
-	RECT rc;
-	udefrag_progress_info pi;
-    
-	(void)WgxAddAccelerators(hInstance,hWindow,IDR_ACCELERATOR1);
-	WgxApplyResourceTable(i18n_table,hWindow);
-	if(hibernate_instead_of_shutdown){
-		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
-	}
-	WgxSetIcon(hInstance,hWindow,IDI_APP);
-	InitFont();
-	WgxSetFont(hWindow,&wgxFont);
-
-	if(skip_removable)
-		(void)SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_CHECKED,0);
-	else
-		(void)SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),BM_SETCHECK,BST_UNCHECKED,0);
-
-	InitVolList();
-	InitProgress();
-	InitMap();
-
-	if(r_rc.left == UNDEFINED_COORD || r_rc.top == UNDEFINED_COORD)
-		coord_undefined = TRUE;
-	WgxCheckWindowCoordinates(&r_rc,130,50);
-
-    if (scale_by_dpi) {
-        rc.top = rc.left = 0;
-        rc.right = rc.bottom = 100;
-        if(MapDialogRect(hWindow,&rc))
-            pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
-    }
-	
-	CreateStatusBar();
-	WgxSetFont(hStatus,&wgxFont);
-
-	if(coord_undefined || restore_default_window_size){
-		/* center default sized window on the screen */
-		dx = DPI(DEFAULT_WIDTH);
-		dy = DPI(DEFAULT_HEIGHT);
-		s_width = GetSystemMetrics(SM_CXSCREEN);
-		s_height = GetSystemMetrics(SM_CYSCREEN);
-		if(s_width < dx || s_height < dy){
-			r_rc.left = r_rc.top = 0;
-		} else {
-			r_rc.left = (s_width - dx) / 2;
-			r_rc.top = (s_height - dy) / 2;
-		}
-		r_rc.right = r_rc.left + dx;
-		r_rc.bottom = r_rc.top + dy;
-		SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
-		restore_default_window_size = 0; /* because already done */
-	} else {
-		dx = r_rc.right - r_rc.left;
-		dy = r_rc.bottom - r_rc.top;
-		SetWindowPos(hWindow,0,r_rc.left,r_rc.top,dx,dy,0);
-	}
-	memcpy((void *)&win_rc,(void *)&r_rc,sizeof(RECT));
-	
-	ResizeMainWindow();
-
-	/* maximize window if required */
-	if(init_maximized_window)
-		SendMessage(hWindow,(WM_USER + 1),0,0);
-	
-	UpdateVolList(); /* after a complete map initialization! */
-
-	/* reset status bar */
-	memset(&pi,0,sizeof(udefrag_progress_info));
-	UpdateStatusBar(&pi);
-}
-
-/**
- * @brief Adjust positions of controls
- * in accordance with main window dimensions.
- */
-void ResizeMainWindow(void)
-{
-	int vlist_height, cmap_height, button_height;
-	int progress_height, sbar_height;
-	
-	int vlist_width, cmap_width;
-	int cmap_label_width, skip_media_width, rescan_btn_width;
-	int button_width, progress_label_width, progress_width;
-	
-	int spacing;
-	int padding_x;
-	int padding_y;
-	
-	RECT rc;
-	int w, h;
-	int offset_y, offset_x;
-	int cmap_offset;
-	int lines, lw, i;
-	int buttons_offset;
-	
-	int cw;
-	HWND hChild;
-	
-	/*
-	* Assign layout variables by layout constants
-	* with the amendment to the current DPI.
-	*/
-	spacing = DPI(SPACING);
-	padding_x = DPI(PADDING_X);
-	padding_y = DPI(PADDING_Y);
-	button_width = DPI(BUTTON_WIDTH);
-	button_height = DPI(BUTTON_HEIGHT);
-	vlist_height = DPI(VLIST_HEIGHT);
-	cmap_label_width = DPI(CMAP_LABEL_WIDTH);
-	skip_media_width = DPI(SKIP_MEDIA_WIDTH);
-	rescan_btn_width = DPI(RESCAN_BTN_WIDTH);
-	progress_label_width = DPI(PROGRESS_LABEL_WIDTH);
-	progress_height = DPI(PROGRESS_HEIGHT);
-	
-	/* get dimensions of the client area of the main window */
-	if(!GetClientRect(hWindow,&rc)){
-		WgxDbgPrint("GetClientRect failed in RepositionMainWindowControls()!\n");
-		return;
-	}
-	
-	w = rc.right - rc.left;
-	h = rc.bottom - rc.top;
-	cw = w - padding_x * 2;
-	offset_y = padding_y;
-
-	/* prevent resizing if the current size is equal to previous */
-	if((prev_rc.right - prev_rc.left == w) && (prev_rc.bottom - prev_rc.top == h))
-		return; /* this usually encounters when user minimizes window and then restores it */
-	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
-	
-	//SendMessage(hWindow,WM_SETREDRAW,FALSE,0);
-	allow_map_redraw = 0;
-
-	/* reposition the volume list */
-    if(cmap_label_width + skip_media_width + rescan_btn_width > cw) vlist_height = vlist_height / 2;
-	vlist_width = cw;
-	vlist_height = ResizeVolList(padding_x,offset_y,vlist_width,vlist_height);
-	
-	offset_y += vlist_height + spacing;
-	
-	/* redraw controls below the volume list */
-	if(cmap_label_width + skip_media_width + rescan_btn_width > cw){
-		/* put volume list related controls firstly, then the cluster map label */
-		offset_x = padding_x;
-		(void)SetWindowPos(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),0,offset_x,offset_y,skip_media_width,button_height,0);
-		offset_x += skip_media_width;
-		if(offset_x + rescan_btn_width > padding_x + cw){
-			offset_x = padding_x;
-			offset_y += button_height + spacing;
-		} else {
-			offset_x = padding_x + cw - rescan_btn_width;
-		}
-		(void)SetWindowPos(GetDlgItem(hWindow,IDC_RESCAN),0,offset_x,offset_y,rescan_btn_width,button_height,0);
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-		(void)SetWindowPos(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),0,offset_x,offset_y,cmap_label_width,button_height,0);
-		offset_y += button_height + spacing;
-	} else {
-		/* put the cluster map label, then volume list related controls */
-		offset_x = padding_x;
-		(void)SetWindowPos(GetDlgItem(hWindow,IDC_CL_MAP_STATIC),0,offset_x,offset_y,cmap_label_width,button_height,0);
-		offset_x = padding_x + cw - rescan_btn_width - skip_media_width;
-		(void)SetWindowPos(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),0,offset_x,offset_y,skip_media_width,button_height,0);
-		offset_x = padding_x + cw - rescan_btn_width;
-		(void)SetWindowPos(GetDlgItem(hWindow,IDC_RESCAN),0,offset_x,offset_y,rescan_btn_width,button_height,0);
-		offset_y += button_height + spacing;
-	}
-
-	/* save cluster map offset */
-	cmap_offset = offset_y;
-	
-	/* reposition the status bar */
-	offset_y = h;
-	sbar_height = ResizeStatusBar(h,w);
-	offset_y -= sbar_height;
-	offset_y -= spacing;
-	
-	/* set progress indicator coordinates */
-	offset_y -= button_height;
-	offset_x = padding_x;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_PROGRESSMSG),0,offset_x,offset_y,progress_label_width,button_height,0);
-	offset_x += progress_label_width + spacing;
-	progress_width = cw - progress_label_width - spacing;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_PROGRESS1),0,offset_x,
-		offset_y + (button_height - progress_height) / 2,progress_width,
-		progress_height,0);
-	offset_y -= spacing;
-	
-	/* set buttons above the progress indicator */
-	lines = 1;
-	lw = cw;
-	/* for the first 7 buttons */
-	for(i = 0; i < 6; i++){
-		lw -= button_width + spacing;
-		if(button_width > lw) lines ++, lw = cw;
-	}
-	/* for the shutdown checkbox */
-	lw -= button_width + spacing;
-	if(button_width * 3 + spacing * 2 > lw) lines ++;
-	
-	/* draw lines of controls */
-	offset_y -= lines * button_height + (lines - 1) * spacing;
-	buttons_offset = offset_y;
-	offset_x = padding_x;
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_ANALYSE),0,offset_x,offset_y,button_width,button_height,0);
-	offset_x += button_width + spacing;
-	if(offset_x + button_width > padding_x + cw){
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-	}
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_DEFRAGM),0,offset_x,offset_y,button_width,button_height,0);
-	offset_x += button_width + spacing;
-	if(offset_x + button_width > padding_x + cw){
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-	}
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_OPTIMIZE),0,offset_x,offset_y,button_width,button_height,0);
-	offset_x += button_width + spacing;
-	if(offset_x + button_width > padding_x + cw){
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-	}
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_STOP),0,offset_x,offset_y,button_width,button_height,0);
-	offset_x += button_width + spacing;
-	if(offset_x + button_width > padding_x + cw){
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-	}
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SHOWFRAGMENTED),0,offset_x,offset_y,button_width,button_height,0);
-	offset_x += button_width + spacing;
-	if(offset_x + button_width > padding_x + cw){
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-	}
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SETTINGS),0,offset_x,offset_y,button_width,button_height,0);
-	offset_x += button_width + spacing;
-	if(offset_x + button_width > padding_x + cw){
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-	}
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_ABOUT),0,offset_x,offset_y,button_width,button_height,0);
-	offset_x += button_width + spacing;
-	if(offset_x + button_width * 3 + spacing * 2 > padding_x + cw){
-		offset_x = padding_x;
-		offset_y += button_height + spacing;
-	}
-	(void)SetWindowPos(GetDlgItem(hWindow,IDC_SHUTDOWN),0,offset_x,offset_y,
-		button_width * 3 + spacing * 2,button_height,0);
-
-	/* adjust cluster map */
-	cmap_width = cw;
-	cmap_height = buttons_offset - cmap_offset - spacing;
-	if(cmap_height < 0) cmap_height = 0;
-	ResizeMap(padding_x,cmap_offset,cmap_width,cmap_height);
-	
-	//SendMessage(hWindow,WM_SETREDRAW,TRUE,0);
-	hChild = GetWindow(hWindow,GW_CHILD);
-	while(hChild){
-		if(hChild != hList && hChild != hMap && hChild != hStatus)
-			(void)InvalidateRect(hChild,NULL,TRUE);
-		hChild = GetWindow(hChild,GW_HWNDNEXT);
-	}
-	
-	allow_map_redraw = 1;
-}
-
-/**
- * @brief Main window procedure.
- */
-BOOL CALLBACK DlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
-{
-	MINMAXINFO *mmi;
-	BOOL size_changed;
-	RECT rc;
-	
-	switch(msg){
-	case WM_INITDIALOG:
-		hWindow = hWnd;
-		InitMainWindow();
-		break;
-	case WM_NOTIFY:
-		VolListNotifyHandler(lParam);
-		break;
-	case WM_COMMAND:
-		switch(LOWORD(wParam)){
-		case IDC_ANALYSE:
-			start_selected_jobs(ANALYSIS_JOB);
-			break;
-		case IDC_DEFRAGM:
-			start_selected_jobs(DEFRAG_JOB);
-			break;
-		case IDC_OPTIMIZE:
-			start_selected_jobs(OPTIMIZER_JOB);
-			break;
-		case IDC_ABOUT:
-			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1))
-				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
-			break;
-		case IDC_SETTINGS:
-			if(!busy_flag)
-				OpenConfigurationDialog();
-			break;
-		case IDC_SKIPREMOVABLE:
-			skip_removable = (
-				SendMessage(GetDlgItem(hWindow,IDC_SKIPREMOVABLE),
-					BM_GETCHECK,0,0) == BST_CHECKED
-				);
-			break;
-		case IDC_SHOWFRAGMENTED:
-			if(!busy_flag)
-				ShowReports();
-			break;
-		case IDC_PAUSE:
-		case IDC_STOP:
-			stop_all_jobs();
-			break;
-		case IDC_RESCAN:
-			if(!busy_flag)
-				UpdateVolList();
-			break;
-		case IDC_SHUTDOWN:
-			if(show_shutdown_check_confirmation_dialog){
-				if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_GETCHECK,0,0) == BST_CHECKED){
-					if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_CHECK_CONFIRM),hWindow,(DLGPROC)CheckConfirmDlgProc) == 0)
-						SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),BM_SETCHECK,(WPARAM)BST_UNCHECKED,0);
-				}
-			}
-		}
-		break;
-	case WM_SIZE:
-		if(wParam == SIZE_MAXIMIZED)
-			maximized_window = 1;
-		else if(wParam != SIZE_MINIMIZED)
-			maximized_window = 0;
-		if(UpdateMainWindowCoordinates() >= 0){
-			if(!maximized_window)
-				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-			ResizeMainWindow();
-		} else {
-			WgxDbgPrint("Wrong window dimensions on WM_SIZE message!\n");
-		}
-		break;
-	case (WM_USER + 1):
-		ShowWindow(hWnd,SW_MAXIMIZE);
-		break;
-	case WM_GETMINMAXINFO:
-		mmi = (MINMAXINFO *)lParam;
-		/* set min size to avoid overlaying controls */
-		mmi->ptMinTrackSize.x = DPI(MIN_WIDTH);
-		mmi->ptMinTrackSize.y = DPI(MIN_HEIGHT);
-		break;
-	case WM_MOVE:
-		size_changed = TRUE;
-		if(GetWindowRect(hWindow,&rc)){
-			if((HIWORD(rc.bottom)) != 0xffff){
-				if((rc.right - rc.left == win_rc.right - win_rc.left) &&
-					(rc.bottom - rc.top == win_rc.bottom - win_rc.top))
-						size_changed = FALSE;
-			}
-		}
-		UpdateMainWindowCoordinates();
-		if(!maximized_window && !size_changed)
-			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-		break;
-	case WM_CLOSE:
-		UpdateMainWindowCoordinates();
-		if(!maximized_window)
-			memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-		VolListGetColumnWidths();
-		exit_pressed = 1;
-		stop_all_jobs();
-		(void)EndDialog(hWnd,0);
-		return TRUE;
-	}
-	return FALSE;
 }
 
 /**

@@ -254,80 +254,6 @@ void InitFont(void)
 }
 
 /**
- * OpenConfigurationDialog thread procedure.
- */
-DWORD WINAPI ConfigThreadProc(LPVOID lpParameter)
-{
-	char path[MAX_PATH];
-	char buffer[MAX_PATH + 64];
-	STARTUPINFO si;
-	PROCESS_INFORMATION pi;
-
-	/* update configuration file by actual preferences */
-	SavePrefs();
-
-	/* pass window handle to the configuration dialog to center it */
-	(void)strcpy(path,".\\udefrag-gui-config.exe");
-	sprintf(buffer,"%s %p",path,hWindow);
-    WgxDbgPrint("UltraDefrag GUI passed window handle as %p\n",hWindow);
-
-	ZeroMemory(&si,sizeof(si));
-	si.cb = sizeof(si);
-	si.dwFlags = STARTF_USESHOWWINDOW;
-	si.wShowWindow = SW_SHOW;
-	ZeroMemory(&pi,sizeof(pi));
-
-	if(!CreateProcess(path,buffer,
-	  NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)){
-	    WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"Cannot execute udefrag-gui-config.exe program!");
-	    return 0;
-	}
-	(void)WaitForSingleObject(pi.hProcess,INFINITE);
-	CloseHandle(pi.hProcess);
-	CloseHandle(pi.hThread);
-
-	/* stop running jobs */
-	stop_all_jobs();
-
-	/* reinitialize GUI */
-	GetPrefs();
-	WgxDestroyFont(&wgxFont);
-	InitFont();
-	WgxSetFont(hWindow,&wgxFont);
-		
-	if(hibernate_instead_of_shutdown)
-		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
-	else
-		WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
-
-	/* if block size or grid line width changed since last redraw, resize map */
-	if(map_block_size != last_block_size  || grid_line_width != last_grid_width){
-		ResizeMap(last_x,last_y,last_width,last_height);
-		InvalidateRect(hMap,NULL,TRUE);
-		UpdateWindow(hMap);
-	}
-	return 0;
-}
-
-/**
- * @brief Opens configuration dialog.
- */
-void OpenConfigurationDialog(void)
-{
-	HANDLE h;
-	DWORD id;
-	
-	h = create_thread(ConfigThreadProc,NULL,&id);
-	if(h == NULL){
-		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"Cannot create thread opening the Configuration dialog!");
-	} else {
-		CloseHandle(h);
-	}
-}
-
-/**
  * @brief StartPrefsChangesTracking thread routine.
  */
 DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
@@ -338,6 +264,8 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 	int s_maximized, s_init_maximized;
 	int s_skip_removable;
 	int cw[sizeof(user_defined_column_widths) / sizeof(int)];
+	short *s = L"";
+	short buffer[256];
 	
 	h = FindFirstChangeNotification(".\\options",
 			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
@@ -373,12 +301,14 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				
 				SetEvent(hMapEvent);
 
-				// TODO
-				/*if(hibernate_instead_of_shutdown)
-					WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
+				if(hibernate_instead_of_shutdown)
+					s = WgxGetResourceString(i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
 				else
-					WgxSetText(GetDlgItem(hWindow,IDC_SHUTDOWN),i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");*/
-
+					s = WgxGetResourceString(i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
+				_snwprintf(buffer,256,L"%ws\tCtrl+S",s);
+				buffer[255] = 0;
+				ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
+			
 				/* if block size or grid line width changed since last redraw, resize map */
 				if(map_block_size != last_block_size  || grid_line_width != last_grid_width){
 					ResizeMap(last_x,last_y,last_width,last_height);

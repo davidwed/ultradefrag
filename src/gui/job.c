@@ -90,6 +90,20 @@ volume_processing_job *get_job(char volume_letter)
 }
 
 /**
+ * @brief Updates status field 
+ * of the list for all volumes.
+ */
+void update_status_of_all_jobs(void)
+{
+	int i;
+
+	for(i = 0; i < NUMBER_OF_JOBS; i++){
+		if(jobs[i].job_type != NEVER_EXECUTED_JOB)
+			VolListUpdateStatusField(&jobs[i]);
+	}
+}
+
+/**
  * @brief Updates progress indicators
  * for the currently running job.
  */
@@ -113,15 +127,21 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	current_operation = pi->current_operation;
 	if(current_operation == 'C') current_operation = 'O';
 	
-	if(current_operation == 'D')
-		ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
-	else if(current_operation == 'O')
-		ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
-	else
-		ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
-	_snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
-	progress_msg[sizeof(progress_msg) - 1] = 0;
-	SetProgress(progress_msg,(int)pi->percentage);
+	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("update_progress: wait on hLangPackEvent failed");
+	} else {
+		if(current_operation == 'D')
+			ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
+		else if(current_operation == 'O')
+			ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
+		else
+			ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
+		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
+		progress_msg[sizeof(progress_msg) - 1] = 0;
+		// TODO
+		//SetProgress(progress_msg,(int)pi->percentage);
+		SetEvent(hLangPackEvent);
+	}
 	
 	(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
 	(void)SetWindowText(hWindow, WindowCaption);
@@ -154,7 +174,8 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 		/* the job is completed */
 		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls 100.00 %%",ProcessCaption);
         progress_msg[sizeof(progress_msg) - 1] = 0;
-		SetProgress(progress_msg,100);
+		// TODO
+		//SetProgress(progress_msg,100);
         (void)SetWindowText(hWindow, VERSIONINTITLE);
 	}
 }
@@ -216,8 +237,9 @@ void ProcessSingleVolume(volume_processing_job *job)
 	/* refresh capacity information of the volume (bug #2036873) */
 	VolListRefreshItem(job);
 	//ClearMap();
-	ShowProgress();
-	SetProgress(L"A 0.00 %",0);
+	///ShowProgress();
+	// TODO
+	//SetProgress(L"A 0.00 %",0);
 
 	/* validate the volume before any processing */
 	error_code = udefrag_validate_volume(job->volume_letter,FALSE);
@@ -260,12 +282,6 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 		return 0;
 	}
 
-	/* disable buttons */
-	WgxDisableWindows(hWindow,IDC_ANALYSE,
-		IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,
-		IDC_RESCAN,IDC_SETTINGS,0);
-	WgxEnableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
-	
 	/* disable menu entries */
 	EnableMenuItem(hMainMenu,IDM_ANALYZE,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_GRAYED);
@@ -294,14 +310,6 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 
 	busy_flag = 0;
 
-	/* enable buttons */
-	if(!exit_pressed){
-		WgxEnableWindows(hWindow,IDC_ANALYSE,
-			IDC_DEFRAGM,IDC_OPTIMIZE,IDC_SHOWFRAGMENTED,
-			IDC_RESCAN,IDC_SETTINGS,0);
-		WgxDisableWindows(hWindow,IDC_PAUSE,IDC_STOP,0);
-	}
-
 	/* enable menu entries */
 	EnableMenuItem(hMainMenu,IDM_ANALYZE,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_ENABLED);
@@ -309,19 +317,10 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	
 	/* check the shutdown after a job box state */
 	if(!exit_pressed && !stop_pressed){
-#ifdef NEW_DESIGN
 		if(shutdown_flag){
 			shutdown_requested = 1;
 			SendMessage(hWindow,WM_COMMAND,IDM_EXIT,0);
 		}
-#else
-		if(SendMessage(GetDlgItem(hWindow,IDC_SHUTDOWN),
-			BM_GETCHECK,0,0) == BST_CHECKED){
-				shutdown_flag = 1;
-				shutdown_requested = 1;
-				(void)SendMessage(hWindow,WM_CLOSE,0,0);
-		}
-#endif
 	}
 	return 0;
 }
