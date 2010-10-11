@@ -34,6 +34,7 @@
  */
 static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table)
 {
+	MENUITEMINFO mi;
 	HMENU hPopup;
 	int i;
 
@@ -44,13 +45,21 @@ static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table)
 			continue;
 		}
 		if(menu_table[i].flags & MF_POPUP){
-			hPopup = WgxBuildPopupMenu((WGX_MENU *)menu_table[i].id);
+			hPopup = WgxBuildPopupMenu(menu_table[i].submenu);
 			if(hPopup == NULL){
 				WgxDbgPrintLastError("WgxBuildMenu: cannot build popup menu");
 				return NULL;
 			}
 			if(!AppendMenuW(hMenu,menu_table[i].flags,(UINT_PTR)hPopup,menu_table[i].text))
 				goto append_menu_fail;
+			/* set id anyway */
+			memset(&mi,0,sizeof(MENUITEMINFO));
+			mi.cbSize = sizeof(MENUITEMINFO);
+			mi.fMask = MIIM_ID;
+			mi.fType = MFT_STRING;
+			mi.wID = menu_table[i].id;
+			if(!SetMenuItemInfo(hMenu,i,TRUE,&mi))
+				goto set_menu_info_fail;
 			continue;
 		}
 		if(!AppendMenuW(hMenu,menu_table[i].flags,menu_table[i].id,menu_table[i].text))
@@ -62,6 +71,10 @@ static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table)
 
 append_menu_fail:
 	WgxDbgPrintLastError("WgxBuildMenu: cannot append menu");
+	return NULL;
+
+set_menu_info_fail:
+	WgxDbgPrintLastError("WgxBuildMenu: cannot set menu item id");
 	return NULL;
 }
 

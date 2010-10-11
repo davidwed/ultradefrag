@@ -74,9 +74,10 @@ typedef struct _WGX_OPTION {
 } WGX_OPTION, *PWGX_OPTION;
 
 typedef struct _WGX_MENU {
-	UINT flags;          /* combination of MF_xxx flags (see MSDN for details) */
-	UINT_PTR id;         /* menu item identifier; pointer to another menu table in case of MF_POPUP */
-	wchar_t *text;       /* menu item text in case of MF_STRING */
+	UINT flags;                 /* combination of MF_xxx flags (see MSDN for details) */
+	UINT id;                    /* menu item identifier */
+	struct _WGX_MENU *submenu;  /* pointer to submenu table in case of MF_POPUP */
+	wchar_t *text;              /* menu item text in case of MF_STRING */
 } WGX_MENU, *PWGX_MENU;
 
 /* wgx routines prototypes */
