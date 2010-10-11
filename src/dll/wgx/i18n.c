@@ -203,7 +203,10 @@ void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table)
 	
 	for(i = 0;; i++){
 		if(table[i].Key == NULL) break;
-		if(table[i].LoadedString) free(table[i].LoadedString);
+		if(table[i].LoadedString){
+			free(table[i].LoadedString);
+			table[i].LoadedString = NULL;
+		}
 	}
 }
 
