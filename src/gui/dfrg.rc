@@ -36,6 +36,17 @@ IDI_REMOVABLE           ICON    DISCARDABLE     "res/removable.ico"
 
 IDI_SHUTDOWN            ICON    DISCARDABLE     "res/shutdown.ico"
 
+/* status icons from http://www.iconspedia.com/pack/phuzion-1825/ 
+   except removable_on icon */
+IDI_SHUTDOWN_ON         ICON    DISCARDABLE     "res/shutdown_on.ico"
+IDI_SHUTDOWN_OFF        ICON    DISCARDABLE     "res/shutdown_off.ico"
+IDI_SKIP_REMOVABLE_ON   ICON    DISCARDABLE     "res/skip_removable_on.ico"
+// IDI_SKIP_REMOVABLE_OFF is the same as IDI_REMOVABLE
+IDI_HIBERNATE_ON        ICON    DISCARDABLE     "res/hibernate_on.ico"
+IDI_HIBERNATE_OFF       ICON    DISCARDABLE     "res/hibernate_off.ico"
+IDI_BOOT_ON             ICON    DISCARDABLE     "res/boot_on.ico"
+IDI_BOOT_OFF            ICON    DISCARDABLE     "res/boot_off.ico"
+
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/ship.bmp"
 
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93

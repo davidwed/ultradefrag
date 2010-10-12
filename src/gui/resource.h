@@ -43,6 +43,15 @@
 
 #define IDM_STATUSBAR                   500
 
+#define IDI_SHUTDOWN_ON                 501
+#define IDI_SHUTDOWN_OFF                502
+#define IDI_SKIP_REMOVABLE_ON           503
+#define IDI_SKIP_REMOVABLE_OFF          IDI_REMOVABLE
+#define IDI_HIBERNATE_ON                505
+#define IDI_HIBERNATE_OFF               506
+#define IDI_BOOT_ON                     507
+#define IDI_BOOT_OFF                    508
+
 #define IDC_CREDITS                     1020
 #define IDC_LICENSE                     1021
 #define IDC_HOMEPAGE                    1035
