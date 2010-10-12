@@ -388,6 +388,10 @@ DWORD WINAPI LangIniChangesTrackingProc(LPVOID lpParameter)
 {
 	HANDLE h;
 	DWORD status;
+	wchar_t selected_lang_name[MAX_PATH];
+	wchar_t text[MAX_PATH];
+	MENUITEMINFOW mi;
+	int i;
 	
 	h = FindFirstChangeNotification(".",
 			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
@@ -402,6 +406,27 @@ DWORD WINAPI LangIniChangesTrackingProc(LPVOID lpParameter)
 		if(status == WAIT_OBJECT_0){
 			// TODO: update only if lang.ini changed
 			ApplyLanguagePack();
+			/* update language menu */
+			GetPrivateProfileStringW(L"Language",L"Selected",L"",selected_lang_name,MAX_PATH,L".\\lang.ini");
+			if(selected_lang_name[0] == 0)
+				wcscpy(selected_lang_name,L"English (US)");
+			for(i = IDM_LANGUAGE + 1; i < IDM_CFG_GUI; i++){
+				if(CheckMenuItem(hMainMenu,i,MF_BYCOMMAND | MF_UNCHECKED) == -1)
+					break;
+				/* check the selected language */
+				memset(&mi,0,sizeof(MENUITEMINFOW));
+				mi.cbSize = sizeof(MENUITEMINFOW);
+				mi.fMask = MIIM_TYPE;
+				mi.fType = MFT_STRING;
+				mi.dwTypeData = text;
+				mi.cch = MAX_PATH;
+				if(!GetMenuItemInfoW(hMainMenu,i,FALSE,&mi)){
+					WgxDbgPrintLastError("LangIniChangesTrackingProc: cannot get menu item info");
+				} else {
+					if(wcscmp(selected_lang_name,text) == 0)
+						CheckMenuItem(hMainMenu,i,MF_BYCOMMAND | MF_CHECKED);
+				}
+			}
 			/* wait for the next notification */
 			if(!FindNextChangeNotification(h)){
 				WgxDbgPrintLastError("LangIniChangesTrackingProc: FindNextChangeNotification failed");
