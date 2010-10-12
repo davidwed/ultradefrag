@@ -70,17 +70,19 @@
 #define IDM_SHOW_REPORT                 1310
 
 #define IDM_SETTINGS                    1400
-#define IDM_LANGUAGE                    1410
-#define IDM_CFG_GUI                     1680
-#define IDM_CFG_GUI_FONT                1681
-#define IDM_CFG_GUI_SETTINGS            1682
-#define IDM_CFG_BOOT                    1685
-#define IDM_CFG_BOOT_ENABLE             1686
-#define IDM_CFG_BOOT_SCRIPT             1687
-#define IDM_CFG_REPORTS                 1690
 
-#define IDM_HELP                        1700
-#define IDM_CONTENTS                    1710
-#define IDM_BEST_PRACTICE               1720
-#define IDM_FAQ                         1730
-#define IDM_ABOUT                       1740
+#define IDM_LANGUAGE                    1410
+/* IDM_CFG_GUI must follow IDM_LANGUAGE */
+#define IDM_CFG_GUI                     2680
+#define IDM_CFG_GUI_FONT                2681
+#define IDM_CFG_GUI_SETTINGS            2682
+#define IDM_CFG_BOOT                    2685
+#define IDM_CFG_BOOT_ENABLE             2686
+#define IDM_CFG_BOOT_SCRIPT             2687
+#define IDM_CFG_REPORTS                 2690
+
+#define IDM_HELP                        2700
+#define IDM_CONTENTS                    2710
+#define IDM_BEST_PRACTICE               2720
+#define IDM_FAQ                         2730
+#define IDM_ABOUT                       2740

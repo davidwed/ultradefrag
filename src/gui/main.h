@@ -59,6 +59,7 @@
 #include <ctype.h>
 #include <wchar.h>
 #include <process.h>
+#include <io.h>
 
 #define lua_c
 #include "../lua5.1/lua.h"

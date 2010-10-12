@@ -256,7 +256,7 @@ int CreateMainWindow(int nShowCmd)
 	
 	/* load i18n resources */
 	ApplyLanguagePack(); // TODO: call it also when user selects another language
-	BuildLanguageMenu(); // TODO: call it also when i18n folder contents becomes changed
+	BuildLanguageMenu();
 	
 	/* show main window on the screen */
 	ShowWindow(hWindow,init_maximized_window ? SW_MAXIMIZE : nShowCmd);
@@ -326,6 +326,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	RECT rc;
 	short path[MAX_PATH];
 	CHOOSEFONT cf;
+	UINT i, id;
+	MENUITEMINFOW mi;
+	short lang_name[MAX_PATH];
 
 	switch(uMsg){
 	case WM_CREATE:
@@ -465,6 +468,37 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1))
 				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
 			return 0;
+		default:
+			/* handle language menu */
+			id = LOWORD(wParam);
+			if(id > IDM_LANGUAGE && id < IDM_CFG_GUI){
+				/* get name of selected language */
+				memset(&mi,0,sizeof(MENUITEMINFOW));
+				mi.cbSize = sizeof(MENUITEMINFOW);
+				mi.fMask = MIIM_TYPE;
+				mi.fType = MFT_STRING;
+				mi.dwTypeData = lang_name;
+				mi.cch = MAX_PATH;
+				if(!GetMenuItemInfoW(hMainMenu,id,FALSE,&mi)){
+					WgxDbgPrintLastError("MainWindowProc: cannot get selected language");
+					return 0;
+				}
+				
+				/* move check mark */
+				for(i = IDM_LANGUAGE + 1; i < IDM_CFG_GUI; i++){
+					if(CheckMenuItem(hMainMenu,i,MF_BYCOMMAND | MF_UNCHECKED) == -1)
+						break;
+				}
+				CheckMenuItem(hMainMenu,id,MF_BYCOMMAND | MF_CHECKED);
+
+				/* save selection to lang.ini file */
+				WritePrivateProfileStringW(L"Language",L"Selected",lang_name,L".\\lang.ini");
+				
+				/* update all gui controls */
+				// this hangs app because of directory change tracking from parallel thread
+				//ApplyLanguagePack();
+				return 0;
+			}
 		}
 		break;
 	case WM_SIZE:

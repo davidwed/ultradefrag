@@ -269,21 +269,113 @@ void ApplyLanguagePack(void)
  */
 void BuildLanguageMenu(void)
 {
+	MENUITEMINFO mi;
+	HMENU hLangMenu;
+	intptr_t h;
+	struct _wfinddata_t lng_file;
+	wchar_t filename[MAX_PATH];
+	int i, length;
+	wchar_t selected_lang_name[MAX_PATH];
+	UINT flags;
+	
 	/* synchronize with other threads */
 	if(WaitForSingleObject(hLangMenuEvent,INFINITE) != WAIT_OBJECT_0){
 		WgxDbgPrintLastError("BuildLanguageMenu: wait on hLangMenuEvent failed");
 		return;
 	}
 	
+	/* get selected language name */
+	GetPrivateProfileStringW(L"Language",L"Selected",L"",selected_lang_name,MAX_PATH,L".\\lang.ini");
+	if(selected_lang_name[0] == 0)
+		wcscpy(selected_lang_name,L"English (US)");
+
 	/* get submenu handle */
+	memset(&mi,0,sizeof(MENUITEMINFO));
+	mi.cbSize = sizeof(MENUITEMINFO);
+	mi.fMask = MIIM_SUBMENU;
+	if(!GetMenuItemInfo(hMainMenu,IDM_LANGUAGE,FALSE,&mi)){
+		WgxDbgPrintLastError("BuildLanguageMenu: cannot get submenu handle");
+		SetEvent(hLangMenuEvent);
+		return;
+	}
+	hLangMenu = mi.hSubMenu;
 	
-	/* clear MF_POPUP flag */
+	/* detach submenu */
+	memset(&mi,0,sizeof(MENUITEMINFO));
+	mi.cbSize = sizeof(MENUITEMINFO);
+	mi.fMask = MIIM_SUBMENU;
+	mi.hSubMenu = NULL;
+	if(!SetMenuItemInfo(hMainMenu,IDM_LANGUAGE,FALSE,&mi)){
+		WgxDbgPrintLastError("BuildLanguageMenu: cannot detach submenu");
+		SetEvent(hLangMenuEvent);
+		return;
+	}
 	
 	/* destroy submenu */
+	DestroyMenu(hLangMenu);
 	
 	/* build new menu from the list of installed files */
+	hLangMenu = CreatePopupMenu();
+	if(hLangMenu == NULL){
+		WgxDbgPrintLastError("BuildLanguageMenu: cannot create submenu");
+		SetEvent(hLangMenuEvent);
+		return;
+	}
+	
+	h = _wfindfirst(L".\\i18n\\*.lng",&lng_file);
+	if(h == -1){
+		WgxDbgPrint("BuildLanguageMenu: no language packs found\n");
+		/* add default US English */
+		if(!AppendMenu(hLangMenu,MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1,"English (US)")){
+			WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+			DestroyMenu(hLangMenu);
+			SetEvent(hLangMenuEvent);
+			return;
+		}
+	} else {
+		i = 0x1;
+		wcsncpy(filename,lng_file.name,MAX_PATH - 1);
+		filename[MAX_PATH - 1] = 0;
+		length = wcslen(filename);
+		if(length > wcslen(L".lng"))
+			filename[length - 4] = 0;
+		flags = MF_STRING | MF_ENABLED;
+		if(wcscmp(selected_lang_name,filename) == 0)
+			flags |= MF_CHECKED;
+		if(!AppendMenuW(hLangMenu,flags,IDM_LANGUAGE + i,filename)){
+			WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+		} else {
+			i++;
+		}
+		while(_wfindnext(h,&lng_file) == 0){
+			wcsncpy(filename,lng_file.name,MAX_PATH - 1);
+			filename[MAX_PATH - 1] = 0;
+			length = wcslen(filename);
+			if(length > wcslen(L".lng"))
+				filename[length - 4] = 0;
+			flags = MF_STRING | MF_ENABLED;
+			if(wcscmp(selected_lang_name,filename) == 0)
+				flags |= MF_CHECKED;
+			if(!AppendMenuW(hLangMenu,flags,IDM_LANGUAGE + i,filename)){
+				WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+			} else {
+				i++;
+			}
+		}
+		_findclose(h);
+	}
 	
 	/* attach submenu to the Language menu */
+	memset(&mi,0,sizeof(MENUITEMINFO));
+	mi.cbSize = sizeof(MENUITEMINFO);
+	mi.fMask = MIIM_SUBMENU;
+	mi.hSubMenu = hLangMenu;
+	if(!SetMenuItemInfo(hMainMenu,IDM_LANGUAGE,FALSE,&mi)){
+		WgxDbgPrintLastError("BuildLanguageMenu: cannot attach submenu");
+		DestroyMenu(hLangMenu);
+		SetEvent(hLangMenuEvent);
+		return;
+	}
 	
 	/* end of synchronization */
 	SetEvent(hLangMenuEvent);
@@ -359,7 +451,10 @@ DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)
 	DWORD status;
 	
 	h = FindFirstChangeNotification(".\\i18n",
-			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
+			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE \
+			| FILE_NOTIFY_CHANGE_FILE_NAME \
+			| FILE_NOTIFY_CHANGE_DIR_NAME \
+			| FILE_NOTIFY_CHANGE_SIZE);
 	if(h == INVALID_HANDLE_VALUE){
 		WgxDbgPrintLastError("I18nFolderChangesTrackingProc: FindFirstChangeNotification failed");
 		i18n_folder_tracking_stopped = 1;
@@ -371,6 +466,8 @@ DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)
 		if(status == WAIT_OBJECT_0){
 			// TODO: update only if current translation updated
 			ApplyLanguagePack();
+			/* update language menu anyway */
+			BuildLanguageMenu();
 			/* wait for the next notification */
 			if(!FindNextChangeNotification(h)){
 				WgxDbgPrintLastError("I18nFolderChangesTrackingProc: FindNextChangeNotification failed");
