@@ -337,7 +337,7 @@ void BuildLanguageMenu(void)
 		wcsncpy(filename,lng_file.name,MAX_PATH - 1);
 		filename[MAX_PATH - 1] = 0;
 		length = wcslen(filename);
-		if(length > wcslen(L".lng"))
+		if(length > (int)wcslen(L".lng"))
 			filename[length - 4] = 0;
 		flags = MF_STRING | MF_ENABLED;
 		if(wcscmp(selected_lang_name,filename) == 0)
@@ -351,7 +351,7 @@ void BuildLanguageMenu(void)
 			wcsncpy(filename,lng_file.name,MAX_PATH - 1);
 			filename[MAX_PATH - 1] = 0;
 			length = wcslen(filename);
-			if(length > wcslen(L".lng"))
+			if(length > (int)wcslen(L".lng"))
 				filename[length - 4] = 0;
 			flags = MF_STRING | MF_ENABLED;
 			if(wcscmp(selected_lang_name,filename) == 0)
