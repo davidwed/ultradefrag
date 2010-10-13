@@ -42,6 +42,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 		}
 		WgxSetFont(hWnd,&wgxFont);
 		(void)WgxAddAccelerators(hInstance,hWnd,IDR_ACCELERATOR2);
+        (void)SetFocus(GetDlgItem(hWnd,IDC_HOMEPAGE));
 		return FALSE;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){

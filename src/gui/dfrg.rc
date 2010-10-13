@@ -61,7 +61,7 @@ BEGIN
     PUSHBUTTON      "&Credits",IDC_CREDITS,72,53,76,10
     PUSHBUTTON      "&License",IDC_LICENSE,153,53,80,10
     PUSHBUTTON      "&http://ultradefrag.sourceforge.net",IDC_HOMEPAGE,72,70,
-                    161,12,BS_FLAT | BS_DEFPUSHBUTTON
+                    161,12,BS_FLAT
 END
 
 /* this dialog should be centered on the screen, because the main window is closed anyway */
