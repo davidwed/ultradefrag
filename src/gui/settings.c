@@ -457,12 +457,14 @@ track_again:
 				CheckMenuItem(hMainMenu,
 					IDM_CFG_BOOT_ENABLE,
 					MF_BYCOMMAND | MF_CHECKED);
+				SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(TRUE,0));
 			} else {
 				WgxDbgPrint("Boot time defragmenter disabled (externally)\n");
 				boot_time_defrag_enabled = 0;
 				CheckMenuItem(hMainMenu,
 					IDM_CFG_BOOT_ENABLE,
 					MF_BYCOMMAND | MF_UNCHECKED);
+				SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(FALSE,0));
 			}
 			goto track_again;
 		}
