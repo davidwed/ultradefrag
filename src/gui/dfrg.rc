@@ -49,6 +49,23 @@ IDI_BOOT_OFF            ICON    DISCARDABLE     "res/boot_off.ico"
 
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/ship.bmp"
 
+/*
+* Toolbar icons were copied from:
+* analyse, defrag, optimize, help icons - from NSIS compiler's frontend
+* stop, config, terminal icons - from Silk icon set 1.3 http://www.famfamfam.com/lab/icons/silk/
+* report, script icons - from http://brandspankingnew.net/download.php?file=doc_types_v2.zip
+* All icons are licensed under terms permitting the use for non commercial purposes.
+*/
+IDB_TOOLBAR                    BITMAP  DISCARDABLE     "res/toolbar24.bmp"
+IDB_TOOLBAR_DISABLED           BITMAP  DISCARDABLE     "res/toolbar24d.bmp"
+IDB_TOOLBAR_HIGHLIGHTED        BITMAP  DISCARDABLE     "res/toolbar24h.bmp"
+IDB_TOOLBAR_8_BIT              BITMAP  DISCARDABLE     "res/toolbar8.bmp"
+IDB_TOOLBAR_DISABLED_8_BIT     BITMAP  DISCARDABLE     "res/toolbar8d.bmp"
+IDB_TOOLBAR_HIGHLIGHTED_8_BIT  BITMAP  DISCARDABLE     "res/toolbar8h.bmp"
+IDB_TOOLBAR_16_BIT             BITMAP  DISCARDABLE     "res/toolbar16.bmp"
+IDB_TOOLBAR_DISABLED_16_BIT    BITMAP  DISCARDABLE     "res/toolbar16d.bmp"
+IDB_TOOLBAR_HIGHLIGHTED_16_BIT BITMAP  DISCARDABLE     "res/toolbar16h.bmp"
+
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
 STYLE DS_CENTER | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Ultra Defragmenter"

@@ -93,8 +93,6 @@ WGX_MENU main_menu[] = {
 	{0,0,NULL,NULL}
 };
 
-extern int boot_time_defrag_enabled;
-
 /**
  * @brief Creates main menu.
  * @return Zero for success,

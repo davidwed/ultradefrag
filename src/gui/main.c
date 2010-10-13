@@ -137,6 +137,7 @@ void new_ResizeMainWindow(int force)
 {
 	int vlist_height, sbar_height;
 	int spacing;
+	int toolbar_height;
 	RECT rc;
 	int w, h;
 	
@@ -155,9 +156,13 @@ void new_ResizeMainWindow(int force)
 		return; /* this usually encounters when user minimizes window and then restores it */
 	memcpy((void *)&prev_rc,(void *)&rc,sizeof(RECT));
 	
-	vlist_height = ResizeVolList(0,0,w,vlist_height);
+	if(GetWindowRect(hToolbar,&rc))
+		toolbar_height = rc.bottom - rc.top;
+	else
+		toolbar_height = 24 + 2 * GetSystemMetrics(SM_CYEDGE);
+	vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height);
 	sbar_height = ResizeStatusBar(h,w);
-	ResizeMap(0,vlist_height,w,h - vlist_height - sbar_height);
+	ResizeMap(0,toolbar_height + vlist_height,w,h - toolbar_height - vlist_height - sbar_height);
 }
 
 /**
@@ -433,12 +438,14 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 					CheckMenuItem(hMainMenu,
 						IDM_CFG_BOOT_ENABLE,
 						MF_BYCOMMAND | MF_UNCHECKED);
+					SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(FALSE,0));
 					(void)wcscat(path,L"\\System32\\boot-off.cmd");
 				} else {
 					boot_time_defrag_enabled = 1;
 					CheckMenuItem(hMainMenu,
 						IDM_CFG_BOOT_ENABLE,
 						MF_BYCOMMAND | MF_CHECKED);
+					SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(TRUE,0));
 					(void)wcscat(path,L"\\System32\\boot-on.cmd");
 				}
 				(void)WgxShellExecuteW(hWindow,L"open",path,NULL,NULL,SW_HIDE);

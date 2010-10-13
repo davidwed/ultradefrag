@@ -207,6 +207,7 @@ extern HWND hList;
 extern HWND hMap;
 extern HWND hStatus;
 extern HMENU hMainMenu;
+extern HWND hToolbar;
 extern WGX_FONT wgxFont;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern volume_processing_job *current_job;
@@ -215,6 +216,7 @@ extern int busy_flag;
 extern int shutdown_flag;
 extern int shutdown_requested;
 extern int exit_pressed;
+extern int boot_time_defrag_enabled;
 extern HANDLE hLangPackEvent;
 extern HANDLE hLangMenuEvent;
 
