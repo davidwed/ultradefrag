@@ -259,6 +259,10 @@ void RedrawMap(volume_processing_job *job)
 		job->map.hbitmap = hBitmap;
 		job->map.width = map_width;
 		job->map.height = map_height;
+	} else {
+		/* if block size changed, but map dimensions aren't, redraw grid anyway */
+		if(job->map.scaled_size != map_blocks_per_line * map_lines)
+			DrawGrid(job->map.hdc);
 	}
 		
 	/* if cluster map does not exist, draw empty bitmap */
