@@ -46,6 +46,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	/* settings menu */
 	{0, L"SETTINGS",                 L"&Settings",                NULL},
 	{0, L"LANGUAGE",                 L"&Language",                NULL},
+	{0, L"TRANSLATIONS_FOLDER",      L"&Translations folder",     NULL},
 	{0, L"GRAPHICAL_INTERFACE",      L"&Graphical interface",     NULL},
 	{0, L"FONT",                     L"&Font",                    NULL},
 	{0, L"OPTIONS",                  L"&Options",                 NULL},
@@ -117,6 +118,7 @@ struct menu_item menu_items[] = {
 	{IDM_RESCAN,                  L"RESCAN_DRIVES",            "Ctrl+D"},
 	{IDM_EXIT,                    L"EXIT",                     "Alt+F4"},
 	{IDM_SHOW_REPORT,             L"SHOW_REPORT",              "F8"    },
+	{IDM_TRANSLATIONS_FOLDER,     L"TRANSLATIONS_FOLDER",      NULL    },
 	{IDM_CFG_GUI_FONT,            L"FONT",                     "F9"    },
 	{IDM_CFG_GUI_SETTINGS,        L"OPTIONS",                  "F10"   },
 	{IDM_CFG_BOOT_ENABLE,         L"ENABLE",                   "F11"   },
@@ -364,6 +366,12 @@ void BuildLanguageMenu(void)
 		}
 		_findclose(h);
 	}
+	
+	/* add separator and translations folder menu item */
+	AppendMenu(hLangMenu,MF_SEPARATOR,0,NULL);
+	if(!AppendMenuW(hLangMenu,MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,
+	  WgxGetResourceString(i18n_table,L"TRANSLATIONS_FOLDER")))
+		WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
 	
 	/* attach submenu to the Language menu */
 	memset(&mi,0,sizeof(MENUITEMINFO));

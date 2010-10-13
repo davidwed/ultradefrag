@@ -397,6 +397,11 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				ShowReports();
 			return 0;
 		/* Settings menu handlers */
+		case IDM_TRANSLATIONS_FOLDER:
+			(void)WgxShellExecuteW(hWindow,L"open",L"explorer.exe",
+				L"/select, \".\\i18n\\translation.template\"",NULL,SW_SHOW);
+			//(void)WgxShellExecuteW(hWindow,L"open",L".\\i18n",NULL,NULL,SW_SHOW);
+			return 0;
 		case IDM_CFG_GUI_FONT:
 			memset(&cf,0,sizeof(cf));
 			cf.lStructSize = sizeof(CHOOSEFONT);
