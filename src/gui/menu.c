@@ -49,9 +49,9 @@ WGX_MENU report_menu[] = {
 };
 
 WGX_MENU language_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1,         NULL, L"English (US)" },
-	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,                 NULL, L"&Translations folder" },
+	{MF_SEPARATOR,0,NULL,NULL},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1,         NULL, L"English (US)" },
 	{0,0,NULL,NULL}
 };
 

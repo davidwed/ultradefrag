@@ -324,6 +324,12 @@ void BuildLanguageMenu(void)
 		return;
 	}
 	
+	/* add translations folder menu item and a separator */
+	if(!AppendMenuW(hLangMenu,MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,
+	  WgxGetResourceString(i18n_table,L"TRANSLATIONS_FOLDER")))
+		WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+	AppendMenu(hLangMenu,MF_SEPARATOR,0,NULL);
+	
 	h = _wfindfirst(L".\\i18n\\*.lng",&lng_file);
 	if(h == -1){
 		WgxDbgPrint("BuildLanguageMenu: no language packs found\n");
@@ -366,12 +372,6 @@ void BuildLanguageMenu(void)
 		}
 		_findclose(h);
 	}
-	
-	/* add separator and translations folder menu item */
-	AppendMenu(hLangMenu,MF_SEPARATOR,0,NULL);
-	if(!AppendMenuW(hLangMenu,MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,
-	  WgxGetResourceString(i18n_table,L"TRANSLATIONS_FOLDER")))
-		WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
 	
 	/* attach submenu to the Language menu */
 	memset(&mi,0,sizeof(MENUITEMINFO));
