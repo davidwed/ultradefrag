@@ -27,13 +27,13 @@ type manifest.part3 >> .\obj\console\defrag.manifest
 echo processorArchitecture="%1" >> .\obj\console\defrag.manifest
 type manifest.part4 >> .\obj\console\defrag.manifest
 
-type manifest.part1 > .\obj\gui\res\dfrg.manifest
-echo version="%ULTRADFGVER%.0" name="ultradefrag" processorArchitecture="%1" >> .\obj\gui\res\dfrg.manifest
-type manifest.part2 >> .\obj\gui\res\dfrg.manifest
-echo UltraDefrag GUI >> .\obj\gui\res\dfrg.manifest
-type manifest.part3 >> .\obj\gui\res\dfrg.manifest
-echo processorArchitecture="%1" >> .\obj\gui\res\dfrg.manifest
-type manifest.part4 >> .\obj\gui\res\dfrg.manifest
+type manifest.part1 > .\obj\gui\res\ultradefrag.manifest
+echo version="%ULTRADFGVER%.0" name="ultradefrag" processorArchitecture="%1" >> .\obj\gui\res\ultradefrag.manifest
+type manifest.part2 >> .\obj\gui\res\ultradefrag.manifest
+echo UltraDefrag GUI >> .\obj\gui\res\ultradefrag.manifest
+type manifest.part3 >> .\obj\gui\res\ultradefrag.manifest
+echo processorArchitecture="%1" >> .\obj\gui\res\ultradefrag.manifest
+type manifest.part4 >> .\obj\gui\res\ultradefrag.manifest
 
 type manifest.part1 > .\obj\bootexctrl\bootexctrl.manifest
 echo version="%ULTRADFGVER%.0" name="bootexctrl" processorArchitecture="%1" >> .\obj\bootexctrl\bootexctrl.manifest
@@ -56,7 +56,7 @@ if "%1" neq "X86" goto L1
 copy /Y .\obj\hibernate\hibernate.manifest .\hibernate\hibernate.manifest
 copy /Y .\obj\console\defrag.manifest .\console\defrag.manifest
 copy /Y .\obj\utf8-16\utf8-16.manifest .\utf8-16\utf8-16.manifest
-copy /Y .\obj\gui\res\dfrg.manifest .\gui\res\dfrg.manifest
+copy /Y .\obj\gui\res\ultradefrag.manifest .\gui\res\ultradefrag.manifest
 copy /Y .\obj\gui-launcher\udefrag-gui.manifest .\gui-launcher\udefrag-gui.manifest
 copy /Y .\obj\udefrag-gui-config\res\config.manifest .\udefrag-gui-config\res\config.manifest
 copy /Y .\obj\bootexctrl\bootexctrl.manifest .\bootexctrl\bootexctrl.manifest

@@ -1,5 +1,5 @@
 [Project]
-name=dfrg
+name=ultradefrag
 type=0
 defaultConfig=0
 
@@ -26,7 +26,7 @@ optimizeLevel=0
 
 // linker
 libraryPath=..\lib
-outputFilename=../bin/dfrg.exe
+outputFilename=../bin/ultradefrag.exe
 libraries=udefrag,lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt
 extraLinkerOptions=-mwindows
 ignoreStartupFile=0
@@ -64,7 +64,7 @@ optimizeLevel=2
 
 // linker
 libraryPath=..\lib
-outputFilename=../bin/dfrg.exe
+outputFilename=../bin/ultradefrag.exe
 libraries=udefrag,lua5.1a,wgx,gdi32,comdlg32,comctl32,msvcrt
 extraLinkerOptions=-mwindows -Wl,--strip-all
 ignoreStartupFile=0
@@ -98,14 +98,14 @@ extraResourceOptions=
 1=main.h
 2=resource.h
 [Resource]
-1=dfrg.rc
+1=ultradefrag.rc
 [Other]
 [History]
 settings.c,9746
 job.c,9506
 main.h,1953
 confirm.c,5120
-dfrg.rc,2841
+ultradefrag.rc,2841
 resource.h,1067
 i18n.c,3870
 statbar.c,984

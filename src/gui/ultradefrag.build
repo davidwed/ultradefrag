@@ -1,6 +1,6 @@
 -- this is the UltraDefrag GUI build options
 
-name        = "dfrg"
+name        = "ultradefrag"
 target_type = "gui"
 
 src = {
@@ -9,7 +9,7 @@ src = {
 	"upgrade.c", "vollist.c"
 	
 }
-rc = { "dfrg.rc" }
+rc = { "ultradefrag.rc" }
 
 libs = {
 	"kernel32", "user32", "gdi32", "comctl32",

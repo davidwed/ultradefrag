@@ -24,7 +24,7 @@ copy /Y bin\udefrag.dll %PORTABLE_DIR%\
 copy /Y bin\udefrag.exe %PORTABLE_DIR%\
 copy /Y bin\zenwinx.dll %PORTABLE_DIR%\
 
-copy /Y bin\dfrg.exe %PORTABLE_DIR%\ultradefrag.exe
+copy /Y bin\ultradefrag.exe %PORTABLE_DIR%
 copy /Y bin\lua5.1a.dll %PORTABLE_DIR%\
 copy /Y bin\lua5.1a.exe %PORTABLE_DIR%\
 copy /Y bin\lua5.1a_gui.exe %PORTABLE_DIR%\
@@ -76,7 +76,7 @@ copy /Y amd64\udefrag.dll %PORTABLE_DIR%\
 copy /Y amd64\udefrag.exe %PORTABLE_DIR%\
 copy /Y amd64\zenwinx.dll %PORTABLE_DIR%\
 
-copy /Y amd64\dfrg.exe %PORTABLE_DIR%\ultradefrag.exe
+copy /Y amd64\ultradefrag.exe %PORTABLE_DIR%
 copy /Y amd64\lua5.1a.dll %PORTABLE_DIR%\
 copy /Y amd64\lua5.1a.exe %PORTABLE_DIR%\
 copy /Y amd64\lua5.1a_gui.exe %PORTABLE_DIR%\
@@ -126,7 +126,7 @@ copy /Y ia64\udefrag.dll %PORTABLE_DIR%\
 copy /Y ia64\udefrag.exe %PORTABLE_DIR%\
 copy /Y ia64\zenwinx.dll %PORTABLE_DIR%\
 
-copy /Y ia64\dfrg.exe %PORTABLE_DIR%\ultradefrag.exe
+copy /Y ia64\ultradefrag.exe %PORTABLE_DIR%
 copy /Y ia64\lua5.1a.dll %PORTABLE_DIR%\
 copy /Y ia64\lua5.1a.exe %PORTABLE_DIR%\
 copy /Y ia64\lua5.1a_gui.exe %PORTABLE_DIR%\

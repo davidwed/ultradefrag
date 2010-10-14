@@ -136,7 +136,7 @@ BEGIN
 END
 
 /* manifests for all targets produces make-manifests.cmd script */
-1 24 "res/dfrg.manifest"
+1 24 "res/ultradefrag.manifest"
 
 VS_VERSION_INFO VERSIONINFO
  FILEVERSION VERSION
@@ -162,9 +162,9 @@ BEGIN
             VALUE "FileDescription", "UltraDefrag Portable GUI interface\0"
 		#endif
             VALUE "FileVersion", VERSION2
-            VALUE "InternalName", "Dfrg\0"
+            VALUE "InternalName", "ultradefrag\0"
             VALUE "LegalCopyright", "Copyright ? 2007-2010 UltraDefrag Development Team\0"
-            VALUE "OriginalFilename", "Dfrg.exe\0"
+            VALUE "OriginalFilename", "ultradefrag.exe\0"
             VALUE "ProductName", "UltraDefrag\0"
             VALUE "ProductVersion", VERSION2
         END

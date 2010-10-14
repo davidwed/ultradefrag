@@ -152,7 +152,7 @@ Section "Ultra Defrag core files (required)" SecCore
   ; install GUI apps to program's directory
   SetOutPath "$INSTDIR"
   Delete "$INSTDIR\ultradefrag.exe"
-  File /oname=ultradefrag.exe "dfrg.exe"
+  File "ultradefrag.exe"
 
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"

@@ -73,7 +73,7 @@ rem workaround for WDK 7
 rem set IGNORE_LINKLIB_ABUSE=
 
 cd ..\gui
-lua ..\..\tools\mkmod.lua dfrg.build
+lua ..\..\tools\mkmod.lua ultradefrag.build
 if %errorlevel% neq 0 goto end
 
 :skip_gui

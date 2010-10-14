@@ -22,7 +22,7 @@ HISTORY
       by obvious ones; as a side effect we have a noticeable speedup
       of the volume analysis
     - filter pattern length limitation (4096 characters) was removed
-    - added hints about using CHKDSK to get a consitent drive
+    - added hints about using CHKDSK to get a consistent drive
     - "Tips and Tricks" moved to separate handbook page to be accessible
       from the "Best Practice" help menu item
     - the following translations were added:
@@ -33,6 +33,8 @@ HISTORY
 
       Portuguese(BR)
 
+    - Developers: dfrg.exe historical name of GUI executable was replaced
+      by final name ultradefrag.exe
     - manifest was added to signal Vista and higher that this is a
       high DPI aware application (http://support.microsoft.com/kb/969789)
     - portable.x file became meaningless for the portable edition
