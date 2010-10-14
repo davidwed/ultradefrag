@@ -344,6 +344,7 @@ Var AtLeastXP
   DetailPrint "Remove shortcuts..."
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\UltraDefrag"
+  Delete "$SMPROGRAMS\UltraDefrag.lnk"
   Delete "$DESKTOP\UltraDefrag.lnk"
   Delete "$QUICKLAUNCH\UltraDefrag.lnk"
 !endif
