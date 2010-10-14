@@ -54,7 +54,7 @@ struct toolbar_button buttons[] = {
 	{6, IDM_CFG_BOOT_ENABLE,  TBSTATE_ENABLED, TBSTYLE_CHECK,  L"BOOT_TIME_SCAN",    "F11"   },
 	{7, IDM_CFG_BOOT_SCRIPT,  TBSTATE_ENABLED, TBSTYLE_BUTTON, L"BOOT_TIME_SCRIPT",  "F12"   },
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
-	{8, IDM_CONTENTS,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"CONTENTS",          "F1"    }
+	{8, IDM_CONTENTS,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"HELP",              "F1"    }
 };
 
 #define N_BUTTONS (sizeof(buttons)/sizeof(struct toolbar_button))
