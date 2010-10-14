@@ -31,7 +31,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Portuguese(BR)
+      Portuguese(BR), Hungarian
 
     - Developers: dfrg.exe historical name of GUI executable was replaced
       by final name ultradefrag.exe
