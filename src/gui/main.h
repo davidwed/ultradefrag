@@ -145,6 +145,7 @@ void release_jobs(void);
 
 int CreateMainMenu(void);
 int CreateToolbar(void);
+void UpdateToolbarTooltips(void);
 
 int Init_I18N_Events(void);
 void ApplyLanguagePack(void);

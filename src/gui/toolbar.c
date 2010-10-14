@@ -27,6 +27,7 @@
 #include "main.h"
 
 HWND hToolbar = NULL;
+HWND hTooltip = NULL;
 HIMAGELIST hToolbarImgList = NULL;
 HIMAGELIST hToolbarImgListD = NULL;
 HIMAGELIST hToolbarImgListH = NULL;
@@ -36,22 +37,24 @@ struct toolbar_button {
     int command;
     int state;
     int style;
+	short *tooltip_key;
+	char *hotkeys;
 };
 
 struct toolbar_button buttons[] = {
-	{0, IDM_ANALYZE,          TBSTATE_ENABLED, TBSTYLE_BUTTON},
-	{1, IDM_DEFRAG,           TBSTATE_ENABLED, TBSTYLE_BUTTON},
-	{2, IDM_OPTIMIZE,         TBSTATE_ENABLED, TBSTYLE_BUTTON},
-	{3, IDM_STOP,             TBSTATE_ENABLED, TBSTYLE_BUTTON},
-	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP   },
-	{4, IDM_SHOW_REPORT,      TBSTATE_ENABLED, TBSTYLE_BUTTON},
-	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP   },
-	{5, IDM_CFG_GUI_SETTINGS, TBSTATE_ENABLED, TBSTYLE_BUTTON},
-	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP   },
-	{6, IDM_CFG_BOOT_ENABLE,  TBSTATE_ENABLED, TBSTYLE_CHECK },
-	{7, IDM_CFG_BOOT_SCRIPT,  TBSTATE_ENABLED, TBSTYLE_BUTTON},
-	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP   },
-	{8, IDM_CONTENTS,         TBSTATE_ENABLED, TBSTYLE_BUTTON},
+	{0, IDM_ANALYZE,          TBSTATE_ENABLED, TBSTYLE_BUTTON, L"ANALYSE",           "F5"    },
+	{1, IDM_DEFRAG,           TBSTATE_ENABLED, TBSTYLE_BUTTON, L"DEFRAGMENT",        "F6"    },
+	{2, IDM_OPTIMIZE,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"OPTIMIZE",          "F7"    },
+	{3, IDM_STOP,             TBSTATE_ENABLED, TBSTYLE_BUTTON, L"STOP",              "Ctrl+C"},
+	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
+	{4, IDM_SHOW_REPORT,      TBSTATE_ENABLED, TBSTYLE_BUTTON, L"SHOW_REPORT",       "F8"    },
+	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
+	{5, IDM_CFG_GUI_SETTINGS, TBSTATE_ENABLED, TBSTYLE_BUTTON, L"OPTIONS",           "F10"   },
+	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
+	{6, IDM_CFG_BOOT_ENABLE,  TBSTATE_ENABLED, TBSTYLE_CHECK,  L"BOOT_TIME_SCAN",    "F11"   },
+	{7, IDM_CFG_BOOT_SCRIPT,  TBSTATE_ENABLED, TBSTYLE_BUTTON, L"BOOT_TIME_SCRIPT",  "F12"   },
+	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
+	{8, IDM_CONTENTS,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"CONTENTS",          "F1"    }
 };
 
 #define N_BUTTONS (sizeof(buttons)/sizeof(struct toolbar_button))
@@ -68,11 +71,13 @@ int CreateToolbar(void)
 	int bpp = 32;
 	int id, idd, idh;
 	int i;
+	TOOLINFOW ti;
+	RECT rc;
 	
 	/* create window */
 	hToolbar = CreateWindowEx(0,
 		TOOLBARCLASSNAME, "",
-		WS_CHILD | WS_VISIBLE | TBSTYLE_TRANSPARENT | TBSTYLE_FLAT,
+		WS_CHILD | WS_VISIBLE | TBSTYLE_TRANSPARENT | TBSTYLE_FLAT | TBSTYLE_TOOLTIPS,
 		0, 0, 10, 10,
 		hWindow, NULL, hInstance, NULL);
 	if(hToolbar == NULL){
@@ -158,7 +163,66 @@ int CreateToolbar(void)
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_CFG_BOOT_SCRIPT,MAKELONG(FALSE,0));
 #endif
 
+	/* initialize tooltips */
+	hTooltip = (HWND)SendMessage(hToolbar,TB_GETTOOLTIPS,0,0);
+	if(hTooltip == NULL){
+		WgxDbgPrintLastError("CreateToolbar: cannot get tooltip control handle");
+	} else {
+		memset(&rc,0,sizeof(RECT));
+		for(i = 0; i < N_BUTTONS; i++){
+			if(buttons[i].style == TBSTYLE_SEP)
+				continue; /* skip separators */
+			SendMessage(hToolbar,TB_GETITEMRECT,i,(LPARAM)&rc);
+			memset(&ti,0,sizeof(TOOLINFOW));
+			ti.cbSize = sizeof(TOOLINFOW);
+			ti.hwnd = hToolbar;
+			ti.hinst = hInstance;
+			ti.uId = i;
+			ti.lpszText = L"";
+			memcpy(&ti.rect,&rc,sizeof(RECT));
+			SendMessage(hTooltip,TTM_ADDTOOLW,0,(LPARAM)&ti);
+		}
+	}
+
 	return 0;
+}
+
+/**
+ * @brief Updates text of the tooltips assigned to the toolbar.
+ */
+void UpdateToolbarTooltips(void)
+{
+	TOOLINFOW ti;
+	int i, j, k;
+	wchar_t buffer[256];
+	wchar_t text[256];
+	
+	if(hTooltip == NULL)
+		return;
+
+	for(i = 0; i < N_BUTTONS; i++){
+		if(buttons[i].style == TBSTYLE_SEP)
+			continue; /* skip separators */
+		memset(&ti,0,sizeof(TOOLINFOW));
+		ti.cbSize = sizeof(TOOLINFOW);
+		ti.hwnd = hToolbar;
+		ti.hinst = hInstance;
+		ti.uId = i;
+		_snwprintf(buffer,256,L"%ws (%hs)",
+			WgxGetResourceString(i18n_table,buttons[i].tooltip_key),
+			buttons[i].hotkeys);
+		buffer[255] = 0;
+		/* remove ampersands */
+		for(j = 0, k = 0; buffer[j]; j++){
+			if(buffer[j] != '&'){
+				text[k] = buffer[j];
+				k++;
+			}
+		}
+		text[k] = 0;
+		ti.lpszText = text;
+		SendMessage(hTooltip,TTM_UPDATETIPTEXTW,0,(LPARAM)&ti);
+	}
 }
 
 /** @} */

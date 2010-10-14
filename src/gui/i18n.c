@@ -62,6 +62,9 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0, L"FAQ",                      L"&FAQ",                     NULL},
 	{0, L"ABOUT",                    L"&About",                   NULL},
 
+	/* toolbar tooltips */
+	{0, L"BOOT_TIME_SCRIPT",         L"Boot time script",         NULL},
+
 	/* volume characteristics */
 	{0, L"VOLUME",                   L"Volume",                   NULL},
 	{0, L"STATUS",                   L"Status",                   NULL},
@@ -246,6 +249,9 @@ void ApplyLanguagePack(void)
 	_snwprintf(buffer,256,L"%ws\tCtrl+S",s);
 	buffer[255] = 0;
 	ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
+	
+	/* apply new strings to the toolbar */
+	UpdateToolbarTooltips();
 	
 	/* end of synchronization */
 	SetEvent(hLangPackEvent);
