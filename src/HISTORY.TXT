@@ -12,7 +12,7 @@ HISTORY
     - the process of adding/editing/testing of translations
       was highly simplified
     - GUI uses system font respecting global Windows settings anywhere
-      except of the list control for which monospace fonts are more preferred
+      except of the list control for which mono-space fonts are more preferred
     - separate Configuration dialog was retired
     - Language Selector was retired
     - ability to run multiple instances simultaneously was added
@@ -30,7 +30,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Portuguese(BR), Hungarian
+      Portuguese(BR), Czech
 
     - Developers: dfrg.exe historical name of GUI executable was replaced
       by final name ultradefrag.exe
