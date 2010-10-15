@@ -236,7 +236,7 @@ int CreateMainWindow(int nShowCmd)
 	
 	/* set font */
 	InitFont();
-	WgxSetFont(hWindow,&wgxFont);
+	WgxSetFont(hList,&wgxFont);
 
 	/* initialize controls */
 	InitVolList();
@@ -416,7 +416,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			if(ChooseFont(&cf)){
 				WgxDestroyFont(&wgxFont);
 				if(WgxCreateFont("",&wgxFont)){
-					WgxSetFont(hWindow,&wgxFont);
+					WgxSetFont(hList,&wgxFont);
 					new_ResizeMainWindow(1);
 					WgxSaveFont(".\\options\\font.lua",&wgxFont);
 				}

@@ -27,7 +27,7 @@
 #include "main.h"
 
 /**
- * @brief Asks user whether he really wants
+ * @brief Asks user whether he (she) really wants
  * to shutdown/hibernate computer after a job
  * completion or not.
  */
@@ -53,7 +53,6 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 
 		/* shutdown will be confirmed by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_YES_BUTTON));
-		WgxSetFont(hWnd,&wgxFont);
 		return FALSE;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
@@ -109,7 +108,6 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 
 		/* shutdown will be rejected by pressing the space key */
 		(void)SetFocus(GetDlgItem(hWnd,IDC_NO_BUTTON));
-		WgxSetFont(hWnd,&wgxFont);
 		/* set timer */
 		counter = seconds_for_shutdown_rejection;
 		if(counter == 0)

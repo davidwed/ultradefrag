@@ -40,7 +40,6 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 			WgxSetText(GetDlgItem(hWnd,IDC_LICENSE),i18n_table,L"LICENSE");
 			SetEvent(hLangPackEvent);
 		}
-		WgxSetFont(hWnd,&wgxFont);
 		(void)WgxAddAccelerators(hInstance,hWnd,IDR_ACCELERATOR2);
         (void)SetFocus(GetDlgItem(hWnd,IDC_HOMEPAGE));
 		return FALSE;

@@ -11,9 +11,8 @@ HISTORY
     - better hotkeys were assigned to GUI actions
     - the process of adding/editing/testing of translations
       was highly simplified
-    - status-bar now uses user specified font too, which is necessary for
-      languages needing a special font to be displayed correctly,
-      like Burmese(Padauk)
+    - GUI uses system font respecting global Windows settings anywhere
+      except of the list control for which monospace fonts are more preferred
     - separate Configuration dialog was retired
     - Language Selector was retired
     - ability to run multiple instances simultaneously was added
