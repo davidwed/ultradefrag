@@ -1,0 +1,7 @@
+GUI Design Guideline links from Microsoft:
+    http://msdn.microsoft.com/en-us/library/aa511282.aspx
+    http://msdn.microsoft.com/en-us/library/aa511502.aspx#labels
+    http://msdn.microsoft.com/en-us/library/aa511502.aspx
+    http://msdn.microsoft.com/en-us/library/aa511500.aspx
+    http://msdn.microsoft.com/en-us/library/bb545460.aspx
+    http://msdn.microsoft.com/en-us/library/dd464659(VS.85).aspx
