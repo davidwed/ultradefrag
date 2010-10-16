@@ -1,30 +1,60 @@
 @echo off
 
 rem This script was made for myself (Stefan Pendl)
-rem to simplify pre-release (RC) building.
+rem to simplify pre-release (alpha, beta and RC) building.
+
+call ParseCommandLine.cmd %*
 
 echo.
-set /P UD_BLD_PRE_RELEASE_VER="Enter RC Version number [1]: "
+goto %UD_BLD_FLG_BUILD_STAGE%
 
-if "%UD_BLD_PRE_RELEASE_VER%" == "" set UD_BLD_PRE_RELEASE_VER=1
+:1
+set UD_BLD_STAGE_NAME=alpha
+set /P UD_BLD_PRE_RELEASE_NUM="Enter alpha Version number [1]: "
+goto :CheckInput
+
+:2
+set UD_BLD_STAGE_NAME=beta
+set /P UD_BLD_PRE_RELEASE_NUM="Enter beta Version number [1]: "
+goto :CheckInput
+
+:3
+set UD_BLD_STAGE_NAME=RC
+set /P UD_BLD_PRE_RELEASE_NUM="Enter RC Version number [1]: "
+
+:CheckInput
+if "%UD_BLD_PRE_RELEASE_NUM%" == "" set UD_BLD_PRE_RELEASE_NUM=1
+
+set UD_BLD_PRE_RELEASE_VER=%UD_BLD_STAGE_NAME%%UD_BLD_PRE_RELEASE_NUM%
 
 set script_dir=%~dp0
 
 echo.
-call build.cmd --use-winddk --pre-release %*
+
+set UD_BLD_STAGE_EXT=exe
+set UD_BLD_STAGE_PKG=
+
+if %UD_BLD_FLG_BUILD_STAGE% EQU 3 goto :BuildPre
+
+set UD_BLD_STAGE_EXT=zip
+set UD_BLD_STAGE_PKG=-portable
+
+:BuildPre
+call build%UD_BLD_STAGE_PKG%.cmd --use-winddk --pre-release %*
 if %errorlevel% neq 0 goto build_failed
 
+:CollectFiles
 cd /D %script_dir%
 
 mkdir pre-release
 echo.
-copy /b /y /v .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe        .\pre-release\ultradefrag-%ULTRADFGVER%-RC%UD_BLD_PRE_RELEASE_VER%.bin.i386.exe
-copy /b /y /v .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\pre-release\ultradefrag-%ULTRADFGVER%-RC%UD_BLD_PRE_RELEASE_VER%.bin.amd64.exe
-copy /b /y /v .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe   .\pre-release\ultradefrag-%ULTRADFGVER%-RC%UD_BLD_PRE_RELEASE_VER%.bin.ia64.exe
+copy /b /y /v .\bin\ultradefrag-*.bin.i386.*        .\pre-release\ultradefrag%UD_BLD_STAGE_PKG%-%ULTRADFGVER%-%UD_BLD_PRE_RELEASE_VER%.bin.i386.%UD_BLD_STAGE_EXT%
+copy /b /y /v .\bin\amd64\ultradefrag-*.bin.amd64.* .\pre-release\ultradefrag%UD_BLD_STAGE_PKG%-%ULTRADFGVER%-%UD_BLD_PRE_RELEASE_VER%.bin.amd64.%UD_BLD_STAGE_EXT%
+copy /b /y /v .\bin\ia64\ultradefrag-*.bin.ia64.*   .\pre-release\ultradefrag%UD_BLD_STAGE_PKG%-%ULTRADFGVER%-%UD_BLD_PRE_RELEASE_VER%.bin.ia64.%UD_BLD_STAGE_EXT%
 
 cd ..
 echo.
-echo RC%UD_BLD_PRE_RELEASE_VER% Pre-Release created successfully!
+echo %UD_BLD_PRE_RELEASE_VER% Pre-Release created successfully!
 exit /B 0
 
 :build_failed

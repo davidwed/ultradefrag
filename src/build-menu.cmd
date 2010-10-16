@@ -15,30 +15,33 @@ echo.
 echo   Brought to You by the UltraDefrag Development Team
 echo.
 echo      1 ... Clean Project Folder
-echo      2 ... Build Release Candidate
-echo      3 ... Build Release
-echo      4 ... Build with Defaults
-echo      5 ... Build with Defaults and Install
+echo      2 ... Build with Defaults
+echo      3 ... Build with Defaults and Install
 echo.
-echo      6 ... Build .................. using WinDDK, no IA64
-echo      7 ... Build Portable ......... using WinDDK, no IA64
-echo      8 ... Build Micro ............ using WinDDK, no IA64
-echo      9 ... Build Micro Portable ... using WinDDK, no IA64
-echo     10 ... Build Docs
+echo      4 ... Build alpha Release
+echo      5 ... Build beta Release
+echo      6 ... Build Release Candidate
+echo      7 ... Build Release
 echo.
-echo     11 ... Build .................. with Custom Switches
-echo     12 ... Build Portable ......... with Custom Switches
-echo     13 ... Build Micro ............ with Custom Switches
-echo     14 ... Build Micro Portable ... with Custom Switches
+echo      8 ... Build .................. using WinDDK, no IA64
+echo      9 ... Build Portable ......... using WinDDK, no IA64
+echo     10 ... Build Micro ............ using WinDDK, no IA64
+echo     11 ... Build Micro Portable ... using WinDDK, no IA64
+echo     12 ... Build Docs
 echo.
-echo     15 ... Build Test Release for Stefan
-echo     16 ... Build Test Installation for Stefan
-echo     17 ... Build Test x86 for Stefan
+echo     13 ... Build .................. with Custom Switches
+echo     14 ... Build Portable ......... with Custom Switches
+echo     15 ... Build Micro ............ with Custom Switches
+echo     16 ... Build Micro Portable ... with Custom Switches
+echo.
+echo     17 ... Build Test Release for Stefan
+echo     18 ... Build Test Installation for Stefan
+echo     19 ... Build Test x86 for Stefan
 echo.
 echo      0 ... EXIT
 
 :: this value holds the number of the last menu entry
-set UD_BLD_MENU_MAX_ENTRIES=17
+set UD_BLD_MENU_MAX_ENTRIES=19
 
 :AskSelection
 echo.
@@ -61,51 +64,61 @@ call cleanup.cmd --clean
 goto finished
 
 :2
-title Build Release Candidate
-call build-pre-release.cmd
-goto finished
-
-:3
-title Build Release
-call build-release.cmd
-goto finished
-
-:4
 title Build with Defaults
 call build.cmd
 goto finished
 
-:5
+:3
 title Build with Defaults and Install
 call build.cmd --install
 goto finished
 
+:4
+title Build alpha Release
+call build-pre-release.cmd --alpha
+goto finished
+
+:5
+title Build beta Release
+call build-pre-release.cmd --beta
+goto finished
+
 :6
+title Build Release Candidate
+call build-pre-release.cmd --rc
+goto finished
+
+:7
+title Build Release
+call build-release.cmd
+goto finished
+
+:8
 title Build .................. using WinDDK, no IA64
 call build.cmd --use-winddk --no-ia64
 goto finished
 
-:7
+:9
 title Build Portable ......... using WinDDK, no IA64
 call build-portable.cmd --use-winddk --no-ia64
 goto finished
 
-:8
+:10
 title Build Micro ............ using WinDDK, no IA64
 call build-micro.cmd --use-winddk --no-ia64
 goto finished
 
-:9
+:11
 title Build Micro Portable ... using WinDDK, no IA64
 call build-micro-portable.cmd --use-winddk --no-ia64
 goto finished
 
-:10
+:12
 title Build Docs
 call build-docs.cmd
 goto finished
 
-:11
+:13
 title Build .................. with Custom Switches
 cls
 echo.
@@ -118,7 +131,7 @@ echo.
 call build.cmd %UD_BLD_MENU_SWITCH%
 goto finished
 
-:12
+:14
 title Build Portable ......... with Custom Switches
 cls
 echo.
@@ -131,7 +144,7 @@ echo.
 call build-portable.cmd %UD_BLD_MENU_SWITCH%
 goto finished
 
-:13
+:15
 title Build Micro ............ with Custom Switches
 cls
 echo.
@@ -144,7 +157,7 @@ echo.
 call build-micro.cmd %UD_BLD_MENU_SWITCH%
 goto finished
 
-:14
+:16
 title Build Micro Portable ... with Custom Switches
 cls
 echo.
@@ -157,9 +170,13 @@ echo.
 call build-micro-portable.cmd %UD_BLD_MENU_SWITCH%
 goto finished
 
-:15
+:17
 title Build Test Release for Stefan
-call build-pre-release.cmd --no-ia64
+echo.
+set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,[beta],rc): "
+if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=beta
+
+call build-pre-release.cmd --no-ia64 --%UD_BLD_PRE_RELEASE_TYPE%
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
@@ -169,17 +186,25 @@ cd /d %UD_BLD_MENU_DIR%
 call cleanup.cmd --clean
 goto finished
 
-:16
+:18
 title Build Test Installation for Stefan
-call build-pre-release.cmd --no-ia64 --no-x86 --install
+echo.
+set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,[beta],rc): "
+if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=beta
+
+call build-pre-release.cmd --no-ia64 --no-x86 --install --%UD_BLD_PRE_RELEASE_TYPE%
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call cleanup.cmd --clean
 goto finished
 
-:17
+:19
 title Build Test x86 for Stefan
-call build-pre-release.cmd --no-ia64 --no-amd64
+echo.
+set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,[beta],rc): "
+if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=beta
+
+call build-pre-release.cmd --no-ia64 --no-amd64 --%UD_BLD_PRE_RELEASE_TYPE%
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
