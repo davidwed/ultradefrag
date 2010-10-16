@@ -50,6 +50,13 @@ IDI_BOOT_OFF            ICON    DISCARDABLE     "res/boot_off.ico"
 IDB_ABOUTBOX_PICTURE    BITMAP  DISCARDABLE     "res/ship.bmp"
 
 /*
+* All toolbar pictures must be in 24bpp format,
+* but 8bpp versions should use less colors
+* to be nicely rendered on screens with
+* low color depth.
+*/
+
+/*
 * Toolbar icons were copied from:
 * analyse, defrag, optimize, help icons - from NSIS compiler's frontend
 * stop, config, terminal icons - from Silk icon set 1.3 http://www.famfamfam.com/lab/icons/silk/
