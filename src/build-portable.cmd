@@ -45,11 +45,11 @@ mkdir %PORTABLE_DIR%\i18n
 copy /Y gui\i18n\*.lng %PORTABLE_DIR%\i18n\
 copy /Y gui\i18n\*.template %PORTABLE_DIR%\i18n\
 
-cd bin
-
 call setvars.cmd
 if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+
+cd bin
 
 cd ultradefrag-portable-%ULTRADFGVER%.i386
 .\ultradefrag.exe --setup
