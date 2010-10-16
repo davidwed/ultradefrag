@@ -200,6 +200,12 @@ void UpdateToolbarTooltips(void)
 	if(hTooltip == NULL)
 		return;
 
+	/* synchronize with other threads */
+	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
+		WgxDbgPrintLastError("UpdateToolbarTooltips: wait on hLangPackEvent failed");
+		return;
+	}
+
 	for(i = 0; i < N_BUTTONS; i++){
 		if(buttons[i].style == TBSTYLE_SEP)
 			continue; /* skip separators */
@@ -223,6 +229,8 @@ void UpdateToolbarTooltips(void)
 		ti.lpszText = text;
 		SendMessage(hTooltip,TTM_UPDATETIPTEXTW,0,(LPARAM)&ti);
 	}
+	
+	SetEvent(hLangPackEvent);
 }
 
 /** @} */

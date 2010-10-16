@@ -250,11 +250,11 @@ void ApplyLanguagePack(void)
 	buffer[255] = 0;
 	ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
 	
-	/* apply new strings to the toolbar */
-	UpdateToolbarTooltips();
-	
 	/* end of synchronization */
 	SetEvent(hLangPackEvent);
+	
+	/* apply new strings to the toolbar */
+	UpdateToolbarTooltips();
 	
 	/* redraw main menu */
 	if(!DrawMenuBar(hWindow))
