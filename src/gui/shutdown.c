@@ -66,11 +66,15 @@ static void ResizeShutdownCheckConfirmDialog(HWND hwnd)
 		goto done;
 	}
 	
-	hFont = (HFONT)SendMessage(hwnd,WM_GETFONT,0,0);
-	if(hFont == NULL){
-		WgxDbgPrintLastError("ResizeShutdownCheckConfirmDialog: cannot get default font");
-		ReleaseDC(hwnd,hdc);
-		goto done;
+	if(use_custom_font_in_dialogs){
+		hFont = wgxFont.hFont;
+	} else {
+		hFont = (HFONT)SendMessage(hwnd,WM_GETFONT,0,0);
+		if(hFont == NULL){
+			WgxDbgPrintLastError("ResizeShutdownCheckConfirmDialog: cannot get default font");
+			ReleaseDC(hwnd,hdc);
+			goto done;
+		}
 	}
 	hOldFont = SelectObject(hdc,hFont);
 	
@@ -172,6 +176,8 @@ BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		WgxCenterWindow(hWnd);
+		if(use_custom_font_in_dialogs)
+			WgxSetFont(hWnd,&wgxFont);
 
 		if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
 			WgxDbgPrintLastError("CheckConfirmDlgProc: wait on hLangPackEvent failed");
@@ -249,11 +255,15 @@ static void ResizeShutdownConfirmDialog(HWND hwnd,wchar_t *counter_msg)
 		goto done;
 	}
 	
-	hFont = (HFONT)SendMessage(hwnd,WM_GETFONT,0,0);
-	if(hFont == NULL){
-		WgxDbgPrintLastError("ResizeShutdownConfirmDialog: cannot get default font");
-		ReleaseDC(hwnd,hdc);
-		goto done;
+	if(use_custom_font_in_dialogs){
+		hFont = wgxFont.hFont;
+	} else {
+		hFont = (HFONT)SendMessage(hwnd,WM_GETFONT,0,0);
+		if(hFont == NULL){
+			WgxDbgPrintLastError("ResizeShutdownConfirmDialog: cannot get default font");
+			ReleaseDC(hwnd,hdc);
+			goto done;
+		}
 	}
 	hOldFont = SelectObject(hdc,hFont);
 	
@@ -383,6 +393,8 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 
 	switch(msg){
 	case WM_INITDIALOG:
+		if(use_custom_font_in_dialogs)
+			WgxSetFont(hWnd,&wgxFont);
 		if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
 			WgxDbgPrintLastError("ShutdownConfirmDlgProc: wait on hLangPackEvent failed");
 			counter_msg[0] = 0;

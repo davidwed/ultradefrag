@@ -26,6 +26,14 @@
 
 #include "main.h"
 
+/* list of languages for which we need to use custom font for dialog boxes */
+char *special_font_languages[] = {
+	"Burmese (Padauk)",
+	NULL /* end of the table */
+};
+
+int use_custom_font_in_dialogs = 0;
+
 WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	/* action menu */
 	{0, L"ACTION",                   L"&Action",                  NULL},
@@ -269,6 +277,15 @@ void ApplyLanguagePack(void)
 	} else {
 		memset(&pi,0,sizeof(udefrag_progress_info));
 		UpdateStatusBar(&pi);
+	}
+	
+	/* define whether to use custom font for dialog boxes */
+	use_custom_font_in_dialogs = 0;
+	for(i = 0; special_font_languages[i]; i++){
+		if(strcmp(lang_name,special_font_languages[i]) == 0){
+			use_custom_font_in_dialogs = 1;
+			break;
+		}
 	}
 }
 

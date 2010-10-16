@@ -32,6 +32,8 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 	case WM_INITDIALOG:
 		/* Window Initialization */
 		WgxCenterWindow(hWnd);
+		if(use_custom_font_in_dialogs)
+			WgxSetFont(hWnd,&wgxFont);
 		if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
 			WgxDbgPrintLastError("AboutDlgProc: wait on hLangPackEvent failed");
 		} else {

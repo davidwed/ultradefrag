@@ -220,6 +220,7 @@ extern int exit_pressed;
 extern int boot_time_defrag_enabled;
 extern HANDLE hLangPackEvent;
 extern HANDLE hLangMenuEvent;
+extern int use_custom_font_in_dialogs;
 
 /* common preferences */
 extern int hibernate_instead_of_shutdown;
