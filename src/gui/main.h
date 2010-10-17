@@ -158,7 +158,7 @@ void HideProgress(void);
 void SetProgress(wchar_t *message, int percentage);
 */
 BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
-BOOL CALLBACK AboutDlgProc(HWND, UINT, WPARAM, LPARAM);
+void AboutBox(void);
 void ShowReports();
 
 void InitFont(void);

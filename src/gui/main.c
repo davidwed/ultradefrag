@@ -42,6 +42,7 @@ int shutdown_requested = 0;
 int boot_time_defrag_enabled = 0;
 extern int init_maximized_window;
 extern int allow_map_redraw;
+extern int lang_ini_tracking_stopped;
 
 /* forward declarations */
 static void UpdateWebStatistics(void);
@@ -477,8 +478,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			OpenWebPage("FAQ.html");
 			return 0;
 		case IDM_ABOUT:
-			if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_ABOUT),hWindow,(DLGPROC)AboutDlgProc) == (-1))
-				WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
+			AboutBox();
 			return 0;
 		default:
 			/* handle language menu */
@@ -507,8 +507,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				WritePrivateProfileStringW(L"Language",L"Selected",lang_name,L".\\lang.ini");
 				
 				/* update all gui controls */
-				// this hangs app because of directory change tracking from parallel thread
-				//ApplyLanguagePack();
+				if(lang_ini_tracking_stopped){
+					// this hangs app if lang.ini change tracking runs in parallel thread
+					ApplyLanguagePack();
+				}
 				return 0;
 			}
 		}

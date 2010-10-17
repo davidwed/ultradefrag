@@ -341,6 +341,7 @@ void StartPrefsChangesTracking()
 	h = create_thread(PrefsChangesTrackingProc,NULL,&id);
 	if(h == NULL){
 		WgxDbgPrintLastError("Cannot create thread for guiopts.lua changes tracking");
+		changes_tracking_stopped = 1;
 	} else {
 		CloseHandle(h);
 	}

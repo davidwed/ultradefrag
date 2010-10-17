@@ -483,6 +483,7 @@ void StartLangIniChangesTracking()
 	h = create_thread(LangIniChangesTrackingProc,NULL,&id);
 	if(h == NULL){
 		WgxDbgPrintLastError("Cannot create thread for lang.ini changes tracking");
+		lang_ini_tracking_stopped = 1;
 	} else {
 		CloseHandle(h);
 	}
@@ -549,6 +550,7 @@ void StartI18nFolderChangesTracking()
 	h = create_thread(I18nFolderChangesTrackingProc,NULL,&id);
 	if(h == NULL){
 		WgxDbgPrintLastError("Cannot create thread for i18n folder changes tracking");
+		i18n_folder_tracking_stopped = 1;
 	} else {
 		CloseHandle(h);
 	}

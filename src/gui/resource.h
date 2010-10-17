@@ -23,15 +23,17 @@
 
 #define IDD_MAIN                        101
 #define IDD_ABOUT                       102
-#define IDD_SHUTDOWN                    103
-#define IDD_CHECK_CONFIRM               104
-#define IDI_APP                         108
-#define IDI_DIR                         109
+#define IDD_ABOUT_8_BIT                 103
+#define IDD_SHUTDOWN                    104
+#define IDD_CHECK_CONFIRM               105
+#define IDI_APP                         106
+#define IDI_DIR                         107
 #define IDI_UNFRAGM                     110
 #define IDI_FRAGM                       111
 #define IDI_CMP                         112
 #define IDI_MFT                         113
-#define IDB_ABOUTBOX_PICTURE            128
+#define IDB_ABOUTBOX_PICTURE            127
+#define IDB_ABOUTBOX_PICTURE_8_BIT      128
 
 #define IDI_FIXED                       129
 #define IDI_REMOVABLE                   130
