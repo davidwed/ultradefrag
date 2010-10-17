@@ -23,7 +23,68 @@
  * The UltraDefrag GUI consists of a single re-sizable window.
  * <a href="http://ultradefrag.sourceforge.net/screenshots.html">View screenshots...</a>
  *
- * <b>List of Volumes</b>\n
+ * <h1>The Menus</h1>
+ * <table><tr><td>
+ * <b>Action</b>
+ * </td><td>
+ * <dl>
+ * <dt>Analyze (F5)</dt>
+ * <dd>This analysis the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dt>Defragment (F6)</dt>
+ * <dd>This defragments the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dt>Optimize (F7)</dt>
+ * <dd>This optimizes the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dt>Stop (Ctrl+C)</dt>
+ * <dd>This aborts the currently running process at any stage, currently pending move operations will be completed to avoid corruption.</dd>
+ * <dt>Skip removable media (Ctrl+M)</dt>
+ * <dd>If this is checked, volumes located on removable drives are not included in the volume list.</dd>
+ * <dt>Rescan drives (Ctrl+D)</dt>
+ * <dd>This updates the volume list to include volumes located on removable drives, which have been plugged in after starting UltraDefrag.</dd>
+ * <dt>Shutdown/Hibernate PC when done (Ctrl+S)</dt>
+ * <dd>If this is checked, the system will shutdown or hibernate after all operations have been performed.</dd>
+ * <dt>Exit (Alt+F4)</dt>
+ * <dd>This terminates UltraDefrag.</dd>
+ * </dl>
+ * </td></tr><tr><td>
+ * <b>Report</b>
+ * </td><td>
+ * <dl>
+ * <dt>Show report (F8)</dt>
+ * <dd>This displays the report generated for the selected volume.</dd>
+ * </dl>
+ * </td></tr><tr><td>
+ * <b>Settings</b>
+ * </td><td>
+ * <dl>
+ * <dt>Language</dt>
+ * <dd>This allows selecting the displayed language and to open the <b>Translations folder</b>, which contains the <b>translation.template</b> and all language files.</dd>
+ * <dt>Graphical interface</dt>
+ * <dd>This allows selecting the <b>Font (F9)</b> and changing the <b>Options (F10)</b>.</dd>
+ * <dt>Boot time scan (Disabled for portable editions)</dt>
+ * <dd>This allows to enable boot time scan by checking <b>Enable (F11)</b> and to edit the boot time script by selecting <b>Script (F12)</b>.</dd>
+ * <dt>Reports (Ctrl+R)</dt>
+ * <dd>This allows changing the look of the reports.</dd>
+ * </dl>
+ * </td></tr><tr><td>
+ * <b>Help</b>
+ * </td><td>
+ * <dl>
+ * <dt>Contents (F1)</dt>
+ * <dd>This launches the handbook you are currently reading.</dd>
+ * <dt>Best practice (F2)</dt>
+ * <dd>This launches the <b>Tips and Tricks</b> section of this handbook.</dd>
+ * <dt>FAQ (F3)</dt>
+ * <dd>This launches the <b>Frequently Asked Questions</b> section of this handbook.</dd>
+ * <dt>About (F4)</dt>
+ * <dd>This opens the about window.</dd>
+ * </dl>
+ * </td></tr>
+ * </table>
+ * 
+ * <h1>The Tool-Bar</h1>
+ * It consists of the most frequently used commands for easy access.
+ *
+ * <h1>List of Volumes</h1>
  * The top part of the window contains a full list of volumes
  * available for defragmentation. Each line of the list contains
  * volume name, type of filesystem, total amount of space,
@@ -33,15 +94,11 @@
  * Fixed drives are marked by @htmlonly <img src="fixed.png"> @endhtmlonly,
  * removable drives - by @htmlonly <img src="removable.png"> @endhtmlonly.
  *
- * Click the Rescan drives button or type Ctrl+R to refresh the list of volumes.
- * Check the Skip removable media box to prevent removable disks like floppies and USB-sticks
- * from being displayed in the list.
- *
  * Multiple volumes can be selected in the list. In this case UltraDefrag
  * will process them one after the other. The rules for the selection are the same as
  * in Windows Explorer.
  *
- * <b>Cluster Map</b>\n
+ * <h1>Cluster Map</h1>
  * It represents the volume clusters by little colored squares.
  * Colors have the following meaning:
  *
@@ -81,60 +138,26 @@
  * are never treated as fragmented. Because trash should not
  * get our attention.
  *
- * <b>Disk Defragmentation Control</b>\n
- * Click the Analyze button or type Ctrl+A to start the volume analysis. 
- * Click the Defragment button or type Ctrl+D to start the volume defragmentation.
- * Click the Optimize button or type Ctrl+C to start the volume optimization.
- * Use the Stop button or Ctrl+S hotkeys to stop the currently running disk
- * defragmentation/analysis job.
- *
- * Note that the window cannot be resized during the volume processing.
- *
- * The progress and status bars located at the bottom of the
- * window are displaying the progress of the currently running job.
- * Note that selecting a different volume
- * will cause the progress bar to disappear.
-
- * Click the Report button or type Ctrl+F to open the file
- * fragmentation report. Click the Settings button or type Ctrl+T to open
- * the UltraDefrag Configuration dialog. The About button (hotkey - F1) opens
- * a little window containing the most important information about the program.
- *
- * <b>Shutting Down or Hibernating the Computer when done</b>\n
- * If the "Shut down PC when done" box is checked, UltraDefrag
- * will automatically shut down the computer after a job completed.
+ * <h1>Shutting Down or Hibernating the Computer when done</h1>
+ * If <b>Shutdown PC when done</b> is checked, UltraDefrag
+ * will automatically shut down the computer after the job completes.
  * Note that your system and hardware configuration must support
  * shutdown and power off, otherwise Windows may reboot your PC
  * or even do nothing. Therefore test this mode before using it
  * at a regular basis.
  *
  * Instead of an automatic shutdown, an automatic hibernation
- * may be used. Open the UltraDefrag Configuration dialog, click the
- * Options button inside the Graphical interface section and set
- * hibernate_instead_of_shutdown = 1. Note that your system must
+ * may be used. Press the <b>F10</b> key and set
+ * <b>hibernate_instead_of_shutdown = 1</b>. Note that your system must
  * support hibernation and it must be turned on. Otherwise Windows
  * will display a message box containing a brief error description
  * and the system will not be switched into hibernation mode.
  *
  * <h1>Configuring</h1>
- * Click the Settings button of the UltraDefrag GUI to open 
- * the UltraDefrag Configuration dialog.
- * This dialog can be launched from the Start menu too, to do so
- * use Start > Programs > UltraDefrag > Preferences.
- * The UltraDefrag Configuration dialog is logically divided
- * into three sections.
- *
- * <b>Graphical Interface</b>\n
- * Click the Font button to select a font for GUI applications rendering.
- * The default font is Courier New, 9. The Options button opens the 
- * guiopts.lua located in the /options sub-folder of the program's directory.
- * The Help button opens this section of the handbook.
- * If you have a local copy of documentation installed, the
- * program will use it. Otherwise the same page will be
- * loaded from the project's web site.
+ * The default font is Courier New, 9.
  *
  * GUI options have the same meaning as the environment variables
- * accepted by UltraDefrag command line tool.
+ * accepted by the UltraDefrag command line tool.
  *
  * Note that you must specify paths in filters with double back
  * slashes instead of a single one. For example:
@@ -216,16 +239,6 @@ restore_default_window_size = 0
  * if you set <b>map_block_size = 1</b> to be able to use the whole
  * size of the cluster map.\n
  * This is especially useful, if you have drives of sizes of 500GB and more.
- *
- * <b>Windows Boot Time Scan</b>\n
- * This section controls the boot time defragmenter. It is disabled
- * for the portable packages. 
- * Check the Enable box to turn on the boot time defragmenter.
- * Click the Script button to open the boot time script for editing.
- * Click the Help button to open the appropriate section of the Handbook.
- *
- * <b>Reports</b>\n
- * This section controls the file fragmentation report options.
  *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 100%;">
