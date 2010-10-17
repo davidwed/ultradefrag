@@ -51,11 +51,11 @@ if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%U
 
 cd bin
 
-cd ultradefrag-portable-%ULTRADFGVER%.i386
-.\ultradefrag.exe --setup
-cd..
+rem cd ultradefrag-portable-%ULTRADFGVER%.i386
+rem .\ultradefrag.exe --setup
+rem cd..
 
-copy /Y ultradefrag-portable-%ULTRADFGVER%.i386\options\guiopts.lua .\
+rem copy /Y ultradefrag-portable-%ULTRADFGVER%.i386\options\guiopts.lua .\
 rem copy /Y ultradefrag-portable-%ULTRADFGVER%.i386\options\font.lua .\
 
 rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip ultradefrag-portable-%ULTRADFGVER%.i386
@@ -97,7 +97,7 @@ mkdir %PORTABLE_DIR%\i18n
 copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\
 copy /Y ..\gui\i18n\*.template %PORTABLE_DIR%\i18n\
 
-copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
+rem copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
 rem copy /Y .\font.lua %PORTABLE_DIR%\options\
 
 cd amd64
@@ -147,7 +147,7 @@ mkdir %PORTABLE_DIR%\i18n
 copy /Y ..\gui\i18n\*.lng %PORTABLE_DIR%\i18n\
 copy /Y ..\gui\i18n\*.template %PORTABLE_DIR%\i18n\
 
-copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
+rem copy /Y .\guiopts.lua %PORTABLE_DIR%\options\
 rem copy /Y .\font.lua %PORTABLE_DIR%\options\
 
 cd ia64
