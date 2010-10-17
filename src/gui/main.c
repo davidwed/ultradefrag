@@ -134,7 +134,7 @@ static RECT prev_rc = {0,0,0,0};
  * @brief Adjust positions of controls
  * in accordance with main window dimensions.
  */
-void new_ResizeMainWindow(int force)
+void ResizeMainWindow(int force)
 {
 	int vlist_height, sbar_height;
 	int spacing;
@@ -248,7 +248,7 @@ int CreateMainWindow(int nShowCmd)
 		SendMessage(hWindow,(WM_USER + 1),0,0);
 	
 	/* resize controls */
-	new_ResizeMainWindow(1);
+	ResizeMainWindow(1);
 	
 	/* fill list of volumes */
 	UpdateVolList(); /* after a complete map initialization! */
@@ -418,7 +418,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				WgxDestroyFont(&wgxFont);
 				if(WgxCreateFont("",&wgxFont)){
 					WgxSetFont(hList,&wgxFont);
-					new_ResizeMainWindow(1);
+					ResizeMainWindow(1);
 					WgxSaveFont(".\\options\\font.lua",&wgxFont);
 				}
 			}
@@ -524,7 +524,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		if(UpdateMainWindowCoordinates() >= 0){
 			if(!maximized_window)
 				memcpy((void *)&r_rc,(void *)&win_rc,sizeof(RECT));
-			new_ResizeMainWindow(0);
+			ResizeMainWindow(0);
 		} else {
 			WgxDbgPrint("Wrong window dimensions on WM_SIZE message!\n");
 		}

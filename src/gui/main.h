@@ -178,7 +178,6 @@ void ReleaseMap(void);
 void CreateStatusBar(void);
 void UpdateStatusBar(udefrag_progress_info *pi);
 
-void ResizeMainWindow(void);
 void ResizeMap(int x, int y, int width, int height);
 int  ResizeVolList(int x, int y, int width, int height);
 int  ResizeStatusBar(int bottom, int width);
