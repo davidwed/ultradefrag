@@ -35,10 +35,9 @@
  * - @ref Devnotes
  *
  * <h2>Technical reference</h2>
- * - <a href="../udefrag-kernel/html/index.html">User Mode Driver</a>
  * - <a href="../udefrag.dll/html/index.html">Udefrag.dll Library</a>
- * - <a href="../wgx/html/index.html">Windows GUI Extended (WGX) Library</a>
  * - <a href="http://zenwinx.sourceforge.net/">ZenWINX Library</a>
+ * - <a href="../wgx/html/index.html">Windows GUI Extended (WGX) Library</a>
  *
  * <h2>Links</h2>
  * - <a href="https://ultradefrag.svn.sourceforge.net/svnroot/ultradefrag/">SVN repository base address</a>

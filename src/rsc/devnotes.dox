@@ -30,7 +30,7 @@
  * they may simply crash your application.
  *
  * - Avoid the use of memset() for local variables. It always fails on x64
- * systems, because MS C compiler does not generate an appropriate code.
+ * systems, because MS C compiler does not generate an appropriate code (?).
  *
  * - When some program uses MessageBox() calls it must contain also
  * InitCommonControls() call in the beginning of its main() function.

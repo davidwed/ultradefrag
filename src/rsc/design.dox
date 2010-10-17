@@ -20,30 +20,28 @@
 /**
  * @page Design Design Notes
  *
- * The Ultra Defragmenter consists of more than 10 different modules.
+ * We have used the following excellent guides of software design:
+ * - <a href="http://www.faqs.org/docs/artu/">The Art of Unix Programming</a>
+ * - <a href="http://www.gnu.org/prep/standards/">GNU coding standards</a>
+ * - <a href="http://www.gnu.org/prep/maintain/">Information for maintainers of GNU software</a>
+ *
+ * The Ultra Defragmenter consists of few modules tied together:
  *
  * @image html udscheme.png
  *
- * At the bottom level we have an engine (driver).
- *
- * Udefrag.dll library is a thin middle layer between the driver and user
- * interfaces. A little set of functions contained there highly simplifies
- * development.
+ * The volume processing algorithms are contained in udefrag.dll library.
+ * All three user interfaces are built over it.
  *
  * ZenWINX is a framework for the Windows native development. The complete
  * documentation for it is <a href="http://zenwinx.sourceforge.net">here</a>.
  *
- * Over the described modules are built three user interfaces.
+ * Lua is used to convert reports from an internal representation to HTML
+ * pages, and to make configuration files reading simpler.
  *
- * The report converter written in Lua is used by GUI to produce the HTML-formatted
- * reports. Lua is used here because it is extremely reliable and has a good 
- * support for the string processing.
+ * WGX library simplifies GUI development by a compact set of common
+ * routines missing in Windows, but needed for the most GUI applications.
  *
- * The report sorting engine embedded in HTML-reports is written in JavaScript.
- *
- * Also UltraDefrag contains one special library which simplifies graphical
- * interfaces development. Its name is WGX (Windows GUI Extended).
- * GUI Configurator is another program which utilizes the WGX library.
+ * The report sorting engine embedded in HTML reports is written in JavaScript.
  *
  * UltraDefrag installer is written in NSIS.
  */
