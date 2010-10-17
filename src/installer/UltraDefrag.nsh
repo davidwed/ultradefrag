@@ -325,10 +325,6 @@ Var AtLeastXP
       File "${ROOTDIR}\src\scripts\udreportopts.lua"
     ${EndUnless}
   ${EndUnless}
-  ; C. write default GUI settings to guiopts.lua file
-  SetOutPath "$INSTDIR"
-  ; the options subdirectory must be already existing here
-  ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
 !endif
 
 !macroend

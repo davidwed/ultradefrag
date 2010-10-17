@@ -580,20 +580,22 @@ done:
  */
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
+	FILE *f;
 	int result;
 	
 	hInstance = GetModuleHandle(NULL);
-    
-	if(strstr(lpCmdLine,"--setup")){
-		/* create default guiopts.lua file */
-		GetPrefs();
-		SavePrefs();
-		DeleteEnvironmentVariables();
-		return 0;
-	}
 
+	/* get preferences */
 	GetPrefs();
 
+	/* save preferences to guiopts.lua file if it misses */
+	f = fopen(".\\options\\guiopts.lua","r");
+	if(f == NULL){
+		SavePrefs();
+	} else {
+		fclose(f);
+	}
+	
 	if(Init_I18N_Events() < 0){
 		DeleteEnvironmentVariables();
 		return 1;
