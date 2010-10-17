@@ -508,7 +508,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				
 				/* update all gui controls */
 				if(lang_ini_tracking_stopped){
-					// this hangs app if lang.ini change tracking runs in parallel thread
+					/* this hangs app if lang.ini change tracking runs in parallel thread */
 					ApplyLanguagePack();
 				}
 				return 0;
