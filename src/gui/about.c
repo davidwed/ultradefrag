@@ -54,39 +54,43 @@ void AboutBox(void)
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
 	switch(msg){
-	case WM_INITDIALOG:
-		/* Window Initialization */
-		WgxCenterWindow(hWnd);
-		if(use_custom_font_in_dialogs)
-			WgxSetFont(hWnd,&wgxFont);
-		if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
-			WgxDbgPrintLastError("AboutDlgProc: wait on hLangPackEvent failed");
-		} else {
-			WgxSetText(hWnd,i18n_table,L"ABOUT_WIN_TITLE");
-			WgxSetText(GetDlgItem(hWnd,IDC_CREDITS),i18n_table,L"CREDITS");
-			WgxSetText(GetDlgItem(hWnd,IDC_LICENSE),i18n_table,L"LICENSE");
-			SetEvent(hLangPackEvent);
-		}
-		(void)WgxAddAccelerators(hInstance,hWnd,IDR_ACCELERATOR2);
-        (void)SetFocus(GetDlgItem(hWnd,IDC_HOMEPAGE));
-		return FALSE;
-	case WM_COMMAND:
-		switch(LOWORD(wParam)){
-		case IDC_CREDITS:
-			(void)WgxShellExecuteW(hWindow,L"open",L".\\CREDITS.TXT",NULL,NULL,SW_SHOW);
-			break;
-		case IDC_LICENSE:
-			(void)WgxShellExecuteW(hWindow,L"open",L".\\LICENSE.TXT",NULL,NULL,SW_SHOW);
-			break;
-		case IDC_HOMEPAGE:
-			(void)SetFocus(GetDlgItem(hWnd,IDC_CREDITS));
-			(void)WgxShellExecuteW(hWindow,L"open",L"http://ultradefrag.sourceforge.net",NULL,NULL,SW_SHOW);
-		}
-		if(LOWORD(wParam) != IDOK)
-			return FALSE;
-	case WM_CLOSE:
-		(void)EndDialog(hWnd,1);
-		return TRUE;
+        case WM_INITDIALOG:
+            /* Window Initialization */
+            WgxCenterWindow(hWnd);
+            if(use_custom_font_in_dialogs)
+                WgxSetFont(hWnd,&wgxFont);
+            if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
+                WgxDbgPrintLastError("AboutDlgProc: wait on hLangPackEvent failed");
+            } else {
+                WgxSetText(hWnd,i18n_table,L"ABOUT_WIN_TITLE");
+                WgxSetText(GetDlgItem(hWnd,IDC_CREDITS),i18n_table,L"CREDITS");
+                WgxSetText(GetDlgItem(hWnd,IDC_LICENSE),i18n_table,L"LICENSE");
+                SetEvent(hLangPackEvent);
+            }
+            (void)WgxAddAccelerators(hInstance,hWnd,IDR_ACCELERATOR2);
+            (void)SetFocus(GetDlgItem(hWnd,IDC_HOMEPAGE));
+            return FALSE;
+        case WM_COMMAND:
+            switch(LOWORD(wParam)){
+                case IDC_CREDITS:
+                    (void)WgxShellExecuteW(hWindow,L"open",L".\\CREDITS.TXT",NULL,NULL,SW_SHOW);
+                    break;
+                case IDC_LICENSE:
+                    (void)WgxShellExecuteW(hWindow,L"open",L".\\LICENSE.TXT",NULL,NULL,SW_SHOW);
+                    break;
+                case IDC_HOMEPAGE:
+                    (void)SetFocus(GetDlgItem(hWnd,IDC_CREDITS));
+                    (void)WgxShellExecuteW(hWindow,L"open",L"http://ultradefrag.sourceforge.net",NULL,NULL,SW_SHOW);
+            }
+            if(LOWORD(wParam) == IDCANCEL){
+                (void)EndDialog(hWnd,1);
+                return TRUE;
+            }
+            if(LOWORD(wParam) != IDOK)
+                return FALSE;
+        case WM_CLOSE:
+            (void)EndDialog(hWnd,1);
+            return TRUE;
 	}
 	return FALSE;
 }
