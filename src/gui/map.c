@@ -229,6 +229,9 @@ void RedrawMap(volume_processing_job *job)
 	//if(!allow_map_redraw)
 		//return;
 	
+	if(map_blocks_per_line == 0 || map_lines == 0)
+		return;
+	
 	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
 		WgxDbgPrintLastError("RedrawMap: wait on hMapEvent failed");
 		return;

@@ -218,6 +218,10 @@ void GetPrefs(void)
 	r_rc.bottom = ry + rheight;
 	
 	init_maximized_window = maximized_window;
+	if(map_block_size < 0)
+		map_block_size = DEFAULT_MAP_BLOCK_SIZE;
+	if(grid_line_width < 0)
+		grid_line_width = DEFAULT_GRID_LINE_WIDTH;
 
 	DeleteEnvironmentVariables();
 	SetEnvironmentVariables();
