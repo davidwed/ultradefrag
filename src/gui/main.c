@@ -164,6 +164,12 @@ void ResizeMainWindow(int force)
 	vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height);
 	sbar_height = ResizeStatusBar(h,w);
 	ResizeMap(0,toolbar_height + vlist_height,w,h - toolbar_height - vlist_height - sbar_height);
+	
+	/* redraw menu bar */
+	DrawMenuBar(hWindow);
+	
+	/* redraw toolbar */
+	SendMessage(hToolbar,TB_AUTOSIZE,0,0);
 }
 
 /**
