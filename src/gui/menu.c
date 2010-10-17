@@ -129,15 +129,20 @@ int CreateMainMenu(void)
 	}
 #else
 	EnableMenuItem(hMainMenu,IDM_CFG_BOOT_ENABLE,MF_BYCOMMAND | MF_GRAYED);
-	EnableMenuItem(hMainMenu,IDM_CFG_BOOT_SCRIPT,MF_BYCOMMAND | MF_GRAYED);
+    
+    /* TODO: uncomment the following two lines,
+       when defragmentation and optimization are implemented.
+
+    EnableMenuItem(hMainMenu,IDM_CFG_BOOT_SCRIPT,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);
+    */
 #endif
 
 	if(hibernate_instead_of_shutdown)
 		s = WgxGetResourceString(i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
 	else
 		s = WgxGetResourceString(i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
-	_snwprintf(buffer,256,L"%ws\tCtrl+S",s);
+	_snwprintf(buffer,sizeof(buffer),L"%ws\tCtrl+S",s);
 	buffer[255] = 0;
 	ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
 
