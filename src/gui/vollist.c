@@ -199,7 +199,7 @@ void VolListNotifyHandler(LPARAM lParam)
 		job = get_first_selected_job();
 		current_job = job;
 		///HideProgress();
-		RedrawMap(job);
+		RedrawMap(job,0);
 		if(job) UpdateStatusBar(&job->pi);
 	}
 }
@@ -333,7 +333,7 @@ static DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 	
 	job = get_first_selected_job();
 	current_job = job;
-	RedrawMap(job);
+	RedrawMap(job,0);
 	if(job) UpdateStatusBar(&job->pi);
 	
 /*	WgxEnableWindows(hWindow,IDC_RESCAN,IDC_ANALYSE,

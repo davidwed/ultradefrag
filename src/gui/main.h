@@ -172,7 +172,7 @@ void VolListRefreshItem(volume_processing_job *job);
 void ReleaseVolList(void);
 
 void InitMap(void);
-void RedrawMap(volume_processing_job *job);
+void RedrawMap(volume_processing_job *job, int map_refill_required);
 void ReleaseMap(void);
 
 void CreateStatusBar(void);

@@ -91,7 +91,7 @@ LRESULT CALLBACK RectWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	
 	if(iMsg == WM_PAINT){
 		(void)BeginPaint(hWnd,&ps); /* (void)? */
-		RedrawMap(current_job);
+		RedrawMap(current_job,0);
 		EndPaint(hWnd,&ps);
 	}
 	return WgxSafeCallWndProc(OldRectWndProc,hWnd,iMsg,wParam,lParam);
@@ -203,6 +203,30 @@ static void FillMap(volume_processing_job *job)
 			block_rc.left = (map_block_size + grid_line_width) * j + grid_line_width;
 			block_rc.right = block_rc.left + map_block_size;
 			block_rc.bottom = block_rc.top + map_block_size;
+			(void)FillRect(hdc,&block_rc,hBrushes[(int)job->map.buffer[i * map_blocks_per_line + j]]);
+		}
+	}
+	(void)SelectObject(hdc,hOldBrush);
+}
+
+/**
+ * @brief Draws scaled cluster map contents.
+ */
+static void FillScaledMap(volume_processing_job *job)
+{
+	HDC hdc = job->map.hdc;
+	HBRUSH hOldBrush;
+	RECT block_rc;
+	int i, j;
+
+	/* draw squares */
+	hOldBrush = SelectObject(hdc,hBrushes[0]);
+	for(i = 0; i < map_lines; i++){
+		for(j = 0; j < map_blocks_per_line; j++){
+			block_rc.top = (map_block_size + grid_line_width) * i + grid_line_width;
+			block_rc.left = (map_block_size + grid_line_width) * j + grid_line_width;
+			block_rc.right = block_rc.left + map_block_size;
+			block_rc.bottom = block_rc.top + map_block_size;
 			(void)FillRect(hdc,&block_rc,hBrushes[(int)job->map.scaled_buffer[i * map_blocks_per_line + j]]);
 		}
 	}
@@ -214,7 +238,7 @@ static void FillMap(volume_processing_job *job)
  * @note Since v3.1.0 all screen
  * color depths are supported.
  */
-void RedrawMap(volume_processing_job *job)
+void RedrawMap(volume_processing_job *job, int map_refill_required)
 {
 	HDC hdc;
 	HDC hDC, hMainDC;
@@ -262,10 +286,13 @@ void RedrawMap(volume_processing_job *job)
 		job->map.hbitmap = hBitmap;
 		job->map.width = map_width;
 		job->map.height = map_height;
+		map_refill_required = 1;
 	} else {
 		/* if block size changed, but map dimensions aren't, redraw grid anyway */
-		if(job->map.scaled_size != map_blocks_per_line * map_lines)
+		if(job->map.scaled_size != map_blocks_per_line * map_lines){
 			DrawGrid(job->map.hdc);
+			map_refill_required = 1;
+		}
 	}
 		
 	/* if cluster map does not exist, draw empty bitmap */
@@ -286,7 +313,17 @@ void RedrawMap(volume_processing_job *job)
 		} else {
 			job->map.scaled_size = map_blocks_per_line * map_lines;
 		}
+		map_refill_required = 1;
 	}
+
+	if(job->map.scaled_size == job->map.size){
+		/* no need for scaling, draw directly */
+		if(map_refill_required)
+			FillMap(job);
+		goto redraw;
+	}
+	
+	/* draw scaled map */
 	ratio = job->map.scaled_size / job->map.size;
 	if(ratio != 0){
 		/* scale up */
@@ -331,9 +368,8 @@ void RedrawMap(volume_processing_job *job)
 		}
 		job->map.scaled_buffer[i] = (char)x;
 	}
-	
-	/* fill cluster map */
-	FillMap(job);
+	if(map_refill_required)
+		FillScaledMap(job);
 	
 redraw:
 	hdc = GetDC(hMap);

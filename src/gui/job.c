@@ -168,7 +168,7 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	SetEvent(hMapEvent);
 
 	if(pi->cluster_map && job->map.buffer)
-		RedrawMap(job);
+		RedrawMap(job,1);
 	
 	if(pi->completion_status != 0 && !stop_pressed){
 		/* the job is completed */
