@@ -238,7 +238,11 @@ void SavePrefs(void)
 	ry = (int)r_rc.top;
 	rwidth = (int)(r_rc.right - r_rc.left);
 	rheight = (int)(r_rc.bottom - r_rc.top);
-	
+
+	if(_mkdir(".\\options") < 0){
+		if(errno != EEXIST)
+			WgxDbgPrint("Cannot create .\\options directory: errno = %u\n",errno);
+	}
 	WgxSaveOptions(".\\options\\guiopts.lua",options,SavePrefsCallback);
 }
 
