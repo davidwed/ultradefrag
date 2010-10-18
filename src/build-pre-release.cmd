@@ -3,27 +3,13 @@
 rem This script was made for myself (Stefan Pendl)
 rem to simplify pre-release (alpha, beta and RC) building.
 
+echo.
+set /P UD_BLD_PRE_RELEASE_NUM="Enter Version number [1]: "
+if "%UD_BLD_PRE_RELEASE_NUM%" == "" set UD_BLD_PRE_RELEASE_NUM=1
+
 call ParseCommandLine.cmd %*
 
-echo.
-goto %UD_BLD_FLG_BUILD_STAGE%
-
-:1
-set UD_BLD_STAGE_NAME=alpha
-set /P UD_BLD_PRE_RELEASE_NUM="Enter alpha Version number [1]: "
-goto :CheckInput
-
-:2
-set UD_BLD_STAGE_NAME=beta
-set /P UD_BLD_PRE_RELEASE_NUM="Enter beta Version number [1]: "
-goto :CheckInput
-
-:3
-set UD_BLD_STAGE_NAME=RC
-set /P UD_BLD_PRE_RELEASE_NUM="Enter RC Version number [1]: "
-
-:CheckInput
-if "%UD_BLD_PRE_RELEASE_NUM%" == "" set UD_BLD_PRE_RELEASE_NUM=1
+for /f "tokens=%UD_BLD_FLG_BUILD_STAGE%" %%T in ( "alpha beta RC" ) do set UD_BLD_STAGE_NAME=%%T
 
 set UD_BLD_PRE_RELEASE_VER=%UD_BLD_STAGE_NAME%%UD_BLD_PRE_RELEASE_NUM%
 
