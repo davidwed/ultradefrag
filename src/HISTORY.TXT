@@ -13,6 +13,8 @@ HISTORY
       was highly simplified
     - GUI uses system font respecting global Windows settings anywhere
       except of the list control for which mono-space fonts are more preferred
+    - GUI uses custom font in all dialog boxes in case of Burmese (Padauk)
+      translation, because otherwise Windows fail to display texts correctly
     - separate Configuration dialog was retired
     - Language Selector was retired
     - ability to run multiple instances simultaneously was added
@@ -32,6 +34,8 @@ HISTORY
 
       Portuguese(BR), Czech
 
+    - FAT12 and FAT16 volumes are displayed in GUI again as a simple FAT,
+      because this highly speeds up the volume list building
     - Developers: dfrg.exe historical name of GUI executable was replaced
       by final name ultradefrag.exe
     - manifest was added to signal Vista and higher that this is a

@@ -28,6 +28,9 @@
 #include "zenwinx.h"
 #include "partition.h"
 
+/* this method is fine, but slow */
+//#define GET_FS_NAME_FROM_THE_FIRST_SECTOR
+
 /**
  * @brief Converts the 64-bit number
  * of bytes to a human readable format.
@@ -355,6 +358,7 @@ static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
 	return 0;
 }
 
+#ifdef GET_FS_NAME_FROM_THE_FIRST_SECTOR
 /**
  * @brief Defines whether bios parameter block
  * belongs to the FAT-formatted partition or not.
@@ -437,6 +441,7 @@ static int IsNtfsPartition(BPB *bpb,winx_volume_information *v)
 	
 	return (-1);
 }
+#endif /* GET_FS_NAME_FROM_THE_FIRST_SECTOR */
 
 /**
  * @brief Opens the volume for read access.
@@ -457,6 +462,7 @@ WINX_FILE * __stdcall winx_vopen(char volume_letter)
 	return winx_fopen(path,flags);
 }
 
+#ifdef GET_FS_NAME_FROM_THE_FIRST_SECTOR
 /**
  * @brief Reads the first sector
  * of the volume into memory.
@@ -491,6 +497,7 @@ static int read_first_sector(void *buffer,winx_volume_information *v)
 	winx_fclose(f);
 	return 0;
 }
+#endif /* GET_FS_NAME_FROM_THE_FIRST_SECTOR */
 
 /**
  * @brief Retrieves the name of file system.
@@ -513,6 +520,8 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 	NTSTATUS Status;
 	short fs_name[MAX_FS_NAME_LENGTH + 1];
 	int length;
+
+#ifdef GET_FS_NAME_FROM_THE_FIRST_SECTOR
 	void *first_sector;
 	BPB *bpb;
 
@@ -547,7 +556,8 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 			}
 		}
 	}
-	
+#endif /* GET_FS_NAME_FROM_THE_FIRST_SECTOR */
+
 	/*
 	* If direct sector analysis failed,
 	* then get file system name through
@@ -659,7 +669,7 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 		NtClose(hRoot);
 		return (-1);
 	}
-	
+
 	/* get NTFS data */
 	memset(&v->ntfs_data,0,sizeof(NTFS_DATA));
 	if(!strcmp(v->fs_name,"NTFS")){
