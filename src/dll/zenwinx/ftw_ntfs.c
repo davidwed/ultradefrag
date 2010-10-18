@@ -1673,6 +1673,9 @@ static int ntfs_scan_disk_helper(char volume_letter,
 /**
  * @brief winx_scan_disk analog, but
  * optimized for fastest NTFS scan.
+ * @note When stop request is sent by the caller,
+ * file paths cannot be built, because of missing
+ * information about directories not scanned yet.
  */
 winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
 	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb, 
