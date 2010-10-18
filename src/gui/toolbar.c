@@ -93,8 +93,8 @@ int CreateToolbar(void)
 		tb_buttons[i].fsState = (BYTE)buttons[i].state;
 		tb_buttons[i].fsStyle = (BYTE)buttons[i].style;
 	}
-	SendMessage(hToolbar,TB_BUTTONSTRUCTSIZE,sizeof(TBBUTTON),0);
-	SendMessage(hToolbar,TB_ADDBUTTONS,N_BUTTONS,(LPARAM)&tb_buttons);
+	SendMessage(hToolbar,TB_BUTTONSTRUCTSIZE,(WPARAM)sizeof(TBBUTTON),0);
+	SendMessage(hToolbar,TB_ADDBUTTONS,(WPARAM)N_BUTTONS,(LPARAM)&tb_buttons);
 	
 	/* assign images to buttons */
 	hdc = GetDC(hWindow);
@@ -178,7 +178,7 @@ int CreateToolbar(void)
 		for(i = 0; i < N_BUTTONS; i++){
 			if(buttons[i].style == TBSTYLE_SEP)
 				continue; /* skip separators */
-			SendMessage(hToolbar,TB_GETITEMRECT,i,(LPARAM)&rc);
+			SendMessage(hToolbar,TB_GETITEMRECT,(WPARAM)i,(LPARAM)&rc);
 			memset(&ti,0,sizeof(TOOLINFOW));
 			ti.cbSize = sizeof(TOOLINFOW);
 			ti.hwnd = hToolbar;
