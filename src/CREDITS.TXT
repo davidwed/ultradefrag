@@ -150,6 +150,7 @@
     Konstantinos Kapoukranidis
     Krzysztof Świderski
     Latino
+    Leo Smulders
     Masao Kajiwara
     Patrick Palm
     Patrick Paludan-Müller
