@@ -1,69 +1,43 @@
-REM This script generates manifests for Vista UAC, 
-REM suggested by Kerem Gumrukcu (http://entwicklung.junetz.de/).
+@echo off
 
-if "%1" equ "" goto failure
+::
+:: This script generates manifests for Vista UAC, 
+:: suggested by Kerem Gumrukcu (http://entwicklung.junetz.de/).
+::
 
-type manifest.part1 > .\obj\hibernate\hibernate.manifest
-echo version="1.0.0.0" name="hibernate" processorArchitecture="%1" >> .\obj\hibernate\hibernate.manifest
-type manifest.part2 >> .\obj\hibernate\hibernate.manifest
-echo Hibernate for Windows >> .\obj\hibernate\hibernate.manifest
-type manifest.part3 >> .\obj\hibernate\hibernate.manifest
-echo processorArchitecture="%1" >> .\obj\hibernate\hibernate.manifest
-type manifest.part4 >> .\obj\hibernate\hibernate.manifest
+if "%1" equ "" (
+	echo Processor Architecture must be specified!
+	exit /B 1
+)
+
+call :make_manifest .\obj\hibernate\hibernate.manifest    %1 1.0.0.0          hibernate    "Hibernate for Windows"
+call :make_manifest .\obj\console\defrag.manifest         %1 %ULTRADFGVER%.0  udefrag      "UltraDefrag console interface"
+call :make_manifest .\obj\gui\res\ultradefrag.manifest    %1 %ULTRADFGVER%.0  ultradefrag  "UltraDefrag GUI"
+call :make_manifest .\obj\bootexctrl\bootexctrl.manifest  %1 %ULTRADFGVER%.0  bootexctrl   "BootExecute Control Program"
+call :make_manifest .\obj\lua5.1\lua.manifest             %1 5.1.2.0          Lua          "Lua Console"
 
 rem we have no need to compile it
-rem type manifest.part1 > .\obj\utf8-16\utf8-16.manifest
-rem echo version="0.0.0.1" name="utf8-16" processorArchitecture="%1" >> .\obj\utf8-16\utf8-16.manifest
-rem type manifest.part2 >> .\obj\utf8-16\utf8-16.manifest
-rem echo UTF-8 to UTF-16 converter >> .\obj\utf8-16\utf8-16.manifest
-rem type manifest.part3 >> .\obj\utf8-16\utf8-16.manifest
-rem echo processorArchitecture="%1" >> .\obj\utf8-16\utf8-16.manifest
-rem type manifest.part4 >> .\obj\utf8-16\utf8-16.manifest
-
-type manifest.part1 > .\obj\console\defrag.manifest
-echo version="%ULTRADFGVER%.0" name="udefrag" processorArchitecture="%1" >> .\obj\console\defrag.manifest
-type manifest.part2 >> .\obj\console\defrag.manifest
-echo UltraDefrag console interface >> .\obj\console\defrag.manifest
-type manifest.part3 >> .\obj\console\defrag.manifest
-echo processorArchitecture="%1" >> .\obj\console\defrag.manifest
-type manifest.part4 >> .\obj\console\defrag.manifest
-
-type manifest.part1 > .\obj\gui\res\ultradefrag.manifest
-echo version="%ULTRADFGVER%.0" name="ultradefrag" processorArchitecture="%1" >> .\obj\gui\res\ultradefrag.manifest
-type manifest.part2 >> .\obj\gui\res\ultradefrag.manifest
-echo UltraDefrag GUI >> .\obj\gui\res\ultradefrag.manifest
-type manifest.part3 >> .\obj\gui\res\ultradefrag.manifest
-echo processorArchitecture="%1" >> .\obj\gui\res\ultradefrag.manifest
-type manifest.part4 >> .\obj\gui\res\ultradefrag.manifest
-
-type manifest.part1 > .\obj\bootexctrl\bootexctrl.manifest
-echo version="%ULTRADFGVER%.0" name="bootexctrl" processorArchitecture="%1" >> .\obj\bootexctrl\bootexctrl.manifest
-type manifest.part2 >> .\obj\bootexctrl\bootexctrl.manifest
-echo BootExecute Control Program >> .\obj\bootexctrl\bootexctrl.manifest
-type manifest.part3 >> .\obj\bootexctrl\bootexctrl.manifest
-echo processorArchitecture="%1" >> .\obj\bootexctrl\bootexctrl.manifest
-type manifest.part4 >> .\obj\bootexctrl\bootexctrl.manifest
-
-type manifest.part1 > .\obj\lua5.1\lua.manifest
-echo version="5.1.2.0" name="Lua" processorArchitecture="%1" >> .\obj\lua5.1\lua.manifest
-type manifest.part2 >> .\obj\lua5.1\lua.manifest
-echo Lua Console >> .\obj\lua5.1\lua.manifest
-type manifest.part3 >> .\obj\lua5.1\lua.manifest
-echo processorArchitecture="%1" >> .\obj\lua5.1\lua.manifest
-type manifest.part4 >> .\obj\lua5.1\lua.manifest
+rem call :make_manifest .\obj\utf8-16\utf8-16.manifest %1 0.0.0.1 utf8-16 "UTF-8 to UTF-16 converter"
 
 rem update manifests in working copy of sources
-if "%1" neq "X86" goto L1
-copy /Y .\obj\hibernate\hibernate.manifest .\hibernate\hibernate.manifest
-copy /Y .\obj\console\defrag.manifest .\console\defrag.manifest
-rem copy /Y .\obj\utf8-16\utf8-16.manifest .\utf8-16\utf8-16.manifest
-copy /Y .\obj\gui\res\ultradefrag.manifest .\gui\res\ultradefrag.manifest
-copy /Y .\obj\bootexctrl\bootexctrl.manifest .\bootexctrl\bootexctrl.manifest
-copy /Y .\obj\lua5.1\lua.manifest .\lua5.1\lua.manifest
-
-:L1
+if /i "%1" equ "X86" (
+	copy /Y .\obj\hibernate\hibernate.manifest .\hibernate\hibernate.manifest
+	copy /Y .\obj\console\defrag.manifest .\console\defrag.manifest
+	copy /Y .\obj\gui\res\ultradefrag.manifest .\gui\res\ultradefrag.manifest
+	copy /Y .\obj\bootexctrl\bootexctrl.manifest .\bootexctrl\bootexctrl.manifest
+	copy /Y .\obj\lua5.1\lua.manifest .\lua5.1\lua.manifest
+	rem copy /Y .\obj\utf8-16\utf8-16.manifest .\utf8-16\utf8-16.manifest
+)
 exit /B 0
 
-:failure
-echo Processor Architecture must be specified!
-exit /B 1
+rem Synopsis: call :make_manifest {path} {arch} {version} {app_name} {full_app_name}
+rem Example:  call :make_manifest .\obj\app\app.manifest ia64 1.0.0.0 app "Application Name"
+:make_manifest
+	type manifest.part1 > %1
+	echo version="%3" name="%4" processorArchitecture="%2" >> %1
+	type manifest.part2 >> %1
+	echo %~5 >> %1
+	type manifest.part3 >> %1
+	echo processorArchitecture="%2" >> %1
+	type manifest.part4 >> %1
+goto :EOF
