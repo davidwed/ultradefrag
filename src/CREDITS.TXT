@@ -152,6 +152,7 @@
     Latino
     Leo Smulders
     Masao Kajiwara
+    Mathieu Van Weersch
     Patrick Palm
     Patrick Paludan-Müller
     Per-Eric Jenshagen
