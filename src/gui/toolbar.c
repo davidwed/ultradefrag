@@ -47,7 +47,7 @@ struct toolbar_button buttons[] = {
 	{2, IDM_OPTIMIZE,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"OPTIMIZE",          "F7"    },
 	{3, IDM_STOP,             TBSTATE_ENABLED, TBSTYLE_BUTTON, L"STOP",              "Ctrl+C"},
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
-	{4, IDM_SHOW_REPORT,      TBSTATE_ENABLED, TBSTYLE_BUTTON, L"SHOW_REPORT",       "F8"    },
+	{4, IDM_SHOW_REPORT,      TBSTATE_ENABLED, TBSTYLE_BUTTON, L"REPORT",            "F8"    },
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
 	{5, IDM_CFG_GUI_SETTINGS, TBSTATE_ENABLED, TBSTYLE_BUTTON, L"OPTIONS",           "F10"   },
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
