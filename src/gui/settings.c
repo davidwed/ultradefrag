@@ -498,6 +498,7 @@ void StartBootExecChangesTracking()
 	h = create_thread(BootExecTrackingProc,NULL,&id);
 	if(h == NULL){
 		WgxDbgPrintLastError("Cannot create thread for BootExecute registry value changes tracking");
+		boot_exec_tracking_stopped = 1;
 	} else {
 		CloseHandle(h);
 	}
