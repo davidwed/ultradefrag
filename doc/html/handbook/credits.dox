@@ -40,48 +40,52 @@
  *
  * <b>Translations Copyright (c) 2008 - 2010</b>
  *
- * - Belarusian      - Dmitri Arkhangelski\n
- * - Bulgarian       - Dmitri Arkhangelski, Stefan Pendl\n
- * - Burmese         - Muhamed Widuya\n
- * - Catalan         - Illes Balears, Stefan Pendl\n
- * - Chinese         - muzuiget, Stefan Pendl\n
- * - Croatian        - Dmitri Arkhangelski, Stefan Pendl\n
- * - Czech           - David Horak, Stefan Pendl\n
- * - Danish          - Patrick Paludan-Müller, Stefan Pendl\n
- * - Dutch           - Wim Kerstens, Stefan Pendl\n
- * - English (US)    - Dmitri Arkhangelski\n
- * - Estonian        - Olav Mägi\n
- * - Farsi           - Ali Jafari\n
- * - Filipino        - Stefan Pendl\n
- * - Finnish         - Stefan Pendl\n
- * - French          - Pascal Crozet, Stefan Pendl\n
- * - German          - Stefan Geuken, Stefan Pendl\n
- * - Greek           - Konstantinos Kapoukranidis, Stefan Pendl\n
- * - Hindi           - Gaurav Chatterjee\n
- * - Hungarian       - Nagy Zsolt, Stefan Pendl\n
- * - Icelandic       - Stefan Pendl\n
- * - Italian         - Paolo Loggia, Stefan Pendl\n
- * - Japanese        - ao3, Stefan Pendl\n
- * - Korean          - Alex Han, Stefan Pendl\n
- * - Latvian         - Sevelyr, Vladislav Stuzhnev, Stefan Pendl\n
- * - Macedonian      - Dmitri Arkhangelski\n
- * - Norwegian       - Stefan Pendl\n
- * - Polish          - Andrzej Rudnik, Stefan Pendl\n
- * - Portuguese (BR) - Depeo da Masol, Stefan Pendl\n
- * - Portuguese      - Ricardo A. Garcia, Stefan Pendl\n
- * - Romanian        - Stefan Pendl\n
- * - Russian         - Dmitri Arkhangelski\n
- * - Serbian         - Dmitri Arkhangelski\n
- * - Slovak          - Milan Cerovsky, Dmitri Arkhangelski\n
- * - Slovenian       - Miha Mlakar, Dmitri Arkhangelski\n
- * - Spanish (AR)    - Daniel Testa\n
- * - Spanish (ES)    - txusti\n
- * - Swedish         - Magnus Rostedt, Stefan Pendl\n
- * - Thai            - Pat Taweewat, Stefan Pendl\n
- * - Turkish         - Huseyin Kozan, Stefan Pendl\n
- * - Ukrainian       - Dmitri Arkhangelski\n
- * - Vietnamese (VI) - Vietnamize Team\n
- * - Yiddish         - Dmitri Arkhangelski\n
+ * @htmlonly
+ * <table style="border:none; margin-left:20px;">
+ * <tr><td>• Belarusian      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Bulgarian       </td><td>-</td><td> Dmitri Arkhangelski, Stefan Pendl</td></tr>
+ * <tr><td>• Burmese         </td><td>-</td><td> Muhamed Widuya</td></tr>
+ * <tr><td>• Catalan         </td><td>-</td><td> Illes Balears, Stefan Pendl</td></tr>
+ * <tr><td>• Chinese         </td><td>-</td><td> muzuiget, Stefan Pendl</td></tr>
+ * <tr><td>• Croatian        </td><td>-</td><td> Dmitri Arkhangelski, Stefan Pendl</td></tr>
+ * <tr><td>• Czech           </td><td>-</td><td> David Horak, Stefan Pendl</td></tr>
+ * <tr><td>• Danish          </td><td>-</td><td> Patrick Paludan-Müller, Stefan Pendl</td></tr>
+ * <tr><td>• Dutch           </td><td>-</td><td> Wim Kerstens, Stefan Pendl</td></tr>
+ * <tr><td>• English (US)    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Estonian        </td><td>-</td><td> Olav Mägi</td></tr>
+ * <tr><td>• Farsi           </td><td>-</td><td> Ali Jafari</td></tr>
+ * <tr><td>• Filipino        </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Finnish         </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• French          </td><td>-</td><td> Pascal Crozet, Stefan Pendl</td></tr>
+ * <tr><td>• German          </td><td>-</td><td> Stefan Geuken, Stefan Pendl</td></tr>
+ * <tr><td>• Greek           </td><td>-</td><td> Konstantinos Kapoukranidis, Stefan Pendl</td></tr>
+ * <tr><td>• Hindi           </td><td>-</td><td> Gaurav Chatterjee</td></tr>
+ * <tr><td>• Hungarian       </td><td>-</td><td> Nagy Zsolt, Stefan Pendl</td></tr>
+ * <tr><td>• Icelandic       </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Italian         </td><td>-</td><td> Paolo Loggia, Stefan Pendl</td></tr>
+ * <tr><td>• Japanese        </td><td>-</td><td> ao3, Stefan Pendl</td></tr>
+ * <tr><td>• Korean          </td><td>-</td><td> Alex Han, Stefan Pendl</td></tr>
+ * <tr><td>• Latvian         </td><td>-</td><td> Sevelyr, Vladislav Stuzhnev, Stefan Pendl</td></tr>
+ * <tr><td>• Macedonian      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Norwegian       </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Polish          </td><td>-</td><td> Andrzej Rudnik, Stefan Pendl</td></tr>
+ * <tr><td>• Portuguese (BR) </td><td>-</td><td> Depeo da Masol, Stefan Pendl</td></tr>
+ * <tr><td>• Portuguese      </td><td>-</td><td> Ricardo A. Garcia, Stefan Pendl</td></tr>
+ * <tr><td>• Romanian        </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Russian         </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Serbian         </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Slovak          </td><td>-</td><td> Milan Cerovsky, Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Slovenian       </td><td>-</td><td> Miha Mlakar, Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Spanish (AR)    </td><td>-</td><td> Daniel Testa</td></tr>
+ * <tr><td>• Spanish (ES)    </td><td>-</td><td> txusti</td></tr>
+ * <tr><td>• Swedish         </td><td>-</td><td> Magnus Rostedt, Stefan Pendl</td></tr>
+ * <tr><td>• Thai            </td><td>-</td><td> Pat Taweewat, Stefan Pendl</td></tr>
+ * <tr><td>• Turkish         </td><td>-</td><td> Huseyin Kozan, Stefan Pendl</td></tr>
+ * <tr><td>• Ukrainian       </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Vietnamese (VI) </td><td>-</td><td> Vietnamize Team</td></tr>
+ * <tr><td>• Yiddish         </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * </table>
+ * @endhtmlonly
  *
  * <b>Translation managers:</b>
  *
@@ -104,28 +108,32 @@
  *
  * Special thanks for good suggestions (in alphabetical order):
  *
- * - Alexander Peter Kowalski - Process priority control.
- * - Alexander Vedyakin - Volume type detection improvements. More effective
- *                        defragmenting algorithms.
- * - Andrei Maksimov    - GUI improvements.
- * - Bryan Kirk         - Better GUI appearance (new list of drives).
- *                        Autodefrag feature (not implemented yet).
- * - Christopher Naegel - Driver loading on Vista problem's partial solution.
- * - Craig Oakes        - Hint about case mismatch of configuration dialog help files
-                          Hint about problem with .lua file open action registration
- * - Dario Raparelli    - NT 4.0 support.
- * - Jan Loncik         - x64 native support. Better filter presets.
- * - Jim Laski          - System fonts and visual styles for graphical interface.
- * - Kalle Koseck       - The volume analysis speedup.
- * - Kerem Gumrukcu     - Manifests for Vista User Account Control (UAC).
- * - Leland G. Whitlock - Progress bar. More effective defragmenting algorithms.
- * - Markus Elfring     - Strong error handling.
- * - Mike Braca         - Reducing driver's memory usage (new cluster map internal representation).
- * - Nagy Zsolt         - Interesting ideas about translation. Installer improvements.
- * - Parvez Reza        - Various interesting programming tricks.
- * - Stefan Pendl       - Boot time defragmenter improvements. Installer improvements.
- * - Vasily Smirnov     - FAT directories defragmentation algorithm.
- *                        Various important GUI improvements.
+ * @htmlonly
+ * <table style="border:none; margin-left:20px;">
+ * <tr><td>• Alexander Peter Kowalski</td><td>-</td><td> Process priority control.</td></tr>
+ * <tr><td>• Alexander Vedyakin      </td><td>-</td><td> Volume type detection improvements.</td></tr>
+ * <tr><td>                          </td><td> </td><td> More effective defragmenting algorithms.</td></tr>
+ * <tr><td>• Andrei Maksimov         </td><td>-</td><td> GUI improvements.</td></tr>
+ * <tr><td>• Bryan Kirk              </td><td>-</td><td> Better GUI appearance (new list of drives).</td></tr>
+ * <tr><td>                          </td><td> </td><td> Autodefrag feature (not implemented yet).</td></tr>
+ * <tr><td>• Christopher Naegel      </td><td>-</td><td> Driver loading on Vista problem's partial solution.</td></tr>
+ * <tr><td>• Craig Oakes             </td><td>-</td><td> Hint about case mismatch of configuration dialog help files.</td></tr>
+ * <tr><td>                          </td><td> </td><td> Hint about problem with .lua file open action registration.</td></tr>
+ * <tr><td>• Dario Raparelli         </td><td>-</td><td> NT 4.0 support.</td></tr>
+ * <tr><td>• Jan Loncik              </td><td>-</td><td> x64 native support. Better filter presets.</td></tr>
+ * <tr><td>• Jim Laski               </td><td>-</td><td> System fonts and visual styles for graphical interface.</td></tr>
+ * <tr><td>• Kalle Koseck            </td><td>-</td><td> The volume analysis speedup.</td></tr>
+ * <tr><td>• Kerem Gumrukcu          </td><td>-</td><td> Manifests for Vista User Account Control (UAC).</td></tr>
+ * <tr><td>• Leland G. Whitlock      </td><td>-</td><td> Progress bar. More effective defragmenting algorithms.</td></tr>
+ * <tr><td>• Markus Elfring          </td><td>-</td><td> Strong error handling.</td></tr>
+ * <tr><td>• Mike Braca              </td><td>-</td><td> Reducing driver's memory usage (new cluster map internal representation).</td></tr>
+ * <tr><td>• Nagy Zsolt              </td><td>-</td><td> Interesting ideas about translation. Installer improvements.</td></tr>
+ * <tr><td>• Parvez Reza             </td><td>-</td><td> Various interesting programming tricks.</td></tr>
+ * <tr><td>• Stefan Pendl            </td><td>-</td><td> Boot time defragmenter improvements. Installer improvements.</td></tr>
+ * <tr><td>• Vasily Smirnov          </td><td>-</td><td> FAT directories defragmentation algorithm.</td></tr>
+ * <tr><td>                          </td><td> </td><td> Various important GUI improvements.</td></tr>
+ * </table>
+ * @endhtmlonly
  *
  * Special thanks for correcting and updating translations (in alphabetical order):
  *
@@ -154,6 +162,7 @@
  * - Latino
  * - Leo Smulders
  * - Masao Kajiwara
+ * - Mathieu Van Weersch
  * - Patrick Palm
  * - Patrick Paludan-Müller
  * - Per-Eric Jenshagen
