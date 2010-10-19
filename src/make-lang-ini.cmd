@@ -6,16 +6,7 @@ set LangList=""
 
 for %%L in ( "%~dp0\gui\i18n\*.lng" ) do call :CreateLangString "%%~nL"
 
-echo %LangList% >%TMP%\LangList.tmp
-echo.
-echo Please remove the leading and trailing double quotes ...
-echo.
-pause
-notepad %TMP%\LangList.tmp
-
 for %%F in ( "lang.ini" "lang-classical.ini" ) do call :CreateINI %%F >"%~dp0\installer\%%~F"
-
-del /f /q %TMP%\LangList.tmp
 
 goto :EOF
 
@@ -23,7 +14,7 @@ goto :EOF
     if %LangList% == "" (
         set LangList="ListItems=%~1"
     ) else (
-        set LangList="%LangList:"=%|%~1"
+        set LangList="%LangList:"=%^|%~1"
     )
 goto :EOF
 
@@ -55,7 +46,7 @@ goto :EOF
     echo Type=Listbox
     echo Text=Listbox
     echo State=English (US)
-    type %TMP%\LangList.tmp
+    echo %LangList:"=%
     echo Left=%Field2Left%
     echo Right=%Field2Right%
     echo Top=0
