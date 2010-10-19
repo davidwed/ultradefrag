@@ -55,9 +55,10 @@ cd ..\console
 lua ..\..\tools\mkmod.lua defrag.build
 if %errorlevel% neq 0 goto end
 
-cd ..\utf8-16
-lua ..\..\tools\mkmod.lua utf8-16.build
-if %errorlevel% neq 0 goto end
+rem we have no need to compile it
+rem cd ..\utf8-16
+rem lua ..\..\tools\mkmod.lua utf8-16.build
+rem if %errorlevel% neq 0 goto end
 
 rem skip GUI when building the micro edition
 if "%UD_MICRO_EDITION%" equ "1" goto skip_gui

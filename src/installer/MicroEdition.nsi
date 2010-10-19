@@ -47,7 +47,7 @@
 !endif
 
 !define MICRO_EDITION
-!include ".\UltraDefrag.nsh"
+!include "${ROOTDIR}\src\installer\UltraDefrag.nsh"
 
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'

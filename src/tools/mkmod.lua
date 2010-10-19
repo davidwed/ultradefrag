@@ -44,7 +44,7 @@ target_type, target_ext, target_name = "", "", ""
 arch = ""
 
 -- Note: Only DDK compiler can compile native executable 
--- with static zenwinx, udefrag, udefrag-kernel libraries.
+-- with static zenwinx and udefrag libraries.
 static_lib = 0
 
 micro_edition = 0

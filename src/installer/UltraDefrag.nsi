@@ -84,8 +84,8 @@ VIAddVersionKey "FileDescription" "Ultra Defragmenter Setup"
 VIAddVersionKey "FileVersion" "${ULTRADFGVER}"
 ;-----------------------------------------
 
-!include ".\UltraDefrag.nsh"
-!include ".\LanguageSelector.nsh"
+!include "${ROOTDIR}\src\installer\UltraDefrag.nsh"
+!include "${ROOTDIR}\src\installer\LanguageSelector.nsh"
 
 ;-----------------------------------------
 

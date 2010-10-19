@@ -81,8 +81,6 @@ cd .\bin
 if %UD_BLD_FLG_BUILD_X86% EQU 0 goto build_amd64_installer
 
 copy /Y ..\installer\MicroEdition.nsi .\
-copy /Y ..\installer\UltraDefrag.nsh .\
-copy /Y ..\installer\*.ico .\
 
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=i386 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
@@ -91,8 +89,6 @@ if %errorlevel% neq 0 goto fail
 if %UD_BLD_FLG_BUILD_AMD64% equ 0 goto build_ia64_installer
 
 copy /Y ..\installer\MicroEdition.nsi .\amd64\
-copy /Y ..\installer\UltraDefrag.nsh .\amd64\
-copy /Y ..\installer\*.ico .\amd64\
 cd amd64
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=amd64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail
@@ -102,8 +98,6 @@ cd..
 if %UD_BLD_FLG_BUILD_IA64% equ 0 goto build_source_package
 
 copy /Y ..\installer\MicroEdition.nsi .\ia64\
-copy /Y ..\installer\UltraDefrag.nsh .\ia64\
-copy /Y ..\installer\*.ico .\ia64\
 cd ia64
 "%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=ia64 MicroEdition.nsi
 if %errorlevel% neq 0 goto fail

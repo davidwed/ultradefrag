@@ -325,6 +325,7 @@ void RedrawMap(volume_processing_job *job, int map_refill_required)
 	
 	/* draw scaled map */
 	ratio = job->map.scaled_size / job->map.size;
+	/* TODO: use better algorithms scaling the map more precisely */
 	if(ratio != 0){
 		/* scale up */
 		for(i = 0, k = 0; i < job->map.size; i++){
