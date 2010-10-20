@@ -53,11 +53,11 @@ if arg[1] ~= nil then
 end
 
 -- make a backup copy of the file
-f = assert(io.open("./SETVARS.BK","w"))
+-- f = assert(io.open("./SETVARS.BK","w"))
 
 -- get parameters from SETVARS.CMD file
 for line in io.lines("./SETVARS.CMD") do
-	f:write(line,"\n")
+	-- f:write(line,"\n")
 	-- split line to a name-value pair
 	for k, v in string.gmatch(line,"(.+)=(.+)") do
 		-- print(k, v)
@@ -76,7 +76,7 @@ for line in io.lines("./SETVARS.CMD") do
 	end
 end
 
-f:close()
+-- f:close()
 
 function param_action(dialog, param_index)
 	if param_index == -2 then
