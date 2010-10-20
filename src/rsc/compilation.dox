@@ -84,7 +84,7 @@
  * @code lua configure.lua --all @endcode
  *
  * There are four different build commands:
- * - <b>build</b> for a full-featured installers and sources package
+ * - <b>build</b> for a full-featured installers
  * - <b>build-micro</b> for the Micro Edition installer
  * - <b>build-portable</b> for the UltraDefrag Portable package
  * - <b>build-micro-portable</b> for the Portable Micro Edition package

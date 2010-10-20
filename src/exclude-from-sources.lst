@@ -4,6 +4,7 @@
 \bin
 \lib
 \obj
+\pre-release
 \src_package
 \doxy-doc
 \robo-doc
@@ -17,4 +18,5 @@
 .exe
 .com
 \DOS
-
+\gui\lang.ini
+\gui\options

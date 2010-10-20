@@ -24,6 +24,51 @@ rem of Windows.
 
 call ParseCommandLine.cmd %*
 
+:: make all directories required to store target binaries
+mkdir lib
+mkdir lib\amd64
+mkdir lib\ia64
+mkdir bin
+mkdir bin\amd64
+mkdir bin\ia64
+
+:: copy source files to obj directory
+xcopy /I /Y /Q .\bootexctrl  .\obj\bootexctrl
+xcopy /I /Y /Q .\hibernate   .\obj\hibernate
+xcopy /I /Y /Q .\console     .\obj\console
+xcopy /I /Y /Q .\native      .\obj\native
+xcopy /I /Y /Q .\include     .\obj\include
+xcopy /I /Y /Q .\share       .\obj\share
+xcopy /I /Y /Q .\dll\udefrag .\obj\udefrag
+xcopy /I /Y /Q .\dll\zenwinx .\obj\zenwinx
+if "%UD_MICRO_EDITION%" neq "1" (
+	xcopy /I /Y /Q .\gui     .\obj\gui
+	xcopy /I /Y /Q .\gui\res .\obj\gui\res
+	xcopy /I /Y /Q .\lua5.1  .\obj\lua5.1
+	xcopy /I /Y /Q .\dll\wgx .\obj\wgx
+)
+
+:: copy external files on which udefrag.exe command line tool depends
+copy /Y .\obj\share\*.c .\obj\console\
+
+:: we cannot link command line tool to WGX, because it is missing in Micro Edition
+copy /Y .\dll\wgx\dbg.c           .\obj\console\
+copy /Y .\dll\wgx\web-analytics.c .\obj\console\
+copy /Y .\dll\wgx\wgx.h           .\obj\console\
+
+:: copy header files to different locations
+:: to make relative paths of them the same
+:: as in /src directory
+mkdir obj\dll
+mkdir obj\dll\zenwinx
+copy /Y obj\zenwinx\ntndk.h   obj\dll\zenwinx\
+copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\
+if "%UD_MICRO_EDITION%" neq "1" (
+	mkdir obj\dll\wgx
+	copy /Y obj\wgx\wgx.h obj\dll\wgx
+)
+
+:: let's build all modules by selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
 	echo No parameters specified, using defaults.
 	goto mingw_build

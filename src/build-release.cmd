@@ -5,12 +5,15 @@ rem to simplify binary packages uploading.
 
 mkdir archive
 
+call build-src-package.cmd
+if %errorlevel% neq 0 goto build_failed
+copy .\src_package\ultradefrag-%ULTRADFGVER%.src.7z .\archive\
+
 call build.cmd --use-winddk
 if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe .\archive\
 copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\archive\
 copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\archive\
-copy .\src_package\ultradefrag-%ULTRADFGVER%.src.7z .\archive\
 
 call build-micro.cmd --use-winddk
 if %errorlevel% neq 0 goto build_failed

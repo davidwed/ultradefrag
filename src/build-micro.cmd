@@ -30,44 +30,12 @@ echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER%" >> .\include\ultradfgver.h
 echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\include\ultradfgver.h
 echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
-rem echo #define NGVERSIONINTITLE "UltraDefrag Next Generation v%ULTRADFGVER%" >> .\include\ultradfgver.h
 
-rem force zenwinx version to be the same as ultradefrag version
-rem echo #define ZENWINX_VERSION %ZENWINX_VERSION% > .\dll\zenwinx\zenwinxver.h
-rem echo #define ZENWINX_VERSION2 %ZENWINX_VERSION2% >> .\dll\zenwinx\zenwinxver.h
+:: force zenwinx version to be the same as ultradefrag version
 echo #define ZENWINX_VERSION %VERSION% > .\dll\zenwinx\zenwinxver.h
 echo #define ZENWINX_VERSION2 %VERSION2% >> .\dll\zenwinx\zenwinxver.h
 
-mkdir lib
-mkdir lib\amd64
-mkdir lib\ia64
-mkdir bin
-mkdir bin\amd64
-mkdir bin\ia64
-
-xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
-xcopy /I /Y /Q    .\hibernate .\obj\hibernate
-xcopy /I /Y /Q    .\console .\obj\console
-xcopy /I /Y /Q    .\native  .\obj\native
-xcopy /I /Y /Q    .\include .\obj\include
-xcopy /I /Y /Q    .\share .\obj\share
-xcopy /I /Y /Q    .\dll\udefrag .\obj\udefrag
-xcopy /I /Y /Q    .\dll\zenwinx .\obj\zenwinx
-
-copy /Y .\obj\share\*.c .\obj\console\
-
-rem we cannot link directly to wgx.dll, because it depends on Lua missing in Micro Edition
-copy /Y .\dll\wgx\web-analytics.c .\obj\console\
-copy /Y .\dll\wgx\wgx.h .\obj\console\
-copy /Y .\dll\wgx\dbg.c .\obj\console\
-
-rem xcopy /I /Y /Q /S source destination
-
-mkdir obj\dll
-mkdir obj\dll\zenwinx
-copy /Y obj\zenwinx\ntndk.h obj\dll\zenwinx\
-copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\
-
+:: build all binaries
 call build-targets.cmd %*
 if %errorlevel% neq 0 goto fail
 
