@@ -33,6 +33,32 @@ exit /B 0
 rem Synopsis: call :make_manifest {path} {arch} {version} {app_name} {full_app_name}
 rem Example:  call :make_manifest .\obj\app\app.manifest ia64 1.0.0.0 app "Application Name"
 :make_manifest
+	echo ^<?xml version="1.0" encoding="UTF-8" standalone="yes"?^>                                   > %1
+	echo ^<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"^>                >> %1
+	echo. ^<assemblyIdentity version="%3" name="%4" processorArchitecture="%2" type="win32"/^>      >> %1
+	echo.  ^<description^>%~5^</description^>                                                       >> %1
+	echo.  ^<dependency^>                                                                           >> %1
+	echo.   ^<dependentAssembly^>                                                                   >> %1
+	echo.    ^<assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls"               >> %1
+	echo.      version="6.0.0.0" processorArchitecture="%2"                                         >> %1
+	echo.      publicKeyToken="6595b64144ccf1df" language="*" /^>                                   >> %1
+	echo.   ^</dependentAssembly^>                                                                  >> %1
+	echo.  ^</dependency^>                                                                          >> %1
+	echo.  ^<trustInfo xmlns="urn:schemas-microsoft-com:asm.v2"^>                                   >> %1
+	echo.   ^<security^>                                                                            >> %1
+	echo.    ^<requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3"^>                       >> %1
+	echo.     ^<requestedExecutionLevel level="requireAdministrator" uiAccess="false" /^>           >> %1
+	echo.    ^</requestedPrivileges^>                                                               >> %1
+	echo.   ^</security^>                                                                           >> %1
+	echo.  ^</trustInfo^>                                                                           >> %1
+	echo.  ^<asmv3:application xmlns:asmv3="urn:schemas-microsoft-com:asm.v3"^>                     >> %1
+	echo.   ^<asmv3:windowsSettings xmlns="http://schemas.microsoft.com/SMI/2005/WindowsSettings"^> >> %1
+	echo.    ^<dpiAware^>true^</dpiAware^>                                                          >> %1
+	echo.   ^</asmv3:windowsSettings^>                                                              >> %1
+	echo.  ^</asmv3:application^>                                                                   >> %1
+	echo ^</assembly^>                                                                              >> %1
+	goto :EOF
+	rem the following sequence is faster, but misty
 	type manifest.part1 > %1
 	echo version="%3" name="%4" processorArchitecture="%2" >> %1
 	type manifest.part2 >> %1
