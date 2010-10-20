@@ -96,8 +96,9 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 		set BUILD_DEFAULT=-nmake -i -g -P
 		set UDEFRAG_LIB_PATH=..\..\lib
 		call :build_modules X86 || exit /B 1
-		set Path=%OLD_PATH%
 	)
+    
+    set Path=%OLD_PATH%
 	
 	if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
 		echo --------- Target is x64 ---------
@@ -111,8 +112,9 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 		set BUILD_DEFAULT=-nmake -i -g -P
 		set UDEFRAG_LIB_PATH=..\..\lib\amd64
 		call :build_modules amd64 || exit /B 1
-		set Path=%OLD_PATH%
 	)
+    
+    set Path=%OLD_PATH%
 	
 	if %UD_BLD_FLG_BUILD_IA64% neq 0 (
 		echo --------- Target is ia64 ---------
@@ -123,8 +125,9 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 		set BUILD_DEFAULT=-nmake -i -g -P
 		set UDEFRAG_LIB_PATH=..\..\lib\ia64
 		call :build_modules ia64 || exit /B 1
-		set Path=%OLD_PATH%
 	)
+    
+    set Path=%OLD_PATH%
 	
 exit /B 0
 
@@ -142,8 +145,9 @@ exit /B 0
 		popd
 		set UDEFRAG_LIB_PATH=..\..\lib
 		call :build_modules X86 || exit /B 1
-		set Path=%OLD_PATH%
 	)
+    
+    set Path=%OLD_PATH%
 
 	if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
 		echo --------- Target is x64 ---------
@@ -154,8 +158,9 @@ exit /B 0
 		popd
 		set UDEFRAG_LIB_PATH=..\..\lib\amd64
 		call :build_modules amd64 || exit /B 1
-		set Path=%OLD_PATH%
 	)
+    
+    set Path=%OLD_PATH%
 
 	if %UD_BLD_FLG_BUILD_IA64% neq 0 (
 		echo --------- Target is ia64 ---------
@@ -167,8 +172,9 @@ exit /B 0
 		set BUILD_DEFAULT=-nmake -i -g -P
 		set UDEFRAG_LIB_PATH=..\..\lib\ia64
 		call :build_modules ia64 || exit /B 1
-		set Path=%OLD_PATH%
 	)
+    
+    set Path=%OLD_PATH%
 	
 exit /B 0
 
