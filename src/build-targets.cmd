@@ -190,27 +190,28 @@ exit /B 0
 	call make-manifests.cmd %1 || exit /B 1
 
 	rem rebuild modules
+	set UD_BUILD_TOOL=lua ..\..\tools\mkmod.lua
 	echo Compile monolithic native interface...
 	pushd obj\zenwinx
-	lua ..\..\tools\mkmod.lua zenwinx.build static-lib || goto fail
+	%UD_BUILD_TOOL% zenwinx.build static-lib || goto fail
 	cd ..\udefrag
-	lua ..\..\tools\mkmod.lua udefrag.build static-lib || goto fail
+	%UD_BUILD_TOOL% udefrag.build static-lib || goto fail
 	cd ..\native
-	lua ..\..\tools\mkmod.lua defrag_native.build || goto fail
+	%UD_BUILD_TOOL% defrag_native.build || goto fail
 
 	echo Compile native DLL's...
 	cd ..\zenwinx
-	lua ..\..\tools\mkmod.lua zenwinx.build || goto fail
+	%UD_BUILD_TOOL% zenwinx.build || goto fail
 	cd ..\udefrag
-	lua ..\..\tools\mkmod.lua udefrag.build || goto fail
+	%UD_BUILD_TOOL% udefrag.build || goto fail
 
 	echo Compile other modules...
 	cd ..\bootexctrl
-	lua ..\..\tools\mkmod.lua bootexctrl.build || goto fail
+	%UD_BUILD_TOOL% bootexctrl.build || goto fail
 	cd ..\hibernate
-	lua ..\..\tools\mkmod.lua hibernate.build || goto fail
+	%UD_BUILD_TOOL% hibernate.build || goto fail
 	cd ..\console
-	lua ..\..\tools\mkmod.lua defrag.build || goto fail
+	%UD_BUILD_TOOL% defrag.build || goto fail
 
 	rem Lua, WGX and GUI are missing in Micro Edition
 	if "%UD_MICRO_EDITION%" equ "1" goto success
@@ -218,26 +219,28 @@ exit /B 0
 	rem workaround for WDK 7
 	rem set IGNORE_LINKLIB_ABUSE=1
 	cd ..\lua5.1
-	lua ..\..\tools\mkmod.lua lua5.1a_dll.build || goto fail
+	%UD_BUILD_TOOL% lua5.1a_dll.build || goto fail
 	rem set IGNORE_LINKLIB_ABUSE=
-	lua ..\..\tools\mkmod.lua lua5.1a_exe.build || goto fail
-	lua ..\..\tools\mkmod.lua lua5.1a_gui.build || goto fail
+	%UD_BUILD_TOOL% lua5.1a_exe.build || goto fail
+	%UD_BUILD_TOOL% lua5.1a_gui.build || goto fail
 
 	rem workaround for WDK 7
 	rem set IGNORE_LINKLIB_ABUSE=1
 	cd ..\wgx
-	lua ..\..\tools\mkmod.lua wgx.build ||  goto fail
+	%UD_BUILD_TOOL% wgx.build ||  goto fail
 	rem set IGNORE_LINKLIB_ABUSE=
 	cd ..\gui
-	lua ..\..\tools\mkmod.lua ultradefrag.build && goto success
+	%UD_BUILD_TOOL% ultradefrag.build && goto success
 
 	:fail
 	rem workaround for WDK 7
 	rem set IGNORE_LINKLIB_ABUSE=
+	set UD_BUILD_TOOL=
 	popd
 	exit /B 1
 	
 	:success
+	set UD_BUILD_TOOL=
 	popd
 
 exit /B 0
