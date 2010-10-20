@@ -48,7 +48,6 @@ mkdir bin\ia64
 xcopy /I /Y /Q    .\bootexctrl .\obj\bootexctrl
 xcopy /I /Y /Q    .\hibernate .\obj\hibernate
 xcopy /I /Y /Q    .\console .\obj\console
-xcopy /I /Y /Q    .\utf8-16 .\obj\utf8-16
 xcopy /I /Y /Q    .\gui     .\obj\gui
 xcopy /I /Y /Q    .\gui\res .\obj\gui\res
 xcopy /I /Y /Q    .\native  .\obj\native
