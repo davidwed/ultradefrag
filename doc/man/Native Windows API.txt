@@ -1,0 +1,5 @@
+Sysinternals Freeware - Inside the Native API
+    http://netcode.cz/img/83/nativeapi.html
+
+Native API function documentation
+    http://undocumented.ntinternals.net/
