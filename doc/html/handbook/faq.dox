@@ -90,7 +90,7 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * be relatively slow.
  *
  * <HR>
- *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
  *    <TR>
  *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Tips</TD>
  *      <TD STYLE="text-align: right; width: 50%;">Next: @ref ReportingBugs</TD>
