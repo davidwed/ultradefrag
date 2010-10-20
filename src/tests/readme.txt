@@ -1,1 +1,0 @@
-This directory will contain stuff written especially to test some things.
