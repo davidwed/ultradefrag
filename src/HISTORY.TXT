@@ -32,7 +32,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Portuguese(BR), Czech, French (FR)
+      Portuguese(BR), Czech, French (FR), Portuguese, Catalan
 
     - FAT12 and FAT16 volumes are displayed in GUI again as a simple FAT,
       because this highly speeds up the volume list building
