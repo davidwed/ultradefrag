@@ -10,7 +10,7 @@ if "%1" equ "" (
 )
 
 echo Preparing to patch applying...
-set path=%1\bin;%path%
+pushd %~dp0
 
 :: save original versions
 if not exist %1\lib\libntdll.a.orig (
@@ -21,9 +21,9 @@ if not exist %1\lib\libntoskrnl.a.orig (
 )
 
 :: generate more adequate versions
-dlltool -k --output-lib libntdll.a --def ntdll.def
+%1\bin\dlltool -k --output-lib libntdll.a --def ntdll.def
 if %errorlevel% neq 0 goto fail
-dlltool -k --output-lib libntoskrnl.a --def ntoskrnl.def
+%1\bin\dlltool -k --output-lib libntoskrnl.a --def ntoskrnl.def
 if %errorlevel% neq 0 goto fail
 
 :: replace files
@@ -31,8 +31,10 @@ move /Y libntdll.a %1\lib\libntdll.a
 move /Y libntoskrnl.a %1\lib\libntoskrnl.a
 
 echo MinGW patched successfully!
+popd
 exit /B 0
 
 :fail
 echo Build error (code %ERRORLEVEL%)!
+popd
 exit /B 1

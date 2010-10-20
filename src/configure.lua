@@ -160,7 +160,7 @@ if ret == 1 then
 	print("SETVARS.CMD script was successfully updated.")
 	if apply_patch == 1 then
 		print("Apply MinGW patch option was selected.")
-		if os.execute("cmd.exe /C mingw_patch.cmd " .. mingwbase) ~= 0 then
+		if os.execute("cmd.exe /C .\\dll\\zenwinx\\mingw_patch.cmd " .. mingwbase) ~= 0 then
 			error("Cannot apply patch to MinGW!")
 		end
 	end
