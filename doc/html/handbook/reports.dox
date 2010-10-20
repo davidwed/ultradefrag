@@ -65,8 +65,8 @@
  * /options sub-folder of the program's directory.
  *
  * To open this file for editing click its icon in Explorer
- * or simply click the appropriate button in the UltraDefrag 
- * Configuration dialog.
+ * or simply select <b>Settings => Reports</b> from the
+ * UltraDefrag GUI menu.
  *
  * The udreportopts.lua file contains parameter-value pairs
  * and comments (they are starting with double dashes).
@@ -97,11 +97,11 @@ enable_sorting = 1
 -- web browser then set this parameter to zero.
 -------------------------------------------------------------------------------
 split_long_names = 0
+
 -------------------------------------------------------------------------------
 -- Set here maximum number of characters per line in filename cells.
 -------------------------------------------------------------------------------
 max_chars_per_line = 50
-
 
 -------------------------------------------------------------------------------
 -- A web page style can be set through udreport.css style sheet.
@@ -113,10 +113,10 @@ max_chars_per_line = 50
  * associate the lua extension with your preferred text editor. 
  *
  * <HR>
- *  <TABLE BORDER="0" STYLE="width: 100%;">
- *    <TR>
- *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref Boot</TD>
- *      <TD STYLE="text-align: right; width: 50%;">Next: @ref Tips</TD>
- *    </TR>
- *  </TABLE>
+ * <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
+ * <TR>
+ * <TD STYLE="text-align: left; width: 50%;">Previous: @ref Boot</TD>
+ * <TD STYLE="text-align: right; width: 50%;">Next: @ref Tips</TD>
+ * </TR>
+ * </TABLE>
  */

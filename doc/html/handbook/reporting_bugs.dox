@@ -27,15 +27,18 @@
  * - screen-shots (required for all GUI-related bugs)
  * - debugging information collected by the <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> program
  *
- * Don't forget to check the <b>Capture Kernel</b> and <b>Capture Win32</b> items of the Capture menu of the DbgView program.
- * Check the Log Boot item if you will debug the boot time defragmenter.
+ * Don't forget to check the <b>Capture Win32</b> item of the Capture menu of the DbgView program.
+ * Check one of the <b>Log to file</b> items of the <b>File</b> menu to create a log file you can send us.
+ *
+ * Don't forget to set <b>dbgprint_level = "DETAILED"</b> in the options file, so we get all the information needed.
+ * You can revert the change after you have created the debugging package.
  *
  * Note that DbgView cannot capture information from the user mode driver during the Windows boot process.
- * This is a well known DbgView limitation. The latest version of DbgView cannot be used on NT 4.0,
+ * This is a well known DbgView limitation. The latest version of DbgView cannot be used on NT 4.0 either,
  * check <a href="http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/freeware/debugview.shtml">this page</a> for an earlier version.
  *
  * <HR>
- *  <TABLE BORDER="0" STYLE="width: 100%;">
+ *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
  *    <TR>
  *      <TD STYLE="text-align: left; width: 50%;">Previous: @ref FAQ</TD>
  *      <TD STYLE="text-align: right; width: 50%;">Next: @ref Credits</TD>
