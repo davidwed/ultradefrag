@@ -16,9 +16,6 @@ call :make_manifest %1 %ULTRADFGVER%.0  ultradefrag  "UltraDefrag GUI"          
 call :make_manifest %1 %ULTRADFGVER%.0  bootexctrl   "BootExecute Control Program"   >.\obj\bootexctrl\bootexctrl.manifest
 call :make_manifest %1 5.1.2.0          Lua          "Lua Console"                   >.\obj\lua5.1\lua.manifest
 
-rem we have no need to compile it
-rem call :make_manifest .\obj\utf8-16\utf8-16.manifest %1 0.0.0.1 utf8-16 "UTF-8 to UTF-16 converter"
-
 rem update manifests in working copy of sources
 if /i "%1" equ "X86" (
 	copy /Y .\obj\hibernate\hibernate.manifest .\hibernate\hibernate.manifest
