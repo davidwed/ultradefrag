@@ -1,0 +1,25 @@
+revising an existing translation:
+1. open language file in text editor
+2. open wiki page and select edit
+3. correct any corrupted headers and comments
+4. copy part between [[code]] tags and paste into editor
+5. save wiki page, if there was something to correct
+6. check correct encoding and end-of-line characters
+7. save translation
+8. update credits and history
+9. commit changes
+
+new translation:
+1. create new language file in translation folder
+   naming rule is "{English language name} ({region or font}).lng"
+   Example:
+        "Spanish (AR).lng" ....... Argentinian Spanish
+        "Burmese (Padauk).lng" ... Burmese needing Padauk font
+2. open wiki page and select edit
+3. correct any corrupted headers and comments
+4. copy part between [[code]] tags and paste into editor
+5. save wiki page, if there was something to correct
+6. check correct encoding and end-of-line characters
+7. save translation
+8. update credits and history
+9. commit changes

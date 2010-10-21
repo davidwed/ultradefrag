@@ -1,4 +1,4 @@
-new RC:
+new pre-release:
 1. prepare website (index) and history.txt for pre-release
 2. run build-pre-release.cmd
 3. upload files through sf.net file manager
