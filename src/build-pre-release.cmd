@@ -1,7 +1,13 @@
 @echo off
 
-rem This script was made for myself (Stefan Pendl)
-rem to simplify pre-release (alpha, beta and RC) building.
+:: This script was made for myself (Stefan Pendl)
+:: to simplify pre-release (alpha, beta and RC) building.
+::
+:: The following arguments are accepted:
+::      --[alpha|beta|rc]
+::          alpha ... builds a portable package and adds alpha{version} to the package names
+::          beta .... builds a portable package and adds beta{version} to the package names
+::          rc ...... builds an installer package and adds RC{version} to the package names
 
 echo.
 set /P UD_BLD_PRE_RELEASE_NUM="Enter Version number [1]: "
@@ -38,7 +44,6 @@ copy /b /y /v .\bin\ultradefrag-*.bin.i386.*        .\pre-release\ultradefrag%UD
 copy /b /y /v .\bin\amd64\ultradefrag-*.bin.amd64.* .\pre-release\ultradefrag%UD_BLD_STAGE_PKG%-%ULTRADFGVER%-%UD_BLD_PRE_RELEASE_VER%.bin.amd64.%UD_BLD_STAGE_EXT%
 copy /b /y /v .\bin\ia64\ultradefrag-*.bin.ia64.*   .\pre-release\ultradefrag%UD_BLD_STAGE_PKG%-%ULTRADFGVER%-%UD_BLD_PRE_RELEASE_VER%.bin.ia64.%UD_BLD_STAGE_EXT%
 
-cd ..
 echo.
 echo %UD_BLD_PRE_RELEASE_VER% Pre-Release created successfully!
 exit /B 0
