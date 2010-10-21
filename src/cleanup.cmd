@@ -17,8 +17,6 @@ rd /s /q ..\doc\html\handbook\doxy-doc
 rd /s /q src_package
 rd /s /q ..\src_package
 rd /s /q pre-release
-
-rem archive may sometimes contain few older releases for comparison
-rem rd /s /q archive
+rd /s /q release
 
 echo Done.
