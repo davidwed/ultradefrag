@@ -23,3 +23,7 @@ new translation:
 7. save translation
 8. update credits and history
 9. commit changes
+
+    If using Notepad++ select all and use
+    "TextFX => TextFX Edit => Line up multiple lines by (=)
+    to line up the translations automatically.
