@@ -35,6 +35,8 @@ volume_processing_job * get_first_selected_job(void);
 static void InitImageList(void);
 static void DestroyImageList(void);
 
+int column_widths_adjusted = 0;
+
 /**
  * @brief Initializes the list of volumes.
  * @todo Return negative value on errors.
@@ -121,7 +123,9 @@ static void AdjustVolListColumns(void)
 	int total_width = 0;
 	int i, width;
 	RECT rc;
-
+	
+	VolListGetColumnWidths();
+	
 	/* adjust columns widths */
 	if(GetClientRect(hList,&rc))
 		width = rc.right - rc.left;
@@ -141,6 +145,7 @@ static void AdjustVolListColumns(void)
 				cw[i] * width / 505);
 		}
 	}
+	column_widths_adjusted = 1;
 }
 
 /**
@@ -364,6 +369,9 @@ void UpdateVolList(void)
 void VolListGetColumnWidths(void)
 {
 	int i;
+	
+	if(column_widths_adjusted == 0)
+		return; /* we haven't set widths yet */
 
 	for(i = 0; i < 5; i++){
 		user_defined_column_widths[i] = \
