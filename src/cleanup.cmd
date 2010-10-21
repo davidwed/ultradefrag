@@ -18,5 +18,4 @@ rd /s /q src_package
 rd /s /q ..\src_package
 rd /s /q pre-release
 rd /s /q release
-
 echo Done.
