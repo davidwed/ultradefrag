@@ -1,0 +1,2 @@
+Underused features of Windows batch files:
+	http://stackoverflow.com/questions/245395/underused-features-of-windows-batch-files
