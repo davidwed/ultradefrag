@@ -17,3 +17,6 @@ GUI Design Guideline links from Microsoft:
 
     Writing High-DPI Win32 Applications:
         http://msdn.microsoft.com/en-us/library/dd464659(VS.85).aspx
+
+Implementing a splitter bar
+    http://www.catch22.net/tuts/splitter
