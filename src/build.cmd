@@ -12,7 +12,7 @@ if %UD_BLD_FLG_DIPLAY_HELP% equ 1 (
 
 :: set environment variables
 set OLD_PATH=%path%
-call SETVARS.CMD
+call setvars.cmd
 if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
 

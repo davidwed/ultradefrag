@@ -3,75 +3,57 @@
 echo Build UltraDefrag development docs...
 echo.
 
-rem Set environment variables if they aren't already set.
-if "%ULTRADFGVER%" neq "" goto build_docs
-call SETVARS.CMD
-if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
-if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+:: set environment variables if they aren't already set
+if "%ULTRADFGVER%" equ "" (
+	call setvars.cmd
+	if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
+	if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+)
 
-:build_docs
-rd /s /q doxy-doc
-mkdir doxy-doc
+call :compile_docs .                                 || goto fail
+call :compile_docs .\dll\udefrag        udefrag.dll  || goto fail
+call :compile_docs .\dll\wgx            wgx          || goto fail
+call :compile_docs .\dll\zenwinx                     || goto fail
+call :compile_docs ..\doc\html\handbook              || goto fail
 
-cd dll\udefrag
-rd /s /q doxy-doc
-lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-doxygen
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-copy /Y .\rsc\*.* .\doxy-doc\html\
-del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
-xcopy /I /Y /Q /S .\doxy-doc\html ..\..\doxy-doc\udefrag.dll\html
-cd ..\..
+:: clean up the handbook
+pushd ..\doc\html\handbook\doxy-doc\html
+del /Q  header.html, footer.html
+del /Q  pages.html
+del /Q  doxygen.png
+del /Q  tabs.css
+del /Q  tab_*.png
+del /Q  bc_*.png
+del /Q  nav_*.png
+del /Q  open.png
+del /Q  closed.png
+popd
 
-cd dll\wgx
-rd /s /q doxy-doc
-lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-doxygen
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-copy /Y .\rsc\*.* .\doxy-doc\html\
-del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
-xcopy /I /Y /Q /S .\doxy-doc\html ..\..\doxy-doc\wgx\html
-cd ..\..
-
-cd dll\zenwinx
-rd /s /q doxy-doc
-lua ..\..\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-doxygen
-if %errorlevel% neq 0 cd ..\.. && exit /B 1
-copy /Y .\rsc\*.* .\doxy-doc\html\
-del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
-rem xcopy /I /Y /Q /S .\doxy-doc\html ..\..\doxy-doc\zenwinx\html
-cd ..\..
-
-cd ..\doc\html\handbook
-rd /s /q doxy-doc
-lua ..\..\..\src\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
-if %errorlevel% neq 0 cd ..\..\..\src && exit /B 1
-doxygen
-if %errorlevel% neq 0 cd ..\..\..\src && exit /B 1
-copy /Y .\rsc\*.* .\doxy-doc\html\
-del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
-echo optimize the handbook...
-del /Q .\doxy-doc\html\pages.html
-del /Q .\doxy-doc\html\doxygen.png
-del /Q .\doxy-doc\html\tabs.css
-del /Q .\doxy-doc\html\tab_*.png
-del /Q .\doxy-doc\html\bc_*.png
-del /Q .\doxy-doc\html\nav_*.png
-del /Q .\doxy-doc\html\open.png
-del /Q .\doxy-doc\html\closed.png
-cd ..\..\..\src
-
-rem finally build the main docs
-lua .\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER%
-if %errorlevel% neq 0 exit /B 1
-doxygen
-if %errorlevel% neq 0 exit /B 1
-copy /Y .\rsc\*.* .\doxy-doc\html\
-del /Q .\doxy-doc\html\header.html,.\doxy-doc\html\footer.html
-del /Q .\doxy-doc\html\*.dox
-
+echo.
+echo Docs compiled successfully!
 exit /B 0
+
+:fail
+echo.
+echo Docs compilation failed!
+exit /B 1
+
+rem Synopsis: call :compile_docs {path} {name}
+rem Note:     omit the second parameter to prevent copying docs to /src/doxy-doc directory
+rem Example:  call :compile_docs .\dll\zenwinx zenwinx
+:compile_docs
+	pushd %1
+	rd /s /q doxy-doc
+	lua %~dp0\tools\set-doxyfile-project-number.lua Doxyfile %ULTRADFGVER% || goto compilation_failed
+	doxygen || goto compilation_failed
+	copy /Y .\rsc\*.* .\doxy-doc\html\
+	if "%2" neq "" (
+		xcopy /I /Y /Q /S .\doxy-doc\html %~dp0\doxy-doc\%2\html || goto compilation_failed
+	)
+	:compilation_succeeded
+	popd
+	exit /B 0
+	:compilation_failed
+	popd
+	exit /B 1
+goto :EOF
