@@ -336,14 +336,12 @@ Var AtLeastXP
   ${DisableX64FSRedirection}
   StrCpy $INSTDIR "$WINDIR\UltraDefrag"
   
-!ifndef MICRO_EDITION
   DetailPrint "Remove shortcuts..."
   SetShellVarContext all
   RMDir /r "$SMPROGRAMS\UltraDefrag"
   Delete "$SMPROGRAMS\UltraDefrag.lnk"
   Delete "$DESKTOP\UltraDefrag.lnk"
   Delete "$QUICKLAUNCH\UltraDefrag.lnk"
-!endif
 
   DetailPrint "Deregister boot time defragmenter..."
   ${Unless} ${Silent}
@@ -364,21 +362,16 @@ Var AtLeastXP
   Delete "$SYSDIR\ud-boot-time.cmd"
   Delete "$SYSDIR\ud-help.cmd"
   Delete "$SYSDIR\udctxhandler.cmd"
-
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\hibernate4win.exe"
   Delete "$SYSDIR\udefrag.exe"
-
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
-
-!ifndef MICRO_EDITION
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
   Delete "$SYSDIR\wgx.dll"
-!endif
 
   DetailPrint "Cleanup registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
@@ -388,11 +381,9 @@ Var AtLeastXP
   DeleteRegKey HKCR "Folder\shell\udefrag"
   DeleteRegKey HKCR "*\shell\udefrag"
 
-!ifndef MICRO_EDITION
   DetailPrint "Deregister .luar file extension..."
   DeleteRegKey HKCR "LuaReport"
   DeleteRegKey HKCR ".luar"
-!endif
   ${EnableX64FSRedirection}
 
 !macroend
