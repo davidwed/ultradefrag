@@ -12,7 +12,7 @@ if %UD_BLD_FLG_DIPLAY_HELP% equ 1 (
 )
 
 :: delete all previously compiled files
-call cleanup.cmd %*
+call :cleanup
 if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 exit /B 0
 
 :: set environment
@@ -228,6 +228,25 @@ rem Installs the program.
 	echo Install success!
 	endlocal
 exit /B 0
+
+rem Cleans up sources directory
+rem by removing all intermediate files.
+:cleanup
+	echo Delete all intermediate files...
+	rd /s /q bin
+	rd /s /q lib
+	rd /s /q obj
+	rd /s /q doxy-doc
+	rd /s /q dll\wgx\doxy-doc
+	rd /s /q dll\udefrag\doxy-doc
+	rd /s /q dll\zenwinx\doxy-doc
+	rd /s /q ..\doc\html\handbook\doxy-doc
+	rd /s /q src_package
+	rd /s /q ..\src_package
+	rd /s /q pre-release
+	rd /s /q release
+	echo Done.
+goto :EOF
 
 rem Displays usage information.
 :usage

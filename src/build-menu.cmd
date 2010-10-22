@@ -60,7 +60,7 @@ goto :EOF
 
 :1
 title Clean Project Folder
-call cleanup.cmd --clean
+call build.cmd --clean
 goto finished
 
 :2
@@ -183,7 +183,7 @@ echo.
 copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 cd /d %UD_BLD_MENU_DIR%
-call cleanup.cmd --clean
+call build.cmd --clean
 goto finished
 
 :18
@@ -195,7 +195,7 @@ if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=beta
 call build-pre-release.cmd --no-ia64 --no-x86 --install --%UD_BLD_PRE_RELEASE_TYPE%
 echo.
 cd /d %UD_BLD_MENU_DIR%
-call cleanup.cmd --clean
+call build.cmd --clean
 goto finished
 
 :19
@@ -211,7 +211,7 @@ echo.
 copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 cd /d %UD_BLD_MENU_DIR%
-call cleanup.cmd --clean
+call build.cmd --clean
 goto finished
 
 :finished
