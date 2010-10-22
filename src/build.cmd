@@ -237,6 +237,7 @@ rem by removing all intermediate files.
 	rd /s /q lib
 	rd /s /q obj
 	rd /s /q doxy-doc
+	rd /s /q gui\doxy-doc
 	rd /s /q dll\wgx\doxy-doc
 	rd /s /q dll\udefrag\doxy-doc
 	rd /s /q dll\zenwinx\doxy-doc
