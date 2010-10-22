@@ -491,20 +491,20 @@ done:
  */
 void StartBootExecChangesTracking()
 {
-#ifndef UDEFRAG_PORTABLE
 	HANDLE h;
 	DWORD id;
-	
-	h = create_thread(BootExecTrackingProc,NULL,&id);
-	if(h == NULL){
-		WgxDbgPrintLastError("Cannot create thread for BootExecute registry value changes tracking");
-		boot_exec_tracking_stopped = 1;
+
+	if(portable_mode == 0){
+		h = create_thread(BootExecTrackingProc,NULL,&id);
+		if(h == NULL){
+			WgxDbgPrintLastError("Cannot create thread for BootExecute registry value changes tracking");
+			boot_exec_tracking_stopped = 1;
+		} else {
+			CloseHandle(h);
+		}
 	} else {
-		CloseHandle(h);
+		boot_exec_tracking_stopped = 1;
 	}
-#else
-	boot_exec_tracking_stopped = 1;
-#endif
 }
 
 /**

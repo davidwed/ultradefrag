@@ -151,23 +151,23 @@ int CreateToolbar(void)
 	SendMessage(hToolbar,TB_SETHOTIMAGELIST,0,(LPARAM)hToolbarImgListH);
 	
 	/* set state of checks */
-#ifndef UDEFRAG_PORTABLE
-	if(IsBootTimeDefragEnabled()){
-		boot_time_defrag_enabled = 1;
-		SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(TRUE,0));
+	if(portable_mode == 0){
+		if(IsBootTimeDefragEnabled()){
+			boot_time_defrag_enabled = 1;
+			SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(TRUE,0));
+		} else {
+			SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(FALSE,0));
+		}
 	} else {
-		SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(FALSE,0));
+		SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(FALSE,0));
+		SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_CFG_BOOT_SCRIPT,MAKELONG(FALSE,0));
+		
+		/* TODO: remove the following lines according to the state of
+		   defragmentation and optimization implementation. */
+	
+		SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,  MAKELONG(FALSE,0));
+		SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE,MAKELONG(FALSE,0));
 	}
-#else
-	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(FALSE,0));
-	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_CFG_BOOT_SCRIPT,MAKELONG(FALSE,0));
-    
-    /* TODO: remove the following lines according to the state of
-       defragmentation and optimization implementation. */
-
-	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,  MAKELONG(FALSE,0));
-	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE,MAKELONG(FALSE,0));
-#endif
 
 	/* initialize tooltips */
 	hTooltip = (HWND)SendMessage(hToolbar,TB_GETTOOLTIPS,0,0);

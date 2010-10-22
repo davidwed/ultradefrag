@@ -44,9 +44,49 @@ extern int init_maximized_window;
 extern int allow_map_redraw;
 extern int lang_ini_tracking_stopped;
 
+/* nonzero value indicates that we are in portable mode */
+int portable_mode = 0;
+
 /* forward declarations */
 static void UpdateWebStatistics(void);
 LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
+
+/**
+ * @brief Defines whether GUI is a part of
+ * the portable package or regular installation.
+ * @return Nonzero value indicates that it is
+ * most likely a part of the portable package.
+ * @todo Decision depends on executable path,
+ * which should be reconsidered when installation
+ * path will become adjustable.
+ */
+static int IsPortable(void)
+{
+	char cd[MAX_PATH];
+	char windir[MAX_PATH];
+	char path[MAX_PATH];
+	
+	if(!GetCurrentDirectory(MAX_PATH,cd)){
+		WgxDbgPrintLastError("IsPortable: cannot get current directory");
+		return 1;
+	}
+	
+	if(!GetWindowsDirectory(windir,MAX_PATH)){
+		WgxDbgPrintLastError("IsPortable: cannot get windows directory");
+		return 1;
+	}
+	
+	_snprintf(path,MAX_PATH,"%s\\UltraDefrag",windir);
+	path[MAX_PATH - 1] = 0;
+	
+	if(_stricmp(path,cd) == 0){
+		WgxDbgPrint("The program is installed to %s, so it isn't portable\n",path);
+		return 0;
+	}
+	
+	WgxDbgPrint("The program is not installed to %s, so it is portable\n",path);
+	return 1;
+}
 
 /**
  * @brief Registers main window class.
@@ -179,7 +219,7 @@ void ResizeMainWindow(int force)
  */
 int CreateMainWindow(int nShowCmd)
 {
-	char *caption = MAIN_CAPTION;
+	char *caption;
 	HACCEL hAccelTable;
 	MSG msg;
 	udefrag_progress_info pi;
@@ -187,7 +227,12 @@ int CreateMainWindow(int nShowCmd)
 	/* register class */
 	if(RegisterMainWindowClass() < 0)
 		return (-1);
-	
+
+	if(portable_mode)
+		caption = VERSIONINTITLE_PORTABLE;
+	else
+		caption = VERSIONINTITLE;
+
 	/* create main window */
 	InitMainWindowCoordinates();
 	hWindow = CreateWindowEx(
@@ -430,11 +475,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			}
 			return 0;
 		case IDM_CFG_GUI_SETTINGS:
-			#ifndef UDEFRAG_PORTABLE
-			(void)WgxShellExecuteW(hWindow,L"Edit",L".\\options\\guiopts.lua",NULL,NULL,SW_SHOW);
-			#else
-			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\guiopts.lua",NULL,SW_SHOW);
-			#endif
+			if(portable_mode)
+				WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\guiopts.lua",NULL,SW_SHOW);
+			else
+				WgxShellExecuteW(hWindow,L"Edit",L".\\options\\guiopts.lua",NULL,NULL,SW_SHOW);
 			return 0;
 		case IDM_CFG_BOOT_ENABLE:
 			if(!GetWindowsDirectoryW(path,MAX_PATH)){
@@ -467,11 +511,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			}
 			return 0;
 		case IDM_CFG_REPORTS:
-			#ifndef UDEFRAG_PORTABLE
-			(void)WgxShellExecuteW(hWindow,L"Edit",L".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
-			#else
-			(void)WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\udreportopts.lua",NULL,SW_SHOW);
-			#endif
+			if(portable_mode)
+				WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\udreportopts.lua",NULL,SW_SHOW);
+			else
+				WgxShellExecuteW(hWindow,L"Edit",L".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
 			return 0;
 		/* Help menu handlers */
 		case IDM_CONTENTS:
@@ -584,6 +627,9 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	int result;
 	
 	hInstance = GetModuleHandle(NULL);
+	
+	/* define whether we are in portable mode or not */
+	portable_mode = IsPortable();
 
 	/* get preferences */
 	GetPrefs();

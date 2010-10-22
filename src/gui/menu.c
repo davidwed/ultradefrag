@@ -120,29 +120,29 @@ int CreateMainMenu(void)
 			MF_BYCOMMAND | MF_UNCHECKED);
 	}
 	
-#ifndef UDEFRAG_PORTABLE
-	if(IsBootTimeDefragEnabled()){
-		boot_time_defrag_enabled = 1;
-		CheckMenuItem(hMainMenu,
-			IDM_CFG_BOOT_ENABLE,
-			MF_BYCOMMAND | MF_CHECKED);
+	if(portable_mode == 0){
+		if(IsBootTimeDefragEnabled()){
+			boot_time_defrag_enabled = 1;
+			CheckMenuItem(hMainMenu,
+				IDM_CFG_BOOT_ENABLE,
+				MF_BYCOMMAND | MF_CHECKED);
+		}
+	} else {
+		EnableMenuItem(hMainMenu,IDM_CFG_BOOT_ENABLE,MF_BYCOMMAND | MF_GRAYED);
+		
+		/* TODO: uncomment the following lines according to the state of
+		   defragmentation and optimization implementation.
+	
+		EnableMenuItem(hMainMenu,IDM_CFG_BOOT_SCRIPT,MF_BYCOMMAND | MF_GRAYED);
+		EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);
+		*/
+		
+		/* TODO: remove the following lines according to the state of
+		   defragmentation and optimization implementation. */
+	
+		EnableMenuItem(hMainMenu,IDM_DEFRAG,   MF_BYCOMMAND | MF_GRAYED);
+		EnableMenuItem(hMainMenu,IDM_OPTIMIZE, MF_BYCOMMAND | MF_GRAYED);
 	}
-#else
-	EnableMenuItem(hMainMenu,IDM_CFG_BOOT_ENABLE,MF_BYCOMMAND | MF_GRAYED);
-    
-    /* TODO: uncomment the following lines according to the state of
-       defragmentation and optimization implementation.
-
-    EnableMenuItem(hMainMenu,IDM_CFG_BOOT_SCRIPT,MF_BYCOMMAND | MF_GRAYED);
-	EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);
-    */
-    
-    /* TODO: remove the following lines according to the state of
-       defragmentation and optimization implementation. */
-
-    EnableMenuItem(hMainMenu,IDM_DEFRAG,   MF_BYCOMMAND | MF_GRAYED);
-	EnableMenuItem(hMainMenu,IDM_OPTIMIZE, MF_BYCOMMAND | MF_GRAYED);
-#endif
 
 	if(hibernate_instead_of_shutdown)
 		s = WgxGetResourceString(i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");

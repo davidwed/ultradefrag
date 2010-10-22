@@ -75,12 +75,6 @@
 
 #include "resource.h"
 
-#ifndef UDEFRAG_PORTABLE
-#define MAIN_CAPTION VERSIONINTITLE
-#else
-#define MAIN_CAPTION VERSIONINTITLE_PORTABLE
-#endif
-
 /* default GUI preferences */
 #define DEFAULT_MAP_BLOCK_SIZE  4
 #define DEFAULT_GRID_LINE_WIDTH 1
@@ -222,6 +216,7 @@ extern int boot_time_defrag_enabled;
 extern HANDLE hLangPackEvent;
 extern HANDLE hLangMenuEvent;
 extern int use_custom_font_in_dialogs;
+extern int portable_mode;
 
 /* common preferences */
 extern int hibernate_instead_of_shutdown;

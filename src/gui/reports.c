@@ -31,25 +31,24 @@
  */
 static void ShowSingleReport(volume_processing_job *job)
 {
-#ifndef UDEFRAG_PORTABLE
 	short l_path[] = L"C:\\fraglist.luar";
-#else
 	char path[] = "C:\\fraglist.luar";
 	char cmd[MAX_PATH];
 	char buffer[MAX_PATH + 64];
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
-#endif
 
 	if(job == NULL) return;
 
 	if(job->job_type == NEVER_EXECUTED_JOB)
 		return; /* the job is never launched yet */
 
-#ifndef UDEFRAG_PORTABLE
-	l_path[0] = (short)job->volume_letter;
-	(void)WgxShellExecuteW(hWindow,L"view",l_path,NULL,NULL,SW_SHOW);
-#else
+	if(portable_mode == 0){
+		l_path[0] = (short)job->volume_letter;
+		(void)WgxShellExecuteW(hWindow,L"view",l_path,NULL,NULL,SW_SHOW);
+		return;
+	}
+
 	path[0] = job->volume_letter;
 	(void)strcpy(cmd,".\\lua5.1a_gui.exe");
 	(void)strcpy(buffer,cmd);
@@ -71,7 +70,6 @@ static void ShowSingleReport(volume_processing_job *job)
 	}
 	CloseHandle(pi.hProcess);
 	CloseHandle(pi.hThread);
-#endif
 }
 
 /**
