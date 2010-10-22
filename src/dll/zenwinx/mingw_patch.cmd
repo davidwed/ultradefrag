@@ -1,7 +1,7 @@
 @echo off
 
-echo This script will replace some libraries in your MinGW installation
-echo with more adequate versions.
+echo This script will replace the ntdll.a library
+echo in MinGW installation with a more adequate version.
 echo Usage: mingw_patch.cmd {path to mingw installation}
 echo.
 
@@ -16,19 +16,19 @@ pushd %~dp0
 if not exist %1\lib\libntdll.a.orig (
 	move %1\lib\libntdll.a %1\lib\libntdll.a.orig
 )
-if not exist %1\lib\libntoskrnl.a.orig (
-	move %1\lib\libntoskrnl.a %1\lib\libntoskrnl.a.orig
-)
+::if not exist %1\lib\libntoskrnl.a.orig (
+::	move %1\lib\libntoskrnl.a %1\lib\libntoskrnl.a.orig
+::)
 
 :: generate more adequate versions
 %1\bin\dlltool -k --output-lib libntdll.a --def ntdll.def
 if %errorlevel% neq 0 goto fail
-%1\bin\dlltool -k --output-lib libntoskrnl.a --def ntoskrnl.def
-if %errorlevel% neq 0 goto fail
+::%1\bin\dlltool -k --output-lib libntoskrnl.a --def ntoskrnl.def
+::if %errorlevel% neq 0 goto fail
 
 :: replace files
 move /Y libntdll.a %1\lib\libntdll.a
-move /Y libntoskrnl.a %1\lib\libntoskrnl.a
+::move /Y libntoskrnl.a %1\lib\libntoskrnl.a
 
 echo MinGW patched successfully!
 popd
