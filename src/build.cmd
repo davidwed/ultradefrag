@@ -87,7 +87,7 @@ rem Sets environment for the build process.
 	echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\include\ultradfgver.h
 	echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
 
-	:: force zenwinx version to be the same as ultradefrag version
+	rem force zenwinx version to be the same as ultradefrag version
 	echo #define ZENWINX_VERSION %VERSION% > .\dll\zenwinx\zenwinxver.h
 	echo #define ZENWINX_VERSION2 %VERSION2% >> .\dll\zenwinx\zenwinxver.h
 goto :EOF
