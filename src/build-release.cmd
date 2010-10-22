@@ -3,6 +3,7 @@
 rem This script was made for myself (Dmitri Arkhangelski)
 rem to simplify binary packages uploading.
 
+rd /s /q release
 mkdir release
 
 call build-src-package.cmd || goto build_failed

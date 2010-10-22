@@ -267,8 +267,10 @@ rem by removing all intermediate files.
 	rd /s /q ..\doc\html\handbook\doxy-doc
 	rd /s /q src_package
 	rd /s /q ..\src_package
-	rd /s /q pre-release
-	rd /s /q release
+    if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 (
+        rd /s /q pre-release
+        rd /s /q release
+    )
 	echo Done.
 goto :EOF
 
