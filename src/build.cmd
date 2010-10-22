@@ -287,7 +287,7 @@ rem Displays usage information.
 	echo --use-mingw     (default)
 	echo --use-winddk    (we use it for official releases)
 	echo --use-winsdk
-	echo --use-msvc      (obsolete)
+	echo --use-msvc      (the fastest compilation)
 	echo --use-pellesc   (experimental, produces wrong code)
 	echo --use-mingw-x64 (experimental, produces wrong x64 code)
 	echo.
@@ -298,4 +298,10 @@ rem Displays usage information.
 	echo.
 	echo Without parameters the build command uses MinGW to build
 	echo a 32-bit regular installer.
+	echo.
+	echo * To use MinGW run mingw_patch.cmd before:
+	echo dll\zenwinx\mingw_patch.cmd {path to mingw installation}
+	echo.
+	echo * To use MS Visual Studio 6.0 run msvc_patch.cmd before:
+	echo dll\zenwinx\msvc_patch.cmd {path to msvs6 installation}
 goto :EOF

@@ -104,7 +104,7 @@ wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 		s1 = cp;
 		s2 = (wchar_t *)wcs2;
 		
-		while(*s1 && *s2 && !( towlower((int)(*s1)) - towlower((int)(*s2)) )){ s1++, s2++; }
+		while(*s1 && *s2 && !( towlower((wint_t)(*s1)) - towlower((wint_t)(*s2)) )){ s1++, s2++; }
 		if(!*s2) return cp;
 		cp++;
 	}

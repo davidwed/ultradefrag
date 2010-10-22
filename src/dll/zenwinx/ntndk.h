@@ -88,7 +88,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-#include <ctype.h> /* for toupper() on mingw */
+#include <ctype.h>
 
 #if defined(__POCC__)
 #pragma ftol(inlined)

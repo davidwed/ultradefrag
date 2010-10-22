@@ -31,6 +31,9 @@
 #ifndef SetWindowLongPtr
 #define SetWindowLongPtr SetWindowLong
 #endif
+#ifndef SetWindowLongPtrA
+#define SetWindowLongPtrA SetWindowLongA
+#endif
 #ifndef SetWindowLongPtrW
 #define SetWindowLongPtrW SetWindowLongW
 #endif
@@ -38,6 +41,12 @@
 #ifndef GWLP_WNDPROC
 #define GWLP_WNDPROC GWL_WNDPROC
 #endif
+#endif
+
+#ifdef USE_MSVC
+#define DWORD_PTR DWORD
+typedef int intptr_t;
+typedef unsigned uintptr_t;
 #endif
 
 #ifndef LR_VGACOLOR
