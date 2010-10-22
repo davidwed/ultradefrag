@@ -100,17 +100,17 @@ goto finished
 
 :9
 title Build Portable ......... using WinDDK, no IA64
-call build-portable.cmd --use-winddk --no-ia64
+call build.cmd --portable --use-winddk --no-ia64
 goto finished
 
 :10
 title Build Micro ............ using WinDDK, no IA64
-call build-micro.cmd --use-winddk --no-ia64
+call build.cmd --micro --use-winddk --no-ia64
 goto finished
 
 :11
 title Build Micro Portable ... using WinDDK, no IA64
-call build-micro-portable.cmd --use-winddk --no-ia64
+call build.cmd --micro --portable --use-winddk --no-ia64
 goto finished
 
 :12
@@ -141,7 +141,7 @@ set /p UD_BLD_MENU_SWITCH="Please enter Switches: "
 
 title Build Portable ......... %UD_BLD_MENU_SWITCH%
 echo.
-call build-portable.cmd %UD_BLD_MENU_SWITCH%
+call build.cmd --portable %UD_BLD_MENU_SWITCH%
 goto finished
 
 :15
@@ -154,7 +154,7 @@ set /p UD_BLD_MENU_SWITCH="Please enter Switches: "
 
 title Build Micro ............ %UD_BLD_MENU_SWITCH%
 echo.
-call build-micro.cmd %UD_BLD_MENU_SWITCH%
+call build.cmd --micro %UD_BLD_MENU_SWITCH%
 goto finished
 
 :16
@@ -167,7 +167,7 @@ set /p UD_BLD_MENU_SWITCH="Please enter Switches: "
 
 title Build Micro Portable ... %UD_BLD_MENU_SWITCH%
 echo.
-call build-micro-portable.cmd %UD_BLD_MENU_SWITCH%
+call build.cmd --micro --portable %UD_BLD_MENU_SWITCH%
 goto finished
 
 :17

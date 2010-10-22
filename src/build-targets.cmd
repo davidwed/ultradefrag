@@ -85,6 +85,7 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 :ddk_build
 
 	set BUILD_ENV=winddk
+	set OLD_PATH=%path%
 
 	if %UD_BLD_FLG_BUILD_X86% neq 0 (
 		echo --------- Target is x86 ---------
@@ -98,7 +99,7 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 		call :build_modules X86 || exit /B 1
 	)
     
-    set Path=%OLD_PATH%
+    set path=%OLD_PATH%
 	
 	if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
 		echo --------- Target is x64 ---------
@@ -114,7 +115,7 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 		call :build_modules amd64 || exit /B 1
 	)
     
-    set Path=%OLD_PATH%
+    set path=%OLD_PATH%
 	
 	if %UD_BLD_FLG_BUILD_IA64% neq 0 (
 		echo --------- Target is ia64 ---------
@@ -127,7 +128,8 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 		call :build_modules ia64 || exit /B 1
 	)
     
-    set Path=%OLD_PATH%
+    set path=%OLD_PATH%
+	set OLD_PATH=
 	
 exit /B 0
 
@@ -135,6 +137,7 @@ exit /B 0
 :winsdk_build
 
 	set BUILD_ENV=winsdk
+	set OLD_PATH=%path%
 
 	if %UD_BLD_FLG_BUILD_X86% neq 0 (
 		echo --------- Target is x86 ---------
@@ -147,7 +150,7 @@ exit /B 0
 		call :build_modules X86 || exit /B 1
 	)
     
-    set Path=%OLD_PATH%
+    set path=%OLD_PATH%
 
 	if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
 		echo --------- Target is x64 ---------
@@ -160,7 +163,7 @@ exit /B 0
 		call :build_modules amd64 || exit /B 1
 	)
     
-    set Path=%OLD_PATH%
+    set path=%OLD_PATH%
 
 	if %UD_BLD_FLG_BUILD_IA64% neq 0 (
 		echo --------- Target is ia64 ---------
@@ -174,7 +177,8 @@ exit /B 0
 		call :build_modules ia64 || exit /B 1
 	)
     
-    set Path=%OLD_PATH%
+    set path=%OLD_PATH%
+	set OLD_PATH=
 	
 exit /B 0
 
@@ -182,6 +186,7 @@ exit /B 0
 :pellesc_build
 
 	set BUILD_ENV=pellesc
+	set OLD_PATH=%path%
 
 	rem x64 and arm targets aren't supported yet
 	rem they require more investigation to be properly set
@@ -193,23 +198,31 @@ exit /B 0
 	set Path=%path%;%PELLESC_BASE%\Bin
 	set UDEFRAG_LIB_PATH=..\..\lib
 	call :build_modules X86 || exit /B 1
-	set Path=%OLD_PATH%
+
+	set path=%OLD_PATH%
+	set OLD_PATH=
 
 exit /B 0
 
 
 :msvc_build
 
+	set OLD_PATH=%path%
+
 	call "%MSVSBIN%\vcvars32.bat"
 	set BUILD_ENV=msvc
 	set UDEFRAG_LIB_PATH=..\..\lib
 	call :build_modules X86 || exit /B 1
-	set Path=%OLD_PATH%
+
+	set path=%OLD_PATH%
+	set OLD_PATH=
 
 exit /B 0
 
 
 :mingw_x64_build
+
+	set OLD_PATH=%path%
 
 	echo --------- Target is x64 ---------
 	set AMD64=1
@@ -217,18 +230,24 @@ exit /B 0
 	set BUILD_ENV=mingw_x64
 	set UDEFRAG_LIB_PATH=..\..\lib\amd64
 	call :build_modules amd64 || exit /B 1
-	set Path=%OLD_PATH%
+
+	set path=%OLD_PATH%
+	set OLD_PATH=
 
 exit /B 0
 
 
 :mingw_build
 
+	set OLD_PATH=%path%
+
 	set path=%MINGWBASE%\bin;%path%
 	set BUILD_ENV=mingw
 	set UDEFRAG_LIB_PATH=..\..\lib
 	call :build_modules X86 || exit /B 1
-	set Path=%OLD_PATH%
+
+	set path=%OLD_PATH%
+	set OLD_PATH=
 
 exit /B 0
 

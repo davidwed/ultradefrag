@@ -15,19 +15,19 @@ copy .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe .\release\
 copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\release\
 copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\release\
 
-call build-micro.cmd --use-winddk
+call build.cmd --micro --use-winddk
 if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-micro-edition-%ULTRADFGVER%.bin.i386.exe .\release\
 copy .\bin\amd64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.amd64.exe .\release\
 copy .\bin\ia64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.ia64.exe .\release\
 
-call build-portable.cmd --use-winddk
+call build.cmd --portable --use-winddk
 if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip .\release\
 copy .\bin\amd64\ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip .\release\
 copy .\bin\ia64\ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip .\release\
 
-call build-micro-portable.cmd --use-winddk
+call build.cmd --micro --portable --use-winddk
 if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip .\release\
 copy .\bin\amd64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip .\release\

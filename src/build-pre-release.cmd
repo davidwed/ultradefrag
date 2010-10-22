@@ -32,7 +32,11 @@ set UD_BLD_STAGE_EXT=zip
 set UD_BLD_STAGE_PKG=-portable
 
 :BuildPre
-call build%UD_BLD_STAGE_PKG%.cmd --use-winddk --pre-release %*
+if "%UD_BLD_STAGE_EXT%" equ "exe" (
+	call build.cmd --use-winddk --pre-release %*
+) else (
+	call build.cmd --portable --use-winddk --pre-release %*
+)
 if %errorlevel% neq 0 goto build_failed
 
 :CollectFiles

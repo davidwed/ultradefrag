@@ -2,6 +2,8 @@ HISTORY
 
   Version 5.0.0  2010-10-
   ------------------------------------------------------------------------------
+    alpha2:
+    - Developers: build scripts were highly optimized
     alpha1:
     - GUI was redesigned to be much more ergonomic (comfortable for daily use)
     - ability to change preferences without the need to restart GUI was added

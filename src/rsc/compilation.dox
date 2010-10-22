@@ -78,25 +78,19 @@
  *
  * @image html config.lua.png
  *
- * The screenshot above represents only the actual options which gives us the best 
+ * The screenshot above shows only the actual options which gives us the best 
  * compilation result. To configure all available options, including obsolete and
  * experimental, type:
  * @code lua configure.lua --all @endcode
- *
- * There are four different build commands:
- * - <b>build</b> for a full-featured installers
- * - <b>build-micro</b> for the Micro Edition installer
- * - <b>build-portable</b> for the UltraDefrag Portable package
- * - <b>build-micro-portable</b> for the Portable Micro Edition package
- *
- * There is a simple menu available too:
- * - <b>build-menu</b> allows selection of predefined build actions
  *
  * To build UltraDefrag type:
  * @code build @endcode
  *
  * To display list of available build options type:
  * @code build --help @endcode
+ *
+ * There is a simple menu available too:
+ * - <b>build-menu</b> allows selection of predefined build actions
  *
  * If you have any questions regarding details of the build process, just look at 
  * appropriate script contents. Sure you'll find an answer.
