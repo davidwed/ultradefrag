@@ -5,30 +5,24 @@ rem to simplify binary packages uploading.
 
 mkdir release
 
-call build-src-package.cmd
-if %errorlevel% neq 0 goto build_failed
+call build-src-package.cmd || goto build_failed
 copy .\src_package\ultradefrag-%ULTRADFGVER%.src.7z .\release\
 
-call build.cmd --use-winddk
-if %errorlevel% neq 0 goto build_failed
+call build.cmd --all --use-winddk || goto build_failed
+
+:: copy all packages to the release directory
 copy .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe .\release\
 copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\release\
 copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\release\
 
-call build.cmd --micro --use-winddk
-if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-micro-edition-%ULTRADFGVER%.bin.i386.exe .\release\
 copy .\bin\amd64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.amd64.exe .\release\
 copy .\bin\ia64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.ia64.exe .\release\
 
-call build.cmd --portable --use-winddk
-if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip .\release\
 copy .\bin\amd64\ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip .\release\
 copy .\bin\ia64\ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip .\release\
 
-call build.cmd --micro --portable --use-winddk
-if %errorlevel% neq 0 goto build_failed
 copy .\bin\ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip .\release\
 copy .\bin\amd64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip .\release\
 copy .\bin\ia64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip .\release\

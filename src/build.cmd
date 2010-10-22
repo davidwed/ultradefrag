@@ -31,16 +31,19 @@ if "%UD_MICRO_EDITION%" equ "" (
 echo Build installers and/or portable packages...
 if %UD_BLD_FLG_BUILD_X86% neq 0 (
 	call :build_installer              .\bin i386 || goto fail
+	call :build_micro_installer        .\bin i386 || goto fail
 	call :build_portable_package       .\bin i386 || goto fail
 	call :build_micro_portable_package .\bin i386 || goto fail
 )
 if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
 	call :build_installer              .\bin\amd64 amd64 || goto fail
+	call :build_micro_installer        .\bin\amd64 amd64 || goto fail
 	call :build_portable_package       .\bin\amd64 amd64 || goto fail
 	call :build_micro_portable_package .\bin\amd64 amd64 || goto fail
 )
 if %UD_BLD_FLG_BUILD_IA64% neq 0 (
 	call :build_installer              .\bin\ia64 ia64 || goto fail
+	call :build_micro_installer        .\bin\ia64 ia64 || goto fail
 	call :build_portable_package       .\bin\ia64 ia64 || goto fail
 	call :build_micro_portable_package .\bin\ia64 ia64 || goto fail
 )
@@ -80,6 +83,11 @@ rem Sets environment for the build process.
 	) else (
 		set UD_MICRO_EDITION=
 	)
+	
+	if %UD_BLD_FLG_BUILD_ALL% equ 1 (
+		set UDEFRAG_PORTABLE=
+		set UD_MICRO_EDITION=
+	)
 
 	echo #define VERSION %VERSION% > .\include\ultradfgver.h
 	echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
@@ -95,66 +103,49 @@ goto :EOF
 rem Synopsis: call :build_installer {path to binaries} {arch}
 rem Example:  call :build_installer .\bin\ia64 ia64
 :build_installer
-	if "%UDEFRAG_PORTABLE%" neq "" exit /B 0
+	if %UD_BLD_FLG_BUILD_ALL% neq 1 (
+		if "%UDEFRAG_PORTABLE%" neq "" exit /B 0
+		if "%UD_MICRO_EDITION%" neq "" exit /B 0
+	)
 
 	pushd %1
-	if "%UD_MICRO_EDITION%" equ "" (
-		rem build regular installer
-		copy /Y %~dp0\installer\UltraDefrag.nsi .\
-		copy /Y %~dp0\installer\lang.ini .\
-		copy /Y %~dp0\installer\lang-classical.ini .\
-		set NSI_FILE_NAME=UltraDefrag.nsi
-	) else (
-		rem build micro edition installer
-		copy /Y %~dp0\installer\MicroEdition.nsi .\
-		set NSI_FILE_NAME=MicroEdition.nsi
-	)
-	"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 %NSI_FILE_NAME%
+	copy /Y %~dp0\installer\UltraDefrag.nsi .\
+	copy /Y %~dp0\installer\lang.ini .\
+	copy /Y %~dp0\installer\lang-classical.ini .\
+	"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 UltraDefrag.nsi
 	if %errorlevel% neq 0 (
-		set NSI_FILE_NAME=
 		popd
 		exit /B 1
 	)
-	set NSI_FILE_NAME=
 	popd
 exit /B 0
 
-rem Synopsis: call :build_micro_portable_package {path to binaries} {arch}
-rem Example:  call :build_micro_portable_package .\bin\ia64 ia64
-:build_micro_portable_package
-	if "%UDEFRAG_PORTABLE%" equ "" exit /B 0
-	if "%UD_MICRO_EDITION%" equ "" exit /B 0
+rem Synopsis: call :build_micro_installer {path to binaries} {arch}
+rem Example:  call :build_micro_installer .\bin\ia64 ia64
+:build_micro_installer
+	if %UD_BLD_FLG_BUILD_ALL% neq 1 (
+		if "%UDEFRAG_PORTABLE%" neq "" exit /B 0
+		if "%UD_MICRO_EDITION%" equ "" exit /B 0
+	)
 
 	pushd %1
-	set PORTABLE_DIR=ultradefrag-micro-portable-%ULTRADFGVER%.%2
-	mkdir %PORTABLE_DIR%
-	copy /Y %~dp0\CREDITS.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\HISTORY.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\LICENSE.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\README.TXT  %PORTABLE_DIR%\
-	copy /Y hibernate.exe     %PORTABLE_DIR%\hibernate4win.exe
-	copy /Y udefrag.dll       %PORTABLE_DIR%\
-	copy /Y udefrag.exe       %PORTABLE_DIR%\
-	copy /Y zenwinx.dll       %PORTABLE_DIR%\
-	rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
-	"%SEVENZIP_PATH%\7z.exe" a -r -mx9 -tzip ultradefrag-micro-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
+	copy /Y %~dp0\installer\MicroEdition.nsi .\
+	"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 MicroEdition.nsi
 	if %errorlevel% neq 0 (
-		rd /s /q %PORTABLE_DIR%
-		set PORTABLE_DIR=
 		popd
 		exit /B 1
 	)
-	rd /s /q %PORTABLE_DIR%
-	set PORTABLE_DIR=
 	popd
 exit /B 0
 
 rem Synopsis: call :build_portable_package {path to binaries} {arch}
 rem Example:  call :build_portable_package .\bin\ia64 ia64
 :build_portable_package
-	if "%UDEFRAG_PORTABLE%" equ "" exit /B 0
-	if "%UD_MICRO_EDITION%" neq "" exit /B 0
-
+	if %UD_BLD_FLG_BUILD_ALL% neq 1 (
+		if "%UDEFRAG_PORTABLE%" equ "" exit /B 0
+		if "%UD_MICRO_EDITION%" neq "" exit /B 0
+	)
+	
 	pushd %1
 	set PORTABLE_DIR=ultradefrag-portable-%ULTRADFGVER%.%2
 	mkdir %PORTABLE_DIR%
@@ -184,6 +175,38 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
 	copy /Y %~dp0\gui\i18n\*.template      %PORTABLE_DIR%\i18n\
 	rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
 	"%SEVENZIP_PATH%\7z.exe" a -r -mx9 -tzip ultradefrag-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
+	if %errorlevel% neq 0 (
+		rd /s /q %PORTABLE_DIR%
+		set PORTABLE_DIR=
+		popd
+		exit /B 1
+	)
+	rd /s /q %PORTABLE_DIR%
+	set PORTABLE_DIR=
+	popd
+exit /B 0
+
+rem Synopsis: call :build_micro_portable_package {path to binaries} {arch}
+rem Example:  call :build_micro_portable_package .\bin\ia64 ia64
+:build_micro_portable_package
+	if %UD_BLD_FLG_BUILD_ALL% neq 1 (
+		if "%UDEFRAG_PORTABLE%" equ "" exit /B 0
+		if "%UD_MICRO_EDITION%" equ "" exit /B 0
+	)
+	
+	pushd %1
+	set PORTABLE_DIR=ultradefrag-micro-portable-%ULTRADFGVER%.%2
+	mkdir %PORTABLE_DIR%
+	copy /Y %~dp0\CREDITS.TXT %PORTABLE_DIR%\
+	copy /Y %~dp0\HISTORY.TXT %PORTABLE_DIR%\
+	copy /Y %~dp0\LICENSE.TXT %PORTABLE_DIR%\
+	copy /Y %~dp0\README.TXT  %PORTABLE_DIR%\
+	copy /Y hibernate.exe     %PORTABLE_DIR%\hibernate4win.exe
+	copy /Y udefrag.dll       %PORTABLE_DIR%\
+	copy /Y udefrag.exe       %PORTABLE_DIR%\
+	copy /Y zenwinx.dll       %PORTABLE_DIR%\
+	rem zip -r -m -9 -X ultradefrag-micro-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
+	"%SEVENZIP_PATH%\7z.exe" a -r -mx9 -tzip ultradefrag-micro-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
 	if %errorlevel% neq 0 (
 		rd /s /q %PORTABLE_DIR%
 		set PORTABLE_DIR=
@@ -256,6 +279,7 @@ rem Displays usage information.
 	echo Common options:
 	echo --micro         build the micro edition
 	echo --portable      build portable packages instead of installers
+	echo --all           build all packages: regular, micro and portable
 	echo --install       perform silent installation after the build
 	echo --clean         perform full cleanup instead of the build
 	echo.
