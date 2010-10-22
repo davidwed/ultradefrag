@@ -267,9 +267,9 @@ rem Displays usage information.
 	echo --use-mingw-x64 (experimental, produces wrong x64 code)
 	echo.
 	echo Target architecture:
-	echo --no-x86        (skip build of 32-bit binaries)
-	echo --no-amd64      (skip build of x64 binaries)
-	echo --no-ia64       (skip build of IA-64 binaries)
+	echo --no-x86        skip build of 32-bit binaries
+	echo --no-amd64      skip build of x64 binaries
+	echo --no-ia64       skip build of IA-64 binaries
 	echo.
 	echo Without parameters the build command uses MinGW to build
 	echo a 32-bit regular installer.
