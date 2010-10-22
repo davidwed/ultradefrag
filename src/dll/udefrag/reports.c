@@ -32,8 +32,8 @@
 #define RSB_SIZE (512 * 1024)
 
 /*
-* Micro Edition generates text reports only,
-* all other editions - both reports.
+* All UltraDefrag editions produce
+* both Lua and text reports by default.
 */
 
 static int save_text_report(udefrag_job_parameters *jp)
@@ -117,10 +117,6 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	char *comment;
 	int i, length, offset;
 	
-#ifdef MICRO_EDITION
-	return 0;
-#endif
-
 	path[4] = jp->volume_letter;
 	f = winx_fbopen(path,"w",RSB_SIZE);
 	if(f == NULL){
