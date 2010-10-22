@@ -87,6 +87,7 @@ if "%1" == "--rc"           set UD_BLD_FLG_BUILD_STAGE=3
 shift
 if not "%1" == "" goto :ParseArgs
 
+:: skip next section if not debugging command line parser
 if %UD_BLD_FLG_PARSER_DEBUG% == 0 goto :EOF
 
 :: display variables
