@@ -32,16 +32,13 @@ set UD_BLD_STAGE_EXT=zip
 set UD_BLD_STAGE_PKG=-portable
 
 :BuildPre
-if "%UD_BLD_STAGE_EXT%" equ "exe" (
-	call build.cmd --use-winddk --pre-release %*
-) else (
-	call build.cmd --portable --use-winddk --pre-release %*
-)
+call build.cmd -%UD_BLD_STAGE_PKG% --use-winddk --pre-release %*
 if %errorlevel% neq 0 goto build_failed
 
 :CollectFiles
 cd /D %script_dir%
 
+rd /s /q pre-release
 mkdir pre-release
 echo.
 copy /b /y /v .\bin\ultradefrag-*.bin.i386.*        .\pre-release\ultradefrag%UD_BLD_STAGE_PKG%-%ULTRADFGVER%-%UD_BLD_PRE_RELEASE_VER%.bin.i386.%UD_BLD_STAGE_EXT%
