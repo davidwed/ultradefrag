@@ -1,6 +1,6 @@
 #!/usr/local/bin/lua
 --[[
-  mkmod.lua - produce makefiles for various compilers from one *.build file.
+  mkmod.lua - produces makefiles for various compilers from a single *.build file.
   Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
 
   This program is free software; you can redistribute it and/or modify
@@ -16,25 +16,23 @@
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-  SYNOPSIS:    lua mkmod.lua <filename>
-  If processing was sucessful, binary modules will be placed in ../../bin directory;
-  *.lib or *.a files - in  ../../lib directory.
-  NOTE: BUILD_ENV environment variable must be set before this script
-  execution in one of three values: winddk, msvc, mingw.
 --]]
 
--- NOTES for C programmers: 
---   1. the first element of each array has index 1.
---   2. only nil and false values are false, all other including 0 are true
+--[[
+  Synopsis: lua mkmod.lua <filename>
+	If processing completes successfully, binary modules are placed in ../../bin directory;
+	*.lib or *.a files - in  ../../lib directory.
+  Note: BUILD_ENV environment variable must be set before.
 
--- Due to OS version independent driver code the nt4 specific issues were removed
--- in 2.1.0 version.
+  Notes for C programmers: 
+	1. the first element of each array has index 1.
+	2. only nil and false values are false, all other including 0 are true
 
--- When you are using Windows SDK don't forget about the following:
--- ntdll.lib are missing - copy them from DDK
--- SSE2 processor is required to run produced binaries
--- kernel mode driver cannot be compiled
+  When you use Windows SDK don't forget about the following:
+	* ntdll.lib are missing - copy them from DDK
+	* SSE2 processor is required to run produced binaries
+	* kernel mode driver cannot be compiled
+--]]
 
 name, deffile, baseaddr, nativedll, umentry = "", "", "", 0, ""
 src, rc, libs, adlibs = {}, {}, {}, {}
