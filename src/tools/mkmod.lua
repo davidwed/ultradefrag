@@ -41,11 +41,9 @@ input_filename = ""
 target_type, target_ext, target_name = "", "", ""
 arch = ""
 
--- Note: Only DDK compiler can compile native executable 
+-- FIXME: Only DDK compiler can compile native executable 
 -- with static zenwinx and udefrag libraries.
 static_lib = 0
-
-micro_edition = 0
 
 ddk_cmd = "build.exe"
 msvc_cmd = "nmake.exe /NOLOGO /A /f"
@@ -122,22 +120,7 @@ function produce_ddk_makefile()
 		f:write("DLLDEF=", deffile, "\n\n")
 	end
 
-	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
-		if micro_edition == 0 then
-			f:write("USER_C_FLAGS=/DUSE_WINDDK /DUDEFRAG_PORTABLE\n\n")
-			f:write("RCOPTIONS=/d UDEFRAG_PORTABLE\n\n")
-		else
-			f:write("USER_C_FLAGS=/DUSE_WINDDK /DUDEFRAG_PORTABLE /DMICRO_EDITION\n\n")
-			f:write("RCOPTIONS=/d MICRO_EDITION /d UDEFRAG_PORTABLE\n\n")
-		end
-	else
-		if micro_edition == 0 then
-			f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
-		else
-			f:write("USER_C_FLAGS=/DUSE_WINDDK /DMICRO_EDITION\n\n")
-			f:write("RCOPTIONS=/d MICRO_EDITION\n\n")
-		end
-	end
+	f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
 	
 	if static_lib == 1 then
 		f:write("USER_C_FLAGS=\$(USER_C_FLAGS) /DSTATIC_LIB\n\n")
@@ -243,14 +226,6 @@ function produce_msvc_makefile()
 	else error("Unknown target type: " .. target_type .. "!")
 	end
 	
-	if micro_edition == 1 then
-		cl_flags = cl_flags .. "/D \"MICRO_EDITION\" "
-	end
-
-	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
-		cl_flags = cl_flags .. "/D \"UDEFRAG_PORTABLE\" "
-	end
-	
 	-- the following check eliminates need of msvcr90.dll when compiles with SDK
 	if nativedll == 0 and os.getenv("BUILD_ENV") ~= "winsdk" then
 		cl_flags = cl_flags .. "/MD "
@@ -268,12 +243,6 @@ function produce_msvc_makefile()
 	f:write(cl_flags, " /c \n")
 
 	rsc_flags = "RSC_PROJ=/l 0x409 /d \"NDEBUG\" "
-	if micro_edition == 1 then
-		rsc_flags = rsc_flags .. "/d \"MICRO_EDITION\" "
-	end
-	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
-		rsc_flags = rsc_flags .. "/d \"UDEFRAG_PORTABLE\" "
-	end
 	f:write(rsc_flags, " \n")
 	
 	link_flags = "LINK32_FLAGS="
@@ -403,24 +372,12 @@ function produce_mingw_makefile()
 	f:write("TARGET = ", target_name, "\n")
 	
 	f:write("CFLAGS = -pipe  -Wall -g0 -O2")
-	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
-		f:write(" -DUDEFRAG_PORTABLE")
-	end
-	if micro_edition ~= 0 then
-		f:write(" -DMICRO_EDITION")
-	end
 --	if static_lib == 1 then
 --		f:write(" -DSTATIC_LIB")
 --	end
 	f:write("\n")
 
 	f:write("RCFLAGS = ")
-	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
-		f:write("-DUDEFRAG_PORTABLE ")
-	end
-	if micro_edition ~= 0 then
-		f:write("-DMICRO_EDITION ")
-	end
 	f:write("\n")
 	
 	f:write("C_INCLUDE_DIRS = \n")
@@ -534,23 +491,8 @@ function produce_mingw_x64_makefile()
 	
 	f:write("TARGET = ", target_name, "\n")
 	
-	if os.getenv("UDEFRAG_PORTABLE") ~= nil then
-		if micro_edition == 0 then
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64 -DUDEFRAG_PORTABLE\n")
-			f:write("RCFLAGS = -DUDEFRAG_PORTABLE \n")
-		else
-			f:write("CFLAGS = -pipe  -Wall -g0 -DMICRO_EDITION -m64 -DUDEFRAG_PORTABLE\n")
-			f:write("RCFLAGS = -DMICRO_EDITION -DUDEFRAG_PORTABLE \n")
-		end
-	else
-		if micro_edition == 0 then
-			f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64\n")
-			f:write("RCFLAGS = \n")
-		else
-			f:write("CFLAGS = -pipe  -Wall -g0 -DMICRO_EDITION -m64\n")
-			f:write("RCFLAGS = -DMICRO_EDITION \n")
-		end
-	end
+	f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64\n")
+	f:write("RCFLAGS = \n")
 	
 	f:write("C_INCLUDE_DIRS = \n")
 	f:write("C_PREPROC = \n")
@@ -671,10 +613,6 @@ else
 	error("Unknown target type: " .. target_type .. "!")
 end
 target_name = name .. "." .. target_ext
-
-if os.getenv("UD_MICRO_EDITION") == "1" then
-	micro_edition = 1
-end
 
 if os.getenv("BUILD_ENV") == "winddk" then
 	if obsolete(input_filename,".\\sources") then
