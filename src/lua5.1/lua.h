@@ -12,10 +12,6 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-#if defined(__POCC__)
-#pragma ftol(inlined)
-#endif
-
 #include "luaconf.h"
 
 

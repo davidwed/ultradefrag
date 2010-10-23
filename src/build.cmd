@@ -290,7 +290,6 @@ rem Displays usage information.
 	echo --use-winddk    (we use it for official releases)
 	echo --use-winsdk
 	echo --use-msvc      (the fastest compilation)
-	echo --use-pellesc   (experimental, produces wrong code)
 	echo --use-mingw-x64 (experimental, produces wrong x64 code)
 	echo.
 	echo Target architecture:

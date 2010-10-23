@@ -24,10 +24,6 @@
 #ifndef _UDEFRAG_H_
 #define _UDEFRAG_H_
 
-#if defined(__POCC__)
-#pragma ftol(inlined)
-#endif
-
 /* debug print levels */
 #define DBG_NORMAL     0
 #define DBG_DETAILED   1

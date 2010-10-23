@@ -10,7 +10,6 @@ rem     --use-mingw (default)
 rem     --use-msvc
 rem     --use-winddk
 rem     --use-winsdk
-rem     --use-pellesc (experimental)
 rem     --use-mingw-x64 (experimental)
 rem
 rem Skip any processor architecture to reduce compile time
@@ -77,7 +76,6 @@ if %UD_BLD_FLG_USE_COMPILER% equ 0 (
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK%  goto ddk_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MSVC%    goto msvc_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW%   goto mingw_build
-if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_PELLESC% goto pellesc_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW64% goto mingw_x64_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 
@@ -180,28 +178,6 @@ exit /B 0
     set path=%OLD_PATH%
 	set OLD_PATH=
 	
-exit /B 0
-
-
-:pellesc_build
-
-	set BUILD_ENV=pellesc
-	set OLD_PATH=%path%
-
-	rem x64 and arm targets aren't supported yet
-	rem they require more investigation to be properly set
-
-	echo --------- Target is x86 ---------
-	set AMD64=
-	set IA64=
-	set ARM=
-	set Path=%path%;%PELLESC_BASE%\Bin
-	set UDEFRAG_LIB_PATH=..\..\lib
-	call :build_modules X86 || exit /B 1
-
-	set path=%OLD_PATH%
-	set OLD_PATH=
-
 exit /B 0
 
 
