@@ -521,7 +521,16 @@
 #define LUA_NUMBER_FMT		"%.14g"
 #define lua_number2str(s,n)	sprintf((s), LUA_NUMBER_FMT, (n))
 #define LUAI_MAXNUMBER2STR	32 /* 16 digits, sign, point, and \0 */
+/* strtod is not available when you compile Lua by the latest official MinGW binaries,
+because of the following patch, incompatible with msvcrt.dll:
+http://sourceforge.net/tracker/index.php?func=detail&aid=1956337&group_id=2435&atid=302435
+*/
+#if defined(__GNUC__)
+double internal_strtod(const char *s, char **sret);
+#define lua_str2number(s,p)	internal_strtod((s), (p))
+#else
 #define lua_str2number(s,p)	strtod((s), (p))
+#endif
 
 
 /*
