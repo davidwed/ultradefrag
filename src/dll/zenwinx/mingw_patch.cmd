@@ -1,6 +1,6 @@
 @echo off
 
-echo This script will replace the ntdll.a library
+echo This script will replace the libntdll.a file
 echo in MinGW installation with a more adequate version.
 echo Usage: mingw_patch.cmd {path to mingw installation}
 echo.
