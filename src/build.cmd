@@ -304,6 +304,6 @@ rem Displays usage information.
 	echo * To use MinGW run mingw_patch.cmd before:
 	echo dll\zenwinx\mingw_patch.cmd {path to mingw installation}
 	echo.
-	echo * To use MS Visual Studio 6.0 run msvc_patch.cmd before:
-	echo dll\zenwinx\msvc_patch.cmd {path to msvs6 installation}
+	echo * To use MS Visual Studio 6.0 follow instructions to patch it:
+	echo dll\zenwinx\msvc_patch.cmd
 goto :EOF
