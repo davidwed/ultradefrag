@@ -4,6 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     alpha2:
     - Developers: build scripts were highly optimized
+    - mistakes preventing build on the path containing spaces were eliminated
     alpha1:
     - GUI was redesigned to be much more ergonomic (comfortable for daily use)
     - ability to change preferences without the need to restart GUI was added

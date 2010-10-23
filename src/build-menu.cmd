@@ -180,7 +180,7 @@ call build-pre-release.cmd --no-ia64 --%UD_BLD_PRE_RELEASE_TYPE%
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
-copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
@@ -208,7 +208,7 @@ call build-pre-release.cmd --no-ia64 --no-amd64 --%UD_BLD_PRE_RELEASE_TYPE%
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
-copy /b /y /v %UD_BLD_MENU_DIR%\pre-release\*.* "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean

@@ -109,9 +109,9 @@ rem Example:  call :build_installer .\bin\ia64 ia64
 	)
 
 	pushd %1
-	copy /Y %~dp0\installer\UltraDefrag.nsi .\
-	copy /Y %~dp0\installer\lang.ini .\
-	copy /Y %~dp0\installer\lang-classical.ini .\
+	copy /Y "%~dp0\installer\UltraDefrag.nsi" .\
+	copy /Y "%~dp0\installer\lang.ini" .\
+	copy /Y "%~dp0\installer\lang-classical.ini" .\
 	"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 UltraDefrag.nsi
 	if %errorlevel% neq 0 (
 		popd
@@ -129,7 +129,7 @@ rem Example:  call :build_micro_installer .\bin\ia64 ia64
 	)
 
 	pushd %1
-	copy /Y %~dp0\installer\MicroEdition.nsi .\
+	copy /Y "%~dp0\installer\MicroEdition.nsi" .\
 	"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 MicroEdition.nsi
 	if %errorlevel% neq 0 (
 		popd
@@ -149,10 +149,10 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
 	pushd %1
 	set PORTABLE_DIR=ultradefrag-portable-%ULTRADFGVER%.%2
 	mkdir %PORTABLE_DIR%
-	copy /Y %~dp0\CREDITS.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\HISTORY.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\LICENSE.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\README.TXT  %PORTABLE_DIR%\
+	copy /Y "%~dp0\CREDITS.TXT" %PORTABLE_DIR%\
+	copy /Y "%~dp0\HISTORY.TXT" %PORTABLE_DIR%\
+	copy /Y "%~dp0\LICENSE.TXT" %PORTABLE_DIR%\
+	copy /Y "%~dp0\README.TXT"  %PORTABLE_DIR%\
 	copy /Y hibernate.exe     %PORTABLE_DIR%\hibernate4win.exe
 	copy /Y udefrag.dll       %PORTABLE_DIR%\
 	copy /Y udefrag.exe       %PORTABLE_DIR%\
@@ -163,16 +163,16 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
 	copy /Y lua5.1a_gui.exe   %PORTABLE_DIR%\
 	copy /Y wgx.dll           %PORTABLE_DIR%\
 	mkdir %PORTABLE_DIR%\handbook
-	copy /Y %~dp0\..\doc\html\handbook\doxy-doc\html\*.* %PORTABLE_DIR%\handbook\
+	copy /Y "%~dp0\..\doc\html\handbook\doxy-doc\html\*.*" %PORTABLE_DIR%\handbook\
 	mkdir %PORTABLE_DIR%\scripts
-	copy /Y %~dp0\scripts\udreportcnv.lua  %PORTABLE_DIR%\scripts\
-	copy /Y %~dp0\scripts\udsorting.js     %PORTABLE_DIR%\scripts\
-	copy /Y %~dp0\scripts\udreport.css     %PORTABLE_DIR%\scripts\
+	copy /Y "%~dp0\scripts\udreportcnv.lua"  %PORTABLE_DIR%\scripts\
+	copy /Y "%~dp0\scripts\udsorting.js"     %PORTABLE_DIR%\scripts\
+	copy /Y "%~dp0\scripts\udreport.css"     %PORTABLE_DIR%\scripts\
 	mkdir %PORTABLE_DIR%\options
-	copy /Y %~dp0\scripts\udreportopts.lua %PORTABLE_DIR%\options\
+	copy /Y "%~dp0\scripts\udreportopts.lua" %PORTABLE_DIR%\options\
 	mkdir %PORTABLE_DIR%\i18n
-	copy /Y %~dp0\gui\i18n\*.lng           %PORTABLE_DIR%\i18n\
-	copy /Y %~dp0\gui\i18n\*.template      %PORTABLE_DIR%\i18n\
+	copy /Y "%~dp0\gui\i18n\*.lng"           %PORTABLE_DIR%\i18n\
+	copy /Y "%~dp0\gui\i18n\*.template"      %PORTABLE_DIR%\i18n\
 	rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
 	"%SEVENZIP_PATH%\7z.exe" a -r -mx9 -tzip ultradefrag-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
 	if %errorlevel% neq 0 (
@@ -197,10 +197,10 @@ rem Example:  call :build_micro_portable_package .\bin\ia64 ia64
 	pushd %1
 	set PORTABLE_DIR=ultradefrag-micro-portable-%ULTRADFGVER%.%2
 	mkdir %PORTABLE_DIR%
-	copy /Y %~dp0\CREDITS.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\HISTORY.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\LICENSE.TXT %PORTABLE_DIR%\
-	copy /Y %~dp0\README.TXT  %PORTABLE_DIR%\
+	copy /Y "%~dp0\CREDITS.TXT" %PORTABLE_DIR%\
+	copy /Y "%~dp0\HISTORY.TXT" %PORTABLE_DIR%\
+	copy /Y "%~dp0\LICENSE.TXT" %PORTABLE_DIR%\
+	copy /Y "%~dp0\README.TXT"  %PORTABLE_DIR%\
 	copy /Y hibernate.exe     %PORTABLE_DIR%\hibernate4win.exe
 	copy /Y udefrag.dll       %PORTABLE_DIR%\
 	copy /Y udefrag.exe       %PORTABLE_DIR%\
