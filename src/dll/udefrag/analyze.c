@@ -486,8 +486,8 @@ static int find_files(udefrag_job_parameters *jp)
 static int is_well_known_locked_file(winx_file_info *f,udefrag_job_parameters *jp)
 {
 	int length;
-	short mft_name[] = L"$Mft";
-	short config_sign[] = L"\\system32\\config\\";
+	wchar_t mft_name[] = L"$Mft";
+	wchar_t config_sign[] = L"\\system32\\config\\";
 	
 	length = wcslen(f->path);
 

@@ -137,14 +137,14 @@ int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber)
  */
 static HANDLE OpenRootDirectory(unsigned char volume_letter)
 {
-	unsigned short rootpath[] = L"\\??\\A:\\";
+	wchar_t rootpath[] = L"\\??\\A:\\";
 	HANDLE hRoot;
 	NTSTATUS Status;
 	UNICODE_STRING uStr;
 	OBJECT_ATTRIBUTES ObjectAttributes;
 	IO_STATUS_BLOCK IoStatusBlock;
 
-	rootpath[4] = (short)winx_toupper(volume_letter);
+	rootpath[4] = (wchar_t)winx_toupper(volume_letter);
 	RtlInitUnicodeString(&uStr,rootpath);
 	InitializeObjectAttributes(&ObjectAttributes,&uStr,
 				   FILE_READ_ATTRIBUTES,NULL,NULL); /* ?? */
@@ -166,7 +166,7 @@ static HANDLE OpenRootDirectory(unsigned char volume_letter)
  */
 int __stdcall winx_get_drive_type(char letter)
 {
-	short link_name[] = L"\\??\\A:";
+	wchar_t link_name[] = L"\\??\\A:";
 	#define MAX_TARGET_LENGTH 256
 	short link_target[MAX_TARGET_LENGTH];
 	PROCESS_DEVICEMAP_INFORMATION *ppdi;

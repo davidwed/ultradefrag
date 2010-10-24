@@ -390,7 +390,7 @@ void colorize_map_region(udefrag_job_parameters *jp,
 static int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
 {
 	int length;
-	short mft_name[] = L"$Mft";
+	wchar_t mft_name[] = L"$Mft";
 
 	if(jp == NULL || f == NULL)
 		return 0;

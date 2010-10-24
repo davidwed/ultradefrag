@@ -48,7 +48,7 @@ static_lib = 0
 ddk_cmd = "build.exe"
 msvc_cmd = "nmake.exe /NOLOGO /A /f"
 mingw_cmd = "mingw32-make --always-make -f Makefile.mingw"
-mingw_x64_cmd = "make --always-make -f Makefile_x64.mingw"
+mingw_x64_cmd = "gmake --always-make -f Makefile_x64.mingw"
 
 -- common subroutines
 function copy(src, dst)
@@ -486,8 +486,8 @@ function produce_mingw_x64_makefile()
 
 	local f = assert(io.open(".\\Makefile_x64.mingw","w"))
 	
-	f:write("PROJECT = ", name, "\nCC = gcc.exe\n\n")
-	f:write("WINDRES = \"\$(COMPILER_BIN)windres.exe\"\n\n")
+	f:write("PROJECT = ", name, "\nCC = x86_64-w64-mingw32-gcc.exe\n\n")
+	f:write("WINDRES = \"\$(COMPILER_BIN)x86_64-w64-mingw32-windres.exe\"\n\n")
 	
 	f:write("TARGET = ", target_name, "\n")
 	
@@ -513,7 +513,11 @@ function produce_mingw_x64_makefile()
 	elseif target_type == "dll" then
 		f:write("LDFLAGS = -pipe -shared -Wl,")
 		f:write("--out-implib,lib", name, ".dll.a -nostartfiles ")
-		f:write("-nodefaultlibs ", name, "-mingw.def -Wl,--kill-at,")
+		if nativedll == 0 then
+			f:write(name, "-mingw.def -Wl,--kill-at,")
+		else
+			f:write("-nodefaultlibs ", name, "-mingw.def -Wl,--kill-at,")
+		end
 		f:write("--entry,_DllMain\@12,--strip-all\n")
 	else error("Unknown target type: " .. target_type .. "!")
 	end
@@ -570,7 +574,7 @@ function produce_mingw_x64_makefile()
 	if target_type == "dll" then
 		f:write("define correct_lib\n")
 		f:write("\t\@echo ------ correct the lib\$(PROJECT).dll.a library ------\n")
-		f:write("\t\@dlltool -k --output-lib lib\$(PROJECT).dll.a --def ")
+		f:write("\t\@x86_64-w64-mingw32-dlltool -k --output-lib lib\$(PROJECT).dll.a --def ")
 		f:write(name, ".def\n")
 		f:write("endef\n\n")
 	end
