@@ -151,7 +151,7 @@ int CreateToolbar(void)
 	SendMessage(hToolbar,TB_SETHOTIMAGELIST,0,(LPARAM)hToolbarImgListH);
 	
 	/* set state of checks */
-	if(portable_mode == 0){
+	if(btd_installed){
 		if(IsBootTimeDefragEnabled()){
 			boot_time_defrag_enabled = 1;
 			SendMessage(hToolbar,TB_CHECKBUTTON,IDM_CFG_BOOT_ENABLE,MAKELONG(TRUE,0));

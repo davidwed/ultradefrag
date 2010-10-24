@@ -494,7 +494,7 @@ void StartBootExecChangesTracking()
 	HANDLE h;
 	DWORD id;
 
-	if(portable_mode == 0){
+	if(btd_installed){
 		h = create_thread(BootExecTrackingProc,NULL,&id);
 		if(h == NULL){
 			WgxDbgPrintLastError("Cannot create thread for BootExecute registry value changes tracking");

@@ -47,6 +47,9 @@ extern int lang_ini_tracking_stopped;
 /* nonzero value indicates that we are in portable mode */
 int portable_mode = 0;
 
+/* nonzero value indicates that boot time defragmenter is installed */
+int btd_installed = 0;
+
 /* forward declarations */
 static void UpdateWebStatistics(void);
 LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
@@ -85,6 +88,34 @@ static int IsPortable(void)
 	}
 	
 	WgxDbgPrint("The program is not installed to %s, so it is portable\n",path);
+	return 1;
+}
+
+/**
+ * @brief Defines whether boot time defragmenter is installed or not.
+ * @return Nonzero value indicates that it is installed.
+ */
+static int IsBtdInstalled(void)
+{
+	char sysdir[MAX_PATH];
+	char path[MAX_PATH];
+	FILE *f;
+	
+	if(!GetSystemDirectory(sysdir,MAX_PATH)){
+		WgxDbgPrintLastError("IsBtdInstalled: cannot get system directory");
+		return 1; /* let's assume that it is installed */
+	}
+	
+	_snprintf(path,MAX_PATH,"%s\\defrag_native.exe",sysdir);
+	path[MAX_PATH - 1] = 0;
+
+	f = fopen(path,"rb");
+	if(f == NULL){
+		WgxDbgPrint("Cannot open %s => the boot time defragmenter is not installed\n",path);
+		return 0;
+	}
+	
+	fclose(f);
 	return 1;
 }
 
@@ -630,6 +661,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	/* define whether we are in portable mode or not */
 	portable_mode = IsPortable();
+	btd_installed = IsBtdInstalled();
 
 	/* get preferences */
 	GetPrefs();

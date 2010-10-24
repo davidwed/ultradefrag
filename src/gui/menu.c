@@ -120,7 +120,7 @@ int CreateMainMenu(void)
 			MF_BYCOMMAND | MF_UNCHECKED);
 	}
 	
-	if(portable_mode == 0){
+	if(btd_installed){
 		if(IsBootTimeDefragEnabled()){
 			boot_time_defrag_enabled = 1;
 			CheckMenuItem(hMainMenu,

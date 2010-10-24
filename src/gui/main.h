@@ -217,6 +217,7 @@ extern HANDLE hLangPackEvent;
 extern HANDLE hLangMenuEvent;
 extern int use_custom_font_in_dialogs;
 extern int portable_mode;
+extern int btd_installed;
 
 /* common preferences */
 extern int hibernate_instead_of_shutdown;
