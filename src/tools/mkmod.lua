@@ -219,7 +219,7 @@ function produce_msvc_makefile()
 		cl_flags = cl_flags .. "/D \"_CONSOLE\" /D \"_USRDLL\" /D \"" .. upname .. "\" "
 		s = "console"
 	elseif target_type == "driver" then
-		cl_flags = cl_flags .. "/I \"\$(DDKINCDIR)\" /I \"\$(DDKINCDIR)\\ddk\" "
+		cl_flags = cl_flags .. "/I \"\$(ROSINCDIR)\" /I \"\$(ROSINCDIR)\\ddk\" "
 		s = "native"
 	elseif target_type == "native" then
 		s = "native"
