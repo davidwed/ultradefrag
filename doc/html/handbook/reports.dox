@@ -27,8 +27,8 @@
  *
  * UltraDefrag saves file fragmentation reports in the
  * following two formats: LuaReport and Plain Text. The first
- * is used by full-featured versions of the program only, the
- * second format is used everywhere to ensure that the report will 
+ * is used to generate HTML reports from. The second 
+ * format is used to ensure that the report will 
  * be accessible even on machines without any web browser installed.
  *
  * UltraDefrag saves all reports to the root directories of
@@ -39,7 +39,7 @@
  * file in Explorer.
  *
  * When you are opening the LuaReport a single HTML page is
- * generated and opens in your default web browser. It contains a
+ * generated and opened in your default web browser. It contains a
  * list of fragmented files. Each line contains the number of
  * fragments, filename and a brief comment: [OVR] for files
  * above the size threshold, [DIR] for directories and [CMP]

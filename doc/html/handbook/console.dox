@@ -178,7 +178,7 @@
  *
  * The last command is included in the UltraDefrag package. It was
  * especially created to hibernate the computer through the command line
- * after a disk defragmentation, which may take a some time to finish.
+ * after a disk defragmentation, which may take some time to finish.
  *
  * <h1>Explorer's context menu handler</h1>
  * The UltraDefrag command line tool is also used as an Explorer's context

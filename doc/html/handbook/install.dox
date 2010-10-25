@@ -29,8 +29,7 @@
  * - Portable packages. Download it, unpack it and use without an installation. 
  * Copy it on an USB stick and you will be able to use UltraDefrag everywhere by simply
  * running it from there. Note that boot time defragmenter is missing from the portable 
- * packages, but all other features are included. To configure the portable
- * package run the LanguageSelector.exe tool and select your preferred language.
+ * packages, but all other features are included. 
  * You can find more information about portable applications
  * <a href="http://en.wikipedia.org/wiki/Portable_application">here</a>.
  *

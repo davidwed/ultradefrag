@@ -38,21 +38,17 @@
  * You can always stop the volume analysis/defragmentation by pressing
  * the Pause/Break key on the keyboard.
  *
- * The only restriction on boot time scans is that you may not
- * scan encrypted volumes. This is because lsass.exe, the component
- * of the operating system that reads encrypted volumes, is loaded
- * after the native executable runs.
- *
- * To enable the boot time defragmenter open the UltraDefrag 
- * Configuration dialog and check the Enable box in the Boot time scan
- * section. The boot time defragmenter can also be enabled by
- * executing boot-on at the command prompt. To disable it the
- * boot-off command may be used.
- *
- * The boot time defragmenter cannot be used in Windows Safe Mode,
- * because it cannot display text on the screen in this mode. 
+ * The following restrictions exist for the boot time scans:
+ * - You may not scan encrypted volumes. This is because lsass.exe, the component
+ * of the operating system that reads encrypted volumes, is still not loaded
+ * at a time of the native applications execution.
+ * - In Windows Safe Mode the program cannot display text on the boot screen.
  * UltraDefrag checks for boot options and returns immediately, if the
  * Safe Mode flag has been found.
+ *
+ * The boot time defragmenter can be enabled/disabled either from 
+ * the main GUI window or by typing boot-on/boot-off commands in
+ * the command prompt.
  *
  * <h1>Boot Time Modes</h1>
  * The boot time defragmenter can be executed in two modes:
