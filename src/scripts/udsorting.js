@@ -32,10 +32,9 @@ var table;
 var whitelist;
 var blacklist;
 // order = 0 - descending; 1 - ascending
-// TODO: set initial values to more useful states
 var order = 0;
 var fragments_order = 1;
-var size_order = 0;
+var size_order = 1;
 var name_order = 0;
 var comment_order = 1;
 var msie_browser = false; // true for ms internet explorer
@@ -73,6 +72,9 @@ function sort_items(criteria)
 	if(criteria == 'fragments'){
 		a.sort(sort_by_fragments);
 		fragments_order = fragments_order ? 0 : 1;
+	} else if(criteria == 'size'){
+		a.sort(sort_by_size);
+		size_order = size_order ? 0 : 1;
 	} else if(criteria == 'name'){
 		a.sort(sort_by_name);
 		name_order = name_order ? 0 : 1;
@@ -117,10 +119,21 @@ function sort_by_fragments(a,b)
 		return (fb - fa);
 }
 
+function sort_by_size(a,b)
+{
+	var fa = parseInt(a.getElementsByTagName("td")[1].id);
+	var fb = parseInt(b.getElementsByTagName("td")[1].id);
+
+	if(size_order)
+		return (fa - fb);
+	else
+		return (fb - fa);
+}
+
 function sort_by_name(a,b)
 {
-	var na = a.getElementsByTagName("td")[1].innerHTML.toLowerCase();
-	var nb = b.getElementsByTagName("td")[1].innerHTML.toLowerCase();
+	var na = a.getElementsByTagName("td")[2].innerHTML.toLowerCase();
+	var nb = b.getElementsByTagName("td")[2].innerHTML.toLowerCase();
 	var result;
 	if(na > nb) result = 1;
 	else if(na == nb) result = 0;
@@ -134,8 +147,8 @@ function sort_by_name(a,b)
 
 function sort_by_comment(a,b)
 {
-	var ca = a.getElementsByTagName("td")[2].innerHTML.toLowerCase();
-	var cb = b.getElementsByTagName("td")[2].innerHTML.toLowerCase();
+	var ca = a.getElementsByTagName("td")[3].innerHTML.toLowerCase();
+	var cb = b.getElementsByTagName("td")[3].innerHTML.toLowerCase();
 	var result;
 	if(ca > cb) result = 1;
 	else if(ca == cb) result = 0;

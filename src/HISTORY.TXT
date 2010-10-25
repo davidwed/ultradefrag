@@ -3,6 +3,8 @@ HISTORY
   Version 5.0.0  2010-10-
   ------------------------------------------------------------------------------
     alpha2:
+    - file sizes were added to HTML reports
+    - file sizes were converted to a human readable format in text reports
     - Developers: build scripts were highly optimized
     - mistakes preventing build on the path containing spaces were eliminated
     - the following translations were updated:

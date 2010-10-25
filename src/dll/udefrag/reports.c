@@ -45,6 +45,9 @@ static int save_text_report(udefrag_job_parameters *jp)
 	udefrag_fragmented_file *file;
 	char *comment;
 	int length, offset;
+	char human_readable_size[32];
+	int n1, n2;
+	char s[32];
 	
 	path[4] = jp->volume_letter;
 	f = winx_fbopen(path,"w",RSB_SIZE);
@@ -67,7 +70,8 @@ static int save_text_report(udefrag_job_parameters *jp)
 	buffer[size - 1] = 0;
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
-	(void)_snwprintf(buffer,size,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");
+	/*(void)_snwprintf(buffer,size,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");*/
+	(void)_snwprintf(buffer,size,L"; Fragments%12hs%9hs    Filename\r\n","Filesize","Comment");
 	buffer[size - 1] = 0;
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
@@ -86,10 +90,21 @@ static int save_text_report(udefrag_job_parameters *jp)
 			else
 				comment = " - ";
 			
-			(void)_snwprintf(buffer,size,L"\r\n%11u%21I64u%9hs    ",
+			/*(void)_snwprintf(buffer,size,L"\r\n%11u%21I64u%9hs    ",
 				(UINT)file->f->disp.fragments,
 				file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				comment);
+			*/
+			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
+				1,human_readable_size,sizeof(human_readable_size));
+			if(sscanf(human_readable_size,"%u.%u %s",&n1,&n2,s) == 3){
+				//if(n2 == 0){ /* remove trailing zero */
+					_snprintf(human_readable_size,sizeof(human_readable_size),"%u %s",n1,s);
+					human_readable_size[sizeof(human_readable_size) - 1] = 0;
+				//}
+			}
+			(void)_snwprintf(buffer,size,L"\r\n%11u%12hs%9hs    ",
+				(UINT)file->f->disp.fragments,human_readable_size,comment);
 			buffer[size - 1] = 0;
 			(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 			
@@ -116,6 +131,9 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	udefrag_fragmented_file *file;
 	char *comment;
 	int i, length, offset;
+	char human_readable_size[32];
+	int n1, n2;
+	char s[32];
 	
 	path[4] = jp->volume_letter;
 	f = winx_fbopen(path,"w",RSB_SIZE);
@@ -129,7 +147,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	/* print header */
 	(void)_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
-		"format_version = 2\r\n\r\n"
+		"format_version = 3\r\n\r\n"
 		"volume_letter = \"%c\"\r\n\r\n"
 		"files = {\r\n",
 		jp->volume_letter, jp->volume_letter
@@ -149,11 +167,20 @@ static int save_lua_report(udefrag_job_parameters *jp)
 			else
 				comment = " - ";
 			
+			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
+				1,human_readable_size,sizeof(human_readable_size));
+			if(sscanf(human_readable_size,"%u.%u %s",&n1,&n2,s) == 3){
+				//if(n2 == 0){ /* remove trailing zero */
+					_snprintf(human_readable_size,sizeof(human_readable_size),"%u&nbsp;%s",n1,s);
+					human_readable_size[sizeof(human_readable_size) - 1] = 0;
+				//}
+			}
 			(void)_snprintf(buffer, sizeof(buffer),
-				"\t{fragments = %u,size = %I64u,filtered = %u,"
+				"\t{fragments = %u,size = %I64u,hrsize = \"%hs\",filtered = %u,"
 				"comment = \"%s\",uname = {",
 				(UINT)file->f->disp.fragments,
 				file->f->disp.clusters * jp->v_info.bytes_per_cluster,
+				human_readable_size,
 				(UINT)is_excluded(file->f),
 				comment
 				);

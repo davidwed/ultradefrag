@@ -179,7 +179,8 @@ links_x2 = [[
 
 table_header = [[
 <tr>
-<td class="c"><a href="javascript:sort_items('fragments')"># fragments</a></td>
+<td class="c"><a href="javascript:sort_items('fragments')">fragments</a></td>
+<td class="c"><a href="javascript:sort_items('size')">size</a></td>
 <td class="c"><a href="javascript:sort_items('name')">filename</a></td>
 <td class="c"><a href="javascript:sort_items('comment')">comment</a></td>
 </tr>
@@ -218,7 +219,8 @@ function write_main_table_body(f)
 	for i, file in ipairs(files) do
 		local class
 		if file.filtered == 1 then class = "f" else class = "u" end
-		f:write("<tr class=\"", class, "\"><td class=\"c\">", file.fragments,"</td><td>")
+		f:write("<tr class=\"", class, "\"><td class=\"c\">", file.fragments,"</td>")
+		f:write("<td class=\"right\" id=\"", file.size, "\">", file.hrsize,"</td><td>")
 		write_unicode_name(f,file.uname)
 		f:write("</td><td class=\"c\">", file.comment, "</td></tr>\n")
 	end
@@ -282,8 +284,8 @@ end
 dofile(arg[1])
 
 -- check the report format version
-if format_version == nil or format_version ~= 2 then
-	error("Reports produced by old versions of UltraDefrag are no more supported.\nUpdate the program at least to the 4.2.0 RC4 version.")
+if format_version == nil or format_version < 3 then
+	error("Reports produced by old versions of UltraDefrag are no more supported.\nUpdate the program at least to the 5.0.0 alpha2 version.")
 end
 
 -- build a web page containing a file fragmentation report
