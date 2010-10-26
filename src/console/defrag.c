@@ -30,56 +30,68 @@
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
-void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
-
-#define settextcolor(c) (void)SetConsoleTextAttribute(hOut,c)
+#define settextcolor(c) (void)SetConsoleTextAttribute(hStdOut,c)
 
 /* global variables */
-HANDLE hOut;
-WORD console_attr = 0x7;
+HANDLE hStdOut; /* handle of the standard output */
+WORD default_color = 0x7; /* default text color */
+
 int a_flag = 0,o_flag = 0;
 int b_flag = 0,h_flag = 0;
 int l_flag = 0,la_flag = 0;
 int p_flag = 0,v_flag = 0;
 int m_flag = 0;
 int obsolete_option = 0;
-char letter = 0;
 int screensaver_mode = 0;
 int all_flag = 0;
 int all_fixed_flag = 0;
 char letters[MAX_DOS_DRIVES] = {0};
 int wait_flag = 0;
 
+int first_progress_update;
 int stop_flag = 0;
 
 extern int map_rows;
 extern int map_symbols_per_line;
+extern int map_completed;
 
+/* prototypes */
 void parse_cmdline(int argc, char **argv);
 void show_help(void);
-void AllocateClusterMap(void);
+void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
+int AllocateClusterMap(void);
+void InitializeMapDisplay(char volume_letter);
+void RedrawMap(udefrag_progress_info *pi);
 void FreeClusterMap(void);
-void RedrawMap(void);
-void InitializeMapDisplay(void);
-void __stdcall update_progress(udefrag_progress_info *pi, void *p);
 
-BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
+/* forward declarations */
 void display_error(char *string);
-void DisplayLastError(char *caption);
+void display_last_error(char *caption);
+static void update_web_statistics(void);
+static int show_vollist(void);
+static int process_volumes(void);
+BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 
-/* fills the current line with spaces */
+/* -------------------------------------------- */
+/*                common routines               */
+/* -------------------------------------------- */
+
+/**
+ * @brief Fills the current line with spaces.
+ */
 void clear_line(FILE *f)
 {
-	char *line;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD cursor_pos;
+	char *line;
 	int n;
 	
-	if(!GetConsoleScreenBufferInfo(hOut,&csbi))
+	if(!GetConsoleScreenBufferInfo(hStdOut,&csbi))
 		return; /* impossible to determine the screen width */
 	n = (int)csbi.dwSize.X;
 	line = malloc(n + 1);
-	if(!line) return;
+	if(line == NULL)
+		return;
 	
 	memset(line,0x20,n);
 	line[n] = 0;
@@ -87,17 +99,58 @@ void clear_line(FILE *f)
 	free(line);
 	
 	/* move cursor back to the previous line */
-	if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
-		DisplayLastError("Cannot retrieve cursor position!");
+	if(!GetConsoleScreenBufferInfo(hStdOut,&csbi)){
+		display_last_error("Cannot retrieve cursor position!");
 		return; /* impossible to determine the current cursor position  */
 	}
 	cursor_pos.X = 0;
 	cursor_pos.Y = csbi.dwCursorPosition.Y - 1;
-	if(!SetConsoleCursorPosition(hOut,cursor_pos))
-		DisplayLastError("Cannot set cursor position!");
+	if(!SetConsoleCursorPosition(hStdOut,cursor_pos))
+		display_last_error("Cannot set cursor position!");
 }
 
-/* prints specified string in red, than restores green/default color */
+/* -------------------------------------------- */
+/*         UltraDefrag specific routines        */
+/* -------------------------------------------- */
+
+/**
+ * @brief Performs basic console initialization.
+ */
+static void init_console(void)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+
+	hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	/* save default color */
+	if(GetConsoleScreenBufferInfo(hStdOut,&csbi))
+		default_color = csbi.wAttributes;
+	/* set green color */
+	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+}
+
+/**
+ * @brief Terminates the program.
+ * @details Restores default text color.
+ */
+static void terminate_console(int code)
+{
+	/* restore default color */
+	if(!b_flag) settextcolor(default_color);
+	exit(code);
+}
+
+/**
+ * @brief Handles Ctrl+C keys.
+ */
+BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
+{
+	stop_flag = 1;
+	return TRUE;
+}
+
+/**
+ * @brief Prints the string in red, than restores green color.
+ */
 void display_error(char *string)
 {
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
@@ -105,34 +158,25 @@ void display_error(char *string)
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
-void DisplayLastError(char *caption)
-{
-	LPVOID lpMsgBuf;
-	DWORD error = GetLastError();
-
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			(LPTSTR)&lpMsgBuf,0,NULL)){
-				printf("\n%s\nError code = 0x%x\n\n",caption,(UINT)error);
-				return;
-	} else {
-		printf("\n%s\n%s\n",caption,(char *)lpMsgBuf);
-		LocalFree(lpMsgBuf);
-	}
-}
-
-void DisplayDefragError(int error_code,char *caption)
+/**
+ * @brief Displays error message
+ * specific for failed disk processing tasks.
+ */
+static void display_defrag_error(int error_code)
 {
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-	printf("\n%s\n\n",caption);
+	printf("\nAnalysis/Defragmentation failed!\n\n");
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("%s\n\n",udefrag_get_error_description(error_code));
 	if(error_code == UDEFRAG_UNKNOWN_ERROR) printf("Use DbgView program to get more information.\n\n");
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
-void DisplayInvalidVolumeError(int error_code)
+/**
+ * @brief Displays error message
+ * specific for invalid disk volumes.
+ */
+static void display_invalid_volume_error(int error_code)
 {
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 	printf("The volume cannot be processed.\n\n");
@@ -148,173 +192,30 @@ void DisplayInvalidVolumeError(int error_code)
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
-/* returns an exit code for console program terminating */
-int show_vollist(void)
+/**
+ * @brief Displays last error message in red.
+ */
+void display_last_error(char *caption)
 {
-	volume_info *v;
-	int i;
-	char s[32];
-	double d;
-	int p;
+	LPVOID lpMsgBuf;
+	DWORD error = GetLastError();
 
-	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	printf("Volumes available for defragmentation:\n\n");
-
-	v = udefrag_get_vollist(la_flag ? FALSE : TRUE);
-	if(v == NULL)
-		return 1;
-
-	for(i = 0; v[i].letter != 0; i++){
-		udefrag_fbsize((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
-		d = (double)(signed __int64)(v[i].free_space.QuadPart);
-		/* 0.1 constant is used to exclude divide by zero error */
-		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
-		p = (int)(100 * d);
-		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		printf("%c:  %8s %12s %8u %%\n",
-			v[i].letter,v[i].fsname,s,p);
-	}
-	udefrag_release_vollist(v);
-	return 0;
-}
-
-BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType)
-{
-	stop_flag = 1;
-	return TRUE;
-}
-
-int __stdcall terminator(void *p)
-{
-	/* do it as quickly as possible :-) */
-	return stop_flag;
-}
-
-void RunScreenSaver(void)
-{
-	printf("Hello!\n");
-}
-
-int process_single_volume(void)
-{
-	long map_size = 0;
-	int error_code = 0;
-
-	/* validate driveletter */
-	if(!letter){
-		display_error("Drive letter should be specified!\n");
-		return 1;
-	}
-	error_code = udefrag_validate_volume(letter,FALSE);
-	if(error_code < 0){
-		DisplayInvalidVolumeError(error_code);
-		return 1;
-	}
-
-	/* allocate memory for cluster map */
-	if(m_flag) AllocateClusterMap();
-	
-	/* check if we need to run in screensaver mode */
-	if(screensaver_mode){
-		RunScreenSaver();
-		FreeClusterMap();
-		return 0;
-	}
-
-	/* do our job */
-	if(m_flag) map_size = map_rows * map_symbols_per_line;
-	
-	/* TODO: wait until already running task completes */
-//	while(1){
-//		error_code = udefrag_init();
-//		if(error_code >= 0) break; /* initialization succeded */
-//		if(error_code == UDEFRAG_ALREADY_RUNNING && wait_flag){
-//			/* wait one second and try again */
-//			Sleep(1000);
-//			continue;
-//		} else {
-//			DisplayDefragError(error_code,"Initialization failed!");
-//			FreeClusterMap();
-//			return 2;
-//		}
-//	}
-
-	if(m_flag) /* prepare console buffer for map */
-		InitializeMapDisplay();
-	
-	stop_flag = 0;
-	if(a_flag){
-		error_code = udefrag_start_job(letter,ANALYSIS_JOB,map_size,update_progress,terminator,NULL);
-	} else if(o_flag){
-		error_code = udefrag_start_job(letter,OPTIMIZER_JOB,map_size,update_progress,terminator,NULL);
+	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+			(LPTSTR)&lpMsgBuf,0,NULL)){
+				if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+				printf("\n%s\nError code = 0x%x\n\n",caption,(UINT)error);
+				if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	} else {
-		error_code = udefrag_start_job(letter,DEFRAG_JOB,map_size,update_progress,terminator,NULL);
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+		printf("\n%s\n%s\n",caption,(char *)lpMsgBuf);
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		LocalFree(lpMsgBuf);
 	}
-	if(error_code < 0){
-		DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
-		FreeClusterMap();
-		return 3;
-	}
-
-	FreeClusterMap();
-	return 0;
 }
 
-int process_multiple_volumes(void)
-{
-	volume_info *v;
-	int i;
-	
-	/* process volumes specified on the command line */
-	if(letters[1]){
-		for(i = 0; i < MAX_DOS_DRIVES; i++){
-			if(!letters[i]) break;
-			if(stop_flag) break;
-			/**/
-			//printf("%c:\n",letters[i]);
-			letter = letters[i];
-			(void)process_single_volume();
-		}
-	}
-	
-	if(stop_flag) return 0;
-	
-	/* process all volumes if requested */
-	if(all_flag || all_fixed_flag){
-		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
-		if(v == NULL)
-			return 1;
-		for(i = 0; v[i].letter != 0; i++){
-			if(stop_flag) break;
-			//printf("%c:\n",v[i].letter);
-			letter = v[i].letter;
-			(void)process_single_volume();
-		}
-		udefrag_release_vollist(v);
-	}
-	
-	return 0;
-}
-
-int check_for_obsolete_options(void)
-{
-	if(obsolete_option){
-		display_error("The -i, -e, -s, -d options are oblolete.\n"
-					  "Use environment variables instead!\n"
-					  );
-		return 1;
-	} else return 0;
-}
-
-void display_copyright(void)
-{
-	printf(VERSIONINTITLE ", "
-		   "Copyright (c) Dmitri Arkhangelski, 2007-2010.\n"
-		   "UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
-		   "and you are welcome to redistribute it under certain conditions.\n\n");
-}
-
-DWORD WINAPI test_thread(LPVOID p)
+/*DWORD WINAPI test_thread(LPVOID p)
 {
 	udefrag_start_job('c',ANALYSIS_JOB,0,NULL,NULL,NULL);
 	return 0;
@@ -328,26 +229,287 @@ void test(void)
 	for(i = 0; i < 10; i++)
 		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)test_thread,NULL,0,&id);
 }
+*/
 
+/**
+ * @brief Command line tool entry point.
+ */
 int __cdecl main(int argc, char **argv)
 {
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	int error_code;
+	int result;
 	
-	//test();
-	//getch();
-	//return 0;
+	/*test();
+	getch();
+	return 0;
+	*/
 
-	/* analyse command line */
+	/* initialize the program */
 	parse_cmdline(argc,argv);
-
-	/* prepare console */
-	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	if(GetConsoleScreenBufferInfo(hOut,&csbi))
-		console_attr = csbi.wAttributes;
-	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	init_console();
+	update_web_statistics();
 	
-	/* collect statistics about the UltraDefrag command line client use */
+	/* handle help request */
+	if(h_flag){
+		show_help();
+		terminate_console(0);
+	}
+
+	printf(VERSIONINTITLE ", Copyright (c) Dmitri Arkhangelski, 2007-2010.\n"
+		"UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
+		"and you are welcome to redistribute it under certain conditions.\n\n"
+		);
+
+	/* handle obsolete options */
+	if(obsolete_option){
+		display_error("The -i, -e, -s, -d options are oblolete.\n"
+			"Use environment variables instead!\n");
+		terminate_console(1);
+	}
+
+	/* show list of volumes if requested */
+	if(l_flag) terminate_console(show_vollist());
+	
+	/* run disk defragmentation job */
+	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
+		display_last_error("Cannot set Ctrl + C handler!");
+	
+	/* TODO: synchronize with other scheduled jobs running with --wait option */
+	result = process_volumes();
+	
+	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+	terminate_console(result);
+	return 0;
+}
+
+/**
+ * @brief Updates progress information on the screen.
+ */
+void __stdcall update_progress(udefrag_progress_info *pi, void *p)
+{
+	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	COORD cursor_pos;
+	char volume_letter;
+	char op;
+	char *op_name = "";
+	char *results;
+	
+	volume_letter = (char)(DWORD_PTR)p;
+    
+	if(!p_flag){
+		if(first_progress_update){
+			/*
+			* Ultra fast ntfs analysis contains one piece of code 
+			* that heavily loads CPU for one-two seconds.
+			*/
+			(void)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
+			first_progress_update = 0;
+		}
+		
+		if(map_completed){ /* we could use simple check for m_flag here */
+			if(!GetConsoleScreenBufferInfo(hStdOut,&csbi)){
+				display_last_error("Cannot retrieve cursor position!");
+				return;
+			}
+			cursor_pos.X = 0;
+			cursor_pos.Y = csbi.dwCursorPosition.Y - map_rows - 3 - 2;
+			if(!SetConsoleCursorPosition(hStdOut,cursor_pos)){
+				display_last_error("Cannot set cursor position!");
+				return;
+			}
+		}
+		
+		op = udefrag_tolower(pi->current_operation);
+		if(op == 'a')
+			op_name = "analyze:  ";
+		else if(op == 'd')
+			op_name = "defrag:   ";
+		else
+			op_name = "optimize: ";
+		clear_line(stderr);
+		fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
+			volume_letter,op_name,pi->percentage,pi->fragmented,pi->files);
+		
+		if(pi->completion_status != 0 && !stop_flag){
+			/* set progress indicator to 100% state */
+			clear_line(stderr);
+			fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
+				volume_letter,op_name,pi->fragmented,pi->files);
+			if(!m_flag) fprintf(stderr,"\n");
+		}
+		
+		if(m_flag)
+			RedrawMap(pi);
+	}
+	
+	if(pi->completion_status != 0 && v_flag){
+		/* print results of the completed job */
+		results = udefrag_get_default_formatted_results(pi);
+		if(results){
+			printf("\n%s",results);
+			udefrag_release_default_formatted_results(results);
+		}
+	}
+}
+
+/**
+ * @brief Callback routine
+ * calling each time when
+ * the volume processing routines
+ * would like to know whether they
+ * should be terminated or not.
+ */
+int __stdcall terminator(void *p)
+{
+	/* do it as quickly as possible :-) */
+	return stop_flag;
+}
+
+/**
+ * @brief A stub.
+ */
+static void RunScreenSaver(void)
+{
+	printf("Hello!\n");
+}
+
+/**
+ * @brief Processes a single volume.
+ * @return Zero for success, nonzero value indicates failure.
+ */
+static int process_single_volume(char volume_letter)
+{
+	long map_size = 0;
+	udefrag_job_type job_type = DEFRAG_JOB;
+	int result;
+
+	/* validate volume letter */
+	if(volume_letter == 0){
+		display_error("Drive letter should be specified!\n");
+		return 3;
+	}
+	result = udefrag_validate_volume(volume_letter,FALSE);
+	if(result < 0){
+		display_invalid_volume_error(result);
+		return 3;
+	}
+
+	/* initialize cluster map */
+	if(m_flag){
+		if(AllocateClusterMap() < 0){
+			/* terminate process */
+			(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+			terminate_console(4);
+		}
+		InitializeMapDisplay(volume_letter);
+		map_size = map_rows * map_symbols_per_line;
+	}
+	
+	/* check if we need to run in screensaver mode */
+	if(screensaver_mode){
+		RunScreenSaver();
+		FreeClusterMap();
+		return 0;
+	}
+
+	/* run the job */
+	stop_flag = 0;
+	if(a_flag) job_type = ANALYSIS_JOB;
+	else if(o_flag) job_type = OPTIMIZER_JOB;
+	first_progress_update = 1;
+	result = udefrag_start_job(volume_letter,job_type,map_size,
+		update_progress,terminator,(void *)(DWORD_PTR)volume_letter);
+	if(result < 0){
+		display_defrag_error(result);
+		FreeClusterMap();
+		return 5;
+	}
+
+	FreeClusterMap();
+	return 0;
+}
+
+/**
+ * @brief Processes all volumes specified on the command line.
+ * @return Zero for success, nonzero value indicates failure.
+ */
+static int process_volumes(void)
+{
+	volume_info *v;
+	int i, result;
+	
+	/* process volumes specified on the command line */
+	for(i = 0; i < MAX_DOS_DRIVES; i++){
+		if(letters[i] == 0) break;
+		if(stop_flag) return 0;
+		//printf("%c:\n",letters[i]);
+		result = process_single_volume(letters[i]);
+	}
+	
+	/* if the job was stopped return success */
+	if(stop_flag)
+		return 0;
+	
+	/* in case of a single volume processing return result */
+	if(letters[1] == 0 && !all_flag && !all_fixed_flag)
+		return result;
+	
+	/* handle --all and --all-fixed options */
+	if(all_flag || all_fixed_flag){
+		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
+		if(v == NULL)
+			return 1;
+		for(i = 0; v[i].letter != 0; i++){
+			if(stop_flag) break;
+			//printf("%c:\n",v[i].letter);
+			(void)process_single_volume(v[i].letter);
+		}
+		udefrag_release_vollist(v);
+	}
+	return 0;
+}
+
+/**
+ * @brief Displays list of disk volumes
+ * available for defragmentation.
+ * @return Zero for success, nonzero
+ * value indicates failure.
+ */
+static int show_vollist(void)
+{
+	volume_info *v;
+	int i, percent;
+	char s[32];
+	double d;
+
+	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	printf("Volumes available for defragmentation:\n\n");
+
+	v = udefrag_get_vollist(la_flag ? FALSE : TRUE);
+	if(v == NULL){
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		return 2;
+	}
+
+	for(i = 0; v[i].letter != 0; i++){
+		udefrag_fbsize((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
+		d = (double)(signed __int64)(v[i].free_space.QuadPart);
+		/* 0.1 constant is used to exclude divide by zero error */
+		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
+		percent = (int)(100 * d);
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		printf("%c:  %8s %12s %8u %%\n",
+			v[i].letter,v[i].fsname,s,percent);
+	}
+	udefrag_release_vollist(v);
+	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+	return 0;
+}
+
+/**
+ * @brief Updates web statistics of the program use.
+ */
+static void update_web_statistics(void)
+{
 #ifndef _WIN64
 	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-x86.html","UA-15890458-1");
 #else
@@ -357,38 +519,4 @@ int __cdecl main(int argc, char **argv)
 		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-x64.html","UA-15890458-1");
 	#endif
 #endif
-
-	/* handle help request */
-	if(h_flag){
-		show_help();
-		error_code = 0; goto done;
-	}
-
-	/* display copyright */
-	display_copyright();
-
-	/* handle obsolete options */
-	if(check_for_obsolete_options()){
-		error_code = 1; goto done;
-	}
-
-	/* show list of volumes if requested */
-	if(l_flag){
-		error_code = show_vollist(); goto done;
-	}
-	
-	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
-		DisplayLastError("Cannot set Ctrl + C handler!");
-
-	/* process multiple volumes if requested */
-	if(letters[1] || all_flag || all_fixed_flag)
-		error_code = process_multiple_volumes();
-	else
-		error_code = process_single_volume();
-
-	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-
-done:
-	if(!b_flag) settextcolor(console_attr);
-	return error_code;
 }

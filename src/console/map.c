@@ -29,21 +29,15 @@
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
-#define settextcolor(c) (void)SetConsoleTextAttribute(hOut,c)
+#define settextcolor(c) (void)SetConsoleTextAttribute(hStdOut,c)
 
 #define BLOCKS_PER_HLINE  68//60//79
 #define BLOCKS_PER_VLINE  10//8//16
 #define N_BLOCKS          (BLOCKS_PER_HLINE * BLOCKS_PER_VLINE)
+#define MAP_SYMBOL        '%'
+#define BORDER_COLOR      (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
 
-void display_error(char *string);
-extern HANDLE hOut;
-extern WORD console_attr;
-extern int b_flag;
-extern int m_flag;
-extern int p_flag;
-extern char letter;
-extern int stop_flag;
-
+/* global variables */
 char *cluster_map = NULL;
 
 WORD colors[NUM_OF_SPACE_STATES] = {
@@ -63,27 +57,33 @@ WORD colors[NUM_OF_SPACE_STATES] = {
 	FOREGROUND_GREEN | FOREGROUND_BLUE | FOREGROUND_INTENSITY,
 };
 
-BOOL map_completed = FALSE;
-
-#define MAP_SYMBOL '%'
-#define BORDER_COLOR (FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY)
-
 short map_border_color = BORDER_COLOR;
 char map_symbol = MAP_SYMBOL;
 int map_rows = BLOCKS_PER_VLINE;
 int map_symbols_per_line = BLOCKS_PER_HLINE;
 int use_entire_window = 0;
+
+int map_completed = 0;
+
+extern HANDLE hStdOut;
+extern WORD default_color;
+extern int b_flag;
+extern int m_flag;
 extern int v_flag;
 
-void DisplayLastError(char *caption);
+/* prototypes */
+void display_error(char *string);
+void display_last_error(char *caption);
 void clear_line(FILE *f);
 
-/* adjust map dimensions to fill entire screen */
+/**
+ * @brief Adjusts map dimensions to fill the entire screen.
+ */
 void CalculateClusterMapDimensions(void)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	HANDLE h;
 	SMALL_RECT sr;
+	HANDLE h;
 
 	h = GetStdHandle(STD_OUTPUT_HANDLE);
 	if(GetConsoleScreenBufferInfo(h,&csbi)){
@@ -99,32 +99,47 @@ void CalculateClusterMapDimensions(void)
 			(void)SetConsoleWindowInfo(h,FALSE,&sr);
 		}
 	} else {
-		printf("CalculateClusterMapDimensions() failed!\n\n");
+		display_error("CalculateClusterMapDimensions() failed!\n\n");
 	}
 }
 
-void AllocateClusterMap(void)
+/**
+ * @brief Allocates cluster map.
+ * @return Zero for success,
+ * negative value otherwise.
+ */
+int AllocateClusterMap(void)
 {
 	cluster_map = malloc(map_rows * map_symbols_per_line);
-	if(!cluster_map){
+	if(cluster_map == NULL){
+		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
 		printf("Cannot allocate %i bytes of memory for cluster map!\n\n",
 			map_rows * map_symbols_per_line);
-		exit(1);
+		if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+		return (-1);
 	}
 	memset(cluster_map,0,map_rows * map_symbols_per_line);
+	return 0;
 }
 
+/**
+ * @brief Frees cluster map resources.
+ */
 void FreeClusterMap(void)
 {
-	if(cluster_map) free(cluster_map);
+	if(cluster_map)
+		free(cluster_map);
 }
 
+/**
+ * @brief Redraws cluster map on the screen.
+ */
 void RedrawMap(udefrag_progress_info *pi)
 {
-	int i,j;
+	WORD border_color = map_border_color;
 	WORD color, prev_color = 0x0;
 	char c[2];
-	WORD border_color = map_border_color;
+	int i,j;
 	
 	if(pi){
 		if(pi->cluster_map && pi->cluster_map_size == map_rows * map_symbols_per_line)
@@ -178,18 +193,21 @@ void RedrawMap(udefrag_progress_info *pi)
 
 	fprintf(stderr,"\n");
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	else settextcolor(console_attr);
-	map_completed = TRUE;
+	else settextcolor(default_color);
+	map_completed = 1;
 }
 
-void InitializeMapDisplay(void)
+/**
+ * @brief Prepares the screen for the map draw.
+ */
+void InitializeMapDisplay(char volume_letter)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD cursor_pos;
 
 	clear_line(stderr);
 	fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %u/%u",
-		letter,"analyze:  ",0.00,0,0);
+		volume_letter,"analyze:  ",0.00,0,0);
 	RedrawMap(NULL);
 
 	if(use_entire_window){
@@ -199,8 +217,8 @@ void InitializeMapDisplay(void)
 		else
 			printf("\n\n\n\n\n\n\n\n\n\n\n");
 		/* move cursor back to the previous line */
-		if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
-			DisplayLastError("Cannot retrieve cursor position!");
+		if(!GetConsoleScreenBufferInfo(hStdOut,&csbi)){
+			display_last_error("Cannot retrieve cursor position!");
 			return; /* impossible to determine the current cursor position  */
 		}
 		cursor_pos.X = 0;
@@ -208,68 +226,7 @@ void InitializeMapDisplay(void)
 			cursor_pos.Y = csbi.dwCursorPosition.Y - 1;
 		else
 			cursor_pos.Y = csbi.dwCursorPosition.Y - 11;
-		if(!SetConsoleCursorPosition(hOut,cursor_pos))
-			DisplayLastError("Cannot set cursor position!");
-	}
-}
-
-BOOL first_run = TRUE;
-
-void __stdcall update_progress(udefrag_progress_info *pi, void *p)
-{
-	char op; char *op_name = "";
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	COORD cursor_pos;
-	char *results;
-    
-	if(!p_flag){
-		if(first_run){
-			/*
-			* Ultra fast ntfs analysis contains one piece of code 
-			* that heavily loads CPU for one-two seconds.
-			*/
-			(void)SetThreadPriority(GetCurrentThread(),THREAD_PRIORITY_ABOVE_NORMAL);
-			first_run = FALSE;
-		}
-		
-		if(map_completed){
-			if(!GetConsoleScreenBufferInfo(hOut,&csbi)){
-				DisplayLastError("Cannot retrieve cursor position!");
-				return;
-			}
-			cursor_pos.X = 0;
-			cursor_pos.Y = csbi.dwCursorPosition.Y - map_rows - 3 - 2;
-			if(!SetConsoleCursorPosition(hOut,cursor_pos)){
-				DisplayLastError("Cannot set cursor position!");
-				return;
-			}
-		}
-		
-		op = pi->current_operation;
-		if(op == 'A' || op == 'a')      op_name = "analyze:  ";
-		else if(op == 'D' || op == 'd') op_name = "defrag:   ";
-		else                            op_name = "optimize: ";
-		clear_line(stderr);
-		fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
-			letter,op_name,pi->percentage,pi->fragmented,pi->files);
-		
-		if(pi->completion_status != 0 && !stop_flag){ /* set progress indicator to 100% state */
-			clear_line(stderr);
-			fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
-				letter,op_name,pi->fragmented,pi->files);
-			if(!m_flag) fprintf(stderr,"\n");
-		}
-		
-		if(m_flag) /* display cluster map */
-			RedrawMap(pi);
-	}
-	
-	if(pi->completion_status != 0 && v_flag){
-		/* print results of the completed job */
-		results = udefrag_get_default_formatted_results(pi);
-		if(results){
-			printf("\n%s",results);
-			udefrag_release_default_formatted_results(results);
-		}
+		if(!SetConsoleCursorPosition(hStdOut,cursor_pos))
+			display_last_error("Cannot set cursor position!");
 	}
 }

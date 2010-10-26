@@ -41,7 +41,6 @@ extern int p_flag;
 extern int v_flag;
 extern int m_flag;
 extern int obsolete_option;
-extern char letter;
 
 extern short map_border_color;
 extern char map_symbol;
@@ -129,7 +128,7 @@ void show_help(void)
 		"       --use-entire-window            Expand cluster map to use entire\n"
 		"                                      console window.\n" 
 		"       --wait                         Wait until already running instance\n"
-		"                                      of UltraDefrag completes before\n"
+		"                                      of udefrag.exe tool completes before\n"
 		"                                      starting the job (useful for\n"
 		"                                      the scheduled defragmentation).\n"
 		"\n"
@@ -143,11 +142,11 @@ void show_help(void)
 		"Accepted environment variables:\n"
 		"\n"
 		"  UD_IN_FILTER                        List of files to be included\n"
-		"                                      in defragmentation process. File names\n"
+		"                                      in defragmentation process. Patterns\n"
 		"                                      must be separated by semicolons.\n"
 		"\n"
 		"  UD_EX_FILTER                        List of files to be excluded from\n"
-		"                                      defragmentation process. File names\n"
+		"                                      defragmentation process. Patterns\n"
 		"                                      must be separated by semicolons.\n"
 		"\n"
 		"  UD_SIZELIMIT                        Exclude all files larger than specified.\n"
@@ -401,8 +400,7 @@ void parse_cmdline(int argc, char **argv)
 	/* --all-fixed flag has more precedence */
 	if(all_fixed_flag) all_flag = 0;
 	
-	letter = letters[0];
-	if(!l_flag && !all_flag && !all_fixed_flag && !letter) h_flag = 1;
+	if(!l_flag && !all_flag && !all_fixed_flag && !letters[0]) h_flag = 1;
 	
 	/* calculate map dimensions if --use-entire-window flag is set */
 	if(use_entire_window) CalculateClusterMapDimensions();
