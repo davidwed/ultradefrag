@@ -301,30 +301,32 @@ Var AtLeastXP
  */
 !macro InstallConfigFiles
 
-  ; 1. install default boot time script if it is not installed yet
+  ; 1. install boot time script if it is not installed yet
   SetOutPath "$SYSDIR"
   ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
     File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
   ${EndUnless}
   
-  ; 2. install GUI related config files
+  ; 2. install report options and style
 !ifndef MICRO_EDITION
   ; A. install default CSS for file fragmentation reports
   SetOutPath "$INSTDIR\scripts"
-  ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css"
-    File "${ROOTDIR}\src\scripts\udreport.css"
-  ${EndUnless}
+  ${If} ${FileExists} "$INSTDIR\scripts\udreport.css"
+    ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css.old"
+      ; ensure that user's choice will not be lost
+      Rename "$INSTDIR\scripts\udreport.css" "$INSTDIR\scripts\udreport.css.old"
+    ${EndUnless}
+  ${EndIf}
+  File "${ROOTDIR}\src\scripts\udreport.css"
   ; B. install default report options
   SetOutPath "$INSTDIR\options"
-  ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua"
-    File "${ROOTDIR}\src\scripts\udreportopts.lua"
-  ${Else}
+  ${If} ${FileExists} "$INSTDIR\options\udreportopts.lua"
     ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua.old"
-      ; this sequence ensures that we have the file in recent format
+      ; ensure that user's choice will not be lost
       Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.old"
-      File "${ROOTDIR}\src\scripts\udreportopts.lua"
     ${EndUnless}
-  ${EndUnless}
+  ${EndIf}
+  File "${ROOTDIR}\src\scripts\udreportopts.lua"
 !endif
 
 !macroend

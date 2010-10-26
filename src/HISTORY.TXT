@@ -7,6 +7,8 @@ HISTORY
     - file sizes were converted to a human readable format in text reports
     - Developers: build scripts were highly optimized
     - mistakes preventing build on the path containing spaces were eliminated
+    - support of custom report options was added to simplify upgrade 
+      of default options
     - the following translations were updated:
 
       Chinese (Simplified)

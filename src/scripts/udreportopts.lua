@@ -1,5 +1,7 @@
 -------------------------------------------------------------------------------
--- Ultra Defragmenter report options
+-- Ultra Defragmenter report options (default).
+-- Save your personal preferences as udreportopts-custom.lua
+-- to ensure that they will not be overwritten on upgrade.
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------

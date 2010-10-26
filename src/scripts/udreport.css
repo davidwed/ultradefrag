@@ -1,5 +1,7 @@
 /*
-* This stylesheet controls a style of UltraDefrag reports.
+* This stylesheet controls a default style of UltraDefrag reports.
+* Save your custom stylesheet as udreport-custom.css
+* to ensure that it will not be overwritten on upgrade.
 */
 
 body {
@@ -30,6 +32,12 @@ td {
 }
 
 .right {
+	text-align: right;
+}
+
+.filesize {
+	padding-left: 5pt;
+	padding-right: 5pt;
 	text-align: right;
 }
 

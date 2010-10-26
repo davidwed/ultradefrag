@@ -417,6 +417,8 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 	UINT i, id;
 	MENUITEMINFOW mi;
 	short lang_name[MAX_PATH];
+	wchar_t *report_opts_path;
+	FILE *f;
 
 	switch(uMsg){
 	case WM_CREATE:
@@ -542,10 +544,17 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			}
 			return 0;
 		case IDM_CFG_REPORTS:
+			/* open custom options or default if they aren't exist */
+			report_opts_path = L".\\options\\udreportopts.lua";
+			f = fopen(".\\options\\udreportopts-custom.lua","r");
+			if(f != NULL){
+				fclose(f);
+				report_opts_path = L".\\options\\udreportopts-custom.lua";
+			}
 			if(portable_mode)
-				WgxShellExecuteW(hWindow,L"open",L"notepad.exe",L".\\options\\udreportopts.lua",NULL,SW_SHOW);
+				WgxShellExecuteW(hWindow,L"open",L"notepad.exe",report_opts_path,NULL,SW_SHOW);
 			else
-				WgxShellExecuteW(hWindow,L"Edit",L".\\options\\udreportopts.lua",NULL,NULL,SW_SHOW);
+				WgxShellExecuteW(hWindow,L"Edit",report_opts_path,NULL,NULL,SW_SHOW);
 			return 0;
 		/* Help menu handlers */
 		case IDM_CONTENTS:

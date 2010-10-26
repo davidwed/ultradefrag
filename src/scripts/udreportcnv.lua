@@ -141,7 +141,10 @@ function get_javascript()
 end
 
 function get_css()
-	local css = "", f
+	local css = ""
+	local custom_css = ""
+	local f
+
 	-- read udreport.css file contents
 	if arg[2] ~= "null" then
 		f = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udreport.css", "r"))
@@ -153,7 +156,22 @@ function get_css()
 	if css == nil then
 		css = ""
 	end
-	return css
+
+	-- read udreport-custom.css file contents
+	if arg[2] ~= "null" then
+		f = io.open(arg[2] .. "\\UltraDefrag\\scripts\\udreport-custom.css", "r")
+	else
+		f = io.open(".\\scripts\\udreport-custom.css", "r")
+	end
+	if f ~= nil then
+		custom_css = f:read("*all")
+		f:close()
+		if custom_css == nil then
+			custom_css = ""
+		end
+	end
+
+	return (css .. custom_css)
 end
 
 -------------------------------------------------------------------------------
@@ -220,7 +238,7 @@ function write_main_table_body(f)
 		local class
 		if file.filtered == 1 then class = "f" else class = "u" end
 		f:write("<tr class=\"", class, "\"><td class=\"c\">", file.fragments,"</td>")
-		f:write("<td class=\"right\" id=\"", file.size, "\">", file.hrsize,"</td><td>")
+		f:write("<td class=\"filesize\" id=\"", file.size, "\">", file.hrsize,"</td><td>")
 		write_unicode_name(f,file.uname)
 		f:write("</td><td class=\"c\">", file.comment, "</td></tr>\n")
 	end
@@ -273,11 +291,23 @@ end
 assert(arg[1],"Lua Report file name must be specified!")
 assert(arg[2],"Path to the Windows directory\nmust be specified as second parameter!")
 
--- read options
+-- read default options
 if arg[2] ~= "null" then
 	dofile(arg[2] .. "\\UltraDefrag\\options\\udreportopts.lua")
 else
 	dofile(".\\options\\udreportopts.lua")
+end
+
+-- read custom (user defined) options
+if arg[2] ~= "null" then
+	custom_options = arg[2] .. "\\UltraDefrag\\options\\udreportopts-custom.lua"
+else
+	custom_options = ".\\options\\udreportopts-custom.lua"
+end
+f = io.open(custom_options)
+if f ~= nil then
+	f:close()
+	dofile(custom_options)
 end
 
 -- read source file
