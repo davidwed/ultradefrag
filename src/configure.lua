@@ -109,7 +109,7 @@ function param_action(dialog, param_index)
 		if show_obsolete_options == 1 then
 			dialog.size = "400x205"
 		else
-			dialog.size = "360x160"
+			dialog.size = "370x160"
 		end
 	end
 	return 1
