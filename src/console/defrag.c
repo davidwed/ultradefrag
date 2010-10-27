@@ -26,6 +26,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <process.h>
+#include <conio.h>
 
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
@@ -33,6 +34,7 @@
 #define settextcolor(c) (void)SetConsoleTextAttribute(hStdOut,c)
 
 /* global variables */
+HANDLE hSynchEvent = NULL;
 HANDLE hStdOut; /* handle of the standard output */
 WORD default_color = 0x7; /* default text color */
 
@@ -215,6 +217,35 @@ void display_last_error(char *caption)
 	}
 }
 
+/**
+* @brief Synchronizes with other scheduled 
+* jobs when running with --wait option.
+*/
+void begin_synchronization(void)
+{
+	/* create event */
+	do {
+		hSynchEvent = CreateEvent(NULL,FALSE,TRUE,"udefrag-exe-synch-event");
+		if(hSynchEvent == NULL){
+			display_last_error("Cannot create udefrag-exe-synch-event event!");
+			return;
+		}
+		if(GetLastError() == ERROR_ALREADY_EXISTS && wait_flag){
+			CloseHandle(hSynchEvent);
+			Sleep(1000);
+			continue;
+		}
+		return;
+	} while (1);
+}
+
+void end_synchronization(void)
+{
+	/* release event */
+	if(hSynchEvent)
+		CloseHandle(hSynchEvent);
+}
+
 /*DWORD WINAPI test_thread(LPVOID p)
 {
 	udefrag_start_job('c',ANALYSIS_JOB,0,NULL,NULL,NULL);
@@ -273,8 +304,14 @@ int __cdecl main(int argc, char **argv)
 	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
 		display_last_error("Cannot set Ctrl + C handler!");
 	
-	/* TODO: synchronize with other scheduled jobs running with --wait option */
+	begin_synchronization();
+	
+	/* uncomment for the --wait option testing */
+	//printf("the job gets running\n");
+	//getch();
 	result = process_volumes();
+	
+	end_synchronization();
 	
 	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
 	terminate_console(result);
