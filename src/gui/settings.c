@@ -295,7 +295,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 	}
 	
 	while(!stop_track_changes){
-		status = WaitForSingleObject(h,500/*INFINITE*/);
+		status = WaitForSingleObject(h,100);
 		if(status == WAIT_OBJECT_0){
 			/* synchronize preferences reload with map redraw */
 			if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
@@ -473,7 +473,7 @@ track_again:
 	}
 	
 	while(!stop_track_boot_exec){
-		if(WaitForSingleObject(hEvent,500) == WAIT_OBJECT_0){
+		if(WaitForSingleObject(hEvent,100) == WAIT_OBJECT_0){
 			if(IsBootTimeDefragEnabled()){
 				WgxDbgPrint("Boot time defragmenter enabled (externally)\n");
 				boot_time_defrag_enabled = 1;

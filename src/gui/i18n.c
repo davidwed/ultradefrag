@@ -433,7 +433,7 @@ DWORD WINAPI LangIniChangesTrackingProc(LPVOID lpParameter)
 	}
 	
 	while(!stop_track_lang_ini){
-		status = WaitForSingleObject(h,500/*INFINITE*/);
+		status = WaitForSingleObject(h,100);
 		if(status == WAIT_OBJECT_0){
 			// TODO: update only if lang.ini changed
 			ApplyLanguagePack();
@@ -519,7 +519,7 @@ DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)
 	}
 	
 	while(!stop_track_i18n_folder){
-		status = WaitForSingleObject(h,500/*INFINITE*/);
+		status = WaitForSingleObject(h,100);
 		if(status == WAIT_OBJECT_0){
 			// TODO: update only if current translation updated
 			ApplyLanguagePack();
