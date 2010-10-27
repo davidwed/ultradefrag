@@ -61,6 +61,9 @@ int rheight = 0;
 extern RECT r_rc;
 extern int map_block_size;
 extern int grid_line_width;
+extern int grid_color_r;
+extern int grid_color_g;
+extern int grid_color_b;
 extern double pix_per_dialog_unit;
 extern int last_block_size;
 extern int last_grid_width;
@@ -122,8 +125,16 @@ WGX_OPTION options[] = {
 	{WGX_CFG_INT,     0, "map_block_size", &map_block_size, (void *)DEFAULT_MAP_BLOCK_SIZE},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
-	{WGX_CFG_COMMENT, 0, "the grid line width, in pixels; default value is 1", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "grid line width, in pixels; default value is 1", NULL, ""},
 	{WGX_CFG_INT,     0, "grid_line_width", &grid_line_width, (void *)DEFAULT_GRID_LINE_WIDTH},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+
+	{WGX_CFG_COMMENT, 0, "grid line color, in RGB format; default value is (0;0;0)", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "all color components should be in range 0-255", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "(0;0;0) means black; (255;255;255) - white", NULL, ""},
+	{WGX_CFG_INT,     0, "grid_color_r", &grid_color_r, (void *)0},
+	{WGX_CFG_INT,     0, "grid_color_g", &grid_color_g, (void *)0},
+	{WGX_CFG_INT,     0, "grid_color_b", &grid_color_b, (void *)0},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 
 	{WGX_CFG_COMMENT, 0, "set disable_latest_version_check parameter to 1", NULL, ""},
@@ -322,6 +333,9 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 					ResizeMap(last_x,last_y,last_width,last_height);
 					InvalidateRect(hMap,NULL,TRUE);
 					UpdateWindow(hMap);
+				} else {
+					/* redraw map if grid color changed */
+					RedrawMap(current_job,0);
 				}
 			}
 			/* wait for the next notification */

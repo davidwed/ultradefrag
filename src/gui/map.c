@@ -42,6 +42,9 @@ int last_width = 0;
 int last_height = 0;
 
 COLORREF grid_color = RGB(0,0,0); //RGB(200,200,200)
+int grid_color_r = 0;
+int grid_color_g = 0;
+int grid_color_b = 0;
 
 COLORREF colors[NUM_OF_SPACE_STATES] = 
 {
@@ -164,7 +167,10 @@ static void DrawGrid(HDC hdc)
 	(void)SelectObject(hdc,hOldBrush);
 	(void)DeleteObject(hBrush);
 
-	if(grid_line_width == 0) return;
+	if(grid_line_width == 0)
+		return;
+
+	grid_color = RGB(grid_color_r,grid_color_g,grid_color_b);
 	hPen = CreatePen(PS_SOLID,1,grid_color);
 	hOldPen = SelectObject(hdc,hPen);
 	/* draw vertical lines */
@@ -292,6 +298,10 @@ void RedrawMap(volume_processing_job *job, int map_refill_required)
 		if(job->map.scaled_size != map_blocks_per_line * map_lines){
 			DrawGrid(job->map.hdc);
 			map_refill_required = 1;
+		}
+		/* if grid color changed, redraw it */
+		if(grid_color != RGB(grid_color_r,grid_color_g,grid_color_b)){
+			DrawGrid(job->map.hdc);
 		}
 	}
 		
