@@ -59,35 +59,65 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
  * the portable package or regular installation.
  * @return Nonzero value indicates that it is
  * most likely a part of the portable package.
- * @todo Decision depends on executable path,
- * which should be reconsidered when installation
- * path will become adjustable.
  */
 static int IsPortable(void)
 {
 	char cd[MAX_PATH];
 	char windir[MAX_PATH];
 	char path[MAX_PATH];
+    HKEY hRegKey = NULL;
+    DWORD path_length = MAX_PATH;
+    REGSAM samDesired = KEY_READ;
+    OSVERSIONINFO osvi;
+    BOOL bIsWindowsXPorLater;
 	
 	if(!GetCurrentDirectory(MAX_PATH,cd)){
 		WgxDbgPrintLastError("IsPortable: cannot get current directory");
 		return 1;
 	}
 	
-	if(!GetWindowsDirectory(windir,MAX_PATH)){
-		WgxDbgPrintLastError("IsPortable: cannot get windows directory");
+    /* only XP and later support 32-bit registry view, so check for it */
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+    GetVersionEx(&osvi);
+
+    bIsWindowsXPorLater = 
+       ( (osvi.dwMajorVersion > 5) ||
+       ( (osvi.dwMajorVersion == 5) && (osvi.dwMinorVersion >= 1) ));
+
+    if(bIsWindowsXPorLater)
+        samDesired |= KEY_WOW64_32KEY;
+
+    /* get install location from uninstall registry key */
+	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\UltraDefrag",0,samDesired,&hRegKey) != ERROR_SUCCESS){
+		WgxDbgPrintLastError("IsPortable: cannot open registry");
 		return 1;
 	}
 	
-	_snprintf(path,MAX_PATH,"%s\\UltraDefrag",windir);
-	path[MAX_PATH - 1] = 0;
+	if(RegQueryValueEx(hRegKey,"InstallLocation",NULL,NULL,(LPBYTE) &windir,&path_length) != ERROR_SUCCESS){
+		WgxDbgPrintLastError("IsPortable: cannot read registry");
+		return 1;
+	}
+    
+    /* make sure we have a trailing zero character */
+    windir[path_length] = 0;
+    
+    /* strip off any double quotes */
+    if(windir[0] == '"'){
+        (void)strncpy(path,&windir[1],strlen(windir)-2);
+        path[strlen(windir)-2] = 0;
+    } else {
+        (void)strcpy(path,windir);
+        path[strlen(windir)] = 0;
+    }
 	
 	if(_stricmp(path,cd) == 0){
-		WgxDbgPrint("The program is installed to %s, so it isn't portable\n",path);
+		WgxDbgPrint("Install location \"%s\" matches \"%s\", so it isn't portable\n",path,cd);
 		return 0;
 	}
 	
-	WgxDbgPrint("The program is not installed to %s, so it is portable\n",path);
+	WgxDbgPrint("Install location \"%s\" differs from \"%s\", so it is portable\n",path,cd);
 	return 1;
 }
 
