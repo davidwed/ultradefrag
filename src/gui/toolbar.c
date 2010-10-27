@@ -37,7 +37,7 @@ struct toolbar_button {
     int command;
     int state;
     int style;
-	short *tooltip_key;
+	wchar_t *tooltip_key;
 	char *hotkeys;
 };
 

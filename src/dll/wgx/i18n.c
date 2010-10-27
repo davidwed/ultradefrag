@@ -32,10 +32,10 @@
 
 #include "wgx.h"
 
-void ExtractToken(short *dest, short *src, int max_chars)
+void ExtractToken(wchar_t *dest, wchar_t *src, int max_chars)
 {
 	signed int i,cnt;
-	short ch;
+	wchar_t ch;
 	
 	cnt = 0;
 	for(i = 0; i < max_chars; i++){
@@ -56,14 +56,14 @@ void ExtractToken(short *dest, short *src, int max_chars)
 	}
 }
 
-void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,short *line_buffer)
+void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *line_buffer)
 {
-	short first_char = line_buffer[0];
-	short *eq_pos;
+	wchar_t first_char = line_buffer[0];
+	wchar_t *eq_pos;
 	int param_len, value_len;
 	int i;
-	short *param_buffer;
-	short *value_buffer;
+	wchar_t *param_buffer;
+	wchar_t *value_buffer;
 
 	/* skip comments and empty lines */
  	if(first_char == ';' || first_char == '#')
@@ -71,9 +71,9 @@ void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,short *line_buffer)
 	eq_pos = wcschr(line_buffer,'=');
 	if(!eq_pos) return;
 
-	param_buffer = malloc(8192 * sizeof(short));
+	param_buffer = malloc(8192 * sizeof(wchar_t));
 	if(!param_buffer) return;
-	value_buffer = malloc(8192 * sizeof(short));
+	value_buffer = malloc(8192 * sizeof(wchar_t));
 	if(!value_buffer){ free(param_buffer); return; }
 
 	/* extract a parameter-value pair */
@@ -88,7 +88,7 @@ void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,short *line_buffer)
 	for(i = 0;; i++){
 		if(table[i].Key == NULL) break;
 		if(!wcscmp(table[i].Key,param_buffer)){
-			table[i].LoadedString = malloc((wcslen(value_buffer) + 1) * sizeof(short));
+			table[i].LoadedString = malloc((wcslen(value_buffer) + 1) * sizeof(wchar_t));
 			if(table[i].LoadedString) (void)wcscpy(table[i].LoadedString, value_buffer);
 			/* break; // the same text may be used for few GUI controls */
 		}
@@ -104,19 +104,19 @@ void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,short *line_buffer)
  * @note All lines in i18n file must be no longer than 8189 characters.
  * Otherwise they will be truncated before an analysis.
  */
-BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_file_path)
+BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path)
 {
 	FILE *f;
-	short *line_buffer;
+	wchar_t *line_buffer;
 	
 	/* parameters validation */
 	if(table == NULL || lng_file_path == NULL)
 		return FALSE;
 
-	line_buffer = malloc(8192 * sizeof(short));
+	line_buffer = malloc(8192 * sizeof(wchar_t));
 	if(line_buffer == NULL){
 		WgxDbgPrint("WgxBuildResourceTable: cannot allocate %u bytes of memory\n",
-			8192 * sizeof(short));
+			8192 * sizeof(wchar_t));
 		return FALSE;
 	}
 	
@@ -163,7 +163,7 @@ void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow
 /**
  * @brief Applies a 18n table to individual GUI control.
  */
-void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, short *key)
+void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, wchar_t *key)
 {
 	(void)SetWindowTextW(hWnd,WgxGetResourceString(table,key));
 }
@@ -175,7 +175,7 @@ void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, short *key)
  * @return A pointer to the localized string if
  * available or to the default string otherwise.
  */
-short * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,short *key)
+wchar_t * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *key)
 {
 	int i;
 	

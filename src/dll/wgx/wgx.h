@@ -26,6 +26,8 @@
 #ifndef _WGX_H_
 #define _WGX_H_
 
+#include <wchar.h>
+
 /* definitions missing on several development systems */
 #ifndef USE_WINDDK
 #ifndef SetWindowLongPtr
@@ -57,9 +59,9 @@ typedef unsigned uintptr_t;
 /* wgx structures */
 typedef struct _WGX_I18N_RESOURCE_ENTRY {
 	int ControlID;
-	short *Key;
-	short *DefaultString;
-	short *LoadedString;
+	wchar_t *Key;
+	wchar_t *DefaultString;
+	wchar_t *LoadedString;
 } WGX_I18N_RESOURCE_ENTRY, *PWGX_I18N_RESOURCE_ENTRY;
 
 typedef struct _WGX_FONT {
@@ -96,10 +98,10 @@ HMENU __stdcall WgxBuildMenu(WGX_MENU *menu_table);
 HMENU __stdcall WgxBuildPopupMenu(WGX_MENU *menu_table);
 
 /* lines in language files are limited by 8191 characters, which is more than enough */
-BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,short *lng_file_path);
+BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path);
 void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow);
-void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, short *key);
-short * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,short *key);
+void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, wchar_t *key);
+wchar_t * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *key);
 void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table);
 
 void __cdecl WgxEnableWindows(HANDLE hMainWindow, ...);

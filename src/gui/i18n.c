@@ -113,7 +113,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 
 struct menu_item {
 	int id;          /* menu item identifier */
-	short *key;      /* i18n table entry key */
+	wchar_t *key;      /* i18n table entry key */
 	char *hotkeys;  /* hotkeys assigned to the item */
 };
 
