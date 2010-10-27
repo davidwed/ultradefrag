@@ -469,7 +469,7 @@ int ShutdownOrHibernate(void)
 	TOKEN_PRIVILEGES tkp; 
 	
 	if(seconds_for_shutdown_rejection){
-		if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0)
+		if(DialogBoxW(hInstance,MAKEINTRESOURCEW(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0)
 			return 0;
 		/* in case of errors we'll shutdown anyway */
 		/* to avoid situation when pc works a long time without any control */

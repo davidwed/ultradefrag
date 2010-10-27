@@ -13,6 +13,8 @@ HISTORY
 
       Chinese (Simplified)
 
+    - the problem of dialog captions not being translated was fixed
+    
     alpha1:
     - GUI was redesigned to be much more ergonomic (comfortable for daily use)
     - ability to change preferences without the need to restart GUI was added

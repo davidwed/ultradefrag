@@ -47,7 +47,7 @@ void AboutBox(void)
 	else
 		id = IDD_ABOUT;
 
-	if(DialogBox(hInstance,MAKEINTRESOURCE(id),hWindow,(DLGPROC)AboutDlgProc) == (-1))
+	if(DialogBoxW(hInstance,MAKEINTRESOURCEW(id),hWindow,(DLGPROC)AboutDlgProc) == (-1))
 		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
 }
 

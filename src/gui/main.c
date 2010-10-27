@@ -465,7 +465,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 					IDM_SHUTDOWN,MF_BYCOMMAND | MF_UNCHECKED);
 			} else {
 				if(show_shutdown_check_confirmation_dialog){
-					if(DialogBox(hInstance,MAKEINTRESOURCE(IDD_CHECK_CONFIRM),
+					if(DialogBoxW(hInstance,MAKEINTRESOURCEW(IDD_CHECK_CONFIRM),
 					  hWindow,(DLGPROC)CheckConfirmDlgProc) != 0)
 					{
 						shutdown_flag = 1;
