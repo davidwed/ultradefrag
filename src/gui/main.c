@@ -63,13 +63,14 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 static int IsPortable(void)
 {
 	char cd[MAX_PATH];
-	char windir[MAX_PATH];
+	char instdir[MAX_PATH];
 	char path[MAX_PATH];
     HKEY hRegKey = NULL;
-    DWORD path_length = MAX_PATH;
+    DWORD path_length = MAX_PATH - 1;
     REGSAM samDesired = KEY_READ;
     OSVERSIONINFO osvi;
     BOOL bIsWindowsXPorLater;
+	LONG result;
 	
 	if(!GetCurrentDirectory(MAX_PATH,cd)){
 		WgxDbgPrintLastError("IsPortable: cannot get current directory");
@@ -90,26 +91,32 @@ static int IsPortable(void)
         samDesired |= KEY_WOW64_32KEY;
 
     /* get install location from uninstall registry key */
-	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\UltraDefrag",0,samDesired,&hRegKey) != ERROR_SUCCESS){
+	result = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
+		"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\UltraDefrag",
+		0,samDesired,&hRegKey);
+	if(result != ERROR_SUCCESS){
+		SetLastError((DWORD)result);
 		WgxDbgPrintLastError("IsPortable: cannot open registry");
 		return 1;
 	}
 	
-	if(RegQueryValueEx(hRegKey,"InstallLocation",NULL,NULL,(LPBYTE) &windir,&path_length) != ERROR_SUCCESS){
+	result = RegQueryValueEx(hRegKey,"InstallLocation",NULL,NULL,(LPBYTE) &instdir,&path_length);
+	RegCloseKey(hRegKey);
+	if(result != ERROR_SUCCESS){
+		SetLastError((DWORD)result);
 		WgxDbgPrintLastError("IsPortable: cannot read registry");
 		return 1;
 	}
     
     /* make sure we have a trailing zero character */
-    windir[path_length] = 0;
+    instdir[path_length] = 0;
     
     /* strip off any double quotes */
-    if(windir[0] == '"'){
-        (void)strncpy(path,&windir[1],strlen(windir)-2);
-        path[strlen(windir)-2] = 0;
+    if(instdir[0] == '"'){
+        (void)strncpy(path,&instdir[1],strlen(instdir)-2);
+        path[strlen(instdir)-2] = 0;
     } else {
-        (void)strcpy(path,windir);
-        path[strlen(windir)] = 0;
+        (void)strcpy(path,instdir);
     }
 	
 	if(_stricmp(path,cd) == 0){

@@ -51,6 +51,10 @@
 #define EWX_FORCEIFHUNG     0x00000010
 #endif
 
+#ifndef KEY_WOW64_32KEY
+#define KEY_WOW64_32KEY    (0x0200)
+#endif
+
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
