@@ -131,6 +131,18 @@ int register_cmd(void)
 		free(data);
 		return 6;
 	}
+	
+	if(size < 2){ /* "\0\0" */
+		/* empty value detected */
+		strcpy(data,cmd);
+		data[strlen(data) + 1] = 0;
+		length = strlen(data) + 1 + 1;
+		goto save_changes;
+	}
+	
+	/* terminate value by two zeros */
+	data[size - 2] = 0;
+	data[size - 1] = 0;
 
 	length = size - 1;
 	for(i = 0; i < length;){
@@ -144,6 +156,7 @@ int register_cmd(void)
 	data[i + strlen(cmd) + 1] = 0;
 	length += strlen(cmd) + 1 + 1;
 
+save_changes:
 	result = RegSetValueEx(hKey,"BootExecute",0,REG_MULTI_SZ,data,length);
 	if(result != ERROR_SUCCESS){
 		if(!silent){
@@ -202,6 +215,15 @@ int unregister_cmd(void)
 		return 6;
 	}
 
+	if(size < 2){ /* "\0\0" */
+		/* empty value detected */
+		goto done;
+	}
+	
+	/* terminate value by two zeros */
+	data[size - 2] = 0;
+	data[size - 1] = 0;
+
 	new_data = malloc(size);
 	if(new_data == NULL){
 		if(!silent)
@@ -241,6 +263,7 @@ int unregister_cmd(void)
 		return 7;
 	}
 
+done:
 	(void)RegCloseKey(hKey);
 	free(data);
 	free(new_data);
