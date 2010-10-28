@@ -3,6 +3,7 @@ HISTORY
   Version 5.0.0  2010-10-
   ------------------------------------------------------------------------------
     alpha2:
+    - ability to resize list of volumes was added to graphical interface
     - file sizes were added to HTML reports
     - file sizes were converted to a human readable format in text reports
     - few bugs were fixed in the BootExecute Control program used to enable and

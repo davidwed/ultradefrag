@@ -185,6 +185,48 @@ int ResizeVolList(int x, int y, int width, int height)
 }
 
 /**
+ * @brief Calculates a minimal height of the list.
+ */
+int GetMinVolListHeight(void)
+{
+	return DPI(MIN_LIST_HEIGHT);
+}
+
+/**
+ * @brief Calculates a maximal height of the list.
+ */
+int GetMaxVolListHeight(void)
+{
+	RECT rc;
+	int h, tb_height, sb_height;
+	
+	if(!GetClientRect(hWindow,&rc)){
+		WgxDbgPrintLastError("GetMaxVolListHeight: cannot get main window dimensions");
+		return DPI(VLIST_HEIGHT);
+	}
+	h = rc.bottom - rc.top;
+	
+	if(GetWindowRect(hToolbar,&rc))
+		tb_height = rc.bottom - rc.top;
+	else
+		tb_height = 24 + 2 * GetSystemMetrics(SM_CYEDGE);
+
+	if(!GetClientRect(hStatus,&rc)){
+		WgxDbgPrintLastError("GetMaxVolListHeight: cannot get status bar dimensions");
+		return DPI(VLIST_HEIGHT);
+	} else {
+		if(!MapWindowPoints(hStatus,hWindow,(LPPOINT)(PRECT)(&rc),(sizeof(RECT)/sizeof(POINT)))){
+			WgxDbgPrintLastError("GetMaxVolListHeight: MapWindowPoints failed");
+			return DPI(VLIST_HEIGHT);
+		} else {			
+			sb_height = rc.bottom - rc.top;
+		}
+	}
+
+	return (h - tb_height - sb_height);
+}
+
+/**
  * @brief Frees resources allocated for the list of volumes.
  */
 void ReleaseVolList(void)

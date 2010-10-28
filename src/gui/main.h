@@ -92,6 +92,7 @@
 #define PADDING_X             14  /* horizontal padding between borders and controls */
 #define PADDING_Y             14  /* vertical padding between top border and controls */
 #define VLIST_HEIGHT          130 /* volume list height */
+#define MIN_LIST_HEIGHT       40  /* minimal list height */
 
 /*
 * An article of Mumtaz Zaheer from Pakistan helped me very much
@@ -180,6 +181,8 @@ void UpdateStatusBar(udefrag_progress_info *pi);
 
 void ResizeMap(int x, int y, int width, int height);
 int  ResizeVolList(int x, int y, int width, int height);
+int  GetMinVolListHeight(void);
+int  GetMaxVolListHeight(void);
 int  ResizeStatusBar(int bottom, int width);
 
 void GetPrefs(void);
@@ -208,6 +211,7 @@ extern HWND hMap;
 extern HWND hStatus;
 extern HMENU hMainMenu;
 extern HWND hToolbar;
+extern double pix_per_dialog_unit;
 extern WGX_FONT wgxFont;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern volume_processing_job *current_job;
@@ -234,6 +238,7 @@ extern int init_maximized_window;
 extern int skip_removable;
 extern int disable_latest_version_check;
 extern int user_defined_column_widths[];
+extern int list_height;
 
 /*
 * Note:

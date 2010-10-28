@@ -52,6 +52,7 @@ int init_maximized_window = 0;
 int skip_removable = TRUE;
 int disable_latest_version_check = 0;
 int user_defined_column_widths[] = {0,0,0,0,0};
+int list_height = VLIST_HEIGHT;
 
 int rx = UNDEFINED_COORD;
 int ry = UNDEFINED_COORD;
@@ -175,6 +176,7 @@ WGX_OPTION options[] = {
 	{WGX_CFG_INT,     0, "column3_width", &user_defined_column_widths[2], 0},
 	{WGX_CFG_INT,     0, "column4_width", &user_defined_column_widths[3], 0},
 	{WGX_CFG_INT,     0, "column5_width", &user_defined_column_widths[4], 0},
+	{WGX_CFG_INT,     0, "list_height", &list_height, (void *)VLIST_HEIGHT},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 
 	{0,               0, NULL, NULL, NULL}
@@ -283,6 +285,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 	int s_maximized, s_init_maximized;
 	int s_skip_removable;
 	int cw[sizeof(user_defined_column_widths) / sizeof(int)];
+	int s_list_height;
 	short *s = L"";
 	short buffer[256];
 	
@@ -307,6 +310,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				s_init_maximized = init_maximized_window;
 				s_skip_removable = skip_removable;
 				memcpy(&cw,&user_defined_column_widths,sizeof(user_defined_column_widths));
+				s_list_height = list_height;
 				
 				/* reload preferences */
 				GetPrefs();
@@ -317,6 +321,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				init_maximized_window = s_init_maximized;
 				skip_removable = s_skip_removable;
 				memcpy(&user_defined_column_widths,&cw,sizeof(user_defined_column_widths));
+				list_height = s_list_height;
 				
 				SetEvent(hMapEvent);
 

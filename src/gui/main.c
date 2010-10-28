@@ -249,13 +249,24 @@ void ResizeMainWindow(int force)
 	int toolbar_height;
 	RECT rc;
 	int w, h;
+	int min_list_height;
+	int max_list_height;
 	
 	if(!GetClientRect(hWindow,&rc)){
 		WgxDbgPrint("GetClientRect failed in RepositionMainWindowControls()!\n");
 		return;
 	}
 	
-	vlist_height = DPI(VLIST_HEIGHT);
+	/* corect invalid list heights */
+	min_list_height = GetMinVolListHeight();
+	if(list_height < min_list_height)
+		list_height = min_list_height;
+
+	max_list_height = GetMaxVolListHeight();
+	if(list_height > max_list_height)
+		list_height = max_list_height;
+	
+	vlist_height = list_height;//DPI(VLIST_HEIGHT);
 	spacing = DPI(SPACING);
 	w = rc.right - rc.left;
 	h = rc.bottom - rc.top;
@@ -269,9 +280,10 @@ void ResizeMainWindow(int force)
 		toolbar_height = rc.bottom - rc.top;
 	else
 		toolbar_height = 24 + 2 * GetSystemMetrics(SM_CYEDGE);
-	vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height);
+
+	list_height = vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height);
 	sbar_height = ResizeStatusBar(h,w);
-	ResizeMap(0,toolbar_height + vlist_height,w,h - toolbar_height - vlist_height - sbar_height);
+	ResizeMap(0,toolbar_height + vlist_height + 1,w,h - toolbar_height - vlist_height - sbar_height);
 	
 	/* redraw menu bar */
 	DrawMenuBar(hWindow);
@@ -442,6 +454,192 @@ int UpdateMainWindowCoordinates(void)
 }
 
 /**
+ * @brief Defines whether the cursor 
+ * is between list and map controls.
+ * @return Nonzero value indicates that
+ * the cursor is between the controls.
+ */
+static int IsCursorBetweenControls(void)
+{
+	POINT pt;
+	RECT rc;
+	
+	/* get cursor's position */
+	if(!GetCursorPos(&pt)){
+		WgxDbgPrintLastError("IsCursorBetweenControls: cannot get cursor position");
+		return 0;
+	}
+	
+	/* convert screen coordinates to list view control coordinates */
+	if(!MapWindowPoints(NULL,hList,&pt,1)){
+		WgxDbgPrintLastError("IsCursorBetweenControls: MapWindowPoints failed");
+		return 0;
+	}
+	
+	/* get dimensions of the list view control */
+	if(!GetWindowRect(hList,&rc)){
+		WgxDbgPrintLastError("IsCursorBetweenControls: cannot get height of the list view control");
+		return 0;
+	}
+	rc.bottom -= rc.top;
+	rc.right -= rc.left;
+	
+	if(pt.x >= 0 && pt.x <= rc.right \
+		&& pt.y >= rc.bottom \
+		&& pt.y <= rc.bottom + 1) return 1;
+
+	return 0;
+}
+
+/*
+* The splitter control routines.
+* Adopted from http://www.catch22.net/tuts/splitter -
+* a public domain piece of code.
+*/
+
+/**
+ * @brief The last position of the cursor.
+ */
+static int old_y = -4;
+
+/**
+ * @brief Drag mode indicator.
+ */
+static int drag_mode = 0;
+
+/**
+ * @brief Draws moving line of the splitter.
+ * @param[in] y the y coordinate of the cursor
+ * relative to the main window's client area.
+ * @note Calling this routine twice restores background.
+ */
+static void DrawXorBar(int y)
+{
+	HDC hdc;
+	HBITMAP hBitmap;
+	HBRUSH  hBrush, hOldBrush;
+	RECT rc, list_rc;
+	POINT pt;
+	int x, width, height;
+	static WORD _dotPatternBmp[8] = { 
+		0x00aa, 0x0055, 0x00aa, 0x0055, 
+		0x00aa, 0x0055, 0x00aa, 0x0055
+	};
+	
+	/* get dimensions of the main window */
+	if(!GetWindowRect(hWindow,&rc)){
+		WgxDbgPrintLastError("DrawXorBar: cannot get main window dimensions");
+		return;
+	}
+
+	/* get dimensions of the list view control */
+	if(!GetWindowRect(hList,&list_rc)){
+		WgxDbgPrintLastError("DrawXorBar: cannot get list dimensions");
+		return;
+	}
+	
+	width = list_rc.right - list_rc.left - GetSystemMetrics(SM_CXEDGE) * 2;
+	height = 4;
+
+	pt.x = 0;
+	pt.y = y - 2;
+	if(!ClientToScreen(hWindow,&pt)){
+		WgxDbgPrintLastError("DrawXorBar: ClientToScreen failed");
+		return;
+	}
+
+	x = (rc.right - rc.left - width) / 2;
+	y = pt.y - rc.top;
+
+	/* create brush */
+	hBitmap = CreateBitmap(8, 8, 1, 1, _dotPatternBmp);
+	if(hBitmap == NULL){
+		WgxDbgPrintLastError("DrawXorBar: cannot create bitmap");
+		return;
+	}
+	hBrush = CreatePatternBrush(hBitmap);
+	if(hBrush == NULL){
+		WgxDbgPrintLastError("DrawXorBar: cannot create brush");
+		DeleteObject(hBitmap);
+		return;
+	}
+	
+	hdc = GetWindowDC(hWindow);
+	SetBrushOrgEx(hdc,x,y,0);
+	hOldBrush = (HBRUSH)SelectObject(hdc,hBrush);
+
+	/* draw line */
+	PatBlt(hdc,x,y,width,height,PATINVERT);
+
+	/* cleanup */
+	SelectObject(hdc,hOldBrush);
+	ReleaseDC(hWindow,hdc);
+	DeleteObject(hBrush);
+	DeleteObject(hBitmap);
+}
+
+/**
+ * @brief Handles the beginning
+ * of the list resize operation.
+ */
+static void ResizeListBegin(short y)
+{
+	if(IsCursorBetweenControls()){
+		drag_mode = 1;
+		SetCapture(hWindow);
+		DrawXorBar(y);
+		old_y = y;
+	}
+}
+
+/**
+ * @brief Handles the middle part
+ * of the list resize operation.
+ */
+static void ResizeListMove(short y)
+{
+	POINT pt;
+	
+	if(drag_mode == 0 || y == old_y) return;
+	
+	/* calculate list height */
+	pt.x = pt.y = 0;
+	if(!MapWindowPoints(hList,hWindow,&pt,1)){
+		WgxDbgPrintLastError("ResizeListMove: MapWindowPoints failed");
+	} else {
+		list_height = y - pt.y;
+		if(list_height >= 0 && list_height <= GetMaxVolListHeight()){
+			DrawXorBar(old_y);
+			DrawXorBar(y);
+			old_y = y;
+		}
+	}
+}
+
+/**
+ * @brief Handles the end
+ * of the list resize operation.
+ */
+static void ResizeListEnd(short y)
+{
+	POINT pt;
+	
+	if(drag_mode){
+		DrawXorBar(old_y);
+		old_y = y;
+		drag_mode = 0;
+		pt.x = pt.y = 0;
+		if(!MapWindowPoints(hList,hWindow,&pt,1)){
+			WgxDbgPrintLastError("ResizeListEnd: MapWindowPoints failed");
+		} else {
+			list_height = y - pt.y;
+			ResizeMainWindow(1);
+		}
+		ReleaseCapture();
+	}
+}
+
+/**
  * @brief Main window procedure.
  */
 LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
@@ -463,6 +661,23 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		return 0;
 	case WM_NOTIFY:
 		VolListNotifyHandler(lParam);
+		return 0;
+	case WM_SETCURSOR:
+		/* show NS arrows between list and map controls */
+		if(IsCursorBetweenControls()){
+			SetCursor(LoadCursor(NULL,IDC_SIZENS));
+			return 0;
+		}
+		break;
+	case WM_LBUTTONDOWN:
+		ResizeListBegin((short)HIWORD(lParam));
+		return 0;
+	case WM_LBUTTONUP:
+		ResizeListEnd((short)HIWORD(lParam));
+		return 0;
+	case WM_MOUSEMOVE:
+		if(wParam & MK_LBUTTON)
+			ResizeListMove((short)HIWORD(lParam));
 		return 0;
 	case WM_COMMAND:
 		switch(LOWORD(wParam)){
