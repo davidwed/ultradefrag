@@ -246,10 +246,15 @@ void ReleaseVolList(void)
 void VolListNotifyHandler(LPARAM lParam)
 {
 	volume_processing_job *job;
-	LPNMLISTVIEW lpnm = (LPNMLISTVIEW)lParam;
-
+	LPNMLISTVIEW lpnm;
+	
+	lpnm = (LPNMLISTVIEW)lParam;
 	if(lpnm->hdr.code == LVN_ITEMCHANGED && lpnm->iItem != (-1)){
 		job = get_first_selected_job();
+		if(job == NULL){
+			/* this may happen when user selects an empty cell */
+			job = current_job;
+		}
 		current_job = job;
 		///HideProgress();
 		RedrawMap(job,0);
