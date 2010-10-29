@@ -151,13 +151,14 @@ static void AdjustVolListColumns(void)
 /**
  * @brief Resizes the list of volumes.
  */
-int ResizeVolList(int x, int y, int width, int height)
+int ResizeVolList(int x, int y, int width, int height, int expand)
 {
 	int border_height;
 	int border_width;
 	int header_height = 0;
 	int item_height = 0;
 	int n_items;
+	int new_height;
 	HWND hHeader;
 	RECT rc;
 
@@ -176,7 +177,12 @@ int ResizeVolList(int x, int y, int width, int height)
 	if(header_height && item_height){
 		/* ensure that an integer number of items will be displayed */
 		n_items = (height - 2 * border_height - header_height) / item_height;
-		height = header_height + n_items * item_height + 2 * border_height;
+		new_height = header_height + n_items * item_height + 2 * border_height;
+		if(expand && new_height < height){
+			n_items ++;
+			new_height += item_height;
+		}
+		height = new_height;
 	}
 	(void)SetWindowPos(hList,0,x,y,width,height,0);
 

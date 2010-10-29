@@ -44,6 +44,9 @@ extern int init_maximized_window;
 extern int allow_map_redraw;
 extern int lang_ini_tracking_stopped;
 
+/* ensure that initial value is greater than any real value */
+int previous_list_height = 10000;
+
 /* nonzero value indicates that we are in portable mode */
 int portable_mode = 0;
 
@@ -251,6 +254,7 @@ void ResizeMainWindow(int force)
 	int w, h;
 	int min_list_height;
 	int max_list_height;
+	int expand_list = 0;
 	
 	if(hStatus == NULL || hMainMenu == NULL || hToolbar == NULL)
 		return; /* this happens on early stages of window initialization */
@@ -260,7 +264,7 @@ void ResizeMainWindow(int force)
 		return;
 	}
 	
-	/* corect invalid list heights */
+	/* correct invalid list heights */
 	min_list_height = GetMinVolListHeight();
 	if(list_height < min_list_height)
 		list_height = min_list_height;
@@ -283,8 +287,14 @@ void ResizeMainWindow(int force)
 		toolbar_height = rc.bottom - rc.top;
 	else
 		toolbar_height = 24 + 2 * GetSystemMetrics(SM_CYEDGE);
+	
+	if(vlist_height > previous_list_height){
+		expand_list = 1;
+		previous_list_height = vlist_height;
+	}
 
-	list_height = vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height);
+	list_height = vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height,expand_list);
+	previous_list_height = vlist_height;
 	sbar_height = ResizeStatusBar(h,w);
 	ResizeMap(0,toolbar_height + vlist_height + 1,w,h - toolbar_height - vlist_height - sbar_height);
 	

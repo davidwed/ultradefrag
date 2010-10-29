@@ -180,7 +180,7 @@ void CreateStatusBar(void);
 void UpdateStatusBar(udefrag_progress_info *pi);
 
 void ResizeMap(int x, int y, int width, int height);
-int  ResizeVolList(int x, int y, int width, int height);
+int  ResizeVolList(int x, int y, int width, int height, int expand);
 int  GetMinVolListHeight(void);
 int  GetMaxVolListHeight(void);
 int  ResizeStatusBar(int bottom, int width);
