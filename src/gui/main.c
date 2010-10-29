@@ -252,6 +252,9 @@ void ResizeMainWindow(int force)
 	int min_list_height;
 	int max_list_height;
 	
+	if(hStatus == NULL || hMainMenu == NULL || hToolbar == NULL)
+		return; /* this happens on early stages of window initialization */
+	
 	if(!GetClientRect(hWindow,&rc)){
 		WgxDbgPrint("GetClientRect failed in RepositionMainWindowControls()!\n");
 		return;
