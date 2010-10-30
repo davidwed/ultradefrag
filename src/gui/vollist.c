@@ -342,25 +342,17 @@ static void VolListAddItem(int index, volume_info *v)
 {
 	volume_processing_job *job;
 	LV_ITEMW lvi;
-    wchar_t lpRootPathName[4];
-    DWORD nVolumeNameSize = MAX_PATH + 1;
-    wchar_t lpVolumeNameBuffer[MAX_PATH + 1] = L"";
-	wchar_t s[64 + MAX_PATH + 1];
-    wchar_t lpWideCharStr[32];
-    
-    (void)_snwprintf(lpRootPathName,sizeof(lpRootPathName)/sizeof(wchar_t),L"%c:\\",v->letter);
-    
-    if(GetVolumeInformationW(lpRootPathName,lpVolumeNameBuffer,nVolumeNameSize,NULL,NULL,NULL,NULL,0) == 0)
-        WgxDbgPrintLastError("VolListAddItem: GetVolumeInformation failed");
+	wchar_t fsname[64];
+	wchar_t vname[64 + MAX_PATH + 1];
 
-    if(MultiByteToWideChar(CP_ACP,0,v->fsname,-1,lpWideCharStr,sizeof(lpWideCharStr)/sizeof(wchar_t)) == 0)
-        WgxDbgPrintLastError("VolListAddItem: MultiByteToWideChar failed");
-
-	(void)_snwprintf(s,sizeof(s)/sizeof(wchar_t),L"%c: [%ws]%*ws%ws",v->letter,lpWideCharStr,wcslen(lpWideCharStr)-6,L" ",lpVolumeNameBuffer);
+	_snwprintf(fsname,64,L"%c: [%hs]",v->letter,v->fsname);
+	fsname[63] = 0;
+	_snwprintf(vname,sizeof(vname)/sizeof(wchar_t),L"%-10ws %ws",fsname,v->label);
+	vname[sizeof(vname)/sizeof(wchar_t) - 1] = 0;
 	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
 	lvi.iItem = index;
 	lvi.iSubItem = 0;
-	lvi.pszText = s;
+	lvi.pszText = vname;
 	lvi.iImage = v->is_removable ? 1 : 0;
 	(void)SendMessage(hList,LVM_INSERTITEMW,0,(LRESULT)&lvi);
 
