@@ -324,7 +324,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 			ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
 		else
 			ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
-		_snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%6.2lf %% %ls",job->pi.percentage,ProcessCaption);
+		_snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls",job->pi.percentage,ProcessCaption);
 		buffer[sizeof(buffer)/sizeof(wchar_t) - 1] = 0;
 		/* remove ampersands */
 		for(j = 0, k = 0; buffer[j]; j++){
