@@ -19,7 +19,15 @@
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 --]]
 
--- USAGE: lua udreportcnv.lua <luar file with full path> <path to Windows directory> [-v]
+usage = [[
+USAGE: lua udreportcnv.lua {path to Lua Report} {UltraDefrag installation directory} [-v]
+]]
+
+report_path = arg[1]
+instdir     = arg[2]
+
+assert(report_path, usage)
+assert(instdir, usage)
 
 webpage_name = ""
 
@@ -126,11 +134,7 @@ function get_javascript()
 	local js = "", f
 	if(enable_sorting == 1) then
 		-- read udsorting.js file contents
-		if arg[2] ~= "null" then
-			f = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udsorting.js", "r"))
-		else
-			f = assert(io.open(".\\scripts\\udsorting.js", "r"))
-		end
+		f = assert(io.open(instdir .. "\\scripts\\udsorting.js", "r"))
 	    js = f:read("*all")
 	    f:close()
 	end
@@ -146,11 +150,7 @@ function get_css()
 	local f
 
 	-- read udreport.css file contents
-	if arg[2] ~= "null" then
-		f = assert(io.open(arg[2] .. "\\UltraDefrag\\scripts\\udreport.css", "r"))
-	else
-		f = assert(io.open(".\\scripts\\udreport.css", "r"))
-	end
+	f = assert(io.open(instdir .. "\\scripts\\udreport.css", "r"))
 	css = f:read("*all")
 	f:close()
 	if css == nil then
@@ -158,11 +158,7 @@ function get_css()
 	end
 
 	-- read udreport-custom.css file contents
-	if arg[2] ~= "null" then
-		f = io.open(arg[2] .. "\\UltraDefrag\\scripts\\udreport-custom.css", "r")
-	else
-		f = io.open(".\\scripts\\udreport-custom.css", "r")
-	end
+	f = io.open(instdir .. "\\scripts\\udreport-custom.css", "r")
 	if f ~= nil then
 		custom_css = f:read("*all")
 		f:close()
@@ -186,7 +182,7 @@ links_x1 = [[
 ]]
 
 links_x2 = [[
-\UltraDefrag\options\udreportopts.lua">View report options</a></td>
+\options\udreportopts.lua">View report options</a></td>
 <td class="right">
 <a href="http://www.lua.org/">Powered by Lua</a>
 </td>
@@ -205,7 +201,7 @@ table_header = [[
 ]]
 
 function write_web_page_header(f,js,css)
-	local links_toolbar = links_x1 .. arg[2] .. links_x2
+	local links_toolbar = links_x1 .. instdir .. links_x2
 
 	f:write("<html>\n",
 		"<head>\n",
@@ -223,7 +219,7 @@ function write_web_page_header(f,js,css)
 end
 
 function write_web_page_footer(f)
-	local links_toolbar = links_x1 .. arg[2] .. links_x2
+	local links_toolbar = links_x1 .. instdir .. links_x2
 
 	f:write("</table>\n",
 		"</div>\n",
@@ -250,10 +246,10 @@ function build_web_page()
 	local js, css
 
 	repeat
-		pos = string.find(arg[1],"\\",pos + 1,true)
+		pos = string.find(report_path,"\\",pos + 1,true)
 		if pos == nil then filename = "fraglist.html" ; break end
-	until string.find(arg[1],"\\",pos + 1,true) == nil
-	filename = string.sub(arg[1],1,pos) .. "fraglist.html"
+	until string.find(report_path,"\\",pos + 1,true) == nil
+	filename = string.sub(report_path,1,pos) .. "fraglist.html"
 
 	-- note that 'b' flag is needed for utf-16 files
 	local f = assert(io.open(filename,"wb"))
@@ -287,23 +283,11 @@ end
 -------------------------------------------------------------------------------
 -- Main Code
 -------------------------------------------------------------------------------
--- parse command line
-assert(arg[1],"Lua Report file name must be specified!")
-assert(arg[2],"Path to the Windows directory\nmust be specified as second parameter!")
-
 -- read default options
-if arg[2] ~= "null" then
-	dofile(arg[2] .. "\\UltraDefrag\\options\\udreportopts.lua")
-else
-	dofile(".\\options\\udreportopts.lua")
-end
+dofile(instdir .. "\\options\\udreportopts.lua")
 
 -- read custom (user defined) options
-if arg[2] ~= "null" then
-	custom_options = arg[2] .. "\\UltraDefrag\\options\\udreportopts-custom.lua"
-else
-	custom_options = ".\\options\\udreportopts-custom.lua"
-end
+custom_options = instdir .. "\\options\\udreportopts-custom.lua"
 f = io.open(custom_options)
 if f ~= nil then
 	f:close()
@@ -311,7 +295,7 @@ if f ~= nil then
 end
 
 -- read source file
-dofile(arg[1])
+dofile(report_path)
 
 -- check the report format version
 if format_version == nil or format_version < 3 then

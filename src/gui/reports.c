@@ -34,7 +34,7 @@ static void ShowSingleReport(volume_processing_job *job)
 	short l_path[] = L"C:\\fraglist.luar";
 	char path[] = "C:\\fraglist.luar";
 	char cmd[MAX_PATH];
-	char buffer[MAX_PATH + 64];
+	char buffer[MAX_PATH];
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
 
@@ -50,11 +50,9 @@ static void ShowSingleReport(volume_processing_job *job)
 	}
 
 	path[0] = job->volume_letter;
-	(void)strcpy(cmd,".\\lua5.1a_gui.exe");
-	(void)strcpy(buffer,cmd);
-	(void)strcat(buffer," .\\scripts\\udreportcnv.lua ");
-	(void)strcat(buffer,path);
-	(void)strcat(buffer," null -v");
+	strcpy(cmd,".\\lua5.1a_gui.exe");
+	_snprintf(buffer,MAX_PATH,".\\lua5.1a_gui.exe .\\scripts\\udreportcnv.lua \"%s\" . -v",path);
+	buffer[MAX_PATH - 1] = 0;
 
 	ZeroMemory(&si,sizeof(si));
 	si.cb = sizeof(si);

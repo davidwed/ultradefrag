@@ -195,7 +195,7 @@ Var AtLeastXP
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
   WriteRegStr HKCR "LuaReport\DefaultIcon" "" "lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua %1 $WINDIR -v"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua $\"%1$\" $\"$INSTDIR$\" -v"
 
   ClearErrors
   ReadRegStr $R0 HKCR ".lua" ""
