@@ -342,9 +342,17 @@ static void VolListAddItem(int index, volume_info *v)
 {
 	volume_processing_job *job;
 	LV_ITEM lvi;
-	char s[64];
+    char lpRootPathName[4];
+    DWORD nVolumeNameSize = MAX_PATH + 1;
+    char lpVolumeNameBuffer[MAX_PATH + 1] = "";
+	char s[64 + MAX_PATH + 1];
+    
+    (void)sprintf(lpRootPathName,"%c:\\",v->letter);
+    
+    if(GetVolumeInformation(lpRootPathName,lpVolumeNameBuffer,nVolumeNameSize,NULL,NULL,NULL,NULL,0) == 0)
+        WgxDbgPrintLastError("VolListAddItem: GetVolumeInformation failed");
 
-	(void)sprintf(s,"%c: [%s]",v->letter,v->fsname);
+	(void)sprintf(s,"%c: [%s] %s",v->letter,v->fsname,lpVolumeNameBuffer);
 	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
 	lvi.iItem = index;
 	lvi.iSubItem = 0;
