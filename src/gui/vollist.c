@@ -177,7 +177,7 @@ int ResizeVolList(int x, int y, int width, int height, int expand)
 	if(header_height && item_height){
 		/* ensure that an integer number of items will be displayed */
 		n_items = (height - 2 * border_height - header_height) / item_height;
-		new_height = header_height + n_items * item_height + 2 * border_height;
+		new_height = header_height + n_items * item_height + 2 * border_height + 2;
 		if(expand && new_height < height){
 			n_items ++;
 			new_height += item_height;
