@@ -28,6 +28,10 @@
 #include <process.h>
 #include <conio.h>
 
+#ifdef USE_MSVC
+#define DWORD_PTR DWORD
+#endif
+
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
@@ -472,7 +476,7 @@ static int process_single_volume(char volume_letter)
 static int process_volumes(void)
 {
 	volume_info *v;
-	int i, result;
+	int i, result = 0;
 	
 	/* process volumes specified on the command line */
 	for(i = 0; i < MAX_DOS_DRIVES; i++){
