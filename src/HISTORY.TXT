@@ -4,6 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     alpha2:
     - ability to resize list of volumes was added to graphical interface
+    - the volume label is now displayed in the volume list
     - file sizes were added to HTML reports
     - file sizes were converted to a human readable format in text reports
     - few bugs were fixed in the BootExecute Control program used to enable and

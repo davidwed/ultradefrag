@@ -57,9 +57,11 @@
  * </td><td>
  * <dl>
  * <dt>Language</dt>
- * <dd>This allows selecting the displayed language and to open the <b>Translations folder</b>, which contains the <b>translation.template</b> and all language files.</dd>
+ * <dd>This allows selecting the displayed language and to open the <b>Translations folder</b>,
+ * which contains the <b>translation.template</b> and all language files.</dd>
  * <dt>Graphical interface</dt>
- * <dd>This allows selecting the <b>Font (F9)</b> and changing the <b>Options (F10)</b>.</dd>
+ * <dd>This allows selecting the <b>Font (F9)</b> and changing the <b>Options (F10)</b>.<br/>
+ * The font must be changed only, if the contents of the volume list are not displayed correctly.</dd>
  * <dt>Boot time scan (Disabled for portable editions)</dt>
  * <dd>This allows to enable boot time scan by checking <b>Enable (F11)</b> and to edit the boot time script by selecting <b>Script (F12)</b>.</dd>
  * <dt>Reports (Ctrl+R)</dt>
