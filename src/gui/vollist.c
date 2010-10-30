@@ -317,7 +317,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	
 	if(job->pi.completion_status < 0){
 		lviw.pszText = L"";
-	} else if(job->pi.completion_status == 0){
+	} else if(job->pi.completion_status == 0 || stop_pressed){
 		if(job->pi.current_operation == 'D')
 			ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
 		else if(job->pi.current_operation == 'C')

@@ -227,6 +227,8 @@ extern int use_custom_font_in_dialogs;
 extern int portable_mode;
 extern int btd_installed;
 
+extern int stop_pressed;
+
 /* common preferences */
 extern int hibernate_instead_of_shutdown;
 extern int show_shutdown_check_confirmation_dialog;
