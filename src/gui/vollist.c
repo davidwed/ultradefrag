@@ -303,8 +303,6 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	LV_ITEMW lviw;
 	wchar_t *ProcessCaption = L"";
 	wchar_t buffer[128];
-	wchar_t progress_msg[128];
-	int j,k;
 
 	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
 		WgxDbgPrintLastError("VolListUpdateStatusFieldInternal: wait on hLangPackEvent failed");
@@ -319,22 +317,14 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 		lviw.pszText = L"";
 	} else if(job->pi.completion_status == 0 || stop_pressed){
 		if(job->pi.current_operation == 'D')
-			ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
+			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
 		else if(job->pi.current_operation == 'C')
-			ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
+			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
 		else
-			ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
+			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
 		_snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls",job->pi.percentage,ProcessCaption);
 		buffer[sizeof(buffer)/sizeof(wchar_t) - 1] = 0;
-		/* remove ampersands */
-		for(j = 0, k = 0; buffer[j]; j++){
-			if(buffer[j] != '&'){
-				progress_msg[k] = buffer[j];
-				k++;
-			}
-		}
-		progress_msg[k] = 0;
-		lviw.pszText = progress_msg;//WgxGetResourceString(i18n_table,L"STATUS_RUNNING");
+		lviw.pszText = buffer;//WgxGetResourceString(i18n_table,L"STATUS_RUNNING");
 	} else {
 		switch(job->job_type){
 		case ANALYSIS_JOB:
