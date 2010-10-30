@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 5.0.0  2010-10-
+  Version 5.0.0  2010-11-
   ------------------------------------------------------------------------------
     alpha2:
     - ability to resize list of volumes was added to graphical interface
