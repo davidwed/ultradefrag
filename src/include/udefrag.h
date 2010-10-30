@@ -46,6 +46,7 @@
 typedef struct _volume_info {
 	char letter;
 	char fsname[MAXFSNAME];
+	wchar_t label[MAX_PATH + 1];
 	LARGE_INTEGER total_space;
 	LARGE_INTEGER free_space;
 	int is_removable;

@@ -204,6 +204,8 @@ static int internal_validate_volume(char volume_letter,int skip_removable,volume
 	v->free_space.QuadPart = volume_info.free_bytes;
 	strncpy(v->fsname,volume_info.fs_name,MAXFSNAME - 1);
 	v->fsname[MAXFSNAME - 1] = 0;
+	wcsncpy(v->label,volume_info.label,MAX_PATH);
+	v->label[MAX_PATH] = 0;
 	return 0;
 }
 
