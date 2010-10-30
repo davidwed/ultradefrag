@@ -462,6 +462,14 @@ typedef struct _SYSTEM_PERFORMANCE_INFORMATION
 #define FILE_DEVICE_FILE_SYSTEM           0x00000009
 #endif
 
+typedef struct _FILE_FS_VOLUME_INFORMATION {
+	LARGE_INTEGER VolumeCreationTime;
+	ULONG VolumeSerialNumber;
+	ULONG VolumeLabelLength;
+	UCHAR Unknown;
+	WCHAR VolumeLabel[1];
+} FILE_FS_VOLUME_INFORMATION, *PFILE_FS_VOLUME_INFORMATION;
+
 typedef struct _FILE_FS_DEVICE_INFORMATION {
   DEVICE_TYPE  DeviceType;
   ULONG  Characteristics;

@@ -627,6 +627,48 @@ static int get_ntfs_data(winx_volume_information *v)
 }
 
 /**
+ * @brief Retrieves volume label.
+ * @param[in] hRoot handle to the
+ * root directory.
+ * @param[out] pointer to the structure
+ * receiving the volume label.
+ * @note Internal use only.
+ */
+static void get_volume_label(HANDLE hRoot,winx_volume_information *v)
+{
+	FILE_FS_VOLUME_INFORMATION *ffvi;
+	int buffer_size;
+	IO_STATUS_BLOCK IoStatusBlock;
+	NTSTATUS Status;
+	
+	/* reset label */
+	v->label[0] = 0;
+	
+	/* allocate memory */
+	buffer_size = (sizeof(FILE_FS_VOLUME_INFORMATION) - sizeof(wchar_t)) + (MAX_PATH + 1) * sizeof(wchar_t);
+	ffvi = winx_heap_alloc(buffer_size);
+	if(ffvi == NULL){
+		DebugPrint("get_volume_label(): cannot allocate %u bytes of memory!",
+			buffer_size);
+		return;
+	}
+	
+	/* try to get actual label */
+	RtlZeroMemory(ffvi,buffer_size);
+	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,ffvi,
+				buffer_size,FileFsVolumeInformation);
+	if(!NT_SUCCESS(Status)){
+		DebugPrintEx(Status,"get_volume_label(): cannot get volume label of drive %c:",
+			v->volume_letter);
+		winx_heap_free(ffvi);
+		return;
+	}
+	wcsncpy(v->label,ffvi->VolumeLabel,MAX_PATH);
+	v->label[MAX_PATH] = 0;
+	winx_heap_free(ffvi);
+}
+
+/**
  * @brief Retrieves detailed information
  * about disk volume.
  * @param[in] volume_letter the volume letter.
@@ -669,6 +711,9 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 		NtClose(hRoot);
 		return (-1);
 	}
+	
+	/* get name of the volume */
+	get_volume_label(hRoot,v);
 
 	/* get NTFS data */
 	memset(&v->ntfs_data,0,sizeof(NTFS_DATA));
