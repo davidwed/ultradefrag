@@ -153,6 +153,10 @@ Section "Ultra Defrag core files (required)" SecCore
   SetOutPath "$INSTDIR"
   Delete "$INSTDIR\ultradefrag.exe"
   File "ultradefrag.exe"
+  File "wgx.dll"
+  File "lua5.1a.dll"
+  File "lua5.1a.exe"
+  File "lua5.1a_gui.exe"
 
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"
@@ -163,16 +167,12 @@ Section "Ultra Defrag core files (required)" SecCore
   ${InstallNativeDefragmenter}
 
   SetOutPath "$SYSDIR"
-  File "lua5.1a.dll"
-  File "lua5.1a.exe"
-  File "lua5.1a_gui.exe"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
   File "${ROOTDIR}\src\installer\udctxhandler.cmd"
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
   File /oname=hibernate4win.exe "hibernate.exe"
-  File "wgx.dll"
 
   ${RegisterFileExtensions}
   ${WriteTheUninstaller}

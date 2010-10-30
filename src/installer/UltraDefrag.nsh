@@ -193,9 +193,9 @@ Var AtLeastXP
 
   WriteRegStr HKCR ".luar" "" "LuaReport"
   WriteRegStr HKCR "LuaReport" "" "Lua Report"
-  WriteRegStr HKCR "LuaReport\DefaultIcon" "" "lua5.1a_gui.exe,1"
+  WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$INSTDIR\lua5.1a_gui.exe,1"
   WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
-  WriteRegStr HKCR "LuaReport\shell\view\command" "" "lua5.1a_gui.exe $INSTDIR\scripts\udreportcnv.lua $\"%1$\" $\"$INSTDIR$\" -v"
+  WriteRegStr HKCR "LuaReport\shell\view\command" "" "$\"$INSTDIR\lua5.1a_gui.exe$\" $\"$INSTDIR\scripts\udreportcnv.lua$\" $\"%1$\" $\"$INSTDIR$\" -v"
 
   ClearErrors
   ReadRegStr $R0 HKCR ".lua" ""
@@ -253,6 +253,10 @@ Var AtLeastXP
   Delete "$SYSDIR\udefrag-scheduler.exe"
   Delete "$SYSDIR\ud-config.cmd"
   Delete "$SYSDIR\udefrag-kernel.dll"
+  Delete "$SYSDIR\wgx.dll"
+  Delete "$SYSDIR\lua5.1a.dll"
+  Delete "$SYSDIR\lua5.1a.exe"
+  Delete "$SYSDIR\lua5.1a_gui.exe"
 
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\presets"
@@ -370,10 +374,6 @@ Var AtLeastXP
   Delete "$SYSDIR\udefrag.exe"
   Delete "$SYSDIR\udefrag.dll"
   Delete "$SYSDIR\zenwinx.dll"
-  Delete "$SYSDIR\lua5.1a.dll"
-  Delete "$SYSDIR\lua5.1a.exe"
-  Delete "$SYSDIR\lua5.1a_gui.exe"
-  Delete "$SYSDIR\wgx.dll"
 
   DetailPrint "Cleanup registry..."
   DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
