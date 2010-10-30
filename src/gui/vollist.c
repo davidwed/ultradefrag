@@ -341,24 +341,28 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 static void VolListAddItem(int index, volume_info *v)
 {
 	volume_processing_job *job;
-	LV_ITEM lvi;
-    char lpRootPathName[4];
+	LV_ITEMW lvi;
+    wchar_t lpRootPathName[4];
     DWORD nVolumeNameSize = MAX_PATH + 1;
-    char lpVolumeNameBuffer[MAX_PATH + 1] = "";
-	char s[64 + MAX_PATH + 1];
+    wchar_t lpVolumeNameBuffer[MAX_PATH + 1] = L"";
+	wchar_t s[64 + MAX_PATH + 1];
+    wchar_t lpWideCharStr[32];
     
-    (void)sprintf(lpRootPathName,"%c:\\",v->letter);
+    (void)_snwprintf(lpRootPathName,sizeof(lpRootPathName)/sizeof(wchar_t),L"%c:\\",v->letter);
     
-    if(GetVolumeInformation(lpRootPathName,lpVolumeNameBuffer,nVolumeNameSize,NULL,NULL,NULL,NULL,0) == 0)
+    if(GetVolumeInformationW(lpRootPathName,lpVolumeNameBuffer,nVolumeNameSize,NULL,NULL,NULL,NULL,0) == 0)
         WgxDbgPrintLastError("VolListAddItem: GetVolumeInformation failed");
 
-	(void)sprintf(s,"%c: [%s] %s",v->letter,v->fsname,lpVolumeNameBuffer);
+    if(MultiByteToWideChar(CP_ACP,0,v->fsname,-1,lpWideCharStr,sizeof(lpWideCharStr)/sizeof(wchar_t)) == 0)
+        WgxDbgPrintLastError("VolListAddItem: MultiByteToWideChar failed");
+
+	(void)_snwprintf(s,sizeof(s)/sizeof(wchar_t),L"%c: [%ws]%*ws%ws",v->letter,lpWideCharStr,wcslen(lpWideCharStr)-6,L" ",lpVolumeNameBuffer);
 	lvi.mask = LVIF_TEXT | LVIF_IMAGE;
 	lvi.iItem = index;
 	lvi.iSubItem = 0;
 	lvi.pszText = s;
 	lvi.iImage = v->is_removable ? 1 : 0;
-	(void)SendMessage(hList,LVM_INSERTITEM,0,(LRESULT)&lvi);
+	(void)SendMessage(hList,LVM_INSERTITEMW,0,(LRESULT)&lvi);
 
 	job = get_job(v->letter);
 	VolListUpdateStatusFieldInternal(index,job);
