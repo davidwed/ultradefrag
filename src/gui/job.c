@@ -136,8 +136,8 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 			ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
 		else
 			ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
-		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
-		progress_msg[sizeof(progress_msg) - 1] = 0;
+		_snwprintf(progress_msg,sizeof(progress_msg)/sizeof(wchar_t),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
+		progress_msg[sizeof(progress_msg)/sizeof(wchar_t) - 1] = 0;
 		// TODO
 		//SetProgress(progress_msg,(int)pi->percentage);
 		SetEvent(hLangPackEvent);
