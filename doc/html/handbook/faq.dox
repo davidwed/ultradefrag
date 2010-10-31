@@ -89,6 +89,10 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * Conversely, when thousands of small files are analyzed, progress will 
  * be relatively slow.
  *
+ * <h3>Why is the volume name not displayed?</h3>
+ * Explorer replaces an empty volume name by <b>Local Disk</b> or similar, 
+ * UltraDefrag does not replace an empty volume name with any default. 
+ *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
  *    <TR>
