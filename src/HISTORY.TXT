@@ -2,6 +2,9 @@ HISTORY
 
   Version 5.0.0  2010-11-
   ------------------------------------------------------------------------------
+    beta1:
+    - 
+    
     alpha2:
     - ability to resize list of volumes was added to graphical interface
     - the volume label is now displayed in the volume list
