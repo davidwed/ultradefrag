@@ -26,6 +26,8 @@
 
 #include "main.h"
 
+typedef	BOOLEAN (WINAPI *SET_SUSPEND_STATE_PROC)(BOOLEAN Hibernate,BOOLEAN ForceCritical,BOOLEAN DisableWakeEvent);
+
 /**
  * @brief Adjusts position of controls inside
  * the shutdown confirmation dialog to make it
@@ -302,8 +304,11 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 int ShutdownOrHibernate(void)
 {
 	HANDLE hToken; 
-	TOKEN_PRIVILEGES tkp; 
-	
+	TOKEN_PRIVILEGES tkp;
+	HMODULE hPowrProfDll;
+	SET_SUSPEND_STATE_PROC pSetSuspendState = NULL;
+	BOOL result;
+
 	switch(when_done_action){
 	case IDM_WHEN_DONE_HIBERNATE:
 	case IDM_WHEN_DONE_LOGOFF:
@@ -336,12 +341,46 @@ int ShutdownOrHibernate(void)
 		return 5;
 	}
 	
+	/*
+	* There is an opinion that SetSuspendState call
+	* is more reliable than SetSystemPowerState:
+	* http://msdn.microsoft.com/en-us/library/aa373206%28VS.85%29.aspx
+	* On the other hand, it is missing on NT4.
+	*/
+	if(when_done_action == IDM_WHEN_DONE_STANDBY || when_done_action == IDM_WHEN_DONE_HIBERNATE){
+		hPowrProfDll = LoadLibrary("powrprof.dll");
+		if(hPowrProfDll == NULL){
+			WgxDbgPrintLastError("ShutdownOrHibernate: cannot load powrprof.dll");
+		} else {
+			pSetSuspendState = (SET_SUSPEND_STATE_PROC)GetProcAddress(hPowrProfDll,"SetSuspendState");
+			if(pSetSuspendState == NULL)
+				WgxDbgPrintLastError("ShutdownOrHibernate: cannot get SetSuspendState address inside powrprof.dll");
+		}
+		if(pSetSuspendState == NULL)
+			WgxDbgPrint("Therefore SetSystemPowerState API will be used instead of SetSuspendState.\n");
+	}
+
 	switch(when_done_action){
 	case IDM_WHEN_DONE_STANDBY:
+		/* suspend, request permission from apps and drivers */
+		if(pSetSuspendState)
+			result = pSetSuspendState(FALSE,FALSE,FALSE);
+		else
+			result = SetSystemPowerState(TRUE,FALSE);
+		if(!result){
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot suspend the system!");
+			return 6;
+		}
 		break;
 	case IDM_WHEN_DONE_HIBERNATE:
-		/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
-		if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
+		/* hibernate, request permission from apps and drivers */
+		if(pSetSuspendState){
+			result = pSetSuspendState(TRUE,FALSE,FALSE);
+		} else {
+			/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
+			result = SetSystemPowerState(FALSE,FALSE);
+		}
+		if(!result){
 			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot hibernate the computer!");
 			return 7;
 		}
