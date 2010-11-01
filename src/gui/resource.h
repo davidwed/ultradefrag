@@ -89,7 +89,14 @@
 #define IDM_STOP                        1135
 #define IDM_IGNORE_REMOVABLE_MEDIA      1140
 #define IDM_RESCAN                      1150
-#define IDM_SHUTDOWN                    1160
+#define IDM_WHEN_DONE                   1160
+#define IDM_WHEN_DONE_NONE              1161
+#define IDM_WHEN_DONE_EXIT              1162
+#define IDM_WHEN_DONE_STANDBY           1163
+#define IDM_WHEN_DONE_HIBERNATE         1164
+#define IDM_WHEN_DONE_LOGOFF            1165
+#define IDM_WHEN_DONE_REBOOT            1166
+#define IDM_WHEN_DONE_SHUTDOWN          1167
 #define IDM_EXIT                        1170
 
 #define IDM_REPORT                      1300

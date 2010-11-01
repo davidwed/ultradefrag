@@ -28,6 +28,19 @@
 
 HMENU hMainMenu = NULL;
 
+WGX_MENU when_done_menu[] = {
+	{MF_STRING | MF_ENABLED,IDM_WHEN_DONE_NONE,      NULL, L"&None"},
+	{MF_SEPARATOR,0,NULL,NULL},
+	{MF_STRING | MF_ENABLED,IDM_WHEN_DONE_EXIT,      NULL, L"E&xit"},
+	{MF_STRING | MF_ENABLED,IDM_WHEN_DONE_STANDBY,   NULL, L"Stan&dby"},
+	{MF_STRING | MF_ENABLED,IDM_WHEN_DONE_HIBERNATE, NULL, L"&Hibernate"},
+	{MF_SEPARATOR,0,NULL,NULL},
+	{MF_STRING | MF_ENABLED,IDM_WHEN_DONE_LOGOFF,    NULL, L"&Logoff"},
+	{MF_STRING | MF_ENABLED,IDM_WHEN_DONE_REBOOT,    NULL, L"&Reboot"},
+	{MF_STRING | MF_ENABLED,IDM_WHEN_DONE_SHUTDOWN,  NULL, L"&Shutdown"},
+	{0,0,NULL,NULL}
+};
+
 WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_ANALYZE,                             NULL, L"&Analyze\tF5"   },
 	{MF_STRING | MF_ENABLED,IDM_DEFRAG,                              NULL, L"&Defragment\tF6"},
@@ -37,7 +50,7 @@ WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA, NULL, L"Skip removable &media\tCtrl+M"},
 	{MF_STRING | MF_ENABLED,IDM_RESCAN,                              NULL, L"&Rescan drives\tCtrl+D"},
 	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_SHUTDOWN,             NULL, L"Shutdown &PC when done\tCtrl+S"},
+	{MF_STRING | MF_ENABLED | MF_POPUP,IDM_WHEN_DONE,                when_done_menu,L"&When done"},
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED,IDM_EXIT,                                NULL, L"E&xit\tAlt+F4"},
 	{0,0,NULL,NULL}
