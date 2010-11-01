@@ -83,10 +83,20 @@ static void ResizeShutdownConfirmDialog(HWND hwnd,wchar_t *counter_msg)
 	}
 	hOldFont = SelectObject(hdc,hFont);
 	
-	//if(hibernate_instead_of_shutdown)
-	//	text1 = WgxGetResourceString(i18n_table,L"REALLY_HIBERNATE_WHEN_DONE");
-	//else
+	switch(when_done_action){
+	case IDM_WHEN_DONE_HIBERNATE:
+		text1 = WgxGetResourceString(i18n_table,L"REALLY_HIBERNATE_WHEN_DONE");
+		break;
+	case IDM_WHEN_DONE_LOGOFF:
+		text1 = WgxGetResourceString(i18n_table,L"REALLY_LOGOFF_WHEN_DONE");
+		break;
+	case IDM_WHEN_DONE_REBOOT:
+		text1 = WgxGetResourceString(i18n_table,L"REALLY_REBOOT_WHEN_DONE");
+		break;
+	case IDM_WHEN_DONE_SHUTDOWN:
 		text1 = WgxGetResourceString(i18n_table,L"REALLY_SHUTDOWN_WHEN_DONE");
+		break;
+	}
 	
 	if(!GetTextExtentPoint32W(hdc,text1,wcslen(text1),&size)){
 		WgxDbgPrintLastError("ResizeShutdownConfirmDialog: cannot get text1 dimensions");
@@ -218,10 +228,20 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 			WgxSetText(hWnd,i18n_table,L"PLEASE_CONFIRM");
 			WgxSetText(GetDlgItem(hWnd,IDC_YES_BUTTON),i18n_table,L"YES");
 			WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
-			//if(hibernate_instead_of_shutdown)
-				//wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATION"),MAX_TEXT_LENGTH);
-			//else
+			switch(when_done_action){
+			case IDM_WHEN_DONE_HIBERNATE:
+				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATE"),MAX_TEXT_LENGTH);
+				break;
+			case IDM_WHEN_DONE_LOGOFF:
+				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_LOGOFF"),MAX_TEXT_LENGTH);
+				break;
+			case IDM_WHEN_DONE_REBOOT:
+				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_REBOOT"),MAX_TEXT_LENGTH);
+				break;
+			case IDM_WHEN_DONE_SHUTDOWN:
 				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_SHUTDOWN"),MAX_TEXT_LENGTH);
+				break;
+			}
 			counter_msg[MAX_TEXT_LENGTH] = 0;
 			SetEvent(hLangPackEvent);
 		}
