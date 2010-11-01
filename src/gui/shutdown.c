@@ -230,7 +230,7 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 			WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
 			switch(when_done_action){
 			case IDM_WHEN_DONE_HIBERNATE:
-				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATE"),MAX_TEXT_LENGTH);
+				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATION"),MAX_TEXT_LENGTH);
 				break;
 			case IDM_WHEN_DONE_LOGOFF:
 				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_LOGOFF"),MAX_TEXT_LENGTH);
