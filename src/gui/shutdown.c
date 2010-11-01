@@ -342,13 +342,23 @@ int ShutdownOrHibernate(void)
 	case IDM_WHEN_DONE_HIBERNATE:
 		/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
 		if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
-			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot hibernate the computer!");
-			return 6;
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot hibernate the computer!");
+			return 7;
 		}
 		break;
 	case IDM_WHEN_DONE_LOGOFF:
+		if(!ExitWindowsEx(EWX_LOGOFF | EWX_FORCEIFHUNG,
+		  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot log the user off!");
+			return 8;
+		}
 		break;
 	case IDM_WHEN_DONE_REBOOT:
+		if(!ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG,
+		  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot reboot the computer!");
+			return 9;
+		}
 		break;
 	case IDM_WHEN_DONE_SHUTDOWN:
 		/*
@@ -357,8 +367,8 @@ int ShutdownOrHibernate(void)
 		*/
 		if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
 		  SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
-			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot shut down the computer!");
-			return 7;
+			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot shut down the computer!");
+			return 10;
 		}
 		break;
 	}
