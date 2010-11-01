@@ -3,7 +3,7 @@ HISTORY
   Version 5.0.0  2010-11-
   ------------------------------------------------------------------------------
     alpha3:
-    - 
+    - actions to take after processing is done implemented as separate menu
     
     alpha2:
     - ability to resize list of volumes was added to graphical interface
