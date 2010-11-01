@@ -40,8 +40,9 @@
  * <dd>If this is checked, volumes located on removable drives are not included in the volume list.</dd>
  * <dt>Rescan drives (Ctrl+D)</dt>
  * <dd>This updates the volume list to include volumes located on removable drives, which have been plugged in after starting UltraDefrag.</dd>
- * <dt>Shutdown/Hibernate PC when done (Ctrl+S)</dt>
- * <dd>If this is checked, the system will shutdown or hibernate after all operations have been performed.</dd>
+ * <dt>When done</dt>
+ * <dd>This allows one to select an action that will be executed after all operations have been performed.<br/>
+ * The default is <b>None</b>, available actions are: <b>Exit, Standby, Hibernate, Logoff, Reboot</b> and <b>Shutdown</b>.</dd>
  * <dt>Exit (Alt+F4)</dt>
  * <dd>This terminates UltraDefrag.</dd>
  * </dl>
@@ -61,7 +62,7 @@
  * which contains the <b>translation.template</b> and all language files.</dd>
  * <dt>Graphical interface</dt>
  * <dd>This allows selecting the <b>Font (F9)</b> and changing the <b>Options (F10)</b>.<br/>
- * The font must be changed only, if the contents of the volume list are not displayed correctly.</dd>
+ * Usually the font must be changed only, if the contents of the volume list are not displayed correctly.</dd>
  * <dt>Boot time scan (Disabled for portable editions)</dt>
  * <dd>This allows to enable boot time scan by checking <b>Enable (F11)</b> and to edit the boot time script by selecting <b>Script (F12)</b>.</dd>
  * <dt>Reports (Ctrl+R)</dt>
@@ -140,20 +141,19 @@
  * are never treated as fragmented. Because trash should not
  * get our attention.
  *
- * <h1>Shutting Down or Hibernating the Computer when done</h1>
- * If <b>Shutdown PC when done</b> is checked, UltraDefrag
- * will automatically shut down the computer after the job completes.
+ * <h1>When done</h1>
+ * If any of the actions except <b>None</b> is checked, UltraDefrag
+ * will automatically perform that action after the job completes.
+ *
  * Note that your system and hardware configuration must support
  * shutdown and power off, otherwise Windows may reboot your PC
  * or even do nothing. Therefore test this mode before using it
  * at a regular basis.
  *
- * Instead of an automatic shutdown, an automatic hibernation
- * may be used. Press the <b>F10</b> key and set
- * <b>hibernate_instead_of_shutdown = 1</b>. Note that your system must
- * support hibernation and it must be turned on. Otherwise Windows
+ * Note that your system must support the selected suspend mode
+ * and it must be turned on. Otherwise Windows
  * will display a message box containing a brief error description
- * and the system will not be switched into hibernation mode.
+ * and the system will not be switched into any suspend mode.
  *
  * <h1>Configuring</h1>
  * The default font is Courier New, 9.
@@ -193,18 +193,8 @@ disable_reports = 0
 
 dbgprint_level = "NORMAL"
 
--- set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system
--- after a job is done instead of shutting it down, otherwise set it to 0
-
-hibernate_instead_of_shutdown = 0
-
--- set show_shutdown_check_confirmation_dialog to 1 to display the confirmation dialog
--- for shutdown or hibernate, otherwise set it to 0
-
-show_shutdown_check_confirmation_dialog = 1
-
 -- seconds_for_shutdown_rejection sets the delay for the user to cancel
--- the shutdown or hibernate execution, default is 60 seconds
+-- the hibernate, logoff, reboot or shutdown execution, default is 60 seconds
 
 seconds_for_shutdown_rejection = 60
 
@@ -216,6 +206,14 @@ map_block_size = 4
 -- the grid line width, in pixels; default value is 1
 
 grid_line_width = 1
+
+-- grid line color, in RGB format; default value is (0;0;0)
+-- all color components should be in range 0-255
+-- (0;0;0) means black; (255;255;255) - white
+
+grid_color_r = 0
+grid_color_g = 0
+grid_color_b = 0
 
 -- set disable_latest_version_check parameter to 1
 -- to disable the automatic check for the latest available
