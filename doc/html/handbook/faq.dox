@@ -93,6 +93,9 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * Explorer replaces an empty volume name by <b>Local Disk</b> or similar, 
  * UltraDefrag does not replace an empty volume name with any default. 
  *
+ * <h3>Where can I find a legend of the cluster map colors?</h3>
+ * The colors are described in the <b>Cluster Map</b> section of the @ref GUI page. 
+ *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
  *    <TR>
