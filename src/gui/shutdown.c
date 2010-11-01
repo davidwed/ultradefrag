@@ -304,11 +304,20 @@ int ShutdownOrHibernate(void)
 	HANDLE hToken; 
 	TOKEN_PRIVILEGES tkp; 
 	
-	if(seconds_for_shutdown_rejection){
-		if(DialogBoxW(hInstance,MAKEINTRESOURCEW(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0)
-			return 0;
-		/* in case of errors we'll shutdown anyway */
-		/* to avoid situation when pc works a long time without any control */
+	switch(when_done_action){
+	case IDM_WHEN_DONE_HIBERNATE:
+	case IDM_WHEN_DONE_LOGOFF:
+	case IDM_WHEN_DONE_REBOOT:
+	case IDM_WHEN_DONE_SHUTDOWN:
+		if(seconds_for_shutdown_rejection){
+			if(DialogBoxW(hInstance,MAKEINTRESOURCEW(IDD_SHUTDOWN),NULL,(DLGPROC)ShutdownConfirmDlgProc) == 0)
+				return 0;
+			/* in case of errors we'll shutdown anyway */
+			/* to avoid situation when pc works a long time without any control */
+		}
+		break;
+	case IDM_WHEN_DONE_EXIT:
+		return 0; /* nothing to do */
 	}
 	
 	/* set SE_SHUTDOWN privilege */
@@ -327,13 +336,21 @@ int ShutdownOrHibernate(void)
 		return 5;
 	}
 	
-	if(0){//hibernate_instead_of_shutdown){
+	switch(when_done_action){
+	case IDM_WHEN_DONE_STANDBY:
+		break;
+	case IDM_WHEN_DONE_HIBERNATE:
 		/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
 		if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
 			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot hibernate the computer!");
 			return 6;
 		}
-	} else {
+		break;
+	case IDM_WHEN_DONE_LOGOFF:
+		break;
+	case IDM_WHEN_DONE_REBOOT:
+		break;
+	case IDM_WHEN_DONE_SHUTDOWN:
 		/*
 		* InitiateSystemShutdown() works fine
 		* but doesn't power off the pc.
@@ -343,6 +360,7 @@ int ShutdownOrHibernate(void)
 			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot shut down the computer!");
 			return 7;
 		}
+		break;
 	}
 	
 	return 0;
