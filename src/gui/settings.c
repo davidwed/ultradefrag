@@ -105,7 +105,7 @@ WGX_OPTION options[] = {
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
 	{WGX_CFG_COMMENT, 0, "seconds_for_shutdown_rejection sets the delay for the user to cancel", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "the logoff, shutdown or hibernate execution, default is 60 seconds", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "the hibernate, logoff, reboot or shutdown execution, default is 60 seconds", NULL, ""},
 	{WGX_CFG_INT,     0, "seconds_for_shutdown_rejection", &seconds_for_shutdown_rejection, (void *)60},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
