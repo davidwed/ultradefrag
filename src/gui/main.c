@@ -723,7 +723,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			if(!busy_flag)
 				UpdateVolList();
 			return 0;
-		case IDM_SHUTDOWN:
+		/*case IDM_SHUTDOWN:
 			if(shutdown_flag){
 				shutdown_flag = 0;
 				CheckMenuItem(hMainMenu,
@@ -743,7 +743,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 						IDM_SHUTDOWN,MF_BYCOMMAND | MF_CHECKED);
 				}
 			}
-			return 0;
+			return 0;*/
 		case IDM_EXIT:
 			goto done;
 		/* Reports menu handler */

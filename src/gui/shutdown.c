@@ -28,190 +28,6 @@
 
 /**
  * @brief Adjusts position of controls inside
- * the shutdown check confirmation dialog to make it
- * nice looking independent from text lengths
- * and font size.
- */
-static void ResizeShutdownCheckConfirmDialog(HWND hwnd)
-{
-	int client_width, client_height;
-	int icon_width = 32;
-	int icon_height = 32;
-	int spacing = 7;
-	int large_spacing = 11;
-	int margin = 11;
-	int text1_width, text1_height;
-	int button_width = 75;
-	int button_height = 23;
-	HDC hdc;
-	wchar_t *text1;
-	SIZE size;
-	int top_width, top_height;
-	int bottom_width, bottom_height;
-	int icon_y, text1_y;
-	int button1_x;
-	RECT rc;
-	HFONT hFont, hOldFont;
-	
-	/* synchronize access to localized strings with other threads */
-	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
-		WgxDbgPrintLastError("ResizeShutdownCheckConfirmDialog: wait on hLangPackEvent failed");
-		return;
-	}
-
-	/* get dimensions of text */
-	hdc = GetDC(hwnd);
-	if(hdc == NULL){
-		WgxDbgPrintLastError("ResizeShutdownCheckConfirmDialog: cannot get device context of the window");
-		goto done;
-	}
-	
-	if(use_custom_font_in_dialogs){
-		hFont = wgxFont.hFont;
-	} else {
-		hFont = (HFONT)SendMessage(hwnd,WM_GETFONT,0,0);
-		if(hFont == NULL){
-			WgxDbgPrintLastError("ResizeShutdownCheckConfirmDialog: cannot get default font");
-			ReleaseDC(hwnd,hdc);
-			goto done;
-		}
-	}
-	hOldFont = SelectObject(hdc,hFont);
-	
-	if(hibernate_instead_of_shutdown)
-		text1 = WgxGetResourceString(i18n_table,L"REALLY_HIBERNATE_WHEN_DONE");
-	else
-		text1 = WgxGetResourceString(i18n_table,L"REALLY_SHUTDOWN_WHEN_DONE");
-	
-	if(!GetTextExtentPoint32W(hdc,text1,wcslen(text1),&size)){
-		WgxDbgPrintLastError("ResizeShutdownCheckConfirmDialog: cannot get text1 dimensions");
-		SelectObject(hdc,hOldFont);
-		ReleaseDC(hwnd,hdc);
-		goto done;
-	}
-	text1_width = size.cx;
-	text1_height = size.cy;
-	
-	SelectObject(hdc,hOldFont);
-	ReleaseDC(hwnd,hdc);
-	
-	top_width = icon_width + large_spacing + text1_width;
-	top_height = max(icon_height,text1_height);
-	bottom_width = button_width * 2 + spacing;
-	bottom_height = button_height;
-	if(top_width < bottom_width){
-		text1_width += bottom_width - top_width;
-		top_width = bottom_width;
-	}
-	
-	/* calculate dimensions of the entire client area */
-	client_width = top_width + margin * 2;
-	client_height = top_height + large_spacing + bottom_height + margin * 2;
-	
-	rc.left = 0;
-	rc.right = client_width;
-	rc.top = 0;
-	rc.bottom = client_height;
-	if(!AdjustWindowRect(&rc,WS_CAPTION | WS_DLGFRAME,FALSE)){
-		WgxDbgPrintLastError("ResizeShutdownConfirmDialog: cannot calculate window dimensions");
-		goto done;
-	}
-			
-	/* resize main window */
-	MoveWindow(hwnd,0,0,rc.right - rc.left,rc.bottom - rc.top,FALSE);
-			
-	/* reposition controls */
-	if(icon_height <= text1_height){
-		icon_y = (text1_height - icon_height) / 2 + margin;
-		text1_y = margin;
-	} else {
-		icon_y = margin;
-		text1_y = (icon_height - text1_height) / 2 + margin;
-	}
-	SetWindowPos(GetDlgItem(hwnd,IDC_SHUTDOWN_ICON),NULL,
-		margin,
-		icon_y,
-		icon_width,
-		icon_height,
-		SWP_NOZORDER);
-	SetWindowPos(GetDlgItem(hwnd,IDC_MESSAGE),NULL,
-		margin + icon_width + large_spacing,
-		text1_y,
-		text1_width,
-		text1_height + spacing,
-		SWP_NOZORDER);
-	button1_x = (client_width - button_width * 2 - spacing) / 2;
-	SetWindowPos(GetDlgItem(hwnd,IDC_YES_BUTTON),NULL,
-		button1_x,
-		margin + top_height + large_spacing,
-		button_width,
-		button_height,
-		SWP_NOZORDER);
-	SetWindowPos(GetDlgItem(hwnd,IDC_NO_BUTTON),NULL,
-		button1_x + button_width + spacing,
-		margin + top_height + large_spacing,
-		button_width,
-		button_height,
-		SWP_NOZORDER);
-
-	/* set localized texts */
-	SetWindowTextW(GetDlgItem(hwnd,IDC_MESSAGE),text1);
-	
-	/* center window over its parent */
-	WgxCenterWindow(hwnd);
-
-done:
-	/* end of synchronization */
-	SetEvent(hLangPackEvent);
-}
-
-/**
- * @brief Asks user whether he (she) really wants
- * to shutdown/hibernate computer after a job
- * completion or not.
- */
-BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
-{
-	switch(msg){
-	case WM_INITDIALOG:
-		/* Window Initialization */
-		WgxCenterWindow(hWnd);
-		if(use_custom_font_in_dialogs)
-			WgxSetFont(hWnd,&wgxFont);
-
-		if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
-			WgxDbgPrintLastError("CheckConfirmDlgProc: wait on hLangPackEvent failed");
-		} else {
-			WgxSetText(hWnd,i18n_table,L"PLEASE_CONFIRM");
-			WgxSetText(GetDlgItem(hWnd,IDC_YES_BUTTON),i18n_table,L"YES");
-			WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
-			SetEvent(hLangPackEvent);
-		}
-
-		/* shutdown will be confirmed by pressing the space key */
-		(void)SetFocus(GetDlgItem(hWnd,IDC_YES_BUTTON));
-
-		ResizeShutdownCheckConfirmDialog(hWnd);
-		return FALSE;
-	case WM_COMMAND:
-		switch(LOWORD(wParam)){
-		case IDC_YES_BUTTON:
-			(void)EndDialog(hWnd,1);
-			break;
-		case IDC_NO_BUTTON:
-			(void)EndDialog(hWnd,0);
-			break;
-		}
-		return TRUE;
-	case WM_CLOSE:
-		(void)EndDialog(hWnd,0);
-		return TRUE;
-	}
-	return FALSE;
-}
-
-/**
- * @brief Adjusts position of controls inside
  * the shutdown confirmation dialog to make it
  * nice looking independent from text lengths
  * and font size.
@@ -267,9 +83,9 @@ static void ResizeShutdownConfirmDialog(HWND hwnd,wchar_t *counter_msg)
 	}
 	hOldFont = SelectObject(hdc,hFont);
 	
-	if(hibernate_instead_of_shutdown)
-		text1 = WgxGetResourceString(i18n_table,L"REALLY_HIBERNATE_WHEN_DONE");
-	else
+	//if(hibernate_instead_of_shutdown)
+	//	text1 = WgxGetResourceString(i18n_table,L"REALLY_HIBERNATE_WHEN_DONE");
+	//else
 		text1 = WgxGetResourceString(i18n_table,L"REALLY_SHUTDOWN_WHEN_DONE");
 	
 	if(!GetTextExtentPoint32W(hdc,text1,wcslen(text1),&size)){
@@ -402,9 +218,9 @@ BOOL CALLBACK ShutdownConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lPa
 			WgxSetText(hWnd,i18n_table,L"PLEASE_CONFIRM");
 			WgxSetText(GetDlgItem(hWnd,IDC_YES_BUTTON),i18n_table,L"YES");
 			WgxSetText(GetDlgItem(hWnd,IDC_NO_BUTTON),i18n_table,L"NO");
-			if(hibernate_instead_of_shutdown)
-				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATION"),MAX_TEXT_LENGTH);
-			else
+			//if(hibernate_instead_of_shutdown)
+				//wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_HIBERNATION"),MAX_TEXT_LENGTH);
+			//else
 				wcsncpy(counter_msg,WgxGetResourceString(i18n_table,L"SECONDS_TILL_SHUTDOWN"),MAX_TEXT_LENGTH);
 			counter_msg[MAX_TEXT_LENGTH] = 0;
 			SetEvent(hLangPackEvent);
@@ -491,7 +307,7 @@ int ShutdownOrHibernate(void)
 		return 5;
 	}
 	
-	if(hibernate_instead_of_shutdown){
+	if(0){//hibernate_instead_of_shutdown){
 		/* the second parameter must be FALSE, dmitriar's windows xp hangs otherwise */
 		if(!SetSystemPowerState(FALSE,FALSE)){ /* hibernate, request permission from apps and drivers */
 			WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot hibernate the computer!");

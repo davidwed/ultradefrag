@@ -158,7 +158,6 @@ void ShowProgress(void);
 void HideProgress(void);
 void SetProgress(wchar_t *message, int percentage);
 */
-BOOL CALLBACK CheckConfirmDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
 void AboutBox(void);
 void ShowReports(void);
 
@@ -230,8 +229,6 @@ extern int btd_installed;
 extern int stop_pressed;
 
 /* common preferences */
-extern int hibernate_instead_of_shutdown;
-extern int show_shutdown_check_confirmation_dialog;
 extern int seconds_for_shutdown_rejection;
 extern int scale_by_dpi;
 extern int restore_default_window_size;

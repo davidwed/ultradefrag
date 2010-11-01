@@ -100,9 +100,6 @@ WGX_MENU main_menu[] = {
  */
 int CreateMainMenu(void)
 {
-	short *s = L"";
-	short buffer[256];
-	
 	/* create menu */
 	hMainMenu = WgxBuildMenu(main_menu);
 	
@@ -143,14 +140,6 @@ int CreateMainMenu(void)
 		EnableMenuItem(hMainMenu,IDM_DEFRAG,   MF_BYCOMMAND | MF_GRAYED);
 		EnableMenuItem(hMainMenu,IDM_OPTIMIZE, MF_BYCOMMAND | MF_GRAYED);
 	}
-
-	if(hibernate_instead_of_shutdown)
-		s = WgxGetResourceString(i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
-	else
-		s = WgxGetResourceString(i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
-	_snwprintf(buffer,sizeof(buffer),L"%ws\tCtrl+S",s);
-	buffer[255] = 0;
-	ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
 
 	if(!DrawMenuBar(hWindow))
 		WgxDbgPrintLastError("Cannot redraw main menu");

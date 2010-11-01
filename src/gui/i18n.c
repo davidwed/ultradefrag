@@ -112,8 +112,8 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 };
 
 struct menu_item {
-	int id;          /* menu item identifier */
-	wchar_t *key;      /* i18n table entry key */
+	int id;         /* menu item identifier */
+	wchar_t *key;   /* i18n table entry key */
 	char *hotkeys;  /* hotkeys assigned to the item */
 };
 
@@ -250,13 +250,6 @@ void ApplyLanguagePack(void)
 		mi.dwTypeData = buffer;
 		SetMenuItemInfoW(hMainMenu,menu_items[i].id,FALSE,&mi);
 	}
-	if(hibernate_instead_of_shutdown)
-		s = WgxGetResourceString(i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
-	else
-		s = WgxGetResourceString(i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
-	_snwprintf(buffer,256,L"%ws\tCtrl+S",s);
-	buffer[255] = 0;
-	ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
 	
 	/* end of synchronization */
 	SetEvent(hLangPackEvent);

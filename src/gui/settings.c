@@ -42,8 +42,6 @@ char dbgprint_level[32] = {0};
 /*
 * GUI specific options
 */
-int hibernate_instead_of_shutdown = FALSE;
-int show_shutdown_check_confirmation_dialog = 1;
 int seconds_for_shutdown_rejection = 60;
 int scale_by_dpi = 1;
 int restore_default_window_size = 0;
@@ -106,18 +104,8 @@ WGX_OPTION options[] = {
 	{WGX_CFG_STRING,  sizeof(dbgprint_level), "dbgprint_level", dbgprint_level, ""},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
-	{WGX_CFG_COMMENT, 0, "set hibernate_instead_of_shutdown to 1, if you prefer to hibernate the system", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "after a job is done instead of shutting it down, otherwise set it to 0",        NULL, ""},
-	{WGX_CFG_INT,     0, "hibernate_instead_of_shutdown", &hibernate_instead_of_shutdown, 0},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "set show_shutdown_check_confirmation_dialog to 1 to display the confirmation dialog", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "for shutdown or hibernate, otherwise set it to 0",                                    NULL, ""},
-	{WGX_CFG_INT,     0, "show_shutdown_check_confirmation_dialog", &show_shutdown_check_confirmation_dialog, (void *)1},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-		
 	{WGX_CFG_COMMENT, 0, "seconds_for_shutdown_rejection sets the delay for the user to cancel", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "the shutdown or hibernate execution, default is 60 seconds", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "the logoff, shutdown or hibernate execution, default is 60 seconds", NULL, ""},
 	{WGX_CFG_INT,     0, "seconds_for_shutdown_rejection", &seconds_for_shutdown_rejection, (void *)60},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
@@ -286,8 +274,6 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 	int s_skip_removable;
 	int cw[sizeof(user_defined_column_widths) / sizeof(int)];
 	int s_list_height;
-	short *s = L"";
-	short buffer[256];
 	
 	h = FindFirstChangeNotification(".\\options",
 			FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
@@ -325,14 +311,6 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				
 				SetEvent(hMapEvent);
 
-				if(hibernate_instead_of_shutdown)
-					s = WgxGetResourceString(i18n_table,L"HIBERNATE_PC_AFTER_A_JOB");
-				else
-					s = WgxGetResourceString(i18n_table,L"SHUTDOWN_PC_AFTER_A_JOB");
-				_snwprintf(buffer,256,L"%ws\tCtrl+S",s);
-				buffer[255] = 0;
-				ModifyMenuW(hMainMenu,IDM_SHUTDOWN,MF_BYCOMMAND | MF_STRING,IDM_SHUTDOWN,buffer);
-			
 				/* if block size or grid line width changed since last redraw, resize map */
 				if(map_block_size != last_block_size  || grid_line_width != last_grid_width){
 					ResizeMap(last_x,last_y,last_width,last_height);
