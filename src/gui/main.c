@@ -37,7 +37,7 @@ RECT win_rc; /* coordinates of main window */
 RECT r_rc;   /* coordinates of restored window */
 double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
 
-int shutdown_flag = 0;
+int when_done_action = IDM_WHEN_DONE_NONE;
 int shutdown_requested = 0;
 int boot_time_defrag_enabled = 0;
 extern int init_maximized_window;
@@ -723,27 +723,6 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			if(!busy_flag)
 				UpdateVolList();
 			return 0;
-		/*case IDM_SHUTDOWN:
-			if(shutdown_flag){
-				shutdown_flag = 0;
-				CheckMenuItem(hMainMenu,
-					IDM_SHUTDOWN,MF_BYCOMMAND | MF_UNCHECKED);
-			} else {
-				if(show_shutdown_check_confirmation_dialog){
-					if(DialogBoxW(hInstance,MAKEINTRESOURCEW(IDD_CHECK_CONFIRM),
-					  hWindow,(DLGPROC)CheckConfirmDlgProc) != 0)
-					{
-						shutdown_flag = 1;
-						CheckMenuItem(hMainMenu,
-							IDM_SHUTDOWN,MF_BYCOMMAND | MF_CHECKED);
-					}
-				} else {
-					shutdown_flag = 1;
-					CheckMenuItem(hMainMenu,
-						IDM_SHUTDOWN,MF_BYCOMMAND | MF_CHECKED);
-				}
-			}
-			return 0;*/
 		case IDM_EXIT:
 			goto done;
 		/* Reports menu handler */
@@ -835,8 +814,8 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			AboutBox();
 			return 0;
 		default:
-			/* handle language menu */
 			id = LOWORD(wParam);
+			/* handle language menu */
 			if(id > IDM_LANGUAGE && id < IDM_CFG_GUI){
 				/* get name of selected language */
 				memset(&mi,0,sizeof(MENUITEMINFOW));
@@ -866,6 +845,18 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 					ApplyLanguagePack();
 				}
 				return 0;
+			}
+			/* handle when done submenu */
+			if(id > IDM_WHEN_DONE && id < IDM_EXIT){
+				/* move check mark */
+				for(i = IDM_WHEN_DONE + 1; i < IDM_EXIT; i++){
+					if(CheckMenuItem(hMainMenu,i,MF_BYCOMMAND | MF_UNCHECKED) == -1)
+						break;
+				}
+				CheckMenuItem(hMainMenu,id,MF_BYCOMMAND | MF_CHECKED);
+				
+				/* save choice */
+				when_done_action = id;
 			}
 		}
 		break;

@@ -324,9 +324,9 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE,MAKELONG(TRUE,0));
 	
-	/* check the shutdown after a job box state */
+	/* check the when done action state */
 	if(!exit_pressed && !stop_pressed){
-		if(shutdown_flag){
+		if(when_done_action != IDM_WHEN_DONE_NONE){
 			shutdown_requested = 1;
 			SendMessage(hWindow,WM_COMMAND,IDM_EXIT,0);
 		}

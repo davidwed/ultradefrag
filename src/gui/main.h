@@ -216,7 +216,7 @@ extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern volume_processing_job *current_job;
 extern HANDLE hMapEvent;
 extern int busy_flag;
-extern int shutdown_flag;
+extern int when_done_action;
 extern int shutdown_requested;
 extern int exit_pressed;
 extern int boot_time_defrag_enabled;
