@@ -44,6 +44,7 @@ static int save_text_report(udefrag_job_parameters *jp)
 	int size = sizeof(buffer) / sizeof(short);
 	udefrag_fragmented_file *file;
 	char *comment;
+	char *status;
 	int length, offset;
 	char human_readable_size[32];
 	int n1, n2;
@@ -71,7 +72,7 @@ static int save_text_report(udefrag_job_parameters *jp)
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	/*(void)_snwprintf(buffer,size,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");*/
-	(void)_snwprintf(buffer,size,L"; Fragments%12hs%9hs    Filename\r\n","Filesize","Comment");
+	(void)_snwprintf(buffer,size,L"; Fragments%12hs%9hs%24hs    Filename\r\n","Filesize","Comment","Status");
 	buffer[size - 1] = 0;
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
@@ -90,6 +91,15 @@ static int save_text_report(udefrag_job_parameters *jp)
 			else
 				comment = " - ";
 			
+			if(is_locked(file->f))
+				status = "locked";
+			else if(is_too_large(file->f))
+				status = "no enough free space";
+			else if(is_moving_failed(file->f))
+				status = "file moving failed";
+			else
+				status = " - ";
+			
 			/*(void)_snwprintf(buffer,size,L"\r\n%11u%21I64u%9hs    ",
 				(UINT)file->f->disp.fragments,
 				file->f->disp.clusters * jp->v_info.bytes_per_cluster,
@@ -103,8 +113,8 @@ static int save_text_report(udefrag_job_parameters *jp)
 					human_readable_size[sizeof(human_readable_size) - 1] = 0;
 				//}
 			}
-			(void)_snwprintf(buffer,size,L"\r\n%11u%12hs%9hs    ",
-				(UINT)file->f->disp.fragments,human_readable_size,comment);
+			(void)_snwprintf(buffer,size,L"\r\n%11u%12hs%9hs%24hs    ",
+				(UINT)file->f->disp.fragments,human_readable_size,comment,status);
 			buffer[size - 1] = 0;
 			(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 			
@@ -130,6 +140,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	char buffer[512];
 	udefrag_fragmented_file *file;
 	char *comment;
+	char *status;
 	int i, length, offset;
 	char human_readable_size[32];
 	int n1, n2;
@@ -147,7 +158,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	/* print header */
 	(void)_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
-		"format_version = 3\r\n\r\n"
+		"format_version = 4\r\n\r\n"
 		"volume_letter = \"%c\"\r\n\r\n"
 		"files = {\r\n",
 		jp->volume_letter, jp->volume_letter
@@ -167,6 +178,15 @@ static int save_lua_report(udefrag_job_parameters *jp)
 			else
 				comment = " - ";
 			
+			if(is_locked(file->f))
+				status = "locked";
+			else if(is_too_large(file->f))
+				status = "no enough free space";
+			else if(is_moving_failed(file->f))
+				status = "file moving failed";
+			else
+				status = " - ";
+			
 			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				1,human_readable_size,sizeof(human_readable_size));
 			if(sscanf(human_readable_size,"%u.%u %s",&n1,&n2,s) == 3){
@@ -177,12 +197,12 @@ static int save_lua_report(udefrag_job_parameters *jp)
 			}
 			(void)_snprintf(buffer, sizeof(buffer),
 				"\t{fragments = %u,size = %I64u,hrsize = \"%hs\",filtered = %u,"
-				"comment = \"%s\",uname = {",
+				"comment = \"%s\",status = \"%s\",uname = {",
 				(UINT)file->f->disp.fragments,
 				file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				human_readable_size,
 				(UINT)is_excluded(file->f),
-				comment
+				comment,status
 				);
 			buffer[sizeof(buffer) - 1] = 0;
 			(void)winx_fwrite(buffer,1,strlen(buffer),f);

@@ -30,11 +30,20 @@
 #endif
 
 /* flags for user_defined_flags member of filelist entries */
-#define UD_FILE_EXCLUDED    0x1
-#define UD_FILE_OVER_LIMIT  0x2
+#define UD_FILE_EXCLUDED       0x1
+#define UD_FILE_OVER_LIMIT     0x2
 
-#define is_excluded(f)    ((f)->user_defined_flags & UD_FILE_EXCLUDED)
-#define is_over_limit(f)  ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
+/* file status flags */
+#define UD_FILE_LOCKED         0x4   /* file is locked by system */
+#define UD_FILE_TOO_LARGE      0x8   /* file is larger than the biggest free space region */
+#define UD_FILE_MOVING_FAILED  0x10  /* file moving completed with failure */
+
+#define is_excluded(f)       ((f)->user_defined_flags & UD_FILE_EXCLUDED)
+#define is_over_limit(f)     ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
+
+#define is_locked(f)         ((f)->user_defined_flags & UD_FILE_LOCKED)
+#define is_too_large(f)      ((f)->user_defined_flags & UD_FILE_TOO_LARGE)
+#define is_moving_failed(f)  ((f)->user_defined_flags & UD_FILE_MOVING_FAILED)
 
 /* named constant for 256k */
 #define _256K (256 * 1024)

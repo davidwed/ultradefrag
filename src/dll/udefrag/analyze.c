@@ -584,6 +584,7 @@ static void redraw_well_known_locked_files(udefrag_job_parameters *jp)
 					f->disp.fragments = 0;
 					f->disp.flags = 0;*/
 					winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+					f->user_defined_flags |= UD_FILE_LOCKED;
 					if(jp->progress_router)
 						jp->progress_router(jp); /* redraw progress */
 				}

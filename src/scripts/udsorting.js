@@ -21,10 +21,10 @@
 * Interface:
 *	1. init_sorting_engine()
 *	2. sort_items(criteria), where criteria is 
-*		{"fragments" | "size" | "name" | "comment"}
+*		{"fragments" | "size" | "name" | "comment" | "status"}
 */
 
-/* Mozilla 1.5.0 and IE 5.0  were tested. */
+/* Mozilla 1.5.0-3.6.3, IE 5.0 and 6.0 were tested. */
 /* IE 3.0 is not supported. */
 
 /* global variables */
@@ -37,6 +37,7 @@ var fragments_order = 1;
 var size_order = 1;
 var name_order = 0;
 var comment_order = 1;
+var status_order = 1;
 var msie_browser = false; // true for ms internet explorer
 
 var x; // for debugging purposes
@@ -81,6 +82,9 @@ function sort_items(criteria)
 	} else if(criteria == 'comment'){
 		a.sort(sort_by_comment);
 		comment_order = comment_order ? 0 : 1;
+	} else if(criteria == 'status'){
+		a.sort(sort_by_status);
+		status_order = status_order ? 0 : 1;
 	} else {
 		return; // invalid criteria
 	}
@@ -155,6 +159,21 @@ function sort_by_comment(a,b)
 	else result = -1;
 	
 	if(comment_order)
+		return -result;
+	else
+		return result;
+}
+
+function sort_by_status(a,b)
+{
+	var ca = a.getElementsByTagName("td")[4].innerHTML.toLowerCase();
+	var cb = b.getElementsByTagName("td")[4].innerHTML.toLowerCase();
+	var result;
+	if(ca > cb) result = 1;
+	else if(ca == cb) result = 0;
+	else result = -1;
+	
+	if(status_order)
 		return -result;
 	else
 		return result;

@@ -197,6 +197,7 @@ table_header = [[
 <td class="c"><a href="javascript:sort_items('size')">size</a></td>
 <td class="c"><a href="javascript:sort_items('name')">filename</a></td>
 <td class="c"><a href="javascript:sort_items('comment')">comment</a></td>
+<td class="c"><a href="javascript:sort_items('status')">status</a></td>
 </tr>
 ]]
 
@@ -236,7 +237,7 @@ function write_main_table_body(f)
 		f:write("<tr class=\"", class, "\"><td class=\"c\">", file.fragments,"</td>")
 		f:write("<td class=\"filesize\" id=\"", file.size, "\">", file.hrsize,"</td><td>")
 		write_unicode_name(f,file.uname)
-		f:write("</td><td class=\"c\">", file.comment, "</td></tr>\n")
+		f:write("</td><td class=\"c\">", file.comment, "</td><td class=\"file-status\">", file.status, "</td></tr>\n")
 	end
 end
 
@@ -298,8 +299,8 @@ end
 dofile(report_path)
 
 -- check the report format version
-if format_version == nil or format_version < 3 then
-	error("Reports produced by old versions of UltraDefrag are no more supported.\nUpdate the program at least to the 5.0.0 alpha2 version.")
+if format_version == nil or format_version < 4 then
+	error("Reports produced by old versions of UltraDefrag are no more supported.\nUpdate the program at least to the 5.0.0 alpha3 version.")
 end
 
 -- build a web page containing a file fragmentation report

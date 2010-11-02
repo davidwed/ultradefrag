@@ -41,6 +41,12 @@ td {
 	text-align: right;
 }
 
+.file-status {
+	padding-left: 5pt;
+	padding-right: 5pt;
+	text-align: center;
+}
+
 /* table cells with filtered out items (currently not used) */
 
 .f {
