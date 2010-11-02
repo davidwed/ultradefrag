@@ -178,7 +178,7 @@ int unregister_cmd(void)
 {
 	HKEY hKey;
 	DWORD type, size;
-	char *data, *new_data, *curr_pos;
+	char *data, *new_data = NULL, *curr_pos;
 	DWORD i, length, new_length, curr_len;
 	LONG result;
 

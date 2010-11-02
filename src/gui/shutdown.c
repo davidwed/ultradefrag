@@ -98,6 +98,9 @@ static void ResizeShutdownConfirmDialog(HWND hwnd,wchar_t *counter_msg)
 	case IDM_WHEN_DONE_SHUTDOWN:
 		text1 = WgxGetResourceString(i18n_table,L"REALLY_SHUTDOWN_WHEN_DONE");
 		break;
+	default:
+		text1 = L"";
+		break;
 	}
 	
 	if(!GetTextExtentPoint32W(hdc,text1,wcslen(text1),&size)){
