@@ -5,6 +5,9 @@ HISTORY
     alpha3:
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
+    - the following translations were updated:
+
+      Italian
     
     alpha2:
     - ability to resize list of volumes was added to graphical interface
