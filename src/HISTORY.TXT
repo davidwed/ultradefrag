@@ -7,7 +7,7 @@ HISTORY
     - file status was added to reports
     - the following translations were updated:
 
-      Italian
+      Italian, Norwegian
     
     alpha2:
     - ability to resize list of volumes was added to graphical interface
