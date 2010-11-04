@@ -114,6 +114,7 @@
  * <tr><td>• Alexander Vedyakin      </td><td>-</td><td> Volume type detection improvements.</td></tr>
  * <tr><td>                          </td><td> </td><td> More effective defragmenting algorithms.</td></tr>
  * <tr><td>• Andrei Maksimov         </td><td>-</td><td> GUI improvements.</td></tr>
+ * <tr><td>                          </td><td> </td><td> A lot of other interesting ideas.</td></tr>
  * <tr><td>• Bryan Kirk              </td><td>-</td><td> Better GUI appearance (new list of drives).</td></tr>
  * <tr><td>                          </td><td> </td><td> Autodefrag feature (not implemented yet).</td></tr>
  * <tr><td>• Christopher Naegel      </td><td>-</td><td> Driver loading on Vista problem's partial solution.</td></tr>
@@ -130,6 +131,7 @@
  * <tr><td>• Nagy Zsolt              </td><td>-</td><td> Interesting ideas about translation. Installer improvements.</td></tr>
  * <tr><td>• Parvez Reza             </td><td>-</td><td> Various interesting programming tricks.</td></tr>
  * <tr><td>• Stefan Pendl            </td><td>-</td><td> Boot time defragmenter improvements. Installer improvements.</td></tr>
+ * <tr><td>                          </td><td> </td><td> Thousands of other interesting ideas.</td></tr>
  * <tr><td>• Vasily Smirnov          </td><td>-</td><td> FAT directories defragmentation algorithm.</td></tr>
  * <tr><td>                          </td><td> </td><td> Various important GUI improvements.</td></tr>
  * </table>
