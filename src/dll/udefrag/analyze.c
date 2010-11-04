@@ -551,6 +551,38 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 }
 
 /**
+ * @brief Defines whether the file
+ * is locked by system or not.
+ * @return Nonzero value indicates
+ * that the file is locked.
+ */
+int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp)
+{
+	NTSTATUS status;
+	HANDLE hFile;
+
+	status = udefrag_fopen(f,&hFile);
+	if(status == STATUS_SUCCESS){
+		NtCloseSafe(hFile);
+		return 0;
+	}
+
+	/*DebugPrintEx(status,"cannot open %ws",f->path);*/
+	/* redraw space */
+	colorize_file_as_system(jp,f);
+	/* file is locked by other application, so its state is unknown */
+	/* don't reset its statistics though! */
+	/*f->disp.clusters = 0;
+	f->disp.fragments = 0;
+	f->disp.flags = 0;*/
+	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+	f->user_defined_flags |= UD_FILE_LOCKED;
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw progress */
+	return 1;
+}
+
+/**
  * @brief Searches for well known locked files
  * and applies their dispositions to the map.
  * @details Resets f->disp structure of locked files.
@@ -560,8 +592,6 @@ static void redraw_well_known_locked_files(udefrag_job_parameters *jp)
 {
 	winx_file_info *f;
 	ULONGLONG time;
-	NTSTATUS status;
-	HANDLE hFile;
 
 	winx_dbg_print_header(0,0,"search for well known locked files...");
 	time = winx_xtime();
@@ -569,24 +599,9 @@ static void redraw_well_known_locked_files(udefrag_job_parameters *jp)
 	for(f = jp->filelist; f; f = f->next){
 		if(f->disp.blockmap && f->path && f->name){ /* otherwise nothing to redraw */
 			if(is_well_known_locked_file(f,jp)){
-				/* check whether the file is actually locked or not */
-				status = udefrag_fopen(f,&hFile);
-				if(status == STATUS_SUCCESS){
-					NtCloseSafe(hFile);
+				if(!is_file_locked(f,jp)){
 					/* possibility of this case must be reduced */
 					DebugPrint("false detection: %ws",f->path);
-				} else {
-					/*DebugPrintEx(status,"cannot open %ws",f->path);*/
-					/* redraw space */
-					colorize_file_as_system(jp,f);
-					/* file is locked by other application, so its state is unknown */
-					/*f->disp.clusters = 0;
-					f->disp.fragments = 0;
-					f->disp.flags = 0;*/
-					winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-					f->user_defined_flags |= UD_FILE_LOCKED;
-					if(jp->progress_router)
-						jp->progress_router(jp); /* redraw progress */
 				}
 			}
 		}

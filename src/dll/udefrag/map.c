@@ -158,6 +158,32 @@ void reset_cluster_map(udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Redraws all temporary system space as free.
+ */
+void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp)
+{
+	ULONGLONG i;
+	ULONGLONG n;
+	
+	if(jp == NULL)
+		return;
+	
+	if(jp->cluster_map.array == NULL)
+		return;
+
+	for(i = 0; i < jp->cluster_map.map_size; i++){
+		n = jp->cluster_map.array[i][TEMPORARY_SYSTEM_SPACE];
+		if(n){
+			jp->cluster_map.array[i][TEMPORARY_SYSTEM_SPACE] = 0;
+			jp->cluster_map.array[i][FREE_SPACE] += n;
+		}
+	}
+
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw map */
+}
+
+/**
  * @brief Checks whether a range of clusters is outside MFT or not.
  */
 static int is_outside_mft(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
@@ -409,7 +435,7 @@ static int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
 /**
  * @brief Defines file's color.
  */
-static int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
+int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
 {
 	winx_blockmap *block;
 	int i;

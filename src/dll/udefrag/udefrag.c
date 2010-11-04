@@ -221,8 +221,7 @@ static DWORD WINAPI start_job(LPVOID p)
 		result = analyze(jp);
 		break;
 	case DEFRAG_JOB:
-		// TODO
-		//result = defragment(jp);
+		result = defragment(jp);
 		break;
 	case OPTIMIZER_JOB:
 		// TODO

@@ -122,6 +122,7 @@ typedef struct _udefrag_progress_info {
 	int completion_status;            /* zero for running job, positive value for succeeded, negative for failed */
 	char *cluster_map;                /* pointer to the cluster map buffer */
 	int cluster_map_size;             /* size of the cluster map buffer, in bytes */
+	ULONGLONG moved_clusters;         /* number of moved clusters */
 } udefrag_progress_info;
 
 typedef void  (__stdcall *udefrag_progress_callback)(udefrag_progress_info *pi, void *p);

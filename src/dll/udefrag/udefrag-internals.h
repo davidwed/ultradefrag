@@ -148,12 +148,18 @@ void colorize_map_region(udefrag_job_parameters *jp,
 		ULONGLONG lcn, ULONGLONG length, int new_color, int old_color);
 void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color);
 void colorize_file_as_system(udefrag_job_parameters *jp, winx_file_info *f);
+int get_file_color(udefrag_job_parameters *jp, winx_file_info *f);
+void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp);
 
 int analyze(udefrag_job_parameters *jp);
+int defragment(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
 
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
+int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
+int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
+void update_fragmented_files_list(udefrag_job_parameters *jp);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
