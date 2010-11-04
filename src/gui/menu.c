@@ -150,7 +150,7 @@ int CreateMainMenu(void)
 		/* TODO: remove the following lines according to the state of
 		   defragmentation and optimization implementation. */
 	
-		EnableMenuItem(hMainMenu,IDM_DEFRAG,   MF_BYCOMMAND | MF_GRAYED);
+		// EnableMenuItem(hMainMenu,IDM_DEFRAG,   MF_BYCOMMAND | MF_GRAYED);
 		EnableMenuItem(hMainMenu,IDM_OPTIMIZE, MF_BYCOMMAND | MF_GRAYED);
 	}
 

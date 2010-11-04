@@ -165,7 +165,7 @@ int CreateToolbar(void)
 		/* TODO: remove the following lines according to the state of
 		   defragmentation and optimization implementation. */
 	
-		SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,  MAKELONG(FALSE,0));
+		// SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,  MAKELONG(FALSE,0));
 		SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE,MAKELONG(FALSE,0));
 	}
 
