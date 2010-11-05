@@ -110,7 +110,7 @@ typedef struct _udefrag_progress_info {
 	unsigned long directories;        /* number of directories */
 	unsigned long compressed;         /* number of compressed files */
 	unsigned long fragmented;         /* number of fragmented files */
-	unsigned long fragments;          /* number of fragments */
+	ULONGLONG fragments;              /* number of fragments */
 	ULONGLONG total_space;            /* volume size, in bytes */
 	ULONGLONG free_space;             /* free space amount, in bytes */
 	ULONGLONG mft_size;               /* mft size, in bytes */

@@ -254,7 +254,7 @@ typedef struct _winx_blockmap {
 
 typedef struct _winx_file_disposition {
 	ULONGLONG clusters;                /* total number of clusters belonging to the file */
-	unsigned long fragments;           /* total number of file fragments */
+	ULONGLONG fragments;               /* total number of file fragments */
 	unsigned long flags;               /* combination of WINX_FILE_DISP_xxx flags */
 	winx_blockmap *blockmap;           /* map of blocks <=> list of fragments */
 } winx_file_disposition;
