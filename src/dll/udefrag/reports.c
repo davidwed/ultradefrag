@@ -96,7 +96,7 @@ static int save_text_report(udefrag_job_parameters *jp)
 			else if(is_moving_failed(file->f)) /* before is_too_large() check */
 				status = "file moving failed";
 			else if(is_too_large(file->f))
-				status = "not enough free space";
+				status = "block of free space too small";
 			else
 				status = " - ";
 			
@@ -183,7 +183,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
 			else if(is_moving_failed(file->f)) /* before is_too_large() check */
 				status = "file moving failed";
 			else if(is_too_large(file->f))
-				status = "not enough free space";
+				status = "block of free space too small";
 			else
 				status = " - ";
 			
