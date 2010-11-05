@@ -36,7 +36,7 @@ goto :EOF
     echo.
     echo [Field 1]
     echo Type=Label
-    echo Text=Select a language pack to be used for UltraDefrag GUI, Configuration dialog and Scheduler.\r\n\r\nIf your native language is missing here or an existing translation is incomplete, feel free to submit your own translation. Your help will be much appreciated!
+    echo Text=Select a language pack to be used for UltraDefrag GUI.\r\n\r\nIf your native language is missing here or an existing translation is incomplete, feel free to submit your own translation. Your help will be much appreciated!
     echo Left=1
     echo Right=%Field1Right%
     echo Top=0
