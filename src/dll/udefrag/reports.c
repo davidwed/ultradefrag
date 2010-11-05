@@ -93,10 +93,10 @@ static int save_text_report(udefrag_job_parameters *jp)
 			
 			if(is_locked(file->f))
 				status = "locked";
+			else if(is_moving_failed(file->f)) /* before is_too_large() check */
+				status = "file moving failed";
 			else if(is_too_large(file->f))
 				status = "not enough free space";
-			else if(is_moving_failed(file->f))
-				status = "file moving failed";
 			else
 				status = " - ";
 			
@@ -180,10 +180,10 @@ static int save_lua_report(udefrag_job_parameters *jp)
 			
 			if(is_locked(file->f))
 				status = "locked";
+			else if(is_moving_failed(file->f)) /* before is_too_large() check */
+				status = "file moving failed";
 			else if(is_too_large(file->f))
 				status = "not enough free space";
-			else if(is_moving_failed(file->f))
-				status = "file moving failed";
 			else
 				status = " - ";
 			

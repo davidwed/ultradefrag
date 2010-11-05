@@ -160,6 +160,8 @@ int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
 int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
+int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
+	ULONGLONG n_blocks,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
 void update_fragmented_files_list(udefrag_job_parameters *jp);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
