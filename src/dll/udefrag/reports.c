@@ -72,7 +72,7 @@ static int save_text_report(udefrag_job_parameters *jp)
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
 	/*(void)_snwprintf(buffer,size,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");*/
-	(void)_snwprintf(buffer,size,L"; Fragments%12hs%9hs%24hs    Filename\r\n","Filesize","Comment","Status");
+	(void)_snwprintf(buffer,size,L"; Fragments%12hs%9hs%32hs    Filename\r\n","Filesize","Comment","Status");
 	buffer[size - 1] = 0;
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
@@ -113,7 +113,7 @@ static int save_text_report(udefrag_job_parameters *jp)
 					human_readable_size[sizeof(human_readable_size) - 1] = 0;
 				//}
 			}
-			(void)_snwprintf(buffer,size,L"\r\n%11u%12hs%9hs%24hs    ",
+			(void)_snwprintf(buffer,size,L"\r\n%11u%12hs%9hs%32hs    ",
 				(UINT)file->f->disp.fragments,human_readable_size,comment,status);
 			buffer[size - 1] = 0;
 			(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
