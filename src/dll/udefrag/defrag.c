@@ -26,8 +26,11 @@
 
 #include "udefrag-internals.h"
 
-/* define it to avoid actual data moving in tests */
-#define DEFRAG_ALGORITHM_TEST
+/*
+* Set UD_DRY_RUN environment variable
+* to avoid actual data moving in tests.
+*/
+int dry_run = 0;
 
 /* forward declarations */
 static int move_file_helper(HANDLE hFile,winx_file_info *f,
@@ -56,12 +59,19 @@ int defragment(udefrag_job_parameters *jp)
 	ULONGLONG remaining_clusters;
 	WINX_FILE *fVolume = NULL;
 	char buffer[32];
+	short env_buffer[32];
 	int result;
 	
 	/* analyze volume */
 	result = analyze(jp);
 	if(result < 0)
 		return result;
+	
+	/* check for %UD_DRY_RUN% existence */
+	if(winx_query_env_variable(L"UD_DRY_RUN",env_buffer,sizeof(env_buffer)/sizeof(short)) >= 0)
+		dry_run = 1;
+	else
+		dry_run = 0;
 	
 	/* open the volume */
 	fVolume = winx_vopen(winx_toupper(jp->volume_letter));
@@ -432,10 +442,10 @@ static int move_file_part(HANDLE hFile,ULONGLONG startVcn,
 
 	if(jp->termination_router((void *)jp)) return (-1);
 	
-#ifdef DEFRAG_ALGORITHM_TEST
-	jp->pi.moved_clusters += n_clusters;
-	return 0;
-#endif
+	if(dry_run){
+		jp->pi.moved_clusters += n_clusters;
+		return 0;
+	}
 
 	/* setup movefile descriptor and make the call */
 	mfd.FileHandle = hFile;
@@ -535,9 +545,8 @@ static int move_file_helper(HANDLE hFile,winx_file_info *f,
 		if(block->next == f->disp.blockmap) break;
 	}
 
-#ifdef DEFRAG_ALGORITHM_TEST
-	return 0;
-#endif
+	if(dry_run)
+		return 0;
 
 	/* check whether the file was actually moved or not */
 	memcpy(&f_cp,f,sizeof(winx_file_info));
@@ -616,9 +625,8 @@ static int move_file_blocks_helper(HANDLE hFile,winx_file_info *f,
 		if(block->next == f->disp.blockmap || i == (n_blocks - 1)) break;
 	}
 
-#ifdef DEFRAG_ALGORITHM_TEST
-	return 0;
-#endif
+	if(dry_run)
+		return 0;
 
 	/* check whether the file was actually moved or not */
 	memcpy(&f_cp,f,sizeof(winx_file_info));
