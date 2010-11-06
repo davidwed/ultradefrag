@@ -9,6 +9,10 @@ HISTORY
     - the following translations were updated:
 
       Italian, Norwegian, Portuguese
+
+    - dry_run parameter added to GUI options as well as UD_DRY_RUN environment
+      variable support added to the driver to be able to quickly test algorithms
+      without actual data moves on disk
     
     alpha2:
     - ability to resize list of volumes was added to graphical interface

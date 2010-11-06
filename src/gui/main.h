@@ -238,6 +238,7 @@ extern int skip_removable;
 extern int disable_latest_version_check;
 extern int user_defined_column_widths[];
 extern int list_height;
+extern int dry_run;
 
 /*
 * Note:

@@ -38,6 +38,7 @@ int fraglimit;
 int refresh_interval;
 int disable_reports;
 char dbgprint_level[32] = {0};
+int dry_run;
 
 /*
 * GUI specific options
@@ -102,6 +103,11 @@ WGX_OPTION options[] = {
 	{WGX_CFG_COMMENT, 0, "set dbgprint_level to DETAILED for reporting a bug,",      NULL, ""},
 	{WGX_CFG_COMMENT, 0, "for normal operation set it to NORMAL or an empty string", NULL, ""},
 	{WGX_CFG_STRING,  sizeof(dbgprint_level), "dbgprint_level", dbgprint_level, ""},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
+	{WGX_CFG_COMMENT, 0, "set dry_run parameter to 1 for defragmentation algorithm testing,", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "no actual data moves will be performed on disk in this case",       NULL, ""},
+	{WGX_CFG_INT,  0, "dry_run", &dry_run, 0},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
 	{WGX_CFG_COMMENT, 0, "seconds_for_shutdown_rejection sets the delay for the user to cancel", NULL, ""},
@@ -180,6 +186,7 @@ void DeleteEnvironmentVariables(void)
 	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",NULL);
 	(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",NULL);
 	(void)SetEnvironmentVariable("UD_TIME_LIMIT",NULL);
+	(void)SetEnvironmentVariable("UD_DRY_RUN",NULL);
 }
 
 void SetEnvironmentVariables(void)
@@ -206,6 +213,8 @@ void SetEnvironmentVariables(void)
 	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",buffer);
 	if(dbgprint_level[0])
 		(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",dbgprint_level);
+	if(dry_run)
+		(void)SetEnvironmentVariable("UD_DRY_RUN","1");
 }
 
 void GetPrefs(void)
@@ -310,6 +319,14 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				list_height = s_list_height;
 				
 				SetEvent(hMapEvent);
+
+				if(dry_run == 0){
+					if(portable_mode) SetWindowText(hWindow,VERSIONINTITLE_PORTABLE);
+					else SetWindowText(hWindow,VERSIONINTITLE);
+				} else {
+					if(portable_mode) SetWindowText(hWindow,VERSIONINTITLE_PORTABLE " (dry run)");
+					else SetWindowText(hWindow,VERSIONINTITLE " (dry run)");
+				}
 
 				/* if block size or grid line width changed since last redraw, resize map */
 				if(map_block_size != last_block_size  || grid_line_width != last_grid_width){

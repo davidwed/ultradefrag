@@ -321,11 +321,14 @@ int CreateMainWindow(int nShowCmd)
 	if(RegisterMainWindowClass() < 0)
 		return (-1);
 
-	if(portable_mode)
-		caption = VERSIONINTITLE_PORTABLE;
-	else
-		caption = VERSIONINTITLE;
-
+	if(dry_run == 0){
+		if(portable_mode) caption = VERSIONINTITLE_PORTABLE;
+		else caption = VERSIONINTITLE;
+	} else {
+		if(portable_mode) caption = VERSIONINTITLE_PORTABLE " (dry run)";
+		else caption = VERSIONINTITLE " (dry run)";
+	}
+	
 	/* create main window */
 	InitMainWindowCoordinates();
 	hWindow = CreateWindowEx(

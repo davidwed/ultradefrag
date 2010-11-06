@@ -176,10 +176,13 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
         progress_msg[sizeof(progress_msg) - 1] = 0;
 		// TODO
 		//SetProgress(progress_msg,100);
-		if(portable_mode)
-			SetWindowText(hWindow,VERSIONINTITLE_PORTABLE);
-		else
-			SetWindowText(hWindow,VERSIONINTITLE);
+		if(dry_run == 0){
+			if(portable_mode) SetWindowText(hWindow,VERSIONINTITLE_PORTABLE);
+			else SetWindowText(hWindow,VERSIONINTITLE);
+		} else {
+			if(portable_mode) SetWindowText(hWindow,VERSIONINTITLE_PORTABLE " (dry run)");
+			else SetWindowText(hWindow,VERSIONINTITLE " (dry run)");
+		}
 	}
 }
 
