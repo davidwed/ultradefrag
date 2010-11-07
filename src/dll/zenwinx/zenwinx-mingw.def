@@ -74,6 +74,7 @@ EXPORTS
 	winx_time2str@16
 	winx_xtime@0
 	winx_get_system_time@4
+	winx_get_local_time@4
 	winx_list_insert_item@12
 	winx_list_remove_item@8
 	winx_list_destroy@4

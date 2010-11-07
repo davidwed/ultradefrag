@@ -147,7 +147,7 @@ ULONGLONG __stdcall winx_xtime(void)
 
 /**
  * @brief Retrieves the current system time
- * in a human understandable format.
+ * (UTC) in a human understandable format.
  * @param[out] t pointer to structure
  * receiving the current system time.
  * @return Zero for success, negative value otherwise.
@@ -168,6 +168,47 @@ int __stdcall winx_get_system_time(winx_time *t)
 	}
 	
 	RtlTimeToTimeFields(&SystemTime,&TimeFields);
+	t->year = TimeFields.Year;
+	t->month = TimeFields.Month;
+	t->day = TimeFields.Day;
+	t->hour = TimeFields.Hour;
+	t->minute = TimeFields.Minute;
+	t->second = TimeFields.Second;
+	t->milliseconds = TimeFields.Milliseconds;
+	t->weekday = TimeFields.Weekday;
+	return 0;
+}
+
+/**
+ * @brief Retrieves the current local time
+ * in a human understandable format.
+ * @param[out] t pointer to structure
+ * receiving the current local time.
+ * @return Zero for success, negative value otherwise.
+ */
+int __stdcall winx_get_local_time(winx_time *t)
+{
+	LARGE_INTEGER SystemTime;
+	LARGE_INTEGER LocalTime;
+	TIME_FIELDS TimeFields;
+	NTSTATUS Status;
+	
+	if(t == NULL)
+		return (-1);
+	
+	Status = NtQuerySystemTime(&SystemTime);
+	if(Status != STATUS_SUCCESS){
+		DebugPrintEx(Status,"winx_get_system_time: NtQuerySystemTime failed");
+		return (-1);
+	}
+	
+	Status = RtlSystemTimeToLocalTime(&SystemTime,&LocalTime);
+	if(Status != STATUS_SUCCESS){
+		DebugPrintEx(Status,"winx_get_system_time: RtlSystemTimeToLocalTime failed");
+		return (-1);
+	}
+	
+	RtlTimeToTimeFields(&LocalTime,&TimeFields);
 	t->year = TimeFields.Year;
 	t->month = TimeFields.Month;
 	t->day = TimeFields.Day;

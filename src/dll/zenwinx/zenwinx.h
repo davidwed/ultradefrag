@@ -329,6 +329,7 @@ typedef struct _winx_time {
 } winx_time;
 
 int __stdcall winx_get_system_time(winx_time *t);
+int __stdcall winx_get_local_time(winx_time *t);
 
 /**
  * @brief Generic structure describing double linked list entry.
