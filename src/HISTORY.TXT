@@ -8,7 +8,7 @@ HISTORY
     - file status was added to reports
     - the following translations were updated:
 
-      Italian, Norwegian, Portuguese
+      Italian, Norwegian, Portuguese, Spanish(ES)
 
     - dry_run parameter added to GUI options as well as UD_DRY_RUN environment
       variable support added to the driver to be able to quickly test algorithms
