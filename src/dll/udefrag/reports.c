@@ -49,6 +49,7 @@ static int save_text_report(udefrag_job_parameters *jp)
 	char human_readable_size[32];
 	int n1, n2;
 	char s[32];
+	winx_time t;
 	
 	path[4] = jp->volume_letter;
 	f = winx_fbopen(path,"w",RSB_SIZE);
@@ -67,11 +68,17 @@ static int save_text_report(udefrag_job_parameters *jp)
 	wcscpy(buffer,L";---------------------------------------------------------------------------------------------\r\n");
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
-	(void)_snwprintf(buffer,size,L"; Fragmented files on %c:\r\n;\r\n",jp->volume_letter);
+	(void)_snwprintf(buffer,size,L"; Fragmented files on %c: ",jp->volume_letter);
 	buffer[size - 1] = 0;
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
 
-	/*(void)_snwprintf(buffer,size,L"; Fragments%21hs%9hs    Filename\r\n","Filesize","Comment");*/
+	memset(&t,0,sizeof(winx_time));
+	(void)winx_get_local_time(&t);
+	(void)_snwprintf(buffer,size,L"[%02i.%02i.%04i at %02i:%02i]\r\n;\r\n",
+		(int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute);
+	buffer[size - 1] = 0;
+	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
+
 	(void)_snwprintf(buffer,size,L"; Fragments%12hs%9hs%12hs    Filename\r\n","Filesize","Comment","Status");
 	buffer[size - 1] = 0;
 	(void)winx_fwrite(buffer,sizeof(short),wcslen(buffer),f);
@@ -100,11 +107,6 @@ static int save_text_report(udefrag_job_parameters *jp)
 			else
 				status = " - ";
 			
-			/*(void)_snwprintf(buffer,size,L"\r\n%11u%21I64u%9hs    ",
-				(UINT)file->f->disp.fragments,
-				file->f->disp.clusters * jp->v_info.bytes_per_cluster,
-				comment);
-			*/
 			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				1,human_readable_size,sizeof(human_readable_size));
 			if(sscanf(human_readable_size,"%u.%u %s",&n1,&n2,s) == 3){
@@ -145,6 +147,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	char human_readable_size[32];
 	int n1, n2;
 	char s[32];
+	winx_time t;
 	
 	path[4] = jp->volume_letter;
 	f = winx_fbopen(path,"w",RSB_SIZE);
@@ -156,12 +159,16 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	}
 
 	/* print header */
+	memset(&t,0,sizeof(winx_time));
+	(void)winx_get_local_time(&t);
 	(void)_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
 		"format_version = 4\r\n\r\n"
 		"volume_letter = \"%c\"\r\n\r\n"
+		"current_time = \"%02i.%02i.%04i at %02i:%02i\"\r\n"
 		"files = {\r\n",
-		jp->volume_letter, jp->volume_letter
+		jp->volume_letter, jp->volume_letter,
+		(int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute
 		);
 	buffer[sizeof(buffer) - 1] = 0;
 	(void)winx_fwrite(buffer,1,strlen(buffer),f);
