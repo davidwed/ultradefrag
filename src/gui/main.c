@@ -922,7 +922,6 @@ done:
  */
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	//FILE *f;
 	int result;
 	
 	hInstance = GetModuleHandle(NULL);
@@ -934,14 +933,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* get preferences */
 	GetPrefs();
 
-	/* save preferences to guiopts.lua file if it misses */
-	/*f = fopen(".\\options\\guiopts.lua","r");
-	if(f == NULL){
-		SavePrefs();
-	} else {
-		fclose(f);
-	}*/
-	
 	/* save preferences to update the config file to the recent format */
 	SavePrefs();
 	
