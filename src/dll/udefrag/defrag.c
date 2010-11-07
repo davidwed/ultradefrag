@@ -314,10 +314,10 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	if(result >= 0){
 		jp->pi.fragmented --;
 		jp->pi.fragments -= f->disp.fragments;
+		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
 	}
 	
 	/* redraw target space */
-	f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
 	colorize_map_region(jp,target,f->disp.clusters,
 			get_file_color(jp,f),FREE_SPACE);
 	if(jp->progress_router)
