@@ -37,19 +37,25 @@ static void ShowSingleReport(volume_processing_job *job)
 	char buffer[MAX_PATH];
 	STARTUPINFO si;
 	PROCESS_INFORMATION pi;
+	FILE *f;
 
 	if(job == NULL) return;
 
-	if(job->job_type == NEVER_EXECUTED_JOB)
-		return; /* the job is never launched yet */
+	l_path[0] = (short)job->volume_letter;
+	path[0] = job->volume_letter;
+
+	if(job->job_type == NEVER_EXECUTED_JOB){
+		/* show report if it already exists */
+		f = fopen(path,"r");
+		if(f) fclose(f);
+		else return;
+	}
 
 	if(portable_mode == 0){
-		l_path[0] = (short)job->volume_letter;
 		(void)WgxShellExecuteW(hWindow,L"view",l_path,NULL,NULL,SW_SHOW);
 		return;
 	}
 
-	path[0] = job->volume_letter;
 	strcpy(cmd,".\\lua5.1a_gui.exe");
 	_snprintf(buffer,MAX_PATH,".\\lua5.1a_gui.exe .\\scripts\\udreportcnv.lua \"%s\" . -v",path);
 	buffer[MAX_PATH - 1] = 0;
