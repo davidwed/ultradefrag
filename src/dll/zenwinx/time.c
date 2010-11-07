@@ -42,6 +42,9 @@ ULONGLONG __stdcall winx_str2time(char *string)
 	char c;
 	ULONGLONG k;
 	
+	if(string == NULL)
+		return 0;
+	
 	for(i = 0;; i++){ /* loop through all characters of the string */
 		c = string[i];
 		if(!c) break;
@@ -93,6 +96,9 @@ int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
 	ULONG t;
 	int result;
 	
+	if(buffer == NULL || size <= 0)
+		return 0;
+
 	t = (ULONG)time; /* because w2k has no _aulldvrm() call in ntdll.dll */
 	y = t / (3600 * 24 * 356);
 	t = t % (3600 * 24 * 356);
@@ -137,6 +143,40 @@ ULONGLONG __stdcall winx_xtime(void)
 	/*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***\n",frequency.QuadPart,counter.QuadPart);*/
 	/* TODO: make calculation more accurately to ensure that overflow is impossible */
 	return ((1000 * counter.QuadPart) / frequency.QuadPart);
+}
+
+/**
+ * @brief Retrieves the current system time
+ * in a human understandable format.
+ * @param[out] t pointer to structure
+ * receiving the current system time.
+ * @return Zero for success, negative value otherwise.
+ */
+int __stdcall winx_get_system_time(winx_time *t)
+{
+	LARGE_INTEGER SystemTime;
+	TIME_FIELDS TimeFields;
+	NTSTATUS Status;
+	
+	if(t == NULL)
+		return (-1);
+	
+	Status = NtQuerySystemTime(&SystemTime);
+	if(Status != STATUS_SUCCESS){
+		DebugPrintEx(Status,"winx_get_system_time: NtQuerySystemTime failed");
+		return (-1);
+	}
+	
+	RtlTimeToTimeFields(&SystemTime,&TimeFields);
+	t->year = TimeFields.Year;
+	t->month = TimeFields.Month;
+	t->day = TimeFields.Day;
+	t->hour = TimeFields.Hour;
+	t->minute = TimeFields.Minute;
+	t->second = TimeFields.Second;
+	t->milliseconds = TimeFields.Milliseconds;
+	t->weekday = TimeFields.Weekday;
+	return 0;
 }
 
 /** @} */

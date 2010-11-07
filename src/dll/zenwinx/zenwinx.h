@@ -317,6 +317,19 @@ int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);
 ULONGLONG __stdcall winx_xtime(void);
 #define winx_xtime_nsec() (winx_xtime() * 1000 * 1000)
 
+typedef struct _winx_time {
+    short year;        // range [1601...]
+    short month;       // range [1..12]
+    short day;         // range [1..31]
+    short hour;        // range [0..23]
+    short minute;      // range [0..59]
+    short second;      // range [0..59]
+    short milliseconds;// range [0..999]
+    short weekday;     // range [0..6] == [sunday..saturday]
+} winx_time;
+
+int __stdcall winx_get_system_time(winx_time *t);
+
 /**
  * @brief Generic structure describing double linked list entry.
  */

@@ -73,6 +73,7 @@ EXPORTS
 	winx_str2time
 	winx_time2str
 	winx_xtime
+	winx_get_system_time
 	winx_list_insert_item
 	winx_list_remove_item
 	winx_list_destroy

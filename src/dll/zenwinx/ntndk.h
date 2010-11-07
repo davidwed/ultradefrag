@@ -1095,6 +1095,18 @@ typedef enum _SECTION_INHERIT {
     ViewUnmap = 2
 } SECTION_INHERIT;
 
+typedef struct _TIME_FIELDS {
+    short Year;        // range [1601...]
+    short Month;       // range [1..12]
+    short Day;         // range [1..31]
+    short Hour;        // range [0..23]
+    short Minute;      // range [0..59]
+    short Second;      // range [0..59]
+    short Milliseconds;// range [0..999]
+    short Weekday;     // range [0..6] == [Sunday..Saturday]
+} TIME_FIELDS;
+typedef TIME_FIELDS *PTIME_FIELDS;
+
 /* native functions prototypes */
 NTSTATUS	NTAPI	NtAdjustPrivilegesToken(HANDLE,SIZE_T,PTOKEN_PRIVILEGES,SIZE_T,PTOKEN_PRIVILEGES,PDWORD);
 NTSTATUS	NTAPI	NtAllocateVirtualMemory(HANDLE,PVOID*,SIZE_T,SIZE_T *,SIZE_T,SIZE_T);
@@ -1125,6 +1137,7 @@ NTSTATUS	NTAPI	NtQueryInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,SIZE_T,FILE_
 NTSTATUS	NTAPI	NtQueryInformationProcess(HANDLE,PROCESSINFOCLASS,PVOID,SIZE_T,PULONG);
 NTSTATUS	NTAPI	NtQueryPerformanceCounter(PLARGE_INTEGER,PLARGE_INTEGER);
 NTSTATUS	NTAPI	NtQuerySymbolicLinkObject(HANDLE,PUNICODE_STRING,PULONG);
+NTSTATUS	NTAPI	NtQuerySystemTime(PLARGE_INTEGER SystemTime);
 NTSTATUS	NTAPI	NtQueryValueKey(HANDLE,PUNICODE_STRING,KEY_VALUE_INFORMATION_CLASS,PVOID,SIZE_T,PULONG);
 NTSTATUS	NTAPI	NtQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,SIZE_T,FS_INFORMATION_CLASS);
 NTSTATUS	NTAPI	NtReadFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,PLARGE_INTEGER,PULONG);
@@ -1156,6 +1169,7 @@ PRTL_USER_PROCESS_PARAMETERS NTAPI RtlNormalizeProcessParams(RTL_USER_PROCESS_PA
 ULONG		NTAPI	RtlNtStatusToDosError(NTSTATUS);
 NTSTATUS	NTAPI	RtlQueryEnvironmentVariable_U(PWSTR,PUNICODE_STRING,PUNICODE_STRING);
 NTSTATUS	NTAPI	RtlSetEnvironmentVariable(PWSTR,PUNICODE_STRING,PUNICODE_STRING);
+VOID		NTAPI	RtlTimeToTimeFields(PLARGE_INTEGER Time,PTIME_FIELDS TimeFields);
 NTSTATUS	NTAPI	RtlUnicodeStringToAnsiString(PANSI_STRING,PUNICODE_STRING,SIZE_T);
 
 VOID		NTAPI	DbgBreakPoint(VOID);
