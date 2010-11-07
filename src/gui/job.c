@@ -292,9 +292,11 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	EnableMenuItem(hMainMenu,IDM_ANALYZE,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_OPTIMIZE,MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMainMenu,IDM_SHOW_REPORT,MF_BYCOMMAND | MF_GRAYED);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_ANALYZE,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE,MAKELONG(FALSE,0));
+	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(FALSE,0));
 
 	/* process all selected volumes */
 	index = -1;
@@ -323,9 +325,11 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	EnableMenuItem(hMainMenu,IDM_ANALYZE,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_OPTIMIZE,MF_BYCOMMAND | MF_ENABLED);
+	EnableMenuItem(hMainMenu,IDM_SHOW_REPORT,MF_BYCOMMAND | MF_ENABLED);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_ANALYZE,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE,MAKELONG(TRUE,0));
+	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(TRUE,0));
 	
 	/* check the when done action state */
 	if(!exit_pressed && !stop_pressed){

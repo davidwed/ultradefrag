@@ -730,8 +730,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			goto done;
 		/* Reports menu handler */
 		case IDM_SHOW_REPORT:
-			if(!busy_flag)
-				ShowReports();
+			ShowReports();
 			return 0;
 		/* Settings menu handlers */
 		case IDM_TRANSLATIONS_FOLDER:
