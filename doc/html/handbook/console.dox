@@ -110,7 +110,7 @@
  * <dt>UD_TIME_LIMIT</dt>
  * <dd>When the specified time interval elapses the job will be terminated 
  * automatically. The following time format is accepted: Ay Bd Ch Dm Es.
- * Here A,B,C,D,E  represent any integer numbers, y,d,h,m,s - suffixes represent
+ * Here A,B,C,D,E  represent any integer number, y,d,h,m,s - suffixes represent
  * years, days, hours, minutes and seconds.</dd>
  * <dt>UD_REFRESH_INTERVAL</dt>
  * <dd>Progress refresh interval, in milliseconds. The default value is 100.</dd>
@@ -121,13 +121,16 @@
  * <dd>Control amount of the debugging output. NORMAL is used by default,
  * DETAILED may be used to collect information for the bug report,
  * PARANOID turns on a really huge amount of debugging information.</dd>
+ * <dt>UD_DRY_RUN</dt>
+ * <dd>If this environment variable is set to 1 (one) the files are not physically moved.
+ * This allows testing the algorithm without changing the content of the volume.</dd>
  * </dl>
  *
  * Note that all filters are case insensitive. Each filter substring represents a pattern,
  * UltraDefrag will search for it in paths. For example, the "temp;tmp" filter
  * will be applied both to temporary folders and to Internet Explorer's cache.
  *
- * Note that files excluded by filters are always shown as unfragmented
+ * Note that files excluded by filters are always shown as not fragmented
  * on the cluster map. Because trash is unimportant anyway and it should not take
  * our attention.
  *

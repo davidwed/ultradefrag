@@ -193,6 +193,11 @@ disable_reports = 0
 
 dbgprint_level = "NORMAL"
 
+-- set dry_run parameter to 1 for defragmentation algorithm testing,
+-- no actual data moves will be performed on disk in this case
+
+dry_run = 0
+
 -- seconds_for_shutdown_rejection sets the delay for the user to cancel
 -- the hibernate, logoff, reboot or shutdown execution, default is 60 seconds
 
