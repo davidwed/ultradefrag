@@ -38,12 +38,12 @@
  * completed. To open the Plain Text report click the fraglist.txt
  * file in Explorer.
  *
+ * To distinguish between old and new reports, the date and time is
+ * included in the header of the report.
+ *
  * When you are opening the LuaReport a single HTML page is
- * generated and opened in your default web browser. It contains a
- * list of fragmented files. Each line contains the number of
- * fragments, filename and a brief comment: [OVR] for files
- * above the size threshold, [DIR] for directories and [CMP]
- * for NTFS compressed files.
+ * generated and opened in your default web browser. It contains the
+ * list of fragmented files. The meaning of the columns are described below.
  *
  * By default, all files are sorted by the number of fragments
  * in descending order. To change the sorting click the column
@@ -51,13 +51,25 @@
  * process (~350 lines/sec on 1.8GHz CPU). Sorting
  * implemented in JavaScript is slow, but very reliable.
  *
- * Each line of the Plain Text report consists of
- * the number of fragments, the file size, the comment 
- * and the name of the file.
- *
  * All files excluded from the defragmentation by filters
  * are excluded from reports too. Trash should not get
  * our attention.
+ *
+ * <h1>Columns</h1>
+ * <dl>
+ * <dt>Fragments</dt>
+ * <dd>The number of fragments.</dd>
+ * <dt>Filesize</dt>
+ * <dd>The size of the file.</dd>
+ * <dt>Comment</dt>
+ * <dd><b>[OVR]</b> for files above the size threshold, <b>[DIR]</b> for directories and <b>[CMP]</b>
+ * for NTFS compressed files</dd>
+ * <dt>Status</dt>
+ * <dd>This is the reason the file is still fragmented. The following states are displayed:<br/>
+ * <b>locked, move failed</b> (file moving failed), <b>too big</b> (block of free space too small)</dd>
+ * <dt>Filename</dt>
+ * <dd>This is the full path of the file.</dd>
+ * </dl>
  *
  * <h1>Configuring</h1>
  * All options related to file fragmentation reports are
