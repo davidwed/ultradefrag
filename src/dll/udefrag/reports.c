@@ -164,11 +164,21 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	(void)_snprintf(buffer,sizeof(buffer),
 		"-- UltraDefrag report for volume %c:\r\n\r\n"
 		"format_version = 4\r\n\r\n"
-		"volume_letter = \"%c\"\r\n\r\n"
-		"current_time = \"%02i.%02i.%04i at %02i:%02i\"\r\n"
+		"volume_letter = \"%c\"\r\n"
+		/*"current_time = \"%02i.%02i.%04i at %02i:%02i\"\r\n"*/
+		"current_time = {\r\n"
+		"\tyear = %04i,\r\n"
+		"\tmonth = %02i,\r\n"
+		"\tday = %02i,\r\n"
+		"\thour = %02i,\r\n"
+		"\tmin = %02i,\r\n"
+		"\tsec = %02i,\r\n"
+		"\tisdst = false\r\n"
+		"}\r\n\r\n"
 		"files = {\r\n",
 		jp->volume_letter, jp->volume_letter,
-		(int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute
+		/*(int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute*/
+		(int)t.year,(int)t.month,(int)t.day,(int)t.hour,(int)t.minute,(int)t.second
 		);
 	buffer[sizeof(buffer) - 1] = 0;
 	(void)winx_fwrite(buffer,1,strlen(buffer),f);

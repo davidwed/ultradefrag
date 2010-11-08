@@ -203,20 +203,22 @@ table_header = [[
 
 function write_web_page_header(f,js,css)
 	local links_toolbar = links_x1 .. instdir .. links_x2
+	local formatted_time = ""
 	
-	if current_time == nil then
-		current_time = ""
+	-- format time appropriate for locale
+	if current_time ~= nil then
+		formatted_time = os.date("%c",os.time(current_time))
 	end
-
+	
 	f:write("<html>\n",
 		"<head>\n",
 			"<meta http-equiv=\"Content-Type\" content=\"text/html;charset=UTF-8\">\n",
-			"<title>Fragmented files on ", volume_letter, ": [", current_time, "]</title>\n",
+			"<title>Fragmented files on ", volume_letter, ": [", formatted_time, "]</title>\n",
 			"<style type=\"text/css\">\n", css, "</style>\n",
 			"<script language=\"javascript\">\n", js, "</script>\n",
 		"</head>\n",
 		"<body>\n",
-			"<h3 class=\"title\">Fragmented files on ", volume_letter, ": (", current_time, ")</h3>\n",
+			"<h3 class=\"title\">Fragmented files on ", volume_letter, ": (", formatted_time, ")</h3>\n",
 			links_toolbar,
 			"<div id=\"for_msie\">\n",
 				"<table id=\"main_table\" border=\"1\" cellspacing=\"0\" width=\"100%\">\n"
