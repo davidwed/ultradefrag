@@ -73,6 +73,9 @@ wchar_t * __cdecl winx_wcsdup(const wchar_t *s)
 	int length;
 	wchar_t *cp;
 	
+	if(s == NULL)
+		return NULL;
+	
 	length = wcslen(s);
 	cp = winx_heap_alloc((length + 1) * sizeof(short));
 	if(cp) wcscpy(cp,s);
@@ -234,6 +237,9 @@ int __stdcall winx_patfind(short *string,winx_patlist *patterns)
  */
 void __stdcall winx_patfree(winx_patlist *patterns)
 {
+	if(patterns == NULL)
+		return;
+	
 	/* free allocated memory */
 	if(patterns->string)
 		winx_heap_free(patterns->string);

@@ -131,8 +131,7 @@ int __stdcall winx_ftw_dump_file(winx_file_info *f,
 	int i;
 	winx_blockmap *block = NULL;
 	
-	if(f == NULL)
-		return (-1);
+	DbgCheck1(f,"winx_ftw_dump_file",-1);
 	
 	/* reset disposition related fields */
 	f->disp.clusters = 0;
@@ -664,6 +663,8 @@ winx_file_info * __stdcall winx_ftw(short *path, int flags,
 		ftw_terminator t, void *user_defined_data)
 {
 	winx_file_info *filelist = NULL;
+	
+	DbgCheck1(path,"winx_ftw",NULL);
 	
 	if(ftw_helper(path,flags,fcb,pcb,t,user_defined_data,&filelist) == (-1) && \
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){

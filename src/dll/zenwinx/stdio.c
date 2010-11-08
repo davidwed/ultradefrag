@@ -185,6 +185,8 @@ int __cdecl winx_kbhit(int msec)
 int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
 {
 	KEYBOARD_INPUT_DATA kbd;
+	
+	DbgCheck1(kbd_rec,"winx_kb_read",-1);
 
 	do{
 		if(kb_read(&kbd,msec) < 0) return (-1);

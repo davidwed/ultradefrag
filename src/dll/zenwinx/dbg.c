@@ -129,6 +129,9 @@ int __stdcall winx_debug_print(char *string)
 	
 	DBG_OUTPUT_DEBUG_STRING_BUFFER *dbuffer;
 	int length;
+	
+	if(string == NULL)
+		return (-1);
 
 	/* never call winx_dbg_print_ex() here! */
 
@@ -309,6 +312,9 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
 	* displayed localized text in completely unreadable form
 	* (as sequence of question characters).
 	*/
+	
+	if(format == NULL)
+		return;
 
 	buffer = winx_heap_alloc(ERR_MSG_LENGTH);
 	if(!buffer){
@@ -361,7 +367,7 @@ void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...)
 	buffer[DBG_BUFFER_SIZE - 1] = 0;
 	va_end(arg);
 	
-	if(width == 0)
+	if(width <= 0)
 		width = DEFAULT_DBG_PRINT_HEADER_WIDTH;
 
 	if(length + 4 > width){

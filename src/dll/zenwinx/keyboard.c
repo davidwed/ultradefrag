@@ -132,6 +132,8 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 	ULONGLONG xtime;
 	int i,j;
 	
+	DbgCheck1(pKID,"kb_read",-1);
+	
 	if(number_of_keyboards == 0) return (-1);
 	
     // winx_printf("mSec ... %d, Delay ... %d, Attempts ... %d\n", msec_timeout, delay, attempts);
@@ -362,6 +364,7 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS Status;
 
+	if(pKID == NULL) return (-1);
 	if(kb[kb_index].hKbDevice == NULL) return (-1);
 	if(kb[kb_index].hKbEvent == NULL) return (-1);
 

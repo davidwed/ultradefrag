@@ -116,6 +116,8 @@ int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber)
 	char t[64];
 	signed int i;
 	ULONGLONG m = 1;
+	
+	DbgCheck2(string,pnumber,"winx_dfbsize",-1);
 
 	if(strlen(string) > 63) return (-1);
 	(void)strcpy(t,string);

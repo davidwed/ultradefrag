@@ -56,6 +56,8 @@ int __stdcall winx_register_boot_exec_command(short *command)
 	short *value, *pos;
 	DWORD length, i, len;
 	
+	DbgCheck1(command,"winx_register_boot_exec_command",-1);
+	
 	if(open_smss_key(&hKey) < 0) return (-1);
 	size = (wcslen(command) + 1) * sizeof(short);
 	if(read_boot_exec_value(hKey,(void **)(void *)&data,&size) < 0){
@@ -114,6 +116,8 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 	short *new_value;
 	DWORD new_value_size;
 	DWORD new_length;
+	
+	DbgCheck1(command,"winx_unregister_boot_exec_command",-1);
 	
 	if(open_smss_key(&hKey) < 0) return (-1);
 	size = (wcslen(command) + 1) * sizeof(short);

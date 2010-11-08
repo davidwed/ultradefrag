@@ -210,7 +210,7 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
 	LARGE_INTEGER new_offset; /* current f->woffset */
 	size_t bytes, result;
 	
-	if(f == NULL)
+	if(buffer == NULL || f == NULL)
 		return 0;
 	
 	/*
