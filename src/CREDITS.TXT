@@ -128,12 +128,12 @@
 --------------------------------------------------------------------------------
     Special thanks for correcting and updating translations (in alphabetical order):
 --------------------------------------------------------------------------------
-    Ali Jafari
     Áron Hegedüs
+    Ali Jafari
     Benny Stütz
     Carlos Rodrigues
-    Connection
     Christoffer Ekberg
+    Connection
     Damjan Daljevic
     Dave MacBlack
     Denis Jeličić
@@ -153,12 +153,13 @@
     Krzysztof Świderski
     Latino
     Leo Smulders
+    Marina Louwrier-Johannsen
     Masao Kajiwara
     Mathieu Van Weersch
     Patrick Palm
     Patrick Paludan-Müller
-    Per-Eric Jenshagen
     Pavel Kinkor
+    Per-Eric Jenshagen
     Robert Jr
     Ryan Ping Chih Ko
     Sérgio Marques
@@ -166,6 +167,7 @@
     SMHA
     Stefan Pendl
     Sveinung Heggen
+    Tom Louwrier
     translucens
     Vedat Odabasioglu
 

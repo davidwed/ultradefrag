@@ -2,14 +2,14 @@ HISTORY
 
   Version 5.0.0  2010-11-
   ------------------------------------------------------------------------------
-    alpha3:
+    beta1:
     - defragmentation algorithm reimplemented; partial defragmentation improved
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
     - current time was added to reports
     - the following translations were updated:
 
-      Italian, Norwegian, Portuguese, Spanish(ES)
+      Italian, Norwegian, Portuguese, Spanish(ES), French(FR), Dutch, Czech
 
     - dry_run parameter added to GUI options as well as UD_DRY_RUN environment
       variable support added to the driver to be able to quickly test algorithms
