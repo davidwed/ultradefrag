@@ -96,6 +96,15 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * <h3>Where can I find a legend of the cluster map colors?</h3>
  * The colors are described in the <b>Cluster Map</b> section of the @ref GUI page. 
  *
+ * <h3>Why is only the last report displayed, if I choose to display multiple reports?</h3>
+ * Browsers which do not support tabbed browsing are reusing the same window.
+ * This is a limitation of the way a HTML page is opened from within Explorer.
+ *
+ * <h3>Why are multiple windows opened, if I choose to display multiple reports?</h3>
+ * If your browser supports tabbed browsing open one instance of your default browser
+ * before you display the reports. This will open each report in a new tab depending
+ * on your browsers configuration.
+ *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
  *    <TR>
