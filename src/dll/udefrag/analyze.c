@@ -95,6 +95,8 @@ int get_volume_information(udefrag_job_parameters *jp)
 		} else if(strstr(jp->v_info.fs_name,"FAT")){
 			/* no need to distinguish better */
 			jp->fs_type = FS_FAT16;
+		} else if(!strcmp(jp->v_info.fs_name,"UDF")){
+			jp->fs_type = FS_UDF;
 		} else {
 //		} else if(!strcmp(jp->v_info.fs_name,"FAT12")){
 //			jp->fs_type = FS_FAT12;
@@ -671,6 +673,30 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 			"cluster size greater than 4 kb\n"
 			"on Windows 2000 (read docs for details).");
 		return UDEFRAG_W2K_4KB_CLUSTERS;
+	}
+	  
+	/*
+	* UDF volumes cannot be either defragmented or optimized
+	* because an appropriate system driver has poor support
+	* of FSCTL_MOVE_FILE.
+	*/
+	if(jp->job_type != ANALYSIS_JOB && jp->fs_type == FS_UDF){
+		DebugPrint("Cannot defragment/optimize UDF volumes\n");
+		DebugPrint("because of poor support of FSCTL_MOVE_FILE\n");
+		DebugPrint("by an appropriate system driver.\n");
+		return UDEFRAG_UDF_DEFRAG;
+	}
+	
+	/*
+	* FAT volumes cannot be optimized.
+	*/
+	if(jp->job_type == OPTIMIZER_JOB \
+	  && (jp->fs_type == FS_FAT12 \
+	  || jp->fs_type == FS_FAT16 \
+	  || jp->fs_type == FS_FAT32 \
+	  || jp->fs_type == FS_FAT32_UNRECOGNIZED)){
+		DebugPrint("Cannot optimize FAT volumes because of unmoveable directories\n");
+		return UDEFRAG_FAT_OPTIMIZATION;
 	}
 
 	switch(jp->fs_type){

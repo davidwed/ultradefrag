@@ -441,6 +441,9 @@ char * __stdcall udefrag_get_error_description(int error_code)
 	case UDEFRAG_UNKNOWN_ERROR:
 		return "Some unknown internal bug or some\n"
 		       "rarely arising error has been encountered.";
+	case UDEFRAG_FAT_OPTIMIZATION:
+		return "FAT volumes cannot be optimized\n"
+		       "because of unmoveable directories.";
 	case UDEFRAG_W2K_4KB_CLUSTERS:
 		return "NTFS volumes with cluster size greater than 4 kb\n"
 		       "cannot be defragmented on Windows 2000.";
@@ -457,6 +460,10 @@ char * __stdcall udefrag_get_error_description(int error_code)
 		return "You are trying to defragment removable volume.\n"
 		       "If the volume type was wrong identified, send\n"
 			   "a bug report to the author, please.";
+	case UDEFRAG_UDF_DEFRAG:
+		return "UDF volumes cannot be either defragmented or optimized\n"
+		       "because an appropriate system driver has poor support\n"
+			   "of FSCTL_MOVE_FILE Windows API.";
 	}
 	return "";
 }

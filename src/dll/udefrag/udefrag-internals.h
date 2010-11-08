@@ -80,7 +80,8 @@ typedef enum {
 	FS_FAT16,
 	FS_FAT32,
 	FS_FAT32_UNRECOGNIZED,
-	FS_NTFS
+	FS_NTFS,
+	FS_UDF
 } file_system_type;
 
 typedef struct _udefrag_allowed_actions {
