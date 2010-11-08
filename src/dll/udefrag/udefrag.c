@@ -450,18 +450,18 @@ char * __stdcall udefrag_get_error_description(int error_code)
 	case UDEFRAG_NO_MEM:
 		return "Not enough memory.";
 	case UDEFRAG_CDROM:
-		return "It is impossible to defragment CDROM drive.";
+		return "It is impossible to defragment CDROM drives.";
 	case UDEFRAG_REMOTE:
-		return "It is impossible to defragment remote volume.";
+		return "It is impossible to defragment remote volumes.";
 	case UDEFRAG_ASSIGNED_BY_SUBST:
 		return "It is impossible to defragment volumes\n"
-		       "assigned by \'subst\' command.";
+		       "assigned by the \'subst\' command.";
 	case UDEFRAG_REMOVABLE:
-		return "You are trying to defragment removable volume.\n"
-		       "If the volume type was wrong identified, send\n"
-			   "a bug report to the author, please.";
+		return "You are trying to defragment a removable volume.\n"
+		       "If the volume type was wrongly identified, send\n"
+			   "a bug report to the author, thanks.";
 	case UDEFRAG_UDF_DEFRAG:
-		return "UDF volumes cannot be either defragmented or optimized\n"
+		return "UDF volumes can neither be defragmented nor optimized\n"
 		       "because an appropriate system driver has poor support\n"
 			   "of FSCTL_MOVE_FILE Windows API.";
 	}
