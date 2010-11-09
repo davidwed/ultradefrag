@@ -37,35 +37,30 @@
 #define DebugPrint winx_dbg_print
 #define DebugPrintEx winx_dbg_print_ex
 
+/*
+* DbgCheckN macro definitions are used
+* to simplify debugging of a situation 
+* when something is mistyped in sources.
+*/
 #define DbgCheck1(c,f,r) { \
 	if(!(c)) {           \
-		DebugPrint("The first parameter of " f " is invalid!"); \
+		DebugPrint("first parameter of %s is invalid",f); \
 		return (r);      \
 	}                    \
 }
 
 #define DbgCheck2(c1,c2,f,r) { \
-	if(!(c1)) {              \
-		DebugPrint("The first parameter of " f " is invalid!"); \
-		return (r);          \
-	}                        \
+	DbgCheck1(c1,f,r)        \
 	if(!(c2)) {              \
-		DebugPrint("The second parameter of " f " is invalid!"); \
+		DebugPrint("second parameter of %s is invalid",f); \
 		return (r);          \
 	}                        \
 }
 
 #define DbgCheck3(c1,c2,c3,f,r) { \
-	if(!(c1)) {              \
-		DebugPrint("The first parameter of " f " is invalid!"); \
-		return (r);          \
-	}                        \
-	if(!(c2)) {              \
-		DebugPrint("The second parameter of " f " is invalid!"); \
-		return (r);          \
-	}                        \
+	DbgCheck2(c1,c2,f,r)        \
 	if(!(c3)) {              \
-		DebugPrint("The third parameter of " f " is invalid!"); \
+		DebugPrint("third parameter of %s is invalid",f); \
 		return (r);          \
 	}                        \
 }

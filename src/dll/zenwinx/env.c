@@ -48,7 +48,7 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
 	v.MaximumLength = length * sizeof(short);
 	Status = RtlQueryEnvironmentVariable_U(NULL,&n,&v);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot query %ws environment variable",name);
+		DebugPrintEx(Status,"cannot query %ws environment variable",name);
 		return (-1);
 	}
 	return 0;
@@ -80,7 +80,7 @@ int __stdcall winx_set_env_variable(short *name, short *value)
 		status = RtlSetEnvironmentVariable(NULL,&n,NULL);
 	}
 	if(!NT_SUCCESS(status)){
-		DebugPrintEx(status,"Cannot set %ws environment variable",name);
+		DebugPrintEx(status,"cannot set %ws environment variable",name);
 		return (-1);
 	}
 	return 0;

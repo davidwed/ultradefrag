@@ -47,17 +47,18 @@ int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_ad
 
 	/* never call winx_dbg_print_ex() from this function! */
 	DbgCheck3(libname,funcname,proc_addr,"winx_get_proc_address",-1);
+	*proc_addr = NULL;
 	
 	RtlInitUnicodeString(&uStr,libname);
 	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("Cannot get %ls handle: %x!",libname,(UINT)Status);
+		DebugPrint("winx_get_proc_address: cannot get %ls handle: %x",libname,(UINT)Status);
 		return (-1);
 	}
 	RtlInitAnsiString(&aStr,funcname);
 	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("Cannot get address for %s: %x!",funcname,(UINT)Status);
+		DebugPrint("winx_get_proc_address: cannot get address of %s: %x",funcname,(UINT)Status);
 		*proc_addr = NULL;
 		return (-1);
 	}

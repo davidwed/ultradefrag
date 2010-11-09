@@ -221,34 +221,34 @@ typedef struct _NT_STATUS_DESCRIPTION {
 } NT_STATUS_DESCRIPTION, *PNT_STATUS_DESCRIPTION;
 
 NT_STATUS_DESCRIPTION status_descriptions[] = {
-	{ STATUS_SUCCESS,                "Operation successful"           },
-	{ STATUS_OBJECT_NAME_INVALID,    "Object name invalid"            },
-	{ STATUS_OBJECT_NAME_NOT_FOUND,  "Object name not found"          },
-	{ STATUS_OBJECT_NAME_COLLISION,  "Object name already exists"     },
-	{ STATUS_OBJECT_PATH_INVALID,    "Path is invalid"                },
-	{ STATUS_OBJECT_PATH_NOT_FOUND,  "Path not found"                 },
-	{ STATUS_OBJECT_PATH_SYNTAX_BAD, "Bad syntax in path"             },
-	{ STATUS_BUFFER_TOO_SMALL,       "Buffer is too small"            },
-	{ STATUS_ACCESS_DENIED,          "Access denied"                  },
-	{ STATUS_NO_MEMORY,              "Not enough memory"              },
-	{ STATUS_UNSUCCESSFUL,           "Operation failed"               },
-	{ STATUS_NOT_IMPLEMENTED,        "Not implemented"                },
-	{ STATUS_INVALID_INFO_CLASS,     "Invalid info class"             },
-	{ STATUS_INFO_LENGTH_MISMATCH,   "Info length mismatch"           },
-	{ STATUS_ACCESS_VIOLATION,       "Access violation"               },
-	{ STATUS_INVALID_HANDLE,         "Invalid handle"                 },
-	{ STATUS_INVALID_PARAMETER,      "Invalid parameter"              },
-	{ STATUS_NO_SUCH_DEVICE,         "Device not found"               },
-	{ STATUS_NO_SUCH_FILE,           "File not found"                 },
-	{ STATUS_INVALID_DEVICE_REQUEST, "Invalid device request"         },
-	{ STATUS_END_OF_FILE,            "End of file reached"            },
-	{ STATUS_WRONG_VOLUME,           "Wrong volume"                   },
-	{ STATUS_NO_MEDIA_IN_DEVICE,     "No media in device"             },
-	{ STATUS_UNRECOGNIZED_VOLUME,    "Cannot recognize file system"   },
-	{ STATUS_VARIABLE_NOT_FOUND,     "Environment variable not found" },
+	{ STATUS_SUCCESS,                "operation successful"           },
+	{ STATUS_OBJECT_NAME_INVALID,    "object name invalid"            },
+	{ STATUS_OBJECT_NAME_NOT_FOUND,  "object name not found"          },
+	{ STATUS_OBJECT_NAME_COLLISION,  "object name already exists"     },
+	{ STATUS_OBJECT_PATH_INVALID,    "path is invalid"                },
+	{ STATUS_OBJECT_PATH_NOT_FOUND,  "path not found"                 },
+	{ STATUS_OBJECT_PATH_SYNTAX_BAD, "bad syntax in path"             },
+	{ STATUS_BUFFER_TOO_SMALL,       "buffer is too small"            },
+	{ STATUS_ACCESS_DENIED,          "access denied"                  },
+	{ STATUS_NO_MEMORY,              "not enough memory"              },
+	{ STATUS_UNSUCCESSFUL,           "operation failed"               },
+	{ STATUS_NOT_IMPLEMENTED,        "not implemented"                },
+	{ STATUS_INVALID_INFO_CLASS,     "invalid info class"             },
+	{ STATUS_INFO_LENGTH_MISMATCH,   "info length mismatch"           },
+	{ STATUS_ACCESS_VIOLATION,       "access violation"               },
+	{ STATUS_INVALID_HANDLE,         "invalid handle"                 },
+	{ STATUS_INVALID_PARAMETER,      "invalid parameter"              },
+	{ STATUS_NO_SUCH_DEVICE,         "device not found"               },
+	{ STATUS_NO_SUCH_FILE,           "file not found"                 },
+	{ STATUS_INVALID_DEVICE_REQUEST, "invalid device request"         },
+	{ STATUS_END_OF_FILE,            "end of file reached"            },
+	{ STATUS_WRONG_VOLUME,           "wrong volume"                   },
+	{ STATUS_NO_MEDIA_IN_DEVICE,     "no media in device"             },
+	{ STATUS_UNRECOGNIZED_VOLUME,    "cannot recognize file system"   },
+	{ STATUS_VARIABLE_NOT_FOUND,     "environment variable not found" },
 	
 	/* A file cannot be opened because the share access flags are incompatible. */
-	{ STATUS_SHARING_VIOLATION,      "File is locked by another process"},
+	{ STATUS_SHARING_VIOLATION,      "file is locked by another process"},
 	
 	{ 0xffffffff,                    NULL                             }
 };
@@ -327,7 +327,7 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
 	length = _vsnprintf(buffer,ERR_MSG_LENGTH - 1,format,arg);
 	(void)length;
 	buffer[ERR_MSG_LENGTH - 1] = 0;
-	DebugPrint("%s: 0x%x! %s.\n",buffer,(unsigned int)status,
+	DebugPrint("%s: 0x%x: %s\n",buffer,(unsigned int)status,
 			winx_get_error_description(status));
 	va_end(arg);
 	
