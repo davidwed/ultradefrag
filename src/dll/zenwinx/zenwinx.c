@@ -194,7 +194,7 @@ void __stdcall winx_shutdown(void)
 	kb_close();
 	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	Status = NtShutdownSystem(ShutdownNoReboot);
+	Status = NtShutdownSystem(ShutdownPowerOff);
 	if(!NT_SUCCESS(Status)){
 		print_post_scriptum("winx_shutdown: cannot shut down the computer",Status);
 	}
