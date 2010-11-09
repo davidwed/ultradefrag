@@ -35,6 +35,8 @@ void winx_destroy_global_heap(void);
 void winx_init_synch_objects(void);
 void winx_destroy_synch_objects(void);
 void __stdcall MarkWindowsBootAsSuccessful(void);
+char * __stdcall winx_get_error_description(unsigned long status);
+void winx_print(char *string);
 
 void test(void)
 {
@@ -106,15 +108,41 @@ void __stdcall zenwinx_native_unload(void)
 int __stdcall winx_init(void *peb)
 {
 	PRTL_USER_PROCESS_PARAMETERS pp;
-	int status;
 
-	/* 1. Normalize and get the Process Parameters */
-	pp = RtlNormalizeProcessParams(((PPEB)peb)->ProcessParameters);
-	/* 2. Breakpoint if we were requested to do so */
-	if(pp->DebugFlags) DbgBreakPoint();
-	/* 3. Open keyboard */
-	status = kb_open();
-	return status;
+	/*  normalize and get the process parameters */
+	if(peb){
+		pp = RtlNormalizeProcessParams(((PPEB)peb)->ProcessParameters);
+		/* breakpoint if we were requested to do so */
+		if(pp){
+			if(pp->DebugFlags)
+				DbgBreakPoint();
+		}
+	}
+
+	/* open keyboard */
+	return kb_open();
+}
+
+/**
+ * @brief Displays error message when
+ * either debug print or memory
+ * allocation may be not available.
+ * @param[in] msg the error message.
+ * @param[in] Status the NT status code.
+ * @note
+ * - Intended to be used after winx_exit,
+ *   winx_shutdown and winx_reboot failure.
+ * - Internal use only.
+ */
+static void print_post_scriptum(char *msg,NTSTATUS Status)
+{
+	char buffer[256];
+
+	_snprintf(buffer,sizeof(buffer),"\n%s: %x: %s\n\n",
+		msg,(UINT)Status,winx_get_error_description(Status));
+	buffer[sizeof(buffer) - 1] = 0;
+	/* winx_printf cannot be used here */
+	winx_print(buffer);
 }
 
 /**
@@ -125,12 +153,13 @@ int __stdcall winx_init(void *peb)
  */
 void __stdcall winx_exit(int exit_code)
 {
+	NTSTATUS Status;
+	
 	kb_close();
-	/*
-	* The next call is undocumented, therefore
-	* we are not checking its result.
-	*/
-	(void)NtTerminateProcess(NtCurrentProcess(),exit_code);
+	Status = NtTerminateProcess(NtCurrentProcess(),exit_code);
+	if(!NT_SUCCESS(Status)){
+		print_post_scriptum("winx_exit: cannot terminate process",Status);
+	}
 }
 
 /**
@@ -141,14 +170,15 @@ void __stdcall winx_exit(int exit_code)
  */
 void __stdcall winx_reboot(void)
 {
+	NTSTATUS Status;
+	
 	kb_close();
 	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	/*
-	* The next call is undocumented, therefore
-	* we are not checking its result.
-	*/
-	(void)NtShutdownSystem(ShutdownReboot);
+	Status = NtShutdownSystem(ShutdownReboot);
+	if(!NT_SUCCESS(Status)){
+		print_post_scriptum("winx_reboot: cannot reboot the computer",Status);
+	}
 }
 
 /**
@@ -159,14 +189,15 @@ void __stdcall winx_reboot(void)
  */
 void __stdcall winx_shutdown(void)
 {
+	NTSTATUS Status;
+	
 	kb_close();
 	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	/*
-	* The next call is undocumented, therefore
-	* we are not checking its result.
-	*/
-	(void)NtShutdownSystem(ShutdownNoReboot);
+	Status = NtShutdownSystem(ShutdownNoReboot);
+	if(!NT_SUCCESS(Status)){
+		print_post_scriptum("winx_shutdown: cannot shut down the computer",Status);
+	}
 }
 
 /** @} */
