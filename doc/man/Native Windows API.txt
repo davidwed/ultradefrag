@@ -3,3 +3,6 @@ Sysinternals Freeware - Inside the Native API
 
 Native API function documentation
     http://undocumented.ntinternals.net/
+
+Listing of the NT Native API  functions
+    http://jedi-apilib.sourceforge.net/native/NativeList.html
