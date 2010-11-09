@@ -104,7 +104,7 @@ int __cdecl winx_printf(const char *format, ...)
 	
 	small_buffer = winx_heap_alloc(INTERNAL_BUFFER_SIZE);
 	if(!small_buffer){
-		DebugPrint("Not enough memory for winx_printf()!\n");
+		DebugPrint("winx_printf: cannot allocate %u bytes of memory\n",INTERNAL_BUFFER_SIZE);
 		winx_print("\nNot enough memory for winx_printf()!\n");
 		return 0;
 	}
@@ -118,7 +118,7 @@ int __cdecl winx_printf(const char *format, ...)
 		do {
 			big_buffer = winx_heap_alloc((SIZE_T)size);
 			if(!big_buffer){
-				DebugPrint("Not enough memory for winx_printf()!\n");
+				DebugPrint("winx_printf: cannot allocate %u bytes of memory\n",size);
 				winx_print("\nNot enough memory for winx_printf()!\n");
 				va_end(arg);
 				winx_heap_free(small_buffer);
@@ -130,8 +130,8 @@ int __cdecl winx_printf(const char *format, ...)
 			winx_heap_free(big_buffer);
 			size = size << 1;
 			if(!size){
-				DebugPrint("winx_printf() failed!\n");
-				winx_print("\nwinx_printf() failed!\n");
+				DebugPrint("winx_printf: buffer expansion failed\n");
+				winx_print("\nwinx_printf: buffer expansion failed!\n");
 				va_end(arg);
 				winx_heap_free(small_buffer);
 				return 0;
@@ -273,11 +273,11 @@ int __cdecl winx_gets(char *string,int n)
 	int ch;
 
 	if(!string){
-		winx_printf("\nwinx_gets() invalid string!\n");
+		winx_printf("\nwinx_gets: invalid string!\n");
 		return (-1);
 	}
 	if(n <= 0){
-		winx_printf("\nwinx_gets() invalid string length %d!\n",n);
+		winx_printf("\nwinx_gets: invalid string length %d!\n",n);
 		return (-1);
 	}
 	
@@ -296,7 +296,7 @@ int __cdecl winx_gets(char *string,int n)
 		}
 		string[i] = (char)ch;
 	}
-	winx_printf("\nwinx_gets() buffer overflow!\n");
+	winx_printf("\nwinx_gets: buffer overflow!\n");
 	string[n-1] = 0;
 	return n;
 }
@@ -309,7 +309,7 @@ int __cdecl winx_gets(char *string,int n)
 void __cdecl winx_init_history(winx_history *h)
 {
 	if(h == NULL){
-		DebugPrint("winx_init_history(): h = NULL!");
+		DebugPrint("winx_init_history: h = NULL!");
 		return;
 	}
 	h->head = h->current = NULL;
@@ -328,7 +328,7 @@ void __cdecl winx_destroy_history(winx_history *h)
 	winx_history_entry *entry;
 	
 	if(h == NULL){
-		DebugPrint("winx_destroy_history(): h = NULL!");
+		DebugPrint("winx_destroy_history: h = NULL!");
 		return;
 	}
 
@@ -356,7 +356,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
 	entry = (winx_history_entry *)winx_list_insert_item((list_entry **)(void *)&h->head,
 		(list_entry *)last_entry,sizeof(winx_history_entry));
 	if(entry == NULL){
-		DebugPrint("Not enough memory for winx_add_winx_history_entry()!");
+		DebugPrint("winx_add_winx_history_entry: cannot allocate %u bytes of memory",sizeof(winx_history_entry));
 		winx_printf("\nNot enough memory for winx_add_winx_history_entry()!\n");
 		return;
 	}
@@ -364,7 +364,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
 	length = strlen(string) + 1;
 	entry->string = (char *)winx_heap_alloc(length);
 	if(entry->string == NULL){
-		DebugPrint("Cannot allocate %u bytes of memory for winx_add_winx_history_entry()!",length);
+		DebugPrint("winx_add_winx_history_entry: cannot allocate %u bytes of memory",length);
 		winx_printf("\nCannot allocate %u bytes of memory for winx_add_winx_history_entry()!\n",length);
 		winx_list_remove_item((list_entry **)(void *)&h->head,(list_entry *)entry);
 	} else {
@@ -376,7 +376,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
 
 /**
  * @brief Displays prompt on the screen and waits for
- * the user input. When user presses the return key
+ * the user input. When user hits the return key it
  * fills the string pointed by the second parameter 
  * by characters read.
  * @param[in] prompt the string to be printed as prompt.
@@ -405,11 +405,11 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 	int history_listed_to_the_last_entry = 0;
 
 	if(!string){
-		winx_printf("\nwinx_prompt_ex() invalid string!\n");
+		winx_printf("\nwinx_prompt_ex: invalid string!\n");
 		return (-1);
 	}
 	if(n <= 0){
-		winx_printf("\nwinx_prompt_ex() invalid string length %d!\n",n);
+		winx_printf("\nwinx_prompt_ex: invalid string length %d!\n",n);
 		return (-1);
 	}
 	
@@ -532,7 +532,7 @@ int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 		/* clear the flag in case of ordinary characters typed */
 		history_listed_to_the_last_entry = 0;
 	}
-	winx_printf("\nwinx_prompt_ex() buffer overflow!\n");
+	winx_printf("\nwinx_prompt_ex: buffer overflow!\n");
 
 done:
 	winx_heap_free(buffer);
@@ -627,7 +627,7 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 	
 	/* check the main parameter for correctness */
 	if(!strings){
-		DebugPrint("winx_print_array_of_strings(): strings = NULL!\n");
+		DebugPrint("winx_print_array_of_strings: strings = NULL!\n");
 		return (-1);
 	}
 	
@@ -640,11 +640,11 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 
 	/* check other parameters */
 	if(!line_width){
-		DebugPrint("winx_print_array_of_strings(): line_width = 0!\n");
+		DebugPrint("winx_print_array_of_strings: line_width = 0!\n");
 		return (-1);
 	}
 	if(!max_rows){
-		DebugPrint("winx_print_array_of_strings(): max_rows = 0!\n");
+		DebugPrint("winx_print_array_of_strings: max_rows = 0!\n");
 		return (-1);
 	}
 	if(prompt == NULL) prompt = DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY;
@@ -655,14 +655,14 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 	/* allocate memory for line buffer */
 	line_buffer = winx_heap_alloc(line_width + 1);
 	if(!line_buffer){
-		DebugPrint("Cannot allocate %u bytes of memory for winx_print_array_of_strings()!",
+		DebugPrint("winx_print_array_of_strings: cannot allocate %u bytes of memory",
 			line_width + 1);
 		return (-1);
 	}
 	/* allocate memory for second ancillary buffer */
 	second_buffer = winx_heap_alloc(line_width + 1);
 	if(!second_buffer){
-		DebugPrint("Cannot allocate %u bytes of memory for winx_print_array_of_strings()!",
+		DebugPrint("winx_print_array_of_strings: cannot allocate %u bytes of memory",
 			line_width + 1);
 		winx_heap_free(line_buffer);
 		return (-1);
