@@ -707,13 +707,17 @@ static int __cdecl reboot_handler(int argc,short **argv,short **envp)
  */
 static int __cdecl hibernate_handler(int argc,short **argv,short **envp)
 {
+	NTSTATUS Status;
+	
 	winx_printf("Hibernation ...");
-	NtSetSystemPowerState(
+	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+	Status = NtSetSystemPowerState(
 		PowerActionHibernate, /* constants defined in winnt.h */
 		PowerSystemHibernate,
-		0
+		0x80000000 /* SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED */
 		);
-	winx_printf("\nHibernation?\n");
+	if(!NT_SUCCESS(Status))
+		winx_printf("\nCannot hibernate the computer: 0x%x\n",(UINT)Status);
 	/*
 	* It seems that hibernation is impossible at 
 	* windows boot time. At least on XP and earlier systems.
