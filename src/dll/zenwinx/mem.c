@@ -27,6 +27,8 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+void winx_print(char *string);
+
 HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc_ex call */
 
 /*
@@ -93,9 +95,9 @@ void winx_create_global_heap(void)
 		hGlobalHeap = RtlCreateHeap(HEAP_GROWABLE,NULL,0,100 * 1024,NULL,NULL);
 	}
 	if(hGlobalHeap == NULL){
-		/* FIXME: this will not work, because winx_printf uses winx_heap_alloc */
 		DebugPrint("Cannot create global memory heap!\n");
-		winx_printf("\nCannot create global memory heap!\n");
+		/* winx_printf cannot be used here */
+		winx_print("\nCannot create global memory heap!\n");
 	}
 }
 
