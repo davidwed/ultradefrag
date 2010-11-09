@@ -43,10 +43,12 @@ int __stdcall winx_enable_privilege(unsigned long luid)
 	NTSTATUS Status;
 	TOKEN_PRIVILEGES tp;
 	LUID luid_struct;
+	
+	/* TODO: investigate whether it is possible to use simpler RtlAdjustPrivilege API or not */
 
 	Status = NtOpenProcessToken(NtCurrentProcess(),MAXIMUM_ALLOWED,&hToken);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot enable privilege %x! Open token failure",(UINT)luid);
+		DebugPrintEx(Status,"winx_enable_privilege: cannot enable privilege %x: open token failure",(UINT)luid);
 		return (-1);
 	}
 
@@ -59,7 +61,7 @@ int __stdcall winx_enable_privilege(unsigned long luid)
 									(PTOKEN_PRIVILEGES)NULL,(PDWORD)NULL);
 	NtCloseSafe(hToken);
 	if(Status == STATUS_NOT_ALL_ASSIGNED || !NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot enable privilege 0x%x",(UINT)luid);
+		DebugPrintEx(Status,"winx_enable_privilege: cannot enable privilege 0x%x",(UINT)luid);
 		return (-1);
 	}
 	return 0;

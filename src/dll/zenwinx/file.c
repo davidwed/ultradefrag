@@ -47,7 +47,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("Cannot open %s! Not enough memory!",filename);
+		DebugPrint("winx_fopen: cannot open %s: not enough memory\n",filename);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -87,13 +87,13 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 			);
 	RtlFreeUnicodeString(&us);
 	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"Cannot open %s",filename);
+		DebugPrintEx(status,"winx_fopen: cannot open %s",filename);
 		return NULL;
 	}
 	f = (WINX_FILE *)winx_heap_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		DebugPrint("Cannot open %s! Not enough memory!",filename);
+		DebugPrint("winx_fopen: cannot open %s: not enough memory\n",filename);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -131,7 +131,7 @@ WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buff
 	/* allocate memory */
 	f->io_buffer = winx_heap_alloc(buffer_size);
 	if(f->io_buffer == NULL){
-		DebugPrint("winx_fbopen: cannot allocate %u bytes of memory!\n",buffer_size);
+		DebugPrint("winx_fbopen: cannot allocate %u bytes of memory\n",buffer_size);
 		winx_fclose(f);
 		return NULL;
 	}
@@ -157,7 +157,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"Cannot read from a file");
+		DebugPrintEx(status,"winx_fread: cannot read from a file");
 		return 0;
 	}
 	if(iosb.Information == 0){ /* encountered on x64 XP */
@@ -190,7 +190,7 @@ static size_t __stdcall winx_fwrite_helper(const void *buffer,size_t size,size_t
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
 	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"Cannot write to a file");
+		DebugPrintEx(status,"winx_fwrite_helper: cannot write to a file");
 		return 0;
 	}
 	if(iosb.Information == 0){ /* encountered on x64 XP */
@@ -306,9 +306,9 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	}
 	if(!NT_SUCCESS(Status)/* || Status == STATUS_PENDING*/){
 		if(description)
-			DebugPrintEx(Status,"%s failed",description);
+			DebugPrintEx(Status,"winx_ioctl: %s failed",description);
 		else
-			DebugPrintEx(Status,"Ioctl %u failed",code);
+			DebugPrintEx(Status,"winx_ioctl: IOCTL %u failed",code);
 		return (-1);
 	}
 	if(pbytes_returned) *pbytes_returned = iosb.Information;
@@ -328,7 +328,7 @@ int __stdcall winx_fflush(WINX_FILE *f)
 
 	Status = NtFlushBuffersFile(f->hFile,&iosb);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"NtFlushBuffersFile() failed");
+		DebugPrintEx(Status,"winx_fflush: NtFlushBuffersFile failed");
 		return (-1);
 	}
 	return 0;
@@ -353,7 +353,7 @@ ULONGLONG __stdcall winx_fsize(WINX_FILE *f)
 		&fsi,sizeof(FILE_STANDARD_INFORMATION),
 		FileStandardInformation);
 	if(!NT_SUCCESS(status)){
-		DebugPrintEx(status,"NtQueryInformationFile(FileStandardInformation) failed");
+		DebugPrintEx(status,"winx_fsize: NtQueryInformationFile(FileStandardInformation) failed");
 		return 0;
 	}
 	return fsi.EndOfFile.QuadPart;
@@ -398,7 +398,7 @@ int __stdcall winx_create_directory(const char *path)
 
 	RtlInitAnsiString(&as,path);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("Cannot create %s! Not enough memory!",path);
+		DebugPrint("winx_create_directory: cannot create %s: not enough memory",path);
 		return (-1);
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -422,7 +422,7 @@ int __stdcall winx_create_directory(const char *path)
 	}
 	/* if it already exists then return success */
 	if(status == STATUS_OBJECT_NAME_COLLISION) return 0;
-	DebugPrintEx(status,"Cannot create %s",path);
+	DebugPrintEx(status,"winx_create_directory: cannot create %s",path);
 	return (-1);
 }
 
@@ -442,7 +442,7 @@ int __stdcall winx_delete_file(const char *filename)
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("Cannot delete %s! Not enough memory!",filename);
+		DebugPrint("winx_delete_file: cannot delete %s: not enough memory",filename);
 		return (-1);
 	}
 
@@ -450,7 +450,7 @@ int __stdcall winx_delete_file(const char *filename)
 	status = NtDeleteFile(&oa);
 	RtlFreeUnicodeString(&us);
 	if(!NT_SUCCESS(status)){
-		DebugPrintEx(status,"Cannot delete %s",filename);
+		DebugPrintEx(status,"winx_delete_file: cannot delete %s",filename);
 		return (-1);
 	}
 	return 0;
@@ -491,7 +491,7 @@ void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read)
 	
 #ifndef _WIN64
 	if(size > 0xFFFFFFFF){
-		winx_printf("\n%s: Files larger than ~4Gb aren't supported!\n\n",
+		winx_printf("\n%s: Files larger than ~4Gb aren\'t supported!\n\n",
 			filename);
 		winx_fclose(f);
 		return NULL;

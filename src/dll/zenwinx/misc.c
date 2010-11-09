@@ -44,10 +44,7 @@ void __stdcall winx_sleep(int msec)
 		/* Approximately 292000 years hence */
 		Interval.QuadPart = MAX_WAIT_INTERVAL;
 	}
-	/*
-	* The next call is undocumented, therefore
-	* we are not checking its result.
-	*/
+	/* don't litter debugging log in case of errors */
 	(void)NtDelayExecution(0/*FALSE*/,&Interval);
 }
 
@@ -76,7 +73,8 @@ int __stdcall winx_get_os_version(void)
 
 	if(winx_get_proc_address(L"ntdll.dll","RtlGetVersion",
 	  (void *)&func_RtlGetVersion) < 0) return 40;
-	func_RtlGetVersion(&ver);
+	/* it seems to be impossible for it to fail */
+	(void)func_RtlGetVersion(&ver);
 	return (ver.dwMajorVersion * 10 + ver.dwMinorVersion);
 }
 
@@ -128,7 +126,7 @@ int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length)
 	InitializeObjectAttributes(&oa,&uStr,OBJ_CASE_INSENSITIVE,NULL,NULL);
 	Status = NtOpenSymbolicLinkObject(&hLink,SYMBOLIC_LINK_QUERY,&oa);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot open symbolic link %ls",name);
+		DebugPrintEx(Status,"winx_query_symbolic_link: cannot open %ls",name);
 		return (-1);
 	}
 	uStr.Buffer = buffer;
@@ -138,7 +136,7 @@ int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length)
 	Status = NtQuerySymbolicLinkObject(hLink,&uStr,&size);
 	(void)NtClose(hLink);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot query symbolic link %ls",name);
+		DebugPrintEx(Status,"winx_query_symbolic_link: cannot query %ls",name);
 		return (-1);
 	}
 	buffer[length - 1] = 0;
@@ -173,7 +171,8 @@ int __stdcall winx_set_system_error_mode(unsigned int mode)
 					(PVOID)&mode,
 					sizeof(int));
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot set system error mode %u",mode);
+		DebugPrintEx(Status,"winx_set_system_error_mode: "
+				"cannot set system error mode %u",mode);
 		return (-1);
 	}
 	return 0;
@@ -190,18 +189,18 @@ int __stdcall winx_set_system_error_mode(unsigned int mode)
 int __stdcall winx_load_driver(short *driver_name)
 {
 	UNICODE_STRING us;
-	short driver_key[128]; /* enough for any driver registry path */
+	short driver_key[MAX_PATH];
 	NTSTATUS Status;
 
 	DbgCheck1(driver_name,"winx_load_driver",-1);
 
-	(void)_snwprintf(driver_key,127,L"%ls%ls",
+	(void)_snwprintf(driver_key,MAX_PATH,L"%ls%ls",
 			L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\",driver_name);
-	driver_key[127] = 0;
+	driver_key[MAX_PATH - 1] = 0;
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtLoadDriver(&us);
 	if(!NT_SUCCESS(Status) && Status != STATUS_IMAGE_ALREADY_LOADED){
-		DebugPrintEx(Status,"Cannot load %ws driver",driver_name);
+		DebugPrintEx(Status,"winx_load_driver: cannot load %ws",driver_name);
 		return (-1);
 	}
 	return 0;
@@ -216,18 +215,18 @@ int __stdcall winx_load_driver(short *driver_name)
 int __stdcall winx_unload_driver(short *driver_name)
 {
 	UNICODE_STRING us;
-	short driver_key[128]; /* enough for any driver registry path */
+	short driver_key[MAX_PATH];
 	NTSTATUS Status;
 
 	DbgCheck1(driver_name,"winx_unload_driver",-1);
 
-	(void)_snwprintf(driver_key,127,L"%ls%ls",
+	(void)_snwprintf(driver_key,MAX_PATH,L"%ls%ls",
 			L"\\Registry\\Machine\\System\\CurrentControlSet\\Services\\",driver_name);
-	driver_key[127] = 0;
+	driver_key[MAX_PATH - 1] = 0;
 	RtlInitUnicodeString(&us,driver_key);
 	Status = NtUnloadDriver(&us);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot unload %ws driver",driver_name);
+		DebugPrintEx(Status,"winx_unload_driver: cannot unload %ws",driver_name);
 		return (-1);
 	}
 	return 0;
@@ -261,8 +260,8 @@ short * __stdcall winx_get_windows_boot_options(void)
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
 	status = NtOpenKey(&hKey,KEY_QUERY_VALUE,&oa);
 	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"Cannot open %ws",us.Buffer);
-		winx_printf("Cannot open %ls: %x!\n\n",us.Buffer,(UINT)status);
+		DebugPrintEx(status,"winx_get_windows_boot_options: cannot open %ws",us.Buffer);
+		winx_printf("winx_get_windows_boot_options: cannot open %ls: %x\n\n",us.Buffer,(UINT)status);
 		return NULL;
 	}
 	
@@ -271,17 +270,15 @@ short * __stdcall winx_get_windows_boot_options(void)
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			NULL,0,&data_size);
 	if(status != STATUS_BUFFER_TOO_SMALL){
-		DebugPrintEx(status,"Cannot query SystemStartOptions value size");
-		winx_printf("Cannot query SystemStartOptions value size: %x!\n\n",(UINT)status);
+		DebugPrintEx(status,"winx_get_windows_boot_options: cannot query SystemStartOptions value size");
+		winx_printf("winx_get_windows_boot_options: cannot query SystemStartOptions value size: %x\n\n",(UINT)status);
 		return NULL;
 	}
 	data_size += sizeof(short);
 	data = winx_heap_alloc(data_size);
 	if(data == NULL){
-		DebugPrint("Cannot allocate %u bytes of memory for winx_get_windows_boot_options()!",
-				data_size);
-		winx_printf("Cannot allocate %u bytes of memory for winx_get_windows_boot_options()!\n\n",
-				data_size);
+		DebugPrint("winx_get_windows_boot_options: cannot allocate %u bytes of memory",data_size);
+		winx_printf("winx_get_windows_boot_options: cannot allocate %u bytes of memory\n\n",data_size);
 		return NULL;
 	}
 	
@@ -289,8 +286,8 @@ short * __stdcall winx_get_windows_boot_options(void)
 	status = NtQueryValueKey(hKey,&us,KeyValuePartialInformation,
 			data,data_size,&data_size2);
 	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"Cannot query SystemStartOptions value");
-		winx_printf("Cannot query SystemStartOptions value: %x!\n\n",(UINT)status);
+		DebugPrintEx(status,"winx_get_windows_boot_options: cannot query SystemStartOptions value");
+		winx_printf("winx_get_windows_boot_options: cannot query SystemStartOptions value: %x\n\n",(UINT)status);
 		winx_heap_free(data);
 		return NULL;
 	}
@@ -307,18 +304,16 @@ short * __stdcall winx_get_windows_boot_options(void)
 
 	boot_options = winx_heap_alloc(buffer_size);
 	if(!boot_options){
-		DebugPrint("Cannot allocate %u bytes of memory for winx_get_windows_boot_options()!",
-				buffer_size);
-		winx_printf("Cannot allocate %u bytes of memory for winx_get_windows_boot_options()!\n\n",
-				buffer_size);
+		DebugPrint("winx_get_windows_boot_options: cannot allocate %u bytes of memory",buffer_size);
+		winx_printf("winx_get_windows_boot_options: cannot allocate %u bytes of memory\n\n",buffer_size);
 		winx_heap_free(data);
 		return NULL;
 	}
 
 	if(!empty_value){
 		memcpy((void *)boot_options,(void *)data_buffer,buffer_size);
-		DebugPrint("%ls - %u\n\n",data_buffer,data_size);
-		//winx_printf("%ls - %u\n\n",data_buffer,data_size);
+		DebugPrint("winx_get_windows_boot_options: %ls - %u\n\n",data_buffer,data_size);
+		//winx_printf("winx_get_windows_boot_options: %ls - %u\n\n",data_buffer,data_size);
 	} else {
 		boot_options[0] = 0;
 	}
@@ -367,8 +362,8 @@ void __stdcall MarkWindowsBootAsSuccessful(void)
 	* bring us a lot of surprises.
 	*/
 	if(winx_get_windows_directory(bootstat_file_path,MAX_PATH) < 0){
-		DebugPrint("MarkWindowsBootAsSuccessful(): Cannot retrieve the Windows directory path!");
-		winx_printf("\nMarkWindowsBootAsSuccessful(): Cannot retrieve the Windows directory path!\n\n");
+		DebugPrint("MarkWindowsBootAsSuccessful(): cannot retrieve the Windows directory path");
+		winx_printf("\nMarkWindowsBootAsSuccessful(): cannot retrieve the Windows directory path\n\n");
 		winx_sleep(3000);
 		return;
 	}

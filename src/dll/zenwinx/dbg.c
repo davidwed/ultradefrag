@@ -89,7 +89,7 @@ void __cdecl winx_dbg_print(char *format, ...)
 	if(!format) return;
 	buffer = winx_virtual_alloc(DBG_BUFFER_SIZE);
 	if(!buffer){
-		winx_debug_print("Cannot allocate memory for winx_dbg_print()!");
+		winx_debug_print("winx_dbg_print: cannot allocate required amount of memory");
 		return;
 	}
 
@@ -318,7 +318,7 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
 
 	buffer = winx_heap_alloc(ERR_MSG_LENGTH);
 	if(!buffer){
-		DebugPrint("Cannot allocate memory for winx_dbg_print_ex()!\n");
+		DebugPrint("winx_dbg_print_ex: cannot allocate %u bytes of memory",ERR_MSG_LENGTH);
 		return;
 	}
 
@@ -356,7 +356,7 @@ void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...)
 	if(!format) return;
 	buffer = winx_virtual_alloc(DBG_BUFFER_SIZE);
 	if(!buffer){
-		winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+		winx_debug_print("winx_dbg_print_header: cannot allocate required amount of memory");
 		return;
 	}
 
@@ -383,19 +383,19 @@ void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...)
 		
 		s_left = winx_heap_alloc(left + 1);
 		if(s_left == NULL){
-			winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+			winx_debug_print("winx_dbg_print_header: cannot allocate required amount of memory");
 			winx_debug_print(buffer); /* print the string not decorated */
 			goto done;
 		}
 		s_right = winx_heap_alloc(right + 1);
 		if(s_right == NULL){
-			winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+			winx_debug_print("winx_dbg_print_header: cannot allocate required amount of memory");
 			winx_debug_print(buffer); /* print the string not decorated */
 			goto done;
 		}
 		s_result = winx_heap_alloc(left + right + 2 + length + 1);
 		if(s_result == NULL){
-			winx_debug_print("Cannot allocate memory for winx_dbg_print_header()!");
+			winx_debug_print("winx_dbg_print_header: cannot allocate required amount of memory");
 			winx_debug_print(buffer); /* print the string not decorated */
 			goto done;
 		}

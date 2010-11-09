@@ -131,13 +131,14 @@ ULONGLONG __stdcall winx_xtime(void)
 	LARGE_INTEGER frequency;
 	LARGE_INTEGER counter;
 	
+	/* TODO: investigate whether it is possible to use more reliable API or not */
 	Status = NtQueryPerformanceCounter(&counter,&frequency);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("NtQueryPerformanceCounter() failed: %x!\n",(UINT)Status);
+		DebugPrint("winx_xtime: NtQueryPerformanceCounter failed: %x\n",(UINT)Status);
 		return 0;
 	}
 	if(!frequency.QuadPart){
-		DebugPrint("Your hardware has no support for High Resolution timer!\n");
+		DebugPrint("winx_xtime: your hardware has no support for High Resolution timer\n");
 		return 0;
 	}
 	/*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***\n",frequency.QuadPart,counter.QuadPart);*/
@@ -198,13 +199,13 @@ int __stdcall winx_get_local_time(winx_time *t)
 	
 	Status = NtQuerySystemTime(&SystemTime);
 	if(Status != STATUS_SUCCESS){
-		DebugPrintEx(Status,"winx_get_system_time: NtQuerySystemTime failed");
+		DebugPrintEx(Status,"winx_get_local_time: NtQuerySystemTime failed");
 		return (-1);
 	}
 	
 	Status = RtlSystemTimeToLocalTime(&SystemTime,&LocalTime);
 	if(Status != STATUS_SUCCESS){
-		DebugPrintEx(Status,"winx_get_system_time: RtlSystemTimeToLocalTime failed");
+		DebugPrintEx(Status,"winx_get_local_time: RtlSystemTimeToLocalTime failed");
 		return (-1);
 	}
 	

@@ -155,7 +155,7 @@ static HANDLE OpenRootDirectory(unsigned char volume_letter)
 				FILE_SHARE_READ|FILE_SHARE_WRITE,FILE_OPEN,0,
 				NULL,0);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot open %ls",rootpath);
+		DebugPrintEx(Status,"OpenRootDirectory: cannot open %ls",rootpath);
 		return NULL;
 	}
 	return hRoot;
@@ -183,7 +183,7 @@ int __stdcall winx_get_drive_type(char letter)
 
 	letter = winx_toupper(letter); /* possibly required for w2k */
 	if(letter < 'A' || letter > 'Z'){
-		DebugPrint("winx_get_drive_type() invalid letter %c!",letter);
+		DebugPrint("winx_get_drive_type: invalid letter %c",letter);
 		return (-1);
 	}
 	
@@ -203,13 +203,15 @@ int __stdcall winx_get_drive_type(char letter)
 	/* allocate memory */
 	ppdi = winx_heap_alloc(sizeof(PROCESS_DEVICEMAP_INFORMATION));
 	if(!ppdi){
-		DebugPrint("Cannot allocate memory for winx_get_drive_type()!\n");
+		DebugPrint("winx_get_drive_type: cannot allocate %u bytes of memory",
+			sizeof(PROCESS_DEVICEMAP_INFORMATION));
 		return (-1);
 	}
 	pffdi = winx_heap_alloc(sizeof(FILE_FS_DEVICE_INFORMATION));
 	if(!pffdi){
 		winx_heap_free(ppdi);
-		DebugPrint("Cannot allocate memory for winx_get_drive_type()!\n");
+		DebugPrint("winx_get_drive_type: cannot allocate %u bytes of memory",
+			sizeof(FILE_FS_DEVICE_INFORMATION));
 		return (-1);
 	}
 	
@@ -236,7 +238,7 @@ int __stdcall winx_get_drive_type(char letter)
 		}
 	} else {
 		if(Status != STATUS_INVALID_INFO_CLASS){ /* on NT4 this is always false */
-			DebugPrintEx(Status,"winx_get_drive_type(): cannot get device map");
+			DebugPrintEx(Status,"winx_get_drive_type: cannot get device map");
 			winx_heap_free(ppdi);
 			winx_heap_free(pffdi);
 			return (-1);
@@ -257,7 +259,7 @@ int __stdcall winx_get_drive_type(char letter)
 					FileFsDeviceInformation);
 	NtClose(hRoot);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"winx_get_drive_type(): cannot get volume type for \'%c\'",letter);
+		DebugPrintEx(Status,"winx_get_drive_type: cannot get volume type for \'%c\'",letter);
 		winx_heap_free(ppdi);
 		winx_heap_free(pffdi);
 		return (-1);
@@ -329,7 +331,7 @@ static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
 	/* allocate memory */
 	pffs = winx_heap_alloc(sizeof(FILE_FS_SIZE_INFORMATION));
 	if(pffs == NULL){
-		DebugPrint("winx_get_volume_information(): cannot allocate %u bytes of memory!",
+		DebugPrint("winx_get_volume_information: cannot allocate %u bytes of memory",
 			sizeof(FILE_FS_SIZE_INFORMATION));
 		return (-1);
 	}
@@ -339,7 +341,7 @@ static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
 	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pffs,
 				sizeof(FILE_FS_SIZE_INFORMATION),FileFsSizeInformation);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"winx_get_volume_information(): cannot get geometry of drive %c:",
+		DebugPrintEx(Status,"winx_get_volume_information: cannot get geometry of drive %c:",
 			v->volume_letter);
 		winx_heap_free(pffs);
 		return (-1);
@@ -539,7 +541,7 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 		/* allocate memory */
 		first_sector = winx_heap_alloc(v->bytes_per_sector);
 		if(first_sector == NULL){
-			DebugPrint("winx_get_volume_information(): cannot allocate %u bytes of memory!",
+			DebugPrint("winx_get_volume_information: cannot allocate %u bytes of memory",
 				v->bytes_per_sector);
 		} else {
 			if(read_first_sector(first_sector,v) < 0){
@@ -568,7 +570,7 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 	fs_attr_info_size = MAX_PATH * sizeof(WCHAR) + sizeof(FILE_FS_ATTRIBUTE_INFORMATION);
 	pfa = winx_heap_alloc(fs_attr_info_size);
 	if(pfa == NULL){
-		DebugPrint("winx_get_volume_information(): cannot allocate %u bytes of memory!",
+		DebugPrint("winx_get_volume_information: cannot allocate %u bytes of memory",
 			fs_attr_info_size);
 		return(-1);
 	}
@@ -577,7 +579,7 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,pfa,
 				fs_attr_info_size,FileFsAttributeInformation);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"winx_get_volume_information(): cannot get file system name of drive %c:",
+		DebugPrintEx(Status,"winx_get_volume_information: cannot get file system name of drive %c:",
 			v->volume_letter);
 		winx_heap_free(pfa);
 		return (-1);
@@ -650,7 +652,7 @@ static void get_volume_label(HANDLE hRoot,winx_volume_information *v)
 	buffer_size = (sizeof(FILE_FS_VOLUME_INFORMATION) - sizeof(wchar_t)) + (MAX_PATH + 1) * sizeof(wchar_t);
 	ffvi = winx_heap_alloc(buffer_size);
 	if(ffvi == NULL){
-		DebugPrint("get_volume_label(): cannot allocate %u bytes of memory!",
+		DebugPrint("get_volume_label: cannot allocate %u bytes of memory",
 			buffer_size);
 		return;
 	}
@@ -660,7 +662,7 @@ static void get_volume_label(HANDLE hRoot,winx_volume_information *v)
 	Status = NtQueryVolumeInformationFile(hRoot,&IoStatusBlock,ffvi,
 				buffer_size,FileFsVolumeInformation);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"get_volume_label(): cannot get volume label of drive %c:",
+		DebugPrintEx(Status,"get_volume_label: cannot get volume label of drive %c:",
 			v->volume_letter);
 		winx_heap_free(ffvi);
 		return;
@@ -721,7 +723,7 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 	memset(&v->ntfs_data,0,sizeof(NTFS_DATA));
 	if(!strcmp(v->fs_name,"NTFS")){
 		if(get_ntfs_data(v) < 0){
-			DebugPrint("NTFS data is unavailable for %c:",
+			DebugPrint("winx_get_volume_information: NTFS data is unavailable for %c:",
 				volume_letter);
 		}
 	}

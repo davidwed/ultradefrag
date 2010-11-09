@@ -62,7 +62,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID paramete
 	Status = RtlCreateUserThread(NtCurrentProcess(),NULL,
 					0,0,0,0,start_addr,parameter,ph,NULL);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot create thread");
+		DebugPrintEx(Status,"winx_create_thread: cannot create thread");
 		return (-1);
 	}
 	if(phandle == NULL) NtCloseSafe(*ph);
@@ -73,12 +73,18 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID paramete
  * @brief Terminates the current thread.
  * @details The exit code is always zero.
  * @todo Add exit code parameter.
+ * @bug This routine causes a small memory leak,
+ * because it doesn't deallocate the initial stack.
+ * On the other hand, such deallocation seems to be
+ * not easy and even if we'll find a proper solution
+ * for, let's say XP, we cannot guarantee its work
+ * on other systems.
  */
 void __stdcall winx_exit_thread(void)
 {
 	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot terminate thread");
+		DebugPrintEx(Status,"winx_exit_thread: cannot terminate thread");
 	}
 }
 
