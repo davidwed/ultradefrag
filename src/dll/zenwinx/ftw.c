@@ -94,7 +94,7 @@ static HANDLE ftw_fopen(winx_file_info *f)
 		&oa, &iosb, NULL, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, FILE_OPEN,
 		flags, NULL, 0);
 	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"Cannot open %ws",f->path);
+		DebugPrintEx(status,"ftw_fopen: cannot open %ws",f->path);
 		return NULL;
 	}
 	
@@ -172,7 +172,7 @@ int __stdcall winx_ftw_dump_file(winx_file_info *f,
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
 			/* it always returns STATUS_END_OF_FILE for small files placed in MFT */
 			if(status != STATUS_END_OF_FILE)
-				DebugPrintEx(status,"dump failed for %ws",f->path);
+				DebugPrintEx(status,"winx_ftw_dump_file: dump failed for %ws",f->path);
 		cleanup:
 			f->disp.clusters = 0;
 			f->disp.fragments = 0;
@@ -191,7 +191,7 @@ int __stdcall winx_ftw_dump_file(winx_file_info *f,
 		
 		/* check for an empty map */
 		if(!filemap->NumberOfPairs && status != STATUS_SUCCESS){
-			DebugPrint("%ws: empty map of file detected",f->path);
+			DebugPrint("winx_ftw_dump_file: %ws: empty map of file detected",f->path);
 			goto cleanup;
 		}
 		
@@ -202,10 +202,10 @@ int __stdcall winx_ftw_dump_file(winx_file_info *f,
 			if(filemap->Pair[i].Lcn == LLINVALID)
 				continue;
 			
-			/* The following code may cause an infinite main loop (bug #2053941?), */
+			/* FIXME: The following code may cause an infinite main loop (bug #2053941?), */
 			/* but for some 3.99 Gb files on FAT32 it works fine. */
 			if(filemap->Pair[i].Vcn == 0){
-				DebugPrint("%ws: wrong map of file detected",f->path);
+				DebugPrint("winx_ftw_dump_file: %ws: wrong map of file detected",f->path);
 				continue;
 			}
 			
@@ -263,7 +263,7 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,
 	int length;
 	int is_rootdir = 0;
 	
-	if(path == NULL)
+	if(path == NULL || file_entry == NULL)
 		return NULL;
 	
 	if(path[0] == 0){
@@ -406,10 +406,10 @@ static int ftw_add_root_directory(short *path, int flags,
 			&fbi,sizeof(FILE_BASIC_INFORMATION),
 			FileBasicInformation);
 		if(!NT_SUCCESS(status)){
-			DebugPrintEx(status,"NtQueryInformationFile(FileBasicInformation) failed");
+			DebugPrintEx(status,"ftw_add_root_directory: NtQueryInformationFile(FileBasicInformation) failed");
 		} else {
 			f->flags = fbi.FileAttributes;
-			DebugPrint("Root directory flags: %u",f->flags);
+			DebugPrint("ftw_add_root_directory: root directory flags: %u",f->flags);
 		}
 		NtClose(hDir);
 	}
@@ -455,6 +455,9 @@ static HANDLE ftw_open_directory(short *path)
 	NTSTATUS status;
 	HANDLE hDir;
 	
+	if(path == NULL)
+		return NULL;
+	
 	RtlInitUnicodeString(&us,path);
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
 	status = NtCreateFile(&hDir, FILE_LIST_DIRECTORY | FILE_RESERVE_OPFILTER,
@@ -462,7 +465,7 @@ static HANDLE ftw_open_directory(short *path)
 		FILE_DIRECTORY_FILE | FILE_SYNCHRONOUS_IO_NONALERT | FILE_OPEN_FOR_BACKUP_INTENT,
 		NULL, 0);
 	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"Cannot open %ws",path);
+		DebugPrintEx(status,"ftw_open_directory: cannot open %ws",path);
 		return NULL;
 	}
 	
@@ -523,6 +526,7 @@ static int ftw_helper(short *path, int flags,
 				NULL,
 				FALSE /* do not restart scan */
 				);
+			/* TODO: better error handling here */
 			if(status != STATUS_SUCCESS){
 				/* no more entries to read */
 				winx_heap_free(file_listing);

@@ -855,9 +855,9 @@ static void analyze_non_resident_attribute_list(winx_file_info *f,ULONGLONG list
 	int i;
 	USHORT length;
 	
-	DebugPrint("Allocated size = %I64u bytes",list_size);
+	DebugPrint("allocated size = %I64u bytes",list_size);
 	if(list_size == 0){
-		DebugPrint("Empty nonresident attribute list found");
+		DebugPrint("empty nonresident attribute list found");
 		return;
 	}
 	
@@ -883,7 +883,7 @@ static void analyze_non_resident_attribute_list(winx_file_info *f,ULONGLONG list
 			lsn = (block->lcn + i) * sp->ml.sectors_per_cluster;
 			status = read_sectors(lsn,current_cluster,(ULONG)cluster_size,sp);
 			if(!NT_SUCCESS(status)){
-				DebugPrintEx(status,"Cannot read the %I64u sector",lsn);
+				DebugPrintEx(status,"analyze_non_resident_attribute_list: cannot read %I64u sector",lsn);
 				/* attribute list seems to be invalid itself, so we'll just skip it */
 				/*sp->errors ++;*/
 				goto scan_done;
@@ -892,7 +892,7 @@ static void analyze_non_resident_attribute_list(winx_file_info *f,ULONGLONG list
 			if(clusters_to_read == 0){
 				/* is it the last cluster of the file? */
 				if(i < (block->length - 1) || block->next != f->disp.blockmap)
-					DebugPrint("The attribute list has more clusters than expected");
+					DebugPrint("attribute list has more clusters than expected");
 				goto analyze_list;
 			}
 			current_cluster += cluster_size;
@@ -902,12 +902,12 @@ static void analyze_non_resident_attribute_list(winx_file_info *f,ULONGLONG list
 
 analyze_list:
 	if(clusters_to_read){
-		DebugPrint("The attribute list has less number of clusters than expected");
-		DebugPrint("It will be skipped, because anyway we don\'t know its exact size\n");
+		DebugPrint("attribute list has less number of clusters than expected");
+		DebugPrint("it will be skipped, because anyway we don\'t know its exact size\n");
 		goto scan_done;
 	}
 
-	DebugPrint("Attribute list analysis started...");
+	DebugPrint("attribute list analysis started...");
 	attr_list_entry = (PATTRIBUTE_LIST)cluster;
 
 	while(!ftw_ntfs_check_for_termination(sp)){
@@ -923,7 +923,7 @@ analyze_list:
 		length = attr_list_entry->Length;
 		attr_list_entry = (PATTRIBUTE_LIST)((char *)attr_list_entry + length);
 	}
-	DebugPrint("Attribute list analysis completed");
+	DebugPrint("attribute list analysis completed");
 
 scan_done:	
 	/* free allocated resources */
@@ -1100,7 +1100,7 @@ static void process_run_list(short *attr_name,PNONRESIDENT_ATTRIBUTE pnr_attr,
 			if(RunLCN(run)){
 				/* check for data consistency */
 				if(!check_run(lcn,length,sp)){
-					DebugPrint("Error in MFT found, run Check Disk program!\n");
+					DebugPrint("error in MFT found, run Check Disk program!\n");
 					break;
 				}
 				process_run(f,vcn,lcn,length,sp);
@@ -1128,7 +1128,7 @@ static void analyze_non_resident_stream(PNONRESIDENT_ATTRIBUTE pnr_attr,mft_scan
 	/* handle the type of the attribute */
 	attr_type = pnr_attr->Attribute.AttributeType;
 	if(attr_type == AttributeAttributeList){
-		DebugPrint("Nonresident attribute list found");
+		DebugPrint("nonresident attribute list found");
 		NonResidentAttrListFound = TRUE;
 	}
 
@@ -1139,7 +1139,8 @@ static void analyze_non_resident_stream(PNONRESIDENT_ATTRIBUTE pnr_attr,mft_scan
 	if(attr_name == NULL)
 		return;
 	
-	if(NonResidentAttrListFound) DebugPrint("%ws:%ws\n",sp->mfi.Name,attr_name);
+	if(NonResidentAttrListFound)
+		DebugPrint("%ws:%ws\n",sp->mfi.Name,attr_name);
 	
 	process_run_list(attr_name,pnr_attr,sp,NonResidentAttrListFound);
 
@@ -1566,7 +1567,7 @@ fail:
 		status = get_file_record(mft_id,nfrob,sp);
 		if(!NT_SUCCESS(status)){
 			if(mft_id == 0){
-				DebugPrintEx(status,"get_file_record failed");
+				DebugPrintEx(status,"scan_mft: get_file_record for $Mft failed");
 				winx_heap_free(nfrob);
 				goto fail;
 			}
