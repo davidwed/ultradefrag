@@ -38,7 +38,12 @@
  */
 list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev,long size)
 {
-	list_entry *new_item = (list_entry *)winx_heap_alloc(size);
+	list_entry *new_item;
+	
+	if(size < sizeof(list_entry))
+		return NULL;
+
+	new_item = (list_entry *)winx_heap_alloc(size);
 	if(new_item == NULL) return NULL;
 
 	/* is list empty? */
