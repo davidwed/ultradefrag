@@ -264,41 +264,10 @@ int __cdecl winx_getche(void)
  * Negative value indicates failure.
  * @note This call may terminate the program if NtCancelIoFile() 
  * fails for one of the existing keyboard devices.
- * @bug Does not recognize special characters
- * such as 'backspace'.
  */
 int __cdecl winx_gets(char *string,int n)
 {
-	int i;
-	int ch;
-
-	if(!string){
-		winx_printf("\nwinx_gets: invalid string!\n");
-		return (-1);
-	}
-	if(n <= 0){
-		winx_printf("\nwinx_gets: invalid string length %d!\n",n);
-		return (-1);
-	}
-	
-	for(i = 0; i < n; i ++){
-		do {
-			ch = winx_getche();
-			if(ch == -1){
-				string[i] = 0;
-				return (-1);
-			}
-		} while(ch == 0 || ch == 0x08); /* skip backspace */
-		if(ch == 13){
-			winx_putch('\n');
-			string[i] = 0;
-			return (i+1);
-		}
-		string[i] = (char)ch;
-	}
-	winx_printf("\nwinx_gets: buffer overflow!\n");
-	string[n-1] = 0;
-	return n;
+	return winx_prompt_ex(NULL,string,n,NULL);
 }
 
 /**
