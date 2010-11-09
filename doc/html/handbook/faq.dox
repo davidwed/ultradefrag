@@ -105,6 +105,11 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * before you display the reports. This will open each report in a new tab depending
  * on your browsers configuration.
  *
+ * <h3>Why is the progress exceeding 100%, when processing FAT volumes?</h3>
+ * On FAT volumes space is immediately released after a file is moved,
+ * so it happens, that more files can be fully defragmented, than initially
+ * calculated. 
+ *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
  *    <TR>
