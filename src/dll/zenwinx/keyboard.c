@@ -27,9 +27,21 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
-char * __stdcall winx_get_error_description(unsigned long status);
+/*
+* This delay affects primarily text typing
+* speed when winx_prompt() is used to get
+* user input.
+*/
+#define MAX_TYPING_DELAY 10 /* msec */
 
 #define MAX_NUM_OF_KEYBOARDS 100
+
+/*
+* Keyboard queue is needed to keep all
+* key hits, including composite ones
+* like Pause/Break.
+*/
+#define KB_QUEUE_LENGTH      100
 
 typedef struct _KEYBOARD {
 	int device_number; /* for debugging purposes */
@@ -40,11 +52,126 @@ typedef struct _KEYBOARD {
 KEYBOARD kb[MAX_NUM_OF_KEYBOARDS];
 int number_of_keyboards;
 
+HANDLE hKbSynchEvent = NULL;
+KEYBOARD_INPUT_DATA kids[KB_QUEUE_LENGTH];
+int start_index = 0;
+int n_written = 0;
+int stop_kb_wait_for_input = 0;
+int kb_wait_for_input_threads = 0;
+#define STOP_KB_WAIT_INTERVAL 100 /* ms */
+
 /* prototypes */
 void __stdcall kb_close(void);
 int  __stdcall kb_check(HANDLE hKbDevice);
 int __stdcall kb_open_internal(int device_number);
-int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INTEGER pInterval);
+char * __stdcall winx_get_error_description(unsigned long status);
+void winx_print(char *string);
+
+/**
+ * @brief Waits for user input on
+ * the specified keyboard.
+ */
+static DWORD WINAPI kb_wait_for_input(LPVOID p)
+{
+	LARGE_INTEGER ByteOffset;
+	IO_STATUS_BLOCK iosb;
+	KEYBOARD_INPUT_DATA kid;
+	NTSTATUS Status;
+	LARGE_INTEGER interval;
+	LARGE_INTEGER synch_interval;
+	int index;
+	char buffer[128];
+	KEYBOARD *kbd = (KEYBOARD *)p;
+	
+	/*
+	* Either debug print or winx_printf,
+	* or memory allocation aren't available here...
+	*/
+	
+	kb_wait_for_input_threads ++;
+	interval.QuadPart = -((signed long)STOP_KB_WAIT_INTERVAL * 10000);
+
+	while(!stop_kb_wait_for_input){
+		ByteOffset.QuadPart = 0;
+		/* make a read request */
+		Status = NtReadFile(kbd->hKbDevice,kbd->hKbEvent,NULL,NULL,
+			&iosb,&kid,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
+		/* wait for key hits */
+		if(NT_SUCCESS(Status)){
+			do {
+				Status = NtWaitForSingleObject(kbd->hKbEvent,FALSE,&interval);
+				if(stop_kb_wait_for_input){
+					if(Status == STATUS_TIMEOUT){
+						/* cancel the pending operation */
+						Status = NtCancelIoFile(kbd->hKbDevice,&iosb);
+						if(NT_SUCCESS(Status)){
+							Status = NtWaitForSingleObject(kbd->hKbEvent,FALSE,NULL);
+							if(NT_SUCCESS(Status)) Status = iosb.Status;
+						}
+						if(!NT_SUCCESS(Status)){
+							_snprintf(buffer,sizeof(buffer),"\nNtCancelIoFile for KeyboadClass%u failed: %x!\n%s\n",
+								kbd->device_number,(UINT)Status,winx_get_error_description((ULONG)Status));
+							buffer[sizeof(buffer) - 1] = 0;
+							winx_print(buffer);
+						}
+					}
+					goto done;
+				}
+			} while(Status == STATUS_TIMEOUT);
+			if(NT_SUCCESS(Status)) Status = iosb.Status;
+		}
+		/* here we have either an input gathered or an error */
+		if(!NT_SUCCESS(Status)){
+			_snprintf(buffer,sizeof(buffer),"\nCannot read the KeyboadClass%u device: %x!\n%s\n",
+				kbd->device_number,(UINT)Status,winx_get_error_description((ULONG)Status));
+			buffer[sizeof(buffer) - 1] = 0;
+			winx_print(buffer);
+			goto done;
+		} else {
+			/* synchronize with other threads */
+			if(hKbSynchEvent){
+				synch_interval.QuadPart = MAX_WAIT_INTERVAL;
+				Status = NtWaitForSingleObject(hKbSynchEvent,FALSE,&synch_interval);
+				if(Status != WAIT_OBJECT_0){
+					_snprintf(buffer,sizeof(buffer),"\nkb_wait_for_input: synchronization failed: %x!\n%s\n",
+						(UINT)Status,winx_get_error_description((ULONG)Status));
+					buffer[sizeof(buffer) - 1] = 0;
+					winx_print(buffer);
+				}
+			}
+
+			/* push new item to the keyboard queue */
+			if(start_index < 0 || start_index >= KB_QUEUE_LENGTH){
+				winx_print("\nkb_wait_for_input: unexpected condition #1!\n\n");
+				start_index = 0;
+			}
+			if(n_written < 0 || n_written > KB_QUEUE_LENGTH){
+				winx_print("\nkb_wait_for_input: unexpected condition #2!\n\n");
+				n_written = 0;
+			}
+
+			index = start_index + n_written;
+			if(index >= KB_QUEUE_LENGTH)
+				index -= KB_QUEUE_LENGTH;
+
+			if(n_written == KB_QUEUE_LENGTH)
+				start_index ++;
+			else
+				n_written ++;
+			
+			memcpy(&kids[index],&kid,sizeof(KEYBOARD_INPUT_DATA));
+			
+			/* release synchronization event */
+			if(hKbSynchEvent)
+				(void)NtSetEvent(hKbSynchEvent,NULL);
+		}
+	}
+
+done:
+	kb_wait_for_input_threads --;
+	winx_exit_thread();
+	return 0;
+}
 
 /**
  * @brief Opens all existing keyboards.
@@ -56,7 +183,23 @@ int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INT
  */
 int __stdcall kb_open(void)
 {
+	short event_name[64];
 	int i, j;
+	
+	/* create synchronization event for safe access to kids array */
+	_snwprintf(event_name,64,L"\\winx_kb_synch_event_%u",
+		(unsigned int)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess));
+	event_name[63] = 0;
+	
+	if(hKbSynchEvent == NULL){
+		(void)winx_create_event(event_name,SynchronizationEvent,&hKbSynchEvent);
+		if(hKbSynchEvent) (void)NtSetEvent(hKbSynchEvent,NULL);
+	}
+	
+	if(hKbSynchEvent == NULL){
+		winx_printf("\nCannot create %ws event!\n\n",event_name);
+		return (-1);
+	}
 
 	/* initialize kb array */
 	memset((void *)kb,0,sizeof(kb));
@@ -81,6 +224,22 @@ int __stdcall kb_open(void)
         }
 	}
 	
+	/* start threads waiting for user input */
+	stop_kb_wait_for_input = 0;
+	kb_wait_for_input_threads = 0;
+	for(i = 0; i < MAX_NUM_OF_KEYBOARDS; i++){
+		if(kb[i].hKbDevice == NULL) break;
+		if(winx_create_thread(kb_wait_for_input,(LPVOID)&kb[i],NULL) < 0){
+			winx_printf("\nCannot create thread gathering input from \\Device\\KeyboardClass%u\n\n",
+				kb[i].device_number);
+			/* stop all threads */
+			stop_kb_wait_for_input = 1;
+			while(kb_wait_for_input_threads)
+				winx_sleep(STOP_KB_WAIT_INTERVAL);
+			return (-1);
+		}
+	}
+	
 	if(kb[0].hKbDevice) return 0; /* success, at least one keyboard found */
 	else return (-1);
 }
@@ -93,6 +252,16 @@ void __stdcall kb_close(void)
 {
 	int i;
 	
+	/*
+	* Either debug print or memory
+	* allocation calls aren't available here...
+	*/
+	
+	/* stop threads waiting for user input */
+	stop_kb_wait_for_input = 1;
+	while(kb_wait_for_input_threads)
+		winx_sleep(STOP_KB_WAIT_INTERVAL);
+	
 	for(i = 0; i < MAX_NUM_OF_KEYBOARDS; i++){
 		if(kb[i].hKbDevice == NULL) break;
 		NtCloseSafe(kb[i].hKbDevice);
@@ -100,20 +269,10 @@ void __stdcall kb_close(void)
 		/* don't reset device_number member here */
 		number_of_keyboards --;
 	}
+	
+	/* destroy synchronization event */
+	winx_destroy_event(hKbSynchEvent);
 }
-
-/*
-* Latency of 100 ms gives less delay error (prolongation)
-* in comparison with shorter latencies. This parameter
-* is used primarily when the program checks for key hits.
-*/
-#define MAX_LATENCY 100     /* msec */
-/*
-* This delay affects primarily text typing
-* speed when winx_prompt() is used to get
-* user input.
-*/
-#define MAX_TYPING_DELAY 10 /* msec */
 
 /**
  * @brief Checks the console for keyboard input.
@@ -126,69 +285,48 @@ void __stdcall kb_close(void)
  */
 int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 {
-	int delay;
 	int attempts = 0;
-	LARGE_INTEGER interval;
-	ULONGLONG xtime;
-	int i,j;
+	ULONGLONG xtime = 0;
+	LARGE_INTEGER synch_interval;
+	NTSTATUS Status;
 	
 	DbgCheck1(pKID,"kb_read",-1);
 	
-	if(number_of_keyboards == 0) return (-1);
-	
-    // winx_printf("mSec ... %d, Delay ... %d, Attempts ... %d\n", msec_timeout, delay, attempts);
-    
 	if(msec_timeout != INFINITE){
-		/*
-		* Here we have a fixed time interval,
-		* and we should not exceed them.
-		*/
-		if(msec_timeout <= MAX_LATENCY){
-			delay = msec_timeout / number_of_keyboards;
-			attempts = 1;
-		} else {
-			delay = (MAX_LATENCY / number_of_keyboards) + 1;
-			attempts = (msec_timeout / MAX_LATENCY) + 1;
-		}
-		interval.QuadPart = -((signed long)delay * 10000);
-
+		attempts = msec_timeout / MAX_TYPING_DELAY + 1;
 		xtime = winx_xtime();
-		for(i = 0; i < attempts; i++){
-			/* loop through all keyboards */
-			for(j = 0; j < number_of_keyboards; j++){
-				if(kb_read_internal(j,pKID,&interval) >= 0)
-					return 0;
-			}
-			if(number_of_keyboards == 0) return (-1);
-			if(i == (attempts - 1)) return (-1);
-			/*
-			* Because delay prolongation occurs always
-			* due to the Windows imperfectness, we're
-			* trying to check directly whether time interval
-			* exceeds or not.
-			*/
-			if(xtime){
-				if(winx_xtime() - xtime >= msec_timeout)
-					return (-1);
-			}
+	}
+	
+	while(number_of_keyboards){
+		/* synchronize with other threads */
+		if(hKbSynchEvent){
+			synch_interval.QuadPart = MAX_WAIT_INTERVAL;
+			Status = NtWaitForSingleObject(hKbSynchEvent,FALSE,&synch_interval);
+			if(Status != WAIT_OBJECT_0)
+				winx_printf("\nkb_read: synchronization failed: 0x%x\n\n",(UINT)Status);
 		}
-	} else {
-		/*
-		* Here the time interval is unlimited,
-		* so we can query keyboards more quickly
-		* to reach more comfortable speed of
-		* text typing for which this mode 
-		* is typically used.
-		*/
-		delay = (MAX_TYPING_DELAY / number_of_keyboards) + 1;
-		interval.QuadPart = -((signed long)delay * 10000);
-		while(1){
-			/* loop through all keyboards */
-			for(j = 0; j < number_of_keyboards; j++){
-				if(kb_read_internal(j,pKID,&interval) >= 0)
-					return 0;
-			}
-			if(number_of_keyboards == 0) return (-1);
+
+		/* pop item from the keyboard queue */
+		if(n_written > 0){
+			memcpy(pKID,&kids[start_index],sizeof(KEYBOARD_INPUT_DATA));
+			start_index ++;
+			if(start_index >= KB_QUEUE_LENGTH)
+				start_index = 0;
+			n_written --;
+			if(hKbSynchEvent)
+				(void)NtSetEvent(hKbSynchEvent,NULL);
+			return 0;
+		}
+
+		/* release synchronization event */
+		if(hKbSynchEvent)
+			(void)NtSetEvent(hKbSynchEvent,NULL);
+
+		winx_sleep(MAX_TYPING_DELAY);
+		if(msec_timeout != INFINITE){
+			attempts --;
+			if(attempts == 0) break;
+			if(xtime && (winx_xtime() - xtime >= msec_timeout)) break;
 		}
 	}
 	return (-1);
@@ -347,71 +485,6 @@ int __stdcall kb_check(HANDLE hKbDevice)
 	}
 
 	(void)kb_light_up_indicators(hKbDevice,LedFlags);
-	return 0;
-}
-
-/**
- * @brief Checks the keyboard for an input.
- * @param[in] kb_index the index of the keyboard to be checked.
- * @param[out] pKID pointer to the structure receiving keyboard input.
- * @param[in] pInterval pointer to the variable holding the time-out interval.
- * @return Zero if some key was pressed, negative value otherwise.
- * @note Internal use only.
- */
-int __stdcall kb_read_internal(int kb_index,PKEYBOARD_INPUT_DATA pKID,PLARGE_INTEGER pInterval)
-{
-	LARGE_INTEGER ByteOffset;
-	IO_STATUS_BLOCK iosb;
-	NTSTATUS Status;
-
-	if(pKID == NULL) return (-1);
-	if(kb[kb_index].hKbDevice == NULL) return (-1);
-	if(kb[kb_index].hKbEvent == NULL) return (-1);
-
-	ByteOffset.QuadPart = 0;
-	Status = NtReadFile(kb[kb_index].hKbDevice,kb[kb_index].hKbEvent,NULL,NULL,
-		&iosb,pKID,sizeof(KEYBOARD_INPUT_DATA),&ByteOffset,0);
-	/* wait in case operation is pending */
-	if(NT_SUCCESS(Status)){
-		Status = NtWaitForSingleObject(kb[kb_index].hKbEvent,FALSE,pInterval);
-		if(Status == STATUS_TIMEOUT){ 
-			/* 
-			* If we have timeout we should cancel read operation
-			* to empty keyboard pending operations queue.
-			*/
-			Status = NtCancelIoFile(kb[kb_index].hKbDevice,&iosb);
-			if(NT_SUCCESS(Status)){
-				/* this waiting is very important */
-				Status = NtWaitForSingleObject(kb[kb_index].hKbEvent,FALSE,NULL);
-				if(NT_SUCCESS(Status)) Status = iosb.Status;
-			}
-			if(!NT_SUCCESS(Status)){
-				/*
-				* This is a hard error because the next read request
-				* may destroy stack where pKID pointed data may be allocated.
-				*/
-				DebugPrintEx(Status,"NtCancelIoFile for KeyboadClass%u failed",
-					kb[kb_index].device_number);
-				winx_printf("\nNtCancelIoFile for KeyboadClass%u failed: %x!\n",
-					kb[kb_index].device_number,(UINT)Status);
-				winx_printf("%s\n",winx_get_error_description((ULONG)Status));
-				/* Terminate the program! */
-				winx_exit(1000); /* exit code is equal to 1000, it was randomly selected :) */
-				return (-1);
-			}
-			/* Timeout - this is a normal situation. */
-			return (-1);
-		}
-		if(NT_SUCCESS(Status)) Status = iosb.Status;
-	}
-	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot read the KeyboadClass%u device",
-			kb[kb_index].device_number);
-		winx_printf("\nCannot read the KeyboadClass%u device: %x!\n",
-			kb[kb_index].device_number,(UINT)Status);
-		winx_printf("%s\n",winx_get_error_description((ULONG)Status));
-		return (-1);
-	}
 	return 0;
 }
 
