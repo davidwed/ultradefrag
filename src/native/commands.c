@@ -705,6 +705,26 @@ static int __cdecl reboot_handler(int argc,short **argv,short **envp)
 /**
  * @brief hibernate command handler.
  */
+/*
+From: Stefan Pendl <stefan.pendl@drei.at>
+To: Dmitri Arkhangelski <dmitriar@gmail.com>
+Subject: RE: UD 5.0 - GUI
+Date: Tue, 9 Nov 2010 23:24:39 +0100
+
+We must get rid of the hibernate command at boot time immediately.
+
+Following will happen, if it is used on Vista and above, where it works:
+
+1) the system will shutdown, which is expected
+2) after turning the system on again, the user will face a black, blank screen
+3) the only way to correct this is to cycle power
+4) now the system will normally boot and will ask the user to run system repair
+5) select to start normally and the user has his system back
+
+Hibernate at boot is a killer.
+
+The native process is terminated and there is no way to get it back running, so there is no point of return.
+*/
 static int __cdecl hibernate_handler(int argc,short **argv,short **envp)
 {
 	NTSTATUS Status;
