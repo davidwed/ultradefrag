@@ -108,7 +108,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0,                 L"PLEASE_CONFIRM",             L"Please Confirm",            NULL},
 	{0,                 L"REALLY_SHUTDOWN_WHEN_DONE",  L"Do you really want to shutdown when done?",  NULL},
 	{0,                 L"REALLY_HIBERNATE_WHEN_DONE", L"Do you really want to hibernate when done?", NULL},
-	{0,                 L"REALLY_LOGOFF_WHEN_DONE",    L"Do you really want to logoff when done?",    NULL},
+	{0,                 L"REALLY_LOGOFF_WHEN_DONE",    L"Do you really want to log off when done?",   NULL},
 	{0,                 L"REALLY_REBOOT_WHEN_DONE",    L"Do you really want to reboot when done?",    NULL},
 	{0,                 L"SECONDS_TILL_SHUTDOWN",      L"seconds till shutdown",     NULL},
 	{0,                 L"SECONDS_TILL_HIBERNATION",   L"seconds till hibernation",  NULL},
