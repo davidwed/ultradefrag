@@ -31,6 +31,8 @@
  *
  * UltraDefrag has the following features:
  * - system files defragmentation (registry, page-file, ...)
+ * - MFT (master file table) defragmentation (on XP and later systems)
+ * - internal NTFS files defragmentation (on Windows 2000 and later systems)
  * - ultra fast NTFS analysis
  * - fast defragmentation algorithm
  * - effective volume optimization algorithm
@@ -68,8 +70,9 @@
  * these restrictions:
  * - Directories on FAT volumes cannot be moved. This is a well
  *   known FAT driver restriction and cannot be fixed.
- * - $MFT, $Bitmap and other internal NTFS files cannot be
- *   defragmented on Windows versions prior to Windows 7. Because
+ * - $Bitmap and other internal NTFS files cannot be
+ *   defragmented on Windows versions prior to Windows 2000. 
+ *   To defragment $MFT file at least Windows XP is needed. Because
  *   NTFS system driver prevents accessing them.
  * - NTFS volumes with a cluster size greater than 4 kilobytes
  *   cannot be defragmented on Windows 2000.
@@ -111,7 +114,7 @@
  * volume.
  *
  * After completion of the described defragmentation
- * algorithms the program (since v4.4.0 RC1) tries to reduce the
+ * algorithms the program tries to reduce a
  * number of fragments of still fragmented files by moving their
  * contents to large continuous free space areas. In case of
  * the volume optimization files are always moved to the
@@ -129,7 +132,7 @@
  * on NTFS volumes, because FAT directories are not movable.
  *
  * On the other hand, NTFS volumes are often logically split
- * to several parts by files which cannot be moved ($MFT and others).
+ * to several parts by files which cannot be moved ($Bitmap and others).
  * Therefore it may be sometimes impossible to get a very large
  * continuous free space area for, for instance, pagefile
  * defragmentation. For such cases there are two workarounds

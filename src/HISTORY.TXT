@@ -4,6 +4,9 @@ HISTORY
   ------------------------------------------------------------------------------
     beta1:
     - defragmentation algorithm reimplemented; partial defragmentation improved
+    - ability to defragment MFT as well as other internal NTFS files
+      on Windows XP and Windows Server 2003 was added
+    - ability to defragment internal NTFS files on Windows 2000 was added
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
     - current time was added to reports
