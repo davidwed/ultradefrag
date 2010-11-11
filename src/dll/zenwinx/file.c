@@ -125,7 +125,7 @@ WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buff
 	if(f == NULL)
 		return NULL;
 	
-	if(buffer_size == 0)
+	if(buffer_size <= 0)
 		return f;
 	
 	/* allocate memory */
