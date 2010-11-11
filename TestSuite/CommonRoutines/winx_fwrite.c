@@ -1,17 +1,17 @@
 /*
 * test suite for winx_fwrite()
-* adjust drive letter in filename before its use
 */
 
 static int winx_fwrite_test_buffered_io(char *filename,char **strings,int test_number,int buffer_size);
 static int winx_fwrite_test_compare(char *filename,char **strings,int total_length,int test_number);
 
 /*
+* accepts native filenames like that:
+* \??\C:\test.txt
 * returns zero on success, negative value otherwise
 */
-int winx_fwrite_test(void)
+int winx_fwrite_test(char *filename)
 {
-	char filename[] = "\\??\\L:\\test.txt";
 	WINX_FILE *f;
 	char *strings[] = {
 		"Sherlock Holmes took his bottle from the corner of the mantelpiece, \r\n",
