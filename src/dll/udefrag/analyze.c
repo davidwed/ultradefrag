@@ -554,6 +554,7 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 	* on Windows XP and Windows Server 2003 systems.
 	* A single SYNCHRONIZE flag also enables internal
 	* NTFS files defragmentation on Windows 2000.
+	* http://forum.sysinternals.com/topic23950.html
 	*/
 	status = NtCreateFile(phFile,/*FILE_GENERIC_READ |*/ SYNCHRONIZE,
 				&oa,&iosb,NULL,0,FILE_SHARE_READ | FILE_SHARE_WRITE,
