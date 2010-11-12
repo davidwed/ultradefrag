@@ -70,10 +70,10 @@
  * these restrictions:
  * - Directories on FAT volumes cannot be moved. This is a well
  *   known FAT driver restriction and cannot be fixed.
- * - $Bitmap and other internal NTFS files cannot be
- *   defragmented on Windows versions prior to Windows 2000. 
- *   To defragment $MFT file at least Windows XP is needed. Because
- *   NTFS system driver prevents accessing them.
+ * - The $Bitmap and other internal NTFS files cannot be
+ *   defragmented on Windows versions prior to Windows 2000 and
+ *   to defragment the $MFT file at least Windows XP is needed, because
+ *   the NTFS system driver prevents accessing them.
  * - NTFS volumes with a cluster size greater than 4 kilobytes
  *   cannot be defragmented on Windows 2000.
  * - UltraDefrag cannot defragment volumes containing more
@@ -114,7 +114,7 @@
  * volume.
  *
  * After completion of the described defragmentation
- * algorithms the program tries to reduce a
+ * algorithms the program tries to reduce the
  * number of fragments of still fragmented files by moving their
  * contents to large continuous free space areas. In case of
  * the volume optimization files are always moved to the
@@ -132,7 +132,7 @@
  * on NTFS volumes, because FAT directories are not movable.
  *
  * On the other hand, NTFS volumes are often logically split
- * to several parts by files which cannot be moved ($Bitmap and others).
+ * into several parts by files which cannot be moved ($Bitmap and others).
  * Therefore it may be sometimes impossible to get a very large
  * continuous free space area for, for instance, pagefile
  * defragmentation. For such cases there are two workarounds
