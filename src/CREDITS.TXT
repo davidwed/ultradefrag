@@ -54,6 +54,7 @@
     Filipino        - Stefan Pendl
     Finnish         - Stefan Pendl
     French          - Pascal Crozet, Stefan Pendl
+    Galician        - Julio Mojón Fuentes
     German          - Stefan Geuken, Stefan Pendl
     Greek           - Konstantinos Kapoukranidis, Stefan Pendl
     Hindi           - Gaurav Chatterjee
@@ -66,8 +67,8 @@
     Macedonian      - Dmitri Arkhangelski
     Norwegian       - Stefan Pendl
     Polish          - Andrzej Rudnik, Stefan Pendl
-    Portuguese (BR) - Depeo da Masol, Stefan Pendl
     Portuguese      - Ricardo A. Garcia, Stefan Pendl
+    Portuguese (BR) - Depeo da Masol, Stefan Pendl
     Romanian        - Stefan Pendl
     Russian         - Dmitri Arkhangelski
     Serbian         - Dmitri Arkhangelski
