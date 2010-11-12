@@ -164,7 +164,6 @@ int defragment(udefrag_job_parameters *jp)
 	time = winx_xtime();
 	
 	/* fill largest free region first */
-	/* TODO: add more termination points */
 	defragmented_files = 0;
 	do {
 		joined_fragments = 0;
@@ -183,6 +182,7 @@ int defragment(udefrag_job_parameters *jp)
 		
 		/* find largest fragmented file which fragments can be joined there */
 		do {
+			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
 				if(f->f->disp.clusters > length && f->f->disp.blockmap && !is_too_large(f->f)){
@@ -200,6 +200,7 @@ int defragment(udefrag_job_parameters *jp)
 			for(first_block = f_largest->f->disp.blockmap; first_block; first_block = first_block->next){
 				n_blocks = 0, remaining_clusters = rgn_largest->length;
 				for(block = first_block; block; block = block->next){
+					if(jp->termination_router((void *)jp)) goto done;
 					if(block->length <= remaining_clusters){
 						n_blocks ++;
 						remaining_clusters -= block->length;
