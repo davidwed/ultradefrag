@@ -678,10 +678,10 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	if(jp->job_type != ANALYSIS_JOB \
 	  && jp->fs_type == FS_NTFS \
 	  && jp->v_info.bytes_per_cluster > 4096 \
-	  && winx_get_os_version() == 50){
+	  && winx_get_os_version() <= 50){
 		DebugPrint("Cannot defragment NTFS volumes with\n"
 			"cluster size greater than 4 kb\n"
-			"on Windows 2000 (read docs for details).");
+			"on Windows 2000 and Windows NT 4.0");
 		return UDEFRAG_W2K_4KB_CLUSTERS;
 	}
 	  

@@ -446,7 +446,7 @@ char * __stdcall udefrag_get_error_description(int error_code)
 		       "because of unmoveable directories.";
 	case UDEFRAG_W2K_4KB_CLUSTERS:
 		return "NTFS volumes with cluster size greater than 4 kb\n"
-		       "cannot be defragmented on Windows 2000.";
+		       "cannot be defragmented on Windows 2000 and Windows NT 4.0";
 	case UDEFRAG_NO_MEM:
 		return "Not enough memory.";
 	case UDEFRAG_CDROM:
