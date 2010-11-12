@@ -75,9 +75,7 @@
  *   to defragment the $MFT file at least Windows XP is needed, because
  *   the NTFS system driver prevents accessing them.
  * - NTFS volumes with a cluster size greater than 4 kilobytes
- *   cannot be defragmented on Windows 2000.
- * - UltraDefrag cannot defragment volumes containing more
- *   than 4.294.967.295 clusters.
+ *   cannot be defragmented on Windows NT 4.0 and Windows 2000.
  *
  * Never try to run UltraDefrag on NTFS v1.2 formatted volumes
  * under Windows NT 4.0, because this may crash your system.
