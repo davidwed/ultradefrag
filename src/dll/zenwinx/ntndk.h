@@ -91,7 +91,12 @@
 #include <ctype.h>
 
 /* define base types */
-#define ULONG_PTR unsigned long*
+#if defined(_WIN64)
+#define ULONG_PTR unsigned __int64
+#else
+#define ULONG_PTR unsigned long
+#endif
+
 typedef int BOOL;
 typedef const char *PCSZ;
 
@@ -268,9 +273,20 @@ typedef struct _OBJECT_ATTRIBUTES {
 #endif
 
 typedef struct _IO_STATUS_BLOCK {
+    union {
+        NTSTATUS Status;
+        PVOID Pointer;
+    };
+
+    ULONG_PTR Information;
+} IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
+
+#if defined(_WIN64)
+typedef struct _IO_STATUS_BLOCK32 {
     NTSTATUS Status;
     ULONG Information;
-} IO_STATUS_BLOCK, *PIO_STATUS_BLOCK;
+} IO_STATUS_BLOCK32, *PIO_STATUS_BLOCK32;
+#endif
 
 typedef VOID(*PIO_APC_ROUTINE) (
 				PVOID ApcContext,

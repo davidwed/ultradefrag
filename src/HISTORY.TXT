@@ -7,6 +7,9 @@ HISTORY
     - ability to defragment MFT as well as other internal NTFS files
       on Windows XP and Windows Server 2003 was added
     - ability to defragment internal NTFS files on Windows 2000 was added
+    - one huge bug was fixed in the boot time defragmenter, udefrag.dll and
+      zenwinx.dll libraries - they all have had improper definition of the
+      IO_STATUS_BLOCK structure used by many undocumented Windows API
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
     - current time was added to reports
@@ -25,6 +28,7 @@ HISTORY
       to reach higher reliability
     - Developers: winx_get_system_time, winx_get_local_time functions 
       added to zenwinx library
+    - ULONG_PTR wrong definition was replaced by correct one in ntndk.h file
     
     alpha2:
     - ability to resize list of volumes was added to graphical interface

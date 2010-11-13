@@ -164,8 +164,8 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 		f->roffset.QuadPart += size * count;
 		return count;
 	}
-	f->roffset.QuadPart += iosb.Information;
-	return (iosb.Information / size);
+	f->roffset.QuadPart += (size_t)iosb.Information;
+	return ((size_t)iosb.Information / size);
 }
 
 /**
@@ -197,8 +197,8 @@ static size_t __stdcall winx_fwrite_helper(const void *buffer,size_t size,size_t
 		f->woffset.QuadPart += size * count;
 		return count;
 	}
-	f->woffset.QuadPart += iosb.Information;
-	return (iosb.Information / size);
+	f->woffset.QuadPart += (size_t)iosb.Information;
+	return ((size_t)iosb.Information / size);
 }
 
 /**
@@ -304,14 +304,14 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 		Status = NtWaitForSingleObject(f->hFile,FALSE,NULL);
 		if(NT_SUCCESS(Status)) Status = iosb.Status;
 	}
-	if(!NT_SUCCESS(Status)/* || Status == STATUS_PENDING*/){
+	if(!NT_SUCCESS(Status)){
 		if(description)
 			DebugPrintEx(Status,"winx_ioctl: %s failed",description);
 		else
 			DebugPrintEx(Status,"winx_ioctl: IOCTL %u failed",code);
 		return (-1);
 	}
-	if(pbytes_returned) *pbytes_returned = iosb.Information;
+	if(pbytes_returned) *pbytes_returned = (int)iosb.Information;
 	return 0;
 }
 
