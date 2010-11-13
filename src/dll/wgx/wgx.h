@@ -30,6 +30,7 @@
 
 /* definitions missing on several development systems */
 #ifndef USE_WINDDK
+
 #ifndef SetWindowLongPtr
 #define SetWindowLongPtr SetWindowLong
 #endif
@@ -39,11 +40,14 @@
 #ifndef SetWindowLongPtrW
 #define SetWindowLongPtrW SetWindowLongW
 #endif
+
 #define LONG_PTR LONG
+
 #ifndef GWLP_WNDPROC
 #define GWLP_WNDPROC GWL_WNDPROC
 #endif
-#endif
+
+#endif /* !USE_WINDDK */
 
 #ifdef USE_MSVC
 #define DWORD_PTR DWORD

@@ -385,7 +385,7 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 		return (-1);
 	}
 	
-	/* TODO: move the file */
+	/* move the file */
 	result = move_file_blocks_helper(hFile,f,first_block,n_blocks,target,jp,fVolume);
 	/* don't set UD_FILE_MOVING_FAILED here */
 	NtCloseSafe(hFile);
