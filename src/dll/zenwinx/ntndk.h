@@ -829,8 +829,9 @@ typedef enum _EVENT_TYPE {
 #endif
 
 /*
-* DriveMap member must be declared as unsigned int and alignment must be 1 
-* because without that it don't works on Windows XP x64 !!!
+* DriveMap member must be declared as unsigned int
+* and alignment must be equal to 1, otherwise it fails
+* on Windows XP x64.
 */
 #pragma pack(push,1)
 typedef struct _PROCESS_DEVICEMAP_INFORMATION
