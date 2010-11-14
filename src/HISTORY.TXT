@@ -13,6 +13,7 @@ HISTORY
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
     - current time was added to reports
+    - icon to Explorer context menu handler added
     - the following translations were added:
 
       Galician

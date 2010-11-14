@@ -165,6 +165,7 @@ Var AtLeastXP
 
   ${If} $AtLeastXP == "1"
     WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+    WriteRegStr HKCR "Drive\shell\udefrag" "Icon" "$INSTDIR\ultradefrag.exe"
     ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
     ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
     WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
@@ -173,9 +174,11 @@ Var AtLeastXP
   ${EndIf}
 
   WriteRegStr HKCR "Folder\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "Folder\shell\udefrag" "Icon" "$INSTDIR\ultradefrag.exe"
   WriteRegStr HKCR "Folder\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
 
   WriteRegStr HKCR "*\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
+  WriteRegStr HKCR "*\shell\udefrag" "Icon" "$INSTDIR\ultradefrag.exe"
   WriteRegStr HKCR "*\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
 
 !macroend
