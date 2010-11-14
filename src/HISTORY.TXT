@@ -9,7 +9,7 @@ HISTORY
     - ability to defragment internal NTFS files on Windows 2000 was added
     - one huge bug was fixed in the boot time defragmenter, udefrag.dll and
       zenwinx.dll libraries - they all have had improper definition of the
-      IO_STATUS_BLOCK structure used by many undocumented Windows API
+      IO_STATUS_BLOCK structure used by many undocumented Windows API functions
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
     - current time was added to reports
@@ -19,7 +19,8 @@ HISTORY
 
     - the following translations were updated:
 
-      Italian, Norwegian, Portuguese, Spanish(ES), French(FR), Dutch, Czech
+      Italian, Norwegian, Portuguese, Spanish(ES), French(FR), Dutch, Czech,
+      Vietnamese(VI)
 
     - dry_run parameter added to GUI options as well as UD_DRY_RUN environment
       variable support added to the driver to be able to quickly test algorithms
