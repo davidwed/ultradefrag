@@ -21,7 +21,7 @@ HISTORY
     - the following translations were updated:
 
       Italian, Norwegian, Portuguese, Spanish(ES), French(FR), Dutch, Czech,
-      Vietnamese(VI)
+      Vietnamese(VI), Spanish(AR)
 
     - dry_run parameter added to GUI options as well as UD_DRY_RUN environment
       variable support added to the driver to be able to quickly test algorithms
