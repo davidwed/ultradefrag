@@ -3,3 +3,7 @@ Defragmenting Files
 
 Master File Table
     http://msdn.microsoft.com/en-us/library/aa365230(VS.85).aspx
+
+Improvements in Windows 7
+    http://blogs.msdn.com/b/e7/archive/2009/01/25/disk-defragmentation-background-and-engineering-the-windows-7-improvements.aspx
+
