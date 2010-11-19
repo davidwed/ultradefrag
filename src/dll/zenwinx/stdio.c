@@ -156,11 +156,8 @@ int __cdecl winx_printf(const char *format, ...)
  * @return If any key was pressed, the return value is
  * the ascii character or zero for the control keys.
  * Negative value indicates failure.
- * @note
- * - If an INFINITE time constant is passed, the
- *   time-out interval never elapses.
- * - This call may terminate the program if NtCancelIoFile() 
- *   fails for one of the existing keyboard devices.
+ * @note If an INFINITE time constant is passed, 
+ * the time-out interval never elapses.
  */
 int __cdecl winx_kbhit(int msec)
 {
@@ -176,11 +173,8 @@ int __cdecl winx_kbhit(int msec)
  * @return If any key was pressed, the return value is
  * the ascii character or zero for the control keys.
  * Negative value indicates failure.
- * @note
- * - If an INFINITE time constant is passed, the
- *   time-out interval never elapses.
- * - This call may terminate the program if NtCancelIoFile() 
- *   fails for one of the existing keyboard devices.
+ * @note If an INFINITE time constant is passed, 
+ * the time-out interval never elapses.
  */
 int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
 {
@@ -202,11 +196,8 @@ int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
  * @param[in] msec the time interval, in milliseconds.
  * @return If the 'Break' key was pressed, the return value is zero.
  * Otherwise it returns negative value.
- * @note
- * - If an INFINITE time constant is passed, the
- *   time-out interval never elapses.
- * - This call may terminate the program if NtCancelIoFile() 
- *   fails for one of the existing keyboard devices.
+ * @note If an INFINITE time constant is passed, 
+ * the time-out interval never elapses.
  */
 int __cdecl winx_breakhit(int msec)
 {
@@ -224,8 +215,6 @@ int __cdecl winx_breakhit(int msec)
 
 /**
  * @brief getch() native equivalent.
- * @note This call may terminate the program if NtCancelIoFile() 
- * fails for one of the existing keyboard devices.
  */
 int __cdecl winx_getch(void)
 {
@@ -241,8 +230,6 @@ int __cdecl winx_getch(void)
 
 /**
  * @brief getche() native equivalent.
- * @note This call may terminate the program if NtCancelIoFile() 
- * fails for one of the existing keyboard devices.
  * @bug Does not recognize special characters such as 'backspace'.
  */
 int __cdecl winx_getche(void)
@@ -262,8 +249,6 @@ int __cdecl winx_getche(void)
  * @param[in] n the maximum number of characters to read.
  * @return Number of characters read including terminal zero.
  * Negative value indicates failure.
- * @note This call may terminate the program if NtCancelIoFile() 
- * fails for one of the existing keyboard devices.
  */
 int __cdecl winx_gets(char *string,int n)
 {
@@ -360,8 +345,6 @@ static void winx_add_history_entry(winx_history *h,char *string)
  * - The sentence above works fine only when user input
  * stands in a single line of the screen.
  * - Recognizes arrow keys to walk through commands history.
- * - This call may terminate the program if NtCancelIoFile() 
- * fails for one of the existing keyboard devices.
  */
 int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 {
