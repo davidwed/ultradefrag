@@ -168,7 +168,11 @@ Var AtLeastXP
   
 ; the following line could already be used for the drive handler
 ;  StrCpy $0 "$\"$SYSDIR\udefrag.exe$\" $\"%1$\""
-  StrCpy $0 "$\"$SYSDIR\udctxhandler.cmd$\" $\"%1$\""
+  ${If} ${AtLeastWinVista}
+    StrCpy $0 "cscript.exe $\"$SYSDIR\udctxhandler.vbs$\" $\"%1$\""
+  ${Else}
+    StrCpy $0 "$\"$SYSDIR\udctxhandler.cmd$\" $\"%1$\""
+  ${EndIf}
   StrCpy $1 "$INSTDIR\ultradefrag.exe"
   StrCpy $2 "[--- &Ultra Defragmenter ---]"
 
@@ -365,9 +369,9 @@ Var AtLeastXP
 
   DetailPrint "Deregister boot time defragmenter..."
   ${Unless} ${Silent}
-  ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
+    ExecWait '"$SYSDIR\bootexctrl.exe" /u defrag_native'
   ${Else}
-  ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
+    ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
   ${EndUnless}
   Delete "$WINDIR\pending-boot-off"
 
@@ -382,6 +386,7 @@ Var AtLeastXP
   Delete "$SYSDIR\ud-boot-time.cmd"
   Delete "$SYSDIR\ud-help.cmd"
   Delete "$SYSDIR\udctxhandler.cmd"
+  Delete "$SYSDIR\udctxhandler.vbs"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\hibernate4win.exe"
@@ -458,15 +463,15 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
-!define CheckWinVersion "!insertmacro CheckWinVersion"
-!define ShowBootSplash "!insertmacro ShowBootSplash"
-!define SetContextMenuHandler "!insertmacro SetContextMenuHandler"
-!define RemoveObsoleteFiles "!insertmacro RemoveObsoleteFiles"
-!define InstallConfigFiles "!insertmacro InstallConfigFiles"
-!define RegisterFileExtensions "!insertmacro RegisterFileExtensions"
+!define CheckWinVersion           "!insertmacro CheckWinVersion"
+!define ShowBootSplash            "!insertmacro ShowBootSplash"
+!define SetContextMenuHandler     "!insertmacro SetContextMenuHandler"
+!define RemoveObsoleteFiles       "!insertmacro RemoveObsoleteFiles"
+!define InstallConfigFiles        "!insertmacro InstallConfigFiles"
+!define RegisterFileExtensions    "!insertmacro RegisterFileExtensions"
 !define InstallNativeDefragmenter "!insertmacro InstallNativeDefragmenter"
-!define UninstallTheProgram "!insertmacro UninstallTheProgram"
-!define WriteTheUninstaller "!insertmacro WriteTheUninstaller"
-!define UpdateUninstallSizeValue "!insertmacro UpdateUninstallSizeValue"
+!define UninstallTheProgram       "!insertmacro UninstallTheProgram"
+!define WriteTheUninstaller       "!insertmacro WriteTheUninstaller"
+!define UpdateUninstallSizeValue  "!insertmacro UpdateUninstallSizeValue"
 
 !endif /* _ULTRA_DEFRAG_NSH_ */

@@ -169,6 +169,9 @@ Section "Ultra Defrag core files (required)" SecCore
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\ud-help.cmd"
   File "${ROOTDIR}\src\installer\udctxhandler.cmd"
+  ${If} ${AtLeastWinVista}
+    File "${ROOTDIR}\src\installer\udctxhandler.vbs"
+  ${EndIf}
   File "udefrag.dll"
   File "udefrag.exe"
   File "zenwinx.dll"
