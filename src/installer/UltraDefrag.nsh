@@ -26,12 +26,11 @@
 
 /*
 * 1. ${DisableX64FSRedirection} is required before
-*    all macro except of CheckWinVersion,
-*    SetContextMenuHandler, UninstallTheProgram.
-* 2. The most macro requires $INSTDIR variable
+*    all macros except CheckWinVersion and UninstallTheProgram.
+* 2. Most macros require the $INSTDIR variable
 *    to be set and plugins directory to be initialized.
 *    It is safe to do both initialization actions
-*    in .onInit function.
+*    in the .onInit function.
 */
 
 Var AtLeastXP
@@ -163,23 +162,35 @@ Var AtLeastXP
 
 !macro SetContextMenuHandler
 
+  push $0
+  push $1
+  push $2
+  
+; the following line could already be used for the drive handler
+;  StrCpy $0 "$\"$SYSDIR\udefrag.exe$\" $\"%1$\""
+  StrCpy $0 "$\"$SYSDIR\udctxhandler.cmd$\" $\"%1$\""
+  StrCpy $1 "$INSTDIR\ultradefrag.exe"
+  StrCpy $2 "[--- &Ultra Defragmenter ---]"
+
   ${If} $AtLeastXP == "1"
-    WriteRegStr HKCR "Drive\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-    WriteRegStr HKCR "Drive\shell\udefrag" "Icon" "$INSTDIR\ultradefrag.exe"
-    ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-    ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
-    WriteRegStr HKCR "Drive\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
+    WriteRegStr HKCR "Drive\shell\udefrag"         ""     $2
+    WriteRegStr HKCR "Drive\shell\udefrag"         "Icon" $1
+    WriteRegStr HKCR "Drive\shell\udefrag\command" ""     $0
   ${Else}
     DeleteRegKey HKCR "Drive\shell\udefrag"
   ${EndIf}
 
-  WriteRegStr HKCR "Folder\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  WriteRegStr HKCR "Folder\shell\udefrag" "Icon" "$INSTDIR\ultradefrag.exe"
-  WriteRegStr HKCR "Folder\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
+  WriteRegStr HKCR "Folder\shell\udefrag"         ""     $2
+  WriteRegStr HKCR "Folder\shell\udefrag"         "Icon" $1
+  WriteRegStr HKCR "Folder\shell\udefrag\command" ""     $0
 
-  WriteRegStr HKCR "*\shell\udefrag" "" "[--- &Ultra Defragmenter ---]"
-  WriteRegStr HKCR "*\shell\udefrag" "Icon" "$INSTDIR\ultradefrag.exe"
-  WriteRegStr HKCR "*\shell\udefrag\command" "" "udctxhandler.cmd $\"%1$\""
+  WriteRegStr HKCR "*\shell\udefrag"         ""     $2
+  WriteRegStr HKCR "*\shell\udefrag"         "Icon" $1
+  WriteRegStr HKCR "*\shell\udefrag\command" ""     $0
+  
+  pop $2
+  pop $1
+  pop $0
 
 !macroend
 

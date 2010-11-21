@@ -209,7 +209,9 @@ SectionEnd
 
 Section "Context menu handler" SecContextMenuHandler
 
+  ${DisableX64FSRedirection}
   ${SetContextMenuHandler}
+  ${EnableX64FSRedirection}
   
 SectionEnd
 
