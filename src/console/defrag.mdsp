@@ -88,10 +88,12 @@ extraResourceOptions=
 6=..\dll\wgx\web-analytics.c
 7=..\dll\wgx\dbg.c
 [Header]
+1=udefrag.h
 [Resource]
 1=defrag.rc
 [Other]
 [History]
-defrag.c,2906
-map.c,5670
-options.c,17074
+map.c,2116
+defrag.c,8168
+udefrag.h,1360
+options.c,16296
