@@ -69,7 +69,7 @@ int defragment(udefrag_job_parameters *jp)
 	
 	/* check for %UD_DRY_RUN% existence */
 	if(winx_query_env_variable(L"UD_DRY_RUN",env_buffer,sizeof(env_buffer)/sizeof(short)) >= 0){
-		DebugPrint("%UD_DRY_RUN% environment variable exists,\n");
+		DebugPrint("%%UD_DRY_RUN%% environment variable exists,\n");
 		DebugPrint("therefore no actual data moves will be performed on disk\n");
 		dry_run = 1;
 	} else {
