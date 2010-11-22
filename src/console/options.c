@@ -224,6 +224,7 @@ void parse_cmdline(int argc, char **argv)
 	int rows = 0, symbols_per_line = 0;
 	int letter_index;
 	char ch;
+	int length;
 	
 	memset(&letters,0,sizeof(letters));
 	letter_index = 0;
@@ -366,7 +367,8 @@ void parse_cmdline(int argc, char **argv)
 		dbg_print("non-option ARGV-elements: ");
 		while(optind < argc){
 			dbg_print("%s ", argv[optind]);
-			if(strlen(argv[optind]) == 2){
+			length = strlen(argv[optind]);
+			if(length == 2){
 				if(argv[optind][1] == ':'){
 					ch = argv[optind][0];
 					if(letter_index > (MAX_DOS_DRIVES - 1)){
@@ -407,15 +409,44 @@ wchar_t full_path[MAX_LONG_PATH + 1];
 */
 void search_for_paths(void)
 {
-	wchar_t *cmdline;
+	wchar_t *cmdline, *cmdline_copy;
 	wchar_t **xargv;
-	int i, xargc;
+	int i, j, xargc;
+	int length;
 	DWORD result;
 	HMODULE hKernel32Dll = NULL;
 	GET_LONG_PATH_NAME_W_PROC pGetLongPathNameW = NULL;
 	
 	cmdline = GetCommandLineW();
-	xargv = CommandLineToArgvW(cmdline,&xargc);
+	
+	/*
+	* CommandLineToArgvW has one documented bug -
+	* it doesn't accept backslash + quotation mark sequence.
+	* So, we're adding a dot after each trailing backslash
+	* in quoted paths. This dot will be removed by GetFullPathName.
+	*/
+	cmdline_copy = malloc(wcslen(cmdline) * sizeof(short) * 2 + sizeof(short));
+	if(cmdline_copy == NULL){
+		display_error("search_for_paths: not enough memory!");
+		return;
+	}
+	length = wcslen(cmdline);
+	for(i = 0, j = 0; i < length; i++){
+		cmdline_copy[j] = cmdline[i];
+		j ++;
+		if(cmdline[i] == '\\' && i != (length - 1)){
+			if(cmdline[i + 1] == '"'){
+				/* trailing backslash in a quoted path detected */
+				cmdline_copy[j] = '.';
+				j ++;
+			}
+		}
+	}
+	cmdline_copy[j] = 0;
+	printf("command line copy: %ls\n",cmdline_copy);
+	
+	xargv = CommandLineToArgvW(cmdline_copy,&xargc);
+	free(cmdline_copy);
 	if(xargv == NULL){
 		display_last_error("CommandLineToArgvW failed!");
 		return;
