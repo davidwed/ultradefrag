@@ -424,6 +424,7 @@ void search_for_paths(void)
 	* it doesn't accept backslash + quotation mark sequence.
 	* So, we're adding a dot after each trailing backslash
 	* in quoted paths. This dot will be removed by GetFullPathName.
+	* http://msdn.microsoft.com/en-us/library/bb776391%28VS.85%29.aspx
 	*/
 	cmdline_copy = malloc(wcslen(cmdline) * sizeof(short) * 2 + sizeof(short));
 	if(cmdline_copy == NULL){
