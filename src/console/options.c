@@ -443,7 +443,7 @@ void search_for_paths(void)
 		}
 	}
 	cmdline_copy[j] = 0;
-	printf("command line copy: %ls\n",cmdline_copy);
+	//printf("command line copy: %ls\n",cmdline_copy);
 	
 	xargv = CommandLineToArgvW(cmdline_copy,&xargc);
 	free(cmdline_copy);
