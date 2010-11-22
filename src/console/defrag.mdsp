@@ -86,13 +86,12 @@ extraResourceOptions=
 4=options.c
 5=map.c
 6=..\dll\wgx\web-analytics.c
+7=..\dll\wgx\dbg.c
 [Header]
 [Resource]
 1=defrag.rc
 [Other]
 [History]
-map.c,1903
-options.c,12847
-..\include\udefrag.h,1442
-..\include\getopt.h,0
-defrag.c,7284
+defrag.c,2906
+map.c,5670
+options.c,17074

@@ -78,6 +78,10 @@
  * <dt>--wait</dt>
  * <dd>Wait until already running instance of UltraDefrag completes before 
  * starting the job (useful for the scheduled defragmentation).</dd>
+ * <dt>--shellex</dt>
+ * <dd>This option forces to list objects to be processed and display a prompt 
+ * to hit any key after a job completion. It is intended for use 
+ * in Explorer's context menu handler.</dd>
  * </dl>
  *
  * Volume letter:

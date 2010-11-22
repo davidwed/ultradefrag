@@ -21,21 +21,7 @@
 * UltraDefrag console interface.
 */
 
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <process.h>
-#include <conio.h>
-
-#ifdef USE_MSVC
-#define DWORD_PTR DWORD
-#endif
-
-#include "../include/udefrag.h"
-#include "../include/ultradfgver.h"
-
-#define settextcolor(c) (void)SetConsoleTextAttribute(hStdOut,c)
+#include "udefrag.h"
 
 /* global variables */
 HANDLE hSynchEvent = NULL;
@@ -51,28 +37,20 @@ int obsolete_option = 0;
 int screensaver_mode = 0;
 int all_flag = 0;
 int all_fixed_flag = 0;
+object_path *paths = NULL;
 char letters[MAX_DOS_DRIVES] = {0};
 int wait_flag = 0;
+int shellex_flag = 0;
 
 int first_progress_update;
 int stop_flag = 0;
 
-extern int map_rows;
-extern int map_symbols_per_line;
-extern int map_completed;
-
-/* prototypes */
-void parse_cmdline(int argc, char **argv);
-void show_help(void);
-void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
-int AllocateClusterMap(void);
-void InitializeMapDisplay(char volume_letter);
-void RedrawMap(udefrag_progress_info *pi);
-void FreeClusterMap(void);
+#define MAX_ENV_VARIABLE_LENGTH 32766
+wchar_t in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
+wchar_t new_in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
+wchar_t aux_buffer[MAX_ENV_VARIABLE_LENGTH + 1];
 
 /* forward declarations */
-void display_error(char *string);
-void display_last_error(char *caption);
 static void update_web_statistics(void);
 static int show_vollist(void);
 static int process_volumes(void);
@@ -271,7 +249,7 @@ void test(void)
  */
 int __cdecl main(int argc, char **argv)
 {
-	int result;
+	int result, pause_result;
 	
 	/*test();
 	getch();
@@ -312,12 +290,30 @@ int __cdecl main(int argc, char **argv)
 	
 	/* uncomment for the --wait option testing */
 	//printf("the job gets running\n");
-	//getch();
+	//_getch();
 	result = process_volumes();
 	
 	end_synchronization();
 	
 	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+	
+	/* display prompt to hit any key in case of context menu handler */
+	if(shellex_flag){
+		if(!b_flag) settextcolor(default_color);
+		printf("\n");
+		pause_result = system("pause");
+		if(pause_result > 0){
+			/* command not found */
+			printf("\n");
+		}
+		if(pause_result != 0){
+			/* command or a command interpreter itself not found */
+			printf("Hit any key to continue...");
+			_getch();
+		}
+	}
+
+	destroy_paths();
 	terminate_console(result);
 	return 0;
 }
@@ -475,10 +471,109 @@ static int process_single_volume(char volume_letter)
  */
 static int process_volumes(void)
 {
+	object_path *path, *another_path;
+	int single_path = 0;
 	volume_info *v;
 	int i, result = 0;
+	char letter;
+	int n, path_found;
+	int first_path = 1;
 	
-	/* process volumes specified on the command line */
+	/* 1. process paths specified on the command line */
+	/* skip invalid paths */
+	for(path = paths; path; path = path->next){
+		if(wcslen(path->path) < 2){
+			printf("incomplete path detected: %ls\n",path->path);
+			path->processed = 1;
+		}
+		if(path->path[1] != ':'){
+			printf("incomplete path detected: %ls\n",path->path);
+			path->processed = 1;
+		}
+		if(path->next == paths) break;
+	}
+	/* process valid paths */
+	for(path = paths; path; path = path->next){
+		if(path->processed == 0){
+			if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+			if(first_path)
+				printf("%ls\n",path->path);
+			else
+				printf("\n%ls\n",path->path);
+			if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+			first_path = 0;
+			path->processed = 1;
+			path_found = 1;
+			
+			/* extract drive letter */
+			letter = (char)path->path[0];
+			
+			/* save %UD_IN_FILTER% */
+			in_filter[0] = 0;
+			if(!GetEnvironmentVariableW(L"UD_IN_FILTER",in_filter,MAX_ENV_VARIABLE_LENGTH + 1)){
+				if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+					display_last_error("process_volumes: cannot get %UD_IN_FILTER%!");
+			}
+			
+			/* save the current path to %UD_IN_FILTER% */
+			n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls",path->path);
+			if(n < 0){
+				display_error("process_volumes: cannot set %UD_IN_FILTER% - path is too long!");
+				wcscpy(new_in_filter,in_filter);
+				path_found = 0;
+			} else {
+				new_in_filter[MAX_ENV_VARIABLE_LENGTH] = 0;
+			}
+			
+			/* search for another paths with the same drive letter */
+			for(another_path = path->next; another_path; another_path = another_path->next){
+				if(another_path == paths) break;
+				if(letter == (char)another_path->path[0]){
+					/* try to append it to %UD_IN_FILTER% */
+					n = _snwprintf(aux_buffer,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls;%ls",new_in_filter,another_path->path);
+					if(n >= 0){
+						aux_buffer[MAX_ENV_VARIABLE_LENGTH] = 0;
+						wcscpy(new_in_filter,aux_buffer);
+						path_found = 1;
+						if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+						printf("%ls\n",another_path->path);
+						if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+						another_path->processed = 1;
+					}
+				}
+			}
+			
+			/* set %UD_IN_FILTER% */
+			if(stop_flag) return 0;
+			if(!SetEnvironmentVariableW(L"UD_IN_FILTER",new_in_filter)){
+				display_last_error("process_volumes: cannot set %UD_IN_FILTER%!");
+			}
+			
+			/* run the job */
+			if(path_found)
+				result = process_single_volume(letter);
+			
+			/* restore %UD_IN_FILTER% */
+			if(!SetEnvironmentVariableW(L"UD_IN_FILTER",in_filter)){
+				display_last_error("process_volumes: cannot restore %UD_IN_FILTER%!");
+			}
+		}
+		if(path->next == paths) break;
+	}
+	
+	/* if the job was stopped return success */
+	if(stop_flag)
+		return 0;
+	
+	/* in case of a single path processing return result */
+	if(paths){
+		if(paths->next == paths)
+			single_path = 1;
+	}
+	if(single_path && letters[0] == 0 && !all_flag && !all_fixed_flag)
+		return result;
+	
+	/* 2. process individual volumes specified on the command line */
 	for(i = 0; i < MAX_DOS_DRIVES; i++){
 		if(letters[i] == 0) break;
 		if(stop_flag) return 0;
@@ -494,7 +589,7 @@ static int process_volumes(void)
 	if(letters[1] == 0 && !all_flag && !all_fixed_flag)
 		return result;
 	
-	/* handle --all and --all-fixed options */
+	/* 3. handle --all and --all-fixed options */
 	if(all_flag || all_fixed_flag){
 		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
 		if(v == NULL)

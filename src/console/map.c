@@ -21,15 +21,7 @@
 * UltraDefrag console interface - cluster map drawing code.
 */
 
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "../include/udefrag.h"
-#include "../include/ultradfgver.h"
-
-#define settextcolor(c) (void)SetConsoleTextAttribute(hStdOut,c)
+#include "udefrag.h"
 
 #define BLOCKS_PER_HLINE  68//60//79
 #define BLOCKS_PER_VLINE  10//8//16
@@ -62,19 +54,7 @@ char map_symbol = MAP_SYMBOL;
 int map_rows = BLOCKS_PER_VLINE;
 int map_symbols_per_line = BLOCKS_PER_HLINE;
 int use_entire_window = 0;
-
 int map_completed = 0;
-
-extern HANDLE hStdOut;
-extern WORD default_color;
-extern int b_flag;
-extern int m_flag;
-extern int v_flag;
-
-/* prototypes */
-void display_error(char *string);
-void display_last_error(char *caption);
-void clear_line(FILE *f);
 
 /**
  * @brief Adjusts map dimensions to fill the entire screen.

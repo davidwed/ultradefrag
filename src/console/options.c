@@ -21,42 +21,16 @@
 * UltraDefrag console interface - command line parsing code.
 */
 
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-
-#include "../include/udefrag.h"
-#include "../include/ultradfgver.h"
-
+#include "udefrag.h"
 #include "../include/getopt.h"
 
-extern int a_flag;
-extern int o_flag;
-extern int b_flag;
-extern int h_flag;
-extern int l_flag;
-extern int la_flag;
-extern int p_flag;
-extern int v_flag;
-extern int m_flag;
-extern int obsolete_option;
+/* forward declarations */
+void search_for_paths(void);
 
-extern short map_border_color;
-extern char map_symbol;
-extern int map_rows;
-extern int map_symbols_per_line;
-
-extern int screensaver_mode;
-
-extern int all_flag;
-extern int all_fixed_flag;
-extern char letters[MAX_DOS_DRIVES];
-
-extern int wait_flag;
-
-extern int use_entire_window;
-void CalculateClusterMapDimensions(void);
+int __cdecl printf_stub(const char *format,...)
+{
+	return 0;
+}
 
 void show_help(void)
 {
@@ -131,6 +105,11 @@ void show_help(void)
 		"                                      of udefrag.exe tool completes before\n"
 		"                                      starting the job (useful for\n"
 		"                                      the scheduled defragmentation).\n"
+		"       --shellex                      This option forces to list objects\n"
+		"                                      to be processed and display a prompt\n"
+		"                                      to hit any key after a job completion.\n"
+		"                                      It is intended for use in Explorer\'s\n"
+		"                                      context menu handler.\n"
 		"\n"
 		"Volume letter:\n"
 		"  It is possible to specify multiple volume letters, like this:\n\n"
@@ -227,6 +206,7 @@ static struct option long_options_[] = {
 	* Miscellaneous options.
 	*/
 	{ "wait",                        no_argument,       0,  0  },
+	{ "shellex",                     no_argument,       0,  0  },
 	
 	{ 0,                             0,                 0,  0  }
 };
@@ -314,6 +294,9 @@ void parse_cmdline(int argc, char **argv)
 			else if(!strcmp(long_option_name,"wait")){
 				wait_flag = 1;
 			}
+			else if(!strcmp(long_option_name,"shellex")){
+				shellex_flag = 1;
+			}
 			else if(!strcmp(long_option_name,"use-entire-window")){
 				use_entire_window = 1;
 			}
@@ -376,12 +359,14 @@ void parse_cmdline(int argc, char **argv)
 		}
 	}
 	
-	if(optind < argc){ /* scan for volume letters */
-		//printf("non-option ARGV-elements: ");
+	dbg_print("command line: %ls\n",GetCommandLineW());
+	
+	/* scan for individual volume letters */
+	if(optind < argc){
+		dbg_print("non-option ARGV-elements: ");
 		while(optind < argc){
-			//printf("%s ", argv[optind]);
-			if(argv[optind][0]){
-				/* next check supports UltraDefrag context menu handler */
+			dbg_print("%s ", argv[optind]);
+			if(strlen(argv[optind]) == 2){
 				if(argv[optind][1] == ':'){
 					ch = argv[optind][0];
 					if(letter_index > (MAX_DOS_DRIVES - 1)){
@@ -393,15 +378,143 @@ void parse_cmdline(int argc, char **argv)
 				}
 			}
 			optind++;
+			if(optind < argc)
+				dbg_print("; ");
 		}
-		//printf("\n");
+		dbg_print("\n");
 	}
 	
+	/* scan for paths of objects to be processed */
+	search_for_paths();
+
 	/* --all-fixed flag has more precedence */
 	if(all_fixed_flag) all_flag = 0;
 	
-	if(!l_flag && !all_flag && !all_fixed_flag && !letters[0]) h_flag = 1;
+	if(!l_flag && !all_flag && !all_fixed_flag && !letters[0] && !paths) h_flag = 1;
 	
 	/* calculate map dimensions if --use-entire-window flag is set */
 	if(use_entire_window) CalculateClusterMapDimensions();
+}
+
+typedef DWORD (WINAPI *GET_LONG_PATH_NAME_W_PROC)(LPCWSTR,LPWSTR,DWORD);
+wchar_t long_path[MAX_LONG_PATH + 1];
+wchar_t full_path[MAX_LONG_PATH + 1];
+
+/*
+* Paths may be either in short or in long format,
+* either ANSI or Unicode, either full or relative.
+* This is not safe to assume something concrete.
+*/
+void search_for_paths(void)
+{
+	wchar_t *cmdline;
+	wchar_t **xargv;
+	int i, xargc;
+	DWORD result;
+	HMODULE hKernel32Dll = NULL;
+	GET_LONG_PATH_NAME_W_PROC pGetLongPathNameW = NULL;
+	
+	cmdline = GetCommandLineW();
+	xargv = CommandLineToArgvW(cmdline,&xargc);
+	if(xargv == NULL){
+		display_last_error("CommandLineToArgvW failed!");
+		return;
+	}
+	
+	hKernel32Dll = LoadLibrary("kernel32.dll");
+	if(hKernel32Dll == NULL){
+		WgxDbgPrintLastError("search_for_paths: cannot load kernel32.dll");
+	} else {
+		pGetLongPathNameW = (GET_LONG_PATH_NAME_W_PROC)GetProcAddress(hKernel32Dll,"GetLongPathNameW");
+		if(pGetLongPathNameW == NULL)
+			WgxDbgPrintLastError("search_for_paths: GetLongPathNameW not found in kernel32.dll");
+	}
+	
+	for(i = 1; i < xargc; i++){
+		if(xargv[i][0] == 0) continue;   /* skip empty strings */
+		if(xargv[i][0] == '-') continue; /* skip options */
+		if(wcslen(xargv[i]) == 2){       /* skip individual volume letters */
+			if(xargv[i][1] == ':')
+				continue;
+		}
+		//printf("path detected: arg[%i] = %ls\n",i,xargv[i]);
+		/* convert path to the long file name format (on w2k+) */
+		if(pGetLongPathNameW){
+			result = pGetLongPathNameW(xargv[i],long_path,MAX_LONG_PATH + 1);
+			if(result == 0){
+				WgxDbgPrintLastError("search_for_paths: GetLongPathNameW failed");
+				goto use_short_path;
+			} else if(result > MAX_LONG_PATH + 1){
+				printf("search_for_paths: long path of \'%ls\' is too long!",xargv[i]);
+				goto use_short_path;
+			}
+		} else {
+use_short_path:
+			wcsncpy(long_path,xargv[i],MAX_LONG_PATH);
+		}
+		long_path[MAX_LONG_PATH] = 0;
+		/* convert path to the full path */
+		result = GetFullPathNameW(long_path,MAX_LONG_PATH + 1,full_path,NULL);
+		if(result == 0){
+			WgxDbgPrintLastError("search_for_paths: GetFullPathNameW failed");
+			wcscpy(full_path,long_path);
+		} else if(result > MAX_LONG_PATH + 1){
+			printf("search_for_paths: full path of \'%ls\' is too long!",long_path);
+			wcscpy(full_path,long_path);
+		}
+		full_path[MAX_LONG_PATH] = 0;
+		/* add path to the list */
+		insert_path(full_path);
+	}
+	
+	GlobalFree(xargv);
+}
+
+int insert_path(wchar_t *path)
+{
+	object_path *new_item, *last_item;
+	
+	if(path == NULL)
+		return (-1);
+	
+	new_item = malloc(sizeof(object_path));
+	if(new_item == NULL){
+		display_error("insert_path: not enough memory!");
+		return (-1);
+	}
+	
+	if(paths == NULL){
+		paths = new_item;
+		new_item->prev = new_item->next = new_item;
+		goto done;
+	}
+	
+	last_item = paths->prev;
+	last_item->next = new_item;
+	new_item->prev = last_item;
+	new_item->next = paths;
+	paths->prev = new_item;
+	
+done:
+	new_item->processed = 0;
+	wcsncpy(new_item->path,path,MAX_LONG_PATH);
+	new_item->path[MAX_LONG_PATH] = 0;
+	return 0;
+}
+
+void destroy_paths(void)
+{
+	object_path *item, *next, *head;
+	
+	if(paths == NULL)
+		return;
+	
+	item = head = paths;
+	do {
+		next = item->next;
+		free(item);
+		item = next;
+	} while (next != head);
+	
+	paths = NULL;
 }

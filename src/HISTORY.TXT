@@ -13,6 +13,12 @@ HISTORY
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
     - current time was added to reports
+    - ability to specify not only drive letters but also paths of files
+      and folders added to the command line interface
+    - Explorer context menu handler reimplemented to be more reliable
+      (batch script used before caused sometimes an environment 
+      desynchronization due to the start of udefrag command with elevated
+      privileges on Vista and Windows 7)
     - icon to Explorer context menu handler added
     - the following translations were added:
 

@@ -166,13 +166,7 @@ Var AtLeastXP
   push $1
   push $2
   
-; the following line could already be used for the drive handler
-;  StrCpy $0 "$\"$SYSDIR\udefrag.exe$\" $\"%1$\""
-  ${If} ${AtLeastWinVista}
-    StrCpy $0 "cscript.exe $\"$SYSDIR\udctxhandler.vbs$\" $\"%1$\""
-  ${Else}
-    StrCpy $0 "$\"$SYSDIR\udctxhandler.cmd$\" $\"%1$\""
-  ${EndIf}
+  StrCpy $0 "$\"$SYSDIR\udefrag.exe$\" --shellex $\"%1$\""
   StrCpy $1 "$INSTDIR\ultradefrag.exe"
   StrCpy $2 "[--- &Ultra Defragmenter ---]"
 
@@ -275,6 +269,8 @@ Var AtLeastXP
   Delete "$SYSDIR\lua5.1a.dll"
   Delete "$SYSDIR\lua5.1a.exe"
   Delete "$SYSDIR\lua5.1a_gui.exe"
+  Delete "$SYSDIR\udctxhandler.cmd"
+  Delete "$SYSDIR\udctxhandler.vbs"
 
   RMDir /r "$INSTDIR\doc"
   RMDir /r "$INSTDIR\presets"
@@ -385,8 +381,6 @@ Var AtLeastXP
   Delete "$SYSDIR\boot-on.cmd"
   Delete "$SYSDIR\ud-boot-time.cmd"
   Delete "$SYSDIR\ud-help.cmd"
-  Delete "$SYSDIR\udctxhandler.cmd"
-  Delete "$SYSDIR\udctxhandler.vbs"
   Delete "$SYSDIR\bootexctrl.exe"
   Delete "$SYSDIR\defrag_native.exe"
   Delete "$SYSDIR\hibernate4win.exe"
