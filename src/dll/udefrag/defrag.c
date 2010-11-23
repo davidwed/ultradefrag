@@ -61,6 +61,10 @@ int defragment(udefrag_job_parameters *jp)
 	char buffer[32];
 	short env_buffer[32];
 	int result;
+	int win_version;
+	int i;
+	
+	win_version = winx_get_os_version();
 	
 	/* analyze volume */
 	result = analyze(jp);
@@ -114,13 +118,32 @@ int defragment(udefrag_job_parameters *jp)
 			for(f = jp->fragmented_files; f; f = f->next){
 				if(f->f->disp.clusters > length && f->f->disp.clusters <= rgn->length && f->f->disp.blockmap){
 					if(!is_directory(f->f) || jp->actions.allow_dir_defrag){
-						f_largest = f;
-						length = f->f->disp.clusters;
+						if(!is_intended_for_part_defrag(f->f)){
+							f_largest = f;
+							length = f->f->disp.clusters;
+						}
 					}
 				}
 				if(f->next == jp->fragmented_files) break;
 			}
 			if(f_largest == NULL) goto next_rgn;
+			
+			/* skip $mft on XP and W2K3, because the first 16 clusters aren't moveable there */
+			if(is_mft(jp,f->f) && jp->actions.allow_full_mft_defrag == 0 \
+			  && (win_version == 51 || win_version == 52)){
+				/* list MFT parts (for debugging purposes) */
+				for(block = f->f->disp.blockmap, i = 0; block; block = block->next, i++){
+					DebugPrint("mft part #%u start: %I64u, length: %I64u",
+						i,block->lcn,block->length);
+					if(block->next == f->f->disp.blockmap) break;
+				}
+				/* remove the first block from the map */
+				winx_list_remove_item((list_entry **)(void *)&f->f->disp.blockmap,
+					(list_entry *)(void *)f->f->disp.blockmap);
+				/* mark the file as intended for partial defragmentation */
+				f->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
+				continue;
+			}
 			
 			/* move the file */
 			if(move_file(f_largest->f,rgn->lcn,jp,fVolume) >= 0){
@@ -186,9 +209,11 @@ int defragment(udefrag_job_parameters *jp)
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
 				if(f->f->disp.clusters > length && f->f->disp.blockmap && !is_too_large(f->f)){
-					if(!is_directory(f->f) || jp->actions.allow_dir_defrag){
-						f_largest = f;
-						length = f->f->disp.clusters;
+					if(f->f->disp.blockmap->next != f->f->disp.blockmap){ /* must have at least 2 fragments */
+						if(!is_directory(f->f) || jp->actions.allow_dir_defrag){
+							f_largest = f;
+							length = f->f->disp.clusters;
+						}
 					}
 				}
 				if(f->next == jp->fragmented_files) break;
@@ -252,7 +277,8 @@ part_defrag_done:
 		if(jp->termination_router((void *)jp)) goto done;
 		if(f->f->disp.blockmap){
 			if(!is_directory(f->f) || jp->actions.allow_dir_defrag)
-				f->f->user_defined_flags |= UD_FILE_TOO_LARGE;
+				if(!is_intended_for_part_defrag(f->f))
+					f->f->user_defined_flags |= UD_FILE_TOO_LARGE;
 		}
 		if(f->next == jp->fragmented_files) break;
 	}
@@ -285,13 +311,17 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	HANDLE hFile;
 	int result;
 	winx_blockmap *block;
+	int old_color;
 	
+	old_color = get_file_color(jp,f);
+
 	/* open the file */
 	Status = udefrag_fopen(f,&hFile);
 	if(Status != STATUS_SUCCESS){
 		DebugPrintEx(Status,"Cannot open %ws",f->path);
 		/* redraw space */
-		colorize_file_as_system(jp,f);
+		if(old_color != MFT_SPACE)
+			colorize_file_as_system(jp,f);
 		/* file is locked by other application, so its state is unknown */
 		/* don't reset its statistics though! */
 		/*f->disp.clusters = 0;
@@ -318,9 +348,12 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
 	}
 	
+	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
+	if(old_color == MFT_SPACE || is_mft_mirror(jp,f))
+		update_mft_zones_layout(jp);
+	
 	/* redraw target space */
-	colorize_map_region(jp,target,f->disp.clusters,
-			get_file_color(jp,f),FREE_SPACE);
+	colorize_map_region(jp,target,f->disp.clusters,old_color,FREE_SPACE);
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
 			
@@ -330,7 +363,10 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	/* redraw source space; after winx_sub_volume_region()! */
 	if(result >= 0){
 		for(block = f->disp.blockmap; block; block = block->next){
-			redraw_freed_space(jp,block->lcn,block->length,FRAGM_SPACE);
+			if(old_color == MFT_SPACE)
+				redraw_freed_space(jp,block->lcn,block->length,MFT_SPACE);
+			else
+				redraw_freed_space(jp,block->lcn,block->length,FRAGM_SPACE);
 			if(block->next == f->disp.blockmap) break;
 		}
 		if(jp->progress_router)
@@ -359,6 +395,7 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 	NTSTATUS Status;
 	HANDLE hFile;
 	int result;
+	int old_color;
 	
 	length = 0;
 	for(block = first_block, n = 0; block; block = block->next, n++){
@@ -366,12 +403,15 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 		if(block->next == f->disp.blockmap || n == (n_blocks - 1)) break;
 	}
 	
+	old_color = get_file_color(jp,f);
+
 	/* open the file */
 	Status = udefrag_fopen(f,&hFile);
 	if(Status != STATUS_SUCCESS){
 		DebugPrintEx(Status,"Cannot open %ws",f->path);
 		/* redraw space */
-		colorize_file_as_system(jp,f);
+		if(old_color != MFT_SPACE)
+			colorize_file_as_system(jp,f);
 		/* file is locked by other application, so its state is unknown */
 		/* don't reset its statistics though! */
 		/*f->disp.clusters = 0;
@@ -395,9 +435,12 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 		jp->pi.fragments -= n_blocks;
 	}
 	
+	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
+	if(old_color == MFT_SPACE || is_mft_mirror(jp,f))
+		update_mft_zones_layout(jp);
+	
 	/* redraw target space */
-	colorize_map_region(jp,target,length,
-			get_file_color(jp,f),FREE_SPACE);
+	colorize_map_region(jp,target,length,old_color,FREE_SPACE);
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
 			
@@ -407,7 +450,10 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 	/* redraw source space; after winx_sub_volume_region()! */
 	if(result >= 0){
 		for(block = first_block, n = 0; block; block = block->next, n++){
-			redraw_freed_space(jp,block->lcn,block->length,FRAGM_SPACE);
+			if(old_color == MFT_SPACE)
+				redraw_freed_space(jp,block->lcn,block->length,MFT_SPACE);
+			else
+				redraw_freed_space(jp,block->lcn,block->length,FRAGM_SPACE);
 			if(block->next == f->disp.blockmap || n == (n_blocks - 1)) break;
 		}
 		if(jp->progress_router)
@@ -672,7 +718,8 @@ static void redraw_freed_space(udefrag_job_parameters *jp,
 	*/
 	if(jp->fs_type == FS_NTFS){
 		/* mark clusters as temporarily allocated by system  */
-		colorize_map_region(jp,lcn,length,TEMPORARY_SYSTEM_SPACE,old_color);
+		/* or as mft zone immediately since we're not using it */
+		colorize_map_region(jp,lcn,length,TMP_SYSTEM_OR_MFT_ZONE_SPACE,old_color);
 	} else {
 		colorize_map_region(jp,lcn,length,FREE_SPACE,old_color);
 		jp->free_regions = winx_add_volume_region(jp->free_regions,lcn,length);

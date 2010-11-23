@@ -367,6 +367,10 @@ void colorize_map_region(udefrag_job_parameters *jp,
 		colorize_respect_to_mft_zones(jp,lcn,length,FREE_SPACE,old_color,1);
 		return;
 	}
+	if(new_color == TMP_SYSTEM_OR_MFT_ZONE_SPACE){
+		colorize_respect_to_mft_zones(jp,lcn,length,TEMPORARY_SYSTEM_SPACE,old_color,1);
+		return;
+	}
 	
 	/* validate colors */
 	if(new_color < 0 || new_color >= jp->cluster_map.n_colors)
@@ -412,8 +416,9 @@ void colorize_map_region(udefrag_job_parameters *jp,
 
 /**
  * @brief Defines whether the file is $Mft or not.
+ * @return Nonzero value indicates that the file is $Mft.
  */
-static int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
+int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
 {
 	int length;
 	wchar_t mft_name[] = L"$Mft";
@@ -426,8 +431,35 @@ static int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
 	
 	length = wcslen(f->path);
 
-	if(length == 11 && winx_wcsistr(f->name,mft_name))
-		return 1;
+	if(length == 11){
+		if(winx_wcsistr(f->name,mft_name))
+			return 1;
+	}
+	
+	return 0;
+}
+
+/**
+ * @brief Defines whether the file is $Mftmirr or not.
+ * @return Nonzero value indicates that the file is $Mftmirr.
+ */
+int is_mft_mirror(udefrag_job_parameters *jp, winx_file_info *f)
+{
+	int length;
+	wchar_t mft_mirror_name[] = L"$Mftmirr";
+
+	if(jp == NULL || f == NULL)
+		return 0;
+	
+	if(f->path == NULL || f->name == NULL)
+		return 0;
+	
+	length = wcslen(f->path);
+
+	if(length == 15){
+		if(winx_wcsistr(f->name,mft_mirror_name))
+			return 1;
+	}
 	
 	return 0;
 }
@@ -437,20 +469,9 @@ static int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
  */
 int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
 {
-	winx_blockmap *block;
-	int i;
-
 	/* show $MFT file in dark magenta color */
-	if(is_mft(jp,f)){
-		i = 0;
-		for(block = f->disp.blockmap; block; block = block->next){
-			DebugPrint("mft part #%u start: %I64u, length: %I64u",
-				i,block->lcn,block->length);
-			i++;
-			if(block->next == f->disp.blockmap) break;
-		}
+	if(is_mft(jp,f))
 		return MFT_SPACE;
-	}
 
 	/* show excluded files as not fragmented */
 	if(is_fragmented(f) && !is_excluded(f))

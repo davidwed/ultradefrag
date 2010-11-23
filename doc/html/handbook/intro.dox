@@ -74,6 +74,11 @@
  *   defragmented on Windows versions prior to Windows 2000 and
  *   to defragment the $MFT file at least Windows XP is needed, because
  *   the NTFS system driver prevents accessing them.
+ * - The first 16 clusters of MFT cannot be moved on Windows XP and Windows
+ *   Server 2003, this is a file system driver limitation. So, UltraDefrag
+ *   skips $Mft file on these systems, if it contains two fragments only.
+ *   In case of three or more fragments the file will be defragmented
+ *   partially, if possible.
  * - NTFS volumes with a cluster size greater than 4 kilobytes
  *   cannot be defragmented on Windows NT 4.0 and Windows 2000.
  *

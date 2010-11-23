@@ -242,6 +242,76 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Updates mft zones layout.
+ * @note MFT space becomes excluded from the free space list.
+ * Because Windows 2000 disallows to move files there.
+ * And because on other systems this dirty technique 
+ * causes MFT fragmentation.
+ */
+void update_mft_zones_layout(udefrag_job_parameters *jp)
+{
+	winx_volume_information v;
+	ULONGLONG start,length,mirror_size;
+	ULONGLONG mft_length = 0;
+
+	if(jp->fs_type != FS_NTFS)
+		return;
+
+	/* get volume information */
+	memset(&v,0,sizeof(winx_volume_information));
+	if(winx_get_volume_information(jp->volume_letter,&v) < 0)
+		return;
+	
+	/* update information about mft zones */
+	memcpy(&jp->v_info.ntfs_data,&v.ntfs_data,sizeof(NTFS_DATA));
+
+	DebugPrint("updated mft zones layout:\n");
+	DebugPrint("%-12s: %-20s: %-20s", "mft section", "start", "length");
+
+	/* $MFT */
+	start = jp->v_info.ntfs_data.MftStartLcn.QuadPart;
+	if(jp->v_info.ntfs_data.BytesPerCluster)
+		length = jp->v_info.ntfs_data.MftValidDataLength.QuadPart / jp->v_info.ntfs_data.BytesPerCluster;
+	else
+		length = 0;
+	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft", start, length);
+	if(check_region(jp,start,length)){
+		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
+		jp->mft_zones.mft_start = start; jp->mft_zones.mft_end = start + length - 1;
+		mft_length += length;
+	}
+
+	/* MFT Zone */
+	start = jp->v_info.ntfs_data.MftZoneStart.QuadPart;
+	length = jp->v_info.ntfs_data.MftZoneEnd.QuadPart - jp->v_info.ntfs_data.MftZoneStart.QuadPart + 1;
+	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft zone", start, length);
+	if(check_region(jp,start,length)){
+		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
+		jp->mft_zones.mftzone_start = start; jp->mft_zones.mftzone_end = start + length - 1;
+	}
+
+	/* $MFT Mirror */
+	start = jp->v_info.ntfs_data.Mft2StartLcn.QuadPart;
+	length = 1;
+	mirror_size = jp->v_info.ntfs_data.BytesPerFileRecordSegment * 4;
+	if(jp->v_info.ntfs_data.BytesPerCluster && mirror_size > jp->v_info.ntfs_data.BytesPerCluster){
+		length = mirror_size / jp->v_info.ntfs_data.BytesPerCluster;
+		if(mirror_size - length * jp->v_info.ntfs_data.BytesPerCluster)
+			length ++;
+	}
+	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft mirror", start, length);
+	if(check_region(jp,start,length)){
+		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
+		jp->mft_zones.mftmirr_start = start; jp->mft_zones.mftmirr_end = start + length - 1;
+	}
+	
+	jp->pi.mft_size = mft_length * jp->v_info.bytes_per_cluster;
+	DebugPrint("mft size = %I64u bytes",jp->pi.mft_size);
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw progress */
+}
+
+/**
  * @brief Defines whether the file
  * must be excluded from the volume
  * processing or not.
@@ -555,6 +625,14 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 	* A single SYNCHRONIZE flag also enables internal
 	* NTFS files defragmentation on Windows 2000.
 	* http://forum.sysinternals.com/topic23950.html
+	*
+	* TODO: FILE_READ_ATTRIBUTES may also be needed for reparse points,
+	* bitmaps and attribute lists as stated in:
+	* http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
+	* Though, this need careful testing on w2k and xp.
+	*
+	* TODO: FILE_GENERIC_READ may be needed for encrypted files
+	* on w2k/nt4, though this should be carefully tested before.
 	*/
 	status = NtCreateFile(phFile,/*FILE_GENERIC_READ |*/ SYNCHRONIZE,
 				&oa,&iosb,NULL,0,FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -670,6 +748,10 @@ static void produce_list_of_fragmented_files(udefrag_job_parameters *jp)
  */
 static int define_allowed_actions(udefrag_job_parameters *jp)
 {
+	int win_version;
+	
+	win_version = winx_get_os_version();
+	
 	/*
 	* NTFS volumes with cluster size greater than 4 kb
 	* cannot be defragmented on Windows 2000.
@@ -678,7 +760,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	if(jp->job_type != ANALYSIS_JOB \
 	  && jp->fs_type == FS_NTFS \
 	  && jp->v_info.bytes_per_cluster > 4096 \
-	  && winx_get_os_version() <= 50){
+	  && win_version <= 50){
 		DebugPrint("Cannot defragment NTFS volumes with\n"
 			"cluster size greater than 4 kb\n"
 			"on Windows 2000 and Windows NT 4.0");
@@ -729,6 +811,11 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		break;
 	}
 	
+	if(win_version <= 52)
+		jp->actions.allow_full_mft_defrag = 0;
+	else
+		jp->actions.allow_full_mft_defrag = 1;
+	
 	if(jp->actions.allow_dir_defrag)
 		DebugPrint("directory defragmentation is allowed");
 	else
@@ -738,6 +825,19 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		DebugPrint("volume optimization is allowed");
 	else
 		DebugPrint("volume optimization is denied (because not possible)");
+	
+	if(jp->fs_type == FS_NTFS){
+		if(jp->actions.allow_full_mft_defrag){
+			DebugPrint("full $mft defragmentation is allowed");
+		} else {
+			if(win_version == 51 || win_version == 52){
+				DebugPrint("full $mft defragmentation is denied on XP and W2K3");
+				DebugPrint("(because first 16 clusters aren't moveable)");
+			} else {
+				DebugPrint("full $mft defragmentation is denied (because not possible)");
+			}
+		}
+	}
 	
 	return 0;
 }

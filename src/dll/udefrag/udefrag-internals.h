@@ -38,12 +38,20 @@
 #define UD_FILE_TOO_LARGE      0x8   /* file is larger than the biggest free space region */
 #define UD_FILE_MOVING_FAILED  0x10  /* file moving completed with failure */
 
+/*
+* If this flag is set then some parts of the file
+* are excluded from the blockmap because they are unmoveable.
+*/
+#define UD_FILE_INTENDED_FOR_PART_DEFRAG  0x20
+
 #define is_excluded(f)       ((f)->user_defined_flags & UD_FILE_EXCLUDED)
 #define is_over_limit(f)     ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
 
 #define is_locked(f)         ((f)->user_defined_flags & UD_FILE_LOCKED)
 #define is_too_large(f)      ((f)->user_defined_flags & UD_FILE_TOO_LARGE)
 #define is_moving_failed(f)  ((f)->user_defined_flags & UD_FILE_MOVING_FAILED)
+
+#define is_intended_for_part_defrag(f)  ((f)->user_defined_flags & UD_FILE_INTENDED_FOR_PART_DEFRAG)
 
 /* named constant for 256k */
 #define _256K (256 * 1024)
@@ -87,6 +95,7 @@ typedef enum {
 typedef struct _udefrag_allowed_actions {
 	int allow_dir_defrag; /* on FAT directories aren't moveable */
 	int allow_optimize;   /* zero on FAT, because of unmoveable directories */
+	int allow_full_mft_defrag; /* zero on XP and W2K3, because the first 16 clusters of $mft are unmoveable there */
 } udefrag_allowed_actions;
 
 /*
@@ -138,9 +147,10 @@ int save_fragmentation_reports(udefrag_job_parameters *jp);
 void remove_fragmentation_reports(udefrag_job_parameters *jp);
 
 /* some volume space states, for internal use only */
-#define SYSTEM_OR_MFT_ZONE_SPACE  100
-#define SYSTEM_OR_FREE_SPACE      101
-#define FREE_OR_MFT_ZONE_SPACE    102
+#define SYSTEM_OR_MFT_ZONE_SPACE      100
+#define SYSTEM_OR_FREE_SPACE          101
+#define FREE_OR_MFT_ZONE_SPACE        102
+#define TMP_SYSTEM_OR_MFT_ZONE_SPACE  103
 
 int allocate_map(int map_size,udefrag_job_parameters *jp);
 void free_map(udefrag_job_parameters *jp);
@@ -157,9 +167,12 @@ int defragment(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
 
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
+void update_mft_zones_layout(udefrag_job_parameters *jp);
 
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
+int is_mft(udefrag_job_parameters *jp, winx_file_info *f);
+int is_mft_mirror(udefrag_job_parameters *jp, winx_file_info *f);
 int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
 int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 	ULONGLONG n_blocks,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
