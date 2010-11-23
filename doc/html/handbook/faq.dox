@@ -62,21 +62,15 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
 @endverbatim
  *
  * <h3>How many differences are between the Ultra Defragmenter and well known MyDefrag (previously JkDefrag) application?</h3>
- * The volume analysis algorithm was generally the same prior to the 3.2.0 version of the program. 
- * Since the 3.2.0 version UltraDefrag uses the Ultra Fast NTFS Analysis algorithm. It reads the MFT
- * directly and analyzes it to retrieve detailed information about all the files located
- * on the volume. This algorithm is much faster (approximately 25 times faster).
+ * Both programs have similar volume analysis algorithms, but defragmentation is done
+ * in different ways. While MyDefrag tends to give more control over a
+ * files placement, UltraDefrag is designed to be as simple and fast as possible.
+ * So, UltraDefrag never uses a complex volume optimization strategies, because their use
+ * often noticeable increases the processing time.
  *
- * Defragmentation is done in different ways. MyDefrag tries to optimize files placement
- * using original algorithm that is complex enough. On the other hand, UltraDefragmenter
- * was designed to be as fast as possible, therefore it simply tries to move all fragmented
- * files to free space areas. Nothing more. The volume optimization command was added primarily 
- * to enlarge the free space area at the end of the volume for future defragmentation
- * success.
- *
- * The biggest advantage of UltraDefrag is its ability to defragment system files at
- * boot time and well readable reports. Also UltraDefrag has a handy graphical interface.
- * In addition it is licensed under GPL, and always will be open source software.
+ * The biggest advantages of UltraDefrag are an ability to defragment system files at
+ * boot time, nice graphical interface, handy reports and instant availability of sources
+ * licensed under GPL.
  *
  * The main disadvantage of both applications (UltraDefrag and MyDefrag) is that they
  * are based on the Windows defragmenting interface that has a very ugly implementation. We cannot
