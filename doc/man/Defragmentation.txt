@@ -7,3 +7,8 @@ Master File Table
 Improvements in Windows 7
     http://blogs.msdn.com/b/e7/archive/2009/01/25/disk-defragmentation-background-and-engineering-the-windows-7-improvements.aspx
 
+Inprovements in Windows XP ('Updating Windows 2000 IFS Drivers to Windows XP')
+    http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
+
+Windows XP Professional Resource Kit: Working with File Systems
+    http://technet.microsoft.com/en-us/library/bb457112.aspx
