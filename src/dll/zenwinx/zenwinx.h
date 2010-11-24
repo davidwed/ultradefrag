@@ -129,7 +129,15 @@ int __cdecl winx_breakhit(int msec);
 int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec);
 
 void __stdcall winx_sleep(int msec);
+
+#define WINDOWS_NT     40
+#define WINDOWS_2K     50
+#define WINDOWS_XP     51
+#define WINDOWS_2K3    52
+#define WINDOWS_VISTA  60
+#define WINDOWS_7      61
 int  __stdcall winx_get_os_version(void);
+
 short * __stdcall winx_get_windows_boot_options(void);
 int __stdcall winx_windows_in_safe_mode(void);
 int  __stdcall winx_get_windows_directory(char *buffer, int length);
