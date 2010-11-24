@@ -652,7 +652,7 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 		* $Mft cannot be defragmented when opened with a single
 		* SYNCHRONIZE access, so we're using more advanced rights here.
 		*/
-		/* TODO: */
+		/* TODO: test it on Vista & Win7 */
 		access_rights |= FILE_READ_ATTRIBUTES;
 	}
 	
