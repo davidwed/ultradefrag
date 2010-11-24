@@ -58,4 +58,13 @@
 /* Returns current debug level, declared in udefrag.c */
 int GetDebugLevel();
 
+#define MAX_ENV_VARIABLE_LENGTH 32766
+#define MAX_LONG_PATH MAX_ENV_VARIABLE_LENGTH /* must be equal */
+typedef struct _object_path {
+	struct _object_path *prev;
+	struct _object_path *next;
+	wchar_t path[MAX_LONG_PATH + 1];
+	int processed;
+} object_path;
+
 #endif /* _DEFRAG_NATIVE_H_ */

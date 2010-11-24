@@ -42,6 +42,17 @@ int progress_line_length = 0;
 extern int scripting_mode;
 extern int escape_flag;
 
+object_path *paths = NULL;
+
+wchar_t in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
+wchar_t new_in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
+wchar_t aux_buffer[MAX_ENV_VARIABLE_LENGTH + 1];
+wchar_t aux_buffer2[MAX_ENV_VARIABLE_LENGTH + 1];
+
+/* forward declarations */
+static void search_for_paths(int argc,short **argv,short **envp);
+static void add_path(wchar_t *buffer);
+
 /**
  * @brief Returns current debug level.
  */
@@ -227,6 +238,9 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	char letter;
 	volume_info *v;
 	int debug_level;
+	object_path *path, *another_path;
+	int n, path_found;
+	int result;
 	
 	if(argc < 2){
 		winx_printf("\nNo volume letter specified!\n\n");
@@ -255,8 +269,8 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			all_fixed_flag = 1;
 			continue;
 		}
-		/* handle drive letters */
-		if(argv[i][0] != 0){
+		/* handle individual drive letters */
+		if(wcslen(argv[i]) == 2){
 			if(argv[i][1] == ':'){
 				if(n_letters > (MAX_DOS_DRIVES - 1)){
 					winx_printf("\n%ws: too many letters specified on the command line\n\n",
@@ -269,13 +283,18 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			}
 		}
 		/* handle unknown options */
-		winx_printf("\n%ws: unknown option \'%ws\' found\n\n",
+		/*winx_printf("\n%ws: unknown option \'%ws\' found\n\n",
 			argv[0],argv[i]);
 		return (-1);
+		*/
+		continue;
 	}
 	
+	/* scan for paths of objects to be processed */
+	search_for_paths(argc,argv,envp);
+	
 	/* check whether volume letters are specified or not */
-	if(!n_letters && !all_flag && !all_fixed_flag){
+	if(!n_letters && !all_flag && !all_fixed_flag && !paths){
 		winx_printf("\nNo volume letter specified!\n\n");
 		return (-1);
 	}
@@ -297,6 +316,90 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 
 	debug_level = GetDebugLevel();
 	
+	/* process paths specified on the command line */
+	/* skip invalid paths */
+	for(path = paths; path; path = path->next){
+		if(wcslen(path->path) < 2){
+			winx_printf("incomplete path detected: %ls\n",path->path);
+			path->processed = 1;
+		}
+		if(path->path[1] != ':'){
+			winx_printf("incomplete path detected: %ls\n",path->path);
+			path->processed = 1;
+		}
+		if(path->next == paths) break;
+	}
+	/* process valid paths */
+	for(path = paths; path; path = path->next){
+		if(path->processed == 0){
+			winx_printf("\n%ls\n",path->path);
+			path->processed = 1;
+			path_found = 1;
+			
+			/* extract drive letter */
+			letter = (char)path->path[0];
+			
+			/* save %UD_IN_FILTER% */
+			in_filter[0] = 0;
+			if(winx_query_env_variable(L"UD_IN_FILTER",in_filter,MAX_ENV_VARIABLE_LENGTH + 1) < 0){
+				/*if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+					display_last_error("process_volumes: cannot get %UD_IN_FILTER%!");
+				*/
+			}
+			
+			/* save the current path to %UD_IN_FILTER% */
+			n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls",path->path);
+			if(n < 0){
+				winx_printf("Cannot set %%UD_IN_FILTER%% - path is too long!\n");
+				wcscpy(new_in_filter,in_filter);
+				path_found = 0;
+			} else {
+				new_in_filter[MAX_ENV_VARIABLE_LENGTH] = 0;
+			}
+			
+			/* search for another paths with the same drive letter */
+			for(another_path = path->next; another_path; another_path = another_path->next){
+				if(another_path == paths) break;
+				if(letter == (char)another_path->path[0]){
+					/* try to append it to %UD_IN_FILTER% */
+					n = _snwprintf(aux_buffer,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls;%ls",new_in_filter,another_path->path);
+					if(n >= 0){
+						aux_buffer[MAX_ENV_VARIABLE_LENGTH] = 0;
+						wcscpy(new_in_filter,aux_buffer);
+						path_found = 1;
+						winx_printf("%ls\n",another_path->path);
+						another_path->processed = 1;
+					}
+				}
+			}
+			
+			/* set %UD_IN_FILTER% */
+			if(abort_flag) goto done;
+			if(winx_set_env_variable(L"UD_IN_FILTER",new_in_filter) < 0){
+				winx_printf("Cannot set %%UD_IN_FILTER%%!\n");
+			}
+			
+			/* run the job */
+			if(path_found){
+				ProcessVolume(letter);
+				if(debug_level > DBG_NORMAL) short_dbg_delay();
+			}
+			
+			/* restore %UD_IN_FILTER% */
+			if(in_filter[0])
+				result = winx_set_env_variable(L"UD_IN_FILTER",in_filter);
+			else
+				result = winx_set_env_variable(L"UD_IN_FILTER",NULL);
+			if(result < 0){
+				winx_printf("Cannot restore %%UD_IN_FILTER%%!\n");
+			}
+		}
+		if(path->next == paths) break;
+	}
+	
+	if(abort_flag)
+		goto done;
+	
 	/* process volumes specified on the command line */
 	for(i = 0; i < n_letters; i++){
 		if(abort_flag) break;
@@ -306,14 +409,14 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	}
 
 	if(abort_flag)
-		return 0;
+		goto done;
 	
 	/* process all volumes if requested */
 	if(all_flag || all_fixed_flag){
 		v = udefrag_get_vollist(all_fixed_flag ? TRUE : FALSE);
 		if(v == NULL){
 			winx_printf("\n%ws: udefrag_get_vollist failed\n\n",argv[0]);
-			return (-1);
+			goto fail;
 		}
 		for(i = 0; v[i].letter != 0; i++){
 			if(abort_flag) break;
@@ -323,5 +426,103 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		}
 		udefrag_release_vollist(v);
 	}
+
+done:	
+	winx_list_destroy((list_entry **)(void *)&paths);
 	return 0;
+
+fail:
+	winx_list_destroy((list_entry **)(void *)&paths);
+	return (-1);
+}
+
+static void search_for_paths(int argc,short **argv,short **envp)
+{
+	int leading_quote_found = 0;
+	int i, n;
+	
+	aux_buffer[0] = 0;  /* reset main buffer */
+	aux_buffer2[0] = 0; /* reset auxiliary buffer */
+	for(i = 1; i < argc; i++){
+		if(argv[i][0] == 0) continue;   /* skip empty strings */
+		if(argv[i][0] == '-') continue; /* skip options */
+		if(wcslen(argv[i]) == 2){       /* skip individual volume letters */
+			if(argv[i][1] == ':')
+				continue;
+		}
+		//winx_printf("part of path detected: arg[%i] = %ls\n",i,argv[i]);
+		if(argv[i][0] == '"'){
+			/* leading quote found */
+			add_path(aux_buffer);
+			wcsncpy(aux_buffer,argv[i] + 1,MAX_LONG_PATH);
+			aux_buffer[MAX_LONG_PATH] = 0;
+			/* check for trailing quote */
+			if(argv[i][wcslen(argv[i]) - 1] == '"'){
+				/* remove trailing quote */
+				n = wcslen(aux_buffer);
+				if(n > 0) aux_buffer[n - 1] = 0;
+				add_path(aux_buffer);
+				aux_buffer[0] = 0;
+			} else {
+				leading_quote_found = 1;
+			}
+		} else if(argv[i][wcslen(argv[i]) - 1] == '"'){
+			/* trailing quote found */
+			if(aux_buffer[0])
+				n = _snwprintf(aux_buffer2,MAX_LONG_PATH + 1,L"%ls %ls",aux_buffer,argv[i]);
+			else
+				n = _snwprintf(aux_buffer2,MAX_LONG_PATH + 1,L"%ls",argv[i]);
+			if(n < 0){
+				winx_printf("search_for_path: path is too long!\n");
+			} else {
+				wcsncpy(aux_buffer,aux_buffer2,MAX_LONG_PATH);
+				aux_buffer[MAX_LONG_PATH] = 0;
+				/* remove trailing quote */
+				n = wcslen(aux_buffer);
+				if(n > 0) aux_buffer[n - 1] = 0;
+			}
+			add_path(aux_buffer);
+			aux_buffer[0] = 0;
+			leading_quote_found = 0;
+		} else {
+			if(leading_quote_found){
+				if(aux_buffer[0])
+					n = _snwprintf(aux_buffer2,MAX_LONG_PATH + 1,L"%ls %ls",aux_buffer,argv[i]);
+				else
+					n = _snwprintf(aux_buffer2,MAX_LONG_PATH + 1,L"%ls",argv[i]);
+				if(n < 0){
+					winx_printf("search_for_path: path is too long!\n");
+				} else {
+					wcsncpy(aux_buffer,aux_buffer2,MAX_LONG_PATH);
+					aux_buffer[MAX_LONG_PATH] = 0;
+				}
+			} else {
+				add_path(aux_buffer);
+				wcsncpy(aux_buffer,argv[i],MAX_LONG_PATH);
+				aux_buffer[MAX_LONG_PATH] = 0;
+			}
+		}
+	}
+	add_path(aux_buffer);
+}
+
+/* size of the buffer must be equal to MAX_LONG_PATH */
+static void add_path(wchar_t *buffer)
+{
+	object_path *new_item, *last_item = NULL;
+
+	if(buffer == NULL) return;
+
+	if(buffer[0]){
+		if(paths) last_item = paths->prev;
+		new_item = (object_path *)winx_list_insert_item((list_entry **)(void *)&paths,
+			(list_entry *)last_item,sizeof(object_path));
+		if(new_item == NULL){
+			winx_printf("add_path: not enough memory!\n");
+		} else {
+			new_item->processed = 0;
+			wcsncpy(new_item->path,buffer,MAX_LONG_PATH);
+			new_item->path[MAX_LONG_PATH] = 0;
+		}
+	}
 }
