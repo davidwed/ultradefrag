@@ -512,13 +512,13 @@ static int process_volumes(void)
 			in_filter[0] = 0;
 			if(!GetEnvironmentVariableW(L"UD_IN_FILTER",in_filter,MAX_ENV_VARIABLE_LENGTH + 1)){
 				if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
-					display_last_error("process_volumes: cannot get %UD_IN_FILTER%!");
+					display_last_error("process_volumes: cannot get %%UD_IN_FILTER%%!");
 			}
 			
 			/* save the current path to %UD_IN_FILTER% */
 			n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls",path->path);
 			if(n < 0){
-				display_error("process_volumes: cannot set %UD_IN_FILTER% - path is too long!");
+				display_error("process_volumes: cannot set %%UD_IN_FILTER%% - path is too long!");
 				wcscpy(new_in_filter,in_filter);
 				path_found = 0;
 			} else {
@@ -546,7 +546,7 @@ static int process_volumes(void)
 			/* set %UD_IN_FILTER% */
 			if(stop_flag) return 0;
 			if(!SetEnvironmentVariableW(L"UD_IN_FILTER",new_in_filter)){
-				display_last_error("process_volumes: cannot set %UD_IN_FILTER%!");
+				display_last_error("process_volumes: cannot set %%UD_IN_FILTER%%!");
 			}
 			
 			/* run the job */
@@ -555,7 +555,7 @@ static int process_volumes(void)
 			
 			/* restore %UD_IN_FILTER% */
 			if(!SetEnvironmentVariableW(L"UD_IN_FILTER",in_filter)){
-				display_last_error("process_volumes: cannot restore %UD_IN_FILTER%!");
+				display_last_error("process_volumes: cannot restore %%UD_IN_FILTER%%!");
 			}
 		}
 		if(path->next == paths) break;
