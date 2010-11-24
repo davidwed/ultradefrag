@@ -29,7 +29,6 @@ HISTORY
       Italian, Norwegian, Portuguese, Spanish(ES), French(FR), Dutch, Czech,
       Vietnamese(VI), Spanish(AR)
 
-    - VBscript added to run context menu handler elevated on Vista and above
     - dry_run parameter added to GUI options as well as UD_DRY_RUN environment
       variable support added to the driver to be able to quickly test algorithms
       without actual data moves on disk
