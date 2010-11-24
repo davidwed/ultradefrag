@@ -167,7 +167,7 @@ Var AtLeastXP
   push $2
   
   StrCpy $0 "$\"$SYSDIR\udefrag.exe$\" --shellex $\"%1$\""
-  StrCpy $1 "$INSTDIR\ultradefrag.exe"
+  StrCpy $1 "$INSTDIR\shellex.ico"
   StrCpy $2 "[--- &Ultra Defragmenter ---]"
 
   ${If} $AtLeastXP == "1"

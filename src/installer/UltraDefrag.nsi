@@ -157,6 +157,9 @@ Section "Ultra Defrag core files (required)" SecCore
   File "lua5.1a.dll"
   File "lua5.1a.exe"
   File "lua5.1a_gui.exe"
+  
+  ; install shell extension icon
+  File "${ROOTDIR}\src\installer\shellex.ico"
 
   SetOutPath "$SYSDIR"
   File "${ROOTDIR}\src\installer\boot-config.cmd"

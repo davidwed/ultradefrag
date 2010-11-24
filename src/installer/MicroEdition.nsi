@@ -121,6 +121,9 @@ Section "Ultra Defrag core files (required)" SecCore
   File "${ROOTDIR}\src\HISTORY.TXT"
   File "${ROOTDIR}\src\README.TXT"
 
+  ; install shell extension icon
+  File "${ROOTDIR}\src\installer\shellex.ico"
+
   ; install manual pages for the boot time interface
   SetOutPath "$INSTDIR\man"
   File "${ROOTDIR}\src\man\*.*"
