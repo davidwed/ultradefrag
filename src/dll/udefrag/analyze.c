@@ -669,7 +669,7 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 	* Though, this need careful testing on w2k and xp.
 	*/
 	status = NtCreateFile(phFile,access_rights,&oa,&iosb,NULL,0,
-				FILE_SHARE_READ | FILE_SHARE_WRITE,
+				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 				FILE_OPEN,flags,NULL,0);
 	return status;
 }
