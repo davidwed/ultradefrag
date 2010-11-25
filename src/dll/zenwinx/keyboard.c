@@ -62,8 +62,8 @@ int kb_wait_for_input_threads = 0;
 
 /* prototypes */
 void __stdcall kb_close(void);
-int  __stdcall kb_check(HANDLE hKbDevice);
-int __stdcall kb_open_internal(int device_number);
+static int  __stdcall kb_check(HANDLE hKbDevice);
+static int __stdcall kb_open_internal(int device_number);
 char * __stdcall winx_get_error_description(unsigned long status);
 void winx_print(char *string);
 
@@ -344,7 +344,7 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-int __stdcall kb_open_internal(int device_number)
+static int __stdcall kb_open_internal(int device_number)
 {
 	short device_name[32];
 	short event_name[32];
@@ -426,7 +426,7 @@ int __stdcall kb_open_internal(int device_number)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
+static int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 {
 	NTSTATUS Status;
 	IO_STATUS_BLOCK iosb;
@@ -453,7 +453,7 @@ int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-int __stdcall kb_check(HANDLE hKbDevice)
+static int __stdcall kb_check(HANDLE hKbDevice)
 {
 	USHORT LedFlags;
 	NTSTATUS Status;
