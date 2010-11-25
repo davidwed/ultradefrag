@@ -166,6 +166,7 @@ int __stdcall terminator(void *p)
 void ProcessVolume(char letter)
 {
 	int status;
+    char *message = "";
 
 	/* validate the volume before any processing */
 	status = udefrag_validate_volume(letter,FALSE);
@@ -183,18 +184,21 @@ void ProcessVolume(char letter)
 	switch(current_job){
 	case ANALYSIS_JOB:
 		winx_printf("analyse %c: ...\n",letter);
+        message = "Analysis";
 		break;
 	case DEFRAG_JOB:
 		winx_printf("defragment %c: ...\n",letter);
+        message = "Defragmentation";
 		break;
 	case OPTIMIZER_JOB:
 		winx_printf("optimize %c: ...\n",letter);
+        message = "Optimization";
 		break;
 	}
 	winx_printf(BREAK_MESSAGE);
 	status = udefrag_start_job(letter,current_job,0,update_progress,terminator,NULL);
 	if(status < 0){
-		winx_printf("\nDefragmentation/Optimization failed!\n");
+		winx_printf("\n%s failed!\n",message);
 		winx_printf("%s\n",udefrag_get_error_description(status));
 		return;
 	}
