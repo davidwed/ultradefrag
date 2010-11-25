@@ -129,7 +129,7 @@ int defragment(udefrag_job_parameters *jp)
 			if(f_largest == NULL) goto next_rgn;
 			
 			/* skip $mft on XP and W2K3, because the first 16 clusters aren't moveable there */
-			if(is_mft(jp,f->f) && jp->actions.allow_full_mft_defrag == 0 \
+			if(is_mft(f->f) && jp->actions.allow_full_mft_defrag == 0 \
 			  && (win_version == 51 || win_version == 52)){
 				/* list MFT parts (for debugging purposes) */
 				for(block = f->f->disp.blockmap, i = 0; block; block = block->next, i++){
@@ -349,7 +349,7 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	}
 	
 	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
-	if(old_color == MFT_SPACE || is_mft_mirror(jp,f))
+	if(old_color == MFT_SPACE || is_mft_mirror(f))
 		update_mft_zones_layout(jp);
 	
 	/* redraw target space */
@@ -436,7 +436,7 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 	}
 	
 	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
-	if(old_color == MFT_SPACE || is_mft_mirror(jp,f))
+	if(old_color == MFT_SPACE || is_mft_mirror(f))
 		update_mft_zones_layout(jp);
 	
 	/* redraw target space */

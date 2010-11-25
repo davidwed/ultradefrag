@@ -418,12 +418,12 @@ void colorize_map_region(udefrag_job_parameters *jp,
  * @brief Defines whether the file is $Mft or not.
  * @return Nonzero value indicates that the file is $Mft.
  */
-int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
+int is_mft(winx_file_info *f)
 {
 	int length;
 	wchar_t mft_name[] = L"$Mft";
 
-	if(jp == NULL || f == NULL)
+	if(f == NULL)
 		return 0;
 	
 	if(f->path == NULL || f->name == NULL)
@@ -443,12 +443,12 @@ int is_mft(udefrag_job_parameters *jp, winx_file_info *f)
  * @brief Defines whether the file is $Mftmirr or not.
  * @return Nonzero value indicates that the file is $Mftmirr.
  */
-int is_mft_mirror(udefrag_job_parameters *jp, winx_file_info *f)
+int is_mft_mirror(winx_file_info *f)
 {
 	int length;
 	wchar_t mft_mirror_name[] = L"$Mftmirr";
 
-	if(jp == NULL || f == NULL)
+	if(f == NULL)
 		return 0;
 	
 	if(f->path == NULL || f->name == NULL)
@@ -470,7 +470,7 @@ int is_mft_mirror(udefrag_job_parameters *jp, winx_file_info *f)
 int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
 {
 	/* show $MFT file in dark magenta color */
-	if(is_mft(jp,f))
+	if(is_mft(f))
 		return MFT_SPACE;
 
 	/* show excluded files as not fragmented */

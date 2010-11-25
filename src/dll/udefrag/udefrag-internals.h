@@ -171,8 +171,8 @@ void update_mft_zones_layout(udefrag_job_parameters *jp);
 
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
-int is_mft(udefrag_job_parameters *jp, winx_file_info *f);
-int is_mft_mirror(udefrag_job_parameters *jp, winx_file_info *f);
+int is_mft(winx_file_info *f);
+int is_mft_mirror(winx_file_info *f);
 int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
 int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 	ULONGLONG n_blocks,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
