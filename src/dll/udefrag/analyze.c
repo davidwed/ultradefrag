@@ -605,7 +605,7 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS status;
 	int win_version;
-	ACCESS_MASK access_rights;
+	ACCESS_MASK access_rights = SYNCHRONIZE;
 	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
 
 	if(f == NULL || phFile == NULL)
@@ -625,7 +625,7 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 	* we're using restricted rights.
 	*/
 	win_version = winx_get_os_version();
-	access_rights = SYNCHRONIZE;
+
 	if(win_version <= WINDOWS_2K){
 		/* on Windows NT and Windows 2000 */
 		if(is_encrypted(f)){
@@ -654,6 +654,10 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 		*/
 		/* TODO: test it on Vista & Win7 */
 		access_rights |= FILE_READ_ATTRIBUTES;
+        
+        /* vista/w7 require this to be able to move $mft */
+        if(is_mft(f))
+            flags |= FILE_NON_DIRECTORY_FILE;
 	}
 	
 	RtlInitUnicodeString(&us,f->path);
@@ -801,8 +805,12 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	* UDF volumes cannot be either defragmented or optimized
 	* because an appropriate system driver has poor support
 	* of FSCTL_MOVE_FILE.
+    *
+    * Windows 7 needs more testing, since it seems to allow defrag
 	*/
-	if(jp->job_type != ANALYSIS_JOB && jp->fs_type == FS_UDF){
+	if(jp->job_type != ANALYSIS_JOB \
+      && jp->fs_type == FS_UDF \
+      /* && win_version <= 60 */){
 		DebugPrint("Cannot defragment/optimize UDF volumes\n");
 		DebugPrint("because of poor support of FSCTL_MOVE_FILE\n");
 		DebugPrint("by an appropriate system driver.\n");
