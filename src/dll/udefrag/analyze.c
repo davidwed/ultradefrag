@@ -794,7 +794,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	if(jp->job_type != ANALYSIS_JOB \
 	  && jp->fs_type == FS_NTFS \
 	  && jp->v_info.bytes_per_cluster > 4096 \
-	  && win_version <= 50){
+	  && win_version <= WINDOWS_2K){
 		DebugPrint("Cannot defragment NTFS volumes with\n"
 			"cluster size greater than 4 kb\n"
 			"on Windows 2000 and Windows NT 4.0");
@@ -810,7 +810,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	*/
 	if(jp->job_type != ANALYSIS_JOB \
       && jp->fs_type == FS_UDF \
-      /* && win_version <= 60 */){
+      /* && win_version <= WINDOWS_VISTA */){
 		DebugPrint("Cannot defragment/optimize UDF volumes\n");
 		DebugPrint("because of poor support of FSCTL_MOVE_FILE\n");
 		DebugPrint("by an appropriate system driver.\n");
@@ -849,7 +849,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		break;
 	}
 	
-	if(win_version <= 52)
+	if(win_version <= WINDOWS_2K3)
 		jp->actions.allow_full_mft_defrag = 0;
 	else
 		jp->actions.allow_full_mft_defrag = 1;
@@ -868,7 +868,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		if(jp->actions.allow_full_mft_defrag){
 			DebugPrint("full $mft defragmentation is allowed");
 		} else {
-			if(win_version == 51 || win_version == 52){
+			if(win_version == WINDOWS_XP || win_version == WINDOWS_2K3){
 				DebugPrint("full $mft defragmentation is denied on XP and W2K3");
 				DebugPrint("(because first 16 clusters aren't moveable)");
 			} else {

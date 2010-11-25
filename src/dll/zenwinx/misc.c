@@ -58,7 +58,7 @@ void __stdcall winx_sleep(int msec)
  * on windows 9x.
  * @par Example:
  * @code 
- * if(winx_get_os_version() >= 51){
+ * if(winx_get_os_version() >= WINDOWS_XP){
  *     // we are running on XP or later system
  * }
  * @endcode

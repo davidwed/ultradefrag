@@ -371,7 +371,7 @@ static int __stdcall kb_open_internal(int device_number)
 				device_name,(UINT)Status);
 			winx_printf("%s\n",winx_get_error_description((ULONG)Status));
             
-            if (Status == STATUS_OBJECT_NAME_NOT_FOUND && winx_get_os_version() < 51) return (-2);
+            if (Status == STATUS_OBJECT_NAME_NOT_FOUND && winx_get_os_version() < WINDOWS_XP) return (-2);
 		}
 		return (-1);
 	}

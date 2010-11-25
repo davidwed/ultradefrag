@@ -130,7 +130,7 @@ int defragment(udefrag_job_parameters *jp)
 			
 			/* skip $mft on XP and W2K3, because the first 16 clusters aren't moveable there */
 			if(is_mft(f->f) && jp->actions.allow_full_mft_defrag == 0 \
-			  && (win_version == 51 || win_version == 52)){
+			  && (win_version == WINDOWS_XP || win_version == WINDOWS_2K3)){
 				/* list MFT parts (for debugging purposes) */
 				for(block = f->f->disp.blockmap, i = 0; block; block = block->next, i++){
 					DebugPrint("mft part #%u start: %I64u, length: %I64u",
