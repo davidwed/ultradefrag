@@ -281,13 +281,6 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	int result = -1;
 	int win_version = winx_get_os_version();
     
-    if(win_version >= WINDOWS_VISTA){
-        (void)winx_enable_privilege(SE_BACKUP_PRIVILEGE);
-        
-        if(win_version >= WINDOWS_7)
-            (void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE);
-    }
-	
 	/* initialize the job */
 	dbg_print_header(&jp);
 
@@ -324,6 +317,14 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 		release_options(&jp);
 		goto done;
 	}
+	
+    /* set additional privileges for Vista and above */
+    if(win_version >= WINDOWS_VISTA){
+        (void)winx_enable_privilege(SE_BACKUP_PRIVILEGE);
+        
+        if(win_version >= WINDOWS_7)
+            (void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE);
+    }
 	
 	/* run the job in separate thread */
 	if(winx_create_thread(start_job,(PVOID)&jp,NULL) < 0){

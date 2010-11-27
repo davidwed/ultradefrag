@@ -604,17 +604,21 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 	OBJECT_ATTRIBUTES oa;
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS status;
-	int win_version;
+	int win_version = winx_get_os_version();
 	ACCESS_MASK access_rights = SYNCHRONIZE;
 	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
 
 	if(f == NULL || phFile == NULL)
 		return STATUS_INVALID_PARAMETER;
 	
-	if(is_directory(f))
+	if(is_directory(f)){
 		flags |= FILE_OPEN_FOR_BACKUP_INTENT;
-	else
+	} else {
 		flags |= FILE_NO_INTERMEDIATE_BUFFERING;
+        
+        if(win_version >= WINDOWS_VISTA)
+            flags |= FILE_NON_DIRECTORY_FILE;
+    }
 
 	/*
 	* All files except of internal NTFS files
@@ -624,8 +628,6 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 	* To defragment internal NTFS files including $mft,
 	* we're using restricted rights.
 	*/
-	win_version = winx_get_os_version();
-
 	if(win_version <= WINDOWS_2K){
 		/* on Windows NT and Windows 2000 */
 		if(is_encrypted(f)){
@@ -654,10 +656,6 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
 		*/
 		/* TODO: test it on Vista & Win7 */
 		access_rights |= FILE_READ_ATTRIBUTES;
-        
-        /* vista/w7 require this to be able to move $mft */
-        if(is_mft(f))
-            flags |= FILE_NON_DIRECTORY_FILE;
 	}
 	
 	RtlInitUnicodeString(&us,f->path);
