@@ -40,6 +40,65 @@ static int move_file_blocks_helper(HANDLE hFile,winx_file_info *f,
 	udefrag_job_parameters *jp,WINX_FILE *fVolume);
 static void redraw_freed_space(udefrag_job_parameters *jp,
 		ULONGLONG lcn, ULONGLONG length, int old_color);
+		
+/* TODO: remove it after testing of $Mft defrag on Vista/Win7 */
+WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
+{
+	char path[] = "\\??\\A:";
+	ANSI_STRING as;
+	UNICODE_STRING us;
+	NTSTATUS status;
+	HANDLE hFile;
+	OBJECT_ATTRIBUTES oa;
+	IO_STATUS_BLOCK iosb;
+	ACCESS_MASK access_mask = FILE_GENERIC_READ;
+	ULONG disposition = FILE_OPEN;
+	WINX_FILE *f;
+
+	path[4] = winx_toupper(volume_letter);
+	RtlInitAnsiString(&as,path);
+	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
+		DebugPrint("new_winx_vopen: cannot open %s: not enough memory\n",path);
+		return NULL;
+	}
+	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
+
+	access_mask = FILE_GENERIC_READ | FILE_GENERIC_WRITE | SYNCHRONIZE;
+	disposition = FILE_OPEN;
+
+	status = NtCreateFile(&hFile,
+			access_mask,
+			&oa,
+			&iosb,
+			NULL,
+			FILE_ATTRIBUTE_NORMAL,
+			FILE_SHARE_READ | FILE_SHARE_WRITE,
+			disposition,
+			FILE_SYNCHRONOUS_IO_NONALERT | FILE_NO_INTERMEDIATE_BUFFERING | FILE_NON_DIRECTORY_FILE,
+			NULL,
+			0
+			);
+	RtlFreeUnicodeString(&us);
+	if(status != STATUS_SUCCESS){
+		DebugPrintEx(status,"new_winx_vopen: cannot open %s",path);
+		return NULL;
+	}
+	f = (WINX_FILE *)winx_heap_alloc(sizeof(WINX_FILE));
+	if(!f){
+		NtClose(hFile);
+		DebugPrint("new_winx_vopen: cannot open %s: not enough memory\n",path);
+		return NULL;
+	}
+	f->hFile = hFile;
+	f->roffset.QuadPart = 0;
+	f->woffset.QuadPart = 0;
+	f->io_buffer = NULL;
+	f->io_buffer_size = 0;
+	f->io_buffer_offset = 0;
+	f->wboffset.QuadPart = 0;
+	return f;
+}
+
 
 /**
  * @brief Performs a volume defragmentation.
@@ -81,7 +140,7 @@ int defragment(udefrag_job_parameters *jp)
 	}
 	
 	/* open the volume */
-	fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	if(fVolume == NULL)
 		return (-1);
 	
