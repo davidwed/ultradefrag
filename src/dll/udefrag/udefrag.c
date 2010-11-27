@@ -279,6 +279,14 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	ULONGLONG time = 0;
 	int use_limit = 0;
 	int result = -1;
+	int win_version = winx_get_os_version();
+    
+    if(win_version >= WINDOWS_VISTA){
+        (void)winx_enable_privilege(SE_BACKUP_PRIVILEGE);
+        
+        if(win_version >= WINDOWS_7)
+            (void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE);
+    }
 	
 	/* initialize the job */
 	dbg_print_header(&jp);
