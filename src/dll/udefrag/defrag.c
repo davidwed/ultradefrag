@@ -51,8 +51,9 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 	HANDLE hFile;
 	OBJECT_ATTRIBUTES oa;
 	IO_STATUS_BLOCK iosb;
-	ACCESS_MASK access_mask = FILE_GENERIC_READ;
+	ACCESS_MASK access_mask = FILE_GENERIC_READ | FILE_GENERIC_WRITE; /*SYNCHRONIZE | FILE_READ_ATTRIBUTES*/
 	ULONG disposition = FILE_OPEN;
+	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT | FILE_NO_INTERMEDIATE_BUFFERING | FILE_NON_DIRECTORY_FILE;
 	WINX_FILE *f;
 
 	path[4] = winx_toupper(volume_letter);
@@ -63,8 +64,8 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
 
-	access_mask = FILE_GENERIC_READ | FILE_GENERIC_WRITE | SYNCHRONIZE;
-	disposition = FILE_OPEN;
+    if(winx_get_os_version() >= WINDOWS_7)
+        flags |= FILE_DISALLOW_EXCLUSIVE;
 
 	status = NtCreateFile(&hFile,
 			access_mask,
@@ -74,7 +75,7 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 			FILE_ATTRIBUTE_NORMAL,
 			FILE_SHARE_READ | FILE_SHARE_WRITE,
 			disposition,
-			FILE_SYNCHRONOUS_IO_NONALERT | FILE_NO_INTERMEDIATE_BUFFERING | FILE_NON_DIRECTORY_FILE,
+			flags,
 			NULL,
 			0
 			);
