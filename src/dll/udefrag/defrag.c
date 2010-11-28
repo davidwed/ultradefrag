@@ -51,7 +51,7 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 	HANDLE hFile;
 	OBJECT_ATTRIBUTES oa;
 	IO_STATUS_BLOCK iosb;
-	ACCESS_MASK access_mask = FILE_GENERIC_READ | FILE_GENERIC_WRITE; /*SYNCHRONIZE | FILE_READ_ATTRIBUTES*/
+	ACCESS_MASK access_mask = FILE_GENERIC_READ /* | FILE_GENERIC_WRITE */;
 	ULONG disposition = FILE_OPEN;
 	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT | FILE_NO_INTERMEDIATE_BUFFERING | FILE_NON_DIRECTORY_FILE;
 	WINX_FILE *f;
@@ -141,7 +141,8 @@ int defragment(udefrag_job_parameters *jp)
 	}
 	
 	/* open the volume */
-	fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	fVolume = winx_vopen(winx_toupper(jp->volume_letter));
 	if(fVolume == NULL)
 		return (-1);
 	
@@ -190,7 +191,7 @@ int defragment(udefrag_job_parameters *jp)
 			
 			/* skip $mft on XP and W2K3, because the first 16 clusters aren't moveable there */
 			if(is_mft(f->f) && jp->actions.allow_full_mft_defrag == 0 \
-			  && (win_version == WINDOWS_XP || win_version == WINDOWS_2K3)){
+			  && (win_version >= WINDOWS_XP /* || win_version == WINDOWS_2K3 */)){
 				/* list MFT parts (for debugging purposes) */
 				for(block = f->f->disp.blockmap, i = 0; block; block = block->next, i++){
 					DebugPrint("mft part #%u start: %I64u, length: %I64u",

@@ -847,10 +847,10 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		break;
 	}
 	
-	if(win_version <= WINDOWS_2K3)
+	// if(win_version <= WINDOWS_2K3)
 		jp->actions.allow_full_mft_defrag = 0;
-	else
-		jp->actions.allow_full_mft_defrag = 1;
+	/* else
+		jp->actions.allow_full_mft_defrag = 1; */
 	
 	if(jp->actions.allow_dir_defrag)
 		DebugPrint("directory defragmentation is allowed");
@@ -866,7 +866,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		if(jp->actions.allow_full_mft_defrag){
 			DebugPrint("full $mft defragmentation is allowed");
 		} else {
-			if(win_version == WINDOWS_XP || win_version == WINDOWS_2K3){
+			if(win_version >= WINDOWS_XP /* || win_version == WINDOWS_2K3 */){
 				DebugPrint("full $mft defragmentation is denied on XP and W2K3");
 				DebugPrint("(because first 16 clusters aren't moveable)");
 			} else {
