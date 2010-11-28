@@ -28,7 +28,7 @@
  * <h1>Command line options</h1>
  * Usage:
  * @code
- * udefrag [command] [options] [volumeletter:]
+ * udefrag [command] [options] [volumeletter:] [path(s)]
  * @endcode
  *
  * Commands:
@@ -97,6 +97,15 @@
  * </dl>
  * Note that --all-fixed key has higher precedence, if both keys are specified
  * UltraDefrag will process fixed drives only.
+ *
+ * Path:
+ *
+ * - Specifying a path will cause UltraDefrag to defragment only the specified path.
+ * - It is possible to specify multiple paths separated by spaces.
+ * - Paths including spaces must be enclosed by double quotes (").
+ * - Relative and absolute paths are supported.
+ * Example:
+ * udefrag "%USERPROFILE%" ..\\Test "\My Documents" C:\\WINDOWS\\WindowsUpdate.log
  *
  * <h1>Environment variables</h1>
  * <dl>

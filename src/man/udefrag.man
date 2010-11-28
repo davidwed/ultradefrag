@@ -1,7 +1,7 @@
 UDEFRAG(1)          Ultradefrag Development Team           UDEFRAG(1)
 
 NAME
-        udefrag - manual page for udefrag v4.4.0
+        udefrag - manual page for udefrag v5.0.0
 
 SYNOPSIS
         udefrag [OPTION]...
@@ -39,10 +39,16 @@ OPTIONS
                 removable ones
         
         --all-fixed
-                Perform action for all available drives excluding
+                perform action for all available drives excluding
                 removable ones
-                If the '--all' option is specified too, this option
+                if the '--all' option is specified too, this option
                 takes precedence
+
+        {path}
+                one or more paths separated by spaces
+                paths including spaces must be enclosed by double
+                quotes (")
+                only absolute paths are supported
 
 EXAMPLES
         udefrag C:
@@ -57,6 +63,9 @@ EXAMPLES
         udefrag E: K: -o
                 optimize drives E: and K:
 
+        udefrag C:\Windows\WindowsUpdate.log "C:\Program Files"
+                defragment the specified file and folder
+
 AUTHOR
         Written by Ultradefrag Development Team
 
@@ -66,4 +75,4 @@ COPYRIGHT
         There is NO warranty; not even for MERCHANTABILITY
         or FITNESS FOR A PARTICULAR PURPOSE.
 
-udefrag                       September 2010                        1
+udefrag                       November 2010                         1
