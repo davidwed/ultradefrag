@@ -51,6 +51,7 @@ winx_history history = {0};
 int exit_flag = 0;
 
 extern int scripting_mode;
+extern int abort_flag;
 
 int parse_command(short *cmdline);
 int ProcessScript(short *filename);
@@ -180,6 +181,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	winx_printf("\nInteractive mode:\nType 'help' for a list of supported commands.\n");
 	winx_printf("\nOnly the English keyboard layout is available.\n\n");
 	scripting_mode = 0;
+	abort_flag = 0;
 	winx_init_history(&history);
 	while(winx_prompt_ex("# ",buffer,MAX_LINE_WIDTH,&history) >= 0){
 		/* convert command to unicode */
