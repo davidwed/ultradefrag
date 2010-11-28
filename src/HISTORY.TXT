@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 5.0.0  2010-11-
+  Version 5.0.0  2010-12-
   ------------------------------------------------------------------------------
     beta1:
     - defragmentation algorithm reimplemented; partial defragmentation improved
@@ -10,6 +10,8 @@ HISTORY
     - one huge bug was fixed in the boot time defragmenter, udefrag.dll and
       zenwinx.dll libraries - they all have had improper definition of the
       IO_STATUS_BLOCK structure used by many undocumented Windows API functions
+    - a problem was fixed, where the abort flag was not cleared, when entering
+      the interactive mode at boot time
     - actions to take after processing is done implemented as separate menu
     - file status was added to reports
     - current time was added to reports
@@ -19,7 +21,7 @@ HISTORY
       (batch script used before caused sometimes an environment 
       desynchronization due to the start of udefrag command with elevated
       privileges on Vista and Windows 7)
-    - icon to Explorer context menu handler in Windows 7 and later added
+    - added icon to Explorer context menu handler in Windows 7 and later
     - the following translations were added:
 
       Galician, Tamil
