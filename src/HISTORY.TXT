@@ -22,7 +22,7 @@ HISTORY
     - icon to Explorer context menu handler in Windows 7 and later added
     - the following translations were added:
 
-      Galician
+      Galician, Tamil
 
     - the following translations were updated:
 

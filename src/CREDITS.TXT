@@ -77,6 +77,7 @@
     Spanish (AR)    - Daniel Testa
     Spanish (ES)    - txusti
     Swedish         - Magnus Rostedt, Stefan Pendl
+    Tamil           - Vinod V.
     Thai            - Pat Taweewat, Stefan Pendl
     Turkish         - Huseyin Kozan, Stefan Pendl
     Ukrainian       - Dmitri Arkhangelski
