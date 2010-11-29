@@ -364,7 +364,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			/* search for another paths with the same drive letter */
 			for(another_path = path->next; another_path; another_path = another_path->next){
 				if(another_path == paths) break;
-				if(letter == (char)another_path->path[0]){
+				if(winx_toupper(letter) == winx_toupper((char)another_path->path[0])){
 					/* try to append it to %UD_IN_FILTER% */
 					n = _snwprintf(aux_buffer,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls;%ls",new_in_filter,another_path->path);
 					if(n >= 0){
