@@ -314,6 +314,8 @@ int __stdcall winx_unregister_boot_exec_command(short *command);
 void __cdecl winx_dbg_print(char *format, ...);
 void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
 void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...);
+void __stdcall winx_enable_dbg_log(void);
+void __stdcall winx_disable_dbg_log(void);
 
 ULONGLONG __stdcall winx_str2time(char *string);
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);
@@ -350,6 +352,7 @@ void         __stdcall winx_list_destroy    (list_entry **phead);
 char __cdecl winx_toupper(char c);
 char __cdecl winx_tolower(char c);
 
+char * __cdecl winx_strdup(const char *s);
 wchar_t * __cdecl winx_wcsdup(const wchar_t *s);
 wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
 

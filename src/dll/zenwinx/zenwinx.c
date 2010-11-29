@@ -37,6 +37,7 @@ void winx_destroy_synch_objects(void);
 void __stdcall MarkWindowsBootAsSuccessful(void);
 char * __stdcall winx_get_error_description(unsigned long status);
 void winx_print(char *string);
+void winx_flush_dbg_log(void);
 
 void test(void)
 {
@@ -54,12 +55,10 @@ void test(void)
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	if(dwReason == DLL_PROCESS_ATTACH){
-		winx_create_global_heap();
-		winx_init_synch_objects();
+		zenwinx_native_init();
 		//test();
 	} else if(dwReason == DLL_PROCESS_DETACH){
-		winx_destroy_global_heap();
-		winx_destroy_synch_objects();
+		zenwinx_native_unload();
 	}
 	return 1;
 }
@@ -83,8 +82,8 @@ void __stdcall zenwinx_native_init(void)
  */
 void __stdcall zenwinx_native_unload(void)
 {
-	winx_destroy_global_heap();
 	winx_destroy_synch_objects();
+	winx_destroy_global_heap();
 }
 
 /**
@@ -156,6 +155,7 @@ void __stdcall winx_exit(int exit_code)
 	NTSTATUS Status;
 	
 	kb_close();
+	winx_flush_dbg_log();
 	Status = NtTerminateProcess(NtCurrentProcess(),exit_code);
 	if(!NT_SUCCESS(Status)){
 		print_post_scriptum("winx_exit: cannot terminate process",Status);
@@ -175,6 +175,7 @@ void __stdcall winx_reboot(void)
 	kb_close();
 	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+	winx_flush_dbg_log();
 	Status = NtShutdownSystem(ShutdownReboot);
 	if(!NT_SUCCESS(Status)){
 		print_post_scriptum("winx_reboot: cannot reboot the computer",Status);
@@ -194,6 +195,7 @@ void __stdcall winx_shutdown(void)
 	kb_close();
 	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+	winx_flush_dbg_log();
 	Status = NtShutdownSystem(ShutdownPowerOff);
 	if(!NT_SUCCESS(Status)){
 		print_post_scriptum("winx_shutdown: cannot shut down the computer",Status);

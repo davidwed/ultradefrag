@@ -66,6 +66,23 @@ char __cdecl winx_tolower(char c)
 }
 
 /**
+ * @brief strdup equivalent.
+ */
+char * __cdecl winx_strdup(const char *s)
+{
+	int length;
+	char *cp;
+	
+	if(s == NULL)
+		return NULL;
+	
+	length = strlen(s);
+	cp = winx_heap_alloc((length + 1) * sizeof(char));
+	if(cp) strcpy(cp,s);
+	return cp;
+}
+
+/**
  * @brief wcsdup equivalent.
  */
 wchar_t * __cdecl winx_wcsdup(const wchar_t *s)

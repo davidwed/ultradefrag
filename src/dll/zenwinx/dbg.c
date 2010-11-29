@@ -34,18 +34,49 @@ typedef struct _DBG_OUTPUT_DEBUG_STRING_BUFFER {
 
 #define DBG_BUFFER_SIZE (4096-sizeof(ULONG))
 
+typedef struct _winx_dbg_log_entry {
+	struct _winx_dbg_log_entry *next;
+	struct _winx_dbg_log_entry *prev;
+	char *buffer;
+} winx_dbg_log_entry;
+
 HANDLE hDbgSynchEvent = NULL;
+HANDLE hFlushLogEvent = NULL;
+int debug_print_enabled = 1;
+
+/**
+ * @brief Indicates whether debug logging
+ * to the file is enabled or not.
+ * @details The logging can be enabled
+ * either by setting UD_ENABLE_DBG_LOG
+ * environment variable before the program
+ * launch or by calling winx_enable_dbg_log().
+ * Size of the log is limited by available
+ * memory, which is rational since logging
+ * is rarely needed and RAM is usually
+ * smaller than free space available on disk.
+ */
+int logging_enabled = 0;
+winx_dbg_log_entry *dbg_log = NULL;
 
 int  __stdcall winx_debug_print(char *string);
+void winx_flush_dbg_log(void);
+void winx_remove_dbg_log(void);
 
 /**
  * @brief Initializes the synchronization 
  * objects used in the debugging routines.
+ * @details This routine checks also for
+ * UD_ENABLE_DBG_LOG environment variable controlling
+ * debug output to the log file. This is done,
+ * because winx_init_synch_objects is called
+ * on early stage of the library initialization.
  * @note Internal use only.
  */
 void winx_init_synch_objects(void)
 {
 	short event_name[64];
+	wchar_t buffer[16];
 	
 	/*
 	* Attach process ID to the event name
@@ -60,6 +91,23 @@ void winx_init_synch_objects(void)
 		(void)winx_create_event(event_name,SynchronizationEvent,&hDbgSynchEvent);
 		if(hDbgSynchEvent) (void)NtSetEvent(hDbgSynchEvent,NULL);
 	}
+	
+	_snwprintf(event_name,64,L"\\winx_flush_log_synch_event_%u",
+		(unsigned int)(DWORD_PTR)(NtCurrentTeb()->ClientId.UniqueProcess));
+	event_name[63] = 0;
+	
+	if(hFlushLogEvent == NULL){
+		(void)winx_create_event(event_name,SynchronizationEvent,&hFlushLogEvent);
+		if(hFlushLogEvent) (void)NtSetEvent(hFlushLogEvent,NULL);
+	}
+	
+	/* check for UD_ENABLE_DBG_LOG */
+	if(winx_query_env_variable(L"UD_ENABLE_DBG_LOG",buffer,sizeof(buffer)/sizeof(wchar_t)) >= 0){
+		if(!wcscmp(buffer,L"1"))
+			logging_enabled = 1;
+	}
+
+	winx_remove_dbg_log();
 }
 
 /**
@@ -69,7 +117,127 @@ void winx_init_synch_objects(void)
  */
 void winx_destroy_synch_objects(void)
 {
+	winx_flush_dbg_log();
 	winx_destroy_event(hDbgSynchEvent);
+	winx_destroy_event(hFlushLogEvent);
+	hDbgSynchEvent = NULL;
+}
+
+/**
+ * @brief Removes the log file.
+ * @note Internal use only.
+ */
+void winx_remove_dbg_log(void)
+{
+	char windir[MAX_PATH + 1];
+	char path[MAX_PATH + 1];
+	
+	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
+		DebugPrint("winx_remove_dbg_log: cannot get windows directory path\n");
+		return;
+	}
+	_snprintf(path,MAX_PATH + 1,"%s\\UltraDefrag\\udefrag.log",windir);
+	path[MAX_PATH] = 0;
+	(void)winx_delete_file(path);
+}
+
+/**
+ * @brief Appends all collected debugging
+ * information to the log file.
+ * @note Internal use only.
+ */
+void winx_flush_dbg_log(void)
+{
+	char windir[MAX_PATH + 1];
+	char path[MAX_PATH + 1];
+	WINX_FILE *f;
+	winx_dbg_log_entry *log_entry;
+	int length;
+	char crlf[] = "\r\n";
+	LARGE_INTEGER interval;
+	NTSTATUS Status;
+	
+	if(dbg_log == NULL)
+		return;
+	
+	/* synchronize with other threads */
+	if(hFlushLogEvent){
+		interval.QuadPart = -(11000 * 10000); /* 11 sec */
+		Status = NtWaitForSingleObject(hFlushLogEvent,FALSE,&interval);
+		if(Status != WAIT_OBJECT_0)	return;
+	}
+	
+	/* disable parallel access to dbg_log list */
+	if(hDbgSynchEvent){
+		interval.QuadPart = -(11000 * 10000); /* 11 sec */
+		Status = NtWaitForSingleObject(hDbgSynchEvent,FALSE,&interval);
+		if(Status != WAIT_OBJECT_0){
+			if(hFlushLogEvent)
+				(void)NtSetEvent(hFlushLogEvent,NULL);
+			return;
+		}
+		debug_print_enabled = 0;
+		(void)NtSetEvent(hDbgSynchEvent,NULL);
+	}
+
+	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
+		DebugPrint("winx_remove_dbg_log: cannot get windows directory path\n");
+		goto done;
+	}
+	_snprintf(path,MAX_PATH + 1,"%s\\UltraDefrag\\udefrag.log",windir);
+	path[MAX_PATH] = 0;
+	f = winx_fbopen(path,"a",DBG_BUFFER_SIZE);
+	if(f != NULL){
+		for(log_entry = dbg_log; log_entry; log_entry = log_entry->next){
+			if(log_entry->buffer){
+				length = strlen(log_entry->buffer);
+				if(length > 0){
+					if(log_entry->buffer[length - 1] == '\n')
+						log_entry->buffer[length - 1] = 0;
+					(void)winx_fwrite(log_entry->buffer,sizeof(char),length,f);
+					/* add a proper newline characters */
+					(void)winx_fwrite(crlf,sizeof(char),2,f);
+				}
+			}
+			if(log_entry->next == dbg_log) break;
+		}
+		winx_fclose(f);
+		winx_list_destroy((list_entry **)(void *)&dbg_log);
+	}
+
+done:
+	/* synchronize with other threads */
+	if(hDbgSynchEvent){
+		interval.QuadPart = -(11000 * 10000); /* 11 sec */
+		Status = NtWaitForSingleObject(hDbgSynchEvent,FALSE,&interval);
+		if(Status != WAIT_OBJECT_0){
+			if(hFlushLogEvent)
+				(void)NtSetEvent(hFlushLogEvent,NULL);
+			return;
+		}
+		debug_print_enabled = 1;
+		(void)NtSetEvent(hDbgSynchEvent,NULL);
+	}
+
+	if(hFlushLogEvent)
+		(void)NtSetEvent(hFlushLogEvent,NULL);
+}
+
+/**
+ * @brief Enables debug logging to the file.
+ */
+void __stdcall winx_enable_dbg_log(void)
+{
+	logging_enabled = 1;
+}
+
+/**
+ * @brief Disables debug logging to the file.
+ */
+void __stdcall winx_disable_dbg_log(void)
+{
+	logging_enabled = 0;
+	winx_flush_dbg_log();
 }
 
 /**
@@ -129,6 +297,7 @@ int __stdcall winx_debug_print(char *string)
 	
 	DBG_OUTPUT_DEBUG_STRING_BUFFER *dbuffer;
 	int length;
+	winx_dbg_log_entry *new_log_entry = NULL, *last_log_entry = NULL;
 	
 	if(string == NULL)
 		return (-1);
@@ -140,6 +309,29 @@ int __stdcall winx_debug_print(char *string)
 		interval.QuadPart = -(11000 * 10000); /* 11 sec */
 		Status = NtWaitForSingleObject(hDbgSynchEvent,FALSE,&interval);
 		if(Status != WAIT_OBJECT_0) return (-1);
+	}
+	
+	if(debug_print_enabled == 0){
+		if(hDbgSynchEvent)
+			(void)NtSetEvent(hDbgSynchEvent,NULL);
+		return 0;
+	}
+	
+	/* save message if logging to file is enabled */
+	if(logging_enabled){
+		if(dbg_log)
+			last_log_entry = dbg_log->prev;
+		new_log_entry = (winx_dbg_log_entry *)winx_list_insert_item((list_entry **)(void *)&dbg_log,
+			(list_entry *)last_log_entry,sizeof(winx_dbg_log_entry));
+		if(new_log_entry == NULL){
+			/* not enough memory */
+		} else {
+			new_log_entry->buffer = winx_strdup(string);
+			if(new_log_entry->buffer == NULL){
+				/* not enough memory */
+				winx_list_remove_item((list_entry **)(void *)&dbg_log,(list_entry *)new_log_entry);
+			}
+		}
 	}
 	
 	/* 1. Open debugger's objects. */

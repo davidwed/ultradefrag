@@ -557,6 +557,17 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 			/* clear environment variable */
 			result = winx_set_env_variable(name,NULL);
 		}
+		/* XXX: handle a special case of %UD_ENABLE_DBG_LOG% */
+		if(wcscmp(_wcsupr(name),L"UD_ENABLE_DBG_LOG") == 0){
+			if(value_length){
+				if(wcscmp(value,L"1") == 0)
+					winx_enable_dbg_log();
+				else
+					winx_disable_dbg_log();
+			} else {
+				winx_disable_dbg_log();
+			}
+		}
 		winx_heap_free(name);
 		return result;
 	}

@@ -70,6 +70,8 @@ EXPORTS
 	winx_dbg_print
 	winx_dbg_print_ex
 	winx_dbg_print_header
+	winx_enable_dbg_log
+	winx_disable_dbg_log
 	winx_str2time
 	winx_time2str
 	winx_xtime
@@ -84,6 +86,7 @@ EXPORTS
 	zenwinx_native_unload
 	winx_toupper
 	winx_tolower
+	winx_strdup
 	winx_wcsdup
 	winx_wcsistr
 	winx_patcomp
