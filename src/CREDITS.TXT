@@ -60,6 +60,7 @@
     Hindi           - Gaurav Chatterjee
     Hungarian       - Nagy Zsolt, Stefan Pendl
     Icelandic       - Stefan Pendl
+    Indonesian      - Imanuel Novian
     Italian         - Paolo Loggia, Stefan Pendl
     Japanese        - ao3, Stefan Pendl
     Korean          - Alex Han, Stefan Pendl

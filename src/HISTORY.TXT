@@ -7,6 +7,10 @@ HISTORY
       information to a log file in %windir%\UltraDefrag\udefrag.log
       Intended for use in boot time interface and batch scripts.
 
+    - the following translations were added:
+
+      Indonesian
+
     - the following translations were updated:
 
       Spanish(ES)
