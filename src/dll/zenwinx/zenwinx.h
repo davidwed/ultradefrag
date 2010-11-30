@@ -355,6 +355,7 @@ char __cdecl winx_tolower(char c);
 char * __cdecl winx_strdup(const char *s);
 wchar_t * __cdecl winx_wcsdup(const wchar_t *s);
 wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
+char * __cdecl winx_vsprintf(const char *format,va_list arg);
 
 #define WINX_PAT_ICASE  0x1 /* compile patterns for case insensitive search */
 

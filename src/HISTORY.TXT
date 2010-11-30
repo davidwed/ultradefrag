@@ -11,8 +11,8 @@ HISTORY
 
       Spanish(ES)
 
-    - Developers: winx_strdup, winx_enable_dbg_log, winx_disable_dbg_log
-      functions added to zenwinx library
+    - Developers: winx_strdup, winx_vsprintf, winx_enable_dbg_log,
+      winx_disable_dbg_log functions added to zenwinx library
 
     beta1:
     - defragmentation algorithm reimplemented; partial defragmentation improved

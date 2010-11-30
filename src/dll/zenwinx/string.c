@@ -28,6 +28,13 @@
 #include "zenwinx.h"
 
 /**
+ * @brief Size of the buffer used by winx_vsprintf
+ * initially. Larger sizes tend to reduce time needed
+ * to format long strings.
+ */
+#define WINX_VSPRINTF_BUFFER_SIZE 128
+
+/**
  * @brief Reliable _toupper analog.
  * @details MSDN states: "In order for toupper to give
  * the expected results, __isascii and islower must both
@@ -128,6 +135,43 @@ wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 		if(!*s2) return cp;
 		cp++;
 	}
+	
+	return NULL;
+}
+
+/**
+ * @brief Robust and flexible alternative to _vsnprintf.
+ * @param[in] format the format specification.
+ * @param[in] arg pointer to list of arguments.
+ * @return Pointer to the formatted string, NULL
+ * indicates failure. The string must be deallocated
+ * by winx_heap_free after its use.
+ */
+char * __cdecl winx_vsprintf(const char *format,va_list arg)
+{
+	char *buffer;
+	int size;
+	int result;
+	
+	if(format == NULL)
+		return NULL;
+	
+	/* set an initial buffer size */
+	size = WINX_VSPRINTF_BUFFER_SIZE;
+	do {
+		buffer = winx_heap_alloc(size);
+		if(buffer == NULL)
+			return NULL;
+		memset(buffer,0,size); /* needed for _vsnprintf */
+		result = _vsnprintf(buffer,size,format,arg);
+		if(result != -1 && result != size)
+			return buffer;
+		/* buffer is too small; try to allocate two times larger */
+		winx_heap_free(buffer);
+		size <<= 1;
+		if(size <= 0)
+			return NULL;
+	} while(1);
 	
 	return NULL;
 }
