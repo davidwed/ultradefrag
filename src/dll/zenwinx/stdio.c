@@ -93,60 +93,21 @@ int __cdecl winx_puts(const char *string)
 int __cdecl winx_printf(const char *format, ...)
 {
 	va_list arg;
-	int done;
-	char *small_buffer;
-	char *big_buffer = NULL;
-	int size = INTERNAL_BUFFER_SIZE * 2;
+	char *string;
+	int result = 0;
 	
-	/* never call winx_dbg_print_ex() here */
-
-	if(!format) return 0;
+	if(format){
+		va_start(arg,format);
+		string = winx_vsprintf(format,arg);
+		if(string){
+			winx_print(string);
+			result = strlen(string);
+			winx_heap_free(string);
+		}
+		va_end(arg);
+	}
 	
-	small_buffer = winx_heap_alloc(INTERNAL_BUFFER_SIZE);
-	if(!small_buffer){
-		DebugPrint("winx_printf: cannot allocate %u bytes of memory\n",INTERNAL_BUFFER_SIZE);
-		winx_print("\nNot enough memory for winx_printf()!\n");
-		return 0;
-	}
-
-	/* prepare for _vsnprintf call */
-	va_start(arg,format);
-	memset(small_buffer,0,INTERNAL_BUFFER_SIZE);
-	done = _vsnprintf(small_buffer,INTERNAL_BUFFER_SIZE,format,arg);
-	if(done == -1 || done == INTERNAL_BUFFER_SIZE){
-		/* buffer is too small; try to allocate two times larger */
-		do {
-			big_buffer = winx_heap_alloc((SIZE_T)size);
-			if(!big_buffer){
-				DebugPrint("winx_printf: cannot allocate %u bytes of memory\n",size);
-				winx_print("\nNot enough memory for winx_printf()!\n");
-				va_end(arg);
-				winx_heap_free(small_buffer);
-				return 0;
-			}
-			memset(big_buffer,0,size);
-			done = _vsnprintf(big_buffer,size,format,arg);
-			if(done != -1 && done != size) break;
-			winx_heap_free(big_buffer);
-			size = size << 1;
-			if(!size){
-				DebugPrint("winx_printf: buffer expansion failed\n");
-				winx_print("\nwinx_printf: buffer expansion failed!\n");
-				va_end(arg);
-				winx_heap_free(small_buffer);
-				return 0;
-			}
-		} while(1);
-	}
-	if(big_buffer){
-		winx_print(big_buffer);
-		winx_heap_free(big_buffer);
-	} else {
-		winx_print(small_buffer);
-	}
-	va_end(arg);
-	winx_heap_free(small_buffer);
-	return done;
+	return result;
 }
 
 /**
