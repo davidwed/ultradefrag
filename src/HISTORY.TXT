@@ -6,8 +6,14 @@ HISTORY
     - UD_ENABLE_DBG_LOG environment variable added to force save of debugging
       information to a log file in %windir%\UltraDefrag\udefrag.log
       Intended for use in boot time interface and batch scripts.
+
+    - the following translations were updated:
+
+      Spanish(ES)
+
     - Developers: winx_strdup, winx_enable_dbg_log, winx_disable_dbg_log
       functions added to zenwinx library
+
     beta1:
     - defragmentation algorithm reimplemented; partial defragmentation improved
     - ability to defragment MFT as well as other internal NTFS files
