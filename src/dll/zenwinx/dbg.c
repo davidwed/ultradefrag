@@ -248,31 +248,18 @@ void __stdcall winx_disable_dbg_log(void)
  */
 void __cdecl winx_dbg_print(char *format, ...)
 {
-	char *buffer = NULL;
 	va_list arg;
-	int length;
+	char *string;
 	
-	/* never call winx_dbg_print_ex() here! */
-
-	if(!format) return;
-	buffer = winx_virtual_alloc(DBG_BUFFER_SIZE);
-	if(!buffer){
-		winx_debug_print("winx_dbg_print: cannot allocate required amount of memory");
-		return;
+	if(format){
+		va_start(arg,format);
+		string = winx_vsprintf(format,arg);
+		if(string){
+			winx_debug_print(string);
+			winx_heap_free(string);
+		}
+		va_end(arg);
 	}
-
-	/* 1a. store resulting ANSI string into buffer */
-	va_start(arg,format);
-	memset(buffer,0,DBG_BUFFER_SIZE);
-	length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
-	(void)length;
-	buffer[DBG_BUFFER_SIZE - 1] = 0;
-	va_end(arg);
-
-	/* 1b. send resulting ANSI string to the debugger */
-	winx_debug_print(buffer);
-	
-	winx_virtual_free(buffer,DBG_BUFFER_SIZE);
 }
 
 /**
@@ -490,40 +477,23 @@ char * __stdcall winx_get_error_description(unsigned long status)
  */
 void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
 {
-	#define ERR_MSG_LENGTH 4096 /* because impossible to define exactly */
-	char *buffer;
 	va_list arg;
-	int length;
-
-	/*
-	* Localized strings sometimes appears on the screen 
-	* in abracadabra form, therefore we should avoid  
-	* FormatMessage() calls in debugging.
-	* When I tried to get debugging information on NT4/w2k
-	* systems running under MS Virtual PC emulator, DbgView
-	* displayed localized text in completely unreadable form
-	* (as sequence of question characters).
-	*/
+	char *string;
 	
-	if(format == NULL)
-		return;
-
-	buffer = winx_heap_alloc(ERR_MSG_LENGTH);
-	if(!buffer){
-		DebugPrint("winx_dbg_print_ex: cannot allocate %u bytes of memory",ERR_MSG_LENGTH);
-		return;
+	if(format){
+		va_start(arg,format);
+		string = winx_vsprintf(format,arg);
+		if(string){
+			/*
+			* FormatMessage may result in unreadable strings
+			* if a proper locale is not set in DbgView program.
+			*/
+			DebugPrint("%s: 0x%x: %s\n",string,(UINT)status,
+				winx_get_error_description(status));
+			winx_heap_free(string);
+		}
+		va_end(arg);
 	}
-
-	va_start(arg,format);
-	memset(buffer,0,ERR_MSG_LENGTH);
-	length = _vsnprintf(buffer,ERR_MSG_LENGTH - 1,format,arg);
-	(void)length;
-	buffer[ERR_MSG_LENGTH - 1] = 0;
-	DebugPrint("%s: 0x%x: %s\n",buffer,(unsigned int)status,
-			winx_get_error_description(status));
-	va_end(arg);
-	
-	winx_heap_free(buffer);
 }
 
 /**
