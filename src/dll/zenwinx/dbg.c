@@ -188,6 +188,8 @@ void winx_flush_dbg_log(void)
 	path[MAX_PATH] = 0;
 	f = winx_fbopen(path,"a",DBG_BUFFER_SIZE);
 	if(f != NULL){
+        winx_printf("\nWriting log file ...\n");
+        
 		for(log_entry = dbg_log; log_entry; log_entry = log_entry->next){
 			if(log_entry->buffer){
 				length = strlen(log_entry->buffer);
@@ -308,8 +310,8 @@ int __stdcall winx_debug_print(char *string)
 	if(logging_enabled){
 		if(dbg_log)
 			last_log_entry = dbg_log->prev;
-		new_log_entry = (winx_dbg_log_entry *)winx_list_insert_item((list_entry **)(void *)&dbg_log,
-			(list_entry *)last_log_entry,sizeof(winx_dbg_log_entry));
+            new_log_entry = (winx_dbg_log_entry *)winx_list_insert_item((list_entry **)(void *)&dbg_log,
+                (list_entry *)last_log_entry,sizeof(winx_dbg_log_entry));
 		if(new_log_entry == NULL){
 			/* not enough memory */
 		} else {
