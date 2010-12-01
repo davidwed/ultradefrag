@@ -256,6 +256,8 @@ int __cdecl main(int argc, char **argv)
 	return 0;
 	*/
 
+    (void)SetEnvironmentVariableW(L"UD_LOG_SUFFIX",L"_console");
+	
 	/* initialize the program */
 	parse_cmdline(argc,argv);
 	init_console();

@@ -63,6 +63,8 @@ int  __stdcall winx_debug_print(char *string);
 void winx_flush_dbg_log(void);
 void winx_remove_dbg_log(void);
 
+#define DBG_LOG_FILE_FORMAT "%s\\UltraDefrag\\udefrag%ls.log"
+
 /**
  * @brief Initializes the synchronization 
  * objects used in the debugging routines.
@@ -132,11 +134,18 @@ void winx_remove_dbg_log(void)
 	char windir[MAX_PATH + 1];
 	char path[MAX_PATH + 1];
 	
+	wchar_t suffix[16] = L"";
+
 	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
 		DebugPrint("winx_remove_dbg_log: cannot get windows directory path\n");
 		return;
 	}
-	_snprintf(path,MAX_PATH + 1,"%s\\UltraDefrag\\udefrag.log",windir);
+
+	/* check for UD_LOG_SUFFIX, assume console as default */
+	if(winx_query_env_variable(L"UD_LOG_SUFFIX",suffix,sizeof(suffix)/sizeof(wchar_t)) < 0)
+		wcscpy(suffix,L"_console");
+
+	_snprintf(path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
 	path[MAX_PATH] = 0;
 	(void)winx_delete_file(path);
 }
@@ -156,6 +165,8 @@ void winx_flush_dbg_log(void)
 	char crlf[] = "\r\n";
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
+	wchar_t suffix[16] = L"";
+
 	
 	if(dbg_log == NULL)
 		return;
@@ -184,7 +195,12 @@ void winx_flush_dbg_log(void)
 		DebugPrint("winx_remove_dbg_log: cannot get windows directory path\n");
 		goto done;
 	}
-	_snprintf(path,MAX_PATH + 1,"%s\\UltraDefrag\\udefrag.log",windir);
+
+	/* check for UD_LOG_SUFFIX */
+	if(winx_query_env_variable(L"UD_LOG_SUFFIX",suffix,sizeof(suffix)/sizeof(wchar_t)) < 0)
+		wcscpy(suffix,L"");
+
+	_snprintf(path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
 	path[MAX_PATH] = 0;
 	f = winx_fbopen(path,"a",DBG_BUFFER_SIZE);
 	if(f != NULL){
