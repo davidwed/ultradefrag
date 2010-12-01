@@ -549,14 +549,6 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 				wcscat(value,argv[i]);
 			}
 		}
-		if(value_length){
-			/* set environment variable */
-			result = winx_set_env_variable(name,value);
-			winx_heap_free(value);
-		} else {
-			/* clear environment variable */
-			result = winx_set_env_variable(name,NULL);
-		}
 		/* XXX: handle a special case of %UD_ENABLE_DBG_LOG% */
 		if(wcscmp(_wcsupr(name),L"UD_ENABLE_DBG_LOG") == 0){
 			if(value_length){
@@ -567,6 +559,14 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 			} else {
 				winx_disable_dbg_log();
 			}
+		}
+		if(value_length){
+			/* set environment variable */
+			result = winx_set_env_variable(name,value);
+			winx_heap_free(value);
+		} else {
+			/* clear environment variable */
+			result = winx_set_env_variable(name,NULL);
 		}
 		winx_heap_free(name);
 		return result;
