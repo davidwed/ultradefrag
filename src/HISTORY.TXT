@@ -13,7 +13,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Spanish(ES)
+      Spanish(ES), Czech
 
     - Developers: winx_strdup, winx_vsprintf, winx_enable_dbg_log,
       winx_disable_dbg_log functions added to zenwinx library
