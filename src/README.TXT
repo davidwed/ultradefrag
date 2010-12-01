@@ -1,4 +1,4 @@
-The Ultra Defragmenter Version 4.4.0
+The Ultra Defragmenter Version 5.0.0
 ------------------------------------
 
 UltraDefrag is a powerful disk defragmentation tool for Windows.
@@ -8,7 +8,7 @@ registry hives and paging file can be processed by UltraDefrag
 during the Windows boot process.
 
 Also one of the primary goals of the UltraDefrag design
-is doing the job as fast as possible.
+is doing the job as fast and reliable as possible.
 
 UltraDefrag is fully compatible with Windows NT 4.0, Windows 2000,
 Windows XP, Windows Server 2003, Windows Vista, Windows Server 2008,
