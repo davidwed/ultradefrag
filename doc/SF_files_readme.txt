@@ -17,9 +17,9 @@ Package contents:
 
 Release stages explained:
 
-    alpha ... new features implemented and tested, problems are to be expected
+    alpha ... new features implemented and tested, problems may be experienced
               used to test major changes
-    beta .... base features implemented and tested, problems are to be expected
+    beta .... base features implemented and tested, problems may be experienced
               used to test minor changes
     RC ...... release candidate, all features are implemented and fully tested
               used to iron out last remaining problems
