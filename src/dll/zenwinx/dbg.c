@@ -150,7 +150,8 @@ void winx_remove_dbg_log(void)
        to set it in the main executable.
        In addition udefrag_native.exe can be checked here too.
        TODO: use NtQueryInformationProcess and parse PEB->RTL_USER_PROCESS_PARAMETERS->ImagePathName
-             set a global variable to hold this information, so it can be used to flush the log */
+             set a global variable to hold this information, so it can be used to flush the log
+             Use a table of ImageFileName-LogSuffix pairs for highest portability */
 
 	_snprintf(path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
 	path[MAX_PATH] = 0;
