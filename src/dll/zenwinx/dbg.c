@@ -144,6 +144,13 @@ void winx_remove_dbg_log(void)
 	/* check for UD_LOG_SUFFIX, assume console as default */
 	if(winx_query_env_variable(L"UD_LOG_SUFFIX",suffix,sizeof(suffix)/sizeof(wchar_t)) < 0)
 		wcscpy(suffix,L"_console");
+    /* for GUI and console this is called from DLL_PROCESS_ATTACH, so UD_LOG_SUFFIX is not set yet,
+       in this case a decission based on ultradefrag.exe or udefrag.exe would be best.
+       This would allow to set the UD_LOG_SUFFIX internal variable here and remove the need
+       to set it in the main executable.
+       In addition udefrag_native.exe can be checked here too.
+       TODO: use NtQueryInformationProcess and parse PEB->RTL_USER_PROCESS_PARAMETERS->ImagePathName
+             set a global variable to hold this information, so it can be used to flush the log */
 
 	_snprintf(path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
 	path[MAX_PATH] = 0;
