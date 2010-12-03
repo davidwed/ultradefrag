@@ -58,6 +58,7 @@ int debug_print_enabled = 1;
  */
 int logging_enabled = 0;
 winx_dbg_log_entry *dbg_log = NULL;
+int log_deleted = 0;
 
 int  __stdcall winx_debug_print(char *string);
 void winx_flush_dbg_log(void);
@@ -106,10 +107,8 @@ void winx_init_synch_objects(void)
 	/* check for UD_ENABLE_DBG_LOG */
 	if(winx_query_env_variable(L"UD_ENABLE_DBG_LOG",buffer,sizeof(buffer)/sizeof(wchar_t)) >= 0){
 		if(!wcscmp(buffer,L"1"))
-			logging_enabled = 1;
+			winx_enable_dbg_log();
 	}
-
-	winx_remove_dbg_log();
 }
 
 /**
@@ -255,6 +254,12 @@ done:
 void __stdcall winx_enable_dbg_log(void)
 {
 	logging_enabled = 1;
+    
+    /* remove old log on first run to avoid deleting it on pending boot-off */
+    if(!log_deleted){
+        log_deleted = 1;
+        winx_remove_dbg_log();
+    }
 }
 
 /**
