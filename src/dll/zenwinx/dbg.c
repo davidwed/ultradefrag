@@ -134,8 +134,10 @@ void winx_destroy_synch_objects(void)
 int winx_build_dbg_log_path(void)
 {
 	char windir[MAX_PATH + 1];
-
 	wchar_t suffix[16] = L"";
+	/* NTSTATUS Status;
+    UNICODE_STRING *ImageFileName;
+    ULONG ImageFileNameLength; */
 
 	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
 		DebugPrint("winx_build_dbg_log_path: cannot get windows directory path\n");
@@ -165,7 +167,7 @@ int winx_build_dbg_log_path(void)
     to set it in the main executable.
     In addition udefrag_native.exe can be checked here too.
 
-    TODO: use NtQueryInformationProcess and parse PEB->RTL_USER_PROCESS_PARAMETERS->ImagePathName
+    TODO: use NtQueryInformationProcess and ProcessImageFileName
         Use a table of ImageFileName-LogPathFormat pairs for highest portability
         typedef struct _dbg_log_path_entry {
             char *executable_name
@@ -178,6 +180,15 @@ int winx_build_dbg_log_path(void)
         "ultradefrag.exe",   "%s\\Logs\\%s.log", "EXE_PATH", "EXE_NAME"
         "defrag_native.exe", "%s\\Ultradefrag\\Logs\\%s.log", "WINDIR", "EXE_NAME"
     */
+    
+	/* ImageFileNameLength = sizeof(UNICODE_STRING) + MAX_PATH * sizeof(wchar_t)
+    ImageFileName = winx_heap_alloc(ImageFileNameLength);
+    Status = NtQueryInformationProcess(NtCurrentProcess(),
+					ProcessImageFileName,ImageFileName,
+					ImageFileNameLength,
+					NULL);
+	if(NT_SUCCESS(Status)){
+    } */
 
 	_snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
 	dbg_log_path[MAX_PATH] = 0;
