@@ -694,7 +694,7 @@ int __cdecl boot_off_handler(int argc,short **argv,short **envp)
  */
 static int __cdecl shutdown_handler(int argc,short **argv,short **envp)
 {
-	winx_printf("Shutdown ...");
+	winx_printf("Shutdown ...\n");
 	SavePendingBootOffState();
 	winx_shutdown();
 	winx_printf("\nShutdown your computer manually.\n");
@@ -706,7 +706,7 @@ static int __cdecl shutdown_handler(int argc,short **argv,short **envp)
  */
 static int __cdecl reboot_handler(int argc,short **argv,short **envp)
 {
-	winx_printf("Reboot ...");
+	winx_printf("Reboot ...\n");
 	SavePendingBootOffState();
 	winx_reboot();
 	winx_printf("\nReboot your computer manually.\n");
