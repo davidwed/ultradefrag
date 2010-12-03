@@ -37,6 +37,7 @@ typedef struct _DBG_OUTPUT_DEBUG_STRING_BUFFER {
 typedef struct _winx_dbg_log_entry {
 	struct _winx_dbg_log_entry *next;
 	struct _winx_dbg_log_entry *prev;
+    /* may be add time stamp here */
 	char *buffer;
 } winx_dbg_log_entry;
 
@@ -59,6 +60,7 @@ int debug_print_enabled = 1;
 int logging_enabled = 0;
 winx_dbg_log_entry *dbg_log = NULL;
 int log_deleted = 0;
+char dbg_log_path[MAX_PATH + 1] = {0};
 
 int  __stdcall winx_debug_print(char *string);
 void winx_flush_dbg_log(void);
@@ -125,36 +127,72 @@ void winx_destroy_synch_objects(void)
 }
 
 /**
+ * @brief Builds the log file path.
+ * @return Zero for success, negative value otherwise.
+ * @note Internal use only.
+ */
+int winx_build_dbg_log_path(void)
+{
+	char windir[MAX_PATH + 1];
+
+	wchar_t suffix[16] = L"";
+
+	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
+		DebugPrint("winx_build_dbg_log_path: cannot get windows directory path\n");
+		return -1;
+	}
+    
+    /*
+    TODO: use a Logs folder contained in the location of the process executable,
+        this allows to make it independend from installed and portable version.
+        In addition make the log file name dependent on the process executable
+
+        Examples:
+            Executable ... C:\WINDOWS\UltraDefrag\udefrag.exe
+            Log file ..... C:\WINDOWS\UltraDefrag\Logs\udefrag.log
+
+            Executable ... X:\UltraDefrag\ultradefrag.exe
+            Log file ..... X:\UltraDefrag\Logs\ultradefrag.log
+    */
+
+	/* check for UD_LOG_SUFFIX, assume console as default */
+	if(winx_query_env_variable(L"UD_LOG_SUFFIX",suffix,sizeof(suffix)/sizeof(wchar_t)) < 0)
+		wcscpy(suffix,L"_console");
+    /*
+    for GUI and console this is called from DLL_PROCESS_ATTACH, so UD_LOG_SUFFIX is not set yet,
+    in this case a decission based on ultradefrag.exe or udefrag.exe would be best.
+    This would allow to set the UD_LOG_SUFFIX internal variable here and remove the need
+    to set it in the main executable.
+    In addition udefrag_native.exe can be checked here too.
+
+    TODO: use NtQueryInformationProcess and parse PEB->RTL_USER_PROCESS_PARAMETERS->ImagePathName
+        Use a table of ImageFileName-LogPathFormat pairs for highest portability
+        typedef struct _dbg_log_path_entry {
+            char *executable_name
+            char *default_log_path
+            char *path_substitute    // literal or one of EXE_PATH/WINDIR
+            char *name_substitute    // literal or EXE_NAME
+        } dbg_log_path_entry
+        
+        "udefrag.exe",       "%s\\Logs\\%s.log", "EXE_PATH", "EXE_NAME"
+        "ultradefrag.exe",   "%s\\Logs\\%s.log", "EXE_PATH", "EXE_NAME"
+        "defrag_native.exe", "%s\\Ultradefrag\\Logs\\%s.log", "WINDIR", "EXE_NAME"
+    */
+
+	_snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
+	dbg_log_path[MAX_PATH] = 0;
+    
+    return 0;
+}
+
+/**
  * @brief Removes the log file.
  * @note Internal use only.
  */
 void winx_remove_dbg_log(void)
 {
-	char windir[MAX_PATH + 1];
-	char path[MAX_PATH + 1];
-	
-	wchar_t suffix[16] = L"";
-
-	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
-		DebugPrint("winx_remove_dbg_log: cannot get windows directory path\n");
-		return;
-	}
-
-	/* check for UD_LOG_SUFFIX, assume console as default */
-	if(winx_query_env_variable(L"UD_LOG_SUFFIX",suffix,sizeof(suffix)/sizeof(wchar_t)) < 0)
-		wcscpy(suffix,L"_console");
-    /* for GUI and console this is called from DLL_PROCESS_ATTACH, so UD_LOG_SUFFIX is not set yet,
-       in this case a decission based on ultradefrag.exe or udefrag.exe would be best.
-       This would allow to set the UD_LOG_SUFFIX internal variable here and remove the need
-       to set it in the main executable.
-       In addition udefrag_native.exe can be checked here too.
-       TODO: use NtQueryInformationProcess and parse PEB->RTL_USER_PROCESS_PARAMETERS->ImagePathName
-             set a global variable to hold this information, so it can be used to flush the log
-             Use a table of ImageFileName-LogSuffix pairs for highest portability */
-
-	_snprintf(path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
-	path[MAX_PATH] = 0;
-	(void)winx_delete_file(path);
+	if(winx_build_dbg_log_path() == 0)
+        (void)winx_delete_file(dbg_log_path);
 }
 
 /**
@@ -164,15 +202,12 @@ void winx_remove_dbg_log(void)
  */
 void winx_flush_dbg_log(void)
 {
-	char windir[MAX_PATH + 1];
-	char path[MAX_PATH + 1];
 	WINX_FILE *f;
 	winx_dbg_log_entry *log_entry;
 	int length;
 	char crlf[] = "\r\n";
 	LARGE_INTEGER interval;
 	NTSTATUS Status;
-	wchar_t suffix[16] = L"";
 
 	
 	if(dbg_log == NULL)
@@ -198,18 +233,10 @@ void winx_flush_dbg_log(void)
 		(void)NtSetEvent(hDbgSynchEvent,NULL);
 	}
 
-	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
-		DebugPrint("winx_remove_dbg_log: cannot get windows directory path\n");
+	if(winx_build_dbg_log_path() != 0)
 		goto done;
-	}
 
-	/* check for UD_LOG_SUFFIX */
-	if(winx_query_env_variable(L"UD_LOG_SUFFIX",suffix,sizeof(suffix)/sizeof(wchar_t)) < 0)
-		wcscpy(suffix,L"");
-
-	_snprintf(path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
-	path[MAX_PATH] = 0;
-	f = winx_fbopen(path,"a",DBG_BUFFER_SIZE);
+	f = winx_fbopen(dbg_log_path,"a",DBG_BUFFER_SIZE);
 	if(f != NULL){
         winx_printf("\nWriting log file ...\n");
         
@@ -255,7 +282,8 @@ void __stdcall winx_enable_dbg_log(void)
 {
 	logging_enabled = 1;
     
-    /* remove old log on first run to avoid deleting it on pending boot-off */
+    /* remove old log only on first run, if new one is created,
+       to avoid deleting it on pending boot-off */
     if(!log_deleted){
         log_deleted = 1;
         winx_remove_dbg_log();
