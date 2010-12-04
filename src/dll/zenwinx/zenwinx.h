@@ -313,13 +313,13 @@ int __stdcall winx_unregister_boot_exec_command(short *command);
 
 typedef enum _DBG_LOG_PATH_TYPE {
     DbgLogPathUseExecutable = 0,    /* same path and name as executable, but .exe replaced by .log */
-    DbgLogPathWinDir,               /* use DBG_LOG_PATH_DIR_FMT format string */
-    DbgLogPathWinDirAndExe,         /* use DBG_LOG_PATH_DIR_EXE_FMT format string */
+    DbgLogPathWinDir,               /* uses DBG_LOG_PATH_DIR_FMT format string, prepends %WinDir% */
+    DbgLogPathWinDirAndExe,         /* uses DBG_LOG_PATH_DIR_EXE_FMT format string, prepends %WinDir% */
 } DBG_LOG_PATH_TYPE, *PDBG_LOG_PATH_TYPE;
 
-#define DBG_LOG_PATH_DIR_FMT        "%s\\UltraDefrag\\udefrag.log"
+#define DBG_LOG_PATH_DIR_FMT        "%s\\UltraDefrag\\ultradefrag.log"
 /* Sample resulting path:
-        \??\C:\Windows\UltraDefrag\udefrag.log */
+        \??\C:\Windows\UltraDefrag\ultradefrag.log */
 
 #define DBG_LOG_PATH_DIR_EXE_FMT    "%s\\UltraDefrag\\%s.log"
 /* Sample resulting path for defrag_native.exe:

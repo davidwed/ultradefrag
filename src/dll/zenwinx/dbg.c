@@ -106,8 +106,11 @@ void winx_init_synch_objects(void)
 	
 	/* check for UD_ENABLE_DBG_LOG */
 	if(winx_query_env_variable(L"UD_ENABLE_DBG_LOG",buffer,sizeof(buffer)/sizeof(wchar_t)) >= 0){
-		if(!wcscmp(buffer,L"1"))
+		if(!wcscmp(buffer,L"1")){
 			winx_enable_dbg_log(DbgLogPathWinDirAndExe);
+			//winx_enable_dbg_log(DbgLogPathWinDir);
+			//winx_enable_dbg_log(DbgLogPathUseExecutable);
+        }
 	}
 }
 
@@ -131,15 +134,16 @@ void winx_destroy_synch_objects(void)
  */
 void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
 {
-	char windir[MAX_PATH + 1];
-	char path[MAX_PATH + 1];
-	char exename[MAX_PATH + 1];
+	char windir[MAX_PATH + 1] = {0};
+	char path[MAX_PATH + 1]   = {0};
+	char name[MAX_PATH + 1]   = {0};
+	char format[MAX_PATH + 1] = {0};
 	NTSTATUS Status;
     PROCESS_BASIC_INFORMATION ProcessInformation;
-    ANSI_STRING as;
-    int i = 0, j = 0;
+    ANSI_STRING as = {0};
+    int i, j;
     
-    if(PathType == DbgLogPathUseExecutable){
+    if(PathType == DbgLogPathUseExecutable || PathType == DbgLogPathWinDirAndExe){
         RtlZeroMemory(&ProcessInformation,sizeof(ProcessInformation));
         Status = NtQueryInformationProcess(NtCurrentProcess(),
                         ProcessBasicInformation,&ProcessInformation,
@@ -147,64 +151,62 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
                         NULL);
         if(NT_SUCCESS(Status)){
             if(RtlUnicodeStringToAnsiString(&as,&ProcessInformation.PebBaseAddress->ProcessParameters->ImagePathName,TRUE) == STATUS_SUCCESS){
-                if(as.Length < MAX_PATH){
-                    (void)strcpy(dbg_log_path,"\\??\\");
-                    (void)strncat(dbg_log_path,as.Buffer,as.Length-3);
-                    (void)strcat(dbg_log_path,"log");
+                if(as.Length < (MAX_PATH-4)){
+                    switch(PathType){
+                        case DbgLogPathUseExecutable:
+                            (void)strcpy(name,"\\??\\");
+                            (void)strcat(name,as.Buffer);
+                            break;
+                        case DbgLogPathWinDirAndExe:
+                            j = 0;
+                            i = as.Length-strlen(strrchr(as.Buffer, '\\'))+1;
+                            while(name[j] = as.Buffer[i]){
+                                j++;
+                                i++;
+                            }
+                    }
+                    /* strip off extension */
+                    i = strlen(name);
+                    while(name[i] != '\\') {
+                        if(name[i] == '.'){
+                            name[i] = 0;
+                            break;
+                        }
+                        i--;
+                    }
                 }
                 RtlFreeAnsiString(&as);
             } else {
-                DebugPrint("winx_build_dbg_log_path: cannot build process specific log path: not enough memory\n");
+                DebugPrint("winx_build_dbg_log_path: cannot convert unicode to ansi path: not enough memory\n");
             }
         } else {
             DebugPrint("winx_build_dbg_log_path: cannot query process basic information\n");
         }
-    } else {
+    }
+    if(PathType == DbgLogPathWinDir || PathType == DbgLogPathWinDirAndExe){
         if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
             DebugPrint("winx_build_dbg_log_path: cannot get windows directory path\n");
         } else {
-            if(PathType == DbgLogPathWinDir){
-                _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_FMT,windir);
-                dbg_log_path[MAX_PATH] = 0;
-            }
-            if(PathType == DbgLogPathWinDirAndExe){
-                RtlZeroMemory(&ProcessInformation,sizeof(ProcessInformation));
-                Status = NtQueryInformationProcess(NtCurrentProcess(),
-                                ProcessBasicInformation,&ProcessInformation,
-                                sizeof(ProcessInformation),
-                                NULL);
-                if(NT_SUCCESS(Status)){
-                    if(RtlUnicodeStringToAnsiString(&as,&ProcessInformation.PebBaseAddress->ProcessParameters->ImagePathName,TRUE) == STATUS_SUCCESS){
-                        if(as.Length < MAX_PATH){
-                            (void)strcpy(path,strrchr(as.Buffer, '\\'));
-                            while(1){
-                                if(path[i] != '\\'){
-                                    if(path[i] == '.'){
-                                        exename[j] = 0;
-                                        break;
-                                    } else {
-                                        exename[j] = path[i];
-                                        j++;
-                                    }
-                                }
-                                i++;
-                            }
-                            
-                            _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_EXE_FMT,windir,exename);
-                            dbg_log_path[MAX_PATH] = 0;
-                        }
-                        RtlFreeAnsiString(&as);
-                    } else {
-                        DebugPrint("winx_build_dbg_log_path: cannot build image specific log path: not enough memory\n");
-                    }
-                } else {
-                    DebugPrint("winx_build_dbg_log_path: cannot query process basic information for image file name\n");
-                }
-            }
+            (void)strcpy(path,windir);
         }
     }
+    switch(PathType){
+        case DbgLogPathUseExecutable:
+            if(strlen(name)>0)
+                _snprintf(dbg_log_path,MAX_PATH + 1,"%s.log",name);
+            break;
+        case DbgLogPathWinDir:
+            if(strlen(path)>0)
+                _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_FMT,path);
+            break;
+        case DbgLogPathWinDirAndExe:
+            if(strlen(path)>0 && strlen(name)>0)
+                _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_EXE_FMT,path,name);
+            break;
+    }
+    dbg_log_path[MAX_PATH] = 0;
 
-    DebugPrint("winx_build_dbg_log_path: log path ... %s\n", dbg_log_path);
+    DebugPrint("winx_build_dbg_log_path: type %d log path ... %s\n", PathType, dbg_log_path);
 }
 
 /**
