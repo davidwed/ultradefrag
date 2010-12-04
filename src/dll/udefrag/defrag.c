@@ -59,7 +59,7 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 	path[4] = winx_toupper(volume_letter);
 	RtlInitAnsiString(&as,path);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("new_winx_vopen: cannot open %s: not enough memory\n",path);
+		DebugPrint("new_winx_vopen: cannot open %s: not enough memory",path);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -87,7 +87,7 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 	f = (WINX_FILE *)winx_heap_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		DebugPrint("new_winx_vopen: cannot open %s: not enough memory\n",path);
+		DebugPrint("new_winx_vopen: cannot open %s: not enough memory",path);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -133,8 +133,8 @@ int defragment(udefrag_job_parameters *jp)
 	
 	/* check for %UD_DRY_RUN% existence */
 	if(winx_query_env_variable(L"UD_DRY_RUN",env_buffer,sizeof(env_buffer)/sizeof(short)) >= 0){
-		DebugPrint("%%UD_DRY_RUN%% environment variable exists,\n");
-		DebugPrint("therefore no actual data moves will be performed on disk\n");
+		DebugPrint("%%UD_DRY_RUN%% environment variable exists,");
+		DebugPrint("therefore no actual data moves will be performed on disk");
 		dry_run = 1;
 	} else {
 		dry_run = 0;
@@ -208,10 +208,10 @@ int defragment(udefrag_job_parameters *jp)
 			
 			/* move the file */
 			if(move_file(f_largest->f,rgn->lcn,jp,fVolume) >= 0){
-				DebugPrint("Defrag success for %ws\n",f_largest->f->path);
+				DebugPrint("Defrag success for %ws",f_largest->f->path);
 				defragmented_files ++;
 			} else {
-				DebugPrint("Defrag failure for %ws\n",f_largest->f->path);
+				DebugPrint("Defrag failure for %ws",f_largest->f->path);
 			}
 
 			/* skip locked files here to prevent skipping the current free region */
@@ -230,10 +230,10 @@ int defragment(udefrag_job_parameters *jp)
 
 	/* display amount of moved data and number of defragmented files */
 	moved_clusters = jp->pi.moved_clusters;
-	DebugPrint("%I64u files defragmented\n",defragmented_files);
-	DebugPrint("%I64u clusters moved\n",moved_clusters);
+	DebugPrint("%I64u files defragmented",defragmented_files);
+	DebugPrint("%I64u clusters moved",moved_clusters);
 	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
-	DebugPrint("%s moved\n",buffer);
+	DebugPrint("%s moved",buffer);
 	/* display time needed for defragmentation */
 	time2 = winx_xtime() - time;
 	seconds = time2 / 1000;
@@ -308,11 +308,11 @@ int defragment(udefrag_job_parameters *jp)
 			} else {
 				/* join fragments */
 				if(move_file_blocks(f_largest->f,longest_sequence,max_n_blocks,rgn_largest->lcn,jp,fVolume) >= 0){
-					DebugPrint("Partial defrag success for %ws\n",f_largest->f->path);
+					DebugPrint("Partial defrag success for %ws",f_largest->f->path);
 					joined_fragments += max_n_blocks;
 					defragmented_files ++;
 				} else {
-					DebugPrint("Partial defrag failure for %ws\n",f_largest->f->path);
+					DebugPrint("Partial defrag failure for %ws",f_largest->f->path);
 				}
 			}
 		} while(is_too_large(f_largest->f));
@@ -321,10 +321,10 @@ int defragment(udefrag_job_parameters *jp)
 part_defrag_done:
 	/* display amount of moved data and number of partially defragmented files */
 	moved_clusters = jp->pi.moved_clusters - moved_clusters;
-	DebugPrint("%I64u files partially defragmented\n",defragmented_files);
-	DebugPrint("%I64u clusters moved\n",moved_clusters);
+	DebugPrint("%I64u files partially defragmented",defragmented_files);
+	DebugPrint("%I64u clusters moved",moved_clusters);
 	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
-	DebugPrint("%s moved\n",buffer);
+	DebugPrint("%s moved",buffer);
 	/* display time needed for partial defragmentation */
 	time2 = winx_xtime() - time;
 	seconds = time2 / 1000;
@@ -548,7 +548,7 @@ static int move_file_part(HANDLE hFile,ULONGLONG startVcn,
 	IO_STATUS_BLOCK iosb;
 	MOVEFILE_DESCRIPTOR mfd;
 
-	DebugPrint("sVcn: %I64u,tLcn: %I64u,n: %u\n",
+	DebugPrint("sVcn: %I64u,tLcn: %I64u,n: %u",
 		 startVcn,targetLcn,n_clusters);
 
 	if(jp->termination_router((void *)jp)) return (-1);
@@ -596,7 +596,7 @@ static void DbgPrintBlocksOfFile(winx_blockmap *blockmap)
 	winx_blockmap *block;
 	
 	for(block = blockmap; block; block = block->next){
-		DebugPrint("VCN: %I64u, LCN: %I64u, LENGTH: %u\n",
+		DebugPrint("VCN: %I64u, LCN: %I64u, LENGTH: %u",
 			block->vcn,block->lcn,block->length);
 		if(block->next == blockmap) break;
 	}
@@ -621,8 +621,8 @@ static int move_file_helper(HANDLE hFile,winx_file_info *f,
 	winx_file_info f_cp;
 	int result;
 	
-	DebugPrint("%ws\n",f->path);
-	DebugPrint("t: %I64u n: %I64u\n",target,f->disp.clusters);
+	DebugPrint("%ws",f->path);
+	DebugPrint("t: %I64u n: %I64u",target,f->disp.clusters);
 
 	clusters_to_process = f->disp.clusters;
 	curr_target = target;
@@ -664,13 +664,13 @@ static int move_file_helper(HANDLE hFile,winx_file_info *f,
 	f_cp.disp.blockmap = NULL;
 	if(winx_ftw_dump_file(&f_cp,dump_terminator,(void *)jp) >= 0){
 		if(is_fragmented(&f_cp)){
-			DebugPrint("File moving failed: file is still fragmented\n");
+			DebugPrint("File moving failed: file is still fragmented");
 			DbgPrintBlocksOfFile(f_cp.disp.blockmap);
 			winx_list_destroy((list_entry **)(void *)&f_cp.disp.blockmap);
 			return (-1);
 		} else if(f_cp.disp.blockmap){
 			if(f_cp.disp.blockmap->lcn != target){
-				DebugPrint("File moving failed: file is not found on target space\n");
+				DebugPrint("File moving failed: file is not found on target space");
 				DbgPrintBlocksOfFile(f_cp.disp.blockmap);
 				winx_list_destroy((list_entry **)(void *)&f_cp.disp.blockmap);
 				return (-1);
@@ -696,8 +696,8 @@ static int move_file_blocks_helper(HANDLE hFile,winx_file_info *f,
 	int result;
 	int block_found;
 	
-	DebugPrint("%ws\n",f->path);
-	DebugPrint("t: %I64u vcn: %I64u n_blocks: %I64u\n",target,first_block->vcn,n_blocks);
+	DebugPrint("%ws",f->path);
+	DebugPrint("t: %I64u vcn: %I64u n_blocks: %I64u",target,first_block->vcn,n_blocks);
 
 	clusters_to_process = 0;
 	for(block = first_block, i = 0; block; block = block->next, i++){
@@ -753,7 +753,7 @@ static int move_file_blocks_helper(HANDLE hFile,winx_file_info *f,
 				if(block->next == f_cp.disp.blockmap) break;
 			}
 			if(!block_found){
-				DebugPrint("File moving failed: file block is not found on target space\n");
+				DebugPrint("File moving failed: file block is not found on target space");
 				DbgPrintBlocksOfFile(f_cp.disp.blockmap);
 				winx_list_destroy((list_entry **)(void *)&f_cp.disp.blockmap);
 				return (-1);

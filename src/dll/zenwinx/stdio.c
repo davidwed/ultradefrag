@@ -540,7 +540,7 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 	
 	/* check the main parameter for correctness */
 	if(!strings){
-		DebugPrint("winx_print_array_of_strings: strings = NULL!\n");
+		DebugPrint("winx_print_array_of_strings: strings = NULL!");
 		return (-1);
 	}
 	
@@ -553,11 +553,11 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 
 	/* check other parameters */
 	if(!line_width){
-		DebugPrint("winx_print_array_of_strings: line_width = 0!\n");
+		DebugPrint("winx_print_array_of_strings: line_width = 0!");
 		return (-1);
 	}
 	if(!max_rows){
-		DebugPrint("winx_print_array_of_strings: max_rows = 0!\n");
+		DebugPrint("winx_print_array_of_strings: max_rows = 0!");
 		return (-1);
 	}
 	if(prompt == NULL) prompt = DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY;

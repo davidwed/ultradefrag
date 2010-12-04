@@ -312,7 +312,7 @@ short * __stdcall winx_get_windows_boot_options(void)
 
 	if(!empty_value){
 		memcpy((void *)boot_options,(void *)data_buffer,buffer_size);
-		DebugPrint("winx_get_windows_boot_options: %ls - %u\n\n",data_buffer,data_size);
+		DebugPrint("winx_get_windows_boot_options: %ls - %u",data_buffer,data_size);
 		//winx_printf("winx_get_windows_boot_options: %ls - %u\n\n",data_buffer,data_size);
 	} else {
 		boot_options[0] = 0;

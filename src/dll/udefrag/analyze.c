@@ -265,7 +265,7 @@ void update_mft_zones_layout(udefrag_job_parameters *jp)
 	/* update information about mft zones */
 	memcpy(&jp->v_info.ntfs_data,&v.ntfs_data,sizeof(NTFS_DATA));
 
-	DebugPrint("updated mft zones layout:\n");
+	DebugPrint("updated mft zones layout:");
 	DebugPrint("%-12s: %-20s: %-20s", "mft section", "start", "length");
 
 	/* $MFT */
@@ -416,7 +416,7 @@ static void __stdcall progress_callback(winx_file_info *f,void *user_defined_dat
 
 	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb */
 	/*if(wcsstr(path,L"largefile"))
-		DebugPrint("SIZE = %I64u\n", filesize);
+		DebugPrint("SIZE = %I64u", filesize);
 	*/
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw progress */
@@ -793,9 +793,9 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	  && jp->fs_type == FS_NTFS \
 	  && jp->v_info.bytes_per_cluster > 4096 \
 	  && win_version <= WINDOWS_2K){
-		DebugPrint("Cannot defragment NTFS volumes with\n"
-			"cluster size greater than 4 kb\n"
-			"on Windows 2000 and Windows NT 4.0");
+		DebugPrint("Cannot defragment NTFS volumes with");
+		DebugPrint("cluster size greater than 4 kb");
+		DebugPrint("on Windows 2000 and Windows NT 4.0");
 		return UDEFRAG_W2K_4KB_CLUSTERS;
 	}
 	  
@@ -809,9 +809,8 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	if(jp->job_type != ANALYSIS_JOB \
       && jp->fs_type == FS_UDF \
       /* && win_version <= WINDOWS_VISTA */){
-		DebugPrint("Cannot defragment/optimize UDF volumes\n");
-		DebugPrint("because of poor support of FSCTL_MOVE_FILE\n");
-		DebugPrint("by an appropriate system driver.\n");
+		DebugPrint("Cannot defragment/optimize UDF volumes,");
+		DebugPrint("because file system driver does not support FSCTL_MOVE_FILE.");
 		return UDEFRAG_UDF_DEFRAG;
 	}
 	
@@ -823,7 +822,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	  || jp->fs_type == FS_FAT16 \
 	  || jp->fs_type == FS_FAT32 \
 	  || jp->fs_type == FS_FAT32_UNRECOGNIZED)){
-		DebugPrint("Cannot optimize FAT volumes because of unmoveable directories\n");
+		DebugPrint("Cannot optimize FAT volumes because of unmoveable directories");
 		return UDEFRAG_FAT_OPTIMIZATION;
 	}
 

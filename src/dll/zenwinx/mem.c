@@ -95,7 +95,7 @@ void winx_create_global_heap(void)
 		hGlobalHeap = RtlCreateHeap(HEAP_GROWABLE,NULL,0,100 * 1024,NULL,NULL);
 	}
 	if(hGlobalHeap == NULL){
-		DebugPrint("Cannot create global memory heap!\n");
+		DebugPrint("Cannot create global memory heap!");
 		/* winx_printf cannot be used here */
 		winx_print("\nCannot create global memory heap!\n");
 	}

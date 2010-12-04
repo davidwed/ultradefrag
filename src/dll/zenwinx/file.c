@@ -47,7 +47,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 
 	RtlInitAnsiString(&as,filename);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) != STATUS_SUCCESS){
-		DebugPrint("winx_fopen: cannot open %s: not enough memory\n",filename);
+		DebugPrint("winx_fopen: cannot open %s: not enough memory",filename);
 		return NULL;
 	}
 	InitializeObjectAttributes(&oa,&us,OBJ_CASE_INSENSITIVE,NULL,NULL);
@@ -93,7 +93,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
 	f = (WINX_FILE *)winx_heap_alloc(sizeof(WINX_FILE));
 	if(!f){
 		NtClose(hFile);
-		DebugPrint("winx_fopen: cannot open %s: not enough memory\n",filename);
+		DebugPrint("winx_fopen: cannot open %s: not enough memory",filename);
 		return NULL;
 	}
 	f->hFile = hFile;
@@ -131,7 +131,7 @@ WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buff
 	/* allocate memory */
 	f->io_buffer = winx_heap_alloc(buffer_size);
 	if(f->io_buffer == NULL){
-		DebugPrint("winx_fbopen: cannot allocate %u bytes of memory\n",buffer_size);
+		DebugPrint("winx_fbopen: cannot allocate %u bytes of memory",buffer_size);
 		winx_fclose(f);
 		return NULL;
 	}

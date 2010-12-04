@@ -392,7 +392,7 @@ char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi
 	/* allocate memory */
 	msg = winx_heap_alloc(MSG_LENGTH + 1);
 	if(msg == NULL){
-		DebugPrint("udefrag_get_default_formatted_results: cannot allocate %u bytes of memory\n",
+		DebugPrint("udefrag_get_default_formatted_results: cannot allocate %u bytes of memory",
 			MSG_LENGTH + 1);
 		winx_printf("\nCannot allocate %u bytes of memory!\n\n",
 			MSG_LENGTH + 1);

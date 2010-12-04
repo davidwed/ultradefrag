@@ -134,14 +134,14 @@ ULONGLONG __stdcall winx_xtime(void)
 	/* TODO: investigate whether it is possible to use more reliable API or not */
 	Status = NtQueryPerformanceCounter(&counter,&frequency);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("winx_xtime: NtQueryPerformanceCounter failed: %x\n",(UINT)Status);
+		DebugPrint("winx_xtime: NtQueryPerformanceCounter failed: %x",(UINT)Status);
 		return 0;
 	}
 	if(!frequency.QuadPart){
-		DebugPrint("winx_xtime: your hardware has no support for High Resolution timer\n");
+		DebugPrint("winx_xtime: your hardware has no support for High Resolution timer");
 		return 0;
 	}
-	/*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***\n",frequency.QuadPart,counter.QuadPart);*/
+	/*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***",frequency.QuadPart,counter.QuadPart);*/
 	/* TODO: make calculation more accurately to ensure that overflow is impossible */
 	return ((1000 * counter.QuadPart) / frequency.QuadPart);
 }

@@ -682,7 +682,7 @@ static void analyze_resident_attribute_list(PRESIDENT_ATTRIBUTE pr_attr,mft_scan
 		if(entry->AttributeType == 0xffffffff) break;
 		if(entry->AttributeType == 0x0) break;
 		if(entry->Length == 0) break;
-		//DebugPrint("@@@@@@@@@ attr_list_entry Length = %u\n", attr_list_entry->Length);
+		//DebugPrint("@@@@@@@@@ attr_list_entry Length = %u", attr_list_entry->Length);
 		analyze_attribute_from_attribute_list(entry,sp);
 		/* go to the next attribute list entry */
 		length = entry->Length;
@@ -767,7 +767,7 @@ static void handle_reparse_point(PRESIDENT_ATTRIBUTE pr_attr,mft_scan_parameters
 
 	rp = (REPARSE_POINT *)((char *)pr_attr + pr_attr->ValueOffset);
 	if(pr_attr->ValueLength >= sizeof(ULONG))
-		DebugPrint("handle_reparse_point: reparse tag = 0x%x\n",rp->ReparseTag);
+		DebugPrint("handle_reparse_point: reparse tag = 0x%x",rp->ReparseTag);
 	else
 		DebugPrint("handle_reparse_point: REPARSE_POINT attribute is too short");
 	
@@ -903,7 +903,7 @@ static void analyze_non_resident_attribute_list(winx_file_info *f,ULONGLONG list
 analyze_list:
 	if(clusters_to_read){
 		DebugPrint("attribute list has less number of clusters than expected");
-		DebugPrint("it will be skipped, because anyway we don\'t know its exact size\n");
+		DebugPrint("it will be skipped, because anyway we don\'t know its exact size");
 		goto scan_done;
 	}
 
@@ -917,7 +917,7 @@ analyze_list:
 		if(attr_list_entry->AttributeType == 0xffffffff) break;
 		if(attr_list_entry->AttributeType == 0x0) break;
 		if(attr_list_entry->Length == 0) break;
-		//DebugPrint("@@@@@@@@@ attr_list_entry Length = %u\n", attr_list_entry->Length);
+		//DebugPrint("@@@@@@@@@ attr_list_entry Length = %u", attr_list_entry->Length);
 		analyze_attribute_from_attribute_list(attr_list_entry,sp);
 		/* go to the next attribute list entry */
 		length = attr_list_entry->Length;
@@ -1100,7 +1100,7 @@ static void process_run_list(short *attr_name,PNONRESIDENT_ATTRIBUTE pnr_attr,
 			if(RunLCN(run)){
 				/* check for data consistency */
 				if(!check_run(lcn,length,sp)){
-					DebugPrint("error in MFT found, run Check Disk program!\n");
+					DebugPrint("error in MFT found, run Check Disk program!");
 					break;
 				}
 				process_run(f,vcn,lcn,length,sp);
@@ -1140,7 +1140,7 @@ static void analyze_non_resident_stream(PNONRESIDENT_ATTRIBUTE pnr_attr,mft_scan
 		return;
 	
 	if(NonResidentAttrListFound)
-		DebugPrint("%ws:%ws\n",sp->mfi.Name,attr_name);
+		DebugPrint("%ws:%ws",sp->mfi.Name,attr_name);
 	
 	process_run_list(attr_name,pnr_attr,sp,NonResidentAttrListFound);
 
@@ -1578,7 +1578,7 @@ fail:
 
 		/* analyze file record */
 		ret_mft_id = GetMftIdFromFRN(nfrob->FileReferenceNumber);
-		//DebugPrint("NTFS record found, id = %I64u\n",ret_mft_id);
+		//DebugPrint("NTFS record found, id = %I64u",ret_mft_id);
 		analyze_file_record(nfrob,sp);
 
 		/* go to the next record */

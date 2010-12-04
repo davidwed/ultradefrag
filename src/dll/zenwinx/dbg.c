@@ -184,15 +184,15 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
 				}
                 RtlFreeAnsiString(&as);
             } else {
-                DebugPrint("winx_build_dbg_log_path: cannot convert unicode to ansi path: not enough memory\n");
+                DebugPrint("winx_build_dbg_log_path: cannot convert unicode to ansi path: not enough memory");
             }
         } else {
-            DebugPrint("winx_build_dbg_log_path: cannot query process basic information\n");
+            DebugPrint("winx_build_dbg_log_path: cannot query process basic information");
         }
     }
     if(PathType == DbgLogPathWinDir || PathType == DbgLogPathWinDirAndExe){
         if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
-            DebugPrint("winx_build_dbg_log_path: cannot get windows directory path\n");
+            DebugPrint("winx_build_dbg_log_path: cannot get windows directory path");
         } else {
             (void)strcpy(path,windir);
         }
@@ -213,7 +213,7 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
     }
     dbg_log_path[MAX_PATH] = 0;
 
-    DebugPrint("winx_build_dbg_log_path: type %d log path ... %s\n", PathType, dbg_log_path);
+    DebugPrint("winx_build_dbg_log_path: type %d log path ... %s", PathType, dbg_log_path);
 }
 
 /**
@@ -269,7 +269,7 @@ void winx_flush_dbg_log(void)
 
 	f = winx_fbopen(dbg_log_path,"a",DBG_BUFFER_SIZE);
 	if(f != NULL){
-        winx_printf("\nWriting log file ...\n");
+        winx_printf("\nWriting log file \"%s\" ...\n",dbg_log_path);
         
 		for(log_entry = dbg_log; log_entry; log_entry = log_entry->next){
 			if(log_entry->buffer){
@@ -316,6 +316,8 @@ void __stdcall winx_enable_dbg_log(DBG_LOG_PATH_TYPE PathType)
 	logging_enabled = 1;
     
 	winx_build_dbg_log_path(PathType);
+    if(strlen(dbg_log_path) > 0)
+        winx_printf("\nUsing log file \"%s\" ...\n",dbg_log_path);
 
     /* remove old log only on first run, if new one is created,
        to avoid deleting it on pending boot-off */
@@ -582,7 +584,7 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
 			* FormatMessage may result in unreadable strings
 			* if a proper locale is not set in DbgView program.
 			*/
-			DebugPrint("%s: 0x%x: %s\n",string,(UINT)status,
+			DebugPrint("%s: 0x%x: %s",string,(UINT)status,
 				winx_get_error_description(status));
 			winx_heap_free(string);
 		}
