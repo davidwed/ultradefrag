@@ -59,8 +59,9 @@ int debug_print_enabled = 1;
  */
 int logging_enabled = 0;
 winx_dbg_log_entry *dbg_log = NULL;
-int log_deleted = 0;
+
 char dbg_log_path[MAX_PATH + 1] = {0};
+char old_dbg_log_path[MAX_PATH + 1] = {0};
 
 int  __stdcall winx_debug_print(char *string);
 void winx_flush_dbg_log(void);
@@ -125,95 +126,6 @@ void winx_destroy_synch_objects(void)
 	winx_destroy_event(hDbgSynchEvent);
 	winx_destroy_event(hFlushLogEvent);
 	hDbgSynchEvent = NULL;
-}
-
-/**
- * @brief Builds the log file path.
- * @return Zero for success, negative value otherwise.
- * @note Internal use only.
- */
-void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
-{
-	char windir[MAX_PATH + 1] = {0};
-	char path[MAX_PATH + 1]   = {0};
-	char name[MAX_PATH + 1]   = {0};
-//	char format[MAX_PATH + 1] = {0};
-	NTSTATUS Status;
-    PROCESS_BASIC_INFORMATION ProcessInformation;
-    ANSI_STRING as = {0};
-    int i, j;
-    
-    if(PathType == DbgLogPathUseExecutable || PathType == DbgLogPathWinDirAndExe){
-        RtlZeroMemory(&ProcessInformation,sizeof(ProcessInformation));
-        Status = NtQueryInformationProcess(NtCurrentProcess(),
-                        ProcessBasicInformation,&ProcessInformation,
-                        sizeof(ProcessInformation),
-                        NULL);
-        if(NT_SUCCESS(Status)){
-            if(RtlUnicodeStringToAnsiString(&as,&ProcessInformation.PebBaseAddress->ProcessParameters->ImagePathName,TRUE) == STATUS_SUCCESS){
-                if(as.Length < (MAX_PATH-4)){
-                    switch(PathType){
-                        case DbgLogPathUseExecutable:
-                            (void)strcpy(name,"\\??\\");
-                            (void)strcat(name,as.Buffer);
-                            break;
-                        case DbgLogPathWinDirAndExe:
-                            j = 0;
-                            i = as.Length-strlen(strrchr(as.Buffer, '\\'))+1;
-                            while((name[j] = as.Buffer[i])){
-                                j++;
-                                i++;
-                            }
-							break;
-						default: /* added to suppress warning on MinGW */
-							break;
-                    }
-                    /* strip off extension */
-                    i = strlen(name);
-                    while(i > 0) {
-						if(name[i] == '\\')
-							break;
-                        if(name[i] == '.'){
-                            name[i] = 0;
-                            break;
-                        }
-                        i--;
-                    }
-                } else {
-					DebugPrint("winx_build_dbg_log_path: path is too long");
-				}
-                RtlFreeAnsiString(&as);
-            } else {
-                DebugPrint("winx_build_dbg_log_path: cannot convert unicode to ansi path: not enough memory");
-            }
-        } else {
-            DebugPrint("winx_build_dbg_log_path: cannot query process basic information");
-        }
-    }
-    if(PathType == DbgLogPathWinDir || PathType == DbgLogPathWinDirAndExe){
-        if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
-            DebugPrint("winx_build_dbg_log_path: cannot get windows directory path");
-        } else {
-            (void)strcpy(path,windir);
-        }
-    }
-    switch(PathType){
-        case DbgLogPathUseExecutable:
-            if(strlen(name)>0)
-                _snprintf(dbg_log_path,MAX_PATH + 1,"%s.log",name);
-            break;
-        case DbgLogPathWinDir:
-            if(strlen(path)>0)
-                _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_FMT,path);
-            break;
-        case DbgLogPathWinDirAndExe:
-            if(strlen(path)>0 && strlen(name)>0)
-                _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_EXE_FMT,path,name);
-            break;
-    }
-    dbg_log_path[MAX_PATH] = 0;
-
-    DebugPrint("winx_build_dbg_log_path: type %d log path ... %s", PathType, dbg_log_path);
 }
 
 /**
@@ -309,22 +221,126 @@ done:
 }
 
 /**
+ * @brief Builds the log file path.
+ * @details This routine builds the log file path
+ * based on the PathType value, which is stored in the
+ * global variable dbg_log_path.
+ * DbgLogPathUseExecutable ... replaces .exe by .log of the
+ * executable file that launched this process
+ * DbgLogPathWinDir .......... prepends the format string
+ * DBG_LOG_PATH_DIR_FMT with the system root (%WinDir%)
+ * DbgLogPathWinDirAndExe .... prepends the format string
+ * DBG_LOG_PATH_DIR_EXE_FMT with the system root (%WinDir%)
+ * and fills in the file name of the executable
+ * that launched this process
+ * @param[in] PathType the type of log file path to be created.
+ * @note Internal use only.
+ */
+void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
+{
+	char windir[MAX_PATH + 1] = {0};
+	char path[MAX_PATH + 1]   = {0};
+	char name[MAX_PATH + 1]   = {0};
+    int i, j;
+	NTSTATUS Status;
+    PROCESS_BASIC_INFORMATION ProcessInformation;
+    ANSI_STRING as = {0};
+    
+    if(PathType == DbgLogPathUseExecutable || PathType == DbgLogPathWinDirAndExe){
+        RtlZeroMemory(&ProcessInformation,sizeof(ProcessInformation));
+        Status = NtQueryInformationProcess(NtCurrentProcess(),
+                        ProcessBasicInformation,&ProcessInformation,
+                        sizeof(ProcessInformation),
+                        NULL);
+        if(NT_SUCCESS(Status)){
+            if(RtlUnicodeStringToAnsiString(&as,&ProcessInformation.PebBaseAddress->ProcessParameters->ImagePathName,TRUE) == STATUS_SUCCESS){
+                if(as.Length < (MAX_PATH-4)){
+                    switch(PathType){
+                        case DbgLogPathUseExecutable:
+                            (void)strcpy(name,"\\??\\");
+                            (void)strcat(name,as.Buffer);
+                            break;
+                        case DbgLogPathWinDirAndExe:
+                            j = 0;
+                            i = as.Length-strlen(strrchr(as.Buffer, '\\'))+1;
+                            while((name[j] = as.Buffer[i])){
+                                j++;
+                                i++;
+                            }
+							break;
+						default: /* added to suppress warning on MinGW */
+							break;
+                    }
+                    /* strip off extension */
+                    i = strlen(name);
+                    while(i > 0) {
+						if(name[i] == '\\')
+							break;
+                        if(name[i] == '.'){
+                            name[i] = 0;
+                            break;
+                        }
+                        i--;
+                    }
+                } else {
+					DebugPrint("winx_build_dbg_log_path: path is too long");
+				}
+                RtlFreeAnsiString(&as);
+            } else {
+                DebugPrint("winx_build_dbg_log_path: cannot convert unicode to ansi path: not enough memory");
+            }
+        } else {
+            DebugPrint("winx_build_dbg_log_path: cannot query process basic information");
+        }
+    }
+    if(PathType == DbgLogPathWinDir || PathType == DbgLogPathWinDirAndExe){
+        if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
+            DebugPrint("winx_build_dbg_log_path: cannot get windows directory path");
+        } else {
+            (void)strcpy(path,windir);
+        }
+    }
+    switch(PathType){
+        case DbgLogPathUseExecutable:
+            if(strlen(name)>0)
+                _snprintf(dbg_log_path,MAX_PATH + 1,"%s.log",name);
+            break;
+        case DbgLogPathWinDir:
+            if(strlen(path)>0)
+                _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_FMT,path);
+            break;
+        case DbgLogPathWinDirAndExe:
+            if(strlen(path)>0 && strlen(name)>0)
+                _snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_PATH_DIR_EXE_FMT,path,name);
+            break;
+    }
+    dbg_log_path[MAX_PATH] = 0;
+
+    DebugPrint("winx_build_dbg_log_path: type %d log path ... %s", PathType, dbg_log_path);
+}
+
+/**
  * @brief Enables debug logging to the file.
+ * @param[in] PathType the type of log file path to be created.
  */
 void __stdcall winx_enable_dbg_log(DBG_LOG_PATH_TYPE PathType)
 {
 	logging_enabled = 1;
     
-	winx_build_dbg_log_path(PathType);
+    /* save old log path, if one exists */
     if(strlen(dbg_log_path) > 0)
+        (void)strcpy(old_dbg_log_path,dbg_log_path);
+    
+	winx_build_dbg_log_path(PathType);
+    if(strlen(dbg_log_path) > 0){
+        DebugPrint("Using log file \"%s\" ...",dbg_log_path);
         winx_printf("\nUsing log file \"%s\" ...\n",dbg_log_path);
-
-    /* remove old log only on first run, if new one is created,
-       to avoid deleting it on pending boot-off */
-    if(!log_deleted){
-        log_deleted = 1;
-        winx_remove_dbg_log();
     }
+
+    /* remove old log only, if new one is created,
+       to avoid deleting it on pending boot-off */
+    if(strcmp(old_dbg_log_path,dbg_log_path))
+        winx_remove_dbg_log();
 }
 
 /**
