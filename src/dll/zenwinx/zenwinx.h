@@ -317,7 +317,7 @@ typedef enum _DBG_LOG_PATH_TYPE {
     DbgLogPathWinDirAndExe,         /* uses DBG_LOG_PATH_DIR_EXE_FMT format string, prepends %WinDir% */
 } DBG_LOG_PATH_TYPE, *PDBG_LOG_PATH_TYPE;
 
-#define DBG_LOG_PATH_DIR_FMT        "%s\\UltraDefrag\\ultradefrag.log"
+#define DBG_LOG_PATH_DIR_FMT        "%s\\UltraDefrag\\temp_defrag.log"
 /* Sample resulting path:
         \??\C:\Windows\UltraDefrag\ultradefrag.log */
 
