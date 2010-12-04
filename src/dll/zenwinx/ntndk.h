@@ -853,6 +853,14 @@ typedef struct _PROCESS_DEVICEMAP_INFORMATION
         } Query;
     };
 } PROCESS_DEVICEMAP_INFORMATION, *PPROCESS_DEVICEMAP_INFORMATION;
+
+typedef struct _PROCESS_BASIC_INFORMATION {
+    PVOID Reserved1;
+    PPEB PebBaseAddress;
+    PVOID Reserved2[2];
+    ULONG_PTR UniqueProcessId;
+    PVOID Reserved3;
+} PROCESS_BASIC_INFORMATION, *PPROCESS_BASIC_INFORMATION;
 #pragma pack(pop)
 
 typedef struct _FILE_FS_SIZE_INFORMATION {

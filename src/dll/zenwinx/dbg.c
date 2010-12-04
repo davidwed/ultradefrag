@@ -60,13 +60,11 @@ int debug_print_enabled = 1;
 int logging_enabled = 0;
 winx_dbg_log_entry *dbg_log = NULL;
 int log_deleted = 0;
-char dbg_log_path[MAX_PATH + 1] = {0};
+char dbg_log_path[MAX_PATH + 1] = "";
 
 int  __stdcall winx_debug_print(char *string);
 void winx_flush_dbg_log(void);
 void winx_remove_dbg_log(void);
-
-#define DBG_LOG_FILE_FORMAT "%s\\UltraDefrag\\udefrag%ls.log"
 
 /**
  * @brief Initializes the synchronization 
@@ -134,65 +132,44 @@ void winx_destroy_synch_objects(void)
 int winx_build_dbg_log_path(void)
 {
 	char windir[MAX_PATH + 1];
-	wchar_t suffix[16] = L"";
-	/* NTSTATUS Status;
-    UNICODE_STRING *ImageFileName;
-    ULONG ImageFileNameLength; */
-
-	if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
-		DebugPrint("winx_build_dbg_log_path: cannot get windows directory path\n");
-		return -1;
-	}
+	NTSTATUS Status;
+    PROCESS_BASIC_INFORMATION ProcessInformation;
+    ANSI_STRING as;
+    int path_set_flag = 0;
     
-    /*
-    TODO: use a Logs folder contained in the location of the process executable,
-        this allows to make it independend from installed and portable version.
-        In addition make the log file name dependent on the process executable
-
-        Examples:
-            Executable ... C:\WINDOWS\UltraDefrag\udefrag.exe
-            Log file ..... C:\WINDOWS\UltraDefrag\Logs\udefrag.log
-
-            Executable ... X:\UltraDefrag\ultradefrag.exe
-            Log file ..... X:\UltraDefrag\Logs\ultradefrag.log
-    */
-
-	/* check for UD_LOG_SUFFIX, assume console as default */
-	if(winx_query_env_variable(L"UD_LOG_SUFFIX",suffix,sizeof(suffix)/sizeof(wchar_t)) < 0)
-		wcscpy(suffix,L"_console");
-    /*
-    for GUI and console this is called from DLL_PROCESS_ATTACH, so UD_LOG_SUFFIX is not set yet,
-    in this case a decission based on ultradefrag.exe or udefrag.exe would be best.
-    This would allow to set the UD_LOG_SUFFIX internal variable here and remove the need
-    to set it in the main executable.
-    In addition udefrag_native.exe can be checked here too.
-
-    TODO: use NtQueryInformationProcess and ProcessImageFileName
-        Use a table of ImageFileName-LogPathFormat pairs for highest portability
-        typedef struct _dbg_log_path_entry {
-            char *executable_name
-            char *default_log_path
-            char *path_substitute    // literal or one of EXE_PATH/WINDIR
-            char *name_substitute    // literal or EXE_NAME
-        } dbg_log_path_entry
-        
-        "udefrag.exe",       "%s\\Logs\\%s.log", "EXE_PATH", "EXE_NAME"
-        "ultradefrag.exe",   "%s\\Logs\\%s.log", "EXE_PATH", "EXE_NAME"
-        "defrag_native.exe", "%s\\Ultradefrag\\Logs\\%s.log", "WINDIR", "EXE_NAME"
-    */
-    
-	/* ImageFileNameLength = sizeof(UNICODE_STRING) + MAX_PATH * sizeof(wchar_t)
-    ImageFileName = winx_heap_alloc(ImageFileNameLength);
+    RtlZeroMemory(&ProcessInformation,sizeof(ProcessInformation));
     Status = NtQueryInformationProcess(NtCurrentProcess(),
-					ProcessImageFileName,ImageFileName,
-					ImageFileNameLength,
+					ProcessBasicInformation,&ProcessInformation,
+					sizeof(ProcessInformation),
 					NULL);
 	if(NT_SUCCESS(Status)){
-    } */
+        if(RtlUnicodeStringToAnsiString(&as,&ProcessInformation.PebBaseAddress->ProcessParameters->ImagePathName,TRUE) == STATUS_SUCCESS){
+            if(as.Length < MAX_PATH){
+                (void)strncpy(dbg_log_path,as.Buffer,as.Length-3);
+                dbg_log_path[as.Length-3] = 0;
+                
+                (void)strcat(dbg_log_path,"log");
+                dbg_log_path[strlen(dbg_log_path)] = 0;
+                
+                path_set_flag = 1;
+            }
+            RtlFreeAnsiString(&as);
+        } else {
+            DebugPrint("winx_build_dbg_log_path: cannot build process specific log path: not enough memory\n");
+        }
+    }
+    if(!path_set_flag){
+        if(winx_get_windows_directory(windir,MAX_PATH + 1) < 0){
+            DebugPrint("winx_build_dbg_log_path: cannot get windows directory path\n");
+            return -1;
+        }
+        
+        _snprintf(dbg_log_path,MAX_PATH + 1,"%s\\UltraDefrag\\udefrag_temp.log",windir);
+        dbg_log_path[MAX_PATH] = 0;
+    }
 
-	_snprintf(dbg_log_path,MAX_PATH + 1,DBG_LOG_FILE_FORMAT,windir,suffix);
-	dbg_log_path[MAX_PATH] = 0;
-    
+    DebugPrint("winx_build_dbg_log_path: log path ... %s\n", dbg_log_path);
+
     return 0;
 }
 
