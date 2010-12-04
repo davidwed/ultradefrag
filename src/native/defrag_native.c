@@ -125,8 +125,6 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	short wbuffer[MAX_LINE_WIDTH + 1];
 	int i;
 
-    (void)winx_set_env_variable(L"UD_LOG_SUFFIX",L"_boot");
-	
 	/* initialize the program */
 	peb = Peb;
 	NativeAppInit();

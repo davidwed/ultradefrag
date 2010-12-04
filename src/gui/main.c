@@ -925,8 +925,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	hInstance = GetModuleHandle(NULL);
 	
-    (void)SetEnvironmentVariableW(L"UD_LOG_SUFFIX",L"_gui");
-	
 	/* define whether we are in portable mode or not */
 	portable_mode = IsPortable();
 	btd_installed = IsBtdInstalled();
