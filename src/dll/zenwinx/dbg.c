@@ -137,7 +137,7 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
 	char windir[MAX_PATH + 1] = {0};
 	char path[MAX_PATH + 1]   = {0};
 	char name[MAX_PATH + 1]   = {0};
-	char format[MAX_PATH + 1] = {0};
+//	char format[MAX_PATH + 1] = {0};
 	NTSTATUS Status;
     PROCESS_BASIC_INFORMATION ProcessInformation;
     ANSI_STRING as = {0};
@@ -160,21 +160,28 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
                         case DbgLogPathWinDirAndExe:
                             j = 0;
                             i = as.Length-strlen(strrchr(as.Buffer, '\\'))+1;
-                            while(name[j] = as.Buffer[i]){
+                            while((name[j] = as.Buffer[i])){
                                 j++;
                                 i++;
                             }
+							break;
+						default: /* added to suppress warning on MinGW */
+							break;
                     }
                     /* strip off extension */
                     i = strlen(name);
-                    while(name[i] != '\\') {
+                    while(i > 0) {
+						if(name[i] == '\\')
+							break;
                         if(name[i] == '.'){
                             name[i] = 0;
                             break;
                         }
                         i--;
                     }
-                }
+                } else {
+					DebugPrint("winx_build_dbg_log_path: path is too long\n");
+				}
                 RtlFreeAnsiString(&as);
             } else {
                 DebugPrint("winx_build_dbg_log_path: cannot convert unicode to ansi path: not enough memory\n");
