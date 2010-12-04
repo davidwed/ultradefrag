@@ -275,8 +275,10 @@ void winx_flush_dbg_log(void)
 			if(log_entry->buffer){
 				length = strlen(log_entry->buffer);
 				if(length > 0){
-					if(log_entry->buffer[length - 1] == '\n')
+					if(log_entry->buffer[length - 1] == '\n'){
 						log_entry->buffer[length - 1] = 0;
+						length --;
+					}
 					(void)winx_fwrite(log_entry->buffer,sizeof(char),length,f);
 					/* add a proper newline characters */
 					(void)winx_fwrite(crlf,sizeof(char),2,f);
