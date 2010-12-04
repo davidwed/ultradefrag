@@ -180,7 +180,7 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType)
                         i--;
                     }
                 } else {
-					DebugPrint("winx_build_dbg_log_path: path is too long\n");
+					DebugPrint("winx_build_dbg_log_path: path is too long");
 				}
                 RtlFreeAnsiString(&as);
             } else {
