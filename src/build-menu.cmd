@@ -36,12 +36,13 @@ echo     16 ... Build Micro Portable ... with Custom Switches
 echo.
 echo     17 ... Build Test Release for Stefan
 echo     18 ... Build Test Installation for Stefan
-echo     19 ... Build Test x86 for Stefan
+echo     19 ... Build Test AMD64 for Stefan
+echo     20 ... Build Test x86 for Stefan
 echo.
 echo      0 ... EXIT
 
 :: this value holds the number of the last menu entry
-set UD_BLD_MENU_MAX_ENTRIES=19
+set UD_BLD_MENU_MAX_ENTRIES=20
 
 :AskSelection
 echo.
@@ -199,6 +200,22 @@ call build.cmd --clean
 goto finished
 
 :19
+title Build Test AMD64 for Stefan
+echo.
+set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,[beta],rc): "
+if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=beta
+
+call build-pre-release.cmd --no-ia64 --no-x86 --%UD_BLD_PRE_RELEASE_TYPE%
+echo.
+if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
+echo.
+copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
+echo.
+cd /d %UD_BLD_MENU_DIR%
+call build.cmd --clean
+goto finished
+
+:20
 title Build Test x86 for Stefan
 echo.
 set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,[beta],rc): "
