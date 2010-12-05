@@ -553,7 +553,7 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 		if(wcscmp(_wcsupr(name),L"UD_ENABLE_DBG_LOG") == 0){
 			if(value_length){
 				if(wcscmp(value,L"1") == 0)
-					winx_enable_dbg_log(DbgLogPathWinDirAndExe);
+					winx_enable_dbg_log(DbgLogPathWinDirAndExe,1);
 				else
 					winx_disable_dbg_log();
 			} else {

@@ -312,23 +312,27 @@ int __stdcall winx_unregister_boot_exec_command(short *command);
 #define DEFAULT_DBG_PRINT_HEADER_WIDTH     64
 
 typedef enum _DBG_LOG_PATH_TYPE {
-    DbgLogPathUseExecutable = 0,    /* same path and name as executable, but .exe replaced by .log */
+    DbgLogPathUseExe = 0,           /* uses DBG_LOG_PATH_FMT format string, replaces .exe by .log */
     DbgLogPathWinDir,               /* uses DBG_LOG_PATH_DIR_FMT format string, prepends %WinDir% */
     DbgLogPathWinDirAndExe,         /* uses DBG_LOG_PATH_DIR_EXE_FMT format string, prepends %WinDir% */
 } DBG_LOG_PATH_TYPE, *PDBG_LOG_PATH_TYPE;
 
-#define DBG_LOG_PATH_DIR_FMT        "%s\\UltraDefrag\\temp_defrag.log"
-/* Sample resulting path:
+#define DBG_LOG_PATH_FMT            "%s.log"
+/* Sample resulting path for "C:\Windows\UltraDefrag\ultradefrag.exe":
         \??\C:\Windows\UltraDefrag\ultradefrag.log */
 
+#define DBG_LOG_PATH_DIR_FMT        "%s\\UltraDefrag\\temp_defrag.log"
+/* Sample resulting path:
+        \??\C:\Windows\UltraDefrag\temp_defrag.log */
+
 #define DBG_LOG_PATH_DIR_EXE_FMT    "%s\\UltraDefrag\\%s.log"
-/* Sample resulting path for defrag_native.exe:
+/* Sample resulting path for "C:\Windows\System32\defrag_native.exe":
         \??\C:\Windows\UltraDefrag\defrag_native.log */
 
 void __cdecl winx_dbg_print(char *format, ...);
 void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
 void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...);
-void __stdcall winx_enable_dbg_log(DBG_LOG_PATH_TYPE PathType);
+void __stdcall winx_enable_dbg_log(DBG_LOG_PATH_TYPE PathType,int CreateFolder);
 void __stdcall winx_disable_dbg_log(void);
 
 ULONGLONG __stdcall winx_str2time(char *string);
