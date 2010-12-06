@@ -74,11 +74,26 @@ static int IsPortable(void)
     OSVERSIONINFO osvi;
     BOOL bIsWindowsXPorLater;
 	LONG result;
+    int i;
 	
-	if(!GetCurrentDirectory(MAX_PATH,cd)){
-		WgxDbgPrintLastError("IsPortable: cannot get current directory");
+	if(!GetModuleFileName(NULL,cd,MAX_PATH)){
+		WgxDbgPrintLastError("IsPortable: cannot get module file name");
 		return 1;
 	}
+    
+    /* make sure we have a terminating null character,
+       if the path is truncated on WinXP and earlier */
+    cd[MAX_PATH-1] = 0;
+    
+    /* strip off the file name */
+    i = strlen(cd);
+    while(i > 0) {
+        if(cd[i] == '\\'){
+            cd[i] = 0;
+            break;
+        }
+        i--;
+    }
 	
     /* only XP and later support 32-bit registry view, so check for it */
     ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
