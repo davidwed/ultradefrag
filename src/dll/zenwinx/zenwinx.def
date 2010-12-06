@@ -90,6 +90,7 @@ EXPORTS
 	winx_wcsdup
 	winx_wcsistr
 	winx_vsprintf
+	winx_sprintf
 	winx_patcomp
 	winx_patfind
 	winx_patfree

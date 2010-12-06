@@ -176,6 +176,26 @@ char * __cdecl winx_vsprintf(const char *format,va_list arg)
 	return NULL;
 }
 
+/**
+ * @brief Robust and flexible alternative to _snprintf.
+ * @param[in] format the format specification.
+ * @param[in] ... the arguments.
+ * @return Pointer to the formatted string, NULL
+ * indicates failure. The string must be deallocated
+ * by winx_heap_free after its use.
+ */
+char * __cdecl winx_sprintf(const char *format, ...)
+{
+	va_list arg;
+	
+	if(format){
+		va_start(arg,format);
+		return winx_vsprintf(format,arg);
+	}
+	
+	return NULL;
+}
+
 /*
 * Lightweight alternative for regular expressions.
 */

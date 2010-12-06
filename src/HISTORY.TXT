@@ -15,7 +15,7 @@ HISTORY
 
       Spanish(ES), Czech
 
-    - Developers: winx_strdup, winx_vsprintf, winx_enable_dbg_log,
+    - Developers: winx_strdup, winx_vsprintf, winx_sprintf, winx_enable_dbg_log,
       winx_disable_dbg_log, winx_path_remove_extension,
       winx_path_remove_filename, winx_path_extract_filename
       functions added to zenwinx library
