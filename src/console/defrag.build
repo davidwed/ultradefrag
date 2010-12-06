@@ -14,6 +14,6 @@ src = {
 rc = { "defrag.rc" }
 
 libs = { "kernel32", "user32", "msvcrt", "shell32" }
-adlibs ={ "$(UDEFRAG_LIB_PATH)\\udefrag" }
+adlibs ={ "$(UDEFRAG_LIB_PATH)\\udefrag", "$(UDEFRAG_LIB_PATH)\\zenwinx" }
 
 umentry = "main"

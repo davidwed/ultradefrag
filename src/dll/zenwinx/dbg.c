@@ -108,7 +108,8 @@ void winx_init_synch_objects(void)
 	/* check for UD_ENABLE_DBG_LOG */
 	if(winx_query_env_variable(L"UD_ENABLE_DBG_LOG",buffer,sizeof(buffer)/sizeof(wchar_t)) >= 0){
 		if(!wcscmp(buffer,L"1")){
-			winx_enable_dbg_log(DbgLogPathWinDir,0);
+            /* only set the flag, since we can not determine which log file to use yet */
+			logging_enabled = 1;
         }
 	}
 }
