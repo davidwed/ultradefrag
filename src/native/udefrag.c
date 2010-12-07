@@ -347,7 +347,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			in_filter[0] = 0;
 			if(winx_query_env_variable(L"UD_IN_FILTER",in_filter,MAX_ENV_VARIABLE_LENGTH + 1) < 0){
 				/*if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
-					winx_printf("udefrag_handler: cannot get %UD_IN_FILTER%!");
+					winx_printf("udefrag_handler: cannot get %%UD_IN_FILTER%%!");
 				*/
 			}
 			
