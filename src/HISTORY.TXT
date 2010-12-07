@@ -10,11 +10,11 @@ HISTORY
 
     - the following translations were added:
 
-      Indonesian, Belarusian
+      Indonesian
 
     - the following translations were updated:
 
-      Spanish(ES), Czech
+      Spanish(ES), Czech, Belarusian, Ukrainian
 
     - Developers: winx_strdup, winx_vsprintf, winx_sprintf, winx_enable_dbg_log,
       winx_disable_dbg_log, winx_path_remove_extension,
