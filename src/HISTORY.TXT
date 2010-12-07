@@ -9,7 +9,7 @@ HISTORY
 
     - the following translations were added:
 
-      Indonesian
+      Indonesian, Belarusian
 
     - the following translations were updated:
 
