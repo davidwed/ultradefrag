@@ -91,6 +91,72 @@ int open_smss_key(HKEY *phkey)
 	return 1;
 }
 
+/**
+ * @brief Compares two boot execute commands.
+ * @details Treats 'command' and 'autocheck command' as the same.
+ * @param[in] reg_cmd command read from registry.
+ * @param[in] cmd command to be searched for.
+ * @return Positive value indicates that commands are equal,
+ * zero indicates that they're different, negative value
+ * indicates failure of comparison.
+ * @note Internal use only.
+ */
+static int __stdcall cmd_compare(char *reg_cmd,char *cmd)
+{
+	char *reg_cmd_copy = NULL;
+	char *cmd_copy = NULL;
+	char *long_cmd = NULL;
+	char autocheck[] = "autocheck ";
+	int length;
+	int result = (-1);
+	
+	/* do we have the command registered as it is? */
+	if(!strcmp(reg_cmd,cmd))
+		return 1;
+	
+	/* allocate memory */
+	reg_cmd_copy = _strdup(reg_cmd);
+	if(reg_cmd_copy == NULL){
+		if(!silent)
+			MessageBox(NULL,"Not enough memory!","Error",MB_OK | MB_ICONHAND);
+		goto done;
+	}
+	cmd_copy = _strdup(cmd);
+	if(cmd_copy == NULL){
+		if(!silent)
+			MessageBox(NULL,"Not enough memory!","Error",MB_OK | MB_ICONHAND);
+		goto done;
+	}
+	length = (strlen(cmd) + strlen(autocheck) + 1) * sizeof(char);
+	long_cmd = malloc(length);
+	if(long_cmd == NULL){
+		if(!silent)
+			MessageBox(NULL,"Not enough memory!","Error",MB_OK | MB_ICONHAND);
+		goto done;
+	}
+	strcpy(long_cmd,autocheck);
+	strcat(long_cmd,cmd);
+	
+	/* convert all strings to lowercase */
+	_strlwr(reg_cmd_copy);
+	_strlwr(cmd_copy);
+	_strlwr(long_cmd);
+
+	/* compare */
+	if(!strcmp(reg_cmd_copy,cmd_copy) || !strcmp(reg_cmd_copy,long_cmd)){
+		result = 1;
+		goto done;
+	}
+
+	result = 0;
+	
+done:
+	if(reg_cmd_copy) free(reg_cmd_copy);
+	if(cmd_copy) free(cmd_copy);
+	if(long_cmd) free(long_cmd);
+	return result;
+}
+
 int register_cmd(void)
 {
 	HKEY hKey;
@@ -149,7 +215,7 @@ int register_cmd(void)
 		curr_pos = data + i;
 		curr_len = strlen(curr_pos) + 1;
 		/* if the command is yet registered then exit */
-		if(!strcmp(curr_pos,cmd)) goto done;
+		if(cmd_compare(curr_pos,cmd) > 0) goto done;
 		i += curr_len;
 	}
 	(void)strcpy(data + i,cmd);
@@ -243,7 +309,7 @@ int unregister_cmd(void)
 	for(i = 0; i < length;){
 		curr_pos = data + i;
 		curr_len = strlen(curr_pos) + 1;
-		if(strcmp(curr_pos,cmd)){
+		if(cmd_compare(curr_pos,cmd) <= 0){
 			(void)strcpy(new_data + new_length,curr_pos);
 			new_length += curr_len;
 		}

@@ -35,6 +35,7 @@
 static int __stdcall open_smss_key(HANDLE *pKey);
 static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size);
 static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size);
+static int __stdcall cmd_compare(short *reg_cmd,short *cmd);
 static void __stdcall flush_smss_key(HANDLE hKey);
 
 /* The following two functions replaces bootexctrl in native mode. */
@@ -79,7 +80,9 @@ int __stdcall winx_register_boot_exec_command(short *command)
 		pos = value + i;
 		//DebugPrint("%ws",pos);
 		len = wcslen(pos) + 1;
-		if(!wcscmp(pos,command)) goto done;
+		/* if the command is yet registered then exit */
+		if(cmd_compare(pos,command) > 0)
+			goto done;
 		i += len;
 	}
 	wcscpy(value + i,command);
@@ -153,7 +156,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
 		pos = value + i;
 		//DebugPrint("%ws",pos);
 		len = wcslen(pos) + 1;
-		if(wcscmp(pos,command)){
+		if(cmd_compare(pos,command) <= 0){
 			wcscpy(new_value + new_length,pos);
 			new_length += len;
 		}
@@ -269,6 +272,71 @@ static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 	}
 	
 	return 0;
+}
+
+/**
+ * @brief Compares two boot execute commands.
+ * @details Treats 'command' and 'autocheck command' as the same.
+ * @param[in] reg_cmd command read from registry.
+ * @param[in] cmd command to be searched for.
+ * @return Positive value indicates that commands are equal,
+ * zero indicates that they're different, negative value
+ * indicates failure of comparison.
+ * @note Internal use only.
+ */
+static int __stdcall cmd_compare(short *reg_cmd,short *cmd)
+{
+	short *reg_cmd_copy = NULL;
+	short *cmd_copy = NULL;
+	short *long_cmd = NULL;
+	short autocheck[] = L"autocheck ";
+	int length;
+	int result = (-1);
+	
+	/* do we have the command registered as it is? */
+	if(!wcscmp(reg_cmd,cmd))
+		return 1;
+	
+	/* allocate memory */
+	reg_cmd_copy = winx_wcsdup(reg_cmd);
+	if(reg_cmd_copy == NULL){
+		DebugPrint("cmd_compare: cannot allocate %u bytes of memory",
+			(wcslen(reg_cmd) + 1) * sizeof(short));
+		goto done;
+	}
+	cmd_copy = winx_wcsdup(cmd);
+	if(cmd_copy == NULL){
+		DebugPrint("cmd_compare: cannot allocate %u bytes of memory",
+			(wcslen(cmd) + 1) * sizeof(short));
+		goto done;
+	}
+	length = (wcslen(cmd) + wcslen(autocheck) + 1) * sizeof(short);
+	long_cmd = winx_heap_alloc(length);
+	if(long_cmd == NULL){
+		DebugPrint("cmd_compare: cannot allocate %u bytes of memory",length);
+		goto done;
+	}
+	wcscpy(long_cmd,autocheck);
+	wcscat(long_cmd,cmd);
+	
+	/* convert all strings to lowercase */
+	_wcslwr(reg_cmd_copy);
+	_wcslwr(cmd_copy);
+	_wcslwr(long_cmd);
+
+	/* compare */
+	if(!wcscmp(reg_cmd_copy,cmd_copy) || !wcscmp(reg_cmd_copy,long_cmd)){
+		result = 1;
+		goto done;
+	}
+
+	result = 0;
+	
+done:
+	if(reg_cmd_copy) winx_heap_free(reg_cmd_copy);
+	if(cmd_copy) winx_heap_free(cmd_copy);
+	if(long_cmd) winx_heap_free(long_cmd);
+	return result;
 }
 
 /**
