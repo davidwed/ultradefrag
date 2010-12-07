@@ -198,11 +198,16 @@ int defragment(udefrag_job_parameters *jp)
 						i,block->lcn,block->length);
 					if(block->next == f->f->disp.blockmap) break;
 				}
-				/* remove the first block from the map */
-				winx_list_remove_item((list_entry **)(void *)&f->f->disp.blockmap,
-					(list_entry *)(void *)f->f->disp.blockmap);
-				/* mark the file as intended for partial defragmentation */
-				f->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
+				/* if there are only two fragments, mark $mft as already processed */
+				if(i < 3){
+					winx_list_destroy((list_entry **)(void *)&f->f->disp.blockmap);
+				} else {
+					/* remove the first block from the map */
+					winx_list_remove_item((list_entry **)(void *)&f->f->disp.blockmap,
+						(list_entry *)(void *)f->f->disp.blockmap);
+					/* mark the file as intended for partial defragmentation */
+					f->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
+				}
 				continue;
 			}
 			
