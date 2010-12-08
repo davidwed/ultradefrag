@@ -60,9 +60,7 @@ copy /Y .\dll\wgx\wgx.h           .\obj\console\
 :: as in /src directory
 mkdir obj\dll
 mkdir obj\dll\zenwinx
-copy /Y obj\zenwinx\ntndk.h   obj\dll\zenwinx\
-copy /Y obj\zenwinx\dbg.h     obj\dll\zenwinx\
-copy /Y obj\zenwinx\zenwinx.h obj\dll\zenwinx\
+copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
 if "%UD_MICRO_EDITION%" neq "1" (
 	mkdir obj\dll\wgx
 	copy /Y obj\wgx\wgx.h obj\dll\wgx
