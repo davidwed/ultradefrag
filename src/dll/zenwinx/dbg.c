@@ -245,9 +245,6 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType, int CreateFolder)
 	char windir[MAX_PATH + 1] = {0};
 	char path[MAX_PATH + 1]   = {0};
 	char name[MAX_PATH + 1]   = {0};
-	NTSTATUS Status;
-    PROCESS_BASIC_INFORMATION ProcessInformation;
-    ANSI_STRING as = {0};
     
     /* retrieve process executable path */
     winx_get_module_filename(path);

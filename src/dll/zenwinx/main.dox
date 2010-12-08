@@ -137,6 +137,12 @@
 /** @} */
 
 /**
+ * @defgroup Paths Paths
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Privileges Privileges
  * @{
  */

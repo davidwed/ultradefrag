@@ -1,6 +1,7 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007-2010 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2010 by Stefan Pendl (stefanpe@users.sourceforge.net).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,15 +20,15 @@
 
 /**
  * @file path.c
- * @brief Path manipulation.
- * @addtogroup Path
+ * @brief Paths.
+ * @addtogroup Paths
  * @{
  */
 
 #include "zenwinx.h"
 
 /**
- * @brief removes the extension from a path.
+ * @brief Removes the extension from a path.
  * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
  * then path contains as output "\\??\\C:\\Windows\\Test".
  * If the file name contains no dot or is starting with a dot,
@@ -60,7 +61,7 @@ void __stdcall winx_path_remove_extension(char *path)
 }
 
 /**
- * @brief removes the file name from a path.
+ * @brief Removes the file name from a path.
  * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
  * then path contains as output "\\??\\C:\\Windows".
  * If the path has a trailing backslash, then only that is removed.
@@ -90,7 +91,7 @@ void __stdcall winx_path_remove_filename(char *path)
 }
 
 /**
- * @brief extracts the file name from a path.
+ * @brief Extracts the file name from a path.
  * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
  * path contains as output "Test.txt".
  * If path contains as input "\\??\\C:\\Windows\\",

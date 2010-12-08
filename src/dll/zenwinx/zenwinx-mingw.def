@@ -94,3 +94,7 @@ EXPORTS
 	winx_patcomp@16
 	winx_patfind@8
 	winx_patfree@4
+	winx_path_remove_extension@4
+	winx_path_remove_filename@4
+	winx_path_extract_filename@4
+	winx_get_module_filename@4

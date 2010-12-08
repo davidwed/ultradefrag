@@ -21,10 +21,13 @@
 * zenwinx.dll interface definitions.
 */
 
-#include "ntndk.h"
-
 #ifndef _ZENWINX_H_
 #define _ZENWINX_H_
+
+/* define WINX_CUSTOM_NTNDK_H to suppress inclusion of ZenWINX ntndk.h file */
+#ifndef WINX_CUSTOM_NTNDK_H
+#include "ntndk.h"
+#endif /* !WINX_CUSTOM_NTNDK_H */
 
 #define DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page..."
 
@@ -81,7 +84,7 @@ typedef struct _WINX_FILE {
 
 /* zenwinx functions prototypes */
 
-/* dbg.c start */
+/* dbg.c */
 #define DEFAULT_DBG_PRINT_DECORATION_CHAR  '-'
 #define DEFAULT_DBG_PRINT_HEADER_WIDTH     64
 
@@ -114,16 +117,16 @@ void __cdecl winx_dbg_print(char *format, ...);
 void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
 void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...);
 
-/* env.c start */
+/* env.c */
 int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
 int __stdcall winx_set_env_variable(short *name, short *value);
 
-/* event.c start */
+/* event.c */
 int __stdcall winx_create_event(short *name,int type,HANDLE *phandle);
 int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle);
 void __stdcall winx_destroy_event(HANDLE h);
 
-/* file.c start */
+/* file.c */
 WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
 WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);
 size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
@@ -141,7 +144,7 @@ int __stdcall winx_delete_file(const char *filename);
 void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read);
 void __stdcall winx_release_file_contents(void *contents);
 
-/* ftw.c start */
+/* ftw.c */
 /* winx_ftw flags */
 #define WINX_FTW_RECURSIVE           0x1 /* forces to recursively scan all subdirectories */
 #define WINX_FTW_DUMP_FILES          0x2 /* forces to fill winx_file_disposition structure */
@@ -214,14 +217,14 @@ void __stdcall winx_ftw_release(winx_file_info *filelist);
 
 int __stdcall winx_ftw_dump_file(winx_file_info *f,ftw_terminator t,void *user_defined_data);
 
-/* ftw_ntfs.c start */
-/* int64.c start */
-/* keyboard.c start */
-/* keytrans.c start */
-/* ldr.c start */
+/* ftw_ntfs.c */
+/* int64.c */
+/* keyboard.c */
+/* keytrans.c */
+/* ldr.c */
 int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
 
-/* list.c start */
+/* list.c */
 /**
  * @brief Generic structure describing double linked list entry.
  */
@@ -234,7 +237,7 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
 void         __stdcall winx_list_remove_item(list_entry **phead,list_entry *item);
 void         __stdcall winx_list_destroy    (list_entry **phead);
 
-/* mem.c start */
+/* mem.c */
 void * __stdcall winx_virtual_alloc(SIZE_T size);
 void   __stdcall winx_virtual_free(void *addr,SIZE_T size);
 void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags);
@@ -242,7 +245,7 @@ void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags);
 #define winx_heap_alloc_zero(n) winx_heap_alloc_ex(n,HEAP_ZERO_MEMORY)
 void   __stdcall winx_heap_free(void *addr);
 
-/* misc.c start */
+/* misc.c */
 void __stdcall winx_sleep(int msec);
 
 #define WINDOWS_NT     40
@@ -266,20 +269,20 @@ int __stdcall winx_unload_driver(short *driver_name);
 short * __stdcall winx_get_windows_boot_options(void);
 int __stdcall winx_windows_in_safe_mode(void);
 
-/* path.c start */
+/* path.c */
 void __stdcall winx_path_remove_extension(char *path);
 void __stdcall winx_path_remove_filename(char *path);
 void __stdcall winx_path_extract_filename(char *path);
 void __stdcall winx_get_module_filename(char *path);
 
-/* privilege.c start */
+/* privilege.c */
 int  __stdcall winx_enable_privilege(unsigned long luid);
 
-/* reg.c start */
+/* reg.c */
 int __stdcall winx_register_boot_exec_command(short *command);
 int __stdcall winx_unregister_boot_exec_command(short *command);
 
-/* stdio.c start */
+/* stdio.c */
 int __cdecl winx_putch(int ch);
 int __cdecl winx_puts(const char *string);
 int __cdecl winx_printf(const char *format, ...);
@@ -316,7 +319,7 @@ int __cdecl winx_prompt(char *prompt,char *string,int n);
 
 int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages);
 
-/* string.c start */
+/* string.c */
 /* reliable _toupper and _tolower analogs */
 char __cdecl winx_toupper(char c);
 char __cdecl winx_tolower(char c);
@@ -340,11 +343,11 @@ int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int
 int __stdcall winx_patfind(short *string,winx_patlist *patterns);
 void __stdcall winx_patfree(winx_patlist *patterns);
 
-/* thread.c start */
+/* thread.c */
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle);
 void __stdcall winx_exit_thread(void);
 
-/* time.c start */
+/* time.c */
 ULONGLONG __stdcall winx_str2time(char *string);
 int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);
 ULONGLONG __stdcall winx_xtime(void);
@@ -364,7 +367,7 @@ typedef struct _winx_time {
 int __stdcall winx_get_system_time(winx_time *t);
 int __stdcall winx_get_local_time(winx_time *t);
 
-/* volume.c start */
+/* volume.c */
 int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length);
 int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber);
 
@@ -417,7 +420,7 @@ winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
 		ULONGLONG lcn,ULONGLONG length);
 void __stdcall winx_release_free_volume_regions(winx_volume_region *rlist);
 
-/* zenwinx.c start */
+/* zenwinx.c */
 void __stdcall zenwinx_native_init(void);
 void __stdcall zenwinx_native_unload(void);
 
