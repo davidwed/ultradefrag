@@ -402,10 +402,16 @@ char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi
 	(void)winx_fbsize(pi->total_space,2,total_space,sizeof(total_space));
 	(void)winx_fbsize(pi->free_space,2,free_space,sizeof(free_space));
 
-	if(pi->files == 0)
+	if(pi->files == 0){
 		p = 0.00;
-	else
-		p = (double)(pi->fragments)/((double)(pi->files));
+	} else {
+		/*
+		* Conversion to LONGLONG is used because of support
+		* of MS Visual Studio 6.0 where conversion from ULONGLONG
+		* to double is not implemented.
+		*/
+		p = (double)(LONGLONG)(pi->fragments)/((double)(LONGLONG)(pi->files));
+	}
 	ip = (unsigned int)(p * 100.00);
 	if(ip < 100)
 		ip = 100; /* fix round off error */
