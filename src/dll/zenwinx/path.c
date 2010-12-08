@@ -34,30 +34,39 @@
  * If the file name contains no dot or is starting with a dot,
  * then path keeps unchanged.
  * @param[in,out] path the native ANSI path to be processed.
- * @note path must be MAX_PATH characters long.
  */
 void __stdcall winx_path_remove_extension(char *path)
 {
-    char buffer[MAX_PATH + 1] = {0};
-    int i;
-    
-    if(path == NULL || strlen(path) == 0)
-        return;
-    
-    (void)strcpy(buffer,path);
+	int i;
 
-    i = strlen(buffer);
-    while(i > 0) {
-        if(buffer[i] == '\\')
-            break;
-        if(buffer[i] == '.'){
-            buffer[i] = 0;
-            break;
-        }
-        i--;
-    }
-    if(i>0 && buffer[i-1] != '\\')
-        (void)strcpy(path,buffer);
+#if 0
+	char *lb, *dot;
+
+	/* slower */
+    if(path){
+		lb = strrchr(path,'\\');
+		dot = strrchr(path,'.');
+		if(lb && dot){ /* both backslash and a dot exist */
+			if(dot < lb || dot == lb + 1)
+				return; /* filename contains either no dot or a leading dot */
+			*dot = 0;
+		}
+	}
+#else
+	if(path == NULL)
+		return;
+    
+	/* faster */
+	for(i = strlen(path) - 1; i >= 0; i--){
+		if(path[i] == '\\')
+			return; /* filename contains no dot */
+		if(path[i] == '.' && i){
+			if(path[i - 1] != '\\')
+				path[i] = 0;
+			return;
+		}
+	}
+#endif
 }
 
 /**
@@ -66,28 +75,15 @@ void __stdcall winx_path_remove_extension(char *path)
  * then path contains as output "\\??\\C:\\Windows".
  * If the path has a trailing backslash, then only that is removed.
  * @param[in,out] path the native ANSI path to be processed.
- * @note path must be MAX_PATH characters long.
  */
 void __stdcall winx_path_remove_filename(char *path)
 {
-    char buffer[MAX_PATH + 1] = {0};
-    int i;
-    
-    if(path == NULL || strlen(path) == 0)
-        return;
-    
-    (void)strcpy(buffer,path);
-
-    i = strlen(buffer);
-    while(i > 0) {
-        if(buffer[i] == '\\'){
-            buffer[i] = 0;
-            break;
-        }
-        i--;
-    }
-    if(i>0)
-        (void)strcpy(path,buffer);
+	char *lb;
+	
+	if(path){
+		lb = strrchr(path,'\\');
+		if(lb) *lb = 0;
+	}
 }
 
 /**
@@ -97,33 +93,28 @@ void __stdcall winx_path_remove_filename(char *path)
  * If path contains as input "\\??\\C:\\Windows\\",
  * path contains as output "Windows\\".
  * @param[in,out] path the native ANSI path to be processed.
- * @note path must be MAX_PATH characters long.
  */
 void __stdcall winx_path_extract_filename(char *path)
 {
-    char buffer[MAX_PATH + 1] = {0};
-    int i,j;
-    
-    if(path == NULL || strlen(path) == 0)
-        return;
-    
-    (void)strcpy(buffer,path);
-
-    i = strlen(buffer);
-    while(i > 0) {
-        i--;
-        if(buffer[i] == '\\'){
-            i++;
-            break;
-        }
-    }
-    if(i>0){
-        j = 0;
-        while((path[j] = buffer[i])){
-            j++;
-            i++;
-        }
-    }
+	int i,j,n;
+	
+	if(path == NULL)
+		return;
+	
+	n = strlen(path);
+	if(n == 0)
+		return;
+	
+    for(i = n - 1; i >= 0; i--){
+        if(path[i] == '\\' && (i != n - 1)){
+			/* path[i+1] points to filename */
+			i++;
+			for(j = 0; path[i]; i++, j++)
+				path[j] = path[i];
+			path[j] = 0;
+			return;
+		}
+	}
 }
 
 /**
@@ -134,7 +125,7 @@ void __stdcall winx_path_extract_filename(char *path)
  */
 void __stdcall winx_get_module_filename(char *path)
 {
-	NTSTATUS Status;
+    NTSTATUS Status;
     PROCESS_BASIC_INFORMATION ProcessInformation;
     ANSI_STRING as = {0};
     
@@ -157,7 +148,7 @@ void __stdcall winx_get_module_filename(char *path)
             if(as.Length < (MAX_PATH-4)){
                 /* add native path prefix to path */
                 (void)strcpy(path,"\\??\\");
-                (void)strcat(path,as.Buffer);
+                (void)strncat(path,as.Buffer,as.Length);
             } else {
                 DebugPrint("winx_get_module_filename: path is too long");
             }
@@ -166,7 +157,7 @@ void __stdcall winx_get_module_filename(char *path)
             DebugPrint("winx_get_module_filename: cannot convert unicode to ansi path: not enough memory");
         }
     } else {
-        DebugPrint("winx_get_module_filename: cannot query process basic information");
+        DebugPrintEx(Status,"winx_get_module_filename: cannot query process basic information");
     }
 }
 
