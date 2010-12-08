@@ -477,8 +477,7 @@ char * __stdcall udefrag_get_error_description(int error_code)
 			   "a bug report to the author, thanks.";
 	case UDEFRAG_UDF_DEFRAG:
 		return "UDF volumes can neither be defragmented nor optimized\n"
-		       "because an appropriate system driver has poor support\n"
-			   "of FSCTL_MOVE_FILE Windows API.";
+		       "because the file system driver does not support FSCTL_MOVE_FILE.";
 	}
 	return "";
 }
