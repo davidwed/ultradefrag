@@ -22,6 +22,7 @@
 */
 
 #include "dbg.h"
+#include "path.h"
 
 #ifndef _ZENWINX_H_
 #define _ZENWINX_H_

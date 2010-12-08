@@ -220,105 +220,6 @@ done:
 }
 
 /**
- * @brief removes the extension from a path.
- * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
- * then path contains as output "\\??\\C:\\Windows\\Test".
- * If the file name contains no dot or is starting with a dot,
- * then path keeps unchanged.
- * @param[in,out] path the native ANSI path to be processed.
- * @note Internal use only.
- */
-void winx_path_remove_extension(char *path)
-{
-    char buffer[MAX_PATH + 1] = {0};
-    int i;
-    
-    if(path == NULL || strlen(path) == 0)
-        return;
-    
-    (void)strcpy(buffer,path);
-
-    i = strlen(buffer);
-    while(i > 0) {
-        if(buffer[i] == '\\')
-            break;
-        if(buffer[i] == '.'){
-            buffer[i] = 0;
-            break;
-        }
-        i--;
-    }
-    if(i>0 && buffer[i-1] != '\\')
-        (void)strcpy(path,buffer);
-}
-
-/**
- * @brief removes the file name from a path.
- * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
- * then path contains as output "\\??\\C:\\Windows".
- * If the path has a trailing backslash, then only that is removed.
- * @param[in,out] path the native ANSI path to be processed.
- * @note Internal use only.
- */
-void winx_path_remove_filename(char *path)
-{
-    char buffer[MAX_PATH + 1] = {0};
-    int i;
-    
-    if(path == NULL || strlen(path) == 0)
-        return;
-    
-    (void)strcpy(buffer,path);
-
-    i = strlen(buffer);
-    while(i > 0) {
-        if(buffer[i] == '\\'){
-            buffer[i] = 0;
-            break;
-        }
-        i--;
-    }
-    if(i>0)
-        (void)strcpy(path,buffer);
-}
-
-/**
- * @brief extracts the file name from a path.
- * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
- * path contains as output "Test.txt".
- * If path contains as input "\\??\\C:\\Windows\\",
- * path contains as output "Windows\\".
- * @param[in,out] path the native ANSI path to be processed.
- * @note Internal use only.
- */
-void winx_path_extract_filename(char *path)
-{
-    char buffer[MAX_PATH + 1] = {0};
-    int i,j;
-    
-    if(path == NULL || strlen(path) == 0)
-        return;
-    
-    (void)strcpy(buffer,path);
-
-    i = strlen(buffer);
-    while(i > 0) {
-        i--;
-        if(buffer[i] == '\\'){
-            i++;
-            break;
-        }
-    }
-    if(i>0){
-        j = 0;
-        while((path[j] = buffer[i])){
-            j++;
-            i++;
-        }
-    }
-}
-
-/**
  * @brief Builds the log file path.
  * @details This routine builds the log file path
  * based on the PathType value, which is stored in the
@@ -350,37 +251,19 @@ void winx_build_dbg_log_path(DBG_LOG_PATH_TYPE PathType, int CreateFolder)
     ANSI_STRING as = {0};
     
     /* retrieve process executable path */
-    RtlZeroMemory(&ProcessInformation,sizeof(ProcessInformation));
-    Status = NtQueryInformationProcess(NtCurrentProcess(),
-                    ProcessBasicInformation,&ProcessInformation,
-                    sizeof(ProcessInformation),
-                    NULL);
-    /* extract path and file name */
-    if(NT_SUCCESS(Status)){
-        /* convert Unicode path to ANSI */
-        if(RtlUnicodeStringToAnsiString(&as,&ProcessInformation.PebBaseAddress->ProcessParameters->ImagePathName,TRUE) == STATUS_SUCCESS){
-            /* avoid buffer overflow */
-            if(as.Length < (MAX_PATH-4)){
-                /* add native path prefix to path */
-                (void)strcpy(path,"\\??\\");
-                (void)strcat(path,as.Buffer);
-                /* retrieve only path */
-                winx_path_remove_filename(path);
-                
-                /* retrieve only file name */
-                (void)strcpy(name,as.Buffer);
-                winx_path_extract_filename(name);
-                /* strip off extension */
-                winx_path_remove_extension(name);
-            } else {
-                DebugPrint("winx_build_dbg_log_path: path is too long");
-            }
-            RtlFreeAnsiString(&as);
-        } else {
-            DebugPrint("winx_build_dbg_log_path: cannot convert unicode to ansi path: not enough memory");
-        }
+    winx_get_module_filename(path);
+    /* split module filename into path and file name */
+    if(strlen(path)>0){
+        /* retrieve only file name */
+        (void)strcpy(name,path);
+        winx_path_extract_filename(name);
+        /* strip off extension */
+        winx_path_remove_extension(name);
+        
+        /* retrieve only path */
+        winx_path_remove_filename(path);
     } else {
-        DebugPrint("winx_build_dbg_log_path: cannot query process basic information");
+        DebugPrint("winx_build_dbg_log_path: cannot get module file name");
     }
     /* prepare path */
     switch(PathType){
