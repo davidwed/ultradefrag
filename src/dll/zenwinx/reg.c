@@ -29,7 +29,6 @@
 * specialized versions of them.
 */
 
-#include "ntndk.h"
 #include "zenwinx.h"
 
 static int __stdcall open_smss_key(HANDLE *pKey);

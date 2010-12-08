@@ -24,9 +24,8 @@
  * @{
  */
 
-#include "ntndk.h"
-#include "ntfs.h"
 #include "zenwinx.h"
+#include "ntfs.h"
 
 /*
 * Add data consistency checks everywhere,

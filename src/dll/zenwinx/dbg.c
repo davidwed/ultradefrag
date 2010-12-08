@@ -24,7 +24,6 @@
  * @{
  */
 
-#include "ntndk.h"
 #include "zenwinx.h"
 
 typedef struct _DBG_OUTPUT_DEBUG_STRING_BUFFER {

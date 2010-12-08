@@ -23,7 +23,7 @@
 
 #include "udefrag.h"
 #include "..\dll\wgx\wgx.h"
-#include "..\dll\zenwinx\dbg.h"
+#include "..\dll\zenwinx\zenwinx.h"
 
 /* global variables */
 HANDLE hSynchEvent = NULL;

@@ -24,7 +24,6 @@
  * @{
  */
 
-#include "ntndk.h"
 #include "zenwinx.h"
 
 int  __stdcall kb_open(void);

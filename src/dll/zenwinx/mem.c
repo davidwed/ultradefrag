@@ -24,7 +24,6 @@
  * @{
  */
 
-#include "ntndk.h"
 #include "zenwinx.h"
 
 void winx_print(char *string);
