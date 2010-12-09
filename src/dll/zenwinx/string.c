@@ -152,6 +152,11 @@ char * __cdecl winx_vsprintf(const char *format,va_list arg)
 	int size;
 	int result;
 	
+	/*
+	* Avoid winx_dbg_xxx calls here
+	* to avoid recursion.
+	*/
+	
 	if(format == NULL)
 		return NULL;
 	

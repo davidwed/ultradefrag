@@ -39,6 +39,11 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
 {
 	list_entry *new_item;
 	
+	/*
+	* Avoid winx_dbg_xxx calls here
+	* to avoid recursion.
+	*/
+
 	if(size < sizeof(list_entry))
 		return NULL;
 
@@ -74,6 +79,11 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
  */
 void __stdcall winx_list_remove_item(list_entry **phead,list_entry *item)
 {
+	/*
+	* Avoid winx_dbg_xxx calls here
+	* to avoid recursion.
+	*/
+
 	/* validate an item */
 	if(item == NULL) return;
 	

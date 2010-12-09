@@ -28,12 +28,7 @@
 
 void winx_print(char *string);
 
-HANDLE hGlobalHeap = NULL; /* for winx_heap_alloc_ex call */
-
-/*
-* NOTE: Never call winx_dbg_print_ex() and
-* winx_dbg_print() from these functions!
-*/
+HANDLE hGlobalHeap = NULL;
 
 /**
  * @brief Allocates a block of virtual memory.
@@ -73,6 +68,10 @@ void __stdcall winx_virtual_free(void *addr,SIZE_T size)
  */
 void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
 {
+	/*
+	* Avoid winx_dbg_xxx calls here
+	* to avoid recursion.
+	*/
 	if(hGlobalHeap == NULL) return NULL;
 	return RtlAllocateHeap(hGlobalHeap,flags,size); 
 }
@@ -83,6 +82,10 @@ void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
  */
 void __stdcall winx_heap_free(void *addr)
 {
+	/*
+	* Avoid winx_dbg_xxx calls here
+	* to avoid recursion.
+	*/
 	if(hGlobalHeap && addr) (void)RtlFreeHeap(hGlobalHeap,0,addr);
 }
 
