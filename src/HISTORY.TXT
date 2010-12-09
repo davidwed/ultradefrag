@@ -3,9 +3,9 @@ HISTORY
   Version 5.0.0  2010-12-
   ------------------------------------------------------------------------------
     beta2:
-    - UD_ENABLE_DBG_LOG environment variable added to force save of debugging
-      information to a log file in %windir%\UltraDefrag\udefrag.log
-      Intended for use in boot time interface and batch scripts.
+    - UD_LOG_FILE_PATH environment variable added to force save of debugging
+      information to a log file. Intended for use in boot time interface
+      and batch scripts.
     - a bug preventing the boot time defragmenter from being turned off fixed
 
     - the following translations were added:

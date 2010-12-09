@@ -482,12 +482,61 @@ char * __stdcall udefrag_get_error_description(int error_code)
 	return "";
 }
 
+/**
+ * @brief Enables debug logging to the file
+ * if %UD_LOG_FILE_PATH% is set.
+ * @note Internal use only.
+ */
+static void set_log_file_path(void)
+{
+	wchar_t *path;
+	int result;
+	char *ansi_path, *native_path;
+	
+	path = winx_heap_alloc(ENV_BUFFER_SIZE * sizeof(wchar_t));
+	if(path == NULL){
+		DebugPrint("set_log_file_path: cannot allocate %u bytes of memory",
+			ENV_BUFFER_SIZE * sizeof(wchar_t));
+		return;
+	}
+	
+	result = winx_query_env_variable(L"UD_LOG_FILE_PATH",path,ENV_BUFFER_SIZE);
+	if(result == 0 && path[0]){
+		ansi_path = winx_sprintf("%ws",path);
+		if(ansi_path == NULL){
+			DebugPrint("set_log_file_path: cannot convert path to ANSI encoding");
+		} else {
+			/* remove old log file */
+			native_path = winx_sprintf("\\??\\%s",ansi_path);
+			if(native_path == NULL){
+				DebugPrint("set_log_file_path: cannot build native path");
+			} else {
+				winx_delete_file(native_path);
+				winx_enable_dbg_log(native_path);
+				winx_heap_free(native_path);
+			}
+			winx_heap_free(ansi_path);
+		}
+	}
+	
+	winx_heap_free(path);
+}
+
 #ifndef STATIC_LIB
 /**
  * @brief udefrag.dll entry point.
  */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
+	/*
+	* Both command line and GUI clients support
+	* UD_LOG_FILE_PATH environment variable
+	* to control debug logging to the file.
+	*/
+	if(dwReason == DLL_PROCESS_ATTACH){
+		set_log_file_path();
+	} else if(dwReason == DLL_PROCESS_DETACH){
+	}
 	return 1;
 }
 #endif
