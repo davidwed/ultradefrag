@@ -70,7 +70,7 @@ EXPORTS
 	winx_dbg_print
 	winx_dbg_print_ex
 	winx_dbg_print_header
-	winx_enable_dbg_log@8
+	winx_enable_dbg_log@4
 	winx_disable_dbg_log@0
 	winx_str2time@4
 	winx_time2str@16
@@ -98,3 +98,8 @@ EXPORTS
 	winx_path_remove_filename@4
 	winx_path_extract_filename@4
 	winx_get_module_filename@4
+	winx_create_path@4
+	winx_init_spin_lock@4
+	winx_acquire_spin_lock@8
+	winx_release_spin_lock@4
+	winx_destroy_spin_lock@4

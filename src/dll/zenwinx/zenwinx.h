@@ -88,30 +88,7 @@ typedef struct _WINX_FILE {
 #define DEFAULT_DBG_PRINT_DECORATION_CHAR  '-'
 #define DEFAULT_DBG_PRINT_HEADER_WIDTH     64
 
-typedef enum _DBG_LOG_PATH_TYPE {
-    DbgLogPathUseExe = 0,           /* uses DBG_LOG_PATH_FMT format string, replaces .exe by .log */
-    DbgLogPathWinDir,               /* uses DBG_LOG_PATH_WINDIR_FMT format string, prepends %WinDir% */
-    DbgLogPathWinDirAndExe,         /* uses DBG_LOG_PATH_WINDIR_EXE_FMT format string, prepends %WinDir% */
-    DbgLogPathUseExeSubDir,         /* uses DBG_LOG_PATH_SUBDIR_FMT format string, prepends exe folder */
-} DBG_LOG_PATH_TYPE, *PDBG_LOG_PATH_TYPE;
-
-#define DBG_LOG_PATH_FMT            "%s.log"
-/* Sample resulting path for "C:\Windows\UltraDefrag\ultradefrag.exe":
-        \??\C:\Windows\UltraDefrag\ultradefrag.log */
-
-#define DBG_LOG_PATH_WINDIR_FMT     "%s\\UltraDefrag\\Logs\\temp_defrag.log"
-/* Sample resulting path:
-        \??\C:\Windows\UltraDefrag\Logs\temp_defrag.log */
-
-#define DBG_LOG_PATH_WINDIR_EXE_FMT "%s\\UltraDefrag\\Logs\\%s.log"
-/* Sample resulting path for "C:\Windows\System32\defrag_native.exe":
-        \??\C:\Windows\UltraDefrag\Logs\defrag_native.log */
-
-#define DBG_LOG_PATH_SUBDIR_FMT     "%s\\Logs\\%s.log"
-/* Sample resulting path for "C:\Windows\UltraDefrag\ultradefrag.exe":
-        \??\C:\Windows\UltraDefrag\Logs\ultradefrag.log */
-
-void __stdcall winx_enable_dbg_log(DBG_LOG_PATH_TYPE PathType,int CreateFolder);
+void __stdcall winx_enable_dbg_log(char *path);
 void __stdcall winx_disable_dbg_log(void);
 void __cdecl winx_dbg_print(char *format, ...);
 void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
@@ -237,6 +214,16 @@ list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev
 void         __stdcall winx_list_remove_item(list_entry **phead,list_entry *item);
 void         __stdcall winx_list_destroy    (list_entry **phead);
 
+/* lock.c */
+typedef struct _winx_spin_lock {
+	HANDLE hEvent;
+} winx_spin_lock;
+
+winx_spin_lock * __stdcall winx_init_spin_lock(char *name);
+int  __stdcall winx_acquire_spin_lock(winx_spin_lock *sl,int msec);
+int  __stdcall winx_release_spin_lock(winx_spin_lock *sl);
+void __stdcall winx_destroy_spin_lock(winx_spin_lock *sl);
+
 /* mem.c */
 void * __stdcall winx_virtual_alloc(SIZE_T size);
 void   __stdcall winx_virtual_free(void *addr,SIZE_T size);
@@ -274,6 +261,7 @@ void __stdcall winx_path_remove_extension(char *path);
 void __stdcall winx_path_remove_filename(char *path);
 void __stdcall winx_path_extract_filename(char *path);
 void __stdcall winx_get_module_filename(char *path);
+int  __stdcall winx_create_path(char *path);
 
 /* privilege.c */
 int  __stdcall winx_enable_privilege(unsigned long luid);
