@@ -44,7 +44,6 @@ int __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_ad
 	NTSTATUS Status;
 	HMODULE base_addr;
 
-	/* never call winx_dbg_print_ex() from this function! */
 	DbgCheck3(libname,funcname,proc_addr,"winx_get_proc_address",-1);
 	*proc_addr = NULL;
 	

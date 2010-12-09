@@ -26,13 +26,6 @@
 	 
 #include "udefrag-internals.h"
 
-/*
-* MSDN states that environment variables
-* are limited by 32767 characters,
-* including terminal zero.
-*/
-#define ENV_BUFFER_SIZE 32767
-
 /**
  * @brief Retrieves all ultradefrag
  * related options from the environment.

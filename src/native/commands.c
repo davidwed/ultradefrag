@@ -549,8 +549,8 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 				wcscat(value,argv[i]);
 			}
 		}
-		/* XXX: handle a special case of %UD_ENABLE_DBG_LOG% */
-		if(wcscmp(_wcsupr(name),L"UD_ENABLE_DBG_LOG") == 0){
+		/* TODO: handle a special case of %UD_LOG_FILE_PATH% */
+		/*if(wcscmp(_wcsupr(name),L"UD_ENABLE_DBG_LOG") == 0){
 			if(value_length){
 				if(wcscmp(value,L"1") == 0)
 					winx_enable_dbg_log(DbgLogPathWinDirAndExe,1);
@@ -559,7 +559,7 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 			} else {
 				winx_disable_dbg_log();
 			}
-		}
+		}*/
 		if(value_length){
 			/* set environment variable */
 			result = winx_set_env_variable(name,value);

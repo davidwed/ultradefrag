@@ -22,8 +22,6 @@
 */
 
 #include "udefrag.h"
-#include "..\dll\wgx\wgx.h"
-#include "..\dll\zenwinx\zenwinx.h"
 
 /* global variables */
 HANDLE hSynchEvent = NULL;
@@ -47,6 +45,11 @@ int shellex_flag = 0;
 int first_progress_update;
 int stop_flag = 0;
 
+/*
+* MSDN states that environment variables
+* are limited by 32767 characters,
+* including terminal zero.
+*/
 #define MAX_ENV_VARIABLE_LENGTH 32766
 wchar_t in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
 wchar_t new_in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
@@ -98,51 +101,6 @@ void clear_line(FILE *f)
 /* -------------------------------------------- */
 /*         UltraDefrag specific routines        */
 /* -------------------------------------------- */
-
-/**
- * @brief Defines whether console is a part of
- * the portable package or regular installation.
- * @return Nonzero value indicates that it is
- * most likely a part of the portable package.
- */
-static int IsPortable()
-{
-	char sysdir[MAX_PATH];
-	char path[MAX_PATH];
-    int i;
-    
-	if(!GetSystemDirectory(sysdir,MAX_PATH)){
-		WgxDbgPrintLastError("IsPortable: cannot get system directory");
-		return 1;
-	}
-    
-	if(!GetModuleFileName(NULL,path,MAX_PATH)){
-		WgxDbgPrintLastError("IsPortable: cannot get module file name");
-		return 1;
-	}
-    
-    /* make sure we have a terminating null character,
-       if the path is truncated on WinXP and earlier */
-    path[MAX_PATH-1] = 0;
-    
-    /* strip off the file name */
-    i = strlen(path);
-    while(i > 0) {
-        if(path[i] == '\\'){
-            path[i] = 0;
-            break;
-        }
-        i--;
-    }
-
-	if(_stricmp(sysdir,path) == 0){
-		WgxDbgPrint("Install location \"%s\" matches \"%s\", so it isn't portable\n",path,sysdir);
-		return 0;
-	}
-	
-	WgxDbgPrint("Install location \"%s\" differs from \"%s\", so it is portable\n",path,sysdir);
-	return 1;
-}
 
 /**
  * @brief Performs basic console initialization.
@@ -297,19 +255,7 @@ void test(void)
 int __cdecl main(int argc, char **argv)
 {
 	int result, pause_result;
-	wchar_t buffer[16] = {0};
 	
-	/* check for UD_ENABLE_DBG_LOG */
-	if(GetEnvironmentVariableW(L"UD_ENABLE_DBG_LOG",buffer,sizeof(buffer)/sizeof(wchar_t)) > 0){
-		if(!wcscmp(buffer,L"1")){
-            if(IsPortable()){
-                winx_enable_dbg_log(DbgLogPathUseExeSubDir,1);
-            } else {
-                winx_enable_dbg_log(DbgLogPathWinDirAndExe,1);
-            }
-        }
-	}
-
 	/*test();
 	getch();
 	return 0;

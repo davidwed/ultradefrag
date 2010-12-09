@@ -56,6 +56,13 @@
 /* named constant for 256k */
 #define _256K (256 * 1024)
 
+/*
+* MSDN states that environment variables
+* are limited by 32767 characters,
+* including terminal zero.
+*/
+#define ENV_BUFFER_SIZE 32767
+
 typedef struct _udefrag_options {
 	winx_patlist in_filter;     /* patterns for file inclusion */
 	winx_patlist ex_filter;     /* patterns for file exclusion */

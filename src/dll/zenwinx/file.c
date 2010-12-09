@@ -112,8 +112,6 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
  * @details The last parameter specifies
  * the buffer size, in bytes. Returns
  * NULL if buffer allocation failed.
- * @note Use winx_fbclose
- * to close the file.
  */
 WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size)
 {

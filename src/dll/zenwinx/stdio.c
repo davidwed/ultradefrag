@@ -42,8 +42,9 @@ void winx_print(char *string)
 	UNICODE_STRING uStr;
 	int i, len;
 
-	/* never call winx_dbg_print_ex() here */
-	if(!string) return;
+	if(!string)
+		return;
+
 	RtlInitAnsiString(&aStr,string);
 	if(RtlAnsiStringToUnicodeString(&uStr,&aStr,TRUE) == STATUS_SUCCESS){
 		NtDisplayString(&uStr);
@@ -66,7 +67,6 @@ int __cdecl winx_putch(int ch)
 	UNICODE_STRING uStr;
 	short s[2];
 
-	/* never call winx_dbg_print_ex() here */
 	s[0] = (short)ch; s[1] = 0;
 	RtlInitUnicodeString(&uStr,s);
 	NtDisplayString(&uStr);
