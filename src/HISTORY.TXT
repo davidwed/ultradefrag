@@ -18,8 +18,9 @@ HISTORY
 
     - Developers: winx_strdup, winx_vsprintf, winx_sprintf, winx_enable_dbg_log,
       winx_disable_dbg_log, winx_get_module_filename, winx_path_remove_filename,
-      winx_path_remove_extension, winx_path_extract_filename
-      functions added to zenwinx library
+      winx_path_remove_extension, winx_path_extract_filename, winx_create_path,
+      winx_init_spin_lock, winx_acquire_spin_lock, winx_release_spin_lock,
+      winx_destroy_spin_lock functions added to zenwinx library
 
     beta1:
     - defragmentation algorithm reimplemented; partial defragmentation improved

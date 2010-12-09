@@ -105,8 +105,8 @@ void __stdcall winx_path_extract_filename(char *path)
 	if(n == 0)
 		return;
 	
-    for(i = n - 1; i >= 0; i--){
-        if(path[i] == '\\' && (i != n - 1)){
+	for(i = n - 1; i >= 0; i--){
+		if(path[i] == '\\' && (i != n - 1)){
 			/* path[i+1] points to filename */
 			i++;
 			for(j = 0; path[i]; i++, j++)
@@ -159,6 +159,54 @@ void __stdcall winx_get_module_filename(char *path)
     } else {
         DebugPrintEx(Status,"winx_get_module_filename: cannot query process basic information");
     }
+}
+
+/**
+ * @brief Creates directory tree.
+ * @param[in] path the native path.
+ * @return Zero for success,
+ * negative value otherwise.
+ */
+int __stdcall winx_create_path(char *path)
+{
+	char *p;
+	int n;
+	
+	if(path == NULL)
+		return (-1);
+
+	/* path must contain at least \??\X:\ */
+	if(strstr(path,"\\??\\") != path || strstr(path,":\\") != (path + 4)){
+		DebugPrint("winx_create_path: native path must be specified");
+		return (-1);
+	}
+
+	n = strlen("\\??\\X:\\");
+	if(strlen(path) <= n)
+		return 0; /* nothing to do */
+	
+	/* skip \??\X:\ */
+	p = path + n;
+	
+	/* create directory tree */
+	while((p = strchr(p,'\\'))){
+		*p = 0;
+		if(winx_create_directory(path) < 0){
+			DebugPrint("winx_create_path failed");
+			*p = '\\';
+			return (-1);
+		}
+		*p = '\\';
+		p ++;
+	}
+	
+	/* create target directory */
+	if(winx_create_directory(path) < 0){
+		DebugPrint("winx_create_path failed");
+		return (-1);
+	}
+	
+	return 0;
 }
 
 /** @} */
