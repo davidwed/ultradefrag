@@ -36,7 +36,7 @@ void winx_destroy_synch_objects(void);
 void __stdcall MarkWindowsBootAsSuccessful(void);
 char * __stdcall winx_get_error_description(unsigned long status);
 void winx_print(char *string);
-void winx_flush_dbg_log(void);
+void flush_dbg_log(int already_synchronized);
 
 void test(void)
 {
@@ -67,6 +67,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
  * @brief Initializes the library.
  * @note Designed especially to replace DllMain
  * functionality in case of monolithic native application.
+ * @todo Handle errors.
  */
 void __stdcall zenwinx_native_init(void)
 {
@@ -154,7 +155,7 @@ void __stdcall winx_exit(int exit_code)
 	NTSTATUS Status;
 	
 	kb_close();
-	winx_flush_dbg_log();
+	flush_dbg_log(0);
 	Status = NtTerminateProcess(NtCurrentProcess(),exit_code);
 	if(!NT_SUCCESS(Status)){
 		print_post_scriptum("winx_exit: cannot terminate process",Status);
@@ -174,7 +175,7 @@ void __stdcall winx_reboot(void)
 	kb_close();
 	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	winx_flush_dbg_log();
+	flush_dbg_log(0);
 	Status = NtShutdownSystem(ShutdownReboot);
 	if(!NT_SUCCESS(Status)){
 		print_post_scriptum("winx_reboot: cannot reboot the computer",Status);
@@ -194,7 +195,7 @@ void __stdcall winx_shutdown(void)
 	kb_close();
 	MarkWindowsBootAsSuccessful();
 	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	winx_flush_dbg_log();
+	flush_dbg_log(0);
 	Status = NtShutdownSystem(ShutdownPowerOff);
 	if(!NT_SUCCESS(Status)){
 		print_post_scriptum("winx_shutdown: cannot shut down the computer",Status);
