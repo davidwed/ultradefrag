@@ -72,17 +72,11 @@ char *help_message[] = {
 	NULL
 };
 
-extern PEB *peb;
-extern winx_history history;
-extern int exit_flag;
-
 typedef int (__cdecl *cmd_handler_proc)(int argc,short **argv,short **envp);
 typedef struct {
 	short *cmd_name;
 	cmd_handler_proc cmd_handler;
 } cmd_table_entry;
-int __cdecl udefrag_handler(int argc,short **argv,short **envp);
-int ProcessScript(short *filename);
 
 /* forward declarations */
 extern cmd_table_entry cmd_table[];
@@ -549,17 +543,6 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 				wcscat(value,argv[i]);
 			}
 		}
-		/* TODO: handle a special case of %UD_LOG_FILE_PATH% */
-		/*if(wcscmp(_wcsupr(name),L"UD_ENABLE_DBG_LOG") == 0){
-			if(value_length){
-				if(wcscmp(value,L"1") == 0)
-					winx_enable_dbg_log(DbgLogPathWinDirAndExe,1);
-				else
-					winx_disable_dbg_log();
-			} else {
-				winx_disable_dbg_log();
-			}
-		}*/
 		if(value_length){
 			/* set environment variable */
 			result = winx_set_env_variable(name,value);
@@ -567,6 +550,11 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 		} else {
 			/* clear environment variable */
 			result = winx_set_env_variable(name,NULL);
+		}
+		/* handle a special case of %UD_LOG_FILE_PATH% */
+		if(wcscmp(_wcsupr(name),L"UD_LOG_FILE_PATH") == 0){
+			if(udefrag_set_log_file_path() < 0)
+				winx_printf("\n%ws: udefrag_set_log_file_path failed\n");
 		}
 		winx_heap_free(name);
 		return result;
@@ -728,8 +716,7 @@ int __cdecl exit_handler(int argc,short **argv,short **envp)
 	
 	winx_printf("Good bye ...\n");
 	winx_destroy_history(&history);
-	udefrag_monolithic_native_app_unload();
-	winx_exit(exit_code);
+	NativeAppExit(exit_code);
 	return 0;
 }
 
@@ -808,6 +795,8 @@ cmd_table_entry cmd_table[] = {
 	{ L"",          NULL }
 };
 
+int first_command = 1;
+
 /**
  * @brief Executes the command.
  * @param[in] cmdline the command line.
@@ -825,6 +814,13 @@ int parse_command(short *cmdline)
 	short *string;
 	int length;
 	int result;
+	
+	/* disable default logging before the first command parsing */
+	if(first_command){
+		winx_disable_dbg_log();
+		(void)winx_set_env_variable(L"UD_LOG_FILE_PATH",NULL);
+		first_command = 0;
+	}
 	
 	/*
 	* Cleanup the command line by removing

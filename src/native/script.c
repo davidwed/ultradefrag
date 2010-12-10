@@ -30,10 +30,6 @@
  */
 int escape_flag = 0;
 
-extern int scripting_mode;
-
-int parse_command(short *cmdline);
-
 /**
  * @brief Processes the boot time script.
  * @param[in] filename the name of file,

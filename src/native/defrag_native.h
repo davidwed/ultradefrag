@@ -67,4 +67,19 @@ typedef struct _object_path {
 	int processed;
 } object_path;
 
+/* prototypes */
+void NativeAppExit(int exit_code);
+int parse_command(short *cmdline);
+int ProcessScript(short *filename);
+int ExecPendingBootOff(void);
+int __cdecl exit_handler(int argc,short **argv,short **envp);
+int __cdecl udefrag_handler(int argc,short **argv,short **envp);
+
+extern PEB *peb;
+extern winx_history history;
+extern int scripting_mode;
+extern int exit_flag;
+extern int abort_flag;
+extern int escape_flag;
+
 #endif /* _DEFRAG_NATIVE_H_ */

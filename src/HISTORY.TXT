@@ -6,6 +6,8 @@ HISTORY
     - UD_LOG_FILE_PATH environment variable added to force save of debugging
       information to a log file. Intended for use in boot time interface
       and batch scripts.
+    - boot time interface startup logging added; the program saves log files
+      in %windir%\UltraDefrag\logs folder
     - a bug preventing the boot time defragmenter from being turned off fixed
 
     - the following translations were added:

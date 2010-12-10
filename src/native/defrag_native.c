@@ -50,13 +50,8 @@ winx_history history = {0};
  */
 int exit_flag = 0;
 
-extern int scripting_mode;
-extern int abort_flag;
-
-int parse_command(short *cmdline);
-int ProcessScript(short *filename);
-int ExecPendingBootOff(void);
-int __cdecl exit_handler(int argc,short **argv,short **envp);
+/* forward declarations */
+static void set_dbg_log(char *name);
 
 /**
  * @brief Initializes the native application.
@@ -78,6 +73,19 @@ static void NativeAppInit(void)
 	* the system in case of missing DLL's.
 	*/
 	udefrag_monolithic_native_app_init();
+	
+	/* start logging */
+	set_dbg_log("startup-phase1");
+	DebugPrint("Hello from phase1!");
+}
+
+/**
+ * @brief Properly terminates the native application.
+ */
+void NativeAppExit(int exit_code)
+{
+	udefrag_monolithic_native_app_unload();
+	winx_exit(exit_code);
 }
 
 /**
@@ -105,8 +113,7 @@ static int HandleSafeModeBoot(void)
 		winx_printf("In Windows Safe Mode this program is useless!\n");
 		/* if someone will see the message, a little delay will help him to read it */
 		short_dbg_delay();
-		udefrag_monolithic_native_app_unload();
-		winx_exit(0);
+		NativeAppExit(0);
 		return 1;
 	}
 	return 0;
@@ -144,21 +151,23 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		return;
 		
 	/* check for the pending boot-off command */
+	set_dbg_log("startup-phase2");
+	DebugPrint("Hello from phase2!");
 	if(ExecPendingBootOff()){
 #ifndef USE_INSTEAD_SMSS
 		winx_printf("Good bye ...\n");
 		short_dbg_delay();
-		udefrag_monolithic_native_app_unload();
-		winx_exit(0);
+		NativeAppExit(0);
 #endif
 	}
 
 	/* initialize keyboards */
+	set_dbg_log("startup-phase3");
+	DebugPrint("Hello from phase3!");
 	if(winx_init(Peb) < 0){
 		winx_printf("Wait 10 seconds ...\n");
 		long_dbg_delay();
-		udefrag_monolithic_native_app_unload();
-		winx_exit(1);
+		NativeAppExit(1);
 	}
 	
 	/* prompt to exit */
@@ -166,8 +175,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	for(i = 0; i < 5; i++){
 		if(winx_kbhit(1000) >= 0){
 			winx_printf("\nGood bye ...\n");
-			udefrag_monolithic_native_app_unload();
-			winx_exit(0);
+			NativeAppExit(0);
 		}
 		//winx_printf("%c ",(char)('0' + 10 - i));
 		winx_printf(".");
@@ -201,4 +209,57 @@ void __stdcall NtProcessStartup(PPEB Peb)
 
 	/* break on winx_prompt_ex() errors */
 	exit_handler(0,NULL,NULL);
+}
+
+/**
+ * @brief Sets debugging log path.
+ * @details Intended primarily to log
+ * debugging information during the
+ * native application startup.
+ */
+static void set_dbg_log(char *name)
+{
+	wchar_t windir[MAX_PATH];
+	char *logpath = NULL;
+	int length;
+	wchar_t *unicode_path = NULL;
+	
+	if(winx_query_env_variable(L"SystemRoot",windir,MAX_PATH) < 0){
+		winx_printf("\nset_dbg_log: cannot get %%windir%% path\n\n");
+		return;
+	}
+	
+	logpath = winx_sprintf("%ws\\UltraDefrag\\logs\\boot-%s.log",windir,name);
+	if(logpath == NULL){
+		winx_printf("\nset_dbg_log: cannot build log path\n\n");
+		return;
+	}
+	
+	length = strlen(logpath);
+	unicode_path = winx_heap_alloc((length + 1) * sizeof(wchar_t));
+	if(unicode_path == NULL){
+		winx_printf("\nset_dbg_log: cannot allocate %u bytes of memory",
+			(length + 1) * sizeof(wchar_t));
+		goto done;
+	}
+	
+	if(_snwprintf(unicode_path,length + 1,L"%hs",logpath) < 0){
+		winx_printf("\nset_dbg_log: cannot convert log path to unicode\n\n");
+		goto done;
+	}
+	
+	unicode_path[length] = 0;
+	if(winx_set_env_variable(L"UD_LOG_FILE_PATH",unicode_path) < 0){
+		winx_printf("\nset_dbg_log: cannot set %%UD_LOG_FILE_PATH%%\n\n");
+		goto done;
+	}
+	
+	if(udefrag_set_log_file_path() < 0)
+		winx_printf("\nset_dbg_log: udefrag_set_log_file_path failed\n\n");
+
+done:
+	if(logpath)
+		winx_heap_free(logpath);
+	if(unicode_path)
+		winx_heap_free(unicode_path);
 }

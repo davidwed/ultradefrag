@@ -39,9 +39,6 @@ int abort_flag = 0;
 /* for the progress draw speedup */
 int progress_line_length = 0;
 
-extern int scripting_mode;
-extern int escape_flag;
-
 object_path *paths = NULL;
 
 wchar_t in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
