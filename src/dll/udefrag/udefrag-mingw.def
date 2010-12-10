@@ -13,3 +13,4 @@ EXPORTS
 	udefrag_get_default_formatted_results@4
 	udefrag_release_default_formatted_results@4
 	udefrag_get_error_description@4
+	udefrag_set_log_file_path@0

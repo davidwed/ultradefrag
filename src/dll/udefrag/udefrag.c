@@ -484,42 +484,82 @@ char * __stdcall udefrag_get_error_description(int error_code)
 
 /**
  * @brief Enables debug logging to the file
- * if %UD_LOG_FILE_PATH% is set.
- * @note Internal use only.
+ * if <b>\%UD_LOG_FILE_PATH\%</b> is set, otherwise
+ * disables the logging.
+ * @details If log path does not exist and
+ * cannot be created, logs are placed in
+ * <b>\%tmp\%\\UltraDefrag_Logs</b> folder.
+ * @return Zero for success, negative value
+ * otherwise.
  */
-static void set_log_file_path(void)
+int __stdcall udefrag_set_log_file_path(void)
 {
 	wchar_t *path;
+	char *native_path, *path_copy, *filename;
 	int result;
-	char *ansi_path, *native_path;
 	
 	path = winx_heap_alloc(ENV_BUFFER_SIZE * sizeof(wchar_t));
 	if(path == NULL){
 		DebugPrint("set_log_file_path: cannot allocate %u bytes of memory",
 			ENV_BUFFER_SIZE * sizeof(wchar_t));
-		return;
+		return (-1);
 	}
 	
 	result = winx_query_env_variable(L"UD_LOG_FILE_PATH",path,ENV_BUFFER_SIZE);
-	if(result == 0 && path[0]){
-		ansi_path = winx_sprintf("%ws",path);
-		if(ansi_path == NULL){
-			DebugPrint("set_log_file_path: cannot convert path to ANSI encoding");
+	if(result < 0 || path[0] == 0){
+		/* empty variable forces to disable log */
+		winx_disable_dbg_log();
+		winx_heap_free(path);
+		return 0;
+	}
+	
+	/* convert to native path */
+	native_path = winx_sprintf("\\??\\%ws",path);
+	if(native_path == NULL){
+		DebugPrint("set_log_file_path: cannot build native path");
+		winx_heap_free(path);
+		return (-1);
+	}
+	
+	/* delete old logfile */
+	winx_delete_file(native_path);
+	
+	/* ensure that target path exists */
+	result = 0;
+	path_copy = winx_strdup(native_path);
+	if(path_copy == NULL){
+		DebugPrint("set_log_file_path: not enough memory");
+	} else {
+		winx_path_remove_filename(path_copy);
+		result = winx_create_path(path_copy);
+		winx_heap_free(path_copy);
+	}
+	
+	/* if target path cannot be created, use %tmp%\UltraDefrag_Logs */
+	if(result < 0){
+		result = winx_query_env_variable(L"TMP",path,ENV_BUFFER_SIZE);
+		if(result < 0 || path[0] == 0){
+			DebugPrint("set_log_file_path: failed to query %%TMP%%");
 		} else {
-			/* remove old log file */
-			native_path = winx_sprintf("\\??\\%s",ansi_path);
-			if(native_path == NULL){
-				DebugPrint("set_log_file_path: cannot build native path");
+			filename = winx_strdup(native_path);
+			if(filename == NULL){
+				DebugPrint("set_log_file_path: cannot allocate memory for filename");
 			} else {
-				winx_delete_file(native_path);
-				winx_enable_dbg_log(native_path);
+				winx_path_extract_filename(filename);
 				winx_heap_free(native_path);
+				native_path = winx_sprintf("\\??\\%ws\\UltraDefrag_Logs\\%s",path,filename);
+				if(native_path == NULL)
+					DebugPrint("set_log_file_path: cannot build %%tmp%%\\UltraDefrag_Logs\\{filename}");
+				winx_heap_free(filename);
 			}
-			winx_heap_free(ansi_path);
 		}
 	}
 	
+	winx_enable_dbg_log(native_path);
+	
+	winx_heap_free(native_path);
 	winx_heap_free(path);
+	return 0;
 }
 
 #ifndef STATIC_LIB
@@ -534,7 +574,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	* to control debug logging to the file.
 	*/
 	if(dwReason == DLL_PROCESS_ATTACH){
-		set_log_file_path();
+		(void)udefrag_set_log_file_path();
 	} else if(dwReason == DLL_PROCESS_DETACH){
 	}
 	return 1;

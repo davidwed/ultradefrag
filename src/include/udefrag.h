@@ -142,4 +142,6 @@ char * __stdcall udefrag_get_error_description(int error_code);
 char __cdecl udefrag_toupper(char c);
 char __cdecl udefrag_tolower(char c);
 
+int __stdcall udefrag_set_log_file_path(void);
+
 #endif /* _UDEFRAG_H_ */
