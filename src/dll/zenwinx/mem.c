@@ -105,7 +105,10 @@ void winx_create_global_heap(void)
 
 void winx_destroy_global_heap(void)
 {
-	if(hGlobalHeap) (void)RtlDestroyHeap(hGlobalHeap);
+	if(hGlobalHeap){
+		(void)RtlDestroyHeap(hGlobalHeap);
+		hGlobalHeap = NULL;
+	}
 }
 
 /** @} */

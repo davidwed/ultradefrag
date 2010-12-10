@@ -55,7 +55,8 @@ static void close_dbg_log(void);
  */
 void winx_init_synch_objects(void)
 {
-	dbg_lock = winx_init_spin_lock("winx_dbg_lock");
+	if(dbg_lock == NULL)
+		dbg_lock = winx_init_spin_lock("winx_dbg_lock");
 	init_dbg_log();
 }
 
@@ -408,7 +409,8 @@ char *log_path = NULL;
  */
 void init_dbg_log(void)
 {
-	file_lock = winx_init_spin_lock("winx_dbg_logfile_lock");
+	if(file_lock == NULL)
+		file_lock = winx_init_spin_lock("winx_dbg_logfile_lock");
 }
 
 /**
