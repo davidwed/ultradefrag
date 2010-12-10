@@ -567,10 +567,14 @@ void __stdcall winx_enable_dbg_log(char *path)
 	/* set new log path */
 	if(log_path)
 		winx_heap_free(log_path);
-	log_path = winx_strdup(path);
-	if(log_path == NULL){
-		DebugPrint("winx_enable_dbg_log: cannot allocate memory for log path");
-		winx_print("\nCannot allocate memory for log path!\n");
+	if(logging_enabled){
+		log_path = winx_strdup(path);
+		if(log_path == NULL){
+			DebugPrint("winx_enable_dbg_log: cannot allocate memory for log path");
+			winx_print("\nCannot allocate memory for log path!\n");
+		}
+	} else {
+		log_path = NULL;
 	}
 	
 	/* end of synchronization */
