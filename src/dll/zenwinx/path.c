@@ -171,19 +171,23 @@ int __stdcall winx_create_path(char *path)
 {
 	char *p;
 	int n;
+	char rootdir[] = "\\??\\X:\\";
 	
 	if(path == NULL)
 		return (-1);
 
-	/* path must contain at least \??\X:\ */
-	if(strstr(path,"\\??\\") != path || strstr(path,":\\") != (path + 4)){
+	/* path must contain at least \??\X: */
+	if(strstr(path,"\\??\\") != path || strchr(path,':') != (path + 5)){
 		DebugPrint("winx_create_path: native path must be specified");
 		return (-1);
 	}
 
 	n = strlen("\\??\\X:\\");
-	if(strlen(path) <= n)
-		return 0; /* nothing to do */
+	if(strlen(path) <= n){
+		/* check for volume existence */
+		rootdir[4] = path[4];
+		return winx_create_directory(rootdir);
+	}
 	
 	/* skip \??\X:\ */
 	p = path + n;
