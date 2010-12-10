@@ -555,7 +555,8 @@ int __stdcall udefrag_set_log_file_path(void)
 		}
 	}
 	
-	winx_enable_dbg_log(native_path);
+	if(native_path)
+		winx_enable_dbg_log(native_path);
 	
 	winx_heap_free(native_path);
 	winx_heap_free(path);
