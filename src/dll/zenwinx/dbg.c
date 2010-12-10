@@ -40,7 +40,7 @@ void winx_print(char *string);
 /* forward declarations */
 int __stdcall winx_debug_print(char *string);
 static int deliver_message_to_the_debugger(char *string);
-static int init_dbg_log(void);
+void init_dbg_log(void);
 static void add_dbg_log_entry(char *string);
 void flush_dbg_log(int already_synchronized);
 static void close_dbg_log(void);
@@ -406,7 +406,7 @@ char *log_path = NULL;
  * @brief Initializes the logging to the file.
  * @note Internal use only.
  */
-static int init_dbg_log(void)
+void init_dbg_log(void)
 {
 	file_lock = winx_init_spin_lock("winx_dbg_logfile_lock");
 }
