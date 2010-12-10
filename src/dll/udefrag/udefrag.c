@@ -476,7 +476,7 @@ char * __stdcall udefrag_get_error_description(int error_code)
 		       "If the volume type was wrongly identified, send\n"
 			   "a bug report to the author, thanks.";
 	case UDEFRAG_UDF_DEFRAG:
-		return "UDF volumes can neither be defragmented nor optimized\n"
+		return "UDF volumes can neither be defragmented nor optimized,\n"
 		       "because the file system driver does not support FSCTL_MOVE_FILE.";
 	}
 	return "";

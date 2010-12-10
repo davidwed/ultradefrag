@@ -800,7 +800,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	}
 	  
 	/*
-	* UDF volumes can neither be defragmented nor optimized
+	* UDF volumes can neither be defragmented nor optimized,
 	* because the system driver does not support FSCTL_MOVE_FILE.
     *
     * Windows 7 needs more testing, since it seems to allow defrag
