@@ -170,7 +170,7 @@ void __stdcall winx_get_module_filename(char *path)
 int __stdcall winx_create_path(char *path)
 {
 	char *p;
-	int n;
+	unsigned int n;
 	char rootdir[] = "\\??\\X:\\";
 	
 	if(path == NULL)
