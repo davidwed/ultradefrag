@@ -189,7 +189,13 @@ int defragment(udefrag_job_parameters *jp)
 			}
 			if(f_largest == NULL) goto next_rgn;
 			
-			/* skip $mft on XP and W2K3, because the first 16 clusters aren't moveable there */
+			/* skip $mft on 2k and below, because we cannot process it anyways */
+			if(is_mft(f->f) && jp->actions.allow_full_mft_defrag == 0 && win_version <= WINDOWS_2K){
+                winx_list_destroy((list_entry **)(void *)&f->f->disp.blockmap);
+                continue;
+            }
+              
+			/* skip $mft on XP and higher, because the first 16 clusters aren't moveable there */
 			if(is_mft(f->f) && jp->actions.allow_full_mft_defrag == 0 \
 			  && (win_version >= WINDOWS_XP /* || win_version == WINDOWS_2K3 */)){
 				/* list MFT parts (for debugging purposes) */
