@@ -553,17 +553,17 @@ void __stdcall winx_enable_dbg_log(char *path)
 		return;
 	}
 	
-	if(logging_enabled){
-		DebugPrint("winx_enable_dbg_log: log_path = %s",path);
-		winx_printf("\nUsing log file \"%s\" ...\n",path);
-	}
-	
 	/* flush old log to disk */
 	if(!logging_enabled || log_path == NULL){
 		flush_dbg_log(1);
 	} else {
 		if(strcmp(path,log_path))
 			flush_dbg_log(1);
+	}
+	
+	if(logging_enabled){
+		DebugPrint("winx_enable_dbg_log: log_path = %s",path);
+		winx_printf("\nUsing log file \"%s\" ...\n",path);
 	}
 	
 	/* set new log path */
