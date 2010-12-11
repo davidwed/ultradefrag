@@ -199,20 +199,24 @@ int defragment(udefrag_job_parameters *jp)
 			if(is_mft(f->f) && jp->actions.allow_full_mft_defrag == 0 \
 			  && (win_version >= WINDOWS_XP /* || win_version == WINDOWS_2K3 */)){
 				/* list MFT parts (for debugging purposes) */
+                DebugPrint("Start displaying MFT blocks");
 				for(block = f->f->disp.blockmap, i = 0; block; block = block->next, i++){
 					DebugPrint("mft part #%u start: %I64u, length: %I64u",
 						i,block->lcn,block->length);
 					if(block->next == f->f->disp.blockmap) break;
 				}
+                DebugPrint("End displaying %u MFT blocks", i-1);
 				/* if there are only two fragments, mark $mft as already processed */
 				if(i < 3){
 					winx_list_destroy((list_entry **)(void *)&f->f->disp.blockmap);
+                    DebugPrint("MFT skiped entirely, only %u blocks", i-1);
 				} else {
 					/* remove the first block from the map */
 					winx_list_remove_item((list_entry **)(void *)&f->f->disp.blockmap,
 						(list_entry *)(void *)f->f->disp.blockmap);
 					/* mark the file as intended for partial defragmentation */
 					f->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
+                    DebugPrint("First MFT block removed");
 				}
 				continue;
 			}
