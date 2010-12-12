@@ -548,8 +548,12 @@ int __stdcall udefrag_set_log_file_path(void)
 				winx_path_extract_filename(filename);
 				winx_heap_free(native_path);
 				native_path = winx_sprintf("\\??\\%ws\\UltraDefrag_Logs\\%s",path,filename);
-				if(native_path == NULL)
+				if(native_path == NULL){
 					DebugPrint("set_log_file_path: cannot build %%tmp%%\\UltraDefrag_Logs\\{filename}");
+				} else {
+					/* delete old logfile from the temporary folder */
+					winx_delete_file(native_path);
+				}
 				winx_heap_free(filename);
 			}
 		}
