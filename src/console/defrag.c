@@ -311,7 +311,7 @@ int __cdecl main(int argc, char **argv)
 			/* command not found */
 			printf("\n");
 		}
-		if(pause_result != 0){
+		if(pause_result != 0 && pause_result != STATUS_CONTROL_C_EXIT){
 			/* command or a command interpreter itself not found */
 			printf("Hit any key to continue...");
 			_getch();
