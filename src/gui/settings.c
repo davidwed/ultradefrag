@@ -38,6 +38,7 @@ int fraglimit;
 int refresh_interval;
 int disable_reports;
 char dbgprint_level[32] = {0};
+char log_file_path[32767] = {0};
 int dry_run;
 
 /*
@@ -105,9 +106,16 @@ WGX_OPTION options[] = {
 	{WGX_CFG_STRING,  sizeof(dbgprint_level), "dbgprint_level", dbgprint_level, ""},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
+	{WGX_CFG_COMMENT, 0, "set log_file_path to the path and file name of the log file to be created,", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "for normal operation set it to an empty string", NULL, ""},
+	{WGX_CFG_COMMENT, 0, "For example:",                                                    NULL, ""},
+	{WGX_CFG_COMMENT, 0, "log_file_path = \"C:\\\\Windows\\\\UltraDefrag\\\\Logs\\\\ultradefrag.log\"", NULL, ""},
+	{WGX_CFG_STRING,  sizeof(log_file_path), "log_file_path", log_file_path, ""},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
 	{WGX_CFG_COMMENT, 0, "set dry_run parameter to 1 for defragmentation algorithm testing,", NULL, ""},
 	{WGX_CFG_COMMENT, 0, "no actual data moves will be performed on disk in this case",       NULL, ""},
-	{WGX_CFG_INT,  0, "dry_run", &dry_run, 0},
+	{WGX_CFG_INT,     0, "dry_run", &dry_run, 0},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
 	{WGX_CFG_COMMENT, 0, "seconds_for_shutdown_rejection sets the delay for the user to cancel", NULL, ""},
@@ -185,6 +193,7 @@ void DeleteEnvironmentVariables(void)
 	(void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",NULL);
 	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",NULL);
 	(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",NULL);
+	(void)SetEnvironmentVariable("UD_LOG_FILE_PATH",NULL);
 	(void)SetEnvironmentVariable("UD_TIME_LIMIT",NULL);
 	(void)SetEnvironmentVariable("UD_DRY_RUN",NULL);
 }
@@ -213,6 +222,10 @@ void SetEnvironmentVariables(void)
 	(void)SetEnvironmentVariable("UD_DISABLE_REPORTS",buffer);
 	if(dbgprint_level[0])
 		(void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",dbgprint_level);
+    if(log_file_path[0]){
+        (void)SetEnvironmentVariable("UD_LOG_FILE_PATH",log_file_path);
+        (void)udefrag_set_log_file_path();
+    }
 	if(dry_run)
 		(void)SetEnvironmentVariable("UD_DRY_RUN","1");
 }
