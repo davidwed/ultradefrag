@@ -193,6 +193,13 @@ disable_reports = 0
 
 dbgprint_level = "NORMAL"
 
+-- set log_file_path to the path and file name of the log file to be created,
+-- for normal operation set it to an empty string
+-- For example:
+-- log_file_path = "C:\\Windows\\UltraDefrag\\Logs\\ultradefrag.log"
+
+log_file_path = ""
+
 -- set dry_run parameter to 1 for defragmentation algorithm testing,
 -- no actual data moves will be performed on disk in this case
 

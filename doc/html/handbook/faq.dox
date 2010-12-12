@@ -99,7 +99,7 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * before you display the reports. This will open each report in a new tab depending
  * on your browsers configuration.
  *
- * <h3>Why is the progress exceeding 100%, when processing FAT volumes?</h3>
+ * <h3>Why is the progress exceeding 100\%, when processing FAT volumes?</h3>
  * On FAT volumes space is immediately released after a file is moved,
  * so it happens, that more files can be fully defragmented, than initially
  * calculated. 
@@ -113,6 +113,17 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
  * skipped for drive C and S.\n
  * The analysis will not be complete for excluded FAT volumes, because the
  * driver does only check the root folder of excluded volumes.
+ *
+ * <h3>I have set UD_LOG_FILE_PATH or log_file_path, but the log file is not created?</h3>
+ * If creating the log file fails for any reason, UltraDefrag tries to create
+ * the log file in the temporary folder of the current user.\n
+ * Only if creating the log file in the temporary fails too, there will be no log file
+ * created.\n
+ * The default temporary location for the GUI and console edition is:
+ * <b>\%TMP\%\\UltraDefrag_Logs\\{filename}</b>\n
+ * The default temporary location for boot time defrag is:
+ * <b>\%SystemRoot\%\\UltraDefrag_Logs\\{filename}</b>\n
+ * The file name is the one from the specified log file path variable.
  *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
