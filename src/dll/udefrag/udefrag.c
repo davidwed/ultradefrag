@@ -33,6 +33,7 @@ static void dbg_print_header(udefrag_job_parameters *jp)
 	int os_version;
 	int mj, mn;
 	char ch;
+	winx_time t;
 
 	/* print driver version */
 	winx_dbg_print_header(0,0,"*");
@@ -43,6 +44,12 @@ static void dbg_print_header(udefrag_job_parameters *jp)
 	mj = os_version / 10;
 	mn = os_version % 10;
 	winx_dbg_print_header(0x20,0,"Windows NT %u.%u",mj,mn);
+	
+	/* print date and time */
+	memset(&t,0,sizeof(winx_time));
+	(void)winx_get_local_time(&t);
+	winx_dbg_print_header(0x20,0,"[%02i.%02i.%04i at %02i:%02i]",
+		(int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute);
 	winx_dbg_print_header(0,0,"*");
 	
 	/* force MinGW to export both udefrag_tolower and udefrag_toupper */
