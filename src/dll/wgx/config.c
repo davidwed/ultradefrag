@@ -44,7 +44,7 @@
  * @note 
  * - NULL can be passed as first parameter to
  * initialize options by their default values.
- * - Option name equal to NULL inicates the end of the table.
+ * - Option name equal to NULL indicates the end of the table.
  * - WGX_CFG_EMPTY and WGX_CFG_COMMENT options are ignored.
  * - If option type is WGX_CFG_INT value buffer must point to
  * variable of type int. Default value is interpreted as
@@ -102,7 +102,7 @@ BOOL __stdcall WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table)
 		if(!lua_isnil(L, lua_gettop(L))){
 			if(opts_table[i].type == WGX_CFG_INT){
 				*((int *)opts_table[i].value) = (int)lua_tointeger(L, lua_gettop(L));
-			} else if(opts_table[i].type == WGX_CFG_STRING){
+			} else if(opts_table[i].type == WGX_CFG_STRING || opts_table[i].type == WGX_CFG_PATH){
 				s = (char *)lua_tostring(L, lua_gettop(L));
 				if(s != NULL){
 					strncpy((char *)opts_table[i].value,s,opts_table[i].value_length);
@@ -149,6 +149,7 @@ BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_
 	char err_msg[1024];
 	FILE *f;
 	int i, result = 0;
+    unsigned int j;
 	
 	if(config_file_path == NULL || opts_table == NULL){
 		if(cb != NULL)
@@ -181,6 +182,17 @@ BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_
 		} else if(opts_table[i].type == WGX_CFG_STRING){
 			//WgxDbgPrint("%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);
 			result = fprintf(f,"%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);
+		} else if(opts_table[i].type == WGX_CFG_PATH){
+			result = fprintf(f,"%s = \"",opts_table[i].name);
+            
+            for(j=0;j<strlen((char *)opts_table[i].value);j++){
+                if(((char *)opts_table[i].value)[j] == '\\'){
+                    result = fprintf(f,"\\\\");
+                } else {
+                    result = fprintf(f,"%c",((char *)opts_table[i].value)[j]);
+                }
+            }
+			result = fprintf(f,"\"\n");
 		}
 		if(result < 0){
 			fclose(f);

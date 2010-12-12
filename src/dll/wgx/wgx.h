@@ -77,7 +77,8 @@ enum {
 	WGX_CFG_EMPTY,
 	WGX_CFG_COMMENT,
 	WGX_CFG_INT,
-	WGX_CFG_STRING
+	WGX_CFG_STRING,
+    WGX_CFG_PATH
 };
 
 typedef struct _WGX_OPTION {
