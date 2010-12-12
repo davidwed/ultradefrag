@@ -105,7 +105,7 @@
  * - Paths including spaces must be enclosed by double quotes (").
  * - Relative and absolute paths are supported.
  * Example:
- * udefrag "%USERPROFILE%" ..\\Test "\My Documents" C:\\WINDOWS\\WindowsUpdate.log
+ * udefrag "\%USERPROFILE\%" ..\\Test "\My Documents" C:\\WINDOWS\\WindowsUpdate.log
  * - Short paths (like C:\\PROGRA~1\\SOMEFI~1.TXT) aren't accepted on NT4.
  *
  * <h1>Environment variables</h1>
@@ -136,8 +136,8 @@
  * DETAILED may be used to collect information for the bug report,
  * PARANOID turns on a really huge amount of debugging information.</dd>
  * <dt>UD_LOG_FILE_PATH</dt>
- * <dd>If this variable is set, it should contain path (including filename)
- * to the log file to save debugging output into. If variable is not set, 
+ * <dd>If this variable is set, it should contain the path (including filename)
+ * to the log file to save debugging output into. If the variable is not set, 
  * no logging to the file will be performed.</dd>
  * <dt>UD_DRY_RUN</dt>
  * <dd>If this environment variable is set to 1 (one) the files are not physically moved.
