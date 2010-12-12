@@ -22,20 +22,46 @@
  *
  * If you have encountered a bug please submit your report via the
  * <a href="http://sourceforge.net/tracker/?atid=969870&group_id=199532&func=browse">bug tracker</a>.
- * The following additional information is always very appreciated:
- *
- * - screen-shots (required for all GUI-related bugs)
- * - debugging information collected by the <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> program
- *
+ * Additional debugging information is always very appreciated.
+ * <br/><br/>
+ * <h2>How to collect debugging information</h2>
+ * <dl>
+ * <dt>Create screen-shots</dt>
+ * <dd>This is highly recommended for reporting display related problems.</dd>
+ * <dt>Enable debugging output</dt>
+ * <dd>Use the <b>dbgprint_level</b> setting or the <b>UD_DBGPRINT_LEVEL</b> environment variable and set it to <b>DETAILED</b></dd>
+ * <dt>Collect debugging output</dt>
+ * <dd>There are two ways:<br/>
+ * - Using the <a href="http://technet.microsoft.com/en-us/sysinternals/bb896647.aspx">DbgView</a> program<br/>
+ * - Using the <b>log_file_path</b> setting or the <b>UD_LOG_FILE_PATH</b> environment variable</dd>
+ * </dl>
+ * 
+ * <h2>How to enable debugging</h2>
+ * <dl>
+ * <dt>Debugging the GUI</dt>
+ * <dd>The <b>dbgprint_level</b> and <b>log_file_path</b> settings are contained in the options file,
+ * which you can access via the wrench icon of the tool-bar or the settings menu.</dd>
+ * <dt>Debugging the console utility</dt>
+ * <dd>Set the <b>UD_DBGPRINT_LEVEL</b> and <b>UD_LOG_FILE_PATH</b> environment variables before
+ * you execute the udefrag utility in the command prompt.</dd>
+ * <dt>Debugging the boot time utility</dt>
+ * <dd>Set the <b>UD_DBGPRINT_LEVEL</b> and <b>UD_LOG_FILE_PATH</b> variables before
+ * you execute the udefrag command in the boot time script.</dd>
+ * </dl>
+ * 
+ * <h2>Using the DbgView program</h2>
  * Don't forget to check the <b>Capture Win32</b> item of the Capture menu of the DbgView program.
  * Check one of the <b>Log to file</b> items of the <b>File</b> menu to create a log file you can send us.
- *
- * Don't forget to set <b>dbgprint_level = "DETAILED"</b> in the options file, so we get all the information needed.
- * You can revert the change after you have created the debugging package.
  *
  * Note that DbgView cannot capture information from the user mode driver during the Windows boot process.
  * This is a well known DbgView limitation. The latest version of DbgView cannot be used on NT 4.0 either,
  * check <a href="http://doc.sch130.nsc.ru/www.sysinternals.com/ntw2k/freeware/debugview.shtml">this page</a> for an earlier version.
+ * <br/><br/>
+ * <h2>Disable debugging</h2>
+ * For the GUI you just have to set <b>dbgprint_level</b> and <b>log_file_path</b> to an empty string.\n
+ * For the boot time utility comment out the lines containing the definition of the
+ * <b>UD_DBGPRINT_LEVEL</b> and <b>UD_LOG_FILE_PATH</b> variables by adding a semicolon (;) at the beginning
+ * of those lines.
  *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
