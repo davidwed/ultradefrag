@@ -394,7 +394,7 @@ done:
 typedef struct _winx_dbg_log_entry {
 	struct _winx_dbg_log_entry *next;
 	struct _winx_dbg_log_entry *prev;
-    /* winx_time time_stamp; */
+	winx_time time_stamp;
 	char *buffer;
 } winx_dbg_log_entry;
 
@@ -433,11 +433,9 @@ static void add_dbg_log_entry(char *string)
 			if(new_log_entry->buffer == NULL){
 				/* not enough memory */
 				winx_list_remove_item((list_entry **)(void *)&dbg_log,(list_entry *)new_log_entry);
-			/*
-            } else {
-                (void)winx_get_local_time(&new_log_entry->time_stamp);
-            */
-            }
+			} else {
+				(void)winx_get_local_time(&new_log_entry->time_stamp);
+			}
 		}
 	}
 }
@@ -457,6 +455,7 @@ void flush_dbg_log(int already_synchronized)
 	winx_dbg_log_entry *log_entry;
 	int length;
 	char crlf[] = "\r\n";
+	char *time_stamp;
 
 	/* synchronize with other threads */
 	if(!already_synchronized){
@@ -512,14 +511,14 @@ void flush_dbg_log(int already_synchronized)
 						log_entry->buffer[length - 1] = 0;
 						length --;
 					}
-                    /*
-                    char *time_stamp = winx_vsprintf("%04d-%02d-%02d %02d:%02d:%02d.%03d ",
-                        log_entry->time_stamp.year, log_entry->time_stamp.month, log_entry->time_stamp.day,
-                        log_entry->time_stamp.hour, log_entry->time_stamp.minute, log_entry->time_stamp.second,
-                        log_entry->time_stamp.millisecond);
-					(void)winx_fwrite(time_stamp,sizeof(char),strlen(time_stamp),f);
-                    winx_heap_free(time_stamp);
-                    */
+					time_stamp = winx_sprintf("%04d-%02d-%02d %02d:%02d:%02d.%03d ",
+						log_entry->time_stamp.year, log_entry->time_stamp.month, log_entry->time_stamp.day,
+						log_entry->time_stamp.hour, log_entry->time_stamp.minute, log_entry->time_stamp.second,
+						log_entry->time_stamp.milliseconds);
+					if(time_stamp){
+						(void)winx_fwrite(time_stamp,sizeof(char),strlen(time_stamp),f);
+						winx_heap_free(time_stamp);
+					}
 					(void)winx_fwrite(log_entry->buffer,sizeof(char),length,f);
 					/* add a proper newline characters */
 					(void)winx_fwrite(crlf,sizeof(char),2,f);
