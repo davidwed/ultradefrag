@@ -145,6 +145,7 @@ wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
  * @return Pointer to the formatted string, NULL
  * indicates failure. The string must be deallocated
  * by winx_heap_free after its use.
+ * @note Optimized for speed, can allocate more memory than needed.
  */
 char * __cdecl winx_vsprintf(const char *format,va_list arg)
 {
@@ -187,6 +188,7 @@ char * __cdecl winx_vsprintf(const char *format,va_list arg)
  * @return Pointer to the formatted string, NULL
  * indicates failure. The string must be deallocated
  * by winx_heap_free after its use.
+ * @note Optimized for speed, can allocate more memory than needed.
  */
 char * __cdecl winx_sprintf(const char *format, ...)
 {
