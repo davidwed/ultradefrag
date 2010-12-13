@@ -35,6 +35,25 @@
 #include "../../lua5.1/lauxlib.h"
 #include "../../lua5.1/lualib.h"
 
+typedef struct _escape_sequence {
+	char c;
+	char *sq;
+} escape_sequence;
+
+escape_sequence esq[] = {
+	{'\\', "\\\\"},
+	{'\a', "\\a" },
+	{'\b', "\\b" },
+	{'\f', "\\f" },
+	{'\n', "\\n" },
+	{'\r', "\\r" },
+	{'\t', "\\t" },
+	{'\v', "\\v" },
+	{'\'', "\\\'" },
+	{'\"', "\\\"" },
+	{0,    NULL  }
+};
+
 /**
  * @brief Reads options from configuration file.
  * @details Configuration files must be written
@@ -102,7 +121,7 @@ BOOL __stdcall WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table)
 		if(!lua_isnil(L, lua_gettop(L))){
 			if(opts_table[i].type == WGX_CFG_INT){
 				*((int *)opts_table[i].value) = (int)lua_tointeger(L, lua_gettop(L));
-			} else if(opts_table[i].type == WGX_CFG_STRING || opts_table[i].type == WGX_CFG_PATH){
+			} else if(opts_table[i].type == WGX_CFG_STRING){
 				s = (char *)lua_tostring(L, lua_gettop(L));
 				if(s != NULL){
 					strncpy((char *)opts_table[i].value,s,opts_table[i].value_length);
@@ -149,7 +168,9 @@ BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_
 	char err_msg[1024];
 	FILE *f;
 	int i, result = 0;
-    unsigned int j;
+    unsigned int j, k, n;
+	char c;
+	char *sq;
 	
 	if(config_file_path == NULL || opts_table == NULL){
 		if(cb != NULL)
@@ -181,20 +202,32 @@ BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_
 			result = fprintf(f,"%s = %i\n",opts_table[i].name,*((int *)opts_table[i].value));
 		} else if(opts_table[i].type == WGX_CFG_STRING){
 			//WgxDbgPrint("%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);
-			result = fprintf(f,"%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);
-		} else if(opts_table[i].type == WGX_CFG_PATH){
+			/*result = fprintf(f,"%s = \"%s\"\n",opts_table[i].name,(char *)opts_table[i].value);*/
 			result = fprintf(f,"%s = \"",opts_table[i].name);
-            
-            for(j=0;j<strlen((char *)opts_table[i].value);j++){
-                if(((char *)opts_table[i].value)[j] == '\\'){
-                    result = fprintf(f,"\\\\");
-                } else {
-                    result = fprintf(f,"%c",((char *)opts_table[i].value)[j]);
-                }
-            }
+			if(result < 0)
+				goto fail;
+		
+			n = strlen((char *)opts_table[i].value);
+			for(j = 0; j < n; j++){
+				c = ((char *)opts_table[i].value)[j];
+				/* replace character by escape sequence when needed */
+				sq = NULL;
+				for(k = 0; esq[k].c; k++){
+					if(esq[k].c == c)
+						sq = esq[k].sq;
+				}
+				if(sq)
+					result = fprintf(f,"%s",sq);
+				else
+					result = fprintf(f,"%c",((char *)opts_table[i].value)[j]);
+				if(result < 0)
+					goto fail;
+			}
+			
 			result = fprintf(f,"\"\n");
 		}
 		if(result < 0){
+fail:
 			fclose(f);
 			(void)_snprintf(err_msg,sizeof(err_msg) - 1,
 				"Cannot write to %s file:\n%s",

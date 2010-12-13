@@ -88,9 +88,9 @@ WGX_OPTION options[] = {
 	{WGX_CFG_COMMENT, 0, "For example:",                                                    NULL, ""},
 	{WGX_CFG_COMMENT, 0, "ex_filter = \"MyDocs\\\\Music\\\\mp3\\\\Red_Hot_Chili_Peppers\"", NULL, ""},
 	{WGX_CFG_EMPTY,   0, "",                                                                NULL, ""},
-	{WGX_CFG_PATH,    sizeof(in_filter), "in_filter",           in_filter,  ""},
+	{WGX_CFG_STRING,  sizeof(in_filter), "in_filter",           in_filter,  ""},
 	/* default value for ex_filter is more advanced to reduce volume processing time */
-	{WGX_CFG_PATH,    sizeof(ex_filter), "ex_filter",           ex_filter,  "system volume information;temp;recycle"},
+	{WGX_CFG_STRING,  sizeof(ex_filter), "ex_filter",           ex_filter,  "system volume information;temp;recycle"},
 	{WGX_CFG_STRING,  sizeof(sizelimit), "sizelimit",           sizelimit,  ""},
 	{WGX_CFG_INT,     0,                 "fragments_threshold", &fraglimit, 0},
 	{WGX_CFG_STRING,  sizeof(timelimit), "time_limit",          timelimit,  ""},
@@ -110,7 +110,7 @@ WGX_OPTION options[] = {
 	{WGX_CFG_COMMENT, 0, "for normal operation set it to an empty string", NULL, ""},
 	{WGX_CFG_COMMENT, 0, "For example:",                                                    NULL, ""},
 	{WGX_CFG_COMMENT, 0, "log_file_path = \"C:\\\\Windows\\\\UltraDefrag\\\\Logs\\\\ultradefrag.log\"", NULL, ""},
-	{WGX_CFG_PATH,    sizeof(log_file_path), "log_file_path", log_file_path, ""},
+	{WGX_CFG_STRING,  sizeof(log_file_path), "log_file_path", log_file_path, ""},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
 	{WGX_CFG_COMMENT, 0, "set dry_run parameter to 1 for defragmentation algorithm testing,", NULL, ""},
