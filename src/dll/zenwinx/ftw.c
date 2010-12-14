@@ -156,6 +156,11 @@ static HANDLE ftw_fopen(winx_file_info *f)
 		/* TODO: test it on Vista & Win7 */
 		access_rights |= FILE_READ_ATTRIBUTES;
 	}
+    
+    /* root folder needs FILE_READ_ATTRIBUTES to successfully retrieve FileBasicInformation,
+    see http://msdn.microsoft.com/en-us/library/ff567052(VS.85).aspx */
+    if(f->path[wcslen(f->path) - 1] == '\\')
+        access_rights |= FILE_READ_ATTRIBUTES;
 	
 	RtlInitUnicodeString(&us,f->path);
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
