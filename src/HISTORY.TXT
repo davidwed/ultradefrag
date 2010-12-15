@@ -16,7 +16,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Spanish(ES), Czech, Belarusian, Ukrainian
+      Spanish(ES), Czech, Belarusian, Ukrainian, Chinese(Traditional)
 
     - Developers: winx_strdup, winx_vsprintf, winx_sprintf, winx_enable_dbg_log,
       winx_disable_dbg_log, winx_get_module_filename, winx_path_remove_filename,
