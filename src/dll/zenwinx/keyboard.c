@@ -301,8 +301,10 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 		if(hKbSynchEvent){
 			synch_interval.QuadPart = MAX_WAIT_INTERVAL;
 			Status = NtWaitForSingleObject(hKbSynchEvent,FALSE,&synch_interval);
-			if(Status != WAIT_OBJECT_0)
-				winx_printf("\nkb_read: synchronization failed: 0x%x\n\n",(UINT)Status);
+			if(Status != WAIT_OBJECT_0){
+				winx_printf("\nkb_read: synchronization failed: 0x%x\n",(UINT)Status);
+				winx_printf("%s\n\n",winx_get_error_description((ULONG)Status));
+			}
 		}
 
 		/* pop item from the keyboard queue */
