@@ -88,8 +88,11 @@ winx_spin_lock * __stdcall winx_init_spin_lock(char *name)
 	
 	winx_heap_free(fullname);
 	
-	if(winx_release_spin_lock(sl) < 0)
+	if(winx_release_spin_lock(sl) < 0){
+		winx_destroy_event(sl->hEvent);
+		winx_heap_free(sl);
 		return NULL;
+	}
 	
 	return sl;
 }
