@@ -189,11 +189,7 @@ int defragment(udefrag_job_parameters *jp)
 			}
 			if(f_largest == NULL) goto next_rgn;
 			
-			/* skip $mft on 2k and below, because we cannot process it anyways */
-			if(is_mft(f_largest->f) && jp->actions.allow_full_mft_defrag == 0 && win_version <= WINDOWS_2K){
-                winx_list_destroy((list_entry **)(void *)&f_largest->f->disp.blockmap);
-                continue;
-            }
+			/* $mft on 2k and nt4 becomes skipped below in move_file and is_locked routines */
               
 			/* skip $mft on XP and higher, because the first 16 clusters aren't moveable there */
 			if(is_mft(f_largest->f) && jp->actions.allow_full_mft_defrag == 0 \
