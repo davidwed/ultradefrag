@@ -38,20 +38,19 @@ void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
  */
 void winx_print(char *string)
 {
-	ANSI_STRING aStr;
-	UNICODE_STRING uStr;
-	int i, len;
+	ANSI_STRING as;
+	UNICODE_STRING us;
+	int i;
 
 	if(!string)
 		return;
 
-	RtlInitAnsiString(&aStr,string);
-	if(RtlAnsiStringToUnicodeString(&uStr,&aStr,TRUE) == STATUS_SUCCESS){
-		NtDisplayString(&uStr);
-		RtlFreeUnicodeString(&uStr);
+	RtlInitAnsiString(&as,string);
+	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) == STATUS_SUCCESS){
+		NtDisplayString(&us);
+		RtlFreeUnicodeString(&us);
 	} else {
-		len = strlen(string);
-		for(i = 0; i < len; i ++)
+		for(i = 0; string[i]; i ++)
 			winx_putch(string[i]);
 	}
 
@@ -64,12 +63,12 @@ void winx_print(char *string)
  */
 int __cdecl winx_putch(int ch)
 {
-	UNICODE_STRING uStr;
+	UNICODE_STRING us;
 	short s[2];
 
 	s[0] = (short)ch; s[1] = 0;
-	RtlInitUnicodeString(&uStr,s);
-	NtDisplayString(&uStr);
+	RtlInitUnicodeString(&us,s);
+	NtDisplayString(&us);
 	return ch;
 }
 
@@ -178,14 +177,9 @@ int __cdecl winx_breakhit(int msec)
  */
 int __cdecl winx_getch(void)
 {
-	KEYBOARD_INPUT_DATA kbd;
 	KBD_RECORD kbd_rec;
-
-	do{
-		if(kb_read(&kbd,INFINITE) < 0) return (-1);
-		IntTranslateKey(&kbd,&kbd_rec);
-	} while(!kbd_rec.bKeyDown);
-	return (int)kbd_rec.AsciiChar;
+	
+	return winx_kb_read(&kbd_rec,INFINITE);
 }
 
 /**
@@ -275,14 +269,13 @@ static void winx_add_history_entry(winx_history *h,char *string)
 		return;
 	}
 	
-	length = strlen(string) + 1;
-	entry->string = (char *)winx_heap_alloc(length);
+	entry->string = winx_strdup(string);
 	if(entry->string == NULL){
+		length = strlen(string) + 1;
 		DebugPrint("winx_add_winx_history_entry: cannot allocate %u bytes of memory",length);
 		winx_printf("\nCannot allocate %u bytes of memory for winx_add_winx_history_entry()!\n",length);
 		winx_list_remove_item((list_entry **)(void *)&h->head,(list_entry *)entry);
 	} else {
-		strcpy(entry->string,string);
 		h->n_entries ++;
 		h->current = entry;
 	}

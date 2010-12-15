@@ -938,7 +938,6 @@ scan_done:
 static winx_file_info * find_filelist_entry(short *attr_name,mft_scan_parameters *sp)
 {
 	winx_file_info *f;
-	int length;
 	
 	/* few streams may have the same mft id */
 	for(f = *sp->filelist; f != NULL; f = f->next){
@@ -968,16 +967,14 @@ static winx_file_info * find_filelist_entry(short *attr_name,mft_scan_parameters
 	}
 
 	/* initialize structure */
-	length = wcslen(attr_name);
-	f->name = winx_heap_alloc((length + 1) * sizeof(short));
+	f->name = winx_wcsdup(attr_name);
 	if(f->name == NULL){
 		DebugPrint("find_filelist_entry: cannot allocate %u bytes of memory",
-			(length + 1) * sizeof(short));
+			(wcslen(attr_name) + 1) * sizeof(short));
 		winx_list_remove_item((list_entry **)(void *)sp->filelist,(list_entry *)f);
 		sp->errors ++;
 		return NULL;
 	}
-	wcscpy(f->name,attr_name);
 	
 	f->path = NULL;
 	f->flags = 0;
@@ -1406,7 +1403,6 @@ static void build_file_path(winx_file_info *f,file_entry *f_array,
 	ULONGLONG mft_id,parent_mft_id;
 	int full_path_retrieved = 0;
 	short *src;
-	int length;
 	
 	/* initialize p->child by filename */
 	wcsncpy(p->child,f->name,MAX_PATH - 1);
@@ -1435,15 +1431,13 @@ static void build_file_path(winx_file_info *f,file_entry *f_array,
 	}
 	
 	/* update f->path */
-	length = wcslen(src);
-	f->path = winx_heap_alloc((length + 1) * sizeof(short));
+	f->path = winx_wcsdup(src);
 	if(f->path == NULL){
 		DebugPrint("build_file_path: cannot allocate %u bytes of memory",
-			(length + 1) * sizeof(short));
+			(wcslen(src) + 1) * sizeof(short));
 		sp->errors ++;
 		return;
 	}
-	wcscpy(f->path,src);
 
 	//DebugPrint("%ws",f->path);
 }
