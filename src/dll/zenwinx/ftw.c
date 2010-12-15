@@ -47,6 +47,9 @@
  */
 #define LLINVALID ((ULONGLONG) -1)
 
+#define FTW_FOPEN_FOR_DUMP       0x1
+#define FTW_FOPEN_FOR_BASIC_INFO 0x2
+
 /* external functions prototypes */
 winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
 	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb, 
@@ -67,12 +70,14 @@ static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
 }
 
 /**
- * @brief Opens the file for dumping.
- * @return Handle to the file, NULL
- * indicates failure.
+ * @brief Opens the file for dumping (or other actions).
+ * @param[in] pointer to structure containing the file information.
+ * @param[in] action one of the FTW_FOPEN_XXX constants
+ * indicating an action file needs to be opened for.
+ * @return Handle to the file, NULL indicates failure.
  * @todo Test all cases on nt4, w2k, xp, vista, w7.
  */
-static HANDLE ftw_fopen(winx_file_info *f)
+static HANDLE ftw_fopen(winx_file_info *f,int action)
 {
 /*	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
 	UNICODE_STRING us;
@@ -159,7 +164,7 @@ static HANDLE ftw_fopen(winx_file_info *f)
     
     /* root folder needs FILE_READ_ATTRIBUTES to successfully retrieve FileBasicInformation,
     see http://msdn.microsoft.com/en-us/library/ff567052(VS.85).aspx */
-    if(f->path[wcslen(f->path) - 1] == '\\')
+    if(action == FTW_FOPEN_FOR_BASIC_INFO)
         access_rights |= FILE_READ_ATTRIBUTES;
 	
 	RtlInitUnicodeString(&us,f->path);
@@ -222,7 +227,7 @@ int __stdcall winx_ftw_dump_file(winx_file_info *f,
 	f->disp.blockmap = NULL;
 	
 	/* open the file */
-	hFile = ftw_fopen(f);
+	hFile = ftw_fopen(f,FTW_FOPEN_FOR_DUMP);
 	if(hFile == NULL)
 		return 0; /* file is locked by system */
 	
@@ -479,7 +484,7 @@ static int ftw_add_root_directory(short *path, int flags,
 	
 	/* get file attributes */
 	f->flags |= FILE_ATTRIBUTE_DIRECTORY;
-	hDir = ftw_fopen(f);
+	hDir = ftw_fopen(f,FTW_FOPEN_FOR_BASIC_INFO);
 	if(hDir != NULL){
 		memset(&fbi,0,sizeof(FILE_BASIC_INFORMATION));
 		status = NtQueryInformationFile(hDir,&iosb,
