@@ -1,7 +1,7 @@
 VARIABLES(1)        Ultradefrag Development Team         VARIABLES(1)
 
 NAME
-        variables - manual page for variables v4.4.0
+        variables - manual page for variables v5.0.0
 
 SYNOPSIS
         [VARIABLE]
@@ -38,6 +38,10 @@ VARIABLES
                 level of debug information displayed
                 NORMAL (default), DETAILED (to report bugs), PARANOID
         
+        UD_LOG_FILE_PATH
+                full path to the log file to use for saving debug
+                information
+        
 EXAMPLES
         set UD_IN_FILTER=windows;winnt;ntuser;pagefile
                 include only paths, which include one of these words
@@ -60,4 +64,4 @@ COPYRIGHT
         There is NO warranty; not even for MERCHANTABILITY
         or FITNESS FOR A PARTICULAR PURPOSE.
 
-variables                   September 2010                          1
+variables                    December 2010                          1
