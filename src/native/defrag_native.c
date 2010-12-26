@@ -74,9 +74,8 @@ static void NativeAppInit(void)
 	*/
 	udefrag_monolithic_native_app_init();
 	
-	/* start logging */
-	set_dbg_log("startup-phase1");
-	DebugPrint("Hello from phase1!");
+	/* start initial logging */
+	set_dbg_log("startup-phase");
 }
 
 /**
@@ -151,8 +150,6 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		return;
 		
 	/* check for the pending boot-off command */
-	set_dbg_log("startup-phase2");
-	DebugPrint("Hello from phase2!");
 	if(ExecPendingBootOff()){
 #ifndef USE_INSTEAD_SMSS
 		winx_printf("Good bye ...\n");
@@ -162,8 +159,6 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	}
 
 	/* initialize keyboards */
-	set_dbg_log("startup-phase3");
-	DebugPrint("Hello from phase3!");
 	if(winx_init(Peb) < 0){
 		winx_printf("Wait 10 seconds ...\n");
 		long_dbg_delay();
