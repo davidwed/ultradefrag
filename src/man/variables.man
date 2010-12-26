@@ -42,6 +42,9 @@ VARIABLES
                 full path to the log file to use for saving debug
                 information
         
+        UD_DRY_RUN
+                set to '1' to disable moving files physically
+        
 EXAMPLES
         set UD_IN_FILTER=windows;winnt;ntuser;pagefile
                 include only paths, which include one of these words
