@@ -29,8 +29,8 @@
 
 /**
  * @brief Removes the extension from a path.
- * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
- * then path contains as output "\\??\\C:\\Windows\\Test".
+ * @details If path contains as input <b>\\??\\C:\\Windows\\Test.txt</b>,
+ * then path contains as output <b>\\??\\C:\\Windows\\Test</b>.
  * If the file name contains no dot or is starting with a dot,
  * then path keeps unchanged.
  * @param[in,out] path the native ANSI path to be processed.
@@ -71,8 +71,8 @@ void __stdcall winx_path_remove_extension(char *path)
 
 /**
  * @brief Removes the file name from a path.
- * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
- * then path contains as output "\\??\\C:\\Windows".
+ * @details If path contains as input <b>\\??\\C:\\Windows\\Test.txt</b>,
+ * then path contains as output <b>\\??\\C:\\Windows</b>.
  * If the path has a trailing backslash, then only that is removed.
  * @param[in,out] path the native ANSI path to be processed.
  */
@@ -88,10 +88,10 @@ void __stdcall winx_path_remove_filename(char *path)
 
 /**
  * @brief Extracts the file name from a path.
- * @details If path contains as input "\\??\\C:\\Windows\\Test.txt",
- * path contains as output "Test.txt".
- * If path contains as input "\\??\\C:\\Windows\\",
- * path contains as output "Windows\\".
+ * @details If path contains as input <b>\\??\\C:\\Windows\\Test.txt</b>,
+ * path contains as output <b>Test.txt</b>.
+ * If path contains as input <b>\\??\\C:\\Windows\\</b>,
+ * path contains as output <b>Windows\\</b>.
  * @param[in,out] path the native ANSI path to be processed.
  */
 void __stdcall winx_path_extract_filename(char *path)
