@@ -509,7 +509,7 @@ static int __cdecl hexview_handler(int argc,short **argv,short **envp)
 			for(; k < 8; k++)
 				winx_printf(" ");
 			winx_printf("\n");
-			offset += n;
+			(size_t *)offset += n;
 			j += n;
 			bytes_to_print -= n;
 		}
