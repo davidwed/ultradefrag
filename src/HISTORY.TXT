@@ -1,7 +1,9 @@
 HISTORY
 
-  Version 5.0.0  2010-12-
+  Version 5.0.0  2011-01-
   ------------------------------------------------------------------------------
+    RC1:
+    - hexview command added to the boot time shell
     beta2:
     - UD_LOG_FILE_PATH environment variable added to force save of debugging
       information to a log file. Intended for use in boot time interface

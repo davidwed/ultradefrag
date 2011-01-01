@@ -56,6 +56,8 @@ char *help_message[] = {
 	"                  display a message or the display status",
 	"  exit          - continue Windows boot",
 	"  help          - display this help screen",
+	"  hexview       - display the contents of the specified",
+	"                  binary file",
 	"  history       - display the list of typed commands",
 	"  man           - list or display available manual pages",
 	"  pause         - halt the execution for the specified timeout",
@@ -397,6 +399,147 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 	/* cleanup */
 	winx_release_file_contents(buffer);
 	return result;
+}
+
+/**
+ * @brief hexview command handler.
+ */
+static int __cdecl hexview_handler(int argc,short **argv,short **envp)
+{
+	char path[MAX_PATH];
+	short *filename;
+	int i, length;
+	WINX_FILE *f;
+	ULONGLONG size;
+	size_t filesize;
+	size_t bytes_to_read, bytes_to_print, n, j, k, m;
+	#define SCREEN_BUFFER_SIZE (8 * (MAX_DISPLAY_ROWS - 4))
+	unsigned char buffer[SCREEN_BUFFER_SIZE];
+	int result;
+	void *offset;
+	KBD_RECORD kbd_rec;
+	int escape_detected = 0;
+	int break_detected = 0;
+	char esq[] = {'\a', '\b', '\f', '\n', '\r', '\t', '\v', 0};
+	int esq_found = 0;
+	
+	if(argc < 1)
+		return (-1);
+
+	if(argc < 2){
+		winx_printf("\n%ws: file name must be specified\n\n",argv[0]);
+		return (-1);
+	}
+
+	/* build the native path to the file */
+	length = 0;
+	for(i = 1; i < argc; i++)
+		length += wcslen(argv[i]) + 1;
+	filename = winx_heap_alloc(length * sizeof(short));
+	if(filename == NULL){
+		winx_printf("\n%ws: cannot allocate %u bytes of memory\n\n",
+			argv[0],length * sizeof(short));
+		return (-1);
+	}
+	filename[0] = 0;
+	for(i = 1; i < argc; i++){
+		wcscat(filename,argv[i]);
+		if(i != argc - 1)
+			wcscat(filename,L" ");
+	}
+	(void)_snprintf(path,MAX_PATH - 1,"\\??\\%ws",filename);
+	path[MAX_PATH - 1] = 0;
+	winx_heap_free(filename);
+	
+	/* open the file */
+	f = winx_fopen(path,"r");
+	if(f == NULL){
+		winx_printf("\n%ws: cannot open %s\n\n",argv[0],path);
+		return (-1);
+	}
+	size = winx_fsize(f);
+	if(size == 0){
+		winx_fclose(f);
+		return 0; /* nothing to display */
+	}
+#ifndef _WIN64
+	if(size > 0xFFFFFFFF){
+		winx_printf("\n%ws: files larger than ~4Gb aren\'t supported\n\n",argv[0]);
+		winx_fclose(f);
+		return (-1);
+	}
+#endif
+	filesize = (size_t)size;
+	
+	/* read the file by portions needed to fill a single screen */
+	offset = 0x0;
+	while(filesize){
+		bytes_to_read = min(SCREEN_BUFFER_SIZE,filesize);
+		result = winx_fread(buffer,sizeof(char),bytes_to_read,f);
+		if(result != bytes_to_read && winx_fsize(f) == size){
+			winx_printf("\n%ws: cannot read %s\n\n",argv[0],path);
+			winx_fclose(f);
+			return (-1);
+		}
+		/* fill a screen */
+		bytes_to_print = bytes_to_read;
+		j = 0;
+		while(bytes_to_print){
+			n = min(8, bytes_to_print);
+			winx_printf("%p: ",offset);
+			for(k = 0; k < n; k++)
+				winx_printf("%02x ",(UINT)buffer[j+k]);
+			for(; k < 8; k++)
+				winx_printf("   ");
+			winx_printf("| ");
+			for(k = 0; k < n; k++){
+				/* replace escape sequences and 0x0 codes by spaces */
+				esq_found = 0;
+				for(m = 0; esq[m]; m++){
+					if(esq[m] == buffer[j+k]){
+						esq_found = 1;
+						break;
+					}
+				}
+				if(esq_found || buffer[j+k] == 0x0)
+					winx_printf(" ");
+				else
+					winx_printf("%c",buffer[j+k]);
+			}
+			for(; k < 8; k++)
+				winx_printf(" ");
+			winx_printf("\n");
+			offset += n;
+			j += n;
+			bytes_to_print -= n;
+		}
+		/* go to the next portion of data */
+		filesize -= bytes_to_read;
+		if(filesize && !scripting_mode){
+			/* display prompt to hit any key in interactive mode */
+			winx_printf("\n%s\n\n",DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY);
+			/* wait for any key */
+			if(winx_kb_read(&kbd_rec,INFINITE) < 0){
+				break; /* break in case of errors */
+			}
+			/* check for escape */
+			if(kbd_rec.wVirtualScanCode == 0x1){
+				escape_detected = 1;
+			} else if(kbd_rec.wVirtualScanCode == 0x1d){
+				/* distinguish between control keys and break key */
+				if(!(kbd_rec.dwControlKeyState & LEFT_CTRL_PRESSED) && \
+				  !(kbd_rec.dwControlKeyState & RIGHT_CTRL_PRESSED)){
+					break_detected = 1;
+				}
+			}
+			if(escape_detected || break_detected)
+				break;
+		}
+	}
+
+	/* cleanup */
+	winx_fclose(f);
+	return 0;
 }
 
 /**
@@ -783,6 +926,7 @@ cmd_table_entry cmd_table[] = {
 	{ L"echo.",     echo_handler },
 	{ L"exit",      exit_handler },
 	{ L"help",      help_handler },
+	{ L"hexview",   hexview_handler },
 	{ L"history",   history_handler },
 	{ L"man",       man_handler },
 	{ L"pause",     pause_handler },
