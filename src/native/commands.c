@@ -416,7 +416,7 @@ static int __cdecl hexview_handler(int argc,short **argv,short **envp)
 	#define SCREEN_BUFFER_SIZE (8 * (MAX_DISPLAY_ROWS - 4))
 	unsigned char buffer[SCREEN_BUFFER_SIZE];
 	int result;
-	void *offset;
+	char *offset;
 	KBD_RECORD kbd_rec;
 	int escape_detected = 0;
 	int break_detected = 0;
@@ -509,7 +509,7 @@ static int __cdecl hexview_handler(int argc,short **argv,short **envp)
 			for(; k < 8; k++)
 				winx_printf(" ");
 			winx_printf("\n");
-			(size_t *)offset += n;
+			offset += n;
 			j += n;
 			bytes_to_print -= n;
 		}
