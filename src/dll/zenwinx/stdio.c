@@ -555,7 +555,7 @@ int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_ro
 	if(prompt == NULL) prompt = DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY;
 	
 	/* allocate space for prompt on the screen */
-	max_rows -= 3;
+	max_rows -= 4;
 	
 	/* allocate memory for line buffer */
 	line_buffer = winx_heap_alloc(line_width + 1);

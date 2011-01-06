@@ -29,7 +29,7 @@
 #include "ntndk.h"
 #endif /* !WINX_CUSTOM_NTNDK_H */
 
-#define DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page..."
+#define DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page,\n          ESC or Break to abort..."
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))

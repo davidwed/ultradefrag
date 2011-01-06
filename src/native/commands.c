@@ -413,7 +413,7 @@ static int __cdecl hexview_handler(int argc,short **argv,short **envp)
 	ULONGLONG size;
 	size_t filesize;
 	size_t bytes_to_read, bytes_to_print, n, j, k, m;
-	#define SCREEN_BUFFER_SIZE (8 * (MAX_DISPLAY_ROWS - 4))
+	#define SCREEN_BUFFER_SIZE (8 * (MAX_DISPLAY_ROWS - 5))
 	unsigned char buffer[SCREEN_BUFFER_SIZE];
 	int result;
 	char *offset;
