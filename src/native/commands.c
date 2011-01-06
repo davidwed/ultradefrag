@@ -57,7 +57,7 @@ char *help_message[] = {
 	"  exit          - continue Windows boot",
 	"  help          - display this help screen",
 	"  hexview       - display the contents of the specified",
-	"                  binary file",
+	"                  file in a HEX viewer layout",
 	"  history       - display the list of typed commands",
 	"  man           - list or display available manual pages",
 	"  pause         - halt the execution for the specified timeout",

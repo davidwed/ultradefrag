@@ -83,7 +83,7 @@ Type 'help' for list of supported commands.
 #
 @endverbatim
  *
- * All commands displaying long lists (help, history, man, set, type) are splitting them into pages in interactive mode.
+ * All commands displaying long lists (help, hexview, history, man, set, type) are splitting them into pages in interactive mode.
  * </dd>
  * </dl>
  *
@@ -113,6 +113,15 @@ Type 'help' for list of supported commands.
  * Break the boot time program execution and return the specified error code or zero.</dd>
  * <dt>help</dt>
  * <dd>Show a list of all available commands.</dd>
+ * <dt>hexview</dt>
+ * <dd>Display the contents of the specified file in a HEX viewer layout.</dd>
+ *
+@verbatim
+000000C0: 0a 00 3b 00 20 00 46 00 |   ;   F
+000000C8: 72 00 61 00 67 00 6d 00 | r a g m
+000000D0: 65 00 6e 00 74 00 65 00 | e n t e
+@endverbatim
+ *
  * <dt>history</dt>
  * <dd>Show a list of all manually entered commands.
  * To cycle through the commands use the up/down arrow/cursor keys.</dd>
