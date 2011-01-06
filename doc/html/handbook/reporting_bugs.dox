@@ -46,7 +46,9 @@
  * you execute the udefrag utility in the command prompt.</dd>
  * <dt>Debugging the boot time utility</dt>
  * <dd>Set the <b>UD_DBGPRINT_LEVEL</b> and <b>UD_LOG_FILE_PATH</b> variables before
- * you execute the udefrag command in the boot time script.</dd>
+ * you execute the udefrag command in the boot time script.<br>
+ * The log file <b>\%windir\%\\UltraDefrag\\Logs\\boot-startup-phase.log</b> is used internally
+ * to collect debugging information before the boot time script is executed.</dd>
  * </dl>
  * 
  * <h2>Using the DbgView program</h2>
