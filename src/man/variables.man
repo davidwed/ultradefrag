@@ -58,6 +58,9 @@ EXAMPLES
         set UD_TIME_LIMIT=6h 30m
                 terminate processing after 6 hours and 30 minutes
         
+        set UD_LOG_FILE_PATH=C:\Windows\Temp\defrag_native.log
+                log debugging information to the specified file
+        
 AUTHOR
         Written by Ultradefrag Development Team
 
@@ -67,4 +70,4 @@ COPYRIGHT
         There is NO warranty; not even for MERCHANTABILITY
         or FITNESS FOR A PARTICULAR PURPOSE.
 
-variables                    December 2010                          1
+variables                    January 2011                           1
