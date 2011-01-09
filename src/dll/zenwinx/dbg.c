@@ -502,7 +502,7 @@ void flush_dbg_log(int already_synchronized)
 		}
 	}
 	if(f != NULL){
-        winx_printf("\nWriting log file \"%s\" ...\n",log_path);
+        winx_printf("\nWriting log file \"%s\" ...\n",&log_path[4]);
         
 		for(log_entry = dbg_log; log_entry; log_entry = log_entry->next){
 			if(log_entry->buffer){
@@ -575,7 +575,7 @@ void __stdcall winx_enable_dbg_log(char *path)
 	
 	if(logging_enabled){
 		DebugPrint("winx_enable_dbg_log: log_path = %s",path);
-		winx_printf("\nUsing log file \"%s\" ...\n",path);
+		winx_printf("\nUsing log file \"%s\" ...\n",&path[4]);
 	}
 	
 	/* set new log path */
