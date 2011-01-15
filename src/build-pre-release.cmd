@@ -4,9 +4,10 @@
 :: to simplify pre-release (alpha, beta and RC) building.
 ::
 :: The following arguments are accepted:
-::      --[alpha|beta|rc]
+::      --[alpha|beta|betai|rc]
 ::          alpha ... builds a portable package and adds alpha{version} to the package names
 ::          beta .... builds a portable package and adds beta{version} to the package names
+::          betai ... builds an installer package and adds beta{version} to the package names
 ::          rc ...... builds an installer package and adds RC{version} to the package names
 
 echo.
@@ -15,7 +16,7 @@ if "%UD_BLD_PRE_RELEASE_NUM%" == "" set UD_BLD_PRE_RELEASE_NUM=1
 
 call ParseCommandLine.cmd %*
 
-for /f "tokens=%UD_BLD_FLG_BUILD_STAGE%" %%T in ( "alpha beta RC" ) do set UD_BLD_STAGE_NAME=%%T
+for /f "tokens=%UD_BLD_FLG_BUILD_STAGE%" %%T in ( "alpha beta beta RC" ) do set UD_BLD_STAGE_NAME=%%T
 
 set UD_BLD_PRE_RELEASE_VER=%UD_BLD_STAGE_NAME%%UD_BLD_PRE_RELEASE_NUM%
 
@@ -26,7 +27,7 @@ echo.
 set UD_BLD_STAGE_EXT=exe
 set UD_BLD_STAGE_PKG=
 
-if %UD_BLD_FLG_BUILD_STAGE% EQU 3 goto :BuildPre
+if %UD_BLD_FLG_BUILD_STAGE% GTR 2 goto :BuildPre
 
 set UD_BLD_STAGE_EXT=zip
 set UD_BLD_STAGE_PKG=-portable

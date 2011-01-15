@@ -75,7 +75,8 @@ if "%1" == "--no-ia64"      set UD_BLD_FLG_BUILD_IA64=0
 
 if "%1" == "--alpha"        set UD_BLD_FLG_BUILD_STAGE=1
 if "%1" == "--beta"         set UD_BLD_FLG_BUILD_STAGE=2
-if "%1" == "--rc"           set UD_BLD_FLG_BUILD_STAGE=3
+if "%1" == "--betai"        set UD_BLD_FLG_BUILD_STAGE=3
+if "%1" == "--rc"           set UD_BLD_FLG_BUILD_STAGE=4
 
 shift
 if not "%1" == "" goto :ParseArgs
