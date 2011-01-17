@@ -241,9 +241,9 @@ void __stdcall winx_sleep(int msec);
 #define WINDOWS_2K3    52 /* and Server 2003 R2 and XP x64 */
 #define WINDOWS_VISTA  60 /* and Server 2008 */
 #define WINDOWS_7      61 /* and Server 2008 R2 */
-int  __stdcall winx_get_os_version(void);
+int __stdcall winx_get_os_version(void);
 
-int  __stdcall winx_get_windows_directory(char *buffer, int length);
+int __stdcall winx_get_windows_directory(char *buffer, int length);
 int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length);
 
 /* process mode constants */
