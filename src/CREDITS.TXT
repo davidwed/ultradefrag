@@ -126,6 +126,7 @@
     Parvez Reza        - Various interesting programming tricks.
     Stefan Pendl       - Boot time defragmenter improvements. Installer improvements.
                          Thousands of other interesting ideas.
+    Tiago Filipe Silva - Optimization of web images and udsorting.js script.
     Vasily Smirnov     - FAT directories defragmentation algorithm.
                          Various important GUI improvements.
 
