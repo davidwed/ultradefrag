@@ -46,7 +46,7 @@
  * - <a href="http://ultradefrag.sourceforge.net">UltraDefrag</a> - a little
  * shell included there allows to defragment hard drives as well as shutdown and 
  * reboot the computer before the Windows logon.
- * - <a href="http://amdf.fatal.ru/nt_native_application_shell_eng.php">Native shell</a> - 
+ * - <a href="http://hex.pp.ua/nt-native-applications-shell-eng.php">Native shell</a> - 
  * this little program runs before the Windows logon too. It allows
  * to navigate through the file system, copy and delete files, display directory
  * listings and more.
