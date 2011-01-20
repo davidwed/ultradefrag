@@ -348,18 +348,18 @@ void start_selected_jobs(udefrag_job_type job_type)
 {
 	DWORD id;
 	HANDLE h;
-	char *action = "analysis";
+	char *action = "volume analysis";
 
 	h = create_thread(StartJobsThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
 	if(h == NULL){
 		if(job_type == DEFRAGMENTATION_JOB)
-			action = "defragmentation";
+			action = "volume defragmentation";
 		else if(job_type == FULL_OPTIMIZATION_JOB)
-			action = "optimization";
+			action = "full volume optimization";
 		else if(job_type == QUICK_OPTIMIZATION_JOB)
-			action = "quick optimization";
+			action = "quick volume optimization";
 		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-			"Cannot create thread starting volume %s!",
+			"Cannot create thread starting %s!",
 			action);
 	} else {
 		CloseHandle(h);
