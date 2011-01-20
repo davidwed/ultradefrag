@@ -63,6 +63,7 @@ void show_help(void)
 		"  -a,  --analyze                      Analyze volume\n"
 		"       --defragment                   Defragment volume\n"
 		"  -o,  --optimize                     Optimize volume space\n"
+		"       --quick-optimize               Perform quick optimization\n"
 		"  -l,  --list-available-volumes       List volumes available\n"
 		"                                      for defragmentation,\n"
 		"                                      except removable media\n"
@@ -186,6 +187,7 @@ static struct option long_options_[] = {
 	{ "analyze",                     no_argument,       0, 'a' },
 	{ "defragment",                  no_argument,       0,  0  },
 	{ "optimize",                    no_argument,       0, 'o' },
+	{ "quick-optimize",              no_argument,       0,  0  },
 	{ "all",                         no_argument,       0,  0  },
 	{ "all-fixed",                   no_argument,       0,  0  },
 	
@@ -260,8 +262,11 @@ void parse_cmdline(int argc, char **argv)
 			//if(optarg) printf(" with arg %s", optarg);
 			//printf("\n");
 			long_option_name = long_options_[option_index].name;
-			if(!strcmp(long_option_name,"defragment")) { /* do nothing here */ }
-			else if(!strcmp(long_option_name,"map-border-color")){
+			if(!strcmp(long_option_name,"defragment")){
+				/* do nothing here */
+			} else if(!strcmp(long_option_name,"quick-optimize")){
+				quick_optimize_flag = 1;
+			} else if(!strcmp(long_option_name,"map-border-color")){
 				if(!optarg) break;
 				if(!strcmp(optarg,"black")){
 					map_border_color = 0x0; break;
@@ -278,26 +283,20 @@ void parse_cmdline(int argc, char **argv)
 
 				if(strstr(optarg,"red")){
 					map_border_color = FOREGROUND_RED;
-				}
-				else if(strstr(optarg,"green")){
+				} else if(strstr(optarg,"green")){
 					map_border_color = FOREGROUND_GREEN;
-				}
-				else if(strstr(optarg,"blue")){
+				} else if(strstr(optarg,"blue")){
 					map_border_color = FOREGROUND_BLUE;
-				}
-				else if(strstr(optarg,"yellow")){
+				} else if(strstr(optarg,"yellow")){
 					map_border_color = FOREGROUND_RED | FOREGROUND_GREEN;
-				}
-				else if(strstr(optarg,"magenta")){
+				} else if(strstr(optarg,"magenta")){
 					map_border_color = FOREGROUND_RED | FOREGROUND_BLUE;
-				}
-				else if(strstr(optarg,"cyan")){
+				} else if(strstr(optarg,"cyan")){
 					map_border_color = FOREGROUND_GREEN | FOREGROUND_BLUE;
 				}
 				
 				if(!dark_color_flag) map_border_color |= FOREGROUND_INTENSITY;
-			}
-			else if(!strcmp(long_option_name,"map-symbol")){
+			} else if(!strcmp(long_option_name,"map-symbol")){
 				if(!optarg) break;
 				if(strstr(optarg,"0x") == optarg){
 					/* decode hexadecimal number */
@@ -307,33 +306,25 @@ void parse_cmdline(int argc, char **argv)
 				} else {
 					if(optarg[0]) map_symbol = optarg[0];
 				}
-			}
-			else if(!strcmp(long_option_name,"screensaver")){
+			} else if(!strcmp(long_option_name,"screensaver")){
 				screensaver_mode = 1;
-			}
-			else if(!strcmp(long_option_name,"wait")){
+			} else if(!strcmp(long_option_name,"wait")){
 				wait_flag = 1;
-			}
-			else if(!strcmp(long_option_name,"shellex")){
+			} else if(!strcmp(long_option_name,"shellex")){
 				shellex_flag = 1;
-			}
-			else if(!strcmp(long_option_name,"use-entire-window")){
+			} else if(!strcmp(long_option_name,"use-entire-window")){
 				use_entire_window = 1;
-			}
-			else if(!strcmp(long_option_name,"map-rows")){
+			} else if(!strcmp(long_option_name,"map-rows")){
 				if(!optarg) break;
 				rows = atoi(optarg);
 				if(rows > 0) map_rows = rows;
-			}
-			else if(!strcmp(long_option_name,"map-symbols-per-line")){
+			} else if(!strcmp(long_option_name,"map-symbols-per-line")){
 				if(!optarg) break;
 				symbols_per_line = atoi(optarg);
 				if(symbols_per_line > 0) map_symbols_per_line = symbols_per_line;
-			}
-			else if(!strcmp(long_option_name,"all")){
+			} else if(!strcmp(long_option_name,"all")){
 				all_flag = 1;
-			}
-			else if(!strcmp(long_option_name,"all-fixed")){
+			} else if(!strcmp(long_option_name,"all-fixed")){
 				all_fixed_flag = 1;
 			}
 			break;
@@ -412,6 +403,9 @@ void parse_cmdline(int argc, char **argv)
 	if(all_fixed_flag) all_flag = 0;
 	
 	if(!l_flag && !all_flag && !all_fixed_flag && !letters[0] && !paths) h_flag = 1;
+	
+	/* --quick-optimize flag has more precedence */
+	if(quick_optimize_flag) o_flag = 0;
 	
 	/* calculate map dimensions if --use-entire-window flag is set */
 	if(use_entire_window) CalculateClusterMapDimensions();

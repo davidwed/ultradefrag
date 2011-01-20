@@ -41,6 +41,7 @@ object_path *paths = NULL;
 char letters[MAX_DOS_DRIVES] = {0};
 int wait_flag = 0;
 int shellex_flag = 0;
+int quick_optimize_flag = 0;
 
 int first_progress_update;
 int stop_flag = 0;
@@ -436,7 +437,7 @@ static void RunScreenSaver(void)
 static int process_single_volume(char volume_letter)
 {
 	long map_size = 0;
-	udefrag_job_type job_type = DEFRAG_JOB;
+	udefrag_job_type job_type = DEFRAGMENTATION_JOB;
 	int result;
 
 	/* validate volume letter */
@@ -471,7 +472,8 @@ static int process_single_volume(char volume_letter)
 	/* run the job */
 	stop_flag = 0;
 	if(a_flag) job_type = ANALYSIS_JOB;
-	else if(o_flag) job_type = OPTIMIZER_JOB;
+	else if(o_flag) job_type = FULL_OPTIMIZATION_JOB;
+	else if(quick_optimize_flag) job_type = QUICK_OPTIMIZATION_JOB;
 	first_progress_update = 1;
 	result = udefrag_start_job(volume_letter,job_type,map_size,
 		update_progress,terminator,(void *)(DWORD_PTR)volume_letter);

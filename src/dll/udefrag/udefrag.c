@@ -218,8 +218,9 @@ static DWORD WINAPI start_job(LPVOID p)
 	int result = 0;
 
 	/* do the job */
-	if(jp->job_type == DEFRAG_JOB) action = "defragmenting";
-	else if(jp->job_type == OPTIMIZER_JOB) action = "optimizing";
+	if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
+	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
+	else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "quick optimizing";
 	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
@@ -227,12 +228,16 @@ static DWORD WINAPI start_job(LPVOID p)
 	case ANALYSIS_JOB:
 		result = analyze(jp);
 		break;
-	case DEFRAG_JOB:
+	case DEFRAGMENTATION_JOB:
 		result = defragment(jp);
 		break;
-	case OPTIMIZER_JOB:
+	case FULL_OPTIMIZATION_JOB:
 		// TODO
-		//result = optimize(jp);
+		//result = full_optimize(jp);
+		break;
+	case QUICK_OPTIMIZATION_JOB:
+		// TODO
+		//result = quick_optimize(jp);
 		break;
 	default:
 		result = 0;

@@ -352,10 +352,12 @@ void start_selected_jobs(udefrag_job_type job_type)
 
 	h = create_thread(StartJobsThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
 	if(h == NULL){
-		if(job_type == DEFRAG_JOB)
+		if(job_type == DEFRAGMENTATION_JOB)
 			action = "defragmentation";
-		else if(job_type == OPTIMIZER_JOB)
+		else if(job_type == FULL_OPTIMIZATION_JOB)
 			action = "optimization";
+		else if(job_type == QUICK_OPTIMIZATION_JOB)
+			action = "quick optimization";
 		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
 			"Cannot create thread starting volume %s!",
 			action);

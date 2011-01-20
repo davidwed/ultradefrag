@@ -717,10 +717,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			start_selected_jobs(ANALYSIS_JOB);
 			return 0;
 		case IDM_DEFRAG:
-			start_selected_jobs(DEFRAG_JOB);
+			start_selected_jobs(DEFRAGMENTATION_JOB);
 			return 0;
 		case IDM_OPTIMIZE:
-			start_selected_jobs(OPTIMIZER_JOB);
+			start_selected_jobs(FULL_OPTIMIZATION_JOB);
 			return 0;
 		case IDM_STOP:
 			stop_all_jobs();

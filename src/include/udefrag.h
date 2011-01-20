@@ -83,8 +83,9 @@ int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);
 
 typedef enum {
 	ANALYSIS_JOB = 0,
-	DEFRAG_JOB,
-	OPTIMIZER_JOB
+	DEFRAGMENTATION_JOB,
+	FULL_OPTIMIZATION_JOB,
+	QUICK_OPTIMIZATION_JOB
 } udefrag_job_type;
 
 enum {

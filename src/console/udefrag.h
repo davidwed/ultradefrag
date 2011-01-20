@@ -86,6 +86,7 @@ extern object_path *paths;
 extern char letters[MAX_DOS_DRIVES];
 extern int wait_flag;
 extern int shellex_flag;
+extern int quick_optimize_flag;
 
 /* prototypes */
 void parse_cmdline(int argc, char **argv);

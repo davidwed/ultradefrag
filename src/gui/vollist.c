@@ -330,10 +330,11 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 		case ANALYSIS_JOB:
 			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
 			break;
-		case DEFRAG_JOB:
+		case DEFRAGMENTATION_JOB:
 			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
 			break;
-		case OPTIMIZER_JOB:
+		case FULL_OPTIMIZATION_JOB:
+		case QUICK_OPTIMIZATION_JOB:
 			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
 			break;
 		default:

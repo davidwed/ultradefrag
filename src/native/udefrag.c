@@ -97,7 +97,7 @@ void RedrawProgress(udefrag_progress_info *pi)
 		p1 = 100;
 		p2 = 0;
 	}
-	if(current_job == OPTIMIZER_JOB){
+	if(current_job == FULL_OPTIMIZATION_JOB || current_job == QUICK_OPTIMIZATION_JOB){
 		n = (pi->pass_number == 0xffffffff) ? 0 : pi->pass_number;
 		if(abort_flag) _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% aborted, fragmented/total = %lu/%lu",n,op_name,p1,p2,pi->fragmented,pi->files);
 		else _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed, fragmented/total = %lu/%lu",n,op_name,p1,p2,pi->fragmented,pi->files);
@@ -183,13 +183,17 @@ void ProcessVolume(char letter)
 		winx_printf("analyse %c: ...\n",letter);
         message = "Analysis";
 		break;
-	case DEFRAG_JOB:
+	case DEFRAGMENTATION_JOB:
 		winx_printf("defragment %c: ...\n",letter);
         message = "Defragmentation";
 		break;
-	case OPTIMIZER_JOB:
+	case FULL_OPTIMIZATION_JOB:
 		winx_printf("optimize %c: ...\n",letter);
         message = "Optimization";
+		break;
+	case QUICK_OPTIMIZATION_JOB:
+		winx_printf("quick optimize %c: ...\n",letter);
+        message = "Quick optimization";
 		break;
 	}
 	winx_printf(BREAK_MESSAGE);
@@ -233,6 +237,7 @@ static int DisplayAvailableVolumes(int skip_removable)
 int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 {
 	int a_flag = 0, o_flag = 0;
+	int quick_optimize_flag = 0;
 	int all_flag = 0, all_fixed_flag = 0;
 	char letters[MAX_DOS_DRIVES];
 	int i, n_letters = 0;
@@ -262,6 +267,9 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			continue;
 		} else if(!wcscmp(argv[i],L"-o")){
 			o_flag = 1;
+			continue;
+		} else if(!wcscmp(argv[i],L"--quick-optimize")){
+			quick_optimize_flag = 1;
 			continue;
 		} else if(!wcscmp(argv[i],L"--all")){
 			all_flag = 1;
@@ -300,10 +308,14 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		return (-1);
 	}
 	
+	/* --quick-optimize flag has more precedence */
+	if(quick_optimize_flag) o_flag = 0;
+
 	/* set current_job global variable */
 	if(a_flag) current_job = ANALYSIS_JOB;
-	else if(o_flag) current_job = OPTIMIZER_JOB;
-	else current_job = DEFRAG_JOB;
+	else if(o_flag) current_job = FULL_OPTIMIZATION_JOB;
+	else if(quick_optimize_flag) current_job = QUICK_OPTIMIZATION_JOB;
+	else current_job = DEFRAGMENTATION_JOB;
 	
 	/*
 	* In scripting mode the abort_flag has initial value 0.

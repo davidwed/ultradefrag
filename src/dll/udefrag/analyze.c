@@ -356,7 +356,7 @@ static int __stdcall filter(winx_file_info *f,void *user_defined_data)
 	* No files can be filtered out when
 	* volume optimization job is requested.
 	*/
-	if(jp->job_type == OPTIMIZER_JOB)
+	if(jp->job_type == FULL_OPTIMIZATION_JOB || jp->job_type == QUICK_OPTIMIZATION_JOB)
 		goto done;
 
 	/* skip temporary files */
@@ -816,7 +816,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	/*
 	* FAT volumes cannot be optimized.
 	*/
-	if(jp->job_type == OPTIMIZER_JOB \
+	if((jp->job_type == FULL_OPTIMIZATION_JOB || jp->job_type == QUICK_OPTIMIZATION_JOB) \
 	  && (jp->fs_type == FS_FAT12 \
 	  || jp->fs_type == FS_FAT16 \
 	  || jp->fs_type == FS_FAT32 \

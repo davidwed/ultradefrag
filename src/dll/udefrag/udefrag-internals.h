@@ -171,6 +171,8 @@ void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp);
 
 int analyze(udefrag_job_parameters *jp);
 int defragment(udefrag_job_parameters *jp);
+int full_optimize(udefrag_job_parameters *jp);
+int quick_optimize(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
 
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
