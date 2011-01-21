@@ -381,7 +381,7 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	HANDLE hFile;
 	int result;
 	winx_blockmap *block;
-	int old_color;
+	int old_color, new_color;
 	
 	old_color = get_file_color(jp,f);
 
@@ -423,7 +423,8 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 		update_mft_zones_layout(jp);
 	
 	/* redraw target space */
-	colorize_map_region(jp,target,f->disp.clusters,old_color,FREE_SPACE);
+	new_color = get_file_color(jp,f);
+	colorize_map_region(jp,target,f->disp.clusters,new_color,FREE_SPACE);
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
 			
@@ -465,7 +466,7 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 	NTSTATUS Status;
 	HANDLE hFile;
 	int result;
-	int old_color;
+	int old_color, new_color;
 	
 	length = 0;
 	for(block = first_block, n = 0; block; block = block->next, n++){
@@ -510,7 +511,8 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 		update_mft_zones_layout(jp);
 	
 	/* redraw target space */
-	colorize_map_region(jp,target,length,old_color,FREE_SPACE);
+	new_color = get_file_color(jp,f);
+	colorize_map_region(jp,target,length,new_color,FREE_SPACE);
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
 			
