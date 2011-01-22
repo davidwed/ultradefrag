@@ -27,7 +27,7 @@
  * <h2>How to collect debugging information</h2>
  * <dl>
  * <dt>Create screen-shots</dt>
- * <dd>This is highly recommended for reporting display related problems.</br>
+ * <dd>This is highly recommended for reporting display related problems.<br/>
  * In addition they help to visualize the current state of your volume.</dd>
  * <dt>Enable debugging output</dt>
  * <dd>Use the <b>dbgprint_level</b> setting or the <b>UD_DBGPRINT_LEVEL</b> environment variable and set it to <b>DETAILED</b></dd>
@@ -44,7 +44,7 @@
  * You can use your favorite screen-capture tool too, a free one is <a href="http://www.gen.hardcopy.de/">Hardcopy</a>.</dd>
  * <dt>Create a PNG image file</dt>
  * <dd>It is recommended to <b>not</b> paste the image from the clipboard into an Office document,
- * but to create a PNG image of it by pasting into <b>Paint</b> or any other drawing program.</br>
+ * but to create a PNG image of it by pasting into <b>Paint</b> or any other drawing program.<br/>
  * If you use Hardcopy you can save it directly.</dd>
  * </dl>
  * 
