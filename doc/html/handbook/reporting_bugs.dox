@@ -77,6 +77,13 @@
  * <b>UD_DBGPRINT_LEVEL</b> and <b>UD_LOG_FILE_PATH</b> variables by adding a semicolon (;) at the beginning
  * of those lines.
  *
+ * <h2>Creating a package to submit</h2>
+ * It is best to ZIP your collected files into a single compressed archive, which will reduce the up- and download size immensely.
+ * If you do not own a ZIP utility, check out <a href="http://sourceforge.net/projects/sevenzip/">7-zip</a>.
+ *
+ * Note that the Sourceforge trackers only allow uploading files of 256KB in size.
+ * For bigger files you may use one of the free file hosting services.
+ *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
  *    <TR>
