@@ -9,11 +9,6 @@ body, table, div, p, dl {
 
 h1 {
 	font-size: 150%;
-	text-align: center;
-}
-
-div.headertitle h1 {
-	text-align: center;
 }
 
 h2 {
@@ -26,6 +21,14 @@ h3 {
 
 dt {
 	font-weight: bold;
+}
+
+dl.author {
+	margin-left: -10px;
+}
+
+address.footer {
+	margin-top: -7px;
 }
 
 div.multicol {
@@ -89,7 +92,7 @@ div.navtab {
 a {
 	color: #3D578C;
 	font-weight: normal;
-	text-decoration: underline;
+	text-decoration: none;
 }
 
 .contents a:visited {
@@ -102,7 +105,6 @@ a:hover {
 
 a.qindex {
 	font-weight: bold;
-	text-decoration: none;
 }
 
 a.qindexHL {
@@ -110,7 +112,6 @@ a.qindexHL {
 	background-color: #9CAFD4;
 	color: #ffffff;
 	border: 1px double #869DCA;
-	text-decoration: none;
 }
 
 .contents a.qindexHL:visited {
@@ -119,29 +120,17 @@ a.qindexHL {
 
 a.el {
 	font-weight: bold;
-	text-decoration: none;
 }
 
 a.elRef {
-	text-decoration: none;
 }
 
 a.code {
 	color: #4665A2;
-	text-decoration: none;
 }
 
 a.codeRef {
 	color: #4665A2;
-	text-decoration: none;
-}
-
-dl.author {
-	margin-left: -10px;
-}
-
-a.index_pointer, a.anchor, a.simple, dl.author a, span.simple a {
-	text-decoration: none;
 }
 
 /* @end */
@@ -198,13 +187,7 @@ div.groupText {
 body {
 	background: white;
 	color: black;
-	padding: 0 0 0 0;
-	margin: 0; 
-}
-
-div.aWholePage {
-	margin-right: 20px;
-	margin-left: 20px;
+        margin: 0;
 }
 
 div.contents {
@@ -822,3 +805,4 @@ dl.bug
 	width: 100%;
 	border-bottom: 1px solid #5373B4;
 }
+
