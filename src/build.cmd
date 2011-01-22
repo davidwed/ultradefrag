@@ -265,6 +265,12 @@ rem by removing all intermediate files.
 	rd /s /q dll\udefrag\doxy-doc
 	rd /s /q dll\zenwinx\doxy-doc
 	rd /s /q ..\doc\html\handbook\doxy-doc
+	rd /s /q doxy-defaults
+	rd /s /q gui\doxy-defaults
+	rd /s /q dll\wgx\doxy-defaults
+	rd /s /q dll\udefrag\doxy-defaults
+	rd /s /q dll\zenwinx\doxy-defaults
+	rd /s /q ..\doc\html\handbook\doxy-defaults
 	rd /s /q src_package
 	rd /s /q ..\src_package
     if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 (
