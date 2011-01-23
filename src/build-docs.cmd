@@ -19,7 +19,6 @@ call :compile_docs ..\doc\html\handbook              || goto fail
 :: clean up the handbook
 pushd ..\doc\html\handbook\doxy-doc\html
 del /Q  header.html, footer.html
-del /Q  pages.html
 del /Q  doxygen.png
 del /Q  tabs.css
 del /Q  tab_*.png

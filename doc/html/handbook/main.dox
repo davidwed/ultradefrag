@@ -27,17 +27,17 @@
  * </dl>
  *
  * <h2>Table of Contents</h2>
- * -# @ref Introduction
- * -# @ref Installation
- * -# @ref Console
- * -# @ref Schedule
- * -# @ref GUI
- * -# @ref Boot
- * -# @ref Reports
- * -# @ref Tips
- * -# @ref FAQ
- * -# @ref ReportingBugs
- * -# @ref Credits
+ * -# @subpage Introduction
+ * -# @subpage Installation
+ * -# @subpage Console
+ * -# @subpage Schedule
+ * -# @subpage GUI
+ * -# @subpage Boot
+ * -# @subpage Reports
+ * -# @subpage Tips
+ * -# @subpage FAQ
+ * -# @subpage ReportingBugs
+ * -# @subpage Credits
  * -# <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/index.html" class="simple"><b>Development</b></a>
  *
  * <h2>License</h2>
