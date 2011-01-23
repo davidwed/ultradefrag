@@ -100,6 +100,13 @@ int get_options(udefrag_job_parameters *jp)
 			jp->udo.dbgprint_level = DBG_PARANOID;
 	}
 	
+	/* set dry_run variable */
+	if(winx_query_env_variable(L"UD_DRY_RUN",buffer,ENV_BUFFER_SIZE) >= 0){
+		DebugPrint("%%UD_DRY_RUN%% environment variable exists,");
+		DebugPrint("therefore no actual data moves will be performed on disk");
+		jp->udo.dry_run = 1;
+	}
+
 	/* print all options */
 	winx_dbg_print_header(0,0,"ultradefrag job options");
 	if(jp->udo.in_filter.count){

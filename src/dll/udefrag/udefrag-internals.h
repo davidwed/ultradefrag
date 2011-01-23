@@ -72,6 +72,7 @@ typedef struct _udefrag_options {
 	int refresh_interval;       /* progress refresh interval, in milliseconds */
 	int disable_reports;        /* nonzero value forces fragmentation reports to be disabled */
 	int dbgprint_level;         /* controls amount of debugging information */
+	int dry_run;                /* set %UD_DRY_RUN% variable to avoid actual data moving in tests */
 } udefrag_options;
 
 typedef struct _udefrag_fragmented_file {

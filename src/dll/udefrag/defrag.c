@@ -26,12 +26,6 @@
 
 #include "udefrag-internals.h"
 
-/*
-* Set UD_DRY_RUN environment variable
-* to avoid actual data moving in tests.
-*/
-int dry_run = 0;
-
 /* forward declarations */
 static int move_file_helper(HANDLE hFile,winx_file_info *f,
 	ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
@@ -119,7 +113,6 @@ int defragment(udefrag_job_parameters *jp)
 	ULONGLONG remaining_clusters;
 	WINX_FILE *fVolume = NULL;
 	char buffer[32];
-	short env_buffer[32];
 	int result;
 	int win_version;
 	int i;
@@ -130,15 +123,6 @@ int defragment(udefrag_job_parameters *jp)
 	result = analyze(jp);
 	if(result < 0)
 		return result;
-	
-	/* check for %UD_DRY_RUN% existence */
-	if(winx_query_env_variable(L"UD_DRY_RUN",env_buffer,sizeof(env_buffer)/sizeof(short)) >= 0){
-		DebugPrint("%%UD_DRY_RUN%% environment variable exists,");
-		DebugPrint("therefore no actual data moves will be performed on disk");
-		dry_run = 1;
-	} else {
-		dry_run = 0;
-	}
 	
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
@@ -564,7 +548,7 @@ static int move_file_part(HANDLE hFile,ULONGLONG startVcn,
 
 	if(jp->termination_router((void *)jp)) return (-1);
 	
-	if(dry_run){
+	if(jp->udo.dry_run){
 		jp->pi.moved_clusters += n_clusters;
 		return 0;
 	}
@@ -667,7 +651,7 @@ static int move_file_helper(HANDLE hFile,winx_file_info *f,
 		if(block->next == f->disp.blockmap) break;
 	}
 
-	if(dry_run)
+	if(jp->udo.dry_run)
 		return 0;
 
 	/* check whether the file was actually moved or not */
@@ -747,7 +731,7 @@ static int move_file_blocks_helper(HANDLE hFile,winx_file_info *f,
 		if(block->next == f->disp.blockmap || i == (n_blocks - 1)) break;
 	}
 
-	if(dry_run)
+	if(jp->udo.dry_run)
 		return 0;
 
 	/* check whether the file was actually moved or not */
