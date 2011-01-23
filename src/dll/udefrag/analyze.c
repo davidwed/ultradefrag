@@ -137,7 +137,7 @@ static int __stdcall process_free_region(winx_volume_region *rgn,void *user_defi
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 	
 	if(jp->udo.dbgprint_level >= DBG_PARANOID)
-		DebugPrint("start: %I64u len: %I64u",rgn->lcn,rgn->length);
+		DebugPrint("Free block start: %I64u len: %I64u",rgn->lcn,rgn->length);
 	colorize_map_region(jp,rgn->lcn,rgn->length,FREE_SPACE,SYSTEM_SPACE);
 	jp->pi.processed_clusters += rgn->length;
 	if(jp->progress_router)
