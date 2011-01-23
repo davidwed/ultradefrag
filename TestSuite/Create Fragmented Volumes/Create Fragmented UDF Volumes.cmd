@@ -11,7 +11,9 @@
 
 :: the following must be set to the character representing "YES"
 :: this is needed to run the format utility without user interaction
-set YES=J
+echo.
+set /p YES="Enter the letter that represents YES in your language [Y]: "
+if "%YES%" == "" set YES=Y
 
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted

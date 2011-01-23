@@ -11,7 +11,9 @@
 
 :: the following must be set to the character representing "YES"
 :: this is needed to run the format utility without user interaction
-set YES=J
+echo.
+set /p YES="Enter the letter that represents YES in your language [Y]: "
+if "%YES%" == "" set YES=Y
 
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
@@ -99,7 +101,7 @@ goto :EOF
 	
 	title Checking Drive "%~1" ...
 	echo Executing ... chkdsk %~1 /r /f
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f
+	if %DryRun% == 0 echo. & echo %YES% | chkdsk %~1 /r /f
 	
 	call :delay 2
 	
@@ -130,7 +132,7 @@ goto :EOF
 	
 	title Checking Drive "%~1" ...
 	echo Executing ... chkdsk %~1 /r /f
-	if %DryRun% == 0 echo. & chkdsk %~1 /r /f
+	if %DryRun% == 0 echo. & echo %YES% | chkdsk %~1 /r /f
 	
 	call :delay 2
 goto :EOF
