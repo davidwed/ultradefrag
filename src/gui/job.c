@@ -124,8 +124,18 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	
 	VolListUpdateStatusField(job);
 	UpdateStatusBar(pi);
-	current_operation = pi->current_operation;
-	if(current_operation == 'C') current_operation = 'O';
+	
+	switch(pi->current_operation){
+	case VOLUME_ANALYSIS:
+		current_operation = 'A';
+		break;
+	case VOLUME_DEFRAGMENTATION:
+		current_operation = 'D';
+		break;
+	default:
+		current_operation = 'O';
+		break;
+	}
 	
 	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
 		WgxDbgPrintLastError("update_progress: wait on hLangPackEvent failed");

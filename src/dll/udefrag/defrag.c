@@ -134,7 +134,7 @@ int defragment(udefrag_job_parameters *jp)
 	jp->pi.clusters_to_process = 0;
 	jp->pi.processed_clusters = 0;
 	jp->pi.moved_clusters = 0;
-	jp->pi.current_operation = 'D';
+	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) goto done;
 		if(f->f->disp.blockmap){

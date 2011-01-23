@@ -316,9 +316,9 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	if(job->pi.completion_status < 0){
 		lviw.pszText = L"";
 	} else if(job->pi.completion_status == 0 || stop_pressed){
-		if(job->pi.current_operation == 'D')
+		if(job->pi.current_operation == VOLUME_DEFRAGMENTATION)
 			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
-		else if(job->pi.current_operation == 'C')
+		else if(job->pi.current_operation == VOLUME_OPTIMIZATION)
 			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
 		else
 			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");

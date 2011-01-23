@@ -886,7 +886,7 @@ int analyze(udefrag_job_parameters *jp)
 	int result;
 	
 	winx_dbg_print_header(0,0,"analysis of %c: started",jp->volume_letter);
-	jp->pi.current_operation = 'A';
+	jp->pi.current_operation = VOLUME_ANALYSIS;
 	time = winx_xtime();
 	
 	/* update volume information */

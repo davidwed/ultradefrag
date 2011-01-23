@@ -88,6 +88,12 @@ typedef enum {
 	QUICK_OPTIMIZATION_JOB
 } udefrag_job_type;
 
+typedef enum {
+	VOLUME_ANALYSIS = 0,
+	VOLUME_DEFRAGMENTATION,
+	VOLUME_OPTIMIZATION
+} udefrag_operation_type;
+
 enum {
 	FREE_SPACE = 0,
 	SYSTEM_SPACE,
@@ -117,7 +123,7 @@ typedef struct _udefrag_progress_info {
 	ULONGLONG total_space;            /* volume size, in bytes */
 	ULONGLONG free_space;             /* free space amount, in bytes */
 	ULONGLONG mft_size;               /* mft size, in bytes */
-	unsigned char current_operation;  /* identifier of the currently running job */
+	udefrag_operation_type current_operation;  /* identifies currently running operation */
 	unsigned long pass_number;        /* the current volume optimizer pass */
 	ULONGLONG clusters_to_process;    /* number of clusters to process */
 	ULONGLONG processed_clusters;     /* number of already processed clusters */

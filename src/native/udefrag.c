@@ -78,17 +78,26 @@ int GetDebugLevel()
 void RedrawProgress(udefrag_progress_info *pi)
 {
 	int p1, p2, n;
-	char op; char *op_name = "";
+	char *op_name = "";
 	char s[64];
 	char format[16];
 	char *results;
 
 	/* TODO: optimize for speed to make redraw faster */
-	op = pi->current_operation;
-	if(op == 'A' || op == 'a')      op_name = "Analyze:  ";
-	else if(op == 'D' || op == 'd') op_name = "Defrag:   ";
-	else if(op == 'C' || op == 'c') op_name = "Optimize: ";
-	else                            op_name = "          ";
+	switch(pi->current_operation){
+	case VOLUME_ANALYSIS:
+		op_name = "Analyze:  ";
+		break;
+	case VOLUME_DEFRAGMENTATION:
+		op_name = "Defrag:   ";
+		break;
+	case VOLUME_OPTIMIZATION:
+		op_name = "Optimize: ";
+		break;
+	default:
+		op_name = "          ";
+		break;
+	}
 	if(pi->completion_status == 0 || abort_flag){
 		p1 = (int)(pi->percentage * 100.00);
 		p2 = p1 % 100;

@@ -347,7 +347,6 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD cursor_pos;
 	char volume_letter;
-	char op;
 	char *op_name = "";
 	char *results;
 	
@@ -376,13 +375,17 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 			}
 		}
 		
-		op = udefrag_tolower(pi->current_operation);
-		if(op == 'a')
+		switch(pi->current_operation){
+		case VOLUME_ANALYSIS:
 			op_name = "analyze:  ";
-		else if(op == 'd')
+			break;
+		case VOLUME_DEFRAGMENTATION:
 			op_name = "defrag:   ";
-		else
+			break;
+		default:
 			op_name = "optimize: ";
+			break;
+		}
 		clear_line(stderr);
 		fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
 			volume_letter,op_name,pi->percentage,pi->fragmented,pi->files);
