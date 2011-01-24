@@ -627,9 +627,9 @@ table.doxtable th {
 .navpath ul
 {
 	font-size: 11px;
-	background-image:url('line.png');
+	background-image:url('tab_b.png');
 	background-repeat:repeat-x;
-	height:28px;
+	height:30px;
 	line-height:30px;
 	color:#8AA0CC;
 	border:solid 1px #C2CDE4;
@@ -805,14 +805,6 @@ dl.bug
 	margin: 0px;
 	width: 100%;
 	border-bottom: 1px solid #5373B4;
-    background-image: url(line.png);
-    height: 28px;
-}
-
-#nav-tree .selected {
-  color: #FF0000;
-}
-
-#nav-tree .selected a {
-  color: #FF0000;
+	background-image: url(tab_b.png);
+	height: 30px;
 }
