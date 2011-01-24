@@ -675,8 +675,7 @@ table.doxtable th {
 
 .navpath li.footer a
 {
-	font-style: normal;
-	color: #2A3D61;
+    text-decoration: none;
 }
 
 div.summary
