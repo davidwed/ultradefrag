@@ -250,6 +250,11 @@ div.center img {
 	border: 0px;
 }
 
+address.footer {
+	text-align: right;
+	padding-right: 12px;
+}
+
 img.footer {
 	border: 0px;
 	vertical-align: middle;
@@ -596,6 +601,11 @@ div.dynheader {
     margin-top: 8px;
 }
 
+address {
+	font-style: normal;
+	color: #2A3D61;
+}
+
 table.doxtable {
 	border-collapse:collapse;
 }
@@ -641,13 +651,13 @@ table.doxtable th {
 .navpath li
 {
 	list-style-type:none;
+	float:left;
 	padding-left:10px;
 	padding-right:15px;
 	background-image:url('bc_s.png');
 	background-repeat:no-repeat;
 	background-position:right;
 	color:#364D7C;
-    text-align:center;
 }
 
 .navpath li.navelem a
@@ -666,6 +676,9 @@ table.doxtable th {
 .navpath li.footer
 {
     list-style-type:none;
+    float:right;
+    padding-left:10px;
+    padding-right:15px;
     background-image:none;
     background-repeat:no-repeat;
     background-position:right;

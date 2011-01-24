@@ -9,7 +9,8 @@ HISTORY
     - one bug preventing a proper redraw of defragmented files was fixed
     - the documentation was updated to include better information about
       taking screen-shots and creating support packages on the bug reports page
-    - tree-view to select chapters was added to documentation
+    - tree-view to select chapters was added to documentation and the
+      default doxygen color theme is now used
     
     - the following translations were updated:
     
