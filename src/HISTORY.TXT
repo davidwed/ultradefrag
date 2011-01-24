@@ -11,6 +11,10 @@ HISTORY
       taking screen-shots and creating support packages on the bug reports page
     - tree-view to select chapters was added to documentation
     
+    - the following translations were updated:
+    
+      Korean
+      
     beta2:
     - UD_LOG_FILE_PATH environment variable added to force save of debugging
       information to a log file. Intended for use in boot time interface
