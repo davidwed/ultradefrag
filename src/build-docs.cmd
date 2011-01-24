@@ -21,7 +21,6 @@ pushd ..\doc\html\handbook\doxy-doc\html
 del /Q  header.html, footer.html
 del /Q  doxygen.png
 del /Q  tabs.css
-del /Q  tab_*.png
 del /Q  bc_*.png
 del /Q  nav_*.png
 del /Q  open.png
