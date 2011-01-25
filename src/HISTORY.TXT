@@ -14,7 +14,7 @@ HISTORY
     
     - the following translations were updated:
     
-      Korean
+      Korean, Turkish
       
     beta2:
     - UD_LOG_FILE_PATH environment variable added to force save of debugging
