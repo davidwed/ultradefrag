@@ -232,12 +232,10 @@ static DWORD WINAPI start_job(LPVOID p)
 		result = defragment(jp);
 		break;
 	case FULL_OPTIMIZATION_JOB:
-		// TODO
-		//result = full_optimize(jp);
+		result = full_optimize(jp);
 		break;
 	case QUICK_OPTIMIZATION_JOB:
-		// TODO
-		//result = quick_optimize(jp);
+		result = quick_optimize(jp);
 		break;
 	default:
 		result = 0;

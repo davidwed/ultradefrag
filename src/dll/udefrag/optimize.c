@@ -26,6 +26,10 @@
 
 #include "udefrag-internals.h"
 
+/************************************************************/
+/*                    Full Optimization                     */
+/************************************************************/
+
 /**
  * @brief Performs a full volume optimization.
  * @details Full optimization moves all files
@@ -39,6 +43,11 @@ int full_optimize(udefrag_job_parameters *jp)
 {
 	return 0;
 }
+
+
+/************************************************************/
+/*                   Quick Optimization                     */
+/************************************************************/
 
 /**
  * @brief Performs a quick volume optimization.

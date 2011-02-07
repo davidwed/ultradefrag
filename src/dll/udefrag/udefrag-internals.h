@@ -176,6 +176,8 @@ int full_optimize(udefrag_job_parameters *jp);
 int quick_optimize(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
 
+int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
+
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 void update_mft_zones_layout(udefrag_job_parameters *jp);
 

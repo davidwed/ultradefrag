@@ -94,6 +94,34 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 	return f;
 }
 
+/**
+ * @brief Defines whether the file
+ * can be defragmented or not.
+ */
+int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
+{
+	/* skip files with undefined cluster map */
+	if(f->disp.blockmap == NULL)
+		return 0;
+	
+	/* skip files with less than 2 fragments */
+	if(f->disp.blockmap->next == f->disp.blockmap || f->disp.fragments < 2 || !is_fragmented(f))
+		return 0;
+
+	/* skip FAT directories */
+	if(is_directory(f) && !jp->actions.allow_dir_defrag)
+		return 0;
+	
+	/* skip files for which moving failed already to avoid infinite loops */
+	if(is_moving_failed(f))
+		return 0;
+	
+	/* skip files already marked as too large to avoid infinite loops */
+	if(is_too_large(f))
+		return 0;
+	
+	return 1;
+}
 
 /**
  * @brief Performs a volume defragmentation.
@@ -137,10 +165,8 @@ int defragment(udefrag_job_parameters *jp)
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) goto done;
-		if(f->f->disp.blockmap){
-			if(!is_directory(f->f) || jp->actions.allow_dir_defrag)
-				jp->pi.clusters_to_process += f->f->disp.clusters;
-		}
+		if(can_defragment(f->f,jp))
+			jp->pi.clusters_to_process += f->f->disp.clusters;
 		if(f->next == jp->fragmented_files) break;
 	}
 	
@@ -161,12 +187,10 @@ int defragment(udefrag_job_parameters *jp)
 			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
-				if(f->f->disp.clusters > length && f->f->disp.clusters <= rgn->length && f->f->disp.blockmap){
-					if(!is_directory(f->f) || jp->actions.allow_dir_defrag){
-						if(!is_intended_for_part_defrag(f->f)){
-							f_largest = f;
-							length = f->f->disp.clusters;
-						}
+				if(f->f->disp.clusters > length && f->f->disp.clusters <= rgn->length){
+					if(can_defragment(f->f,jp) && !is_intended_for_part_defrag(f->f)){
+						f_largest = f;
+						length = f->f->disp.clusters;
 					}
 				}
 				if(f->next == jp->fragmented_files) break;
@@ -262,13 +286,9 @@ int defragment(udefrag_job_parameters *jp)
 			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
-				if(f->f->disp.clusters > length && f->f->disp.blockmap && !is_too_large(f->f)){
-					if(f->f->disp.blockmap->next != f->f->disp.blockmap){ /* must have at least 2 fragments */
-						if(!is_directory(f->f) || jp->actions.allow_dir_defrag){
-							f_largest = f;
-							length = f->f->disp.clusters;
-						}
-					}
+				if(f->f->disp.clusters > length && can_defragment(f->f,jp)){
+					f_largest = f;
+					length = f->f->disp.clusters;
 				}
 				if(f->next == jp->fragmented_files) break;
 			}
@@ -329,11 +349,8 @@ part_defrag_done:
 	/* mark all files not processed yet as too large */
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) goto done;
-		if(f->f->disp.blockmap){
-			if(!is_directory(f->f) || jp->actions.allow_dir_defrag)
-				if(!is_intended_for_part_defrag(f->f))
-					f->f->user_defined_flags |= UD_FILE_TOO_LARGE;
-		}
+		if(can_defragment(f->f,jp))
+			f->f->user_defined_flags |= UD_FILE_TOO_LARGE;
 		if(f->next == jp->fragmented_files) break;
 	}
 	
@@ -352,6 +369,8 @@ done:
 
 /**
  * @brief Moves the file entirely.
+ * @details Can move any file
+ * regardless of its fragmentation.
  * @param[in] f the file to be moved.
  * @param[in] target the LCN 
  * of the target free region.
@@ -391,15 +410,22 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	
 	/* move the file */
 	result = move_file_helper(hFile,f,target,jp,fVolume);
-	if(result < 0)
-		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 	NtCloseSafe(hFile);
 	
-	/* update statistics */
+	/* update statistics in case of successful defragmentation */
 	if(result >= 0){
-		jp->pi.fragmented --;
-		jp->pi.fragments -= f->disp.fragments;
-		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
+		if(is_fragmented(f)){
+			jp->pi.fragmented --;
+			jp->pi.fragments -= (f->disp.fragments - 1);
+			f->disp.fragments = 1;
+			f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
+		}
+	} else {
+		/*
+		* Here we have some indeterminism because 
+		* of the undefined new cluster map of the file.
+		*/
+		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 	}
 	
 	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
@@ -418,16 +444,14 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	/* redraw source space; after winx_sub_volume_region()! */
 	if(result >= 0){
 		for(block = f->disp.blockmap; block; block = block->next){
-			if(old_color == MFT_SPACE)
-				redraw_freed_space(jp,block->lcn,block->length,MFT_SPACE);
-			else
-				redraw_freed_space(jp,block->lcn,block->length,FRAGM_SPACE);
+			redraw_freed_space(jp,block->lcn,block->length,old_color);
 			if(block->next == f->disp.blockmap) break;
 		}
 		if(jp->progress_router)
 			jp->progress_router(jp); /* redraw map */
 	}
 	
+	/* mark file as already processed */
 	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 	return result;
 }
