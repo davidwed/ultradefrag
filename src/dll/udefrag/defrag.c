@@ -406,6 +406,7 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 	int old_color, new_color;
 	int was_fragmented;
 	winx_blockmap *block, *next_block;
+	ULONGLONG lcn;
 	winx_file_info new_file_info;
 	
 	/* save file properties */
@@ -450,9 +451,11 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX
 move_success:
 		if(was_fragmented){
 			jp->pi.fragmented --;
-			jp->pi.fragments -= (f->disp.fragments - 1);
+			if(!is_compressed(f) && !is_sparse(f)){
+				jp->pi.fragments -= (f->disp.fragments - 1);
+				f->disp.fragments = 1;
+			}
 		}
-		f->disp.fragments = 1;
 		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
 
 		/* redraw target space */
@@ -473,12 +476,22 @@ move_success:
 			jp->progress_router(jp); /* redraw map */
 		
 		/* adjust block map */
-		f->disp.blockmap->lcn = target;
-		f->disp.blockmap->length = f->disp.clusters;
-		for(block = f->disp.blockmap->next; block != f->disp.blockmap; ){
-			next_block = block->next;
-			winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)(void *)block);
-			block = next_block;
+		if(!is_compressed(f) && !is_sparse(f)){
+			f->disp.blockmap->lcn = target;
+			f->disp.blockmap->length = f->disp.clusters;
+			for(block = f->disp.blockmap->next; block != f->disp.blockmap; ){
+				next_block = block->next;
+				winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)(void *)block);
+				block = next_block;
+			}
+		} else {
+			/* compressed and sparse files must have vcn's properly set */
+			lcn = target;
+			for(block = f->disp.blockmap; block; block = block->next){
+				block->lcn = lcn;
+				lcn += block->length;
+				if(block->next == f->disp.blockmap) break;
+			}
 		}
 		return 0;
 	}
