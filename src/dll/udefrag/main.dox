@@ -61,6 +61,12 @@
 /** @} */
 
 /**
+ * @defgroup Move File moving
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Optimizer Volume optimization
  * @{
  */

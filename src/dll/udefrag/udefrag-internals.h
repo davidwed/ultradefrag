@@ -147,6 +147,7 @@ typedef struct _udefrag_job_parameters {
 	ULONGLONG clusters_per_256k;                /* number of clusters in 256k block */
 	udefrag_allowed_actions actions;            /* actions allowed for selected file system */
 	cmap cluster_map;                           /* cluster map internal data */
+	WINX_FILE *fVolume;                         /* handle of the volume, used by file moving routines */
 } udefrag_job_parameters;
 
 int  get_options(udefrag_job_parameters *jp);
@@ -177,6 +178,7 @@ int quick_optimize(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
 
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
+WINX_FILE * __stdcall new_winx_vopen(char volume_letter);
 
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 void update_mft_zones_layout(udefrag_job_parameters *jp);
@@ -185,9 +187,9 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
 int is_mft(winx_file_info *f);
 int is_mft_mirror(winx_file_info *f);
-int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
+int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp);
 int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
-	ULONGLONG n_blocks,ULONGLONG target,udefrag_job_parameters *jp,WINX_FILE *fVolume);
+	ULONGLONG n_blocks,ULONGLONG target,udefrag_job_parameters *jp);
 void update_fragmented_files_list(udefrag_job_parameters *jp);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
