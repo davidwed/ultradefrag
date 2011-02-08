@@ -298,13 +298,6 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 	move_file_helper(hFile,f,target,jp);
 	NtCloseSafe(hFile);
 
-	/*
-	* Regardless of file moving status refresh coordinates
-	* of mft zones if $mft or $mftmirr has been moved.
-	*/
-	if(old_color == MFT_SPACE || is_mft_mirror(f))
-		update_mft_zones_layout(jp);
-
 	/* get file moving result */
 	if(jp->udo.dry_run){
 		moving_result = UNDETERMINED_MOVING_SUCCESS;
@@ -342,6 +335,10 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 	* Something has been moved, therefore we need to redraw 
 	* space, update free space pool and adjust statistics.
 	*/
+
+	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
+	if(old_color == MFT_SPACE || is_mft_mirror(f))
+		update_mft_zones_layout(jp);
 	
 	/* adjust statistics and basic file properties */
 	if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS){
@@ -355,17 +352,6 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 			jp->pi.fragmented ++;
 		f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
-	}
-	
-	if(moving_result != UNDETERMINED_MOVING_SUCCESS){
-		/* new file information is available */
-		jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
-	} else {
-		/* new file information isn't available */
-		if(!is_compressed(f) && !is_sparse(f)){
-			jp->pi.fragments -= (f->disp.fragments - 1);
-			f->disp.fragments = 1;
-		}
 	}
 	
 	/* redraw target space */
@@ -388,7 +374,7 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
 	
-	/* adjust block map */
+	/* adjust block map and statistics */
 	if(moving_result == UNDETERMINED_MOVING_SUCCESS){
 		if(!is_compressed(f) && !is_sparse(f)){
 			f->disp.blockmap->lcn = target;
@@ -398,6 +384,8 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 				winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)(void *)block);
 				block = next_block;
 			}
+			jp->pi.fragments -= (f->disp.fragments - 1);
+			f->disp.fragments = 1;
 		} else {
 			/* compressed and sparse files must have vcn's properly set */
 			lcn = target;
@@ -409,6 +397,7 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 		}
 	} else {
 		/* new block map is available - use it */
+		jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
 		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 		memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
 	}
