@@ -236,6 +236,17 @@ static int __stdcall dump_terminator(void *user_defined_data)
 }
 
 /**
+ * @brief File moving results
+ * intended for use in move_file only.
+ */
+typedef enum {
+	UNDETERMINED_MOVING_SUCCESS,        /* file has been moved successfully, but its new block map isn't available */
+	DETERMINED_MOVING_FAILURE,          /* nothing has been moved; new block map is available */
+	DETERMINED_MOVING_PARTIAL_SUCCESS,  /* file has been moved partially; new block map is available */
+	DETERMINED_MOVING_SUCCESS           /* file has been moved entirely; new block map is available */
+} ud_file_moving_result;
+
+/**
  * @brief Moves the file entirely.
  * @details Can move any file
  * regardless of its fragmentation.
@@ -257,6 +268,7 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 	winx_blockmap *block, *next_block;
 	ULONGLONG lcn;
 	winx_file_info new_file_info;
+	ud_file_moving_result moving_result;
 	
 	/* save file properties */
 	old_color = get_file_color(jp,f);
@@ -293,38 +305,91 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 	if(old_color == MFT_SPACE || is_mft_mirror(f))
 		update_mft_zones_layout(jp);
 
-	/* redraw space, update free space pool and adjust statistics */
-	
-	/* handle dry run */
+	/* get file moving result */
 	if(jp->udo.dry_run){
-move_success:
-		if(was_fragmented){
-			jp->pi.fragmented --;
-			if(!is_compressed(f) && !is_sparse(f)){
-				jp->pi.fragments -= (f->disp.fragments - 1);
-				f->disp.fragments = 1;
+		moving_result = UNDETERMINED_MOVING_SUCCESS;
+	} else {
+		/* redump the file to define precisely its new state */
+		memcpy(&new_file_info,f,sizeof(winx_file_info));
+		new_file_info.disp.blockmap = NULL;
+
+		if(winx_ftw_dump_file(&new_file_info,dump_terminator,(void *)jp) < 0){
+			DebugPrint("move_file: cannot redump the file");
+			/* let's assume a successful move */
+			moving_result = UNDETERMINED_MOVING_SUCCESS;
+		} else {
+			if(new_file_info.disp.blockmap->lcn == f->disp.blockmap->lcn){
+				DebugPrint("move_file: nothing has been moved");
+				moving_result = DETERMINED_MOVING_FAILURE;
+			} else if(is_fragmented(&new_file_info)){
+				DebugPrint("move_file: the file has been moved just partially");
+				DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
+				moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
+			} else {
+				moving_result = DETERMINED_MOVING_SUCCESS;
 			}
 		}
-		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
+	}
 
-		/* redraw target space */
-		new_color = get_file_color(jp,f);
-		colorize_map_region(jp,target,f->disp.clusters,new_color,FREE_SPACE);
-		if(jp->progress_router)
-			jp->progress_router(jp); /* redraw map */
-				
-		/* remove target space from free space pool */
-		jp->free_regions = winx_sub_volume_region(jp->free_regions,target,f->disp.clusters);
-		
-		/* redraw source space; after winx_sub_volume_region()! */
-		for(block = f->disp.blockmap; block; block = block->next){
-			redraw_freed_space(jp,block->lcn,block->length,old_color);
-			if(block->next == f->disp.blockmap) break;
+	/* handle a case when nothing has been moved */
+	if(moving_result == DETERMINED_MOVING_FAILURE){
+		winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
+		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
+		return (-1);
+	}
+
+	/*
+	* Something has been moved, therefore we need to redraw 
+	* space, update free space pool and adjust statistics.
+	*/
+	
+	/* adjust statistics and basic file properties */
+	if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS){
+		/* file has been moved entirely */
+		if(was_fragmented)
+			jp->pi.fragmented --;
+		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
+	} else {
+		/* file has been moved partially */
+		if(!was_fragmented)
+			jp->pi.fragmented ++;
+		f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
+		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
+	}
+	
+	if(moving_result != UNDETERMINED_MOVING_SUCCESS){
+		/* new file information is available */
+		jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
+	} else {
+		/* new file information isn't available */
+		if(!is_compressed(f) && !is_sparse(f)){
+			jp->pi.fragments -= (f->disp.fragments - 1);
+			f->disp.fragments = 1;
 		}
-		if(jp->progress_router)
-			jp->progress_router(jp); /* redraw map */
+	}
+	
+	/* redraw target space */
+	new_color = get_file_color(jp,f);
+	colorize_map_region(jp,target,f->disp.clusters,new_color,FREE_SPACE);
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw map */
+			
+	/* remove target space from free space pool */
+	jp->free_regions = winx_sub_volume_region(jp->free_regions,target,f->disp.clusters);
 		
-		/* adjust block map */
+	/* redraw source space; after winx_sub_volume_region()! */
+	for(block = f->disp.blockmap; block; block = block->next){
+		if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS)
+			redraw_freed_space(jp,block->lcn,block->length,old_color);
+		else
+			colorize_map_region(jp,block->lcn,block->length,FRAGM_SPACE,old_color);
+		if(block->next == f->disp.blockmap) break;
+	}
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw map */
+	
+	/* adjust block map */
+	if(moving_result == UNDETERMINED_MOVING_SUCCESS){
 		if(!is_compressed(f) && !is_sparse(f)){
 			f->disp.blockmap->lcn = target;
 			f->disp.blockmap->length = f->disp.clusters;
@@ -342,95 +407,13 @@ move_success:
 				if(block->next == f->disp.blockmap) break;
 			}
 		}
-		return 0;
-	}
-
-	/* redump the file to define precisely its new state */
-	memcpy(&new_file_info,f,sizeof(winx_file_info));
-	new_file_info.disp.blockmap = NULL;
-	
-	/* handle case of redumping failure */
-	if(winx_ftw_dump_file(&new_file_info,dump_terminator,(void *)jp) < 0){
-		DebugPrint("move_file: cannot redump the file");
-		/* let's assume a successful move */
-		goto move_success;
-	}
-
-	/* here we have a new file information */
-	
-	/* handle a case when nothing has been moved */
-	if(new_file_info.disp.blockmap->lcn == f->disp.blockmap->lcn){
-		DebugPrint("move_file: nothing has been moved");
-		winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
-		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
-		return (-1);
-	}
-
-	/* handle a case when the file has been moved partially */
-	if(is_fragmented(&new_file_info)){
-		DebugPrint("move_file: the file has been moved just partially");
-		DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
-
-		if(!was_fragmented)
-			jp->pi.fragmented ++;
-		jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
-		f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
-
-		/* redraw target space */
-		new_color = get_file_color(jp,f);
-		colorize_map_region(jp,target,f->disp.clusters,new_color,FREE_SPACE);
-		if(jp->progress_router)
-			jp->progress_router(jp); /* redraw map */
-				
-		/* remove target space from free space pool */
-		jp->free_regions = winx_sub_volume_region(jp->free_regions,target,f->disp.clusters);
-		
-		/* redraw source space; after winx_sub_volume_region()! */
-		for(block = f->disp.blockmap; block; block = block->next){
-			colorize_map_region(jp,block->lcn,block->length,FRAGM_SPACE,old_color);
-			if(block->next == f->disp.blockmap) break;
-		}
-		if(jp->progress_router)
-			jp->progress_router(jp); /* redraw map */
-		
-		/* adjust block map */
+	} else {
+		/* new block map is available - use it */
 		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 		memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
-
-		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
-		return (-1);
 	}
-
-	/* handle a case when the file has been moved entirely */
-	if(was_fragmented){
-		jp->pi.fragmented --;
-		jp->pi.fragments -= (f->disp.fragments - 1);
-	}
-	f->disp.fragments = 1;
-	f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
-
-	/* redraw target space */
-	new_color = get_file_color(jp,f);
-	colorize_map_region(jp,target,f->disp.clusters,new_color,FREE_SPACE);
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw map */
-			
-	/* remove target space from free space pool */
-	jp->free_regions = winx_sub_volume_region(jp->free_regions,target,f->disp.clusters);
 	
-	/* redraw source space; after winx_sub_volume_region()! */
-	for(block = f->disp.blockmap; block; block = block->next){
-		redraw_freed_space(jp,block->lcn,block->length,old_color);
-		if(block->next == f->disp.blockmap) break;
-	}
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw map */
-	
-	/* adjust block map */
-	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-	memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
-
-	return 0;
+	return (moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS) ? (-1) : 0;
 }
 
 /* TODO: */
