@@ -26,6 +26,10 @@
 
 #include "udefrag-internals.h"
 
+/************************************************************/
+/*                    Internal Routines                     */
+/************************************************************/
+
 /* TODO: remove it after testing of $Mft defrag on Vista/Win7 */
 WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 {
@@ -168,7 +172,7 @@ static int move_file_clusters(HANDLE hFile,ULONGLONG startVcn,
 /**
  * @brief move_file helper.
  */
-void move_file_helper(HANDLE hFile,winx_file_info *f,
+static void move_file_helper(HANDLE hFile,winx_file_info *f,
 	ULONGLONG target,udefrag_job_parameters *jp)
 {
 	winx_blockmap *block;
@@ -228,12 +232,59 @@ static void DbgPrintBlocksOfFile(winx_blockmap *blockmap)
 	}
 }
 
+/**
+ * @brief Compares two block maps.
+ * @return Positive value indicates 
+ * difference, zero indicates equality.
+ * Negative value indicates that 
+ * arguments are invalid.
+ */
+static int blockmap_compare(winx_file_disposition *disp1, winx_file_disposition *disp2)
+{
+	winx_blockmap *block1, *block2;
+
+	/* validate arguments */
+	if(disp1 == NULL || disp2 == NULL)
+		return (-1);
+	
+	if(disp1->blockmap == disp2->blockmap)
+		return 0;
+	
+	/* empty bitmap is not equal to non-empty one */
+	if(disp1->blockmap == NULL || disp2->blockmap == NULL)
+		return 1;
+
+	/* ensure that both maps have non-negative number of elements */
+	if(disp1->fragments <= 0 || disp2->fragments <= 0)
+		return (-1);
+
+	/* if number of elements differs, maps are different */
+	if(disp1->fragments != disp2->fragments)
+		return 1;
+
+	/* comapare maps */	
+	for(block1 = disp1->blockmap, block2 = disp2->blockmap;
+	  block1 && block2; block1 = block1->next, block2 = block2->next){
+		if((block1->vcn != block2->vcn) 
+		  || (block1->lcn != block2->lcn)
+		  || (block1->length != block2->length))
+			return 1;
+		if(block1->next == disp1->blockmap || block2->next == disp2->blockmap) break;
+	}
+	
+	return 0;
+}
+
 static int __stdcall dump_terminator(void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 
 	return jp->termination_router((void *)jp);
 }
+
+/************************************************************/
+/*                    move_file routine                     */
+/************************************************************/
 
 /**
  * @brief File moving results
@@ -311,7 +362,8 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 			/* let's assume a successful move */
 			moving_result = UNDETERMINED_MOVING_SUCCESS;
 		} else {
-			if(new_file_info.disp.blockmap->lcn == f->disp.blockmap->lcn){
+			/* compare old and new block maps */
+			if(blockmap_compare(&new_file_info.disp,&f->disp) == 0){
 				DebugPrint("move_file: nothing has been moved");
 				moving_result = DETERMINED_MOVING_FAILURE;
 			} else if(is_fragmented(&new_file_info)){
