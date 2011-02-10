@@ -479,10 +479,10 @@ typedef enum {
  */
 int move_file(winx_file_info *f,
               ULONGLONG vcn,
-			  ULONGLONG length,
-			  ULONGLONG target,
-			  udefrag_job_parameters *jp
-			  )
+              ULONGLONG length,
+              ULONGLONG target,
+              udefrag_job_parameters *jp
+              )
 {
 	NTSTATUS Status;
 	HANDLE hFile;
