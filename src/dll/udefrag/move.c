@@ -128,6 +128,34 @@ static winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLO
 }
 
 /**
+ * @brief Checks whether the cluster chain 
+ * starts on a specified LCN and runs 
+ * continuously from there or not.
+ */
+static int check_cluster_chain_location(winx_file_info *f,ULONGLONG vcn,ULONGLONG length,ULONGLONG startLcn)
+{
+	winx_blockmap *block, *first_block;
+	ULONGLONG clusters_to_check, curr_vcn, curr_target, n;
+	
+	first_block = get_first_block_of_cluster_chain(f,vcn);
+	clusters_to_check = length;
+	curr_vcn = vcn;
+	curr_target = startLcn;
+	for(block = first_block; block; block = block->next){
+		if(curr_target != block->lcn + (curr_vcn - block->vcn)) break;
+
+		n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
+		curr_target += n;
+		clusters_to_check -= n;
+		
+		if(!clusters_to_check || block->next == f->disp.blockmap) break;
+		curr_vcn = block->next->vcn;
+	}
+	
+	return (clusters_to_check == 0) ? 1 : 0;
+}
+
+/**
  * @brief Moves file clusters.
  * @return Zero for success,
  * negative value otherwise.
@@ -461,8 +489,8 @@ int move_file(winx_file_info *f,
 	int old_color, new_color;
 	int was_fragmented;
 	winx_blockmap *block, *first_block;
-	ULONGLONG clusters_to_check, clusters_to_redraw;
-	ULONGLONG curr_vcn, curr_target, n;
+	ULONGLONG clusters_to_redraw;
+	ULONGLONG curr_vcn, n;
 	winx_file_info new_file_info;
 	ud_file_moving_result moving_result;
 
@@ -538,32 +566,12 @@ calculate_new_map:
 				moving_result = DETERMINED_MOVING_FAILURE;
 			} else {
 				/* check whether all data has been moved to the target or not */
-				first_block = get_first_block_of_cluster_chain(&new_file_info,vcn);
-				if(first_block == NULL){
+				if(check_cluster_chain_location(&new_file_info,vcn,length,target)){
+					moving_result = DETERMINED_MOVING_SUCCESS;
+				} else {
 					DebugPrint("move_file: the file has been moved just partially");
 					DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
 					moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
-				} else {
-					clusters_to_check = length;
-					curr_vcn = vcn;
-					curr_target = target;
-					for(block = first_block; block; block = block->next){
-						if(curr_target != block->lcn + (curr_vcn - block->vcn)) break;
-
-						n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
-						curr_target += n;
-						clusters_to_check -= n;
-						
-						if(!clusters_to_check || block->next == new_file_info.disp.blockmap) break;
-						curr_vcn = block->next->vcn;
-					}
-					if(clusters_to_check != 0){
-						DebugPrint("move_file: the file has been moved just partially");
-						DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
-						moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
-					} else {
-						moving_result = DETERMINED_MOVING_SUCCESS;
-					}
 				}
 			}
 		}
