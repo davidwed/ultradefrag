@@ -298,10 +298,6 @@ done:
 	return 0;
 }
 
-/******************************************************/
-/*                  common routines                   */
-/******************************************************/
-
 /**
  * @brief Removes unfragmented files
  * from the list of fragmented.
