@@ -349,6 +349,71 @@ repeat_scan:
 	}
 }
 
+/**
+ * @brief Calculates and builds a new file map respect 
+ * to a successful move of the cluster chain.
+ */
+static winx_blockmap *calculate_new_blockmap(winx_file_info *f,ULONGLONG vcn,ULONGLONG length,ULONGLONG target)
+{
+	winx_blockmap *blockmap = NULL;
+	winx_blockmap *block, *first_block, *new_block;
+	ULONGLONG clusters_to_check, curr_vcn, curr_target, n;
+	
+	first_block = get_first_block_of_cluster_chain(f,vcn);
+	if(first_block == NULL)
+		return NULL;
+	
+	/* copy all blocks prior to the first_block to the new map */
+	for(block = f->disp.blockmap; block && block != first_block; block = block->next){
+		new_block = add_new_block(&blockmap,block->vcn,block->lcn,block->length);
+		if(new_block == NULL) goto fail;
+	}
+	
+	/* copy all remaining blocks */
+	clusters_to_check = length;
+	curr_vcn = vcn;
+	curr_target = target;
+	for(block = first_block; block; block = block->next){
+		if(!clusters_to_check){
+			new_block = add_new_block(&blockmap,block->vcn,block->lcn,block->length);
+			if(new_block == NULL) goto fail;
+		} else {
+			n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
+			
+			if(curr_vcn != block->vcn){
+				/* we have the second part of block moved */
+				new_block = add_new_block(&blockmap,block->vcn,block->lcn,block->length - n);
+				if(new_block == NULL) goto fail;
+				new_block = add_new_block(&blockmap,curr_vcn,curr_target,n);
+				if(new_block == NULL) goto fail;
+			} else {
+				if(n != block->length){
+					/* we have the first part of block moved */
+					new_block = add_new_block(&blockmap,curr_vcn,curr_target,n);
+					if(new_block == NULL) goto fail;
+					new_block = add_new_block(&blockmap,block->vcn + n,block->lcn + n,block->length - n);
+					if(new_block == NULL) goto fail;
+				} else {
+					/* we have entire block moved */
+					new_block = add_new_block(&blockmap,block->vcn,curr_target,block->length);
+					if(new_block == NULL) goto fail;
+				}
+			}
+
+			curr_target += n;
+			clusters_to_check -= n;
+		}
+		if(block->next == f->disp.blockmap) break;
+		curr_vcn = block->next->vcn;
+	}
+	return blockmap;
+	
+fail:
+	DebugPrint("calculate_new_blockmap: no enough memory");
+	winx_list_destroy((list_entry **)(void *)&blockmap);
+	return NULL;
+}
+
 static int __stdcall dump_terminator(void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
@@ -395,8 +460,7 @@ int move_file(winx_file_info *f,
 	HANDLE hFile;
 	int old_color, new_color;
 	int was_fragmented;
-	int move_entire_file;
-	winx_blockmap *block, *new_block, *first_block;
+	winx_blockmap *block, *first_block;
 	ULONGLONG clusters_to_check, clusters_to_redraw;
 	ULONGLONG curr_vcn, curr_target, n;
 	winx_file_info new_file_info;
@@ -415,10 +479,12 @@ int move_file(winx_file_info *f,
 	if(vcn + length > f->disp.blockmap->prev->vcn + f->disp.blockmap->prev->length)
 		return (-1); /* data move behind the end of the file requested */
 	
+	first_block = get_first_block_of_cluster_chain(f,vcn);
+	if(first_block == NULL)
+		return (-1); /* data move out of file bounds requested */
+	
 	if(!check_region(jp,target,length))
 		return (-1); /* there is no sufficient free space available */
-	
-	move_entire_file = (length == f->disp.clusters) ? 1 : 0;
 	
 	/* save file properties */
 	old_color = get_file_color(jp,f);
@@ -451,79 +517,11 @@ int move_file(winx_file_info *f,
 	/* get file moving result */
 	if(jp->udo.dry_run){
 calculate_new_map:
-		/* TODO: we have no new map of file blocks, so let's calculate it */
+		/* we have no new map of file blocks, so let's calculate it */
 		memcpy(&new_file_info,f,sizeof(winx_file_info));
-		new_file_info.disp.blockmap = NULL;
-		first_block = get_first_block_of_cluster_chain(f,vcn);
-		if(first_block == NULL){
-			//moving_result = DETERMINED_MOVING_FAILURE;
-			/* user will have a chance to move file on next run */
-			/* TODO: try to move again in case of failure */
-			f->user_defined_flags |= UD_FILE_MOVING_FAILED;
-			return (-1);
-		} else {
-			/* copy all blocks prior to the first_block to the new map */
-			for(block = f->disp.blockmap; block && block != first_block; block = block->next){
-				new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,block->lcn,block->length);
-				if(new_block == NULL){
-out_of_resources:
-					/* system is out of resources */
-					DebugPrint("move_file: no enough memory");
-					winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
-					winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-					f->user_defined_flags |= UD_FILE_MOVING_FAILED;
-					return (-1);
-				}
-			}
-			
-			/* copy all remaining blocks */
-			clusters_to_check = length;
-			curr_vcn = vcn;
-			curr_target = target;
-			for(block = first_block; block; block = block->next){
-				if(!clusters_to_check){
-					new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,block->lcn,block->length);
-					if(new_block == NULL)
-						goto out_of_resources;
-				} else {
-					n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
-					
-					if(curr_vcn != block->vcn){
-						/* we have the second part of block moved */
-						new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,block->lcn,block->length - n);
-						if(new_block == NULL)
-							goto out_of_resources;
-						new_block = add_new_block(&new_file_info.disp.blockmap,curr_vcn,curr_target,n);
-						if(new_block == NULL)
-							goto out_of_resources;
-					} else {
-						if(n != block->length){
-							/* we have the first part of block moved */
-							new_block = add_new_block(&new_file_info.disp.blockmap,curr_vcn,curr_target,n);
-							if(new_block == NULL)
-								goto out_of_resources;
-							new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn + n,block->lcn + n,block->length - n);
-							if(new_block == NULL)
-								goto out_of_resources;
-						} else {
-							/* we have entire block moved */
-							new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,curr_target,block->length);
-							if(new_block == NULL)
-								goto out_of_resources;
-						}
-					}
-
-					curr_target += n;
-					clusters_to_check -= n;
-				}
-				if(block->next == f->disp.blockmap) break;
-				curr_vcn = block->next->vcn;
-			}
-			
-			/* optimize map - reduce number of blocks when possible */
-			optimize_blockmap(&new_file_info);
-			moving_result = CALCULATED_MOVING_SUCCESS;
-		}
+		new_file_info.disp.blockmap = calculate_new_blockmap(f,vcn,length,target);
+		optimize_blockmap(&new_file_info);
+		moving_result = CALCULATED_MOVING_SUCCESS;
 	} else {
 		/* redump the file to define precisely its new state */
 		memcpy(&new_file_info,f,sizeof(winx_file_info));
