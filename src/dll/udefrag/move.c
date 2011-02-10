@@ -488,6 +488,7 @@ int move_file(winx_file_info *f,
 	HANDLE hFile;
 	int old_color, new_color;
 	int was_fragmented;
+	int dump_result;
 	winx_blockmap *block, *first_block;
 	ULONGLONG clusters_to_redraw;
 	ULONGLONG curr_vcn, n;
@@ -543,40 +544,40 @@ int move_file(winx_file_info *f,
 	NtCloseSafe(hFile);
 
 	/* get file moving result */
+	memcpy(&new_file_info,f,sizeof(winx_file_info));
+	new_file_info.disp.blockmap = NULL;
 	if(jp->udo.dry_run){
-calculate_new_map:
+		dump_result = -1;
+	} else {
+		dump_result = winx_ftw_dump_file(&new_file_info,dump_terminator,(void *)jp);
+		if(dump_result < 0)
+			DebugPrint("move_file: cannot redump the file");
+	}
+	
+	if(dump_result < 0){
+		/* let's assume a successful move */
 		/* we have no new map of file blocks, so let's calculate it */
 		memcpy(&new_file_info,f,sizeof(winx_file_info));
 		new_file_info.disp.blockmap = calculate_new_blockmap(f,vcn,length,target);
 		optimize_blockmap(&new_file_info);
 		moving_result = CALCULATED_MOVING_SUCCESS;
 	} else {
-		/* redump the file to define precisely its new state */
-		memcpy(&new_file_info,f,sizeof(winx_file_info));
-		new_file_info.disp.blockmap = NULL;
-
-		if(winx_ftw_dump_file(&new_file_info,dump_terminator,(void *)jp) < 0){
-			DebugPrint("move_file: cannot redump the file");
-			/* let's assume a successful move */
-			goto calculate_new_map;
+		/* compare old and new block maps */
+		if(blockmap_compare(&new_file_info.disp,&f->disp) == 0){
+			DebugPrint("move_file: nothing has been moved");
+			moving_result = DETERMINED_MOVING_FAILURE;
 		} else {
-			/* compare old and new block maps */
-			if(blockmap_compare(&new_file_info.disp,&f->disp) == 0){
-				DebugPrint("move_file: nothing has been moved");
-				moving_result = DETERMINED_MOVING_FAILURE;
+			/* check whether all data has been moved to the target or not */
+			if(check_cluster_chain_location(&new_file_info,vcn,length,target)){
+				moving_result = DETERMINED_MOVING_SUCCESS;
 			} else {
-				/* check whether all data has been moved to the target or not */
-				if(check_cluster_chain_location(&new_file_info,vcn,length,target)){
-					moving_result = DETERMINED_MOVING_SUCCESS;
-				} else {
-					DebugPrint("move_file: the file has been moved just partially");
-					DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
-					moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
-				}
+				DebugPrint("move_file: the file has been moved just partially");
+				DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
+				moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
 			}
 		}
 	}
-
+	
 	/* handle a case when nothing has been moved */
 	if(moving_result == DETERMINED_MOVING_FAILURE){
 		winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
