@@ -112,6 +112,22 @@ static void redraw_freed_space(udefrag_job_parameters *jp,
 }
 
 /**
+ * @brief Returns the first file block
+ * belonging to the cluster chain.
+ */
+static winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn)
+{
+	winx_blockmap *block;
+	
+	for(block = f->disp.blockmap; block; block = block->next){
+		if(vcn >= block->vcn && vcn < block->vcn + block->length)
+			return block;
+		if(block->next == f->disp.blockmap) break;
+	}
+	return NULL;
+}
+
+/**
  * @brief Moves file clusters.
  * @return Zero for success,
  * negative value otherwise.
@@ -172,50 +188,54 @@ static int move_file_clusters(HANDLE hFile,ULONGLONG startVcn,
 /**
  * @brief move_file helper.
  */
-static void move_file_helper(HANDLE hFile,winx_file_info *f,
-	ULONGLONG target,udefrag_job_parameters *jp)
+static void move_file_helper(HANDLE hFile, winx_file_info *f,
+	ULONGLONG vcn, ULONGLONG length, ULONGLONG target,
+	udefrag_job_parameters *jp)
 {
-	winx_blockmap *block;
-	ULONGLONG curr_target, j, n, r;
+	winx_blockmap *block, *first_block;
+	ULONGLONG curr_vcn, curr_target, j, n, r;
 	ULONGLONG clusters_to_process;
+	ULONGLONG clusters_to_move;
 	int result;
 	
 	DebugPrint("%ws",f->path);
-	DebugPrint("t: %I64u n: %I64u",target,f->disp.clusters);
+	DebugPrint("t: %I64u n: %I64u",target,length);
 
-	clusters_to_process = f->disp.clusters;
+	clusters_to_process = length;
+	curr_vcn = vcn;
 	curr_target = target;
-	for(block = f->disp.blockmap; block; block = block->next){
-		/* try to move current block */
-		n = block->length / jp->clusters_per_256k;
+	first_block = get_first_block_of_cluster_chain(f,vcn);
+	for(block = first_block; block; block = block->next){
+		/* move the current block or its part */
+		clusters_to_move = min(block->length - (curr_vcn - block->vcn),clusters_to_process);
+		n = clusters_to_move / jp->clusters_per_256k;
 		for(j = 0; j < n; j++){
-			result = move_file_clusters(hFile,
-				block->vcn + j * jp->clusters_per_256k,
+			result = move_file_clusters(hFile,curr_vcn,
 				curr_target,jp->clusters_per_256k,jp);
-			if(result < 0){
-				jp->pi.processed_clusters += clusters_to_process;
-				return;
-			}
+			if(result < 0)
+				goto done;
 			jp->pi.processed_clusters += jp->clusters_per_256k;
 			clusters_to_process -= jp->clusters_per_256k;
+			curr_vcn += jp->clusters_per_256k;
 			curr_target += jp->clusters_per_256k;
 		}
 		/* try to move rest of block */
-		r = block->length % jp->clusters_per_256k;
+		r = clusters_to_move % jp->clusters_per_256k;
 		if(r){
-			result = move_file_clusters(hFile,
-				block->vcn + j * jp->clusters_per_256k,
-				curr_target,r,jp);
-			if(result < 0){
-				jp->pi.processed_clusters += clusters_to_process;
-				return;
-			}
+			result = move_file_clusters(hFile,curr_vcn,curr_target,r,jp);
+			if(result < 0)
+				goto done;
 			jp->pi.processed_clusters += r;
 			clusters_to_process -= r;
+			curr_vcn += r;
 			curr_target += r;
 		}
-		if(block->next == f->disp.blockmap) break;
+		if(!clusters_to_move || block->next == f->disp.blockmap) break;
+		curr_vcn = block->next->vcn;
 	}
+
+done: /* count all unprocessed clusters here */
+	jp->pi.processed_clusters += clusters_to_process;
 }
 
 /**
@@ -275,6 +295,60 @@ static int blockmap_compare(winx_file_disposition *disp1, winx_file_disposition 
 	return 0;
 }
 
+/**
+ * @brief Adds a new block to the file map.
+ */
+static winx_blockmap *add_new_block(winx_blockmap **head,ULONGLONG vcn,ULONGLONG lcn,ULONGLONG length)
+{
+	winx_blockmap *block, *last_block = NULL;
+	
+	if(*head != NULL)
+		last_block = (*head)->prev;
+	
+	block = (winx_blockmap *)winx_list_insert_item((list_entry **)head,
+				(list_entry *)last_block,sizeof(winx_blockmap));
+	if(block != NULL){
+		block->vcn = vcn;
+		block->lcn = lcn;
+		block->length = length;
+	}
+	return block;
+}
+
+/**
+ * @brief Reduces number of blocks if possible.
+ */
+static void optimize_blockmap(winx_file_info *f)
+{
+	winx_blockmap *block;
+
+	/* remove unnecessary blocks */
+repeat_scan:
+	for(block = f->disp.blockmap; block; block = block->next){
+		if(block->next == f->disp.blockmap)
+			break; /* no more pairs to be detected */
+		/* does next block follow the current? */
+		if(block->next->vcn == block->vcn + block->length \
+		 && block->next->lcn == block->lcn + block->length){
+			/* adjust the current block and remove the next one */
+			block->length += block->next->length;
+			winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)block->next);
+			goto repeat_scan;
+		}
+	}
+	
+	/* adjust number of fragments and set flags */
+	f->disp.fragments = 0;
+	f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
+	for(block = f->disp.blockmap; block; block = block->next){
+		f->disp.fragments ++;
+		if(block != f->disp.blockmap && \
+		  block->lcn != (block->prev->lcn + block->prev->length))
+			f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
+		if(block->next == f->disp.blockmap) break;
+	}
+}
+
 static int __stdcall dump_terminator(void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
@@ -291,35 +365,60 @@ static int __stdcall dump_terminator(void *user_defined_data)
  * intended for use in move_file only.
  */
 typedef enum {
-	UNDETERMINED_MOVING_SUCCESS,        /* file has been moved successfully, but its new block map isn't available */
-	DETERMINED_MOVING_FAILURE,          /* nothing has been moved; new block map is available */
-	DETERMINED_MOVING_PARTIAL_SUCCESS,  /* file has been moved partially; new block map is available */
-	DETERMINED_MOVING_SUCCESS           /* file has been moved entirely; new block map is available */
+	CALCULATED_MOVING_SUCCESS,          /* file has been moved successfully, but its new block map is just calculated */
+	DETERMINED_MOVING_FAILURE,          /* nothing has been moved; a real new block map is available */
+	DETERMINED_MOVING_PARTIAL_SUCCESS,  /* file has been moved partially; a real new block map is available */
+	DETERMINED_MOVING_SUCCESS           /* file has been moved entirely; a real new block map is available */
 } ud_file_moving_result;
 
 /**
- * @brief Moves the file entirely.
- * @details Can move any file
- * regardless of its fragmentation.
- * @param[in] f the file to be moved.
- * @param[in] target the LCN 
- * of the target free region.
+ * @brief Moves a cluster chain of the file.
+ * @details Can move any part of any file regardless of its fragmentation.
+ * @param[in] f pointer to structure describing the file to be moved.
+ * @param[in] vcn the VCN of the first cluster to be moved.
+ * @param[in] length the length of the cluster chain to be moved.
+ * @param[in] target the LCN of the target free region.
  * @param[in] jp job parameters.
  * @return Zero for success, negative value otherwise.
  * @note 
  * - Volume must be opened before this call,
  * jp->fVolume must contain a proper handle.
  */
-int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
+int move_file(winx_file_info *f,
+              ULONGLONG vcn,
+			  ULONGLONG length,
+			  ULONGLONG target,
+			  udefrag_job_parameters *jp
+			  )
 {
 	NTSTATUS Status;
 	HANDLE hFile;
 	int old_color, new_color;
 	int was_fragmented;
-	winx_blockmap *block, *next_block;
-	ULONGLONG lcn;
+	int move_entire_file;
+	winx_blockmap *block, *new_block, *first_block;
+	ULONGLONG clusters_to_check, clusters_to_redraw;
+	ULONGLONG curr_vcn, curr_target, n;
 	winx_file_info new_file_info;
 	ud_file_moving_result moving_result;
+
+	/* validate parameters */
+	if(f == NULL || jp == NULL)
+		return (-1);
+	
+	if(length == 0)
+		return 0; /* nothing to move */
+	
+	if(f->disp.clusters == 0 || f->disp.fragments == 0 || f->disp.blockmap == NULL)
+		return 0; /* nothing to move */
+	
+	if(vcn + length > f->disp.blockmap->prev->vcn + f->disp.blockmap->prev->length)
+		return (-1); /* data move behind the end of the file requested */
+	
+	if(!check_region(jp,target,length))
+		return (-1); /* there is no sufficient free space available */
+	
+	move_entire_file = (length == f->disp.clusters) ? 1 : 0;
 	
 	/* save file properties */
 	old_color = get_file_color(jp,f);
@@ -339,19 +438,92 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 		f->disp.flags = 0;*/
 		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 		f->user_defined_flags |= UD_FILE_LOCKED;
-		jp->pi.processed_clusters += f->disp.clusters;
+		jp->pi.processed_clusters += length;
 		if(jp->progress_router)
 			jp->progress_router(jp); /* redraw progress */
 		return (-1);
 	}
 	
 	/* move the file */
-	move_file_helper(hFile,f,target,jp);
+	move_file_helper(hFile,f,vcn,length,target,jp);
 	NtCloseSafe(hFile);
 
 	/* get file moving result */
 	if(jp->udo.dry_run){
-		moving_result = UNDETERMINED_MOVING_SUCCESS;
+calculate_new_map:
+		/* TODO: we have no new map of file blocks, so let's calculate it */
+		memcpy(&new_file_info,f,sizeof(winx_file_info));
+		new_file_info.disp.blockmap = NULL;
+		first_block = get_first_block_of_cluster_chain(f,vcn);
+		if(first_block == NULL){
+			//moving_result = DETERMINED_MOVING_FAILURE;
+			/* user will have a chance to move file on next run */
+			/* TODO: try to move again in case of failure */
+			f->user_defined_flags |= UD_FILE_MOVING_FAILED;
+			return (-1);
+		} else {
+			/* copy all blocks prior to the first_block to the new map */
+			for(block = f->disp.blockmap; block && block != first_block; block = block->next){
+				new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,block->lcn,block->length);
+				if(new_block == NULL){
+out_of_resources:
+					/* system is out of resources */
+					DebugPrint("move_file: no enough memory");
+					winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
+					winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+					f->user_defined_flags |= UD_FILE_MOVING_FAILED;
+					return (-1);
+				}
+			}
+			
+			/* copy all remaining blocks */
+			clusters_to_check = length;
+			curr_vcn = vcn;
+			curr_target = target;
+			for(block = first_block; block; block = block->next){
+				if(!clusters_to_check){
+					new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,block->lcn,block->length);
+					if(new_block == NULL)
+						goto out_of_resources;
+				} else {
+					n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
+					
+					if(curr_vcn != block->vcn){
+						/* we have the second part of block moved */
+						new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,block->lcn,block->length - n);
+						if(new_block == NULL)
+							goto out_of_resources;
+						new_block = add_new_block(&new_file_info.disp.blockmap,curr_vcn,curr_target,n);
+						if(new_block == NULL)
+							goto out_of_resources;
+					} else {
+						if(n != block->length){
+							/* we have the first part of block moved */
+							new_block = add_new_block(&new_file_info.disp.blockmap,curr_vcn,curr_target,n);
+							if(new_block == NULL)
+								goto out_of_resources;
+							new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn + n,block->lcn + n,block->length - n);
+							if(new_block == NULL)
+								goto out_of_resources;
+						} else {
+							/* we have entire block moved */
+							new_block = add_new_block(&new_file_info.disp.blockmap,block->vcn,curr_target,block->length);
+							if(new_block == NULL)
+								goto out_of_resources;
+						}
+					}
+
+					curr_target += n;
+					clusters_to_check -= n;
+				}
+				if(block->next == f->disp.blockmap) break;
+				curr_vcn = block->next->vcn;
+			}
+			
+			/* optimize map - reduce number of blocks when possible */
+			optimize_blockmap(&new_file_info);
+			moving_result = CALCULATED_MOVING_SUCCESS;
+		}
 	} else {
 		/* redump the file to define precisely its new state */
 		memcpy(&new_file_info,f,sizeof(winx_file_info));
@@ -360,18 +532,41 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 		if(winx_ftw_dump_file(&new_file_info,dump_terminator,(void *)jp) < 0){
 			DebugPrint("move_file: cannot redump the file");
 			/* let's assume a successful move */
-			moving_result = UNDETERMINED_MOVING_SUCCESS;
+			goto calculate_new_map;
 		} else {
 			/* compare old and new block maps */
 			if(blockmap_compare(&new_file_info.disp,&f->disp) == 0){
 				DebugPrint("move_file: nothing has been moved");
 				moving_result = DETERMINED_MOVING_FAILURE;
-			} else if(is_fragmented(&new_file_info)){
-				DebugPrint("move_file: the file has been moved just partially");
-				DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
-				moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
 			} else {
-				moving_result = DETERMINED_MOVING_SUCCESS;
+				/* check whether all data has been moved to the target or not */
+				first_block = get_first_block_of_cluster_chain(&new_file_info,vcn);
+				if(first_block == NULL){
+					DebugPrint("move_file: the file has been moved just partially");
+					DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
+					moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
+				} else {
+					clusters_to_check = length;
+					curr_vcn = vcn;
+					curr_target = target;
+					for(block = first_block; block; block = block->next){
+						if(curr_target != block->lcn + (curr_vcn - block->vcn)) break;
+
+						n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
+						curr_target += n;
+						clusters_to_check -= n;
+						
+						if(!clusters_to_check || block->next == new_file_info.disp.blockmap) break;
+						curr_vcn = block->next->vcn;
+					}
+					if(clusters_to_check != 0){
+						DebugPrint("move_file: the file has been moved just partially");
+						DbgPrintBlocksOfFile(new_file_info.disp.blockmap);
+						moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
+					} else {
+						moving_result = DETERMINED_MOVING_SUCCESS;
+					}
+				}
 			}
 		}
 	}
@@ -379,6 +574,8 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 	/* handle a case when nothing has been moved */
 	if(moving_result == DETERMINED_MOVING_FAILURE){
 		winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
+		/* user will have a chance to move file on next run */
+		/* TODO: try to move again in case of failure */
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 		return (-1);
 	}
@@ -393,140 +590,23 @@ int move_file(winx_file_info *f,ULONGLONG target,udefrag_job_parameters *jp)
 		update_mft_zones_layout(jp);
 	
 	/* adjust statistics and basic file properties */
-	if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS){
-		/* file has been moved entirely */
-		if(was_fragmented)
-			jp->pi.fragmented --;
-		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
-	} else {
-		/* file has been moved partially */
+	
+	/* define whether the file is fragmented now or not */
+	if(is_fragmented(&new_file_info)){
 		if(!was_fragmented)
 			jp->pi.fragmented ++;
 		f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
+	} else {			
+		if(was_fragmented)
+			jp->pi.fragmented --;
+		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
+	}
+	
+	if(moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS){
+		/* user will have a chance to move file on next run */
+		/* TODO: try to move again in case of failure */
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 	}
-	
-	/* redraw target space */
-	new_color = get_file_color(jp,f);
-	colorize_map_region(jp,target,f->disp.clusters,new_color,FREE_SPACE);
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw map */
-			
-	/* remove target space from free space pool */
-	jp->free_regions = winx_sub_volume_region(jp->free_regions,target,f->disp.clusters);
-		
-	/* redraw source space; after winx_sub_volume_region()! */
-	for(block = f->disp.blockmap; block; block = block->next){
-		if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS)
-			redraw_freed_space(jp,block->lcn,block->length,old_color);
-		else
-			colorize_map_region(jp,block->lcn,block->length,FRAGM_SPACE,old_color);
-		if(block->next == f->disp.blockmap) break;
-	}
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw map */
-	
-	/* adjust block map and statistics */
-	if(moving_result == UNDETERMINED_MOVING_SUCCESS){
-		if(!is_compressed(f) && !is_sparse(f)){
-			f->disp.blockmap->lcn = target;
-			f->disp.blockmap->length = f->disp.clusters;
-			for(block = f->disp.blockmap->next; block != f->disp.blockmap; ){
-				next_block = block->next;
-				winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)(void *)block);
-				block = next_block;
-			}
-			jp->pi.fragments -= (f->disp.fragments - 1);
-			f->disp.fragments = 1;
-		} else {
-			/* compressed and sparse files must have vcn's properly set */
-			lcn = target;
-			for(block = f->disp.blockmap; block; block = block->next){
-				block->lcn = lcn;
-				lcn += block->length;
-				if(block->next == f->disp.blockmap) break;
-			}
-		}
-	} else {
-		/* new block map is available - use it */
-		jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
-		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-		memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
-	}
-	
-	return (moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS) ? (-1) : 0;
-}
-
-/* TODO: */
-
-static int move_file_blocks_helper(HANDLE hFile,winx_file_info *f,
-	winx_blockmap *first_block,ULONGLONG n_blocks,ULONGLONG target,
-	udefrag_job_parameters *jp);
-
-
-/**
- * @brief Moves blocks of the file.
- * @param[in] f the file to be moved.
- * @param[in] first_block the first block.
- * @param[in] n_blocks number of blocks to move.
- * @param[in] target the LCN of the target free region.
- * @param[in] jp job parameters.
- * @return Zero for success, negative value otherwise.
- * @note 
- * - Volume must be opened before this call,
- * jp->fVolume must contain a proper handle.
- */
-int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
-	ULONGLONG n_blocks,ULONGLONG target,udefrag_job_parameters *jp)
-{
-	winx_blockmap *block, *next_block;
-	ULONGLONG n, length;
-	NTSTATUS Status;
-	HANDLE hFile;
-	int result;
-	int old_color, new_color;
-	
-	length = 0;
-	for(block = first_block, n = 0; block; block = block->next, n++){
-		length += block->length;
-		if(block->next == f->disp.blockmap || n == (n_blocks - 1)) break;
-	}
-	
-	old_color = get_file_color(jp,f);
-
-	/* open the file */
-	Status = udefrag_fopen(f,&hFile);
-	if(Status != STATUS_SUCCESS){
-		DebugPrintEx(Status,"Cannot open %ws",f->path);
-		/* redraw space */
-		if(old_color != MFT_SPACE)
-			colorize_file_as_system(jp,f);
-		/* file is locked by other application, so its state is unknown */
-		/* don't reset its statistics though! */
-		/*f->disp.clusters = 0;
-		f->disp.fragments = 0;
-		f->disp.flags = 0;*/
-		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-		f->user_defined_flags |= UD_FILE_LOCKED;
-		jp->pi.processed_clusters += length;
-		if(jp->progress_router)
-			jp->progress_router(jp); /* redraw progress */
-		return (-1);
-	}
-	
-	/* move the file */
-	result = move_file_blocks_helper(hFile,f,first_block,n_blocks,target,jp);
-	/* don't set UD_FILE_MOVING_FAILED here */
-	NtCloseSafe(hFile);
-	
-	/* update statistics */
-	if(result >= 0){
-		jp->pi.fragments -= n_blocks;
-	}
-	
-	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
-	if(old_color == MFT_SPACE || is_mft_mirror(f))
-		update_mft_zones_layout(jp);
 	
 	/* redraw target space */
 	new_color = get_file_color(jp,f);
@@ -536,117 +616,31 @@ int move_file_blocks(winx_file_info *f,winx_blockmap *first_block,
 			
 	/* remove target space from free space pool */
 	jp->free_regions = winx_sub_volume_region(jp->free_regions,target,length);
-	
+
 	/* redraw source space; after winx_sub_volume_region()! */
-	if(result >= 0){
-		for(block = first_block, n = 0; block; block = block->next, n++){
-			if(old_color == MFT_SPACE)
-				redraw_freed_space(jp,block->lcn,block->length,MFT_SPACE);
-			else
-				redraw_freed_space(jp,block->lcn,block->length,FRAGM_SPACE);
-			if(block->next == f->disp.blockmap || n == (n_blocks - 1)) break;
-		}
-		if(jp->progress_router)
-			jp->progress_router(jp); /* redraw map */
+	clusters_to_redraw = length;
+	curr_vcn = vcn;
+	first_block = get_first_block_of_cluster_chain(f,vcn);
+	for(block = first_block; block; block = block->next){
+		/* redraw the current block or its part */
+		n = min(block->length - (curr_vcn - block->vcn),clusters_to_redraw);
+		if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS)
+			redraw_freed_space(jp,block->lcn + (curr_vcn - block->vcn),n,old_color);
+		else
+			colorize_map_region(jp,block->lcn + (curr_vcn - block->vcn),n,FRAGM_SPACE,old_color);
+		clusters_to_redraw -= n;
+		if(!clusters_to_redraw || block->next == f->disp.blockmap) break;
+		curr_vcn = block->next->vcn;
 	}
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw map */
 	
-	/* adjust blockmap */
-	first_block->lcn = target;
-	first_block->length = length;
-	for(block = first_block->next, n = 1; block; n++){
-		next_block = block->next;
-		winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)(void *)block);
-		if(next_block == f->disp.blockmap || n == (n_blocks - 1)) break;
-		block = next_block;
-	}
-	f->disp.fragments -= (n_blocks - 1);
-	return result;
+	/* new block map is available - use it */
+	jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
+	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+	memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
+
+	return (moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS) ? (-1) : 0;
 }
-
-/**
- * @brief move_file_blocks helper.
- */
-static int move_file_blocks_helper(HANDLE hFile,winx_file_info *f,
-	winx_blockmap *first_block,ULONGLONG n_blocks,ULONGLONG target,
-	udefrag_job_parameters *jp)
-{
-	winx_blockmap *block;
-	ULONGLONG curr_target, i, j, n, r;
-	ULONGLONG clusters_to_process;
-	winx_file_info f_cp;
-	int result;
-	int block_found;
-	
-	DebugPrint("%ws",f->path);
-	DebugPrint("t: %I64u vcn: %I64u n_blocks: %I64u",target,first_block->vcn,n_blocks);
-
-	clusters_to_process = 0;
-	for(block = first_block, i = 0; block; block = block->next, i++){
-		clusters_to_process += block->length;
-		if(block->next == f->disp.blockmap || i == (n_blocks - 1)) break;
-	}
-
-	curr_target = target;
-	for(block = first_block, i = 0; block; block = block->next, i++){
-		/* try to move current block */
-		n = block->length / jp->clusters_per_256k;
-		for(j = 0; j < n; j++){
-			result = move_file_clusters(hFile,
-				block->vcn + j * jp->clusters_per_256k,
-				curr_target,jp->clusters_per_256k,jp);
-			if(result < 0){
-				jp->pi.processed_clusters += clusters_to_process;
-				return result;
-			}
-			jp->pi.processed_clusters += jp->clusters_per_256k;
-			clusters_to_process -= jp->clusters_per_256k;
-			curr_target += jp->clusters_per_256k;
-		}
-		/* try to move rest of block */
-		r = block->length % jp->clusters_per_256k;
-		if(r){
-			result = move_file_clusters(hFile,
-				block->vcn + j * jp->clusters_per_256k,
-				curr_target,r,jp);
-			if(result < 0){
-				jp->pi.processed_clusters += clusters_to_process;
-				return result;
-			}
-			jp->pi.processed_clusters += r;
-			clusters_to_process -= r;
-			curr_target += r;
-		}
-		if(block->next == f->disp.blockmap || i == (n_blocks - 1)) break;
-	}
-
-	if(jp->udo.dry_run)
-		return 0;
-
-	/* check whether the file was actually moved or not */
-	memcpy(&f_cp,f,sizeof(winx_file_info));
-	f_cp.disp.blockmap = NULL;
-	if(winx_ftw_dump_file(&f_cp,dump_terminator,(void *)jp) >= 0){
-		if(f_cp.disp.blockmap){
-			block_found = 0;
-			for(block = f_cp.disp.blockmap; block; block = block->next){
-				if(block->lcn == target){
-					block_found = 1;
-					break;
-				}
-				if(block->next == f_cp.disp.blockmap) break;
-			}
-			if(!block_found){
-				DebugPrint("File moving failed: file block is not found on target space");
-				DbgPrintBlocksOfFile(f_cp.disp.blockmap);
-				winx_list_destroy((list_entry **)(void *)&f_cp.disp.blockmap);
-				return (-1);
-			}
-		}
-		winx_list_destroy((list_entry **)(void *)&f_cp.disp.blockmap);
-	}
-
-	return 0;
-}
-
 
 /** @} */

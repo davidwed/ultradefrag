@@ -69,7 +69,7 @@ int defragment(udefrag_job_parameters *jp)
 	ULONGLONG defragmented_files;
 	ULONGLONG joined_fragments;
 	winx_blockmap *block, *first_block, *longest_sequence;
-	ULONGLONG n_blocks, max_n_blocks;
+	ULONGLONG n_blocks, max_n_blocks, longest_sequence_length;
 	ULONGLONG remaining_clusters;
 	char buffer[32];
 	int result;
@@ -155,7 +155,8 @@ int defragment(udefrag_job_parameters *jp)
 			}
 			
 			/* move the file */
-			if(move_file(f_largest->f,rgn->lcn,jp) >= 0){
+			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,
+			 f_largest->f->disp.clusters,rgn->lcn,jp) >= 0){
 				DebugPrint("Defrag success for %ws",f_largest->f->path);
 				defragmented_files ++;
 			} else {
@@ -226,7 +227,7 @@ int defragment(udefrag_job_parameters *jp)
 			if(f_largest == NULL) goto part_defrag_done;
 			
 			/* find longest sequence of file blocks which fits in the current free region */
-			longest_sequence = NULL, max_n_blocks = 0;
+			longest_sequence = NULL, max_n_blocks = 0, longest_sequence_length = 0;
 			for(first_block = f_largest->f->disp.blockmap; first_block; first_block = first_block->next){
 				n_blocks = 0, remaining_clusters = rgn_largest->length;
 				for(block = first_block; block; block = block->next){
@@ -242,6 +243,7 @@ int defragment(udefrag_job_parameters *jp)
 				if(n_blocks > 1 && n_blocks > max_n_blocks){
 					longest_sequence = first_block;
 					max_n_blocks = n_blocks;
+					longest_sequence_length = rgn_largest->length - remaining_clusters;
 				}
 				if(first_block->next == f_largest->f->disp.blockmap) break;
 			}
@@ -251,7 +253,7 @@ int defragment(udefrag_job_parameters *jp)
 				f_largest->f->user_defined_flags |= UD_FILE_TOO_LARGE;
 			} else {
 				/* join fragments */
-				if(move_file_blocks(f_largest->f,longest_sequence,max_n_blocks,rgn_largest->lcn,jp) >= 0){
+				if(move_file(f_largest->f,longest_sequence->vcn,longest_sequence_length,rgn_largest->lcn,jp) >= 0){
 					DebugPrint("Partial defrag success for %ws",f_largest->f->path);
 					joined_fragments += max_n_blocks;
 					defragmented_files ++;
