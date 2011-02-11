@@ -19,18 +19,9 @@ if "%YES%" == "" set YES=Y
 :: any file located in the root folder will be deleted
 set ProcessVolumes=R: S: T: U: V: W:
 
-echo.
-set /p answer="Enable DryRun (Y/[N])? "
-
-if /i "%answer%" == "Y" (
-    set DryRun=1
-) else (
-    set DryRun=0
-)
-
 for /d %%D in ( "%ProgramFiles%\MyDefrag*" ) do set MyDefragDir=%%~D
 
-if %DryRun% == 0 if "%MyDefragDir%" == "" (
+if "%MyDefragDir%" == "" (
     echo.
     echo MyDefrag not installed ... aborting!
     echo.
@@ -44,9 +35,9 @@ cls
 echo.
 echo The values are based on volumes of 1GB in size
 echo.
-echo 1 ...  5%% of free Space
-echo 2 ... 10%% of free Space
-echo 3 ... 13%% of free Space
+echo 1 ... 10%% of free Space
+echo 2 ... 20%% of free Space
+echo 3 ... 30%% of free Space
 
 set maxAnswers=3
 
@@ -67,7 +58,7 @@ pause
 goto :DisplayMenu
 
 :StartProcess
-set /a InitialSize="23 - answer"
+set /a PercentageFree="answer * 10"
 
 set ex_type=UDF
 set fs_ver=X
@@ -82,10 +73,10 @@ pause
 goto :EOF
 
 :FragmentDrive
-	call :delay 0
-	
-	set mirror=
-	
+    call :delay 0
+    
+    set mirror=
+    
     if %fs_ver% == 2.50 set fs_ver=2.50 & set fs_ver_txt=250 & set mirror=/D
     if %fs_ver% == 2.01 set fs_ver=2.50 & set fs_ver_txt=250
     if %fs_ver% == 2.00 set fs_ver=2.01 & set fs_ver_txt=201
@@ -93,85 +84,85 @@ goto :EOF
     if %fs_ver% == 1.02 set fs_ver=1.50 & set fs_ver_txt=150
     if %fs_ver% == X    set fs_ver=1.02 & set fs_ver_txt=102
 
-	call :answers >"%TMP%\answers.txt"
-	
-    title Setting Volume Label of "%~1" ...
-	echo Executing ... label %~1 Test%ex_type%v%fs_ver_txt%
-    echo.
-    if %DryRun% == 0 label %~1 Test%ex_type%v%fs_ver_txt%
-	
-	title Formatting Drive "%~1" ...
-	echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% %mirror%
-	if %DryRun% == 0 echo. & format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% %mirror% <"%TMP%\answers.txt"
-	
-	call :delay 5
-	
-	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f
-	if %DryRun% == 0 echo. & echo n | chkdsk %~1 /r /f
-	
-	call :delay 2
+    call :answers >"%TMP%\answers.txt"
     
-    set size=%InitialSize%
+    title Setting Volume Label of "%~1" ...
+    echo Executing ... label %~1 Test%ex_type%v%fs_ver_txt%
+    echo.
+    label %~1 Test%ex_type%v%fs_ver_txt%
+    
+    title Formatting Drive "%~1" ...
+    echo Executing ... format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% %mirror%
+    echo. & format %~1 /FS:%ex_type% /V:Test%ex_type%v%fs_ver_txt% /X /R:%fs_ver% %mirror% <"%TMP%\answers.txt"
+    
+    call :delay 5
+    
+    title Checking Drive "%~1" ...
+    echo Executing ... chkdsk %~1 /r /f
+    echo. & echo n | chkdsk %~1 /r /f
+    
+    call :delay 2
+
+    set size=24
     set fragments=0
     set count=0
     set total=0
     set dest=%~1
-	
-	title Creating Fragmented Files on Drive "%~1" ...
-	echo Creating Fragmented Files on Drive "%~1" ...
-	echo.
     
-	for /L %%C in (1,1,101) do (
-        call :increment
-        call :doit "%~1" %%C
+    title Creating Fragmented Files on Drive "%~1" ...
+    echo Creating Fragmented Files on Drive "%~1" ...
+    echo.
+
+:loop
+    call :increment
+    call :doit "%~1"
+    set ExitCode=%ERRORLEVEL%
+    for /f "tokens=1,5" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LSS %%Y goto :loop
+
+    if %ExitCode% GEQ 1 (
+        echo.
+        echo Operation failed ...
+    ) else (
+        echo.
+        echo Operation succeeded ...
     )
-	
-	if ERRORLEVEL 1 (
-		echo.
-		echo Operation failed ...
-	) else (
-		echo.
-		echo Operation succeeded ...
-	)
-	
-	call :delay 5
-	
-	title Checking Drive "%~1" ...
-	echo Executing ... chkdsk %~1 /r /f
-	if %DryRun% == 0 echo. & echo n | chkdsk %~1 /r /f
-	
-	call :delay 2
+    
+    call :delay 5
+    
+    title Checking Drive "%~1" ...
+    echo Executing ... chkdsk %~1 /r /f
+    echo. & echo n | chkdsk %~1 /r /f
+    
+    call :delay 2
 goto :EOF
 
 :answers
-	echo Test%ex_type%v%fs_ver_txt%
-	echo %YES%
+    echo Test%ex_type%v%fs_ver_txt%
+    echo %YES%
 goto :EOF
 
 :doit
     set /a total+=size
-    
+
     if %count% EQU 1 goto :skip
         if %rest4% EQU 0 set dest=%~1\folder_%size%
         if %rest4% EQU 0 echo mkdir "%dest%"
-        if %DryRun% == 0 if %rest4% EQU 0 mkdir "%dest%"
+        if %rest4% EQU 0 mkdir "%dest%"
     :skip
-    
-    if %DryRun% == 0 "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" >NUL
-    if %DryRun% == 1 echo "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%~2.bin" ... Total Usage: %total% kB
+
+    "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%count%.bin" >NUL
 goto :EOF
 
 :delay
     set /a seconds="%1 + 1"
-	echo.
-	if %seconds% == 1 (
-		echo ============================================
-	) else (
-		echo --------------------------------------------
-		if %DryRun% == 0 ping -n %seconds% localhost >NUL
-	)
-	echo.
+    echo.
+    if %seconds% == 1 (
+        echo ============================================
+    ) else (
+        echo --------------------------------------------
+        ping -n %seconds% localhost >NUL
+    )
+    echo.
 goto :EOF
 
 :increment
@@ -179,9 +170,9 @@ goto :EOF
     set /a rest2="count %% 8"
     set /a rest3="count %% 5"
     set /a rest4="count %% 10"
-    
+
     if %rest1% EQU 0 set /a size="size * 2"
     if %rest2% EQU 0 set /a fragments+=2
-    
+
     set /a count+=1
 goto :EOF
