@@ -6,8 +6,6 @@
 :: it uses the fragmentation utility included in MyDefrag
 :: available at http://www.mydefrag.com/
 ::
-:: the percentage of free space is based on volumes of 1GB in size
-::
 
 :: the following must be set to the character representing "YES"
 :: this is needed to run the format utility without user interaction
@@ -33,13 +31,13 @@ if "%MyDefragDir%" == "" (
 title UltraDefrag - Test Volume Fragmentation Creator
 cls
 echo.
-echo The values are based on volumes of 1GB in size
-echo.
 echo 1 ... 10%% of free Space
 echo 2 ... 20%% of free Space
 echo 3 ... 30%% of free Space
+echo 4 ... 40%% of free Space
+echo 5 ... 50%% of free Space
 
-set maxAnswers=3
+set maxAnswers=5
 
 echo.
 echo 0 ... EXIT
@@ -96,21 +94,21 @@ goto :EOF
     
     call :delay 2
     
-    set size=24
-    set fragments=0
+    set /a size="24 + %RANDOM%"
+    set /a fragments="%RANDOM% / 1365"
     set count=0
-    set total=0
+    set rest2=0
     set dest=%~1
     
     title Creating Fragmented Files on Drive "%~1" ...
     echo Creating Fragmented Files on Drive "%~1" ...
     echo.
 
-:loop
-    call :increment
-    call :doit "%~1"
-    set ExitCode=%ERRORLEVEL%
-    for /f "tokens=1,5" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LSS %%Y goto :loop
+    :loop
+        call :doit "%~1"
+        call :increment
+        set ExitCode=%ERRORLEVEL%
+    for /f "tokens=1,5" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LEQ %%Y goto :loop
 
     if %ExitCode% GEQ 1 (
         echo.
@@ -135,13 +133,17 @@ goto :EOF
 goto :EOF
 
 :doit
-    set /a total+=size
-
-    if %count% EQU 1 goto :skip
-        if %rest4% EQU 0 set dest=%~1\folder_%size%
-        if %rest4% EQU 0 echo mkdir "%dest%"
-        if %rest4% EQU 0 mkdir "%dest%"
+    if %count% EQU 0 goto :skip
+        if %rest1% EQU 0 set dest=%~1\folder_%count%
+        if %rest1% EQU 0 echo Folder                     %dest%
+        if %rest1% EQU 0 mkdir "%dest%"
     :skip
+
+    set count_fmt=   %count%
+    set size_fmt=      %size%
+    set frag_fmt=   %fragments%
+
+    echo File %count_fmt:~-3% ... %size_fmt:~-6% ... %frag_fmt:~-3%
 
     "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%count%.bin" >NUL
 goto :EOF
@@ -159,13 +161,11 @@ goto :EOF
 goto :EOF
 
 :increment
-    set /a rest1="count %% 9"
-    set /a rest2="count %% 8"
-    set /a rest3="count %% 5"
-    set /a rest4="count %% 10"
-
-    if %rest1% EQU 0 set /a size="size * 2"
-    if %rest2% EQU 0 set /a fragments+=2
-
     set /a count+=1
+    
+    set /a rest1="count %% 10"
+    set /a rest2="count %% 5"
+
+    set /a size="24 + %RANDOM%"
+    set /a fragments="%RANDOM% / 1365"
 goto :EOF
