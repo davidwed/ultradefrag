@@ -620,8 +620,6 @@ int move_file(winx_file_info *f,
 		if(!clusters_to_redraw || block->next == f->disp.blockmap) break;
 		curr_vcn = block->next->vcn;
 	}
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw map */
 	
 	/* adjust statistics */
 	if(is_fragmented(&new_file_info) && !was_fragmented)
@@ -629,6 +627,8 @@ int move_file(winx_file_info *f,
 	if(!is_fragmented(&new_file_info) && was_fragmented)
 		jp->pi.fragmented --;
 	jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw map and update statistics */
 
 	/* new block map is available - use it */
 	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
