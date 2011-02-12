@@ -45,6 +45,7 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 		return 0;
 	
 	/* skip files for which moving failed already to avoid infinite loops */
+	/* TODO: try to move at least once again in case of failure */
 	if(is_moving_failed(f))
 		return 0;
 	

@@ -581,8 +581,6 @@ int move_file(winx_file_info *f,
 	/* handle a case when nothing has been moved */
 	if(moving_result == DETERMINED_MOVING_FAILURE){
 		winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
-		/* user will have a chance to move file on next run */
-		/* TODO: try to move again in case of failure */
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 		return (-1);
 	}
@@ -591,16 +589,12 @@ int move_file(winx_file_info *f,
 	* Something has been moved, therefore we need to redraw 
 	* space, update free space pool and adjust statistics.
 	*/
-
+	if(moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS)
+		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
+	
 	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
 	if(old_color == MFT_SPACE || is_mft_mirror(f))
 		update_mft_zones_layout(jp);
-	
-	if(moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS){
-		/* user will have a chance to move file on next run */
-		/* TODO: try to move again in case of failure */
-		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
-	}
 	
 	/* redraw target space */
 	new_color = get_file_color(jp,&new_file_info);
