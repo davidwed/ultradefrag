@@ -596,19 +596,6 @@ int move_file(winx_file_info *f,
 	if(old_color == MFT_SPACE || is_mft_mirror(f))
 		update_mft_zones_layout(jp);
 	
-	/* adjust statistics and basic file properties */
-	
-	/* define whether the file is fragmented now or not */
-	if(is_fragmented(&new_file_info)){
-		if(!was_fragmented)
-			jp->pi.fragmented ++;
-		f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
-	} else {			
-		if(was_fragmented)
-			jp->pi.fragmented --;
-		f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
-	}
-	
 	if(moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS){
 		/* user will have a chance to move file on next run */
 		/* TODO: try to move again in case of failure */
@@ -642,8 +629,14 @@ int move_file(winx_file_info *f,
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
 	
-	/* new block map is available - use it */
+	/* adjust statistics */
+	if(is_fragmented(&new_file_info) && !was_fragmented)
+		jp->pi.fragmented ++;
+	if(!is_fragmented(&new_file_info) && was_fragmented)
+		jp->pi.fragmented --;
 	jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
+
+	/* new block map is available - use it */
 	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 	memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
 
