@@ -616,7 +616,7 @@ int move_file(winx_file_info *f,
 	}
 	
 	/* redraw target space */
-	new_color = get_file_color(jp,f);
+	new_color = get_file_color(jp,&new_file_info);
 	colorize_map_region(jp,target,length,new_color,FREE_SPACE);
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
