@@ -104,7 +104,7 @@ goto :EOF
     set /a size="24 + %RANDOM%"
     set /a fragments="%RANDOM% / 1365"
     set count=0
-    set rest2=0
+    set NoCompr=0
     set dest=%~1
     
     title Creating Fragmented Files on Drive "%~1" ...
@@ -141,9 +141,9 @@ goto :EOF
 
 :doit
     if %count% EQU 0 goto :skip
-        if %rest1% EQU 0 set dest=%~1\folder_%count%
-        if %rest1% EQU 0 echo Folder                     %dest%
-        if %rest1% EQU 0 mkdir "%dest%"
+        if %NoFolder% EQU 0 set dest=%~1\folder_%count%
+        if %NoFolder% EQU 0 echo Folder                     %dest%
+        if %NoFolder% EQU 0 mkdir "%dest%"
     :skip
 
     set count_fmt=   %count%
@@ -170,8 +170,8 @@ goto :EOF
 :increment
     set /a count+=1
     
-    set /a rest1="count %% 10"
-    set /a rest2="count %% 5"
+    set /a NoFolder="count %% 10"
+    set /a NoCompr="count %% 5"
 
     set /a size="24 + %RANDOM%"
     set /a fragments="%RANDOM% / 1365"
