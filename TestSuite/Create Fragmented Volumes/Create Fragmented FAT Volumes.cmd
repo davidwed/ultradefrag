@@ -108,6 +108,7 @@ goto :EOF
         call :doit "%~1"
         call :increment
         set ExitCode=%ERRORLEVEL%
+        ping -n 2 localhost >NUL
     for /f "tokens=1,5" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LEQ %%Y goto :loop
 
     if %ExitCode% GEQ 1 (
