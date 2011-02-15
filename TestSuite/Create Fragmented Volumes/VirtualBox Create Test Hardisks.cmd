@@ -9,7 +9,7 @@
 set VBoxRoot=%ProgramFiles%\Oracle\VirtualBox
 
 :: Folder containing the virtual harddisks
-set HDRoot=Z:\VirtualBox\HardDisks
+set HDRoot=E:\VirtualBox\HardDisks
 
 if not exist "%VBoxRoot%" goto :noVBroot
 if not exist "%HDRoot%" goto :noHDroot
@@ -30,13 +30,13 @@ cd /d %VBoxRoot%
 :FAT
 if /i "%createFAT%" == "N" goto :NTFS
 
-for %%F in ( FAT FAT32 ) do (
+for %%F in ( FAT FAT32 exFAT) do (
     echo.
     echo ---------------------------------------
     echo.
     echo Creating "%HDRoot%\%prefix%%%F.vdi" ...
     echo.
-    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024 --remember
+    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024
 )
 
 :NTFS
@@ -48,7 +48,7 @@ for %%F in ( NTFS NTFScompressed NTFSmixed ) do (
     echo.
     echo Creating "%HDRoot%\%prefix%%%F.vdi" ...
     echo.
-    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024 --remember
+    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024
 )
 
 :UDF
@@ -60,7 +60,7 @@ for %%F in ( UDF102 UDF150 UDF200 UDF201 UDF250 UDF250mirror ) do (
     echo.
     echo Creating "%HDRoot%\%prefix%%%F.vdi" ...
     echo.
-    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024 --remember
+    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024
 )
 
 :quit
