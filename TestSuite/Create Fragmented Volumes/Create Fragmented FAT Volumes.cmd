@@ -15,7 +15,7 @@ if "%YES%" == "" set YES=Y
 
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
-set ProcessVolumes=L: M:
+set ProcessVolumes=L: M: N:
 
 for /d %%D in ( "%ProgramFiles%\MyDefrag*" ) do set MyDefragDir=%%~D
 
@@ -72,8 +72,11 @@ goto :EOF
 :FragmentDrive
     call :delay 0
     
-    if %ex_type% == FAT set ex_type=FAT32
-    if %ex_type% == X   set ex_type=FAT
+    if not exist "%~1\" goto :EOF
+    
+    if %ex_type% == FAT32 set ex_type=exFAT
+    if %ex_type% == FAT   set ex_type=FAT32
+    if %ex_type% == X     set ex_type=FAT
     
     call :answers >"%TMP%\answers.txt"
 
