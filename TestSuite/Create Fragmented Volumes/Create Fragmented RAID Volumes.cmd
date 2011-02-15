@@ -76,11 +76,13 @@ goto :EOF
 :FragmentDrive
     call :delay 0
     
+    if not exist "%~1\" goto :EOF
+    
     set ex_type=
     set c_switch=
     if /i "%~1" == "%CompressedVolume%" set ex_type=compressed
     if /i "%~1" == "%CompressedVolume%" set c_switch=/C
-    if /i "%~1" == "%MixedVolume%" set ex_type=mixed
+    if /i "%~1" == "%MixedVolume%"      set ex_type=mixed
 
     call :answers >"%TMP%\answers.txt"
     

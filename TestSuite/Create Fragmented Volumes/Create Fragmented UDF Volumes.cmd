@@ -73,6 +73,8 @@ goto :EOF
 :FragmentDrive
     call :delay 0
     
+    if not exist "%~1\" goto :EOF
+    
     set mirror=
     
     if %fs_ver% == 2.50 set fs_ver=2.50 & set fs_ver_txt=250 & set mirror=/D
