@@ -37,32 +37,31 @@ if "%MyDefragDir%" == "" (
 title UltraDefrag - Test Volume Fragmentation Creator
 cls
 echo.
-echo 1 ... 10%% of free Space
-echo 2 ... 20%% of free Space
-echo 3 ... 30%% of free Space
-echo 4 ... 40%% of free Space
-echo 5 ... 50%% of free Space
-
-set maxAnswers=5
+echo Values 1 to 9 will be multiplied by 10
+echo any other value will be used as is
 
 echo.
 echo 0 ... EXIT
 echo.
-set /p answer="Select an Option: "
+set /p answer="Enter percentage of free Space: "
 
 if "%answer%" == "" goto :EOF
 if %answer% EQU 0 goto :EOF
 
-if %answer% LEQ %maxAnswers% goto :StartProcess
+set PercentageFree=0
+
+if %answer% LEQ 100 set PercentageFree=%answer%
+if %answer% LSS 10 set /a PercentageFree="answer * 10"
+
+if %PercentageFree% GTR 0 goto :StartProcess
 
 echo.
-echo Selection must be between 0 and %maxAnswers% !!!
+echo Selection must be between 0 and 100 !!!
 echo.
 pause
 goto :DisplayMenu
 
 :StartProcess
-set /a PercentageFree="answer * 10"
 
 rem NTFS volumes
 for %%L in ( %ProcessVolumes% ) do call :FragmentDrive "%%~L"
@@ -109,15 +108,15 @@ goto :EOF
     set NoCompr=0
     set dest=%~1
     
-    title Creating Fragmented Files on Drive "%~1" ...
-    echo Creating Fragmented Files on Drive "%~1" ...
+    title Creating Fragmented Files on Drive "%~1" until %PercentageFree%%% free space left ...
+    echo Creating Fragmented Files on Drive "%~1" until %PercentageFree%%% free space left ...
     echo.
 
     :loop
         call :doit "%~1"
         call :increment
         set ExitCode=%ERRORLEVEL%
-        ping -n 2 localhost >NUL
+        ping -n 3 localhost >NUL
     for /f "tokens=1,5" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LEQ %%Y goto :loop
 
     if %ExitCode% GEQ 1 (
