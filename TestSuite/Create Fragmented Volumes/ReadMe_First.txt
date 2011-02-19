@@ -1,7 +1,7 @@
 
 General Information:
 
-    This test suite is desingned to be used with volumes of 1GB in size,
+    This test suite is designed to be used with volumes of 1GB in size,
     which allows for a really short processing time.
 
     It is used on a virtual machine to test the algorithm.
@@ -10,15 +10,16 @@ General Information:
 
         1) L: ... FAT
         2) M: ... FAT32
-        3) O: ... NTFS
-        4) P: ... NTFS with compression enabled
-        5) Q: ... NTFS with 25% of compressed files, which mimics a regular system disk
-        6) R: ... UDF v1.02
-        7) S: ... UDF v1.50
-        8) T: ... UDF v2.00
-        9) U: ... UDF v2.01
-       10) V: ... UDF v2.50
-       11) W: ... UDF v2.50 with duplicated metadata
+        3) N: ... exFAT
+        4) O: ... NTFS
+        5) P: ... NTFS with compression enabled
+        6) Q: ... NTFS with 25% of compressed files, which mimics a regular system disk
+        7) R: ... UDF v1.02
+        8) S: ... UDF v1.50
+        9) T: ... UDF v2.00
+       10) U: ... UDF v2.01
+       11) V: ... UDF v2.50
+       12) W: ... UDF v2.50 with duplicated meta-data
 
     The fragmentation utility from http://www.mydefrag.com/ is used to create
     fragmented files.
@@ -38,7 +39,7 @@ Setup:
 
     1) Prepare separate volumes, 1GB in size with the disk management utility
     
-    2) asign the volume letters and file system types as outlined above
+    2) assign the volume letters and file system types as outlined above
     
         a) You may change the drive letters in the batch scripts to match your test drives too.
            This is done by changing the definition of the "ProcessVolumes" variable,
@@ -54,6 +55,9 @@ Setup:
            It is also possible to create a fully compressed NTFS volume, see "set CompressedVolume="
 
         c) UDF volumes are only supported on Vista and higher
+        
+        d) exFAT is only included with Vista and above.
+           For XP you need to download and install the driver from http://support.microsoft.com/kb/955704/en-us
 
     3) CHKDSK is executed before and after the fragmented files creation process,
        to make sure the volume is consistent.
