@@ -55,7 +55,7 @@ static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 	URLMON_PROCEDURE pURLDownloadToCacheFile;
 	HMODULE hUrlmonDLL = NULL;
 	HRESULT result;
-	char path[MAX_PATH + 1];
+	char path[MAX_PATH + 1] = {0};
 	
 	if(url == NULL){
 		WgxDbgPrint("SendWebAnalyticsRequest: URL = NULL\n");
@@ -90,7 +90,7 @@ static BOOL __stdcall SendWebAnalyticsRequest(char *url)
 	}
 	
 	/* remove cached data, otherwise it may not be loaded next time */
-	(void)remove(path);
+	if (path[0] != 0) (void)remove(path);
 	
 	/* free previously allocated url */
 	free(url);
