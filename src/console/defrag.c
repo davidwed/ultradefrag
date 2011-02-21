@@ -280,7 +280,11 @@ int __cdecl main(int argc, char **argv)
 	/* initialize the program */
 	parse_cmdline(argc,argv);
 	init_console();
-	update_web_statistics();
+    
+    /* run web analytics only, if -l is not used,
+       which results in unexpected application crash or hang
+       TODO: find a solution for being able to run it in any case */
+	if (!l_flag) update_web_statistics();
 	
 	/* handle help request */
 	if(h_flag){
