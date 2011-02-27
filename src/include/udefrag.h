@@ -95,24 +95,25 @@ typedef enum {
 } udefrag_operation_type;
 
 enum {
-	FREE_SPACE = 0,
+    UNUSED_MAP_SPACE = 0,
+	FREE_SPACE,
 	SYSTEM_SPACE,
 	SYSTEM_OVER_LIMIT_SPACE,
 	FRAGM_SPACE,
 	FRAGM_OVER_LIMIT_SPACE,
 	UNFRAGM_SPACE,
 	UNFRAGM_OVER_LIMIT_SPACE,
-	MFT_ZONE_SPACE, /* after free! */
-	MFT_SPACE, /* after mft zone! */
+	MFT_ZONE_SPACE,           /* after free! */
+	MFT_SPACE,                /* after mft zone! */
 	DIR_SPACE,
 	DIR_OVER_LIMIT_SPACE,
 	COMPRESSED_SPACE,
 	COMPRESSED_OVER_LIMIT_SPACE,
-	TEMPORARY_SYSTEM_SPACE
+	TEMPORARY_SYSTEM_SPACE,
+    NUM_OF_SPACE_STATES          /* this must always be the last */
 };
 
 #define UNKNOWN_SPACE FRAGM_SPACE
-#define NUM_OF_SPACE_STATES (TEMPORARY_SYSTEM_SPACE - FREE_SPACE + 1)
 
 typedef struct _udefrag_progress_info {
 	unsigned long files;              /* number of files */

@@ -281,7 +281,7 @@ static void colorize_respect_to_mft_zones(udefrag_job_parameters *jp,
 				colorize_map_region(jp,lcn,length,new_color,MFT_ZONE_SPACE);
 		} else {
 			/* block is partially inside mft zone */
-			/* this case is rare, it may encounter mo more than 6 times */
+			/* this case is rare, it may encounter no more than 6 times */
 			/* therefore we can handle it easy, without optimizing the code for speed */
 			for(i = lcn; i < lcn + length; i++){
 				if((i < jp->mft_zones.mft_start || i > jp->mft_zones.mft_end) \
@@ -404,13 +404,22 @@ void colorize_map_region(udefrag_job_parameters *jp,
 		/* clusters < cells */
 		cell = lcn * jp->cluster_map.cells_per_cluster;
 		ncells = length * jp->cluster_map.cells_per_cluster;
-		if(lcn + length == jp->v_info.total_clusters)
-			ncells += (jp->cluster_map.cells_per_last_cluster - jp->cluster_map.cells_per_cluster);
 		for(i = 0; i < ncells; i++){
 			for(j = 0; j < jp->cluster_map.n_colors; j++)
 				jp->cluster_map.array[cell + i][j] = 0;
 			jp->cluster_map.array[cell + i][new_color] = 1;
 		}
+        /* colorize remaining cells as unused */
+		if(lcn + length == jp->v_info.total_clusters){
+            cell += ncells;
+			ncells = (jp->cluster_map.cells_per_last_cluster - jp->cluster_map.cells_per_cluster);
+            
+            for(i = 0; i < ncells; i++){
+                for(j = 0; j < jp->cluster_map.n_colors; j++)
+                    jp->cluster_map.array[cell + i][j] = 0;
+                jp->cluster_map.array[cell + i][UNUSED_MAP_SPACE] = 1;
+            }
+        }
 	}
 }
 

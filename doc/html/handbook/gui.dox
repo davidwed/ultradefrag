@@ -136,6 +136,7 @@
  * is set. Dark magenta represents the master file table (MFT),
  * light magenta - space reserved for the <a href="http://support.microsoft.com/kb/174619">MFT expansion</a>.
  * The cyan color represents space temporarily allocated by Windows. 
+ * Gray is indicating unused map blocks, because the map is bigger than the number of available clusters.
  *
  * Note that files excluded from the defragmentation process
  * are never treated as fragmented. Because trash should not

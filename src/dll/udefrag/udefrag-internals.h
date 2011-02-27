@@ -101,8 +101,8 @@ typedef enum {
 } file_system_type;
 
 typedef struct _udefrag_allowed_actions {
-	int allow_dir_defrag; /* on FAT directories aren't moveable */
-	int allow_optimize;   /* zero on FAT, because of unmoveable directories */
+	int allow_dir_defrag;      /* on FAT directories aren't moveable */
+	int allow_optimize;        /* zero on FAT, because of unmoveable directories */
 	int allow_full_mft_defrag; /* zero on XP and W2K3, because the first 16 clusters of $mft are unmoveable there */
 } udefrag_allowed_actions;
 

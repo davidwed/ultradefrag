@@ -14,7 +14,9 @@ HISTORY
     
     - the following translations were updated:
     
-      Korean, Turkish, Slovak
+      Korean, Turkish, Slovak, English (US)
+      
+    - the cluster map now indicates unused map blocks with gray color
       
     beta2:
     - UD_LOG_FILE_PATH environment variable added to force save of debugging
