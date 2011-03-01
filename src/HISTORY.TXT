@@ -3,9 +3,9 @@ HISTORY
   Version 5.0.0  2011-01-
   ------------------------------------------------------------------------------
     RC1:
-    - hexview command added to the boot time shell
     - volume optimization reimplemented
     - quick volume optimization implemented
+    - the cluster map now indicates unused map blocks with gray color
     - one bug preventing a proper redraw of defragmented files was fixed
     - the documentation was updated to include better information about
       taking screen-shots and creating support packages on the bug reports page
@@ -16,8 +16,8 @@ HISTORY
     
       Korean, Turkish, Slovak, English (US)
       
-    - the cluster map now indicates unused map blocks with gray color
-      
+    - hexview command added to the boot time shell
+
     beta2:
     - UD_LOG_FILE_PATH environment variable added to force save of debugging
       information to a log file. Intended for use in boot time interface

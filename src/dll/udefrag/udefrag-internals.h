@@ -177,6 +177,9 @@ int full_optimize(udefrag_job_parameters *jp);
 int quick_optimize(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
 
+ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp);
+void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameters *jp);
+
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 WINX_FILE * __stdcall new_winx_vopen(char volume_letter);
 

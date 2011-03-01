@@ -877,6 +877,37 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Displays message like
+ * <b>analysis of c: started</b>
+ * and returns the current time
+ * (needed for stop_timing).
+ */
+ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp)
+{
+	winx_dbg_print_header(0,0,"%s of %c: started",operation_name,jp->volume_letter);
+	return winx_xtime();
+}
+
+/**
+ * @brief Displays time needed 
+ * for the operation; the second
+ * parameter must be obtained from
+ * the start_timing procedure.
+ */
+void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameters *jp)
+{
+	ULONGLONG time, seconds;
+	char buffer[32];
+	
+	time = winx_xtime() - start_time;
+	seconds = time / 1000;
+	winx_time2str(seconds,buffer,sizeof(buffer));
+	time -= seconds * 1000;
+	winx_dbg_print_header(0,0,"%s of %c: completed in %s %I64ums",
+		operation_name,jp->volume_letter,buffer,time);
+}
+
+/**
  * @brief Performs a volume analysis.
  * @return Zero for success, negative value otherwise.
  */
@@ -885,9 +916,8 @@ int analyze(udefrag_job_parameters *jp)
 	ULONGLONG time;
 	int result;
 	
-	winx_dbg_print_header(0,0,"analysis of %c: started",jp->volume_letter);
+	time = start_timing("analysis",jp);
 	jp->pi.current_operation = VOLUME_ANALYSIS;
-	time = winx_xtime();
 	
 	/* update volume information */
 	if(get_volume_information(jp) < 0)
@@ -914,8 +944,7 @@ int analyze(udefrag_job_parameters *jp)
 	if(result < 0)
 		return result;
 	
-	winx_dbg_print_header(0,0,"analysis of %c: completed in %I64u ms",
-		jp->volume_letter, winx_xtime() - time);
+	stop_timing("analysis",time,jp);
 	return 0;
 }
 

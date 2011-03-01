@@ -65,7 +65,7 @@ int defragment(udefrag_job_parameters *jp)
 	udefrag_fragmented_file *f, *f_largest;
 	winx_volume_region *rgn, *rgn_largest;
 	ULONGLONG length;
-	ULONGLONG time, time2, seconds;
+	ULONGLONG time;
 	ULONGLONG moved_clusters;
 	ULONGLONG defragmented_files;
 	ULONGLONG joined_fragments;
@@ -103,8 +103,7 @@ int defragment(udefrag_job_parameters *jp)
 	}
 	
 	/* defragment all small files */
-	winx_dbg_print_header(0,0,"defragmentation of %c: started",jp->volume_letter);
-	time = winx_xtime();
+	time = start_timing("defragmentation",jp);
 
 	/* fill free regions in the beginning of the volume */
 	defragmented_files = 0;
@@ -187,18 +186,11 @@ int defragment(udefrag_job_parameters *jp)
 	DebugPrint("%I64u clusters moved",moved_clusters);
 	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
-	/* display time needed for defragmentation */
-	time2 = winx_xtime() - time;
-	seconds = time2 / 1000;
-	winx_time2str(seconds,buffer,sizeof(buffer));
-	time2 -= seconds * 1000;
-	winx_dbg_print_header(0,0,"defragmentation of %c: completed in %s %I64ums",
-		jp->volume_letter,buffer,time2);
+	stop_timing("defragmentation",time,jp);
 	
 	/* defragment all large files partially */
 	/* UD_FILE_TOO_LARGE flag should not be set for success of the operation */
-	winx_dbg_print_header(0,0,"partial defragmentation of %c: started",jp->volume_letter);
-	time = winx_xtime();
+	time = start_timing("partial defragmentation",jp);
 	
 	/* fill largest free region first */
 	defragmented_files = 0;
@@ -278,13 +270,7 @@ part_defrag_done:
 	DebugPrint("%I64u clusters moved",moved_clusters);
 	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
-	/* display time needed for partial defragmentation */
-	time2 = winx_xtime() - time;
-	seconds = time2 / 1000;
-	winx_time2str(seconds,buffer,sizeof(buffer));
-	time2 -= seconds * 1000;
-	winx_dbg_print_header(0,0,"partial defragmentation of %c: completed in %s %I64ums",
-		jp->volume_letter,buffer,time2);
+	stop_timing("partial defragmentation",time,jp);
 	
 	/* mark all files not processed yet as too large */
 	for(f = jp->fragmented_files; f; f = f->next){
