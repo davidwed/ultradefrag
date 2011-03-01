@@ -496,8 +496,10 @@ int move_file(winx_file_info *f,
 	ud_file_moving_result moving_result;
 
 	/* validate parameters */
-	if(f == NULL || jp == NULL)
+	if(f == NULL || jp == NULL){
+		DebugPrint("move_file: invalid parameter");
 		return (-1);
+	}
 	
 	if(length == 0)
 		return 0; /* nothing to move */
@@ -505,15 +507,21 @@ int move_file(winx_file_info *f,
 	if(f->disp.clusters == 0 || f->disp.fragments == 0 || f->disp.blockmap == NULL)
 		return 0; /* nothing to move */
 	
-	if(vcn + length > f->disp.blockmap->prev->vcn + f->disp.blockmap->prev->length)
-		return (-1); /* data move behind the end of the file requested */
+	if(vcn + length > f->disp.blockmap->prev->vcn + f->disp.blockmap->prev->length){
+		DebugPrint("move_file: data move behind the end of the file requested");
+		return (-1);
+	}
 	
 	first_block = get_first_block_of_cluster_chain(f,vcn);
-	if(first_block == NULL)
-		return (-1); /* data move out of file bounds requested */
+	if(first_block == NULL){
+		DebugPrint("move_file: data move out of file bounds requested");
+		return (-1);
+	}
 	
-	if(!check_region(jp,target,length))
-		return (-1); /* there is no sufficient free space available */
+	if(!check_region(jp,target,length)){
+		DebugPrint("move_file: there is no sufficient free space available on target block");
+		return (-1);
+	}
 	
 	/* save file properties */
 	old_color = get_file_color(jp,f);
