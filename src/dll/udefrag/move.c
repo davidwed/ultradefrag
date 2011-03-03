@@ -138,11 +138,30 @@ static int check_cluster_chain_location(winx_file_info *f,ULONGLONG vcn,ULONGLON
 	ULONGLONG clusters_to_check, curr_vcn, curr_target, n;
 	
 	first_block = get_first_block_of_cluster_chain(f,vcn);
+	if(first_block == NULL){
+		/* is file empty? */
+		if(f->disp.blockmap == NULL)
+			return 1; /* let's assume a successful move in case of empty file */
+		/* is vcn outside of the current file length? */
+		if(vcn >= f->disp.blockmap->prev->vcn + f->disp.blockmap->prev->length)
+			return 1; /* let's assume a successful move of non existing part of the file */
+		/* sparse file changed its contents, so let's assume a partial move */
+		return 0;
+	}
+	
+	if(length == 0){
+		/* let's assume a successful move of zero number of clusters */
+		return 1;
+	}
+	
 	clusters_to_check = length;
 	curr_vcn = vcn;
 	curr_target = startLcn;
 	for(block = first_block; block; block = block->next){
-		if(curr_target != block->lcn + (curr_vcn - block->vcn)) break;
+		if(curr_target != block->lcn + (curr_vcn - block->vcn)){
+			/* current block is not found on target location */
+			return 0;
+		}
 
 		n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
 		curr_target += n;
@@ -152,7 +171,11 @@ static int check_cluster_chain_location(winx_file_info *f,ULONGLONG vcn,ULONGLON
 		curr_vcn = block->next->vcn;
 	}
 	
-	return (clusters_to_check == 0) ? 1 : 0;
+	/*
+	* All clusters passed the check, or blocks
+	* exhausted because of a file truncation.
+	*/
+	return 1;
 }
 
 /**
