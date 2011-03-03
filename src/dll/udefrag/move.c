@@ -595,6 +595,9 @@ int move_file(winx_file_info *f,
 		optimize_blockmap(&new_file_info);
 		moving_result = CALCULATED_MOVING_SUCCESS;
 	} else {
+		/* adjust $mft file - its first 16 clusters aren't moveable */
+		if(is_mft(&new_file_info,jp)) adjust_mft_file(&new_file_info,jp);
+
 		/* compare old and new block maps */
 		if(blockmap_compare(&new_file_info.disp,&f->disp) == 0){
 			DebugPrint("move_file: nothing has been moved");

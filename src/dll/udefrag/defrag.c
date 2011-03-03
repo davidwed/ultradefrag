@@ -74,10 +74,6 @@ int defragment(udefrag_job_parameters *jp)
 	ULONGLONG remaining_clusters;
 	char buffer[32];
 	int result;
-	int win_version;
-	int i;
-	
-	win_version = winx_get_os_version();
 	
 	/* analyze volume */
 	result = analyze(jp);
@@ -127,32 +123,6 @@ int defragment(udefrag_job_parameters *jp)
 				if(f->next == jp->fragmented_files) break;
 			}
 			if(f_largest == NULL) goto next_rgn;
-			
-			/* $mft on 2k and nt4 becomes skipped below in move_file and is_locked routines */
-              
-			/* skip $mft on XP and higher, because the first 16 clusters aren't moveable there */
-			if(is_mft(f_largest->f,jp) && jp->actions.allow_full_mft_defrag == 0 \
-			  && (win_version >= WINDOWS_XP /* || win_version == WINDOWS_2K3 */)){
-				/* list MFT parts (for debugging purposes) */
-				for(block = f_largest->f->disp.blockmap, i = 0; block; block = block->next, i++){
-					DebugPrint("mft part #%u start: %I64u, length: %I64u",
-						i,block->lcn,block->length);
-					if(block->next == f_largest->f->disp.blockmap) break;
-				}
-				/* if there are only two fragments, mark $mft as already processed */
-				if(i < 2){
-					winx_list_destroy((list_entry **)(void *)&f_largest->f->disp.blockmap);
-                    DebugPrint("MFT skiped entirely, only %u blocks", i+1);
-				} else {
-					/* remove the first block from the map */
-					winx_list_remove_item((list_entry **)(void *)&f_largest->f->disp.blockmap,
-						(list_entry *)(void *)f_largest->f->disp.blockmap);
-					/* mark the file as intended for partial defragmentation */
-					f_largest->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
-                    DebugPrint("First MFT block removed");
-				}
-				continue;
-			}
 			
 			/* move the file */
 			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,

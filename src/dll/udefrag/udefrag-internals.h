@@ -103,7 +103,6 @@ typedef enum {
 typedef struct _udefrag_allowed_actions {
 	int allow_dir_defrag;      /* on FAT directories aren't moveable */
 	int allow_optimize;        /* zero on FAT, because of unmoveable directories */
-	int allow_full_mft_defrag; /* zero on XP and W2K3, because the first 16 clusters of $mft are unmoveable there */
 } udefrag_allowed_actions;
 
 /*
@@ -185,6 +184,7 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter);
 
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 void update_mft_zones_layout(udefrag_job_parameters *jp);
+void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp);
 
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);

@@ -317,6 +317,28 @@ void update_mft_zones_layout(udefrag_job_parameters *jp)
  */
 void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp)
 {
+	int win_version, i;
+	winx_blockmap *block;
+	
+	win_version = winx_get_os_version();
+	if(win_version < WINDOWS_XP){
+		/* on nt4 and w2k $mft file is always locked entirely */
+	} else {
+		/* on xp and later systems the first 16 clusters are locked */
+		/* we skip the first entire block in such a case */
+
+		/* list MFT parts (for debugging purposes) */
+		for(block = f->disp.blockmap, i = 0; block; block = block->next, i++){
+			DebugPrint("mft part #%u start: %I64u, length: %I64u",
+				i,block->lcn,block->length);
+			if(block->next == f->disp.blockmap) break;
+		}
+		
+		/* remove the first block from the map */
+		winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,
+			(list_entry *)(void *)f->disp.blockmap);
+		DebugPrint("First MFT block skipped because unmoveable");
+	}
 }
 
 /**
@@ -426,9 +448,6 @@ static void __stdcall progress_callback(winx_file_info *f,void *user_defined_dat
 	/*if(wcsstr(path,L"largefile"))
 		DebugPrint("SIZE = %I64u", filesize);
 	*/
-	
-	/* adjust $mft file - its first 16 clusters aren't moveable */
-	if(is_mft(f,jp)) adjust_mft_file(f,jp);
 	
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw progress */
@@ -545,11 +564,16 @@ static int find_files(udefrag_job_parameters *jp)
 			jp->pi.fragmented ++;
 			jp->pi.fragments += f->disp.fragments;
 		}
+
 		/* redraw cluster map */
 		if(jp->fs_type == FS_NTFS)
 			colorize_file(jp,f,SYSTEM_OR_MFT_ZONE_SPACE);
 		else
 			colorize_file(jp,f,SYSTEM_SPACE);
+
+		/* adjust $mft file - its first 16 clusters aren't moveable */
+		if(is_mft(f,jp)) adjust_mft_file(f,jp);
+
 		//DebugPrint("%ws",f->path);
 		if(jp->progress_router) /* need speedup? */
 			jp->progress_router(jp); /* redraw progress */
@@ -857,11 +881,6 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		break;
 	}
 	
-	// if(win_version <= WINDOWS_2K3)
-		jp->actions.allow_full_mft_defrag = 0;
-	/* else
-		jp->actions.allow_full_mft_defrag = 1; */
-	
 	if(jp->actions.allow_dir_defrag)
 		DebugPrint("directory defragmentation is allowed");
 	else
@@ -873,15 +892,11 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 		DebugPrint("volume optimization is denied (because not possible)");
 	
 	if(jp->fs_type == FS_NTFS){
-		if(jp->actions.allow_full_mft_defrag){
-			DebugPrint("full $mft defragmentation is allowed");
+		if(win_version < WINDOWS_XP){
+			DebugPrint("$mft defragmentation is not possible");
 		} else {
-			if(win_version >= WINDOWS_XP /* || win_version == WINDOWS_2K3 */){
-				DebugPrint("full $mft defragmentation is denied on XP and W2K3");
-				DebugPrint("(because first 16 clusters aren't moveable)");
-			} else {
-				DebugPrint("full $mft defragmentation is denied (because not possible)");
-			}
+			DebugPrint("partial $mft defragmentation is possible");
+			DebugPrint("(the first 16 clusters aren\'t moveable)");
 		}
 	}
 	
