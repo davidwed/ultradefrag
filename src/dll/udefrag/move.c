@@ -226,9 +226,6 @@ static void move_file_helper(HANDLE hFile, winx_file_info *f,
 	ULONGLONG clusters_to_move;
 	int result;
 	
-	DebugPrint("%ws",f->path);
-	DebugPrint("t: %I64u n: %I64u",target,length);
-
 	clusters_to_process = length;
 	curr_vcn = vcn;
 	curr_target = target;
@@ -437,7 +434,7 @@ static winx_blockmap *calculate_new_blockmap(winx_file_info *f,ULONGLONG vcn,ULO
 	return blockmap;
 	
 fail:
-	DebugPrint("calculate_new_blockmap: no enough memory");
+	DebugPrint("calculate_new_blockmap: not enough memory");
 	winx_list_destroy((list_entry **)(void *)&blockmap);
 	return NULL;
 }
@@ -501,6 +498,10 @@ int move_file(winx_file_info *f,
 		return (-1);
 	}
 	
+	if(f->path)	DebugPrint("%ws",f->path);
+	else DebugPrint("empty filename");
+	DebugPrint("vcn = %I64u, length = %I64u, target = %I64u",vcn,length,target);
+
 	if(length == 0)
 		return 0; /* nothing to move */
 	
@@ -509,6 +510,7 @@ int move_file(winx_file_info *f,
 	
 	if(vcn + length > f->disp.blockmap->prev->vcn + f->disp.blockmap->prev->length){
 		DebugPrint("move_file: data move behind the end of the file requested");
+		DbgPrintBlocksOfFile(f->disp.blockmap);
 		return (-1);
 	}
 	
