@@ -207,6 +207,10 @@ BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *ac
  * @brief An asynchronous equivalent 
  * of IncreaseGoogleAnalyticsCounter.
  * @note Runs in a separate thread.
+ * @bug This routine is not safe.
+ * If the calling process terminates before
+ * the request completion, the program
+ * crashes.
  */
 void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account)
 {

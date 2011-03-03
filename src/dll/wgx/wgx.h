@@ -125,6 +125,7 @@ void __stdcall WgxDestroyFont(PWGX_FONT pFont);
 BOOL __stdcall WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont);
 
 BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
+/* NOTE: this routine is not safe, avoid its use */
 void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
 
 void __cdecl WgxDbgPrint(char *format, ...);
