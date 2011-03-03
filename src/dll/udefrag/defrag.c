@@ -131,7 +131,7 @@ int defragment(udefrag_job_parameters *jp)
 			/* $mft on 2k and nt4 becomes skipped below in move_file and is_locked routines */
               
 			/* skip $mft on XP and higher, because the first 16 clusters aren't moveable there */
-			if(is_mft(f_largest->f) && jp->actions.allow_full_mft_defrag == 0 \
+			if(is_mft(f_largest->f,jp) && jp->actions.allow_full_mft_defrag == 0 \
 			  && (win_version >= WINDOWS_XP /* || win_version == WINDOWS_2K3 */)){
 				/* list MFT parts (for debugging purposes) */
 				for(block = f_largest->f->disp.blockmap, i = 0; block; block = block->next, i++){

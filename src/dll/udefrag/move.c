@@ -626,7 +626,7 @@ int move_file(winx_file_info *f,
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 	
 	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
-	if(old_color == MFT_SPACE || is_mft_mirror(f))
+	if(old_color == MFT_SPACE || is_mft_mirror(f,jp))
 		update_mft_zones_layout(jp);
 	
 	/* redraw target space */

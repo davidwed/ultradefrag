@@ -312,6 +312,14 @@ void update_mft_zones_layout(udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Adjusts $mft file characteristics to reflect 
+ * impossibility of its first 16 clusters move.
+ */
+void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp)
+{
+}
+
+/**
  * @brief Defines whether the file
  * must be excluded from the volume
  * processing or not.
@@ -414,10 +422,14 @@ static void __stdcall progress_callback(winx_file_info *f,void *user_defined_dat
 	if(jp->udo.size_limit && filesize > jp->udo.size_limit)
 		f->user_defined_flags |= UD_FILE_OVER_LIMIT;
 
-	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb */
+	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb on FAT32 volume */
 	/*if(wcsstr(path,L"largefile"))
 		DebugPrint("SIZE = %I64u", filesize);
 	*/
+	
+	/* adjust $mft file - its first 16 clusters aren't moveable */
+	if(is_mft(f,jp)) adjust_mft_file(f,jp);
+	
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw progress */
 }

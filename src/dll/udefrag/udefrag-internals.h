@@ -188,8 +188,8 @@ void update_mft_zones_layout(udefrag_job_parameters *jp);
 
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
-int is_mft(winx_file_info *f);
-int is_mft_mirror(winx_file_info *f);
+int is_mft(winx_file_info *f,udefrag_job_parameters *jp);
+int is_mft_mirror(winx_file_info *f,udefrag_job_parameters *jp);
 int move_file(winx_file_info *f,
               ULONGLONG vcn,
 			  ULONGLONG length,
