@@ -46,6 +46,8 @@ int quick_optimize_flag = 0;
 int first_progress_update;
 int stop_flag = 0;
 
+int web_statistics_completed = 0;
+
 /*
 * MSDN states that environment variables
 * are limited by 32767 characters,
@@ -57,7 +59,6 @@ wchar_t new_in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
 wchar_t aux_buffer[MAX_ENV_VARIABLE_LENGTH + 1];
 
 /* forward declarations */
-static void update_web_statistics(void);
 static int show_vollist(void);
 static int process_volumes(void);
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
@@ -119,7 +120,53 @@ void print_unicode_string(wchar_t *string)
 /* -------------------------------------------- */
 
 /**
+ * @brief Updates web statistics of the program use.
+ */
+DWORD WINAPI UpdateWebStatisticsThreadProc(LPVOID lpParameter)
+{
+#ifndef _WIN64
+	IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console-x86.html","UA-15890458-1");
+#else
+	#if defined(_IA64_)
+		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console-ia64.html","UA-15890458-1");
+	#else
+		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console-x64.html","UA-15890458-1");
+	#endif
+#endif
+
+	web_statistics_completed = 1;
+	return 0;
+}
+
+/**
+ * @brief Starts web statistics request delivering.
+ */
+void start_web_statistics(void)
+{
+	HANDLE h;
+	DWORD id;
+
+	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)UpdateWebStatisticsThreadProc,NULL,0,&id);
+	if(h == NULL){
+		WgxDbgPrintLastError("Cannot run UpdateWebStatisticsThreadProc");
+		web_statistics_completed = 1;
+	} else {
+		CloseHandle(h);
+	}
+}
+
+/**
+ * @brief Waits for web statistics request completion.
+ */
+void stop_web_statistics()
+{
+	while(!web_statistics_completed) Sleep(100);
+}
+
+/**
  * @brief Performs basic console initialization.
+ * @details Starts thread delivering usage statistics
+ * to the server.
  */
 static void init_console(void)
 {
@@ -131,16 +178,28 @@ static void init_console(void)
 		default_color = csbi.wAttributes;
 	/* set green color */
 	if(!b_flag)	settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+
+	/* update web statistics */
+	start_web_statistics();
 }
 
 /**
  * @brief Terminates the program.
- * @details Restores default text color.
+ * @details 
+ * - Restores default text color.
+ * - Waits until the completion of
+ * the usage statistics delivering
+ * to prevent crash of application
+ * in case of slow internet connection.
  */
 static void terminate_console(int code)
 {
 	/* restore default color */
 	if(!b_flag) settextcolor(default_color);
+
+	/* wait for web statistics request completion */
+	stop_web_statistics();
+	
 	exit(code);
 }
 
@@ -280,11 +339,6 @@ int __cdecl main(int argc, char **argv)
 	/* initialize the program */
 	parse_cmdline(argc,argv);
 	init_console();
-    
-    /* run web analytics only, if -l is not used,
-       which results in unexpected application crash or hang
-       TODO: find a solution for being able to run it in any case */
-	if (!l_flag) update_web_statistics();
 	
 	/* handle help request */
 	if(h_flag){
@@ -673,20 +727,4 @@ static int show_vollist(void)
 	udefrag_release_vollist(v);
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	return 0;
-}
-
-/**
- * @brief Updates web statistics of the program use.
- */
-static void update_web_statistics(void)
-{
-#ifndef _WIN64
-	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-x86.html","UA-15890458-1");
-#else
-	#if defined(_IA64_)
-		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-ia64.html","UA-15890458-1");
-	#else
-		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/console-x64.html","UA-15890458-1");
-	#endif
-#endif
 }
