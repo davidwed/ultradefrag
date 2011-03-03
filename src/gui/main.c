@@ -53,8 +53,9 @@ int portable_mode = 0;
 /* nonzero value indicates that boot time defragmenter is installed */
 int btd_installed = 0;
 
+int web_statistics_completed = 0;
+
 /* forward declarations */
-static void UpdateWebStatistics(void);
 LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 
 /**
@@ -932,6 +933,50 @@ done:
 }
 
 /**
+ * @brief Updates web statistics of the program use.
+ */
+DWORD WINAPI UpdateWebStatisticsThreadProc(LPVOID lpParameter)
+{
+#ifndef _WIN64
+	IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui-x86.html","UA-15890458-1");
+#else
+	#if defined(_IA64_)
+		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui-ia64.html","UA-15890458-1");
+	#else
+		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui-x64.html","UA-15890458-1");
+	#endif
+#endif
+
+	web_statistics_completed = 1;
+	return 0;
+}
+
+/**
+ * @brief Starts web statistics request delivering.
+ */
+void start_web_statistics(void)
+{
+	HANDLE h;
+	DWORD id;
+
+	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)UpdateWebStatisticsThreadProc,NULL,0,&id);
+	if(h == NULL){
+		WgxDbgPrintLastError("Cannot run UpdateWebStatisticsThreadProc");
+		web_statistics_completed = 1;
+	} else {
+		CloseHandle(h);
+	}
+}
+
+/**
+ * @brief Waits for web statistics request completion.
+ */
+void stop_web_statistics()
+{
+	while(!web_statistics_completed) Sleep(100);
+}
+
+/**
  * @brief Entry point.
  */
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
@@ -955,7 +1000,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		return 1;
 	}
 
-	UpdateWebStatistics();
+	start_web_statistics();
 	CheckForTheNewVersion();
 
 	/*
@@ -968,6 +1013,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	if(init_jobs() < 0){
 		Destroy_I18N_Events();
 		DeleteEnvironmentVariables();
+		stop_web_statistics();
 		return 2;
 	}
 	
@@ -986,6 +1032,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 		Destroy_I18N_Events();
 		WgxDestroyResourceTable(i18n_table);
 		DeleteEnvironmentVariables();
+		stop_web_statistics();
 		return 3;
 	}
 
@@ -1001,6 +1048,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	/* save settings */
 	SavePrefs();
 	DeleteEnvironmentVariables();
+	stop_web_statistics();
 	
 	if(shutdown_requested){
 		result = ShutdownOrHibernate();
@@ -1014,22 +1062,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	Destroy_I18N_Events();
 	WgxDestroyResourceTable(i18n_table);
 	return 0;
-}
-
-/**
- * @brief Updates web statistics of the program use.
- */
-static void UpdateWebStatistics(void)
-{
-#ifndef _WIN64
-	IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-x86.html","UA-15890458-1");
-#else
-	#if defined(_IA64_)
-		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-ia64.html","UA-15890458-1");
-	#else
-		IncreaseGoogleAnalyticsCounterAsynch("ultradefrag.sourceforge.net","/appstat/gui-x64.html","UA-15890458-1");
-	#endif
-#endif
 }
 
 /** @} */
