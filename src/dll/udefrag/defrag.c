@@ -57,6 +57,29 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Searches for largest free space region.
+ * @note In case of termination request returns
+ * NULL immediately.
+ */
+winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp)
+{
+	winx_volume_region *rgn, *rgn_largest;
+	ULONGLONG length;
+	
+	rgn_largest = NULL, length = 0;
+	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
+		if(jp->termination_router((void *)jp))
+			return NULL;
+		if(rgn->length > length){
+			rgn_largest = rgn;
+			length = rgn->length;
+		}
+		if(rgn->next == jp->free_regions) break;
+	}
+	return rgn_largest;
+}
+
+/**
  * @brief Performs a volume defragmentation.
  * @return Zero for success, negative value otherwise.
  */
@@ -168,16 +191,10 @@ int defragment(udefrag_job_parameters *jp)
 		joined_fragments = 0;
 		
 		/* find largest free space region */
-		rgn_largest = NULL, length = 0;
-		for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-			if(jp->termination_router((void *)jp)) goto done;
-			if(rgn->length > length){
-				rgn_largest = rgn;
-				length = rgn->length;
-			}
-			if(rgn->next == jp->free_regions) break;
-		}
-		if(rgn_largest == NULL || rgn_largest->length < 2) break;
+		rgn_largest = find_largest_free_region(jp);
+		if(jp->termination_router((void *)jp)) goto done;
+		if(rgn_largest == NULL) break;
+		if(rgn_largest->length < 2) break;
 		
 		/* find largest fragmented file which fragments can be joined there */
 		do {
@@ -254,10 +271,8 @@ part_defrag_done:
 	redraw_all_temporary_system_space_as_free(jp);
 
 done:
-	if(jp->fVolume){
-		winx_fclose(jp->fVolume);
-		jp->fVolume = NULL;
-	}
+	winx_fclose(jp->fVolume);
+	jp->fVolume = NULL;
 	return 0;
 }
 
