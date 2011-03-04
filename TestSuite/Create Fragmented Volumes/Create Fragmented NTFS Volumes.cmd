@@ -152,7 +152,7 @@ goto :EOF
     set size_fmt=      %size%
     set frag_fmt=   %fragments%
 
-    echo File %count_fmt:~-3% ... %size_fmt:~-6% ... %frag_fmt:~-3%
+    echo File %count_fmt:~-3% ... %size_fmt:~-6% kB ... %frag_fmt:~-3% Fragments
 
     "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%count%.bin" >NUL
     if /i "%~1" == "%MixedVolume%" if %NoCompr% EQU 0 compact /c "%dest%\file_%count%.bin" >NUL
