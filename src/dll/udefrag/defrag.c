@@ -57,6 +57,45 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Searches for best matching free space region.
+ * @param[in] file_start_cluster lcn of first file cluster.
+ * @param[in] file_length length of file in clusters.
+ * @param[in] preferred_position flag for preferred region position
+ * 1 ... region before the files start preferred
+ * 0 ... any region accepted
+ * @note In case of termination request returns
+ * NULL immediately.
+ */
+winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
+    ULONGLONG file_start_cluster, ULONGLONG file_length, int preferred_position)
+{
+	winx_volume_region *rgn, *rgn_matching;
+	ULONGLONG length, clcn;
+	
+	rgn_matching = NULL, length = 0, clcn = 0;
+	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
+		if(jp->termination_router((void *)jp))
+			return NULL;
+		if(rgn->length >= file_length){
+            if( length == 0 || rgn->length < length){
+                rgn_matching = rgn;
+                length = rgn->length;
+                clcn = rgn->lcn;
+            }
+		}
+        if(rgn_matching != NULL){
+            if(preferred_position == 1 && clcn > file_start_cluster){
+                break;
+            } else {
+                if(length == file_length) break;
+            }
+        }
+		if(rgn->next == jp->free_regions) break;
+	}
+	return rgn_matching;
+}
+
+/**
  * @brief Searches for largest free space region.
  * @note In case of termination request returns
  * NULL immediately.
