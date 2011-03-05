@@ -397,8 +397,8 @@ static DWORD WINAPI RescanDrivesThreadProc(LPVOID lpParameter)
 
 	/* select the first item */
 	lvi.mask = LVIF_STATE;
-	lvi.stateMask = LVIS_SELECTED;
-	lvi.state = LVIS_SELECTED;
+	lvi.stateMask = LVIS_SELECTED | LVIS_FOCUSED;
+	lvi.state = LVIS_SELECTED | LVIS_FOCUSED;
 	(void)SendMessage(hList,LVM_SETITEMSTATE,0,(LRESULT)&lvi);
 	
 	/* scrollbar may appear/disappear after a scan */

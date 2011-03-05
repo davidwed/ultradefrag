@@ -421,7 +421,6 @@ int CreateMainWindow(int nShowCmd)
 	UpdateStatusBar(&pi);
 	
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
-	SetFocus(hList);
 	
 	/* load i18n resources */
 	ApplyLanguagePack(); // TODO: call it also when user selects another language
@@ -437,6 +436,8 @@ int CreateMainWindow(int nShowCmd)
 		WgxDbgPrintLastError("CreateMainWindow: accelerators cannot be loaded");
 	}
 	
+	SetFocus(hList);
+
 	/* go to the message loop */
 	while(GetMessage(&msg,NULL,0,0)){
 		if(!TranslateAccelerator(hWindow,hAccelTable,&msg)){
