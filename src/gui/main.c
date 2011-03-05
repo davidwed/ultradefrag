@@ -518,7 +518,7 @@ static int IsCursorBetweenControls(void)
 	
 	if(pt.x >= 0 && pt.x <= rc.right \
 		&& pt.y >= rc.bottom \
-		&& pt.y <= rc.bottom + 1) return 1;
+		&& pt.y <= rc.bottom + 3) return 1;
 
 	return 0;
 }
