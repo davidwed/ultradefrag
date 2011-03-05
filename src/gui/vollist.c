@@ -97,13 +97,10 @@ LRESULT CALLBACK ListWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	case WM_LBUTTONUP:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
-		if(busy_flag) return 0;
-		break;
 	case WM_KEYDOWN:
-		if(busy_flag && wParam != VK_F1 && wParam != 'S'){
-			/* only 'Stop' and 'About' actions are allowed */
-			return 0;
-		}
+	case WM_CHAR:
+        /* no actions are allowed while processing volumes */
+		if(busy_flag) return 0;
 		break;
 	case WM_VSCROLL:
 		/* why? */
