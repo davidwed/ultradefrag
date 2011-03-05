@@ -110,10 +110,10 @@ static int save_text_report(udefrag_job_parameters *jp)
 			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				1,human_readable_size,sizeof(human_readable_size));
 			if(sscanf(human_readable_size,"%u.%u %31s",&n1,&n2,s) == 3){
-				//if(n2 == 0){ /* remove trailing zero */
-					_snprintf(human_readable_size,sizeof(human_readable_size),"%u %s",n1,s);
-					human_readable_size[sizeof(human_readable_size) - 1] = 0;
-				//}
+				if(n2 >= 5) n1 += 1; /* round up, so 1.9 will get 2 instead of 1*/
+                
+                _snprintf(human_readable_size,sizeof(human_readable_size),"%u %s",n1,s);
+                human_readable_size[sizeof(human_readable_size) - 1] = 0;
 			}
 			(void)_snwprintf(buffer,size,L"\r\n%11u%12hs%9hs%12hs    ",
 				(UINT)file->f->disp.fragments,human_readable_size,comment,status);
@@ -207,10 +207,10 @@ static int save_lua_report(udefrag_job_parameters *jp)
 			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				1,human_readable_size,sizeof(human_readable_size));
 			if(sscanf(human_readable_size,"%u.%u %31s",&n1,&n2,s) == 3){
-				//if(n2 == 0){ /* remove trailing zero */
-					_snprintf(human_readable_size,sizeof(human_readable_size),"%u&nbsp;%s",n1,s);
-					human_readable_size[sizeof(human_readable_size) - 1] = 0;
-				//}
+				if(n2 >= 5) n1 += 1; /* round up, so 1.9 will get 2 instead of 1*/
+
+                _snprintf(human_readable_size,sizeof(human_readable_size),"%u&nbsp;%s",n1,s);
+                human_readable_size[sizeof(human_readable_size) - 1] = 0;
 			}
 			(void)_snprintf(buffer, sizeof(buffer),
 				"\t{fragments = %u,size = %I64u,hrsize = \"%s\",filtered = %u,"
