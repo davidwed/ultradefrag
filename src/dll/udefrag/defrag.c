@@ -122,6 +122,67 @@ winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Cuts off range of clusters from the file map.
+ */
+void subtract_clusters(winx_file_info *f, ULONGLONG vcn,
+	ULONGLONG length, udefrag_job_parameters *jp)
+{
+	winx_blockmap *block, *first_block, *new_block;
+	ULONGLONG clusters_to_cut = length;
+	ULONGLONG new_lcn, new_vcn, new_length;
+	
+	first_block = get_first_block_of_cluster_chain(f,vcn);
+	for(block = first_block; block; block = block->next){
+		if(vcn > block->vcn){
+			/* cut off something inside the first block of sequence */
+			if(clusters_to_cut >= (block->length - (vcn - block->vcn))){
+				/* cut off right side entirely */
+				clusters_to_cut -= block->length - (vcn - block->vcn);
+				block->length = vcn - block->vcn;
+			} else {
+				/* remove a central part of the block */
+				new_length = block->length - (vcn - block->vcn) - clusters_to_cut;
+				block->length = vcn - block->vcn;
+				new_vcn = vcn + clusters_to_cut;
+				new_lcn = block->lcn + block->length + clusters_to_cut;
+				/* add a new block to the map */
+				new_block = (winx_blockmap *)winx_list_insert_item((list_entry **)&f->disp.blockmap,
+					(list_entry *)block,sizeof(winx_blockmap));
+				if(new_block == NULL){
+					DebugPrint("subtract_clusters: not enough memory");
+				} else {
+					new_block->lcn = new_lcn;
+					new_block->vcn = new_vcn;
+					new_block->length = new_length;
+				}
+				clusters_to_cut = 0;
+			}
+		} else if(clusters_to_cut < block->length){
+			/* cut off left side of the block */
+			block->lcn += clusters_to_cut;
+			block->vcn += clusters_to_cut;
+			block->length -= clusters_to_cut;
+			clusters_to_cut = 0;
+		} else {
+			/* remove entire block */
+			clusters_to_cut -= block->length;
+			block->length = 0;
+		}
+		if(clusters_to_cut == 0 || block->next == f->disp.blockmap) break;
+	}
+	
+	/* remove blocks of zero length */
+repeat_scan:
+	for(block = f->disp.blockmap; block; block = block->next){
+		if(block->length == 0){
+			winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)block);
+			goto repeat_scan;
+		}
+		if(block->next == f->disp.blockmap) break;
+	}
+}
+
+/**
  * @brief Performs a volume defragmentation.
  * @return Zero for success, negative value otherwise.
  */
@@ -129,7 +190,7 @@ int defragment(udefrag_job_parameters *jp)
 {
 	udefrag_fragmented_file *f, *f_largest;
 	winx_volume_region *rgn, *rgn_largest;
-	ULONGLONG length;
+	ULONGLONG vcn, length;
 	ULONGLONG time;
 	ULONGLONG moved_clusters;
 	ULONGLONG defragmented_files;
@@ -275,10 +336,15 @@ int defragment(udefrag_job_parameters *jp)
 				f_largest->f->user_defined_flags |= UD_FILE_TOO_LARGE;
 			} else {
 				/* join fragments */
-				if(move_file(f_largest->f,longest_sequence->vcn,longest_sequence_length,rgn_largest->lcn,jp) >= 0){
+				vcn = longest_sequence->vcn;
+				length = longest_sequence_length;
+				result = move_file(f_largest->f,vcn,length,rgn_largest->lcn,jp);
+				if(result >= 0){
 					DebugPrint("Partial defrag success for %ws",f_largest->f->path);
 					joined_fragments += max_n_blocks;
 					defragmented_files ++;
+					/* subtract moved range of clusters from the file's map */
+					subtract_clusters(f_largest->f,vcn,length,jp);
 				} else {
 					DebugPrint("Partial defrag failure for %ws",f_largest->f->path);
 				}

@@ -187,6 +187,7 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter);
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 void update_mft_zones_layout(udefrag_job_parameters *jp);
 void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp);
+winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn);
 
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);

@@ -115,7 +115,7 @@ static void redraw_freed_space(udefrag_job_parameters *jp,
  * @brief Returns the first file block
  * belonging to the cluster chain.
  */
-static winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn)
+winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn)
 {
 	winx_blockmap *block;
 	
