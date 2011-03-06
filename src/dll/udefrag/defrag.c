@@ -45,10 +45,13 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 		return 0;
 	
 	/* skip files for which moving failed already to avoid infinite loops */
-	/* TODO: try to move at least once again in case of failure */
 	if(is_moving_failed(f))
 		return 0;
 	
+	/* skip file in case of improper state detected */
+	if(is_in_improper_state(f))
+		return 0;
+
 	/* skip files already marked as too large to avoid infinite loops */
 	if(is_too_large(f))
 		return 0;
@@ -193,9 +196,6 @@ int defragment(udefrag_job_parameters *jp)
 				defragmented_files ++;
 			} else {
 				DebugPrint("Defrag failure for %ws",f_largest->f->path);
-				/* avoid infinite loops */
-				if(!is_locked(f_largest->f) && !is_moving_failed(f_largest->f))
-					f_largest->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
 			}
 			
 			/* skip locked files here to prevent skipping the current free region */
@@ -281,9 +281,6 @@ int defragment(udefrag_job_parameters *jp)
 					defragmented_files ++;
 				} else {
 					DebugPrint("Partial defrag failure for %ws",f_largest->f->path);
-					/* avoid infinite loops */
-					if(!is_locked(f_largest->f) && !is_moving_failed(f_largest->f))
-						winx_list_destroy((list_entry **)(void *)&f_largest->f->disp.blockmap);
 				}
 			}
 		} while(is_too_large(f_largest->f));

@@ -34,22 +34,24 @@
 #define UD_FILE_OVER_LIMIT     0x2
 
 /* file status flags */
-#define UD_FILE_LOCKED         0x4   /* file is locked by system */
-#define UD_FILE_TOO_LARGE      0x8   /* file is larger than the biggest free space region */
-#define UD_FILE_MOVING_FAILED  0x10  /* file moving completed with failure */
+#define UD_FILE_LOCKED           0x4   /* file is locked by system */
+#define UD_FILE_TOO_LARGE        0x8   /* file is larger than the biggest free space region */
+#define UD_FILE_MOVING_FAILED    0x10  /* file moving completed with failure */
+#define UD_FILE_IMPROPER_STATE   0x20  /* file is in improper state (chkdsk run needed) or some bug encountered */
 
 /*
 * If this flag is set then some parts of the file
 * are excluded from the blockmap because they are unmoveable.
 */
-#define UD_FILE_INTENDED_FOR_PART_DEFRAG  0x20
+#define UD_FILE_INTENDED_FOR_PART_DEFRAG  0x40
 
-#define is_excluded(f)       ((f)->user_defined_flags & UD_FILE_EXCLUDED)
-#define is_over_limit(f)     ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
+#define is_excluded(f)           ((f)->user_defined_flags & UD_FILE_EXCLUDED)
+#define is_over_limit(f)         ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
 
-#define is_locked(f)         ((f)->user_defined_flags & UD_FILE_LOCKED)
-#define is_too_large(f)      ((f)->user_defined_flags & UD_FILE_TOO_LARGE)
-#define is_moving_failed(f)  ((f)->user_defined_flags & UD_FILE_MOVING_FAILED)
+#define is_locked(f)             ((f)->user_defined_flags & UD_FILE_LOCKED)
+#define is_too_large(f)          ((f)->user_defined_flags & UD_FILE_TOO_LARGE)
+#define is_moving_failed(f)      ((f)->user_defined_flags & UD_FILE_MOVING_FAILED)
+#define is_in_improper_state(f)  ((f)->user_defined_flags & UD_FILE_IMPROPER_STATE)
 
 #define is_intended_for_part_defrag(f)  ((f)->user_defined_flags & UD_FILE_INTENDED_FOR_PART_DEFRAG)
 

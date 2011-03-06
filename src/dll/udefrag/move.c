@@ -496,6 +496,11 @@ typedef enum {
  * @note 
  * - Volume must be opened before this call,
  * jp->fVolume must contain a proper handle.
+ * - If this function returns negative value
+ * indicating failure, one of the flags listed
+ * in udefrag_internals.h under "file status flags"
+ * must be set to avoid repetitive moving attempts
+ * for a single file.
  */
 int move_file(winx_file_info *f,
               ULONGLONG vcn,
@@ -518,6 +523,7 @@ int move_file(winx_file_info *f,
 	/* validate parameters */
 	if(f == NULL || jp == NULL){
 		DebugPrint("move_file: invalid parameter");
+		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
 		return (-1);
 	}
 	
@@ -525,26 +531,34 @@ int move_file(winx_file_info *f,
 	else DebugPrint("empty filename");
 	DebugPrint("vcn = %I64u, length = %I64u, target = %I64u",vcn,length,target);
 
-	if(length == 0)
+	if(length == 0){
+		DebugPrint("move_file: move of zero number of clusters requested");
+		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
 		return 0; /* nothing to move */
+	}
 	
-	if(f->disp.clusters == 0 || f->disp.fragments == 0 || f->disp.blockmap == NULL)
+	if(f->disp.clusters == 0 || f->disp.fragments == 0 || f->disp.blockmap == NULL){
+		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
 		return 0; /* nothing to move */
+	}
 	
 	if(vcn + length > f->disp.blockmap->prev->vcn + f->disp.blockmap->prev->length){
 		DebugPrint("move_file: data move behind the end of the file requested");
 		DbgPrintBlocksOfFile(f->disp.blockmap);
+		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
 		return (-1);
 	}
 	
 	first_block = get_first_block_of_cluster_chain(f,vcn);
 	if(first_block == NULL){
 		DebugPrint("move_file: data move out of file bounds requested");
+		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
 		return (-1);
 	}
 	
 	if(!check_region(jp,target,length)){
 		DebugPrint("move_file: there is no sufficient free space available on target block");
+		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
 		return (-1);
 	}
 	
