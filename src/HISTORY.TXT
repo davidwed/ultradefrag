@@ -14,7 +14,7 @@ HISTORY
     
     - the following translations were updated:
     
-      Korean, Turkish, Slovak, English (US), Hindi
+      Korean, Turkish, Slovak, English (US), Hindi, Romanian
       
     - hexview command added to the boot time shell
 

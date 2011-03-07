@@ -134,6 +134,7 @@
     Special thanks for correcting and updating translations (in alphabetical order):
 --------------------------------------------------------------------------------
     Áron Hegedüs
+    Şahin Salincakli
     Ali Jafari
     Benny Stütz
     Carlos Rodrigues
@@ -163,6 +164,7 @@
     Marina Louwrier-Johannsen
     Masao Kajiwara
     Mathieu Van Weersch
+    Micu Dumitru
     Patrick Palm
     Patrick Paludan-Müller
     Pavel Kinkor
@@ -170,7 +172,6 @@
     Reynald Didier
     Robert Jr
     Ryan Ping Chih Ko
-    Şahin Salincakli
     Sérgio Marques
     Sherpya
     SMHA
