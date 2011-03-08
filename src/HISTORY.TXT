@@ -12,6 +12,10 @@ HISTORY
     - tree-view to select chapters was added to documentation and the
       default doxygen color theme is now used
     
+    - the following translations were added:
+
+      English (GB)
+    
     - the following translations were updated:
     
       Korean, Turkish, Slovak, English (US), Hindi, Romanian

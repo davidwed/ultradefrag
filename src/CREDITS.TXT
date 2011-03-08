@@ -48,6 +48,7 @@
     Czech           - David Horak, Stefan Pendl
     Danish          - Patrick Paludan-Müller, Stefan Pendl
     Dutch           - Wim Kerstens, Stefan Pendl
+    English (GB)    - Andrew Smith
     English (US)    - Dmitri Arkhangelski
     Estonian        - Olav Mägi
     Farsi           - Ali Jafari
