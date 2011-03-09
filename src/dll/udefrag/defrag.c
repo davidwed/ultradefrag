@@ -28,9 +28,9 @@
 
 /**
  * @brief Defines whether the file
- * can be defragmented or not.
+ * can be defragmented partially or not.
  */
-int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
+int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp)
 {
 	/* skip files with undefined cluster map */
 	if(f->disp.blockmap == NULL)
@@ -44,10 +44,6 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 	if(is_directory(f) && !jp->actions.allow_dir_defrag)
 		return 0;
 	
-	/* skip files for which moving failed already to avoid infinite loops */
-	if(is_moving_failed(f))
-		return 0;
-	
 	/* skip file in case of improper state detected */
 	if(is_in_improper_state(f))
 		return 0;
@@ -57,6 +53,27 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 		return 0;
 	
 	return 1;
+}
+
+/**
+ * @brief Defines whether the file
+ * can be defragmented entirely or not.
+ * @details While can_defragment_partially
+ * lets to defragment files for which cluster
+ * move failures occured, can_defragment_entirely 
+ * routine excludes such a files. As well as files
+ * intended for partial defragmentation especially.
+ */
+int can_defragment_entirely(winx_file_info *f,udefrag_job_parameters *jp)
+{
+	if(is_intended_for_part_defrag(f))
+		return 0;
+	
+	/* skip files for which moving failed already to avoid infinite loops */
+	if(is_moving_failed(f))
+		return 0;
+	
+	return can_defragment_partially(f,jp);
 }
 
 /**
@@ -122,67 +139,6 @@ winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Cuts off range of clusters from the file map.
- */
-void subtract_clusters(winx_file_info *f, ULONGLONG vcn,
-	ULONGLONG length, udefrag_job_parameters *jp)
-{
-	winx_blockmap *block, *first_block, *new_block;
-	ULONGLONG clusters_to_cut = length;
-	ULONGLONG new_lcn, new_vcn, new_length;
-	
-	first_block = get_first_block_of_cluster_chain(f,vcn);
-	for(block = first_block; block; block = block->next){
-		if(vcn > block->vcn){
-			/* cut off something inside the first block of sequence */
-			if(clusters_to_cut >= (block->length - (vcn - block->vcn))){
-				/* cut off right side entirely */
-				clusters_to_cut -= block->length - (vcn - block->vcn);
-				block->length = vcn - block->vcn;
-			} else {
-				/* remove a central part of the block */
-				new_length = block->length - (vcn - block->vcn) - clusters_to_cut;
-				block->length = vcn - block->vcn;
-				new_vcn = vcn + clusters_to_cut;
-				new_lcn = block->lcn + block->length + clusters_to_cut;
-				/* add a new block to the map */
-				new_block = (winx_blockmap *)winx_list_insert_item((list_entry **)&f->disp.blockmap,
-					(list_entry *)block,sizeof(winx_blockmap));
-				if(new_block == NULL){
-					DebugPrint("subtract_clusters: not enough memory");
-				} else {
-					new_block->lcn = new_lcn;
-					new_block->vcn = new_vcn;
-					new_block->length = new_length;
-				}
-				clusters_to_cut = 0;
-			}
-		} else if(clusters_to_cut < block->length){
-			/* cut off left side of the block */
-			block->lcn += clusters_to_cut;
-			block->vcn += clusters_to_cut;
-			block->length -= clusters_to_cut;
-			clusters_to_cut = 0;
-		} else {
-			/* remove entire block */
-			clusters_to_cut -= block->length;
-			block->length = 0;
-		}
-		if(clusters_to_cut == 0 || block->next == f->disp.blockmap) break;
-	}
-	
-	/* remove blocks of zero length */
-repeat_scan:
-	for(block = f->disp.blockmap; block; block = block->next){
-		if(block->length == 0){
-			winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)block);
-			goto repeat_scan;
-		}
-		if(block->next == f->disp.blockmap) break;
-	}
-}
-
-/**
  * @brief Performs a volume defragmentation.
  * @return Zero for success, negative value otherwise.
  */
@@ -190,11 +146,10 @@ int defragment(udefrag_job_parameters *jp)
 {
 	udefrag_fragmented_file *f, *f_largest;
 	winx_volume_region *rgn, *rgn_largest;
-	ULONGLONG vcn, length;
+	ULONGLONG target, length;
 	ULONGLONG time;
 	ULONGLONG moved_clusters;
 	ULONGLONG defragmented_files;
-	ULONGLONG joined_fragments;
 	winx_blockmap *block, *first_block, *longest_sequence;
 	ULONGLONG n_blocks, max_n_blocks, longest_sequence_length;
 	ULONGLONG remaining_clusters;
@@ -219,7 +174,7 @@ int defragment(udefrag_job_parameters *jp)
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) goto done;
-		if(can_defragment(f->f,jp))
+		if(can_defragment_partially(f->f,jp))
 			jp->pi.clusters_to_process += f->f->disp.clusters;
 		if(f->next == jp->fragmented_files) break;
 	}
@@ -241,7 +196,7 @@ int defragment(udefrag_job_parameters *jp)
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
 				if(f->f->disp.clusters > length && f->f->disp.clusters <= rgn->length){
-					if(can_defragment(f->f,jp) && !is_intended_for_part_defrag(f->f)){
+					if(can_defragment_entirely(f->f,jp)){
 						f_largest = f;
 						length = f->f->disp.clusters;
 					}
@@ -252,7 +207,7 @@ int defragment(udefrag_job_parameters *jp)
 			
 			/* move the file */
 			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,
-			 f_largest->f->disp.clusters,rgn->lcn,jp) >= 0){
+			 f_largest->f->disp.clusters,rgn->lcn,0,jp) >= 0){
 				DebugPrint("Defrag success for %ws",f_largest->f->path);
 				defragmented_files ++;
 			} else {
@@ -287,9 +242,7 @@ int defragment(udefrag_job_parameters *jp)
 	
 	/* fill largest free region first */
 	defragmented_files = 0;
-	do {
-		joined_fragments = 0;
-		
+	while(1) {
 		/* find largest free space region */
 		rgn_largest = find_largest_free_region(jp);
 		if(jp->termination_router((void *)jp)) goto done;
@@ -301,7 +254,7 @@ int defragment(udefrag_job_parameters *jp)
 			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
-				if(f->f->disp.clusters > length && can_defragment(f->f,jp)){
+				if(f->f->disp.clusters > length && can_defragment_partially(f->f,jp)){
 					f_largest = f;
 					length = f->f->disp.clusters;
 				}
@@ -332,25 +285,28 @@ int defragment(udefrag_job_parameters *jp)
 			}
 			
 			if(longest_sequence == NULL){
-				/* fragments cannot be joined */
+				/* fragments of the current file cannot be joined */
 				f_largest->f->user_defined_flags |= UD_FILE_TOO_LARGE;
-			} else {
-				/* join fragments */
-				vcn = longest_sequence->vcn;
-				length = longest_sequence_length;
-				result = move_file(f_largest->f,vcn,length,rgn_largest->lcn,jp);
-				if(result >= 0){
-					DebugPrint("Partial defrag success for %ws",f_largest->f->path);
-					joined_fragments += max_n_blocks;
-					defragmented_files ++;
-					/* subtract moved range of clusters from the file's map */
-					subtract_clusters(f_largest->f,vcn,length,jp);
-				} else {
-					DebugPrint("Partial defrag failure for %ws",f_largest->f->path);
-				}
 			}
 		} while(is_too_large(f_largest->f));
-	} while(joined_fragments);
+
+		/* join fragments */
+		target = rgn_largest->lcn; 
+		if(move_file(f_largest->f,longest_sequence->vcn,longest_sequence_length,
+		  target,UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS,jp) >= 0){
+			DebugPrint("Partial defrag success for %ws",f_largest->f->path);
+			defragmented_files ++;
+		} else {
+			DebugPrint("Partial defrag failure for %ws",f_largest->f->path);
+		}
+		
+		/*
+		* Remove target space from the free space pool.
+		* This will safely prevent infinite loops
+		* on a single free space block.
+		*/
+		jp->free_regions = winx_sub_volume_region(jp->free_regions,target,longest_sequence_length);
+	}
 
 part_defrag_done:
 	/* display amount of moved data and number of partially defragmented files */
@@ -364,7 +320,7 @@ part_defrag_done:
 	/* mark all files not processed yet as too large */
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) goto done;
-		if(can_defragment(f->f,jp))
+		if(can_defragment_partially(f->f,jp))
 			f->f->user_defined_flags |= UD_FILE_TOO_LARGE;
 		if(f->next == jp->fragmented_files) break;
 	}

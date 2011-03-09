@@ -462,6 +462,67 @@ fail:
 	return NULL;
 }
 
+/**
+ * @brief Cuts off range of clusters from the file map.
+ */
+static void subtract_clusters(winx_file_info *f, ULONGLONG vcn,
+	ULONGLONG length, udefrag_job_parameters *jp)
+{
+	winx_blockmap *block, *first_block, *new_block;
+	ULONGLONG clusters_to_cut = length;
+	ULONGLONG new_lcn, new_vcn, new_length;
+	
+	first_block = get_first_block_of_cluster_chain(f,vcn);
+	for(block = first_block; block; block = block->next){
+		if(vcn > block->vcn){
+			/* cut off something inside the first block of sequence */
+			if(clusters_to_cut >= (block->length - (vcn - block->vcn))){
+				/* cut off right side entirely */
+				clusters_to_cut -= block->length - (vcn - block->vcn);
+				block->length = vcn - block->vcn;
+			} else {
+				/* remove a central part of the block */
+				new_length = block->length - (vcn - block->vcn) - clusters_to_cut;
+				block->length = vcn - block->vcn;
+				new_vcn = vcn + clusters_to_cut;
+				new_lcn = block->lcn + block->length + clusters_to_cut;
+				/* add a new block to the map */
+				new_block = (winx_blockmap *)winx_list_insert_item((list_entry **)&f->disp.blockmap,
+					(list_entry *)block,sizeof(winx_blockmap));
+				if(new_block == NULL){
+					DebugPrint("subtract_clusters: not enough memory");
+				} else {
+					new_block->lcn = new_lcn;
+					new_block->vcn = new_vcn;
+					new_block->length = new_length;
+				}
+				clusters_to_cut = 0;
+			}
+		} else if(clusters_to_cut < block->length){
+			/* cut off left side of the block */
+			block->lcn += clusters_to_cut;
+			block->vcn += clusters_to_cut;
+			block->length -= clusters_to_cut;
+			clusters_to_cut = 0;
+		} else {
+			/* remove entire block */
+			clusters_to_cut -= block->length;
+			block->length = 0;
+		}
+		if(clusters_to_cut == 0 || block->next == f->disp.blockmap) break;
+	}
+	
+	/* remove blocks of zero length */
+repeat_scan:
+	for(block = f->disp.blockmap; block; block = block->next){
+		if(block->length == 0){
+			winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)block);
+			goto repeat_scan;
+		}
+		if(block->next == f->disp.blockmap) break;
+	}
+}
+
 static int __stdcall dump_terminator(void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
@@ -491,6 +552,8 @@ typedef enum {
  * @param[in] vcn the VCN of the first cluster to be moved.
  * @param[in] length the length of the cluster chain to be moved.
  * @param[in] target the LCN of the target free region.
+ * @param[in] flags combination of UD_MOVE_FILE_xxx flags
+ * defined in udefrag_internals.h file
  * @param[in] jp job parameters.
  * @return Zero for success, negative value otherwise.
  * @note 
@@ -506,6 +569,7 @@ int move_file(winx_file_info *f,
               ULONGLONG vcn,
               ULONGLONG length,
               ULONGLONG target,
+			  int flags,
               udefrag_job_parameters *jp
               )
 {
@@ -632,6 +696,8 @@ int move_file(winx_file_info *f,
 	if(moving_result == DETERMINED_MOVING_FAILURE){
 		winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
+		if(flags & UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS)
+			subtract_clusters(f,vcn,length,jp);
 		return (-1);
 	}
 
@@ -680,10 +746,20 @@ int move_file(winx_file_info *f,
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map and update statistics */
 
-	/* new block map is available - use it */
-	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-	memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
-
+	if(flags & UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS){
+		/* destroy new blockmap, since we use an old one anyway in this case */
+		winx_list_destroy((list_entry **)(void *)&new_file_info.disp.blockmap);
+		/* cut off moved range of clusters from the original blockmap */
+		subtract_clusters(f,vcn,length,jp);
+		/* update statistics though */
+		f->disp.fragments = new_file_info.disp.fragments;
+		f->disp.clusters = new_file_info.disp.clusters;
+	} else {
+		/* new block map is available - use it */
+		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+		memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
+	}
+	
 	return (moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS) ? (-1) : 0;
 }
 

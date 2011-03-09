@@ -181,9 +181,7 @@ void destroy_lists(udefrag_job_parameters *jp);
 ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp);
 void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameters *jp);
 
-int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 WINX_FILE * __stdcall new_winx_vopen(char volume_letter);
-
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 void update_mft_zones_layout(udefrag_job_parameters *jp);
 void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp);
@@ -193,12 +191,29 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
 int is_mft(winx_file_info *f,udefrag_job_parameters *jp);
 int is_mft_mirror(winx_file_info *f,udefrag_job_parameters *jp);
+void update_fragmented_files_list(udefrag_job_parameters *jp);
+
+/*
+* move_file prototype and flags
+*/
+
+/*
+* If this flag is set, the move_file
+* routine will cut off moved range
+* of clusters from the file's map passed in.
+* Thus, after each move file's map will become
+* shorter and shorter preventing subsequent
+* moves of the same data in a partial
+* defragmentation.
+*/
+#define UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS 0x1
+
 int move_file(winx_file_info *f,
               ULONGLONG vcn,
 			  ULONGLONG length,
 			  ULONGLONG target,
+			  int flags,
 			  udefrag_job_parameters *jp
 			  );
-void update_fragmented_files_list(udefrag_job_parameters *jp);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
