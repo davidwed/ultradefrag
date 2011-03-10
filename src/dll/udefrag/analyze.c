@@ -377,9 +377,11 @@ static int __stdcall filter(winx_file_info *f,void *user_defined_data)
 	* be able to defragment it.
 	*/
 	length = wcslen(f->path);
-	if(f->path[length - 1] == '.'){
-		DebugPrint("root directory detected, its trailing dot will be removed");
-		f->path[length - 1] = 0;
+	if(length >= 2){
+		if(f->path[length - 1] == '.' && f->path[length - 2] == '\\'){
+			DebugPrint("root directory detected, its trailing dot will be removed");
+			f->path[length - 1] = 0;
+		}
 	}
 	
 	/*
