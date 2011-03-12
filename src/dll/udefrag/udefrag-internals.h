@@ -55,6 +55,8 @@
 
 #define is_intended_for_part_defrag(f)  ((f)->user_defined_flags & UD_FILE_INTENDED_FOR_PART_DEFRAG)
 
+#define is_block_excluded(b)  ((b)->length == 0)
+
 /* named constant for 256k */
 #define _256K (256 * 1024)
 

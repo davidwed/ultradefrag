@@ -511,9 +511,14 @@ static void subtract_clusters(winx_file_info *f, ULONGLONG vcn,
 		}
 		if(clusters_to_cut == 0 || block->next == f->disp.blockmap) break;
 	}
-	
+
+	/*
+	* Don't remove blocks of zero length -
+	* we'll use them as a markers checked by
+	* is_block_excluded macro.
+	*/
 	/* remove blocks of zero length */
-repeat_scan:
+/*repeat_scan:
 	for(block = f->disp.blockmap; block; block = block->next){
 		if(block->length == 0){
 			winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)block);
@@ -521,6 +526,7 @@ repeat_scan:
 		}
 		if(block->next == f->disp.blockmap) break;
 	}
+*/
 }
 
 static int __stdcall dump_terminator(void *user_defined_data)

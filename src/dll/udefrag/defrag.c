@@ -265,21 +265,24 @@ int defragment(udefrag_job_parameters *jp)
 			/* find longest sequence of file blocks which fits in the current free region */
 			longest_sequence = NULL, max_n_blocks = 0, longest_sequence_length = 0;
 			for(first_block = f_largest->f->disp.blockmap; first_block; first_block = first_block->next){
-				n_blocks = 0, remaining_clusters = rgn_largest->length;
-				for(block = first_block; block; block = block->next){
-					if(jp->termination_router((void *)jp)) goto done;
-					if(block->length <= remaining_clusters){
-						n_blocks ++;
-						remaining_clusters -= block->length;
-					} else {
-						break;
+				if(!is_block_excluded(first_block)){
+					n_blocks = 0, remaining_clusters = rgn_largest->length;
+					for(block = first_block; block; block = block->next){
+						if(jp->termination_router((void *)jp)) goto done;
+						if(is_block_excluded(block)) break;
+						if(block->length <= remaining_clusters){
+							n_blocks ++;
+							remaining_clusters -= block->length;
+						} else {
+							break;
+						}
+						if(block->next == f_largest->f->disp.blockmap) break;
 					}
-					if(block->next == f_largest->f->disp.blockmap) break;
-				}
-				if(n_blocks > 1 && n_blocks > max_n_blocks){
-					longest_sequence = first_block;
-					max_n_blocks = n_blocks;
-					longest_sequence_length = rgn_largest->length - remaining_clusters;
+					if(n_blocks > 1 && n_blocks > max_n_blocks){
+						longest_sequence = first_block;
+						max_n_blocks = n_blocks;
+						longest_sequence_length = rgn_largest->length - remaining_clusters;
+					}
 				}
 				if(first_block->next == f_largest->f->disp.blockmap) break;
 			}
