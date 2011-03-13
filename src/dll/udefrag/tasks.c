@@ -114,30 +114,25 @@ winx_volume_region *find_free_region_backward(udefrag_job_parameters *jp,
  * @note In case of termination request returns
  * NULL immediately.
  */
-winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
+static winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
     ULONGLONG file_start_cluster, ULONGLONG file_length, int preferred_position)
 {
 	winx_volume_region *rgn, *rgn_matching;
-	ULONGLONG length, clcn;
+	ULONGLONG length;
 	
-	rgn_matching = NULL, length = 0, clcn = 0;
+	rgn_matching = NULL, length = 0;
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->termination_router((void *)jp))
-			return NULL;
+		if(jp->termination_router((void *)jp)) return NULL;
+		if(preferred_position == 1 && rgn->lcn > file_start_cluster)
+			if(rgn_matching != NULL)
+				break;
 		if(rgn->length >= file_length){
-            if( length == 0 || rgn->length < length){
+            if(length == 0 || rgn->length < length){
                 rgn_matching = rgn;
                 length = rgn->length;
-                clcn = rgn->lcn;
+				if(length == file_length) break;
             }
 		}
-        if(rgn_matching != NULL){
-            if(preferred_position == 1 && clcn > file_start_cluster){
-                break;
-            } else {
-                if(length == file_length) break;
-            }
-        }
 		if(rgn->next == jp->free_regions) break;
 	}
 	return rgn_matching;
@@ -249,8 +244,6 @@ static void update_fragmented_files_list(udefrag_job_parameters *jp)
 /**
  * @brief Defragments all fragmented files entirely, if possible.
  * @details 
- * - If some file cannot be defragmented due to its size,
- * this routine marks it by UD_FILE_INTENDED_FOR_PART_DEFRAG flag.
  * - This routine fills free space areas from the beginning of the
  * volume regardless of the best matching rules.
  * @note Volume must be opened before this call,
@@ -315,6 +308,70 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	}
 
 done:
+	/* display amount of moved data and number of defragmented files */
+	moved_clusters = jp->pi.moved_clusters;
+	DebugPrint("%I64u files defragmented",defragmented_files);
+	DebugPrint("%I64u clusters moved",moved_clusters);
+	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	DebugPrint("%s moved",buffer);
+	stop_timing("defragmentation",time,jp);
+	return 0;
+}
+
+/**
+ * @brief Defragments all fragmented files entirely, if possible.
+ * @details 
+ * - If some file cannot be defragmented due to its size,
+ * this routine marks it by UD_FILE_INTENDED_FOR_PART_DEFRAG flag.
+ * - This routine fills free space areas respect to the best matching rule.
+ * @note Volume must be opened before this call,
+ * jp->fVolume must contain a proper handle.
+ */
+int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
+{
+	ULONGLONG time;
+	ULONGLONG moved_clusters;
+	ULONGLONG defragmented_files;
+	winx_volume_region *rgn;
+	udefrag_fragmented_file *f, *f_largest;
+	ULONGLONG length;
+	char buffer[32];
+
+	time = start_timing("defragmentation",jp);
+
+	/* find best matching free region for each fragmented file */
+	defragmented_files = 0;
+	while(1){
+		if(jp->termination_router((void *)jp)) break;
+		f_largest = NULL, length = 0;
+		for(f = jp->fragmented_files; f; f = f->next){
+			if(f->f->disp.clusters > length){
+				if(can_defragment_entirely(f->f,jp)){
+					f_largest = f;
+					length = f->f->disp.clusters;
+				}
+			}
+			if(f->next == jp->fragmented_files) break;
+		}
+		if(f_largest == NULL) break;
+
+		rgn = find_matching_free_region(jp,f_largest->f->disp.blockmap->lcn,f_largest->f->disp.clusters,0);
+		if(rgn == NULL){
+			f_largest->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
+		} else {
+			/* move the file */
+			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,
+			 f_largest->f->disp.clusters,rgn->lcn,0,jp) >= 0){
+				DebugPrint("Defrag success for %ws",f_largest->f->path);
+				defragmented_files ++;
+			} else {
+				DebugPrint("Defrag failure for %ws",f_largest->f->path);
+			}
+			/* truncate list of fragmented files */
+			update_fragmented_files_list(jp);
+		}
+	}
+	
 	/* display amount of moved data and number of defragmented files */
 	moved_clusters = jp->pi.moved_clusters;
 	DebugPrint("%I64u files defragmented",defragmented_files);

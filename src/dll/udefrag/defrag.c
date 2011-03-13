@@ -63,7 +63,8 @@ int defragment(udefrag_job_parameters *jp)
 	}
 	
 	/* defragment all small files */
-	defragment_small_files(jp);
+	//defragment_small_files(jp);
+	defragment_small_files_respect_best_matching(jp);
 	
 	/* defragment all large files partially */
 	defragment_big_files(jp);

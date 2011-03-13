@@ -219,6 +219,7 @@ int move_file(winx_file_info *f,
 
 int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp);
 int defragment_small_files(udefrag_job_parameters *jp);
+int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp);
 int defragment_big_files(udefrag_job_parameters *jp);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
