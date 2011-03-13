@@ -356,6 +356,7 @@ int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
 		if(f_largest == NULL) break;
 
 		rgn = find_matching_free_region(jp,f_largest->f->disp.blockmap->lcn,f_largest->f->disp.clusters,0);
+		if(jp->termination_router((void *)jp)) break;
 		if(rgn == NULL){
 			f_largest->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
 		} else {

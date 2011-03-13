@@ -40,19 +40,13 @@ int defragment(udefrag_job_parameters *jp)
 	if(result < 0)
 		return result;
 	
-	/* open the volume */
-	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
-	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
-	if(jp->fVolume == NULL)
-		return (-1);
-	
 	/* reset statistics */
 	jp->pi.clusters_to_process = 0;
 	jp->pi.processed_clusters = 0;
 	jp->pi.moved_clusters = 0;
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	for(f = jp->fragmented_files; f; f = f->next){
-		if(jp->termination_router((void *)jp)) goto done;
+		if(jp->termination_router((void *)jp)) return 0;
 		/*
 		* Count all fragmented files which 
 		* can be processed at least partially.
@@ -62,17 +56,19 @@ int defragment(udefrag_job_parameters *jp)
 		if(f->next == jp->fragmented_files) break;
 	}
 	
-	/* defragment all small files */
+	/* open the volume */
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return (-1);
+	
 	//defragment_small_files(jp);
 	defragment_small_files_respect_best_matching(jp);
-	
-	/* defragment all large files partially */
-	defragment_big_files(jp);
-	
-	/* redraw all temporary system space as free */
-	redraw_all_temporary_system_space_as_free(jp);
 
-done:
+	if(jp->termination_router((void *)jp) == 0)
+		defragment_big_files(jp);
+	
+	redraw_all_temporary_system_space_as_free(jp);
 	winx_fclose(jp->fVolume);
 	jp->fVolume = NULL;
 	return 0;
