@@ -193,7 +193,6 @@ NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
 int is_mft(winx_file_info *f,udefrag_job_parameters *jp);
 int is_mft_mirror(winx_file_info *f,udefrag_job_parameters *jp);
-void update_fragmented_files_list(udefrag_job_parameters *jp);
 
 /*
 * move_file prototype and flags
@@ -217,5 +216,9 @@ int move_file(winx_file_info *f,
 			  int flags,
 			  udefrag_job_parameters *jp
 			  );
+
+int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp);
+int defragment_small_files(udefrag_job_parameters *jp);
+int defragment_big_files(udefrag_job_parameters *jp);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
