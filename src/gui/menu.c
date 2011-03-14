@@ -98,11 +98,20 @@ WGX_MENU help_menu[] = {
 	{0,0,NULL,NULL}
 };
 
+WGX_MENU preview_menu[] = {
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_ITEM01, NULL, L"Repeat action until nothing left to move"},
+	{MF_SEPARATOR,0,NULL,NULL},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_ITEM02, NULL, L"Find largest free space"},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_PREVIEW_ITEM03,   NULL, L"Find matching free space"},
+	{0,0,NULL,NULL}
+};
+
 WGX_MENU main_menu[] = {
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_ACTION,   action_menu,        L"&Action"},
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_REPORT,   report_menu,        L"&Report"},
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_SETTINGS, settings_menu,      L"&Settings"},
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_HELP,     help_menu,          L"&Help"},
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_PREVIEW,  preview_menu,       L"Preview"},
 	{0,0,NULL,NULL}
 };
 

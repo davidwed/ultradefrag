@@ -73,6 +73,7 @@
 #define IDC_PIC1                        1059
 #define IDC_SHUTDOWN                    1060
 
+/* menu item constants */
 #define IDM_ACTION                      1100
 #define IDM_ANALYZE                     1110
 #define IDM_DEFRAG                      1120
@@ -113,3 +114,12 @@
 #define IDM_BEST_PRACTICE               2720
 #define IDM_FAQ                         2730
 #define IDM_ABOUT                       2740
+
+/* preview menu items */
+enum {
+    IDM_PREVIEW = 5000,
+    IDM_PREVIEW_ITEM01,
+    IDM_PREVIEW_ITEM02,
+    IDM_PREVIEW_ITEM03,
+    IDM_PREVIEW_ITEM_LAST    /* must always be the last entry */
+};
