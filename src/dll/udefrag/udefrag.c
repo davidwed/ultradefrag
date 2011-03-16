@@ -211,6 +211,78 @@ static int __stdcall killer(void *p)
 	return 1;
 }
 
+static DWORD WINAPI start_job_ex(LPVOID p)
+{
+	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+	char *action = "analyzing";
+	int result = 0;
+
+	/* do the job */
+	if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
+	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
+	else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "quick optimizing";
+	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
+	remove_fragmentation_reports(jp);
+	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
+    
+	while(1){
+        /* for dry-run analyze only on first pass */
+		if(jp->pi.pass_number == 0 || jp->udo.dry_run == 0 )
+            result = analyze(jp);
+        
+		if(jp->job_type == ANALYSIS_JOB) break;
+        
+        if(jp->termination_router((void *)jp)) break;
+        
+		if(result == 0){
+        
+            /* call moving clusters to the end of the volume here,
+               which is used for full optimization */
+        
+            result = defragment_ex(jp);
+            
+            if(jp->termination_router((void *)jp)) break;
+            
+            if(result == 0){
+                switch(jp->job_type){
+                    case FULL_OPTIMIZATION_JOB:
+                        result = full_optimize(jp);
+                        break;
+                    case QUICK_OPTIMIZATION_JOB:
+                        result = quick_optimize(jp);
+                        break;
+                }
+            }
+            
+            /* call partial defragmentation here;
+               for optimization only execute it,
+               if no cluster was moved */
+		}
+        
+        jp->pi.pass_number ++;
+        
+        if(jp->termination_router((void *)jp)) break;
+        
+        /* exit if no repeat */
+		if(!(jp->udo.preview_mask & 2)) break;
+        
+        /* exit if nothing moved */
+		if(jp->pi.moved_clusters == 0) break;
+        
+        if(result != 0) break;
+	}
+    
+	(void)save_fragmentation_reports(jp);
+
+	/* now it is safe to adjust the completion status */
+	jp->pi.completion_status = result;
+	if(jp->pi.completion_status == 0)
+		jp->pi.completion_status ++; /* success */
+
+	winx_exit_thread(); /* 8k/12k memory leak here? */
+	return 0;
+}
+
 static DWORD WINAPI start_job(LPVOID p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
@@ -337,7 +409,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
     }
 	
 	/* run the job in separate thread */
-	if(winx_create_thread(start_job,(PVOID)&jp,NULL) < 0){
+	if(winx_create_thread(start_job_ex,(PVOID)&jp,NULL) < 0){
 		free_map(&jp);
 		release_options(&jp);
 		goto done;
