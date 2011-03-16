@@ -311,33 +311,35 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	lviw.iItem = index;
 	lviw.iSubItem = 1;
 	
-	if(job->pi.completion_status < 0){
-		lviw.pszText = L"";
-	} else if(job->pi.completion_status == 0 || stop_pressed){
-		if(job->pi.current_operation == VOLUME_DEFRAGMENTATION)
-			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
-		else if(job->pi.current_operation == VOLUME_OPTIMIZATION)
-			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
-		else
-			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
-		_snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls",job->pi.percentage,ProcessCaption);
-		buffer[sizeof(buffer)/sizeof(wchar_t) - 1] = 0;
-		lviw.pszText = buffer;//WgxGetResourceString(i18n_table,L"STATUS_RUNNING");
-	} else {
-		switch(job->job_type){
+    switch(job->job_type){
 		case ANALYSIS_JOB:
-			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
+			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
 			break;
 		case DEFRAGMENTATION_JOB:
-			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
+			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
 			break;
 		case FULL_OPTIMIZATION_JOB:
 		case QUICK_OPTIMIZATION_JOB:
-			lviw.pszText = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
+			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
 			break;
-		default:
-			lviw.pszText = L"";
-		}
+    }
+
+    if(job->pi.completion_status < 0){
+		lviw.pszText = L"";
+	} else {
+        if(job->pi.completion_status == 0 || stop_pressed){
+            if(job->pi.pass_number > 1)
+                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls, Pass %d",job->pi.percentage,ProcessCaption,job->pi.pass_number);
+            else
+                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls",job->pi.percentage,ProcessCaption);
+        } else {
+            if(job->pi.pass_number > 1)
+                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls in %d passes",ProcessCaption,job->pi.pass_number);
+            else
+                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls",ProcessCaption);
+        }
+        buffer[sizeof(buffer)/sizeof(wchar_t) - 1] = 0;
+        lviw.pszText = buffer;
 	}
 
 	(void)SendMessage(hList,LVM_SETITEMW,0,(LRESULT)&lviw);
