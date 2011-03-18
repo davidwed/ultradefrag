@@ -111,8 +111,43 @@ int defragment_ex(udefrag_job_parameters *jp)
     else
         defragment_small_files_respect_best_matching(jp);
 
-	if(jp->termination_router((void *)jp) == 0)
-		defragment_big_files(jp);
+	redraw_all_temporary_system_space_as_free(jp);
+	winx_fclose(jp->fVolume);
+	jp->fVolume = NULL;
+	return 0;
+}
+
+/**
+ * @brief Performs a partial volume defragmentation.
+ * @return Zero for success, negative value otherwise.
+ */
+int defragment_partial(udefrag_job_parameters *jp)
+{
+	udefrag_fragmented_file *f;
+	
+	/* reset statistics */
+	jp->pi.clusters_to_process = 0;
+	jp->pi.processed_clusters = 0;
+	jp->pi.moved_clusters = 0;
+	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
+	for(f = jp->fragmented_files; f; f = f->next){
+		if(jp->termination_router((void *)jp)) return 0;
+		/*
+		* Count all fragmented files which 
+		* can be processed at least partially.
+		*/
+		if(can_defragment_partially(f->f,jp))
+			jp->pi.clusters_to_process += f->f->disp.clusters;
+		if(f->next == jp->fragmented_files) break;
+	}
+	
+	/* open the volume */
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return (-1);
+	
+	defragment_big_files(jp);
 	
 	redraw_all_temporary_system_space_as_free(jp);
 	winx_fclose(jp->fVolume);

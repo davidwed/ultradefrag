@@ -235,32 +235,37 @@ static DWORD WINAPI start_job_ex(LPVOID p)
         if(jp->termination_router((void *)jp)) break;
         
 		if(result == 0){
+            /* move all clusters to the end of the volume
+               starting with cluster 0 or the first fragmented cluster */
+            if(jp->job_type == FULL_OPTIMIZATION_JOB)
+                result = full_optimize(jp);
         
-            /* call moving clusters to the end of the volume here,
-               which is used for full optimization */
-        
-            result = defragment_ex(jp);
+            if(jp->termination_router((void *)jp)) break;
+
+            if(result == 0)
+                result = defragment_ex(jp);
             
             if(jp->termination_router((void *)jp)) break;
             
-            if(result == 0){
-                switch(jp->job_type){
-                    case FULL_OPTIMIZATION_JOB:
-                        result = full_optimize(jp);
-                        break;
-                    case QUICK_OPTIMIZATION_JOB:
-                        result = quick_optimize(jp);
-                        break;
-                }
-            }
+            /* move fragmented clusters from the first half of the volume
+               to the end of the volume and move not fragmented files from
+               the second half of the volume to the beginning of the volume */
+            if(result == 0 && jp->job_type == QUICK_OPTIMIZATION_JOB)
+                result = quick_optimize(jp);
             
-            /* call partial defragmentation here;
-               for optimization only execute it,
-               if no cluster was moved */
-		}
+            if(jp->termination_router((void *)jp)) break;
+            
+            if(result == 0 && jp->pi.moved_clusters == 0)
+                result = defragment_partial(jp);
+            
+            if(jp->termination_router((void *)jp)) break;
+		} else {
+            break;
+        }
         
         jp->pi.pass_number ++;
         
+        /* exit if user selected stop */
         if(jp->termination_router((void *)jp)) break;
         
         /* exit if no repeat */
@@ -268,8 +273,6 @@ static DWORD WINAPI start_job_ex(LPVOID p)
         
         /* exit if nothing moved */
 		if(jp->pi.moved_clusters == 0) break;
-        
-        if(result != 0) break;
 	}
     
 	(void)save_fragmentation_reports(jp);
