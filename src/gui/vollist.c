@@ -334,7 +334,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
                 _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls",job->pi.percentage,ProcessCaption);
         } else {
             if(job->pi.pass_number > 1)
-                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls in %d passes",ProcessCaption,job->pi.pass_number);
+                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls, %d passes needed",ProcessCaption,job->pi.pass_number);
             else
                 _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls",ProcessCaption);
         }
