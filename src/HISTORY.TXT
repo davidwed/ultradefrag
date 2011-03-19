@@ -15,11 +15,12 @@ HISTORY
     
     - the following translations were added:
 
-      English (GB)
+      English (GB), Filipino (Ilokano)
     
     - the following translations were updated:
     
-      Korean, Turkish, Slovak, English (US), Hindi, Romanian, Filipino (Tagalog)
+      Korean, Turkish, Slovak, English (US), Hindi, Romanian, Filipino (Tagalog),
+      Catalan, Spanish (ES)
       
     - hexview command added to the boot time shell
 
