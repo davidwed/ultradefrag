@@ -62,7 +62,7 @@ int defragment(udefrag_job_parameters *jp)
 	if(jp->fVolume == NULL)
 		return (-1);
 	
-	if(jp->udo.preview_mask & 4)
+	if(jp->udo.preview_mask & UD_PREVIEW_LARGEST)
         defragment_small_files(jp);
     else
         defragment_small_files_respect_best_matching(jp);
@@ -106,7 +106,7 @@ int defragment_ex(udefrag_job_parameters *jp)
 	if(jp->fVolume == NULL)
 		return (-1);
 	
-	if(jp->udo.preview_mask & 4)
+	if(jp->udo.preview_mask & UD_PREVIEW_LARGEST)
         defragment_small_files(jp);
     else
         defragment_small_files_respect_best_matching(jp);

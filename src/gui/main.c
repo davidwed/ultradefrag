@@ -56,7 +56,7 @@ int btd_installed = 0;
 int web_statistics_completed = 0;
 
 /* set initial preview item selection value */
-int preview_mask = 8;
+int preview_mask = UD_PREVIEW_MATCHING;
 
 /* forward declarations */
 LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
@@ -884,7 +884,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			}
 			/* handle preview submenu */
 			if(id == IDM_PREVIEW_ITEM01){
-                preview_item = 2;
+                preview_item = UD_PREVIEW_REPEAT;
                 
 				/* switch check mark */
 				if(preview_mask & preview_item){
@@ -897,13 +897,13 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				/* save choice */
                 (void)sprintf(buffer,"%d",preview_mask);
                 (void)SetEnvironmentVariable("UD_PREVIEW_ITEM_MASK",buffer);
-                WgxDbgPrint("%%UD_PREVIEW_ITEM_MASK%% environment variable set to %d\n", preview_mask);
+                WgxDbgPrint("%%UD_PREVIEW_ITEM_MASK%% environment variable set to %s\n", buffer);
 			}
-			if(id > IDM_PREVIEW_ITEM01 && id < IDM_PREVIEW_ITEM_LAST){
+			if(id > IDM_PREVIEW_ITEM01 && id < IDM_PREVIEW_ITEM04){
                 preview_item = (int)pow(2,id - IDM_PREVIEW);
                 
 				/* move check mark */
-				for(i = IDM_PREVIEW_ITEM01 + 1; i < IDM_PREVIEW_ITEM_LAST; i++){
+				for(i = IDM_PREVIEW_ITEM01 + 1; i < IDM_PREVIEW_ITEM04; i++){
 					if(CheckMenuItem(hMainMenu,i,MF_BYCOMMAND | MF_UNCHECKED) == MF_CHECKED)
                         preview_mask ^= (int)pow(2,i - IDM_PREVIEW);
 				}
@@ -913,7 +913,23 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 preview_mask |= preview_item;
                 (void)sprintf(buffer,"%d",preview_mask);
                 (void)SetEnvironmentVariable("UD_PREVIEW_ITEM_MASK",buffer);
-                WgxDbgPrint("%%UD_PREVIEW_ITEM_MASK%% environment variable set to %d\n", preview_mask);
+                WgxDbgPrint("%%UD_PREVIEW_ITEM_MASK%% environment variable set to %s\n", buffer);
+			}
+			if(id == IDM_PREVIEW_ITEM04){
+                preview_item = UD_PREVIEW_QUICK;
+                
+				/* switch check mark */
+				if(preview_mask & preview_item){
+					CheckMenuItem(hMainMenu,id,MF_BYCOMMAND | MF_UNCHECKED);
+                    preview_mask ^= preview_item;
+				} else {
+                    CheckMenuItem(hMainMenu,id,MF_BYCOMMAND | MF_CHECKED);
+                    preview_mask |= preview_item;
+				}
+				/* save choice */
+                (void)sprintf(buffer,"%d",preview_mask);
+                (void)SetEnvironmentVariable("UD_PREVIEW_ITEM_MASK",buffer);
+                WgxDbgPrint("%%UD_PREVIEW_ITEM_MASK%% environment variable set to %s\n", buffer);
 			}
 		}
 		break;

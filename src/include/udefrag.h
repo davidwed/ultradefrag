@@ -45,6 +45,12 @@
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think, that's enough */
 
+/* preview options */
+#define UD_PREVIEW_REPEAT    2
+#define UD_PREVIEW_LARGEST   4
+#define UD_PREVIEW_MATCHING  8
+#define UD_PREVIEW_QUICK    16
+
 typedef struct _volume_info {
 	char letter;
 	char fsname[MAXFSNAME];

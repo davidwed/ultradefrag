@@ -269,7 +269,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
         if(jp->termination_router((void *)jp)) break;
         
         /* exit if no repeat */
-		if(!(jp->udo.preview_mask & 2)) break;
+		if(!(jp->udo.preview_mask & UD_PREVIEW_REPEAT)) break;
         
         /* exit if nothing moved */
 		if(jp->pi.moved_clusters == 0) break;
