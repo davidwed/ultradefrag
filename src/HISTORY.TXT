@@ -15,7 +15,7 @@ HISTORY
     
     - the following translations were added:
 
-      English (GB), Filipino (Ilokano)
+      English (GB), Iloko
     
     - the following translations were updated:
     
