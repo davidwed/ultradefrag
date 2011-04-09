@@ -11,6 +11,12 @@ h1 {
 	font-size: 150%;
 }
 
+.title {
+	font-size: 150%;
+	font-weight: bold;
+	margin: 10px 2px;
+}
+
 h2 {
 	font-size: 120%;
 }
@@ -369,6 +375,10 @@ table.memberdecls {
         white-space: nowrap;
 }
 
+.memItemRight {
+	width: 100%;
+}
+
 .memTemplParams {
 	color: #4665A2;
         white-space: nowrap;
@@ -394,6 +404,10 @@ table.memberdecls {
 	margin: 2px;
 	margin-right: 15px;
 	padding: 2px;
+}
+
+.mempage {
+	width: 100%;
 }
 
 .memitem {
@@ -732,7 +746,7 @@ dl.note, dl.warning, dl.attention, dl.pre, dl.post, dl.invariant, dl.deprecated,
 
 dl.note
 {
-        border-color: #D0D000;
+        border-color: #D0C000;
 }
 
 dl.warning, dl.attention
@@ -779,21 +793,21 @@ dl.bug
  
 #projectname
 {
-	font: 300% arial,sans-serif;
+	font: 300% Tahoma, Arial,sans-serif;
 	margin: 0px;
 	padding: 0px;
 }
     
 #projectbrief
 {
-	font: 120% arial,sans-serif;
+	font: 120% Tahoma, Arial,sans-serif;
 	margin: 0px;
 	padding: 0px;
 }
 
 #projectnumber
 {
-	font: 50% arial,sans-serif;
+	font: 50% Tahoma, Arial,sans-serif;
 	margin: 0px;
 	padding: 0px;
 }
@@ -804,5 +818,25 @@ dl.bug
 	margin: 0px;
 	width: 100%;
 	border-bottom: 1px solid #5373B4;
+}
+
+.image
+{
+        text-align: center;
+}
+
+.dotgraph
+{
+        text-align: center;
+}
+
+.mscgraph
+{
+        text-align: center;
+}
+
+.caption
+{
+	font-weight: bold;
 }
 
