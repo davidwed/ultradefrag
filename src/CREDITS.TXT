@@ -135,9 +135,8 @@
 --------------------------------------------------------------------------------
     Special thanks for correcting and updating translations (in alphabetical order):
 --------------------------------------------------------------------------------
-    Áron Hegedüs
-    Şahin Salincakli
     Ali Jafari
+    Áron Hegedüs
     Benny Stütz
     Carlos Rodrigues
     Christoffer Ekberg
@@ -151,6 +150,7 @@
     Haein Jung
     HPJ
     Inhwan Hwang
+	Ireneusz Chorosz
     Jérôme Blum
     James Bond
     José Carlos Taveira de Souza
@@ -175,6 +175,7 @@
     Reynald Didier
     Robert Jr
     Ryan Ping Chih Ko
+    Şahin Salincakli
     Sérgio Marques
     Sherpya
     SMHA
