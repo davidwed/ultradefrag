@@ -36,6 +36,7 @@
 
 /**
  * @brief Searches for free space region starting at the beginning of the volume.
+ * @param[in] jp job parameters structure.
  * @param[in] start_cluster lcn to start searching from.
  * @param[in] min_length minimum length of free space in clusters.
  * @note In case of termination request returns NULL immediately.
@@ -71,6 +72,7 @@ winx_volume_region *find_free_region_forward(udefrag_job_parameters *jp,
 
 /**
  * @brief Searches for free space region starting at the end of the volume.
+ * @param[in] jp job parameters structure.
  * @param[in] start_cluster lcn to start searching from.
  * @param[in] min_length minimum length of free space in clusters.
  * @note In case of termination request returns NULL immediately.
