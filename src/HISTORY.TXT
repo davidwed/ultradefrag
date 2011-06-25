@@ -20,7 +20,8 @@ HISTORY
     - the following translations were updated:
     
       Korean, Turkish, Slovak, English (US), Hindi, Romanian, Filipino (Tagalog),
-      Catalan, Spanish (ES), Greek, Chinese (Simplified), Polish, Swedish, Italian
+      Catalan, Spanish (ES), Greek, Chinese (Simplified), Polish, Swedish, Italian,
+      Finnish
       
     - hexview command added to the boot time shell
 
