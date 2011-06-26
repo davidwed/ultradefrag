@@ -21,7 +21,7 @@ HISTORY
     
       Korean, Turkish, Slovak, English (US), Hindi, Romanian, Filipino (Tagalog),
       Catalan, Spanish (ES), Greek, Chinese (Simplified), Polish, Swedish, Italian,
-      Finnish
+      Finnish, Chinese (Traditional)
       
     - hexview command added to the boot time shell
 
