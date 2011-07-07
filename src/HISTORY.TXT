@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 5.0.0  2011-01-
+  Version 5.0.0  2011-07-
   ------------------------------------------------------------------------------
     RC1:
     - volume optimization reimplemented
@@ -20,10 +20,12 @@ HISTORY
     - the following translations were updated:
     
       Korean, Turkish, Slovak, English (US), Hindi, Romanian, Filipino (Tagalog),
-      Catalan, Spanish (ES), Greek, Chinese (Simplified), Polish, Swedish, Italian,
-      Finnish, Chinese (Traditional), German
+      Catalan, Spanish (ES), Greek, Chinese (Simplified), Polish, Swedish, 
+      Italian, Finnish, Chinese (Traditional), German
       
     - hexview command added to the boot time shell
+    - Developers: udefrag_start_job prototype changed by adding algorithm 
+      preview flags
 
     beta2:
     - UD_LOG_FILE_PATH environment variable added to force save of debugging

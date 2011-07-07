@@ -118,9 +118,9 @@
 /* preview menu items */
 enum {
     IDM_PREVIEW = 5000,
-    IDM_PREVIEW_ITEM01,
-    IDM_PREVIEW_ITEM02,
-    IDM_PREVIEW_ITEM03,
-    IDM_PREVIEW_ITEM04,
-    IDM_PREVIEW_ITEM_LAST    /* must always be the last entry */
+    IDM_PREVIEW_REPEAT,
+    IDM_PREVIEW_LARGEST,
+    IDM_PREVIEW_MATCHING,
+    IDM_PREVIEW_QUICK,
+    IDM_PREVIEW_LAST_ITEM    /* must always be the last entry */
 };

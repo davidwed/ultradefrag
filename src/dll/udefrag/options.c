@@ -107,12 +107,6 @@ int get_options(udefrag_job_parameters *jp)
 		jp->udo.dry_run = 1;
 	}
 
-	/* set preview mask */
-	if(winx_query_env_variable(L"UD_PREVIEW_ITEM_MASK",buffer,ENV_BUFFER_SIZE) >= 0){
-        DebugPrint("%%UD_PREVIEW_ITEM_MASK%% environment variable is set to %ws", buffer);
-		jp->udo.preview_mask = _wtoi(buffer);
-    }
-
 	/* print all options */
 	winx_dbg_print_header(0,0,"ultradefrag job options");
 	if(jp->udo.in_filter.count){
@@ -141,7 +135,6 @@ int get_options(udefrag_job_parameters *jp)
 	default:
 		DebugPrint("normal debug level set");
 	}
-	DebugPrint("preview mask = %u",jp->udo.preview_mask);
 
 	/* cleanup */
 	winx_heap_free(buffer);

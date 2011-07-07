@@ -206,7 +206,7 @@ void ProcessVolume(char letter)
 		break;
 	}
 	winx_printf(BREAK_MESSAGE);
-	status = udefrag_start_job(letter,current_job,0,update_progress,terminator,NULL);
+	status = udefrag_start_job(letter,current_job,0,0,update_progress,terminator,NULL);
 	if(status < 0){
 		winx_printf("\n%s failed!\n",message);
 		winx_printf("%s\n",udefrag_get_error_description(status));

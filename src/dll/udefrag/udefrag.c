@@ -217,6 +217,18 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	char *action = "analyzing";
 	int result = 0;
 
+	/* check for preview masks */
+	if(jp->udo.preview_flags & UD_PREVIEW_REPEAT)
+		DebugPrint("Preview -> Repeat action until nothing left to move");
+	if(jp->udo.preview_flags & UD_PREVIEW_MATCHING)
+		DebugPrint("Preview -> Find matching free space");
+	else
+		DebugPrint("Preview -> Find largest free space");
+	if((jp->udo.preview_flags & UD_PREVIEW_QUICK) && jp->job_type == FULL_OPTIMIZATION_JOB){
+		DebugPrint("Preview -> Use quick optimize");
+		jp->job_type = QUICK_OPTIMIZATION_JOB;
+	}
+
 	/* do the job */
 	if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
 	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
@@ -224,7 +236,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
-    
+	
 	while(1){
         /* for dry-run analyze only on first pass */
 		if(jp->pi.pass_number == 0 || jp->udo.dry_run == 0 )
@@ -269,7 +281,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
         if(jp->termination_router((void *)jp)) break;
         
         /* exit if no repeat */
-		if(!(jp->udo.preview_mask & UD_PREVIEW_REPEAT)) break;
+		if(!(jp->udo.preview_flags & UD_PREVIEW_REPEAT)) break;
         
         /* exit if nothing moved */
 		if(jp->pi.moved_clusters == 0) break;
@@ -344,6 +356,7 @@ void destroy_lists(udefrag_job_parameters *jp)
  * @brief Starts disk analysis/defragmentation/optimization job.
  * @param[in] volume_letter the volume letter.
  * @param[in] job_type one of the xxx_JOB constants, defined in udefrag.h
+ * @param[in] preview_flags combination of UD_PREVIEW_xxx flags defined in udefrag.h
  * @param[in] cluster_map_size size of the cluster map, in cells.
  * Zero value forces to avoid cluster map use.
  * @param[in] cb address of procedure to be called each time when
@@ -357,7 +370,7 @@ void destroy_lists(udefrag_job_parameters *jp)
  * @note [Callback procedures should complete as quickly
  * as possible to avoid slowdown of the volume processing].
  */
-int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
+int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int preview_flags,
 		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p)
 {
 	udefrag_job_parameters jp;
@@ -397,6 +410,8 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
 	
 	if(get_options(&jp) < 0)
 		goto done;
+	
+	jp.udo.preview_flags = preview_flags;
 
 	if(allocate_map(cluster_map_size,&jp) < 0){
 		release_options(&jp);

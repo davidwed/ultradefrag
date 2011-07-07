@@ -77,7 +77,7 @@ typedef struct _udefrag_options {
 	int disable_reports;        /* nonzero value forces fragmentation reports to be disabled */
 	int dbgprint_level;         /* controls amount of debugging information */
 	int dry_run;                /* set %UD_DRY_RUN% variable to avoid actual data moving in tests */
-	int preview_mask;           /* set %UD_PREVIEW_ITEM_MASK% variable to the bit mask */
+	int preview_flags;          /* flags triggering algorithm features on preview stage */
 } udefrag_options;
 
 typedef struct _udefrag_fragmented_file {

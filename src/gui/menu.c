@@ -99,12 +99,12 @@ WGX_MENU help_menu[] = {
 };
 
 WGX_MENU preview_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_ITEM01, NULL, L"Repeat action until nothing left to move"},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_REPEAT, NULL, L"Repeat action until nothing left to move"},
 	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_ITEM02, NULL, L"Find largest free space"},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_PREVIEW_ITEM03,   NULL, L"Find matching free space"},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST, NULL, L"Find largest free space"},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_PREVIEW_MATCHING,   NULL, L"Find matching free space"},
 	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_ITEM04, NULL, L"Use quick optimize"},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_QUICK, NULL, L"Use quick optimize"},
 	{0,0,NULL,NULL}
 };
 

@@ -49,6 +49,8 @@ int exit_pressed = 0;
 extern int map_blocks_per_line;
 extern int map_lines;
 
+extern int preview_flags;
+
 /**
  * @brief Initializes structures belonging to all jobs.
  */
@@ -266,8 +268,8 @@ void ProcessSingleVolume(volume_processing_job *job)
 		/* process the volume */
 		current_job = job;
 		error_code = udefrag_start_job(job->volume_letter, job->job_type,
-				map_blocks_per_line * map_lines,
-				update_progress, terminator, NULL);
+				preview_flags,map_blocks_per_line * map_lines,update_progress,
+				terminator, NULL);
 		if(error_code < 0 && !exit_pressed){
 			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
 			//ClearMap();

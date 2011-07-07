@@ -310,7 +310,7 @@ void end_synchronization(void)
 
 /*DWORD WINAPI test_thread(LPVOID p)
 {
-	udefrag_start_job('c',ANALYSIS_JOB,0,NULL,NULL,NULL);
+	udefrag_start_job('c',ANALYSIS_JOB,0,0,NULL,NULL,NULL);
 	return 0;
 }
 
@@ -536,7 +536,7 @@ static int process_single_volume(char volume_letter)
 	else if(o_flag) job_type = FULL_OPTIMIZATION_JOB;
 	else if(quick_optimize_flag) job_type = QUICK_OPTIMIZATION_JOB;
 	first_progress_update = 1;
-	result = udefrag_start_job(volume_letter,job_type,map_size,
+	result = udefrag_start_job(volume_letter,job_type,0,map_size,
 		update_progress,terminator,(void *)(DWORD_PTR)volume_letter);
 	if(result < 0){
 		display_defrag_error(result);

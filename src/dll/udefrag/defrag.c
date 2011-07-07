@@ -62,10 +62,10 @@ int defragment(udefrag_job_parameters *jp)
 	if(jp->fVolume == NULL)
 		return (-1);
 	
-	if(jp->udo.preview_mask & UD_PREVIEW_LARGEST)
-        defragment_small_files(jp);
-    else
+	if(jp->udo.preview_flags & UD_PREVIEW_MATCHING)
         defragment_small_files_respect_best_matching(jp);
+    else
+        defragment_small_files(jp);
 
 	if(jp->termination_router((void *)jp) == 0)
 		defragment_big_files(jp);
@@ -106,10 +106,10 @@ int defragment_ex(udefrag_job_parameters *jp)
 	if(jp->fVolume == NULL)
 		return (-1);
 	
-	if(jp->udo.preview_mask & UD_PREVIEW_LARGEST)
-        defragment_small_files(jp);
-    else
+	if(jp->udo.preview_flags & UD_PREVIEW_MATCHING)
         defragment_small_files_respect_best_matching(jp);
+    else
+        defragment_small_files(jp);
 
 	redraw_all_temporary_system_space_as_free(jp);
 	winx_fclose(jp->fVolume);

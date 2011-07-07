@@ -45,12 +45,6 @@
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think, that's enough */
 
-/* preview options */
-#define UD_PREVIEW_REPEAT    2
-#define UD_PREVIEW_LARGEST   4
-#define UD_PREVIEW_MATCHING  8
-#define UD_PREVIEW_QUICK    16
-
 typedef struct _volume_info {
 	char letter;
 	char fsname[MAXFSNAME];
@@ -100,6 +94,11 @@ typedef enum {
 	VOLUME_OPTIMIZATION
 } udefrag_operation_type;
 
+/* flags triggering algorithm features on preview stage */
+#define UD_PREVIEW_REPEAT    0x1
+#define UD_PREVIEW_MATCHING  0x2
+#define UD_PREVIEW_QUICK     0x4
+
 enum {
     UNUSED_MAP_SPACE = 0,
 	FREE_SPACE,
@@ -144,7 +143,7 @@ typedef struct _udefrag_progress_info {
 typedef void  (__stdcall *udefrag_progress_callback)(udefrag_progress_info *pi, void *p);
 typedef int   (__stdcall *udefrag_terminator)(void *p);
 
-int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,
+int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int preview_flags,
 		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p);
 
 char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi);
