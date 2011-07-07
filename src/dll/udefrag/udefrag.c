@@ -216,6 +216,19 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	char *action = "analyzing";
 	int result = 0;
+	
+	/*
+	* To avoid infinite loops in optimization
+	* we define starting point and move it forward
+	* on each algorithm pass.
+	*/
+	ULONGLONG start_lcn = 0;
+	
+	/*
+	* Infinite loops in defragmentation
+	* aren't possible because of instant 
+	* decreasing number of fragmented files.
+	*/
 
 	/* check for preview masks */
 	if(jp->udo.preview_flags & UD_PREVIEW_REPEAT)
@@ -238,66 +251,71 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
 	
 	while(1){
-        /* for dry-run analyze only on first pass */
+		/* for dry-run analyze only on first pass */
 		if(jp->pi.pass_number == 0 || jp->udo.dry_run == 0 )
-            result = analyze(jp);
-        
+			result = analyze(jp);
+		
 		if(jp->job_type == ANALYSIS_JOB) break;
-        
-        if(jp->termination_router((void *)jp)) break;
-        
+		
+		if(jp->termination_router((void *)jp)) break;
+		
 		if(result == 0){
-            /* move all clusters to the end of the volume
-               starting with cluster 0 or the first fragmented cluster */
-            if(jp->job_type == FULL_OPTIMIZATION_JOB)
-                result = full_optimize(jp);
-        
-            if(jp->termination_router((void *)jp)) break;
-
-            if(result == 0)
-                result = defragment_ex(jp);
-            
-            if(jp->termination_router((void *)jp)) break;
-            
-            /* move fragmented clusters from the first half of the volume
-               to the end of the volume and move not fragmented files from
-               the second half of the volume to the beginning of the volume */
-            if(result == 0 && jp->job_type == QUICK_OPTIMIZATION_JOB)
-                result = quick_optimize(jp);
-            
-            if(jp->termination_router((void *)jp)) break;
-            
-            if(result == 0 && jp->pi.moved_clusters == 0)
-                result = defragment_partial(jp);
-            
-            if(jp->termination_router((void *)jp)) break;
+			/* move all or fragmented clusters to the end of the volume
+			starting with cluster 0 or the first fragmented cluster */
+			
+			if(jp->job_type == FULL_OPTIMIZATION_JOB)
+				result = move_files_to_back(jp, MOVE_ALL);
+			
+			if(jp->job_type == QUICK_OPTIMIZATION_JOB)
+				result = move_files_to_back(jp, MOVE_FRAGMENTED);
+			
+			/* defragment */
+			if(jp->termination_router((void *)jp)) break;
+			
+			if(result == 0)
+				result = defragment_ex(jp);
+			
+			if(jp->termination_router((void *)jp)) break;
+			
+			/* move not fragmented files from
+			the second half of the volume to the beginning of the volume */
+			
+			if(result == 0 && (jp->job_type == QUICK_OPTIMIZATION_JOB || jp->job_type == FULL_OPTIMIZATION_JOB))
+				result = move_files_to_front(jp, MOVE_NOT_FRAGMENTED);
+			
+			/* partial defragment if nothing moved */
+			if(result == 0 && jp->pi.moved_clusters == 0)
+				result = defragment_partial(jp);
+		
+			if(jp->termination_router((void *)jp)) break;
 		} else {
-            break;
-        }
-        
-        jp->pi.pass_number ++;
-        
-        /* exit if user selected stop */
-        if(jp->termination_router((void *)jp)) break;
-        
-        /* exit if no repeat */
+			break;
+		}
+	
+		jp->pi.pass_number ++;
+		
+		/* exit if user selected stop */
+		if(jp->termination_router((void *)jp)) break;
+		
+		/* exit if no repeat */
 		if(!(jp->udo.preview_flags & UD_PREVIEW_REPEAT)) break;
-        
-        /* exit if nothing moved */
+		
+		/* exit if nothing moved */
 		if(jp->pi.moved_clusters == 0) break;
 	}
-    
+	
 	(void)save_fragmentation_reports(jp);
-
+	
 	/* now it is safe to adjust the completion status */
 	jp->pi.completion_status = result;
 	if(jp->pi.completion_status == 0)
-		jp->pi.completion_status ++; /* success */
-
+	jp->pi.completion_status ++; /* success */
+	
 	winx_exit_thread(); /* 8k/12k memory leak here? */
 	return 0;
 }
 
+#if 0
 static DWORD WINAPI start_job(LPVOID p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
@@ -338,6 +356,7 @@ static DWORD WINAPI start_job(LPVOID p)
 	winx_exit_thread(); /* 8k/12k memory leak here? */
 	return 0;
 }
+#endif
 
 /**
  * @brief Destroys list of free regions, 

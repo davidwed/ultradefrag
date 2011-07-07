@@ -504,4 +504,33 @@ done:
 	return 0;
 }
 
+/**
+ * @brief Moves selected group of files
+ * to the beginning of the volume to free its end.
+ * @param[in] jp job parameters.
+ * @param[in] flags combination of MOVE_xxx flags defined in udefrag.h
+ * @note Volume must be opened before this call,
+ * jp->fVolume must contain a proper handle.
+ * @return Zero for success, negative value otherwise.
+ */
+int move_files_to_front(udefrag_job_parameters *jp, int flags)
+{
+	return 0;
+}
+
+/**
+ * @brief Moves selected group of files
+ * to the end of the volume to free its
+ * beginning.
+ * @param[in] jp job parameters.
+ * @param[in] flags combination of MOVE_xxx flags defined in udefrag.h
+ * @note Volume must be opened before this call,
+ * jp->fVolume must contain a proper handle.
+ * @return Zero for success, negative value otherwise.
+ */
+int move_files_to_back(udefrag_job_parameters *jp, int flags)
+{
+	return 0;
+}
+
 /** @} */

@@ -225,4 +225,14 @@ int defragment_small_files(udefrag_job_parameters *jp);
 int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp);
 int defragment_big_files(udefrag_job_parameters *jp);
 
+/* flags used in move_files_to_xxx routines */
+enum {
+	MOVE_FRAGMENTED,
+	MOVE_NOT_FRAGMENTED,
+	MOVE_ALL
+};
+
+int move_files_to_front(udefrag_job_parameters *jp, int flags);
+int move_files_to_back(udefrag_job_parameters *jp, int flags);
+
 #endif /* _UDEFRAG_INTERNALS_H_ */

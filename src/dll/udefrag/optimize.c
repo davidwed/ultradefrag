@@ -26,6 +26,7 @@
 
 #include "udefrag-internals.h"
 
+#if 0
 /************************************************************/
 /*                    Full Optimization                     */
 /************************************************************/
@@ -83,5 +84,6 @@ int quick_optimize(udefrag_job_parameters *jp)
     */
 	return 0;
 }
+#endif
 
 /** @} */

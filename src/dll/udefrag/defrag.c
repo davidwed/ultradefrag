@@ -26,6 +26,7 @@
 
 #include "udefrag-internals.h"
 
+#if 0
 /**
  * @brief Performs a volume defragmentation.
  * @return Zero for success, negative value otherwise.
@@ -75,6 +76,7 @@ int defragment(udefrag_job_parameters *jp)
 	jp->fVolume = NULL;
 	return 0;
 }
+#endif
 
 /**
  * @brief Performs a volume defragmentation.
