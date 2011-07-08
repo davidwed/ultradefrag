@@ -102,7 +102,7 @@ WGX_MENU preview_menu[] = {
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_REPEAT, NULL, L"Repeat action until nothing left to move"},
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST, NULL, L"Find largest free space"},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_PREVIEW_MATCHING,   NULL, L"Find matching free space"},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,   NULL, L"Find matching free space"},
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_QUICK, NULL, L"Use quick optimize"},
 	{0,0,NULL,NULL}
@@ -163,6 +163,26 @@ int CreateMainMenu(void)
 	
 		// EnableMenuItem(hMainMenu,IDM_DEFRAG,   MF_BYCOMMAND | MF_GRAYED);
 		EnableMenuItem(hMainMenu,IDM_OPTIMIZE, MF_BYCOMMAND | MF_GRAYED);
+	}
+	
+	if(preview_flags & UD_PREVIEW_REPEAT){
+		CheckMenuItem(hMainMenu,
+			IDM_PREVIEW_REPEAT,
+			MF_BYCOMMAND | MF_CHECKED);
+	}
+	if(preview_flags & UD_PREVIEW_MATCHING){
+		CheckMenuItem(hMainMenu,
+			IDM_PREVIEW_MATCHING,
+			MF_BYCOMMAND | MF_CHECKED);
+	} else {
+		CheckMenuItem(hMainMenu,
+			IDM_PREVIEW_LARGEST,
+			MF_BYCOMMAND | MF_CHECKED);
+	}
+	if(preview_flags & UD_PREVIEW_QUICK){
+		CheckMenuItem(hMainMenu,
+			IDM_PREVIEW_QUICK,
+			MF_BYCOMMAND | MF_CHECKED);
 	}
 
 	if(!DrawMenuBar(hWindow))

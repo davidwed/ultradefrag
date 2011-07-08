@@ -181,6 +181,9 @@ WGX_OPTION options[] = {
 	{WGX_CFG_INT,     0, "list_height", &list_height, (void *)VLIST_HEIGHT},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 
+	{WGX_CFG_INT,     0, "preview_flags", &preview_flags, (void *)UD_PREVIEW_MATCHING},
+	{WGX_CFG_EMPTY,   0, "", NULL, ""},
+	
 	{0,               0, NULL, NULL, NULL}
 };
 
