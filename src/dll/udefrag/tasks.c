@@ -216,6 +216,27 @@ static int can_defragment_entirely(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Defines whether the file
+ * can be moved or not.
+ */
+int can_move(winx_file_info *f,udefrag_job_parameters *jp)
+{
+	/* skip files with undefined cluster map */
+	if(f->disp.blockmap == NULL)
+		return 0;
+	
+	/* skip FAT directories */
+	if(is_directory(f) && !jp->actions.allow_dir_defrag)
+		return 0;
+	
+	/* skip file in case of improper state detected */
+	if(is_in_improper_state(f))
+		return 0;
+
+	return 1;
+}
+
+/**
  * @brief Removes unfragmented files
  * from the list of fragmented.
  */

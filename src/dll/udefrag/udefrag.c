@@ -218,6 +218,7 @@ static ULONGLONG calculate_amount_of_data_to_be_moved(udefrag_job_parameters *jp
 {
 	ULONGLONG clusters_to_process = 0;
 	udefrag_fragmented_file *f;
+	winx_file_info *file;
 
 	switch(jp->job_type){
 	case DEFRAGMENTATION_JOB:
@@ -234,6 +235,18 @@ static ULONGLONG calculate_amount_of_data_to_be_moved(udefrag_job_parameters *jp
 		break;
 	case QUICK_OPTIMIZATION_JOB:
 	case FULL_OPTIMIZATION_JOB:
+		/*
+		* We have a chance to move all data
+		* to the end of disk and then in contrary
+		* direction.
+		*/
+		for(file = jp->filelist; file; file = file->next){
+			if(can_move(file,jp))
+				clusters_to_process += file->disp.clusters;
+			if(file->next == jp->filelist) break;
+		}
+		/* FIXME: avoid overflow on volumes larger than 8 Eb in size */
+		clusters_to_process *= 2;
 		break;
 	default:
 		break;
@@ -251,11 +264,19 @@ static ULONGLONG calculate_amount_of_data_to_be_moved(udefrag_job_parameters *jp
 * Therefore, regardless of number of algorithm passes, we'll have
 * always a true progress percentage gradually increasing from 0% to 100%.
 *
-* To avoid infinite loops in optimization we define starting point 
+* To avoid infinite loops in full optimization we define starting point 
 * and move it forward on each algorithm pass.
+*
+* Infinite loops in quick optimization aren't possible because number
+* of fragmented files instantly descreases and all files become closer
+* and closer to the beginning of the volume.
 *
 * Infinite loops in defragmentation aren't possible because of instant 
 * decreasing number of fragmented files.
+*
+* NOTE: progress over 100% means deeper processing than expected.
+* This is not a bug, this is an algorithm feature causing by iterational
+* nature of multipass processing.
 */
 
 static DWORD WINAPI start_job_ex(LPVOID p)
@@ -305,7 +326,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 			if(jp->job_type == FULL_OPTIMIZATION_JOB)
 				result = move_files_to_back(jp, MOVE_ALL);
 			
-			if(jp->job_type == QUICK_OPTIMIZATION_JOB)
+			if(jp->job_type == QUICK_OPTIMIZATION_JOB && jp->pi.pass_number == 0)
 				result = move_files_to_back(jp, MOVE_FRAGMENTED);
 			
 			/* defragment */
