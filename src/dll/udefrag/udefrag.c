@@ -211,25 +211,29 @@ static int __stdcall killer(void *p)
 	return 1;
 }
 
+/*
+* How statistical data adjusts in all the volume processing routines:
+* 1. we calculate a maximum amount of data which may be moved in process
+*    and assign this value to jp->pi.clusters_to_process counter
+* 2. when we move something, we adjust jp->pi.processed_clusters
+* 3. when we skip something, we adjust that counter too
+* Therefore, regardless of number of algorithm passes, we'll have
+* always a true progress percentage gradually increasing from 0% to 100%.
+*
+* To avoid infinite loops in optimization we define starting point 
+* and move it forward on each algorithm pass.
+*
+* Infinite loops in defragmentation aren't possible because of instant 
+* decreasing number of fragmented files.
+*/
+
 static DWORD WINAPI start_job_ex(LPVOID p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	char *action = "analyzing";
 	int result = 0;
-	
-	/*
-	* To avoid infinite loops in optimization
-	* we define starting point and move it forward
-	* on each algorithm pass.
-	*/
 	ULONGLONG start_lcn = 0;
 	
-	/*
-	* Infinite loops in defragmentation
-	* aren't possible because of instant 
-	* decreasing number of fragmented files.
-	*/
-
 	/* check for preview masks */
 	if(jp->udo.preview_flags & UD_PREVIEW_REPEAT)
 		DebugPrint("Preview -> Repeat action until nothing left to move");
