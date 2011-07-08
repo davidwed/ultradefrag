@@ -211,6 +211,37 @@ static int __stdcall killer(void *p)
 	return 1;
 }
 
+/**
+ * @brief Calculates a maximum amount of data which may be moved in process.
+ */
+static ULONGLONG calculate_amount_of_data_to_be_moved(udefrag_job_parameters *jp)
+{
+	ULONGLONG clusters_to_process = 0;
+	udefrag_fragmented_file *f;
+
+	switch(jp->job_type){
+	case DEFRAGMENTATION_JOB:
+		for(f = jp->fragmented_files; f; f = f->next){
+			if(jp->termination_router((void *)jp)) break;
+			/*
+			* Count all fragmented files which 
+			* can be processed at least partially.
+			*/
+			if(can_defragment_partially(f->f,jp))
+				clusters_to_process += f->f->disp.clusters;
+			if(f->next == jp->fragmented_files) break;
+		}
+		break;
+	case QUICK_OPTIMIZATION_JOB:
+	case FULL_OPTIMIZATION_JOB:
+		break;
+	default:
+		break;
+	}
+	
+	return clusters_to_process;
+}
+ 
 /*
 * How statistical data adjusts in all the volume processing routines:
 * 1. we calculate a maximum amount of data which may be moved in process
@@ -232,7 +263,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	char *action = "analyzing";
 	int result = 0;
-	ULONGLONG start_lcn = 0;
+	//ULONGLONG start_lcn = 0;
 	
 	/* check for preview masks */
 	if(jp->udo.preview_flags & UD_PREVIEW_REPEAT)
@@ -254,12 +285,16 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
 	
+	result = analyze(jp); /* needed for the next call */
+	if(jp->job_type == ANALYSIS_JOB) goto done;
+
+	jp->pi.clusters_to_process = calculate_amount_of_data_to_be_moved(jp);
+	jp->pi.processed_clusters = 0;
+	
 	while(1){
 		/* for dry-run analyze only on first pass */
-		if(jp->pi.pass_number == 0 || jp->udo.dry_run == 0 )
+		if(jp->pi.pass_number > 0 && jp->udo.dry_run == 0)
 			result = analyze(jp);
-		
-		if(jp->job_type == ANALYSIS_JOB) break;
 		
 		if(jp->termination_router((void *)jp)) break;
 		
@@ -277,7 +312,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 			if(jp->termination_router((void *)jp)) break;
 			
 			if(result == 0)
-				result = defragment_ex(jp);
+				result = defragment(jp);
 			
 			if(jp->termination_router((void *)jp)) break;
 			
@@ -307,7 +342,9 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		/* exit if nothing moved */
 		if(jp->pi.moved_clusters == 0) break;
 	}
-	
+
+done:	
+	redraw_all_temporary_system_space_as_free(jp);
 	(void)save_fragmentation_reports(jp);
 	
 	/* now it is safe to adjust the completion status */

@@ -30,6 +30,8 @@
 
 #include "udefrag-internals.h"
 
+static int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp);
+
 /************************************************************/
 /*                    Internal Routines                     */
 /************************************************************/
@@ -248,22 +250,31 @@ static void update_fragmented_files_list(udefrag_job_parameters *jp)
  * @details 
  * - This routine fills free space areas from the beginning of the
  * volume regardless of the best matching rules.
- * @note Volume must be opened before this call,
- * jp->fVolume must contain a proper handle.
  */
 int defragment_small_files(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
-	ULONGLONG moved_clusters;
 	ULONGLONG defragmented_files;
 	winx_volume_region *rgn;
 	udefrag_fragmented_file *f, *f_largest;
 	ULONGLONG length;
 	char buffer[32];
+	
+	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
+
+	if(jp->udo.preview_flags & UD_PREVIEW_MATCHING)
+		return defragment_small_files_respect_best_matching(jp);
+
+	/* open the volume */
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return (-1);
 
 	time = start_timing("defragmentation",jp);
 
 	/* fill free regions in the beginning of the volume */
+	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(jp->termination_router((void *)jp)) goto done;
@@ -311,12 +322,13 @@ int defragment_small_files(udefrag_job_parameters *jp)
 
 done:
 	/* display amount of moved data and number of defragmented files */
-	moved_clusters = jp->pi.moved_clusters;
 	DebugPrint("%I64u files defragmented",defragmented_files);
-	DebugPrint("%I64u clusters moved",moved_clusters);
-	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
+	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("defragmentation",time,jp);
+	winx_fclose(jp->fVolume);
+	jp->fVolume = NULL;
 	return 0;
 }
 
@@ -326,22 +338,26 @@ done:
  * - If some file cannot be defragmented due to its size,
  * this routine marks it by UD_FILE_INTENDED_FOR_PART_DEFRAG flag.
  * - This routine fills free space areas respect to the best matching rule.
- * @note Volume must be opened before this call,
- * jp->fVolume must contain a proper handle.
  */
-int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
+static int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
-	ULONGLONG moved_clusters;
 	ULONGLONG defragmented_files;
 	winx_volume_region *rgn;
 	udefrag_fragmented_file *f, *f_largest;
 	ULONGLONG length;
 	char buffer[32];
 
+	/* open the volume */
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return (-1);
+
 	time = start_timing("defragmentation",jp);
 
 	/* find best matching free region for each fragmented file */
+	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
 	while(1){
 		if(jp->termination_router((void *)jp)) break;
@@ -376,12 +392,13 @@ int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
 	}
 	
 	/* display amount of moved data and number of defragmented files */
-	moved_clusters = jp->pi.moved_clusters;
 	DebugPrint("%I64u files defragmented",defragmented_files);
-	DebugPrint("%I64u clusters moved",moved_clusters);
-	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
+	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("defragmentation",time,jp);
+	winx_fclose(jp->fVolume);
+	jp->fVolume = NULL;
 	return 0;
 }
 
@@ -394,13 +411,10 @@ int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
  * - This routine fills free space areas starting
  * from the biggest one to concatenate as much fragments
  * as possible.
- * @note Volume must be opened before this call,
- * jp->fVolume must contain a proper handle.
  */
 int defragment_big_files(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
-	ULONGLONG moved_clusters;
 	ULONGLONG defragmented_files;
 	winx_volume_region *rgn_largest;
 	udefrag_fragmented_file *f, *f_largest;
@@ -410,10 +424,17 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	ULONGLONG remaining_clusters;
 	char buffer[32];
 
+	/* open the volume */
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return (-1);
+
 	time = start_timing("partial defragmentation",jp);
 	
 	/* fill largest free region first */
-	moved_clusters = jp->pi.moved_clusters;
+	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
+	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
 	while(1) {
 		/* find largest free space region */
@@ -495,12 +516,13 @@ part_defrag_done:
 
 done:
 	/* display amount of moved data and number of partially defragmented files */
-	moved_clusters = jp->pi.moved_clusters - moved_clusters;
 	DebugPrint("%I64u files partially defragmented",defragmented_files);
-	DebugPrint("%I64u clusters moved",moved_clusters);
-	winx_fbsize(moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
+	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("partial defragmentation",time,jp);
+	winx_fclose(jp->fVolume);
+	jp->fVolume = NULL;
 	return 0;
 }
 

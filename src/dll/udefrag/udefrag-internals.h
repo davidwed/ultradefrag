@@ -177,7 +177,6 @@ void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp);
 
 int analyze(udefrag_job_parameters *jp);
 int defragment(udefrag_job_parameters *jp);
-int defragment_ex(udefrag_job_parameters *jp);
 int defragment_partial(udefrag_job_parameters *jp);
 int full_optimize(udefrag_job_parameters *jp);
 int quick_optimize(udefrag_job_parameters *jp);
@@ -222,7 +221,6 @@ int move_file(winx_file_info *f,
 
 int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp);
 int defragment_small_files(udefrag_job_parameters *jp);
-int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp);
 int defragment_big_files(udefrag_job_parameters *jp);
 
 /* flags used in move_files_to_xxx routines */
