@@ -555,11 +555,23 @@ done:
  * @param[in] jp job parameters.
  * @param[in] flags one of MOVE_xxx flags defined in udefrag.h
  * @return Zero for success, negative value otherwise.
+ * @note For better performance reason only the MOVE_NOT_FRAGMENTED
+ * flag is supported currently.
  */
 int move_files_to_front(udefrag_job_parameters *jp, int flags)
 {
 	ULONGLONG time;
 	char buffer[32];
+	ULONGLONG parts_bound; /* TODO: try to run it without a bound */
+	ULONGLONG moves;
+	int empty_passes;
+	winx_file_info *file;
+	winx_volume_region *rgn;
+	
+	if(flags != MOVE_NOT_FRAGMENTED){
+		DebugPrint("move_files_to_front: 0x%x flag is not supported",(UINT)flags);
+		return (-1);
+	}
 
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
@@ -573,7 +585,44 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 	jp->pi.moved_clusters = 0;
 	
 	/* do the job */
+	parts_bound = jp->v_info.total_clusters - jp->v_info.free_bytes * jp->v_info.bytes_per_cluster;
+	DebugPrint("move_files_to_front: total clusters:      %I64u", jp->v_info.total_clusters);
+	DebugPrint("move_files_to_front: free clusters:       %I64u", jp->v_info.free_bytes * jp->v_info.bytes_per_cluster);
+	DebugPrint("move_files_to_front: initial parts bound: %I64u", parts_bound);
+	empty_passes = 0;
+	while(1){
+		moves = 0;
+		/* cycle through all not fragmented files */
+		for(file = jp->filelist; file; file = file->next){
+			if(!is_fragmented(file) && file->disp.blockmap){
+				if(file->disp.blockmap->lcn > parts_bound){
+					if(!can_move(file,jp)){
+						/* adjust parts bound */
+						parts_bound -= file->disp.clusters;
+					} else {
+						/* move the file */
+						rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,1);
+						if(rgn->lcn < file->disp.blockmap->lcn){
+							(void)move_file(file,file->disp.blockmap->vcn,file->disp.clusters,rgn->lcn,
+								UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS,jp);
+							moves ++;
+						}
+					}
+				}
+			}
+			if(file->next == jp->filelist) break;
+		}				
+		if(moves == 0){
+			/* give it another chance since parts bound may be adjusted */
+			empty_passes ++;
+			if(empty_passes > 1)
+				goto done;
+		} else {
+			empty_passes = 0;
+		}
+	}	
 
+done:
 	/* display amount of moved data */
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
 	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
@@ -678,6 +727,7 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 										UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS,jp);
 									current_vcn += length;
 									remaining_clusters -= length;
+									moves ++;
 								}
 								if(jp->free_regions == NULL) break;
 								if(prev_rgn == jp->free_regions->prev) break;
