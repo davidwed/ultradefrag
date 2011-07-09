@@ -353,7 +353,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	}
 
 done:	
-	redraw_all_temporary_system_space_as_free(jp);
+	release_temp_space_regions(jp);
 	(void)save_fragmentation_reports(jp);
 	
 	/* now it is safe to adjust the completion status */
