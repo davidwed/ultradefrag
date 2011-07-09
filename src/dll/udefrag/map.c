@@ -159,6 +159,7 @@ void reset_cluster_map(udefrag_job_parameters *jp)
 
 /**
  * @brief Redraws all temporary system space as free.
+ * @note Intended for use from release_temp_space_regions.
  */
 void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp)
 {

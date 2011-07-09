@@ -152,6 +152,7 @@ typedef struct _udefrag_job_parameters {
 	udefrag_allowed_actions actions;            /* actions allowed for selected file system */
 	cmap cluster_map;                           /* cluster map internal data */
 	WINX_FILE *fVolume;                         /* handle of the volume, used by file moving routines */
+	winx_volume_region *temp_space_list;        /* list of regions of space temporarily allocated by system */
 } udefrag_job_parameters;
 
 int  get_options(udefrag_job_parameters *jp);
@@ -173,6 +174,7 @@ void colorize_map_region(udefrag_job_parameters *jp,
 void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color);
 void colorize_file_as_system(udefrag_job_parameters *jp, winx_file_info *f);
 int get_file_color(udefrag_job_parameters *jp, winx_file_info *f);
+void release_temp_space_regions(udefrag_job_parameters *jp);
 void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp);
 
 int analyze(udefrag_job_parameters *jp);

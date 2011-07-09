@@ -284,7 +284,6 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	char *action = "analyzing";
 	int result = 0;
-	ULONGLONG clusters_to_process, processed_clusters;
 	//ULONGLONG start_lcn = 0;
 	
 	/* check for preview masks */
@@ -307,92 +306,42 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
 	
-	result = analyze(jp); /* needed for the next call */
+	result = analyze(jp); /* we need to call it once, here */
 	if(jp->job_type == ANALYSIS_JOB) goto done;
 
 	jp->pi.clusters_to_process = calculate_amount_of_data_to_be_moved(jp);
 	jp->pi.processed_clusters = 0;
 	
-	while(1){
-		/* for dry-run analyze only on first pass */
-		if(jp->pi.pass_number > 0 && jp->udo.dry_run == 0){
-			clusters_to_process = jp->pi.clusters_to_process;
-			processed_clusters = jp->pi.processed_clusters;
-			result = analyze(jp);
-			jp->pi.clusters_to_process = clusters_to_process;
-			jp->pi.processed_clusters = processed_clusters;
-		}
+	for(; result == 0; jp->pi.pass_number++){
+		/* move all or fragmented clusters to the end of the volume
+		starting with cluster 0 or the first fragmented cluster */
+		if(jp->job_type == FULL_OPTIMIZATION_JOB)
+			result = move_files_to_back(jp, MOVE_ALL);
 		
+		/* TODO: this routine makes a lot of slow move_file() calls,
+		try to comment it out and test effectiveness of the quick optimization
+		in this case */
+		if(jp->job_type == QUICK_OPTIMIZATION_JOB && jp->pi.pass_number == 0)
+			result = move_files_to_back(jp, MOVE_FRAGMENTED);
+		if(jp->termination_router((void *)jp)) break;
+
+		/* defragment */
+		if(result == 0)	result = defragment(jp);
 		if(jp->termination_router((void *)jp)) break;
 		
-		if(result == 0){
-			/* move all or fragmented clusters to the end of the volume
-			starting with cluster 0 or the first fragmented cluster */
-			
-			if(jp->job_type == FULL_OPTIMIZATION_JOB)
-				result = move_files_to_back(jp, MOVE_ALL);
-			
-			/* TODO: this routine makes a lot of slow move_file() calls,
-			try to comment it out and test effectiveness of the quick optimization
-			in this case */
-			if(jp->job_type == QUICK_OPTIMIZATION_JOB && jp->pi.pass_number == 0)
-				result = move_files_to_back(jp, MOVE_FRAGMENTED);
-			
-			/* defragment */
-			if(jp->termination_router((void *)jp)) break;
-			
-			if(result == 0){
-				if(jp->job_type != DEFRAGMENTATION_JOB){
-					/* analyze again to free all temporarily allocated space */
-					clusters_to_process = jp->pi.clusters_to_process;
-					processed_clusters = jp->pi.processed_clusters;
-					result = analyze(jp);
-					jp->pi.clusters_to_process = clusters_to_process;
-					jp->pi.processed_clusters = processed_clusters;
-					if(result != 0) goto done;
-				}
-				result = defragment(jp);
-			}
-			
-			if(jp->termination_router((void *)jp)) break;
-			
-			/* move not fragmented files from
-			the second half of the volume to the beginning of the volume */
-			
-			if(result == 0 && \
-			  (jp->job_type == QUICK_OPTIMIZATION_JOB || \
-			   jp->job_type == FULL_OPTIMIZATION_JOB)){
-				/* analyze again to free all temporarily allocated space */
-				clusters_to_process = jp->pi.clusters_to_process;
-				processed_clusters = jp->pi.processed_clusters;
-				result = analyze(jp);
-				jp->pi.clusters_to_process = clusters_to_process;
-				jp->pi.processed_clusters = processed_clusters;
-				if(result != 0) goto done;
-
-				result = move_files_to_front(jp, MOVE_NOT_FRAGMENTED);
-			}
-			
-			/* partial defragment if nothing moved */
-			if(result == 0 && jp->pi.moved_clusters == 0){
-				/* analyze again to free all temporarily allocated space */
-				clusters_to_process = jp->pi.clusters_to_process;
-				processed_clusters = jp->pi.processed_clusters;
-				result = analyze(jp);
-				jp->pi.clusters_to_process = clusters_to_process;
-				jp->pi.processed_clusters = processed_clusters;
-				if(result != 0) goto done;
-
-				result = defragment_partial(jp);
-			}
-		
-			if(jp->termination_router((void *)jp)) break;
-		} else {
-			break;
+		/* move not fragmented files from
+		the second half of the volume to the beginning of the volume */
+		if(result == 0 && \
+		  (jp->job_type == QUICK_OPTIMIZATION_JOB || \
+		   jp->job_type == FULL_OPTIMIZATION_JOB)){
+			result = move_files_to_front(jp, MOVE_NOT_FRAGMENTED);
 		}
+		if(jp->termination_router((void *)jp)) break;
+
+		/* partial defragment if nothing moved */
+		if(result == 0 && jp->pi.moved_clusters == 0)
+			result = defragment_partial(jp);
 	
-		jp->pi.pass_number ++;
-		
 		/* exit if user selected stop */
 		if(jp->termination_router((void *)jp)) break;
 		

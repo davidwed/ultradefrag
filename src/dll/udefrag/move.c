@@ -89,6 +89,71 @@ WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
 	return f;
 }
 
+/*
+* The following routines are used to track
+* space temporarily allocated by system
+* and to release this space before the file
+* moving.
+*/
+
+/**
+ * @brief Adds region to the list of space
+ * temporarily allocated by system.
+ * @return Zero for success, negative value otherwise.
+ * @note Use release_temp_space_regions to free 
+ * memory allocated by add_temp_space_region calls.
+ */
+static int add_temp_space_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
+{
+	winx_volume_region *rgn;
+	
+	rgn = (winx_volume_region *)winx_list_insert_item(
+		(list_entry **)(void *)&jp->temp_space_list,NULL,
+		sizeof(winx_volume_region));
+	if(rgn == NULL){
+		DebugPrint("add_temp_space_region: cannot allocate %u bytes of memory",
+			sizeof(winx_volume_region));
+		return (-1);
+	} else {
+		rgn->lcn = lcn;
+		rgn->length = length;
+	}
+	
+	return 0;
+}
+
+/**
+ * @brief Releases all space regions
+ * added by add_temp_space_region calls.
+ * @details This routine forces Windows
+ * to mark space regions as free. Also
+ * it colorizes cluster map to reflect
+ * changes and frees memory allocated by
+ * add_temp_space_region calls.
+ */
+void release_temp_space_regions(udefrag_job_parameters *jp)
+{
+	winx_volume_region *rgn;
+	
+	/* release space on disk */
+	rgn = winx_get_free_volume_regions(jp->volume_letter,
+		WINX_GVR_ALLOW_PARTIAL_SCAN,NULL,(void *)jp);
+	winx_release_free_volume_regions(rgn);
+	
+	/* update free space pool */
+	for(rgn = jp->temp_space_list; rgn; rgn = rgn->next){
+		jp->free_regions = winx_add_volume_region(jp->free_regions,rgn->lcn,rgn->length);
+		if(rgn->next == jp->temp_space_list) break;
+	}
+	
+	/* redraw map */
+	redraw_all_temporary_system_space_as_free(jp);
+	
+	/* free memory */
+	winx_list_destroy((list_entry **)(void *)&jp->temp_space_list);
+	jp->temp_space_list = NULL;
+}
+
 /**
  * @brief Redraws freed space.
  */
@@ -105,6 +170,7 @@ static void redraw_freed_space(udefrag_job_parameters *jp,
 		/* mark clusters as temporarily allocated by system  */
 		/* or as mft zone immediately since we're not using it */
 		colorize_map_region(jp,lcn,length,TMP_SYSTEM_OR_MFT_ZONE_SPACE,old_color);
+		add_temp_space_region(jp,lcn,length);
 	} else {
 		colorize_map_region(jp,lcn,length,FREE_SPACE,old_color);
 		jp->free_regions = winx_add_volume_region(jp->free_regions,lcn,length);
