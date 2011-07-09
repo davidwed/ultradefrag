@@ -296,6 +296,7 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	udefrag_fragmented_file *f, *f_largest;
 	ULONGLONG length;
 	char buffer[32];
+	ULONGLONG clusters_to_move;
 	
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 
@@ -338,8 +339,12 @@ int defragment_small_files(udefrag_job_parameters *jp)
 			if(f_largest == NULL) goto next_rgn;
 			
 			/* move the file */
+			if(is_mft(f_largest->f,jp))
+				clusters_to_move = jp->moveable_mft_clusters;
+			else
+				clusters_to_move = f_largest->f->disp.clusters;
 			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,
-			 f_largest->f->disp.clusters,rgn->lcn,0,jp) >= 0){
+			 clusters_to_move,rgn->lcn,0,jp) >= 0){
 				DebugPrint("Defrag success for %ws",f_largest->f->path);
 				defragmented_files ++;
 			} else {
@@ -387,6 +392,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 	udefrag_fragmented_file *f, *f_largest;
 	ULONGLONG length;
 	char buffer[32];
+	ULONGLONG clusters_to_move;
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
@@ -422,8 +428,12 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 			f_largest->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
 		} else {
 			/* move the file */
+			if(is_mft(f_largest->f,jp))
+				clusters_to_move = jp->moveable_mft_clusters;
+			else
+				clusters_to_move = f_largest->f->disp.clusters;
 			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,
-			 f_largest->f->disp.clusters,rgn->lcn,0,jp) >= 0){
+			 clusters_to_move,rgn->lcn,0,jp) >= 0){
 				DebugPrint("Defrag success for %ws",f_largest->f->path);
 				defragmented_files ++;
 			} else {
@@ -591,6 +601,7 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 	ULONGLONG moves;
 	winx_file_info *file;
 	winx_volume_region *rgn;
+	ULONGLONG clusters_to_move;
 	
 	if(flags != MOVE_NOT_FRAGMENTED){
 		DebugPrint("move_files_to_front: 0x%x flag is not supported",(UINT)flags);
@@ -633,7 +644,11 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 						rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,1);
 						if(rgn != NULL){
 							if(rgn->lcn < file->disp.blockmap->lcn){
-								if(move_file(file,file->disp.blockmap->vcn,file->disp.clusters,rgn->lcn,0,jp) >= 0)
+								if(is_mft(file,jp))
+									clusters_to_move = jp->moveable_mft_clusters;
+								else
+									clusters_to_move = file->disp.clusters;
+								if(move_file(file,file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0)
 									moves ++;
 							}
 						}

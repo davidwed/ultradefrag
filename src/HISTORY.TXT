@@ -8,6 +8,7 @@ HISTORY
     - the cluster map now indicates unused map blocks with gray color
     - one bug preventing a proper redraw of defragmented files was fixed
     - few bugs causing infinite loops in defragmentation algorithm were fixed
+    - one bug preventing MFT defragmentation was fixed
     - the documentation was updated to include better information about
       taking screen-shots and creating support packages on the bug reports page
     - tree-view to select chapters was added to documentation and the

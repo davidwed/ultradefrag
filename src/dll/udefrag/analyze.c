@@ -320,6 +320,7 @@ void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp)
 	int win_version, i;
 	winx_blockmap *block;
 	
+	jp->moveable_mft_clusters = f->disp.clusters;
 	win_version = winx_get_os_version();
 	if(win_version < WINDOWS_XP){
 		/* on nt4 and w2k $mft file is always locked entirely */
@@ -335,6 +336,7 @@ void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp)
 		}
 		
 		/* remove the first block from the map */
+		jp->moveable_mft_clusters -= f->disp.blockmap->length;
 		winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,
 			(list_entry *)(void *)f->disp.blockmap);
 		DebugPrint("First MFT block skipped because unmoveable");
