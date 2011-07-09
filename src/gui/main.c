@@ -897,6 +897,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 					flag = UD_PREVIEW_QUICK;
 					break;
 				default:
+					flag = 0;
 					break;
 				}
 				if(preview_flags & flag){
