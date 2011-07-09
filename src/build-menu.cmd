@@ -188,6 +188,12 @@ echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
+set old_file=X
+for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
+if "%old_file%" == "X" goto :skip18
+set new_file=%old_file:i386=x86%
+move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
+:skip18
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
@@ -216,6 +222,12 @@ echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
+set old_file=X
+for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
+if "%old_file%" == "X" goto :skip20
+set new_file=%old_file:i386=x86%
+move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
+:skip20
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
@@ -232,6 +244,12 @@ echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
 copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
+set old_file=X
+for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
+if "%old_file%" == "X" goto :skip21
+set new_file=%old_file:i386=x86%
+move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
+:skip21
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
