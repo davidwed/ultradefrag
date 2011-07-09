@@ -207,7 +207,7 @@ int is_mft_mirror(winx_file_info *f,udefrag_job_parameters *jp);
 * Thus, after each move file's map will become
 * shorter and shorter preventing subsequent
 * moves of the same data in a partial
-* defragmentation.
+* defragmentation and in volume optimization.
 */
 #define UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS 0x1
 

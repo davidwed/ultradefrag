@@ -648,7 +648,7 @@ int move_file(winx_file_info *f,
 		/*f->disp.clusters = 0;
 		f->disp.fragments = 0;
 		f->disp.flags = 0;*/
-		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+		/*winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);*/
 		f->user_defined_flags |= UD_FILE_LOCKED;
 		jp->pi.processed_clusters += length;
 		if(jp->progress_router)

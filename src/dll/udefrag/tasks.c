@@ -171,8 +171,8 @@ static winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp)
  */
 int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	/* skip files with undefined cluster map */
-	if(f->disp.blockmap == NULL)
+	/* skip files with undefined cluster map and locked files */
+	if(f->disp.blockmap == NULL || is_locked(f))
 		return 0;
 	
 	/* skip files with less than 2 fragments */
@@ -221,8 +221,8 @@ static int can_defragment_entirely(winx_file_info *f,udefrag_job_parameters *jp)
  */
 int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	/* skip files with undefined cluster map */
-	if(f->disp.blockmap == NULL)
+	/* skip files with undefined cluster map and locked files */
+	if(f->disp.blockmap == NULL || is_locked(f))
 		return 0;
 	
 	/* skip FAT directories */
@@ -550,14 +550,37 @@ done:
 /**
  * @brief Moves selected group of files
  * to the beginning of the volume to free its end.
+ * @details This routine tries to move each file entirely
+ * to avoid increasing fragmentation.
  * @param[in] jp job parameters.
- * @param[in] flags combination of MOVE_xxx flags defined in udefrag.h
- * @note Volume must be opened before this call,
- * jp->fVolume must contain a proper handle.
+ * @param[in] flags one of MOVE_xxx flags defined in udefrag.h
  * @return Zero for success, negative value otherwise.
  */
 int move_files_to_front(udefrag_job_parameters *jp, int flags)
 {
+	ULONGLONG time;
+	char buffer[32];
+
+	/* open the volume */
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return (-1);
+
+	time = start_timing("file moving to front",jp);
+	
+	jp->pi.current_operation = VOLUME_OPTIMIZATION;
+	jp->pi.moved_clusters = 0;
+	
+	/* do the job */
+
+	/* display amount of moved data */
+	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
+	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	DebugPrint("%s moved",buffer);
+	stop_timing("file moving to front",time,jp);
+	winx_fclose(jp->fVolume);
+	jp->fVolume = NULL;
 	return 0;
 }
 
@@ -565,14 +588,127 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
  * @brief Moves selected group of files
  * to the end of the volume to free its
  * beginning.
+ * @brief This routine moves individual clusters
+ * and never tries to keep the file not fragmented.
  * @param[in] jp job parameters.
- * @param[in] flags combination of MOVE_xxx flags defined in udefrag.h
- * @note Volume must be opened before this call,
- * jp->fVolume must contain a proper handle.
+ * @param[in] flags one of MOVE_xxx flags defined in udefrag.h
  * @return Zero for success, negative value otherwise.
+ * @note This routine is optimized for speed.
+ * To achieve the best performance we devide the disk
+ * into two parts. The first one will become empty after
+ * the completion of file moving (in case of MOVE_ALL flag
+ * passed in). The second part will become fully occupied by files.
+ * Therefore, we have no need to move something from the second part
+ * to the end of the disk, we have a good reason to move data from
+ * the first part only. Then, if something cannot be moved from the
+ * first part (or is not intended for moving respect to the flags
+ * passed in), we're moving the bound between parts forward, because 
+ * we have a chance to move other files instead of excluded ones.
  */
 int move_files_to_back(udefrag_job_parameters *jp, int flags)
 {
+	ULONGLONG time;
+	char buffer[32];
+	ULONGLONG used_clusters, parts_bound;
+	ULONGLONG moves;
+	int empty_passes;
+	winx_file_info *file;
+	winx_blockmap *block;
+	ULONGLONG current_vcn, remaining_clusters;
+	winx_volume_region *rgn, *prev_rgn;
+	ULONGLONG length;
+
+	/* open the volume */
+	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return (-1);
+
+	time = start_timing("file moving to end",jp);
+	
+	jp->pi.current_operation = VOLUME_OPTIMIZATION;
+	jp->pi.moved_clusters = 0;
+	
+	/* do the job */
+	used_clusters = (jp->v_info.total_bytes - jp->v_info.free_bytes);
+	used_clusters /= jp->v_info.bytes_per_cluster;
+	parts_bound = jp->v_info.total_clusters - used_clusters;
+	DebugPrint("move_files_to_back: total clusters:      %I64u", jp->v_info.total_clusters);
+	DebugPrint("move_files_to_back: used clusters:       %I64u", used_clusters);
+	DebugPrint("move_files_to_back: initial parts bound: %I64u", parts_bound);
+	empty_passes = 0;
+	while(1){
+		moves = 0;
+		/* cycle through all files and all their blocks */
+		for(file = jp->filelist; file; file = file->next){
+//repeat_scan:
+			for(block = file->disp.blockmap; block; block = block->next){
+				if(jp->termination_router((void *)jp)) goto done;
+				if(block->lcn < parts_bound && block->length){
+					if(!can_move(file,jp)){
+						/* adjust parts bound */
+						parts_bound += block->length;
+						//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
+					} else {
+						if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+							/* adjust parts bound */
+							parts_bound += block->length;
+							//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
+						} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
+							/* adjust parts bound */
+							parts_bound += block->length;
+							//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
+						} else {
+							/* file block can be moved, let's move it to the end of disk */
+							if(jp->free_regions == NULL) goto done;
+							current_vcn = block->vcn;
+							remaining_clusters = block->length;
+							for(rgn = jp->free_regions->prev; rgn && remaining_clusters; rgn = prev_rgn){
+								prev_rgn = rgn->prev; /* save it now since free regions list may be changed */
+								if(rgn->lcn < block->lcn){
+									//DebugPrint("move_files_to_back: unexpected condition");
+									DebugPrint("move_files_to_back: optimization completed");
+									DebugPrint("rgn->lcn = %I64u, block->lcn = %I64u",rgn->lcn,block->lcn);
+									goto done;
+								}
+								if(rgn->length > 0){
+									length = min(rgn->length,remaining_clusters);
+									if(jp->termination_router((void *)jp)) goto done;
+									(void)move_file(file,current_vcn,length,rgn->lcn + rgn->length - length,
+										UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS,jp);
+									current_vcn += length;
+									remaining_clusters -= length;
+								}
+								if(jp->free_regions == NULL) break;
+								if(prev_rgn == jp->free_regions->prev) break;
+							}
+							/* map of file blocks changed, so let's scan it again from the beginning */
+							//goto repeat_scan; /* not neccessary because of UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS flag used */
+						}
+					}
+				}
+				if(block->next == file->disp.blockmap) break;
+			}
+			if(file->next == jp->filelist) break;
+		}
+		if(moves == 0){
+			/* give it another chance since parts bound may be adjusted */
+			empty_passes ++;
+			if(empty_passes > 1)
+				goto done;
+		} else {
+			empty_passes = 0;
+		}
+	}	
+
+done:
+	/* display amount of moved data */
+	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
+	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	DebugPrint("%s moved",buffer);
+	stop_timing("file moving to end",time,jp);
+	winx_fclose(jp->fVolume);
+	jp->fVolume = NULL;
 	return 0;
 }
 
