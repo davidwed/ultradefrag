@@ -585,9 +585,9 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 	jp->pi.moved_clusters = 0;
 	
 	/* do the job */
-	parts_bound = jp->v_info.total_clusters - jp->v_info.free_bytes * jp->v_info.bytes_per_cluster;
+	parts_bound = jp->v_info.total_clusters - jp->v_info.free_bytes / jp->v_info.bytes_per_cluster;
 	DebugPrint("move_files_to_front: total clusters:      %I64u", jp->v_info.total_clusters);
-	DebugPrint("move_files_to_front: free clusters:       %I64u", jp->v_info.free_bytes * jp->v_info.bytes_per_cluster);
+	DebugPrint("move_files_to_front: free clusters:       %I64u", jp->v_info.free_bytes / jp->v_info.bytes_per_cluster);
 	DebugPrint("move_files_to_front: initial parts bound: %I64u", parts_bound);
 	empty_passes = 0;
 	while(1){
