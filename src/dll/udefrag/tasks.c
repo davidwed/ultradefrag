@@ -627,7 +627,7 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 	DebugPrint("move_files_to_front: total clusters:      %I64u", jp->v_info.total_clusters);
 	DebugPrint("move_files_to_front: free clusters:       %I64u", jp->v_info.free_bytes / jp->v_info.bytes_per_cluster);
 	DebugPrint("move_files_to_front: initial parts bound: %I64u", parts_bound);
-	while(1){
+	while(jp->termination_router((void *)jp) == 0){
 		moves = 0;
 		/* cycle through all not fragmented files */
 		for(file = jp->filelist; file; file = file->next){
@@ -655,11 +655,13 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 					}
 				}
 			}
+			if(jp->termination_router((void *)jp)) goto done;
 			if(file->next == jp->filelist) break;
 		}				
 		if(moves == 0) break;
 	}	
 
+done:
 	/* display amount of moved data */
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
 	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
