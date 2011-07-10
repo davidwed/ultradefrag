@@ -598,6 +598,8 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 	ULONGLONG time;
 	char buffer[32];
 	ULONGLONG parts_bound; /* TODO: try to run it without a bound */
+	ULONGLONG prev_pass_parts_bound; /* don't count unmoveable files twice when possible */
+	ULONGLONG initial_parts_bound;
 	ULONGLONG moves;
 	winx_file_info *file;
 	winx_volume_region *rgn;
@@ -627,8 +629,10 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 	DebugPrint("move_files_to_front: total clusters:      %I64u", jp->v_info.total_clusters);
 	DebugPrint("move_files_to_front: free clusters:       %I64u", jp->v_info.free_bytes / jp->v_info.bytes_per_cluster);
 	DebugPrint("move_files_to_front: initial parts bound: %I64u", parts_bound);
+	prev_pass_parts_bound = jp->v_info.total_clusters - 1;
 	while(jp->termination_router((void *)jp) == 0){
 		moves = 0;
+		initial_parts_bound = parts_bound;
 		/* cycle through all not fragmented files */
 		for(file = jp->filelist; file; file = file->next){
 			if(!is_fragmented(file) && file->disp.blockmap){
@@ -636,18 +640,21 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 					if(!can_move(file,jp)){
 						if(!is_in_improper_state(file)){
 							/* adjust parts bound */
-							parts_bound -= file->disp.clusters;
-							moves ++;
+							if(file->disp.blockmap->lcn < prev_pass_parts_bound){
+								parts_bound -= file->disp.clusters;
+								moves ++;
+								//DebugPrint("parts bound adjusted by %I64u clusters",file->disp.clusters);
+							}
 						}
 					} else {
 						/* move the file */
-						rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,1);
+						if(is_mft(file,jp))
+							clusters_to_move = jp->moveable_mft_clusters;
+						else
+							clusters_to_move = file->disp.clusters;
+						rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,clusters_to_move,1);
 						if(rgn != NULL){
 							if(rgn->lcn < file->disp.blockmap->lcn){
-								if(is_mft(file,jp))
-									clusters_to_move = jp->moveable_mft_clusters;
-								else
-									clusters_to_move = file->disp.clusters;
 								if(move_file(file,file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0)
 									moves ++;
 							}
@@ -659,6 +666,8 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 			if(file->next == jp->filelist) break;
 		}				
 		if(moves == 0) break;
+		else DebugPrint("go to the next pass, moves = %I64u",moves);
+		prev_pass_parts_bound = initial_parts_bound;
 	}	
 
 done:
@@ -698,6 +707,8 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 	ULONGLONG time;
 	char buffer[32];
 	ULONGLONG used_clusters, parts_bound;
+	ULONGLONG prev_pass_parts_bound; /* don't count unmoveable files twice when possible */
+	ULONGLONG initial_parts_bound;
 	ULONGLONG moves;
 	winx_file_info *file;
 	winx_blockmap *block;
@@ -726,8 +737,10 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 	DebugPrint("move_files_to_back: total clusters:      %I64u", jp->v_info.total_clusters);
 	DebugPrint("move_files_to_back: used clusters:       %I64u", used_clusters);
 	DebugPrint("move_files_to_back: initial parts bound: %I64u", parts_bound);
-	while(1){
+	prev_pass_parts_bound = 0;
+	while(jp->termination_router((void *)jp) == 0){
 		moves = 0;
+		initial_parts_bound = parts_bound;
 		/* cycle through all files and all their blocks */
 		for(file = jp->filelist; file; file = file->next){
 repeat_scan:
@@ -735,21 +748,27 @@ repeat_scan:
 				if(jp->termination_router((void *)jp)) goto done;
 				if(block->lcn < parts_bound && block->length){
 					if(!can_move(file,jp)){
-						/* adjust parts bound */
-						parts_bound += block->length;
-						//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
-						if(block->length) moves ++;
+						if(block->lcn > prev_pass_parts_bound){
+							/* adjust parts bound */
+							parts_bound += block->length;
+							//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
+							if(block->length) moves ++;
+						}
 					} else {
 						if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
-							/* adjust parts bound */
-							parts_bound += block->length;
-							//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
-							if(block->length) moves ++;
+							if(block->lcn > prev_pass_parts_bound){
+								/* adjust parts bound */
+								parts_bound += block->length;
+								//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
+								if(block->length) moves ++;
+							}
 						} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
-							/* adjust parts bound */
-							parts_bound += block->length;
-							//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
-							if(block->length) moves ++;
+							if(block->lcn > prev_pass_parts_bound){
+								/* adjust parts bound */
+								parts_bound += block->length;
+								//DebugPrint("move_files_to_back: parts bound adjusted: %I64u", parts_bound);
+								if(block->length) moves ++;
+							}
 						} else {
 							/* file block can be moved, let's move it to the end of disk */
 							if(jp->free_regions == NULL) goto done;
@@ -784,6 +803,8 @@ repeat_scan:
 			if(file->next == jp->filelist) break;
 		}
 		if(moves == 0) break;
+		else DebugPrint("go to the next pass, moves = %I64u",moves);
+		prev_pass_parts_bound = initial_parts_bound;
 	}	
 
 done:
