@@ -715,6 +715,8 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 	ULONGLONG current_vcn, remaining_clusters;
 	winx_volume_region *rgn, *prev_rgn;
 	ULONGLONG length;
+	int move_result;
+	int block_moved;
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
@@ -774,6 +776,8 @@ repeat_scan:
 							if(jp->free_regions == NULL) goto done;
 							current_vcn = block->vcn;
 							remaining_clusters = block->length;
+							block_moved = 0;
+							move_result = 0;
 							for(rgn = jp->free_regions->prev; rgn && remaining_clusters; rgn = prev_rgn){
 								prev_rgn = rgn->prev; /* save it now since free regions list may be changed */
 								if(rgn->lcn < block->lcn){
@@ -787,19 +791,28 @@ repeat_scan:
 									if(jp->termination_router((void *)jp)) goto done;
 									if(move_file(file,current_vcn,length,rgn->lcn + rgn->length - length,0,jp) >= 0)
 										moves ++;
+									else
+										move_result = -1;
+									block_moved = 1;
 									current_vcn += length;
 									remaining_clusters -= length;
 								}
 								if(jp->free_regions == NULL) break;
 								if(prev_rgn == jp->free_regions->prev) break;
 							}
-							/* map of file blocks changed, so let's scan it again from the beginning */
-							goto repeat_scan;
+							if(block_moved){
+								/* map of file blocks changed, so let's scan it again from the beginning */
+								if(move_result >= 0) goto repeat_scan;
+								else goto next_file; /* blockmap may be changed anyway, therefore walk continuation is not safe */
+							} else {
+								/* go to the next block */
+							}
 						}
 					}
 				}
 				if(block->next == file->disp.blockmap) break;
 			}
+next_file:
 			if(file->next == jp->filelist) break;
 		}
 		if(moves == 0) break;
