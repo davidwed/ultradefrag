@@ -155,7 +155,10 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 		SetEvent(hLangPackEvent);
 	}
 	
-	(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
+	if(dry_run)
+		(void)sprintf(WindowCaption, "UD - %c %6.2lf %% (dry run)", current_operation, pi->percentage);
+	else
+		(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
 	(void)SetWindowText(hWindow, WindowCaption);
 
 	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
@@ -182,7 +185,7 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	if(pi->cluster_map && job->map.buffer)
 		RedrawMap(job,1);
 	
-	if(pi->completion_status != 0 && !stop_pressed){
+	if(pi->completion_status != 0/* && !stop_pressed*/){
 		/* the job is completed */
 		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls 100.00 %%",ProcessCaption);
         progress_msg[sizeof(progress_msg) - 1] = 0;
