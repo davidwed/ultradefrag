@@ -271,6 +271,7 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	ULONGLONG length;
 	char buffer[32];
 	ULONGLONG clusters_to_move;
+	winx_file_info *file;
 	
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 
@@ -311,24 +312,26 @@ int defragment_small_files(udefrag_job_parameters *jp)
 				if(f->next == jp->fragmented_files) break;
 			}
 			if(f_largest == NULL) goto next_rgn;
+			file = f_largest->f; /* f_largest may be destroyed by move_file */
 			
 			/* move the file */
-			if(is_mft(f_largest->f,jp))
+			if(is_mft(file,jp))
 				clusters_to_move = jp->moveable_mft_clusters;
 			else
-				clusters_to_move = f_largest->f->disp.clusters;
-			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,
+				clusters_to_move = file->disp.clusters;
+			if(move_file(file,file->disp.blockmap->vcn,
 			 clusters_to_move,rgn->lcn,0,jp) >= 0){
-				DebugPrint("Defrag success for %ws",f_largest->f->path);
+				DebugPrint("Defrag success for %ws",file->path);
 				defragmented_files ++;
 			} else {
-				DebugPrint("Defrag failure for %ws",f_largest->f->path);
+				DebugPrint("Defrag failure for %ws",file->path);
 			}
 			
 			/* skip locked files here to prevent skipping the current free region */
-		} while(is_locked(f_largest->f));
+		} while(is_locked(file));
 		
 		/* after file moving continue from the first free region */
+		if(jp->free_regions == NULL) break;
 		rgn = jp->free_regions->prev;
 		continue;
 		
@@ -364,6 +367,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 	ULONGLONG length;
 	char buffer[32];
 	ULONGLONG clusters_to_move;
+	winx_file_info *file;
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
@@ -391,23 +395,24 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 			if(f->next == jp->fragmented_files) break;
 		}
 		if(f_largest == NULL) break;
+		file = f_largest->f; /* f_largest may be destroyed by move_file */
 
-		rgn = find_matching_free_region(jp,f_largest->f->disp.blockmap->lcn,f_largest->f->disp.clusters,0);
+		rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,0);
 		if(jp->termination_router((void *)jp)) break;
 		if(rgn == NULL){
-			f_largest->f->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
+			file->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
 		} else {
 			/* move the file */
-			if(is_mft(f_largest->f,jp))
+			if(is_mft(file,jp))
 				clusters_to_move = jp->moveable_mft_clusters;
 			else
-				clusters_to_move = f_largest->f->disp.clusters;
-			if(move_file(f_largest->f,f_largest->f->disp.blockmap->vcn,
+				clusters_to_move = file->disp.clusters;
+			if(move_file(file,file->disp.blockmap->vcn,
 			 clusters_to_move,rgn->lcn,0,jp) >= 0){
-				DebugPrint("Defrag success for %ws",f_largest->f->path);
+				DebugPrint("Defrag success for %ws",file->path);
 				defragmented_files ++;
 			} else {
-				DebugPrint("Defrag failure for %ws",f_largest->f->path);
+				DebugPrint("Defrag failure for %ws",file->path);
 			}
 		}
 	}
@@ -444,6 +449,7 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	ULONGLONG n_blocks, max_n_blocks, longest_sequence_length;
 	ULONGLONG remaining_clusters;
 	char buffer[32];
+	winx_file_info *file;
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
@@ -511,13 +517,14 @@ int defragment_big_files(udefrag_job_parameters *jp)
 		} while(is_too_large(f_largest->f));
 
 		/* join fragments */
+		file = f_largest->f; /* f_largest may be destroyed by move_file */
 		target = rgn_largest->lcn; 
-		if(move_file(f_largest->f,longest_sequence->vcn,longest_sequence_length,
+		if(move_file(file,longest_sequence->vcn,longest_sequence_length,
 		  target,UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS,jp) >= 0){
-			DebugPrint("Partial defrag success for %ws",f_largest->f->path);
+			DebugPrint("Partial defrag success for %ws",file->path);
 			defragmented_files ++;
 		} else {
-			DebugPrint("Partial defrag failure for %ws",f_largest->f->path);
+			DebugPrint("Partial defrag failure for %ws",file->path);
 		}
 		
 		/*
