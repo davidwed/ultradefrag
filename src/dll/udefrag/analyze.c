@@ -775,38 +775,63 @@ static void redraw_well_known_locked_files(udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Adds file to the list of fragmented files.
+ */
+int expand_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp)
+{
+	udefrag_fragmented_file *ff, *ffprev = NULL;
+
+	for(ff = jp->fragmented_files; ff; ff = ff->next){
+		if(ff->f->disp.fragments <= f->disp.fragments){
+			if(ff != jp->fragmented_files)
+				ffprev = ff->prev;
+			break;
+		}
+		if(ff->next == jp->fragmented_files){
+			ffprev = ff;
+			break;
+		}
+	}
+	
+	ff = (udefrag_fragmented_file *)winx_list_insert_item((list_entry **)(void *)&jp->fragmented_files,
+			(list_entry *)ffprev,sizeof(udefrag_fragmented_file));
+	if(ff == NULL){
+		DebugPrint("expand_fragmented_files_list: cannot allocate %u bytes of memory",
+			sizeof(udefrag_fragmented_file));
+		return (-1);
+	} else {
+		ff->f = f;
+	}
+	
+	return 0;
+}
+
+/**
+ * @brief Removes file from the list of fragmented files.
+ */
+void truncate_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp)
+{
+	udefrag_fragmented_file *ff;
+	
+	for(ff = jp->fragmented_files; ff; ff = ff->next){
+		if(ff->f == f){
+			winx_list_remove_item((list_entry **)(void *)&jp->fragmented_files,(list_entry *)ff);
+			break;
+		}
+		if(ff->next == jp->fragmented_files) break;
+	}
+}
+
+/**
  * @brief Produces list of fragmented files.
  */
 static void produce_list_of_fragmented_files(udefrag_job_parameters *jp)
 {
 	winx_file_info *f;
-	udefrag_fragmented_file *ff, *ffprev;
 	
 	for(f = jp->filelist; f; f = f->next){
-		if(is_fragmented(f) && !is_excluded(f)){
-			ffprev = NULL;
-			/* add file to list of fragmented */
-			for(ff = jp->fragmented_files; ff; ff = ff->next){
-				if(ff->f->disp.fragments <= f->disp.fragments){
-					if(ff != jp->fragmented_files)
-						ffprev = ff->prev;
-					break;
-				}
-				if(ff->next == jp->fragmented_files){
-					ffprev = ff;
-					break;
-				}
-			}
-			
-			ff = (udefrag_fragmented_file *)winx_list_insert_item((list_entry **)(void *)&jp->fragmented_files,
-					(list_entry *)ffprev,sizeof(udefrag_fragmented_file));
-			if(ff == NULL){
-				DebugPrint("produce_list_of_fragmented_files: cannot allocate %u bytes of memory",
-					sizeof(udefrag_fragmented_file));
-			} else {
-				ff->f = f;
-			}
-		}
+		if(is_fragmented(f) && !is_excluded(f))
+			expand_fragmented_files_list(f,jp);
 		if(f->next == jp->filelist) break;
 	}
 }

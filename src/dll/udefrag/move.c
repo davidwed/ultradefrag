@@ -648,7 +648,7 @@ int move_file(winx_file_info *f,
 	NTSTATUS Status;
 	HANDLE hFile;
 	int old_color, new_color;
-	int was_fragmented;
+	int was_fragmented, became_fragmented;
 	int dump_result;
 	winx_blockmap *block, *first_block;
 	ULONGLONG clusters_to_redraw;
@@ -709,12 +709,7 @@ int move_file(winx_file_info *f,
 		/* redraw space */
 		if(old_color != MFT_SPACE)
 			colorize_file_as_system(jp,f);
-		/* file is locked by other application, so its state is unknown */
-		/* don't reset its statistics though! */
-		/*f->disp.clusters = 0;
-		f->disp.fragments = 0;
-		f->disp.flags = 0;*/
-		/*winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);*/
+		/* don't reset file information here */
 		f->user_defined_flags |= UD_FILE_LOCKED;
 		jp->pi.processed_clusters += length;
 		if(jp->progress_router)
@@ -810,9 +805,10 @@ int move_file(winx_file_info *f,
 	}
 	
 	/* adjust statistics */
-	if(is_fragmented(&new_file_info) && !was_fragmented)
+	became_fragmented = is_fragmented(&new_file_info);
+	if(became_fragmented && !was_fragmented)
 		jp->pi.fragmented ++;
-	if(!is_fragmented(&new_file_info) && was_fragmented)
+	if(!became_fragmented && was_fragmented)
 		jp->pi.fragmented --;
 	jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
 	if(jp->progress_router)
@@ -826,11 +822,21 @@ int move_file(winx_file_info *f,
 		/* update statistics though */
 		f->disp.fragments = new_file_info.disp.fragments;
 		f->disp.clusters = new_file_info.disp.clusters;
+		if(became_fragmented)
+			f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
+		else
+			f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
 	} else {
 		/* new block map is available - use it */
 		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 		memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
 	}
+
+	/* update list of fragmented files */
+	if(!became_fragmented && was_fragmented)
+		truncate_fragmented_files_list(f,jp);
+	if(became_fragmented && !was_fragmented)
+		expand_fragmented_files_list(f,jp);
 	
 	return (moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS) ? (-1) : 0;
 }

@@ -252,32 +252,6 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 	return 1;
 }
 
-/**
- * @brief Removes unfragmented files
- * from the list of fragmented.
- */
-static void update_fragmented_files_list(udefrag_job_parameters *jp)
-{
-	udefrag_fragmented_file *f, *next, *head;
-	
-	f = head = jp->fragmented_files;
-	while(f){
-		next = f->next;
-		if(!is_fragmented(f->f)){
-			winx_list_remove_item((list_entry **)(void *)&jp->fragmented_files,(list_entry *)f);
-			if(jp->fragmented_files == NULL)
-				break; /* list is empty */
-			if(jp->fragmented_files != head){
-				head = jp->fragmented_files;
-				f = next;
-				continue;
-			}
-		}
-		f = next;
-		if(f == head) break;
-	}
-}
-
 /************************************************************/
 /*                      Atomic Tasks                        */
 /************************************************************/
@@ -353,9 +327,6 @@ int defragment_small_files(udefrag_job_parameters *jp)
 			
 			/* skip locked files here to prevent skipping the current free region */
 		} while(is_locked(f_largest->f));
-		
-		/* truncate list of fragmented files */
-		update_fragmented_files_list(jp);
 		
 		/* after file moving continue from the first free region */
 		rgn = jp->free_regions->prev;
@@ -439,8 +410,6 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 			} else {
 				DebugPrint("Defrag failure for %ws",f_largest->f->path);
 			}
-			/* truncate list of fragmented files */
-			update_fragmented_files_list(jp);
 		}
 	}
 	
