@@ -379,8 +379,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 	/* find best matching free region for each fragmented file */
 	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
-	while(1){
-		if(jp->termination_router((void *)jp)) break;
+	while(jp->termination_router((void *)jp) == 0){
 		f_largest = NULL, length = 0;
 		for(f = jp->fragmented_files; f; f = f->next){
 			if(f->f->disp.clusters > length){
@@ -461,10 +460,9 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
-	while(1) {
+	while(jp->termination_router((void *)jp) == 0){
 		/* find largest free space region */
 		rgn_largest = find_largest_free_region(jp);
-		if(jp->termination_router((void *)jp)) goto done;
 		if(rgn_largest == NULL) break;
 		if(rgn_largest->length < 2) break;
 		
