@@ -236,7 +236,8 @@ static int save_lua_report(udefrag_job_parameters *jp)
 				length = wcslen(file->f->path);
 				if(length > 4) offset = 4; else offset = 0;
 				for(i = offset; i < length; i++){
-					(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)file->f->path[i]);
+					/* conversion to unsigned short firstly is needed here to convert all unicode chars properly */
+					(void)_snprintf(buffer,sizeof(buffer),"%u,",(unsigned int)(unsigned short)file->f->path[i]);
 					buffer[sizeof(buffer) - 1] = 0;
 					(void)winx_fwrite(buffer,1,strlen(buffer),f);
 				}
