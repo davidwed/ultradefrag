@@ -751,9 +751,10 @@ repeat_scan:
 								prev_rgn = rgn->prev; /* save it now since free regions list may be changed */
 								if(rgn->lcn < block->lcn){
 									//DebugPrint("move_files_to_back: unexpected condition");
-									DebugPrint("move_files_to_back: optimization completed");
+									/*DebugPrint("move_files_to_back: optimization completed");
 									DebugPrint("rgn->lcn = %I64u, block->lcn = %I64u",rgn->lcn,block->lcn);
-									goto done;
+									goto done;*/
+									break;
 								}
 								if(rgn->length > 0){
 									length = min(rgn->length,remaining_clusters);
