@@ -154,7 +154,7 @@ int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length)
  *   any popup windows displaying error messages.
  * - winx_set_system_error_mode(1) call is equal to SetErrorMode(0).
  * - Other mode constants can be found in ReactOS sources, but
- *   they needs to be tested meticulously because they were never
+ *   they need to be tested carefully because they were never
  *   officially documented.
  * @par Example:
  * @code
