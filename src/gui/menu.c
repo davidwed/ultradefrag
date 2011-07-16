@@ -187,6 +187,12 @@ int CreateMainMenu(void)
 			MF_BYCOMMAND | MF_CHECKED);
 	}
 
+	if(preview_flags & UD_PREVIEW_SKIP_PARTIAL){
+		CheckMenuItem(hMainMenu,
+			IDM_PREVIEW_SKIP_PARTIAL,
+			MF_BYCOMMAND | MF_CHECKED);
+	}
+
 	if(!DrawMenuBar(hWindow))
 		WgxDbgPrintLastError("Cannot redraw main menu");
 
