@@ -104,9 +104,10 @@ typedef enum {
 } udefrag_operation_type;
 
 /* flags triggering algorithm features on preview stage */
-#define UD_PREVIEW_REPEAT    0x1
-#define UD_PREVIEW_MATCHING  0x2
-#define UD_PREVIEW_QUICK     0x4
+#define UD_PREVIEW_REPEAT           0x1
+#define UD_PREVIEW_MATCHING         0x2
+#define UD_PREVIEW_QUICK            0x4
+#define UD_PREVIEW_SKIP_PARTIAL     0x8
 
 enum {
     UNUSED_MAP_SPACE = 0,

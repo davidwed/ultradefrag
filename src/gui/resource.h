@@ -122,5 +122,6 @@ enum {
     IDM_PREVIEW_LARGEST,
     IDM_PREVIEW_MATCHING,
     IDM_PREVIEW_QUICK,
+    IDM_PREVIEW_SKIP_PARTIAL,
     IDM_PREVIEW_LAST_ITEM    /* must always be the last entry */
 };

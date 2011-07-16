@@ -337,10 +337,6 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 			result = move_files_to_front(jp, MOVE_NOT_FRAGMENTED);
 		}
 		if(jp->termination_router((void *)jp)) break;
-
-		/* partial defragment if nothing moved */
-		if(result == 0 && jp->pi.moved_clusters == 0)
-			result = defragment_partial(jp);
 	
 		/* exit if user selected stop */
 		if(jp->termination_router((void *)jp)) break;
@@ -351,6 +347,11 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		/* exit if nothing moved */
 		if(jp->pi.moved_clusters == 0) break;
 	}
+
+    /* partial defragment only once */
+    if(!(jp->termination_router((void *)jp) || \
+        (jp->udo.preview_flags & UD_PREVIEW_SKIP_PARTIAL)))
+            result = defragment_partial(jp);
 
 done:	
 	release_temp_space_regions(jp);

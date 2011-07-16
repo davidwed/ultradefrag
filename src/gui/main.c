@@ -896,6 +896,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				case IDM_PREVIEW_QUICK:
 					flag = UD_PREVIEW_QUICK;
 					break;
+				case IDM_PREVIEW_SKIP_PARTIAL:
+					flag = UD_PREVIEW_SKIP_PARTIAL;
+					break;
 				default:
 					flag = 0;
 					break;
