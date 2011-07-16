@@ -21,9 +21,10 @@ new translation:
  5. save wiki page, if there was something to correct
  6. check correct encoding and end-of-line characters
  7. save translation
- 8. update credits and history
- 9. commit changes
-10. add translation to project details at sf.net
+ 8. run "src\make-lang-ini.cmd" utility
+ 9. update credits and history
+10. commit changes
+11. add translation to project details at sf.net
 
     If using Notepad++ select all and use
     "TextFX => TextFX Edit => Line up multiple lines by (=)
