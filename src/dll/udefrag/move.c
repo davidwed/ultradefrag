@@ -289,7 +289,7 @@ static int move_file_clusters(HANDLE hFile,ULONGLONG startVcn,
 		Status = iosb.Status;
 	}
 	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"Cannot move file clusters");
+		DebugPrintEx(Status,"cannot move file clusters");
 		return (-1);
 	}
 
@@ -313,16 +313,59 @@ static void move_file_helper(HANDLE hFile, winx_file_info *f,
 	ULONGLONG curr_vcn, curr_target, j, n, r;
 	ULONGLONG clusters_to_process;
 	ULONGLONG clusters_to_move;
+	ULONGLONG extra_clusters;
 	int result;
 	
 	clusters_to_process = length;
 	curr_vcn = vcn;
 	curr_target = target;
-	first_block = get_first_block_of_cluster_chain(f,vcn);
-	for(block = first_block; block; block = block->next){
-		/* move the current block or its part */
-		clusters_to_move = min(block->length - (curr_vcn - block->vcn),clusters_to_process);
-		n = clusters_to_move / jp->clusters_per_256k;
+	
+	if(is_compressed(f) || is_sparse(f)){
+		/* move blocks of file */
+		first_block = get_first_block_of_cluster_chain(f,vcn);
+		for(block = first_block; block; block = block->next){
+			/* move the current block or its part */
+			clusters_to_move = min(block->length - (curr_vcn - block->vcn),clusters_to_process);
+			n = clusters_to_move / jp->clusters_per_256k;
+			for(j = 0; j < n; j++){
+				result = move_file_clusters(hFile,curr_vcn,
+					curr_target,jp->clusters_per_256k,jp);
+				if(result < 0)
+					goto done;
+				jp->pi.processed_clusters += jp->clusters_per_256k;
+				clusters_to_process -= jp->clusters_per_256k;
+				curr_vcn += jp->clusters_per_256k;
+				curr_target += jp->clusters_per_256k;
+			}
+			/* try to move rest of the block */
+			r = clusters_to_move % jp->clusters_per_256k;
+			extra_clusters = r % 16; /* to comply with nt4/w2k rules */
+			r -= extra_clusters;
+			if(r){
+				result = move_file_clusters(hFile,curr_vcn,curr_target,r,jp);
+				if(result < 0)
+					goto done;
+				jp->pi.processed_clusters += r;
+				clusters_to_process -= r;
+				curr_vcn += r;
+				curr_target += r;
+			}
+			if(extra_clusters){
+				result = move_file_clusters(hFile,curr_vcn,curr_target,extra_clusters,jp);
+				if(result < 0)
+					goto done;
+				jp->pi.processed_clusters += extra_clusters;
+				clusters_to_process -= extra_clusters;
+				curr_vcn += extra_clusters;
+				curr_target += extra_clusters;
+			}
+			if(!clusters_to_move || block->next == f->disp.blockmap) break;
+			curr_vcn = block->next->vcn;
+		}
+	} else {
+		/* move file clusters regardless of block boundaries */
+		/* this works much better on w2k/nt4 NTFS volumes */
+		n = clusters_to_process / jp->clusters_per_256k;
 		for(j = 0; j < n; j++){
 			result = move_file_clusters(hFile,curr_vcn,
 				curr_target,jp->clusters_per_256k,jp);
@@ -333,8 +376,10 @@ static void move_file_helper(HANDLE hFile, winx_file_info *f,
 			curr_vcn += jp->clusters_per_256k;
 			curr_target += jp->clusters_per_256k;
 		}
-		/* try to move rest of block */
-		r = clusters_to_move % jp->clusters_per_256k;
+		/* try to move remaining clusters */
+		r = clusters_to_process;
+		extra_clusters = r % 16; /* to comply with nt4/w2k rules */
+		r -= extra_clusters;
 		if(r){
 			result = move_file_clusters(hFile,curr_vcn,curr_target,r,jp);
 			if(result < 0)
@@ -344,8 +389,13 @@ static void move_file_helper(HANDLE hFile, winx_file_info *f,
 			curr_vcn += r;
 			curr_target += r;
 		}
-		if(!clusters_to_move || block->next == f->disp.blockmap) break;
-		curr_vcn = block->next->vcn;
+		if(extra_clusters){
+			result = move_file_clusters(hFile,curr_vcn,curr_target,extra_clusters,jp);
+			if(result < 0)
+				goto done;
+			jp->pi.processed_clusters += extra_clusters;
+			clusters_to_process -= extra_clusters;
+		}
 	}
 
 done: /* count all unprocessed clusters here */
@@ -634,8 +684,17 @@ typedef enum {
  * - If this function returns negative value
  * indicating failure, one of the flags listed
  * in udefrag_internals.h under "file status flags"
- * must be set to avoid repetitive moving attempts
+ * becomes set to help to avoid repetitive moving attempts
  * for a single file.
+ * - On Windows NT 4.0 and Windows 2000 NTFS file system driver
+ * has a lot of complex limitations covered in 
+ * <a href="http://www.decuslib.com/decus/vmslt99a/nt/defrag.txt">Inside 
+ * Windows NT Disk Defragmenting</a> article by Mark Russinovich.
+ * Follow rules shown there to successfully move file clusters
+ * on nt4/w2k systems. The move_file routine itself guaranties
+ * the rules compliance only when either an entire file or 
+ * an entire block of a compressed/sparse file is requested
+ * to be moved.
  */
 int move_file(winx_file_info *f,
               ULONGLONG vcn,

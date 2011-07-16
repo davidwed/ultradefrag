@@ -466,6 +466,13 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
+	
+	if(winx_get_os_version() <= WINDOWS_2K && jp->fs_type == FS_NTFS){
+		DebugPrint("Windows NT 4.0 and Windows 2000 have stupid limitations in defrag API");
+		DebugPrint("a partial file defragmentation is almost impossible on these systems");
+		goto done;
+	}
+	
 	while(jp->termination_router((void *)jp) == 0){
 		/* find largest free space region */
 		rgn_largest = find_largest_free_region(jp);
@@ -705,6 +712,12 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 	
 	jp->pi.current_operation = VOLUME_OPTIMIZATION;
 	jp->pi.moved_clusters = 0;
+	
+	if(winx_get_os_version() <= WINDOWS_2K && jp->fs_type == FS_NTFS){
+		DebugPrint("Windows NT 4.0 and Windows 2000 have stupid limitations in defrag API");
+		DebugPrint("it is impossible to move file blocks of various sizes on these systems");
+		goto done;
+	}
 	
 	/* do the job */
 	used_clusters = (jp->v_info.total_bytes - jp->v_info.free_bytes);

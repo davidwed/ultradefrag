@@ -11,6 +11,8 @@ HISTORY
     - one bug preventing MFT defragmentation was fixed
     - one bug preventing reports containing Asian characters in file names
       from being built was fixed
+    - one bug preventing defragmentation in some cases on Windows NT 4.0
+      and Windows 2000 was fixed
     - the documentation was updated to include better information about
       taking screen-shots and creating support packages on the bug reports page
     - tree-view to select chapters was added to documentation and the
