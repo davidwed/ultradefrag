@@ -36,6 +36,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 /*                    Internal Routines                     */
 /************************************************************/
 
+#if 0
 /**
  * @brief Searches for free space region starting at the beginning of the volume.
  * @param[in] jp job parameters structure.
@@ -43,7 +44,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
  * @param[in] min_length minimum length of free space in clusters.
  * @note In case of termination request returns NULL immediately.
  */
-winx_volume_region *find_free_region_forward(udefrag_job_parameters *jp,
+static winx_volume_region *find_free_region_forward(udefrag_job_parameters *jp,
     ULONGLONG start_cluster, ULONGLONG min_length)
 {
 	winx_volume_region *rgn, *rgn_found;
@@ -79,7 +80,7 @@ winx_volume_region *find_free_region_forward(udefrag_job_parameters *jp,
  * @param[in] min_length minimum length of free space in clusters.
  * @note In case of termination request returns NULL immediately.
  */
-winx_volume_region *find_free_region_backward(udefrag_job_parameters *jp,
+static winx_volume_region *find_free_region_backward(udefrag_job_parameters *jp,
     ULONGLONG start_cluster, ULONGLONG min_length)
 {
 	winx_volume_region *rgn, *rgn_found;
@@ -107,14 +108,22 @@ winx_volume_region *find_free_region_backward(udefrag_job_parameters *jp,
 	}
 	return rgn_found;
 }
+#endif
+
+enum {
+	FIND_MATCHING_RGN_FORWARD,
+	FIND_MATCHING_RGN_BACKWARD,
+	FIND_MATCHING_RGN_ANY
+};
 
 /**
  * @brief Searches for best matching free space region.
  * @param[in] file_start_cluster lcn of first file cluster.
  * @param[in] file_length length of file in clusters.
- * @param[in] preferred_position flag for preferred region position
- * 1 ... region before the files start preferred
- * 0 ... any region accepted
+ * @param[in] preferred_position one of the FIND_MATCHING_RGN_xxx constants:
+ * FIND_MATCHING_RGN_FORWARD - region after the file_start_cluster preferred
+ * FIND_MATCHING_RGN_BACKWARD - region before the file_start_cluster preferred
+ * FIND_MATCHING_RGN_ANY - any region accepted
  * @note In case of termination request returns
  * NULL immediately.
  */
@@ -127,14 +136,17 @@ static winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
 	rgn_matching = NULL, length = 0;
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(jp->termination_router((void *)jp)) return NULL;
-		if(preferred_position == 1 && rgn->lcn > file_start_cluster)
+		if(preferred_position == FIND_MATCHING_RGN_BACKWARD \
+		  && rgn->lcn > file_start_cluster)
 			if(rgn_matching != NULL)
 				break;
 		if(rgn->length >= file_length){
             if(length == 0 || rgn->length < length){
                 rgn_matching = rgn;
                 length = rgn->length;
-				if(length == file_length) break;
+				if(length == file_length \
+				  && preferred_position != FIND_MATCHING_RGN_FORWARD)
+					break;
             }
 		}
 		if(rgn->next == jp->free_regions) break;
@@ -397,7 +409,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 		if(f_largest == NULL) break;
 		file = f_largest->f; /* f_largest may be destroyed by move_file */
 
-		rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,0);
+		rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,FIND_MATCHING_RGN_ANY);
 		if(jp->termination_router((void *)jp)) break;
 		if(rgn == NULL){
 			file->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
@@ -633,7 +645,7 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 							clusters_to_move = jp->moveable_mft_clusters;
 						else
 							clusters_to_move = file->disp.clusters;
-						rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,clusters_to_move,1);
+						rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,clusters_to_move,FIND_MATCHING_RGN_BACKWARD);
 						if(rgn != NULL){
 							if(rgn->lcn < file->disp.blockmap->lcn){
 								if(move_file(file,file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0)
@@ -698,6 +710,8 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 	ULONGLONG length;
 	int move_result;
 	int block_moved;
+	int nt4w2k_limitations = 0;
+	ULONGLONG clusters_to_move;
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
@@ -715,8 +729,8 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 	
 	if(winx_get_os_version() <= WINDOWS_2K && jp->fs_type == FS_NTFS){
 		DebugPrint("Windows NT 4.0 and Windows 2000 have stupid limitations in defrag API");
-		DebugPrint("it is impossible to move file blocks of various sizes on these systems");
-		goto done;
+		DebugPrint("volume optimization is not so much effective on these systems");
+		nt4w2k_limitations = 1;
 	}
 	
 	/* do the job */
@@ -759,41 +773,79 @@ repeat_scan:
 								if(block->length) moves ++;
 							}
 						} else {
-							/* file block can be moved, let's move it to the end of disk */
-							if(jp->free_regions == NULL) goto done;
-							current_vcn = block->vcn;
-							remaining_clusters = block->length;
-							block_moved = 0;
-							move_result = 0;
-							for(rgn = jp->free_regions->prev; rgn && remaining_clusters; rgn = prev_rgn){
-								prev_rgn = rgn->prev; /* save it now since free regions list may be changed */
-								if(rgn->lcn < block->lcn){
-									//DebugPrint("move_files_to_back: unexpected condition");
-									/*DebugPrint("move_files_to_back: optimization completed");
-									DebugPrint("rgn->lcn = %I64u, block->lcn = %I64u",rgn->lcn,block->lcn);
-									goto done;*/
-									break;
+							if(!nt4w2k_limitations){
+								/* file block can be moved, let's move it to the end of disk */
+								if(jp->free_regions == NULL) goto done;
+								current_vcn = block->vcn;
+								remaining_clusters = block->length;
+								block_moved = 0;
+								move_result = 0;
+								for(rgn = jp->free_regions->prev; rgn && remaining_clusters; rgn = prev_rgn){
+									prev_rgn = rgn->prev; /* save it now since free regions list may be changed */
+									if(rgn->lcn < block->lcn){
+										//DebugPrint("move_files_to_back: unexpected condition");
+										/*DebugPrint("move_files_to_back: optimization completed");
+										DebugPrint("rgn->lcn = %I64u, block->lcn = %I64u",rgn->lcn,block->lcn);
+										goto done;*/
+										break;
+									}
+									if(rgn->length > 0){
+										length = min(rgn->length,remaining_clusters);
+										if(jp->termination_router((void *)jp)) goto done;
+										if(move_file(file,current_vcn,length,rgn->lcn + rgn->length - length,0,jp) >= 0)
+											moves ++;
+										else
+											move_result = -1;
+										block_moved = 1;
+										current_vcn += length;
+										remaining_clusters -= length;
+									}
+									if(jp->free_regions == NULL) break;
+									if(prev_rgn == jp->free_regions->prev) break;
 								}
-								if(rgn->length > 0){
-									length = min(rgn->length,remaining_clusters);
-									if(jp->termination_router((void *)jp)) goto done;
-									if(move_file(file,current_vcn,length,rgn->lcn + rgn->length - length,0,jp) >= 0)
-										moves ++;
-									else
-										move_result = -1;
-									block_moved = 1;
-									current_vcn += length;
-									remaining_clusters -= length;
+								if(block_moved){
+									/* map of file blocks changed, so let's scan it again from the beginning */
+									if(move_result >= 0) goto repeat_scan;
+									else goto next_file; /* blockmap may be changed anyway, therefore walk continuation is not safe */
+								} else {
+									/* go to the next block */
 								}
-								if(jp->free_regions == NULL) break;
-								if(prev_rgn == jp->free_regions->prev) break;
-							}
-							if(block_moved){
-								/* map of file blocks changed, so let's scan it again from the beginning */
-								if(move_result >= 0) goto repeat_scan;
-								else goto next_file; /* blockmap may be changed anyway, therefore walk continuation is not safe */
 							} else {
-								/* go to the next block */
+								/* it is safe to move entire files and entire blocks of compressed/sparse files */
+								if(is_compressed(file) || is_sparse(file)){
+									/* move entire block */
+									rgn = find_matching_free_region(jp,block->lcn,block->length,FIND_MATCHING_RGN_FORWARD);
+									if(rgn != NULL){
+										if(rgn->lcn > block->lcn){
+											if(move_file(file,block->vcn,block->length,rgn->lcn + rgn->length - block->length,0,jp) >= 0){
+												moves ++;
+												/* map of file blocks changed, so let's scan it again from the beginning */
+												goto repeat_scan;
+											} else {
+												/* blockmap may be changed anyway, therefore walk continuation is not safe */
+												goto next_file;
+											}
+										}
+									}
+									/* go to the next block */
+								} else {
+									/* move entire file */
+									if(is_mft(file,jp))
+										clusters_to_move = jp->moveable_mft_clusters;
+									else
+										clusters_to_move = file->disp.clusters;
+									rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,clusters_to_move,FIND_MATCHING_RGN_FORWARD);
+									if(rgn != NULL){
+										if(rgn->lcn > block->lcn){
+											if(move_file(file,file->disp.blockmap->vcn,clusters_to_move,
+											  rgn->lcn + rgn->length - clusters_to_move,0,jp) >= 0){
+												moves ++;
+											}
+										}
+									}
+									/* go to the next file */
+									goto next_file;
+								}
 							}
 						}
 					}
