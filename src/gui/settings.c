@@ -297,6 +297,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 	RECT rc;
 	int s_maximized, s_init_maximized;
 	int s_skip_removable;
+	int s_preview_flags;
 	int cw[sizeof(user_defined_column_widths) / sizeof(int)];
 	int s_list_height;
 	
@@ -322,6 +323,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				s_skip_removable = skip_removable;
 				memcpy(&cw,&user_defined_column_widths,sizeof(user_defined_column_widths));
 				s_list_height = list_height;
+				s_preview_flags = preview_flags;
 				
 				/* reload preferences */
 				GetPrefs();
@@ -333,6 +335,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				skip_removable = s_skip_removable;
 				memcpy(&user_defined_column_widths,&cw,sizeof(user_defined_column_widths));
 				list_height = s_list_height;
+				preview_flags = s_preview_flags;
 				
 				SetEvent(hMapEvent);
 
