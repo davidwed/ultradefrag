@@ -39,11 +39,9 @@
 #define UD_FILE_MOVING_FAILED    0x10  /* file moving completed with failure */
 #define UD_FILE_IMPROPER_STATE   0x20  /* file is in improper state (chkdsk run needed) or some bug encountered */
 
-/*
-* If this flag is set then some parts of the file
-* are excluded from the blockmap because they are unmoveable.
-*/
-#define UD_FILE_INTENDED_FOR_PART_DEFRAG  0x40
+/* this flag is used to skip files already processed with errors, */
+/* it is intended for use in individual volume processing tasks */
+#define UD_FILE_CURRENTLY_EXCLUDED	 0x40
 
 #define is_excluded(f)           ((f)->user_defined_flags & UD_FILE_EXCLUDED)
 #define is_over_limit(f)         ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
@@ -53,7 +51,7 @@
 #define is_moving_failed(f)      ((f)->user_defined_flags & UD_FILE_MOVING_FAILED)
 #define is_in_improper_state(f)  ((f)->user_defined_flags & UD_FILE_IMPROPER_STATE)
 
-#define is_intended_for_part_defrag(f)  ((f)->user_defined_flags & UD_FILE_INTENDED_FOR_PART_DEFRAG)
+#define is_currently_excluded(f) ((f)->user_defined_flags & UD_FILE_CURRENTLY_EXCLUDED)
 
 #define is_block_excluded(b)  ((b)->length == 0)
 
@@ -225,7 +223,7 @@ int move_file(winx_file_info *f,
 			  udefrag_job_parameters *jp
 			  );
 
-int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp);
+int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
 int defragment_small_files(udefrag_job_parameters *jp);
 int defragment_big_files(udefrag_job_parameters *jp);

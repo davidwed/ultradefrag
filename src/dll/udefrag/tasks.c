@@ -178,17 +178,16 @@ static winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file
- * can be defragmented partially or not.
+ * @brief Defines whether the file can be moved or not.
  */
-int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp)
+int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	/* skip files with undefined cluster map and locked files */
-	if(f->disp.blockmap == NULL || is_locked(f))
+	/* skip files already excluded by the current task */
+	if(is_currently_excluded(f))
 		return 0;
 	
-	/* skip files with less than 2 fragments */
-	if(f->disp.blockmap->next == f->disp.blockmap || f->disp.fragments < 2 || !is_fragmented(f))
+	/* skip files with undefined cluster map and locked files */
+	if(f->disp.blockmap == NULL || is_locked(f))
 		return 0;
 	
 	/* skip files of zero length */
@@ -207,60 +206,22 @@ int can_defragment_partially(winx_file_info *f,udefrag_job_parameters *jp)
 	if(is_in_improper_state(f))
 		return 0;
 
-	/* skip files already marked as too large to avoid infinite loops */
-	if(is_too_large(f))
-		return 0;
-	
 	return 1;
 }
 
 /**
- * @brief Defines whether the file
- * can be defragmented entirely or not.
- * @details While can_defragment_partially
- * lets to defragment files for which cluster
- * move failures occured, can_defragment_entirely 
- * routine excludes such a files. As well as files
- * intended for partial defragmentation especially.
+ * @brief Defines whether the file can be defragmented or not.
  */
-static int can_defragment_entirely(winx_file_info *f,udefrag_job_parameters *jp)
+int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	if(is_intended_for_part_defrag(f))
-		return 0;
-	
-	/* skip files for which moving failed already to avoid infinite loops */
-	if(is_moving_failed(f))
-		return 0;
-	
-	return can_defragment_partially(f,jp);
-}
-
-/**
- * @brief Defines whether the file
- * can be moved or not.
- */
-int can_move(winx_file_info *f,udefrag_job_parameters *jp)
-{
-	/* skip files with undefined cluster map and locked files */
-	if(f->disp.blockmap == NULL || is_locked(f))
-		return 0;
-	
-	/* skip files of zero length */
-	if(f->disp.clusters == 0 || \
-	  (f->disp.blockmap->next == f->disp.blockmap && \
-	  f->disp.blockmap->length == 0)){
-		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
-		return 0;
-	}
-
-	/* skip FAT directories */
-	if(is_directory(f) && !jp->actions.allow_dir_defrag)
-		return 0;
-	
-	/* skip file in case of improper state detected */
-	if(is_in_improper_state(f))
+	if(!can_move(f,jp))
 		return 0;
 
+	/* skip files with less than 2 fragments */
+	if(f->disp.blockmap->next == f->disp.blockmap \
+	  || f->disp.fragments < 2 || !is_fragmented(f))
+		return 0;
+	
 	return 1;
 }
 
@@ -292,6 +253,12 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
+	
+	/* no files are excluded by this task currently */
+	for(f = jp->fragmented_files; f; f = f->next){
+		f->f->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
+		if(f->next == jp->fragmented_files) break;
+	}
 
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
@@ -305,7 +272,7 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->termination_router((void *)jp)) goto done;
+		if(jp->termination_router((void *)jp)) break;
 		
 		/* skip micro regions */
 		if(rgn->length < 2) goto next_rgn;
@@ -316,7 +283,7 @@ int defragment_small_files(udefrag_job_parameters *jp)
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
 				if(f->f->disp.clusters > length && f->f->disp.clusters <= rgn->length){
-					if(can_defragment_entirely(f->f,jp)){
+					if(can_defragment(f->f,jp)){
 						f_largest = f;
 						length = f->f->disp.clusters;
 					}
@@ -337,6 +304,8 @@ int defragment_small_files(udefrag_job_parameters *jp)
 				defragmented_files ++;
 			} else {
 				DebugPrint("Defrag failure for %ws",file->path);
+				/* exclude file from the current task */
+				file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 			}
 			
 			/* skip locked files here to prevent skipping the current free region */
@@ -365,10 +334,7 @@ done:
 
 /**
  * @brief Defragments all fragmented files entirely, if possible.
- * @details 
- * - If some file cannot be defragmented due to its size,
- * this routine marks it by UD_FILE_INTENDED_FOR_PART_DEFRAG flag.
- * - This routine fills free space areas respect to the best matching rule.
+ * @details This routine fills free space areas respect to the best matching rules.
  */
 static int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
 {
@@ -383,6 +349,12 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
+
+	/* no files are excluded by this task currently */
+	for(f = jp->fragmented_files; f; f = f->next){
+		f->f->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
+		if(f->next == jp->fragmented_files) break;
+	}
 
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
@@ -399,7 +371,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 		f_largest = NULL, length = 0;
 		for(f = jp->fragmented_files; f; f = f->next){
 			if(f->f->disp.clusters > length){
-				if(can_defragment_entirely(f->f,jp)){
+				if(can_defragment(f->f,jp)){
 					f_largest = f;
 					length = f->f->disp.clusters;
 				}
@@ -412,7 +384,8 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 		rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,FIND_MATCHING_RGN_ANY);
 		if(jp->termination_router((void *)jp)) break;
 		if(rgn == NULL){
-			file->user_defined_flags |= UD_FILE_INTENDED_FOR_PART_DEFRAG;
+			/* exclude file from the current task */
+			file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 		} else {
 			/* move the file */
 			if(is_mft(file,jp))
@@ -425,6 +398,8 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 				defragmented_files ++;
 			} else {
 				DebugPrint("Defrag failure for %ws",file->path);
+				/* exclude file from the current task */
+				file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 			}
 		}
 	}
@@ -466,6 +441,12 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
 
+	/* no files are excluded by this task currently */
+	for(f = jp->fragmented_files; f; f = f->next){
+		f->f->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
+		if(f->next == jp->fragmented_files) break;
+	}
+
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
@@ -496,7 +477,7 @@ int defragment_big_files(udefrag_job_parameters *jp)
 			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
-				if(f->f->disp.clusters > length && can_defragment_partially(f->f,jp)){
+				if(f->f->disp.clusters > length && can_defragment(f->f,jp)){
 					f_largest = f;
 					length = f->f->disp.clusters;
 				}
@@ -532,6 +513,8 @@ int defragment_big_files(udefrag_job_parameters *jp)
 			if(longest_sequence == NULL){
 				/* fragments of the current file cannot be joined */
 				f_largest->f->user_defined_flags |= UD_FILE_TOO_LARGE;
+				/* exclude file from the current task */
+				f_largest->f->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 			}
 		} while(is_too_large(f_largest->f));
 
@@ -544,13 +527,11 @@ int defragment_big_files(udefrag_job_parameters *jp)
 			defragmented_files ++;
 		} else {
 			DebugPrint("Partial defrag failure for %ws",file->path);
+			/* exclude file from the current task */
+			file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 		}
 		
-		/*
-		* Remove target space from the free space pool.
-		* This will safely prevent infinite loops
-		* on a single free space block.
-		*/
+		/* remove target space from the free space pool anyway */
 		jp->free_regions = winx_sub_volume_region(jp->free_regions,target,longest_sequence_length);
 	}
 
@@ -558,7 +539,7 @@ part_defrag_done:
 	/* mark all files not processed yet as too large */
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) break;
-		if(can_defragment_partially(f->f,jp))
+		if(can_defragment(f->f,jp))
 			f->f->user_defined_flags |= UD_FILE_TOO_LARGE;
 		if(f->next == jp->fragmented_files) break;
 	}
@@ -605,6 +586,12 @@ int move_files_to_front(udefrag_job_parameters *jp, int flags)
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
+
+	/* no files are excluded by this task currently */
+	for(file = jp->filelist; file; file = file->next){
+		file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
+		if(file->next == jp->filelist) break;
+	}
 
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
@@ -715,6 +702,12 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
+
+	/* no files are excluded by this task currently */
+	for(file = jp->filelist; file; file = file->next){
+		file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
+		if(file->next == jp->filelist) break;
+	}
 
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
@@ -834,7 +827,7 @@ repeat_scan:
 										clusters_to_move = jp->moveable_mft_clusters;
 									else
 										clusters_to_move = file->disp.clusters;
-									rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,clusters_to_move,FIND_MATCHING_RGN_FORWARD);
+									rgn = find_matching_free_region(jp,block->lcn,clusters_to_move,FIND_MATCHING_RGN_FORWARD);
 									if(rgn != NULL){
 										if(rgn->lcn > block->lcn){
 											if(move_file(file,file->disp.blockmap->vcn,clusters_to_move,

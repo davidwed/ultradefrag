@@ -225,10 +225,9 @@ static ULONGLONG calculate_amount_of_data_to_be_moved(udefrag_job_parameters *jp
 		for(f = jp->fragmented_files; f; f = f->next){
 			if(jp->termination_router((void *)jp)) break;
 			/*
-			* Count all fragmented files which 
-			* can be processed at least partially.
+			* Count all fragmented files which can be processed.
 			*/
-			if(can_defragment_partially(f->f,jp))
+			if(can_defragment(f->f,jp))
 				clusters_to_process += f->f->disp.clusters;
 			if(f->next == jp->fragmented_files) break;
 		}

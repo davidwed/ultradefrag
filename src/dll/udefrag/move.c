@@ -681,11 +681,9 @@ typedef enum {
  * @note 
  * - Volume must be opened before this call,
  * jp->fVolume must contain a proper handle.
- * - If this function returns negative value
- * indicating failure, one of the flags listed
- * in udefrag_internals.h under "file status flags"
- * becomes set to help to avoid repetitive moving attempts
- * for a single file.
+ * - If this function returns negative value indicating failure, 
+ * one of the flags listed in udefrag_internals.h under "file status flags"
+ * becomes set to display a proper message in fragmentation reports.
  * - On Windows NT 4.0 and Windows 2000 NTFS file system driver
  * has a lot of complex limitations covered in 
  * <a href="http://www.decuslib.com/decus/vmslt99a/nt/defrag.txt">Inside 
