@@ -348,10 +348,12 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		if(jp->pi.moved_clusters == 0) break;
 	}
 
-    /* partial defragment only once */
-    if(!(jp->termination_router((void *)jp) || \
-        (jp->udo.preview_flags & UD_PREVIEW_SKIP_PARTIAL)))
-            result = defragment_partial(jp);
+    /* partial defragment only once, but never in optimization */
+	if(jp->job_type == DEFRAGMENTATION_JOB){
+		if(!(jp->termination_router((void *)jp) || \
+			(jp->udo.preview_flags & UD_PREVIEW_SKIP_PARTIAL)))
+				result = defragment_partial(jp);
+	}
 
 done:	
 	release_temp_space_regions(jp);
