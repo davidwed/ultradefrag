@@ -298,7 +298,7 @@ static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, U
 {
 	udefrag_fragmented_file *f;
 	winx_blockmap *block;
-	int i, j, n, total = 0;
+	ULONGLONG i, j, n, total = 0;
 	
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) break;
