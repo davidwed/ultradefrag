@@ -722,6 +722,9 @@ int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp)
 {
 	NTSTATUS status;
 	HANDLE hFile;
+	
+	if(f->user_defined_flags & UD_FILE_LOCKED)
+		return 1;
 
 	status = udefrag_fopen(f,&hFile);
 	if(status == STATUS_SUCCESS){
