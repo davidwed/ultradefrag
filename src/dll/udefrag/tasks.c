@@ -424,6 +424,11 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
  * - This routine fills free space areas starting
  * from the biggest one to concatenate as much fragments
  * as possible.
+ * - This routine uses UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS
+ * flag to avoid infinite loops, therefore processed file
+ * maps become cut. This is not a problem while we use
+ * a single defragment_big_files call after all other
+ * volume processing steps.
  */
 int defragment_big_files(udefrag_job_parameters *jp)
 {
