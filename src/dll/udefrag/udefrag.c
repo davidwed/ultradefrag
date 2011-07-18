@@ -253,7 +253,148 @@ static ULONGLONG calculate_amount_of_data_to_be_moved(udefrag_job_parameters *jp
 	
 	return clusters_to_process;
 }
- 
+
+/**
+ * @brief Calculates free region size
+ * threshold used in volume optimization.
+ */
+static void calculate_free_rgn_size_threshold(udefrag_job_parameters *jp)
+{
+	winx_volume_region *rgn;
+	ULONGLONG length = 0;
+
+	if(jp->v_info.total_bytes / jp->v_info.free_bytes <= 10){
+		/*
+		* We have at least 10% of free space on the volume, so
+		* it seems to be reasonable to put all data together
+		* even if the free space is split to many little pieces.
+		*/
+		DebugPrint("calculate_free_rgn_size_threshold: strategy #1 because of at least 10%% of free space on the volume");
+		for(rgn = jp->free_regions; rgn; rgn = rgn->next){
+			if(rgn->length > length)
+				length = rgn->length;
+			if(rgn->next == jp->free_regions) break;
+		}
+		/* Threshold = 0.5% of the volume or a half of the largest free space block. */
+		jp->free_rgn_size_threshold = min(jp->v_info.total_clusters / 200, length / 2);
+	} else {
+		/*
+		* On volumes with less than 10% of free space
+		* we're searching for the free space block
+		* at least 0.5% long.
+		*/
+		DebugPrint("calculate_free_rgn_size_threshold: strategy #2 because of less than 10%% of free space on the volume");
+		jp->free_rgn_size_threshold = jp->v_info.total_clusters / 200;
+	}
+	if(jp->free_rgn_size_threshold < 2) jp->free_rgn_size_threshold = 2;
+	DebugPrint("free region size threshold = %I64u clusters",jp->free_rgn_size_threshold);
+}
+
+/**
+ * @brief Returns number of fragmented clusters
+ * locating inside a specified part of the volume.
+ */
+static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
+{
+	udefrag_fragmented_file *f;
+	winx_blockmap *block;
+	int i, j, n, total = 0;
+	
+	for(f = jp->fragmented_files; f; f = f->next){
+		if(jp->termination_router((void *)jp)) break;
+		n = 0;
+		for(block = f->f->disp.blockmap; block; block = block->next){
+			if((block->lcn + block->length >= first_lcn + 1) && block->lcn <= last_lcn){
+				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
+				if(block->lcn + block->length < last_lcn + 1) j = block->lcn + block->length; else j = last_lcn + 1;
+				n += (j - i);
+			}
+			if(block->next == f->f->disp.blockmap) break;
+		}
+		if(n && !is_file_locked(f->f,jp))
+			total += n;
+		if(f->next == jp->fragmented_files) break;
+	}
+	
+	return total;
+}
+
+/**
+ * @brief Calculates starting point
+ * for a volume optimization process
+ * to skip already optimized data.
+ * All the clusters before it will
+ * be skipped in move_files_to_back
+ * routine.
+ */
+static ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
+{
+	ULONGLONG new_sp;
+	ULONGLONG fragmented, lim, i;
+	winx_volume_region *rgn;
+	winx_file_info *file;
+	winx_blockmap *block;
+	
+	/* search for the first large free space gap after an old starting point */
+	new_sp = old_sp;
+	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
+		if(rgn->lcn >= old_sp && rgn->length >= jp->free_rgn_size_threshold){
+			new_sp = rgn->lcn;
+			break;
+		}
+		if(rgn->next == jp->free_regions) break;
+	}
+	
+	/* move starting point back to release heavily fragmented data */
+	fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
+	if(fragmented < jp->free_rgn_size_threshold) goto done;
+
+	/*
+	* Fast binary search allows to find quickly a proper part 
+	* of the volume which is heavily fragmented.
+	* Based on bsearch() algorithm copyrighted by DJ Delorie (1994).
+	*/
+	i = old_sp;
+	for(lim = new_sp - old_sp; lim != 0; lim >>= 1){
+		new_sp = i + (lim >> 1);
+		fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
+		if(fragmented >= jp->free_rgn_size_threshold){
+			/* move left */
+		} else {
+			/* move right */
+			i = new_sp + 1; lim --;
+		}
+	}
+	if(new_sp == old_sp + 1 || new_sp == old_sp)
+		return old_sp;
+	
+	/*
+	* Release all remaining data when all space
+	* between new_sp and old_sp is heavily fragmented.
+	*/
+	if(fragmented >= (new_sp - old_sp + 1) / 3)
+		return old_sp; /* because at least 1/3 of skipped space is fragmented */
+	
+done:
+	/* is starting point inside a file block? */
+	for(file = jp->filelist; file; file = file->next){
+		for(block = file->disp.blockmap; block; block = block->next){
+			if(new_sp >= block->lcn && new_sp <= block->lcn + block->length - 1){
+				if(is_fragmented(file)){
+					/* include block */
+					return block->lcn;
+				} else {
+					/* skip block */
+					return (block->lcn + block->length);
+				}
+			}
+			if(block->next == file->disp.blockmap) break;
+		}
+		if(file->next == jp->filelist) break;
+	}
+	return new_sp;
+}
+
 /*
 * How statistical data adjusts in all the volume processing routines:
 * 1. we calculate a maximum amount of data which may be moved in process
@@ -283,7 +424,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	char *action = "analyzing";
 	int result = 0;
-	//ULONGLONG start_lcn = 0;
+	ULONGLONG start_lcn, new_start_lcn;
 	
 	/* check for preview masks */
 	if(jp->udo.preview_flags & UD_PREVIEW_REPEAT)
@@ -310,18 +451,34 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 
 	jp->pi.clusters_to_process = calculate_amount_of_data_to_be_moved(jp);
 	jp->pi.processed_clusters = 0;
+	start_lcn = 0;
+	if(jp->job_type != DEFRAGMENTATION_JOB)
+		calculate_free_rgn_size_threshold(jp);
 	
 	for(; result == 0; jp->pi.pass_number++){
+		/* define starting point */
+		if(jp->job_type != DEFRAGMENTATION_JOB){
+			new_start_lcn = calculate_starting_point(jp,start_lcn);
+			if(new_start_lcn <= start_lcn && jp->pi.pass_number){
+				DebugPrint("volume optimization completed: old_sp = %I64u, new_sp = %I64u",
+					start_lcn, new_start_lcn);
+				break;
+			}
+			start_lcn = new_start_lcn;
+			DebugPrint("volume optimization pass #%u, starting point = %I64u",
+				jp->pi.pass_number, start_lcn);
+		}
+		
 		/* move all or fragmented clusters to the end of the volume
 		starting with cluster 0 or the first fragmented cluster */
 		if(jp->job_type == FULL_OPTIMIZATION_JOB)
-			result = move_files_to_back(jp, MOVE_ALL);
+			result = move_files_to_back(jp, start_lcn, MOVE_ALL);
 		
 		/* TODO: this routine makes a lot of slow move_file() calls,
 		try to comment it out and test effectiveness of the quick optimization
 		in this case */
-		if(jp->job_type == QUICK_OPTIMIZATION_JOB && jp->pi.pass_number == 0)
-			result = move_files_to_back(jp, MOVE_FRAGMENTED);
+		if(jp->job_type == QUICK_OPTIMIZATION_JOB/* && jp->pi.pass_number == 0*/)
+			result = move_files_to_back(jp, start_lcn, MOVE_FRAGMENTED);
 		if(jp->termination_router((void *)jp)) break;
 
 		/* defragment */

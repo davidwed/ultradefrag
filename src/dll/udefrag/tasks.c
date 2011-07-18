@@ -673,6 +673,8 @@ done:
  * @brief This routine moves individual clusters
  * and never tries to keep the file not fragmented.
  * @param[in] jp job parameters.
+ * @param[in] start_lcn the first cluster of an area intended 
+ * to be cleaned up - all clusters before it should be skipped.
  * @param[in] flags one of MOVE_xxx flags defined in udefrag.h
  * @return Zero for success, negative value otherwise.
  * @note This routine is optimized for speed.
@@ -687,7 +689,7 @@ done:
  * passed in), we're moving the bound between parts forward, because 
  * we have a chance to move other files instead of excluded ones.
  */
-int move_files_to_back(udefrag_job_parameters *jp, int flags)
+int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags)
 {
 	ULONGLONG time;
 	char buffer[32];
@@ -734,7 +736,7 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 	/* do the job */
 	used_clusters = (jp->v_info.total_bytes - jp->v_info.free_bytes);
 	used_clusters /= jp->v_info.bytes_per_cluster;
-	parts_bound = jp->v_info.total_clusters - used_clusters;
+	parts_bound = jp->v_info.total_clusters - used_clusters + start_lcn;
 	DebugPrint("move_files_to_back: total clusters:      %I64u", jp->v_info.total_clusters);
 	DebugPrint("move_files_to_back: used clusters:       %I64u", used_clusters);
 	DebugPrint("move_files_to_back: initial parts bound: %I64u", parts_bound);
@@ -747,7 +749,7 @@ int move_files_to_back(udefrag_job_parameters *jp, int flags)
 repeat_scan:
 			for(block = file->disp.blockmap; block; block = block->next){
 				if(jp->termination_router((void *)jp)) goto done;
-				if(block->lcn < parts_bound && block->length){
+				if(block->lcn < parts_bound && block->length && block->lcn > start_lcn){
 					if(!can_move(file,jp)){
 						if(block->lcn > prev_pass_parts_bound){
 							/* adjust parts bound */

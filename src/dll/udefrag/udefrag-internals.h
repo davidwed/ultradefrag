@@ -152,6 +152,7 @@ typedef struct _udefrag_job_parameters {
 	WINX_FILE *fVolume;                         /* handle of the volume, used by file moving routines */
 	winx_volume_region *temp_space_list;        /* list of regions of space temporarily allocated by system */
 	ULONGLONG moveable_mft_clusters;            /* number of clusters in moveable parts of $mft */
+	ULONGLONG free_rgn_size_threshold;          /* free region size threshold used in volume optimization */
 } udefrag_job_parameters;
 
 int  get_options(udefrag_job_parameters *jp);
@@ -236,6 +237,6 @@ enum {
 };
 
 int move_files_to_front(udefrag_job_parameters *jp, int flags);
-int move_files_to_back(udefrag_job_parameters *jp, int flags);
+int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
