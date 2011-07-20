@@ -26,7 +26,7 @@ HISTORY
     
       Korean, Turkish, Slovak, English (US), Hindi, Romanian, Filipino (Tagalog),
       Catalan, Spanish (ES), Greek, Chinese (Simplified), Polish, Swedish, 
-      Italian, Finnish, Chinese (Traditional), German, Hungarian
+      Italian, Finnish, Chinese (Traditional), German, Hungarian, Danish
       
     - hexview command added to the boot time shell
     - Developers: udefrag_start_job prototype changed by adding algorithm 
