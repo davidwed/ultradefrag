@@ -224,6 +224,7 @@ int move_file(winx_file_info *f,
 			  udefrag_job_parameters *jp
 			  );
 
+ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
 int defragment_small_files(udefrag_job_parameters *jp);
@@ -236,7 +237,7 @@ enum {
 	MOVE_ALL
 };
 
-int move_files_to_front(udefrag_job_parameters *jp, int flags);
+int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags);
 int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags);
 
 #endif /* _UDEFRAG_INTERNALS_H_ */
