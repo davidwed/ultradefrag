@@ -229,6 +229,8 @@ void ApplyLanguagePack(void)
 	if(lang_name[0] == 0){
 		WgxDbgPrint("Selected language name not found in lang.ini file\n");
 		SetEvent(hLangPackEvent);
+		/* assign default strings to the toolbar tooltips */
+		UpdateToolbarTooltips();
 		return;
 	}
 	_snwprintf(path,MAX_PATH,L".\\i18n\\%hs.lng",lang_name);
