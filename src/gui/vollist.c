@@ -311,19 +311,24 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	lviw.iItem = index;
 	lviw.iSubItem = 1;
 	
-    switch(job->job_type){
-		case ANALYSIS_JOB:
-			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
-			break;
-		case DEFRAGMENTATION_JOB:
-			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
-			break;
-		case FULL_OPTIMIZATION_JOB:
-		case QUICK_OPTIMIZATION_JOB:
-			ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
-			break;
-    }
-
+	/* each job starts with a volume analysis */
+	if(job->pi.current_operation == VOLUME_ANALYSIS){
+		ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
+	} else {
+		switch(job->job_type){
+			case ANALYSIS_JOB:
+				ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
+				break;
+			case DEFRAGMENTATION_JOB:
+				ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_DEFRAGMENTED");
+				break;
+			case FULL_OPTIMIZATION_JOB:
+			case QUICK_OPTIMIZATION_JOB:
+				ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
+				break;
+		}
+	}
+	
     if(job->pi.completion_status < 0){
 		lviw.pszText = L"";
 	} else {

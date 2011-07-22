@@ -98,7 +98,7 @@ typedef enum {
 } udefrag_job_type;
 
 typedef enum {
-	VOLUME_ANALYSIS = 0,
+	VOLUME_ANALYSIS = 0,     /* should be zero */
 	VOLUME_DEFRAGMENTATION,
 	VOLUME_OPTIMIZATION
 } udefrag_operation_type;
