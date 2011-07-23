@@ -44,7 +44,8 @@ WGX_MENU when_done_menu[] = {
 WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_ANALYZE,                             NULL, L"&Analyze\tF5"   },
 	{MF_STRING | MF_ENABLED,IDM_DEFRAG,                              NULL, L"&Defragment\tF6"},
-	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE,                            NULL, L"&Optimize\tF7"  },
+	{MF_STRING | MF_ENABLED,IDM_QUICK_OPTIMIZE,                      NULL, L"&Quick optimization\tF7"  },
+	{MF_STRING | MF_ENABLED,IDM_FULL_OPTIMIZE,                       NULL, L"&Full optimization\tCtrl+F7"  },
 	{MF_STRING | MF_ENABLED,IDM_STOP,                                NULL, L"&Stop\tCtrl+C"  },
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA, NULL, L"Skip removable &media\tCtrl+M"},
@@ -103,8 +104,6 @@ WGX_MENU preview_menu[] = {
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space"},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_QUICK,        NULL, L"Use quick optimize"},
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_SKIP_PARTIAL, NULL, L"Skip partial defragmenting"},
 	{0,0,NULL,NULL}
@@ -170,12 +169,6 @@ int CreateMainMenu(void)
 			IDM_PREVIEW_LARGEST,
 			MF_BYCOMMAND | MF_CHECKED);
 	}
-	if(preview_flags & UD_PREVIEW_QUICK){
-		CheckMenuItem(hMainMenu,
-			IDM_PREVIEW_QUICK,
-			MF_BYCOMMAND | MF_CHECKED);
-	}
-
 	if(preview_flags & UD_PREVIEW_SKIP_PARTIAL){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_SKIP_PARTIAL,

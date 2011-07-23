@@ -725,7 +725,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		case IDM_DEFRAG:
 			start_selected_jobs(DEFRAGMENTATION_JOB);
 			return 0;
-		case IDM_OPTIMIZE:
+		case IDM_QUICK_OPTIMIZE:
+			start_selected_jobs(QUICK_OPTIMIZATION_JOB);
+			return 0;
+		case IDM_FULL_OPTIMIZE:
 			start_selected_jobs(FULL_OPTIMIZATION_JOB);
 			return 0;
 		case IDM_STOP:
@@ -892,9 +895,6 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 					id = IDM_PREVIEW_MATCHING;
 				case IDM_PREVIEW_MATCHING:
 					flag = UD_PREVIEW_MATCHING;
-					break;
-				case IDM_PREVIEW_QUICK:
-					flag = UD_PREVIEW_QUICK;
 					break;
 				case IDM_PREVIEW_SKIP_PARTIAL:
 					flag = UD_PREVIEW_SKIP_PARTIAL;

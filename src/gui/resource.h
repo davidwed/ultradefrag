@@ -77,7 +77,8 @@
 #define IDM_ACTION                      1100
 #define IDM_ANALYZE                     1110
 #define IDM_DEFRAG                      1120
-#define IDM_OPTIMIZE                    1130
+#define IDM_QUICK_OPTIMIZE              1130
+#define IDM_FULL_OPTIMIZE               1131
 #define IDM_STOP                        1135
 #define IDM_IGNORE_REMOVABLE_MEDIA      1140
 #define IDM_RESCAN                      1150
@@ -121,7 +122,6 @@ enum {
     IDM_PREVIEW_REPEAT,
     IDM_PREVIEW_LARGEST,
     IDM_PREVIEW_MATCHING,
-    IDM_PREVIEW_QUICK,
     IDM_PREVIEW_SKIP_PARTIAL,
     IDM_PREVIEW_LAST_ITEM    /* must always be the last entry */
 };

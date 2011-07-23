@@ -40,6 +40,8 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0, L"ANALYSE",                  L"&Analyze",                 NULL},
 	{0, L"DEFRAGMENT",               L"&Defragment",              NULL},
 	{0, L"OPTIMIZE",                 L"&Optimize",                NULL},
+	{0, L"QUICK_OPTIMIZE",           L"&Quick optimization",      NULL},
+	{0, L"FULL_OPTIMIZE",            L"&Full optimization",       NULL},
 	{0, L"STOP",                     L"&Stop",                    NULL},
 	{0, L"SKIP_REMOVABLE_MEDIA",     L"Skip removable &media",    NULL},
 	{0, L"RESCAN_DRIVES",            L"&Rescan drives",           NULL},
@@ -133,7 +135,8 @@ struct menu_item {
 struct menu_item menu_items[] = {
 	{IDM_ANALYZE,                 L"ANALYSE",                  "F5"    },
 	{IDM_DEFRAG,                  L"DEFRAGMENT",               "F6"    },
-	{IDM_OPTIMIZE,                L"OPTIMIZE",                 "F7"    },
+	{IDM_QUICK_OPTIMIZE,          L"QUICK_OPTIMIZE",           "F7"    },
+	{IDM_FULL_OPTIMIZE,           L"FULL_OPTIMIZE",            "Ctrl+F7"},
 	{IDM_STOP,                    L"STOP",                     "Ctrl+C"},
 	{IDM_IGNORE_REMOVABLE_MEDIA,  L"SKIP_REMOVABLE_MEDIA",     "Ctrl+M"},
 	{IDM_RESCAN,                  L"RESCAN_DRIVES",            "Ctrl+D"},
