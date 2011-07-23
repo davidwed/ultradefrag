@@ -32,8 +32,10 @@
  * <dd>This analysis the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
  * <dt>Defragment (F6)</dt>
  * <dd>This defragments the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
- * <dt>Optimize (F7)</dt>
+ * <dt>Quick optimization (F7)</dt>
  * <dd>This optimizes the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dt>Full optimization (Ctrl+F7)</dt>
+ * <dd>This is similar to the quick optimization, but moves all files from the beginning to the end of the volume first.</dd>
  * <dt>Stop (Ctrl+C)</dt>
  * <dd>This aborts the currently running process at any stage, currently pending move operations will be completed to avoid corruption.</dd>
  * <dt>Skip removable media (Ctrl+M)</dt>
@@ -80,6 +82,20 @@
  * <dd>This launches the <b>Frequently Asked Questions</b> section of this handbook.</dd>
  * <dt>About (F4)</dt>
  * <dd>This opens the about window.</dd>
+ * </dl>
+ * </td></tr><tr><td>
+ * <b>Preview</b> (available only in testing releases)
+ * </td><td>
+ * <dl>
+ * <dt>Repeat action until nothing left to move</dt>
+ * <dd>Processes the selected volume(s) in a loop till all movable files are processed.</dd>
+ * <dt>Find largest free space</dt>
+ * <dd>Always fill the largest free space region first.</dd>
+ * <dt>Find matching free space</dt>
+ * <dd>Always fill a free space region which is similar to the size of the file.</dd>
+ * <dt>Skip partial defragmenting</dt>
+ * <dd>On regular defragmentation skip the final partial defragmentation,
+ * which consolidates small parts of files.</dd>
  * </dl>
  * </td></tr>
  * </table>

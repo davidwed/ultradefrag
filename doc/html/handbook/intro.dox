@@ -63,7 +63,7 @@
  *
  * <h1>Supported file-systems</h1>
  * The following file-systems can be defragmented by UltraDefrag:
- * FAT12/16/32 and NTFS.
+ * FAT12/16/32, exFAT and NTFS.
  *
  * There are a few system restrictions which apply to disk
  * defragmentation. Unfortunately UltraDefrag cannot take away
