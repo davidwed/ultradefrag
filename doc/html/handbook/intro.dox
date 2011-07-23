@@ -88,47 +88,36 @@
  * was not reliable.
  *
  * <h1>Defragmentation algorithm</h1>
- * UltraDefrag uses the following three algorithms:
- * - During the volume analysis UltraDefrag scans the complete
- * filesystem contained on the volume. To define exactly where
- * free space is located and which files are fragmented.
- * - During defragmentation UltraDefrag fills free space areas
- * in the beginning of the volume by moving parts of fragmented files
- * thitherward. Thus files become unfragmented.
- * - Volume optimization process is more complex. It consists of the
- * following six steps:
  * <ol>
- * <li>During the initial analysis UltraDefrag collects detailed
- * information about all files contained on the volume.</li>
- * <li>On the first optimization step UltraDefrag tries to 
- * create a single large free space area in the beginning of the
- * volume by moving all files to the end of the volume.</li>
- * <li>The second analysis updates all information.</li>
- * <li>On the next step UltraDefrag defragments all fragmented
- * files as described above.</li>
- * <li>On the second optimization phase UltraDefrag moves all
- * remaining files from the end of the volume to the
- * beginning.</li>
- * <li>The final analysis updates all information.</li>
+ * <li>The analysis phase scans the whole volume to collect
+ * information about all files and free space.</li>
+ * <li>The defragmentation phase concartenates all fragmented files
+ * into one chunk. Files that can't be moved or are locked are skiped.</li>
+ * <li>The partial defragmentation phase tries to concartenate the
+ * remaining fragmented files into as less pieces as possible.</li>
  * </ol>
- * This sequence repeats until the end of the volume is reached.
- * The starting point of the optimization moves forward before
- * repeating the sequence to skip already optimized parts of the
- * volume.
  *
- * After completion of the described defragmentation
- * algorithms the program tries to reduce the
- * number of fragments of still fragmented files by moving their
- * contents to large continuous free space areas. In case of
- * the volume optimization files are always moved to the
- * beginning of the volume to free as much space as possible at the
- * end of the volume as mentioned before.
+ * <h1>Quick optimization algorithm</h1>
+ * <ol>
+ * <li>The analysis phase is the same as for defragmentation.</li>
+ * <li>The next phase moves only fragmented files to the end of the
+ * volume to free space at the begining of it.</li>
+ * <li>The defragmentation phase is the same as for defragmentation.</li>
+ * <li>The last phase tries to move as much not fragmented files 
+ * to the beginning of the volume to create a big free space at the end.</li>
+ * </ol>
  *
- * The multi-pass disk optimization algorithm is very effective,
- * even on disks which have a low amount of free space.
+ * <h1>Full optimization algorithm</h1>
+ * <ol>
+ * <li>The analysis phase is the same as for defragmentation.</li>
+ * <li>The next phase moves all files, fragmented or not, to the end of the
+ * volume to free space at the begining of it.</li>
+ * <li>The defragmentation phase is the same as for defragmentation.</li>
+ * <li>The last phase is the same as for quick optimization.</li>
+ * </ol>
  *
- * Another advantage of the described optimization algorithm
- * over more complicated algorithms is it's relatively small
+ * Another advantage of the described optimization algorithms
+ * over more complicated algorithms is their relatively small
  * processing time.
  *
  * Unfortunately the volume optimization algorithm works only
