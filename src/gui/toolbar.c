@@ -44,17 +44,18 @@ struct toolbar_button {
 struct toolbar_button buttons[] = {
 	{0, IDM_ANALYZE,          TBSTATE_ENABLED, TBSTYLE_BUTTON, L"ANALYSE",           "F5"    },
 	{1, IDM_DEFRAG,           TBSTATE_ENABLED, TBSTYLE_BUTTON, L"DEFRAGMENT",        "F6"    },
-	{2, IDM_OPTIMIZE,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"OPTIMIZE",          "F7"    },
-	{3, IDM_STOP,             TBSTATE_ENABLED, TBSTYLE_BUTTON, L"STOP",              "Ctrl+C"},
+	{2, IDM_QUICK_OPTIMIZE,   TBSTATE_ENABLED, TBSTYLE_BUTTON, L"QUICK_OPTIMIZE",    "F7"    },
+	{3, IDM_FULL_OPTIMIZE,    TBSTATE_ENABLED, TBSTYLE_BUTTON, L"FULL_OPTIMIZE",     "Ctrl+F7"},
+	{4, IDM_STOP,             TBSTATE_ENABLED, TBSTYLE_BUTTON, L"STOP",              "Ctrl+C"},
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
-	{4, IDM_SHOW_REPORT,      TBSTATE_ENABLED, TBSTYLE_BUTTON, L"REPORT",            "F8"    },
+	{5, IDM_SHOW_REPORT,      TBSTATE_ENABLED, TBSTYLE_BUTTON, L"REPORT",            "F8"    },
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
-	{5, IDM_CFG_GUI_SETTINGS, TBSTATE_ENABLED, TBSTYLE_BUTTON, L"OPTIONS",           "F10"   },
+	{6, IDM_CFG_GUI_SETTINGS, TBSTATE_ENABLED, TBSTYLE_BUTTON, L"OPTIONS",           "F10"   },
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
-	{6, IDM_CFG_BOOT_ENABLE,  TBSTATE_ENABLED, TBSTYLE_CHECK,  L"BOOT_TIME_SCAN",    "F11"   },
-	{7, IDM_CFG_BOOT_SCRIPT,  TBSTATE_ENABLED, TBSTYLE_BUTTON, L"BOOT_TIME_SCRIPT",  "F12"   },
+	{7, IDM_CFG_BOOT_ENABLE,  TBSTATE_ENABLED, TBSTYLE_CHECK,  L"BOOT_TIME_SCAN",    "F11"   },
+	{8, IDM_CFG_BOOT_SCRIPT,  TBSTATE_ENABLED, TBSTYLE_BUTTON, L"BOOT_TIME_SCRIPT",  "F12"   },
 	{0, 0,                    TBSTATE_ENABLED, TBSTYLE_SEP,    NULL,                 NULL    },
-	{8, IDM_CONTENTS,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"HELP",              "F1"    }
+	{9, IDM_CONTENTS,         TBSTATE_ENABLED, TBSTYLE_BUTTON, L"HELP",              "F1"    }
 };
 
 #define N_BUTTONS (sizeof(buttons)/sizeof(struct toolbar_button))
