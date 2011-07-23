@@ -2,7 +2,7 @@ HISTORY
 
   Version 5.0.0  2011-07-
   ------------------------------------------------------------------------------
-    RC1:
+    beta3:
     - volume optimization reimplemented
     - quick volume optimization implemented
     - the cluster map now indicates unused map blocks with gray color
