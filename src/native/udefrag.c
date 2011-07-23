@@ -79,7 +79,7 @@ void RedrawProgress(udefrag_progress_info *pi)
 {
 	int p1, p2, n;
 	char *op_name = "";
-	char s[64];
+	char s[MAX_LINE_WIDTH];
 	char format[16];
 	char *results;
 
