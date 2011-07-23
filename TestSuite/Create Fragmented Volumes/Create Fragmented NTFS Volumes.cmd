@@ -102,7 +102,7 @@ goto :EOF
     
     call :delay 2
     
-    set /a size="24 + %RANDOM%"
+    set /a size="24 + %RANDOM% / 3"
     set /a fragments="%RANDOM% / 1365"
     set count=0
     set NoCompr=0
@@ -176,6 +176,6 @@ goto :EOF
     set /a NoFolder="count %% 10"
     set /a NoCompr="count %% 5"
 
-    set /a size="24 + %RANDOM%"
+    set /a size="24 + %RANDOM% / 3"
     set /a fragments="%RANDOM% / 1365"
 goto :EOF
