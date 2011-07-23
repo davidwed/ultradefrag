@@ -64,7 +64,7 @@
  * You should never use this to process entire volumes.</dd>
  * <dt>Using quick instead of full optimize</dt>
  * <dd>Quick optimize is much faster than full optimize due to only
- * moving fragmented files to the end of the volume.<br/>
+ * moving fragmented files to the end of the volume first.<br/>
  * This makes it perfectly suited for system and boot drives.</dd>
  * </dl>
  * <span style="color: darkred">

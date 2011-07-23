@@ -84,7 +84,7 @@
  * <dd>This opens the about window.</dd>
  * </dl>
  * </td></tr><tr><td>
- * <b>Preview</b> (available only in testing releases)
+ * <b>Preview</b><br/>(available only in testing releases)
  * </td><td>
  * <dl>
  * <dt>Repeat action until nothing left to move</dt>
