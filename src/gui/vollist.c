@@ -312,7 +312,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	lviw.iSubItem = 1;
 	
 	/* each job starts with a volume analysis */
-	if(job->pi.current_operation == VOLUME_ANALYSIS){
+	if(job->pi.current_operation == VOLUME_ANALYSIS && job->job_type != NEVER_EXECUTED_JOB){
 		ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_ANALYSED");
 	} else {
 		switch(job->job_type){
