@@ -87,7 +87,8 @@
  * NTFS 1.2 had beta status and an appropriate system driver
  * was not reliable.
  *
- * <h1>Defragmentation algorithm</h1>
+ * <h1>Processing algorithms</h1>
+ * <h2>Defragmentation algorithm</h2>
  * <ol>
  * <li>The analysis phase scans the whole volume to collect
  * information about all files and free space.</li>
@@ -97,7 +98,7 @@
  * remaining fragmented files into as less pieces as possible.</li>
  * </ol>
  *
- * <h1>Quick optimization algorithm</h1>
+ * <h2>Quick optimization algorithm</h2>
  * <ol>
  * <li>The analysis phase is the same as for defragmentation.</li>
  * <li>The next phase moves only fragmented files to the end of the
@@ -107,7 +108,7 @@
  * to the beginning of the volume to create a big free space at the end.</li>
  * </ol>
  *
- * <h1>Full optimization algorithm</h1>
+ * <h2>Full optimization algorithm</h2>
  * <ol>
  * <li>The analysis phase is the same as for defragmentation.</li>
  * <li>The next phase moves all files, fragmented or not, to the end of the
