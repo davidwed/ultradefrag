@@ -472,7 +472,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	int result = 0;
 	ULONGLONG start_lcn, new_start_lcn;
 	/* variables indicating whether something has been moved or not */
-	int x = -1, y = -1, z = -1;
+	ULONGLONG mx = 0, my = 0, mz = 0;
 	/* variables indicating whether something failed or not */
 	int rx = -1, ry = -1, rz = -1;
 	int optimize_entire_disk = 0;
@@ -545,8 +545,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		starting with cluster 0 or the first fragmented cluster */
 		if(jp->job_type == FULL_OPTIMIZATION_JOB){
 			rx = move_files_to_back(jp, start_lcn, MOVE_ALL);
-			if(jp->pi.moved_clusters == 0 || rx < 0) x = -1;
-			else x = 0;
+			x = jp->pi.moved_clusters ? 0 : (-1);
 		}
 		
 		/* TODO: this routine makes a lot of slow move_file() calls,

@@ -225,6 +225,7 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	ULONGLONG file_length;
 	
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
+	jp->pi.moved_clusters = 0;
 
 	if(jp->udo.preview_flags & UD_PREVIEW_MATCHING)
 		return defragment_small_files_respect_best_matching(jp);
@@ -247,7 +248,6 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	time = start_timing("defragmentation",jp);
 
 	/* fill free regions in the beginning of the volume */
-	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(jp->termination_router((void *)jp)) break;
@@ -324,6 +324,8 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 	winx_file_info *file;
 	ULONGLONG file_length;
 
+	jp->pi.moved_clusters = 0;
+
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
 
@@ -342,7 +344,6 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 	time = start_timing("defragmentation",jp);
 
 	/* find best matching free region for each fragmented file */
-	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
 	while(jp->termination_router((void *)jp) == 0){
 		f_largest = NULL, length = 0;
@@ -419,6 +420,9 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	winx_file_info *file;
 	ULONGLONG file_length;
 
+	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
+	jp->pi.moved_clusters = 0;
+
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
 
@@ -437,8 +441,6 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	time = start_timing("partial defragmentation",jp);
 	
 	/* fill largest free region first */
-	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
-	jp->pi.moved_clusters = 0;
 	defragmented_files = 0;
 	
 	if(winx_get_os_version() <= WINDOWS_2K && jp->fs_type == FS_NTFS){
@@ -565,6 +567,9 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	ULONGLONG file_length;
 	char buffer[32];
 	
+	jp->pi.current_operation = VOLUME_OPTIMIZATION;
+	jp->pi.moved_clusters = 0;
+	
 	if(flags != MOVE_NOT_FRAGMENTED){
 		DebugPrint("move_files_to_front: 0x%x flag is not supported",(UINT)flags);
 		return (-1);
@@ -583,9 +588,6 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 		return (-1);
 
 	time = start_timing("file moving to front",jp);
-	
-	jp->pi.current_operation = VOLUME_OPTIMIZATION;
-	jp->pi.moved_clusters = 0;
 	
 	/* do the job */
 	/* strategy 1: the most effective one */
@@ -747,6 +749,9 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 	ULONGLONG clusters_to_move;
 	char buffer[32];
 
+	jp->pi.current_operation = VOLUME_OPTIMIZATION;
+	jp->pi.moved_clusters = 0;
+	
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
 
@@ -763,9 +768,6 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 		return (-1);
 
 	time = start_timing("file moving to end",jp);
-	
-	jp->pi.current_operation = VOLUME_OPTIMIZATION;
-	jp->pi.moved_clusters = 0;
 	
 	if(winx_get_os_version() <= WINDOWS_2K && jp->fs_type == FS_NTFS){
 		DebugPrint("Windows NT 4.0 and Windows 2000 have stupid limitations in defrag API");
