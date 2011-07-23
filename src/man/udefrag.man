@@ -17,19 +17,24 @@ OPTIONS
         -l
                 list all available drives excluding removable ones
                 can not be used with any other option
-        
+
         -la
                 list all available drives including removable ones
                 can not be used with any other option
-        
+
         -a
                 only analyze the drives
-                can not be used with the '-o' option
-        
+                can not be used with the '-o' and --quick-optimize
+                option
+
         -o
-                optimize the drives
+                fully optimize the drives
                 can not be used with the '-a' option
-        
+
+        --quick-optimize
+                quick optimize the drives
+                can not be used with the '-a' option
+
         {drive letter}:
                 one or more drives separated by spaces
                 can be omitted if one of the --all... options is used
@@ -37,7 +42,7 @@ OPTIONS
         --all
                 perform action for all available drives including
                 removable ones
-        
+
         --all-fixed
                 perform action for all available drives excluding
                 removable ones
@@ -53,15 +58,18 @@ OPTIONS
 EXAMPLES
         udefrag C:
                 Defragment drive C:
-        
+
         udefrag -la
                 List all available drives
-        
+
         udefrag -a --all-fixed
                 Analyze all drives excluding removable ones
-        
+
         udefrag E: K: -o
                 optimize drives E: and K:
+
+        udefrag O: Q: --quick-optimize
+                quick optimize drives O: and Q:
 
         udefrag C:\Windows\WindowsUpdate.log "C:\Program Files"
                 defragment the specified file and folder
@@ -75,4 +83,4 @@ COPYRIGHT
         There is NO warranty; not even for MERCHANTABILITY
         or FITNESS FOR A PARTICULAR PURPOSE.
 
-udefrag                       November 2010                         1
+udefrag                         July 2011                           1

@@ -40,6 +40,8 @@
  * the volume letter will cause UltraDefrag to defragment the volume.</dd>
  * <dt>-o, --optimize</dt>
  * <dd>Optimize the volume space by moving all files to the beginning of the volume.</dd>
+ * <dt>--quick-optimize</dt>
+ * <dd>Optimize the volume space by moving not fragmented files to the beginning of the volume.</dd>
  * <dt>-l, --list-available-volumes</dt>
  * <dd>List all volumes available for defragmentation, except removable. Each line of the
  * output contains a volume letter, filesystem name, total space and amount of 
