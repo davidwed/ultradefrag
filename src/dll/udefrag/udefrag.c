@@ -545,7 +545,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		starting with cluster 0 or the first fragmented cluster */
 		if(jp->job_type == FULL_OPTIMIZATION_JOB){
 			rx = move_files_to_back(jp, start_lcn, MOVE_ALL);
-			x = jp->pi.moved_clusters ? 0 : (-1);
+			mx = jp->pi.moved_clusters;
 		}
 		
 		/* TODO: this routine makes a lot of slow move_file() calls,
@@ -553,27 +553,24 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		in this case */
 		if(jp->job_type == QUICK_OPTIMIZATION_JOB/* && jp->pi.pass_number == 0*/){
 			rx = move_files_to_back(jp, start_lcn, MOVE_FRAGMENTED);
-			if(jp->pi.moved_clusters == 0 || rx < 0) x = -1;
-			else x = 0;
+			mx = jp->pi.moved_clusters;
 		}
 		if(jp->termination_router((void *)jp)) break;
 		
 		/* defragment */
 		ry = defragment(jp);
-		if(jp->pi.moved_clusters == 0 || ry < 0) y = -1;
-		else y = 0;
+		my = jp->pi.moved_clusters;
 		if(jp->termination_router((void *)jp)) break;
 		
 		/* move not fragmented files from
 		the second half of the volume to the beginning of the volume */
 		if(jp->job_type != DEFRAGMENTATION_JOB){
 			rz = move_files_to_front(jp, start_lcn, MOVE_NOT_FRAGMENTED);
-			if(jp->pi.moved_clusters == 0 || rz < 0) z = -1;
-			else z = 0;
+			mz = jp->pi.moved_clusters;
 		}
 	
 		/* exit if nothing moved */
-		if(x < 0 && y < 0 && z < 0){
+		if(mx == 0 && my == 0 && mz == 0){
 			if(jp->pi.pass_number == 0 && rx < 0 && ry < 0 && rz < 0)
 				result = -1; /* no actions succeeded */
 			break;
@@ -589,8 +586,11 @@ static DWORD WINAPI start_job_ex(LPVOID p)
     /* partial defragment only once, but never in optimization */
 	if(jp->job_type == DEFRAGMENTATION_JOB){
 		if(!(jp->termination_router((void *)jp) || \
-			(jp->udo.preview_flags & UD_PREVIEW_SKIP_PARTIAL)))
-				result = defragment_partial(jp);
+			(jp->udo.preview_flags & UD_PREVIEW_SKIP_PARTIAL))){
+				rx = defragment_partial(jp);
+				if(result < 0) /* all previous actions failed */
+					result = rx;
+		}
 	}
 
 done:	
