@@ -541,8 +541,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 				jp->pi.pass_number, start_lcn);
 		}
 		
-		/* move all or fragmented clusters to the end of the volume
-		starting with cluster 0 or the first fragmented cluster */
+		/* cleanup space after start_lcn */
 		if(jp->job_type == FULL_OPTIMIZATION_JOB){
 			rx = move_files_to_back(jp, start_lcn, MOVE_ALL);
 			mx = jp->pi.moved_clusters;
@@ -562,8 +561,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		my = jp->pi.moved_clusters;
 		if(jp->termination_router((void *)jp)) break;
 		
-		/* move not fragmented files from
-		the second half of the volume to the beginning of the volume */
+		/* move not fragmented files as close to the beginning of the volume as possible */
 		if(jp->job_type != DEFRAGMENTATION_JOB){
 			rz = move_files_to_front(jp, start_lcn, MOVE_NOT_FRAGMENTED);
 			mz = jp->pi.moved_clusters;
