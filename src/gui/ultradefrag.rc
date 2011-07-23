@@ -48,7 +48,7 @@ IDB_ABOUTBOX_PICTURE_8_BIT    BITMAP  DISCARDABLE     "res/ship_8bit.bmp"
 
 /*
 * Toolbar icons were copied from:
-* analyze, help icons - from NSIS compiler's frontend
+* analysis, help icons - from NSIS compiler's frontend
 * stop, config, terminal icons - from Silk icon set 1.3 http://www.famfamfam.com/lab/icons/silk/
 * report, script icons - from http://brandspankingnew.net/download.php?file=doc_types_v2.zip
 * All icons are licensed under terms permitting the use for non commercial purposes.
