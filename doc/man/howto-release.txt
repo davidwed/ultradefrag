@@ -5,6 +5,8 @@ new pre-release:
 4. update website
 5. submit news
 6. close bugs and requests
+7. update language wiki pages
+8. kindly request translation updates from known translators
 
 new release:
 1. update version in readme file
