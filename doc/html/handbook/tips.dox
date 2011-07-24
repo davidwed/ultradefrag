@@ -62,8 +62,8 @@
  * <dd>this is the worst and not recommended at all,
  * since many files are locked by running applications.
  * You should never use this to process entire volumes.</dd>
- * <dt>Using quick instead of full optimize</dt>
- * <dd>Quick optimize is much faster than full optimize due to only
+ * <dt>Using quick instead of full optimization</dt>
+ * <dd>Quick optimization is much faster than full optimization due to only
  * moving fragmented files to the end of the volume first.<br/>
  * This makes it perfectly suited for system and boot drives.</dd>
  * </dl>
