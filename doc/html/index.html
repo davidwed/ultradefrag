@@ -167,16 +167,18 @@ wikispaces_color_fontsize = "83%";
 	</div>
 	<div class="mpart">
 		<!-- pre-release announcement -->
-		<h3>Latest News - UltraDefrag 5.0.0 beta2 released</h3>
+		<h3>Latest News - UltraDefrag 5.0.0 beta3 released</h3>
         <h2>&nbsp;</h2> 
 		<p>This preview release includes the new GUI design and the new log file creation feature.</br>
-        Analysis and defragmentation are implemented, but optimization is still being worked on.</p>
+        Analysis, defragmentation and two optimization strategies are implemented.<br/>
+        The final release candidat is mainly focused on performance improvements.</p>
 		<p><a href=""><b>GUI:</b></a></p>
         <ul>
 		<li>The volume list hight can now be adjusted by dragging the bottom border of it.</li>
 		<li>Progress is now displayed in the status column of the volume list.</li>
 		<li>The volume label is now displayed in the volume list. Please check if all localized labels are displayed correctly.</li>
 		<li>There are now more actions available to be executed when UltraDefrag terminates.</li>
+		<li>The cluster map now displays unused map blocks in gray, so they can not be confused with free space.</li>
 		</ul>
 		<p><a href=""><b>Command line interface:</b></a></p>
 		<ul>
@@ -185,6 +187,8 @@ wikispaces_color_fontsize = "83%";
 		<p><a href=""><b>Driver:</b></a></p>
         <ul>
 		<li>Defragmentation of regular files and volume metafiles was improved.</li>
+		<li>Full optimization has been reimplemented, which processes all files despite of fragmentation.</li>
+		<li>Quick optimization has been added, which mainly processes fragmented files.</li>
 		<li>Creation of a log file by setting an environment variable is now possible, which highly simplifies reporting problems.</li>
 		</ul>
 		<p><a href=""><b>Reports:</b></a></p>
