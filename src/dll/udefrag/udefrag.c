@@ -523,6 +523,16 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 				optimize_entire_disk = 1;
 		}
 	}*/
+    
+    /*
+    * For optimization handle MFT here since it must be processed only once.
+    * Create a function to process the MFT separately, so we can ignore it in subsequent processing
+    *
+    * if(jp->job_type != DEFRAGMENTATION_JOB){
+    *     result = process_mft(jp);
+    *     if (result < 0) goto done;
+    * }
+    */
 	
 	while(!jp->termination_router((void *)jp)){
 		/* define starting point */

@@ -207,6 +207,33 @@ ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f)
 /************************************************************/
 
 /**
+ * @brief Defragments the MFT and MFTzone, if possible.
+ * @details 
+ * - This routine concatenates the MFT and MFTzone pieces into one
+ * contiguous string.
+ */
+int process_mft(udefrag_job_parameters *jp)
+{
+    /*
+    * if MFT or MFTzone is fragmented
+    *   1)  free as much space after the first MFT piece
+    *       to hold all the remaining MFT and MFT zone pieces
+    *   2)  place the MFT pieces after the initial MFT piece
+    *   3)  place the MFTzone after the last MFT piece
+    *
+    * finally
+    *       mark the MFT and MFTzone as processed
+    *
+    * no need to move the MFT to a different location than the one initially chosen by the O/S,
+    * since on big volumes it makes sense to keep it near the middle of the disk,
+    * so the disk head does not have to move back and forth across the whole disk
+    * to access files at the back of the volume
+    */
+    
+	return 0;
+}
+
+/**
  * @brief Defragments all fragmented files entirely, if possible.
  * @details 
  * - This routine fills free space areas from the beginning of the
