@@ -93,6 +93,11 @@
  * was not reliable.
  *
  * <h1>Processing algorithms</h1>
+ *
+ * <span style="color: darkred">
+ * Both optimization algorithms ignore any size, name and fragment count filters.
+ * </span>
+ *
  * <h2>Defragmentation algorithm</h2>
  * <ol>
  * <li>The analysis phase scans the whole volume to collect
