@@ -227,6 +227,7 @@ int move_file(winx_file_info *f,
 ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
+int optimize_mft(udefrag_job_parameters *jp);
 int defragment_small_files(udefrag_job_parameters *jp);
 int defragment_big_files(udefrag_job_parameters *jp);
 

@@ -171,6 +171,10 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 	/* skip file in case of improper state detected */
 	if(is_in_improper_state(f))
 		return 0;
+	
+	/* skip MFT - it will be processed individually by optimize_mft() */
+	if(is_mft(f,jp))
+		return 0;
 
 	return 1;
 }
@@ -212,7 +216,7 @@ ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f)
  * - This routine concatenates the MFT and MFTzone pieces into one
  * contiguous string.
  */
-int process_mft(udefrag_job_parameters *jp)
+int optimize_mft(udefrag_job_parameters *jp)
 {
     /*
     * if MFT or MFTzone is fragmented
