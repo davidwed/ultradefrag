@@ -9,7 +9,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Portuguese (BR)
+      Portuguese (BR), Yiddish
 
     beta3:
     - volume optimization reimplemented
