@@ -2,6 +2,15 @@ HISTORY
 
   Version 5.0.0  2011-07-
   ------------------------------------------------------------------------------
+    RC1:
+    - the following translations were added:
+
+      Latin, Hebrew
+
+    - the following translations were updated:
+
+      Portuguese (BR)
+
     beta3:
     - volume optimization reimplemented
     - quick volume optimization implemented
