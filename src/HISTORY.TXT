@@ -3,6 +3,7 @@ HISTORY
   Version 5.0.0  2011-07-
   ------------------------------------------------------------------------------
     RC1:
+    - one bug causing incorrect time limit treatment was fixed
     - the following translations were added:
 
       Latin, Hebrew

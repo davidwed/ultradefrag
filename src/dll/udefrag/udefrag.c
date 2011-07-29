@@ -525,10 +525,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	}*/
     
     /* optimize MFT separately to keep its optimal location */
-	//if(jp->job_type != DEFRAGMENTATION_JOB){
-		result = optimize_mft(jp);
-		if(result < 0) goto done;
-	//}
+	(void)optimize_mft(jp); /* ignore result because this task is not mandatory */
 	
 	while(!jp->termination_router((void *)jp)){
 		/* define starting point */
@@ -754,6 +751,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
 	*/
 	if(jp.udo.time_limit){
 		use_limit = 1;
+		/* FIXME: avoid overflow */
 		time = jp.udo.time_limit * 1000;
 	}
 	do {
@@ -762,9 +760,19 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
 		if(use_limit){
 			if(time <= jp.udo.refresh_interval){
 				/* time limit exceeded */
+				winx_dbg_print_header(0,0,"*");
+				winx_dbg_print_header(0x20,0,"time limit exceeded");
+				winx_dbg_print_header(0,0,"*");
 				jp.termination_router = killer;
 			} else {
-				time -= jp.udo.refresh_interval;
+				if(jp.start_time){
+					/* FIXME: avoid overflow */
+					if(winx_xtime() - jp.start_time > jp.udo.time_limit * 1000)
+						time = 0;
+				} else {
+					/* this method gives not so fine results, but requires no winx_xtime calls */
+					time -= jp.udo.refresh_interval; 
+				}
 			}
 		}
 	} while(jp.pi.completion_status == 0);
@@ -872,7 +880,7 @@ char * __stdcall udefrag_get_error_description(int error_code)
 		       "rarely arising error has been encountered.";
 	case UDEFRAG_FAT_OPTIMIZATION:
 		return "FAT volumes cannot be optimized\n"
-		       "because of unmoveable directories.";
+		       "because of unmovable directories.";
 	case UDEFRAG_W2K_4KB_CLUSTERS:
 		return "NTFS volumes with cluster size greater than 4 kb\n"
 		       "cannot be defragmented on Windows 2000 and Windows NT 4.0";
