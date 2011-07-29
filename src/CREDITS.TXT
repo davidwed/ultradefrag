@@ -59,6 +59,7 @@
     Galician           - Julio Mojón Fuentes
     German             - Stefan Geuken, Stefan Pendl
     Greek              - Konstantinos Kapoukranidis, Stefan Pendl
+    Hebrew             - Dmitri Arkhangelski
     Hindi              - Gaurav Chatterjee
     Hungarian          - Nagy Zsolt, Stefan Pendl
     Icelandic          - Stefan Pendl
@@ -66,6 +67,7 @@
     Italian            - Paolo Loggia, Stefan Pendl
     Japanese           - ao3, Stefan Pendl
     Korean             - Alex Han, Stefan Pendl
+    Latin              - Dmitri Arkhangelski
     Latvian            - Sevelyr, Vladislav Stuzhnev, Stefan Pendl
     Macedonian         - Dmitri Arkhangelski
     Norwegian          - Stefan Pendl
