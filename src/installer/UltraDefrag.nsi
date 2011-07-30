@@ -40,6 +40,11 @@
 !define MODERN_UI
 ;!define SHOW_BOOTSPLASH
 
+; --- support command line parsing
+!include "FileFunc.nsh"
+!insertmacro GetParameters
+!insertmacro GetOptions
+
 !include "WinVer.nsh"
 !include "x64.nsh"
 
@@ -191,18 +196,32 @@ SectionEnd
 Section "Documentation" SecDocs
 
   push $R0
+  push $R1
+  push $R2
+
   ${DisableX64FSRedirection}
 
   DetailPrint "Install documentation..."
   ; update the handbook
   RMDir /r "$INSTDIR\handbook"
-  SetOutPath "$INSTDIR\handbook"
-  File "${ROOTDIR}\doc\html\handbook\doxy-doc\html\*.*"
+
+  ; --- Check if documentation should be omitted
+  ; --- allows silent installation with: installer.exe /S /NOHELP=1
+  ${GetParameters} $R1
+  ClearErrors
+  ${GetOptions} $R1 /NOHELP= $R2
+  ${If} ${Errors}
+  ${OrIf} $R2 != "1"
+    SetOutPath "$INSTDIR\handbook"
+    File "${ROOTDIR}\doc\html\handbook\doxy-doc\html\*.*"
+  ${EndIf}
 
   ; update the uninstall size value
   ${UpdateUninstallSizeValue}
 
   ${EnableX64FSRedirection}
+  pop $R2
+  pop $R1
   pop $R0
 
 SectionEnd
@@ -211,9 +230,29 @@ SectionEnd
 
 Section "Context menu handler" SecContextMenuHandler
 
-  ${DisableX64FSRedirection}
-  ${SetContextMenuHandler}
-  ${EnableX64FSRedirection}
+  push $R1
+  push $R2
+
+  ; --- Check if context menu handler should be omitted
+  ; --- allows silent installation with: installer.exe /S /NOSHELLEXT=1
+  ${GetParameters} $R1
+  ClearErrors
+  ${GetOptions} $R1 /NOSHELLEXT= $R2
+  ${If} ${Errors}
+  ${OrIf} $R2 != "1"
+
+    ${DisableX64FSRedirection}
+    ${SetContextMenuHandler}
+    ${EnableX64FSRedirection}
+
+  ${Else}
+    DeleteRegKey HKCR "Drive\shell\udefrag"
+    DeleteRegKey HKCR "Folder\shell\udefrag"
+    DeleteRegKey HKCR "*\shell\udefrag"
+  ${EndIf}
+
+  pop $R2
+  pop $R1
   
 SectionEnd
 
@@ -222,6 +261,9 @@ SectionEnd
 Section "Shortcuts" SecShortcuts
 
   push $R0
+  push $R1
+  push $R2
+
   AddSize 5
 
   DetailPrint "Install shortcuts..."
@@ -234,12 +276,26 @@ Section "Shortcuts" SecShortcuts
   ; accessed from the GUI
   CreateShortCut "$SMPROGRAMS\UltraDefrag.lnk" \
    "$INSTDIR\ultradefrag.exe"
-  CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
-   "$INSTDIR\ultradefrag.exe"
-  CreateShortCut "$QUICKLAUNCH\UltraDefrag.lnk" \
-   "$INSTDIR\ultradefrag.exe"
+
+  ; --- Check if desktop and quick launch shortcut should be omitted
+  ; --- allows silent installation with: installer.exe /S /NOICONS=1
+  ${GetParameters} $R1
+  ClearErrors
+  ${GetOptions} $R1 /NOICONS= $R2
+  ${If} ${Errors}
+  ${OrIf} $R2 != "1"
+    CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
+     "$INSTDIR\ultradefrag.exe"
+    CreateShortCut "$QUICKLAUNCH\UltraDefrag.lnk" \
+     "$INSTDIR\ultradefrag.exe"
+  ${Else}
+    Delete "$DESKTOP\UltraDefrag.lnk"
+    Delete "$QUICKLAUNCH\UltraDefrag.lnk"
+  ${EndIf}
 
   ${EnableX64FSRedirection}
+  pop $R2
+  pop $R1
   pop $R0
 
 SectionEnd

@@ -4,6 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     RC1:
     - one bug causing incorrect time limit treatment was fixed
+    - added display of the time limit at boot time
     - the following translations were added:
 
       Latin, Hebrew
@@ -11,6 +12,9 @@ HISTORY
     - the following translations were updated:
 
       Portuguese (BR), Yiddish
+    
+    - added installer switches /NOHELP, /NOICONS and /NOSHELLEXT,
+      so all options can be deselected during silent installation
 
     beta3:
     - volume optimization reimplemented
