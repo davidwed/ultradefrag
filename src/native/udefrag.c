@@ -113,8 +113,15 @@ void RedrawProgress(udefrag_progress_info *pi)
 		if(abort_flag) _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% aborted, fragmented/total = %lu/%lu",n,op_name,p1,p2,pi->fragmented,pi->files);
 		else _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed, fragmented/total = %lu/%lu",n,op_name,p1,p2,pi->fragmented,pi->files);
 	} else { */
+    
+    if(pi->current_operation == VOLUME_OPTIMIZATION && !abort_flag && pi->completion_status == 0){
+        /* display number of moves */
+		_snprintf(s,sizeof(s),"%s%3u.%02u%% completed, moves total = %lu",op_name,p1,p2,pi->total_moves);
+    } else {
+        /* display fragmentation status */
 		if(abort_flag) _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted, fragmented/total = %lu/%lu",op_name,p1,p2,pi->fragmented,pi->files);
 		else _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, fragmented/total = %lu/%lu",op_name,p1,p2,pi->fragmented,pi->files);
+    }
 	//}
 	s[sizeof(s) - 1] = 0;
 	_snprintf(format,sizeof(format),"\r%%-%us",progress_line_length);
@@ -175,6 +182,7 @@ void ProcessVolume(char letter)
 {
 	int status;
     char *message = "";
+    short *buffer;
 
 	/* validate the volume before any processing */
 	status = udefrag_validate_volume(letter,FALSE);
@@ -207,6 +215,14 @@ void ProcessVolume(char letter)
         message = "Quick optimization";
 		break;
 	}
+    /* display the time limit if possible */
+	buffer = winx_heap_alloc(MAX_ENV_VARIABLE_LENGTH * sizeof(short));
+	if(buffer != NULL){
+        if(winx_query_env_variable(L"UD_TIME_LIMIT",buffer,MAX_ENV_VARIABLE_LENGTH) >= 0)
+            winx_printf("\nProcess will be terminated in %ws automatically.\n",buffer);
+        winx_heap_free(buffer);
+    }
+    
 	winx_printf(BREAK_MESSAGE);
 	status = udefrag_start_job(letter,current_job,0,0,update_progress,terminator,NULL);
 	if(status < 0){

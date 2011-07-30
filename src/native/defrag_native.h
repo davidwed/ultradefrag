@@ -47,7 +47,7 @@
 #define MAX_LINE_WIDTH 70
 
 /* message to terminate volume processing */
-#define BREAK_MESSAGE "Use Pause/Break key to abort the process.\n\n"
+#define BREAK_MESSAGE "Use Pause/Break key to abort the process early.\n\n"
 
 /* define whether @echo is on by default or not */
 #define DEFAULT_ECHO_FLAG 1
