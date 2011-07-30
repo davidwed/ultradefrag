@@ -105,13 +105,17 @@
  * - Specifying a path will cause UltraDefrag to defragment only the specified path.
  * - It is possible to specify multiple paths separated by spaces.
  * - Paths including spaces must be enclosed by double quotes (").
- * - Relative and absolute paths are supported.
+ * - Relative and absolute paths are supported.<br/>
  * Example:
- * udefrag "\%USERPROFILE\%" ..\\Test "\My Documents" C:\\WINDOWS\\WindowsUpdate.log
+ * @code
+ * udefrag "%USERPROFILE%" ..\Test "My Documents" C:\WINDOWS\WindowsUpdate.log
+ * @endcode
  * - Short paths (like C:\\PROGRA~1\\SOMEFI~1.TXT) aren't accepted on NT4.
  *
  * <h1>Environment variables</h1>
  * <dl>
+ * <dt>Filter variables</dt>
+ * <dd><dl>
  * <dt>UD_IN_FILTER</dt>
  * <dd>List of files to be included in defragmentation process. File names 
  * must be separated by semicolons.</dd>
@@ -119,13 +123,16 @@
  * <dd>List of files to be excluded from defragmentation process. File names 
  * must be separated by semicolons.</dd>
  * <dt>UD_SIZELIMIT</dt>
- * <dd>Exclude all files larger than the specified size. The following 
+ * <dd>Exclude all files larger than the specified size.<br/>The following 
  * size suffixes are accepted: Kb, Mb, Gb, Tb, Pb, Eb.</dd>
  * <dt>UD_FRAGMENTS_THRESHOLD</dt>
  * <dd>Exclude all files which have less fragments than the specified number.</dd>
+ * </dl></dd><br/>
+ * <dt>Process variables</dt>
+ * <dd><dl>
  * <dt>UD_TIME_LIMIT</dt>
  * <dd>When the specified time interval elapses the job will be terminated 
- * automatically. The following time format is accepted: Ay Bd Ch Dm Es.
+ * automatically.<br/> The following time format is accepted: Ay Bd Ch Dm Es.<br/>
  * Here A,B,C,D,E  represent any integer number, y,d,h,m,s - suffixes represent
  * years, days, hours, minutes and seconds.</dd>
  * <dt>UD_REFRESH_INTERVAL</dt>
@@ -133,17 +140,21 @@
  * <dt>UD_DISABLE_REPORTS</dt>
  * <dd>If this environment variable is set to 1 (one), no 
  * file fragmentation report will be generated.</dd>
+ * </dl></dd><br/>
+ * <dt>Debug variables</dt>
+ * <dd><dl>
  * <dt>UD_DBGPRINT_LEVEL</dt>
  * <dd>Control amount of the debugging output. NORMAL is used by default,
  * DETAILED may be used to collect information for the bug report,
  * PARANOID turns on a really huge amount of debugging information.</dd>
  * <dt>UD_LOG_FILE_PATH</dt>
  * <dd>If this variable is set, it should contain the path (including filename)
- * to the log file to save debugging output into. If the variable is not set, 
- * no logging to the file will be performed.</dd>
+ * to the log file to save debugging output into.<br/>If the variable is not set, 
+ * no logging to a file will be performed.</dd>
  * <dt>UD_DRY_RUN</dt>
  * <dd>If this environment variable is set to 1 (one) the files are not physically moved.
  * This allows testing the algorithm without changing the content of the volume.</dd>
+ * </dl></dd>
  * </dl>
  *
  * Note that all filters are case insensitive. Each filter substring represents a pattern,
