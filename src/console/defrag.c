@@ -445,9 +445,13 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 			break;
 		}
 		clear_line(stderr);
-		fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
-			volume_letter,op_name,pi->percentage,pi->fragmented,pi->files);
-		
+        if(pi->current_operation == VOLUME_OPTIMIZATION && !stop_flag && pi->completion_status == 0){
+            fprintf(stderr,"\r%c: %s%6.2lf%% complete, moves total = %lu",
+                volume_letter,op_name,pi->percentage,pi->total_moves);
+		} else {
+            fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
+                volume_letter,op_name,pi->percentage,pi->fragmented,pi->files);
+        }
 		if(pi->completion_status != 0 && !stop_flag){
 			/* set progress indicator to 100% state */
 			clear_line(stderr);

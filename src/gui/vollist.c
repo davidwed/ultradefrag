@@ -300,7 +300,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 {
 	LV_ITEMW lviw;
 	wchar_t *ProcessCaption = L"";
-	wchar_t buffer[128];
+	wchar_t buffer[128], PassString[32] = L"", MoveString[32] = L"", PercentString[32] = L"";
 
 	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
 		WgxDbgPrintLastError("VolListUpdateStatusFieldInternal: wait on hLangPackEvent failed");
@@ -333,16 +333,18 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 		lviw.pszText = L"";
 	} else {
         if(job->pi.completion_status == 0 || stop_pressed){
+            _snwprintf(PercentString,sizeof(PercentString)/sizeof(wchar_t),L"%5.2lf %% ",job->pi.percentage);
+            
             if(job->pi.pass_number > 1)
-                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls, Pass %d",job->pi.percentage,ProcessCaption,job->pi.pass_number);
-            else
-                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%5.2lf %% %ls",job->pi.percentage,ProcessCaption);
+                _snwprintf(PassString,sizeof(PassString)/sizeof(wchar_t),L", Pass %d",job->pi.pass_number);
+                
+            if(job->pi.current_operation == VOLUME_OPTIMIZATION)
+                _snwprintf(MoveString,sizeof(MoveString)/sizeof(wchar_t),L", %lu moves total",job->pi.total_moves);
         } else {
             if(job->pi.pass_number > 1)
-                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls, %d passes needed",ProcessCaption,job->pi.pass_number);
-            else
-                _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls",ProcessCaption);
+                _snwprintf(PassString,sizeof(PassString)/sizeof(wchar_t),L", %d passes needed",job->pi.pass_number);
         }
+        _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls%ls%ls%ls",PercentString,ProcessCaption,PassString,MoveString);
         buffer[sizeof(buffer)/sizeof(wchar_t) - 1] = 0;
         lviw.pszText = buffer;
 	}

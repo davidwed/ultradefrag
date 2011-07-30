@@ -587,7 +587,7 @@ done:
 int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags)
 {
 	ULONGLONG time;
-	ULONGLONG moves, pass, total_moves;
+	ULONGLONG moves, pass;
 	winx_file_info *file, *last_file, *largest_file;
 	ULONGLONG length, rgn_size_threshold;
 	int files_found;
@@ -622,7 +622,7 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	
 	/* do the job */
 	/* strategy 1: the most effective one */
-	rgn_size_threshold = 1; pass = 0; total_moves = 0;
+	rgn_size_threshold = 1; pass = 0; jp->pi.total_moves = 0;
 	while(!jp->termination_router((void *)jp)){
 		moves = 0;
 	
@@ -670,7 +670,7 @@ try_again:
 					clusters_to_move = get_file_length(jp,largest_file);
 					if(move_file(largest_file,largest_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
 						moves ++;
-						total_moves ++;
+						jp->pi.total_moves ++;
 					}
 					/* regardless of result, exclude the file */
 					largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
@@ -703,7 +703,7 @@ try_again:
 					if(rgn->lcn < file->disp.blockmap->lcn && rgn->lcn <= max_rgn_lcn){
 						file_lcn = file->disp.blockmap->lcn;
 						if(move_file(file,file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0)
-							total_moves ++;
+							jp->pi.total_moves ++;
 						if(max_rgn_lcn > file_lcn - 1)
 							max_rgn_lcn = file_lcn - 1;
 					}
@@ -743,7 +743,7 @@ try_again:
 			if(rgn->lcn < last_file->disp.blockmap->lcn){
 				if(move_file(last_file,last_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
 					moves ++;
-					total_moves ++;
+					jp->pi.total_moves ++;
 				}
 			}
 		}
@@ -752,7 +752,7 @@ try_again:
 
 done:
 	/* display amount of moved data */
-	DebugPrint("%I64u files moved totally",total_moves);
+	DebugPrint("%I64u files moved totally",jp->pi.total_moves);
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
 	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
@@ -788,6 +788,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 
 	jp->pi.current_operation = VOLUME_OPTIMIZATION;
 	jp->pi.moved_clusters = 0;
+    jp->pi.total_moves = 0;
 	
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
@@ -854,6 +855,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 					move_file(first_file,current_vcn,n,rgn->lcn + rgn->length - n,0,jp);
 					current_vcn += n;
 					remaining_clusters -= n;
+                    jp->pi.total_moves ++;
 				}
 				if(jp->free_regions == NULL) goto done;
 				if(prev_rgn == jp->free_regions->prev) break;
@@ -875,6 +877,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 				if(rgn->lcn > first_block->lcn){
 					move_file(first_file,current_vcn,clusters_to_move,
 						rgn->lcn + rgn->length - clusters_to_move,0,jp);
+                    jp->pi.total_moves ++;
 				}
 			}
 			/* otherwise the volume processing is extremely slow */
