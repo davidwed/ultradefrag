@@ -299,7 +299,6 @@ static void list_mft_blocks(winx_file_info *mft_file)
  * of the volume.
  * @note As a side effect it may increase
  * number of fragmented files.
- * @todo Speed up.
  */
 int optimize_mft(udefrag_job_parameters *jp)
 {
@@ -314,6 +313,8 @@ int optimize_mft(udefrag_job_parameters *jp)
 	ULONGLONG end_lcn, min_lcn, next_vcn;
 	ULONGLONG current_vcn, remaining_clusters, n, lcn;
 	winx_volume_region region;
+	ULONGLONG clusters_to_cleanup;
+	int block_cleaned_up;
 	char buffer[32];
 	
 	jp->pi.current_operation = VOLUME_OPTIMIZATION;
@@ -359,7 +360,10 @@ int optimize_mft(udefrag_job_parameters *jp)
 		/* process file blocks between start_lcn and target_rgn */
 		if(target_rgn) end_lcn = target_rgn->lcn;
 		else end_lcn = jp->v_info.total_clusters;
-		while(1){
+		clusters_to_cleanup = clusters_to_process;
+		block_cleaned_up = 0;
+		region.length = 0;
+		while(clusters_to_cleanup > 0){
 			if(jp->termination_router((void *)jp)) goto done;
 			first_file = NULL; first_block = NULL; min_lcn = end_lcn;
 			for(file = jp->filelist; file; file = file->next){
@@ -377,6 +381,14 @@ int optimize_mft(udefrag_job_parameters *jp)
 			}
 			if(first_file == NULL) break;
 			if(is_file_locked(first_file,jp)) continue;
+			
+			/* does the first block follow a previously moved one? */
+			if(block_cleaned_up){
+				if(first_block->lcn != region.lcn + region.length)
+					break;
+				if(first_file == mft_file)
+					break;
+			}
 			
 			/* don't move already optimized parts of $mft */
 			if(first_file == mft_file && first_block->vcn == start_vcn){
@@ -396,12 +408,16 @@ int optimize_mft(udefrag_job_parameters *jp)
 			if(rlist == NULL) goto done;
 			lcn = first_block->lcn;
 			current_vcn = first_block->vcn;
-			clusters_to_move = remaining_clusters = min(clusters_to_process, first_block->length);
+			clusters_to_move = remaining_clusters = min(clusters_to_cleanup, first_block->length);
 			for(rgn = rlist->prev; rgn && remaining_clusters; rgn = rgn->prev){
 				if(rgn->length > 0){
 					n = min(rgn->length,remaining_clusters);
-					if(move_file(first_file,current_vcn,n,rgn->lcn + rgn->length - n,0,jp) < 0)
-						goto done;
+					if(move_file(first_file,current_vcn,n,rgn->lcn + rgn->length - n,0,jp) < 0){
+						if(!block_cleaned_up)
+							goto done;
+						else
+							goto move_mft;
+					}
 					current_vcn += n;
 					remaining_clusters -= n;
 				}
@@ -415,12 +431,16 @@ int optimize_mft(udefrag_job_parameters *jp)
 			}
 			/* space cleaned up successfully */
 			region.next = region.prev = &region;
-			region.lcn = lcn;
-			region.length = clusters_to_move;
+			if(!block_cleaned_up)
+				region.lcn = lcn;
+			region.length += clusters_to_move;
 			target_rgn = &region;
-			break;
+			start_lcn = region.lcn + region.length;
+			clusters_to_cleanup -= clusters_to_move;
+			block_cleaned_up = 1;
 		}
-		
+	
+move_mft:		
 		/* target_rgn points to the target free region, so let's move the next portion of $mft */
 		if(target_rgn == NULL) break;
 		n = clusters_to_move = min(clusters_to_process,target_rgn->length);
