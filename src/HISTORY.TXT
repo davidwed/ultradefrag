@@ -3,6 +3,7 @@ HISTORY
   Version 5.0.0  2011-07-
   ------------------------------------------------------------------------------
     RC1:
+    - MFT optimization implemented
     - one bug causing incorrect time limit treatment was fixed
     - added display of the time limit at boot time
     - the following translations were added:

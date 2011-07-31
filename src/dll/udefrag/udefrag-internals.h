@@ -39,8 +39,10 @@
 #define UD_FILE_MOVING_FAILED    0x10  /* file moving completed with failure */
 #define UD_FILE_IMPROPER_STATE   0x20  /* file is in improper state (chkdsk run needed) or some bug encountered */
 
-/* this flag is used to skip files already processed with errors, */
-/* it is intended for use in individual volume processing tasks */
+/*
+* This flag is used to skip already processed
+* files in individual volume processing tasks.
+*/
 #define UD_FILE_CURRENTLY_EXCLUDED	 0x40
 
 #define is_excluded(f)           ((f)->user_defined_flags & UD_FILE_EXCLUDED)
@@ -104,8 +106,8 @@ typedef enum {
 } file_system_type;
 
 typedef struct _udefrag_allowed_actions {
-	int allow_dir_defrag;      /* on FAT directories aren't moveable */
-	int allow_optimize;        /* zero on FAT, because of unmoveable directories */
+	int allow_dir_defrag;      /* on FAT directories aren't movable */
+	int allow_optimize;        /* zero on FAT, because of unmovable directories */
 } udefrag_allowed_actions;
 
 /*
@@ -151,7 +153,6 @@ typedef struct _udefrag_job_parameters {
 	cmap cluster_map;                           /* cluster map internal data */
 	WINX_FILE *fVolume;                         /* handle of the volume, used by file moving routines */
 	winx_volume_region *temp_space_list;        /* list of regions of space temporarily allocated by system */
-	ULONGLONG moveable_mft_clusters;            /* number of clusters in moveable parts of $mft */
 	ULONGLONG free_rgn_size_threshold;          /* free region size threshold used in volume optimization */
 } udefrag_job_parameters;
 
@@ -174,6 +175,7 @@ void colorize_map_region(udefrag_job_parameters *jp,
 void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color);
 void colorize_file_as_system(udefrag_job_parameters *jp, winx_file_info *f);
 int get_file_color(udefrag_job_parameters *jp, winx_file_info *f);
+void release_temp_space_regions_internal(udefrag_job_parameters *jp);
 void release_temp_space_regions(udefrag_job_parameters *jp);
 void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp);
 

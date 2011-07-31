@@ -123,6 +123,28 @@ static int add_temp_space_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGL
 }
 
 /**
+ * @brief This auxiliary routine intended for
+ * use in optimize_mft, just to speed things up.
+ */
+void release_temp_space_regions_internal(udefrag_job_parameters *jp)
+{
+	winx_volume_region *rgn;
+
+	/* update free space pool */
+	for(rgn = jp->temp_space_list; rgn; rgn = rgn->next){
+		jp->free_regions = winx_add_volume_region(jp->free_regions,rgn->lcn,rgn->length);
+		if(rgn->next == jp->temp_space_list) break;
+	}
+	
+	/* redraw map */
+	redraw_all_temporary_system_space_as_free(jp);
+	
+	/* free memory */
+	winx_list_destroy((list_entry **)(void *)&jp->temp_space_list);
+	jp->temp_space_list = NULL;
+}
+
+/**
  * @brief Releases all space regions
  * added by add_temp_space_region calls.
  * @details This routine forces Windows
@@ -140,18 +162,7 @@ void release_temp_space_regions(udefrag_job_parameters *jp)
 		WINX_GVR_ALLOW_PARTIAL_SCAN,NULL,(void *)jp);
 	winx_release_free_volume_regions(rgn);
 	
-	/* update free space pool */
-	for(rgn = jp->temp_space_list; rgn; rgn = rgn->next){
-		jp->free_regions = winx_add_volume_region(jp->free_regions,rgn->lcn,rgn->length);
-		if(rgn->next == jp->temp_space_list) break;
-	}
-	
-	/* redraw map */
-	redraw_all_temporary_system_space_as_free(jp);
-	
-	/* free memory */
-	winx_list_destroy((list_entry **)(void *)&jp->temp_space_list);
-	jp->temp_space_list = NULL;
+	release_temp_space_regions_internal(jp);
 }
 
 /**
@@ -797,7 +808,7 @@ int move_file(winx_file_info *f,
 		optimize_blockmap(&new_file_info);
 		moving_result = CALCULATED_MOVING_SUCCESS;
 	} else {
-		/* adjust $mft file - its first 16 clusters aren't moveable */
+		/* adjust $mft file - its first 16 clusters aren't movable */
 		if(is_mft(&new_file_info,jp)) adjust_mft_file(&new_file_info,jp);
 
 		/* compare old and new block maps */

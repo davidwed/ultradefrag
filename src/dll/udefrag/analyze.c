@@ -317,30 +317,7 @@ void update_mft_zones_layout(udefrag_job_parameters *jp)
  */
 void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	int win_version, i;
-	winx_blockmap *block;
-	
-	jp->moveable_mft_clusters = f->disp.clusters;
-	win_version = winx_get_os_version();
-	if(win_version < WINDOWS_XP){
-		/* on nt4 and w2k $mft file is always locked entirely */
-	} else {
-		/* on xp and later systems the first 16 clusters are locked */
-		/* we skip the first entire block in such a case */
-
-		/* list MFT parts (for debugging purposes) */
-		for(block = f->disp.blockmap, i = 0; block; block = block->next, i++){
-			DebugPrint("mft part #%u start: %I64u, length: %I64u",
-				i,block->lcn,block->length);
-			if(block->next == f->disp.blockmap) break;
-		}
-		
-		/* remove the first block from the map */
-		jp->moveable_mft_clusters -= f->disp.blockmap->length;
-		winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,
-			(list_entry *)(void *)f->disp.blockmap);
-		DebugPrint("First MFT block skipped because unmoveable");
-	}
+	/* do nothing, because of the optimize_mft routine */
 }
 
 /**
@@ -575,7 +552,7 @@ static int find_files(udefrag_job_parameters *jp)
 		else
 			colorize_file(jp,f,SYSTEM_SPACE);
 
-		/* adjust $mft file - its first 16 clusters aren't moveable */
+		/* adjust $mft file - its first 16 clusters aren't movable */
 		if(is_mft(f,jp)) adjust_mft_file(f,jp);
 
 		//DebugPrint("%ws",f->path);
@@ -886,7 +863,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	  || jp->fs_type == FS_FAT16 \
 	  || jp->fs_type == FS_FAT32 \
 	  || jp->fs_type == FS_FAT32_UNRECOGNIZED)){
-		DebugPrint("Cannot optimize FAT volumes because of unmoveable directories");
+		DebugPrint("Cannot optimize FAT volumes because of unmovable directories");
 		return UDEFRAG_FAT_OPTIMIZATION;
 	}
 
@@ -922,10 +899,12 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	
 	if(jp->fs_type == FS_NTFS){
 		if(win_version < WINDOWS_XP){
-			DebugPrint("$mft defragmentation is not possible");
+			/*DebugPrint("$mft defragmentation is not possible");*/
+			DebugPrint("$mft optimization is not possible");
 		} else {
-			DebugPrint("partial $mft defragmentation is possible");
-			DebugPrint("(the first 16 clusters aren\'t moveable)");
+			/*DebugPrint("partial $mft defragmentation is possible");
+			DebugPrint("(the first 16 clusters aren\'t movable)");*/
+			DebugPrint("$mft optimization is possible");
 		}
 	}
 	
