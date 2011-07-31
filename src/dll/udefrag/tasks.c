@@ -302,10 +302,10 @@ static void list_mft_blocks(winx_file_info *mft_file)
  */
 int optimize_mft(udefrag_job_parameters *jp)
 {
-	LONGLONG clusters_to_process; /* the number of $mft clusters not processed yet */
-	ULONGLONG start_vcn;          /* VCN of the portion of $mft not processed yet */
-	LONGLONG clusters_to_move;    /* the number of $mft clusters intended for the current move */
-	ULONGLONG start_lcn;          /* address of space not processed yet */
+	ULONGLONG clusters_to_process; /* the number of $mft clusters not processed yet */
+	ULONGLONG start_vcn;           /* VCN of the portion of $mft not processed yet */
+	ULONGLONG clusters_to_move;    /* the number of $mft clusters intended for the current move */
+	ULONGLONG start_lcn;           /* address of space not processed yet */
 	ULONGLONG time;
 	winx_volume_region *rlist = NULL, *rgn, *target_rgn;
 	winx_file_info *mft_file, *file, *first_file;
@@ -319,7 +319,8 @@ int optimize_mft(udefrag_job_parameters *jp)
 	
 	jp->pi.current_operation = VOLUME_OPTIMIZATION;
 	jp->pi.moved_clusters = 0;
-	
+	jp->pi.total_moves = 0;
+    
 	if(!can_optimize_mft(jp,&mft_file))
 		return 0;
 	
@@ -476,6 +477,7 @@ move_mft:
 		clusters_to_process -= clusters_to_move;
 		start_lcn = target_rgn->lcn + clusters_to_move;
 		start_vcn = next_vcn;
+        jp->pi.total_moves ++;
 	}
 
 done:
