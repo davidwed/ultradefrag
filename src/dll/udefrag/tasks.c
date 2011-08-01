@@ -943,7 +943,7 @@ try_again:
 		}
 	
 		if(moves == 0) break;
-		DebugPrint("move_files_to_front: %I64u pass completed, %I64u files moved",pass,moves);
+		DebugPrint("move_files_to_front: pass %I64u completed, %I64u files moved",pass,moves);
 		pass ++;
 	}
 	/* end of strategy 1 */
