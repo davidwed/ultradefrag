@@ -12,7 +12,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Portuguese (BR), Yiddish
+      Portuguese (BR), Yiddish, Hungarian
     
     - added installer switches /NOHELP, /NOICONS and /NOSHELLEXT,
       so all options can be deselected during silent installation
