@@ -326,26 +326,29 @@ Var AtLeastXP
   ${EndUnless}
   
   ; 2. install report options and style
-!ifndef MICRO_EDITION
-  ; A. install default CSS for file fragmentation reports
-  SetOutPath "$INSTDIR\scripts"
-  ${If} ${FileExists} "$INSTDIR\scripts\udreport.css"
-    ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css.old"
-      ; ensure that user's choice will not be lost
-      Rename "$INSTDIR\scripts\udreport.css" "$INSTDIR\scripts\udreport.css.old"
-    ${EndUnless}
+  ${If} $InstallGUI == "1"
+      ; A. install default CSS for file fragmentation reports
+      SetOutPath "$INSTDIR\scripts"
+      ${If} ${FileExists} "$INSTDIR\scripts\udreport.css"
+        ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css.old"
+          ; ensure that user's choice will not be lost
+          Rename "$INSTDIR\scripts\udreport.css" "$INSTDIR\scripts\udreport.css.old"
+        ${EndUnless}
+      ${EndIf}
+      File "${ROOTDIR}\src\scripts\udreport.css"
+      ; B. install default report options
+      SetOutPath "$INSTDIR\options"
+      ${If} ${FileExists} "$INSTDIR\options\udreportopts.lua"
+        ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua.old"
+          ; ensure that user's choice will not be lost
+          Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.old"
+        ${EndUnless}
+      ${EndIf}
+      File "${ROOTDIR}\src\scripts\udreportopts.lua"
+  ${Else}
+      Delete "$INSTDIR\scripts\udreport.css"
+      Delete "$INSTDIR\options\udreportopts.lua"
   ${EndIf}
-  File "${ROOTDIR}\src\scripts\udreport.css"
-  ; B. install default report options
-  SetOutPath "$INSTDIR\options"
-  ${If} ${FileExists} "$INSTDIR\options\udreportopts.lua"
-    ${Unless} ${FileExists} "$INSTDIR\options\udreportopts.lua.old"
-      ; ensure that user's choice will not be lost
-      Rename "$INSTDIR\options\udreportopts.lua" "$INSTDIR\options\udreportopts.lua.old"
-    ${EndUnless}
-  ${EndIf}
-  File "${ROOTDIR}\src\scripts\udreportopts.lua"
-!endif
 
 !macroend
 
@@ -412,11 +415,8 @@ Var AtLeastXP
   DetailPrint "Write the uninstall keys..."
   SetOutPath "$INSTDIR"
   StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
-!ifdef MICRO_EDITION
-  WriteRegStr   HKLM $R0 "DisplayName"     "Ultra Defragmenter Micro Edition"
-!else
+
   WriteRegStr   HKLM $R0 "DisplayName"     "Ultra Defragmenter"
-!endif
   WriteRegStr   HKLM $R0 "DisplayVersion"  "${ULTRADFGVER}"
   WriteRegStr   HKLM $R0 "Publisher"       "UltraDefrag Development Team"
   WriteRegStr   HKLM $R0 "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"

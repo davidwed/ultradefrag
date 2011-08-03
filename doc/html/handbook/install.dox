@@ -23,18 +23,18 @@
  * To obtain the latest version of the program please visit the 
  * <a href="http://sourceforge.net/projects/ultradefrag/files/">project's download page</a>.
  *
- * There are two different types of binaries available for download:
- * - Full-featured installers. They contain all of the program features,
+ * There are two different types of packages available for download:
+ * - Full-featured installer, which installs all of the program features,
  * but require installation therefore cannot be used directly from USB sticks.
- * - Portable packages. Download it, unpack it and use without an installation. 
+ * - Portable package. Download it, unpack it and use without an installation. 
  * Copy it on an USB stick and you will be able to use UltraDefrag everywhere by simply
  * running it from there. Note that boot time defragmenter is missing from the portable 
  * packages, but all other features are included. 
  * You can find more information about portable applications
  * <a href="http://en.wikipedia.org/wiki/Portable_application">here</a>.
  *
- * The UltraDefrag Micro Edition is a lightweight version of the program containing only the command line tool
- * and the boot time defragmenter.
+ * The installer allows installing the <b>UltraDefrag Micro Edition</b> too, which is a lightweight version
+ * of the program containing only the command line tool and the boot time defragmenter.
  * It is intended to be used from the console only.
  * 
  * <span style="color: darkred">
@@ -67,16 +67,29 @@
  * use <b>/LANG="German"</b> to install the German language pack.<br/>
  * Valid language names can be found at the 
  * <a href="http://ultradefrag.wikispaces.com/Translations+v5.0.0">Translation Wiki</a></dd>
- * <dt>/NOHELP</dt>
- * <dd>Do not install the local help file. Example: <b>/NOHELP=1</b></dd>
- * <dt>/NOICONS</dt>
- * <dd>Do not create the Desktop and Quick Launch icons. Example: <b>/NOICONS=1</b></dd>
- * <dt>/NOSHELLEXT</dt>
- * <dd>Do not install the Explorer context menu handler. Example: <b>/NOSHELLEXT=1</b></dd>
+ * <dt>/FULL=1</dt>
+ * <dd>Install the full edition, which includes all components and icons.</dd>
+ * <dt>/MICRO=1</dt>
+ * <dd>Install the micro edition, which includes only the core components and the shell extension.</dd>
+ * <dt>/ICONS=(0|1)</dt>
+ * <dd>Install or remove all shortcut icons. Example: <b>/ICONS=0</b> removes all icons.</dd>
+ * <dt>/GUI=(0|1)</dt>
+ * <dd>Install or remove the GUI components. Example: <b>/GUI=1</b> installs the GUI components.</dd>
+ * <dt>/HELP=(0|1)</dt>
+ * <dd>Install or remove the documentation. Example: <b>/HELP=0</b> remove the documentation.</dd>
+ * <dt>/SHELLEXTENSION=(0|1)</dt>
+ * <dd>Install or remove the Explorer context menu handler.
+ * Example: <b>/SHELLEXTENSION=0</b> removes the Explorer context menu handler.</dd>
+ * <dt>/STARTMENUICON=(0|1)</dt>
+ * <dd>Install or remove the start menu icon. Example: <b>/STARTMENUICON=1</b> installs the start menu icon.</dd>
+ * <dt>/DESKTOPICON=(0|1)</dt>
+ * <dd>Install or remove the desktop icon. Example: <b>/DESKTOPICON=0</b> removes the desktop icon.</dd>
+ * <dt>/QUICKLAUNCHICON=(0|1)</dt>
+ * <dd>Install or remove the quick launch icon. Example: <b>/QUICKLAUNCHICON=1</b> installs the quick launch icon.</dd>
  * </dl>
- * Example command line to install silently using all optional commandline switches:
+ * Example command line to silently install the full edition in "Burmese (Padauk)" with only the start menu icon:
  * @code
- * ultradefrag.bin.x86 /S /LANG="Burmese (Padauk)" /NOHELP=1 /NOICONS=1 /NOSHELLEXT=1
+ * ultradefrag.bin.x86 /S /LANG="Burmese (Padauk)" /FULL=1 /ICONS=0 /STARTMENUICON=1
  * @endcode
  *
  * There is also a silent mode in the

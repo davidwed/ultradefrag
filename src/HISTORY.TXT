@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 5.0.0  2011-07-
+  Version 5.0.0  2011-08-
   ------------------------------------------------------------------------------
     RC1:
     - MFT optimization implemented
@@ -14,8 +14,21 @@ HISTORY
 
       Portuguese (BR), Yiddish, Hungarian
     
-    - added installer switches /NOHELP, /NOICONS and /NOSHELLEXT,
-      so all options can be deselected during silent installation
+    - installer has been enhanced in the following ways:
+      + installer supports full, micro edition and custom installation
+      + component selections are remembered between installations
+      + shortcut icons can be selected individually
+      + all selections can be done through command line switches
+        during silent installations using the /S switch:
+            * /FULL .............. install full installation
+            * /MICRO ............. install micro edition (no GUI, no help, no icons)
+            * /ICONS ............. install/remove all shortcut icons
+            * /GUI ............... install/remove GUI component
+            * /HELP .............. install/remove documentation
+            * /SHELLEXTENSION .... install/remove Explorer context menu handler
+            * /STARTMENUICON ..... install/remove start menu icon
+            * /DESKTOPICON ....... install/remove desktop icon
+            * /QUICKLAUNCHICON ... install/remove quick launch icon
 
     beta3:
     - volume optimization reimplemented
