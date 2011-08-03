@@ -16,24 +16,14 @@ copy .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe .\release\
 copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\release\
 copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\release\
 
-copy .\bin\ultradefrag-micro-edition-%ULTRADFGVER%.bin.i386.exe .\release\
-copy .\bin\amd64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.amd64.exe .\release\
-copy .\bin\ia64\ultradefrag-micro-edition-%ULTRADFGVER%.bin.ia64.exe .\release\
-
 copy .\bin\ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip .\release\
 copy .\bin\amd64\ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip .\release\
 copy .\bin\ia64\ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip .\release\
 
-copy .\bin\ultradefrag-micro-portable-%ULTRADFGVER%.bin.i386.zip .\release\
-copy .\bin\amd64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.amd64.zip .\release\
-copy .\bin\ia64\ultradefrag-micro-portable-%ULTRADFGVER%.bin.ia64.zip .\release\
-
 cd release
-md5sum ultradefrag-%ULTRADFGVER%.bin.* > ultradefrag-%ULTRADFGVER%.MD5SUMS
-md5sum ultradefrag-micro-edition-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
-md5sum ultradefrag-portable-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
-md5sum ultradefrag-micro-portable-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
-md5sum ultradefrag-%ULTRADFGVER%.src.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
+..\tools\md5sum ultradefrag-%ULTRADFGVER%.bin.* > ultradefrag-%ULTRADFGVER%.MD5SUMS
+..\tools\md5sum ultradefrag-portable-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
+..\tools\md5sum ultradefrag-%ULTRADFGVER%.src.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
 cd ..
 
 echo.

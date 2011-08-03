@@ -40,12 +40,10 @@ xcopy /I /Y /Q .\include     .\obj\include
 xcopy /I /Y /Q .\share       .\obj\share
 xcopy /I /Y /Q .\dll\udefrag .\obj\udefrag
 xcopy /I /Y /Q .\dll\zenwinx .\obj\zenwinx
-if "%UD_MICRO_EDITION%" neq "1" (
-	xcopy /I /Y /Q .\gui     .\obj\gui
-	xcopy /I /Y /Q .\gui\res .\obj\gui\res
-	xcopy /I /Y /Q .\lua5.1  .\obj\lua5.1
-	xcopy /I /Y /Q .\dll\wgx .\obj\wgx
-)
+xcopy /I /Y /Q .\gui         .\obj\gui
+xcopy /I /Y /Q .\gui\res     .\obj\gui\res
+xcopy /I /Y /Q .\lua5.1      .\obj\lua5.1
+xcopy /I /Y /Q .\dll\wgx     .\obj\wgx
 
 :: copy external files on which udefrag.exe command line tool depends
 copy /Y .\obj\share\*.c .\obj\console\
@@ -61,10 +59,8 @@ copy /Y .\dll\wgx\wgx.h           .\obj\console\
 mkdir obj\dll
 mkdir obj\dll\zenwinx
 copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
-if "%UD_MICRO_EDITION%" neq "1" (
-	mkdir obj\dll\wgx
-	copy /Y obj\wgx\wgx.h obj\dll\wgx
-)
+mkdir obj\dll\wgx
+copy /Y obj\wgx\wgx.h obj\dll\wgx
 
 :: let's build all modules by selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
@@ -257,9 +253,6 @@ exit /B 0
 	%UD_BUILD_TOOL% hibernate.build || goto fail
 	cd ..\console
 	%UD_BUILD_TOOL% defrag.build || goto fail
-
-	rem Lua, WGX and GUI are missing in Micro Edition
-	if "%UD_MICRO_EDITION%" equ "1" goto success
 
 	rem workaround for WDK 7
 	rem set IGNORE_LINKLIB_ABUSE=1

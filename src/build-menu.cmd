@@ -26,24 +26,20 @@ echo      8 ... Build Release
 echo.
 echo      9 ... Build .................. using WinDDK, no IA64
 echo     10 ... Build Portable ......... using WinDDK, no IA64
-echo     11 ... Build Micro ............ using WinDDK, no IA64
-echo     12 ... Build Micro Portable ... using WinDDK, no IA64
-echo     13 ... Build Docs
+echo     11 ... Build Docs
 echo.
-echo     14 ... Build .................. with Custom Switches
-echo     15 ... Build Portable ......... with Custom Switches
-echo     16 ... Build Micro ............ with Custom Switches
-echo     17 ... Build Micro Portable ... with Custom Switches
+echo     12 ... Build .................. with Custom Switches
+echo     13 ... Build Portable ......... with Custom Switches
 echo.
-echo     18 ... Build Test Release for Stefan
-echo     19 ... Build Test Installation for Stefan
-echo     20 ... Build Test AMD64 for Stefan
-echo     21 ... Build Test x86 for Stefan
+echo     14 ... Build Test Release for Stefan
+echo     15 ... Build Test Installation for Stefan
+echo     16 ... Build Test AMD64 for Stefan
+echo     17 ... Build Test x86 for Stefan
 echo.
 echo      0 ... EXIT
 
 :: this value holds the number of the last menu entry
-set UD_BLD_MENU_MAX_ENTRIES=21
+set UD_BLD_MENU_MAX_ENTRIES=17
 
 :AskSelection
 echo.
@@ -111,21 +107,11 @@ call build.cmd --portable --use-winddk --no-ia64
 goto finished
 
 :11
-title Build Micro ............ using WinDDK, no IA64
-call build.cmd --micro --use-winddk --no-ia64
-goto finished
-
-:12
-title Build Micro Portable ... using WinDDK, no IA64
-call build.cmd --micro --portable --use-winddk --no-ia64
-goto finished
-
-:13
 title Build Docs
 call build-docs.cmd
 goto finished
 
-:14
+:12
 title Build .................. with Custom Switches
 cls
 echo.
@@ -138,7 +124,7 @@ echo.
 call build.cmd %UD_BLD_MENU_SWITCH%
 goto finished
 
-:15
+:13
 title Build Portable ......... with Custom Switches
 cls
 echo.
@@ -151,33 +137,7 @@ echo.
 call build.cmd --portable %UD_BLD_MENU_SWITCH%
 goto finished
 
-:16
-title Build Micro ............ with Custom Switches
-cls
-echo.
-call build.cmd --help
-echo.
-set /p UD_BLD_MENU_SWITCH="Please enter Switches: "
-
-title Build Micro ............ %UD_BLD_MENU_SWITCH%
-echo.
-call build.cmd --micro %UD_BLD_MENU_SWITCH%
-goto finished
-
-:17
-title Build Micro Portable ... with Custom Switches
-cls
-echo.
-call build.cmd --help
-echo.
-set /p UD_BLD_MENU_SWITCH="Please enter Switches: "
-
-title Build Micro Portable ... %UD_BLD_MENU_SWITCH%
-echo.
-call build.cmd --micro --portable %UD_BLD_MENU_SWITCH%
-goto finished
-
-:18
+:14
 title Build Test Release for Stefan
 echo.
 set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
@@ -190,16 +150,16 @@ echo.
 copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
 set old_file=X
 for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip18
+if "%old_file%" == "X" goto :skip14
 set new_file=%old_file:i386=x86%
 move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip18
+:skip14
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
 goto finished
 
-:19
+:15
 title Build Test Installation for Stefan
 echo.
 set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
@@ -211,7 +171,7 @@ cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
 goto finished
 
-:20
+:16
 title Build Test AMD64 for Stefan
 echo.
 set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
@@ -224,16 +184,16 @@ echo.
 copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
 set old_file=X
 for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip20
+if "%old_file%" == "X" goto :skip16
 set new_file=%old_file:i386=x86%
 move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip20
+:skip16
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
 goto finished
 
-:21
+:17
 title Build Test x86 for Stefan
 echo.
 set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
@@ -246,10 +206,10 @@ echo.
 copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
 set old_file=X
 for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip21
+if "%old_file%" == "X" goto :skip17
 set new_file=%old_file:i386=x86%
 move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip21
+:skip17
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean

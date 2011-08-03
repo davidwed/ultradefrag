@@ -8,12 +8,12 @@ Package and Windows version relation:
 Package contents:
 
     regular (with installer):
-        ultradefrag ..... full package with GUI, console and boot time components
-        micro edition ... only console and boot time components
+        ultradefrag ... full package with GUI, console and boot time components,
+                        allows installing the micro edition too by omitting the GUI components
     
     portable (for removable drives, no installer):
-        ultradefrag ..... full package with GUI and console components
-        micro edition ... only console components
+        ultradefrag ... full package with GUI and console components,
+                        micro edition can be extracted by using only the console components
 
 Release stages explained:
 
