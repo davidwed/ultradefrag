@@ -446,7 +446,7 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 		}
 		clear_line(stderr);
         if(pi->current_operation == VOLUME_OPTIMIZATION && !stop_flag && pi->completion_status == 0){
-            fprintf(stderr,"\r%c: %s%6.2lf%% complete, moves total = %lu",
+            fprintf(stderr,"\r%c: %s%6.2lf%% complete, moves total = %I64u",
                 volume_letter,op_name,pi->percentage,pi->total_moves);
 		} else {
             fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",

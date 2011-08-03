@@ -339,7 +339,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
                 _snwprintf(PassString,sizeof(PassString)/sizeof(wchar_t),L", Pass %d",job->pi.pass_number);
                 
             if(job->pi.current_operation == VOLUME_OPTIMIZATION)
-                _snwprintf(MoveString,sizeof(MoveString)/sizeof(wchar_t),L", %lu moves total",job->pi.total_moves);
+                _snwprintf(MoveString,sizeof(MoveString)/sizeof(wchar_t),L", %I64u moves total",job->pi.total_moves);
         } else {
             if(job->pi.pass_number > 1)
                 _snwprintf(PassString,sizeof(PassString)/sizeof(wchar_t),L", %d passes needed",job->pi.pass_number);

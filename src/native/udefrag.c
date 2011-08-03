@@ -77,7 +77,7 @@ int GetDebugLevel()
  */
 void RedrawProgress(udefrag_progress_info *pi)
 {
-	int p1, p2, n;
+	int p1, p2;//, n;
 	char *op_name = "";
 	char s[MAX_LINE_WIDTH + 1];
 	char format[16];
@@ -116,7 +116,7 @@ void RedrawProgress(udefrag_progress_info *pi)
     
     if(pi->current_operation == VOLUME_OPTIMIZATION && !abort_flag && pi->completion_status == 0){
         /* display number of moves */
-		_snprintf(s,sizeof(s),"%s%3u.%02u%% completed, moves total = %lu",op_name,p1,p2,pi->total_moves);
+		_snprintf(s,sizeof(s),"%s%3u.%02u%% completed, moves total = %I64u",op_name,p1,p2,pi->total_moves);
     } else {
         /* display fragmentation status */
 		if(abort_flag) _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted, fragmented/total = %lu/%lu",op_name,p1,p2,pi->fragmented,pi->files);
