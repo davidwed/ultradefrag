@@ -25,8 +25,8 @@
 */
 
 /*
-* All macros must be added to .onInit except PreserveInRegistry
-* which should be added to the end of a mandatory section.
+* All macros must be added to .onInit except PreserveInRegistry,
+* which must be added to .onInstSuccess.
 */
 
 !ifndef _PRESET_SECTIONS_NSH_
