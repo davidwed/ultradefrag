@@ -54,6 +54,8 @@
  *
  * Options:
  * <dl>
+ * <dt>-r, --repeat</dt>
+ * <dd>Defragment or optimize the volume until there is nothing left that can be moved.</dd>
  * <dt>-b, --use-system-color-scheme</dt>
  * <dd>Use system color scheme (usually black/white) instead of the green color.</dd>
  * <dt>-p, --suppress-progress-indicator</dt>
