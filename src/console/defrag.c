@@ -42,6 +42,7 @@ char letters[MAX_DOS_DRIVES] = {0};
 int wait_flag = 0;
 int shellex_flag = 0;
 int quick_optimize_flag = 0;
+int repeat_flag = 0;
 
 int first_progress_update;
 int stop_flag = 0;
@@ -503,7 +504,7 @@ static int process_single_volume(char volume_letter)
 {
 	long map_size = 0;
 	udefrag_job_type job_type = DEFRAGMENTATION_JOB;
-	int result;
+	int flags = 0, result;
 
 	/* validate volume letter */
 	if(volume_letter == 0){
@@ -539,8 +540,10 @@ static int process_single_volume(char volume_letter)
 	if(a_flag) job_type = ANALYSIS_JOB;
 	else if(o_flag) job_type = FULL_OPTIMIZATION_JOB;
 	else if(quick_optimize_flag) job_type = QUICK_OPTIMIZATION_JOB;
+	if(repeat_flag)
+		flags = UD_PREVIEW_REPEAT;
 	first_progress_update = 1;
-	result = udefrag_start_job(volume_letter,job_type,0,map_size,
+	result = udefrag_start_job(volume_letter,job_type,flags,map_size,
 		update_progress,terminator,(void *)(DWORD_PTR)volume_letter);
 	if(result < 0){
 		display_defrag_error(result);

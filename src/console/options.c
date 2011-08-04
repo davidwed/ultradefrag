@@ -74,6 +74,7 @@ void show_help(void)
 		"  If command is not specified it will defragment volume.\n"
 		"\n"
 		"Options:\n"
+		"  -r,  --repeat                       Repeat action until nothing left to move.\n"
 		"  -b,  --use-system-color-scheme      Use system (usually black/white)\n"
 		"                                      color scheme instead of the green color.\n"
 		"  -p,  --suppress-progress-indicator  Hide progress indicator.\n"
@@ -197,6 +198,11 @@ static struct option long_options_[] = {
 	{ "list-available-volumes",      optional_argument, 0, 'l' },
 	
 	/*
+	* Volume processing options.
+	*/
+	{ "repeat",                      no_argument,       0, 'r' },
+	
+	/*
 	* Progress indicators options.
 	*/
 	{ "suppress-progress-indicator", no_argument,       0, 'p' },
@@ -232,7 +238,7 @@ static struct option long_options_[] = {
 	{ 0,                             0,                 0,  0  }
 };
 
-char short_options_[] = "aol::pvmbh?iesd";
+char short_options_[] = "aol::rpvmbh?iesd";
 
 /* new code based on GNU getopt() function */
 void parse_cmdline(int argc, char **argv)
@@ -340,6 +346,9 @@ void parse_cmdline(int argc, char **argv)
 				if(!strcmp(optarg,"a")) la_flag = 1;
 				if(!strcmp(optarg,"all")) la_flag = 1;
 			}
+			break;
+		case 'r':
+			repeat_flag = 1;
 			break;
 		case 'p':
 			p_flag = 1;

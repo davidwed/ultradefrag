@@ -30,6 +30,11 @@
 udefrag_job_type current_job;
 
 /**
+ * @brief Current job flags.
+ */
+int current_job_flags;
+
+/**
  * @brief Indicates whether the 
  * defragmentation must be aborted
  * or not.
@@ -224,7 +229,7 @@ void ProcessVolume(char letter)
     }
     
 	winx_printf(BREAK_MESSAGE);
-	status = udefrag_start_job(letter,current_job,0,0,update_progress,terminator,NULL);
+	status = udefrag_start_job(letter,current_job,current_job_flags,0,update_progress,terminator,NULL);
 	if(status < 0){
 		winx_printf("\n%s failed!\n",message);
 		winx_printf("%s\n",udefrag_get_error_description(status));
@@ -266,6 +271,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	int a_flag = 0, o_flag = 0;
 	int quick_optimize_flag = 0;
 	int all_flag = 0, all_fixed_flag = 0;
+	int repeat_flag = 0;
 	char letters[MAX_DOS_DRIVES];
 	int i, n_letters = 0;
 	char letter;
@@ -303,6 +309,12 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 			continue;
 		} else if(!wcscmp(argv[i],L"--all-fixed")){
 			all_fixed_flag = 1;
+			continue;
+		} else if(!wcscmp(argv[i],L"-r")){
+			repeat_flag = 1;
+			continue;
+		} else if(!wcscmp(argv[i],L"--repeat")){
+			repeat_flag = 1;
 			continue;
 		}
 		/* handle individual drive letters */
@@ -343,6 +355,8 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	else if(o_flag) current_job = FULL_OPTIMIZATION_JOB;
 	else if(quick_optimize_flag) current_job = QUICK_OPTIMIZATION_JOB;
 	else current_job = DEFRAGMENTATION_JOB;
+	
+	current_job_flags = repeat_flag ? UD_PREVIEW_REPEAT : 0;
 	
 	/*
 	* In scripting mode the abort_flag has initial value 0.

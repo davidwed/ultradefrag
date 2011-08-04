@@ -4,6 +4,8 @@ HISTORY
   ------------------------------------------------------------------------------
     RC1:
     - MFT optimization implemented
+    - --repeat command line switch was added to the console interface
+      and to the boot time defragmenter
     - one bug causing incorrect time limit treatment was fixed
     - added display of the time limit at boot time
     - the following translations were added:
