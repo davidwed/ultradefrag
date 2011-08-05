@@ -775,9 +775,8 @@ int move_file(winx_file_info *f,
 	if(Status != STATUS_SUCCESS){
 		DebugPrintEx(Status,"move_file: cannot open %ws",f->path);
 		/* redraw space */
-		if(old_color != MFT_SPACE)
-			colorize_file_as_system(jp,f);
-		/* don't reset file information here */
+		colorize_file_as_system(jp,f);
+		/* however, don't reset file information here */
 		f->user_defined_flags |= UD_FILE_LOCKED;
 		jp->pi.processed_clusters += length;
 		if(jp->progress_router)

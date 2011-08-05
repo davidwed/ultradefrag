@@ -711,10 +711,9 @@ int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp)
 
 	/*DebugPrintEx(status,"cannot open %ws",f->path);*/
 	/* redraw space */
-	if(!is_mft(f,jp))
-		colorize_file_as_system(jp,f);
+	colorize_file_as_system(jp,f);
 	/* file is locked by other application, so its state is unknown */
-	/* don't reset file information here */
+	/* however, don't reset file information here */
 	f->user_defined_flags |= UD_FILE_LOCKED;
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw progress */

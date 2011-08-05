@@ -541,6 +541,9 @@ void colorize_file_as_system(udefrag_job_parameters *jp, winx_file_info *f)
 	if(jp == NULL || f == NULL)
 		return;
 	
+	/* never draw MFT in green */
+	if(is_mft(f,jp)) return;
+	
 	new_color = is_over_limit(f) ? SYSTEM_OVER_LIMIT_SPACE : SYSTEM_SPACE;
 	old_color = get_file_color(jp,f);
 	for(block = f->disp.blockmap; block; block = block->next){
