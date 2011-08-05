@@ -56,6 +56,17 @@ pause
 goto :DisplayMenu
 
 :StartProcess
+echo.
+echo --------------------------------------
+echo.
+echo Enter the fragmentation rate,
+echo 1 out of x files should be fragmented.
+echo.
+set /p FragmentationRate="Enter a value between 1 and 100 for x: "
+
+if "%FragmentationRate%" == "" set FragmentationRate=1
+if %FragmentationRate% EQU 0 set FragmentationRate=1
+if %FragmentationRate% GTR 100 set FragmentationRate=100
 
 set ex_type=UDF
 set fs_ver=X
@@ -177,4 +188,10 @@ goto :EOF
 
     set /a size="24 + %RANDOM% / 3"
     set /a fragments="%RANDOM% / 1365"
+    
+    set /a quotient="count %% %FragmentationRate%"
+    
+    if %quotient% EQU 0 goto :EOF
+    
+    set fragments=1
 goto :EOF
