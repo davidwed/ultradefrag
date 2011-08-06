@@ -48,6 +48,8 @@ WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_FULL_OPTIMIZE,                       NULL, L"&Full optimization\tCtrl+F7"  },
 	{MF_STRING | MF_ENABLED,IDM_STOP,                                NULL, L"&Stop\tCtrl+C"  },
 	{MF_SEPARATOR,0,NULL,NULL},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_REPEAT_ACTION,        NULL, L"Re&peat action\tShift+R"  },
+	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA, NULL, L"Skip removable &media\tCtrl+M"},
 	{MF_STRING | MF_ENABLED,IDM_RESCAN,                              NULL, L"&Rescan drives\tCtrl+D"},
 	{MF_SEPARATOR,0,NULL,NULL},
@@ -100,8 +102,8 @@ WGX_MENU help_menu[] = {
 };
 
 WGX_MENU preview_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_REPEAT,       NULL, L"Repeat action until nothing left to move"},
-	{MF_SEPARATOR,0,NULL,NULL},
+	/*{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_REPEAT,       NULL, L"Repeat action until nothing left to move"},
+	{MF_SEPARATOR,0,NULL,NULL},*/
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space"},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space"},
 	{MF_SEPARATOR,0,NULL,NULL},
@@ -142,6 +144,12 @@ int CreateMainMenu(void)
 			MF_BYCOMMAND | MF_UNCHECKED);
 	}
 	
+	if(repeat_action){
+		CheckMenuItem(hMainMenu,
+			IDM_REPEAT_ACTION,
+			MF_BYCOMMAND | MF_CHECKED);
+	}
+
 	if(btd_installed){
 		if(IsBootTimeDefragEnabled()){
 			boot_time_defrag_enabled = 1;
@@ -155,11 +163,11 @@ int CreateMainMenu(void)
 		/*EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);*/
 	}
 	
-	if(preview_flags & UD_PREVIEW_REPEAT){
+	/*if(preview_flags & UD_PREVIEW_REPEAT){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_REPEAT,
 			MF_BYCOMMAND | MF_CHECKED);
-	}
+	}*/
 	if(preview_flags & UD_PREVIEW_MATCHING){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_MATCHING,

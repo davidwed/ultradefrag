@@ -80,6 +80,7 @@
 #define IDM_QUICK_OPTIMIZE              1130
 #define IDM_FULL_OPTIMIZE               1131
 #define IDM_STOP                        1135
+#define IDM_REPEAT_ACTION               1137
 #define IDM_IGNORE_REMOVABLE_MEDIA      1140
 #define IDM_RESCAN                      1150
 
@@ -119,7 +120,7 @@
 /* preview menu items */
 enum {
     IDM_PREVIEW = 5000,
-    IDM_PREVIEW_REPEAT,
+    /*IDM_PREVIEW_REPEAT,*/
     IDM_PREVIEW_LARGEST,
     IDM_PREVIEW_MATCHING,
     IDM_PREVIEW_SKIP_PARTIAL,

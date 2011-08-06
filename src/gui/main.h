@@ -240,6 +240,7 @@ extern int user_defined_column_widths[];
 extern int list_height;
 extern int dry_run;
 extern int preview_flags;
+extern int repeat_action;
 
 /*
 * Note:

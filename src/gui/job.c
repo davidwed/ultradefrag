@@ -49,8 +49,6 @@ int exit_pressed = 0;
 extern int map_blocks_per_line;
 extern int map_lines;
 
-extern int preview_flags;
-
 /**
  * @brief Initializes structures belonging to all jobs.
  */
@@ -270,6 +268,8 @@ void ProcessSingleVolume(volume_processing_job *job)
 	} else {
 		/* process the volume */
 		current_job = job;
+		if(repeat_action) preview_flags |= UD_PREVIEW_REPEAT;
+		else preview_flags &= ~UD_PREVIEW_REPEAT;
 		error_code = udefrag_start_job(job->volume_letter, job->job_type,
 				preview_flags,map_blocks_per_line * map_lines,update_progress,
 				terminator, NULL);
@@ -308,11 +308,13 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_QUICK_OPTIMIZE,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_FULL_OPTIMIZE,MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMainMenu,IDM_REPEAT_ACTION,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_SHOW_REPORT,MF_BYCOMMAND | MF_GRAYED);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_ANALYZE,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_QUICK_OPTIMIZE,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_FULL_OPTIMIZE,MAKELONG(FALSE,0));
+	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_REPEAT_ACTION,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(FALSE,0));
 
 	/* process all selected volumes */
@@ -343,11 +345,13 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_QUICK_OPTIMIZE,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_FULL_OPTIMIZE,MF_BYCOMMAND | MF_ENABLED);
+	EnableMenuItem(hMainMenu,IDM_REPEAT_ACTION,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_SHOW_REPORT,MF_BYCOMMAND | MF_ENABLED);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_ANALYZE,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_QUICK_OPTIMIZE,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_FULL_OPTIMIZE,MAKELONG(TRUE,0));
+	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_REPEAT_ACTION,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(TRUE,0));
 	
 	/* check the when done action state */

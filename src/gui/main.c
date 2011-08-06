@@ -734,6 +734,21 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		case IDM_STOP:
 			stop_all_jobs();
 			return 0;
+		case IDM_REPEAT_ACTION:
+			if(repeat_action){
+				repeat_action = 0;
+				CheckMenuItem(hMainMenu,
+					IDM_REPEAT_ACTION,
+					MF_BYCOMMAND | MF_UNCHECKED);
+				SendMessage(hToolbar,TB_CHECKBUTTON,IDM_REPEAT_ACTION,MAKELONG(FALSE,0));
+			} else {
+				repeat_action = 1;
+				CheckMenuItem(hMainMenu,
+					IDM_REPEAT_ACTION,
+					MF_BYCOMMAND | MF_CHECKED);
+				SendMessage(hToolbar,TB_CHECKBUTTON,IDM_REPEAT_ACTION,MAKELONG(TRUE,0));
+			}
+			return 0;
 		case IDM_IGNORE_REMOVABLE_MEDIA:
 			if(skip_removable){
 				skip_removable = 0;
@@ -887,9 +902,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			/* handle preview submenu */
 			if(id > IDM_PREVIEW && id < IDM_PREVIEW_LAST_ITEM){
 				switch(id){
-				case IDM_PREVIEW_REPEAT:
+				/*case IDM_PREVIEW_REPEAT:
 					flag = UD_PREVIEW_REPEAT;
-					break;
+					break;*/
 				case IDM_PREVIEW_LARGEST:
 					/* "find largest" menu item affects "find matching" item too */
 					id = IDM_PREVIEW_MATCHING;

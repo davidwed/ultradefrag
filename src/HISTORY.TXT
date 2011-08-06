@@ -4,6 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     RC1:
     - MFT optimization implemented
+    - repeat action menu and toolbar button were added to GUI
     - --repeat command line switch was added to the console interface
       and to the boot time defragmenter
     - one bug causing incorrect time limit treatment was fixed
