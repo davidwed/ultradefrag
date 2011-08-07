@@ -15,3 +15,9 @@ set SEVENZIP_PATH=C:\Program Files\7-Zip
 set MSVSBIN=
 set DDKINCDIR=
 set PELLESC_BASE=C:\Program Files\PellesC
+
+rem comment out next line to enable warnings to find unreachable code
+goto :EOF
+
+set CL=/Wall /wd4619 /wd4711 /wd4706
+rem set LINK=/WX
