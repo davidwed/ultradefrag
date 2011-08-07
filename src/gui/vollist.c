@@ -334,15 +334,22 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 	} else {
         if(job->pi.completion_status == 0 || stop_pressed){
             _snwprintf(PercentString,sizeof(PercentString)/sizeof(wchar_t),L"%5.2lf %% ",job->pi.percentage);
+			PercentString[sizeof(PercentString)/sizeof(wchar_t) - 1] = 0;
             
-            if(job->pi.pass_number > 1)
+            if(job->pi.pass_number > 1){
                 _snwprintf(PassString,sizeof(PassString)/sizeof(wchar_t),L", Pass %d",job->pi.pass_number);
+				PassString[sizeof(PassString)/sizeof(wchar_t) - 1] = 0;
+			}
                 
-            if(job->pi.current_operation == VOLUME_OPTIMIZATION)
+            if(job->pi.current_operation == VOLUME_OPTIMIZATION){
                 _snwprintf(MoveString,sizeof(MoveString)/sizeof(wchar_t),L", %I64u moves total",job->pi.total_moves);
+				MoveString[sizeof(MoveString)/sizeof(wchar_t) - 1] = 0;
+			}
         } else {
-            if(job->pi.pass_number > 1)
+            if(job->pi.pass_number > 1){
                 _snwprintf(PassString,sizeof(PassString)/sizeof(wchar_t),L", %d passes needed",job->pi.pass_number);
+				PassString[sizeof(PassString)/sizeof(wchar_t) - 1] = 0;
+			}
         }
         _snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%ls%ls%ls%ls",PercentString,ProcessCaption,PassString,MoveString);
         buffer[sizeof(buffer)/sizeof(wchar_t) - 1] = 0;
