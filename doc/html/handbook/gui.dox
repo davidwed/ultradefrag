@@ -158,6 +158,11 @@
  * are never treated as fragmented. Because trash should not
  * get our attention.
  *
+ * Due to the way the amount of clusters per map block is calculated, it can happen
+ * that the last block represents much more clusters than the other ones.
+ * This leads to the effect, that there is a small delay till the clusters are painted,
+ * if they are moved to the end of the volume.
+ *
  * <h1>When done</h1>
  * If any of the actions except <b>None</b> is checked, UltraDefrag
  * will automatically perform that action after the job completes.
