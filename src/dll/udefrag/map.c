@@ -114,6 +114,8 @@ fail:
 		jp->cluster_map.opposite_order = FALSE;
 		jp->cluster_map.clusters_per_last_cell = jp->cluster_map.clusters_per_cell + \
 			(jp->cluster_map.field_size - jp->cluster_map.clusters_per_cell * jp->cluster_map.map_size);
+		DebugPrint("allocate_map: normal order %I64u : %I64u : %I64u", \
+			jp->cluster_map.field_size,jp->cluster_map.clusters_per_cell,jp->cluster_map.clusters_per_last_cell);
 		for(i = 0; i < jp->cluster_map.map_size - 1; i++)
 			jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_cell;
 		jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_last_cell;

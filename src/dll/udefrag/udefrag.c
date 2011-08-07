@@ -551,6 +551,12 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 				optimize_entire_disk = 1;
 		}
 	}*/
+	
+	/* for map redraw testing */
+	/*my = 100;
+	mx = jp->v_info.total_clusters - my;
+	colorize_map_region(jp,mx,my,FRAGM_SPACE,FREE_SPACE);
+	goto done;*/
     
     /* optimize MFT separately to keep its optimal location */
 	(void)optimize_mft(jp); /* ignore result because this task is not mandatory */
