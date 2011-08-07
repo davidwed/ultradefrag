@@ -147,7 +147,7 @@ typedef struct _udefrag_job_parameters {
 	winx_file_info *filelist;                   /* list of files */
 	udefrag_fragmented_file *fragmented_files;  /* list of fragmented files */
 	winx_volume_region *free_regions;           /* list of free space regions */
-	struct _mft_zones mft_zones;                /* coordinates of mft zones */
+	struct _mft_zones mft_zones;                /* coordinates of mft zones; as they are before the volume processing */
 	ULONGLONG clusters_per_256k;                /* number of clusters in 256k block */
 	udefrag_allowed_actions actions;            /* actions allowed for selected file system */
 	cmap cluster_map;                           /* cluster map internal data */
@@ -162,10 +162,7 @@ int save_fragmentation_reports(udefrag_job_parameters *jp);
 void remove_fragmentation_reports(udefrag_job_parameters *jp);
 
 /* some volume space states, for internal use only */
-#define SYSTEM_OR_MFT_ZONE_SPACE      100
-#define SYSTEM_OR_FREE_SPACE          101
-#define FREE_OR_MFT_ZONE_SPACE        102
-#define TMP_SYSTEM_OR_MFT_ZONE_SPACE  103
+#define SYSTEM_OR_FREE_SPACE          100
 
 int allocate_map(int map_size,udefrag_job_parameters *jp);
 void free_map(udefrag_job_parameters *jp);
@@ -191,14 +188,11 @@ void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameter
 
 WINX_FILE * __stdcall new_winx_vopen(char volume_letter);
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
-void update_mft_zones_layout(udefrag_job_parameters *jp);
-void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp);
 winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn);
 
 NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile);
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp);
 int is_mft(winx_file_info *f,udefrag_job_parameters *jp);
-int is_mft_mirror(winx_file_info *f,udefrag_job_parameters *jp);
 
 int expand_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp);
 void truncate_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp);

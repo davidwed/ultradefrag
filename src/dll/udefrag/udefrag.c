@@ -69,14 +69,23 @@ static void dbg_print_footer(udefrag_job_parameters *jp)
 
 /**
  * @brief Delivers progress information to the caller.
- * @note completion_status parameter delivers to the caller
+ * @note 
+ * - completion_status parameter delivers to the caller
  * instead of an appropriate field of jp->pi structure.
+ * - If cluster map cell is occupied entirely by MFT zone
+ * it will be drawn in light magenta if no files exist there.
+ * Otherwise, such a cell will be drawn in different color
+ * indicating that something still exists inside the zone.
+ * This will help people to realize whether they need to run
+ * full optimization or not.
  */
 static void deliver_progress_info(udefrag_job_parameters *jp,int completion_status)
 {
 	udefrag_progress_info pi;
 	double x, y;
 	int i, k, index;
+	int mft_zone_detected;
+	int free_cell_detected;
 	ULONGLONG maximum, n;
 	
 	if(jp->cb == NULL)
@@ -99,19 +108,38 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
 	if(jp->pi.cluster_map && jp->cluster_map.array \
 	  && jp->pi.cluster_map_size == jp->cluster_map.map_size){
 		for(i = 0; i < jp->cluster_map.map_size; i++){
-			maximum = jp->cluster_map.array[i][0];
-			index = 0;
-			for(k = 1; k < jp->cluster_map.n_colors; k++){
-				n = jp->cluster_map.array[i][k];
-				if(n >= maximum){ /* support of colors precedence  */
-					maximum = n;
-					index = k;
-				}
+			/* check for mft zone to apply special rules there */
+			mft_zone_detected = free_cell_detected = 0;
+			maximum = 1; /* for jp->cluster_map.opposite_order */
+			if(!jp->cluster_map.opposite_order){
+				if(i == jp->cluster_map.map_size - 1)
+					maximum = jp->cluster_map.clusters_per_last_cell;
+				else
+					maximum = jp->cluster_map.clusters_per_cell;
 			}
-			if(maximum == 0)
-				jp->pi.cluster_map[i] = SYSTEM_SPACE;
-			else
-				jp->pi.cluster_map[i] = (char)index;
+			if(jp->cluster_map.array[i][MFT_ZONE_SPACE] >= maximum)
+				mft_zone_detected = 1;
+			if(jp->cluster_map.array[i][FREE_SPACE] >= maximum)
+				free_cell_detected = 1;
+			if(mft_zone_detected && free_cell_detected){
+				jp->pi.cluster_map[i] = MFT_ZONE_SPACE;
+			} else {
+				maximum = jp->cluster_map.array[i][0];
+				index = 0;
+				for(k = 1; k < jp->cluster_map.n_colors; k++){
+					n = jp->cluster_map.array[i][k];
+					if(n >= maximum){ /* support of colors precedence  */
+						if(k != MFT_ZONE_SPACE || !mft_zone_detected){
+							maximum = n;
+							index = k;
+						}
+					}
+				}
+				if(maximum == 0)
+					jp->pi.cluster_map[i] = SYSTEM_SPACE;
+				else
+					jp->pi.cluster_map[i] = (char)index;
+			}
 		}
 	}
 	

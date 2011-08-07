@@ -9,6 +9,7 @@ HISTORY
       and to the boot time defragmenter
     - one bug causing incorrect time limit treatment was fixed
     - added display of the time limit at boot time
+    - MFT zone draw was adjusted to be more precise and correct
     - the following translations were added:
 
       Latin, Hebrew

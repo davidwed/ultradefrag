@@ -109,22 +109,26 @@ typedef enum {
 #define UD_PREVIEW_QUICK            0x4
 #define UD_PREVIEW_SKIP_PARTIAL     0x8
 
+/*
+* MFT_ZONE_SPACE has special meaning - 
+* it is used as a marker for MFT Zone space.
+*/
 enum {
-    UNUSED_MAP_SPACE = 0,
-	FREE_SPACE,
+    UNUSED_MAP_SPACE = 0,        /* other colors have more precedence */
+	FREE_SPACE,                  /* has lowest precedence */
 	SYSTEM_SPACE,
 	SYSTEM_OVER_LIMIT_SPACE,
 	FRAGM_SPACE,
 	FRAGM_OVER_LIMIT_SPACE,
 	UNFRAGM_SPACE,
 	UNFRAGM_OVER_LIMIT_SPACE,
-	MFT_ZONE_SPACE,           /* after free! */
-	MFT_SPACE,                /* after mft zone! */
 	DIR_SPACE,
 	DIR_OVER_LIMIT_SPACE,
 	COMPRESSED_SPACE,
 	COMPRESSED_OVER_LIMIT_SPACE,
-	TEMPORARY_SYSTEM_SPACE,
+	MFT_ZONE_SPACE,
+	MFT_SPACE,
+	TEMPORARY_SYSTEM_SPACE,      /* has highest precedence */
     NUM_OF_SPACE_STATES          /* this must always be the last */
 };
 

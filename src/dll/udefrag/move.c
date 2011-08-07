@@ -179,8 +179,7 @@ static void redraw_freed_space(udefrag_job_parameters *jp,
 	*/
 	if(jp->fs_type == FS_NTFS){
 		/* mark clusters as temporarily allocated by system  */
-		/* or as mft zone immediately since we're not using it */
-		colorize_map_region(jp,lcn,length,TMP_SYSTEM_OR_MFT_ZONE_SPACE,old_color);
+		colorize_map_region(jp,lcn,length,TEMPORARY_SYSTEM_SPACE,old_color);
 		add_temp_space_region(jp,lcn,length);
 	} else {
 		colorize_map_region(jp,lcn,length,FREE_SPACE,old_color);
@@ -807,9 +806,6 @@ int move_file(winx_file_info *f,
 		optimize_blockmap(&new_file_info);
 		moving_result = CALCULATED_MOVING_SUCCESS;
 	} else {
-		/* adjust $mft file - its first 16 clusters aren't movable */
-		if(is_mft(&new_file_info,jp)) adjust_mft_file(&new_file_info,jp);
-
 		/* compare old and new block maps */
 		if(blockmap_compare(&new_file_info.disp,&f->disp) == 0){
 			DebugPrint("move_file: nothing has been moved");
@@ -841,10 +837,6 @@ int move_file(winx_file_info *f,
 	*/
 	if(moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS)
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
-	
-	/* refresh coordinates of mft zones if $mft or $mftmirr has been moved */
-	if(old_color == MFT_SPACE || is_mft_mirror(f,jp))
-		update_mft_zones_layout(jp);
 	
 	/* redraw target space */
 	new_color = get_file_color(jp,&new_file_info);

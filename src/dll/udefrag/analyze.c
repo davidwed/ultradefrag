@@ -172,10 +172,9 @@ int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
 
 /**
  * @brief Retrieves mft zones layout.
- * @note MFT space becomes excluded from the free space list.
- * Because Windows 2000 disallows to move files there.
- * And because on other systems this dirty technique 
- * causes MFT fragmentation.
+ * @note MFT zone space becomes excluded from the free space list.
+ * Because Windows 2000 disallows to move files there. And because on 
+ * other systems this dirty technique may increase MFT fragmentation.
  */
 static void get_mft_zones_layout(udefrag_job_parameters *jp)
 {
@@ -200,9 +199,9 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 		length = 0;
 	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft", start, length);
 	if(check_region(jp,start,length)){
-		/* remark space as reserved */
-		colorize_map_region(jp,start,length,MFT_ZONE_SPACE,SYSTEM_OR_FREE_SPACE);
-		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
+		/* to be honest, this is not MFT zone */
+		/*colorize_map_region(jp,start,length,MFT_ZONE_SPACE,0);
+		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);*/
 		jp->mft_zones.mft_start = start; jp->mft_zones.mft_end = start + length - 1;
 		mft_length += length;
 	}
@@ -213,7 +212,7 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft zone", start, length);
 	if(check_region(jp,start,length)){
 		/* remark space as reserved */
-		colorize_map_region(jp,start,length,MFT_ZONE_SPACE,SYSTEM_OR_FREE_SPACE);
+		colorize_map_region(jp,start,length,MFT_ZONE_SPACE,0);
 		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
 		jp->mft_zones.mftzone_start = start; jp->mft_zones.mftzone_end = start + length - 1;
 	}
@@ -229,9 +228,9 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 	}
 	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft mirror", start, length);
 	if(check_region(jp,start,length)){
-		/* remark space as reserved */
-		colorize_map_region(jp,start,length,MFT_ZONE_SPACE,SYSTEM_OR_FREE_SPACE);
-		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
+		/* to be honest, this is not MFT zone */
+		/*colorize_map_region(jp,start,length,MFT_ZONE_SPACE,0);
+		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);*/
 		jp->mft_zones.mftmirr_start = start; jp->mft_zones.mftmirr_end = start + length - 1;
 	}
 	
@@ -239,85 +238,6 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 	DebugPrint("mft size = %I64u bytes",jp->pi.mft_size);
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw progress */
-}
-
-/**
- * @brief Updates mft zones layout.
- * @note MFT space becomes excluded from the free space list.
- * Because Windows 2000 disallows to move files there.
- * And because on other systems this dirty technique 
- * causes MFT fragmentation.
- */
-void update_mft_zones_layout(udefrag_job_parameters *jp)
-{
-	winx_volume_information v;
-	ULONGLONG start,length,mirror_size;
-	ULONGLONG mft_length = 0;
-
-	if(jp->fs_type != FS_NTFS)
-		return;
-
-	/* get volume information */
-	memset(&v,0,sizeof(winx_volume_information));
-	if(winx_get_volume_information(jp->volume_letter,&v) < 0)
-		return;
-	
-	/* update information about mft zones */
-	memcpy(&jp->v_info.ntfs_data,&v.ntfs_data,sizeof(NTFS_DATA));
-
-	DebugPrint("updated mft zones layout:");
-	DebugPrint("%-12s: %-20s: %-20s", "mft section", "start", "length");
-
-	/* $MFT */
-	start = jp->v_info.ntfs_data.MftStartLcn.QuadPart;
-	if(jp->v_info.ntfs_data.BytesPerCluster)
-		length = jp->v_info.ntfs_data.MftValidDataLength.QuadPart / jp->v_info.ntfs_data.BytesPerCluster;
-	else
-		length = 0;
-	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft", start, length);
-	if(check_region(jp,start,length)){
-		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
-		jp->mft_zones.mft_start = start; jp->mft_zones.mft_end = start + length - 1;
-		mft_length += length;
-	}
-
-	/* MFT Zone */
-	start = jp->v_info.ntfs_data.MftZoneStart.QuadPart;
-	length = jp->v_info.ntfs_data.MftZoneEnd.QuadPart - jp->v_info.ntfs_data.MftZoneStart.QuadPart + 1;
-	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft zone", start, length);
-	if(check_region(jp,start,length)){
-		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
-		jp->mft_zones.mftzone_start = start; jp->mft_zones.mftzone_end = start + length - 1;
-	}
-
-	/* $MFT Mirror */
-	start = jp->v_info.ntfs_data.Mft2StartLcn.QuadPart;
-	length = 1;
-	mirror_size = jp->v_info.ntfs_data.BytesPerFileRecordSegment * 4;
-	if(jp->v_info.ntfs_data.BytesPerCluster && mirror_size > jp->v_info.ntfs_data.BytesPerCluster){
-		length = mirror_size / jp->v_info.ntfs_data.BytesPerCluster;
-		if(mirror_size - length * jp->v_info.ntfs_data.BytesPerCluster)
-			length ++;
-	}
-	DebugPrint("%-12s: %-20I64u: %-20I64u", "mft mirror", start, length);
-	if(check_region(jp,start,length)){
-		jp->free_regions = winx_sub_volume_region(jp->free_regions,start,length);
-		jp->mft_zones.mftmirr_start = start; jp->mft_zones.mftmirr_end = start + length - 1;
-	}
-	
-	jp->pi.mft_size = mft_length * jp->v_info.bytes_per_cluster;
-	DebugPrint("mft size = %I64u bytes",jp->pi.mft_size);
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw progress */
-}
-
-/**
- * @brief Adjusts $mft file characteristics to reflect 
- * impossibility of its first 16 clusters move.
- */
-void adjust_mft_file(winx_file_info *f,udefrag_job_parameters *jp)
-{
-	/* do nothing, because of the optimize_mft routine */
 }
 
 /**
@@ -547,13 +467,7 @@ static int find_files(udefrag_job_parameters *jp)
 		}
 
 		/* redraw cluster map */
-		if(jp->fs_type == FS_NTFS)
-			colorize_file(jp,f,SYSTEM_OR_MFT_ZONE_SPACE);
-		else
-			colorize_file(jp,f,SYSTEM_SPACE);
-
-		/* adjust $mft file - its first 16 clusters aren't movable */
-		if(is_mft(f,jp)) adjust_mft_file(f,jp);
+		colorize_file(jp,f,SYSTEM_SPACE);
 
 		//DebugPrint("%ws",f->path);
 		if(jp->progress_router) /* need speedup? */

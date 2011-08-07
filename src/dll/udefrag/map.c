@@ -185,122 +185,6 @@ void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Checks whether a range of clusters is outside MFT or not.
- */
-static int is_outside_mft(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
-{
-	if(jp->mft_zones.mft_end == 0 \
-		|| (lcn + length) <= jp->mft_zones.mft_start \
-		|| lcn > jp->mft_zones.mft_end) return 1;
-	return 0;
-}
-
-/**
- * @brief Checks whether a range of clusters is outside MFT Zone or not.
- */
-static int is_outside_mft_zone(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
-{
-	if(jp->mft_zones.mftzone_end == 0 \
-		|| (lcn + length) <= jp->mft_zones.mftzone_start \
-		|| lcn > jp->mft_zones.mftzone_end) return 1;
-	return 0;
-}
-
-/**
- * @brief Checks whether a range of clusters is outside MFT Mirror or not.
- */
-static int is_outside_mft_mirr(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
-{
-	if(jp->mft_zones.mftmirr_end == 0 \
-		|| (lcn + length) <= jp->mft_zones.mftmirr_start \
-		|| lcn > jp->mft_zones.mftmirr_end) return 1;
-	return 0;
-}
-
-/**
- * @brief Checks whether a range of clusters is inside MFT or not.
- */
-static int is_inside_mft(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
-{
-	if(jp->mft_zones.mft_end != 0 \
-		&& lcn >= jp->mft_zones.mft_start \
-		&& (lcn + length) <= (jp->mft_zones.mft_end + 1)) return 1;
-	return 0;
-}
-
-/**
- * @brief Checks whether a range of clusters is inside MFT Zone or not.
- */
-static int is_inside_mft_zone(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
-{
-	if(jp->mft_zones.mftzone_end != 0 \
-		&& lcn >= jp->mft_zones.mftzone_start \
-		&& (lcn + length) <= (jp->mft_zones.mftzone_end + 1)) return 1;
-	return 0;
-}
-
-/**
- * @brief Checks whether a range of clusters is inside MFT Mirror or not.
- */
-static int is_inside_mft_mirr(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
-{
-	if(jp->mft_zones.mftmirr_end != 0 \
-		&& lcn >= jp->mft_zones.mftmirr_start \
-		&& (lcn + length) <= (jp->mft_zones.mftmirr_end + 1)) return 1;
-	return 0;
-}
-
-/**
- * @brief colorize_map_region helper.
- */
-static void colorize_respect_to_mft_zones(udefrag_job_parameters *jp,
-	ULONGLONG lcn, ULONGLONG length, int new_color, int old_color, int undefined_new_color)
-{
-	int outside_mft, outside_mftzone, outside_mftmirr;
-	int inside_mft, inside_mftzone, inside_mftmirr;
-	int default_color, adjusted_color;
-	ULONGLONG i;
-	
-	if(undefined_new_color) default_color = new_color;
-	else default_color = old_color;
-
-	/* check whether the block is outside mft zones */
-	outside_mft = is_outside_mft(jp,lcn,length);
-	outside_mftzone = is_outside_mft_zone(jp,lcn,length);
-	outside_mftmirr = is_outside_mft_mirr(jp,lcn,length);
-	if(outside_mft && outside_mftzone && outside_mftmirr){
-		colorize_map_region(jp,lcn,length,new_color,old_color);
-	} else {
-		/* check whether the block is completely inside mft zone */
-		inside_mft = is_inside_mft(jp,lcn,length);
-		inside_mftzone = is_inside_mft_zone(jp,lcn,length);
-		inside_mftmirr = is_inside_mft_mirr(jp,lcn,length);
-		if(inside_mft || inside_mftzone || inside_mftmirr){
-			if(undefined_new_color)
-				colorize_map_region(jp,lcn,length,MFT_ZONE_SPACE,old_color);
-			else
-				colorize_map_region(jp,lcn,length,new_color,MFT_ZONE_SPACE);
-		} else {
-			/* block is partially inside mft zone */
-			/* this case is rare, it may encounter no more than 6 times */
-			/* therefore we can handle it easy, without optimizing the code for speed */
-			for(i = lcn; i < lcn + length; i++){
-				if((i < jp->mft_zones.mft_start || i > jp->mft_zones.mft_end) \
-				  && (i < jp->mft_zones.mftzone_start || i > jp->mft_zones.mftzone_end) \
-				  && (i < jp->mft_zones.mftmirr_start || i > jp->mft_zones.mftmirr_end))
-					adjusted_color = default_color;
-				else
-					adjusted_color = MFT_ZONE_SPACE;
-				if(undefined_new_color)
-					colorize_map_region(jp,i,1,adjusted_color,old_color);
-				else
-					colorize_map_region(jp,i,1,new_color,adjusted_color);
-			}
-		}
-	}
-}
-
-/**
  * @brief colorize_map_region helper.
  */
 static void colorize_system_or_free_region(udefrag_job_parameters *jp,
@@ -338,6 +222,8 @@ static void colorize_system_or_free_region(udefrag_job_parameters *jp,
 
 /**
  * @brief Colorizes specified range of clusters.
+ * @note If new color is equal to MFT_ZONE_SPACE,
+ * old color is ignored.
  */
 void colorize_map_region(udefrag_job_parameters *jp,
 		ULONGLONG lcn, ULONGLONG length, int new_color, int old_color)
@@ -360,24 +246,14 @@ void colorize_map_region(udefrag_job_parameters *jp,
 		colorize_system_or_free_region(jp,lcn,length,new_color);
 		return;
 	}
-	if(old_color == SYSTEM_OR_MFT_ZONE_SPACE){
-		colorize_respect_to_mft_zones(jp,lcn,length,new_color,SYSTEM_SPACE,0);
-		return;
-	}
-	if(new_color == FREE_OR_MFT_ZONE_SPACE){
-		colorize_respect_to_mft_zones(jp,lcn,length,FREE_SPACE,old_color,1);
-		return;
-	}
-	if(new_color == TMP_SYSTEM_OR_MFT_ZONE_SPACE){
-		colorize_respect_to_mft_zones(jp,lcn,length,TEMPORARY_SYSTEM_SPACE,old_color,1);
-		return;
-	}
 	
 	/* validate colors */
 	if(new_color < 0 || new_color >= jp->cluster_map.n_colors)
 		return;
-	if(old_color < 0 || old_color >= jp->cluster_map.n_colors)
-		return;
+	if(new_color != MFT_ZONE_SPACE){
+		if(old_color < 0 || old_color >= jp->cluster_map.n_colors)
+			return;
+	}
 	
 	if(jp->cluster_map.opposite_order == FALSE){
 		/* we're using here less obvious code,
@@ -389,8 +265,10 @@ void colorize_map_region(udefrag_job_parameters *jp,
 		while(cell < (jp->cluster_map.map_size - 1) && length){
 			n = min(length,jp->cluster_map.clusters_per_cell - offset);
 			jp->cluster_map.array[cell][new_color] += n;
-			c = &jp->cluster_map.array[cell][old_color];
-			if(*c >= n) *c -= n; else *c = 0;
+			if(new_color != MFT_ZONE_SPACE){
+				c = &jp->cluster_map.array[cell][old_color];
+				if(*c >= n) *c -= n; else *c = 0;
+			}
 			length -= n;
 			cell ++;
 			offset = 0;
@@ -398,16 +276,20 @@ void colorize_map_region(udefrag_job_parameters *jp,
 		if(length){
 			n = min(length,jp->cluster_map.clusters_per_last_cell - offset);
 			jp->cluster_map.array[cell][new_color] += n;
-			c = &jp->cluster_map.array[cell][old_color];
-			if(*c >= n) *c -= n; else *c = 0;
+			if(new_color != MFT_ZONE_SPACE){
+				c = &jp->cluster_map.array[cell][old_color];
+				if(*c >= n) *c -= n; else *c = 0;
+			}
 		}
 	} else {
 		/* clusters < cells */
 		cell = lcn * jp->cluster_map.cells_per_cluster;
 		ncells = length * jp->cluster_map.cells_per_cluster;
 		for(i = 0; i < ncells; i++){
-			for(j = 0; j < jp->cluster_map.n_colors; j++)
-				jp->cluster_map.array[cell + i][j] = 0;
+			if(new_color != MFT_ZONE_SPACE){
+				for(j = 0; j < jp->cluster_map.n_colors; j++)
+					jp->cluster_map.array[cell + i][j] = 0;
+			}
 			jp->cluster_map.array[cell + i][new_color] = 1;
 		}
         /* colorize remaining cells as unused */
@@ -446,34 +328,6 @@ int is_mft(winx_file_info *f,udefrag_job_parameters *jp)
 
 	if(length == 11){
 		if(winx_wcsistr(f->name,mft_name))
-			return 1;
-	}
-	
-	return 0;
-}
-
-/**
- * @brief Defines whether the file is $Mftmirr or not.
- * @return Nonzero value indicates that the file is $Mftmirr.
- */
-int is_mft_mirror(winx_file_info *f,udefrag_job_parameters *jp)
-{
-	int length;
-	wchar_t mft_mirror_name[] = L"$Mftmirr";
-
-	if(f == NULL || jp == NULL)
-		return 0;
-	
-	if(jp->fs_type != FS_NTFS)
-		return 0;
-	
-	if(f->path == NULL || f->name == NULL)
-		return 0;
-	
-	length = wcslen(f->path);
-
-	if(length == 15){
-		if(winx_wcsistr(f->name,mft_mirror_name))
 			return 1;
 	}
 	
