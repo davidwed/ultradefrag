@@ -541,7 +541,7 @@ static int process_single_volume(char volume_letter)
 	else if(o_flag) job_type = FULL_OPTIMIZATION_JOB;
 	else if(quick_optimize_flag) job_type = QUICK_OPTIMIZATION_JOB;
 	if(repeat_flag)
-		flags = UD_PREVIEW_REPEAT;
+		flags = UD_JOB_REPEAT;
 	first_progress_update = 1;
 	result = udefrag_start_job(volume_letter,job_type,flags,map_size,
 		update_progress,terminator,(void *)(DWORD_PTR)volume_letter);

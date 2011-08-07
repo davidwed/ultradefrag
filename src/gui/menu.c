@@ -163,12 +163,12 @@ int CreateMainMenu(void)
 		/*EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);*/
 	}
 	
-	/*if(preview_flags & UD_PREVIEW_REPEAT){
+	/*if(job_flags & UD_PREVIEW_REPEAT){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_REPEAT,
 			MF_BYCOMMAND | MF_CHECKED);
 	}*/
-	if(preview_flags & UD_PREVIEW_MATCHING){
+	if(job_flags & UD_PREVIEW_MATCHING){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_MATCHING,
 			MF_BYCOMMAND | MF_CHECKED);
@@ -177,7 +177,7 @@ int CreateMainMenu(void)
 			IDM_PREVIEW_LARGEST,
 			MF_BYCOMMAND | MF_CHECKED);
 	}
-	if(preview_flags & UD_PREVIEW_SKIP_PARTIAL){
+	if(job_flags & UD_PREVIEW_SKIP_PARTIAL){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_SKIP_PARTIAL,
 			MF_BYCOMMAND | MF_CHECKED);

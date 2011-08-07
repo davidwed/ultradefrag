@@ -56,7 +56,7 @@ int btd_installed = 0;
 int web_statistics_completed = 0;
 
 /* algorithm preview flags controlled through the preview menu */
-int preview_flags = UD_PREVIEW_MATCHING;
+int job_flags = UD_PREVIEW_MATCHING;
 
 /* forward declarations */
 LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
@@ -918,16 +918,16 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 					flag = 0;
 					break;
 				}
-				if(preview_flags & flag){
+				if(job_flags & flag){
 					CheckMenuItem(hMainMenu,id,MF_BYCOMMAND | MF_UNCHECKED);
-					preview_flags ^= flag;
+					job_flags ^= flag;
 				} else {
 					CheckMenuItem(hMainMenu,id,MF_BYCOMMAND | MF_CHECKED);
-					preview_flags |= flag;
+					job_flags |= flag;
 				}
 				
 				/* set "find largest" menu state opposed to "find matching" state */
-				if(preview_flags & UD_PREVIEW_MATCHING)
+				if(job_flags & UD_PREVIEW_MATCHING)
 					CheckMenuItem(hMainMenu,IDM_PREVIEW_LARGEST,MF_BYCOMMAND | MF_UNCHECKED);
 				else
 					CheckMenuItem(hMainMenu,IDM_PREVIEW_LARGEST,MF_BYCOMMAND | MF_CHECKED);

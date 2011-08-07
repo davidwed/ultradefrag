@@ -356,7 +356,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	else if(quick_optimize_flag) current_job = QUICK_OPTIMIZATION_JOB;
 	else current_job = DEFRAGMENTATION_JOB;
 	
-	current_job_flags = repeat_flag ? UD_PREVIEW_REPEAT : 0;
+	current_job_flags = repeat_flag ? UD_JOB_REPEAT : 0;
 	
 	/*
 	* In scripting mode the abort_flag has initial value 0.

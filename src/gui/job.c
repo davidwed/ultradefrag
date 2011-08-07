@@ -268,10 +268,10 @@ void ProcessSingleVolume(volume_processing_job *job)
 	} else {
 		/* process the volume */
 		current_job = job;
-		if(repeat_action) preview_flags |= UD_PREVIEW_REPEAT;
-		else preview_flags &= ~UD_PREVIEW_REPEAT;
+		if(repeat_action) job_flags |= UD_JOB_REPEAT;
+		else job_flags &= ~UD_JOB_REPEAT;
 		error_code = udefrag_start_job(job->volume_letter, job->job_type,
-				preview_flags,map_blocks_per_line * map_lines,update_progress,
+				job_flags,map_blocks_per_line * map_lines,update_progress,
 				terminator, NULL);
 		if(error_code < 0 && !exit_pressed){
 			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");

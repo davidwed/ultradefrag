@@ -183,7 +183,7 @@ WGX_OPTION options[] = {
 	{WGX_CFG_INT,     0, "list_height", &list_height, (void *)VLIST_HEIGHT},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 
-	{WGX_CFG_INT,     0, "preview_flags", &preview_flags, (void *)UD_PREVIEW_MATCHING},
+	{WGX_CFG_INT,     0, "job_flags", &job_flags, (void *)UD_PREVIEW_MATCHING},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
 	{0,               0, NULL, NULL, NULL}
@@ -300,7 +300,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 	int s_maximized, s_init_maximized;
 	int s_skip_removable;
 	int s_repeat_action;
-	int s_preview_flags;
+	int s_job_flags;
 	int cw[sizeof(user_defined_column_widths) / sizeof(int)];
 	int s_list_height;
 	
@@ -327,7 +327,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				s_repeat_action = repeat_action;
 				memcpy(&cw,&user_defined_column_widths,sizeof(user_defined_column_widths));
 				s_list_height = list_height;
-				s_preview_flags = preview_flags;
+				s_job_flags = job_flags;
 				
 				/* reload preferences */
 				GetPrefs();
@@ -340,7 +340,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
 				repeat_action = s_repeat_action;
 				memcpy(&user_defined_column_widths,&cw,sizeof(user_defined_column_widths));
 				list_height = s_list_height;
-				preview_flags = s_preview_flags;
+				job_flags = s_job_flags;
 				
 				SetEvent(hMapEvent);
 

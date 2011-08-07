@@ -516,7 +516,7 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	jp->pi.moved_clusters = 0;
 
-	if(jp->udo.preview_flags & UD_PREVIEW_MATCHING)
+	if(jp->udo.job_flags & UD_PREVIEW_MATCHING)
 		return defragment_small_files_respect_best_matching(jp);
 	
 	/* free as much temporarily allocated space as possible */
