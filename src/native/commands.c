@@ -703,7 +703,7 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 		return result;
 	}
 	
-	return 0;
+	return 0; /* this point will never be reached */
 }
 
 /**

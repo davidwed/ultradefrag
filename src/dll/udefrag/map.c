@@ -365,7 +365,7 @@ int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
 		else
 			return UNFRAGM_SPACE;
 	}
-	return UNFRAGM_SPACE;
+	return UNFRAGM_SPACE; /* this point will never be reached */
 }
 
 /**

@@ -395,7 +395,7 @@ int __cdecl main(int argc, char **argv)
 
 	destroy_paths();
 	terminate_console(result);
-	return 0;
+	return 0; /* this point will never be reached */
 }
 
 /**
