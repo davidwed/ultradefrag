@@ -312,7 +312,7 @@ int optimize_mft(udefrag_job_parameters *jp)
 	winx_blockmap *block, *first_block;
 	ULONGLONG end_lcn, min_lcn, next_vcn;
 	ULONGLONG current_vcn, remaining_clusters, n, lcn;
-	winx_volume_region region;
+	winx_volume_region region = {0};
 	ULONGLONG clusters_to_cleanup;
 	int block_cleaned_up;
 	char buffer[32];
@@ -948,7 +948,7 @@ try_again:
 	}
 	/* end of strategy 1 */
 	goto done;
-
+#if 0
 	/* strategy 2: not so effective */
 	max_rgn_lcn = jp->v_info.total_clusters - 1;
 	for(file = jp->filelist; file; file = file->next){
@@ -1007,7 +1007,7 @@ try_again:
 		}
 		last_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 	}
-
+#endif
 done:
 	/* display amount of moved data */
 	DebugPrint("%I64u files moved totally",jp->pi.total_moves);
