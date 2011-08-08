@@ -290,6 +290,7 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	LV_ITEM lvi;
 	char buffer[64];
 	int index;
+	TBBUTTONINFO tbi;
 	udefrag_job_type job_type = (udefrag_job_type)(DWORD_PTR)lpParameter;
 	
 	/* return immediately if we are busy */
@@ -315,6 +316,11 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_QUICK_OPTIMIZE,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_FULL_OPTIMIZE,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_REPEAT_ACTION,MAKELONG(FALSE,0));
+	/*SendMessage(hToolbar,TB_SETSTATE,IDM_REPEAT_ACTION,MAKELONG(TBSTATE_INDETERMINATE,0));*/
+	tbi.cbSize = sizeof(TBBUTTONINFO);
+	tbi.dwMask = TBIF_IMAGE;
+	tbi.iImage = 2; /* grayed repeat icon */
+	SendMessage(hToolbar,TB_SETBUTTONINFO,IDM_REPEAT_ACTION,(LRESULT)&tbi);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(FALSE,0));
 
 	/* process all selected volumes */
@@ -352,6 +358,16 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_QUICK_OPTIMIZE,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_FULL_OPTIMIZE,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_REPEAT_ACTION,MAKELONG(TRUE,0));
+	/*SendMessage(hToolbar,TB_SETSTATE,IDM_REPEAT_ACTION,MAKELONG(TBSTATE_ENABLED,0));
+	if(repeat_action)
+		SendMessage(hToolbar,TB_CHECKBUTTON,IDM_REPEAT_ACTION,MAKELONG(TRUE,0));
+	else
+		SendMessage(hToolbar,TB_CHECKBUTTON,IDM_REPEAT_ACTION,MAKELONG(FALSE,0));
+	*/
+	tbi.cbSize = sizeof(TBBUTTONINFO);
+	tbi.dwMask = TBIF_IMAGE;
+	tbi.iImage = 1; /* normal repeat icon */
+	SendMessage(hToolbar,TB_SETBUTTONINFO,IDM_REPEAT_ACTION,(LRESULT)&tbi);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(TRUE,0));
 	
 	/* check the when done action state */
