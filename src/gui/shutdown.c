@@ -113,8 +113,8 @@ static void ResizeShutdownConfirmDialog(HWND hwnd,wchar_t *counter_msg)
 	text1_height = size.cy;
 	
 	/* TODO: do it more accurately, without the need of extra_spacing  */
-	_snwprintf(buffer,sizeof(buffer)/sizeof(short),L"%u %ws",seconds_for_shutdown_rejection,counter_msg);
-	buffer[sizeof(buffer)/sizeof(short) - 1] = 0;
+	_snwprintf(buffer,sizeof(buffer)/sizeof(wchar_t),L"%u %ws",seconds_for_shutdown_rejection,counter_msg);
+	buffer[sizeof(buffer)/sizeof(wchar_t) - 1] = 0;
 	text2 = buffer;
 	if(!GetTextExtentPoint32W(hdc,text2,wcslen(text2),&size)){
 		WgxDbgPrintLastError("ResizeShutdownConfirmDialog: cannot get text2 dimensions");
