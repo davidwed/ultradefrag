@@ -42,55 +42,57 @@
  *
  * @htmlonly
  * <table style="border:none; margin-left:20px;">
- * <tr><td>• Belarusian         </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Bulgarian          </td><td>-</td><td> Dmitri Arkhangelski, Stefan Pendl</td></tr>
- * <tr><td>• Burmese            </td><td>-</td><td> Muhamed Widuya</td></tr>
- * <tr><td>• Catalan            </td><td>-</td><td> Illes Balears, Stefan Pendl</td></tr>
- * <tr><td>• Chinese            </td><td>-</td><td> muzuiget, Stefan Pendl</td></tr>
- * <tr><td>• Croatian           </td><td>-</td><td> Dmitri Arkhangelski, Stefan Pendl</td></tr>
- * <tr><td>• Czech              </td><td>-</td><td> David Horak, Stefan Pendl</td></tr>
- * <tr><td>• Danish             </td><td>-</td><td> Patrick Paludan-Müller, Stefan Pendl</td></tr>
- * <tr><td>• Dutch              </td><td>-</td><td> Wim Kerstens, Stefan Pendl</td></tr>
- * <tr><td>• English (GB)       </td><td>-</td><td> Andrew Smith</td></tr>
- * <tr><td>• English (US)       </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Estonian           </td><td>-</td><td> Olav Mägi</td></tr>
- * <tr><td>• Farsi              </td><td>-</td><td> Ali Jafari</td></tr>
- * <tr><td>• Filipino (Ilokano) </td><td>-</td><td> Joseph S. Maza</td></tr>
- * <tr><td>• Filipino (Tagalog) </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>• Finnish            </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>• French             </td><td>-</td><td> Pascal Crozet, Stefan Pendl</td></tr>
- * <tr><td>• Galician           </td><td>-</td><td> Julio Mojón Fuentes</td></tr>
- * <tr><td>• German             </td><td>-</td><td> Stefan Geuken, Stefan Pendl</td></tr>
- * <tr><td>• Greek              </td><td>-</td><td> Konstantinos Kapoukranidis, Stefan Pendl</td></tr>
- * <tr><td>• Hebrew             </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Hindi              </td><td>-</td><td> Gaurav Chatterjee</td></tr>
- * <tr><td>• Hungarian          </td><td>-</td><td> Nagy Zsolt, Stefan Pendl</td></tr>
- * <tr><td>• Icelandic          </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>• Indonesian         </td><td>-</td><td> Imanuel Novian</td></tr>
- * <tr><td>• Italian            </td><td>-</td><td> Paolo Loggia, Stefan Pendl</td></tr>
- * <tr><td>• Japanese           </td><td>-</td><td> ao3, Stefan Pendl</td></tr>
- * <tr><td>• Korean             </td><td>-</td><td> Alex Han, Stefan Pendl</td></tr>
- * <tr><td>• Latin              </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Latvian            </td><td>-</td><td> Sevelyr, Vladislav Stuzhnev, Stefan Pendl</td></tr>
- * <tr><td>• Macedonian         </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Norwegian          </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>• Polish             </td><td>-</td><td> Andrzej Rudnik, Stefan Pendl</td></tr>
- * <tr><td>• Portuguese         </td><td>-</td><td> Ricardo A. Garcia, Stefan Pendl</td></tr>
- * <tr><td>• Portuguese (BR)    </td><td>-</td><td> Depeo da Masol, Stefan Pendl</td></tr>
- * <tr><td>• Romanian           </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>• Russian            </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Serbian            </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Slovak             </td><td>-</td><td> Milan Cerovsky, Dmitri Arkhangelski</td></tr>
- * <tr><td>• Slovenian          </td><td>-</td><td> Miha Mlakar, Dmitri Arkhangelski</td></tr>
- * <tr><td>• Spanish (AR)       </td><td>-</td><td> Daniel Testa</td></tr>
- * <tr><td>• Spanish (ES)       </td><td>-</td><td> txusti</td></tr>
- * <tr><td>• Swedish            </td><td>-</td><td> Magnus Rostedt, Stefan Pendl</td></tr>
- * <tr><td>• Tamil              </td><td>-</td><td> Vinod V.</td></tr>
- * <tr><td>• Thai               </td><td>-</td><td> Pat Taweewat, Stefan Pendl</td></tr>
- * <tr><td>• Turkish            </td><td>-</td><td> Huseyin Kozan, Stefan Pendl</td></tr>
- * <tr><td>• Ukrainian          </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>• Vietnamese (VI)    </td><td>-</td><td> Vietnamize Team</td></tr>
- * <tr><td>• Yiddish            </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Belarusian                   </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Bulgarian                    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Burmese                      </td><td>-</td><td> Muhamed Widuya</td></tr>
+ * <tr><td>• Catalan                      </td><td>-</td><td> Illes Balears</td></tr>
+ * <tr><td>• Chinese                      </td><td>-</td><td> muzuiget</td></tr>
+ * <tr><td>• Croatian                     </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Czech                        </td><td>-</td><td> David Horak</td></tr>
+ * <tr><td>• Danish                       </td><td>-</td><td> Patrick Paludan-Müller</td></tr>
+ * <tr><td>• Dutch                        </td><td>-</td><td> Wim Kerstens</td></tr>
+ * <tr><td>• English (GB)                 </td><td>-</td><td> Andrew Smith</td></tr>
+ * <tr><td>• English (US)                 </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Estonian                     </td><td>-</td><td> Olav Mägi</td></tr>
+ * <tr><td>• Farsi                        </td><td>-</td><td> Ali Jafari</td></tr>
+ * <tr><td>• Filipino (Ilokano)           </td><td>-</td><td> Joseph S. Maza</td></tr>
+ * <tr><td>• Filipino (Tagalog)           </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Finnish                      </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• French                       </td><td>-</td><td> Pascal Crozet</td></tr>
+ * <tr><td>• Galician                     </td><td>-</td><td> Julio Mojón Fuentes</td></tr>
+ * <tr><td>• German                       </td><td>-</td><td> Stefan Geuken</td></tr>
+ * <tr><td>• Greek                        </td><td>-</td><td> Konstantinos Kapoukranidis</td></tr>
+ * <tr><td>• Hebrew                       </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Hindi                        </td><td>-</td><td> Gaurav Chatterjee</td></tr>
+ * <tr><td>• Hungarian                    </td><td>-</td><td> Nagy Zsolt</td></tr>
+ * <tr><td>• Icelandic                    </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Indonesian                   </td><td>-</td><td> Imanuel Novian</td></tr>
+ * <tr><td>• Indonesian (Bahasa Indonesia)</td><td>-</td><td> Taufan Nur Hidayat</td></tr>
+ * <tr><td>• Italian                      </td><td>-</td><td> Paolo Loggia</td></tr>
+ * <tr><td>• Japanese                     </td><td>-</td><td> ao3</td></tr>
+ * <tr><td>• Javanese                     </td><td>-</td><td> Taufan Nur Hidayat</td></tr>
+ * <tr><td>• Korean                       </td><td>-</td><td> Alex Han</td></tr>
+ * <tr><td>• Latin                        </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Latvian                      </td><td>-</td><td> Sevelyr, Vladislav Stuzhnev</td></tr>
+ * <tr><td>• Macedonian                   </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Norwegian                    </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Polish                       </td><td>-</td><td> Andrzej Rudnik</td></tr>
+ * <tr><td>• Portuguese                   </td><td>-</td><td> Ricardo A. Garcia</td></tr>
+ * <tr><td>• Portuguese (BR)              </td><td>-</td><td> Depeo da Masol</td></tr>
+ * <tr><td>• Romanian                     </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>• Russian                      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Serbian                      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Slovak                       </td><td>-</td><td> Milan Cerovsky, Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Slovenian                    </td><td>-</td><td> Miha Mlakar, Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Spanish (AR)                 </td><td>-</td><td> Daniel Testa</td></tr>
+ * <tr><td>• Spanish (ES)                 </td><td>-</td><td> txusti</td></tr>
+ * <tr><td>• Swedish                      </td><td>-</td><td> Magnus Rostedt</td></tr>
+ * <tr><td>• Tamil                        </td><td>-</td><td> Vinod V.</td></tr>
+ * <tr><td>• Thai                         </td><td>-</td><td> Pat Taweewat</td></tr>
+ * <tr><td>• Turkish                      </td><td>-</td><td> Huseyin Kozan</td></tr>
+ * <tr><td>• Ukrainian                    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>• Vietnamese (VI)              </td><td>-</td><td> Vietnamize Team</td></tr>
+ * <tr><td>• Yiddish                      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
  * </table>
  * @endhtmlonly
  *

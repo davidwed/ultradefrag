@@ -39,55 +39,57 @@
 ----------------------------------------
 	Translators:
 ----------------------------------------
-    Belarusian         - Dmitri Arkhangelski
-    Bulgarian          - Dmitri Arkhangelski, Stefan Pendl
-    Burmese            - Muhamed Widuya
-    Catalan            - Illes Balears, Stefan Pendl
-    Chinese            - muzuiget, Stefan Pendl
-    Croatian           - Dmitri Arkhangelski, Stefan Pendl
-    Czech              - David Horak, Stefan Pendl
-    Danish             - Patrick Paludan-Müller, Stefan Pendl
-    Dutch              - Wim Kerstens, Stefan Pendl
-    English (GB)       - Andrew Smith
-    English (US)       - Dmitri Arkhangelski
-    Estonian           - Olav Mägi
-    Farsi              - Ali Jafari
-    Filipino (Ilokano) - Joseph S. Maza
-    Filipino (Tagalog) - Stefan Pendl
-    Finnish            - Stefan Pendl
-    French             - Pascal Crozet, Stefan Pendl
-    Galician           - Julio Mojón Fuentes
-    German             - Stefan Geuken, Stefan Pendl
-    Greek              - Konstantinos Kapoukranidis, Stefan Pendl
-    Hebrew             - Dmitri Arkhangelski
-    Hindi              - Gaurav Chatterjee
-    Hungarian          - Nagy Zsolt, Stefan Pendl
-    Icelandic          - Stefan Pendl
-    Indonesian         - Imanuel Novian
-    Italian            - Paolo Loggia, Stefan Pendl
-    Japanese           - ao3, Stefan Pendl
-    Korean             - Alex Han, Stefan Pendl
-    Latin              - Dmitri Arkhangelski
-    Latvian            - Sevelyr, Vladislav Stuzhnev, Stefan Pendl
-    Macedonian         - Dmitri Arkhangelski
-    Norwegian          - Stefan Pendl
-    Polish             - Andrzej Rudnik, Stefan Pendl
-    Portuguese         - Ricardo A. Garcia, Stefan Pendl
-    Portuguese (BR)    - Depeo da Masol, Stefan Pendl
-    Romanian           - Stefan Pendl
-    Russian            - Dmitri Arkhangelski
-    Serbian            - Dmitri Arkhangelski
-    Slovak             - Milan Cerovsky, Dmitri Arkhangelski
-    Slovenian          - Miha Mlakar, Dmitri Arkhangelski
-    Spanish (AR)       - Daniel Testa
-    Spanish (ES)       - txusti
-    Swedish            - Magnus Rostedt, Stefan Pendl
-    Tamil              - Vinod V.
-    Thai               - Pat Taweewat, Stefan Pendl
-    Turkish            - Huseyin Kozan, Stefan Pendl
-    Ukrainian          - Dmitri Arkhangelski
-    Vietnamese (VI)    - Vietnamize Team
-    Yiddish            - Dmitri Arkhangelski
+    Belarusian                   - Dmitri Arkhangelski
+    Bulgarian                    - Dmitri Arkhangelski
+    Burmese                      - Muhamed Widuya
+    Catalan                      - Illes Balears
+    Chinese                      - muzuiget
+    Croatian                     - Dmitri Arkhangelski
+    Czech                        - David Horak
+    Danish                       - Patrick Paludan-Müller
+    Dutch                        - Wim Kerstens
+    English (GB)                 - Andrew Smith
+    English (US)                 - Dmitri Arkhangelski
+    Estonian                     - Olav Mägi
+    Farsi                        - Ali Jafari
+    Filipino (Ilokano)           - Joseph S. Maza
+    Filipino (Tagalog)           - Stefan Pendl
+    Finnish                      - Stefan Pendl
+    French                       - Pascal Crozet
+    Galician                     - Julio Mojón Fuentes
+    German                       - Stefan Geuken
+    Greek                        - Konstantinos Kapoukranidis
+    Hebrew                       - Dmitri Arkhangelski
+    Hindi                        - Gaurav Chatterjee
+    Hungarian                    - Nagy Zsolt
+    Icelandic                    - Stefan Pendl
+    Indonesian                   - Imanuel Novian
+    Indonesian (Bahasa Indonesia)- Taufan Nur Hidayat
+    Italian                      - Paolo Loggia
+    Japanese                     - ao3
+    Javanese                     - Taufan Nur Hidayat
+    Korean                       - Alex Han
+    Latin                        - Dmitri Arkhangelski
+    Latvian                      - Sevelyr, Vladislav Stuzhnev
+    Macedonian                   - Dmitri Arkhangelski
+    Norwegian                    - Stefan Pendl
+    Polish                       - Andrzej Rudnik
+    Portuguese                   - Ricardo A. Garcia
+    Portuguese (BR)              - Depeo da Masol
+    Romanian                     - Stefan Pendl
+    Russian                      - Dmitri Arkhangelski
+    Serbian                      - Dmitri Arkhangelski
+    Slovak                       - Milan Cerovsky, Dmitri Arkhangelski
+    Slovenian                    - Miha Mlakar, Dmitri Arkhangelski
+    Spanish (AR)                 - Daniel Testa
+    Spanish (ES)                 - txusti
+    Swedish                      - Magnus Rostedt
+    Tamil                        - Vinod V.
+    Thai                         - Pat Taweewat
+    Turkish                      - Huseyin Kozan
+    Ukrainian                    - Dmitri Arkhangelski
+    Vietnamese (VI)              - Vietnamize Team
+    Yiddish                      - Dmitri Arkhangelski
 
 --------------------------------------------------------------------------------
     Special thanks for strong testing to (in alphabetical order):

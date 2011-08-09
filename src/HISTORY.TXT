@@ -13,7 +13,7 @@ HISTORY
     - few bugs in cluster map redraw algorithm were fixed
     - the following translations were added:
 
-      Latin, Hebrew
+      Latin, Hebrew, Javanese, Indonesian (Bahasa Indonesia)
 
     - the following translations were updated:
 
