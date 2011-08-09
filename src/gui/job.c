@@ -185,8 +185,8 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	
 	if(pi->completion_status != 0/* && !stop_pressed*/){
 		/* the job is completed */
-		_snwprintf(progress_msg,sizeof(progress_msg),L"%ls 100.00 %%",ProcessCaption);
-        progress_msg[sizeof(progress_msg) - 1] = 0;
+		_snwprintf(progress_msg,sizeof(progress_msg)/sizeof(wchar_t),L"%ls 100.00 %%",ProcessCaption);
+        progress_msg[sizeof(progress_msg)/sizeof(wchar_t) - 1] = 0;
 		// TODO
 		//SetProgress(progress_msg,100);
 		if(dry_run == 0){
