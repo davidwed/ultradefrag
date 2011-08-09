@@ -39,7 +39,6 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0, L"ACTION",                   L"&Action",                  NULL},
 	{0, L"ANALYSE",                  L"&Analyze",                 NULL},
 	{0, L"DEFRAGMENT",               L"&Defragment",              NULL},
-	{0, L"OPTIMIZE",                 L"&Optimize",                NULL},
 	{0, L"QUICK_OPTIMIZE",           L"&Quick optimization",      NULL},
 	{0, L"FULL_OPTIMIZE",            L"&Full optimization",       NULL},
 	{0, L"STOP",                     L"&Stop",                    NULL},
