@@ -10,6 +10,7 @@ HISTORY
     - one bug causing incorrect time limit treatment was fixed
     - added display of the time limit at boot time
     - MFT zone draw was adjusted to be more precise and correct
+    - few bugs in cluster map redraw algorithm were fixed
     - the following translations were added:
 
       Latin, Hebrew

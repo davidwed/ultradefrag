@@ -844,25 +844,32 @@ int move_file(winx_file_info *f,
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw map */
 			
-	/* remove target space from free space pool */
+	/* remove target space from the free space pool - before the following map redraw */
 	jp->free_regions = winx_sub_volume_region(jp->free_regions,target,length);
-
-	/* redraw source space; after winx_sub_volume_region()! */
-	clusters_to_redraw = length;
-	curr_vcn = vcn;
-	first_block = get_first_block_of_cluster_chain(f,vcn);
-	for(block = first_block; block; block = block->next){
-		/* redraw the current block or its part */
-		n = min(block->length - (curr_vcn - block->vcn),clusters_to_redraw);
-		if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS)
-			redraw_freed_space(jp,block->lcn + (curr_vcn - block->vcn),n,old_color);
-		else
-			colorize_map_region(jp,block->lcn + (curr_vcn - block->vcn),n,new_color,old_color);
-		clusters_to_redraw -= n;
-		if(!clusters_to_redraw || block->next == f->disp.blockmap) break;
-		curr_vcn = block->next->vcn;
+	
+	/* redraw file clusters in new color */
+	if(new_color != old_color){
+		for(block = f->disp.blockmap; block; block = block->next){
+			colorize_map_region(jp,block->lcn,block->length,new_color,old_color);
+			if(block->next == f->disp.blockmap) break;
+		}
 	}
 	
+	/* redraw freed range of clusters */
+	if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS){
+		clusters_to_redraw = length;
+		curr_vcn = vcn;
+		first_block = get_first_block_of_cluster_chain(f,vcn);
+		for(block = first_block; block; block = block->next){
+			/* redraw the current block or its part */
+			n = min(block->length - (curr_vcn - block->vcn),clusters_to_redraw);
+			redraw_freed_space(jp,block->lcn + (curr_vcn - block->vcn),n,new_color);
+			clusters_to_redraw -= n;
+			if(!clusters_to_redraw || block->next == f->disp.blockmap) break;
+			curr_vcn = block->next->vcn;
+		}
+	}
+
 	/* adjust statistics */
 	became_fragmented = is_fragmented(&new_file_info);
 	if(became_fragmented && !was_fragmented)
