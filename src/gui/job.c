@@ -110,8 +110,6 @@ void update_status_of_all_jobs(void)
 static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 {
 	volume_processing_job *job;
-	static wchar_t progress_msg[128];
-    static wchar_t *ProcessCaption = L"";
     char WindowCaption[256];
 	char current_operation;
 
@@ -135,22 +133,6 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	default:
 		current_operation = 'O';
 		break;
-	}
-	
-	if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
-		WgxDbgPrintLastError("update_progress: wait on hLangPackEvent failed");
-	} else {
-		if(current_operation == 'D')
-			ProcessCaption = WgxGetResourceString(i18n_table,L"DEFRAGMENT");
-		else if(current_operation == 'O')
-			ProcessCaption = WgxGetResourceString(i18n_table,L"OPTIMIZE");
-		else
-			ProcessCaption = WgxGetResourceString(i18n_table,L"ANALYSE");
-		_snwprintf(progress_msg,sizeof(progress_msg)/sizeof(wchar_t),L"%ls %6.2lf %%",ProcessCaption,pi->percentage);
-		progress_msg[sizeof(progress_msg)/sizeof(wchar_t) - 1] = 0;
-		// TODO
-		//SetProgress(progress_msg,(int)pi->percentage);
-		SetEvent(hLangPackEvent);
 	}
 	
 	if(dry_run)
@@ -184,11 +166,6 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 		RedrawMap(job,1);
 	
 	if(pi->completion_status != 0/* && !stop_pressed*/){
-		/* the job is completed */
-		_snwprintf(progress_msg,sizeof(progress_msg)/sizeof(wchar_t),L"%ls 100.00 %%",ProcessCaption);
-        progress_msg[sizeof(progress_msg)/sizeof(wchar_t) - 1] = 0;
-		// TODO
-		//SetProgress(progress_msg,100);
 		if(dry_run == 0){
 			if(portable_mode) SetWindowText(hWindow,VERSIONINTITLE_PORTABLE);
 			else SetWindowText(hWindow,VERSIONINTITLE);
