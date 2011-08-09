@@ -257,6 +257,9 @@ void colorize_map_region(udefrag_job_parameters *jp,
 			return;
 	}
 	
+	if(new_color == old_color)
+		return;
+	
 	if(jp->cluster_map.opposite_order == FALSE){
 		/* we're using here less obvious code,
 		because _aulldvrm misses on nt4 */
