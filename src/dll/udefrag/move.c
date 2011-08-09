@@ -857,7 +857,7 @@ int move_file(winx_file_info *f,
 		if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS)
 			redraw_freed_space(jp,block->lcn + (curr_vcn - block->vcn),n,old_color);
 		else
-			colorize_map_region(jp,block->lcn + (curr_vcn - block->vcn),n,FRAGM_SPACE,old_color);
+			colorize_map_region(jp,block->lcn + (curr_vcn - block->vcn),n,new_color,old_color);
 		clusters_to_redraw -= n;
 		if(!clusters_to_redraw || block->next == f->disp.blockmap) break;
 		curr_vcn = block->next->vcn;
