@@ -20,13 +20,13 @@ goto :EOF
 
 :CreateINI
     if %1 == "lang.ini" (
-        set Field1Right=211
-        set Field2Left=215
+        set Field1Right=178
+        set Field2Left=182
         set Field2Right=297
         set Field2Bottom=139
     ) else (
-        set Field1Right=179
-        set Field2Left=182
+        set Field1Right=168
+        set Field2Left=171
         set Field2Right=262
         set Field2Bottom=123
     )
