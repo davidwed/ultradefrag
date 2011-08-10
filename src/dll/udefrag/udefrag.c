@@ -595,8 +595,10 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		if(jp->termination_router((void *)jp)) break;
 		
 		/* move not fragmented files as close to the beginning of the volume as possible */
-		rz = move_files_to_front(jp, start_lcn, MOVE_NOT_FRAGMENTED);
-		mz = jp->pi.moved_clusters;
+		if(jp->job_type != DEFRAGMENTATION_JOB){
+			rz = move_files_to_front(jp, start_lcn, MOVE_NOT_FRAGMENTED);
+			mz = jp->pi.moved_clusters;
+		}
 	
 		/* exit if nothing moved */
 		if(mx == 0 && my == 0 && mz == 0){
