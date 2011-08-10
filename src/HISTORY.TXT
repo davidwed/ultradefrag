@@ -35,6 +35,7 @@ HISTORY
             * /DESKTOPICON ....... install/remove desktop icon
             * /QUICKLAUNCHICON ... install/remove quick launch icon
     - one little bug causing log file path truncation in GUI was fixed
+    - one bug causing infinite loops in volume optimization was fixed
 
     beta3:
     - volume optimization reimplemented

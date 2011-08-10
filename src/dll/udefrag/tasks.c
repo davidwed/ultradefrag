@@ -42,7 +42,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
  * @param[in] min_length minimum length of region, in clusters.
  * @note In case of termination request returns NULL immediately.
  */
-static winx_volume_region *find_first_free_region(udefrag_job_parameters *jp,ULONGLONG min_length)
+/*static */winx_volume_region *find_first_free_region(udefrag_job_parameters *jp,ULONGLONG min_length)
 {
 	winx_volume_region *rgn;
 
@@ -846,11 +846,11 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 {
 	ULONGLONG time;
 	ULONGLONG moves, pass;
-	winx_file_info *file, *last_file, *largest_file;
+	winx_file_info *file,/* *last_file, */*largest_file;
 	ULONGLONG length, rgn_size_threshold;
 	int files_found;
 	ULONGLONG rgn_lcn, file_lcn, min_rgn_lcn, max_rgn_lcn;
-	ULONGLONG end_lcn, last_lcn;
+	/*ULONGLONG end_lcn, last_lcn;*/
 	winx_volume_region *rgn;
 	ULONGLONG clusters_to_move;
 	ULONGLONG file_length;
@@ -1110,7 +1110,10 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 				}
 				if(rgn->length > 0){
 					n = min(rgn->length,remaining_clusters);
-					move_file(first_file,current_vcn,n,rgn->lcn + rgn->length - n,0,jp);
+					if(move_file(first_file,current_vcn,n,rgn->lcn + rgn->length - n,0,jp) < 0){
+						/* exclude file from the current task to avoid infinite loops */
+						file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
+					}
 					current_vcn += n;
 					remaining_clusters -= n;
                     jp->pi.total_moves ++;
@@ -1138,7 +1141,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
                     jp->pi.total_moves ++;
 				}
 			}
-			/* otherwise the volume processing is extremely slow */
+			/* otherwise the volume processing is extremely slow and may even go to an infinite loop */
 			first_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 		}
 		start_lcn ++; /* the current block will be skipped anyway in this case */
