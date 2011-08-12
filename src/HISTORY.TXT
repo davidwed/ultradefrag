@@ -36,6 +36,7 @@ HISTORY
             * /QUICKLAUNCHICON ... install/remove quick launch icon
     - one little bug causing log file path truncation in GUI was fixed
     - one bug causing infinite loops in volume optimization was fixed
+    - progress percentage calculation was improved
 
     beta3:
     - volume optimization reimplemented

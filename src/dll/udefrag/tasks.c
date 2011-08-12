@@ -746,6 +746,7 @@ int defragment_big_files(udefrag_job_parameters *jp)
 		
 		/* find largest fragmented file which fragments can be joined there */
 		do {
+try_again:
 			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0;
 			for(f = jp->fragmented_files; f; f = f->next){
@@ -757,6 +758,10 @@ int defragment_big_files(udefrag_job_parameters *jp)
 				if(f->next == jp->fragmented_files) break;
 			}
 			if(f_largest == NULL) goto part_defrag_done;
+			if(is_file_locked(f_largest->f,jp)){
+				jp->pi.processed_clusters += f_largest->f->disp.clusters;
+				goto try_again;
+			}
 			
 			/* find longest sequence of file blocks which fits in the current free region */
 			longest_sequence = NULL, max_n_blocks = 0, longest_sequence_length = 0;
@@ -920,8 +925,10 @@ try_again:
 					/* current free region is too small, let's try next one */
 					rgn_size_threshold = rgn->length;
 				} else {
-					if(is_file_locked(largest_file,jp))
+					if(is_file_locked(largest_file,jp)){
+						jp->pi.processed_clusters += largest_file->disp.clusters;
 						goto try_again; /* skip locked files */
+					}
 					/* move the file */
 					file_lcn = largest_file->disp.blockmap->lcn;
 					rgn_lcn = rgn->lcn;
@@ -1093,7 +1100,10 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 			if(file->next == jp->filelist) break;
 		}
 		if(first_file == NULL) break;
-		if(is_file_locked(first_file,jp)) continue;
+		if(is_file_locked(first_file,jp)){
+			jp->pi.processed_clusters += first_file->disp.clusters;
+			continue;
+		}
 		
 		/* move the first block to the last free regions */
 		block_lcn = first_block->lcn; block_length = first_block->length;

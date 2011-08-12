@@ -320,6 +320,34 @@ static void calculate_free_rgn_size_threshold(udefrag_job_parameters *jp)
 }
 
 /**
+ * @brief Returns number of allocated clusters
+ * locating inside a specified part of the volume.
+ */
+static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
+{
+	winx_file_info *file;
+	winx_blockmap *block;
+	ULONGLONG i, j, n, total = 0;
+	
+	for(file = jp->filelist; file; file = file->next){
+		if(jp->termination_router((void *)jp)) break;
+		n = 0;
+		for(block = file->disp.blockmap; block; block = block->next){
+			if((block->lcn + block->length >= first_lcn + 1) && block->lcn <= last_lcn){
+				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
+				if(block->lcn + block->length < last_lcn + 1) j = block->lcn + block->length; else j = last_lcn + 1;
+				n += (j - i);
+			}
+			if(block->next == file->disp.blockmap) break;
+		}
+		total += n;
+		if(file->next == jp->filelist) break;
+	}
+	
+	return total;
+}
+
+/**
  * @brief Returns number of fragmented clusters
  * locating inside a specified part of the volume.
  */
@@ -505,6 +533,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	int rx = -1, ry = -1, rz = -1;
 	int optimize_entire_disk = 0;
 	//ULONGLONG fragmented_clusters;
+	ULONGLONG remaining_clusters;
 	
 	/* check for preview masks */
 	if(jp->udo.job_flags & UD_JOB_REPEAT)
@@ -570,8 +599,16 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 				break;
 			}
 			start_lcn = new_start_lcn;
-			DebugPrint("volume optimization pass #%u, starting point = %I64u",
-				jp->pi.pass_number, start_lcn);
+			
+			remaining_clusters = get_number_of_allocated_clusters(jp,start_lcn,jp->v_info.total_clusters - 1);
+			jp->pi.processed_clusters = 0; /* reset counter */
+			jp->pi.clusters_to_process = remaining_clusters;
+			jp->pi.processed_clusters = jp->v_info.total_clusters - \
+				jp->v_info.free_bytes / jp->v_info.bytes_per_cluster - \
+				remaining_clusters; /* set counter */
+			
+			DebugPrint("volume optimization pass #%u, starting point = %I64u, remaining clusters = %I64u",
+				jp->pi.pass_number, start_lcn, remaining_clusters);
 		}
 		
 		/* cleanup space after start_lcn */
