@@ -222,7 +222,7 @@
  * you can select an appropriate menu item to defragment the
  * selected object.
  *
- * To stop the defragmentation press Ctrl+C keys 4 times or close
+ * To stop the defragmentation press Ctrl+C keys or close
  * the command prompt.
  *
  * Currently the context menu handler is not available in the portable

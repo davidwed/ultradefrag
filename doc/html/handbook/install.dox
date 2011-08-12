@@ -47,7 +47,7 @@
  * </span>
  *
  * <span style="color: darkred">
- * You must be an administrator to install and run UltraDefrag
+ * You must be an administrator to install and run UltraDefrag.
  * </span>
  *
  * Note that UltraDefrag installs into the Windows directory. This is by design,
@@ -76,7 +76,7 @@
  * <dt>/GUI=(0|1)</dt>
  * <dd>Install or remove the GUI components. Example: <b>/GUI=1</b> installs the GUI components.</dd>
  * <dt>/HELP=(0|1)</dt>
- * <dd>Install or remove the documentation. Example: <b>/HELP=0</b> remove the documentation.</dd>
+ * <dd>Install or remove the documentation. Example: <b>/HELP=0</b> removes the documentation.</dd>
  * <dt>/SHELLEXTENSION=(0|1)</dt>
  * <dd>Install or remove the Explorer context menu handler.
  * Example: <b>/SHELLEXTENSION=0</b> removes the Explorer context menu handler.</dd>
