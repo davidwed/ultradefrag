@@ -6,13 +6,25 @@
 :: it uses the fragmentation utility included in MyDefrag
 :: available at http://www.mydefrag.com/
 ::
+:: get install language from registry
+set YES=
+set InstallLanguage=X
+for /f "tokens=3" %%L in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Nls\Language" /v InstallLanguage') do set InstallLanguage=%%L
 
+:: German installation
+for %%L in (0407 0c07 1407 1007 0807) do if %InstallLanguage% == %%L set YES=J
+
+:: English installation
+for %%L in (0409 0809 0c09 2809 1009 2409 3c09 4009 3809 1809 2009 4409 1409 3409 4809 1c09 2c09 3009) do if %InstallLanguage% == %%L set YES=Y
+
+if not "%YES%" == "" goto :skipYES
 :: the following must be set to the character representing "YES"
 :: this is needed to run the format utility without user interaction
 echo.
 set /p YES="Enter the letter that represents YES in your language [Y]: "
 if "%YES%" == "" set YES=Y
 
+:skipYES
 :: specify volumes that should be used as test volumes
 :: any file located in the root folder will be deleted
 set ProcessVolumes=R: S: T: U: V: W:
