@@ -32,7 +32,10 @@
  */
 int defragment(udefrag_job_parameters *jp)
 {
-    return defragment_small_files(jp);
+	if(jp->udo.job_flags & UD_PREVIEW_MATCHING)
+		return defragment_small_files_respect_best_matching(jp);
+	else
+        return defragment_small_files(jp);
 }
 
 /**

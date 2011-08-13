@@ -30,8 +30,6 @@
 
 #include "udefrag-internals.h"
 
-static int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp);
-
 /************************************************************/
 /*                    Internal Routines                     */
 /************************************************************/
@@ -516,9 +514,6 @@ int defragment_small_files(udefrag_job_parameters *jp)
 	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	jp->pi.moved_clusters = 0;
 
-	if(jp->udo.job_flags & UD_PREVIEW_MATCHING)
-		return defragment_small_files_respect_best_matching(jp);
-	
 	/* free as much temporarily allocated space as possible */
 	release_temp_space_regions(jp);
 	
@@ -601,7 +596,7 @@ done:
  * @brief Defragments all fragmented files entirely, if possible.
  * @details This routine fills free space areas respect to the best matching rules.
  */
-static int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
+int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
 	ULONGLONG defragmented_files;
@@ -613,6 +608,7 @@ static int defragment_small_files_respect_best_matching(udefrag_job_parameters *
 	winx_file_info *file;
 	ULONGLONG file_length;
 
+	jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
 	jp->pi.moved_clusters = 0;
 
 	/* free as much temporarily allocated space as possible */

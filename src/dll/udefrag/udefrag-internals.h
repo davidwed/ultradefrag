@@ -225,6 +225,7 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
 int optimize_mft(udefrag_job_parameters *jp);
 int defragment_small_files(udefrag_job_parameters *jp);
+int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp);
 int defragment_big_files(udefrag_job_parameters *jp);
 
 /* flags used in move_files_to_xxx routines */
