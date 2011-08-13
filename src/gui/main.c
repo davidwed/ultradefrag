@@ -902,9 +902,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 			/* handle preview submenu */
 			if(id > IDM_PREVIEW && id < IDM_PREVIEW_LAST_ITEM){
 				switch(id){
-				/*case IDM_PREVIEW_REPEAT:
-					flag = UD_PREVIEW_REPEAT;
-					break;*/
+				case IDM_PREVIEW_MOVE_FRONT:
+					flag = UD_PREVIEW_MOVE_FRONT;
+					break;
 				case IDM_PREVIEW_LARGEST:
 					/* "find largest" menu item affects "find matching" item too */
 					id = IDM_PREVIEW_MATCHING;

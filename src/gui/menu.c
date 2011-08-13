@@ -102,8 +102,8 @@ WGX_MENU help_menu[] = {
 };
 
 WGX_MENU preview_menu[] = {
-	/*{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_REPEAT,       NULL, L"Repeat action until nothing left to move"},
-	{MF_SEPARATOR,0,NULL,NULL},*/
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MOVE_FRONT,   NULL, L"Move files to front for optimization"},
+	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space"},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space"},
 	{MF_SEPARATOR,0,NULL,NULL},
@@ -116,7 +116,9 @@ WGX_MENU main_menu[] = {
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_REPORT,   report_menu,        L"&Report"},
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_SETTINGS, settings_menu,      L"&Settings"},
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_HELP,     help_menu,          L"&Help"},
+#ifndef _UD_HIDE_PREVIEW_
 	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_PREVIEW,  preview_menu,       L"Preview"},
+#endif /* _UD_HIDE_PREVIEW_ */
 	{0,0,NULL,NULL}
 };
 
@@ -163,11 +165,11 @@ int CreateMainMenu(void)
 		/*EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);*/
 	}
 	
-	/*if(job_flags & UD_PREVIEW_REPEAT){
+	if(job_flags & UD_PREVIEW_MOVE_FRONT){
 		CheckMenuItem(hMainMenu,
-			IDM_PREVIEW_REPEAT,
+			IDM_PREVIEW_MOVE_FRONT,
 			MF_BYCOMMAND | MF_CHECKED);
-	}*/
+	}
 	if(job_flags & UD_PREVIEW_MATCHING){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_MATCHING,

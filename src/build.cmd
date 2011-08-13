@@ -79,6 +79,11 @@ rem Sets environment for the build process.
 	echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER%" >> .\include\ultradfgver.h
 	echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\include\ultradfgver.h
 	echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
+    
+    rem remove preview menu for release candidates
+    if %UD_BLD_FLG_BUILD_STAGE% EQU 4 echo #define _UD_HIDE_PREVIEW_ >> .\include\ultradfgver.h
+    rem remove preview menu for final release
+    if %UD_BLD_FLG_IS_PRE_RELEASE% EQU 0 echo #define _UD_HIDE_PREVIEW_ >> .\include\ultradfgver.h
 
 	rem force zenwinx version to be the same as ultradefrag version
 	echo #define ZENWINX_VERSION %VERSION% > .\dll\zenwinx\zenwinxver.h
