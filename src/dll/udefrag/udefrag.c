@@ -653,8 +653,7 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 
     /* partial defragment only once, but never in optimization */
 	if(jp->job_type == DEFRAGMENTATION_JOB){
-		if(!(jp->termination_router((void *)jp) || \
-			(jp->udo.job_flags & UD_PREVIEW_SKIP_PARTIAL))){
+		if(!(jp->termination_router((void *)jp))){
 				rx = defragment_partial(jp);
 				if(result < 0) /* all previous actions failed */
 					result = rx;

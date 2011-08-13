@@ -911,9 +911,9 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 				case IDM_PREVIEW_MATCHING:
 					flag = UD_PREVIEW_MATCHING;
 					break;
-				case IDM_PREVIEW_SKIP_PARTIAL:
+				/* case IDM_PREVIEW_SKIP_PARTIAL:
 					flag = UD_PREVIEW_SKIP_PARTIAL;
-					break;
+					break; */
 				default:
 					flag = 0;
 					break;

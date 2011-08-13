@@ -107,7 +107,7 @@ typedef enum {
 #define UD_JOB_REPEAT               0x1
 #define UD_PREVIEW_MATCHING         0x2
 #define UD_PREVIEW_MOVE_FRONT       0x4
-#define UD_PREVIEW_SKIP_PARTIAL     0x8
+// #define UD_PREVIEW_SKIP_PARTIAL     0x8
 
 /*
 * MFT_ZONE_SPACE has special meaning - 

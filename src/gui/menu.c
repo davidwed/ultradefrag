@@ -106,8 +106,8 @@ WGX_MENU preview_menu[] = {
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space"},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_SKIP_PARTIAL, NULL, L"Skip partial defragmenting"},
+//	{MF_SEPARATOR,0,NULL,NULL},
+//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_SKIP_PARTIAL, NULL, L"Skip partial defragmenting"},
 	{0,0,NULL,NULL}
 };
 
@@ -179,11 +179,11 @@ int CreateMainMenu(void)
 			IDM_PREVIEW_LARGEST,
 			MF_BYCOMMAND | MF_CHECKED);
 	}
-	if(job_flags & UD_PREVIEW_SKIP_PARTIAL){
+	/* if(job_flags & UD_PREVIEW_SKIP_PARTIAL){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_SKIP_PARTIAL,
 			MF_BYCOMMAND | MF_CHECKED);
-	}
+	} */
 
 	if(!DrawMenuBar(hWindow))
 		WgxDbgPrintLastError("Cannot redraw main menu");
