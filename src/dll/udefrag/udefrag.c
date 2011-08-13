@@ -406,7 +406,7 @@ static ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLO
  * be skipped in move_files_to_back
  * routine.
  */
-static ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
+ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 {
 	ULONGLONG new_sp;
 	ULONGLONG fragmented, free, lim, i, max_new_sp;
@@ -602,9 +602,9 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 			
 			remaining_clusters = get_number_of_allocated_clusters(jp,start_lcn,jp->v_info.total_clusters - 1);
 			jp->pi.processed_clusters = 0; /* reset counter */
-			jp->pi.clusters_to_process = remaining_clusters;
-			jp->pi.processed_clusters = jp->v_info.total_clusters - \
-				jp->v_info.free_bytes / jp->v_info.bytes_per_cluster - \
+			jp->pi.clusters_to_process = jp->v_info.total_clusters - \
+				jp->v_info.free_bytes / jp->v_info.bytes_per_cluster;
+			jp->pi.processed_clusters = jp->pi.clusters_to_process - \
 				remaining_clusters; /* set counter */
 			
 			DebugPrint("volume optimization pass #%u, starting point = %I64u, remaining clusters = %I64u",
