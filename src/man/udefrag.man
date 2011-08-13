@@ -29,7 +29,8 @@ OPTIONS
 
         -r, --repeat
                 repeat defragmentation or optimization until there is
-                nothing left that can be moved
+                nothing left that can be moved, this will process the
+                volume multiple times in a row
 
         -o
                 fully optimize the drives
