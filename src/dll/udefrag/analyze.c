@@ -140,6 +140,7 @@ static int __stdcall process_free_region(winx_volume_region *rgn,void *user_defi
 		DebugPrint("Free block start: %I64u len: %I64u",rgn->lcn,rgn->length);
 	colorize_map_region(jp,rgn->lcn,rgn->length,FREE_SPACE,SYSTEM_SPACE);
 	jp->pi.processed_clusters += rgn->length;
+    jp->free_regions_count ++;
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw progress */
 	return 0; /* continue scan */
@@ -154,6 +155,8 @@ static int get_free_space_layout(udefrag_job_parameters *jp)
 	jp->free_regions = winx_get_free_volume_regions(jp->volume_letter,
 		WINX_GVR_ALLOW_PARTIAL_SCAN,process_free_region,(void *)jp);
 	
+    DebugPrint("Free regions count: %u",jp->free_regions_count);
+    
 	return (jp->free_regions != NULL) ? 0 : (-1);
 }
 

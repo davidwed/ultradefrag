@@ -147,6 +147,7 @@ typedef struct _udefrag_job_parameters {
 	winx_file_info *filelist;                   /* list of files */
 	udefrag_fragmented_file *fragmented_files;  /* list of fragmented files */
 	winx_volume_region *free_regions;           /* list of free space regions */
+	unsigned long free_regions_count;           /* number of free space regions */
 	struct _mft_zones mft_zones;                /* coordinates of mft zones; as they are before the volume processing */
 	ULONGLONG clusters_per_256k;                /* number of clusters in 256k block */
 	udefrag_allowed_actions actions;            /* actions allowed for selected file system */
@@ -224,8 +225,8 @@ ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
 int optimize_mft(udefrag_job_parameters *jp);
-int defragment_small_files(udefrag_job_parameters *jp);
-int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp);
+int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp);
+int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp);
 int defragment_big_files(udefrag_job_parameters *jp);
 
 /* flags used in move_files_to_xxx routines */

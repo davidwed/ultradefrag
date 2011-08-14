@@ -499,7 +499,7 @@ done:
  * - This routine fills free space areas from the beginning of the
  * volume regardless of the best matching rules.
  */
-int defragment_small_files(udefrag_job_parameters *jp)
+int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
 	ULONGLONG defragmented_files;
@@ -596,7 +596,7 @@ done:
  * @brief Defragments all fragmented files entirely, if possible.
  * @details This routine fills free space areas respect to the best matching rules.
  */
-int defragment_small_files_respect_best_matching(udefrag_job_parameters *jp)
+int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
 	ULONGLONG defragmented_files;

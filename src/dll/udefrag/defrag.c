@@ -32,10 +32,14 @@
  */
 int defragment(udefrag_job_parameters *jp)
 {
-	if(jp->udo.job_flags & UD_PREVIEW_MATCHING)
-		return defragment_small_files_respect_best_matching(jp);
-	else
-        return defragment_small_files(jp);
+	if(jp->pi.fragmented >= jp->free_regions_count || \
+       jp->udo.job_flags & UD_PREVIEW_MATCHING){
+        DebugPrint("Walking fragmented files list");
+		return defragment_small_files_walk_fragmented_files(jp);
+	} else {
+        DebugPrint("Walking free regions list");
+        return defragment_small_files_walk_free_regions(jp);
+    }
 }
 
 /**
