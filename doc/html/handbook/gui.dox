@@ -29,7 +29,7 @@
  * </td><td>
  * <dl>
  * <dt>Analyze (F5)</dt>
- * <dd>@htmlonly <img src="Analysis.png"> @endhtmlonly This analysis the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dd>@htmlonly <img src="Analysis.png"> @endhtmlonly This analyzes the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
  * <dt>Defragment (F6)</dt>
  * <dd>@htmlonly <img src="Defragment.png"> @endhtmlonly This defragments the currently selected volume(s), constantly updates the cluster map and status bar, and generates a report.</dd>
  * <dt>Quick optimization (F7)</dt>
