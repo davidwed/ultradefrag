@@ -58,7 +58,7 @@
  * ancillary commands and comments.
  * It is located at \%windir\%\\system32\\ud-boot-time.cmd.
  * To edit this file execute boot-config at the command prompt or simply click
- * the Script button of the UltraDefrag Configuration dialog.
+ * the Boot time script button on the UltraDefrag GUI toolbar.
  *
  * The boot time script simplifies also the use of UltraDefrag on
  * computers running Windows 98. After installing Windows XP as a second

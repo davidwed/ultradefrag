@@ -45,7 +45,7 @@
  * generated and opened in your default web browser. It contains the
  * list of fragmented files. The meaning of the columns are described below.
  *
- * By default, all files are sorted by the number of fragments
+ * By default, all files are sorted by number of fragments
  * in descending order. To change the sorting click the column
  * heading by which to sort the list. Note that it is a slow
  * process (~350 lines/sec on 1.8GHz CPU). Sorting
