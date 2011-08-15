@@ -102,8 +102,8 @@ WGX_MENU help_menu[] = {
 };
 
 WGX_MENU preview_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MOVE_FRONT,   NULL, L"Move files to front for optimization"},
-	{MF_SEPARATOR,0,NULL,NULL},
+//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MOVE_FRONT,   NULL, L"Move files to front for optimization"},
+//	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space"},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space"},
 //	{MF_SEPARATOR,0,NULL,NULL},
@@ -165,11 +165,11 @@ int CreateMainMenu(void)
 		/*EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);*/
 	}
 	
-	if(job_flags & UD_PREVIEW_MOVE_FRONT){
+	/* if(job_flags & UD_PREVIEW_MOVE_FRONT){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_MOVE_FRONT,
 			MF_BYCOMMAND | MF_CHECKED);
-	}
+	} */
 	if(job_flags & UD_PREVIEW_MATCHING){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_MATCHING,
