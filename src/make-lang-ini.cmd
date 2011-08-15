@@ -6,7 +6,7 @@ set LangList=""
 
 for %%L in ( "%~dp0\gui\i18n\*.lng" ) do call :CreateLangString "%%~nL"
 
-call :CreateINI "lang.ini" >"%~dp0\installer\%%~F"
+call :CreateINI >"%~dp0\installer\lang.ini"
 
 goto :EOF
 
