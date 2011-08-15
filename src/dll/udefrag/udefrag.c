@@ -544,10 +544,10 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 		DebugPrint("Preview -> Find largest free space");
 	
 	/* use 'Find largest free space' strategy in optimization */
-	if(jp->job_type == FULL_OPTIMIZATION_JOB || jp->job_type == QUICK_OPTIMIZATION_JOB)
+	if(jp->job_type != DEFRAGMENTATION_JOB)
 		jp->udo.job_flags &= ~UD_PREVIEW_MATCHING;
 	/* use 'Find matching free space' strategy in defragmentation */
-	if(jp->job_type == DEFRAGMENTATION_JOB)
+	else
 		jp->udo.job_flags |= UD_PREVIEW_MATCHING;
 
 	/* do the job */
