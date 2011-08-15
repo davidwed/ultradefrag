@@ -1,66 +1,87 @@
+@rem 
 @echo off
 ::
 :: This script creates virtual harddisks
+:: It is tested with VirtualBox v4.1
 ::
-:: It can be used to create {Prefix}FAT.vdi, {Prefix}NTFS.vdi, {Prefix}UDF.vdi
+:: It can be used to create NewHardDisk{Index}.vdi files
+:: in the folders containing virtual machines
 ::
+
+setlocal enabledelayedexpansion
+
+title %~n0
 
 :: installation folder of VirtualBox
-set VBoxRoot=%ProgramFiles%\Oracle\VirtualBox
-
-:: Folder containing the virtual harddisks
-set HDRoot=E:\VirtualBox\HardDisks
-
+for /f "tokens=2*" %%I in ('reg query "HKLM\SOFTWARE\Oracle\VirtualBox" /v InstallDir') do set VBoxRoot=%%~J
+if "%VBoxRoot%" == "" goto :noVBroot
 if not exist "%VBoxRoot%" goto :noVBroot
-if not exist "%HDRoot%" goto :noHDroot
+
+:: Folder containing the virtual machines
+if not exist "%USERPROFILE%\.VirtualBox\VirtualBox.xml" goto :noVMRoot
+
+for /f "tokens=2" %%D in ('findstr "defaultMachineFolder" "%USERPROFILE%\.VirtualBox\VirtualBox.xml"') do set VMRootTMP1=%%~D
+set VMRootTMP=%VMRootTMP1:"=%
+if "%VMRootTMP%" == "" goto :noVMRoot
+
+for /f "tokens=2 delims==" %%D in ('echo "%VMRootTMP%"') do set VMRootTMP1=%%~D
+set VMRoot=%VMRootTMP1:"=%
+if "%VMRoot%" == "" goto :noVMRoot
+if not exist "%VMRoot%" goto :noVMRoot
+
+cd /d %VMRoot%
+
+:DisplayVMlist
+cls
+set MenuItem=0
+set MenuSelectionsTMP=
+echo.
+for /d %%V in ( * ) do set /a MenuItem+=1 & echo !MenuItem! ... "%%~V" & set MenuSelectionsTMP=!MenuSelectionsTMP!:%%~V
+
+set MenuSelections=%MenuSelectionsTMP:~1%
+echo.
+echo 0 ... EXIT
+echo.
+set /p SelectedItem="Select the VM to create disks for: "
+
+if "%SelectedItem%" == "" goto :quit
+if %SelectedItem% EQU 0 goto :quit
+
+if %SelectedItem% LEQ %MenuItem% goto :CreateDisks
 
 echo.
-set /p prefix="Enter Prefix (Example: XPTest): "
+echo Please enter a number in the range of 0 to %MenuItem%.
 echo.
-set /p createFAT="Create FAT Disks ([Y]/N)? "
-echo.
-set /p createNTFS="Create NTFS Disks ([Y]/N)? "
-echo.
-set /p createUDF="Create UDF Disks ([Y]/N)? "
+pause
+goto :DisplayVMlist
 
-if "%prefix%" == "" goto :quit
+:CreateDisks
+for /f "tokens=%SelectedItem% delims=:" %%S in ('echo %MenuSelections%') do set SelectedVM=%%~S
+
+echo.
+set /p MaxIndex="Enter number of disks to create (0 to exit, maximum 10): "
+if "%MaxIndex%" == "" goto :quit
+if %MaxIndex% EQU 0 goto :quit
+if %MaxIndex% GTR 10 set MaxIndex=10
 
 cd /d %VBoxRoot%
 
-:FAT
-if /i "%createFAT%" == "N" goto :NTFS
-
-for %%F in ( FAT FAT32 exFAT) do (
+for /L %%F in (1,1,%MaxIndex%) do (
+    set HardDiskName="%VMRoot%\%SelectedVM%\NewHardDisk%%F.vdi"
+    
     echo.
     echo ---------------------------------------
     echo.
-    echo Creating "%HDRoot%\%prefix%%%F.vdi" ...
-    echo.
-    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024
-)
-
-:NTFS
-if /i "%createNTFS%" == "N" goto :UDF
-
-for %%F in ( NTFS NTFScompressed NTFSmixed ) do (
-    echo.
-    echo ---------------------------------------
-    echo.
-    echo Creating "%HDRoot%\%prefix%%%F.vdi" ...
-    echo.
-    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024
-)
-
-:UDF
-if /i "%createUDF%" == "N" goto :quit
-
-for %%F in ( UDF102 UDF150 UDF200 UDF201 UDF250 UDF250mirror ) do (
-    echo.
-    echo ---------------------------------------
-    echo.
-    echo Creating "%HDRoot%\%prefix%%%F.vdi" ...
-    echo.
-    VBoxManage createhd --filename "%HDRoot%\%prefix%%%F.vdi" --size 1024
+    
+    if not exist !HardDiskName! (
+        echo Creating !HardDiskName! ...
+        echo.
+        VBoxManage createhd --filename !HardDiskName! --size 1024
+    ) else (
+        echo Modifying !HardDiskName! ...
+        echo.
+        VBoxManage modifyhd --filename !HardDiskName! --resize 1024
+    )
 )
 
 :quit
@@ -76,7 +97,7 @@ echo.
 echo VirtualBox not installed, aborting ...
 goto :quit
 
-:noHDroot
+:noVMRoot
 echo.
 echo Harddisk Root Folder missing, aborting ...
 goto :quit

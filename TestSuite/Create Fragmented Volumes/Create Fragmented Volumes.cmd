@@ -178,6 +178,7 @@ for /f "tokens=1,2,3" %%R in ('echo %SelectedVolumeType%') do (
 set VolumeName=%ex_type%
 if not "%option1%" == "" set VolumeName=%VolumeName%_%option1:.=%
 if not "%option2%" == "" set VolumeName=%VolumeName%_%option2%
+set VolumeName=%VolumeName%_%FragmentationRate%
 
 call :answers >"%TMP%\answers.txt"
 
