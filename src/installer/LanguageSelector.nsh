@@ -40,11 +40,6 @@
 !insertmacro GetParameters
 !insertmacro GetOptions
 
-; --- define which page layout to use - classical or modern
-!ifndef MODERN_UI
-!system 'move /Y lang-classical.ini lang.ini'
-!endif
-
 Var LanguagePack
 ReserveFile "lang.ini"
 
@@ -130,9 +125,7 @@ FunctionEnd
 
   ${EnableX64FSRedirection}
   InitPluginsDir
-!ifdef MODERN_UI
   !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
-!endif
 
 !macroend
 

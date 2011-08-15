@@ -37,7 +37,6 @@
 !error "ULTRADFGARCH parameter must be specified on the command line!"
 !endif
 
-!define MODERN_UI
 ;!define SHOW_BOOTSPLASH
 
 !include "WinVer.nsh"
@@ -49,11 +48,9 @@
 !define ROOTDIR "..\..\.."
 !endif
 
-!ifdef MODERN_UI
-  !include "MUI.nsh"
-  !define MUI_ICON   "${ROOTDIR}\src\installer\udefrag-install.ico"
-  !define MUI_UNICON "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
-!endif
+!include "MUI.nsh"
+!define MUI_ICON   "${ROOTDIR}\src\installer\udefrag-install.ico"
+!define MUI_UNICON "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
 
 ;-----------------------------------------
 !if ${ULTRADFGARCH} == 'amd64'
@@ -90,36 +87,25 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 
 ;-----------------------------------------
 
-!ifdef MODERN_UI
-  !define MUI_WELCOMEFINISHPAGE_BITMAP   "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
-  !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
-  !define MUI_COMPONENTSPAGE_SMALLDESC
+!define MUI_WELCOMEFINISHPAGE_BITMAP   "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
+!define MUI_UNWELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
+!define MUI_COMPONENTSPAGE_SMALLDESC
 
-  !insertmacro MUI_PAGE_WELCOME
-  !insertmacro MUI_PAGE_LICENSE "${ROOTDIR}\src\LICENSE.TXT"
-  !insertmacro MUI_PAGE_COMPONENTS
+!insertmacro MUI_PAGE_WELCOME
+!insertmacro MUI_PAGE_LICENSE "${ROOTDIR}\src\LICENSE.TXT"
+!insertmacro MUI_PAGE_COMPONENTS
 ;  !insertmacro MUI_PAGE_DIRECTORY
-  !insertmacro LANG_PAGE
-  !insertmacro MUI_PAGE_INSTFILES
-  !insertmacro MUI_PAGE_FINISH
+!insertmacro LANG_PAGE
+!insertmacro MUI_PAGE_INSTFILES
+!insertmacro MUI_PAGE_FINISH
 
-  !insertmacro MUI_UNPAGE_WELCOME
-  !insertmacro MUI_UNPAGE_CONFIRM
-  !insertmacro MUI_UNPAGE_INSTFILES
-  !insertmacro MUI_UNPAGE_FINISH
+!insertmacro MUI_UNPAGE_WELCOME
+!insertmacro MUI_UNPAGE_CONFIRM
+!insertmacro MUI_UNPAGE_INSTFILES
+!insertmacro MUI_UNPAGE_FINISH
 
-  !insertmacro MUI_LANGUAGE "English"
-  !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
-!else
-  Page license
-  Page components
-;  Page directory
-  !insertmacro LANG_PAGE
-  Page instfiles
-
-  UninstPage uninstConfirm
-  UninstPage instfiles
-!endif
+!insertmacro MUI_LANGUAGE "English"
+!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 ;------------------------------------------
 
@@ -357,7 +343,6 @@ SectionEnd
 
 ;----------------------------------------------
 
-!ifdef MODERN_UI
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
   !insertmacro MUI_DESCRIPTION_TEXT ${SecCore}            "The core files required to use UltraDefrag.$\nIncluding console interface."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecGUI}             "The graphical user interface with cluster map and volume list."
@@ -368,7 +353,6 @@ SectionEnd
   !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktopIcon}     "Adds an icon to your desktop for easy access."
   !insertmacro MUI_DESCRIPTION_TEXT ${SecQuickLaunchIcon} "Adds an icon to your quick launch for easy access."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
-!endif
 
 ;---------------------------------------------
 
