@@ -17,7 +17,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Portuguese (BR), Yiddish, Hungarian, Spanish (ES)
+      Portuguese (BR), Yiddish, Hungarian, Spanish (ES), Dutch
     
     - installer has been enhanced in the following ways:
       + installer supports full, micro edition and custom installation
