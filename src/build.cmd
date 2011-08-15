@@ -25,6 +25,9 @@ call build-targets.cmd %* || goto fail
 :: build documentation
 call build-docs.cmd || goto fail
 
+:: update installer lang.ini
+call make-lang-ini.cmd || goto fail
+
 :: build installers and portable packages
 echo Build installers and/or portable packages...
 if %UD_BLD_FLG_BUILD_X86% neq 0 (

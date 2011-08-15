@@ -8,7 +8,7 @@ for %%L in ( "%~dp0\gui\i18n\*.lng" ) do call :CreateLangString "%%~nL"
 
 call :CreateINI >"%~dp0\installer\lang.ini"
 
-goto :EOF
+exit /B 0
 
 :CreateLangString
     if %LangList% == "" (
