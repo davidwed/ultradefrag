@@ -7,6 +7,8 @@ HISTORY
     - repeat action menu and toolbar button were added to GUI
     - --repeat command line switch was added to the console interface
       and to the boot time defragmenter
+    - volume label is now displayed by the console interface for
+      -l and -la switches
     - one bug causing incorrect time limit treatment was fixed
     - added display of the time limit at boot time
     - MFT zone draw was adjusted to be more precise and correct
