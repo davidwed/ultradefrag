@@ -80,7 +80,7 @@ for /L %%F in (1,1,%MaxIndex%) do (
     ) else (
         echo Modifying !HardDiskName! ...
         echo.
-        VBoxManage modifyhd --filename !HardDiskName! --resize 1024
+        VBoxManage modifyhd !HardDiskName! --resize 1024
     )
 )
 
