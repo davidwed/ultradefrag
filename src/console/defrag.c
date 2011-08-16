@@ -728,8 +728,8 @@ static int show_vollist(void)
 		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
 		percent = (int)(100 * d);
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-		printf("%c:  %8s %12s %8u %%\n",
-			v[i].letter,v[i].fsname,s,percent);
+		printf("%c:  %8s %12s %8u %%   %ls\n",
+			v[i].letter,v[i].fsname,s,percent,v[i].label);
 	}
 	udefrag_release_vollist(v);
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
