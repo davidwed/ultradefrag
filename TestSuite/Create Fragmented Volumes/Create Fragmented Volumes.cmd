@@ -36,24 +36,21 @@ for %%L in (0407 0c07 1407 1007 0807) do if %InstallLanguage% == %%L set YES=J
 :: English installation
 for %%L in (0409 0809 0c09 2809 1009 2409 3c09 4009 3809 1809 2009 4409 1409 3409 4809 1c09 2c09 3009) do if %InstallLanguage% == %%L set YES=Y
 
-if not "%YES%" == "" goto :skipYES
+if not "%YES%" == "" goto :SelectVolume
 :: the following must be set to the character representing "YES"
 :: this is needed to run the format utility without user interaction
 echo.
 set /p YES="Enter the letter that represents YES in your language [Y]: "
 if "%YES%" == "" set YES=Y
 
-:skipYES
-:: collect volumes that can be used as test volumes
-set FoundVolumes=
-
-for /f "tokens=1 skip=6" %%D in ('udefrag -l') do call :AddToDriveList %%~D
-
 :SelectVolume
+:: collect volumes that can be used as test volumes
 cls
 echo.
 set MenuItem=0
-for %%I in (%FoundVolumes%) do call :DisplayMenuItem %%~I
+set FoundVolumes=
+
+for /f "tokens=1,7* skip=6" %%D in ('udefrag -l') do call :AddToDriveList %%~D & if not %%~D == %SystemDrive% call :DisplayMenuItem %%~D - "%%~E"
 
 echo.
 echo 0 ... EXIT
@@ -222,6 +219,7 @@ call :delay 5
 rem process the volume
 call :FragmentDrive "%ProcessVolume%"
 
+:quit
 title Operation Completed ...
 echo.
 pause
