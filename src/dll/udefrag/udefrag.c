@@ -248,17 +248,6 @@ static int __stdcall killer(void *p)
 * Therefore, regardless of number of algorithm passes, we'll have
 * always a true progress percentage gradually increasing from 0% to 100%.
 *
-* To avoid infinite loops in full optimization we define starting point 
-* and move it forward on each algorithm pass.
-*
-* Infinite loops in quick optimization aren't possible because number
-* of fragmented files instantly descreases and all files become closer
-* and closer to the beginning of the volume. To reduce number of passes 
-* and make it more effective we use a starting point concept here too.
-*
-* Infinite loops in defragmentation aren't possible because of instant 
-* decreasing number of fragmented files.
-*
 * NOTE: progress over 100% means deeper processing than expected.
 * This is not a bug, this is an algorithm feature causing by iterational
 * nature of multipass processing.

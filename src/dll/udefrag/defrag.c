@@ -48,6 +48,10 @@ static ULONGLONG fragmented_clusters(udefrag_job_parameters *jp)
 
 /**
  * @brief Performs a volume defragmentation.
+ * @details To avoid infinite data moves in multipass
+ * processing, we exclude files for which moving failed.
+ * On the other hand, number of fragmented files instantly
+ * decreases, so we'll never have infinite loops here.
  * @return Zero for success, negative value otherwise.
  */
 int defragment(udefrag_job_parameters *jp)

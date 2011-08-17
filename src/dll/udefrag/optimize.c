@@ -30,9 +30,34 @@ static void calculate_free_rgn_size_threshold(udefrag_job_parameters *jp);
 static ULONGLONG get_number_of_allocated_clusters(
 	udefrag_job_parameters *jp, ULONGLONG first_lcn,
 	ULONGLONG last_lcn);
+static int increase_starting_point(udefrag_job_parameters *jp, ULONGLONG *sp);
 
 /**
  * @brief Performs a volume optimization.
+ * @details The volume optimization consists of two
+ * phases, repeated in case of multipass processing.
+ *
+ * First of all, we split disk into two parts - the
+ * first one is already optimized while the second one
+ * needs to be optimized. So called starting point
+ * represents the bound between parts.
+ *
+ * Then, we move all fragmented files from the beginning
+ * of the volume to its terminal part. After that we
+ * move everything locating after the starting point in 
+ * the same direction (in full optimization only).
+ * When all the operations complete, we have two arrays
+ * of data (already optimized and moved to the end)
+ * separated by a free space region.
+ *
+ * Then, we begin to move files from the end to the beginning.
+ * Before each move we ensure that the file will be not moved back
+ * on the next pass.
+ *
+ * If nothing has been moved, we increase starting point to the next
+ * suitable free region and continue the volume processing.
+ *
+ * This algorithm guarantees that no repeated moves are possible.
  * @return Zero for success, negative value otherwise.
  */
 int optimize(udefrag_job_parameters *jp)
@@ -107,8 +132,11 @@ int optimize(udefrag_job_parameters *jp)
 			overall_result = 0;
 		}
 		
-		/* break if nothing moved */
-		if(result < 0 || jp->pi.moved_clusters == 0) break;
+		/* move starting point to the next free region if nothing moved */
+		if(result < 0 || jp->pi.moved_clusters == 0){
+			if(increase_starting_point(jp, &start_lcn) < 0)
+				break; /* end of disk reached */
+		}
 		
 		/* break if no repeat */
 		if(!(jp->udo.job_flags & UD_JOB_REPEAT)) break;
@@ -242,10 +270,10 @@ static ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLO
 
 /**
  * @brief Calculates starting point
- * for a volume optimization process
+ * for the volume optimization process
  * to skip already optimized data.
  * All the clusters before it will
- * be skipped in move_files_to_back
+ * be skipped in the move_files_to_back
  * routine.
  */
 ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
@@ -332,7 +360,6 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 					return block->lcn;
 				} else {
 					/* don't skip to avoid slow walk from a block to the next one etc. */
-					///* skip block */
 					//return (block->lcn + block->length);
 					return new_sp;
 				}
@@ -354,6 +381,32 @@ done:
 		if(rgn->next == jp->free_regions) break;
 	}
 	return new_sp;
+}
+
+/**
+ * @brief Moves starting point to the next free region.
+ * @return Zero for success, negative value otherwise.
+ */
+static int increase_starting_point(udefrag_job_parameters *jp, ULONGLONG *sp)
+{
+	ULONGLONG new_sp;
+	winx_volume_region *rgn;
+	
+	if(sp == NULL)
+		return (-1);
+	
+	new_sp = calculate_starting_point(jp,*sp);
+
+	/* go to the first large free space gap after a new starting point */
+	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
+		if(rgn->lcn > new_sp && rgn->length >= jp->free_rgn_size_threshold){
+			*sp = rgn->lcn;
+			return 0;
+		}
+		if(rgn->next == jp->free_regions) break;
+	}
+	/* end of disk reached */
+	return (-1);
 }
 
 /** @} */
