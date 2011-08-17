@@ -59,10 +59,13 @@ goto :DisplayVMlist
 for /f "tokens=%SelectedItem% delims=:" %%S in ('echo %MenuSelections%') do set SelectedVM=%%~S
 
 echo.
-set /p MaxIndex="Enter number of disks to create (0 to exit, maximum 20): "
+echo For Windows 2000 the maximum disk count is 8,
+echo since the controller dosn't support more!
+echo.
+set /p MaxIndex="Enter number of disks to create (0 to exit, maximum 15): "
 if "%MaxIndex%" == "" goto :quit
 if %MaxIndex% EQU 0 goto :quit
-if %MaxIndex% GTR 20 set MaxIndex=20
+if %MaxIndex% GTR 15 set MaxIndex=15
 
 cd /d %VBoxRoot%
 
