@@ -74,10 +74,13 @@ for /f "tokens=%SelectedVolume%" %%V in ("%FoundVolumes%") do set ProcessVolume=
 
 :: ask if we like to format the volume
 echo.
-set /p FormatVolume="Format volume %ProcessVolume%? ([Y]/N) "
-if /i not "%FormatVolume%" == "N" set FormatVolume=Y
-
-if not "%FormatVolume%" == "Y" goto :SelectFragmentationRate
+set /p FormatVolume="Format volume %ProcessVolume%? (Y/[N]) "
+if /i not "%FormatVolume%" == "Y" (
+    set FormatVolume=N
+) else (
+    set FormatVolume=Y
+)
+if "%FormatVolume%" == "N" goto :SelectFragmentationRate
 
 :: collect available volume types
 for /f "tokens=2 delims=[" %%V in ('ver') do set test=%%V
@@ -111,7 +114,7 @@ for %%I in (%AvailableTypes%) do call :DisplayMenuItem %%~I
 echo.
 echo 0 ... EXIT
 echo.
-set /p SelectedType="Select volume type: "
+set /p SelectedType="Select new volume type: "
 
 if "%SelectedType%" == "" goto :EOF
 if %SelectedType% EQU 0 goto :EOF
@@ -168,7 +171,7 @@ if %FragmentationRate% GTR 100 set FragmentationRate=100
 
 call :delay 0
 
-if not "%FormatVolume%" == "Y" goto :ParseVolumeLabel
+if "%FormatVolume%" == "N" goto :ParseVolumeLabel
 
 for /f "tokens=1,2,3" %%R in ('echo %SelectedVolumeType%') do (
 	set ex_type=%%R
