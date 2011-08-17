@@ -59,15 +59,15 @@ goto :DisplayVMlist
 for /f "tokens=%SelectedItem% delims=:" %%S in ('echo %MenuSelections%') do set SelectedVM=%%~S
 
 echo.
-set /p MaxIndex="Enter number of disks to create (0 to exit, maximum 10): "
+set /p MaxIndex="Enter number of disks to create (0 to exit, maximum 20): "
 if "%MaxIndex%" == "" goto :quit
 if %MaxIndex% EQU 0 goto :quit
-if %MaxIndex% GTR 10 set MaxIndex=10
+if %MaxIndex% GTR 20 set MaxIndex=20
 
 cd /d %VBoxRoot%
 
 for /L %%F in (1,1,%MaxIndex%) do (
-    set HardDiskName="%VMRoot%\%SelectedVM%\NewHardDisk%%F.vdi"
+    set HardDiskName="%VMRoot%\%SelectedVM%\%SelectedVM: =_%_TestDisk_%%F.vdi"
     
     echo.
     echo ---------------------------------------
