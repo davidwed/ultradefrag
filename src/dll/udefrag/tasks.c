@@ -170,6 +170,10 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 	if(is_in_improper_state(f))
 		return 0;
 	
+	/* avoid infinite loops */
+	if(is_moving_failed(f))
+		return 0;
+	
 	return 1;
 }
 
@@ -499,7 +503,7 @@ done:
  * - This routine fills free space areas from the beginning of the
  * volume regardless of the best matching rules.
  */
-int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
+int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
 	ULONGLONG defragmented_files;
@@ -596,7 +600,7 @@ done:
  * @brief Defragments all fragmented files entirely, if possible.
  * @details This routine fills free space areas respect to the best matching rules.
  */
-int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
+int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
 	ULONGLONG defragmented_files;
@@ -691,7 +695,7 @@ int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
  * a single defragment_big_files call after all other
  * volume processing steps.
  */
-int defragment_big_files(udefrag_job_parameters *jp)
+int __stdcall defragment_big_files(udefrag_job_parameters *jp)
 {
 	ULONGLONG time;
 	ULONGLONG defragmented_files;
@@ -840,8 +844,6 @@ done:
  * to be cleaned up - all clusters before it should be skipped.
  * @param[in] flags one of MOVE_xxx flags defined in udefrag.h
  * @return Zero for success, negative value otherwise.
- * @note For better performance reason only the MOVE_NOT_FRAGMENTED
- * flag is supported currently.
  */
 int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags)
 {
@@ -850,21 +852,18 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	winx_file_info *file,/* *last_file, */*largest_file;
 	ULONGLONG length, rgn_size_threshold;
 	int files_found;
-	ULONGLONG rgn_lcn, file_lcn, min_rgn_lcn, max_rgn_lcn;
+	ULONGLONG rgn_lcn, min_file_lcn, min_rgn_lcn, max_rgn_lcn;
 	/*ULONGLONG end_lcn, last_lcn;*/
 	winx_volume_region *rgn;
 	ULONGLONG clusters_to_move;
 	ULONGLONG file_length;
+	winx_blockmap *block;
+	ULONGLONG new_sp;
 	char buffer[32];
 	
 	jp->pi.current_operation = VOLUME_OPTIMIZATION;
 	jp->pi.moved_clusters = 0;
 	
-	if(flags != MOVE_NOT_FRAGMENTED){
-		DebugPrint("move_files_to_front: 0x%x flag is not supported",(UINT)flags);
-		return (-1);
-	}
-
 	/* no files are excluded by this task currently */
 	for(file = jp->filelist; file; file = file->next){
 		file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
@@ -895,26 +894,40 @@ repeat_scan:
 			/* break if we have already moved files behind the current region */
 			if(rgn->lcn > max_rgn_lcn) break;
 			if(rgn->length > rgn_size_threshold && rgn->lcn >= min_rgn_lcn){
+				/* break if on the next pass the current region will be moved to the end */
+				if(jp->udo.job_flags & UD_JOB_REPEAT){
+					/* TODO: speedup */
+					new_sp = calculate_starting_point(jp,start_lcn);
+					if(rgn->lcn > new_sp){
+						DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u",rgn->lcn,rgn->length);
+						DebugPrint("move_files_to_front: heavily fragmented space begins at %I64u cluster",new_sp);
+						goto done;
+					}
+				}
 try_again:
 				/* find largest not fragmented file after start_lcn which fits here */
 				largest_file = NULL; length = 0; files_found = 0;
 				for(file = jp->filelist; file; file = file->next){
-					if(can_move(file,jp) && !is_mft(file,jp) && !is_fragmented(file)){
-						if(file->disp.blockmap->lcn >= start_lcn \
-						  && file->disp.blockmap->lcn > rgn->lcn){
-							files_found = 1;
-							file_length = get_file_length(jp,file);
-							if(file_length > length \
-							  && file_length <= rgn->length){
-								largest_file = file;
-								length = file_length;
+					if(can_move(file,jp) && !is_mft(file,jp)){
+						if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+						} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
+						} else {
+							if(file->disp.blockmap->lcn >= start_lcn \
+							  && file->disp.blockmap->lcn > rgn->lcn){
+								files_found = 1;
+								file_length = get_file_length(jp,file);
+								if(file_length > length \
+								  && file_length <= rgn->length){
+									largest_file = file;
+									length = file_length;
+								}
 							}
 						}
 					}
 					if(file->next == jp->filelist) break;
 				}
 				if(files_found == 0){
-					/* no more movable files after start_lcn exist */
+					/* no more files can be moved on the current pass */
 					break; /*goto done;*/
 				}
 				if(largest_file == NULL){
@@ -926,7 +939,12 @@ try_again:
 						goto try_again; /* skip locked files */
 					}
 					/* move the file */
-					file_lcn = largest_file->disp.blockmap->lcn;
+					min_file_lcn = jp->v_info.total_clusters - 1;
+					for(block = largest_file->disp.blockmap; block; block = block->next){
+						if(block->length && block->lcn < min_file_lcn)
+							min_file_lcn = block->lcn;
+						if(block->next == largest_file->disp.blockmap) break;
+					}
 					rgn_lcn = rgn->lcn;
 					clusters_to_move = get_file_length(jp,largest_file);
 					if(move_file(largest_file,largest_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
@@ -937,8 +955,8 @@ try_again:
 					largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 					/* continue from the first free region after used one */
 					min_rgn_lcn = rgn_lcn + 1;
-					if(max_rgn_lcn > file_lcn - 1)
-						max_rgn_lcn = file_lcn - 1;
+					if(max_rgn_lcn > min_file_lcn - 1)
+						max_rgn_lcn = min_file_lcn - 1;
 					goto repeat_scan;
 				}
 			}

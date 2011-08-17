@@ -179,9 +179,7 @@ void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp);
 
 int analyze(udefrag_job_parameters *jp);
 int defragment(udefrag_job_parameters *jp);
-int defragment_partial(udefrag_job_parameters *jp);
-int full_optimize(udefrag_job_parameters *jp);
-int quick_optimize(udefrag_job_parameters *jp);
+int optimize(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
 
 ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp);
@@ -225,9 +223,9 @@ ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
 int optimize_mft(udefrag_job_parameters *jp);
-int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp);
-int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp);
-int defragment_big_files(udefrag_job_parameters *jp);
+int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *jp);
+int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp);
+int __stdcall defragment_big_files(udefrag_job_parameters *jp);
 
 /* flags used in move_files_to_xxx routines */
 enum {
@@ -236,6 +234,8 @@ enum {
 	MOVE_ALL
 };
 
+ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp);
+typedef int (__stdcall *disk_processing_routine)(udefrag_job_parameters *jp);
 int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags);
 int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags);
 

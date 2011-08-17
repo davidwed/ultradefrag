@@ -239,263 +239,6 @@ static int __stdcall killer(void *p)
 	return 1;
 }
 
-/**
- * @brief Calculates a maximum amount of data which may be moved in process.
- */
-static ULONGLONG calculate_amount_of_data_to_be_moved(udefrag_job_parameters *jp)
-{
-	ULONGLONG clusters_to_process = 0;
-	udefrag_fragmented_file *f;
-	winx_file_info *file;
-
-	switch(jp->job_type){
-	case DEFRAGMENTATION_JOB:
-		for(f = jp->fragmented_files; f; f = f->next){
-			if(jp->termination_router((void *)jp)) break;
-			/*
-			* Count all fragmented files which can be processed.
-			*/
-			if(can_defragment(f->f,jp))
-				clusters_to_process += get_file_length(jp,f->f);
-			if(f->next == jp->fragmented_files) break;
-		}
-		break;
-	case QUICK_OPTIMIZATION_JOB:
-	case FULL_OPTIMIZATION_JOB:
-		/*
-		* We have a chance to move all data
-		* to the end of disk and then in contrary
-		* direction.
-		*/
-		for(file = jp->filelist; file; file = file->next){
-			if(can_move(file,jp))
-				clusters_to_process += get_file_length(jp,file);
-			if(file->next == jp->filelist) break;
-		}
-		/* FIXME: avoid overflow on volumes larger than 8 Eb in size */
-		clusters_to_process *= 2;
-		break;
-	default:
-		break;
-	}
-	
-	return clusters_to_process;
-}
-
-/**
- * @brief Calculates free region size
- * threshold used in volume optimization.
- */
-static void calculate_free_rgn_size_threshold(udefrag_job_parameters *jp)
-{
-	winx_volume_region *rgn;
-	ULONGLONG length = 0;
-
-	if(jp->v_info.free_bytes >= jp->v_info.total_bytes / 10){
-		/*
-		* We have at least 10% of free space on the volume, so
-		* it seems to be reasonable to put all data together
-		* even if the free space is split to many little pieces.
-		*/
-		DebugPrint("calculate_free_rgn_size_threshold: strategy #1 because of at least 10%% of free space on the volume");
-		for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-			if(rgn->length > length)
-				length = rgn->length;
-			if(rgn->next == jp->free_regions) break;
-		}
-		/* Threshold = 0.5% of the volume or a half of the largest free space region. */
-		jp->free_rgn_size_threshold = min(jp->v_info.total_clusters / 200, length / 2);
-	} else {
-		/*
-		* On volumes with less than 10% of free space
-		* we're searching for the free space region
-		* at least 0.5% long.
-		*/
-		DebugPrint("calculate_free_rgn_size_threshold: strategy #2 because of less than 10%% of free space on the volume");
-		jp->free_rgn_size_threshold = jp->v_info.total_clusters / 200;
-	}
-	//jp->free_rgn_size_threshold >>= 1;
-	if(jp->free_rgn_size_threshold < 2) jp->free_rgn_size_threshold = 2;
-	DebugPrint("free region size threshold = %I64u clusters",jp->free_rgn_size_threshold);
-}
-
-/**
- * @brief Returns number of allocated clusters
- * locating inside a specified part of the volume.
- */
-static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
-{
-	winx_file_info *file;
-	winx_blockmap *block;
-	ULONGLONG i, j, n, total = 0;
-	
-	for(file = jp->filelist; file; file = file->next){
-		if(jp->termination_router((void *)jp)) break;
-		n = 0;
-		for(block = file->disp.blockmap; block; block = block->next){
-			if((block->lcn + block->length >= first_lcn + 1) && block->lcn <= last_lcn){
-				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
-				if(block->lcn + block->length < last_lcn + 1) j = block->lcn + block->length; else j = last_lcn + 1;
-				n += (j - i);
-			}
-			if(block->next == file->disp.blockmap) break;
-		}
-		total += n;
-		if(file->next == jp->filelist) break;
-	}
-	
-	return total;
-}
-
-/**
- * @brief Returns number of fragmented clusters
- * locating inside a specified part of the volume.
- */
-static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
-{
-	udefrag_fragmented_file *f;
-	winx_blockmap *block;
-	ULONGLONG i, j, n, total = 0;
-	
-	for(f = jp->fragmented_files; f; f = f->next){
-		if(jp->termination_router((void *)jp)) break;
-		n = 0;
-		for(block = f->f->disp.blockmap; block; block = block->next){
-			if((block->lcn + block->length >= first_lcn + 1) && block->lcn <= last_lcn){
-				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
-				if(block->lcn + block->length < last_lcn + 1) j = block->lcn + block->length; else j = last_lcn + 1;
-				n += (j - i);
-			}
-			if(block->next == f->f->disp.blockmap) break;
-		}
-		if(n && !is_file_locked(f->f,jp))
-			total += n;
-		if(f->next == jp->fragmented_files) break;
-	}
-	
-	return total;
-}
-
-/**
- * @brief Returns number of free clusters
- * locating inside a specified part of the volume.
- */
-static ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
-{
-	winx_volume_region *rgn;
-	ULONGLONG i, j, total = 0;
-	
-	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(rgn->lcn > last_lcn) break;
-		if(rgn->lcn + rgn->length >= first_lcn + 1){
-			if(rgn->lcn > first_lcn) i = rgn->lcn; else i = first_lcn;
-			if(rgn->lcn + rgn->length < last_lcn + 1) j = rgn->lcn + rgn->length; else j = last_lcn + 1;
-			total += (j - i);
-		}
-		if(rgn->next == jp->free_regions) break;
-	}
-	
-	return total;
-}
-
-/**
- * @brief Calculates starting point
- * for a volume optimization process
- * to skip already optimized data.
- * All the clusters before it will
- * be skipped in move_files_to_back
- * routine.
- */
-ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
-{
-	ULONGLONG new_sp;
-	ULONGLONG fragmented, free, lim, i, max_new_sp;
-	winx_volume_region *rgn;
-	winx_file_info *file;
-	winx_blockmap *block;
-	
-	/* free temporarily allocated space */
-	release_temp_space_regions(jp);
-
-	/* search for the first large free space gap after an old starting point */
-	new_sp = old_sp;
-	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->udo.dbgprint_level >= DBG_PARANOID)
-			DebugPrint("Free block start: %I64u len: %I64u",rgn->lcn,rgn->length);
-		if(rgn->lcn >= old_sp && rgn->length >= jp->free_rgn_size_threshold){
-			new_sp = rgn->lcn;
-			break;
-		}
-		if(rgn->next == jp->free_regions) break;
-	}
-	
-	/* move starting point back to release heavily fragmented data */
-	/* allow no more than 5% of fragmented data inside of a skipped part of the disk */
-	fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
-	if(fragmented < /*jp->free_rgn_size_threshold*/ (new_sp - old_sp) / 20) return new_sp;
-
-	/*
-	* Fast binary search finds quickly a proper part 
-	* of the volume which is heavily fragmented.
-	* Based on bsearch() algorithm from ReactOS.
-	*/
-	i = old_sp;
-	for(lim = new_sp - old_sp; lim != 0; lim >>= 1){
-		new_sp = i + (lim >> 1);
-		fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
-		if(fragmented >= /*jp->free_rgn_size_threshold*/ (new_sp - old_sp) / 20){
-			/* move left */
-		} else {
-			/* move right */
-			i = new_sp + 1; lim --;
-		}
-	}
-	if(new_sp <= old_sp + 1)
-		return old_sp;
-	
-	/*
-	* Release all remaining data when all space
-	* between new_sp and old_sp is heavily fragmented.
-	*/
-	if(fragmented >= (new_sp - old_sp + 1) / 3)
-		return old_sp; /* because at least 1/3 of skipped space is fragmented */
-	
-	/* cut off heavily fragmented free space */
-	i = old_sp; max_new_sp = new_sp;
-	for(lim = new_sp - old_sp; lim != 0; lim >>= 1){
-		new_sp = i + (lim >> 1);
-		free = get_number_of_free_clusters(jp,new_sp,max_new_sp);
-		if(free >= (max_new_sp - new_sp + 1) / 3){
-			/* move left */
-		} else {
-			/* move right */
-			i = new_sp + 1; lim --;
-		}
-	}
-	if(new_sp <= old_sp + 1)
-		return old_sp;
-	
-	/* is starting point inside a file block? */
-	for(file = jp->filelist; file; file = file->next){
-		for(block = file->disp.blockmap; block; block = block->next){
-			if(new_sp >= block->lcn && new_sp <= block->lcn + block->length - 1){
-				if(is_fragmented(file)){
-					/* include block */
-					return block->lcn;
-				} else {
-					/* don't skip to avoid slow walk from a block to the next one etc. */
-					///* skip block */
-					//return (block->lcn + block->length);
-					return new_sp;
-				}
-			}
-			if(block->next == file->disp.blockmap) break;
-		}
-		if(file->next == jp->filelist) break;
-	}
-	return new_sp;
-}
-
 /*
 * How statistical data adjusts in all the volume processing routines:
 * 1. we calculate a maximum amount of data which may be moved in process
@@ -520,36 +263,16 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 * This is not a bug, this is an algorithm feature causing by iterational
 * nature of multipass processing.
 */
-
-static DWORD WINAPI start_job_ex(LPVOID p)
+static DWORD WINAPI start_job(LPVOID p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	char *action = "analyzing";
 	int result = 0;
-	ULONGLONG start_lcn, new_start_lcn;
-	/* variables indicating whether something has been moved or not */
-	ULONGLONG mx = 0, my = 0, mz = 0;
-	/* variables indicating whether something failed or not */
-	int rx = -1, ry = -1, rz = -1;
-	int optimize_entire_disk = 0;
-	//ULONGLONG fragmented_clusters;
-	ULONGLONG remaining_clusters;
-	
-	/* check for preview masks */
+
+	/* check job flags */
 	if(jp->udo.job_flags & UD_JOB_REPEAT)
 		DebugPrint("Repeat action until nothing left to move");
-	if(jp->udo.job_flags & UD_PREVIEW_MATCHING)
-		DebugPrint("Preview -> Find matching free space");
-	else
-		DebugPrint("Preview -> Find largest free space");
 	
-	/* use 'Find largest free space' strategy in optimization */
-	if(jp->job_type != DEFRAGMENTATION_JOB)
-		jp->udo.job_flags &= ~UD_PREVIEW_MATCHING;
-	/* use 'Find matching free space' strategy in defragmentation */
-	else
-		jp->udo.job_flags |= UD_PREVIEW_MATCHING;
-
 	/* do the job */
 	if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
 	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
@@ -557,113 +280,23 @@ static DWORD WINAPI start_job_ex(LPVOID p)
 	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
-	
-	result = analyze(jp); /* we need to call it once, here */
-	if(jp->job_type == ANALYSIS_JOB || result < 0) goto done;
 
-	jp->pi.clusters_to_process = calculate_amount_of_data_to_be_moved(jp);
-	jp->pi.processed_clusters = 0;
-	start_lcn = 0;
-	if(jp->job_type != DEFRAGMENTATION_JOB)
-		calculate_free_rgn_size_threshold(jp);
-	
-	/*
-	* Optimize entire disk if free space amount 
-	* is less than 20% and at least a half of data
-	* is fragmented.
-	*/
-	/*if(jp->job_type != DEFRAGMENTATION_JOB){
-		if(jp->v_info.free_bytes < jp->v_info.total_bytes / 5){
-			fragmented_clusters = get_number_of_fragmented_clusters(jp,0,jp->v_info.total_clusters - 1);
-			if(fragmented_clusters >= jp->v_info.total_clusters / 2)
-				optimize_entire_disk = 1;
-		}
-	}*/
-	
-	/* for map redraw testing */
-	/*my = 100;
-	mx = jp->v_info.total_clusters - my;
-	colorize_map_region(jp,mx,my,FRAGM_SPACE,FREE_SPACE);
-	goto done;*/
-    
-    /* optimize MFT separately to keep its optimal location */
-	(void)optimize_mft(jp); /* ignore result because this task is not mandatory */
-	
-	while(!jp->termination_router((void *)jp)){
-		/* define starting point */
-		if(jp->job_type != DEFRAGMENTATION_JOB){
-			if(jp->pi.pass_number == 0 && optimize_entire_disk)
-				new_start_lcn = 0;
-			else
-				new_start_lcn = calculate_starting_point(jp,start_lcn);
-			if(new_start_lcn <= start_lcn && jp->pi.pass_number){
-				DebugPrint("volume optimization completed: old_sp = %I64u, new_sp = %I64u",
-					start_lcn, new_start_lcn);
-				break;
-			}
-			start_lcn = new_start_lcn;
-			
-			remaining_clusters = get_number_of_allocated_clusters(jp,start_lcn,jp->v_info.total_clusters - 1);
-			jp->pi.processed_clusters = 0; /* reset counter */
-			jp->pi.clusters_to_process = jp->v_info.total_clusters - \
-				jp->v_info.free_bytes / jp->v_info.bytes_per_cluster;
-			jp->pi.processed_clusters = jp->pi.clusters_to_process - \
-				remaining_clusters; /* set counter */
-			
-			DebugPrint("volume optimization pass #%u, starting point = %I64u, remaining clusters = %I64u",
-				jp->pi.pass_number, start_lcn, remaining_clusters);
-		}
-		
-		/* cleanup space after start_lcn */
-		if(jp->job_type == FULL_OPTIMIZATION_JOB){
-			rx = move_files_to_back(jp, start_lcn, MOVE_ALL);
-			mx = jp->pi.moved_clusters;
-		}
-		
-		/* TODO: this routine makes a lot of slow move_file() calls,
-		try to comment it out and test effectiveness of the quick optimization
-		in this case */
-		if(jp->job_type == QUICK_OPTIMIZATION_JOB/* && jp->pi.pass_number == 0*/){
-			rx = move_files_to_back(jp, start_lcn, MOVE_FRAGMENTED);
-			mx = jp->pi.moved_clusters;
-		}
-		if(jp->termination_router((void *)jp)) break;
-		
-		/* defragment */
-		ry = defragment(jp);
-		my = jp->pi.moved_clusters;
-		if(jp->termination_router((void *)jp)) break;
-		
-		/* move not fragmented files as close to the beginning of the volume as possible */
-		if(jp->job_type != DEFRAGMENTATION_JOB){
-			rz = move_files_to_front(jp, start_lcn, MOVE_NOT_FRAGMENTED);
-			mz = jp->pi.moved_clusters;
-		}
-	
-		/* exit if nothing moved */
-		if(mx == 0 && my == 0 && mz == 0){
-			if(jp->pi.pass_number == 0 && rx < 0 && ry < 0 && rz < 0)
-				result = -1; /* no actions succeeded */
-			break;
-		}
-		
-		/* exit if no repeat */
-		if(!(jp->udo.job_flags & UD_JOB_REPEAT)) break;
-		
-		/* go to the next pass */
-		jp->pi.pass_number ++;
+	switch(jp->job_type){
+	case ANALYSIS_JOB:
+		result = analyze(jp);
+		break;
+	case DEFRAGMENTATION_JOB:
+		result = defragment(jp);
+		break;
+	case FULL_OPTIMIZATION_JOB:
+	case QUICK_OPTIMIZATION_JOB:
+		result = optimize(jp);
+		break;
+	default:
+		result = 0;
+		break;
 	}
 
-    /* partial defragment only once, but never in optimization */
-	if(jp->job_type == DEFRAGMENTATION_JOB){
-		if(!(jp->termination_router((void *)jp))){
-				rx = defragment_partial(jp);
-				if(result < 0) /* all previous actions failed */
-					result = rx;
-		}
-	}
-
-done:	
 	release_temp_space_regions(jp);
 	(void)save_fragmentation_reports(jp);
 	
@@ -675,49 +308,6 @@ done:
 	winx_exit_thread(); /* 8k/12k memory leak here? */
 	return 0;
 }
-
-#if 0
-static DWORD WINAPI start_job(LPVOID p)
-{
-	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
-	char *action = "analyzing";
-	int result = 0;
-
-	/* do the job */
-	if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
-	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
-	else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "quick optimizing";
-	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
-	remove_fragmentation_reports(jp);
-	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
-	switch(jp->job_type){
-	case ANALYSIS_JOB:
-		result = analyze(jp);
-		break;
-	case DEFRAGMENTATION_JOB:
-		result = defragment(jp);
-		break;
-	case FULL_OPTIMIZATION_JOB:
-		result = full_optimize(jp);
-		break;
-	case QUICK_OPTIMIZATION_JOB:
-		result = quick_optimize(jp);
-		break;
-	default:
-		result = 0;
-		break;
-	}
-	(void)save_fragmentation_reports(jp);
-
-	/* now it is safe to adjust the completion status */
-	jp->pi.completion_status = result;
-	if(jp->pi.completion_status == 0)
-		jp->pi.completion_status ++; /* success */
-
-	winx_exit_thread(); /* 8k/12k memory leak here? */
-	return 0;
-}
-#endif
 
 /**
  * @brief Destroys list of free regions, 
@@ -807,7 +397,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
     }
 	
 	/* run the job in separate thread */
-	if(winx_create_thread(start_job_ex,(PVOID)&jp,NULL) < 0){
+	if(winx_create_thread(start_job,(PVOID)&jp,NULL) < 0){
 		free_map(&jp);
 		release_options(&jp);
 		goto done;
