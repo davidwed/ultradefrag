@@ -28,10 +28,14 @@ General Information:
     
     For cloning the disks to test different settings on the same data you may use
     HDClone available freely at http://www.miray.de/products/sat.hdclone.html
+    
+    You can change the number of fragmented files by not formating the drive.
+    This way the current files will be fragmented.
 
         (1) exFAT is only included with Vista and above.
             For Windows XP SP2 and SP3 you need to download and install
             the driver from http://support.microsoft.com/kb/955704/en-us
+            Windows XP SP1 and below do not support exFAT.
 
         (2) UDF is only included with Vista and above.
 

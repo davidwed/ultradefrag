@@ -47,10 +47,12 @@ if "%YES%" == "" set YES=Y
 :: collect volumes that can be used as test volumes
 cls
 echo.
+echo Collecting available volumes ...
+echo.
 set MenuItem=0
 set FoundVolumes=
 
-for /f "tokens=1,7* skip=6" %%D in ('udefrag -l') do call :AddToDriveList %%~D & if not %%~D == %SystemDrive% call :DisplayMenuItem %%~D - "%%~E"
+for /f "tokens=1,6* skip=6" %%D in ('udefrag -l') do call :AddToDriveList %%~D & if not %%~D == %SystemDrive% call :DisplayMenuItem %%~D - "%%~F"
 
 echo.
 echo 0 ... EXIT
@@ -75,9 +77,9 @@ echo.
 set /p FormatVolume="Format volume %ProcessVolume%? ([Y]/N) "
 if /i not "%FormatVolume%" == "N" set FormatVolume=Y
 
-if not "%FormatVolume%" == "Y" goto :SelectFreeSpace
+if not "%FormatVolume%" == "Y" goto :SelectFragmentationRate
 
-:: collect available vomume types
+:: collect available volume types
 for /f "tokens=2 delims=[" %%V in ('ver') do set test=%%V
 for /f "tokens=2" %%V in ('echo %test%') do set test1=%%V
 for /f "tokens=1,2 delims=." %%V in ('echo %test1%') do set OSversion=%%V.%%W
@@ -164,7 +166,9 @@ if "%FragmentationRate%" == "" set FragmentationRate=1
 if %FragmentationRate% LEQ 0 set FragmentationRate=1
 if %FragmentationRate% GTR 100 set FragmentationRate=100
 
-if not "%FormatVolume%" == "Y" goto :StartProcess
+call :delay 0
+
+if not "%FormatVolume%" == "Y" goto :ParseVolumeLabel
 
 for /f "tokens=1,2,3" %%R in ('echo %SelectedVolumeType%') do (
 	set ex_type=%%R
@@ -178,8 +182,6 @@ if not "%option2%" == "" set VolumeName=%VolumeName%_%option2%
 set VolumeName=%VolumeName%_%FragmentationRate%
 
 call :answers >"%TMP%\answers.txt"
-
-call :delay 0
 
 title Setting Volume Label of "%ProcessVolume%" ...
 echo.
@@ -214,6 +216,50 @@ echo.
 %CommandLine% <"%TMP%\answers.txt"
 
 call :delay 5
+
+goto :StartProcess
+
+:ParseVolumeLabel
+for /f "tokens=1,5,6* skip=6" %%D in ('udefrag -l') do if %%~D == %ProcessVolume% set PercentageFree=%%E & set VolumeName="%%~G"
+
+for /f "tokens=1,2,3 delims=_" %%R in ('echo %VolumeName:"=%') do (
+	set ex_type=%%R
+	set option1=%%S
+	set option2=%%T
+)
+
+set ApplyLabel=0
+
+if not "%ex_type%" == "FAT" if not "%ex_type%" == "FAT32" if not "%ex_type%" == "exFAT" goto :makeNTFS
+set ApplyLabel=1
+set VolumeName=%ex_type%
+
+:makeNTFS
+if not "%ex_type%" == "NTFS" goto :makeUDF
+set ApplyLabel=1
+set VolumeName=%ex_type%
+if not "%option1%" == "compressed" if not "%option1%" == "mixed" goto :makeUDF
+set VolumeName=%VolumeName%_%option1%
+
+:makeUDF
+if not "%ex_type%" == "UDF" goto :ApplyVolumeLabel
+set ApplyLabel=1
+set VolumeName=%ex_type%
+set VolumeName=%VolumeName%_%option1:.=%
+if "%option2%" == "mirror" set VolumeName=%VolumeName%_%option2%
+
+:ApplyVolumeLabel
+if %ApplyLabel% EQU 0 goto :StartProcess
+set VolumeName=%VolumeName%_%FragmentationRate%
+
+title Setting Volume Label of "%ProcessVolume%" ...
+echo.
+set CommandLine=label %ProcessVolume% %VolumeName%
+echo %CommandLine%
+echo.
+%CommandLine%
+
+call :delay 2
 
 :StartProcess
 rem process the volume
@@ -253,19 +299,35 @@ goto :EOF
     set count=0
     set NoCompr=0
     set dest=%~1
+    set ExitCode=0
     
+    if "%FormatVolume%" == "Y" goto :create
+    
+    title Changing Fragmented Files on Drive "%~1" ...
+    echo Changing Fragmented Files on Drive "%~1" ...
+    echo.
+
+    for /r "%~1" %%X in ( *.* ) do (
+        call :doFragment "%%~X" "%%~zX" || goto :finished
+        call :increment
+        ping -n 3 localhost >NUL
+    )
+    
+    goto :finished
+
+    :create
     title Creating Fragmented Files on Drive "%~1" until %PercentageFree%%% free space left ...
     echo Creating Fragmented Files on Drive "%~1" until %PercentageFree%%% free space left ...
     echo.
 
     :loop
-        call :doit "%~1"
+        call :doit "%~1" || goto :finished
         call :increment
-        set ExitCode=%ERRORLEVEL%
         ping -n 3 localhost >NUL
-    for /f "tokens=1,5" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LEQ %%Y goto :loop
+    for /f "tokens=1,5 skip=6" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LEQ %%Y goto :loop
 
-    if %ExitCode% GEQ 1 (
+    :finished
+    if %ExitCode% GTR 0 (
         echo.
         echo Operation failed ...
     ) else (
@@ -287,6 +349,20 @@ goto :EOF
     echo %YES%
 goto :EOF
 
+:doFragment
+    set /a size="%~2 / 1024"
+    
+    set count_fmt=   %count%
+    set size_fmt=      %size%
+    set frag_fmt=   %fragments%
+
+    echo File %count_fmt:~-3% ... %size_fmt:~-6% kB ... %frag_fmt:~-3% Fragments ... "%~1"
+
+    "%MyDefragDir%\MyFragmenter.exe" -p %fragments% "%~1" >NUL
+    set ExitCode=%ERRORLEVEL%
+    exit /B %ExitCode%
+goto :EOF
+
 :doit
     if %count% EQU 0 goto :skip
         if %NoFolder% EQU 0 set dest=%~1\folder_%count%
@@ -301,7 +377,12 @@ goto :EOF
     echo File %count_fmt:~-3% ... %size_fmt:~-6% kB ... %frag_fmt:~-3% Fragments
 
     "%MyDefragDir%\MyFragmenter.exe" -p %fragments% -s %size% "%dest%\file_%count%.bin" >NUL
+    set ExitCode=%ERRORLEVEL%
+    if %ExitCode% GTR 0 exit /B %ExitCode%
+    
     if "%option1%" == "mixed" if %NoCompr% EQU 0 compact /c "%dest%\file_%count%.bin" >NUL
+    set ExitCode=%ERRORLEVEL%
+    exit /B %ExitCode%
 goto :EOF
 
 :delay
@@ -329,5 +410,5 @@ goto :EOF
     
     if %quotient% EQU 0 goto :EOF
     
-    set fragments=1
+    set fragments=0
 goto :EOF
