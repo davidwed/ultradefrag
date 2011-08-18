@@ -31,7 +31,7 @@
  * @param[in] name the name of the event.
  * @param[in] type the type of the event:
  * SynchronizationEvent or NotificationEvent.
- * @param[out] phandle pointer to the handle of the event
+ * @param[out] phandle pointer to the handle of the event.
  * @return Zero for success, negative value otherwise.
  * @note
  * - The initial state of the successfully created
@@ -71,7 +71,7 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
  * @param[in] name the name of the event.
  * @param[in] flags the same flags as in Win32
  * OpenEvent() call's dwDesiredAccess parameter.
- * @param[out] phandle pointer to the handle of the event
+ * @param[out] phandle pointer to the handle of the event.
  * @return Zero for success, negative value otherwise.
  */
 int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle)
