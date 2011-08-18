@@ -48,7 +48,7 @@ ReserveFile "lang.ini"
  */
 !macro CollectOldLang
 
-    push $R0
+    Push $R0
     
     ClearErrors
     ReadRegStr $R0 HKLM "Software\UltraDefrag" "Language"
@@ -64,7 +64,7 @@ ReserveFile "lang.ini"
     ${EndUnless}
     SetRegView 32
     
-    pop $R0
+    Pop $R0
 
 !macroend
 
@@ -73,46 +73,46 @@ ReserveFile "lang.ini"
 ;-----------------------------------------------------------
 
 !macro LANG_PAGE
-  Page custom LangShow LangLeave ""
+    Page custom LangShow LangLeave ""
 !macroend
 
 ;-----------------------------------------------------------
 
 Function LangShow
 
-  push $R0
-  push $R1
-  push $R2
+    Push $R0
+    Push $R1
+    Push $R2
 
-  StrCpy $LanguagePack "English (US)"
+    StrCpy $LanguagePack "English (US)"
 
-  ; --- get language from $INSTDIR\lang.ini file
-  ${DisableX64FSRedirection}
-  ${If} ${FileExists} "$INSTDIR\lang.ini"
-    ReadINIStr $LanguagePack "$INSTDIR\lang.ini" "Language" "Selected"
-  ${EndIf}
-  ${EnableX64FSRedirection}
+    ; --- get language from $INSTDIR\lang.ini file
+    ${DisableX64FSRedirection}
+    ${If} ${FileExists} "$INSTDIR\lang.ini"
+        ReadINIStr $LanguagePack "$INSTDIR\lang.ini" "Language" "Selected"
+    ${EndIf}
+    ${EnableX64FSRedirection}
 
-  ; --- get language from command line
-  ; --- allows silent installation with: installer.exe /S /LANG="German"
-  ${GetParameters} $R1
-  ClearErrors
-  ${GetOptions} $R1 /LANG= $R2
-  ${Unless} ${Errors}
-    StrCpy $LanguagePack $R2
-  ${EndUnless}
+    ; --- get language from command line
+    ; --- allows silent installation with: installer.exe /S /LANG="German"
+    ${GetParameters} $R1
+    ClearErrors
+    ${GetOptions} $R1 /LANG= $R2
+    ${Unless} ${Errors}
+        StrCpy $LanguagePack $R2
+    ${EndUnless}
 
-  WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $LanguagePack
+    WriteINIStr "$PLUGINSDIR\lang.ini" "Field 2" "State" $LanguagePack
 
-  InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
-  pop $R0
-  InstallOptions::show
-  pop $R0
+    InstallOptions::initDialog /NOUNLOAD "$PLUGINSDIR\lang.ini"
+    Pop $R0
+    InstallOptions::show
+    Pop $R0
 
-  pop $R2
-  pop $R1
-  pop $R0
-  Abort
+    Pop $R2
+    Pop $R1
+    Pop $R0
+    Abort
 
 FunctionEnd
 
@@ -123,9 +123,9 @@ FunctionEnd
  */
 !macro InitLanguageSelector
 
-  ${EnableX64FSRedirection}
-  InitPluginsDir
-  !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
+    ${EnableX64FSRedirection}
+    InitPluginsDir
+    !insertmacro MUI_INSTALLOPTIONS_EXTRACT "lang.ini"
 
 !macroend
 
@@ -138,18 +138,18 @@ FunctionEnd
 
 Function LangLeave
 
-  push $R0
+    Push $R0
 
-  ReadINIStr $R0 "$PLUGINSDIR\lang.ini" "Settings" "State"
-  ${If} $R0 != "0"
-    pop $R0
-    Abort
-  ${EndIf}
+    ReadINIStr $R0 "$PLUGINSDIR\lang.ini" "Settings" "State"
+    ${If} $R0 != "0"
+        Pop $R0
+        Abort
+    ${EndIf}
 
-  ; save selected language to $INSTDIR\lang.ini file before exit
-  ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
-  WriteINIStr "$INSTDIR\lang.ini" "Language" "Selected" $LanguagePack
-  pop $R0
+    ; save selected language to $INSTDIR\lang.ini file before exit
+    ReadINIStr $LanguagePack "$PLUGINSDIR\lang.ini" "Field 2" "State"
+    WriteINIStr "$INSTDIR\lang.ini" "Language" "Selected" $LanguagePack
+    Pop $R0
 
 FunctionEnd
 

@@ -37,10 +37,12 @@
 !error "ULTRADFGARCH parameter must be specified on the command line!"
 !endif
 
-;!define SHOW_BOOTSPLASH
+/*
+ * Constants
+ */
 
-!include "WinVer.nsh"
-!include "x64.nsh"
+!define UD_UNINSTALL_REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
+!define UD_INSTALL_DIR "$WINDIR\UltraDefrag"
 
 !if ${ULTRADFGARCH} == 'i386'
 !define ROOTDIR "..\.."
@@ -48,11 +50,10 @@
 !define ROOTDIR "..\..\.."
 !endif
 
-!include "MUI.nsh"
-!define MUI_ICON   "${ROOTDIR}\src\installer\udefrag-install.ico"
-!define MUI_UNICON "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
-
-;-----------------------------------------
+/*
+ * Installer Attributes
+ */
+ 
 !if ${ULTRADFGARCH} == 'amd64'
 Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
 !else if ${ULTRADFGARCH} == 'ia64'
@@ -61,11 +62,12 @@ Name "Ultra Defragmenter v${ULTRADFGVER} (IA64)"
 Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
 !endif
 
+InstallDir ${UD_INSTALL_DIR}
+
 OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
 LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 ShowInstDetails show
 ShowUninstDetails show
-SetCompressor /SOLID lzma
 
 Icon "${ROOTDIR}\src\installer\udefrag-install.ico"
 UninstallIcon "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
@@ -73,19 +75,44 @@ UninstallIcon "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
 XPStyle on
 RequestExecutionLevel admin
 
+InstType "Full"
+InstType "Micro Edition"
+
+/*
+ * Compiler Flags
+ */
+
+AllowSkipFiles off
+SetCompressor /SOLID lzma
+
+/*
+ * Version Information
+ */
+
 VIProductVersion "${ULTRADFGVER}.0"
 VIAddVersionKey  "ProductName"     "Ultra Defragmenter"
 VIAddVersionKey  "CompanyName"     "UltraDefrag Development Team"
 VIAddVersionKey  "LegalCopyright"  "Copyright © 2007-2011 UltraDefrag Development Team"
 VIAddVersionKey  "FileDescription" "Ultra Defragmenter Setup"
 VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
-;-----------------------------------------
 
+/*
+ * Headers
+ */
+
+!include "WinVer.nsh"
+!include "x64.nsh"
+!include "MUI.nsh"
 !include "${ROOTDIR}\src\installer\UltraDefrag.nsh"
 !include "${ROOTDIR}\src\installer\LanguageSelector.nsh"
 !include "${ROOTDIR}\src\installer\PresetSections.nsh"
 
-;-----------------------------------------
+/*
+ * Modern User Interface Pages
+ */
+
+!define MUI_ICON   "${ROOTDIR}\src\installer\udefrag-install.ico"
+!define MUI_UNICON "${ROOTDIR}\src\installer\udefrag-uninstall.ico"
 
 !define MUI_WELCOMEFINISHPAGE_BITMAP   "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
 !define MUI_UNWELCOMEFINISHPAGE_BITMAP "${ROOTDIR}\src\installer\WelcomePageBitmap.bmp"
@@ -94,7 +121,7 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${ROOTDIR}\src\LICENSE.TXT"
 !insertmacro MUI_PAGE_COMPONENTS
-;  !insertmacro MUI_PAGE_DIRECTORY
+;!insertmacro MUI_PAGE_DIRECTORY
 !insertmacro LANG_PAGE
 !insertmacro MUI_PAGE_INSTFILES
 !insertmacro MUI_PAGE_FINISH
@@ -107,191 +134,85 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
-;------------------------------------------
+/*
+ * Component Sections
+ */
 
-InstType "Full"
-InstType "Micro Edition"
+Section "Ultra Defrag core files (required)" SecCore
 
-;------------------------------------------
+    SectionIn 1 2 RO
 
-Section "!Ultra Defrag core files (required)" SecCore
-
-  push $R0
-  ${DisableX64FSRedirection}
-
-  SectionIn 1 2 RO
-  ;AddSize 24 /* for the components installed in system directories (driver) */
-
-  DetailPrint "Install core files..."
-  SetOutPath $INSTDIR
-  File "${ROOTDIR}\src\LICENSE.TXT"
-  File "${ROOTDIR}\src\CREDITS.TXT"
-  File "${ROOTDIR}\src\HISTORY.TXT"
-  File "${ROOTDIR}\src\README.TXT"
-
-  ; install manual pages for the boot time interface
-  SetOutPath "$INSTDIR\man"
-  File "${ROOTDIR}\src\man\*.*"
-
-  SetOutPath "$SYSDIR"
-  File "${ROOTDIR}\src\installer\boot-config.cmd"
-  File "${ROOTDIR}\src\installer\boot-off.cmd"
-  File "${ROOTDIR}\src\installer\boot-on.cmd"
-  File "bootexctrl.exe"
-
-  ${InstallNativeDefragmenter}
-
-  SetOutPath "$SYSDIR"
-  File "${ROOTDIR}\src\installer\ud-help.cmd"
-  File "udefrag.dll"
-  File "udefrag.exe"
-  File "zenwinx.dll"
-  File /oname=hibernate4win.exe "hibernate.exe"
-
-  ${WriteTheUninstaller}
-  ${RemoveObsoleteFiles}
-  ${InstallConfigFiles}
-
-  ; update the uninstall size value
-  ${UpdateUninstallSizeValue}
-
-  ${EnableX64FSRedirection}
-  pop $R0
+    ${InstallCoreFiles}
 
 SectionEnd
 
-;----------------------------------------------
+SectionGroup /e "Interfaces (at least one must be selected)" SecInterfaces
 
-Section "GUI" SecGUI
+Section "Boot" SecBoot
 
-  SectionIn 1
+    SectionIn 1 2
+
+    ${InstallBootFiles}
   
-  ${DisableX64FSRedirection}
+SectionEnd
 
-  ; install all language packs
-  SetOutPath "$INSTDIR\i18n"
-  File /nonfatal "${ROOTDIR}\src\gui\i18n\*.lng"
-  File /nonfatal "${ROOTDIR}\src\gui\i18n\*.template"
+Section "Console" SecConsole
 
-  ; install GUI apps to program's directory
-  SetOutPath "$INSTDIR"
-  Delete "$INSTDIR\ultradefrag.exe"
-  File "ultradefrag.exe"
-  File "wgx.dll"
-  File "lua5.1a.dll"
-  File "lua5.1a.exe"
-  File "lua5.1a_gui.exe"
+    SectionIn 1 2
 
-  SetOutPath "$INSTDIR\scripts"
-  File "${ROOTDIR}\src\scripts\udreportcnv.lua"
-  File "${ROOTDIR}\src\scripts\udsorting.js"
+    ${InstallConsoleFiles}
+  
+SectionEnd
 
-  ; update the uninstall size value
-  ${UpdateUninstallSizeValue}
+Section "GUI (Default)" SecGUI
 
-  ${RegisterFileExtensions}
+    SectionIn 1
 
-  ${EnableX64FSRedirection}
+    ${InstallGUIFiles}
 
 SectionEnd
 
-;----------------------------------------------
+SectionGroupEnd
 
 Section "Documentation" SecHelp
 
-  SectionIn 1
-  
-  ${DisableX64FSRedirection}
+    SectionIn 1
 
-  DetailPrint "Install documentation..."
-  ; update the handbook
-  RMDir /r "$INSTDIR\handbook"
-
-    SetOutPath "$INSTDIR\handbook"
-    File "${ROOTDIR}\doc\html\handbook\doxy-doc\html\*.*"
-
-  ; update the uninstall size value
-  ${UpdateUninstallSizeValue}
-
-  ${EnableX64FSRedirection}
+    ${InstallHelpFiles}
 
 SectionEnd
 
-;----------------------------------------------
+Section "Context menu handler (requires Console)" SecShellHandler
 
-Section "Context menu handler" SecShellHandler
+    SectionIn 1 2
 
-  SectionIn 1 2
-  
-    ${DisableX64FSRedirection}
-    
-    ; install shell extension icon
-    SetOutPath "$INSTDIR"
-    File "${ROOTDIR}\src\installer\shellex.ico"
-
-    ${SetContextMenuHandler}
-    ${EnableX64FSRedirection}
+    ${InstallShellHandlerFiles}
   
 SectionEnd
 
-;----------------------------------------------
-
-SectionGroup /e "Shortcuts" SecShortcuts
+SectionGroup /e "Shortcuts (require GUI)" SecShortcuts
 
 Section "Startmenu Icon" SecStartMenuIcon
 
-  SectionIn 1
-  
-    AddSize 5
+    SectionIn 1
 
-    DetailPrint "Install startmenu icon..."
-    ${DisableX64FSRedirection}
-    SetShellVarContext all
-    SetOutPath $INSTDIR
-
-    ; install a single shortcut to the Start menu,
-    ; because all important information can be easily
-    ; accessed from the GUI
-    CreateShortCut "$SMPROGRAMS\UltraDefrag.lnk" \
-        "$INSTDIR\ultradefrag.exe"
-
-    ${EnableX64FSRedirection}
+    ${InstallStartMenuIcon}
 
 SectionEnd
 
 Section "Desktop Icon" SecDesktopIcon
 
-  SectionIn 1
-  
-    AddSize 5
+    SectionIn 1
 
-    DetailPrint "Install desktop icon..."
-    ${DisableX64FSRedirection}
-    SetShellVarContext all
-    SetOutPath $INSTDIR
-
-    CreateShortCut "$DESKTOP\UltraDefrag.lnk" \
-        "$INSTDIR\ultradefrag.exe"
-
-    ${EnableX64FSRedirection}
+    ${InstallDesktopIcon}
 
 SectionEnd
 
 Section "Quick Launch Icon" SecQuickLaunchIcon
 
-  SectionIn 1
-  
-    AddSize 5
+    SectionIn 1
 
-    DetailPrint "Install quick launch icon..."
-    ${DisableX64FSRedirection}
-    SetShellVarContext all
-    SetOutPath $INSTDIR
-
-    CreateShortCut "$QUICKLAUNCH\UltraDefrag.lnk" \
-        "$INSTDIR\ultradefrag.exe"
-
-    ${EnableX64FSRedirection}
+    ${InstallQuickLaunchIcon}
 
 SectionEnd
 
@@ -299,59 +220,104 @@ SectionGroupEnd
 
 ;----------------------------------------------
 
+Section "Uninstall"
+
+    ${DisableX64FSRedirection}
+
+    DetailPrint "Deregister boot time defragmenter..."
+    ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
+    Delete "$WINDIR\pending-boot-off"
+
+    ${EnableX64FSRedirection}
+
+    ${RemoveQuickLaunchIcon}
+    ${RemoveDesktopIcon}
+    ${RemoveStartMenuIcon}
+    ${RemoveShellHandlerFiles}
+    ${RemoveHelpFiles}
+    ${RemoveGUIFiles}
+    ${RemoveConsoleFiles}
+    ${RemoveBootFiles}
+    ${RemoveCoreFiles}
+
+SectionEnd
+
+;----------------------------------------------
+
 Function .onInit
 
-  ${CheckWinVersion}
+    ${CheckWinVersion}
+    ${CheckMutex}
 
-  ${EnableX64FSRedirection}
-  InitPluginsDir
+    ${EnableX64FSRedirection}
+    InitPluginsDir
 
-  ${DisableX64FSRedirection}
-  StrCpy $INSTDIR "$WINDIR\UltraDefrag"
+    ${DisableX64FSRedirection}
+    StrCpy $INSTDIR ${UD_INSTALL_DIR}
 
-  ${CollectOldLang}
-  ${InitLanguageSelector}
+    ${CollectOldLang}
+    ${InitLanguageSelector}
 
-!ifdef SHOW_BOOTSPLASH
-  ${ShowBootSplash}
-!endif
+    ${CollectFromRegistry}
+    ${ParseCommandLine}
 
-  ${InitSelection}
-  ${CollectFromRegistry}
-  ${ParseCommandLine}
-  ${PresetSections}
+    ${EnableX64FSRedirection}
 
-  ${EnableX64FSRedirection}
+FunctionEnd
+
+Function un.onInit
+
+    ${CheckMutex}
+
+    ${DisableX64FSRedirection}
+    StrCpy $INSTDIR ${UD_INSTALL_DIR}
+    ${EnableX64FSRedirection}
+
+FunctionEnd
+
+;----------------------------------------------
+
+Function .onSelChange
+
+    ${VerifySelections}
 
 FunctionEnd
 
 ;----------------------------------------------
 
 Function .onInstSuccess
-  
-  ${PreserveInRegistry}
+
+    ${PreserveInRegistry}
+
+    ${WriteTheUninstaller}
+
+    ${RemoveObsoleteFiles}
+
+    ${UpdateUninstallSizeValue}
+
+FunctionEnd
+
+Function un.onUninstSuccess
+
+    DetailPrint "Cleanup registry..."
+    DeleteRegKey HKLM ${UD_UNINSTALL_REG_KEY}
 
 FunctionEnd
 
 ;----------------------------------------------
 
-Section "Uninstall"
-
-  ${UninstallTheProgram}
-
-SectionEnd
-
-;----------------------------------------------
-
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecCore}            "The core files required to use UltraDefrag.$\nIncluding console interface."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecGUI}             "The graphical user interface with cluster map and volume list."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecHelp}            "Handbook, documentation or help file however you like to call it."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecShellHandler}    "Defragment your volumes, folders and files from their Explorer context menu."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts}       "Adds icons to your start menu, desktop and quick launch for easy access."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecStartMenuIcon}   "Adds an icon to your start menu for easy access."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktopIcon}     "Adds an icon to your desktop for easy access."
-  !insertmacro MUI_DESCRIPTION_TEXT ${SecQuickLaunchIcon} "Adds an icon to your quick launch for easy access."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecCore}            "The core files required to use UltraDefrag."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecInterfaces}      "Select at least one interface to be installed."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecBoot}            "The boot time interface processes your volumes during the start of Windows."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecConsole}         "The command line interface can be used for automation."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecGUI}             "The graphical user interface with cluster map and volume list."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecHelp}            "Handbook, documentation or help file however you like to call it."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecShellHandler}    "Defragment your volumes, folders and files from their Explorer context menu."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecShortcuts}       "Adds icons for easy access."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecStartMenuIcon}   "Adds an icon to your start menu."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktopIcon}     "Adds an icon to your desktop."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecQuickLaunchIcon} "Adds an icon to your quick launch toolbar."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;---------------------------------------------

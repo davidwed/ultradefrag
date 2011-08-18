@@ -73,19 +73,27 @@
  * <dd>Install the micro edition, which includes only the core components and the shell extension.</dd>
  * <dt>/ICONS=(0|1)</dt>
  * <dd>Install or remove all shortcut icons. Example: <b>/ICONS=0</b> removes all icons.</dd>
+ * <dt>/BOOT=(0|1)</dt>
+ * <dd>Install or remove the boot components. Example: <b>/BOOT=1</b> installs the boot components.</dd>
+ * <dt>/CONSOLE=(0|1)</dt>
+ * <dd>Install or remove the console components. Example: <b>/CONSOLE=1</b> installs the console components.</dd>
  * <dt>/GUI=(0|1)</dt>
  * <dd>Install or remove the GUI components. Example: <b>/GUI=1</b> installs the GUI components.</dd>
  * <dt>/HELP=(0|1)</dt>
  * <dd>Install or remove the documentation. Example: <b>/HELP=0</b> removes the documentation.</dd>
  * <dt>/SHELLEXTENSION=(0|1)</dt>
  * <dd>Install or remove the Explorer context menu handler.
- * Example: <b>/SHELLEXTENSION=0</b> removes the Explorer context menu handler.</dd>
+ * Example: <b>/SHELLEXTENSION=0</b> removes the Explorer context menu handler.<br/>
+ * Installing the context menu handler forces the console interface it depends on to be installed.</dd>
  * <dt>/STARTMENUICON=(0|1)</dt>
- * <dd>Install or remove the start menu icon. Example: <b>/STARTMENUICON=1</b> installs the start menu icon.</dd>
+ * <dd>Install or remove the start menu icon. Example: <b>/STARTMENUICON=1</b> installs the start menu icon.<br/>
+ * Installing the start menu icon forces the GUI interface it depends on to be installed.</dd>
  * <dt>/DESKTOPICON=(0|1)</dt>
- * <dd>Install or remove the desktop icon. Example: <b>/DESKTOPICON=0</b> removes the desktop icon.</dd>
+ * <dd>Install or remove the desktop icon. Example: <b>/DESKTOPICON=0</b> removes the desktop icon.<br/>
+ * Installing the desktop icon forces the GUI interface it depends on to be installed.</dd>
  * <dt>/QUICKLAUNCHICON=(0|1)</dt>
- * <dd>Install or remove the quick launch icon. Example: <b>/QUICKLAUNCHICON=1</b> installs the quick launch icon.</dd>
+ * <dd>Install or remove the quick launch icon. Example: <b>/QUICKLAUNCHICON=1</b> installs the quick launch icon.<br/>
+ * Installing the quick launch icon forces the GUI interface it depends on to be installed.</dd>
  * </dl>
  * Example command line to silently install the full edition in "Burmese (Padauk)" with only the start menu icon:
  * @code

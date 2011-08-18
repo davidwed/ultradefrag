@@ -19,14 +19,9 @@
  */
 
 /*
-* Routines to read the options from the command line,
-* the previous selections from the registry, to apply these
+* Routines to select the components based on the command line switches
+* and the previous selections read from the registry,
 * and to save them for the future.
-*/
-
-/*
-* All macros must be added to .onInit except PreserveInRegistry,
-* which must be added to .onInstSuccess.
 */
 
 !ifndef _PRESET_SECTIONS_NSH_
@@ -39,93 +34,117 @@
 
 ; --- simple section handling
 !include "Sections.nsh"
-!define SelectSection   "!insertmacro SelectSection"
-!define UnselectSection "!insertmacro UnselectSection"
-
-Var InstallGUI
-Var InstallHelp
-Var InstallShellHandler
-Var InstallStartMenuIcon
-Var InstallDesktopIcon
-Var InstallQuickLaunchIcon
-
-/*
- * This presets the selections to the full installation
- */
-!macro InitSelection
-    StrCpy $InstallGUI             "1"
-    StrCpy $InstallHelp            "1"
-    StrCpy $InstallShellHandler    "1"
-    StrCpy $InstallStartMenuIcon   "1"
-    StrCpy $InstallDesktopIcon     "1"
-    StrCpy $InstallQuickLaunchIcon "1"
-!macroend
-
-!define InitSelection "!insertmacro InitSelection"
-
-;-----------------------------------------------------------
+!define SelectSection    "!insertmacro SelectSection"
+!define UnselectSection  "!insertmacro UnselectSection"
+!define SetSectionFlag   "!insertmacro SetSectionFlag"
+!define ClearSectionFlag "!insertmacro ClearSectionFlag"
 
 /*
  * This collects the previous selections from the registry
+ * add to .onInit
  */
 !macro CollectFromRegistry
 
-    push $R0
-    push $R1
+    Push $R1
     
     DetailPrint "Collecting previous selections from registry ..."
-    StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
     
     ClearErrors
-    ReadRegStr $R1 HKLM $R0 "Var::InstallGUI"
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallBoot"
     ${Unless} ${Errors}
-        StrCpy $InstallGUI $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecBoot}
+        ${Else}
+            ${UnselectSection} ${SecBoot}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
-    ReadRegStr $R1 HKLM $R0 "Var::InstallHelp"
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallConsole"
     ${Unless} ${Errors}
-        StrCpy $InstallHelp $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecConsole}
+        ${Else}
+            ${UnselectSection} ${SecConsole}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
-    ReadRegStr $R1 HKLM $R0 "Var::InstallShellHandler"
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallGUI"
     ${Unless} ${Errors}
-        StrCpy $InstallShellHandler $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecGUI}
+        ${Else}
+            ${UnselectSection} ${SecGUI}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
-    ReadRegStr $R1 HKLM $R0 "Var::InstallStartMenuIcon"
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallHelp"
     ${Unless} ${Errors}
-        StrCpy $InstallStartMenuIcon $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecHelp}
+        ${Else}
+            ${UnselectSection} ${SecHelp}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
-    ReadRegStr $R1 HKLM $R0 "Var::InstallDesktopIcon"
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallShellHandler"
     ${Unless} ${Errors}
-        StrCpy $InstallDesktopIcon $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecShellHandler}
+        ${Else}
+            ${UnselectSection} ${SecShellHandler}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
-    ReadRegStr $R1 HKLM $R0 "Var::InstallQuickLaunchIcon"
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallStartMenuIcon"
     ${Unless} ${Errors}
-        StrCpy $InstallQuickLaunchIcon $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecStartMenuIcon}
+        ${Else}
+            ${UnselectSection} ${SecStartMenuIcon}
+        ${EndIf}
     ${EndUnless}
     
-    pop $R1
-    pop $R0
+    ClearErrors
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallDesktopIcon"
+    ${Unless} ${Errors}
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecDesktopIcon}
+        ${Else}
+            ${UnselectSection} ${SecDesktopIcon}
+        ${EndIf}
+    ${EndUnless}
+    
+    ClearErrors
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallQuickLaunchIcon"
+    ${Unless} ${Errors}
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecQuickLaunchIcon}
+        ${Else}
+            ${UnselectSection} ${SecQuickLaunchIcon}
+        ${EndIf}
+    ${EndUnless}
+    
+    Pop $R1
 
 !macroend
+
+!define CollectFromRegistry "!insertmacro CollectFromRegistry"
 
 ;-----------------------------------------------------------
 
 /*
  * This collects selections from the command line
+ * add to .onInit
  */
 !macro ParseCommandLine
 
-    push $R0
-    push $R1
+    Push $R0
+    Push $R1
     
     DetailPrint "Collecting selections from the command line ..."
     ${GetParameters} $R0
@@ -133,214 +152,248 @@ Var InstallQuickLaunchIcon
     ClearErrors
     ${GetOptions} $R0 /FULL= $R1
     ${Unless} ${Errors}
-        ${InitSelection}
+        SetCurInstType 0
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /MICRO= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallGUI             "0"
-        StrCpy $InstallHelp            "0"
-        StrCpy $InstallShellHandler    "1"
-        StrCpy $InstallDesktopIcon     "0"
-        StrCpy $InstallQuickLaunchIcon "0"
-        StrCpy $InstallStartMenuIcon   "0"
+        SetCurInstType 1
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /ICONS= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallDesktopIcon     $R1
-        StrCpy $InstallQuickLaunchIcon $R1
-        StrCpy $InstallStartMenuIcon   $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecShortcuts}
+        ${Else}
+            ${UnselectSection} ${SecShortcuts}
+        ${EndIf}
+    ${EndUnless}
+    
+    ClearErrors
+    ${GetOptions} $R0 /BOOT= $R1
+    ${Unless} ${Errors}
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecBoot}
+        ${Else}
+            ${UnselectSection} ${SecBoot}
+        ${EndIf}
+    ${EndUnless}
+    
+    ClearErrors
+    ${GetOptions} $R0 /CONSOLE= $R1
+    ${Unless} ${Errors}
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecConsole}
+        ${Else}
+            ${UnselectSection} ${SecConsole}
+            ${UnselectSection} ${SecShellHandler}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /GUI= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallGUI $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecGUI}
+        ${Else}
+            ${UnselectSection} ${SecGUI}
+            ${UnselectSection} ${SecShortcuts}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /HELP= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallHelp $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecHelp}
+        ${Else}
+            ${UnselectSection} ${SecHelp}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /SHELLEXTENSION= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallShellHandler $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecShellHandler}
+            ${SelectSection} ${SecConsole}
+        ${Else}
+            ${UnselectSection} ${SecShellHandler}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /STARTMENUICON= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallStartMenuIcon $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecStartMenuIcon}
+            ${SelectSection} ${SecGUI}
+        ${Else}
+            ${UnselectSection} ${SecStartMenuIcon}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /DESKTOPICON= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallDesktopIcon $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecDesktopIcon}
+            ${SelectSection} ${SecGUI}
+        ${Else}
+            ${UnselectSection} ${SecDesktopIcon}
+        ${EndIf}
     ${EndUnless}
     
     ClearErrors
     ${GetOptions} $R0 /QUICKLAUNCHICON= $R1
     ${Unless} ${Errors}
-        StrCpy $InstallQuickLaunchIcon $R1
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecQuickLaunchIcon}
+            ${SelectSection} ${SecGUI}
+        ${Else}
+            ${UnselectSection} ${SecQuickLaunchIcon}
+        ${EndIf}
     ${EndUnless}
     
-    pop $R1
-    pop $R0
+    Pop $R1
+    Pop $R0
 
 !macroend
+
+!define ParseCommandLine "!insertmacro ParseCommandLine"
 
 ;-----------------------------------------------------------
 
 /*
  * This writes the selections to the registry for future reference
+ * add to .onInstSuccess
  */
 !macro PreserveInRegistry
 
-    push $R0
-    push $0
-    push $1
+    Push $0
+    Push $1
     
-    ${DisableX64FSRedirection}
-    SetShellVarContext all
-
     DetailPrint "Saving selections to registry ..."
-    StrCpy $R0 "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
     
+    SectionGetFlags ${SecBoot} $0
+    IntOp $1 $0 & ${SF_SELECTED}
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallBoot" $1
+    ${If} $1 == "0"
+        ${RemoveBootFiles}
+    ${EndIf}
+
+    SectionGetFlags ${SecConsole} $0
+    IntOp $1 $0 & ${SF_SELECTED}
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallConsole" $1
+    ${If} $1 == "0"
+        ${RemoveConsoleFiles}
+    ${EndIf}
+
     SectionGetFlags ${SecGUI} $0
     IntOp $1 $0 & ${SF_SELECTED}
-    WriteRegStr HKLM $R0 "Var::InstallGUI" $1
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallGUI" $1
     ${If} $1 == "0"
-        RMDir /r "$INSTDIR\i18n"
-        Delete "$INSTDIR\ultradefrag.exe"
-        Delete "$INSTDIR\wgx.dll"
-        Delete "$INSTDIR\lua5.1a.dll"
-        Delete "$INSTDIR\lua5.1a.exe"
-        Delete "$INSTDIR\lua5.1a_gui.exe"
-        Delete "$INSTDIR\scripts\udreportcnv.lua"
-        Delete "$INSTDIR\scripts\udsorting.js"
-        Delete "$INSTDIR\scripts\udsorting.js"
-        DeleteRegKey HKCR "LuaReport"
-        DeleteRegKey HKCR ".luar"
+        ${RemoveGUIFiles}
     ${EndIf}
 
     SectionGetFlags ${SecHelp} $0
     IntOp $1 $0 & ${SF_SELECTED}
-    WriteRegStr HKLM $R0 "Var::InstallHelp" $1
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallHelp" $1
     ${If} $1 == "0"
-        RMDir /r "$INSTDIR\handbook"
+        ${RemoveHelpFiles}
     ${EndIf}
 
     SectionGetFlags ${SecShellHandler} $0
     IntOp $1 $0 & ${SF_SELECTED}
-    WriteRegStr HKLM $R0 "Var::InstallShellHandler" $1
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallShellHandler" $1
     ${If} $1 == "0"
-        DeleteRegKey HKCR "Drive\shell\udefrag"
-        DeleteRegKey HKCR "Folder\shell\udefrag"
-        DeleteRegKey HKCR "*\shell\udefrag"
-        Delete "$INSTDIR\shellex.ico"
+        ${RemoveShellHandlerFiles}
     ${EndIf}
     
     SectionGetFlags ${SecStartMenuIcon} $0
     IntOp $1 $0 & ${SF_SELECTED}
-    WriteRegStr HKLM $R0 "Var::InstallStartMenuIcon" $1
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallStartMenuIcon" $1
     ${If} $1 == "0"
-        Delete "$SMPROGRAMS\UltraDefrag.lnk"
+        ${RemoveStartMenuIcon}
     ${EndIf}
 
     SectionGetFlags ${SecDesktopIcon} $0
     IntOp $1 $0 & ${SF_SELECTED}
-    WriteRegStr HKLM $R0 "Var::InstallDesktopIcon" $1
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallDesktopIcon" $1
     ${If} $1 == "0"
-        Delete "$DESKTOP\UltraDefrag.lnk"
+        ${RemoveDesktopIcon}
     ${EndIf}
 
     SectionGetFlags ${SecQuickLaunchIcon} $0
     IntOp $1 $0 & ${SF_SELECTED}
-    WriteRegStr HKLM $R0 "Var::InstallQuickLaunchIcon" $1
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallQuickLaunchIcon" $1
     ${If} $1 == "0"
-        Delete "$QUICKLAUNCH\UltraDefrag.lnk"
+        ${RemoveQuickLaunchIcon}
     ${EndIf}
 
-    ${EnableX64FSRedirection}
-    pop $1
-    pop $0
-    pop $R0
+    Pop $1
+    Pop $0
 
 !macroend
 
+!define PreserveInRegistry "!insertmacro PreserveInRegistry"
+
 ;-----------------------------------------------------------
+
+Var BootSelected
+Var ConsoleSelected
+Var GUISelected
 
 /*
- * This sets the selections
+ * This verifies the selections
+ * add to .onSelChange
  */
-!macro PresetSections
+!macro VerifySelections
 
-    push $0
-    push $1
-    
-    DetailPrint "Setting selections ..."
-    
-    ; handle GUI section
-    ${If} $InstallGUI == "1"
+    Push $0
+
+    SectionGetFlags ${SecBoot} $0
+    IntOp $BootSelected $0 & ${SF_SELECTED}
+
+    SectionGetFlags ${SecConsole} $0
+    IntOp $ConsoleSelected $0 & ${SF_SELECTED}
+
+    SectionGetFlags ${SecGUI} $0
+    IntOp $GUISelected $0 & ${SF_SELECTED}
+
+    ${If} $BootSelected == "0"
+    ${AndIf} $ConsoleSelected == "0"
+    ${AndIf} $GUISelected == "0"
         ${SelectSection} ${SecGUI}
-    ${Else}
-        ${UnselectSection} ${SecGUI}
+        StrCpy $GUISelected "1"
     ${EndIf}
 
-    ; handle help section
-    ${If} $InstallHelp == "1"
-        ${SelectSection} ${SecHelp}
+    ${If} $GUISelected == "0"
+        ${UnselectSection} ${SecShortcuts}
+        ${SetSectionFlag} ${SecShortcuts} ${SF_RO}
+        ${SetSectionFlag} ${SecStartMenuIcon} ${SF_RO}
+        ${SetSectionFlag} ${SecDesktopIcon} ${SF_RO}
+        ${SetSectionFlag} ${SecQuickLaunchIcon} ${SF_RO}
     ${Else}
-        ${UnselectSection} ${SecHelp}
+        ${ClearSectionFlag} ${SecShortcuts} ${SF_RO}
+        ${ClearSectionFlag} ${SecStartMenuIcon} ${SF_RO}
+        ${ClearSectionFlag} ${SecDesktopIcon} ${SF_RO}
+        ${ClearSectionFlag} ${SecQuickLaunchIcon} ${SF_RO}
     ${EndIf}
 
-    ; handle shell extension section
-    ${If} $InstallShellHandler == "1"
-        ${SelectSection} ${SecShellHandler}
-    ${Else}
+    ${If} $ConsoleSelected == "0"
         ${UnselectSection} ${SecShellHandler}
-    ${EndIf}
-    
-    ; handle start menu icon section
-    ${If} $InstallStartMenuIcon == "1"
-        ${SelectSection} ${SecStartMenuIcon}
+        ${SetSectionFlag} ${SecShellHandler} ${SF_RO}
     ${Else}
-        ${UnselectSection} ${SecStartMenuIcon}
+        ${ClearSectionFlag} ${SecShellHandler} ${SF_RO}
     ${EndIf}
 
-    ; handle desktop icon section
-    ${If} $InstallDesktopIcon == "1"
-        ${SelectSection} ${SecDesktopIcon}
-    ${Else}
-        ${UnselectSection} ${SecDesktopIcon}
-    ${EndIf}
-
-    ; handle quick launch icon section
-    ${If} $InstallQuickLaunchIcon == "1"
-        ${SelectSection} ${SecQuickLaunchIcon}
-    ${Else}
-        ${UnselectSection} ${SecQuickLaunchIcon}
-    ${EndIf}
-
-    pop $1
-    pop $0
+    Pop $0
 
 !macroend
 
-;-----------------------------------------------------------
-
-!define CollectFromRegistry "!insertmacro CollectFromRegistry"
-!define ParseCommandLine    "!insertmacro ParseCommandLine"
-!define PresetSections      "!insertmacro PresetSections"
-!define PreserveInRegistry  "!insertmacro PreserveInRegistry"
-
-;-----------------------------------------------------------
+!define VerifySelections "!insertmacro VerifySelections"
 
 !endif /* _PRESET_SECTIONS_NSH_ */
