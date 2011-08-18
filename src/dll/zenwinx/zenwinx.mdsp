@@ -103,6 +103,7 @@ extraResourceOptions=
 21=ftw_ntfs.c
 22=path.c
 23=lock.c
+24=mutex.c
 [Header]
 1=ntndk.h
 2=version.h
