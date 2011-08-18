@@ -65,6 +65,10 @@ EXPORTS
 	winx_create_event
 	winx_open_event
 	winx_destroy_event
+	winx_create_mutex
+	winx_open_mutex
+	winx_release_mutex
+	winx_destroy_mutex
 	winx_register_boot_exec_command
 	winx_unregister_boot_exec_command
 	winx_dbg_print

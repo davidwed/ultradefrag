@@ -39,6 +39,8 @@ HISTORY
     - one little bug causing log file path truncation in GUI was fixed
     - one bug causing infinite loops in volume optimization was fixed
     - progress percentage calculation was improved
+    - Developers: winx_create_mutex, winx_open_mutex, winx_release_mutex,
+      winx_destroy_mutex functions added to zenwinx library
 
     beta3:
     - volume optimization reimplemented

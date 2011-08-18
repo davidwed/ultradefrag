@@ -143,6 +143,12 @@
 /** @} */
 
 /**
+ * @defgroup Mutexes Mutexes
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Paths Paths
  * @{
  */

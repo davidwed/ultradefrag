@@ -256,6 +256,12 @@ int __stdcall winx_unload_driver(short *driver_name);
 short * __stdcall winx_get_windows_boot_options(void);
 int __stdcall winx_windows_in_safe_mode(void);
 
+/* mutex.c */
+int  __stdcall winx_create_mutex(short *name,HANDLE *phandle);
+int  __stdcall winx_open_mutex(short *name,HANDLE *phandle);
+int  __stdcall winx_release_mutex(HANDLE h);
+void __stdcall winx_destroy_mutex(HANDLE h);
+
 /* path.c */
 void __stdcall winx_path_remove_extension(char *path);
 void __stdcall winx_path_remove_filename(char *path);

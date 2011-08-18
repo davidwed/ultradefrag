@@ -9,7 +9,7 @@ src = {
 	"zenwinx.c", "misc.c", "ldr.c", "thread.c", "privilege.c",
 	"reg.c", "volume.c", "file.c", "env.c", "dbg.c", "time.c", 
 	"int64.c", "list.c", "string.c", "ftw.c", "ftw_ntfs.c",
-	"path.c", "lock.c"
+	"path.c", "lock.c", "mutex.c"
 }
 rc = { "zenwinx.rc" }
 
