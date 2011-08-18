@@ -638,6 +638,9 @@ int __stdcall udefrag_set_log_file_path(void)
 }
 
 #ifndef STATIC_LIB
+
+HANDLE hMutex = NULL;
+
 /**
  * @brief udefrag.dll entry point.
  */
@@ -649,8 +652,10 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	* to control debug logging to the file.
 	*/
 	if(dwReason == DLL_PROCESS_ATTACH){
+		(void)winx_create_mutex(L"\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
 		(void)udefrag_set_log_file_path();
 	} else if(dwReason == DLL_PROCESS_DETACH){
+		winx_destroy_mutex(hMutex);
 	}
 	return 1;
 }
