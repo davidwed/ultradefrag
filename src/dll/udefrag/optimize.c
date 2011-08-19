@@ -285,7 +285,7 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	winx_blockmap *block;
 	
 	/* free temporarily allocated space */
-	release_temp_space_regions(jp);
+	release_temp_space_regions_internal(jp);
 
 	/* search for the first large free space gap after an old starting point */
 	new_sp = old_sp;
@@ -302,7 +302,7 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	/* move starting point back to release heavily fragmented data */
 	/* allow no more than 5% of fragmented data inside of a skipped part of the disk */
 	fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
-	if(fragmented < /*jp->free_rgn_size_threshold*/ (new_sp - old_sp) / 20) goto done;
+	if(fragmented < /*jp->free_rgn_size_threshold*/ (new_sp - old_sp) / 20) return new_sp;
 
 	/*
 	* Fast binary search finds quickly a proper part 
@@ -320,19 +320,15 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 			i = new_sp + 1; lim --;
 		}
 	}
-	if(new_sp <= old_sp + 1){
-		new_sp = old_sp;
-		goto done;
-	}
+	if(new_sp <= old_sp + 1)
+		return old_sp;
 	
 	/*
 	* Release all remaining data when all space
 	* between new_sp and old_sp is heavily fragmented.
 	*/
-	if(fragmented >= (new_sp - old_sp + 1) / 3){
-		new_sp = old_sp; /* because at least 1/3 of skipped space is fragmented */
-		goto done;
-	}
+	if(fragmented >= (new_sp - old_sp + 1) / 3)
+		return old_sp; /* because at least 1/3 of skipped space is fragmented */
 	
 	/* cut off heavily fragmented free space */
 	i = old_sp; max_new_sp = new_sp;
@@ -346,10 +342,8 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 			i = new_sp + 1; lim --;
 		}
 	}
-	if(new_sp <= old_sp + 1){
-		new_sp = old_sp;
-		goto done;
-	}
+	if(new_sp <= old_sp + 1)
+		return old_sp;
 	
 	/* is starting point inside a file block? */
 	for(file = jp->filelist; file; file = file->next){
@@ -367,18 +361,6 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 			if(block->next == file->disp.blockmap) break;
 		}
 		if(file->next == jp->filelist) break;
-	}
-
-done:
-	return new_sp;
-	/* FIXME: incompatible with next sp calculation */
-	/* if starting point is inside a free region, skip it entirely */
-	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(new_sp >= rgn->lcn && new_sp < rgn->lcn + rgn->length){
-			new_sp = rgn->lcn + rgn->length;
-			break;
-		}
-		if(rgn->next == jp->free_regions) break;
 	}
 	return new_sp;
 }
