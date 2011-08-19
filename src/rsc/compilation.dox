@@ -34,23 +34,29 @@
  * to compile UltraDefrag. Type <b>build --help</b> (see below)
  * for details.
  *
- * Regardless of the selected compiler you need to setup few other little
+ * You can download the <a href="http://koti.mbnet.fi/vaultec/mingwstudio.php">MinGW Developer Studio</a>,
+ * if you need a fully functional development environment for MinGW.
+ *
+ * Regardless of the selected compiler you need to setup a few other little
  * tools on your system:
  *
  * - <a href="http://nsis.sourceforge.net/">NSIS compiler</a>
  * - <a href="http://luabinaries.luaforge.net/">Lua</a>, 
- * <a href="http://sourceforge.net/projects/iup/files/">IUP</a>, 
- * <a href="http://sourceforge.net/projects/canvasdraw/files/">CD</a>
+ * <a href="http://sourceforge.net/projects/iup/files/">IUP</a> and 
+ * <a href="http://sourceforge.net/projects/canvasdraw/files/">CD</a>,
+ * or install <a href="http://code.google.com/p/luaforwindows/">Lua for Windows</a>
  * - <a href="http://www.7-zip.org/">7-zip file archiver</a>
  * - <a href="http://www.doxygen.org/">Doxygen</a>
  * - <a href="http://www.etree.org/md5com.html">md5sum tool</a>
  * 
- * All listed packages can be downloaded from 
+ * All listed packages can be downloaded from the
  * <a href="http://ultradefrag.sourceforge.net/devtools/">UltraDefrag web site</a>.
- * Install NSIS and 7-zip. Extract all others to some directory on your \%PATH\%,
- * e.g. to C:\\Windows.
+ * Install NSIS, 7-zip, Doxygen and optionally "Lua for Windows".
+ * If you did not install "Lua for Windows",
+ * extract Lua, IUP and CD to some directory on your \%PATH\%, e.g. to C:\\Windows.
+ * Place md5sum.exe in the src/tools folder of the source code distribution. 
  *
- * Also we use <a href="http://upx.sf.net/">UPX</a> to reduce size of installers.
+ * Also we use <a href="http://upx.sf.net/">UPX</a> to reduce the size of the installers.
  * The following command should be included in nsisconf.nsh file:
 @verbatim
 !packhdr temp.dat '"C:\WINDOWS\upx" --best -q temp.dat'
