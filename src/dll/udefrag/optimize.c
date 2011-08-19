@@ -281,7 +281,7 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	ULONGLONG new_sp;
 	ULONGLONG fragmented, free, lim, i, max_new_sp;
 	winx_volume_region *rgn;
-	winx_file_info *file;
+	udefrag_fragmented_file *f;	
 	winx_blockmap *block;
 	
 	/* free temporarily allocated space */
@@ -345,22 +345,16 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	if(new_sp <= old_sp + 1)
 		return old_sp;
 	
-	/* is starting point inside a file block? */
-	for(file = jp->filelist; file; file = file->next){
-		for(block = file->disp.blockmap; block; block = block->next){
+	/* is starting point inside a fragmented file block? */
+	for(f = jp->fragmented_files; f; f = f->next){
+		for(block = f->f->disp.blockmap; block; block = block->next){
 			if(new_sp >= block->lcn && new_sp <= block->lcn + block->length - 1){
-				if(is_fragmented(file)){
-					/* include block */
-					return block->lcn;
-				} else {
-					/* don't skip to avoid slow walk from a block to the next one etc. */
-					//return (block->lcn + block->length);
-					return new_sp;
-				}
+				/* include block */
+				return block->lcn;
 			}
-			if(block->next == file->disp.blockmap) break;
+			if(block->next == f->f->disp.blockmap) break;
 		}
-		if(file->next == jp->filelist) break;
+		if(f->next == jp->fragmented_files) break;
 	}
 	return new_sp;
 }
