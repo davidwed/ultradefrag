@@ -45,6 +45,8 @@ HISTORY
     - progress percentage calculation was improved
     - Developers: winx_create_mutex, winx_open_mutex, winx_release_mutex,
       winx_destroy_mutex functions added to zenwinx library
+    - binary trees manipulation routines were added to zenwinx library;
+      they're based on the GNU libavl red-black trees with parent pointers
 
     beta3:
     - volume optimization reimplemented

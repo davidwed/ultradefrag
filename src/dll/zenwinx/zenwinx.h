@@ -423,4 +423,7 @@ void __stdcall winx_exit(int exit_code);
 void __stdcall winx_reboot(void);
 void __stdcall winx_shutdown(void);
 
+/* Red-black trees with parent pointers */
+#include "prb.h"
+
 #endif /* _ZENWINX_H_ */

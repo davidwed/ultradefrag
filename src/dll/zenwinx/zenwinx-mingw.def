@@ -86,8 +86,6 @@ EXPORTS
 	winx_list_destroy@4
 	winx_get_windows_boot_options@0
 	winx_windows_in_safe_mode@0
-	zenwinx_native_init@0
-	zenwinx_native_unload@0
 	winx_toupper
 	winx_tolower
 	winx_strdup
@@ -107,3 +105,25 @@ EXPORTS
 	winx_acquire_spin_lock@8
 	winx_release_spin_lock@4
 	winx_destroy_spin_lock@4
+	zenwinx_native_init@0
+	zenwinx_native_unload@0
+	prb_create
+	prb_copy
+	prb_destroy
+	prb_probe
+	prb_insert
+	prb_replace
+	prb_delete
+	prb_find
+	; prb_assert_insert
+	; prb_assert_delete
+	prb_t_init
+	prb_t_first
+	prb_t_last
+	prb_t_find
+	prb_t_insert
+	prb_t_copy
+	prb_t_next
+	prb_t_prev
+	prb_t_cur
+	prb_t_replace

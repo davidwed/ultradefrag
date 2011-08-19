@@ -68,7 +68,17 @@
  * ZenWINX is a <a href="http://www.gnu.org/copyleft/gpl.html">GPL</a>-
  * licensed product. Feel free to redistribute it under certain
  * conditions.
+ *
+ * ZenWINX includes a part of the <a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>
+ * code licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">GNU Lesser General 
+ * Public License</a>.
  */
+
+/**
+ * @defgroup BinaryTrees Binary trees
+ * @{
+ */
+/** @} */
 
 /**
  * @defgroup Console Console
