@@ -27,7 +27,7 @@ optimizeLevel=0
 // linker
 libraryPath=..\lib
 outputFilename=../bin/udefrag.exe
-libraries=udefrag,msvcrt
+libraries=udefrag,msvcrt,wgx
 extraLinkerOptions=
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -65,7 +65,7 @@ optimizeLevel=2
 // linker
 libraryPath=..\lib
 outputFilename=../bin/udefrag.exe
-libraries=udefrag,msvcrt
+libraries=udefrag,msvcrt,wgx
 extraLinkerOptions=-Wl,--strip-all
 ignoreStartupFile=0
 ignoreDefaultLibs=0
@@ -85,15 +85,13 @@ extraResourceOptions=
 3=..\share\getopt1.c
 4=options.c
 5=map.c
-6=..\dll\wgx\web-analytics.c
-7=..\dll\wgx\dbg.c
 [Header]
 1=udefrag.h
 [Resource]
 1=defrag.rc
 [Other]
 [History]
-map.c,2116
-defrag.c,8168
-udefrag.h,1360
-options.c,16296
+map.c,1875
+options.c,15536
+udefrag.h,2394
+defrag.c,14619

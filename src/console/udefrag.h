@@ -36,6 +36,8 @@
 #define DWORD_PTR DWORD
 #endif
 
+#include "../dll/wgx/wgx.h"
+
 #include "../include/udefrag.h"
 #include "../include/ultradfgver.h"
 
@@ -92,8 +94,6 @@ extern int repeat_flag;
 /* prototypes */
 void parse_cmdline(int argc, char **argv);
 void show_help(void);
-void __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
-void __cdecl WgxDbgPrintLastError(char *format, ...);
 int  AllocateClusterMap(void);
 void InitializeMapDisplay(char volume_letter);
 void CalculateClusterMapDimensions(void);

@@ -48,11 +48,6 @@ xcopy /I /Y /Q .\dll\wgx     .\obj\wgx
 :: copy external files on which udefrag.exe command line tool depends
 copy /Y .\obj\share\*.c .\obj\console\
 
-:: we cannot link command line tool to WGX, because it is missing in Micro Edition
-copy /Y .\dll\wgx\dbg.c           .\obj\console\
-copy /Y .\dll\wgx\web-analytics.c .\obj\console\
-copy /Y .\dll\wgx\wgx.h           .\obj\console\
-
 :: copy header files to different locations
 :: to make relative paths of them the same
 :: as in /src directory
@@ -246,14 +241,6 @@ exit /B 0
 	cd ..\udefrag
 	%UD_BUILD_TOOL% udefrag.build || goto fail
 
-	echo Compile other modules...
-	cd ..\bootexctrl
-	%UD_BUILD_TOOL% bootexctrl.build || goto fail
-	cd ..\hibernate
-	%UD_BUILD_TOOL% hibernate.build || goto fail
-	cd ..\console
-	%UD_BUILD_TOOL% defrag.build || goto fail
-
 	rem workaround for WDK 7
 	rem set IGNORE_LINKLIB_ABUSE=1
 	cd ..\lua5.1
@@ -266,6 +253,15 @@ exit /B 0
 	rem set IGNORE_LINKLIB_ABUSE=1
 	cd ..\wgx
 	%UD_BUILD_TOOL% wgx.build ||  goto fail
+
+	echo Compile other modules...
+	cd ..\bootexctrl
+	%UD_BUILD_TOOL% bootexctrl.build || goto fail
+	cd ..\hibernate
+	%UD_BUILD_TOOL% hibernate.build || goto fail
+	cd ..\console
+	%UD_BUILD_TOOL% defrag.build || goto fail
+
 	rem set IGNORE_LINKLIB_ABUSE=
 	cd ..\gui
 	%UD_BUILD_TOOL% ultradefrag.build && goto success
