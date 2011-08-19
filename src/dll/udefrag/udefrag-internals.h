@@ -45,6 +45,14 @@
 */
 #define UD_FILE_CURRENTLY_EXCLUDED	 0x40
 
+/*
+* This flag is used to speed things up.
+* If we'll repeatedly check the file
+* we'll noticeably slow down all the
+* volume procesing routines.
+*/
+#define UD_FILE_NOT_LOCKED 0x80
+
 #define is_excluded(f)           ((f)->user_defined_flags & UD_FILE_EXCLUDED)
 #define is_over_limit(f)         ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
 

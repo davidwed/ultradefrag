@@ -617,12 +617,17 @@ int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp)
 	NTSTATUS status;
 	HANDLE hFile;
 	
+	/* check whether the file has been passed the check already */
+	if(f->user_defined_flags & UD_FILE_NOT_LOCKED)
+		return 0;
 	if(f->user_defined_flags & UD_FILE_LOCKED)
 		return 1;
 
+	/* file status is undefined, so let's try to open it */
 	status = udefrag_fopen(f,&hFile);
 	if(status == STATUS_SUCCESS){
 		NtCloseSafe(hFile);
+		f->user_defined_flags |= UD_FILE_NOT_LOCKED;
 		return 0;
 	}
 
