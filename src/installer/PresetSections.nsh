@@ -257,6 +257,12 @@
         ${EndIf}
     ${EndUnless}
     
+    ${IfNot} ${SectionIsSelected} ${SecBoot}
+    ${AndIfNot} ${SectionIsSelected} ${SecConsole}
+    ${AndIfNot} ${SectionIsSelected} ${SecGUI}
+        ${SelectSection} ${SecGUI}
+    ${EndIf}
+
     Pop $R1
     Pop $R0
 
@@ -342,55 +348,37 @@
 
 ;-----------------------------------------------------------
 
-Var BootSelected
-Var ConsoleSelected
-Var GUISelected
-
 /*
  * This verifies the selections
  * add to .onSelChange
  */
 !macro VerifySelections
 
-    Push $0
-
-    SectionGetFlags ${SecBoot} $0
-    IntOp $BootSelected $0 & ${SF_SELECTED}
-
-    SectionGetFlags ${SecConsole} $0
-    IntOp $ConsoleSelected $0 & ${SF_SELECTED}
-
-    SectionGetFlags ${SecGUI} $0
-    IntOp $GUISelected $0 & ${SF_SELECTED}
-
-    ${If} $BootSelected == "0"
-    ${AndIf} $ConsoleSelected == "0"
-    ${AndIf} $GUISelected == "0"
+    ${IfNot} ${SectionIsSelected} ${SecBoot}
+    ${AndIfNot} ${SectionIsSelected} ${SecConsole}
+    ${AndIfNot} ${SectionIsSelected} ${SecGUI}
         ${SelectSection} ${SecGUI}
-        StrCpy $GUISelected "1"
     ${EndIf}
 
-    ${If} $GUISelected == "0"
+    ${IfNot} ${SectionIsSelected} ${SecGUI}
         ${UnselectSection} ${SecShortcuts}
         ${SetSectionFlag} ${SecShortcuts} ${SF_RO}
         ${SetSectionFlag} ${SecStartMenuIcon} ${SF_RO}
         ${SetSectionFlag} ${SecDesktopIcon} ${SF_RO}
         ${SetSectionFlag} ${SecQuickLaunchIcon} ${SF_RO}
-    ${Else}
+    ${ElseIf} ${SectionIsReadOnly} ${SecShortcuts}
         ${ClearSectionFlag} ${SecShortcuts} ${SF_RO}
         ${ClearSectionFlag} ${SecStartMenuIcon} ${SF_RO}
         ${ClearSectionFlag} ${SecDesktopIcon} ${SF_RO}
         ${ClearSectionFlag} ${SecQuickLaunchIcon} ${SF_RO}
     ${EndIf}
 
-    ${If} $ConsoleSelected == "0"
+    ${IfNot} ${SectionIsSelected} ${SecConsole}
         ${UnselectSection} ${SecShellHandler}
         ${SetSectionFlag} ${SecShellHandler} ${SF_RO}
-    ${Else}
+    ${ElseIf} ${SectionIsReadOnly} ${SecShellHandler}
         ${ClearSectionFlag} ${SecShellHandler} ${SF_RO}
     ${EndIf}
-
-    Pop $0
 
 !macroend
 
