@@ -214,10 +214,6 @@ Var AtLeastXP
     DeleteRegKey HKCR "LuaReport"
     DeleteRegKey HKCR ".luar"
 
-    DetailPrint "Removing installation directory..."
-    ; safe, because installation directory is predefined
-    RMDir /r $INSTDIR
-
     ${EnableX64FSRedirection}
 
 !macroend

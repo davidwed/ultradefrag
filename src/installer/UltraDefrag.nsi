@@ -192,7 +192,7 @@ SectionEnd
 
 SectionGroup /e "Shortcuts (require GUI)" SecShortcuts
 
-Section "Startmenu Icon" SecStartMenuIcon
+Section "Start Menu icon" SecStartMenuIcon
 
     SectionIn 1
 
@@ -200,7 +200,7 @@ Section "Startmenu Icon" SecStartMenuIcon
 
 SectionEnd
 
-Section "Desktop Icon" SecDesktopIcon
+Section "Desktop icon" SecDesktopIcon
 
     SectionIn 1
 
@@ -208,7 +208,7 @@ Section "Desktop Icon" SecDesktopIcon
 
 SectionEnd
 
-Section "Quick Launch Icon" SecQuickLaunchIcon
+Section "Quick Launch icon" SecQuickLaunchIcon
 
     SectionIn 1
 
@@ -298,6 +298,10 @@ Function .onInstSuccess
 FunctionEnd
 
 Function un.onUninstSuccess
+
+    DetailPrint "Removing installation directory..."
+    ; safe, because installation directory is predefined
+    RMDir /r $INSTDIR
 
     DetailPrint "Cleanup registry..."
     DeleteRegKey HKLM ${UD_UNINSTALL_REG_KEY}
