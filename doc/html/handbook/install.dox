@@ -99,9 +99,12 @@
  * @code
  * ultradefrag.bin.x86 /S /LANG="Burmese (Padauk)" /FULL=1 /ICONS=0 /STARTMENUICON=1
  * @endcode
+ * To check the result of the command line switches omit the <b>/S</b> switch,
+ * which opens the interactive installer and allows checking the selections
+ * on the component page.
  *
- * There is also a silent mode in the
- * uninstaller program. At the command prompt type <b>\%windir\%\\UltraDefrag\\uninstall.exe /S</b>
+ * There is also a silent mode for the uninstaller program.
+ * At the command prompt type <b>\%windir\%\\UltraDefrag\\uninstall.exe /S</b>
  * to remove the program from the hard drive automatically without any graphical dialogs.
  *
  * <HR>
