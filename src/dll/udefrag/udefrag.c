@@ -652,9 +652,12 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 	* to control debug logging to the file.
 	*/
 	if(dwReason == DLL_PROCESS_ATTACH){
-		if(winx_get_os_version() >= WINDOWS_2K)
-			(void)winx_create_mutex(L"\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
-		else
+		if(winx_get_os_version() >= WINDOWS_2K){
+            if(winx_get_os_version() >= WINDOWS_VISTA)
+                (void)winx_create_mutex(L"\\Sessions\\1\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
+            else
+                (void)winx_create_mutex(L"\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
+		} else
 			(void)winx_create_mutex(L"ultradefrag_mutex",&hMutex);
 		(void)udefrag_set_log_file_path();
 	} else if(dwReason == DLL_PROCESS_DETACH){

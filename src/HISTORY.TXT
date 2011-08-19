@@ -22,6 +22,7 @@ HISTORY
       Portuguese (BR), Yiddish, Hungarian, Spanish (ES), Dutch
     
     - installer has been enhanced in the following ways:
+      + now checks Mutex to prevent install/remove while the program is running
       + installer supports full, micro edition and custom installation
       + component selections are remembered between installations
       + interfaces can be selected individually

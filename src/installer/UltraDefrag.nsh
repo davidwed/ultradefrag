@@ -44,6 +44,9 @@ Var AtLeastXP
     ${If} $R0 == 0
         System::Call 'kernel32::OpenMutex(i 0x100000, b 0, t "\BaseNamedObjects\ultradefrag_mutex") i .R0'
     ${EndIf}
+    ${If} $R0 == 0
+        System::Call 'kernel32::OpenMutex(i 0x100000, b 0, t "\Sessions\1\BaseNamedObjects\ultradefrag_mutex") i .R0'
+    ${EndIf}
     ${If} $R0 != 0
         System::Call 'kernel32::CloseHandle(i $R0)'
         MessageBox MB_OK|MB_ICONEXCLAMATION "Ultra Defragmenter is running. Please close it first!" /SD IDOK
