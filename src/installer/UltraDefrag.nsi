@@ -51,6 +51,12 @@
 !endif
 
 /*
+ * Compress installer exehead with an executable compressor
+ */
+
+!packhdr temp.dat '"${ROOTDIR}\src\tools\upx\upx" --best -q temp.dat'
+
+/*
  * Installer Attributes
  */
  
