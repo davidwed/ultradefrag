@@ -111,21 +111,25 @@ void RedrawProgress(udefrag_progress_info *pi)
 		p1 = 100;
 		p2 = 0;
 	}
-    /* TODO: enable multi-pass-display after repeat feature is implemented
-             multi-pass-display is no longer only possible with optimization
-	 if(current_job == FULL_OPTIMIZATION_JOB || current_job == QUICK_OPTIMIZATION_JOB){
-		n = (pi->pass_number == 0xffffffff) ? 0 : pi->pass_number;
-		if(abort_flag) _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% aborted, fragmented/total = %lu/%lu",n,op_name,p1,p2,pi->fragmented,pi->files);
-		else _snprintf(s,sizeof(s),"Pass %u:  %s%3u.%02u%% completed, fragmented/total = %lu/%lu",n,op_name,p1,p2,pi->fragmented,pi->files);
-	} else { */
-    
     if(pi->current_operation == VOLUME_OPTIMIZATION && !abort_flag && pi->completion_status == 0){
         /* display number of moves */
-		_snprintf(s,sizeof(s),"%s%3u.%02u%% completed, moves total = %I64u",op_name,p1,p2,pi->total_moves);
+        if(pi->pass_number > 1)
+            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, pass %u, moves total = %I64u",op_name,p1,p2,pi->pass_number,pi->total_moves);
+        else
+            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, moves total = %I64u",op_name,p1,p2,pi->total_moves);
     } else {
         /* display fragmentation status */
-		if(abort_flag) _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted, fragmented/total = %lu/%lu",op_name,p1,p2,pi->fragmented,pi->files);
-		else _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, fragmented/total = %lu/%lu",op_name,p1,p2,pi->fragmented,pi->files);
+		if(abort_flag){
+            if(pi->pass_number > 1)
+                _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted, pass %u, fragmented/total = %lu/%lu",op_name,p1,p2,pi->pass_number,pi->fragmented,pi->files);
+            else
+                _snprintf(s,sizeof(s),"%s%3u.%02u%% aborted, fragmented/total = %lu/%lu",op_name,p1,p2,pi->fragmented,pi->files);
+		} else {
+            if(pi->pass_number > 1)
+                _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, pass %u, fragmented/total = %lu/%lu",op_name,p1,p2,pi->pass_number,pi->fragmented,pi->files);
+            else
+                _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, fragmented/total = %lu/%lu",op_name,p1,p2,pi->fragmented,pi->files);
+        }
     }
 	//}
 	s[sizeof(s) - 1] = 0;

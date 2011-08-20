@@ -447,17 +447,29 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 		}
 		clear_line(stderr);
         if(pi->current_operation == VOLUME_OPTIMIZATION && !stop_flag && pi->completion_status == 0){
-            fprintf(stderr,"\r%c: %s%6.2lf%% complete, moves total = %I64u",
-                volume_letter,op_name,pi->percentage,pi->total_moves);
+            if(pi->pass_number > 1)
+                fprintf(stderr,"\r%c: %s%6.2lf%% complete, pass %d, moves total = %I64u",
+                    volume_letter,op_name,pi->percentage,pi->pass_number,pi->total_moves);
+            else
+                fprintf(stderr,"\r%c: %s%6.2lf%% complete, moves total = %I64u",
+                    volume_letter,op_name,pi->percentage,pi->total_moves);
 		} else {
-            fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
-                volume_letter,op_name,pi->percentage,pi->fragmented,pi->files);
+            if(pi->pass_number > 1)
+                fprintf(stderr,"\r%c: %s%6.2lf%% complete, pass %d, fragmented/total = %lu/%lu",
+                    volume_letter,op_name,pi->percentage,pi->pass_number,pi->fragmented,pi->files);
+            else
+                fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
+                    volume_letter,op_name,pi->percentage,pi->fragmented,pi->files);
         }
 		if(pi->completion_status != 0 && !stop_flag){
 			/* set progress indicator to 100% state */
 			clear_line(stderr);
-			fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
-				volume_letter,op_name,pi->fragmented,pi->files);
+            if(pi->pass_number > 1)
+                fprintf(stderr,"\r%c: %s100.00%% complete, %d passes needed, fragmented/total = %lu/%lu",
+                    volume_letter,op_name,pi->pass_number,pi->fragmented,pi->files);
+            else
+                fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
+                    volume_letter,op_name,pi->fragmented,pi->files);
 			if(!m_flag) fprintf(stderr,"\n");
 		}
 		
