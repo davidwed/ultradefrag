@@ -148,7 +148,7 @@ set PercentageFree=0
 if %value% LEQ 100 set PercentageFree=%value%
 if %value% LSS 10 set /a PercentageFree="value * 10"
 
-if %PercentageFree% GTR 0 goto :SelectFragmentationRate
+if %PercentageFree% GTR 0 goto :SelectSmallFileRate
 
 echo.
 echo Selection must be between 0 and 100 !!!
@@ -156,12 +156,25 @@ echo.
 pause
 goto :SelectFreeSpace
 
+:SelectSmallFileRate
+echo.
+echo --------------------------------------
+echo.
+echo Enter the small files rate,
+echo x out of 10 files should be below 512kB.
+echo.
+set /p SmallFileRate="Enter a value between 1 and 10 for x: "
+
+if "%SmallFileRate%" == "" set SmallFileRate=1
+if %SmallFileRate% LEQ 0 set SmallFileRate=1
+if %SmallFileRate% GTR 10 set SmallFileRate=10
+
 :SelectFragmentationRate
 echo.
 echo --------------------------------------
 echo.
 echo Enter the fragmentation rate,
-echo 1 out of x files should be fragmented.
+echo every x-th file should be fragmented.
 echo.
 set /p FragmentationRate="Enter a value between 1 and 100 for x: "
 
@@ -182,7 +195,7 @@ for /f "tokens=1,2,3" %%R in ('echo %SelectedVolumeType%') do (
 set VolumeName=%ex_type%
 if not "%option1%" == "" set VolumeName=%VolumeName%_%option1:.=%
 if not "%option2%" == "" set VolumeName=%VolumeName%_%option2%
-set VolumeName=%VolumeName%_%FragmentationRate%
+set VolumeName=%VolumeName%_fr%FragmentationRate%_sr%SmallFileRate%
 
 call :answers >"%TMP%\answers.txt"
 
@@ -225,10 +238,11 @@ goto :StartProcess
 :ParseVolumeLabel
 for /f "tokens=1,5,6* skip=6" %%D in ('udefrag -l') do if %%~D == %ProcessVolume% set PercentageFree=%%E & set VolumeName="%%~G"
 
-for /f "tokens=1,2,3 delims=_" %%R in ('echo %VolumeName:"=%') do (
+for /f "tokens=1,2,3,4 delims=_" %%R in ('echo %VolumeName:"=%') do (
 	set ex_type=%%R
 	set option1=%%S
 	set option2=%%T
+	set option3=%%U
 )
 
 set ApplyLabel=0
@@ -253,7 +267,11 @@ if "%option2%" == "mirror" set VolumeName=%VolumeName%_%option2%
 
 :ApplyVolumeLabel
 if %ApplyLabel% EQU 0 goto :StartProcess
-set VolumeName=%VolumeName%_%FragmentationRate%
+set temp_var=%option2:~0,2%
+if "%temp_var%" == "sr" set SmallFileRate=%option2:~2%
+set temp_var=%option3:~0,2%
+if "%temp_var%" == "sr" set SmallFileRate=%option3:~2%
+set VolumeName=%VolumeName%_fr%FragmentationRate%_sr%SmallFileRate%
 
 title Setting Volume Label of "%ProcessVolume%" ...
 echo.
@@ -405,8 +423,14 @@ goto :EOF
     
     set /a NoFolder="count %% 10"
     set /a NoCompr="count %% 5"
+    
+    if %NoFolder% LSS %SmallFileRate% (
+        set divisor=64
+    ) else (
+        set divisor=3
+    )
 
-    set /a size="24 + %RANDOM% / 3"
+    set /a size="24 + %RANDOM% / %divisor%"
     set /a fragments="%RANDOM% / 1365"
     
     set /a quotient="count %% %FragmentationRate%"
