@@ -329,21 +329,18 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, 
 		found_file = NULL; first_block = NULL;
 		b.lcn = *min_lcn; fb.block = &b;
 		prb_t_init(&t,jp->file_blocks);
-		item = prb_t_find(&t,jp->file_blocks,&fb);
+		item = prb_t_insert(&t,jp->file_blocks,&fb);
 		if(item == NULL){
+			/* insertion failed, let's go to the slow search */
+			goto slow_search;
+		}
+		if(item == &fb){
 			/* block at min_lcn not found */
-			item = prb_t_insert(&t,jp->file_blocks,&fb);
-			if(item == NULL){
-				/* insertion failed, let's go to the slow search */
-				goto slow_search;
-			}
 			item = prb_t_next(&t);
 			if(prb_delete(jp->file_blocks,&fb) == NULL){
 				/* removing failed, let's go to the slow search */
 				goto slow_search;
 			}
-		} else {
-			item = prb_t_cur(&t);
 		}
 		if(item){
 			found_file = item->file;
