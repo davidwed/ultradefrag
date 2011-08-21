@@ -85,6 +85,12 @@
 /** @} */
 
 /**
+ * @defgroup Search Search
+ * @{
+ */
+/** @} */
+
+/**
  * @defgroup Tasks Volume processing tasks
  * @{
  */

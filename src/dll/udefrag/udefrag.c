@@ -324,6 +324,7 @@ static DWORD WINAPI start_job(LPVOID p)
 	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
+	create_file_blocks_tree(jp);
 
 	switch(jp->job_type){
 	case ANALYSIS_JOB:
@@ -341,6 +342,7 @@ static DWORD WINAPI start_job(LPVOID p)
 		break;
 	}
 
+	destroy_file_blocks_tree(jp);
 	release_temp_space_regions(jp);
 	(void)save_fragmentation_reports(jp);
 	

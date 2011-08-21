@@ -412,6 +412,7 @@ static int find_files(udefrag_job_parameters *jp)
 	short path[MAX_PATH + 1];
 	short *p, *s_filter;
 	winx_file_info *f;
+	winx_blockmap *block;
 
 	/*
 	* FIXME: context menu handler will process files
@@ -459,7 +460,7 @@ static int find_files(udefrag_job_parameters *jp)
 	if(jp->filelist == NULL && !jp->termination_router((void *)jp))
 		return (-1);
 	
-	/* calculate number of fragmented files; redraw map */
+	/* calculate number of fragmented files; redraw map; build tree of file blocks */
 	for(f = jp->filelist; f; f = f->next){
 		/* skip excluded files and reparse points */
 		if(!is_fragmented(f) || is_reparse_point(f) || is_excluded(f)){
@@ -475,6 +476,12 @@ static int find_files(udefrag_job_parameters *jp)
 		//DebugPrint("%ws",f->path);
 		if(jp->progress_router) /* need speedup? */
 			jp->progress_router(jp); /* redraw progress */
+		
+		for(block = f->disp.blockmap; block; block = block->next){
+			if(add_block_to_file_blocks_tree(jp,f,block) < 0) break;
+			if(block->next == f->disp.blockmap) break;
+		}
+		
 		if(f->next == jp->filelist) break;
 	}
 

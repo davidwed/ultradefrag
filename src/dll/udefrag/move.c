@@ -652,6 +652,7 @@ static void subtract_clusters(winx_file_info *f, ULONGLONG vcn,
 /*repeat_scan:
 	for(block = f->disp.blockmap; block; block = block->next){
 		if(block->length == 0){
+			remove_block_from_file_blocks_tree(jp,block);
 			winx_list_remove_item((list_entry **)(void *)&f->disp.blockmap,(list_entry *)block);
 			goto repeat_scan;
 		}
@@ -912,8 +913,16 @@ int move_file(winx_file_info *f,
 			f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
 	} else {
 		/* new block map is available - use it */
+		for(block = f->disp.blockmap; block; block = block->next){
+			if(remove_block_from_file_blocks_tree(jp,block) < 0) break;
+			if(block->next == f->disp.blockmap) break;
+		}
 		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 		memcpy(&f->disp,&new_file_info.disp,sizeof(winx_file_disposition));
+		for(block = f->disp.blockmap; block; block = block->next){
+			if(add_block_to_file_blocks_tree(jp,f,block) < 0) break;
+			if(block->next == f->disp.blockmap) break;
+		}
 	}
 
 	/* update list of fragmented files */

@@ -35,130 +35,6 @@
 /************************************************************/
 
 /**
- * @brief Searches for free space region starting at the beginning of the volume.
- * @param[in] jp job parameters structure.
- * @param[in] min_length minimum length of region, in clusters.
- * @note In case of termination request returns NULL immediately.
- */
-/*static */winx_volume_region *find_first_free_region(udefrag_job_parameters *jp,ULONGLONG min_length)
-{
-	winx_volume_region *rgn;
-	ULONGLONG time = winx_xtime();
-
-	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->termination_router((void *)jp)) break;
-		if(rgn->length >= min_length){
-			jp->p_counters.searching_time += winx_xtime() - time;
-			return rgn;
-		}
-		if(rgn->next == jp->free_regions) break;
-	}
-	jp->p_counters.searching_time += winx_xtime() - time;
-	return NULL;
-}
-
-/**
- * @brief Searches for free space region starting at the end of the volume.
- * @param[in] jp job parameters structure.
- * @param[in] min_length minimum length of region, in clusters.
- * @note In case of termination request returns NULL immediately.
- */
-/*static */winx_volume_region *find_last_free_region(udefrag_job_parameters *jp,ULONGLONG min_length)
-{
-	winx_volume_region *rgn;
-	ULONGLONG time = winx_xtime();
-
-	if(jp->free_regions){
-		for(rgn = jp->free_regions->prev; rgn; rgn = rgn->prev){
-			if(jp->termination_router((void *)jp)) break;
-			if(rgn->length >= min_length){
-				jp->p_counters.searching_time += winx_xtime() - time;
-				return rgn;
-			}
-			if(rgn->prev == jp->free_regions->prev) break;
-		}
-	}
-	jp->p_counters.searching_time += winx_xtime() - time;
-	return NULL;
-}
-
-enum {
-	FIND_MATCHING_RGN_FORWARD,
-	FIND_MATCHING_RGN_BACKWARD,
-	FIND_MATCHING_RGN_ANY
-};
-
-/**
- * @brief Searches for best matching free space region.
- * @param[in] start_lcn a point which divides disk into two parts (see below).
- * @param[in] min_length minimal accepted length of the region, in clusters.
- * @param[in] preferred_position one of the FIND_MATCHING_RGN_xxx constants:
- * FIND_MATCHING_RGN_FORWARD - region after the start_lcn preferred
- * FIND_MATCHING_RGN_BACKWARD - region before the start_lcn preferred
- * FIND_MATCHING_RGN_ANY - any region accepted
- * @note In case of termination request returns
- * NULL immediately.
- */
-static winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
-    ULONGLONG start_lcn, ULONGLONG min_length, int preferred_position)
-{
-	winx_volume_region *rgn, *rgn_matching;
-	ULONGLONG length;
-	ULONGLONG time = winx_xtime();
-	
-	rgn_matching = NULL, length = 0;
-	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->termination_router((void *)jp)){
-			jp->p_counters.searching_time += winx_xtime() - time;
-			return NULL;
-		}
-		if(preferred_position == FIND_MATCHING_RGN_BACKWARD \
-		  && rgn->lcn > start_lcn)
-			if(rgn_matching != NULL)
-				break;
-		if(rgn->length >= min_length){
-            if(length == 0 || rgn->length < length){
-                rgn_matching = rgn;
-                length = rgn->length;
-				if(length == min_length \
-				  && preferred_position != FIND_MATCHING_RGN_FORWARD)
-					break;
-            }
-		}
-		if(rgn->next == jp->free_regions) break;
-	}
-	jp->p_counters.searching_time += winx_xtime() - time;
-	return rgn_matching;
-}
-
-/**
- * @brief Searches for largest free space region.
- * @note In case of termination request returns
- * NULL immediately.
- */
-static winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp)
-{
-	winx_volume_region *rgn, *rgn_largest;
-	ULONGLONG length;
-	ULONGLONG time = winx_xtime();
-	
-	rgn_largest = NULL, length = 0;
-	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->termination_router((void *)jp)){
-			jp->p_counters.searching_time += winx_xtime() - time;
-			return NULL;
-		}
-		if(rgn->length > length){
-			rgn_largest = rgn;
-			length = rgn->length;
-		}
-		if(rgn->next == jp->free_regions) break;
-	}
-	jp->p_counters.searching_time += winx_xtime() - time;
-	return rgn_largest;
-}
-
-/**
  * @brief Defines whether the file can be moved or not.
  */
 int can_move(winx_file_info *f,udefrag_job_parameters *jp)
@@ -1092,11 +968,11 @@ done:
  */
 int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags)
 {
-	ULONGLONG time, tm;
+	ULONGLONG time;
 	int nt4w2k_limitations = 0;
 	winx_file_info *file, *first_file;
-	winx_blockmap *block, *first_block;
-	ULONGLONG min_lcn, block_lcn, block_length, n;
+	winx_blockmap *first_block;
+	ULONGLONG block_lcn, block_length, n;
 	ULONGLONG current_vcn, remaining_clusters;
 	winx_volume_region *rgn, *prev_rgn;
 	ULONGLONG clusters_to_move;
@@ -1132,36 +1008,8 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 	/* do the job */
 	while(!jp->termination_router((void *)jp)){
 		/* find the first block after start_lcn */
-		tm = winx_xtime();
-		first_file = NULL; first_block = NULL; min_lcn = jp->v_info.total_clusters;
-		for(file = jp->filelist; file; file = file->next){
-			if(can_move(file,jp) && !is_mft(file,jp)){
-				if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
-				} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
-				} else {
-					for(block = file->disp.blockmap; block; block = block->next){
-						if(block->lcn >= start_lcn && block->lcn < min_lcn && block->length){
-							first_file = file;
-							first_block = block;
-							min_lcn = block->lcn;
-						}
-						if(block->next == file->disp.blockmap) break;
-					}
-				}
-			}
-			if(file->next == jp->filelist) break;
-		}
-		if(first_file == NULL){
-			jp->p_counters.searching_time += winx_xtime() - tm;
-			break;
-		}
-		if(is_file_locked(first_file,jp)){
-			jp->pi.processed_clusters += first_file->disp.clusters;
-			jp->p_counters.searching_time += winx_xtime() - tm;
-			continue;
-		}
-		jp->p_counters.searching_time += winx_xtime() - tm;
-		
+		first_block = find_first_block(jp,&start_lcn,flags,&first_file);
+		if(first_block == NULL) break;
 		/* move the first block to the last free regions */
 		block_lcn = first_block->lcn; block_length = first_block->length;
 		if(!nt4w2k_limitations){
@@ -1211,7 +1059,6 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 			/* otherwise the volume processing is extremely slow and may even go to an infinite loop */
 			first_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 		}
-		start_lcn ++; /* the current block will be skipped anyway in this case */
 	}
 	
 done:
