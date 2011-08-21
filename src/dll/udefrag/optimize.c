@@ -198,6 +198,7 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 	winx_file_info *file;
 	winx_blockmap *block;
 	ULONGLONG i, j, n, total = 0;
+	ULONGLONG time = winx_xtime();
 	
 	for(file = jp->filelist; file; file = file->next){
 		if(jp->termination_router((void *)jp)) break;
@@ -214,6 +215,7 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 		if(file->next == jp->filelist) break;
 	}
 	
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return total;
 }
 
@@ -226,6 +228,7 @@ static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, U
 	udefrag_fragmented_file *f;
 	winx_blockmap *block;
 	ULONGLONG i, j, n, total = 0;
+	ULONGLONG time = winx_xtime();
 	
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) break;
@@ -243,6 +246,7 @@ static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, U
 		if(f->next == jp->fragmented_files) break;
 	}
 	
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return total;
 }
 
@@ -254,6 +258,7 @@ static ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLO
 {
 	winx_volume_region *rgn;
 	ULONGLONG i, j, total = 0;
+	ULONGLONG time = winx_xtime();
 	
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(rgn->lcn > last_lcn) break;
@@ -265,6 +270,7 @@ static ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLO
 		if(rgn->next == jp->free_regions) break;
 	}
 	
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return total;
 }
 
@@ -283,12 +289,13 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	winx_volume_region *rgn;
 	udefrag_fragmented_file *f;	
 	winx_blockmap *block;
+	ULONGLONG time;
 	
 	/* free temporarily allocated space */
 	release_temp_space_regions_internal(jp);
 
 	/* search for the first large free space gap after an old starting point */
-	new_sp = old_sp;
+	new_sp = old_sp; time = winx_xtime();
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(jp->udo.dbgprint_level >= DBG_PARANOID)
 			DebugPrint("Free block start: %I64u len: %I64u",rgn->lcn,rgn->length);
@@ -298,6 +305,7 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 		}
 		if(rgn->next == jp->free_regions) break;
 	}
+	jp->p_counters.searching_time += winx_xtime() - time;
 	
 	/* move starting point back to release heavily fragmented data */
 	/* allow no more than 5% of fragmented data inside of a skipped part of the disk */
@@ -346,16 +354,19 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 		return old_sp;
 	
 	/* is starting point inside a fragmented file block? */
+	time = winx_xtime();
 	for(f = jp->fragmented_files; f; f = f->next){
 		for(block = f->f->disp.blockmap; block; block = block->next){
 			if(new_sp >= block->lcn && new_sp <= block->lcn + block->length - 1){
 				/* include block */
+				jp->p_counters.searching_time += winx_xtime() - time;
 				return block->lcn;
 			}
 			if(block->next == f->f->disp.blockmap) break;
 		}
 		if(f->next == jp->fragmented_files) break;
 	}
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return new_sp;
 }
 
@@ -367,6 +378,7 @@ static int increase_starting_point(udefrag_job_parameters *jp, ULONGLONG *sp)
 {
 	ULONGLONG new_sp;
 	winx_volume_region *rgn;
+	ULONGLONG time;
 	
 	if(sp == NULL)
 		return (-1);
@@ -374,14 +386,17 @@ static int increase_starting_point(udefrag_job_parameters *jp, ULONGLONG *sp)
 	new_sp = calculate_starting_point(jp,*sp);
 
 	/* go to the first large free space gap after a new starting point */
+	time = winx_xtime();
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(rgn->lcn > new_sp && rgn->length >= jp->free_rgn_size_threshold){
 			*sp = rgn->lcn;
+			jp->p_counters.searching_time += winx_xtime() - time;
 			return 0;
 		}
 		if(rgn->next == jp->free_regions) break;
 	}
 	/* end of disk reached */
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return (-1);
 }
 

@@ -43,13 +43,17 @@
 /*static */winx_volume_region *find_first_free_region(udefrag_job_parameters *jp,ULONGLONG min_length)
 {
 	winx_volume_region *rgn;
+	ULONGLONG time = winx_xtime();
 
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(jp->termination_router((void *)jp)) break;
-		if(rgn->length >= min_length)
+		if(rgn->length >= min_length){
+			jp->p_counters.searching_time += winx_xtime() - time;
 			return rgn;
+		}
 		if(rgn->next == jp->free_regions) break;
 	}
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return NULL;
 }
 
@@ -62,15 +66,19 @@
 /*static */winx_volume_region *find_last_free_region(udefrag_job_parameters *jp,ULONGLONG min_length)
 {
 	winx_volume_region *rgn;
+	ULONGLONG time = winx_xtime();
 
 	if(jp->free_regions){
 		for(rgn = jp->free_regions->prev; rgn; rgn = rgn->prev){
 			if(jp->termination_router((void *)jp)) break;
-			if(rgn->length >= min_length)
+			if(rgn->length >= min_length){
+				jp->p_counters.searching_time += winx_xtime() - time;
 				return rgn;
+			}
 			if(rgn->prev == jp->free_regions->prev) break;
 		}
 	}
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return NULL;
 }
 
@@ -96,10 +104,14 @@ static winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
 {
 	winx_volume_region *rgn, *rgn_matching;
 	ULONGLONG length;
+	ULONGLONG time = winx_xtime();
 	
 	rgn_matching = NULL, length = 0;
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->termination_router((void *)jp)) return NULL;
+		if(jp->termination_router((void *)jp)){
+			jp->p_counters.searching_time += winx_xtime() - time;
+			return NULL;
+		}
 		if(preferred_position == FIND_MATCHING_RGN_BACKWARD \
 		  && rgn->lcn > start_lcn)
 			if(rgn_matching != NULL)
@@ -115,6 +127,7 @@ static winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
 		}
 		if(rgn->next == jp->free_regions) break;
 	}
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return rgn_matching;
 }
 
@@ -127,17 +140,21 @@ static winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp)
 {
 	winx_volume_region *rgn, *rgn_largest;
 	ULONGLONG length;
+	ULONGLONG time = winx_xtime();
 	
 	rgn_largest = NULL, length = 0;
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(jp->termination_router((void *)jp))
+		if(jp->termination_router((void *)jp)){
+			jp->p_counters.searching_time += winx_xtime() - time;
 			return NULL;
+		}
 		if(rgn->length > length){
 			rgn_largest = rgn;
 			length = rgn->length;
 		}
 		if(rgn->next == jp->free_regions) break;
 	}
+	jp->p_counters.searching_time += winx_xtime() - time;
 	return rgn_largest;
 }
 
@@ -308,7 +325,7 @@ int optimize_mft(udefrag_job_parameters *jp)
 	ULONGLONG start_vcn;           /* VCN of the portion of $mft not processed yet */
 	ULONGLONG clusters_to_move;    /* the number of $mft clusters intended for the current move */
 	ULONGLONG start_lcn;           /* address of space not processed yet */
-	ULONGLONG time;
+	ULONGLONG time, tm;
 	winx_volume_region *rlist = NULL, *rgn, *target_rgn;
 	winx_file_info *mft_file, *file, *first_file;
 	winx_blockmap *block, *first_block;
@@ -345,13 +362,15 @@ int optimize_mft(udefrag_job_parameters *jp)
 		
 		/* update list of free regions */
 		winx_release_free_volume_regions(rlist);
+		tm = winx_xtime();
 		rlist = winx_get_free_volume_regions(jp->volume_letter,
 			WINX_GVR_ALLOW_PARTIAL_SCAN,NULL,(void *)jp);
+		jp->p_counters.temp_space_releasing_time += winx_xtime() - tm;
 		if(rlist == NULL) break;
 		release_temp_space_regions_internal(jp);
 		
 		/* search for the first free region after start_lcn */
-		target_rgn = NULL;
+		target_rgn = NULL; tm = winx_xtime();
 		for(rgn = rlist; rgn; rgn = rgn->next){
 			if(rgn->lcn >= start_lcn && rgn->length){
 				target_rgn = rgn;
@@ -359,6 +378,7 @@ int optimize_mft(udefrag_job_parameters *jp)
 			}
 			if(rgn->next == rlist) break;
 		}
+		jp->p_counters.searching_time += winx_xtime() - tm;
 		
 		/* process file blocks between start_lcn and target_rgn */
 		if(target_rgn) end_lcn = target_rgn->lcn;
@@ -368,6 +388,7 @@ int optimize_mft(udefrag_job_parameters *jp)
 		region.length = 0;
 		while(clusters_to_cleanup > 0){
 			if(jp->termination_router((void *)jp)) goto done;
+			tm = winx_xtime();
 			first_file = NULL; first_block = NULL; min_lcn = end_lcn;
 			for(file = jp->filelist; file; file = file->next){
 				if(can_move(file,jp)){
@@ -382,8 +403,15 @@ int optimize_mft(udefrag_job_parameters *jp)
 				}
 				if(file->next == jp->filelist) break;
 			}
-			if(first_file == NULL) break;
-			if(is_file_locked(first_file,jp)) continue;
+			if(first_file == NULL){
+				jp->p_counters.searching_time += winx_xtime() - tm;
+				break;
+			}
+			if(is_file_locked(first_file,jp)){
+				jp->p_counters.searching_time += winx_xtime() - tm;
+				continue;
+			}
+			jp->p_counters.searching_time += winx_xtime() - tm;
 			
 			/* does the first block follow a previously moved one? */
 			if(block_cleaned_up){
@@ -505,7 +533,7 @@ done:
  */
 int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
 {
-	ULONGLONG time;
+	ULONGLONG time, tm;
 	ULONGLONG defragmented_files;
 	winx_volume_region *rgn;
 	udefrag_fragmented_file *f, *f_largest;
@@ -546,7 +574,7 @@ int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *j
 		/* find largest fragmented file that fits in the current region */
 		do {
 			if(jp->termination_router((void *)jp)) goto done;
-			f_largest = NULL, length = 0;
+			f_largest = NULL, length = 0; tm = winx_xtime();
 			for(f = jp->fragmented_files; f; f = f->next){
 				file_length = get_file_length(jp,f->f);
 				if(file_length > length && file_length <= rgn->length){
@@ -557,6 +585,7 @@ int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *j
 				}
 				if(f->next == jp->fragmented_files) break;
 			}
+			jp->p_counters.searching_time += winx_xtime() - tm;
 			if(f_largest == NULL) goto next_rgn;
 			file = f_largest->f; /* f_largest may be destroyed by move_file */
 			
@@ -602,7 +631,7 @@ done:
  */
 int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
 {
-	ULONGLONG time;
+	ULONGLONG time, tm;
 	ULONGLONG defragmented_files;
 	winx_volume_region *rgn;
 	udefrag_fragmented_file *f, *f_largest;
@@ -635,7 +664,7 @@ int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameter
 	/* find best matching free region for each fragmented file */
 	defragmented_files = 0;
 	while(jp->termination_router((void *)jp) == 0){
-		f_largest = NULL, length = 0;
+		f_largest = NULL, length = 0; tm = winx_xtime();
 		for(f = jp->fragmented_files; f; f = f->next){
 			file_length = get_file_length(jp,f->f);
 			if(file_length > length){
@@ -646,6 +675,7 @@ int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameter
 			}
 			if(f->next == jp->fragmented_files) break;
 		}
+		jp->p_counters.searching_time += winx_xtime() - tm;
 		if(f_largest == NULL) break;
 		file = f_largest->f; /* f_largest may be destroyed by move_file */
 
@@ -697,7 +727,7 @@ int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameter
  */
 int __stdcall defragment_big_files(udefrag_job_parameters *jp)
 {
-	ULONGLONG time;
+	ULONGLONG time, tm;
 	ULONGLONG defragmented_files;
 	winx_volume_region *rgn_largest;
 	udefrag_fragmented_file *f, *f_largest;
@@ -748,7 +778,7 @@ int __stdcall defragment_big_files(udefrag_job_parameters *jp)
 		do {
 try_again:
 			if(jp->termination_router((void *)jp)) goto done;
-			f_largest = NULL, length = 0;
+			f_largest = NULL, length = 0; tm = winx_xtime();
 			for(f = jp->fragmented_files; f; f = f->next){
 				file_length = get_file_length(jp,f->f);
 				if(file_length > length && can_defragment(f->f,jp) && !is_mft(f->f,jp)){
@@ -757,11 +787,16 @@ try_again:
 				}
 				if(f->next == jp->fragmented_files) break;
 			}
-			if(f_largest == NULL) goto part_defrag_done;
+			if(f_largest == NULL){
+				jp->p_counters.searching_time += winx_xtime() - tm;
+				goto part_defrag_done;
+			}
 			if(is_file_locked(f_largest->f,jp)){
 				jp->pi.processed_clusters += f_largest->f->disp.clusters;
+				jp->p_counters.searching_time += winx_xtime() - tm;
 				goto try_again;
 			}
+			jp->p_counters.searching_time += winx_xtime() - tm;
 			
 			/* find longest sequence of file blocks which fits in the current free region */
 			longest_sequence = NULL, max_n_blocks = 0, longest_sequence_length = 0;
@@ -847,7 +882,7 @@ done:
  */
 int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags)
 {
-	ULONGLONG time;
+	ULONGLONG time, tm;
 	ULONGLONG moves, pass;
 	winx_file_info *file,/* *last_file, */*largest_file;
 	ULONGLONG length, rgn_size_threshold;
@@ -905,7 +940,8 @@ repeat_scan:
 					}
 				}
 try_again:
-				/* find largest not fragmented file after start_lcn which fits here */
+				/* find largest file after start_lcn which fits here */
+				tm = winx_xtime();
 				largest_file = NULL; length = 0; files_found = 0;
 				for(file = jp->filelist; file; file = file->next){
 					if(can_move(file,jp) && !is_mft(file,jp)){
@@ -926,6 +962,7 @@ try_again:
 					}
 					if(file->next == jp->filelist) break;
 				}
+				jp->p_counters.searching_time += winx_xtime() - tm;
 				if(files_found == 0){
 					/* no more files can be moved on the current pass */
 					break; /*goto done;*/
@@ -1055,7 +1092,7 @@ done:
  */
 int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags)
 {
-	ULONGLONG time;
+	ULONGLONG time, tm;
 	int nt4w2k_limitations = 0;
 	winx_file_info *file, *first_file;
 	winx_blockmap *block, *first_block;
@@ -1064,7 +1101,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 	winx_volume_region *rgn, *prev_rgn;
 	ULONGLONG clusters_to_move;
 	char buffer[32];
-
+	
 	jp->pi.current_operation = VOLUME_OPTIMIZATION;
 	jp->pi.moved_clusters = 0;
     jp->pi.total_moves = 0;
@@ -1085,7 +1122,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 		return (-1);
 
 	time = start_timing("file moving to end",jp);
-	
+
 	if(winx_get_os_version() <= WINDOWS_2K && jp->fs_type == FS_NTFS){
 		DebugPrint("Windows NT 4.0 and Windows 2000 have stupid limitations in defrag API");
 		DebugPrint("volume optimization is not so much effective on these systems");
@@ -1095,6 +1132,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 	/* do the job */
 	while(!jp->termination_router((void *)jp)){
 		/* find the first block after start_lcn */
+		tm = winx_xtime();
 		first_file = NULL; first_block = NULL; min_lcn = jp->v_info.total_clusters;
 		for(file = jp->filelist; file; file = file->next){
 			if(can_move(file,jp) && !is_mft(file,jp)){
@@ -1113,11 +1151,16 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 			}
 			if(file->next == jp->filelist) break;
 		}
-		if(first_file == NULL) break;
+		if(first_file == NULL){
+			jp->p_counters.searching_time += winx_xtime() - tm;
+			break;
+		}
 		if(is_file_locked(first_file,jp)){
 			jp->pi.processed_clusters += first_file->disp.clusters;
+			jp->p_counters.searching_time += winx_xtime() - tm;
 			continue;
 		}
+		jp->p_counters.searching_time += winx_xtime() - tm;
 		
 		/* move the first block to the last free regions */
 		block_lcn = first_block->lcn; block_length = first_block->length;

@@ -157,11 +157,13 @@ void release_temp_space_regions_internal(udefrag_job_parameters *jp)
 void release_temp_space_regions(udefrag_job_parameters *jp)
 {
 	winx_volume_region *rgn;
+	ULONGLONG time = winx_xtime();
 	
 	/* release space on disk */
 	rgn = winx_get_free_volume_regions(jp->volume_letter,
 		WINX_GVR_ALLOW_PARTIAL_SCAN,NULL,(void *)jp);
 	winx_release_free_volume_regions(rgn);
+	jp->p_counters.temp_space_releasing_time += winx_xtime() - time;
 	
 	release_temp_space_regions_internal(jp);
 }
@@ -713,6 +715,7 @@ int move_file(winx_file_info *f,
               udefrag_job_parameters *jp
               )
 {
+	ULONGLONG time;
 	NTSTATUS Status;
 	HANDLE hFile;
 	int old_color, new_color;
@@ -723,11 +726,14 @@ int move_file(winx_file_info *f,
 	ULONGLONG curr_vcn, n;
 	winx_file_info new_file_info;
 	ud_file_moving_result moving_result;
+	
+	time = winx_xtime();
 
 	/* validate parameters */
 	if(f == NULL || jp == NULL){
 		DebugPrint("move_file: invalid parameter");
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return (-1);
 	}
 	
@@ -738,11 +744,13 @@ int move_file(winx_file_info *f,
 	if(length == 0){
 		DebugPrint("move_file: move of zero number of clusters requested");
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return 0; /* nothing to move */
 	}
 	
 	if(f->disp.clusters == 0 || f->disp.fragments == 0 || f->disp.blockmap == NULL){
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return 0; /* nothing to move */
 	}
 	
@@ -750,6 +758,7 @@ int move_file(winx_file_info *f,
 		DebugPrint("move_file: data move behind the end of the file requested");
 		DbgPrintBlocksOfFile(f->disp.blockmap);
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return (-1);
 	}
 	
@@ -757,12 +766,14 @@ int move_file(winx_file_info *f,
 	if(first_block == NULL){
 		DebugPrint("move_file: data move out of file bounds requested");
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return (-1);
 	}
 	
 	if(!check_region(jp,target,length)){
 		DebugPrint("move_file: there is no sufficient free space available on target block");
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return (-1);
 	}
 	
@@ -781,6 +792,7 @@ int move_file(winx_file_info *f,
 		jp->pi.processed_clusters += length;
 		if(jp->progress_router)
 			jp->progress_router(jp); /* redraw progress */
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return (-1);
 	}
 	
@@ -829,6 +841,7 @@ int move_file(winx_file_info *f,
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 		if(flags & UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS)
 			subtract_clusters(f,vcn,length,jp);
+		jp->p_counters.moving_time += winx_xtime() - time;
 		return (-1);
 	}
 
@@ -905,6 +918,7 @@ int move_file(winx_file_info *f,
 	if(became_fragmented && !was_fragmented)
 		expand_fragmented_files_list(f,jp);
 	
+	jp->p_counters.moving_time += winx_xtime() - time;
 	return (moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS) ? (-1) : 0;
 }
 

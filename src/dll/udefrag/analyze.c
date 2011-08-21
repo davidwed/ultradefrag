@@ -900,6 +900,7 @@ int analyze(udefrag_job_parameters *jp)
 	if(result < 0)
 		return result;
 	
+	jp->p_counters.analysis_time = winx_xtime() - time;
 	stop_timing("analysis",time,jp);
 	return 0;
 }

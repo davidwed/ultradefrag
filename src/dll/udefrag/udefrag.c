@@ -68,6 +68,61 @@ static void dbg_print_footer(udefrag_job_parameters *jp)
 }
 
 /**
+ */
+static void dbg_print_single_counter(udefrag_job_parameters *jp,ULONGLONG counter,char *name)
+{
+	ULONGLONG time, seconds;
+	double p;
+	unsigned int ip;
+	char buffer[32];
+	char *s;
+
+	time = counter;
+	seconds = time / 1000;
+	winx_time2str(seconds,buffer,sizeof(buffer));
+	time -= seconds * 1000;
+	
+	if(counter == 0){
+		p = 0.00;
+	} else {
+		/*
+		* Conversion to LONGLONG is used because of support
+		* of MS Visual Studio 6.0 where conversion from ULONGLONG
+		* to double is not implemented.
+		*/
+		p = (double)(LONGLONG)(counter)/((double)(LONGLONG)(jp->p_counters.overall_time));
+	}
+	ip = (unsigned int)(p * 10000);
+	s = winx_sprintf("%s %I64ums",buffer,time);
+	if(s == NULL){
+		DebugPrint(" - %s: %-18s %6I64ums (%u.%02u %%)",name,buffer,time,ip / 100,ip % 100);
+	} else {
+		DebugPrint(" - %s: %-25s (%u.%02u %%)",name,s,ip / 100,ip % 100);
+		winx_heap_free(s);
+	}
+}
+
+/**
+ */
+static void dbg_print_performance_counters(udefrag_job_parameters *jp)
+{
+	ULONGLONG time, seconds;
+	char buffer[32];
+	
+	winx_dbg_print_header(0,0,"*");
+
+	time = jp->p_counters.overall_time;
+	seconds = time / 1000;
+	winx_time2str(seconds,buffer,sizeof(buffer));
+	time -= seconds * 1000;
+	DebugPrint("volume processing completed in %s %I64ums:",buffer,time);
+	dbg_print_single_counter(jp,jp->p_counters.analysis_time,             "analysis ...............");
+	dbg_print_single_counter(jp,jp->p_counters.searching_time,            "searching ..............");
+	dbg_print_single_counter(jp,jp->p_counters.moving_time,               "moving .................");
+	dbg_print_single_counter(jp,jp->p_counters.temp_space_releasing_time, "releasing temp space ...");
+}
+
+/**
  * @brief Delivers progress information to the caller.
  * @note 
  * - completion_status parameter delivers to the caller
@@ -364,7 +419,7 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
 	/* we'll decide whether to kill or not from the current thread */
 	jp.termination_router = terminator;
 
-	jp.start_time = winx_xtime();
+	jp.start_time = jp.p_counters.overall_time = winx_xtime();
 	jp.pi.completion_status = 0;
 	
 	if(get_options(&jp) < 0)
@@ -434,6 +489,8 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
 	release_options(&jp);
 	
 done:
+	jp.p_counters.overall_time = winx_xtime() - jp.p_counters.overall_time;
+	dbg_print_performance_counters(&jp);
 	dbg_print_footer(&jp);
 	if(jp.pi.completion_status > 0)
 		result = 0;

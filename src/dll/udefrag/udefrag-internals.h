@@ -135,6 +135,14 @@ typedef struct _cmap {
 	ULONGLONG cells_per_last_cluster;
 } cmap;
 
+struct performance_counters {
+	ULONGLONG overall_time;               /* time needed for volume processing */
+	ULONGLONG analysis_time;              /* time needed for volume analysis */
+	ULONGLONG searching_time;             /* time needed for searching */
+	ULONGLONG moving_time;                /* time needed for file moves */
+	ULONGLONG temp_space_releasing_time;  /* time needed to release space temporarily allocated by system */
+};
+
 typedef void (__stdcall *udefrag_progress_router)(void /*udefrag_job_parameters*/ *p);
 typedef int  (__stdcall *udefrag_termination_router)(void /*udefrag_job_parameters*/ *p);
 
@@ -163,6 +171,7 @@ typedef struct _udefrag_job_parameters {
 	WINX_FILE *fVolume;                         /* handle of the volume, used by file moving routines */
 	winx_volume_region *temp_space_list;        /* list of regions of space temporarily allocated by system */
 	ULONGLONG free_rgn_size_threshold;          /* free region size threshold used in volume optimization */
+	struct performance_counters p_counters;     /* performance counters */
 } udefrag_job_parameters;
 
 int  get_options(udefrag_job_parameters *jp);
