@@ -105,6 +105,7 @@ int optimize(udefrag_job_parameters *jp)
 			jp->v_info.free_bytes / jp->v_info.bytes_per_cluster) * 2;
 		jp->pi.processed_clusters = jp->pi.clusters_to_process - \
 			remaining_clusters * 2; /* set counter */
+		if(remaining_clusters == 0) break;
 		
 		DebugPrint("volume optimization pass #%u, starting point = %I64u, remaining clusters = %I64u",
 			jp->pi.pass_number, start_lcn, remaining_clusters);
@@ -211,7 +212,8 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 			}
 			if(block->next == file->disp.blockmap) break;
 		}
-		total += n;
+		if(!is_file_locked(file,jp))
+			total += n;
 		if(file->next == jp->filelist) break;
 	}
 	
@@ -241,7 +243,7 @@ static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, U
 			}
 			if(block->next == f->f->disp.blockmap) break;
 		}
-		if(n && !is_file_locked(f->f,jp))
+		if(!is_file_locked(f->f,jp))
 			total += n;
 		if(f->next == jp->fragmented_files) break;
 	}
