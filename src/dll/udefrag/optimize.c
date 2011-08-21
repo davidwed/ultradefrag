@@ -105,8 +105,7 @@ int optimize(udefrag_job_parameters *jp)
 			jp->v_info.free_bytes / jp->v_info.bytes_per_cluster) * 2;
 		jp->pi.processed_clusters = jp->pi.clusters_to_process - \
 			remaining_clusters * 2; /* set counter */
-		if(remaining_clusters == 0) break;
-		
+				
 		DebugPrint("volume optimization pass #%u, starting point = %I64u, remaining clusters = %I64u",
 			jp->pi.pass_number, start_lcn, remaining_clusters);
 		
@@ -116,6 +115,9 @@ int optimize(udefrag_job_parameters *jp)
 			/* at least something succeeded */
 			overall_result = 0;
 		}
+		
+		/* break if nothing moveable exist after starting point */
+		if(jp->pi.moved_clusters == 0 && remaining_clusters == 0) break;
 		
 		/* full opt: cleanup space after start_lcn */
 		if(jp->job_type == FULL_OPTIMIZATION_JOB){
