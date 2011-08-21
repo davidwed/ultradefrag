@@ -84,6 +84,7 @@ winx_volume_region *find_last_free_region(udefrag_job_parameters *jp,ULONGLONG m
 
 /**
  * @brief Searches for best matching free space region.
+ * @param[in] jp job parameters structure.
  * @param[in] start_lcn a point which divides disk into two parts (see below).
  * @param[in] min_length minimal accepted length of the region, in clusters.
  * @param[in] preferred_position one of the FIND_MATCHING_RGN_xxx constants:
@@ -307,8 +308,8 @@ void destroy_file_blocks_tree(udefrag_job_parameters *jp)
  * @param[in,out] min_lcn pointer to variable containing
  * minimum LCN - file blocks below it will be ignored.
  * @param[in] flags one of MOVE_xxx flags defined in udefrag.h
- * @param[out] pointer to variable receiving information about
- * the file the first block belongs to.
+ * @param[out] first_file pointer to variable receiving information
+ * about the file the first block belongs to.
  * @return Pointer to the first block. NULL indicates failure.
  */
 winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, int flags, winx_file_info **first_file)
