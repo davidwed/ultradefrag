@@ -274,9 +274,11 @@ static int move_file_clusters(HANDLE hFile,ULONGLONG startVcn,
 	IO_STATUS_BLOCK iosb;
 	MOVEFILE_DESCRIPTOR mfd;
 
-	DebugPrint("sVcn: %I64u,tLcn: %I64u,n: %u",
-		 startVcn,targetLcn,n_clusters);
-
+	if(jp->udo.dbgprint_level >= DBG_DETAILED){
+		DebugPrint("sVcn: %I64u,tLcn: %I64u,n: %u",
+			 startVcn,targetLcn,n_clusters);
+	}
+	
 	if(jp->termination_router((void *)jp))
 		return (-1);
 	
@@ -737,10 +739,12 @@ int move_file(winx_file_info *f,
 		return (-1);
 	}
 	
-	if(f->path)	DebugPrint("%ws",f->path);
-	else DebugPrint("empty filename");
-	DebugPrint("vcn = %I64u, length = %I64u, target = %I64u",vcn,length,target);
-
+	if(jp->udo.dbgprint_level >= DBG_DETAILED){
+		if(f->path)	DebugPrint("%ws",f->path);
+		else DebugPrint("empty filename");
+		DebugPrint("vcn = %I64u, length = %I64u, target = %I64u",vcn,length,target);
+	}
+	
 	if(length == 0){
 		DebugPrint("move_file: move of zero number of clusters requested");
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
