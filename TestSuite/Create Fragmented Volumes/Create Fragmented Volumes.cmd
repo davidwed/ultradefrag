@@ -195,7 +195,7 @@ for /f "tokens=1,2,3" %%R in ('echo %SelectedVolumeType%') do (
 set VolumeName=%ex_type%
 if not "%option1%" == "" set VolumeName=%VolumeName%_%option1:.=%
 if not "%option2%" == "" set VolumeName=%VolumeName%_%option2%
-set VolumeName=%VolumeName%_fr%FragmentationRate%_sr%SmallFileRate%
+set VolumeName=%VolumeName%_sr%SmallFileRate%_fr%FragmentationRate%
 
 call :answers >"%TMP%\answers.txt"
 
@@ -267,11 +267,13 @@ if "%option2%" == "mirror" set VolumeName=%VolumeName%_%option2%
 
 :ApplyVolumeLabel
 if %ApplyLabel% EQU 0 goto :StartProcess
+set temp_var=%option1:~0,2%
+if "%temp_var%" == "sr" set SmallFileRate=%option1:~2%
 set temp_var=%option2:~0,2%
 if "%temp_var%" == "sr" set SmallFileRate=%option2:~2%
 set temp_var=%option3:~0,2%
 if "%temp_var%" == "sr" set SmallFileRate=%option3:~2%
-set VolumeName=%VolumeName%_fr%FragmentationRate%_sr%SmallFileRate%
+set VolumeName=%VolumeName%_sr%SmallFileRate%_fr%FragmentationRate%
 
 title Setting Volume Label of "%ProcessVolume%" ...
 echo.
@@ -324,8 +326,8 @@ goto :EOF
     
     if "%FormatVolume%" == "Y" goto :create
     
-    title Changing Fragmented Files on Drive "%~1" ...
-    echo Changing Fragmented Files on Drive "%~1" ...
+    title Changing Fragmented Files on Drive "%~1 (%VolumeName%)" ...
+    echo Changing Fragmented Files on Drive "%~1 (%VolumeName%)" ...
     echo.
 
     for /r "%~1" %%X in ( *.* ) do (
@@ -337,8 +339,8 @@ goto :EOF
     goto :finished
 
     :create
-    title Creating Fragmented Files on Drive "%~1" until %PercentageFree%%% free space left ...
-    echo Creating Fragmented Files on Drive "%~1" until %PercentageFree%%% free space left ...
+    title Creating Fragmented Files on Drive "%~1 (%VolumeName%)" until %PercentageFree%%% free space left ...
+    echo Creating Fragmented Files on Drive "%~1 (%VolumeName%)" until %PercentageFree%%% free space left ...
     echo.
 
     :loop
