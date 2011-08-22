@@ -485,8 +485,10 @@ static int find_files(udefrag_job_parameters *jp)
 		if(f->next == jp->filelist) break;
 	}
 
-	DebugPrint("files found: %u",jp->pi.files);
+	DebugPrint("folders total:    %u",jp->pi.directories);
+	DebugPrint("files total:      %u",jp->pi.files);
 	DebugPrint("fragmented files: %u",jp->pi.fragmented);
+	DebugPrint("compressed files: %u",jp->pi.compressed);
 	return 0;
 }
 
