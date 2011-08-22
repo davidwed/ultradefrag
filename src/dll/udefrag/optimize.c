@@ -201,11 +201,12 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 	winx_file_info *file;
 	winx_blockmap *block;
 	ULONGLONG i, j, n, total = 0;
+	int counter = 0;
 	ULONGLONG time = winx_xtime();
 	
 	for(file = jp->filelist; file; file = file->next){
 		if(jp->termination_router((void *)jp)) break;
-		n = 0;
+		n = 0; file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED; /* for can_move call */
 		for(block = file->disp.blockmap; block; block = block->next){
 			if((block->lcn + block->length >= first_lcn + 1) && block->lcn <= last_lcn){
 				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
@@ -214,8 +215,16 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 			}
 			if(block->next == file->disp.blockmap) break;
 		}
-		if(!is_file_locked(file,jp))
-			total += n;
+		if(n){
+			if(can_move(file,jp) && !is_mft(file,jp)){
+				total += n;
+				if(counter < GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT){
+					if(is_file_locked(file,jp))
+						total -= n;
+					counter ++;
+				}
+			}
+		}
 		if(file->next == jp->filelist) break;
 	}
 	
@@ -245,8 +254,12 @@ static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, U
 			}
 			if(block->next == f->f->disp.blockmap) break;
 		}
-		if(!is_file_locked(f->f,jp))
-			total += n;
+		if(n){
+			/* don't call can_move since it depends on UD_FILE_CURRENTLY_EXCLUDED flag */
+			/*if(can_move(f->f,jp) && !is_mft(f->f,jp))*/
+				if(!is_file_locked(f->f,jp))
+					total += n;
+		}
 		if(f->next == jp->fragmented_files) break;
 	}
 	

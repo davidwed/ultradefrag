@@ -25,6 +25,27 @@
 #include "../zenwinx/zenwinx.h"
 #include "../../include/ultradfgver.h"
 
+/************************************************************/
+/*             Constants affecting performance              */
+/************************************************************/
+
+/*
+* Number of files intended to be checked for locked state
+* in get_number_of_allocated_clusters routine. Low numbers
+* will result in quicker preparation for volume optimization.
+* Higher numbers result in better performance of file searching
+* routines used in atomic volume optimization tasks.
+* Assuming that each is_file_locked call requires no more than
+* 5 ms (on our XP testing system it requires 2/3 ms), we choose
+* constant equal to 100 in believe that delay of volume optimization
+* start will be no longer than 0.5 seconds.
+*/
+#define GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT 100
+
+/************************************************************/
+/*                Prototypes, constants etc.                */
+/************************************************************/
+
 #ifndef DebugPrint
 #define DebugPrint winx_dbg_print
 #endif
