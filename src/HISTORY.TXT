@@ -14,6 +14,7 @@ HISTORY
     - added display of the time limit at boot time
     - MFT zone draw was adjusted to be more precise and correct
     - few bugs in cluster map redraw algorithm were fixed
+    - few bugs in volume processing routines were fixed
     - the following translations were added:
 
       Latin, Hebrew, Javanese, Indonesian (Bahasa Indonesia)

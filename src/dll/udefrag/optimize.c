@@ -99,7 +99,7 @@ int optimize(udefrag_job_parameters *jp)
 			start_lcn = new_start_lcn;
 		
 		/* reset counters */
-		remaining_clusters = get_number_of_allocated_clusters(jp,start_lcn,jp->v_info.total_clusters - 1);
+		remaining_clusters = get_number_of_allocated_clusters(jp,start_lcn,jp->v_info.total_clusters);
 		jp->pi.processed_clusters = 0; /* reset counter */
 		jp->pi.clusters_to_process = (jp->v_info.total_clusters - \
 			jp->v_info.free_bytes / jp->v_info.bytes_per_cluster) * 2;
@@ -195,6 +195,8 @@ static void calculate_free_rgn_size_threshold(udefrag_job_parameters *jp)
 /**
  * @brief Returns number of allocated clusters
  * locating inside a specified part of the volume.
+ * @note first_lcn is included in search while
+ * last_lcn is not included.
  */
 static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
 {
@@ -202,15 +204,20 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 	winx_blockmap *block;
 	ULONGLONG i, j, n, total = 0;
 	int counter = 0;
+	int was_currently_excluded;
 	ULONGLONG time = winx_xtime();
+	
+	if(first_lcn == last_lcn)
+		return 0;
 	
 	for(file = jp->filelist; file; file = file->next){
 		if(jp->termination_router((void *)jp)) break;
+		was_currently_excluded = is_currently_excluded(file);
 		n = 0; file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED; /* for can_move call */
 		for(block = file->disp.blockmap; block; block = block->next){
-			if((block->lcn + block->length >= first_lcn + 1) && block->lcn <= last_lcn){
+			if((block->lcn + block->length > first_lcn) && block->lcn < last_lcn){
 				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
-				if(block->lcn + block->length < last_lcn + 1) j = block->lcn + block->length; else j = last_lcn + 1;
+				if(block->lcn + block->length < last_lcn) j = block->lcn + block->length; else j = last_lcn;
 				n += (j - i);
 			}
 			if(block->next == file->disp.blockmap) break;
@@ -225,6 +232,8 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 				}
 			}
 		}
+		if(was_currently_excluded)
+			file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 		if(file->next == jp->filelist) break;
 	}
 	
@@ -235,6 +244,8 @@ static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, UL
 /**
  * @brief Returns number of fragmented clusters
  * locating inside a specified part of the volume.
+ * @note first_lcn is included in search while
+ * last_lcn is not included.
  */
 static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
 {
@@ -243,13 +254,16 @@ static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, U
 	ULONGLONG i, j, n, total = 0;
 	ULONGLONG time = winx_xtime();
 	
+	if(first_lcn == last_lcn)
+		return 0;
+	
 	for(f = jp->fragmented_files; f; f = f->next){
 		if(jp->termination_router((void *)jp)) break;
 		n = 0;
 		for(block = f->f->disp.blockmap; block; block = block->next){
-			if((block->lcn + block->length >= first_lcn + 1) && block->lcn <= last_lcn){
+			if((block->lcn + block->length > first_lcn) && block->lcn < last_lcn){
 				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
-				if(block->lcn + block->length < last_lcn + 1) j = block->lcn + block->length; else j = last_lcn + 1;
+				if(block->lcn + block->length < last_lcn) j = block->lcn + block->length; else j = last_lcn;
 				n += (j - i);
 			}
 			if(block->next == f->f->disp.blockmap) break;
@@ -270,6 +284,8 @@ static ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, U
 /**
  * @brief Returns number of free clusters
  * locating inside a specified part of the volume.
+ * @note first_lcn is included in search while
+ * last_lcn is not included.
  */
 static ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
 {
@@ -277,11 +293,14 @@ static ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLO
 	ULONGLONG i, j, total = 0;
 	ULONGLONG time = winx_xtime();
 	
+	if(first_lcn == last_lcn)
+		return 0;
+	
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-		if(rgn->lcn > last_lcn) break;
-		if(rgn->lcn + rgn->length >= first_lcn + 1){
+		if(rgn->lcn >= last_lcn) break;
+		if(rgn->lcn + rgn->length > first_lcn){
 			if(rgn->lcn > first_lcn) i = rgn->lcn; else i = first_lcn;
-			if(rgn->lcn + rgn->length < last_lcn + 1) j = rgn->lcn + rgn->length; else j = last_lcn + 1;
+			if(rgn->lcn + rgn->length < last_lcn) j = rgn->lcn + rgn->length; else j = last_lcn;
 			total += (j - i);
 		}
 		if(rgn->next == jp->free_regions) break;
@@ -307,7 +326,7 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	udefrag_fragmented_file *f;	
 	winx_blockmap *block;
 	ULONGLONG time;
-	
+
 	/* free temporarily allocated space */
 	release_temp_space_regions_internal(jp);
 
@@ -327,48 +346,40 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	/* move starting point back to release heavily fragmented data */
 	/* allow no more than 5% of fragmented data inside of a skipped part of the disk */
 	fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
-	if(fragmented < /*jp->free_rgn_size_threshold*/ (new_sp - old_sp) / 20) return new_sp;
-
-	/*
-	* Fast binary search finds quickly a proper part 
-	* of the volume which is heavily fragmented.
-	* Based on bsearch() algorithm from ReactOS.
-	*/
-	i = old_sp;
-	for(lim = new_sp - old_sp; lim != 0; lim >>= 1){
-		new_sp = i + (lim >> 1);
-		fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
-		if(fragmented >= /*jp->free_rgn_size_threshold*/ (new_sp - old_sp) / 20){
-			/* move left */
-		} else {
-			/* move right */
-			i = new_sp + 1; lim --;
+	if(fragmented > (new_sp - old_sp) / 20){
+		/* based on bsearch() algorithm from ReactOS */
+		i = old_sp;
+		for(lim = new_sp - old_sp + 1; lim; lim >>= 1){
+			new_sp = i + (lim >> 1);
+			fragmented = get_number_of_fragmented_clusters(jp,old_sp,new_sp);
+			if(fragmented > (new_sp - old_sp) / 20){
+				/* move left */
+			} else {
+				/* move right */
+				i = new_sp + 1; lim --;
+			}
 		}
 	}
-	if(new_sp <= old_sp + 1)
+	if(new_sp == old_sp)
 		return old_sp;
 	
-	/*
-	* Release all remaining data when all space
-	* between new_sp and old_sp is heavily fragmented.
-	*/
-	if(fragmented >= (new_sp - old_sp + 1) / 3)
-		return old_sp; /* because at least 1/3 of skipped space is fragmented */
-	
+	//DebugPrint("*** 1 old = %I64u, new = %I64u ***",old_sp,new_sp);
 	/* cut off heavily fragmented free space */
 	i = old_sp; max_new_sp = new_sp;
-	for(lim = new_sp - old_sp; lim != 0; lim >>= 1){
+	for(lim = new_sp - old_sp + 1; lim; lim >>= 1){
 		new_sp = i + (lim >> 1);
 		free = get_number_of_free_clusters(jp,new_sp,max_new_sp);
-		if(free >= (max_new_sp - new_sp + 1) / 3){
+		if(free > (max_new_sp - new_sp) / 3){
 			/* move left */
+			//max_new_sp = new_sp;
 		} else {
 			/* move right */
 			i = new_sp + 1; lim --;
 		}
 	}
-	if(new_sp <= old_sp + 1)
+	if(new_sp == old_sp)
 		return old_sp;
+	//DebugPrint("*** 2 old = %I64u, new = %I64u ***",old_sp,new_sp);
 	
 	/* is starting point inside a fragmented file block? */
 	time = winx_xtime();
