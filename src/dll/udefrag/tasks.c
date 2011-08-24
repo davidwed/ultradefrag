@@ -799,7 +799,7 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	/*ULONGLONG end_lcn, last_lcn;*/
 	winx_volume_region *rgn;
 	ULONGLONG clusters_to_move;
-	ULONGLONG file_length;
+	ULONGLONG file_length, file_lcn;
 	winx_blockmap *block;
 	ULONGLONG new_sp;
 	char buffer[32];
@@ -963,6 +963,7 @@ slow_search:
 					}
 					rgn_lcn = rgn->lcn;
 					clusters_to_move = get_file_length(jp,largest_file);
+					file_lcn = largest_file->disp.blockmap->lcn;
 					if(move_file(largest_file,largest_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
 						moves ++;
 						jp->pi.total_moves ++;
@@ -970,13 +971,18 @@ slow_search:
 					/* regardless of result, exclude the file */
 					largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 					largest_file->user_defined_flags |= UD_FILE_MOVED_TO_FRONT;
-					if(pt != NULL && largest_file->disp.blockmap == NULL){ /* remove invalid tree items */
+					/* remove file from the tree to speed things up */
+					block = largest_file->disp.blockmap;
+					if(pt != NULL /*&& largest_file->disp.blockmap == NULL*/){ /* remove invalid tree items */
+						b.lcn = file_lcn;
+						largest_file->disp.blockmap = &b;
 						if(prb_delete(pt,largest_file) == NULL){
 							DebugPrint("move_files_to_front: cannot remove file from the tree (case 2)");
 							prb_destroy(pt,NULL);
 							pt = NULL;
 						}
 					}
+					largest_file->disp.blockmap = block;
 					/* continue from the first free region after used one */
 					min_rgn_lcn = rgn_lcn + 1;
 					if(max_rgn_lcn > min_file_lcn - 1)
