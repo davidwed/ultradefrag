@@ -753,6 +753,28 @@ done:
 }
 
 /**
+ * @brief Auxiliary routine used to sort files in binary tree.
+ */
+static int files_compare(const void *prb_a, const void *prb_b, void *prb_param)
+{
+	winx_file_info *a, *b;
+	
+	a = (winx_file_info *)prb_a;
+	b = (winx_file_info *)prb_b;
+	
+	if(a->disp.blockmap == NULL || b->disp.blockmap == NULL){
+		DebugPrint("files_compare: unexpected condition");
+		return 0;
+	}
+	
+	if(a->disp.blockmap->lcn < b->disp.blockmap->lcn)
+		return (-1);
+	if(a->disp.blockmap->lcn == b->disp.blockmap->lcn)
+		return 0;
+	return 1;
+}
+
+/**
  * @brief Moves selected group of files
  * to the beginning of the volume to free its end.
  * @details This routine tries to move each file entirely
@@ -779,15 +801,44 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	ULONGLONG new_sp;
 	char buffer[32];
 	
+	struct prb_table *pt;
+	struct prb_traverser t;
+	winx_file_info f;
+	winx_blockmap b;
+	
 	jp->pi.current_operation = VOLUME_OPTIMIZATION;
 	jp->pi.moved_clusters = 0;
+	
+	pt = prb_create(files_compare,NULL,NULL);
+	if(pt == NULL){
+		DebugPrint("move_files_to_front: cannot create files tree");
+		DebugPrint("move_files_to_front: slow file search will be used");
+	}
 	
 	/* no files are excluded by this task currently */
 	for(file = jp->filelist; file; file = file->next){
 		file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
+		if(pt != NULL){
+			if(can_move(file,jp) && !is_mft(file,jp)){
+				if(file->disp.blockmap->lcn >= start_lcn){
+					if(prb_probe(pt,(void *)file) == NULL){
+						DebugPrint("move_files_to_front: cannot add file to the tree");
+						prb_destroy(pt,NULL);
+						pt = NULL;
+					}
+				}
+			}
+		}
 		if(file->next == jp->filelist) break;
 	}
 	
+	/*DebugPrint("start LCN = %I64u",start_lcn);
+	file = prb_t_first(&t,pt);
+	while(file){
+		DebugPrint("file %ws at %I64u",file->path,file->disp.blockmap->lcn);
+		file = prb_t_next(&t);
+	}*/
+
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
@@ -817,33 +868,74 @@ repeat_scan:
 					/* TODO: speedup */
 					new_sp = calculate_starting_point(jp,start_lcn);
 					if(rgn->lcn > new_sp){
-						DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u",rgn->lcn,rgn->length);
+						DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u, %p",rgn->lcn,rgn->length,rgn);
 						DebugPrint("move_files_to_front: heavily fragmented space begins at %I64u cluster",new_sp);
 						goto done;
 					}
 				}
 try_again:
 				tm = winx_xtime();
-				largest_file = NULL; length = 0; files_found = 0;
-				min_lcn = max(start_lcn, rgn->lcn + 1);
-				for(file = jp->filelist; file; file = file->next){
-					if(can_move(file,jp) && !is_mft(file,jp)){
+				if(pt != NULL){
+					largest_file = NULL; length = 0; files_found = 0;
+					b.lcn = rgn->lcn + 1;
+					f.disp.blockmap = &b;
+					prb_t_init(&t,pt);
+					file = prb_t_insert(&t,pt,&f);
+					if(file == NULL){
+						DebugPrint("move_files_to_front: cannot insert file to the tree");
+						prb_destroy(pt,NULL);
+						pt = NULL;
+						goto slow_search;
+					}
+					if(file == &f){
+						file = prb_t_next(&t);
+						if(prb_delete(pt,&f) == NULL){
+							DebugPrint("move_files_to_front: cannot remove file from the tree (case 1)");
+							prb_destroy(pt,NULL);
+							pt = NULL;
+						}
+					}
+					while(file){
+						/*DebugPrint("XX: %ws",file->path);*/
 						if(is_moved_to_front(file)){
+						} else if(!can_move(file,jp) || is_mft(file,jp)){
 						} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
 						} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 						} else {
-							if(file->disp.blockmap->lcn >= min_lcn){
-								files_found = 1;
-								file_length = get_file_length(jp,file);
-								if(file_length > length \
-								  && file_length <= rgn->length){
-									largest_file = file;
-									length = file_length;
+							files_found = 1;
+							file_length = get_file_length(jp,file);
+							if(file_length > length \
+							  && file_length <= rgn->length){
+								largest_file = file;
+								length = file_length;
+								if(file_length == rgn->length) break;
+							}
+						}
+						file = prb_t_next(&t);
+					}
+				} else {
+slow_search:
+					largest_file = NULL; length = 0; files_found = 0;
+					min_lcn = max(start_lcn, rgn->lcn + 1);
+					for(file = jp->filelist; file; file = file->next){
+						if(can_move(file,jp) && !is_mft(file,jp)){
+							if(is_moved_to_front(file)){
+							} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+							} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
+							} else {
+								if(file->disp.blockmap->lcn >= min_lcn){
+									files_found = 1;
+									file_length = get_file_length(jp,file);
+									if(file_length > length \
+									  && file_length <= rgn->length){
+										largest_file = file;
+										length = file_length;
+									}
 								}
 							}
 						}
+						if(file->next == jp->filelist) break;
 					}
-					if(file->next == jp->filelist) break;
 				}
 				jp->p_counters.searching_time += winx_xtime() - tm;
 
@@ -875,6 +967,13 @@ try_again:
 					/* regardless of result, exclude the file */
 					largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 					largest_file->user_defined_flags |= UD_FILE_MOVED_TO_FRONT;
+					if(pt != NULL && largest_file->disp.blockmap == NULL){ /* remove invalid tree items */
+						if(prb_delete(pt,largest_file) == NULL){
+							DebugPrint("move_files_to_front: cannot remove file from the tree (case 2)");
+							prb_destroy(pt,NULL);
+							pt = NULL;
+						}
+					}
 					/* continue from the first free region after used one */
 					min_rgn_lcn = rgn_lcn + 1;
 					if(max_rgn_lcn > min_file_lcn - 1)
@@ -889,6 +988,8 @@ try_again:
 		DebugPrint("move_files_to_front: pass %I64u completed, %I64u files moved",pass,moves);
 		pass ++;
 	}
+	if(pt != NULL)
+		prb_destroy(pt,NULL);
 	/* end of strategy 1 */
 	goto done;
 #if 0
