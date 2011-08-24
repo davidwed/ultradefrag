@@ -258,7 +258,6 @@ int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *fi
  * the binary tree of all file blocks.
  * @return Zero for success, 
  * negative value otherwise.
- * @note Destroys the tree in case of errors.
  */
 int remove_block_from_file_blocks_tree(udefrag_job_parameters *jp, winx_blockmap *block)
 {
@@ -275,8 +274,13 @@ int remove_block_from_file_blocks_tree(udefrag_job_parameters *jp, winx_blockmap
 	b.block = block;
 	fb = prb_delete(jp->file_blocks,&b);
 	if(fb == NULL){
-		destroy_file_blocks_tree(jp);
-		return (-1);
+		/* the following debugging output indicates either
+		   a bug, or file system inconsistency */
+		DebugPrint("remove_block_from_file_blocks_tree: failed for "
+			"%p: VCN = %I64u, LCN = %I64u, LEN = %I64u",
+			block, block->vcn, block->lcn, block->length);
+		/* if block does not exist in tree, we have nothing to cleanup */
+		return 0;
 	}
 	winx_heap_free(fb);
 	return 0;
@@ -333,6 +337,7 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, 
 		item = prb_t_insert(&t,jp->file_blocks,&fb);
 		if(item == NULL){
 			/* insertion failed, let's go to the slow search */
+			DebugPrint("find_first_block: slow search will be used");
 			goto slow_search;
 		}
 		if(item == &fb){
@@ -340,6 +345,7 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, 
 			item = prb_t_next(&t);
 			if(prb_delete(jp->file_blocks,&fb) == NULL){
 				/* removing failed, let's go to the slow search */
+				DebugPrint("find_first_block: slow search will be used");
 				goto slow_search;
 			}
 		}
@@ -349,7 +355,8 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, 
 		}
 		while(!jp->termination_router((void *)jp)){
 			if(found_file == NULL) break;
-			if(!can_move(found_file,jp) || is_mft(found_file,jp)){
+			if(is_moved_to_front(found_file)){
+			} else if(!can_move(found_file,jp) || is_mft(found_file,jp)){
 			} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(found_file)){
 			} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(found_file)){
 			} else if(is_file_locked(found_file,jp)){
@@ -380,7 +387,8 @@ slow_search:
 		found_file = NULL; first_block = NULL; lcn = jp->v_info.total_clusters;
 		for(file = jp->filelist; file; file = file->next){
 			if(can_move(file,jp) && !is_mft(file,jp)){
-				if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+				if(is_moved_to_front(file)){
+				} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
 				} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 				} else {
 					for(block = file->disp.blockmap; block; block = block->next){

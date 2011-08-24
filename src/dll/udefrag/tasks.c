@@ -209,6 +209,7 @@ int optimize_mft(udefrag_job_parameters *jp)
 	ULONGLONG current_vcn, remaining_clusters, n, lcn;
 	winx_volume_region region = {0};
 	ULONGLONG clusters_to_cleanup;
+	ULONGLONG target;
 	int block_cleaned_up;
 	char buffer[32];
 	
@@ -229,21 +230,22 @@ int optimize_mft(udefrag_job_parameters *jp)
 	list_mft_blocks(mft_file);
 	
 	time = start_timing("mft optimization",jp);
+	
+	/* get list of free regions - without exclusion of MFT zone */
+	tm = winx_xtime();
+	rlist = winx_get_free_volume_regions(jp->volume_letter,
+		WINX_GVR_ALLOW_PARTIAL_SCAN,NULL,(void *)jp);
+	jp->p_counters.temp_space_releasing_time += winx_xtime() - tm;
 
 	clusters_to_process = mft_file->disp.clusters - mft_file->disp.blockmap->length;
 	start_lcn = mft_file->disp.blockmap->lcn + mft_file->disp.blockmap->length;
 	start_vcn = mft_file->disp.blockmap->next->vcn;
 	while(clusters_to_process > 0){
 		if(jp->termination_router((void *)jp)) break;
-		
-		/* update list of free regions */
-		winx_release_free_volume_regions(rlist);
-		tm = winx_xtime();
-		rlist = winx_get_free_volume_regions(jp->volume_letter,
-			WINX_GVR_ALLOW_PARTIAL_SCAN,NULL,(void *)jp);
-		jp->p_counters.temp_space_releasing_time += winx_xtime() - tm;
 		if(rlist == NULL) break;
-		release_temp_space_regions_internal(jp);
+
+		/* release temporary allocated space */
+		release_temp_space_regions(jp);
 		
 		/* search for the first free region after start_lcn */
 		target_rgn = NULL; tm = winx_xtime();
@@ -316,10 +318,13 @@ int optimize_mft(udefrag_job_parameters *jp)
 			lcn = first_block->lcn;
 			current_vcn = first_block->vcn;
 			clusters_to_move = remaining_clusters = min(clusters_to_cleanup, first_block->length);
-			for(rgn = rlist->prev; rgn && remaining_clusters; rgn = rgn->prev){
+			for(rgn = rlist->prev; rgn && remaining_clusters; rgn = rlist->prev){
 				if(rgn->length > 0){
 					n = min(rgn->length,remaining_clusters);
-					if(move_file(first_file,current_vcn,n,rgn->lcn + rgn->length - n,0,jp) < 0){
+					target = rgn->lcn + rgn->length - n;
+					/* subtract target clusters from auxiliary list of free regions */
+					rlist = winx_sub_volume_region(rlist,target,n);
+					if(move_file(first_file,current_vcn,n,target,0,jp) < 0){
 						if(!block_cleaned_up)
 							goto done;
 						else
@@ -334,7 +339,6 @@ int optimize_mft(udefrag_job_parameters *jp)
 					else
 						break;
 				}
-				if(rgn->prev == rlist->prev) break;
 			}
 			/* space cleaned up successfully */
 			region.next = region.prev = &region;
@@ -375,13 +379,16 @@ move_mft:
 			DebugPrint("optimize_mft: next_vcn calculation failed");
 			break;
 		}
-		if(move_file(mft_file,start_vcn,clusters_to_move,target_rgn->lcn,0,jp) < 0){
+		target = target_rgn->lcn;
+		/* subtract target clusters from auxiliary list of free regions */
+		rlist = winx_sub_volume_region(rlist,target,clusters_to_move);
+		if(move_file(mft_file,start_vcn,clusters_to_move,target,0,jp) < 0){
 			/* on failures exit */
 			break;
 		}
 		/* $mft part moved successfully */
 		clusters_to_process -= clusters_to_move;
-		start_lcn = target_rgn->lcn + clusters_to_move;
+		start_lcn = target + clusters_to_move;
 		start_vcn = next_vcn;
         jp->pi.total_moves ++;
 	}
@@ -763,7 +770,7 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	winx_file_info *file,/* *last_file, */*largest_file;
 	ULONGLONG length, rgn_size_threshold;
 	int files_found;
-	ULONGLONG rgn_lcn, min_file_lcn, min_rgn_lcn, max_rgn_lcn;
+	ULONGLONG min_lcn, rgn_lcn, min_file_lcn, min_rgn_lcn, max_rgn_lcn;
 	/*ULONGLONG end_lcn, last_lcn;*/
 	winx_volume_region *rgn;
 	ULONGLONG clusters_to_move;
@@ -780,7 +787,7 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 		file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
 		if(file->next == jp->filelist) break;
 	}
-
+	
 	/* open the volume */
 	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
@@ -816,16 +823,16 @@ repeat_scan:
 					}
 				}
 try_again:
-				/* find largest file after start_lcn which fits here */
 				tm = winx_xtime();
 				largest_file = NULL; length = 0; files_found = 0;
+				min_lcn = max(start_lcn, rgn->lcn + 1);
 				for(file = jp->filelist; file; file = file->next){
 					if(can_move(file,jp) && !is_mft(file,jp)){
-						if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+						if(is_moved_to_front(file)){
+						} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
 						} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 						} else {
-							if(file->disp.blockmap->lcn >= start_lcn \
-							  && file->disp.blockmap->lcn > rgn->lcn){
+							if(file->disp.blockmap->lcn >= min_lcn){
 								files_found = 1;
 								file_length = get_file_length(jp,file);
 								if(file_length > length \
@@ -839,6 +846,7 @@ try_again:
 					if(file->next == jp->filelist) break;
 				}
 				jp->p_counters.searching_time += winx_xtime() - tm;
+
 				if(files_found == 0){
 					/* no more files can be moved on the current pass */
 					break; /*goto done;*/
@@ -866,6 +874,7 @@ try_again:
 					}
 					/* regardless of result, exclude the file */
 					largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
+					largest_file->user_defined_flags |= UD_FILE_MOVED_TO_FRONT;
 					/* continue from the first free region after used one */
 					min_rgn_lcn = rgn_lcn + 1;
 					if(max_rgn_lcn > min_file_lcn - 1)
@@ -974,7 +983,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 	winx_blockmap *first_block;
 	ULONGLONG block_lcn, block_length, n;
 	ULONGLONG current_vcn, remaining_clusters;
-	winx_volume_region *rgn, *prev_rgn;
+	winx_volume_region *rgn;
 	ULONGLONG clusters_to_move;
 	char buffer[32];
 	
@@ -1017,8 +1026,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 			if(jp->free_regions == NULL) goto done;
 			current_vcn = first_block->vcn;
 			remaining_clusters = first_block->length;
-			for(rgn = jp->free_regions->prev; rgn && remaining_clusters; rgn = prev_rgn){
-				prev_rgn = rgn->prev; /* save it now since free regions list may be changed */
+			for(rgn = jp->free_regions->prev; rgn && remaining_clusters; rgn = jp->free_regions->prev){
 				if(rgn->lcn < block_lcn + block_length){
 					/* no more moves to the end of disk are possible */
 					goto done;
@@ -1034,7 +1042,6 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
                     jp->pi.total_moves ++;
 				}
 				if(jp->free_regions == NULL) goto done;
-				if(prev_rgn == jp->free_regions->prev) break;
 			}
 		} else {
 			/* it is safe to move entire files and entire blocks of compressed/sparse files */

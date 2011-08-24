@@ -74,6 +74,12 @@
 */
 #define UD_FILE_NOT_LOCKED 0x80
 
+/*
+* This flag is used to avoid 
+* repeated moves in volume optimization.
+*/
+#define UD_FILE_MOVED_TO_FRONT 0x100
+
 #define is_excluded(f)           ((f)->user_defined_flags & UD_FILE_EXCLUDED)
 #define is_over_limit(f)         ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
 
@@ -83,8 +89,9 @@
 #define is_in_improper_state(f)  ((f)->user_defined_flags & UD_FILE_IMPROPER_STATE)
 
 #define is_currently_excluded(f) ((f)->user_defined_flags & UD_FILE_CURRENTLY_EXCLUDED)
+#define is_moved_to_front(f)     ((f)->user_defined_flags & UD_FILE_MOVED_TO_FRONT)
 
-#define is_block_excluded(b)  ((b)->length == 0)
+#define is_block_excluded(b)     ((b)->length == 0)
 
 /* named constant for 256k */
 #define _256K (256 * 1024)
