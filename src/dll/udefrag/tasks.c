@@ -476,7 +476,8 @@ int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *j
 			clusters_to_move = get_file_length(jp,file);
 			if(move_file(file,file->disp.blockmap->vcn,
 			 clusters_to_move,rgn->lcn,0,jp) >= 0){
-				DebugPrint("Defrag success for %ws",file->path);
+				if(jp->udo.dbgprint_level >= DBG_DETAILED)
+					DebugPrint("Defrag success for %ws",file->path);
 				defragmented_files ++;
 			} else {
 				DebugPrint("Defrag failure for %ws",file->path);
@@ -572,7 +573,8 @@ int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameter
 			clusters_to_move = get_file_length(jp,file);
 			if(move_file(file,file->disp.blockmap->vcn,
 			 clusters_to_move,rgn->lcn,0,jp) >= 0){
-				DebugPrint("Defrag success for %ws",file->path);
+				if(jp->udo.dbgprint_level >= DBG_DETAILED)
+					DebugPrint("Defrag success for %ws",file->path);
 				defragmented_files ++;
 			} else {
 				DebugPrint("Defrag failure for %ws",file->path);
@@ -719,7 +721,8 @@ try_again:
 		target = rgn_largest->lcn; 
 		if(move_file(file,longest_sequence->vcn,longest_sequence_length,
 		  target,UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS,jp) >= 0){
-			DebugPrint("Partial defrag success for %ws",file->path);
+			if(jp->udo.dbgprint_level >= DBG_DETAILED)
+				DebugPrint("Partial defrag success for %ws",file->path);
 			defragmented_files ++;
 		} else {
 			DebugPrint("Partial defrag failure for %ws",file->path);
