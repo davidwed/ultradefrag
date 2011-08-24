@@ -324,7 +324,10 @@ static DWORD WINAPI start_job(LPVOID p)
 	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
-	create_file_blocks_tree(jp);
+	
+	/* speedup file searching in optimization */
+	if(jp->job_type == FULL_OPTIMIZATION_JOB || jp->job_type == QUICK_OPTIMIZATION_JOB)
+		create_file_blocks_tree(jp);
 
 	switch(jp->job_type){
 	case ANALYSIS_JOB:
