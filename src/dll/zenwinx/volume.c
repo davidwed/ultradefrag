@@ -974,8 +974,9 @@ winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
 	ULONGLONG remaining_clusters;
 	ULONGLONG new_lcn, new_length;
 
-	head = rlist; remaining_clusters = length;
+	remaining_clusters = length;
 	for(r = rlist; r && remaining_clusters; r = next){
+		head = rlist;
 		next = r->next;
 		if(r->lcn >= lcn + length) break;
 		if(r->lcn + r->length > lcn){
