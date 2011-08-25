@@ -471,7 +471,7 @@ ULONGLONG get_number_of_movable_clusters(udefrag_job_parameters *jp, ULONGLONG f
 			was_currently_excluded = is_currently_excluded(file);
 			file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
 			
-			if(counter < GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT){
+			if(counter < GET_NUMBER_OF_MOVABLE_CLUSTERS_MAGIC_CONSTANT){
 				(void)is_file_locked(file,jp);
 				counter ++;
 			}
@@ -517,7 +517,7 @@ slow_search:
 				} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 				} else {
 					total += n;
-					if(counter < GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT){
+					if(counter < GET_NUMBER_OF_MOVABLE_CLUSTERS_MAGIC_CONSTANT){
 						if(is_file_locked(file,jp))
 							total -= n;
 						counter ++;

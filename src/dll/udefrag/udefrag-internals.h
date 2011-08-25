@@ -31,7 +31,7 @@
 
 /*
 * Number of files intended to be checked for locked state
-* in get_number_of_allocated_clusters routine. Low numbers
+* in get_number_of_movable_clusters routine. Low numbers
 * will result in quicker preparation for volume optimization.
 * Higher numbers result in better performance of file searching
 * routines used in atomic volume optimization tasks.
@@ -40,7 +40,7 @@
 * constant equal to 100 in believe that delay of volume optimization
 * start will be no longer than 0.5 seconds.
 */
-#define GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT 100
+#define GET_NUMBER_OF_MOVABLE_CLUSTERS_MAGIC_CONSTANT 100
 
 /************************************************************/
 /*                Prototypes, constants etc.                */

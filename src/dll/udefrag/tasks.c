@@ -981,68 +981,7 @@ slow_search:
 	}
 	if(pt != NULL)
 		prb_destroy(pt,NULL);
-	/* end of strategy 1 */
-	goto done;
-#if 0
-	/* strategy 2: not so effective */
-	max_rgn_lcn = jp->v_info.total_clusters - 1;
-	for(file = jp->filelist; file; file = file->next){
-		if(jp->termination_router((void *)jp)) break;
-		if(can_move(file,jp) && !is_mft(file,jp) && !is_fragmented(file)){
-			if(file->disp.blockmap->lcn >= start_lcn){
-				clusters_to_move = get_file_length(jp,file);
-				rgn = find_first_free_region(jp,clusters_to_move);
-				if(rgn != NULL){
-					if(rgn->lcn < file->disp.blockmap->lcn && rgn->lcn <= max_rgn_lcn){
-						file_lcn = file->disp.blockmap->lcn;
-						if(move_file(file,file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0)
-							jp->pi.total_moves ++;
-						if(max_rgn_lcn > file_lcn - 1)
-							max_rgn_lcn = file_lcn - 1;
-					}
-				}
-			}
-		}
-		if(file->next == jp->filelist) break;
-	}
-	/* end of strategy 2 */
-	goto done;
-		
-	/* strategy 3: very slow */
-	moves = 0; end_lcn = jp->v_info.total_clusters;
-	while(!jp->termination_router((void *)jp) && end_lcn > start_lcn){
-		/* find last not fragmented file between start_lcn and end_lcn */
-		last_file = NULL; last_lcn = 0;
-		for(file = jp->filelist; file; file = file->next){
-			if(can_move(file,jp) && !is_mft(file,jp) && !is_fragmented(file)){
-				if(file->disp.blockmap->lcn >= start_lcn && \
-				  file->disp.blockmap->lcn < end_lcn && \
-				  file->disp.blockmap->lcn > last_lcn){
-					last_file = file;
-					last_lcn = file->disp.blockmap->lcn;
-				}
-			}
-			if(file->next == jp->filelist) break;
-		}
-		if(last_file == NULL) break;
-		if(is_file_locked(last_file,jp)) continue;
-		
-		/* move the file to the beginning of the volume */
-		end_lcn = last_file->disp.blockmap->lcn;
-		DebugPrint("end lcn = %I64u, start lcn = %I64u",end_lcn,start_lcn);
-		clusters_to_move = get_file_length(jp,last_file);
-		rgn = find_first_free_region(jp,clusters_to_move);
-		if(rgn != NULL){
-			if(rgn->lcn < last_file->disp.blockmap->lcn){
-				if(move_file(last_file,last_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
-					moves ++;
-					jp->pi.total_moves ++;
-				}
-			}
-		}
-		last_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
-	}
-#endif
+
 done:
 	/* display amount of moved data */
 	DebugPrint("%I64u files moved totally",jp->pi.total_moves);
