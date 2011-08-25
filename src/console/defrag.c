@@ -448,14 +448,14 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 		clear_line(stderr);
         if(pi->current_operation == VOLUME_OPTIMIZATION && !stop_flag && pi->completion_status == 0){
             if(pi->pass_number > 1)
-                fprintf(stderr,"\r%c: %s%6.2lf%% complete, pass %d, moves total = %I64u",
+                fprintf(stderr,"\r%c: %s%6.2lf%% complete, pass %lu, moves total = %I64u",
                     volume_letter,op_name,pi->percentage,pi->pass_number,pi->total_moves);
             else
                 fprintf(stderr,"\r%c: %s%6.2lf%% complete, moves total = %I64u",
                     volume_letter,op_name,pi->percentage,pi->total_moves);
 		} else {
             if(pi->pass_number > 1)
-                fprintf(stderr,"\r%c: %s%6.2lf%% complete, pass %d, fragmented/total = %lu/%lu",
+                fprintf(stderr,"\r%c: %s%6.2lf%% complete, pass %lu, fragmented/total = %lu/%lu",
                     volume_letter,op_name,pi->percentage,pi->pass_number,pi->fragmented,pi->files);
             else
                 fprintf(stderr,"\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
@@ -465,7 +465,7 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 			/* set progress indicator to 100% state */
 			clear_line(stderr);
             if(pi->pass_number > 1)
-                fprintf(stderr,"\r%c: %s100.00%% complete, %d passes needed, fragmented/total = %lu/%lu",
+                fprintf(stderr,"\r%c: %s100.00%% complete, %lu passes needed, fragmented/total = %lu/%lu",
                     volume_letter,op_name,pi->pass_number,pi->fragmented,pi->files);
             else
                 fprintf(stderr,"\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",

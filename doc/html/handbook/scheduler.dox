@@ -23,7 +23,7 @@
  * The completely automatic disk defragmentation can be easily set
  * through standard <a href="http://en.wikipedia.org/wiki/Task_Scheduler">Windows Task Scheduler</a>.
  *
- * I'm using the following scheduled tasks personally on my system:
+ * The following scheduling scheme looks quite reasonable:
  *
  * - Every 30 minutes:
  * @code
@@ -45,8 +45,8 @@
  * cmd.exe /C "set UD_EX_FILTER="system volume information;temp;recycle;.zip;.7z;.rar" && set UD_SIZELIMIT=100M && udefrag --wait --all-fixed"
  * @endcode
  *
- * This scheme runs automatically and saves a lot of my time, because I have
- * no need to start defragmenter manually anymore.
+ * This scheme running automatically may save a lot of time eliminating the need 
+ * to start defragmenter manually.
  *
  * The variable <b>often_accessed_folders</b> is just a placeholder.
  * It must be created by yourself or replaced by a list of folders.
