@@ -265,16 +265,21 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	for(f = jp->fragmented_files; f; f = f->next){
 		for(block = f->f->disp.blockmap; block; block = block->next){
 			if(new_sp >= block->lcn && new_sp <= block->lcn + block->length - 1){
-				/* include block */
-				jp->p_counters.searching_time += winx_xtime() - time;
-				return block->lcn;
+				if(can_move(f->f,jp) && !is_mft(f->f,jp) && !is_file_locked(f->f,jp)){
+					/* include block */
+					jp->p_counters.searching_time += winx_xtime() - time;
+					return block->lcn;
+				} else {
+					goto skip_unmovable_files;
+				}
 			}
 			if(block->next == f->f->disp.blockmap) break;
 		}
 		if(f->next == jp->fragmented_files) break;
 	}
 	jp->p_counters.searching_time += winx_xtime() - time;
-	
+
+skip_unmovable_files:	
 	/* skip not movable contents */
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(rgn->lcn > new_sp){
