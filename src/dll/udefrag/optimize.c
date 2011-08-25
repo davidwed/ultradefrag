@@ -27,9 +27,6 @@
 #include "udefrag-internals.h"
 
 static void calculate_free_rgn_size_threshold(udefrag_job_parameters *jp);
-static ULONGLONG get_number_of_allocated_clusters(
-	udefrag_job_parameters *jp, ULONGLONG first_lcn,
-	ULONGLONG last_lcn);
 static int increase_starting_point(udefrag_job_parameters *jp, ULONGLONG *sp);
 
 /**
@@ -99,7 +96,7 @@ int optimize(udefrag_job_parameters *jp)
 			start_lcn = new_start_lcn;
 		
 		/* reset counters */
-		remaining_clusters = get_number_of_allocated_clusters(jp,start_lcn,jp->v_info.total_clusters);
+		remaining_clusters = get_number_of_movable_clusters(jp,start_lcn,jp->v_info.total_clusters,MOVE_ALL);
 		jp->pi.processed_clusters = 0; /* reset counter */
 		jp->pi.clusters_to_process = (jp->v_info.total_clusters - \
 			jp->v_info.free_bytes / jp->v_info.bytes_per_cluster) * 2;
@@ -190,55 +187,6 @@ static void calculate_free_rgn_size_threshold(udefrag_job_parameters *jp)
 	//jp->free_rgn_size_threshold >>= 1;
 	if(jp->free_rgn_size_threshold < 2) jp->free_rgn_size_threshold = 2;
 	DebugPrint("free region size threshold = %I64u clusters",jp->free_rgn_size_threshold);
-}
-
-/**
- * @brief Returns number of allocated clusters
- * locating inside a specified part of the volume.
- * @note first_lcn is included in search while
- * last_lcn is not included.
- */
-static ULONGLONG get_number_of_allocated_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn)
-{
-	winx_file_info *file;
-	winx_blockmap *block;
-	ULONGLONG i, j, n, total = 0;
-	int counter = 0;
-	int was_currently_excluded;
-	ULONGLONG time = winx_xtime();
-	
-	if(first_lcn == last_lcn)
-		return 0;
-	
-	for(file = jp->filelist; file; file = file->next){
-		if(jp->termination_router((void *)jp)) break;
-		was_currently_excluded = is_currently_excluded(file);
-		n = 0; file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED; /* for can_move call */
-		for(block = file->disp.blockmap; block; block = block->next){
-			if((block->lcn + block->length > first_lcn) && block->lcn < last_lcn){
-				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
-				if(block->lcn + block->length < last_lcn) j = block->lcn + block->length; else j = last_lcn;
-				n += (j - i);
-			}
-			if(block->next == file->disp.blockmap) break;
-		}
-		if(n){
-			if(can_move(file,jp) && !is_mft(file,jp)){
-				total += n;
-				if(counter < GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT){
-					if(is_file_locked(file,jp))
-						total -= n;
-					counter ++;
-				}
-			}
-		}
-		if(was_currently_excluded)
-			file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
-		if(file->next == jp->filelist) break;
-	}
-	
-	jp->p_counters.searching_time += winx_xtime() - time;
-	return total;
 }
 
 /**
@@ -396,10 +344,10 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 	}
 	jp->p_counters.searching_time += winx_xtime() - time;
 	
-	/* skip not moveable contents */
+	/* skip not movable contents */
 	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
 		if(rgn->lcn > new_sp){
-			if(get_number_of_allocated_clusters(jp,new_sp,rgn->lcn) != 0){
+			if(get_number_of_movable_clusters(jp,new_sp,rgn->lcn,MOVE_ALL) != 0){
 				break;
 			} else {
 				new_sp = rgn->lcn;

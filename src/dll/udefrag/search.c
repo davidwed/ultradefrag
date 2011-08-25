@@ -417,4 +417,115 @@ slow_search:
 	return NULL;
 }
 
+/**
+ * @brief Returns number of movable clusters
+ * inside specified part of the volume.
+ * @note first_lcn is included in search while
+ * last_lcn is not included.
+ */
+ULONGLONG get_number_of_movable_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn, int flags)
+{
+	winx_blockmap b;
+	struct file_block fb, *item;
+	struct prb_traverser t;
+	winx_file_info *file;
+	winx_blockmap *block;
+	ULONGLONG i, j, n, total = 0;
+	int counter = 0;
+	int was_currently_excluded;
+	ULONGLONG time = winx_xtime();
+
+	if(jp == NULL || first_lcn == last_lcn)
+		return 0;
+
+	/* try to use fast binary tree search strategy first */
+	if(jp->file_blocks != NULL){
+		b.lcn = first_lcn; fb.block = &b;
+		prb_t_init(&t,jp->file_blocks);
+		item = prb_t_insert(&t,jp->file_blocks,&fb);
+		if(item == NULL){
+			/* insertion failed, let's go to the slow search */
+			DebugPrint("get_number_of_movable_clusters: slow search will be used");
+			goto slow_search;
+		}
+		if(item == &fb){
+			/* block at first_lcn not found */
+			item = prb_t_prev(&t);
+			if(prb_delete(jp->file_blocks,&fb) == NULL){
+				/* removing failed, let's go to the slow search */
+				DebugPrint("get_number_of_movable_clusters: slow search will be used");
+				goto slow_search;
+			}
+			if(item == NULL)
+				item = prb_t_next(&t);
+		}
+		while(!jp->termination_router((void *)jp) && item){
+			file = item->file; block = item->block;
+			if(block->lcn >= last_lcn) break;
+			
+			was_currently_excluded = is_currently_excluded(file);
+			file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED;
+			
+			if(counter < GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT){
+				(void)is_file_locked(file,jp);
+				counter ++;
+			}
+
+			if(!can_move(file,jp) || is_mft(file,jp)){
+			} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+			} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
+			} else {
+				if((block->lcn + block->length > first_lcn) && block->lcn < last_lcn){
+					if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
+					if(block->lcn + block->length < last_lcn) j = block->lcn + block->length; else j = last_lcn;
+					total += (j - i);
+				}
+			}
+			
+			if(was_currently_excluded)
+				file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
+			
+			/* go to the next block */
+			item = prb_t_next(&t);
+		}
+		jp->p_counters.searching_time += winx_xtime() - time;
+		return total;
+	}
+	
+slow_search:
+	total = 0;
+	for(file = jp->filelist; file; file = file->next){
+		if(jp->termination_router((void *)jp)) break;
+		was_currently_excluded = is_currently_excluded(file);
+		n = 0; file->user_defined_flags &= ~UD_FILE_CURRENTLY_EXCLUDED; /* for can_move call */
+		for(block = file->disp.blockmap; block; block = block->next){
+			if((block->lcn + block->length > first_lcn) && block->lcn < last_lcn){
+				if(block->lcn > first_lcn) i = block->lcn; else i = first_lcn;
+				if(block->lcn + block->length < last_lcn) j = block->lcn + block->length; else j = last_lcn;
+				n += (j - i);
+			}
+			if(block->next == file->disp.blockmap) break;
+		}
+		if(n){
+			if(can_move(file,jp) && !is_mft(file,jp)){
+				if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+				} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
+				} else {
+					total += n;
+					if(counter < GET_NUMBER_OF_ALLOCATED_CLUSTERS_MAGIC_CONSTANT){
+						if(is_file_locked(file,jp))
+							total -= n;
+						counter ++;
+					}
+				}
+			}
+		}
+		if(was_currently_excluded)
+			file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
+		if(file->next == jp->filelist) break;
+	}
+	jp->p_counters.searching_time += winx_xtime() - time;
+	return total;
+}
+
 /** @} */
