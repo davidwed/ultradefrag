@@ -171,6 +171,22 @@ struct performance_counters {
 	ULONGLONG temp_space_releasing_time;  /* time needed to release space temporarily allocated by system */
 };
 
+#define TINY_FILE_SIZE            0 * 1024  /* < 10 kb */
+#define SMALL_FILE_SIZE          10 * 1024  /* 10 - 100 kb */
+#define AVERAGE_FILE_SIZE       100 * 1024  /* 100 kb - 1 Mb */
+#define BIG_FILE_SIZE          1024 * 1024  /* 1 - 16 Mb */
+#define HUGE_FILE_SIZE    16 * 1024 * 1024  /* 16 - 128 Mb */
+#define GIANT_FILE_SIZE  128 * 1024 * 1024  /* > 128 Mb */
+
+struct file_counters {
+	unsigned long tiny_files;
+	unsigned long small_files;
+	unsigned long average_files;
+	unsigned long big_files;
+	unsigned long huge_files;
+	unsigned long giant_files;
+};
+
 typedef void (__stdcall *udefrag_progress_router)(void /*udefrag_job_parameters*/ *p);
 typedef int  (__stdcall *udefrag_termination_router)(void /*udefrag_job_parameters*/ *p);
 
@@ -201,12 +217,14 @@ typedef struct _udefrag_job_parameters {
 	ULONGLONG free_rgn_size_threshold;          /* free region size threshold used in volume optimization */
 	struct performance_counters p_counters;     /* performance counters */
 	struct prb_table *file_blocks;              /* pointer to binary tree of all file blocks found on the volume */
+	struct file_counters f_counters;            /* file counters */
 } udefrag_job_parameters;
 
 int  get_options(udefrag_job_parameters *jp);
 void release_options(udefrag_job_parameters *jp);
 int save_fragmentation_reports(udefrag_job_parameters *jp);
 void remove_fragmentation_reports(udefrag_job_parameters *jp);
+void dbg_print_file_counters(udefrag_job_parameters *jp);
 
 /* some volume space states, for internal use only */
 #define SYSTEM_OR_FREE_SPACE          100

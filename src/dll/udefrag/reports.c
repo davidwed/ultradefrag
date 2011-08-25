@@ -268,10 +268,7 @@ int save_fragmentation_reports(udefrag_job_parameters *jp)
 	ULONGLONG time;
 
 	winx_dbg_print_header(0,0,"*");
-	DebugPrint("folders total:    %u",jp->pi.directories);
-	DebugPrint("files total:      %u",jp->pi.files);
-	DebugPrint("fragmented files: %u",jp->pi.fragmented);
-	DebugPrint("compressed files: %u",jp->pi.compressed);
+	dbg_print_file_counters(jp);
 	
 	if(jp->udo.disable_reports)
 		return 0;

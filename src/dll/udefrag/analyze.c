@@ -353,6 +353,19 @@ static void __stdcall progress_callback(winx_file_info *f,void *user_defined_dat
 		DebugPrint("SIZE = %I64u", filesize);
 	*/
 	
+	if(filesize >= GIANT_FILE_SIZE)
+		jp->f_counters.giant_files ++;
+	else if(filesize >= HUGE_FILE_SIZE)
+		jp->f_counters.huge_files ++;
+	else if(filesize >= BIG_FILE_SIZE)
+		jp->f_counters.big_files ++;
+	else if(filesize >= AVERAGE_FILE_SIZE)
+		jp->f_counters.average_files ++;
+	else if(filesize >= SMALL_FILE_SIZE)
+		jp->f_counters.small_files ++;
+	else
+		jp->f_counters.tiny_files ++;
+	
 	if(jp->progress_router)
 		jp->progress_router(jp); /* redraw progress */
 }
@@ -400,6 +413,23 @@ int is_context_menu_handler(udefrag_job_parameters *jp)
 	
 	/* ok, we are in context menu handler */
 	return 1;
+}
+
+/**
+ * @brief Displays file counters.
+ */
+void dbg_print_file_counters(udefrag_job_parameters *jp)
+{
+	DebugPrint("folders total:    %u",jp->pi.directories);
+	DebugPrint("files total:      %u",jp->pi.files);
+	DebugPrint("fragmented files: %u",jp->pi.fragmented);
+	DebugPrint("compressed files: %u",jp->pi.compressed);
+	DebugPrint("tiny ...... <  10 kB: %u",jp->f_counters.tiny_files);
+	DebugPrint("small ..... < 100 kB: %u",jp->f_counters.small_files);
+	DebugPrint("average ... <   1 MB: %u",jp->f_counters.average_files);
+	DebugPrint("big ....... <  16 MB: %u",jp->f_counters.big_files);
+	DebugPrint("huge ...... < 128 MB: %u",jp->f_counters.huge_files);
+	DebugPrint("giant ..............: %u",jp->f_counters.giant_files);
 }
 
 /**
@@ -485,10 +515,7 @@ static int find_files(udefrag_job_parameters *jp)
 		if(f->next == jp->filelist) break;
 	}
 
-	DebugPrint("folders total:    %u",jp->pi.directories);
-	DebugPrint("files total:      %u",jp->pi.files);
-	DebugPrint("fragmented files: %u",jp->pi.fragmented);
-	DebugPrint("compressed files: %u",jp->pi.compressed);
+	dbg_print_file_counters(jp);
 	return 0;
 }
 
