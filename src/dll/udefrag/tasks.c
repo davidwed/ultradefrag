@@ -786,6 +786,7 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	ULONGLONG file_length, file_lcn;
 	winx_blockmap *block;
 	ULONGLONG new_sp;
+	int completed;
 	char buffer[32];
 	
 	struct prb_table *pt;
@@ -855,9 +856,16 @@ repeat_scan:
 					/* TODO: speedup */
 					new_sp = calculate_starting_point(jp,start_lcn);
 					if(rgn->lcn > new_sp){
-						DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u",rgn->lcn,rgn->length);
-						DebugPrint("move_files_to_front: heavily fragmented space begins at %I64u cluster",new_sp);
-						goto done;
+						completed = 1;
+						if(jp->job_type == QUICK_OPTIMIZATION_JOB){
+							if(get_number_of_fragmented_clusters(jp,new_sp,rgn->lcn) == 0)
+								completed = 0;
+						}
+						if(completed){
+							DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u",rgn->lcn,rgn->length);
+							DebugPrint("move_files_to_front: heavily fragmented space begins at %I64u cluster",new_sp);
+							goto done;
+						}
 					}
 				}
 try_again:

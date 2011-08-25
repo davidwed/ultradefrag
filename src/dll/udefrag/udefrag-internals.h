@@ -276,6 +276,7 @@ winx_volume_region *find_last_free_region(udefrag_job_parameters *jp,ULONGLONG m
 winx_volume_region *find_matching_free_region(udefrag_job_parameters *jp,
     ULONGLONG start_lcn, ULONGLONG min_length, int preferred_position);
 winx_volume_region *find_largest_free_region(udefrag_job_parameters *jp);
+ULONGLONG get_number_of_free_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn);
 
 int create_file_blocks_tree(udefrag_job_parameters *jp);
 int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *file, winx_blockmap *block);
@@ -284,6 +285,7 @@ void destroy_file_blocks_tree(udefrag_job_parameters *jp);
 winx_blockmap *find_first_block(udefrag_job_parameters *jp,
 	ULONGLONG *min_lcn, int flags, int skip_mft, winx_file_info **first_file);
 ULONGLONG get_number_of_movable_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn, int flags);
+ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn);
 
 ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
