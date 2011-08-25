@@ -312,11 +312,14 @@ void destroy_file_blocks_tree(udefrag_job_parameters *jp)
  * @param[in,out] min_lcn pointer to variable containing
  * minimum LCN - file blocks below it will be ignored.
  * @param[in] flags one of MOVE_xxx flags defined in udefrag.h
+ * @param[in] skip_mft boolean flag indicating whether $mft blocks
+ * must be skipped or not.
  * @param[out] first_file pointer to variable receiving information
  * about the file the first block belongs to.
  * @return Pointer to the first block. NULL indicates failure.
  */
-winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, int flags, winx_file_info **first_file)
+winx_blockmap *find_first_block(udefrag_job_parameters *jp,
+	ULONGLONG *min_lcn, int flags, int skip_mft, winx_file_info **first_file)
 {
 	winx_file_info *found_file, *file;
 	winx_blockmap *first_block, *block;
@@ -355,7 +358,8 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, 
 		}
 		while(!jp->termination_router((void *)jp)){
 			if(found_file == NULL) break;
-			if(!can_move(found_file,jp) || is_mft(found_file,jp)){
+			if(!can_move(found_file,jp)){
+			} else if(skip_mft && is_mft(found_file,jp)){
 			} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(found_file)){
 			} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(found_file)){
 			} else if(is_file_locked(found_file,jp)){
@@ -385,8 +389,9 @@ slow_search:
 	while(!jp->termination_router((void *)jp)){
 		found_file = NULL; first_block = NULL; lcn = jp->v_info.total_clusters;
 		for(file = jp->filelist; file; file = file->next){
-			if(can_move(file,jp) && !is_mft(file,jp)){
-				if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+			if(can_move(file,jp)){
+				if(skip_mft && is_mft(file,jp)){
+				} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
 				} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 				} else {
 					for(block = file->disp.blockmap; block; block = block->next){

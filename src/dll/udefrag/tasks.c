@@ -207,7 +207,7 @@ int optimize_mft(udefrag_job_parameters *jp)
 	ULONGLONG start_lcn;           /* address of space not processed yet */
 	ULONGLONG time, tm;
 	winx_volume_region *rlist = NULL, *rgn, *target_rgn;
-	winx_file_info *mft_file, *file, *first_file;
+	winx_file_info *mft_file, *first_file;
 	winx_blockmap *block, *first_block;
 	ULONGLONG end_lcn, min_lcn, next_vcn;
 	ULONGLONG current_vcn, remaining_clusters, n, lcn;
@@ -270,30 +270,10 @@ int optimize_mft(udefrag_job_parameters *jp)
 		region.length = 0;
 		while(clusters_to_cleanup > 0){
 			if(jp->termination_router((void *)jp)) goto done;
-			tm = winx_xtime();
-			first_file = NULL; first_block = NULL; min_lcn = end_lcn;
-			for(file = jp->filelist; file; file = file->next){
-				if(can_move(file,jp)){
-					for(block = file->disp.blockmap; block; block = block->next){
-						if(block->lcn >= start_lcn && block->lcn < min_lcn && block->length){
-							first_file = file;
-							first_block = block;
-							min_lcn = block->lcn;
-						}
-						if(block->next == file->disp.blockmap) break;
-					}
-				}
-				if(file->next == jp->filelist) break;
-			}
-			if(first_file == NULL){
-				jp->p_counters.searching_time += winx_xtime() - tm;
-				break;
-			}
-			if(is_file_locked(first_file,jp)){
-				jp->p_counters.searching_time += winx_xtime() - tm;
-				continue;
-			}
-			jp->p_counters.searching_time += winx_xtime() - tm;
+			min_lcn = start_lcn;
+			first_block = find_first_block(jp, &min_lcn, MOVE_ALL, 0, &first_file);
+			if(first_block->lcn >= end_lcn) break;
+			if(first_block == NULL)	break;
 			
 			/* does the first block follow a previously moved one? */
 			if(block_cleaned_up){
@@ -1129,7 +1109,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 	/* do the job */
 	while(!jp->termination_router((void *)jp)){
 		/* find the first block after start_lcn */
-		first_block = find_first_block(jp,&start_lcn,flags,&first_file);
+		first_block = find_first_block(jp,&start_lcn,flags,1,&first_file);
 		if(first_block == NULL) break;
 		/* move the first block to the last free regions */
 		block_lcn = first_block->lcn; block_length = first_block->length;

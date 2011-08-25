@@ -281,7 +281,8 @@ int create_file_blocks_tree(udefrag_job_parameters *jp);
 int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *file, winx_blockmap *block);
 int remove_block_from_file_blocks_tree(udefrag_job_parameters *jp, winx_blockmap *block);
 void destroy_file_blocks_tree(udefrag_job_parameters *jp);
-winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, int flags, winx_file_info **first_file);
+winx_blockmap *find_first_block(udefrag_job_parameters *jp,
+	ULONGLONG *min_lcn, int flags, int skip_mft, winx_file_info **first_file);
 ULONGLONG get_number_of_movable_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn, int flags);
 
 ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
