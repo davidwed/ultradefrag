@@ -979,8 +979,6 @@ slow_search:
 		DebugPrint("move_files_to_front: pass %I64u completed, %I64u files moved",pass,moves);
 		pass ++;
 	}
-	if(pt != NULL)
-		prb_destroy(pt,NULL);
 
 done:
 	/* display amount of moved data */
@@ -988,6 +986,7 @@ done:
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
 	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
+	if(pt != NULL) prb_destroy(pt,NULL);
 	stop_timing("file moving to front",time,jp);
 	winx_fclose(jp->fVolume);
 	jp->fVolume = NULL;
