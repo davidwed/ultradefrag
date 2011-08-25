@@ -875,7 +875,7 @@ repeat_scan:
 					/* TODO: speedup */
 					new_sp = calculate_starting_point(jp,start_lcn);
 					if(rgn->lcn > new_sp){
-						DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u, %p",rgn->lcn,rgn->length,rgn);
+						DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u",rgn->lcn,rgn->length);
 						DebugPrint("move_files_to_front: heavily fragmented space begins at %I64u cluster",new_sp);
 						goto done;
 					}
