@@ -355,8 +355,7 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp, ULONGLONG *min_lcn, 
 		}
 		while(!jp->termination_router((void *)jp)){
 			if(found_file == NULL) break;
-			if(is_moved_to_front(found_file)){
-			} else if(!can_move(found_file,jp) || is_mft(found_file,jp)){
+			if(!can_move(found_file,jp) || is_mft(found_file,jp)){
 			} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(found_file)){
 			} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(found_file)){
 			} else if(is_file_locked(found_file,jp)){
@@ -387,8 +386,7 @@ slow_search:
 		found_file = NULL; first_block = NULL; lcn = jp->v_info.total_clusters;
 		for(file = jp->filelist; file; file = file->next){
 			if(can_move(file,jp) && !is_mft(file,jp)){
-				if(is_moved_to_front(file)){
-				} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+				if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
 				} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 				} else {
 					for(block = file->disp.blockmap; block; block = block->next){

@@ -39,6 +39,10 @@
  */
 int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 {
+	/* skip files already moved to front in optimization */
+	if(is_moved_to_front(f))
+		return 0;
+	
 	/* skip files already excluded by the current task */
 	if(is_currently_excluded(f))
 		return 0;
@@ -900,8 +904,7 @@ try_again:
 					}
 					while(file){
 						/*DebugPrint("XX: %ws",file->path);*/
-						if(is_moved_to_front(file)){
-						} else if(!can_move(file,jp) || is_mft(file,jp)){
+						if(!can_move(file,jp) || is_mft(file,jp)){
 						} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
 						} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 						} else {
@@ -922,8 +925,7 @@ slow_search:
 					min_lcn = max(start_lcn, rgn->lcn + 1);
 					for(file = jp->filelist; file; file = file->next){
 						if(can_move(file,jp) && !is_mft(file,jp)){
-							if(is_moved_to_front(file)){
-							} else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+							if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
 							} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 							} else {
 								if(file->disp.blockmap->lcn >= min_lcn){

@@ -395,6 +395,18 @@ ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp)
 		if(f->next == jp->fragmented_files) break;
 	}
 	jp->p_counters.searching_time += winx_xtime() - time;
+	
+	/* skip not moveable contents */
+	for(rgn = jp->free_regions; rgn; rgn = rgn->next){
+		if(rgn->lcn > new_sp){
+			if(get_number_of_allocated_clusters(jp,new_sp,rgn->lcn) != 0){
+				break;
+			} else {
+				new_sp = rgn->lcn;
+			}
+		}
+		if(rgn->next == jp->free_regions) break;
+	}
 	return new_sp;
 }
 
