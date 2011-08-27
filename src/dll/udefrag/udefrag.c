@@ -352,7 +352,8 @@ static DWORD WINAPI start_job(LPVOID p)
 	}
 
 	destroy_file_blocks_tree(jp);
-	release_temp_space_regions(jp);
+	if(jp->job_type != ANALYSIS_JOB)
+		release_temp_space_regions(jp);
 	(void)save_fragmentation_reports(jp);
 	
 	/* now it is safe to adjust the completion status */
