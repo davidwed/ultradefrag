@@ -123,9 +123,8 @@ static int add_temp_space_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGL
 }
 
 /**
- * @brief This auxiliary routine intended for
- * use in optimize_mft and calculate_starting_point,
- * just to speed things up.
+ * @brief This auxiliary routine intended for use in
+ * calculate_starting_point just to speed things up.
  */
 void release_temp_space_regions_internal(udefrag_job_parameters *jp)
 {

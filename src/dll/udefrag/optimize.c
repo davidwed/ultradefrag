@@ -75,7 +75,7 @@ int optimize(udefrag_job_parameters *jp)
 		jp->v_info.free_bytes / jp->v_info.bytes_per_cluster) * 2;
 	
 	/* optimize MFT separately to keep its optimal location */
-	result = optimize_mft(jp);
+	result = optimize_mft_helper(jp);
 	if(result == 0){
 		/* at least mft optimization succeeded */
 		overall_result = 0;
@@ -148,6 +148,35 @@ int optimize(udefrag_job_parameters *jp)
 	if(jp->termination_router((void *)jp)) return 0;
 	
 	return overall_result;
+}
+
+/**
+ * @brief Optimizes MFT.
+ */
+int optimize_mft(udefrag_job_parameters *jp)
+{
+	int result;
+	winx_file_info *file;
+	
+	/* perform volume analysis */
+	result = analyze(jp); /* we need to call it once, here */
+	if(result < 0) return result;
+	
+	/* reset counters */
+	jp->pi.processed_clusters = 0;
+	jp->pi.clusters_to_process = 1;
+	for(file = jp->filelist; file; file = file->next){
+		if(is_mft(file,jp)){
+			/* we'll move no more than double size of MFT */
+			jp->pi.clusters_to_process = file->disp.clusters * 2;
+			break;
+		}
+		if(file->next == jp->filelist) break;
+	}
+	
+	/* optimize MFT */
+	result = optimize_mft_helper(jp);
+	return result;
 }
 
 /************************* Internal routines ****************************/

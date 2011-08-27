@@ -286,12 +286,14 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_QUICK_OPTIMIZE,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_FULL_OPTIMIZE,MF_BYCOMMAND | MF_GRAYED);
+	EnableMenuItem(hMainMenu,IDM_OPTIMIZE_MFT,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_REPEAT_ACTION,MF_BYCOMMAND | MF_GRAYED);
 	EnableMenuItem(hMainMenu,IDM_SHOW_REPORT,MF_BYCOMMAND | MF_GRAYED);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_ANALYZE,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_QUICK_OPTIMIZE,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_FULL_OPTIMIZE,MAKELONG(FALSE,0));
+	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE_MFT,MAKELONG(FALSE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_REPEAT_ACTION,MAKELONG(FALSE,0));
 	/*SendMessage(hToolbar,TB_SETSTATE,IDM_REPEAT_ACTION,MAKELONG(TBSTATE_INDETERMINATE,0));*/
 	tbi.cbSize = sizeof(TBBUTTONINFO);
@@ -328,12 +330,14 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
 	EnableMenuItem(hMainMenu,IDM_DEFRAG,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_QUICK_OPTIMIZE,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_FULL_OPTIMIZE,MF_BYCOMMAND | MF_ENABLED);
+	EnableMenuItem(hMainMenu,IDM_OPTIMIZE_MFT,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_REPEAT_ACTION,MF_BYCOMMAND | MF_ENABLED);
 	EnableMenuItem(hMainMenu,IDM_SHOW_REPORT,MF_BYCOMMAND | MF_ENABLED);
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_ANALYZE,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_DEFRAG,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_QUICK_OPTIMIZE,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_FULL_OPTIMIZE,MAKELONG(TRUE,0));
+	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_OPTIMIZE_MFT,MAKELONG(TRUE,0));
 	SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_REPEAT_ACTION,MAKELONG(TRUE,0));
 	/*SendMessage(hToolbar,TB_SETSTATE,IDM_REPEAT_ACTION,MAKELONG(TBSTATE_ENABLED,0));
 	if(repeat_action)
@@ -374,6 +378,8 @@ void start_selected_jobs(udefrag_job_type job_type)
 			action = "full volume optimization";
 		else if(job_type == QUICK_OPTIMIZATION_JOB)
 			action = "quick volume optimization";
+		else if(job_type == MFT_OPTIMIZATION_JOB)
+			action = "MFT optimization";
 		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
 			"Cannot create thread starting %s!",
 			action);

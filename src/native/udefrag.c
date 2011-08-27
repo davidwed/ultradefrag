@@ -223,6 +223,10 @@ void ProcessVolume(char letter)
 		winx_printf("quick optimize %c: ...\n",letter);
         message = "Quick optimization";
 		break;
+	case MFT_OPTIMIZATION_JOB:
+		winx_printf("optimize mft on %c: ...\n",letter);
+        message = "MFT optimization";
+		break;
 	}
     /* display the time limit if possible */
 	buffer = winx_heap_alloc(MAX_ENV_VARIABLE_LENGTH * sizeof(short));
@@ -274,6 +278,7 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 {
 	int a_flag = 0, o_flag = 0;
 	int quick_optimize_flag = 0;
+	int optimize_mft_flag = 0;
 	int all_flag = 0, all_fixed_flag = 0;
 	int repeat_flag = 0;
 	char letters[MAX_DOS_DRIVES];
@@ -305,8 +310,14 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 		} else if(!wcscmp(argv[i],L"-o")){
 			o_flag = 1;
 			continue;
+		} else if(!wcscmp(argv[i],L"-q")){
+			quick_optimize_flag = 1;
+			continue;
 		} else if(!wcscmp(argv[i],L"--quick-optimize")){
 			quick_optimize_flag = 1;
+			continue;
+		} else if(!wcscmp(argv[i],L"--optimize-mft")){
+			optimize_mft_flag = 1;
 			continue;
 		} else if(!wcscmp(argv[i],L"--all")){
 			all_flag = 1;
@@ -353,11 +364,12 @@ int __cdecl udefrag_handler(int argc,short **argv,short **envp)
 	
 	/* --quick-optimize flag has more precedence */
 	if(quick_optimize_flag) o_flag = 0;
-
+	
 	/* set current_job global variable */
 	if(a_flag) current_job = ANALYSIS_JOB;
 	else if(o_flag) current_job = FULL_OPTIMIZATION_JOB;
 	else if(quick_optimize_flag) current_job = QUICK_OPTIMIZATION_JOB;
+	else if(optimize_mft_flag) current_job = MFT_OPTIMIZATION_JOB;
 	else current_job = DEFRAGMENTATION_JOB;
 	
 	current_job_flags = repeat_flag ? UD_JOB_REPEAT : 0;

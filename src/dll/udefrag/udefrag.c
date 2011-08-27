@@ -321,12 +321,15 @@ static DWORD WINAPI start_job(LPVOID p)
 	if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
 	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
 	else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "quick optimizing";
+	else if(jp->job_type == MFT_OPTIMIZATION_JOB) action = "optimizing $mft on";
 	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
 	
 	/* speedup file searching in optimization */
-	if(jp->job_type == FULL_OPTIMIZATION_JOB || jp->job_type == QUICK_OPTIMIZATION_JOB)
+	if(jp->job_type == FULL_OPTIMIZATION_JOB \
+	  || jp->job_type == QUICK_OPTIMIZATION_JOB \
+	  || jp->job_type == MFT_OPTIMIZATION_JOB)
 		create_file_blocks_tree(jp);
 
 	switch(jp->job_type){
@@ -339,6 +342,9 @@ static DWORD WINAPI start_job(LPVOID p)
 	case FULL_OPTIMIZATION_JOB:
 	case QUICK_OPTIMIZATION_JOB:
 		result = optimize(jp);
+		break;
+	case MFT_OPTIMIZATION_JOB:
+		result = optimize_mft(jp);
 		break;
 	default:
 		result = 0;
@@ -610,6 +616,10 @@ char * __stdcall udefrag_get_error_description(int error_code)
 	case UDEFRAG_UDF_DEFRAG:
 		return "UDF volumes can neither be defragmented nor optimized,\n"
 		       "because the file system driver does not support FSCTL_MOVE_FILE.";
+	case UDEFRAG_NO_MFT:
+		return "MFT can be optimized on NTFS volumes only.";
+	case UDEFRAG_UNMOVABLE_MFT:
+		return "On NT4 and Windows 2000 MFT is not movable.";
 	}
 	return "";
 }

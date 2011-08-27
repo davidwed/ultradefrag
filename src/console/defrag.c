@@ -42,6 +42,7 @@ char letters[MAX_DOS_DRIVES] = {0};
 int wait_flag = 0;
 int shellex_flag = 0;
 int quick_optimize_flag = 0;
+int optimize_mft_flag = 0;
 int repeat_flag = 0;
 
 int first_progress_update;
@@ -552,6 +553,7 @@ static int process_single_volume(char volume_letter)
 	if(a_flag) job_type = ANALYSIS_JOB;
 	else if(o_flag) job_type = FULL_OPTIMIZATION_JOB;
 	else if(quick_optimize_flag) job_type = QUICK_OPTIMIZATION_JOB;
+	else if(optimize_mft_flag) job_type = MFT_OPTIMIZATION_JOB;
 	if(repeat_flag)
 		flags = UD_JOB_REPEAT;
 	first_progress_update = 1;

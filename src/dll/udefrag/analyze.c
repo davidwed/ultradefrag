@@ -290,7 +290,9 @@ static int __stdcall filter(winx_file_info *f,void *user_defined_data)
 	* No files can be filtered out when
 	* volume optimization job is requested.
 	*/
-	if(jp->job_type == FULL_OPTIMIZATION_JOB || jp->job_type == QUICK_OPTIMIZATION_JOB)
+	if(jp->job_type == FULL_OPTIMIZATION_JOB \
+	  || jp->job_type == QUICK_OPTIMIZATION_JOB \
+	  || jp->job_type == MFT_OPTIMIZATION_JOB)
 		goto done;
 
 	/* skip temporary files */
@@ -793,9 +795,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	  && jp->fs_type == FS_NTFS \
 	  && jp->v_info.bytes_per_cluster > 4096 \
 	  && win_version <= WINDOWS_2K){
-		DebugPrint("Cannot defragment NTFS volumes with");
-		DebugPrint("cluster size greater than 4 kb");
-		DebugPrint("on Windows 2000 and Windows NT 4.0");
+		DebugPrint("cannot defragment NTFS volumes with clusters bigger than 4kb on nt4/w2k");
 		return UDEFRAG_W2K_4KB_CLUSTERS;
 	}
 	  
@@ -808,7 +808,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	if(jp->job_type != ANALYSIS_JOB \
       && jp->fs_type == FS_UDF \
       /* && win_version <= WINDOWS_VISTA */){
-		DebugPrint("Cannot defragment/optimize UDF volumes,");
+		DebugPrint("cannot defragment/optimize UDF volumes,");
 		DebugPrint("because the file system driver does not support FSCTL_MOVE_FILE.");
 		return UDEFRAG_UDF_DEFRAG;
 	}
@@ -821,8 +821,20 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 	  || jp->fs_type == FS_FAT16 \
 	  || jp->fs_type == FS_FAT32 \
 	  || jp->fs_type == FS_FAT32_UNRECOGNIZED)){
-		DebugPrint("Cannot optimize FAT volumes because of unmovable directories");
+		DebugPrint("cannot optimize FAT volumes because of unmovable directories");
 		return UDEFRAG_FAT_OPTIMIZATION;
+	}
+	  
+	/* MFT optimization is impossible in some cases. */
+	if(jp->job_type == MFT_OPTIMIZATION_JOB){
+		if(jp->fs_type != FS_NTFS){
+			DebugPrint("MFT can be optimized on NTFS volumes only");
+			return UDEFRAG_NO_MFT;
+		}
+		if(winx_get_os_version() <= WINDOWS_2K){
+			DebugPrint("MFT is not movable on NT4 and Windows 2000");
+			return UDEFRAG_UNMOVABLE_MFT;
+		}			
 	}
 
 	switch(jp->fs_type){

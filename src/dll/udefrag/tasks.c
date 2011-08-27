@@ -199,7 +199,7 @@ static void list_mft_blocks(winx_file_info *mft_file)
  * @note As a side effect it may increase
  * number of fragmented files.
  */
-int optimize_mft(udefrag_job_parameters *jp)
+int optimize_mft_helper(udefrag_job_parameters *jp)
 {
 	ULONGLONG clusters_to_process; /* the number of $mft clusters not processed yet */
 	ULONGLONG start_vcn;           /* VCN of the portion of $mft not processed yet */

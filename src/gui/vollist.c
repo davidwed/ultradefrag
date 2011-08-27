@@ -324,6 +324,7 @@ static void VolListUpdateStatusFieldInternal(int index,volume_processing_job *jo
 				break;
 			case FULL_OPTIMIZATION_JOB:
 			case QUICK_OPTIMIZATION_JOB:
+			case MFT_OPTIMIZATION_JOB:
 				ProcessCaption = WgxGetResourceString(i18n_table,L"STATUS_OPTIMIZED");
 				break;
 		}

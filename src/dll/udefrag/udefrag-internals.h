@@ -308,6 +308,7 @@ ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, ULONGLON
 ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
+int optimize_mft_helper(udefrag_job_parameters *jp);
 int optimize_mft(udefrag_job_parameters *jp);
 int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *jp);
 int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp);

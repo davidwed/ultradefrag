@@ -731,6 +731,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		case IDM_FULL_OPTIMIZE:
 			start_selected_jobs(FULL_OPTIMIZATION_JOB);
 			return 0;
+		case IDM_OPTIMIZE_MFT:
+			MessageBox(0,0,0,0);
+			start_selected_jobs(MFT_OPTIMIZATION_JOB);
+			return 0;
 		case IDM_STOP:
 			stop_all_jobs();
 			return 0;

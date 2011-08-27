@@ -39,6 +39,8 @@
 #define UDEFRAG_ASSIGNED_BY_SUBST (-7)
 #define UDEFRAG_REMOVABLE         (-8)
 #define UDEFRAG_UDF_DEFRAG        (-9)
+#define UDEFRAG_NO_MFT            (-10)
+#define UDEFRAG_UNMOVABLE_MFT     (-11)
 
 #define DEFAULT_REFRESH_INTERVAL 100
 
@@ -94,7 +96,8 @@ typedef enum {
 	ANALYSIS_JOB = 0,
 	DEFRAGMENTATION_JOB,
 	FULL_OPTIMIZATION_JOB,
-	QUICK_OPTIMIZATION_JOB
+	QUICK_OPTIMIZATION_JOB,
+	MFT_OPTIMIZATION_JOB
 } udefrag_job_type;
 
 typedef enum {

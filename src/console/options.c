@@ -63,7 +63,8 @@ void show_help(void)
 		"  -a,  --analyze                      Analyze volume\n"
 		"       --defragment                   Defragment volume\n"
 		"  -o,  --optimize                     Optimize volume space\n"
-		"       --quick-optimize               Perform quick optimization\n"
+		"  -q,  --quick-optimize               Perform quick optimization\n"
+		"       --optimize-mft                 Optimize MFT\n"
 		"  -l,  --list-available-volumes       List volumes available\n"
 		"                                      for defragmentation,\n"
 		"                                      except removable media\n"
@@ -188,7 +189,8 @@ static struct option long_options_[] = {
 	{ "analyze",                     no_argument,       0, 'a' },
 	{ "defragment",                  no_argument,       0,  0  },
 	{ "optimize",                    no_argument,       0, 'o' },
-	{ "quick-optimize",              no_argument,       0,  0  },
+	{ "quick-optimize",              no_argument,       0, 'q' },
+	{ "optimize-mft",                no_argument,       0,  0  },
 	{ "all",                         no_argument,       0,  0  },
 	{ "all-fixed",                   no_argument,       0,  0  },
 	
@@ -238,7 +240,7 @@ static struct option long_options_[] = {
 	{ 0,                             0,                 0,  0  }
 };
 
-char short_options_[] = "aol::rpvmbh?iesd";
+char short_options_[] = "aoql::rpvmbh?iesd";
 
 /* new code based on GNU getopt() function */
 void parse_cmdline(int argc, char **argv)
@@ -270,8 +272,8 @@ void parse_cmdline(int argc, char **argv)
 			long_option_name = long_options_[option_index].name;
 			if(!strcmp(long_option_name,"defragment")){
 				/* do nothing here */
-			} else if(!strcmp(long_option_name,"quick-optimize")){
-				quick_optimize_flag = 1;
+			} else if(!strcmp(long_option_name,"optimize-mft")){
+				optimize_mft_flag = 1;
 			} else if(!strcmp(long_option_name,"map-border-color")){
 				if(!optarg) break;
 				if(!strcmp(optarg,"black")){
@@ -339,6 +341,9 @@ void parse_cmdline(int argc, char **argv)
 			break;
 		case 'o':
 			o_flag = 1;
+			break;
+		case 'q':
+			quick_optimize_flag = 1;
 			break;
 		case 'l':
 			l_flag = 1;
