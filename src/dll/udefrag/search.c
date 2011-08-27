@@ -258,6 +258,7 @@ int create_file_blocks_tree(udefrag_job_parameters *jp)
 int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *file, winx_blockmap *block)
 {
 	struct file_block *fb;
+	void **p;
 	
 	if(jp == NULL || file == NULL || block == NULL)
 		return (-1);
@@ -273,11 +274,16 @@ int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *fi
 	
 	fb->file = file;
 	fb->block = block;
-	/* FIXME: what if a duplicate item exists */
-	if(prb_probe(jp->file_blocks,(void *)fb) == NULL){
+	p = prb_probe(jp->file_blocks,(void *)fb);
+	if(p == NULL){
 		winx_heap_free(fb);
 		destroy_file_blocks_tree(jp);
 		return (-1);
+	}
+	/* if a duplicate item exists... */
+	if(*p != fb){
+		DebugPrint("add_block_to_file_blocks_tree: a duplicate found");
+		winx_heap_free(fb);
 	}
 	return 0;
 }
