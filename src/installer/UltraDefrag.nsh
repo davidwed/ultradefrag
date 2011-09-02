@@ -1,6 +1,7 @@
 /*
- *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  UltraDefrag - a powerful defragmentation tool for Windows NT.
  *  Copyright (c) 2007-2011 by Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2010-2011 by Stefan Pendl (stefanpe@users.sourceforge.net).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
