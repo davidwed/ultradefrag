@@ -1,5 +1,5 @@
 /*
- *  UltraDefrag - powerful defragmentation tool for Windows NT.
+ *  ZenWINX - WIndows Native eXtended library.
  *  Copyright (c) 2007-2011 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
