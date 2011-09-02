@@ -458,10 +458,10 @@ int CreateMainWindow(int nShowCmd)
 }
 
 /**
- * @brief Opens web page of the handbook,
- * either from local storage or from the network.
+ * @brief Opens a page of the handbook, either
+ * from local storage or from the network.
  */
-static void OpenWebPage(char *page)
+void OpenWebPage(char *page)
 {
 	short path[MAX_PATH];
 	HINSTANCE hApp;

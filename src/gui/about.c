@@ -73,7 +73,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
         case WM_COMMAND:
             switch(LOWORD(wParam)){
                 case IDC_CREDITS:
-                    (void)WgxShellExecuteW(hWindow,L"open",L".\\CREDITS.TXT",NULL,NULL,SW_SHOW);
+                    OpenWebPage("Credits.html");
                     break;
                 case IDC_LICENSE:
                     (void)WgxShellExecuteW(hWindow,L"open",L".\\LICENSE.TXT",NULL,NULL,SW_SHOW);

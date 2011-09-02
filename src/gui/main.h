@@ -202,6 +202,8 @@ void StopI18nFolderChangesTracking();
 
 int ShutdownOrHibernate(void);
 
+void OpenWebPage(char *page);
+
 /* common global variables */
 extern HINSTANCE hInstance;
 extern HWND hWindow;
