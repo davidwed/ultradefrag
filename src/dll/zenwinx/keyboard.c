@@ -24,6 +24,11 @@
  * @{
  */
 
+/*
+* Revised by Stefan Pendl, 2010
+* <stefanpe@users.sourceforge.net>
+*/
+
 #include "zenwinx.h"
 
 /*

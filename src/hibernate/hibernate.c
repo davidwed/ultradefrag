@@ -1,8 +1,8 @@
 /*
-* Hibernate for Windows - command line tool for Windows hibernation.
+* Hibernate for Windows - a command line tool for Windows hibernation.
 *
-* Programmer:    Dmitri Arkhangelski (dmitriar@gmail.com).
-* Creation date: October 2009.
+* Programmer:    Dmitri Arkhangelski (dmitriar@gmail.com)
+* Creation date: October 2009
 * License:       Public Domain
 */
 

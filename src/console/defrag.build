@@ -2,8 +2,8 @@
 name        = "udefrag"
 target_type = "console"
 
--- getopt* files will be copied by build.cmd command to obj\console directory
-
+-- getopt* files are copied by the build.cmd tool to obj\console directory
+-- during the build process, so they become accessible for the compiler
 src = {
 	"defrag.c", "getopt.c", "getopt1.c", "options.c", "map.c"
 }
