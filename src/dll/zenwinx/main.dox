@@ -71,7 +71,9 @@
  *
  * ZenWINX includes a part of the <a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>
  * code licensed under the <a href="http://www.gnu.org/licenses/lgpl.html">GNU Lesser General 
- * Public License</a>.
+ * Public License</a>. Also ZenWINX includes keytrans.c file from 
+ * <a href="http://www.reactos.org/">ReactOS</a> source code licensed under the
+ * <a href="http://www.gnu.org/copyleft/gpl.html">GNU General Public License</a>.
  */
 
 /**

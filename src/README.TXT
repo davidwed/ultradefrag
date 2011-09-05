@@ -44,5 +44,21 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+along with this program (in a file called LICENSE.TXT); if not, go
+to http://www.gnu.org/copyleft/gpl.html or write to
+
+  Free Software Foundation, Inc.
+  59 Temple Place - Suite 330
+  Boston, MA 02111-1307 USA
+
+
+Additional Copyright Information
+--------------------------------
+
+UltraDefrag includes portions of a few open source libraries 
+(Lua, GNU C Library, GNU libavl) as well as portions of ReactOS source code.
+Most of these libraries are not distributed under the terms of the GPL, but
+rather some other free, GPL-compatible license. For detailed information 
+read the `Credits and License' chapter of the UltraDefrag Handbook. You 
+should have received a copy of it along with this program; if not, go to
+http://ultradefrag.sourceforge.net/handbook/Credits.html

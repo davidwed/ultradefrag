@@ -127,7 +127,8 @@
  * UltraDefrag includes portions of the following open source libraries:
  * <a href="http://www.lua.org/">Lua</a>, 
  * <a href="http://www.gnu.org/software/libc/">GNU C Library</a>,
- * <a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>.
+ * <a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>. Also 
+ * UltraDefrag includes portions of <a href="http://www.reactos.org/">ReactOS</a> code.
  *
  * - Portions Copyright © 1994-2007 Lua.org, PUC-Rio
  *
@@ -159,13 +160,12 @@
  * 
  * The GNU C Library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Library General Public License for more details.
  * 
  * You should have received a copy of the GNU Library General Public
- * License along with the GNU C Library; see the file COPYING.LIB.  If not,
- * write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * License along with this program. If not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * - Portions Copyright (C) 1998, 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
  *
@@ -176,13 +176,29 @@
  * 
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
  * 
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
+ * License along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.
+ *
+ * - Portions Copyright (C) 2002 ReactOS Team
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  * <b>Chief Architect</b>
  *
@@ -284,11 +300,9 @@
  *
  * Also many thanks to all the people who helped us improve UltraDefrag.
  *
- * This documentation is licensed under the terms of the 
- * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/FDL.html">GNU Free Documentation License</a>.
+ * This documentation is licensed under the terms of the @ref FDL.
  *
- * The program is licensed under the terms of the 
- * <a href="http://ultradefrag.sourceforge.net/doxy-doc/html/GPL.html">GNU General Public License</a>.
+ * The program is licensed under the terms of the @ref GPL.
  *
  * <HR>
  *  <TABLE BORDER="0" STYLE="width: 97%; margin:auto;">
