@@ -21,7 +21,8 @@ HISTORY
 
     - the following translations were updated:
 
-      Portuguese (BR), Yiddish, Hungarian, Spanish (ES), Dutch, Finnish
+      Portuguese (BR), Yiddish, Hungarian, Spanish (ES), Dutch, Finnish,
+      Italian, Iloko, Filipino (Tagalog), Catalan
     
     - installer has been enhanced in the following ways:
       + now checks Mutex to prevent install/remove while the program is running
