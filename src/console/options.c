@@ -36,7 +36,7 @@ void show_help(void)
 {
 	printf(
 		"===============================================================================\n"
-		VERSIONINTITLE " - Powerful disk defragmentation tool for Windows NT\n"
+		VERSIONINTITLE " - a powerful disk defragmentation tool for Windows NT\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007-2011.\n"
 		"\n"
 		"===============================================================================\n"

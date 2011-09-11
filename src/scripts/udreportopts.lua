@@ -28,5 +28,5 @@ split_long_names = 0
 max_chars_per_line = 50
 
 -------------------------------------------------------------------------------
--- A web page style can be set through udreport.css style sheet.
+-- The web page style can be set through udreport.css style sheet.
 -------------------------------------------------------------------------------
