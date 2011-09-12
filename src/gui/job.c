@@ -199,12 +199,12 @@ void DisplayInvalidVolumeError(int error_code)
 
 	if(error_code == UDEFRAG_UNKNOWN_ERROR){
 		MessageBoxA(NULL,"Volume is missing or some error has been encountered.\n"
-		                 "Use DbgView program to get more information.",
+		                 "Enable logs or use DbgView program to get more information.",
 		                 "The volume cannot be processed!",MB_OK | MB_ICONHAND);
 	} else {
 		(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
 				udefrag_get_error_description(error_code),
-				"Use DbgView program to get more information.");
+				"Enable logs or use DbgView program to get more information.");
 		buffer[sizeof(buffer) - 1] = 0;
 		MessageBoxA(NULL,buffer,"The volume cannot be processed!",MB_OK | MB_ICONHAND);
 	}
@@ -214,13 +214,24 @@ void DisplayInvalidVolumeError(int error_code)
  * @brief Displays detailed information
  * about volume processing failure.
  */
-void DisplayDefragError(int error_code,char *caption)
+void DisplayDefragError(int error_code)
 {
 	char buffer[512];
+	char *caption = "Volume optimization failed!";
 	
+	switch(current_job->job_type){
+	case ANALYSIS_JOB:
+		caption = "Volume analysis failed!";
+		break;
+	case DEFRAGMENTATION_JOB:
+		caption = "Volume defragmentation failed!";
+		break;
+	default:
+		break;
+	}
 	(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
 			udefrag_get_error_description(error_code),
-			"Use DbgView program to get more information.");
+			"Enable logs or use DbgView program to get more information.");
 	buffer[sizeof(buffer) - 1] = 0;
 	MessageBoxA(NULL,buffer,caption,MB_OK | MB_ICONHAND);
 }
@@ -256,7 +267,7 @@ void ProcessSingleVolume(volume_processing_job *job)
 				job_flags,map_blocks_per_line * map_lines,update_progress,
 				terminator, NULL);
 		if(error_code < 0 && !exit_pressed){
-			DisplayDefragError(error_code,"Analysis/Defragmentation failed!");
+			DisplayDefragError(error_code);
 			//ClearMap();
 		}
 	}

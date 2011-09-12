@@ -233,13 +233,29 @@ void display_error(char *string)
  * @brief Displays error message
  * specific for failed disk processing tasks.
  */
-static void display_defrag_error(int error_code)
+static void display_defrag_error(udefrag_job_type job_type, int error_code)
 {
+	char *operation = "optimization";
+	
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-	printf("\nAnalysis/Defragmentation failed!\n\n");
+	
+	switch(job_type){
+	case ANALYSIS_JOB:
+		operation = "analysis";
+		break;
+	case DEFRAGMENTATION_JOB:
+		operation = "defragmentation";
+		break;
+	default:
+		break;
+	}
+	printf("\nVolume %s failed!\n\n",operation);
+	
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("%s\n\n",udefrag_get_error_description(error_code));
-	if(error_code == UDEFRAG_UNKNOWN_ERROR) printf("Use DbgView program to get more information.\n\n");
+	if(error_code == UDEFRAG_UNKNOWN_ERROR)
+		printf("Enable logs or use DbgView program to get more information.\n\n");
+	
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
@@ -255,7 +271,7 @@ static void display_invalid_volume_error(int error_code)
 
 	if(error_code == UDEFRAG_UNKNOWN_ERROR){
 		printf("Volume is missing or some error has been encountered.\n");
-		printf("Use DbgView program to get more information.\n\n");
+		printf("Enable logs or use DbgView program to get more information.\n\n");
 	} else {
 		printf("%s\n\n",udefrag_get_error_description(error_code));
 	}
@@ -565,7 +581,7 @@ static int process_single_volume(char volume_letter)
 	result = udefrag_start_job(volume_letter,job_type,flags,map_size,
 		update_progress,terminator,(void *)(DWORD_PTR)volume_letter);
 	if(result < 0){
-		display_defrag_error(result);
+		display_defrag_error(job_type, result);
 		FreeClusterMap();
 		return 5;
 	}
