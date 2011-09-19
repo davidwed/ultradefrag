@@ -51,7 +51,7 @@ WGX_MENU action_menu[] = {
 	{MF_STRING | MF_ENABLED,IDM_DEFRAG,                              NULL, L"&Defragment\tF6"},
 	{MF_STRING | MF_ENABLED,IDM_QUICK_OPTIMIZE,                      NULL, L"&Quick optimization\tF7"  },
 	{MF_STRING | MF_ENABLED,IDM_FULL_OPTIMIZE,                       NULL, L"&Full optimization\tCtrl+F7"  },
-	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE_MFT,                        NULL, L"Optimize MFT\tShift+F7"  },
+	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE_MFT,                        NULL, L"&Optimize MFT\tShift+F7"  },
 	{MF_STRING | MF_ENABLED,IDM_STOP,                                NULL, L"&Stop\tCtrl+C"  },
 	{MF_SEPARATOR,0,NULL,NULL},
 	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_REPEAT_ACTION,        NULL, L"Re&peat action\tShift+R"  },
