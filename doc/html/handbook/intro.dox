@@ -21,6 +21,10 @@
  * Also one of the primary goals of the UltraDefrag design is
  * doing the job as fast as possible.
  *
+ * UltraDefrag aims to be also the most reliable and small disk
+ * defragmenter. We're trying to keep a reasonable balance between
+ * algorithms complexity and effectiveness.
+ *
  * UltraDefrag has the following features:
  * - system files defragmentation (registry, page-file, ...)
  * - MFT (master file table) defragmentation (on XP and later systems)
