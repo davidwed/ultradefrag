@@ -1,4 +1,4 @@
-/*
+Ôªø/*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
  *  Copyright (c) 2007-2011 by Dmitri Arkhangelski (dmitriar@gmail.com).
  *  Copyright (c) 2010-2011 by Stefan Pendl (stefanpe@users.sourceforge.net).
@@ -34,92 +34,93 @@
  *
  * @htmlonly
  * <table style="border:none; margin-left:20px;">
- * <tr><td>ï Belarusian                   </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Bulgarian                    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Burmese                      </td><td>-</td><td> Muhamed Widuya</td></tr>
- * <tr><td>ï Catalan                      </td><td>-</td><td> Illes Balears</td></tr>
+ * <tr><td>‚Ä¢ Belarusian                   </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Bulgarian                    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Burmese                      </td><td>-</td><td> Muhamed Widuya</td></tr>
+ * <tr><td>‚Ä¢ Catalan                      </td><td>-</td><td> Illes Balears</td></tr>
  * <tr><td>                               </td><td>-</td><td> Joseph S. B. Maza</td></tr>
  * <tr><td>                               </td><td>-</td><td> TurboHz</td></tr>
- * <tr><td>ï Chinese (Simplified)         </td><td>-</td><td> muzuiget</td></tr>
+ * <tr><td>‚Ä¢ Chinese (Simplified)         </td><td>-</td><td> muzuiget</td></tr>
  * <tr><td>                               </td><td>-</td><td> HPJ</td></tr>
  * <tr><td>                               </td><td>-</td><td> Tommy He</td></tr>
- * <tr><td>ï Chinese (Traditional)        </td><td>-</td><td> muzuiget</td></tr>
+ * <tr><td>‚Ä¢ Chinese (Traditional)        </td><td>-</td><td> muzuiget</td></tr>
  * <tr><td>                               </td><td>-</td><td> Ryan Ping Chih Ko</td></tr>
  * <tr><td>                               </td><td>-</td><td> rexx</td></tr>
  * <tr><td>                               </td><td>-</td><td> James Bond</td></tr>
- * <tr><td>ï Croatian                     </td><td>-</td><td> Denis Jelicic</td></tr>
+ * <tr><td>‚Ä¢ Croatian                     </td><td>-</td><td> Denis Jeliƒçiƒá</td></tr>
  * <tr><td>                               </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Czech                        </td><td>-</td><td> David Horak /Dave MacBlack/</td></tr>
+ * <tr><td>‚Ä¢ Czech                        </td><td>-</td><td> David Hor√°k /Dave MacBlack/</td></tr>
  * <tr><td>                               </td><td>-</td><td> Pavel Kinkor</td></tr>
- * <tr><td>ï Danish                       </td><td>-</td><td> Patrick Paludan-M¸ller</td></tr>
- * <tr><td>ï Dutch                        </td><td>-</td><td> Wim Kerstens</td></tr>
+ * <tr><td>‚Ä¢ Danish                       </td><td>-</td><td> Patrick Paludan-M√ºller</td></tr>
+ * <tr><td>‚Ä¢ Dutch                        </td><td>-</td><td> Wim Kerstens</td></tr>
+ * <tr><td>                               </td><td>-</td><td> Klaas Nekeman</td></tr>
  * <tr><td>                               </td><td>-</td><td> Tom Louwrier</td></tr>
- * <tr><td>ï English (GB)                 </td><td>-</td><td> Andrew Smith</td></tr>
- * <tr><td>ï English (US)                 </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Estonian                     </td><td>-</td><td> Olav M‰gi</td></tr>
- * <tr><td>ï Farsi                        </td><td>-</td><td> Ali Jafari</td></tr>
- * <tr><td>ï Filipino (Ilokano)           </td><td>-</td><td> Joseph S. B. Maza</td></tr>
- * <tr><td>ï Filipino (Tagalog)           </td><td>-</td><td> Joseph S. B. Maza</td></tr>
+ * <tr><td>‚Ä¢ English (GB)                 </td><td>-</td><td> Andrew Smith</td></tr>
+ * <tr><td>‚Ä¢ English (US)                 </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Estonian                     </td><td>-</td><td> Olav M√§gi</td></tr>
+ * <tr><td>‚Ä¢ Farsi                        </td><td>-</td><td> Ali Jafari</td></tr>
+ * <tr><td>‚Ä¢ Filipino (Ilokano)           </td><td>-</td><td> Joseph S. B. Maza</td></tr>
+ * <tr><td>‚Ä¢ Filipino (Tagalog)           </td><td>-</td><td> Joseph S. B. Maza</td></tr>
  * <tr><td>                               </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>ï Finnish                      </td><td>-</td><td> jtl</td></tr>
+ * <tr><td>‚Ä¢ Finnish                      </td><td>-</td><td> jtl</td></tr>
  * <tr><td>                               </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>ï French                       </td><td>-</td><td> Pascal Crozet</td></tr>
- * <tr><td>                               </td><td>-</td><td> JÈrÙme Blum</td></tr>
+ * <tr><td>‚Ä¢ French                       </td><td>-</td><td> Pascal Crozet</td></tr>
+ * <tr><td>                               </td><td>-</td><td> J√©r√¥me Blum</td></tr>
  * <tr><td>                               </td><td>-</td><td> Mathieu Van Weersch</td></tr>
  * <tr><td>                               </td><td>-</td><td> Marina Louwrier-Johannsen</td></tr>
- * <tr><td>ï Galician                     </td><td>-</td><td> Julio MojÛn Fuentes</td></tr>
- * <tr><td>ï German                       </td><td>-</td><td> Stefan Geuken</td></tr>
+ * <tr><td>‚Ä¢ Galician                     </td><td>-</td><td> Julio Moj√≥n Fuentes</td></tr>
+ * <tr><td>‚Ä¢ German                       </td><td>-</td><td> Stefan Geuken</td></tr>
  * <tr><td>                               </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>ï Greek                        </td><td>-</td><td> Konstantinos Kapoukranidis</td></tr>
- * <tr><td>ï Hebrew                       </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Hindi                        </td><td>-</td><td> Gaurav Chatterjee</td></tr>
- * <tr><td>ï Hungarian                    </td><td>-</td><td> Nagy Zsolt</td></tr>
- * <tr><td>                               </td><td>-</td><td> ¡ron Heged¸s</td></tr>
- * <tr><td>ï Icelandic                    </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>ï Indonesian                   </td><td>-</td><td> Imanuel Novian</td></tr>
- * <tr><td>ï Indonesian (Bahasa Indonesia)</td><td>-</td><td> Taufan Nur Hidayat</td></tr>
- * <tr><td>ï Italian                      </td><td>-</td><td> Paolo Loggia</td></tr>
+ * <tr><td>‚Ä¢ Greek                        </td><td>-</td><td> Konstantinos Kapoukranidis</td></tr>
+ * <tr><td>‚Ä¢ Hebrew                       </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Hindi                        </td><td>-</td><td> Gaurav Chatterjee</td></tr>
+ * <tr><td>‚Ä¢ Hungarian                    </td><td>-</td><td> Nagy Zsolt</td></tr>
+ * <tr><td>                               </td><td>-</td><td> √Åron Heged√ºs</td></tr>
+ * <tr><td>‚Ä¢ Icelandic                    </td><td>-</td><td> Stefan Pendl</td></tr>
+ * <tr><td>‚Ä¢ Indonesian                   </td><td>-</td><td> Imanuel Novian</td></tr>
+ * <tr><td>‚Ä¢ Indonesian (Bahasa Indonesia)</td><td>-</td><td> Taufan Nur Hidayat</td></tr>
+ * <tr><td>‚Ä¢ Italian                      </td><td>-</td><td> Paolo Loggia</td></tr>
  * <tr><td>                               </td><td>-</td><td> Sherpya</td></tr>
  * <tr><td>                               </td><td>-</td><td> Edoardo Brunetti</td></tr>
- * <tr><td>ï Japanese                     </td><td>-</td><td> ao3</td></tr>
+ * <tr><td>‚Ä¢ Japanese                     </td><td>-</td><td> ao3</td></tr>
  * <tr><td>                               </td><td>-</td><td> Masao Kajiwara</td></tr>
- * <tr><td>ï Javanese                     </td><td>-</td><td> Taufan Nur Hidayat</td></tr>
- * <tr><td>ï Korean                       </td><td>-</td><td> Alex Han</td></tr>
+ * <tr><td>‚Ä¢ Javanese                     </td><td>-</td><td> Taufan Nur Hidayat</td></tr>
+ * <tr><td>‚Ä¢ Korean                       </td><td>-</td><td> Alex Han</td></tr>
  * <tr><td>                               </td><td>-</td><td> Inhwan Hwang</td></tr>
- * <tr><td>ï Latin                        </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Latvian                      </td><td>-</td><td> Sevelyr</td></tr>
+ * <tr><td>‚Ä¢ Latin                        </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Latvian                      </td><td>-</td><td> Sevelyr</td></tr>
  * <tr><td>                               </td><td>-</td><td> Vladislav Stuzhnev</td></tr>
- * <tr><td>ï Macedonian                   </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Norwegian                    </td><td>-</td><td> Sveinung Heggen</td></tr>
+ * <tr><td>‚Ä¢ Macedonian                   </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Norwegian                    </td><td>-</td><td> Sveinung Heggen</td></tr>
  * <tr><td>                               </td><td>-</td><td> Stefan Pendl</td></tr>
- * <tr><td>ï Polish                       </td><td>-</td><td> Andrzej Rudnik</td></tr>
+ * <tr><td>‚Ä¢ Polish                       </td><td>-</td><td> Andrzej Rudnik</td></tr>
  * <tr><td>                               </td><td>-</td><td> Krzysztof Swiderski</td></tr>
  * <tr><td>                               </td><td>-</td><td> Ireneusz Chorosz</td></tr>
- * <tr><td>ï Portuguese                   </td><td>-</td><td> Ricardo A. Garcia</td></tr>
+ * <tr><td>‚Ä¢ Portuguese                   </td><td>-</td><td> Ricardo A. Garcia</td></tr>
  * <tr><td>                               </td><td>-</td><td> Carlos Rodrigues</td></tr>
- * <tr><td>                               </td><td>-</td><td> SÈrgio Marques</td></tr>
- * <tr><td>ï Portuguese (BR)              </td><td>-</td><td> Depeo da Masol</td></tr>
+ * <tr><td>                               </td><td>-</td><td> S√©rgio Marques</td></tr>
+ * <tr><td>‚Ä¢ Portuguese (BR)              </td><td>-</td><td> Depeo da Masol</td></tr>
  * <tr><td>                               </td><td>-</td><td> Felipe</td></tr>
- * <tr><td>ï Romanian                     </td><td>-</td><td> Micu Dumitru</td></tr>
- * <tr><td>ï Russian                      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Serbian                      </td><td>-</td><td> Damjan Daljevic</td></tr>
+ * <tr><td>‚Ä¢ Romanian                     </td><td>-</td><td> Micu Dumitru</td></tr>
+ * <tr><td>‚Ä¢ Russian                      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Serbian                      </td><td>-</td><td> Damjan Daljevic</td></tr>
  * <tr><td>                               </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Slovak                       </td><td>-</td><td> Milan Cerovsky</td></tr>
- * <tr><td>ï Slovenian                    </td><td>-</td><td> Miha Mlakar</td></tr>
+ * <tr><td>‚Ä¢ Slovak                       </td><td>-</td><td> Milan Cerovsk√Ω</td></tr>
+ * <tr><td>‚Ä¢ Slovenian                    </td><td>-</td><td> Miha Mlakar</td></tr>
  * <tr><td>                               </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Spanish (AR)                 </td><td>-</td><td> Daniel Testa</td></tr>
- * <tr><td>ï Spanish (ES)                 </td><td>-</td><td> Txusti</td></tr>
+ * <tr><td>‚Ä¢ Spanish (AR)                 </td><td>-</td><td> Daniel Testa</td></tr>
+ * <tr><td>‚Ä¢ Spanish (ES)                 </td><td>-</td><td> Txusti</td></tr>
  * <tr><td>                               </td><td>-</td><td> Juan C. Mendez Valledor</td></tr>
- * <tr><td>ï Swedish                      </td><td>-</td><td> Magnus Rostedt</td></tr>
+ * <tr><td>‚Ä¢ Swedish                      </td><td>-</td><td> Magnus Rostedt</td></tr>
  * <tr><td>                               </td><td>-</td><td> Per-Eric Jenshagen</td></tr>
- * <tr><td>ï Tamil                        </td><td>-</td><td> Vinod V.</td></tr>
- * <tr><td>ï Thai                         </td><td>-</td><td> Pat Taweewat</td></tr>
- * <tr><td>ï Turkish                      </td><td>-</td><td> Huseyin Kozan</td></tr>
+ * <tr><td>‚Ä¢ Tamil                        </td><td>-</td><td> Vinod V.</td></tr>
+ * <tr><td>‚Ä¢ Thai                         </td><td>-</td><td> Pat Taweewat</td></tr>
+ * <tr><td>‚Ä¢ Turkish                      </td><td>-</td><td> Huseyin Kozan</td></tr>
  * <tr><td>                               </td><td>-</td><td> Vedat Odabasioglu</td></tr>
- * <tr><td>                               </td><td>-</td><td> Sahin Salincakli</td></tr>
- * <tr><td>ï Ukrainian                    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
- * <tr><td>ï Vietnamese (VI)              </td><td>-</td><td> Vietnamize Team</td></tr>
- * <tr><td>ï Yiddish                      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>                               </td><td>-</td><td> ≈ûahin Salincakli</td></tr>
+ * <tr><td>‚Ä¢ Ukrainian                    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>‚Ä¢ Vietnamese (VI)              </td><td>-</td><td> Vietnamize Team</td></tr>
+ * <tr><td>‚Ä¢ Yiddish                      </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
  * </table>
  * @endhtmlonly
  *
@@ -131,7 +132,7 @@
  * <a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>. Also 
  * UltraDefrag includes portions of <a href="http://www.reactos.org/">ReactOS</a> code.
  *
- * - Portions Copyright © 1994-2007 Lua.org, PUC-Rio
+ * - Portions Copyright ¬© 1994-2007 Lua.org, PUC-Rio
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of
  * this software and associated documentation files (the "Software"), to deal in the
@@ -213,9 +214,9 @@
  *
  * @htmlonly
  * <table style="border:none; margin-left:20px;">
- * <tr><td>ï Justin Dearing          </td><td>-</td><td> An initial version of this handbook and other documentation files.</td></tr>
+ * <tr><td>‚Ä¢ Justin Dearing          </td><td>-</td><td> An initial version of this handbook and other documentation files.</td></tr>
  * <tr><td>                          </td><td> </td><td> UltraDefrag Scheduler .NET application.</td></tr>
- * <tr><td>ï Tiago Filipe Silva      </td><td>-</td><td> Optimization of web images and udsorting.js script.</td></tr>
+ * <tr><td>‚Ä¢ Tiago Filipe Silva      </td><td>-</td><td> Optimization of web images and udsorting.js script.</td></tr>
  * </table>
  * @endhtmlonly
  *
@@ -223,46 +224,46 @@
  *
  * @htmlonly
  * <table style="border:none; margin-left:20px;">
- * <tr><td>ï Alexander Peter Kowalski</td><td>-</td><td> Process priority control (not implemented yet).</td></tr>
- * <tr><td>ï Alexander Vedyakin      </td><td>-</td><td> Volume type detection improvements.</td></tr>
+ * <tr><td>‚Ä¢ Alexander Peter Kowalski</td><td>-</td><td> Process priority control (not implemented yet).</td></tr>
+ * <tr><td>‚Ä¢ Alexander Vedyakin      </td><td>-</td><td> Volume type detection improvements.</td></tr>
  * <tr><td>                          </td><td> </td><td> More effective defragmenting algorithms.</td></tr>
- * <tr><td>ï Andrei Maksimov         </td><td>-</td><td> GUI improvements.</td></tr>
+ * <tr><td>‚Ä¢ Andrei Maksimov         </td><td>-</td><td> GUI improvements.</td></tr>
  * <tr><td>                          </td><td> </td><td> A lot of other interesting ideas.</td></tr>
- * <tr><td>ï Bryan Kirk              </td><td>-</td><td> Better GUI appearance (new list of drives).</td></tr>
+ * <tr><td>‚Ä¢ Bryan Kirk              </td><td>-</td><td> Better GUI appearance (new list of drives).</td></tr>
  * <tr><td>                          </td><td> </td><td> Autodefrag feature (not implemented yet).</td></tr>
- * <tr><td>ï Christopher Naegel      </td><td>-</td><td> A partial solution for kernel mode driver loading problem on Vista.</td></tr>
- * <tr><td>ï Craig Oakes             </td><td>-</td><td> Hint about case mismatch of configuration dialog help files.</td></tr>
+ * <tr><td>‚Ä¢ Christopher Naegel      </td><td>-</td><td> A partial solution for kernel mode driver loading problem on Vista.</td></tr>
+ * <tr><td>‚Ä¢ Craig Oakes             </td><td>-</td><td> Hint about case mismatch of configuration dialog help files.</td></tr>
  * <tr><td>                          </td><td> </td><td> Hint about problem with .lua file open action registration.</td></tr>
- * <tr><td>ï Dario Raparelli         </td><td>-</td><td> NT 4.0 support.</td></tr>
- * <tr><td>ï Jan Loncik              </td><td>-</td><td> x64 native support. Better default values for filters.</td></tr>
- * <tr><td>ï Jim Laski               </td><td>-</td><td> System fonts and visual styles for graphical interface.</td></tr>
- * <tr><td>ï Justin Dearing          </td><td>-</td><td> Boot time defragmentation.</td></tr>
- * <tr><td>ï Kalle Koseck            </td><td>-</td><td> Volume analysis speedup. GUI improvements.</td></tr>
- * <tr><td>ï Kerem G¸mr¸kc¸          </td><td>-</td><td> Manifests for Vista User Account Control (UAC).</td></tr>
- * <tr><td>ï Leland G. Whitlock      </td><td>-</td><td> Progress bar. More effective defragmenting algorithms.</td></tr>
- * <tr><td>ï Markus Elfring          </td><td>-</td><td> Strong error handling.</td></tr>
- * <tr><td>ï Mike Braca              </td><td>-</td><td> Reducing driver's memory usage by the new cluster map internal representation.</td></tr>
- * <tr><td>ï Nagy Zsolt              </td><td>-</td><td> Internationalization support. Installer improvements.</td></tr>
- * <tr><td>ï Parvez Reza             </td><td>-</td><td> Various interesting programming tricks.</td></tr>
- * <tr><td>ï Steve Lawrence          </td><td>-</td><td> Shutdown when done option.</td></tr>
- * <tr><td>ï Vasily Smirnov          </td><td>-</td><td> FAT directories defragmentation algorithm.</td></tr>
+ * <tr><td>‚Ä¢ Dario Raparelli         </td><td>-</td><td> NT 4.0 support.</td></tr>
+ * <tr><td>‚Ä¢ Jan Loncik              </td><td>-</td><td> x64 native support. Better default values for filters.</td></tr>
+ * <tr><td>‚Ä¢ Jim Laski               </td><td>-</td><td> System fonts and visual styles for graphical interface.</td></tr>
+ * <tr><td>‚Ä¢ Justin Dearing          </td><td>-</td><td> Boot time defragmentation.</td></tr>
+ * <tr><td>‚Ä¢ Kalle Koseck            </td><td>-</td><td> Volume analysis speedup. GUI improvements.</td></tr>
+ * <tr><td>‚Ä¢ Kerem G√ºmr√ºkc√º          </td><td>-</td><td> Manifests for Vista User Account Control (UAC).</td></tr>
+ * <tr><td>‚Ä¢ Leland G. Whitlock      </td><td>-</td><td> Progress bar. More effective defragmenting algorithms.</td></tr>
+ * <tr><td>‚Ä¢ Markus Elfring          </td><td>-</td><td> Strong error handling.</td></tr>
+ * <tr><td>‚Ä¢ Mike Braca              </td><td>-</td><td> Reducing driver's memory usage by the new cluster map internal representation.</td></tr>
+ * <tr><td>‚Ä¢ Nagy Zsolt              </td><td>-</td><td> Internationalization support. Installer improvements.</td></tr>
+ * <tr><td>‚Ä¢ Parvez Reza             </td><td>-</td><td> Various interesting programming tricks.</td></tr>
+ * <tr><td>‚Ä¢ Steve Lawrence          </td><td>-</td><td> Shutdown when done option.</td></tr>
+ * <tr><td>‚Ä¢ Vasily Smirnov          </td><td>-</td><td> FAT directories defragmentation algorithm.</td></tr>
  * <tr><td>                          </td><td> </td><td> Various important GUI improvements.</td></tr>
  * </table>
  * @endhtmlonly
  *
  * Special thanks for correcting and updating translations (in alphabetical order):
  *
- * - Benny St¸tz
+ * - Benny St√ºtz
  * - Christoffer Ekberg
  * - Connection
  * - Erwin Dokter
  * - Francisco Ortega Olivos
  * - FS
- * - GellÈrt Luk·cs
+ * - Gell√©rt Luk√°cs
  * - Haein Jung
  * - Joseph S. B. Maza
- * - JosÈ Carlos Taveira de Souza
- * - JosÈ Luis FarÌas
+ * - Jos√© Carlos Taveira de Souza
+ * - Jos√© Luis Far√≠as
  * - Ken Choy
  * - Latino
  * - Leo Smulders
@@ -279,7 +280,7 @@
  * - Fred Schall
  * - Jeff Cubillos
  * - Kalle Koseck
- * - Kerem G¸mr¸kc¸
+ * - Kerem G√ºmr√ºkc√º
  * - Leslie Trenholm
  * - Markus Elfring
  * - Nagy Zsolt
@@ -293,7 +294,7 @@
  * - <a href="http://free.pages.at/blumetools/">blume1975</a>
  * - <a href="http://www.reactos.org">ReactOS Team</a>
  * - <a href="http://nsis.sourceforge.net">NSIS developers</a>
- * - <a href="http://upx.sf.net">Markus F.X.J. Oberhumer, L·szlÛ Moln·r &  John F. Reiser</a>
+ * - <a href="http://upx.sf.net">Markus F.X.J. Oberhumer, L√°szl√≥ Moln√°r &  John F. Reiser</a>
  * - <a href="http://www.mingw.org">MinGW Team</a>
  * - <a href="http://alter.org.ua/en/">Alexander A. Telyatnikov</a>
  * - <a href="http://www.codeproject.com/Members/Mumtaz-Zaheer">Mumtaz Zaheer</a>
