@@ -319,6 +319,9 @@ void ResizeMainWindow(int force)
 
 	list_height = vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height,expand_list);
 	previous_list_height = vlist_height;
+	/* do it twice for a proper list redraw when maximized window gets restored */
+	list_height = vlist_height = ResizeVolList(0,toolbar_height,w,vlist_height,0);
+	previous_list_height = vlist_height;
 	sbar_height = ResizeStatusBar(h,w);
 	ResizeMap(0,toolbar_height + vlist_height + 1,w,h - toolbar_height - vlist_height - sbar_height);
 	
