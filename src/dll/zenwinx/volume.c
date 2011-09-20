@@ -264,19 +264,12 @@ int __stdcall winx_get_drive_type(char letter)
 		return (-1);
 	}
 
-	/* separate remote and removable drives */
+	/* detect remote/cd/dvd/unknown drives */
 	if(pffdi->Characteristics & FILE_REMOTE_DEVICE){
 		winx_heap_free(ppdi);
 		winx_heap_free(pffdi);
 		return DRIVE_REMOTE;
 	}
-	if(pffdi->Characteristics & FILE_REMOVABLE_MEDIA){
-		winx_heap_free(ppdi);
-		winx_heap_free(pffdi);
-		return DRIVE_REMOVABLE;
-	}
-
-	/* finally define drive type exactly */
 	switch(pffdi->DeviceType){
 	case FILE_DEVICE_CD_ROM:
 	case FILE_DEVICE_CD_ROM_FILE_SYSTEM:
@@ -293,6 +286,21 @@ int __stdcall winx_get_drive_type(char letter)
 		winx_heap_free(ppdi);
 		winx_heap_free(pffdi);
 		return DRIVE_REMOTE;
+	case FILE_DEVICE_UNKNOWN:
+		winx_heap_free(ppdi);
+		winx_heap_free(pffdi);
+		return DRIVE_UNKNOWN;
+	}
+
+	/* detect removable disks */
+	if(pffdi->Characteristics & FILE_REMOVABLE_MEDIA){
+		winx_heap_free(ppdi);
+		winx_heap_free(pffdi);
+		return DRIVE_REMOVABLE;
+	}
+
+	/* detect fixed disks */
+	switch(pffdi->DeviceType){
 	case FILE_DEVICE_DISK:
 	case FILE_DEVICE_FILE_SYSTEM: /* ? */
 	/*case FILE_DEVICE_VIRTUAL_DISK:*/
@@ -301,11 +309,9 @@ int __stdcall winx_get_drive_type(char letter)
 		winx_heap_free(ppdi);
 		winx_heap_free(pffdi);
 		return DRIVE_FIXED;
-	case FILE_DEVICE_UNKNOWN:
-		winx_heap_free(ppdi);
-		winx_heap_free(pffdi);
-		return DRIVE_UNKNOWN;
 	}
+	
+	/* nothing detected => drive type is unknown */
 	winx_heap_free(ppdi);
 	winx_heap_free(pffdi);
 	return DRIVE_UNKNOWN;
