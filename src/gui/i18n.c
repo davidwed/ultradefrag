@@ -314,6 +314,23 @@ void ApplyLanguagePack(void)
 }
 
 /**
+ * @brief Auxiliary routine used to sort file names in binary tree.
+ */
+static int names_compare(const void *prb_a, const void *prb_b, void *prb_param)
+{
+	return wcscmp((wchar_t *)prb_a,(wchar_t *)prb_b);
+}
+
+/**
+ * @brief Auxiliary routine used to free memory allocated for tree items.
+ */
+static void free_item (void *prb_item, void *prb_param)
+{
+	wchar_t *item = (wchar_t *)prb_item;
+	free(item);
+}
+
+/**
  * @brief Builds Language menu.
  */
 void BuildLanguageMenu(void)
@@ -327,6 +344,10 @@ void BuildLanguageMenu(void)
 	wchar_t selected_lang_name[MAX_PATH];
 	UINT flags;
 	
+	struct prb_table *pt;
+	struct prb_traverser t;
+	wchar_t *f;
+
 	/* synchronize with other threads */
 	if(WaitForSingleObject(hLangMenuEvent,INFINITE) != WAIT_OBJECT_0){
 		WgxDbgPrintLastError("BuildLanguageMenu: wait on hLangMenuEvent failed");
@@ -380,6 +401,7 @@ void BuildLanguageMenu(void)
 	h = _wfindfirst(L".\\i18n\\*.lng",&lng_file);
 	if(h == -1){
 		WgxDbgPrint("BuildLanguageMenu: no language packs found\n");
+no_files_found:
 		/* add default US English */
 		if(!AppendMenu(hLangMenu,MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1,"English (US)")){
 			WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
@@ -388,19 +410,27 @@ void BuildLanguageMenu(void)
 			return;
 		}
 	} else {
-		i = 0x1;
+		/* use binary tree to sort items */
+		pt = prb_create(names_compare,NULL,NULL);
+		if(pt == NULL){
+			/* this case is extraordinary */
+			WgxDbgPrint("BuildLanguageMenu: prb_create failed!");
+			_findclose(h);
+			goto no_files_found;
+		}
 		wcsncpy(filename,lng_file.name,MAX_PATH - 1);
 		filename[MAX_PATH - 1] = 0;
 		length = wcslen(filename);
 		if(length > (int)wcslen(L".lng"))
 			filename[length - 4] = 0;
-		flags = MF_STRING | MF_ENABLED;
-		if(wcscmp(selected_lang_name,filename) == 0)
-			flags |= MF_CHECKED;
-		if(!AppendMenuW(hLangMenu,flags,IDM_LANGUAGE + i,filename)){
-			WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+		f = _wcsdup(filename);
+		if(f == NULL){
+			WgxDbgPrint("BuildLanguageMenu: not enough memory!");
 		} else {
-			i++;
+			if(prb_probe(pt,(void *)f) == NULL){
+				WgxDbgPrint("BuildLanguageMenu: prb_probe failed for %ws!",f);
+				free(f);
+			}
 		}
 		while(_wfindnext(h,&lng_file) == 0){
 			wcsncpy(filename,lng_file.name,MAX_PATH - 1);
@@ -408,16 +438,36 @@ void BuildLanguageMenu(void)
 			length = wcslen(filename);
 			if(length > (int)wcslen(L".lng"))
 				filename[length - 4] = 0;
+			f = _wcsdup(filename);
+			if(f == NULL){
+				WgxDbgPrint("BuildLanguageMenu: not enough memory!");
+			} else {
+				if(prb_probe(pt,(void *)f) == NULL){
+					WgxDbgPrint("BuildLanguageMenu: prb_probe failed for %ws!",f);
+					free(f);
+				}
+			}
+		}
+		_findclose(h);
+		
+		/* build the menu */
+		i = 0x1;
+		prb_t_init(&t,pt);
+		f = (wchar_t *)prb_t_first(&t,pt);
+		while(f != NULL){
 			flags = MF_STRING | MF_ENABLED;
-			if(wcscmp(selected_lang_name,filename) == 0)
+			if(wcscmp(selected_lang_name,f) == 0)
 				flags |= MF_CHECKED;
-			if(!AppendMenuW(hLangMenu,flags,IDM_LANGUAGE + i,filename)){
+			if(!AppendMenuW(hLangMenu,flags,IDM_LANGUAGE + i,f)){
 				WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
 			} else {
 				i++;
 			}
+			f = (wchar_t *)prb_t_next(&t);
 		}
-		_findclose(h);
+		
+		/* destroy binary tree */
+		prb_destroy(pt,free_item);
 	}
 	
 	/* attach submenu to the Language menu */

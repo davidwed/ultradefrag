@@ -67,6 +67,8 @@
 #include <direct.h>
 #include <errno.h>
 
+#include "prb.h"
+
 #define lua_c
 #include "../lua5.1/lua.h"
 #include "../lua5.1/lauxlib.h"
