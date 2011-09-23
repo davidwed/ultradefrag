@@ -37,7 +37,13 @@ static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size);
 static int __stdcall cmd_compare(short *reg_cmd,short *cmd);
 static void __stdcall flush_smss_key(HANDLE hKey);
 
-/* The following two functions replaces bootexctrl in native mode. */
+/*
+* The following two routines replaces bootexctrl in native mode.
+* It is not reasonable to use these routines to build bootexctrl
+* application over however, since that win32 app uses all the
+* benefits of win32 API such as error messages available for all
+* error codes.
+*/
 
 /**
  * @brief Registers command to be executed

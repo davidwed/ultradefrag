@@ -4,6 +4,11 @@
 ** See Copyright Notice in lua.h
 */
 
+/*
+* os.shellexec call has been added
+* by Dmitri Arkhangelski (2008) especially
+* for UltraDefrag report converter.
+*/
 
 #include <windows.h>
 #include <shellapi.h>
