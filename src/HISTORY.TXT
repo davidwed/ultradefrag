@@ -47,9 +47,12 @@ HISTORY
     - one bug causing infinite loops in volume optimization was fixed
     - progress percentage calculation was improved
     - Developers: winx_create_mutex, winx_open_mutex, winx_release_mutex,
-      winx_destroy_mutex functions added to zenwinx library
+      winx_destroy_mutex, winx_stristr functions added to zenwinx library
     - binary trees manipulation routines were added to zenwinx library;
       they're based on the GNU libavl red-black trees with parent pointers
+    - winx_fbsize, winx_dfbsize, udefrag_fbsize, udefrag_dfbsize routines
+      replaced by winx_bytes_to_hr, winx_hr_to_bytes, udefrag_bytes_to_hr,
+      udefrag_hr_to_bytes routines in zenwinx and udefrag libraries
 
     beta3:
     - volume optimization reimplemented

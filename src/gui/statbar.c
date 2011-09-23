@@ -139,7 +139,7 @@ void UpdateStatusBar(udefrag_progress_info *pi)
 	bf[BFSIZE - 1] = 0;
 	(void)SendMessage(hStatus,SB_SETTEXTW,3,(LPARAM)bf);
 
-	(void)udefrag_fbsize(pi->mft_size,2,s,sizeof(s));
+	(void)udefrag_bytes_to_hr(pi->mft_size,2,s,sizeof(s));
 	(void)_snwprintf(bf,BFSIZE - 1,L"%S %s",s,
 			WgxGetResourceString(i18n_table,L"MFT"));
 	bf[BFSIZE - 1] = 0;

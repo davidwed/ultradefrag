@@ -25,6 +25,7 @@
  */
 
 #include "zenwinx.h"
+#include <math.h> /* for pow function */
 
 /**
  * @brief Size of the buffer used by winx_vsprintf
@@ -132,6 +133,28 @@ wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 		
 		while(*s1 && *s2 && !( towlower((wint_t)(*s1)) - towlower((wint_t)(*s2)) )){ s1++, s2++; }
 		if(!*s2) return cp;
+		cp++;
+	}
+	
+	return NULL;
+}
+
+/**
+ * @brief Case insensitive version of strstr.
+ */
+char * __cdecl winx_stristr(const char * s1,const char * s2)
+{
+	char *cp = (char *)s1;
+	char *_s1, *_s2;
+
+	if(s1 == NULL || s2 == NULL) return NULL;
+	
+	while(*cp){
+		_s1 = cp;
+		_s2 = (char *)s2;
+		
+		while(*_s1 && *_s2 && !( winx_tolower(*_s1) - winx_tolower(*_s2) )){ _s1++, _s2++; }
+		if(!*_s2) return cp;
 		cp++;
 	}
 	
@@ -338,6 +361,101 @@ void __stdcall winx_patfree(winx_patlist *patterns)
 	patterns->count = 0;
 	patterns->array = NULL;
 	patterns->string = NULL;
+}
+
+/*
+* End of lightweight alternative for regular expressions.
+*/
+
+/**
+ * @brief Converts number of bytes
+ * to a human readable string.
+ * @param[in] bytes number of bytes.
+ * @param[in] digits number of digits after a dot.
+ * @param[out] buffer pointer to string receiving
+ * converted number of bytes.
+ * @param[in] length the length of the buffer, in characters.
+ * @return A number of characters stored, not counting the 
+ * terminating null character. If the number of characters
+ * required to store the data exceeds length, then length 
+ * characters are stored in buffer and a negative value is returned.
+ */
+int __stdcall winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length)
+{
+	char *suffixes[] = { "b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb" };
+	ULONGLONG n; /* an integer part of the result */
+	ULONGLONG m; /* a multiplier */
+	ULONGLONG r; /* a rest */
+	int i;       /* an index for the suffixes array */
+	double rd;
+	char spec[] = "%I64u.%00I64u %s";
+	int result;
+	
+	DbgCheck3(digits >= 0, buffer != NULL, length > 0, "winx_bytes_to_hr", -1);
+
+	for(n = bytes, m = 1, i = 0; n >> 10; n >>= 10, m <<= 10, i++){}
+	r = bytes - n * m;
+	
+	/* Win DDK cannot convert ULONGLONG to double directly, */
+	/* but now it's safe to convert both r and m through LONGLONG */
+	rd = (double)(LONGLONG)r / (double)(LONGLONG)m;
+	rd *= pow(10, digits);
+	/* convertion to LONGLONG is needed for MinGW */
+	/* it is safe, but may lower a highest possible precision */
+	r = (ULONGLONG)(LONGLONG)rd;
+	
+	if(digits == 0){
+		result = _snprintf(buffer, length - 1, "%I64u %s", n, suffixes[i]);
+	} else {
+		spec[7] = '0' + digits / 10;
+		spec[8] = '0' + digits % 10;
+		result = _snprintf(buffer, length - 1, spec, n, r, suffixes[i]);
+	}
+	return result;
+}
+
+/**
+ * @brief Converts human readable
+ * string to number of bytes.
+ * @details Supported suffixes:
+ * b, Kb, Mb, Gb, Tb, Pb, Eb, Zb, Yb.
+ * @param[in] string string to be converted.
+ * @return Number of bytes.
+ */
+ULONGLONG __stdcall winx_hr_to_bytes(char *string)
+{
+	char *suffixes[] = { "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb" };
+	int suffix_found = 0;
+	char *dp;    /* a dot position */
+	ULONGLONG n; /* an integer part */
+	ULONGLONG m; /* a multiplier */
+	ULONGLONG r; /* a rest */
+	int i;       /* an index for the suffixes array */
+	double rd;
+	
+	DbgCheck1(string != NULL, "winx_hr_to_bytes", 0);
+
+	n = (ULONGLONG)_atoi64(string);
+
+	for(i = 0, m = 1024; i < sizeof(suffixes) / sizeof(char *); i++, m <<= 10){
+		if(winx_stristr(string,suffixes[i])){
+			suffix_found = 1;
+			break;
+		}
+	}
+	if(suffix_found == 0){
+		return n;
+	}
+
+	dp = strchr(string, '.');
+	if(dp == NULL){
+		return n * m;
+	}
+	
+	r = (ULONGLONG)_atoi64(dp + 1);
+	for(rd = (double)(LONGLONG)r; rd > 1; rd /= 10){}
+	r = (ULONGLONG)(LONGLONG)((double)(LONGLONG)m * rd);
+	return n * m + r;
 }
 
 /** @} */

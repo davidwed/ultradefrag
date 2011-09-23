@@ -11,6 +11,7 @@ EXPORTS
 	winx_heap_free
 	winx_putch
 	winx_puts
+	winx_print
 	winx_printf
 	winx_getch
 	winx_getche
@@ -60,8 +61,8 @@ EXPORTS
 	winx_query_env_variable
 	winx_set_env_variable
 	winx_query_symbolic_link
-	winx_fbsize
-	winx_dfbsize
+	winx_bytes_to_hr
+	winx_hr_to_bytes
 	winx_create_event
 	winx_open_event
 	winx_destroy_event
@@ -91,6 +92,7 @@ EXPORTS
 	winx_strdup
 	winx_wcsdup
 	winx_wcsistr
+	winx_stristr
 	winx_vsprintf
 	winx_sprintf
 	winx_patcomp
@@ -106,6 +108,7 @@ EXPORTS
 	winx_release_spin_lock
 	winx_destroy_spin_lock
 	zenwinx_native_init
+	zenwinx_init_failed
 	zenwinx_native_unload
 	prb_create
 	prb_copy

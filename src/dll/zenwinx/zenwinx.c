@@ -28,34 +28,27 @@
 
 int  __stdcall kb_open(void);
 void __stdcall kb_close(void);
-
-void winx_create_global_heap(void);
+int  winx_create_global_heap(void);
 void winx_destroy_global_heap(void);
-void winx_init_synch_objects(void);
+int  winx_init_synch_objects(void);
 void winx_destroy_synch_objects(void);
 void __stdcall MarkWindowsBootAsSuccessful(void);
 char * __stdcall winx_get_error_description(unsigned long status);
-void winx_print(char *string);
 void flush_dbg_log(int already_synchronized);
 
-void test(void)
-{
-	winx_file_info *f;
-	
-	//f = winx_ftw(L"\\??\\c:\\",WINX_FTW_RECURSIVE | WINX_FTW_DUMP_FILES,NULL,NULL);
-	f = winx_scan_disk('L',WINX_FTW_DUMP_FILES,NULL,NULL,NULL,NULL);
-	if(f == NULL)
-		DebugPrint("$$$$ winx_scan_disk failed $$$");
-	else
-		winx_ftw_release(f);
-}
+/**
+ * @brief Internal variable indicating
+ * whether library initialization failed
+ * or not. Intended to be checked by
+ * zenwinx_init_failed routine.
+ */
+int initialization_failed = 1;
 
 #ifndef STATIC_LIB
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
 	if(dwReason == DLL_PROCESS_ATTACH){
 		zenwinx_native_init();
-		//test();
 	} else if(dwReason == DLL_PROCESS_DETACH){
 		zenwinx_native_unload();
 	}
@@ -65,20 +58,37 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 
 /**
  * @brief Initializes the library.
- * @note Designed especially to replace DllMain
+ * @details Designed especially to replace DllMain
  * functionality in case of monolithic native application.
- * @todo Handle errors.
+ * Call this routine in the beginning of the NtProcessStartup.
+ * @return Zero for success, negative value otherwise.
  */
-void __stdcall zenwinx_native_init(void)
+int __stdcall zenwinx_native_init(void)
 {
-	winx_create_global_heap();
-	winx_init_synch_objects();
+	if(winx_create_global_heap() < 0)
+		return (-1);
+	if(winx_init_synch_objects() < 0)
+		return (-1);
+	initialization_failed = 0;
+	return 0;
+}
+
+/**
+ * @brief Defines whether the library has 
+ * been initialized successfully or not.
+ * @return Boolean value.
+ */
+int __stdcall zenwinx_init_failed(void)
+{
+	return initialization_failed;
 }
 
 /**
  * @brief Frees library resources.
  * @note Designed especially to replace DllMain
  * functionality in case of monolithic native application.
+ * Don't call it before winx_shutdown() and winx_reboot(),
+ * but call always before winx_exit().
  */
 void __stdcall zenwinx_native_unload(void)
 {

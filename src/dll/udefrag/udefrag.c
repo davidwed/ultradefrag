@@ -32,6 +32,16 @@
 #include "udefrag-internals.h"
 
 /**
+ * @brief Defines whether the library has 
+ * been initialized successfully or not.
+ * @return Boolean value.
+ */
+int __stdcall udefrag_init_failed(void)
+{
+	return zenwinx_init_failed();
+}
+
+/**
  */
 static void dbg_print_header(udefrag_job_parameters *jp)
 {
@@ -543,8 +553,8 @@ char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi
 		return NULL;
 	}
 
-	(void)winx_fbsize(pi->total_space,2,total_space,sizeof(total_space));
-	(void)winx_fbsize(pi->free_space,2,free_space,sizeof(free_space));
+	(void)winx_bytes_to_hr(pi->total_space,2,total_space,sizeof(total_space));
+	(void)winx_bytes_to_hr(pi->free_space,2,free_space,sizeof(free_space));
 
 	if(pi->files == 0){
 		p = 0.00;

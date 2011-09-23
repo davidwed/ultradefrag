@@ -1053,6 +1053,13 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 	
 	hInstance = GetModuleHandle(NULL);
 	
+	/* handle initialization failure */
+	if(udefrag_init_failed()){
+		MessageBoxA(NULL,"Send bug report to the authors please.",
+			"UltraDefrag initialization failed!",MB_OK | MB_ICONHAND);
+		return 1;
+	}
+	
 	/* define whether we are in portable mode or not */
 	portable_mode = IsPortable();
 	btd_installed = IsBtdInstalled();

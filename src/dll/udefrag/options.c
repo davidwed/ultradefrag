@@ -67,7 +67,7 @@ int get_options(udefrag_job_parameters *jp)
 	if(winx_query_env_variable(L"UD_SIZELIMIT",buffer,ENV_BUFFER_SIZE) >= 0){
 		(void)_snprintf(buf,sizeof(buf) - 1,"%ws",buffer);
 		buf[sizeof(buf) - 1] = 0;
-		(void)winx_dfbsize(buf,&jp->udo.size_limit);
+		jp->udo.size_limit = winx_hr_to_bytes(buf);
 	}
 
 	/* set file fragments threshold */

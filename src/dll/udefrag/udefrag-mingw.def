@@ -5,8 +5,8 @@ EXPORTS
 	udefrag_release_vollist@4
 	udefrag_get_volume_information@8
 	udefrag_validate_volume@8
-	udefrag_fbsize@20=winx_fbsize@20
-	udefrag_dfbsize@8=winx_dfbsize@8
+	udefrag_bytes_to_hr@20=winx_bytes_to_hr@20
+	udefrag_hr_to_bytes@4=winx_hr_to_bytes@4
 	udefrag_tolower=winx_tolower
 	udefrag_toupper=winx_toupper
 	udefrag_start_job@28
@@ -14,3 +14,4 @@ EXPORTS
 	udefrag_release_default_formatted_results@4
 	udefrag_get_error_description@4
 	udefrag_set_log_file_path@0
+	udefrag_init_failed@0

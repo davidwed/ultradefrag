@@ -277,9 +277,10 @@ int __stdcall winx_register_boot_exec_command(short *command);
 int __stdcall winx_unregister_boot_exec_command(short *command);
 
 /* stdio.c */
-int __cdecl winx_putch(int ch);
-int __cdecl winx_puts(const char *string);
-int __cdecl winx_printf(const char *format, ...);
+int  __cdecl winx_putch(int ch);
+int  __cdecl winx_puts(const char *string);
+void __cdecl winx_print(char *string);
+int  __cdecl winx_printf(const char *format, ...);
 
 /*
 * Note: winx_scanf() can not be implemented;
@@ -321,6 +322,7 @@ char __cdecl winx_tolower(char c);
 char * __cdecl winx_strdup(const char *s);
 wchar_t * __cdecl winx_wcsdup(const wchar_t *s);
 wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
+char * __cdecl winx_stristr(const char * s1,const char * s2);
 char * __cdecl winx_vsprintf(const char *format,va_list arg);
 char * __cdecl winx_sprintf(const char *format, ...);
 
@@ -336,6 +338,9 @@ typedef struct _winx_patlist {
 int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags);
 int __stdcall winx_patfind(short *string,winx_patlist *patterns);
 void __stdcall winx_patfree(winx_patlist *patterns);
+
+int       __stdcall winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
+ULONGLONG __stdcall winx_hr_to_bytes(char *string);
 
 /* thread.c */
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle);
@@ -362,9 +367,6 @@ int __stdcall winx_get_system_time(winx_time *t);
 int __stdcall winx_get_local_time(winx_time *t);
 
 /* volume.c */
-int __stdcall winx_fbsize(ULONGLONG number, int digits, char *buffer, int length);
-int __stdcall winx_dfbsize(char *string,ULONGLONG *pnumber);
-
 #define DRIVE_ASSIGNED_BY_SUBST_COMMAND 1200
 int __stdcall winx_get_drive_type(char letter);
 
@@ -415,7 +417,8 @@ winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
 void __stdcall winx_release_free_volume_regions(winx_volume_region *rlist);
 
 /* zenwinx.c */
-void __stdcall zenwinx_native_init(void);
+int  __stdcall zenwinx_native_init(void);
+int  __stdcall zenwinx_init_failed(void);
 void __stdcall zenwinx_native_unload(void);
 
 int  __stdcall winx_init(void *peb);

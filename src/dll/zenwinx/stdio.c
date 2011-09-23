@@ -33,14 +33,23 @@ void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
 
 /**
  * @brief Displays ANSI string on the screen.
+ * @details This routine requires no library
+ * initialization, therefore may be used when
+ * it fails.
  * @param[in] string the string to be displayed.
- * @note Internal use only.
+ * @bug Does not recognize special
+ * characters such as 'backspace'.
  */
-void winx_print(char *string)
+void __cdecl winx_print(char *string)
 {
 	ANSI_STRING as;
 	UNICODE_STRING us;
 	int i;
+	
+	/*
+	* Use neither memory allocation nor debugging
+	* routines: they may be not available here.
+	*/
 
 	if(!string)
 		return;
@@ -65,6 +74,11 @@ int __cdecl winx_putch(int ch)
 {
 	UNICODE_STRING us;
 	short s[2];
+
+	/*
+	* Use neither memory allocation nor debugging
+	* routines: they may be not available here.
+	*/
 
 	s[0] = (short)ch; s[1] = 0;
 	RtlInitUnicodeString(&us,s);
@@ -522,6 +536,8 @@ static int print_line(char *line_buffer,char *prompt,int max_rows,int *rows_prin
  * immediately.
  * @return Zero for success, negative
  * value otherwise.
+ * @bug Does not recognize special
+ * characters such as 'backspace'.
  */
 int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages)
 {

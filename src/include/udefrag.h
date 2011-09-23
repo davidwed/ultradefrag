@@ -65,32 +65,13 @@ typedef struct _volume_info {
 	int is_removable;
 } volume_info;
 
-/**
- * @brief Initializes all libraries required 
- * for the native application.
- * @note Designed especially to replace DllMain
- * functionality in case of monolithic native application.
- * Call this routine in the beginning of NtProcessStartup() code.
- */
-#define udefrag_monolithic_native_app_init() zenwinx_native_init()
-
-/**
- * @brief Frees resources of all libraries required 
- * for the native application.
- * @note Designed especially to replace DllMain
- * functionality in case of monolithic native application.
- * Don't call it before winx_shutdown() and winx_reboot(),
- * but call always before winx_exit().
- */
-#define udefrag_monolithic_native_app_unload() zenwinx_native_unload()
-
 volume_info * __stdcall udefrag_get_vollist(int skip_removable);
 void __stdcall udefrag_release_vollist(volume_info *v);
 int __stdcall udefrag_validate_volume(char volume_letter,int skip_removable);
 int __stdcall udefrag_get_volume_information(char volume_letter,volume_info *v);
 
-int __stdcall udefrag_fbsize(ULONGLONG number, int digits, char *buffer, int length);
-int __stdcall udefrag_dfbsize(char *string,ULONGLONG *pnumber);
+int       __stdcall udefrag_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
+ULONGLONG __stdcall udefrag_hr_to_bytes(char *string);
 
 typedef enum {
 	ANALYSIS_JOB = 0,
@@ -174,5 +155,6 @@ char __cdecl udefrag_toupper(char c);
 char __cdecl udefrag_tolower(char c);
 
 int __stdcall udefrag_set_log_file_path(void);
+int __stdcall udefrag_init_failed(void);
 
 #endif /* _UDEFRAG_H_ */

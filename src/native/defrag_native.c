@@ -56,7 +56,7 @@ static void set_dbg_log(char *name);
 /**
  * @brief Initializes the native application.
  */
-static void NativeAppInit(void)
+static int NativeAppInit(void)
 {
 	/*
 	* Initialize registry in case 
@@ -72,10 +72,12 @@ static void NativeAppInit(void)
 	* It was not reliable before because crashed
 	* the system in case of missing DLL's.
 	*/
-	udefrag_monolithic_native_app_init();
+	if(zenwinx_native_init() < 0)
+		return (-1);
 	
 	/* start initial logging */
 	set_dbg_log("startup-phase");
+	return 0;
 }
 
 /**
@@ -83,7 +85,7 @@ static void NativeAppInit(void)
  */
 void NativeAppExit(int exit_code)
 {
-	udefrag_monolithic_native_app_unload();
+	zenwinx_native_unload();
 	winx_exit(exit_code);
 }
 
@@ -123,6 +125,7 @@ static int HandleSafeModeBoot(void)
  */
 void __stdcall NtProcessStartup(PPEB Peb)
 {
+	int init_result;
 	/*
 	* No longer than MAX_LINE_WIDTH to ensure that escape and backspace
 	* keys will work properly with winx_prompt() function.
@@ -130,20 +133,28 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	char buffer[MAX_LINE_WIDTH + 1];
 	short wbuffer[MAX_LINE_WIDTH + 1];
 	int i;
-
+	
 	/* initialize the program */
 	peb = Peb;
-	NativeAppInit();
+	init_result = NativeAppInit();
 
 	/* display copyrights */
-	winx_printf("\n\n");
-	winx_printf(VERSIONINTITLE " native interface\n"
+	winx_print("\n\n");
+	winx_print(VERSIONINTITLE " native interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007-2011.\n"
 		"Copyright (c) Stefan Pendl, 2010-2011.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
 		"If something is wrong, hit F8 on startup\n"
 		"and select 'Last Known Good Configuration'\n"
 		"or execute 'CHKDSK {Drive:} /R /F'.\n\n");
+		
+	/* handle initialization failure */
+	if(init_result < 0){
+		winx_print("Initialization failed!\n");
+		winx_print("Send bug report to the authors please.\n");
+		long_dbg_delay();
+		NativeAppExit(1);
+	}
 		
 	/* handle safe mode boot */
 	if(HandleSafeModeBoot())

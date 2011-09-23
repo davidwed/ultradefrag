@@ -373,6 +373,12 @@ int __cdecl main(int argc, char **argv)
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
 		"and you are welcome to redistribute it under certain conditions.\n\n"
 		);
+		
+	/* handle initialization failure */
+	if(udefrag_init_failed()){
+		display_error("Initialization failed!\nSend bug report to the authors please.\n");
+		terminate_console(1);
+	}
 
 	/* handle obsolete options */
 	if(obsolete_option){
@@ -757,7 +763,7 @@ static int show_vollist(void)
 	}
 
 	for(i = 0; v[i].letter != 0; i++){
-		udefrag_fbsize((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
+		udefrag_bytes_to_hr((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
 		d = (double)(signed __int64)(v[i].free_space.QuadPart);
 		/* 0.1 constant is used to exclude divide by zero error */
 		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);

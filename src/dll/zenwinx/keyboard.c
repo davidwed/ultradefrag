@@ -69,7 +69,6 @@ void __stdcall kb_close(void);
 static int  __stdcall kb_check(HANDLE hKbDevice);
 static int __stdcall kb_open_internal(int device_number);
 char * __stdcall winx_get_error_description(unsigned long status);
-void winx_print(char *string);
 
 /**
  * @brief Waits for user input on

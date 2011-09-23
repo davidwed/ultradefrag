@@ -35,12 +35,10 @@
 winx_spin_lock *dbg_lock = NULL;
 int debug_print_enabled = 1;
 
-void winx_print(char *string);
-
 /* forward declarations */
 int __stdcall winx_debug_print(char *string);
 static int deliver_message_to_the_debugger(char *string);
-void init_dbg_log(void);
+static int init_dbg_log(void);
 static void add_dbg_log_entry(char *string);
 void flush_dbg_log(int already_synchronized);
 static void close_dbg_log(void);
@@ -48,16 +46,18 @@ static void close_dbg_log(void);
 /* Initialization routines */
 
 /**
- * @brief Initializes the synchronization 
- * objects used in the debugging routines.
+ * @brief Initializes the synchronization objects used
+ * in the debugging routines.
+ * @return Zero for success, negative value otherwise.
  * @note Internal use only.
- * @todo Handle errors.
  */
-void winx_init_synch_objects(void)
+int winx_init_synch_objects(void)
 {
 	if(dbg_lock == NULL)
 		dbg_lock = winx_init_spin_lock("winx_dbg_lock");
-	init_dbg_log();
+	if(dbg_lock == NULL)
+		return (-1);
+	return init_dbg_log();
 }
 
 /**
@@ -276,8 +276,10 @@ int __stdcall winx_debug_print(char *string)
 		return (-1);
 
 	/* synchronize with other threads, wait no more than 11 sec */
-	if(dbg_lock->hEvent && winx_acquire_spin_lock(dbg_lock,11000) < 0)
-		return (-1);
+	if(dbg_lock != NULL){
+		if(dbg_lock->hEvent && winx_acquire_spin_lock(dbg_lock,11000) < 0)
+			return (-1);
+	}
 	
 	/* return immediately if debug print is disabled */
 	if(debug_print_enabled){
@@ -399,18 +401,20 @@ typedef struct _winx_dbg_log_entry {
 } winx_dbg_log_entry;
 
 winx_dbg_log_entry *dbg_log = NULL;
-winx_spin_lock *file_lock;
+winx_spin_lock *file_lock = NULL;
 int logging_enabled = 0;
 char *log_path = NULL;
 
 /**
  * @brief Initializes the logging to the file.
+ * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-void init_dbg_log(void)
+static int init_dbg_log(void)
 {
 	if(file_lock == NULL)
 		file_lock = winx_init_spin_lock("winx_dbg_logfile_lock");
+	return (file_lock == NULL) ? (-1) : (0);
 }
 
 /**
@@ -459,7 +463,7 @@ void flush_dbg_log(int already_synchronized)
 	char *time_stamp;
 
 	/* synchronize with other threads */
-	if(!already_synchronized){
+	if(!already_synchronized && file_lock != NULL){
 		if(file_lock->hEvent && winx_acquire_spin_lock(file_lock,INFINITE) < 0){
 			DebugPrint("flush_dbg_log: synchronization failed");
 			winx_print("\nflush_dbg_log: synchronization failed!\n");
@@ -468,14 +472,15 @@ void flush_dbg_log(int already_synchronized)
 	}
 
 	/* disable parallel access to dbg_log list */
-	if(dbg_lock->hEvent && winx_acquire_spin_lock(dbg_lock,11000) < 0){
-		if(!already_synchronized)
-			winx_release_spin_lock(file_lock);
-		return;
-	} else {
-		debug_print_enabled = 0;
-		winx_release_spin_lock(dbg_lock);
+	if(dbg_lock != NULL){
+		if(dbg_lock->hEvent && winx_acquire_spin_lock(dbg_lock,11000) < 0){
+			if(!already_synchronized)
+				winx_release_spin_lock(file_lock);
+			return;
+		}
 	}
+	debug_print_enabled = 0;
+	winx_release_spin_lock(dbg_lock);
 	
 	if(dbg_log == NULL || log_path == NULL)
 		goto done;
@@ -533,7 +538,9 @@ void flush_dbg_log(int already_synchronized)
 
 done:
 	/* enable access to dbg_log list again */
-	if(!dbg_lock->hEvent || winx_acquire_spin_lock(dbg_lock,11000) == 0){
+	if(dbg_lock == NULL){
+		debug_print_enabled = 1;
+	} else if(!dbg_lock->hEvent || winx_acquire_spin_lock(dbg_lock,11000) == 0){
 		debug_print_enabled = 1;
 		winx_release_spin_lock(dbg_lock);
 	}
@@ -559,10 +566,12 @@ void __stdcall winx_enable_dbg_log(char *path)
 	}
 	
 	/* synchronize with other threads */
-	if(file_lock->hEvent && winx_acquire_spin_lock(file_lock,INFINITE) < 0){
-		DebugPrint("winx_enable_dbg_log: synchronization failed");
-		winx_print("\nwinx_enable_dbg_log: synchronization failed!\n");
-		return;
+	if(file_lock != NULL){
+		if(file_lock->hEvent && winx_acquire_spin_lock(file_lock,INFINITE) < 0){
+			DebugPrint("winx_enable_dbg_log: synchronization failed");
+			winx_print("\nwinx_enable_dbg_log: synchronization failed!\n");
+			return;
+		}
 	}
 	
 	/* flush old log to disk */

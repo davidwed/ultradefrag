@@ -384,7 +384,7 @@ move_mft:
 
 done:
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
-	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	winx_bytes_to_hr(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("mft optimization",time,jp);
 	winx_release_free_volume_regions(rlist);
@@ -490,7 +490,7 @@ done:
 	/* display amount of moved data and number of defragmented files */
 	DebugPrint("%I64u files defragmented",defragmented_files);
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
-	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	winx_bytes_to_hr(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("defragmentation",time,jp);
 	winx_fclose(jp->fVolume);
@@ -576,7 +576,7 @@ int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameter
 	/* display amount of moved data and number of defragmented files */
 	DebugPrint("%I64u files defragmented",defragmented_files);
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
-	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	winx_bytes_to_hr(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("defragmentation",time,jp);
 	winx_fclose(jp->fVolume);
@@ -736,7 +736,7 @@ done:
 	/* display amount of moved data and number of partially defragmented files */
 	DebugPrint("%I64u files partially defragmented",defragmented_files);
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
-	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	winx_bytes_to_hr(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("partial defragmentation",time,jp);
 	winx_fclose(jp->fVolume);
@@ -997,7 +997,7 @@ done:
 	/* display amount of moved data */
 	DebugPrint("%I64u files moved totally",jp->pi.total_moves);
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
-	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	winx_bytes_to_hr(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	if(pt != NULL) prb_destroy(pt,NULL);
 	stop_timing("file moving to front",time,jp);
@@ -1114,7 +1114,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 done:
 	/* display amount of moved data */
 	DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
-	winx_fbsize(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
+	winx_bytes_to_hr(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
 	DebugPrint("%s moved",buffer);
 	stop_timing("file moving to end",time,jp);
 	winx_fclose(jp->fVolume);

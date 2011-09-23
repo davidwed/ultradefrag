@@ -114,7 +114,7 @@ static int save_text_report(udefrag_job_parameters *jp)
 			else
 				status = " - ";
 			
-			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
+			(void)winx_bytes_to_hr(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				1,human_readable_size,sizeof(human_readable_size));
 			if(sscanf(human_readable_size,"%u.%u %31s",&n1,&n2,s) == 3){
 				if(n2 >= 5) n1 += 1; /* round up, so 1.9 will get 2 instead of 1*/
@@ -213,7 +213,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
 			else
 				status = " - ";
 			
-			(void)winx_fbsize(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
+			(void)winx_bytes_to_hr(file->f->disp.clusters * jp->v_info.bytes_per_cluster,
 				1,human_readable_size,sizeof(human_readable_size));
 			if(sscanf(human_readable_size,"%u.%u %31s",&n1,&n2,s) == 3){
 				if(n2 >= 5) n1 += 1; /* round up, so 1.9 will get 2 instead of 1*/
