@@ -379,6 +379,7 @@ void __stdcall winx_patfree(winx_patlist *patterns)
  * terminating null character. If the number of characters
  * required to store the data exceeds length, then length 
  * characters are stored in buffer and a negative value is returned.
+ * @todo Investigate how many digits can be successfully calculated.
  */
 int __stdcall winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length)
 {
@@ -421,6 +422,7 @@ int __stdcall winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int le
  * b, Kb, Mb, Gb, Tb, Pb, Eb, Zb, Yb.
  * @param[in] string string to be converted.
  * @return Number of bytes.
+ * @todo Investigate limits.
  */
 ULONGLONG __stdcall winx_hr_to_bytes(char *string)
 {
@@ -452,8 +454,8 @@ ULONGLONG __stdcall winx_hr_to_bytes(char *string)
 		return n * m;
 	}
 	
-	r = (ULONGLONG)_atoi64(dp + 1);
-	for(rd = (double)(LONGLONG)r; rd > 1; rd /= 10){}
+	for(rd = (double)_atoi64(dp + 1); rd > 1; rd /= 10){}
+	/* convertion to LONGLONG is needed for MinGW */
 	r = (ULONGLONG)(LONGLONG)((double)(LONGLONG)m * rd);
 	return n * m + r;
 }
