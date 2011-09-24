@@ -751,7 +751,8 @@ static int show_vollist(void)
 	volume_info *v;
 	int i, percent;
 	char s[32];
-	double d;
+	ULONGLONG free, total;
+	double d = 0;
 
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("Volumes available for defragmentation:\n\n");
@@ -764,9 +765,12 @@ static int show_vollist(void)
 
 	for(i = 0; v[i].letter != 0; i++){
 		udefrag_bytes_to_hr((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
-		d = (double)(signed __int64)(v[i].free_space.QuadPart);
-		/* 0.1 constant is used to exclude divide by zero error */
-		d /= ((double)(signed __int64)(v[i].total_space.QuadPart) + 0.1);
+		/* conversion to LONGLONG is needed for Win DDK */
+		/* so, let's divide both numbers to make safe conversion then */
+		total = v->total_space.QuadPart / 2;
+		free = v->free_space.QuadPart / 2;
+		if(total > 0)
+			d = (double)(LONGLONG)free / (double)(LONGLONG)total;
 		percent = (int)(100 * d);
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 		printf("%c:  %8s %12s %8u %%   %ls\n",

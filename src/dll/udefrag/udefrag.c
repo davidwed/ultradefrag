@@ -97,15 +97,11 @@ static void dbg_print_single_counter(udefrag_job_parameters *jp,ULONGLONG counte
 	winx_time2str(seconds,buffer,sizeof(buffer));
 	time -= seconds * 1000;
 	
-	if(counter == 0){
+	if(jp->p_counters.overall_time == 0){
 		p = 0.00;
 	} else {
-		/*
-		* Conversion to LONGLONG is used because of support
-		* of MS Visual Studio 6.0 where conversion from ULONGLONG
-		* to double is not implemented.
-		*/
-		p = (double)(LONGLONG)(counter)/((double)(LONGLONG)(jp->p_counters.overall_time));
+		/* conversion to LONGLONG is needed for Win DDK */
+		p = (double)(LONGLONG)counter / (double)(LONGLONG)jp->p_counters.overall_time;
 	}
 	ip = (unsigned int)(p * 10000);
 	s = winx_sprintf("%s %I64ums",buffer,time);
@@ -152,7 +148,7 @@ static void dbg_print_performance_counters(udefrag_job_parameters *jp)
 static void deliver_progress_info(udefrag_job_parameters *jp,int completion_status)
 {
 	udefrag_progress_info pi;
-	double x, y;
+	ULONGLONG x, y;
 	int i, k, index;
 	int mft_zone_detected;
 	int free_cell_detected;
@@ -168,11 +164,12 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
 	pi.completion_status = completion_status;
 	
 	/* calculate progress percentage */
-	/* FIXME: do it more accurate */
-	x = (double)(LONGLONG)pi.processed_clusters;
-	y = (double)(LONGLONG)pi.clusters_to_process;
+	/* conversion to LONGLONG is needed for Win DDK */
+	/* so, let's divide both numbers to make safe conversion then */
+	x = pi.processed_clusters / 2;
+	y = pi.clusters_to_process / 2;
 	if(y == 0) pi.percentage = 0.00;
-	else pi.percentage = (x / y) * 100.00;
+	else pi.percentage = ((double)(LONGLONG)x / (double)(LONGLONG)y) * 100.00;
 	
 	/* refill cluster map */
 	if(jp->pi.cluster_map && jp->cluster_map.array \
@@ -479,9 +476,13 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
 	* detail&aid=2886353&group_id=199532&atid=969873
 	*/
 	if(jp.udo.time_limit){
-		use_limit = 1;
-		/* FIXME: avoid overflow */
 		time = jp.udo.time_limit * 1000;
+		if(time / 1000 == jp.udo.time_limit){
+			/* no overflow occured */
+			use_limit = 1;
+		} else {
+			/* Windows will die sooner */
+		}
 	}
 	do {
 		winx_sleep(jp.udo.refresh_interval);
@@ -495,7 +496,6 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
 				jp.termination_router = killer;
 			} else {
 				if(jp.start_time){
-					/* FIXME: avoid overflow */
 					if(winx_xtime() - jp.start_time > jp.udo.time_limit * 1000)
 						time = 0;
 				} else {
@@ -558,12 +558,8 @@ char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi
 	if(pi->files == 0){
 		p = 0.00;
 	} else {
-		/*
-		* Conversion to LONGLONG is used because of support
-		* of MS Visual Studio 6.0 where conversion from ULONGLONG
-		* to double is not implemented.
-		*/
-		p = (double)(LONGLONG)(pi->fragments)/((double)(LONGLONG)(pi->files));
+		/* conversion to LONGLONG is needed for Win DDK */
+		p = (double)(LONGLONG)pi->fragments / (double)(LONGLONG)pi->files;
 	}
 	ip = (unsigned int)(p * 100.00);
 	if(ip < 100)
