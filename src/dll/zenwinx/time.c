@@ -116,6 +116,12 @@ int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
 }
 
 /**
+ * @brief Internal variable used
+ * to log winx_xtime failure once.
+ */
+int xtime_failed = 0;
+
+/**
  * @brief Returns time interval since 
  * some abstract unique event in the past.
  * @return Time, in milliseconds.
@@ -123,26 +129,39 @@ int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
  * @note
  * - Useful for performance measures.
  * - Has no physical meaning.
+ * @todo Investigate whether it is possible
+ * to use even more reliable API or not.
  */
 ULONGLONG __stdcall winx_xtime(void)
 {
 	NTSTATUS Status;
 	LARGE_INTEGER frequency;
 	LARGE_INTEGER counter;
+	ULONGLONG xtime;
 	
-	/* TODO: investigate whether it is possible to use more reliable API or not */
 	Status = NtQueryPerformanceCounter(&counter,&frequency);
 	if(!NT_SUCCESS(Status)){
-		DebugPrint("winx_xtime: NtQueryPerformanceCounter failed: %x",(UINT)Status);
+		if(!xtime_failed)
+			DebugPrint("winx_xtime: NtQueryPerformanceCounter failed: %x",(UINT)Status);
+		xtime_failed = 1;
 		return 0;
 	}
 	if(!frequency.QuadPart){
-		DebugPrint("winx_xtime: your hardware has no support for High Resolution timer");
+		if(!xtime_failed)
+			DebugPrint("winx_xtime: your hardware has no support for High Resolution timer");
+		xtime_failed = 1;
 		return 0;
 	}
 	/*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***",frequency.QuadPart,counter.QuadPart);*/
-	/* TODO: make calculation more accurately to ensure that overflow is impossible */
-	return ((1000 * counter.QuadPart) / frequency.QuadPart);
+	xtime = 1000 * counter.QuadPart;
+	if(xtime / 1000 != counter.QuadPart){
+		/* overflow occured; to avoid use of arbitrary
+		   precision arithmetic let's round to seconds */
+		xtime = 1000 * (counter.QuadPart / frequency.QuadPart);
+	} else {
+		xtime /= frequency.QuadPart;
+	}
+	return xtime;
 }
 
 /**
