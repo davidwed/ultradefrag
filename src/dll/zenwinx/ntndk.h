@@ -163,6 +163,9 @@ typedef LONG NTSTATUS;
 #ifndef STATUS_PENDING
 #define STATUS_PENDING                ((NTSTATUS)0x00000103)
 #endif
+#ifndef STATUS_NO_MORE_FILES
+#define STATUS_NO_MORE_FILES          ((NTSTATUS)0x80000006)
+#endif
 #ifndef STATUS_INVALID_HANDLE
 #define STATUS_INVALID_HANDLE         ((NTSTATUS)0xC0000008)
 #endif

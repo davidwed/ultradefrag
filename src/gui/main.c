@@ -434,7 +434,7 @@ int CreateMainWindow(int nShowCmd)
 	WgxSetIcon(hInstance,hWindow,IDI_APP);
 	
 	/* load i18n resources */
-	ApplyLanguagePack(); // TODO: call it also when user selects another language
+	ApplyLanguagePack();
 	BuildLanguageMenu();
 	
 	/* show main window on the screen */

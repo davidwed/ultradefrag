@@ -426,7 +426,6 @@ int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int
 	/* convert volume letter to uppercase - needed for w2k */
 	volume_letter = winx_toupper(volume_letter);
 	
-	/* TEST: may fail on x64? */
 	memset(&jp,0,sizeof(udefrag_job_parameters));
 	jp.filelist = NULL;
 	jp.fragmented_files = NULL;

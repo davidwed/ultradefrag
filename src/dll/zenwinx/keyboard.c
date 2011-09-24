@@ -53,11 +53,11 @@ typedef struct _KEYBOARD {
 	HANDLE hKbEvent;
 } KEYBOARD, *PKEYBOARD;
 
-KEYBOARD kb[MAX_NUM_OF_KEYBOARDS];
-int number_of_keyboards;
+KEYBOARD kb[MAX_NUM_OF_KEYBOARDS] = {{0}};
+int number_of_keyboards = 0;
 
 HANDLE hKbSynchEvent = NULL;
-KEYBOARD_INPUT_DATA kids[KB_QUEUE_LENGTH];
+KEYBOARD_INPUT_DATA kids[KB_QUEUE_LENGTH] = {{0}};
 int start_index = 0;
 int n_written = 0;
 int stop_kb_wait_for_input = 0;

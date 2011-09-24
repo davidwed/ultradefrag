@@ -79,32 +79,6 @@ static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
  */
 static HANDLE ftw_fopen(winx_file_info *f,int action)
 {
-/*	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
-	UNICODE_STRING us;
-	OBJECT_ATTRIBUTES oa;
-	IO_STATUS_BLOCK iosb;
-	NTSTATUS status;
-	HANDLE hFile;
-	
-	if(f == NULL)
-		return NULL;
-	
-	RtlInitUnicodeString(&us,f->path);
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	if(is_directory(f))
-		flags |= FILE_OPEN_FOR_BACKUP_INTENT;
-	else
-		flags |= FILE_NO_INTERMEDIATE_BUFFERING;
-	status = NtCreateFile(&hFile, FILE_GENERIC_READ | SYNCHRONIZE,
-		&oa, &iosb, NULL, 0, FILE_SHARE_READ | FILE_SHARE_WRITE, FILE_OPEN,
-		flags, NULL, 0);
-	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"ftw_fopen: cannot open %ws",f->path);
-		return NULL;
-	}
-	
-	return hFile;
-*/
 	UNICODE_STRING us;
 	OBJECT_ATTRIBUTES oa;
 	IO_STATUS_BLOCK iosb;
@@ -611,8 +585,9 @@ static int ftw_helper(short *path, int flags,
 				NULL,
 				FALSE /* do not restart scan */
 				);
-			/* TODO: better error handling here */
 			if(status != STATUS_SUCCESS){
+				if(status != STATUS_NO_MORE_FILES)
+					DebugPrintEx(status,"ftw_helper failed");
 				/* no more entries to read */
 				winx_heap_free(file_listing);
 				NtClose(hDir);

@@ -28,7 +28,7 @@
 #include "ntfs.h"
 
 /*
-* Add data consistency checks everywhere,
+* TODO: sdd data consistency checks everywhere,
 * because NTFS volumes often have invalid
 * data in MFT entries.
 */
