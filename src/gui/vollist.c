@@ -272,7 +272,8 @@ static void AddCapacityInformation(int index, volume_info *v)
 {
 	LV_ITEM lvi;
 	char s[32];
-	double d;
+	ULONGLONG free, total;
+	double d = 0;
 	int p;
 
 	lvi.mask = LVIF_TEXT;
@@ -287,10 +288,13 @@ static void AddCapacityInformation(int index, volume_info *v)
 	lvi.iSubItem = 3;
 	lvi.pszText = s;
 	(void)SendMessage(hList,LVM_SETITEM,0,(LRESULT)&lvi);
-
-	d = (double)(signed __int64)(v->free_space.QuadPart);
-	/* 0.1 constant is used to exclude divide by zero error */
-	d /= ((double)(signed __int64)(v->total_space.QuadPart) + 0.1);
+	
+	/* conversion to LONGLONG is needed for Win DDK */
+	/* so, let's divide both numbers to make safe conversion then */
+	total = v->total_space.QuadPart / 2;
+	free = v->free_space.QuadPart / 2;
+	if(total > 0)
+		d = (double)(LONGLONG)free / (double)(LONGLONG)total;
 	p = (int)(100 * d);
 	(void)sprintf(s,"%u %%",p);
 	lvi.iSubItem = 4;
