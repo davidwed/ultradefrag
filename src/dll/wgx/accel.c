@@ -25,7 +25,7 @@
  */
 
 /*
-* An article of Mumtaz Zaheer from Pakistan helped me very much
+* An article of Mumtaz Zaheer from Pakistan helped us very much
 * to make a valid subclassing:
 * http://www.codeproject.com/KB/winsdk/safesubclassing.aspx
 */
@@ -46,8 +46,8 @@ typedef struct _CHILD_WINDOW {
 	BOOL isWindowUnicode;
 } CHILD_WINDOW, *PCHILD_WINDOW;
 
-CHILD_WINDOW win[WIN_ARRAY_SIZE];
-int idx;
+CHILD_WINDOW win[WIN_ARRAY_SIZE] = {{0}};
+int idx = 0;
 BOOL first_call = TRUE;
 BOOL error_flag = FALSE;
 
@@ -71,7 +71,9 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			message.lParam = lParam;
 			message.pt.x = message.pt.y = 0;
 			message.time = 0;
-			/* TranslateAcceleratorW ? */
+			/* if we'll receive a report about improper accelerators work
+			   we may use TranslateAcceleratorW to solve the problem;
+			   but currently everything seems to be working fine */
 			(void)TranslateAccelerator(win[i].hMainWindow,win[i].hAccelerator,&message);
 		}
 		if(win[i].isWindowUnicode)
@@ -115,9 +117,7 @@ BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId)
 		first_call = FALSE;
 	}
 	
-	/* Set accelerator for the main window. */
-	/* FIXME: decide is it neccessary or not. */
-	
+	/* No need to set accelerator for the main window. */
 	/* Set accelerator for children. */
 	hChild = GetWindow(hWindow,GW_CHILD);
 	while(hChild){

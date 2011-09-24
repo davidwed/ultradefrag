@@ -97,7 +97,7 @@
 #define MIN_LIST_HEIGHT       40  /* minimal list height */
 
 /*
-* An article of Mumtaz Zaheer from Pakistan helped me very much
+* An article of Mumtaz Zaheer from Pakistan helped us very much
 * to make a valid subclassing:
 * http://www.codeproject.com/KB/winsdk/safesubclassing.aspx
 */

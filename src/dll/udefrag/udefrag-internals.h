@@ -154,7 +154,7 @@ typedef struct _cmap {
 	ULONGLONG (*array)[NUM_OF_SPACE_STATES];
 	ULONGLONG field_size;
 	int map_size;
-	int n_colors; /* TODO: remove it */
+	int n_colors;
 	int default_color;
 	ULONGLONG clusters_per_cell;
 	ULONGLONG clusters_per_last_cell;

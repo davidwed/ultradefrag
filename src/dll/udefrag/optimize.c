@@ -87,7 +87,6 @@ int optimize(udefrag_job_parameters *jp)
 		/* exclude already optimized part of the volume */
 		new_start_lcn = calculate_starting_point(jp,start_lcn);
 		if(0){//if(new_start_lcn <= start_lcn && jp->pi.pass_number){
-			/* TODO */
 			DebugPrint("volume optimization completed: old_sp = %I64u, new_sp = %I64u",
 				start_lcn, new_start_lcn);
 			break;

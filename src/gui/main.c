@@ -204,7 +204,6 @@ static int RegisterMainWindowClass(void)
 	wc.hIcon         = NULL;
 	wc.hIconSm       = NULL;
 	wc.hCursor       = LoadCursor(NULL,IDC_ARROW);
-	/* TODO: do it more accurately */
 	wc.hbrBackground = (HBRUSH)(COLOR_MENU + 1);
 	wc.lpszMenuName  = NULL;
 	wc.lpszClassName = class_name;

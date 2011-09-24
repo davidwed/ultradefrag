@@ -627,8 +627,6 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 	} else {
 		/* check whether the first parameter contains '=' character */
 		if(!wcschr(argv[1],'=')){
-			//winx_printf("\n%ws: invalid syntax!\n\n",argv[0]);
-			//return (-1);
 			/*
 			* List variables containing argv[1] string
 			* in the beginning of their names.
