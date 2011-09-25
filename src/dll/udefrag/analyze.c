@@ -772,8 +772,13 @@ static void produce_list_of_fragmented_files(udefrag_job_parameters *jp)
 	winx_file_info *f;
 	
 	for(f = jp->filelist; f; f = f->next){
-		if(is_fragmented(f) && !is_excluded(f))
-			expand_fragmented_files_list(f,jp);
+		if(is_fragmented(f) && !is_excluded(f)){
+			/* exclude files with empty path */
+			if(f->path != NULL){
+				if(f->path[0] != 0)
+					expand_fragmented_files_list(f,jp);
+			}
+		}
 		if(f->next == jp->filelist) break;
 	}
 }
