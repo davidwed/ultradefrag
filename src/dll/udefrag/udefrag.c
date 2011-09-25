@@ -373,7 +373,7 @@ static DWORD WINAPI start_job(LPVOID p)
 	if(jp->pi.completion_status == 0)
 	jp->pi.completion_status ++; /* success */
 	
-	winx_exit_thread(); /* 8k/12k memory leak here? */
+	winx_exit_thread(0); /* 8k/12k memory leak here? */
 	return 0;
 }
 

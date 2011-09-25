@@ -29,6 +29,7 @@
 #include "ntndk.h"
 #endif /* !WINX_CUSTOM_NTNDK_H */
 
+#define DEFAULT_TAB_WIDTH 2
 #define DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page,\n          ESC or Break to abort..."
 
 #ifndef max
@@ -344,7 +345,7 @@ ULONGLONG __stdcall winx_hr_to_bytes(char *string);
 
 /* thread.c */
 int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle);
-void __stdcall winx_exit_thread(void);
+void __stdcall winx_exit_thread(NTSTATUS status);
 
 /* time.c */
 ULONGLONG __stdcall winx_str2time(char *string);

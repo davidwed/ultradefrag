@@ -38,7 +38,7 @@
  * DWORD WINAPI thread_proc(LPVOID parameter)
  * {
  *     // do something
- *     winx_exit_thread();
+ *     winx_exit_thread(0);
  *     return 0;
  * }
  * winx_create_thread(thread_proc,NULL);
@@ -70,18 +70,17 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID paramete
 
 /**
  * @brief Terminates the current thread.
- * @details The exit code is always zero.
- * @todo Add exit code parameter.
- * @bug This routine causes a small memory leak,
+ * @param[in] status the exit status.
+ * @note This routine causes a small memory leak,
  * because it doesn't deallocate the initial stack.
  * On the other hand, such deallocation seems to be
  * not easy and even if we'll find a proper solution
  * for, let's say XP, we cannot guarantee its work
  * on other systems.
  */
-void __stdcall winx_exit_thread(void)
+void __stdcall winx_exit_thread(NTSTATUS status)
 {
-	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),STATUS_SUCCESS);
+	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),status);
 	if(!NT_SUCCESS(Status)){
 		DebugPrintEx(Status,"winx_exit_thread: cannot terminate thread");
 	}

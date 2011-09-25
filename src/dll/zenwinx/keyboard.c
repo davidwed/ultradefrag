@@ -172,7 +172,7 @@ static DWORD WINAPI kb_wait_for_input(LPVOID p)
 
 done:
 	kb_wait_for_input_threads --;
-	winx_exit_thread();
+	winx_exit_thread(0);
 	return 0;
 }
 

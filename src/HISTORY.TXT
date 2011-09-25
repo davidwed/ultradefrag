@@ -53,6 +53,7 @@ HISTORY
     - winx_fbsize, winx_dfbsize, udefrag_fbsize, udefrag_dfbsize routines
       replaced by winx_bytes_to_hr, winx_hr_to_bytes, udefrag_bytes_to_hr,
       udefrag_hr_to_bytes routines in zenwinx and udefrag libraries
+    - winx_exit_thread prototype changed by adding the exit status parameter
 
     beta3:
     - volume optimization reimplemented

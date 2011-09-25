@@ -37,8 +37,7 @@ void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
  * initialization, therefore may be used when
  * it fails.
  * @param[in] string the string to be displayed.
- * @bug Does not recognize special
- * characters such as 'backspace'.
+ * @note Does not recognize \\b character.
  */
 void __cdecl winx_print(char *string)
 {
@@ -53,43 +52,53 @@ void __cdecl winx_print(char *string)
 
 	if(!string)
 		return;
+	
+	/* use slower winx_putch based code if \t detected */
+	if(strchr(string,'\t'))
+		goto second_algorithm;
 
 	RtlInitAnsiString(&as,string);
 	if(RtlAnsiStringToUnicodeString(&us,&as,TRUE) == STATUS_SUCCESS){
 		NtDisplayString(&us);
 		RtlFreeUnicodeString(&us);
 	} else {
+second_algorithm:
 		for(i = 0; string[i]; i ++)
 			winx_putch(string[i]);
 	}
-
 }
 
 /**
  * @brief putch() native equivalent.
- * @bug Does not recognize special
- * characters such as 'backspace'.
+ * @note Does not recognize \\b character.
  */
 int __cdecl winx_putch(int ch)
 {
 	UNICODE_STRING us;
+	int i;
+	short t[DEFAULT_TAB_WIDTH + 1];
 	short s[2];
 
 	/*
 	* Use neither memory allocation nor debugging
 	* routines: they may be not available here.
 	*/
-
-	s[0] = (short)ch; s[1] = 0;
-	RtlInitUnicodeString(&us,s);
+	
+	if(ch == '\t'){
+		for(i = 0; i < DEFAULT_TAB_WIDTH; i++) t[i] = 0x20;
+		t[DEFAULT_TAB_WIDTH] = 0;
+		RtlInitUnicodeString(&us,t);
+	} else {
+		s[0] = (short)ch; s[1] = 0;
+		RtlInitUnicodeString(&us,s);
+	}
 	NtDisplayString(&us);
 	return ch;
 }
 
 /**
  * @brief puts() native equivalent.
- * @bug Does not recognize special
- * characters such as 'backspace'.
+ * @note Does not recognize \\b character.
  */
 int __cdecl winx_puts(const char *string)
 {
@@ -99,8 +108,7 @@ int __cdecl winx_puts(const char *string)
 
 /**
  * @brief printf() native equivalent.
- * @bug Does not recognize special
- * characters such as 'backspace'.
+ * @note Does not recognize \\b character.
  */
 int __cdecl winx_printf(const char *format, ...)
 {
@@ -198,7 +206,9 @@ int __cdecl winx_getch(void)
 
 /**
  * @brief getche() native equivalent.
- * @bug Does not recognize special characters such as 'backspace'.
+ * @note 
+ * - Does not recognize \\b character.
+ * - Does not recognize tabulation.
  */
 int __cdecl winx_getche(void)
 {
@@ -217,6 +227,7 @@ int __cdecl winx_getche(void)
  * @param[in] n the maximum number of characters to read.
  * @return Number of characters read including terminal zero.
  * Negative value indicates failure.
+ * @note Does not recognize tabulation.
  */
 int __cdecl winx_gets(char *string,int n)
 {
@@ -302,7 +313,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
  * by characters read.
  * @param[in] prompt the string to be printed as prompt.
  * @param[out] string the storage for the input string.
- * @param[in] n the maximum number of characters to read.
+ * @param[in] n the size of the string, in characters.
  * @param[in,out] h pointer to structure holding
  * the commands history. May be NULL.
  * @return Number of characters read including terminal zero.
@@ -312,6 +323,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
  * - The sentence above works fine only when user input
  * stands in a single line of the screen.
  * - Recognizes arrow keys to walk through commands history.
+ * @note Does not recognize tabulation.
  */
 int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 {
@@ -469,13 +481,12 @@ fail:
 /**
  * @brief Simplified analog of winx_prompt_ex() call.
  * Has no support of commands history.
+ * @note Does not recognize tabulation.
  */
 int __cdecl winx_prompt(char *prompt,char *string,int n)
 {
 	return winx_prompt_ex(prompt,string,n,NULL);
 }
-
-#define DEFAULT_TAB_WIDTH 2
 
 /* returns 1 if break or escape was pressed, zero otherwise */
 static int print_line(char *line_buffer,char *prompt,int max_rows,int *rows_printed,int last_line)
@@ -536,8 +547,7 @@ static int print_line(char *line_buffer,char *prompt,int max_rows,int *rows_prin
  * immediately.
  * @return Zero for success, negative
  * value otherwise.
- * @bug Does not recognize special
- * characters such as 'backspace'.
+ * @note Does not recognize \\b character.
  */
 int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages)
 {

@@ -290,7 +290,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
 	if(out_buffer) RtlZeroMemory(out_buffer,out_size);
 	
 	if(pbytes_returned) *pbytes_returned = 0;
-	if((code >> 16) == FILE_DEVICE_FILE_SYSTEM){ /* on x64? */
+	if((code >> 16) == FILE_DEVICE_FILE_SYSTEM){
 		Status = NtFsControlFile(f->hFile,NULL,NULL,NULL,
 			&iosb,code,in_buffer,in_size,out_buffer,out_size);
 	} else {

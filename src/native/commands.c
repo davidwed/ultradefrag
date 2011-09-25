@@ -124,9 +124,9 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 	if(filelist){
         winx_printf("Available Manual Pages:\n");
 		for(file = filelist->prev, column = 0; file; file = file->prev){
-			/* XXX: skip readme.txt file */
+			/* display man files only */
 			_wcslwr(file->name);
-			if(wcscmp(file->name,L"readme.txt")){
+			if(wcsstr(file->name,L".man")){
 				winx_printf("%-15ws",file->name);
 				column ++;
 				if(column >= max_columns){

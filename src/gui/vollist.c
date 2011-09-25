@@ -44,7 +44,6 @@ int column_widths_adjusted = 0;
 
 /**
  * @brief Initializes the list of volumes.
- * @todo Return negative value on errors.
  */
 void InitVolList(void)
 {
