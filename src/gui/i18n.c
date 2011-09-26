@@ -509,7 +509,6 @@ DWORD WINAPI LangIniChangesTrackingProc(LPVOID lpParameter)
 	while(!stop_track_lang_ini){
 		status = WaitForSingleObject(h,100);
 		if(status == WAIT_OBJECT_0){
-			// TODO: update only if lang.ini changed
 			ApplyLanguagePack();
 			/* update language menu */
 			GetPrivateProfileStringW(L"Language",L"Selected",L"",selected_lang_name,MAX_PATH,L".\\lang.ini");
@@ -595,7 +594,6 @@ DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)
 	while(!stop_track_i18n_folder){
 		status = WaitForSingleObject(h,100);
 		if(status == WAIT_OBJECT_0){
-			// TODO: update only if current translation updated
 			ApplyLanguagePack();
 			/* update language menu anyway */
 			BuildLanguageMenu();

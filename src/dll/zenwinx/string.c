@@ -266,8 +266,6 @@ int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int
 		return (-1);
 	}
 	
-	/* TODO: test for speed a case when s is converted to lowercase */
-	
 	/* replace all delimiters by zeros */
 	for(n = 0; s[n]; n++){
 		if(wcschr(delim,s[n]))

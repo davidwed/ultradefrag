@@ -248,10 +248,8 @@ void ProcessSingleVolume(volume_processing_job *job)
 
 	/* refresh capacity information of the volume (bug #2036873) */
 	VolListRefreshItem(job);
-	//ClearMap();
-	///ShowProgress();
-	// TODO
-	//SetProgress(L"A 0.00 %",0);
+	/*ShowProgress();
+	SetProgress(L"A 0.00 %",0);*/
 
 	/* validate the volume before any processing */
 	error_code = udefrag_validate_volume(job->volume_letter,FALSE);
@@ -268,7 +266,6 @@ void ProcessSingleVolume(volume_processing_job *job)
 				terminator, NULL);
 		if(error_code < 0 && !exit_pressed){
 			DisplayDefragError(error_code);
-			//ClearMap();
 		}
 	}
 }

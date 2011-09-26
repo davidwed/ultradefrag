@@ -258,7 +258,7 @@ void VolListNotifyHandler(LPARAM lParam)
 			job = current_job;
 		}
 		current_job = job;
-		///HideProgress();
+		/*HideProgress();*/
 		RedrawMap(job,0);
 		if(job) UpdateStatusBar(&job->pi);
 	}

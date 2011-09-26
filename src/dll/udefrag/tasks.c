@@ -858,7 +858,6 @@ repeat_scan:
 			if(rgn->length > rgn_size_threshold && rgn->lcn >= min_rgn_lcn){
 				/* break if on the next pass the current region will be moved to the end */
 				if(jp->udo.job_flags & UD_JOB_REPEAT){
-					/* TODO: speedup */
 					new_sp = calculate_starting_point(jp,start_lcn);
 					if(rgn->lcn > new_sp){
 						completed = 1;

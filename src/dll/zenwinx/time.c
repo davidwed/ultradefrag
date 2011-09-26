@@ -129,8 +129,6 @@ int xtime_failed = 0;
  * @note
  * - Useful for performance measures.
  * - Has no physical meaning.
- * @todo Investigate whether it is possible
- * to use even more reliable API or not.
  */
 ULONGLONG __stdcall winx_xtime(void)
 {
