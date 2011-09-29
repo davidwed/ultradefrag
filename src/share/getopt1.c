@@ -23,7 +23,7 @@
 #include <jsconfig.h>
 #endif
 
-#include "../include/getopt.h"
+#include "getopt.h"
 
 #if !defined (__STDC__) || !__STDC__
 /* This is a separate conditional since some stdc systems

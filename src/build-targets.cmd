@@ -65,16 +65,18 @@ xcopy /I /Y /Q .\lua5.1      .\obj\lua5.1
 xcopy /I /Y /Q .\dll\wgx     .\obj\wgx
 
 :: copy external files on which udefrag.exe command line tool depends
-copy /Y .\obj\share\*.c .\obj\console\
+copy /Y .\obj\share\*.* .\obj\console\
 
 :: copy header files to different locations
 :: to make relative paths of them the same
 :: as in /src directory
 mkdir obj\dll
-mkdir obj\dll\zenwinx
-copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
+mkdir obj\dll\udefrag
+copy /Y obj\udefrag\udefrag.h obj\dll\udefrag
 mkdir obj\dll\wgx
 copy /Y obj\wgx\wgx.h obj\dll\wgx
+mkdir obj\dll\zenwinx
+copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
 
 :: let's build all modules by selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (

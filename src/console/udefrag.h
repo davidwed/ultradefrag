@@ -37,8 +37,7 @@
 #endif
 
 #include "../dll/wgx/wgx.h"
-
-#include "../include/udefrag.h"
+#include "../dll/udefrag/udefrag.h"
 #include "../include/ultradfgver.h"
 
 #define settextcolor(c) (void)SetConsoleTextAttribute(hStdOut,c)

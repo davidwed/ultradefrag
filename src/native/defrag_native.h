@@ -25,11 +25,9 @@
 #ifndef _DEFRAG_NATIVE_H_
 #define _DEFRAG_NATIVE_H_
 
-#include "../include/ntndk.h"
-
-#include "../include/udefrag.h"
-#include "../include/ultradfgver.h"
 #include "../dll/zenwinx/zenwinx.h"
+#include "../dll/udefrag/udefrag.h"
+#include "../include/ultradfgver.h"
 
 /* uncomment it if you want to replace smss.exe by this program */
 //#define USE_INSTEAD_SMSS

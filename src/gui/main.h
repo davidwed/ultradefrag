@@ -75,8 +75,7 @@
 #include "../lua5.1/lualib.h"
 
 #include "../dll/wgx/wgx.h"
-
-#include "../include/udefrag.h"
+#include "../dll/udefrag/udefrag.h"
 #include "../include/ultradfgver.h"
 
 #include "resource.h"

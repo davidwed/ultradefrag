@@ -22,7 +22,7 @@
 */
 
 #include "udefrag.h"
-#include "../include/getopt.h"
+#include "../share/getopt.h"
 
 /* forward declarations */
 void search_for_paths(void);

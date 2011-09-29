@@ -23,7 +23,7 @@
  * @{
  */
 
-#include "ntndk.h"
+#include "zenwinx.h"
 
 #if defined(__GNUC__)
 #ifndef _WIN64

@@ -24,10 +24,7 @@
  * @{
  */
 
-#include "../../include/ntndk.h"
-
-#include "../../include/udefrag.h"
-#include "../zenwinx/zenwinx.h"
+#include "udefrag-internals.h"
 
 static int internal_validate_volume(char letter,int skip_removable,volume_info *v);
 

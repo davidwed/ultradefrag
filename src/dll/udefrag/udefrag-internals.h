@@ -20,9 +20,8 @@
 #ifndef _UDEFRAG_INTERNALS_H_
 #define _UDEFRAG_INTERNALS_H_
 
-#include "../../include/ntndk.h"
-#include "../../include/udefrag.h"
 #include "../zenwinx/zenwinx.h"
+#include "udefrag.h"
 #include "../../include/ultradfgver.h"
 
 /************************************************************/
