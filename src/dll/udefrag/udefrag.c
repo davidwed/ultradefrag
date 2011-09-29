@@ -32,13 +32,13 @@
 #include "udefrag-internals.h"
 
 /**
- * @brief Defines whether the library has 
+ * @brief Defines whether udefrag library has 
  * been initialized successfully or not.
  * @return Boolean value.
  */
 int udefrag_init_failed(void)
 {
-	return zenwinx_init_failed();
+	return winx_init_failed();
 }
 
 /**

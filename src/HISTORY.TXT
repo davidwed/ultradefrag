@@ -54,6 +54,10 @@ HISTORY
       replaced by winx_bytes_to_hr, winx_hr_to_bytes, udefrag_bytes_to_hr,
       udefrag_hr_to_bytes routines in zenwinx and udefrag libraries
     - winx_exit_thread prototype changed by adding the exit status parameter
+    - zenwinx_native_init and zenwinx_native_unload routines replaced
+      by winx_init_library and winx_unload_library routines respectively
+    - winx_init_failed and winx_kb_init routines added to zenwinx library
+    - winx_init routine removed from zenwinx library
     - calling conventions removed from all the function prototypes
       in all the libraries
 

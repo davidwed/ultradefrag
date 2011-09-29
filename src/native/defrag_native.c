@@ -56,7 +56,7 @@ static void set_dbg_log(char *name);
 /**
  * @brief Initializes the native application.
  */
-static int NativeAppInit(void)
+static int NativeAppInit(PPEB Peb)
 {
 	/*
 	* Initialize registry in case 
@@ -72,21 +72,12 @@ static int NativeAppInit(void)
 	* It was not reliable before because crashed
 	* the system in case of missing DLL's.
 	*/
-	if(zenwinx_native_init() < 0)
+	if(winx_init_library(Peb) < 0)
 		return (-1);
 	
 	/* start initial logging */
 	set_dbg_log("startup-phase");
 	return 0;
-}
-
-/**
- * @brief Properly terminates the native application.
- */
-void NativeAppExit(int exit_code)
-{
-	zenwinx_native_unload();
-	winx_exit(exit_code);
 }
 
 /**
@@ -114,7 +105,7 @@ static int HandleSafeModeBoot(void)
 		winx_printf("In Windows Safe Mode this program is useless!\n");
 		/* if someone will see the message, a little delay will help him to read it */
 		short_dbg_delay();
-		NativeAppExit(0);
+		winx_exit(0);
 		return 1;
 	}
 	return 0;
@@ -136,7 +127,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	
 	/* initialize the program */
 	peb = Peb;
-	init_result = NativeAppInit();
+	init_result = NativeAppInit(Peb);
 
 	/* display copyrights */
 	winx_print("\n\n");
@@ -153,7 +144,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 		winx_print("Initialization failed!\n");
 		winx_print("Send bug report to the authors please.\n");
 		long_dbg_delay();
-		NativeAppExit(1);
+		winx_exit(1);
 	}
 		
 	/* handle safe mode boot */
@@ -165,15 +156,15 @@ void __stdcall NtProcessStartup(PPEB Peb)
 #ifndef USE_INSTEAD_SMSS
 		winx_printf("Good bye ...\n");
 		short_dbg_delay();
-		NativeAppExit(0);
+		winx_exit(0);
 #endif
 	}
 
 	/* initialize keyboards */
-	if(winx_init(Peb) < 0){
+	if(winx_kb_init() < 0){
 		winx_printf("Wait 10 seconds ...\n");
 		long_dbg_delay();
-		NativeAppExit(1);
+		winx_exit(1);
 	}
 	
 	/* prompt to exit */
@@ -181,7 +172,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 	for(i = 0; i < 5; i++){
 		if(winx_kbhit(1000) >= 0){
 			winx_printf("\nGood bye ...\n");
-			NativeAppExit(0);
+			winx_exit(0);
 		}
 		//winx_printf("%c ",(char)('0' + 10 - i));
 		winx_printf(".");

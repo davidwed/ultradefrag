@@ -177,14 +177,14 @@ done:
 }
 
 /**
- * @brief Opens all existing keyboards.
+ * @brief Prepares all existing keyboards
+ * for work with user input related procedures.
  * @details If checking of first keyboard fails
  * it waits ten seconds for the initialization.
  * This is needed for wireless devices.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
-int kb_open(void)
+int winx_kb_init(void)
 {
 	short event_name[64];
 	int i, j;

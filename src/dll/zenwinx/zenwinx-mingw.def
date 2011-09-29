@@ -1,7 +1,6 @@
 LIBRARY zenwinx.dll
 
 EXPORTS
-	winx_init
 	winx_exit
 	winx_reboot
 	winx_shutdown
@@ -23,6 +22,7 @@ EXPORTS
 	winx_print_array_of_strings
 	winx_kbhit
 	winx_breakhit
+	winx_kb_init
 	winx_kb_read
 	winx_sleep
 	winx_get_os_version
@@ -107,9 +107,9 @@ EXPORTS
 	winx_acquire_spin_lock
 	winx_release_spin_lock
 	winx_destroy_spin_lock
-	zenwinx_native_init
-	zenwinx_init_failed
-	zenwinx_native_unload
+	winx_init_library
+	winx_init_failed
+	winx_unload_library
 	prb_create
 	prb_copy
 	prb_destroy

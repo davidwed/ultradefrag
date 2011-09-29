@@ -198,6 +198,8 @@ int winx_ftw_dump_file(winx_file_info *f,ftw_terminator t,void *user_defined_dat
 /* ftw_ntfs.c */
 /* int64.c */
 /* keyboard.c */
+int winx_kb_init(void);
+
 /* keytrans.c */
 /* ldr.c */
 int winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
@@ -418,11 +420,10 @@ winx_volume_region *winx_sub_volume_region(winx_volume_region *rlist,
 void winx_release_free_volume_regions(winx_volume_region *rlist);
 
 /* zenwinx.c */
-int zenwinx_native_init(void);
-int zenwinx_init_failed(void);
-void zenwinx_native_unload(void);
+int winx_init_library(void *peb);
+int winx_init_failed(void);
+void winx_unload_library(void);
 
-int winx_init(void *peb);
 void winx_exit(int exit_code);
 void winx_reboot(void);
 void winx_shutdown(void);

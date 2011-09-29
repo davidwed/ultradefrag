@@ -857,7 +857,7 @@ int exit_handler(int argc,short **argv,short **envp)
 	
 	winx_printf("Good bye ...\n");
 	winx_destroy_history(&history);
-	NativeAppExit(exit_code);
+	winx_exit(exit_code);
 	return 0;
 }
 
