@@ -411,13 +411,17 @@ function produce_mingw_makefile()
 
 	j = 1
 	for i, v in ipairs(adlibs) do
-		pos = 0
-		repeat
-			pos = string.find(v,"\\",pos + 1,true)
-			--FIXME: pos == nil ??? it's unusual, but ...
-		until string.find(v,"\\",pos + 1,true) == nil
-		adlibs_libs[j] = string.sub(v,pos + 1)
-		adlibs_paths[j] = string.sub(v,0,pos - 1)
+		if string.find(v,"\\",1,true) == nil then
+			adlibs_libs[j] = v
+			adlibs_paths[j] = ""
+		else
+			pos = 0
+			repeat
+				pos = string.find(v,"\\",pos + 1,true)
+			until string.find(v,"\\",pos + 1,true) == nil
+			adlibs_libs[j] = string.sub(v,pos + 1)
+			adlibs_paths[j] = string.sub(v,0,pos - 1)
+		end
 		j = j + 1
 	end
 	for i, v in ipairs(adlibs_libs) do
@@ -529,13 +533,17 @@ function produce_mingw_x64_makefile()
 
 	j = 1
 	for i, v in ipairs(adlibs) do
-		pos = 0
-		repeat
-			pos = string.find(v,"\\",pos + 1,true)
-			--FIXME: pos == nil ??? it's unusual, but ...
-		until string.find(v,"\\",pos + 1,true) == nil
-		adlibs_libs[j] = string.sub(v,pos + 1)
-		adlibs_paths[j] = string.sub(v,0,pos - 1)
+		if string.find(v,"\\",1,true) == nil then
+			adlibs_libs[j] = v
+			adlibs_paths[j] = ""
+		else
+			pos = 0
+			repeat
+				pos = string.find(v,"\\",pos + 1,true)
+			until string.find(v,"\\",pos + 1,true) == nil
+			adlibs_libs[j] = string.sub(v,pos + 1)
+			adlibs_paths[j] = string.sub(v,0,pos - 1)
+		end
 		j = j + 1
 	end
 	for i, v in ipairs(adlibs_libs) do
