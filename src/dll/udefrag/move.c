@@ -31,7 +31,7 @@
 /************************************************************/
 
 /* TODO: remove it after testing of $Mft defrag on Vista/Win7 */
-WINX_FILE * __stdcall new_winx_vopen(char volume_letter)
+WINX_FILE *new_winx_vopen(char volume_letter)
 {
 	char path[] = "\\??\\A:";
 	ANSI_STRING as;
@@ -660,7 +660,7 @@ static void subtract_clusters(winx_file_info *f, ULONGLONG vcn,
 */
 }
 
-static int __stdcall dump_terminator(void *user_defined_data)
+static int dump_terminator(void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 

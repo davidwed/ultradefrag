@@ -71,7 +71,7 @@ pitchandfamily = 34
 facename = "Arial Black"
 @endverbatim
  */
-BOOL __stdcall WgxCreateFont(char *wgx_font_path,PWGX_FONT pFont)
+BOOL WgxCreateFont(char *wgx_font_path,PWGX_FONT pFont)
 {
 	lua_State *L;
 	int status;
@@ -150,7 +150,7 @@ use_default_font:
  * @param[in] hWnd handle to the window.
  * @param[in] pFont pointer to the font definition structure.
  */
-void __stdcall WgxSetFont(HWND hWnd, PWGX_FONT pFont)
+void WgxSetFont(HWND hWnd, PWGX_FONT pFont)
 {
 	HWND hChild;
 	
@@ -175,7 +175,7 @@ void __stdcall WgxSetFont(HWND hWnd, PWGX_FONT pFont)
 /**
  * @brief Destroys font built by WgxCreateFont.
  */
-void __stdcall WgxDestroyFont(PWGX_FONT pFont)
+void WgxDestroyFont(PWGX_FONT pFont)
 {
 	if(pFont){
 		if(pFont->hFont){
@@ -193,7 +193,7 @@ void __stdcall WgxDestroyFont(PWGX_FONT pFont)
  * @note This function shows a message box in case when
  * some error has been occured.
  */
-BOOL __stdcall WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont)
+BOOL WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont)
 {
 	LOGFONT *lf;
 	FILE *pf;

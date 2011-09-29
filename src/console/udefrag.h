@@ -51,7 +51,7 @@
 #else
 #define dbg_print printf_stub
 #endif
-int __cdecl printf_stub(const char *format,...);
+int printf_stub(const char *format,...);
 
 #define MAX_LONG_PATH 32767
 

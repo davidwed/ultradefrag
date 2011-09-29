@@ -38,7 +38,7 @@
 /**
  * @brief Sends formatted string to DbgView program.
  */
-void __cdecl WgxDbgPrint(char *format, ...)
+void WgxDbgPrint(char *format, ...)
 {
 	char *buffer;
 	va_list arg;
@@ -72,7 +72,7 @@ void __cdecl WgxDbgPrint(char *format, ...)
  * @brief Sends formatted string to DbgView program,
  * with attached description of the last Win32 error.
  */
-void __cdecl WgxDbgPrintLastError(char *format, ...)
+void WgxDbgPrintLastError(char *format, ...)
 {
 	char *buffer;
 	va_list arg;
@@ -127,7 +127,7 @@ void __cdecl WgxDbgPrintLastError(char *format, ...)
  * @param[in] ... the parameters.
  * @return Return value is the same as MessageBox returns.
  */
-int __cdecl WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...)
+int WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...)
 {
 	char *buffer;
 	va_list arg;

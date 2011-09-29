@@ -50,7 +50,7 @@ DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter);
  * @brief Sends web analytics request.
  * @note Passed url must be allocated by malloc.
  */
-static BOOL __stdcall SendWebAnalyticsRequest(char *url)
+static BOOL SendWebAnalyticsRequest(char *url)
 {
 	URLMON_PROCEDURE pURLDownloadToCacheFile;
 	HMODULE hUrlmonDLL = NULL;
@@ -113,7 +113,7 @@ DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter)
  * @note Based on http://www.vdgraaf.info/google-analytics-without-javascript.html
  * and http://code.google.com/apis/analytics/docs/tracking/gaTrackingTroubleshooting.html
  */
-static char * __stdcall build_ga_request(char *hostname,char *path,char *account)
+static char *build_ga_request(char *hostname,char *path,char *account)
 {
 	int utmn, utmhid, cookie, random;
 	__int64 today;
@@ -192,7 +192,7 @@ static char * __stdcall build_ga_request(char *hostname,char *path,char *account
  * }
  * @endcode
  */
-BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account)
+BOOL IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account)
 {
 	char *url;
 	
@@ -212,7 +212,7 @@ BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *ac
  * the request completion, the program
  * crashes.
  */
-void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account)
+void IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account)
 {
 	char *url;
 	HANDLE h;

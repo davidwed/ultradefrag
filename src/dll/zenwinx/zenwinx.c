@@ -26,14 +26,14 @@
 
 #include "zenwinx.h"
 
-int  __stdcall kb_open(void);
-void __stdcall kb_close(void);
+int kb_open(void);
+void kb_close(void);
 int  winx_create_global_heap(void);
 void winx_destroy_global_heap(void);
 int  winx_init_synch_objects(void);
 void winx_destroy_synch_objects(void);
-void __stdcall MarkWindowsBootAsSuccessful(void);
-char * __stdcall winx_get_error_description(unsigned long status);
+void MarkWindowsBootAsSuccessful(void);
+char *winx_get_error_description(unsigned long status);
 void flush_dbg_log(int already_synchronized);
 
 /**
@@ -63,7 +63,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
  * Call this routine in the beginning of the NtProcessStartup.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall zenwinx_native_init(void)
+int zenwinx_native_init(void)
 {
 	if(winx_create_global_heap() < 0)
 		return (-1);
@@ -78,7 +78,7 @@ int __stdcall zenwinx_native_init(void)
  * been initialized successfully or not.
  * @return Boolean value.
  */
-int __stdcall zenwinx_init_failed(void)
+int zenwinx_init_failed(void)
 {
 	return initialization_failed;
 }
@@ -90,7 +90,7 @@ int __stdcall zenwinx_init_failed(void)
  * Don't call it before winx_shutdown() and winx_reboot(),
  * but call always before winx_exit().
  */
-void __stdcall zenwinx_native_unload(void)
+void zenwinx_native_unload(void)
 {
 	winx_destroy_synch_objects();
 	winx_destroy_global_heap();
@@ -114,7 +114,7 @@ void __stdcall zenwinx_native_unload(void)
  * }
  * @endcode
  */
-int __stdcall winx_init(void *peb)
+int winx_init(void *peb)
 {
 	PRTL_USER_PROCESS_PARAMETERS pp;
 
@@ -160,7 +160,7 @@ static void print_post_scriptum(char *msg,NTSTATUS Status)
  * used by zenwinx library before the process termination.
  * @param[in] exit_code the exit status.
  */
-void __stdcall winx_exit(int exit_code)
+void winx_exit(int exit_code)
 {
 	NTSTATUS Status;
 	
@@ -178,7 +178,7 @@ void __stdcall winx_exit(int exit_code)
  * then the computer will not be rebooted and the program 
  * will continue the execution after this call.
  */
-void __stdcall winx_reboot(void)
+void winx_reboot(void)
 {
 	NTSTATUS Status;
 	
@@ -198,7 +198,7 @@ void __stdcall winx_reboot(void)
  * then the computer will not be shut down and the program 
  * will continue the execution after this call.
  */
-void __stdcall winx_shutdown(void)
+void winx_shutdown(void)
 {
 	NTSTATUS Status;
 	

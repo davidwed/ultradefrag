@@ -36,7 +36,7 @@
  * been initialized successfully or not.
  * @return Boolean value.
  */
-int __stdcall udefrag_init_failed(void)
+int udefrag_init_failed(void)
 {
 	return zenwinx_init_failed();
 }
@@ -226,7 +226,7 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
  * no more frequently than specified in UD_REFRESH_INTERVAL
  * environment variable.
  */
-void __stdcall progress_router(void *p)
+void progress_router(void *p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 
@@ -247,7 +247,7 @@ void __stdcall progress_router(void *p)
  * environment variable elapses, it terminates
  * the job immediately.
  */
-int __stdcall termination_router(void *p)
+int termination_router(void *p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	int result;
@@ -278,7 +278,7 @@ int __stdcall termination_router(void *p)
 /*
 * Another multithreaded technique delivers progress info more smoothly.
 */
-static int __stdcall terminator(void *p)
+static int terminator(void *p)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 	int result;
@@ -298,7 +298,7 @@ static int __stdcall terminator(void *p)
 	return 0;
 }
 
-static int __stdcall killer(void *p)
+static int killer(void *p)
 {
 	winx_dbg_print_header(0,0,"*");
 	winx_dbg_print_header(0x20,0,"termination requested by caller");
@@ -408,7 +408,7 @@ void destroy_lists(udefrag_job_parameters *jp)
  * @note [Callback procedures should complete as quickly
  * as possible to avoid slowdown of the volume processing].
  */
-int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
+int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
 		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p)
 {
 	udefrag_job_parameters jp;
@@ -533,7 +533,7 @@ done:
  * of the disk defragmentation job. NULL indicates failure.
  * @note This function is used in console and native applications.
  */
-char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi)
+char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
 {
 	#define MSG_LENGTH 4095
 	char *msg;
@@ -587,7 +587,7 @@ char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi
  * by udefrag_get_default_formatted_results.
  * @param[in] results the string to be released.
  */
-void __stdcall udefrag_release_default_formatted_results(char *results)
+void udefrag_release_default_formatted_results(char *results)
 {
 	if(results)
 		winx_heap_free(results);
@@ -599,7 +599,7 @@ void __stdcall udefrag_release_default_formatted_results(char *results)
  * @param[in] error_code the error code.
  * @return A human readable description.
  */
-char * __stdcall udefrag_get_error_description(int error_code)
+char *udefrag_get_error_description(int error_code)
 {
 	switch(error_code){
 	case UDEFRAG_UNKNOWN_ERROR:
@@ -645,7 +645,7 @@ char * __stdcall udefrag_get_error_description(int error_code)
  * @return Zero for success, negative value
  * otherwise.
  */
-int __stdcall udefrag_set_log_file_path(void)
+int udefrag_set_log_file_path(void)
 {
 	wchar_t *path;
 	char *native_path, *path_copy, *filename;

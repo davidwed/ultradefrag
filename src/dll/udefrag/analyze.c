@@ -137,7 +137,7 @@ int get_volume_information(udefrag_job_parameters *jp)
 /**
  * @brief get_free_space_layout helper.
  */
-static int __stdcall process_free_region(winx_volume_region *rgn,void *user_defined_data)
+static int process_free_region(winx_volume_region *rgn,void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 	
@@ -268,7 +268,7 @@ int exclude_by_path(winx_file_info *f,udefrag_job_parameters *jp)
 /**
  * @brief find_files helper.
  */
-static int __stdcall filter(winx_file_info *f,void *user_defined_data)
+static int filter(winx_file_info *f,void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 	int length;
@@ -332,7 +332,7 @@ skip:
 /**
  * @brief find_files helper.
  */
-static void __stdcall progress_callback(winx_file_info *f,void *user_defined_data)
+static void progress_callback(winx_file_info *f,void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 	ULONGLONG filesize;
@@ -387,7 +387,7 @@ static void __stdcall progress_callback(winx_file_info *f,void *user_defined_dat
 /**
  * @brief find_files helper.
  */
-static int __stdcall terminator(void *user_defined_data)
+static int terminator(void *user_defined_data)
 {
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 

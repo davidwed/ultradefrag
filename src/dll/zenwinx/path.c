@@ -35,7 +35,7 @@
  * then path keeps unchanged.
  * @param[in,out] path the native ANSI path to be processed.
  */
-void __stdcall winx_path_remove_extension(char *path)
+void winx_path_remove_extension(char *path)
 {
 	int i;
 
@@ -76,7 +76,7 @@ void __stdcall winx_path_remove_extension(char *path)
  * If the path has a trailing backslash, then only that is removed.
  * @param[in,out] path the native ANSI path to be processed.
  */
-void __stdcall winx_path_remove_filename(char *path)
+void winx_path_remove_filename(char *path)
 {
 	char *lb;
 	
@@ -94,7 +94,7 @@ void __stdcall winx_path_remove_filename(char *path)
  * path contains as output <b>Windows\\</b>.
  * @param[in,out] path the native ANSI path to be processed.
  */
-void __stdcall winx_path_extract_filename(char *path)
+void winx_path_extract_filename(char *path)
 {
 	int i,j,n;
 	
@@ -123,7 +123,7 @@ void __stdcall winx_path_extract_filename(char *path)
  * @param[out] path receives the native path of the current executable.
  * @note path must be MAX_PATH characters long.
  */
-void __stdcall winx_get_module_filename(char *path)
+void winx_get_module_filename(char *path)
 {
     NTSTATUS Status;
     PROCESS_BASIC_INFORMATION ProcessInformation;
@@ -167,7 +167,7 @@ void __stdcall winx_get_module_filename(char *path)
  * @return Zero for success,
  * negative value otherwise.
  */
-int __stdcall winx_create_path(char *path)
+int winx_create_path(char *path)
 {
 	char *p;
 	unsigned int n;

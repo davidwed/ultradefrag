@@ -39,7 +39,7 @@
  * - If an event already exists this function returns
  *   STATUS_OBJECT_NAME_COLLISION defined in ntndk.h file.
  */
-int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
+int winx_create_event(short *name,int type,HANDLE *phandle)
 {
 	UNICODE_STRING us;
 	NTSTATUS Status;
@@ -74,7 +74,7 @@ int __stdcall winx_create_event(short *name,int type,HANDLE *phandle)
  * @param[out] phandle pointer to the handle of the event.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle)
+int winx_open_event(short *name,int flags,HANDLE *phandle)
 {
 	UNICODE_STRING us;
 	NTSTATUS Status;
@@ -99,7 +99,7 @@ int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle)
  * @details Destroys named event created by winx_create_event().
  * @param[in] h the handle of the event.
  */
-void __stdcall winx_destroy_event(HANDLE h)
+void winx_destroy_event(HANDLE h)
 {
 	if(h) NtClose(h);
 }

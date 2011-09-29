@@ -56,7 +56,7 @@ static int internal_validate_volume(char letter,int skip_removable,volume_info *
  * }
  * @endcode
  */
-volume_info * __stdcall udefrag_get_vollist(int skip_removable)
+volume_info *udefrag_get_vollist(int skip_removable)
 {
 	volume_info *v;
 	ULONG i, index;
@@ -93,7 +93,7 @@ volume_info * __stdcall udefrag_get_vollist(int skip_removable)
  * @brief Releases list of volumes
  * returned by udefrag_get_vollist.
  */
-void __stdcall udefrag_release_vollist(volume_info *v)
+void udefrag_release_vollist(volume_info *v)
 {
 	if(v) winx_heap_free(v);
 }
@@ -104,7 +104,7 @@ void __stdcall udefrag_release_vollist(volume_info *v)
  * @param[in] v pointer to structure receiving the information.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall udefrag_get_volume_information(char volume_letter,volume_info *v)
+int udefrag_get_volume_information(char volume_letter,volume_info *v)
 {
 	int result;
 	
@@ -129,7 +129,7 @@ int __stdcall udefrag_get_volume_information(char volume_letter,volume_info *v)
  * to validate a floppy drive without a floppy disk
  * then you will hear noise :))
  */
-int __stdcall udefrag_validate_volume(char volume_letter,int skip_removable)
+int udefrag_validate_volume(char volume_letter,int skip_removable)
 {
 	volume_info v;
 	int error_code;

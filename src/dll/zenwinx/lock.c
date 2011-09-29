@@ -40,7 +40,7 @@
  * @return Pointer to intialized spin lock.
  * NULL indicates failure.
  */
-winx_spin_lock * __stdcall winx_init_spin_lock(char *name)
+winx_spin_lock *winx_init_spin_lock(char *name)
 {
 	winx_spin_lock *sl;
 	char *buffer;
@@ -106,7 +106,7 @@ winx_spin_lock * __stdcall winx_init_spin_lock(char *name)
  * @return Zero for success,
  * negative value otherwise.
  */
-int __stdcall winx_acquire_spin_lock(winx_spin_lock *sl,int msec)
+int winx_acquire_spin_lock(winx_spin_lock *sl,int msec)
 {
 	LARGE_INTEGER interval;
 	NTSTATUS status;
@@ -133,7 +133,7 @@ int __stdcall winx_acquire_spin_lock(winx_spin_lock *sl,int msec)
  * @return Zero for success,
  * negative value otherwise.
  */
-int __stdcall winx_release_spin_lock(winx_spin_lock *sl)
+int winx_release_spin_lock(winx_spin_lock *sl)
 {
 	NTSTATUS status;
 	
@@ -153,7 +153,7 @@ int __stdcall winx_release_spin_lock(winx_spin_lock *sl)
 /**
  * @brief Destroys a spin lock.
  */
-void __stdcall winx_destroy_spin_lock(winx_spin_lock *sl)
+void winx_destroy_spin_lock(winx_spin_lock *sl)
 {
 	if(sl){
 		if(sl->hEvent)

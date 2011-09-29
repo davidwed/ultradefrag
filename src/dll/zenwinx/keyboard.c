@@ -65,10 +65,10 @@ int kb_wait_for_input_threads = 0;
 #define STOP_KB_WAIT_INTERVAL 100 /* ms */
 
 /* prototypes */
-void __stdcall kb_close(void);
-static int  __stdcall kb_check(HANDLE hKbDevice);
-static int __stdcall kb_open_internal(int device_number);
-char * __stdcall winx_get_error_description(unsigned long status);
+void kb_close(void);
+static int kb_check(HANDLE hKbDevice);
+static int kb_open_internal(int device_number);
+char *winx_get_error_description(unsigned long status);
 
 /**
  * @brief Waits for user input on
@@ -184,7 +184,7 @@ done:
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-int __stdcall kb_open(void)
+int kb_open(void)
 {
 	short event_name[64];
 	int i, j;
@@ -251,7 +251,7 @@ int __stdcall kb_open(void)
  * @brief Closes all opened keyboards.
  * @note Internal use only.
  */
-void __stdcall kb_close(void)
+void kb_close(void)
 {
 	int i;
 	
@@ -286,7 +286,7 @@ void __stdcall kb_close(void)
  * @return Zero if some key was pressed, negative value otherwise.
  * @note Internal use only.
  */
-int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
+int kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 {
 	int attempts = 0;
 	ULONGLONG xtime = 0;
@@ -349,7 +349,7 @@ int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-static int __stdcall kb_open_internal(int device_number)
+static int kb_open_internal(int device_number)
 {
 	short device_name[32];
 	short event_name[32];
@@ -431,7 +431,7 @@ static int __stdcall kb_open_internal(int device_number)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-static int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
+static int kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 {
 	NTSTATUS Status;
 	IO_STATUS_BLOCK iosb;
@@ -458,7 +458,7 @@ static int __stdcall kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-static int __stdcall kb_check(HANDLE hKbDevice)
+static int kb_check(HANDLE hKbDevice)
 {
 	USHORT LedFlags;
 	NTSTATUS Status;

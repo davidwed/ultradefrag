@@ -101,7 +101,7 @@ int open_smss_key(HKEY *phkey)
  * indicates failure of comparison.
  * @note Internal use only.
  */
-static int __stdcall cmd_compare(char *reg_cmd,char *cmd)
+static int cmd_compare(char *reg_cmd,char *cmd)
 {
 	char *reg_cmd_copy = NULL;
 	char *cmd_copy = NULL;

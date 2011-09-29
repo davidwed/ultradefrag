@@ -104,7 +104,7 @@ void AddResourceEntry(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *line_buffer)
  * @note All lines in i18n file must be no longer than 8189 characters.
  * Otherwise they will be truncated before an analysis.
  */
-BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path)
+BOOL WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path)
 {
 	FILE *f;
 	wchar_t *line_buffer;
@@ -145,7 +145,7 @@ BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng
  * @param[in] table pointer to the i18n table.
  * @param[in] hWindow handle to the window.
  */
-void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow)
+void WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow)
 {
 	int i;
 	HWND hChild;
@@ -163,7 +163,7 @@ void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow
 /**
  * @brief Applies a 18n table to individual GUI control.
  */
-void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, wchar_t *key)
+void WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, wchar_t *key)
 {
 	(void)SetWindowTextW(hWnd,WgxGetResourceString(table,key));
 }
@@ -175,7 +175,7 @@ void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, wchar_t *ke
  * @return A pointer to the localized string if
  * available or to the default string otherwise.
  */
-wchar_t * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *key)
+wchar_t *WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *key)
 {
 	int i;
 	
@@ -195,7 +195,7 @@ wchar_t * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t 
  * @brief Destroys an i18n table.
  * @param[in] table pointer to the i18n table.
  */
-void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table)
+void WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table)
 {
 	int i;
 	

@@ -42,7 +42,7 @@
  * @note Converts ANSI characters, does not accept other
  * encodings.
  */
-char __cdecl winx_toupper(char c)
+char winx_toupper(char c)
 {
 	char s[2];
 	
@@ -61,7 +61,7 @@ char __cdecl winx_toupper(char c)
  * @note Converts ANSI characters, does not accept other
  * encodings.
  */
-char __cdecl winx_tolower(char c)
+char winx_tolower(char c)
 {
 	char s[2];
 	
@@ -75,7 +75,7 @@ char __cdecl winx_tolower(char c)
 /**
  * @brief strdup equivalent.
  */
-char * __cdecl winx_strdup(const char *s)
+char *winx_strdup(const char *s)
 {
 	int length;
 	char *cp;
@@ -92,7 +92,7 @@ char * __cdecl winx_strdup(const char *s)
 /**
  * @brief wcsdup equivalent.
  */
-wchar_t * __cdecl winx_wcsdup(const wchar_t *s)
+wchar_t *winx_wcsdup(const wchar_t *s)
 {
 	int length;
 	wchar_t *cp;
@@ -120,7 +120,7 @@ wchar_t * __cdecl winx_wcsdup(const wchar_t *s)
 /**
  * @brief Case insensitive version of wcsstr.
  */
-wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
+wchar_t *winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 {
 	wchar_t *cp = (wchar_t *)wcs1;
 	wchar_t *s1, *s2;
@@ -142,7 +142,7 @@ wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2)
 /**
  * @brief Case insensitive version of strstr.
  */
-char * __cdecl winx_stristr(const char * s1,const char * s2)
+char *winx_stristr(const char * s1,const char * s2)
 {
 	char *cp = (char *)s1;
 	char *_s1, *_s2;
@@ -170,7 +170,7 @@ char * __cdecl winx_stristr(const char * s1,const char * s2)
  * by winx_heap_free after its use.
  * @note Optimized for speed, can allocate more memory than needed.
  */
-char * __cdecl winx_vsprintf(const char *format,va_list arg)
+char *winx_vsprintf(const char *format,va_list arg)
 {
 	char *buffer;
 	int size;
@@ -213,7 +213,7 @@ char * __cdecl winx_vsprintf(const char *format,va_list arg)
  * by winx_heap_free after its use.
  * @note Optimized for speed, can allocate more memory than needed.
  */
-char * __cdecl winx_sprintf(const char *format, ...)
+char *winx_sprintf(const char *format, ...)
 {
 	va_list arg;
 	
@@ -240,7 +240,7 @@ char * __cdecl winx_sprintf(const char *format, ...)
  * @param[in] flags combination of WINX_PAT_xxx flags.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags)
+int winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags)
 {
 	int pattern_detected;
 	int i, j, n;
@@ -319,7 +319,7 @@ int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int
  * @return Nonzero value indicates
  * that at least one pattern has been found.
  */
-int __stdcall winx_patfind(short *string,winx_patlist *patterns)
+int winx_patfind(short *string,winx_patlist *patterns)
 {
 	int i;
 	wchar_t *result;
@@ -343,7 +343,7 @@ int __stdcall winx_patfind(short *string,winx_patlist *patterns)
  * @brief Frees resources allocated by winx_patcomp.
  * @param[in] patterns the list of patterns.
  */
-void __stdcall winx_patfree(winx_patlist *patterns)
+void winx_patfree(winx_patlist *patterns)
 {
 	if(patterns == NULL)
 		return;
@@ -379,7 +379,7 @@ void __stdcall winx_patfree(winx_patlist *patterns)
  * characters are stored in buffer and a negative value is returned.
  * @todo Investigate how many digits can be successfully calculated.
  */
-int __stdcall winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length)
+int winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length)
 {
 	char *suffixes[] = { "b", "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb" };
 	ULONGLONG n; /* an integer part of the result */
@@ -422,7 +422,7 @@ int __stdcall winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int le
  * @return Number of bytes.
  * @todo Investigate limits.
  */
-ULONGLONG __stdcall winx_hr_to_bytes(char *string)
+ULONGLONG winx_hr_to_bytes(char *string)
 {
 	char *suffixes[] = { "Kb", "Mb", "Gb", "Tb", "Pb", "Eb", "Zb", "Yb" };
 	int suffix_found = 0;

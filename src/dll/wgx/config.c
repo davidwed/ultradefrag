@@ -71,7 +71,7 @@ escape_sequence esq[] = {
  * - If otion type is WGX_CFG_STING, all fields of the structure
  * have an obvious meaning.
  */
-BOOL __stdcall WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table)
+BOOL WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table)
 {
 	lua_State *L;
 	int status;
@@ -163,7 +163,7 @@ BOOL __stdcall WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table)
  * - WGX_CFG_INT saves an integer number, on which its value points.
  * - WGX_CFG_STRING saves a string pointed by value field of the structure.
  */
-BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_SAVE_OPTIONS_CALLBACK cb)
+BOOL WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_SAVE_OPTIONS_CALLBACK cb)
 {
 	char err_msg[1024];
 	FILE *f;

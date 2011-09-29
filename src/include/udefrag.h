@@ -65,13 +65,13 @@ typedef struct _volume_info {
 	int is_removable;
 } volume_info;
 
-volume_info * __stdcall udefrag_get_vollist(int skip_removable);
-void __stdcall udefrag_release_vollist(volume_info *v);
-int __stdcall udefrag_validate_volume(char volume_letter,int skip_removable);
-int __stdcall udefrag_get_volume_information(char volume_letter,volume_info *v);
+volume_info *udefrag_get_vollist(int skip_removable);
+void udefrag_release_vollist(volume_info *v);
+int udefrag_validate_volume(char volume_letter,int skip_removable);
+int udefrag_get_volume_information(char volume_letter,volume_info *v);
 
-int       __stdcall udefrag_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
-ULONGLONG __stdcall udefrag_hr_to_bytes(char *string);
+int udefrag_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
+ULONGLONG udefrag_hr_to_bytes(char *string);
 
 typedef enum {
 	ANALYSIS_JOB = 0,
@@ -139,22 +139,22 @@ typedef struct _udefrag_progress_info {
 	ULONGLONG total_moves;            /* number of moves by move_files_to_front/back functions */
 } udefrag_progress_info;
 
-typedef void  (__stdcall *udefrag_progress_callback)(udefrag_progress_info *pi, void *p);
-typedef int   (__stdcall *udefrag_terminator)(void *p);
+typedef void  (*udefrag_progress_callback)(udefrag_progress_info *pi, void *p);
+typedef int   (*udefrag_terminator)(void *p);
 
-int __stdcall udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
-		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p);
+int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
+	int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p);
 
-char * __stdcall udefrag_get_default_formatted_results(udefrag_progress_info *pi);
-void __stdcall udefrag_release_default_formatted_results(char *results);
+char *udefrag_get_default_formatted_results(udefrag_progress_info *pi);
+void udefrag_release_default_formatted_results(char *results);
 
-char * __stdcall udefrag_get_error_description(int error_code);
+char *udefrag_get_error_description(int error_code);
 
 /* reliable _toupper and _tolower analogs */
-char __cdecl udefrag_toupper(char c);
-char __cdecl udefrag_tolower(char c);
+char udefrag_toupper(char c);
+char udefrag_tolower(char c);
 
-int __stdcall udefrag_set_log_file_path(void);
-int __stdcall udefrag_init_failed(void);
+int udefrag_set_log_file_path(void);
+int udefrag_init_failed(void);
 
 #endif /* _UDEFRAG_H_ */

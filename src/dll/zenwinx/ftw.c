@@ -51,7 +51,7 @@
 #define FTW_FOPEN_FOR_BASIC_INFO 0x2
 
 /* external functions prototypes */
-winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
+winx_file_info *ntfs_scan_disk(char volume_letter,
 	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb, 
 	ftw_terminator t, void *user_defined_data);
 
@@ -177,7 +177,7 @@ static HANDLE ftw_fopen(winx_file_info *f,int action)
  * @note Callback procedure should complete as quickly
  * as possible to avoid slowdown of the scan.
  */
-int __stdcall winx_ftw_dump_file(winx_file_info *f,
+int winx_ftw_dump_file(winx_file_info *f,
 		ftw_terminator t, void *user_defined_data)
 {
 	GET_RETRIEVAL_DESCRIPTOR *filemap;
@@ -690,7 +690,7 @@ static int ftw_helper(short *path, int flags,
  *   as possible to avoid slowdown of the scan.
  * @par Example:
  * @code
- * int __stdcall filter(winx_file_info *f, void *user_defined_data)
+ * int filter(winx_file_info *f, void *user_defined_data)
  * {
  *     if(skip_directory(f))
  *         return 1;    // skip current directory
@@ -698,14 +698,14 @@ static int ftw_helper(short *path, int flags,
  *     return 0; // continue walk
  * }
  *
- * void __stdcall update_progress(winx_file_info *f, void *user_defined_data)
+ * void update_progress(winx_file_info *f, void *user_defined_data)
  * {
  *     if(is_directory(f))
  *         dir_count ++;
  *     // etc.
  * }
  *
- * int __stdcall terminator(void *user_defined_data)
+ * int terminator(void *user_defined_data)
  * {
  *     if(stop_event)
  *         return 1; // terminate walk
@@ -722,7 +722,7 @@ static int ftw_helper(short *path, int flags,
  * winx_ftw_release(filelist);
  * @endcode
  */
-winx_file_info * __stdcall winx_ftw(short *path, int flags,
+winx_file_info *winx_ftw(short *path, int flags,
 		ftw_filter_callback fcb, ftw_progress_callback pcb,
 		ftw_terminator t, void *user_defined_data)
 {
@@ -752,7 +752,7 @@ winx_file_info * __stdcall winx_ftw(short *path, int flags,
  * UDF has been never tested in direct mode
  * because of its highly complicated standard.
  */
-winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
+winx_file_info *winx_scan_disk(char volume_letter, int flags,
 		ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t,
 		void *user_defined_data)
 {
@@ -808,7 +808,7 @@ done:
  * @param[in] filelist pointer
  * to list of files.
  */
-void __stdcall winx_ftw_release(winx_file_info *filelist)
+void winx_ftw_release(winx_file_info *filelist)
 {
 	winx_file_info *f;
 

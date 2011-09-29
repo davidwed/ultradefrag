@@ -74,7 +74,7 @@ char *help_message[] = {
 	NULL
 };
 
-typedef int (__cdecl *cmd_handler_proc)(int argc,short **argv,short **envp);
+typedef int (*cmd_handler_proc)(int argc,short **argv,short **envp);
 typedef struct {
 	short *cmd_name;
 	cmd_handler_proc cmd_handler;
@@ -82,10 +82,10 @@ typedef struct {
 
 /* forward declarations */
 extern cmd_table_entry cmd_table[];
-static int __cdecl boot_off_handler(int argc,short **argv,short **envp);
-static int __cdecl type_handler(int argc,short **argv,short **envp);
+static int boot_off_handler(int argc,short **argv,short **envp);
+static int type_handler(int argc,short **argv,short **envp);
 
-static int __stdcall man_listing_terminator(void *user_defined_parameter)
+static int man_listing_terminator(void *user_defined_parameter)
 {
 	KBD_RECORD kbd_rec;
 
@@ -98,7 +98,7 @@ static int __stdcall man_listing_terminator(void *user_defined_parameter)
 	return 0;
 }
 
-static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
+static int list_installed_man_pages(int argc,short **argv,short **envp)
 {
 	char windir[MAX_PATH + 1];
 	char path[MAX_PATH + 1];
@@ -169,7 +169,7 @@ static int __cdecl list_installed_man_pages(int argc,short **argv,short **envp)
 /**
  * @brief man command handler.
  */
-static int __cdecl man_handler(int argc,short **argv,short **envp)
+static int man_handler(int argc,short **argv,short **envp)
 {
 	short *type_argv[2];
 	char path[MAX_PATH + 1];
@@ -206,7 +206,7 @@ static int __cdecl man_handler(int argc,short **argv,short **envp)
 /**
  * @brief help command handler.
  */
-static int __cdecl help_handler(int argc,short **argv,short **envp)
+static int help_handler(int argc,short **argv,short **envp)
 {
 	if(argc < 1)
 		return (-1);
@@ -224,7 +224,7 @@ static int __cdecl help_handler(int argc,short **argv,short **envp)
 /**
  * @brief history command handler.
  */
-static int __cdecl history_handler(int argc,short **argv,short **envp)
+static int history_handler(int argc,short **argv,short **envp)
 {
 	winx_history_entry *entry;
 	char **strings;
@@ -268,7 +268,7 @@ static int __cdecl history_handler(int argc,short **argv,short **envp)
 /**
  * @brief echo command handler.
  */
-static int __cdecl echo_handler(int argc,short **argv,short **envp)
+static int echo_handler(int argc,short **argv,short **envp)
 {
 	int i;
 	
@@ -314,7 +314,7 @@ static int __cdecl echo_handler(int argc,short **argv,short **envp)
 /**
  * @brief type command handler.
  */
-static int __cdecl type_handler(int argc,short **argv,short **envp)
+static int type_handler(int argc,short **argv,short **envp)
 {
 	char path[MAX_PATH];
 	short *filename;
@@ -404,7 +404,7 @@ static int __cdecl type_handler(int argc,short **argv,short **envp)
 /**
  * @brief hexview command handler.
  */
-static int __cdecl hexview_handler(int argc,short **argv,short **envp)
+static int hexview_handler(int argc,short **argv,short **envp)
 {
 	char path[MAX_PATH];
 	short *filename;
@@ -608,7 +608,7 @@ fail:
 /**
  * @brief set command handler.
  */
-static int __cdecl set_handler(int argc,short **argv,short **envp)
+static int set_handler(int argc,short **argv,short **envp)
 {
 	int name_length = 0, value_length = 0;
 	short *name = NULL, *value = NULL;
@@ -707,7 +707,7 @@ static int __cdecl set_handler(int argc,short **argv,short **envp)
 /**
  * @brief pause command handler.
  */
-static int __cdecl pause_handler(int argc,short **argv,short **envp)
+static int pause_handler(int argc,short **argv,short **envp)
 {
 	int msec;
 
@@ -793,7 +793,7 @@ static void SavePendingBootOffState(void)
 /**
  * @brief boot-on command handler.
  */
-static int __cdecl boot_on_handler(int argc,short **argv,short **envp)
+static int boot_on_handler(int argc,short **argv,short **envp)
 {
 	pending_boot_off = 0;
 	
@@ -807,7 +807,7 @@ static int __cdecl boot_on_handler(int argc,short **argv,short **envp)
 /**
  * @brief boot-off command handler.
  */
-int __cdecl boot_off_handler(int argc,short **argv,short **envp)
+int boot_off_handler(int argc,short **argv,short **envp)
 {
 	pending_boot_off = 1;
 	
@@ -821,7 +821,7 @@ int __cdecl boot_off_handler(int argc,short **argv,short **envp)
 /**
  * @brief shutdown command handler.
  */
-static int __cdecl shutdown_handler(int argc,short **argv,short **envp)
+static int shutdown_handler(int argc,short **argv,short **envp)
 {
 	winx_printf("Shutdown ...\n");
 	SavePendingBootOffState();
@@ -833,7 +833,7 @@ static int __cdecl shutdown_handler(int argc,short **argv,short **envp)
 /**
  * @brief reboot command handler.
  */
-static int __cdecl reboot_handler(int argc,short **argv,short **envp)
+static int reboot_handler(int argc,short **argv,short **envp)
 {
 	winx_printf("Reboot ...\n");
 	SavePendingBootOffState();
@@ -845,7 +845,7 @@ static int __cdecl reboot_handler(int argc,short **argv,short **envp)
 /**
  * @brief exit command handler.
  */
-int __cdecl exit_handler(int argc,short **argv,short **envp)
+int exit_handler(int argc,short **argv,short **envp)
 {
 	int exit_code = 0;
 	
@@ -864,7 +864,7 @@ int __cdecl exit_handler(int argc,short **argv,short **envp)
 /**
  * @brief call command handler.
  */
-static int __cdecl call_handler(int argc,short **argv,short **envp)
+static int call_handler(int argc,short **argv,short **envp)
 {
 	short *filename;
 	int i, length;
@@ -907,7 +907,7 @@ static int __cdecl call_handler(int argc,short **argv,short **envp)
  * @details Paste here any code
  * which needs to be tested.
  */
-static int __cdecl test_handler(int argc,short **argv,short **envp)
+static int test_handler(int argc,short **argv,short **envp)
 {
 	winx_printf("Hi, I'm here ;-)\n");
 	return 0;

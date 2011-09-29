@@ -89,38 +89,38 @@ typedef struct _WINX_FILE {
 #define DEFAULT_DBG_PRINT_DECORATION_CHAR  '-'
 #define DEFAULT_DBG_PRINT_HEADER_WIDTH     64
 
-void __stdcall winx_enable_dbg_log(char *path);
-void __stdcall winx_disable_dbg_log(void);
-void __cdecl winx_dbg_print(char *format, ...);
-void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...);
-void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...);
+void winx_enable_dbg_log(char *path);
+void winx_disable_dbg_log(void);
+void winx_dbg_print(char *format, ...);
+void winx_dbg_print_ex(unsigned long status,char *format, ...);
+void winx_dbg_print_header(char ch, int width, char *format, ...);
 
 /* env.c */
-int __stdcall winx_query_env_variable(short *name, short *buffer, int length);
-int __stdcall winx_set_env_variable(short *name, short *value);
+int winx_query_env_variable(short *name, short *buffer, int length);
+int winx_set_env_variable(short *name, short *value);
 
 /* event.c */
-int __stdcall winx_create_event(short *name,int type,HANDLE *phandle);
-int __stdcall winx_open_event(short *name,int flags,HANDLE *phandle);
-void __stdcall winx_destroy_event(HANDLE h);
+int winx_create_event(short *name,int type,HANDLE *phandle);
+int winx_open_event(short *name,int flags,HANDLE *phandle);
+void winx_destroy_event(HANDLE h);
 
 /* file.c */
-WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode);
-WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size);
-size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
-size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
-ULONGLONG __stdcall winx_fsize(WINX_FILE *f);
-void   __stdcall winx_fclose(WINX_FILE *f);
-int __stdcall winx_ioctl(WINX_FILE *f,
-                         int code,char *description,
-                         void *in_buffer,int in_size,
-                         void *out_buffer,int out_size,
-                         int *pbytes_returned);
-int __stdcall winx_fflush(WINX_FILE *f);
-int __stdcall winx_create_directory(const char *path);
-int __stdcall winx_delete_file(const char *filename);
-void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read);
-void __stdcall winx_release_file_contents(void *contents);
+WINX_FILE *winx_fopen(const char *filename,const char *mode);
+WINX_FILE *winx_fbopen(const char *filename,const char *mode,int buffer_size);
+size_t winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f);
+size_t winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
+ULONGLONG winx_fsize(WINX_FILE *f);
+void winx_fclose(WINX_FILE *f);
+int winx_ioctl(WINX_FILE *f,
+	int code,char *description,
+	void *in_buffer,int in_size,
+	void *out_buffer,int out_size,
+	int *pbytes_returned);
+int winx_fflush(WINX_FILE *f);
+int winx_create_directory(const char *path);
+int winx_delete_file(const char *filename);
+void *winx_get_file_contents(const char *filename,size_t *bytes_read);
+void winx_release_file_contents(void *contents);
 
 /* ftw.c */
 /* winx_ftw flags */
@@ -180,27 +180,27 @@ typedef struct _winx_file_info {
 	winx_file_internal_info internal;  /* internal information used by ftw_scan_disk support routines */
 } winx_file_info;
 
-typedef int  (__stdcall *ftw_filter_callback)(winx_file_info *f,void *user_defined_data);
-typedef void (__stdcall *ftw_progress_callback)(winx_file_info *f,void *user_defined_data);
-typedef int  (__stdcall *ftw_terminator)(void *user_defined_data);
+typedef int  (*ftw_filter_callback)(winx_file_info *f,void *user_defined_data);
+typedef void (*ftw_progress_callback)(winx_file_info *f,void *user_defined_data);
+typedef int  (*ftw_terminator)(void *user_defined_data);
 
-winx_file_info * __stdcall winx_ftw(short *path, int flags,
+winx_file_info *winx_ftw(short *path, int flags,
 		ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t,void *user_defined_data);
 
-winx_file_info * __stdcall winx_scan_disk(char volume_letter, int flags,
+winx_file_info *winx_scan_disk(char volume_letter, int flags,
 		ftw_filter_callback fcb,ftw_progress_callback pcb, ftw_terminator t,void *user_defined_data);
 
-void __stdcall winx_ftw_release(winx_file_info *filelist);
+void winx_ftw_release(winx_file_info *filelist);
 #define winx_scan_disk_release(f) winx_ftw_release(f)
 
-int __stdcall winx_ftw_dump_file(winx_file_info *f,ftw_terminator t,void *user_defined_data);
+int winx_ftw_dump_file(winx_file_info *f,ftw_terminator t,void *user_defined_data);
 
 /* ftw_ntfs.c */
 /* int64.c */
 /* keyboard.c */
 /* keytrans.c */
 /* ldr.c */
-int  __stdcall winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
+int winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
 
 /* list.c */
 /**
@@ -211,30 +211,30 @@ typedef struct _list_entry {
 	struct _list_entry *prev; /* pointer to previous entry */
 } list_entry;
 
-list_entry * __stdcall winx_list_insert_item(list_entry **phead,list_entry *prev,long size);
-void         __stdcall winx_list_remove_item(list_entry **phead,list_entry *item);
-void         __stdcall winx_list_destroy    (list_entry **phead);
+list_entry *winx_list_insert_item(list_entry **phead,list_entry *prev,long size);
+void winx_list_remove_item(list_entry **phead,list_entry *item);
+void winx_list_destroy(list_entry **phead);
 
 /* lock.c */
 typedef struct _winx_spin_lock {
 	HANDLE hEvent;
 } winx_spin_lock;
 
-winx_spin_lock * __stdcall winx_init_spin_lock(char *name);
-int  __stdcall winx_acquire_spin_lock(winx_spin_lock *sl,int msec);
-int  __stdcall winx_release_spin_lock(winx_spin_lock *sl);
-void __stdcall winx_destroy_spin_lock(winx_spin_lock *sl);
+winx_spin_lock *winx_init_spin_lock(char *name);
+int winx_acquire_spin_lock(winx_spin_lock *sl,int msec);
+int winx_release_spin_lock(winx_spin_lock *sl);
+void winx_destroy_spin_lock(winx_spin_lock *sl);
 
 /* mem.c */
-void * __stdcall winx_virtual_alloc(SIZE_T size);
-void   __stdcall winx_virtual_free(void *addr,SIZE_T size);
-void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags);
+void *winx_virtual_alloc(SIZE_T size);
+void winx_virtual_free(void *addr,SIZE_T size);
+void *winx_heap_alloc_ex(SIZE_T size,SIZE_T flags);
 #define winx_heap_alloc(n)      winx_heap_alloc_ex(n,0)
 #define winx_heap_alloc_zero(n) winx_heap_alloc_ex(n,HEAP_ZERO_MEMORY)
-void   __stdcall winx_heap_free(void *addr);
+void winx_heap_free(void *addr);
 
 /* misc.c */
-void __stdcall winx_sleep(int msec);
+void winx_sleep(int msec);
 
 #define WINDOWS_NT     40
 #define WINDOWS_2K     50
@@ -242,58 +242,58 @@ void __stdcall winx_sleep(int msec);
 #define WINDOWS_2K3    52 /* and Server 2003 R2 and XP x64 */
 #define WINDOWS_VISTA  60 /* and Server 2008 */
 #define WINDOWS_7      61 /* and Server 2008 R2 */
-int __stdcall winx_get_os_version(void);
+int winx_get_os_version(void);
 
-int __stdcall winx_get_windows_directory(char *buffer, int length);
-int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length);
+int winx_get_windows_directory(char *buffer, int length);
+int winx_query_symbolic_link(short *name, short *buffer, int length);
 
 /* process mode constants */
 #define INTERNAL_SEM_FAILCRITICALERRORS 0
-int  __stdcall winx_set_system_error_mode(unsigned int mode);
+int winx_set_system_error_mode(unsigned int mode);
 
-int __stdcall winx_load_driver(short *driver_name);
-int __stdcall winx_unload_driver(short *driver_name);
+int winx_load_driver(short *driver_name);
+int winx_unload_driver(short *driver_name);
 
-short * __stdcall winx_get_windows_boot_options(void);
-int __stdcall winx_windows_in_safe_mode(void);
+short *winx_get_windows_boot_options(void);
+int winx_windows_in_safe_mode(void);
 
 /* mutex.c */
-int  __stdcall winx_create_mutex(short *name,HANDLE *phandle);
-int  __stdcall winx_open_mutex(short *name,HANDLE *phandle);
-int  __stdcall winx_release_mutex(HANDLE h);
-void __stdcall winx_destroy_mutex(HANDLE h);
+int winx_create_mutex(short *name,HANDLE *phandle);
+int winx_open_mutex(short *name,HANDLE *phandle);
+int winx_release_mutex(HANDLE h);
+void winx_destroy_mutex(HANDLE h);
 
 /* path.c */
-void __stdcall winx_path_remove_extension(char *path);
-void __stdcall winx_path_remove_filename(char *path);
-void __stdcall winx_path_extract_filename(char *path);
-void __stdcall winx_get_module_filename(char *path);
-int  __stdcall winx_create_path(char *path);
+void winx_path_remove_extension(char *path);
+void winx_path_remove_filename(char *path);
+void winx_path_extract_filename(char *path);
+void winx_get_module_filename(char *path);
+int winx_create_path(char *path);
 
 /* privilege.c */
-int  __stdcall winx_enable_privilege(unsigned long luid);
+int winx_enable_privilege(unsigned long luid);
 
 /* reg.c */
-int __stdcall winx_register_boot_exec_command(short *command);
-int __stdcall winx_unregister_boot_exec_command(short *command);
+int winx_register_boot_exec_command(short *command);
+int winx_unregister_boot_exec_command(short *command);
 
 /* stdio.c */
-int  __cdecl winx_putch(int ch);
-int  __cdecl winx_puts(const char *string);
-void __cdecl winx_print(char *string);
-int  __cdecl winx_printf(const char *format, ...);
+int winx_putch(int ch);
+int winx_puts(const char *string);
+void winx_print(char *string);
+int winx_printf(const char *format, ...);
 
 /*
 * Note: winx_scanf() can not be implemented;
 * use winx_gets() and sscanf() instead.
 */
-int __cdecl winx_kbhit(int msec);
-int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec);
-int __cdecl winx_breakhit(int msec);
+int winx_kbhit(int msec);
+int winx_kb_read(KBD_RECORD *kbd_rec,int msec);
+int winx_breakhit(int msec);
 
-int __cdecl winx_getch(void);
-int __cdecl winx_getche(void);
-int __cdecl winx_gets(char *string,int n);
+int winx_getch(void);
+int winx_getche(void);
+int winx_gets(char *string,int n);
 
 typedef struct _winx_history_entry {
 	struct _winx_history_entry *next;
@@ -307,25 +307,25 @@ typedef struct _winx_history {
 	int n_entries;
 } winx_history;
 
-void __cdecl winx_init_history(winx_history *h);
-void __cdecl winx_destroy_history(winx_history *h);
+void winx_init_history(winx_history *h);
+void winx_destroy_history(winx_history *h);
 
-int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h);
-int __cdecl winx_prompt(char *prompt,char *string,int n);
+int winx_prompt_ex(char *prompt,char *string,int n,winx_history *h);
+int winx_prompt(char *prompt,char *string,int n);
 
-int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages);
+int winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages);
 
 /* string.c */
 /* reliable _toupper and _tolower analogs */
-char __cdecl winx_toupper(char c);
-char __cdecl winx_tolower(char c);
+char winx_toupper(char c);
+char winx_tolower(char c);
 
-char * __cdecl winx_strdup(const char *s);
-wchar_t * __cdecl winx_wcsdup(const wchar_t *s);
-wchar_t * __cdecl winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
-char * __cdecl winx_stristr(const char * s1,const char * s2);
-char * __cdecl winx_vsprintf(const char *format,va_list arg);
-char * __cdecl winx_sprintf(const char *format, ...);
+char *winx_strdup(const char *s);
+wchar_t *winx_wcsdup(const wchar_t *s);
+wchar_t *winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
+char *winx_stristr(const char * s1,const char * s2);
+char *winx_vsprintf(const char *format,va_list arg);
+char *winx_sprintf(const char *format, ...);
 
 #define WINX_PAT_ICASE  0x1 /* compile patterns for case insensitive search */
 
@@ -336,21 +336,21 @@ typedef struct _winx_patlist {
 	short *string;
 } winx_patlist;
 
-int __stdcall winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags);
-int __stdcall winx_patfind(short *string,winx_patlist *patterns);
-void __stdcall winx_patfree(winx_patlist *patterns);
+int winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags);
+int winx_patfind(short *string,winx_patlist *patterns);
+void winx_patfree(winx_patlist *patterns);
 
-int       __stdcall winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
-ULONGLONG __stdcall winx_hr_to_bytes(char *string);
+int winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
+ULONGLONG winx_hr_to_bytes(char *string);
 
 /* thread.c */
-int  __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle);
-void __stdcall winx_exit_thread(NTSTATUS status);
+int winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle);
+void winx_exit_thread(NTSTATUS status);
 
 /* time.c */
-ULONGLONG __stdcall winx_str2time(char *string);
-int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size);
-ULONGLONG __stdcall winx_xtime(void);
+ULONGLONG winx_str2time(char *string);
+int winx_time2str(ULONGLONG time,char *buffer,int size);
+ULONGLONG winx_xtime(void);
 #define winx_xtime_nsec() (winx_xtime() * 1000 * 1000)
 
 typedef struct _winx_time {
@@ -364,12 +364,12 @@ typedef struct _winx_time {
     short weekday;     // range [0..6] == [sunday..saturday]
 } winx_time;
 
-int __stdcall winx_get_system_time(winx_time *t);
-int __stdcall winx_get_local_time(winx_time *t);
+int winx_get_system_time(winx_time *t);
+int winx_get_local_time(winx_time *t);
 
 /* volume.c */
 #define DRIVE_ASSIGNED_BY_SUBST_COMMAND 1200
-int __stdcall winx_get_drive_type(char letter);
+int winx_get_drive_type(char letter);
 
 /*
 * Maximal length of the file system name.
@@ -393,9 +393,9 @@ typedef struct _winx_volume_information {
 	NTFS_DATA ntfs_data;                   /* NTFS data, valid for NTFS formatted volumes only */
 } winx_volume_information;
 
-int __stdcall winx_get_volume_information(char volume_letter,winx_volume_information *v);
-WINX_FILE * __stdcall winx_vopen(char volume_letter);
-int         __stdcall winx_vflush(char volume_letter);
+int winx_get_volume_information(char volume_letter,winx_volume_information *v);
+WINX_FILE *winx_vopen(char volume_letter);
+int winx_vflush(char volume_letter);
 
 /* winx_get_free_volume_regions flags */
 #define WINX_GVR_ALLOW_PARTIAL_SCAN  0x1
@@ -407,25 +407,25 @@ typedef struct _winx_volume_region {
 	ULONGLONG length;                  /* size of region, in clusters */
 } winx_volume_region;
 
-typedef int  (__stdcall *volume_region_callback)(winx_volume_region *reg,void *user_defined_data);
+typedef int (*volume_region_callback)(winx_volume_region *reg,void *user_defined_data);
 
-winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,
+winx_volume_region *winx_get_free_volume_regions(char volume_letter,
 		int flags,volume_region_callback cb,void *user_defined_data);
-winx_volume_region * __stdcall winx_add_volume_region(winx_volume_region *rlist,
+winx_volume_region *winx_add_volume_region(winx_volume_region *rlist,
 		ULONGLONG lcn,ULONGLONG length);
-winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
+winx_volume_region *winx_sub_volume_region(winx_volume_region *rlist,
 		ULONGLONG lcn,ULONGLONG length);
-void __stdcall winx_release_free_volume_regions(winx_volume_region *rlist);
+void winx_release_free_volume_regions(winx_volume_region *rlist);
 
 /* zenwinx.c */
-int  __stdcall zenwinx_native_init(void);
-int  __stdcall zenwinx_init_failed(void);
-void __stdcall zenwinx_native_unload(void);
+int zenwinx_native_init(void);
+int zenwinx_init_failed(void);
+void zenwinx_native_unload(void);
 
-int  __stdcall winx_init(void *peb);
-void __stdcall winx_exit(int exit_code);
-void __stdcall winx_reboot(void);
-void __stdcall winx_shutdown(void);
+int winx_init(void *peb);
+void winx_exit(int exit_code);
+void winx_reboot(void);
+void winx_shutdown(void);
 
 /* Red-black trees with parent pointers */
 #include "prb.h"

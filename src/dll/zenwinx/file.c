@@ -30,7 +30,7 @@
  * @brief fopen() native equivalent.
  * @note Only r, w, a, r+, w+, a+ modes are supported.
  */
-WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
+WINX_FILE *winx_fopen(const char *filename,const char *mode)
 {
 	ANSI_STRING as;
 	UNICODE_STRING us;
@@ -113,7 +113,7 @@ WINX_FILE * __stdcall winx_fopen(const char *filename,const char *mode)
  * the buffer size, in bytes. Returns
  * NULL if buffer allocation failed.
  */
-WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buffer_size)
+WINX_FILE *winx_fbopen(const char *filename,const char *mode,int buffer_size)
 {
 	WINX_FILE *f;
 	
@@ -140,7 +140,7 @@ WINX_FILE * __stdcall winx_fbopen(const char *filename,const char *mode,int buff
 /**
  * @brief fread() native equivalent.
  */
-size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
+size_t winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 {
 	NTSTATUS status;
 	IO_STATUS_BLOCK iosb;
@@ -171,7 +171,7 @@ size_t __stdcall winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
  * regardless of whether it is opened for
  * buffered i/o or not.
  */
-static size_t __stdcall winx_fwrite_helper(const void *buffer,size_t size,size_t count,WINX_FILE *f)
+static size_t winx_fwrite_helper(const void *buffer,size_t size,size_t count,WINX_FILE *f)
 {
 	NTSTATUS status;
 	IO_STATUS_BLOCK iosb;
@@ -201,7 +201,7 @@ static size_t __stdcall winx_fwrite_helper(const void *buffer,size_t size,size_t
 /**
  * @brief fwrite() native equivalent.
  */
-size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f)
+size_t winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f)
 {
 	LARGE_INTEGER nwd_offset; /* offset of data not written yet, in file */
 	LARGE_INTEGER new_offset; /* current f->woffset */
@@ -275,11 +275,11 @@ size_t __stdcall winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FI
  * the number of bytes written to the output buffer.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_ioctl(WINX_FILE *f,
-                         int code,char *description,
-                         void *in_buffer,int in_size,
-                         void *out_buffer,int out_size,
-						 int *pbytes_returned)
+int winx_ioctl(WINX_FILE *f,
+	int code,char *description,
+	void *in_buffer,int in_size,
+	void *out_buffer,int out_size,
+	int *pbytes_returned)
 {
 	IO_STATUS_BLOCK iosb;
 	NTSTATUS Status;
@@ -316,7 +316,7 @@ int __stdcall winx_ioctl(WINX_FILE *f,
  * @brief fflush() native equivalent.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_fflush(WINX_FILE *f)
+int winx_fflush(WINX_FILE *f)
 {
 	NTSTATUS Status;
 	IO_STATUS_BLOCK iosb;
@@ -337,7 +337,7 @@ int __stdcall winx_fflush(WINX_FILE *f)
  * by winx_fopen() call.
  * @return The size of the file, in bytes.
  */
-ULONGLONG __stdcall winx_fsize(WINX_FILE *f)
+ULONGLONG winx_fsize(WINX_FILE *f)
 {
 	NTSTATUS status;
 	IO_STATUS_BLOCK iosb;
@@ -359,7 +359,7 @@ ULONGLONG __stdcall winx_fsize(WINX_FILE *f)
 /**
  * @brief fclose() native equivalent.
  */
-void __stdcall winx_fclose(WINX_FILE *f)
+void winx_fclose(WINX_FILE *f)
 {
 	if(f == NULL)
 		return;
@@ -382,7 +382,7 @@ void __stdcall winx_fclose(WINX_FILE *f)
  * @note If the requested directory already exists
  * this function completes successfully.
  */
-int __stdcall winx_create_directory(const char *path)
+int winx_create_directory(const char *path)
 {
 	ANSI_STRING as;
 	UNICODE_STRING us;
@@ -428,7 +428,7 @@ int __stdcall winx_create_directory(const char *path)
  * @param[in] filename the native path to the file.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_delete_file(const char *filename)
+int winx_delete_file(const char *filename)
 {
 	ANSI_STRING as;
 	UNICODE_STRING us;
@@ -463,7 +463,7 @@ int __stdcall winx_delete_file(const char *filename)
  * the file contents. This allows to add terminal
  * zero easily.
  */
-void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read)
+void *winx_get_file_contents(const char *filename,size_t *bytes_read)
 {
 	WINX_FILE *f;
 	ULONGLONG size;
@@ -520,7 +520,7 @@ void * __stdcall winx_get_file_contents(const char *filename,size_t *bytes_read)
  * @brief Releases memory allocated
  * by winx_get_file_contents().
  */
-void __stdcall winx_release_file_contents(void *contents)
+void winx_release_file_contents(void *contents)
 {
 	if(contents) winx_heap_free(contents);
 }

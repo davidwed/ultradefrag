@@ -429,7 +429,7 @@ int __cdecl main(int argc, char **argv)
 /**
  * @brief Updates progress information on the screen.
  */
-void __stdcall update_progress(udefrag_progress_info *pi, void *p)
+void update_progress(udefrag_progress_info *pi, void *p)
 {
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
 	COORD cursor_pos;
@@ -522,7 +522,7 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
  * would like to know whether they
  * should be terminated or not.
  */
-int __stdcall terminator(void *p)
+int terminator(void *p)
 {
 	/* do it as quickly as possible :-) */
 	return stop_flag;

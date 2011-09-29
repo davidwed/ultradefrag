@@ -152,7 +152,7 @@ void RedrawProgress(udefrag_progress_info *pi)
  * on the screen and raises a job termination
  * when Esc\Break keys are pressed.
  */
-void __stdcall update_progress(udefrag_progress_info *pi, void *p)
+void update_progress(udefrag_progress_info *pi, void *p)
 {
 	KBD_RECORD kbd_rec;
 	int escape_detected = 0;
@@ -177,7 +177,7 @@ void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 	RedrawProgress(pi);
 }
 
-int __stdcall terminator(void *p)
+int terminator(void *p)
 {
 	/* do it as quickly as possible :-) */
 	return abort_flag;
@@ -273,7 +273,7 @@ static int DisplayAvailableVolumes(int skip_removable)
 /**
  * @brief udefrag command handler.
  */
-int __cdecl udefrag_handler(int argc,short **argv,short **envp)
+int udefrag_handler(int argc,short **argv,short **envp)
 {
 	int a_flag = 0, o_flag = 0;
 	int quick_optimize_flag = 0;

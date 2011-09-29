@@ -36,7 +36,7 @@
  * winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
  * @endcode
  */
-int __stdcall winx_enable_privilege(unsigned long luid)
+int winx_enable_privilege(unsigned long luid)
 {
 	NTSTATUS Status;
 	SIZE_T WasEnabled; /* boolean value receiving a previous state */

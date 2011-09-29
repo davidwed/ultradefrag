@@ -84,7 +84,7 @@ typedef struct {
 	short *AttributeName;  /* The default name of the attribute. */
 } attribute_name;
 
-typedef void (__stdcall *attribute_handler)(PATTRIBUTE pattr,mft_scan_parameters *sp);
+typedef void (*attribute_handler)(PATTRIBUTE pattr,mft_scan_parameters *sp);
 
 /* forward declarations */
 static void analyze_resident_stream(PRESIDENT_ATTRIBUTE pr_attr,mft_scan_parameters *sp);
@@ -299,7 +299,7 @@ static short * get_attribute_name(ATTRIBUTE *attr,mft_scan_parameters *sp)
 **************************************************
 */
 
-static void __stdcall get_number_of_file_records_callback(PATTRIBUTE pattr,mft_scan_parameters *sp)
+static void get_number_of_file_records_callback(PATTRIBUTE pattr,mft_scan_parameters *sp)
 {
 	PNONRESIDENT_ATTRIBUTE pnr_attr;
 
@@ -1184,13 +1184,13 @@ static void analyze_attribute(PATTRIBUTE pattr,mft_scan_parameters *sp)
 	else analyze_resident_stream((PRESIDENT_ATTRIBUTE)pattr,sp);
 }
 
-static void __stdcall analyze_attribute_callback(PATTRIBUTE pattr,mft_scan_parameters *sp)
+static void analyze_attribute_callback(PATTRIBUTE pattr,mft_scan_parameters *sp)
 {
 	if(pattr->AttributeType != AttributeAttributeList)
 		analyze_attribute(pattr,sp);
 }
 
-static void __stdcall analyze_attribute_list_callback(PATTRIBUTE pattr,mft_scan_parameters *sp)
+static void analyze_attribute_list_callback(PATTRIBUTE pattr,mft_scan_parameters *sp)
 {
 	if(pattr->AttributeType == AttributeAttributeList)
 		analyze_attribute(pattr,sp);
@@ -1671,7 +1671,7 @@ static int ntfs_scan_disk_helper(char volume_letter,
  * file paths cannot be built, because of missing
  * information about directories not scanned yet.
  */
-winx_file_info * __stdcall ntfs_scan_disk(char volume_letter,
+winx_file_info *ntfs_scan_disk(char volume_letter,
 	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb, 
 	ftw_terminator t, void *user_defined_data)
 {

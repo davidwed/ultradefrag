@@ -31,11 +31,11 @@
 
 #include "zenwinx.h"
 
-static int __stdcall open_smss_key(HANDLE *pKey);
-static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size);
-static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size);
-static int __stdcall cmd_compare(short *reg_cmd,short *cmd);
-static void __stdcall flush_smss_key(HANDLE hKey);
+static int open_smss_key(HANDLE *pKey);
+static int read_boot_exec_value(HANDLE hKey,void **data,DWORD *size);
+static int write_boot_exec_value(HANDLE hKey,void *data,DWORD size);
+static int cmd_compare(short *reg_cmd,short *cmd);
+static void flush_smss_key(HANDLE hKey);
 
 /*
 * The following two routines replaces bootexctrl in native mode.
@@ -54,7 +54,7 @@ static void __stdcall flush_smss_key(HANDLE hKey);
  * @note Command's executable must be placed inside 
  * a system32 directory to be executed successfully.
  */
-int __stdcall winx_register_boot_exec_command(short *command)
+int winx_register_boot_exec_command(short *command)
 {
 	HANDLE hKey;
 	KEY_VALUE_PARTIAL_INFORMATION *data;
@@ -114,7 +114,7 @@ done:
  * executable, without an extension.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_unregister_boot_exec_command(short *command)
+int winx_unregister_boot_exec_command(short *command)
 {
 	HANDLE hKey;
 	KEY_VALUE_PARTIAL_INFORMATION *data;
@@ -190,7 +190,7 @@ int __stdcall winx_unregister_boot_exec_command(short *command)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-static int __stdcall open_smss_key(HANDLE *pKey)
+static int open_smss_key(HANDLE *pKey)
 {
 	UNICODE_STRING us;
 	OBJECT_ATTRIBUTES oa;
@@ -219,7 +219,7 @@ static int __stdcall open_smss_key(HANDLE *pKey)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
+static int read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 {
 	void *data_buffer = NULL;
 	DWORD data_size = 0;
@@ -264,7 +264,7 @@ static int __stdcall read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
+static int write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 {
 	UNICODE_STRING us;
 	NTSTATUS status;
@@ -289,7 +289,7 @@ static int __stdcall write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
  * indicates failure of comparison.
  * @note Internal use only.
  */
-static int __stdcall cmd_compare(short *reg_cmd,short *cmd)
+static int cmd_compare(short *reg_cmd,short *cmd)
 {
 	short *reg_cmd_copy = NULL;
 	short *cmd_copy = NULL;
@@ -352,7 +352,7 @@ done:
  * - Takes no effect in native apps before 
  * the system shutdown/reboot :-)
  */
-static void __stdcall flush_smss_key(HANDLE hKey)
+static void flush_smss_key(HANDLE hKey)
 {
 	NTSTATUS status;
 	

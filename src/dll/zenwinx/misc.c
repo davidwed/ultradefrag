@@ -32,7 +32,7 @@
  * If an INFINITE constant is passed, the time-out
  * interval never elapses.
  */
-void __stdcall winx_sleep(int msec)
+void winx_sleep(int msec)
 {
 	LARGE_INTEGER Interval;
 
@@ -62,7 +62,7 @@ void __stdcall winx_sleep(int msec)
  * }
  * @endcode
  */
-int __stdcall winx_get_os_version(void)
+int winx_get_os_version(void)
 {
 	/*NTSTATUS (__stdcall *func_RtlGetVersion)(PRTL_OSVERSIONINFOW lpVersionInformation);*/
 	NTSTATUS (__stdcall *func_RtlGetVersion)(OSVERSIONINFOW *version_info);
@@ -86,7 +86,7 @@ int __stdcall winx_get_os_version(void)
  * @note This function retrieves a native path, like this 
  *       \\??\\C:\\WINDOWS
  */
-int __stdcall winx_get_windows_directory(char *buffer, int length)
+int winx_get_windows_directory(char *buffer, int length)
 {
 	short buf[MAX_PATH + 1];
 
@@ -111,7 +111,7 @@ int __stdcall winx_get_windows_directory(char *buffer, int length)
  * // now the buffer may contain \Device\HarddiskVolume1 or something like that
  * @endcode
  */
-int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length)
+int winx_query_symbolic_link(short *name, short *buffer, int length)
 {
 	OBJECT_ATTRIBUTES oa;
 	UNICODE_STRING uStr;
@@ -161,7 +161,7 @@ int __stdcall winx_query_symbolic_link(short *name, short *buffer, int length)
  * winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS);
  * @endcode
  */
-int __stdcall winx_set_system_error_mode(unsigned int mode)
+int winx_set_system_error_mode(unsigned int mode)
 {
 	NTSTATUS Status;
 
@@ -185,7 +185,7 @@ int __stdcall winx_set_system_error_mode(unsigned int mode)
  * @note When the driver is already loaded this function
  * completes successfully.
  */
-int __stdcall winx_load_driver(short *driver_name)
+int winx_load_driver(short *driver_name)
 {
 	UNICODE_STRING us;
 	short driver_key[MAX_PATH];
@@ -211,7 +211,7 @@ int __stdcall winx_load_driver(short *driver_name)
  * exactly as written in system registry.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_unload_driver(short *driver_name)
+int winx_unload_driver(short *driver_name)
 {
 	UNICODE_STRING us;
 	short driver_key[MAX_PATH];
@@ -238,7 +238,7 @@ int __stdcall winx_unload_driver(short *driver_name)
  * @note After a use of returned string it should be freed
  * by winx_heap_free() call.
  */
-short * __stdcall winx_get_windows_boot_options(void)
+short *winx_get_windows_boot_options(void)
 {
 	UNICODE_STRING us;
 	OBJECT_ATTRIBUTES oa;
@@ -327,7 +327,7 @@ short * __stdcall winx_get_windows_boot_options(void)
  * Zero value indicates a normal boot. Negative value indicates
  * indeterminism caused by impossibility of an appropriate check.
  */
-int __stdcall winx_windows_in_safe_mode(void)
+int winx_windows_in_safe_mode(void)
 {
 	short *boot_options;
 	int safe_boot = 0;
@@ -349,7 +349,7 @@ int __stdcall winx_windows_in_safe_mode(void)
  * - Based on http://www.osronline.com/showthread.cfm?link=185567
  * - Is used internally by winx_shutdown and winx_reboot.
  */
-void __stdcall MarkWindowsBootAsSuccessful(void)
+void MarkWindowsBootAsSuccessful(void)
 {
 	char bootstat_file_path[MAX_PATH];
 	WINX_FILE *f_bootstat;

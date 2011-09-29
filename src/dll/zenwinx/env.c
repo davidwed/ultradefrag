@@ -34,7 +34,7 @@
  * @param[in]  length the length of the buffer, in characters.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
+int winx_query_env_variable(short *name, short *buffer, int length)
 {
 	UNICODE_STRING n, v;
 	NTSTATUS Status;
@@ -64,7 +64,7 @@ int __stdcall winx_query_env_variable(short *name, short *buffer, int length)
  * because unsigned short data type can hold numbers
  * less than or equal to 32767.
  */
-int __stdcall winx_set_env_variable(short *name, short *value)
+int winx_set_env_variable(short *name, short *value)
 {
 	UNICODE_STRING n, v;
 	NTSTATUS status;

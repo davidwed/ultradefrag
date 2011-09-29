@@ -100,7 +100,7 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
  * of the accelerator table.
  * @return Boolean value. TRUE indicates success.
  */
-BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId)
+BOOL WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId)
 {
 	HACCEL hAccel;
 	HANDLE hChild;

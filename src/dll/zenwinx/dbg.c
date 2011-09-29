@@ -36,7 +36,7 @@ winx_spin_lock *dbg_lock = NULL;
 int debug_print_enabled = 1;
 
 /* forward declarations */
-int __stdcall winx_debug_print(char *string);
+int winx_debug_print(char *string);
 static int deliver_message_to_the_debugger(char *string);
 static int init_dbg_log(void);
 static void add_dbg_log_entry(char *string);
@@ -128,7 +128,7 @@ NT_STATUS_DESCRIPTION status_descriptions[] = {
  * // prints "access violation"
  * @endcode
  */
-char * __stdcall winx_get_error_description(unsigned long status)
+char *winx_get_error_description(unsigned long status)
 {
 	int i;
 	
@@ -149,7 +149,7 @@ char * __stdcall winx_get_error_description(unsigned long status)
  * be captured by DbgPrint loggers, therefore we are
  * using our own routine for debugging purposes.
  */
-void __cdecl winx_dbg_print(char *format, ...)
+void winx_dbg_print(char *format, ...)
 {
 	va_list arg;
 	char *string;
@@ -181,7 +181,7 @@ void __cdecl winx_dbg_print(char *format, ...)
  * }
  * @endcode
  */
-void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
+void winx_dbg_print_ex(unsigned long status,char *format, ...)
 {
 	va_list arg;
 	char *string;
@@ -212,7 +212,7 @@ void __cdecl winx_dbg_print_ex(unsigned long status,char *format, ...)
  * @param[in] format the format string.
  * @param[in] ... the parameters.
  */
-void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...)
+void winx_dbg_print_header(char ch, int width, char *format, ...)
 {
 	va_list arg;
 	char *string;
@@ -268,7 +268,7 @@ void __cdecl winx_dbg_print_header(char ch, int width, char *format, ...)
  * @return Zero for success, negative value otherwise.
  * @note Internal use only.
  */
-int __stdcall winx_debug_print(char *string)
+int winx_debug_print(char *string)
 {
 	int result = 0;
 	
@@ -557,7 +557,7 @@ done:
  * all collected data to the disk and disable
  * logging to the file.
  */
-void __stdcall winx_enable_dbg_log(char *path)
+void winx_enable_dbg_log(char *path)
 {
 	if(path == NULL){
 		logging_enabled = 0;
@@ -607,7 +607,7 @@ void __stdcall winx_enable_dbg_log(char *path)
 /**
  * @brief Disables debug logging to the file.
  */
-void __stdcall winx_disable_dbg_log(void)
+void winx_disable_dbg_log(void)
 {
 	winx_enable_dbg_log(NULL);
 }

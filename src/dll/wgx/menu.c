@@ -92,7 +92,7 @@ set_menu_info_fail:
  * - MF_POPUP - id field must point to
  * another menu table describing a submenu.
  */
-HMENU __stdcall WgxBuildMenu(WGX_MENU *menu_table)
+HMENU WgxBuildMenu(WGX_MENU *menu_table)
 {
 	HMENU hMenu;
 	
@@ -117,7 +117,7 @@ HMENU __stdcall WgxBuildMenu(WGX_MENU *menu_table)
  * @brief WgxBuildMenu analog, 
  * but works for popup menus.
  */
-HMENU __stdcall WgxBuildPopupMenu(WGX_MENU *menu_table)
+HMENU WgxBuildPopupMenu(WGX_MENU *menu_table)
 {
 	HMENU hMenu;
 	

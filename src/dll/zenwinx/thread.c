@@ -44,7 +44,7 @@
  * winx_create_thread(thread_proc,NULL);
  * @endcode
  */
-int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle)
+int winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter,HANDLE *phandle)
 {
 	NTSTATUS Status;
 	HANDLE hThread;
@@ -78,7 +78,7 @@ int __stdcall winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID paramete
  * for, let's say XP, we cannot guarantee its work
  * on other systems.
  */
-void __stdcall winx_exit_thread(NTSTATUS status)
+void winx_exit_thread(NTSTATUS status)
 {
 	NTSTATUS Status = ZwTerminateThread(NtCurrentThread(),status);
 	if(!NT_SUCCESS(Status)){

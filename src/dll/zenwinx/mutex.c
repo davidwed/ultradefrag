@@ -37,7 +37,7 @@
  * winx_create_mutex(L"\\BaseNamedObjects\\ultradefrag_mutex",&h);
  * @endcode
  */
-int __stdcall winx_create_mutex(short *name,HANDLE *phandle)
+int winx_create_mutex(short *name,HANDLE *phandle)
 {
 	UNICODE_STRING us;
 	NTSTATUS Status;
@@ -72,7 +72,7 @@ int __stdcall winx_create_mutex(short *name,HANDLE *phandle)
  * winx_open_mutex(L"\\BaseNamedObjects\\ultradefrag_mutex",&h);
  * @endcode
  */
-int __stdcall winx_open_mutex(short *name,HANDLE *phandle)
+int winx_open_mutex(short *name,HANDLE *phandle)
 {
 	UNICODE_STRING us;
 	NTSTATUS Status;
@@ -98,7 +98,7 @@ int __stdcall winx_open_mutex(short *name,HANDLE *phandle)
  * @return Zero for success, 
  * negative value otherwise.
  */
-int __stdcall winx_release_mutex(HANDLE h)
+int winx_release_mutex(HANDLE h)
 {
 	NTSTATUS Status;
 	
@@ -119,7 +119,7 @@ int __stdcall winx_release_mutex(HANDLE h)
  * winx_open_mutex().
  * @param[in] h the handle of the mutex.
  */
-void __stdcall winx_destroy_mutex(HANDLE h)
+void winx_destroy_mutex(HANDLE h)
 {
 	if(h) NtClose(h);
 }

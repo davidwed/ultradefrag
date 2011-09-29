@@ -96,45 +96,45 @@ typedef struct _WGX_MENU {
 } WGX_MENU, *PWGX_MENU;
 
 /* wgx routines prototypes */
-BOOL __stdcall WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
+BOOL WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
 
-HMENU __stdcall WgxBuildMenu(WGX_MENU *menu_table);
-HMENU __stdcall WgxBuildPopupMenu(WGX_MENU *menu_table);
+HMENU WgxBuildMenu(WGX_MENU *menu_table);
+HMENU WgxBuildPopupMenu(WGX_MENU *menu_table);
 
 /* lines in language files are limited by 8191 characters, which is more than enough */
-BOOL __stdcall WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path);
-void __stdcall WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow);
-void __stdcall WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, wchar_t *key);
-wchar_t * __stdcall WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *key);
-void __stdcall WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table);
+BOOL WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path);
+void WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow);
+void WgxSetText(HWND hWnd, PWGX_I18N_RESOURCE_ENTRY table, wchar_t *key);
+wchar_t *WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *key);
+void WgxDestroyResourceTable(PWGX_I18N_RESOURCE_ENTRY table);
 
-void __cdecl WgxEnableWindows(HANDLE hMainWindow, ...);
-void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...);
-void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID);
-void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height);
-void __stdcall WgxCenterWindow(HWND hwnd);
-WNDPROC __stdcall WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc);
-LRESULT __stdcall WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam);
+void WgxEnableWindows(HANDLE hMainWindow, ...);
+void WgxDisableWindows(HANDLE hMainWindow, ...);
+void WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID);
+void WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height);
+void WgxCenterWindow(HWND hwnd);
+WNDPROC WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc);
+LRESULT WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam);
 
-BOOL __stdcall WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
-                               LPCWSTR lpParameters,LPCWSTR lpDirectory,INT nShowCmd);
+BOOL WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
+	LPCWSTR lpParameters,LPCWSTR lpDirectory,INT nShowCmd);
 
-BOOL __stdcall WgxCreateFont(char *wgx_font_path,PWGX_FONT pFont);
-void __stdcall WgxSetFont(HWND hWnd, PWGX_FONT pFont);
-void __stdcall WgxDestroyFont(PWGX_FONT pFont);
-BOOL __stdcall WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont);
+BOOL WgxCreateFont(char *wgx_font_path,PWGX_FONT pFont);
+void WgxSetFont(HWND hWnd, PWGX_FONT pFont);
+void WgxDestroyFont(PWGX_FONT pFont);
+BOOL WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont);
 
-BOOL __stdcall IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
+BOOL IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
 /* NOTE: this routine is not safe, avoid its use */
-void __stdcall IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
+void IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
 
-void __cdecl WgxDbgPrint(char *format, ...);
-void __cdecl WgxDbgPrintLastError(char *format, ...);
-int  __cdecl WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...);
+void WgxDbgPrint(char *format, ...);
+void WgxDbgPrintLastError(char *format, ...);
+int WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...);
 
-typedef void (__stdcall *WGX_SAVE_OPTIONS_CALLBACK)(char *error);
+typedef void (*WGX_SAVE_OPTIONS_CALLBACK)(char *error);
 
-BOOL __stdcall WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table);
-BOOL __stdcall WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_SAVE_OPTIONS_CALLBACK cb);
+BOOL WgxGetOptions(char *config_file_path,WGX_OPTION *opts_table);
+BOOL WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_SAVE_OPTIONS_CALLBACK cb);
 
 #endif /* _WGX_H_ */

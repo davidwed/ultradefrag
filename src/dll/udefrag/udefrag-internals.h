@@ -187,8 +187,8 @@ struct file_counters {
 	unsigned long giant_files;
 };
 
-typedef void (__stdcall *udefrag_progress_router)(void /*udefrag_job_parameters*/ *p);
-typedef int  (__stdcall *udefrag_termination_router)(void /*udefrag_job_parameters*/ *p);
+typedef void (*udefrag_progress_router)(void /*udefrag_job_parameters*/ *p);
+typedef int  (*udefrag_termination_router)(void /*udefrag_job_parameters*/ *p);
 
 typedef struct _udefrag_job_parameters {
 	unsigned char volume_letter;                /* volume letter */
@@ -249,7 +249,7 @@ void destroy_lists(udefrag_job_parameters *jp);
 ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp);
 void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameters *jp);
 
-WINX_FILE * __stdcall new_winx_vopen(char volume_letter);
+WINX_FILE *new_winx_vopen(char volume_letter);
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn);
 
@@ -310,9 +310,9 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
 int optimize_mft_helper(udefrag_job_parameters *jp);
 int optimize_mft(udefrag_job_parameters *jp);
-int __stdcall defragment_small_files_walk_free_regions(udefrag_job_parameters *jp);
-int __stdcall defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp);
-int __stdcall defragment_big_files(udefrag_job_parameters *jp);
+int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp);
+int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp);
+int defragment_big_files(udefrag_job_parameters *jp);
 
 /* flags used in move_files_to_xxx routines */
 enum {
@@ -322,7 +322,7 @@ enum {
 };
 
 ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp);
-typedef int (__stdcall *disk_processing_routine)(udefrag_job_parameters *jp);
+typedef int (*disk_processing_routine)(udefrag_job_parameters *jp);
 int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags);
 int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags);
 

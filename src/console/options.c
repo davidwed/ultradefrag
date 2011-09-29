@@ -27,7 +27,7 @@
 /* forward declarations */
 void search_for_paths(void);
 
-int __cdecl printf_stub(const char *format,...)
+int printf_stub(const char *format,...)
 {
 	return 0;
 }

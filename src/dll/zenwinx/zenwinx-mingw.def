@@ -1,14 +1,14 @@
 LIBRARY zenwinx.dll
 
 EXPORTS
-	winx_init@4
-	winx_exit@4
-	winx_reboot@0
-	winx_shutdown@0
-	winx_virtual_alloc@4
-	winx_virtual_free@8
-	winx_heap_alloc_ex@8
-	winx_heap_free@4
+	winx_init
+	winx_exit
+	winx_reboot
+	winx_shutdown
+	winx_virtual_alloc
+	winx_virtual_free
+	winx_heap_alloc_ex
+	winx_heap_free
 	winx_putch
 	winx_puts
 	winx_print
@@ -24,69 +24,69 @@ EXPORTS
 	winx_kbhit
 	winx_breakhit
 	winx_kb_read
-	winx_sleep@4
-	winx_get_os_version@0
-	winx_get_windows_directory@8
-	winx_get_proc_address@12
-	winx_set_system_error_mode@4
-	winx_load_driver@4
-	winx_unload_driver@4
-	winx_create_thread@12
-	winx_exit_thread@4
-	winx_enable_privilege@4
-	winx_get_drive_type@4
-	winx_get_volume_information@8
-	winx_get_free_volume_regions@16
-	winx_add_volume_region@20
-	winx_sub_volume_region@20
-	winx_release_free_volume_regions@4
-	winx_vopen@4
-	winx_vflush@4
-	winx_fopen@8
-	winx_fbopen@12
-	winx_fread@16
-	winx_fwrite@16
-	winx_ioctl@32
-	winx_fflush@4
-	winx_fsize@4
-	winx_fclose@4
-	winx_ftw@24
-	winx_scan_disk@24
-	winx_ftw_release@4
-	winx_ftw_dump_file@12
-	winx_create_directory@4
-	winx_delete_file@4
-	winx_get_file_contents@8
-	winx_release_file_contents@4
-	winx_query_env_variable@12
-	winx_set_env_variable@8
-	winx_query_symbolic_link@12
-	winx_bytes_to_hr@20
-	winx_hr_to_bytes@4
-	winx_create_event@12
-	winx_open_event@12
-	winx_destroy_event@4
-	winx_create_mutex@8
-	winx_open_mutex@8
-	winx_release_mutex@4
-	winx_destroy_mutex@4
-	winx_register_boot_exec_command@4
-	winx_unregister_boot_exec_command@4
+	winx_sleep
+	winx_get_os_version
+	winx_get_windows_directory
+	winx_get_proc_address
+	winx_set_system_error_mode
+	winx_load_driver
+	winx_unload_driver
+	winx_create_thread
+	winx_exit_thread
+	winx_enable_privilege
+	winx_get_drive_type
+	winx_get_volume_information
+	winx_get_free_volume_regions
+	winx_add_volume_region
+	winx_sub_volume_region
+	winx_release_free_volume_regions
+	winx_vopen
+	winx_vflush
+	winx_fopen
+	winx_fbopen
+	winx_fread
+	winx_fwrite
+	winx_ioctl
+	winx_fflush
+	winx_fsize
+	winx_fclose
+	winx_ftw
+	winx_scan_disk
+	winx_ftw_release
+	winx_ftw_dump_file
+	winx_create_directory
+	winx_delete_file
+	winx_get_file_contents
+	winx_release_file_contents
+	winx_query_env_variable
+	winx_set_env_variable
+	winx_query_symbolic_link
+	winx_bytes_to_hr
+	winx_hr_to_bytes
+	winx_create_event
+	winx_open_event
+	winx_destroy_event
+	winx_create_mutex
+	winx_open_mutex
+	winx_release_mutex
+	winx_destroy_mutex
+	winx_register_boot_exec_command
+	winx_unregister_boot_exec_command
 	winx_dbg_print
 	winx_dbg_print_ex
 	winx_dbg_print_header
-	winx_enable_dbg_log@4
-	winx_disable_dbg_log@0
-	winx_str2time@4
-	winx_time2str@16
-	winx_xtime@0
-	winx_get_system_time@4
-	winx_get_local_time@4
-	winx_list_insert_item@12
-	winx_list_remove_item@8
-	winx_list_destroy@4
-	winx_get_windows_boot_options@0
-	winx_windows_in_safe_mode@0
+	winx_enable_dbg_log
+	winx_disable_dbg_log
+	winx_str2time
+	winx_time2str
+	winx_xtime
+	winx_get_system_time
+	winx_get_local_time
+	winx_list_insert_item
+	winx_list_remove_item
+	winx_list_destroy
+	winx_get_windows_boot_options
+	winx_windows_in_safe_mode
 	winx_toupper
 	winx_tolower
 	winx_strdup
@@ -95,21 +95,21 @@ EXPORTS
 	winx_stristr
 	winx_vsprintf
 	winx_sprintf
-	winx_patcomp@16
-	winx_patfind@8
-	winx_patfree@4
-	winx_path_remove_extension@4
-	winx_path_remove_filename@4
-	winx_path_extract_filename@4
-	winx_get_module_filename@4
-	winx_create_path@4
-	winx_init_spin_lock@4
-	winx_acquire_spin_lock@8
-	winx_release_spin_lock@4
-	winx_destroy_spin_lock@4
-	zenwinx_native_init@0
-	zenwinx_init_failed@0
-	zenwinx_native_unload@0
+	winx_patcomp
+	winx_patfind
+	winx_patfree
+	winx_path_remove_extension
+	winx_path_remove_filename
+	winx_path_extract_filename
+	winx_get_module_filename
+	winx_create_path
+	winx_init_spin_lock
+	winx_acquire_spin_lock
+	winx_release_spin_lock
+	winx_destroy_spin_lock
+	zenwinx_native_init
+	zenwinx_init_failed
+	zenwinx_native_unload
 	prb_create
 	prb_copy
 	prb_destroy

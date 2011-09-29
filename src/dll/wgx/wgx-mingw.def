@@ -1,37 +1,37 @@
 LIBRARY wgx.dll
 
 EXPORTS
-	WgxAddAccelerators@12
-	WgxBuildMenu@4
-	WgxBuildPopupMenu@4
+	WgxAddAccelerators
+	WgxBuildMenu
+	WgxBuildPopupMenu
 
-	WgxBuildResourceTable@8
-	WgxApplyResourceTable@8
-	WgxSetText@12
-	WgxGetResourceString@8
-	WgxDestroyResourceTable@4
+	WgxBuildResourceTable
+	WgxApplyResourceTable
+	WgxSetText
+	WgxGetResourceString
+	WgxDestroyResourceTable
 
 	WgxEnableWindows
 	WgxDisableWindows
-	WgxSetIcon@12
-	WgxCheckWindowCoordinates@12
-	WgxCenterWindow@4
-	WgxSafeSubclassWindow@8
-	WgxSafeCallWndProc@20
+	WgxSetIcon
+	WgxCheckWindowCoordinates
+	WgxCenterWindow
+	WgxSafeSubclassWindow
+	WgxSafeCallWndProc
 
-	WgxShellExecuteW@24
+	WgxShellExecuteW
 
-	WgxCreateFont@8
-	WgxSetFont@8
-	WgxDestroyFont@4
-	WgxSaveFont@8
+	WgxCreateFont
+	WgxSetFont
+	WgxDestroyFont
+	WgxSaveFont
 
-	IncreaseGoogleAnalyticsCounter@12
-	IncreaseGoogleAnalyticsCounterAsynch@12
+	IncreaseGoogleAnalyticsCounter
+	IncreaseGoogleAnalyticsCounterAsynch
 
 	WgxDbgPrint
 	WgxDbgPrintLastError
 	WgxDisplayLastError
-
-	WgxGetOptions@8
-	WgxSaveOptions@12
+	
+	WgxGetOptions
+	WgxSaveOptions

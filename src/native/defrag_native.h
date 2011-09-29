@@ -72,8 +72,8 @@ void NativeAppExit(int exit_code);
 int parse_command(short *cmdline);
 int ProcessScript(short *filename);
 int ExecPendingBootOff(void);
-int __cdecl exit_handler(int argc,short **argv,short **envp);
-int __cdecl udefrag_handler(int argc,short **argv,short **envp);
+int exit_handler(int argc,short **argv,short **envp);
+int udefrag_handler(int argc,short **argv,short **envp);
 
 extern PEB *peb;
 extern winx_history history;

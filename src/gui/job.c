@@ -112,7 +112,7 @@ void update_status_of_all_jobs(void)
  * @brief Updates progress indicators
  * for the currently running job.
  */
-static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
+static void update_progress(udefrag_progress_info *pi, void *p)
 {
 	volume_processing_job *job;
     char WindowCaption[256];
@@ -184,7 +184,7 @@ static void __stdcall update_progress(udefrag_progress_info *pi, void *p)
 /**
  * @brief Terminates currently running job.
  */
-static int __stdcall terminator(void *p)
+static int terminator(void *p)
 {
 	return stop_pressed;
 }

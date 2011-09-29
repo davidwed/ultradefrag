@@ -32,7 +32,7 @@
  * Format example: 3y 12d 4h 8m 37s.
  * @return Time interval in seconds.
  */
-ULONGLONG __stdcall winx_str2time(char *string)
+ULONGLONG winx_str2time(char *string)
 {
 	ULONGLONG time = 0;
 	char buffer[128] = "";
@@ -89,7 +89,7 @@ ULONGLONG __stdcall winx_str2time(char *string)
  * @note The time interval should not exceed 140 years
  * (0xFFFFFFFF seconds), otherwise it will be truncated.
  */
-int __stdcall winx_time2str(ULONGLONG time,char *buffer,int size)
+int winx_time2str(ULONGLONG time,char *buffer,int size)
 {
 	ULONG y,d,h,m,s;
 	ULONG t;
@@ -130,7 +130,7 @@ int xtime_failed = 0;
  * - Useful for performance measures.
  * - Has no physical meaning.
  */
-ULONGLONG __stdcall winx_xtime(void)
+ULONGLONG winx_xtime(void)
 {
 	NTSTATUS Status;
 	LARGE_INTEGER frequency;
@@ -169,7 +169,7 @@ ULONGLONG __stdcall winx_xtime(void)
  * receiving the current system time.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_get_system_time(winx_time *t)
+int winx_get_system_time(winx_time *t)
 {
 	LARGE_INTEGER SystemTime;
 	TIME_FIELDS TimeFields;
@@ -203,7 +203,7 @@ int __stdcall winx_get_system_time(winx_time *t)
  * receiving the current local time.
  * @return Zero for success, negative value otherwise.
  */
-int __stdcall winx_get_local_time(winx_time *t)
+int winx_get_local_time(winx_time *t)
 {
 	LARGE_INTEGER SystemTime;
 	LARGE_INTEGER LocalTime;

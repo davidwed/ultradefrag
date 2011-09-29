@@ -26,7 +26,7 @@
 
 #include "zenwinx.h"
 
-int __stdcall winx_debug_print(char *string);
+int winx_debug_print(char *string);
 
 HANDLE hGlobalHeap = NULL;
 
@@ -39,7 +39,7 @@ HANDLE hGlobalHeap = NULL;
  * - Allocated memory is automatically initialized to zero.
  * - Memory protection for the allocated pages is PAGE_READWRITE.
  */
-void * __stdcall winx_virtual_alloc(SIZE_T size)
+void *winx_virtual_alloc(SIZE_T size)
 {
 	void *addr = NULL;
 	NTSTATUS Status;
@@ -54,7 +54,7 @@ void * __stdcall winx_virtual_alloc(SIZE_T size)
  * @param[in] addr the memory block pointer.
  * @param[in] size the size of the block to be released, in bytes.
  */
-void __stdcall winx_virtual_free(void *addr,SIZE_T size)
+void winx_virtual_free(void *addr,SIZE_T size)
 {
 	(void)NtFreeVirtualMemory(NtCurrentProcess(),&addr,&size,MEM_RELEASE);
 }
@@ -66,7 +66,7 @@ void __stdcall winx_virtual_free(void *addr,SIZE_T size)
  * @param flags HEAP_ZERO_MEMORY to initialize memory to zero, zero otherwise.
  * @return A pointer to the allocated block. NULL indicates failure.
  */
-void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
+void *winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
 {
 	/*
 	* Avoid winx_dbg_xxx calls here
@@ -80,7 +80,7 @@ void * __stdcall winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
  * @brief Frees a previously allocated memory block. 
  * @param[in] addr the memory block pointer.
  */
-void __stdcall winx_heap_free(void *addr)
+void winx_heap_free(void *addr)
 {
 	/*
 	* Avoid winx_dbg_xxx calls here

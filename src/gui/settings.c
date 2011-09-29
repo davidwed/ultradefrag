@@ -255,7 +255,7 @@ void GetPrefs(void)
 	SetEnvironmentVariables();
 }
 
-void __stdcall SavePrefsCallback(char *error)
+void SavePrefsCallback(char *error)
 {
 	MessageBox(NULL,error,"Warning!",MB_OK | MB_ICONWARNING);
 }

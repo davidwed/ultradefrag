@@ -38,7 +38,7 @@
  *                of child windows.
  * @note The list of identifiers must be terminated by zero.
  */
-void __cdecl WgxEnableWindows(HANDLE hMainWindow, ...)
+void WgxEnableWindows(HANDLE hMainWindow, ...)
 {
 	va_list marker;
 	int id;
@@ -58,7 +58,7 @@ void __cdecl WgxEnableWindows(HANDLE hMainWindow, ...)
  *                of child windows.
  * @note The list of identifiers must be terminated by zero.
  */
-void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...)
+void WgxDisableWindows(HANDLE hMainWindow, ...)
 {
 	va_list marker;
 	int id;
@@ -79,7 +79,7 @@ void __cdecl WgxDisableWindows(HANDLE hMainWindow, ...)
  * @param[in] hWindow handle to the window.
  * @param[in] IconID the resource identifier of the icon.
  */
-void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID)
+void WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID)
 {
 	HICON hIcon;
 
@@ -97,7 +97,7 @@ void __stdcall WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID)
  * @param[in] min_height height of the minimal
  * visible part of the window.
  */
-void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height)
+void WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height)
 {
 	int cx,cy;
 
@@ -113,7 +113,7 @@ void __stdcall WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_heigh
  * @note Based on the public domain code:
  * http://www.catch22.net/tuts/tips#CenterWindow
  */
-void __stdcall WgxCenterWindow(HWND hwnd)
+void WgxCenterWindow(HWND hwnd)
 {
     HWND hwndParent;
     RECT rect, rectP;
@@ -153,7 +153,7 @@ void __stdcall WgxCenterWindow(HWND hwnd)
  * @details Works safe regardless of whether the window
  * is unicode or not.
  */
-WNDPROC __stdcall WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc)
+WNDPROC WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc)
 {
     if(IsWindowUnicode(hwnd))
         return (WNDPROC)SetWindowLongPtrW(hwnd,GWLP_WNDPROC,(LONG_PTR)NewProc);
@@ -166,7 +166,7 @@ WNDPROC __stdcall WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc)
  * @details Works safe regardless of whether
  * the window is unicode or not.
  */
-LRESULT __stdcall WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
+LRESULT WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
     if(IsWindowUnicode(hwnd))
         return CallWindowProcW(OldProc,hwnd,msg,wParam,lParam);

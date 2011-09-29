@@ -28,7 +28,7 @@
 
 #define INTERNAL_BUFFER_SIZE 2048
 
-int __stdcall kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout);
+int kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout);
 void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
 
 /**
@@ -39,7 +39,7 @@ void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
  * @param[in] string the string to be displayed.
  * @note Does not recognize \\b character.
  */
-void __cdecl winx_print(char *string)
+void winx_print(char *string)
 {
 	ANSI_STRING as;
 	UNICODE_STRING us;
@@ -72,7 +72,7 @@ second_algorithm:
  * @brief putch() native equivalent.
  * @note Does not recognize \\b character.
  */
-int __cdecl winx_putch(int ch)
+int winx_putch(int ch)
 {
 	UNICODE_STRING us;
 	int i;
@@ -100,7 +100,7 @@ int __cdecl winx_putch(int ch)
  * @brief puts() native equivalent.
  * @note Does not recognize \\b character.
  */
-int __cdecl winx_puts(const char *string)
+int winx_puts(const char *string)
 {
 	if(!string) return (-1);
 	return winx_printf("%s\n",string) ? 0 : (-1);
@@ -110,7 +110,7 @@ int __cdecl winx_puts(const char *string)
  * @brief printf() native equivalent.
  * @note Does not recognize \\b character.
  */
-int __cdecl winx_printf(const char *format, ...)
+int winx_printf(const char *format, ...)
 {
 	va_list arg;
 	char *string;
@@ -140,7 +140,7 @@ int __cdecl winx_printf(const char *format, ...)
  * @note If an INFINITE time constant is passed, 
  * the time-out interval never elapses.
  */
-int __cdecl winx_kbhit(int msec)
+int winx_kbhit(int msec)
 {
 	KBD_RECORD kbd_rec;
 
@@ -157,7 +157,7 @@ int __cdecl winx_kbhit(int msec)
  * @note If an INFINITE time constant is passed, 
  * the time-out interval never elapses.
  */
-int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
+int winx_kb_read(KBD_RECORD *kbd_rec,int msec)
 {
 	KEYBOARD_INPUT_DATA kbd;
 	
@@ -180,7 +180,7 @@ int __cdecl winx_kb_read(KBD_RECORD *kbd_rec,int msec)
  * @note If an INFINITE time constant is passed, 
  * the time-out interval never elapses.
  */
-int __cdecl winx_breakhit(int msec)
+int winx_breakhit(int msec)
 {
 	KEYBOARD_INPUT_DATA kbd;
 	KBD_RECORD kbd_rec;
@@ -197,7 +197,7 @@ int __cdecl winx_breakhit(int msec)
 /**
  * @brief getch() native equivalent.
  */
-int __cdecl winx_getch(void)
+int winx_getch(void)
 {
 	KBD_RECORD kbd_rec;
 	
@@ -210,7 +210,7 @@ int __cdecl winx_getch(void)
  * - Does not recognize \\b character.
  * - Does not recognize tabulation.
  */
-int __cdecl winx_getche(void)
+int winx_getche(void)
 {
 	int ch;
 
@@ -229,7 +229,7 @@ int __cdecl winx_getche(void)
  * Negative value indicates failure.
  * @note Does not recognize tabulation.
  */
-int __cdecl winx_gets(char *string,int n)
+int winx_gets(char *string,int n)
 {
 	return winx_prompt_ex(NULL,string,n,NULL);
 }
@@ -239,7 +239,7 @@ int __cdecl winx_gets(char *string,int n)
  * @param[in] h pointer to structure holding
  * the commands history.
  */
-void __cdecl winx_init_history(winx_history *h)
+void winx_init_history(winx_history *h)
 {
 	if(h == NULL){
 		DebugPrint("winx_init_history: h = NULL!");
@@ -256,7 +256,7 @@ void __cdecl winx_init_history(winx_history *h)
  * @note There is no need to call winx_init_history()
  * after this call to reinitialize the structure.
  */
-void __cdecl winx_destroy_history(winx_history *h)
+void winx_destroy_history(winx_history *h)
 {
 	winx_history_entry *entry;
 	
@@ -325,7 +325,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
  * - Recognizes arrow keys to walk through commands history.
  * @note Does not recognize tabulation.
  */
-int __cdecl winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
+int winx_prompt_ex(char *prompt,char *string,int n,winx_history *h)
 {
 	KEYBOARD_INPUT_DATA kbd;
 	KBD_RECORD kbd_rec;
@@ -483,7 +483,7 @@ fail:
  * Has no support of commands history.
  * @note Does not recognize tabulation.
  */
-int __cdecl winx_prompt(char *prompt,char *string,int n)
+int winx_prompt(char *prompt,char *string,int n)
 {
 	return winx_prompt_ex(prompt,string,n,NULL);
 }
@@ -549,7 +549,7 @@ static int print_line(char *line_buffer,char *prompt,int max_rows,int *rows_prin
  * value otherwise.
  * @note Does not recognize \\b character.
  */
-int __cdecl winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages)
+int winx_print_array_of_strings(char **strings,int line_width,int max_rows,char *prompt,int divide_to_pages)
 {
 	int i, j, k, index, length;
 	char *line_buffer, *second_buffer;

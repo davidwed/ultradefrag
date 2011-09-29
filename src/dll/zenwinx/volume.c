@@ -65,7 +65,7 @@ static HANDLE OpenRootDirectory(unsigned char volume_letter)
  * @param[in] letter the volume letter
  * @return A drive type, negative value indicates failure.
  */
-int __stdcall winx_get_drive_type(char letter)
+int winx_get_drive_type(char letter)
 {
 	wchar_t link_name[] = L"\\??\\A:";
 	#define MAX_TARGET_LENGTH 256
@@ -357,7 +357,7 @@ static int IsNtfsPartition(BPB *bpb,winx_volume_information *v)
  * @param[in] volume_letter the volume letter.
  * @return File descriptor, NULL indicates failure.
  */
-WINX_FILE * __stdcall winx_vopen(char volume_letter)
+WINX_FILE *winx_vopen(char volume_letter)
 {
 	char path[] = "\\??\\A:";
 	char flags[2];
@@ -586,7 +586,7 @@ static void get_volume_label(HANDLE hRoot,winx_volume_information *v)
  * @return Zero for success, negative
  * value otherwise.
  */
-int __stdcall winx_get_volume_information(char volume_letter,winx_volume_information *v)
+int winx_get_volume_information(char volume_letter,winx_volume_information *v)
 {
 	HANDLE hRoot;
 	
@@ -640,7 +640,7 @@ int __stdcall winx_get_volume_information(char volume_letter,winx_volume_informa
 /**
  * @brief fflush equivalent for entire volume.
  */
-int __stdcall winx_vflush(char volume_letter)
+int winx_vflush(char volume_letter)
 {
 	char path[] = "\\??\\A:";
 	WINX_FILE *f;
@@ -675,7 +675,7 @@ int __stdcall winx_vflush(char volume_letter)
  * - Callback procedure should complete as quickly
  * as possible to avoid slowdown of the scan.
  */
-winx_volume_region * __stdcall winx_get_free_volume_regions(char volume_letter,
+winx_volume_region *winx_get_free_volume_regions(char volume_letter,
 		int flags, volume_region_callback cb, void *user_defined_data)
 {
 	winx_volume_region *rlist = NULL, *rgn = NULL;
@@ -811,7 +811,7 @@ fail:
  * @note For performance reason this routine doesn't insert
  * regions of zero length.
  */
-winx_volume_region * __stdcall winx_add_volume_region(winx_volume_region *rlist,
+winx_volume_region *winx_add_volume_region(winx_volume_region *rlist,
 		ULONGLONG lcn,ULONGLONG length)
 {
 	winx_volume_region *r, *rnext, *rprev = NULL;
@@ -873,7 +873,7 @@ winx_volume_region * __stdcall winx_add_volume_region(winx_volume_region *rlist,
  * @param[in] length the size of the region to be subtracted, in clusters.
  * @return Pointer to updated list of regions.
  */
-winx_volume_region * __stdcall winx_sub_volume_region(winx_volume_region *rlist,
+winx_volume_region *winx_sub_volume_region(winx_volume_region *rlist,
 		ULONGLONG lcn,ULONGLONG length)
 {
 	winx_volume_region *r, *head, *next = NULL;
@@ -945,7 +945,7 @@ next_region:
  * @brief Frees memory allocated
  * by winx_get_free_volume_regions.
  */
-void __stdcall winx_release_free_volume_regions(winx_volume_region *rlist)
+void winx_release_free_volume_regions(winx_volume_region *rlist)
 {
 	winx_list_destroy((list_entry **)(void *)&rlist);
 }
