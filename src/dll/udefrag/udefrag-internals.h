@@ -304,7 +304,6 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp,
 ULONGLONG get_number_of_movable_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn, int flags);
 ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn);
 
-ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f);
 int can_defragment(winx_file_info *f,udefrag_job_parameters *jp);
 int can_move(winx_file_info *f,udefrag_job_parameters *jp);
 int optimize_mft_helper(udefrag_job_parameters *jp);

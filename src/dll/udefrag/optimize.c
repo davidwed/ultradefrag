@@ -51,7 +51,7 @@ static int increase_starting_point(udefrag_job_parameters *jp, ULONGLONG *sp);
  * Before each move we ensure that the file will be not moved back
  * on the next pass.
  *
- * If nothing has been moved, we increase starting point to the next
+ * If nothing has been moved, we advance starting point to the next
  * suitable free region and continue the volume processing.
  *
  * This algorithm guarantees that no repeated moves are possible.

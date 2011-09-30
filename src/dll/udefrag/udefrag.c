@@ -222,6 +222,7 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
 * indication not so smoothly as desired.
 */
 /**
+ * @internal
  * @brief Delivers progress information to the caller,
  * no more frequently than specified in UD_REFRESH_INTERVAL
  * environment variable.
@@ -242,6 +243,7 @@ void progress_router(void *p)
 }
 
 /**
+ * @internal
  * @brief Calls terminator registered by caller.
  * When time interval specified in UD_TIME_LIMIT
  * environment variable elapses, it terminates

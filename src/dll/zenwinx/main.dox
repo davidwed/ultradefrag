@@ -31,7 +31,7 @@
  *   participating in the Windows boot process
  * 
  * Using ZenWINX library you may easily create your own native 
- * application. This library gives you about 80 functions which
+ * application. This library gives you over 100 functions which
  * highly simplifies the Windows native development. Also it 
  * contains a Native Development Kit header file with a lot of
  * definitions required for the native development.

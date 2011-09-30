@@ -672,6 +672,7 @@ static int dump_terminator(void *user_defined_data)
 /************************************************************/
 
 /**
+ * @internal
  * @brief File moving results
  * intended for use in move_file only.
  */

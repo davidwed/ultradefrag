@@ -57,7 +57,7 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 		return 0;
 	
 	/* skip files of zero length */
-	if(get_file_length(jp,f) == 0 || \
+	if(f->disp.clusters == 0 || \
 	  (f->disp.blockmap->next == f->disp.blockmap && \
 	  f->disp.blockmap->length == 0)){
 		f->user_defined_flags |= UD_FILE_IMPROPER_STATE;
@@ -159,14 +159,6 @@ static int can_optimize_mft(udefrag_job_parameters *jp,winx_file_info **mft_file
 	if(mft_file)
 		*mft_file = file;
 	return 1;
-}
-
-/**
- * @brief Returns length of a movable part of the file.
- */
-ULONGLONG get_file_length(udefrag_job_parameters *jp, winx_file_info *f)
-{
-	return f->disp.clusters;
 }
 
 /**
@@ -448,7 +440,7 @@ int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
 			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0; tm = winx_xtime();
 			for(f = jp->fragmented_files; f; f = f->next){
-				file_length = get_file_length(jp,f->f);
+				file_length = f->f->disp.clusters;
 				if(file_length > length && file_length <= rgn->length){
 					if(can_defragment(f->f,jp) && !is_mft(f->f,jp)){
 						f_largest = f;
@@ -462,7 +454,7 @@ int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
 			file = f_largest->f; /* f_largest may be destroyed by move_file */
 			
 			/* move the file */
-			clusters_to_move = get_file_length(jp,file);
+			clusters_to_move = file->disp.clusters;
 			if(move_file(file,file->disp.blockmap->vcn,
 			 clusters_to_move,rgn->lcn,0,jp) >= 0){
 				if(jp->udo.dbgprint_level >= DBG_DETAILED)
@@ -539,7 +531,7 @@ int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
 	while(jp->termination_router((void *)jp) == 0){
 		f_largest = NULL, length = 0; tm = winx_xtime();
 		for(f = jp->fragmented_files; f; f = f->next){
-			file_length = get_file_length(jp,f->f);
+			file_length = f->f->disp.clusters;
 			if(file_length > length){
 				if(can_defragment(f->f,jp) && !is_mft(f->f,jp)){
 					f_largest = f;
@@ -552,14 +544,14 @@ int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
 		if(f_largest == NULL) break;
 		file = f_largest->f; /* f_largest may be destroyed by move_file */
 
-		rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,get_file_length(jp,file),FIND_MATCHING_RGN_ANY);
+		rgn = find_matching_free_region(jp,file->disp.blockmap->lcn,file->disp.clusters,FIND_MATCHING_RGN_ANY);
 		if(jp->termination_router((void *)jp)) break;
 		if(rgn == NULL){
 			/* exclude file from the current task */
 			file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
 		} else {
 			/* move the file */
-			clusters_to_move = get_file_length(jp,file);
+			clusters_to_move = file->disp.clusters;
 			if(move_file(file,file->disp.blockmap->vcn,
 			 clusters_to_move,rgn->lcn,0,jp) >= 0){
 				if(jp->udo.dbgprint_level >= DBG_DETAILED)
@@ -654,7 +646,7 @@ try_again:
 			if(jp->termination_router((void *)jp)) goto done;
 			f_largest = NULL, length = 0; tm = winx_xtime();
 			for(f = jp->fragmented_files; f; f = f->next){
-				file_length = get_file_length(jp,f->f);
+				file_length = f->f->disp.clusters;
 				if(file_length > length && can_defragment(f->f,jp) && !is_mft(f->f,jp)){
 					f_largest = f;
 					length = file_length;
@@ -901,7 +893,7 @@ try_again:
 						} else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
 						} else {
 							files_found = 1;
-							file_length = get_file_length(jp,file);
+							file_length = file->disp.clusters;
 							if(file_length > length \
 							  && file_length <= rgn->length){
 								largest_file = file;
@@ -922,7 +914,7 @@ slow_search:
 							} else {
 								if(file->disp.blockmap->lcn >= min_lcn){
 									files_found = 1;
-									file_length = get_file_length(jp,file);
+									file_length = file->disp.clusters;
 									if(file_length > length \
 									  && file_length <= rgn->length){
 										largest_file = file;
@@ -956,7 +948,7 @@ slow_search:
 						if(block->next == largest_file->disp.blockmap) break;
 					}
 					rgn_lcn = rgn->lcn;
-					clusters_to_move = get_file_length(jp,largest_file);
+					clusters_to_move = largest_file->disp.clusters;
 					file_lcn = largest_file->disp.blockmap->lcn;
 					if(move_file(largest_file,largest_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
 						moves ++;
@@ -1094,7 +1086,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 			} else {
 				/* move entire file */
 				current_vcn = first_file->disp.blockmap->vcn;
-				clusters_to_move = get_file_length(jp,first_file);
+				clusters_to_move = first_file->disp.clusters;
 			}
 			rgn = find_matching_free_region(jp,first_block->lcn,clusters_to_move,FIND_MATCHING_RGN_FORWARD);
 			//rgn = find_last_free_region(jp,clusters_to_move);

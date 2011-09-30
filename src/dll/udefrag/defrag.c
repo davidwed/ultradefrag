@@ -45,7 +45,7 @@ static ULONGLONG fragmented_clusters(udefrag_job_parameters *jp)
 		* Count all fragmented files which can be processed.
 		*/
 		if(can_defragment(f->f,jp))
-			n += get_file_length(jp,f->f);
+			n += f->f->disp.clusters;
 		if(f->next == jp->fragmented_files) break;
 	}
 	return n;
