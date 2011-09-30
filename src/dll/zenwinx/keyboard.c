@@ -71,6 +71,7 @@ static int kb_open_internal(int device_number);
 char *winx_get_error_description(unsigned long status);
 
 /**
+ * @internal
  * @brief Waits for user input on
  * the specified keyboard.
  */
@@ -248,8 +249,8 @@ int winx_kb_init(void)
 }
 
 /**
+ * @internal
  * @brief Closes all opened keyboards.
- * @note Internal use only.
  */
 void kb_close(void)
 {
@@ -278,13 +279,13 @@ void kb_close(void)
 }
 
 /**
+ * @internal
  * @brief Checks the console for keyboard input.
  * @details Tries to read from all keyboard devices 
  * until specified time-out expires.
  * @param[out] pKID pointer to the structure receiving keyboard input.
  * @param[in] msec_timeout time-out interval in milliseconds.
  * @return Zero if some key was pressed, negative value otherwise.
- * @note Internal use only.
  */
 int kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 {
@@ -344,10 +345,10 @@ int kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 */
 
 /**
+ * @internal
  * @brief Opens the keyboard.
  * @param[in] device_number the number of the keyboard device.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int kb_open_internal(int device_number)
 {
@@ -424,12 +425,12 @@ static int kb_open_internal(int device_number)
 #define LIGHTING_REPEAT_COUNT 0x5
 
 /**
+ * @internal
  * @brief Light up the keyboard indicators.
  * @param[in] hKbDevice the handle of the keyboard device.
  * @param[in] LedFlags the flags specifying
  * which indicators must be lighten up.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 {
@@ -453,10 +454,10 @@ static int kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 }
 
 /**
+ * @internal
  * @brief Checks the keyboard for an existence.
  * @param[in] hKbDevice the handle of the keyboard device.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int kb_check(HANDLE hKbDevice)
 {

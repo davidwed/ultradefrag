@@ -116,6 +116,7 @@ int winx_time2str(ULONGLONG time,char *buffer,int size)
 }
 
 /**
+ * @internal
  * @brief Internal variable used
  * to log winx_xtime failure once.
  */

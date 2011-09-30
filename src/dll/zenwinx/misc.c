@@ -344,6 +344,7 @@ int winx_windows_in_safe_mode(void)
 }
 
 /**
+ * @internal
  * @brief Marks Windows boot as successful.
  * @note
  * - Based on http://www.osronline.com/showthread.cfm?link=185567

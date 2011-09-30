@@ -46,10 +46,10 @@ static void close_dbg_log(void);
 /* Initialization routines */
 
 /**
+ * @internal
  * @brief Initializes the synchronization objects used
  * in the debugging routines.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 int winx_init_synch_objects(void)
 {
@@ -61,9 +61,9 @@ int winx_init_synch_objects(void)
 }
 
 /**
+ * @internal
  * @brief Destroys the synchronization
  * objects used in the debugging routines.
- * @note Internal use only.
  */
 void winx_destroy_synch_objects(void)
 {
@@ -114,6 +114,7 @@ NT_STATUS_DESCRIPTION status_descriptions[] = {
 };
 
 /**
+ * @internal
  * @brief Retrieves a human readable
  * explanation of the NT status code.
  * @param[in] status the NT status code.
@@ -262,11 +263,11 @@ void winx_dbg_print_header(char ch, int width, char *format, ...)
 }
 
 /**
+ * @internal
  * @brief Delivers a message to the Debug View program and
  * saves it to the log list if logging to the file is enabled.
  * @param[in] string the string to be delivered.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 int winx_debug_print(char *string)
 {
@@ -294,6 +295,7 @@ int winx_debug_print(char *string)
 }
 
 /**
+ * @internal
  * @brief Internal structure used to deliver
  * information to the Debug View program.
  */
@@ -305,10 +307,10 @@ typedef struct _DBG_OUTPUT_DEBUG_STRING_BUFFER {
 #define DBG_BUFFER_SIZE (4096-sizeof(ULONG))
 
 /**
+ * @internal
  * @brief Low-level routine for delivering
  * of debugging messages to the Debug View program.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int deliver_message_to_the_debugger(char *string)
 {
@@ -406,9 +408,9 @@ int logging_enabled = 0;
 char *log_path = NULL;
 
 /**
+ * @internal
  * @brief Initializes the logging to the file.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int init_dbg_log(void)
 {
@@ -418,8 +420,8 @@ static int init_dbg_log(void)
 }
 
 /**
+ * @internal
  * @brief Adds a string to the debug log.
- * @note Internal use only.
  */
 static void add_dbg_log_entry(char *string)
 {
@@ -446,12 +448,12 @@ static void add_dbg_log_entry(char *string)
 }
 
 /**
+ * @internal
  * @brief Appends all collected debugging
  * information to the log file.
  * @param[in] already_synchronized an internal
  * flag, used in winx_enable_dbg_log only.
  * Should be always set to zero in other cases.
- * @note Internal use only.
  */
 void flush_dbg_log(int already_synchronized)
 {
@@ -613,8 +615,8 @@ void winx_disable_dbg_log(void)
 }
 
 /**
+ * @internal
  * @brief Closes logging to the file.
- * @note Internal use only.
  */
 static void close_dbg_log(void)
 {

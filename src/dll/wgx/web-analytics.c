@@ -47,6 +47,7 @@ typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
 DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter);
 
 /**
+ * @internal
  * @brief Sends web analytics request.
  * @note Passed url must be allocated by malloc.
  */
@@ -102,6 +103,7 @@ fail:
 }
 
 /**
+ * @internal
  */
 DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter)
 {
@@ -110,6 +112,7 @@ DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter)
 }
 
 /**
+ * @internal
  * @note Based on http://www.vdgraaf.info/google-analytics-without-javascript.html
  * and http://code.google.com/apis/analytics/docs/tracking/gaTrackingTroubleshooting.html
  */

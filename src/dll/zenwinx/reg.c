@@ -179,16 +179,16 @@ int winx_unregister_boot_exec_command(short *command)
 
 	winx_heap_free((void *)new_value);
 	winx_heap_free((void *)data);
-	flush_smss_key(hKey); /* required by native app before shutdown */
+	flush_smss_key(hKey);
 	NtCloseSafe(hKey);
 	return 0;
 }
 
 /**
+ * @internal
  * @brief Opens the SMSS registry key.
  * @param[out] pKey pointer to the key handle.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int open_smss_key(HANDLE *pKey)
 {
@@ -208,6 +208,7 @@ static int open_smss_key(HANDLE *pKey)
 }
 
 /**
+ * @internal
  * @brief Queries the BootExecute
  * value of the SMSS registry key.
  * @param[in] hKey the key handle.
@@ -217,7 +218,6 @@ static int open_smss_key(HANDLE *pKey)
  * of the BootExecute value. After the call this parameter contains
  * size of the allocated buffer containing the queried value, in bytes.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 {
@@ -257,12 +257,12 @@ static int read_boot_exec_value(HANDLE hKey,void **data,DWORD *size)
 }
 
 /**
+ * @internal
  * @brief Sets the BootExecute value of the SMSS registry key.
  * @param[in] hKey the key handle.
  * @param[in] data pointer to a buffer containing the value.
  * @param[in] size the size of buffer, in bytes.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 {
@@ -280,6 +280,7 @@ static int write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
 }
 
 /**
+ * @internal
  * @brief Compares two boot execute commands.
  * @details Treats 'command' and 'autocheck command' as the same.
  * @param[in] reg_cmd command read from registry.
@@ -287,7 +288,6 @@ static int write_boot_exec_value(HANDLE hKey,void *data,DWORD size)
  * @return Positive value indicates that commands are equal,
  * zero indicates that they're different, negative value
  * indicates failure of comparison.
- * @note Internal use only.
  */
 static int cmd_compare(short *reg_cmd,short *cmd)
 {
@@ -345,6 +345,7 @@ done:
 }
 
 /**
+ * @internal
  * @brief Flushes the SMSS registry key.
  * @param[in] hKey the key handle.
  * @note

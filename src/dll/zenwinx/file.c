@@ -166,6 +166,7 @@ size_t winx_fread(void *buffer,size_t size,size_t count,WINX_FILE *f)
 }
 
 /**
+ * @internal
  * @brief winx_fwrite helper.
  * @details Writes to the file directly
  * regardless of whether it is opened for

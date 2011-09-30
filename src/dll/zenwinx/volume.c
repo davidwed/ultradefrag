@@ -31,10 +31,10 @@
 //#define GET_FS_NAME_FROM_THE_FIRST_SECTOR
 
 /**
+ * @internal
  * @brief Opens a root directory of the volume.
  * @param[in] volume_letter the volume letter.
  * @return File handle, NULL indicates failure.
- * @note Internal use only.
  */
 static HANDLE OpenRootDirectory(unsigned char volume_letter)
 {
@@ -218,6 +218,7 @@ int winx_get_drive_type(char letter)
 }
 
 /**
+ * @internal
  * @brief Retrieves drive geometry.
  * @param[in] hRoot handle to the
  * root directory.
@@ -225,7 +226,6 @@ int winx_get_drive_type(char letter)
  * receiving drive geometry.
  * @return Zero for success, negative
  * value otherwise.
- * @note Internal use only.
  */
 static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
 {
@@ -269,6 +269,7 @@ static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
 
 #ifdef GET_FS_NAME_FROM_THE_FIRST_SECTOR
 /**
+ * @internal
  * @brief Defines whether bios parameter block
  * belongs to the FAT-formatted partition or not.
  * Updates file system type related information
@@ -329,6 +330,7 @@ static int IsFatPartition(BPB *bpb,winx_volume_information *v)
 }
 
 /**
+ * @internal
  * @brief Defines whether bios parameter block
  * belongs to the NTFS-formatted partition or not.
  * Updates file system type related information
@@ -373,6 +375,7 @@ WINX_FILE *winx_vopen(char volume_letter)
 
 #ifdef GET_FS_NAME_FROM_THE_FIRST_SECTOR
 /**
+ * @internal
  * @brief Reads the first sector
  * of the volume into memory.
  * @param[out] buffer pointer
@@ -383,7 +386,6 @@ WINX_FILE *winx_vopen(char volume_letter)
  * containing drive geometry.
  * @return Zero for sucsess, negative
  * value otherwise.
- * @note Internal use only.
  */
 static int read_first_sector(void *buffer,winx_volume_information *v)
 {
@@ -409,6 +411,7 @@ static int read_first_sector(void *buffer,winx_volume_information *v)
 #endif /* GET_FS_NAME_FROM_THE_FIRST_SECTOR */
 
 /**
+ * @internal
  * @brief Retrieves the name of file system.
  * @param[in] hRoot handle to the
  * root directory.
@@ -419,7 +422,6 @@ static int read_first_sector(void *buffer,winx_volume_information *v)
  * @return Zero for success, negative
  * value otherwise.
  * @note Call it after get_drive_geometry.
- * Internal use only.
  */
 static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 {
@@ -507,11 +509,11 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
 }
 
 /**
+ * @internal
  * @brief Retrieves NTFS data for the filesystem.
  * @param[out] pointer to the structure
  * receiving the information.
  * @return Zero for success, negative value otherwise.
- * @note Internal use only.
  */
 static int get_ntfs_data(winx_volume_information *v)
 {
@@ -536,12 +538,12 @@ static int get_ntfs_data(winx_volume_information *v)
 }
 
 /**
+ * @internal
  * @brief Retrieves volume label.
  * @param[in] hRoot handle to the
  * root directory.
  * @param[out] pointer to the structure
  * receiving the volume label.
- * @note Internal use only.
  */
 static void get_volume_label(HANDLE hRoot,winx_volume_information *v)
 {

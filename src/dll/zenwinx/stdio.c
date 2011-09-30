@@ -275,8 +275,8 @@ void winx_destroy_history(winx_history *h)
 }
 
 /**
+ * @internal
  * @brief Adds an entry to commands history list.
- * @note Internal use only.
  */
 static void winx_add_history_entry(winx_history *h,char *string)
 {

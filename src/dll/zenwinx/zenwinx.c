@@ -36,6 +36,7 @@ char *winx_get_error_description(unsigned long status);
 void flush_dbg_log(int already_synchronized);
 
 /**
+ * @internal
  * @brief Internal variable indicating
  * whether library initialization failed
  * or not. Intended to be checked by
@@ -151,15 +152,14 @@ void winx_unload_library(void)
 }
 
 /**
+ * @internal
  * @brief Displays error message when
  * either debug print or memory
  * allocation may be not available.
  * @param[in] msg the error message.
  * @param[in] Status the NT status code.
- * @note
- * - Intended to be used after winx_exit,
- *   winx_shutdown and winx_reboot failure.
- * - Internal use only.
+ * @note Intended to be used after winx_exit,
+ * winx_shutdown and winx_reboot failures.
  */
 static void print_post_scriptum(char *msg,NTSTATUS Status)
 {

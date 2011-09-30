@@ -29,7 +29,7 @@
 /**
  * @brief Size of the buffer dedicated
  * to list directory entries into.
- * @note Must be multiple of sizeof(void *).
+ * @note Must be a multiple of sizeof(void *).
  */
 #define FILE_LISTING_SIZE (16*1024)
 
@@ -43,6 +43,7 @@
 #define FILE_MAP_SIZE (sizeof(GET_RETRIEVAL_DESCRIPTOR) - sizeof(MAPPING_PAIR) + 512 * sizeof(MAPPING_PAIR))
 
 /**
+ * @internal
  * @brief LCN of virtual clusters.
  */
 #define LLINVALID ((ULONGLONG) -1)
@@ -56,6 +57,7 @@ winx_file_info *ntfs_scan_disk(char volume_letter,
 	ftw_terminator t, void *user_defined_data);
 
 /**
+ * @internal
  * @brief Checks whether the file
  * tree walk must be terminated or not.
  * @return Nonzero value indicates that
@@ -70,6 +72,7 @@ static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
 }
 
 /**
+ * @internal
  * @brief Opens the file for dumping (or other actions).
  * @param[in] pointer to structure containing the file information.
  * @param[in] action one of the FTW_FOPEN_XXX constants
@@ -308,6 +311,7 @@ int winx_ftw_dump_file(winx_file_info *f,
 }
 
 /**
+ * @internal
  * @brief Adds directory entry to the file list.
  * @return Address of inserted file list entry,
  * NULL indicates failure.
@@ -401,6 +405,7 @@ static winx_file_info * ftw_add_entry_to_filelist(short *path,
 }
 
 /**
+ * @internal
  * @brief Adds information about
  * root directory to file list.
  */
@@ -502,6 +507,7 @@ static int ftw_add_root_directory(short *path, int flags,
 }
 
 /**
+ * @internal
  * @brief Opens directory for file listing.
  * @return Handle to the directory, NULL
  * indicates failure.
@@ -532,6 +538,7 @@ static HANDLE ftw_open_directory(short *path)
 }
 
 /**
+ * @internal
  * @brief Scans directory and adde information
  * about files found to the passed file list.
  * @return Zero for success, -1 indicates

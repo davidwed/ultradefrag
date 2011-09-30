@@ -30,6 +30,7 @@
 #include "wgx.h"
 
 /**
+ * @internal
  * @brief WgxBuildMenu helper.
  */
 static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table)

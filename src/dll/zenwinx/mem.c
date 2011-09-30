@@ -51,7 +51,7 @@ void *winx_virtual_alloc(SIZE_T size)
 
 /**
  * @brief Releases a block of virtual memory.
- * @param[in] addr the memory block pointer.
+ * @param[in] addr address of the memory block.
  * @param[in] size the size of the block to be released, in bytes.
  */
 void winx_virtual_free(void *addr,SIZE_T size)
@@ -77,8 +77,8 @@ void *winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
 }
 
 /**
- * @brief Frees a previously allocated memory block. 
- * @param[in] addr the memory block pointer.
+ * @brief Frees memory allocated by winx_heap_alloc_ex.
+ * @param[in] addr address of the memory block.
  */
 void winx_heap_free(void *addr)
 {
@@ -90,6 +90,7 @@ void winx_heap_free(void *addr)
 }
 
 /**
+ * @internal
  * @brief Creates global memory heap.
  * @return Zero for success, negative value otherwise.
  */
@@ -110,6 +111,7 @@ int winx_create_global_heap(void)
 }
 
 /**
+ * @internal
  * @brief Destroys global memory heap.
  */
 void winx_destroy_global_heap(void)

@@ -31,7 +31,7 @@
  * @param[in] name the name of environment variable.
  * @param[out] buffer pointer to the buffer to receive
  * the null-terminated value string.
- * @param[in]  length the length of the buffer, in characters.
+ * @param[in] length the length of the buffer, in characters.
  * @return Zero for success, negative value otherwise.
  */
 int winx_query_env_variable(short *name, short *buffer, int length)
