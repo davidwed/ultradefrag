@@ -29,3 +29,12 @@ new translation:
     If using Notepad++ select all and use
     "TextFX => TextFX Edit => Line up multiple lines by (=)
     to line up the translations automatically.
+
+copyright rules:
+ 1. http://www.gnu.org/prep/maintain/maintain.html#Legally-Significant
+ 2. since language files are quite small, we consider to assign copyright
+    to anyone who contributed more than around ten lines of text
+ 3. any person contributed less than around ten lines of text deserves 
+    to be mentioned however in 'Special thanks' list of the 'Credits and 
+    License' chapter of the UltraDefrag handbook - sure, even a minor
+    improvements help us to move forward in right direction to our target
