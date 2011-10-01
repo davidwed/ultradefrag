@@ -248,20 +248,31 @@ exit /B 0
 
 	rem rebuild modules
 	set UD_BUILD_TOOL=lua ..\..\tools\mkmod.lua
-	echo Compile monolithic native interface...
-	pushd obj\zenwinx
-	%UD_BUILD_TOOL% zenwinx.build static-lib || goto fail
-	cd ..\udefrag
-	%UD_BUILD_TOOL% udefrag.build static-lib || goto fail
-	cd ..\native
-	%UD_BUILD_TOOL% defrag_native.build || goto fail
+	
+	:: monolithic native executable can be
+	:: produced currently by DDK only
+	if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK% (
+		echo Compile monolithic native interface...
+		pushd obj\zenwinx
+		%UD_BUILD_TOOL% zenwinx.build static-lib || goto fail
+		cd ..\udefrag
+		%UD_BUILD_TOOL% udefrag.build static-lib || goto fail
+		cd ..\native
+		%UD_BUILD_TOOL% defrag_native.build || goto fail
 
-	echo Compile native DLL's...
-	cd ..\zenwinx
-	%UD_BUILD_TOOL% zenwinx.build || goto fail
-	cd ..\udefrag
-	%UD_BUILD_TOOL% udefrag.build || goto fail
-
+		echo Compile native DLL's...
+		cd ..\zenwinx
+		%UD_BUILD_TOOL% zenwinx.build || goto fail
+		cd ..\udefrag
+		%UD_BUILD_TOOL% udefrag.build || goto fail
+	) else (
+		pushd obj\zenwinx
+		%UD_BUILD_TOOL% zenwinx.build || goto fail
+		cd ..\udefrag
+		%UD_BUILD_TOOL% udefrag.build || goto fail
+		cd ..\native
+		%UD_BUILD_TOOL% defrag_native.build || goto fail
+	)
 	rem workaround for WDK 7
 	rem set IGNORE_LINKLIB_ABUSE=1
 	cd ..\lua5.1
