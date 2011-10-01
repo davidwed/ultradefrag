@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 5.0.0  2011-08-
+  Version 5.0.0  2011-10-
   ------------------------------------------------------------------------------
     RC1:
     - MFT optimization implemented
@@ -22,7 +22,8 @@ HISTORY
     - the following translations were updated:
 
       Portuguese (BR), Yiddish, Hungarian, Spanish (ES), Dutch, Finnish,
-      Italian, Iloko, Filipino (Tagalog), Catalan
+      Italian, Iloko, Filipino (Tagalog), Catalan, Danish, Norwegian,
+      Portuguese
     
     - installer has been enhanced in the following ways:
       + now checks Mutex to prevent install/remove while the program is running
@@ -32,7 +33,7 @@ HISTORY
       + shortcut icons can be selected individually
       + all selections can be done through command line switches
         during silent installations using the /S switch:
-            * /FULL .............. install full installation
+            * /FULL .............. install full edition
             * /MICRO ............. install micro edition (no GUI, no help, no icons)
             * /ICONS ............. install/remove all shortcut icons
             * /BOOT .............. install/remove boot time component
