@@ -27,12 +27,12 @@
  * prompt is displayed. If no key is pressed during this
  * delay, the boot time script will be executed.
  *
- * You can always stop the volume analysis/defragmentation by pressing
+ * You can always stop the disk analysis/defragmentation by pressing
  * the Pause/Break key on the keyboard.
  *
  * The following restrictions exist for the boot time scans:
- * - You may not scan encrypted volumes. This is because lsass.exe, the component
- * of the operating system that reads encrypted volumes, is still not loaded
+ * - You may not scan encrypted disks. This is because lsass.exe, the component
+ * of the operating system that reads encrypted disks, is still not loaded
  * at a time of the native applications execution.
  * - In Windows Safe Mode the program cannot display text on the boot screen.
  * UltraDefrag checks for boot options and returns immediately, if the

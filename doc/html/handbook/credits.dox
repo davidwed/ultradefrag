@@ -225,7 +225,7 @@
  * @htmlonly
  * <table style="border:none; margin-left:20px;">
  * <tr><td>• Alexander Peter Kowalski</td><td>-</td><td> Process priority control (not implemented yet).</td></tr>
- * <tr><td>• Alexander Vedyakin      </td><td>-</td><td> Volume type detection improvements.</td></tr>
+ * <tr><td>• Alexander Vedyakin      </td><td>-</td><td> Disk type detection improvements.</td></tr>
  * <tr><td>                          </td><td> </td><td> More effective defragmenting algorithms.</td></tr>
  * <tr><td>• Andrei Maksimov         </td><td>-</td><td> GUI improvements.</td></tr>
  * <tr><td>                          </td><td> </td><td> A lot of other interesting ideas.</td></tr>
@@ -238,7 +238,7 @@
  * <tr><td>• Jan Loncik              </td><td>-</td><td> x64 native support. Better default values for filters.</td></tr>
  * <tr><td>• Jim Laski               </td><td>-</td><td> System fonts and visual styles for graphical interface.</td></tr>
  * <tr><td>• Justin Dearing          </td><td>-</td><td> Boot time defragmentation.</td></tr>
- * <tr><td>• Kalle Koseck            </td><td>-</td><td> Volume analysis speedup. GUI improvements.</td></tr>
+ * <tr><td>• Kalle Koseck            </td><td>-</td><td> Disk analysis speedup. GUI improvements.</td></tr>
  * <tr><td>• Kerem Gümrükcü          </td><td>-</td><td> Manifests for Vista User Account Control (UAC).</td></tr>
  * <tr><td>• Leland G. Whitlock      </td><td>-</td><td> Progress bar. More effective defragmenting algorithms.</td></tr>
  * <tr><td>• Markus Elfring          </td><td>-</td><td> Strong error handling.</td></tr>

@@ -20,7 +20,7 @@
  * <dl>
  * <dt>Create screen-shots</dt>
  * <dd>This is highly recommended for reporting display related problems.<br/>
- * In addition they help to visualize the current state of your volume.</dd>
+ * In addition they help to visualize the current state of your disk.</dd>
  * <dt>Enable debugging output</dt>
  * <dd>Use the <b>dbgprint_level</b> setting or the <b>UD_DBGPRINT_LEVEL</b> environment variable and set it to <b>DETAILED</b></dd>
  * <dt>Collect debugging output</dt>

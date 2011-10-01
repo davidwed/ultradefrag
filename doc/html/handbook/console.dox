@@ -20,26 +20,26 @@
  * <h1>Command line options</h1>
  * Usage:
  * @code
- * udefrag [command] [options] [volumeletter:] [path(s)]
+ * udefrag [command] [options] [driveletter:] [path(s)]
  * @endcode
  *
  * Commands:
  * <dl>
  * <dt>-a, --analyze</dt>
- * <dd>Analyze the volume.</dd>
+ * <dd>Analyze the disk.</dd>
  * <dt>--defragment</dt>
- * <dd>Defragment the volume. This key is optional. Specifying just 
- * the volume letter will cause UltraDefrag to defragment the volume.</dd>
+ * <dd>Defragment the disk. This key is optional. Specifying just 
+ * the drive letter will cause UltraDefrag to defragment the disk.</dd>
  * <dt>-o, --optimize</dt>
- * <dd>Optimize the volume space by moving all files to the beginning of the volume.</dd>
+ * <dd>Optimize the disk space by moving all files to the beginning of the disk.</dd>
  * <dt>--quick-optimize</dt>
- * <dd>Optimize the volume space by moving not fragmented files to the beginning of the volume.</dd>
+ * <dd>Optimize the disk space by moving not fragmented files to the beginning of the disk.</dd>
  * <dt>-l, --list-available-volumes</dt>
- * <dd>List all volumes available for defragmentation, except removable. Each line of the
- * output contains a volume letter, filesystem name, total space and amount of 
+ * <dd>List all disks available for defragmentation, except removable. Each line of the
+ * output contains a drive letter, filesystem name, total space and amount of 
  * free space.</dd>
  * <dt>-la, --list-available-volumes=all</dt>
- * <dd>List all volumes available for defragmentation, including removable.</dd>
+ * <dd>List all disks available for defragmentation, including removable.</dd>
  * <dt>-h, -?, --help</dt>
  * <dd>Show help screen. Running UltraDefrag without arguments has the same effect.</dd>
  * </dl>
@@ -47,16 +47,16 @@
  * Options:
  * <dl>
  * <dt>-r, --repeat</dt>
- * <dd>Defragment or optimize the volume until there is nothing left that can be moved.
- * This will process the volume multiple times in a row.</dd>
+ * <dd>Defragment or optimize the disk until there is nothing left that can be moved.
+ * This will process the disk multiple times in a row.</dd>
  * <dt>-b, --use-system-color-scheme</dt>
  * <dd>Use system color scheme (usually black/white) instead of the green color.</dd>
  * <dt>-p, --suppress-progress-indicator</dt>
  * <dd>Hide progress indicator.</dd>
  * <dt>-v, --show-volume-information</dt>
- * <dd>Show volume information after a job completes.</dd>
+ * <dd>Show disk information after a job completes.</dd>
  * <dt>-m, --show-cluster-map</dt>
- * <dd>Show a map representing clusters of the volume.</dd>
+ * <dd>Show a map representing clusters of the disk.</dd>
  * <dt>--map-border-color=color</dt>
  * <dd>Set cluster map border color. Available values: black, white, red, green,
  * blue, yellow, magenta, cyan, darkred, darkgreen, darkblue, darkyellow, darkmagenta,
@@ -81,16 +81,16 @@
  * in Explorer's context menu handler.</dd>
  * </dl>
  *
- * Volume letter:
+ * Drive letter:
  *
- * - Specifying just the volume letter will cause UltraDefrag to defragment the volume.
- * - It is possible to specify multiple volume letters. Like this: udefrag c: d: x:
- * - Also the following keys can be used instead of the volume letter:
+ * - Specifying just the drive letter will cause UltraDefrag to defragment the disk.
+ * - It is possible to specify multiple drive letters. Like this: udefrag c: d: x:
+ * - Also the following keys can be used instead of the drive letter:
  * <dl>
  * <dt>--all</dt>
- * <dd>Process all available volumes.</dd>
+ * <dd>Process all available disks.</dd>
  * <dt>--all-fixed</dt>
- * <dd>Process all volumes except removable.</dd>
+ * <dd>Process all disks except removable.</dd>
  * </dl>
  * Note that --all-fixed key has higher precedence, if both keys are specified
  * UltraDefrag will process fixed drives only.
@@ -148,7 +148,7 @@
  * no logging to a file will be performed.</dd>
  * <dt>UD_DRY_RUN</dt>
  * <dd>If this environment variable is set to 1 (one) the files are not physically moved.
- * This allows testing the algorithm without changing the content of the volume.</dd>
+ * This allows testing the algorithm without changing the content of the disk.</dd>
  * </dl></dd>
  * </dl>
  *
@@ -162,8 +162,8 @@
  *
  * <h1>Example batch scripts</h1>
  * The following example illustrates defragmentation of a few
- * different volumes in series adjusting parameters separately for
- * each volume.
+ * different disks in series adjusting parameters separately for
+ * each disk.
  * @code
  * @echo off
  *
@@ -201,7 +201,7 @@
  *
  * The following three commands are very useful
  * in disk defragmentation scripts too:
- * - <b>chkdsk</b> checks volumes for errors and corrects them
+ * - <b>chkdsk</b> checks disks for errors and corrects them
  * - <b>shutdown -s -t 00</b> automatically shuts down the computer
  * - <b>hibernate4win now</b> hibernates the computer
  *

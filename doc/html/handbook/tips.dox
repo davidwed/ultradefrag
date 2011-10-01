@@ -53,10 +53,10 @@
  * <dt>Running when the System is fully used</dt>
  * <dd>this is the worst and not recommended at all,
  * since many files are locked by running applications.
- * You should never use this to process entire volumes.</dd>
+ * You should never use this to process entire disks.</dd>
  * <dt>Using quick instead of full optimization</dt>
  * <dd>Quick optimization is much faster than full optimization due to only
- * moving fragmented files to the end of the volume first.<br/>
+ * moving fragmented files to the end of the disk first.<br/>
  * This makes it perfectly suited for system and boot drives.</dd>
  * </dl>
  * <span style="color: darkred">
@@ -84,24 +84,24 @@
  * result.
  *
  * <h1>Parallel Processing</h1>
- * You can process multiple volumes simultaneously, but only if they
+ * You can process multiple disks simultaneously, but only if they
  * are located on different hard-disks.
- * Processing multiple volumes located on the same hard-disk will
+ * Processing multiple disks located on the same physical hard-disk will
  * increase processing time significantly.
  *
  * Example:
- * - Hard-disk 1 contains volumes C: and D:
- * - Hard-disk 2 contains volumes G: and H:
+ * - Hard-disk 1 contains disks C: and D:
+ * - Hard-disk 2 contains disks G: and H:
  *
- * You can start one UltraDefrag session to process volumes C: and D:
- * and a second separate session to process volumes G: and H:\n
- * This will result in less time needed to process all four volumes.
+ * You can start one UltraDefrag session to process disks C: and D:
+ * and a second separate session to process disks G: and H:\n
+ * This will result in less time needed to process all four disks.
  * If both hard-disks are occupied in a similar way the time will be
- * reduced to about 50% compared to the time needed for all volumes to be
+ * reduced to about 50% compared to the time needed for all disks to be
  * processed one after the other.
  *
  * <h1>Caveats</h1>
- * Highly fragmented volumes will have to be defragmented several
+ * Highly fragmented disks will have to be defragmented several
  * times until you will see an improvement.
  *
  * <HR>

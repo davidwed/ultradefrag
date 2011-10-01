@@ -12,10 +12,10 @@
 /**
  * @page Reports File Fragmentation Reports
  *
- * Every time you run a volume analysis, defragmentation or
+ * Every time you run a disk analysis, defragmentation or
  * optimization, UltraDefrag produces the file fragmentation
  * report with a full list of fragmented files located on the
- * volume.
+ * disk.
  *
  * UltraDefrag saves file fragmentation reports in the
  * following two formats: LuaReport and Plain Text. The first
@@ -24,7 +24,7 @@
  * be accessible even on machines without any web browser installed.
  *
  * UltraDefrag saves all reports to the root directories of
- * the processed volumes. To open LuaReport click the fraglist.luar
+ * the processed disks. To open LuaReport click the fraglist.luar
  * file in Explorer or simply click the Report button in the
  * UltraDefrag GUI after a disk defragmentation/analysis job has
  * completed. To open the Plain Text report click the fraglist.txt
