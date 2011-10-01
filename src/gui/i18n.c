@@ -136,6 +136,7 @@ struct menu_item {
 };
 
 /**
+ * @internal
  * @brief Simplifies build of localized menu.
  */
 struct menu_item menu_items[] = {
@@ -180,6 +181,7 @@ struct menu_item menu_items[] = {
 };
 
 /**
+ * @internal
  * @brief Synchronization events.
  */
 HANDLE hLangPackEvent = NULL;
@@ -487,6 +489,7 @@ no_files_found:
 }
 
 /**
+ * @internal
  * @brief StartLangIniChangesTracking thread routine.
  */
 DWORD WINAPI LangIniChangesTrackingProc(LPVOID lpParameter)
@@ -573,6 +576,7 @@ void StopLangIniChangesTracking()
 }
 
 /**
+ * @internal
  * @brief StartI18nFolderChangesTracking thread routine.
  */
 DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)

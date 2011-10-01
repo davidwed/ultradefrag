@@ -290,6 +290,7 @@ void InitFont(void)
 }
 
 /**
+ * @internal
  * @brief StartPrefsChangesTracking thread routine.
  */
 DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
@@ -463,6 +464,7 @@ int IsBootTimeDefragEnabled(void)
 }
 
 /**
+ * @internal
  * @brief StartBootExecTracking thread routine.
  */
 DWORD WINAPI BootExecTrackingProc(LPVOID lpParameter)

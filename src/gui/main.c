@@ -480,10 +480,11 @@ void OpenWebPage(char *page)
 }
 
 /**
+ * @internal
  * @brief Updates the global win_rc structure.
  * @return Zero for success, negative value otherwise.
  */
-int UpdateMainWindowCoordinates(void)
+static int UpdateMainWindowCoordinates(void)
 {
 	RECT rc;
 
@@ -1000,6 +1001,7 @@ done:
 }
 
 /**
+ * @internal
  * @brief Updates web statistics of the program use.
  */
 DWORD WINAPI UpdateWebStatisticsThreadProc(LPVOID lpParameter)

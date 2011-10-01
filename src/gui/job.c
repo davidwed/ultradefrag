@@ -109,6 +109,7 @@ void update_status_of_all_jobs(void)
 }
 
 /**
+ * @internal
  * @brief Updates progress indicators
  * for the currently running job.
  */
@@ -182,6 +183,7 @@ static void update_progress(udefrag_progress_info *pi, void *p)
 }
 
 /**
+ * @internal
  * @brief Terminates currently running job.
  */
 static int terminator(void *p)
@@ -190,10 +192,11 @@ static int terminator(void *p)
 }
 
 /**
+ * @internal
  * @brief Displays detailed information
  * about volume validation failure.
  */
-void DisplayInvalidVolumeError(int error_code)
+static void DisplayInvalidVolumeError(int error_code)
 {
 	char buffer[512];
 
@@ -211,10 +214,11 @@ void DisplayInvalidVolumeError(int error_code)
 }
 
 /**
+ * @internal
  * @brief Displays detailed information
  * about volume processing failure.
  */
-void DisplayDefragError(int error_code)
+static void DisplayDefragError(int error_code)
 {
 	char buffer[512];
 	char *caption = "Volume optimization failed!";
@@ -237,9 +241,10 @@ void DisplayDefragError(int error_code)
 }
 
 /**
+ * @internal
  * @brief Runs job for a single volume.
  */
-void ProcessSingleVolume(volume_processing_job *job)
+static void ProcessSingleVolume(volume_processing_job *job)
 {
 	int error_code;
 
@@ -271,6 +276,7 @@ void ProcessSingleVolume(volume_processing_job *job)
 }
 
 /**
+ * @internal
  * @brief start_selected_jobs thread routine.
  */
 DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
