@@ -32,7 +32,7 @@
  * the drive letter will cause UltraDefrag to defragment the disk.</dd>
  * <dt>-o, --optimize</dt>
  * <dd>Optimize the disk space by moving all files to the beginning of the disk.</dd>
- * <dt>--quick-optimize</dt>
+ * <dt>-q, --quick-optimize</dt>
  * <dd>Optimize the disk space by moving not fragmented files to the beginning of the disk.</dd>
  * <dt>-l, --list-available-volumes</dt>
  * <dd>List all disks available for defragmentation, except removable. Each line of the
@@ -92,7 +92,7 @@
  * <dt>--all-fixed</dt>
  * <dd>Process all disks except removable.</dd>
  * </dl>
- * Note that --all-fixed key has higher precedence, if both keys are specified
+ * Note that the --all-fixed key has higher precedence, if both keys are specified
  * UltraDefrag will process fixed drives only.
  *
  * Path:

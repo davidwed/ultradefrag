@@ -34,11 +34,11 @@ OPTIONS
 
         -o
                 fully optimize the drives
-                can not be used with the '-a' option
+                can not be used with the '-a' and '-q' option
 
-        --quick-optimize
+        -q, --quick-optimize
                 quick optimize the drives
-                can not be used with the '-a' option
+                can not be used with the '-a' and '-o' option
 
         {drive letter}:
                 one or more drives separated by spaces
@@ -70,10 +70,10 @@ EXAMPLES
         udefrag -a --all-fixed
                 Analyze all drives excluding removable ones
 
-        udefrag E: K: -o
+        udefrag -o E: K:
                 optimize drives E: and K:
 
-        udefrag O: Q: --quick-optimize
+        udefrag -q O: Q:
                 quick optimize drives O: and Q:
 
         udefrag C:\Windows\WindowsUpdate.log "C:\Program Files"
