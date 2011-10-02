@@ -59,7 +59,7 @@ EXAMPLES
                 terminate processing after 6 hours and 30 minutes
         
         set UD_LOG_FILE_PATH=C:\Windows\Temp\defrag_native.log
-                log debugging information to the specified file
+                save debugging information to the specified file
         
 AUTHOR
         Written by Ultradefrag Development Team

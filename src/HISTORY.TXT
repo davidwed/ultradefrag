@@ -15,6 +15,7 @@ HISTORY
     - MFT zone draw was adjusted to be more precise and correct
     - few bugs in cluster map redraw algorithm were fixed
     - few bugs in volume processing routines were fixed
+    - console interface help screen now includes examples
     - the following translations were added:
 
       Latin, Hebrew, Javanese, Indonesian (Bahasa Indonesia)
@@ -520,7 +521,7 @@ HISTORY
 
     - gui design was improved
     - two different driver versions (for NT4 and later systems) were replaced 
-      by one universal os version independent driver
+      by one universal OS version independent driver
     - installer was highly optimized
     - winx_fopen: a, a+ modes were added
 
