@@ -249,7 +249,7 @@ static void display_defrag_error(udefrag_job_type job_type, int error_code)
 	default:
 		break;
 	}
-	printf("\nVolume %s failed!\n\n",operation);
+	printf("\nDisk %s failed!\n\n",operation);
 	
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("%s\n\n",udefrag_get_error_description(error_code));
@@ -266,11 +266,11 @@ static void display_defrag_error(udefrag_job_type job_type, int error_code)
 static void display_invalid_volume_error(int error_code)
 {
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-	printf("The volume cannot be processed.\n\n");
+	printf("The disk cannot be processed.\n\n");
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 
 	if(error_code == UDEFRAG_UNKNOWN_ERROR){
-		printf("Volume is missing or some error has been encountered.\n");
+		printf("Disk is missing or some unknown error has been encountered.\n");
 		printf("Enable logs or use DbgView program to get more information.\n\n");
 	} else {
 		printf("%s\n\n",udefrag_get_error_description(error_code));
@@ -755,7 +755,7 @@ static int show_vollist(void)
 	double d = 0;
 
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-	printf("Volumes available for defragmentation:\n\n");
+	printf("Disks available for defragmentation:\n\n");
 
 	v = udefrag_get_vollist(la_flag ? FALSE : TRUE);
 	if(v == NULL){
@@ -767,8 +767,8 @@ static int show_vollist(void)
 		udefrag_bytes_to_hr((ULONGLONG)(v[i].total_space.QuadPart),2,s,sizeof(s));
 		/* conversion to LONGLONG is needed for Win DDK */
 		/* so, let's divide both numbers to make safe conversion then */
-		total = v->total_space.QuadPart / 2;
-		free = v->free_space.QuadPart / 2;
+		total = v[i].total_space.QuadPart / 2;
+		free = v[i].free_space.QuadPart / 2;
 		if(total > 0)
 			d = (double)(LONGLONG)free / (double)(LONGLONG)total;
 		percent = (int)(100 * d);
