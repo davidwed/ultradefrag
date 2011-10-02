@@ -88,7 +88,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
 	{0, L"BOOT_TIME_SCRIPT",         L"Boot time script",         NULL},
 
 	/* volume characteristics */
-	{0, L"VOLUME",                   L"Volume",                   NULL},
+	{0, L"VOLUME",                   L"Disk",                     NULL},
 	{0, L"STATUS",                   L"Status",                   NULL},
 	{0, L"TOTAL",                    L"Total Space",              NULL},
 	{0, L"FREE",                     L"Free Space",               NULL},

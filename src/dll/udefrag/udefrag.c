@@ -336,7 +336,7 @@ static DWORD WINAPI start_job(LPVOID p)
 	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
 	else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "quick optimizing";
 	else if(jp->job_type == MFT_OPTIMIZATION_JOB) action = "optimizing $mft on";
-	winx_dbg_print_header(0,0,"Start %s volume %c:",action,jp->volume_letter);
+	winx_dbg_print_header(0,0,"Start %s disk %c:",action,jp->volume_letter);
 	remove_fragmentation_reports(jp);
 	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
 	
@@ -568,8 +568,8 @@ char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
 		ip = 100; /* fix round off error */
 
 	(void)_snprintf(msg,MSG_LENGTH,
-			  "Volume information:\n\n"
-			  "  Volume size                  = %s\n"
+			  "Disk information:\n\n"
+			  "  Disk size                    = %s\n"
 			  "  Free space                   = %s\n\n"
 			  "  Total number of files        = %u\n"
 			  "  Number of fragmented files   = %u\n"
@@ -608,29 +608,29 @@ char *udefrag_get_error_description(int error_code)
 		return "Some unknown internal bug or some\n"
 		       "rarely arising error has been encountered.";
 	case UDEFRAG_FAT_OPTIMIZATION:
-		return "FAT volumes cannot be optimized\n"
+		return "FAT disks cannot be optimized\n"
 		       "because of unmovable directories.";
 	case UDEFRAG_W2K_4KB_CLUSTERS:
-		return "NTFS volumes with cluster size greater than 4 kb\n"
+		return "NTFS disks with cluster size greater than 4 kb\n"
 		       "cannot be defragmented on Windows 2000 and Windows NT 4.0";
 	case UDEFRAG_NO_MEM:
 		return "Not enough memory.";
 	case UDEFRAG_CDROM:
 		return "It is impossible to defragment CDROM drives.";
 	case UDEFRAG_REMOTE:
-		return "It is impossible to defragment remote volumes.";
+		return "It is impossible to defragment remote disks.";
 	case UDEFRAG_ASSIGNED_BY_SUBST:
-		return "It is impossible to defragment volumes\n"
+		return "It is impossible to defragment disks\n"
 		       "assigned by the \'subst\' command.";
 	case UDEFRAG_REMOVABLE:
-		return "You are trying to defragment a removable volume.\n"
-		       "If the volume type was wrongly identified, send\n"
+		return "You are trying to defragment a removable disk.\n"
+		       "If the disk type was wrongly identified, send\n"
 			   "a bug report to the author, thanks.";
 	case UDEFRAG_UDF_DEFRAG:
-		return "UDF volumes can neither be defragmented nor optimized,\n"
+		return "UDF disks can neither be defragmented nor optimized,\n"
 		       "because the file system driver does not support FSCTL_MOVE_FILE.";
 	case UDEFRAG_NO_MFT:
-		return "MFT can be optimized on NTFS volumes only.";
+		return "MFT can be optimized on NTFS disks only.";
 	case UDEFRAG_UNMOVABLE_MFT:
 		return "On NT4 and Windows 2000 MFT is not movable.";
 	}

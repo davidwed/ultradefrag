@@ -195,9 +195,9 @@ void ProcessVolume(char letter)
 	/* validate the volume before any processing */
 	status = udefrag_validate_volume(letter,FALSE);
 	if(status < 0){
-		winx_printf("\nThe %c: volume cannot be processed!\n",letter);
+		winx_printf("\nThe disk %c: cannot be processed!\n",letter);
 		if(status == UDEFRAG_UNKNOWN_ERROR)
-			winx_printf("Volume is missing or some error has been encountered.\n");
+			winx_printf("Disk is missing or some unknown error has been encountered.\n");
 		else
 			winx_printf("%s\n",udefrag_get_error_description(status));
 		return;
@@ -290,7 +290,7 @@ int udefrag_handler(int argc,short **argv,short **envp)
 	int result;
 	
 	if(argc < 2){
-		winx_printf("\nNo volume letter specified!\n\n");
+		winx_printf("\nNo drive letter specified!\n\n");
 		return (-1);
 	}
 	
@@ -357,7 +357,7 @@ int udefrag_handler(int argc,short **argv,short **envp)
 	
 	/* check whether volume letters are specified or not */
 	if(!n_letters && !all_flag && !all_fixed_flag && !paths){
-		winx_printf("\nNo volume letter specified!\n\n");
+		winx_printf("\nNo drive letter specified!\n\n");
 		return (-1);
 	}
 	

@@ -389,7 +389,7 @@ int CreateMainWindow(int nShowCmd)
 			hWindow,NULL,hInstance,NULL);
 	if(hList == NULL){
 		WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
-			"Cannot create volume list control!");
+			"Cannot create disk list control!");
 		return (-1);
 	}
 

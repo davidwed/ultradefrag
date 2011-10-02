@@ -201,15 +201,15 @@ static void DisplayInvalidVolumeError(int error_code)
 	char buffer[512];
 
 	if(error_code == UDEFRAG_UNKNOWN_ERROR){
-		MessageBoxA(NULL,"Volume is missing or some error has been encountered.\n"
+		MessageBoxA(NULL,"Disk is missing or some error has been encountered.\n"
 		                 "Enable logs or use DbgView program to get more information.",
-		                 "The volume cannot be processed!",MB_OK | MB_ICONHAND);
+		                 "The disk cannot be processed!",MB_OK | MB_ICONHAND);
 	} else {
 		(void)_snprintf(buffer,sizeof(buffer),"%s\n%s",
 				udefrag_get_error_description(error_code),
 				"Enable logs or use DbgView program to get more information.");
 		buffer[sizeof(buffer) - 1] = 0;
-		MessageBoxA(NULL,buffer,"The volume cannot be processed!",MB_OK | MB_ICONHAND);
+		MessageBoxA(NULL,buffer,"The disk cannot be processed!",MB_OK | MB_ICONHAND);
 	}
 }
 
@@ -221,14 +221,14 @@ static void DisplayInvalidVolumeError(int error_code)
 static void DisplayDefragError(int error_code)
 {
 	char buffer[512];
-	char *caption = "Volume optimization failed!";
+	char *caption = "Disk optimization failed!";
 	
 	switch(current_job->job_type){
 	case ANALYSIS_JOB:
-		caption = "Volume analysis failed!";
+		caption = "Disk analysis failed!";
 		break;
 	case DEFRAGMENTATION_JOB:
-		caption = "Volume defragmentation failed!";
+		caption = "Disk defragmentation failed!";
 		break;
 	default:
 		break;
@@ -387,16 +387,16 @@ void start_selected_jobs(udefrag_job_type job_type)
 {
 	DWORD id;
 	HANDLE h;
-	char *action = "volume analysis";
+	char *action = "disk analysis";
 
 	h = create_thread(StartJobsThreadProc,(LPVOID)(DWORD_PTR)job_type,&id);
 	if(h == NULL){
 		if(job_type == DEFRAGMENTATION_JOB)
-			action = "volume defragmentation";
+			action = "disk defragmentation";
 		else if(job_type == FULL_OPTIMIZATION_JOB)
-			action = "full volume optimization";
+			action = "full disk optimization";
 		else if(job_type == QUICK_OPTIMIZATION_JOB)
-			action = "quick volume optimization";
+			action = "quick disk optimization";
 		else if(job_type == MFT_OPTIMIZATION_JOB)
 			action = "MFT optimization";
 		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,

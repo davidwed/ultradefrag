@@ -67,7 +67,7 @@ char *help_message[] = {
 	"  shutdown      - halt the PC",
 	"  type          - display the contents of the boot script or",
     "                  the specified file",
-	"  udefrag       - list, analyze, defrag or optimize volumes",
+	"  udefrag       - list, analyze, defrag or optimize disks",
 	"",
 	"    For detailed information execute 'man {command}'.",
 	"",

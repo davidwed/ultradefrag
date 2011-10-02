@@ -169,7 +169,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
 	memset(&t,0,sizeof(winx_time));
 	(void)winx_get_local_time(&t);
 	(void)_snprintf(buffer,sizeof(buffer),
-		"-- UltraDefrag report for volume %c:\r\n\r\n"
+		"-- UltraDefrag report for disk %c:\r\n\r\n"
 		"format_version = 4\r\n\r\n"
 		"volume_letter = \"%c\"\r\n"
 		/*"current_time = \"%02i.%02i.%04i at %02i:%02i\"\r\n"*/
