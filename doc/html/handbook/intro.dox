@@ -12,6 +12,20 @@
 /**
  * @page Introduction Introduction
  *
+ * <h1>About disk fragmentation</h1>
+ * <h2>What is disk fragmentation</h2>
+ * <a href="http://en.wikipedia.org/wiki/File_system_fragmentation">Disk fragmentation</a>
+ * is generally described as files and free space being divided into separate chunks, which
+ * are scattered around the disk.
+ * This usually happens by deleting, truncating or extending files, which
+ * is done regularly during a files life.
+ *
+ * <h2>How to repair disk fragmentation</h2>
+ * <a href="http://en.wikipedia.org/wiki/Defragmentation">Defragmentation</a>
+ * is the process used to correct disk and file fragmentation by concatenating
+ * the files into one contiguous chunk and consolidating free space.
+ *
+ * <h1>About the software</h1>
  * UltraDefrag is the first open source disk defragmenter for
  * Windows which supports defragmentation of locked system files
  * by running during the Windows boot process. Actually all files
