@@ -160,9 +160,12 @@ static int get_free_space_layout(udefrag_job_parameters *jp)
 	jp->free_regions = winx_get_free_volume_regions(jp->volume_letter,
 		WINX_GVR_ALLOW_PARTIAL_SCAN,process_free_region,(void *)jp);
 	
-    DebugPrint("Free regions count: %u",jp->free_regions_count);
+    DebugPrint("free regions count: %u",jp->free_regions_count);
     
-	return (jp->free_regions != NULL) ? 0 : (-1);
+	/* let full disks to pass the analysis successfully */
+	if(jp->free_regions == NULL || jp->free_regions_count == 0)
+		DebugPrint("get_free_space_layout: disk is full or some error has been encountered");
+	return 0;
 }
 
 /**

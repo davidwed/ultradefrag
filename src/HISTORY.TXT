@@ -48,6 +48,7 @@ HISTORY
     - one little bug causing log file path truncation in GUI was fixed
     - one bug causing infinite loops in volume optimization was fixed
     - progress percentage calculation was improved
+    - volume analysis was allowed for full disks having no free space
     - Developers: winx_create_mutex, winx_open_mutex, winx_release_mutex,
       winx_destroy_mutex, winx_stristr functions added to zenwinx library
     - binary trees manipulation routines were added to zenwinx library;
