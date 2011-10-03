@@ -110,6 +110,9 @@ NT_STATUS_DESCRIPTION status_descriptions[] = {
 	/* A file cannot be opened because the share access flags are incompatible. */
 	{ STATUS_SHARING_VIOLATION,      "file is locked by another process"},
 	
+	/* A file cannot be moved because target clusters are in use. */
+	{ STATUS_ALREADY_COMMITTED,      "target clusters are already in use"},
+	
 	{ 0xffffffff,                    NULL                             }
 };
 
