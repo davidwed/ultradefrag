@@ -29,7 +29,7 @@
  * the files into one contiguous chunk and consolidating free space.
  * Disk defragmentaion eliminates the need to move drive's head from one file
  * fragment to another, so it reduces amount of mechanical work needed to 
- * access files on disk. So, it speed things up. 
+ * access files on disk. So, it speeds things up. 
  *
  * <h1>About the software</h1>
  * UltraDefrag is the first open source disk defragmenter for
