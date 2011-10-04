@@ -19,6 +19,21 @@
 :: Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ::
 
+:: check for administrative rights
+for /f "tokens=2 delims=[" %%V in ('ver') do set test=%%V
+for /f "tokens=2" %%V in ('echo %test%') do set test1=%%V
+for /f "tokens=1,2 delims=." %%V in ('echo %test1%') do set OSversion=%%V.%%W
+
+if %OSversion% LSS 6.0 goto :IsAdmin
+
+if /i %USERNAME% == Administrator goto :IsAdmin
+if not defined SESSIONNAME goto :IsAdmin
+
+echo.
+echo This script must be run by the Administrator !!!
+goto :quit
+
+:IsAdmin
 cd /D %~dp0
 
 rem For Windows XP x64 Edition we need to force notepad.
