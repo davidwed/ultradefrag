@@ -333,6 +333,9 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
 		}
 	
 move_mft:		
+		/* release temporary allocated space ! */
+		release_temp_space_regions(jp);
+		
 		/* target_rgn points to the target free region, so let's move the next portion of $mft */
 		if(target_rgn == NULL) break;
 		n = clusters_to_move = min(clusters_to_process,target_rgn->length);
