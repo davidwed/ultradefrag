@@ -33,7 +33,7 @@ rmdir /s /q .\src_package
 mkdir .\src_package
 
 :: set SRC_PKG_PATH pointing to directory one level above the current directory
-set SRC_PKG_PATH=..\src_package\ultradefrag-%ULTRADFGVER%
+set SRC_PKG_PATH=..\src_package\ultradefrag-%UDVERSION_SUFFIX%
 rmdir /s /q ..\src_package
 mkdir ..\src_package
 
@@ -46,9 +46,9 @@ xcopy /I /Y /Q /S ..\doc\html\handbook    %SRC_PKG_PATH%\doc\html\handbook
 :: make source code package
 cd ..\src_package
 REM zip -r -m -9 -X ultradefrag-%ULTRADFGVER%.src.zip .
-"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-%ULTRADFGVER%.src.7z * || exit /B 1
-rd /s /q ultradefrag-%ULTRADFGVER%
+"%SEVENZIP_PATH%\7z.exe" a -r -mx9 ultradefrag-%UDVERSION_SUFFIX%.src.7z * || exit /B 1
+rd /s /q ultradefrag-%UDVERSION_SUFFIX%
 cd ..\src
-move /Y ..\src_package\ultradefrag-%ULTRADFGVER%.src.7z .\src_package\
+move /Y ..\src_package\ultradefrag-%UDVERSION_SUFFIX%.src.7z .\src_package\
 rmdir /s /q ..\src_package
 exit /B 0

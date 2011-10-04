@@ -25,23 +25,23 @@ rd /s /q release
 mkdir release
 
 call build-src-package.cmd || goto build_failed
-copy .\src_package\ultradefrag-%ULTRADFGVER%.src.7z .\release\
+copy .\src_package\ultradefrag-%UDVERSION_SUFFIX%.src.7z .\release\
 
 call build.cmd --all --use-winddk || goto build_failed
 
 :: copy all packages to the release directory
-copy .\bin\ultradefrag-%ULTRADFGVER%.bin.i386.exe .\release\
-copy .\bin\amd64\ultradefrag-%ULTRADFGVER%.bin.amd64.exe .\release\
-copy .\bin\ia64\ultradefrag-%ULTRADFGVER%.bin.ia64.exe .\release\
+copy .\bin\ultradefrag-%UDVERSION_SUFFIX%.bin.i386.exe .\release\
+copy .\bin\amd64\ultradefrag-%UDVERSION_SUFFIX%.bin.amd64.exe .\release\
+copy .\bin\ia64\ultradefrag-%UDVERSION_SUFFIX%.bin.ia64.exe .\release\
 
-copy .\bin\ultradefrag-portable-%ULTRADFGVER%.bin.i386.zip .\release\
-copy .\bin\amd64\ultradefrag-portable-%ULTRADFGVER%.bin.amd64.zip .\release\
-copy .\bin\ia64\ultradefrag-portable-%ULTRADFGVER%.bin.ia64.zip .\release\
+copy .\bin\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.i386.zip .\release\
+copy .\bin\amd64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.amd64.zip .\release\
+copy .\bin\ia64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.ia64.zip .\release\
 
 cd release
-..\tools\md5sum ultradefrag-%ULTRADFGVER%.bin.* > ultradefrag-%ULTRADFGVER%.MD5SUMS
-..\tools\md5sum ultradefrag-portable-%ULTRADFGVER%.bin.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
-..\tools\md5sum ultradefrag-%ULTRADFGVER%.src.* >> ultradefrag-%ULTRADFGVER%.MD5SUMS
+..\tools\md5sum ultradefrag-%UDVERSION_SUFFIX%.bin.* > ultradefrag-%UDVERSION_SUFFIX%.MD5SUMS
+..\tools\md5sum ultradefrag-portable-%UDVERSION_SUFFIX%.bin.* >> ultradefrag-%UDVERSION_SUFFIX%.MD5SUMS
+..\tools\md5sum ultradefrag-%UDVERSION_SUFFIX%.src.* >> ultradefrag-%UDVERSION_SUFFIX%.MD5SUMS
 cd ..
 
 echo.

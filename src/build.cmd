@@ -95,14 +95,20 @@ rem Sets environment for the build process.
 
 	echo #define VERSION %VERSION% > .\include\ultradfgver.h
 	echo #define VERSION2 %VERSION2% >> .\include\ultradfgver.h
-	echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER%" >> .\include\ultradfgver.h
-	echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\include\ultradfgver.h
-	echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
+	if "%RELEASE_STAGE%" neq "" (
+		echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER% %RELEASE_STAGE%" >> .\include\ultradfgver.h
+		echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% %RELEASE_STAGE% Portable" >> .\include\ultradfgver.h
+		echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER% %RELEASE_STAGE%" >> .\include\ultradfgver.h
+	) else (
+		echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER%" >> .\include\ultradfgver.h
+		echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\include\ultradfgver.h
+		echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\ultradfgver.h
+	)
     
     rem remove preview menu for release candidates
-    if %UD_BLD_FLG_BUILD_STAGE% EQU 4 echo #define _UD_HIDE_PREVIEW_ >> .\include\ultradfgver.h
+	if "%RELEASE_CANDIDATE%" neq "" echo #define _UD_HIDE_PREVIEW_ >> .\include\ultradfgver.h
     rem remove preview menu for final release
-    if %UD_BLD_FLG_IS_PRE_RELEASE% EQU 0 echo #define _UD_HIDE_PREVIEW_ >> .\include\ultradfgver.h
+    if "%RELEASE_STAGE%" equ "" echo #define _UD_HIDE_PREVIEW_ >> .\include\ultradfgver.h
 
 	rem force zenwinx version to be the same as ultradefrag version
 	echo #define ZENWINX_VERSION %VERSION% > .\dll\zenwinx\zenwinxver.h
@@ -123,6 +129,7 @@ rem Example:  call :build_installer .\bin\ia64 ia64
 		popd
 		exit /B 1
 	)
+	ren ultradefrag-%ULTRADFGVER%.bin.%2.exe ultradefrag-%UDVERSION_SUFFIX%.bin.%2.exe
 	popd
 exit /B 0
 
@@ -132,7 +139,7 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
 	if %UD_BLD_FLG_BUILD_ALL% neq 1 if "%UDEFRAG_PORTABLE%" equ "" exit /B 0
 	
 	pushd %1
-	set PORTABLE_DIR=ultradefrag-portable-%ULTRADFGVER%.%2
+	set PORTABLE_DIR=ultradefrag-portable-%UDVERSION_SUFFIX%.%2
 	mkdir %PORTABLE_DIR%
 	copy /Y "%~dp0\CREDITS.TXT" %PORTABLE_DIR%\
 	copy /Y "%~dp0\HISTORY.TXT" %PORTABLE_DIR%\
@@ -159,7 +166,7 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
 	copy /Y "%~dp0\gui\i18n\*.lng"           %PORTABLE_DIR%\i18n\
 	copy /Y "%~dp0\gui\i18n\*.template"      %PORTABLE_DIR%\i18n\
 	rem zip -r -m -9 -X ultradefrag-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
-	"%SEVENZIP_PATH%\7z.exe" a -r -mx9 -tzip ultradefrag-portable-%ULTRADFGVER%.bin.%2.zip %PORTABLE_DIR%
+	"%SEVENZIP_PATH%\7z.exe" a -r -mx9 -tzip ultradefrag-portable-%UDVERSION_SUFFIX%.bin.%2.zip %PORTABLE_DIR%
 	if %errorlevel% neq 0 (
 		rd /s /q %PORTABLE_DIR%
 		set PORTABLE_DIR=
@@ -191,7 +198,7 @@ rem Installs the program.
     set INSTALLER_NAME=ultradefrag
 
 	echo Start installer...
-	%INSTALLER_PATH%\%INSTALLER_NAME%-%ULTRADFGVER%.bin.%INSTALLER_ARCH%.exe /S
+	%INSTALLER_PATH%\%INSTALLER_NAME%-%UDVERSION_SUFFIX%.bin.%INSTALLER_ARCH%.exe /S
 	if %errorlevel% neq 0 (
 		echo Install error!
 		endlocal

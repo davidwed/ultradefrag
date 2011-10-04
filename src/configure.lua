@@ -41,6 +41,7 @@ iup.SetLanguage("ENGLISH")
 -- initialize parameters
 apply_patch = 0
 udver = ""
+stage = ""
 mingwbase = ""
 nsisroot = ""
 ziproot = ""
@@ -69,6 +70,7 @@ for line in io.lines("./SETVARS.CMD") do
 		-- print(k, v)
 		-- f:write(k,"=",v,"\n")
 		if string.find(k, "ULTRADFGVER") then udver = v
+		elseif string.find(k, "RELEASE_STAGE") then stage = v
 		elseif string.find(k, "WINDDKBASE") then ddkbase = v
 		elseif string.find(k, "MINGWBASE") then mingwbase = v
 		elseif string.find(k, "NSISDIR") then nsisroot = v
@@ -107,18 +109,19 @@ function param_action(dialog, param_index)
 		}
 		dialog.icon = icon
 		if show_obsolete_options == 1 then
-			dialog.size = "400x205"
+			dialog.size = "400x218"
 		else
-			dialog.size = "370x160"
+			dialog.size = "370x173"
 		end
 	end
 	return 1
 end
 
 if show_obsolete_options == 1 then
-	ret, udver, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, mingw64base, winsdkbase, rosinc, apply_patch = 
+	ret, udver, stage, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, mingw64base, winsdkbase, rosinc, apply_patch = 
 		iup.GetParam("UltraDefrag build configurator",param_action,
 			"UltraDefrag version: %s\n"..
+			"Release stage (alpha1, beta2, rc3, final): %s\n".. 
 			"MinGW path: %s\n"..
 			"NSIS path: %s\n"..
 			"7-Zip path: %s\n"..
@@ -128,19 +131,20 @@ if show_obsolete_options == 1 then
 			"Windows SDK base path: %s\n"..
 			"ReactOS include path: %s\n"..
 			"Apply patch to MinGW: %b[No,Yes]\n",
-			udver, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, mingw64base, winsdkbase, rosinc, apply_patch
+			udver, stage, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, mingw64base, winsdkbase, rosinc, apply_patch
 			)
 else
-	ret, udver, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, apply_patch = 
+	ret, udver, stage, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, apply_patch = 
 		iup.GetParam("UltraDefrag build configurator",param_action,
 			"UltraDefrag version: %s\n"..
+			"Release stage (alpha1, beta2, rc3, final): %s\n".. 
 			"MinGW path: %s\n"..
 			"NSIS path: %s\n"..
 			"7-Zip path: %s\n"..
 			"Windows Server 2003 DDK path: %s\n"..
 			"MS Visual Studio 6.0 /bin path: %s\n"..
 			"Apply patch to MinGW: %b[No,Yes]\n",
-			udver, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, apply_patch
+			udver, stage, mingwbase, nsisroot, ziproot, ddkbase, vsbinpath, apply_patch
 			)
 end
 if ret == 1 then
@@ -152,6 +156,19 @@ if ret == 1 then
 		f:write("set VERSION2=\"", i, ", ", j, ", ", k, ", 0\\0\"\n")
 	end
 	f:write("set ULTRADFGVER=", udver, "\n")
+	if stage == "final" then
+		-- set variable for pre-release stages only
+		f:write("set RELEASE_STAGE=\n")
+		f:write("set UDVERSION_SUFFIX=", udver, "\n")
+	else
+		f:write("set RELEASE_STAGE=", stage, "\n")
+		f:write("set UDVERSION_SUFFIX=", udver, "-", stage, "\n")
+	end
+	if string.find(stage, "[Rr][Cc]") then
+		f:write("set RELEASE_CANDIDATE=1\n")
+	else
+		f:write("set RELEASE_CANDIDATE=0\n")
+	end
 	f:write("set WINDDKBASE=", ddkbase, "\n")
 	f:write("set WINSDKBASE=", winsdkbase, "\n")
 	f:write("set MINGWBASE=", mingwbase, "\n")
