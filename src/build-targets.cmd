@@ -42,7 +42,7 @@ rem of Windows.
 
 call ParseCommandLine.cmd %*
 
-:: make all directories required to store target binaries
+:: create all directories required to store target binaries
 mkdir lib
 mkdir lib\amd64
 mkdir lib\ia64
@@ -84,6 +84,15 @@ if %UD_BLD_FLG_USE_COMPILER% equ 0 (
 	goto mingw_build
 )
 
+:: check if we are using WDK 6 and above
+for /d %%D in ( "%WINDDKBASE%" ) do set UD_DDK_NAME=%%~nD
+set UD_DDK_VER=%UD_DDK_NAME:~0,4%
+echo UD_DDK_VER set to "%UD_DDK_VER%"... 
+
+:: disable __ftol2_see error for WDK 6 and above
+:: TODO cast (float) to (__int64) to (long)
+if %UD_DDK_VER% NEQ 3790 set CL=/QIfist %CL%
+
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK%  goto ddk_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MSVC%    goto msvc_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW%   goto mingw_build
@@ -109,15 +118,18 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 	)
     
     set path=%OLD_PATH%
+    set DDKBUILDENV=
 	
 	if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
 		echo --------- Target is x64 ---------
 		set IA64=
 		pushd ..
-		rem WDK 7 uses x64 instead of AMD64,
-		rem so setenv.bat of WDK 7 must be changed to support AMD64 switch
-		rem call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre x64 WNET
-		call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre AMD64 WNET
+		rem WDK 6 and above use x64 instead of AMD64
+        if %UD_DDK_VER% NEQ 3790 (
+            call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre x64 WNET
+        ) else (
+            call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre AMD64 WNET
+        )
 		popd
 		set BUILD_DEFAULT=-nmake -i -g -P
 		set UDEFRAG_LIB_PATH=..\..\lib\amd64
@@ -125,6 +137,7 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 	)
     
     set path=%OLD_PATH%
+    set DDKBUILDENV=
 	
 	if %UD_BLD_FLG_BUILD_IA64% neq 0 (
 		echo --------- Target is ia64 ---------
@@ -139,6 +152,7 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
     
     set path=%OLD_PATH%
 	set OLD_PATH=
+    set DDKBUILDENV=
 	
 exit /B 0
 
@@ -242,6 +256,8 @@ exit /B 0
 :: Builds all UltraDefrag modules
 :: Example: call :build_modules X86
 :build_modules
+	rem workaround for WDK 6 and above
+	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=1
 
 	rem update manifests
 	call make-manifests.cmd %1 || exit /B 1
@@ -273,16 +289,11 @@ exit /B 0
 		cd ..\native
 		%UD_BUILD_TOOL% defrag_native.build || goto fail
 	)
-	rem workaround for WDK 7
-	rem set IGNORE_LINKLIB_ABUSE=1
 	cd ..\lua5.1
 	%UD_BUILD_TOOL% lua5.1a_dll.build || goto fail
-	rem set IGNORE_LINKLIB_ABUSE=
 	%UD_BUILD_TOOL% lua5.1a_exe.build || goto fail
 	%UD_BUILD_TOOL% lua5.1a_gui.build || goto fail
 
-	rem workaround for WDK 7
-	rem set IGNORE_LINKLIB_ABUSE=1
 	cd ..\wgx
 	%UD_BUILD_TOOL% wgx.build ||  goto fail
 
@@ -294,18 +305,19 @@ exit /B 0
 	cd ..\console
 	%UD_BUILD_TOOL% defrag.build || goto fail
 
-	rem set IGNORE_LINKLIB_ABUSE=
 	cd ..\gui
 	%UD_BUILD_TOOL% ultradefrag.build && goto success
 
 	:fail
-	rem workaround for WDK 7
-	rem set IGNORE_LINKLIB_ABUSE=
+	rem workaround for WDK 6 and above
+	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=
 	set UD_BUILD_TOOL=
 	popd
 	exit /B 1
 	
 	:success
+	rem workaround for WDK 6 and above
+	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=
 	set UD_BUILD_TOOL=
 	popd
 
