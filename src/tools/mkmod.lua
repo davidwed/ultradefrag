@@ -142,8 +142,9 @@ function produce_ddk_makefile()
 		f:write("USE_NTDLL=1\n\n")
         
         -- workaround for WDK 7
-        -- f:write("MINWIN_SDK_LIB_PATH=\$(SDK_LIB_PATH)\n")
-        -- f:write("USER_C_FLAGS=\$(USER_C_FLAGS) /QIfist\n")
+        if os.getenv("UD_DDK_VER") == "7600" then
+            f:write("MINWIN_SDK_LIB_PATH=\$(SDK_LIB_PATH)\n")
+        end
 	end
 	if target_type == "dll" then
 		if nativedll == 1 then

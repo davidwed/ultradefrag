@@ -104,7 +104,7 @@ void RedrawProgress(udefrag_progress_info *pi)
 		break;
 	}
 	if(pi->completion_status == 0 || abort_flag){
-		p1 = (int)(pi->percentage * 100.00);
+		p1 = (int)(__int64)(pi->percentage * 100.00);
 		p2 = p1 % 100;
 		p1 = p1 / 100;
 	} else {

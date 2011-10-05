@@ -91,7 +91,7 @@ echo UD_DDK_VER set to "%UD_DDK_VER%"...
 
 :: disable __ftol2_see error for WDK 6 and above
 :: TODO cast (float) to (__int64) to (long)
-if %UD_DDK_VER% NEQ 3790 set CL=/QIfist %CL%
+:: if %UD_DDK_VER% NEQ 3790 set CL=/QIfist %CL%
 
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK%  goto ddk_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MSVC%    goto msvc_build
