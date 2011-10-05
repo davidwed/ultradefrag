@@ -35,28 +35,24 @@ echo      1 ... Clean Project Folder
 echo      2 ... Build with Defaults
 echo      3 ... Build with Defaults and Install
 echo.
-echo      4 ... Build alpha Release
-echo      5 ... Build beta Release
-echo      6 ... Build beta Release Installer
-echo      7 ... Build Release Candidate
-echo      8 ... Build Release
+echo      4 ... Build Release
 echo.
-echo      9 ... Build .................. using WinDDK, no IA64
-echo     10 ... Build Portable ......... using WinDDK, no IA64
-echo     11 ... Build Docs
+echo      5 ... Build .................. using WinDDK, no IA64
+echo      6 ... Build Portable ......... using WinDDK, no IA64
+echo      7 ... Build Docs
 echo.
-echo     12 ... Build .................. with Custom Switches
-echo     13 ... Build Portable ......... with Custom Switches
+echo      8 ... Build .................. with Custom Switches
+echo      9 ... Build Portable ......... with Custom Switches
 echo.
-echo     14 ... Build Test Release for Stefan
-echo     15 ... Build Test Installation for Stefan
-echo     16 ... Build Test AMD64 for Stefan
-echo     17 ... Build Test x86 for Stefan
+echo     10 ... Build Test Release for Stefan
+echo     11 ... Build Test Installation for Stefan
+echo     12 ... Build Test AMD64 for Stefan
+echo     13 ... Build Test x86 for Stefan
 echo.
 echo      0 ... EXIT
 
 :: this value holds the number of the last menu entry
-set UD_BLD_MENU_MAX_ENTRIES=17
+set UD_BLD_MENU_MAX_ENTRIES=13
 
 :AskSelection
 echo.
@@ -89,46 +85,26 @@ call build.cmd --install
 goto finished
 
 :4
-title Build alpha Release
-call build-pre-release.cmd --alpha
-goto finished
-
-:5
-title Build beta Release
-call build-pre-release.cmd --beta
-goto finished
-
-:6
-title Build beta Release Installer
-call build-pre-release.cmd --betai
-goto finished
-
-:7
-title Build Release Candidate
-call build-pre-release.cmd --rc
-goto finished
-
-:8
 title Build Release
 call build-release.cmd
 goto finished
 
-:9
+:5
 title Build .................. using WinDDK, no IA64
 call build.cmd --use-winddk --no-ia64
 goto finished
 
-:10
+:6
 title Build Portable ......... using WinDDK, no IA64
 call build.cmd --portable --use-winddk --no-ia64
 goto finished
 
-:11
+:7
 title Build Docs
 call build-docs.cmd
 goto finished
 
-:12
+:8
 title Build .................. with Custom Switches
 cls
 echo.
@@ -141,7 +117,7 @@ echo.
 call build.cmd %UD_BLD_MENU_SWITCH%
 goto finished
 
-:13
+:9
 title Build Portable ......... with Custom Switches
 cls
 echo.
@@ -154,79 +130,74 @@ echo.
 call build.cmd --portable %UD_BLD_MENU_SWITCH%
 goto finished
 
-:14
+:10
 title Build Test Release for Stefan
 echo.
-set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
-if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=betai
-
-call build-pre-release.cmd --no-ia64 --%UD_BLD_PRE_RELEASE_TYPE%
+call build.cmd --use-winddk --no-ia64
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
-copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*"        "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ia64\ultradefrag-*.bin.ia64.*"   "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\amd64\ultradefrag-*.bin.amd64.*" "%USERPROFILE%\Downloads\UltraDefrag"
 set old_file=X
-for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip14
+for %%F in ( "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*" ) do set old_file=%%~nxF
+if "%old_file%" == "X" goto :skip10
 set new_file=%old_file:i386=x86%
 move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip14
+:skip10
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
 goto finished
 
-:15
+:11
 title Build Test Installation for Stefan
 echo.
-set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
-if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=betai
-
-call build-pre-release.cmd --no-ia64 --no-x86 --install --%UD_BLD_PRE_RELEASE_TYPE%
+if %PROCESSOR_ARCHITECTURE% == AMD64 call build.cmd --use-winddk --no-ia64 --no-x86 --install
+if %PROCESSOR_ARCHITECTURE% == x86 call build.cmd --use-winddk --no-ia64 --no-amd64 --install
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
 goto finished
 
-:16
+:12
 title Build Test AMD64 for Stefan
 echo.
-set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
-if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=betai
-
-call build-pre-release.cmd --no-ia64 --no-x86 --%UD_BLD_PRE_RELEASE_TYPE%
+call build.cmd --use-winddk --no-ia64 --no-x86
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
-copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*"        "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ia64\ultradefrag-*.bin.ia64.*"   "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\amd64\ultradefrag-*.bin.amd64.*" "%USERPROFILE%\Downloads\UltraDefrag"
 set old_file=X
-for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip16
+for %%F in ( "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*" ) do set old_file=%%~nxF
+if "%old_file%" == "X" goto :skip12
 set new_file=%old_file:i386=x86%
 move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip16
+:skip12
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean
 goto finished
 
-:17
+:13
 title Build Test x86 for Stefan
 echo.
-set /P UD_BLD_PRE_RELEASE_TYPE="Enter Release Type (alpha,beta,[betai],rc): "
-if "%UD_BLD_PRE_RELEASE_TYPE%" == "" set UD_BLD_PRE_RELEASE_TYPE=betai
-
-call build-pre-release.cmd --no-ia64 --no-amd64 --%UD_BLD_PRE_RELEASE_TYPE%
+call build.cmd --use-winddk --no-ia64 --no-amd64
 echo.
 if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
 echo.
-copy /b /y /v "%UD_BLD_MENU_DIR%\pre-release\*.*" "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*"        "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ia64\ultradefrag-*.bin.ia64.*"   "%USERPROFILE%\Downloads\UltraDefrag"
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\amd64\ultradefrag-*.bin.amd64.*" "%USERPROFILE%\Downloads\UltraDefrag"
 set old_file=X
-for %%F in ( "%UD_BLD_MENU_DIR%\pre-release\*i386*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip17
+for %%F in ( "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*" ) do set old_file=%%~nxF
+if "%old_file%" == "X" goto :skip13
 set new_file=%old_file:i386=x86%
 move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip17
+:skip13
 echo.
 cd /d %UD_BLD_MENU_DIR%
 call build.cmd --clean

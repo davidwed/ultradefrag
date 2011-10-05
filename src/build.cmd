@@ -229,10 +229,7 @@ rem by removing all intermediate files.
 	rd /s /q ..\doc\html\handbook\doxy-defaults
 	rd /s /q src_package
 	rd /s /q ..\src_package
-    if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 (
-        rd /s /q pre-release
-        rd /s /q release
-    )
+    if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 rd /s /q release
 	echo Done.
 goto :EOF
 
@@ -253,7 +250,7 @@ rem Displays usage information.
 	echo --use-msvc      (the fastest compilation)
 	echo --use-mingw-x64 (experimental, produces wrong x64 code)
 	echo.
-	echo Target architecture:
+	echo Target architecture (must always be after compiler):
 	echo --no-x86        skip build of 32-bit binaries
 	echo --no-amd64      skip build of x64 binaries
 	echo --no-ia64       skip build of IA-64 binaries
