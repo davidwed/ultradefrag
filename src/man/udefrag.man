@@ -27,11 +27,6 @@ OPTIONS
                 can not be used with the '-o' and --quick-optimize
                 option
 
-        -r, --repeat
-                repeat defragmentation or optimization until there is
-                nothing left that can be moved, this will process the
-                volume multiple times in a row
-
         -o
                 fully optimize the drives
                 can not be used with the '-a' and '-q' option
@@ -39,6 +34,14 @@ OPTIONS
         -q, --quick-optimize
                 quick optimize the drives
                 can not be used with the '-a' and '-o' option
+
+        --optimize-mft
+                concatenate the MFT into one single chunk
+
+        -r, --repeat
+                repeat defragmentation or optimization until there is
+                nothing left that can be moved, this will process the
+                volume multiple times in a row
 
         {drive letter}:
                 one or more drives separated by spaces
@@ -73,8 +76,8 @@ EXAMPLES
         udefrag -o E: K:
                 optimize drives E: and K:
 
-        udefrag -q O: Q:
-                quick optimize drives O: and Q:
+        udefrag --optimize-mft O: Q:
+                optimize the MFT of drives O: and Q:
 
         udefrag C:\Windows\WindowsUpdate.log "C:\Program Files"
                 defragment the specified file and folder

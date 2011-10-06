@@ -20,18 +20,20 @@
  * <b>Action</b>
  * </td><td>
  * <dl>
- * <dt>Analyze (F5)</dt>
- * <dd>@htmlonly <img src="Analysis.png"> @endhtmlonly This analyzes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
- * <dt>Defragment (F6)</dt>
- * <dd>@htmlonly <img src="Defragment.png"> @endhtmlonly This defragments the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
- * <dt>Quick optimization (F7)</dt>
- * <dd>@htmlonly <img src="QuickOptimize.png"> @endhtmlonly This optimizes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
- * <dt>Full optimization (Ctrl+F7)</dt>
- * <dd>@htmlonly <img src="FullOptimize.png"> @endhtmlonly This is similar to the quick optimization, but moves all files from the beginning to the end of the disk first.</dd>
- * <dt>Stop (Ctrl+C)</dt>
- * <dd>@htmlonly <img src="Stop.png"> @endhtmlonly This aborts the currently running process at any stage, currently pending move operations will be completed to avoid corruption.</dd>
- * <dt>Repeat action (Shift+R)</dt>
- * <dd>@htmlonly <img src="Repeat.png"> @endhtmlonly If this is set, the current operation will be repeated multiple times in a row. This allows processing as many files as possible.</dd>
+ * <dt>@htmlonly <img src="Analysis.png"> @endhtmlonly Analyze (F5)</dt>
+ * <dd>This analyzes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dt>@htmlonly <img src="Defragment.png"> @endhtmlonly Defragment (F6)</dt>
+ * <dd>This defragments the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dt>@htmlonly <img src="QuickOptimize.png"> @endhtmlonly Quick optimization (F7)</dt>
+ * <dd>This optimizes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dt>@htmlonly <img src="FullOptimize.png"> @endhtmlonly Full optimization (Ctrl+F7)</dt>
+ * <dd>This is similar to the quick optimization, but moves all files from the beginning to the end of the disk first.</dd>
+ * <dt>@htmlonly <img src="OptimizeMFT.png"> @endhtmlonly Optimize MFT (Shit+F7)</dt>
+ * <dd>This concatenates the MFT into one single chunk.</dd>
+ * <dt>@htmlonly <img src="Stop.png"> @endhtmlonly Stop (Ctrl+C)</dt>
+ * <dd>This aborts the currently running process at any stage, currently pending move operations will be completed to avoid corruption.</dd>
+ * <dt>@htmlonly <img src="Repeat.png"> @endhtmlonly Repeat action (Shift+R)</dt>
+ * <dd>If this is set, the current operation will be repeated multiple times in a row. This allows processing as many files as possible.</dd>
  * <dt>Skip removable media (Ctrl+M)</dt>
  * <dd>If this is checked, disks located on removable drives are not included in the disk list.</dd>
  * <dt>Rescan drives (Ctrl+D)</dt>
@@ -46,8 +48,8 @@
  * <b>Report</b>
  * </td><td>
  * <dl>
- * <dt>Show report (F8)</dt>
- * <dd>@htmlonly <img src="Report.png"> @endhtmlonly This displays the report generated for the selected disk(s).</dd>
+ * <dt>@htmlonly <img src="Report.png"> @endhtmlonly Show report (F8)</dt>
+ * <dd>This displays the report generated for the selected disk(s).</dd>
  * </dl>
  * </td></tr><tr><td>
  * <b>Settings</b>
@@ -57,11 +59,21 @@
  * <dd>This allows selecting the displayed language and to open the <b>Translations folder</b>,
  * which contains the <b>translation.template</b> and all language files.</dd>
  * <dt>Graphical interface</dt>
- * <dd>This allows selecting the <b>Font (F9)</b> and changing the <b>Options (F10)</b> @htmlonly <img src="Options.png"> @endhtmlonly.<br/>
- * Usually the font must be changed only, if the contents of the disk list are not displayed correctly.</dd>
+ * <dd><dl>
+ * <dt>Font (F9)</dt>
+ * <dd>Usually the font must be changed only, if the contents of the disk list are not displayed correctly.</dd>
+ * <dt>@htmlonly <img src="Options.png"> @endhtmlonly Options (F10)</dt>
+ * <dd>This will open a text editor window with the script loaded mentioned in the section <b>Configuring</b> below,
+ * which allows you to change the look and feel of the window as well as the behaviour of the actions.</dd>
+ * </dl></dd>
  * <dt>Boot time scan (Disabled for portable editions)</dt>
- * <dd>This allows to enable boot time scan by checking <b>Enable (F11)</b> @htmlonly <img src="BootTimeScan.png"> @endhtmlonly
- * and to edit the boot time script by selecting <b>Script (F12)</b> @htmlonly <img src="BootTimeScript.png"> @endhtmlonly.</dd>
+ * <dd><dl>
+ * <dt>@htmlonly <img src="BootTimeScan.png"> @endhtmlonly Enable (F11)</dt>
+ * <dd>This enables or disables the boot time processing.</dd>
+ * <dt>@htmlonly <img src="BootTimeScript.png"> @endhtmlonly Script (F12)</dt>
+ * <dd>This opens a text editor window with the script loaded mentioned in the chapter @ref Boot,
+ * which allows changing the way the boot time processing behaves.</dd>
+ * </dl></dd>
  * <dt>Reports (Ctrl+R)</dt>
  * <dd>This allows changing the look of the reports.</dd>
  * </dl>
@@ -69,8 +81,8 @@
  * <b>Help</b>
  * </td><td>
  * <dl>
- * <dt>Contents (F1)</dt>
- * <dd>@htmlonly <img src="Help.png"> @endhtmlonly This launches the handbook you are currently reading.</dd>
+ * <dt>@htmlonly <img src="Help.png"> @endhtmlonly Contents (F1)</dt>
+ * <dd>This launches the handbook you are currently reading.</dd>
  * <dt>Best practice (F2)</dt>
  * <dd>This launches the <b>Tips and Tricks</b> section of this handbook.</dd>
  * <dt>FAQ (F3)</dt>
