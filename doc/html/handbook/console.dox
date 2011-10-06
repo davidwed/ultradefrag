@@ -159,8 +159,8 @@
  * will be applied both to temporary folders and to Internet Explorer's cache.
  *
  * Note that files excluded by filters are always shown as not fragmented
- * on the cluster map. Because trash is unimportant anyway and it should not take
- * our attention.
+ * on the cluster map. Because files affecting system performance only 
+ * should take our attention.
  *
  * <h1>Examples</h1>
  * <dl>

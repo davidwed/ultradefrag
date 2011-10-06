@@ -160,8 +160,8 @@
  * Gray is indicating unused map blocks, because the map is bigger than the number of available clusters.
  *
  * Note that files excluded from the defragmentation process
- * are never treated as fragmented. Because trash should not
- * get our attention.
+ * are never treated as fragmented. Because files affecting system performance 
+ * only should get our attention.
  *
  * Due to the way the amount of clusters per map block is calculated, it can happen
  * that the last block represents much more clusters than the other ones.
