@@ -28,10 +28,12 @@
 #include "ntfs.h"
 
 /*
-* TODO: sdd data consistency checks everywhere,
-* because NTFS volumes often have invalid
-* data in MFT entries.
+* Uncomment this definition to test
+* NTFS scanner by corrupting MFT records
+* in random order. The scanner should
+* catch all errors and never hang/crash.
 */
+//#define TEST_NTFS_SCANNER
 
 /* internal structures */
 typedef struct _mft_layout {
@@ -93,6 +95,50 @@ static winx_file_info * find_filelist_entry(short *attr_name,mft_scan_parameters
 
 /*
 **************************************************
+*                Test suite
+**************************************************
+*/
+
+#ifdef TEST_NTFS_SCANNER
+
+/* a simple pseudo-random number generator */
+long r = 1;
+
+static void srnd(long x)
+{
+	r = x;
+}
+
+/* generates numbers in range 0 - 32767 */
+static long rnd(void)
+{
+	return(((r = r * 214013 + 2531011) >> 16) & 0x7fff);
+}
+
+/* corrupts file record in random order */
+static void randomize_file_record_data(char *record, unsigned long size)
+{
+	long factors[] = { 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024 };
+	long factor, i;
+	
+	/* randomize a half of records */
+	if(rnd() % 2) return;
+	
+	/* set amount of data to be corrupted */
+	i = rnd() % (sizeof(factors) / sizeof(long));
+	factor = factors[i];
+	
+	/* randomize data, skip FileReferenceNumber and FileRecordLength */
+	for(i = sizeof(ULONGLONG) + sizeof(ULONG); i < size; i++){
+		if(i % factor == 0)
+			record[i] = (char)rnd();
+	}
+}
+
+#endif
+
+/*
+**************************************************
 *              Common routines
 **************************************************
 */
@@ -110,8 +156,8 @@ static int ftw_ntfs_check_for_termination(mft_scan_parameters *sp)
 
 /**
  * @note
- * - LSN, buffer, length must be valid before this call!
- * - Length MUST BE an integral of the sector size.
+ * - lsn, buffer, length must be valid before this call
+ * - length must be an integral of the sector size
  */
 static NTSTATUS read_sectors(ULONGLONG lsn,PVOID buffer,ULONG length,mft_scan_parameters *sp)
 {
@@ -125,13 +171,18 @@ static NTSTATUS read_sectors(ULONGLONG lsn,PVOID buffer,ULONG length,mft_scan_pa
 		status = NtWaitForSingleObject(winx_fileno(sp->f_volume),FALSE,NULL);
 		if(NT_SUCCESS(status)) status = iosb.Status;
 	}
-	/* FIXME: number of bytes actually read check? */
+	if(status == STATUS_SUCCESS && iosb.Information){
+		if(iosb.Information > length)
+			DebugPrint("read_sectors: more bytes read than needed?");
+		else if(iosb.Information < length)
+			DebugPrint("read_sectors: less bytes read than needed?");
+	}
 	return status;
 }
 
 /**
  * @brief Retrieves a single file record from MFT.
- * @note sp->f_volume must contain volume handle.
+ * @note sp->f_volume must contain a volume handle.
  * sp->ml.file_record_buffer_size must be properly set.
  */
 static NTSTATUS get_file_record(ULONGLONG mft_id,
@@ -155,6 +206,15 @@ static NTSTATUS get_file_record(ULONGLONG mft_id,
 		(void)NtWaitForSingleObject(winx_fileno(sp->f_volume),FALSE,NULL);
 		status = iosb.Status;
 	}
+	if(status == STATUS_SUCCESS && iosb.Information){
+		if(iosb.Information > sp->ml.file_record_buffer_size)
+			DebugPrint("get_file_record: more bytes read than needed?");
+		else if(iosb.Information < sp->ml.file_record_buffer_size)
+			DebugPrint("get_file_record: less bytes read than needed?");
+	}
+#ifdef TEST_NTFS_SCANNER
+	randomize_file_record_data((char *)(void *)nfrob,sp->ml.file_record_buffer_size);
+#endif
 	return status;
 }
 
@@ -386,6 +446,7 @@ static int get_number_of_file_records(mft_scan_parameters *sp)
 static int get_mft_layout(mft_scan_parameters *sp)
 {
 	NTFS_DATA *ntfs_data;
+	int length;
 	
 	if(sp == NULL)
 		return (-1);
@@ -404,9 +465,15 @@ static int get_mft_layout(mft_scan_parameters *sp)
 	/* get ntfs data */
 	if(winx_ioctl(sp->f_volume,FSCTL_GET_NTFS_VOLUME_DATA,
 	  "get_mft_layout: ntfs data request",
-	  NULL,0,ntfs_data,sizeof(NTFS_DATA),NULL) < 0){
+	  NULL,0,ntfs_data,sizeof(NTFS_DATA),&length) < 0){
 		winx_heap_free(ntfs_data);
 		return (-1);
+	}
+	if(length){
+		if(length > sizeof(NTFS_DATA))
+			DebugPrint("get_mft_layout: FSCTL_GET_NTFS_VOLUME_DATA: less bytes read than needed?");
+		else if(length < sizeof(NTFS_DATA))
+			DebugPrint("get_mft_layout: FSCTL_GET_NTFS_VOLUME_DATA: more bytes read than needed?");
 	}
 	
 	sp->ml.file_record_size = ntfs_data->BytesPerFileRecordSegment;
@@ -578,7 +645,7 @@ static void analyze_attribute_from_mft_record(ULONGLONG mft_id,ATTRIBUTE_TYPE at
 	if(GetMftIdFromFRN(nfrob->FileReferenceNumber) != mft_id){
 		DebugPrint("analyse_attribute_from_mft_record: cannot get %I64u file record",mft_id);
 		winx_heap_free(nfrob);
-		sp->errors ++; /* XXX: ??? */
+		/*sp->errors ++;*/
 		return;
 	}
 	
@@ -1538,6 +1605,11 @@ static int scan_mft(mft_scan_parameters *sp)
 	DebugPrint("mft scan started");
 	start_time = winx_xtime();
 	
+#ifdef TEST_NTFS_SCANNER
+	DebugPrint("NTFS SCANNER TEST STARTED");
+	srnd(1);
+#endif
+	
 	/* get mft layout */
 	if(get_mft_layout(sp) < 0){
 fail:
@@ -1595,6 +1667,11 @@ fail:
 	result = build_full_paths(sp);
 
 	winx_heap_free(nfrob);
+
+#ifdef TEST_NTFS_SCANNER
+	DebugPrint("NTFS SCANNER TEST PASSED");
+#endif
+
 	DebugPrint("mft scan completed in %I64u ms",
 		winx_xtime() - start_time);
 	return result;
