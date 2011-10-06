@@ -35,9 +35,6 @@
 * On our test machines NTFS access caused blue
 * screens regardless of whether we accessed it
 * from kernel mode or user mode.
-* Though, this fact should be tested again,
-* because there was lots of improvements in code
-* since time of the tests.
 */
 
 #include "udefrag-internals.h"

@@ -120,6 +120,8 @@ function produce_ddk_makefile()
 		f:write("DLLDEF=", deffile, "\n\n")
 	end
 
+	-- use /FA switch to generate assembly listings
+	-- f:write("USER_C_FLAGS=/DUSE_WINDDK /FA\n\n")
 	f:write("USER_C_FLAGS=/DUSE_WINDDK\n\n")
 	
 	if static_lib == 1 then

@@ -44,15 +44,6 @@
 
 #define DEFAULT_REFRESH_INTERVAL 100
 
-/*
-* This constant will control size of free space regions
-* which will be skipped always in volume optimization
-* process. Nonzero values speed up the volume processing.
-* Note: the use of this threshold will need careful testing
-* because it may affect current use of volume space division.
-*/
-#define FREE_REGION_SIZE_THRESHOLD 16
-
 #define MAX_DOS_DRIVES 26
 #define MAXFSNAME      32  /* I think, that's enough */
 
