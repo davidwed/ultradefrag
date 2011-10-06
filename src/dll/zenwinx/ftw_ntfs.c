@@ -1017,9 +1017,7 @@ static winx_file_info * find_filelist_entry(short *attr_name,mft_scan_parameters
 		} else {
 			if(f->internal.BaseMftId < sp->mfi.BaseMftId) break;
 		}
-		if(!wcscmp(f->name,attr_name) && \
-		  (f->internal.ParentDirectoryMftId == sp->mfi.ParentDirectoryMftId) && \
-		  (f->internal.BaseMftId == sp->mfi.BaseMftId))
+		if(!wcscmp(f->name,attr_name) && f->internal.BaseMftId == sp->mfi.BaseMftId)
 			return f; /* slow? */
 		//if(f->internal.BaseMftId == sp->mfi.BaseMftId) return f; /* safe? */
 		if(f->next == *sp->filelist) break;
@@ -1048,7 +1046,7 @@ static winx_file_info * find_filelist_entry(short *attr_name,mft_scan_parameters
 	f->user_defined_flags = 0;
 	memset(&f->disp,0,sizeof(winx_file_disposition));
 	f->internal.BaseMftId = sp->mfi.BaseMftId;
-	f->internal.ParentDirectoryMftId = sp->mfi.ParentDirectoryMftId;
+	f->internal.ParentDirectoryMftId = FILE_root;
 	return f;
 }
 
@@ -1339,11 +1337,12 @@ static void analyze_file_record(NTFS_FILE_RECORD_OUTPUT_BUFFER *nfrob,
 			if(f->internal.BaseMftId < sp->mfi.BaseMftId) break;
 		}
 		next = f->next;
-		if(f->internal.ParentDirectoryMftId == sp->mfi.ParentDirectoryMftId && \
-		  f->internal.BaseMftId == sp->mfi.BaseMftId){
+		if(f->internal.BaseMftId == sp->mfi.BaseMftId){
 			/* update flags, because sp->mfi contains more actual data  */
 			f->flags = sp->mfi.Flags;
-			/* append name of stream to the name of file */
+			/* set parent directory id for the stream */
+			f->internal.ParentDirectoryMftId = sp->mfi.ParentDirectoryMftId;
+			/* add filename to the name of the stream */
 			if(update_stream_name(f,sp) < 0){
 				winx_list_remove_item((list_entry **)(void *)sp->filelist,(list_entry *)f);
 				if(*sp->filelist == NULL) break;
