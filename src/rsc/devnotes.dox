@@ -11,22 +11,25 @@
 /**
  * @page Devnotes Development Notes
  *
- * - UltraDefrag contains few modules which must be running during 
- * the Windows boot process. Therefore the program utilizes a lot 
+ * - UltraDefrag contains few modules running during 
+ * the Windows boot process. For this purpose the program utilizes a lot 
  * of undocumented Windows functions, primary exported by ntdll.dll 
  * library. Please read carefully comments in the beginning of 
  * <a href="http://ultradefrag.svn.sourceforge.net/viewvc/ultradefrag/src/dll/zenwinx/ntndk.h?view=markup">/src/dll/zenwinx/ntndk.h</a>
- * file before using such functions. Because they often requires
- * something unexpected and without corresponding to these rules
+ * file before use of such functions. They often requires
+ * something unexpected, so without a careful use
  * they may simply crash your application.
  *
- * - Avoid the use of memset() for local variables. It always fails on x64
- * systems, because MS C compiler does not generate an appropriate code (?).
- *
- * - When some program uses MessageBox() calls it must contain also
- * InitCommonControls() call in the beginning of its main() function.
- * To be compatible with manifest file which defines comctl32.dll
- * dependency for Windows visual styles support. Otherwise message
- * boxes will never appear on the screen. This undocumented behavior
+ * - When some program uses MessageBox() call it must call also
+ * InitCommonControls() in the beginning of its main() function.
+ * Otherwise it will be not compatible with manifest defining comctl32.dll
+ * dependency for Windows visual styles support. Message boxes will never 
+ * appear on the screen in this case. This undocumented behavior
  * was discovered on 32-bit XP system.
+ *
+ * - Note that different compilers may use different calling conventions.
+ * While GCC uses __cdecl convention by default, MS C compiler included in DDK
+ * uses __stdcall. This makes impossible to use binaries together while they're 
+ * compiled by these two compilers. UltraDefrag uses no certain convention
+ * to keep the code cleaner.
  */
