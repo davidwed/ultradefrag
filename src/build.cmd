@@ -124,12 +124,18 @@ rem Example:  call :build_installer .\bin\ia64 ia64
 	copy /Y "%~dp0\installer\UltraDefrag.nsi" .\
 	copy /Y "%~dp0\installer\lang.ini" .\
 	copy /Y "%~dp0\installer\lang-classical.ini" .\
-	"%NSISDIR%\makensis.exe" /DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 UltraDefrag.nsi
+	if "%RELEASE_STAGE%" neq "" (
+		set NSIS_COMPILER_FLAGS=/DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 /DRELEASE_STAGE=%RELEASE_STAGE% /DUDVERSION_SUFFIX=%UDVERSION_SUFFIX%
+	) else (
+		set NSIS_COMPILER_FLAGS=/DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 /DUDVERSION_SUFFIX=%UDVERSION_SUFFIX%
+	)
+	"%NSISDIR%\makensis.exe" %NSIS_COMPILER_FLAGS% UltraDefrag.nsi
 	if %errorlevel% neq 0 (
+		set NSIS_COMPILER_FLAGS=
 		popd
 		exit /B 1
 	)
-	ren ultradefrag-%ULTRADFGVER%.bin.%2.exe ultradefrag-%UDVERSION_SUFFIX%.bin.%2.exe
+	set NSIS_COMPILER_FLAGS=
 	popd
 exit /B 0
 

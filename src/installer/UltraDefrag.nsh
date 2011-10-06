@@ -732,7 +732,11 @@ Var AtLeastXP
     SetOutPath "$INSTDIR"
 
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayName"     "Ultra Defragmenter"
-    WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayVersion"  "${ULTRADFGVER}"
+    !ifdef RELEASE_STAGE
+        WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayVersion"  "${ULTRADFGVER} ${RELEASE_STAGE}"
+    !else
+        WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayVersion"  "${ULTRADFGVER}"
+    !endif
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "Publisher"       "UltraDefrag Development Team"
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "UninstallString" "$INSTDIR\uninstall.exe"

@@ -23,10 +23,14 @@
 */
 
 /*
-*  NOTE: The following symbols should be defined
-*        through makensis command line:
+*  NOTE: The following symbols must be
+*  defined through makensis command line:
 *  ULTRADFGVER=<version number in form x.y.z>
 *  ULTRADFGARCH=<i386 | amd64 | ia64>
+*  UDVERSION_SUFFIX
+*  The following symbol is accepted too,
+*  but may be undefined:
+*  RELEASE_STAGE
 */
 
 !ifndef ULTRADFGVER
@@ -35,6 +39,10 @@
 
 !ifndef ULTRADFGARCH
 !error "ULTRADFGARCH parameter must be specified on the command line!"
+!endif
+
+!ifndef UDVERSION_SUFFIX
+!error "UDVERSION_SUFFIX parameter must be specified on the command line!"
 !endif
 
 /*
@@ -59,18 +67,28 @@
 /*
  * Installer Attributes
  */
- 
-!if ${ULTRADFGARCH} == 'amd64'
-Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
-!else if ${ULTRADFGARCH} == 'ia64'
-Name "Ultra Defragmenter v${ULTRADFGVER} (IA64)"
+
+!ifdef RELEASE_STAGE
+    !if ${ULTRADFGARCH} == 'amd64'
+    Name "Ultra Defragmenter v${ULTRADFGVER} ${RELEASE_STAGE} (AMD64)"
+    !else if ${ULTRADFGARCH} == 'ia64'
+    Name "Ultra Defragmenter v${ULTRADFGVER} ${RELEASE_STAGE} (IA64)"
+    !else
+    Name "Ultra Defragmenter v${ULTRADFGVER} ${RELEASE_STAGE} (i386)"
+    !endif
 !else
-Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
+    !if ${ULTRADFGARCH} == 'amd64'
+    Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
+    !else if ${ULTRADFGARCH} == 'ia64'
+    Name "Ultra Defragmenter v${ULTRADFGVER} (IA64)"
+    !else
+    Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
+    !endif
 !endif
 
 InstallDir ${UD_INSTALL_DIR}
 
-OutFile "ultradefrag-${ULTRADFGVER}.bin.${ULTRADFGARCH}.exe"
+OutFile "ultradefrag-${UDVERSION_SUFFIX}.bin.${ULTRADFGARCH}.exe"
 LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 ShowInstDetails show
 ShowUninstDetails show
