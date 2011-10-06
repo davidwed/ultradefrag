@@ -84,15 +84,6 @@ if %UD_BLD_FLG_USE_COMPILER% equ 0 (
 	goto mingw_build
 )
 
-:: check if we are using WDK 6 and above
-for /d %%D in ( "%WINDDKBASE%" ) do set UD_DDK_NAME=%%~nD
-set UD_DDK_VER=%UD_DDK_NAME:~0,4%
-echo UD_DDK_VER set to "%UD_DDK_VER%"... 
-
-:: disable __ftol2_see error for WDK 6 and above
-:: TODO cast (float) to (__int64) to (long)
-:: if %UD_DDK_VER% NEQ 3790 set CL=/QIfist %CL%
-
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK%  goto ddk_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MSVC%    goto msvc_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW%   goto mingw_build
@@ -104,6 +95,19 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 
 	set BUILD_ENV=winddk
 	set OLD_PATH=%path%
+
+	:: check if we are using WDK 6 and above
+	for /d %%D in ( "%WINDDKBASE%" ) do set UD_DDK_NAME=%%~nD
+	set UD_DDK_VER=%UD_DDK_NAME:~0,4%
+	set UD_DDK_NAME=
+	echo UD_DDK_VER set to "%UD_DDK_VER%"... 
+
+	rem workaround for WDK 6 and above
+	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=1
+
+	:: disable __ftol2_see error for WDK 6 and above
+	:: TODO cast (float) to (__int64) to (long)
+	:: if %UD_DDK_VER% NEQ 3790 set CL=/QIfist %CL%
 
 	if %UD_BLD_FLG_BUILD_X86% neq 0 (
 		echo --------- Target is x86 ---------
@@ -149,10 +153,23 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 		set UDEFRAG_LIB_PATH=..\..\lib\ia64
 		call :build_modules ia64 || exit /B 1
 	)
+	
+	goto ddk_build_success
     
+	:ddk_build_fail
     set path=%OLD_PATH%
 	set OLD_PATH=
     set DDKBUILDENV=
+	set UD_DDK_VER=
+	set IGNORE_LINKLIB_ABUSE=
+	exit /B 1
+	
+	:ddk_build_success
+    set path=%OLD_PATH%
+	set OLD_PATH=
+    set DDKBUILDENV=
+	set UD_DDK_VER=
+	set IGNORE_LINKLIB_ABUSE=
 	
 exit /B 0
 
@@ -256,9 +273,6 @@ exit /B 0
 :: Builds all UltraDefrag modules
 :: Example: call :build_modules X86
 :build_modules
-	rem workaround for WDK 6 and above
-	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=1
-
 	rem update manifests
 	call make-manifests.cmd %1 || exit /B 1
 
@@ -309,15 +323,11 @@ exit /B 0
 	%UD_BUILD_TOOL% ultradefrag.build && goto success
 
 	:fail
-	rem workaround for WDK 6 and above
-	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=
 	set UD_BUILD_TOOL=
 	popd
 	exit /B 1
 	
 	:success
-	rem workaround for WDK 6 and above
-	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=
 	set UD_BUILD_TOOL=
 	popd
 
