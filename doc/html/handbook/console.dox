@@ -34,6 +34,8 @@
  * <dd>Optimize the disk space by moving all files to the beginning of the disk.</dd>
  * <dt>-q, --quick-optimize</dt>
  * <dd>Optimize the disk space by moving not fragmented files to the beginning of the disk.</dd>
+ * <dt>--optimize-mft</dt>
+ * <dd>Concatenate the MFT into one single chunk.</dd>
  * <dt>-l, --list-available-volumes</dt>
  * <dd>List all disks available for defragmentation, except removable. Each line of the
  * output contains a drive letter, filesystem name, total space and amount of 
@@ -159,6 +161,76 @@
  * Note that files excluded by filters are always shown as not fragmented
  * on the cluster map. Because trash is unimportant anyway and it should not take
  * our attention.
+ *
+ * <h1>Examples</h1>
+ * <dl>
+ * <dt>include only paths, which include one of these words</dt>
+ * <dd>
+ * @code
+ * set UD_IN_FILTER=windows;winnt
+ * @endcode
+ * </dd>
+ * <dt>process only files below 50 MB in size</dt>
+ * <dd>
+ * @code
+ * set UD_SIZELIMIT=50Mb
+ * @endcode
+ * </dd>
+ * <dt>process only files with more than 6 fragments</dt>
+ * <dd>
+ * @code
+ * set UD_FRAGMENTS_THRESHOLD=6
+ * @endcode
+ * </dd>
+ * <dt>terminate processing after 6 hours and 30 minutes</dt>
+ * <dd>
+ * @code
+ * set UD_TIME_LIMIT=6h 30m
+ * @endcode
+ * </dd>
+ * <dt>save debugging information to the specified file</dt>
+ * <dd>
+ * @code
+ * set UD_LOG_FILE_PATH=C:\Windows\Temp\defrag_native.log
+ * @endcode
+ * </dd>
+ * <dt>defragment drive C:</dt>
+ * <dd>
+ * @code
+ * udefrag C:
+ * @endcode
+ * </dd>
+ * <dt>list all available drives</dt>
+ * <dd>
+ * @code
+ * udefrag -la
+ * @endcode
+ * </dd>
+ * <dt>analyze all drives excluding removable ones</dt>
+ * <dd>
+ * @code
+ * udefrag -a --all-fixed
+ * @endcode
+ * </dd>
+ * <dt>optimize drives E: and K:</dt>
+ * <dd>
+ * @code
+ * udefrag -o E: K:
+ * @endcode
+ * </dd>
+ * <dt>optimize the MFT of drives O: and Q:</dt>
+ * <dd>
+ * @code
+ * udefrag --optimize-mft O: Q:
+ * @endcode
+ * </dd>
+ * <dt>defragment the specified file and folder</dt>
+ * <dd>
+ * @code
+ * udefrag C:\Windows\WindowsUpdate.log "C:\Program Files"
+ * @endcode
+ * </dd>
+ * </dl>
  *
  * <h1>Example batch scripts</h1>
  * The following example illustrates defragmentation of a few
