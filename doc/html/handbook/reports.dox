@@ -43,9 +43,8 @@
  * process (~350 lines/sec on 1.8GHz CPU). Sorting
  * implemented in JavaScript is slow, but very reliable.
  *
- * All files excluded from the defragmentation by filters
- * are excluded from reports too. Because files affecting system performance 
- * only should get our attention.
+ * Note that files excluded from processing are never treated as fragmented.
+ * Because only files affecting system performance should get our attention.
  *
  * <h1>Columns</h1>
  * <dl>

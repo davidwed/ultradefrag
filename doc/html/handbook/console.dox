@@ -158,9 +158,8 @@
  * UltraDefrag will search for it in paths. For example, the "temp;tmp" filter
  * will be applied both to temporary folders and to Internet Explorer's cache.
  *
- * Note that files excluded by filters are always shown as not fragmented
- * on the cluster map. Because files affecting system performance only 
- * should take our attention.
+ * Note that files excluded from processing are never treated as fragmented.
+ * Because only files affecting system performance should get our attention.
  *
  * <h1>Examples</h1>
  * <dl>
