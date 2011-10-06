@@ -79,6 +79,12 @@
 */
 #define UD_FILE_MOVED_TO_FRONT 0x100
 
+/*
+* This flag is used to mark files
+* fragmented by MFT optimizer.
+*/
+#define UD_FILE_FRAGMENTED_BY_MFT_OPT 0x200
+
 #define is_excluded(f)           ((f)->user_defined_flags & UD_FILE_EXCLUDED)
 #define is_over_limit(f)         ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
 
@@ -89,6 +95,8 @@
 
 #define is_currently_excluded(f) ((f)->user_defined_flags & UD_FILE_CURRENTLY_EXCLUDED)
 #define is_moved_to_front(f)     ((f)->user_defined_flags & UD_FILE_MOVED_TO_FRONT)
+
+#define is_fragmented_by_mft_opt(f) ((f)->user_defined_flags & UD_FILE_FRAGMENTED_BY_MFT_OPT)
 
 #define is_block_excluded(b)     ((b)->length == 0)
 

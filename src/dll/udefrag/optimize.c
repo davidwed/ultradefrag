@@ -175,6 +175,10 @@ int optimize_mft(udefrag_job_parameters *jp)
 	
 	/* optimize MFT */
 	result = optimize_mft_helper(jp);
+	if(result < 0) return result;
+	
+	/* defragment files fragmented by MFT optimizer */
+	result = defragment(jp);
 	return result;
 }
 

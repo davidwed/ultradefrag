@@ -65,8 +65,10 @@ int defragment(udefrag_job_parameters *jp)
 	int result, overall_result = -1;
 	
 	/* perform volume analysis */
-	result = analyze(jp); /* we need to call it once, here */
-	if(result < 0) return result;
+	if(jp->job_type != MFT_OPTIMIZATION_JOB){
+		result = analyze(jp); /* we need to call it once, here */
+		if(result < 0) return result;
+	}
 	
 	/* choose defragmentation strategy */
 	if(jp->pi.fragmented >= jp->free_regions_count || \
@@ -102,6 +104,8 @@ int defragment(udefrag_job_parameters *jp)
 	}
 	
 	if(jp->termination_router((void *)jp)) return 0;
+	
+	if(jp->job_type == MFT_OPTIMIZATION_JOB) return overall_result;
 	
 	/* perform partial defragmentation */
 	jp->pi.processed_clusters = 0;

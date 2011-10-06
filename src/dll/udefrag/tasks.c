@@ -91,6 +91,11 @@ int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 	if(f->disp.blockmap->next == f->disp.blockmap \
 	  || f->disp.fragments < 2 || !is_fragmented(f))
 		return 0;
+		
+	/* in MFT optimization defragment marked files only */
+	if(jp->job_type == MFT_OPTIMIZATION_JOB \
+	  && !is_fragmented_by_mft_opt(f))
+		return 0;
 	
 	return 1;
 }
@@ -305,6 +310,8 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
 					target = rgn->lcn + rgn->length - n;
 					/* subtract target clusters from auxiliary list of free regions */
 					rlist = winx_sub_volume_region(rlist,target,n);
+					if(first_file != mft_file)
+						first_file->user_defined_flags |= UD_FILE_FRAGMENTED_BY_MFT_OPT;
 					if(move_file(first_file,current_vcn,n,target,0,jp) < 0){
 						if(!block_cleaned_up)
 							goto done;
