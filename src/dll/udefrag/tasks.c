@@ -44,6 +44,12 @@
  */
 int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 {
+	/* skip files with empty path */
+	if(f->path == NULL)
+		return 0;
+	if(f->path[0] == 0)
+		return 0;
+	
 	/* skip files already moved to front in optimization */
 	if(is_moved_to_front(f))
 		return 0;
