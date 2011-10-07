@@ -21,13 +21,18 @@
  * </td><td>
  * <dl>
  * <dt>@htmlonly <img src="Analysis.png"> @endhtmlonly Analyze (F5)</dt>
- * <dd>This analyzes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dd>This analyzes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.<br/>
+ * The process locates free space, folders, fragmented, compressed, regular and system files.</dd>
  * <dt>@htmlonly <img src="Defragment.png"> @endhtmlonly Defragment (F6)</dt>
- * <dd>This defragments the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dd>This defragments the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.<br/>
+ * The process moves fragmented files to free space to concatenate them.</dd>
  * <dt>@htmlonly <img src="QuickOptimize.png"> @endhtmlonly Quick optimization (F7)</dt>
- * <dd>This optimizes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.</dd>
+ * <dd>This optimizes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.<br/>
+ * The process moves fragmented files to the back of the disk to free space at the front and moves them back to the front to concatenate them.</dd>
  * <dt>@htmlonly <img src="FullOptimize.png"> @endhtmlonly Full optimization (Ctrl+F7)</dt>
- * <dd>This is similar to the quick optimization, but moves all files from the beginning to the end of the disk first.</dd>
+ * <dd>This optimizes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.<br/>
+ * The process moves fragmented and regular files to the back of the disk to free space at the front
+ * and moves them back to the front to concatenate them.</dd>
  * <dt>@htmlonly <img src="OptimizeMFT.png"> @endhtmlonly Optimize MFT (Shit+F7)</dt>
  * <dd>This concatenates the MFT into one single chunk.</dd>
  * <dt>@htmlonly <img src="Stop.png"> @endhtmlonly Stop (Ctrl+C)</dt>
@@ -49,7 +54,7 @@
  * </td><td>
  * <dl>
  * <dt>@htmlonly <img src="Report.png"> @endhtmlonly Show report (F8)</dt>
- * <dd>This displays the report generated for the selected disk(s).</dd>
+ * <dd>This displays the report generated for the selected disk(s) in a browser window.</dd>
  * </dl>
  * </td></tr><tr><td>
  * <b>Settings</b>
@@ -84,14 +89,14 @@
  * <dt>@htmlonly <img src="Help.png"> @endhtmlonly Contents (F1)</dt>
  * <dd>This launches the handbook you are currently reading.</dd>
  * <dt>Best practice (F2)</dt>
- * <dd>This launches the <b>Tips and Tricks</b> section of this handbook.</dd>
+ * <dd>This launches the @ref Tips chapter of this handbook.</dd>
  * <dt>FAQ (F3)</dt>
- * <dd>This launches the <b>Frequently Asked Questions</b> section of this handbook.</dd>
+ * <dd>This launches the @ref FAQ chapter of this handbook.</dd>
  * <dt>About (F4)</dt>
  * <dd>This opens the about window.</dd>
  * </dl>
  * </td></tr><tr><td>
- * <b>Preview</b><br/>(available only in testing releases)
+ * <b>Preview</b><br/>(available only in alpha and beta releases)
  * </td><td>
  * <dl>
  * <dt>Find largest free space</dt>
