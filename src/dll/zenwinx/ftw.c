@@ -372,7 +372,6 @@ static int ftw_add_root_directory(short *path, int flags,
 	f->flags |= FILE_ATTRIBUTE_DIRECTORY;
 	status = winx_defrag_fopen(f,WINX_OPEN_FOR_BASIC_INFO,&hDir);
 	if(status == STATUS_SUCCESS){
-		DebugPrintEx(status,"ftw_add_root_directory: cannot open %ws",f->path);
 		memset(&fbi,0,sizeof(FILE_BASIC_INFORMATION));
 		status = NtQueryInformationFile(hDir,&iosb,
 			&fbi,sizeof(FILE_BASIC_INFORMATION),
@@ -384,6 +383,8 @@ static int ftw_add_root_directory(short *path, int flags,
 			DebugPrint("ftw_add_root_directory: root directory flags: %u",f->flags);
 		}
 		winx_defrag_fclose(hDir);
+	} else {
+		DebugPrintEx(status,"ftw_add_root_directory: cannot open %ws",f->path);
 	}
 	
 	/* reset user defined flags */
