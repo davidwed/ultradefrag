@@ -195,6 +195,13 @@ void winx_ftw_release(winx_file_info *filelist);
 
 int winx_ftw_dump_file(winx_file_info *f,ftw_terminator t,void *user_defined_data);
 
+#define WINX_OPEN_FOR_DUMP       0x1 /* open for FSCTL_GET_RETRIEVAL_POINTERS */
+#define WINX_OPEN_FOR_BASIC_INFO 0x2 /* open for NtQueryInformationFile(FILE_BASIC_INFORMATION) */
+#define WINX_OPEN_FOR_MOVE       0x4 /* open for FSCTL_MOVE_FILE */
+
+NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle);
+void winx_defrag_fclose(HANDLE h);
+
 /* ftw_ntfs.c */
 /* int64.c */
 /* keyboard.c */

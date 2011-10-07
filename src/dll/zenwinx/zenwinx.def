@@ -50,6 +50,8 @@ EXPORTS
 	winx_fflush
 	winx_fsize
 	winx_fclose
+	winx_defrag_fopen
+	winx_defrag_fclose
 	winx_ftw
 	winx_scan_disk
 	winx_ftw_release

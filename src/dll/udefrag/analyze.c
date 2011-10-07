@@ -274,7 +274,7 @@ static int filter(winx_file_info *f,void *user_defined_data)
 	int length;
 	ULONGLONG filesize;
 	
-	/* skip entries with empty path */
+	/* skip entries with empty path, as well as their children */
 	if(f->path == NULL) goto skip;
 	if(f->path[0] == 0) goto skip;
 	
@@ -291,6 +291,12 @@ static int filter(winx_file_info *f,void *user_defined_data)
 		}
 	}
 	
+	/* show debugging information about interesting cases */
+	if(is_sparse(f))
+		DebugPrint("sparse file found: %ws",f->path);
+	if(is_reparse_point(f))
+		DebugPrint("reparse point found: %ws",f->path);
+	
 	/*
 	* No files can be filtered out when
 	* volume optimization job is requested.
@@ -298,31 +304,35 @@ static int filter(winx_file_info *f,void *user_defined_data)
 	if(jp->job_type == FULL_OPTIMIZATION_JOB \
 	  || jp->job_type == QUICK_OPTIMIZATION_JOB \
 	  || jp->job_type == MFT_OPTIMIZATION_JOB)
-		goto done;
+		return 0;
 
-	/* skip temporary files */
+	/* skip temporary files, as well as their children */
 	if(is_temporary(f))	goto skip;
 
 	/* filter files by their sizes */
 	filesize = f->disp.clusters * jp->v_info.bytes_per_cluster;
-	if(jp->udo.size_limit && filesize > jp->udo.size_limit)
-		goto skip;
+	if(jp->udo.size_limit && filesize > jp->udo.size_limit){
+		f->user_defined_flags |= UD_FILE_OVER_LIMIT;
+		f->user_defined_flags |= UD_FILE_EXCLUDED;
+		/* don't skip children however */
+		return 0;
+	}
+
+	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb on FAT32 volume */
+	/*if(wcsstr(path,L"largefile"))
+		DebugPrint("SIZE = %I64u", filesize);
+	*/
 	
 	/* filter files by their number of fragments */
-	if(jp->udo.fragments_limit && f->disp.fragments < jp->udo.fragments_limit)
-		goto skip;
+	if(jp->udo.fragments_limit && f->disp.fragments < jp->udo.fragments_limit){
+		f->user_defined_flags |= UD_FILE_EXCLUDED;
+		/* don't skip children however */
+		return 0;
+	}
 
 	/* filter files by their paths */
-	if(exclude_by_path(f,jp))
-		goto skip;
-	
-done:
-	/* very important: don't scan inside reparse points */
-	if(is_reparse_point(f))
-		goto skip; /* reparse points are always excluded */
-
-	/* continue scan for ordinary not filtered out files */
-	return 0;
+	if(!exclude_by_path(f,jp))
+		return 0;
 
 skip:
 	f->user_defined_flags |= UD_FILE_EXCLUDED;
@@ -344,23 +354,7 @@ static void progress_callback(winx_file_info *f,void *user_defined_data)
 	if(is_compressed(f)) jp->pi.compressed ++;
 	jp->pi.processed_clusters += f->disp.clusters;
 
-	/* show debugging information about interesting cases */
-	if(is_sparse(f) && f->path)
-		DebugPrint("sparse file found: %ws",f->path);
-	
-	/*
-	* Mark files of size larger than threshold
-	* to be able to show them in dark colors on the map.
-	*/
 	filesize = f->disp.clusters * jp->v_info.bytes_per_cluster;
-	if(jp->udo.size_limit && filesize > jp->udo.size_limit)
-		f->user_defined_flags |= UD_FILE_OVER_LIMIT;
-
-	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb on FAT32 volume */
-	/*if(wcsstr(path,L"largefile"))
-		DebugPrint("SIZE = %I64u", filesize);
-	*/
-	
 	if(filesize >= GIANT_FILE_SIZE)
 		jp->f_counters.giant_files ++;
 	else if(filesize >= HUGE_FILE_SIZE)
@@ -505,8 +499,8 @@ static int find_files(udefrag_job_parameters *jp)
 	
 	/* calculate number of fragmented files; redraw map */
 	for(f = jp->filelist; f; f = f->next){
-		/* skip excluded files and reparse points */
-		if(!is_fragmented(f) || is_reparse_point(f) || is_excluded(f)){
+		/* skip excluded files */
+		if(!is_fragmented(f) || is_excluded(f)){
 			jp->pi.fragments ++;
 		} else {
 			jp->pi.fragmented ++;
@@ -574,83 +568,6 @@ static int is_well_known_locked_file(winx_file_info *f,udefrag_job_parameters *j
 }
 
 /**
- * @brief Opens the file for moving.
- */
-NTSTATUS udefrag_fopen(winx_file_info *f,HANDLE *phFile)
-{
-	UNICODE_STRING us;
-	OBJECT_ATTRIBUTES oa;
-	IO_STATUS_BLOCK iosb;
-	NTSTATUS status;
-	int win_version = winx_get_os_version();
-	ACCESS_MASK access_rights = SYNCHRONIZE;
-	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
-
-	if(f == NULL || phFile == NULL)
-		return STATUS_INVALID_PARAMETER;
-	
-	if(is_directory(f)){
-		flags |= FILE_OPEN_FOR_BACKUP_INTENT;
-	} else {
-		flags |= FILE_NO_INTERMEDIATE_BUFFERING;
-        
-        if(win_version >= WINDOWS_VISTA)
-            flags |= FILE_NON_DIRECTORY_FILE;
-    }
-
-	/*
-	* All files except of internal NTFS files
-	* can be successfully defragmented when opened
-	* with FILE_GENERIC_READ | SYNCHRONIZE access rights
-	* on all of the supported versions of Windows.
-	* To defragment internal NTFS files including $mft,
-	* we're using restricted rights.
-	*/
-	if(win_version <= WINDOWS_2K){
-		/* on Windows NT and Windows 2000 */
-		if(is_encrypted(f)){
-			/* encrypted files require read access */
-			access_rights |= FILE_GENERIC_READ;
-		} else {
-			/*
-			* All other files can be processed with a single
-			* SYNCHRONIZE access. More advanced FILE_GENERIC_READ
-			* rights prevent defragmentation of internal NTFS files on w2k.
-			*/
-		}
-	} else if(win_version == WINDOWS_XP || win_version == WINDOWS_2K3){
-		/* On Windows XP and Windows Server 2003 */
-		/*
-		* All files can be processed with a single SYNCHRONIZE access.
-		* More advanced FILE_GENERIC_READ rights prevent defragmentation
-		* of $mft file as well as other internal NTFS files.
-		* http://forum.sysinternals.com/topic23950.html
-		*/
-	} else if(win_version >= WINDOWS_VISTA){
-		/* On Windows Vista and Windows 7 */
-		/*
-		* $Mft cannot be defragmented when opened with a single
-		* SYNCHRONIZE access, so we're using more advanced rights here.
-		*/
-		/* TODO: test it on Vista & Win7 */
-		access_rights |= FILE_READ_ATTRIBUTES;
-	}
-	
-	RtlInitUnicodeString(&us,f->path);
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	/*
-	* TODO: FILE_READ_ATTRIBUTES may also be needed for reparse points,
-	* bitmaps and attribute lists as stated in:
-	* http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
-	* Though, this need careful testing on w2k and xp.
-	*/
-	status = NtCreateFile(phFile,access_rights,&oa,&iosb,NULL,0,
-				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-				FILE_OPEN,flags,NULL,0);
-	return status;
-}
-
-/**
  * @brief Defines whether the file
  * is locked by system or not.
  * @return Nonzero value indicates
@@ -668,9 +585,9 @@ int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp)
 		return 1;
 
 	/* file status is undefined, so let's try to open it */
-	status = udefrag_fopen(f,&hFile);
+	status = winx_defrag_fopen(f,WINX_OPEN_FOR_MOVE,&hFile);
 	if(status == STATUS_SUCCESS){
-		NtCloseSafe(hFile);
+		winx_defrag_fclose(hFile);
 		f->user_defined_flags |= UD_FILE_NOT_LOCKED;
 		return 0;
 	}

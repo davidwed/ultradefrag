@@ -48,9 +48,6 @@
  */
 #define LLINVALID ((ULONGLONG) -1)
 
-#define FTW_FOPEN_FOR_DUMP       0x1
-#define FTW_FOPEN_FOR_BASIC_INFO 0x2
-
 /* external functions prototypes */
 winx_file_info *ntfs_scan_disk(char volume_letter,
 	int flags, ftw_filter_callback fcb, ftw_progress_callback pcb, 
@@ -69,98 +66,6 @@ static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
 		return 0;
 	
 	return t(user_defined_data);
-}
-
-/**
- * @internal
- * @brief Opens the file for dumping (or other actions).
- * @param[in] pointer to structure containing the file information.
- * @param[in] action one of the FTW_FOPEN_XXX constants
- * indicating an action file needs to be opened for.
- * @return Handle to the file, NULL indicates failure.
- * @todo Test all cases on nt4, w2k, xp, vista, w7.
- */
-static HANDLE ftw_fopen(winx_file_info *f,int action)
-{
-	UNICODE_STRING us;
-	OBJECT_ATTRIBUTES oa;
-	IO_STATUS_BLOCK iosb;
-	NTSTATUS status;
-	HANDLE hFile;
-	int win_version = winx_get_os_version();
-	ACCESS_MASK access_rights = SYNCHRONIZE;
-	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
-
-	if(f == NULL)
-		return NULL;
-	
-	if(is_directory(f)){
-		flags |= FILE_OPEN_FOR_BACKUP_INTENT;
-	} else {
-		flags |= FILE_NO_INTERMEDIATE_BUFFERING;
-        
-        if(win_version >= WINDOWS_VISTA)
-            flags |= FILE_NON_DIRECTORY_FILE;
-    }
-
-	/*
-	* All files except of internal NTFS files
-	* can be successfully opened with FILE_GENERIC_READ | SYNCHRONIZE
-	* access rights on all of the supported versions of Windows.
-	* To open internal NTFS files including $mft, we use more restricted rights.
-	*/
-	if(win_version <= WINDOWS_2K){
-		/* on Windows NT and Windows 2000 */
-		if(is_encrypted(f)){
-			/* encrypted files may require read access */
-			access_rights |= FILE_GENERIC_READ;
-		} else {
-			/*
-			* All other files can be successfully opened with a single
-			* SYNCHRONIZE access. More advanced FILE_GENERIC_READ
-			* rights may prevent opening of internal NTFS files on w2k.
-			*/
-		}
-	} else if(win_version == WINDOWS_XP || win_version == WINDOWS_2K3){
-		/* On Windows XP and Windows Server 2003 */
-		/*
-		* All files can be opened with a single SYNCHRONIZE access.
-		* More advanced FILE_GENERIC_READ rights prevent opening
-		* of $mft file as well as other internal NTFS files.
-		* http://forum.sysinternals.com/topic23950.html
-		*/
-	} else if(win_version >= WINDOWS_VISTA){
-		/* On Windows Vista and Windows 7 */
-		/*
-		* $Mft may require more advanced rights, 
-		* than a single SYNCHRONIZE, to be dumped.
-		*/
-		/* TODO: test it on Vista & Win7 */
-		access_rights |= FILE_READ_ATTRIBUTES;
-	}
-    
-    /* root folder needs FILE_READ_ATTRIBUTES to successfully retrieve FileBasicInformation,
-    see http://msdn.microsoft.com/en-us/library/ff567052(VS.85).aspx */
-    if(action == FTW_FOPEN_FOR_BASIC_INFO)
-        access_rights |= FILE_READ_ATTRIBUTES;
-	
-	RtlInitUnicodeString(&us,f->path);
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	/*
-	* TODO: FILE_READ_ATTRIBUTES may also be needed for reparse points,
-	* bitmaps and attribute lists as stated in:
-	* http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
-	* Though, this need careful testing on w2k and xp.
-	*/
-	status = NtCreateFile(&hFile,access_rights,&oa,&iosb,NULL,0,
-				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
-				FILE_OPEN,flags,NULL,0);
-	if(status != STATUS_SUCCESS){
-		DebugPrintEx(status,"ftw_fopen: cannot open %ws",f->path);
-		return NULL;
-	}
-	
-	return hFile;
 }
 
 /**
@@ -204,16 +109,18 @@ int winx_ftw_dump_file(winx_file_info *f,
 	f->disp.blockmap = NULL;
 	
 	/* open the file */
-	hFile = ftw_fopen(f,FTW_FOPEN_FOR_DUMP);
-	if(hFile == NULL)
+	status = winx_defrag_fopen(f,WINX_OPEN_FOR_DUMP,&hFile);
+	if(status != STATUS_SUCCESS){
+		DebugPrintEx(status,"winx_ftw_dump_file: cannot open %ws",f->path);
 		return 0; /* file is locked by system */
+	}
 	
 	/* allocate memory */
 	filemap = winx_heap_alloc(FILE_MAP_SIZE);
 	if(filemap == NULL){
 		DebugPrint("winx_ftw_dump_file: cannot allocate %u bytes of memory",
 			FILE_MAP_SIZE);
-		NtClose(hFile);
+		winx_defrag_fclose(hFile);
 		return (-1);
 	}
 	
@@ -241,7 +148,7 @@ int winx_ftw_dump_file(winx_file_info *f,
 			f->disp.flags = 0;
 			winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 			winx_heap_free(filemap);
-			NtClose(hFile);
+			winx_defrag_fclose(hFile);
 			return 0; /* file is inside MFT */
 		}
 
@@ -282,7 +189,7 @@ int winx_ftw_dump_file(winx_file_info *f,
 				f->disp.flags = 0;
 				winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 				winx_heap_free(filemap);
-				NtClose(hFile);
+				winx_defrag_fclose(hFile);
 				return (-1);
 			}
 			block->lcn = filemap->Pair[i].Lcn;
@@ -306,7 +213,7 @@ int winx_ftw_dump_file(winx_file_info *f,
 
 	/* small directories placed inside MFT have empty list of fragments... */
 	winx_heap_free(filemap);
-	NtClose(hFile);
+	winx_defrag_fclose(hFile);
 	return 0;
 }
 
@@ -463,8 +370,9 @@ static int ftw_add_root_directory(short *path, int flags,
 	
 	/* get file attributes */
 	f->flags |= FILE_ATTRIBUTE_DIRECTORY;
-	hDir = ftw_fopen(f,FTW_FOPEN_FOR_BASIC_INFO);
-	if(hDir != NULL){
+	status = winx_defrag_fopen(f,WINX_OPEN_FOR_BASIC_INFO,&hDir);
+	if(status == STATUS_SUCCESS){
+		DebugPrintEx(status,"ftw_add_root_directory: cannot open %ws",f->path);
 		memset(&fbi,0,sizeof(FILE_BASIC_INFORMATION));
 		status = NtQueryInformationFile(hDir,&iosb,
 			&fbi,sizeof(FILE_BASIC_INFORMATION),
@@ -475,7 +383,7 @@ static int ftw_add_root_directory(short *path, int flags,
 			f->flags = fbi.FileAttributes;
 			DebugPrint("ftw_add_root_directory: root directory flags: %u",f->flags);
 		}
-		NtClose(hDir);
+		winx_defrag_fclose(hDir);
 	}
 	
 	/* reset user defined flags */
@@ -646,11 +554,14 @@ static int ftw_helper(short *path, int flags,
 
 		/* scan subdirectories if requested */
 		if(is_directory(f) && (flags & WINX_FTW_RECURSIVE) && !skip_children){
-			result = ftw_helper(f->path,flags,fcb,pcb,t,user_defined_data,filelist);
-			if(result < 0){
-				winx_heap_free(file_listing);
-				NtClose(hDir);
-				return result;
+			/* don't follow reparse points! */
+			if(!is_reparse_point(f)){
+				result = ftw_helper(f->path,flags,fcb,pcb,t,user_defined_data,filelist);
+				if(result < 0){
+					winx_heap_free(file_listing);
+					NtClose(hDir);
+					return result;
+				}
 			}
 		}
 	}
@@ -673,10 +584,14 @@ static int ftw_helper(short *path, int flags,
  * to be called for each file; if it returns
  * nonzero value, all file's children will be
  * skipped. Zero value forces to continue
- * subdirectory scan.
+ * subdirectory scan. Note that the filter callback
+ * is called when the complete information is gathered
+ * for the file.
  * @param[in] pcb address of callback routine
  * to be called for each file to update progress
- * information specific for the caller.
+ * information specific for the caller. Note that the
+ * progress callback may be called when all the file
+ * information is gathered except of the file name and path.
  * @param[in] t address of procedure to be called
  * each time when winx_ftw would like to know
  * whether it must be terminated or not.
@@ -700,7 +615,7 @@ static int ftw_helper(short *path, int flags,
  * int filter(winx_file_info *f, void *user_defined_data)
  * {
  *     if(skip_directory(f))
- *         return 1;    // skip current directory
+ *         return 1;    // skip contents of the current directory
  *
  *     return 0; // continue walk
  * }

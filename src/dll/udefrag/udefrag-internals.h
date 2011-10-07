@@ -256,7 +256,6 @@ void destroy_lists(udefrag_job_parameters *jp);
 ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp);
 void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameters *jp);
 
-WINX_FILE *new_winx_vopen(char volume_letter);
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length);
 winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn);
 

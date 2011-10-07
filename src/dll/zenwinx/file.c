@@ -526,4 +526,107 @@ void winx_release_file_contents(void *contents)
 	if(contents) winx_heap_free(contents);
 }
 
+/**
+ * @brief Opens the file for defragmentation related actions.
+ * @param[in] pointer to structure containing the file information.
+ * @param[in] action one of the WINX_OPEN_XXX constants
+ * indicating an action file needs to be opened for:
+ * - WINX_OPEN_FOR_DUMP - open for FSCTL_GET_RETRIEVAL_POINTERS
+ * - WINX_OPEN_FOR_BASIC_INFO - open for NtQueryInformationFile(FILE_BASIC_INFORMATION)
+ * - WINX_OPEN_FOR_MOVE - open for FSCTL_MOVE_FILE
+ * @param[out] pointer to variable receiving file handle.
+ * @return NTSTATUS code.
+ */
+NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
+{
+	UNICODE_STRING us;
+	OBJECT_ATTRIBUTES oa;
+	IO_STATUS_BLOCK iosb;
+	NTSTATUS status;
+	int win_version = winx_get_os_version();
+	ACCESS_MASK access_rights = SYNCHRONIZE;
+	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
+
+	if(f == NULL || phandle == NULL)
+		return STATUS_INVALID_PARAMETER;
+	
+	if(is_directory(f)){
+		flags |= FILE_OPEN_FOR_BACKUP_INTENT;
+	} else {
+		flags |= FILE_NO_INTERMEDIATE_BUFFERING;
+        
+        if(win_version >= WINDOWS_VISTA)
+            flags |= FILE_NON_DIRECTORY_FILE;
+    }
+	
+	if(is_reparse_point(f)){
+		/* open the point itself, not its target */
+		flags |= FILE_OPEN_REPARSE_POINT;
+	}
+
+	/*
+	* All files except of internal NTFS files
+	* can be successfully opened with FILE_GENERIC_READ | SYNCHRONIZE
+	* access rights on all of the supported versions of Windows.
+	* To open internal NTFS files including $mft, we use more restricted rights.
+	*/
+	if(win_version <= WINDOWS_2K){
+		/* on Windows NT and Windows 2000 */
+		if(is_encrypted(f)){
+			/* encrypted files may require read access */
+			access_rights |= FILE_GENERIC_READ;
+		} else {
+			/*
+			* All other files can be successfully opened with a single
+			* SYNCHRONIZE access. More advanced FILE_GENERIC_READ
+			* rights may prevent opening of internal NTFS files on w2k.
+			*/
+		}
+	} else if(win_version == WINDOWS_XP || win_version == WINDOWS_2K3){
+		/* On Windows XP and Windows Server 2003 */
+		/*
+		* All files can be opened with a single SYNCHRONIZE access.
+		* More advanced FILE_GENERIC_READ rights prevent opening
+		* of $mft file as well as other internal NTFS files.
+		* http://forum.sysinternals.com/topic23950.html
+		*/
+	} else if(win_version >= WINDOWS_VISTA){
+		/* On Windows Vista and Windows 7 */
+		/*
+		* $Mft may require more advanced rights, 
+		* than a single SYNCHRONIZE.
+		*/
+		access_rights |= FILE_READ_ATTRIBUTES;
+	}
+    
+    /* root folder needs FILE_READ_ATTRIBUTES to successfully retrieve FileBasicInformation,
+    see http://msdn.microsoft.com/en-us/library/ff567052(VS.85).aspx */
+    if(action == WINX_OPEN_FOR_BASIC_INFO)
+        access_rights |= FILE_READ_ATTRIBUTES;
+	
+	RtlInitUnicodeString(&us,f->path);
+	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+	/*
+	* TODO: FILE_READ_ATTRIBUTES may also be needed for reparse points,
+	* bitmaps and attribute lists as stated in:
+	* http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
+	* Though, this need careful testing on w2k and xp.
+	*/
+	status = NtCreateFile(phandle,access_rights,&oa,&iosb,NULL,0,
+				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+				FILE_OPEN,flags,NULL,0);
+	if(status != STATUS_SUCCESS)
+		*phandle = NULL;
+	return status;
+}
+
+/**
+ * @brief Closes a file opened
+ * by winx_defrag_fopen.
+ */
+void winx_defrag_fclose(HANDLE h)
+{
+	NtCloseSafe(h);
+}
+
 /** @} */

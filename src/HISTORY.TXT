@@ -9,6 +9,7 @@ HISTORY
       and to the boot time defragmenter
     - volume label is now displayed by the console interface for
       -l and -la switches
+    - ability to defragment reparse points was added
     - all the volume processing routines were optimized for speed
     - one bug causing incorrect time limit treatment was fixed
     - added display of the time limit at boot time

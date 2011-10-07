@@ -274,10 +274,6 @@ typedef struct _OBJECT_ATTRIBUTES {
         (p)->SecurityQualityOfService = NULL; \
     } while (0)
 	
-#ifndef FILE_NO_INTERMEDIATE_BUFFERING
-#define FILE_NO_INTERMEDIATE_BUFFERING  0x00000008
-#endif
-
 typedef struct _IO_STATUS_BLOCK {
     union {
         NTSTATUS Status;
@@ -576,6 +572,13 @@ typedef enum _PROCESSINFOCLASS {
 #define FILE_NON_DIRECTORY_FILE         0x00000040
 /* Windows 7 and later */
 #define FILE_DISALLOW_EXCLUSIVE         0x00020000
+
+#ifndef FILE_NO_INTERMEDIATE_BUFFERING
+#define FILE_NO_INTERMEDIATE_BUFFERING  0x00000008
+#endif
+#ifndef FILE_OPEN_REPARSE_POINT
+#define FILE_OPEN_REPARSE_POINT         0x00200000
+#endif
 
 typedef struct RTL_DRIVE_LETTER_CURDIR
 {
