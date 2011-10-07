@@ -31,6 +31,80 @@
 
 #include "udefrag-internals.h"
 
+/*
+* Uncomment it to test defragmentation
+* of various special files like reparse
+* points, attribute lists and others.
+*/
+#define TEST_SPECIAL_FILES_DEFRAG
+
+/* Test suite for special files. */
+#ifdef TEST_SPECIAL_FILES_DEFRAG
+void test_move(winx_file_info *f,udefrag_job_parameters *jp)
+{
+	winx_volume_region *target_rgn;
+	ULONGLONG source_lcn = f->disp.blockmap->lcn;
+	
+	/* try to move the first cluster to the last free region */
+	target_rgn = find_last_free_region(jp,1);
+	if(target_rgn == NULL){
+		DebugPrint("test_move: no free region found on disk");
+		return;
+	}
+	if(move_file(f,f->disp.blockmap->vcn,1,target_rgn->lcn,0,jp) < 0){
+		DebugPrint("test_move: move failed for %ws",f->path);
+		return;
+	} else {
+		DebugPrint("test_move: move succeeded for %ws",f->path);
+	}
+	/* release temporary allocated clusters */
+	release_temp_space_regions(jp);
+	/* try to move the first cluster back */
+	if(move_file(f,f->disp.blockmap->vcn,1,source_lcn,0,jp) < 0){
+		DebugPrint("test_move: move failed for %ws",f->path);
+		return;
+	} else {
+		DebugPrint("test_move: move succeeded for %ws",f->path);
+	}
+}
+
+/*
+* Tests defragmentation of reparse points,
+* encrypted files, bitmaps and attribute lists.
+*/
+void test_special_files_defrag(udefrag_job_parameters *jp)
+{
+	winx_file_info *f;
+	int special_file = 0;
+	
+	DebugPrint("test of special files defragmentation started");
+	
+	for(f = jp->filelist; f; f = f->next){
+		if(can_move(f,jp)){
+			special_file = 0;
+			if(is_reparse_point(f)){
+				DebugPrint("reparse point detected: %ws",f->path);
+				special_file = 1;
+			} else if(is_encrypted(f)){
+				DebugPrint("encrypted file detected: %ws",f->path);
+				special_file = 1;
+			} else if(winx_wcsistr(f->path,L"$BITMAP")){
+				DebugPrint("bitmap detected: %ws",f->path);
+				special_file = 1;
+			} else if(winx_wcsistr(f->path,L"$ATTRIBUTE_LIST")){
+				DebugPrint("attribute list detected: %ws",f->path);
+				special_file = 1;
+			}
+			if(special_file)
+				test_move(f,jp);
+		}
+		if(f->next == jp->filelist) break;
+	}
+	
+	DebugPrint("test of special files defragmentation completed");
+}
+#endif /* TEST_SPECIAL_FILES_DEFRAG */
+
 /**
  * @brief Calculates total number of fragmented clusters.
  */
@@ -69,6 +143,13 @@ int defragment(udefrag_job_parameters *jp)
 		result = analyze(jp); /* we need to call it once, here */
 		if(result < 0) return result;
 	}
+	
+#ifdef TEST_SPECIAL_FILES_DEFRAG
+	if(jp->job_type == DEFRAGMENTATION_JOB){
+		test_special_files_defrag(jp);
+		return 0;
+	}
+#endif
 	
 	/* choose defragmentation strategy */
 	if(jp->pi.fragmented >= jp->free_regions_count || \

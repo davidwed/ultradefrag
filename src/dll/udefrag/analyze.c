@@ -296,7 +296,13 @@ static int filter(winx_file_info *f,void *user_defined_data)
 		DebugPrint("sparse file found: %ws",f->path);
 	if(is_reparse_point(f))
 		DebugPrint("reparse point found: %ws",f->path);
+	/* TODO: comment it out after testing to speed things up */
+	if(winx_wcsistr(f->path,L"$BITMAP"))
+		DebugPrint("bitmap found: %ws",f->path);
+	if(winx_wcsistr(f->path,L"$ATTRIBUTE_LIST"))
+		DebugPrint("attribute list found: %ws",f->path);
 	
+
 	/*
 	* No files can be filtered out when
 	* volume optimization job is requested.
