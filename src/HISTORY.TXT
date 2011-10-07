@@ -62,6 +62,8 @@ HISTORY
       by winx_init_library and winx_unload_library routines respectively
     - winx_init_failed and winx_kb_init routines added to zenwinx library
     - winx_init routine removed from zenwinx library
+    - winx_defrag_fopen and winx_defrag_fclose routines
+      added to zenwinx library
     - calling conventions removed from all the function prototypes
       in all the libraries
 
