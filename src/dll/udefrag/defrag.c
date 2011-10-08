@@ -78,7 +78,12 @@ void test_special_files_defrag(udefrag_job_parameters *jp)
 	int special_file = 0;
 	
 	DebugPrint("test of special files defragmentation started");
-	
+
+	/* open the volume */
+	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+	if(jp->fVolume == NULL)
+		return;
+
 	for(f = jp->filelist; f; f = f->next){
 		if(can_move(f,jp)){
 			special_file = 0;
@@ -101,6 +106,7 @@ void test_special_files_defrag(udefrag_job_parameters *jp)
 		if(f->next == jp->filelist) break;
 	}
 	
+	winx_fclose(jp->fVolume);
 	DebugPrint("test of special files defragmentation completed");
 }
 #endif /* TEST_SPECIAL_FILES_DEFRAG */
