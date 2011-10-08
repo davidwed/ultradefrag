@@ -527,14 +527,42 @@ void winx_release_file_contents(void *contents)
 }
 
 /**
+ * @internal
+ */
+struct names_pair {
+	wchar_t *original_name;
+	wchar_t *accepted_name;
+};
+
+/**
+ * @internal
+ * @brief Auxiliary table helping to replace
+ * file name by name accepted by Windows
+ * in case of special NTFS files.
+ */
+struct names_pair special_file_names[] = {
+	{ L"$Secure:$SDH",                  L"$Secure:$SDH:$INDEX_ALLOCATION" },
+	{ L"$Secure:$SII",                  L"$Secure:$SII:$INDEX_ALLOCATION" },
+	{ L"$Extend",                       L"$Extend:$I30:$INDEX_ALLOCATION" },
+	{ L"$Extend\\$Quota:$Q",            L"$Extend\\$Quota:$Q:$INDEX_ALLOCATION" },
+	{ L"$Extend\\$Quota:$O",            L"$Extend\\$Quota:$O:$INDEX_ALLOCATION" },
+	{ L"$Extend\\$ObjId:$O",            L"$Extend\\$ObjId:$O:$INDEX_ALLOCATION" },
+	{ L"$Extend\\$Reparse:$R",          L"$Extend\\$Reparse:$R:$INDEX_ALLOCATION" },
+	{ L"$Extend\\$RmMetadata",          L"$Extend\\$RmMetadata:$I30:$INDEX_ALLOCATION" },
+	{ L"$Extend\\$RmMetadata\\$Txf",    L"$Extend\\$RmMetadata\\$Txf:$I30:$INDEX_ALLOCATION" },
+	{ L"$Extend\\$RmMetadata\\$TxfLog", L"$Extend\\$RmMetadata\\$TxfLog:$I30:$INDEX_ALLOCATION" },
+	{ NULL, NULL }
+};
+
+/**
  * @brief Opens the file for defragmentation related actions.
- * @param[in] pointer to structure containing the file information.
+ * @param[in] f pointer to structure containing the file information.
  * @param[in] action one of the WINX_OPEN_XXX constants
  * indicating an action file needs to be opened for:
  * - WINX_OPEN_FOR_DUMP - open for FSCTL_GET_RETRIEVAL_POINTERS
  * - WINX_OPEN_FOR_BASIC_INFO - open for NtQueryInformationFile(FILE_BASIC_INFORMATION)
  * - WINX_OPEN_FOR_MOVE - open for FSCTL_MOVE_FILE
- * @param[out] pointer to variable receiving file handle.
+ * @param[out] phandle pointer to variable receiving file handle.
  * @return NTSTATUS code.
  */
 NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
@@ -546,8 +574,18 @@ NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
 	int win_version = winx_get_os_version();
 	ACCESS_MASK access_rights = SYNCHRONIZE;
 	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
+	int length, i;
+	char volume_letter;
+	short *path;
+	short buffer[MAX_PATH + 1];
 
 	if(f == NULL || phandle == NULL)
+		return STATUS_INVALID_PARAMETER;
+	
+	if(f->path == NULL)
+		return STATUS_INVALID_PARAMETER;
+	
+	if(f->path[0] == 0)
 		return STATUS_INVALID_PARAMETER;
 	
 	if(is_directory(f)){
@@ -604,7 +642,31 @@ NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
     if(action == WINX_OPEN_FOR_BASIC_INFO)
         access_rights |= FILE_READ_ATTRIBUTES;
 	
-	RtlInitUnicodeString(&us,f->path);
+	/*
+	* Handle special cases, according to
+	* http://msdn.microsoft.com/en-us/library/windows/desktop/aa363911(v=vs.85).aspx
+	*/
+	path = f->path;
+	length = wcslen(f->path);
+	if(length >= 9){ /* to ensure that we have at least \??\X:\$x */
+		if(f->path[7] == '$'){
+			volume_letter = (char)f->path[4];
+			for(i = 0; special_file_names[i].original_name; i++){
+				if(winx_wcsistr(f->path,special_file_names[i].original_name)){
+					if(wcslen(f->path) == wcslen(special_file_names[i].original_name) + 0x7){
+						_snwprintf(buffer,MAX_PATH,L"\\??\\%c:\\%ws",volume_letter,
+							special_file_names[i].accepted_name);
+						buffer[MAX_PATH] = 0;
+						path = buffer;
+						DebugPrint("winx_defrag_fopen: %ws used instead of %ws",path,f->path);
+						break;
+					}
+				}
+			}
+		}
+	}
+	
+	RtlInitUnicodeString(&us,path);
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
 	/*
 	* TODO: FILE_READ_ATTRIBUTES may also be needed for reparse points,
