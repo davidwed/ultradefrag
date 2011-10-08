@@ -233,7 +233,6 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
 		return 0;
 	
 	/* open the volume */
-	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
 	if(jp->fVolume == NULL)
 		return (-1);
@@ -436,7 +435,6 @@ int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
 	}
 
 	/* open the volume */
-	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
 	if(jp->fVolume == NULL)
 		return (-1);
@@ -535,7 +533,6 @@ int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
 	}
 
 	/* open the volume */
-	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
 	if(jp->fVolume == NULL)
 		return (-1);
@@ -634,7 +631,6 @@ int defragment_big_files(udefrag_job_parameters *jp)
 	}
 
 	/* open the volume */
-	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
 	if(jp->fVolume == NULL)
 		return (-1);
@@ -841,7 +837,6 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
 	}*/
 
 	/* open the volume */
-	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
 	if(jp->fVolume == NULL)
 		return (-1);
@@ -1051,7 +1046,6 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
 	}
 
 	/* open the volume */
-	// fVolume = new_winx_vopen(winx_toupper(jp->volume_letter));
 	jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
 	if(jp->fVolume == NULL)
 		return (-1);
