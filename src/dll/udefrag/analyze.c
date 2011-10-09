@@ -278,6 +278,10 @@ static int filter(winx_file_info *f,void *user_defined_data)
 	if(f->path == NULL) goto skip;
 	if(f->path[0] == 0) goto skip;
 	
+	/* skip resident streams */
+	if(f->disp.fragments == 0)
+		return 0;
+	
 	/*
 	* Remove trailing dot from the root
 	* directory path, otherwise we'll not
@@ -475,7 +479,8 @@ static int find_files(udefrag_job_parameters *jp)
 		/* let's assume that directory processing is requested */
 		_snwprintf(path,MAX_PATH,L"\\??\\%ws",s_filter);
 		jp->filelist = winx_ftw(path,
-			WINX_FTW_RECURSIVE | WINX_FTW_DUMP_FILES | WINX_FTW_ALLOW_PARTIAL_SCAN,
+			WINX_FTW_RECURSIVE | WINX_FTW_DUMP_FILES | \
+			WINX_FTW_ALLOW_PARTIAL_SCAN | WINX_FTW_SKIP_RESIDENT_STREAMS,
 			filter,progress_callback,terminator,(void *)jp);
 		if(jp->filelist == NULL){
 			/* it seems that single file processing is requested */
@@ -490,14 +495,16 @@ static int find_files(udefrag_job_parameters *jp)
 			}
 			/* scan parent directory not recursively */
 			jp->filelist = winx_ftw(path,
-				WINX_FTW_DUMP_FILES | WINX_FTW_ALLOW_PARTIAL_SCAN,
+				WINX_FTW_DUMP_FILES | WINX_FTW_ALLOW_PARTIAL_SCAN | \
+				WINX_FTW_SKIP_RESIDENT_STREAMS,
 				filter,progress_callback,terminator,(void *)jp);
 		} else {
 			DebugPrint("directory processing requested? %ws",s_filter);
 		}
 	} else {
 		jp->filelist = winx_scan_disk(jp->volume_letter,
-			WINX_FTW_DUMP_FILES | WINX_FTW_ALLOW_PARTIAL_SCAN,
+			WINX_FTW_DUMP_FILES | WINX_FTW_ALLOW_PARTIAL_SCAN | \
+			WINX_FTW_SKIP_RESIDENT_STREAMS,
 			filter,progress_callback,terminator,(void *)jp);
 	}
 	if(jp->filelist == NULL && !jp->termination_router((void *)jp))
