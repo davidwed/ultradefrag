@@ -82,8 +82,12 @@ static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
  * passed to the registered terminator.
  * @return Zero for success,
  * negative value otherwise.
- * @note Callback procedure should complete as quickly
+ * @note 
+ * - Callback procedure should complete as quickly
  * as possible to avoid slowdown of the scan.
+ * - For resident NTFS streams (small files and
+ * directories located inside MFT) this function resets
+ * all the file disposition structure fields to zero.
  */
 int winx_ftw_dump_file(winx_file_info *f,
 		ftw_terminator t, void *user_defined_data)
@@ -104,9 +108,7 @@ int winx_ftw_dump_file(winx_file_info *f,
 	f->disp.clusters = 0;
 	f->disp.fragments = 0;
 	f->disp.flags = 0;
-	if(f->disp.blockmap)
-		winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-	f->disp.blockmap = NULL;
+	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 	
 	/* open the file */
 	status = winx_defrag_fopen(f,WINX_OPEN_FOR_DUMP,&hFile);
@@ -407,8 +409,10 @@ static int ftw_add_root_directory(short *path, int flags,
 	}
 	
 	/* call callbacks */
-	if(pcb != NULL)
-		pcb(f,user_defined_data);
+	if(pcb != NULL){
+		if(!(flags & WINX_FTW_SKIP_RESIDENT_STREAMS) || f->disp.fragments)
+			pcb(f,user_defined_data);
+	}
 	if(fcb != NULL)
 		fcb(f,user_defined_data);
 	
@@ -546,8 +550,10 @@ static int ftw_helper(short *path, int flags,
 		}
 		
 		/* call the callback routines */
-		if(pcb != NULL)
-			pcb(f,user_defined_data);
+		if(pcb != NULL){
+			if(!(flags & WINX_FTW_SKIP_RESIDENT_STREAMS) || f->disp.fragments)
+				pcb(f,user_defined_data);
+		}
 		
 		skip_children = 0;
 		if(fcb != NULL)
@@ -574,6 +580,28 @@ static int ftw_helper(short *path, int flags,
 }
 
 /**
+ * @internal
+ * @brief Removes resident streams from the file list.
+ */
+static void ftw_remove_resident_streams(winx_file_info **filelist)
+{
+	winx_file_info *f, *head, *next = NULL;
+
+	for(f = *filelist; f; f = next){
+		head = *filelist;
+		next = f->next;
+		if(f->disp.fragments == 0){
+			winx_heap_free(f->name);
+			winx_heap_free(f->path);
+			winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+			winx_list_remove_item((list_entry **)(void *)filelist,(list_entry *)f);
+		}
+		if(*filelist == NULL) break;
+		if(next == head) break;
+	}
+}
+
+/**
  * @brief Returns list of files contained
  * in directory, and all its subdirectories
  * if WINX_FTW_RECURSIVE flag is passed.
@@ -593,6 +621,9 @@ static int ftw_helper(short *path, int flags,
  * information specific for the caller. Note that the
  * progress callback may be called when all the file
  * information is gathered except of the file name and path.
+ * If WINX_FTW_SKIP_RESIDENT_STREAMS flag is set, the progress
+ * callback will never be called for files of zero length
+ * and resident NTFS streams.
  * @param[in] t address of procedure to be called
  * each time when winx_ftw would like to know
  * whether it must be terminated or not.
@@ -608,9 +639,14 @@ static int ftw_helper(short *path, int flags,
  * - fcb parameter may be equal to NULL if no
  *   filtering is needed.
  * - pcb parameter may be equal to NULL.
- * - Does not recognize NTFS data streams.
  * - Callback procedures should complete as quickly
  *   as possible to avoid slowdown of the scan.
+ * - Does not recognize additional NTFS data streams.
+ * - For resident NTFS streams (small files and
+ *   directories located inside MFT) this function resets
+ *   all the file disposition structure fields to zero.
+ * - WINX_FTW_DUMP_FILES flag must be set to accept
+ *   WINX_FTW_SKIP_RESIDENT_STREAMS.
  * @par Example:
  * @code
  * int filter(winx_file_info *f, void *user_defined_data)
@@ -653,12 +689,23 @@ winx_file_info *winx_ftw(short *path, int flags,
 	
 	DbgCheck1(path,"winx_ftw",NULL);
 	
+	if(flags & WINX_FTW_SKIP_RESIDENT_STREAMS){
+		if(!(flags & WINX_FTW_DUMP_FILES)){
+			DebugPrint("winx_ftw: WINX_FTW_DUMP_FILES flag"
+				" must be set to accept WINX_FTW_SKIP_RESIDENT_STREAMS");
+			flags &= ~WINX_FTW_SKIP_RESIDENT_STREAMS;
+		}
+	}
+	
 	if(ftw_helper(path,flags,fcb,pcb,t,user_defined_data,&filelist) == (-1) && \
 	  !(flags & WINX_FTW_ALLOW_PARTIAL_SCAN)){
 		/* destroy list */
 		winx_ftw_release(filelist);
 		return NULL;
 	}
+	  
+	if(flags & WINX_FTW_SKIP_RESIDENT_STREAMS)
+		ftw_remove_resident_streams(&filelist);
 		
 	return filelist;
 }
@@ -690,11 +737,19 @@ winx_file_info *winx_scan_disk(char volume_letter, int flags,
 	time = winx_xtime();
 	winx_dbg_print_header(0,0,"winx_scan_disk started");
 	
+	if(flags & WINX_FTW_SKIP_RESIDENT_STREAMS){
+		if(!(flags & WINX_FTW_DUMP_FILES)){
+			DebugPrint("winx_ftw: WINX_FTW_DUMP_FILES flag"
+				" must be set to accept WINX_FTW_SKIP_RESIDENT_STREAMS");
+			flags &= ~WINX_FTW_SKIP_RESIDENT_STREAMS;
+		}
+	}
+	
 	if(winx_get_volume_information(volume_letter,&v) >= 0){
 		DebugPrint("winx_scan_disk: file system is %s",v.fs_name);
 		if(!strcmp(v.fs_name,"NTFS")){
 			filelist = ntfs_scan_disk(volume_letter,flags,fcb,pcb,t,user_defined_data);
-			goto done;
+			goto cleanup;
 		}
 	}
 	
@@ -718,6 +773,10 @@ winx_file_info *winx_scan_disk(char volume_letter, int flags,
 		goto done;
 	}
 
+cleanup:
+	if(flags & WINX_FTW_SKIP_RESIDENT_STREAMS)
+		ftw_remove_resident_streams(&filelist);
+		
 done:
 	winx_dbg_print_header(0,0,"winx_scan_disk completed in %I64u ms",
 		winx_xtime() - time);

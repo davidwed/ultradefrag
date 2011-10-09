@@ -124,9 +124,10 @@ void winx_release_file_contents(void *contents);
 
 /* ftw.c */
 /* winx_ftw flags */
-#define WINX_FTW_RECURSIVE           0x1 /* forces to recursively scan all subdirectories */
-#define WINX_FTW_DUMP_FILES          0x2 /* forces to fill winx_file_disposition structure */
-#define WINX_FTW_ALLOW_PARTIAL_SCAN  0x4 /* allows information to be gathered partially */
+#define WINX_FTW_RECURSIVE              0x1 /* forces to recursively scan all subdirectories */
+#define WINX_FTW_DUMP_FILES             0x2 /* forces to fill winx_file_disposition structure */
+#define WINX_FTW_ALLOW_PARTIAL_SCAN     0x4 /* allows information to be gathered partially */
+#define WINX_FTW_SKIP_RESIDENT_STREAMS  0x8 /* forces to skip files of zero length and files located inside MFT */
 
 #define is_readonly(f)            ((f)->flags & FILE_ATTRIBUTE_READONLY)
 #define is_hidden(f)              ((f)->flags & FILE_ATTRIBUTE_HIDDEN)

@@ -1353,8 +1353,10 @@ static void analyze_file_record(NTFS_FILE_RECORD_OUTPUT_BUFFER *nfrob,
 				}
 			} else {
 				/* call progress callback */
-				if(sp->pcb)
-					sp->pcb(f,sp->user_defined_data);
+				if(sp->pcb){
+					if(!(sp->flags & WINX_FTW_SKIP_RESIDENT_STREAMS) || f->disp.fragments)
+						sp->pcb(f,sp->user_defined_data);
+				}
 			}
 		}
 		f = next;
