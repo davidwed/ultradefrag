@@ -135,20 +135,7 @@ title Build Test Release for Stefan
 echo.
 call build.cmd --use-winddk --no-ia64
 echo.
-if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
-echo.
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*"        "%USERPROFILE%\Downloads\UltraDefrag"
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ia64\ultradefrag-*.bin.ia64.*"   "%USERPROFILE%\Downloads\UltraDefrag"
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\amd64\ultradefrag-*.bin.amd64.*" "%USERPROFILE%\Downloads\UltraDefrag"
-set old_file=X
-for %%F in ( "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip10
-set new_file=%old_file:i386=x86%
-move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip10
-echo.
-cd /d %UD_BLD_MENU_DIR%
-call build.cmd --clean
+call :CopyInstallers -zip
 goto finished
 
 :11
@@ -166,20 +153,7 @@ title Build Test AMD64 for Stefan
 echo.
 call build.cmd --use-winddk --no-ia64 --no-x86
 echo.
-if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
-echo.
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*"        "%USERPROFILE%\Downloads\UltraDefrag"
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ia64\ultradefrag-*.bin.ia64.*"   "%USERPROFILE%\Downloads\UltraDefrag"
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\amd64\ultradefrag-*.bin.amd64.*" "%USERPROFILE%\Downloads\UltraDefrag"
-set old_file=X
-for %%F in ( "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip12
-set new_file=%old_file:i386=x86%
-move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip12
-echo.
-cd /d %UD_BLD_MENU_DIR%
-call build.cmd --clean
+call :CopyInstallers
 goto finished
 
 :13
@@ -187,22 +161,34 @@ title Build Test x86 for Stefan
 echo.
 call build.cmd --use-winddk --no-ia64 --no-amd64
 echo.
-if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
-echo.
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*"        "%USERPROFILE%\Downloads\UltraDefrag"
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ia64\ultradefrag-*.bin.ia64.*"   "%USERPROFILE%\Downloads\UltraDefrag"
-copy /b /y /v "%UD_BLD_MENU_DIR%\bin\amd64\ultradefrag-*.bin.amd64.*" "%USERPROFILE%\Downloads\UltraDefrag"
-set old_file=X
-for %%F in ( "%UD_BLD_MENU_DIR%\bin\ultradefrag-*.bin.i386.*" ) do set old_file=%%~nxF
-if "%old_file%" == "X" goto :skip13
-set new_file=%old_file:i386=x86%
-move /y "%USERPROFILE%\Downloads\UltraDefrag\%old_file%" "%USERPROFILE%\Downloads\UltraDefrag\%new_file%"
-:skip13
-echo.
-cd /d %UD_BLD_MENU_DIR%
-call build.cmd --clean
+call :CopyInstallers
 goto finished
 
 :finished
 echo.
 pause
+
+goto :EOF
+
+:CopyInstallers
+if not exist "%USERPROFILE%\Downloads\UltraDefrag" mkdir "%USERPROFILE%\Downloads\UltraDefrag"
+cd /d "%USERPROFILE%\Downloads\UltraDefrag"
+echo.
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ultradefrag-%UDVERSION_SUFFIX%.bin.i386.exe"        .
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\ia64\ultradefrag-%UDVERSION_SUFFIX%.bin.ia64.exe"   .
+copy /b /y /v "%UD_BLD_MENU_DIR%\bin\amd64\ultradefrag-%UDVERSION_SUFFIX%.bin.amd64.exe" .
+set old_file=X
+for %%F in ( "%UD_BLD_MENU_DIR%\bin\ultradefrag-%UDVERSION_SUFFIX%.bin.i386.exe" ) do set old_file=%%~nxF
+if "%old_file%" == "X" goto :noRename
+set new_file=%old_file:i386=x86%
+move /y "%old_file%" "%new_file%"
+:noRename
+echo.
+if "%~1" == "" goto :noZip
+del /f /q "ultradefrag-%UDVERSION_SUFFIX%.7z"
+"%SEVENZIP_PATH%\7z.exe" a -r -t7z -mx9 -pud -mhe=on "ultradefrag-%UDVERSION_SUFFIX%.7z" "ultradefrag-%UDVERSION_SUFFIX%.bin.*.exe"
+:noZip
+echo.
+cd /d %UD_BLD_MENU_DIR%
+call build.cmd --clean
+goto :EOF
