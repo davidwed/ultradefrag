@@ -23,7 +23,6 @@ echo Creating default doxygen HTML header, footer and CSS script...
 echo.
 
 call :make_default .                    || goto fail
-call :make_default .\gui                || goto fail
 call :make_default .\dll\udefrag        || goto fail
 call :make_default .\dll\wgx            || goto fail
 call :make_default .\dll\zenwinx        || goto fail
@@ -49,7 +48,7 @@ rem Example:  call :make_default .\dll\zenwinx
     echo ====
     echo %CD%
     echo.
-	rd /s /q doxy-defaults
+	if exist doxy-defaults rd /s /q doxy-defaults
 	doxygen -w html default_header.html default_footer.html default_styles.css DoxyFile || goto compilation_failed
     md doxy-defaults
 	move /Y default_*.* doxy-defaults
