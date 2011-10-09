@@ -207,6 +207,7 @@ BOOL IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account)
 }
 
 /**
+ * @internal
  * @brief An asynchronous equivalent 
  * of IncreaseGoogleAnalyticsCounter.
  * @note Runs in a separate thread.
