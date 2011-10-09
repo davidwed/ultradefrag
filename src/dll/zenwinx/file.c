@@ -576,8 +576,8 @@ NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
 	ULONG flags = FILE_SYNCHRONOUS_IO_NONALERT;
 	int length, i;
 	char volume_letter;
-	short *path;
-	short buffer[MAX_PATH + 1];
+	wchar_t *path;
+	wchar_t buffer[MAX_PATH + 1];
 
 	if(f == NULL || phandle == NULL)
 		return STATUS_INVALID_PARAMETER;
@@ -643,6 +643,15 @@ NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
         access_rights |= FILE_READ_ATTRIBUTES;
 	
 	/*
+	* FILE_READ_ATTRIBUTES may also be needed for reparse points,
+	* bitmaps and attribute lists as stated in:
+	* http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
+	* However, both nonresident bitmaps and reparse points
+	* seem to be extraordinary while attribute lists are locked
+	* regardless of access rights used to open them.
+	*/
+	
+	/*
 	* Handle special cases, according to
 	* http://msdn.microsoft.com/en-us/library/windows/desktop/aa363911(v=vs.85).aspx
 	*/
@@ -668,12 +677,6 @@ NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
 	
 	RtlInitUnicodeString(&us,path);
 	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	/*
-	* TODO: FILE_READ_ATTRIBUTES may also be needed for reparse points,
-	* bitmaps and attribute lists as stated in:
-	* http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
-	* Though, this need careful testing on w2k and xp.
-	*/
 	status = NtCreateFile(phandle,access_rights,&oa,&iosb,NULL,0,
 				FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
 				FILE_OPEN,flags,NULL,0);
