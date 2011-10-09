@@ -12,8 +12,6 @@ HISTORY
     - ability to defragment a few more internal NTFS files 
       ($Secure streams, $Extend folder and its subfolders) was added
     - ability to defragment reparse points was added
-    - volume analysis was forced to skip files of zero length and
-      resident streams (files located inside MFT)
     - all the volume processing routines were optimized for speed
     - one bug causing incorrect time limit treatment was fixed
     - added display of the time limit at boot time

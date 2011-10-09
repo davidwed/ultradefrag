@@ -409,10 +409,8 @@ static int ftw_add_root_directory(short *path, int flags,
 	}
 	
 	/* call callbacks */
-	if(pcb != NULL){
-		if(!(flags & WINX_FTW_SKIP_RESIDENT_STREAMS) || f->disp.fragments)
-			pcb(f,user_defined_data);
-	}
+	if(pcb != NULL)
+		pcb(f,user_defined_data);
 	if(fcb != NULL)
 		fcb(f,user_defined_data);
 	
@@ -550,10 +548,8 @@ static int ftw_helper(short *path, int flags,
 		}
 		
 		/* call the callback routines */
-		if(pcb != NULL){
-			if(!(flags & WINX_FTW_SKIP_RESIDENT_STREAMS) || f->disp.fragments)
-				pcb(f,user_defined_data);
-		}
+		if(pcb != NULL)
+			pcb(f,user_defined_data);
 		
 		skip_children = 0;
 		if(fcb != NULL)
