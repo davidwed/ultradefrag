@@ -53,8 +53,9 @@ HISTORY
     - progress percentage calculation was improved
     - volume analysis was allowed for full disks having no free space
     - Developers: winx_create_mutex, winx_open_mutex, winx_release_mutex,
-      winx_destroy_mutex, winx_stristr functions added to zenwinx library
-    - binary trees manipulation routines were added to zenwinx library;
+      winx_destroy_mutex, winx_stristr, winx_wcsmatch, winx_patcmp, 
+      winx_defrag_fopen, winx_defrag_fclose functions added to zenwinx library
+    - binary tree manipulation routines were added to zenwinx library;
       they're based on the GNU libavl red-black trees with parent pointers
     - winx_fbsize, winx_dfbsize, udefrag_fbsize, udefrag_dfbsize routines
       replaced by winx_bytes_to_hr, winx_hr_to_bytes, udefrag_bytes_to_hr,
@@ -64,8 +65,6 @@ HISTORY
       by winx_init_library and winx_unload_library routines respectively
     - winx_init_failed and winx_kb_init routines added to zenwinx library
     - winx_init routine removed from zenwinx library
-    - winx_defrag_fopen and winx_defrag_fclose routines
-      added to zenwinx library
     - WINX_FTW_SKIP_RESIDENT_STREAMS flag added to winx_ftw and winx_scan_disk
       routines
     - calling conventions removed from all the function prototypes

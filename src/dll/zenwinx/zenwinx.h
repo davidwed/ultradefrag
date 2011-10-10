@@ -334,6 +334,7 @@ char *winx_strdup(const char *s);
 wchar_t *winx_wcsdup(const wchar_t *s);
 wchar_t *winx_wcsistr(const wchar_t * wcs1,const wchar_t * wcs2);
 char *winx_stristr(const char * s1,const char * s2);
+int winx_wcsmatch(wchar_t *string, wchar_t *mask, int flags);
 char *winx_vsprintf(const char *format,va_list arg);
 char *winx_sprintf(const char *format, ...);
 
@@ -341,13 +342,14 @@ char *winx_sprintf(const char *format, ...);
 
 typedef struct _winx_patlist {
 	int count;
-	short **array;
+	wchar_t **array;
 	int flags;
-	short *string;
+	wchar_t *string;
 } winx_patlist;
 
-int winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags);
-int winx_patfind(short *string,winx_patlist *patterns);
+int winx_patcomp(winx_patlist *patterns,wchar_t *string,wchar_t *delim,int flags);
+int winx_patfind(wchar_t *string,winx_patlist *patterns);
+int winx_patcmp(wchar_t *string,winx_patlist *patterns);
 void winx_patfree(winx_patlist *patterns);
 
 int winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);

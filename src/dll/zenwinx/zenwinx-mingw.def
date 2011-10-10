@@ -95,10 +95,12 @@ EXPORTS
 	winx_wcsdup
 	winx_wcsistr
 	winx_stristr
+	winx_wcsmatch
 	winx_vsprintf
 	winx_sprintf
 	winx_patcomp
 	winx_patfind
+	winx_patcmp
 	winx_patfree
 	winx_path_remove_extension
 	winx_path_remove_filename

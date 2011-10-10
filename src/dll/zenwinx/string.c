@@ -162,6 +162,53 @@ char *winx_stristr(const char * s1,const char * s2)
 }
 
 /**
+ * @brief Compares a string with a mask.
+ * @details Supports <b>?</b> and <b>*</b> wildcards.
+ * @param[in] string the string to be compared with mask.
+ * @param[in] mask the mask to be compared with string.
+ * @param[in] flags combination of WINX_PAT_xxx flags.
+ * @return Nonzero value indicates that string matches the mask.
+ */
+int winx_wcsmatch(wchar_t *string, wchar_t *mask, int flags)
+{
+	wchar_t cs, cm;
+	
+	if(string == NULL || mask == NULL)
+		return 0;
+	
+	if(wcscmp(mask,L"*") == 0)
+		return 1;
+
+	while(*string && *mask){
+		cs = *string; cm = *mask;
+		if(flags & WINX_PAT_ICASE){
+			cs = (wchar_t)towlower((wint_t)cs);
+			cm = (wchar_t)towlower((wint_t)cm);
+		}
+		if(cs != cm && cm != '?'){
+			/* the current pair of characters differs */
+			if(cm != '*') return 0;
+			/* skip asterisk */
+			mask ++;
+			if(*mask == 0)
+				return 1;
+			/* compare rest of the string with rest of the mask */
+			for(; *string; string++){
+				if(winx_wcsmatch(string, mask, flags))
+					return 1;
+			}
+			return 0;
+		}
+		/* let's compare next pair of characters */
+		string ++;
+		mask ++;
+	}
+	
+	while(*mask == '*') mask ++;
+	return (*string == 0 && *mask == 0) ? 1 : 0;
+}
+
+/**
  * @brief Robust and flexible alternative to _vsnprintf.
  * @param[in] format the format specification.
  * @param[in] arg pointer to list of arguments.
@@ -240,11 +287,11 @@ char *winx_sprintf(const char *format, ...)
  * @param[in] flags combination of WINX_PAT_xxx flags.
  * @return Zero for success, negative value otherwise.
  */
-int winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags)
+int winx_patcomp(winx_patlist *patterns,wchar_t *string,wchar_t *delim,int flags)
 {
 	int pattern_detected;
 	int i, j, n;
-	short *s;
+	wchar_t *s;
 	
 	if(patterns == NULL || string == NULL || delim == NULL)
 		return (-1);
@@ -262,7 +309,7 @@ int winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags)
 	s = winx_wcsdup(string);
 	if(s == NULL){
 		DebugPrint("winx_patcomp: cannot allocate %u bytes of memory",
-			(wcslen(string) + 1) * sizeof(short));
+			(wcslen(string) + 1) * sizeof(wchar_t));
 		return (-1);
 	}
 	
@@ -286,10 +333,10 @@ int winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags)
 	}
 	
 	/* build array of patterns */
-	patterns->array = winx_heap_alloc(patterns->count * sizeof(short *));
+	patterns->array = winx_heap_alloc(patterns->count * sizeof(wchar_t *));
 	if(patterns->array == NULL){
 		DebugPrint("winx_patcomp: cannot allocate %u bytes of memory",
-			patterns->count * sizeof(short *));
+			patterns->count * sizeof(wchar_t *));
 		winx_heap_free(s);
 		patterns->count = 0;
 		return (-1);
@@ -312,14 +359,14 @@ int winx_patcomp(winx_patlist *patterns,short *string,short *delim,int flags)
 }
 
 /**
- * @brief Searches for patterns in the string.
+ * @brief Searches for patterns in a string.
  * @param[in] string the string to search in.
  * @param[in] patterns the list of patterns
  * to be searched for.
  * @return Nonzero value indicates
  * that at least one pattern has been found.
  */
-int winx_patfind(short *string,winx_patlist *patterns)
+int winx_patfind(wchar_t *string,winx_patlist *patterns)
 {
 	int i;
 	wchar_t *result;
@@ -336,6 +383,30 @@ int winx_patfind(short *string,winx_patlist *patterns)
 			return 1; /* pattern found */
 	}
 	/* no patterns found */
+	return 0;
+}
+
+/**
+ * @brief Compares a string with patterns.
+ * @details Supports <b>?</b> and <b>*</b> wildcards.
+ * @param[in] string the string to compare patterns with.
+ * @param[in] patterns the list of patterns
+ * to be compared with the string.
+ * @return Nonzero value indicates that
+ * at least one pattern matches the string.
+ */
+int winx_patcmp(wchar_t *string,winx_patlist *patterns)
+{
+	int i;
+	
+	if(string == NULL || patterns == NULL)
+		return 0;
+	
+	for(i = 0; i < patterns->count; i++){
+		if(winx_wcsmatch(string, patterns->array[i], patterns->flags))
+			return 1;
+	}
+	/* no pattern matches the string */
 	return 0;
 }
 
