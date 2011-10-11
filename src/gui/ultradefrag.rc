@@ -64,6 +64,10 @@ IDB_TOOLBAR_16_BIT             BITMAP  DISCARDABLE     "res/toolbar16.bmp"
 IDB_TOOLBAR_DISABLED_16_BIT    BITMAP  DISCARDABLE     "res/toolbar16d.bmp"
 IDB_TOOLBAR_HIGHLIGHTED_16_BIT BITMAP  DISCARDABLE     "res/toolbar16h.bmp"
 
+IDB_MENU                       BITMAP  DISCARDABLE     "res/menu24.bmp"
+IDB_MENU_8_BIT                 BITMAP  DISCARDABLE     "res/menu8.bmp"
+IDB_MENU_16_BIT                BITMAP  DISCARDABLE     "res/menu16.bmp"
+
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
 STYLE DS_CENTER | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Ultra Defragmenter"

@@ -34,98 +34,98 @@
 HMENU hMainMenu = NULL;
 
 WGX_MENU when_done_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_WHEN_DONE_NONE,        NULL, L"&None"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_EXIT,      NULL, L"E&xit"},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_STANDBY,   NULL, L"Stan&dby"},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_HIBERNATE, NULL, L"&Hibernate"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_LOGOFF,    NULL, L"&Logoff"},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_REBOOT,    NULL, L"&Reboot"},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_SHUTDOWN,  NULL, L"&Shutdown"},
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_WHEN_DONE_NONE,        NULL, L"&None",       -1 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_EXIT,      NULL, L"E&xit",       -1 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_STANDBY,   NULL, L"Stan&dby",    -1 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_HIBERNATE, NULL, L"&Hibernate",  -1 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_LOGOFF,    NULL, L"&Logoff",     -1 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_REBOOT,    NULL, L"&Reboot",     -1 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_WHEN_DONE_SHUTDOWN,  NULL, L"&Shutdown",   -1 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU action_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_ANALYZE,                             NULL, L"&Analyze\tF5"   },
-	{MF_STRING | MF_ENABLED,IDM_DEFRAG,                              NULL, L"&Defragment\tF6"},
-	{MF_STRING | MF_ENABLED,IDM_QUICK_OPTIMIZE,                      NULL, L"&Quick optimization\tF7"  },
-	{MF_STRING | MF_ENABLED,IDM_FULL_OPTIMIZE,                       NULL, L"&Full optimization\tCtrl+F7"  },
-	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE_MFT,                        NULL, L"&Optimize MFT\tShift+F7"  },
-	{MF_STRING | MF_ENABLED,IDM_STOP,                                NULL, L"&Stop\tCtrl+C"  },
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_REPEAT_ACTION,        NULL, L"Re&peat action\tShift+R"  },
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA, NULL, L"Skip removable &media\tCtrl+M"},
-	{MF_STRING | MF_ENABLED,IDM_RESCAN,                              NULL, L"&Rescan drives\tCtrl+D"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_POPUP,IDM_WHEN_DONE,                when_done_menu,L"&When done"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED,IDM_EXIT,                                NULL, L"E&xit\tAlt+F4"},
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED,IDM_ANALYZE,                             NULL, L"&Analyze\tF5",                   0 },
+	{MF_STRING | MF_ENABLED,IDM_DEFRAG,                              NULL, L"&Defragment\tF6",                3 },
+	{MF_STRING | MF_ENABLED,IDM_QUICK_OPTIMIZE,                      NULL, L"&Quick optimization\tF7",        4 },
+	{MF_STRING | MF_ENABLED,IDM_FULL_OPTIMIZE,                       NULL, L"&Full optimization\tCtrl+F7",    5 },
+	{MF_STRING | MF_ENABLED,IDM_OPTIMIZE_MFT,                        NULL, L"&Optimize MFT\tShift+F7",        6 },
+	{MF_STRING | MF_ENABLED,IDM_STOP,                                NULL, L"&Stop\tCtrl+C",                  7 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_REPEAT_ACTION,        NULL, L"Re&peat action\tShift+R",        1 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_IGNORE_REMOVABLE_MEDIA, NULL, L"Skip removable &media\tCtrl+M", -1 },
+	{MF_STRING | MF_ENABLED,IDM_RESCAN,                              NULL, L"&Rescan drives\tCtrl+D",        -1 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED | MF_POPUP,IDM_WHEN_DONE,                when_done_menu,L"&When done",           -1 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED,IDM_EXIT,                                NULL, L"E&xit\tAlt+F4",                 -1 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU report_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT,                         NULL, L"&Show report\tF8"},
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT,                         NULL, L"&Show report\tF8", 8 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU language_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,                 NULL, L"&Translations folder" },
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1,         NULL, L"English (US)" },
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,                 NULL, L"&Translations folder", -1 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1,         NULL, L"English (US)",         -1 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU gui_config_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_FONT,                        NULL, L"&Font\tF9"    },
-	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS,                    NULL, L"&Options\tF10"},
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_FONT,                        NULL, L"&Font\tF9"    , -1 },
+	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS,                    NULL, L"&Options\tF10",  9 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU boot_config_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_CFG_BOOT_ENABLE,      NULL, L"&Enable\tF11"},
-	{MF_STRING | MF_ENABLED,IDM_CFG_BOOT_SCRIPT,                     NULL, L"&Script\tF12"},
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_CFG_BOOT_ENABLE,      NULL, L"&Enable\tF11", 10 },
+	{MF_STRING | MF_ENABLED,IDM_CFG_BOOT_SCRIPT,                     NULL, L"&Script\tF12", 11 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU settings_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_LANGUAGE,    language_menu,     L"&Language"            },
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_GUI,     gui_config_menu,   L"&Graphical interface" },
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_BOOT,    boot_config_menu,  L"&Boot time scan"      },
-	{MF_STRING | MF_ENABLED,            IDM_CFG_REPORTS, NULL,              L"&Reports\tCtrl+R"     },
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_LANGUAGE,    language_menu,     L"&Language",            -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_GUI,     gui_config_menu,   L"&Graphical interface", -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_BOOT,    boot_config_menu,  L"&Boot time scan",      -1 },
+	{MF_STRING | MF_ENABLED,            IDM_CFG_REPORTS, NULL,              L"&Reports\tCtrl+R",     -1 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU help_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_CONTENTS,                            NULL, L"&Contents\tF1"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED,IDM_BEST_PRACTICE,                       NULL, L"Best &practice\tF2"},
-	{MF_STRING | MF_ENABLED,IDM_FAQ,                                 NULL, L"&FAQ\tF3"},
-	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED,IDM_ABOUT,                               NULL, L"&About\tF4"},
-	{0,0,NULL,NULL}
+	{MF_STRING | MF_ENABLED,IDM_CONTENTS,                            NULL, L"&Contents\tF1",      12 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED,IDM_BEST_PRACTICE,                       NULL, L"Best &practice\tF2", -1 },
+	{MF_STRING | MF_ENABLED,IDM_FAQ,                                 NULL, L"&FAQ\tF3",           -1 },
+	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED,IDM_ABOUT,                               NULL, L"&About\tF4",         -1 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU preview_menu[] = {
-//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MOVE_FRONT,   NULL, L"Move files to front for optimization"},
-//	{MF_SEPARATOR,0,NULL,NULL},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space"},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space"},
-//	{MF_SEPARATOR,0,NULL,NULL},
-//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_SKIP_PARTIAL, NULL, L"Skip partial defragmenting"},
-	{0,0,NULL,NULL}
+//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MOVE_FRONT,   NULL, L"Move files to front for optimization", -1 },
+//	{MF_SEPARATOR,0,NULL,NULL,0},
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space", -1 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space", -1 },
+//	{MF_SEPARATOR,0,NULL,NULL,0},
+//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_SKIP_PARTIAL, NULL, L"Skip partial defragmenting", -1 },
+	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU main_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_ACTION,   action_menu,        L"&Action"},
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_REPORT,   report_menu,        L"&Report"},
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_SETTINGS, settings_menu,      L"&Settings"},
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_HELP,     help_menu,          L"&Help"},
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_ACTION,   action_menu,        L"&Action",   -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_REPORT,   report_menu,        L"&Report",   -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_SETTINGS, settings_menu,      L"&Settings", -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_HELP,     help_menu,          L"&Help",     -1 },
 #ifndef _UD_HIDE_PREVIEW_
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_PREVIEW,  preview_menu,       L"Preview"},
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_PREVIEW,  preview_menu,       L"Preview",   -1 },
 #endif /* _UD_HIDE_PREVIEW_ */
-	{0,0,NULL,NULL}
+	{0,0,NULL,NULL,0}
 };
 
 /**
@@ -135,8 +135,38 @@ WGX_MENU main_menu[] = {
  */
 int CreateMainMenu(void)
 {
+    HBITMAP hBMtoolbar = NULL;
+	HDC hdc;
+	int bpp = 32;
+	int id;
+
+	/* get image for menu items */
+	hdc = GetDC(hWindow);
+	if(hdc){
+		bpp = GetDeviceCaps(hdc,BITSPIXEL);
+		ReleaseDC(hWindow,hdc);
+	}
+	switch(bpp){
+	case 1:
+	case 2:
+	case 4:
+	case 8:
+		/* nt4 etc */
+		id = IDB_MENU_8_BIT;
+		break;
+	case 16:
+		/* w2k etc */
+		id = IDB_MENU_16_BIT;
+		break;
+	default:
+		/* xp etc */
+		id = IDB_MENU;
+		break;
+	}
+    hBMtoolbar = LoadBitmap(hInstance, MAKEINTRESOURCE(id));
+
 	/* create menu */
-	hMainMenu = WgxBuildMenu(main_menu);
+	hMainMenu = WgxBuildMenu(main_menu,hBMtoolbar);
 	
 	/* attach menu to the window */
 	if(!SetMenu(hWindow,hMainMenu)){
