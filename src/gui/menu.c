@@ -66,64 +66,60 @@ WGX_MENU action_menu[] = {
 };
 
 WGX_MENU report_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT,                         NULL, L"&Show report\tF8", 8 },
+	{MF_STRING | MF_ENABLED,IDM_SHOW_REPORT, NULL, L"&Show report\tF8", 8 },
 	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU language_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,                 NULL, L"&Translations folder", -1 },
+	{MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,         NULL, L"&Translations folder", -1 },
 	{MF_SEPARATOR,0,NULL,NULL,0},
-	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1,         NULL, L"English (US)",         -1 },
+	{MF_STRING | MF_ENABLED | MF_CHECKED,IDM_LANGUAGE + 0x1, NULL, L"English (US)",         -1 },
 	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU gui_config_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_FONT,                        NULL, L"&Font\tF9"    , -1 },
-	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS,                    NULL, L"&Options\tF10",  9 },
+	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_FONT,     NULL, L"&Font\tF9"    , -1 },
+	{MF_STRING | MF_ENABLED,IDM_CFG_GUI_SETTINGS, NULL, L"&Options\tF10",  9 },
 	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU boot_config_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_CFG_BOOT_ENABLE,      NULL, L"&Enable\tF11", 10 },
-	{MF_STRING | MF_ENABLED,IDM_CFG_BOOT_SCRIPT,                     NULL, L"&Script\tF12", 11 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_CFG_BOOT_ENABLE, NULL, L"&Enable\tF11", 10 },
+	{MF_STRING | MF_ENABLED,IDM_CFG_BOOT_SCRIPT,                NULL, L"&Script\tF12", 11 },
 	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU settings_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_LANGUAGE,    language_menu,     L"&Language",            -1 },
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_GUI,     gui_config_menu,   L"&Graphical interface", -1 },
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_BOOT,    boot_config_menu,  L"&Boot time scan",      -1 },
-	{MF_STRING | MF_ENABLED,            IDM_CFG_REPORTS, NULL,              L"&Reports\tCtrl+R",     -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_LANGUAGE,    language_menu,    L"&Language",            -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_GUI,     gui_config_menu,  L"&Graphical interface", -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_CFG_BOOT,    boot_config_menu, L"&Boot time scan",      -1 },
+	{MF_STRING | MF_ENABLED,            IDM_CFG_REPORTS, NULL,             L"&Reports\tCtrl+R",     -1 },
 	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU help_menu[] = {
-	{MF_STRING | MF_ENABLED,IDM_CONTENTS,                            NULL, L"&Contents\tF1",      12 },
+	{MF_STRING | MF_ENABLED,IDM_CONTENTS,      NULL, L"&Contents\tF1",      12 },
 	{MF_SEPARATOR,0,NULL,NULL,0},
-	{MF_STRING | MF_ENABLED,IDM_BEST_PRACTICE,                       NULL, L"Best &practice\tF2", -1 },
-	{MF_STRING | MF_ENABLED,IDM_FAQ,                                 NULL, L"&FAQ\tF3",           -1 },
+	{MF_STRING | MF_ENABLED,IDM_BEST_PRACTICE, NULL, L"Best &practice\tF2", -1 },
+	{MF_STRING | MF_ENABLED,IDM_FAQ,           NULL, L"&FAQ\tF3",           -1 },
 	{MF_SEPARATOR,0,NULL,NULL,0},
-	{MF_STRING | MF_ENABLED,IDM_ABOUT,                               NULL, L"&About\tF4",         -1 },
+	{MF_STRING | MF_ENABLED,IDM_ABOUT,         NULL, L"&About\tF4",         -1 },
 	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU preview_menu[] = {
-//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MOVE_FRONT,   NULL, L"Move files to front for optimization", -1 },
-//	{MF_SEPARATOR,0,NULL,NULL,0},
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,      NULL, L"Find largest free space", -1 },
-	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING,     NULL, L"Find matching free space", -1 },
-//	{MF_SEPARATOR,0,NULL,NULL,0},
-//	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_SKIP_PARTIAL, NULL, L"Skip partial defragmenting", -1 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_LARGEST,  NULL, L"Find largest free space",  -1 },
+	{MF_STRING | MF_ENABLED | MF_UNCHECKED,IDM_PREVIEW_MATCHING, NULL, L"Find matching free space", -1 },
 	{0,0,NULL,NULL,0}
 };
 
 WGX_MENU main_menu[] = {
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_ACTION,   action_menu,        L"&Action",   -1 },
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_REPORT,   report_menu,        L"&Report",   -1 },
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_SETTINGS, settings_menu,      L"&Settings", -1 },
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_HELP,     help_menu,          L"&Help",     -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_ACTION,   action_menu,   L"&Action",   -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_REPORT,   report_menu,   L"&Report",   -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_SETTINGS, settings_menu, L"&Settings", -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_HELP,     help_menu,     L"&Help",     -1 },
 #ifndef _UD_HIDE_PREVIEW_
-	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_PREVIEW,  preview_menu,       L"Preview",   -1 },
+	{MF_STRING | MF_ENABLED | MF_POPUP, IDM_PREVIEW,  preview_menu,  L"Preview",   -1 },
 #endif /* _UD_HIDE_PREVIEW_ */
 	{0,0,NULL,NULL,0}
 };
@@ -198,14 +194,8 @@ int CreateMainMenu(void)
 	} else {
 		EnableMenuItem(hMainMenu,IDM_CFG_BOOT_ENABLE,MF_BYCOMMAND | MF_GRAYED);
 		EnableMenuItem(hMainMenu,IDM_CFG_BOOT_SCRIPT,MF_BYCOMMAND | MF_GRAYED);
-		/*EnableMenuItem(hMainMenu,IDM_CFG_BOOT,       MF_BYCOMMAND | MF_GRAYED);*/
 	}
 	
-	/* if(job_flags & UD_PREVIEW_MOVE_FRONT){
-		CheckMenuItem(hMainMenu,
-			IDM_PREVIEW_MOVE_FRONT,
-			MF_BYCOMMAND | MF_CHECKED);
-	} */
 	if(job_flags & UD_PREVIEW_MATCHING){
 		CheckMenuItem(hMainMenu,
 			IDM_PREVIEW_MATCHING,
@@ -215,11 +205,6 @@ int CreateMainMenu(void)
 			IDM_PREVIEW_LARGEST,
 			MF_BYCOMMAND | MF_CHECKED);
 	}
-	/* if(job_flags & UD_PREVIEW_SKIP_PARTIAL){
-		CheckMenuItem(hMainMenu,
-			IDM_PREVIEW_SKIP_PARTIAL,
-			MF_BYCOMMAND | MF_CHECKED);
-	} */
 
 	if(!DrawMenuBar(hWindow))
 		WgxDbgPrintLastError("Cannot redraw main menu");
