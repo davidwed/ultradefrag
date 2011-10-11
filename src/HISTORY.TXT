@@ -5,6 +5,7 @@ HISTORY
     RC1:
     - MFT optimization implemented
     - repeat action menu and toolbar button were added to GUI
+    - menu now shows the same images as the toolbar
     - --repeat command line switch was added to the console interface
       and to the boot time defragmenter
     - volume label is now displayed by the console interface for
@@ -67,6 +68,7 @@ HISTORY
     - winx_init routine removed from zenwinx library
     - WINX_FTW_SKIP_RESIDENT_STREAMS flag added to winx_ftw and winx_scan_disk
       routines
+    - WgxGetToolbarBitmapForMenu function added
     - calling conventions removed from all the function prototypes
       in all the libraries
 

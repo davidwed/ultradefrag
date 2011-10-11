@@ -93,13 +93,14 @@ typedef struct _WGX_MENU {
 	UINT id;                    /* menu item identifier */
 	struct _WGX_MENU *submenu;  /* pointer to submenu table in case of MF_POPUP */
 	wchar_t *text;              /* menu item text in case of MF_STRING */
+    int toolbar_image_id;       /* position of the image on the toolbar ( -1 if not used, ignored for separators) */
 } WGX_MENU, *PWGX_MENU;
 
 /* wgx routines prototypes */
 BOOL WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
 
-HMENU WgxBuildMenu(WGX_MENU *menu_table);
-HMENU WgxBuildPopupMenu(WGX_MENU *menu_table);
+HMENU WgxBuildMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp);
+HMENU WgxBuildPopupMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp);
 
 /* lines in language files are limited by 8191 characters, which is more than enough */
 BOOL WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path);

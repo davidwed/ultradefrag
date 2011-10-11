@@ -31,12 +31,51 @@
 
 /**
  * @internal
+ * @brief Adds menu bitmaps to menu items.
+ * @param[in] hBMSrc handle to the toolbar bitmap.
+ * @param[in] nPos position of menu bitmap.
+ * @return Handle of the created bitmap,
+ * NULL indicates failure.
+ * @note Based on an example at
+ * http://forum.pellesc.de/index.php?topic=3265.0
+ */
+HBITMAP WgxGetToolbarBitmapForMenu(HBITMAP hBMSrc, int nPos)
+{
+	HDC hDCSrc = NULL, hDCDst = NULL;
+	BITMAP bm = {0};
+	HBITMAP hBMDst = NULL, hOldBmp = NULL;
+	int cx, cy;
+
+	cx = GetSystemMetrics(SM_CXMENUCHECK);
+	cy = GetSystemMetrics(SM_CYMENUCHECK);
+	if ((hDCSrc = CreateCompatibleDC(NULL)) != NULL) {
+		if ((hDCDst = CreateCompatibleDC(NULL)) != NULL) {
+			SelectObject(hDCSrc, hBMSrc);
+			GetObject(hBMSrc, sizeof(bm), &bm);
+			hBMDst = CreateBitmap(bm.bmHeight, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);
+			if (hBMDst) {
+				GetObject(hBMDst, sizeof(bm), &bm);
+				hOldBmp = SelectObject(hDCDst, hBMDst);
+				StretchBlt(hDCDst, 0, 0, cx, cy, hDCSrc, nPos*bm.bmHeight, 0, bm.bmHeight, bm.bmHeight, SRCCOPY);
+				SelectObject(hDCDst, hOldBmp);
+				GetObject(hBMDst, sizeof(bm), &bm);
+			}
+			DeleteDC(hDCDst);
+		}
+		DeleteDC(hDCSrc);
+	}
+	return hBMDst;
+}
+
+/**
+ * @internal
  * @brief WgxBuildMenu helper.
  */
-static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table)
+static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table,HBITMAP toolbar_bmp)
 {
 	MENUITEMINFO mi;
 	HMENU hPopup;
+    HBITMAP hBMitem;
 	int i;
 
 	for(i = 0; menu_table[i].flags || menu_table[i].id || menu_table[i].text; i++){
@@ -46,7 +85,7 @@ static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table)
 			continue;
 		}
 		if(menu_table[i].flags & MF_POPUP){
-			hPopup = WgxBuildPopupMenu(menu_table[i].submenu);
+			hPopup = WgxBuildPopupMenu(menu_table[i].submenu,toolbar_bmp);
 			if(hPopup == NULL){
 				WgxDbgPrintLastError("WgxBuildMenu: cannot build popup menu");
 				return NULL;
@@ -65,6 +104,17 @@ static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table)
 		}
 		if(!AppendMenuW(hMenu,menu_table[i].flags,menu_table[i].id,menu_table[i].text))
 			goto append_menu_fail;
+
+        if(toolbar_bmp != NULL){
+            hBMitem = NULL;
+            
+            if(menu_table[i].toolbar_image_id > -1){
+                hBMitem = WgxGetToolbarBitmapForMenu(toolbar_bmp,menu_table[i].toolbar_image_id);
+                
+                if(hBMitem != NULL)
+                    SetMenuItemBitmaps(hMenu,menu_table[i].id,MF_BYCOMMAND,hBMitem,hBMitem);
+            }
+        }
 	}
 	
 	/* success */
@@ -84,6 +134,7 @@ set_menu_info_fail:
  * @param[in] menu_table pointer to array of
  * WGX_MENU structures. All fields of the structure
  * equal to zero indicate the end of the table.
+ * @param[in] toolbar_bmp handle to the toolbar bitmap.
  * @return Handle of the created menu,
  * NULL indicates failure.
  * @note The following flags are supported:
@@ -93,7 +144,7 @@ set_menu_info_fail:
  * - MF_POPUP - id field must point to
  * another menu table describing a submenu.
  */
-HMENU WgxBuildMenu(WGX_MENU *menu_table)
+HMENU WgxBuildMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp)
 {
 	HMENU hMenu;
 	
@@ -106,7 +157,7 @@ HMENU WgxBuildMenu(WGX_MENU *menu_table)
 		return NULL;
 	}
 	
-	if(BuildMenu(hMenu,menu_table) == NULL){
+	if(BuildMenu(hMenu,menu_table,toolbar_bmp) == NULL){
 		DestroyMenu(hMenu);
 		return NULL;
 	}
@@ -118,7 +169,7 @@ HMENU WgxBuildMenu(WGX_MENU *menu_table)
  * @brief WgxBuildMenu analog, 
  * but works for popup menus.
  */
-HMENU WgxBuildPopupMenu(WGX_MENU *menu_table)
+HMENU WgxBuildPopupMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp)
 {
 	HMENU hMenu;
 	
@@ -131,7 +182,7 @@ HMENU WgxBuildPopupMenu(WGX_MENU *menu_table)
 		return NULL;
 	}
 	
-	if(BuildMenu(hMenu,menu_table) == NULL){
+	if(BuildMenu(hMenu,menu_table,toolbar_bmp) == NULL){
 		DestroyMenu(hMenu);
 		return NULL;
 	}
