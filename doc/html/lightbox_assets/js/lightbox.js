@@ -1,22 +1,496 @@
-var fileLoadingImage="lightbox_assets/images/loading.gif",fileBottomNavCloseImage="lightbox_assets/images/closelabel.gif",overlayOpacity=0.8,animate=true,resizeSpeed=7,borderSize=10,imageArray=[],activeImage;if(animate==true){overlayDuration=0.2;if(resizeSpeed>10)resizeSpeed=10;if(resizeSpeed<1)resizeSpeed=1;resizeDuration=(11-resizeSpeed)*0.15}else resizeDuration=overlayDuration=0;
-Object.extend(Element,{getWidth:function(a){a=$(a);return a.offsetWidth},setWidth:function(a,b){a=$(a);a.style.width=b+"px"},setHeight:function(a,b){a=$(a);a.style.height=b+"px"},setTop:function(a,b){a=$(a);a.style.top=b+"px"},setLeft:function(a,b){a=$(a);a.style.left=b+"px"},setSrc:function(a,b){a=$(a);a.src=b},setHref:function(a,b){a=$(a);a.href=b},setInnerHTML:function(a,b){a=$(a);a.innerHTML=b}});
-Array.prototype.removeDuplicates=function(){for(i=0;i<this.length;i++)for(j=this.length-1;j>i;j--)this[i][0]==this[j][0]&&this.splice(j,1)};Array.prototype.empty=function(){for(i=0;i<=this.length;i++)this.shift()};var Lightbox=Class.create();
-Lightbox.prototype={initialize:function(){this.updateImageList();var a=document.getElementsByTagName("body").item(0),b=document.createElement("div");b.setAttribute("id","overlay");b.style.display="none";b.onclick=function(){myLightbox.end()};a.appendChild(b);b=document.createElement("div");b.setAttribute("id","lightbox");b.style.display="none";b.onclick=function(e){if(!e)e=window.event;Event.element(e).id=="lightbox"&&myLightbox.end()};a.appendChild(b);var c=document.createElement("div");c.setAttribute("id",
-"outerImageContainer");b.appendChild(c);if(animate){Element.setWidth("outerImageContainer",250);Element.setHeight("outerImageContainer",250)}else{Element.setWidth("outerImageContainer",1);Element.setHeight("outerImageContainer",1)}a=document.createElement("div");a.setAttribute("id","imageContainer");c.appendChild(a);c=document.createElement("img");c.setAttribute("id","lightboxImage");a.appendChild(c);c=document.createElement("div");c.setAttribute("id","hoverNav");a.appendChild(c);var d=document.createElement("a");
-d.setAttribute("id","prevLink");d.setAttribute("href","#");c.appendChild(d);d=document.createElement("a");d.setAttribute("id","nextLink");d.setAttribute("href","#");c.appendChild(d);c=document.createElement("div");c.setAttribute("id","loading");a.appendChild(c);a=document.createElement("a");a.setAttribute("id","loadingLink");a.setAttribute("href","#");a.onclick=function(){myLightbox.end();return false};c.appendChild(a);c=document.createElement("img");c.setAttribute("src",fileLoadingImage);a.appendChild(c);
-a=document.createElement("div");a.setAttribute("id","imageDataContainer");b.appendChild(a);b=document.createElement("div");b.setAttribute("id","imageData");a.appendChild(b);a=document.createElement("div");a.setAttribute("id","imageDetails");b.appendChild(a);c=document.createElement("span");c.setAttribute("id","caption");a.appendChild(c);c=document.createElement("span");c.setAttribute("id","numberDisplay");a.appendChild(c);a=document.createElement("div");a.setAttribute("id","bottomNav");b.appendChild(a);
-b=document.createElement("a");b.setAttribute("id","bottomNavClose");b.setAttribute("href","#");b.onclick=function(){myLightbox.end();return false};a.appendChild(b);a=document.createElement("img");a.setAttribute("src",fileBottomNavCloseImage);b.appendChild(a)},updateImageList:function(){if(document.getElementsByTagName){for(var a=document.getElementsByTagName("a"),b=document.getElementsByTagName("area"),c=0;c<a.length;c++){var d=a[c],e=String(d.getAttribute("rel"));if(d.getAttribute("href")&&e.toLowerCase().match("lightbox"))d.onclick=
-function(){myLightbox.start(this);return false}}for(c=0;c<b.length;c++){a=b[c];e=String(a.getAttribute("rel"));if(a.getAttribute("href")&&e.toLowerCase().match("lightbox"))a.onclick=function(){myLightbox.start(this);return false}}}},start:function(a){hideSelectBoxes();hideFlash();var b=getPageSize();Element.setWidth("overlay",b[0]);Element.setHeight("overlay",b[1]);new Effect.Appear("overlay",{duration:overlayDuration,from:0,to:overlayOpacity});imageArray=[];imageNum=0;if(document.getElementsByTagName){var c=
-document.getElementsByTagName(a.tagName);if(a.getAttribute("rel")=="lightbox")imageArray.push(new Array(a.getAttribute("href"),a.getAttribute("title")));else{for(var d=0;d<c.length;d++){var e=c[d];e.getAttribute("href")&&e.getAttribute("rel")==a.getAttribute("rel")&&imageArray.push(new Array(e.getAttribute("href"),e.getAttribute("title")))}for(imageArray.removeDuplicates();imageArray[imageNum][0]!=a.getAttribute("href");)imageNum++}a=getPageScroll();c=a[0];Element.setTop("lightbox",a[1]+b[3]/10);
-Element.setLeft("lightbox",c);Element.show("lightbox");this.changeImage(imageNum)}},changeImage:function(a){activeImage=a;animate&&Element.show("loading");Element.hide("lightboxImage");Element.hide("hoverNav");Element.hide("prevLink");Element.hide("nextLink");Element.hide("imageDataContainer");Element.hide("numberDisplay");imgPreloader=new Image;imgPreloader.onload=function(){Element.setSrc("lightboxImage",imageArray[activeImage][0]);myLightbox.resizeImageContainer(imgPreloader.width,imgPreloader.height);
-imgPreloader.onload=function(){}};imgPreloader.src=imageArray[activeImage][0]},resizeImageContainer:function(a,b){this.widthCurrent=Element.getWidth("outerImageContainer");this.heightCurrent=Element.getHeight("outerImageContainer");var c=a+borderSize*2,d=b+borderSize*2;this.xScale=c/this.widthCurrent*100;this.yScale=d/this.heightCurrent*100;wDiff=this.widthCurrent-c;hDiff=this.heightCurrent-d;hDiff!=0&&new Effect.Scale("outerImageContainer",this.yScale,{scaleX:false,duration:resizeDuration,queue:"front"});
-wDiff!=0&&new Effect.Scale("outerImageContainer",this.xScale,{scaleY:false,delay:resizeDuration,duration:resizeDuration});if(hDiff==0&&wDiff==0)navigator.appVersion.indexOf("MSIE")!=-1?pause(250):pause(100);Element.setHeight("prevLink",b);Element.setHeight("nextLink",b);Element.setWidth("imageDataContainer",c);this.showImage()},showImage:function(){Element.hide("loading");new Effect.Appear("lightboxImage",{duration:resizeDuration,queue:"end",afterFinish:function(){myLightbox.updateDetails()}});this.preloadNeighborImages()},
-updateDetails:function(){if(imageArray[activeImage][1]){Element.show("caption");Element.setInnerHTML("caption",imageArray[activeImage][1])}if(imageArray.length>1){Element.show("numberDisplay");Element.setInnerHTML("numberDisplay","Image "+eval(activeImage+1)+" of "+imageArray.length)}new Effect.Parallel([new Effect.SlideDown("imageDataContainer",{sync:true,duration:resizeDuration,from:0,to:1}),new Effect.Appear("imageDataContainer",{sync:true,duration:resizeDuration})],{duration:resizeDuration,afterFinish:function(){var a=
-getPageSize();Element.setHeight("overlay",a[1]);myLightbox.updateNav()}})},updateNav:function(){Element.show("hoverNav");if(activeImage!=0){Element.show("prevLink");document.getElementById("prevLink").onclick=function(){myLightbox.changeImage(activeImage-1);return false}}if(activeImage!=imageArray.length-1){Element.show("nextLink");document.getElementById("nextLink").onclick=function(){myLightbox.changeImage(activeImage+1);return false}}this.enableKeyboardNav()},enableKeyboardNav:function(){document.onkeydown=
-this.keyboardAction},disableKeyboardNav:function(){document.onkeydown=""},keyboardAction:function(a){if(a==null){keycode=event.keyCode;escapeKey=27}else{keycode=a.keyCode;escapeKey=a.DOM_VK_ESCAPE}key=String.fromCharCode(keycode).toLowerCase();if(key=="x"||key=="o"||key=="c"||keycode==escapeKey)myLightbox.end();else if(key=="p"||keycode==37){if(activeImage!=0){myLightbox.disableKeyboardNav();myLightbox.changeImage(activeImage-1)}}else if(key=="n"||keycode==39)if(activeImage!=imageArray.length-1){myLightbox.disableKeyboardNav();
-myLightbox.changeImage(activeImage+1)}},preloadNeighborImages:function(){if(imageArray.length-1>activeImage){preloadNextImage=new Image;preloadNextImage.src=imageArray[activeImage+1][0]}if(activeImage>0){preloadPrevImage=new Image;preloadPrevImage.src=imageArray[activeImage-1][0]}},end:function(){this.disableKeyboardNav();Element.hide("lightbox");new Effect.Fade("overlay",{duration:overlayDuration});showSelectBoxes();showFlash()}};
-function getPageScroll(){var a,b;if(self.pageYOffset){b=self.pageYOffset;a=self.pageXOffset}else if(document.documentElement&&document.documentElement.scrollTop){b=document.documentElement.scrollTop;a=document.documentElement.scrollLeft}else if(document.body){b=document.body.scrollTop;a=document.body.scrollLeft}return arrayPageScroll=new Array(a,b)}
-function getPageSize(){var a,b;if(window.innerHeight&&window.scrollMaxY){a=window.innerWidth+window.scrollMaxX;b=window.innerHeight+window.scrollMaxY}else if(document.body.scrollHeight>document.body.offsetHeight){a=document.body.scrollWidth;b=document.body.scrollHeight}else{a=document.body.offsetWidth;b=document.body.offsetHeight}var c,d;if(self.innerHeight){c=document.documentElement.clientWidth?document.documentElement.clientWidth:self.innerWidth;d=self.innerHeight}else if(document.documentElement&&
-document.documentElement.clientHeight){c=document.documentElement.clientWidth;d=document.documentElement.clientHeight}else if(document.body){c=document.body.clientWidth;d=document.body.clientHeight}pageHeight=b<d?d:b;pageWidth=a<c?a:c;return arrayPageSize=new Array(pageWidth,pageHeight,c,d)}function getKey(a){keycode=a==null?event.keyCode:a.which;key=String.fromCharCode(keycode).toLowerCase()}
-function showSelectBoxes(){var a=document.getElementsByTagName("select");for(i=0;i!=a.length;i++)a[i].style.visibility="visible"}function hideSelectBoxes(){var a=document.getElementsByTagName("select");for(i=0;i!=a.length;i++)a[i].style.visibility="hidden"}function showFlash(){var a=document.getElementsByTagName("object");for(i=0;i<a.length;i++)a[i].style.visibility="visible";a=document.getElementsByTagName("embed");for(i=0;i<a.length;i++)a[i].style.visibility="visible"}
-function hideFlash(){var a=document.getElementsByTagName("object");for(i=0;i<a.length;i++)a[i].style.visibility="hidden";a=document.getElementsByTagName("embed");for(i=0;i<a.length;i++)a[i].style.visibility="hidden"}function pause(a){var b=new Date;do var c=new Date;while(c-b<a)}function initLightbox(){myLightbox=new Lightbox};
+// -----------------------------------------------------------------------------------
+//
+//	Lightbox v2.05
+//	by Lokesh Dhakar - http://www.lokeshdhakar.com
+//	Last Modification: 3/18/11
+//
+//	For more information, visit:
+//	http://lokeshdhakar.com/projects/lightbox2/
+//
+//	Licensed under the Creative Commons Attribution 2.5 License - http://creativecommons.org/licenses/by/2.5/
+//  	- Free for use in both personal and commercial projects
+//		- Attribution requires leaving author name, author link, and the license info intact.
+//	
+//  Thanks: Scott Upton(uptonic.com), Peter-Paul Koch(quirksmode.com), and Thomas Fuchs(mir.aculo.us) for ideas, libs, and snippets.
+//  		Artemy Tregubenko (arty.name) for cleanup and help in updating to latest ver of proto-aculous.
+//
+// -----------------------------------------------------------------------------------
+/*
+
+    Table of Contents
+    -----------------
+    Configuration
+
+    Lightbox Class Declaration
+    - initialize()
+    - updateImageList()
+    - start()
+    - changeImage()
+    - resizeImageContainer()
+    - showImage()
+    - updateDetails()
+    - updateNav()
+    - enableKeyboardNav()
+    - disableKeyboardNav()
+    - keyboardAction()
+    - preloadNeighborImages()
+    - end()
+    
+    Function Calls
+    - document.observe()
+   
+*/
+// -----------------------------------------------------------------------------------
+
+//
+//  Configurationl
+//
+LightboxOptions = Object.extend({
+    fileLoadingImage:        'lightbox_assets/images/loading.gif',     
+    fileBottomNavCloseImage: 'lightbox_assets/images/closelabel.gif',
+
+    overlayOpacity: 0.8,   // controls transparency of shadow overlay
+
+    animate: true,         // toggles resizing animations
+    resizeSpeed: 7,        // controls the speed of the image resizing animations (1=slowest and 10=fastest)
+
+    borderSize: 10,         //if you adjust the padding in the CSS, you will need to update this variable
+
+	// When grouping images this is used to write: Image # of #.
+	// Change it for non-english localization
+	labelImage: "Image",
+	labelOf: "of"
+}, window.LightboxOptions || {});
+
+// -----------------------------------------------------------------------------------
+
+var Lightbox = Class.create();
+
+Lightbox.prototype = {
+    imageArray: [],
+    activeImage: undefined,
+    
+    // initialize()
+    // Constructor runs on completion of the DOM loading. Calls updateImageList and then
+    // the function inserts html at the bottom of the page which is used to display the shadow 
+    // overlay and the image container.
+    //
+    initialize: function() {    
+        
+        this.updateImageList();
+        
+        this.keyboardAction = this.keyboardAction.bindAsEventListener(this);
+
+        if (LightboxOptions.resizeSpeed > 10) LightboxOptions.resizeSpeed = 10;
+        if (LightboxOptions.resizeSpeed < 1)  LightboxOptions.resizeSpeed = 1;
+
+	    this.resizeDuration = LightboxOptions.animate ? ((11 - LightboxOptions.resizeSpeed) * 0.15) : 0;
+	    this.overlayDuration = LightboxOptions.animate ? 0.2 : 0;  // shadow fade in/out duration
+
+        // When Lightbox starts it will resize itself from 250 by 250 to the current image dimension.
+        // If animations are turned off, it will be hidden as to prevent a flicker of a
+        // white 250 by 250 box.
+        var size = (LightboxOptions.animate ? 250 : 1) + 'px';
+        
+
+        // Code inserts html at the bottom of the page that looks similar to this:
+        //
+        //  <div id="overlay"></div>
+        //  <div id="lightbox">
+        //      <div id="outerImageContainer">
+        //          <div id="imageContainer">
+        //              <img id="lightboxImage">
+        //              <div style="" id="hoverNav">
+        //                  <a href="#" id="prevLink"></a>
+        //                  <a href="#" id="nextLink"></a>
+        //              </div>
+        //              <div id="loading">
+        //                  <a href="#" id="loadingLink">
+        //                      <img src="images/loading.gif">
+        //                  </a>
+        //              </div>
+        //          </div>
+        //      </div>
+        //      <div id="imageDataContainer">
+        //          <div id="imageData">
+        //              <div id="imageDetails">
+        //                  <span id="caption"></span>
+        //                  <span id="numberDisplay"></span>
+        //              </div>
+        //              <div id="bottomNav">
+        //                  <a href="#" id="bottomNavClose">
+        //                      <img src="images/close.gif">
+        //                  </a>
+        //              </div>
+        //          </div>
+        //      </div>
+        //  </div>
+
+
+        var objBody = $$('body')[0];
+
+		objBody.appendChild(Builder.node('div',{id:'overlay'}));
+	
+        objBody.appendChild(Builder.node('div',{id:'lightbox'}, [
+            Builder.node('div',{id:'outerImageContainer'}, 
+                Builder.node('div',{id:'imageContainer'}, [
+                    Builder.node('img',{id:'lightboxImage'}), 
+                    Builder.node('div',{id:'hoverNav'}, [
+                        Builder.node('a',{id:'prevLink', href: '#' }),
+                        Builder.node('a',{id:'nextLink', href: '#' })
+                    ]),
+                    Builder.node('div',{id:'loading'}, 
+                        Builder.node('a',{id:'loadingLink', href: '#' }, 
+                            Builder.node('img', {src: LightboxOptions.fileLoadingImage})
+                        )
+                    )
+                ])
+            ),
+            Builder.node('div', {id:'imageDataContainer'},
+                Builder.node('div',{id:'imageData'}, [
+                    Builder.node('div',{id:'imageDetails'}, [
+                        Builder.node('span',{id:'caption'}),
+                        Builder.node('span',{id:'numberDisplay'})
+                    ]),
+                    Builder.node('div',{id:'bottomNav'},
+                        Builder.node('a',{id:'bottomNavClose', href: '#' },
+                            Builder.node('img', { src: LightboxOptions.fileBottomNavCloseImage })
+                        )
+                    )
+                ])
+            )
+        ]));
+
+
+		$('overlay').hide().observe('click', (function() { this.end(); }).bind(this));
+		$('lightbox').hide().observe('click', (function(event) { if (event.element().id == 'lightbox') this.end(); }).bind(this));
+		$('outerImageContainer').setStyle({ width: size, height: size });
+		$('prevLink').observe('click', (function(event) { event.stop(); this.changeImage(this.activeImage - 1); }).bindAsEventListener(this));
+		$('nextLink').observe('click', (function(event) { event.stop(); this.changeImage(this.activeImage + 1); }).bindAsEventListener(this));
+		$('loadingLink').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
+		$('bottomNavClose').observe('click', (function(event) { event.stop(); this.end(); }).bind(this));
+
+        var th = this;
+        (function(){
+            var ids = 
+                'overlay lightbox outerImageContainer imageContainer lightboxImage hoverNav prevLink nextLink loading loadingLink ' + 
+                'imageDataContainer imageData imageDetails caption numberDisplay bottomNav bottomNavClose';   
+            $w(ids).each(function(id){ th[id] = $(id); });
+        }).defer();
+    },
+
+    //
+    // updateImageList()
+    // Loops through anchor tags looking for 'lightbox' references and applies onclick
+    // events to appropriate links. You can rerun after dynamically adding images w/ajax.
+    //
+    updateImageList: function() {   
+        this.updateImageList = Prototype.emptyFunction;
+
+        document.observe('click', (function(event){
+            var target = event.findElement('a[rel^=lightbox]') || event.findElement('area[rel^=lightbox]');
+            if (target) {
+                event.stop();
+                this.start(target);
+            }
+        }).bind(this));
+    },
+    
+    //
+    //  start()
+    //  Display overlay and lightbox. If image is part of a set, add siblings to imageArray.
+    //
+    start: function(imageLink) {    
+
+        $$('select', 'object', 'embed').each(function(node){ node.style.visibility = 'hidden' });
+
+        // stretch overlay to fill page and fade in
+        var arrayPageSize = this.getPageSize();
+        $('overlay').setStyle({ width: arrayPageSize[0] + 'px', height: arrayPageSize[1] + 'px' });
+
+        new Effect.Appear(this.overlay, { duration: this.overlayDuration, from: 0.0, to: LightboxOptions.overlayOpacity });
+
+        this.imageArray = [];
+        var imageNum = 0;       
+
+        if ((imageLink.getAttribute("rel") == 'lightbox')){
+            // if image is NOT part of a set, add single image to imageArray
+            this.imageArray.push([imageLink.href, imageLink.title]);         
+        } else {
+            // if image is part of a set..
+            this.imageArray = 
+                $$(imageLink.tagName + '[href][rel="' + imageLink.rel + '"]').
+                collect(function(anchor){ return [anchor.href, anchor.title]; }).
+                uniq();
+            
+            while (this.imageArray[imageNum][0] != imageLink.href) { imageNum++; }
+        }
+
+        // calculate top and left offset for the lightbox 
+        var arrayPageScroll = document.viewport.getScrollOffsets();
+        var lightboxTop = arrayPageScroll[1] + (document.viewport.getHeight() / 10);
+        var lightboxLeft = arrayPageScroll[0];
+        this.lightbox.setStyle({ top: lightboxTop + 'px', left: lightboxLeft + 'px' }).show();
+        
+        this.changeImage(imageNum);
+    },
+
+    //
+    //  changeImage()
+    //  Hide most elements and preload image in preparation for resizing image container.
+    //
+    changeImage: function(imageNum) {   
+        
+        this.activeImage = imageNum; // update global var
+
+        // hide elements during transition
+        if (LightboxOptions.animate) this.loading.show();
+        this.lightboxImage.hide();
+        this.hoverNav.hide();
+        this.prevLink.hide();
+        this.nextLink.hide();
+		// HACK: Opera9 does not currently support scriptaculous opacity and appear fx
+        this.imageDataContainer.setStyle({opacity: .0001});
+        this.numberDisplay.hide();      
+        
+        var imgPreloader = new Image();
+        
+        // once image is preloaded, resize image container
+        imgPreloader.onload = (function(){
+            this.lightboxImage.src = this.imageArray[this.activeImage][0];
+            /*Bug Fixed by Andy Scott*/
+            this.lightboxImage.width = imgPreloader.width;
+            this.lightboxImage.height = imgPreloader.height;
+            /*End of Bug Fix*/
+            this.resizeImageContainer(imgPreloader.width, imgPreloader.height);
+        }).bind(this);
+        imgPreloader.src = this.imageArray[this.activeImage][0];
+    },
+
+    //
+    //  resizeImageContainer()
+    //
+    resizeImageContainer: function(imgWidth, imgHeight) {
+
+        // get current width and height
+        var widthCurrent  = this.outerImageContainer.getWidth();
+        var heightCurrent = this.outerImageContainer.getHeight();
+
+        // get new width and height
+        var widthNew  = (imgWidth  + LightboxOptions.borderSize * 2);
+        var heightNew = (imgHeight + LightboxOptions.borderSize * 2);
+
+        // scalars based on change from old to new
+        var xScale = (widthNew  / widthCurrent)  * 100;
+        var yScale = (heightNew / heightCurrent) * 100;
+
+        // calculate size difference between new and old image, and resize if necessary
+        var wDiff = widthCurrent - widthNew;
+        var hDiff = heightCurrent - heightNew;
+
+        if (hDiff != 0) new Effect.Scale(this.outerImageContainer, yScale, {scaleX: false, duration: this.resizeDuration, queue: 'front'}); 
+        if (wDiff != 0) new Effect.Scale(this.outerImageContainer, xScale, {scaleY: false, duration: this.resizeDuration, delay: this.resizeDuration}); 
+
+        // if new and old image are same size and no scaling transition is necessary, 
+        // do a quick pause to prevent image flicker.
+        var timeout = 0;
+        if ((hDiff == 0) && (wDiff == 0)){
+            timeout = 100;
+            if (Prototype.Browser.IE) timeout = 250;   
+        }
+
+        (function(){
+            this.prevLink.setStyle({ height: imgHeight + 'px' });
+            this.nextLink.setStyle({ height: imgHeight + 'px' });
+            this.imageDataContainer.setStyle({ width: widthNew + 'px' });
+
+            this.showImage();
+        }).bind(this).delay(timeout / 1000);
+    },
+    
+    //
+    //  showImage()
+    //  Display image and begin preloading neighbors.
+    //
+    showImage: function(){
+        this.loading.hide();
+        new Effect.Appear(this.lightboxImage, { 
+            duration: this.resizeDuration, 
+            queue: 'end', 
+            afterFinish: (function(){ this.updateDetails(); }).bind(this) 
+        });
+        this.preloadNeighborImages();
+    },
+
+    //
+    //  updateDetails()
+    //  Display caption, image number, and bottom nav.
+    //
+    updateDetails: function() {
+    
+        this.caption.update(this.imageArray[this.activeImage][1]).show();
+
+        // if image is part of set display 'Image x of x' 
+        if (this.imageArray.length > 1){
+            this.numberDisplay.update( LightboxOptions.labelImage + ' ' + (this.activeImage + 1) + ' ' + LightboxOptions.labelOf + '  ' + this.imageArray.length).show();
+        }
+
+        new Effect.Parallel(
+            [ 
+                new Effect.SlideDown(this.imageDataContainer, { sync: true, duration: this.resizeDuration, from: 0.0, to: 1.0 }), 
+                new Effect.Appear(this.imageDataContainer, { sync: true, duration: this.resizeDuration }) 
+            ], 
+            { 
+                duration: this.resizeDuration, 
+                afterFinish: (function() {
+	                // update overlay size and update nav
+	                var arrayPageSize = this.getPageSize();
+	                this.overlay.setStyle({ width: arrayPageSize[0] + 'px', height: arrayPageSize[1] + 'px' });
+	                this.updateNav();
+                }).bind(this)
+            } 
+        );
+    },
+
+    //
+    //  updateNav()
+    //  Display appropriate previous and next hover navigation.
+    //
+    updateNav: function() {
+
+        this.hoverNav.show();               
+
+        // if not first image in set, display prev image button
+        if (this.activeImage > 0) this.prevLink.show();
+
+        // if not last image in set, display next image button
+        if (this.activeImage < (this.imageArray.length - 1)) this.nextLink.show();
+        
+        this.enableKeyboardNav();
+    },
+
+    //
+    //  enableKeyboardNav()
+    //
+    enableKeyboardNav: function() {
+        document.observe('keydown', this.keyboardAction); 
+    },
+
+    //
+    //  disableKeyboardNav()
+    //
+    disableKeyboardNav: function() {
+        document.stopObserving('keydown', this.keyboardAction); 
+    },
+
+    //
+    //  keyboardAction()
+    //
+    keyboardAction: function(event) {
+        var keycode = event.keyCode;
+
+        var escapeKey;
+        if (event.DOM_VK_ESCAPE) {  // mozilla
+            escapeKey = event.DOM_VK_ESCAPE;
+        } else { // ie
+            escapeKey = 27;
+        }
+
+        var key = String.fromCharCode(keycode).toLowerCase();
+        
+        if (key.match(/x|o|c/) || (keycode == escapeKey)){ // close lightbox
+            this.end();
+        } else if ((key == 'p') || (keycode == 37)){ // display previous image
+            if (this.activeImage != 0){
+                this.disableKeyboardNav();
+                this.changeImage(this.activeImage - 1);
+            }
+        } else if ((key == 'n') || (keycode == 39)){ // display next image
+            if (this.activeImage != (this.imageArray.length - 1)){
+                this.disableKeyboardNav();
+                this.changeImage(this.activeImage + 1);
+            }
+        }
+    },
+
+    //
+    //  preloadNeighborImages()
+    //  Preload previous and next images.
+    //
+    preloadNeighborImages: function(){
+        var preloadNextImage, preloadPrevImage;
+        if (this.imageArray.length > this.activeImage + 1){
+            preloadNextImage = new Image();
+            preloadNextImage.src = this.imageArray[this.activeImage + 1][0];
+        }
+        if (this.activeImage > 0){
+            preloadPrevImage = new Image();
+            preloadPrevImage.src = this.imageArray[this.activeImage - 1][0];
+        }
+    
+    },
+
+    //
+    //  end()
+    //
+    end: function() {
+        this.disableKeyboardNav();
+        this.lightbox.hide();
+        new Effect.Fade(this.overlay, { duration: this.overlayDuration });
+        $$('select', 'object', 'embed').each(function(node){ node.style.visibility = 'visible' });
+    },
+
+    //
+    //  getPageSize()
+    //
+    getPageSize: function() {
+	        
+	     var xScroll, yScroll;
+		
+		if (window.innerHeight && window.scrollMaxY) {	
+			xScroll = window.innerWidth + window.scrollMaxX;
+			yScroll = window.innerHeight + window.scrollMaxY;
+		} else if (document.body.scrollHeight > document.body.offsetHeight){ // all but Explorer Mac
+			xScroll = document.body.scrollWidth;
+			yScroll = document.body.scrollHeight;
+		} else { // Explorer Mac...would also work in Explorer 6 Strict, Mozilla and Safari
+			xScroll = document.body.offsetWidth;
+			yScroll = document.body.offsetHeight;
+		}
+		
+		var windowWidth, windowHeight;
+		
+		if (self.innerHeight) {	// all except Explorer
+			if(document.documentElement.clientWidth){
+				windowWidth = document.documentElement.clientWidth; 
+			} else {
+				windowWidth = self.innerWidth;
+			}
+			windowHeight = self.innerHeight;
+		} else if (document.documentElement && document.documentElement.clientHeight) { // Explorer 6 Strict Mode
+			windowWidth = document.documentElement.clientWidth;
+			windowHeight = document.documentElement.clientHeight;
+		} else if (document.body) { // other Explorers
+			windowWidth = document.body.clientWidth;
+			windowHeight = document.body.clientHeight;
+		}	
+
+		// for small pages with total height less then height of the viewport
+		if(yScroll < windowHeight){
+			pageHeight = windowHeight;
+		} else { 
+			pageHeight = yScroll;
+		}
+	
+		// for small pages with total width less then width of the viewport
+		if(xScroll < windowWidth){	
+			pageWidth = xScroll;		
+		} else {
+			pageWidth = windowWidth;
+		}
+
+		return [pageWidth,pageHeight];
+	}
+}
+
+document.observe('dom:loaded', function () { new Lightbox(); });
