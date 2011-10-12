@@ -132,33 +132,14 @@ WGX_MENU main_menu[] = {
 int CreateMainMenu(void)
 {
     HBITMAP hBMtoolbar = NULL;
-	HDC hdc;
-	int bpp = 32;
 	int id;
 
 	/* get image for menu items */
-	hdc = GetDC(hWindow);
-	if(hdc){
-		bpp = GetDeviceCaps(hdc,BITSPIXEL);
-		ReleaseDC(hWindow,hdc);
-	}
-	switch(bpp){
-	case 1:
-	case 2:
-	case 4:
-	case 8:
-		/* nt4 etc */
-		id = IDB_MENU_8_BIT;
-		break;
-	case 16:
-		/* w2k etc */
-		id = IDB_MENU_16_BIT;
-		break;
-	default:
-		/* xp etc */
-		id = IDB_MENU;
-		break;
-	}
+	if(GetSystemMetrics(SM_CYMENUCHECK) <= 13)
+		id = IDB_MENU_13;
+    else
+		id = IDB_MENU_15;
+
     hBMtoolbar = LoadBitmap(hInstance, MAKEINTRESOURCE(id));
 
 	/* create menu */

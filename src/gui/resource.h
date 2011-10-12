@@ -48,21 +48,19 @@
 #define IDB_TOOLBAR_DISABLED            161
 #define IDB_TOOLBAR_HIGHLIGHTED         162
 
-#define IDB_MENU                        200
-
 /* for 8 bits per pixel displays (nt4 etc) */
 #define IDB_TOOLBAR_8_BIT               163
 #define IDB_TOOLBAR_DISABLED_8_BIT      164
 #define IDB_TOOLBAR_HIGHLIGHTED_8_BIT   165
-
-#define IDB_MENU_8_BIT                  201
 
 /* for 16 bits per pixel displays (w2k etc) */
 #define IDB_TOOLBAR_16_BIT              166
 #define IDB_TOOLBAR_DISABLED_16_BIT     167
 #define IDB_TOOLBAR_HIGHLIGHTED_16_BIT  168
 
-#define IDB_MENU_16_BIT                 202
+/* for menu items 13x13 and 15x15 */
+#define IDB_MENU_13                     200
+#define IDB_MENU_15                     201
 
 #define IDM_STATUSBAR                   500
 
