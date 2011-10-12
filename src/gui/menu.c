@@ -163,6 +163,8 @@ int CreateMainMenu(void)
 
 	/* create menu */
 	hMainMenu = WgxBuildMenu(main_menu,hBMtoolbar);
+    
+    DeleteObject(hBMtoolbar);
 	
 	/* attach menu to the window */
 	if(!SetMenu(hWindow,hMainMenu)){
