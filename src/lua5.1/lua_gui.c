@@ -286,6 +286,7 @@ static int pmain (lua_State *L) {
 int __cdecl internal_main (int argc, char **argv) {
   int i, status;
   struct Smain s;
+  lua_State *L = NULL;
   
   /* check for silent mode */
   for(i = 0; i < argc; i++){
@@ -293,7 +294,7 @@ int __cdecl internal_main (int argc, char **argv) {
 		  silent_mode = 1;
   }
   
-  lua_State *L = lua_open();  /* create state */
+  L = lua_open();  /* create state */
   if (L == NULL) {
     l_message(argv[0], "cannot create state: not enough memory");
     return EXIT_FAILURE;
