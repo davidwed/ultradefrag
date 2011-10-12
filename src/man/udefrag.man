@@ -41,7 +41,7 @@ OPTIONS
         -r, --repeat
                 repeat defragmentation or optimization until there is
                 nothing left that can be moved, this will process the
-                volume multiple times in a row
+                disk multiple times in a row
 
         {drive letter}:
                 one or more drives separated by spaces

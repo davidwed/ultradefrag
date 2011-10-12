@@ -49,7 +49,7 @@
  * individual files are locating on disk?</h3>
  * When defragmentation algorithms are quite effective, this is not necessary
  * to know location of individual files - anyway you'll get your drive optimized
- * quite well. Maybe we'll implement discussed feature later, but now we prefer
+ * quite well. Maybe we'll implement the discussed feature later, but now we prefer
  * to concentrate our forces on a disk optimization algorithm improvements.
  *
  * <h3>Why configuration files editing is better than one settings window with tabs?</h3>

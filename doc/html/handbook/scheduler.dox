@@ -19,17 +19,17 @@
  *
  * - Every 30 minutes:
  * @code
- * cmd.exe /C "set UD_IN_FILTER="%APPDATA%\Mozilla" && udefrag %APPDATA%"
+ * udefrag "%APPDATA%\Mozilla*"
  * @endcode
  *
  * - Every day:
  * @code
- * cmd.exe /C "set UD_IN_FILTER="%APPDATA%\Google\GoogleEarth" && udefrag %APPDATA%"
+ * udefrag "%APPDATA%\Google\GoogleEarth*"
  * @endcode
  *
  * - Every week:
  * @code
- * cmd.exe /C "set UD_IN_FILTER="%often_accessed_folders%" && udefrag --wait --all-fixed"
+ * udefrag cmd.exe /C "set UD_IN_FILTER="%often_accessed_folders%" && udefrag --wait --all-fixed"
  * @endcode
  *
  * - Every two months:
@@ -42,7 +42,7 @@
  *
  * The variable <b>often_accessed_folders</b> is just a placeholder.
  * It must be created by yourself or replaced by a list of folders.
- * Example: documents;pictures;music
+ * Example: *documents*;*pictures*;*music*
  *
  * Visit <a href="http://ultradefrag.wikispaces.com/">ultradefrag.wikispaces.com</a> 
  * for tutorials and more examples.

@@ -166,7 +166,7 @@
  * <dt>include only paths, which include one of these words</dt>
  * <dd>
  * @code
- * set UD_IN_FILTER=windows;winnt
+ * set UD_IN_FILTER=*windows*;*winnt*
  * @endcode
  * </dd>
  * <dt>process only files below 50 MB in size</dt>
@@ -238,11 +238,11 @@
  * @code
  * @echo off
  *
- * set UD_EX_FILTER=system volume information;temp;recycle;.zip;.7z;.rar
+ * set UD_EX_FILTER=*system volume information*;*temp*;*tmp*;*recycle*;*.zip;*.7z;*.rar
  * set UD_SIZELIMIT=50Mb
  * udefrag c: > c:\ud.log
  *
- * set UD_IN_FILTER=My Documents
+ * set UD_IN_FILTER=D:\My Documents\*
  * udefrag d: >> c:\ud.log
  *
  * set UD_IN_FILTER=

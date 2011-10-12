@@ -46,7 +46,7 @@ VARIABLES
                 set to '1' to disable moving files physically
         
 EXAMPLES
-        set UD_IN_FILTER=windows;winnt;ntuser;pagefile
+        set UD_IN_FILTER=*windows*;*winnt*;*ntuser*;*pagefile*
                 include only paths, which include one of these words
         
         set UD_SIZELIMIT=50Mb
