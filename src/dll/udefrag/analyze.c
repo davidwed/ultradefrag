@@ -39,6 +39,8 @@
 
 #include "udefrag-internals.h"
 
+static void update_progress_counters(winx_file_info *f,udefrag_job_parameters *jp);
+
 /**
  * @brief Retrieves all information about the volume.
  * @return Zero for success, negative value otherwise.
@@ -257,16 +259,25 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
  */
 int exclude_by_path(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	if(jp->udo.in_filter.count){
-		if(!winx_patfind(f->path,&jp->udo.in_filter))
-			return 1;
+	/* note that paths have \??\ internal prefix while patterns haven't */
+	if(wcslen(f->path) < 0x4)
+		return 1; /* path is invalid */
+	
+	/* ignore ex_filter in context menu handler */
+	if(!(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER)){
+		if(jp->udo.ex_filter.count){
+			if(winx_patcmp(f->path + 0x4,&jp->udo.ex_filter))
+				return 1;
+		}
 	}
 	
-	return winx_patfind(f->path,&jp->udo.ex_filter);
+	if(jp->udo.in_filter.count == 0) return 0;
+	return !winx_patcmp(f->path + 0x4,&jp->udo.in_filter);
 }
 
 /**
  * @brief find_files helper.
+ * @note Optimized for speed.
  */
 static int filter(winx_file_info *f,void *user_defined_data)
 {
@@ -275,11 +286,11 @@ static int filter(winx_file_info *f,void *user_defined_data)
 	ULONGLONG filesize;
 	
 	/* skip entries with empty path, as well as their children */
-	if(f->path == NULL) goto skip;
-	if(f->path[0] == 0) goto skip;
+	if(f->path == NULL) goto skip_file_and_children;
+	if(f->path[0] == 0) goto skip_file_and_children;
 	
-	/* skip resident streams */
-	if(f->disp.fragments == 0)
+	/* skip resident streams, but not in context menu handler */
+	if(f->disp.fragments == 0 && !(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER))
 		return 0;
 	
 	/*
@@ -293,6 +304,13 @@ static int filter(winx_file_info *f,void *user_defined_data)
 			DebugPrint("root directory detected, its trailing dot will be removed");
 			f->path[length - 1] = 0;
 		}
+	}
+	
+	/* skip resident streams in context menu handler, but count them */
+	if(f->disp.fragments == 0){
+		if(!exclude_by_path(f,jp))
+			update_progress_counters(f,jp);
+		return 0;
 	}
 	
 	/* show debugging information about interesting cases */
@@ -317,15 +335,13 @@ static int filter(winx_file_info *f,void *user_defined_data)
 		return 0;
 
 	/* skip temporary files, as well as their children */
-	if(is_temporary(f))	goto skip;
+	if(is_temporary(f))	goto skip_file_and_children;
 
 	/* filter files by their sizes */
 	filesize = f->disp.clusters * jp->v_info.bytes_per_cluster;
 	if(jp->udo.size_limit && filesize > jp->udo.size_limit){
 		f->user_defined_flags |= UD_FILE_OVER_LIMIT;
-		f->user_defined_flags |= UD_FILE_EXCLUDED;
-		/* don't skip children however */
-		return 0;
+		goto skip_file;
 	}
 
 	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb on FAT32 volume */
@@ -334,31 +350,33 @@ static int filter(winx_file_info *f,void *user_defined_data)
 	*/
 	
 	/* filter files by their number of fragments */
-	if(jp->udo.fragments_limit && f->disp.fragments < jp->udo.fragments_limit){
-		f->user_defined_flags |= UD_FILE_EXCLUDED;
-		/* don't skip children however */
-		return 0;
-	}
+	if(jp->udo.fragments_limit && f->disp.fragments < jp->udo.fragments_limit)
+		goto skip_file;
 
 	/* filter files by their paths */
-	if(!exclude_by_path(f,jp))
-		return 0;
+	if(exclude_by_path(f,jp)){
+		f->user_defined_flags |= UD_FILE_EXCLUDED;
+		f->user_defined_flags |= UD_FILE_EXCLUDED_BY_PATH;
+	}
+	/* don't skip children since their paths may match patterns */
+	return 0;
 
-skip:
+skip_file:
+	f->user_defined_flags |= UD_FILE_EXCLUDED;
+	return 0;
+
+skip_file_and_children:
 	f->user_defined_flags |= UD_FILE_EXCLUDED;
 	return 1;
 }
 
 /**
- * @brief find_files helper.
+ * @internal
  */
-static void progress_callback(winx_file_info *f,void *user_defined_data)
+static void update_progress_counters(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 	ULONGLONG filesize;
-	winx_blockmap *block;
 
-	/* update progress counters */
 	jp->pi.files ++;
 	if(is_directory(f)) jp->pi.directories ++;
 	if(is_compressed(f)) jp->pi.compressed ++;
@@ -378,14 +396,27 @@ static void progress_callback(winx_file_info *f,void *user_defined_data)
 	else
 		jp->f_counters.tiny_files ++;
 
+	if(jp->progress_router)
+		jp->progress_router(jp); /* redraw progress */
+}
+
+/**
+ * @brief find_files helper.
+ */
+static void progress_callback(winx_file_info *f,void *user_defined_data)
+{
+	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
+	winx_blockmap *block;
+	
+	/* don't count excluded files in context menu handler */
+	if(!(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER))
+		update_progress_counters(f,jp);
+
 	/* add file blocks to the binary search tree */
 	for(block = f->disp.blockmap; block; block = block->next){
 		if(add_block_to_file_blocks_tree(jp,f,block) < 0) break;
 		if(block->next == f->disp.blockmap) break;
 	}
-	
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw progress */
 }
 
 /**
@@ -396,41 +427,6 @@ static int terminator(void *user_defined_data)
 	udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
 
 	return jp->termination_router((void *)jp);
-}
-
-/**
- * @brief Guesses whether Explorer's 
- * context menu handler requested
- * defragmentation job or not.
- * @return Nonzero value indicates
- * that likely context menu handler
- * requested the job.
- * @note 
- * - get_options call must preceed
- *   this call.
- * - returns zero if entire disk
- *   processing is requested.
- */
-int is_context_menu_handler(udefrag_job_parameters *jp)
-{
-	int length;
-	
-	/* single pattern must exist */
-	if(jp->udo.in_filter.count != 1)
-		return 0;
-	
-	/* at least x:\y must exist */
-	length = wcslen(jp->udo.in_filter.array[0]);
-	if(length < 4)
-		return 0;
-	
-	/* check for x:\ */
-	if(jp->udo.in_filter.array[0][1] != ':' || \
-	  jp->udo.in_filter.array[0][2] != '\\')
-		return 0;
-	
-	/* ok, we are in context menu handler */
-	return 1;
 }
 
 /**
@@ -456,52 +452,43 @@ void dbg_print_file_counters(udefrag_job_parameters *jp)
  */
 static int find_files(udefrag_job_parameters *jp)
 {
-	int context_menu_handler;
-	short path[MAX_PATH + 1];
-	short *p, *s_filter;
+	int context_menu_handler = 0;
+	wchar_t parent_directory[MAX_PATH + 1];
+	wchar_t *p;
+	wchar_t c;
+	int flags = 0;
 	winx_file_info *f;
-
-	/*
-	* FIXME: context menu handler will process files
-	* with similar names: if c:\1 is requested, 
-	* c:\1.txt, c:\1.html etc. will be processed too.
-	*/
-
+	
 	/* check for context menu handler */
-	context_menu_handler = is_context_menu_handler(jp);
-	if(context_menu_handler)
-		DebugPrint("context menu handler?");
+	if(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER){
+		if(jp->udo.in_filter.count > 0){
+			if(wcslen(jp->udo.in_filter.array[0]) >= wcslen(L"C:\\"))
+				context_menu_handler = 1;
+		}
+	}
 
-	/* speed up context menu handler */
+	/* speed up the context menu handler */
 	if(jp->fs_type != FS_NTFS && context_menu_handler){
-		DebugPrint("context menu handler on FAT?");
-		s_filter = jp->udo.in_filter.array[0];
-		/* let's assume that directory processing is requested */
-		_snwprintf(path,MAX_PATH,L"\\??\\%ws",s_filter);
-		jp->filelist = winx_ftw(path,
-			WINX_FTW_RECURSIVE | WINX_FTW_DUMP_FILES | \
+		/* in case of c:\* or c:\ scan entire disk */
+		c = jp->udo.in_filter.array[0][3];
+		if(c == 0 || c == '*')
+			goto scan_entire_disk;
+		/* in case of c:\test;c:\test\* scan parent directory recursively */
+		if(jp->udo.in_filter.count > 1)
+			flags = WINX_FTW_RECURSIVE;
+		/* in case of c:\test scan parent directory, not recursively */
+		_snwprintf(parent_directory, MAX_PATH, L"\\??\\%ws", jp->udo.in_filter.array[0]);
+		parent_directory[MAX_PATH] = 0;
+		p = wcsrchr(parent_directory,'\\');
+		if(p) *p = 0;
+		if(wcslen(parent_directory) <= wcslen(L"\\??\\C:\\"))
+			goto scan_entire_disk;
+		jp->filelist = winx_ftw(parent_directory,
+			flags | WINX_FTW_DUMP_FILES | \
 			WINX_FTW_ALLOW_PARTIAL_SCAN | WINX_FTW_SKIP_RESIDENT_STREAMS,
 			filter,progress_callback,terminator,(void *)jp);
-		if(jp->filelist == NULL){
-			/* it seems that single file processing is requested */
-			DebugPrint("single file processing requested? %ws",s_filter);
-			/* get parent directory path */
-			p = wcsrchr(path,'\\');
-			if(p == path + wcslen(L"\\??\\C:")){
-				/* root directory, save trailing backslash */
-				p[1] = 0;
-			} else {
-				p[0] = 0;
-			}
-			/* scan parent directory not recursively */
-			jp->filelist = winx_ftw(path,
-				WINX_FTW_DUMP_FILES | WINX_FTW_ALLOW_PARTIAL_SCAN | \
-				WINX_FTW_SKIP_RESIDENT_STREAMS,
-				filter,progress_callback,terminator,(void *)jp);
-		} else {
-			DebugPrint("directory processing requested? %ws",s_filter);
-		}
 	} else {
+	scan_entire_disk:
 		jp->filelist = winx_scan_disk(jp->volume_letter,
 			WINX_FTW_DUMP_FILES | WINX_FTW_ALLOW_PARTIAL_SCAN | \
 			WINX_FTW_SKIP_RESIDENT_STREAMS,
@@ -520,6 +507,12 @@ static int find_files(udefrag_job_parameters *jp)
 			jp->pi.fragments += f->disp.fragments;
 		}
 
+		/* count nonresident files included by context menu handler */
+		if(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER){
+			if(!is_excluded_by_path(f))
+				update_progress_counters(f,jp);
+		}
+	
 		/* redraw cluster map */
 		colorize_file(jp,f,SYSTEM_SPACE);
 

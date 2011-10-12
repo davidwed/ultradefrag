@@ -80,87 +80,35 @@ int stop_track_boot_exec = 0;
 int boot_exec_tracking_stopped = 0;
 extern int boot_time_defrag_enabled;
 
-WGX_OPTION options[] = {
+/* options read from guiopts.lua */
+WGX_OPTION read_only_options[] = {
 	/* type, value buffer size, name, value, default value */
-	{WGX_CFG_COMMENT, 0, "UltraDefrag GUI options",                                         NULL, ""},
-	{WGX_CFG_EMPTY,   0, "",                                                                NULL, ""},
-	{WGX_CFG_COMMENT, 0, "Note that you must specify paths in filters",                     NULL, ""},
-	{WGX_CFG_COMMENT, 0, "with double back slashes instead of the single ones.",            NULL, ""},
-	{WGX_CFG_COMMENT, 0, "For example:",                                                    NULL, ""},
-	{WGX_CFG_COMMENT, 0, "ex_filter = \"MyDocs\\\\Music\\\\mp3\\\\Red_Hot_Chili_Peppers\"", NULL, ""},
-	{WGX_CFG_EMPTY,   0, "",                                                                NULL, ""},
 	{WGX_CFG_STRING,  sizeof(in_filter), "in_filter",           in_filter,  ""},
-	/* default value for ex_filter is more advanced to reduce volume processing time */
-	{WGX_CFG_STRING,  sizeof(ex_filter), "ex_filter",           ex_filter,  "system volume information;temp;recycle"},
+	{WGX_CFG_STRING,  sizeof(ex_filter), "ex_filter",           ex_filter,  ""},
 	{WGX_CFG_STRING,  sizeof(sizelimit), "sizelimit",           sizelimit,  ""},
 	{WGX_CFG_INT,     0,                 "fragments_threshold", &fraglimit, 0},
 	{WGX_CFG_STRING,  sizeof(timelimit), "time_limit",          timelimit,  ""},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-
 	{WGX_CFG_INT,     0, "refresh_interval", &refresh_interval, (void *)DEFAULT_REFRESH_INTERVAL},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	{WGX_CFG_INT,     0, "disable_reports",  &disable_reports,  0},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-
-	{WGX_CFG_COMMENT, 0, "set dbgprint_level to DETAILED for reporting a bug,",      NULL, ""},
-	{WGX_CFG_COMMENT, 0, "for normal operation set it to NORMAL or an empty string", NULL, ""},
 	{WGX_CFG_STRING,  sizeof(dbgprint_level), "dbgprint_level", dbgprint_level, ""},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "set log_file_path to the path and file name of the log file to be created,", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "for normal operation set it to an empty string", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "For example:",                                                    NULL, ""},
-	{WGX_CFG_COMMENT, 0, "log_file_path = \"C:\\\\Windows\\\\UltraDefrag\\\\Logs\\\\ultradefrag.log\"", NULL, ""},
 	{WGX_CFG_STRING,  sizeof(log_file_path), "log_file_path", log_file_path, ""},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "set dry_run parameter to 1 for defragmentation algorithm testing,", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "no actual data moves will be performed on disk in this case",       NULL, ""},
 	{WGX_CFG_INT,     0, "dry_run", &dry_run, 0},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "seconds_for_shutdown_rejection sets the delay for the user to cancel", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "the hibernate, logoff, reboot or shutdown execution, default is 60 seconds", NULL, ""},
 	{WGX_CFG_INT,     0, "seconds_for_shutdown_rejection", &seconds_for_shutdown_rejection, (void *)60},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "cluster map options (restart required to take effect):", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "the size of the block, in pixels; default value is 4", NULL, ""},
 	{WGX_CFG_INT,     0, "map_block_size", &map_block_size, (void *)DEFAULT_MAP_BLOCK_SIZE},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "grid line width, in pixels; default value is 1", NULL, ""},
 	{WGX_CFG_INT,     0, "grid_line_width", &grid_line_width, (void *)DEFAULT_GRID_LINE_WIDTH},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-
-	{WGX_CFG_COMMENT, 0, "grid line color, in RGB format; default value is (0;0;0)", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "all color components should be in range 0-255", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "(0;0;0) means black; (255;255;255) - white", NULL, ""},
 	{WGX_CFG_INT,     0, "grid_color_r", &grid_color_r, (void *)0},
 	{WGX_CFG_INT,     0, "grid_color_g", &grid_color_g, (void *)0},
 	{WGX_CFG_INT,     0, "grid_color_b", &grid_color_b, (void *)0},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-
-	{WGX_CFG_COMMENT, 0, "set disable_latest_version_check parameter to 1", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "to disable the automatic check for the latest available", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "version of the program during startup", NULL, ""},
 	{WGX_CFG_INT,     0, "disable_latest_version_check", &disable_latest_version_check, 0},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "window coordinates etc.", NULL, ""},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
-	{WGX_CFG_COMMENT, 0, "set scale_by_dpi parameter to 0", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "to not scale the buttons and text according to the", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "screens DPI settings", NULL, ""},
 	{WGX_CFG_INT,     0, "scale_by_dpi", &scale_by_dpi, (void *)1},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-
-	{WGX_CFG_COMMENT, 0, "set restore_default_window_size parameter to 1", NULL, ""},
-	{WGX_CFG_COMMENT, 0, "to restore default window size on the next startup", NULL, ""},
 	{WGX_CFG_INT,     0, "restore_default_window_size", &restore_default_window_size, 0},
-	{WGX_CFG_EMPTY,   0, "", NULL, ""},
 	
+	{0,               0, NULL, NULL, NULL}
+};
+
+/* options stored in guiopts-internals.lua */
+WGX_OPTION internal_options[] = {
+	/* type, value buffer size, name, value, default value */
 	{WGX_CFG_COMMENT, 0, "the settings below are not changeable by the user,", NULL, ""},
 	{WGX_CFG_COMMENT, 0, "they are always overwritten when the program ends", NULL, ""},
 	
@@ -185,7 +133,7 @@ WGX_OPTION options[] = {
 
 	{WGX_CFG_INT,     0, "job_flags", &job_flags, (void *)UD_PREVIEW_MATCHING},
 	{WGX_CFG_EMPTY,   0, "", NULL, ""},
-	
+
 	{0,               0, NULL, NULL, NULL}
 };
 
@@ -237,7 +185,8 @@ void SetEnvironmentVariables(void)
 
 void GetPrefs(void)
 {
-	WgxGetOptions(".\\options\\guiopts.lua",options);
+	WgxGetOptions(".\\options\\guiopts.lua",read_only_options);
+	WgxGetOptions(".\\options\\guiopts-internals.lua",internal_options);
 	
 	/* get restored main window coordinates */
 	r_rc.left = rx;
@@ -271,7 +220,7 @@ void SavePrefs(void)
 		if(errno != EEXIST)
 			WgxDbgPrint("Cannot create .\\options directory: errno = %u\n",errno);
 	}
-	WgxSaveOptions(".\\options\\guiopts.lua",options,SavePrefsCallback);
+	WgxSaveOptions(".\\options\\guiopts-internals.lua",internal_options,SavePrefsCallback);
 }
 
 /**

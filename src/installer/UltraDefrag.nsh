@@ -204,6 +204,15 @@ Var AtLeastXP
     ${DisableX64FSRedirection}
 
     DetailPrint "Removing core files..."
+    Delete "$INSTDIR\LICENSE.TXT"
+    Delete "$INSTDIR\CREDITS.TXT"
+    Delete "$INSTDIR\HISTORY.TXT"
+    Delete "$INSTDIR\README.TXT"
+    Delete "$INSTDIR\lua5.1a.exe"
+    Delete "$INSTDIR\lua5.1a_gui.exe"
+    RMDir /r "$INSTDIR\scripts"
+    RMDir /r "$INSTDIR\options"
+
     Delete "$SYSDIR\zenwinx.dll"
     Delete "$SYSDIR\udefrag.dll"
     Delete "$SYSDIR\wgx.dll"
@@ -344,6 +353,16 @@ Var AtLeastXP
     SetOutPath "$INSTDIR"
         Delete "$INSTDIR\ultradefrag.exe"
         File "ultradefrag.exe"
+        
+    SetOutPath "$INSTDIR\scripts"
+        File "${ROOTDIR}\src\scripts\upgrade-guiopts.lua"
+        
+    DetailPrint "Upgrade GUI preferences..."
+    ${If} ${Silent}
+        ExecWait '"$INSTDIR\lua5.1a_gui.exe" -s "$INSTDIR\scripts\upgrade-guiopts.lua" "$INSTDIR"'
+    ${Else}
+        ExecWait '"$INSTDIR\lua5.1a_gui.exe" "$INSTDIR\scripts\upgrade-guiopts.lua" "$INSTDIR"'
+    ${EndIf}
 
     Push $R0
     Push $0
@@ -404,6 +423,7 @@ Var AtLeastXP
     RMDir /r "$INSTDIR\i18n"
 
     Delete "$INSTDIR\ultradefrag.exe"
+    Delete "$INSTDIR\scripts\upgrade-guiopts.lua"
     
     Push $R0
 
@@ -491,31 +511,53 @@ Var AtLeastXP
     DetailPrint "Installing the context menu handler..."
     SetOutPath "$INSTDIR"
         File "${ROOTDIR}\src\installer\shellex.ico"
+        File "${ROOTDIR}\src\installer\shellex-folder.ico"
 
     Push $0
     Push $1
     Push $2
+    Push $3
+    Push $4
+    Push $5
+    Push $6
+    Push $7
 
     StrCpy $0 "$\"$SYSDIR\udefrag.exe$\" --shellex $\"%1$\""
     StrCpy $1 "$INSTDIR\shellex.ico"
     StrCpy $2 "[--- &Ultra Defragmenter ---]"
+    StrCpy $3 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder $\"%1$\""
+    StrCpy $4 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder-itself $\"%1$\""
+    StrCpy $5 "$INSTDIR\shellex-folder.ico"
+    StrCpy $6 "[--- &Defragment folder itself ---]"
+    StrCpy $7 "[--- &Defragment root folder itself ---]"
 
     ${If} $AtLeastXP == "1"
-        WriteRegStr HKCR "Drive\shell\udefrag"         ""     $2
-        WriteRegStr HKCR "Drive\shell\udefrag"         "Icon" $1
-        WriteRegStr HKCR "Drive\shell\udefrag\command" ""     $0
+        WriteRegStr HKCR "Drive\shell\udefrag"                ""     $2
+        WriteRegStr HKCR "Drive\shell\udefrag"                "Icon" $1
+        WriteRegStr HKCR "Drive\shell\udefrag\command"        ""     $3
+        WriteRegStr HKCR "Drive\shell\udefrag-folder"         ""     $7
+        WriteRegStr HKCR "Drive\shell\udefrag-folder"         "Icon" $5
+        WriteRegStr HKCR "Drive\shell\udefrag-folder\command" ""     $4
     ${Else}
         DeleteRegKey HKCR "Drive\shell\udefrag"
     ${EndIf}
 
-    WriteRegStr HKCR "Folder\shell\udefrag"         ""     $2
-    WriteRegStr HKCR "Folder\shell\udefrag"         "Icon" $1
-    WriteRegStr HKCR "Folder\shell\udefrag\command" ""     $0
+    WriteRegStr HKCR "Folder\shell\udefrag"                ""     $2
+    WriteRegStr HKCR "Folder\shell\udefrag"                "Icon" $1
+    WriteRegStr HKCR "Folder\shell\udefrag\command"        ""     $3
+    WriteRegStr HKCR "Folder\shell\udefrag-folder"         ""     $6
+    WriteRegStr HKCR "Folder\shell\udefrag-folder"         "Icon" $5
+    WriteRegStr HKCR "Folder\shell\udefrag-folder\command" ""     $4
 
     WriteRegStr HKCR "*\shell\udefrag"         ""     $2
     WriteRegStr HKCR "*\shell\udefrag"         "Icon" $1
     WriteRegStr HKCR "*\shell\udefrag\command" ""     $0
 
+    Pop $7
+    Pop $6
+    Pop $5
+    Pop $4
+    Pop $3
     Pop $2
     Pop $1
     Pop $0
@@ -536,7 +578,9 @@ Var AtLeastXP
 
     DetailPrint "Removing the context menu handler..."
     DeleteRegKey HKCR "Drive\shell\udefrag"
+    DeleteRegKey HKCR "Drive\shell\udefrag-folder"
     DeleteRegKey HKCR "Folder\shell\udefrag"
+    DeleteRegKey HKCR "Folder\shell\udefrag-folder"
     DeleteRegKey HKCR "*\shell\udefrag"
 
     ${EnableX64FSRedirection}

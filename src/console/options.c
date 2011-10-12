@@ -267,6 +267,8 @@ static struct option long_options_[] = {
 	*/
 	{ "wait",                        no_argument,       0,  0  },
 	{ "shellex",                     no_argument,       0,  0  },
+	{ "folder",                      no_argument,       0,  0  },
+	{ "folder-itself",               no_argument,       0,  0  },
 	
 	{ 0,                             0,                 0,  0  }
 };
@@ -351,6 +353,10 @@ void parse_cmdline(int argc, char **argv)
 				wait_flag = 1;
 			} else if(!strcmp(long_option_name,"shellex")){
 				shellex_flag = 1;
+			} else if(!strcmp(long_option_name,"folder")){
+				folder_flag = 1;
+			} else if(!strcmp(long_option_name,"folder_itself")){
+				folder_itself_flag = 1;
 			} else if(!strcmp(long_option_name,"use-entire-window")){
 				use_entire_window = 1;
 			} else if(!strcmp(long_option_name,"map-rows")){

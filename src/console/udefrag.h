@@ -87,6 +87,8 @@ extern object_path *paths;
 extern char letters[MAX_DOS_DRIVES];
 extern int wait_flag;
 extern int shellex_flag;
+extern int folder_flag;
+extern int folder_itself_flag;
 extern int quick_optimize_flag;
 extern int optimize_mft_flag;
 extern int repeat_flag;

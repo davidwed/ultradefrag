@@ -46,6 +46,8 @@ object_path *paths = NULL;
 char letters[MAX_DOS_DRIVES] = {0};
 int wait_flag = 0;
 int shellex_flag = 0;
+int folder_flag = 0;
+int folder_itself_flag = 0;
 int quick_optimize_flag = 0;
 int optimize_mft_flag = 0;
 int repeat_flag = 0;
@@ -583,6 +585,8 @@ static int process_single_volume(char volume_letter)
 	else if(optimize_mft_flag) job_type = MFT_OPTIMIZATION_JOB;
 	if(repeat_flag)
 		flags = UD_JOB_REPEAT;
+	if(shellex_flag)
+		flags |= UD_JOB_CONTEXT_MENU_HANDLER;
 	first_progress_update = 1;
 	result = udefrag_start_job(volume_letter,job_type,flags,map_size,
 		update_progress,terminator,(void *)(DWORD_PTR)volume_letter);
@@ -650,31 +654,53 @@ static int process_volumes(void)
 					display_last_error("process_volumes: cannot get %%UD_IN_FILTER%%!");
 			}
 			
-			/* save the current path to %UD_IN_FILTER% */
-			n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls",path->path);
-			if(n < 0){
-				display_error("process_volumes: cannot set %%UD_IN_FILTER%% - path is too long!");
-				wcscpy(new_in_filter,in_filter);
-				path_found = 0;
+			if(shellex_flag && (folder_flag || folder_itself_flag)){
+				if(folder_flag){
+					if(path->path[wcslen(path->path) - 1] == '\\'){
+						/* set UD_IN_FILTER=c:\* */
+						n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls*",path->path);
+					} else {
+						/* set UD_IN_FILTER=c:\test;c:\test\* */
+						n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls;%ls\\*",path->path,path->path);
+					}
+				} else {
+					/* set UD_IN_FILTER=c:\test */
+					n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls",path->path);
+				}
+				if(n < 0){
+					display_error("process_volumes: cannot set %%UD_IN_FILTER%% - path is too long!");
+					wcscpy(new_in_filter,in_filter);
+					path_found = 0;
+				} else {
+					new_in_filter[MAX_ENV_VARIABLE_LENGTH] = 0;
+				}
 			} else {
-				new_in_filter[MAX_ENV_VARIABLE_LENGTH] = 0;
-			}
-			
-			/* search for another paths with the same drive letter */
-			for(another_path = path->next; another_path; another_path = another_path->next){
-				if(another_path == paths) break;
-				if(udefrag_toupper(letter) == udefrag_toupper((char)another_path->path[0])){
-					/* try to append it to %UD_IN_FILTER% */
-					n = _snwprintf(aux_buffer,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls;%ls",new_in_filter,another_path->path);
-					if(n >= 0){
-						aux_buffer[MAX_ENV_VARIABLE_LENGTH] = 0;
-						wcscpy(new_in_filter,aux_buffer);
-						path_found = 1;
-						if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-						print_unicode_string(another_path->path);
-						printf("\n");
-						if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-						another_path->processed = 1;
+				/* save the current path to %UD_IN_FILTER% */
+				n = _snwprintf(new_in_filter,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls",path->path);
+				if(n < 0){
+					display_error("process_volumes: cannot set %%UD_IN_FILTER%% - path is too long!");
+					wcscpy(new_in_filter,in_filter);
+					path_found = 0;
+				} else {
+					new_in_filter[MAX_ENV_VARIABLE_LENGTH] = 0;
+				}
+				
+				/* search for another paths with the same drive letter */
+				for(another_path = path->next; another_path; another_path = another_path->next){
+					if(another_path == paths) break;
+					if(udefrag_toupper(letter) == udefrag_toupper((char)another_path->path[0])){
+						/* try to append it to %UD_IN_FILTER% */
+						n = _snwprintf(aux_buffer,MAX_ENV_VARIABLE_LENGTH + 1,L"%ls;%ls",new_in_filter,another_path->path);
+						if(n >= 0){
+							aux_buffer[MAX_ENV_VARIABLE_LENGTH] = 0;
+							wcscpy(new_in_filter,aux_buffer);
+							path_found = 1;
+							if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+							print_unicode_string(another_path->path);
+							printf("\n");
+							if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+							another_path->processed = 1;
+						}
 					}
 				}
 			}

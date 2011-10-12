@@ -36,7 +36,7 @@
 * of various special files like reparse
 * points, attribute lists and others.
 */
-#define TEST_SPECIAL_FILES_DEFRAG
+//#define TEST_SPECIAL_FILES_DEFRAG
 
 /* Test suite for special files. */
 #ifdef TEST_SPECIAL_FILES_DEFRAG

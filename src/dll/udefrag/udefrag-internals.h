@@ -50,8 +50,8 @@
 #endif
 
 /* flags for user_defined_flags member of filelist entries */
-#define UD_FILE_EXCLUDED       0x1
-#define UD_FILE_OVER_LIMIT     0x2
+#define UD_FILE_EXCLUDED         0x1
+#define UD_FILE_OVER_LIMIT       0x2
 
 /* file status flags */
 #define UD_FILE_LOCKED           0x4   /* file is locked by system */
@@ -63,7 +63,7 @@
 * This flag is used to skip already processed
 * files in individual volume processing tasks.
 */
-#define UD_FILE_CURRENTLY_EXCLUDED	 0x40
+#define UD_FILE_CURRENTLY_EXCLUDED      0x40
 
 /*
 * This flag is used to speed things up.
@@ -71,19 +71,21 @@
 * we'll noticeably slow down all the
 * volume procesing routines.
 */
-#define UD_FILE_NOT_LOCKED 0x80
+#define UD_FILE_NOT_LOCKED              0x80
 
 /*
 * This flag is used to avoid 
 * repeated moves in volume optimization.
 */
-#define UD_FILE_MOVED_TO_FRONT 0x100
+#define UD_FILE_MOVED_TO_FRONT         0x100
 
 /*
 * This flag is used to mark files
 * fragmented by MFT optimizer.
 */
-#define UD_FILE_FRAGMENTED_BY_MFT_OPT 0x200
+#define UD_FILE_FRAGMENTED_BY_MFT_OPT  0x200
+
+#define UD_FILE_EXCLUDED_BY_PATH       0x400
 
 #define is_excluded(f)           ((f)->user_defined_flags & UD_FILE_EXCLUDED)
 #define is_over_limit(f)         ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
@@ -97,6 +99,8 @@
 #define is_moved_to_front(f)     ((f)->user_defined_flags & UD_FILE_MOVED_TO_FRONT)
 
 #define is_fragmented_by_mft_opt(f) ((f)->user_defined_flags & UD_FILE_FRAGMENTED_BY_MFT_OPT)
+
+#define is_excluded_by_path(f)   ((f)->user_defined_flags & UD_FILE_EXCLUDED_BY_PATH)
 
 #define is_block_excluded(b)     ((b)->length == 0)
 

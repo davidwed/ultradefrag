@@ -3,6 +3,10 @@ HISTORY
   Version 5.0.0  2011-10-
   ------------------------------------------------------------------------------
     RC1:
+    - FILTER SYNTAX CHANGED to provide better flexibility
+    - ability to defragment folder itself without defragmentation
+      of its contents added to the context menu of Windows Explorer
+    - GUI options forced to be not overwritten at GUI program exit
     - MFT optimization implemented
     - repeat action menu and toolbar button were added to GUI
     - menu now shows the same images as the toolbar
@@ -71,6 +75,7 @@ HISTORY
     - WgxGetToolbarBitmapForMenu function added
     - calling conventions removed from all the function prototypes
       in all the libraries
+    - silent mode (-s switch) added to lua5.1a_gui program
 
     beta3:
     - volume optimization reimplemented
