@@ -26,7 +26,7 @@ static lua_State *globalL = NULL;
 
 static const char *progname = LUA_PROGNAME;
 
-
+static int silent_mode = 0;
 
 static void lstop (lua_State *L, lua_Debug *ar) {
   (void)ar;  /* unused arg. */
@@ -43,12 +43,14 @@ static void __cdecl laction (int i) {
 
 
 static void print_usage (void) {
+  if(silent_mode) return;
   MessageBox(0,
   "usage: lua5.1a_gui [options] [script [args]].\n"
   "Available options are:\n"
   "  -e stat  execute string " LUA_QL("stat") "\n"
   "  -l name  require library " LUA_QL("name") "\n"
   "  -v       show version information\n"
+  "  -s       silent mode (errors not displayed on the screen\n"
   "  --       stop handling options\n"
   ,
   "Lua GUI",MB_OK);
@@ -56,6 +58,7 @@ static void print_usage (void) {
 
 
 static void l_message (const char *pname, const char *msg) {
+  if(silent_mode) return;
   if (!pname) pname = "Lua GUI";
   MessageBox(0,msg,pname,MB_OK);
 }
@@ -277,8 +280,15 @@ static int pmain (lua_State *L) {
 
 
 int __cdecl internal_main (int argc, char **argv) {
-  int status;
+  int i, status;
   struct Smain s;
+  
+  /* check for silent mode */
+  for(i = 0; i < argc; i++){
+	  if(!strcmp(argv[i],"-s") || !strcmp(argv[i],"-S"))
+		  silent_mode = 1;
+  }
+  
   lua_State *L = lua_open();  /* create state */
   if (L == NULL) {
     l_message(argv[0], "cannot create state: not enough memory");
