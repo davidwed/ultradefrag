@@ -190,6 +190,10 @@ static int collectargs (char **argv, int *pi, int *pv, int *pe) {
         notail(argv[i]);
         *pv = 1;
         break;
+      case 's':
+	  case 'S':
+        notail(argv[i]);
+        break;
       case 'e':
         *pe = 1;  /* go through */
       case 'l':
