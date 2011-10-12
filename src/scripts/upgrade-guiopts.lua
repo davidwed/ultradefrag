@@ -48,6 +48,9 @@ config_file_contents = [[
 -- character, '*' - any zero or more characters. For example, "file.mp?" matches
 -- both file.mp3 and file.mp4 while "*.mp3" matches all files with mp3 extension.
 
+-- *.* pattern matches any file with an extension. An asterisk alone (*) matches
+-- anything (with or without an extension).
+
 -- Note that you must type either full paths, or substitute the beginning of the
 -- path by '*' wildcard. For example, to defragment all the books of a famous Scottish
 -- novelist use "C:\\Books\\Arthur Conan Doyle\\*" or simply "*\\Arthur Conan Doyle\\*"
