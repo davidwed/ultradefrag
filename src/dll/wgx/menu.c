@@ -48,6 +48,9 @@ HBITMAP WgxGetToolbarBitmapForMenu(HBITMAP hBMSrc, int nPos)
 
 	cx = GetSystemMetrics(SM_CXMENUCHECK);
 	cy = GetSystemMetrics(SM_CYMENUCHECK);
+    if(nPos == 0)
+        WgxDbgPrint("Menu bitmap size %d x %d",cx,cy);
+    
 	if ((hDCSrc = CreateCompatibleDC(NULL)) != NULL) {
 		if ((hDCDst = CreateCompatibleDC(NULL)) != NULL) {
 			SelectObject(hDCSrc, hBMSrc);
