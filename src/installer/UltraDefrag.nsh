@@ -276,6 +276,15 @@ Var AtLeastXP
 
     ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.cmd"
         File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
+        File "${ROOTDIR}\src\installer\ud-boot-time.ini"
+    ${Else}
+        ; the script of v5.0 is not compatible with previous
+        ; versions because of the filter syntax changes
+        ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.ini"
+            Rename "$SYSDIR\ud-boot-time.cmd" "$SYSDIR\ud-boot-time.cmd.old"
+            File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
+            File "${ROOTDIR}\src\installer\ud-boot-time.ini"
+        ${EndUnless}
     ${EndUnless}
   
     ${EnableX64FSRedirection}
@@ -301,6 +310,8 @@ Var AtLeastXP
     Delete "$SYSDIR\bootexctrl.exe"
     Delete "$SYSDIR\defrag_native.exe"
     Delete "$SYSDIR\ud-boot-time.cmd"
+    Delete "$SYSDIR\ud-boot-time.cmd.old"
+    Delete "$SYSDIR\ud-boot-time.ini"
 
     ${EnableX64FSRedirection}
 
