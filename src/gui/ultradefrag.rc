@@ -64,7 +64,9 @@ IDB_TOOLBAR_16_BIT             BITMAP  DISCARDABLE     "res/toolbar16.bmp"
 IDB_TOOLBAR_DISABLED_16_BIT    BITMAP  DISCARDABLE     "res/toolbar16d.bmp"
 IDB_TOOLBAR_HIGHLIGHTED_16_BIT BITMAP  DISCARDABLE     "res/toolbar16h.bmp"
 
-IDB_MENU_13                    BITMAP  DISCARDABLE     "res/menu_13x13.bmp"
+//IDB_MENU_13                    BITMAP  DISCARDABLE     "res/menu_13x13.bmp"
+//IDB_MENU_13                    BITMAP  DISCARDABLE     "res/menu_13x13_grayscale.bmp"
+IDB_MENU_13                    BITMAP  DISCARDABLE     "res/menu_13x13_monochrome.bmp"
 IDB_MENU_15                    BITMAP  DISCARDABLE     "res/menu_15x15.bmp"
 
 IDD_ABOUT DIALOG DISCARDABLE  0, 0, 239, 93
