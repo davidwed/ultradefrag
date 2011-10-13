@@ -294,7 +294,10 @@ void display_last_error(char *caption)
 			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			(LPTSTR)&lpMsgBuf,0,NULL)){
 				if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
-				printf("\n%s\nError code = 0x%x\n\n",caption,(UINT)error);
+				if(error == ERROR_COMMITMENT_LIMIT)
+					printf("\n%s\nNot enough memory.\n\n",caption);
+				else
+					printf("\n%s\nError code = 0x%x\n\n",caption,(UINT)error);
 				if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	} else {
 		if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);

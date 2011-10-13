@@ -858,10 +858,8 @@ winx_volume_region *winx_add_volume_region(winx_volume_region *rlist,
 	
 	r = (winx_volume_region *)winx_list_insert_item((list_entry **)(void *)&rlist,
 		(list_entry *)rprev,sizeof(winx_volume_region));
-	if(r == NULL){
-		/* TODO: better error handling */
+	if(r == NULL)
 		return rlist;
-	}
 	
 	r->lcn = lcn;
 	r->length = length;

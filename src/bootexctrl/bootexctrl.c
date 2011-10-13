@@ -63,8 +63,13 @@ void DisplayLastError(char *caption)
 			FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 			NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 			(LPTSTR)&lpMsgBuf,0,NULL)){
-				(void)_snprintf(buffer,sizeof(buffer),
-						"Error code = 0x%x",(UINT)error);
+				if(error == ERROR_COMMITMENT_LIMIT){
+					(void)_snprintf(buffer,sizeof(buffer),
+							"Not enough memory.");
+				} else {
+					(void)_snprintf(buffer,sizeof(buffer),
+							"Error code = 0x%x",(UINT)error);
+				}
 				buffer[sizeof(buffer) - 1] = 0;
 				MessageBox(NULL,buffer,caption,MB_OK | MB_ICONHAND);
 				return;

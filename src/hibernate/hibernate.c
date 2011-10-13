@@ -6,6 +6,8 @@
 * License:       Public Domain
 */
 
+/* Revised by Dmitri Arkhangelski, 2011 */
+
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -23,15 +25,17 @@ void show_help(void)
 
 void HandleError(char *msg)
 {
+	DWORD error;
 	LPVOID error_message;
 
+	error = GetLastError();
 	/* format message and display it on the screen */
 	if(FormatMessage( 
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | 
 		FORMAT_MESSAGE_FROM_SYSTEM | 
 		FORMAT_MESSAGE_IGNORE_INSERTS,
 		NULL,
-		GetLastError(),
+		error,
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), // Default language
 		(LPTSTR) &error_message,
 		0,
@@ -39,7 +43,10 @@ void HandleError(char *msg)
 			printf(msg,(LPCTSTR)error_message);
 			LocalFree(error_message);
 	} else {
-		printf(msg,"unknown reason");
+		if(error == ERROR_COMMITMENT_LIMIT)
+			printf(msg,"not enough memory");
+		else
+			printf(msg,"unknown reason");
 	}
 }
 

@@ -106,7 +106,10 @@ void WgxDbgPrintLastError(char *format, ...)
 	  FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 	  NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 	  (LPTSTR)&msg,0,NULL)){
-		(void)sprintf(buffer,"Error code = 0x%x",(UINT)error);
+		if(error == ERROR_COMMITMENT_LIMIT)
+			(void)sprintf(buffer,"Not enough memory.");
+		else
+			(void)sprintf(buffer,"Error code = 0x%x",(UINT)error);
 		OutputDebugString(buffer);
 	} else {
 		OutputDebugString((LPCTSTR)msg);
@@ -164,7 +167,10 @@ int WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...)
 	  FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
 	  NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
 	  (LPTSTR)&msg,0,NULL)){
-		(void)_snprintf(b,sizeof(b),"Error code = 0x%x",(UINT)error);
+		if(error == ERROR_COMMITMENT_LIMIT)
+			(void)_snprintf(b,sizeof(b),"Not enough memory.");
+		else
+			(void)_snprintf(b,sizeof(b),"Error code = 0x%x",(UINT)error);
 		b[sizeof(b) - 1] = 0;
 		msg = NULL;
 		text = b;
