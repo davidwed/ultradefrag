@@ -32,7 +32,7 @@ HISTORY
 
       Portuguese (BR), Yiddish, Hungarian, Spanish (ES), Dutch, Finnish,
       Italian, Iloko, Filipino (Tagalog), Catalan, Danish, Norwegian,
-      Portuguese
+      Portuguese, Chinese (Traditional), Korean
     
     - installer has been enhanced in the following ways:
       + now checks Mutex to prevent install/remove while the program is running
