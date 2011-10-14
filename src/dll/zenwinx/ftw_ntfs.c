@@ -1068,15 +1068,20 @@ static void process_run(winx_file_info *f,ULONGLONG vcn,ULONGLONG lcn,ULONGLONG 
 	block->lcn = lcn;
 	block->length = length;
 
-	f->disp.fragments ++;
 	f->disp.clusters += block->length;
+	if(block == f->disp.blockmap)
+		f->disp.fragments ++;
+	
 	/*
-	* Sometimes normal file has more than one fragment, 
-	* but is not fragmented yet! 8-) 
+	* Sometimes files have more than one fragment, 
+	* but are not fragmented yet. In case of compressed
+	* files this happens quite frequently.
 	*/
 	if(block != f->disp.blockmap && \
-	  block->lcn != (block->prev->lcn + block->prev->length))
+	  block->lcn != (block->prev->lcn + block->prev->length)){
+		f->disp.fragments ++;
 		f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
+	}
 }
 
 static int check_run(ULONGLONG lcn,ULONGLONG length,mft_scan_parameters *sp)

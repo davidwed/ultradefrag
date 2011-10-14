@@ -397,7 +397,7 @@ static int blockmap_compare(winx_file_disposition *disp1, winx_file_disposition 
 	if(disp1->fragments <= 0 || disp2->fragments <= 0)
 		return (-1);
 
-	/* if number of elements differs, maps are different */
+	/* if number of file fragments differs, maps are different */
 	if(disp1->fragments != disp2->fragments)
 		return 1;
 
@@ -410,6 +410,9 @@ static int blockmap_compare(winx_file_disposition *disp1, winx_file_disposition 
 			return 1;
 		if(block1->next == disp1->blockmap || block2->next == disp2->blockmap) break;
 	}
+	  
+	if(block1->next != disp1->blockmap || block2->next != disp2->blockmap)
+		return 1; /* one map is shorter than another */
 	
 	return 0;
 }
@@ -459,11 +462,14 @@ repeat_scan:
 	/* adjust number of fragments and set flags */
 	f->disp.fragments = 0;
 	f->disp.flags &= ~WINX_FILE_DISP_FRAGMENTED;
-	for(block = f->disp.blockmap; block; block = block->next){
+	if(f->disp.blockmap != NULL)
 		f->disp.fragments ++;
+	for(block = f->disp.blockmap; block; block = block->next){
 		if(block != f->disp.blockmap && \
-		  block->lcn != (block->prev->lcn + block->prev->length))
+		  block->lcn != (block->prev->lcn + block->prev->length)){
+			f->disp.fragments ++;
 			f->disp.flags |= WINX_FILE_DISP_FRAGMENTED;
+		}
 		if(block->next == f->disp.blockmap) break;
 	}
 }
