@@ -55,9 +55,9 @@ HBITMAP WgxGetToolbarBitmapForMenu(HBITMAP hBMSrc, int nPos)
 		if ((hDCDst = CreateCompatibleDC(NULL)) != NULL) {
 			SelectObject(hDCSrc, hBMSrc);
 			GetObject(hBMSrc, sizeof(bm), &bm);
-			hBMDst = CreateBitmap(bm.bmHeight, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);
+			hBMDst = CreateBitmap(cx, cy, bm.bmPlanes, bm.bmBitsPixel, NULL);
 			if (hBMDst) {
-				GetObject(hBMDst, sizeof(bm), &bm);
+				//GetObject(hBMDst, sizeof(bm), &bm);
 				hOldBmp = SelectObject(hDCDst, hBMDst);
 				StretchBlt(hDCDst, 0, 0, cx, cy, hDCSrc, nPos*bm.bmHeight, 0, bm.bmHeight, bm.bmHeight, SRCCOPY);
 				SelectObject(hDCDst, hOldBmp);
