@@ -189,94 +189,9 @@
  * <h1>Configuring</h1>
  * The default font is Courier New, 9.
  *
- * GUI options have the same meaning as the environment variables
- * accepted by the UltraDefrag command line tool.
- *
- * Note that you must specify paths in filters with double back
- * slashes instead of a single one. For example:
- *
- *
-@verbatim
-ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"
-@endverbatim
- *
- * The following script is used by default:
- *
-@verbatim
--- UltraDefrag GUI options
-
--- Note that you must specify paths in filters
--- with double back slashes instead of the single ones.
--- For example:
--- ex_filter = "MyDocs\\Music\\mp3\\Red_Hot_Chili_Peppers"
-
-in_filter = ""
-ex_filter = "system volume information;temp;recycle"
-sizelimit = ""
-fragments_threshold = 0
-refresh_interval = 100
-time_limit = ""
-
-disable_reports = 0
-
--- set dbgprint_level to DETAILED for reporting a bug,
--- for normal operation set it to NORMAL or an empty string
-
-dbgprint_level = "NORMAL"
-
--- set log_file_path to the path and file name of the log file to be created,
--- for normal operation set it to an empty string
--- For example:
--- log_file_path = "C:\\Windows\\UltraDefrag\\Logs\\ultradefrag.log"
-
-log_file_path = ""
-
--- set dry_run parameter to 1 for defragmentation algorithm testing,
--- no actual data moves will be performed on disk in this case
-
-dry_run = 0
-
--- seconds_for_shutdown_rejection sets the delay for the user to cancel
--- the hibernate, logoff, reboot or shutdown execution, default is 60 seconds
-
-seconds_for_shutdown_rejection = 60
-
--- cluster map options (restart required to take effect):
--- the size of the block, in pixels; default value is 4
-
-map_block_size = 4
-
--- the grid line width, in pixels; default value is 1
-
-grid_line_width = 1
-
--- grid line color, in RGB format; default value is (0;0;0)
--- all color components should be in range 0-255
--- (0;0;0) means black; (255;255;255) - white
-
-grid_color_r = 0
-grid_color_g = 0
-grid_color_b = 0
-
--- set disable_latest_version_check parameter to 1
--- to disable the automatic check for the latest available
--- version of the program during startup
-
-disable_latest_version_check = 0
-
--- window coordinates etc.
-
--- set scale_by_dpi parameter to 0
--- to not scale the buttons and text according to the
--- screens DPI settings
-
-scale_by_dpi = 1
-
--- set restore_default_window_size parameter to 1
--- to restore default window size on the next startup
-
-restore_default_window_size = 0
-@endverbatim
+ * GUI options are stored in guiopts.lua file. They have the same
+ * meaning as the environment variables accepted by the UltraDefrag
+ * command line tool.
  *
  * It does make sense to set <b>grid_line_width = 0</b>,
  * if you set <b>map_block_size = 1</b> to be able to use the whole

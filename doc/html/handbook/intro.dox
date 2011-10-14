@@ -77,6 +77,11 @@
  * aren't supported yet, because they have no defragmentation
  * API implemented at this moment.
  *
+ * UltraDefrag cannot be used on DOS, Windows 9x, Windows NT 3.51 and Mac OS
+ * since these operating systems provide no defragmentation API.
+ * However, <a href="http://b.andre.pagesperso-orange.fr/advanced-ntfs-3g.html">Linux port of UltraDefrag</a> exists.
+ * It is based on NTFS-3G capabilities.
+ *
  * <h1>Supported file-systems</h1>
  * The following file-systems can be defragmented by UltraDefrag:
  * FAT12/16/32, exFAT and NTFS.
