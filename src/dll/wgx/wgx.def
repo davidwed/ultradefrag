@@ -4,6 +4,8 @@ EXPORTS
 	WgxAddAccelerators
 	WgxBuildMenu
 	WgxBuildPopupMenu
+    
+    WgxCreateMenuBitmapMasked
 
 	WgxBuildResourceTable
 	WgxApplyResourceTable

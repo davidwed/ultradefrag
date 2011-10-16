@@ -30,8 +30,115 @@
 #include "wgx.h"
 
 /**
+ * @brief Masks bitmaps.
+ * @param[in] hBMSrc handle to the bitmap.
+ * @param[in] crTransparent transparent color. If set to
+ * (COLORREF)-1 the color of pixel 0/0 of the image is used.
+ * @return Handle of the created bitmap,
+ * NULL indicates failure.
+ * @note Based on an example at
+ * http://forum.pellesc.de/index.php?topic=3265.0
+ */
+HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent)
+{
+	HDC hDCMem = NULL, hDCMem2 = NULL, hDCDst1 = NULL;
+	BITMAP bm = {0};
+	HBITMAP hBMDst1 = NULL;
+	HBITMAP hBMDst2 = NULL;
+	HBITMAP hBMMask = NULL;
+	RECT rc = {0};
+
+	GetObject(hBMSrc, sizeof(bm), &bm);
+
+	hDCMem = CreateCompatibleDC(NULL);
+    if(hDCMem == NULL) return NULL;
+
+	hDCMem2 = CreateCompatibleDC(NULL);
+    if(hDCMem2 == NULL){
+        DeleteDC(hDCMem);
+        return NULL;
+    }
+
+	hBMDst1 = CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);	// new bitmap
+	hBMDst2 = CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);	// copy bitmap
+	hBMMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);	// mask bitmap
+	// make copy of source bitmap
+	SelectObject(hDCMem, hBMSrc);	// source
+	SelectObject(hDCMem2, hBMDst2);	// target
+	BitBlt(hDCMem2, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCCOPY);	//
+	DeleteDC(hDCMem);	// free source
+	DeleteDC(hDCMem2);
+	// make masks
+
+	hDCMem = CreateCompatibleDC(NULL);
+    if(hDCMem == NULL){
+        DeleteObject(hBMDst1);
+        DeleteObject(hBMDst2);
+        DeleteObject(hBMMask);
+        return NULL;
+    }
+
+	hDCMem2 = CreateCompatibleDC(NULL);
+    if(hDCMem2 == NULL){
+        DeleteDC(hDCMem);
+        DeleteObject(hBMDst1);
+        DeleteObject(hBMDst2);
+        DeleteObject(hBMMask);
+        return NULL;
+    }
+
+	SelectObject(hDCMem, hBMDst2);
+	SelectObject(hDCMem2, hBMMask);
+    /* get color from pixel 0/0, if transparent color is not set */
+    if(crTransparent == (COLORREF)-1)
+        SetBkColor(hDCMem, GetPixel(hDCMem, 0, 0));
+    else
+        SetBkColor(hDCMem, crTransparent);
+
+	BitBlt(hDCMem2, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCCOPY);
+	BitBlt(hDCMem, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem2, 0, 0, SRCINVERT);
+	DeleteDC(hDCMem);
+	DeleteDC(hDCMem2);
+
+	rc.top = rc.left = 0;
+	rc.right = bm.bmWidth;
+	rc.bottom = bm.bmHeight;
+
+	hDCMem = CreateCompatibleDC(NULL);
+    if(hDCMem == NULL){
+        DeleteObject(hBMDst1);
+        DeleteObject(hBMDst2);
+        DeleteObject(hBMMask);
+        return NULL;
+    }
+
+	hDCDst1 = CreateCompatibleDC(NULL);
+    if(hDCDst1 == NULL){
+        DeleteDC(hDCMem);
+        DeleteObject(hBMDst1);
+        DeleteObject(hBMDst2);
+        DeleteObject(hBMMask);
+        return NULL;
+    }
+
+	SelectObject(hDCDst1, hBMDst1);
+	FillRect(hDCDst1, &rc, GetSysColorBrush(COLOR_MENU));
+
+	SelectObject(hDCMem, hBMMask);
+	BitBlt(hDCDst1, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCAND);
+	SelectObject(hDCMem, hBMDst2);
+	BitBlt(hDCDst1, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCPAINT);
+	DeleteDC(hDCMem);
+	DeleteDC(hDCDst1);
+
+	DeleteObject(hBMDst2);
+	DeleteObject(hBMMask);
+	return hBMDst1;
+}
+
+/**
  * @internal
- * @brief Adds menu bitmaps to menu items.
+ * @brief Extracts menu bitmaps from toolbar bitmaps.
  * @param[in] hBMSrc handle to the toolbar bitmap.
  * @param[in] nPos position of menu bitmap.
  * @return Handle of the created bitmap,
@@ -48,8 +155,6 @@ HBITMAP WgxGetToolbarBitmapForMenu(HBITMAP hBMSrc, int nPos)
 
 	cx = GetSystemMetrics(SM_CXMENUCHECK);
 	cy = GetSystemMetrics(SM_CYMENUCHECK);
-    if(nPos == 0)
-        WgxDbgPrint("Menu bitmap size %d x %d",cx,cy);
     
 	if ((hDCSrc = CreateCompatibleDC(NULL)) != NULL) {
 		if ((hDCDst = CreateCompatibleDC(NULL)) != NULL) {
@@ -57,7 +162,6 @@ HBITMAP WgxGetToolbarBitmapForMenu(HBITMAP hBMSrc, int nPos)
 			GetObject(hBMSrc, sizeof(bm), &bm);
 			hBMDst = CreateBitmap(cx, cy, bm.bmPlanes, bm.bmBitsPixel, NULL);
 			if (hBMDst) {
-				//GetObject(hBMDst, sizeof(bm), &bm);
 				hOldBmp = SelectObject(hDCDst, hBMDst);
 				StretchBlt(hDCDst, 0, 0, cx, cy, hDCSrc, nPos*bm.bmHeight, 0, bm.bmHeight, bm.bmHeight, SRCCOPY);
 				SelectObject(hDCDst, hOldBmp);

@@ -131,22 +131,39 @@ WGX_MENU main_menu[] = {
  */
 int CreateMainMenu(void)
 {
-    HBITMAP hBMtoolbar = NULL;
+    HBITMAP hBMtoolbar = NULL, hBMtoolbarMasked = NULL;
 	int id;
+    OSVERSIONINFO osvi;
 
-	/* get image for menu items */
-	if(GetSystemMetrics(SM_CYMENUCHECK) <= 13)
-		id = IDB_MENU_13;
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+
+    GetVersionEx(&osvi);
+
+    if(osvi.dwMajorVersion > 5)
+		id = IDB_TOOLBAR;
     else
-		id = IDB_MENU_15;
+		id = IDB_MENU;
+
+    WgxDbgPrint("Menu row height ........ %d",GetSystemMetrics(SM_CYMENU));
+    WgxDbgPrint("Menu button size ....... %d x %d",GetSystemMetrics(SM_CXMENUSIZE),GetSystemMetrics(SM_CYMENUSIZE));
+    WgxDbgPrint("Menu check-mark size ... %d x %d",GetSystemMetrics(SM_CXMENUCHECK),GetSystemMetrics(SM_CYMENUCHECK));
 
     hBMtoolbar = LoadBitmap(hInstance, MAKEINTRESOURCE(id));
 
-	/* create menu */
-	hMainMenu = WgxBuildMenu(main_menu,hBMtoolbar);
+    if(osvi.dwMajorVersion > 5)
+		hBMtoolbarMasked = WgxCreateMenuBitmapMasked(hBMtoolbar, (COLORREF)-1);
+        
+    /* create menu */
+    if(hBMtoolbarMasked == NULL)
+        hMainMenu = WgxBuildMenu(main_menu,hBMtoolbar);
+    else
+        hMainMenu = WgxBuildMenu(main_menu,hBMtoolbarMasked);
     
     if(hBMtoolbar != NULL)
         DeleteObject(hBMtoolbar);
+    if(hBMtoolbarMasked != NULL)
+        DeleteObject(hBMtoolbarMasked);
 	
 	/* attach menu to the window */
 	if(!SetMenu(hWindow,hMainMenu)){

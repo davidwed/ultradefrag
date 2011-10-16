@@ -102,6 +102,8 @@ BOOL WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId);
 HMENU WgxBuildMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp);
 HMENU WgxBuildPopupMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp);
 
+HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent);
+
 /* lines in language files are limited by 8191 characters, which is more than enough */
 BOOL WgxBuildResourceTable(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *lng_file_path);
 void WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow);

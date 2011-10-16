@@ -58,9 +58,8 @@
 #define IDB_TOOLBAR_DISABLED_16_BIT     167
 #define IDB_TOOLBAR_HIGHLIGHTED_16_BIT  168
 
-/* for menu items 13x13 and 15x15 */
-#define IDB_MENU_13                     200
-#define IDB_MENU_15                     201
+/* for menu items for Windows XP and below */
+#define IDB_MENU                        200
 
 #define IDM_STATUSBAR                   500
 
