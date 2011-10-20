@@ -25,7 +25,7 @@ HISTORY
     - console interface help screen now includes examples
     - the following translations were added:
 
-      Latin, Hebrew, Javanese, Indonesian (Bahasa Indonesia)
+      Latin, Hebrew, Javanese, Indonesian (Bahasa Indonesia), Spanish (MEX)
 
     - the following translations were updated:
 
