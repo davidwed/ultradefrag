@@ -155,10 +155,11 @@ int CreateMainMenu(void)
 		hBMtoolbarMasked = WgxCreateMenuBitmapMasked(hBMtoolbar, (COLORREF)-1);
         
     /* create menu */
-    if(hBMtoolbarMasked == NULL)
+    /* if(hBMtoolbarMasked == NULL)
         hMainMenu = WgxBuildMenu(main_menu,hBMtoolbar);
     else
-        hMainMenu = WgxBuildMenu(main_menu,hBMtoolbarMasked);
+        hMainMenu = WgxBuildMenu(main_menu,hBMtoolbarMasked); */
+        hMainMenu = WgxBuildMenu(main_menu,NULL);
     
     if(hBMtoolbar != NULL)
         DeleteObject(hBMtoolbar);
