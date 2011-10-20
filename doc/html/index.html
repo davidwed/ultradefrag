@@ -169,16 +169,14 @@ td.cell_3 {
 	</div>
 	<div class="mpart">
 		<!-- pre-release announcement -->
-		<h3>Latest News - UltraDefrag 5.0.0 beta3 released</h3>
+		<h3>Latest News - UltraDefrag 5.0.0 RC1 released</h3>
         <h2>&nbsp;</h2> 
-		<p>This preview release includes the new GUI design and the new log file creation feature.</br>
-        Analysis, defragmentation and two optimization strategies are implemented.<br/>
-        The final release candidat is mainly focused on performance improvements.</p>
+		<p>This release candidate includes all the new features of the initial v5.0.0 release.</p>
 		<p><a href=""><b>GUI:</b></a></p>
         <ul>
-		<li>The volume list hight can now be adjusted by dragging the bottom border of it.</li>
-		<li>Progress is now displayed in the status column of the volume list.</li>
-		<li>The volume label is now displayed in the volume list. Please check if all localized labels are displayed correctly.</li>
+		<li>The drive list hight can now be adjusted by dragging the bottom border of it.</li>
+		<li>Progress is now displayed in the status column of the drive list.</li>
+		<li>The drive label is now displayed in the drive list. Please check if all localized labels are displayed correctly.</li>
 		<li>There are now more actions available to be executed when UltraDefrag terminates.</li>
 		<li>The cluster map now displays unused map blocks in gray, so they can not be confused with free space.</li>
 		</ul>
@@ -189,13 +187,19 @@ td.cell_3 {
 		<p><a href=""><b>Driver:</b></a></p>
         <ul>
 		<li>Defragmentation of regular files and volume metafiles was improved.</li>
-		<li>Full optimization has been reimplemented, which processes all files despite of fragmentation.</li>
+		<li>Full optimization has been improved, which processes all files despite of fragmentation.</li>
 		<li>Quick optimization has been added, which mainly processes fragmented files.</li>
+		<li>MFT optimization has been added, which only processes the MFT.</li>
 		<li>Creation of a log file by setting an environment variable is now possible, which highly simplifies reporting problems.</li>
 		</ul>
 		<p><a href=""><b>Reports:</b></a></p>
         <ul>
 		<li>The file size, file status and report creation date and time were added to the fragmentation reports.</li>
+		</ul>
+		<p><a href=""><b>Installer:</b></a></p>
+        <ul>
+		<li>All selections can now be done through command line parameters too.<br/>
+        For further information about the switches see the <a href="handbook/Installation.html" target="_blank">handbook</a>.</li>
 		</ul>
         <p>Comments and suggestions about the new design are much appreciated!</p>
         <p>Please visit <a href="http://ultradefrag.wikispaces.com/">UltraDefrag.WikiSpaces.com</a>
@@ -204,7 +208,7 @@ td.cell_3 {
         <p><a href="http://sourceforge.net/project/screenshots.php?group_id=199532" target="_blank">Screenshots</a> of the new GUI.
         <a href="http://sourceforge.net/projects/ultradefrag/files/" target="_blank">Download</a> pre-release.</p>
         <p><a href="HISTORY.TXT">Change Log</a> contains a full list of changes.</p>
-        <div class="date"><a href="#" title="#">Posted on</a> 26th Jul. 2011</div> 
+        <div class="date"><a href="#" title="#">Posted on</a> 20th Oct. 2011</div> 
 
 		<!-- release announcement -->
 		<h3>News - UltraDefrag 4.4 has been finally released!</h3>
