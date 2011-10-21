@@ -2,6 +2,11 @@ HISTORY
 
   Version 5.0.0  2011-10-
   ------------------------------------------------------------------------------
+    RC2:
+    - the following translations were updated:
+
+      Japanese
+
     RC1:
     - FILTER SYNTAX CHANGED to provide better flexibility
     - ability to defragment folder itself without defragmentation
