@@ -5,7 +5,7 @@ HISTORY
     RC2:
     - the following translations were updated:
 
-      Japanese
+      Japanese, Korean
 
     RC1:
     - FILTER SYNTAX CHANGED to provide better flexibility
