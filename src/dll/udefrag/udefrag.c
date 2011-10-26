@@ -31,6 +31,8 @@
 
 #include "udefrag-internals.h"
 
+int progress_trigger = 0;
+
 /**
  * @brief Defines whether udefrag library has 
  * been initialized successfully or not.
@@ -149,7 +151,7 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
 {
 	udefrag_progress_info pi;
 	ULONGLONG x, y;
-	int i, k, index;
+	int i, k, index, p1, p2;
 	int mft_zone_detected;
 	int free_cell_detected;
 	ULONGLONG maximum, n;
@@ -215,6 +217,17 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
 	jp->progress_refresh_time = winx_xtime();
 	if(jp->udo.dbgprint_level >= DBG_PARANOID)
 		winx_dbg_print_header(0x20,0,"progress update");
+        
+	if(jp->udo.dbgprint_level >= DBG_DETAILED){
+        p1 = (int)(__int64)(pi.percentage * 100.00);
+        p2 = p1 % 100;
+		p1 = p1 / 100;
+        
+        if(p1 >= progress_trigger){
+            winx_dbg_print_header('>',0,"progress %3u.%02u%% completed, trigger %3u", p1, p2, progress_trigger);
+            progress_trigger = (p1 / 10) * 10 + 10;
+        }
+    }
 }
 
 /*
