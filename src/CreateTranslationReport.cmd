@@ -46,7 +46,7 @@ echo %TotalStrings% translation strings total ...
 
 echo.
 echo Comparing files ...
-for %%F in ( "%~dp0\gui\i18n\*.lng" ) do fc "%TMP%\translation.tmp" "%TMP%\%%~nF.tmp" >"%TMP%\%%~nF.cmp"
+for %%F in ( "%~dp0\gui\i18n\*.lng" ) do fc /L "%TMP%\translation.tmp" "%TMP%\%%~nF.tmp" >"%TMP%\%%~nF.cmp"
 
 echo.
 echo Creating report ...
@@ -56,12 +56,16 @@ echo.
     echo tr ... translated strings
     echo to ... total strings
     echo.
-    echo Language ...............................  tr/ to ... percentage
-    echo ===============================================================
+    echo Language ...............................  tr ^|  to ... percentage
+    echo =================================================================
     echo.
 ) >"%~dp0\gui\i18n\TranslationReport.txt"
 
 for %%F in ( "%~dp0\gui\i18n\*.lng" ) do call :CycleLines "%TMP%\%%~nF.cmp"
+
+echo.
+echo Cleaning up temporary files ...
+for %%F in ( "%~dp0\gui\i18n\translation.template" "%~dp0\gui\i18n\*.lng" ) do del /f /q "%TMP%\%%~nF.*"
 
 cls
 type "%~dp0\gui\i18n\TranslationReport.txt"
@@ -94,9 +98,9 @@ goto :EOF
     
     set TranslatedFormat=   %gCounter%
     set TotalFormat=   %TotalStrings%
-    set PercentFormat=      %Percentage%
+    set PercentFormat=     %Percentage%
     
-    echo %FileName:~1,40% %TranslatedFormat:~-3%/%TotalFormat:~-3% ... %PercentFormat:~-6% %% %suffix% >>"%~dp0\gui\i18n\TranslationReport.txt"
+    echo %FileName:~1,40% %TranslatedFormat:~-3% ^| %TotalFormat:~-3% ... %PercentFormat:~-5% %% %suffix% >>"%~dp0\gui\i18n\TranslationReport.txt"
 goto :EOF
 
 ::
