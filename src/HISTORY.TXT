@@ -7,6 +7,9 @@ HISTORY
 
       Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),
       Romanian
+    
+    - added command script to create translation report as text/plain
+      and text/wiki
 
     RC1:
     - FILTER SYNTAX CHANGED to provide better flexibility

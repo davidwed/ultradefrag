@@ -60,6 +60,10 @@ echo.
     echo =================================================================
     echo.
 ) >"%~dp0\gui\i18n\TranslationReport.txt"
+(
+    echo.
+    echo ^|^|~ Language ^|^|~ ^|^|~ translated ^|^|~ ^|^|~ total ^|^|~ ^|^|~ percentage ^|^|
+) >"%~dp0\gui\i18n\TranslationReportWiki.txt"
 
 for %%F in ( "%~dp0\gui\i18n\*.lng" ) do call :CycleLines "%TMP%\%%~nF.cmp"
 
@@ -86,21 +90,24 @@ goto :EOF
 :CycleLines
     set gCounter=0
     set FileName="%~n1 %dots%"
+    set FileNameWiki="[[%~n1.lng^|%~n1]]"
     set StartCounting=0
-    set suffix=
+    set suffix=%%
     
     echo Processing "%~n1" ...
     for /F "tokens=1*" %%L in ( 'type "%~1"' ) do if not "%%~L" == "" call :ParseResult "%~n1" "%%~L" "%%~nM"
     
     set /A Percentage="%gCounter% * 100 / %TotalStrings%"
     
-    if %Percentage% GTR 100 set suffix=???
+    if %Percentage% GTR 100 set suffix=%% ???
+    if %Percentage% LSS   0 set suffix=%% ???
     
     set TranslatedFormat=   %gCounter%
     set TotalFormat=   %TotalStrings%
     set PercentFormat=     %Percentage%
     
-    echo %FileName:~1,40% %TranslatedFormat:~-3% ^| %TotalFormat:~-3% ... %PercentFormat:~-5% %% %suffix% >>"%~dp0\gui\i18n\TranslationReport.txt"
+    echo %FileName:~1,40% %TranslatedFormat:~-3% ^| %TotalFormat:~-3% ... %PercentFormat:~-5% %suffix%>>"%~dp0\gui\i18n\TranslationReport.txt"
+    echo ^|^| %FileNameWiki:~1,-1% ^|^| ^|^|= %gCounter% ^|^| ^|^|= %TotalStrings% ^|^| ^|^|^> %Percentage% %% ^|^|>>"%~dp0\gui\i18n\TranslationReportWiki.txt"
 goto :EOF
 
 ::
