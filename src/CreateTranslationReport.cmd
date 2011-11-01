@@ -63,6 +63,7 @@ echo.
 
 for %%F in ( "%~dp0\gui\i18n\*.lng" ) do call :CycleLines "%TMP%\%%~nF.cmp"
 
+cls
 type "%~dp0\gui\i18n\TranslationReport.txt"
 
 :quit
