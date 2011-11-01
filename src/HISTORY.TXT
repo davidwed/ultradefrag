@@ -5,7 +5,8 @@ HISTORY
     RC2:
     - the following translations were updated:
 
-      Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR)
+      Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),
+      Romanian
 
     RC1:
     - FILTER SYNTAX CHANGED to provide better flexibility
