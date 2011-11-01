@@ -1,11 +1,11 @@
 HISTORY
 
-  Version 5.0.0  2011-10-
+  Version 5.0.0  2011-11-
   ------------------------------------------------------------------------------
     RC2:
     - the following translations were updated:
 
-      Japanese, Korean, Italian, Iloko, Czech, Slovak
+      Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR)
 
     RC1:
     - FILTER SYNTAX CHANGED to provide better flexibility
