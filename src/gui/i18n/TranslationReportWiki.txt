@@ -23,7 +23,7 @@
 || [[Hebrew.lng|Hebrew]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Hindi.lng|Hindi]] || ||= 60 || ||= 65 || ||> 92 % ||
 || [[Hungarian.lng|Hungarian]] || ||= 63 || ||= 65 || ||> 96 % ||
-|| [[Icelandic.lng|Icelandic]] || ||= 49 || ||= 65 || ||> 75 % ||
+|| [[Icelandic.lng|Icelandic]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Iloko.lng|Iloko]] || ||= 62 || ||= 65 || ||> 95 % ||
 || [[Indonesian (Bahasa Indonesia).lng|Indonesian (Bahasa Indonesia)]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Indonesian.lng|Indonesian]] || ||= 62 || ||= 65 || ||> 95 % ||
@@ -32,7 +32,7 @@
 || [[Javanese.lng|Javanese]] || ||= 62 || ||= 65 || ||> 95 % ||
 || [[Korean.lng|Korean]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Latin.lng|Latin]] || ||= 62 || ||= 65 || ||> 95 % ||
-|| [[Latvian.lng|Latvian]] || ||= 49 || ||= 65 || ||> 75 % ||
+|| [[Latvian.lng|Latvian]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Macedonian.lng|Macedonian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Norwegian.lng|Norwegian]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Polish.lng|Polish]] || ||= 62 || ||= 65 || ||> 95 % ||
@@ -42,13 +42,13 @@
 || [[Russian.lng|Russian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Serbian.lng|Serbian]] || ||= 53 || ||= 65 || ||> 81 % ||
 || [[Slovak.lng|Slovak]] || ||= 52 || ||= 65 || ||> 80 % ||
-|| [[Slovenian.lng|Slovenian]] || ||= 49 || ||= 65 || ||> 75 % ||
+|| [[Slovenian.lng|Slovenian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Spanish (AR).lng|Spanish (AR)]] || ||= 61 || ||= 65 || ||> 93 % ||
 || [[Spanish (ES).lng|Spanish (ES)]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Spanish (MEX).lng|Spanish (MEX)]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Swedish.lng|Swedish]] || ||= 61 || ||= 65 || ||> 93 % ||
-|| [[Tamil.lng|Tamil]] || ||= 38 || ||= 65 || ||> 58 % ||
-|| [[Thai.lng|Thai]] || ||= 49 || ||= 65 || ||> 75 % ||
+|| [[Tamil.lng|Tamil]] || ||= 52 || ||= 65 || ||> 80 % ||
+|| [[Thai.lng|Thai]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Turkish.lng|Turkish]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Ukrainian.lng|Ukrainian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Vietnamese (VI).lng|Vietnamese (VI)]] || ||= 63 || ||= 65 || ||> 96 % ||
