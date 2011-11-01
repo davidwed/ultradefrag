@@ -86,7 +86,7 @@ goto :EOF
     set suffix=
     
     echo Processing "%~n1" ...
-    for /F "tokens=1*" %%L in ( 'type "%~1"' ) do call :ParseResult "%~n1" "%%~L" "%%~nM"
+    for /F "tokens=1*" %%L in ( 'type "%~1"' ) do if not "%%~L" == "" call :ParseResult "%~n1" "%%~L" "%%~nM"
     
     set /A Percentage="%gCounter% * 100 / %TotalStrings%"
     
@@ -136,6 +136,7 @@ goto :EOF
         set "line=%%~L"
 
         echo !line:"=!
+        echo.
     )
     
     endlocal
