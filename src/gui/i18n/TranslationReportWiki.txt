@@ -3,7 +3,7 @@
 || [[Belarusian.lng|Belarusian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Bulgarian.lng|Bulgarian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Burmese (Padauk).lng|Burmese (Padauk)]] || ||= 62 || ||= 65 || ||> 95 % ||
-|| [[Catalan.lng|Catalan]] || ||= 63 || ||= 65 || ||> 96 % ||
+|| [[Catalan.lng|Catalan]] || ||= 62 || ||= 65 || ||> 95 % ||
 || [[Chinese (Simplified).lng|Chinese (Simplified)]] || ||= 60 || ||= 65 || ||> 92 % ||
 || [[Chinese (Traditional).lng|Chinese (Traditional)]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Croatian.lng|Croatian]] || ||= 53 || ||= 65 || ||> 81 % ||
@@ -14,7 +14,7 @@
 || [[English (US).lng|English (US)]] || ||= 0 || ||= 65 || ||> 0 % ||
 || [[Estonian.lng|Estonian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Farsi.lng|Farsi]] || ||= 50 || ||= 65 || ||> 76 % ||
-|| [[Filipino (Tagalog).lng|Filipino (Tagalog)]] || ||= 62 || ||= 65 || ||> 95 % ||
+|| [[Filipino (Tagalog).lng|Filipino (Tagalog)]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Finnish.lng|Finnish]] || ||= 62 || ||= 65 || ||> 95 % ||
 || [[French (FR).lng|French (FR)]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Galician.lng|Galician]] || ||= 63 || ||= 65 || ||> 96 % ||
@@ -24,7 +24,7 @@
 || [[Hindi.lng|Hindi]] || ||= 60 || ||= 65 || ||> 92 % ||
 || [[Hungarian.lng|Hungarian]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Icelandic.lng|Icelandic]] || ||= 63 || ||= 65 || ||> 96 % ||
-|| [[Iloko.lng|Iloko]] || ||= 62 || ||= 65 || ||> 95 % ||
+|| [[Iloko.lng|Iloko]] || ||= 63 || ||= 65 || ||> 96 % ||
 || [[Indonesian (Bahasa Indonesia).lng|Indonesian (Bahasa Indonesia)]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Indonesian.lng|Indonesian]] || ||= 62 || ||= 65 || ||> 95 % ||
 || [[Italian.lng|Italian]] || ||= 61 || ||= 65 || ||> 93 % ||
@@ -44,7 +44,7 @@
 || [[Slovak.lng|Slovak]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Slovenian.lng|Slovenian]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Spanish (AR).lng|Spanish (AR)]] || ||= 61 || ||= 65 || ||> 93 % ||
-|| [[Spanish (ES).lng|Spanish (ES)]] || ||= 63 || ||= 65 || ||> 96 % ||
+|| [[Spanish (ES).lng|Spanish (ES)]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Spanish (MEX).lng|Spanish (MEX)]] || ||= 52 || ||= 65 || ||> 80 % ||
 || [[Swedish.lng|Swedish]] || ||= 61 || ||= 65 || ||> 93 % ||
 || [[Tamil.lng|Tamil]] || ||= 52 || ||= 65 || ||> 80 % ||
