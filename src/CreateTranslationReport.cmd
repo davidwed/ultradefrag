@@ -46,7 +46,7 @@ echo %TotalStrings% translation strings total ...
 
 echo.
 echo Comparing files ...
-for %%F in ( "%~dp0\gui\i18n\*.lng" ) do fc /L "%TMP%\translation.tmp" "%TMP%\%%~nF.tmp" >"%TMP%\%%~nF.cmp"
+for %%F in ( "%~dp0\gui\i18n\*.lng" ) do fc /L /1 "%TMP%\translation.tmp" "%TMP%\%%~nF.tmp" >"%TMP%\%%~nF.cmp"
 
 echo.
 echo Creating report ...
@@ -139,7 +139,7 @@ goto :EOF
 :: so only translation strings remain
 ::
 :ExtractStrings
-    type "%~1" | findstr /v /r "^;" | findstr /v /r "^$" >"%TMP%\%~n1.tmp1"
+    type "%~1" | findstr /v /r "^;" | findstr /v /r "^$" | findstr /v /r "^MFT " >"%TMP%\%~n1.tmp1"
     
     setlocal EnableDelayedExpansion
     
