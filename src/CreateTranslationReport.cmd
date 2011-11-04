@@ -145,6 +145,7 @@ goto :EOF
     
     for /f "tokens=*" %%L in ('type "%TMP%\%~n1.tmp1"') do (
         set "line=%%~L"
+        set "line=!line:&=!"
 
         echo !line:"=!
         echo.
