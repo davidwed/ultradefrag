@@ -19,7 +19,7 @@
  */
 
 /*
-* UltraDefrag native interface - native commands implementation.
+* UltraDefrag boot time (native) interface - native commands implementation.
 */
 
 #include "defrag_native.h"

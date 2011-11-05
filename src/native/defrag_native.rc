@@ -18,7 +18,7 @@
  */
 
 /*
- *  Native interface resources description.
+ *  UltraDefrag boot time (native) interface resources description.
  */
 
 #include "../include/version.h"

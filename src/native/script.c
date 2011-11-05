@@ -18,7 +18,7 @@
  */
 
 /*
-* UltraDefrag native interface - boot time script parsing code.
+* UltraDefrag boot time (native) interface - boot time script parsing code.
 */
 
 #include "defrag_native.h"

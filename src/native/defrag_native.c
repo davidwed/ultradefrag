@@ -19,7 +19,7 @@
  */
 
 /*
-* UltraDefrag native interface.
+* UltraDefrag boot time (native) interface.
 */
 
 #include "defrag_native.h"
@@ -131,7 +131,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 
 	/* display copyrights */
 	winx_print("\n\n");
-	winx_print(VERSIONINTITLE " native interface\n"
+	winx_print(VERSIONINTITLE " boot time interface\n"
 		"Copyright (c) Dmitri Arkhangelski, 2007-2011.\n"
 		"Copyright (c) Stefan Pendl, 2010-2011.\n\n"
 		"UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"

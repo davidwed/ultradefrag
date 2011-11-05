@@ -19,7 +19,7 @@
  */
 
 /*
-* UltraDefrag native interface header.
+* UltraDefrag boot time (native) interface header.
 */
 
 #ifndef _DEFRAG_NATIVE_H_
