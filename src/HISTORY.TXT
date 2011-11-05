@@ -7,7 +7,7 @@ HISTORY
 
       Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),
       Romanian, Filipino (Tagalog), Catalan, Spanish (ES), Hungarian,
-      Farsi
+      Farsi, Yiddish
     
     - added command script to create translation report as text/plain
       and text/wiki
