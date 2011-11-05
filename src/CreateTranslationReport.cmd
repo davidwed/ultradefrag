@@ -28,8 +28,6 @@
 :: Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ::
 
-set dots=........................................
-
 echo.
 echo Extracting strings, please wait ...
 echo.
@@ -65,11 +63,18 @@ echo.
     echo ^|^|~ Language ^|^|~ ^|^|~ translated ^|^|~ ^|^|~ total ^|^|~ ^|^|~ percentage ^|^|
 ) >"%~dp0\gui\i18n\TranslationReportWiki.txt"
 
+type NUL >"%TMP%\TranslationReport.tmp"
+type NUL >"%TMP%\TranslationReportWiki.tmp"
+
 for %%F in ( "%~dp0\gui\i18n\*.lng" ) do call :CycleLines "%TMP%\%%~nF.cmp"
+
+sort /R /+56 "%TMP%\TranslationReport.tmp" >>"%~dp0\gui\i18n\TranslationReport.txt"
+sort /R /+103 "%TMP%\TranslationReportWiki.tmp" >>"%~dp0\gui\i18n\TranslationReportWiki.txt"
 
 echo.
 echo Cleaning up temporary files ...
 for %%F in ( "%~dp0\gui\i18n\translation.template" "%~dp0\gui\i18n\*.lng" ) do del /f /q "%TMP%\%%~nF.*"
+del /f /q "%TMP%\TranslationReport*.tmp"
 
 cls
 type "%~dp0\gui\i18n\TranslationReport.txt"
@@ -89,8 +94,8 @@ goto :EOF
 ::
 :CycleLines
     set gCounter=0
-    set FileName="%~n1 %dots%"
-    set FileNameWiki="[[%~n1.lng^|%~n1]]"
+    set FileName="%~n1 ........................................"
+    set FileNameWiki="[[%~n1.lng^|%~n1]]                                                            "
     set StartCounting=0
     set suffix=%%
     
@@ -106,8 +111,8 @@ goto :EOF
     set TotalFormat=   %TotalStrings%
     set PercentFormat=     %Percentage%
     
-    echo %FileName:~1,40% %TranslatedFormat:~-3% ^| %TotalFormat:~-3% ... %PercentFormat:~-5% %suffix%>>"%~dp0\gui\i18n\TranslationReport.txt"
-    echo ^|^| %FileNameWiki:~1,-1% ^|^| ^|^|= %gCounter% ^|^| ^|^|= %TotalStrings% ^|^| ^|^|^> %Percentage% %% ^|^|>>"%~dp0\gui\i18n\TranslationReportWiki.txt"
+    echo %FileName:~1,40% %TranslatedFormat:~-3% ^| %TotalFormat:~-3% ... %PercentFormat:~-5% %suffix%>>"%TMP%\TranslationReport.tmp"
+    echo ^|^| %FileNameWiki:~1,70% ^|^| ^|^|= %TranslatedFormat:~-3% ^|^| ^|^|= %TotalFormat:~-3% ^|^| ^|^|^> %PercentFormat:~-5% %% ^|^|>>"%TMP%\TranslationReportWiki.tmp"
 goto :EOF
 
 ::
