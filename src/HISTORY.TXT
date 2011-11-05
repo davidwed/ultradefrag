@@ -6,7 +6,8 @@ HISTORY
     - the following translations were updated:
 
       Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),
-      Romanian, Filipino (Tagalog), Catalan, Spanish (ES), Hungarian
+      Romanian, Filipino (Tagalog), Catalan, Spanish (ES), Hungarian,
+      Farsi
     
     - added command script to create translation report as text/plain
       and text/wiki

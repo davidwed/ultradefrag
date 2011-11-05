@@ -13,7 +13,7 @@
 || [[English (GB).lng|English (GB)]] || ||= 11 || ||= 64 || ||> 17 % ||
 || [[English (US).lng|English (US)]] || ||= 0 || ||= 64 || ||> 0 % ||
 || [[Estonian.lng|Estonian]] || ||= 62 || ||= 64 || ||> 96 % ||
-|| [[Farsi.lng|Farsi]] || ||= 37 || ||= 64 || ||> 57 % ||
+|| [[Farsi.lng|Farsi]] || ||= 64 || ||= 64 || ||> 100 % ||
 || [[Filipino (Tagalog).lng|Filipino (Tagalog)]] || ||= 63 || ||= 64 || ||> 98 % ||
 || [[Finnish.lng|Finnish]] || ||= 62 || ||= 64 || ||> 96 % ||
 || [[French (FR).lng|French (FR)]] || ||= 56 || ||= 64 || ||> 87 % ||
