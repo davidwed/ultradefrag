@@ -279,8 +279,8 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
 			if(jp->termination_router((void *)jp)) goto done;
 			min_lcn = start_lcn;
 			first_block = find_first_block(jp, &min_lcn, MOVE_ALL, 0, &first_file);
-			if(first_block->lcn >= end_lcn) break;
 			if(first_block == NULL)	break;
+			if(first_block->lcn >= end_lcn) break;
 			
 			/* does the first block follow a previously moved one? */
 			if(block_cleaned_up){
