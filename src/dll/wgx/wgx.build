@@ -11,6 +11,8 @@ src = {
 rc = { "wgx.rc" }
 
 deffile  = "wgx.def"
+-- we never use __stdcall convention
+mingw_deffile  = "wgx.def"
 baseaddr = "0x01700000"
 
 libs = {

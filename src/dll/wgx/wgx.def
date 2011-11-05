@@ -5,7 +5,7 @@ EXPORTS
 	WgxBuildMenu
 	WgxBuildPopupMenu
     
-    WgxCreateMenuBitmapMasked
+	WgxCreateMenuBitmapMasked
 
 	WgxBuildResourceTable
 	WgxApplyResourceTable

@@ -12,6 +12,8 @@ src = {
 rc = { "udefrag.rc" }
 
 deffile  = "udefrag.def"
+-- we never use __stdcall convention
+mingw_deffile  = "udefrag.def"
 baseaddr = "0x01500000"
 
 libs = { "ntdll" }

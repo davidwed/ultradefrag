@@ -28,7 +28,7 @@ optimizeLevel=0
 libraryPath=
 outputFilename=../../bin/udefrag.dll
 libraries=ntdll,zenwinx
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+extraLinkerOptions=udefrag.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -66,7 +66,7 @@ optimizeLevel=2
 libraryPath=..\..\lib
 outputFilename=../../bin/udefrag.dll
 libraries=ntdll,zenwinx
-extraLinkerOptions=udefrag-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+extraLinkerOptions=udefrag.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -94,20 +94,22 @@ extraResourceOptions=
 12=search.c
 [Header]
 1=udefrag-internals.h
+2=udefrag.h
 [Resource]
 1=udefrag.rc
 [Other]
 [History]
-map.c,14104
-volume.c,0
-..\..\include\udefrag.h,1737
+tasks.c,8530
+reports.c,1908
+defrag.c,1512
+map.c,12805
+udefrag.h,2415
 udefrag.build,193
-udefrag-internals.h,3015
-udefrag.def,139
-udefrag-mingw.def,84
-main.dox,1910
-options.c,3595
-move.c,11581
-analyze.c,25331
-tasks.c,11764
-udefrag.c,24728
+udefrag-internals.h,5827
+udefrag.def,217
+main.dox,1827
+search.c,3399
+udefrag.c,1243
+analyze.c,10532
+optimize.c,3409
+move.c,25702

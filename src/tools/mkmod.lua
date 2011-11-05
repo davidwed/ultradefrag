@@ -32,9 +32,14 @@
 	* ntdll.lib are missing - copy them from DDK
 	* SSE2 processor is required to run produced binaries
 	* kernel mode driver cannot be compiled
+
+  If some library exports functions of __stdcall calling convention
+  the mingw_deffile variable should point to a separate file
+  containing names decorated by at signs and number of bytes needed
+  to pass all the parameters on a 32-bit machine.
 --]]
 
-name, deffile, baseaddr, nativedll, umentry = "", "", "", 0, ""
+name, deffile, mingw_deffile, baseaddr, nativedll, umentry = "", "", "", "", 0, ""
 src, rc, libs, adlibs = {}, {}, {}, {}
 
 input_filename = ""
@@ -397,12 +402,12 @@ function produce_mingw_makefile()
 		f:write("-Wl,--entry,_NtProcessStartup\@4,--subsystem,native,--strip-all\n")
 	elseif target_type == "driver" then
 		f:write("LDFLAGS = -pipe -nostartfiles -nodefaultlibs ")
-		f:write(name .. "-mingw.def -Wl,--entry,_DriverEntry\@8,")
+		f:write(mingw_deffile .. " -Wl,--entry,_DriverEntry\@8,")
 		f:write("--subsystem,native,--image-base,0x10000,-shared,--strip-all\n")
 	elseif target_type == "dll" then
 		f:write("LDFLAGS = -pipe -shared -Wl,")
 		f:write("--out-implib,lib", name, ".dll.a -nostartfiles ")
-		f:write("-nodefaultlibs ", name, "-mingw.def -Wl,--kill-at,")
+		f:write("-nodefaultlibs ", mingw_deffile, " -Wl,--kill-at,")
 		f:write("--entry,_DllMain\@12,--strip-all\n")
 	else error("Unknown target type: " .. target_type .. "!")
 	end
@@ -468,7 +473,7 @@ function produce_mingw_makefile()
 		f:write("define correct_lib\n")
 		f:write("\t\@echo ------ correct the lib\$(PROJECT).dll.a library ------\n")
 		f:write("\t\@dlltool -k --output-lib lib\$(PROJECT).dll.a --def ")
-		f:write(name, "-mingw.def\n")
+		f:write(mingw_deffile, "\n")
 		f:write("endef\n\n")
 	end
 	
@@ -515,15 +520,15 @@ function produce_mingw_x64_makefile()
 		f:write("-Wl,--entry,_NtProcessStartup\@4,--subsystem,native,--strip-all\n")
 	elseif target_type == "driver" then
 		f:write("LDFLAGS = -pipe -nostartfiles -nodefaultlibs ")
-		f:write(name .. "-mingw.def -Wl,--entry,_DriverEntry\@8,")
+		f:write(mingw_deffile .. " -Wl,--entry,_DriverEntry\@8,")
 		f:write("--subsystem,native,--image-base,0x10000,-shared,--strip-all\n")
 	elseif target_type == "dll" then
 		f:write("LDFLAGS = -pipe -shared -Wl,")
 		f:write("--out-implib,lib", name, ".dll.a -nostartfiles ")
 		if nativedll == 0 then
-			f:write(name, "-mingw.def -Wl,--kill-at,")
+			f:write(mingw_deffile, " -Wl,--kill-at,")
 		else
-			f:write("-nodefaultlibs ", name, "-mingw.def -Wl,--kill-at,")
+			f:write("-nodefaultlibs ", mingw_deffile, " -Wl,--kill-at,")
 		end
 		f:write("--entry,_DllMain\@12,--strip-all\n")
 	else error("Unknown target type: " .. target_type .. "!")
@@ -586,7 +591,7 @@ function produce_mingw_x64_makefile()
 		f:write("define correct_lib\n")
 		f:write("\t\@echo ------ correct the lib\$(PROJECT).dll.a library ------\n")
 		f:write("\t\@x86_64-w64-mingw32-dlltool -k --output-lib lib\$(PROJECT).dll.a --def ")
-		f:write(name, ".def\n")
+		f:write(deffile, "\n")
 		f:write("endef\n\n")
 	end
 	

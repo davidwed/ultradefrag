@@ -28,7 +28,7 @@ optimizeLevel=0
 libraryPath=
 outputFilename=../../bin/zenwinx.dll
 libraries=ntdll
-extraLinkerOptions=zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+extraLinkerOptions=zenwinx.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -66,7 +66,7 @@ optimizeLevel=2
 libraryPath=
 outputFilename=../../bin/zenwinx.dll
 libraries=ntdll
-extraLinkerOptions=zenwinx-mingw.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
+extraLinkerOptions=zenwinx.def -Wl,--kill-at,--entry,_DllMain@12,--strip-all
 ignoreStartupFile=1
 ignoreDefaultLibs=1
 stripExecutableFile=0
@@ -115,16 +115,20 @@ extraResourceOptions=
 [Resource]
 1=zenwinx.rc
 [Other]
-1=zenwinx-mingw.def
-2=zenwinx.def
+1=zenwinx.def
 [History]
-mutex.c,3423
-zenwinx.build,403
-main.dox,3310
-zenwinx.h,17288
-list.c,956
-ntndk.h,45892
-zenwinx-mingw.def,2607
-zenwinx.def,2423
-prb.h,4262
-prb.c,1267
+volume.c,24810
+file.c,0
+ntfs.h,1949
+ftw.c,6795
+prb.c,1129
+zenwinx.build,364
+main.dox,3218
+ntndk.h,6653
+zenwinx.def,377
+prb.h,1150
+keyboard.c,5595
+zenwinx.c,2823
+zenwinx.h,16001
+dbg.c,6541
+ftw_ntfs.c,35541
