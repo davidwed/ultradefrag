@@ -1293,7 +1293,7 @@ static void analyze_file_record(NTFS_FILE_RECORD_OUTPUT_BUFFER *nfrob,
 	
 	/*
 	* Here we have found a new file, so let's
-	* walk throuh all file records blonging to it.
+	* walk throuh all file records belonging to it.
 	* First of all, we're setting up sp->mfi
 	* structure. Than, we're walking through list
 	* of attributes containing in the current file
