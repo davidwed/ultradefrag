@@ -49,6 +49,12 @@ for %%F in ( "%~dp0\gui\i18n\*.lng" ) do fc /L /1 "%TMP%\translation.tmp" "%TMP%
 echo.
 echo Creating report ...
 echo.
+type NUL >"%TMP%\TranslationReport.tmp"
+type NUL >"%TMP%\TranslationReportWiki.tmp"
+
+for %%F in ( "%~dp0\gui\i18n\*.lng" ) do call :CycleLines "%TMP%\%%~nF.cmp"
+
+:: text/plain
 (
     echo.
     echo tr ... translated strings
@@ -58,18 +64,36 @@ echo.
     echo =================================================================
     echo.
 ) >"%~dp0\gui\i18n\TranslationReport.txt"
+
+sort /R /+56 "%TMP%\TranslationReport.tmp" >>"%~dp0\gui\i18n\TranslationReport.txt"
+
+:: text/wiki
 (
+    echo.
+    echo [[toc]]
+    echo.
+    echo =Sorted by language=
     echo.
     echo ^|^|~ Language ^|^|~ ^|^|~ translated ^|^|~ ^|^|~ total ^|^|~ ^|^|~ percentage ^|^|
 ) >"%~dp0\gui\i18n\TranslationReportWiki.txt"
 
-type NUL >"%TMP%\TranslationReport.tmp"
-type NUL >"%TMP%\TranslationReportWiki.tmp"
+type "%TMP%\TranslationReportWiki.tmp" >>"%~dp0\gui\i18n\TranslationReportWiki.txt"
 
-for %%F in ( "%~dp0\gui\i18n\*.lng" ) do call :CycleLines "%TMP%\%%~nF.cmp"
+(
+    echo.
+    echo [[toc]]
+    echo.
+    echo =Sorted by percent completed=
+    echo.
+    echo ^|^|~ Language ^|^|~ ^|^|~ translated ^|^|~ ^|^|~ total ^|^|~ ^|^|~ percentage ^|^|
+) >>"%~dp0\gui\i18n\TranslationReportWiki.txt"
 
-sort /R /+56 "%TMP%\TranslationReport.tmp" >>"%~dp0\gui\i18n\TranslationReport.txt"
 sort /R /+103 "%TMP%\TranslationReportWiki.tmp" >>"%~dp0\gui\i18n\TranslationReportWiki.txt"
+
+(
+    echo.
+    echo [[toc]]
+) >>"%~dp0\gui\i18n\TranslationReportWiki.txt"
 
 echo.
 echo Cleaning up temporary files ...
