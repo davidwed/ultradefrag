@@ -141,10 +141,13 @@ static void update_progress(udefrag_progress_info *pi, void *p)
 		break;
 	}
 	
-	if(dry_run)
-		(void)sprintf(WindowCaption, "UD - %c %6.2lf %% (dry run)", current_operation, pi->percentage);
-	else
-		(void)sprintf(WindowCaption, "UD - %c %6.2lf %%", current_operation, pi->percentage);
+	if(dry_run){
+		(void)sprintf(WindowCaption, "%c:  %c %6.2lf %% (dry run)", 
+			udefrag_toupper(job->volume_letter), current_operation, pi->percentage);
+	} else {
+		(void)sprintf(WindowCaption, "%c:  %c %6.2lf %%",
+			udefrag_toupper(job->volume_letter), current_operation, pi->percentage);
+	}
 	(void)SetWindowText(hWindow, WindowCaption);
 
 	if(WaitForSingleObject(hMapEvent,INFINITE) != WAIT_OBJECT_0){
