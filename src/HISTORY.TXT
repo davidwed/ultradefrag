@@ -3,6 +3,7 @@ HISTORY
   Version 5.0.0  2011-11-
   ------------------------------------------------------------------------------
     RC2:
+    - ability to defragment NTFS attribute lists was added
     - the following translations were updated:
 
       Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),

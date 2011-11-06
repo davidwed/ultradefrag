@@ -272,19 +272,24 @@ static void enumerate_attributes(FILE_RECORD_HEADER *frh,attribute_handler ah,mf
 	}
 }
 
-/* attributes listed here represent data streams */
+/*
+* Attributes listed here represent data streams.
+* Streams with default attribute names can be opened
+* only with an additional colon sign, like that:
+* file::$ATTRIBUTE_LIST
+*/
 attribute_name default_attribute_names[] = {
-	{AttributeAttributeList,       L"$ATTRIBUTE_LIST"       },
-	{AttributeEA,                  L"$EA"                   },
-	{AttributeEAInformation,       L"$EA_INFORMATION"       },
-	{AttributeSecurityDescriptor,  L"$SECURITY_DESCRIPTOR"  },
-	{AttributeData,                L"$DATA"                 },
-	{AttributeIndexRoot,           L"$INDEX_ROOT"           },
-	{AttributeIndexAllocation,     L"$INDEX_ALLOCATION"     },
-	{AttributeBitmap,              L"$BITMAP"               },
-	{AttributeReparsePoint,        L"$REPARSE_POINT"        },
-	{AttributeLoggedUtulityStream, L"$LOGGED_UTILITY_STREAM"}, /* used by EFS */
-	{0,                            NULL                     }
+	{AttributeAttributeList,       L":$ATTRIBUTE_LIST"       },
+	{AttributeEA,                  L":$EA"                   },
+	{AttributeEAInformation,       L":$EA_INFORMATION"       },
+	{AttributeSecurityDescriptor,  L":$SECURITY_DESCRIPTOR"  },
+	{AttributeData,                L":$DATA"                 },
+	{AttributeIndexRoot,           L":$INDEX_ROOT"           },
+	{AttributeIndexAllocation,     L":$INDEX_ALLOCATION"     },
+	{AttributeBitmap,              L":$BITMAP"               },
+	{AttributeReparsePoint,        L":$REPARSE_POINT"        },
+	{AttributeLoggedUtulityStream, L":$LOGGED_UTILITY_STREAM"}, /* used by EFS */
+	{0,                            NULL                      }
 };
 
 static short * get_default_attribute_name(ATTRIBUTE_TYPE attr_type)
@@ -344,11 +349,15 @@ static short * get_attribute_name(ATTRIBUTE *attr,mft_scan_parameters *sp)
 	}
 
 	/* never append $DATA attribute name */
-	if(wcscmp(attr_name,L"$DATA") == 0) attr_name[0] = 0;
+	if(attr_type == AttributeData || wcscmp(attr_name,L"$DATA") == 0) attr_name[0] = 0;
 	
-	/* do not append $I30 attribute name - required by get_directory_information */
-	if(wcscmp(attr_name,L"$I30") == 0) attr_name[0] = 0;
-	if(wcscmp(attr_name,L"$INDEX_ALLOCATION") == 0) attr_name[0] = 0;
+	/* do not append index allocation attribute names - required by get_directory_information */
+	if(attr_type == AttributeIndexAllocation){
+		attr_name[0] = 0;
+	} else {
+		if(wcscmp(attr_name,L"$I30") == 0) attr_name[0] = 0;
+		if(wcscmp(attr_name,L"$INDEX_ALLOCATION") == 0) attr_name[0] = 0;
+	}
 	
 	return attr_name;
 }
