@@ -121,6 +121,8 @@
 #define IDM_FAQ                         2730
 #define IDM_ABOUT                       2740
 
+#define IDM_SELECT_ALL                  2750
+
 /* preview menu items */
 enum {
     IDM_PREVIEW = 5000,

@@ -865,6 +865,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 		case IDM_ABOUT:
 			AboutBox();
 			return 0;
+		case IDM_SELECT_ALL:
+			if(!busy_flag)
+				SelectAllDrives();
+			return 0;
 		default:
 			id = LOWORD(wParam);
 			/* handle language menu */

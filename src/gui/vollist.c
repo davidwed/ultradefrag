@@ -555,6 +555,18 @@ void VolListRefreshItem(volume_processing_job *job)
 }
 
 /**
+ * @brief Selects all drives in the list.
+ */
+void SelectAllDrives(void)
+{
+	LV_ITEM lvi;
+
+	lvi.stateMask = LVIS_SELECTED;
+	lvi.state = LVIS_SELECTED;
+	(void)SendMessage(hList,LVM_SETITEMSTATE,-1,(LRESULT)&lvi);
+}
+
+/**
  * @brief InitVolList helper.
  */
 static void InitImageList(void)
