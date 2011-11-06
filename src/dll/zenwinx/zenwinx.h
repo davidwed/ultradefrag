@@ -403,6 +403,7 @@ typedef struct _winx_volume_information {
 	ULONG sectors_per_cluster;             /* number of sectors in each cluster */
 	ULONG bytes_per_sector;                /* sector size, in bytes */
 	NTFS_DATA ntfs_data;                   /* NTFS data, valid for NTFS formatted volumes only */
+	int is_dirty;                          /* nonzero value indicates that volume is dirty and needs to be checked */
 } winx_volume_information;
 
 int winx_get_volume_information(char volume_letter,winx_volume_information *v);

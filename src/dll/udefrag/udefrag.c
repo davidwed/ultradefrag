@@ -646,6 +646,8 @@ char *udefrag_get_error_description(int error_code)
 		return "MFT can be optimized on NTFS disks only.";
 	case UDEFRAG_UNMOVABLE_MFT:
 		return "On NT4 and Windows 2000 MFT is not movable.";
+	case UDEFRAG_DIRTY_VOLUME:
+		return "Disk is dirty, run Check Disk to repair it.";
 	}
 	return "";
 }

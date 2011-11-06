@@ -41,6 +41,7 @@
 #define UDEFRAG_UDF_DEFRAG        (-9)
 #define UDEFRAG_NO_MFT            (-10)
 #define UDEFRAG_UNMOVABLE_MFT     (-11)
+#define UDEFRAG_DIRTY_VOLUME      (-12)
 
 #define DEFAULT_REFRESH_INTERVAL 100
 
@@ -54,6 +55,7 @@ typedef struct _volume_info {
 	LARGE_INTEGER total_space;
 	LARGE_INTEGER free_space;
 	int is_removable;
+	int is_dirty;
 } volume_info;
 
 volume_info *udefrag_get_vollist(int skip_removable);

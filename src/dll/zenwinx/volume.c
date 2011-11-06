@@ -580,6 +580,34 @@ static void get_volume_label(HANDLE hRoot,winx_volume_information *v)
 }
 
 /**
+ * @internal
+ * @brief Retrieves the volume dirty flag.
+ * @param[out] pointer to the structure
+ * receiving the volume dirty flag.
+ */
+static void get_volume_dirty_flag(winx_volume_information *v)
+{
+	WINX_FILE *f;
+	ULONG dirty_flag;
+	int result;
+	
+	/* open the volume */
+	f = winx_vopen(v->volume_letter);
+	if(f == NULL) return;
+	
+	/* get dirty flag */
+	result = winx_ioctl(f,FSCTL_IS_VOLUME_DIRTY,
+		"get_volume_dirty_flag: dirty flag request",
+		NULL,0,&dirty_flag,sizeof(ULONG),NULL);
+	winx_fclose(f);
+	if(result >= 0 && (dirty_flag & VOLUME_IS_DIRTY)){
+		DebugPrint("%c: volume is dirty! Run Check Disk to repair it.",
+			v->volume_letter);
+		v->is_dirty = 1;
+	}
+}
+
+/**
  * @brief Retrieves detailed information
  * about disk volume.
  * @param[in] volume_letter the volume letter.
@@ -634,6 +662,9 @@ int winx_get_volume_information(char volume_letter,winx_volume_information *v)
 				volume_letter);
 		}
 	}
+	
+	/* get dirty flag */
+	get_volume_dirty_flag(v);
 	
 	NtClose(hRoot);
 	return 0;

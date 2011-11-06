@@ -4,6 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     RC2:
     - ability to defragment NTFS attribute lists was added
+    - check for the volume dirty flag was added to the volume analysis
     - the following translations were updated:
 
       Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),
@@ -15,6 +16,8 @@ HISTORY
     - few little bugs in volume processing routines were fixed
     - volume letter being processed was added to GUI title
     - a header was added to 'udefrag -l' command output
+    - Developers: is_dirty flag added to winx_volume_information (zenwinx.h)
+      and volume_info (udefrag.h) structures
 
     RC1:
     - FILTER SYNTAX CHANGED to provide better flexibility
