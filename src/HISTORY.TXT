@@ -13,6 +13,7 @@ HISTORY
     - added command script to create translation report as text/plain
       and text/wiki
     - few little bugs in volume processing routines were fixed
+    - a header was added to 'udefrag -l' command output
 
     RC1:
     - FILTER SYNTAX CHANGED to provide better flexibility

@@ -785,6 +785,8 @@ static int show_vollist(void)
 
 	if(!b_flag) settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	printf("Disks available for defragmentation:\n\n");
+	printf("Drive     FS     Capacity       Free   Label\n");
+	printf("--------------------------------------------\n");
 
 	v = udefrag_get_vollist(la_flag ? FALSE : TRUE);
 	if(v == NULL){
