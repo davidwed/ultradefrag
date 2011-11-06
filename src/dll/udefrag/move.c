@@ -793,6 +793,8 @@ int move_file(winx_file_info *f,
 		f->user_defined_flags |= UD_FILE_MOVING_FAILED;
 		if(flags & UD_MOVE_FILE_CUT_OFF_MOVED_CLUSTERS)
 			subtract_clusters(f,vcn,length,jp);
+		/* remove target space from the free space pool */
+		jp->free_regions = winx_sub_volume_region(jp->free_regions,target,length);
 		jp->p_counters.moving_time += winx_xtime() - time;
 		return (-1);
 	}
