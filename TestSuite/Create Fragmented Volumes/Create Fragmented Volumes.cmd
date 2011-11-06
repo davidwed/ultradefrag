@@ -83,7 +83,7 @@ echo.
 set MenuItem=0
 set FoundVolumes=
 
-for /f "tokens=1,6* skip=6" %%D in ('udefrag -l') do call :AddToDriveList %%~D & if not %%~D == %SystemDrive% call :DisplayMenuItem %%~D - "%%~F"
+for /f "tokens=1,6* skip=8" %%D in ('udefrag -l') do call :AddToDriveList %%~D & if not %%~D == %SystemDrive% call :DisplayMenuItem %%~D - "%%~F"
 
 echo.
 echo 0 ... EXIT
@@ -267,7 +267,7 @@ call :delay 5
 goto :StartProcess
 
 :ParseVolumeLabel
-for /f "tokens=1,5,6* skip=6" %%D in ('udefrag -l') do if %%~D == %ProcessVolume% set PercentageFree=%%E & set VolumeName="%%~G"
+for /f "tokens=1,5,6* skip=8" %%D in ('udefrag -l') do if %%~D == %ProcessVolume% set PercentageFree=%%E & set VolumeName="%%~G"
 
 for /f "tokens=1,2,3,4 delims=_" %%R in ('echo %VolumeName:"=%') do (
 	set ex_type=%%R
@@ -379,7 +379,7 @@ goto :EOF
         call :doit "%~1" || goto :finished
         call :increment
         ping -n 3 localhost >NUL
-    for /f "tokens=1,5 skip=6" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LEQ %%Y goto :loop
+    for /f "tokens=1,5 skip=8" %%X in ( 'udefrag -l' ) do if "%%~X" == "%~1" if %PercentageFree% LEQ %%Y goto :loop
 
     :finished
     if %ExitCode% GTR 0 (

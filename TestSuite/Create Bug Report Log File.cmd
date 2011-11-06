@@ -46,7 +46,7 @@ echo.
 set MenuItem=0
 set ItemList=
 
-for /f "tokens=1,6* skip=6" %%D in ('udefrag -l') do call :AddToItemList %%~D & call :DisplayMenuItem %%~D - "%%~F"
+for /f "tokens=1,6* skip=8" %%D in ('udefrag -l') do call :AddToItemList %%~D & call :DisplayMenuItem %%~D - "%%~F"
 
 echo.
 echo 0 ... EXIT

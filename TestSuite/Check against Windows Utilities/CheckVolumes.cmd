@@ -38,7 +38,7 @@ goto :quit
 for /F "tokens=2 delims=[]" %%V in ('ver') do for /F "tokens=2" %%R in ( 'echo %%V' ) do set win_ver=%%R
 
 echo.
-for /F "tokens=1 skip=6" %%D in ( 'udefrag -l' ) do call :process %%D
+for /F "tokens=1 skip=8" %%D in ( 'udefrag -l' ) do call :process %%D
 
 :quit
 echo.
