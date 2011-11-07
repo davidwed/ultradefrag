@@ -346,11 +346,6 @@ static int filter(winx_file_info *f,void *user_defined_data)
 		goto skip_file;
 	}
 
-	/* FIXME: it shows approx. 1.6 Gb instead of 3.99 Gb on FAT32 volume */
-	/*if(wcsstr(path,L"largefile"))
-		DebugPrint("SIZE = %I64u", filesize);
-	*/
-	
 	/* filter files by their number of fragments */
 	if(jp->udo.fragments_limit && f->disp.fragments < jp->udo.fragments_limit)
 		goto skip_file;

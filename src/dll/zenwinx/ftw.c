@@ -141,29 +141,23 @@ int winx_ftw_dump_file(winx_file_info *f,
 			status = iosb.Status;
 		}
 		if(status != STATUS_SUCCESS && status != STATUS_BUFFER_OVERFLOW){
-			/* it always returns STATUS_END_OF_FILE for small files placed in MFT */
-			if(status != STATUS_END_OF_FILE)
-				DebugPrintEx(status,"winx_ftw_dump_file: dump failed for %ws",f->path);
-		cleanup:
-			f->disp.clusters = 0;
-			f->disp.fragments = 0;
-			f->disp.flags = 0;
-			winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-			winx_heap_free(filemap);
-			winx_defrag_fclose(hFile);
-			return 0; /* file is inside MFT */
+			/* it always returns STATUS_END_OF_FILE for small files placed inside MFT */
+			if(status == STATUS_END_OF_FILE) goto empty_map_detected;
+			DebugPrintEx(status,"winx_ftw_dump_file: dump failed for %ws",f->path);
+			goto dump_failed;
 		}
 
 		if(ftw_check_for_termination(t,user_defined_data)){
 			if(counter > MAX_COUNT)
 				DebugPrint("winx_ftw_dump_file: %ws: infinite main loop?",f->path);
+			/* reset incomplete map */
 			goto cleanup;
 		}
 		
 		/* check for an empty map */
 		if(!filemap->NumberOfPairs && status != STATUS_SUCCESS){
 			DebugPrint("winx_ftw_dump_file: %ws: empty map of file detected",f->path);
-			goto cleanup;
+			goto empty_map_detected;
 		}
 		
 		/* loop through the buffer of number/cluster pairs */
@@ -173,11 +167,10 @@ int winx_ftw_dump_file(winx_file_info *f,
 			if(filemap->Pair[i].Lcn == LLINVALID)
 				continue;
 			
-			/* FIXME: The following code may cause an infinite main loop (bug #2053941?), */
-			/* but for some 3.99 Gb files on FAT32 it works fine. */
+			/* the following is usual for 3.99 Gb files on FAT32 under XP */
 			if(filemap->Pair[i].Vcn == 0){
 				DebugPrint("winx_ftw_dump_file: %ws: wrong map of file detected",f->path);
-				continue;
+				goto dump_failed;
 			}
 			
 			block = (winx_blockmap *)winx_list_insert_item((list_entry **)&f->disp.blockmap,
@@ -185,14 +178,7 @@ int winx_ftw_dump_file(winx_file_info *f,
 			if(block == NULL){
 				DebugPrint("winx_ftw_dump_file: cannot allocate %u bytes of memory",
 					sizeof(winx_blockmap));
-				/* cleanup */
-				f->disp.clusters = 0;
-				f->disp.fragments = 0;
-				f->disp.flags = 0;
-				winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
-				winx_heap_free(filemap);
-				winx_defrag_fclose(hFile);
-				return (-1);
+				goto dump_failed;
 			}
 			block->lcn = filemap->Pair[i].Lcn;
 			block->length = filemap->Pair[i].Vcn - startVcn;
@@ -217,11 +203,26 @@ int winx_ftw_dump_file(winx_file_info *f,
 			}
 		}
 	} while(status != STATUS_SUCCESS);
-
 	/* small directories placed inside MFT have empty list of fragments... */
+	
+cleanup:
+empty_map_detected:
+	f->disp.clusters = 0;
+	f->disp.fragments = 0;
+	f->disp.flags = 0;
+	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
 	winx_heap_free(filemap);
 	winx_defrag_fclose(hFile);
 	return 0;
+
+dump_failed:
+	f->disp.clusters = 0;
+	f->disp.fragments = 0;
+	f->disp.flags = 0;
+	winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+	winx_heap_free(filemap);
+	winx_defrag_fclose(hFile);
+	return (-1);
 }
 
 /**

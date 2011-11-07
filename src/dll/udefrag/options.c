@@ -102,9 +102,11 @@ int get_options(udefrag_job_parameters *jp)
 	
 	/* set dry_run variable */
 	if(winx_query_env_variable(L"UD_DRY_RUN",buffer,ENV_BUFFER_SIZE) >= 0){
-		DebugPrint("%%UD_DRY_RUN%% environment variable exists,");
-		DebugPrint("therefore no actual data moves will be performed on disk");
-		jp->udo.dry_run = 1;
+		if(!wcscmp(buffer,L"1")){
+			DebugPrint("%%UD_DRY_RUN%% environment variable is set to 1,");
+			DebugPrint("therefore no actual data moves will be performed on disk");
+			jp->udo.dry_run = 1;
+		}
 	}
 
 	/* print all options */

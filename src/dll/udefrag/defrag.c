@@ -60,11 +60,15 @@ void test_move(winx_file_info *f,udefrag_job_parameters *jp)
 	/* release temporary allocated clusters */
 	release_temp_space_regions(jp);
 	/* try to move the first cluster back */
-	if(move_file(f,f->disp.blockmap->vcn,1,source_lcn,0,jp) < 0){
-		DebugPrint("test_move: move failed for %ws",f->path);
-		return;
+	if(can_move(f,jp)){
+		if(move_file(f,f->disp.blockmap->vcn,1,source_lcn,0,jp) < 0){
+			DebugPrint("test_move: move failed for %ws",f->path);
+			return;
+		} else {
+			DebugPrint("test_move: move succeeded for %ws",f->path);
+		}
 	} else {
-		DebugPrint("test_move: move succeeded for %ws",f->path);
+		DebugPrint("test_move: file became unmovable %ws",f->path);
 	}
 }
 
