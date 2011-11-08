@@ -93,6 +93,8 @@ static void analyze_resident_stream(PRESIDENT_ATTRIBUTE pr_attr,mft_scan_paramet
 static void analyze_non_resident_stream(PNONRESIDENT_ATTRIBUTE pnr_attr,mft_scan_parameters *sp);
 static winx_file_info * find_filelist_entry(short *attr_name,mft_scan_parameters *sp);
 
+void validate_blockmap(winx_file_info *f);
+
 /*
 **************************************************
 *                Test suite
@@ -1738,12 +1740,11 @@ static int ntfs_scan_disk_helper(char volume_letter,
 	}
 	
 	/* call filter callback for each file found */
-	if(fcb != NULL){
-		for(f = *filelist; f != NULL; f = f->next){
-			if(ftw_ntfs_check_for_termination(&sp)) break;
-			(void)fcb(f,sp.user_defined_data);
-			if(f->next == *filelist) break;
-		}
+	for(f = *filelist; f != NULL; f = f->next){
+		if(ftw_ntfs_check_for_termination(&sp)) break;
+		validate_blockmap(f);
+		if(fcb)	(void)fcb(f,sp.user_defined_data);
+		if(f->next == *filelist) break;
 	}
 	
 	winx_fclose(sp.f_volume);

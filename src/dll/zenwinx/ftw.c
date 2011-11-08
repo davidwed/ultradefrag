@@ -69,6 +69,47 @@ static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
 }
 
 /**
+ * @internal
+ * @brief Validates map of file blocks,
+ * destroys it in case of errors found.
+ */
+void validate_blockmap(winx_file_info *f)
+{
+	winx_blockmap *b1 = NULL, *b2 = NULL;
+	
+#if 0
+	/* seems to be too slow */
+	for(b1 = f->disp.blockmap; b1; b1 = b1->next){
+		if(b1->next == f->disp.blockmap) break;
+		for(b2 = b1->next; b2; b2 = b2->next){
+			/* does two blocks overlap? */
+			//if(yes){
+			//	destroy_blockmap();
+			//	return;
+			//}
+			if(b2->next == f->disp.blockmap) break;
+		}
+	}
+#else
+	/* a simplified version */
+	/* multiple blocks of zero VCN were detected on reparse points on 32-bit XP SP2 */
+	b1 = f->disp.blockmap;
+	if(b1) b2 = b1->next;
+	if(b1 && b2 && b2 != b1){
+		if(b1->vcn == b2->vcn){
+			DebugPrint("validate_blockmap: %ws: wrong map detected:", f->path);
+			for(b1 = f->disp.blockmap; b1; b1 = b1->next){
+				DebugPrint("VCN = %I64u, LCN = %I64u, LEN = %I64u",
+					b1->vcn, b1->lcn, b1->length);
+				if(b1->next == f->disp.blockmap) break;
+			}
+			winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
+		}
+	}
+#endif
+}
+
+/**
  * @brief Retrieves information
  * about the file disposition.
  * @param[out] f pointer to
@@ -206,6 +247,7 @@ int winx_ftw_dump_file(winx_file_info *f,
 	/* small directories placed inside MFT have empty list of fragments... */
 
 	/* the dump is completed */
+	validate_blockmap(f);
 	winx_heap_free(filemap);
 	winx_defrag_fclose(hFile);
 	return 0;

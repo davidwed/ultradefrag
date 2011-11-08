@@ -771,6 +771,18 @@ int move_file(winx_file_info *f,
 		optimize_blockmap(&new_file_info);
 		moving_result = CALCULATED_MOVING_SUCCESS;
 	} else {
+		/*DebugPrint("OLD MAP:");
+		for(block = f->disp.blockmap; block; block = block->next){
+			DebugPrint("VCN = %I64u, LCN = %I64u, LEN = %I64u",
+				block->vcn, block->lcn, block->length);
+			if(block->next == f->disp.blockmap) break;
+		}
+		DebugPrint("NEW MAP:");
+		for(block = new_file_info.disp.blockmap; block; block = block->next){
+			DebugPrint("VCN = %I64u, LCN = %I64u, LEN = %I64u",
+				block->vcn, block->lcn, block->length);
+			if(block->next == new_file_info.disp.blockmap) break;
+		}*/
 		/* compare old and new block maps */
 		if(blockmap_compare(&new_file_info.disp,&f->disp) == 0){
 			DebugPrint("move_file: nothing has been moved");
