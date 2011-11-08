@@ -204,6 +204,11 @@ int winx_ftw_dump_file(winx_file_info *f,
 		}
 	} while(status != STATUS_SUCCESS);
 	/* small directories placed inside MFT have empty list of fragments... */
+
+	/* the dump is completed */
+	winx_heap_free(filemap);
+	winx_defrag_fclose(hFile);
+	return 0;
 	
 cleanup:
 empty_map_detected:
