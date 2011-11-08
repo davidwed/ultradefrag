@@ -643,12 +643,10 @@ NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)
         access_rights |= FILE_READ_ATTRIBUTES;
 	
 	/*
-	* FILE_READ_ATTRIBUTES may also be needed for reparse points,
-	* bitmaps and attribute lists as stated in:
+	* FILE_READ_ATTRIBUTES may also be needed 
+	* for bitmaps on Windows XP as stated in:
 	* http://www.microsoft.com/whdc/archive/2kuptoXP.mspx
-	* However, both nonresident bitmaps and reparse points
-	* seem to be extraordinary while attribute lists are locked
-	* regardless of access rights used to open them.
+	* However, nonresident bitmaps seem to be extraordinary.
 	*/
 	
 	/*
