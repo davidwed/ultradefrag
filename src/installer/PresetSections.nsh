@@ -99,6 +99,16 @@
     ${EndUnless}
     
     ClearErrors
+    ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallUsageTracking"
+    ${Unless} ${Errors}
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecUsageTracking}
+        ${Else}
+            ${UnselectSection} ${SecUsageTracking}
+        ${EndIf}
+    ${EndUnless}
+    
+    ClearErrors
     ReadRegStr $R1 HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallStartMenuIcon"
     ${Unless} ${Errors}
         ${If} $R1 == "1"
@@ -224,6 +234,16 @@
     ${EndUnless}
     
     ClearErrors
+    ${GetOptions} $R0 /DISABLE_USAGE_TRACKING= $R1
+    ${Unless} ${Errors}
+        ${If} $R1 == "1"
+            ${SelectSection} ${SecUsageTracking}
+        ${Else}
+            ${UnselectSection} ${SecUsageTracking}
+        ${EndIf}
+    ${EndUnless}
+    
+    ClearErrors
     ${GetOptions} $R0 /STARTMENUICON= $R1
     ${Unless} ${Errors}
         ${If} $R1 == "1"
@@ -315,6 +335,13 @@
     WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallShellHandler" $1
     ${If} $1 == "0"
         ${RemoveShellHandlerFiles}
+    ${EndIf}
+    
+    SectionGetFlags ${SecUsageTracking} $0
+    IntOp $1 $0 & ${SF_SELECTED}
+    WriteRegStr HKLM ${UD_UNINSTALL_REG_KEY} "Var::InstallUsageTracking" $1
+    ${If} $1 == "0"
+        ${RemoveUsageTracking}
     ${EndIf}
     
     SectionGetFlags ${SecStartMenuIcon} $0

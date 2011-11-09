@@ -77,6 +77,8 @@
  * <dd>Install or remove the Explorer context menu handler.
  * Example: <b>/SHELLEXTENSION=0</b> removes the Explorer context menu handler.<br/>
  * Installing the context menu handler forces the console interface it depends on to be installed.</dd>
+ * <dt>/DISABLE_USAGE_TRACKING=(0|1)</dt>
+ * <dd>Enable or disable usage tracking. Example: <b>/DISABLE_USAGE_TRACKING=1</b> disables usage tracking.</dd>
  * <dt>/STARTMENUICON=(0|1)</dt>
  * <dd>Install or remove the start menu icon. Example: <b>/STARTMENUICON=1</b> installs the start menu icon.<br/>
  * Installing the start menu icon forces the GUI interface it depends on to be installed.</dd>

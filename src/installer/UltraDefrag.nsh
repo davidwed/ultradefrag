@@ -602,6 +602,39 @@ Var AtLeastXP
 
 ;-----------------------------------------
 
+!macro InstallUsageTracking
+
+    DetailPrint "Disabling usage tracking..."
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" \
+                "UD_DISABLE_USAGE_TRACKING" "1"
+
+    ; "Export" our change
+    SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+!macroend
+
+!define InstallUsageTracking "!insertmacro InstallUsageTracking"
+
+;-----------------------------------------
+
+!macro RemoveUsageTracking
+
+    DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" \
+                "UD_DISABLE_USAGE_TRACKING"
+    DeleteRegValue HKLM "SYSTEM\ControlSet001\Control\Session Manager\Environment" \
+                "UD_DISABLE_USAGE_TRACKING"
+    DeleteRegValue HKLM "SYSTEM\ControlSet002\Control\Session Manager\Environment" \
+                "UD_DISABLE_USAGE_TRACKING"
+
+    ; "Export" our change
+    SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+!macroend
+
+!define RemoveUsageTracking "!insertmacro RemoveUsageTracking"
+
+;-----------------------------------------
+
 !macro InstallStartMenuIcon
 
     ${DisableX64FSRedirection}

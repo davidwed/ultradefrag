@@ -124,6 +124,7 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
  * Headers
  */
 
+!include "WinMessages.nsh"
 !include "WinVer.nsh"
 !include "x64.nsh"
 !include "MUI.nsh"
@@ -214,6 +215,12 @@ Section "Context menu handler (requires Console)" SecShellHandler
   
 SectionEnd
 
+Section "Turn off usage tracking" SecUsageTracking
+
+    ${InstallUsageTracking}
+  
+SectionEnd
+
 SectionGroup /e "Shortcuts (require GUI)" SecShortcuts
 
 Section "Start Menu icon" SecStartMenuIcon
@@ -257,6 +264,7 @@ Section "Uninstall"
     ${RemoveQuickLaunchIcon}
     ${RemoveDesktopIcon}
     ${RemoveStartMenuIcon}
+    ${RemoveUsageTracking}
     ${RemoveShellHandlerFiles}
     ${RemoveHelpFiles}
     ${RemoveGUIFiles}

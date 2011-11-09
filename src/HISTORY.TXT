@@ -12,6 +12,11 @@ HISTORY
       Romanian, Filipino (Tagalog), Catalan, Spanish (ES), Hungarian,
       Farsi, Yiddish
     
+    - installer has been enhanced in the following ways:
+      + usage tracking can be enabled/disabled
+        during silent installations using the /S switch:
+            * /DISABLE_USAGE_TRACKING ... enable/disable usage tracking
+                                          through the web
     - added command script to create translation report as text/plain
       and text/wiki
     - few little bugs in volume processing routines were fixed
