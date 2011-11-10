@@ -354,7 +354,7 @@ FunctionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecStartMenuIcon}   "Adds an icon to your start menu."
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktopIcon}     "Adds an icon to your desktop."
     !insertmacro MUI_DESCRIPTION_TEXT ${SecQuickLaunchIcon} "Adds an icon to your quick launch toolbar."
-    !insertmacro MUI_DESCRIPTION_TEXT ${SecUsageTracking}   "Turns off usage tracking requests to Google Analytics service."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecUsageTracking}   "Disable web based usage tracking."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;---------------------------------------------
