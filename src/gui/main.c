@@ -49,6 +49,14 @@ extern int init_maximized_window;
 extern int allow_map_redraw;
 extern int lang_ini_tracking_stopped;
 
+/*
+* MSDN states that environment variables
+* are limited by 32767 characters,
+* including terminal zero.
+*/
+#define MAX_ENV_VARIABLE_LENGTH 32766
+wchar_t env_buffer[MAX_ENV_VARIABLE_LENGTH + 1];
+
 /* ensure that initial value is greater than any real value */
 int previous_list_height = 10000;
 
@@ -1010,8 +1018,20 @@ done:
  */
 DWORD WINAPI UpdateWebStatisticsThreadProc(LPVOID lpParameter)
 {
+	int tracking_enabled = 1;
+	
+	/* getenv() may give wrong results as stated in MSDN */
+	if(!GetEnvironmentVariableW(L"UD_DISABLE_USAGE_TRACKING",env_buffer,MAX_ENV_VARIABLE_LENGTH + 1)){
+		if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+			WgxDbgPrintLastError("UpdateWebStatisticsThreadProc: cannot get %%UD_DISABLE_USAGE_TRACKING%%!");
+	} else {
+		if(wcscmp(env_buffer,L"1") == 0)
+			tracking_enabled = 0;
+	}
+	
+	if(tracking_enabled){
 #ifndef _WIN64
-	IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui-x86.html","UA-15890458-1");
+		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui-x86.html","UA-15890458-1");
 #else
 	#if defined(_IA64_)
 		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui-ia64.html","UA-15890458-1");
@@ -1019,6 +1039,7 @@ DWORD WINAPI UpdateWebStatisticsThreadProc(LPVOID lpParameter)
 		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/gui-x64.html","UA-15890458-1");
 	#endif
 #endif
+	}
 
 	web_statistics_completed = 1;
 	return 0;

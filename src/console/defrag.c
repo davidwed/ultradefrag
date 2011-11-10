@@ -66,10 +66,12 @@ int web_statistics_completed = 0;
 wchar_t in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
 wchar_t new_in_filter[MAX_ENV_VARIABLE_LENGTH + 1];
 wchar_t aux_buffer[MAX_ENV_VARIABLE_LENGTH + 1];
+wchar_t env_buffer[MAX_ENV_VARIABLE_LENGTH + 1];
 
 /* forward declarations */
 static int show_vollist(void);
 static int process_volumes(void);
+static void RunScreenSaver(void);
 BOOL WINAPI CtrlHandlerRoutine(DWORD dwCtrlType);
 
 /* -------------------------------------------- */
@@ -133,8 +135,20 @@ void print_unicode_string(wchar_t *string)
  */
 DWORD WINAPI UpdateWebStatisticsThreadProc(LPVOID lpParameter)
 {
+	int tracking_enabled = 1;
+	
+	/* getenv() may give wrong results as stated in MSDN */
+	if(!GetEnvironmentVariableW(L"UD_DISABLE_USAGE_TRACKING",env_buffer,MAX_ENV_VARIABLE_LENGTH + 1)){
+		if(GetLastError() != ERROR_ENVVAR_NOT_FOUND)
+			WgxDbgPrintLastError("UpdateWebStatisticsThreadProc: cannot get %%UD_DISABLE_USAGE_TRACKING%%!");
+	} else {
+		if(wcscmp(env_buffer,L"1") == 0)
+			tracking_enabled = 0;
+	}
+	
+	if(tracking_enabled){
 #ifndef _WIN64
-	IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console-x86.html","UA-15890458-1");
+		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console-x86.html","UA-15890458-1");
 #else
 	#if defined(_IA64_)
 		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console-ia64.html","UA-15890458-1");
@@ -142,6 +156,7 @@ DWORD WINAPI UpdateWebStatisticsThreadProc(LPVOID lpParameter)
 		IncreaseGoogleAnalyticsCounter("ultradefrag.sourceforge.net","/appstat/console-x64.html","UA-15890458-1");
 	#endif
 #endif
+	}
 
 	web_statistics_completed = 1;
 	return 0;
@@ -336,101 +351,6 @@ void end_synchronization(void)
 		CloseHandle(hSynchEvent);
 }
 
-/*DWORD WINAPI test_thread(LPVOID p)
-{
-	udefrag_start_job('c',ANALYSIS_JOB,0,0,NULL,NULL,NULL);
-	return 0;
-}
-
-void test(void)
-{
-	int i;
-	DWORD id;
-	
-	for(i = 0; i < 10; i++)
-		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)test_thread,NULL,0,&id);
-}
-*/
-
-/**
- * @brief Command line tool entry point.
- */
-int __cdecl main(int argc, char **argv)
-{
-	int result, pause_result;
-	
-	/*test();
-	getch();
-	return 0;
-	*/
-
-	/* initialize the program */
-	parse_cmdline(argc,argv);
-	init_console();
-	
-	/* handle help request */
-	if(h_flag){
-		show_help();
-		terminate_console(0);
-	}
-
-	printf(VERSIONINTITLE ", Copyright (c) UltraDefrag Development Team, 2007-2011.\n"
-		"UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
-		"and you are welcome to redistribute it under certain conditions.\n\n"
-		);
-		
-	/* handle initialization failure */
-	if(udefrag_init_failed()){
-		display_error("Initialization failed!\nSend bug report to the authors please.\n");
-		terminate_console(1);
-	}
-
-	/* handle obsolete options */
-	if(obsolete_option){
-		display_error("The -i, -e, -s, -d options are oblolete.\n"
-			"Use environment variables instead!\n");
-		terminate_console(1);
-	}
-
-	/* show list of volumes if requested */
-	if(l_flag) terminate_console(show_vollist());
-	
-	/* run disk defragmentation job */
-	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
-		display_last_error("Cannot set Ctrl + C handler!");
-	
-	begin_synchronization();
-	
-	/* uncomment for the --wait option testing */
-	//printf("the job gets running\n");
-	//_getch();
-	result = process_volumes();
-	
-	end_synchronization();
-	
-	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
-	
-	/* display prompt to hit any key in case of context menu handler */
-	if(shellex_flag){
-		if(!b_flag) settextcolor(default_color);
-		printf("\n");
-		pause_result = system("pause");
-		if(pause_result > 0){
-			/* command not found */
-			printf("\n");
-		}
-		if(pause_result != 0 && pause_result != STATUS_CONTROL_C_EXIT){
-			/* command or a command interpreter itself not found */
-			printf("Hit any key to continue...");
-			_getch();
-		}
-	}
-
-	destroy_paths();
-	terminate_console(result);
-	return 0; /* this point will never be reached */
-}
-
 /**
  * @brief Updates progress information on the screen.
  */
@@ -531,14 +451,6 @@ int terminator(void *p)
 {
 	/* do it as quickly as possible :-) */
 	return stop_flag;
-}
-
-/**
- * @brief A stub.
- */
-static void RunScreenSaver(void)
-{
-	printf("Hello!\n");
 }
 
 /**
@@ -810,4 +722,107 @@ static int show_vollist(void)
 	udefrag_release_vollist(v);
 	if(!b_flag) settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 	return 0;
+}
+
+/**
+ * @brief A stub.
+ */
+static void RunScreenSaver(void)
+{
+	printf("Hello!\n");
+}
+
+/*DWORD WINAPI test_thread(LPVOID p)
+{
+	udefrag_start_job('c',ANALYSIS_JOB,0,0,NULL,NULL,NULL);
+	return 0;
+}
+
+void test(void)
+{
+	int i;
+	DWORD id;
+	
+	for(i = 0; i < 10; i++)
+		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)test_thread,NULL,0,&id);
+}
+*/
+
+/**
+ * @brief Command line tool entry point.
+ */
+int __cdecl main(int argc, char **argv)
+{
+	int result, pause_result;
+	
+	/*test();
+	getch();
+	return 0;
+	*/
+
+	/* initialize the program */
+	parse_cmdline(argc,argv);
+	init_console();
+	
+	/* handle help request */
+	if(h_flag){
+		show_help();
+		terminate_console(0);
+	}
+
+	printf(VERSIONINTITLE ", Copyright (c) UltraDefrag Development Team, 2007-2011.\n"
+		"UltraDefrag comes with ABSOLUTELY NO WARRANTY. This is free software, \n"
+		"and you are welcome to redistribute it under certain conditions.\n\n"
+		);
+		
+	/* handle initialization failure */
+	if(udefrag_init_failed()){
+		display_error("Initialization failed!\nSend bug report to the authors please.\n");
+		terminate_console(1);
+	}
+
+	/* handle obsolete options */
+	if(obsolete_option){
+		display_error("The -i, -e, -s, -d options are oblolete.\n"
+			"Use environment variables instead!\n");
+		terminate_console(1);
+	}
+
+	/* show list of volumes if requested */
+	if(l_flag) terminate_console(show_vollist());
+	
+	/* run disk defragmentation job */
+	if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE))
+		display_last_error("Cannot set Ctrl + C handler!");
+	
+	begin_synchronization();
+	
+	/* uncomment for the --wait option testing */
+	//printf("the job gets running\n");
+	//_getch();
+	result = process_volumes();
+	
+	end_synchronization();
+	
+	(void)SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,FALSE);
+	
+	/* display prompt to hit any key in case of context menu handler */
+	if(shellex_flag){
+		if(!b_flag) settextcolor(default_color);
+		printf("\n");
+		pause_result = system("pause");
+		if(pause_result > 0){
+			/* command not found */
+			printf("\n");
+		}
+		if(pause_result != 0 && pause_result != STATUS_CONTROL_C_EXIT){
+			/* command or a command interpreter itself not found */
+			printf("Hit any key to continue...");
+			_getch();
+		}
+	}
+
+	destroy_paths();
+	terminate_console(result);
+	return 0; /* this point will never be reached */
 }
