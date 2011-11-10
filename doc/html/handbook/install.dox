@@ -47,6 +47,13 @@
  * Moreover, it is impossible to run the boot time defragmenter without having its
  * files inside the System32 directory.
  *
+ * To expand usage statistics gathering by the website UltraDefrag sends also
+ * requests to the <a href="http://www.google.com/analytics/">Google Analytics</a> 
+ * service during startup. It takes no negative effect on security - many thousands
+ * of websites around the world use the same service to gather basic statistics
+ * of use. However, the UltraDefrag usage tracking can be turned off during an 
+ * installation.
+ *
  * <h1>Silent Installation</h1>
  * UltraDefrag can be installed in silent mode by adding the <b>/S</b> switch to the installer's command line
  * at the command prompt. In this case no dialogs will be shown and the program will be installed 
