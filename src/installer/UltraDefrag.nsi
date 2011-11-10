@@ -215,12 +215,6 @@ Section "Context menu handler (requires Console)" SecShellHandler
   
 SectionEnd
 
-Section "Turn off usage tracking" SecUsageTracking
-
-    ${InstallUsageTracking}
-  
-SectionEnd
-
 SectionGroup /e "Shortcuts (require GUI)" SecShortcuts
 
 Section "Start Menu icon" SecStartMenuIcon
@@ -248,6 +242,12 @@ Section "Quick Launch icon" SecQuickLaunchIcon
 SectionEnd
 
 SectionGroupEnd
+
+Section "Turn off usage tracking" SecUsageTracking
+
+    ${InstallUsageTracking}
+
+SectionEnd
 
 ;----------------------------------------------
 
@@ -354,6 +354,7 @@ FunctionEnd
     !insertmacro MUI_DESCRIPTION_TEXT ${SecStartMenuIcon}   "Adds an icon to your start menu."
     !insertmacro MUI_DESCRIPTION_TEXT ${SecDesktopIcon}     "Adds an icon to your desktop."
     !insertmacro MUI_DESCRIPTION_TEXT ${SecQuickLaunchIcon} "Adds an icon to your quick launch toolbar."
+    !insertmacro MUI_DESCRIPTION_TEXT ${SecUsageTracking}   "Turns off usage tracking requests to Google Analytics service."
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 ;---------------------------------------------

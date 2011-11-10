@@ -604,12 +604,17 @@ Var AtLeastXP
 
 !macro InstallUsageTracking
 
+    Push $0
+
     DetailPrint "Disabling usage tracking..."
-    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" \
-                "UD_DISABLE_USAGE_TRACKING" "1"
+    StrCpy $0 "UD_DISABLE_USAGE_TRACKING"
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" $0 "1"
+    WriteRegStr HKCU "Environment" $0 "1"
 
     ; "Export" our change
     SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
+    
+    Pop $0
 
 !macroend
 
@@ -619,15 +624,18 @@ Var AtLeastXP
 
 !macro RemoveUsageTracking
 
-    DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" \
-                "UD_DISABLE_USAGE_TRACKING"
-    DeleteRegValue HKLM "SYSTEM\ControlSet001\Control\Session Manager\Environment" \
-                "UD_DISABLE_USAGE_TRACKING"
-    DeleteRegValue HKLM "SYSTEM\ControlSet002\Control\Session Manager\Environment" \
-                "UD_DISABLE_USAGE_TRACKING"
+    Push $0
+
+    StrCpy $0 "UD_DISABLE_USAGE_TRACKING"
+    DeleteRegValue HKCU "Environment" $0
+    DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" $0
+    DeleteRegValue HKLM "SYSTEM\ControlSet001\Control\Session Manager\Environment" $0
+    DeleteRegValue HKLM "SYSTEM\ControlSet002\Control\Session Manager\Environment" $0
 
     ; "Export" our change
     SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
+    
+    Pop $0
 
 !macroend
 
