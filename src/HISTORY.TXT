@@ -22,7 +22,7 @@ HISTORY
     - few little bugs in volume processing routines were fixed
     - volume letter being processed was added to GUI title
     - a header was added to 'udefrag -l' command output
-    - Developers: is_dirty flag added to winx_volume_information (zenwinx.h)
+    - Internals: is_dirty flag added to winx_volume_information (zenwinx.h)
       and volume_info (udefrag.h) structures
 
     RC1:
@@ -79,7 +79,7 @@ HISTORY
     - one bug causing infinite loops in volume optimization was fixed
     - progress percentage calculation was improved
     - volume analysis was allowed for full disks having no free space
-    - Developers: winx_create_mutex, winx_open_mutex, winx_release_mutex,
+    - Internals: winx_create_mutex, winx_open_mutex, winx_release_mutex,
       winx_destroy_mutex, winx_stristr, winx_wcsmatch, winx_patcmp, 
       winx_defrag_fopen, winx_defrag_fclose functions added to zenwinx library
     - binary tree manipulation routines were added to zenwinx library;
@@ -126,7 +126,7 @@ HISTORY
       Italian, Finnish, Chinese (Traditional), German, Hungarian, Danish
       
     - hexview command added to the boot time shell
-    - Developers: udefrag_start_job prototype changed by adding algorithm 
+    - Internals: udefrag_start_job prototype changed by adding algorithm 
       preview flags
 
     beta2:
@@ -147,7 +147,7 @@ HISTORY
 
       Spanish(ES), Czech, Belarusian, Ukrainian, Chinese(Traditional)
 
-    - Developers: winx_strdup, winx_vsprintf, winx_sprintf, winx_enable_dbg_log,
+    - Internals: winx_strdup, winx_vsprintf, winx_sprintf, winx_enable_dbg_log,
       winx_disable_dbg_log, winx_get_module_filename, winx_path_remove_filename,
       winx_path_remove_extension, winx_path_extract_filename, winx_create_path,
       winx_init_spin_lock, winx_acquire_spin_lock, winx_release_spin_lock,
@@ -188,7 +188,7 @@ HISTORY
       without actual data moves on disk
     - keyboard reading routines used at Windows boot time were reimplemented
       to reach higher reliability
-    - Developers: winx_get_system_time, winx_get_local_time functions 
+    - Internals: winx_get_system_time, winx_get_local_time functions 
       added to zenwinx library
     - ULONG_PTR wrong definition was replaced by correct one in ntndk.h file
     
@@ -200,7 +200,7 @@ HISTORY
     - file sizes were converted to a human readable format in text reports
     - few bugs were fixed in the BootExecute Control program used to enable and
       disable the boot time defragmenter
-    - Developers: build scripts were highly optimized
+    - Internals: build scripts were highly optimized
     - mistakes preventing build on the path containing spaces were eliminated
     - support of custom report options was added to simplify upgrade 
       of default options
@@ -244,7 +244,7 @@ HISTORY
 
     - FAT12 and FAT16 volumes are displayed in GUI again as a simple FAT,
       because this highly speeds up the volume list building
-    - Developers: dfrg.exe historical name of GUI executable was replaced
+    - Internals: dfrg.exe historical name of GUI executable was replaced
       by final name ultradefrag.exe
     - manifest was added to signal Vista and higher that this is a
       high DPI aware application (http://support.microsoft.com/kb/969789)
