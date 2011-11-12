@@ -49,18 +49,18 @@ goto :EOF
     set drive_tmp=%1
     set drive=%drive_tmp:~0,1%
     
-	echo Processing %1 ...
-	echo      Running CHKDSK ....
-	call :RunUtility chkdsk %1 >"%COMPUTERNAME%_%drive%_chkdsk.log" 2>nul
-	
-	if %win_ver% GEQ 5.1 (
-		echo      Running DEFRAG ....
-		call :RunUtility defrag %1 >"%COMPUTERNAME%_%drive%_defrag.log" 2>nul
-	)
-	
-	echo      Running UDEFRAG ...
-	call :RunUtility udefrag %1 >"%COMPUTERNAME%_%drive%_udefrag.log" 2>nul
-	echo ------------------------
+    echo Processing %1 ...
+    echo      Running CHKDSK ....
+    call :RunUtility chkdsk %1 >"%COMPUTERNAME%_%drive%_chkdsk.log" 2>nul
+    
+    if %win_ver% GEQ 5.1 (
+        echo      Running DEFRAG ....
+        call :RunUtility defrag %1 >"%COMPUTERNAME%_%drive%_defrag.log" 2>nul
+    )
+    
+    echo      Running UDEFRAG ...
+    call :RunUtility udefrag %1 >"%COMPUTERNAME%_%drive%_udefrag.log" 2>nul
+    echo ------------------------
 goto :EOF
 
 :RunUtility

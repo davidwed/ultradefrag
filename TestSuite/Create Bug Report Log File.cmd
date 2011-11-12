@@ -157,14 +157,14 @@ pause
 goto :EOF
 
 :DisplayMenuItem
-	set /a MenuItem+=1
-	echo %MenuItem% ... %*
+    set /a MenuItem+=1
+    echo %MenuItem% ... %*
 goto :EOF
 
 :AddToItemList
-	if "%ItemList%" == "" (
-		set ItemList=%~1
-	) else (
-		set ItemList=%ItemList% %~1
-	)
+    if "%ItemList%" == "" (
+        set ItemList=%~1
+    ) else (
+        set ItemList=%ItemList% %~1
+    )
 goto :EOF

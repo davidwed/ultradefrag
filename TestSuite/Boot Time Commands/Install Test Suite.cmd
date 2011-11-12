@@ -47,11 +47,11 @@ set boot_time_scripts=ud-boot-time.cmd "%SystemRoot%\System32\ud-boot-time.cmd"
 for /F "tokens=2 delims=[]" %%V in ('ver') do for /F "tokens=2" %%R in ( 'echo %%V' ) do set win_ver=%%R
 
 if %PROCESSOR_ARCHITECTURE% == AMD64 (
-	if %win_ver% LSS 6 (
-		set force_default_editor=1
-	) else (
-		set boot_time_scripts=ud-boot-time.cmd "%SystemRoot%\SysNative\ud-boot-time.cmd"
-	)
+    if %win_ver% LSS 6 (
+        set force_default_editor=1
+    ) else (
+        set boot_time_scripts=ud-boot-time.cmd "%SystemRoot%\SysNative\ud-boot-time.cmd"
+    )
 )
 
 title Installing Ultradefrag Boot Time Test Suite

@@ -122,8 +122,8 @@ for /f "tokens=1,2 delims=." %%V in ('echo %test1%') do set OSversion=%%V.%%W
 set AvailableTypes=FAT FAT32
 set SelectionTypes=FAT-FAT32
 if %OSversion% GEQ 5.1 (
-	set AvailableTypes=%AvailableTypes% exFAT
-	set SelectionTypes=%SelectionTypes%-exFAT
+    set AvailableTypes=%AvailableTypes% exFAT
+    set SelectionTypes=%SelectionTypes%-exFAT
 )
 
 :: NTFS volumes
@@ -132,8 +132,8 @@ set SelectionTypes=%SelectionTypes%-NTFS-NTFS compressed-NTFS mixed
 
 :: UDF volumes
 if %OSversion% GEQ 6.0 (
-	set AvailableTypes=%AvailableTypes% "UDF 1.02" "UDF 1.50" "UDF 2.00" "UDF 2.01" "UDF 2.50" "UDF 2.50 mirror"
-	set SelectionTypes=%SelectionTypes%-UDF 1.02-UDF 1.50-UDF 2.00-UDF 2.01-UDF 2.50-UDF 2.50 mirror
+    set AvailableTypes=%AvailableTypes% "UDF 1.02" "UDF 1.50" "UDF 2.00" "UDF 2.01" "UDF 2.50" "UDF 2.50 mirror"
+    set SelectionTypes=%SelectionTypes%-UDF 1.02-UDF 1.50-UDF 2.00-UDF 2.01-UDF 2.50-UDF 2.50 mirror
 )
 
 :SelectVolumeType
@@ -218,9 +218,9 @@ call :delay 0
 if "%FormatVolume%" == "N" goto :ParseVolumeLabel
 
 for /f "tokens=1,2,3" %%R in ('echo %SelectedVolumeType%') do (
-	set ex_type=%%R
-	set option1=%%S
-	set option2=%%T
+    set ex_type=%%R
+    set option1=%%S
+    set option2=%%T
 )
 
 set VolumeName=%ex_type%
@@ -270,10 +270,10 @@ goto :StartProcess
 for /f "tokens=1,5,6* skip=8" %%D in ('udefrag -l') do if %%~D == %ProcessVolume% set PercentageFree=%%E & set VolumeName="%%~G"
 
 for /f "tokens=1,2,3,4 delims=_" %%R in ('echo %VolumeName:"=%') do (
-	set ex_type=%%R
-	set option1=%%S
-	set option2=%%T
-	set option3=%%U
+    set ex_type=%%R
+    set option1=%%S
+    set option2=%%T
+    set option3=%%U
 )
 
 set ApplyLabel=0
@@ -328,18 +328,18 @@ pause
 goto :EOF
 
 :DisplayMenuItem
-	set /a MenuItem+=1
-	echo %MenuItem% ... %*
+    set /a MenuItem+=1
+    echo %MenuItem% ... %*
 goto :EOF
 
 :AddToDriveList
-	if %~1 == %SystemDrive% goto :EOF
-	
-	if "%FoundVolumes%" == "" (
-		set FoundVolumes=%~1
-	) else (
-		set FoundVolumes=%FoundVolumes% %~1
-	)
+    if %~1 == %SystemDrive% goto :EOF
+    
+    if "%FoundVolumes%" == "" (
+        set FoundVolumes=%~1
+    ) else (
+        set FoundVolumes=%FoundVolumes% %~1
+    )
 goto :EOF
 
 :FragmentDrive
