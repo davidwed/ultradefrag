@@ -1,6 +1,6 @@
 Version Control with Subversion:
 
-	http://svnbook.red-bean.com/en/1.5/svn-book.html
+    http://svnbook.red-bean.com/en/1.5/svn-book.html
 
 Do not set svn:mime-type property of *.c, *.h, *.cmd files to text/plain.
 Otherwise the online SVN browser http://sourceforge.net/projects/ultradefrag
