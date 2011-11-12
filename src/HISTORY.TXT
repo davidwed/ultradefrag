@@ -6,6 +6,8 @@ HISTORY
     - ability to defragment NTFS attribute lists was added
     - check for the volume dirty flag was added to the volume analysis
     - ability to select all disks by pressing Ctrl+A was added to GUI
+    - ability to analyze disk by pressing Enter or double-clicking on
+      the list row was added to GUI
     - the following translations were updated:
 
       Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),

@@ -20,7 +20,7 @@
  * <b>Action</b>
  * </td><td>
  * <dl>
- * <dt>@htmlonly <img src="Analysis.png"> @endhtmlonly Analyze (F5)</dt>
+ * <dt>@htmlonly <img src="Analysis.png"> @endhtmlonly Analyze (F5; Enter)</dt>
  * <dd>This analyzes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.<br/>
  * The process locates free space, folders, fragmented, compressed, regular and system files.</dd>
  * <dt>@htmlonly <img src="Defragment.png"> @endhtmlonly Defragment (F6)</dt>

@@ -151,6 +151,7 @@ BEGIN
 	VK_F3,         IDM_FAQ,                     VIRTKEY, NOINVERT
 	VK_F4,         IDM_ABOUT,                   VIRTKEY, NOINVERT
 	"A",           IDM_SELECT_ALL,              VIRTKEY, CONTROL, NOINVERT
+	VK_RETURN,     IDM_ANALYZE,                 VIRTKEY, NOINVERT
 END
 
 /* manifests for all targets produces make-manifests.cmd script */

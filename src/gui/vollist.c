@@ -262,6 +262,9 @@ void VolListNotifyHandler(LPARAM lParam)
 		RedrawMap(job,0);
 		if(job) UpdateStatusBar(&job->pi);
 	}
+	/* perform a volume analysis when list item becomes double-clicked */
+	if(lpnm->hdr.hwndFrom == hList && lpnm->hdr.code == NM_DBLCLK)
+		PostMessage(hWindow,WM_COMMAND,(WPARAM)IDM_ANALYZE,0);
 }
 
 /**
