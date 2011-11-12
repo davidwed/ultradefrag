@@ -169,7 +169,7 @@ static int handle_script (lua_State *L, char **argv, int n) {
 
 
 /* check that argument has no extra characters at the end */
-#define notail(x)	{if ((x)[2] != '\0') return -1;}
+#define notail(x)    {if ((x)[2] != '\0') return -1;}
 
 
 static int collectargs (char **argv, int *pi, int *pv, int *pe) {
@@ -191,7 +191,7 @@ static int collectargs (char **argv, int *pi, int *pv, int *pe) {
         *pv = 1;
         break;
       case 's':
-	  case 'S':
+      case 'S':
         notail(argv[i]);
         break;
       case 'e':
@@ -290,8 +290,8 @@ int __cdecl internal_main (int argc, char **argv) {
   
   /* check for silent mode */
   for(i = 0; i < argc; i++){
-	  if(!strcmp(argv[i],"-s") || !strcmp(argv[i],"-S"))
-		  silent_mode = 1;
+      if(!strcmp(argv[i],"-s") || !strcmp(argv[i],"-S"))
+          silent_mode = 1;
   }
   
   L = lua_open();  /* create state */
@@ -310,124 +310,124 @@ int __cdecl internal_main (int argc, char **argv) {
 /* Copyright (C) Alexander A. Telyatnikov (http://alter.org.ua/) */
 PCHAR*
 CommandLineToArgvA(
-	PCHAR CmdLine,
-	int* _argc
-	)
+    PCHAR CmdLine,
+    int* _argc
+    )
 {
-	PCHAR* argv;
-	PCHAR  _argv;
-	ULONG   len;
-	ULONG   argc;
-	CHAR   a;
-	ULONG   i, j;
+    PCHAR* argv;
+    PCHAR  _argv;
+    ULONG   len;
+    ULONG   argc;
+    CHAR   a;
+    ULONG   i, j;
 
-	BOOLEAN  in_QM;
-	BOOLEAN  in_TEXT;
-	BOOLEAN  in_SPACE;
+    BOOLEAN  in_QM;
+    BOOLEAN  in_TEXT;
+    BOOLEAN  in_SPACE;
 
-	len = strlen(CmdLine);
-	i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
+    len = strlen(CmdLine);
+    i = ((len+2)/2)*sizeof(PVOID) + sizeof(PVOID);
 
-	argv = (PCHAR*)GlobalAlloc(GMEM_FIXED,
-		i + (len+2)*sizeof(CHAR));
+    argv = (PCHAR*)GlobalAlloc(GMEM_FIXED,
+        i + (len+2)*sizeof(CHAR));
 
-	/* added by dmitriar */
-	if(!argv){
-		*_argc = 0;
-		return NULL;
-	}
+    /* added by dmitriar */
+    if(!argv){
+        *_argc = 0;
+        return NULL;
+    }
 
-	_argv = (PCHAR)(((PUCHAR)argv)+i);
+    _argv = (PCHAR)(((PUCHAR)argv)+i);
 
-	argc = 0;
-	argv[argc] = _argv;
-	in_QM = FALSE;
-	in_TEXT = FALSE;
-	in_SPACE = TRUE;
-	i = 0;
-	j = 0;
+    argc = 0;
+    argv[argc] = _argv;
+    in_QM = FALSE;
+    in_TEXT = FALSE;
+    in_SPACE = TRUE;
+    i = 0;
+    j = 0;
 
-	while( (a = CmdLine[i]) ) {
-		if(in_QM) {
-			if(a == '\"') {
-				in_QM = FALSE;
-			} else {
-				_argv[j] = a;
-				j++;
-			}
-		} else {
-			switch(a) {
-			case '\"':
-				in_QM = TRUE;
-				in_TEXT = TRUE;
-				if(in_SPACE) {
-					argv[argc] = _argv+j;
-					argc++;
-				}
-				in_SPACE = FALSE;
-				break;
-			case ' ':
-			case '\t':
-			case '\n':
-			case '\r':
-				if(in_TEXT) {
-					_argv[j] = '\0';
-					j++;
-				}
-				in_TEXT = FALSE;
-				in_SPACE = TRUE;
-				break;
-			default:
-				in_TEXT = TRUE;
-				if(in_SPACE) {
-					argv[argc] = _argv+j;
-					argc++;
-				}
-				_argv[j] = a;
-				j++;
-				in_SPACE = FALSE;
-				break;
-			}
-		}
-		i++;
-	}
-	_argv[j] = '\0';
-	argv[argc] = NULL;
+    while( (a = CmdLine[i]) ) {
+        if(in_QM) {
+            if(a == '\"') {
+                in_QM = FALSE;
+            } else {
+                _argv[j] = a;
+                j++;
+            }
+        } else {
+            switch(a) {
+            case '\"':
+                in_QM = TRUE;
+                in_TEXT = TRUE;
+                if(in_SPACE) {
+                    argv[argc] = _argv+j;
+                    argc++;
+                }
+                in_SPACE = FALSE;
+                break;
+            case ' ':
+            case '\t':
+            case '\n':
+            case '\r':
+                if(in_TEXT) {
+                    _argv[j] = '\0';
+                    j++;
+                }
+                in_TEXT = FALSE;
+                in_SPACE = TRUE;
+                break;
+            default:
+                in_TEXT = TRUE;
+                if(in_SPACE) {
+                    argv[argc] = _argv+j;
+                    argc++;
+                }
+                _argv[j] = a;
+                j++;
+                in_SPACE = FALSE;
+                break;
+            }
+        }
+        i++;
+    }
+    _argv[j] = '\0';
+    argv[argc] = NULL;
 
-	(*_argc) = argc;
-	return argv;
+    (*_argc) = argc;
+    return argv;
 }
 
 BOOL CALLBACK EmptyDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	switch(msg){
-	case WM_INITDIALOG:
-		/* kill our window before showing them :) */
-		(void)EndDialog(hWnd,1);
-		return FALSE;
-	case WM_CLOSE:
-		/* this code - for extraordinary cases */
-		(void)EndDialog(hWnd,1);
-		return TRUE;
-	}
-	return FALSE;
+    switch(msg){
+    case WM_INITDIALOG:
+        /* kill our window before showing them :) */
+        (void)EndDialog(hWnd,1);
+        return FALSE;
+    case WM_CLOSE:
+        /* this code - for extraordinary cases */
+        (void)EndDialog(hWnd,1);
+        return TRUE;
+    }
+    return FALSE;
 }
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nShowCmd)
 {
-	int argc;
-	char **argv;
-	int ret;
-	
-	InitCommonControls(); /* strongly required! to be compatible with manifest */
+    int argc;
+    char **argv;
+    int ret;
+    
+    InitCommonControls(); /* strongly required! to be compatible with manifest */
 
-	/*
-	* To disable the sand glass on the cursor
-	* we must show a window on startup.
-	*/
-	(void)DialogBox(hInst,MAKEINTRESOURCE(100),NULL,(DLGPROC)EmptyDlgProc);
-	argv = CommandLineToArgvA(GetCommandLineA(),&argc);
-	ret = internal_main(argc,argv);
-	if(argv) (void)GlobalFree(argv);
-	return ret;
+    /*
+    * To disable the sand glass on the cursor
+    * we must show a window on startup.
+    */
+    (void)DialogBox(hInst,MAKEINTRESOURCE(100),NULL,(DLGPROC)EmptyDlgProc);
+    argv = CommandLineToArgvA(GetCommandLineA(),&argc);
+    ret = internal_main(argc,argv);
+    if(argv) (void)GlobalFree(argv);
+    return ret;
 }

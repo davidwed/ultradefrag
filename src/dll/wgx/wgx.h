@@ -62,37 +62,37 @@ typedef unsigned uintptr_t;
 
 /* wgx structures */
 typedef struct _WGX_I18N_RESOURCE_ENTRY {
-	int ControlID;
-	wchar_t *Key;
-	wchar_t *DefaultString;
-	wchar_t *LoadedString;
+    int ControlID;
+    wchar_t *Key;
+    wchar_t *DefaultString;
+    wchar_t *LoadedString;
 } WGX_I18N_RESOURCE_ENTRY, *PWGX_I18N_RESOURCE_ENTRY;
 
 typedef struct _WGX_FONT {
-	LOGFONT lf;
-	HFONT hFont;
+    LOGFONT lf;
+    HFONT hFont;
 } WGX_FONT, *PWGX_FONT;
 
 enum {
-	WGX_CFG_EMPTY,
-	WGX_CFG_COMMENT,
-	WGX_CFG_INT,
-	WGX_CFG_STRING
+    WGX_CFG_EMPTY,
+    WGX_CFG_COMMENT,
+    WGX_CFG_INT,
+    WGX_CFG_STRING
 };
 
 typedef struct _WGX_OPTION {
-	int type;             /* one of WGX_CFG_xxx constants */
-	int value_length;     /* length of the value buffer, in bytes (including terminal zero) */
-	char *name;           /* option name, NULL indicates end of options table */
-	void *value;          /* value buffer */
-	void *default_value;  /* default value */
+    int type;             /* one of WGX_CFG_xxx constants */
+    int value_length;     /* length of the value buffer, in bytes (including terminal zero) */
+    char *name;           /* option name, NULL indicates end of options table */
+    void *value;          /* value buffer */
+    void *default_value;  /* default value */
 } WGX_OPTION, *PWGX_OPTION;
 
 typedef struct _WGX_MENU {
-	UINT flags;                 /* combination of MF_xxx flags (see MSDN for details) */
-	UINT id;                    /* menu item identifier */
-	struct _WGX_MENU *submenu;  /* pointer to submenu table in case of MF_POPUP */
-	wchar_t *text;              /* menu item text in case of MF_STRING */
+    UINT flags;                 /* combination of MF_xxx flags (see MSDN for details) */
+    UINT id;                    /* menu item identifier */
+    struct _WGX_MENU *submenu;  /* pointer to submenu table in case of MF_POPUP */
+    wchar_t *text;              /* menu item text in case of MF_STRING */
     int toolbar_image_id;       /* position of the image on the toolbar ( -1 if not used, ignored for separators) */
 } WGX_MENU, *PWGX_MENU;
 
@@ -120,7 +120,7 @@ WNDPROC WgxSafeSubclassWindow(HWND hwnd,WNDPROC NewProc);
 LRESULT WgxSafeCallWndProc(WNDPROC OldProc,HWND hwnd,UINT msg,WPARAM wParam,LPARAM lParam);
 
 BOOL WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
-	LPCWSTR lpParameters,LPCWSTR lpDirectory,INT nShowCmd);
+    LPCWSTR lpParameters,LPCWSTR lpDirectory,INT nShowCmd);
 
 BOOL WgxCreateFont(char *wgx_font_path,PWGX_FONT pFont);
 void WgxSetFont(HWND hWnd, PWGX_FONT pFont);

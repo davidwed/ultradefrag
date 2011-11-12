@@ -34,50 +34,50 @@
  */
 ULONGLONG winx_str2time(char *string)
 {
-	ULONGLONG time = 0;
-	char buffer[128] = "";
-	int index = 0;
-	int i;
-	char c;
-	ULONGLONG k;
-	
-	if(string == NULL)
-		return 0;
-	
-	for(i = 0;; i++){ /* loop through all characters of the string */
-		c = string[i];
-		if(!c) break;
-		if(c >= '0' && c <= '9'){
-			buffer[index] = c;
-			index++;
-		}
+    ULONGLONG time = 0;
+    char buffer[128] = "";
+    int index = 0;
+    int i;
+    char c;
+    ULONGLONG k;
+    
+    if(string == NULL)
+        return 0;
+    
+    for(i = 0;; i++){ /* loop through all characters of the string */
+        c = string[i];
+        if(!c) break;
+        if(c >= '0' && c <= '9'){
+            buffer[index] = c;
+            index++;
+        }
 
-		k = 0;
-		c = winx_toupper(c);
-		switch(c){
-		case 'S':
-			k = 1;
-			break;
-		case 'M':
-			k = 60;
-			break;
-		case 'H':
-			k = 3600;
-			break;
-		case 'D':
-			k = 3600 * 24;
-			break;
-		case 'Y':
-			k = 3600 * 24 * 356;
-			break;
-		}
-		if(k){
-			buffer[index] = 0;
-			index = 0;
-			time += k * _atoi64(buffer);
-		}
-	}
-	return time;
+        k = 0;
+        c = winx_toupper(c);
+        switch(c){
+        case 'S':
+            k = 1;
+            break;
+        case 'M':
+            k = 60;
+            break;
+        case 'H':
+            k = 3600;
+            break;
+        case 'D':
+            k = 3600 * 24;
+            break;
+        case 'Y':
+            k = 3600 * 24 * 356;
+            break;
+        }
+        if(k){
+            buffer[index] = 0;
+            index = 0;
+            time += k * _atoi64(buffer);
+        }
+    }
+    return time;
 }
 
 /**
@@ -91,28 +91,28 @@ ULONGLONG winx_str2time(char *string)
  */
 int winx_time2str(ULONGLONG time,char *buffer,int size)
 {
-	ULONG y,d,h,m,s;
-	ULONG t;
-	int result;
-	
-	if(buffer == NULL || size <= 0)
-		return 0;
+    ULONG y,d,h,m,s;
+    ULONG t;
+    int result;
+    
+    if(buffer == NULL || size <= 0)
+        return 0;
 
-	t = (ULONG)time; /* because w2k has no _aulldvrm() call in ntdll.dll */
-	y = t / (3600 * 24 * 356);
-	t = t % (3600 * 24 * 356);
-	d = t / (3600 * 24);
-	t = t % (3600 * 24);
-	h = t / 3600;
-	t = t % 3600;
-	m = t / 60;
-	s = t % 60;
-	
-	result = _snprintf(buffer,size - 1,
-		"%uy %ud %uh %um %us",
-		y,d,h,m,s);
-	buffer[size - 1] = 0;
-	return result;
+    t = (ULONG)time; /* because w2k has no _aulldvrm() call in ntdll.dll */
+    y = t / (3600 * 24 * 356);
+    t = t % (3600 * 24 * 356);
+    d = t / (3600 * 24);
+    t = t % (3600 * 24);
+    h = t / 3600;
+    t = t % 3600;
+    m = t / 60;
+    s = t % 60;
+    
+    result = _snprintf(buffer,size - 1,
+        "%uy %ud %uh %um %us",
+        y,d,h,m,s);
+    buffer[size - 1] = 0;
+    return result;
 }
 
 /**
@@ -133,34 +133,34 @@ int xtime_failed = 0;
  */
 ULONGLONG winx_xtime(void)
 {
-	NTSTATUS Status;
-	LARGE_INTEGER frequency;
-	LARGE_INTEGER counter;
-	ULONGLONG xtime;
-	
-	Status = NtQueryPerformanceCounter(&counter,&frequency);
-	if(!NT_SUCCESS(Status)){
-		if(!xtime_failed)
-			DebugPrint("winx_xtime: NtQueryPerformanceCounter failed: %x",(UINT)Status);
-		xtime_failed = 1;
-		return 0;
-	}
-	if(!frequency.QuadPart){
-		if(!xtime_failed)
-			DebugPrint("winx_xtime: your hardware has no support for High Resolution timer");
-		xtime_failed = 1;
-		return 0;
-	}
-	/*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***",frequency.QuadPart,counter.QuadPart);*/
-	xtime = 1000 * counter.QuadPart;
-	if(xtime / 1000 != counter.QuadPart){
-		/* overflow occured; to avoid use of arbitrary
-		   precision arithmetic let's round to seconds */
-		xtime = 1000 * (counter.QuadPart / frequency.QuadPart);
-	} else {
-		xtime /= frequency.QuadPart;
-	}
-	return xtime;
+    NTSTATUS Status;
+    LARGE_INTEGER frequency;
+    LARGE_INTEGER counter;
+    ULONGLONG xtime;
+    
+    Status = NtQueryPerformanceCounter(&counter,&frequency);
+    if(!NT_SUCCESS(Status)){
+        if(!xtime_failed)
+            DebugPrint("winx_xtime: NtQueryPerformanceCounter failed: %x",(UINT)Status);
+        xtime_failed = 1;
+        return 0;
+    }
+    if(!frequency.QuadPart){
+        if(!xtime_failed)
+            DebugPrint("winx_xtime: your hardware has no support for High Resolution timer");
+        xtime_failed = 1;
+        return 0;
+    }
+    /*DebugPrint("*** Frequency = %I64u, Counter = %I64u ***",frequency.QuadPart,counter.QuadPart);*/
+    xtime = 1000 * counter.QuadPart;
+    if(xtime / 1000 != counter.QuadPart){
+        /* overflow occured; to avoid use of arbitrary
+           precision arithmetic let's round to seconds */
+        xtime = 1000 * (counter.QuadPart / frequency.QuadPart);
+    } else {
+        xtime /= frequency.QuadPart;
+    }
+    return xtime;
 }
 
 /**
@@ -172,29 +172,29 @@ ULONGLONG winx_xtime(void)
  */
 int winx_get_system_time(winx_time *t)
 {
-	LARGE_INTEGER SystemTime;
-	TIME_FIELDS TimeFields;
-	NTSTATUS Status;
-	
-	if(t == NULL)
-		return (-1);
-	
-	Status = NtQuerySystemTime(&SystemTime);
-	if(Status != STATUS_SUCCESS){
-		DebugPrintEx(Status,"winx_get_system_time: NtQuerySystemTime failed");
-		return (-1);
-	}
-	
-	RtlTimeToTimeFields(&SystemTime,&TimeFields);
-	t->year = TimeFields.Year;
-	t->month = TimeFields.Month;
-	t->day = TimeFields.Day;
-	t->hour = TimeFields.Hour;
-	t->minute = TimeFields.Minute;
-	t->second = TimeFields.Second;
-	t->milliseconds = TimeFields.Milliseconds;
-	t->weekday = TimeFields.Weekday;
-	return 0;
+    LARGE_INTEGER SystemTime;
+    TIME_FIELDS TimeFields;
+    NTSTATUS Status;
+    
+    if(t == NULL)
+        return (-1);
+    
+    Status = NtQuerySystemTime(&SystemTime);
+    if(Status != STATUS_SUCCESS){
+        DebugPrintEx(Status,"winx_get_system_time: NtQuerySystemTime failed");
+        return (-1);
+    }
+    
+    RtlTimeToTimeFields(&SystemTime,&TimeFields);
+    t->year = TimeFields.Year;
+    t->month = TimeFields.Month;
+    t->day = TimeFields.Day;
+    t->hour = TimeFields.Hour;
+    t->minute = TimeFields.Minute;
+    t->second = TimeFields.Second;
+    t->milliseconds = TimeFields.Milliseconds;
+    t->weekday = TimeFields.Weekday;
+    return 0;
 }
 
 /**
@@ -206,36 +206,36 @@ int winx_get_system_time(winx_time *t)
  */
 int winx_get_local_time(winx_time *t)
 {
-	LARGE_INTEGER SystemTime;
-	LARGE_INTEGER LocalTime;
-	TIME_FIELDS TimeFields;
-	NTSTATUS Status;
-	
-	if(t == NULL)
-		return (-1);
-	
-	Status = NtQuerySystemTime(&SystemTime);
-	if(Status != STATUS_SUCCESS){
-		DebugPrintEx(Status,"winx_get_local_time: NtQuerySystemTime failed");
-		return (-1);
-	}
-	
-	Status = RtlSystemTimeToLocalTime(&SystemTime,&LocalTime);
-	if(Status != STATUS_SUCCESS){
-		DebugPrintEx(Status,"winx_get_local_time: RtlSystemTimeToLocalTime failed");
-		return (-1);
-	}
-	
-	RtlTimeToTimeFields(&LocalTime,&TimeFields);
-	t->year = TimeFields.Year;
-	t->month = TimeFields.Month;
-	t->day = TimeFields.Day;
-	t->hour = TimeFields.Hour;
-	t->minute = TimeFields.Minute;
-	t->second = TimeFields.Second;
-	t->milliseconds = TimeFields.Milliseconds;
-	t->weekday = TimeFields.Weekday;
-	return 0;
+    LARGE_INTEGER SystemTime;
+    LARGE_INTEGER LocalTime;
+    TIME_FIELDS TimeFields;
+    NTSTATUS Status;
+    
+    if(t == NULL)
+        return (-1);
+    
+    Status = NtQuerySystemTime(&SystemTime);
+    if(Status != STATUS_SUCCESS){
+        DebugPrintEx(Status,"winx_get_local_time: NtQuerySystemTime failed");
+        return (-1);
+    }
+    
+    Status = RtlSystemTimeToLocalTime(&SystemTime,&LocalTime);
+    if(Status != STATUS_SUCCESS){
+        DebugPrintEx(Status,"winx_get_local_time: RtlSystemTimeToLocalTime failed");
+        return (-1);
+    }
+    
+    RtlTimeToTimeFields(&LocalTime,&TimeFields);
+    t->year = TimeFields.Year;
+    t->month = TimeFields.Month;
+    t->day = TimeFields.Day;
+    t->hour = TimeFields.Hour;
+    t->minute = TimeFields.Minute;
+    t->second = TimeFields.Second;
+    t->milliseconds = TimeFields.Milliseconds;
+    t->weekday = TimeFields.Weekday;
+    return 0;
 }
 
 /** @} */

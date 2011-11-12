@@ -31,29 +31,29 @@ HWND hProgressBar;
 
 void InitProgress(void)
 {
-	hProgressMsg = GetDlgItem(hWindow,IDC_PROGRESSMSG);
-	hProgressBar = GetDlgItem(hWindow,IDC_PROGRESS1);
-	HideProgress();
+    hProgressMsg = GetDlgItem(hWindow,IDC_PROGRESSMSG);
+    hProgressBar = GetDlgItem(hWindow,IDC_PROGRESS1);
+    HideProgress();
 }
 
 void ShowProgress(void)
 {
-	(void)ShowWindow(hProgressMsg,SW_SHOWNORMAL);
-	(void)ShowWindow(hProgressBar,SW_SHOWNORMAL);
+    (void)ShowWindow(hProgressMsg,SW_SHOWNORMAL);
+    (void)ShowWindow(hProgressBar,SW_SHOWNORMAL);
 }
 
 void HideProgress(void)
 {
-	(void)ShowWindow(hProgressMsg,SW_HIDE);
-	(void)ShowWindow(hProgressBar,SW_HIDE);
-	(void)SetWindowText(hProgressMsg,"A 0.00 %");
-	(void)SendMessage(hProgressBar,PBM_SETPOS,0,0);
+    (void)ShowWindow(hProgressMsg,SW_HIDE);
+    (void)ShowWindow(hProgressBar,SW_HIDE);
+    (void)SetWindowText(hProgressMsg,"A 0.00 %");
+    (void)SendMessage(hProgressBar,PBM_SETPOS,0,0);
 }
 
 void SetProgress(wchar_t *message, int percentage)
 {
-	(void)SetWindowTextW(hProgressMsg,message);
-	(void)SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
+    (void)SetWindowTextW(hProgressMsg,message);
+    (void)SendMessage(hProgressBar,PBM_SETPOS,(WPARAM)percentage,0);
 }
 */
 /** @} */

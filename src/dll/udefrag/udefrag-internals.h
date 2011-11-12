@@ -115,46 +115,46 @@
 #define ENV_BUFFER_SIZE 32767
 
 typedef struct _udefrag_options {
-	winx_patlist in_filter;     /* patterns for file inclusion */
-	winx_patlist ex_filter;     /* patterns for file exclusion */
-	ULONGLONG size_limit;       /* file size threshold */
-	ULONGLONG fragments_limit;  /* file fragments threshold */
-	ULONGLONG time_limit;       /* processing time limit, in seconds */
-	int refresh_interval;       /* progress refresh interval, in milliseconds */
-	int disable_reports;        /* nonzero value forces fragmentation reports to be disabled */
-	int dbgprint_level;         /* controls amount of debugging information */
-	int dry_run;                /* set %UD_DRY_RUN% variable to avoid actual data moving in tests */
-	int job_flags;              /* flags triggering algorithm features */
+    winx_patlist in_filter;     /* patterns for file inclusion */
+    winx_patlist ex_filter;     /* patterns for file exclusion */
+    ULONGLONG size_limit;       /* file size threshold */
+    ULONGLONG fragments_limit;  /* file fragments threshold */
+    ULONGLONG time_limit;       /* processing time limit, in seconds */
+    int refresh_interval;       /* progress refresh interval, in milliseconds */
+    int disable_reports;        /* nonzero value forces fragmentation reports to be disabled */
+    int dbgprint_level;         /* controls amount of debugging information */
+    int dry_run;                /* set %UD_DRY_RUN% variable to avoid actual data moving in tests */
+    int job_flags;              /* flags triggering algorithm features */
 } udefrag_options;
 
 typedef struct _udefrag_fragmented_file {
-	struct _udefrag_fragmented_file *next;
-	struct _udefrag_fragmented_file *prev;
-	winx_file_info *f;
+    struct _udefrag_fragmented_file *next;
+    struct _udefrag_fragmented_file *prev;
+    winx_file_info *f;
 } udefrag_fragmented_file;
 
 struct _mft_zones {
-	ULONGLONG mft_start;
-	ULONGLONG mft_end;
-	ULONGLONG mftzone_start;
-	ULONGLONG mftzone_end;
-	ULONGLONG mftmirr_start;
-	ULONGLONG mftmirr_end;
+    ULONGLONG mft_start;
+    ULONGLONG mft_end;
+    ULONGLONG mftzone_start;
+    ULONGLONG mftzone_end;
+    ULONGLONG mftmirr_start;
+    ULONGLONG mftmirr_end;
 };
 
 typedef enum {
-	FS_UNKNOWN = 0, /* including UDF and Ext2 */
-	FS_FAT12,
-	FS_FAT16,
-	FS_FAT32,
-	FS_FAT32_UNRECOGNIZED,
-	FS_NTFS,
-	FS_UDF
+    FS_UNKNOWN = 0, /* including UDF and Ext2 */
+    FS_FAT12,
+    FS_FAT16,
+    FS_FAT32,
+    FS_FAT32_UNRECOGNIZED,
+    FS_NTFS,
+    FS_UDF
 } file_system_type;
 
 typedef struct _udefrag_allowed_actions {
-	int allow_dir_defrag;      /* on FAT directories aren't movable */
-	int allow_optimize;        /* zero on FAT, because of unmovable directories */
+    int allow_dir_defrag;      /* on FAT directories aren't movable */
+    int allow_optimize;        /* zero on FAT, because of unmovable directories */
 } udefrag_allowed_actions;
 
 /*
@@ -162,24 +162,24 @@ typedef struct _udefrag_allowed_actions {
 * ('Dynamically-allocated Multi-dimensional Arrays - C').
 */
 typedef struct _cmap {
-	ULONGLONG (*array)[NUM_OF_SPACE_STATES];
-	ULONGLONG field_size;
-	int map_size;
-	int n_colors;
-	int default_color;
-	ULONGLONG clusters_per_cell;
-	ULONGLONG clusters_per_last_cell;
-	BOOLEAN opposite_order; /* clusters < cells */
-	ULONGLONG cells_per_cluster;
-	ULONGLONG cells_per_last_cluster;
+    ULONGLONG (*array)[NUM_OF_SPACE_STATES];
+    ULONGLONG field_size;
+    int map_size;
+    int n_colors;
+    int default_color;
+    ULONGLONG clusters_per_cell;
+    ULONGLONG clusters_per_last_cell;
+    BOOLEAN opposite_order; /* clusters < cells */
+    ULONGLONG cells_per_cluster;
+    ULONGLONG cells_per_last_cluster;
 } cmap;
 
 struct performance_counters {
-	ULONGLONG overall_time;               /* time needed for volume processing */
-	ULONGLONG analysis_time;              /* time needed for volume analysis */
-	ULONGLONG searching_time;             /* time needed for searching */
-	ULONGLONG moving_time;                /* time needed for file moves */
-	ULONGLONG temp_space_releasing_time;  /* time needed to release space temporarily allocated by system */
+    ULONGLONG overall_time;               /* time needed for volume processing */
+    ULONGLONG analysis_time;              /* time needed for volume analysis */
+    ULONGLONG searching_time;             /* time needed for searching */
+    ULONGLONG moving_time;                /* time needed for file moves */
+    ULONGLONG temp_space_releasing_time;  /* time needed to release space temporarily allocated by system */
 };
 
 #define TINY_FILE_SIZE            0 * 1024  /* < 10 kb */
@@ -190,45 +190,45 @@ struct performance_counters {
 #define GIANT_FILE_SIZE  128 * 1024 * 1024  /* > 128 Mb */
 
 struct file_counters {
-	unsigned long tiny_files;
-	unsigned long small_files;
-	unsigned long average_files;
-	unsigned long big_files;
-	unsigned long huge_files;
-	unsigned long giant_files;
+    unsigned long tiny_files;
+    unsigned long small_files;
+    unsigned long average_files;
+    unsigned long big_files;
+    unsigned long huge_files;
+    unsigned long giant_files;
 };
 
 typedef void (*udefrag_progress_router)(void /*udefrag_job_parameters*/ *p);
 typedef int  (*udefrag_termination_router)(void /*udefrag_job_parameters*/ *p);
 
 typedef struct _udefrag_job_parameters {
-	unsigned char volume_letter;                /* volume letter */
-	udefrag_job_type job_type;                  /* type of requested job */
-	udefrag_progress_callback cb;               /* progress update callback */
-	udefrag_terminator t;                       /* termination callback */
-	void *p;                                    /* pointer to user defined data to be passed to both callbacks */
-	udefrag_progress_router progress_router;        /* address of procedure delivering progress info to the caller */
-	udefrag_termination_router termination_router;  /* address of procedure triggering job termination */
-	ULONGLONG start_time;                       /* time of the job launch */
-	ULONGLONG progress_refresh_time;            /* time of the last progress refresh */
-	udefrag_options udo;                        /* job options */
-	udefrag_progress_info pi;                   /* progress counters */
-	winx_volume_information v_info;             /* basic volume information */
-	file_system_type fs_type;                   /* type of volume file system */
-	winx_file_info *filelist;                   /* list of files */
-	udefrag_fragmented_file *fragmented_files;  /* list of fragmented files */
-	winx_volume_region *free_regions;           /* list of free space regions */
-	unsigned long free_regions_count;           /* number of free space regions */
-	struct _mft_zones mft_zones;                /* coordinates of mft zones; as they are before the volume processing */
-	ULONGLONG clusters_per_256k;                /* number of clusters in 256k block */
-	udefrag_allowed_actions actions;            /* actions allowed for selected file system */
-	cmap cluster_map;                           /* cluster map internal data */
-	WINX_FILE *fVolume;                         /* handle of the volume, used by file moving routines */
-	winx_volume_region *temp_space_list;        /* list of regions of space temporarily allocated by system */
-	ULONGLONG free_rgn_size_threshold;          /* free region size threshold used in volume optimization */
-	struct performance_counters p_counters;     /* performance counters */
-	struct prb_table *file_blocks;              /* pointer to binary tree of all file blocks found on the volume */
-	struct file_counters f_counters;            /* file counters */
+    unsigned char volume_letter;                /* volume letter */
+    udefrag_job_type job_type;                  /* type of requested job */
+    udefrag_progress_callback cb;               /* progress update callback */
+    udefrag_terminator t;                       /* termination callback */
+    void *p;                                    /* pointer to user defined data to be passed to both callbacks */
+    udefrag_progress_router progress_router;        /* address of procedure delivering progress info to the caller */
+    udefrag_termination_router termination_router;  /* address of procedure triggering job termination */
+    ULONGLONG start_time;                       /* time of the job launch */
+    ULONGLONG progress_refresh_time;            /* time of the last progress refresh */
+    udefrag_options udo;                        /* job options */
+    udefrag_progress_info pi;                   /* progress counters */
+    winx_volume_information v_info;             /* basic volume information */
+    file_system_type fs_type;                   /* type of volume file system */
+    winx_file_info *filelist;                   /* list of files */
+    udefrag_fragmented_file *fragmented_files;  /* list of fragmented files */
+    winx_volume_region *free_regions;           /* list of free space regions */
+    unsigned long free_regions_count;           /* number of free space regions */
+    struct _mft_zones mft_zones;                /* coordinates of mft zones; as they are before the volume processing */
+    ULONGLONG clusters_per_256k;                /* number of clusters in 256k block */
+    udefrag_allowed_actions actions;            /* actions allowed for selected file system */
+    cmap cluster_map;                           /* cluster map internal data */
+    WINX_FILE *fVolume;                         /* handle of the volume, used by file moving routines */
+    winx_volume_region *temp_space_list;        /* list of regions of space temporarily allocated by system */
+    ULONGLONG free_rgn_size_threshold;          /* free region size threshold used in volume optimization */
+    struct performance_counters p_counters;     /* performance counters */
+    struct prb_table *file_blocks;              /* pointer to binary tree of all file blocks found on the volume */
+    struct file_counters f_counters;            /* file counters */
 } udefrag_job_parameters;
 
 int  get_options(udefrag_job_parameters *jp);
@@ -244,7 +244,7 @@ int allocate_map(int map_size,udefrag_job_parameters *jp);
 void free_map(udefrag_job_parameters *jp);
 void reset_cluster_map(udefrag_job_parameters *jp);
 void colorize_map_region(udefrag_job_parameters *jp,
-		ULONGLONG lcn, ULONGLONG length, int new_color, int old_color);
+        ULONGLONG lcn, ULONGLONG length, int new_color, int old_color);
 void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color);
 void colorize_file_as_system(udefrag_job_parameters *jp, winx_file_info *f);
 int get_file_color(udefrag_job_parameters *jp, winx_file_info *f);
@@ -287,17 +287,17 @@ void truncate_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp
 
 int move_file(winx_file_info *f,
               ULONGLONG vcn,
-			  ULONGLONG length,
-			  ULONGLONG target,
-			  int flags,
-			  udefrag_job_parameters *jp
-			  );
+              ULONGLONG length,
+              ULONGLONG target,
+              int flags,
+              udefrag_job_parameters *jp
+              );
 
 /* flags for find_matching_free_region */
 enum {
-	FIND_MATCHING_RGN_FORWARD,
-	FIND_MATCHING_RGN_BACKWARD,
-	FIND_MATCHING_RGN_ANY
+    FIND_MATCHING_RGN_FORWARD,
+    FIND_MATCHING_RGN_BACKWARD,
+    FIND_MATCHING_RGN_ANY
 };
 winx_volume_region *find_first_free_region(udefrag_job_parameters *jp,ULONGLONG min_length);
 winx_volume_region *find_last_free_region(udefrag_job_parameters *jp,ULONGLONG min_length);
@@ -311,7 +311,7 @@ int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *fi
 int remove_block_from_file_blocks_tree(udefrag_job_parameters *jp, winx_blockmap *block);
 void destroy_file_blocks_tree(udefrag_job_parameters *jp);
 winx_blockmap *find_first_block(udefrag_job_parameters *jp,
-	ULONGLONG *min_lcn, int flags, int skip_mft, winx_file_info **first_file);
+    ULONGLONG *min_lcn, int flags, int skip_mft, winx_file_info **first_file);
 ULONGLONG get_number_of_movable_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn, int flags);
 ULONGLONG get_number_of_fragmented_clusters(udefrag_job_parameters *jp, ULONGLONG first_lcn, ULONGLONG last_lcn);
 
@@ -325,9 +325,9 @@ int defragment_big_files(udefrag_job_parameters *jp);
 
 /* flags used in move_files_to_xxx routines */
 enum {
-	MOVE_FRAGMENTED,
-	MOVE_NOT_FRAGMENTED,
-	MOVE_ALL
+    MOVE_FRAGMENTED,
+    MOVE_NOT_FRAGMENTED,
+    MOVE_ALL
 };
 
 ULONGLONG calculate_starting_point(udefrag_job_parameters *jp, ULONGLONG old_sp);

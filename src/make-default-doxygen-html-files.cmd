@@ -44,19 +44,19 @@ goto :EOF
 rem Synopsis: call :make_default {path}
 rem Example:  call :make_default .\dll\zenwinx
 :make_default
-	pushd %1
+    pushd %1
     echo ====
     echo %CD%
     echo.
-	if exist doxy-defaults rd /s /q doxy-defaults
-	doxygen -w html default_header.html default_footer.html default_styles.css DoxyFile || goto compilation_failed
+    if exist doxy-defaults rd /s /q doxy-defaults
+    doxygen -w html default_header.html default_footer.html default_styles.css DoxyFile || goto compilation_failed
     md doxy-defaults
-	move /Y default_*.* doxy-defaults
-	
-	:compilation_succeeded
-	popd
-	exit /B 0
-	:compilation_failed
-	popd
-	exit /B 1
+    move /Y default_*.* doxy-defaults
+    
+    :compilation_succeeded
+    popd
+    exit /B 0
+    :compilation_failed
+    popd
+    exit /B 1
 goto :EOF

@@ -25,9 +25,9 @@ echo.
 
 :: set environment variables if they aren't already set
 if "%ULTRADFGVER%" equ "" (
-	call setvars.cmd
-	if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
-	if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+    call setvars.cmd
+    if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
+    if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
 )
 
 call :compile_docs .                                 || goto fail
@@ -60,18 +60,18 @@ rem Synopsis: call :compile_docs {path} {name}
 rem Note:     omit the second parameter to prevent copying docs to /src/doxy-doc directory
 rem Example:  call :compile_docs .\dll\zenwinx zenwinx
 :compile_docs
-	pushd %1
-	rd /s /q doxy-doc
-	lua "%~dp0\tools\set-doxyfile-project-number.lua" Doxyfile %ULTRADFGVER% || goto compilation_failed
-	doxygen || goto compilation_failed
-	copy /Y .\rsc\*.* .\doxy-doc\html\
-	if "%2" neq "" (
-		xcopy /I /Y /Q /S .\doxy-doc\html "%~dp0\doxy-doc\%2\html" || goto compilation_failed
-	)
-	:compilation_succeeded
-	popd
-	exit /B 0
-	:compilation_failed
-	popd
-	exit /B 1
+    pushd %1
+    rd /s /q doxy-doc
+    lua "%~dp0\tools\set-doxyfile-project-number.lua" Doxyfile %ULTRADFGVER% || goto compilation_failed
+    doxygen || goto compilation_failed
+    copy /Y .\rsc\*.* .\doxy-doc\html\
+    if "%2" neq "" (
+        xcopy /I /Y /Q /S .\doxy-doc\html "%~dp0\doxy-doc\%2\html" || goto compilation_failed
+    )
+    :compilation_succeeded
+    popd
+    exit /B 0
+    :compilation_failed
+    popd
+    exit /B 1
 goto :EOF

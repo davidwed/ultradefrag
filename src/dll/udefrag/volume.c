@@ -55,35 +55,35 @@ static int internal_validate_volume(char letter,int skip_removable,volume_info *
  */
 volume_info *udefrag_get_vollist(int skip_removable)
 {
-	volume_info *v;
-	ULONG i, index;
-	char letter;
-	
-	/* allocate memory */
-	v = winx_heap_alloc((MAX_DOS_DRIVES + 1) * sizeof(volume_info));
-	if(v == NULL){
-		DebugPrint("udefrag_get_vollist: cannot allocate %u bytes of memory",
-			(MAX_DOS_DRIVES + 1) * sizeof(volume_info));
-		return NULL;
-	}
+    volume_info *v;
+    ULONG i, index;
+    char letter;
+    
+    /* allocate memory */
+    v = winx_heap_alloc((MAX_DOS_DRIVES + 1) * sizeof(volume_info));
+    if(v == NULL){
+        DebugPrint("udefrag_get_vollist: cannot allocate %u bytes of memory",
+            (MAX_DOS_DRIVES + 1) * sizeof(volume_info));
+        return NULL;
+    }
 
-	/* set error mode to ignore missing removable drives */
-	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0){
-		winx_heap_free(v);
-		return NULL;
-	}
+    /* set error mode to ignore missing removable drives */
+    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0){
+        winx_heap_free(v);
+        return NULL;
+    }
 
-	/* cycle through drive letters */
-	for(i = 0, index = 0; i < MAX_DOS_DRIVES; i++){
-		letter = 'A' + (char)i; /* uppercase required by w2k! */
-		if(internal_validate_volume(letter, skip_removable,v + index) >= 0)
-			index ++;
-	}
-	v[index].letter = 0;
+    /* cycle through drive letters */
+    for(i = 0, index = 0; i < MAX_DOS_DRIVES; i++){
+        letter = 'A' + (char)i; /* uppercase required by w2k! */
+        if(internal_validate_volume(letter, skip_removable,v + index) >= 0)
+            index ++;
+    }
+    v[index].letter = 0;
 
-	/* try to restore error mode to default state */
-	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-	return v;
+    /* try to restore error mode to default state */
+    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
+    return v;
 }
 
 /**
@@ -92,7 +92,7 @@ volume_info *udefrag_get_vollist(int skip_removable)
  */
 void udefrag_release_vollist(volume_info *v)
 {
-	if(v) winx_heap_free(v);
+    if(v) winx_heap_free(v);
 }
 
 /**
@@ -103,17 +103,17 @@ void udefrag_release_vollist(volume_info *v)
  */
 int udefrag_get_volume_information(char volume_letter,volume_info *v)
 {
-	int result;
-	
-	/* set error mode to ignore missing removable drives */
-	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
-		return (-1);
+    int result;
+    
+    /* set error mode to ignore missing removable drives */
+    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
+        return (-1);
 
-	result = internal_validate_volume(volume_letter,0,v);
+    result = internal_validate_volume(volume_letter,0,v);
 
-	/* try to restore error mode to default state */
-	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-	return result;
+    /* try to restore error mode to default state */
+    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
+    return result;
 }
 
 /**
@@ -128,17 +128,17 @@ int udefrag_get_volume_information(char volume_letter,volume_info *v)
  */
 int udefrag_validate_volume(char volume_letter,int skip_removable)
 {
-	volume_info v;
-	int error_code;
+    volume_info v;
+    int error_code;
 
-	/* set error mode to ignore missing removable drives */
-	if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
-		return (-1);
-	error_code = internal_validate_volume(volume_letter,skip_removable,&v);
-	if(error_code < 0) return error_code;
-	/* try to restore error mode to default state */
-	winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-	return 0;
+    /* set error mode to ignore missing removable drives */
+    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
+        return (-1);
+    error_code = internal_validate_volume(volume_letter,skip_removable,&v);
+    if(error_code < 0) return error_code;
+    /* try to restore error mode to default state */
+    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
+    return 0;
 }
 
 /**
@@ -157,55 +157,55 @@ int udefrag_validate_volume(char volume_letter,int skip_removable)
  */
 static int internal_validate_volume(char volume_letter,int skip_removable,volume_info *v)
 {
-	winx_volume_information volume_info;
-	int type;
-	
-	if(v == NULL)
-		return (-1);
+    winx_volume_information volume_info;
+    int type;
+    
+    if(v == NULL)
+        return (-1);
 
-	/* convert volume letter to uppercase - needed for w2k */
-	volume_letter = winx_toupper(volume_letter);
-	
-	v->letter = volume_letter;
-	v->is_removable = FALSE;
-	v->is_dirty = FALSE;
-	type = winx_get_drive_type(volume_letter);
-	if(type < 0) return (-1);
-	if(type == DRIVE_CDROM){
-		DebugPrint("Disk %c: is cdrom drive.",volume_letter);
-		return UDEFRAG_CDROM;
-	}
-	if(type == DRIVE_REMOTE){
-		DebugPrint("Disk %c: is remote drive.",volume_letter);
-		return UDEFRAG_REMOTE;
-	}
-	if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
-		DebugPrint("It seems that %c: drive letter is assigned by \'subst\' command.",volume_letter);
-		return UDEFRAG_ASSIGNED_BY_SUBST;
-	}
-	if(type == DRIVE_REMOVABLE){
-		v->is_removable = TRUE;
-		if(skip_removable){
-			DebugPrint("Disk %c: is removable media.",volume_letter);
-			return UDEFRAG_REMOVABLE;
-		}
-	}
+    /* convert volume letter to uppercase - needed for w2k */
+    volume_letter = winx_toupper(volume_letter);
+    
+    v->letter = volume_letter;
+    v->is_removable = FALSE;
+    v->is_dirty = FALSE;
+    type = winx_get_drive_type(volume_letter);
+    if(type < 0) return (-1);
+    if(type == DRIVE_CDROM){
+        DebugPrint("Disk %c: is cdrom drive.",volume_letter);
+        return UDEFRAG_CDROM;
+    }
+    if(type == DRIVE_REMOTE){
+        DebugPrint("Disk %c: is remote drive.",volume_letter);
+        return UDEFRAG_REMOTE;
+    }
+    if(type == DRIVE_ASSIGNED_BY_SUBST_COMMAND){
+        DebugPrint("It seems that %c: drive letter is assigned by \'subst\' command.",volume_letter);
+        return UDEFRAG_ASSIGNED_BY_SUBST;
+    }
+    if(type == DRIVE_REMOVABLE){
+        v->is_removable = TRUE;
+        if(skip_removable){
+            DebugPrint("Disk %c: is removable media.",volume_letter);
+            return UDEFRAG_REMOVABLE;
+        }
+    }
 
-	/*
-	* Get volume information; it is strongly 
-	* required to exclude missing floppies.
-	*/
-	if(winx_get_volume_information(volume_letter,&volume_info) < 0)
-		return (-1);
-	
-	v->total_space.QuadPart = volume_info.total_bytes;
-	v->free_space.QuadPart = volume_info.free_bytes;
-	strncpy(v->fsname,volume_info.fs_name,MAXFSNAME - 1);
-	v->fsname[MAXFSNAME - 1] = 0;
-	wcsncpy(v->label,volume_info.label,MAX_PATH);
-	v->label[MAX_PATH] = 0;
-	v->is_dirty = volume_info.is_dirty;
-	return v->is_dirty ? UDEFRAG_DIRTY_VOLUME : 0;
+    /*
+    * Get volume information; it is strongly 
+    * required to exclude missing floppies.
+    */
+    if(winx_get_volume_information(volume_letter,&volume_info) < 0)
+        return (-1);
+    
+    v->total_space.QuadPart = volume_info.total_bytes;
+    v->free_space.QuadPart = volume_info.free_bytes;
+    strncpy(v->fsname,volume_info.fs_name,MAXFSNAME - 1);
+    v->fsname[MAXFSNAME - 1] = 0;
+    wcsncpy(v->label,volume_info.label,MAX_PATH);
+    v->label[MAX_PATH] = 0;
+    v->is_dirty = volume_info.is_dirty;
+    return v->is_dirty ? UDEFRAG_DIRTY_VOLUME : 0;
 }
 
 /** @} */

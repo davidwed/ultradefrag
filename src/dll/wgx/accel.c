@@ -39,11 +39,11 @@
 #define WIN_ARRAY_SIZE 1024
 
 typedef struct _CHILD_WINDOW {
-	HWND hWindow;
-	WNDPROC OldWindowProcedure;
-	HACCEL hAccelerator;
-	HWND hMainWindow;
-	BOOL isWindowUnicode;
+    HWND hWindow;
+    WNDPROC OldWindowProcedure;
+    HACCEL hAccelerator;
+    HWND hMainWindow;
+    BOOL isWindowUnicode;
 } CHILD_WINDOW, *PCHILD_WINDOW;
 
 CHILD_WINDOW win[WIN_ARRAY_SIZE] = {{0}};
@@ -53,40 +53,40 @@ BOOL error_flag = FALSE;
 
 LRESULT CALLBACK NewWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 {
-	int i, found = 0;
-	MSG message;
+    int i, found = 0;
+    MSG message;
 
-	/* search for our window in win array */
-	for(i = 0; i <= idx; i++){
-		if(win[i].hWindow == hWnd){
-			found = 1; break;
-		}
-	}
-	
-	if(found){
-		if(iMsg == WM_KEYDOWN){
-			message.hwnd = hWnd;
-			message.message = iMsg;
-			message.wParam = wParam;
-			message.lParam = lParam;
-			message.pt.x = message.pt.y = 0;
-			message.time = 0;
-			/* if we'll receive a report about improper accelerators work
-			   we may use TranslateAcceleratorW to solve the problem;
-			   but currently everything seems to be working fine */
-			(void)TranslateAccelerator(win[i].hMainWindow,win[i].hAccelerator,&message);
-		}
-		if(win[i].isWindowUnicode)
-			return CallWindowProcW(win[i].OldWindowProcedure,hWnd,iMsg,wParam,lParam);
-		else
-			return CallWindowProc(win[i].OldWindowProcedure,hWnd,iMsg,wParam,lParam);
-	}
-	/* very extraordinary situation */
-	if(!error_flag){ /* show message box once */
-		error_flag = TRUE;
-		MessageBox(NULL,"OldWindowProcedure is lost!","Error!",MB_OK | MB_ICONHAND);
-	}
-	return 0;
+    /* search for our window in win array */
+    for(i = 0; i <= idx; i++){
+        if(win[i].hWindow == hWnd){
+            found = 1; break;
+        }
+    }
+    
+    if(found){
+        if(iMsg == WM_KEYDOWN){
+            message.hwnd = hWnd;
+            message.message = iMsg;
+            message.wParam = wParam;
+            message.lParam = lParam;
+            message.pt.x = message.pt.y = 0;
+            message.time = 0;
+            /* if we'll receive a report about improper accelerators work
+               we may use TranslateAcceleratorW to solve the problem;
+               but currently everything seems to be working fine */
+            (void)TranslateAccelerator(win[i].hMainWindow,win[i].hAccelerator,&message);
+        }
+        if(win[i].isWindowUnicode)
+            return CallWindowProcW(win[i].OldWindowProcedure,hWnd,iMsg,wParam,lParam);
+        else
+            return CallWindowProc(win[i].OldWindowProcedure,hWnd,iMsg,wParam,lParam);
+    }
+    /* very extraordinary situation */
+    if(!error_flag){ /* show message box once */
+        error_flag = TRUE;
+        MessageBox(NULL,"OldWindowProcedure is lost!","Error!",MB_OK | MB_ICONHAND);
+    }
+    return 0;
 }
 
 /**
@@ -102,48 +102,48 @@ LRESULT CALLBACK NewWndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
  */
 BOOL WgxAddAccelerators(HINSTANCE hInstance,HWND hWindow,UINT AccelId)
 {
-	HACCEL hAccel;
-	HANDLE hChild;
-	WNDPROC OldWndProc;
-	BOOL isWindowUnicode;
-	
-	/* Load the accelerator table. */
-	hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(AccelId));
-	if(!hAccel) return FALSE;
+    HACCEL hAccel;
+    HANDLE hChild;
+    WNDPROC OldWndProc;
+    BOOL isWindowUnicode;
+    
+    /* Load the accelerator table. */
+    hAccel = LoadAccelerators(hInstance,MAKEINTRESOURCE(AccelId));
+    if(!hAccel) return FALSE;
 
-	if(first_call){
-		memset(win,0,sizeof(win));
-		idx = 0;
-		first_call = FALSE;
-	}
-	
-	/* No need to set accelerator for the main window. */
-	/* Set accelerator for children. */
-	hChild = GetWindow(hWindow,GW_CHILD);
-	while(hChild){
-		if(idx >= (WIN_ARRAY_SIZE - 1))
-			return FALSE; /* too many child windows */
+    if(first_call){
+        memset(win,0,sizeof(win));
+        idx = 0;
+        first_call = FALSE;
+    }
+    
+    /* No need to set accelerator for the main window. */
+    /* Set accelerator for children. */
+    hChild = GetWindow(hWindow,GW_CHILD);
+    while(hChild){
+        if(idx >= (WIN_ARRAY_SIZE - 1))
+            return FALSE; /* too many child windows */
 
-		if(IsWindowUnicode(hChild)) isWindowUnicode = TRUE;
-		else isWindowUnicode = FALSE;
+        if(IsWindowUnicode(hChild)) isWindowUnicode = TRUE;
+        else isWindowUnicode = FALSE;
 
-		if(isWindowUnicode)
-			OldWndProc = (WNDPROC)SetWindowLongPtrW(hChild,GWLP_WNDPROC,(LONG_PTR)NewWndProc);
-		else
-			OldWndProc = (WNDPROC)SetWindowLongPtr(hChild,GWLP_WNDPROC,(LONG_PTR)NewWndProc);
+        if(isWindowUnicode)
+            OldWndProc = (WNDPROC)SetWindowLongPtrW(hChild,GWLP_WNDPROC,(LONG_PTR)NewWndProc);
+        else
+            OldWndProc = (WNDPROC)SetWindowLongPtr(hChild,GWLP_WNDPROC,(LONG_PTR)NewWndProc);
 
-		if(OldWndProc){
-			win[idx].hWindow = hChild;
-			win[idx].OldWindowProcedure = OldWndProc;
-			win[idx].hAccelerator = hAccel;
-			win[idx].hMainWindow = hWindow;
-			win[idx].isWindowUnicode = isWindowUnicode;
-			idx ++;
-		}
-		hChild = GetWindow(hChild,GW_HWNDNEXT);
-	}
-	
-	return TRUE;
+        if(OldWndProc){
+            win[idx].hWindow = hChild;
+            win[idx].OldWindowProcedure = OldWndProc;
+            win[idx].hAccelerator = hAccel;
+            win[idx].hMainWindow = hWindow;
+            win[idx].isWindowUnicode = isWindowUnicode;
+            idx ++;
+        }
+        hChild = GetWindow(hChild,GW_HWNDNEXT);
+    }
+    
+    return TRUE;
 }
 
 /** @} */

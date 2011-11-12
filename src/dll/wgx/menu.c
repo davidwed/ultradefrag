@@ -41,36 +41,36 @@
  */
 HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent)
 {
-	HDC hDCMem = NULL, hDCMem2 = NULL, hDCDst1 = NULL;
-	BITMAP bm = {0};
-	HBITMAP hBMDst1 = NULL;
-	HBITMAP hBMDst2 = NULL;
-	HBITMAP hBMMask = NULL;
-	RECT rc = {0};
+    HDC hDCMem = NULL, hDCMem2 = NULL, hDCDst1 = NULL;
+    BITMAP bm = {0};
+    HBITMAP hBMDst1 = NULL;
+    HBITMAP hBMDst2 = NULL;
+    HBITMAP hBMMask = NULL;
+    RECT rc = {0};
 
-	GetObject(hBMSrc, sizeof(bm), &bm);
+    GetObject(hBMSrc, sizeof(bm), &bm);
 
-	hDCMem = CreateCompatibleDC(NULL);
+    hDCMem = CreateCompatibleDC(NULL);
     if(hDCMem == NULL) return NULL;
 
-	hDCMem2 = CreateCompatibleDC(NULL);
+    hDCMem2 = CreateCompatibleDC(NULL);
     if(hDCMem2 == NULL){
         DeleteDC(hDCMem);
         return NULL;
     }
 
-	hBMDst1 = CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);	// new bitmap
-	hBMDst2 = CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);	// copy bitmap
-	hBMMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL);	// mask bitmap
-	// make copy of source bitmap
-	SelectObject(hDCMem, hBMSrc);	// source
-	SelectObject(hDCMem2, hBMDst2);	// target
-	BitBlt(hDCMem2, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCCOPY);	//
-	DeleteDC(hDCMem);	// free source
-	DeleteDC(hDCMem2);
-	// make masks
+    hBMDst1 = CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);    // new bitmap
+    hBMDst2 = CreateBitmap(bm.bmWidth, bm.bmHeight, bm.bmPlanes, bm.bmBitsPixel, NULL);    // copy bitmap
+    hBMMask = CreateBitmap(bm.bmWidth, bm.bmHeight, 1, 1, NULL); // mask bitmap
+    // make copy of source bitmap
+    SelectObject(hDCMem, hBMSrc);      // source
+    SelectObject(hDCMem2, hBMDst2);    // target
+    BitBlt(hDCMem2, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCCOPY);    //
+    DeleteDC(hDCMem);    // free source
+    DeleteDC(hDCMem2);
+    // make masks
 
-	hDCMem = CreateCompatibleDC(NULL);
+    hDCMem = CreateCompatibleDC(NULL);
     if(hDCMem == NULL){
         DeleteObject(hBMDst1);
         DeleteObject(hBMDst2);
@@ -78,7 +78,7 @@ HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent)
         return NULL;
     }
 
-	hDCMem2 = CreateCompatibleDC(NULL);
+    hDCMem2 = CreateCompatibleDC(NULL);
     if(hDCMem2 == NULL){
         DeleteDC(hDCMem);
         DeleteObject(hBMDst1);
@@ -87,24 +87,24 @@ HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent)
         return NULL;
     }
 
-	SelectObject(hDCMem, hBMDst2);
-	SelectObject(hDCMem2, hBMMask);
+    SelectObject(hDCMem, hBMDst2);
+    SelectObject(hDCMem2, hBMMask);
     /* get color from pixel 0/0, if transparent color is not set */
     if(crTransparent == (COLORREF)-1)
         SetBkColor(hDCMem, GetPixel(hDCMem, 0, 0));
     else
         SetBkColor(hDCMem, crTransparent);
 
-	BitBlt(hDCMem2, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCCOPY);
-	BitBlt(hDCMem, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem2, 0, 0, SRCINVERT);
-	DeleteDC(hDCMem);
-	DeleteDC(hDCMem2);
+    BitBlt(hDCMem2, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCCOPY);
+    BitBlt(hDCMem, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem2, 0, 0, SRCINVERT);
+    DeleteDC(hDCMem);
+    DeleteDC(hDCMem2);
 
-	rc.top = rc.left = 0;
-	rc.right = bm.bmWidth;
-	rc.bottom = bm.bmHeight;
+    rc.top = rc.left = 0;
+    rc.right = bm.bmWidth;
+    rc.bottom = bm.bmHeight;
 
-	hDCMem = CreateCompatibleDC(NULL);
+    hDCMem = CreateCompatibleDC(NULL);
     if(hDCMem == NULL){
         DeleteObject(hBMDst1);
         DeleteObject(hBMDst2);
@@ -112,7 +112,7 @@ HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent)
         return NULL;
     }
 
-	hDCDst1 = CreateCompatibleDC(NULL);
+    hDCDst1 = CreateCompatibleDC(NULL);
     if(hDCDst1 == NULL){
         DeleteDC(hDCMem);
         DeleteObject(hBMDst1);
@@ -121,19 +121,19 @@ HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent)
         return NULL;
     }
 
-	SelectObject(hDCDst1, hBMDst1);
-	FillRect(hDCDst1, &rc, GetSysColorBrush(COLOR_MENU));
+    SelectObject(hDCDst1, hBMDst1);
+    FillRect(hDCDst1, &rc, GetSysColorBrush(COLOR_MENU));
 
-	SelectObject(hDCMem, hBMMask);
-	BitBlt(hDCDst1, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCAND);
-	SelectObject(hDCMem, hBMDst2);
-	BitBlt(hDCDst1, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCPAINT);
-	DeleteDC(hDCMem);
-	DeleteDC(hDCDst1);
+    SelectObject(hDCMem, hBMMask);
+    BitBlt(hDCDst1, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCAND);
+    SelectObject(hDCMem, hBMDst2);
+    BitBlt(hDCDst1, 0, 0, bm.bmWidth, bm.bmHeight, hDCMem, 0, 0, SRCPAINT);
+    DeleteDC(hDCMem);
+    DeleteDC(hDCDst1);
 
-	DeleteObject(hBMDst2);
-	DeleteObject(hBMMask);
-	return hBMDst1;
+    DeleteObject(hBMDst2);
+    DeleteObject(hBMMask);
+    return hBMDst1;
 }
 
 /**
@@ -148,30 +148,30 @@ HBITMAP WgxCreateMenuBitmapMasked(HBITMAP hBMSrc, COLORREF crTransparent)
  */
 HBITMAP WgxGetToolbarBitmapForMenu(HBITMAP hBMSrc, int nPos)
 {
-	HDC hDCSrc = NULL, hDCDst = NULL;
-	BITMAP bm = {0};
-	HBITMAP hBMDst = NULL, hOldBmp = NULL;
-	int cx, cy;
+    HDC hDCSrc = NULL, hDCDst = NULL;
+    BITMAP bm = {0};
+    HBITMAP hBMDst = NULL, hOldBmp = NULL;
+    int cx, cy;
 
-	cx = GetSystemMetrics(SM_CXMENUCHECK);
-	cy = GetSystemMetrics(SM_CYMENUCHECK);
+    cx = GetSystemMetrics(SM_CXMENUCHECK);
+    cy = GetSystemMetrics(SM_CYMENUCHECK);
     
-	if ((hDCSrc = CreateCompatibleDC(NULL)) != NULL) {
-		if ((hDCDst = CreateCompatibleDC(NULL)) != NULL) {
-			SelectObject(hDCSrc, hBMSrc);
-			GetObject(hBMSrc, sizeof(bm), &bm);
-			hBMDst = CreateBitmap(cx, cy, bm.bmPlanes, bm.bmBitsPixel, NULL);
-			if (hBMDst) {
-				hOldBmp = SelectObject(hDCDst, hBMDst);
-				StretchBlt(hDCDst, 0, 0, cx, cy, hDCSrc, nPos*bm.bmHeight, 0, bm.bmHeight, bm.bmHeight, SRCCOPY);
-				SelectObject(hDCDst, hOldBmp);
-				GetObject(hBMDst, sizeof(bm), &bm);
-			}
-			DeleteDC(hDCDst);
-		}
-		DeleteDC(hDCSrc);
-	}
-	return hBMDst;
+    if ((hDCSrc = CreateCompatibleDC(NULL)) != NULL) {
+        if ((hDCDst = CreateCompatibleDC(NULL)) != NULL) {
+            SelectObject(hDCSrc, hBMSrc);
+            GetObject(hBMSrc, sizeof(bm), &bm);
+            hBMDst = CreateBitmap(cx, cy, bm.bmPlanes, bm.bmBitsPixel, NULL);
+            if (hBMDst) {
+                hOldBmp = SelectObject(hDCDst, hBMDst);
+                StretchBlt(hDCDst, 0, 0, cx, cy, hDCSrc, nPos*bm.bmHeight, 0, bm.bmHeight, bm.bmHeight, SRCCOPY);
+                SelectObject(hDCDst, hOldBmp);
+                GetObject(hBMDst, sizeof(bm), &bm);
+            }
+            DeleteDC(hDCDst);
+        }
+        DeleteDC(hDCSrc);
+    }
+    return hBMDst;
 }
 
 /**
@@ -180,37 +180,37 @@ HBITMAP WgxGetToolbarBitmapForMenu(HBITMAP hBMSrc, int nPos)
  */
 static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table,HBITMAP toolbar_bmp)
 {
-	MENUITEMINFO mi;
-	HMENU hPopup;
+    MENUITEMINFO mi;
+    HMENU hPopup;
     HBITMAP hBMitem;
-	int i;
+    int i;
 
-	for(i = 0; menu_table[i].flags || menu_table[i].id || menu_table[i].text; i++){
-		if(menu_table[i].flags & MF_SEPARATOR){
-			if(!AppendMenuW(hMenu,MF_SEPARATOR,0,NULL))
-				goto append_menu_fail;
-			continue;
-		}
-		if(menu_table[i].flags & MF_POPUP){
-			hPopup = WgxBuildPopupMenu(menu_table[i].submenu,toolbar_bmp);
-			if(hPopup == NULL){
-				WgxDbgPrintLastError("WgxBuildMenu: cannot build popup menu");
-				return NULL;
-			}
-			if(!AppendMenuW(hMenu,menu_table[i].flags,(UINT_PTR)hPopup,menu_table[i].text))
-				goto append_menu_fail;
-			/* set id anyway */
-			memset(&mi,0,sizeof(MENUITEMINFO));
-			mi.cbSize = sizeof(MENUITEMINFO);
-			mi.fMask = MIIM_ID;
-			mi.fType = MFT_STRING;
-			mi.wID = menu_table[i].id;
-			if(!SetMenuItemInfo(hMenu,i,TRUE,&mi))
-				goto set_menu_info_fail;
-			continue;
-		}
-		if(!AppendMenuW(hMenu,menu_table[i].flags,menu_table[i].id,menu_table[i].text))
-			goto append_menu_fail;
+    for(i = 0; menu_table[i].flags || menu_table[i].id || menu_table[i].text; i++){
+        if(menu_table[i].flags & MF_SEPARATOR){
+            if(!AppendMenuW(hMenu,MF_SEPARATOR,0,NULL))
+                goto append_menu_fail;
+            continue;
+        }
+        if(menu_table[i].flags & MF_POPUP){
+            hPopup = WgxBuildPopupMenu(menu_table[i].submenu,toolbar_bmp);
+            if(hPopup == NULL){
+                WgxDbgPrintLastError("WgxBuildMenu: cannot build popup menu");
+                return NULL;
+            }
+            if(!AppendMenuW(hMenu,menu_table[i].flags,(UINT_PTR)hPopup,menu_table[i].text))
+                goto append_menu_fail;
+            /* set id anyway */
+            memset(&mi,0,sizeof(MENUITEMINFO));
+            mi.cbSize = sizeof(MENUITEMINFO);
+            mi.fMask = MIIM_ID;
+            mi.fType = MFT_STRING;
+            mi.wID = menu_table[i].id;
+            if(!SetMenuItemInfo(hMenu,i,TRUE,&mi))
+                goto set_menu_info_fail;
+            continue;
+        }
+        if(!AppendMenuW(hMenu,menu_table[i].flags,menu_table[i].id,menu_table[i].text))
+            goto append_menu_fail;
 
         if(toolbar_bmp != NULL){
             hBMitem = NULL;
@@ -222,18 +222,18 @@ static HMENU BuildMenu(HMENU hMenu,WGX_MENU *menu_table,HBITMAP toolbar_bmp)
                     SetMenuItemBitmaps(hMenu,menu_table[i].id,MF_BYCOMMAND,hBMitem,hBMitem);
             }
         }
-	}
-	
-	/* success */
-	return hMenu;
+    }
+    
+    /* success */
+    return hMenu;
 
 append_menu_fail:
-	WgxDbgPrintLastError("WgxBuildMenu: cannot append menu");
-	return NULL;
+    WgxDbgPrintLastError("WgxBuildMenu: cannot append menu");
+    return NULL;
 
 set_menu_info_fail:
-	WgxDbgPrintLastError("WgxBuildMenu: cannot set menu item id");
-	return NULL;
+    WgxDbgPrintLastError("WgxBuildMenu: cannot set menu item id");
+    return NULL;
 }
 
 /**
@@ -253,23 +253,23 @@ set_menu_info_fail:
  */
 HMENU WgxBuildMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp)
 {
-	HMENU hMenu;
-	
-	if(menu_table == NULL)
-		return NULL;
+    HMENU hMenu;
+    
+    if(menu_table == NULL)
+        return NULL;
 
-	hMenu = CreateMenu();
-	if(hMenu == NULL){
-		WgxDbgPrintLastError("WgxBuildMenu: cannot create menu");
-		return NULL;
-	}
-	
-	if(BuildMenu(hMenu,menu_table,toolbar_bmp) == NULL){
-		DestroyMenu(hMenu);
-		return NULL;
-	}
-	
-	return hMenu;
+    hMenu = CreateMenu();
+    if(hMenu == NULL){
+        WgxDbgPrintLastError("WgxBuildMenu: cannot create menu");
+        return NULL;
+    }
+    
+    if(BuildMenu(hMenu,menu_table,toolbar_bmp) == NULL){
+        DestroyMenu(hMenu);
+        return NULL;
+    }
+    
+    return hMenu;
 }
 
 /**
@@ -278,23 +278,23 @@ HMENU WgxBuildMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp)
  */
 HMENU WgxBuildPopupMenu(WGX_MENU *menu_table,HBITMAP toolbar_bmp)
 {
-	HMENU hMenu;
-	
-	if(menu_table == NULL)
-		return NULL;
+    HMENU hMenu;
+    
+    if(menu_table == NULL)
+        return NULL;
 
-	hMenu = CreatePopupMenu();
-	if(hMenu == NULL){
-		WgxDbgPrintLastError("WgxBuildPopupMenu: cannot create menu");
-		return NULL;
-	}
-	
-	if(BuildMenu(hMenu,menu_table,toolbar_bmp) == NULL){
-		DestroyMenu(hMenu);
-		return NULL;
-	}
-	
-	return hMenu;
+    hMenu = CreatePopupMenu();
+    if(hMenu == NULL){
+        WgxDbgPrintLastError("WgxBuildPopupMenu: cannot create menu");
+        return NULL;
+    }
+    
+    if(BuildMenu(hMenu,menu_table,toolbar_bmp) == NULL){
+        DestroyMenu(hMenu);
+        return NULL;
+    }
+    
+    return hMenu;
 }
 
 /** @} */

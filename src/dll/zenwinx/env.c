@@ -36,21 +36,21 @@
  */
 int winx_query_env_variable(short *name, short *buffer, int length)
 {
-	UNICODE_STRING n, v;
-	NTSTATUS Status;
-	
-	DbgCheck3(name,buffer,(length > 0),"winx_query_env_variable",-1);
+    UNICODE_STRING n, v;
+    NTSTATUS Status;
+    
+    DbgCheck3(name,buffer,(length > 0),"winx_query_env_variable",-1);
 
-	RtlInitUnicodeString(&n,name);
-	v.Buffer = buffer;
-	v.Length = 0;
-	v.MaximumLength = length * sizeof(short);
-	Status = RtlQueryEnvironmentVariable_U(NULL,&n,&v);
-	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"cannot query %ws environment variable",name);
-		return (-1);
-	}
-	return 0;
+    RtlInitUnicodeString(&n,name);
+    v.Buffer = buffer;
+    v.Length = 0;
+    v.MaximumLength = length * sizeof(short);
+    Status = RtlQueryEnvironmentVariable_U(NULL,&n,&v);
+    if(!NT_SUCCESS(Status)){
+        DebugPrintEx(Status,"cannot query %ws environment variable",name);
+        return (-1);
+    }
+    return 0;
 }
 
 /**
@@ -66,23 +66,23 @@ int winx_query_env_variable(short *name, short *buffer, int length)
  */
 int winx_set_env_variable(short *name, short *value)
 {
-	UNICODE_STRING n, v;
-	NTSTATUS status;
+    UNICODE_STRING n, v;
+    NTSTATUS status;
 
-	DbgCheck1(name,"winx_set_env_variable",-1);
+    DbgCheck1(name,"winx_set_env_variable",-1);
 
-	RtlInitUnicodeString(&n,name);
-	if(value){
-		RtlInitUnicodeString(&v,value);
-		status = RtlSetEnvironmentVariable(NULL,&n,&v);
-	} else {
-		status = RtlSetEnvironmentVariable(NULL,&n,NULL);
-	}
-	if(!NT_SUCCESS(status)){
-		DebugPrintEx(status,"cannot set %ws environment variable",name);
-		return (-1);
-	}
-	return 0;
+    RtlInitUnicodeString(&n,name);
+    if(value){
+        RtlInitUnicodeString(&v,value);
+        status = RtlSetEnvironmentVariable(NULL,&n,&v);
+    } else {
+        status = RtlSetEnvironmentVariable(NULL,&n,NULL);
+    }
+    if(!NT_SUCCESS(status)){
+        DebugPrintEx(status,"cannot set %ws environment variable",name);
+        return (-1);
+    }
+    return 0;
 }
 
 /** @} */

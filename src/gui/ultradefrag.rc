@@ -132,26 +132,26 @@ END
 IDR_MAIN_ACCELERATOR ACCELERATORS DISCARDABLE
 BEGIN
     VK_F5,         IDM_ANALYZE,                 VIRTKEY, NOINVERT
-	VK_F6,         IDM_DEFRAG,                  VIRTKEY, NOINVERT
-	VK_F7,         IDM_QUICK_OPTIMIZE,          VIRTKEY, NOINVERT
-	VK_F7,         IDM_FULL_OPTIMIZE,           VIRTKEY, CONTROL, NOINVERT
-	VK_F7,         IDM_OPTIMIZE_MFT,            VIRTKEY, SHIFT,   NOINVERT
-	"C",           IDM_STOP,                    VIRTKEY, CONTROL, NOINVERT
-	"R",           IDM_REPEAT_ACTION,           VIRTKEY, SHIFT,   NOINVERT
-	"M",           IDM_IGNORE_REMOVABLE_MEDIA,  VIRTKEY, CONTROL, NOINVERT
-	"D",           IDM_RESCAN,                  VIRTKEY, CONTROL, NOINVERT
-	VK_F8,         IDM_SHOW_REPORT,             VIRTKEY, NOINVERT
-	VK_F9,         IDM_CFG_GUI_FONT,            VIRTKEY, NOINVERT
-	VK_F10,        IDM_CFG_GUI_SETTINGS,        VIRTKEY, NOINVERT
-	VK_F11,        IDM_CFG_BOOT_ENABLE,         VIRTKEY, NOINVERT
-	VK_F12,        IDM_CFG_BOOT_SCRIPT,         VIRTKEY, NOINVERT
-	"R",           IDM_CFG_REPORTS,             VIRTKEY, CONTROL, NOINVERT
-	VK_F1,         IDM_CONTENTS,                VIRTKEY, NOINVERT
-	VK_F2,         IDM_BEST_PRACTICE,           VIRTKEY, NOINVERT
-	VK_F3,         IDM_FAQ,                     VIRTKEY, NOINVERT
-	VK_F4,         IDM_ABOUT,                   VIRTKEY, NOINVERT
-	"A",           IDM_SELECT_ALL,              VIRTKEY, CONTROL, NOINVERT
-	VK_RETURN,     IDM_ANALYZE,                 VIRTKEY, NOINVERT
+    VK_F6,         IDM_DEFRAG,                  VIRTKEY, NOINVERT
+    VK_F7,         IDM_QUICK_OPTIMIZE,          VIRTKEY, NOINVERT
+    VK_F7,         IDM_FULL_OPTIMIZE,           VIRTKEY, CONTROL, NOINVERT
+    VK_F7,         IDM_OPTIMIZE_MFT,            VIRTKEY, SHIFT,   NOINVERT
+    "C",           IDM_STOP,                    VIRTKEY, CONTROL, NOINVERT
+    "R",           IDM_REPEAT_ACTION,           VIRTKEY, SHIFT,   NOINVERT
+    "M",           IDM_IGNORE_REMOVABLE_MEDIA,  VIRTKEY, CONTROL, NOINVERT
+    "D",           IDM_RESCAN,                  VIRTKEY, CONTROL, NOINVERT
+    VK_F8,         IDM_SHOW_REPORT,             VIRTKEY, NOINVERT
+    VK_F9,         IDM_CFG_GUI_FONT,            VIRTKEY, NOINVERT
+    VK_F10,        IDM_CFG_GUI_SETTINGS,        VIRTKEY, NOINVERT
+    VK_F11,        IDM_CFG_BOOT_ENABLE,         VIRTKEY, NOINVERT
+    VK_F12,        IDM_CFG_BOOT_SCRIPT,         VIRTKEY, NOINVERT
+    "R",           IDM_CFG_REPORTS,             VIRTKEY, CONTROL, NOINVERT
+    VK_F1,         IDM_CONTENTS,                VIRTKEY, NOINVERT
+    VK_F2,         IDM_BEST_PRACTICE,           VIRTKEY, NOINVERT
+    VK_F3,         IDM_FAQ,                     VIRTKEY, NOINVERT
+    VK_F4,         IDM_ABOUT,                   VIRTKEY, NOINVERT
+    "A",           IDM_SELECT_ALL,              VIRTKEY, CONTROL, NOINVERT
+    VK_RETURN,     IDM_ANALYZE,                 VIRTKEY, NOINVERT
 END
 
 /* manifests for all targets produces make-manifests.cmd script */

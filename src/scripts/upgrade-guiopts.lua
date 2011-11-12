@@ -227,17 +227,17 @@ job_flags = $job_flags
 
 function expand (s)
   s = string.gsub(s, "$([%w_]+)", function (n)
-		return string.gsub(tostring(_G[n]), "\\", "\\\\")
-	  end)
+        return string.gsub(tostring(_G[n]), "\\", "\\\\")
+      end)
   return s
 end
 
 function save_preferences(f)
-	f:write(expand(config_file_contents))
+    f:write(expand(config_file_contents))
 end
 
 function save_internal_preferences(f)
-	f:write(expand(int_config_file_contents))
+    f:write(expand(int_config_file_contents))
 end
 
 -- THE MAIN CODE STARTS HERE
@@ -275,55 +275,55 @@ grid_color_b = 0
 path = instdir .. "\\options\\guiopts.lua"
 f = io.open(path, "r")
 if f ~= nil then
-	f:close()
-	dofile(path)
+    f:close()
+    dofile(path)
 end
 
 -- if version of configuration file is greater or equal than the current one, do nothing
 if version ~= nil then
-	old_version = version
-	if version >= current_version then
-		upgrade_needed = 0
-	end
+    old_version = version
+    if version >= current_version then
+        upgrade_needed = 0
+    end
 end
 
 -- upgrade the file
 if upgrade_needed ~= 0 then
-	-- make a backup copy
-	f = io.open(path, "r")
-	if f ~= nil then
-		contents = f:read("*all")
-		f:close()
-		f = assert(io.open(path .. ".old", "w"))
-		if f ~= nil then
-			f:write(contents)
-			f:close()
-		end
-	end
-	
-	-- RULES OF UPGRADE TO THE CURRENT VERSION
-	if old_version == 0 then
-		-- revert in_filter and ex_filter to their defaults
-		-- this is a main reason for upgrade to the version 1
-		in_filter = ""
-		ex_filter = "*system volume information*;*temp*;*tmp*;*recycle*;*.zip;*.7z;*.rar"
-	end
-	
-	-- save the upgraded configuration
-	f = assert(io.open(path, "w"))
-	if f ~= nil then
-		save_preferences(f)
-		f:close()
-	end
-	
-	-- save guiopts-internals.lua when needed
-	if old_version == 0 then
-		if rx ~= nil then
-			f = assert(io.open(instdir .. "\\options\\guiopts-internals.lua", "w"))
-			if f ~= nil then
-				save_internal_preferences(f)
-				f:close()
-			end
-		end
-	end
+    -- make a backup copy
+    f = io.open(path, "r")
+    if f ~= nil then
+        contents = f:read("*all")
+        f:close()
+        f = assert(io.open(path .. ".old", "w"))
+        if f ~= nil then
+            f:write(contents)
+            f:close()
+        end
+    end
+    
+    -- RULES OF UPGRADE TO THE CURRENT VERSION
+    if old_version == 0 then
+        -- revert in_filter and ex_filter to their defaults
+        -- this is a main reason for upgrade to the version 1
+        in_filter = ""
+        ex_filter = "*system volume information*;*temp*;*tmp*;*recycle*;*.zip;*.7z;*.rar"
+    end
+    
+    -- save the upgraded configuration
+    f = assert(io.open(path, "w"))
+    if f ~= nil then
+        save_preferences(f)
+        f:close()
+    end
+    
+    -- save guiopts-internals.lua when needed
+    if old_version == 0 then
+        if rx ~= nil then
+            f = assert(io.open(instdir .. "\\options\\guiopts-internals.lua", "w"))
+            if f ~= nil then
+                save_internal_preferences(f)
+                f:close()
+            end
+        end
+    end
 end

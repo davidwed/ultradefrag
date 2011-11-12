@@ -30,7 +30,7 @@
 
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
-	return 1;
+    return 1;
 }
 
 /** @} */

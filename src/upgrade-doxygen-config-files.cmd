@@ -44,16 +44,16 @@ goto :EOF
 rem Synopsis: call :upgrade_config {path}
 rem Example:  call :upgrade_config .\dll\zenwinx
 :upgrade_config
-	pushd %1
+    pushd %1
     echo ====
     echo %CD%
-	doxygen -u DoxyFile || goto compilation_failed
-	
-	:compilation_succeeded
+    doxygen -u DoxyFile || goto compilation_failed
+    
+    :compilation_succeeded
     del /f /q DoxyFile.bak
-	popd
-	exit /B 0
-	:compilation_failed
-	popd
-	exit /B 1
+    popd
+    exit /B 0
+    :compilation_failed
+    popd
+    exit /B 1
 goto :EOF

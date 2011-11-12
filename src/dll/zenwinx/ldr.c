@@ -39,28 +39,28 @@
  */
 int winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr)
 {
-	UNICODE_STRING uStr;
-	ANSI_STRING aStr;
-	NTSTATUS Status;
-	HMODULE base_addr;
+    UNICODE_STRING uStr;
+    ANSI_STRING aStr;
+    NTSTATUS Status;
+    HMODULE base_addr;
 
-	DbgCheck3(libname,funcname,proc_addr,"winx_get_proc_address",-1);
-	*proc_addr = NULL;
-	
-	RtlInitUnicodeString(&uStr,libname);
-	Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
-	if(!NT_SUCCESS(Status)){
-		DebugPrint("winx_get_proc_address: cannot get %ls handle: %x",libname,(UINT)Status);
-		return (-1);
-	}
-	RtlInitAnsiString(&aStr,funcname);
-	Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
-	if(!NT_SUCCESS(Status)){
-		DebugPrint("winx_get_proc_address: cannot get address of %s: %x",funcname,(UINT)Status);
-		*proc_addr = NULL;
-		return (-1);
-	}
-	return 0;
+    DbgCheck3(libname,funcname,proc_addr,"winx_get_proc_address",-1);
+    *proc_addr = NULL;
+    
+    RtlInitUnicodeString(&uStr,libname);
+    Status = LdrGetDllHandle(0,0,&uStr,(HMODULE *)&base_addr);
+    if(!NT_SUCCESS(Status)){
+        DebugPrint("winx_get_proc_address: cannot get %ls handle: %x",libname,(UINT)Status);
+        return (-1);
+    }
+    RtlInitAnsiString(&aStr,funcname);
+    Status = LdrGetProcedureAddress(base_addr,&aStr,0,proc_addr);
+    if(!NT_SUCCESS(Status)){
+        DebugPrint("winx_get_proc_address: cannot get address of %s: %x",funcname,(UINT)Status);
+        *proc_addr = NULL;
+        return (-1);
+    }
+    return 0;
 }
 
 /** @} */

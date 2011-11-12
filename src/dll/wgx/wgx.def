@@ -1,39 +1,39 @@
 LIBRARY wgx.dll
 
 EXPORTS
-	WgxAddAccelerators
-	WgxBuildMenu
-	WgxBuildPopupMenu
+    WgxAddAccelerators
+    WgxBuildMenu
+    WgxBuildPopupMenu
     
-	WgxCreateMenuBitmapMasked
+    WgxCreateMenuBitmapMasked
 
-	WgxBuildResourceTable
-	WgxApplyResourceTable
-	WgxSetText
-	WgxGetResourceString
-	WgxDestroyResourceTable
+    WgxBuildResourceTable
+    WgxApplyResourceTable
+    WgxSetText
+    WgxGetResourceString
+    WgxDestroyResourceTable
 
-	WgxEnableWindows
-	WgxDisableWindows
-	WgxSetIcon
-	WgxCheckWindowCoordinates
-	WgxCenterWindow
-	WgxSafeSubclassWindow
-	WgxSafeCallWndProc
+    WgxEnableWindows
+    WgxDisableWindows
+    WgxSetIcon
+    WgxCheckWindowCoordinates
+    WgxCenterWindow
+    WgxSafeSubclassWindow
+    WgxSafeCallWndProc
 
-	WgxShellExecuteW
+    WgxShellExecuteW
 
-	WgxCreateFont
-	WgxSetFont
-	WgxDestroyFont
-	WgxSaveFont
+    WgxCreateFont
+    WgxSetFont
+    WgxDestroyFont
+    WgxSaveFont
 
-	IncreaseGoogleAnalyticsCounter
-	IncreaseGoogleAnalyticsCounterAsynch
+    IncreaseGoogleAnalyticsCounter
+    IncreaseGoogleAnalyticsCounterAsynch
 
-	WgxDbgPrint
-	WgxDbgPrintLastError
-	WgxDisplayLastError
-	
-	WgxGetOptions
-	WgxSaveOptions
+    WgxDbgPrint
+    WgxDbgPrintLastError
+    WgxDisplayLastError
+    
+    WgxGetOptions
+    WgxSaveOptions

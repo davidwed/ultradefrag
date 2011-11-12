@@ -5,11 +5,11 @@ target_type = "dll"
 nativedll   = 1
 
 src = {
-	"event.c", "keyboard.c", "keytrans.c", "mem.c", "stdio.c",
-	"zenwinx.c", "misc.c", "ldr.c", "thread.c", "privilege.c",
-	"reg.c", "volume.c", "file.c", "env.c", "dbg.c", "time.c", 
-	"int64.c", "list.c", "string.c", "ftw.c", "ftw_ntfs.c",
-	"path.c", "lock.c", "mutex.c", "prb.c"
+    "event.c", "keyboard.c", "keytrans.c", "mem.c", "stdio.c",
+    "zenwinx.c", "misc.c", "ldr.c", "thread.c", "privilege.c",
+    "reg.c", "volume.c", "file.c", "env.c", "dbg.c", "time.c", 
+    "int64.c", "list.c", "string.c", "ftw.c", "ftw_ntfs.c",
+    "path.c", "lock.c", "mutex.c", "prb.c"
 }
 rc = { "zenwinx.rc" }
 

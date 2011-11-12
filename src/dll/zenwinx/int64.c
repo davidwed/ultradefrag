@@ -29,15 +29,15 @@
 #ifndef _WIN64
 ULONGLONG __udivdi3(ULONGLONG n, ULONGLONG d)
 {
-	return _aulldiv(n,d);
+    return _aulldiv(n,d);
 }
 LONGLONG __divdi3(LONGLONG n,LONGLONG d)
 {
-	return _alldiv(n,d);
+    return _alldiv(n,d);
 }
 ULONGLONG __umoddi3(ULONGLONG u, ULONGLONG v)
 {
-	return _aullrem(u,v);
+    return _aullrem(u,v);
 }
 #endif
 #endif

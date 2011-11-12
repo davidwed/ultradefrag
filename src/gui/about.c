@@ -33,27 +33,27 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam);
  */
 void AboutBox(void)
 {
-	HDC hdc;
-	int bpp = 32;
-	int id;
-	
-	hdc = GetDC(hWindow);
-	if(hdc){
-		bpp = GetDeviceCaps(hdc,BITSPIXEL);
-		ReleaseDC(hWindow,hdc);
-	}
-	if(bpp <= 8)
-		id = IDD_ABOUT_8_BIT;
-	else
-		id = IDD_ABOUT;
+    HDC hdc;
+    int bpp = 32;
+    int id;
+    
+    hdc = GetDC(hWindow);
+    if(hdc){
+        bpp = GetDeviceCaps(hdc,BITSPIXEL);
+        ReleaseDC(hWindow,hdc);
+    }
+    if(bpp <= 8)
+        id = IDD_ABOUT_8_BIT;
+    else
+        id = IDD_ABOUT;
 
-	if(DialogBoxW(hInstance,MAKEINTRESOURCEW(id),hWindow,(DLGPROC)AboutDlgProc) == (-1))
-		WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
+    if(DialogBoxW(hInstance,MAKEINTRESOURCEW(id),hWindow,(DLGPROC)AboutDlgProc) == (-1))
+        WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot create the About window!");
 }
 
 BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-	switch(msg){
+    switch(msg){
         case WM_INITDIALOG:
             /* Window Initialization */
             WgxCenterWindow(hWnd);
@@ -91,8 +91,8 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
         case WM_CLOSE:
             (void)EndDialog(hWnd,1);
             return TRUE;
-	}
-	return FALSE;
+    }
+    return FALSE;
 }
 
 /** @} */

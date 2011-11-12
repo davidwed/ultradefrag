@@ -50,50 +50,50 @@ typedef struct _BPB {
     ULONG    HiddenSectors;      // 28 number of hidden sectors
     ULONG    FAT32totalsectors;  // 32 if FAT32 number of sectors if Sectors==0    // End of BPB
     union {
-		struct {
-			UCHAR  BS_DrvNum;          // 36
-			UCHAR  BS_Reserved1;       // 37
-			UCHAR  BS_BootSig;         // 38
-			ULONG  BS_VolID;           // 39
-			UCHAR  BS_VolLab[11];      // 43
-			UCHAR  BS_FilSysType[8];   // 54
-			UCHAR  BS_Reserved2[448];  // 62
-		} Fat1x;
-		struct {
-			ULONG  FAT32sectors;       // 36
-			USHORT BPB_ExtFlags;       // 40
-			USHORT BPB_FSVer;          // 42
-			ULONG  BPB_RootClus;       // 44
-			USHORT BPB_FSInfo;         // 48
-			USHORT BPB_BkBootSec;      // 50
-			UCHAR  BPB_Reserved[12];   // 52
-			UCHAR  BS_DrvNum;          // 64
-			UCHAR  BS_Reserved1;       // 65
-			UCHAR  BS_BootSig;         // 66
-			ULONG  BS_VolID;           // 67
-			UCHAR  BS_VolLab[11];      // 71
-			UCHAR  BS_FilSysType[8];   // 82
-			UCHAR  BPB_Reserved2[420]; // 90
-		} Fat32;
-		struct {
-			UCHAR  unused[4];  /* zero, NTFS diskedit.exe states that
-			                      this is actually:
-			                      __u8 physical_drive;  // 0x80
-			                      __u8 current_head;    // zero
-			                      __u8 extended_boot_signature; // 0x80
-			                      __u8 unused;          // zero
-			                   */
-			ULONGLONG number_of_sectors;     /* Number of sectors in volume. */
-			ULONGLONG mft_lcn;               /* Cluster location of mft data. */
-			ULONGLONG mftmirr_lcn;           /* Cluster location of copy of mft. */
-			UCHAR clusters_per_mft_record;   /* Mft record size in clusters. */
-			UCHAR reserved0[3];              /* zero */
-			UCHAR clusters_per_index_record; /* Index block size in clusters. */
-			UCHAR reserved1[3];		         /* zero */
-			ULONGLONG volume_serial_number;	 /* Irrelevant (serial number). */
-			ULONG checksum;			         /* Boot sector checksum. */
-			UCHAR bootstrap[426];		     /* Irrelevant (boot up code). */
-		} Ntfs;
+        struct {
+            UCHAR  BS_DrvNum;          // 36
+            UCHAR  BS_Reserved1;       // 37
+            UCHAR  BS_BootSig;         // 38
+            ULONG  BS_VolID;           // 39
+            UCHAR  BS_VolLab[11];      // 43
+            UCHAR  BS_FilSysType[8];   // 54
+            UCHAR  BS_Reserved2[448];  // 62
+        } Fat1x;
+        struct {
+            ULONG  FAT32sectors;       // 36
+            USHORT BPB_ExtFlags;       // 40
+            USHORT BPB_FSVer;          // 42
+            ULONG  BPB_RootClus;       // 44
+            USHORT BPB_FSInfo;         // 48
+            USHORT BPB_BkBootSec;      // 50
+            UCHAR  BPB_Reserved[12];   // 52
+            UCHAR  BS_DrvNum;          // 64
+            UCHAR  BS_Reserved1;       // 65
+            UCHAR  BS_BootSig;         // 66
+            ULONG  BS_VolID;           // 67
+            UCHAR  BS_VolLab[11];      // 71
+            UCHAR  BS_FilSysType[8];   // 82
+            UCHAR  BPB_Reserved2[420]; // 90
+        } Fat32;
+        struct {
+            UCHAR  unused[4];  /* zero, NTFS diskedit.exe states that
+                                  this is actually:
+                                  __u8 physical_drive;  // 0x80
+                                  __u8 current_head;    // zero
+                                  __u8 extended_boot_signature; // 0x80
+                                  __u8 unused;          // zero
+                               */
+            ULONGLONG number_of_sectors;     /* Number of sectors in volume. */
+            ULONGLONG mft_lcn;               /* Cluster location of mft data. */
+            ULONGLONG mftmirr_lcn;           /* Cluster location of copy of mft. */
+            UCHAR clusters_per_mft_record;   /* Mft record size in clusters. */
+            UCHAR reserved0[3];              /* zero */
+            UCHAR clusters_per_index_record; /* Index block size in clusters. */
+            UCHAR reserved1[3];              /* zero */
+            ULONGLONG volume_serial_number;  /* Irrelevant (serial number). */
+            ULONG checksum;                  /* Boot sector checksum. */
+            UCHAR bootstrap[426];            /* Irrelevant (boot up code). */
+        } Ntfs;
     };
     USHORT Signature;              // 510
 } BPB;

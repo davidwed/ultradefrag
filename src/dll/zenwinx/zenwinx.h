@@ -49,36 +49,36 @@
 * when something is mistyped in sources.
 */
 #define DbgCheck1(c,f,r) { \
-	if(!(c)) {           \
-		DebugPrint("first parameter of %s is invalid",f); \
-		return (r);      \
-	}                    \
+    if(!(c)) {           \
+        DebugPrint("first parameter of %s is invalid",f); \
+        return (r);      \
+    }                    \
 }
 
 #define DbgCheck2(c1,c2,f,r) { \
-	DbgCheck1(c1,f,r)        \
-	if(!(c2)) {              \
-		DebugPrint("second parameter of %s is invalid",f); \
-		return (r);          \
-	}                        \
+    DbgCheck1(c1,f,r)        \
+    if(!(c2)) {              \
+        DebugPrint("second parameter of %s is invalid",f); \
+        return (r);          \
+    }                        \
 }
 
 #define DbgCheck3(c1,c2,c3,f,r) { \
-	DbgCheck2(c1,c2,f,r)        \
-	if(!(c3)) {              \
-		DebugPrint("third parameter of %s is invalid",f); \
-		return (r);          \
-	}                        \
+    DbgCheck2(c1,c2,f,r)        \
+    if(!(c3)) {              \
+        DebugPrint("third parameter of %s is invalid",f); \
+        return (r);          \
+    }                        \
 }
 
 typedef struct _WINX_FILE {
-	HANDLE hFile;             /* file handle */
-	LARGE_INTEGER roffset;    /* offset for read requests */
-	LARGE_INTEGER woffset;    /* offset for write requests */
-	void *io_buffer;          /* for buffered i/o */
-	size_t io_buffer_size;    /* size of the buffer, in bytes */
-	size_t io_buffer_offset;  /* current offset inside io_buffer */
-	LARGE_INTEGER wboffset;   /* offset for write requests in buffered mode */
+    HANDLE hFile;             /* file handle */
+    LARGE_INTEGER roffset;    /* offset for read requests */
+    LARGE_INTEGER woffset;    /* offset for write requests */
+    void *io_buffer;          /* for buffered i/o */
+    size_t io_buffer_size;    /* size of the buffer, in bytes */
+    size_t io_buffer_offset;  /* current offset inside io_buffer */
+    LARGE_INTEGER wboffset;   /* offset for write requests in buffered mode */
 } WINX_FILE, *PWINX_FILE;
 
 #define winx_fileno(f) ((f)->hFile)
@@ -112,10 +112,10 @@ size_t winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f);
 ULONGLONG winx_fsize(WINX_FILE *f);
 void winx_fclose(WINX_FILE *f);
 int winx_ioctl(WINX_FILE *f,
-	int code,char *description,
-	void *in_buffer,int in_size,
-	void *out_buffer,int out_size,
-	int *pbytes_returned);
+    int code,char *description,
+    void *in_buffer,int in_size,
+    void *out_buffer,int out_size,
+    int *pbytes_returned);
 int winx_fflush(WINX_FILE *f);
 int winx_create_directory(const char *path);
 int winx_delete_file(const char *filename);
@@ -151,34 +151,34 @@ void winx_release_file_contents(void *contents);
 #define is_fragmented(f)          ((f)->disp.flags & WINX_FILE_DISP_FRAGMENTED)
 
 typedef struct _winx_blockmap {
-	struct _winx_blockmap *next; /* pointer to the next fragment */
-	struct _winx_blockmap *prev; /* pointer to the previous fragment */
-	ULONGLONG vcn;               /* virtual cluster number */
-	ULONGLONG lcn;               /* logical cluster number */
-	ULONGLONG length;            /* size of the fragment, in clusters */
+    struct _winx_blockmap *next; /* pointer to the next fragment */
+    struct _winx_blockmap *prev; /* pointer to the previous fragment */
+    ULONGLONG vcn;               /* virtual cluster number */
+    ULONGLONG lcn;               /* logical cluster number */
+    ULONGLONG length;            /* size of the fragment, in clusters */
 } winx_blockmap;
 
 typedef struct _winx_file_disposition {
-	ULONGLONG clusters;                /* total number of clusters belonging to the file */
-	ULONGLONG fragments;               /* total number of file fragments */
-	unsigned long flags;               /* combination of WINX_FILE_DISP_xxx flags */
-	winx_blockmap *blockmap;           /* map of blocks <=> list of fragments */
+    ULONGLONG clusters;                /* total number of clusters belonging to the file */
+    ULONGLONG fragments;               /* total number of file fragments */
+    unsigned long flags;               /* combination of WINX_FILE_DISP_xxx flags */
+    winx_blockmap *blockmap;           /* map of blocks <=> list of fragments */
 } winx_file_disposition;
 
 typedef struct _winx_file_internal_info {
-	ULONGLONG BaseMftId;
-	ULONGLONG ParentDirectoryMftId;
+    ULONGLONG BaseMftId;
+    ULONGLONG ParentDirectoryMftId;
 } winx_file_internal_info;
 
 typedef struct _winx_file_info {
-	struct _winx_file_info *next;      /* pointer to the next item */
-	struct _winx_file_info *prev;      /* pointer to the previous item */
-	short *name;                       /* name of the file */
-	short *path;                       /* full native path */
-	unsigned long flags;               /* combination of FILE_ATTRIBUTE_xxx flags defined in winnt.h */
-	winx_file_disposition disp;        /* information about file fragments and their disposition */
-	unsigned long user_defined_flags;  /* combination of flags defined by the caller */
-	winx_file_internal_info internal;  /* internal information used by ftw_scan_disk support routines */
+    struct _winx_file_info *next;      /* pointer to the next item */
+    struct _winx_file_info *prev;      /* pointer to the previous item */
+    short *name;                       /* name of the file */
+    short *path;                       /* full native path */
+    unsigned long flags;               /* combination of FILE_ATTRIBUTE_xxx flags defined in winnt.h */
+    winx_file_disposition disp;        /* information about file fragments and their disposition */
+    unsigned long user_defined_flags;  /* combination of flags defined by the caller */
+    winx_file_internal_info internal;  /* internal information used by ftw_scan_disk support routines */
 } winx_file_info;
 
 typedef int  (*ftw_filter_callback)(winx_file_info *f,void *user_defined_data);
@@ -186,10 +186,10 @@ typedef void (*ftw_progress_callback)(winx_file_info *f,void *user_defined_data)
 typedef int  (*ftw_terminator)(void *user_defined_data);
 
 winx_file_info *winx_ftw(short *path, int flags,
-		ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t,void *user_defined_data);
+        ftw_filter_callback fcb, ftw_progress_callback pcb, ftw_terminator t,void *user_defined_data);
 
 winx_file_info *winx_scan_disk(char volume_letter, int flags,
-		ftw_filter_callback fcb,ftw_progress_callback pcb, ftw_terminator t,void *user_defined_data);
+        ftw_filter_callback fcb,ftw_progress_callback pcb, ftw_terminator t,void *user_defined_data);
 
 void winx_ftw_release(winx_file_info *filelist);
 #define winx_scan_disk_release(f) winx_ftw_release(f)
@@ -217,8 +217,8 @@ int winx_get_proc_address(short *libname,char *funcname,PVOID *proc_addr);
  * @brief Generic structure describing double linked list entry.
  */
 typedef struct _list_entry {
-	struct _list_entry *next; /* pointer to next entry */
-	struct _list_entry *prev; /* pointer to previous entry */
+    struct _list_entry *next; /* pointer to next entry */
+    struct _list_entry *prev; /* pointer to previous entry */
 } list_entry;
 
 list_entry *winx_list_insert_item(list_entry **phead,list_entry *prev,long size);
@@ -227,7 +227,7 @@ void winx_list_destroy(list_entry **phead);
 
 /* lock.c */
 typedef struct _winx_spin_lock {
-	HANDLE hEvent;
+    HANDLE hEvent;
 } winx_spin_lock;
 
 winx_spin_lock *winx_init_spin_lock(char *name);
@@ -306,15 +306,15 @@ int winx_getche(void);
 int winx_gets(char *string,int n);
 
 typedef struct _winx_history_entry {
-	struct _winx_history_entry *next;
-	struct _winx_history_entry *prev;
-	char *string;
+    struct _winx_history_entry *next;
+    struct _winx_history_entry *prev;
+    char *string;
 } winx_history_entry;
 
 typedef struct _winx_history {
-	winx_history_entry *head;
-	winx_history_entry *current;
-	int n_entries;
+    winx_history_entry *head;
+    winx_history_entry *current;
+    int n_entries;
 } winx_history;
 
 void winx_init_history(winx_history *h);
@@ -341,10 +341,10 @@ char *winx_sprintf(const char *format, ...);
 #define WINX_PAT_ICASE  0x1 /* compile patterns for case insensitive search */
 
 typedef struct _winx_patlist {
-	int count;
-	wchar_t **array;
-	int flags;
-	wchar_t *string;
+    int count;
+    wchar_t **array;
+    int flags;
+    wchar_t *string;
 } winx_patlist;
 
 int winx_patcomp(winx_patlist *patterns,wchar_t *string,wchar_t *delim,int flags);
@@ -391,19 +391,19 @@ int winx_get_drive_type(char letter);
 #define MAX_FS_NAME_LENGTH 31
 
 typedef struct _winx_volume_information {
-	char volume_letter;                    /* must be set by caller! */
-	char fs_name[MAX_FS_NAME_LENGTH + 1];  /* the name of the file system */
-	wchar_t label[MAX_PATH + 1];           /* volume label */
-	ULONG fat32_mj_version;                /* major number of FAT32 version */
-	ULONG fat32_mn_version;                /* minor number of FAT32 version */
-	ULONGLONG total_bytes;                 /* total volume size, in bytes */
-	ULONGLONG free_bytes;                  /* amount of free space, in bytes */
-	ULONGLONG total_clusters;              /* total number of clusters */
-	ULONGLONG bytes_per_cluster;           /* cluster size, in bytes */
-	ULONG sectors_per_cluster;             /* number of sectors in each cluster */
-	ULONG bytes_per_sector;                /* sector size, in bytes */
-	NTFS_DATA ntfs_data;                   /* NTFS data, valid for NTFS formatted volumes only */
-	int is_dirty;                          /* nonzero value indicates that volume is dirty and needs to be checked */
+    char volume_letter;                    /* must be set by caller! */
+    char fs_name[MAX_FS_NAME_LENGTH + 1];  /* the name of the file system */
+    wchar_t label[MAX_PATH + 1];           /* volume label */
+    ULONG fat32_mj_version;                /* major number of FAT32 version */
+    ULONG fat32_mn_version;                /* minor number of FAT32 version */
+    ULONGLONG total_bytes;                 /* total volume size, in bytes */
+    ULONGLONG free_bytes;                  /* amount of free space, in bytes */
+    ULONGLONG total_clusters;              /* total number of clusters */
+    ULONGLONG bytes_per_cluster;           /* cluster size, in bytes */
+    ULONG sectors_per_cluster;             /* number of sectors in each cluster */
+    ULONG bytes_per_sector;                /* sector size, in bytes */
+    NTFS_DATA ntfs_data;                   /* NTFS data, valid for NTFS formatted volumes only */
+    int is_dirty;                          /* nonzero value indicates that volume is dirty and needs to be checked */
 } winx_volume_information;
 
 int winx_get_volume_information(char volume_letter,winx_volume_information *v);
@@ -414,20 +414,20 @@ int winx_vflush(char volume_letter);
 #define WINX_GVR_ALLOW_PARTIAL_SCAN  0x1
 
 typedef struct _winx_volume_region {
-	struct _winx_volume_region *next;  /* pointer to the next region */
-	struct _winx_volume_region *prev;  /* pointer to the previous region */
-	ULONGLONG lcn;                     /* logical cluster number */
-	ULONGLONG length;                  /* size of region, in clusters */
+    struct _winx_volume_region *next;  /* pointer to the next region */
+    struct _winx_volume_region *prev;  /* pointer to the previous region */
+    ULONGLONG lcn;                     /* logical cluster number */
+    ULONGLONG length;                  /* size of region, in clusters */
 } winx_volume_region;
 
 typedef int (*volume_region_callback)(winx_volume_region *reg,void *user_defined_data);
 
 winx_volume_region *winx_get_free_volume_regions(char volume_letter,
-		int flags,volume_region_callback cb,void *user_defined_data);
+        int flags,volume_region_callback cb,void *user_defined_data);
 winx_volume_region *winx_add_volume_region(winx_volume_region *rlist,
-		ULONGLONG lcn,ULONGLONG length);
+        ULONGLONG lcn,ULONGLONG length);
 winx_volume_region *winx_sub_volume_region(winx_volume_region *rlist,
-		ULONGLONG lcn,ULONGLONG length);
+        ULONGLONG lcn,ULONGLONG length);
 void winx_release_free_volume_regions(winx_volume_region *rlist);
 
 /* zenwinx.c */

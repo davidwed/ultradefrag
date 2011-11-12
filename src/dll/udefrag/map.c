@@ -23,7 +23,7 @@
  * @addtogroup ClusterMap
  * @{
  */
-	 
+     
 /*
 * Revised by Stefan Pendl, 2011
 * <stefanpe@users.sourceforge.net>
@@ -60,83 +60,83 @@
  */
 int allocate_map(int map_size,udefrag_job_parameters *jp)
 {
-	int array_size;
-	ULONGLONG i;
-	
-	if(jp == NULL)
-		return (-1);
-	
-	/* reset all internal data */
-	jp->pi.cluster_map = NULL;
-	jp->pi.cluster_map_size = 0;
-	memset(&jp->cluster_map,0,sizeof(cmap));
-	
-	DebugPrint("map size = %u",map_size);
-	if(map_size == 0)
-		return 0;
-	
-	/* allocate memory */
-	jp->pi.cluster_map = winx_heap_alloc(map_size);
-	if(jp->pi.cluster_map == NULL){
-		DebugPrint("allocate_map: cannot allocate %u bytes of memory",
-			map_size);
-		return (-1);
-	}
-	array_size = map_size * NUM_OF_SPACE_STATES * sizeof(ULONGLONG);
-	jp->cluster_map.array = winx_heap_alloc(array_size);
-	if(jp->cluster_map.array == NULL){
-		DebugPrint("allocate_map: cannot allocate %u bytes of memory",
-			array_size);
-		winx_heap_free(jp->pi.cluster_map);
-		jp->pi.cluster_map = NULL;
-		return (-1);
-	}
-	
-	/* get volume information */
-	if(winx_get_volume_information(jp->volume_letter,&jp->v_info) < 0){
+    int array_size;
+    ULONGLONG i;
+    
+    if(jp == NULL)
+        return (-1);
+    
+    /* reset all internal data */
+    jp->pi.cluster_map = NULL;
+    jp->pi.cluster_map_size = 0;
+    memset(&jp->cluster_map,0,sizeof(cmap));
+    
+    DebugPrint("map size = %u",map_size);
+    if(map_size == 0)
+        return 0;
+    
+    /* allocate memory */
+    jp->pi.cluster_map = winx_heap_alloc(map_size);
+    if(jp->pi.cluster_map == NULL){
+        DebugPrint("allocate_map: cannot allocate %u bytes of memory",
+            map_size);
+        return (-1);
+    }
+    array_size = map_size * NUM_OF_SPACE_STATES * sizeof(ULONGLONG);
+    jp->cluster_map.array = winx_heap_alloc(array_size);
+    if(jp->cluster_map.array == NULL){
+        DebugPrint("allocate_map: cannot allocate %u bytes of memory",
+            array_size);
+        winx_heap_free(jp->pi.cluster_map);
+        jp->pi.cluster_map = NULL;
+        return (-1);
+    }
+    
+    /* get volume information */
+    if(winx_get_volume_information(jp->volume_letter,&jp->v_info) < 0){
 fail:
-		winx_heap_free(jp->pi.cluster_map);
-		jp->pi.cluster_map = NULL;
-		winx_heap_free(jp->cluster_map.array);
-		jp->cluster_map.array = NULL;
-		return (-1);
-	}
+        winx_heap_free(jp->pi.cluster_map);
+        jp->pi.cluster_map = NULL;
+        winx_heap_free(jp->cluster_map.array);
+        jp->cluster_map.array = NULL;
+        return (-1);
+    }
 
-	if(jp->v_info.total_clusters == 0)
-		goto fail;
+    if(jp->v_info.total_clusters == 0)
+        goto fail;
 
-	/* set internal data */
-	jp->pi.cluster_map_size = map_size;
-	jp->cluster_map.map_size = map_size;
-	jp->cluster_map.n_colors = NUM_OF_SPACE_STATES;
-	jp->cluster_map.default_color = SYSTEM_SPACE;
-	jp->cluster_map.field_size = jp->v_info.total_clusters;
-	
-	/* reset map */
-	memset(jp->cluster_map.array,0,array_size);
-	jp->cluster_map.clusters_per_cell = jp->cluster_map.field_size / jp->cluster_map.map_size;
-	if(jp->cluster_map.clusters_per_cell){
-		jp->cluster_map.opposite_order = FALSE;
-		jp->cluster_map.clusters_per_last_cell = jp->cluster_map.clusters_per_cell + \
-			(jp->cluster_map.field_size - jp->cluster_map.clusters_per_cell * jp->cluster_map.map_size);
-		DebugPrint("allocate_map: normal order %I64u : %I64u : %I64u", \
-			jp->cluster_map.field_size,jp->cluster_map.clusters_per_cell,jp->cluster_map.clusters_per_last_cell);
-		for(i = 0; i < jp->cluster_map.map_size - 1; i++)
-			jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_cell;
-		jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_last_cell;
-	} else {
-		jp->cluster_map.opposite_order = TRUE;
-		jp->cluster_map.cells_per_cluster = jp->cluster_map.map_size / jp->cluster_map.field_size;
-		jp->cluster_map.cells_per_last_cluster = jp->cluster_map.cells_per_cluster + \
-			(jp->cluster_map.map_size - jp->cluster_map.cells_per_cluster * jp->cluster_map.field_size);
-		DebugPrint("allocate_map: opposite order %I64u : %I64u : %I64u", \
-			jp->cluster_map.field_size,jp->cluster_map.cells_per_cluster,jp->cluster_map.cells_per_last_cluster);
-		for(i = 0; i < jp->cluster_map.map_size - 1; i++)
-			jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
-		jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
-	}
+    /* set internal data */
+    jp->pi.cluster_map_size = map_size;
+    jp->cluster_map.map_size = map_size;
+    jp->cluster_map.n_colors = NUM_OF_SPACE_STATES;
+    jp->cluster_map.default_color = SYSTEM_SPACE;
+    jp->cluster_map.field_size = jp->v_info.total_clusters;
+    
+    /* reset map */
+    memset(jp->cluster_map.array,0,array_size);
+    jp->cluster_map.clusters_per_cell = jp->cluster_map.field_size / jp->cluster_map.map_size;
+    if(jp->cluster_map.clusters_per_cell){
+        jp->cluster_map.opposite_order = FALSE;
+        jp->cluster_map.clusters_per_last_cell = jp->cluster_map.clusters_per_cell + \
+            (jp->cluster_map.field_size - jp->cluster_map.clusters_per_cell * jp->cluster_map.map_size);
+        DebugPrint("allocate_map: normal order %I64u : %I64u : %I64u", \
+            jp->cluster_map.field_size,jp->cluster_map.clusters_per_cell,jp->cluster_map.clusters_per_last_cell);
+        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
+            jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_cell;
+        jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_last_cell;
+    } else {
+        jp->cluster_map.opposite_order = TRUE;
+        jp->cluster_map.cells_per_cluster = jp->cluster_map.map_size / jp->cluster_map.field_size;
+        jp->cluster_map.cells_per_last_cluster = jp->cluster_map.cells_per_cluster + \
+            (jp->cluster_map.map_size - jp->cluster_map.cells_per_cluster * jp->cluster_map.field_size);
+        DebugPrint("allocate_map: opposite order %I64u : %I64u : %I64u", \
+            jp->cluster_map.field_size,jp->cluster_map.cells_per_cluster,jp->cluster_map.cells_per_last_cluster);
+        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
+            jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
+        jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
+    }
 
-	return 0;
+    return 0;
 }
 
 /**
@@ -144,24 +144,24 @@ fail:
  */
 void reset_cluster_map(udefrag_job_parameters *jp)
 {
-	ULONGLONG i;
-	
-	if(jp == NULL)
-		return;
-	
-	if(jp->cluster_map.array == NULL)
-		return;
+    ULONGLONG i;
+    
+    if(jp == NULL)
+        return;
+    
+    if(jp->cluster_map.array == NULL)
+        return;
 
-	memset(jp->cluster_map.array,0,jp->cluster_map.map_size * jp->cluster_map.n_colors * sizeof(ULONGLONG));
-	if(jp->cluster_map.opposite_order == FALSE){
-		for(i = 0; i < jp->cluster_map.map_size - 1; i++)
-			jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_cell;
-		jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_last_cell;
-	} else {
-		for(i = 0; i < jp->cluster_map.map_size - 1; i++)
-			jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
-		jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
-	}
+    memset(jp->cluster_map.array,0,jp->cluster_map.map_size * jp->cluster_map.n_colors * sizeof(ULONGLONG));
+    if(jp->cluster_map.opposite_order == FALSE){
+        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
+            jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_cell;
+        jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_last_cell;
+    } else {
+        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
+            jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
+        jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
+    }
 }
 
 /**
@@ -170,61 +170,61 @@ void reset_cluster_map(udefrag_job_parameters *jp)
  */
 void redraw_all_temporary_system_space_as_free(udefrag_job_parameters *jp)
 {
-	ULONGLONG i;
-	ULONGLONG n;
-	
-	if(jp == NULL)
-		return;
-	
-	if(jp->cluster_map.array == NULL)
-		return;
+    ULONGLONG i;
+    ULONGLONG n;
+    
+    if(jp == NULL)
+        return;
+    
+    if(jp->cluster_map.array == NULL)
+        return;
 
-	for(i = 0; i < jp->cluster_map.map_size; i++){
-		n = jp->cluster_map.array[i][TEMPORARY_SYSTEM_SPACE];
-		if(n){
-			jp->cluster_map.array[i][TEMPORARY_SYSTEM_SPACE] = 0;
-			jp->cluster_map.array[i][FREE_SPACE] += n;
-		}
-	}
+    for(i = 0; i < jp->cluster_map.map_size; i++){
+        n = jp->cluster_map.array[i][TEMPORARY_SYSTEM_SPACE];
+        if(n){
+            jp->cluster_map.array[i][TEMPORARY_SYSTEM_SPACE] = 0;
+            jp->cluster_map.array[i][FREE_SPACE] += n;
+        }
+    }
 
-	if(jp->progress_router)
-		jp->progress_router(jp); /* redraw map */
+    if(jp->progress_router)
+        jp->progress_router(jp); /* redraw map */
 }
 
 /**
  * @brief colorize_map_region helper.
  */
 static void colorize_system_or_free_region(udefrag_job_parameters *jp,
-						ULONGLONG lcn, ULONGLONG length, int new_color)
+                        ULONGLONG lcn, ULONGLONG length, int new_color)
 {
-	winx_volume_region *r;
-	ULONGLONG n, current_cluster, clusters_to_process;
-	
-	current_cluster = lcn;
-	clusters_to_process = length;
-	for(r = jp->free_regions; r; r = r->next){
-		/* break if current region follows specified range */
-		if(r->lcn >= lcn + length){
-			if(clusters_to_process)
-				colorize_map_region(jp,current_cluster,clusters_to_process,new_color,SYSTEM_SPACE);
-			break;
-		}
-		/* skip preceding regions */
-		if(r->lcn >= current_cluster){
-			if(r->lcn > current_cluster){
-				n = r->lcn - current_cluster;
-				colorize_map_region(jp,current_cluster,n,new_color,SYSTEM_SPACE);
-				current_cluster += n;
-				clusters_to_process -= n;
-			}
-			/* now r->lcn is equal to current_cluster always */
-			n = min(r->length,clusters_to_process);
-			colorize_map_region(jp,current_cluster,n,new_color,FREE_SPACE);
-			current_cluster += n;
-			clusters_to_process -= n;
-		}
-		if(r->next == jp->free_regions) break;
-	}
+    winx_volume_region *r;
+    ULONGLONG n, current_cluster, clusters_to_process;
+    
+    current_cluster = lcn;
+    clusters_to_process = length;
+    for(r = jp->free_regions; r; r = r->next){
+        /* break if current region follows specified range */
+        if(r->lcn >= lcn + length){
+            if(clusters_to_process)
+                colorize_map_region(jp,current_cluster,clusters_to_process,new_color,SYSTEM_SPACE);
+            break;
+        }
+        /* skip preceding regions */
+        if(r->lcn >= current_cluster){
+            if(r->lcn > current_cluster){
+                n = r->lcn - current_cluster;
+                colorize_map_region(jp,current_cluster,n,new_color,SYSTEM_SPACE);
+                current_cluster += n;
+                clusters_to_process -= n;
+            }
+            /* now r->lcn is equal to current_cluster always */
+            n = min(r->length,clusters_to_process);
+            colorize_map_region(jp,current_cluster,n,new_color,FREE_SPACE);
+            current_cluster += n;
+            clusters_to_process -= n;
+        }
+        if(r->next == jp->free_regions) break;
+    }
 }
 
 /**
@@ -233,79 +233,79 @@ static void colorize_system_or_free_region(udefrag_job_parameters *jp,
  * old color is ignored.
  */
 void colorize_map_region(udefrag_job_parameters *jp,
-		ULONGLONG lcn, ULONGLONG length, int new_color, int old_color)
+        ULONGLONG lcn, ULONGLONG length, int new_color, int old_color)
 {
-	ULONGLONG i, j, n, cell, offset, ncells;
-	ULONGLONG *c;
-	
-	/* validate parameters */
-	if(jp == NULL)
-		return;
-	if(jp->cluster_map.array == NULL)
-		return;
-	if(!check_region(jp,lcn,length))
-		return;
-	if(length == 0)
-		return;
-	
-	/* handle special cases */
-	if(old_color == SYSTEM_OR_FREE_SPACE){
-		colorize_system_or_free_region(jp,lcn,length,new_color);
-		return;
-	}
-	
-	/* validate colors */
-	if(new_color < 0 || new_color >= jp->cluster_map.n_colors)
-		return;
-	if(new_color != MFT_ZONE_SPACE){
-		if(old_color < 0 || old_color >= jp->cluster_map.n_colors)
-			return;
-	}
-	
-	if(new_color == old_color)
-		return;
-	
-	if(jp->cluster_map.opposite_order == FALSE){
-		/* we're using here less obvious code,
-		because _aulldvrm misses on nt4 */
-		cell = lcn / jp->cluster_map.clusters_per_cell;
-		if(cell >= jp->cluster_map.map_size)
-			return;
-		offset = lcn - cell * jp->cluster_map.clusters_per_cell;
-		while(cell < (jp->cluster_map.map_size - 1) && length){
-			n = min(length,jp->cluster_map.clusters_per_cell - offset);
-			jp->cluster_map.array[cell][new_color] += n;
-			if(new_color != MFT_ZONE_SPACE){
-				c = &jp->cluster_map.array[cell][old_color];
-				if(*c >= n) *c -= n; else *c = 0;
-			}
-			length -= n;
-			cell ++;
-			offset = 0;
-		}
-		if(length){
-			n = min(length,jp->cluster_map.clusters_per_last_cell - offset);
-			jp->cluster_map.array[cell][new_color] += n;
-			if(new_color != MFT_ZONE_SPACE){
-				c = &jp->cluster_map.array[cell][old_color];
-				if(*c >= n) *c -= n; else *c = 0;
-			}
-		}
-	} else {
-		/* clusters < cells */
-		cell = lcn * jp->cluster_map.cells_per_cluster;
-		ncells = length * jp->cluster_map.cells_per_cluster;
-		for(i = 0; i < ncells; i++){
-			if(new_color != MFT_ZONE_SPACE){
-				for(j = 0; j < jp->cluster_map.n_colors; j++)
-					jp->cluster_map.array[cell + i][j] = 0;
-			}
-			jp->cluster_map.array[cell + i][new_color] = 1;
-		}
+    ULONGLONG i, j, n, cell, offset, ncells;
+    ULONGLONG *c;
+    
+    /* validate parameters */
+    if(jp == NULL)
+        return;
+    if(jp->cluster_map.array == NULL)
+        return;
+    if(!check_region(jp,lcn,length))
+        return;
+    if(length == 0)
+        return;
+    
+    /* handle special cases */
+    if(old_color == SYSTEM_OR_FREE_SPACE){
+        colorize_system_or_free_region(jp,lcn,length,new_color);
+        return;
+    }
+    
+    /* validate colors */
+    if(new_color < 0 || new_color >= jp->cluster_map.n_colors)
+        return;
+    if(new_color != MFT_ZONE_SPACE){
+        if(old_color < 0 || old_color >= jp->cluster_map.n_colors)
+            return;
+    }
+    
+    if(new_color == old_color)
+        return;
+    
+    if(jp->cluster_map.opposite_order == FALSE){
+        /* we're using here less obvious code,
+        because _aulldvrm misses on nt4 */
+        cell = lcn / jp->cluster_map.clusters_per_cell;
+        if(cell >= jp->cluster_map.map_size)
+            return;
+        offset = lcn - cell * jp->cluster_map.clusters_per_cell;
+        while(cell < (jp->cluster_map.map_size - 1) && length){
+            n = min(length,jp->cluster_map.clusters_per_cell - offset);
+            jp->cluster_map.array[cell][new_color] += n;
+            if(new_color != MFT_ZONE_SPACE){
+                c = &jp->cluster_map.array[cell][old_color];
+                if(*c >= n) *c -= n; else *c = 0;
+            }
+            length -= n;
+            cell ++;
+            offset = 0;
+        }
+        if(length){
+            n = min(length,jp->cluster_map.clusters_per_last_cell - offset);
+            jp->cluster_map.array[cell][new_color] += n;
+            if(new_color != MFT_ZONE_SPACE){
+                c = &jp->cluster_map.array[cell][old_color];
+                if(*c >= n) *c -= n; else *c = 0;
+            }
+        }
+    } else {
+        /* clusters < cells */
+        cell = lcn * jp->cluster_map.cells_per_cluster;
+        ncells = length * jp->cluster_map.cells_per_cluster;
+        for(i = 0; i < ncells; i++){
+            if(new_color != MFT_ZONE_SPACE){
+                for(j = 0; j < jp->cluster_map.n_colors; j++)
+                    jp->cluster_map.array[cell + i][j] = 0;
+            }
+            jp->cluster_map.array[cell + i][new_color] = 1;
+        }
         /* colorize remaining cells as unused */
-		if(lcn + length == jp->v_info.total_clusters){
+        if(lcn + length == jp->v_info.total_clusters){
             cell += ncells;
-			ncells = (jp->cluster_map.cells_per_last_cluster - jp->cluster_map.cells_per_cluster);
+            ncells = (jp->cluster_map.cells_per_last_cluster - jp->cluster_map.cells_per_cluster);
             
             for(i = 0; i < ncells; i++){
                 for(j = 0; j < jp->cluster_map.n_colors; j++)
@@ -313,7 +313,7 @@ void colorize_map_region(udefrag_job_parameters *jp,
                 jp->cluster_map.array[cell + i][UNUSED_MAP_SPACE] = 1;
             }
         }
-	}
+    }
 }
 
 /**
@@ -322,26 +322,26 @@ void colorize_map_region(udefrag_job_parameters *jp,
  */
 int is_mft(winx_file_info *f,udefrag_job_parameters *jp)
 {
-	int length;
-	wchar_t mft_name[] = L"$Mft";
+    int length;
+    wchar_t mft_name[] = L"$Mft";
 
-	if(f == NULL || jp == NULL)
-		return 0;
-	
-	if(jp->fs_type != FS_NTFS)
-		return 0;
-	
-	if(f->path == NULL || f->name == NULL)
-		return 0;
-	
-	length = wcslen(f->path);
+    if(f == NULL || jp == NULL)
+        return 0;
+    
+    if(jp->fs_type != FS_NTFS)
+        return 0;
+    
+    if(f->path == NULL || f->name == NULL)
+        return 0;
+    
+    length = wcslen(f->path);
 
-	if(length == 11){
-		if(winx_wcsistr(f->name,mft_name))
-			return 1;
-	}
-	
-	return 0;
+    if(length == 11){
+        if(winx_wcsistr(f->name,mft_name))
+            return 1;
+    }
+    
+    return 0;
 }
 
 /**
@@ -349,31 +349,31 @@ int is_mft(winx_file_info *f,udefrag_job_parameters *jp)
  */
 int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
 {
-	/* show $MFT file in dark magenta color */
-	if(is_mft(f,jp))
-		return MFT_SPACE;
+    /* show $MFT file in dark magenta color */
+    if(is_mft(f,jp))
+        return MFT_SPACE;
 
-	/* show excluded files as not fragmented */
-	if(is_fragmented(f) && !is_excluded(f))
-		return is_over_limit(f) ? FRAGM_OVER_LIMIT_SPACE : FRAGM_SPACE;
+    /* show excluded files as not fragmented */
+    if(is_fragmented(f) && !is_excluded(f))
+        return is_over_limit(f) ? FRAGM_OVER_LIMIT_SPACE : FRAGM_SPACE;
 
-	if(is_directory(f)){
-		if(is_over_limit(f))
-			return DIR_OVER_LIMIT_SPACE;
-		else
-			return DIR_SPACE;
-	} else if(is_compressed(f)){
-		if(is_over_limit(f))
-			return COMPRESSED_OVER_LIMIT_SPACE;
-		else
-			return COMPRESSED_SPACE;
-	} else {
-		if(is_over_limit(f))
-			return UNFRAGM_OVER_LIMIT_SPACE;
-		else
-			return UNFRAGM_SPACE;
-	}
-	return UNFRAGM_SPACE; /* this point will never be reached */
+    if(is_directory(f)){
+        if(is_over_limit(f))
+            return DIR_OVER_LIMIT_SPACE;
+        else
+            return DIR_SPACE;
+    } else if(is_compressed(f)){
+        if(is_over_limit(f))
+            return COMPRESSED_OVER_LIMIT_SPACE;
+        else
+            return COMPRESSED_SPACE;
+    } else {
+        if(is_over_limit(f))
+            return UNFRAGM_OVER_LIMIT_SPACE;
+        else
+            return UNFRAGM_SPACE;
+    }
+    return UNFRAGM_SPACE; /* this point will never be reached */
 }
 
 /**
@@ -381,17 +381,17 @@ int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
  */
 void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color)
 {
-	winx_blockmap *block;
-	int new_color;
-	
-	if(jp == NULL || f == NULL)
-		return;
-	
-	new_color = get_file_color(jp,f);
-	for(block = f->disp.blockmap; block; block = block->next){
-		colorize_map_region(jp,block->lcn,block->length,new_color,old_color);
-		if(block->next == f->disp.blockmap) break;
-	}
+    winx_blockmap *block;
+    int new_color;
+    
+    if(jp == NULL || f == NULL)
+        return;
+    
+    new_color = get_file_color(jp,f);
+    for(block = f->disp.blockmap; block; block = block->next){
+        colorize_map_region(jp,block->lcn,block->length,new_color,old_color);
+        if(block->next == f->disp.blockmap) break;
+    }
 }
 
 /**
@@ -399,21 +399,21 @@ void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color)
  */
 void colorize_file_as_system(udefrag_job_parameters *jp, winx_file_info *f)
 {
-	winx_blockmap *block;
-	int new_color, old_color;
-	
-	if(jp == NULL || f == NULL)
-		return;
-	
-	/* never draw MFT in green */
-	if(is_mft(f,jp)) return;
-	
-	new_color = is_over_limit(f) ? SYSTEM_OVER_LIMIT_SPACE : SYSTEM_SPACE;
-	old_color = get_file_color(jp,f);
-	for(block = f->disp.blockmap; block; block = block->next){
-		colorize_map_region(jp,block->lcn,block->length,new_color,old_color);
-		if(block->next == f->disp.blockmap) break;
-	}
+    winx_blockmap *block;
+    int new_color, old_color;
+    
+    if(jp == NULL || f == NULL)
+        return;
+    
+    /* never draw MFT in green */
+    if(is_mft(f,jp)) return;
+    
+    new_color = is_over_limit(f) ? SYSTEM_OVER_LIMIT_SPACE : SYSTEM_SPACE;
+    old_color = get_file_color(jp,f);
+    for(block = f->disp.blockmap; block; block = block->next){
+        colorize_map_region(jp,block->lcn,block->length,new_color,old_color);
+        if(block->next == f->disp.blockmap) break;
+    }
 }
 
 /**
@@ -422,15 +422,15 @@ void colorize_file_as_system(udefrag_job_parameters *jp, winx_file_info *f)
  */
 void free_map(udefrag_job_parameters *jp)
 {
-	if(jp != NULL){
-		if(jp->pi.cluster_map)
-			winx_heap_free(jp->pi.cluster_map);
-		if(jp->cluster_map.array)
-			winx_heap_free(jp->cluster_map.array);
-		jp->pi.cluster_map = NULL;
-		jp->pi.cluster_map_size = 0;
-		memset(&jp->cluster_map,0,sizeof(cmap));
-	}
+    if(jp != NULL){
+        if(jp->pi.cluster_map)
+            winx_heap_free(jp->pi.cluster_map);
+        if(jp->cluster_map.array)
+            winx_heap_free(jp->cluster_map.array);
+        jp->pi.cluster_map = NULL;
+        jp->pi.cluster_map_size = 0;
+        memset(&jp->cluster_map,0,sizeof(cmap));
+    }
 }
 
 /** @} */

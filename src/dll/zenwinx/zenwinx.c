@@ -47,12 +47,12 @@ int initialization_failed = 1;
 #ifndef STATIC_LIB
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
-	if(dwReason == DLL_PROCESS_ATTACH){
-		winx_init_library(NULL);
-	} else if(dwReason == DLL_PROCESS_DETACH){
-		winx_unload_library();
-	}
-	return 1;
+    if(dwReason == DLL_PROCESS_ATTACH){
+        winx_init_library(NULL);
+    } else if(dwReason == DLL_PROCESS_DETACH){
+        winx_unload_library();
+    }
+    return 1;
 }
 #endif
 
@@ -107,24 +107,24 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
  */
 int winx_init_library(void *peb)
 {
-	PRTL_USER_PROCESS_PARAMETERS pp;
+    PRTL_USER_PROCESS_PARAMETERS pp;
 
-	/*  normalize and get the process parameters */
-	if(peb){
-		pp = RtlNormalizeProcessParams(((PPEB)peb)->ProcessParameters);
-		/* breakpoint if we were requested to do so */
-		if(pp){
-			if(pp->DebugFlags)
-				DbgBreakPoint();
-		}
-	}
+    /*  normalize and get the process parameters */
+    if(peb){
+        pp = RtlNormalizeProcessParams(((PPEB)peb)->ProcessParameters);
+        /* breakpoint if we were requested to do so */
+        if(pp){
+            if(pp->DebugFlags)
+                DbgBreakPoint();
+        }
+    }
 
-	if(winx_create_global_heap() < 0)
-		return (-1);
-	if(winx_init_synch_objects() < 0)
-		return (-1);
-	initialization_failed = 0;
-	return 0;
+    if(winx_create_global_heap() < 0)
+        return (-1);
+    if(winx_init_synch_objects() < 0)
+        return (-1);
+    initialization_failed = 0;
+    return 0;
 }
 
 /**
@@ -136,7 +136,7 @@ int winx_init_library(void *peb)
  */
 int winx_init_failed(void)
 {
-	return initialization_failed;
+    return initialization_failed;
 }
 
 /**
@@ -147,8 +147,8 @@ int winx_init_failed(void)
  */
 void winx_unload_library(void)
 {
-	winx_destroy_synch_objects();
-	winx_destroy_global_heap();
+    winx_destroy_synch_objects();
+    winx_destroy_global_heap();
 }
 
 /**
@@ -163,13 +163,13 @@ void winx_unload_library(void)
  */
 static void print_post_scriptum(char *msg,NTSTATUS Status)
 {
-	char buffer[256];
+    char buffer[256];
 
-	_snprintf(buffer,sizeof(buffer),"\n%s: %x: %s\n\n",
-		msg,(UINT)Status,winx_get_error_description(Status));
-	buffer[sizeof(buffer) - 1] = 0;
-	/* winx_printf cannot be used here */
-	winx_print(buffer);
+    _snprintf(buffer,sizeof(buffer),"\n%s: %x: %s\n\n",
+        msg,(UINT)Status,winx_get_error_description(Status));
+    buffer[sizeof(buffer) - 1] = 0;
+    /* winx_printf cannot be used here */
+    winx_print(buffer);
 }
 
 /**
@@ -180,15 +180,15 @@ static void print_post_scriptum(char *msg,NTSTATUS Status)
  */
 void winx_exit(int exit_code)
 {
-	NTSTATUS Status;
-	
-	kb_close();
-	flush_dbg_log(0);
-	winx_unload_library();
-	Status = NtTerminateProcess(NtCurrentProcess(),exit_code);
-	if(!NT_SUCCESS(Status)){
-		print_post_scriptum("winx_exit: cannot terminate process",Status);
-	}
+    NTSTATUS Status;
+    
+    kb_close();
+    flush_dbg_log(0);
+    winx_unload_library();
+    Status = NtTerminateProcess(NtCurrentProcess(),exit_code);
+    if(!NT_SUCCESS(Status)){
+        print_post_scriptum("winx_exit: cannot terminate process",Status);
+    }
 }
 
 /**
@@ -199,16 +199,16 @@ void winx_exit(int exit_code)
  */
 void winx_reboot(void)
 {
-	NTSTATUS Status;
-	
-	kb_close();
-	MarkWindowsBootAsSuccessful();
-	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	flush_dbg_log(0);
-	Status = NtShutdownSystem(ShutdownReboot);
-	if(!NT_SUCCESS(Status)){
-		print_post_scriptum("winx_reboot: cannot reboot the computer",Status);
-	}
+    NTSTATUS Status;
+    
+    kb_close();
+    MarkWindowsBootAsSuccessful();
+    (void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+    flush_dbg_log(0);
+    Status = NtShutdownSystem(ShutdownReboot);
+    if(!NT_SUCCESS(Status)){
+        print_post_scriptum("winx_reboot: cannot reboot the computer",Status);
+    }
 }
 
 /**
@@ -219,16 +219,16 @@ void winx_reboot(void)
  */
 void winx_shutdown(void)
 {
-	NTSTATUS Status;
-	
-	kb_close();
-	MarkWindowsBootAsSuccessful();
-	(void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
-	flush_dbg_log(0);
-	Status = NtShutdownSystem(ShutdownPowerOff);
-	if(!NT_SUCCESS(Status)){
-		print_post_scriptum("winx_shutdown: cannot shut down the computer",Status);
-	}
+    NTSTATUS Status;
+    
+    kb_close();
+    MarkWindowsBootAsSuccessful();
+    (void)winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);
+    flush_dbg_log(0);
+    Status = NtShutdownSystem(ShutdownPowerOff);
+    if(!NT_SUCCESS(Status)){
+        print_post_scriptum("winx_shutdown: cannot shut down the computer",Status);
+    }
 }
 
 /** @} */

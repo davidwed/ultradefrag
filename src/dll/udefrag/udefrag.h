@@ -49,13 +49,13 @@
 #define MAXFSNAME      32  /* I think, that's enough */
 
 typedef struct _volume_info {
-	char letter;
-	char fsname[MAXFSNAME];
-	wchar_t label[MAX_PATH + 1];
-	LARGE_INTEGER total_space;
-	LARGE_INTEGER free_space;
-	int is_removable;
-	int is_dirty;
+    char letter;
+    char fsname[MAXFSNAME];
+    wchar_t label[MAX_PATH + 1];
+    LARGE_INTEGER total_space;
+    LARGE_INTEGER free_space;
+    int is_removable;
+    int is_dirty;
 } volume_info;
 
 volume_info *udefrag_get_vollist(int skip_removable);
@@ -67,17 +67,17 @@ int udefrag_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length);
 ULONGLONG udefrag_hr_to_bytes(char *string);
 
 typedef enum {
-	ANALYSIS_JOB = 0,
-	DEFRAGMENTATION_JOB,
-	FULL_OPTIMIZATION_JOB,
-	QUICK_OPTIMIZATION_JOB,
-	MFT_OPTIMIZATION_JOB
+    ANALYSIS_JOB = 0,
+    DEFRAGMENTATION_JOB,
+    FULL_OPTIMIZATION_JOB,
+    QUICK_OPTIMIZATION_JOB,
+    MFT_OPTIMIZATION_JOB
 } udefrag_job_type;
 
 typedef enum {
-	VOLUME_ANALYSIS = 0,     /* should be zero */
-	VOLUME_DEFRAGMENTATION,
-	VOLUME_OPTIMIZATION
+    VOLUME_ANALYSIS = 0,     /* should be zero */
+    VOLUME_DEFRAGMENTATION,
+    VOLUME_OPTIMIZATION
 } udefrag_operation_type;
 
 /* flags triggering algorithm features */
@@ -93,51 +93,51 @@ typedef enum {
 */
 enum {
     UNUSED_MAP_SPACE = 0,        /* other colors have more precedence */
-	FREE_SPACE,                  /* has lowest precedence */
-	SYSTEM_SPACE,
-	SYSTEM_OVER_LIMIT_SPACE,
-	FRAGM_SPACE,
-	FRAGM_OVER_LIMIT_SPACE,
-	UNFRAGM_SPACE,
-	UNFRAGM_OVER_LIMIT_SPACE,
-	DIR_SPACE,
-	DIR_OVER_LIMIT_SPACE,
-	COMPRESSED_SPACE,
-	COMPRESSED_OVER_LIMIT_SPACE,
-	MFT_ZONE_SPACE,
-	MFT_SPACE,
-	TEMPORARY_SYSTEM_SPACE,      /* has highest precedence */
+    FREE_SPACE,                  /* has lowest precedence */
+    SYSTEM_SPACE,
+    SYSTEM_OVER_LIMIT_SPACE,
+    FRAGM_SPACE,
+    FRAGM_OVER_LIMIT_SPACE,
+    UNFRAGM_SPACE,
+    UNFRAGM_OVER_LIMIT_SPACE,
+    DIR_SPACE,
+    DIR_OVER_LIMIT_SPACE,
+    COMPRESSED_SPACE,
+    COMPRESSED_OVER_LIMIT_SPACE,
+    MFT_ZONE_SPACE,
+    MFT_SPACE,
+    TEMPORARY_SYSTEM_SPACE,      /* has highest precedence */
     NUM_OF_SPACE_STATES          /* this must always be the last */
 };
 
 #define UNKNOWN_SPACE FRAGM_SPACE
 
 typedef struct _udefrag_progress_info {
-	unsigned long files;              /* number of files */
-	unsigned long directories;        /* number of directories */
-	unsigned long compressed;         /* number of compressed files */
-	unsigned long fragmented;         /* number of fragmented files */
-	ULONGLONG fragments;              /* number of fragments */
-	ULONGLONG total_space;            /* volume size, in bytes */
-	ULONGLONG free_space;             /* free space amount, in bytes */
-	ULONGLONG mft_size;               /* mft size, in bytes */
-	udefrag_operation_type current_operation;  /* identifies currently running operation */
-	unsigned long pass_number;        /* the current volume optimizer pass */
-	ULONGLONG clusters_to_process;    /* number of clusters to process */
-	ULONGLONG processed_clusters;     /* number of already processed clusters */
-	double percentage;                /* used to deliver a job completion percentage to the caller */
-	int completion_status;            /* zero for running job, positive value for succeeded, negative for failed */
-	char *cluster_map;                /* pointer to the cluster map buffer */
-	int cluster_map_size;             /* size of the cluster map buffer, in bytes */
-	ULONGLONG moved_clusters;         /* number of moved clusters */
-	ULONGLONG total_moves;            /* number of moves by move_files_to_front/back functions */
+    unsigned long files;              /* number of files */
+    unsigned long directories;        /* number of directories */
+    unsigned long compressed;         /* number of compressed files */
+    unsigned long fragmented;         /* number of fragmented files */
+    ULONGLONG fragments;              /* number of fragments */
+    ULONGLONG total_space;            /* volume size, in bytes */
+    ULONGLONG free_space;             /* free space amount, in bytes */
+    ULONGLONG mft_size;               /* mft size, in bytes */
+    udefrag_operation_type current_operation;  /* identifies currently running operation */
+    unsigned long pass_number;        /* the current volume optimizer pass */
+    ULONGLONG clusters_to_process;    /* number of clusters to process */
+    ULONGLONG processed_clusters;     /* number of already processed clusters */
+    double percentage;                /* used to deliver a job completion percentage to the caller */
+    int completion_status;            /* zero for running job, positive value for succeeded, negative for failed */
+    char *cluster_map;                /* pointer to the cluster map buffer */
+    int cluster_map_size;             /* size of the cluster map buffer, in bytes */
+    ULONGLONG moved_clusters;         /* number of moved clusters */
+    ULONGLONG total_moves;            /* number of moves by move_files_to_front/back functions */
 } udefrag_progress_info;
 
 typedef void  (*udefrag_progress_callback)(udefrag_progress_info *pi, void *p);
 typedef int   (*udefrag_terminator)(void *p);
 
 int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
-	int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p);
+    int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p);
 
 char *udefrag_get_default_formatted_results(udefrag_progress_info *pi);
 void udefrag_release_default_formatted_results(char *results);

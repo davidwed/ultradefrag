@@ -6,7 +6,7 @@ echo Usage: mingw_patch.cmd {path to mingw installation}
 echo.
 
 if "%1" equ "" (
-	exit /B 0
+    exit /B 0
 )
 
 echo Preparing to patch applying...
@@ -14,7 +14,7 @@ pushd %~dp0
 
 :: save original version
 if not exist %1\lib\libntdll.a.orig (
-	move %1\lib\libntdll.a %1\lib\libntdll.a.orig
+    move %1\lib\libntdll.a %1\lib\libntdll.a.orig
 )
 
 :: generate more adequate version

@@ -40,32 +40,32 @@
  */
 void WgxDbgPrint(char *format, ...)
 {
-	char *buffer;
-	va_list arg;
-	int length;
-	
-	if(format == NULL)
-		return;
+    char *buffer;
+    va_list arg;
+    int length;
+    
+    if(format == NULL)
+        return;
 
-	buffer = malloc(DBG_BUFFER_SIZE);
-	if(buffer == NULL){
-		OutputDebugString("Cannot allocate memory for WgxDbgPrint!");
-		return;
-	}
+    buffer = malloc(DBG_BUFFER_SIZE);
+    if(buffer == NULL){
+        OutputDebugString("Cannot allocate memory for WgxDbgPrint!");
+        return;
+    }
 
-	/* store formatted string into buffer */
-	va_start(arg,format);
-	memset(buffer,0,DBG_BUFFER_SIZE);
-	length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
-	(void)length;
-	buffer[DBG_BUFFER_SIZE - 1] = 0;
-	va_end(arg);
+    /* store formatted string into buffer */
+    va_start(arg,format);
+    memset(buffer,0,DBG_BUFFER_SIZE);
+    length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
+    (void)length;
+    buffer[DBG_BUFFER_SIZE - 1] = 0;
+    va_end(arg);
 
-	/* send formatted string to the debugger */
-	OutputDebugString(buffer);
+    /* send formatted string to the debugger */
+    OutputDebugString(buffer);
 
-	/* cleanup */
-	free(buffer);
+    /* cleanup */
+    free(buffer);
 }
 
 /**
@@ -74,51 +74,51 @@ void WgxDbgPrint(char *format, ...)
  */
 void WgxDbgPrintLastError(char *format, ...)
 {
-	char *buffer;
-	va_list arg;
-	int length;
-	LPVOID msg;
-	DWORD error = GetLastError();
-	
-	if(format == NULL)
-		return;
+    char *buffer;
+    va_list arg;
+    int length;
+    LPVOID msg;
+    DWORD error = GetLastError();
+    
+    if(format == NULL)
+        return;
 
-	buffer = malloc(DBG_BUFFER_SIZE);
-	if(buffer == NULL){
-		OutputDebugString("Cannot allocate memory for WgxDbgPrintLastError!");
-		return;
-	}
+    buffer = malloc(DBG_BUFFER_SIZE);
+    if(buffer == NULL){
+        OutputDebugString("Cannot allocate memory for WgxDbgPrintLastError!");
+        return;
+    }
 
-	/* store formatted string into buffer */
-	va_start(arg,format);
-	memset(buffer,0,DBG_BUFFER_SIZE);
-	length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
-	(void)length;
-	buffer[DBG_BUFFER_SIZE - 1] = 0;
-	va_end(arg);
+    /* store formatted string into buffer */
+    va_start(arg,format);
+    memset(buffer,0,DBG_BUFFER_SIZE);
+    length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
+    (void)length;
+    buffer[DBG_BUFFER_SIZE - 1] = 0;
+    va_end(arg);
 
-	/* send formatted string to the debugger */
-	OutputDebugString(buffer);
-	OutputDebugString(": ");
-	
-	/* send last error description to the debugger */
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-	  FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-	  NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-	  (LPTSTR)&msg,0,NULL)){
-		if(error == ERROR_COMMITMENT_LIMIT)
-			(void)sprintf(buffer,"Not enough memory.");
-		else
-			(void)sprintf(buffer,"Error code = 0x%x",(UINT)error);
-		OutputDebugString(buffer);
-	} else {
-		OutputDebugString((LPCTSTR)msg);
-		LocalFree(msg);
-	}
-	
-	/* cleanup */
-	OutputDebugString("\n");
-	free(buffer);
+    /* send formatted string to the debugger */
+    OutputDebugString(buffer);
+    OutputDebugString(": ");
+    
+    /* send last error description to the debugger */
+    if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+      FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPTSTR)&msg,0,NULL)){
+        if(error == ERROR_COMMITMENT_LIMIT)
+            (void)sprintf(buffer,"Not enough memory.");
+        else
+            (void)sprintf(buffer,"Error code = 0x%x",(UINT)error);
+        OutputDebugString(buffer);
+    } else {
+        OutputDebugString((LPCTSTR)msg);
+        LocalFree(msg);
+    }
+    
+    /* cleanup */
+    OutputDebugString("\n");
+    free(buffer);
 }
 
 /**
@@ -132,61 +132,61 @@ void WgxDbgPrintLastError(char *format, ...)
  */
 int WgxDisplayLastError(HWND hParent,UINT msgbox_flags, char *format, ...)
 {
-	char *buffer;
-	va_list arg;
-	int length;
-	char b[32];
-	char *text;
-	LPVOID msg;
-	DWORD error = GetLastError();
-	int result;
-	
-	if(format == NULL)
-		return 0;
+    char *buffer;
+    va_list arg;
+    int length;
+    char b[32];
+    char *text;
+    LPVOID msg;
+    DWORD error = GetLastError();
+    int result;
+    
+    if(format == NULL)
+        return 0;
 
-	buffer = malloc(DBG_BUFFER_SIZE);
-	if(buffer == NULL){
-		OutputDebugString("Cannot allocate memory for WgxDisplayLastError!");
-		return 0;
-	}
+    buffer = malloc(DBG_BUFFER_SIZE);
+    if(buffer == NULL){
+        OutputDebugString("Cannot allocate memory for WgxDisplayLastError!");
+        return 0;
+    }
 
-	/* store formatted string into buffer */
-	va_start(arg,format);
-	memset(buffer,0,DBG_BUFFER_SIZE);
-	length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
-	(void)length;
-	buffer[DBG_BUFFER_SIZE - 1] = 0;
-	va_end(arg);
+    /* store formatted string into buffer */
+    va_start(arg,format);
+    memset(buffer,0,DBG_BUFFER_SIZE);
+    length = _vsnprintf(buffer,DBG_BUFFER_SIZE - 1,format,arg);
+    (void)length;
+    buffer[DBG_BUFFER_SIZE - 1] = 0;
+    va_end(arg);
 
-	/* send formatted string to the debugger */
-	OutputDebugString(buffer);
-	OutputDebugString(": ");
-	
-	/* send last error description to the debugger */
-	if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
-	  FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-	  NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-	  (LPTSTR)&msg,0,NULL)){
-		if(error == ERROR_COMMITMENT_LIMIT)
-			(void)_snprintf(b,sizeof(b),"Not enough memory.");
-		else
-			(void)_snprintf(b,sizeof(b),"Error code = 0x%x",(UINT)error);
-		b[sizeof(b) - 1] = 0;
-		msg = NULL;
-		text = b;
-	} else {
-		text = (char *)msg;
-	}
-	OutputDebugString(text);
-	OutputDebugString("\n");
+    /* send formatted string to the debugger */
+    OutputDebugString(buffer);
+    OutputDebugString(": ");
+    
+    /* send last error description to the debugger */
+    if(!FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER | 
+      FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+      NULL,error,MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+      (LPTSTR)&msg,0,NULL)){
+        if(error == ERROR_COMMITMENT_LIMIT)
+            (void)_snprintf(b,sizeof(b),"Not enough memory.");
+        else
+            (void)_snprintf(b,sizeof(b),"Error code = 0x%x",(UINT)error);
+        b[sizeof(b) - 1] = 0;
+        msg = NULL;
+        text = b;
+    } else {
+        text = (char *)msg;
+    }
+    OutputDebugString(text);
+    OutputDebugString("\n");
 
-	/* display message box */
-	result = MessageBox(hParent,text,buffer,msgbox_flags);
-	
-	/* cleanup */
-	if(msg) LocalFree(msg);
-	free(buffer);
-	return result;
+    /* display message box */
+    result = MessageBox(hParent,text,buffer,msgbox_flags);
+    
+    /* cleanup */
+    if(msg) LocalFree(msg);
+    free(buffer);
+    return result;
 }
 
 /** @} */

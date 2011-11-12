@@ -41,12 +41,12 @@ HANDLE hGlobalHeap = NULL;
  */
 void *winx_virtual_alloc(SIZE_T size)
 {
-	void *addr = NULL;
-	NTSTATUS Status;
+    void *addr = NULL;
+    NTSTATUS Status;
 
-	Status = NtAllocateVirtualMemory(NtCurrentProcess(),&addr,0,
-		&size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
-	return (NT_SUCCESS(Status)) ? addr : NULL;
+    Status = NtAllocateVirtualMemory(NtCurrentProcess(),&addr,0,
+        &size,MEM_COMMIT | MEM_RESERVE,PAGE_READWRITE);
+    return (NT_SUCCESS(Status)) ? addr : NULL;
 }
 
 /**
@@ -56,7 +56,7 @@ void *winx_virtual_alloc(SIZE_T size)
  */
 void winx_virtual_free(void *addr,SIZE_T size)
 {
-	(void)NtFreeVirtualMemory(NtCurrentProcess(),&addr,&size,MEM_RELEASE);
+    (void)NtFreeVirtualMemory(NtCurrentProcess(),&addr,&size,MEM_RELEASE);
 }
 
 /**
@@ -68,12 +68,12 @@ void winx_virtual_free(void *addr,SIZE_T size)
  */
 void *winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
 {
-	/*
-	* Avoid winx_dbg_xxx calls here
-	* to avoid recursion.
-	*/
-	if(hGlobalHeap == NULL) return NULL;
-	return RtlAllocateHeap(hGlobalHeap,flags,size); 
+    /*
+    * Avoid winx_dbg_xxx calls here
+    * to avoid recursion.
+    */
+    if(hGlobalHeap == NULL) return NULL;
+    return RtlAllocateHeap(hGlobalHeap,flags,size); 
 }
 
 /**
@@ -82,11 +82,11 @@ void *winx_heap_alloc_ex(SIZE_T size,SIZE_T flags)
  */
 void winx_heap_free(void *addr)
 {
-	/*
-	* Avoid winx_dbg_xxx calls here
-	* to avoid recursion.
-	*/
-	if(hGlobalHeap && addr) (void)RtlFreeHeap(hGlobalHeap,0,addr);
+    /*
+    * Avoid winx_dbg_xxx calls here
+    * to avoid recursion.
+    */
+    if(hGlobalHeap && addr) (void)RtlFreeHeap(hGlobalHeap,0,addr);
 }
 
 /**
@@ -96,18 +96,18 @@ void winx_heap_free(void *addr)
  */
 int winx_create_global_heap(void)
 {
-	/* create growable heap with initial size of 100 kb */
-	if(hGlobalHeap == NULL){
-		hGlobalHeap = RtlCreateHeap(HEAP_GROWABLE,NULL,0,100 * 1024,NULL,NULL);
-	}
-	if(hGlobalHeap == NULL){
-		/* DebugPrint cannot be used here */
-		winx_debug_print("Cannot create global memory heap!");
-		/* winx_printf cannot be used here */
-		winx_print("\nCannot create global memory heap!\n");
-		return (-1);
-	}
-	return 0;
+    /* create growable heap with initial size of 100 kb */
+    if(hGlobalHeap == NULL){
+        hGlobalHeap = RtlCreateHeap(HEAP_GROWABLE,NULL,0,100 * 1024,NULL,NULL);
+    }
+    if(hGlobalHeap == NULL){
+        /* DebugPrint cannot be used here */
+        winx_debug_print("Cannot create global memory heap!");
+        /* winx_printf cannot be used here */
+        winx_print("\nCannot create global memory heap!\n");
+        return (-1);
+    }
+    return 0;
 }
 
 /**
@@ -116,10 +116,10 @@ int winx_create_global_heap(void)
  */
 void winx_destroy_global_heap(void)
 {
-	if(hGlobalHeap){
-		(void)RtlDestroyHeap(hGlobalHeap);
-		hGlobalHeap = NULL;
-	}
+    if(hGlobalHeap){
+        (void)RtlDestroyHeap(hGlobalHeap);
+        hGlobalHeap = NULL;
+    }
 }
 
 /** @} */

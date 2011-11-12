@@ -31,10 +31,10 @@
 * Extremely important notes for the 64-bit compilation.
 *
 * 1. The following function prototype causes wrong compiled code:
-*    NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,BOOLEAN,BOOLEAN);
+*    NTSTATUS    NTAPI    NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,BOOLEAN,BOOLEAN);
 *
 *    Right prototype does not contain BOOLEAN keywords:
-*    NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,SIZE_T,SIZE_T);
+*    NTSTATUS    NTAPI    NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,SIZE_T,SIZE_T);
 *
 *    http://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=519510
 *
@@ -262,8 +262,8 @@ typedef struct _OBJECT_ATTRIBUTES {
 #define OBJ_OPENLINK         0x00000100
 #define OBJ_KERNEL_HANDLE    0x00000200
 #define OBJ_VALID_ATTRIBUTES (OBJ_KERNEL_HANDLE | OBJ_OPENLINK | \
-		OBJ_OPENIF | OBJ_CASE_INSENSITIVE | OBJ_EXCLUSIVE | \
-		OBJ_PERMANENT | OBJ_INHERIT)
+        OBJ_OPENIF | OBJ_CASE_INSENSITIVE | OBJ_EXCLUSIVE | \
+        OBJ_PERMANENT | OBJ_INHERIT)
 #define InitializeObjectAttributes(p,n,a,r,s) \
     do { \
         (p)->Length = sizeof(OBJECT_ATTRIBUTES); \
@@ -273,7 +273,7 @@ typedef struct _OBJECT_ATTRIBUTES {
         (p)->SecurityDescriptor = s; \
         (p)->SecurityQualityOfService = NULL; \
     } while (0)
-	
+    
 typedef struct _IO_STATUS_BLOCK {
     union {
         NTSTATUS Status;
@@ -291,10 +291,10 @@ typedef struct _IO_STATUS_BLOCK32 {
 #endif
 
 typedef VOID(*PIO_APC_ROUTINE) (
-				PVOID ApcContext,
-				PIO_STATUS_BLOCK IoStatusBlock,
-				ULONG Reserved
-			);
+                PVOID ApcContext,
+                PIO_STATUS_BLOCK IoStatusBlock,
+                ULONG Reserved
+            );
 
 /* additional nt structures */
 typedef struct _CURDIR
@@ -365,7 +365,7 @@ typedef enum _SYSTEM_INFORMATION_CLASS {
     SystemRangeStartInformation = 50,
     SystemVerifierInformation = 51,
     SystemAddVerifier = 52,
-    SystemSessionProcessesInformation	= 53,
+    SystemSessionProcessesInformation = 53,
     SystemInformationClassMax
 } SYSTEM_INFORMATION_CLASS, *PSYSTEM_INFORMATION_CLASS;
 
@@ -481,11 +481,11 @@ typedef struct _SYSTEM_PERFORMANCE_INFORMATION
 #endif
 
 typedef struct _FILE_FS_VOLUME_INFORMATION {
-	LARGE_INTEGER VolumeCreationTime;
-	ULONG VolumeSerialNumber;
-	ULONG VolumeLabelLength;
-	UCHAR Unknown;
-	WCHAR VolumeLabel[1];
+    LARGE_INTEGER VolumeCreationTime;
+    ULONG VolumeSerialNumber;
+    ULONG VolumeLabelLength;
+    UCHAR Unknown;
+    WCHAR VolumeLabel[1];
 } FILE_FS_VOLUME_INFORMATION, *PFILE_FS_VOLUME_INFORMATION;
 
 typedef struct _FILE_FS_DEVICE_INFORMATION {
@@ -887,10 +887,10 @@ typedef struct _FILE_FS_ATTRIBUTE_INFORMATION {
 } FILE_FS_ATTRIBUTE_INFORMATION, *PFILE_FS_ATTRIBUTE_INFORMATION;
 
 typedef struct _KBD_RECORD {
-	WORD	wVirtualScanCode;
-	DWORD	dwControlKeyState;
-	UCHAR	AsciiChar;
-	BOOL	bKeyDown;
+    WORD    wVirtualScanCode;
+    DWORD    dwControlKeyState;
+    UCHAR    AsciiChar;
+    BOOL    bKeyDown;
 } KBD_RECORD, *PKBD_RECORD;
 
 typedef LPOSVERSIONINFOW PRTL_OSVERSIONINFOW;
@@ -1115,10 +1115,10 @@ typedef struct _FILE_BOTH_DIRECTORY_INFORMATION {
     LARGE_INTEGER       LastWriteTime;
     LARGE_INTEGER       ChangeTime;
     LARGE_INTEGER       EndOfFile;
-	/*
-	* The next field may hold zero for 3.99 Gb files on FAT32
-	* volumes with 32k cluster size (tested on 32-bit XP SP1).
-	*/
+    /*
+    * The next field may hold zero for 3.99 Gb files on FAT32
+    * volumes with 32k cluster size (tested on 32-bit XP SP1).
+    */
     LARGE_INTEGER       AllocationSize;
     ULONG               FileAttributes;
     ULONG               FileNameLength;
@@ -1147,108 +1147,108 @@ typedef struct _TIME_FIELDS {
 typedef TIME_FIELDS *PTIME_FIELDS;
 
 /* native functions prototypes */
-NTSTATUS	NTAPI	NtAdjustPrivilegesToken(HANDLE,SIZE_T,PTOKEN_PRIVILEGES,SIZE_T,PTOKEN_PRIVILEGES,PDWORD);
-NTSTATUS	NTAPI	NtAllocateVirtualMemory(HANDLE,PVOID*,SIZE_T,SIZE_T *,SIZE_T,SIZE_T);
-NTSTATUS	NTAPI	NtCancelIoFile(HANDLE,PIO_STATUS_BLOCK);
-NTSTATUS	NTAPI	NtClearEvent(HANDLE);
-NTSTATUS	NTAPI	NtClose(HANDLE);
-NTSTATUS	NTAPI	NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,SIZE_T,SIZE_T);
-NTSTATUS	NTAPI	NtCreateFile(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,PIO_STATUS_BLOCK,PLARGE_INTEGER,SIZE_T,SIZE_T,SIZE_T,SIZE_T,PVOID,SIZE_T);
-NTSTATUS	NTAPI	NtCreateKey(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,SIZE_T,PUNICODE_STRING,SIZE_T,PULONG);
-NTSTATUS	NTAPI	NtCreateMutant(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,SIZE_T);
-NTSTATUS	NTAPI	NtDeleteFile(POBJECT_ATTRIBUTES);
-NTSTATUS	NTAPI	NtDelayExecution(SIZE_T,const LARGE_INTEGER*);
-NTSTATUS	NTAPI	NtDeviceIoControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,SIZE_T,PVOID,SIZE_T,PVOID,SIZE_T);
-NTSTATUS	NTAPI	NtDisplayString(PUNICODE_STRING); 
-NTSTATUS	NTAPI	NtFlushBuffersFile(HANDLE,PIO_STATUS_BLOCK);
-NTSTATUS	NTAPI	NtFlushKey(HANDLE KeyHandle);
-NTSTATUS	NTAPI	NtFreeVirtualMemory(HANDLE,PVOID*,SIZE_T *,SIZE_T);
-NTSTATUS	NTAPI	NtFsControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,SIZE_T,PVOID,SIZE_T,PVOID,SIZE_T);
-NTSTATUS	NTAPI	NtInitializeRegistry(SIZE_T);
-NTSTATUS	NTAPI	NtLoadDriver(PUNICODE_STRING);
-NTSTATUS	NTAPI	NtMapViewOfSection(HANDLE,HANDLE,PVOID*,SIZE_T,SIZE_T,const LARGE_INTEGER*,SIZE_T*,SECTION_INHERIT,SIZE_T,SIZE_T);
-NTSTATUS	NTAPI	NtOpenEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *);
-NTSTATUS	NTAPI	NtOpenKey(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES);
-NTSTATUS	NTAPI	NtOpenMutant(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES);
-NTSTATUS	NTAPI	NtOpenProcessToken(HANDLE,ACCESS_MASK,PHANDLE);
-NTSTATUS	NTAPI	NtOpenSection(HANDLE*,ACCESS_MASK,const OBJECT_ATTRIBUTES*);
-NTSTATUS	NTAPI	NtOpenSymbolicLinkObject(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES);
-NTSTATUS	NTAPI	NtQueryDirectoryFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,FILE_INFORMATION_CLASS,SIZE_T,PUNICODE_STRING,SIZE_T);
-NTSTATUS	NTAPI	NtQueryInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,SIZE_T,FILE_INFORMATION_CLASS);
-NTSTATUS	NTAPI	NtQueryInformationProcess(HANDLE,PROCESSINFOCLASS,PVOID,SIZE_T,PULONG);
-NTSTATUS	NTAPI	NtQueryPerformanceCounter(PLARGE_INTEGER,PLARGE_INTEGER);
-NTSTATUS	NTAPI	NtQuerySymbolicLinkObject(HANDLE,PUNICODE_STRING,PULONG);
-NTSTATUS	NTAPI	NtQuerySystemTime(PLARGE_INTEGER SystemTime);
-NTSTATUS	NTAPI	NtQueryValueKey(HANDLE,PUNICODE_STRING,KEY_VALUE_INFORMATION_CLASS,PVOID,SIZE_T,PULONG);
-NTSTATUS	NTAPI	NtQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,SIZE_T,FS_INFORMATION_CLASS);
-NTSTATUS	NTAPI	NtReadFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,PLARGE_INTEGER,PULONG);
-NTSTATUS	NTAPI	NtReleaseMutant(PHANDLE,SIZE_T *);
-NTSTATUS	NTAPI	NtSetEvent(HANDLE,PULONG);
-NTSTATUS	NTAPI	NtSetInformationProcess(HANDLE,PROCESS_INFORMATION_CLASS,PVOID,SIZE_T);
-NTSTATUS	NTAPI	NtSetSystemPowerState(POWER_ACTION SystemAction,SYSTEM_POWER_STATE MinSystemState,SIZE_T Flags);
-NTSTATUS	NTAPI	NtSetValueKey(HANDLE,PUNICODE_STRING,SIZE_T,SIZE_T,PVOID,SIZE_T);
-NTSTATUS	NTAPI	NtShutdownSystem(SHUTDOWN_ACTION);
-NTSTATUS	NTAPI	NtTerminateProcess(HANDLE,SIZE_T);
-NTSTATUS	NTAPI	NtWaitForSingleObject(HANDLE,SIZE_T,const LARGE_INTEGER*);
-NTSTATUS	NTAPI	NtWriteFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,PLARGE_INTEGER,PULONG);
-NTSTATUS	NTAPI	NtUnloadDriver(PUNICODE_STRING);
-NTSTATUS	NTAPI	NtUnmapViewOfSection(HANDLE,PVOID);
+NTSTATUS    NTAPI    NtAdjustPrivilegesToken(HANDLE,SIZE_T,PTOKEN_PRIVILEGES,SIZE_T,PTOKEN_PRIVILEGES,PDWORD);
+NTSTATUS    NTAPI    NtAllocateVirtualMemory(HANDLE,PVOID*,SIZE_T,SIZE_T *,SIZE_T,SIZE_T);
+NTSTATUS    NTAPI    NtCancelIoFile(HANDLE,PIO_STATUS_BLOCK);
+NTSTATUS    NTAPI    NtClearEvent(HANDLE);
+NTSTATUS    NTAPI    NtClose(HANDLE);
+NTSTATUS    NTAPI    NtCreateEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *,SIZE_T,SIZE_T);
+NTSTATUS    NTAPI    NtCreateFile(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,PIO_STATUS_BLOCK,PLARGE_INTEGER,SIZE_T,SIZE_T,SIZE_T,SIZE_T,PVOID,SIZE_T);
+NTSTATUS    NTAPI    NtCreateKey(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,SIZE_T,PUNICODE_STRING,SIZE_T,PULONG);
+NTSTATUS    NTAPI    NtCreateMutant(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES,SIZE_T);
+NTSTATUS    NTAPI    NtDeleteFile(POBJECT_ATTRIBUTES);
+NTSTATUS    NTAPI    NtDelayExecution(SIZE_T,const LARGE_INTEGER*);
+NTSTATUS    NTAPI    NtDeviceIoControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,SIZE_T,PVOID,SIZE_T,PVOID,SIZE_T);
+NTSTATUS    NTAPI    NtDisplayString(PUNICODE_STRING); 
+NTSTATUS    NTAPI    NtFlushBuffersFile(HANDLE,PIO_STATUS_BLOCK);
+NTSTATUS    NTAPI    NtFlushKey(HANDLE KeyHandle);
+NTSTATUS    NTAPI    NtFreeVirtualMemory(HANDLE,PVOID*,SIZE_T *,SIZE_T);
+NTSTATUS    NTAPI    NtFsControlFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,SIZE_T,PVOID,SIZE_T,PVOID,SIZE_T);
+NTSTATUS    NTAPI    NtInitializeRegistry(SIZE_T);
+NTSTATUS    NTAPI    NtLoadDriver(PUNICODE_STRING);
+NTSTATUS    NTAPI    NtMapViewOfSection(HANDLE,HANDLE,PVOID*,SIZE_T,SIZE_T,const LARGE_INTEGER*,SIZE_T*,SECTION_INHERIT,SIZE_T,SIZE_T);
+NTSTATUS    NTAPI    NtOpenEvent(PHANDLE,ACCESS_MASK,const OBJECT_ATTRIBUTES *);
+NTSTATUS    NTAPI    NtOpenKey(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES);
+NTSTATUS    NTAPI    NtOpenMutant(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES);
+NTSTATUS    NTAPI    NtOpenProcessToken(HANDLE,ACCESS_MASK,PHANDLE);
+NTSTATUS    NTAPI    NtOpenSection(HANDLE*,ACCESS_MASK,const OBJECT_ATTRIBUTES*);
+NTSTATUS    NTAPI    NtOpenSymbolicLinkObject(PHANDLE,ACCESS_MASK,POBJECT_ATTRIBUTES);
+NTSTATUS    NTAPI    NtQueryDirectoryFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,FILE_INFORMATION_CLASS,SIZE_T,PUNICODE_STRING,SIZE_T);
+NTSTATUS    NTAPI    NtQueryInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,SIZE_T,FILE_INFORMATION_CLASS);
+NTSTATUS    NTAPI    NtQueryInformationProcess(HANDLE,PROCESSINFOCLASS,PVOID,SIZE_T,PULONG);
+NTSTATUS    NTAPI    NtQueryPerformanceCounter(PLARGE_INTEGER,PLARGE_INTEGER);
+NTSTATUS    NTAPI    NtQuerySymbolicLinkObject(HANDLE,PUNICODE_STRING,PULONG);
+NTSTATUS    NTAPI    NtQuerySystemTime(PLARGE_INTEGER SystemTime);
+NTSTATUS    NTAPI    NtQueryValueKey(HANDLE,PUNICODE_STRING,KEY_VALUE_INFORMATION_CLASS,PVOID,SIZE_T,PULONG);
+NTSTATUS    NTAPI    NtQueryVolumeInformationFile(HANDLE,PIO_STATUS_BLOCK,PVOID,SIZE_T,FS_INFORMATION_CLASS);
+NTSTATUS    NTAPI    NtReadFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,PLARGE_INTEGER,PULONG);
+NTSTATUS    NTAPI    NtReleaseMutant(PHANDLE,SIZE_T *);
+NTSTATUS    NTAPI    NtSetEvent(HANDLE,PULONG);
+NTSTATUS    NTAPI    NtSetInformationProcess(HANDLE,PROCESS_INFORMATION_CLASS,PVOID,SIZE_T);
+NTSTATUS    NTAPI    NtSetSystemPowerState(POWER_ACTION SystemAction,SYSTEM_POWER_STATE MinSystemState,SIZE_T Flags);
+NTSTATUS    NTAPI    NtSetValueKey(HANDLE,PUNICODE_STRING,SIZE_T,SIZE_T,PVOID,SIZE_T);
+NTSTATUS    NTAPI    NtShutdownSystem(SHUTDOWN_ACTION);
+NTSTATUS    NTAPI    NtTerminateProcess(HANDLE,SIZE_T);
+NTSTATUS    NTAPI    NtWaitForSingleObject(HANDLE,SIZE_T,const LARGE_INTEGER*);
+NTSTATUS    NTAPI    NtWriteFile(HANDLE,HANDLE,PIO_APC_ROUTINE,PVOID,PIO_STATUS_BLOCK,PVOID,SIZE_T,PLARGE_INTEGER,PULONG);
+NTSTATUS    NTAPI    NtUnloadDriver(PUNICODE_STRING);
+NTSTATUS    NTAPI    NtUnmapViewOfSection(HANDLE,PVOID);
 
-NTSTATUS	NTAPI	RtlAdjustPrivilege(SIZE_T Id,SIZE_T Enable,SIZE_T ForCurrentThread,SIZE_T *WasEnabled);
-PVOID		NTAPI	RtlAllocateHeap(HANDLE,SIZE_T,SIZE_T);
-NTSTATUS	NTAPI	RtlAnsiStringToUnicodeString(PUNICODE_STRING,PANSI_STRING,SIZE_T);
-HANDLE		NTAPI	RtlCreateHeap(SIZE_T,PVOID,SIZE_T,SIZE_T,PVOID,PRTL_HEAP_DEFINITION);
-BOOLEAN		NTAPI	RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);
-NTSTATUS	NTAPI	RtlCreateUserThread(HANDLE,PSECURITY_DESCRIPTOR,SIZE_T,SIZE_T,SIZE_T,SIZE_T,PTHREAD_START_ROUTINE,PVOID,PHANDLE,PCLIENT_ID);
-HANDLE		NTAPI	RtlDestroyHeap(HANDLE);
-BOOLEAN     NTAPI	RtlDosPathNameToNtPathName_U(PCWSTR,PUNICODE_STRING,PCWSTR*,CURDIR*);
-/* VOID		NTAPI	RtlExitUserThread(NTSTATUS); - NEVER use this unreliable call! */
-VOID		NTAPI	RtlFreeAnsiString(PANSI_STRING);
-BOOLEAN		NTAPI	RtlFreeHeap(HANDLE,SIZE_T,PVOID);
-VOID		NTAPI	RtlFreeUnicodeString(PUNICODE_STRING);
-VOID		NTAPI	RtlInitAnsiString(PANSI_STRING,PCSZ);
-VOID		NTAPI	RtlInitUnicodeString(PUNICODE_STRING,PCWSTR);
+NTSTATUS    NTAPI    RtlAdjustPrivilege(SIZE_T Id,SIZE_T Enable,SIZE_T ForCurrentThread,SIZE_T *WasEnabled);
+PVOID       NTAPI    RtlAllocateHeap(HANDLE,SIZE_T,SIZE_T);
+NTSTATUS    NTAPI    RtlAnsiStringToUnicodeString(PUNICODE_STRING,PANSI_STRING,SIZE_T);
+HANDLE      NTAPI    RtlCreateHeap(SIZE_T,PVOID,SIZE_T,SIZE_T,PVOID,PRTL_HEAP_DEFINITION);
+BOOLEAN     NTAPI    RtlCreateUnicodeString(PUNICODE_STRING,LPCWSTR);
+NTSTATUS    NTAPI    RtlCreateUserThread(HANDLE,PSECURITY_DESCRIPTOR,SIZE_T,SIZE_T,SIZE_T,SIZE_T,PTHREAD_START_ROUTINE,PVOID,PHANDLE,PCLIENT_ID);
+HANDLE      NTAPI    RtlDestroyHeap(HANDLE);
+BOOLEAN     NTAPI    RtlDosPathNameToNtPathName_U(PCWSTR,PUNICODE_STRING,PCWSTR*,CURDIR*);
+/* VOID     NTAPI    RtlExitUserThread(NTSTATUS); - NEVER use this unreliable call! */
+VOID        NTAPI    RtlFreeAnsiString(PANSI_STRING);
+BOOLEAN     NTAPI    RtlFreeHeap(HANDLE,SIZE_T,PVOID);
+VOID        NTAPI    RtlFreeUnicodeString(PUNICODE_STRING);
+VOID        NTAPI    RtlInitAnsiString(PANSI_STRING,PCSZ);
+VOID        NTAPI    RtlInitUnicodeString(PUNICODE_STRING,PCWSTR);
 PRTL_USER_PROCESS_PARAMETERS NTAPI RtlNormalizeProcessParams(RTL_USER_PROCESS_PARAMETERS*);
-ULONG		NTAPI	RtlNtStatusToDosError(NTSTATUS);
-NTSTATUS	NTAPI	RtlQueryEnvironmentVariable_U(PWSTR,PUNICODE_STRING,PUNICODE_STRING);
-NTSTATUS	NTAPI	RtlSetEnvironmentVariable(PWSTR,PUNICODE_STRING,PUNICODE_STRING);
-NTSTATUS	NTAPI	RtlSystemTimeToLocalTime(const LARGE_INTEGER* SystemTime,PLARGE_INTEGER LocalTime);
-VOID		NTAPI	RtlTimeToTimeFields(PLARGE_INTEGER Time,PTIME_FIELDS TimeFields);
-NTSTATUS	NTAPI	RtlUnicodeStringToAnsiString(PANSI_STRING,PUNICODE_STRING,SIZE_T);
+ULONG       NTAPI    RtlNtStatusToDosError(NTSTATUS);
+NTSTATUS    NTAPI    RtlQueryEnvironmentVariable_U(PWSTR,PUNICODE_STRING,PUNICODE_STRING);
+NTSTATUS    NTAPI    RtlSetEnvironmentVariable(PWSTR,PUNICODE_STRING,PUNICODE_STRING);
+NTSTATUS    NTAPI    RtlSystemTimeToLocalTime(const LARGE_INTEGER* SystemTime,PLARGE_INTEGER LocalTime);
+VOID        NTAPI    RtlTimeToTimeFields(PLARGE_INTEGER Time,PTIME_FIELDS TimeFields);
+NTSTATUS    NTAPI    RtlUnicodeStringToAnsiString(PANSI_STRING,PUNICODE_STRING,SIZE_T);
 
-VOID		NTAPI	DbgBreakPoint(VOID);
-NTSTATUS	NTAPI	LdrGetDllHandle(SIZE_T,SIZE_T,const UNICODE_STRING*,HMODULE*);
-NTSTATUS	NTAPI	LdrGetProcedureAddress(PVOID,PANSI_STRING,SIZE_T,PVOID *);
-NTSTATUS	NTAPI	ZwQuerySystemInformation(IN SYSTEM_INFORMATION_CLASS,PVOID,SIZE_T,PULONG);
-NTSTATUS	NTAPI	ZwTerminateThread(HANDLE,NTSTATUS);
+VOID        NTAPI    DbgBreakPoint(VOID);
+NTSTATUS    NTAPI    LdrGetDllHandle(SIZE_T,SIZE_T,const UNICODE_STRING*,HMODULE*);
+NTSTATUS    NTAPI    LdrGetProcedureAddress(PVOID,PANSI_STRING,SIZE_T,PVOID *);
+NTSTATUS    NTAPI    ZwQuerySystemInformation(IN SYSTEM_INFORMATION_CLASS,PVOID,SIZE_T,PULONG);
+NTSTATUS    NTAPI    ZwTerminateThread(HANDLE,NTSTATUS);
 
 /*
 typedef enum _LATENCY_TIME {
-	LT_DONT_CARE,
-	LT_LOWEST_LATENCY
+    LT_DONT_CARE,
+    LT_LOWEST_LATENCY
 } LATENCY_TIME, *PLATENCY_TIME;
 
 typedef enum _SYSTEM_POWER_STATE {
-	PowerSystemUnspecified,
-	PowerSystemWorking,
-	PowerSystemSleeping1,
-	PowerSystemSleeping2,
-	PowerSystemSleeping3,
-	PowerSystemHibernate,
-	PowerSystemShutdown,
-	PowerSystemMaximum
+    PowerSystemUnspecified,
+    PowerSystemWorking,
+    PowerSystemSleeping1,
+    PowerSystemSleeping2,
+    PowerSystemSleeping3,
+    PowerSystemHibernate,
+    PowerSystemShutdown,
+    PowerSystemMaximum
 } SYSTEM_POWER_STATE, *PSYSTEM_POWER_STATE;
 #define POWER_SYSTEM_MAXIMUM PowerSystemMaximum
 
 typedef enum {
-	PowerActionNone,
-	PowerActionReserved,
-	PowerActionSleep,
-	PowerActionHibernate,
-	PowerActionShutdown,
-	PowerActionShutdownReset,
-	PowerActionShutdownOff,
-	PowerActionWarmEject
+    PowerActionNone,
+    PowerActionReserved,
+    PowerActionSleep,
+    PowerActionHibernate,
+    PowerActionShutdown,
+    PowerActionShutdownReset,
+    PowerActionShutdownOff,
+    PowerActionWarmEject
 } POWER_ACTION, *PPOWER_ACTION;
 */
 
@@ -1263,7 +1263,7 @@ typedef struct {
      LARGE_INTEGER     StartVcn; 
      LARGE_INTEGER     TargetLcn;
      ULONG             NumVcns; 
-     ULONG             Reserved1;	
+     ULONG             Reserved1;    
 } MOVEFILE_DESCRIPTOR, *PMOVEFILE_DESCRIPTOR;
 #else
 typedef struct {
@@ -1279,26 +1279,26 @@ typedef struct {
  * FSCTL_GET_RETRIEVAL_POINTERS
  */
 typedef struct {
-	ULONGLONG			Vcn;
-	ULONGLONG			Lcn;
+    ULONGLONG            Vcn;
+    ULONGLONG            Lcn;
 } MAPPING_PAIR, *PMAPPING_PAIR;
 
 /* This is the definition for the buffer that FSCTL_GET_RETRIEVAL_POINTERS
  * returns. It consists of a header followed by mapping pairs
  */
 typedef struct {
-	ULONG				NumberOfPairs;
-	ULONGLONG			StartVcn;
-	MAPPING_PAIR		Pair[1];
+    ULONG                NumberOfPairs;
+    ULONGLONG            StartVcn;
+    MAPPING_PAIR         Pair[1];
 } GET_RETRIEVAL_DESCRIPTOR, *PGET_RETRIEVAL_DESCRIPTOR;
 
 /* This is the definition of the buffer that FSCTL_GET_VOLUME_BITMAP
  * returns. It consists of a header followed by the actual bitmap data
  */
 typedef struct {
-	ULONGLONG			StartLcn;
-	ULONGLONG			ClustersToEndOfVol;
-	UCHAR				Map[1];
+    ULONGLONG            StartLcn;
+    ULONGLONG            ClustersToEndOfVol;
+    UCHAR                Map[1];
 } BITMAP_DESCRIPTOR, *PBITMAP_DESCRIPTOR; 
 
 #pragma pack(push, 1)
@@ -1329,17 +1329,17 @@ typedef struct _NTFS_DATA {
 #endif
 
 #ifndef STATUS_BUFFER_OVERFLOW
-#define STATUS_BUFFER_OVERFLOW	((NTSTATUS)0x80000005)
+#define STATUS_BUFFER_OVERFLOW    ((NTSTATUS)0x80000005)
 #endif
 
 /* Based on http://www.osronline.com/showthread.cfm?link=185567 */
 typedef struct {
-	DWORD	dwSize;              /* the size of the structure, in bytes; 12 on NT 5.1, 32 on NT 6.1 */
-	DWORD	NtProductType;       /* NtProductWinNt, NtProductLanManNt, NtProductServer */
-	UCHAR	RecoveryFlag;        /* Defines whether "Time to display recovery options when needed" is checked or not. */
-	UCHAR	RecoveryMenuTimeout; /* Timeout, in seconds, of the recovery menu. */
-	UCHAR	BootSuccessFlag;     /* Set to 1 on successful boot. */
-	UCHAR	OrderlyShutdownFlag; /* Set to 1 on orderly shutdown. */
+    DWORD dwSize;              /* the size of the structure, in bytes; 12 on NT 5.1, 32 on NT 6.1 */
+    DWORD NtProductType;       /* NtProductWinNt, NtProductLanManNt, NtProductServer */
+    UCHAR RecoveryFlag;        /* Defines whether "Time to display recovery options when needed" is checked or not. */
+    UCHAR RecoveryMenuTimeout; /* Timeout, in seconds, of the recovery menu. */
+    UCHAR BootSuccessFlag;     /* Set to 1 on successful boot. */
+    UCHAR OrderlyShutdownFlag; /* Set to 1 on orderly shutdown. */
 } BOOT_STATUS_DATA, *PBOOT_STATUS_DATA;
 
 #endif /* _NTNDK_H_ */

@@ -8,6 +8,6 @@ rc = { "defrag_native.rc" }
 
 libs = { "ntdll" }
 adlibs = { 
-	"$(UDEFRAG_LIB_PATH)\\zenwinx",
-	"$(UDEFRAG_LIB_PATH)\\udefrag"
+    "$(UDEFRAG_LIB_PATH)\\zenwinx",
+    "$(UDEFRAG_LIB_PATH)\\udefrag"
 }

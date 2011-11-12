@@ -38,15 +38,15 @@
  */
 int winx_enable_privilege(unsigned long luid)
 {
-	NTSTATUS Status;
-	SIZE_T WasEnabled; /* boolean value receiving a previous state */
-	
-	Status = RtlAdjustPrivilege((SIZE_T)luid, TRUE, FALSE, &WasEnabled);
-	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"winx_enable_privilege: cannot enable privilege %x",(UINT)luid);
-		return (-1);
-	}
-	return 0;
+    NTSTATUS Status;
+    SIZE_T WasEnabled; /* boolean value receiving a previous state */
+    
+    Status = RtlAdjustPrivilege((SIZE_T)luid, TRUE, FALSE, &WasEnabled);
+    if(!NT_SUCCESS(Status)){
+        DebugPrintEx(Status,"winx_enable_privilege: cannot enable privilege %x",(UINT)luid);
+        return (-1);
+    }
+    return 0;
 }
 
 /** @} */

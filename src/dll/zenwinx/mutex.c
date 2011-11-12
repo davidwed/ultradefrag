@@ -39,26 +39,26 @@
  */
 int winx_create_mutex(short *name,HANDLE *phandle)
 {
-	UNICODE_STRING us;
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES oa;
+    UNICODE_STRING us;
+    NTSTATUS Status;
+    OBJECT_ATTRIBUTES oa;
 
-	DbgCheck2(name,phandle,"winx_create_mutex",-1);
-	*phandle = NULL;
+    DbgCheck2(name,phandle,"winx_create_mutex",-1);
+    *phandle = NULL;
 
-	RtlInitUnicodeString(&us,name);
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	Status = NtCreateMutant(phandle,MUTEX_ALL_ACCESS,&oa,0/*FALSE*/);
-	if(Status == STATUS_OBJECT_NAME_COLLISION){
-		DebugPrint("winx_create_mutex: %ws already exists",name);
-		Status = NtOpenMutant(phandle,MUTEX_ALL_ACCESS,&oa);
-	}
-	if(!NT_SUCCESS(Status)){
-		*phandle = NULL;
-		DebugPrintEx(Status,"cannot create/open %ws mutex",name);
-		return (-1);
-	}
-	return 0;
+    RtlInitUnicodeString(&us,name);
+    InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+    Status = NtCreateMutant(phandle,MUTEX_ALL_ACCESS,&oa,0/*FALSE*/);
+    if(Status == STATUS_OBJECT_NAME_COLLISION){
+        DebugPrint("winx_create_mutex: %ws already exists",name);
+        Status = NtOpenMutant(phandle,MUTEX_ALL_ACCESS,&oa);
+    }
+    if(!NT_SUCCESS(Status)){
+        *phandle = NULL;
+        DebugPrintEx(Status,"cannot create/open %ws mutex",name);
+        return (-1);
+    }
+    return 0;
 }
 
 /**
@@ -74,22 +74,22 @@ int winx_create_mutex(short *name,HANDLE *phandle)
  */
 int winx_open_mutex(short *name,HANDLE *phandle)
 {
-	UNICODE_STRING us;
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES oa;
+    UNICODE_STRING us;
+    NTSTATUS Status;
+    OBJECT_ATTRIBUTES oa;
 
-	DbgCheck2(name,phandle,"winx_open_mutex",-1);
-	*phandle = NULL;
+    DbgCheck2(name,phandle,"winx_open_mutex",-1);
+    *phandle = NULL;
 
-	RtlInitUnicodeString(&us,name);
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	Status = NtOpenMutant(phandle,MUTEX_ALL_ACCESS,&oa);
-	if(!NT_SUCCESS(Status)){
-		*phandle = NULL;
-		DebugPrintEx(Status,"cannot open %ws mutex",name);
-		return (-1);
-	}
-	return 0;
+    RtlInitUnicodeString(&us,name);
+    InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+    Status = NtOpenMutant(phandle,MUTEX_ALL_ACCESS,&oa);
+    if(!NT_SUCCESS(Status)){
+        *phandle = NULL;
+        DebugPrintEx(Status,"cannot open %ws mutex",name);
+        return (-1);
+    }
+    return 0;
 }
 
 /**
@@ -100,16 +100,16 @@ int winx_open_mutex(short *name,HANDLE *phandle)
  */
 int winx_release_mutex(HANDLE h)
 {
-	NTSTATUS Status;
-	
-	DbgCheck1(h,"winx_release_mutex",-1);
-	
-	Status = NtReleaseMutant(h,NULL);
-	if(!NT_SUCCESS(Status)){
-		DebugPrintEx(Status,"cannot release mutex");
-		return (-1);
-	}
-	return 0;
+    NTSTATUS Status;
+    
+    DbgCheck1(h,"winx_release_mutex",-1);
+    
+    Status = NtReleaseMutant(h,NULL);
+    if(!NT_SUCCESS(Status)){
+        DebugPrintEx(Status,"cannot release mutex");
+        return (-1);
+    }
+    return 0;
 }
 
 /**
@@ -121,7 +121,7 @@ int winx_release_mutex(HANDLE h)
  */
 void winx_destroy_mutex(HANDLE h)
 {
-	if(h) NtClose(h);
+    if(h) NtClose(h);
 }
 
 /** @} */

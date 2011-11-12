@@ -35,12 +35,12 @@
 #define MAX_GA_REQUEST_LENGTH 1024
 
 typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
-	/* LPUNKNOWN */ void *lpUnkcaller,
-	LPCSTR szURL,
-	LPTSTR szFileName,
-	DWORD cchFileName,
-	DWORD dwReserved,
-	/*IBindStatusCallback*/ void *pBSC
+    /* LPUNKNOWN */ void *lpUnkcaller,
+    LPCSTR szURL,
+    LPTSTR szFileName,
+    DWORD cchFileName,
+    DWORD dwReserved,
+    /*IBindStatusCallback*/ void *pBSC
 );
 
 /* forward declaration */
@@ -53,53 +53,53 @@ DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter);
  */
 static BOOL SendWebAnalyticsRequest(char *url)
 {
-	URLMON_PROCEDURE pURLDownloadToCacheFile;
-	HMODULE hUrlmonDLL = NULL;
-	HRESULT result;
-	char path[MAX_PATH + 1] = {0};
-	
-	if(url == NULL){
-		WgxDbgPrint("SendWebAnalyticsRequest: URL = NULL\n");
-		goto fail;
-	}
-	
-	WgxDbgPrint("SendWebAnalyticsRequest: URL = %s\n",url);
-	
-	/* load urlmon.dll library */
-	hUrlmonDLL = LoadLibrary("urlmon.dll");
-	if(hUrlmonDLL == NULL){
-		WgxDbgPrintLastError("SendWebAnalyticsRequest: LoadLibrary(urlmon.dll) failed");
-		goto fail;
-	}
-	
-	/* get an address of procedure downloading a file */
-	pURLDownloadToCacheFile = (URLMON_PROCEDURE)GetProcAddress(hUrlmonDLL,"URLDownloadToCacheFileA");
-	if(pURLDownloadToCacheFile == NULL){
-		WgxDbgPrintLastError("SendWebAnalyticsRequest: URLDownloadToCacheFile not found in urlmon.dll");
-		goto fail;
-	}
-	
-	/* download a file */
-	result = pURLDownloadToCacheFile(NULL,url,path,MAX_PATH,0,NULL);
-	path[MAX_PATH] = 0;
-	if(result != S_OK){
-		if(result == E_OUTOFMEMORY)
-			WgxDbgPrint("SendWebAnalyticsRequest: not enough memory\n");
-		else
-			WgxDbgPrint("SendWebAnalyticsRequest: URLDownloadToCacheFile failed\n");
-		goto fail;
-	}
-	
-	/* remove cached data, otherwise it may not be loaded next time */
-	if (path[0] != 0) (void)remove(path);
-	
-	/* free previously allocated url */
-	free(url);
-	return TRUE;
-	
+    URLMON_PROCEDURE pURLDownloadToCacheFile;
+    HMODULE hUrlmonDLL = NULL;
+    HRESULT result;
+    char path[MAX_PATH + 1] = {0};
+    
+    if(url == NULL){
+        WgxDbgPrint("SendWebAnalyticsRequest: URL = NULL\n");
+        goto fail;
+    }
+    
+    WgxDbgPrint("SendWebAnalyticsRequest: URL = %s\n",url);
+    
+    /* load urlmon.dll library */
+    hUrlmonDLL = LoadLibrary("urlmon.dll");
+    if(hUrlmonDLL == NULL){
+        WgxDbgPrintLastError("SendWebAnalyticsRequest: LoadLibrary(urlmon.dll) failed");
+        goto fail;
+    }
+    
+    /* get an address of procedure downloading a file */
+    pURLDownloadToCacheFile = (URLMON_PROCEDURE)GetProcAddress(hUrlmonDLL,"URLDownloadToCacheFileA");
+    if(pURLDownloadToCacheFile == NULL){
+        WgxDbgPrintLastError("SendWebAnalyticsRequest: URLDownloadToCacheFile not found in urlmon.dll");
+        goto fail;
+    }
+    
+    /* download a file */
+    result = pURLDownloadToCacheFile(NULL,url,path,MAX_PATH,0,NULL);
+    path[MAX_PATH] = 0;
+    if(result != S_OK){
+        if(result == E_OUTOFMEMORY)
+            WgxDbgPrint("SendWebAnalyticsRequest: not enough memory\n");
+        else
+            WgxDbgPrint("SendWebAnalyticsRequest: URLDownloadToCacheFile failed\n");
+        goto fail;
+    }
+    
+    /* remove cached data, otherwise it may not be loaded next time */
+    if (path[0] != 0) (void)remove(path);
+    
+    /* free previously allocated url */
+    free(url);
+    return TRUE;
+    
 fail:
-	free(url);
-	return FALSE;
+    free(url);
+    return FALSE;
 }
 
 /**
@@ -107,8 +107,8 @@ fail:
  */
 DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter)
 {
-	(void)SendWebAnalyticsRequest((char *)lpParameter);
-	return 0;
+    (void)SendWebAnalyticsRequest((char *)lpParameter);
+    return 0;
 }
 
 /**
@@ -118,38 +118,38 @@ DWORD WINAPI SendWebAnalyticsRequestThreadProc(LPVOID lpParameter)
  */
 static char *build_ga_request(char *hostname,char *path,char *account)
 {
-	int utmn, utmhid, cookie, random;
-	__int64 today;
-	char *ga_request;
-	
-	ga_request = malloc(MAX_GA_REQUEST_LENGTH);
-	if(ga_request == NULL){
-		WgxDbgPrint("build_ga_request: cannot allocate %u bytes of memory\n",
-			MAX_GA_REQUEST_LENGTH);
-		return NULL;
-	}
-	
-	srand((unsigned int)time(NULL));
-	utmn = (rand() << 16) + rand();
-	utmhid = (rand() << 16) + rand();
-	cookie = (rand() << 16) + rand();
-	random = (rand() << 16) + rand();
-	today = (__int64)time(NULL);
-	
-	(void)_snprintf(ga_request,MAX_GA_REQUEST_LENGTH,
-		"http://www.google-analytics.com/__utm.gif?utmwv=4.6.5"
-		"&utmn=%u"
-		"&utmhn=%s"
-		"&utmhid=%u"
-		"&utmr=-"
-		"&utmp=%s"
-		"&utmac=%s"
-		"&utmcc=__utma%%3D%u.%u.%I64u.%I64u.%I64u.50%%3B%%2B__utmz%%3D%u.%I64u.27.2.utmcsr%%3Dgoogle.com%%7Cutmccn%%3D(referral)%%7Cutmcmd%%3Dreferral%%7Cutmcct%%3D%%2F%3B",
-		utmn,hostname,utmhid,path,account,
-		cookie,random,today,today,today,cookie,today
-		);
-	ga_request[MAX_GA_REQUEST_LENGTH - 1] = 0;
-	return ga_request;
+    int utmn, utmhid, cookie, random;
+    __int64 today;
+    char *ga_request;
+    
+    ga_request = malloc(MAX_GA_REQUEST_LENGTH);
+    if(ga_request == NULL){
+        WgxDbgPrint("build_ga_request: cannot allocate %u bytes of memory\n",
+            MAX_GA_REQUEST_LENGTH);
+        return NULL;
+    }
+    
+    srand((unsigned int)time(NULL));
+    utmn = (rand() << 16) + rand();
+    utmhid = (rand() << 16) + rand();
+    cookie = (rand() << 16) + rand();
+    random = (rand() << 16) + rand();
+    today = (__int64)time(NULL);
+    
+    (void)_snprintf(ga_request,MAX_GA_REQUEST_LENGTH,
+        "http://www.google-analytics.com/__utm.gif?utmwv=4.6.5"
+        "&utmn=%u"
+        "&utmhn=%s"
+        "&utmhid=%u"
+        "&utmr=-"
+        "&utmp=%s"
+        "&utmac=%s"
+        "&utmcc=__utma%%3D%u.%u.%I64u.%I64u.%I64u.50%%3B%%2B__utmz%%3D%u.%I64u.27.2.utmcsr%%3Dgoogle.com%%7Cutmccn%%3D(referral)%%7Cutmcmd%%3Dreferral%%7Cutmcct%%3D%%2F%3B",
+        utmn,hostname,utmhid,path,account,
+        cookie,random,today,today,today,cookie,today
+        );
+    ga_request[MAX_GA_REQUEST_LENGTH - 1] = 0;
+    return ga_request;
 }
 
 /**
@@ -197,13 +197,13 @@ static char *build_ga_request(char *hostname,char *path,char *account)
  */
 BOOL IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account)
 {
-	char *url;
-	
-	url = build_ga_request(hostname,path,account);
-	if(url == NULL)
-		return FALSE;
-	
-	return SendWebAnalyticsRequest(url);
+    char *url;
+    
+    url = build_ga_request(hostname,path,account);
+    if(url == NULL)
+        return FALSE;
+    
+    return SendWebAnalyticsRequest(url);
 }
 
 /**
@@ -218,22 +218,22 @@ BOOL IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account)
  */
 void IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account)
 {
-	char *url;
-	HANDLE h;
-	DWORD id;
-	
-	url = build_ga_request(hostname,path,account);
-	if(url == NULL)
-		return;
-	
-	h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)SendWebAnalyticsRequestThreadProc,(void *)url,0,&id);
-	if(h == NULL){
-		WgxDbgPrintLastError("SendWebAnalyticsRequestAsynch: cannot create thread");
-		free(url);
-		return;
-	}
-	
-	CloseHandle(h);
+    char *url;
+    HANDLE h;
+    DWORD id;
+    
+    url = build_ga_request(hostname,path,account);
+    if(url == NULL)
+        return;
+    
+    h = CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)SendWebAnalyticsRequestThreadProc,(void *)url,0,&id);
+    if(h == NULL){
+        WgxDbgPrintLastError("SendWebAnalyticsRequestAsynch: cannot create thread");
+        free(url);
+        return;
+    }
+    
+    CloseHandle(h);
 }
 
 /** @} */

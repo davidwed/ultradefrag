@@ -115,22 +115,22 @@
 */
 
 typedef struct _udefrag_map {
-	HBITMAP hbitmap;      /* bitmap used to draw map on */
-	HDC hdc;              /* device context of the bitmap */
-	int width;            /* width of the map, in pixels */
-	int height;           /* height of the map, in pixels */
-	char *buffer;         /* internal map representation */
-	int size;             /* size of internal representation, in bytes */
-	char *scaled_buffer;  /* scaled map representation */
-	int scaled_size;      /* size of scaled representation, in bytes */
+    HBITMAP hbitmap;      /* bitmap used to draw map on */
+    HDC hdc;              /* device context of the bitmap */
+    int width;            /* width of the map, in pixels */
+    int height;           /* height of the map, in pixels */
+    char *buffer;         /* internal map representation */
+    int size;             /* size of internal representation, in bytes */
+    char *scaled_buffer;  /* scaled map representation */
+    int scaled_size;      /* size of scaled representation, in bytes */
 } udefrag_map;
 
 typedef struct _volume_processing_job {
-	char volume_letter;
-	udefrag_job_type job_type;
-	int termination_flag;
-	udefrag_progress_info pi;
-	udefrag_map map;
+    char volume_letter;
+    udefrag_job_type job_type;
+    int termination_flag;
+    udefrag_progress_info pi;
+    udefrag_map map;
 } volume_processing_job;
 
 /* a type of the job being never executed */
@@ -282,7 +282,7 @@ extern int repeat_action;
 */
 
 #define create_thread(func,param,ph) \
-		CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)
+        CreateThread(NULL,0,(LPTHREAD_START_ROUTINE)func,(void *)param,0,ph)
 
 #define UNDEFINED_COORD (-10000)
 

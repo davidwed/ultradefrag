@@ -55,10 +55,10 @@ int printf_stub(const char *format,...);
 #define MAX_LONG_PATH 32767
 
 typedef struct _object_path {
-	struct _object_path *next;
-	struct _object_path *prev;
-	wchar_t path[MAX_LONG_PATH + 1];
-	int processed;
+    struct _object_path *next;
+    struct _object_path *prev;
+    wchar_t path[MAX_LONG_PATH + 1];
+    int processed;
 } object_path;
 
 extern HANDLE hStdOut;

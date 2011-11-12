@@ -9,7 +9,7 @@
 Hibernate for Windows is a part of UltraDefrag project. Visit our website
 for more details: 
 
-	http://ultradefrag.sourceforge.net/
+    http://ultradefrag.sourceforge.net/
 
 To hibernate your PC type 'hibernate now'.
 Enjoy!

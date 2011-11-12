@@ -41,29 +41,29 @@
  */
 int winx_create_event(short *name,int type,HANDLE *phandle)
 {
-	UNICODE_STRING us;
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES oa;
+    UNICODE_STRING us;
+    NTSTATUS Status;
+    OBJECT_ATTRIBUTES oa;
 
-	DbgCheck3(name,(type == SynchronizationEvent) || (type == NotificationEvent),
-		phandle,"winx_create_event",-1);
-	*phandle = NULL;
+    DbgCheck3(name,(type == SynchronizationEvent) || (type == NotificationEvent),
+        phandle,"winx_create_event",-1);
+    *phandle = NULL;
 
-	RtlInitUnicodeString(&us,name);
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,&oa,type,1/*TRUE*/);
-	if(Status == STATUS_OBJECT_NAME_COLLISION){
-		*phandle = NULL;
-		DebugPrint("winx_create_event: %ws already exists",name);
-		/* useful for allowing a single instance of the program */
-		return (int)STATUS_OBJECT_NAME_COLLISION;
-	}
-	if(!NT_SUCCESS(Status)){
-		*phandle = NULL;
-		DebugPrintEx(Status,"cannot create %ws event",name);
-		return (-1);
-	}
-	return 0;
+    RtlInitUnicodeString(&us,name);
+    InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+    Status = NtCreateEvent(phandle,STANDARD_RIGHTS_ALL | 0x1ff,&oa,type,1/*TRUE*/);
+    if(Status == STATUS_OBJECT_NAME_COLLISION){
+        *phandle = NULL;
+        DebugPrint("winx_create_event: %ws already exists",name);
+        /* useful for allowing a single instance of the program */
+        return (int)STATUS_OBJECT_NAME_COLLISION;
+    }
+    if(!NT_SUCCESS(Status)){
+        *phandle = NULL;
+        DebugPrintEx(Status,"cannot create %ws event",name);
+        return (-1);
+    }
+    return 0;
 }
 
 /**
@@ -76,22 +76,22 @@ int winx_create_event(short *name,int type,HANDLE *phandle)
  */
 int winx_open_event(short *name,int flags,HANDLE *phandle)
 {
-	UNICODE_STRING us;
-	NTSTATUS Status;
-	OBJECT_ATTRIBUTES oa;
+    UNICODE_STRING us;
+    NTSTATUS Status;
+    OBJECT_ATTRIBUTES oa;
 
-	DbgCheck2(name,phandle,"winx_open_event",-1);
-	*phandle = NULL;
+    DbgCheck2(name,phandle,"winx_open_event",-1);
+    *phandle = NULL;
 
-	RtlInitUnicodeString(&us,name);
-	InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
-	Status = NtOpenEvent(phandle,flags,&oa);
-	if(!NT_SUCCESS(Status)){
-		*phandle = NULL;
-		DebugPrintEx(Status,"cannot open %ws event",name);
-		return (-1);
-	}
-	return 0;
+    RtlInitUnicodeString(&us,name);
+    InitializeObjectAttributes(&oa,&us,0,NULL,NULL);
+    Status = NtOpenEvent(phandle,flags,&oa);
+    if(!NT_SUCCESS(Status)){
+        *phandle = NULL;
+        DebugPrintEx(Status,"cannot open %ws event",name);
+        return (-1);
+    }
+    return 0;
 }
 
 /**
@@ -101,7 +101,7 @@ int winx_open_event(short *name,int flags,HANDLE *phandle)
  */
 void winx_destroy_event(HANDLE h)
 {
-	if(h) NtClose(h);
+    if(h) NtClose(h);
 }
 
 /** @} */

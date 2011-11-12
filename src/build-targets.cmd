@@ -80,8 +80,8 @@ copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
 
 :: let's build all modules by selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
-	echo No parameters specified, using defaults.
-	goto mingw_build
+    echo No parameters specified, using defaults.
+    goto mingw_build
 )
 
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK%  goto ddk_build
@@ -93,179 +93,179 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 
 :ddk_build
 
-	set BUILD_ENV=winddk
-	set OLD_PATH=%path%
+    set BUILD_ENV=winddk
+    set OLD_PATH=%path%
 
-	:: check if we are using WDK 6 and above
-	for /d %%D in ( "%WINDDKBASE%" ) do set UD_DDK_NAME=%%~nD
-	set UD_DDK_VER=%UD_DDK_NAME:~0,4%
-	set UD_DDK_NAME=
-	echo UD_DDK_VER set to "%UD_DDK_VER%"... 
+    :: check if we are using WDK 6 and above
+    for /d %%D in ( "%WINDDKBASE%" ) do set UD_DDK_NAME=%%~nD
+    set UD_DDK_VER=%UD_DDK_NAME:~0,4%
+    set UD_DDK_NAME=
+    echo UD_DDK_VER set to "%UD_DDK_VER%"... 
 
-	rem workaround for WDK 6 and above
-	if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=1
+    rem workaround for WDK 6 and above
+    if %UD_DDK_VER% NEQ 3790 set IGNORE_LINKLIB_ABUSE=1
 
-	:: disable __ftol2_see error for WDK 6 and above
-	:: TODO cast (float) to (__int64) to (long)
-	:: if %UD_DDK_VER% NEQ 3790 set CL=/QIfist %CL%
+    :: disable __ftol2_see error for WDK 6 and above
+    :: TODO cast (float) to (__int64) to (long)
+    :: if %UD_DDK_VER% NEQ 3790 set CL=/QIfist %CL%
 
-	if %UD_BLD_FLG_BUILD_X86% neq 0 (
-		echo --------- Target is x86 ---------
-		set AMD64=
-		set IA64=
-		pushd ..
-		call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre WNET
-		popd
-		set BUILD_DEFAULT=-nmake -i -g -P
-		set UDEFRAG_LIB_PATH=..\..\lib
-		call :build_modules X86 || exit /B 1
-	)
+    if %UD_BLD_FLG_BUILD_X86% neq 0 (
+        echo --------- Target is x86 ---------
+        set AMD64=
+        set IA64=
+        pushd ..
+        call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre WNET
+        popd
+        set BUILD_DEFAULT=-nmake -i -g -P
+        set UDEFRAG_LIB_PATH=..\..\lib
+        call :build_modules X86 || exit /B 1
+    )
     
     set path=%OLD_PATH%
     set DDKBUILDENV=
-	
-	if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
-		echo --------- Target is x64 ---------
-		set IA64=
-		pushd ..
-		rem WDK 6 and above use x64 instead of AMD64
+    
+    if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
+        echo --------- Target is x64 ---------
+        set IA64=
+        pushd ..
+        rem WDK 6 and above use x64 instead of AMD64
         if %UD_DDK_VER% NEQ 3790 (
             call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre x64 WNET
         ) else (
             call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre AMD64 WNET
         )
-		popd
-		set BUILD_DEFAULT=-nmake -i -g -P
-		set UDEFRAG_LIB_PATH=..\..\lib\amd64
-		call :build_modules amd64 || exit /B 1
-	)
+        popd
+        set BUILD_DEFAULT=-nmake -i -g -P
+        set UDEFRAG_LIB_PATH=..\..\lib\amd64
+        call :build_modules amd64 || exit /B 1
+    )
     
     set path=%OLD_PATH%
     set DDKBUILDENV=
-	
-	if %UD_BLD_FLG_BUILD_IA64% neq 0 (
-		echo --------- Target is ia64 ---------
-		set AMD64=
-		pushd ..
-		call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre 64 WNET
-		popd
-		set BUILD_DEFAULT=-nmake -i -g -P
-		set UDEFRAG_LIB_PATH=..\..\lib\ia64
-		call :build_modules ia64 || exit /B 1
-	)
-	
-	goto ddk_build_success
     
-	:ddk_build_fail
+    if %UD_BLD_FLG_BUILD_IA64% neq 0 (
+        echo --------- Target is ia64 ---------
+        set AMD64=
+        pushd ..
+        call "%WINDDKBASE%\bin\setenv.bat" %WINDDKBASE% fre 64 WNET
+        popd
+        set BUILD_DEFAULT=-nmake -i -g -P
+        set UDEFRAG_LIB_PATH=..\..\lib\ia64
+        call :build_modules ia64 || exit /B 1
+    )
+    
+    goto ddk_build_success
+    
+    :ddk_build_fail
     set path=%OLD_PATH%
-	set OLD_PATH=
+    set OLD_PATH=
     set DDKBUILDENV=
-	set UD_DDK_VER=
-	set IGNORE_LINKLIB_ABUSE=
-	exit /B 1
-	
-	:ddk_build_success
+    set UD_DDK_VER=
+    set IGNORE_LINKLIB_ABUSE=
+    exit /B 1
+    
+    :ddk_build_success
     set path=%OLD_PATH%
-	set OLD_PATH=
+    set OLD_PATH=
     set DDKBUILDENV=
-	set UD_DDK_VER=
-	set IGNORE_LINKLIB_ABUSE=
-	
+    set UD_DDK_VER=
+    set IGNORE_LINKLIB_ABUSE=
+    
 exit /B 0
 
 
 :winsdk_build
 
-	set BUILD_ENV=winsdk
-	set OLD_PATH=%path%
+    set BUILD_ENV=winsdk
+    set OLD_PATH=%path%
 
-	if %UD_BLD_FLG_BUILD_X86% neq 0 (
-		echo --------- Target is x86 ---------
-		set AMD64=
-		set IA64=
-		pushd ..
-		call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /x86 /xp
-		popd
-		set UDEFRAG_LIB_PATH=..\..\lib
-		call :build_modules X86 || exit /B 1
-	)
+    if %UD_BLD_FLG_BUILD_X86% neq 0 (
+        echo --------- Target is x86 ---------
+        set AMD64=
+        set IA64=
+        pushd ..
+        call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /x86 /xp
+        popd
+        set UDEFRAG_LIB_PATH=..\..\lib
+        call :build_modules X86 || exit /B 1
+    )
     
     set path=%OLD_PATH%
 
-	if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
-		echo --------- Target is x64 ---------
-		set IA64=
-		set AMD64=1
-		pushd ..
-		call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /x64 /xp
-		popd
-		set UDEFRAG_LIB_PATH=..\..\lib\amd64
-		call :build_modules amd64 || exit /B 1
-	)
+    if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
+        echo --------- Target is x64 ---------
+        set IA64=
+        set AMD64=1
+        pushd ..
+        call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /x64 /xp
+        popd
+        set UDEFRAG_LIB_PATH=..\..\lib\amd64
+        call :build_modules amd64 || exit /B 1
+    )
     
     set path=%OLD_PATH%
 
-	if %UD_BLD_FLG_BUILD_IA64% neq 0 (
-		echo --------- Target is ia64 ---------
-		set AMD64=
-		set IA64=1
-		pushd ..
-		call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /ia64 /xp
-		popd
-		set BUILD_DEFAULT=-nmake -i -g -P
-		set UDEFRAG_LIB_PATH=..\..\lib\ia64
-		call :build_modules ia64 || exit /B 1
-	)
+    if %UD_BLD_FLG_BUILD_IA64% neq 0 (
+        echo --------- Target is ia64 ---------
+        set AMD64=
+        set IA64=1
+        pushd ..
+        call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /ia64 /xp
+        popd
+        set BUILD_DEFAULT=-nmake -i -g -P
+        set UDEFRAG_LIB_PATH=..\..\lib\ia64
+        call :build_modules ia64 || exit /B 1
+    )
     
     set path=%OLD_PATH%
-	set OLD_PATH=
-	
+    set OLD_PATH=
+    
 exit /B 0
 
 
 :msvc_build
 
-	set OLD_PATH=%path%
+    set OLD_PATH=%path%
 
-	call "%MSVSBIN%\vcvars32.bat"
-	set BUILD_ENV=msvc
-	set UDEFRAG_LIB_PATH=..\..\lib
-	call :build_modules X86 || exit /B 1
+    call "%MSVSBIN%\vcvars32.bat"
+    set BUILD_ENV=msvc
+    set UDEFRAG_LIB_PATH=..\..\lib
+    call :build_modules X86 || exit /B 1
 
-	set path=%OLD_PATH%
-	set OLD_PATH=
+    set path=%OLD_PATH%
+    set OLD_PATH=
 
 exit /B 0
 
 
 :mingw_x64_build
 
-	set OLD_PATH=%path%
+    set OLD_PATH=%path%
 
-	echo --------- Target is x64 ---------
-	set AMD64=1
-	set path=%MINGWx64BASE%\bin;%path%
-	set BUILD_ENV=mingw_x64
-	set UDEFRAG_LIB_PATH=..\..\lib\amd64
-	call :build_modules amd64 || exit /B 1
+    echo --------- Target is x64 ---------
+    set AMD64=1
+    set path=%MINGWx64BASE%\bin;%path%
+    set BUILD_ENV=mingw_x64
+    set UDEFRAG_LIB_PATH=..\..\lib\amd64
+    call :build_modules amd64 || exit /B 1
 
-	set path=%OLD_PATH%
-	set OLD_PATH=
+    set path=%OLD_PATH%
+    set OLD_PATH=
 
 exit /B 0
 
 
 :mingw_build
 
-	set OLD_PATH=%path%
+    set OLD_PATH=%path%
 
-	set path=%MINGWBASE%\bin;%path%
-	set BUILD_ENV=mingw
-	set UDEFRAG_LIB_PATH=..\..\lib
-	call :build_modules X86 || exit /B 1
+    set path=%MINGWBASE%\bin;%path%
+    set BUILD_ENV=mingw
+    set UDEFRAG_LIB_PATH=..\..\lib
+    call :build_modules X86 || exit /B 1
 
-	set path=%OLD_PATH%
-	set OLD_PATH=
+    set path=%OLD_PATH%
+    set OLD_PATH=
 
 exit /B 0
 
@@ -273,62 +273,62 @@ exit /B 0
 :: Builds all UltraDefrag modules
 :: Example: call :build_modules X86
 :build_modules
-	rem update manifests
-	call make-manifests.cmd %1 || exit /B 1
+    rem update manifests
+    call make-manifests.cmd %1 || exit /B 1
 
-	rem rebuild modules
-	set UD_BUILD_TOOL=lua ..\..\tools\mkmod.lua
-	
-	:: monolithic native executable can be
-	:: produced currently by DDK only
-	if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK% (
-		echo Compile monolithic native interface...
-		pushd obj\zenwinx
-		%UD_BUILD_TOOL% zenwinx.build static-lib || goto fail
-		cd ..\udefrag
-		%UD_BUILD_TOOL% udefrag.build static-lib || goto fail
-		cd ..\native
-		%UD_BUILD_TOOL% defrag_native.build || goto fail
+    rem rebuild modules
+    set UD_BUILD_TOOL=lua ..\..\tools\mkmod.lua
+    
+    :: monolithic native executable can be
+    :: produced currently by DDK only
+    if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK% (
+        echo Compile monolithic native interface...
+        pushd obj\zenwinx
+        %UD_BUILD_TOOL% zenwinx.build static-lib || goto fail
+        cd ..\udefrag
+        %UD_BUILD_TOOL% udefrag.build static-lib || goto fail
+        cd ..\native
+        %UD_BUILD_TOOL% defrag_native.build || goto fail
 
-		echo Compile native DLL's...
-		cd ..\zenwinx
-		%UD_BUILD_TOOL% zenwinx.build || goto fail
-		cd ..\udefrag
-		%UD_BUILD_TOOL% udefrag.build || goto fail
-	) else (
-		pushd obj\zenwinx
-		%UD_BUILD_TOOL% zenwinx.build || goto fail
-		cd ..\udefrag
-		%UD_BUILD_TOOL% udefrag.build || goto fail
-		cd ..\native
-		%UD_BUILD_TOOL% defrag_native.build || goto fail
-	)
-	cd ..\lua5.1
-	%UD_BUILD_TOOL% lua5.1a_dll.build || goto fail
-	%UD_BUILD_TOOL% lua5.1a_exe.build || goto fail
-	%UD_BUILD_TOOL% lua5.1a_gui.build || goto fail
+        echo Compile native DLL's...
+        cd ..\zenwinx
+        %UD_BUILD_TOOL% zenwinx.build || goto fail
+        cd ..\udefrag
+        %UD_BUILD_TOOL% udefrag.build || goto fail
+    ) else (
+        pushd obj\zenwinx
+        %UD_BUILD_TOOL% zenwinx.build || goto fail
+        cd ..\udefrag
+        %UD_BUILD_TOOL% udefrag.build || goto fail
+        cd ..\native
+        %UD_BUILD_TOOL% defrag_native.build || goto fail
+    )
+    cd ..\lua5.1
+    %UD_BUILD_TOOL% lua5.1a_dll.build || goto fail
+    %UD_BUILD_TOOL% lua5.1a_exe.build || goto fail
+    %UD_BUILD_TOOL% lua5.1a_gui.build || goto fail
 
-	cd ..\wgx
-	%UD_BUILD_TOOL% wgx.build ||  goto fail
+    cd ..\wgx
+    %UD_BUILD_TOOL% wgx.build ||  goto fail
 
-	echo Compile other modules...
-	cd ..\bootexctrl
-	%UD_BUILD_TOOL% bootexctrl.build || goto fail
-	cd ..\hibernate
-	%UD_BUILD_TOOL% hibernate.build || goto fail
-	cd ..\console
-	%UD_BUILD_TOOL% defrag.build || goto fail
+    echo Compile other modules...
+    cd ..\bootexctrl
+    %UD_BUILD_TOOL% bootexctrl.build || goto fail
+    cd ..\hibernate
+    %UD_BUILD_TOOL% hibernate.build || goto fail
+    cd ..\console
+    %UD_BUILD_TOOL% defrag.build || goto fail
 
-	cd ..\gui
-	%UD_BUILD_TOOL% ultradefrag.build && goto success
+    cd ..\gui
+    %UD_BUILD_TOOL% ultradefrag.build && goto success
 
-	:fail
-	set UD_BUILD_TOOL=
-	popd
-	exit /B 1
-	
-	:success
-	set UD_BUILD_TOOL=
-	popd
+    :fail
+    set UD_BUILD_TOOL=
+    popd
+    exit /B 1
+    
+    :success
+    set UD_BUILD_TOOL=
+    popd
 
 exit /B 0

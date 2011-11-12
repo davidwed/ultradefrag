@@ -37,38 +37,38 @@
  */
 list_entry *winx_list_insert_item(list_entry **phead,list_entry *prev,long size)
 {
-	list_entry *new_item;
-	
-	/*
-	* Avoid winx_dbg_xxx calls here
-	* to avoid recursion.
-	*/
+    list_entry *new_item;
+    
+    /*
+    * Avoid winx_dbg_xxx calls here
+    * to avoid recursion.
+    */
 
-	if(size < sizeof(list_entry))
-		return NULL;
+    if(size < sizeof(list_entry))
+        return NULL;
 
-	new_item = (list_entry *)winx_heap_alloc(size);
-	if(new_item == NULL) return NULL;
+    new_item = (list_entry *)winx_heap_alloc(size);
+    if(new_item == NULL) return NULL;
 
-	/* is list empty? */
-	if(*phead == NULL){
-		*phead = new_item;
-		new_item->prev = new_item->next = new_item;
-		return new_item;
-	}
+    /* is list empty? */
+    if(*phead == NULL){
+        *phead = new_item;
+        new_item->prev = new_item->next = new_item;
+        return new_item;
+    }
 
-	/* insert as a new head? */
-	if(prev == NULL){
-		prev = (*phead)->prev;
-		*phead = new_item;
-	}
+    /* insert as a new head? */
+    if(prev == NULL){
+        prev = (*phead)->prev;
+        *phead = new_item;
+    }
 
-	/* insert after an item specified by prev argument */
-	new_item->prev = prev;
-	new_item->next = prev->next;
-	new_item->prev->next = new_item;
-	new_item->next->prev = new_item;
-	return new_item;
+    /* insert after an item specified by prev argument */
+    new_item->prev = prev;
+    new_item->next = prev->next;
+    new_item->prev->next = new_item;
+    new_item->next->prev = new_item;
+    return new_item;
 }
 
 /**
@@ -79,31 +79,31 @@ list_entry *winx_list_insert_item(list_entry **phead,list_entry *prev,long size)
  */
 void winx_list_remove_item(list_entry **phead,list_entry *item)
 {
-	/*
-	* Avoid winx_dbg_xxx calls here
-	* to avoid recursion.
-	*/
+    /*
+    * Avoid winx_dbg_xxx calls here
+    * to avoid recursion.
+    */
 
-	/* validate an item */
-	if(item == NULL) return;
-	
-	/* is list empty? */
-	if(*phead == NULL) return;
+    /* validate an item */
+    if(item == NULL) return;
+    
+    /* is list empty? */
+    if(*phead == NULL) return;
 
-	/* remove alone first item? */
-	if(item == *phead && item->next == *phead){
-		winx_heap_free(item);
-		*phead = NULL;
-		return;
-	}
-	
-	/* remove first item? */
-	if(item == *phead){
-		*phead = (*phead)->next;
-	}
-	item->prev->next = item->next;
-	item->next->prev = item->prev;
-	winx_heap_free(item);
+    /* remove alone first item? */
+    if(item == *phead && item->next == *phead){
+        winx_heap_free(item);
+        *phead = NULL;
+        return;
+    }
+    
+    /* remove first item? */
+    if(item == *phead){
+        *phead = (*phead)->next;
+    }
+    item->prev->next = item->next;
+    item->next->prev = item->prev;
+    winx_heap_free(item);
 }
 
 /**
@@ -114,21 +114,21 @@ void winx_list_remove_item(list_entry **phead,list_entry *item)
  */
 void winx_list_destroy(list_entry **phead)
 {
-	list_entry *item, *next, *head;
-	
-	/* is list empty? */
-	if(*phead == NULL) return;
+    list_entry *item, *next, *head;
+    
+    /* is list empty? */
+    if(*phead == NULL) return;
 
-	head = *phead;
-	item = head;
+    head = *phead;
+    item = head;
 
-	do {
-		next = item->next;
-		winx_heap_free(item);
-		item = next;
-	} while (next != head);
+    do {
+        next = item->next;
+        winx_heap_free(item);
+        item = next;
+    } while (next != head);
 
-	*phead = NULL;
+    *phead = NULL;
 }
 
 /** @} */

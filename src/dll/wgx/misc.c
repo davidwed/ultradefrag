@@ -40,15 +40,15 @@
  */
 void WgxEnableWindows(HANDLE hMainWindow, ...)
 {
-	va_list marker;
-	int id;
-	
-	va_start(marker,hMainWindow);
-	do {
-		id = va_arg(marker,int);
-		if(id) (void)EnableWindow(GetDlgItem(hMainWindow,id),TRUE);
-	} while(id);
-	va_end(marker);
+    va_list marker;
+    int id;
+    
+    va_start(marker,hMainWindow);
+    do {
+        id = va_arg(marker,int);
+        if(id) (void)EnableWindow(GetDlgItem(hMainWindow,id),TRUE);
+    } while(id);
+    va_end(marker);
 }
 
 /**
@@ -60,15 +60,15 @@ void WgxEnableWindows(HANDLE hMainWindow, ...)
  */
 void WgxDisableWindows(HANDLE hMainWindow, ...)
 {
-	va_list marker;
-	int id;
-	
-	va_start(marker,hMainWindow);
-	do {
-		id = va_arg(marker,int);
-		if(id) (void)EnableWindow(GetDlgItem(hMainWindow,id),FALSE);
-	} while(id);
-	va_end(marker);
+    va_list marker;
+    int id;
+    
+    va_start(marker,hMainWindow);
+    do {
+        id = va_arg(marker,int);
+        if(id) (void)EnableWindow(GetDlgItem(hMainWindow,id),FALSE);
+    } while(id);
+    va_end(marker);
 }
 
 /**
@@ -81,11 +81,11 @@ void WgxDisableWindows(HANDLE hMainWindow, ...)
  */
 void WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID)
 {
-	HICON hIcon;
+    HICON hIcon;
 
-	hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IconID));
-	(void)SendMessage(hWindow,WM_SETICON,1,(LRESULT)hIcon);
-	if(hIcon) (void)DeleteObject(hIcon);
+    hIcon = LoadIcon(hInstance,MAKEINTRESOURCE(IconID));
+    (void)SendMessage(hWindow,WM_SETICON,1,(LRESULT)hIcon);
+    if(hIcon) (void)DeleteObject(hIcon);
 }
 
 /**
@@ -99,13 +99,13 @@ void WgxSetIcon(HINSTANCE hInstance,HWND hWindow,UINT IconID)
  */
 void WgxCheckWindowCoordinates(LPRECT lprc,int min_width,int min_height)
 {
-	int cx,cy;
+    int cx,cy;
 
-	cx = GetSystemMetrics(SM_CXSCREEN);
-	cy = GetSystemMetrics(SM_CYSCREEN);
-	if(lprc->left < 0) lprc->left = 0; if(lprc->top < 0) lprc->top = 0;
-	if(lprc->left >= (cx - min_width)) lprc->left = cx - min_width;
-	if(lprc->top >= (cy - min_height)) lprc->top = cy - min_height;
+    cx = GetSystemMetrics(SM_CXSCREEN);
+    cy = GetSystemMetrics(SM_CYSCREEN);
+    if(lprc->left < 0) lprc->left = 0; if(lprc->top < 0) lprc->top = 0;
+    if(lprc->left >= (cx - min_width)) lprc->left = cx - min_width;
+    if(lprc->top >= (cy - min_height)) lprc->top = cy - min_height;
 }
 
 /**
@@ -121,31 +121,31 @@ void WgxCenterWindow(HWND hwnd)
     int screenwidth, screenheight;
     int x, y;
 
-	//make the window relative to its parent
-	hwndParent = GetParent(hwnd);
-	if(hwndParent == NULL)
-		hwndParent = GetDesktopWindow();
+    //make the window relative to its parent
+    hwndParent = GetParent(hwnd);
+    if(hwndParent == NULL)
+        hwndParent = GetDesktopWindow();
 
-	GetWindowRect(hwnd, &rect);
-	GetWindowRect(hwndParent, &rectP);
+    GetWindowRect(hwnd, &rect);
+    GetWindowRect(hwndParent, &rectP);
 
-	width = rect.right - rect.left;
-	height = rect.bottom - rect.top;
+    width = rect.right - rect.left;
+    height = rect.bottom - rect.top;
 
-	x = ((rectP.right-rectP.left) - width) / 2 + rectP.left;
-	y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
+    x = ((rectP.right-rectP.left) - width) / 2 + rectP.left;
+    y = ((rectP.bottom-rectP.top) - height) / 2 + rectP.top;
 
-	screenwidth = GetSystemMetrics(SM_CXSCREEN);
-	screenheight = GetSystemMetrics(SM_CYSCREEN);
+    screenwidth = GetSystemMetrics(SM_CXSCREEN);
+    screenheight = GetSystemMetrics(SM_CYSCREEN);
 
-	//make sure that the dialog box never moves outside of
-	//the screen
-	if(x < 0) x = 0;
-	if(y < 0) y = 0;
-	if(x + width > screenwidth) x = screenwidth - width;
-	if(y + height > screenheight) y = screenheight - height;
+    //make sure that the dialog box never moves outside of
+    //the screen
+    if(x < 0) x = 0;
+    if(y < 0) y = 0;
+    if(x + width > screenwidth) x = screenwidth - width;
+    if(y + height > screenheight) y = screenheight - height;
 
-	MoveWindow(hwnd, x, y, width, height, FALSE);
+    MoveWindow(hwnd, x, y, width, height, FALSE);
 }
 
 /**

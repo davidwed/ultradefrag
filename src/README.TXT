@@ -22,7 +22,7 @@ Web Resources
 
 The project's home page is at:
 
-	http://ultradefrag.sourceforge.net
+    http://ultradefrag.sourceforge.net
 
 Please be sure to visit this site for information, documentation, tutorials,
 news, etc.  All UltraDefrag related things are available from there.

@@ -37,35 +37,35 @@
  */
 void winx_path_remove_extension(char *path)
 {
-	int i;
+    int i;
 
 #if 0
-	char *lb, *dot;
+    char *lb, *dot;
 
-	/* slower */
+    /* slower */
     if(path){
-		lb = strrchr(path,'\\');
-		dot = strrchr(path,'.');
-		if(lb && dot){ /* both backslash and a dot exist */
-			if(dot < lb || dot == lb + 1)
-				return; /* filename contains either no dot or a leading dot */
-			*dot = 0;
-		}
-	}
+        lb = strrchr(path,'\\');
+        dot = strrchr(path,'.');
+        if(lb && dot){ /* both backslash and a dot exist */
+            if(dot < lb || dot == lb + 1)
+                return; /* filename contains either no dot or a leading dot */
+            *dot = 0;
+        }
+    }
 #else
-	if(path == NULL)
-		return;
+    if(path == NULL)
+        return;
     
-	/* faster */
-	for(i = strlen(path) - 1; i >= 0; i--){
-		if(path[i] == '\\')
-			return; /* filename contains no dot */
-		if(path[i] == '.' && i){
-			if(path[i - 1] != '\\')
-				path[i] = 0;
-			return;
-		}
-	}
+    /* faster */
+    for(i = strlen(path) - 1; i >= 0; i--){
+        if(path[i] == '\\')
+            return; /* filename contains no dot */
+        if(path[i] == '.' && i){
+            if(path[i - 1] != '\\')
+                path[i] = 0;
+            return;
+        }
+    }
 #endif
 }
 
@@ -78,12 +78,12 @@ void winx_path_remove_extension(char *path)
  */
 void winx_path_remove_filename(char *path)
 {
-	char *lb;
-	
-	if(path){
-		lb = strrchr(path,'\\');
-		if(lb) *lb = 0;
-	}
+    char *lb;
+    
+    if(path){
+        lb = strrchr(path,'\\');
+        if(lb) *lb = 0;
+    }
 }
 
 /**
@@ -96,25 +96,25 @@ void winx_path_remove_filename(char *path)
  */
 void winx_path_extract_filename(char *path)
 {
-	int i,j,n;
-	
-	if(path == NULL)
-		return;
-	
-	n = strlen(path);
-	if(n == 0)
-		return;
-	
-	for(i = n - 1; i >= 0; i--){
-		if(path[i] == '\\' && (i != n - 1)){
-			/* path[i+1] points to filename */
-			i++;
-			for(j = 0; path[i]; i++, j++)
-				path[j] = path[i];
-			path[j] = 0;
-			return;
-		}
-	}
+    int i,j,n;
+    
+    if(path == NULL)
+        return;
+    
+    n = strlen(path);
+    if(n == 0)
+        return;
+    
+    for(i = n - 1; i >= 0; i--){
+        if(path[i] == '\\' && (i != n - 1)){
+            /* path[i+1] points to filename */
+            i++;
+            for(j = 0; path[i]; i++, j++)
+                path[j] = path[i];
+            path[j] = 0;
+            return;
+        }
+    }
 }
 
 /**
@@ -169,53 +169,53 @@ void winx_get_module_filename(char *path)
  */
 int winx_create_path(char *path)
 {
-	char *p;
-	unsigned int n;
-	/*char rootdir[] = "\\??\\X:\\";*/
-	winx_volume_information v;
-	
-	if(path == NULL)
-		return (-1);
+    char *p;
+    unsigned int n;
+    /*char rootdir[] = "\\??\\X:\\";*/
+    winx_volume_information v;
+    
+    if(path == NULL)
+        return (-1);
 
-	/* path must contain at least \??\X: */
-	if(strstr(path,"\\??\\") != path || strchr(path,':') != (path + 5)){
-		DebugPrint("winx_create_path: native path must be specified");
-		return (-1);
-	}
+    /* path must contain at least \??\X: */
+    if(strstr(path,"\\??\\") != path || strchr(path,':') != (path + 5)){
+        DebugPrint("winx_create_path: native path must be specified");
+        return (-1);
+    }
 
-	n = strlen("\\??\\X:\\");
-	if(strlen(path) <= n){
-		/* check for volume existence */
-		/*
-		rootdir[4] = path[4];
-		// may fail with access denied status
-		return winx_create_directory(rootdir);
-		*/
-		return winx_get_volume_information(path[4],&v);
-	}
-	
-	/* skip \??\X:\ */
-	p = path + n;
-	
-	/* create directory tree */
-	while((p = strchr(p,'\\'))){
-		*p = 0;
-		if(winx_create_directory(path) < 0){
-			DebugPrint("winx_create_path failed");
-			*p = '\\';
-			return (-1);
-		}
-		*p = '\\';
-		p ++;
-	}
-	
-	/* create target directory */
-	if(winx_create_directory(path) < 0){
-		DebugPrint("winx_create_path failed");
-		return (-1);
-	}
-	
-	return 0;
+    n = strlen("\\??\\X:\\");
+    if(strlen(path) <= n){
+        /* check for volume existence */
+        /*
+        rootdir[4] = path[4];
+        // may fail with access denied status
+        return winx_create_directory(rootdir);
+        */
+        return winx_get_volume_information(path[4],&v);
+    }
+    
+    /* skip \??\X:\ */
+    p = path + n;
+    
+    /* create directory tree */
+    while((p = strchr(p,'\\'))){
+        *p = 0;
+        if(winx_create_directory(path) < 0){
+            DebugPrint("winx_create_path failed");
+            *p = '\\';
+            return (-1);
+        }
+        *p = '\\';
+        p ++;
+    }
+    
+    /* create target directory */
+    if(winx_create_directory(path) < 0){
+        DebugPrint("winx_create_path failed");
+        return (-1);
+    }
+    
+    return 0;
 }
 
 /** @} */

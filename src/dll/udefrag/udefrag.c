@@ -40,99 +40,99 @@ int progress_trigger = 0;
  */
 int udefrag_init_failed(void)
 {
-	return winx_init_failed();
+    return winx_init_failed();
 }
 
 /**
  */
 static void dbg_print_header(udefrag_job_parameters *jp)
 {
-	int os_version;
-	int mj, mn;
-	char ch;
-	winx_time t;
+    int os_version;
+    int mj, mn;
+    char ch;
+    winx_time t;
 
-	/* print driver version */
-	winx_dbg_print_header(0,0,"*");
-	winx_dbg_print_header(0x20,0,"%s",VERSIONINTITLE);
+    /* print driver version */
+    winx_dbg_print_header(0,0,"*");
+    winx_dbg_print_header(0x20,0,"%s",VERSIONINTITLE);
 
-	/* print windows version */
-	os_version = winx_get_os_version();
-	mj = os_version / 10;
-	mn = os_version % 10;
-	winx_dbg_print_header(0x20,0,"Windows NT %u.%u",mj,mn);
-	
-	/* print date and time */
-	memset(&t,0,sizeof(winx_time));
-	(void)winx_get_local_time(&t);
-	winx_dbg_print_header(0x20,0,"[%02i.%02i.%04i at %02i:%02i]",
-		(int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute);
-	winx_dbg_print_header(0,0,"*");
-	
-	/* force MinGW to export both udefrag_tolower and udefrag_toupper */
-	ch = 'a';
-	ch = winx_tolower(ch) - winx_toupper(ch);
+    /* print windows version */
+    os_version = winx_get_os_version();
+    mj = os_version / 10;
+    mn = os_version % 10;
+    winx_dbg_print_header(0x20,0,"Windows NT %u.%u",mj,mn);
+    
+    /* print date and time */
+    memset(&t,0,sizeof(winx_time));
+    (void)winx_get_local_time(&t);
+    winx_dbg_print_header(0x20,0,"[%02i.%02i.%04i at %02i:%02i]",
+        (int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute);
+    winx_dbg_print_header(0,0,"*");
+    
+    /* force MinGW to export both udefrag_tolower and udefrag_toupper */
+    ch = 'a';
+    ch = winx_tolower(ch) - winx_toupper(ch);
 }
 
 /**
  */
 static void dbg_print_footer(udefrag_job_parameters *jp)
 {
-	winx_dbg_print_header(0,0,"*");
-	winx_dbg_print_header(0,0,"Processing of %c: %s",
-		jp->volume_letter, (jp->pi.completion_status > 0) ? "succeeded" : "failed");
-	winx_dbg_print_header(0,0,"*");
+    winx_dbg_print_header(0,0,"*");
+    winx_dbg_print_header(0,0,"Processing of %c: %s",
+        jp->volume_letter, (jp->pi.completion_status > 0) ? "succeeded" : "failed");
+    winx_dbg_print_header(0,0,"*");
 }
 
 /**
  */
 static void dbg_print_single_counter(udefrag_job_parameters *jp,ULONGLONG counter,char *name)
 {
-	ULONGLONG time, seconds;
-	double p;
-	unsigned int ip;
-	char buffer[32];
-	char *s;
+    ULONGLONG time, seconds;
+    double p;
+    unsigned int ip;
+    char buffer[32];
+    char *s;
 
-	time = counter;
-	seconds = time / 1000;
-	winx_time2str(seconds,buffer,sizeof(buffer));
-	time -= seconds * 1000;
-	
-	if(jp->p_counters.overall_time == 0){
-		p = 0.00;
-	} else {
-		/* conversion to LONGLONG is needed for Win DDK */
-		p = (double)(LONGLONG)counter / (double)(LONGLONG)jp->p_counters.overall_time;
-	}
-	ip = (unsigned int)(p * 10000);
-	s = winx_sprintf("%s %I64ums",buffer,time);
-	if(s == NULL){
-		DebugPrint(" - %s %-18s %6I64ums (%u.%02u %%)",name,buffer,time,ip / 100,ip % 100);
-	} else {
-		DebugPrint(" - %s %-25s (%u.%02u %%)",name,s,ip / 100,ip % 100);
-		winx_heap_free(s);
-	}
+    time = counter;
+    seconds = time / 1000;
+    winx_time2str(seconds,buffer,sizeof(buffer));
+    time -= seconds * 1000;
+    
+    if(jp->p_counters.overall_time == 0){
+        p = 0.00;
+    } else {
+        /* conversion to LONGLONG is needed for Win DDK */
+        p = (double)(LONGLONG)counter / (double)(LONGLONG)jp->p_counters.overall_time;
+    }
+    ip = (unsigned int)(p * 10000);
+    s = winx_sprintf("%s %I64ums",buffer,time);
+    if(s == NULL){
+        DebugPrint(" - %s %-18s %6I64ums (%u.%02u %%)",name,buffer,time,ip / 100,ip % 100);
+    } else {
+        DebugPrint(" - %s %-25s (%u.%02u %%)",name,s,ip / 100,ip % 100);
+        winx_heap_free(s);
+    }
 }
 
 /**
  */
 static void dbg_print_performance_counters(udefrag_job_parameters *jp)
 {
-	ULONGLONG time, seconds;
-	char buffer[32];
-	
-	winx_dbg_print_header(0,0,"*");
+    ULONGLONG time, seconds;
+    char buffer[32];
+    
+    winx_dbg_print_header(0,0,"*");
 
-	time = jp->p_counters.overall_time;
-	seconds = time / 1000;
-	winx_time2str(seconds,buffer,sizeof(buffer));
-	time -= seconds * 1000;
-	DebugPrint("volume processing completed in %s %I64ums:",buffer,time);
-	dbg_print_single_counter(jp,jp->p_counters.analysis_time,             "analysis ...............");
-	dbg_print_single_counter(jp,jp->p_counters.searching_time,            "searching ..............");
-	dbg_print_single_counter(jp,jp->p_counters.moving_time,               "moving .................");
-	dbg_print_single_counter(jp,jp->p_counters.temp_space_releasing_time, "releasing temp space ...");
+    time = jp->p_counters.overall_time;
+    seconds = time / 1000;
+    winx_time2str(seconds,buffer,sizeof(buffer));
+    time -= seconds * 1000;
+    DebugPrint("volume processing completed in %s %I64ums:",buffer,time);
+    dbg_print_single_counter(jp,jp->p_counters.analysis_time,             "analysis ...............");
+    dbg_print_single_counter(jp,jp->p_counters.searching_time,            "searching ..............");
+    dbg_print_single_counter(jp,jp->p_counters.moving_time,               "moving .................");
+    dbg_print_single_counter(jp,jp->p_counters.temp_space_releasing_time, "releasing temp space ...");
 }
 
 /**
@@ -149,79 +149,79 @@ static void dbg_print_performance_counters(udefrag_job_parameters *jp)
  */
 static void deliver_progress_info(udefrag_job_parameters *jp,int completion_status)
 {
-	udefrag_progress_info pi;
-	ULONGLONG x, y;
-	int i, k, index, p1, p2;
-	int mft_zone_detected;
-	int free_cell_detected;
-	ULONGLONG maximum, n;
-	
-	if(jp->cb == NULL)
-		return;
+    udefrag_progress_info pi;
+    ULONGLONG x, y;
+    int i, k, index, p1, p2;
+    int mft_zone_detected;
+    int free_cell_detected;
+    ULONGLONG maximum, n;
+    
+    if(jp->cb == NULL)
+        return;
 
-	/* make a copy of jp->pi */
-	memcpy(&pi,&jp->pi,sizeof(udefrag_progress_info));
-	
-	/* replace completion status */
-	pi.completion_status = completion_status;
-	
-	/* calculate progress percentage */
-	/* conversion to LONGLONG is needed for Win DDK */
-	/* so, let's divide both numbers to make safe conversion then */
-	x = pi.processed_clusters / 2;
-	y = pi.clusters_to_process / 2;
-	if(y == 0) pi.percentage = 0.00;
-	else pi.percentage = ((double)(LONGLONG)x / (double)(LONGLONG)y) * 100.00;
-	
-	/* refill cluster map */
-	if(jp->pi.cluster_map && jp->cluster_map.array \
-	  && jp->pi.cluster_map_size == jp->cluster_map.map_size){
-		for(i = 0; i < jp->cluster_map.map_size; i++){
-			/* check for mft zone to apply special rules there */
-			mft_zone_detected = free_cell_detected = 0;
-			maximum = 1; /* for jp->cluster_map.opposite_order */
-			if(!jp->cluster_map.opposite_order){
-				if(i == jp->cluster_map.map_size - 1)
-					maximum = jp->cluster_map.clusters_per_last_cell;
-				else
-					maximum = jp->cluster_map.clusters_per_cell;
-			}
-			if(jp->cluster_map.array[i][MFT_ZONE_SPACE] >= maximum)
-				mft_zone_detected = 1;
-			if(jp->cluster_map.array[i][FREE_SPACE] >= maximum)
-				free_cell_detected = 1;
-			if(mft_zone_detected && free_cell_detected){
-				jp->pi.cluster_map[i] = MFT_ZONE_SPACE;
-			} else {
-				maximum = jp->cluster_map.array[i][0];
-				index = 0;
-				for(k = 1; k < jp->cluster_map.n_colors; k++){
-					n = jp->cluster_map.array[i][k];
-					if(n >= maximum){ /* support of colors precedence  */
-						if(k != MFT_ZONE_SPACE || !mft_zone_detected){
-							maximum = n;
-							index = k;
-						}
-					}
-				}
-				if(maximum == 0)
-					jp->pi.cluster_map[i] = SYSTEM_SPACE;
-				else
-					jp->pi.cluster_map[i] = (char)index;
-			}
-		}
-	}
-	
-	/* deliver information to the caller */
-	jp->cb(&pi,jp->p);
-	jp->progress_refresh_time = winx_xtime();
-	if(jp->udo.dbgprint_level >= DBG_PARANOID)
-		winx_dbg_print_header(0x20,0,"progress update");
+    /* make a copy of jp->pi */
+    memcpy(&pi,&jp->pi,sizeof(udefrag_progress_info));
+    
+    /* replace completion status */
+    pi.completion_status = completion_status;
+    
+    /* calculate progress percentage */
+    /* conversion to LONGLONG is needed for Win DDK */
+    /* so, let's divide both numbers to make safe conversion then */
+    x = pi.processed_clusters / 2;
+    y = pi.clusters_to_process / 2;
+    if(y == 0) pi.percentage = 0.00;
+    else pi.percentage = ((double)(LONGLONG)x / (double)(LONGLONG)y) * 100.00;
+    
+    /* refill cluster map */
+    if(jp->pi.cluster_map && jp->cluster_map.array \
+      && jp->pi.cluster_map_size == jp->cluster_map.map_size){
+        for(i = 0; i < jp->cluster_map.map_size; i++){
+            /* check for mft zone to apply special rules there */
+            mft_zone_detected = free_cell_detected = 0;
+            maximum = 1; /* for jp->cluster_map.opposite_order */
+            if(!jp->cluster_map.opposite_order){
+                if(i == jp->cluster_map.map_size - 1)
+                    maximum = jp->cluster_map.clusters_per_last_cell;
+                else
+                    maximum = jp->cluster_map.clusters_per_cell;
+            }
+            if(jp->cluster_map.array[i][MFT_ZONE_SPACE] >= maximum)
+                mft_zone_detected = 1;
+            if(jp->cluster_map.array[i][FREE_SPACE] >= maximum)
+                free_cell_detected = 1;
+            if(mft_zone_detected && free_cell_detected){
+                jp->pi.cluster_map[i] = MFT_ZONE_SPACE;
+            } else {
+                maximum = jp->cluster_map.array[i][0];
+                index = 0;
+                for(k = 1; k < jp->cluster_map.n_colors; k++){
+                    n = jp->cluster_map.array[i][k];
+                    if(n >= maximum){ /* support of colors precedence  */
+                        if(k != MFT_ZONE_SPACE || !mft_zone_detected){
+                            maximum = n;
+                            index = k;
+                        }
+                    }
+                }
+                if(maximum == 0)
+                    jp->pi.cluster_map[i] = SYSTEM_SPACE;
+                else
+                    jp->pi.cluster_map[i] = (char)index;
+            }
+        }
+    }
+    
+    /* deliver information to the caller */
+    jp->cb(&pi,jp->p);
+    jp->progress_refresh_time = winx_xtime();
+    if(jp->udo.dbgprint_level >= DBG_PARANOID)
+        winx_dbg_print_header(0x20,0,"progress update");
         
-	if(jp->udo.dbgprint_level >= DBG_DETAILED){
+    if(jp->udo.dbgprint_level >= DBG_DETAILED){
         p1 = (int)(__int64)(pi.percentage * 100.00);
         p2 = p1 % 100;
-		p1 = p1 / 100;
+        p1 = p1 / 100;
         
         if(p1 >= progress_trigger){
             winx_dbg_print_header('>',0,"progress %3u.%02u%% completed, trigger %3u", p1, p2, progress_trigger);
@@ -242,17 +242,17 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
  */
 void progress_router(void *p)
 {
-	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+    udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
 
-	if(jp->cb){
-		/* ensure that jp->udo.refresh_interval exceeded */
-		if((winx_xtime() - jp->progress_refresh_time) > jp->udo.refresh_interval){
-			deliver_progress_info(jp,jp->pi.completion_status);
-		} else if(jp->pi.completion_status){
-			/* deliver completed job information anyway */
-			deliver_progress_info(jp,jp->pi.completion_status);
-		}
-	}
+    if(jp->cb){
+        /* ensure that jp->udo.refresh_interval exceeded */
+        if((winx_xtime() - jp->progress_refresh_time) > jp->udo.refresh_interval){
+            deliver_progress_info(jp,jp->pi.completion_status);
+        } else if(jp->pi.completion_status){
+            /* deliver completed job information anyway */
+            deliver_progress_info(jp,jp->pi.completion_status);
+        }
+    }
 }
 
 /**
@@ -264,30 +264,30 @@ void progress_router(void *p)
  */
 int termination_router(void *p)
 {
-	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
-	int result;
+    udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+    int result;
 
-	/* check for time limit */
-	if(jp->udo.time_limit){
-		if((winx_xtime() - jp->start_time) / 1000 > jp->udo.time_limit){
-			winx_dbg_print_header(0,0,"@ time limit exceeded @");
-			return 1;
-		}
-	}
+    /* check for time limit */
+    if(jp->udo.time_limit){
+        if((winx_xtime() - jp->start_time) / 1000 > jp->udo.time_limit){
+            winx_dbg_print_header(0,0,"@ time limit exceeded @");
+            return 1;
+        }
+    }
 
-	/* ask caller */
-	if(jp->t){
-		result = jp->t(jp->p);
-		if(result){
-			winx_dbg_print_header(0,0,"*");
-			winx_dbg_print_header(0x20,0,"termination requested by caller");
-			winx_dbg_print_header(0,0,"*");
-		}
-		return result;
-	}
+    /* ask caller */
+    if(jp->t){
+        result = jp->t(jp->p);
+        if(result){
+            winx_dbg_print_header(0,0,"*");
+            winx_dbg_print_header(0x20,0,"termination requested by caller");
+            winx_dbg_print_header(0,0,"*");
+        }
+        return result;
+    }
 
-	/* continue */
-	return 0;
+    /* continue */
+    return 0;
 }
 
 /*
@@ -295,30 +295,30 @@ int termination_router(void *p)
 */
 static int terminator(void *p)
 {
-	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
-	int result;
+    udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+    int result;
 
-	/* ask caller */
-	if(jp->t){
-		result = jp->t(jp->p);
-		if(result){
-			winx_dbg_print_header(0,0,"*");
-			winx_dbg_print_header(0x20,0,"termination requested by caller");
-			winx_dbg_print_header(0,0,"*");
-		}
-		return result;
-	}
+    /* ask caller */
+    if(jp->t){
+        result = jp->t(jp->p);
+        if(result){
+            winx_dbg_print_header(0,0,"*");
+            winx_dbg_print_header(0x20,0,"termination requested by caller");
+            winx_dbg_print_header(0,0,"*");
+        }
+        return result;
+    }
 
-	/* continue */
-	return 0;
+    /* continue */
+    return 0;
 }
 
 static int killer(void *p)
 {
-	winx_dbg_print_header(0,0,"*");
-	winx_dbg_print_header(0x20,0,"termination requested by caller");
-	winx_dbg_print_header(0,0,"*");
-	return 1;
+    winx_dbg_print_header(0,0,"*");
+    winx_dbg_print_header(0x20,0,"termination requested by caller");
+    winx_dbg_print_header(0,0,"*");
+    return 1;
 }
 
 /*
@@ -336,60 +336,60 @@ static int killer(void *p)
 */
 static DWORD WINAPI start_job(LPVOID p)
 {
-	udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
-	char *action = "analyzing";
-	int result = 0;
+    udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
+    char *action = "analyzing";
+    int result = 0;
 
-	/* check job flags */
-	if(jp->udo.job_flags & UD_JOB_REPEAT)
-		DebugPrint("repeat action until nothing left to move");
-	
-	/* do the job */
-	if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
-	else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
-	else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "quick optimizing";
-	else if(jp->job_type == MFT_OPTIMIZATION_JOB) action = "optimizing $mft on";
-	winx_dbg_print_header(0,0,"Start %s disk %c:",action,jp->volume_letter);
-	remove_fragmentation_reports(jp);
-	(void)winx_vflush(jp->volume_letter); /* flush all file buffers */
-	
-	/* speedup file searching in optimization */
-	if(jp->job_type == FULL_OPTIMIZATION_JOB \
-	  || jp->job_type == QUICK_OPTIMIZATION_JOB \
-	  || jp->job_type == MFT_OPTIMIZATION_JOB)
-		create_file_blocks_tree(jp);
+    /* check job flags */
+    if(jp->udo.job_flags & UD_JOB_REPEAT)
+        DebugPrint("repeat action until nothing left to move");
+    
+    /* do the job */
+    if(jp->job_type == DEFRAGMENTATION_JOB) action = "defragmenting";
+    else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "optimizing";
+    else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "quick optimizing";
+    else if(jp->job_type == MFT_OPTIMIZATION_JOB) action = "optimizing $mft on";
+    winx_dbg_print_header(0,0,"Start %s disk %c:",action,jp->volume_letter);
+    remove_fragmentation_reports(jp);
+    (void)winx_vflush(jp->volume_letter); /* flush all file buffers */
+    
+    /* speedup file searching in optimization */
+    if(jp->job_type == FULL_OPTIMIZATION_JOB \
+      || jp->job_type == QUICK_OPTIMIZATION_JOB \
+      || jp->job_type == MFT_OPTIMIZATION_JOB)
+        create_file_blocks_tree(jp);
 
-	switch(jp->job_type){
-	case ANALYSIS_JOB:
-		result = analyze(jp);
-		break;
-	case DEFRAGMENTATION_JOB:
-		result = defragment(jp);
-		break;
-	case FULL_OPTIMIZATION_JOB:
-	case QUICK_OPTIMIZATION_JOB:
-		result = optimize(jp);
-		break;
-	case MFT_OPTIMIZATION_JOB:
-		result = optimize_mft(jp);
-		break;
-	default:
-		result = 0;
-		break;
-	}
+    switch(jp->job_type){
+    case ANALYSIS_JOB:
+        result = analyze(jp);
+        break;
+    case DEFRAGMENTATION_JOB:
+        result = defragment(jp);
+        break;
+    case FULL_OPTIMIZATION_JOB:
+    case QUICK_OPTIMIZATION_JOB:
+        result = optimize(jp);
+        break;
+    case MFT_OPTIMIZATION_JOB:
+        result = optimize_mft(jp);
+        break;
+    default:
+        result = 0;
+        break;
+    }
 
-	destroy_file_blocks_tree(jp);
-	if(jp->job_type != ANALYSIS_JOB)
-		release_temp_space_regions(jp);
-	(void)save_fragmentation_reports(jp);
-	
-	/* now it is safe to adjust the completion status */
-	jp->pi.completion_status = result;
-	if(jp->pi.completion_status == 0)
-	jp->pi.completion_status ++; /* success */
-	
-	winx_exit_thread(0); /* 8k/12k memory leak here? */
-	return 0;
+    destroy_file_blocks_tree(jp);
+    if(jp->job_type != ANALYSIS_JOB)
+        release_temp_space_regions(jp);
+    (void)save_fragmentation_reports(jp);
+    
+    /* now it is safe to adjust the completion status */
+    jp->pi.completion_status = result;
+    if(jp->pi.completion_status == 0)
+    jp->pi.completion_status ++; /* success */
+    
+    winx_exit_thread(0); /* 8k/12k memory leak here? */
+    return 0;
 }
 
 /**
@@ -398,11 +398,11 @@ static DWORD WINAPI start_job(LPVOID p)
  */
 void destroy_lists(udefrag_job_parameters *jp)
 {
-	winx_scan_disk_release(jp->filelist);
-	winx_release_free_volume_regions(jp->free_regions);
-	winx_list_destroy((list_entry **)(void *)&jp->fragmented_files);
-	jp->filelist = NULL;
-	jp->free_regions = NULL;
+    winx_scan_disk_release(jp->filelist);
+    winx_release_free_volume_regions(jp->free_regions);
+    winx_list_destroy((list_entry **)(void *)&jp->fragmented_files);
+    jp->filelist = NULL;
+    jp->free_regions = NULL;
 }
 
 /**
@@ -424,52 +424,52 @@ void destroy_lists(udefrag_job_parameters *jp)
  * as possible to avoid slowdown of the volume processing].
  */
 int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
-		int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p)
+        int cluster_map_size,udefrag_progress_callback cb,udefrag_terminator t,void *p)
 {
-	udefrag_job_parameters jp;
-	ULONGLONG time = 0;
-	int use_limit = 0;
-	int result = -1;
-	int win_version = winx_get_os_version();
+    udefrag_job_parameters jp;
+    ULONGLONG time = 0;
+    int use_limit = 0;
+    int result = -1;
+    int win_version = winx_get_os_version();
     
-	/* initialize the job */
-	dbg_print_header(&jp);
+    /* initialize the job */
+    dbg_print_header(&jp);
 
-	/* convert volume letter to uppercase - needed for w2k */
-	volume_letter = winx_toupper(volume_letter);
-	
-	memset(&jp,0,sizeof(udefrag_job_parameters));
-	jp.filelist = NULL;
-	jp.fragmented_files = NULL;
-	jp.free_regions = NULL;
-	jp.progress_refresh_time = 0;
-	
-	jp.volume_letter = volume_letter;
-	jp.job_type = job_type;
-	jp.cb = cb;
-	jp.t = t;
-	jp.p = p;
+    /* convert volume letter to uppercase - needed for w2k */
+    volume_letter = winx_toupper(volume_letter);
+    
+    memset(&jp,0,sizeof(udefrag_job_parameters));
+    jp.filelist = NULL;
+    jp.fragmented_files = NULL;
+    jp.free_regions = NULL;
+    jp.progress_refresh_time = 0;
+    
+    jp.volume_letter = volume_letter;
+    jp.job_type = job_type;
+    jp.cb = cb;
+    jp.t = t;
+    jp.p = p;
 
-	/*jp.progress_router = progress_router;
-	jp.termination_router = termination_router;*/
-	/* we'll deliver progress info from the current thread */
-	jp.progress_router = NULL;
-	/* we'll decide whether to kill or not from the current thread */
-	jp.termination_router = terminator;
+    /*jp.progress_router = progress_router;
+    jp.termination_router = termination_router;*/
+    /* we'll deliver progress info from the current thread */
+    jp.progress_router = NULL;
+    /* we'll decide whether to kill or not from the current thread */
+    jp.termination_router = terminator;
 
-	jp.start_time = jp.p_counters.overall_time = winx_xtime();
-	jp.pi.completion_status = 0;
-	
-	if(get_options(&jp) < 0)
-		goto done;
-	
-	jp.udo.job_flags = flags;
+    jp.start_time = jp.p_counters.overall_time = winx_xtime();
+    jp.pi.completion_status = 0;
+    
+    if(get_options(&jp) < 0)
+        goto done;
+    
+    jp.udo.job_flags = flags;
 
-	if(allocate_map(cluster_map_size,&jp) < 0){
-		release_options(&jp);
-		goto done;
-	}
-	
+    if(allocate_map(cluster_map_size,&jp) < 0){
+        release_options(&jp);
+        goto done;
+    }
+    
     /* set additional privileges for Vista and above */
     if(win_version >= WINDOWS_VISTA){
         (void)winx_enable_privilege(SE_BACKUP_PRIVILEGE);
@@ -477,67 +477,67 @@ int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
         if(win_version >= WINDOWS_7)
             (void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE);
     }
-	
-	/* run the job in separate thread */
-	if(winx_create_thread(start_job,(PVOID)&jp,NULL) < 0){
-		free_map(&jp);
-		release_options(&jp);
-		goto done;
-	}
+    
+    /* run the job in separate thread */
+    if(winx_create_thread(start_job,(PVOID)&jp,NULL) < 0){
+        free_map(&jp);
+        release_options(&jp);
+        goto done;
+    }
 
-	/*
-	* Call specified callback every refresh_interval milliseconds.
-	* http://sourceforge.net/tracker/index.php?func=
-	* detail&aid=2886353&group_id=199532&atid=969873
-	*/
-	if(jp.udo.time_limit){
-		time = jp.udo.time_limit * 1000;
-		if(time / 1000 == jp.udo.time_limit){
-			/* no overflow occured */
-			use_limit = 1;
-		} else {
-			/* Windows will die sooner */
-		}
-	}
-	do {
-		winx_sleep(jp.udo.refresh_interval);
-		deliver_progress_info(&jp,0); /* status = running */
-		if(use_limit){
-			if(time <= jp.udo.refresh_interval){
-				/* time limit exceeded */
-				winx_dbg_print_header(0,0,"*");
-				winx_dbg_print_header(0x20,0,"time limit exceeded");
-				winx_dbg_print_header(0,0,"*");
-				jp.termination_router = killer;
-			} else {
-				if(jp.start_time){
-					if(winx_xtime() - jp.start_time > jp.udo.time_limit * 1000)
-						time = 0;
-				} else {
-					/* this method gives not so fine results, but requires no winx_xtime calls */
-					time -= jp.udo.refresh_interval; 
-				}
-			}
-		}
-	} while(jp.pi.completion_status == 0);
+    /*
+    * Call specified callback every refresh_interval milliseconds.
+    * http://sourceforge.net/tracker/index.php?func=
+    * detail&aid=2886353&group_id=199532&atid=969873
+    */
+    if(jp.udo.time_limit){
+        time = jp.udo.time_limit * 1000;
+        if(time / 1000 == jp.udo.time_limit){
+            /* no overflow occured */
+            use_limit = 1;
+        } else {
+            /* Windows will die sooner */
+        }
+    }
+    do {
+        winx_sleep(jp.udo.refresh_interval);
+        deliver_progress_info(&jp,0); /* status = running */
+        if(use_limit){
+            if(time <= jp.udo.refresh_interval){
+                /* time limit exceeded */
+                winx_dbg_print_header(0,0,"*");
+                winx_dbg_print_header(0x20,0,"time limit exceeded");
+                winx_dbg_print_header(0,0,"*");
+                jp.termination_router = killer;
+            } else {
+                if(jp.start_time){
+                    if(winx_xtime() - jp.start_time > jp.udo.time_limit * 1000)
+                        time = 0;
+                } else {
+                    /* this method gives not so fine results, but requires no winx_xtime calls */
+                    time -= jp.udo.refresh_interval; 
+                }
+            }
+        }
+    } while(jp.pi.completion_status == 0);
 
-	/* cleanup */
-	deliver_progress_info(&jp,jp.pi.completion_status);
-	/*if(jp.progress_router)
-		jp.progress_router(&jp);*/ /* redraw progress */
-	destroy_lists(&jp);
-	free_map(&jp);
-	release_options(&jp);
-	
+    /* cleanup */
+    deliver_progress_info(&jp,jp.pi.completion_status);
+    /*if(jp.progress_router)
+        jp.progress_router(&jp);*/ /* redraw progress */
+    destroy_lists(&jp);
+    free_map(&jp);
+    release_options(&jp);
+    
 done:
-	jp.p_counters.overall_time = winx_xtime() - jp.p_counters.overall_time;
-	dbg_print_performance_counters(&jp);
-	dbg_print_footer(&jp);
-	if(jp.pi.completion_status > 0)
-		result = 0;
-	else if(jp.pi.completion_status < 0)
-		result = jp.pi.completion_status;
-	return result;
+    jp.p_counters.overall_time = winx_xtime() - jp.p_counters.overall_time;
+    dbg_print_performance_counters(&jp);
+    dbg_print_footer(&jp);
+    if(jp.pi.completion_status > 0)
+        result = 0;
+    else if(jp.pi.completion_status < 0)
+        result = jp.pi.completion_status;
+    return result;
 }
 
 /**
@@ -550,51 +550,51 @@ done:
  */
 char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
 {
-	#define MSG_LENGTH 4095
-	char *msg;
-	char total_space[68];
-	char free_space[68];
-	double p;
-	unsigned int ip;
-	
-	/* allocate memory */
-	msg = winx_heap_alloc(MSG_LENGTH + 1);
-	if(msg == NULL){
-		DebugPrint("udefrag_get_default_formatted_results: cannot allocate %u bytes of memory",
-			MSG_LENGTH + 1);
-		winx_printf("\nCannot allocate %u bytes of memory!\n\n",
-			MSG_LENGTH + 1);
-		return NULL;
-	}
+    #define MSG_LENGTH 4095
+    char *msg;
+    char total_space[68];
+    char free_space[68];
+    double p;
+    unsigned int ip;
+    
+    /* allocate memory */
+    msg = winx_heap_alloc(MSG_LENGTH + 1);
+    if(msg == NULL){
+        DebugPrint("udefrag_get_default_formatted_results: cannot allocate %u bytes of memory",
+            MSG_LENGTH + 1);
+        winx_printf("\nCannot allocate %u bytes of memory!\n\n",
+            MSG_LENGTH + 1);
+        return NULL;
+    }
 
-	(void)winx_bytes_to_hr(pi->total_space,2,total_space,sizeof(total_space));
-	(void)winx_bytes_to_hr(pi->free_space,2,free_space,sizeof(free_space));
+    (void)winx_bytes_to_hr(pi->total_space,2,total_space,sizeof(total_space));
+    (void)winx_bytes_to_hr(pi->free_space,2,free_space,sizeof(free_space));
 
-	if(pi->files == 0){
-		p = 0.00;
-	} else {
-		/* conversion to LONGLONG is needed for Win DDK */
-		p = (double)(LONGLONG)pi->fragments / (double)(LONGLONG)pi->files;
-	}
-	ip = (unsigned int)(p * 100.00);
-	if(ip < 100)
-		ip = 100; /* fix round off error */
+    if(pi->files == 0){
+        p = 0.00;
+    } else {
+        /* conversion to LONGLONG is needed for Win DDK */
+        p = (double)(LONGLONG)pi->fragments / (double)(LONGLONG)pi->files;
+    }
+    ip = (unsigned int)(p * 100.00);
+    if(ip < 100)
+        ip = 100; /* fix round off error */
 
-	(void)_snprintf(msg,MSG_LENGTH,
-			  "Disk information:\n\n"
-			  "  Disk size                    = %s\n"
-			  "  Free space                   = %s\n\n"
-			  "  Total number of files        = %u\n"
-			  "  Number of fragmented files   = %u\n"
-			  "  Fragments per file           = %u.%02u\n\n",
-			  total_space,
-			  free_space,
-			  pi->files,
-			  pi->fragmented,
-			  ip / 100, ip % 100
-			 );
-	msg[MSG_LENGTH] = 0;
-	return msg;
+    (void)_snprintf(msg,MSG_LENGTH,
+              "Disk information:\n\n"
+              "  Disk size                    = %s\n"
+              "  Free space                   = %s\n\n"
+              "  Total number of files        = %u\n"
+              "  Number of fragmented files   = %u\n"
+              "  Fragments per file           = %u.%02u\n\n",
+              total_space,
+              free_space,
+              pi->files,
+              pi->fragmented,
+              ip / 100, ip % 100
+             );
+    msg[MSG_LENGTH] = 0;
+    return msg;
 }
 
 /**
@@ -604,8 +604,8 @@ char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
  */
 void udefrag_release_default_formatted_results(char *results)
 {
-	if(results)
-		winx_heap_free(results);
+    if(results)
+        winx_heap_free(results);
 }
 
 /**
@@ -616,40 +616,40 @@ void udefrag_release_default_formatted_results(char *results)
  */
 char *udefrag_get_error_description(int error_code)
 {
-	switch(error_code){
-	case UDEFRAG_UNKNOWN_ERROR:
-		return "Some unknown internal bug or some\n"
-		       "rarely arising error has been encountered.";
-	case UDEFRAG_FAT_OPTIMIZATION:
-		return "FAT disks cannot be optimized\n"
-		       "because of unmovable directories.";
-	case UDEFRAG_W2K_4KB_CLUSTERS:
-		return "NTFS disks with cluster size greater than 4 kb\n"
-		       "cannot be defragmented on Windows 2000 and Windows NT 4.0";
-	case UDEFRAG_NO_MEM:
-		return "Not enough memory.";
-	case UDEFRAG_CDROM:
-		return "It is impossible to defragment CDROM drives.";
-	case UDEFRAG_REMOTE:
-		return "It is impossible to defragment remote disks.";
-	case UDEFRAG_ASSIGNED_BY_SUBST:
-		return "It is impossible to defragment disks\n"
-		       "assigned by the \'subst\' command.";
-	case UDEFRAG_REMOVABLE:
-		return "You are trying to defragment a removable disk.\n"
-		       "If the disk type was wrongly identified, send\n"
-			   "a bug report to the author, thanks.";
-	case UDEFRAG_UDF_DEFRAG:
-		return "UDF disks can neither be defragmented nor optimized,\n"
-		       "because the file system driver does not support FSCTL_MOVE_FILE.";
-	case UDEFRAG_NO_MFT:
-		return "MFT can be optimized on NTFS disks only.";
-	case UDEFRAG_UNMOVABLE_MFT:
-		return "On NT4 and Windows 2000 MFT is not movable.";
-	case UDEFRAG_DIRTY_VOLUME:
-		return "Disk is dirty, run Check Disk to repair it.";
-	}
-	return "";
+    switch(error_code){
+    case UDEFRAG_UNKNOWN_ERROR:
+        return "Some unknown internal bug or some\n"
+               "rarely arising error has been encountered.";
+    case UDEFRAG_FAT_OPTIMIZATION:
+        return "FAT disks cannot be optimized\n"
+               "because of unmovable directories.";
+    case UDEFRAG_W2K_4KB_CLUSTERS:
+        return "NTFS disks with cluster size greater than 4 kb\n"
+               "cannot be defragmented on Windows 2000 and Windows NT 4.0";
+    case UDEFRAG_NO_MEM:
+        return "Not enough memory.";
+    case UDEFRAG_CDROM:
+        return "It is impossible to defragment CDROM drives.";
+    case UDEFRAG_REMOTE:
+        return "It is impossible to defragment remote disks.";
+    case UDEFRAG_ASSIGNED_BY_SUBST:
+        return "It is impossible to defragment disks\n"
+               "assigned by the \'subst\' command.";
+    case UDEFRAG_REMOVABLE:
+        return "You are trying to defragment a removable disk.\n"
+               "If the disk type was wrongly identified, send\n"
+               "a bug report to the author, thanks.";
+    case UDEFRAG_UDF_DEFRAG:
+        return "UDF disks can neither be defragmented nor optimized,\n"
+               "because the file system driver does not support FSCTL_MOVE_FILE.";
+    case UDEFRAG_NO_MFT:
+        return "MFT can be optimized on NTFS disks only.";
+    case UDEFRAG_UNMOVABLE_MFT:
+        return "On NT4 and Windows 2000 MFT is not movable.";
+    case UDEFRAG_DIRTY_VOLUME:
+        return "Disk is dirty, run Check Disk to repair it.";
+    }
+    return "";
 }
 
 /**
@@ -664,77 +664,77 @@ char *udefrag_get_error_description(int error_code)
  */
 int udefrag_set_log_file_path(void)
 {
-	wchar_t *path;
-	char *native_path, *path_copy, *filename;
-	int result;
-	
-	path = winx_heap_alloc(ENV_BUFFER_SIZE * sizeof(wchar_t));
-	if(path == NULL){
-		DebugPrint("set_log_file_path: cannot allocate %u bytes of memory",
-			ENV_BUFFER_SIZE * sizeof(wchar_t));
-		return (-1);
-	}
-	
-	result = winx_query_env_variable(L"UD_LOG_FILE_PATH",path,ENV_BUFFER_SIZE);
-	if(result < 0 || path[0] == 0){
-		/* empty variable forces to disable log */
-		winx_disable_dbg_log();
-		winx_heap_free(path);
-		return 0;
-	}
-	
-	/* convert to native path */
-	native_path = winx_sprintf("\\??\\%ws",path);
-	if(native_path == NULL){
-		DebugPrint("set_log_file_path: cannot build native path");
-		winx_heap_free(path);
-		return (-1);
-	}
-	
-	/* delete old logfile */
-	winx_delete_file(native_path);
-	
-	/* ensure that target path exists */
-	result = 0;
-	path_copy = winx_strdup(native_path);
-	if(path_copy == NULL){
-		DebugPrint("set_log_file_path: not enough memory");
-	} else {
-		winx_path_remove_filename(path_copy);
-		result = winx_create_path(path_copy);
-		winx_heap_free(path_copy);
-	}
-	
-	/* if target path cannot be created, use %tmp%\UltraDefrag_Logs */
-	if(result < 0){
-		result = winx_query_env_variable(L"TMP",path,ENV_BUFFER_SIZE);
-		if(result < 0 || path[0] == 0){
-			DebugPrint("set_log_file_path: failed to query %%TMP%%");
-		} else {
-			filename = winx_strdup(native_path);
-			if(filename == NULL){
-				DebugPrint("set_log_file_path: cannot allocate memory for filename");
-			} else {
-				winx_path_extract_filename(filename);
-				winx_heap_free(native_path);
-				native_path = winx_sprintf("\\??\\%ws\\UltraDefrag_Logs\\%s",path,filename);
-				if(native_path == NULL){
-					DebugPrint("set_log_file_path: cannot build %%tmp%%\\UltraDefrag_Logs\\{filename}");
-				} else {
-					/* delete old logfile from the temporary folder */
-					winx_delete_file(native_path);
-				}
-				winx_heap_free(filename);
-			}
-		}
-	}
-	
-	if(native_path)
-		winx_enable_dbg_log(native_path);
-	
-	winx_heap_free(native_path);
-	winx_heap_free(path);
-	return 0;
+    wchar_t *path;
+    char *native_path, *path_copy, *filename;
+    int result;
+    
+    path = winx_heap_alloc(ENV_BUFFER_SIZE * sizeof(wchar_t));
+    if(path == NULL){
+        DebugPrint("set_log_file_path: cannot allocate %u bytes of memory",
+            ENV_BUFFER_SIZE * sizeof(wchar_t));
+        return (-1);
+    }
+    
+    result = winx_query_env_variable(L"UD_LOG_FILE_PATH",path,ENV_BUFFER_SIZE);
+    if(result < 0 || path[0] == 0){
+        /* empty variable forces to disable log */
+        winx_disable_dbg_log();
+        winx_heap_free(path);
+        return 0;
+    }
+    
+    /* convert to native path */
+    native_path = winx_sprintf("\\??\\%ws",path);
+    if(native_path == NULL){
+        DebugPrint("set_log_file_path: cannot build native path");
+        winx_heap_free(path);
+        return (-1);
+    }
+    
+    /* delete old logfile */
+    winx_delete_file(native_path);
+    
+    /* ensure that target path exists */
+    result = 0;
+    path_copy = winx_strdup(native_path);
+    if(path_copy == NULL){
+        DebugPrint("set_log_file_path: not enough memory");
+    } else {
+        winx_path_remove_filename(path_copy);
+        result = winx_create_path(path_copy);
+        winx_heap_free(path_copy);
+    }
+    
+    /* if target path cannot be created, use %tmp%\UltraDefrag_Logs */
+    if(result < 0){
+        result = winx_query_env_variable(L"TMP",path,ENV_BUFFER_SIZE);
+        if(result < 0 || path[0] == 0){
+            DebugPrint("set_log_file_path: failed to query %%TMP%%");
+        } else {
+            filename = winx_strdup(native_path);
+            if(filename == NULL){
+                DebugPrint("set_log_file_path: cannot allocate memory for filename");
+            } else {
+                winx_path_extract_filename(filename);
+                winx_heap_free(native_path);
+                native_path = winx_sprintf("\\??\\%ws\\UltraDefrag_Logs\\%s",path,filename);
+                if(native_path == NULL){
+                    DebugPrint("set_log_file_path: cannot build %%tmp%%\\UltraDefrag_Logs\\{filename}");
+                } else {
+                    /* delete old logfile from the temporary folder */
+                    winx_delete_file(native_path);
+                }
+                winx_heap_free(filename);
+            }
+        }
+    }
+    
+    if(native_path)
+        winx_enable_dbg_log(native_path);
+    
+    winx_heap_free(native_path);
+    winx_heap_free(path);
+    return 0;
 }
 
 #ifndef STATIC_LIB
@@ -746,21 +746,21 @@ HANDLE hMutex = NULL;
  */
 BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
 {
-	/*
-	* Both command line and GUI clients support
-	* UD_LOG_FILE_PATH environment variable
-	* to control debug logging to the file.
-	*/
-	if(dwReason == DLL_PROCESS_ATTACH){
-		if(winx_get_os_version() >= WINDOWS_VISTA)
-			(void)winx_create_mutex(L"\\Sessions\\1\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
-		else
-			(void)winx_create_mutex(L"\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
-		(void)udefrag_set_log_file_path();
-	} else if(dwReason == DLL_PROCESS_DETACH){
-		winx_destroy_mutex(hMutex);
-	}
-	return 1;
+    /*
+    * Both command line and GUI clients support
+    * UD_LOG_FILE_PATH environment variable
+    * to control debug logging to the file.
+    */
+    if(dwReason == DLL_PROCESS_ATTACH){
+        if(winx_get_os_version() >= WINDOWS_VISTA)
+            (void)winx_create_mutex(L"\\Sessions\\1\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
+        else
+            (void)winx_create_mutex(L"\\BaseNamedObjects\\ultradefrag_mutex",&hMutex);
+        (void)udefrag_set_log_file_path();
+    } else if(dwReason == DLL_PROCESS_DETACH){
+        winx_destroy_mutex(hMutex);
+    }
+    return 1;
 }
 #endif
 

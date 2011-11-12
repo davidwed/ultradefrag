@@ -59,10 +59,10 @@ int GetDebugLevel();
 #define MAX_ENV_VARIABLE_LENGTH 32766
 #define MAX_LONG_PATH MAX_ENV_VARIABLE_LENGTH /* must be equal */
 typedef struct _object_path {
-	struct _object_path *next;
-	struct _object_path *prev;
-	wchar_t path[MAX_LONG_PATH + 1];
-	int processed;
+    struct _object_path *next;
+    struct _object_path *prev;
+    wchar_t path[MAX_LONG_PATH + 1];
+    int processed;
 } object_path;
 
 /* prototypes */
