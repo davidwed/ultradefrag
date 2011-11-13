@@ -47,6 +47,7 @@ by itself if there is no else keyword. Example:
 
     if(a == 5){
         printf("a was 5.\n");
+        do_something();
     } else if(a == 6){
         printf("a was 6.\n");
     } else {
@@ -56,6 +57,10 @@ by itself if there is no else keyword. Example:
 Note that 'else if' is considered a single statement; otherwise a long if/
 else if/else if/.../else sequence would need an indent for every else
 statement.
+
+Note that if the first statement is braced, all its counterparts should
+be enclosed by braces too regardless of whether they are single-line or not
+(as in else statement in example above).
 
 An exception is the opening brace for a function; for reasons of tradition
 and clarity it comes on a line by itself:
