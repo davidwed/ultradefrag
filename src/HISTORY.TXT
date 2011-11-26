@@ -2,6 +2,10 @@ HISTORY
 
   Version 5.0.0  2011-11-
   ------------------------------------------------------------------------------
+    - the following translations were updated:
+
+      Italian
+
     RC2:
     - ability to defragment NTFS attribute lists was added
     - check for the volume dirty flag was added to the volume analysis
@@ -13,7 +17,7 @@ HISTORY
       Japanese, Korean, Italian, Iloko, Czech, Slovak, Portuguese (BR),
       Romanian, Filipino (Tagalog), Catalan, Spanish (ES), Hungarian,
       Farsi, Yiddish
-    
+
     - installer has been enhanced in the following ways:
       + usage tracking can be enabled/disabled
         during silent installations using the /S switch:
