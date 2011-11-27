@@ -4,7 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     - the following translations were updated:
 
-      Italian
+      Italian, Polish
 
     RC2:
     - ability to defragment NTFS attribute lists was added
