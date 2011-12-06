@@ -143,6 +143,7 @@ dry_run = $dry_run
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -- Seconds_for_shutdown_rejection sets the delay for the user to cancel
 -- the hibernate, logoff, reboot or shutdown execution, default is 60 seconds.
+-- If set to 0 (zero) the confirmation dialog will not be displayed.
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 seconds_for_shutdown_rejection = $seconds_for_shutdown_rejection
