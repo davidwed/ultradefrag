@@ -1,4 +1,0 @@
-# enable expirations
-ExpiresActive On
-# expire coutry flags after a year in the client's cache
-ExpiresByType image/gif "access plus 1 years"
