@@ -33,7 +33,7 @@
  * <dd>This optimizes the currently selected disk(s), constantly updates the cluster map and status bar, and generates a report.<br/>
  * The process moves fragmented and regular files to the back of the disk to free space at the front
  * and moves them back to the front to concatenate them.</dd>
- * <dt>@htmlonly <img src="OptimizeMFT.png"> @endhtmlonly Optimize MFT (Shit+F7)</dt>
+ * <dt>@htmlonly <img src="OptimizeMFT.png"> @endhtmlonly Optimize MFT (Shift+F7)</dt>
  * <dd>This concatenates the MFT into one single chunk.</dd>
  * <dt>@htmlonly <img src="Stop.png"> @endhtmlonly Stop (Ctrl+C)</dt>
  * <dd>This aborts the currently running process at any stage, currently pending move operations will be completed to avoid corruption.</dd>
