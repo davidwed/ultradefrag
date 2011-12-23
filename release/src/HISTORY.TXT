@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 5.0.0  2011-12-
+  Version 5.0.0  2011-12-31
   ------------------------------------------------------------------------------
     - the following translations were added:
 
@@ -8,7 +8,7 @@ HISTORY
 
     - the following translations were updated:
 
-      Italian, Polish, Swedish, Burmese (Padauk)
+      Italian, Polish, Swedish, Burmese (Padauk), Finnish
 
     RC2:
     - ability to defragment NTFS attribute lists was added
