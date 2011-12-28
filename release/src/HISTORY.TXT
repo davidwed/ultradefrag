@@ -4,7 +4,7 @@ HISTORY
   ------------------------------------------------------------------------------
     - the following translations were added:
 
-      Kapampangan
+      Kapampangan, Georgian
 
     - the following translations were updated:
 
