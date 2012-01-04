@@ -2,7 +2,7 @@
 
 ::
 :: This script will install the Ultradefrag Boot Time Defrag Test Suite on your system.
-:: Copyright (c) 2010 by Stefan Pendl (stefanpe@users.sourceforge.net).
+:: Copyright (c) 2010-2012 by Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
 :: it under the terms of the GNU General Public License as published by
