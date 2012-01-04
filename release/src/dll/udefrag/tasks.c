@@ -412,11 +412,7 @@ done:
     winx_release_free_volume_regions(rlist);
     winx_fclose(jp->fVolume);
     jp->fVolume = NULL;
-
-    if(jp->termination_router((void *)jp))
-        return 0;
-
-    return (clusters_to_process > 0) ? (-1) : 0;
+    return 0;
 }
 
 /**
