@@ -214,7 +214,7 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
     ULONGLONG clusters_to_move;    /* the number of $mft clusters intended for the current move */
     ULONGLONG start_lcn;           /* address of space not processed yet */
     ULONGLONG time, tm;
-    winx_volume_region *rlist = NULL, *rgn, *target_rgn;
+    winx_volume_region *rlist = NULL, *rgn, *r, *target_rgn;
     winx_file_info *mft_file, *first_file;
     winx_blockmap *block, *first_block;
     ULONGLONG end_lcn, min_lcn, next_vcn;
@@ -251,6 +251,8 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
     clusters_to_process = mft_file->disp.clusters - mft_file->disp.blockmap->length;
     start_lcn = mft_file->disp.blockmap->lcn + mft_file->disp.blockmap->length;
     start_vcn = mft_file->disp.blockmap->next->vcn;
+
+try_again:
     while(clusters_to_process > 0){
         if(jp->termination_router((void *)jp)) break;
         if(rlist == NULL) break;
@@ -298,6 +300,7 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
                     goto done;
                 } else {
                     clusters_to_process -= first_block->length;
+                    clusters_to_cleanup -= first_block->length;
                     start_vcn = first_block->next->vcn;
                     start_lcn = first_block->lcn + first_block->length;
                     continue;
@@ -309,29 +312,35 @@ int optimize_mft_helper(udefrag_job_parameters *jp)
             lcn = first_block->lcn;
             current_vcn = first_block->vcn;
             clusters_to_move = remaining_clusters = min(clusters_to_cleanup, first_block->length);
-            for(rgn = rlist->prev; rgn && remaining_clusters; rgn = rlist->prev){
-                if(rgn->length > 0){
-                    n = min(rgn->length,remaining_clusters);
-                    target = rgn->lcn + rgn->length - n;
-                    /* subtract target clusters from auxiliary list of free regions */
-                    rlist = winx_sub_volume_region(rlist,target,n);
-                    if(first_file != mft_file)
-                        first_file->user_defined_flags |= UD_FILE_FRAGMENTED_BY_MFT_OPT;
-                    if(move_file(first_file,current_vcn,n,target,0,jp) < 0){
-                        if(!block_cleaned_up)
-                            goto done;
-                        else
-                            goto move_mft;
-                    }
-                    current_vcn += n;
-                    remaining_clusters -= n;
-                }
-                if(rlist == NULL){
-                    if(remaining_clusters)
-                        goto done;
-                    else
+            while(remaining_clusters){
+                /* use last free region */
+                if(rlist == NULL) goto done;
+                rgn = NULL;
+                for(r = rlist->prev; r; r = r->prev){
+                    if(r->length > 0){
+                        rgn = r;
                         break;
+                    }
+                    if(r->prev == rlist->prev) break;
                 }
+                if(rgn == NULL) goto done;
+                
+                n = min(rgn->length,remaining_clusters);
+                target = rgn->lcn + rgn->length - n;
+                /* subtract target clusters from auxiliary list of free regions */
+                rlist = winx_sub_volume_region(rlist,target,n);
+                if(first_file != mft_file)
+                    first_file->user_defined_flags |= UD_FILE_FRAGMENTED_BY_MFT_OPT;
+                if(move_file(first_file,current_vcn,n,target,0,jp) < 0){
+                    if(!block_cleaned_up){
+                        start_lcn = lcn + clusters_to_move;
+                        goto try_again;
+                    } else {
+                        goto move_mft;
+                    }
+                }
+                current_vcn += n;
+                remaining_clusters -= n;
             }
             /* space cleaned up successfully */
             region.next = region.prev = &region;
@@ -379,8 +388,14 @@ move_mft:
         /* subtract target clusters from auxiliary list of free regions */
         rlist = winx_sub_volume_region(rlist,target,clusters_to_move);
         if(move_file(mft_file,start_vcn,clusters_to_move,target,0,jp) < 0){
-            /* on failures exit */
-            break;
+            if(jp->last_move_status != STATUS_ALREADY_COMMITTED){
+                /* on unrecoverable failures exit */
+                break;
+            }
+            /* go forward and try to cleanup next blocks */
+            mft_file->user_defined_flags &= ~UD_FILE_MOVING_FAILED;
+            start_lcn = target + clusters_to_move;
+            continue;
         }
         /* $mft part moved successfully */
         clusters_to_process -= clusters_to_move;

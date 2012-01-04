@@ -243,6 +243,7 @@ static int move_file_clusters(HANDLE hFile,ULONGLONG startVcn,
         NtWaitForSingleObject(winx_fileno(jp->fVolume),FALSE,NULL);
         Status = iosb.Status;
     }
+    jp->last_move_status = Status;
     if(!NT_SUCCESS(Status)){
         DebugPrintEx(Status,"cannot move file clusters");
         return (-1);
@@ -678,6 +679,7 @@ int move_file(winx_file_info *f,
     ud_file_moving_result moving_result;
     
     time = winx_xtime();
+    jp->last_move_status = 0;
 
     /* validate parameters */
     if(f == NULL || jp == NULL){
