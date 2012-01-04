@@ -71,9 +71,9 @@ for /f "tokens=%SelectedVolume%" %%V in ("%ItemList%") do set ProcessVolume=%%~V
 cls
 echo.
 set MenuItem=0
-set ItemList=-a -d -q -o
+set ItemList=-a -d -q -o --optimize-mft
 
-for %%D in ("Analyze" "Defrag" "Quick Optimize" "Full Optimize") do call :DisplayMenuItem %%~D
+for %%D in ("Analyze" "Defrag" "Quick Optimize" "Full Optimize" "Optimize MFT") do call :DisplayMenuItem %%~D
 
 echo.
 echo 0 ... EXIT
@@ -94,7 +94,7 @@ goto :SelectAction
 for /f "tokens=%SelectedAction%" %%V in ("%ItemList%") do set ProcessAction=%%~V
 if "%ProcessAction%" == "-d" set ProcessAction=
 
-set ItemList=Analyze Defrag QuickOptimize FullOptimize
+set ItemList=Analyze Defrag QuickOptimize FullOptimize OptimizeMFT
 for /f "tokens=%SelectedAction%" %%V in ("%ItemList%") do set ActionName=%%~V
 
 :AskRepeatAction
