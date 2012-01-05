@@ -405,6 +405,9 @@ move_mft:
     }
 
 done:
+    DebugPrint("optimize_mft: final $mft map:");
+    list_mft_blocks(mft_file);
+    
     DebugPrint("%I64u clusters moved",jp->pi.moved_clusters);
     winx_bytes_to_hr(jp->pi.moved_clusters * jp->v_info.bytes_per_cluster,1,buffer,sizeof(buffer));
     DebugPrint("%s moved",buffer);
