@@ -877,7 +877,8 @@ int move_file(winx_file_info *f,
     } else {
         /* new block map is available - use it */
         for(block = f->disp.blockmap; block; block = block->next){
-            if(remove_block_from_file_blocks_tree(jp,block) < 0) break;
+            /* all blocks must be removed! */
+            (void)remove_block_from_file_blocks_tree(jp,block);
             if(block->next == f->disp.blockmap) break;
         }
         winx_list_destroy((list_entry **)(void *)&f->disp.blockmap);
