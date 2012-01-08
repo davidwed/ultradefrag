@@ -315,6 +315,10 @@ static int filter(winx_file_info *f,void *user_defined_data)
         return 0;
     }
     
+    /* skip files with invalid map */
+    if(f->disp.blockmap == NULL)
+        goto skip_file;
+
     /* show debugging information about interesting cases */
     if(is_sparse(f))
         DebugPrint("sparse file found: %ws",f->path);
