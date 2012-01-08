@@ -1,6 +1,6 @@
 HISTORY
 
-  Version 5.0.1  2012-01-
+  Version 5.0.1  2012-01-08
   ------------------------------------------------------------------------------
     - few important bugs in disk processing routines were fixed
     - few bugs in MFT optimizer were fixed
