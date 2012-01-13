@@ -2,6 +2,10 @@ HISTORY
 
   Version 5.0.2  2012-01-
   ------------------------------------------------------------------------------
+    - the following translations were added:
+
+      Bosanski
+
     - the following translations were updated:
 
       Dutch
