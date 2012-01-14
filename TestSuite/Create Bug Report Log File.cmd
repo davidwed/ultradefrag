@@ -49,12 +49,15 @@ set ItemList=
 for /f "tokens=1,6* skip=8" %%D in ('udefrag -l') do call :AddToItemList %%~D & call :DisplayMenuItem %%~D - "%%~F"
 
 echo.
+echo 99 ... All except system drive
+echo.
 echo 0 ... EXIT
 echo.
 set /p SelectedVolume="Select volume to process: "
 
 if "%SelectedVolume%" == "" goto :EOF
 if %SelectedVolume% EQU 0 goto :EOF
+if %SelectedVolume% EQU 99 goto :GetDriveLetter
 
 if %SelectedVolume% LEQ %MenuItem% goto :GetDriveLetter
 echo.
@@ -64,7 +67,11 @@ pause
 goto :SelectVolume
 
 :GetDriveLetter
-for /f "tokens=%SelectedVolume%" %%V in ("%ItemList%") do set ProcessVolume=%%~V
+if %SelectedVolume% EQU 99 (
+    set ProcessVolume=%ItemList%
+) else (
+    for /f "tokens=%SelectedVolume%" %%V in ("%ItemList%") do set ProcessVolume=%%~V
+)
 
 :SelectAction
 :: select action to take
@@ -138,15 +145,12 @@ cls
 echo.
 set UD_DBGPRINT_LEVEL=%ProcessLogLevel%
 echo Debug level set to "%UD_DBGPRINT_LEVEL%"
-echo.
-set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%ProcessVolume:~0,1%.log
-echo Using log file "%UD_LOG_FILE_PATH%"
-echo.
-echo.
-echo Executing "udefrag %RepeatAction% %ProcessAction% %ProcessVolume%"... 
-echo.
-echo.
-udefrag %RepeatAction% %ProcessAction% %ProcessVolume%
+
+if %SelectedVolume% EQU 99 (
+    for %%V in ( %ProcessVolume% ) do if %%V neq %SystemDrive% call :ProcessVolumes %%V
+) else (
+    call :ProcessVolumes %ProcessVolume%
+)
 
 title Operation Completed ...
 
@@ -154,6 +158,19 @@ title Operation Completed ...
 echo.
 pause
 
+goto :EOF
+
+:ProcessVolumes
+    set CurrentVolume=%~1
+    echo.
+    set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
+    echo Using log file "%UD_LOG_FILE_PATH%"
+    echo.
+    echo.
+    echo Executing "udefrag %RepeatAction% %ProcessAction% %CurrentVolume%"... 
+    echo.
+    echo.
+    udefrag %RepeatAction% %ProcessAction% %CurrentVolume%
 goto :EOF
 
 :DisplayMenuItem
