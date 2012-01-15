@@ -162,8 +162,9 @@ goto :EOF
 
 :ProcessVolumes
     set CurrentVolume=%~1
-    echo.
     set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
+
+    echo.
     echo Using log file "%UD_LOG_FILE_PATH%"
     echo.
     echo.
@@ -171,6 +172,9 @@ goto :EOF
     echo.
     echo.
     udefrag %RepeatAction% %ProcessAction% %CurrentVolume%
+    echo.
+    ping -n 11 localhost >nul 2>&1
+    copy /v /y "%CurrentVolume%\fraglist.txt" "%SystemRoot%\UltraDefrag\Logs\fraglist_%CurrentVolume:~0,1%.txt"
 goto :EOF
 
 :DisplayMenuItem

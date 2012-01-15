@@ -35,6 +35,7 @@ cls
 echo.
 echo Collecting available hosts ...
 echo.
+set SelectedHost=0
 set MenuItem=0
 set ItemList=
 
@@ -76,6 +77,10 @@ pause
 
 echo.
 for /l %%P in (%PortNum%,-1,0) do call :UnMountDisk %%P
+
+for %%F in ( "%VM_ROOT_DIR%\%ProcessHost%\Snapshots\*.vdi" ) do VBoxManage closemedium disk "%%~F" --delete >nul 2>&1
+
+goto :SelectHost
 
 :quit
 echo.
