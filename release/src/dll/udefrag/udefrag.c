@@ -198,7 +198,7 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
                 for(k = 1; k < jp->cluster_map.n_colors; k++){
                     n = jp->cluster_map.array[i][k];
                     if(n >= maximum){ /* support of colors precedence  */
-                        if(k != MFT_ZONE_SPACE || !mft_zone_detected){
+                        if((k != MFT_ZONE_SPACE && k != FREE_SPACE) || !mft_zone_detected){
                             maximum = n;
                             index = k;
                         }
