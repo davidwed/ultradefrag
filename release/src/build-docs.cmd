@@ -36,8 +36,12 @@ call :compile_docs .\dll\wgx            wgx          || goto fail
 call :compile_docs .\dll\zenwinx                     || goto fail
 call :compile_docs ..\doc\html\handbook              || goto fail
 
-call :compile_pdf ..\doc\html\handbook a4     UltraDefrag_Handbook || goto fail
-call :compile_pdf ..\doc\html\handbook letter UltraDefrag_Handbook || goto fail
+:: compile PDF documentation if MiKTeX is installed
+pdflatex --version >nul 2>&1
+if not errorlevel 1 (
+    call :compile_pdf ..\doc\html\handbook a4     UltraDefrag_Handbook || goto fail
+    call :compile_pdf ..\doc\html\handbook letter UltraDefrag_Handbook || goto fail
+)
 
 :: move .htaccess file to the root of dev docs
 move /Y doxy-doc\html\.htaccess doxy-doc\.htaccess
