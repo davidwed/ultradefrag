@@ -171,7 +171,7 @@ typedef struct _cmap {
     ULONGLONG clusters_per_last_cell;
     BOOLEAN opposite_order; /* clusters < cells */
     ULONGLONG cells_per_cluster;
-    ULONGLONG cells_per_last_cluster;
+    ULONGLONG unused_cells;
 } cmap;
 
 struct performance_counters {

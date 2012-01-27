@@ -61,7 +61,7 @@
 int allocate_map(int map_size,udefrag_job_parameters *jp)
 {
     int array_size;
-    ULONGLONG i;
+    ULONGLONG used_cells;
     
     if(jp == NULL)
         return (-1);
@@ -112,30 +112,30 @@ fail:
     jp->cluster_map.default_color = SYSTEM_SPACE;
     jp->cluster_map.field_size = jp->v_info.total_clusters;
     
-    /* reset map */
-    memset(jp->cluster_map.array,0,array_size);
     jp->cluster_map.clusters_per_cell = jp->cluster_map.field_size / jp->cluster_map.map_size;
     if(jp->cluster_map.clusters_per_cell){
-        jp->cluster_map.opposite_order = FALSE;
-        jp->cluster_map.clusters_per_last_cell = jp->cluster_map.clusters_per_cell + \
-            (jp->cluster_map.field_size - jp->cluster_map.clusters_per_cell * jp->cluster_map.map_size);
-        DebugPrint("allocate_map: normal order %I64u : %I64u : %I64u", \
-            jp->cluster_map.field_size,jp->cluster_map.clusters_per_cell,jp->cluster_map.clusters_per_last_cell);
-        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
-            jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_cell;
-        jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_last_cell;
+        jp->cluster_map.opposite_order = 0;
+        if(jp->cluster_map.clusters_per_cell * jp->cluster_map.map_size != jp->cluster_map.field_size)
+            jp->cluster_map.clusters_per_cell ++; /* ensure that the map will cover entire disk */
+        used_cells = jp->cluster_map.field_size / jp->cluster_map.clusters_per_cell;
+        if(jp->cluster_map.clusters_per_cell * used_cells != jp->cluster_map.field_size) used_cells ++;
+        jp->cluster_map.unused_cells = jp->cluster_map.map_size - used_cells;
+        jp->cluster_map.clusters_per_last_cell = jp->cluster_map.field_size - \
+           jp->cluster_map.clusters_per_cell * (used_cells - 1);
+        DebugPrint("allocate_map: normal order %I64u : %I64u : %I64u: %I64u", \
+            jp->cluster_map.field_size,jp->cluster_map.clusters_per_cell,
+            jp->cluster_map.clusters_per_last_cell,jp->cluster_map.unused_cells);
     } else {
-        jp->cluster_map.opposite_order = TRUE;
+        jp->cluster_map.opposite_order = 1;
         jp->cluster_map.cells_per_cluster = jp->cluster_map.map_size / jp->cluster_map.field_size;
-        jp->cluster_map.cells_per_last_cluster = jp->cluster_map.cells_per_cluster + \
-            (jp->cluster_map.map_size - jp->cluster_map.cells_per_cluster * jp->cluster_map.field_size);
+        jp->cluster_map.unused_cells = jp->cluster_map.map_size - \
+            jp->cluster_map.cells_per_cluster * jp->cluster_map.field_size;
         DebugPrint("allocate_map: opposite order %I64u : %I64u : %I64u", \
-            jp->cluster_map.field_size,jp->cluster_map.cells_per_cluster,jp->cluster_map.cells_per_last_cluster);
-        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
-            jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
-        jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
+            jp->cluster_map.field_size,jp->cluster_map.cells_per_cluster,jp->cluster_map.unused_cells);
     }
 
+    /* reset map */
+    reset_cluster_map(jp);
     return 0;
 }
 
@@ -144,7 +144,7 @@ fail:
  */
 void reset_cluster_map(udefrag_job_parameters *jp)
 {
-    ULONGLONG i;
+    ULONGLONG i, j;
     
     if(jp == NULL)
         return;
@@ -153,14 +153,17 @@ void reset_cluster_map(udefrag_job_parameters *jp)
         return;
 
     memset(jp->cluster_map.array,0,jp->cluster_map.map_size * jp->cluster_map.n_colors * sizeof(ULONGLONG));
-    if(jp->cluster_map.opposite_order == FALSE){
-        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
+    if(jp->cluster_map.opposite_order == 0){
+        for(i = 0; i < jp->cluster_map.map_size - jp->cluster_map.unused_cells - 1; i++)
             jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_cell;
         jp->cluster_map.array[i][jp->cluster_map.default_color] = jp->cluster_map.clusters_per_last_cell;
+        for(j = 0, i++; j < jp->cluster_map.unused_cells; j++)
+            jp->cluster_map.array[i+j][UNUSED_MAP_SPACE] = jp->cluster_map.clusters_per_cell;
     } else {
-        for(i = 0; i < jp->cluster_map.map_size - 1; i++)
+        for(i = 0; i < jp->cluster_map.map_size - jp->cluster_map.unused_cells; i++)
             jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
-        jp->cluster_map.array[i][jp->cluster_map.default_color] = 1;
+        for(j = 0; j < jp->cluster_map.unused_cells; j++)
+            jp->cluster_map.array[i+j][UNUSED_MAP_SPACE] = 1;
     }
 }
 
@@ -301,17 +304,6 @@ void colorize_map_region(udefrag_job_parameters *jp,
                     jp->cluster_map.array[cell + i][j] = 0;
             }
             jp->cluster_map.array[cell + i][new_color] = 1;
-        }
-        /* colorize remaining cells as unused */
-        if(lcn + length == jp->v_info.total_clusters){
-            cell += ncells;
-            ncells = (jp->cluster_map.cells_per_last_cluster - jp->cluster_map.cells_per_cluster);
-            
-            for(i = 0; i < ncells; i++){
-                for(j = 0; j < jp->cluster_map.n_colors; j++)
-                    jp->cluster_map.array[cell + i][j] = 0;
-                jp->cluster_map.array[cell + i][UNUSED_MAP_SPACE] = 1;
-            }
         }
     }
 }
