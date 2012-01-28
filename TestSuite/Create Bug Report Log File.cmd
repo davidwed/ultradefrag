@@ -114,6 +114,12 @@ if /i not "%RepeatAction%" == "Y" (
     set RepeatAction=-r
 )
 
+:AskDryRun
+:: ask if we like to use dryrun
+echo.
+set /p DryRun="Use dryrun? (Y/[N]) "
+if /i "%DryRun%" == "Y" set UD_DRY_RUN=1
+
 :SelectLogLevel
 :: select log level to use
 cls
@@ -145,6 +151,7 @@ cls
 echo.
 set UD_DBGPRINT_LEVEL=%ProcessLogLevel%
 echo Debug level set to "%UD_DBGPRINT_LEVEL%"
+if "%UD_DRY_RUN%" == "1" echo Dryrun enabled ...
 
 if %SelectedVolume% EQU 99 (
     for %%V in ( %ProcessVolume% ) do if %%V neq %SystemDrive% call :ProcessVolumes %%V
@@ -162,7 +169,11 @@ goto :EOF
 
 :ProcessVolumes
     set CurrentVolume=%~1
-    set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
+    if "%UD_DRY_RUN%" == "1" (
+        set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%_dryrun.log
+    ) else (
+        set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
+    )
 
     echo.
     echo Using log file "%UD_LOG_FILE_PATH%"
@@ -174,7 +185,11 @@ goto :EOF
     udefrag %RepeatAction% %ProcessAction% %CurrentVolume%
     echo.
     ping -n 11 localhost >nul 2>&1
-    copy /v /y "%CurrentVolume%\fraglist.txt" "%SystemRoot%\UltraDefrag\Logs\fraglist_%CurrentVolume:~0,1%.txt"
+    if "%UD_DRY_RUN%" == "1" (
+        copy /v /y "%CurrentVolume%\fraglist.txt" "%SystemRoot%\UltraDefrag\Logs\fraglist_%CurrentVolume:~0,1%_dryrun.txt"
+    ) else (
+        copy /v /y "%CurrentVolume%\fraglist.txt" "%SystemRoot%\UltraDefrag\Logs\fraglist_%CurrentVolume:~0,1%.txt"
+    )
 goto :EOF
 
 :DisplayMenuItem
