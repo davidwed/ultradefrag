@@ -174,7 +174,6 @@ goto :EOF
     ) else (
         set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
     )
-
     echo.
     echo Using log file "%UD_LOG_FILE_PATH%"
     echo.
