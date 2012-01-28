@@ -34,6 +34,7 @@ if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 exit /B 0
 :: set environment
 call :set_build_environment
 echo %ULTRADFGVER% > ..\doc\html\version.ini
+:: TODO remove line below after release of version 6.0.0
 echo %ULTRADFGVER% > ..\doc\html\version_xp.ini
 
 :: build all binaries
