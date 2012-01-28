@@ -34,6 +34,7 @@ if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 exit /B 0
 :: set environment
 call :set_build_environment
 echo %ULTRADFGVER% > ..\doc\html\version.ini
+echo %ULTRADFGVER% > ..\doc\html\version_xp.ini
 
 :: build all binaries
 call build-targets.cmd %* || goto fail
@@ -123,7 +124,6 @@ rem Example:  call :build_installer .\bin\ia64 ia64
     pushd %1
     copy /Y "%~dp0\installer\UltraDefrag.nsi" .\
     copy /Y "%~dp0\installer\lang.ini" .\
-    copy /Y "%~dp0\installer\lang-classical.ini" .\
     if "%RELEASE_STAGE%" neq "" (
         set NSIS_COMPILER_FLAGS=/DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 /DRELEASE_STAGE=%RELEASE_STAGE% /DUDVERSION_SUFFIX=%UDVERSION_SUFFIX%
     ) else (
