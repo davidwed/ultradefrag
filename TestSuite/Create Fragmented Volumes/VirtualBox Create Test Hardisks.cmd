@@ -7,7 +7,7 @@
 :: It can be used to create NewHardDisk{Index}.vdi files
 :: in the folders containing virtual machines
 ::
-:: Copyright (c) 2010-2012 by Stefan Pendl (stefanpe@users.sourceforge.net).
+:: Copyright (c) 2010-2012 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
 :: it under the terms of the GNU General Public License as published by
