@@ -32,7 +32,7 @@ PROJECT_NAME           = "udefrag.dll"
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER         = 5.0.1
+PROJECT_NUMBER         = 5.0.2
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -893,7 +893,7 @@ HTML_FOOTER            = ./rsc/footer.html
 # the style sheet file to the HTML output directory, so don't put your own
 # style sheet in the HTML output directory as well, or it will be erased!
 
-HTML_STYLESHEET        = ./rsc/footer.html
+HTML_STYLESHEET        = ./rsc/custom-doxygen.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
