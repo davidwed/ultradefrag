@@ -33,3 +33,7 @@ following conditions:
    text to your product name.
  * The logo can be used in any scale as long as the relative
    proportions of its elements are maintained. 
+
+                               ***
+
+toolbar_monochrome.bmp - a monochrome version of the GUI toolbar
