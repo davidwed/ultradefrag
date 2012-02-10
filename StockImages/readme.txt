@@ -4,13 +4,13 @@ they may come in handy later.
 
                                ***
 
-Redesigned main icon in 16x16, 22x22, 24x24, 32x32, 40x40, 48x48,
-64x64, 96x96, 128x128 and 256x256 sizes:
+Redesigned main icon in 16x16, 20x20, 22x22, 24x24, 26x26, 32x32,
+40x40, 48x48, 64x64, 96x96, 128x128 and 256x256 sizes:
 
 advanced white.ico                - new design of the main icon
 advanced white adjusted.ico       - new design, but 16x16 in old fashion
-advanced white adjusted twice.ico - new design, but 16x16, 22x22, 
-                                    24x24 and 32x32 in old fashion
+advanced white adjusted twice.ico - new design, but 16x16, 20x20, 22x22, 
+                                    24x24, 26x26 and 32x32 in old fashion
 
                                ***
 
