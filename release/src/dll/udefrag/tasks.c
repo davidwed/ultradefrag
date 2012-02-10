@@ -785,6 +785,86 @@ static int files_compare(const void *prb_a, const void *prb_b, void *prb_param)
 }
 
 /**
+ * @brief move_files_to_front helper.
+ */
+static winx_file_info *find_largest_file(udefrag_job_parameters *jp,
+        struct prb_table **pt,ULONGLONG min_lcn,int flags,int *files_found,
+        ULONGLONG *length,ULONGLONG max_length)
+{
+    winx_file_info *file, *largest_file = NULL;
+    struct prb_traverser t;
+    winx_file_info f;
+    winx_blockmap b;
+    ULONGLONG file_length;
+    ULONGLONG tm;
+    
+    tm = winx_xtime();
+    if(*pt == NULL) goto slow_search;
+    largest_file = NULL; *length = 0; *files_found = 0;
+    b.lcn = min_lcn;
+    f.disp.blockmap = &b;
+    prb_t_init(&t,*pt);
+    file = prb_t_insert(&t,*pt,&f);
+    if(file == NULL){
+        DebugPrint("find_largest_file: cannot insert file to the tree");
+        prb_destroy(*pt,NULL);
+        *pt = NULL;
+        goto slow_search;
+    }
+    if(file == &f){
+        file = prb_t_next(&t);
+        if(prb_delete(*pt,&f) == NULL){
+            DebugPrint("find_largest_file: cannot remove file from the tree");
+            prb_destroy(*pt,NULL);
+            *pt = NULL;
+        }
+    }
+    while(file){
+        /*DebugPrint("XX: %ws",file->path);*/
+        if(!can_move(file,jp) || is_mft(file,jp)){
+        } else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+        } else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
+        } else {
+            *files_found = 1;
+            file_length = file->disp.clusters;
+            if(file_length > *length \
+              && file_length <= max_length){
+                largest_file = file;
+                *length = file_length;
+                if(file_length == max_length) break;
+            }
+        }
+        file = prb_t_next(&t);
+    }
+    goto done;
+
+slow_search:
+    largest_file = NULL; *length = 0; *files_found = 0;
+    for(file = jp->filelist; file; file = file->next){
+        if(can_move(file,jp) && !is_mft(file,jp)){
+            if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
+            } else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
+            } else {
+                if(file->disp.blockmap->lcn >= min_lcn){
+                    *files_found = 1;
+                    file_length = file->disp.clusters;
+                    if(file_length > *length \
+                      && file_length <= max_length){
+                        largest_file = file;
+                        *length = file_length;
+                    }
+                }
+            }
+        }
+        if(file->next == jp->filelist) break;
+    }
+
+done:
+    jp->p_counters.searching_time += winx_xtime() - tm;
+    return largest_file;
+}
+
+/**
  * @brief Moves selected group of files
  * to the beginning of the volume to free its end.
  * @details This routine tries to move each file entirely
@@ -797,24 +877,22 @@ static int files_compare(const void *prb_a, const void *prb_b, void *prb_param)
  */
 int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flags)
 {
-    ULONGLONG time, tm;
+    ULONGLONG time;
     ULONGLONG moves, pass;
     winx_file_info *file,/* *last_file, */*largest_file;
     ULONGLONG length, rgn_size_threshold;
     int files_found;
-    ULONGLONG min_lcn, rgn_lcn, min_file_lcn, min_rgn_lcn, max_rgn_lcn;
+    ULONGLONG rgn_lcn, min_file_lcn, min_rgn_lcn, max_rgn_lcn;
     /*ULONGLONG end_lcn, last_lcn;*/
-    winx_volume_region *rgn;
+    winx_volume_region *rgn, *r;
     ULONGLONG clusters_to_move;
-    ULONGLONG file_length, file_lcn;
+    ULONGLONG file_lcn;
     winx_blockmap *block;
-    ULONGLONG new_sp;
+    ULONGLONG new_sp = 0;
     int completed;
     char buffer[32];
     
     struct prb_table *pt;
-    struct prb_traverser t;
-    winx_file_info f;
     winx_blockmap b;
     
     jp->pi.current_operation = VOLUME_OPTIMIZATION;
@@ -867,143 +945,91 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
         release_temp_space_regions(jp);
         
         min_rgn_lcn = 0; max_rgn_lcn = jp->v_info.total_clusters - 1;
-repeat_scan:
-        for(rgn = jp->free_regions; rgn; rgn = rgn->next){
-            if(jp->termination_router((void *)jp)) break;
-            /* break if we have already moved files behind the current region */
-            if(rgn->lcn > max_rgn_lcn) break;
-            if(rgn->length > rgn_size_threshold && rgn->lcn >= min_rgn_lcn){
-                /* break if on the next pass the current region will be moved to the end */
-                if(jp->udo.job_flags & UD_JOB_REPEAT){
-                    new_sp = calculate_starting_point(jp,start_lcn);
-                    if(rgn->lcn > new_sp){
-                        completed = 1;
-                        if(jp->job_type == QUICK_OPTIMIZATION_JOB){
-                            if(get_number_of_fragmented_clusters(jp,new_sp,rgn->lcn) == 0)
-                                completed = 0;
-                        }
-                        if(completed){
-                            DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u",rgn->lcn,rgn->length);
-                            DebugPrint("move_files_to_front: heavily fragmented space begins at %I64u cluster",new_sp);
-                            goto done;
-                        }
+        while(!jp->termination_router((void *)jp)){
+            if(jp->udo.job_flags & UD_JOB_REPEAT)
+                new_sp = calculate_starting_point(jp,start_lcn);
+            rgn = NULL;
+            for(r = jp->free_regions; r; r = r->next){
+                if(r->lcn >= min_rgn_lcn && r->lcn <= max_rgn_lcn){
+                    if(rgn->length > rgn_size_threshold){
+                        rgn = r;
+                        break;
                     }
                 }
-try_again:
-                tm = winx_xtime();
-                if(pt != NULL){
-                    largest_file = NULL; length = 0; files_found = 0;
-                    b.lcn = rgn->lcn + 1;
-                    f.disp.blockmap = &b;
-                    prb_t_init(&t,pt);
-                    file = prb_t_insert(&t,pt,&f);
-                    if(file == NULL){
-                        DebugPrint("move_files_to_front: cannot insert file to the tree");
-                        prb_destroy(pt,NULL);
-                        pt = NULL;
-                        goto slow_search;
+                if(r->next == jp->free_regions) break;
+            }
+            if(rgn == NULL) break;
+            /* break if on the next pass the region will be moved to the end */
+            if(jp->udo.job_flags & UD_JOB_REPEAT){
+                if(rgn->lcn > new_sp){
+                    completed = 1;
+                    if(jp->job_type == QUICK_OPTIMIZATION_JOB){
+                        if(get_number_of_fragmented_clusters(jp,new_sp,rgn->lcn) == 0)
+                            completed = 0;
                     }
-                    if(file == &f){
-                        file = prb_t_next(&t);
-                        if(prb_delete(pt,&f) == NULL){
-                            DebugPrint("move_files_to_front: cannot remove file from the tree (case 1)");
-                            prb_destroy(pt,NULL);
-                            pt = NULL;
-                        }
+                    if(completed){
+                        DebugPrint("rgn->lcn = %I64u, rgn->length = %I64u",rgn->lcn,rgn->length);
+                        DebugPrint("move_files_to_front: heavily fragmented space begins at %I64u cluster",new_sp);
+                        goto done;
                     }
-                    while(file){
-                        /*DebugPrint("XX: %ws",file->path);*/
-                        if(!can_move(file,jp) || is_mft(file,jp)){
-                        } else if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
-                        } else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
-                        } else {
-                            files_found = 1;
-                            file_length = file->disp.clusters;
-                            if(file_length > length \
-                              && file_length <= rgn->length){
-                                largest_file = file;
-                                length = file_length;
-                                if(file_length == rgn->length) break;
-                            }
-                        }
-                        file = prb_t_next(&t);
-                    }
-                } else {
-slow_search:
-                    largest_file = NULL; length = 0; files_found = 0;
-                    min_lcn = max(start_lcn, rgn->lcn + 1);
-                    for(file = jp->filelist; file; file = file->next){
-                        if(can_move(file,jp) && !is_mft(file,jp)){
-                            if((flags == MOVE_FRAGMENTED) && !is_fragmented(file)){
-                            } else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(file)){
-                            } else {
-                                if(file->disp.blockmap->lcn >= min_lcn){
-                                    files_found = 1;
-                                    file_length = file->disp.clusters;
-                                    if(file_length > length \
-                                      && file_length <= rgn->length){
-                                        largest_file = file;
-                                        length = file_length;
-                                    }
-                                }
-                            }
-                        }
-                        if(file->next == jp->filelist) break;
-                    }
-                }
-                jp->p_counters.searching_time += winx_xtime() - tm;
-
-                if(files_found == 0){
-                    /* no more files can be moved on the current pass */
-                    break; /*goto done;*/
-                }
-                if(largest_file == NULL){
-                    /* current free region is too small, let's try next one */
-                    rgn_size_threshold = rgn->length;
-                } else {
-                    if(is_file_locked(largest_file,jp)){
-                        jp->pi.processed_clusters += largest_file->disp.clusters;
-                        goto try_again; /* skip locked files */
-                    }
-                    /* move the file */
-                    min_file_lcn = jp->v_info.total_clusters - 1;
-                    for(block = largest_file->disp.blockmap; block; block = block->next){
-                        if(block->length && block->lcn < min_file_lcn)
-                            min_file_lcn = block->lcn;
-                        if(block->next == largest_file->disp.blockmap) break;
-                    }
-                    rgn_lcn = rgn->lcn;
-                    clusters_to_move = largest_file->disp.clusters;
-                    file_lcn = largest_file->disp.blockmap->lcn;
-                    if(move_file(largest_file,largest_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
-                        moves ++;
-                        jp->pi.total_moves ++;
-                    }
-                    /* regardless of result, exclude the file */
-                    largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
-                    largest_file->user_defined_flags |= UD_FILE_MOVED_TO_FRONT;
-                    /* remove file from the tree to speed things up */
-                    block = largest_file->disp.blockmap;
-                    if(pt != NULL /*&& largest_file->disp.blockmap == NULL*/){ /* remove invalid tree items */
-                        b.lcn = file_lcn;
-                        largest_file->disp.blockmap = &b;
-                        if(prb_delete(pt,largest_file) == NULL){
-                            DebugPrint("move_files_to_front: cannot remove file from the tree (case 2)");
-                            prb_destroy(pt,NULL);
-                            pt = NULL;
-                        }
-                    }
-                    largest_file->disp.blockmap = block;
-                    /* continue from the first free region after used one */
-                    min_rgn_lcn = rgn_lcn + 1;
-                    if(max_rgn_lcn > min_file_lcn - 1)
-                        max_rgn_lcn = min_file_lcn - 1;
-                    goto repeat_scan;
                 }
             }
-            if(rgn->next == jp->free_regions) break;
+
+            largest_file = NULL;
+            do {
+                if(largest_file){
+                    /* count clusters of locked files */
+                    jp->pi.processed_clusters += largest_file->disp.clusters;
+                }
+                largest_file = find_largest_file(jp,&pt,max(start_lcn, rgn->lcn + 1),flags,&files_found,&length,rgn->length);
+                if(files_found == 0){
+                    /* no more files can be moved on the current pass */
+                    goto next_pass;
+                }
+                if(largest_file == NULL) break;
+            } while(is_file_locked(largest_file,jp));
+
+            if(largest_file == NULL){
+                /* current free region is too small, let's try next one */
+                rgn_size_threshold = rgn->length;
+            } else {
+                /* move the file */
+                min_file_lcn = jp->v_info.total_clusters - 1;
+                for(block = largest_file->disp.blockmap; block; block = block->next){
+                    if(block->length && block->lcn < min_file_lcn)
+                        min_file_lcn = block->lcn;
+                    if(block->next == largest_file->disp.blockmap) break;
+                }
+                rgn_lcn = rgn->lcn;
+                clusters_to_move = largest_file->disp.clusters;
+                file_lcn = largest_file->disp.blockmap->lcn;
+                if(move_file(largest_file,largest_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
+                    moves ++;
+                    jp->pi.total_moves ++;
+                }
+                /* regardless of result, exclude the file */
+                largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
+                largest_file->user_defined_flags |= UD_FILE_MOVED_TO_FRONT;
+                /* remove file from the tree to speed things up */
+                block = largest_file->disp.blockmap;
+                if(pt != NULL /*&& largest_file->disp.blockmap == NULL*/){ /* remove invalid tree items */
+                    b.lcn = file_lcn;
+                    largest_file->disp.blockmap = &b;
+                    if(prb_delete(pt,largest_file) == NULL){
+                        DebugPrint("move_files_to_front: cannot remove file from the tree");
+                        prb_destroy(pt,NULL);
+                        pt = NULL;
+                    }
+                }
+                largest_file->disp.blockmap = block;
+                /* continue from the first free region after used one */
+                min_rgn_lcn = rgn_lcn + 1;
+                if(max_rgn_lcn > min_file_lcn - 1)
+                    max_rgn_lcn = min_file_lcn - 1;
+            }
         }
-    
+
+next_pass:    
         if(moves == 0) break;
         DebugPrint("move_files_to_front: pass %I64u completed, %I64u files moved",pass,moves);
         pass ++;
@@ -1042,7 +1068,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
     winx_blockmap *first_block;
     ULONGLONG block_lcn, block_length, n;
     ULONGLONG current_vcn, remaining_clusters;
-    winx_volume_region *rgn;
+    winx_volume_region *rgn, *last_rgn;
     ULONGLONG clusters_to_move;
     char buffer[32];
     
@@ -1084,22 +1110,30 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
             if(jp->free_regions == NULL) goto done;
             current_vcn = first_block->vcn;
             remaining_clusters = first_block->length;
-            for(rgn = jp->free_regions->prev; rgn && remaining_clusters; rgn = jp->free_regions->prev){
-                if(rgn->lcn < block_lcn + block_length){
+            while(remaining_clusters){
+                /* find last suitable free region */
+                if(jp->free_regions == NULL) goto done;
+                last_rgn = NULL;
+                for(rgn = jp->free_regions->prev; rgn; rgn = rgn->prev){
+                    if(rgn->length > 0){
+                        last_rgn = rgn;
+                        break;
+                    }
+                    if(rgn->prev == jp->free_regions->prev) break;
+                }
+                if(last_rgn == NULL) goto done;
+                if(last_rgn->lcn < block_lcn + block_length){
                     /* no more moves to the end of disk are possible */
                     goto done;
                 }
-                if(rgn->length > 0){
-                    n = min(rgn->length,remaining_clusters);
-                    if(move_file(first_file,current_vcn,n,rgn->lcn + rgn->length - n,0,jp) < 0){
-                        /* exclude file from the current task to avoid infinite loops */
-                        file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
-                    }
-                    current_vcn += n;
-                    remaining_clusters -= n;
-                    jp->pi.total_moves ++;
+                n = min(last_rgn->length,remaining_clusters);
+                if(move_file(first_file,current_vcn,n,last_rgn->lcn + last_rgn->length - n,0,jp) < 0){
+                    /* exclude file from the current task to avoid infinite loops */
+                    file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
                 }
-                if(jp->free_regions == NULL) goto done;
+                current_vcn += n;
+                remaining_clusters -= n;
+                jp->pi.total_moves ++;
             }
         } else {
             /* it is safe to move entire files and entire blocks of compressed/sparse files */
