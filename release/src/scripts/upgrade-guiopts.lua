@@ -67,19 +67,20 @@ in_filter = "$in_filter"
 ex_filter = "$ex_filter"
 
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
--- The sizelimit filter allows to exclude big files from the
--- defragmentation. For example, when you watch a movie, it takes usually
--- 1-2 hours while time needed to move drive's head from one fragment to
--- another is about a few seconds. Therefore, you'll see no difference between 
--- fragmented and not fragmented movie file. By setting sizelimit filter, 
--- overall disk defragmentation time can be highly decreased.
+-- The file_size_threshold filter allows to exclude big files from
+-- the defragmentation. For example, when you watch a movie, it takes
+-- usually 1-2 hours while time needed to move drive's head from one 
+-- fragment to another is about a few seconds. Therefore, you'll see
+-- no difference between fragmented and not fragmented movie file.
+-- By setting the file_size_threshold filter, overall disk 
+-- defragmentation time can be highly decreased.
 
 -- To exclude all files greater than 100 Mb, set:
 
--- sizelimit = "100 Mb"
+-- file_size_threshold = "100 Mb"
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-sizelimit = "$sizelimit"
+file_size_threshold = "$file_size_threshold"
 
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -- The fragments_threshold filter allows to exclude files which have low
@@ -254,7 +255,7 @@ end
 -- THE MAIN CODE STARTS HERE
 -- current version of configuration file
 -- version numbers 0-99 are reserved for 5.0.x series of the program
-current_version = 2
+current_version = 3
 old_version = 0
 upgrade_needed = 1
 
@@ -319,6 +320,10 @@ if upgrade_needed ~= 0 then
         -- this is a main reason for upgrade to the version 1
         in_filter = ""
         ex_filter = "*system volume information*;*temp*;*tmp*;*recycle*;*.zip;*.7z;*.rar"
+    end
+    if file_size_threshold == nil then
+        -- sizelimit has been superseded by file_size_threshold
+        file_size_threshold = sizelimit
     end
     
     -- save the upgraded configuration
