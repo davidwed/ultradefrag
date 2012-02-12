@@ -1129,7 +1129,7 @@ int move_files_to_back(udefrag_job_parameters *jp, ULONGLONG start_lcn, int flag
                 n = min(last_rgn->length,remaining_clusters);
                 if(move_file(first_file,current_vcn,n,last_rgn->lcn + last_rgn->length - n,0,jp) < 0){
                     /* exclude file from the current task to avoid infinite loops */
-                    file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
+                    first_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
                 }
                 current_vcn += n;
                 remaining_clusters -= n;
