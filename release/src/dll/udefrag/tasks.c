@@ -817,6 +817,7 @@ static winx_file_info *find_largest_file(udefrag_job_parameters *jp,
             DebugPrint("find_largest_file: cannot remove file from the tree");
             prb_destroy(*pt,NULL);
             *pt = NULL;
+            goto slow_search;
         }
     }
     while(file){
