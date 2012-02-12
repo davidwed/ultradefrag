@@ -892,9 +892,8 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
     ULONGLONG new_sp = 0;
     int completed;
     char buffer[32];
-    
+
     struct prb_table *pt;
-    winx_blockmap b;
     
     jp->pi.current_operation = VOLUME_OPTIMIZATION;
     jp->pi.moved_clusters = 0;
@@ -1004,6 +1003,14 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
                 rgn_lcn = rgn->lcn;
                 clusters_to_move = largest_file->disp.clusters;
                 file_lcn = largest_file->disp.blockmap->lcn;
+                /* move_file may destroy map of the file, so remove it from the tree */
+                if(pt){
+                    if(prb_delete(pt,largest_file) == NULL){
+                        DebugPrint("move_files_to_front: cannot remove file from the tree");
+                        prb_destroy(pt,NULL);
+                        pt = NULL;
+                    }
+                }
                 if(move_file(largest_file,largest_file->disp.blockmap->vcn,clusters_to_move,rgn->lcn,0,jp) >= 0){
                     moves ++;
                     jp->pi.total_moves ++;
@@ -1011,18 +1018,6 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
                 /* regardless of result, exclude the file */
                 largest_file->user_defined_flags |= UD_FILE_CURRENTLY_EXCLUDED;
                 largest_file->user_defined_flags |= UD_FILE_MOVED_TO_FRONT;
-                /* remove file from the tree to speed things up */
-                block = largest_file->disp.blockmap;
-                if(pt != NULL /*&& largest_file->disp.blockmap == NULL*/){ /* remove invalid tree items */
-                    b.lcn = file_lcn;
-                    largest_file->disp.blockmap = &b;
-                    if(prb_delete(pt,largest_file) == NULL){
-                        DebugPrint("move_files_to_front: cannot remove file from the tree");
-                        prb_destroy(pt,NULL);
-                        pt = NULL;
-                    }
-                }
-                largest_file->disp.blockmap = block;
                 /* continue from the first free region after used one */
                 min_rgn_lcn = rgn_lcn + 1;
                 if(max_rgn_lcn > min_file_lcn - 1)
