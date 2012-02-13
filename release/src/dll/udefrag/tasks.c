@@ -951,7 +951,7 @@ int move_files_to_front(udefrag_job_parameters *jp, ULONGLONG start_lcn, int fla
             rgn = NULL;
             for(r = jp->free_regions; r; r = r->next){
                 if(r->lcn >= min_rgn_lcn && r->lcn <= max_rgn_lcn){
-                    if(rgn->length > rgn_size_threshold){
+                    if(r->length > rgn_size_threshold){
                         rgn = r;
                         break;
                     }
