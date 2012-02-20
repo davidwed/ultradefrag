@@ -38,7 +38,7 @@
  * Optimize the disk space by moving not fragmented files to the beginning of the disk.
  *
  * @par --optimize-mft
- * Concatenate the MFT into one single chunk.
+ * Optimize the MFT by placing its fragments as close to each other as possible.
  *
  * @par -l, --list-available-volumes
  * List all disks available for defragmentation, except removable. Each line of the

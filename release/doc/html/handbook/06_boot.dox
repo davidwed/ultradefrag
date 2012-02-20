@@ -59,7 +59,7 @@
  * computer. It will be shut down automatically after the job is completed.
  * <br/><br/>
  * To abort the script execution and enter the interactive mode immediately
- * hit <b>ESC</b> at any time during boot time script processing.
+ * hit <b>ESC</b> at any time during the boot time script processing.
  *
  * @par Interactive mode
  * When the exit command is missing in the boot time script UltraDefrag
