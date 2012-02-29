@@ -37,3 +37,6 @@ EXPORTS
     
     WgxGetOptions
     WgxSaveOptions
+
+    WgxSetTaskbarIconOverlay
+    WgxRemoveTaskbarIconOverlay
