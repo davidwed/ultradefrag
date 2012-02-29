@@ -40,6 +40,13 @@ IDB_ABOUTBOX_PICTURE          BITMAP  DISCARDABLE     "res/ship.bmp"
 IDB_ABOUTBOX_PICTURE_8_BIT    BITMAP  DISCARDABLE     "res/ship_8bit.bmp"
 
 /*
+* This icon is copied from Fugue icon set:
+* http://p.yusukekamiyamane.com/
+* It is licensed under a Creative Commons Attribution 3.0 License.
+*/
+IDI_BUSY                ICON    DISCARDABLE     "res/hourglass_arrow.ico"
+
+/*
 * All toolbar pictures must be in 24bpp format,
 * but 8bpp versions should use less colors
 * to be nicely rendered on screens with

@@ -41,6 +41,7 @@
 #define IDR_ACCELERATOR2                131
 
 #define IDI_SHUTDOWN                    140
+#define IDI_BUSY                        145
 #define IDR_MAIN_ACCELERATOR            150
 
 /* for 24/32 bits per pixel (xp etc) */
