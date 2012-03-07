@@ -711,7 +711,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
     short lang_name[MAX_PATH];
     wchar_t *report_opts_path;
     FILE *f;
-    int flag;
+    int flag, disable_latest_version_check_old;
     
     if(uMsg == TaskbarButtonCreatedMsg){
         /* set taskbar icon overlay */
@@ -888,6 +888,12 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             return 0;
         case IDM_FAQ:
             OpenWebPage("FAQ.html");
+            return 0;
+        case IDM_CHECK_UPDATE:
+            disable_latest_version_check_old = disable_latest_version_check;
+            disable_latest_version_check = 0;
+            CheckForTheNewVersion();
+            disable_latest_version_check = disable_latest_version_check_old;
             return 0;
         case IDM_ABOUT:
             AboutBox();
