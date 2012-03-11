@@ -328,7 +328,7 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
     SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(FALSE,0));
     
     /* set taskbar icon overlay */
-    if(job_type != ANALYSIS_JOB && show_taskbar_icon_overlay && hTaskbarIconEvent){
+    if(show_taskbar_icon_overlay && hTaskbarIconEvent){
         if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
             WgxDbgPrintLastError("StartJobsThreadProc: wait on hTaskbarIconEvent failed");
         } else {
@@ -388,7 +388,7 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
     SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(TRUE,0));
     
     /* remove taskbar icon overlay */
-    if(job_type != ANALYSIS_JOB && hTaskbarIconEvent){
+    if(hTaskbarIconEvent){
         if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
             WgxDbgPrintLastError("StartJobsThreadProc: wait on hTaskbarIconEvent failed");
         } else {
