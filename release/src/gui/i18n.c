@@ -189,7 +189,6 @@ struct menu_item menu_items[] = {
  * @internal
  * @brief Synchronization events.
  */
-HANDLE hLangPackEvent = NULL;
 HANDLE hLangMenuEvent = NULL;
 
 int lang_ini_tracking_stopped = 0;
@@ -204,18 +203,10 @@ int stop_track_i18n_folder = 0;
  */
 int Init_I18N_Events(void)
 {
-    hLangPackEvent = CreateEvent(NULL,FALSE,TRUE,NULL);
-    if(hLangPackEvent == NULL){
-        WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
-            "Cannot create language pack synchronization event!");
-        return (-1);
-    }
-
     hLangMenuEvent = CreateEvent(NULL,FALSE,TRUE,NULL);
     if(hLangMenuEvent == NULL){
         WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
             "Cannot create language menu synchronization event!");
-        CloseHandle(hLangPackEvent);
         return (-1);
     }
     
@@ -231,22 +222,16 @@ void ApplyLanguagePack(void)
     wchar_t path[MAX_PATH];
     udefrag_progress_info pi;
     MENUITEMINFOW mi;
-    short *s = L"";
-    short buffer[256];
+    wchar_t *text;
+    wchar_t *s = L"";
+    wchar_t buffer[256];
     int i;
     LVCOLUMNW lvc;
-    
-    /* synchronize with other threads */
-    if(WaitForSingleObject(hLangPackEvent,INFINITE) != WAIT_OBJECT_0){
-        WgxDbgPrintLastError("ApplyLanguagePack: wait on hLangPackEvent failed");
-        return;
-    }
     
     /* read lang.ini file */
     GetPrivateProfileString("Language","Selected","",lang_name,MAX_PATH,".\\lang.ini");
     if(lang_name[0] == 0){
         WgxDbgPrint("Selected language name not found in lang.ini file\n");
-        SetEvent(hLangPackEvent);
         /* assign default strings to the toolbar tooltips */
         UpdateToolbarTooltips();
         return;
@@ -262,35 +247,50 @@ void ApplyLanguagePack(void)
     
     /* apply new strings to the list of volumes */
     lvc.mask = LVCF_TEXT;
-    lvc.pszText = WgxGetResourceString(i18n_table,L"VOLUME");
-    SendMessage(hList,LVM_SETCOLUMNW,0,(LPARAM)&lvc);
-    lvc.pszText = WgxGetResourceString(i18n_table,L"STATUS");
-    SendMessage(hList,LVM_SETCOLUMNW,1,(LPARAM)&lvc);
-    lvc.pszText = WgxGetResourceString(i18n_table,L"TOTAL");
-    SendMessage(hList,LVM_SETCOLUMNW,2,(LPARAM)&lvc);
-    lvc.pszText = WgxGetResourceString(i18n_table,L"FREE");
-    SendMessage(hList,LVM_SETCOLUMNW,3,(LPARAM)&lvc);
-    lvc.pszText = WgxGetResourceString(i18n_table,L"PERCENT");
-    SendMessage(hList,LVM_SETCOLUMNW,4,(LPARAM)&lvc);
+    lvc.pszText = text = WgxGetResourceString(i18n_table,L"VOLUME");
+    if(text){
+        SendMessage(hList,LVM_SETCOLUMNW,0,(LPARAM)&lvc);
+        free(text);
+    }
+    lvc.pszText =  text = WgxGetResourceString(i18n_table,L"STATUS");
+    if(text){
+        SendMessage(hList,LVM_SETCOLUMNW,1,(LPARAM)&lvc);
+        free(text);
+    }
+    lvc.pszText =  text = WgxGetResourceString(i18n_table,L"TOTAL");
+    if(text){
+        SendMessage(hList,LVM_SETCOLUMNW,2,(LPARAM)&lvc);
+        free(text);
+    }
+    lvc.pszText =  text = WgxGetResourceString(i18n_table,L"FREE");
+    if(text){
+        SendMessage(hList,LVM_SETCOLUMNW,3,(LPARAM)&lvc);
+        free(text);
+    }
+    lvc.pszText =  text = WgxGetResourceString(i18n_table,L"PERCENT");
+    if(text){
+        SendMessage(hList,LVM_SETCOLUMNW,4,(LPARAM)&lvc);
+        free(text);
+    }
     
     /* apply new strings to the main menu */
     for(i = 0; menu_items[i].id; i++){
         s = WgxGetResourceString(i18n_table,menu_items[i].key);
-        if(menu_items[i].hotkeys)
-            _snwprintf(buffer,256,L"%ws\t%hs",s,menu_items[i].hotkeys);
-        else
-            _snwprintf(buffer,256,L"%ws",s);
-        buffer[255] = 0;
-        memset(&mi,0,sizeof(MENUITEMINFOW));
-        mi.cbSize = sizeof(MENUITEMINFOW);
-        mi.fMask = MIIM_TYPE;
-        mi.fType = MFT_STRING;
-        mi.dwTypeData = buffer;
-        SetMenuItemInfoW(hMainMenu,menu_items[i].id,FALSE,&mi);
+        if(s){
+            if(menu_items[i].hotkeys)
+                _snwprintf(buffer,256,L"%ws\t%hs",s,menu_items[i].hotkeys);
+            else
+                _snwprintf(buffer,256,L"%ws",s);
+            buffer[255] = 0;
+            memset(&mi,0,sizeof(MENUITEMINFOW));
+            mi.cbSize = sizeof(MENUITEMINFOW);
+            mi.fMask = MIIM_TYPE;
+            mi.fType = MFT_STRING;
+            mi.dwTypeData = buffer;
+            SetMenuItemInfoW(hMainMenu,menu_items[i].id,FALSE,&mi);
+            free(s);
+        }
     }
-    
-    /* end of synchronization */
-    SetEvent(hLangPackEvent);
     
     /* apply new strings to the toolbar */
     UpdateToolbarTooltips();
@@ -308,6 +308,18 @@ void ApplyLanguagePack(void)
     } else {
         memset(&pi,0,sizeof(udefrag_progress_info));
         UpdateStatusBar(&pi);
+    }
+    
+    /* update taskbar icon overlay */
+    if(show_taskbar_icon_overlay && hTaskbarIconEvent){
+        if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
+            WgxDbgPrintLastError("ApplyLanguagePack: wait on hTaskbarIconEvent failed");
+        } else {
+            RemoveTaskbarIconOverlay();
+            if(job_is_running)
+                SetTaskbarIconOverlay(IDI_BUSY,L"JOB_IS_RUNNING");
+            SetEvent(hTaskbarIconEvent);
+        }
     }
     
     /* define whether to use custom font for dialog boxes */
@@ -343,6 +355,7 @@ static void free_item (void *prb_item, void *prb_param)
 void BuildLanguageMenu(void)
 {
     MENUITEMINFO mi;
+    wchar_t *text;
     HMENU hLangMenu;
     intptr_t h;
     struct _wfinddata_t lng_file;
@@ -400,9 +413,15 @@ void BuildLanguageMenu(void)
     }
     
     /* add translations folder menu item and a separator */
-    if(!AppendMenuW(hLangMenu,MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,
-      WgxGetResourceString(i18n_table,L"TRANSLATIONS_FOLDER")))
-        WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+    text = WgxGetResourceString(i18n_table,L"TRANSLATIONS_FOLDER");
+    if(text){
+        if(!AppendMenuW(hLangMenu,MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,text))
+            WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+        free(text);
+    } else {
+        if(!AppendMenuW(hLangMenu,MF_STRING | MF_ENABLED,IDM_TRANSLATIONS_FOLDER,L"Translations folder"))
+            WgxDbgPrintLastError("BuildLanguageMenu: cannot append menu item");
+    }
     AppendMenu(hLangMenu,MF_SEPARATOR,0,NULL);
     
     h = _wfindfirst(L".\\i18n\\*.lng",&lng_file);
@@ -653,8 +672,6 @@ void StopI18nFolderChangesTracking()
  */
 void Destroy_I18N_Events(void)
 {
-    if(hLangPackEvent)
-        CloseHandle(hLangPackEvent);
     if(hLangMenuEvent)
         CloseHandle(hLangMenuEvent);
 }

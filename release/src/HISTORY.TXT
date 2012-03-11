@@ -12,6 +12,7 @@
       
     - Internals: WgxSetTaskbarIconOverlay, WgxRemoveTaskbarIconOverlay
       routines added to wgx library
+    - WgxGetResourceString behavior changed
 
 
   Version 5.0.3  2012-02-26
