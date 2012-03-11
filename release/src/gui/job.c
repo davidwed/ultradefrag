@@ -60,20 +60,9 @@ extern int map_lines;
 /**
  * @brief Initializes structures belonging to all jobs.
  */
-int init_jobs(void)
+void init_jobs(void)
 {
-    char event_name[64];
     int i;
-    
-    _snprintf(event_name,64,"udefrag-gui-%u",(int)GetCurrentProcessId());
-    event_name[63] = 0;
-    hMapEvent = CreateEvent(NULL,FALSE,TRUE,event_name);
-    if(hMapEvent == NULL){
-        WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,
-            "Cannot create %s event!",
-            event_name);
-        return (-1);
-    }
     
     for(i = 0; i < NUMBER_OF_JOBS; i++){
         memset(&jobs[i],0,sizeof(volume_processing_job));
@@ -81,7 +70,6 @@ int init_jobs(void)
         jobs[i].job_type = NEVER_EXECUTED_JOB;
         jobs[i].volume_letter = 'a' + i;
     }
-    return 0;
 }
 
 /**
@@ -328,7 +316,7 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
     SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(FALSE,0));
     
     /* set taskbar icon overlay */
-    if(show_taskbar_icon_overlay && hTaskbarIconEvent){
+    if(show_taskbar_icon_overlay){
         if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
             WgxDbgPrintLastError("StartJobsThreadProc: wait on hTaskbarIconEvent failed");
         } else {
@@ -388,14 +376,12 @@ DWORD WINAPI StartJobsThreadProc(LPVOID lpParameter)
     SendMessage(hToolbar,TB_ENABLEBUTTON,IDM_SHOW_REPORT,MAKELONG(TRUE,0));
     
     /* remove taskbar icon overlay */
-    if(hTaskbarIconEvent){
-        if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
-            WgxDbgPrintLastError("StartJobsThreadProc: wait on hTaskbarIconEvent failed");
-        } else {
-            job_is_running = 0;
-            RemoveTaskbarIconOverlay();
-            SetEvent(hTaskbarIconEvent);
-        }
+    if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
+        WgxDbgPrintLastError("StartJobsThreadProc: wait on hTaskbarIconEvent failed");
+    } else {
+        job_is_running = 0;
+        RemoveTaskbarIconOverlay();
+        SetEvent(hTaskbarIconEvent);
     }
 
     /* check the when done action state */
@@ -462,8 +448,6 @@ void release_jobs(void)
         if(j->map.scaled_buffer)
             free(j->map.scaled_buffer);
     }
-    if(hMapEvent)
-        CloseHandle(hMapEvent);
 }
 
 /** @} */
