@@ -24,7 +24,10 @@
  * @{
  */
 
-#define WIN32_NO_STATUS
+/*
+* We use STATUS_WAIT_0...
+* #define WIN32_NO_STATUS
+*/
 #include <windows.h>
 #include <string.h>
 #include <stdio.h>
@@ -189,7 +192,7 @@ void WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow)
                 WgxDbgPrintLastError("WgxApplyResourceTable: synchronization failed");
             } else {
                 if(table[i].LoadedString){
-                    text = wcsdup(table[i].LoadedString);
+                    text = _wcsdup(table[i].LoadedString);
                     if(text == NULL)
                         OutputDebugString("WgxApplyResourceTable: cannot allocate memory\n");
                 }
@@ -198,7 +201,7 @@ void WgxApplyResourceTable(PWGX_I18N_RESOURCE_ENTRY table,HWND hWindow)
             }
         }
         if(text == NULL){
-            text = wcsdup(table[i].DefaultString);
+            text = _wcsdup(table[i].DefaultString);
             if(text == NULL)
                 OutputDebugString("WgxApplyResourceTable: cannot allocate memory\n");
         }
@@ -249,9 +252,9 @@ wchar_t *WgxGetResourceString(PWGX_I18N_RESOURCE_ENTRY table,wchar_t *key)
                 if(table[i].Key == NULL) break;
                 if(!wcscmp(table[i].Key,key)){
                     if(table[i].LoadedString)
-                        text = wcsdup(table[i].LoadedString);
+                        text = _wcsdup(table[i].LoadedString);
                     else
-                        text = wcsdup(table[i].DefaultString);
+                        text = _wcsdup(table[i].DefaultString);
                     if(text == NULL)
                         OutputDebugString("WgxGetResourceString: cannot allocate memory\n");
                     break;
@@ -265,7 +268,7 @@ synch_failed:
         for(i = 0;; i++){
             if(table[i].Key == NULL) break;
             if(!wcscmp(table[i].Key,key)){
-                text = wcsdup(table[i].DefaultString);
+                text = _wcsdup(table[i].DefaultString);
                 if(text == NULL)
                     OutputDebugString("WgxGetResourceString: cannot allocate memory\n");
                 break;
