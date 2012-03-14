@@ -9,10 +9,10 @@
     - i18n support was added to file fragmentation reports
     - the following translations were updated:
 
-      Korean, French (FR), Spanish (AR), Croatian
+      Korean, French (FR), Spanish (AR), Croatian, Spanish (MEX)
       
-    - Internals: WgxSetTaskbarIconOverlay, WgxRemoveTaskbarIconOverlay
-      routines added to wgx library
+    - Internals: WgxSetTaskbarIconOverlay, WgxRemoveTaskbarIconOverlay,
+      WgxLoadIcon routines added to wgx library
     - WgxGetResourceString behavior changed
     - math.lshift function added to Lua library
 
