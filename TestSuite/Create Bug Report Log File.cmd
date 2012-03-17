@@ -125,9 +125,9 @@ if /i "%DryRun%" == "Y" set UD_DRY_RUN=1
 cls
 echo.
 set MenuItem=0
-set ItemList=DETAILED PARANOID
+set ItemList=NORMAL DETAILED PARANOID
 
-for %%D in ("Detailed" "Paranoid") do call :DisplayMenuItem %%~D
+for %%D in ("Normal" "Detailed" "Paranoid") do call :DisplayMenuItem %%~D
 
 echo.
 echo 0 ... EXIT
@@ -185,9 +185,9 @@ goto :EOF
     echo.
     ping -n 11 localhost >nul 2>&1
     if "%UD_DRY_RUN%" == "1" (
-        copy /v /y "%CurrentVolume%\fraglist.txt" "%SystemRoot%\UltraDefrag\Logs\fraglist_%CurrentVolume:~0,1%_dryrun.txt"
+        for %%F in ( "%CurrentVolume%\fraglist.*" ) do copy /v /y "%%~F" "%SystemRoot%\UltraDefrag\Logs\%%~nF_%CurrentVolume:~0,1%_dryrun%%~xF"
     ) else (
-        copy /v /y "%CurrentVolume%\fraglist.txt" "%SystemRoot%\UltraDefrag\Logs\fraglist_%CurrentVolume:~0,1%.txt"
+        for %%F in ( "%CurrentVolume%\fraglist.*" ) do copy /v /y "%%~F" "%SystemRoot%\UltraDefrag\Logs\%%~nF_%CurrentVolume:~0,1%%%~xF"
     )
 goto :EOF
 
