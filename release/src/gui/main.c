@@ -40,7 +40,7 @@ HWND hMap = NULL;
 WGX_FONT wgxFont = {{0},0};
 RECT win_rc; /* coordinates of main window */
 RECT r_rc;   /* coordinates of restored window */
-double pix_per_dialog_unit = PIX_PER_DIALOG_UNIT_96DPI;
+double fScale = 1.0f;
 UINT TaskbarButtonCreatedMsg = 0;
 
 int when_done_action = IDM_WHEN_DONE_NONE;
@@ -295,15 +295,16 @@ static void InitMainWindowCoordinates(void)
     int center_on_the_screen = 0;
     int screen_width, screen_height;
     int width, height;
-    RECT rc;
+    HDC hDC;
 
     if(scale_by_dpi){
-        rc.top = rc.left = 0;
-        rc.right = rc.bottom = 100;
-        if(MapDialogRect(hWindow,&rc))
-            pix_per_dialog_unit = (double)(rc.right - rc.left) / 100;
+        hDC = GetDC(NULL);
+        if(hDC){
+            fScale = (double)GetDeviceCaps(hDC,LOGPIXELSX) / 96.0f;
+            ReleaseDC(NULL,hDC);
+        }
     }
-
+    
     if(r_rc.left == UNDEFINED_COORD)
         center_on_the_screen = 1;
     else if(r_rc.top == UNDEFINED_COORD)
@@ -357,6 +358,9 @@ void ResizeMainWindow(int force)
         return;
     }
     
+    if(list_height == 0)
+        list_height = DPI(VLIST_HEIGHT);
+
     /* correct invalid list heights */
     min_list_height = GetMinVolListHeight();
     if(list_height < min_list_height)

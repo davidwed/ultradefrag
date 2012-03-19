@@ -218,7 +218,7 @@ extern HWND hMap;
 extern HWND hStatus;
 extern HMENU hMainMenu;
 extern HWND hToolbar;
-extern double pix_per_dialog_unit;
+extern double fScale;
 extern WGX_FONT wgxFont;
 extern WGX_I18N_RESOURCE_ENTRY i18n_table[];
 extern volume_processing_job *current_job;
@@ -292,8 +292,7 @@ extern int show_taskbar_icon_overlay;
 
 #define UNDEFINED_COORD (-10000)
 
-/* This macro converts pixels from 96 DPI to the current one. */
-#define PIX_PER_DIALOG_UNIT_96DPI 1.74
-#define DPI(x) ((int)((double)x * pix_per_dialog_unit / PIX_PER_DIALOG_UNIT_96DPI))
+/* this macro converts pixels from 96 DPI to the current one */
+#define DPI(x) ((int)((double)x * fScale))
 
 #endif /* _UDEFRAG_GUI_MAIN_H_ */
