@@ -37,3 +37,11 @@ following conditions:
                                ***
 
 toolbar_monochrome.bmp - a monochrome version of the GUI toolbar
+
+                               ***
+
+Installer icons are based on graphics included in NSIS:
+http://nsis.sourceforge.net/
+
+The following sizes are included: 16x16, 20x20, 22x22, 24x24,
+32x32, 40x40, 48x48, 64x64, 96x96, 128x128 and 256x256.
