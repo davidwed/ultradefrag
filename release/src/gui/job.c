@@ -240,7 +240,9 @@ static void DisplayDefragError(int error_code)
  */
 static void ProcessSingleVolume(volume_processing_job *job)
 {
+    volume_info v;
     int error_code;
+    int index;
 
     if(job == NULL)
         return;
@@ -265,6 +267,13 @@ static void ProcessSingleVolume(volume_processing_job *job)
                 terminator, NULL);
         if(error_code < 0 && !exit_pressed){
             DisplayDefragError(error_code);
+        }
+        /* update dirty volume mark */
+        index = get_job_index(job);
+        if(index != -1){
+            if(udefrag_get_volume_information(job->volume_letter,&v) >= 0){
+                if(v.is_dirty) MarkVolumeAsDirty(index);
+            }
         }
     }
 }

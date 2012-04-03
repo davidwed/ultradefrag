@@ -74,36 +74,40 @@ int get_volume_information(udefrag_job_parameters *jp)
     destroy_lists(jp);
     
     /* update global variables holding drive geometry */
-    if(winx_get_volume_information(jp->volume_letter,&jp->v_info) < 0){
+    if(winx_get_volume_information(jp->volume_letter,&jp->v_info) < 0)
         return (-1);
+
+    /* don't touch dirty volumes */
+    if(jp->v_info.is_dirty)
+        return UDEFRAG_DIRTY_VOLUME;
+
+    jp->pi.total_space = jp->v_info.total_bytes;
+    jp->pi.free_space = jp->v_info.free_bytes;
+    if(jp->v_info.bytes_per_cluster) jp->clusters_per_256k = _256K / jp->v_info.bytes_per_cluster;
+    else jp->clusters_per_256k = 0;
+    DebugPrint("total clusters: %I64u",jp->v_info.total_clusters);
+    DebugPrint("cluster size: %I64u",jp->v_info.bytes_per_cluster);
+    if(!jp->clusters_per_256k){
+        DebugPrint("clusters are larger than 256 kbytes");
+        jp->clusters_per_256k ++;
+    }
+    /* validate geometry */
+    if(!jp->v_info.total_clusters || !jp->v_info.bytes_per_cluster){
+        DebugPrint("wrong volume geometry detected");
+        return (-1);
+    }
+    /* check partition type */
+    DebugPrint("%s partition detected",jp->v_info.fs_name);
+    if(!strcmp(jp->v_info.fs_name,"NTFS")){
+        jp->fs_type = FS_NTFS;
+    } else if(!strcmp(jp->v_info.fs_name,"FAT32")){
+        jp->fs_type = FS_FAT32;
+    } else if(strstr(jp->v_info.fs_name,"FAT")){
+        /* no need to distinguish better */
+        jp->fs_type = FS_FAT16;
+    } else if(!strcmp(jp->v_info.fs_name,"UDF")){
+        jp->fs_type = FS_UDF;
     } else {
-        jp->pi.total_space = jp->v_info.total_bytes;
-        jp->pi.free_space = jp->v_info.free_bytes;
-        if(jp->v_info.bytes_per_cluster) jp->clusters_per_256k = _256K / jp->v_info.bytes_per_cluster;
-        else jp->clusters_per_256k = 0;
-        DebugPrint("total clusters: %I64u",jp->v_info.total_clusters);
-        DebugPrint("cluster size: %I64u",jp->v_info.bytes_per_cluster);
-        if(!jp->clusters_per_256k){
-            DebugPrint("clusters are larger than 256 kbytes");
-            jp->clusters_per_256k ++;
-        }
-        /* validate geometry */
-        if(!jp->v_info.total_clusters || !jp->v_info.bytes_per_cluster){
-            DebugPrint("wrong volume geometry detected");
-            return (-1);
-        }
-        /* check partition type */
-        DebugPrint("%s partition detected",jp->v_info.fs_name);
-        if(!strcmp(jp->v_info.fs_name,"NTFS")){
-            jp->fs_type = FS_NTFS;
-        } else if(!strcmp(jp->v_info.fs_name,"FAT32")){
-            jp->fs_type = FS_FAT32;
-        } else if(strstr(jp->v_info.fs_name,"FAT")){
-            /* no need to distinguish better */
-            jp->fs_type = FS_FAT16;
-        } else if(!strcmp(jp->v_info.fs_name,"UDF")){
-            jp->fs_type = FS_UDF;
-        } else {
 //        } else if(!strcmp(jp->v_info.fs_name,"FAT12")){
 //            jp->fs_type = FS_FAT12;
 //        } else if(!strcmp(jp->v_info.fs_name,"FAT16")){
@@ -119,10 +123,9 @@ int get_volume_information(udefrag_job_parameters *jp)
 //                jp->fs_type = FS_FAT32;
 //            }
 //        } else {
-            DebugPrint("file system type is not recognized");
-            DebugPrint("type independent routines will be used to defragment it");
-            jp->fs_type = FS_UNKNOWN;
-        }
+        DebugPrint("file system type is not recognized");
+        DebugPrint("type independent routines will be used to defragment it");
+        jp->fs_type = FS_UNKNOWN;
     }
 
     jp->pi.clusters_to_process = jp->v_info.total_clusters;
@@ -861,8 +864,9 @@ int analyze(udefrag_job_parameters *jp)
     jp->pi.current_operation = VOLUME_ANALYSIS;
     
     /* update volume information */
-    if(get_volume_information(jp) < 0)
-        return (-1);
+    result = get_volume_information(jp);
+    if(result < 0)
+        return result;
     
     /* scan volume for free space areas */
     if(get_free_space_layout(jp) < 0)
