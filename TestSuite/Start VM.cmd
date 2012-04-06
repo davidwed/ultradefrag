@@ -61,6 +61,7 @@ for /f "tokens=%SelectedHost% delims=;" %%V in ("%ItemList%") do set ProcessHost
 
 set StorageController=SCSI-Controller
 if "%ProcessHost%" == "Windows XP x86 Englisch" set StorageController=SATA-Controller
+if "%ProcessHost%" == "Commodore OS Vision" set StorageController=SATA-Controller
 
 set PATH=%PATH%;%VBOX_INSTALL_DIR%
 set PortNum=-1
