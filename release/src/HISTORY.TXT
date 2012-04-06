@@ -18,6 +18,8 @@
       WgxLoadIcon and WgxGetTextDimensions routines added to wgx library
     - WgxGetResourceString behavior changed
     - math.lshift function added to Lua library
+    - incremental compilation enabled
+    - MS Visual Studio 6.0 development environment support dropped
 
 
   Version 5.0.3  2012-02-26

@@ -26,7 +26,6 @@ rem     build-targets [<compiler>]
 rem
 rem Available <compiler> values:
 rem     --use-mingw (default)
-rem     --use-msvc
 rem     --use-winddk
 rem     --use-winsdk
 rem     --use-mingw-x64 (experimental)
@@ -86,6 +85,21 @@ copy /Y obj\wgx\wgx.h obj\dll\wgx
 mkdir obj\dll\zenwinx
 copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
 
+:: build list of headers to produce dependencies
+:: for MinGW/SDK makefiles from
+cd obj
+dir /S /B *.h >headers || exit /B 1
+copy /Y .\headers .\bootexctrl || exit /B 1
+copy /Y .\headers .\console    || exit /B 1
+copy /Y .\headers .\udefrag    || exit /B 1
+copy /Y .\headers .\wgx        || exit /B 1
+copy /Y .\headers .\zenwinx    || exit /B 1
+copy /Y .\headers .\gui        || exit /B 1
+copy /Y .\headers .\hibernate  || exit /B 1
+copy /Y .\headers .\lua5.1     || exit /B 1
+copy /Y .\headers .\native     || exit /B 1
+cd ..
+
 :: let's build all modules by selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
     echo No parameters specified, using defaults.
@@ -93,7 +107,6 @@ if %UD_BLD_FLG_USE_COMPILER% equ 0 (
 )
 
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK%  goto ddk_build
-if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MSVC%    goto msvc_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW%   goto mingw_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_MINGW64% goto mingw_x64_build
 if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
@@ -227,21 +240,6 @@ exit /B 0
 exit /B 0
 
 
-:msvc_build
-
-    set OLD_PATH=%path%
-
-    call "%MSVSBIN%\vcvars32.bat"
-    set BUILD_ENV=msvc
-    set UDEFRAG_LIB_PATH=..\..\lib
-    call :build_modules X86 || exit /B 1
-
-    set path=%OLD_PATH%
-    set OLD_PATH=
-
-exit /B 0
-
-
 :mingw_x64_build
 
     set OLD_PATH=%path%
@@ -288,16 +286,24 @@ exit /B 0
     if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINDDK% (
         echo Compile monolithic native interface...
         pushd obj\zenwinx
+        :: zenwinx.c needs to be recompiled because of DllMain
+        del /s /q zenwinx.obj
         %UD_BUILD_TOOL% zenwinx.build static-lib || goto fail
         cd ..\udefrag
+        :: udefrag.c needs to be recompiled because of DllMain
+        del /s /q udefrag.obj
         %UD_BUILD_TOOL% udefrag.build static-lib || goto fail
         cd ..\native
         %UD_BUILD_TOOL% defrag_native.build || goto fail
 
         echo Compile native DLL's...
         cd ..\zenwinx
+        :: zenwinx.c needs to be recompiled because of DllMain
+        del /s /q zenwinx.obj
         %UD_BUILD_TOOL% zenwinx.build || goto fail
         cd ..\udefrag
+        :: udefrag.c needs to be recompiled because of DllMain
+        del /s /q udefrag.obj
         %UD_BUILD_TOOL% udefrag.build || goto fail
     ) else (
         pushd obj\zenwinx
@@ -315,8 +321,13 @@ exit /B 0
     )
 
     cd ..\lua5.1
+    :: _objects.mac needs to be recompiled because
+    :: three different modules share a single directory
+    del /s /q _objects.mac
     %UD_BUILD_TOOL% lua5.1a_dll.build || goto fail
+    del /s /q _objects.mac
     %UD_BUILD_TOOL% lua5.1a_exe.build || goto fail
+    del /s /q _objects.mac
     %UD_BUILD_TOOL% lua5.1a_gui.build || goto fail
 
     rem workaround for WDK 6 and above
