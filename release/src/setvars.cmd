@@ -1,10 +1,10 @@
 @echo off
 echo Set common environment variables...
-set VERSION=5,0,3,0
-set VERSION2="5, 0, 3, 0\0"
-set ULTRADFGVER=5.0.3
+set VERSION=5,0,4,0
+set VERSION2="5, 0, 4, 0\0"
+set ULTRADFGVER=5.0.4
 set RELEASE_STAGE=
-set UDVERSION_SUFFIX=5.0.3
+set UDVERSION_SUFFIX=5.0.4
 set WINDDKBASE=D:\WINDDK\3790~1.183
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v6.1
 set MINGWBASE=D:\Software\MinGWStudio\MinGW
