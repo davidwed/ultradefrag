@@ -257,6 +257,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
     int s_job_flags;
     int cw[sizeof(user_defined_column_widths) / sizeof(int)];
     int s_list_height;
+    int s_show_taskbar_icon_overlay;
     ULONGLONG counter = 0;
     
     h = FindFirstChangeNotification(".\\options",
@@ -297,6 +298,7 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
                     memcpy(&cw,&user_defined_column_widths,sizeof(user_defined_column_widths));
                     s_list_height = list_height;
                     s_job_flags = job_flags;
+                    s_show_taskbar_icon_overlay = show_taskbar_icon_overlay;
                     
                     /* reload preferences */
                     GetPrefs();
@@ -329,6 +331,19 @@ DWORD WINAPI PrefsChangesTrackingProc(LPVOID lpParameter)
                     } else {
                         /* redraw map if grid color changed */
                         RedrawMap(current_job,0);
+                    }
+
+                    /* handle show_taskbar_icon_overlay option adjustment */
+                    if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
+                        WgxDbgPrintLastError("PrefsChangesTrackingProc: wait on hTaskbarIconEvent failed");
+                    } else {
+                        if(show_taskbar_icon_overlay != s_show_taskbar_icon_overlay){
+                            if(show_taskbar_icon_overlay && job_is_running)
+                                SetTaskbarIconOverlay(IDI_BUSY,L"JOB_IS_RUNNING");
+                            else
+                                RemoveTaskbarIconOverlay();
+                        }
+                        SetEvent(hTaskbarIconEvent);
                     }
                 }
             }
