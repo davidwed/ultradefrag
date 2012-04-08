@@ -209,6 +209,9 @@ extern int job_is_running;
 void SetTaskbarIconOverlay(int resource_id, wchar_t *description_key);
 void RemoveTaskbarIconOverlay(void);
 
+#define WM_MAXIMIZE_MAIN_WINDOW  (WM_USER + 1)
+#define WM_RESIZE_MAP            (WM_USER + 1)
+
 /* common global variables */
 extern HINSTANCE hInstance;
 extern HWND hWindow;
