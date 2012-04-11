@@ -129,6 +129,10 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
     
     /* taskbar icon overlay message */
     {0,                 L"JOB_IS_RUNNING",             L"A job is running",           NULL},
+    
+    /* upgrade dialog */
+    {0,                 L"UPGRADE_CAPTION",            L"You can upgrade me ^-^",     NULL},
+    {0,                 L"UPGRADE_MESSAGE",            L"release is available for download!", NULL},
 
     /* end of the table */
     {0,                 NULL,                          NULL,                          NULL}
