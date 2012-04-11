@@ -304,7 +304,7 @@ static void InitMainWindowCoordinates(void)
             ReleaseDC(NULL,hDC);
         }
     }
-    
+
     if(r_rc.left == UNDEFINED_COORD)
         center_on_the_screen = 1;
     else if(r_rc.top == UNDEFINED_COORD)
@@ -360,7 +360,7 @@ void ResizeMainWindow(int force)
     
     if(list_height == 0)
         list_height = DPI(VLIST_HEIGHT);
-
+    
     /* correct invalid list heights */
     min_list_height = GetMinVolListHeight();
     if(list_height < min_list_height)
@@ -543,7 +543,7 @@ int CreateMainWindow(int nShowCmd)
  */
 void OpenWebPage(char *page)
 {
-    short path[MAX_PATH];
+    wchar_t path[MAX_PATH];
     HINSTANCE hApp;
     
     (void)_snwprintf(path,MAX_PATH,L".\\handbook\\%hs",page);
@@ -769,20 +769,21 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
     MINMAXINFO *mmi;
     BOOL size_changed;
     RECT rc;
-    short path[MAX_PATH];
+    wchar_t path[MAX_PATH];
     CHOOSEFONT cf;
     UINT i, id;
     MENUITEMINFOW mi;
-    short lang_name[MAX_PATH];
+    wchar_t lang_name[MAX_PATH];
     wchar_t *report_opts_path;
     FILE *f;
     int flag, disable_latest_version_check_old;
     
+    /* handle shell restart */
     if(uMsg == TaskbarButtonCreatedMsg){
         /* set taskbar icon overlay */
         if(show_taskbar_icon_overlay){
             if(WaitForSingleObject(hTaskbarIconEvent,INFINITE) != WAIT_OBJECT_0){
-                WgxDbgPrintLastError("StartJobsThreadProc: wait on hTaskbarIconEvent failed");
+                WgxDbgPrintLastError("MainWindowProc: wait on hTaskbarIconEvent failed");
             } else {
                 if(job_is_running)
                     SetTaskbarIconOverlay(IDI_BUSY,L"JOB_IS_RUNNING");
@@ -867,6 +868,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case IDM_RESCAN:
             if(!busy_flag)
                 UpdateVolList();
+            return 0;
+        case IDM_REPAIR:
+            if(!busy_flag)
+                RepairSelectedVolumes();
             return 0;
         case IDM_EXIT:
             goto done;
