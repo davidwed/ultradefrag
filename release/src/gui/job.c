@@ -459,6 +459,14 @@ void release_jobs(void)
 }
 
 /**
+ * @internal
+ * @brief Buffers for RepairSelectedVolumes.
+ */
+#define MAX_CMD_LENGTH 32768
+char command[MAX_CMD_LENGTH];
+char buffer[MAX_CMD_LENGTH];
+
+/**
  * @brief Tries to repair all selected volumes.
  */
 void RepairSelectedVolumes(void)
@@ -466,12 +474,11 @@ void RepairSelectedVolumes(void)
     LRESULT SelectedItem;
     LV_ITEM lvi;
     char path[MAX_PATH];
-    char buffer[MAX_PATH];
-    char command[MAX_PATH];
     char letter;
     int index;
     STARTUPINFO si;
     PROCESS_INFORMATION pi;
+    int counter = 0;
 
     if(!GetSystemDirectory(path,MAX_PATH)){
         WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,"Cannot retrieve the system directory path");
@@ -480,6 +487,9 @@ void RepairSelectedVolumes(void)
     _snprintf(buffer,MAX_PATH,"%s\\cmd.exe",path);
     buffer[MAX_PATH - 1] = 0;
     strcpy(path,buffer);
+    
+    _snprintf(command,MAX_CMD_LENGTH,"%s /C",path);
+    command[MAX_CMD_LENGTH - 1] = 0;
     
     index = -1;
     while(1){
@@ -492,11 +502,17 @@ void RepairSelectedVolumes(void)
         lvi.cchTextMax = 127;
         if(SendMessage(hList,LVM_GETITEM,0,(LRESULT)&lvi)){
             letter = buffer[0];
-            _snprintf(command,MAX_PATH,"/C title CHKDSK %c: & echo. & chkdsk %c: /V /F & echo. & pause",letter,letter);
-            command[MAX_PATH - 1] = 0;
+            _snprintf(buffer,MAX_CMD_LENGTH,
+                "%s title CHKDSK %c: & echo. & chkdsk %c: /V /F & echo. & pause &",
+                command,letter,letter);
+            buffer[MAX_CMD_LENGTH - 1] = 0;
+            strcpy(command,buffer);
+            counter ++;
         }
         index = (int)SelectedItem;
     }
+    
+    if(counter == 0) return;
 
     ZeroMemory(&si,sizeof(si));
     si.cb = sizeof(si);
