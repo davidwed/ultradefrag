@@ -315,6 +315,8 @@ int ShutdownOrHibernate(void)
 {
     HANDLE hToken; 
     TOKEN_PRIVILEGES tkp;
+    HMODULE hPowrProfDll;
+    SET_SUSPEND_STATE_PROC pSetSuspendState = NULL;
     BOOL shutdown_cmd_present;
     BOOL result;
 
