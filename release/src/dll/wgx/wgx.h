@@ -49,12 +49,6 @@
 
 #endif /* !USE_WINDDK */
 
-#ifdef USE_MSVC
-#define DWORD_PTR DWORD
-typedef int intptr_t;
-typedef unsigned uintptr_t;
-#endif
-
 #ifndef LR_VGACOLOR
 /* this constant is not defined in winuser.h on mingw */
 #define LR_VGACOLOR         0x0080
@@ -130,8 +124,6 @@ void WgxDestroyFont(PWGX_FONT pFont);
 BOOL WgxSaveFont(char *wgx_font_path,PWGX_FONT pFont);
 
 BOOL IncreaseGoogleAnalyticsCounter(char *hostname,char *path,char *account);
-/* NOTE: this routine is not safe, avoid its use */
-void IncreaseGoogleAnalyticsCounterAsynch(char *hostname,char *path,char *account);
 
 void WgxDbgPrint(char *format, ...);
 void WgxDbgPrintLastError(char *format, ...);

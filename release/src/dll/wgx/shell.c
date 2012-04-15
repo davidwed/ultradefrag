@@ -24,10 +24,6 @@
  * @{
  */
 
-/*
-* We use STATUS_WAIT_0...
-* #define WIN32_NO_STATUS
-*/
 #include <windows.h>
 #include <shellapi.h>
 #include <stdio.h>
@@ -45,7 +41,7 @@ BOOL WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
     HINSTANCE hApp;
     int error_code;
     char *error_description = "";
-    short *error_msg;
+    wchar_t *error_msg;
     int buffer_length;
     
     hApp = ShellExecuteW(hwnd,lpOperation,lpFile,lpParameters,lpDirectory,nShowCmd);
@@ -107,7 +103,7 @@ BOOL WgxShellExecuteW(HWND hwnd,LPCWSTR lpOperation,LPCWSTR lpFile,
     buffer_length += strlen(error_description);
     buffer_length += 64;
 
-    error_msg = malloc(buffer_length * sizeof(short));
+    error_msg = malloc(buffer_length * sizeof(wchar_t));
     if(error_msg == NULL){
         MessageBoxW(hwnd,L"Not enough memory!",L"Error!",MB_OK | MB_ICONHAND);
         return FALSE;
