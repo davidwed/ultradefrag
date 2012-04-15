@@ -14,6 +14,9 @@
       Hebrew
 
     - Internals: make-mingw-projects.lua script added
+    - unsafe IncreaseGoogleAnalyticsCounterAsynch routine
+      removed from wgx library
+    - WgxCreateProcess and WgxCreateThread routines added to wgx library
 
 
   Version 5.0.4  2012-04-07

@@ -137,4 +137,7 @@ BOOL WgxSaveOptions(char *config_file_path,WGX_OPTION *opts_table,WGX_SAVE_OPTIO
 BOOL WgxSetTaskbarIconOverlay(HWND hWindow,HINSTANCE hInstance,int resource_id, wchar_t *description);
 BOOL WgxRemoveTaskbarIconOverlay(HWND hWindow);
 
+BOOL WgxCreateProcess(char *cmd,char *args);
+BOOL WgxCreateThread(LPTHREAD_START_ROUTINE routine,LPVOID param);
+
 #endif /* _WGX_H_ */
