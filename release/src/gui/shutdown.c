@@ -315,8 +315,7 @@ int ShutdownOrHibernate(void)
 {
     HANDLE hToken; 
     TOKEN_PRIVILEGES tkp;
-    HMODULE hPowrProfDll;
-    SET_SUSPEND_STATE_PROC pSetSuspendState = NULL;
+    BOOL shutdown_cmd_present;
     BOOL result;
 
     switch(when_done_action){
@@ -350,6 +349,12 @@ int ShutdownOrHibernate(void)
         WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"ShutdownOrHibernate: cannot set shutdown privilege!");
         return 5;
     }
+    
+    /*
+    * Shutdown command works better on remote
+    * computers since it shows no confirmation.
+    */
+    shutdown_cmd_present = WgxCreateProcess("%windir%\\system32\\shutdown.exe","/?");
     
     /*
     * There is an opinion that SetSuspendState call
@@ -396,26 +401,40 @@ int ShutdownOrHibernate(void)
         }
         break;
     case IDM_WHEN_DONE_LOGOFF:
-        if(!ExitWindowsEx(EWX_LOGOFF | EWX_FORCEIFHUNG,
-          SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
+        if(shutdown_cmd_present){
+            result = WgxCreateProcess("%windir%\\system32\\cmd.exe","/K shutdown -l -t 0");
+        } else {
+            result = ExitWindowsEx(EWX_LOGOFF | EWX_FORCEIFHUNG,
+                SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | \
+                SHTDN_REASON_FLAG_PLANNED);
+        }
+        if(!result){
             WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot log the user off!");
             return 8;
         }
         break;
     case IDM_WHEN_DONE_REBOOT:
-        if(!ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG,
-          SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
+        if(shutdown_cmd_present){
+            result = WgxCreateProcess("%windir%\\system32\\cmd.exe","/K shutdown -r -t 0");
+        } else {
+            result = ExitWindowsEx(EWX_REBOOT | EWX_FORCEIFHUNG,
+                SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | \
+                SHTDN_REASON_FLAG_PLANNED);
+        }
+        if(!result){
             WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot reboot the computer!");
             return 9;
         }
         break;
     case IDM_WHEN_DONE_SHUTDOWN:
-        /*
-        * InitiateSystemShutdown() works fine
-        * but doesn't power off the pc.
-        */
-        if(!ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
-          SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | SHTDN_REASON_FLAG_PLANNED)){
+        if(shutdown_cmd_present){
+            result = WgxCreateProcess("%windir%\\system32\\cmd.exe","/K shutdown -s -t 0");
+        } else {
+            result = ExitWindowsEx(EWX_POWEROFF | EWX_FORCEIFHUNG,
+                SHTDN_REASON_MAJOR_OTHER | SHTDN_REASON_MINOR_OTHER | \
+                SHTDN_REASON_FLAG_PLANNED);
+        }
+        if(!result){
             WgxDisplayLastError(NULL,MB_OK | MB_ICONHAND,"UltraDefrag: cannot shut down the computer!");
             return 10;
         }
