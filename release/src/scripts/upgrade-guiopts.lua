@@ -236,6 +236,21 @@ grid_color_b = $grid_color_b
 version = $current_version
 
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- this code initializes environment for UltraDefrag, don't modify it
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+os.setenv("UD_IN_FILTER",in_filter)
+os.setenv("UD_EX_FILTER",ex_filter)
+os.setenv("UD_FILE_SIZE_THRESHOLD",file_size_threshold)
+os.setenv("UD_TIME_LIMIT",time_limit)
+os.setenv("UD_FRAGMENTS_THRESHOLD",fragments_threshold)
+os.setenv("UD_REFRESH_INTERVAL",refresh_interval)
+os.setenv("UD_DISABLE_REPORTS",disable_reports)
+os.setenv("UD_DBGPRINT_LEVEL",dbgprint_level)
+os.setenv("UD_LOG_FILE_PATH",log_file_path)
+os.setenv("UD_DRY_RUN",dry_run)
+
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -- END OF FILE
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ]]
@@ -280,7 +295,7 @@ end
 -- THE MAIN CODE STARTS HERE
 -- current version of configuration file
 -- version numbers 0-99 are reserved for 5.0.x series of the program
-current_version = 6
+current_version = 7
 old_version = 0
 upgrade_needed = 1
 
