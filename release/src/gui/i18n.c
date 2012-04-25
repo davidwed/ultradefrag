@@ -227,7 +227,7 @@ void ApplyLanguagePack(void)
         UpdateToolbarTooltips();
         return;
     }
-    _snprintf(path,MAX_PATH,".\\i18n\\%s.lng",lang_name);
+    _snprintf(path,MAX_PATH,".\\\\i18n\\\\%s.lng",lang_name);
     path[MAX_PATH - 1] = 0;
     
     /* destroy resource table */
