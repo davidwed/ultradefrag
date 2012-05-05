@@ -1,5 +1,12 @@
 ﻿HISTORY
 
+  Version 5.0.6  2012-06-
+  ------------------------------------------------------------------------------
+    - the following translations were updated:
+
+      Arabic
+
+
   Version 5.0.5  2012-05-05
   ------------------------------------------------------------------------------
     - repair drives action was added to the GUI menu
