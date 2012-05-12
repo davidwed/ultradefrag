@@ -525,7 +525,7 @@ Var AtLeastXP
     ${DisableX64FSRedirection}
 
     DetailPrint "Installing the context menu handler..."
-    SetOutPath "$INSTDIR"
+    SetOutPath "$INSTDIR\icons"
         File "${ROOTDIR}\src\installer\shellex.ico"
         File "${ROOTDIR}\src\installer\shellex-folder.ico"
 
@@ -545,11 +545,11 @@ Var AtLeastXP
     Push $R3
 
     StrCpy $0 "$\"$SYSDIR\udefrag.exe$\" --shellex $\"%1$\""
-    StrCpy $1 "$INSTDIR\shellex.ico"
+    StrCpy $1 "$INSTDIR\icons\shellex.ico"
     StrCpy $2 "[--- &Ultra Defragmenter ---]"
     StrCpy $3 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder $\"%1$\""
     StrCpy $4 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder-itself $\"%1$\""
-    StrCpy $5 "$INSTDIR\shellex-folder.ico"
+    StrCpy $5 "$INSTDIR\icons\shellex-folder.ico"
     StrCpy $6 "[--- &Defragment folder itself ---]"
     StrCpy $7 "[--- &Defragment root folder itself ---]"
     StrCpy $8 "[--- &Analyze drive with UltraDefrag ---]"
@@ -618,8 +618,9 @@ Var AtLeastXP
     ${DisableX64FSRedirection}
 
     DetailPrint "Removing the context menu handler..."
-    Delete "$INSTDIR\shellex.ico"
-    Delete "$INSTDIR\shellex-folder.ico"
+    Delete "$INSTDIR\icons\shellex.ico"
+    Delete "$INSTDIR\icons\shellex-folder.ico"
+    RmDir "$INSTDIR\icons"
 
     DeleteRegKey HKCR "Drive\shell\udefrag"
     DeleteRegKey HKCR "Drive\shell\udefrag-folder"
@@ -836,6 +837,9 @@ Var AtLeastXP
     Delete "$INSTDIR\udefrag-gui-config.exe"
     Delete "$INSTDIR\LanguageSelector.exe"
 
+    Delete "$INSTDIR\shellex.ico"
+    Delete "$INSTDIR\shellex-folder.ico"
+
     ; remove shortcuts of any previous version of the program
     SetShellVarContext all
     RMDir /r "$SMPROGRAMS\DASoft"
@@ -912,6 +916,42 @@ Var AtLeastXP
 !macroend
 
 !define UpdateUninstallSizeValue "!insertmacro UpdateUninstallSizeValue"
+
+;-----------------------------------------
+
+!macro RegisterInstallationFolder
+
+    ${DisableX64FSRedirection}
+
+    WriteRegStr HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "UD_INSTALL_DIR" "$INSTDIR"
+
+    ; "Export" our change
+    SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+    ${EnableX64FSRedirection}
+
+!macroend
+
+!define RegisterInstallationFolder "!insertmacro RegisterInstallationFolder"
+
+;-----------------------------------------
+
+!macro UnRegisterInstallationFolder
+
+    ${DisableX64FSRedirection}
+
+    DeleteRegValue HKLM "SYSTEM\CurrentControlSet\Control\Session Manager\Environment" "UD_INSTALL_DIR"
+    DeleteRegValue HKLM "SYSTEM\ControlSet001\Control\Session Manager\Environment"     "UD_INSTALL_DIR"
+    DeleteRegValue HKLM "SYSTEM\ControlSet002\Control\Session Manager\Environment"     "UD_INSTALL_DIR"
+
+    ; "Export" our change
+    SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
+
+    ${EnableX64FSRedirection}
+
+!macroend
+
+!define UnRegisterInstallationFolder "!insertmacro UnRegisterInstallationFolder"
 
 ;-----------------------------------------
 
