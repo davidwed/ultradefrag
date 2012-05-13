@@ -51,7 +51,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
     {0, "REPEAT_ACTION",            L"Re&peat action",           NULL},
     {0, "SKIP_REMOVABLE_MEDIA",     L"Skip removable &media",    NULL},
     {0, "RESCAN_DRIVES",            L"&Rescan drives",           NULL},
-    {0, "REPAIR_DRIVES",            L"Repair drives",            NULL},
+    {0, "REPAIR_DRIVES",            L"Repair dri&ves",           NULL},
     {0, "WHEN_DONE",                L"&When done",               NULL},
     {0, "WHEN_DONE_NONE",           L"&None",                    NULL},
     {0, "WHEN_DONE_EXIT",           L"E&xit",                    NULL},
@@ -139,7 +139,7 @@ WGX_I18N_RESOURCE_ENTRY i18n_table[] = {
     {0,                 "JOB_IS_RUNNING",             L"A job is running",           NULL},
 
     /* end of the table */
-    {0,                 NULL,                          NULL,                          NULL}
+    {0,                 NULL,                         NULL,                          NULL}
 };
 
 struct menu_item {
