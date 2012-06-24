@@ -435,8 +435,8 @@ void dbg_print_file_counters(udefrag_job_parameters *jp)
     DebugPrint("files total:      %u",jp->pi.files);
     DebugPrint("fragmented files: %u",jp->pi.fragmented);
     DebugPrint("compressed files: %u",jp->pi.compressed);
-    DebugPrint("tiny ...... <  10 kB: %u",jp->f_counters.tiny_files);
-    DebugPrint("small ..... < 100 kB: %u",jp->f_counters.small_files);
+    DebugPrint("tiny ...... <  10 KB: %u",jp->f_counters.tiny_files);
+    DebugPrint("small ..... < 100 KB: %u",jp->f_counters.small_files);
     DebugPrint("average ... <   1 MB: %u",jp->f_counters.average_files);
     DebugPrint("big ....... <  16 MB: %u",jp->f_counters.big_files);
     DebugPrint("huge ...... < 128 MB: %u",jp->f_counters.huge_files);
@@ -724,7 +724,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
     win_version = winx_get_os_version();
     
     /*
-    * NTFS volumes with cluster size greater than 4 kb
+    * NTFS volumes with cluster size greater than 4 KB
     * cannot be defragmented on Windows 2000.
     * This is a well known limitation of Windows Defrag API.
     */
@@ -732,7 +732,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
       && jp->fs_type == FS_NTFS \
       && jp->v_info.bytes_per_cluster > 4096 \
       && win_version <= WINDOWS_2K){
-        DebugPrint("cannot defragment NTFS volumes with clusters bigger than 4kb on nt4/w2k");
+        DebugPrint("cannot defragment NTFS volumes with clusters bigger than 4KB on nt4/w2k");
         return UDEFRAG_W2K_4KB_CLUSTERS;
     }
       

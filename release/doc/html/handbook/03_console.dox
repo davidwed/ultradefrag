@@ -141,7 +141,7 @@
  *
  * @par UD_FILE_SIZE_THRESHOLD
  * Exclude all files larger than the specified size.<br/>The following 
- * size suffixes are accepted: Kb, Mb, Gb, Tb, Pb, Eb.
+ * size suffixes are accepted: KB, MB, GB, TB, PB, EB.
  *
  * @par UD_FRAGMENTS_THRESHOLD
  * Exclude all files which have less fragments than the specified number.
@@ -215,7 +215,7 @@
  *
  * @par process only files below 50 MB in size
  * @code
- * set UD_FILE_SIZE_THRESHOLD=50Mb
+ * set UD_FILE_SIZE_THRESHOLD=50MB
  * @endcode
  *
  * @par process only files with more than 6 fragments
@@ -271,7 +271,7 @@
  * @echo off
  *
  * set UD_EX_FILTER=*system volume information*;*temp*;*tmp*;*recycle*;*.zip;*.7z;*.rar
- * set UD_FILE_SIZE_THRESHOLD=50Mb
+ * set UD_FILE_SIZE_THRESHOLD=50MB
  * udefrag c: > c:\ud.log
  *
  * set UD_IN_FILTER=D:\My Documents\*
@@ -291,7 +291,7 @@
  *
  * rem Defragment small files.
  *
- * set UD_FILE_SIZE_THRESHOLD=50Mb
+ * set UD_FILE_SIZE_THRESHOLD=50MB
  * udefrag c:
  *
  * rem Defragment large files 

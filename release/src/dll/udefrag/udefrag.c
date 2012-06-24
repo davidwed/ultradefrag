@@ -626,7 +626,7 @@ char *udefrag_get_error_description(int error_code)
         return "FAT disks cannot be optimized\n"
                "because of unmovable directories.";
     case UDEFRAG_W2K_4KB_CLUSTERS:
-        return "NTFS disks with cluster size greater than 4 kb\n"
+        return "NTFS disks with cluster size greater than 4 KB\n"
                "cannot be defragmented on Windows 2000 and Windows NT 4.0";
     case UDEFRAG_NO_MEM:
         return "Not enough memory.";

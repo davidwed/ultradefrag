@@ -1,5 +1,16 @@
 ﻿HISTORY
 
+  Version 5.0.7  2012-07-
+  ------------------------------------------------------------------------------
+    - changed unit suffixes from lower case 'b' to capital 'B',
+      this is going conform with the SI units
+    - the following translations were updated:
+
+      
+
+    - 
+
+
   Version 5.0.6  2012-06-20
   ------------------------------------------------------------------------------
     - GUI debugging output was forced to be saved in the log file
