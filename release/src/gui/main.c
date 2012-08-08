@@ -1252,10 +1252,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     WgxSetDbgPrintHandler(udefrag_dbg_print);
     hInstance = GetModuleHandle(NULL);
     
+    /* show crash info when the program crashed last time */
+    StartCrashInfoCheck();
+    
     /* handle initialization failure */
     if(udefrag_init_failed()){
         MessageBoxA(NULL,"Send bug report to the authors please.",
             "UltraDefrag initialization failed!",MB_OK | MB_ICONHAND);
+        StopCrashInfoCheck();
         return 1;
     }
     
@@ -1271,6 +1275,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     
     if(InitSynchObjects() < 0){
         DeleteEnvironmentVariables();
+        StopCrashInfoCheck();
         return 1;
     }
 
@@ -1308,6 +1313,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
         stop_web_statistics();
         DeleteEnvironmentVariables();
         DestroySynchObjects();
+        StopCrashInfoCheck();
         return 3;
     }
 
@@ -1324,6 +1330,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     SavePrefs();
     DeleteEnvironmentVariables();
     stop_web_statistics();
+    StopCrashInfoCheck();
     
     if(shutdown_requested){
         result = ShutdownOrHibernate();
