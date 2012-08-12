@@ -2,5 +2,5 @@
 name        = "hibernate"
 target_type = "console"
 
-libs = { "kernel32", "msvcrt", "advapi32" }
+libs = { "kernel32", "msvcrt", "advapi32", "powrprof" }
 umentry = "main"
