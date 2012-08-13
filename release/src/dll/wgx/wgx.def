@@ -45,3 +45,5 @@ EXPORTS
     
     WgxCreateProcess
     WgxCreateThread
+    
+    WgxPrintUnicodeString

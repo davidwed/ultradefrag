@@ -141,4 +141,6 @@ BOOL WgxRemoveTaskbarIconOverlay(HWND hWindow);
 BOOL WgxCreateProcess(char *cmd,char *args);
 BOOL WgxCreateThread(LPTHREAD_START_ROUTINE routine,LPVOID param);
 
+void WgxPrintUnicodeString(wchar_t *string,FILE *f);
+
 #endif /* _WGX_H_ */
