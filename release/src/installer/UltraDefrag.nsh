@@ -36,6 +36,29 @@
 
 Var AtLeastXP
 
+!macro CheckAdminRights
+
+    Push $R0
+    Push $R1
+    
+    ; check if the user has administrative rights by openening "HKEY_USERS\S-1-5-19" registry key
+    System::Call 'advapi32::RegOpenKey(i 0x80000003, t "S-1-5-19", *i 0 R1) i .R0'
+    ${If} $R0 == 0 ; ERROR_SUCCESS
+        System::Call 'advapi32::RegCloseKey(i $R1)'
+    ${Else}
+        MessageBox MB_OK|MB_ICONEXCLAMATION "Administrative rights are needed to install the program!" /SD IDOK
+        Abort
+    ${EndIf}
+
+    Pop $R1
+    Pop $R0
+
+!macroend
+
+!define CheckAdminRights "!insertmacro CheckAdminRights"
+
+;-----------------------------------------
+
 !macro CheckMutex
 
     Push $R0
@@ -70,20 +93,17 @@ Var AtLeastXP
         StrCpy $AtLeastXP 0
     ${EndIf}
 
-    ${Unless} ${IsNT}
-    ${OrUnless} ${AtLeastWinNT4}
+    /* release 6.0.0 and above is not compatible with Windows 2000 and below,
+       even worse, enabling boot time processing results in an unbootable system */
+    ${If} ${AtMostWin2000}
         MessageBox MB_OK|MB_ICONEXCLAMATION \
-        "On Windows 9x and NT 3.x this program is absolutely useless!$\nIf you are running another system then something is corrupt inside it.$\nTherefore we will try to continue." \
+        "This program is not supported on Windows 2000 and below!$\n$\n\
+        If you are running Windows XP and higher, then something is wrong.$\n\
+        Please report this problem to the developers.$\n$\n\
+        Download UltraDefrag v5 if you'd like to use it on NT 4 or Windows 2000." \
         /SD IDOK
-        ;Abort
-        /*
-        * Sometimes on modern versions of Windows it fails.
-        * This problem has been encountered on XP SP3 and Vista.
-        * Therefore let's assume that we have at least XP system.
-        * A dirty hack, but should work.
-        */
-        StrCpy $AtLeastXP 1
-    ${EndUnless}
+        Abort
+    ${EndIf}
 
     /* this idea was suggested by bender647 at users.sourceforge.net */
     Push $R0
