@@ -112,4 +112,23 @@ BOOL WgxCreateThread(LPTHREAD_START_ROUTINE routine,LPVOID param)
     return TRUE;
 }
 
+/**
+ * @brief Defines whether the user
+ * has administrative rights or not.
+ */
+BOOL WgxCheckAdminRights(void)
+{
+    HKEY hKey;
+    LONG result;
+    
+    result = RegOpenKey(HKEY_USERS,"S-1-5-19",&hKey);
+    if(result != ERROR_SUCCESS){
+        SetLastError((DWORD)result);
+        WgxDbgPrintLastError("WgxCheckAdminRights: cannot open HKEY_USERS\\S-1-5-19 registry key");
+        return FALSE;
+    }
+    RegCloseKey(hKey);
+    return TRUE;
+}
+
 /** @} */
