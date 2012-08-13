@@ -93,17 +93,20 @@ Var AtLeastXP
         StrCpy $AtLeastXP 0
     ${EndIf}
 
-    /* release 6.0.0 and above is not compatible with Windows 2000 and below,
-       even worse, enabling boot time processing results in an unbootable system */
-    ${If} ${AtMostWin2000}
+    ${Unless} ${IsNT}
+    ${OrUnless} ${AtLeastWinNT4}
         MessageBox MB_OK|MB_ICONEXCLAMATION \
-        "This program is not supported on Windows 2000 and below!$\n$\n\
-        If you are running Windows XP and higher, then something is wrong.$\n\
-        Please report this problem to the developers.$\n$\n\
-        Download UltraDefrag v5 if you'd like to use it on NT 4 or Windows 2000." \
+        "On Windows 9x and NT 3.x this program is absolutely useless!$\nIf you are running another system then something is corrupt inside it.$\nTherefore we will try to continue." \
         /SD IDOK
-        Abort
-    ${EndIf}
+        ;Abort
+        /*
+        * Sometimes on modern versions of Windows it fails.
+        * This problem has been encountered on XP SP3 and Vista.
+        * Therefore let's assume that we have at least XP system.
+        * A dirty hack, but should work.
+        */
+        StrCpy $AtLeastXP 1
+    ${EndUnless}
 
     /* this idea was suggested by bender647 at users.sourceforge.net */
     Push $R0
