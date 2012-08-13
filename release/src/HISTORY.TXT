@@ -1,6 +1,6 @@
 ﻿HISTORY
 
-  Version 5.0.7  2012-07-
+  Version 5.0.7  2012-08-
   ------------------------------------------------------------------------------
     - added crash handling code to the GUI, it shows the crash information
       on startup when the program crashed during the last run
