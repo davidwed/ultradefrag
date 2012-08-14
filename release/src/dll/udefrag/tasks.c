@@ -44,6 +44,18 @@
  */
 int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 {
+    wchar_t *boot_files[] = {
+        L"*\\safeboot.fs",   /* http://www.safeboot.com/ */
+        L"*\\Gobackio.bin",  /* Symantec GoBack */
+        L"*\\PGPWDE0*",      /* PGP Whole Disk Encryption */
+        L"*\\bootwiz*",      /* Acronis OS Selector */
+        L"*\\BootAuth?.sys", /* DriveCrypt (http://www.securstar.com/) */
+        L"*\\$dcsys$",       /* DiskCryptor (Diskencryption Software) */
+        L"*\\bootstat.dat",  /* part of Windows */
+        NULL
+    };
+    int i;
+
     /* skip files with empty path */
     if(f->path == NULL)
         return 0;
@@ -82,6 +94,16 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
     if(is_moving_failed(f))
         return 0;
     
+    /* keep the computer bootable */
+    if(is_essential_boot_file(f)) return 0;
+    for(i = 0; boot_files[i]; i++){
+        if(winx_wcsmatch(f->path,boot_files[i],WINX_PAT_ICASE)){
+            DebugPrint("can_move: essential boot file detected: %ws",f->path);
+            f->user_defined_flags |= UD_FILE_ESSENTIAL_BOOT_FILE;
+            return 0;
+        }
+    }
+
     return 1;
 }
 
