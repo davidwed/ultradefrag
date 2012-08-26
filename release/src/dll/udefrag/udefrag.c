@@ -329,12 +329,10 @@ static int killer(void *p)
 *    and assign this value to jp->pi.clusters_to_process counter
 * 2. when we move something, we adjust jp->pi.processed_clusters
 * 3. when we skip something, we adjust that counter too
+* 4. before each pass we adjust the jp->pi.clusters_to_process value
+*    to prevent the progress indicator overflow
 * Therefore, regardless of number of algorithm passes, we'll have
-* always a true progress percentage gradually increasing from 0% to 100%.
-*
-* NOTE: progress over 100% means deeper processing than expected.
-* This is not a bug, this is an algorithm feature causing by iterational
-* nature of multipass processing.
+* always the progress percentage gradually increasing from 0% to 100%.
 */
 static DWORD WINAPI start_job(LPVOID p)
 {

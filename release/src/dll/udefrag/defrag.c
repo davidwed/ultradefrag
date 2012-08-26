@@ -116,26 +116,6 @@ void test_special_files_defrag(udefrag_job_parameters *jp)
 #endif /* TEST_SPECIAL_FILES_DEFRAG */
 
 /**
- * @brief Calculates total number of fragmented clusters.
- */
-static ULONGLONG fragmented_clusters(udefrag_job_parameters *jp)
-{
-    udefrag_fragmented_file *f;
-    ULONGLONG n = 0;
-    
-    for(f = jp->fragmented_files; f; f = f->next){
-        if(jp->termination_router((void *)jp)) break;
-        /*
-        * Count all fragmented files which can be processed.
-        */
-        if(can_defragment(f->f,jp))
-            n += f->f->disp.clusters;
-        if(f->next == jp->fragmented_files) break;
-    }
-    return n;
-}
-
-/**
  * @brief Performs a volume defragmentation.
  * @details To avoid infinite data moves in multipass
  * processing, we exclude files for which moving failed.
@@ -149,9 +129,12 @@ int defragment(udefrag_job_parameters *jp)
     int result, overall_result = -1;
     
     /* perform volume analysis */
-    if(jp->job_type != MFT_OPTIMIZATION_JOB){
+    if(jp->job_type == DEFRAGMENTATION_JOB){
         result = analyze(jp); /* we need to call it once, here */
         if(result < 0) return result;
+        /* reset counters */
+        jp->pi.processed_clusters = 0;
+        jp->pi.clusters_to_process = 0;
     }
     
 #ifdef TEST_SPECIAL_FILES_DEFRAG
@@ -174,10 +157,6 @@ int defragment(udefrag_job_parameters *jp)
     /* do the job */
     jp->pi.pass_number = 0;
     while(!jp->termination_router((void *)jp)){
-        /* reset counters */
-        jp->pi.processed_clusters = 0;
-        jp->pi.clusters_to_process = fragmented_clusters(jp);
-        
         result = defrag_routine(jp);
         if(result == 0){
             /* defragmentation succeeded at least once */
@@ -199,8 +178,6 @@ int defragment(udefrag_job_parameters *jp)
     if(jp->job_type == MFT_OPTIMIZATION_JOB) return overall_result;
     
     /* perform partial defragmentation */
-    jp->pi.processed_clusters = 0;
-    jp->pi.clusters_to_process = fragmented_clusters(jp);
     result = defragment_big_files(jp);
     if(result == 0){
         /* at least partial defragmentation succeeded */

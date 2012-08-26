@@ -441,6 +441,26 @@ done:
 }
 
 /**
+ * @brief Calculates total number of fragmented clusters.
+ */
+static ULONGLONG fragmented_clusters(udefrag_job_parameters *jp)
+{
+    udefrag_fragmented_file *f;
+    ULONGLONG n = 0;
+    
+    for(f = jp->fragmented_files; f; f = f->next){
+        if(jp->termination_router((void *)jp)) break;
+        /*
+        * Count all fragmented files which can be processed.
+        */
+        if(can_defragment(f->f,jp))
+            n += f->f->disp.clusters;
+        if(f->next == jp->fragmented_files) break;
+    }
+    return n;
+}
+
+/**
  * @brief Defragments all fragmented files entirely, if possible.
  * @details 
  * - This routine fills free space areas from the beginning of the
@@ -476,6 +496,9 @@ int defragment_small_files_walk_free_regions(udefrag_job_parameters *jp)
         return (-1);
 
     time = start_timing("defragmentation",jp);
+    
+    jp->pi.clusters_to_process = \
+        jp->pi.processed_clusters + fragmented_clusters(jp);
 
     /* fill free regions in the beginning of the volume */
     defragmented_files = 0;
@@ -575,6 +598,9 @@ int defragment_small_files_walk_fragmented_files(udefrag_job_parameters *jp)
 
     time = start_timing("defragmentation",jp);
 
+    jp->pi.clusters_to_process = \
+        jp->pi.processed_clusters + fragmented_clusters(jp);
+
     /* find best matching free region for each fragmented file */
     defragmented_files = 0;
     while(jp->termination_router((void *)jp) == 0){
@@ -673,6 +699,9 @@ int defragment_big_files(udefrag_job_parameters *jp)
 
     time = start_timing("partial defragmentation",jp);
     
+    jp->pi.clusters_to_process = \
+        jp->pi.processed_clusters + fragmented_clusters(jp);
+
     /* fill largest free region first */
     defragmented_files = 0;
     

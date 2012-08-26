@@ -403,7 +403,7 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp,
             } else if((flags == MOVE_FRAGMENTED) && !is_fragmented(found_file)){
             } else if((flags == MOVE_NOT_FRAGMENTED) && is_fragmented(found_file)){
             } else if(is_file_locked(found_file,jp)){
-                jp->pi.processed_clusters += first_block->length;
+                /*jp->pi.processed_clusters += first_block->length;*/
             } else {
                 /* desired block found */
                 *min_lcn = first_block->lcn + 1; /* the current block will be skipped later anyway in this case */
@@ -448,7 +448,7 @@ slow_search:
         }
         if(found_file == NULL) break;
         if(is_file_locked(found_file,jp)){
-            jp->pi.processed_clusters += found_file->disp.clusters;
+            /*jp->pi.processed_clusters += found_file->disp.clusters;*/
             continue;
         }
         /* desired block found */
