@@ -27,7 +27,7 @@ set VBOX_INSTALL_DIR=%ProgramFiles%\Oracle\VirtualBox
 ::
 :: folders indicate virtual hosts
 :: files indicate test disks
-set VM_ROOT_DIR=D:\VirtualBox
+set VM_ROOT_DIR=Y:\VirtualBox
 
 :SelectHost
 :: collect virtual hosts
