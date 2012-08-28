@@ -35,7 +35,9 @@ echo This script must be run by the Administrator !!!
 goto :quit
 
 :IsAdmin
-title UltraDefrag - Create Bug Report Log File
+set CommandLine=udefrag
+set WindowTitle=UltraDefrag - Create Bug Report Log File
+title %WindowTitle%
 
 :SelectVolume
 :: collect volumes that can be processed
@@ -99,7 +101,7 @@ goto :SelectAction
 
 :GetAction
 for /f "tokens=%SelectedAction%" %%V in ("%ItemList%") do set ProcessAction=%%~V
-if "%ProcessAction%" == "-d" set ProcessAction=
+if not "%ProcessAction%" == "-d" set CommandLine=%CommandLine% %ProcessAction%
 
 set ItemList=Analyze Defrag QuickOptimize FullOptimize OptimizeMFT
 for /f "tokens=%SelectedAction%" %%V in ("%ItemList%") do set ActionName=%%~V
@@ -108,17 +110,13 @@ for /f "tokens=%SelectedAction%" %%V in ("%ItemList%") do set ActionName=%%~V
 :: ask if we like to repeat the action
 echo.
 set /p RepeatAction="Repeat action for volume %ProcessVolume%? (Y/[N]) "
-if /i not "%RepeatAction%" == "Y" (
-    set RepeatAction=
-) else (
-    set RepeatAction=-r
-)
+if /i "%RepeatAction%" == "Y" set CommandLine=%CommandLine% -r
 
 :AskDryRun
 :: ask if we like to use dryrun
 echo.
-set /p DryRun="Use dryrun? (Y/[N]) "
-if /i "%DryRun%" == "Y" set UD_DRY_RUN=1
+set /p DryRun="Use dryrun? ([Y]/N) "
+if /i not "%DryRun%" == "N" set UD_DRY_RUN=1
 
 :SelectLogLevel
 :: select log level to use
@@ -150,8 +148,10 @@ for /f "tokens=%SelectedLogLevel%" %%V in ("%ItemList%") do set ProcessLogLevel=
 cls
 echo.
 set UD_DBGPRINT_LEVEL=%ProcessLogLevel%
-echo Debug level set to "%UD_DBGPRINT_LEVEL%"
-if "%UD_DRY_RUN%" == "1" echo Dryrun enabled ...
+
+set WindowTitle=%WindowTitle% - %UD_DBGPRINT_LEVEL%
+if "%UD_DRY_RUN%" == "1" set WindowTitle=%WindowTitle% - Dryrun
+title %WindowTitle%
 
 if %SelectedVolume% EQU 99 (
     for %%V in ( %ProcessVolume% ) do if %%V neq %SystemDrive% call :ProcessVolumes %%V
@@ -178,10 +178,10 @@ goto :EOF
     echo Using log file "%UD_LOG_FILE_PATH%"
     echo.
     echo.
-    echo Executing "udefrag %RepeatAction% %ProcessAction% %CurrentVolume%"... 
+    echo Executing "%CommandLine% %CurrentVolume%"... 
     echo.
     echo.
-    udefrag %RepeatAction% %ProcessAction% %CurrentVolume%
+    %CommandLine% %CurrentVolume%
     echo.
     ping -n 11 localhost >nul 2>&1
     if "%UD_DRY_RUN%" == "1" (
