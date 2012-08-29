@@ -96,7 +96,10 @@ int optimize(udefrag_job_parameters *jp)
         
         /* reset counters */
         remaining_clusters = get_number_of_movable_clusters(jp,start_lcn,jp->v_info.total_clusters,MOVE_ALL);
-        jp->pi.clusters_to_process = jp->pi.processed_clusters + remaining_clusters * 2;
+        /* this way guarantees no progress overflow; more precise calculation is difficult */
+        jp->pi.clusters_to_process = jp->pi.processed_clusters + \
+            get_number_of_movable_clusters(jp,0,jp->v_info.total_clusters,MOVE_ALL) * 2 - \
+            get_number_of_movable_clusters(jp,0,start_lcn,MOVE_NOT_FRAGMENTED) * 2;
                 
         DebugPrint("volume optimization pass #%u, starting point = %I64u, remaining clusters = %I64u",
             jp->pi.pass_number, start_lcn, remaining_clusters);
