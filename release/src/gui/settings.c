@@ -166,6 +166,7 @@ static void ValidateGUIOptions(void)
 
 void GetPrefs(void)
 {
+    DeleteEnvironmentVariables();
     ValidateGUIOptions();
     WgxGetOptions(".\\options\\guiopts.lua",read_only_options);
     WgxGetOptions(".\\options\\guiopts-internals.lua",internal_options);
