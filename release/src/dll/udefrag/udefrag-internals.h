@@ -235,6 +235,7 @@ typedef struct _udefrag_job_parameters {
     struct prb_table *file_blocks;              /* pointer to binary tree of all file blocks found on the volume */
     struct file_counters f_counters;            /* file counters */
     NTSTATUS last_move_status;                  /* status of the last move file operation; zero by default */
+    int progress_trigger;                       /* a trigger used for debugging purposes */
 } udefrag_job_parameters;
 
 int  get_options(udefrag_job_parameters *jp);

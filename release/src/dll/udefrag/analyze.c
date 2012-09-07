@@ -39,8 +39,6 @@
 
 #include "udefrag-internals.h"
 
-extern int progress_trigger;
-
 static void update_progress_counters(winx_file_info *f,udefrag_job_parameters *jp);
 
 /**
@@ -827,7 +825,7 @@ static int define_allowed_actions(udefrag_job_parameters *jp)
 ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp)
 {
     winx_dbg_print_header(0,0,"%s of %c: started",operation_name,jp->volume_letter);
-    progress_trigger = 0;
+    jp->progress_trigger = 0;
     return winx_xtime();
 }
 
@@ -848,7 +846,7 @@ void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameter
     time -= seconds * 1000;
     winx_dbg_print_header(0,0,"%s of %c: completed in %s %I64ums",
         operation_name,jp->volume_letter,buffer,time);
-    progress_trigger = 0;
+    jp->progress_trigger = 0;
 }
 
 /**
