@@ -43,6 +43,21 @@
 #define fast_towlower(c) (u16_lowercase[(unsigned int)(c)])
 
 /**
+ * @internal
+ * @brief Initializes tables for
+ * the character case conversion.
+ */
+void winx_init_case_tables(void)
+{
+    int i;
+    
+    for(i = 0; i < sizeof(u16_uppercase) / sizeof(wchar_t); i++){
+        if(u16_uppercase[i] == 0) u16_uppercase[i] = (wchar_t)i;
+        if(u16_lowercase[i] == 0) u16_lowercase[i] = (wchar_t)i;
+    }
+}
+
+/**
  * @brief Reliable _toupper analog.
  * @details MSDN states: "In order for toupper to give
  * the expected results, __isascii and islower must both
