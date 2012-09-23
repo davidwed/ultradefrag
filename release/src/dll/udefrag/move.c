@@ -855,10 +855,15 @@ int move_file(winx_file_info *f,
 
     /* adjust statistics */
     became_fragmented = is_fragmented(&new_file_info);
-    if(became_fragmented && !was_fragmented)
+    if(became_fragmented && !was_fragmented){
         jp->pi.fragmented ++;
-    if(!became_fragmented && was_fragmented)
+        jp->pi.bad_fragments += new_file_info.disp.fragments;
+    } else if(!became_fragmented && was_fragmented){
         jp->pi.fragmented --;
+        jp->pi.bad_fragments -= f->disp.fragments;
+    } else if(became_fragmented && was_fragmented){
+        jp->pi.bad_fragments -= (f->disp.fragments - new_file_info.disp.fragments);
+    }
     jp->pi.fragments -= (f->disp.fragments - new_file_info.disp.fragments);
     if(jp->progress_router)
         jp->progress_router(jp); /* redraw map and update statistics */

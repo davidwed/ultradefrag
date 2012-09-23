@@ -178,6 +178,14 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
     if(y == 0) pi.percentage = 0.00;
     else pi.percentage = ((double)(LONGLONG)x / (double)(LONGLONG)y) * 100.00;
     
+    /* calculate fragmentation percentage */
+    /* conversion to LONGLONG is needed for Win DDK */
+    /* so, let's divide both numbers to make safe conversion then */
+    x = pi.bad_fragments / 2;
+    y = pi.fragments / 2;
+    if(y == 0) pi.fragmentation = 0.00;
+    else pi.fragmentation = ((double)(LONGLONG)x / (double)(LONGLONG)y) * 100.00;
+    
     /* refill cluster map */
     if(jp->pi.cluster_map && jp->cluster_map.array \
       && jp->pi.cluster_map_size == jp->cluster_map.map_size){
@@ -559,7 +567,7 @@ char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
     char total_space[68];
     char free_space[68];
     double p;
-    unsigned int ip;
+    unsigned int ip, ifr;
     
     /* allocate memory */
     msg = winx_heap_alloc(MSG_LENGTH + 1);
@@ -581,8 +589,9 @@ char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
         p = (double)(LONGLONG)pi->fragments / (double)(LONGLONG)pi->files;
     }
     ip = (unsigned int)(p * 100.00);
-    if(ip < 100)
-        ip = 100; /* fix round off error */
+    if(ip < 100) ip = 100; /* fix round off error */
+    ifr = (unsigned int)(pi->fragmentation * 100.00);
+    if(ifr < 100) ifr = 100; /* fix round off error */
 
     (void)_snprintf(msg,MSG_LENGTH,
               "Drive information:\n\n"
@@ -590,12 +599,14 @@ char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
               "  Free space                   = %s\n\n"
               "  Total number of files        = %u\n"
               "  Number of fragmented files   = %u\n"
-              "  Fragments per file           = %u.%02u\n\n",
+              "  Fragments per file           = %u.%02u\n"
+              "  Fragmentation                = %u.%02u%%\n\n",
               total_space,
               free_space,
               pi->files,
               pi->fragmented,
-              ip / 100, ip % 100
+              ip  / 100, ip  % 100,
+              ifr / 100, ifr % 100
              );
     msg[MSG_LENGTH] = 0;
     return msg;
