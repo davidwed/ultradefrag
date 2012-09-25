@@ -25,6 +25,7 @@
  */
      
 #include "udefrag-internals.h"
+#include <math.h> /* for pow function */
 
 /**
  * @brief Retrieves all ultradefrag
@@ -34,9 +35,11 @@
  */
 int get_options(udefrag_job_parameters *jp)
 {
-    short *buffer;
+    short *buffer, *dp;
     char buf[64];
-    int i;
+    double r;
+    unsigned int it;
+    int i, z, index = 0;
 
     if(jp == NULL)
         return (-1);
@@ -109,6 +112,18 @@ int get_options(udefrag_job_parameters *jp)
         }
     }
 
+    /* set fragmentation threshold */
+    if(winx_query_env_variable(L"UD_FRAGMENTATION_THRESHOLD",buffer,ENV_BUFFER_SIZE) >= 0){
+        jp->udo.fragmentation_threshold = (double)_wtoi(buffer);
+        dp = wcschr(buffer,'.');
+        if(dp != NULL){
+            for(z = 0; dp[z + 1] == '0'; z++) {}
+            for(r = (double)_wtoi(dp + 1); r > 1; r /= 10){}
+            r *= pow(10, -z);
+            jp->udo.fragmentation_threshold += r;
+        }
+    }
+    
     /* print all options */
     winx_dbg_print_header(0,0,"ultradefrag job options");
     if(jp->udo.in_filter.count){
@@ -121,9 +136,11 @@ int get_options(udefrag_job_parameters *jp)
         for(i = 0; i < jp->udo.ex_filter.count; i++)
             DebugPrint("  - %ws",jp->udo.ex_filter.array[i]);
     }
-    DebugPrint("file size threshold = %I64u",jp->udo.size_limit);
-    DebugPrint("file fragments threshold = %I64u",jp->udo.fragments_limit);
-    DebugPrint("time limit = %I64u seconds",jp->udo.time_limit);
+    it = (unsigned int)(jp->udo.fragmentation_threshold * 100.00);
+    DebugPrint("fragmentation threshold   = %u.%02u %%",it / 100,it % 100);
+    DebugPrint("file size threshold       = %I64u",jp->udo.size_limit);
+    DebugPrint("file fragments threshold  = %I64u",jp->udo.fragments_limit);
+    DebugPrint("time limit                = %I64u seconds",jp->udo.time_limit);
     DebugPrint("progress refresh interval = %u msec",jp->udo.refresh_interval);
     if(jp->udo.disable_reports) DebugPrint("reports disabled");
     else DebugPrint("reports enabled");

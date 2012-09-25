@@ -67,6 +67,10 @@ int optimize(udefrag_job_parameters *jp)
     result = analyze(jp); /* we need to call it once, here */
     if(result < 0) return result;
     
+    /* check fragmentation level */
+    if(!check_fragmentation_level(jp))
+        return 0;
+    
     /* set free region size threshold, reset counters */
     calculate_free_rgn_size_threshold(jp);
     jp->pi.processed_clusters = 0;

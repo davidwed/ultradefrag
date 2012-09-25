@@ -139,6 +139,7 @@ void DeleteEnvironmentVariables(void)
     (void)SetEnvironmentVariable("UD_EX_FILTER",NULL);
     (void)SetEnvironmentVariable("UD_FILE_SIZE_THRESHOLD",NULL);
     (void)SetEnvironmentVariable("UD_FRAGMENTS_THRESHOLD",NULL);
+    (void)SetEnvironmentVariable("UD_FRAGMENTATION_THRESHOLD",NULL);
     (void)SetEnvironmentVariable("UD_REFRESH_INTERVAL",NULL);
     (void)SetEnvironmentVariable("UD_DISABLE_REPORTS",NULL);
     (void)SetEnvironmentVariable("UD_DBGPRINT_LEVEL",NULL);

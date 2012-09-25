@@ -138,6 +138,21 @@ file_size_threshold = "$file_size_threshold"
 fragments_threshold = $fragments_threshold
 
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+-- The fragmentation_threshold filter allows to avoid the disk processing
+-- when the disk fragmentation level is below than specified. For example,
+-- to avoid defragmentation/optimization of disks with fragmentation level
+-- below 10 percents, set:
+
+-- fragmentation_threshold = "10%"
+
+-- Both zero value and empty string ("") turn off the filter.
+
+-- Note that this filter does not affect the MFT optimization task.
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+fragmentation_threshold = "$fragmentation_threshold"
+
+-- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 -- II. Miscellaneous options
 -- ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -303,8 +318,9 @@ if include_video ~= 0 then in_filter = in_filter .. ";" .. video_patterns end
 os.setenv("UD_IN_FILTER",in_filter)
 os.setenv("UD_EX_FILTER",ex_filter)
 os.setenv("UD_FILE_SIZE_THRESHOLD",file_size_threshold)
-os.setenv("UD_TIME_LIMIT",time_limit)
 os.setenv("UD_FRAGMENTS_THRESHOLD",fragments_threshold)
+os.setenv("UD_FRAGMENTATION_THRESHOLD",fragmentation_threshold)
+os.setenv("UD_TIME_LIMIT",time_limit)
 os.setenv("UD_REFRESH_INTERVAL",refresh_interval)
 os.setenv("UD_DISABLE_REPORTS",disable_reports)
 os.setenv("UD_DBGPRINT_LEVEL",dbgprint_level)
@@ -356,7 +372,7 @@ end
 -- THE MAIN CODE STARTS HERE
 -- current version of configuration file
 -- version numbers 0-99 are reserved for 5.0.x series of the program
-current_version = 10
+current_version = 11
 old_version = 0
 upgrade_needed = 1
 
@@ -383,6 +399,7 @@ include_video = 0
 exclude_video = 0
 sizelimit = ""
 fragments_threshold = 0
+fragmentation_threshold = ""
 time_limit = ""
 refresh_interval = 100
 disable_reports = 0

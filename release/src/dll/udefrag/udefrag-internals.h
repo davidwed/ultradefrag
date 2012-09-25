@@ -130,6 +130,7 @@ typedef struct _udefrag_options {
     int dbgprint_level;         /* controls amount of debugging information */
     int dry_run;                /* set %UD_DRY_RUN% variable to avoid actual data moving in tests */
     int job_flags;              /* flags triggering algorithm features */
+    double fragmentation_threshold; /* fragmentation level threshold */
 } udefrag_options;
 
 typedef struct _udefrag_fragmented_file {
@@ -263,6 +264,7 @@ int analyze(udefrag_job_parameters *jp);
 int defragment(udefrag_job_parameters *jp);
 int optimize(udefrag_job_parameters *jp);
 void destroy_lists(udefrag_job_parameters *jp);
+int check_fragmentation_level(udefrag_job_parameters *jp);
 
 ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp);
 void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameters *jp);

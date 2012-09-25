@@ -132,17 +132,17 @@ int defragment(udefrag_job_parameters *jp)
     if(jp->job_type == DEFRAGMENTATION_JOB){
         result = analyze(jp); /* we need to call it once, here */
         if(result < 0) return result;
+    #ifdef TEST_SPECIAL_FILES_DEFRAG
+        test_special_files_defrag(jp);
+        return 0;
+    #endif
+        /* check fragmentation level */
+        if(!check_fragmentation_level(jp))
+            return 0;
         /* reset counters */
         jp->pi.processed_clusters = 0;
         jp->pi.clusters_to_process = 0;
     }
-    
-#ifdef TEST_SPECIAL_FILES_DEFRAG
-    if(jp->job_type == DEFRAGMENTATION_JOB){
-        test_special_files_defrag(jp);
-        return 0;
-    }
-#endif
     
     /* choose defragmentation strategy */
     if(jp->pi.fragmented >= jp->free_regions_count || \
