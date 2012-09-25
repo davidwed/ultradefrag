@@ -67,6 +67,14 @@ set PATH=%PATH%;%VBOX_INSTALL_DIR%
 set PortNum=-1
 echo.
 
+set /p ReadOnly="Mount test disks readonly ([Y]/N)? "
+if /i "%ReadOnly%" == "N" (
+    set mType=normal
+) else (
+    set mType=immutable
+)
+echo.
+
 for %%F in ( "%VM_ROOT_DIR%\*.vdi" ) do call :MountDisk "%%~F"
 
 echo.
@@ -103,7 +111,7 @@ goto :EOF
 
 :MountDisk
     set /a PortNum+=1
-    VBoxManage storageattach "%ProcessHost%" --storagectl "%StorageController%" --port %PortNum% --device 0 --type hdd --medium "%~1"
+    VBoxManage storageattach "%ProcessHost%" --storagectl "%StorageController%" --port %PortNum% --device 0 --type hdd --mtype %mType% --medium "%~1"
     if %ERRORLEVEL% equ 0 (
         echo Mounting disk "%~n1" to port %PortNum% succeeded ...
     ) else (
