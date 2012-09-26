@@ -63,7 +63,7 @@ set StorageController=SCSI-Controller
 if "%ProcessHost%" == "Windows XP x86 English" set StorageController=SATA-Controller
 if "%ProcessHost%" == "Commodore OS Vision" set StorageController=SATA-Controller
 
-set PATH=%PATH%;%VBOX_INSTALL_DIR%
+set PATH=%VBOX_INSTALL_DIR%;%PATH%
 set PortNum=-1
 echo.
 
