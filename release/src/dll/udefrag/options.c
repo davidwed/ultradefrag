@@ -39,7 +39,7 @@ int get_options(udefrag_job_parameters *jp)
     char buf[64];
     double r;
     unsigned int it;
-    int i, z, index = 0;
+    int i, z;
 
     if(jp == NULL)
         return (-1);
