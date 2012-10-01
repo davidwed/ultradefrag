@@ -95,6 +95,9 @@
 */
 #define UD_FILE_ESSENTIAL_BOOT_FILE    0x2000
 
+/* This flag is used to speed things up. */
+#define UD_FILE_NOT_ESSENTIAL_FILE     0x4000
+
 #define is_excluded(f)              ((f)->user_defined_flags & UD_FILE_EXCLUDED)
 #define is_over_limit(f)            ((f)->user_defined_flags & UD_FILE_OVER_LIMIT)
 #define is_locked(f)                ((f)->user_defined_flags & UD_FILE_LOCKED)
@@ -106,6 +109,7 @@
 #define is_fragmented_by_mft_opt(f) ((f)->user_defined_flags & UD_FILE_FRAGMENTED_BY_MFT_OPT)
 #define is_excluded_by_path(f)      ((f)->user_defined_flags & UD_FILE_EXCLUDED_BY_PATH)
 #define is_essential_boot_file(f)   ((f)->user_defined_flags & UD_FILE_ESSENTIAL_BOOT_FILE)
+#define is_not_essential_file(f)    ((f)->user_defined_flags & UD_FILE_NOT_ESSENTIAL_FILE)
 
 #define is_block_excluded(b)        ((b)->length == 0)
 

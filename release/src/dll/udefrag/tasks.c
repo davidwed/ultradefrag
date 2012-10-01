@@ -95,6 +95,7 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
         return 0;
     
     /* keep the computer bootable */
+    if(is_not_essential_file(f)) return 1;
     if(is_essential_boot_file(f)) return 0;
     for(i = 0; boot_files[i]; i++){
         if(winx_wcsmatch(f->path,boot_files[i],WINX_PAT_ICASE)){
@@ -103,7 +104,7 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
             return 0;
         }
     }
-
+    f->user_defined_flags |= UD_FILE_NOT_ESSENTIAL_FILE;
     return 1;
 }
 
