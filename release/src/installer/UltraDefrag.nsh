@@ -93,7 +93,7 @@ Var AtLeastXP
     Pop $R0
 
     ${If} $R0 != "Admin"
-        MessageBox MB_OK|MB_ICONEXCLAMATION "Administrative rights are needed to install the program!" /SD IDOK
+        MessageBox MB_OK|MB_ICONSTOP "Administrative rights are needed to install the program!" /SD IDOK
         Abort
     ${EndIf}
 
@@ -119,7 +119,7 @@ Var AtLeastXP
     ${EndIf}
     ${If} $R0 != 0
         System::Call 'kernel32::CloseHandle(i $R0)'
-        MessageBox MB_OK|MB_ICONEXCLAMATION "Ultra Defragmenter is running. Please close it first!" /SD IDOK
+        MessageBox MB_OK|MB_ICONSTOP "Ultra Defragmenter is running. Please close it first!" /SD IDOK
         Abort
     ${EndIf}
 
@@ -168,7 +168,7 @@ Var AtLeastXP
     ${Unless} ${Errors}
         ${If} $R0 == "x86"
         ${AndIf} ${ULTRADFGARCH} != "i386"
-            MessageBox MB_OK|MB_ICONEXCLAMATION \
+            MessageBox MB_OK|MB_ICONSTOP \
             "This installer cannot be used on 32-bit Windows!$\n \
             Download the i386 version from http://ultradefrag.sourceforge.net/" \
             /SD IDOK
@@ -177,7 +177,7 @@ Var AtLeastXP
         ${EndIf}
         ${If} $R0 == "amd64"
         ${AndIf} ${ULTRADFGARCH} != "amd64"
-            MessageBox MB_OK|MB_ICONEXCLAMATION \
+            MessageBox MB_OK|MB_ICONSTOP \
             "This installer cannot be used on x64 version of Windows!$\n \
             Download the amd64 version from http://ultradefrag.sourceforge.net/" \
             /SD IDOK
@@ -186,7 +186,7 @@ Var AtLeastXP
         ${EndIf}
         ${If} $R0 == "ia64"
         ${AndIf} ${ULTRADFGARCH} != "ia64"
-            MessageBox MB_OK|MB_ICONEXCLAMATION \
+            MessageBox MB_OK|MB_ICONSTOP \
             "This installer cannot be used on IA-64 version of Windows!$\n \
             Download the ia64 version from http://ultradefrag.sourceforge.net/" \
             /SD IDOK
@@ -211,6 +211,21 @@ Var AtLeastXP
 
     ${DisableX64FSRedirection}
 
+    ; move old installation to new location
+    IfFileExists "$OldInstallDir\*.*" 0 SkipMove
+    StrCmp "$INSTDIR" "$OldInstallDir" SkipMove
+
+    DetailPrint "Moving old installation to new location..."
+    ClearErrors
+    ExecShell "" "cmd.exe" '/c move /y "$OldInstallDir" "$INSTDIR"'
+    ${If} ${Errors}
+        MessageBox MB_OK|MB_ICONSTOP \
+            "Cannot move old installation to new location!" \
+            /SD IDOK
+        Abort
+    ${EndIf}
+
+SkipMove:
     DetailPrint "Installing core files..."
     SetOutPath "$SYSDIR"
         File "lua5.1a.dll"
@@ -237,8 +252,6 @@ Var AtLeastXP
     ${Else}
         ExecWait '"$INSTDIR\lua5.1a_gui.exe" "$INSTDIR\scripts\upgrade-rptopts.lua" "$INSTDIR"'
     ${EndIf}
-    ; get rid of obsolete files
-    Delete "$INSTDIR\options\udreportopts-custom.lua"
 
     ; install default CSS for file fragmentation reports
     ${If} ${FileExists} "$INSTDIR\scripts\udreport.css"
@@ -248,7 +261,7 @@ Var AtLeastXP
         ${EndUnless}
     ${EndIf}
     File "${ROOTDIR}\src\scripts\udreport.css"
-        
+
     SetOutPath "$SYSDIR"
         File "zenwinx.dll"
         File "udefrag.dll"
@@ -360,7 +373,7 @@ Var AtLeastXP
             File "${ROOTDIR}\src\installer\ud-boot-time.ini"
         ${EndUnless}
     ${EndUnless}
-  
+
     ${EnableX64FSRedirection}
 
 !macroend
@@ -438,10 +451,10 @@ Var AtLeastXP
     SetOutPath "$INSTDIR"
         Delete "$INSTDIR\ultradefrag.exe"
         File "ultradefrag.exe"
-        
+
     SetOutPath "$INSTDIR\scripts"
         File "${ROOTDIR}\src\scripts\upgrade-guiopts.lua"
-        
+
     DetailPrint "Upgrade GUI preferences..."
     ${If} ${Silent}
         ExecWait '"$INSTDIR\lua5.1a_gui.exe" -s "$INSTDIR\scripts\upgrade-guiopts.lua" "$INSTDIR"'
@@ -509,7 +522,7 @@ Var AtLeastXP
 
     Delete "$INSTDIR\ultradefrag.exe"
     Delete "$INSTDIR\scripts\upgrade-guiopts.lua"
-    
+
     Push $R0
 
     DetailPrint "Unregister file extensions..."
@@ -719,7 +732,7 @@ Var AtLeastXP
 
     ; "Export" our change
     SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
-    
+
     Pop $0
 
 !macroend
@@ -740,7 +753,7 @@ Var AtLeastXP
 
     ; "Export" our change
     SendMessage ${HWND_BROADCAST} ${WM_SETTINGCHANGE} 0 "STR:Environment" /TIMEOUT=5000
-    
+
     Pop $0
 
 !macroend
@@ -888,12 +901,15 @@ Var AtLeastXP
     RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
     RMDir /r "$INSTDIR\i18n\gui"
     RMDir /r "$INSTDIR\i18n\gui-config"
-    
+
     Delete "$INSTDIR\i18n\French (FR).lng"
     Delete "$INSTDIR\i18n\Vietnamese (VI).lng"
     Delete "$INSTDIR\i18n\Bosanski.lng"
 
     Delete "$INSTDIR\scripts\udctxhandler.lua"
+
+    Delete "$INSTDIR\options\udreportopts-custom.lua"
+
     Delete "$INSTDIR\dfrg.exe"
     Delete "$INSTDIR\INSTALL.TXT"
     Delete "$INSTDIR\FAQ.TXT"
