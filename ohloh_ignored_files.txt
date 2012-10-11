@@ -1,0 +1,15 @@
+# This script lists files needing to be ignored by the Ohloh
+# code analysis service (http://www.ohloh.net/p/ultradefrag):
+
+# exclude all the branches except of trunk
+Disallow: /release/
+
+# exclude external libraries
+Disallow: /trunk/src/lua5.1/
+Disallow: /trunk/src/share/
+Disallow: /trunk/src/dll/zenwinx/prb.c
+Disallow: /trunk/src/dll/zenwinx/prb.h
+Disallow: /trunk/src/gui/prb.c
+Disallow: /trunk/src/gui/prb.h
+Disallow: /trunk/doc/html/lightbox_assets/
+Disallow: /trunk/doc/html/SpryAssets/
