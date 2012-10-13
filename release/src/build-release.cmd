@@ -47,6 +47,11 @@ cd release
 cd ..
 
 copy .\HISTORY.TXT .\release\
+copy /Y .\HISTORY.TXT ..\..\web\
+
+echo %ULTRADFGVER% > ..\..\web\version.ini
+:: TODO remove line below after release of version 6.0.0
+echo %ULTRADFGVER% > ..\..\web\version_xp.ini
 
 echo.
 echo Release made successfully!
