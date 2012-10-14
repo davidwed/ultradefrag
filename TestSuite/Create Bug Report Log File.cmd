@@ -170,9 +170,9 @@ goto :EOF
 :ProcessVolumes
     set CurrentVolume=%~1
     if "%UD_DRY_RUN%" == "1" (
-        set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%_dryrun.log
+        set UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%_dryrun.log
     ) else (
-        set UD_LOG_FILE_PATH=%SystemRoot%\UltraDefrag\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
+        set UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
     )
     echo.
     echo Using log file "%UD_LOG_FILE_PATH%"
@@ -185,9 +185,9 @@ goto :EOF
     echo.
     ping -n 11 localhost >nul 2>&1
     if "%UD_DRY_RUN%" == "1" (
-        for %%F in ( "%CurrentVolume%\fraglist.*" ) do copy /v /y "%%~F" "%SystemRoot%\UltraDefrag\Logs\%%~nF_%CurrentVolume:~0,1%_dryrun%%~xF"
+        for %%F in ( "%CurrentVolume%\fraglist.*" ) do copy /v /y "%%~F" "%UD_INSTALL_DIR%\Logs\%%~nF_%CurrentVolume:~0,1%_dryrun%%~xF"
     ) else (
-        for %%F in ( "%CurrentVolume%\fraglist.*" ) do copy /v /y "%%~F" "%SystemRoot%\UltraDefrag\Logs\%%~nF_%CurrentVolume:~0,1%%%~xF"
+        for %%F in ( "%CurrentVolume%\fraglist.*" ) do copy /v /y "%%~F" "%UD_INSTALL_DIR%\Logs\%%~nF_%CurrentVolume:~0,1%%%~xF"
     )
 goto :EOF
 
