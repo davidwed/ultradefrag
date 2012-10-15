@@ -7,6 +7,7 @@ new pre-release:
 6. close bugs and requests, but still allow posting comments
 7. update language wiki pages
 8. kindly request translation updates from known translators
+9. add milestone to trackers
 
 new release:
 1. add date to history.txt file
@@ -17,3 +18,4 @@ new release:
 5. submit news
 6. close bugs and requests, but still allow posting comments
 7. update project info
+8. add milestone to trackers and disable old one
