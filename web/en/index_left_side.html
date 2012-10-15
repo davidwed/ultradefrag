@@ -12,19 +12,13 @@
     </div>
     <div class="mpart">
         <h2 class="content"><strong>NEWS</strong></h2>
-        <a href="http://sourceforge.net/p/ultradefrag/news/"><strong><span style="font-size: large;">UltraDefrag 5.0.7 released</span></strong> <small>[2012-09-01]</small></a>
+        <a href="http://sourceforge.net/p/ultradefrag/news/"><strong><span style="font-size: large;">UltraDefrag 5.1.0 released</span></strong> <small>[2012-09-01]</small></a>
         <!-- brief description of key improvements here -->
         <ul>
-            <li>Compatibility with some boot loaders and disk encryption software added, see <a href="../HISTORY.TXT">Change Log</a> for the full list.</li>
-            <li>Crash handling was added to GUI interface, so crash information can be easily submitted.</li>
-            <li>The progress indicator should now never exceed 100% in any case.</li>
-            <li>It is now possible to change the background (free-space) color of the cluster map to support dark themes.</li>
-            <li>The following translations were added:<br />
-                <p style="padding-left: 20px">Lithuanian, Albanian</p></li>
-            <li>The following translations were updated:<br />
-                <p style="padding-left: 20px">Vietnamese, Polish, Iloko, Portuguese (BR), Norwegian, Slovak,
-                Chinese (Simplified), Chinese (Traditional), Spanish (MEX),
-                Wáray-Wáray, Japanese, Spanish (AR)</p></li>
+            <li>A performance regression introduced in v5.0.7 was fixed.</li>
+            <li>The installer now allows to specify the installation folder,
+            existing installations will be moved to the new location before the upgrade to preserve the settings.</li>
+            <li>Fragmentation percentage is now displayed in the drives list of the GUI and the verbose output of the command line utility.</li>
         </ul>
         <p>The <a href="../HISTORY.TXT">Change Log</a> contains the full list of changes.</p>
         <p>&nbsp;</p>
@@ -58,9 +52,9 @@
         <p><span class="style0">Driver:</span></p>
         <ul>
         <li>Currently FAT, exFAT and NTFS are supported. <span class="enhancement">(enhanced in 5.0.0)</span></li>
-        <li>Defragmentation of files and folders including system files and file system meta files. <span class="enhancement">(enhanced in 5.0.0)</span></li>
-        <li>Full optimization of the drive, which processes all files despite of their fragmentation. <span class="enhancement">(enhanced in 5.0.3)</span></li>
-        <li>Quick optimization of the drive, which mainly processes fragmented files. <span class="enhancement">(enhanced in 5.0.3)</span></li>
+        <li>Defragmentation of files and folders including system files and file system meta files. <span class="enhancement">(enhanced in 5.1.0)</span></li>
+        <li>Full optimization of the drive, which processes all files despite of their fragmentation. <span class="enhancement">(enhanced in 5.1.0)</span></li>
+        <li>Quick optimization of the drive, which mainly processes fragmented files. <span class="enhancement">(enhanced in 5.1.0)</span></li>
         <li>MFT optimization, which processes the MFT only. <span class="enhancement">(enhanced in 5.0.1)</span></li>
         <li>Filtering of files to process by name, fragment count and size.</li>
         <li>Drive processing can be interrupted automatically after a defined amount of time.</li>
@@ -72,16 +66,16 @@
         <ul>
         <li>Graphical display of the drives cluster map. <span class="enhancement">(enhanced in 5.0.7)</span></li>
         <li>Modern design with menus and tool bar. <span class="enhancement">(enhanced in 5.0.3)</span></li>
-        <li>The current progress and all important information are displayed in the drives list. <span class="enhancement">(enhanced in 5.0.4)</span></li>
+        <li>The current progress and all important information are displayed in the drives list. <span class="enhancement">(enhanced in 5.1.0)</span></li>
         <li>A final action can be specified to be executed after processing the drives. <span class="newfeature">(new in 5.0.0)</span></li>
         <li>Color coding of the usage of the cluster map. <span class="enhancement">(enhanced in 5.0.7)</span></li>
-        <li>Localization can be done by the user or by one of the 60 included language packages. <span class="enhancement">(enhanced in 5.0.7)</span></li>
+        <li>Localization can be done by the user or by one of the 61 included language packages. <span class="enhancement">(enhanced in 5.1.0)</span></li>
         <li><a href="../handbook/GUI.html">Read more...</a></li>
         </ul>
         <p><span class="style0">Command Line Tool:</span></p>
         <ul>
         <li>Useful for automation through scheduled tasks or batch scripts.</li>
-        <li>Integrated into Explorer's context menu. <span class="enhancement">(enhanced in 5.0.5)</span></li>
+        <li>Integrated into Explorer's context menu. <span class="enhancement">(enhanced in 5.1.0)</span></li>
         <li>Specify options through command line arguments or environment variables. <span class="enhancement">(enhanced in 5.0.0)</span></li>
         <li>On demand, display of the graphical cluster map.</li>
         <li><a href="../handbook/Console.html">Read more...</a></li>
@@ -103,6 +97,8 @@
         <li>Two configurations are available, full and without GUI. <span class="enhancement">(enhanced in 5.0.0)</span></li>
         <li>All features can be configured through command line arguments. <span class="newfeature">(new in 5.0.0)</span></li>
         <li>Selections of previous installations are retained. <span class="enhancement">(enhanced in 5.0.3)</span></li>
+        <li>Destination folder can be specified. <span class="newfeature">(new in 5.1.0)</span></li>
+        <li>Log file creation on failure of silent installation. <span class="newfeature">(new in 5.1.0)</span></li>
         <li><a href="../handbook/Installation.html">Read more...</a></li>
         </ul>
         <p>&nbsp;</p>
