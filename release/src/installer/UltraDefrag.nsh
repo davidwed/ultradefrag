@@ -200,7 +200,7 @@ Var AtLeastXP
     /* this idea was suggested by bender647 at users.sourceforge.net */
     Push $R0
     ClearErrors
-    ;ReadEnvStr $R0 "PROCESSOR_ARCHITECTURE"
+    ; ReadEnvStr $R0 "PROCESSOR_ARCHITECTURE"
     ; On 64-bit systems it always returns 'x86' because the installer
     ; is a 32-bit application and runs on a virtual machine :(((
 
@@ -329,9 +329,18 @@ PathGood:
     SetDetailsPrint both
 
 SkipMove:
+    DetailPrint "Removing old executable files..."
+        Delete "$INSTDIR\*.exe"
+        Delete "$INSTDIR\*.dll"
+
     DetailPrint "Installing core files..."
     SetOutPath "$SYSDIR"
         File "lua5.1a.dll"
+        File "zenwinx.dll"
+        File "udefrag.dll"
+        File "wgx.dll"
+        File /oname=hibernate4win.exe "hibernate.exe"
+        File "${ROOTDIR}\src\installer\ud-help.cmd"
 
     SetOutPath "$INSTDIR"
         File "${ROOTDIR}\src\LICENSE.TXT"
@@ -364,13 +373,6 @@ SkipMove:
         ${EndUnless}
     ${EndIf}
     File "${ROOTDIR}\src\scripts\udreport.css"
-
-    SetOutPath "$SYSDIR"
-        File "zenwinx.dll"
-        File "udefrag.dll"
-        File "wgx.dll"
-        File /oname=hibernate4win.exe "hibernate.exe"
-        File "${ROOTDIR}\src\installer\ud-help.cmd"
 
     DetailPrint "Register .luar file extension..."
     WriteRegStr HKCR ".luar" "" "LuaReport"
