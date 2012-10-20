@@ -10,7 +10,7 @@
 
     - the following translations were updated:
 
-      Greek
+      Greek, Javanese
 
     - Internals:
 
