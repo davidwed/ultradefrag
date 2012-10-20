@@ -90,6 +90,7 @@ for /l %%P in (%PortNum%,-1,0) do call :UnMountDisk %%P
 echo.
 echo Clearing Snapshots ...
 for %%F in ( "%VM_ROOT_DIR%\%ProcessHost%\Snapshots\*.vdi" ) do VBoxManage closemedium disk "%%~F" --delete >nul 2>&1
+for %%F in ( "%VM_ROOT_DIR%\*.vdi" ) do VBoxManage closemedium disk "%%~F" >nul 2>&1
 
 goto :SelectHost
 
