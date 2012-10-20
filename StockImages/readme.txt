@@ -20,6 +20,8 @@ http://lua-users.org/wiki/LuaLogo
 The following sizes are included: 16x16, 32x32, 48x48, 64x64, 96x96,
 128x128 and 256x256.
 
+4 bits per pixel icons are not included.
+
 Copyright © 1998 Lua.org. Graphic design by Alexandre Nakonechnyj.
 
 Permission is hereby granted, without written agreement and without 
@@ -45,3 +47,5 @@ http://nsis.sourceforge.net/
 
 The following sizes are included: 16x16, 20x20, 22x22, 24x24,
 32x32, 40x40, 48x48, 64x64, 96x96, 128x128 and 256x256.
+
+4 bits per pixel icons are not included.
