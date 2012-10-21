@@ -189,6 +189,7 @@ goto :EOF
     ) else (
         for %%F in ( "%CurrentVolume%\fraglist.*" ) do copy /v /y "%%~F" "%UD_INSTALL_DIR%\Logs\%%~nF_%CurrentVolume:~0,1%%%~xF"
     )
+    ping -n 31 localhost >nul 2>&1
 goto :EOF
 
 :DisplayMenuItem
