@@ -29,14 +29,6 @@
 * and Stefan Pendl <stefanpe@users.sourceforge.net>.
 */
 
-/*
-* NTFS formatted volumes cannot be safely accessed
-* in NT4, as mentioned in program's handbook.
-* On our test machines NTFS access caused blue
-* screens regardless of whether we accessed it
-* from kernel mode or user mode.
-*/
-
 #include "udefrag-internals.h"
 
 static void update_progress_counters(winx_file_info *f,udefrag_job_parameters *jp);
