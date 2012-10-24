@@ -159,9 +159,13 @@ static int process_free_region(winx_volume_region *rgn,void *user_defined_data)
  */
 static int get_free_space_layout(udefrag_job_parameters *jp)
 {
+    char buffer[32];
+
     jp->free_regions = winx_get_free_volume_regions(jp->volume_letter,
         WINX_GVR_ALLOW_PARTIAL_SCAN,process_free_region,(void *)jp);
     
+    winx_bytes_to_hr(jp->v_info.free_bytes,1,buffer,sizeof(buffer));
+    DebugPrint("free space amount : %s",buffer);
     DebugPrint("free regions count: %u",jp->free_regions_count);
     
     /* let full disks to pass the analysis successfully */
