@@ -635,10 +635,17 @@ void StopLangIniChangesTracking()
  */
 DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)
 {
+    OSVERSIONINFO osvi;
+    int is_nt4 = 0;
     HANDLE h;
     DWORD status;
     ULONGLONG counter = 0;
     
+    ZeroMemory(&osvi, sizeof(OSVERSIONINFO));
+    osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+    GetVersionEx(&osvi);
+    if(osvi.dwMajorVersion < 5) is_nt4 = 1;
+
     h = FindFirstChangeNotification(".\\i18n",
             FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE \
             | FILE_NOTIFY_CHANGE_FILE_NAME \
@@ -653,7 +660,7 @@ DWORD WINAPI I18nFolderChangesTrackingProc(LPVOID lpParameter)
     while(!stop_track_i18n_folder){
         status = WaitForSingleObject(h,100);
         if(status == WAIT_OBJECT_0){
-            if(counter % 2 == 0){
+            if(counter % 2 == 0 && !is_nt4){
                 /*
                 * Do nothing; see comment in 
                 * settings.c::PrefsChangesTrackingProc
