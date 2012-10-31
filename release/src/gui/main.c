@@ -1319,7 +1319,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     SavePrefs();
     
     if(InitSynchObjects() < 0){
-        DeleteEnvironmentVariables();
         StopCrashInfoCheck();
         return 1;
     }
@@ -1356,7 +1355,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
         release_jobs();
         WgxDestroyResourceTable(i18n_table);
         stop_web_statistics();
-        DeleteEnvironmentVariables();
         DestroySynchObjects();
         StopCrashInfoCheck();
         return 3;
@@ -1373,7 +1371,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
 
     /* save settings */
     SavePrefs();
-    DeleteEnvironmentVariables();
     stop_web_statistics();
     StopCrashInfoCheck();
     
