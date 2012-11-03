@@ -19,6 +19,7 @@ Redirect permanent /handbook/reporting_bugs.html http://ultradefrag.sourceforge.
 Redirect permanent /handbook/reports.html        http://ultradefrag.sourceforge.net/handbook/Reports.html
 Redirect permanent /handbook/schedule.html       http://ultradefrag.sourceforge.net/handbook/Schedule.html
 Redirect permanent /handbook/scheduler.html      http://ultradefrag.sourceforge.net/handbook/Schedule.html
+Redirect permanent /handbook/tips.html           http://ultradefrag.sourceforge.net/handbook/Tips.html
 
 Redirect permanent /handbook/boot                http://ultradefrag.sourceforge.net/handbook/Boot.html
 
