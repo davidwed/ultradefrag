@@ -12,7 +12,7 @@
 
     - the following translations were updated:
 
-      Czech, Greek, Iloko, Javanese
+      Czech, Greek, Iloko, Javanese, Latvian
 
     - Internals:
 
