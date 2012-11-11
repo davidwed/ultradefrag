@@ -18,3 +18,7 @@ new release:
 6. close bugs and requests, but still allow posting comments
 7. add milestone to trackers and disable old one
 8. update project info
+9. create a backup of the translation wiki:
+   a) Manage Wiki => Exports / Backup
+   b) delete all previous backups
+   c) Wikitext => Windows .zip => Export Wiki
