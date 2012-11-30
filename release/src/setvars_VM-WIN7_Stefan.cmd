@@ -5,20 +5,18 @@ echo Set Stefans' environment variables...
 if not defined ORIG_USERNAME set ORIG_USERNAME=%USERNAME%
 
 :: DDK for Windows Server 2003 SP1
-set WINDDKBASE=C:\WinDDK\3790.1830
+:: set WINDDKBASE=C:\WinDDK\3790.1830
 :: WDK for Windows Server 2008
 :: set WINDDKBASE=C:\WinDDK\6001.18002
 :: Windows Driver Kit 7_1_0
-:: set WINDDKBASE=C:\WinDDK\7600.16385.1
+set WINDDKBASE=C:\WinDDK\7600.16385.1
 set WINSDKBASE=
-set MINGWBASE=
+set MINGWBASE=C:\PROGRA~1\MinGWStudio\MinGW
 set MINGWx64BASE=
-set NETRUNTIMEPATH=C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727
 set NSISDIR=C:\Program Files\NSIS
 set SEVENZIP_PATH=C:\Program Files\7-Zip
 set MSVSBIN=
-set DDKINCDIR=
-set PELLESC_BASE=
+set ROSINCDIR=
 
 rem comment out next line to enable warnings to find unreachable code
 goto :EOF
