@@ -2,6 +2,35 @@
 
   Version 6.0.0 2012-01-
   ------------------------------------------------------------------------------
+    beta2:
+    - added progress indication to the taskbar button for Windows 7
+      and more recent Windows editions; it can be turned on/off by 
+      show_progress_in_taskbar GUI option
+    - file fragmentation reports moved from the root directories of
+      the drives to the /reports sub-folder of the program's directory
+    - added ability to configure the Explorer's context menu handler;
+      an appropriate section added to guiopts.lua file
+    - bug fix: UD_IN_FILTER forced to be not ignored when individual
+      files/directories are specified on the command line
+    - bug fix: UD_SORTING and UD_SORTING_ORDER environment variables
+      forced to be set properly on GUI startup according to the Preview
+      menu selections
+    - added prefixes for all the debugging messages for easier analysis of logs
+    - Internals: many prototypes changed in zenwinx, udefrag, wgx libraries;
+      obsolete routines removed
+    - winx_bootex_check routine added to zenwinx library
+    - udefrag_init_library, udefrag_unload_library, udefrag_bootex_check,
+      udefrag_bootex_register, udefrag_bootex_unregister routines added
+    - WgxSetTaskbarProgressState, WgxSetTaskbarProgressValue, wgx_sprintf,
+      wgx_vsprintf, wgx_swprintf, wgx_vswprintf routines added to wgx library
+    - tracing macros for easier debugging added to zenwinx.h and wgx.h files
+    - Windows Server 2003 DDK support dropped because of lack of variadic macros
+      support there - use Windows Driver Kit v7.1.0 instead
+
+    - the following translations were updated:
+
+      Catalan
+
     beta1:
     - all the disk processing algorithms were reimplemented
       to reach better efficiency and shorter processing times
