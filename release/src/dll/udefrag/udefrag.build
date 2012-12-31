@@ -1,0 +1,13 @@
+-- this is the udefrag library build options
+name        = "udefrag"
+target_type = "dll"
+nativedll   = 1
+
+-- list of directories containing headers the library relies on
+includes = { "include", "udefrag", "zenwinx" }
+
+libs = { "ntdll" }
+adlibs = { 
+      "$(UDEFRAG_LIB_PATH)\\zenwinx", 
+}
+baseaddr = "0x01500000"
