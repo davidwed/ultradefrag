@@ -6,7 +6,7 @@ if not defined ORIG_USERNAME set ORIG_USERNAME=%USERNAME%
 
 :: set WINDDKBASE=C:\WinDDK\3790.1830
 set WINDDKBASE=C:\WINDDK\7600.16385.1
-set WINSDKBASE=
+set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v7.1
 set MINGWBASE=C:\MinGW32
 set MINGWx64BASE=
 set NSISDIR=C:\Program Files (x86)\NSIS
