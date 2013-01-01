@@ -2,7 +2,7 @@
 
   Version 6.0.0 2012-01-
   ------------------------------------------------------------------------------
-    beta3:
+    RC1:
     - Internals: changed definition of WGX_OPTION structure
     - WgxGetControlDimensions routine added to wgx library
 
