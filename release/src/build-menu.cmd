@@ -80,7 +80,7 @@ goto finished
 
 :2
 title Build with Defaults
-call build.cmd
+call build.cmd --no-pdf --no-dev
 goto finished
 
 :3
@@ -95,12 +95,12 @@ goto finished
 
 :5
 title Build .................. using WinDDK, no IA64
-call build.cmd --use-winddk --no-ia64
+call build.cmd --use-winddk --no-ia64 --no-pdf --no-dev
 goto finished
 
 :6
 title Build Portable ......... using WinDDK, no IA64
-call build.cmd --portable --use-winddk --no-ia64
+call build.cmd --portable --use-winddk --no-ia64 --no-pdf --no-dev
 goto finished
 
 :7

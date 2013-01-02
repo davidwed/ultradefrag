@@ -36,12 +36,12 @@ call :make_manifest %1 5.1.2.0          Lua          "Lua GUI"                  
 
 rem update manifests in working copy of sources
 if /i "%1" equ "X86" (
-    copy /Y .\obj\hibernate\hibernate.manifest .\hibernate\hibernate.manifest
-    copy /Y .\obj\console\defrag.manifest .\console\defrag.manifest
-    copy /Y .\obj\gui\res\ultradefrag.manifest .\gui\res\ultradefrag.manifest
+    copy /Y .\obj\hibernate\hibernate.manifest   .\hibernate\hibernate.manifest
+    copy /Y .\obj\console\defrag.manifest        .\console\defrag.manifest
+    copy /Y .\obj\gui\res\ultradefrag.manifest   .\gui\res\ultradefrag.manifest
     copy /Y .\obj\bootexctrl\bootexctrl.manifest .\bootexctrl\bootexctrl.manifest
-    copy /Y .\obj\lua\lua.manifest .\lua\lua.manifest
-    copy /Y .\obj\lua-gui\lua.manifest .\lua-gui\lua.manifest
+    copy /Y .\obj\lua\lua.manifest               .\lua\lua.manifest
+    copy /Y .\obj\lua-gui\lua.manifest           .\lua-gui\lua.manifest
 )
 exit /B 0
 
