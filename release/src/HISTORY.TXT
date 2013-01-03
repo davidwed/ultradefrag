@@ -1,6 +1,6 @@
 ﻿HISTORY
 
-  Version 6.0.0 2012-01-
+  Version 6.0.0 2013-01-
   ------------------------------------------------------------------------------
     RC1:
     - Internals: changed definition of WGX_OPTION structure
@@ -10,7 +10,7 @@
 
       Bengali
 
-      - the following translations were updated:
+    - the following translations were updated:
 
       Catalan, Italian
 
