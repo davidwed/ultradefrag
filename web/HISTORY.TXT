@@ -1,7 +1,19 @@
 ﻿HISTORY
 
-  Version 6.0.0 2012-01-
+  Version 6.0.0 2013-01-20
   ------------------------------------------------------------------------------
+    RC1:
+    - Internals: changed definition of WGX_OPTION structure
+    - WgxGetControlDimensions routine added to wgx library
+
+    - the following translations were added:
+
+      Bengali
+
+    - the following translations were updated:
+
+      Catalan, Italian
+
     beta2:
     - added progress indication to the taskbar button for Windows 7
       and more recent Windows editions; it can be turned on/off by 
