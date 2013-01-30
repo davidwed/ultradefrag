@@ -576,6 +576,10 @@ if os.getenv("BUILD_ENV") == "winddk" then
         copy(objpath .. name .. ".lib",libpath)
     end
 elseif os.getenv("BUILD_ENV") == "winsdk" then
+    -- SDK is not supported because GUI cannot safely
+    -- free memory allocated by WGX library when the /MT
+    -- compiler switch is used for their compilation
+    error("Windows SDK is not supported!")
     if target_type == "driver" then
         error("Driver compilation is not supported by Windows SDK!")
     else
