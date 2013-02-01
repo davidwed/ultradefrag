@@ -1429,6 +1429,21 @@ void stop_web_statistics()
     while(!web_statistics_completed) Sleep(100);
 }
 
+static int out_of_memory_handler(size_t n)
+{
+    int choice = MessageBox(hWindow,
+        "Try to release some memory by closing\n"
+        "other applications and click Retry then\n"
+        "or click Cancel to terminate the program.",
+        "UltraDefrag: out of memory!",
+        MB_RETRYCANCEL | MB_ICONHAND);
+    if(choice == IDCANCEL){
+        exit(3);
+        return 0;
+    }
+    return 1;
+}
+
 /**
  * @brief Entry point.
  */
@@ -1446,6 +1461,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     GetVersionEx(&osvi);
     if(osvi.dwMajorVersion < 5) is_nt4 = 1;
 
+    udefrag_set_killer(out_of_memory_handler);
     init_result = udefrag_init_library();
     WgxSetInternalTraceHandler(udefrag_dbg_print);
     hInstance = GetModuleHandle(NULL);

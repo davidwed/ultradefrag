@@ -50,6 +50,9 @@
 int udefrag_init_library(void);
 void udefrag_unload_library(void);
 
+typedef int (*udefrag_killer)(size_t n);
+void udefrag_set_killer(udefrag_killer k);
+
 typedef struct _volume_info {
     char letter;
     char fsname[MAXFSNAME];

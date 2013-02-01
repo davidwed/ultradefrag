@@ -155,7 +155,7 @@ char *winx_strdup(const char *s)
         return NULL;
     
     length = strlen(s);
-    cp = winx_malloc((length + 1) * sizeof(char));
+    cp = winx_tmalloc((length + 1) * sizeof(char));
     if(cp) strcpy(cp,s);
     return cp;
 }
@@ -172,7 +172,7 @@ wchar_t *winx_wcsdup(const wchar_t *s)
         return NULL;
     
     length = wcslen(s);
-    cp = winx_malloc((length + 1) * sizeof(wchar_t));
+    cp = winx_tmalloc((length + 1) * sizeof(wchar_t));
     if(cp) wcscpy(cp,s);
     return cp;
 }
@@ -389,7 +389,7 @@ char *winx_vsprintf(const char *format,va_list arg)
     /* set the initial buffer size */
     size = WINX_VSPRINTF_BUFFER_SIZE;
     do {
-        buffer = winx_malloc(size);
+        buffer = winx_tmalloc(size);
         if(!buffer) break;
         memset(buffer,0,size); /* needed for _vsnprintf */
         result = _vsnprintf(buffer,size,format,arg);
@@ -486,13 +486,6 @@ int winx_patcomp(winx_patlist *patterns,wchar_t *string,wchar_t *delim,int flags
     
     /* build array of patterns */
     patterns->array = winx_malloc(patterns->count * sizeof(wchar_t *));
-    if(patterns->array == NULL){
-        etrace("cannot allocate %u bytes of memory",
-            patterns->count * sizeof(wchar_t *));
-        winx_free(s);
-        patterns->count = 0;
-        return (-1);
-    }
     pattern_detected = 0;
     for(i = j = 0; i < n; i++){
         if(s[i] != 0){

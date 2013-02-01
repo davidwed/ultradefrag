@@ -439,8 +439,6 @@ char *udefrag_get_default_formatted_results(udefrag_progress_info *pi)
     
     /* allocate memory */
     msg = winx_malloc(MSG_LENGTH + 1);
-    if(msg == NULL)
-        return msg;
 
     (void)winx_bytes_to_hr(pi->total_space,2,total_space,sizeof(total_space));
     (void)winx_bytes_to_hr(pi->free_space,2,free_space,sizeof(free_space));
@@ -604,17 +602,7 @@ int udefrag_set_log_file_path(void)
     }
     
     longpath = winx_malloc((MAX_PATH + 1) * sizeof(wchar_t));
-    if(longpath == NULL){
-        winx_free(path);
-        return UDEFRAG_NO_MEM;
-    }
-
     fullpath = winx_malloc((MAX_PATH + 1) * sizeof(wchar_t));
-    if(fullpath == NULL){
-        winx_free(longpath);
-        winx_free(path);
-        return UDEFRAG_NO_MEM;
-    }
     
     /* convert to the full path whenever possible */
     pGetLongPathNameW = (GETLONGPATHNAME_PROC)
@@ -726,6 +714,14 @@ int udefrag_set_log_file_path(void)
 void udefrag_flush_dbg_log(void)
 {
     winx_flush_dbg_log();
+}
+
+/**
+ * @brief Interface to winx_set_killer.
+ */
+void udefrag_set_killer(udefrag_killer k)
+{
+    winx_set_killer((winx_killer)k);
 }
 
 /** @} */

@@ -9,6 +9,7 @@ EXPORTS
     udefrag_init_library
     udefrag_release_default_formatted_results
     udefrag_release_vollist
+    udefrag_set_killer
     udefrag_set_log_file_path
     udefrag_start_job
     udefrag_unload_library

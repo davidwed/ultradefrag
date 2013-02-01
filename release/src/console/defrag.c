@@ -733,6 +733,14 @@ void test(void)
 }
 */
 
+static int out_of_memory_handler(size_t n)
+{
+    settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
+    printf("\nOut of memory!\n");
+    settextcolor(default_color);
+    exit(3); return 0;
+}
+
 /**
  * @brief Command line tool entry point.
  */
@@ -750,6 +758,7 @@ int __cdecl main(int argc, char **argv)
 
     /* initialize the program */
     hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    udefrag_set_killer(out_of_memory_handler);
     init_result = udefrag_init_library();
     WgxSetInternalTraceHandler(udefrag_dbg_print);
     parse_cmdline_result = parse_cmdline(argc,argv);
