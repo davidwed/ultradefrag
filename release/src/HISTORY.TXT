@@ -1,6 +1,6 @@
 ﻿HISTORY
 
-  Version 6.0.0 2013-01-
+  Version 6.0.0 2013-02-
   ------------------------------------------------------------------------------
     RC2:
     - upgrade check now better supports development releases

@@ -1,7 +1,11 @@
 ﻿HISTORY
 
-  Version 6.0.0 2013-01-20
+  Version 6.0.0 2013-02-
   ------------------------------------------------------------------------------
+    RC2:
+    - upgrade check now better supports development releases
+    - out of memory condition handling added
+
     RC1:
     - Internals: changed definition of WGX_OPTION structure
     - WgxGetControlDimensions routine added to wgx library
