@@ -135,7 +135,6 @@ int __cdecl main(int argc, char **argv)
     if(!OpenProcessToken(GetCurrentProcess(), 
     TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY,&hToken)){
         handle_error("Cannot open process token");
-        udefrag_unload_library();
         return EXIT_FAILURE;
     }
     
@@ -145,7 +144,6 @@ int __cdecl main(int argc, char **argv)
     AdjustTokenPrivileges(hToken,FALSE,&tkp,0,(PTOKEN_PRIVILEGES)NULL,0);         
     if(GetLastError() != ERROR_SUCCESS){
         handle_error("Cannot set shutdown privilege");
-        udefrag_unload_library();
         return EXIT_FAILURE;
     }
     
@@ -173,9 +171,7 @@ int __cdecl main(int argc, char **argv)
     }
     if(!result){
         handle_error("Cannot hibernate the computer");
-        udefrag_unload_library();
         return EXIT_FAILURE;
     }
-    udefrag_unload_library();
     return EXIT_SUCCESS;
 }

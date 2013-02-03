@@ -306,7 +306,7 @@ int ShutdownOrHibernate(void)
     /*
     * Save log file before any action.
     */
-    udefrag_flush_dbg_log();
+    udefrag_flush_dbg_log(0);
     
     
     /*

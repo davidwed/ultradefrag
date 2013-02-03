@@ -201,8 +201,8 @@ static void terminate_console(int code)
 
     /* wait for web statistics request completion */
     stop_web_statistics();
-    
-    udefrag_unload_library();
+
+    udefrag_flush_dbg_log(0);
     exit(code);
 }
 
@@ -738,6 +738,7 @@ static int out_of_memory_handler(size_t n)
     settextcolor(FOREGROUND_RED | FOREGROUND_INTENSITY);
     printf("\nOut of memory!\n");
     settextcolor(default_color);
+    udefrag_flush_dbg_log(FLUSH_IN_OUT_OF_MEMORY);
     exit(3); return 0;
 }
 
@@ -758,8 +759,8 @@ int __cdecl main(int argc, char **argv)
 
     /* initialize the program */
     hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
-    udefrag_set_killer(out_of_memory_handler);
     init_result = udefrag_init_library();
+    udefrag_set_killer(out_of_memory_handler);
     WgxSetInternalTraceHandler(udefrag_dbg_print);
     parse_cmdline_result = parse_cmdline(argc,argv);
     init_console();

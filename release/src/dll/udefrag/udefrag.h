@@ -164,8 +164,14 @@ wchar_t *udefrag_wcslwr(wchar_t *s);
 /* reliable _wcsicmp analog */
 int udefrag_wcsicmp(const wchar_t *s1, const wchar_t *s2);
 
+/* flags for udefrag_flush_dbg_log */
+#ifndef FLUSH_ALREADY_SYNCHRONIZED
+#define FLUSH_ALREADY_SYNCHRONIZED 0x1 /* for internal use only */
+#define FLUSH_IN_OUT_OF_MEMORY     0x2 /* flush in the out of memory condition */
+#endif
+
 int udefrag_set_log_file_path(void);
-void udefrag_flush_dbg_log(void);
+void udefrag_flush_dbg_log(int flags);
 
 /**
  * @brief Delivers a message to the Debug View

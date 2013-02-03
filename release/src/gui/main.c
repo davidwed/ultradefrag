@@ -676,7 +676,7 @@ void OpenLog(void)
         letrace("cannot query UD_LOG_FILE_PATH environment variable");
         MessageBox(hWindow,"The log_file_path option is not set.","Cannot open log file!",MB_OK | MB_ICONHAND);
     } else {
-        udefrag_flush_dbg_log();
+        udefrag_flush_dbg_log(0);
         (void)WgxShellExecute(hWindow,L"open",env_buffer2,
             NULL,NULL,SW_SHOW,WSH_ALLOW_DEFAULT_ACTION);
     }
@@ -1438,8 +1438,8 @@ static int out_of_memory_handler(size_t n)
         "UltraDefrag: out of memory!",
         MB_RETRYCANCEL | MB_ICONHAND);
     if(choice == IDCANCEL){
-        exit(3);
-        return 0;
+        udefrag_flush_dbg_log(FLUSH_IN_OUT_OF_MEMORY);
+        exit(3); return 0;
     }
     return 1;
 }
@@ -1461,8 +1461,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     GetVersionEx(&osvi);
     if(osvi.dwMajorVersion < 5) is_nt4 = 1;
 
-    udefrag_set_killer(out_of_memory_handler);
     init_result = udefrag_init_library();
+    udefrag_set_killer(out_of_memory_handler);
     WgxSetInternalTraceHandler(udefrag_dbg_print);
     hInstance = GetModuleHandle(NULL);
     
@@ -1471,7 +1471,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
         MessageBox(NULL,"Administrative rights are needed "
           "to run the program!","UltraDefrag",
           MB_OK | MB_ICONHAND);
-        udefrag_unload_library();
+        udefrag_flush_dbg_log(0);
         return EXIT_FAILURE;
     }
 
@@ -1483,7 +1483,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
         MessageBoxA(NULL,"Send bug report to the authors please.",
             "UltraDefrag initialization failed!",MB_OK | MB_ICONHAND);
         StopCrashInfoCheck();
-        udefrag_unload_library();
+        udefrag_flush_dbg_log(0);
         return EXIT_FAILURE;
     }
     
@@ -1499,7 +1499,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     
     if(InitSynchObjects() < 0){
         StopCrashInfoCheck();
-        udefrag_unload_library();
+        udefrag_flush_dbg_log(0);
         return EXIT_FAILURE;
     }
 
@@ -1541,7 +1541,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
         }
         DestroySynchObjects();
         StopCrashInfoCheck();
-        udefrag_unload_library();
+        udefrag_flush_dbg_log(0);
         return EXIT_FAILURE;
     }
 
@@ -1564,14 +1564,14 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
         WgxDestroyFont(&wgxFont);
         WgxDestroyResourceTable(i18n_table);
         DestroySynchObjects();
-        udefrag_unload_library();
+        udefrag_flush_dbg_log(0);
         return result;
     }
     
     WgxDestroyFont(&wgxFont);
     WgxDestroyResourceTable(i18n_table);
     DestroySynchObjects();
-    udefrag_unload_library();
+    udefrag_flush_dbg_log(0);
     return EXIT_SUCCESS;
 }
 

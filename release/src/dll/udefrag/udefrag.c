@@ -74,8 +74,9 @@ int udefrag_init_library(void)
 /**
  * @brief Releases resources 
  * acquired by udefrag library.
- * @note Releases zenwinx resources
- * as well.
+ * @note
+ * - Releases zenwinx resources as well.
+ * - Call it ONLY if you know what you're doing.
  */
 void udefrag_unload_library(void)
 {
@@ -711,9 +712,9 @@ int udefrag_set_log_file_path(void)
  * @brief Appends all collected debugging
  * information to the log file.
  */
-void udefrag_flush_dbg_log(void)
+void udefrag_flush_dbg_log(int flags)
 {
-    winx_flush_dbg_log();
+    winx_flush_dbg_log(flags);
 }
 
 /**

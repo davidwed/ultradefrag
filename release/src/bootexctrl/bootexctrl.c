@@ -131,14 +131,11 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     WgxSetInternalTraceHandler(udefrag_dbg_print);
 
     result = parse_cmdline(cmdline);
-    if(result != EXIT_SUCCESS){
-        udefrag_unload_library();
+    if(result != EXIT_SUCCESS)
         return EXIT_FAILURE;
-    }
 
     if(h_flag){
         show_help();
-        udefrag_unload_library();
         return EXIT_SUCCESS;
     }
     
@@ -146,7 +143,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     if(!WgxCheckAdminRights()){
         DisplayError("Administrative rights"
             " are needed to run the program!");
-        udefrag_unload_library();
         return EXIT_FAILURE;
     }
 
@@ -163,6 +159,5 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
                 "Use DbgView program to get more information.");
         }
     }
-    udefrag_unload_library();
     return (result == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
