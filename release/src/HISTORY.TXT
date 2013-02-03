@@ -2,6 +2,11 @@
 
   Version 6.0.0 2013-02-
   ------------------------------------------------------------------------------
+    - log creation in case of out of memory condition added
+    - the following translations were updated:
+
+      Chinese (Traditional)
+
     RC2:
     - upgrade check now better supports development releases
     - out of memory condition handling added
