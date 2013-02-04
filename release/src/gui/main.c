@@ -957,6 +957,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             return 0;
         }
         break;
+    case WM_SETFOCUS:
+        /* suggested by Brian Gaff */
+        SetFocus(hList);
+        return 0;
     case WM_LBUTTONDOWN:
         ResizeListBegin((short)HIWORD(lParam));
         return 0;
