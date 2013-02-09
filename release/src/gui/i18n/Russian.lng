@@ -83,10 +83,10 @@ SCRIPT                    = &Сценарий
 SORT_BY_PATH              = Сортировать по &пути (path)
 SORT_BY_SIZE              = Сортировать по &размеру (size)
 SORT_BY_C_TIME            = Сортировать по дате &создания
-SORT_BY_M_TIME            = Сортировать по дате &модификации
-SORT_BY_A_TIME            = Сортировать по дате &доступа (last access)
-SORT_ASCENDING            = Сортировать в &возрастающем порядке
-SORT_DESCENDING           = Сортировать в &убывающем порядке
+SORT_BY_M_TIME            = Сортировать по дате &изменения
+SORT_BY_A_TIME            = Сортировать по дате &доступа
+SORT_ASCENDING            = Сортировать по &возрастанию
+SORT_DESCENDING           = Сортировать по &убыванию
 
 ; --- Help Menu
 

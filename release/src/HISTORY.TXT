@@ -5,7 +5,7 @@
     - log creation in case of out of memory condition added
     - the following translations were updated:
 
-      Chinese (Traditional)
+      Chinese (Traditional), Russian
 
     RC2:
     - upgrade check now better supports development releases
