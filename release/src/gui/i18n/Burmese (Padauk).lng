@@ -176,7 +176,7 @@ POWERED_BY_LUA            = LUA နှင့် အားအင်ဖြည်�
 FRAGMENTS                 = အစအနများ
 SIZE                      = အရွယ်
 FILENAME                  = ဖိုင်အမည်
-COMMENT                 ‌  = ဝေဖန်ချက်
+COMMENT                   = ဝေဖန်ချက်
 
 LOCKED                    = ဖြည်မရပါ
 MOVE_FAILED               = ရွှေ့မရပါ
