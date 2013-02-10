@@ -29,7 +29,7 @@ DEFRAGMENT                = &Defragment
 QUICK_OPTIMIZE            = &Quick optimisation
 FULL_OPTIMIZE             = &Full optimisation
 OPTIMIZE_MFT              = &Optimise MFT
-PAUSE                     = &Pause
+PAUSE                     = Pa&use
 STOP                      = &Stop
 REPEAT_ACTION             = Re&peat action
 SKIP_REMOVABLE_MEDIA      = Skip removable &media
@@ -93,7 +93,7 @@ CONTENTS                  = &Contents
 BEST_PRACTICE             = Best &practice
 FAQ                       = &Frequently asked questions
 CM_LEGEND                 = Cluster map &legend
-DEBUG                     = De&bug
+DEBUG                     = &Debug
 CHECK_UPDATE              = Check for &update
 ABOUT                     = &About
 
