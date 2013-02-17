@@ -79,12 +79,6 @@ NTSTATUS NTAPI query_routine(PWSTR ValueName,
         (list_entry **)(void *)list,
         (list_entry *)prev_command,
         sizeof(struct cmd));
-    if(command == NULL){
-        mtrace();
-        winx_free(cmd);
-        return STATUS_NO_MEMORY;
-    }
-    
     command->cmd = cmd;
     return STATUS_SUCCESS;
 }
@@ -289,10 +283,6 @@ int winx_bootex_register(wchar_t *command)
         (list_entry **)(void *)&list,
         (list_entry *)prev_command,
         sizeof(struct cmd));
-    if(c == NULL){
-        mtrace();
-        goto done;
-    }
     c->cmd = cmd_copy;
     
     /* save list of registered commands */
