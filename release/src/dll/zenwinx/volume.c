@@ -583,7 +583,7 @@ done:
     winx_free(bitmap);
     return rlist;
     
-fail:
+// fail:
     winx_fclose(f);
     winx_free(bitmap);
     winx_list_destroy((list_entry **)(void *)&rlist);
