@@ -59,6 +59,8 @@
 
 #include "udefrag-internals.h"
 
+HANDLE hMutex = NULL;
+
 /**
  * @brief Initializes udefrag library.
  * @details This routine needs to be called
@@ -68,7 +70,22 @@
  */
 int udefrag_init_library(void)
 {
-    return winx_init_library();
+    if(winx_init_library() < 0)
+        return (-1);
+
+    /* deny installation/upgrade */
+    if(winx_get_os_version() >= WINDOWS_VISTA){
+        (void)winx_create_mutex(L"\\Sessions\\1"
+            L"\\BaseNamedObjects\\ultradefrag_mutex",
+            &hMutex);
+    } else {
+        (void)winx_create_mutex(L"\\BaseNamedObjects"
+            L"\\ultradefrag_mutex",&hMutex);
+    }
+    
+    /* accept UD_LOG_FILE_PATH environment variable */
+    (void)udefrag_set_log_file_path();
+    return 0;
 }
 
 /**
@@ -80,6 +97,9 @@ int udefrag_init_library(void)
  */
 void udefrag_unload_library(void)
 {
+    /* allow installation/upgrade */
+    winx_destroy_mutex(hMutex);
+
     winx_unload_library();
 }
 
