@@ -10,6 +10,7 @@
 ; Revised Oct. 18, 2010 by Leo Smulders
 ; Revised Jan. 10, 2012 by Jan Iemhoff
 ; Revised May  23, 2012 by Fabrizio Marana
+; Revised Feb. 23, 2012 by Tjeerd van Sas
 ;------------------------------------------------------------------------------
 
 ; Please keep the header and comments in English and use Latin letters,
@@ -34,7 +35,7 @@ DEFRAGMENT                = &Defragmenteren
 QUICK_OPTIMIZE            = &Snel optimaliseren
 FULL_OPTIMIZE             = &Volledig optimaliseren
 OPTIMIZE_MFT              = &MFT optimaliseren
-PAUSE                     = &Pause
+PAUSE                     = &Pauzeren
 STOP                      = &Stoppen
 REPEAT_ACTION             = &Actie herhalen
 SKIP_REMOVABLE_MEDIA      = &Verwijderbare media overslaan
@@ -157,8 +158,8 @@ NO                        = &Nee
 
 ; Upgrade dialog (Opwaardering dialoog)
 
-UPGRADE_CAPTION           = U kunt een upgrade me ^-^
-UPGRADE_MESSAGE           = release is beschikbaar voor download!
+UPGRADE_CAPTION           = U kunt mij upgraden ^-^
+UPGRADE_MESSAGE           = Er is een nieuwe versie berschikbaar!
 
 ; A string for the taskbar icon overlay, needed for accessibility.
 
