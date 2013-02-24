@@ -169,10 +169,11 @@ goto :EOF
 
 :ProcessVolumes
     set CurrentVolume=%~1
+    set UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%_%UD_DBGPRINT_LEVEL%
     if "%UD_DRY_RUN%" == "1" (
-        set UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%_dryrun.log
+        set UD_LOG_FILE_PATH=%UD_LOG_FILE_PATH%_dryrun.log
     ) else (
-        set UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\Logs\udefrag_%ActionName%_%CurrentVolume:~0,1%.log
+        set UD_LOG_FILE_PATH=%UD_LOG_FILE_PATH%.log
     )
     echo.
     echo Using log file "%UD_LOG_FILE_PATH%"
