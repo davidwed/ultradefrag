@@ -8,7 +8,7 @@ set VERSION_REVISION=0
 
 :: alpha1, beta2, rc3, etc.
 :: unset for the final releases
-set RELEASE_STAGE=rc2
+set RELEASE_STAGE=rc3
 
 :: paths to development tools
 set WINDDKBASE=D:\WINDDK\7600.16385.1
