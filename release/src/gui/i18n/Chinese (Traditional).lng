@@ -33,7 +33,7 @@ DEFRAGMENT                = 重組(&D)
 QUICK_OPTIMIZE            = 快速優化(&Q)
 FULL_OPTIMIZE             = 完整優化(&F)
 OPTIMIZE_MFT              = 優化MFT(&O)
-PAUSE                     = 暫停(&P)
+PAUSE                     = 暫停(&U)
 STOP                      = 停止(&S)
 REPEAT_ACTION             = 重複動作(&P)
 SKIP_REMOVABLE_MEDIA      = 隱藏可卸除式裝置(&M)
@@ -60,7 +60,7 @@ SHOW_REPORT               = 顯示報告(&S)
 
 LANGUAGE                  = 語系(&L)
 GRAPHICAL_INTERFACE       = 圖形介面(&G)
-BOOT_TIME_SCAN            = 開機時進行重組(&B)
+BOOT_TIME_SCAN            = 開機重組(&B)
 REPORTS                   = 報告(&R)
 SORTING                   = 排序(&S)
 
@@ -114,14 +114,14 @@ BOOT_TIME_SCRIPT          = 開機重組指令碼
 
 VOLUME                    = 磁碟
 STATUS                    = 狀態
-FRAGMENTATION             = 分散
+FRAGMENTATION             = 分散率
 TOTAL                     = 磁碟大小
 FREE                      = 可用空間
-PERCENT                   = %可用
+PERCENT                   = ％可用
 
 ; Status messages
 
-STATUS_RUNNING            = 作業執行中…
+STATUS_RUNNING            = 作業執行中
 STATUS_ANALYSED           = 已分析
 STATUS_DEFRAGMENTED       = 已重組
 STATUS_OPTIMIZED          = 已優化
@@ -129,14 +129,14 @@ STATUS_DIRTY              = 磁碟需要修復
 
 ; Status bar messages.
 
-DIRS                      = 目錄
-FILES                     = 檔案
-FRAGMENTED                = 分散的檔案
-COMPRESSED                = 壓縮的檔案
+DIRS                      = 個目錄
+FILES                     = 個檔案
+FRAGMENTED                = 個分散的檔案
+COMPRESSED                = 個壓縮的檔案
 
 ; About window.
 
-ABOUT_WIN_TITLE           = 關於UltraDefrag
+ABOUT_WIN_TITLE           = 關於Ultra Defragmenter
 CREDITS                   = 致謝(&C)
 LICENSE                   = 授權(&L)
 
@@ -157,11 +157,11 @@ NO                        = 否(&N)
 ; Upgrade dialog
 
 UPGRADE_CAPTION           = 您可升級我 ^-^
-UPGRADE_MESSAGE           = 已可下載！
+UPGRADE_MESSAGE           = 版已可下載！
 
 ; A string for the taskbar icon overlay, needed for accessibility.
 
-JOB_IS_RUNNING            = 作業正在執行中，請稍後…
+JOB_IS_RUNNING            = 一個作業正在執行中
 
 ; Strings for system tray icon context menu.
 
@@ -170,16 +170,16 @@ HIDE                      = 隱藏
 
 ; Strings for the file fragmentation reports.
 
-FRAGMENTED_FILES_ON       = 上分散的檔案。
+FRAGMENTED_FILES_ON       = 分散檔案的於
 
 VISIT_HOMEPAGE            = 拜訪我們的網站
-VIEW_REPORT_OPTIONS       = 查看報告選項
-POWERED_BY_LUA            = 由Lua技術支援
+VIEW_REPORT_OPTIONS       = 查看報告設定
+POWERED_BY_LUA            = 基於Lua建構
 
-FRAGMENTS                 = 分散
-SIZE                      = 大小
+FRAGMENTS                 = 分散數量
+SIZE                      = 檔案大小
 FILENAME                  = 檔案名稱
-COMMENT                   = 備註
+COMMENT                   = 檔案說明
 
 LOCKED                    = 鎖定
 MOVE_FAILED               = 移動失敗
