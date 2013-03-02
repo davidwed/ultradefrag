@@ -3,7 +3,8 @@ new pre-release:
  2. change version number in "\src\setvars.cmd" and
     "\doc\handbook\rsc\custom_header_*.tex"
  3. run build-release.cmd
- 4. test files at http://www.virustotal.com/
+ 4. test files for x86 and AMD64 (installers, executables and archives)
+    at http://www.virustotal.com/
  5. upload files through sf.net file manager
  6. update website
  7. submit news
@@ -17,7 +18,8 @@ new release:
  2. change version number in "\src\setvars.cmd" and
     "\doc\handbook\rsc\custom_header_*.tex"
  3. run build-release.cmd
- 4. test files at http://www.virustotal.com/
+ 4. test files for x86 and AMD64 (installers, executables and archives)
+    at http://www.virustotal.com/
  5. upload files through sf.net file manager
  6. update website and zenwinx
  7. submit news
