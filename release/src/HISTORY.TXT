@@ -1,5 +1,12 @@
 ﻿HISTORY
 
+  Version 6.0.1 2013-04-
+  ------------------------------------------------------------------------------
+    - the following translations were updated:
+
+      Ukrainian
+
+
   Version 6.0.0 2013-03-02
   ------------------------------------------------------------------------------
     - the following translations were updated:
