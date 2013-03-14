@@ -6,6 +6,7 @@
 ||~ Language ||~ ||~ translated ||~ ||~ total ||~ ||~ percentage ||
 || [[Albanian.lng|Albanian]]                                             || ||=  90 || ||= 100 || ||>    90 % ||
 || [[Arabic.lng|Arabic]]                                                 || ||=  99 || ||= 100 || ||>    99 % ||
+|| [[Armenian.lng|Armenian]]                                             || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Belarusian.lng|Belarusian]]                                         || ||=  91 || ||= 100 || ||>    91 % ||
 || [[Bengali.lng|Bengali]]                                               || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Bosnian.lng|Bosnian]]                                               || ||=  76 || ||= 100 || ||>    76 % ||
@@ -72,6 +73,7 @@
 =Sorted by percent completed=
 
 ||~ Language ||~ ||~ translated ||~ ||~ total ||~ ||~ percentage ||
+|| [[Armenian.lng|Armenian]]                                             || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Bengali.lng|Bengali]]                                               || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Burmese (Padauk).lng|Burmese (Padauk)]]                             || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Chinese (Simplified).lng|Chinese (Simplified)]]                     || ||= 100 || ||= 100 || ||>   100 % ||
