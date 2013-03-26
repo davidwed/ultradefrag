@@ -35,7 +35,7 @@ echo This script must be run by the Administrator !!!
 goto :quit
 
 :IsAdmin
-set CommandLine=udefrag
+set CommandLine=udefrag -v
 set WindowTitle=UltraDefrag - Create Bug Report Log File
 title %WindowTitle%
 
