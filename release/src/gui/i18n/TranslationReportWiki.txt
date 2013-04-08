@@ -17,7 +17,7 @@
 || [[Chinese (Traditional).lng|Chinese (Traditional)]]                   || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Croatian.lng|Croatian]]                                             || ||=  86 || ||= 100 || ||>    86 % ||
 || [[Czech.lng|Czech]]                                                   || ||=  99 || ||= 100 || ||>    99 % ||
-|| [[Danish.lng|Danish]]                                                 || ||=  89 || ||= 100 || ||>    89 % ||
+|| [[Danish.lng|Danish]]                                                 || ||=  95 || ||= 100 || ||>    95 % ||
 || [[Dutch.lng|Dutch]]                                                   || ||=  98 || ||= 100 || ||>    98 % ||
 || [[English (GB).lng|English (GB)]]                                     || ||=  12 || ||= 100 || ||>    12 % ||
 || [[English (US).lng|English (US)]]                                     || ||=   0 || ||= 100 || ||>     0 % ||
@@ -105,6 +105,7 @@
 || [[Swedish.lng|Swedish]]                                               || ||=  98 || ||= 100 || ||>    98 % ||
 || [[Filipino (Tagalog).lng|Filipino (Tagalog)]]                         || ||=  97 || ||= 100 || ||>    97 % ||
 || [[Italian.lng|Italian]]                                               || ||=  96 || ||= 100 || ||>    96 % ||
+|| [[Danish.lng|Danish]]                                                 || ||=  95 || ||= 100 || ||>    95 % ||
 || [[French.lng|French]]                                                 || ||=  95 || ||= 100 || ||>    95 % ||
 || [[Portuguese (BR).lng|Portuguese (BR)]]                               || ||=  95 || ||= 100 || ||>    95 % ||
 || [[Romanian.lng|Romanian]]                                             || ||=  95 || ||= 100 || ||>    95 % ||
@@ -123,7 +124,6 @@
 || [[Estonian.lng|Estonian]]                                             || ||=  90 || ||= 100 || ||>    90 % ||
 || [[Indonesian.lng|Indonesian]]                                         || ||=  90 || ||= 100 || ||>    90 % ||
 || [[Spanish (AR).lng|Spanish (AR)]]                                     || ||=  90 || ||= 100 || ||>    90 % ||
-|| [[Danish.lng|Danish]]                                                 || ||=  89 || ||= 100 || ||>    89 % ||
 || [[Norwegian.lng|Norwegian]]                                           || ||=  89 || ||= 100 || ||>    89 % ||
 || [[Slovak.lng|Slovak]]                                                 || ||=  88 || ||= 100 || ||>    88 % ||
 || [[Finnish.lng|Finnish]]                                               || ||=  87 || ||= 100 || ||>    87 % ||
