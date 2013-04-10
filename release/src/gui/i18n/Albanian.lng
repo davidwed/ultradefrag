@@ -24,16 +24,16 @@ HELP                      = N&dihmë
 
 ; --- Action Menu
 
-ANALYSE                   = &Analizimi
-DEFRAGMENT                = &Defragmentimi
-QUICK_OPTIMIZE            = &Shpejtësia e optimizimit
+ANALYSE                   = &Analizo
+DEFRAGMENT                = &Ç'fragmento
+QUICK_OPTIMIZE            = Optimizimi i &shpejtë
 FULL_OPTIMIZE             = &Optimizimi i plotë
 OPTIMIZE_MFT              = &Optimizimi MFT
-PAUSE                     = &Pause
-STOP                      = &Ndalimi
-REPEAT_ACTION             = Për&sërit aksionin
-SKIP_REMOVABLE_MEDIA      = Tejkalo &mediumin e lëvizshëm
-RESCAN_DRIVES             = Rifresko &diskun
+PAUSE                     = Pa&uzë
+STOP                      = &Ndalo
+REPEAT_ACTION             = Për&sërit veprimin
+SKIP_REMOVABLE_MEDIA      = Tejkalo &mediat e lëvizshme
+RESCAN_DRIVES             = &Riskeno diskun
 REPAIR_DRIVES             = Riparo &diskun
 WHEN_DONE                 = Përf&undimi
 EXIT                      = Da&lja
@@ -42,8 +42,8 @@ EXIT                      = Da&lja
 
 WHEN_DONE_NONE            = &Asgjë
 WHEN_DONE_EXIT            = Da&lja
-WHEN_DONE_STANDBY         = Stan&dby
-WHEN_DONE_HIBERNATE       = &Hibernimi
+WHEN_DONE_STANDBY         = Pri&t
+WHEN_DONE_HIBERNATE       = &Pusho
 WHEN_DONE_LOGOFF          = &Shkyçje
 WHEN_DONE_REBOOT          = &Restartimi i kompjuterit
 WHEN_DONE_SHUTDOWN        = &Fikja
@@ -58,7 +58,7 @@ LANGUAGE                  = &Gjuha
 GRAPHICAL_INTERFACE       = &Interfejsi grafik
 BOOT_TIME_SCAN            = &Skenimi para kyçjes së kompjuterit
 REPORTS                   = &Raportet
-SORTING                   = &Sorting
+SORTING                   = &Klasifikim
 
 ; --- --- Language submenu
 
@@ -79,13 +79,13 @@ SCRIPT                    = &Skripta
 
 ; --- --- Sorting submenu
 
-SORT_BY_PATH              = Sort by &path
-SORT_BY_SIZE              = Sort by &size
-SORT_BY_C_TIME            = Sort by &creation time
-SORT_BY_M_TIME            = Sort by last &modification time
-SORT_BY_A_TIME            = Sort by &last access time
-SORT_ASCENDING            = Sort in &ascending order
-SORT_DESCENDING           = Sort in &descending order
+SORT_BY_PATH              = Sipas &rrugës
+SORT_BY_SIZE              = Sipas &madhësisë
+SORT_BY_C_TIME            = Sipas kohës së &krijimit
+SORT_BY_M_TIME            = Sipas kohës së &ndryshimit të fundit
+SORT_BY_A_TIME            = Sipas kohës së &qasjes së fundit
+SORT_ASCENDING            = Sipas rendit në &ngjitje
+SORT_DESCENDING           = Sipas rendit në zbritje
 
 ; --- Help Menu
 
@@ -132,7 +132,7 @@ COMPRESSED                = i kompresuar
 
 ; About window.
 
-ABOUT_WIN_TITLE           = Për Ultra Defragmenter-in
+ABOUT_WIN_TITLE           = Rreth UltraDefrag-in
 CREDITS                   = &Autori
 LICENSE                   = &Licenca
 

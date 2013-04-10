@@ -4,7 +4,7 @@
 =Sorted by language=
 
 ||~ Language ||~ ||~ translated ||~ ||~ total ||~ ||~ percentage ||
-|| [[Albanian.lng|Albanian]]                                             || ||=  90 || ||= 100 || ||>    90 % ||
+|| [[Albanian.lng|Albanian]]                                             || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Arabic.lng|Arabic]]                                                 || ||=  99 || ||= 100 || ||>    99 % ||
 || [[Armenian.lng|Armenian]]                                             || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Belarusian.lng|Belarusian]]                                         || ||=  91 || ||= 100 || ||>    91 % ||
@@ -73,6 +73,7 @@
 =Sorted by percent completed=
 
 ||~ Language ||~ ||~ translated ||~ ||~ total ||~ ||~ percentage ||
+|| [[Albanian.lng|Albanian]]                                             || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Armenian.lng|Armenian]]                                             || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Bengali.lng|Bengali]]                                               || ||= 100 || ||= 100 || ||>   100 % ||
 || [[Burmese (Padauk).lng|Burmese (Padauk)]]                             || ||= 100 || ||= 100 || ||>   100 % ||
@@ -119,7 +120,6 @@
 || [[Tamil.lng|Tamil]]                                                   || ||=  91 || ||= 100 || ||>    91 % ||
 || [[Thai.lng|Thai]]                                                     || ||=  91 || ||= 100 || ||>    91 % ||
 || [[Yiddish.lng|Yiddish]]                                               || ||=  91 || ||= 100 || ||>    91 % ||
-|| [[Albanian.lng|Albanian]]                                             || ||=  90 || ||= 100 || ||>    90 % ||
 || [[Catalan.lng|Catalan]]                                               || ||=  90 || ||= 100 || ||>    90 % ||
 || [[Estonian.lng|Estonian]]                                             || ||=  90 || ||= 100 || ||>    90 % ||
 || [[Indonesian.lng|Indonesian]]                                         || ||=  90 || ||= 100 || ||>    90 % ||
