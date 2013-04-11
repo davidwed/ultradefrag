@@ -27,17 +27,17 @@ HELP                      = &Tulong
 ; --- Action Menu
 
 ANALYSE                   = Mag&suri
-DEFRAGMENT                = &Muling Ibuo
+DEFRAGMENT                = &Magbuo
 QUICK_OPTIMIZE            = Ma&bilis na pagpapahusay
 FULL_OPTIMIZE             = Mas&using pagpapahusay
 OPTIMIZE_MFT              = Paghusayan sa M&FT
 PAUSE                     = &Pansamantalang Itigil
 STOP                      = &Ihinto
 REPEAT_ACTION             = &Ulitin
-SKIP_REMOVABLE_MEDIA      = Laktawan ang Matatanggal na &Media
+SKIP_REMOVABLE_MEDIA      = Laktawan ang Natatanggal na &Media
 RESCAN_DRIVES             = Tignan ang mga &Drive para sa sira
-REPAIR_DRIVES             = Pag&kumpuni Drive
-WHEN_DONE                 = &Pagkatapos...
+REPAIR_DRIVES             = &Kumpunihin ang Drive
+WHEN_DONE                 = &Pagnatapos...
 EXIT                      = &Lumabas
 
 ; --- --- When done submenu
@@ -60,12 +60,12 @@ LANGUAGE                  = &Wika
 GRAPHICAL_INTERFACE       = &Interface
 BOOT_TIME_SCAN            = &Pagiiskan sa Simula
 REPORTS                   = &Ulat
-SORTING                   = &Pagka-ayos ayos
+SORTING                   = &Pagka-Sunod sunod
 
 ; --- --- Language submenu
 
-TRANSLATIONS_CHANGE_LOG   = &Tignan ang pagbabago sa log
-TRANSLATIONS_REPORT       = Tignan ang  &ulat ng pagsasalin
+TRANSLATIONS_CHANGE_LOG   = &Tignan ang log ng pagbabago sa pagsasalin
+TRANSLATIONS_REPORT       = Tignan ang &ulat ng pagsasalin
 TRANSLATIONS_FOLDER       = &Mga Pagsasalin
 TRANSLATIONS_SUBMIT       = &Isumite ang kasalukuyang pagsasalin
 
@@ -82,12 +82,12 @@ SCRIPT                    = I&skrip
 ; --- --- Sorting submenu
 
 SORT_BY_PATH              = &I-Ayos base sa kung saan nakalagay
-SORT_BY_SIZE              = &I-ayos base sa kalakihan
-SORT_BY_C_TIME            = &I-ayos base sa kung kylan ginawa
-SORT_BY_M_TIME            = &I-ayos base sa kung kylan pinalitan
-SORT_BY_A_TIME            = &I-ayos base sa kung kylan tiningnan
-SORT_ASCENDING            = &I-ayos base sa una hanggang huli
-SORT_DESCENDING           = &I-ayos base sa huli hanggang una
+SORT_BY_SIZE              = &I-Ayos base sa kalakihan
+SORT_BY_C_TIME            = &I-Ayos base sa kung kylan ginawa
+SORT_BY_M_TIME            = &I-Ayos base sa kung kylan pinalitan
+SORT_BY_A_TIME            = &I-Ayos base sa kung kylan tiningnan
+SORT_ASCENDING            = &I-Ayos base sa una hanggang huli
+SORT_DESCENDING           = &I-Ayos base sa huli hanggang una
 
 ; --- Help Menu
 
@@ -106,13 +106,13 @@ REPORT_BUG                = Ipadala ang &Ulat ng Bug
 
 ; --- Toolbar Tooltips
 
-BOOT_TIME_SCRIPT          = Iskrip sa Pagsisimula
+BOOT_TIME_SCRIPT          = Iskrip para sa oras ng Pagsisimula
 
 ; Drives list items.
 
-VOLUME                    = Mga Drives
+VOLUME                    = Drives
 STATUS                    = Katayuan
-FRAGMENTATION             = Mga Kapiraso
+FRAGMENTATION             = Pagkapirapiraso
 TOTAL                     = Kapasidad
 FREE                      = Lamang Natitira
 PERCENT                   = % ng Lamang Natitira
@@ -121,7 +121,7 @@ PERCENT                   = % ng Lamang Natitira
 
 STATUS_RUNNING            = Tumatakbo
 STATUS_ANALYSED           = Nasuri
-STATUS_DEFRAGMENTED       = Muling Binuo
+STATUS_DEFRAGMENTED       = Muling Nabuo
 STATUS_OPTIMIZED          = Pinahusay
 STATUS_DIRTY              = Dapat makumpuni ang disk
 
@@ -135,7 +135,7 @@ COMPRESSED                = Nakasiksik na laman
 ; About window.
 
 ABOUT_WIN_TITLE           = Tungkol sa Ultra Defragmenter
-CREDITS                   = &Pinagkakautangan
+CREDITS                   = &Mga Pinagkakautangan
 LICENSE                   = &Lisensiya
 
 ; Shutdown confirmation
@@ -154,8 +154,8 @@ NO                        = &Hindi
 
 ; Upgrade dialog
 
-UPGRADE_CAPTION           = Maipaasenso ang bersiyong ito ^-^
-UPGRADE_MESSAGE           = Na bersiyon ay mai-download na!
+UPGRADE_CAPTION           = Pwede mo akong paasensuhin ^-^
+UPGRADE_MESSAGE           = Ang bagong nilabas n version ay maaari ng i-download!
 
 ; A string for the taskbar icon overlay, needed for accessibility.
 
@@ -168,10 +168,10 @@ HIDE                      = Itago
 
 ; Strings for the file fragmentation reports.
 
-FRAGMENTED_FILES_ON       = Nakapirisong file sa
+FRAGMENTED_FILES_ON       = Nakapirasong file sa
 
-VISIT_HOMEPAGE            = Bisitahin ang Homepage
-VIEW_REPORT_OPTIONS       = tignan ang mga Opsiyon ng Ulat
+VISIT_HOMEPAGE            = Bisitahin ang aming Homepage
+VIEW_REPORT_OPTIONS       = Tignan ang mga Opsiyon ng Ulat
 POWERED_BY_LUA            = Pinagana ng Lua
 
 FRAGMENTS                 = Kapiraso
