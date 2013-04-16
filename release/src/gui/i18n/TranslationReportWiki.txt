@@ -23,7 +23,7 @@
 || [[English (US).lng|English (US)]]                                     || ||=   0 || ||= 100 || ||>     0 % ||
 || [[Estonian.lng|Estonian]]                                             || ||=  90 || ||= 100 || ||>    90 % ||
 || [[Farsi.lng|Farsi]]                                                   || ||=  91 || ||= 100 || ||>    91 % ||
-|| [[Filipino (Tagalog).lng|Filipino (Tagalog)]]                         || ||=  97 || ||= 100 || ||>    97 % ||
+|| [[Filipino (Tagalog).lng|Filipino (Tagalog)]]                         || ||=  96 || ||= 100 || ||>    96 % ||
 || [[Finnish.lng|Finnish]]                                               || ||=  87 || ||= 100 || ||>    87 % ||
 || [[French.lng|French]]                                                 || ||=  95 || ||= 100 || ||>    95 % ||
 || [[Galician.lng|Galician]]                                             || ||=  91 || ||= 100 || ||>    91 % ||
@@ -104,7 +104,7 @@
 || [[Indonesian (Bahasa Indonesia).lng|Indonesian (Bahasa Indonesia)]]   || ||=  98 || ||= 100 || ||>    98 % ||
 || [[Javanese.lng|Javanese]]                                             || ||=  98 || ||= 100 || ||>    98 % ||
 || [[Swedish.lng|Swedish]]                                               || ||=  98 || ||= 100 || ||>    98 % ||
-|| [[Filipino (Tagalog).lng|Filipino (Tagalog)]]                         || ||=  97 || ||= 100 || ||>    97 % ||
+|| [[Filipino (Tagalog).lng|Filipino (Tagalog)]]                         || ||=  96 || ||= 100 || ||>    96 % ||
 || [[Italian.lng|Italian]]                                               || ||=  96 || ||= 100 || ||>    96 % ||
 || [[Danish.lng|Danish]]                                                 || ||=  95 || ||= 100 || ||>    95 % ||
 || [[French.lng|French]]                                                 || ||=  95 || ||= 100 || ||>    95 % ||
