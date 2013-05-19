@@ -12,6 +12,24 @@
     </div>
     <div class="mpart">
         <h2 class="content"><strong>NEWS</strong></h2>
+        <a href="http://sourceforge.net/p/ultradefrag/news/"><strong><span style="font-size: large;">UltraDefrag 7.0.0 beta1 released</span></strong> <small>[2013-05-]</small></a>
+        <!-- brief description of key improvements here -->
+        <ul>
+            <li>This release gets rid of our home-brew GUI framework, which is replaced by <a href="http://www.wxwidgets.org/">wxWidgets</a>.</br>
+                This allows us to focus on the defragmentation engine and implement some long requested features.</br>
+                The only drawback is that we have to retire support for Windows 2000<sup>&reg;</sup> and below.</li>
+            <li>The translation is now moved from our home-brew one to <a href="http://www.gnu.org/software/gettext/">GNU gettext</a>,
+                which is shipping with wxWidgets.</br>
+                The translations are hosted online at <a href="https://www.transifex.com/projects/p/ultradefrag/">Transifex</a>
+                and shipping with UltraDefrag for offline translation using <a href="http://www.poedit.net/">PoEdit</a>.</br>
+                All translators are encouraged to read the <b>Translation</b> section of the handbook for further information.</li>
+            <li>This release doesn't offer any new features, it is meant for testing the migration of the entire GUI code.</br>
+                Please give it a whirl and report back any problems you encounter.</br>
+                The executables are not yet optimized for size, which will be taken care of near the final release.</li>
+        </ul>
+        <p>The <a href="../HISTORY.TXT">Change Log</a> contains the full list of changes.</p>
+        <p>Download the <a href="index.html?download#testing">development release</a>.</p>
+        <p>&nbsp;</p>
         <a href="http://sourceforge.net/p/ultradefrag/news/"><strong><span style="font-size: large;">UltraDefrag 6.0.2 released</span></strong> <small>[2013-05-17]</small></a>
         <!-- brief description of key improvements here -->
         <ul>
@@ -76,7 +94,7 @@
         <p><span class="style0">Command Line Tool:</span></p>
         <ul>
         <li>Useful for automation through scheduled tasks or batch scripts.</li>
-        <li>Integrated into Explorer's context menu. <span class="enhancement">(enhanced in 6.0.0)</span></li>
+        <li>Integrated into Explorer's context menu. <span class="enhancement">(enhanced in 6.0.2)</span></li>
         <li>Specify options through command line arguments or environment variables. <span class="enhancement">(enhanced in 5.0.0)</span></li>
         <li>On demand, display of the graphical cluster map.</li>
         <li><a href="../handbook/Console.html">Read more...</a></li>
