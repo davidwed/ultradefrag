@@ -1,5 +1,34 @@
 ﻿HISTORY
 
+  Version 7.0.0 2013-06-
+  ------------------------------------------------------------------------------
+    beta1:
+    - GUI and command line tool reimplemented on top of wxWidgets library
+    - online translation migrated from http://ultradefrag.wikispaces.com/
+      to http://www.transifex.com/projects/p/ultradefrag/
+    - initial language selection is now done by the GUI instead of the installer
+    - ability to hide drives list columns through their resizing added
+    - ability to apply for all or only stable update notifications added
+    - multicolumn language selection menu implemented
+    - internal GUI settings moved from guiopts-internals.lua to gui.ini file
+    - Windows NT 4.0 and Windows 2000 support dropped due to poor API support
+    - useless font selection dialog removed from GUI (adjust Windows theme instead)
+    - scale_by_dpi GUI parameter removed, as well as disable_latest_version_check
+      and restore_default_window_size parameters (examine guiopts.lua file for details)
+    - Internals: Windows Driver Kit support dropped because of its
+      unreliable development environment - use Windows SDK v7.1 instead
+    - winx_vswprintf and winx_swprintf routines added to zenwinx library
+    - wgx library replaced by wxWidgets library
+
+                                    ***
+
+  Version 6.0.3 2013-06-
+  ------------------------------------------------------------------------------
+    - the following translations were updated:
+
+      Thai
+
+
   Version 6.0.2 2013-05-17
   ------------------------------------------------------------------------------
     - the FAQ section of the handbook now contains information about how to

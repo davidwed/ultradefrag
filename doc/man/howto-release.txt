@@ -1,5 +1,5 @@
 new pre-release:
- 1. prepare website (index) and history.txt for pre-release
+ 1. prepare website (index and download) and history.txt for pre-release
  2. change version number in "\src\setvars.cmd" and
     "\doc\handbook\rsc\custom_header_*.tex"
  3. run build-release.cmd
