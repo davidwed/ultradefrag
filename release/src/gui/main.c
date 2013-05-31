@@ -1111,7 +1111,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             }
             return 0;
         case IDM_CFG_BOOT_SCRIPT:
-            if(!GetWindowsDirectoryW(path,MAX_PATH)){
+            if(!GetSystemWindowsDirectoryW(path,MAX_PATH)){
                 WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
                     L"Cannot retrieve the Windows directory path");
             } else {
