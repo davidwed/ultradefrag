@@ -1111,11 +1111,11 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             }
             return 0;
         case IDM_CFG_BOOT_SCRIPT:
-            if(!GetSystemWindowsDirectoryW(path,MAX_PATH)){
+            if(!GetSystemDirectoryW(path,MAX_PATH)){
                 WgxDisplayLastError(hWindow,MB_OK | MB_ICONHAND,
-                    L"Cannot retrieve the Windows directory path");
+                    L"Cannot retrieve the System32 directory path");
             } else {
-                (void)wcscat(path,L"\\System32\\ud-boot-time.cmd");
+                (void)wcscat(path,L"\\ud-boot-time.cmd");
                 (void)WgxShellExecute(hWindow,L"edit",path,NULL,NULL,SW_SHOW,0);
             }
             return 0;
