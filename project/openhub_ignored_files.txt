@@ -1,0 +1,23 @@
+# This script lists files needing to be ignored by the Open Hub
+# code analysis service (http://www.openhub.net/p/ultradefrag/):
+
+# exclude external libraries
+Disallow: /src/console/getopt1.c
+Disallow: /src/console/getopt.c
+Disallow: /src/console/getopt.h
+Disallow: /src/dll/zenwinx/prb.c
+Disallow: /src/dll/zenwinx/prb.h
+Disallow: /src/lua/
+Disallow: /src/lua5.1/
+Disallow: /src/lua-gui/
+Disallow: /src/tools/patch/wx/
+
+# exclude auto-generated stuff
+Disallow: /src/dll/zenwinx/case-tables.h
+
+# exclude documentation
+Disallow: /doc/handbook/
+Disallow: /src/dll/udefrag/rsc/
+Disallow: /src/dll/zenwinx/rsc/
+Disallow: /src/dll/zenwinx/index.html
+Disallow: /src/rsc/

@@ -170,8 +170,12 @@
  * Please report all problems and bugs via our
  * <a href="http://sourceforge.net/p/ultradefrag/bugs/">bug tracker at Sourceforge.net</a>.
  *
- * To participate in UltraDefrag translation
- * please visit <a href="http://ultradefrag.wikispaces.com/">WikiSpaces.com</a>.
+ * To participate in translation of the recent UltraDefrag version
+ * please visit <a href="http://www.transifex.com/projects/p/ultradefrag/">UltraDefrag project at Transifex</a>.
+ * To submit your own translation for UltraDefrag v6 use our forum mentioned above.
+ *
+ * <a href="http://sourceforge.net/p/ultradefrag/wiki/Home/">UltraDefrag Wiki</a>
+ * is a good place to share some stuff like tutorials and scripts.
  *
  * @htmlonly
  * <HR>

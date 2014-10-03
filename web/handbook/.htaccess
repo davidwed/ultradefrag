@@ -9,7 +9,7 @@ Redirect permanent /handbook/design_notes.html   http://ultradefrag.sourceforge.
 Redirect permanent /handbook/development.html    http://ultradefrag.sourceforge.net/doxy-doc/html/
 Redirect permanent /handbook/faq.html            http://ultradefrag.sourceforge.net/handbook/FAQ.html
 Redirect permanent /handbook/gui.html            http://ultradefrag.sourceforge.net/handbook/GUI.html
-Redirect permanent /handbook/i18n.html           http://ultradefrag.wikispaces.com/
+Redirect permanent /handbook/i18n.html           http://www.transifex.com/projects/p/ultradefrag/
 Redirect permanent /handbook/installation.html   http://ultradefrag.sourceforge.net/handbook/Installation.html
 Redirect permanent /handbook/introduction.html   http://ultradefrag.sourceforge.net/handbook/Introduction.html
 Redirect permanent /handbook/main.html           http://ultradefrag.sourceforge.net/handbook/
