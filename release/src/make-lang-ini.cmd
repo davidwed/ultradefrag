@@ -43,7 +43,7 @@ goto :EOF
     echo.
     echo [Field 1]
     echo Type=Label
-    echo Text=Select a language pack to be used for UltraDefrag GUI.\r\n\r\nIf your native language is missing here or an existing translation is incomplete, feel free to submit your own translation. Your help will be much appreciated!
+    echo Text=Select a language pack to be used for UltraDefrag GUI.\r\n\r\nIf your native language is missing here or an existing translation is incomplete, feel free to send us your own translation. Your help will be much appreciated!
     echo Left=1
     echo Right=178
     echo Top=0
@@ -58,13 +58,4 @@ goto :EOF
     echo Right=297
     echo Top=0
     echo Bottom=139
-    echo.
-    echo [Field 3]
-    echo Type=Link
-    echo Text=Visit ultradefrag.wikispaces.com for more details...
-    echo State=http://ultradefrag.wikispaces.com/
-    echo Left=1
-    echo Right=163
-    echo Top=57
-    echo Bottom=72
 goto :EOF
