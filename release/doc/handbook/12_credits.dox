@@ -34,7 +34,7 @@
  *
  * @htmlonly
  * <table style="border:none; margin-left:20px;">
- * <tr><td>• Albanian                     </td><td>-</td><td> Fitim I. HALILI</td></tr>
+ * <tr><td>• Albanian                     </td><td>-</td><td> Fitim I. Halili</td></tr>
  * <tr><td>• Arabic                       </td><td>-</td><td> Ahmed Arbaoui</td></tr>
  * <tr><td>                               </td><td>-</td><td> Awadh A Al-Ghaamdi</td></tr>
  * <tr><td>                               </td><td>-</td><td> Karam Al-Shorbassi</td></tr>
@@ -159,6 +159,7 @@
  * <tr><td>                               </td><td>-</td><td> Şahin Salincakli</td></tr>
  * <tr><td>                               </td><td>-</td><td> Alper Tiryakioglu</td></tr>
  * <tr><td>• Ukrainian                    </td><td>-</td><td> Dmitri Arkhangelski</td></tr>
+ * <tr><td>                               </td><td>-</td><td> lembergman</td></tr>
  * <tr><td>• Vietnamese                   </td><td>-</td><td> Vietnamize Team</td></tr>
  * <tr><td>                               </td><td>-</td><td> DT</td></tr>
  * <tr><td>• Wáray-Wáray                  </td><td>-</td><td> Harvey Fiji</td></tr>
@@ -170,7 +171,7 @@
  *
  * @latexonly
  * \par\begin{Indent}\begin{xtabular}{p{0.4\linewidth}cl}
- * • Albanian                      & - & Fitim I. HALILI \\
+ * • Albanian                      & - & Fitim I. Halili \\
  * • Arabic                        & - & Ahmed Arbaoui \\
  *                                 & - & Awadh A Al-Ghaamdi \\
  *                                 & - & Karam Al-Shorbassi \\
@@ -295,6 +296,7 @@
  *                                 & - & Şahin Salincakli \\
  *                                 & - & Alper Tiryakioglu \\
  * • Ukrainian                     & - & Dmitri Arkhangelski \\
+ *                                 & - & lembergman \\
  * • Vietnamese                    & - & Vietnamize Team \\
  *                                 & - & DT \\
  * • Wáray-Wáray                   & - & Harvey Fiji \\
@@ -560,20 +562,19 @@
  * \end{xtabular}\end{Indent}\par
  * @endlatexonly
  *
- * Special thanks for correcting and updating translations (in alphabetical order):
+ * Special thanks for translation updates and correction (in alphabetical order):
  *
- * - Alper Tiryakioglu, Antonio Vivace
+ * - Antonio Vivace
  * - Benny Stütz
  * - Connection
  * - Dandy Cheung, Daniel Rodríguez, Dmitry Zemskov
  * - Erwin Dokter, El Fiera
- * - Fabrizio Marana, Francisco Ortega Olivos, FS
+ * - Fabrizio Marana, FS
  * - Giulio Fornasar, Gustavo Rezende
  * - Haein Jung, Harald Arnesen
  * - Jan Iemhoff, JIFF
- * - lembergman, Luigi C.
- * - Denis Jeličić
- * - Javier Valdivieso, Joseph S. B. Maza, Joseph S. Maza, José Carlos Taveira de Souza, José Luis Farías
+ * - Luigi C.
+ * - Javier Valdivieso, José Carlos Taveira de Souza, José Luis Farías
  * - Ken Choy
  * - Latino, Leo Smulders
  * - Massa, Matej Marton
@@ -600,7 +601,7 @@
  * - Stefan Pendl
  * - Tom Arroyo
  *
- * Also special thanks is going to:
+ * Also special thanks are going to:
  * - <a href="http://www.sysinternals.com">Mark Russinovich</a>
  * - <a href="http://www.soldatov.net">V. Soldatov</a>
  * - <a href="http://free.pages.at/blumetools/">blume1975</a>
@@ -618,7 +619,7 @@
  * - <a href="http://www.codeproject.com/Members/Michael-Dunn">Michael Dunn</a>
  * - <a href="http://blogs.msdn.com/b/michkap/">Michael Kaplan</a>
  *
- * Special thanks for good music is going to (in chronological order):
+ * Special thanks for good music are going to (in chronological order):
  * - <a href="http://en.wikipedia.org/wiki/Yegor_Letov">Egor Letov</a>
  * - <a href="http://en.wikipedia.org/wiki/Jean_Michel_Jarre">Jean Michel Jarre</a>
  * - <a href="http://en.wikipedia.org/wiki/Erik_Truffaz">Erik Truffaz</a>
