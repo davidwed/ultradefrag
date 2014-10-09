@@ -1,6 +1,6 @@
 ﻿HISTORY
 
-  Version 6.0.3 2015-01-
+  Version 6.0.3 2014-10-xx
   ------------------------------------------------------------------------------
     - corrected a problem where the Windows folder was not detected properly
       if the terminal services were activated
