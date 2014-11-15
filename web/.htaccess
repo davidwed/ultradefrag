@@ -55,3 +55,5 @@ RedirectMatch permanent /en/index\.html.+ http://ultradefrag.sourceforge.net/en/
 
 Redirect seeother  /disclaimer.html      http://ultradefrag.sourceforge.net/handbook/
 Redirect seeother  /vista_guide.html     http://ultradefrag.sourceforge.net/handbook/
+
+Redirect permanent /sitemap.html         http://ultradefrag.sourceforge.net/

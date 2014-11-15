@@ -7,7 +7,7 @@ h2 {font:bold 1.6em Arial,Sans-Serif;letter-spacing:-1px}
 h3 {padding:4px 0;margin:0}
 hr {height:1px;border-style:none;color:#d0d0d0;margin:10px 0;background:#c0c0c0}
 img {border:0}
-input.button {margin:0;font:bold 1em Arial,Sans-serif;background:#FFF url(gradientbg.jpg) repeat-x;padding:2px 3px;color:#333;border:1px solid #DADADA}
+input.button {margin:0;font:bold 1em Arial,Sans-serif;background:#FFF url(images/gradientbg.jpg) repeat-x;padding:2px 3px;color:#333;border:1px solid #DADADA}
 td.cell_1 {background-image:url(../images/back.png); height:30px; width:158px; text-align:center; }
 td.cell_2 {background-image:url(../images/back_blue.gif); height:30px; width:158px; text-align:center; }
 td.cell_3 {height:30px;width:158px;text-align:center;}
