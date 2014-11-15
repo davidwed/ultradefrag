@@ -1,1 +1,1 @@
-This directory will contain temporary files.
+This directory contains temporary files.
