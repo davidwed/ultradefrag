@@ -1,4 +1,4 @@
-GUI Design Guideline links from Microsoft:
+GUI Design Guidelines by Microsoft:
 
     Windows User Experience Interaction Guidelines:
         http://msdn.microsoft.com/en-us/library/aa511258.aspx
@@ -27,10 +27,10 @@ GUI Design Guideline links from Microsoft:
     Standard icons:
         http://msdn.microsoft.com/en-us/library/windows/desktop/aa511277.aspx
 
-Implementing a splitter bar
+A splitter bar implementation
     http://www.catch22.net/tuts/splitter
 
                                  ***
 
 All layers in multi-dimensional icons must have the same color depth
-to avoid scaling when icon of requested dimension already exists.
+to avoid scaling when the icon of the requested dimension already exists.
