@@ -16,7 +16,7 @@ Disallow: /src/tools/patch/wx/
 Disallow: /src/dll/zenwinx/case-tables.h
 
 # exclude documentation
-Disallow: /doc/handbook/
+Disallow: /doc/
 Disallow: /src/dll/udefrag/rsc/
 Disallow: /src/dll/zenwinx/rsc/
 Disallow: /src/dll/zenwinx/index.html
