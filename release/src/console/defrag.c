@@ -537,16 +537,18 @@ static int process_volumes(void)
     /* process valid paths */
     for(path = paths; path; path = path->next){
         if(path->processed == 0){
-            settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
-            if(first_path){
-                WgxPrintUnicodeString(path->path,stdout);
-                printf("\n");
-            } else {
-                printf("\n");
-                WgxPrintUnicodeString(path->path,stdout);
-                printf("\n");
+            if(!(shellex_flag && (folder_flag || folder_itself_flag))){
+                settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                if(first_path){
+                    WgxPrintUnicodeString(path->path,stdout);
+                    printf("\n");
+                } else {
+                    printf("\n");
+                    WgxPrintUnicodeString(path->path,stdout);
+                    printf("\n");
+                }
+                settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
             }
-            settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
             first_path = 0;
             path->processed = 1;
             path_found = 1;
@@ -580,6 +582,10 @@ static int process_volumes(void)
                     path_found = 0;
                 } else {
                     cut_filter[MAX_ENV_VARIABLE_LENGTH] = 0;
+                    settextcolor(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
+                    WgxPrintUnicodeString(cut_filter,stdout);
+                    printf("\n");
+                    settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
                 }
             } else {
                 /* save the current path to %UD_CUT_FILTER% */
