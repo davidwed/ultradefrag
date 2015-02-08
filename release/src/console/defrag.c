@@ -173,11 +173,6 @@ void stop_web_statistics()
  */
 static void init_console(void)
 {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-
-    /* save default color */
-    if(GetConsoleScreenBufferInfo(hStdOut,&csbi))
-        default_color = csbi.wAttributes;
     /* set green color */
     settextcolor(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 
@@ -753,6 +748,7 @@ static int out_of_memory_handler(size_t n)
  */
 int __cdecl main(int argc, char **argv)
 {
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
     int init_result;
     int parse_cmdline_result;
     int pause_result;
@@ -763,8 +759,12 @@ int __cdecl main(int argc, char **argv)
     return 0;
     */
 
-    /* initialize the program */
+    /* save default color */
     hStdOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if(GetConsoleScreenBufferInfo(hStdOut,&csbi))
+        default_color = csbi.wAttributes;
+
+    /* initialize the program */
     init_result = udefrag_init_library();
     udefrag_set_killer(out_of_memory_handler);
     WgxSetInternalTraceHandler(udefrag_dbg_print);
