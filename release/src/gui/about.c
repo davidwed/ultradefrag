@@ -185,8 +185,7 @@ BOOL CALLBACK AboutDlgProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                     OpenWebPage("Credits.html", NULL);
                     break;
                 case IDC_LICENSE:
-                    (void)WgxShellExecute(hWindow,L"open",L".\\LICENSE.TXT",
-                        NULL,NULL,SW_SHOW,WSH_ALLOW_DEFAULT_ACTION);
+                    OpenWebPage("GPL.html", NULL);
                     break;
                 case IDC_HOMEPAGE:
                     (void)SetFocus(GetDlgItem(hWnd,IDC_CREDITS));
