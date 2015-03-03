@@ -19,9 +19,6 @@ ul {margin:0;padding:0;list-style:none}
 .screenshots img {margin-left:auto;margin-right:auto;}
 .style0 {color:#7a9833;background:inherit;text-decoration:none}
 .style1 {font-family: Arial, Helvetica, sans-serif; font-size: x-large; color: #CCCCCC}
-/* for logos_web.html */
-.style2 {font-size: x-large;color: #CCCCCC;}
-.style3 {color: #CCCCCC}
 /* for about.html */
 .style4 {font-weight: bold}
 .newfeature {font-weight: bold;color: green;font-style:italic;font-size:smaller;}
