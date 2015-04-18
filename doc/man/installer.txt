@@ -1,6 +1,0 @@
-Installer Guidelines by Microsoft:
-
-    Start Menu:
-        http://msdn.microsoft.com/en-us/library/aa511447.aspx
-
-    

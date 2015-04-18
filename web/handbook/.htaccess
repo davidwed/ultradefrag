@@ -15,7 +15,8 @@ Redirect permanent /handbook/introduction.html   http://ultradefrag.sourceforge.
 Redirect permanent /handbook/main.html           http://ultradefrag.sourceforge.net/handbook/
 Redirect permanent /handbook/micro_edition.html  http://ultradefrag.sourceforge.net/handbook/Installation.html
 Redirect permanent /handbook/portable.html       http://ultradefrag.sourceforge.net/handbook/Installation.html
-Redirect permanent /handbook/reporting_bugs.html http://ultradefrag.sourceforge.net/handbook/ReportingBugs.html
+Redirect permanent /handbook/reporting_bugs.html http://ultradefrag.sourceforge.net/handbook/Troubleshooting.html
+Redirect permanent /handbook/ReportingBugs.html  http://ultradefrag.sourceforge.net/handbook/Troubleshooting.html
 Redirect permanent /handbook/reports.html        http://ultradefrag.sourceforge.net/handbook/Reports.html
 Redirect permanent /handbook/schedule.html       http://ultradefrag.sourceforge.net/handbook/Schedule.html
 Redirect permanent /handbook/scheduler.html      http://ultradefrag.sourceforge.net/handbook/Schedule.html

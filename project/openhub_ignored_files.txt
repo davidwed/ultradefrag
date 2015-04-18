@@ -20,4 +20,3 @@ Disallow: /doc/
 Disallow: /src/dll/udefrag/rsc/
 Disallow: /src/dll/zenwinx/rsc/
 Disallow: /src/dll/zenwinx/index.html
-Disallow: /src/rsc/
