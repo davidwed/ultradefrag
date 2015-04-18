@@ -33,11 +33,6 @@
         <changefreq>monthly</changefreq>
     </url>
     <url>
-        <loc>http://ultradefrag.sourceforge.net/index.html?wallpapers</loc>
-        <priority>0.64</priority>
-        <changefreq>monthly</changefreq>
-    </url>
-    <url>
         <loc>http://ultradefrag.sourceforge.net/handbook/</loc>
         <priority>0.80</priority>
         <changefreq>monthly</changefreq>

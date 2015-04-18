@@ -689,11 +689,11 @@ int udefrag_set_log_file_path(void)
         winx_free(path_copy);
     }
     
-    /* if target path cannot be created, use %tmp%\UltraDefrag_Logs */
+    /* if target path cannot be created, use %SystemRoot%\Temp */
     if(result < 0){
-        path = winx_getenv(L"TMP");
+        path = winx_getenv(L"SystemRoot");
         if(path == NULL){
-            etrace("failed to query %%TMP%%");
+            etrace("failed to query %%SystemRoot%%");
         } else {
             filename = winx_wcsdup(native_path);
             if(filename == NULL){
@@ -702,10 +702,10 @@ int udefrag_set_log_file_path(void)
                 winx_path_extract_filename(filename);
                 winx_free(native_path);
                 winx_swprintf(native_path,size,result,
-                    L"\\??\\%ws\\UltraDefrag_Logs\\%ws",
+                    L"\\??\\%ws\\Temp\\%ws",
                     path,filename);
                 if(native_path == NULL){
-                    etrace("cannot build %%tmp%%\\UltraDefrag_Logs\\{filename}");
+                    etrace("cannot build %%SystemRoot%%\\Temp\\{filename}");
                 } else {
                     /* delete old logfile from the temporary folder */
                     winx_delete_file(native_path);
