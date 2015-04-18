@@ -649,25 +649,6 @@ void OpenWebPage(char *page, char *anchor)
 }
 
 /**
- * @brief Opens a page of the translation wiki.
- * @param[in] page name of the page
- * @param[in] islang 1 indicates a language page, 0 not
- */
-/*void OpenTranslationWebPage(wchar_t *page, int islang)
-{
-    wchar_t path[MAX_PATH] = {0};
-
-    if(islang == 0 )
-        (void)_snwprintf(path,MAX_PATH,L"http://ultradefrag.wikispaces.com/%ls",page);
-    else
-        (void)_snwprintf(path,MAX_PATH,L"http://ultradefrag.wikispaces.com/%ls.lng",page);
-    path[MAX_PATH - 1] = 0;
-    (void)WgxShellExecute(hWindow,L"open",path,
-        NULL,NULL,SW_SHOW,WSH_ALLOW_DEFAULT_ACTION);
-}
-*/
-
-/**
  * @brief Opens the log file.
  */
 void OpenLog(void)
@@ -1038,9 +1019,7 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             OpenLog();
             return 0;
         case IDM_REPORT_BUG:
-            (void)WgxShellExecute(hWindow,L"open",
-                L"http://sourceforge.net/p/ultradefrag/bugs/",
-                NULL,NULL,SW_SHOW,WSH_ALLOW_DEFAULT_ACTION);
+            OpenWebPage("Troubleshooting.html", NULL);
             return 0;
         case IDM_EXIT:
             goto done;
@@ -1049,22 +1028,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
             ShowReports();
             return 0;
         /* Settings menu handlers */
-        /*case IDM_TRANSLATIONS_CHANGE_LOG:
-            OpenTranslationWebPage(L"Change+Log", 0);
-            return 0;
-        case IDM_TRANSLATIONS_REPORT:
-            OpenTranslationWebPage(L"Translation+Report", 0);
-            return 0;
-        */
         case IDM_TRANSLATIONS_FOLDER:
             (void)WgxShellExecute(hWindow,L"open",L"explorer.exe",
                 L"/select, \".\\i18n\\translation.template\"",NULL,SW_SHOW,0);
             return 0;
-        /*case IDM_TRANSLATIONS_SUBMIT:
-            if(GetPrivateProfileStringW(L"Language",L"Selected",NULL,lang_name,MAX_PATH,L".\\lang.ini")>0)
-                OpenTranslationWebPage(lang_name, 1);
-            return 0;
-        */
         case IDM_CFG_GUI_FONT:
             memset(&cf,0,sizeof(cf));
             cf.lStructSize = sizeof(CHOOSEFONT);
@@ -1121,19 +1088,6 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
                 (void)wcscat(path,L"\\ud-boot-time.cmd");
                 (void)WgxShellExecute(hWindow,L"edit",path,NULL,NULL,SW_SHOW,0);
             }
-            return 0;
-        case IDM_CFG_REPORTS:
-            /* open custom options or default if they aren't exist */
-            report_opts_path = L".\\options\\udreportopts.lua";
-            f = fopen(".\\options\\udreportopts-custom.lua","r");
-            if(f != NULL){
-                fclose(f);
-                report_opts_path = L".\\options\\udreportopts-custom.lua";
-            }
-            if(portable_mode)
-                WgxShellExecute(hWindow,L"open",L"notepad.exe",report_opts_path,NULL,SW_SHOW,0);
-            else
-                WgxShellExecute(hWindow,L"Edit",report_opts_path,NULL,NULL,SW_SHOW,0);
             return 0;
         /* Help menu handlers */
         case IDM_CONTENTS:
