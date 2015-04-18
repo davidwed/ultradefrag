@@ -551,16 +551,16 @@ static int ReadShellExOptions(void)
     
     /*
     * Explorer's context menu handler should be
-    * configurable through guiopts.lua file only.
+    * configurable through the options.lua file only.
     */
     CleanupEnvironment();
     
-    /* interprete guiopts.lua file */
+    /* interprete options.lua file */
     if(!GetEnvironmentVariable("UD_INSTALL_DIR",instdir,MAX_PATH + 1)){
         display_last_error("Cannot query UD_INSTALL_DIR environment variable!");
         return (-1);
     } else {
-        _snprintf(path,MAX_PATH + 1,"%s\\options\\guiopts.lua",instdir);
+        _snprintf(path,MAX_PATH + 1,"%s\\options.lua",instdir);
         path[MAX_PATH] = 0;
     }
     

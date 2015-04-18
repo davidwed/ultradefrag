@@ -1083,10 +1083,10 @@ LRESULT CALLBACK MainWindowProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
         case IDM_CFG_GUI_SETTINGS:
             if(portable_mode)
                 WgxShellExecute(hWindow,L"open",L"notepad.exe",
-                    L".\\options\\guiopts.lua",NULL,SW_SHOW,0);
+                    L".\\options.lua",NULL,SW_SHOW,0);
             else
                 WgxShellExecute(hWindow,L"Edit",
-                    L".\\options\\guiopts.lua",NULL,NULL,SW_SHOW,0);
+                    L".\\options.lua",NULL,NULL,SW_SHOW,0);
             return 0;
         case IDM_CFG_BOOT_ENABLE:
             if(boot_time_defrag_enabled){
@@ -1528,7 +1528,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nS
     
     init_jobs();
     
-    /* track changes in guiopts.lua file; synchronized with map redraw */
+    /* track changes in options.lua file; synchronized with map redraw */
     StartPrefsChangesTracking();
     StartBootExecChangesTracking();
     StartLangIniChangesTracking();

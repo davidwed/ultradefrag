@@ -200,11 +200,11 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
     copy /Y "%~dp0\scripts\udreportcnv.lua"      %PORTABLE_DIR%\scripts\
     copy /Y "%~dp0\scripts\udsorting.js"         %PORTABLE_DIR%\scripts\
     copy /Y "%~dp0\scripts\udreport.css"         %PORTABLE_DIR%\scripts\
-    copy /Y "%~dp0\scripts\upgrade-guiopts.lua"  %PORTABLE_DIR%\scripts\
-    copy /Y "%~dp0\scripts\upgrade-rptopts.lua"  %PORTABLE_DIR%\scripts\
+    copy /Y "%~dp0\scripts\upgrade-options.lua"  %PORTABLE_DIR%\scripts\
     mkdir %PORTABLE_DIR%\options
-    lua "%~dp0\scripts\upgrade-guiopts.lua"  %PORTABLE_DIR%
-    lua "%~dp0\scripts\upgrade-rptopts.lua"  %PORTABLE_DIR%
+    echo This folder contains internal configuration files only. > %PORTABLE_DIR%\options\readme.txt
+    echo. >> %PORTABLE_DIR%\options\readme.txt
+    lua "%~dp0\scripts\upgrade-options.lua"  %PORTABLE_DIR%
     mkdir %PORTABLE_DIR%\i18n
     copy /Y "%~dp0\gui\i18n\*.lng"           %PORTABLE_DIR%\i18n\
     copy /Y "%~dp0\gui\i18n\*.template"      %PORTABLE_DIR%\i18n\
