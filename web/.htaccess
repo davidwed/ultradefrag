@@ -44,11 +44,17 @@ Redirect permanent /sitemap.html         http://ultradefrag.sourceforge.net/
 Redirect permanent /wallpapers.html      http://ultradefrag.sourceforge.net/
 
 # redirects for development resources
-Redirect permanent /design_notes.html    http://ultradefrag.sourceforge.net/doxy-doc/html/
-Redirect permanent /developer_info.html  http://ultradefrag.sourceforge.net/doxy-doc/html/
-Redirect permanent /development.html     http://ultradefrag.sourceforge.net/doxy-doc/html/
-Redirect permanent /devtools/            http://ultradefrag.sourceforge.net/doxy-doc/html/Compilation.html
+Redirect permanent /design_notes.html    http://ultradefrag.sourceforge.net/handbook/Development.html
+Redirect permanent /developer_info.html  http://ultradefrag.sourceforge.net/handbook/Development.html
+Redirect permanent /development.html     http://ultradefrag.sourceforge.net/handbook/Development.html
+Redirect permanent /devtools/            http://ultradefrag.sourceforge.net/handbook/Development.html
 Redirect permanent /stats                http://sourceforge.net/p/ultradefrag/stats/traffic
+
+RedirectMatch permanent /doxy-doc/html/.+\.html     http://ultradefrag.sourceforge.net/handbook/Development.html
+RedirectMatch permanent /doxy-doc/wgx/html/.+\.html http://ultradefrag.sourceforge.net/handbook/Development.html
+
+RedirectMatch permanent /doxy-doc/udefrag.dll/html/(.*)$       http://ultradefrag.sourceforge.net/doc/lib/udefrag/$1
+RedirectMatch seeother  /doxy-doc/udefrag-kernel/html/.+\.html http://ultradefrag.sourceforge.net/doc/lib/udefrag/
 
 # redirects for trash
 Redirect permanent /%C2%A0               http://ultradefrag.sourceforge.net/

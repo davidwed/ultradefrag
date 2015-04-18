@@ -258,7 +258,6 @@ rem by removing all intermediate files.
     rd /s /q bin
     rd /s /q lib
     rd /s /q obj
-    rd /s /q doxy-doc
     rd /s /q gui\doxy-doc
     rd /s /q dll\wgx\doxy-doc
     rd /s /q dll\udefrag\doxy-doc
@@ -276,7 +275,6 @@ rem by removing all intermediate files.
     rd /s /q ..\src_package
     if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 rd /s /q release
 
-    del /f /q ..\..\web\doxy-doc\html\*.*
     del /f /q ..\..\web\doxy-doc\udefrag.dll\html\*.*
     del /f /q ..\..\web\doxy-doc\wgx\html\*.*
 

@@ -35,23 +35,21 @@ if "%ULTRADFGVER%" equ "" (
 doxygen --version >nul 2>&1 || goto fail
 
 if "%UD_BLD_FLG_BUILD_DEV%" == "1" (
-    call :compile_docs .                    .            || goto fail
-    call :compile_docs .\dll\udefrag        udefrag.dll  || goto fail
-    call :compile_docs .\dll\wgx            wgx          || goto fail
-    call :compile_docs .\dll\zenwinx                     || goto fail
+    call :compile_docs .\dll\udefrag || goto fail
+    call :compile_docs .\dll\wgx     || goto fail
+    call :compile_docs .\dll\zenwinx || goto fail
 )
 
 if "%UD_BLD_FLG_BUILD_INT%" == "1" (
     rd /s /q "%~dp0\internal-doc\%ULTRADFGVER%"
     md "%~dp0\internal-doc\%ULTRADFGVER%"
 
-    call :compile_int .\dll\udefrag        udefrag.dll  || goto fail
-    call :compile_int .\dll\wgx            wgx          || goto fail
-    call :compile_int .\dll\zenwinx        zenwinx      || goto fail
-    call :compile_int .\gui                gui          || goto fail
+    call :compile_int .\dll\udefrag  udefrag.dll  || goto fail
+    call :compile_int .\dll\wgx      wgx          || goto fail
+    call :compile_int .\dll\zenwinx  zenwinx      || goto fail
+    call :compile_int .\gui          gui          || goto fail
 ) else (
     call :compile_docs ..\doc\handbook || goto fail
-    copy /Y ..\doc\handbook\doxy-doc\html\*.* "%~dp0\..\..\web\handbook" || goto fail
 )
 
 :: compile PDF documentation if MiKTeX is installed
@@ -73,9 +71,8 @@ echo.
 echo Docs compilation failed!
 exit /B 1
 
-rem Synopsis: call :compile_docs {path} {name}
-rem Note:     omit the second parameter to prevent copying docs to /src/doxy-doc directory
-rem Example:  call :compile_docs .\dll\zenwinx zenwinx
+rem Synopsis: call :compile_docs {path}
+rem Example:  call :compile_docs .\dll\zenwinx
 :compile_docs
     pushd %1
     rd /s /q doxy-doc
@@ -84,9 +81,6 @@ rem Example:  call :compile_docs .\dll\zenwinx zenwinx
 
     del /Q .\doxy-doc\html\doxygen.png
 
-    if "%2" neq "" (
-        copy /Y .\doxy-doc\html\*.* "%~dp0\..\..\web\doxy-doc\%2\html" || goto compilation_failed
-    )
     :compilation_succeeded
     popd
     exit /B 0

@@ -1,0 +1,6 @@
+# disable SSI
+Options -IncludesNOEXEC
+
+# redirects
+Redirect permanent /doc/lib/udefrag/group__Driver.html http://ultradefrag.sourceforge.net/doc/lib/udefrag/
+Redirect permanent /doc/lib/udefrag/main.html          http://ultradefrag.sourceforge.net/doc/lib/udefrag/
