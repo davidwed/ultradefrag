@@ -588,6 +588,29 @@ static void write_log_file_header(wchar_t *path)
 }
 
 /**
+ * @internal
+ * @brief Creates target directory for a file.
+ * @return Zero for success, negative value
+ * otherwise.
+ */
+static int create_target_directory(wchar_t *path)
+{
+    wchar_t *path_copy;
+    int result;
+
+    path_copy = winx_wcsdup(path);
+    if(path_copy == NULL){
+        etrace("not enough memory");
+        return (-1);
+    }
+    
+    winx_path_remove_filename(path_copy);
+    result = winx_create_path(path_copy);
+    winx_free(path_copy);
+    return result;
+}
+
+/**
  * @brief Enables debug logging to the file
  * if <b>\%UD_LOG_FILE_PATH\%</b> is set, otherwise
  * disables the logging.
@@ -601,7 +624,7 @@ int udefrag_set_log_file_path(void)
 {
     wchar_t *path, *longpath, *fullpath;
     int conversion_result;
-    wchar_t *native_path, *path_copy, *filename;
+    wchar_t *native_path, *filename;
     int size, result;
 
     typedef DWORD (__stdcall *GETLONGPATHNAME_PROC)(
@@ -679,33 +702,28 @@ int udefrag_set_log_file_path(void)
     winx_delete_file(native_path);
     
     /* ensure that target path exists */
-    result = 0;
-    path_copy = winx_wcsdup(native_path);
-    if(path_copy == NULL){
-        etrace("not enough memory");
-    } else {
-        winx_path_remove_filename(path_copy);
-        result = winx_create_path(path_copy);
-        winx_free(path_copy);
-    }
-    
-    /* if target path cannot be created, use %SystemRoot%\Temp */
-    if(result < 0){
-        path = winx_getenv(L"SystemRoot");
+    if(create_target_directory(native_path) < 0){
+        /* try %SystemDrive%\UltraDefrag_Logs */
+        path = winx_getenv(L"SystemDrive");
         if(path == NULL){
-            etrace("failed to query %%SystemRoot%%");
+            etrace("failed to query %%SystemDrive%%");
+            goto fail;
         } else {
             filename = winx_wcsdup(native_path);
             if(filename == NULL){
                 etrace("cannot allocate memory for filename");
+                winx_free(path);
+                goto fail;
             } else {
                 winx_path_extract_filename(filename);
                 winx_free(native_path);
                 winx_swprintf(native_path,size,result,
-                    L"\\??\\%ws\\Temp\\%ws",
+                    L"\\??\\%ws\\UltraDefrag_Logs\\%ws",
                     path,filename);
                 if(native_path == NULL){
-                    etrace("cannot build %%SystemRoot%%\\Temp\\{filename}");
+                    etrace("cannot build %%SystemDrive%%\\UltraDefrag_Logs\\{filename}");
+                    winx_free(filename); winx_free(path);
+                    goto fail;
                 } else {
                     /* delete old logfile from the temporary folder */
                     winx_delete_file(native_path);
@@ -714,16 +732,20 @@ int udefrag_set_log_file_path(void)
             }
             winx_free(path);
         }
+        /* ensure that target path exists */
+        if(create_target_directory(native_path) < 0) goto fail;
     }
     
-    if(native_path){
-        /* write header to the log file */
-        write_log_file_header(native_path);
-        /* allow debugging output to be appended */
-        winx_enable_dbg_log(native_path);
-        winx_free(native_path);
-    }
+    /* write header to the log file */
+    write_log_file_header(native_path);
+    /* allow debugging output to be appended */
+    winx_enable_dbg_log(native_path);
+    winx_free(native_path);
     return 0;
+    
+fail:
+    winx_free(native_path);
+    return (-1);
 }
 
 /**
