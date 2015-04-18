@@ -42,15 +42,7 @@ copy .\bin\ia64\ultradefrag-%UDVERSION_SUFFIX%.bin.ia64.exe .\release\
 copy .\bin\amd64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.amd64.zip .\release\
 copy .\bin\ia64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.ia64.zip .\release\
 
-cd release
-..\tools\md5sum ultradefrag-%UDVERSION_SUFFIX%.bin.*           > ultradefrag-%UDVERSION_SUFFIX%.MD5SUMS
-..\tools\md5sum ultradefrag-portable-%UDVERSION_SUFFIX%.bin.* >> ultradefrag-%UDVERSION_SUFFIX%.MD5SUMS
-..\tools\md5sum ultradefrag-%UDVERSION_SUFFIX%.src.*          >> ultradefrag-%UDVERSION_SUFFIX%.MD5SUMS
-..\tools\md5sum UltraDefrag_Handbook_%ULTRADFGVER%_*.pdf      >> ultradefrag-%UDVERSION_SUFFIX%.MD5SUMS
-cd ..
-
 :: update history file
-copy .\HISTORY.TXT .\release\
 copy /Y .\HISTORY.TXT ..\..\web\
 
 :: update version notification

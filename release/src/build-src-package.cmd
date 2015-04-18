@@ -39,7 +39,6 @@ mkdir ..\src_package
 
 :: copy all important source files with generated documentation
 xcopy /I /Y /Q /S /EXCLUDE:exclude-from-sources.lst . %SRC_PKG_PATH%\src
-xcopy /I /Y /Q /S .\doxy-doc              %SRC_PKG_PATH%\src\doxy-doc
 xcopy /I /Y /Q /S .\dll\zenwinx\doxy-doc  %SRC_PKG_PATH%\src\dll\zenwinx\doxy-doc
 xcopy /I /Y /Q /S ..\doc\handbook         %SRC_PKG_PATH%\doc\handbook
 
