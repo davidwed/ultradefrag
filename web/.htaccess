@@ -5,6 +5,9 @@ ErrorDocument 404 /Error_Pages/404.html
 Options +IncludesNOEXEC
 AddOutputFilter INCLUDES .html
 
+# enable compression
+AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript
+
 # enable expirations
 ExpiresActive On
 
