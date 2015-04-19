@@ -4,6 +4,11 @@ they may come in handy later.
 
                                ***
 
+Note: all layers in multi-dimensional icons must have the same color depth
+to avoid scaling when the icon of the requested dimension already exists.
+
+                               ***
+
 Redesigned main icon in 16x16, 20x20, 22x22, 24x24, 26x26, 32x32,
 40x40, 48x48, 64x64, 96x96, 128x128 and 256x256 sizes:
 
