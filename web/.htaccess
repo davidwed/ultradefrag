@@ -20,6 +20,15 @@ ExpiresByType image/png              A604800
 ExpiresByType text/css               A604800
 ExpiresByType text/javascript        A604800
 
+# force the program to check for available updates correctly
+<Files "*.ini">
+    FileETag None
+    Header unset ETag
+    Header set Pragma "no-cache"
+    Header set Cache-Control "private, no-cache, max-age=0, must-revalidate"
+    Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
+</Files>
+
 # redirects for old pages
 Redirect permanent /about.html           http://ultradefrag.sourceforge.net/index.html?about
 Redirect permanent /authors_about.html   http://ultradefrag.sourceforge.net/index.html?about
