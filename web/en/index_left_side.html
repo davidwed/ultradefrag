@@ -1,128 +1,66 @@
     <div class="intro">
-        <div class="pad">
+        <div class="pad" style="padding:21px 0 0">
             UltraDefrag is an open source disk defragmenter for Windows. It can quickly
             defragment everything including files which are usually locked by Windows.
-            For instance, UltraDefrag can re-join paging and hibernation files.<br /><br />
-            <a href="#interfaces">Available Interfaces</a>&nbsp; | &nbsp;
-            <a href="#features">Features</a>&nbsp; | &nbsp;
-            <a href="#requirements">System Requirements</a>&nbsp; | &nbsp;
-            <a href="#translation">Translation</a>
+            For instance, UltraDefrag can re-join paging and hibernation files.
         </div>
     </div>
     <div class="mpart">
         <h2 class="content"><strong>NEWS</strong></h2>
 
-        <a href="index.html?download"><strong><span style="font-size: large;">UltraDefrag 6.1.0 has been released</span></strong></a>
+        <a href="index.html?download"><strong><span style="font-size: large;">UltraDefrag 6.1.0 has been released</span></strong> <small>[2015-04-19]</small></a>
+
         <!-- brief description of key improvements here -->
         <p>This release features completely rewritten documentation.
         A bit later it will be included in UltraDefrag v7 along with
         a bunch of bug fixes. If you believe some information is
         missing there, don't hesitate to drop us a note.</p>
-        <p>The <a href="../HISTORY.TXT">Change Log</a> contains the full list of changes.</p>
-        <p>Download the <a href="index.html?download#stable">stable release</a>.</p>
         <p>&nbsp;</p>
 
-        <div class="date"><!--#config timefmt="%F" --><span class="style0">Posted on</span> <!--#flastmod file="index_left_side.html" --></div> 
-
-        <a name="interfaces" id="interfaces"></a>
         <h2 class="content"><strong>AVAILABLE INTERFACES</strong></h2>
-
+        
         <link rel="stylesheet" href="../scripts/lightbox/css/lightbox.css" type="text/css" media="screen" />
-        <script src="../scripts/lightbox/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-        <script src="../scripts/lightbox/js/lightbox.js" type="text/javascript"></script>
+        <script src="../scripts/lightbox/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+        <script src="../scripts/lightbox/js/lightbox.min.js" type="text/javascript"></script>
 
-        <table class="screenshots" border="0" style="text-align: center;"><tbody>
-        <tr>
-        <td style="width: 200px; height: 155px">
-            <a href="../screenshots/index_boot.png" title="Boot Time Interface - optional interactive mode" rel="lightbox[index]">
-                <img src="../screenshots/th/index_boot.png" alt="" width="155" height="132" style="padding:0;float:none;" />
-            </a>
-        </td>
-        <td style="width: 200px; height: 155px">
-            <a href="../screenshots/index_console.png" title="Console Interface - optional map and verbose output" rel="lightbox[index]">
-                <img src="../screenshots/th/index_console.png" alt="" width="155" height="100" style="padding:0;float:none;" />
-            </a>
-        </td>
-        <td style="width: 200px; height: 155px">
-            <a href="../screenshots/index_gui.png" title="Graphical User Interface" rel="lightbox[index]">
-                <img src="../screenshots/th/index_gui.png" alt="" width="155" height="121" style="padding:0;float:none;" />
-            </a>
-        </td>
-        </tr>
+        <table class="screenshots"><tbody>
+            <tr>
+                <td>
+                    <a href="../screenshots/index_boot.png" title="Boot time interface - optional interactive mode" rel="lightbox[index]">
+                        <img src="../screenshots/th/index_boot.png" alt="" width="155" height="132" style="padding:0;float:none;" />
+                    </a>
+                </td>
+                <td>
+                    <a href="../screenshots/index_console.png" title="Console interface - optional map and verbose output" rel="lightbox[index]">
+                        <img src="../screenshots/th/index_console.png" alt="" width="155" height="100" style="padding:0;float:none;" />
+                    </a>
+                </td>
+                <td>
+                    <a href="../screenshots/index_gui.png" title="Graphical interface" rel="lightbox[index]">
+                        <img src="../screenshots/th/index_gui.png" alt="" width="155" height="121" style="padding:0;float:none;" />
+                    </a>
+                </td>
+            </tr>
         </tbody></table>
         <p>&nbsp;</p>
 
-        <a name="features" id="features"></a>
         <h2 class="content"><strong>FEATURES</strong></h2>
-        <p><span class="style0">Driver:</span></p>
+        
         <ul>
-        <li>Currently FAT, exFAT and NTFS are supported. <span class="enhancement">(enhanced in 6.0.0)</span></li>
-        <li>Defragmentation of files and folders including system files and file system meta files. <span class="enhancement">(enhanced in 5.1.0)</span></li>
-        <li>Full optimization of the drive, which processes all files despite of their fragmentation. <span class="enhancement">(enhanced in 6.0.0)</span></li>
-        <li>Quick optimization of the drive, which mainly processes fragmented files. <span class="enhancement">(enhanced in 6.0.0)</span></li>
-        <li>MFT optimization, which processes the MFT only. <span class="enhancement">(enhanced in 5.0.1)</span></li>
-        <li>Filtering of files to process by name, fragment count and size and file size. <span class="enhancement">(enhanced in 6.0.0)</span></li>
-        <li>Drive processing can be interrupted automatically after a defined amount of time.</li>
-        <li>User defined log file creation, which highly simplifies reporting bugs. <span class="enhancement">(enhanced in 5.0.6)</span></li>
-        <li>Drives needed to be checked by CHKDSK are excluded. <span class="enhancement">(enhanced in 5.0.5)</span></li>
-        <li><a href="../handbook/Introduction.html">Read more...</a></li>
-        </ul>
-        <p><span class="style0">Graphical User Interface:</span></p>
-        <ul>
-        <li>Graphical display of the drives cluster map. <span class="enhancement">(enhanced in 5.0.7)</span></li>
-        <li>Modern design with menus and tool bar. <span class="enhancement">(enhanced in 5.0.3)</span></li>
-        <li>The current progress and all important information are displayed in the drives list. <span class="enhancement">(enhanced in 5.1.0)</span></li>
-        <li>A final action can be specified to be executed after processing the drives. <span class="newfeature">(new in 5.0.0)</span></li>
-        <li>Color coding of the usage of the cluster map. <span class="enhancement">(enhanced in 5.0.7)</span></li>
-        <li>Localization can be done by the user or by one of the 63 included language packages. <span class="enhancement">(enhanced in 5.1.0)</span></li>
-        <li>The window can be minimized to the system tray. <span class="newfeature">(new in 6.0.0)</span></li>
-        <li>The progress can be displayed on the task bar icon under Windows 7<sup>&reg;</sup> and above. <span class="newfeature">(new in 6.0.0)</span></li>
-        <li><a href="../handbook/GUI.html">Read more...</a></li>
-        </ul>
-        <p><span class="style0">Command Line Tool:</span></p>
-        <ul>
-        <li>Useful for automation through scheduled tasks or batch scripts.</li>
-        <li>Integrated into Explorer's context menu. <span class="enhancement">(enhanced in 6.0.2)</span></li>
-        <li>Specify options through command line arguments or environment variables. <span class="enhancement">(enhanced in 5.0.0)</span></li>
-        <li>On demand, display of the graphical cluster map.</li>
-        <li><a href="../handbook/Console.html">Read more...</a></li>
-        </ul>
-        <p><span class="style0">Boot Time Interface:</span></p>
-        <ul>
-        <li>Useful to process locked system files. <span class="enhancement">(enhanced in 5.0.0)</span></li>
-        <li>An interactive mode is available too. <span class="enhancement">(enhanced in 5.0.0)</span></li>
-        <li><a href="../handbook/Boot.html">Read more...</a></li>
-        </ul>
-        <p><span class="style0">Reports:</span></p>
-        <ul>
-        <li>Available as plain text and HTML page. <span class="enhancement">(enhanced in 5.0.3)</span></li>
-        <li>Includes all information about the fragmented files. <span class="enhancement">(enhanced in 5.0.4)</span></li>
-        <li><a href="../handbook/Reports.html">Read more...</a></li>
-        </ul>
-        <p><span class="style0">Installer:</span></p>
-        <ul>
-        <li>Two configurations are available, full and without GUI. <span class="enhancement">(enhanced in 5.0.0)</span></li>
-        <li>All features can be configured through command line arguments. <span class="newfeature">(new in 5.0.0)</span></li>
-        <li>Selections of previous installations are retained. <span class="enhancement">(enhanced in 5.0.3)</span></li>
-        <li>Destination folder can be specified. <span class="enhancement">(enhanced in 5.1.1)</span></li>
-        <li>Log file creation on failure of silent installation. <span class="newfeature">(new in 5.1.0)</span></li>
-        <li><a href="../handbook/Installation.html">Read more...</a></li>
+        <li class="feature"><span>Simple but efficient defragmentation algorightms.</span></li>
+        <li class="feature"><span>Defragmentation of NTFS metafiles and streams.</span></li>
+        <li class="feature"><span>Optimization of NTFS master file tables (MFT).</span></li>
+        <li class="feature"><span>Automatic hibernation or shutdown after the job completion.</span></li>
+        <li class="feature"><a href="http://ultradefrag.sourceforge.net/handbook/Introduction.html">More...</a></li>
         </ul>
         <p>&nbsp;</p>
-
-        <a name="requirements" id="requirements"></a>
+        
         <h2 class="content"><strong>SYSTEM REQUIREMENTS</strong></h2>
-        <p><span class="style0">Desktop PC:</span> Windows NT 4.0, 2000, XP, Vista, 7, 8</p>
+        <p><span class="style0">Desktop:</span> Windows NT 4.0, 2000, XP, Vista, 7, 8</p>
         <p><span class="style0">Server:</span> Windows NT 4.0, 2000, 2003, 2008, 2008 R2, 2012</p>
         <p>32-bit, 64-bit and Itanium Editions</p>
         <p>&nbsp;</p>
-
-        <a name="translation" id="translation"></a>
-        <h2 class="content"><strong>TRANSLATION</strong></h2>
-        <h3 class="style0">Translate UltraDefrag to your native language!</h3>
-        <p><img src="../images/language.gif" alt="" width="60" height="60" /></p>
-        <p>You may participate in UltraDefrag translation by submitting a new translation or modifying an existing one.
-        Visit <a href="http://www.transifex.com/projects/p/ultradefrag/">UltraDefrag project at Transifex</a> for details.</p>
-        <p>You are welcome! Your help will be much appreciated!</p>
-        <p>&nbsp;</p>
     </div>
+    <!--<div class="greybox">
+        <p><a href="#top" title="#"><img src="../images/up.gif" alt="" width="10" height="12" />Back to Top</a></p>
+    </div>-->

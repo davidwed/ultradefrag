@@ -1,128 +1,66 @@
     <div class="intro">
-        <div class="pad">
+        <div class="pad" style="padding:21px 0 0">
             UltraDefrag ist ein leistungsstarkes Open Source Defragmentierungswerkzeug für Windows.
             Es kann jegliche Systemdateien defragmentieren, einschließlich Registrierungs- und Auslagerungsdateien.
-            Ein Hauptziel von UltraDefrag ist es, diese Aufgabe so schnell und zuverlässig wie möglich zu erledigen.<br /> 
-            <a href="#interfaces">Vorhandene Oberflächen</a>&nbsp; | &nbsp;
-            <a href="#features">Funktionen</a>&nbsp; | &nbsp;
-            <a href="#requirements">Systemvoraussetzungen</a>&nbsp; | &nbsp;
-            <a href="#translation">Übersetzung</a>
         </div>
     </div>
     <div class="mpart">
         <h2 class="content"><strong>NEUIGKEITEN</strong></h2>
 
-        <a href="index.html?download"><strong><span style="font-size: large;">UltraDefrag 6.1.0 has been released</span></strong></a>
+        <a href="index.html?download"><strong><span style="font-size: large;">UltraDefrag 6.1.0 has been released</span></strong> <small>[2015-04-19]</small></a>
+
         <!-- brief description of key improvements here -->
         <p>This release features completely rewritten documentation.
         A bit later it will be included in UltraDefrag v7 along with
         a bunch of bug fixes. If you believe some information is
         missing there, don't hesitate to drop us a note.</p>
-        <p>Das <a href="../HISTORY.TXT">Änderungsprotokoll</a> enthält eine komplette Liste aller Änderungen.</p>
-        <p>Lade die <a href="index.html?download#stable">stabile Version</a> herunter.</p>
         <p>&nbsp;</p>
 
-        <div class="date"><!--#config timefmt="%F" --><span class="style0">Veröffentlicht am</span> <!--#flastmod file="index_left_side.html" --></div> 
-
-        <a name="interfaces" id="interfaces"></a>
         <h2 class="content"><strong>VORHANDENE OBERFLÄCHEN</strong></h2>
 
         <link rel="stylesheet" href="../scripts/lightbox/css/lightbox.css" type="text/css" media="screen" />
-        <script src="../scripts/lightbox/js/jquery-1.7.2.min.js" type="text/javascript"></script>
-        <script src="../scripts/lightbox/js/lightbox.js" type="text/javascript"></script>
+        <script src="../scripts/lightbox/js/jquery-1.11.0.min.js" type="text/javascript"></script>
+        <script src="../scripts/lightbox/js/lightbox.min.js" type="text/javascript"></script>
 
-        <table class="screenshots" border="0" style="text-align: center;"><tbody>
-        <tr>
-        <td style="width: 200px; height: 155px">
-            <a href="../screenshots/index_boot.png" title="Startzeitoberfläche - wahlweise im interaktiven Modus" rel="lightbox[index]">
-                <img src="../screenshots/th/index_boot.png" alt="" width="155" height="132" style="padding:0;float:none;" />
-            </a>
-        </td>
-        <td style="width: 200px; height: 155px">
-            <a href="../screenshots/index_console.png" title="Konsolenoberfläche - wahlweise mit Darstellung und ausführlicher Ausgabe" rel="lightbox[index]">
-                <img src="../screenshots/th/index_console.png" alt="" width="155" height="100" style="padding:0;float:none;" />
-            </a>
-        </td>
-        <td style="width: 200px; height: 155px">
-            <a href="../screenshots/index_gui.png" title="Grafische Benutzeroberfläche" rel="lightbox[index]">
-                <img src="../screenshots/th/index_gui.png" alt="" width="155" height="121" style="padding:0;float:none;" />
-            </a>
-        </td>
-        </tr>
+        <table class="screenshots"><tbody>
+            <tr>
+                <td>
+                    <a href="../screenshots/index_boot.png" title="Startzeitoberfläche - wahlweise im interaktiven Modus" rel="lightbox[index]">
+                        <img src="../screenshots/th/index_boot.png" alt="" width="155" height="132" style="padding:0;float:none;" />
+                    </a>
+                </td>
+                <td>
+                    <a href="../screenshots/index_console.png" title="Konsolenoberfläche - wahlweise mit Darstellung und ausführlicher Ausgabe" rel="lightbox[index]">
+                        <img src="../screenshots/th/index_console.png" alt="" width="155" height="100" style="padding:0;float:none;" />
+                    </a>
+                </td>
+                <td>
+                    <a href="../screenshots/index_gui.png" title="Grafische Benutzeroberfläche" rel="lightbox[index]">
+                        <img src="../screenshots/th/index_gui.png" alt="" width="155" height="121" style="padding:0;float:none;" />
+                    </a>
+                </td>
+            </tr>
         </tbody></table>
         <p>&nbsp;</p>
 
-        <a name="features" id="features"></a>
         <h2 class="content"><strong>FUNKTIONEN</strong></h2>
-        <p><span class="style0">Treiber:</span></p>
+
         <ul>
-        <li>Derzeit werden FAT, exFAT und NTFS unterstützt. <span class="enhancement">(verbessert in 6.0.0)</span></li>
-        <li>Defragmentierung von Dateien und Ordnern inklusive Systemdateien und Dateisystem-Metadateien. <span class="enhancement">(verbessert in 5.1.0)</span></li>
-        <li>Komplettoptimierung des Laufwerks, welche alle Dateien ungeachtet ihrer Fragmentierung behandelt. <span class="enhancement">(verbessert in 6.0.0)</span></li>
-        <li>Schnelloptimierung des Laufwerks, welche hauptsächlich fragmentierte Dateien behandelt. <span class="enhancement">(verbessert in 6.0.0)</span></li>
-        <li>Optimierung des MFT, welche nur den MFT behandelt. <span class="enhancement">(verbessert in 5.0.1)</span></li>
-        <li>Filterung der zu verarbeitenden Dateien über Größe, Anzahl und Größe der Fragmente und Namen. <span class="enhancement">(verbessert in 6.0.0)</span></li>
-        <li>Die Festplattenverarbeitung kann nach einer angegebenen Zeitspanne automatisch abgebrochen werden.</li>
-        <li>Benutzerdefinierte Erstellung einer Protokolldatei, welche das Erstellen von Problemberichten erheblich vereinfacht. <span class="enhancement">(verbessert in 5.0.6)</span></li>
-        <li>Laufwerke die von CHKDSK überprüft werden müssen werden übersprungen. <span class="enhancement">(verbessert in 5.0.5)</span></li>
-        <li><a href="../handbook/Introduction.html">Mehr darüber...</a></li>
-        </ul>
-        <p><span class="style0">Grafische Benutzeroberfläche:</span></p>
-        <ul>
-        <li>Grafische Darstellung der Zuordnungseinheiten des Laufwerkes. <span class="enhancement">(verbessert in 5.0.7)</span></li>
-        <li>Modernes Design mit Menüs und Werkzeugleiste. <span class="enhancement">(verbessert in 5.0.3)</span></li>
-        <li>Der aktuelle Fortschritt und alle wichtigen Informationen werden in der Laufwerksliste angezeigt. <span class="enhancement">(verbessert in 5.1.0)</span></li>
-        <li>Nach Abschluss der Verarbeitung der Laufwerke können verschiedene Aktionen ausgeführt werden. <span class="newfeature">(neu in 5.0.0)</span></li>
-        <li>Farbkodierung der Zuordnungseinheiten je nach Nutzung. <span class="enhancement">(verbessert in 5.0.7)</span></li>
-        <li>Lokalisierung der Texte durch den Benutzer oder die 63 mitgelieferten Sprachpakete. <span class="enhancement">(verbessert in 5.1.0)</span></li>
-        <li>Das Anwendungsfenster kann in den Systembereich minimiert werden. <span class="newfeature">(neu in 6.0.0)</span></li>
-        <li>Unter Windows 7<sup>&reg;</sup> und höher kann der Fortschritt im Taskleisten-Icon angezeigt werden. <span class="newfeature">(neu in 6.0.0)</span></li>
-        <li><a href="../handbook/GUI.html">Mehr darüber...</a></li>
-        </ul>
-        <p><span class="style0">Kommandozeilenprogramm:</span></p>
-        <ul>
-        <li>Geeignet für die Automatisierung über geplante Aufgaben und Befehlsskripts.</li>
-        <li>In das Kontextmenü des Explorers integriert. <span class="enhancement">(verbessert in 6.0.2)</span></li>
-        <li>Angabe der Optionen über Kommandozeilenparameter oder Umgebungsvariablen. <span class="enhancement">(verbessert in 5.0.0)</span></li>
-        <li>Wenn gewünscht, grafische Darstellung der Zuordnungseinheiten des Laufwerkes.</li>
-        <li><a href="../handbook/Console.html">Mehr darüber...</a></li>
-        </ul>
-        <p><span class="style0">Oberfläche beim Windows Start:</span></p>
-        <ul>
-        <li>Geeignet um häufig gesperrte Systemdateien verarbeiten zu können. <span class="enhancement">(verbessert in 5.0.0)</span></li>
-        <li>In einen interaktiven Modus kann gewechselt werden. <span class="enhancement">(verbessert in 5.0.0)</span></li>
-        <li><a href="../handbook/Boot.html">Mehr darüber...</a></li>
-        </ul>
-        <p><span class="style0">Berichte:</span></p>
-        <ul>
-        <li>Als Textdatei und HTML-Seite vorhanden. <span class="enhancement">(verbessert in 5.0.3)</span></li>
-        <li>Enthalten sind alle Informationen über die fragmentierten Dateien. <span class="enhancement">(verbessert in 5.0.4)</span></li>
-        <li><a href="../handbook/Reports.html">Mehr darüber...</a></li>
-        </ul>
-        <p><span class="style0">Installationsprogramm:</span></p>
-        <ul>
-        <li>Zwei Konfigurationen stehen zur Verfügung, vollständig und ohne grafische Oberfläche. <span class="enhancement">(verbessert in 5.0.0)</span></li>
-        <li>Alle Optionen können über Kommandozeilenparameter konfiguriert werden. <span class="newfeature">(neu in 5.0.0)</span></li>
-        <li>Die Auswahl vorheriger Installationen wird übernommen. <span class="enhancement">(verbessert in 5.0.3)</span></li>
-        <li>Das Zielverzeichnis kann angegeben werden. <span class="enhancement">(verbessert in 5.1.1)</span></li>
-        <li>Eine Protokolldatei wird beim Fehlschlagen der unbeaufsichtigten Installation erzeugt. <span class="newfeature">(neu in 5.1.0)</span></li>
-        <li><a href="../handbook/Installation.html">Mehr darüber...</a></li>
+        <li class="feature"><span>Simple but efficient defragmentation algorightms.</span></li>
+        <li class="feature"><span>Defragmentation of NTFS metafiles and streams.</span></li>
+        <li class="feature"><span>Optimization of NTFS master file tables (MFT).</span></li>
+        <li class="feature"><span>Automatic hibernation or shutdown after the job completion.</span></li>
+        <li class="feature"><a href="http://ultradefrag.sourceforge.net/handbook/Introduction.html">Mehr darüber...</a></li>
         </ul>
         <p>&nbsp;</p>
-
-        <a name="requirements" id="requirements"></a>
+        
         <h2 class="content"><strong>SYSTEMVORAUSSETZUNGEN</strong></h2>
-        <p><span class="style0">Desktop PC:</span> Windows NT 4.0, 2000, XP, Vista, 7, 8</p>
+
+        <p><span class="style0">Desktop:</span> Windows NT 4.0, 2000, XP, Vista, 7, 8</p>
         <p><span class="style0">Server:</span> Windows NT 4.0, 2000, 2003, 2008, 2008 R2, 2012</p>
         <p>32-bit, 64-bit und Itanium Editionen</p>
         <p>&nbsp;</p>
-
-        <a name="translation" id="translation"></a>
-        <h2 class="content"><strong>ÜBERSETZUNG</strong></h2>
-        <h3 class="style0">Übersetze UltraDefrag in Deine Muttersprache!</h3>
-        <p><img src="../images/language.gif" alt="" width="60" height="60" /></p>
-        <p>Du kannst an der Übersetzung von UltraDefrag durch hinzufügen neuer oder ändern bestehender Übersetzungen teilhaben.
-        Besuche <a href="http://www.transifex.com/projects/p/ultradefrag/">Transifex.com</a> für weitere Details.</p>
-        <p>Besten Dank im Voraus! Wir schätzen Deine Unterstützung sehr!</p>
-        <p>&nbsp;</p>
     </div>
+    <!--<div class="greybox">
+      <p><a href="#top" title="#"><img src="../images/up.gif" alt="" width="10" height="12" />Zurück zum Anfang</a></p>
+    </div>-->
