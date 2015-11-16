@@ -3,11 +3,11 @@ name        = "udefrag"
 target_type = "console"
 
 -- list of directories containing headers the program relies on
-includes = { "console", "include", "lua5.1", "udefrag" }
+includes = { "console", "include", "lua5.1", "udefrag", "zenwinx" }
 
 libs = {
     "kernel32", "user32", "shell32", "msvcrt",
-    "advapi32", "ole32", "uuid"
+    "advapi32", "ole32", "uuid", "urlmon"
 }
 adlibs = { 
     "$(UDEFRAG_LIB_PATH)\\zenwinx", 

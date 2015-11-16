@@ -3,5 +3,6 @@
 	<Workspace title="UltraDefrag">
 		<Project filename="wxgui/wxgui.cbp" />
 		<Project filename="console/console.cbp" />
+		<Project filename="dbg/dbg.cbp" />
 	</Workspace>
 </CodeBlocks_workspace_file>

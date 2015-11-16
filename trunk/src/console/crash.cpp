@@ -58,7 +58,7 @@ wchar_t cmd[MAX_CMD_LENGTH];
 /**
  * @brief Attaches UltraDefrag debugger.
  */
-void App::AttachDebugger(void)
+void attach_debugger(void)
 {
     HANDLE hEvent = NULL;
 

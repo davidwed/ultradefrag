@@ -1,7 +1,7 @@
 @echo off
 ::
 :: This script generates manifests for Vista UAC for UltraDefrag project.
-:: Copyright (c) 2009-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2009-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
 :: Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
@@ -32,14 +32,16 @@ call :make_manifest %1 %ULTRADFGVER%.0  wxultradefrag  "UltraDefrag GUI"        
 call :make_manifest %1 %ULTRADFGVER%.0  bootexctrl     "BootExecute Control Program"   >.\obj\bootexctrl\bootexctrl.manifest
 call :make_manifest %1 5.1.2.0          Lua            "Lua Console"                   >.\obj\lua\lua.manifest
 call :make_manifest %1 5.1.2.0          Lua            "Lua GUI"                       >.\obj\lua-gui\lua.manifest
+call :make_manifest %1 %ULTRADFGVER%.0  udefrag-dbg    "UltraDefrag debugger"          >.\obj\dbg\dbg.manifest
 
 if /i "%1" equ "X86" (
     copy /Y .\obj\hibernate\hibernate.manifest   .\hibernate\hibernate.manifest
-    copy /Y .\obj\console\console.manifest        .\console\console.manifest
+    copy /Y .\obj\console\console.manifest       .\console\console.manifest
     copy /Y .\obj\wxgui\res\ultradefrag.manifest .\wxgui\res\ultradefrag.manifest
     copy /Y .\obj\bootexctrl\bootexctrl.manifest .\bootexctrl\bootexctrl.manifest
     copy /Y .\obj\lua\lua.manifest               .\lua\lua.manifest
     copy /Y .\obj\lua-gui\lua.manifest           .\lua-gui\lua.manifest
+    copy /Y .\obj\dbg\dbg.manifest               .\dbg\dbg.manifest
 )
 exit /B 0
 

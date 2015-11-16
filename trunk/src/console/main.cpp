@@ -42,6 +42,13 @@
 
 #define MAX_ENV_VAR_LENGTH 32767 // as MSDN states
 
+// Uncomment to test crash reporting facilities.
+// NOTE: on Windows 7 you should reset Fault Tolerant
+// Heap protection from time to time via the following
+// command: rundll32 fthsvc.dll,FthSysprepSpecialize
+// Otherwise some of crash tests will fail.
+// #define CRASH_TESTS
+
 void cleanup(void);
 
 // =======================================================================
@@ -478,14 +485,9 @@ void *StatThread::Entry()
         if(s.Cmp(wxT("1")) == 0) enabled = false;
 
     if(enabled){
-#ifndef _WIN64
-        ga_request(wxT("/appstat/console-x86.html"));
-#else
-    #if defined(_IA64_)
-        ga_request(wxT("/appstat/console-ia64.html"));
-    #else
-        ga_request(wxT("/appstat/console-x64.html"));
-    #endif
+        GA_REQUEST(USAGE_TRACKING);
+#if defined(OFFICIAL_RELEASE) && !defined(STABLE_RELEASE)
+        GA_REQUEST(TEST_TRACKING);
 #endif
     }
 
@@ -583,13 +585,18 @@ static int out_of_memory_handler(size_t n)
 
 int __cdecl main(int argc, char **argv)
 {
-    int result = 1;
-
     // initialize udefrag library
     if(udefrag_init_library() < 0){
         fprintf(stderr,"Initialization failed!\n");
         return 1;
     }
+
+    // enable memory corruption handling
+#ifndef STABLE_RELEASE
+    attach_debugger();
+#endif
+
+    int result = 1;
 
     // set out of memory handler
 #if !defined(__GNUC__)
@@ -615,6 +622,23 @@ int __cdecl main(int argc, char **argv)
     // uncomment to test out of memory condition
     /*for(int i = 0; i < 1000000000; i++)
         char *p = new char[1024];*/
+
+#ifdef CRASH_TESTS
+#ifndef _WIN64
+    if(true){
+        wchar_t *s1 = new wchar_t[1024];
+        wcscpy(s1,wxT("hello"));
+        delete s1;
+        wcscpy(s1,wxT("world"));
+        delete s1;
+    }
+#else
+    // the code above fails to crash
+    // on Windows XP 64-bit edition
+    void *p = NULL;
+    *(char *)p = 0;
+#endif
+#endif
 
     if(g_list_volumes){
         result = list_volumes();

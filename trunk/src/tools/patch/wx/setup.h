@@ -120,7 +120,9 @@
 // Default is 1
 //
 // Recommended setting: 1 if your compiler supports it.
-#define wxUSE_ON_FATAL_EXCEPTION 1
+//
+// Turn off as we use memory corruption tolerant alternative anyway.
+#define wxUSE_ON_FATAL_EXCEPTION 0
 
 // Set this to 1 to be able to generate a human-readable (unlike
 // machine-readable minidump created by wxCrashReport::Generate()) stack back
@@ -1345,7 +1347,9 @@
 // Default is 1 if supported by the compiler (VC++ and recent BC++ only).
 //
 // Recommended setting: 1, set to 0 if your programs never crash
-#define wxUSE_CRASHREPORT 1
+//
+// Turn off as it requires wxUSE_ON_FATAL_EXCEPTION.
+#define wxUSE_CRASHREPORT 0
 
 // ----------------------------------------------------------------------------
 // obsolete settings

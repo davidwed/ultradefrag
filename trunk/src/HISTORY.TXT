@@ -1,8 +1,9 @@
 ﻿HISTORY
 
-  Version 7.0.0 2015-06-xx
+  Version 7.0.0 2016-xx-xx
   ------------------------------------------------------------------------------
     beta3:
+    - crash handling was reimplemented to gather more information
     - few minor bugs were fixed
     - the following translations were updated:
 

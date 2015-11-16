@@ -142,6 +142,14 @@ help32     RCDATA "res/32x32/help.png"
 light32    RCDATA "res/32x32/light.png"
 star32     RCDATA "res/32x32/star.png"
 
+// dummy dialog for modal message boxes icon setup
+dummy_dialog DIALOG DISCARDABLE  0, 0, 50, 20
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION ""
+FONT 9, "Courier New"
+BEGIN
+END
+
 // manifests for all targets produces make-manifests.cmd script
 1 24 "res/ultradefrag.manifest"
 
