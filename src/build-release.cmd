@@ -19,6 +19,9 @@
 :: Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ::
 
+:: crash reporting must be turned on in official releases only
+set OFFICIAL_RELEASE=1
+
 call build.cmd --clean
 
 rd /s /q release
@@ -56,10 +59,12 @@ copy /Y .\dll\zenwinx\doxy-doc\html\*.*   ..\..\web\doc\lib\zenwinx || goto buil
 echo.
 echo Release made successfully!
 title Release made successfully!
+set OFFICIAL_RELEASE=
 exit /B 0
 
 :build_failed
 echo.
 echo Release building error!
 title Release building error!
+set OFFICIAL_RELEASE=
 exit /B 1

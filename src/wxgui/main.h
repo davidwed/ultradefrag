@@ -79,6 +79,28 @@ typedef enum {
     TBPF_PAUSED	= 0x8
 } TBPFLAG;
 
+#if defined(__GNUC__)
+extern "C" {
+HRESULT WINAPI URLDownloadToFileW(
+    /* LPUNKNOWN */ void *lpUnkcaller,
+    LPCWSTR szURL,
+    LPCWSTR szFileName,
+    DWORD dwReserved,
+    /*IBindStatusCallback*/ void *pBSC
+);
+
+HRESULT WINAPI URLDownloadToCacheFileW(
+    /* LPUNKNOWN */ void *lpUnkcaller,
+    LPCWSTR szURL,
+    LPWSTR szFileName,
+    DWORD cchFileName,
+    DWORD dwReserved,
+    /*IBindStatusCallback*/ void *pBSC
+);
+}
+#endif
+
+#include "../include/dbg.h"
 #include "../include/version.h"
 #include "../dll/zenwinx/zenwinx.h"
 #include "../dll/udefrag/udefrag.h"
@@ -88,6 +110,29 @@ typedef enum {
 // =======================================================================
 
 #define LIST_COLUMNS 6 // number of columns in the list of volumes
+
+#define USAGE_TRACKING_ACCOUNT_ID wxT("UA-15890458-1")
+#define TEST_TRACKING_ACCOUNT_ID  wxT("UA-70148850-1")
+
+#ifndef _WIN64
+  #define TRACKING_ID wxT("gui-x86")
+#else
+ #if defined(_IA64_)
+  #define TRACKING_ID wxT("gui-ia64")
+ #else
+  #define TRACKING_ID wxT("gui-x64")
+ #endif
+#endif
+
+// append html extension to the tracking id, for historical reasons
+#define USAGE_TRACKING_PATH wxT("/appstat/") TRACKING_ID wxT(".html")
+
+// append 0x00000000 to count test runs, for reports usability sake;
+// crash cases will be listed below, so it would be easy to compare numbers
+#define TEST_TRACKING_PATH  wxT("/appstat/test/") wxT(wxUD_ABOUT_VERSION) \
+    wxT("/") TRACKING_ID wxT("/0x00000000")
+
+#define GA_REQUEST(type) ::Utils::GaRequest(type##_PATH, type##_ACCOUNT_ID)
 
 enum {
     // file menu identifiers
@@ -277,6 +322,8 @@ public:
     static void SetLocale(int id);
     static void SaveReportTranslation();
 
+    static void AttachDebugger();
+
 private:
     void Cleanup();
 
@@ -296,14 +343,6 @@ class ConfigThread: public wxThread {
 public:
     ConfigThread() : wxThread(wxTHREAD_JOINABLE) { Create(); Run(); }
     ~ConfigThread() { Wait(); }
-
-    virtual void *Entry();
-};
-
-class CrashInfoThread: public wxThread {
-public:
-    CrashInfoThread() : wxThread(wxTHREAD_JOINABLE) { Create(); Run(); }
-    ~CrashInfoThread() { Wait(); }
 
     virtual void *Entry();
 };
@@ -572,7 +611,6 @@ private:
     BtdThread *m_btdThread;
 
     ConfigThread    *m_configThread;
-    CrashInfoThread *m_crashInfoThread;
     ListThread      *m_listThread;
     UpgradeThread   *m_upgradeThread;
 
@@ -583,7 +621,7 @@ class Utils {
 public:
     static bool CheckAdminRights(void);
     static bool DownloadFile(const wxString& url, const wxString& path);
-    static void GaRequest(const wxString& path);
+    static void GaRequest(const wxString& path, const wxString& id);
     static wxBitmap *LoadPngResource(const wchar_t *name);
     static int MessageDialog(wxFrame *parent,
         const wxString& caption, const wxArtID& icon,

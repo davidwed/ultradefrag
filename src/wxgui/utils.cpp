@@ -36,14 +36,6 @@
 
 #include "main.h"
 
-typedef HRESULT (__stdcall *URLMON_PROCEDURE)(
-    /* LPUNKNOWN */ void *lpUnkcaller,
-    LPCWSTR szURL,
-    LPCWSTR szFileName,
-    DWORD dwReserved,
-    /*IBindStatusCallback*/ void *pBSC
-);
-
 // =======================================================================
 //                         Auxiliary utilities
 // =======================================================================
@@ -90,15 +82,8 @@ bool Utils::DownloadFile(const wxString& url, const wxString& path)
     * here because it may immediately delete
     * the file after its creation.
     */
-    wxDynamicLibrary lib(wxT("urlmon"));
-    wxDYNLIB_FUNCTION(URLMON_PROCEDURE,
-        URLDownloadToFileW, lib);
-
-    if(!pfnURLDownloadToFileW)
-        return false;
-
-    HRESULT result = pfnURLDownloadToFileW(
-        NULL,url.wc_str(),path.wc_str(),0,NULL);
+    HRESULT result = ::URLDownloadToFileW(NULL,
+        url.wc_str(),path.wc_str(),0,NULL);
     if(result != S_OK){
         etrace("URLDownloadToFile failed "
             "with code 0x%x",(UINT)result);
@@ -115,7 +100,7 @@ bool Utils::DownloadFile(const wxString& url, const wxString& path)
  * @details Based on http://code.google.com/apis/analytics/docs/
  * and http://www.vdgraaf.info/google-analytics-without-javascript.html
  */
-void Utils::GaRequest(const wxString& path)
+void Utils::GaRequest(const wxString& path, const wxString& id)
 {
     srand((unsigned int)time(NULL));
     int utmn = (rand() << 16) + rand();
@@ -125,35 +110,29 @@ void Utils::GaRequest(const wxString& path)
     __int64 today = (__int64)time(NULL);
 
     wxString url;
-
     url << wxT("http://www.google-analytics.com/__utm.gif?utmwv=4.6.5");
     url << wxString::Format(wxT("&utmn=%u"),utmn);
     url << wxT("&utmhn=ultradefrag.sourceforge.net");
     url << wxString::Format(wxT("&utmhid=%u&utmr=-"),utmhid);
     url << wxT("&utmp=") << path;
-    url << wxT("&utmac=");
-    url << wxT("UA-15890458-1");
+    url << wxT("&utmac=") << id;
     url << wxString::Format(wxT("&utmcc=__utma%%3D%u.%u.%I64u.%I64u.%I64u.") \
         wxT("50%%3B%%2B__utmz%%3D%u.%I64u.27.2.utmcsr%%3Dgoogle.com%%7Cutmccn%%3D") \
         wxT("(referral)%%7Cutmcmd%%3Dreferral%%7Cutmcct%%3D%%2F%%3B"),
         cookie,random,today,today,today,cookie,today);
 
-    wxFileName target(wxT(".\\tmp"));
-    target.Normalize();
-    wxString dir(target.GetFullPath());
-    if(!wxDirExists(dir)) wxMkdir(dir);
+    itrace("downloading %ls",url.wc_str());
 
-    /*
-    * Use a subfolder to prevent configuration files
-    * reload (see ConfigThread::Entry() for details).
-    */
-    dir << wxT("\\data");
-    if(!wxDirExists(dir)) wxMkdir(dir);
+    wchar_t file[MAX_PATH + 1]; file[MAX_PATH] = 0;
+    HRESULT result = ::URLDownloadToCacheFileW(
+        NULL,url.wc_str(),file,MAX_PATH,0,NULL);
+    if(result != S_OK){
+        etrace("URLDownloadToCacheFile failed "
+               "with code 0x%x",(UINT)result);
+        return;
+    }
 
-    wxString file(dir);
-    file << wxT("\\__utm.gif");
-    if(DownloadFile(url,file))
-        wxRemoveFile(file);
+    (void)::DeleteFile(file);
 }
 
 /**

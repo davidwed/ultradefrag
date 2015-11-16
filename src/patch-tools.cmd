@@ -50,10 +50,15 @@ if "%MINGWBASE%" neq "" (
     echo.
     pushd "%MINGWBASE%\lib"
     if not exist libntdll.a.orig move libntdll.a libntdll.a.orig
+    if not exist liburlmon.a.orig (
+        if exist liburlmon.a move liburlmon.a liburlmon.a.orig
+    )
     popd
     pushd tools\patch\mingw
     "%MINGWBASE%\bin\dlltool" -k --output-lib libntdll.a --def ntdll.def || goto fail
+    "%MINGWBASE%\bin\dlltool" -k --output-lib liburlmon.a --def urlmon.def || goto fail
     move /Y libntdll.a "%MINGWBASE%\lib\libntdll.a" || goto fail
+    move /Y liburlmon.a "%MINGWBASE%\lib\liburlmon.a" || goto fail
     popd
 )
 

@@ -86,54 +86,6 @@
 
 ;-----------------------------------------
 
-!macro InitCrashDate
-
-    Push $5
-    Push $6
-    Push $7
-    Push $8
-    Push $9
-
-    ; get seconds since 1.1.1970 based on the remarks section of RtlTimeToSecondsSince1970 at
-    ; http://msdn.microsoft.com/en-us/library/windows/desktop/ms724928%28v=vs.85%29.aspx
-
-    ; initialize SYSTEMTIME structure with 01.01.1970 00:00:00
-    System::Call "*(&i2 1970,&i2 1,&i2 0,&i2 1,&i2 0,&i2 0,&i2 0,&i2 0) i .r6"
-
-    ; get current date and time in UTC
-    System::Call "*(&i2,&i2,&i2,&i2,&i2,&i2,&i2,&i2) i .r7"
-    System::Call "kernel32::GetSystemTime(i r7) v"
-
-    ; convert SYSTEMTIME to FILETIME
-    System::Call "kernel32::SystemTimeToFileTime(i r6,*l .r8) i"
-    System::Call "kernel32::SystemTimeToFileTime(i r7,*l .r9) i"
-
-    ; calculate seconds
-    System::Int64Op $9 - $8
-    Pop $5
-    System::Int64Op $5 / 10000000
-    Pop $5
-
-    ; cleanup
-    System::Free $7
-    System::Free $6
-
-    ; create entry in the crash ini file
-    WriteINIStr "$INSTDIR\crash-info.ini" "LastProcessedEvent" "TimeStamp" $5
-    FlushINI    "$INSTDIR\crash-info.ini"
-
-    Pop $9
-    Pop $8
-    Pop $7
-    Pop $6
-    Pop $5
-
-!macroend
-
-!define InitCrashDate "!insertmacro InitCrashDate"
-
-;-----------------------------------------
-
 !macro CheckAdminRights
 
     Push $R0
@@ -340,6 +292,7 @@ SkipMove:
         File "zenwinx.dll"
         File "udefrag.dll"
         File /oname=hibernate4win.exe "hibernate.exe"
+        File "udefrag-dbg.exe"
 
     SetOutPath "$INSTDIR"
         File "${ROOTDIR}\src\HISTORY.TXT"
@@ -404,6 +357,7 @@ SkipMove:
     Delete "$SYSDIR\udefrag.dll"
     Delete "$SYSDIR\lua5.1a.dll"
     Delete "$SYSDIR\hibernate4win.exe"
+    Delete "$SYSDIR\udefrag-dbg.exe"
 
     DetailPrint "Deregister .luar file extension..."
     DeleteRegKey HKCR "LuaReport"
@@ -1052,6 +1006,9 @@ SkipMove:
 
     Delete "$INSTDIR\shellex.ico"
     Delete "$INSTDIR\shellex-folder.ico"
+
+    Delete "$INSTDIR\crash-info.ini"
+    Delete "$INSTDIR\crash-info.log"
 
     ; remove shortcuts of any previous version of the program
     SetShellVarContext all

@@ -366,8 +366,6 @@ Function .onInstSuccess
 
     ${RegisterInstallationFolder}
 
-    ${InitCrashDate}
-
 FunctionEnd
 
 Function un.onUninstSuccess

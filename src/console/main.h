@@ -46,9 +46,50 @@
 #define wxCharStringFmtSpec "%hs"
 #endif
 
+#if defined(__GNUC__)
+extern "C" {
+HRESULT WINAPI URLDownloadToCacheFileW(
+    /* LPUNKNOWN */ void *lpUnkcaller,
+    LPCWSTR szURL,
+    LPWSTR szFileName,
+    DWORD cchFileName,
+    DWORD dwReserved,
+    /*IBindStatusCallback*/ void *pBSC
+);
+}
+#endif
+
+#include "../include/dbg.h"
 #include "../include/version.h"
 #include "../dll/zenwinx/zenwinx.h"
 #include "../dll/udefrag/udefrag.h"
+
+// =======================================================================
+//                              Constants
+// =======================================================================
+
+#define USAGE_TRACKING_ACCOUNT_ID wxT("UA-15890458-1")
+#define TEST_TRACKING_ACCOUNT_ID  wxT("UA-70148850-1")
+
+#ifndef _WIN64
+  #define TRACKING_ID wxT("console-x86")
+#else
+ #if defined(_IA64_)
+  #define TRACKING_ID wxT("console-ia64")
+ #else
+  #define TRACKING_ID wxT("console-x64")
+ #endif
+#endif
+
+// append html extension to the tracking id, for historical reasons
+#define USAGE_TRACKING_PATH wxT("/appstat/") TRACKING_ID wxT(".html")
+
+// append 0x00000000 to count test runs, for reports usability sake;
+// crash cases will be listed below, so it would be easy to compare numbers
+#define TEST_TRACKING_PATH  wxT("/appstat/test/") wxT(wxUD_ABOUT_VERSION) \
+    wxT("/") TRACKING_ID wxT("/0x00000000")
+
+#define GA_REQUEST(type) ga_request(type##_PATH, type##_ACCOUNT_ID)
 
 // =======================================================================
 //                          Macro definitions
@@ -84,7 +125,9 @@ void redraw_map(udefrag_progress_info *pi);
 void destroy_map(void);
 void clear_line(void);
 void print_unicode(wchar_t *string);
-void ga_request(const wxString& path);
+void ga_request(const wxString& path, const wxString& id);
+
+void attach_debugger(void);
 
 // =======================================================================
 //                           Global variables

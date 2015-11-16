@@ -72,6 +72,7 @@ xcopy .\lua5.1      .\obj\lua5.1      /I /Y /Q /EXCLUDE:%~n0_exclude.txt
 xcopy .\lua         .\obj\lua         /I /Y /Q /EXCLUDE:%~n0_exclude.txt
 xcopy .\lua-gui     .\obj\lua-gui     /I /Y /Q /EXCLUDE:%~n0_exclude.txt
 xcopy .\native      .\obj\native      /I /Y /Q /EXCLUDE:%~n0_exclude.txt
+xcopy .\dbg         .\obj\dbg         /I /Y /Q /EXCLUDE:%~n0_exclude.txt
 
 del /f /q "%~n0_exclude.txt"
 
@@ -106,6 +107,7 @@ copy /Y .\headers .\lua5.1     || exit /B 1
 copy /Y .\headers .\lua        || exit /B 1
 copy /Y .\headers .\lua-gui    || exit /B 1
 copy /Y .\headers .\native     || exit /B 1
+copy /Y .\headers .\dbg        || exit /B 1
 cd ..
 
 :: let's build all modules by selected compiler
@@ -258,6 +260,8 @@ exit /B 0
     %UD_BUILD_TOOL% console.build || goto fail
     cd ..\wxgui
     %UD_BUILD_TOOL% wxgui.build || goto fail
+    cd ..\dbg
+    %UD_BUILD_TOOL% dbg.build || goto fail
 
     :success
     set UD_BUILD_TOOL=

@@ -40,6 +40,13 @@
 #include <new.h> // for _set_new_handler
 #endif
 
+// Uncomment to test crash reporting facilities.
+// NOTE: on Windows 7 you should reset Fault Tolerant
+// Heap protection from time to time via the following
+// command: rundll32 fthsvc.dll,FthSysprepSpecialize
+// Otherwise some of crash tests will fail.
+// #define CRASH_TESTS
+
 // =======================================================================
 //                            Global variables
 // =======================================================================
@@ -61,14 +68,9 @@ void *StatThread::Entry()
         if(s.Cmp(wxT("1")) == 0) enabled = false;
 
     if(enabled){
-#ifndef _WIN64
-        Utils::GaRequest(wxT("/appstat/gui-x86.html"));
-#else
-    #if defined(_IA64_)
-        Utils::GaRequest(wxT("/appstat/gui-ia64.html"));
-    #else
-        Utils::GaRequest(wxT("/appstat/gui-x64.html"));
-    #endif
+        GA_REQUEST(USAGE_TRACKING);
+#if defined(OFFICIAL_RELEASE) && !defined(STABLE_RELEASE)
+        GA_REQUEST(TEST_TRACKING);
 #endif
     }
 
@@ -79,6 +81,34 @@ void *StatThread::Entry()
 //                    Application startup and shutdown
 // =======================================================================
 
+/**
+ * @brief Sets icon for system modal message boxes.
+ */
+BOOL CALLBACK DummyDlgProc(HWND hWnd,
+    UINT msg,WPARAM wParam,LPARAM lParam)
+{
+    HINSTANCE hInst;
+
+    switch(msg){
+    case WM_INITDIALOG:
+        // set icon for system modal message boxes
+        hInst = (HINSTANCE)GetModuleHandle(NULL);
+        if(hInst){
+            HICON hIcon = LoadIcon(hInst,wxT("appicon"));
+            if(hIcon) (void)SetClassLongPtr( \
+                hWnd,GCLP_HICON,(LONG_PTR)hIcon);
+        }
+        // kill our window before showing it :)
+        (void)EndDialog(hWnd,1);
+        return FALSE;
+    case WM_CLOSE:
+        // handle it too, just for safety
+        (void)EndDialog(hWnd,1);
+        return TRUE;
+    }
+    return FALSE;
+}
+
 #if !defined(__GNUC__)
 static int out_of_memory_handler(size_t n)
 {
@@ -88,7 +118,7 @@ static int out_of_memory_handler(size_t n)
         wxT("other applications and click Retry then\n")
         wxT("or click Cancel to terminate the program."),
         wxT("UltraDefrag: out of memory!"),
-        MB_RETRYCANCEL | MB_ICONHAND);
+        MB_RETRYCANCEL | MB_ICONHAND | MB_SYSTEMMODAL);
     if(choice == IDCANCEL){
         winx_flush_dbg_log(FLUSH_IN_OUT_OF_MEMORY);
         if(g_mainFrame) // remove system tray icon
@@ -110,6 +140,13 @@ bool App::OnInit()
     if(!wxApp::OnInit())
         return false;
 
+    // set icon for system modal message boxes
+    (void)DialogBox(
+        (HINSTANCE)GetModuleHandle(NULL),
+        wxT("dummy_dialog"),NULL,
+        (DLGPROC)DummyDlgProc
+    );
+
     // initialize udefrag library
     if(::udefrag_init_library() < 0){
         wxLogError(wxT("Initialization failed!"));
@@ -121,6 +158,30 @@ bool App::OnInit()
     winx_set_killer(out_of_memory_handler);
     _set_new_handler(out_of_memory_handler);
     _set_new_mode(1);
+#endif
+
+    // enable crash handling
+#ifndef STABLE_RELEASE
+    AttachDebugger();
+#endif
+
+    // uncomment to test out of memory condition
+    /*for(int i = 0; i < 1000000000; i++)
+        char *p = new char[1024];*/
+
+#ifdef CRASH_TESTS
+#ifndef _WIN64
+    wchar_t *s1 = new wchar_t[1024];
+    wcscpy(s1,wxT("hello"));
+    delete s1;
+    wcscpy(s1,wxT("world"));
+    delete s1;
+#else
+    // the code above fails to crash
+    // on Windows XP 64-bit edition
+    void *p = NULL;
+    *(char *)p = 0;
+#endif
 #endif
 
     // initialize debug log
@@ -338,7 +399,6 @@ MainFrame::MainFrame()
     // launch threads for time consuming operations
     m_btdThread = btd ? new BtdThread() : NULL;
     m_configThread = new ConfigThread();
-    m_crashInfoThread = new CrashInfoThread();
 
     wxConfigBase *cfg = wxConfigBase::Get();
     int ulevel = (int)cfg->Read(wxT("/Upgrade/Level"),1);
@@ -373,7 +433,6 @@ MainFrame::~MainFrame()
     ::SetEvent(g_synchEvent);
     delete m_btdThread;
     delete m_configThread;
-    delete m_crashInfoThread;
     delete m_jobThread;
     delete m_listThread;
 

@@ -64,6 +64,7 @@
 			<Add library="libcomctl32.a" />
 			<Add library="libwsock32.a" />
 			<Add library="libodbc32.a" />
+			<Add library="liburlmon.a" />
 			<Add directory="../lib" />
 			<Add directory="$(WXWIDGETSDIR)/lib/gcc_libmingw-X86" />
 		</Linker>

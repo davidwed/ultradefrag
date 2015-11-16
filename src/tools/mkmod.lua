@@ -101,7 +101,14 @@ function produce_sdk_makefile()
 
     f:write("ALL : \"", target_name, "\"\n\n")
     f:write("CPP_PROJ=/nologo /W3 /D \"WIN32\" /D \"NDEBUG\" /D \"_MBCS\" ")
-    f:write("/D \"USE_WINSDK\" /D \"_CRT_SECURE_NO_WARNINGS\" /GS- /Gd ")
+    f:write("/D \"USE_WINSDK\" /D \"_CRT_SECURE_NO_WARNINGS\" ")
+    if os.getenv("OFFICIAL_RELEASE") then
+        f:write("/D \"OFFICIAL_RELEASE\" ")
+    end
+    if not os.getenv("RELEASE_STAGE") then
+        f:write("/D \"STABLE_RELEASE\" ")
+    end
+    f:write("/GS- /Gd ")
     if arch == "i386" then
         f:write("/arch:SSE2 ")
     end
@@ -115,7 +122,7 @@ function produce_sdk_makefile()
     end
     f:write("/I \"$(WXWIDGETS_INC2_PATH)\" /I \"$(WXWIDGETS_INC_PATH)\" ")
     
-    -- the following check eliminates need of msvcr90.dll library
+    -- use static CRT instead of external msvcr100.dll library
     if nativedll == 0 then
         f:write("/MT ")
     end
@@ -271,11 +278,17 @@ function produce_mingw_makefile()
     f:write("WINDRES = \"\$(COMPILER_BIN)windres.exe\"\n\n")
 
     f:write("TARGET = ", outpath, target_name, "\n")
+    f:write("CFLAGS = -pipe  -Wall -g0 -O2")
     if os.getenv("BUILD_ENV") == "mingw_x64" then
-        f:write("CFLAGS = -pipe  -Wall -g0 -O2 -m64\n")
-    else
-        f:write("CFLAGS = -pipe  -Wall -g0 -O2\n")
+        f:write(" -m64")
     end
+    if os.getenv("OFFICIAL_RELEASE") then
+        f:write(" -DOFFICIAL_RELEASE")
+    end
+    if not os.getenv("RELEASE_STAGE") then
+        f:write(" -DSTABLE_RELEASE")
+    end
+    f:write("\n")
     
     f:write("RCFLAGS = \n")
     f:write("C_INCLUDE_DIRS = -I\"$(WXWIDGETS_INC2_PATH)\" -I\"$(WXWIDGETS_INC_PATH)\"\n")
