@@ -4,7 +4,11 @@
 # 
 # Translators:
 # Dmitri Arkhangelski <dmitriar@gmail.com>, 2014
-# Rafael Ferreira <rafael.f.f1@gmail.com>, 2013
+# Felipefpl, 2015
+# Felipefpl, 2015
+# Felipefpl, 2015
+# Rafael Fontenelle <rffontenelle@gmail.com>, 2013
+# Rafael Fontenelle <rffontenelle@gmail.com>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 msgid ""
@@ -12,9 +16,9 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2013-07-10 21:44+0200\n"
-"PO-Revision-Date: 2015-04-24 16:37+0000\n"
-"Last-Translator: Felipefpl <felipefpl@oi.com.br>\n"
-"Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/ultradefrag/language/pt_BR/)\n"
+"PO-Revision-Date: 2015-08-07 14:23+0000\n"
+"Last-Translator: Felipefpl\n"
+"Language-Team: Portuguese (Brazil) (http://www.transifex.com/stefanpendl/ultradefrag/language/pt_BR/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -31,7 +35,7 @@ msgstr "Um utilitário de desfragmentação de código aberto."
 
 #: about.cpp:92
 msgid "Credits and licenses are listed in the handbook."
-msgstr "Créditos e licenças estão listados no manual."
+msgstr "Os créditos e licenças estão listados no manual."
 
 #: about.cpp:95
 msgid "UltraDefrag website"
@@ -183,11 +187,11 @@ msgstr "Pelo &caminho"
 
 #: i18n.cpp:182
 msgid "By &size"
-msgstr "Pelo %tamanho"
+msgstr "Pelo &tamanho"
 
 #: i18n.cpp:183
 msgid "By &creation time"
-msgstr "Pela hora da &criação"
+msgstr "Pela &hora da criação"
 
 #: i18n.cpp:184
 msgid "By last &modification time"
@@ -231,7 +235,7 @@ msgstr "&Nunca verificar"
 
 #: i18n.cpp:198
 msgid "Check &stable releases only"
-msgstr "Verificar &só lançamento estáveis"
+msgstr "Verificar &só lançamentos estáveis"
 
 #: i18n.cpp:199
 msgid "Check &all releases"
@@ -255,7 +259,7 @@ msgstr "Abrir &log"
 
 #: i18n.cpp:206
 msgid "Send bug &report"
-msgstr "Enviar relatório de &erros"
+msgstr "Enviar relatório de &bugs"
 
 #: i18n.cpp:211
 msgid "Boot time script"
@@ -300,7 +304,7 @@ msgstr "Visualizar opções do relatório"
 
 #: i18n.cpp:270
 msgid "Powered by Lua"
-msgstr "Desenvolvido pela Lua"
+msgstr "Desenvolvido pelo Lua"
 
 #: i18n.cpp:271
 msgid "Fragments"
@@ -324,7 +328,7 @@ msgstr "trancado"
 
 #: i18n.cpp:277
 msgid "move failed"
-msgstr "mover falhou"
+msgstr "falhou em mover"
 
 #: i18n.cpp:278
 msgid "invalid"
@@ -380,7 +384,7 @@ msgstr "Você realmente quer desligar quando concluído?"
 #: shutdown.cpp:128
 #, c-format
 msgid "%lu seconds until shutdown"
-msgstr "%lu segundos até o desligar"
+msgstr "%lu segundos até o desligamento"
 
 #: shutdown.cpp:140
 msgid "&Yes"
@@ -428,7 +432,7 @@ msgstr "Ocultar"
 #: upgrade.cpp:158
 #, c-format
 msgid "Release %ls is available for download!"
-msgstr "O lançamento %ls está disponível para download!"
+msgstr "O lançamento %ls está disponível pra download!"
 
 #: upgrade.cpp:160
 msgid "You can upgrade me ^-^"
