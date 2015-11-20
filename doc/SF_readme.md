@@ -1,13 +1,3 @@
-The folder **stable-release** contains the current releases.
-
-The folder **latest-release-candidates** contains the development releases.
-
----
-
-The following folders contain old and unstable releases, which are just kept for reference:
-
-* ultradefrag
-* ultradefrag-beta
-* ultradefrag-micro-edition
-* ultradefrag-micro-edition-beta
-* old-release-candidates
+The **stable-release** folder contains stable releases ready for daily use.
+The **latest-release-candidates** folder contains the most recent beta releases.
+All the remaining stuff is old and unstable. We're keeping it just for reference.

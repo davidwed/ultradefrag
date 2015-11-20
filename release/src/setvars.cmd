@@ -4,7 +4,7 @@ echo Set common environment variables...
 :: UltraDefrag version
 set VERSION_MAJOR=6
 set VERSION_MINOR=1
-set VERSION_REVISION=0
+set VERSION_REVISION=1
 
 :: alpha1, beta2, rc3, etc.
 :: unset for the final releases
@@ -12,8 +12,8 @@ set RELEASE_STAGE=
 
 :: paths to development tools
 set WINDDKBASE=D:\WINDDK\7600.16385.1
-set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v6.1
-set MINGWBASE=D:\Software\MinGWStudio\MinGW
+set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v7.1
+set MINGWBASE=D:\Software\MinGW32
 set MINGWx64BASE=D:\Software\mingw64
 set NSISDIR=D:\Software\Tools\NSIS
 set SEVENZIP_PATH=C:\Program Files\7-Zip

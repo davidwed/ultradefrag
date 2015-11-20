@@ -18,6 +18,17 @@
 /* Save preferred language. */
 document.cookie = "language=en; path=/";
 </script>
+
+<!-- include Facebook JavaScript SDK -->
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.5";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
 <div class="content">
     <div id="top">
         <div id="icons">
@@ -27,7 +38,7 @@ document.cookie = "language=en; path=/";
             <a href="http://sourceforge.net/p/ultradefrag/news/feed" title="RSS News Feed"><img src="../images/rss.gif" alt="RSS News Feed" width="40" height="40" /></a>
         </div> 
         <h1>ULTRADEFRAG</h1>
-        <h2>An Open Source Defragmenter</h2>
+        <h2>An Open Source Disk Defragmenter</h2>
     </div>
 
     <div id="menu">
@@ -89,7 +100,7 @@ document.cookie = "language=en; path=/";
                     <li class="rss"><a href="http://sourceforge.net/api/file/index/project-id/199532/mtime/desc/rss">RSS: RELEASES</a></li>
                 </ul>
 
-                <hr />
+                <hr style="margin:2px 0 10px 0" />
 
                 <!-- donations -->
                 <p><a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=55FLGB3EJTDLS" title="Support this project" target="_blank">
