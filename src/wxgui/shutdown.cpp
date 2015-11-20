@@ -198,7 +198,7 @@ int MainFrame::ShowShutdownDialog(int action)
 
 void MainFrame::Shutdown(wxCommandEvent& WXUNUSED(event))
 {
-    int action;
+    int action = 0;
 
     if(m_menuBar->FindItem(ID_WhenDoneNone)->IsChecked()){
         // nothing to do

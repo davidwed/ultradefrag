@@ -7,6 +7,4 @@ nativedll   = 1
 includes = { "include", "udefrag", "zenwinx" }
 
 libs = { "ntdll" }
-adlibs = { 
-      "$(UDEFRAG_LIB_PATH)\\zenwinx", 
-}
+adlibs = { "$(UDEFRAG_LIB_PATH)\\zenwinx" }

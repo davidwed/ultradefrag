@@ -5,9 +5,7 @@
     beta3:
     - crash handling was reimplemented to gather more information
     - few minor bugs were fixed
-    - the following translations were updated:
-
-      xxx
+    - Portuguese (Brazil) translation was updated
 
     beta2:
     - the following translations were updated:
@@ -38,7 +36,7 @@
 
                                     ***
 
-  Version 6.1.1 2015-05-xx
+  Version 6.1.1 2015-11-20
   ------------------------------------------------------------------------------
     - graphical interface forced to check for available updates more reliably
 

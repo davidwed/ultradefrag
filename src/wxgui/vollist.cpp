@@ -125,7 +125,7 @@ void DrivesList::OnKeyDown(wxKeyEvent& event)
 void DrivesList::OnKeyUp(wxKeyEvent& event)
 {
     if(!g_mainFrame->m_busy){
-        // dtrace("Modifier: %d ... KeyCode: %d", \
+        // dtrace("Modifier: %d ... KeyCode: %d",
         //    event.GetModifiers(), event.GetKeyCode());
         switch(event.GetKeyCode()){
         case WXK_RETURN:
@@ -196,7 +196,7 @@ void MainFrame::AdjustListColumns(wxCommandEvent& event)
 
     int lastColumnWidth = width;
 
-    int border = wxSystemSettings::GetMetric(wxSYS_BORDER_X);
+    // int border = wxSystemSettings::GetMetric(wxSYS_BORDER_X);
 
     // dtrace("border width ......... %d", border);
     // dtrace("client width ......... %d", width);
