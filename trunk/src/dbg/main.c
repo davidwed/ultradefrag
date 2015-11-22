@@ -105,7 +105,7 @@ static void send_crash_report()
     today = (__int64)time(NULL);
 
     _snwprintf(tracking_path,sizeof(tracking_path) / sizeof(wchar_t),
-        L"/appstat/test/%hs/%ls/0x%X",wxUD_ABOUT_VERSION,sd->tracking_id,
+        L"/%hs/%ls/0x%x",wxUD_ABOUT_VERSION,sd->tracking_id,
         sd->exception_code
     );
 

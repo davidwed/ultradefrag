@@ -178,7 +178,7 @@ LONG WINAPI ExceptionHandler(EXCEPTION_POINTERS* ExceptionInfo)
             // send crash report
             sd->version = SHARED_DATA_VERSION;
             sd->exception_code = exception_code;
-            wcscpy(sd->tracking_id,TRACKING_ID);
+            wcscpy(sd->tracking_id,TEST_TRACKING_ID);
             sd->ready = true;
 
             // terminate process safely

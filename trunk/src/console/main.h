@@ -72,22 +72,24 @@ HRESULT WINAPI URLDownloadToCacheFileW(
 #define TEST_TRACKING_ACCOUNT_ID  wxT("UA-70148850-1")
 
 #ifndef _WIN64
-  #define TRACKING_ID wxT("console-x86")
+  #define USAGE_TRACKING_ID wxT("console-x86")
+  #define TEST_TRACKING_ID  wxT("cmd-x86")
 #else
  #if defined(_IA64_)
-  #define TRACKING_ID wxT("console-ia64")
+  #define USAGE_TRACKING_ID wxT("console-ia64")
+  #define TEST_TRACKING_ID  wxT("cmd-ia64")
  #else
-  #define TRACKING_ID wxT("console-x64")
+  #define USAGE_TRACKING_ID wxT("console-x64")
+  #define TEST_TRACKING_ID  wxT("cmd-x64")
  #endif
 #endif
 
 // append html extension to the tracking id, for historical reasons
-#define USAGE_TRACKING_PATH wxT("/appstat/") TRACKING_ID wxT(".html")
+#define USAGE_TRACKING_PATH wxT("/appstat/") USAGE_TRACKING_ID wxT(".html")
 
-// append 0x00000000 to count test runs, for reports usability sake;
-// crash cases will be listed below, so it would be easy to compare numbers
-#define TEST_TRACKING_PATH  wxT("/appstat/test/") wxT(wxUD_ABOUT_VERSION) \
-    wxT("/") TRACKING_ID wxT("/0x00000000")
+// use shorter paths to build neat test reports
+#define TEST_TRACKING_PATH  wxT("/") wxT(wxUD_ABOUT_VERSION) \
+    wxT("/") TEST_TRACKING_ID wxT("/") wxT("overall")
 
 #define GA_REQUEST(type) ga_request(type##_PATH, type##_ACCOUNT_ID)
 
