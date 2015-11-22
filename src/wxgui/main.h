@@ -127,10 +127,9 @@ HRESULT WINAPI URLDownloadToCacheFileW(
 // append html extension to the tracking id, for historical reasons
 #define USAGE_TRACKING_PATH wxT("/appstat/") TRACKING_ID wxT(".html")
 
-// append 0x00000000 to count test runs, for reports usability sake;
-// crash cases will be listed below, so it would be easy to compare numbers
-#define TEST_TRACKING_PATH  wxT("/appstat/test/") wxT(wxUD_ABOUT_VERSION) \
-    wxT("/") TRACKING_ID wxT("/0x00000000")
+// use shorter paths to build neat test reports
+#define TEST_TRACKING_PATH  wxT("/") wxT(wxUD_ABOUT_VERSION) \
+    wxT("/") TRACKING_ID wxT("/") wxT("overall")
 
 #define GA_REQUEST(type) ::Utils::GaRequest(type##_PATH, type##_ACCOUNT_ID)
 
