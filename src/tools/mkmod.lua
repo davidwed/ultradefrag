@@ -117,6 +117,11 @@ function produce_sdk_makefile()
         -- the compiler stucks with the message:
         -- error loading dll 'sched.dll': dll not found
         f:write("/Od ")
+    elseif arch == "amd64" then
+        -- optimization for x64 is not available,
+        -- because it leads to application crashes:
+        -- http://support.microsoft.com/en-us/kb/2280741
+        f:write("/Od ")
     else
         f:write("/O2 ")
     end
