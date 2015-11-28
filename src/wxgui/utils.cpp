@@ -139,7 +139,7 @@ void Utils::GaRequest(const wxString& path, const wxString& id)
  * @brief Creates a bitmap
  * from a png resource.
  */
-wxBitmap * Utils::LoadPngResource(const wchar_t *name)
+wxBitmap Utils::LoadPngResource(const wchar_t *name)
 {
     HRSRC resource = ::FindResource(NULL,name,RT_RCDATA);
     if(!resource){
@@ -166,7 +166,7 @@ wxBitmap * Utils::LoadPngResource(const wchar_t *name)
     }
 
     wxMemoryInputStream is(data,size);
-    return new wxBitmap(wxImage(is,wxBITMAP_TYPE_PNG,-1),-1);
+    return wxBitmap(wxImage(is,wxBITMAP_TYPE_PNG,-1),-1);
 }
 
 /**
