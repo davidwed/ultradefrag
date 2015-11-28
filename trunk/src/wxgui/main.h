@@ -621,7 +621,7 @@ public:
     static bool CheckAdminRights(void);
     static bool DownloadFile(const wxString& url, const wxString& path);
     static void GaRequest(const wxString& path, const wxString& id);
-    static wxBitmap *LoadPngResource(const wchar_t *name);
+    static wxBitmap LoadPngResource(const wchar_t *name);
     static int MessageDialog(wxFrame *parent,
         const wxString& caption, const wxArtID& icon,
         const wxString& text1, const wxString& text2,

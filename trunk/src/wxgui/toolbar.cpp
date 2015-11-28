@@ -43,24 +43,22 @@
 #define UD_MakeToolItem(id, icon) { \
     wxString string; \
     string.Printf(wxT("%hs%u"),#icon,g_iconSize); \
-    wxBitmap *pic = Utils::LoadPngResource(string.wc_str()); \
-    if(pic){ \
-        wxImage img = pic->ConvertToImage(); \
+    wxBitmap pic = Utils::LoadPngResource(string.wc_str()); \
+    if(pic.IsOk()){ \
+        wxImage img = pic.ConvertToImage(); \
         wxBitmap bmp(img.ConvertToGreyscale()); \
-        m_toolBar->AddTool(id,*pic,bmp); \
-        delete pic; \
+        m_toolBar->AddTool(id,pic,bmp); \
     } \
 }
 
 #define UD_MakeToolCheckItem(id, icon) { \
     wxString string; \
     string.Printf(wxT("%hs%u"),#icon,g_iconSize); \
-    wxBitmap *pic = Utils::LoadPngResource(string.wc_str()); \
-    if(pic){ \
-        wxImage img = pic->ConvertToImage(); \
+    wxBitmap pic = Utils::LoadPngResource(string.wc_str()); \
+    if(pic.IsOk()){ \
+        wxImage img = pic.ConvertToImage(); \
         wxBitmap bmp(img.ConvertToGreyscale()); \
-        m_toolBar->AddCheckTool(id,wxEmptyString,*pic,bmp); \
-        delete pic; \
+        m_toolBar->AddCheckTool(id,wxEmptyString,pic,bmp); \
     } \
 }
 

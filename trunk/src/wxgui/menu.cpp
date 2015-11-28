@@ -40,11 +40,10 @@
 #define UD_AppendRadioItem(id) AppendRadioItem(id, wxEmptyString)
 
 #define UD_SetMenuIcon(id, icon) { \
-    wxBitmap *pic; wxString string; \
+    wxString string; \
     string.Printf(wxT("%hs%u"),#icon,g_iconSize); \
-    pic = Utils::LoadPngResource(string.wc_str()); \
-    if(pic) m_menuBar->FindItem(id)->SetBitmap(*pic); \
-    delete pic; \
+    wxBitmap pic = Utils::LoadPngResource(string.wc_str()); \
+    if(pic.IsOk()) m_menuBar->FindItem(id)->SetBitmap(pic); \
 }
 
 #define UD_SetMarginWidth(menu) { \
