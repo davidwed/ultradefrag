@@ -77,7 +77,7 @@ wxMenu *SystemTrayIcon::CreatePopupMenu()
 
     menu->AppendSeparator();
 
-    item = menu->Append(ID_PauseMenu,_("Pa&use"));
+    item = menu->AppendCheckItem(ID_PauseMenu,_("Pa&use"));
     if(g_mainFrame->m_paused) item->Check(true);
 
     menu->AppendSeparator();
