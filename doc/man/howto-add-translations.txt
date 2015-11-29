@@ -1,3 +1,21 @@
+;-----------------------------------------------------------------------------
+;                             COPYRIGHT RULES
+;-----------------------------------------------------------------------------
+
+UltraDefrag follows "Information for maintainers of GNU software"
+to decide whether to assign copyright to a person or not:
+http://www.gnu.org/prep/maintain/maintain.html#Legally-Significant
+
+As language packs are pretty small, we consider to assign copyright
+to anyone who contributed around twelve lines of text. We decided,
+however, to give respect to all the remaining contributors in the
+handbook, as we believe even small improvements help us advance
+further.
+
+;-----------------------------------------------------------------------------
+;                   OLD TRANSLATIONS MAINTENANCE (FOR V6)
+;-----------------------------------------------------------------------------
+
 revising an existing translation:
  1. open language file in text editor
  2. open wiki page and select edit
@@ -29,12 +47,3 @@ new translation:
     If using Notepad++ select all and use
     "TextFX => TextFX Edit => Line up multiple lines by (=)
     to line up the translations automatically.
-
-copyright rules:
- 1. http://www.gnu.org/prep/maintain/maintain.html#Legally-Significant
- 2. since language files are quite small, we consider to assign copyright
-    to anyone who contributed more than around ten lines of text
- 3. any person contributed less than around ten lines of text deserves 
-    to be mentioned however in 'Special thanks' list of the 'Credits and 
-    License' chapter of the UltraDefrag handbook - sure, even a minor
-    improvements help us to move forward in right direction to our target

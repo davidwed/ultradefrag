@@ -2,6 +2,11 @@
 
   Version 7.0.0 2016-xx-xx
   ------------------------------------------------------------------------------
+    beta4:
+    - safer options were used for compilation
+    - Slovak translation was updated
+    - one minor bug was fixed
+    
     beta3:
     - crash handling was reimplemented to gather more information
     - few minor bugs were fixed
