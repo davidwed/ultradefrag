@@ -563,6 +563,10 @@
  * @endhtmlonly
  *
  * @latexonly
+ * % FIXME: pdfTeX inserts a page break here for the letter paper size
+ * @endlatexonly 
+ *
+ * @latexonly
  * \setlength\LTleft{1.25em}\setlength\LTright{\fill}\begin{longtable}{lcp{0.6\linewidth}}
  * • Justin Dearing     & - & The initial version of this handbook and other documentation files. \\
  *                      &   & UltraDefrag Scheduler .NET application. \\

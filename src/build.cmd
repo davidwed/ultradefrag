@@ -127,12 +127,11 @@ rem Synopsis: call :build_readme_file {path to the file}
 rem Example:  call :build_readme_file .
 :build_readme_file
     echo ------------------------------------------------------------------------------- > %1
-    echo UltraDefrag %ULTRADFGVER% - an open source disk defragmenter for Windows. >> %1
+    echo       UltraDefrag %ULTRADFGVER% - an open source disk defragmenter for Windows >> %1
     echo ------------------------------------------------------------------------------- >> %1
     echo. >> %1
-    echo The complete information about the program can be found in UltraDefrag >> %1
-    echo Handbook. You should have received it along with this program; if not, >> %1
-    echo go to: >> %1
+    echo Complete information about the program can be found in UltraDefrag Handbook. >> %1
+    echo You should have received it along with this program; if not, go to: >> %1
     echo. >> %1
     echo   http://ultradefrag.sourceforge.net/handbook/ >> %1
     echo. >> %1
