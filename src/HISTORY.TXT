@@ -4,6 +4,7 @@
   ------------------------------------------------------------------------------
     beta5:
     - wxWidgets upgraded to the latest stable 3.0.2 release
+    - Finnish translation was updated
     - NOTE: the language selection got broken, because wxWidgets 3.0.2
       uses different language identifiers; just click Settings > Language
       and select yours once again to fix that
