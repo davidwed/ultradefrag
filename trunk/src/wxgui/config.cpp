@@ -130,6 +130,7 @@ void MainFrame::SaveAppConfiguration()
     }
 
     cfg->Write(wxT("/Language/Selected"),(long)g_locale->GetLanguage());
+    cfg->Write(wxT("/Language/Version"),wxVERSION_NUM_DOT_STRING);
 
     cfg->Write(wxT("/Algorithm/RepeatAction"),m_repeat);
     cfg->Write(wxT("/Algorithm/SkipRemovableMedia"),m_skipRem);
@@ -207,7 +208,7 @@ void MainFrame::ReadUserPreferences(wxCommandEvent& WXUNUSED(event))
     path.Normalize();
     if(!path.FileExists()){
         etrace("%ls file not found",
-            path.GetFullPath().wc_str());
+            ws(path.GetFullPath()));
         goto done;
     }
 
@@ -222,10 +223,10 @@ void MainFrame::ReadUserPreferences(wxCommandEvent& WXUNUSED(event))
     luaL_openlibs(L);
     lua_gc(L,LUA_GCRESTART,0);
 
-    status = luaL_dofile(L,path.GetFullPath().char_str());
+    status = luaL_dofile(L,ansi(path.GetFullPath()));
     if(status != 0){
         error += wxT("cannot interprete ") + path.GetFullPath();
-        etrace("%ls",error.wc_str());
+        etrace("%ls",ws(error));
         if(!lua_isnil(L,-1)){
             const char *msg = lua_tostring(L,-1);
             if(!msg) msg = "(error object is not a string)";
@@ -279,8 +280,6 @@ int MainFrame::CheckOption(const wxString& name)
     }
     return 0;
 }
-
-#undef UD_AdjustOption
 
 // =======================================================================
 //                      User preferences tracking

@@ -123,7 +123,7 @@ void MainFrame::SetTaskbarIconOverlay(const wxString& icon, const wxString& text
         wxIcon i(icon,wxBITMAP_TYPE_ICO_RESOURCE,g_iconSize,g_iconSize);
         HRESULT result = taskBar->SetOverlayIcon(
             (HWND)g_mainFrame->GetHandle(),
-            (HICON)i.GetHICON(),text.wc_str()
+            (HICON)i.GetHICON(),ws(text)
         );
         if(!SUCCEEDED(result))
             etrace("failed with code 0x%x",(UINT)result);

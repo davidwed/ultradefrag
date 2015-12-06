@@ -38,19 +38,23 @@
 
 #define HOMEPAGE wxT("http://ultradefrag.sourceforge.net")
 
-class HomePageLink: public wxHyperlinkCtrl {
+class HomePageLink: public wxGenericHyperlinkCtrl {
 public:
     HomePageLink(wxWindow* parent,const wxString& title,const wxString& url)
-      : wxHyperlinkCtrl(parent,wxID_ANY,title,url) {}
+      : wxGenericHyperlinkCtrl(parent,wxID_ANY,title,url) {
+            // use custom paint handler to get rid of annoying border
+            Connect(wxEVT_PAINT,wxPaintEventHandler(HomePageLink::OnPaint));
+        }
     ~HomePageLink() {}
 
     void OnKeyUp(wxKeyEvent& event);
+    void OnPaint(wxPaintEvent& event);
 
 private:
     DECLARE_EVENT_TABLE()
 };
 
-BEGIN_EVENT_TABLE(HomePageLink, wxHyperlinkCtrl)
+BEGIN_EVENT_TABLE(HomePageLink, wxGenericHyperlinkCtrl)
     EVT_KEY_UP(HomePageLink::OnKeyUp)
 END_EVENT_TABLE()
 
@@ -70,6 +74,18 @@ void HomePageLink::OnKeyUp(wxKeyEvent& event)
         return;
     }
     event.Skip();
+}
+
+// copied from %WXWIDGETSDIR%\src\generic\hyperlinkg.cpp
+void HomePageLink::OnPaint(wxPaintEvent& WXUNUSED(event))
+{
+    wxPaintDC dc(this);
+    dc.SetFont(GetFont());
+    dc.SetTextForeground(GetForegroundColour());
+    dc.SetTextBackground(GetBackgroundColour());
+
+    dc.DrawText(GetLabel(), GetLabelRect().GetTopLeft());
+    // draw no border around even when the link has focus
 }
 
 void MainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
@@ -101,6 +117,8 @@ void MainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
             etrace("Padauk font needed for correct Burmese text display not found");
         } else {
             textFont.SetPointSize(textFont.GetPointSize() + 2);
+            version->SetFont(textFont);
+            copyright->SetFont(textFont);
             description->SetFont(textFont);
             credits->SetFont(textFont);
             homepage->SetFont(textFont);

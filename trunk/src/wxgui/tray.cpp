@@ -65,21 +65,20 @@ END_EVENT_TABLE()
 wxMenu *SystemTrayIcon::CreatePopupMenu()
 {
     wxMenu *menu = new wxMenu;
-    wxMenuItem *item;
-    if(g_mainFrame->IsIconized()){
-        item = menu->Append(ID_ShowHideMenu,_("Show"));
-    } else {
-        item = menu->Append(ID_ShowHideMenu,_("Hide"));
-    }
-    wxFont font = item->GetFont();
-    font.SetWeight(wxFONTWEIGHT_BOLD);
-    item->SetFont(font);
 
+    wxMenuItem *item = new wxMenuItem(NULL,ID_ShowHideMenu,
+        g_mainFrame->IsIconized() ? _("Show") : _("Hide"));
+
+    // somehow in wxWidgets 3.0 item->GetFont() fails
+    wxFont font = wxSystemSettings::GetFont(wxSYS_DEFAULT_GUI_FONT);
+    font.MakeBold(); dtrace("%ls",ws(font.GetNativeFontInfoDesc()));
+
+    item->SetFont(font);
+    menu->Append(item);
     menu->AppendSeparator();
 
     item = menu->AppendCheckItem(ID_PauseMenu,_("Pa&use"));
     if(g_mainFrame->m_paused) item->Check(true);
-
     menu->AppendSeparator();
 
     menu->Append(ID_ExitMenu,_("E&xit"));

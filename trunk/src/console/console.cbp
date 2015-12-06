@@ -46,7 +46,7 @@
 			<Add library="libzenwinx.dll.a" />
 			<Add library="libudefrag.dll.a" />
 			<Add library="liblua5.1a.a" />
-			<Add library="libwxbase28u.a" />
+			<Add library="libwxbase30u.a" />
 			<Add library="libkernel32.a" />
 			<Add library="libuser32.a" />
 			<Add library="libadvapi32.a" />

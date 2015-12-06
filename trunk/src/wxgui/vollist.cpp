@@ -421,11 +421,13 @@ void MainFrame::PopulateList(wxCommandEvent& event)
     m_vList->DeleteAllItems();
 
     for(int i = 0; v[i].letter; i++){
+        wxString s = wxString::Format(
+            wxT("%c: [%hs]"),v[i].letter,
+            v[i].fsname
+        );
         wxString label;
         label.Printf(wxT("%-10ls %ls"),
-            wxString::Format(wxT("%c: [%hs]"),
-            v[i].letter,v[i].fsname).wc_str(),
-            v[i].label);
+            ws(s),v[i].label);
         m_vList->InsertItem(i,label);
 
         wxCommandEvent e(wxEVT_COMMAND_MENU_SELECTED,ID_UpdateVolumeInformation);

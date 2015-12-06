@@ -43,18 +43,18 @@
 #define UD_MakeToolItem(id, icon) { \
     wxString string; \
     string.Printf(wxT("%hs%u"),#icon,g_iconSize); \
-    wxBitmap pic = Utils::LoadPngResource(string.wc_str()); \
+    wxBitmap pic = Utils::LoadPngResource(ws(string)); \
     if(pic.IsOk()){ \
         wxImage img = pic.ConvertToImage(); \
         wxBitmap bmp(img.ConvertToGreyscale()); \
-        m_toolBar->AddTool(id,pic,bmp); \
+        m_toolBar->AddTool(id,wxEmptyString,pic,bmp); \
     } \
 }
 
 #define UD_MakeToolCheckItem(id, icon) { \
     wxString string; \
     string.Printf(wxT("%hs%u"),#icon,g_iconSize); \
-    wxBitmap pic = Utils::LoadPngResource(string.wc_str()); \
+    wxBitmap pic = Utils::LoadPngResource(ws(string)); \
     if(pic.IsOk()){ \
         wxImage img = pic.ConvertToImage(); \
         wxBitmap bmp(img.ConvertToGreyscale()); \
@@ -93,8 +93,5 @@ void MainFrame::InitToolbar()
     // initial settings (must be after realize)
     m_toolBar->ToggleTool(ID_Repeat,m_repeat);
 }
-
-#undef UD_MakeToolItem
-#undef UD_MakeToolCheckItem
 
 /** @} */

@@ -3,7 +3,7 @@
 ::
 :: This script builds all binaries for UltraDefrag project
 :: for all of the supported target platforms.
-:: Copyright (c) 2007-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
 :: Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
@@ -226,7 +226,7 @@ exit /B 0
         set WXWIDGETS_LIB_PATH=%WXWIDGETSDIR%\lib\vc_lib%WX_CONFIG%
     )
     if %BUILD_ENV% equ winsdk if %1 equ amd64 (
-        set WXWIDGETS_LIB_PATH=%WXWIDGETSDIR%\lib\vc_amd64_lib%WX_CONFIG%
+        set WXWIDGETS_LIB_PATH=%WXWIDGETSDIR%\lib\vc_x64_lib%WX_CONFIG%
     )
     if %BUILD_ENV% equ winsdk if %1 equ ia64 (
         set WXWIDGETS_LIB_PATH=%WXWIDGETSDIR%\lib\vc_ia64_lib%WX_CONFIG%
@@ -262,14 +262,21 @@ exit /B 0
     %UD_BUILD_TOOL% wxgui.build || goto fail
     cd ..\dbg
     %UD_BUILD_TOOL% dbg.build || goto fail
+    popd
 
+    :: compress gui and command line tools for
+    :: a bit faster startup on older machines
+    if %1 equ X86 (
+        upx -q -9 .\bin\udefrag.exe
+        upx -q -9 .\bin\ultradefrag.exe
+    )
+    
     :success
     set UD_BUILD_TOOL=
     set WX_CONFIG=
     set WXWIDGETS_INC_PATH=
     set WXWIDGETS_INC2_PATH=
     set WXWIDGETS_LIB_PATH=
-    popd
     exit /B 0
 
     :fail

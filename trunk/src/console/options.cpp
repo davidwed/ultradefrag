@@ -269,10 +269,10 @@ bool parse_cmdline(int argc, char **argv)
     g_volumes = new wxArrayString(); g_paths = new wxArrayString();
     for(int i = 1; i < (int)opts.GetCount(); i++){
         opts[i].Replace(wxT("\\\\"),wxT("\\"));
-        //printf("%ls\n",opts[i].wc_str());
+        //printf("%ls\n",ws(opts[i]));
         if(opts[i].IsEmpty()) continue;
-        if(opts[i][0] == '-') continue;
-        if(opts[i].Len() == 2 && opts[i][1] == ':'){
+        if((char)opts[i][0] == '-') continue;
+        if(opts[i].Len() == 2 && (char)opts[i][1] == ':'){
             g_volumes->Add(opts[i]);
         } else {
             wxFileName path(opts[i]);
@@ -284,9 +284,9 @@ bool parse_cmdline(int argc, char **argv)
     }
 
     /*for(int i = 0; i < g_volumes->GetCount(); i++)
-        printf("%ls\n",(*g_volumes)[i].wc_str());
+        printf("%ls\n",ws((*g_volumes)[i]));
     for(int i = 0; i < g_paths->GetCount(); i++)
-        printf("%ls\n",(*g_paths)[i].wc_str());
+        printf("%ls\n",ws((*g_paths)[i]));
     */
 
     if(!g_list_volumes && !g_all && !g_all_fixed){
@@ -373,7 +373,7 @@ bool set_shellex_options(void)
     path.Normalize();
     if(!path.FileExists()){
         etrace("%ls file not found",
-            path.GetFullPath().wc_str());
+            ws(path.GetFullPath()));
         return true;
     }
 
@@ -391,12 +391,12 @@ bool set_shellex_options(void)
 
     lua_pushnumber(L,1);
     lua_setglobal(L,"shellex_flag");
-    int status = luaL_dofile(L,path.GetFullPath().char_str());
+    int status = luaL_dofile(L,ansi(path.GetFullPath()));
     if(status != 0){
         etrace("cannot interprete %ls",
-            path.GetFullPath().wc_str());
+            ws(path.GetFullPath()));
         fprintf(stderr,"Cannot interprete %ls!\n",
-            path.GetFullPath().wc_str());
+            ws(path.GetFullPath()));
         if(!lua_isnil(L,-1)){
             const char *msg = lua_tostring(L,-1);
             if(!msg) msg = "(error object is not a string)";

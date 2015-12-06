@@ -80,12 +80,12 @@ void *UpgradeThread::Entry()
                 wxTextFile file; file.Open(path);
                 wxString lv = file.GetFirstLine();
                 lv.Trim(true); lv.Trim(false);
-                int last = ParseVersionString(lv.char_str());
+                int last = ParseVersionString(ansi(lv));
 
                 const char *cv = VERSIONINTITLE;
                 int current = ParseVersionString(&cv[12]);
 
-                itrace("latest version : %ls",lv.wc_str());
+                itrace("latest version : %hs",ansi(lv));
                 itrace("current version: %hs",&cv[12]);
 
                 if(last && current && last > current){
@@ -173,14 +173,14 @@ void MainFrame::ShowUpgradeDialog(wxCommandEvent& event)
     wxString message = wxString();
     //: This expands to "Release 7.0.0 is available for download!"
     //: Make sure that "%ls" is included in the translated string at the correct position
-    message.Printf(_("Release %ls is available for download!"),event.GetString().wc_str());
+    message.Printf(_("Release %ls is available for download!"),ws(event.GetString()));
 
     if(Utils::MessageDialog(this,_("You can upgrade me ^-^"),
       wxART_INFORMATION,_("&Upgrade"),_("&Cancel"),message) == wxID_OK)
     {
         wxString url(wxT("http://ultradefrag.sourceforge.net"));
         if(!wxLaunchDefaultBrowser(url))
-            Utils::ShowError(wxT("Cannot open %ls!"),url.wc_str());
+            Utils::ShowError(wxT("Cannot open %ls!"),ws(url));
     }
 }
 
