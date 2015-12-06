@@ -122,7 +122,7 @@ void clear_line(void)
  * cannot be converted become replaced by question
  * marks.
  */
-void print_unicode(wchar_t *string)
+void print_unicode(const wchar_t *string)
 {
     int old_cp = GetConsoleOutputCP();
 
@@ -137,7 +137,7 @@ void print_unicode(wchar_t *string)
             if(!GetConsoleMode(g_out,&mode)){
                 if(GetLastError() == ERROR_INVALID_HANDLE){
                     wxString s(string);
-                    printf("%s",s.utf8_str().data());
+                    printf("%s",(const char *)s.utf8_str().data());
                     return;
                 } else {
                     letrace("GetConsoleMode failed");
@@ -145,7 +145,7 @@ void print_unicode(wchar_t *string)
             }
         } else {
             wxString s(string);
-            printf("%s",s.utf8_str().data());
+            printf("%s",(const char *)s.utf8_str().data());
             return;
         }
     }
@@ -168,7 +168,7 @@ void print_unicode(wchar_t *string)
                         letrace("SetConsoleOutputCP failed");
                     } else {
                         wxString s(string);
-                        printf("%s",s.utf8_str().data());
+                        printf("%s",(const char *)s.utf8_str().data());
                         SetConsoleOutputCP(old_cp);
                         return;
                     }
@@ -211,11 +211,11 @@ void ga_request(const wxString& path, const wxString& id)
         wxT("(referral)%%7Cutmcmd%%3Dreferral%%7Cutmcct%%3D%%2F%%3B"),
         cookie,random,today,today,today,cookie,today);
 
-    itrace("downloading %ls",url.wc_str());
+    itrace("downloading %ls",ws(url));
 
     wchar_t file[MAX_PATH + 1]; file[MAX_PATH] = 0;
     HRESULT result = ::URLDownloadToCacheFileW(
-        NULL,url.wc_str(),file,MAX_PATH,0,NULL);
+        NULL,ws(url),file,MAX_PATH,0,NULL);
     if(result != S_OK){
         etrace("URLDownloadToCacheFile failed "
                "with code 0x%x",(UINT)result);

@@ -303,21 +303,28 @@ MainFrame::MainFrame()
     m_paused = false;
 
     // set main window icon
-    SetIcons(wxICON(appicon));
+    wxIconBundle icons;
+    int sizes[] = {16,20,22,24,26,32,40,48,64};
+    for(int i = 0; i < sizeof(sizes) / sizeof(int); i++){
+        icons.AddIcon(wxIcon(wxT("appicon"),
+            wxBITMAP_TYPE_ICO_RESOURCE,
+            sizes[i],sizes[i])
+        );
+    }
+    SetIcons(icons);
 
     // read configuration
     ReadAppConfiguration();
     ProcessCommandEvent(ID_ReadUserPreferences);
 
     // set main window title
-    wxString *instdir = new wxString();
-    if(wxGetEnv(wxT("UD_INSTALL_DIR"),instdir)){
-        wxStandardPaths stdpaths;
-        wxFileName exepath(stdpaths.GetExecutablePath());
-        wxString cd = exepath.GetPath();
-        itrace("current directory: %ls",cd.wc_str());
-        itrace("installation directory: %ls",instdir->wc_str());
-        if(cd.CmpNoCase(*instdir) == 0){
+    wxString instdir;
+    if(wxGetEnv(wxT("UD_INSTALL_DIR"),&instdir)){
+        wxFileName path(wxGetCwd()); path.Normalize();
+        wxString cd = path.GetFullPath();
+        itrace("current directory: %ls",ws(cd));
+        itrace("installation directory: %ls",ws(instdir));
+        if(cd.CmpNoCase(instdir) == 0){
             itrace("current directory matches "
                 "installation location, so it isn't portable");
             m_title = new wxString(wxT(VERSIONINTITLE));
@@ -330,7 +337,6 @@ MainFrame::MainFrame()
         m_title = new wxString(wxT(VERSIONINTITLE_PORTABLE));
     }
     ProcessCommandEvent(ID_SetWindowTitle);
-    delete instdir;
 
     // set main window size and position
     SetSize(m_width,m_height);

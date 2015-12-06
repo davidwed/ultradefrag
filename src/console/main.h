@@ -40,12 +40,6 @@
 
 #include <conio.h>
 
-#if wxUSE_UNICODE
-#define wxCharStringFmtSpec "%ls"
-#else
-#define wxCharStringFmtSpec "%hs"
-#endif
-
 #if defined(__GNUC__)
 extern "C" {
 HRESULT WINAPI URLDownloadToCacheFileW(
@@ -97,6 +91,14 @@ HRESULT WINAPI URLDownloadToCacheFileW(
 //                          Macro definitions
 // =======================================================================
 
+/*
+* Convert wxString to formats acceptable by vararg functions.
+* NOTE: Use it to pass strings to functions only as returned
+* objects may be temporary!
+*/
+#define ansi(s) ((const char *)s.mb_str())
+#define ws(s) ((const wchar_t *)s.wc_str())
+
 /* sets text color only if -b option is not set */
 #define color(c) { if(!g_use_default_colors) (void)SetConsoleTextAttribute(g_out,c); }
 
@@ -115,8 +117,7 @@ public:
     Log()  { delete SetActiveTarget(this); };
     ~Log() { SetActiveTarget(NULL); };
 
-    virtual void DoLog(wxLogLevel level,
-        const wxChar *msg,time_t timestamp);
+    virtual void DoLogTextAtLevel(wxLogLevel level, const wxString& msg);
 };
 
 bool check_admin_rights(void);
@@ -126,7 +127,7 @@ void init_map(char letter);
 void redraw_map(udefrag_progress_info *pi);
 void destroy_map(void);
 void clear_line(void);
-void print_unicode(wchar_t *string);
+void print_unicode(const wchar_t *string);
 void ga_request(const wxString& path, const wxString& id);
 
 void attach_debugger(void);

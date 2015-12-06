@@ -1,7 +1,7 @@
 @echo off
 ::
 :: Build script for wxWidgets library.
-:: Copyright (c) 2007-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
 :: Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
@@ -36,6 +36,9 @@ if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%U
 
 :: configure wxWidgets
 copy /Y .\tools\patch\wx\setup.h "%WXWIDGETSDIR%\include\wx\msw\setup.h"
+
+:: patch wxWidgets
+copy /Y .\tools\patch\wx\debughlp.h "%WXWIDGETSDIR%\include\wx\msw\debughlp.h"
 
 :: build wxWidgets
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
@@ -134,6 +137,15 @@ exit /B 1
 :build_library
     set WX_CONFIG=%BUILD_ENV%-%1
 
+    set WX_OPTIONS=BUILD=release UNICODE=1
+
+    :: speed compilation up
+    set WX_OPTIONS=%WX_OPTIONS% USE_HTML=0 USE_WEBVIEW=0
+    set WX_OPTIONS=%WX_OPTIONS% USE_MEDIA=0 USE_XRC=0
+    set WX_OPTIONS=%WX_OPTIONS% USE_AUI=0 USE_RIBBON=0
+    set WX_OPTIONS=%WX_OPTIONS% USE_PROPGRID=0 USE_RICHTEXT=0
+    set WX_OPTIONS=%WX_OPTIONS% USE_STC=0 USE_OPENGL=0 USE_CAIRO=0
+    
     echo.
     echo wxWidgets compilation started...
     echo.
@@ -147,41 +159,46 @@ exit /B 1
     if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 goto cleanup
     
     set WX_SDK_LIBPATH=%WXWIDGETSDIR%\lib\vc_lib%WX_CONFIG%
-    if %1 equ amd64 set WX_SDK_LIBPATH=%WXWIDGETSDIR%\lib\vc_amd64_lib%WX_CONFIG%
+    if %1 equ amd64 set WX_SDK_LIBPATH=%WXWIDGETSDIR%\lib\vc_x64_lib%WX_CONFIG%
     if %1 equ ia64 set WX_SDK_LIBPATH=%WXWIDGETSDIR%\lib\vc_ia64_lib%WX_CONFIG%
     
     :: ia64 targeting SDK compiler doesn't support optimization
     if %1 equ ia64 set WX_SDK_CPPFLAGS=/Od
     
+    :: x64 optimization leads to crashes
+    :: http://support.microsoft.com/en-us/kb/2280741
+    if %1 equ amd64 set WX_SDK_CPPFLAGS=/Od
+    
     if %BUILD_ENV% equ winsdk (
         copy /Y "%WXWIDGETSDIR%\include\wx\msw\setup.h" "%WX_SDK_LIBPATH%\mswu\wx\"
-        nmake -f makefile.vc TARGET_CPU=%1 BUILD=release UNICODE=1 CFG=%WX_CONFIG% CPPFLAGS="%WX_SDK_CPPFLAGS% /MT" || goto build_failure
+        nmake -f makefile.vc TARGET_CPU=%1 %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS="%WX_SDK_CPPFLAGS% /MT" || goto build_failure
     )
     if %BUILD_ENV% equ mingw (
         copy /Y "%WXWIDGETSDIR%\include\wx\msw\setup.h" "%WXWIDGETSDIR%\lib\gcc_lib%WX_CONFIG%\mswu\wx\"
-        mingw32-make -f makefile.gcc BUILD=release UNICODE=1 CFG=%WX_CONFIG% CPPFLAGS=-g0 || goto build_failure
+        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS=-g0 || goto build_failure
     )
     if %BUILD_ENV% equ mingw_x64 (
         copy /Y "%WXWIDGETSDIR%\include\wx\msw\setup.h" "%WXWIDGETSDIR%\lib\gcc_lib%WX_CONFIG%\mswu\wx\"
-        mingw32-make -f makefile.gcc BUILD=release UNICODE=1 CFG=%WX_CONFIG% CPPFLAGS="-g0 -m64" || goto build_failure
+        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS="-g0 -m64" || goto build_failure
     )
     goto success
     
     :cleanup
     if %BUILD_ENV% equ winsdk (
-        nmake -f makefile.vc TARGET_CPU=%1 BUILD=release UNICODE=1 CFG=%WX_CONFIG% clean || goto build_failure
+        nmake -f makefile.vc TARGET_CPU=%1 %WX_OPTIONS% CFG=%WX_CONFIG% clean || goto build_failure
     )
     if %BUILD_ENV% equ mingw (
-        mingw32-make -f makefile.gcc BUILD=release UNICODE=1 CFG=%WX_CONFIG% clean || goto build_failure
+        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% clean || goto build_failure
     )
     if %BUILD_ENV% equ mingw_x64 (
-        mingw32-make -f makefile.gcc BUILD=release UNICODE=1 CFG=%WX_CONFIG% clean || goto build_failure
+        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% clean || goto build_failure
     )
     goto success
     
     :build_failure
     popd
     set WX_CONFIG=
+    set WX_OPTIONS=
     set WX_SDK_CPPFLAGS=
     set WX_SDK_LIBPATH=
     exit /B 1
@@ -192,6 +209,7 @@ exit /B 1
     echo wxWidgets compilation completed successfully!
 
     set WX_CONFIG=
+    set WX_OPTIONS=
     set WX_SDK_CPPFLAGS=
     set WX_SDK_LIBPATH=
 exit /B 0

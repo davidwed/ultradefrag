@@ -43,9 +43,10 @@
     ::SendMessage((HWND)GetStatusBar()->GetHandle(),SB_SETICON,index,(LPARAM)icon->GetHICON()); \
 }
 
+// FIXME: in wxWidgets 3.0.2 the status text isn't centered vertically
 #define UD_SetStatusText(index,text,counter) { \
     wxString t = text; \
-    SetStatusText(wxString::Format(wxT("%lu %ls"),counter,t.wc_str()), index); \
+    SetStatusText(wxString::Format(wxT("%lu %ls"),counter,ws(t)), index); \
 }
 
 // =======================================================================
@@ -97,8 +98,5 @@ void MainFrame::UpdateStatusBar(wxCommandEvent& event)
     char s[32]; winx_bytes_to_hr(mft_size,2,s,sizeof(s));
     SetStatusText(wxString::Format(wxT("%hs MFT"),s), 4);
 }
-
-#undef UD_SetStatusIcon
-#undef UD_SetStatusText
 
 /** @} */

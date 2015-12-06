@@ -36,21 +36,33 @@
 
 #include "main.h"
 
-#define UD_AppendCheckItem(id) AppendCheckItem(id, wxEmptyString)
-#define UD_AppendRadioItem(id) AppendRadioItem(id, wxEmptyString)
+/*
+* wxWidgets raises a lot of "assert failure"
+* messages if wxEmptyString is used instead
+*/
+#define EmptyLabel wxT(" ")
 
-#define UD_SetMenuIcon(id, icon) { \
-    wxString string; \
-    string.Printf(wxT("%hs%u"),#icon,g_iconSize); \
-    wxBitmap pic = Utils::LoadPngResource(string.wc_str()); \
-    if(pic.IsOk()) m_menuBar->FindItem(id)->SetBitmap(pic); \
+#define UD_AppendItem(menu,id,icon) { \
+    wxMenuItem *item = new wxMenuItem(NULL,id,EmptyLabel); \
+    wxString s(icon); \
+    if(!s.IsEmpty() && CheckOption(wxT("UD_SHOW_MENU_ICONS"))){ \
+        s << wxString::Format("%u",g_iconSize); \
+        wxBitmap pic = Utils::LoadPngResource(ws(s)); \
+        if(pic.IsOk()) item->SetBitmap(pic); \
+    } \
+    menu->Append(item); \
 }
 
+#define UD_AppendCheckItem(menu,id) menu->AppendCheckItem(id,EmptyLabel)
+#define UD_AppendRadioItem(menu,id) menu->AppendRadioItem(id,EmptyLabel)
+#define UD_AppendSeparator(menu)    menu->AppendSeparator();
+
+// FIXME: on Windows 7 menu icons ain't centered
 #define UD_SetMarginWidth(menu) { \
     wxMenuItemList list = menu->GetMenuItems(); \
     size_t count = list.GetCount(); \
     for(size_t i = 0; i < count; i++) \
-        list.Item(i)->GetData()->SetMarginWidth(g_iconSize); \
+        list.Item(i)->GetData()->SetMarginWidth(g_iconSize + DPI(4)); \
 }
 
 // =======================================================================
@@ -64,55 +76,58 @@ void MainFrame::InitMenu()
 {
     // create when done menu
     wxMenu *menuWhenDone = new wxMenu;
-    menuWhenDone->UD_AppendRadioItem(ID_WhenDoneNone);
-    menuWhenDone->UD_AppendRadioItem(ID_WhenDoneExit);
-    menuWhenDone->UD_AppendRadioItem(ID_WhenDoneStandby);
-    menuWhenDone->UD_AppendRadioItem(ID_WhenDoneHibernate);
-    menuWhenDone->UD_AppendRadioItem(ID_WhenDoneLogoff);
-    menuWhenDone->UD_AppendRadioItem(ID_WhenDoneReboot);
-    menuWhenDone->UD_AppendRadioItem(ID_WhenDoneShutdown);
+    UD_AppendRadioItem(menuWhenDone, ID_WhenDoneNone);
+    UD_AppendRadioItem(menuWhenDone, ID_WhenDoneExit);
+    UD_AppendRadioItem(menuWhenDone, ID_WhenDoneStandby);
+    UD_AppendRadioItem(menuWhenDone, ID_WhenDoneHibernate);
+    UD_AppendRadioItem(menuWhenDone, ID_WhenDoneLogoff);
+    UD_AppendRadioItem(menuWhenDone, ID_WhenDoneReboot);
+    UD_AppendRadioItem(menuWhenDone, ID_WhenDoneShutdown);
 
     // create action menu
     wxMenu *m_menuAction = new wxMenu;
-    m_menuAction->Append(ID_Analyze);
-    m_menuAction->Append(ID_Defrag);
-    m_menuAction->Append(ID_QuickOpt);
-    m_menuAction->Append(ID_FullOpt);
-    m_menuAction->Append(ID_MftOpt);
-    m_menuAction->UD_AppendCheckItem(ID_Pause);
-    m_menuAction->Append(ID_Stop);
-    m_menuAction->AppendSeparator();
-    m_menuAction->UD_AppendCheckItem(ID_Repeat);
-    m_menuAction->AppendSeparator();
-    m_menuAction->Append(ID_ShowReport);
-    m_menuAction->AppendSeparator();
-    m_menuAction->UD_AppendCheckItem(ID_SkipRem);
-    m_menuAction->Append(ID_Rescan);
-    m_menuAction->AppendSeparator();
-    m_menuAction->Append(ID_Repair);
-    m_menuAction->AppendSeparator();
-    m_subMenuWhenDone = \
-        m_menuAction->AppendSubMenu(
-            menuWhenDone, wxEmptyString
-        );
-    m_menuAction->AppendSeparator();
-    m_menuAction->Append(ID_Exit);
+    UD_AppendItem(m_menuAction,      ID_Analyze,    wxT("glass") );
+    UD_AppendItem(m_menuAction,      ID_Defrag,     wxT("defrag"));
+    UD_AppendItem(m_menuAction,      ID_QuickOpt,   wxT("quick") );
+    UD_AppendItem(m_menuAction,      ID_FullOpt,    wxT("full")  );
+    UD_AppendItem(m_menuAction,      ID_MftOpt,     wxT("mft")   );
+    UD_AppendCheckItem(m_menuAction, ID_Pause                    );
+    UD_AppendItem(m_menuAction,      ID_Stop,       wxT("stop")  );
+    UD_AppendSeparator(m_menuAction);
+
+    UD_AppendCheckItem(m_menuAction, ID_Repeat                   );
+    UD_AppendSeparator(m_menuAction);
+
+    UD_AppendItem(m_menuAction,      ID_ShowReport, wxT("report"));
+    UD_AppendSeparator(m_menuAction);
+
+    UD_AppendCheckItem(m_menuAction, ID_SkipRem                  );
+    UD_AppendItem(m_menuAction,      ID_Rescan,     wxEmptyString);
+    UD_AppendSeparator(m_menuAction);
+
+    UD_AppendItem(m_menuAction,      ID_Repair,     wxEmptyString);
+    UD_AppendSeparator(m_menuAction);
+
+    m_subMenuWhenDone = m_menuAction->AppendSubMenu(menuWhenDone, EmptyLabel);
+    UD_AppendSeparator(m_menuAction);
+
+    UD_AppendItem(m_menuAction,      ID_Exit,       wxEmptyString);
 
     // create language menu
     m_menuLanguage = new wxMenu;
-    m_menuLanguage->Append(ID_LangTranslateOnline);
-    m_menuLanguage->Append(ID_LangTranslateOffline);
-    m_menuLanguage->Append(ID_LangOpenFolder);
-    m_menuLanguage->AppendSeparator();
+    UD_AppendItem(m_menuLanguage, ID_LangTranslateOnline,  wxEmptyString);
+    UD_AppendItem(m_menuLanguage, ID_LangTranslateOffline, wxEmptyString);
+    UD_AppendItem(m_menuLanguage, ID_LangOpenFolder,       wxEmptyString);
+    UD_AppendSeparator(m_menuLanguage);
 
     wxString AppLocaleDir(wxGetCwd());
     AppLocaleDir.Append(wxT("/locale"));
     if(!wxDirExists(AppLocaleDir)){
-        itrace("lang dir not found: %ls",AppLocaleDir.wc_str());
+        itrace("lang dir not found: %ls",ws(AppLocaleDir));
         AppLocaleDir = wxGetCwd() + wxT("/../wxgui/locale");
     }
     if(!wxDirExists(AppLocaleDir)){
-        etrace("lang dir not found: %ls",AppLocaleDir.wc_str());
+        etrace("lang dir not found: %ls",ws(AppLocaleDir));
         AppLocaleDir = wxGetCwd() + wxT("/../../wxgui/locale");
     }
 
@@ -120,7 +135,7 @@ void MainFrame::InitMenu()
     const wxLanguageInfo *info;
 
     if(!dir.IsOpened()){
-        etrace("can't open lang dir: %ls",AppLocaleDir.wc_str());
+        etrace("can't open lang dir: %ls",ws(AppLocaleDir));
         info = g_locale->FindLanguageInfo(wxT("en_US"));
         m_menuLanguage->AppendRadioItem(ID_LocaleChange \
             + info->Language, info->Description);
@@ -143,7 +158,7 @@ void MainFrame::InitMenu()
                     }
                 }
             } else {
-                etrace("can't find locale info for %ls",folder.wc_str());
+                etrace("can't find locale info for %ls",ws(folder));
             }
             cont = dir.GetNext(&folder);
         }
@@ -169,92 +184,73 @@ void MainFrame::InitMenu()
 
     // create boot configuration menu
     wxMenu *menuBootConfig = new wxMenu;
-    menuBootConfig->UD_AppendCheckItem(ID_BootEnable);
-    menuBootConfig->Append(ID_BootScript);
+    UD_AppendCheckItem(menuBootConfig, ID_BootEnable);
+    UD_AppendItem(menuBootConfig, ID_BootScript, wxT("script"));
 
     // create sorting configuration menu
     wxMenu *menuSortingConfig = new wxMenu;
-    menuSortingConfig->UD_AppendRadioItem(ID_SortByPath);
-    menuSortingConfig->UD_AppendRadioItem(ID_SortBySize);
-    menuSortingConfig->UD_AppendRadioItem(ID_SortByCreationDate);
-    menuSortingConfig->UD_AppendRadioItem(ID_SortByModificationDate);
-    menuSortingConfig->UD_AppendRadioItem(ID_SortByLastAccessDate);
-    menuSortingConfig->AppendSeparator();
-    menuSortingConfig->UD_AppendRadioItem(ID_SortAscending);
-    menuSortingConfig->UD_AppendRadioItem(ID_SortDescending);
+    UD_AppendRadioItem(menuSortingConfig, ID_SortByPath);
+    UD_AppendRadioItem(menuSortingConfig, ID_SortBySize);
+    UD_AppendRadioItem(menuSortingConfig, ID_SortByCreationDate);
+    UD_AppendRadioItem(menuSortingConfig, ID_SortByModificationDate);
+    UD_AppendRadioItem(menuSortingConfig, ID_SortByLastAccessDate);
+    UD_AppendSeparator(menuSortingConfig);
+
+    UD_AppendRadioItem(menuSortingConfig, ID_SortAscending);
+    UD_AppendRadioItem(menuSortingConfig, ID_SortDescending);
 
     // create settings menu
     wxMenu *menuSettings = new wxMenu;
-    m_subMenuLanguage = \
-        menuSettings->AppendSubMenu(
-            m_menuLanguage, wxEmptyString
-        );
-    menuSettings->Append(ID_GuiOptions);
-    m_subMenuSortingConfig = \
-        menuSettings->AppendSubMenu(
-            menuSortingConfig, wxEmptyString
-        );
-    m_subMenuBootConfig = \
-        menuSettings->AppendSubMenu(
-            menuBootConfig, wxEmptyString
-        );
+    m_subMenuLanguage = menuSettings-> \
+        AppendSubMenu(m_menuLanguage, EmptyLabel);
+    UD_AppendItem(menuSettings, ID_GuiOptions, wxT("gear"));
+    m_subMenuSortingConfig = menuSettings-> \
+        AppendSubMenu(menuSortingConfig, EmptyLabel);
+    m_subMenuBootConfig = menuSettings-> \
+        AppendSubMenu(menuBootConfig, EmptyLabel);
 
     // create debug menu
     wxMenu *menuDebug = new wxMenu;
-    menuDebug->Append(ID_DebugLog);
-    menuDebug->Append(ID_DebugSend);
+    UD_AppendItem(menuDebug, ID_DebugLog,  wxEmptyString);
+    UD_AppendItem(menuDebug, ID_DebugSend, wxEmptyString);
 
     // create upgrade menu
     wxMenu *menuUpgrade = new wxMenu;
-    menuUpgrade->UD_AppendRadioItem(ID_HelpUpgradeNone);
-    menuUpgrade->UD_AppendRadioItem(ID_HelpUpgradeStable);
-    menuUpgrade->UD_AppendRadioItem(ID_HelpUpgradeAll);
-    menuUpgrade->AppendSeparator();
-    menuUpgrade->Append(ID_HelpUpgradeCheck);
+    UD_AppendRadioItem(menuUpgrade, ID_HelpUpgradeNone);
+    UD_AppendRadioItem(menuUpgrade, ID_HelpUpgradeStable);
+    UD_AppendRadioItem(menuUpgrade, ID_HelpUpgradeAll);
+    UD_AppendSeparator(menuUpgrade);
+
+    UD_AppendItem(menuUpgrade, ID_HelpUpgradeCheck, wxEmptyString);
 
     // create help menu
     wxMenu *menuHelp = new wxMenu;
-    menuHelp->Append(ID_HelpContents);
-    menuHelp->AppendSeparator();
-    menuHelp->Append(ID_HelpBestPractice);
-    menuHelp->Append(ID_HelpFaq);
-    menuHelp->Append(ID_HelpLegend);
-    menuHelp->AppendSeparator();
-    m_subMenuDebug = \
-        menuHelp->AppendSubMenu(
-            menuDebug, wxEmptyString
-        );
-    menuHelp->AppendSeparator();
-    m_subMenuUpgrade = \
-        menuHelp->AppendSubMenu(
-            menuUpgrade, wxEmptyString
-        );
-    menuHelp->AppendSeparator();
-    menuHelp->Append(ID_HelpAbout);
+    UD_AppendItem(menuHelp, ID_HelpContents, wxT("help"));
+    UD_AppendSeparator(menuHelp);
+
+    UD_AppendItem(menuHelp, ID_HelpBestPractice, wxT("light"));
+    UD_AppendItem(menuHelp, ID_HelpFaq,          wxEmptyString);
+    UD_AppendItem(menuHelp, ID_HelpLegend,       wxEmptyString);
+    UD_AppendSeparator(menuHelp);
+
+    m_subMenuDebug = menuHelp->AppendSubMenu(menuDebug, EmptyLabel);
+    UD_AppendSeparator(menuHelp);
+
+    m_subMenuUpgrade = menuHelp->AppendSubMenu(menuUpgrade, EmptyLabel);
+    UD_AppendSeparator(menuHelp);
+
+    UD_AppendItem(menuHelp, ID_HelpAbout, wxT("star"));
 
     // create main menu
     m_menuBar = new wxMenuBar;
-    m_menuBar->Append(m_menuAction, wxEmptyString);
-    m_menuBar->Append(menuSettings, wxEmptyString);
-    m_menuBar->Append(menuHelp    , wxEmptyString);
+    m_menuBar->Append(m_menuAction, EmptyLabel);
+    m_menuBar->Append(menuSettings, EmptyLabel);
+    m_menuBar->Append(menuHelp    , EmptyLabel);
 
     SetMenuBar(m_menuBar);
 
-    // set menu icons
+    // set margin width
     if(CheckOption(wxT("UD_SHOW_MENU_ICONS"))){
-        UD_SetMenuIcon(ID_Analyze         , glass );
-        UD_SetMenuIcon(ID_Defrag          , defrag);
-        UD_SetMenuIcon(ID_QuickOpt        , quick );
-        UD_SetMenuIcon(ID_FullOpt         , full  );
-        UD_SetMenuIcon(ID_MftOpt          , mft   );
-        UD_SetMenuIcon(ID_Stop            , stop  );
-        UD_SetMenuIcon(ID_ShowReport      , report);
-        UD_SetMenuIcon(ID_GuiOptions      , gear  );
-        UD_SetMenuIcon(ID_BootScript      , script);
-        UD_SetMenuIcon(ID_HelpContents    , help  );
-        UD_SetMenuIcon(ID_HelpBestPractice, light );
-        UD_SetMenuIcon(ID_HelpAbout       , star  );
-
         UD_SetMarginWidth(m_menuBar->GetMenu(0));
         UD_SetMarginWidth(m_menuBar->GetMenu(1));
         UD_SetMarginWidth(m_menuBar->GetMenu(2));
@@ -289,10 +285,5 @@ void MainFrame::InitMenu()
         m_menuBar->FindItem(ID_SortDescending)->Check();
     }
 }
-
-#undef UD_AppendCheckItem
-#undef UD_AppendRadioItem
-#undef UD_SetMenuIcon
-#undef UD_SetMarginWidth
 
 /** @} */

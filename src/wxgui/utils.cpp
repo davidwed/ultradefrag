@@ -75,15 +75,15 @@ bool Utils::CheckAdminRights(void)
  */
 bool Utils::DownloadFile(const wxString& url, const wxString& path)
 {
-    itrace("downloading %ls",url.wc_str());
+    itrace("downloading %ls",ws(url));
 
     /*
     * URLDownloadToCacheFileW cannot be used
     * here because it may immediately delete
     * the file after its creation.
     */
-    HRESULT result = ::URLDownloadToFileW(NULL,
-        url.wc_str(),path.wc_str(),0,NULL);
+    HRESULT result = ::URLDownloadToFileW(
+        NULL,ws(url),ws(path),0,NULL);
     if(result != S_OK){
         etrace("URLDownloadToFile failed "
             "with code 0x%x",(UINT)result);
@@ -121,11 +121,11 @@ void Utils::GaRequest(const wxString& path, const wxString& id)
         wxT("(referral)%%7Cutmcmd%%3Dreferral%%7Cutmcct%%3D%%2F%%3B"),
         cookie,random,today,today,today,cookie,today);
 
-    itrace("downloading %ls",url.wc_str());
+    itrace("downloading %ls",ws(url));
 
     wchar_t file[MAX_PATH + 1]; file[MAX_PATH] = 0;
     HRESULT result = ::URLDownloadToCacheFileW(
-        NULL,url.wc_str(),file,MAX_PATH,0,NULL);
+        NULL,ws(url),file,MAX_PATH,0,NULL);
     if(result != S_OK){
         etrace("URLDownloadToCacheFile failed "
                "with code 0x%x",(UINT)result);
@@ -215,10 +215,10 @@ void Utils::OpenHandbook(const wxString& page, const wxString& anchor)
             path << wxT("#") << anchor;
     }
 
-    itrace("%ls",path.wc_str());
+    itrace("%ls",ws(path));
     if(path.Left(4) == wxT("http")) {
         if(!wxLaunchDefaultBrowser(path))
-            ShowError(wxT("Cannot open %ls!"),path.wc_str());
+            ShowError(wxT("Cannot open %ls!"),ws(path));
     } else {
         ShellExec(path,wxT("open"));
     }
@@ -262,23 +262,30 @@ void Utils::ShellExec(
     if(flags & SHELLEX_NOASYNC)
         se.fMask |= SEE_MASK_FLAG_DDEWAIT;
 
-    se.lpVerb = action.wc_str();
-    se.lpFile = file.wc_str();
-    if(!parameters.IsEmpty())
-        se.lpParameters = parameters.wc_str();
+    wchar_t *action_string = winx_wcsdup(ws(action));
+    wchar_t *file_string = winx_wcsdup(ws(file));
+    wchar_t *param_string = parameters.IsEmpty() ? NULL :
+        winx_wcsdup(ws(parameters));
 
+    se.lpVerb = action_string;
+    se.lpFile = file_string;
+    se.lpParameters = param_string;
     se.nShow = show;
 
     if(!ShellExecuteEx(&se)){
         letrace("cannot %ls %ls %ls",
-            action.wc_str(), file.wc_str(),
-            parameters.wc_str());
+            ws(action), ws(file),
+            ws(parameters));
         if(!(flags & SHELLEX_SILENT)){
             ShowError(wxT("Cannot %ls %ls %ls"),
-                action.wc_str(), file.wc_str(),
-                parameters.wc_str());
+                ws(action), ws(file),
+                ws(parameters));
         }
     }
+
+    winx_free(action_string);
+    winx_free(file_string);
+    winx_free(param_string);
 }
 
 /**
@@ -297,7 +304,7 @@ void Utils::ShellExec(
 int Utils::MessageDialog(wxFrame *parent,
     const wxString& caption, const wxArtID& icon,
     const wxString& text1, const wxString& text2,
-    const wxChar* format, ...)
+    const wxString& format, ...)
 {
     wxString message;
     va_list args;
@@ -320,13 +327,13 @@ int Utils::MessageDialog(wxFrame *parent,
     HICON hIcon = NULL;
     if(id){
         hIcon = ::LoadIcon(NULL,id);
-        if(!hIcon) letrace("cannot load icon for \"%ls\"",icon.wc_str());
+        if(!hIcon) letrace("cannot load icon for \"%ls\"",ws(icon));
     }
 
     wxIcon messageIcon;
     if(hIcon){
-        wxSize size = wxGetHiconSize(hIcon);
-        messageIcon.SetSize(size.x, size.y);
+        int size = ::GetSystemMetrics(SM_CXICON);
+        messageIcon.SetSize(size, size);
         messageIcon.SetHICON((WXHICON)hIcon);
     } else {
         messageIcon = wxArtProvider::GetIcon(icon,wxART_MESSAGE_BOX);
@@ -392,7 +399,7 @@ int Utils::MessageDialog(wxFrame *parent,
  * @brief Shows an error and
  * invites to open log file.
  */
-void Utils::ShowError(const wxChar* format, ...)
+void Utils::ShowError(const wxString& format, ...)
 {
     wxString message;
     va_list args;

@@ -42,7 +42,7 @@
  * To build the program install the following software:
  *
  * - <a href="http://sourceforge.net/projects/tdm-gcc/">MinGW</a>,
- *   <a href="http://prdownloads.sourceforge.net/wxwindows/wxMSW-2.8.12.zip">wxWidgets 2.8.12</a>,
+ *   <a href="http://github.com/wxWidgets/wxWidgets/releases/download/v3.0.2/wxWidgets-3.0.2.7z">wxWidgets 3.0.2</a>,
  *   <a href="http://www.doxygen.org/">Doxygen 1.8.4</a>, <a href="http://nsis.sourceforge.net/">NSIS</a>,
  *   <a href="http://www.7-zip.org/">7-zip</a>
  * - <a href="http://luabinaries.luaforge.net/">Lua 5.1.x</a>, <a href="http://upx.sf.net/">UPX</a>

@@ -90,27 +90,23 @@ bool g_stop = false;
 //                                Logging
 // =======================================================================
 
-void Log::DoLog(wxLogLevel level,const wxChar *msg,time_t timestamp)
+void Log::DoLogTextAtLevel(wxLogLevel level, const wxString& msg)
 {
-    #define INFO_FMT  (I wxCharStringFmtSpec)
-    #define DEBUG_FMT (D wxCharStringFmtSpec)
-    #define ERROR_FMT (E wxCharStringFmtSpec)
-
     switch(level){
     case wxLOG_FatalError:
         // XXX: fatal errors pass by actually
-        winx_dbg_print(0,ERROR_FMT,msg);
+        trace(E"%ls",ws(msg));
         winx_flush_dbg_log(0);
         break;
     case wxLOG_Error:
-        winx_dbg_print(0,ERROR_FMT,msg);
+        trace(E"%ls",ws(msg));
         break;
     case wxLOG_Warning:
     case wxLOG_Info:
-        winx_dbg_print(0,DEBUG_FMT,msg);
+        trace(D"%ls",ws(msg));
         break;
     default:
-        winx_dbg_print(0,INFO_FMT,msg);
+        trace(I"%ls",ws(msg));
         break;
     }
 }
@@ -360,10 +356,8 @@ static int process_volumes(void)
 
         if(path.Len() > MAX_ENV_VAR_LENGTH){
             // path is too long to be put into environment variable
-            etrace("%ls path is too long",path.wc_str());
-            display_error(wxString::Format(
-                wxT("%ls path is too long"),
-                path.wc_str()).char_str());
+            wxString s = path << wxT(" path is too long");
+            etrace("%ls",ws(s)); display_error(ansi(s));
             continue;
         }
 
@@ -375,7 +369,7 @@ static int process_volumes(void)
         // and reset it then before putting the current
         // path into it
         if((path.Len() + cut_filter.Len() > MAX_ENV_VAR_LENGTH) \
-            || (letter != 0 && path[0] != letter))
+            || (letter != 0 && (char)path[0] != letter))
         {
             wxSetEnv(wxT("UD_CUT_FILTER"),cut_filter);
             if(process_single_volume(letter))
@@ -385,11 +379,11 @@ static int process_volumes(void)
         }
 
         cut_filter << path;
-        letter = path[0];
+        letter = (char)path[0];
 
         color(FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_INTENSITY);
         if(!first_group) printf("\n");
-        print_unicode(path.wchar_str());
+        print_unicode(ws(path));
         printf("\n");
         color(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
     }
@@ -557,15 +551,15 @@ void cleanup(void)
     winx_flush_dbg_log(0);
     delete g_Log;
 
-    // deinitialize wxWidgets
-    wxUninitialize();
-
     // restore text color
     color(g_default_color);
 
     // release resources
     delete g_volumes;
     delete g_paths;
+
+    // deinitialize wxWidgets
+    wxUninitialize();
 }
 
 // =======================================================================

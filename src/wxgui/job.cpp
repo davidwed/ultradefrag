@@ -399,7 +399,7 @@ void MainFrame::OnRepair(wxCommandEvent& WXUNUSED(event))
     cmd << wxT("& echo. ");
     cmd << wxT("& pause");
 
-    itrace("Command Line: %ls", cmd.wc_str());
+    itrace("Command Line: %ls", ws(cmd));
     if(!wxExecute(cmd)) Utils::ShowError(wxT("Cannot execute cmd.exe program!"));
 }
 
@@ -426,19 +426,19 @@ void MainFrame::OnDiskProcessingFailure(wxCommandEvent& event)
     case ANALYSIS_JOB:
         caption = wxString::Format(
             wxT("Analysis of %ls failed."),
-            event.GetString().wc_str()
+            ws(event.GetString())
         );
         break;
     case DEFRAGMENTATION_JOB:
         caption = wxString::Format(
             wxT("Defragmentation of %ls failed."),
-            event.GetString().wc_str()
+            ws(event.GetString())
         );
         break;
     default:
         caption = wxString::Format(
             wxT("Optimization of %ls failed."),
-            event.GetString().wc_str()
+            ws(event.GetString())
         );
         break;
     }
@@ -448,10 +448,7 @@ void MainFrame::OnDiskProcessingFailure(wxCommandEvent& event)
         + wxString::Format(wxT("%hs"),
         udefrag_get_error_description(error));
 
-    Utils::ShowError(wxT("%ls"),msg.wc_str());
+    Utils::ShowError(wxT("%ls"),ws(msg));
 }
-
-#undef UD_EnableTool
-#undef UD_DisableTool
 
 /** @} */

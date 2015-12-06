@@ -46,20 +46,14 @@
 #include <wx/intl.h>
 #include <wx/listctrl.h>
 #include <wx/mstream.h>
+#include <wx/settings.h>
 #include <wx/splitter.h>
-#include <wx/stdpaths.h>
 #include <wx/sysopt.h>
 #include <wx/taskbar.h>
 #include <wx/textfile.h>
 #include <wx/thread.h>
 #include <wx/toolbar.h>
 #include <wx/uri.h>
-
-#if wxUSE_UNICODE
-#define wxCharStringFmtSpec "%ls"
-#else
-#define wxCharStringFmtSpec "%hs"
-#endif
 
 /*
 * Next definition is very important for mingw:
@@ -261,19 +255,27 @@ enum {
    Important: never change their order when adding new translations
    or the selection of the user will be broken */
 enum {
-    wxUD_LANGUAGE_BOSNIAN = wxLANGUAGE_USER_DEFINED+1,
-    wxUD_LANGUAGE_ILOKO,
+    wxUD_LANGUAGE_ILOKO = wxLANGUAGE_USER_DEFINED+1,
     wxUD_LANGUAGE_KAPAMPANGAN,
     wxUD_LANGUAGE_NORWEGIAN,
     wxUD_LANGUAGE_WARAY_WARAY,
     wxUD_LANGUAGE_ACOLI,
     wxUD_LANGUAGE_SINHALA_SRI_LANKA,
+    wxUD_LANGUAGE_SILESIAN,
     wxUD_LANGUAGE_LAST          // must always be last in the list
 };
 
 // =======================================================================
 //                          Macro definitions
 // =======================================================================
+
+/*
+* Convert wxString to formats acceptable by vararg functions.
+* NOTE: Use it to pass strings to functions only as returned
+* objects may be temporary!
+*/
+#define ansi(s) ((const char *)s.mb_str())
+#define ws(s) ((const wchar_t *)s.wc_str())
 
 /* converts pixels from 96 DPI to the current one */
 #define DPI(x) ((int)((double)x * g_scaleFactor))
@@ -305,8 +307,7 @@ public:
     Log()  { delete SetActiveTarget(this); };
     ~Log() { SetActiveTarget(NULL); };
 
-    virtual void DoLog(wxLogLevel level,
-        const wxChar *msg,time_t timestamp);
+    virtual void DoLogTextAtLevel(wxLogLevel level, const wxString& msg);
 };
 
 class App: public wxApp {
@@ -314,11 +315,15 @@ public:
     virtual bool OnInit();
     virtual int  OnExit();
     virtual void OnInitCmdLine(wxCmdLineParser& parser) {
+        /* wxWidgets raises an "assert failure" message without them */
         parser.AddSwitch(wxT("s"),wxT("setup"),wxT("setup"));
+        parser.AddSwitch(wxT("v"),wxT("verbose"),wxT("verbose"));
     }
 
-    static void InitLocale();
+    /* wxLANGUAGE_UNKNOWN forces to use the most suitable locale */
+    static void InitLocale() { SetLocale(wxLANGUAGE_UNKNOWN); }
     static void SetLocale(int id);
+    static void ResetLocale();
     static void SaveReportTranslation();
 
     static void AttachDebugger();
@@ -625,7 +630,7 @@ public:
     static int MessageDialog(wxFrame *parent,
         const wxString& caption, const wxArtID& icon,
         const wxString& text1, const wxString& text2,
-        const wxChar* format, ...);
+        const wxString& format, ...);
     static void OpenHandbook(const wxString& page,
         const wxString& anchor = wxEmptyString);
     static bool SetProcessPriority(int priority);
@@ -633,7 +638,7 @@ public:
         const wxString& action = wxT("open"),
         const wxString& parameters = wxEmptyString,
         int show = SW_SHOW, int flags = 0);
-    static void ShowError(const wxChar* format, ...);
+    static void ShowError(const wxString& format, ...);
 };
 
 /* flags for Utils::ShellExec */

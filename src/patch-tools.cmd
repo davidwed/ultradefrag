@@ -1,7 +1,7 @@
 @echo off
 ::
 :: This script patches all UltraDefrag development tools.
-:: Copyright (c) 2007-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
 ::
 :: This program is free software; you can redistribute it and/or modify
 :: it under the terms of the GNU General Public License as published by
@@ -23,15 +23,6 @@ if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"^
     call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd"^
     call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
-
-if "%WXWIDGETSDIR%" neq "" (
-    echo.
-    echo Patching wxWidgets
-    echo ------------------
-    echo.
-    copy /Y tools\patch\wx\intl.cpp "%WXWIDGETSDIR%\src\common\" || goto fail
-    copy /Y tools\patch\wx\menuitem.cpp "%WXWIDGETSDIR%\src\msw\" || goto fail
-)
 
 if "%WINSDKBASE%" neq "" (
     echo.
