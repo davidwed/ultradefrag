@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Jani Kinnunen <jani.kinnunen@wippies.fi>, 2015
 # Jukka Laari <jukka.t.laari@gmail.com>, 2015
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
@@ -11,8 +12,8 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2013-07-10 21:44+0200\n"
-"PO-Revision-Date: 2015-04-20 21:50+0000\n"
-"Last-Translator: Jukka Laari <jukka.t.laari@gmail.com>\n"
+"PO-Revision-Date: 2015-11-30 11:32+0000\n"
+"Last-Translator: Jani Kinnunen <jani.kinnunen@wippies.fi>\n"
 "Language-Team: Finnish (http://www.transifex.com/stefanpendl/ultradefrag/language/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -222,23 +223,23 @@ msgstr "&Klusterikartan selite"
 
 #: i18n.cpp:196 upgrade.cpp:161
 msgid "&Upgrade"
-msgstr ""
+msgstr "&Päivitä"
 
 #: i18n.cpp:197
 msgid "&Never check"
-msgstr ""
+msgstr "&Älä tarkista koskaan"
 
 #: i18n.cpp:198
 msgid "Check &stable releases only"
-msgstr ""
+msgstr "Tarkista vain &vakaat versiot"
 
 #: i18n.cpp:199
 msgid "Check &all releases"
-msgstr ""
+msgstr "Tarkista &kaikki versiot"
 
 #: i18n.cpp:200
 msgid "&Check now"
-msgstr ""
+msgstr "T&arkista nyt"
 
 #: i18n.cpp:201
 msgid "&About"
@@ -299,7 +300,7 @@ msgstr "Näytä raportti vaihtoehdot"
 
 #: i18n.cpp:270
 msgid "Powered by Lua"
-msgstr ""
+msgstr "Voimanlähteenä Lua"
 
 #: i18n.cpp:271
 msgid "Fragments"
