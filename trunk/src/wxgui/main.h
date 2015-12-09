@@ -545,7 +545,6 @@ public:
 
     // common routines
     int  CheckOption(const wxString& name);
-    void SetSystemTrayIcon(const wxString& icon, const wxString& tooltip);
     void SetTaskbarProgressState(TBPFLAG flag);
     void SetTaskbarProgressValue(ULONGLONG completed, ULONGLONG total);
 
