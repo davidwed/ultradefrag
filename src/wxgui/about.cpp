@@ -43,7 +43,9 @@ public:
     HomePageLink(wxWindow* parent,const wxString& title,const wxString& url)
       : wxGenericHyperlinkCtrl(parent,wxID_ANY,title,url) {
             // use custom paint handler to get rid of annoying border
-            Connect(wxEVT_PAINT,wxPaintEventHandler(HomePageLink::OnPaint));
+            GetEventHandler()->Connect(wxEVT_PAINT,
+                wxPaintEventHandler(HomePageLink::OnPaint)
+            );
         }
     ~HomePageLink() {}
 

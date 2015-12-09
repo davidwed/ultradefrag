@@ -72,9 +72,11 @@ void *BtdThread::Entry()
                 if(result >= 0){
                     itrace("boot time defragmenter %hs",
                         result > 0 ? "enabled" : "disabled");
-                    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_BootChange);
-                    event.SetInt(result > 0 ? true : false);
-                    wxPostEvent(g_mainFrame,event);
+                    wxCommandEvent *event = new wxCommandEvent(
+                        wxEVT_COMMAND_MENU_SELECTED,ID_BootChange
+                    );
+                    event->SetInt(result > 0 ? true : false);
+                    g_mainFrame->GetEventHandler()->QueueEvent(event);
                 }
                 break;
             }

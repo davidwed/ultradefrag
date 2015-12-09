@@ -89,9 +89,11 @@ void *UpgradeThread::Entry()
                 itrace("current version: %hs",&cv[12]);
 
                 if(last && current && last > current){
-                    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_ShowUpgradeDialog);
-                    event.SetString(lv);
-                    wxPostEvent(g_mainFrame,event);
+                    wxCommandEvent *event = new wxCommandEvent(
+                        wxEVT_COMMAND_MENU_SELECTED,ID_ShowUpgradeDialog
+                    );
+                    event->SetString(lv.c_str()); // make a deep copy
+                    g_mainFrame->GetEventHandler()->QueueEvent(event);
                 }
 
                 file.Close(); wxRemoveFile(path);

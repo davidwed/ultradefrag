@@ -315,7 +315,7 @@ MainFrame::MainFrame()
 
     // read configuration
     ReadAppConfiguration();
-    ProcessCommandEvent(ID_ReadUserPreferences);
+    ProcessCommandEvent(this,ID_ReadUserPreferences);
 
     // set main window title
     wxString instdir;
@@ -336,7 +336,7 @@ MainFrame::MainFrame()
     } else {
         m_title = new wxString(wxT(VERSIONINTITLE_PORTABLE));
     }
-    ProcessCommandEvent(ID_SetWindowTitle);
+    ProcessCommandEvent(this,ID_SetWindowTitle);
 
     // set main window size and position
     SetSize(m_width,m_height);
@@ -378,7 +378,8 @@ MainFrame::MainFrame()
     // to initialize list of volumes and
     // cluster map properly
     wxSizeEvent evt(wxSize(m_width,m_height));
-    ProcessEvent(evt); m_splitter->UpdateSize();
+    GetEventHandler()->ProcessEvent(evt);
+    m_splitter->UpdateSize();
 
     InitVolList();
     m_vList->SetFocus();
@@ -422,7 +423,7 @@ MainFrame::MainFrame()
     SetSystemTrayIcon(wxT("tray"),wxT("UltraDefrag"));
 
     // set localized text
-    ProcessCommandEvent(ID_LocaleChange \
+    ProcessCommandEvent(this,ID_LocaleChange \
         + g_locale->GetLanguage());
 
     // allow disk processing
@@ -435,7 +436,7 @@ MainFrame::MainFrame()
 MainFrame::~MainFrame()
 {
     // terminate threads
-    ProcessCommandEvent(ID_Stop);
+    ProcessCommandEvent(this,ID_Stop);
     ::SetEvent(g_synchEvent);
     delete m_btdThread;
     delete m_configThread;
@@ -553,7 +554,7 @@ WXLRESULT MainFrame::MSWWindowProc(WXUINT msg,WXWPARAM wParam,WXLPARAM lParam)
 {
     if(msg == g_TaskbarIconMsg){
         // handle shell restart
-        PostCommandEvent(this,ID_AdjustTaskbarIconOverlay);
+        QueueCommandEvent(this,ID_AdjustTaskbarIconOverlay);
         return 0;
     }
     return wxFrame::MSWWindowProc(msg,wParam,lParam);

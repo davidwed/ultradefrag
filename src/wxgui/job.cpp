@@ -87,8 +87,11 @@ void JobThread::ProgressCallback(udefrag_progress_info *pi, void *p)
     );
     if(g_mainFrame->CheckOption(wxT("UD_DRY_RUN"))) title += wxT(" (dry run)");
 
-    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_SetWindowTitle);
-    event.SetString(title); wxPostEvent(g_mainFrame,event);
+    wxCommandEvent *event = new wxCommandEvent(
+        wxEVT_COMMAND_MENU_SELECTED,ID_SetWindowTitle
+    );
+    event->SetString(title.c_str()); // make a deep copy
+    g_mainFrame->GetEventHandler()->QueueEvent(event);
 
     g_mainFrame->SetSystemTrayIcon(g_mainFrame->m_paused ? \
         wxT("tray_paused") : wxT("tray_running"),title);
@@ -127,16 +130,15 @@ void JobThread::ProgressCallback(udefrag_progress_info *pi, void *p)
         );
     }
     cacheEntry->stopped = g_mainFrame->m_stopped;
-    event.SetId(ID_CacheJob);
-    event.SetInt(letter);
-    event.SetClientData((void *)cacheEntry);
-    wxPostEvent(g_mainFrame,event);
+    event = new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,ID_CacheJob);
+    event->SetInt(letter); event->SetClientData((void *)cacheEntry);
+    g_mainFrame->GetEventHandler()->QueueEvent(event);
 
     // update progress indicators
-    event.SetId(ID_UpdateVolumeStatus);
-    event.SetInt(letter); wxPostEvent(g_mainFrame,event);
-    PostCommandEvent(g_mainFrame,ID_RedrawMap);
-    PostCommandEvent(g_mainFrame,ID_UpdateStatusBar);
+    event = new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,ID_UpdateVolumeStatus);
+    event->SetInt(letter); g_mainFrame->GetEventHandler()->QueueEvent(event);
+    QueueCommandEvent(g_mainFrame,ID_RedrawMap);
+    QueueCommandEvent(g_mainFrame,ID_UpdateStatusBar);
 }
 
 int JobThread::Terminator(void *p)
@@ -148,8 +150,11 @@ int JobThread::Terminator(void *p)
 void JobThread::ProcessVolume(int index)
 {
     // update volume capacity information
-    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_UpdateVolumeInformation);
-    event.SetInt((int)m_letter); wxPostEvent(g_mainFrame,event);
+    wxCommandEvent *event = new wxCommandEvent(
+        wxEVT_COMMAND_MENU_SELECTED,ID_UpdateVolumeInformation
+    );
+    event->SetInt((int)m_letter);
+    g_mainFrame->GetEventHandler()->QueueEvent(event);
 
     // process volume
     int result = udefrag_validate_volume(m_letter,FALSE);
@@ -162,12 +167,17 @@ void JobThread::ProcessVolume(int index)
     }
 
     if(result < 0 && !g_mainFrame->m_stopped){
-        wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_DiskProcessingFailure);
-        event.SetInt(result); event.SetString((*m_volumes)[index]); wxPostEvent(g_mainFrame,event);
+        wxCommandEvent *event = new wxCommandEvent(
+            wxEVT_COMMAND_MENU_SELECTED,ID_DiskProcessingFailure
+        );
+        event->SetInt(result);
+        event->SetString(((*m_volumes)[index]).c_str()); // make a deep copy
+        g_mainFrame->GetEventHandler()->QueueEvent(event);
     }
 
     // update volume dirty status
-    wxPostEvent(g_mainFrame,event);
+    event = new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,ID_UpdateVolumeInformation);
+    event->SetInt((int)m_letter); g_mainFrame->GetEventHandler()->QueueEvent(event);
 }
 
 void *JobThread::Entry()
@@ -197,7 +207,7 @@ void *JobThread::Entry()
             }
 
             // complete the job
-            PostCommandEvent(g_mainFrame,ID_JobCompletion);
+            QueueCommandEvent(g_mainFrame,ID_JobCompletion);
             delete m_volumes; m_launch = false;
         }
     }
@@ -239,7 +249,7 @@ void MainFrame::OnStartJob(wxCommandEvent& event)
     ReleasePause();
 
     SetSystemTrayIcon(wxT("tray_running"),wxT("UltraDefrag"));
-    ProcessCommandEvent(ID_AdjustTaskbarIconOverlay);
+    ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
     /* set overall progress: normal 0% */
     if(CheckOption(wxT("UD_SHOW_PROGRESS_IN_TASKBAR"))){
         SetTaskbarProgressValue(0,1);
@@ -311,12 +321,12 @@ void MainFrame::OnJobCompletion(wxCommandEvent& WXUNUSED(event))
     ReleasePause();
 
     SetSystemTrayIcon(wxT("tray"),wxT("UltraDefrag"));
-    ProcessCommandEvent(ID_SetWindowTitle);
-    ProcessCommandEvent(ID_AdjustTaskbarIconOverlay);
+    ProcessCommandEvent(this,ID_SetWindowTitle);
+    ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
     SetTaskbarProgressState(TBPF_NOPROGRESS);
 
     // shutdown when requested
-    if(!m_stopped) ProcessCommandEvent(ID_Shutdown);
+    if(!m_stopped) ProcessCommandEvent(this,ID_Shutdown);
 }
 
 void MainFrame::SetPause()
@@ -328,7 +338,7 @@ void MainFrame::SetPause()
 
     SetSystemTrayIcon(m_busy ? wxT("tray_paused") \
         : wxT("tray"),wxT("UltraDefrag"));
-    ProcessCommandEvent(ID_AdjustTaskbarIconOverlay);
+    ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
 }
 
 void MainFrame::ReleasePause()
@@ -340,7 +350,7 @@ void MainFrame::ReleasePause()
 
     SetSystemTrayIcon(m_busy ? wxT("tray_running") \
         : wxT("tray"),wxT("UltraDefrag"));
-    ProcessCommandEvent(ID_AdjustTaskbarIconOverlay);
+    ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
 }
 
 void MainFrame::OnPause(wxCommandEvent& WXUNUSED(event))
@@ -411,11 +421,11 @@ void MainFrame::OnDefaultAction(wxCommandEvent& WXUNUSED(event))
         char letter = (char)m_vList->GetItemText(i)[0];
         if(udefrag_get_volume_information(letter,&v) >= 0){
             if(v.is_dirty){
-                ProcessCommandEvent(ID_Repair);
+                ProcessCommandEvent(this,ID_Repair);
                 return;
             }
         }
-        ProcessCommandEvent(ID_Analyze);
+        ProcessCommandEvent(this,ID_Analyze);
     }
 }
 
