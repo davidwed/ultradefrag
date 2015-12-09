@@ -420,7 +420,7 @@ MainFrame::MainFrame()
         etrace("system tray icon initialization failed");
         wxSetEnv(wxT("UD_MINIMIZE_TO_SYSTEM_TRAY"),wxT("0"));
     }
-    SetSystemTrayIcon(wxT("tray"),wxT("UltraDefrag"));
+    ProcessCommandEvent(this,ID_AdjustSystemTrayIcon);
 
     // set localized text
     ProcessCommandEvent(this,ID_LocaleChange \

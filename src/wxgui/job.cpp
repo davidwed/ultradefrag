@@ -93,8 +93,11 @@ void JobThread::ProgressCallback(udefrag_progress_info *pi, void *p)
     event->SetString(title.c_str()); // make a deep copy
     g_mainFrame->GetEventHandler()->QueueEvent(event);
 
-    g_mainFrame->SetSystemTrayIcon(g_mainFrame->m_paused ? \
-        wxT("tray_paused") : wxT("tray_running"),title);
+    event = new wxCommandEvent(
+        wxEVT_COMMAND_MENU_SELECTED,ID_AdjustSystemTrayIcon
+    );
+    event->SetString(title.c_str()); // make another deep copy
+    g_mainFrame->GetEventHandler()->QueueEvent(event);
 
     // set overall progress
     if(g_mainFrame->m_jobThread->m_jobType == ANALYSIS_JOB \
@@ -248,7 +251,7 @@ void MainFrame::OnStartJob(wxCommandEvent& event)
 
     ReleasePause();
 
-    SetSystemTrayIcon(wxT("tray_running"),wxT("UltraDefrag"));
+    ProcessCommandEvent(this,ID_AdjustSystemTrayIcon);
     ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
     /* set overall progress: normal 0% */
     if(CheckOption(wxT("UD_SHOW_PROGRESS_IN_TASKBAR"))){
@@ -320,7 +323,7 @@ void MainFrame::OnJobCompletion(wxCommandEvent& WXUNUSED(event))
 
     ReleasePause();
 
-    SetSystemTrayIcon(wxT("tray"),wxT("UltraDefrag"));
+    ProcessCommandEvent(this,ID_AdjustSystemTrayIcon);
     ProcessCommandEvent(this,ID_SetWindowTitle);
     ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
     SetTaskbarProgressState(TBPF_NOPROGRESS);
@@ -336,8 +339,7 @@ void MainFrame::SetPause()
 
     Utils::SetProcessPriority(IDLE_PRIORITY_CLASS);
 
-    SetSystemTrayIcon(m_busy ? wxT("tray_paused") \
-        : wxT("tray"),wxT("UltraDefrag"));
+    ProcessCommandEvent(this,ID_AdjustSystemTrayIcon);
     ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
 }
 
@@ -348,8 +350,7 @@ void MainFrame::ReleasePause()
 
     Utils::SetProcessPriority(NORMAL_PRIORITY_CLASS);
 
-    SetSystemTrayIcon(m_busy ? wxT("tray_running") \
-        : wxT("tray"),wxT("UltraDefrag"));
+    ProcessCommandEvent(this,ID_AdjustSystemTrayIcon);
     ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
 }
 
