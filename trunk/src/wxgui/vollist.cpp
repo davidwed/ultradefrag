@@ -98,10 +98,10 @@ void MainFrame::InitVolList()
     // ensure that the list will cover integral number of items
     m_vListHeight = 0xFFFFFFFF; // prevent expansion of the list
     m_vList->InsertItem(0,wxT("hi"),0);
-    ProcessCommandEvent(ID_AdjustListHeight);
+    ProcessCommandEvent(this,ID_AdjustListHeight);
 
-    Connect(wxEVT_SIZE,wxSizeEventHandler(MainFrame::OnListSize),NULL,this);
-    m_splitter->Connect(wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED,
+    GetEventHandler()->Connect(wxEVT_SIZE,wxSizeEventHandler(MainFrame::OnListSize),NULL,this);
+    m_splitter->GetEventHandler()->Connect(wxEVT_COMMAND_SPLITTER_SASH_POS_CHANGED,
         wxSplitterEventHandler(MainFrame::OnSplitChanged),NULL,this);
 }
 
@@ -131,11 +131,11 @@ void DrivesList::OnKeyUp(wxKeyEvent& event)
         case WXK_RETURN:
         case WXK_NUMPAD_ENTER:
             if(event.GetModifiers() == wxMOD_NONE)
-                PostCommandEvent(g_mainFrame,ID_DefaultAction);
+                QueueCommandEvent(g_mainFrame,ID_DefaultAction);
             break;
         case 'A':
             if(event.GetModifiers() == wxMOD_CONTROL)
-                PostCommandEvent(g_mainFrame,ID_SelectAll);
+                QueueCommandEvent(g_mainFrame,ID_SelectAll);
             break;
         default:
             break;
@@ -149,7 +149,7 @@ void DrivesList::OnMouse(wxMouseEvent& event)
     if(!g_mainFrame->m_busy){
         // left double click starts default action
         if(event.GetEventType() == wxEVT_LEFT_DCLICK)
-            PostCommandEvent(g_mainFrame,ID_DefaultAction);
+            QueueCommandEvent(g_mainFrame,ID_DefaultAction);
         event.Skip();
     }
 }
@@ -162,8 +162,8 @@ void DrivesList::OnSelectionChange(wxListEvent& event)
         JobsCacheEntry *currentJob = g_mainFrame->m_jobsCache[(int)letter];
         if(g_mainFrame->m_currentJob != currentJob){
             g_mainFrame->m_currentJob = currentJob;
-            PostCommandEvent(g_mainFrame,ID_RedrawMap);
-            PostCommandEvent(g_mainFrame,ID_UpdateStatusBar);
+            QueueCommandEvent(g_mainFrame,ID_RedrawMap);
+            QueueCommandEvent(g_mainFrame,ID_UpdateStatusBar);
         }
     }
     event.Skip();
@@ -260,9 +260,9 @@ void MainFrame::AdjustListHeight(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnSplitChanged(wxSplitterEvent& event)
 {
-    PostCommandEvent(this,ID_AdjustListHeight);
-    PostCommandEvent(this,ID_AdjustListColumns);
-    PostCommandEvent(this,ID_RedrawMap);
+    QueueCommandEvent(this,ID_AdjustListHeight);
+    QueueCommandEvent(this,ID_AdjustListColumns);
+    QueueCommandEvent(this,ID_RedrawMap);
 
     event.Skip();
 }
@@ -279,9 +279,9 @@ void MainFrame::OnListSize(wxSizeEvent& event)
     wxCommandEvent evt(wxEVT_COMMAND_MENU_SELECTED,ID_AdjustListColumns);
     evt.SetInt(new_width);
     if(new_width <= old_width)
-        ProcessEvent(evt);
+        GetEventHandler()->ProcessEvent(evt);
     else
-        wxPostEvent(this,evt);
+        GetEventHandler()->AddPendingEvent(evt);
 
     event.Skip();
 }
@@ -294,7 +294,7 @@ void *ListThread::Entry()
 {
     while(!g_mainFrame->CheckForTermination(200)){
         if(m_rescan){
-            PostCommandEvent(g_mainFrame,ID_PopulateList);
+            QueueCommandEvent(g_mainFrame,ID_PopulateList);
             m_rescan = false;
         }
     }
@@ -434,21 +434,21 @@ void MainFrame::PopulateList(wxCommandEvent& event)
         volume_info *v_copy = new volume_info;
         memcpy(v_copy,&v[i],sizeof(volume_info));
         e.SetInt(i); e.SetClientData((void *)v_copy);
-        ProcessEvent(e);
+        GetEventHandler()->ProcessEvent(e);
 
         e.SetId(ID_UpdateVolumeStatus);
         e.SetInt((int)v[i].letter);
-        ProcessEvent(e);
+        GetEventHandler()->ProcessEvent(e);
     }
 
-    ProcessCommandEvent(ID_AdjustListColumns);
+    ProcessCommandEvent(this,ID_AdjustListColumns);
 
     m_vList->Select(0);
     m_vList->Focus(0);
 
     m_currentJob = m_jobsCache[(int)v[0].letter];
-    ProcessCommandEvent(ID_RedrawMap);
-    ProcessCommandEvent(ID_UpdateStatusBar);
+    ProcessCommandEvent(this,ID_RedrawMap);
+    ProcessCommandEvent(this,ID_UpdateStatusBar);
 
     ::udefrag_release_vollist(v);
 }

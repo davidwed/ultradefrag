@@ -259,14 +259,14 @@ void MainFrame::OnLocaleChange(wxCommandEvent& event)
     for(int i = 0; i < m_vList->GetItemCount(); i++){
         int letter = (int)m_vList->GetItemText(i)[0];
         wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,ID_UpdateVolumeStatus);
-        event.SetInt(letter); ProcessEvent(event);
+        event.SetInt(letter); GetEventHandler()->ProcessEvent(event);
     }
 
     // update task-bar icon overlay
-    ProcessCommandEvent(ID_AdjustTaskbarIconOverlay);
+    ProcessCommandEvent(this,ID_AdjustTaskbarIconOverlay);
 
     // update progress counters
-    ProcessCommandEvent(ID_UpdateStatusBar);
+    ProcessCommandEvent(this,ID_UpdateStatusBar);
 
     // update report translation
     App::SaveReportTranslation();

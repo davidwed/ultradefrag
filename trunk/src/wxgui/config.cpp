@@ -325,11 +325,11 @@ void *ConfigThread::Entry()
                 */
             } else {
                 itrace("configuration has been changed");
-                PostCommandEvent(g_mainFrame,ID_ReadUserPreferences);
-                PostCommandEvent(g_mainFrame,ID_SetWindowTitle);
-                PostCommandEvent(g_mainFrame,ID_AdjustSystemTrayIcon);
-                PostCommandEvent(g_mainFrame,ID_AdjustTaskbarIconOverlay);
-                PostCommandEvent(g_mainFrame,ID_RedrawMap);
+                QueueCommandEvent(g_mainFrame,ID_ReadUserPreferences);
+                QueueCommandEvent(g_mainFrame,ID_SetWindowTitle);
+                QueueCommandEvent(g_mainFrame,ID_AdjustSystemTrayIcon);
+                QueueCommandEvent(g_mainFrame,ID_AdjustTaskbarIconOverlay);
+                QueueCommandEvent(g_mainFrame,ID_RedrawMap);
             }
             counter ++;
             /* wait for the next notification */

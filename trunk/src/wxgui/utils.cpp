@@ -413,7 +413,7 @@ void Utils::ShowError(const wxString& format, ...)
     if(MessageDialog(g_mainFrame,_("Error!"),
       wxART_ERROR,log,_("&Cancel"),message) == wxID_OK)
     {
-        PostCommandEvent(g_mainFrame,ID_DebugLog);
+        QueueCommandEvent(g_mainFrame,ID_DebugLog);
     }
 }
 

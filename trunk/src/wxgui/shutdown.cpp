@@ -205,7 +205,7 @@ void MainFrame::Shutdown(wxCommandEvent& WXUNUSED(event))
         return;
     } else if(m_menuBar->FindItem(ID_WhenDoneExit)->IsChecked()){
         // just close the window
-        ProcessCommandEvent(ID_Exit);
+        ProcessCommandEvent(this,ID_Exit);
         return;
     } else if(m_menuBar->FindItem(ID_WhenDoneStandby)->IsChecked()){
         action = WHEN_DONE_STANDBY;
@@ -228,7 +228,7 @@ void MainFrame::Shutdown(wxCommandEvent& WXUNUSED(event))
     ::winx_flush_dbg_log(0);
 
     // close the window after the request completion
-    PostCommandEvent(this,ID_Exit);
+    QueueCommandEvent(this,ID_Exit);
 
     // There is an opinion that SetSuspendState call
     // is more reliable than SetSystemPowerState:

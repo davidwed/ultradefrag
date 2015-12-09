@@ -280,14 +280,22 @@ enum {
 /* converts pixels from 96 DPI to the current one */
 #define DPI(x) ((int)((double)x * g_scaleFactor))
 
-#define PostCommandEvent(window,id) { \
+/*
+* Immediately processes a command event.
+* NOTE: Call it from the main thread only!
+*/
+#define ProcessCommandEvent(window,id) { \
     wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,id); \
-    wxPostEvent(window,event); \
+    window->GetEventHandler()->ProcessEvent(event); \
 }
 
-#define ProcessCommandEvent(id) { \
-    wxCommandEvent event(wxEVT_COMMAND_MENU_SELECTED,id); \
-    ProcessEvent(event); \
+/*
+* Safely delivers a command event to the event queue.
+*/
+#define QueueCommandEvent(window,id) { \
+    window->GetEventHandler()->QueueEvent( \
+        new wxCommandEvent(wxEVT_COMMAND_MENU_SELECTED,id) \
+    ); \
 }
 
 // =======================================================================
