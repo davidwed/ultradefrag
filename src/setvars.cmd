@@ -8,7 +8,7 @@ set VERSION_REVISION=0
 
 :: alpha1, beta2, rc3, etc.
 :: unset for the final releases
-set RELEASE_STAGE=beta5
+set RELEASE_STAGE=beta6
 
 :: paths to development tools
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v7.1
