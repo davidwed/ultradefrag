@@ -2,6 +2,9 @@
 
   Version 7.0.0 2016-xx-xx
   ------------------------------------------------------------------------------
+    beta6:
+    - few major bugs affecting thread safety were fixed
+
     beta5:
     - wxWidgets were upgraded to the latest stable 3.0.2 release
     - a lot of minor bugs were fixed
