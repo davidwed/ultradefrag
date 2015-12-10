@@ -352,11 +352,15 @@ MainFrame::MainFrame()
     // create menu, tool and status bars
     InitMenu(); InitToolbar(); InitStatusBar();
 
-    // create list of volumes and cluster map
-    // don't use live update style to avoid horizontal scrollbar appearance on list resizing
+    // create list of volumes and cluster map; don't use
+    // live update style to avoid horizontal scrollbar
+    // appearance on list resizing; use wxSP_NO_XP_THEME
+    // to draw borders correctly on Windows XP theme
     m_splitter = new wxSplitterWindow(this,wxID_ANY,
-        wxDefaultPosition,wxDefaultSize,
-        wxSP_3D/* | wxSP_LIVE_UPDATE*/ | wxCLIP_CHILDREN);
+        wxDefaultPosition,wxDefaultSize,wxSP_3D |
+        wxSP_NO_XP_THEME/* | wxSP_LIVE_UPDATE*/ |
+        wxCLIP_CHILDREN
+    );
     m_splitter->SetMinimumPaneSize(DPI(MIN_PANEL_HEIGHT));
 
     m_vList = new DrivesList(m_splitter,wxLC_REPORT | \
