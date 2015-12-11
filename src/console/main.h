@@ -81,9 +81,9 @@ HRESULT WINAPI URLDownloadToCacheFileW(
 // append html extension to the tracking id, for historical reasons
 #define USAGE_TRACKING_PATH wxT("/appstat/") USAGE_TRACKING_ID wxT(".html")
 
-// use shorter paths to build neat test reports
-#define TEST_TRACKING_PATH  wxT("/") wxT(wxUD_ABOUT_VERSION) \
-    wxT("/") TEST_TRACKING_ID wxT("/") wxT("overall")
+#define TEST_TRACKING_PATH \
+    wxT("/") wxT(wxUD_ABOUT_VERSION) \
+    wxT("/") TEST_TRACKING_ID wxT("/")
 
 #define GA_REQUEST(type) ga_request(type##_PATH, type##_ACCOUNT_ID)
 
