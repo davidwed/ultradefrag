@@ -30,7 +30,7 @@
  *
  * - Sayem Chaklader     <span class="simple">\<gearspec@gmail.com\></span>
  *
- * <b>Translations Copyright &copy; 2008-2014</b>
+ * <b>Translations Copyright &copy; 2008-2015</b>
  *
  * @htmlonly
  * <table style="border:none; margin-left:25px;">
@@ -548,6 +548,12 @@
  *
  * - Stefan Pendl <span class="simple">\<stefanpe@users.sourceforge.net\></span>
  *
+ * @latexonly
+ * \ifletter
+ *   \newpage
+ * \fi
+ * @endlatexonly
+ *
  * <b>Chief Architect</b>
  *
  * - Dmitri Arkhangelski <span class="simple">\<dmitriar@users.sourceforge.net\></span>
@@ -561,10 +567,6 @@
  * <tr><td>• Tiago Filipe Silva </td><td>-</td><td> Optimized web images and udsorting.js script.</td></tr>
  * </table>
  * @endhtmlonly
- *
- * @latexonly
- * % FIXME: pdfTeX inserts a page break here for the letter paper size
- * @endlatexonly 
  *
  * @latexonly
  * \setlength\LTleft{1.25em}\setlength\LTright{\fill}\begin{longtable}{lcp{0.6\linewidth}}
@@ -666,6 +668,12 @@
  * @latexonly
  * \\
  * \end{longtable}
+ * @endlatexonly
+ *
+ * @latexonly
+ * \ifletter
+ *   \newpage
+ * \fi
  * @endlatexonly
  *
  * Special thanks for extensive testing (in alphabetical order):
