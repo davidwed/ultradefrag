@@ -391,7 +391,7 @@ bool set_shellex_options(void)
 
     lua_pushnumber(L,1);
     lua_setglobal(L,"shellex_flag");
-    int status = luaL_dofile(L,ansi(path.GetFullPath()));
+    int status = luaL_dofile(L,ansi(path.GetShortPath()));
     if(status != 0){
         etrace("cannot interprete %ls",
             ws(path.GetFullPath()));

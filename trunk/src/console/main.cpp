@@ -118,10 +118,10 @@ void Log::DoLogTextAtLevel(wxLogLevel level, const wxString& msg)
 /**
  * @brief Prints the string in red, than restores green color.
  */
-void display_error(const char *msg)
+void display_error(const wchar_t *msg)
 {
     color(FOREGROUND_RED | FOREGROUND_INTENSITY);
-    fprintf(stderr,"%s",msg);
+    fprintf(stderr,"%ls",msg);
     color(FOREGROUND_GREEN | FOREGROUND_INTENSITY);
 }
 
@@ -185,7 +185,7 @@ static void begin_synchronization(void)
         g_synch_event = CreateEvent(NULL,FALSE,TRUE,wxT("udefrag-exe-synch-event"));
         if(!g_synch_event){
             letrace("cannot create udefrag-exe-synch-event event");
-            display_error("Synchronization failed!\n");
+            display_error(wxT("Synchronization failed!\n"));
             break;
         }
         if(GetLastError() == ERROR_ALREADY_EXISTS && g_wait){
@@ -326,7 +326,7 @@ static int process_volumes(void)
 
     if(!SetConsoleCtrlHandler((PHANDLER_ROUTINE)CtrlHandlerRoutine,TRUE)){
         letrace("cannot set Ctrl + C handler");
-        display_error("Cannot set Ctrl + C handler!\n");
+        display_error(wxT("Cannot set Ctrl + C handler!\n"));
     }
 
     begin_synchronization();
@@ -357,7 +357,7 @@ static int process_volumes(void)
         if(path.Len() > MAX_ENV_VAR_LENGTH){
             // path is too long to be put into environment variable
             wxString s = path << wxT(" path is too long");
-            etrace("%ls",ws(s)); display_error(ansi(s));
+            etrace("%ls",ws(s)); display_error(ws(s));
             continue;
         }
 
