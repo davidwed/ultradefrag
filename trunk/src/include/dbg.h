@@ -74,6 +74,19 @@ typedef struct _udefrag_shared_data {
 */
 #define SHARED_DATA_VERSION 0x1
 
+/* don't litter reliability reports by test crashes */
+#ifndef OFFICIAL_RELEASE
+  #undef SEND_CRASH_REPORTS
+#endif
+
+/*
+* Test runs need to be counted for
+* investigation of crashes only.
+*/
+#ifdef SEND_CRASH_REPORTS
+  #define SEND_TEST_REPORTS
+#endif
+
 #if defined(__cplusplus)
 }
 #endif

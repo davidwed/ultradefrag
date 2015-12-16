@@ -121,8 +121,7 @@ static void send_crash_report()
 
     itrace("downloading %ls",url);
 
-#ifdef OFFICIAL_RELEASE
-    // don't litter reliability reports by test crashes
+#ifdef SEND_CRASH_REPORTS
     result = URLDownloadToCacheFileW(NULL,url,path,MAX_PATH,0,NULL);
     if(result != S_OK){
         etrace("failed with code 0x%x",(UINT)result);

@@ -77,6 +77,9 @@
 // #else
 //  #define wxDEBUG_LEVEL 2
 // #endif
+#ifndef ENABLE_WX_ASSERTS
+    #define wxDEBUG_LEVEL 0
+#endif
 
 // wxHandleFatalExceptions() may be used to catch the program faults at run
 // time and, instead of terminating the program with a usual GPF message box,

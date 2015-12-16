@@ -105,8 +105,11 @@ function produce_sdk_makefile()
     if os.getenv("OFFICIAL_RELEASE") then
         f:write("/D \"OFFICIAL_RELEASE\" ")
     end
-    if not os.getenv("RELEASE_STAGE") then
-        f:write("/D \"STABLE_RELEASE\" ")
+    if os.getenv("ATTACH_DEBUGGER") == "1" then
+        f:write("/D \"ATTACH_DEBUGGER\" ")
+    end
+    if os.getenv("SEND_CRASH_REPORTS") == "1" then
+        f:write("/D \"SEND_CRASH_REPORTS\" ")
     end
     f:write("/GS- /Gd ")
     if arch == "i386" then
@@ -294,8 +297,11 @@ function produce_mingw_makefile()
     if os.getenv("OFFICIAL_RELEASE") then
         f:write(" -DOFFICIAL_RELEASE")
     end
-    if not os.getenv("RELEASE_STAGE") then
-        f:write(" -DSTABLE_RELEASE")
+    if os.getenv("ATTACH_DEBUGGER") == "1" then
+        f:write(" -DATTACH_DEBUGGER")
+    end
+    if os.getenv("SEND_CRASH_REPORTS") == "1" then
+        f:write(" -DSEND_CRASH_REPORTS")
     end
     f:write("\n")
     
