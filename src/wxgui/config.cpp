@@ -223,7 +223,7 @@ void MainFrame::ReadUserPreferences(wxCommandEvent& WXUNUSED(event))
     luaL_openlibs(L);
     lua_gc(L,LUA_GCRESTART,0);
 
-    status = luaL_dofile(L,ansi(path.GetFullPath()));
+    status = luaL_dofile(L,ansi(path.GetShortPath()));
     if(status != 0){
         error += wxT("cannot interprete ") + path.GetFullPath();
         etrace("%ls",ws(error));
