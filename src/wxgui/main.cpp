@@ -69,7 +69,7 @@ void *StatThread::Entry()
 
     if(enabled){
         GA_REQUEST(USAGE_TRACKING);
-#if defined(OFFICIAL_RELEASE) && !defined(STABLE_RELEASE)
+#ifdef SEND_TEST_REPORTS
         GA_REQUEST(TEST_TRACKING);
 #endif
     }
@@ -161,7 +161,7 @@ bool App::OnInit()
 #endif
 
     // enable crash handling
-#ifndef STABLE_RELEASE
+#ifdef ATTACH_DEBUGGER
     AttachDebugger();
 #endif
 

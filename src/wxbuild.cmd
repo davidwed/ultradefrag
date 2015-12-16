@@ -162,24 +162,35 @@ exit /B 1
     if %1 equ amd64 set WX_SDK_LIBPATH=%WXWIDGETSDIR%\lib\vc_x64_lib%WX_CONFIG%
     if %1 equ ia64 set WX_SDK_LIBPATH=%WXWIDGETSDIR%\lib\vc_ia64_lib%WX_CONFIG%
     
+    set WX_SDK_CPPFLAGS=/MT
+    
     :: ia64 targeting SDK compiler doesn't support optimization
-    if %1 equ ia64 set WX_SDK_CPPFLAGS=/Od
+    if %1 equ ia64 set WX_SDK_CPPFLAGS=%WX_SDK_CPPFLAGS% /Od
     
     :: x64 optimization leads to crashes
     :: http://support.microsoft.com/en-us/kb/2280741
-    if %1 equ amd64 set WX_SDK_CPPFLAGS=/Od
+    if %1 equ amd64 set WX_SDK_CPPFLAGS=%WX_SDK_CPPFLAGS% /Od
+    
+    set WX_GCC_CPPFLAGS=-g0
+
+    if %1 equ amd64 set WX_GCC_CPPFLAGS=%WX_GCC_CPPFLAGS% -m64
+    
+    if "%ENABLE_WX_ASSERTS%" equ "1" (
+        set WX_SDK_CPPFLAGS=%WX_SDK_CPPFLAGS% /DENABLE_WX_ASSERTS
+        set WX_GCC_CPPFLAGS=%WX_GCC_CPPFLAGS% -DENABLE_WX_ASSERTS
+    )
     
     if %BUILD_ENV% equ winsdk (
         copy /Y "%WXWIDGETSDIR%\include\wx\msw\setup.h" "%WX_SDK_LIBPATH%\mswu\wx\"
-        nmake -f makefile.vc TARGET_CPU=%1 %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS="%WX_SDK_CPPFLAGS% /MT" || goto build_failure
+        nmake -f makefile.vc TARGET_CPU=%1 %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS="%WX_SDK_CPPFLAGS%" || goto build_failure
     )
     if %BUILD_ENV% equ mingw (
         copy /Y "%WXWIDGETSDIR%\include\wx\msw\setup.h" "%WXWIDGETSDIR%\lib\gcc_lib%WX_CONFIG%\mswu\wx\"
-        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS=-g0 || goto build_failure
+        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS="%WX_GCC_CPPFLAGS%" || goto build_failure
     )
     if %BUILD_ENV% equ mingw_x64 (
         copy /Y "%WXWIDGETSDIR%\include\wx\msw\setup.h" "%WXWIDGETSDIR%\lib\gcc_lib%WX_CONFIG%\mswu\wx\"
-        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS="-g0 -m64" || goto build_failure
+        mingw32-make -f makefile.gcc %WX_OPTIONS% CFG=%WX_CONFIG% CPPFLAGS="%WX_GCC_CPPFLAGS%" || goto build_failure
     )
     goto success
     

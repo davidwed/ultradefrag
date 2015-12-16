@@ -480,7 +480,7 @@ void *StatThread::Entry()
 
     if(enabled){
         GA_REQUEST(USAGE_TRACKING);
-#if defined(OFFICIAL_RELEASE) && !defined(STABLE_RELEASE)
+#ifdef SEND_TEST_REPORTS
         GA_REQUEST(TEST_TRACKING);
 #endif
     }
@@ -586,7 +586,7 @@ int __cdecl main(int argc, char **argv)
     }
 
     // enable memory corruption handling
-#ifndef STABLE_RELEASE
+#ifdef ATTACH_DEBUGGER
     attach_debugger();
 #endif
 

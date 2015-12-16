@@ -10,6 +10,16 @@ set VERSION_REVISION=0
 :: unset for the final releases
 set RELEASE_STAGE=beta6
 
+:: debugging facilities
+:: - set to 1 to attach UltraDefrag debugger which
+::   will handle application crashes in a special way
+set ATTACH_DEBUGGER=1
+:: - set to 1 to send crash reports via Google Analytics service
+set SEND_CRASH_REPORTS=1
+:: - set to 1 to enable wxWidgets asserts raising dialog boxes
+::   NOTE: don't forget to recompile wxWidgets after adjustment
+set ENABLE_WX_ASSERTS=1
+
 :: paths to development tools
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v7.1
 set MINGWBASE=D:\Software\MinGW32
