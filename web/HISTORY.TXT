@@ -2,6 +2,12 @@
 
   Version 7.0.0 2016-xx-xx
   ------------------------------------------------------------------------------
+    RC1:
+    - few minor bugs were fixed
+    - the following translations were updated:
+
+      Filipino (Tagalog), Spanish
+    
     beta6:
     - few major bugs affecting thread safety were fixed
 
