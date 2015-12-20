@@ -57,7 +57,7 @@
 #define UD_AppendRadioItem(menu,id) menu->AppendRadioItem(id,EmptyLabel)
 #define UD_AppendSeparator(menu)    menu->AppendSeparator();
 
-// FIXME: on Windows 7 menu icons ain't centered
+// FIXME: on Windows 7 check marks ain't centered at 150% DPI
 #define UD_SetMarginWidth(menu) { \
     wxMenuItemList list = menu->GetMenuItems(); \
     size_t count = list.GetCount(); \
