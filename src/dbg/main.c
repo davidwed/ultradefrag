@@ -140,10 +140,15 @@ static void send_crash_report()
 static void show_advice(void)
 {
     MessageBox(NULL,
-       "Oops, UltraDefrag crashed on your system.\n"
-       "Please downgrade to UltraDefrag v6 which\n"
-       "is known to be stable. We'll do our best to\n"
-       "fix the bug before the next beta release.",
+       "Oops, UltraDefrag crashed on your system.\n\n"
+       "The program itself is known to be pretty\n"
+       "stable, so you probably have either broken\n"
+       "hardware or a virus infection. However, if\n"
+       "it's not your case, dont' hesitate to report\n"
+       "the crash via our bug tracker:\n\n"
+       "http://sourceforge.net/p/ultradefrag/bugs/\n\n"
+       "Also you might downgrade to UltraDefrag v6\n"
+       "which is known to be very stable.",
        "UltraDefrag debugger",
        MB_OK | MB_ICONHAND | MB_SYSTEMMODAL
     );

@@ -8,7 +8,7 @@ set VERSION_REVISION=0
 
 :: alpha1, beta2, RC3, etc.
 :: unset for the final releases
-set RELEASE_STAGE=RC1
+set RELEASE_STAGE=
 
 :: debugging facilities
 :: - set to 1 to attach UltraDefrag debugger which

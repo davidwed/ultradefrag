@@ -544,9 +544,9 @@
  *
  * <center>***</center>
  *
- * <b>Maintainer</b>
+ * <b>Chief Architect</b>
  *
- * - Stefan Pendl <span class="simple">\<stefanpe@users.sourceforge.net\></span>
+ * - Dmitri Arkhangelski <span class="simple">\<dmitriar@users.sourceforge.net\></span>
  *
  * @latexonly
  * \ifletter
@@ -554,9 +554,9 @@
  * \fi
  * @endlatexonly
  *
- * <b>Chief Architect</b>
+ * Special thanks for porting UltraDefrag to Linux are going to:
  *
- * - Dmitri Arkhangelski <span class="simple">\<dmitriar@users.sourceforge.net\></span>
+ * - Jean-Pierre André <span class="simple">\<jean-pierre.andre@wanadoo.fr\></span>
  *
  * Special thanks for contributions (in alphabetical order):
  *
