@@ -33,7 +33,7 @@
  * - scheduled defragmentation (using Windows Task Scheduler)
  * - automatic termination when specified time interval elapses
  * - automatic hibernation or shutdown after the job completion
- * - small size of installers (about 1 MB)
+ * - small size of installers (about 2 MB)
  * - availability of portable packages requiring no installation
  * - full support of 64-bit editions of Windows
  * - granted permission to freely use and redistribute the program
