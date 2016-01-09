@@ -1,0 +1,12 @@
+*\.svn*
+*\bin*
+*\doxy-doc*
+*\lib*
+*\obj*
+*\release*
+*thumbs.db
+*.depend
+*.layout
+*.exe
+*.7z
+*.bk
