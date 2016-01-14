@@ -22,10 +22,9 @@
 
 /**
  * @file prb.c
- * @brief Red-black trees with parent pointers.
- * @details The entire code was copied from the 
- * <a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>
- * sources. Just a few minor changes were applied to it.
+ * @brief Red-black binary trees with parent pointers.
+ * @details This file is part of the <a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>
+ * library. Just a couple of minor changes have been applied to it to make it compatible with zenwinx library.
  * @addtogroup BinaryTrees
  * @{
  */

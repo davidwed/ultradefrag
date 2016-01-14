@@ -29,14 +29,13 @@ rem     --use-mingw     (default)
 rem     --use-winsdk    (we use it for official releases)
 rem     --use-mingw-x64 (experimental, produces wrong x64 code)
 rem
-rem Skip any processor architecture to reduce compile time
+rem Skip any processor architectures to reduce compilation time
 rem     --no-x86
 rem     --no-amd64
 rem     --no-ia64
 
-rem NOTE: IA-64 targeting binaries were never tested by the authors 
-rem due to missing appropriate hardware and appropriate 64-bit version 
-rem of Windows.
+rem NOTE: IA-64 binaries were never tested by the authors
+rem because of lack of Itanium hardware.
 
 call ParseCommandLine.cmd %*
 

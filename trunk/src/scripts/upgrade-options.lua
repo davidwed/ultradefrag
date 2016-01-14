@@ -414,7 +414,7 @@ function extract_preferences(file)
 end
 
 function get_preferences()
-    -- version of the old configuration file
+    -- the version of the old configuration file
     version = 0
     
     -- set defaults
@@ -492,7 +492,7 @@ function get_preferences()
     if version < 8 then path_upgrade_needed = 1 end
     if version > 99 and version < 107 then path_upgrade_needed = 1 end
     if path_upgrade_needed ~= 0 and log_file_path == "" then
-        -- default log is needed for easier bug reporting
+        -- enable logging to file, to simplify troubleshooting
         log_file_path = ".\\logs\\ultradefrag.log"
     end
     if orig_in_filter then in_filter = orig_in_filter end
@@ -500,7 +500,7 @@ function get_preferences()
 end
 
 -- THE MAIN CODE STARTS HERE
--- current version of configuration file
+-- the current version of the configuration file
 -- 0 - 99 for v5; 100 - 199 for v6; 200+ for v7
 current_version = 202
 shellex_options = ""

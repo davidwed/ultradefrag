@@ -239,9 +239,9 @@ rem Displays usage information.
     echo --use-mingw-x64 (experimental, produces wrong x64 code)
     echo.
     echo Target architecture (must always be after compiler):
-    echo --no-x86        skip build of 32-bit binaries
-    echo --no-amd64      skip build of x64 binaries
-    echo --no-ia64       skip build of IA-64 binaries
+    echo --no-x86        don't build 32-bit binaries
+    echo --no-amd64      don't build x64 binaries
+    echo --no-ia64       don't build IA-64 binaries
     echo.
     echo Example:
     echo wxbuild --use-winsdk --no-amd64 --no-ia64 --clean
