@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@
 #include <math.h> /* for pow function */
 
 /**
+ * @internal
  * @brief Retrieves all ultradefrag
  * related options from the environment.
  * @return Zero for success, negative
@@ -239,6 +240,7 @@ int get_options(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief Frees all resources
  * allocated by get_options.
  */

@@ -58,7 +58,7 @@ function hrsize(n)
     return m .. " " .. suffixes[i]
 end
 
--- writes path to the file, splitted when requested
+-- writes a path to a file, splitted when requested
 function write_file_path(path,f)
     local split = false
     if split_long_names ~= 1 then
@@ -83,10 +83,10 @@ function write_file_path(path,f)
             end
             table.insert(part,c)
         elseif b < 0xC2 then
-            -- 2-nd or 3-rd byte of multibyte sequence
+            -- 2-nd or 3-rd byte of a multibyte sequence
             seq = seq .. c
         else
-            -- 1-st byte of multibyte sequence
+            -- 1-st byte of a multibyte sequence
             if string.len(seq) ~= 0 then
                 table.insert(part,seq)
             end
@@ -117,7 +117,7 @@ function write_file_path(path,f)
                 f:write(seq); break_at_end = false
             end
             chars_to_write = chars_to_write - part_len
-        else -- current part is too long
+        else -- the current part is too long
             for k, seq in ipairs(part) do
                 f:write(seq); break_at_end = false
                 chars_to_write = chars_to_write - 1
@@ -177,7 +177,7 @@ function write_text_header(f)
         compname = computer_name .. ': '
     end
     
-    -- format time appropriate for locale
+    -- format time according to the current locale
     if current_time then
         formatted_time = os.date("%c",os.time(current_time))
     end
@@ -316,7 +316,7 @@ function get_javascript()
         js = "function init_sorting_engine(){}\nfunction sort_items(criteria){}\n"
     end
 
-    -- replace $TABLE_HEAD by actual markup
+    -- replace $TABLE_HEAD by the actual markup
     return string.gsub(js,"$TABLE_HEAD",table_head_for_js)
 end
 
@@ -353,7 +353,7 @@ function build_html_report()
         compname = ""
     end
     
-    -- format time appropriate for locale
+    -- format time according to the current locale
     if current_time then
         formatted_time = os.date("%c",os.time(current_time))
     end
@@ -367,7 +367,7 @@ function build_html_report()
 end
 
 -------------------------------------------------------------------------------
--- Main Code
+-- The main code
 -------------------------------------------------------------------------------
 report_path = arg[1]
 instdir     = arg[2]
@@ -381,7 +381,7 @@ assert(instdir, usage)
 -- get report options
 dofile(instdir .. "\\options.lua")
 
--- read source file
+-- read the source file
 dofile(report_path)
 
 error_msg = [[
@@ -394,7 +394,7 @@ if format_version == nil or format_version < 7 then
     error(error_msg)
 end
 
--- read i18n strings
+-- read localization strings
 get_localization_strings()
 
 -- build file fragmentation reports
@@ -405,7 +405,7 @@ if produce_plain_text_report == 1 then
     text_report_path = build_text_report()
 end
 
--- display report if requested
+-- display the report if requested
 if arg[3] == "-v" then
     if produce_html_report == 1 then
         display_report(html_report_path)

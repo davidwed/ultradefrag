@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -59,11 +59,14 @@ void winx_set_killer(winx_killer k)
 }
 
 /**
- * @brief Allocates a block of memory from a global growable heap.
- * @param size the size of the block to be allocated, in bytes.
- * Note that the allocated block may be bigger than the requested size.
- * @param flags combination of MALLOC_XXX flags defined in zenwinx.h file.
- * @return A pointer to the allocated block. NULL indicates failure.
+ * @brief Allocates a block of memory.
+ * @param size size of the block, in bytes.
+ * @param flags a combination of MALLOC_XXX
+ * flags defined in zenwinx.h file.
+ * @return The address of the allocated block.
+ * NULL indicates failure.
+ * @note The allocated block may be larger
+ * than requested.
  */
 void *winx_heap_alloc(size_t size,int flags)
 {
