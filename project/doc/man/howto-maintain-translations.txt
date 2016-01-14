@@ -1,0 +1,12 @@
+How to assign copyright:
+------------------------
+
+UltraDefrag follows "Information for maintainers of GNU software"
+to decide whether to assign copyright to a person or not:
+http://www.gnu.org/prep/maintain/maintain.html#Legally-Significant
+
+As language packs are pretty small, we consider to assign copyright
+to anyone who contributed around twelve lines of text. We decided,
+however, to give respect to all the remaining contributors in the
+handbook, as we believe even small improvements help us advance
+further.

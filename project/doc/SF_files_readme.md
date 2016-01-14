@@ -13,7 +13,7 @@
 2. **portable** *(for removable drives, no installer)*
     * full package with GUI and console components
 
-## Release stages explained:
+## Release stages:
 1. **alpha**
     * new features implemented and tested *(problems may be experienced)*
     * used to test major changes

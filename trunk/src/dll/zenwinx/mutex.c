@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,9 +28,10 @@
 #include "zenwinx.h"
 
 /**
- * @brief Creates a named mutex.
- * @param[in] name the mutex name.
- * @param[out] phandle pointer to the mutex handle.
+ * @brief Creates a mutex.
+ * @param[in] name the name of the mutex.
+ * @param[out] phandle pointer to variable
+ * to store the mutex handle into.
  * @return Zero for success, negative value otherwise.
  * @par Example:
  * @code
@@ -63,9 +64,10 @@ int winx_create_mutex(wchar_t *name,HANDLE *phandle)
 }
 
 /**
- * @brief Opens a named mutex.
- * @param[in] name the mutex name.
- * @param[out] phandle pointer to the mutex handle.
+ * @brief Opens a mutex.
+ * @param[in] name the name of the mutex.
+ * @param[out] phandle pointer to variable
+ * to store the mutex handle into.
  * @return Zero for success, negative value otherwise.
  * @par Example:
  * @code
@@ -115,9 +117,6 @@ int winx_release_mutex(HANDLE h)
 
 /**
  * @brief Destroys a mutex.
- * @details Closes the handle of a named mutex
- * created/opened by winx_create_mutex() or 
- * winx_open_mutex().
  * @param[in] h the mutex handle.
  */
 void winx_destroy_mutex(HANDLE h)
