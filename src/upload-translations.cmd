@@ -19,10 +19,6 @@
 :: Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ::
 
-:: parameters:
-::
-::      --lng2po ... extract translations from LNG files
-
 title Upload started
 
 :: set environment
@@ -45,33 +41,6 @@ xgettext -C -j --add-comments=: %PO_INFO% -k_ -kwxPLURAL:1,2 -kUD_UpdateMenuItem
 copy /v /y "locale\UltraDefrag.pot" "%~dp0\tools\transifex\translations\ultradefrag.main\en_US.po"
 popd
 echo.
-
-if "%~1" neq "--lng2po" goto :skiplng2po
-
-:: fetch latest translations
-pushd "%~dp0\tools\transifex"
-if exist tx.exe tx.exe pull -a || popd && goto fail
-popd
-
-:: convert LNG to PO
-pushd "%~dp0\tools"
-if exist lng2po.lua lua lng2po.lua || popd && goto fail
-
-:: update transifex PO with converted LNG
-for %%F in ( "%~dp0\tools\transifex\translations\ultradefrag.main\*.po" ) do (
-    if exist "%~dp0\tools\transifex\translations\%%~nF.pot" (
-        msgcat --use-first "%%~F" "%~dp0\tools\transifex\translations\%%~nF.pot" -o "%~dp0\tools\transifex\translations\%%~nxF"
-        msgmerge --update --backup=none --no-fuzzy-matching --verbose "%~dp0\tools\transifex\translations\%%~nxF" "%~dp0\wxgui\locale\UltraDefrag.pot"
-        copy /v /y "%~dp0\tools\transifex\translations\%%~nxF" "%%~F"
-        del /f /q "%~dp0\tools\transifex\translations\%%~nF.po*"
-        echo %%~nF ... DONE
-        echo.
-    )
-)
-popd
-echo.
-
-:skiplng2po
 
 :: update source language
 pushd "%~dp0\tools\transifex"

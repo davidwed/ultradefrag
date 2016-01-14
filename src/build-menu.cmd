@@ -41,39 +41,36 @@ echo      5 ... Build .................. using WinSDK, no IA64
 echo      6 ... Build Portable ......... using WinSDK, no IA64
 echo.
 echo      7 ... Build Docs
-echo      8 ... Build only Handbook
-echo      9 ... Build internal docs
 echo.
-echo     10 ... Build .................. with Custom Switches
-echo     11 ... Build Portable ......... with Custom Switches
+echo      8 ... Build .................. with Custom Switches
+echo      9 ... Build Portable ......... with Custom Switches
 echo.
-echo     12 ... Clean all wxWidgets libraries
-echo     13 ... Build wxWidgets ........ using MinGW
-echo     14 ... Build wxWidgets ........ using WinSDK
+echo     10 ... Clean all wxWidgets libraries
+echo     11 ... Build wxWidgets ........ using MinGW
+echo     12 ... Build wxWidgets ........ using WinSDK
 echo.
-echo     15 ... Update translation
-echo     16 ... Upload translations
-echo     17 ... Upload translations with LNG to PO conversion
+echo     13 ... Update translations
+echo     14 ... Upload translations
 echo.
-echo     18 ... Build Test Release for Stefan
-echo     19 ... Build Test Installation for Stefan
-echo     20 ... Build Test AMD64 for Stefan
-echo     21 ... Build Test x86 for Stefan
+echo     15 ... Build Test Release for Stefan
+echo     16 ... Build Test Installation for Stefan
+echo     17 ... Build Test AMD64 for Stefan
+echo     18 ... Build Test x86 for Stefan
 echo.
-echo      0 ... EXIT
+echo      0 ... Exit
 
 :: this value holds the number of the last menu entry
-set UD_BLD_MENU_MAX_ENTRIES=21
+set UD_BLD_MENU_MAX_ENTRIES=18
 
 :AskSelection
 echo.
-set /p UD_BLD_MENU_SELECT="Please select an Option: "
+set /p UD_BLD_MENU_SELECT="Please select an option: "
 echo.
 
 if %UD_BLD_MENU_SELECT% LEQ %UD_BLD_MENU_MAX_ENTRIES% goto %UD_BLD_MENU_SELECT%
 
 color 8C
-echo Wrong Selection !!!
+echo Wrong selection!
 color
 set UD_BLD_MENU_SELECT=
 goto AskSelection
@@ -88,12 +85,12 @@ goto finished
 
 :2
 title Build with Defaults
-call build.cmd --no-pdf --no-dev
+call build.cmd --no-pdf
 goto finished
 
 :3
 title Build with Defaults and Install
-call build.cmd --install --no-pdf --no-dev
+call build.cmd --install --no-pdf
 goto finished
 
 :4
@@ -103,117 +100,99 @@ goto finished
 
 :5
 title Build .................. using WinSDK, no IA64
-call build.cmd --use-winsdk --no-ia64 --no-pdf --no-dev
+call build.cmd --use-winsdk --no-ia64 --no-pdf
 goto finished
 
 :6
 title Build Portable ......... using WinSDK, no IA64
-call build.cmd --portable --use-winsdk --no-ia64 --no-pdf --no-dev
+call build.cmd --portable --use-winsdk --no-ia64 --no-pdf
 goto finished
 
 :7
 title Build Docs
-call build.cmd --clean
 call build-docs.cmd
 goto finished
 
 :8
-title Build only Handbook
-call build.cmd --clean
-call build-docs.cmd --no-dev
-goto finished
-
-:9
-title Build internal docs
-call build.cmd --clean
-call build-docs.cmd --internal-doc
-goto finished
-
-:10
 title Build .................. with Custom Switches
 cls
 echo.
 call build.cmd --help
 echo.
-set /p UD_BLD_MENU_SWITCH="Please enter Switches: "
+set /p UD_BLD_MENU_SWITCH="Please enter switches: "
 
 title Build .................. %UD_BLD_MENU_SWITCH%
 echo.
 call build.cmd %UD_BLD_MENU_SWITCH%
 goto finished
 
-:11
+:9
 title Build Portable ......... with Custom Switches
 cls
 echo.
 call build.cmd --help
 echo.
-set /p UD_BLD_MENU_SWITCH="Please enter Switches: "
+set /p UD_BLD_MENU_SWITCH="Please enter switches: "
 
 title Build Portable ......... %UD_BLD_MENU_SWITCH%
 echo.
 call build.cmd --portable %UD_BLD_MENU_SWITCH%
 goto finished
 
-:12
+:10
 title Clean all wxWidgets libraries
 call wxbuild.cmd --use-mingw --clean
 call wxbuild.cmd --use-winsdk --clean
 goto finished
 
-:13
+:11
 title Build wxWidgets ........ using MinGW
 call wxbuild.cmd --use-mingw
 goto finished
 
-:14
+:12
 title Build wxWidgets ........ using WinSDK
 call wxbuild.cmd --use-winsdk
 goto finished
 
-:15
-title Update translation
+:13
+title Update translations
 call update-translations.cmd
 goto finished
 
-:16
+:14
 title Upload translations
 call upload-translations.cmd
 goto finished
 
-:17
-title Upload translations without LNG to PO conversion
-call upload-translations.cmd --lng2po
-goto finished
-
-:18
+:15
 title Build Test Release for Stefan
 echo.
-call build.cmd --use-winsdk --no-ia64 --no-pdf --no-dev
+call build.cmd --use-winsdk --no-ia64 --no-pdf
 echo.
 call :CopyInstallers -zip
 goto finished
 
-:19
+:16
 title Build Test Installation for Stefan
 echo.
-if %PROCESSOR_ARCHITECTURE% == AMD64 call build.cmd --use-winsdk --no-ia64 --no-x86 --install --no-pdf --no-dev
-if %PROCESSOR_ARCHITECTURE% == x86 call build.cmd --use-winsdk --no-ia64 --no-amd64 --install --no-pdf --no-dev
+if %PROCESSOR_ARCHITECTURE% == AMD64 call build.cmd --use-winsdk --no-ia64 --no-x86 --install --no-pdf
+if %PROCESSOR_ARCHITECTURE% == x86 call build.cmd --use-winsdk --no-ia64 --no-amd64 --install --no-pdf
 echo.
 goto finished
 
-:20
+:17
 title Build Test AMD64 for Stefan
 echo.
-call build.cmd --use-winsdk --no-ia64 --no-x86 --no-pdf --no-dev
+call build.cmd --use-winsdk --no-ia64 --no-x86 --no-pdf
 echo.
 call :CopyInstallers
 goto finished
 
-:21
+:18
 title Build Test x86 for Stefan
 echo.
-call build.cmd --use-winsdk --no-ia64 --no-amd64 --no-pdf --no-dev
+call build.cmd --use-winsdk --no-ia64 --no-amd64 --no-pdf
 echo.
 call :CopyInstallers
 goto finished
