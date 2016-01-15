@@ -108,7 +108,9 @@ SCANTOASCII ScanToAscii[] = {
 {0,    0,    0}
 };
 
-
+/**
+ * @internal
+ */
 static void IntUpdateControlKeyState(LPDWORD State, PKEYBOARD_INPUT_DATA InputData)
 {
     DWORD Value = 0;
@@ -155,6 +157,9 @@ static void IntUpdateControlKeyState(LPDWORD State, PKEYBOARD_INPUT_DATA InputDa
         *State |= Value;
 }
 
+/**
+ * @internal
+ */
 static UCHAR IntAsciiFromInput(PKEYBOARD_INPUT_DATA InputData, DWORD KeyState)
 {
     UINT Counter = 0;
@@ -170,8 +175,9 @@ static UCHAR IntAsciiFromInput(PKEYBOARD_INPUT_DATA InputData, DWORD KeyState)
     return 0;
 }
 
-/*
- * Only the bKeyDown and AsciiChar members are used in the zenwinx library.
+/**
+ * @internal
+ * @note Only bKeyDown and AsciiChar members are used in zenwinx library.
  */
 void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec)
 {
