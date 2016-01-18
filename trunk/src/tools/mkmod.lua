@@ -1,6 +1,6 @@
 #!/usr/local/bin/lua
 --[[
-  mkmod.lua - produces makefiles for various compilers from a single *.build file.
+  mkmod.lua - builds a module according to the specified .build file.
   Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
 
   This program is free software; you can redistribute it and/or modify
@@ -50,9 +50,9 @@ sdk_cmd = "nmake.exe /NOLOGO /S /f Makefile.winsdk"
 function build_list_of_headers()
     local f, i, j, dir, n, h
     if not includes[1] then return end
-    -- include headers listed in 'headers' file,
-    -- but only these locating in directories
-    -- listed in 'includes' table
+    -- include headers listed in the 'headers' file,
+    -- but only those locating in directories listed
+    -- in the 'includes' table
     n = 0 -- total number of headers
     f = assert(io.open("headers","rt"))
     for line in f:lines() do
@@ -524,5 +524,5 @@ end
 
 print(input_filename .. " " .. os.getenv("BUILD_ENV") .. " build was successful.\n")
 
--- uncomment for checking each targets build process separately
+-- uncomment to manually build one binary after another
 -- os.execute("cmd.exe /C pause")

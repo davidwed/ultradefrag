@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,30 +32,27 @@
 #include "udefrag-internals.h"
 
 /*
-* Because of huge number of clusters
-* on contemporary hard drives, we cannot
-* define exacly, which color is on each
-* individual cluster.
+* Contemporary hard drives may contain
+* huge number of clusters. To draw each
+* cluster on the map we need at least
+* 4 bits of memory. Therefore, to draw
+* 1 billion of clusters, we'll need at
+* least 500 MB of memory.
 *
-* For example, let's assume that hard disk
-* has 1 billion clusters. We need at least
-* 4 bits to save color of each cluster.
-* Therefore, we need to allocate 500 MB
-* of memory, which isn't acceptable.
+* That's definitely too much, so the program
+* never tries to draw individual clusters on
+* the map. Instead, it splits the disk into
+* cells and draws them on the map afterwards.
 *
-* Due to this reason, we're splitting
-* the disk to cells of fixed size.
-* Each cell contains number of clusters
-* of each color.
-*
-* When we're defining cell's color,
-* the most occured inside wins.
+* Each cell keeps information on how much
+* clusters of each kind belongs to it.
 */
 
 /**
+ * @internal
  * @brief Allocates cluster map.
  * @param[in] map_size the number of cells.
- * @param[in,out] jp pointer to job parameters.
+ * @param[in,out] jp pointer to the job parameters.
  * @return Zero for success, negative value otherwise.
  */
 int allocate_map(int map_size,udefrag_job_parameters *jp)
@@ -122,13 +119,14 @@ int allocate_map(int map_size,udefrag_job_parameters *jp)
             jp->cluster_map.field_size,jp->cluster_map.cells_per_cluster,jp->cluster_map.unused_cells);
     }
 
-    /* reset map */
+    /* reset the map */
     reset_cluster_map(jp);
     return 0;
 }
 
 /**
- * @brief Fills the map by default color.
+ * @internal
+ * @brief Fills the map by the default color.
  */
 void reset_cluster_map(udefrag_job_parameters *jp)
 {
@@ -153,9 +151,10 @@ void reset_cluster_map(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Colorizes specified range of clusters.
- * @note If new color is equal to MFT_ZONE_SPACE,
- * old color is ignored.
+ * @internal
+ * @brief Colorizes the specified range of clusters.
+ * @note If the new color is equal to MFT_ZONE_SPACE,
+ * the old color is ignored.
  */
 void colorize_map_region(udefrag_job_parameters *jp,
         ULONGLONG lcn, ULONGLONG length, int new_color, int old_color)
@@ -220,7 +219,8 @@ void colorize_map_region(udefrag_job_parameters *jp,
 }
 
 /**
- * @brief Defines whether the file is $Mft or not.
+ * @internal
+ * @brief Defines whether a file is $Mft or not.
  * @return Nonzero value indicates that the file is $Mft.
  */
 int is_mft(winx_file_info *f,udefrag_job_parameters *jp)
@@ -250,11 +250,12 @@ int is_mft(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief Defines file's color.
  */
 int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
 {
-    /* show $MFT file in dark magenta color */
+    /* show the $MFT file in dark magenta color */
     if(is_mft(f,jp))
         return MFT_SPACE;
     
@@ -285,7 +286,8 @@ int get_file_color(udefrag_job_parameters *jp, winx_file_info *f)
 }
 
 /**
- * @brief Colorizes space belonging to the file.
+ * @internal
+ * @brief Colorizes space belonging to a file.
  */
 void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color)
 {
@@ -303,6 +305,7 @@ void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color)
 }
 
 /**
+ * @internal
  * @brief Frees resources
  * allocated by allocate_map.
  */

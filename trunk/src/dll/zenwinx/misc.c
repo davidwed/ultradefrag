@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2007-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,33 +28,33 @@
 #include "zenwinx.h"
 
 /**
- * @brief Suspends the execution of the current thread.
- * @param[in] msec the time interval, in milliseconds.
- * If an INFINITE constant is passed, the time-out
- * interval never elapses.
+ * @brief Suspends execution of the current thread.
+ * @param[in] msec the timeout interval, in milliseconds.
+ * If the INFINITE constant is passed, the interval never
+ * elapses.
  */
 void winx_sleep(int msec)
 {
     LARGE_INTEGER Interval;
 
     if(msec != INFINITE){
-        /* System time units are 100 nanoseconds. */
+        /* system time units are 100 nanoseconds */
         Interval.QuadPart = -((signed long)msec * 10000);
     } else {
-        /* Approximately 292000 years hence */
+        /* approximately 292000 years hence */
         Interval.QuadPart = MAX_WAIT_INTERVAL;
     }
-    /* don't litter debugging log in case of errors */
+    /* don't litter debugging output in case of errors */
     (void)NtDelayExecution(0/*FALSE*/,&Interval);
 }
 
 /**
- * @brief Returns the version of Windows.
+ * @brief Returns Windows version.
  * @return major_version_number * 10 + minor_version_number.
  * @par Example:
  * @code 
  * if(winx_get_os_version() >= WINDOWS_XP){
- *     // we are running on XP or later system
+ *     // we are on XP or a later system
  * }
  * @endcode
  */
@@ -69,13 +69,10 @@ int winx_get_os_version(void)
 }
 
 /**
- * @brief Retrieves the path of the Windows directory.
- * @return The native path of the Windows directory.
- * NULL indicates failure.
- * @note 
- * - This function retrieves the native path, like this 
- *       \\??\\C:\\WINDOWS
- * - The returned string should be freed by the winx_free
+ * @brief Retrieves the Windows directory path.
+ * @return The native path of the Windows directory,
+ * like this: <b>\\??\\C:\\WINDOWS</b>. NULL indicates failure.
+ * @note The returned string should be freed by the winx_free
  * call after its use.
  */
 wchar_t *winx_get_windows_directory(void)
@@ -94,10 +91,9 @@ wchar_t *winx_get_windows_directory(void)
 
 /**
  * @brief Queries a symbolic link.
- * @param[in] name the symbolic link name.
- * @param[out] buffer pointer to the buffer
- * receiving the null-terminated target.
- * @param[in] length of the buffer, in characters.
+ * @param[in] name the name of the symbolic link.
+ * @param[out] buffer the buffer to store the target into.
+ * @param[in] length length of the buffer, in characters.
  * @return Zero for success, negative value otherwise.
  * @par Example:
  * @code
@@ -137,15 +133,14 @@ int winx_query_symbolic_link(wchar_t *name, wchar_t *buffer, int length)
 }
 
 /**
- * @brief Sets a system error mode.
- * @param[in] mode the process error mode.
+ * @brief Sets the system error mode.
+ * @param[in] mode the error mode.
  * @return Zero for success, negative value otherwise.
  * @note 
  * - The mode constants aren't the same as in Win32 SetErrorMode() call.
- * - Use INTERNAL_SEM_FAILCRITICALERRORS constant to 
- *   disable the critical-error-handler message box. After that
- *   you can for example try to read a missing floppy disk without 
- *   any popup windows displaying error messages.
+ * - Pass INTERNAL_SEM_FAILCRITICALERRORS constant to disable the critical
+ *   error handler message box. Afterwards you can, for instance, access
+ *   missing floppies without any messages popping up.
  * - winx_set_system_error_mode(1) call is equal to SetErrorMode(0).
  * - Other mode constants can be found in ReactOS sources, but
  *   they need to be tested carefully because they were never
@@ -171,11 +166,10 @@ int winx_set_system_error_mode(unsigned int mode)
 }
 
 /**
- * @brief Retrieves the Windows boot options.
- * @return Pointer to Unicode string containing all Windows
- * boot options. NULL indicates failure.
- * @note After a use of the returned string it should be freed
- * by winx_free() call.
+ * @brief Retrieves Windows boot options.
+ * @return Windows boot options. NULL indicates failure.
+ * @note The returned string should be freed by the
+ * winx_free call after its use.
  */
 wchar_t *winx_get_windows_boot_options(void)
 {
@@ -262,8 +256,8 @@ wchar_t *winx_get_windows_boot_options(void)
 
 /**
  * @brief Determines whether Windows is in Safe Mode or not.
- * @return Positive value indicates the presence of the Safe Mode.
- * Zero value indicates a normal boot. Negative value indicates
+ * @return Positive value indicates Safe Mode presence,
+ * zero indicates normal boot and negative value indicates
  * indeterminism caused by impossibility of the appropriate check.
  */
 int winx_windows_in_safe_mode(void)
@@ -289,7 +283,7 @@ int winx_windows_in_safe_mode(void)
  * - Based on http://www.osronline.com/showthread.cfm?link=185567
  * - Is used internally by winx_shutdown and winx_reboot.
  */
-void MarkWindowsBootAsSuccessful(void)
+void mark_windows_boot_as_successful(void)
 {
     wchar_t *windir;
     wchar_t path[MAX_PATH + 1];
@@ -313,8 +307,8 @@ void MarkWindowsBootAsSuccessful(void)
     winx_free(windir);
 
     /*
-    * Set BootSuccessFlag to 0x1 (look at 
-    * BOOT_STATUS_DATA definition in ntndk.h
+    * Set the BootSuccessFlag to 0x1 (look at 
+    * the BOOT_STATUS_DATA definition in ntndk.h
     * file for details).
     */
     f = winx_fopen(path,"r+");

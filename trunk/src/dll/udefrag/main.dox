@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
  */
 
 /**
- * @defgroup Analysis Volume analysis
+ * @defgroup Analysis Analysis
  * @{
  */
 /** @} */
@@ -42,7 +42,7 @@
 /** @} */
 
 /**
- * @defgroup Defrag Volume defragmentation
+ * @defgroup Defrag Defragmentation
  * @{
  */
 /** @} */
@@ -66,13 +66,13 @@
 /** @} */
 
 /**
- * @defgroup Move File moving
+ * @defgroup Move Files transfer
  * @{
  */
 /** @} */
 
 /**
- * @defgroup Optimizer Volume optimization
+ * @defgroup Optimizer Optimization
  * @{
  */
 /** @} */
