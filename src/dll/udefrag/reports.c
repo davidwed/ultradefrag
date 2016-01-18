@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,10 +32,14 @@
 #include "udefrag-internals.h"
 
 /**
- * @brief The size of the report saving buffer, in bytes.
+ * @internal
+ * @brief Size of the report saving buffer, in bytes.
  */
 #define RSB_SIZE (512 * 1024)
 
+/**
+ * @internal
+ */
 static void convert_to_utf8_path(char *dst,int size,wchar_t *src)
 {
     char *p = dst;
@@ -52,6 +56,9 @@ static void convert_to_utf8_path(char *dst,int size,wchar_t *src)
     }
 }
 
+/**
+ * @internal
+ */
 static wchar_t *get_report_path(udefrag_job_parameters *jp)
 {
     wchar_t *instdir, *fpath;
@@ -96,6 +103,9 @@ static wchar_t *get_report_path(udefrag_job_parameters *jp)
     return path;
 }
 
+/**
+ * @internal
+ */
 static int save_lua_report(udefrag_job_parameters *jp)
 {
     wchar_t *path = NULL;
@@ -237,8 +247,10 @@ static int save_lua_report(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Saves fragmentation report on the volume.
- * @return Zero for success, negative value otherwise.
+ * @internal
+ * @brief Saves fragmentation report.
+ * @return Zero for success,
+ * negative value otherwise.
  */
 int save_fragmentation_report(udefrag_job_parameters *jp)
 {
@@ -264,7 +276,8 @@ int save_fragmentation_report(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Removes all fragmentation reports from the volume.
+ * @internal
+ * @brief Removes all fragmentation reports from the disk.
  */
 void remove_fragmentation_report(udefrag_job_parameters *jp)
 {
