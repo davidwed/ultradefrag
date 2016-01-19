@@ -47,7 +47,7 @@ mkdir bin
 mkdir bin\amd64
 mkdir bin\ia64
 
-:: copy source files to obj directory
+:: copy sources to obj subdirectory
 (
     echo doxyfile
     echo .dox
@@ -92,8 +92,8 @@ copy /Y obj\udefrag\udefrag.h obj\dll\udefrag
 mkdir obj\dll\zenwinx
 copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
 
-:: build list of headers to produce dependencies
-:: for MinGW/SDK makefiles from
+:: build list of headers to produce
+:: dependencies for makefiles from
 cd obj
 dir /S /B *.h >headers || exit /B 1
 copy /Y .\headers .\bootexctrl || exit /B 1
@@ -109,7 +109,7 @@ copy /Y .\headers .\native     || exit /B 1
 copy /Y .\headers .\dbg        || exit /B 1
 cd ..
 
-:: let's build all modules by selected compiler
+:: let's build all modules by the selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
     echo No parameters specified, using defaults.
     goto mingw_build

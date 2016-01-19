@@ -29,6 +29,7 @@
 #include <math.h> /* for pow function */
 
 /**
+ * @internal
  * @brief The initial buffer size for the 
  * winx_vsprintf and winx_vswprintf routines.
  * Increase this value to format long strings

@@ -34,6 +34,7 @@ char *reserved_memory = NULL;
 winx_killer killer = default_killer;
 
 /**
+ * @internal
  * @brief Aborts the application in the out of memory condition case
  * when no custom killer is set by the winx_set_killer routine.
  */
