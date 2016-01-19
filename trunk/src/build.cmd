@@ -69,12 +69,12 @@ if %UD_BLD_FLG_DO_INSTALL% neq 0 (
     call :install || exit /B 1
 )
 
-:: all operations successfully completed!
+:: all operations completed successfully!
 exit /B 0
 
 :fail
-echo Build error (code %ERRORLEVEL%)!
-title Build error (code %ERRORLEVEL%)!
+echo Build failed with code %ERRORLEVEL%!
+title Build failed with code %ERRORLEVEL%!
 exit /B 1
 
 :: --------------------------------------------------------
@@ -111,13 +111,12 @@ rem Sets environment for the build process.
         echo #define wxUD_ABOUT_VERSION "%ULTRADFGVER%" >> .\include\version.new
     )
     
-    rem remove preview menu for release candidates
+    rem remove the preview menu for stable releases
     if /I "%RELEASE_STAGE:~0,2%" equ "RC" echo #define _UD_HIDE_PREVIEW_ >> .\include\version.new
-    rem remove preview menu for final release
     if "%RELEASE_STAGE%" equ "" echo #define _UD_HIDE_PREVIEW_ >> .\include\version.new
     
-    rem update version.h only when something
-    rem changed to speed incremental compilation up
+    rem update version.h file only when something got
+    rem changed to speed up incremental compilation
     fc .\include\version.new .\include\version.h >nul
     if errorlevel 1 move /Y .\include\version.new .\include\version.h
     del /q .\include\version.new
@@ -234,16 +233,16 @@ rem Installs the program.
     echo Start installer...
     %INSTALLER_PATH%\%INSTALLER_NAME%-%UDVERSION_SUFFIX%.bin.%INSTALLER_ARCH%.exe /S
     if %errorlevel% neq 0 (
-        echo Install error!
+        echo Installation failed!
         endlocal
         exit /B 1
     )
-    echo Install success!
+    echo Installation success!
     endlocal
 exit /B 0
 
-rem Cleans up sources directory
-rem by removing all intermediate files.
+rem Cleans up sources directory by
+rem removal of all intermediate files.
 :cleanup
     echo Delete all intermediate files...
     rd /s /q bin
@@ -276,8 +275,7 @@ rem Displays usage information.
     echo --all           build all packages: regular and portable
     echo --install       perform silent installation after the build
     echo --clean         perform full cleanup instead of the build
-    echo --no-pdf        skip building of PDF documentation
-    echo --no-dev        skip building of development documentation
+    echo --no-pdf        don't build PDF documentation
     echo.
     echo Compiler:
     echo --use-mingw     (default)
@@ -285,12 +283,12 @@ rem Displays usage information.
     echo --use-mingw-x64 (experimental, produces wrong x64 code)
     echo.
     echo Target architecture (must always be after compiler):
-    echo --no-x86        skip build of 32-bit binaries
-    echo --no-amd64      skip build of x64 binaries
-    echo --no-ia64       skip build of IA-64 binaries
+    echo --no-x86        don't build 32-bit binaries
+    echo --no-amd64      don't build x64 binaries
+    echo --no-ia64       don't build IA-64 binaries
     echo.
-    echo Without parameters the build command uses MinGW to build
-    echo a 32-bit regular installer.
+    echo Without parameters the build command uses MinGW
+    echo to build 32-bit installer.
     echo.
-    echo * Run patch-tools.cmd before starting development!
+    echo * Run patch-tools.cmd once before compilation!
 goto :EOF

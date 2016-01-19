@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -32,9 +32,10 @@
 #include "udefrag-internals.h"
 
 /**
- * @brief Displays common information
- * like program version, operating
- * system version and so on.
+ * @internal
+ * @brief Displays generic information
+ * about the program and the operating
+ * system.
  */
 void dbg_print_header(udefrag_job_parameters *jp)
 {
@@ -61,7 +62,8 @@ void dbg_print_header(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Displays message like
+ * @internal
+ * @brief Displays a message like
  * <b>analysis of c: started</b>
  * and returns the current time
  * (needed for stop_timing).
@@ -74,10 +76,12 @@ ULONGLONG start_timing(char *operation_name,udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Displays time needed 
- * for the operation; the second
- * parameter must be obtained from
- * the start_timing procedure.
+ * @internal
+ * @brief Displays how much time
+ * the specified operation took.
+ * @note The start_time parameter
+ * must be obtained from the
+ * start_timing procedure.
  */
 void stop_timing(char *operation_name,ULONGLONG start_time,udefrag_job_parameters *jp)
 {
@@ -127,6 +131,7 @@ static void dbg_print_single_counter(udefrag_job_parameters *jp,ULONGLONG counte
 }
 
 /**
+ * @internal
  * @brief Displays all the
  * performance counters.
  */
@@ -149,6 +154,7 @@ void dbg_print_performance_counters(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief Displays how much time
  * the entire disk processing job
  * took.

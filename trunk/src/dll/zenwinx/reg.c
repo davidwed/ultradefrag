@@ -32,6 +32,9 @@
 #include "ntndk.h"
 #include "zenwinx.h"
 
+/**
+ * @internal
+ */
 struct cmd {
     struct cmd *next;  /* pointer to the next command */
     struct cmd *prev;  /* pointer to the previous command */
