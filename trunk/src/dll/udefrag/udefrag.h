@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
  */
 
 /*
-* Udefrag.dll interface header.
+* udefrag.dll interface header.
 */
 
 #ifndef _UDEFRAG_H_
@@ -88,13 +88,9 @@ typedef enum {
 */
 #define UD_JOB_CONTEXT_MENU_HANDLER       0x10
 
-/*
-* MFT_ZONE_SPACE has special meaning - 
-* it is used as a marker for MFT Zone space.
-*/
 enum {
-    UNUSED_MAP_SPACE = 0,        /* other colors have more precedence */
-    FREE_SPACE,                  /* has lowest precedence */
+    UNUSED_MAP_SPACE = 0,        /* has the lowest precedence */
+    FREE_SPACE,                  
     SYSTEM_SPACE,
     SYSTEM_OVER_LIMIT_SPACE,
     FRAGM_SPACE,
@@ -106,8 +102,8 @@ enum {
     COMPRESSED_SPACE,
     COMPRESSED_OVER_LIMIT_SPACE,
     MFT_ZONE_SPACE,
-    MFT_SPACE,                   /* has highest precedence */
-    SPACE_STATES                 /* this must always be the last */
+    MFT_SPACE,                   /* has the highest precedence */
+    SPACE_STATES                 /* this member must always be the last one */
 };
 
 #define UNKNOWN_SPACE FRAGM_SPACE
@@ -123,17 +119,17 @@ typedef struct _udefrag_progress_info {
     ULONGLONG total_space;            /* volume size, in bytes */
     ULONGLONG free_space;             /* free space amount, in bytes */
     ULONGLONG mft_size;               /* mft size, in bytes */
-    udefrag_operation_type current_operation;  /* identifies currently running operation */
+    udefrag_operation_type current_operation;  /* identifies the currently running operation */
     unsigned long pass_number;        /* the current disk processing pass, increases 
                                          immediately after the pass completion */
     ULONGLONG clusters_to_process;    /* number of clusters to process */
     ULONGLONG processed_clusters;     /* number of already processed clusters */
     double percentage;                /* job completion percentage */
-    int completion_status;            /* zero for running job, positive value for succeeded, negative for failed */
-    char *cluster_map;                /* pointer to the cluster map buffer */
-    int cluster_map_size;             /* size of the cluster map buffer, in bytes */
+    int completion_status;            /* zero for running jobs, positive value for succeeded, negative for failed */
+    char *cluster_map;                /* the cluster map */
+    int cluster_map_size;             /* size of the cluster map, in bytes */
     ULONGLONG moved_clusters;         /* number of moved clusters */
-    ULONGLONG total_moves;            /* number of moves by move_files_to_front/back functions */
+    ULONGLONG total_moves;            /* number of moves made by move_files_to_front/back functions */
 } udefrag_progress_info;
 
 typedef void  (*udefrag_progress_callback)(udefrag_progress_info *pi, void *p);
