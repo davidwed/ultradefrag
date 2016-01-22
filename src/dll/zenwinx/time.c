@@ -1,6 +1,6 @@
 /*
  *  ZenWINX - WIndows Native eXtended library.
- *  Copyright (c) 2009-2013 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2009-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -28,10 +28,10 @@
 #include "zenwinx.h"
 
 /**
- * @brief Converts a formatted string to the time value in seconds.
- * @param[in] string the formatted string to be converted.
- * Format example: 3y 12d 4h 8m 37s.
- * @return Time interval in seconds.
+ * @brief Converts a string to time interval.
+ * @param[in] string the string to be converted,
+ * like that: 3y 12d 4h 8m 37s.
+ * @return The time interval, in seconds.
  */
 ULONGLONG winx_str2time(char *string)
 {
@@ -82,10 +82,10 @@ ULONGLONG winx_str2time(char *string)
 }
 
 /**
- * @brief Converts a time value in seconds to the formatted string.
+ * @brief Converts a time interval to string.
  * @param[in] time the time interval, in seconds.
- * @param[out] buffer the storage for the resulting string.
- * @param[in] size the length of the buffer, in characters.
+ * @param[out] buffer the output buffer.
+ * @param[in] size size of the buffer, in characters.
  * @return The number of characters stored.
  * @note The time interval should not exceed 140 years
  * (0xFFFFFFFF seconds), otherwise it will be truncated.
@@ -124,12 +124,12 @@ int winx_time2str(ULONGLONG time,char *buffer,int size)
 int xtime_failed = 0;
 
 /**
- * @brief Returns time interval since 
+ * @brief Returns the time interval since 
  * some abstract unique event in the past.
- * @return Time, in milliseconds.
+ * @return The time interval, in milliseconds.
  * Zero indicates failure.
  * @note
- * - Useful for performance measures.
+ * - Useful for performance measurements.
  * - Has no physical meaning.
  */
 ULONGLONG winx_xtime(void)
