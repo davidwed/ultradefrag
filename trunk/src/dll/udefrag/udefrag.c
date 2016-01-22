@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 /**
  * @file udefrag.c
  * @brief Entry point.
- * @details Each disk processing algorithm
+ * @details Each of the disk processing algorithms
  * should comply with the following rules:
  * -# never try to move directories on FAT entirely
  * -# never try to move MFT on NTFS entirely
@@ -28,17 +28,18 @@
  * -# sort primarily small files, because big files sorting is useless
  * -# save more time than needed to complete the disk processing itself
  * -# terminate quickly on already processed disks
- * -# don't sort out all the files when just a few files were changed
- *    since the last optimization
- * -# show progress percentage advancing from 0 to 100%
+ * -# don't sort out all the files when just a few files
+ *    have been changed since the last optimization
+ * -# advance progress indication from 0 to 100%
  * -# cleanup as much space as possible before use of the cleaned up space;
  *    otherwise NTFS processing will be slow
  * -# don't optimize any file twice
- * -# never go into infinite loop
+ * -# never go into infinite loops
  * -# handle correctly either normal or compressed/sparse files
  * -# handle correctly locked files
  * -# distinguish between file blocks and file fragments
- * -# handle a case when region assumed to be free becomes "already in use"
+ * -# handle the case when a region assumed to
+ *    be free turns out to be already in use
  * -# filter files properly
  * -# produce reports properly
  *
@@ -64,7 +65,7 @@ HANDLE hMutex = NULL;
 /**
  * @brief Initializes udefrag library.
  * @details This routine needs to be called
- * before any use of other routines.
+ * once before any use of other routines.
  * @return Zero for success, negative value otherwise.
  * @note This routine initializes zenwinx library as well.
  */
@@ -101,14 +102,17 @@ void udefrag_unload_library(void)
 }
 
 /**
+ * @internal
  * @brief Delivers progress information to the caller.
  * @note 
- * - completion_status parameter becomes delivered to the caller
- * instead of the appropriate field of jp->pi structure.
- * - If cluster map cell is occupied entirely by MFT zone
- * it will be drawn in light magenta if no files exist there.
- * Otherwise, such a cell will be drawn in different color
- * indicating that something still exists inside the zone.
+ * - This routine delivers the completion_status parameter
+ * to the caller instead of the appropriate field of the
+ * jp->pi structure.
+ * - If a cell of the cluster map is occupied entirely by the
+ * MFT zone it will be drawn in light magenta only when it's
+ * completely free. Otherwise, it will be drawn using another
+ * color (according to its contents) to show explicitly that
+ * some files are is still there.
  */
 static void deliver_progress_info(udefrag_job_parameters *jp,int completion_status)
 {
@@ -199,6 +203,7 @@ static void deliver_progress_info(udefrag_job_parameters *jp,int completion_stat
 }
 
 /**
+ * @internal
  */
 static int terminator(void *p)
 {
@@ -210,7 +215,7 @@ static int terminator(void *p)
         result = jp->t(jp->p);
         if(result){
             winx_dbg_print_header(0,0,I"*");
-            winx_dbg_print_header(0x20,0,I"termination requested by caller");
+            winx_dbg_print_header(0x20,0,I"termination requested");
             winx_dbg_print_header(0,0,I"*");
         }
         return result;
@@ -221,16 +226,18 @@ static int terminator(void *p)
 }
 
 /**
+ * @internal
  */
 static int killer(void *p)
 {
     winx_dbg_print_header(0,0,I"*");
-    winx_dbg_print_header(0x20,0,I"termination requested by caller");
+    winx_dbg_print_header(0x20,0,I"termination requested");
     winx_dbg_print_header(0,0,I"*");
     return 1;
 }
 
 /**
+ * @internal
  */
 static DWORD WINAPI start_job(LPVOID p)
 {
@@ -291,10 +298,11 @@ static DWORD WINAPI start_job(LPVOID p)
 }
 
 /**
- * @brief Destroys list of free regions, 
- * list of files and list of fragmented files.
+ * @internal
+ * @brief Destroys the list of free regions, the
+ * list of files and the list of fragmented files.
  */
-void destroy_lists(udefrag_job_parameters *jp)
+static void destroy_lists(udefrag_job_parameters *jp)
 {
     winx_scan_disk_release(jp->filelist);
     winx_release_free_volume_regions(jp->free_regions);
@@ -302,21 +310,21 @@ void destroy_lists(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Starts disk analysis/defragmentation/optimization job.
+ * @brief Starts a disk analysis/defragmentation/optimization job.
  * @param[in] volume_letter the volume letter.
  * @param[in] job_type one of the xxx_JOB constants, defined in udefrag.h
  * @param[in] flags combination of UD_JOB_xxx and UD_PREVIEW_xxx flags defined in udefrag.h
  * @param[in] cluster_map_size size of the cluster map, in cells.
  * Zero value forces to avoid cluster map use.
  * @param[in] cb address of procedure to be called each time when
- * progress information updates, but no more frequently than
+ * the progress information updates, but no more frequently than
  * specified in UD_REFRESH_INTERVAL environment variable.
  * @param[in] t address of procedure to be called each time
- * when requested job would like to know whether it must be terminated or not.
- * Nonzero value, returned by terminator, forces the job to be terminated.
- * @param[in] p pointer to user defined data to be passed to both callbacks.
+ * when the requested job would like to know whether it must be terminated or not.
+ * Nonzero value, returned by the terminator, forces the job to be terminated.
+ * @param[in] p pointer to a user defined data to be passed to both callbacks.
  * @return Zero for success, negative value otherwise.
- * @note Callback procedures should complete as quickly
+ * @note The callback procedures should complete as quickly
  * as possible to avoid slowdown of the volume processing.
  */
 int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
@@ -369,14 +377,12 @@ int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
     }
     
     /* set additional privileges for Vista and above */
-    if(win_version >= WINDOWS_VISTA){
+    if(win_version >= WINDOWS_VISTA)
         (void)winx_enable_privilege(SE_BACKUP_PRIVILEGE);
-        
-        if(win_version >= WINDOWS_7)
-            (void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE);
-    }
+    if(win_version >= WINDOWS_7)
+        (void)winx_enable_privilege(SE_MANAGE_VOLUME_PRIVILEGE);
     
-    /* run the job in separate thread */
+    /* run the job in a separate thread */
     if(winx_create_thread(start_job,(PVOID)&jp) < 0){
         free_map(&jp);
         release_options(&jp);
@@ -384,7 +390,7 @@ int udefrag_start_job(char volume_letter,udefrag_job_type job_type,int flags,
     }
 
     /*
-    * Call specified callback every refresh_interval milliseconds.
+    * Call the specified callback every refresh_interval milliseconds.
     * http://sourceforge.net/tracker/index.php?func=
     * detail&aid=2886353&group_id=199532&atid=969873
     */
@@ -439,12 +445,14 @@ done:
 }
 
 /**
- * @brief Retrieves default formatted results 
- * of the completed disk defragmentation job.
- * @param[in] pi pointer to udefrag_progress_info structure.
- * @return A string containing default formatted results
- * of the disk defragmentation job. NULL indicates failure.
- * @note This function is used in console and native applications.
+ * @brief Retrieves default formatted
+ * results of a disk defragmentation job.
+ * @param[in] pi pointer to structure containing
+ * the progress information of the job.
+ * @return The default formatted results
+ * of the job. NULL indicates failure.
+ * @note This function is intended for use
+ * in console and native applications.
  */
 char *udefrag_get_results(udefrag_progress_info *pi)
 {
@@ -501,7 +509,7 @@ void udefrag_release_results(char *results)
 
 /**
  * @brief Retrieves a human readable error
- * description for ultradefrag error codes.
+ * description for an ultradefrag error code.
  * @param[in] error_code the error code.
  * @return A human readable description.
  */
@@ -603,16 +611,15 @@ static int create_target_directory(wchar_t *path)
 }
 
 /**
- * @brief Enables debug logging to the file
- * if <b>\%UD_LOG_FILE_PATH\%</b> is set, otherwise
- * disables the logging.
- * @details If log path does not exist and
- * cannot be created, logs are placed in
- * <b>\%tmp\%\\UltraDefrag_Logs</b> folder.
- * @return Zero for success, negative value
- * otherwise.
- * @note The environment variable mentioned
- * above must contain the full path of the log file.
+ * @brief Turns logging to file on/off,
+ * according to <b>\%UD_LOG_FILE_PATH\%</b>
+ * environment variable.
+ * @details If the library cannot create the
+ * specified path, it uses the following path
+ * instead: <b>\%SystemDrive\%\\UltraDefrag_Logs</b>.
+ * @return Zero for success, negative value otherwise.
+ * @note The environment variable mentioned above
+ * must contain the full path of the log file.
  */
 int udefrag_set_log_file_path(void)
 {
@@ -620,7 +627,7 @@ int udefrag_set_log_file_path(void)
     
     path = winx_getenv(L"UD_LOG_FILE_PATH");
     if(path == NULL){
-        /* empty variable forces to disable log */
+        /* empty variable forces to disable logging */
         winx_disable_dbg_log();
         return 0;
     }
