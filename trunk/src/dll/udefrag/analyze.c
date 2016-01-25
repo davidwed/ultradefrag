@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -35,19 +35,22 @@ static void update_progress_counters(winx_file_info *f,udefrag_job_parameters *j
 
 /**
  * @internal
- * @brief Auxiliary structure
- * used by get_volume_information.
+ * @brief An auxiliary structure for
+ * the get_volume_information routine.
  */
 struct fs {
-    char *name; /* name in uppercase */
-    file_system_type type;
+    char *name; /* the file system name, in uppercase */
+    file_system_type type; /* the type of the file system */
     /* 
-    * On fat the first clusters 
-    * of directories cannot be moved.
+    * The FAT-formatted disks are somewhat special as the
+    * first clusters of directories are immovable there.
     */
     int is_fat;
 };
 
+/**
+ * @internal
+ */
 struct fs fs_types[] = {
     {"NTFS",  FS_NTFS,  0},
     {"FAT12", FS_FAT12, 1},
@@ -62,7 +65,7 @@ struct fs fs_types[] = {
 /**
  * @internal
  * @brief Constant definitions for
- * adjust_move_at_once_parameter
+ * the adjust_move_at_once_parameter
  * routine.
  */
 #define _256K                           (256LL * 1024LL)
@@ -78,11 +81,12 @@ struct fs fs_types[] = {
 #define _2T    (2LL * 1024LL * 1024LL * 1024LL * 1024LL)
 
 /**
+ * @internal
  * @brief Defines how many clusters to move at once in the move_file routine.
  * @details This algorithm has been suggested by Joachim Otahal:
  * http://sourceforge.net/projects/ultradefrag/forums/forum/709672/topic/4779581
  */
-void adjust_move_at_once_parameter(udefrag_job_parameters *jp)
+static void adjust_move_at_once_parameter(udefrag_job_parameters *jp)
 {
     ULONGLONG bytes_at_once;
     char buffer[32];
@@ -110,11 +114,12 @@ void adjust_move_at_once_parameter(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Retrieves all information about the volume.
+ * @internal
+ * @brief Retrieves complete information about the disk.
  * @return Zero for success, negative value otherwise.
  * @note Resets statistics and cluster map.
  */
-int get_volume_information(udefrag_job_parameters *jp)
+static int get_volume_information(udefrag_job_parameters *jp)
 {
     char fs_name[MAX_FS_NAME_LENGTH + 1];
     int i;
@@ -194,6 +199,7 @@ int get_volume_information(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief get_free_space_layout helper.
  */
 static int process_free_region(winx_volume_region *rgn,void *user_defined_data)
@@ -209,6 +215,7 @@ static int process_free_region(winx_volume_region *rgn,void *user_defined_data)
 }
 
 /**
+ * @internal
  * @brief Retrieves free space layout.
  * @return Zero for success, negative value otherwise.
  */
@@ -230,8 +237,9 @@ static int get_free_space_layout(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Checks whether specified 
- * region is inside processed volume.
+ * @internal
+ * @brief Checks whether the specified 
+ * region is inside of the volume.
  */
 int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
 {
@@ -243,6 +251,7 @@ int check_region(udefrag_job_parameters *jp,ULONGLONG lcn,ULONGLONG length)
 }
 
 /**
+ * @internal
  * @brief Retrieves mft zones layout.
  * @note Since we have MFT optimization routine, 
  * let's use MFT zone for files placement on XP
@@ -256,8 +265,8 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
     
     /* 
     * Don't increment progress counters,
-    * because mft zones are partially
-    * inside already counted free space pool.
+    * because mft zones are partially inside
+    * of the already counted free space pool.
     */
     itrace("%-12s: %-20s: %-20s", "mft section", "start", "length");
 
@@ -296,11 +305,8 @@ static void get_mft_zones_layout(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file must be
- * excluded from the volume processing or not
- * because of its fragments size.
- * @return Nonzero value indicates
- * that the file must be excluded.
+ * @internal
+ * @brief Excludes files according to UD_FRAGMENT_SIZE_THRESHOLD filter.
  */
 int exclude_by_fragment_size(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -337,11 +343,8 @@ int exclude_by_fragment_size(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file must be
- * excluded from the volume processing or not
- * because of its number of fragments.
- * @return Nonzero value indicates
- * that the file must be excluded.
+ * @internal
+ * @brief Excludes files according to UD_FRAGMENTS_THRESHOLD filter.
  */
 int exclude_by_fragments(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -350,11 +353,8 @@ int exclude_by_fragments(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file must be
- * excluded from the volume processing or not
- * because of its size.
- * @return Nonzero value indicates
- * that the file must be excluded.
+ * @internal
+ * @brief Excludes files according to UD_FILE_SIZE_THRESHOLD filter.
  */
 int exclude_by_size(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -370,17 +370,14 @@ int exclude_by_size(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file must be
- * excluded from the volume processing or not
- * because of its path.
- * @return Nonzero value indicates
- * that the file must be excluded.
+ * @internal
+ * @brief Excludes files according to UD_IN_FILTER and UD_EX_FILTER filters.
  */
 int exclude_by_path(winx_file_info *f,udefrag_job_parameters *jp)
 {
-    /* note that paths have \??\ internal prefix while patterns haven't */
+    /* note that paths have the \??\ internal prefix while patterns haven't */
     if(wcslen(f->path) < 0x4)
-        return 1; /* path is invalid */
+        return 1; /* the path is invalid */
     
     if(jp->udo.ex_filter.count){
         if(winx_patcmp(f->path + 0x4,&jp->udo.ex_filter))
@@ -397,6 +394,7 @@ int exclude_by_path(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief find_files helper.
  * @note Optimized for speed.
  */
@@ -477,7 +475,7 @@ skip_file:
     f->user_defined_flags |= UD_FILE_EXCLUDED;
     
 accept_file:
-    /* count everything in context menu handler to avoid ambiguity */
+    /* count everything in the context menu handler to avoid ambiguity */
     if(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER){
         if(jp->udo.cut_filter.count){
             if(winx_patcmp(f->path + 0x4,&jp->udo.cut_filter))
@@ -521,18 +519,20 @@ static void update_progress_counters(winx_file_info *f,udefrag_job_parameters *j
 }
 
 /**
+ * @internal
  * @brief find_files helper.
  */
 static void progress_callback(winx_file_info *f,void *user_defined_data)
 {
     udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
     
-    /* don't count excluded files in context menu handler */
+    /* don't count excluded files in the context menu handler */
     if(!(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER))
         update_progress_counters(f,jp);
 }
 
 /**
+ * @internal
  * @brief find_files helper.
  */
 static int terminator(void *user_defined_data)
@@ -543,6 +543,7 @@ static int terminator(void *user_defined_data)
 }
 
 /**
+ * @internal
  * @brief Displays file counters.
  */
 void dbg_print_file_counters(udefrag_job_parameters *jp)
@@ -560,7 +561,8 @@ void dbg_print_file_counters(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Searches for all files on disk.
+ * @internal
+ * @brief Searches for all files on the disk.
  * @return Zero for success, negative value otherwise.
  */
 static int find_files(udefrag_job_parameters *jp)
@@ -573,7 +575,7 @@ static int find_files(udefrag_job_parameters *jp)
     winx_file_info *f;
     winx_blockmap *block;
     
-    /* check for context menu handler */
+    /* check for the context menu handler */
     if(jp->udo.job_flags & UD_JOB_CONTEXT_MENU_HANDLER){
         if(jp->udo.cut_filter.count > 0){
             if(wcslen(jp->udo.cut_filter.array[0]) >= wcslen(L"C:\\"))
@@ -583,14 +585,14 @@ static int find_files(udefrag_job_parameters *jp)
 
     /* speed up the context menu handler */
     if(jp->fs_type != FS_NTFS && context_menu_handler){
-        /* in case of c:\* or c:\ scan entire disk */
+        /* in case of c:\* or c:\ scan the entire disk */
         c = jp->udo.cut_filter.array[0][3];
         if(c == 0 || c == '*')
             goto scan_entire_disk;
-        /* in case of c:\test;c:\test\* scan parent directory recursively */
+        /* in case of c:\test;c:\test\* scan the parent directory recursively */
         if(jp->udo.cut_filter.count > 1)
             flags = WINX_FTW_RECURSIVE;
-        /* in case of c:\test scan parent directory, not recursively */
+        /* in case of c:\test scan the parent directory, not recursively */
         _snwprintf(parent_directory, MAX_PATH, L"\\??\\%ws", jp->udo.cut_filter.array[0]);
         parent_directory[MAX_PATH] = 0;
         p = wcsrchr(parent_directory,'\\');
@@ -611,7 +613,7 @@ static int find_files(udefrag_job_parameters *jp)
     if(jp->filelist == NULL && !jp->termination_router((void *)jp))
         return (-1);
     
-    /* calculate number of fragmented files; redraw map */
+    /* calculate number of fragmented files; redraw the map */
     for(f = jp->filelist; f; f = f->next){
         /* skip excluded files */
         if(!is_fragmented(f) || is_excluded(f)){
@@ -624,7 +626,7 @@ static int find_files(udefrag_job_parameters *jp)
         /* redraw cluster map */
         colorize_file(jp,f,SYSTEM_SPACE);
         
-        /* add file blocks to the binary search tree - after winx_scan_disk! */
+        /* add file blocks to a binary tree - after winx_scan_disk! */
         for(block = f->disp.blockmap; block; block = block->next){
             if(add_block_to_file_blocks_tree(jp,f,block) < 0) break;
             if(block->next == f->disp.blockmap) break;
@@ -638,7 +640,8 @@ static int find_files(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file
+ * @internal
+ * @brief Defines whether a file
  * is locked by system or not.
  * @return Nonzero value indicates
  * that the file is locked.
@@ -672,8 +675,9 @@ int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file is from
- * well known locked files list or not.
+ * @internal
+ * @brief Defines whether a file is from the
+ * list of well known locked files or not.
  * @note Optimized for speed.
  */
 static int is_well_known_locked_file(winx_file_info *f,udefrag_job_parameters *jp)
@@ -709,6 +713,7 @@ static int is_well_known_locked_file(winx_file_info *f,udefrag_job_parameters *j
 }
 
 /**
+ * @internal
  * @brief Searches for well known locked files
  * and applies their dispositions to the map.
  * @details Resets f->disp structure of locked files.
@@ -743,6 +748,7 @@ static void redraw_well_known_locked_files(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief Defines rules for the fragmented files list sorting.
  */
 static int fragmented_files_compare(const void *prb_a, const void *prb_b, void *prb_param)
@@ -763,7 +769,8 @@ static int fragmented_files_compare(const void *prb_a, const void *prb_b, void *
 }
 
 /**
- * @brief Adds file to the list of fragmented files.
+ * @internal
+ * @brief Adds a file to the list of fragmented files.
  * @note Ignores files excluded from the disk processing.
  */
 int expand_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp)
@@ -779,7 +786,8 @@ int expand_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Removes file from the list of fragmented files.
+ * @internal
+ * @brief Removes a file from the list of fragmented files.
  */
 void truncate_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -788,7 +796,8 @@ void truncate_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp
 }
 
 /**
- * @brief Produces list of fragmented files.
+ * @internal
+ * @brief Produces the list of fragmented files.
  */
 static void produce_list_of_fragmented_files(udefrag_job_parameters *jp)
 {
@@ -810,11 +819,11 @@ static void produce_list_of_fragmented_files(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Check whether the requested
+ * @internal
+ * @brief Checks whether the requested
  * action is allowed or not.
- * @return Zero indicates that the
- * requested operation is allowed,
- * negative value indicates contrary.
+ * @return Zero indicates that it's allowed,
+ * negative value indicates the contrary.
  */
 static int check_requested_action(udefrag_job_parameters *jp)
 {
@@ -829,6 +838,7 @@ static int check_requested_action(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief Defines whether the fragmentation level
  * is above the fragmentation threshold or not.
  */
@@ -855,8 +865,10 @@ int check_fragmentation_level(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Performs a volume analysis.
- * @return Zero for success, negative value otherwise.
+ * @internal
+ * @brief Analyzes the disk.
+ * @return Zero for success,
+ * negative value otherwise.
  */
 int analyze(udefrag_job_parameters *jp)
 {
@@ -871,7 +883,7 @@ int analyze(udefrag_job_parameters *jp)
     if(result < 0)
         return result;
     
-    /* scan volume for free space areas */
+    /* search for free space areas */
     if(get_free_space_layout(jp) < 0)
         return (-1);
     
@@ -885,7 +897,7 @@ int analyze(udefrag_job_parameters *jp)
     /* redraw well known locked files in green */
     redraw_well_known_locked_files(jp);
 
-    /* produce list of fragmented files */
+    /* produce a list of fragmented files */
     produce_list_of_fragmented_files(jp);
     (void)check_fragmentation_level(jp); /* for debugging */
 

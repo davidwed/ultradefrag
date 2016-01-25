@@ -25,19 +25,19 @@
 #include "defrag_native.h"
 
 /**
- * @brief Current defrag job type.
+ * @brief The current job type.
  */
 udefrag_job_type current_job;
 
 /**
- * @brief Current job flags.
+ * @brief The current job flags.
  */
 int current_job_flags;
 
 /**
- * @brief Indicates whether the 
- * defragmentation must be aborted
- * or not.
+ * @brief Indicates whether 
+ * defragmentation must be
+ * aborted or not.
  */
 int abort_flag = 0;
 
@@ -56,7 +56,7 @@ static void search_for_paths(int argc,wchar_t **argv,wchar_t **envp);
 static void add_path(wchar_t *buffer);
 
 /**
- * @brief Returns current debug level.
+ * @brief Returns the current debugging level.
  */
 int GetDebugLevel()
 {
@@ -80,9 +80,6 @@ int old_pass_number = 0;
 
 /**
  * @brief Redraws the progress information.
- * @note Old dash based progress indication has wrong
- * algorithm not reliable by definition. Therefore
- * it has been replaced by a new single line indicator.
  */
 void RedrawProgress(udefrag_progress_info *pi)
 {
@@ -122,12 +119,16 @@ void RedrawProgress(udefrag_progress_info *pi)
         status = "completed";
     }
 
-    /* allow display of all process stages for better verification */
+    /* display all the processing stages, for easier verification */
     if(!winx_stristr(old_op_name,op_name) && old_op_name[0] != 0){
-        if(old_pass_number > 1)
-            _snprintf(s,sizeof(s),"%s100.00%% %s, pass %u, fragmented/total = %lu/%lu",old_op_name,status,old_pass_number,pi->fragmented,pi->files);
-        else
-            _snprintf(s,sizeof(s),"%s100.00%% %s, fragmented/total = %lu/%lu",old_op_name,status,pi->fragmented,pi->files);
+        if(old_pass_number > 1){
+            _snprintf(s,sizeof(s),"%s100.00%% %s, pass %u, "
+                "fragmented/total = %lu/%lu",old_op_name,
+                status,old_pass_number,pi->fragmented,pi->files);
+        } else {
+            _snprintf(s,sizeof(s),"%s100.00%% %s, fragmented/total = "
+                "%lu/%lu",old_op_name,status,pi->fragmented,pi->files);
+        }
 
         s[sizeof(s) - 1] = 0;
         _snprintf(format,sizeof(format),"\r%%-%us",progress_line_length);
@@ -140,18 +141,27 @@ void RedrawProgress(udefrag_progress_info *pi)
         strncpy(old_op_name,op_name,sizeof(old_op_name)-1);
     }
 
-    if(pi->current_operation == VOLUME_OPTIMIZATION && !abort_flag && pi->completion_status == 0){
+    if(pi->current_operation == VOLUME_OPTIMIZATION \
+      && !abort_flag && pi->completion_status == 0){
         /* display number of moves */
-        if(pi->pass_number > 1)
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, pass %u, moves total = %I64u",op_name,p1,p2,pi->pass_number,pi->total_moves);
-        else
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, moves total = %I64u",op_name,p1,p2,pi->total_moves);
+        if(pi->pass_number > 1){
+            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, "
+                "pass %u, moves total = %I64u",op_name,p1,
+                p2,pi->pass_number,pi->total_moves);
+        } else {
+            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, "
+            "moves total = %I64u",op_name,p1,p2,pi->total_moves);
+        }
     } else {
         /* display fragmentation status */
-        if(pi->pass_number > 1)
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% %s, pass %u, fragmented/total = %lu/%lu",op_name,p1,p2,status,pi->pass_number,pi->fragmented,pi->files);
-        else
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% %s, fragmented/total = %lu/%lu",op_name,p1,p2,status,pi->fragmented,pi->files);
+        if(pi->pass_number > 1){
+            _snprintf(s,sizeof(s),"%s%3u.%02u%% %s, pass %u, "
+                "fragmented/total = %lu/%lu",op_name,p1,p2,
+                status,pi->pass_number,pi->fragmented,pi->files);
+        } else {
+            _snprintf(s,sizeof(s),"%s%3u.%02u%% %s, fragmented/total = "
+                "%lu/%lu",op_name,p1,p2,status,pi->fragmented,pi->files);
+        }
     }
 
     s[sizeof(s) - 1] = 0;
@@ -172,9 +182,9 @@ void RedrawProgress(udefrag_progress_info *pi)
 }
 
 /**
- * @brief Updates progress information
- * on the screen and raises a job termination
- * when Esc\Break keys are pressed.
+ * @brief Updates the progress information
+ * on the screen and terminates the job
+ * if the user hit either Escape or Break.
  */
 void update_progress(udefrag_progress_info *pi, void *p)
 {
@@ -189,7 +199,7 @@ void update_progress(udefrag_progress_info *pi, void *p)
             escape_detected = 1;
             escape_flag = 1;
         } else if(kbd_rec.wVirtualScanCode == 0x1d){
-            /* distinguish between control keys and break key */
+            /* distinguish between control keys and the break key */
             if(!(kbd_rec.dwControlKeyState & LEFT_CTRL_PRESSED) && \
               !(kbd_rec.dwControlKeyState & RIGHT_CTRL_PRESSED)){
                 break_detected = 1;
@@ -208,7 +218,7 @@ int terminator(void *p)
 }
 
 /**
- * @brief Processes single volume.
+ * @brief Processes a single volume.
  */
 void ProcessVolume(char letter)
 {
@@ -251,7 +261,7 @@ void ProcessVolume(char letter)
         message = "MFT optimization";
         break;
     }
-    /* display the time limit if possible */
+    /* display the time limit whenever it's set */
     buffer = winx_getenv(L"UD_TIME_LIMIT");
     if(buffer){
         winx_printf("\nProcess will be terminated in %ws automatically.\n",buffer);
@@ -268,7 +278,7 @@ void ProcessVolume(char letter)
 }
 
 /**
- * @brief Displays list of volumes
+ * @brief Enumerates volumes
  * available for defragmentation.
  * @param[in] skip_removable defines
  * whether to skip removable media or not.
@@ -318,7 +328,7 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
         return (-1);
     }
     
-    /* handle volumes listing request */
+    /* handle the volumes listing request */
     if(!wcscmp(argv[1],L"-l"))
         return DisplayAvailableVolumes(TRUE);
     if(!wcscmp(argv[1],L"-la"))
@@ -388,7 +398,7 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
     /* --quick-optimize flag has more precedence */
     if(quick_optimize_flag) o_flag = 0;
     
-    /* set current_job global variable */
+    /* set the current_job global variable */
     if(a_flag) current_job = ANALYSIS_JOB;
     else if(o_flag) current_job = FULL_OPTIMIZATION_JOB;
     else if(quick_optimize_flag) current_job = QUICK_OPTIMIZATION_JOB;
@@ -398,12 +408,9 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
     current_job_flags = repeat_flag ? UD_JOB_REPEAT : 0;
     
     /*
-    * In scripting mode the abort_flag has initial value 0.
-    * The Break key sets them to 1 => disables any further
-    * defragmentation jobs.
-    * On the other hand, in interactive mode we are setting
-    * this flag to 0 before any defragmentation job. This
-    * technique breaks only the current job.
+    * In the interactive mode let the job run
+    * regardless of whether the previous job
+    * has been aborted or not.
     */
     if(!scripting_mode) abort_flag = 0;
 
@@ -451,7 +458,7 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
                 cut_filter[MAX_ENV_VARIABLE_LENGTH] = 0;
             }
             
-            /* search for another paths with the same drive letter */
+            /* search for other paths with the same drive letter */
             for(another_path = path->next; another_path; another_path = another_path->next){
                 if(another_path == paths) break;
                 if(winx_toupper(letter) == winx_toupper((char)another_path->path[0])){
@@ -532,8 +539,8 @@ static void search_for_paths(int argc,wchar_t **argv,wchar_t **envp)
     int leading_quote_found = 0;
     int i, n;
     
-    aux_buffer[0] = 0;  /* reset main buffer */
-    aux_buffer2[0] = 0; /* reset auxiliary buffer */
+    aux_buffer[0] = 0;  /* reset the main buffer */
+    aux_buffer2[0] = 0; /* reset an auxiliary buffer */
     for(i = 1; i < argc; i++){
         if(argv[i][0] == 0) continue;   /* skip empty strings */
         if(argv[i][0] == '-') continue; /* skip options */
@@ -543,13 +550,13 @@ static void search_for_paths(int argc,wchar_t **argv,wchar_t **envp)
         }
         //winx_printf("part of path detected: arg[%i] = %ls\n",i,argv[i]);
         if(argv[i][0] == '"'){
-            /* leading quote found */
+            /* a leading quote found */
             add_path(aux_buffer);
             wcsncpy(aux_buffer,argv[i] + 1,MAX_LONG_PATH);
             aux_buffer[MAX_LONG_PATH] = 0;
-            /* check for trailing quote */
+            /* check for a trailing quote */
             if(argv[i][wcslen(argv[i]) - 1] == '"'){
-                /* remove trailing quote */
+                /* remove the trailing quote */
                 n = (int)wcslen(aux_buffer);
                 if(n > 0) aux_buffer[n - 1] = 0;
                 add_path(aux_buffer);
@@ -558,7 +565,7 @@ static void search_for_paths(int argc,wchar_t **argv,wchar_t **envp)
                 leading_quote_found = 1;
             }
         } else if(argv[i][wcslen(argv[i]) - 1] == '"'){
-            /* trailing quote found */
+            /* a trailing quote found */
             if(aux_buffer[0])
                 n = _snwprintf(aux_buffer2,MAX_LONG_PATH + 1,L"%ls %ls",aux_buffer,argv[i]);
             else
@@ -568,7 +575,7 @@ static void search_for_paths(int argc,wchar_t **argv,wchar_t **envp)
             } else {
                 wcsncpy(aux_buffer,aux_buffer2,MAX_LONG_PATH);
                 aux_buffer[MAX_LONG_PATH] = 0;
-                /* remove trailing quote */
+                /* remove the trailing quote */
                 n = (int)wcslen(aux_buffer);
                 if(n > 0) aux_buffer[n - 1] = 0;
             }
