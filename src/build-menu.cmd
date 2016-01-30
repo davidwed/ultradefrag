@@ -29,7 +29,7 @@ echo.
 echo UltraDefrag Project - Build Menu
 echo ================================
 echo.
-echo   Brought to You by the UltraDefrag Development Team
+echo   Brought to you by UltraDefrag Development Team
 echo.
 echo      1 ... Clean Project Folder
 echo      2 ... Build with Defaults

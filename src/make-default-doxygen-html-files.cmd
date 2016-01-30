@@ -31,12 +31,12 @@ call :make_pdf_default ..\doc\handbook a4     || goto fail
 call :make_pdf_default ..\doc\handbook letter || goto fail
 
 echo.
-echo Created default files successfully!
+echo Default files created successfully!
 goto :END
 
 :fail
 echo.
-echo Creating default files failed!
+echo Default files creation failed!
 
 :END
 echo.
