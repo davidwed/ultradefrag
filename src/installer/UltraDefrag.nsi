@@ -19,19 +19,18 @@
  */
 
 /*
-* UltraDefrag regular installer.
-*/
+ * UltraDefrag installer.
+ */
 
 /*
-*  NOTE: The following symbols must be
-*  defined through makensis command line:
-*  ULTRADFGVER=<version number in form x.y.z>
-*  ULTRADFGARCH=<i386 | amd64 | ia64>
-*  UDVERSION_SUFFIX
-*  The following symbol is accepted too,
-*  but may be undefined:
-*  RELEASE_STAGE
-*/
+ * NOTE: The following symbols must be
+ * defined through the makensis command line:
+ * ULTRADFGVER=<UltraDefrag version, like so: 7.0.0>
+ * ULTRADFGARCH=<i386 | amd64 | ia64>
+ * UDVERSION_SUFFIX
+ * The following optional symbol is accepted too:
+ * RELEASE_STAGE
+ */
 
 !ifndef ULTRADFGVER
 !error "ULTRADFGVER parameter must be specified on the command line!"
@@ -59,20 +58,20 @@
 !endif
 
 /*
- * Compress installer exehead with an executable compressor
+ * Compress the installer using UPX.
  */
 
 !packhdr temp.dat 'upx --best -q temp.dat'
 
 /*
- * Include additional plug-in folders
+ * Include additional plug-in folders.
  */
 
 !addplugindir "${ROOTDIR}\src\installer\plug_ins\Plugin"
 !addincludedir "${ROOTDIR}\src\installer\plug_ins\Include"
 
 /*
- * Installer Attributes
+ * Installer attributes.
  */
 
 !ifdef RELEASE_STAGE
@@ -119,14 +118,14 @@ InstType "Full"
 InstType "Micro Edition"
 
 /*
- * Compiler Flags
+ * Compiler flags.
  */
 
 AllowSkipFiles off
 SetCompressor /SOLID lzma
 
 /*
- * Version Information
+ * Version information.
  */
 
 VIProductVersion "${ULTRADFGVER}.0"
@@ -148,7 +147,7 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 !include "${ROOTDIR}\src\installer\PresetSections.nsh"
 
 /*
- * Modern User Interface Pages
+ * Modern user interface pages.
  */
 
 !define MUI_ICON   "${ROOTDIR}\src\installer\udefrag-install.ico"
@@ -177,7 +176,7 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 /*
- * Component Sections
+ * Component sections.
  */
 
 Section "!UltraDefrag core files (required)" SecCore
@@ -266,7 +265,7 @@ Section "Turn off usage tracking" SecUsageTracking
 
 SectionEnd
 
-; this must always be the last install section
+; this must be the last section of the installer
 Section "-Finalize" SecFinalize
 
     SectionIn 1 2 RO
@@ -285,7 +284,7 @@ Section "Uninstall"
 
     ${DisableX64FSRedirection}
 
-    DetailPrint "Deregister boot time defragmenter..."
+    DetailPrint "Deregistering boot time defragmenter..."
     ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
     Delete "$WINDIR\pending-boot-off"
 
@@ -371,10 +370,10 @@ FunctionEnd
 Function un.onUninstSuccess
 
     DetailPrint "Removing installation directory..."
-    ; safe, because installation directory is predefined
+    ; safe, because it has been verified on installation
     RMDir /r $INSTDIR
 
-    DetailPrint "Cleanup registry..."
+    DetailPrint "Registry cleanup..."
     DeleteRegKey HKLM ${UD_UNINSTALL_REG_KEY}
 
     ${UnRegisterInstallationFolder}

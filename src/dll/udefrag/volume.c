@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -26,128 +26,22 @@
 
 #include "udefrag-internals.h"
 
-static int internal_validate_volume(char letter,int skip_removable,volume_info *v);
+/******************************************************************************/
+/*                            Auxiliary functions                             */
+/******************************************************************************/
 
 /**
- * @brief Retrieves a list of volumes
- * available for defragmentation.
- * @param[in] skip_removable boolean value
- * indicating whether removable drives
- * should be skipped or not.
- * @return Pointer to the list of volumes.
- * NULL indicates failure.
- * @note if skip_removable is equal to FALSE
- * and you have a floppy drive without a disk
- * inside, then you will hear noise :-)
- * @par Example:
- * @code
- * volume_info *v;
- * int i;
- *
- * v = udefrag_get_vollist(TRUE);
- * if(v != NULL){
- *     for(i = 0; v[i].letter != 0; i++){
- *         // process volume list entry
- *     }
- *     udefrag_release_vollist(v);
- * }
- * @endcode
- */
-volume_info *udefrag_get_vollist(int skip_removable)
-{
-    volume_info *v;
-    ULONG i, index;
-    char letter;
-    
-    /* allocate memory */
-    v = winx_malloc((MAX_DOS_DRIVES + 1) * sizeof(volume_info));
-
-    /* set error mode to ignore missing removable drives */
-    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0){
-        winx_free(v);
-        return NULL;
-    }
-
-    /* cycle through drive letters */
-    for(i = 0, index = 0; i < MAX_DOS_DRIVES; i++){
-        letter = 'A' + (char)i;
-        if(internal_validate_volume(letter, skip_removable,v + index) >= 0)
-            index ++;
-    }
-    v[index].letter = 0;
-
-    /* try to restore error mode to default state */
-    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-    return v;
-}
-
-/**
- * @brief Releases list of volumes
- * returned by udefrag_get_vollist.
- */
-void udefrag_release_vollist(volume_info *v)
-{
-    winx_free(v);
-}
-
-/**
- * @brief Retrieves volume information.
+ * @internal
+ * @brief Finds out whether a disk can be defragmented or not. 
+ * If so, retrieves the complete information about it as well.
  * @param[in] volume_letter the volume letter.
- * @param[in] v pointer to structure receiving the information.
+ * @param[in] skip_removable defines whether
+ * to skip removable media or not.
+ * @param[out] v pointer to structure receiving the information.
  * @return Zero for success, negative value otherwise.
- */
-int udefrag_get_volume_information(char volume_letter,volume_info *v)
-{
-    int result;
-    
-    /* set error mode to ignore missing removable drives */
-    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
-        return (-1);
-
-    result = internal_validate_volume(volume_letter,0,v);
-
-    /* try to restore error mode to default state */
-    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-    return result;
-}
-
-/**
- * @brief Checks a volume for the defragmentation possibility.
- * @param[in] volume_letter the volume letter.
- * @param[in] skip_removable the boolean value 
- * defining, must removable drives be skipped or not.
- * @return Zero for success, negative value otherwise.
- * @note if skip_removable is equal to FALSE and you want 
- * to validate a floppy drive without a floppy disk
- * then you will hear noise :))
- */
-int udefrag_validate_volume(char volume_letter,int skip_removable)
-{
-    volume_info v;
-    int result;
-
-    /* set error mode to ignore missing removable drives */
-    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
-        return (-1);
-    result = internal_validate_volume(volume_letter,skip_removable,&v);
-    /* try to restore error mode to default state */
-    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
-    return result;
-}
-
-/**
- * @brief Retrieves a volume parameters.
- * @param[in] volume_letter the volume letter.
- * @param[in] skip_removable the boolean value defining,
- * must removable drives be treated as invalid or not.
- * @param[out] v pointer to structure receiving volume
- * parameters.
- * @return Zero for success, negative value otherwise.
- * @note
- * - Internal use only.
- * - if skip_removable is equal to FALSE and you want 
- *   to validate a floppy drive without a floppy disk
- *   then you will hear noise :))
+ * @note If skip_removable is equal to zero and you want to
+ * validate a floppy drive with no floppy disk inserted then
+ * you'll hear noise :)
  */
 static int internal_validate_volume(char volume_letter,int skip_removable,volume_info *v)
 {
@@ -200,6 +94,117 @@ static int internal_validate_volume(char volume_letter,int skip_removable,volume
     v->label[MAX_PATH] = 0;
     v->is_dirty = volume_info.is_dirty;
     return 0;
+}
+
+/******************************************************************************/
+/*                            Interface functions                             */
+/******************************************************************************/
+
+/**
+ * @brief Enumerates disk volumes
+ * available for defragmentation.
+ * @param[in] skip_removable defines
+ * whether to skip removable media or not.
+ * @return Pointer to the list of volumes.
+ * NULL indicates failure.
+ * @note If skip_removable is equal to zero
+ * and you have a floppy drive with no disk
+ * inserted, then you'll hear noise :)
+ * @par Example:
+ * @code
+ * volume_info *v;
+ * int i;
+ *
+ * v = udefrag_get_vollist(TRUE);
+ * if(v != NULL){
+ *     for(i = 0; v[i].letter != 0; i++){
+ *         // process the volume
+ *     }
+ *     udefrag_release_vollist(v);
+ * }
+ * @endcode
+ */
+volume_info *udefrag_get_vollist(int skip_removable)
+{
+    volume_info *v;
+    ULONG i, index;
+    char letter;
+    
+    /* allocate memory */
+    v = winx_malloc((MAX_DOS_DRIVES + 1) * sizeof(volume_info));
+
+    /* set error mode to ignore missing removable drives */
+    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0){
+        winx_free(v);
+        return NULL;
+    }
+
+    /* cycle through drive letters */
+    for(i = 0, index = 0; i < MAX_DOS_DRIVES; i++){
+        letter = 'A' + (char)i;
+        if(internal_validate_volume(letter,skip_removable,v + index) >= 0)
+            index ++;
+    }
+    v[index].letter = 0;
+
+    /* try to restore error mode to default state */
+    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
+    return v;
+}
+
+/**
+ * @brief Releases list of volumes
+ * returned by udefrag_get_vollist.
+ */
+void udefrag_release_vollist(volume_info *v)
+{
+    winx_free(v);
+}
+
+/**
+ * @brief Retrieves complete information about a disk volume.
+ * @param[in] volume_letter the volume letter.
+ * @param[in] v pointer to structure receiving the information.
+ * @return Zero for success, negative value otherwise.
+ */
+int udefrag_get_volume_information(char volume_letter,volume_info *v)
+{
+    int result;
+    
+    /* set error mode to ignore missing removable drives */
+    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
+        return (-1);
+
+    result = internal_validate_volume(volume_letter,0,v);
+
+    /* try to restore error mode to default state */
+    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
+    return result;
+}
+
+/**
+ * @brief Checks whether defragmentation is
+ * possible for the specified disk volume or not.
+ * @param[in] volume_letter the volume letter.
+ * @param[in] skip_removable defines whether
+ * to skip removable media or not.
+ * @return Zero for success, negative value otherwise.
+ * @note If skip_removable is equal to zero and you want 
+ * to validate a floppy drive with no floppy disk inserted
+ * then you'll hear noise :)
+ */
+int udefrag_validate_volume(char volume_letter,int skip_removable)
+{
+    volume_info v;
+    int result;
+
+    /* set error mode to ignore missing removable drives */
+    if(winx_set_system_error_mode(INTERNAL_SEM_FAILCRITICALERRORS) < 0)
+        return (-1);
+    result = internal_validate_volume(volume_letter,skip_removable,&v);
+    /* try to restore error mode to default state */
+    winx_set_system_error_mode(1); /* equal to SetErrorMode(0) */
+    return result;
 }
 
 /** @} */
