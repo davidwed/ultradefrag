@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -126,7 +126,8 @@ void test_special_files_defrag(udefrag_job_parameters *jp)
 /************************************************************/
 
 /**
- * @brief Defines whether the file can be defragmented or not.
+ * @internal
+ * @brief Defines whether a file can be defragmented or not.
  */
 static int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -154,6 +155,7 @@ static int can_defragment(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief build_fragments_list helper.
  */
 static winx_blockmap *add_fragment(winx_blockmap **fragments,
@@ -172,7 +174,8 @@ static winx_blockmap *add_fragment(winx_blockmap **fragments,
 }
 
 /**
- * @brief Builds list of file fragments.
+ * @internal
+ * @brief Enumerates fragments of a file.
  */
 winx_blockmap *build_fragments_list(winx_file_info *f,ULONGLONG *n_fragments)
 {
@@ -214,7 +217,8 @@ winx_blockmap *build_fragments_list(winx_file_info *f,ULONGLONG *n_fragments)
 }
 
 /**
- * @brief Releases list of file fragments.
+ * @internal
+ * @brief Releases a list of file fragments.
  */
 void release_fragments_list(winx_blockmap **fragments)
 {
@@ -222,7 +226,8 @@ void release_fragments_list(winx_blockmap **fragments)
 }
 
 /**
- * @brief Clears the UD_FILE_CURRENTLY_EXCLUDED flag for all of the files.
+ * @internal
+ * @brief Clears UD_FILE_CURRENTLY_EXCLUDED flag for all files.
  */
 void clear_currently_excluded_flag(udefrag_job_parameters *jp)
 {
@@ -235,8 +240,9 @@ void clear_currently_excluded_flag(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Calculates total number of clusters
- * needed to be moved to complete the defragmentation.
+ * @internal
+ * @brief Calculates number of clusters which
+ * need to be moved to complete defragmentation.
  */
 static ULONGLONG defrag_cc_routine(udefrag_job_parameters *jp)
 {
@@ -257,8 +263,9 @@ static ULONGLONG defrag_cc_routine(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Eliminates little fragments
- * respect to the fragment size threshold filter.
+ * @internal
+ * @brief Eliminates little fragments respect
+ * to the fragment size threshold filter.
  */
 static int defrag_routine(udefrag_job_parameters *jp)
 {
@@ -318,7 +325,7 @@ static int defrag_routine(udefrag_job_parameters *jp)
             else if(jp->win_version < WINDOWS_XP && jp->fs_type == FS_NTFS)
                 move_entirely = 1; /* keep algorithm simple */
             if(move_entirely){
-                /* move entire file */
+                /* move the entire file */
                 rgn = find_first_free_region(jp,0,file->disp.clusters,NULL);
                 if(rgn){
                     x = jp->pi.moved_clusters;
@@ -473,8 +480,8 @@ completed:
 }
 
 /**
- * @brief Performes a sequence of operations
- * needed for the complete disk defragmentation.
+ * @internal
+ * @brief Defragments the disk once.
  */
 static int defrag_sequence(udefrag_job_parameters *jp)
 {
@@ -534,7 +541,8 @@ static int defrag_sequence(udefrag_job_parameters *jp)
 /************************************************************/
 
 /**
- * @brief Performs a volume defragmentation.
+ * @internal
+ * @brief Defragments the disk.
  * @details To avoid infinite data moves in multipass
  * processing, we exclude files for which moving failed.
  * On the other hand, number of fragmented files instantly
@@ -550,7 +558,7 @@ int defragment(udefrag_job_parameters *jp)
     ULONGLONG time;
     
     if(jp->job_type == DEFRAGMENTATION_JOB){
-        /* perform volume analysis */
+        /* analyze the disk */
         result = analyze(jp); /* we need to call it once, here */
         if(result < 0) return result;
     #ifdef TEST_SPECIAL_FILES_DEFRAG
@@ -575,9 +583,9 @@ int defragment(udefrag_job_parameters *jp)
     }
     
     /*
-    * Some file moves failed because the disk space
-    * was already in use at the moment of the move.
-    * So, let's give them another chance.
+    * Some files haven't been moved because target
+    * space turned out to be already in use. So, 
+    * let's give those files another chance.
     */
     prb_t_init(&t,jp->fragmented_files);
     file = prb_t_first(&t,jp->fragmented_files);
