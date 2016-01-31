@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -36,20 +36,18 @@
 /************************************************************/
 
 /**
- * @brief Cleans the space up by moving
- * specified number of clusters starting
- * at specified file block's beginning
- * to the free space areas outside of
- * the region intended to be cleaned up.
+ * @internal
+ * @brief Cleans up a range of clusters.
  * @param[in] jp the job parameters.
  * @param[in] file the file to be moved.
  * @param[in] block the block to be moved.
- * @param[in] clusters_to_cleanup the number
- * of clusters to be cleaned up.
- * @param[in] reserved_start_lcn the first
- * LCN of the space intended to be cleaned up.
- * @param[in] reserved_end_lcn the last
- * LCN of the space intended to be cleaned up.
+ * @param[in] clusters_to_cleanup number
+ * of clusters to be moved, starting
+ * from the beginning of the block.
+ * @param[in] reserved_start_lcn the beginning
+ * of the region intended to be cleaned up.
+ * @param[in] reserved_end_lcn the end of
+ * the region intended to be cleaned up.
  * @return Zero indicates success. (-1)
  * indicates that not enough free space
  * exist on the disk. (-2) indicates that
@@ -67,7 +65,7 @@ static int cleanup_space(udefrag_job_parameters *jp, winx_file_info *file,
     
     current_vcn = block->vcn;
     while(clusters_to_cleanup){
-        /* use last free region */
+        /* use the last free region */
         if(jp->free_regions == NULL) return (-1);
         rgn = NULL;
         for(r = jp->free_regions->prev; r; r = r->prev){
@@ -92,8 +90,9 @@ static int cleanup_space(udefrag_job_parameters *jp, winx_file_info *file,
 }
 
 /**
+ * @internal
  * @brief Advances VCN by the specified number of clusters.
- * @return Advanced VCN; may point beyond the file.
+ * @return The advanced VCN; may point beyond the file.
  */
 static ULONGLONG advance_vcn(winx_file_info *f,ULONGLONG vcn,ULONGLONG n)
 {
@@ -127,13 +126,13 @@ static ULONGLONG advance_vcn(winx_file_info *f,ULONGLONG vcn,ULONGLONG n)
 }
 
 /**
- * @brief Optimizes the file by placing all its
- * fragments as close as possible after the first
- * one.
+ * @internal
+ * @brief Optimizes a file by placing its fragments
+ * close to each other behind the first one.
  * @details Intended to optimize MFT on NTFS-formatted
- * volumes and to optimize directories on FAT. In both
- * cases the first clusters are not moveable, therefore
- * regular defragmentation cannot help.
+ * volumes and optimize directories on FAT. In both
+ * cases the first clusters are immovable, so regular
+ * defragmentation cannot help.
  * @note
  * - As a side effect this routine may increase
  * number of fragmented files (they become marked
@@ -145,11 +144,11 @@ static ULONGLONG advance_vcn(winx_file_info *f,ULONGLONG vcn,ULONGLONG n)
  */
 static int optimize_file(winx_file_info *f,udefrag_job_parameters *jp)
 {
-    ULONGLONG clusters_to_process; /* the number of file clusters not processed yet */
-    ULONGLONG start_vcn;           /* VCN of the portion of the file not processed yet */
-    ULONGLONG first_cluster;       /* LCN of the first cluster of the file */
+    ULONGLONG clusters_to_process; /* number of file clusters not processed yet */
+    ULONGLONG start_vcn;           /* VCN of the cluster chain not processed yet */
+    ULONGLONG first_cluster;       /* LCN of the first file cluster */
     ULONGLONG start_lcn;           /* address of space not processed yet */
-    ULONGLONG clusters_to_move;    /* the number of the file clusters intended for the current move */
+    ULONGLONG clusters_to_move;    /* number of clusters intended for the current move */
     winx_volume_region *rgn, *target_rgn;
     winx_file_info *first_file;
     winx_blockmap *first_block;
@@ -213,7 +212,7 @@ try_again:
             if(first_block == NULL) break;
             if(first_block->lcn >= end_lcn) break;
             
-            /* does the first block follow a previously moved one? */
+            /* does the first block follow the previously moved one? */
             if(block_cleaned_up){
                 if(first_block->lcn != region.lcn + region.length)
                     break;
@@ -298,9 +297,10 @@ done:
 }
 
 /**
+ * @internal
  * @brief Calculates number of clusters
- * needed to be moved to complete the
- * optimization of directories.
+ * which need to be moved to optimize
+ * all directories.
  */
 static ULONGLONG opt_dirs_cc_routine(udefrag_job_parameters *jp)
 {
@@ -320,8 +320,9 @@ static ULONGLONG opt_dirs_cc_routine(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief Optimizes directories by placing their
- * fragments after the first ones as close as possible.
+ * fragments close to each other behind the first one.
  * @details Intended for use on FAT-formatted volumes.
  * @return Zero for success, negative value otherwise.
  */
@@ -380,7 +381,8 @@ static int optimize_directories(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Sends list of $mft blocks to the debugger.
+ * @internal
+ * @brief Enumerates MFT blocks.
  */
 static void list_mft_blocks(winx_file_info *mft_file)
 {
@@ -394,16 +396,16 @@ static void list_mft_blocks(winx_file_info *mft_file)
 }
 
 /**
+ * @internal
  * @brief Calculates number of clusters
- * needed to be moved to complete the
- * MFT optimization.
+ * which need to be moved to optimize MFT.
  */
 static ULONGLONG opt_mft_cc_routine(udefrag_job_parameters *jp)
 {
     winx_file_info *f;
     ULONGLONG n = 0;
 
-    /* search for $mft file */
+    /* search for the $mft file */
     for(f = jp->filelist; f; f = f->next){
         if(jp->termination_router((void *)jp)) break;
         if(is_mft(f,jp)){
@@ -416,9 +418,10 @@ static ULONGLONG opt_mft_cc_routine(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief Optimizes MFT by placing its fragments
- * as close as possible after the first one.
- * @details MFT Zone follows MFT automatically. 
+ * close to each other behind the first one.
+ * @details The MFT Zone will follow MFT automatically.
  * @return Zero for success, negative value otherwise.
  */
 static int optimize_mft_routine(udefrag_job_parameters *jp)
@@ -441,7 +444,7 @@ static int optimize_mft_routine(udefrag_job_parameters *jp)
 
     time = start_timing("mft optimization",jp);
 
-    /* search for $mft file */
+    /* search for the $mft file */
     for(f = jp->filelist; f; f = f->next){
         if(is_mft(f,jp)){
             mft_file = f;
@@ -479,9 +482,8 @@ static int optimize_mft_routine(udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Auxiliary routine to sort files in the binary tree.
- * @details This routine exclusively defines rules of the file
- * sorting on the disk.
+ * @internal
+ * @brief Exclusively defines rules for the file sorting on the disk.
  */
 static int files_compare(const void *prb_a, const void *prb_b, void *prb_param)
 {
@@ -530,16 +532,17 @@ done:
 }
 
 /**
+ * @internal
  * @brief Moves small files to the 
  * beginning of the disk, sorted.
  * @param[in] jp the job parameters.
- * @param[in,out] start_lcn LCN of
- * the space not optimized yet.
- * @param[in] end_lcn LCN of the space
- * beyond the area intended for placement
- * of sorted out files.
- * @param[in] t pointer to the binary tree
- * traverser.
+ * @param[in,out] start_lcn the beginning
+ * of the region not optimized yet.
+ * @param[in] end_lcn the first LCN beyond
+ * of the region intended for placement of
+ * sorted out files.
+ * @param[in] t pointer to structure
+ * used to traverse the tree of files.
  */
 static void move_files_to_front(udefrag_job_parameters *jp,
     ULONGLONG *start_lcn, ULONGLONG end_lcn, struct prb_traverser *t)
@@ -570,7 +573,7 @@ static void move_files_to_front(udefrag_job_parameters *jp,
             }
             if(region_not_found){
                 if(file->user_defined_flags & UD_FILE_REGION_NOT_FOUND){
-                    /* if region is not found twice, skip the file */
+                    /* whenever it's impossible to find a suitable region twice, skip the file */
                     file = prb_t_next(t);
                     skipped_files ++;
                     continue;
@@ -609,10 +612,10 @@ static void move_files_to_front(udefrag_job_parameters *jp,
 }
 
 /**
- * @brief Defines whether the file block
- * deserves to be moved to the end
- * of the disk or not in the move_files_to_back
- * routine.
+ * @internal
+ * @brief Defines whether a file block deserves
+ * to be moved to the end of the disk or not in
+ * the move_files_to_back routine.
  * @note Optimized for speed.
  */
 static int is_block_quite_small(udefrag_job_parameters *jp,
@@ -655,12 +658,13 @@ static int is_block_quite_small(udefrag_job_parameters *jp,
 }
 
 /**
+ * @internal
  * @brief Cleans up the beginning
  * of the disk by moving small files
  * and fragments to the end.
  * @param[in] jp the job parameters.
- * @param[in,out] start_lcn LCN of
- * the space not optimized yet.
+ * @param[in,out] start_lcn the beginning
+ * of the region not optimized yet.
  */
 static void move_files_to_back(udefrag_job_parameters *jp,ULONGLONG *start_lcn)
 {
@@ -710,8 +714,9 @@ done:
 }
 
 /**
- * @brief Marks group of files
- * as already optimized.
+ * @internal
+ * @brief Marks a group of
+ * files as already optimized.
  */
 static void cut_off_group_of_files(udefrag_job_parameters *jp,
     struct prb_table *pt,winx_file_info *first_file,ULONGLONG n,
@@ -721,7 +726,7 @@ static void cut_off_group_of_files(udefrag_job_parameters *jp,
     winx_file_info *file;
     ULONGLONG magic_length;
     
-    /* group should be larger than 20 MB or should contain at least 10 files */
+    /* the group should be larger than 20 MB or should contain at least 10 files */
     magic_length = min(OPTIMIZER_MAGIC_CONSTANT,jp->udo.optimizer_size_limit);
     if(length * jp->v_info.bytes_per_cluster < magic_length){
         if(n < OPTIMIZER_MAGIC_CONSTANT_N)
@@ -742,18 +747,19 @@ static void cut_off_group_of_files(udefrag_job_parameters *jp,
 }
 
 /**
- * @brief Marks all sorted out groups of
- * files in the tree as already optimized.
+ * @internal
+ * @brief Marks all sorted out groups
+ * of files as already optimized.
  */
 static void cut_off_sorted_out_files(udefrag_job_parameters *jp,struct prb_table *pt)
 {
     struct prb_traverser t;
     winx_file_info *file;
-    winx_file_info *first_file; /* first file of the group */
-    ULONGLONG n;                /* number of files in group */
+    winx_file_info *first_file; /* the first file of the group */
+    ULONGLONG n;                /* number of files in the group */
     ULONGLONG length;           /* length of the group, in clusters */
-    ULONGLONG pplcn;            /* LCN of (i - 2)-th file */
-    ULONGLONG plcn;             /* LCN of (i - 1)-th file */
+    ULONGLONG pplcn;            /* LCN of the (i - 2)-th file */
+    ULONGLONG plcn;             /* LCN of the (i - 1)-th file */
     ULONGLONG lcn;
     ULONGLONG distance;
     ULONGLONG file_length;
@@ -769,7 +775,7 @@ static void cut_off_sorted_out_files(udefrag_job_parameters *jp,struct prb_table
     jp->already_optimized_clusters = 0;
     magic_length = min(OPTIMIZER_MAGIC_CONSTANT,jp->udo.optimizer_size_limit);
     
-    /* select first not fragmented file */
+    /* select the first not fragmented file */
     prb_t_init(&t,pt);
     file = prb_t_first(&t,pt);
     while(file){
@@ -778,7 +784,7 @@ static void cut_off_sorted_out_files(udefrag_job_parameters *jp,struct prb_table
     }
     if(file == NULL) goto done;
 
-    /* initialize group */
+    /* initialize the group */
     first_file = file;
     n = 1;
     length = file->disp.clusters;
@@ -789,7 +795,7 @@ static void cut_off_sorted_out_files(udefrag_job_parameters *jp,struct prb_table
     /* analyze subsequent files */
     file = prb_t_next(&t);
     while(file){
-        /* check whether the file is in group or not */
+        /* check whether the file belongs to the group or not */
         belongs_to_group = 1;
         /* 1. the file must be not fragmented */
         if(is_fragmented(file))
@@ -814,7 +820,7 @@ static void cut_off_sorted_out_files(udefrag_job_parameters *jp,struct prb_table
             }
             second_magic_length = file_length * OPTIMIZER_MAGIC_CONSTANT_M;
             if(second_magic_length / OPTIMIZER_MAGIC_CONSTANT_M != file_length){
-                /* overflow occured */
+                /* an overflow occured */
                 second_magic_length = MAX_FILE_SIZE;
             }
             if(distance > max(magic_length,second_magic_length))
@@ -828,10 +834,10 @@ static void cut_off_sorted_out_files(udefrag_job_parameters *jp,struct prb_table
             prev_file = file;
         } else {
             if(n > 1){
-                /* remark all files in previous group */
+                /* remark all files in the previous group */
                 cut_off_group_of_files(jp,pt,first_file,n,length);
             }
-            /* reset group */
+            /* reset the group */
             while(file){
                 if(!is_fragmented(file)) break;
                 file = prb_t_next(&t);
@@ -848,7 +854,7 @@ static void cut_off_sorted_out_files(udefrag_job_parameters *jp,struct prb_table
     }
     
     if(n > 1){
-        /* remark all files in group */
+        /* remark all files in the group */
         cut_off_group_of_files(jp,pt,first_file,n,length);
     }
 
@@ -860,6 +866,7 @@ done:
 }
 
 /**
+ * @internal
  * @brief Calculates number of allocated clusters
  * between start_lcn and the end of the disk.
  */
@@ -869,7 +876,7 @@ static ULONGLONG count_clusters(udefrag_job_parameters *jp,ULONGLONG start_lcn)
     ULONGLONG n = 0;
     ULONGLONG time = winx_xtime();
 
-    /* actualize list of free regions */
+    /* actualize the list of free regions */
     release_temp_space_regions(jp);
 
     for(rgn = jp->free_regions; rgn; rgn = rgn->next){
@@ -886,9 +893,8 @@ static ULONGLONG count_clusters(udefrag_job_parameters *jp,ULONGLONG start_lcn)
 }
 
 /**
- * @brief Calculates number
- * of clusters still needing
- * to be optimized.
+ * @internal
+ * @brief Calculates number of clusters still needing to be optimized.
  */
 static ULONGLONG clusters_to_optimize(udefrag_job_parameters *jp,struct prb_table *pt)
 {
@@ -909,9 +915,9 @@ static ULONGLONG clusters_to_optimize(udefrag_job_parameters *jp,struct prb_tabl
 }
 
 /**
- * @brief Optimizes the disk.
- * @return Zero for success,
- * negative value otherwise.
+ * @internal
+ * @brief Sorts out small files on the disk.
+ * @return Zero for success, negative value otherwise.
  */
 static int optimize_routine(udefrag_job_parameters *jp)
 {
@@ -935,7 +941,7 @@ static int optimize_routine(udefrag_job_parameters *jp)
     /* no files are excluded by this task currently */
     clear_currently_excluded_flag(jp);
 
-    /* build tree of files sorted by the requested criteria */
+    /* build a tree of files sorted by the requested criteria */
     pt = prb_create(files_compare,(void *)jp,NULL);
     for(f = jp->filelist; f; f = f->next){
         if(f->disp.clusters * jp->v_info.bytes_per_cluster \
@@ -999,11 +1005,13 @@ done:
 /************************************************************/
 
 /**
- * @brief Performs a volume optimization.
- * @details The disk optimization sorts
- * small files (below fragment size threshold)
- * on the disk. On FAT it optimizes directories
- * also. On NTFS it optimizes the MFT.
+ * @internal
+ * @brief Optimizes the disk.
+ * @details Sorts out small files (according to
+ * UD_OPTIMIZER_FILE_SIZE_THRESHOLD filter). FAT
+ * directories and NTFS master file tables get
+ * fixed up as well by placing their fragments
+ * close to each other behind the first ones.
  * @return Zero for success, negative value otherwise.
  */
 int optimize(udefrag_job_parameters *jp)
@@ -1015,7 +1023,7 @@ int optimize(udefrag_job_parameters *jp)
     jp->udo.size_limit = MAX_FILE_SIZE;
     jp->udo.fragments_limit = 0;
     
-    /* perform volume analysis */
+    /* analyze the disk */
     result = analyze(jp); /* we need to call it once, here */
     if(result < 0) return result;
     
@@ -1062,13 +1070,14 @@ int optimize(udefrag_job_parameters *jp)
 }
 
 /**
+ * @internal
  * @brief MFT optimizer entry point.
  */
 int optimize_mft(udefrag_job_parameters *jp)
 {
     int result;
 
-    /* perform volume analysis */
+    /* analyze the disk */
     result = analyze(jp); /* we need to call it once, here */
     if(result < 0) return result;
 
