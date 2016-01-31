@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 
 /**
  * @file move.c
- * @brief File moving.
+ * @brief Files transfer.
  * @addtogroup Move
  * @{
  */
@@ -27,9 +27,10 @@
 #include "udefrag-internals.h"
 
 /**
- * @brief Actualizes the free space regions list.
+ * @internal
+ * @brief Actualizes the list of free space regions.
  * @details All NTFS regions temporarily allocated
- * by system become freed after this call.
+ * by system become released after this call.
  */
 void release_temp_space_regions(udefrag_job_parameters *jp)
 {
@@ -52,7 +53,8 @@ void release_temp_space_regions(udefrag_job_parameters *jp)
 /************************************************************/
 
 /**
- * @brief Defines whether the file can be
+ * @internal
+ * @brief Defines whether a file can be
  * moved or not, at least partially.
  */
 int can_move(winx_file_info *f,udefrag_job_parameters *jp)
@@ -130,7 +132,8 @@ int can_move(winx_file_info *f,udefrag_job_parameters *jp)
 }
 
 /**
- * @brief Defines whether the file
+ * @internal
+ * @brief Defines whether s file
  * can be moved entirely or not.
  */
 int can_move_entirely(winx_file_info *f,udefrag_job_parameters *jp)
@@ -154,8 +157,9 @@ int can_move_entirely(winx_file_info *f,udefrag_job_parameters *jp)
 /************************************************************/
 
 /**
+ * @internal
  * @brief Returns the first file block
- * belonging to the cluster chain.
+ * belonging to a cluster chain.
  */
 static winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLONG vcn)
 {
@@ -170,11 +174,12 @@ static winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLO
 }
 
 /**
+ * @internal
  * @brief Moves file clusters.
  * @return Zero for success,
  * negative value otherwise.
  * @note 
- * - Volume must be opened before this call,
+ * - The volume must be opened before this call,
  * jp->fVolume must contain a proper handle.
  */
 static int move_file_clusters(winx_file_info *f,HANDLE hFile,ULONGLONG startVcn,
@@ -246,6 +251,7 @@ static int move_file_clusters(winx_file_info *f,HANDLE hFile,ULONGLONG startVcn,
 }
 
 /**
+ * @internal
  * @brief move_file helper.
  */
 static void move_file_helper(HANDLE hFile, winx_file_info *f,
@@ -281,7 +287,8 @@ static void move_file_helper(HANDLE hFile, winx_file_info *f,
 }
 
 /**
- * @brief Prints list of file blocks.
+ * @internal
+ * @brief Prints a list of file blocks.
  */
 static void DbgPrintBlocksOfFile(winx_blockmap *blockmap)
 {
@@ -295,7 +302,8 @@ static void DbgPrintBlocksOfFile(winx_blockmap *blockmap)
 }
 
 /**
- * @brief Adds a new block to the file map.
+ * @internal
+ * @brief Adds a block to a file map.
  */
 static winx_blockmap *add_new_block(winx_blockmap **head,ULONGLONG vcn,ULONGLONG lcn,ULONGLONG length)
 {
@@ -313,13 +321,15 @@ static winx_blockmap *add_new_block(winx_blockmap **head,ULONGLONG vcn,ULONGLONG
 }
 
 /**
- * @brief Calculates new file disposition.
- * @param[in] f pointer to the file information structure.
+ * @internal
+ * @brief Calculates disposition of a file.
+ * @param[in] f pointer to structure
+ * containing the initial disposition.
  * @param[in] vcn VCN of the moved cluster chain.
  * @param[in] length length of the moved cluster chain.
- * @param[in] target new LCN of the moved cluster chain.
+ * @param[in] target the new LCN of the moved cluster chain.
  * @param[out] new_file_info pointer to structure 
- * receiving the new file information.
+ * receiving the updated file information.
  */
 static void calculate_file_disposition(winx_file_info *f,ULONGLONG vcn,
     ULONGLONG length,ULONGLONG target,winx_file_info *new_file_info)
@@ -361,25 +371,25 @@ static void calculate_file_disposition(winx_file_info *f,ULONGLONG vcn,
             n = min(block->length - (curr_vcn - block->vcn),clusters_to_check);
             
             if(curr_vcn != block->vcn){
-                /* we have the second part of block moved */
+                /* we have the second part of the block moved */
                 if(!add_new_block(&new_file_info->disp.blockmap,
                     block->vcn,block->lcn,block->length - n)) goto fail;
                 if(!add_new_block(&new_file_info->disp.blockmap,
                     curr_vcn,curr_target,n)) goto fail;
             } else {
                 if(n != block->length){
-                    /* we have the first part of block moved */
+                    /* we have the first part of the block moved */
                     if(!add_new_block(&new_file_info->disp.blockmap,
                         curr_vcn,curr_target,n)) goto fail;
                     if(!add_new_block(&new_file_info->disp.blockmap,
                         block->vcn + n,block->lcn + n,block->length - n)) goto fail;
                 } else {
-                    /* we have entire block moved */
+                    /* we have the entire block moved */
                     if(!add_new_block(&new_file_info->disp.blockmap,
                         block->vcn,curr_target,block->length)) goto fail;
                 }
             }
-            /* XXX: when middle part of the block moved, behaviour is 
+            /* XXX: when a middle part of the block moved, the behaviour is 
                unexpected; however, this never happens in current algorithms
             */
 
@@ -405,6 +415,7 @@ fail:
 }
 
 /**
+ * @internal
  * @brief Compares two file dispositions.
  * @return Positive value indicates 
  * difference, zero indicates equality.
@@ -452,6 +463,9 @@ different_maps:
     return 1;
 }
 
+/**
+ * @internal
+ */
 static int dump_terminator(void *user_defined_data)
 {
     udefrag_job_parameters *jp = (udefrag_job_parameters *)user_defined_data;
@@ -465,33 +479,34 @@ static int dump_terminator(void *user_defined_data)
 
 /**
  * @internal
- * @brief File moving results
- * intended for use in move_file only.
+ * @brief File moving results.
+ * @details Intended for use in
+ * the move_file routine only.
  */
 typedef enum {
-    CALCULATED_MOVING_SUCCESS,          /* file has been moved successfully, but its new block map is just calculated */
-    DETERMINED_MOVING_FAILURE,          /* nothing has been moved; a real new block map is available */
-    DETERMINED_MOVING_PARTIAL_SUCCESS,  /* file has been moved partially; a real new block map is available */
-    DETERMINED_MOVING_SUCCESS           /* file has been moved entirely; a real new block map is available */
+    CALCULATED_MOVING_SUCCESS,          /* file has been moved successfully, but its new map of blocks is just calculated */
+    DETERMINED_MOVING_FAILURE,          /* nothing has been moved; the new map of file blocks is real */
+    DETERMINED_MOVING_PARTIAL_SUCCESS,  /* file has been moved partially; its new map of blocks is real */
+    DETERMINED_MOVING_SUCCESS           /* file has been moved entirely; its new map of blocks is real */
 } ud_file_moving_result;
 
 /**
- * @brief Moves a cluster chain of the file.
- * @details Can move any part of any file.
+ * @internal
+ * @brief Moves a cluster chain of a file.
  * @param[in] f pointer to structure describing the file to be moved.
  * @param[in] vcn the VCN of the first cluster to be moved.
- * @param[in] length the length of the cluster chain to be moved.
+ * @param[in] length length of the cluster chain to be moved.
  * @param[in] target the LCN of the target free region.
- * @param[in] jp job parameters.
+ * @param[in] jp the job parameters.
  * @return Zero for success, negative value otherwise.
  * @note 
  * - This routine cannot move the first fragment of MFT
  * on NTFS as well as first clusters of FAT directories.
- * - Volume must be opened before this call,
+ * - The volume must be opened before this call,
  * jp->fVolume must contain a proper handle.
- * - If this function returns negative value indicating failure, 
- * one of the flags listed in udefrag_internals.h under "file status flags"
- * becomes set to display a proper message in fragmentation reports.
+ * - If this function returns a negative value, it sets also one of the
+ * file status flags defined in udefrag_internals.h file. This helps to
+ * display the file moving status in fragmentation reports.
  */
 int move_file(winx_file_info *f,
               ULONGLONG vcn,
@@ -607,8 +622,8 @@ int move_file(winx_file_info *f,
     }
     
     if(dump_result < 0){
-        /* let's assume a successful move */
-        /* we have no new map of file blocks, so let's use calculated one */
+        /* let's assume the move has been successful */
+        /* we have no new map of file blocks, so let's use the calculated one */
         memcpy(&new_file_info,&desired_file_info,sizeof(winx_file_info));
         moving_result = CALCULATED_MOVING_SUCCESS;
     } else {
@@ -637,7 +652,7 @@ int move_file(winx_file_info *f,
                 moving_result = DETERMINED_MOVING_PARTIAL_SUCCESS;
             }
         }
-        /* release calculated desired disposition */
+        /* release calculated disposition */
         winx_list_destroy((list_entry **)(void *)&desired_file_info.disp.blockmap);
     }
     
@@ -652,8 +667,9 @@ int move_file(winx_file_info *f,
     }
 
     /*
-    * Remove file from the list of fragmented files
-    * till its number of fragments is not changed.
+    * Remove the file from the list of fragmented
+    * files as we cannot say for sure whether it's
+    * still fragmented right now or not.
     */
     if(was_fragmented && !was_excluded)
         truncate_fragmented_files_list(f,jp);
@@ -683,7 +699,7 @@ int move_file(winx_file_info *f,
     /* remove target space from the free space pool - before the following map redraw */
     jp->free_regions = winx_sub_volume_region(jp->free_regions,target,length);
     
-    /* redraw file clusters in new color */
+    /* redraw file clusters in the new color */
     if(new_color != old_color){
         for(block = f->disp.blockmap; block; block = block->next){
             colorize_map_region(jp,block->lcn,block->length,new_color,old_color);
@@ -691,7 +707,7 @@ int move_file(winx_file_info *f,
         }
     }
     
-    /* redraw freed range of clusters */
+    /* redraw the released range of clusters */
     if(moving_result != DETERMINED_MOVING_PARTIAL_SUCCESS){
         clusters_to_redraw = length;
         curr_vcn = vcn;
@@ -703,10 +719,10 @@ int move_file(winx_file_info *f,
             colorize_map_region(jp,lcn,n,FREE_SPACE,new_color);
             clusters_to_redraw -= n;
             if(jp->fs_type != FS_NTFS || jp->udo.dry_run){
-                /* on NTFS we cannot use freed space until
-                   release_temp_space_regions call because
-                   Windows marks clusters as temporarily
-                   allocated immediately after the move
+                /* on NTFS we cannot use the released space until
+                   release_temp_space_regions call because Windows
+                   marks clusters as temporarily allocated
+                   immediately after the move
                 */
                 jp->free_regions = winx_add_volume_region(jp->free_regions,lcn,n);
             }
@@ -748,7 +764,7 @@ int move_file(winx_file_info *f,
         if(block->next == f->disp.blockmap) break;
     }
 
-    /* update list of fragmented files */
+    /* update the list of fragmented files */
     if(is_fragmented(f) && !is_excluded(f))
         expand_fragmented_files_list(f,jp);
 
