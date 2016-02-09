@@ -28,10 +28,9 @@
 /*
 * 1. ${DisableX64FSRedirection} is required before
 *    all macros except CheckWinVersion and UninstallTheProgram.
-* 2. Most macros require the $INSTDIR variable
-*    to be set and plugins directory to be initialized.
-*    It is safe to do both initialization actions
-*    in the .onInit function.
+* 2. Most macros require the $INSTDIR variable to be set and the
+*    plugins directory to be initialized. It is safe to initialize
+*    them both in the .onInit function.
 */
 
 !macro LogAndDisplayAbort _Message
@@ -121,7 +120,7 @@
     ${EndIf}
     ${If} $R0 != 0
         System::Call 'kernel32::CloseHandle(i $R0)'
-        ${LogAndDisplayAbort} "Ultra Defragmenter is running. Please close it first!"
+        ${LogAndDisplayAbort} "UltraDefrag is running. Please close it first!"
         Abort
     ${EndIf}
 
@@ -196,8 +195,8 @@
 ;-----------------------------------------
 
 /**
- * This procedure validates the destination folder
- * and is only used by the directory page verify callback.
+ * This procedure validates destination folder and is
+ * only used by the directory page verification callback.
  * Only empty folders or folders containing an existing
  * UltraDefrag installation are valid.
  */
@@ -205,7 +204,7 @@
 
     StrCpy $ValidDestDir "1"
 
-    ; if $INSTDIR is a ultradefrag directory, let us install there
+    ; if $INSTDIR is an ultradefrag directory, let us install there
     IfFileExists "$INSTDIR\lua5.1a_gui.exe" PathGood
 
     ; if $INSTDIR is not empty, don't let us install there
@@ -247,14 +246,14 @@ PathGood:
 /**
  * This procedure installs all mandatory files and
  * upgrades already existing configuration files
- * if they are in obsolete format.
+ * if they are in an obsolete format.
  */
 !macro InstallCoreFiles
 
     ${DisableX64FSRedirection}
 
-    ; validate destination folder for silent installation here,
-    ; since the directory page is not displayed in silent mode
+    ; validate destination folder for silent installations here,
+    ; since the directory page is not displayed in the silent mode
     ${If} ${Silent}
         ${CheckDestFolder}
 
@@ -264,16 +263,16 @@ PathGood:
         ${EndIf}
     ${EndIf}
 
-    ; move old installation to new location
+    ; relocate the installation
     IfFileExists "$OldInstallDir\*.*" 0 SkipMove
     StrCmp "$INSTDIR" "$OldInstallDir" SkipMove
 
-    DetailPrint "Moving old installation to new location..."
+    DetailPrint "Relocating the installation..."
     CreateDirectory "$INSTDIR"
     ClearErrors
     CopyFiles /SILENT "$OldInstallDir\*" "$INSTDIR"
     ${If} ${Errors}
-        ${LogAndDisplayAbort} "Cannot move old installation to new location!"
+        ${LogAndDisplayAbort} "Cannot relocate the installation!"
         Abort
     ${EndIf}
 
@@ -306,7 +305,7 @@ SkipMove:
         File "${ROOTDIR}\src\scripts\udsorting.js"
         File "${ROOTDIR}\src\scripts\upgrade-options.lua"
 
-    DetailPrint "Upgrade configuration files..."
+    DetailPrint "Configuration files upgrade..."
     ; ensure that target directory exists
     CreateDirectory "$INSTDIR\options"
     ${If} ${Silent}
@@ -324,7 +323,7 @@ SkipMove:
     ${EndIf}
     File "${ROOTDIR}\src\scripts\udreport.css"
 
-    DetailPrint "Register .luar file extension..."
+    DetailPrint "Registering .luar file extension..."
     WriteRegStr HKCR ".luar" "" "LuaReport"
     WriteRegStr HKCR "LuaReport" "" "Lua Report"
     WriteRegStr HKCR "LuaReport\DefaultIcon" "" "$INSTDIR\lua5.1a_gui.exe,1"
@@ -359,7 +358,7 @@ SkipMove:
     Delete "$SYSDIR\hibernate4win.exe"
     Delete "$SYSDIR\udefrag-dbg.exe"
 
-    DetailPrint "Deregister .luar file extension..."
+    DetailPrint "Deregistering .luar file extension..."
     DeleteRegKey HKCR "LuaReport"
     DeleteRegKey HKCR ".luar"
 
@@ -376,21 +375,20 @@ SkipMove:
     ${DisableX64FSRedirection}
 
     ${If} ${FileExists} "$SYSDIR\defrag_native.exe"
-        DetailPrint "Removing current boot interface..."
+        DetailPrint "Removing old boot time interface..."
         ClearErrors
         Delete "$SYSDIR\defrag_native.exe"
         ${If} ${Errors}
             /*
-            * If the native app depends on native DLL's
-            * it may cause BSOD in case of inconsistency
-            * between their versions. Therefore, we must
-            * force upgrade to the latest monolithic native
-            * defragmenter.
+            * It's not safe to leave it as is, because some
+            * older versions of it may cause BSOD in case of
+            * inconsistency between them and udefrag/zenwinx
+            * libraries they depend on.
             */
             ${LogAndDisplayAbort} "Cannot update $SYSDIR\defrag_native.exe file!"
-            ; try to recover the problem
+            ; turn the boot time interface off
             ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
-            ; the second attempt, just for safety
+            ; try to remove it once again, just for safety
             ${EnableX64FSRedirection}
             SetOutPath $PLUGINSDIR
             File "bootexctrl.exe"
@@ -400,7 +398,7 @@ SkipMove:
         ${EndIf}
     ${EndIf}
 
-    DetailPrint "Installing boot interface..."
+    DetailPrint "Installing boot time interface..."
     SetOutPath "$INSTDIR\man"
     File "${ROOTDIR}\doc\man\*.*"
 
@@ -416,7 +414,7 @@ SkipMove:
         File "${ROOTDIR}\src\installer\ud-boot-time.ini"
     ${Else}
         ; the script of v5.0 is not compatible with previous
-        ; versions because of the filter syntax changes
+        ; versions because of filter syntax changes
         ${Unless} ${FileExists} "$SYSDIR\ud-boot-time.ini"
             Rename "$SYSDIR\ud-boot-time.cmd" "$SYSDIR\ud-boot-time.cmd.old"
             File "${ROOTDIR}\src\installer\ud-boot-time.cmd"
@@ -436,7 +434,7 @@ SkipMove:
 
     ${DisableX64FSRedirection}
 
-    DetailPrint "Removing boot interface..."
+    DetailPrint "Removing boot time interface..."
     RMDir /r "$INSTDIR\man"
 
     ExecWait '"$SYSDIR\bootexctrl.exe" /u /s defrag_native'
@@ -493,7 +491,7 @@ SkipMove:
 
     ${DisableX64FSRedirection}
 
-    DetailPrint "Installing GUI interface..."
+    DetailPrint "Installing graphical interface..."
     SetOutPath "$INSTDIR"
         File /nonfatal /r /x *.pot /x *.header /x *.svn "${ROOTDIR}\src\wxgui\locale"
 
@@ -505,15 +503,15 @@ SkipMove:
         Delete "$INSTDIR\ultradefrag.exe"
         File "ultradefrag.exe"
 
-    DetailPrint "Update report translation..."
+    DetailPrint "Fragmentation reports translation update..."
     ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
 
     Push $R0
     Push $0
 
-    DetailPrint "Register file extensions..."
-    ; Without $SYSDIR because x64 system applies registry redirection for HKCR before writing.
-    ; When we are using $SYSDIR Windows always converts them to C:\WINDOWS\SysWow64.
+    DetailPrint "Registering file extensions..."
+    ; Without $SYSDIR because x64 systems apply registry redirection for HKCR before writing.
+    ; Whenever we are using $SYSDIR Windows converts it to C:\WINDOWS\SysWow64.
 
     ClearErrors
     ReadRegStr $R0 HKCR ".lua" ""
@@ -551,7 +549,7 @@ SkipMove:
 
     ${DisableX64FSRedirection}
 
-    DetailPrint "Removing GUI interface..."
+    DetailPrint "Removing graphical interface..."
     RMDir /r "$INSTDIR\locale"
     RMDir /r "$INSTDIR\po"
 
@@ -559,7 +557,7 @@ SkipMove:
 
     Push $R0
 
-    DetailPrint "Unregister file extensions..."
+    DetailPrint "Deregistering file extensions..."
     ClearErrors
     ReadRegStr $R0 HKLM ${UD_UNINSTALL_REG_KEY} "Registered.lua"
     ${Unless} ${Errors}
@@ -630,7 +628,7 @@ SkipMove:
 
     ${DisableX64FSRedirection}
 
-    DetailPrint "Installing the context menu handler..."
+    DetailPrint "Installing context menu handler..."
     SetOutPath "$INSTDIR\icons"
         File "${ROOTDIR}\src\installer\shellex.ico"
         File "${ROOTDIR}\src\installer\shellex-folder.ico"
@@ -767,7 +765,7 @@ SkipMove:
 
     ${DisableX64FSRedirection}
 
-    DetailPrint "Removing the context menu handler..."
+    DetailPrint "Removing context menu handler..."
     Delete "$INSTDIR\icons\shellex.ico"
     Delete "$INSTDIR\icons\shellex-folder.ico"
     RmDir "$INSTDIR\icons"
@@ -1010,7 +1008,7 @@ SkipMove:
     Delete "$INSTDIR\crash-info.ini"
     Delete "$INSTDIR\crash-info.log"
 
-    ; remove shortcuts of any previous version of the program
+    ; remove obsolete shortcuts
     SetShellVarContext all
     RMDir /r "$SMPROGRAMS\DASoft"
     RMDir /r "$SMPROGRAMS\UltraDefrag"
@@ -1046,7 +1044,7 @@ SkipMove:
 
     ${DisableX64FSRedirection}
 
-    DetailPrint "Creating the uninstall information..."
+    DetailPrint "Creating uninstaller..."
     SetOutPath "$INSTDIR"
 
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayName"     "Ultra Defragmenter"
@@ -1083,7 +1081,7 @@ SkipMove:
 
     ${DisableX64FSRedirection}
 
-    ; update the uninstall size value
+    ; save estimated size of the installation to system registry
     ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
     IntFmt $0 "0x%08X" $0
     WriteRegDWORD HKLM ${UD_UNINSTALL_REG_KEY} "EstimatedSize" "$0"
