@@ -9,7 +9,6 @@
 ## Package contents:
 1. **regular** *(with installer)*
     * full package with GUI, console and boot time components
-    * allows installing the micro edition by changing the installation type
 2. **portable** *(for removable drives, no installer)*
     * full package with GUI and console components
 
