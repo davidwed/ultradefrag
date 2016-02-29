@@ -302,7 +302,7 @@ static DWORD WINAPI start_job(LPVOID p)
  * @brief Destroys the list of free regions, the
  * list of files and the list of fragmented files.
  */
-static void destroy_lists(udefrag_job_parameters *jp)
+void destroy_lists(udefrag_job_parameters *jp)
 {
     winx_scan_disk_release(jp->filelist);
     winx_release_free_volume_regions(jp->free_regions);
