@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Zames Dean <zdci4li@gmail.com>, 2013-2014
+# Zames Dean <zdci4li@gmail.com>, 2013-2014,2016
 msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2013-07-10 21:44+0200\n"
-"PO-Revision-Date: 2014-08-04 08:00+0000\n"
+"PO-Revision-Date: 2016-02-07 14:03+0000\n"
 "Last-Translator: Zames Dean <zdci4li@gmail.com>\n"
 "Language-Team: Korean (http://www.transifex.com/stefanpendl/ultradefrag/language/ko/)\n"
 "MIME-Version: 1.0\n"
@@ -104,7 +104,7 @@ msgstr "작업을 마치면(&W)..."
 
 #: i18n.cpp:150
 msgid "&None"
-msgstr "아무 것도 안함(&N)"
+msgstr "아무 것도 안 함(&N)"
 
 #: i18n.cpp:152
 msgid "Stan&dby"
@@ -176,23 +176,23 @@ msgstr "스크립트(&S)"
 
 #: i18n.cpp:181
 msgid "By &path"
-msgstr "경로별로 정렬(&P)"
+msgstr "경로 별로 정렬(&P)"
 
 #: i18n.cpp:182
 msgid "By &size"
-msgstr "크기별로 정렬(&S)"
+msgstr "크기 별로 정렬(&S)"
 
 #: i18n.cpp:183
 msgid "By &creation time"
-msgstr "만든 시간별로 정렬(&C)"
+msgstr "만든 시간 별로 정렬(&C)"
 
 #: i18n.cpp:184
 msgid "By last &modification time"
-msgstr "최근 고친 시간별로 정렬(&M)"
+msgstr "최근 고친 시간 별로 정렬(&M)"
 
 #: i18n.cpp:185
 msgid "By &last access time"
-msgstr "최근 접근 시간별로 정렬(&L)"
+msgstr "최근 접근 시간 별로 정렬(&L)"
 
 #: i18n.cpp:186
 msgid "In &ascending order"
@@ -224,15 +224,15 @@ msgstr "업그레이드(&U)"
 
 #: i18n.cpp:197
 msgid "&Never check"
-msgstr "확인 안함(&N)"
+msgstr "확인 안 함(&N)"
 
 #: i18n.cpp:198
 msgid "Check &stable releases only"
-msgstr "정식 릴리즈만 확인(&S)"
+msgstr "정식 출시만 확인(&S)"
 
 #: i18n.cpp:199
 msgid "Check &all releases"
-msgstr "모든 릴리즈 확인(&A)"
+msgstr "모든 출시 확인(&A)"
 
 #: i18n.cpp:200
 msgid "&Check now"
@@ -425,7 +425,7 @@ msgstr "감추기"
 #: upgrade.cpp:158
 #, c-format
 msgid "Release %ls is available for download!"
-msgstr "릴리즈 %ls(을)를 다운로드할 수 있습니다!"
+msgstr "출시된 %ls (을)를 다운로드할 수 있습니다!"
 
 #: upgrade.cpp:160
 msgid "You can upgrade me ^-^"
