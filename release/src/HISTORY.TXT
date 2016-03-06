@@ -1,8 +1,9 @@
 ﻿HISTORY
 
-  Version 7.0.1 2016-01-xx
+  Version 7.0.1 2016-03-xx
   ------------------------------------------------------------------------------
     - x86 binaries were optimized for speed and size
+    - Uzbek (Latin) translation was added
 
 
   Version 7.0.0 2015-12-23
