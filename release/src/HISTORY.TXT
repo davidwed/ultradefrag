@@ -4,6 +4,9 @@
   ------------------------------------------------------------------------------
     - crash handler was improved to handle division by zero errors
     - Uzbek (Latin) translation was added
+    - the following translations were updated:
+    
+      Filipino (Tagalog), Iloko, Korean
 
 
   Version 7.0.0 2015-12-23
