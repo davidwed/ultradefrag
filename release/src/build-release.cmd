@@ -30,10 +30,14 @@ mkdir release
 :: build source code package
 call build-src-package.cmd || goto build_failed
 
-:: build all binaries
-call build.cmd --all --use-winsdk || goto build_failed
+:: build 32-bit binaries using MinGW for full compatibility 
+:: with Windows XP SP1, just to keep system requirements simple
+call build.cmd --all --use-mingw || goto build_failed
 copy .\bin\ultradefrag-%UDVERSION_SUFFIX%.bin.i386.exe .\release\
 copy .\bin\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.i386.zip .\release\
+
+:: build 64-bit binaries using Windows SDK
+call build.cmd --all --use-winsdk --no-x86 || goto build_failed
 copy .\bin\amd64\ultradefrag-%UDVERSION_SUFFIX%.bin.amd64.exe .\release\
 copy .\bin\amd64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.amd64.zip .\release\
 copy .\bin\ia64\ultradefrag-%UDVERSION_SUFFIX%.bin.ia64.exe .\release\
