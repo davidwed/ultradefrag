@@ -18,7 +18,7 @@ ul {margin:0;padding:0;list-style:none}
 .comparison td.c2 {border:3px ridge #7a9833;text-align:center;width:150px;height:35px;}
 .content {margin:0 auto;width:900px;padding-left:10px;padding-right:10px}
 .date {border-top:1px dotted #ccc;padding:5px 0;margin:10px 0 25px;text-align:right}
-.screenshots {width:100%;text-align:center;}
+.screenshots {width:100%;text-align:center;margin-bottom:15px;}
 .screenshots tr.header  td {width:200px;height:20px;font-weight:bold;}
 .screenshots td {width:200px;height:155px;}
 .screenshots img {margin-left:auto;margin-right:auto;}
