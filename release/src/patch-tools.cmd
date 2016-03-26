@@ -1,7 +1,7 @@
 @echo off
 ::
 :: This script patches all UltraDefrag development tools.
-:: Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
 ::
 :: This program is free software; you can redistribute it and/or modify
 :: it under the terms of the GNU General Public License as published by
@@ -51,6 +51,14 @@ if "%MINGWBASE%" neq "" (
     move /Y libntdll.a "%MINGWBASE%\lib\libntdll.a" || goto fail
     move /Y liburlmon.a "%MINGWBASE%\lib\liburlmon.a" || goto fail
     popd
+)
+
+if "%NSISDIR%" neq "" (
+    echo.
+    echo Patching NSIS
+    echo -------------
+    echo.
+    copy /Y tools\patch\nsis\Finish.nsh "%NSISDIR%\Contrib\Modern UI 2\Pages\" || goto fail
 )
 
 echo.
