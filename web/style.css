@@ -13,6 +13,16 @@ td.cell_2 {background-image:url(../images/back_blue.gif); height:30px; width:158
 td.cell_3 {height:30px;width:158px;text-align:center;}
 td.center {text-align:center;}
 ul {margin:0;padding:0;list-style:none}
+.donations {width:100%;border-collapse:collapse;margin-bottom:31px;}
+tr.amounts td {padding-left:6px;padding-top:1px;}
+tr.progress td {padding-top:6px;}
+div.bar {border:1px solid #aaa;border-radius:4px;overflow:hidden;text-align:center;line-height:2em;position:relative;cursor:default;}
+div.progress-bar {border:1px solid #aaa;border-top-left-radius:4px;border-bottom-left-radius:4px;height:100%;margin:-1px;background:#aed357;}
+div.progress-label {position:absolute;top:0.2em;width:100%;line-height:1em;}
+tr.amounts div.bar {line-height:23px;}
+tr.amounts div.bar:hover {background-color:#ebebeb;}
+tr.amounts td.highlighted div.bar {background-color:#ebebeb;}
+sup.help:hover {cursor:help;}
 .comparison  {width:100%;border-collapse:collapse;}
 .comparison td.c1 {border:3px ridge #7a9833;width:300px;height:35px;padding-left:5px;}
 .comparison td.c2 {border:3px ridge #7a9833;text-align:center;width:150px;height:35px;}

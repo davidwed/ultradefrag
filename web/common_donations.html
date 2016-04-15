@@ -1,0 +1,79 @@
+        <p style="margin-bottom:11px;">
+        We have a lot of exciting ideas for the next release, but no time for
+        development, as currently we have hard time working all days long just
+        to survive. However, we made it easy for you to help us via donations.
+        So far we have to raise $15.000 to leave paths of survival and return
+        back to active UltraDefrag development. We have already collected
+        $1690. Big thanks for your support!
+        </p>
+        
+        <table class="donations"><tbody>
+            <tr class="amounts">
+                <td style="padding-left:0;">
+                    <div class="bar" onclick="SelectAmount(this);">$5</div>
+                </td>
+                <td><div class="bar" onclick="SelectAmount(this);">$10</div></td>
+                <td><div class="bar" onclick="SelectAmount(this);">$20</div></td>
+                <td><div class="bar" onclick="SelectAmount(this);">$50</div></td>
+                <td><div class="bar" onclick="SelectAmount(this);">$100</div></td>
+                <td><div class="bar" onclick="SelectAmount(this);">$250</div></td>
+                <td><div class="bar" onclick="SelectAmount(this);">Custom</div></td>
+                <!--
+                <td width="120px" rowspan="2" style="padding-top:0;">
+                    <a id="donation_btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=55FLGB3EJTDLS" title="Support this project" target="_blank">
+                    <img src="../images/Paypal_US_btn_donateCC_LG.gif" alt="PayPal - The safer, easier way to pay online!" width="120" height="47" style="padding:0;" /></a>
+                </td>
+                -->
+                <td width="92px" style="padding-top:0;">
+                    <a id="donation_btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=55FLGB3EJTDLS" title="Support this project" target="_blank">
+                    <img src="../images/Paypal_US_btn_donate_square.gif" alt="PayPal - The safer, easier way to pay online!" width="92" height="26" style="padding:0;" /></a>
+                </td>
+                <!--<td style="padding-top:0;"><div class="bar" style="color:#003366;background:#ffac2c;"><b><i>Donate</i></b></div></td>-->
+            </tr>
+            <tr class="progress">
+                <td colspan="8">
+                    <div class="bar">
+                        <div class="progress-bar" style="width: 11%;">&nbsp;</div>
+                        <div class="progress-label">
+                            $1690 collected towards $15000
+                            <sup class="help" title="Due to technical limitations it may take up to 24 hours for the progress bar to update.">
+                                [<b>?</b>]
+                            </sup>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody></table>
+
+        <script type="text/javascript">
+        <!--
+        function SelectAmount(bar){
+            // highlight selected amount
+            var amounts = document.getElementsByClassName("amounts")[0].childNodes;
+            for(i = 0; i < amounts.length; i++){ amounts[i].className = "blank"; }
+            bar.parentNode.className = "highlighted";
+
+            // set donation URL
+            var url = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=";
+            
+            var amount = bar.innerHTML;
+            if(amount === '$5'){
+                url += "ASXFF8HKPLWPU";
+            } else if(amount === '$10'){
+                url += "YRNTVYQ9TBX7J";
+            } else if(amount === '$20'){
+                url += "PTJAJTK52TPZ6";
+            } else if(amount === '$50'){
+                url += "FPBGXWKC2RRZ2";
+            } else if(amount === '$100'){
+                url += "2J8HMRHFQ2668";
+            } else if(amount === '$250'){
+                url += "56UE3999MNZ7Y";
+            } else {
+                url += "55FLGB3EJTDLS";
+            }
+            
+            document.getElementById("donation_btn").href = url;
+        }
+        //-->
+        </script>
