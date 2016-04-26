@@ -4,7 +4,7 @@
         to survive. However, we made it easy for you to help us via donations.
         So far we have to raise $15.000 to leave paths of survival and return
         back to active UltraDefrag development. We have already collected
-        $1900. Big thanks for your support!
+        $2125. Big thanks for your support!
         </p>
         
         <table class="donations"><tbody>
@@ -25,7 +25,7 @@
                 </td>
                 -->
                 <td width="92px" style="padding-top:0;">
-                    <a id="donation_btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=55FLGB3EJTDLS" title="Support this project" target="_blank">
+                    <a id="donation_btn" href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=55FLGB3EJTDLS" title="Support this project" target="_blank" onclick="TrackDonation(); return false;">
                     <img src="../images/Paypal_US_btn_donate_square.gif" alt="PayPal - The safer, easier way to pay online!" width="92" height="26" style="padding:0;" /></a>
                 </td>
                 <!--<td style="padding-top:0;"><div class="bar" style="color:#003366;background:#ffac2c;"><b><i>Donate</i></b></div></td>-->
@@ -33,9 +33,9 @@
             <tr class="progress">
                 <td colspan="8">
                     <div class="bar">
-                        <div class="progress-bar" style="width: 12.7%;">&nbsp;</div>
+                        <div class="progress-bar" style="width: 14.2%;">&nbsp;</div>
                         <div class="progress-label">
-                            $1900 collected towards $15000
+                            $2125 collected towards $15000
                             <sup class="help" title="Due to technical limitations it may take up to 24 hours for the progress bar to update.">
                                 [<b>?</b>]
                             </sup>
@@ -80,6 +80,19 @@
             }
             
             document.getElementById("donation_btn").href = url;
+        }
+        
+        function TrackDonation(){
+            // track donations to find out how reliable PayPal is
+            var url = document.getElementById("donation_btn").href;
+            ga('send', 'event', 'donation', 'click', url, {
+                'transport': 'beacon',
+                'hitCallback': function(){
+                    // open the link in a new tab whenever possible
+                    var t = window.open(url, '_blank');
+                    if(t) t.focus(); else document.location = url;
+                }
+            });
         }
         //-->
         </script>
