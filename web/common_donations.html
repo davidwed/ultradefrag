@@ -4,7 +4,7 @@
         to survive. However, we made it easy for you to help us via donations.
         So far we have to raise $15.000 to leave paths of survival and return
         back to active UltraDefrag development. We have already collected
-        $2125. Big thanks for your support!
+        $2160. Big thanks for your support!
         </p>
         
         <table class="donations"><tbody>
@@ -32,10 +32,10 @@
             </tr>
             <tr class="progress">
                 <td colspan="8">
-                    <div class="bar">
-                        <div class="progress-bar" style="width: 14.2%;">&nbsp;</div>
+                    <div class="bar" style="cursor:default;">
+                        <div class="progress-bar" style="width: 14.4%;">&nbsp;</div>
                         <div class="progress-label">
-                            $2125 collected towards $15000
+                            $2160 collected towards $15000
                             <sup class="help" title="Due to technical limitations it may take up to 24 hours for the progress bar to update.">
                                 [<b>?</b>]
                             </sup>
@@ -49,9 +49,9 @@
         <!--
         function SelectAmount(bar){
             // highlight selected amount
-            var amounts = document.getElementsByClassName("amounts")[0].childNodes;
+            /*var amounts = document.getElementsByClassName("amounts")[0].childNodes;
             for(i = 0; i < amounts.length; i++){ amounts[i].className = "blank"; }
-            bar.parentNode.className = "highlighted";
+            bar.parentNode.className = "highlighted";*/
 
             // set donation URL
             var url = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=";
@@ -80,6 +80,9 @@
             }
             
             document.getElementById("donation_btn").href = url;
+            
+            // open the link
+            TrackDonation();
         }
         
         function TrackDonation(){
