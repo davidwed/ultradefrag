@@ -4,16 +4,16 @@
         to survive. However, we made it easy for you to help us via donations.
         So far we have to raise $15.000 to leave paths of survival and return
         back to active UltraDefrag development. We have already collected
-        $2235. Big thanks for your support!
+        $2270. Big thanks for your support!
         </p>
         
         <table class="donations"><tbody>
             <tr>
                 <td width="100%" style="padding-left:0;">
                     <div class="bar">
-                        <div class="progress-bar" style="width: 14.9%;">&nbsp;</div>
+                        <div class="progress-bar" style="width: 15.1%;">&nbsp;</div>
                         <div class="progress-label">
-                            $2235 collected towards $15000
+                            $2270 collected towards $15000
                             <sup class="help" title="Due to technical limitations it may take up to 24 hours for the progress bar to update.">
                                 [<b>?</b>]
                             </sup>
@@ -45,34 +45,40 @@
         <script type="text/javascript">
         function AdjustSelectorWidth(){
             var selector = document.getElementById("amounts");
-            var amounts = selector.childNodes;
-            for(i = 0; i < amounts.length; i++){
-                if(amounts[i].selected){
-                    // adjust width of the selector
-                    var length = amounts[i].innerHTML.length;
-                    if(length < 3){
-                        selector.style.width = "39px";
-                    } else if(length < 4){
-                        selector.style.width = "45px";
-                    } else if(length < 5){
-                        selector.style.width = "52px";
-                    } else {
-                        selector.style.width = "57px";
-                    }
+            var length = selector.options[selector.selectedIndex].text.length;
 
-                    // get rid of annoying highlight
-                    selector.blur();
+            var width;
+            switch(length){
+                case 2:
+                    width = 39;
                     break;
-                }
+                case 3:
+                    width = 45;
+                    break;
+                case 4:
+                    width = 52;
+                    break;
+                default:
+                    width = 57;
             }
+            
+            // add extra space if default arrow is used
+            var style = selector.currentStyle || window.getComputedStyle(selector,null);
+            if(style.backgroundImage.indexOf("images/arrow.gif") == -1) width += 2;
+            
+            // adjust width of the selector
+            selector.style.width = width + "px";
+
+            // get rid of annoying highlight
+            selector.blur();
         }
         
         function Donate(){
             var url = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=";
             
-            var amounts = document.getElementById("amounts").childNodes;
-            for(i = 0; i < amounts.length; i++){ if(amounts[i].selected) url += amounts[i].id; }
-            
+            var selector = document.getElementById("amounts");
+            url += selector.options[selector.selectedIndex].id;
+
             // track donations to find out how reliable PayPal is
             ga('send', 'event', 'donation', 'click', url, {
                 'transport': 'beacon',
