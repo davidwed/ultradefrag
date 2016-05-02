@@ -20,10 +20,16 @@ div.progress-bar {border:1px solid #aaa;border-top-left-radius:4px;border-bottom
 div.progress-label {position:absolute;top:0.2em;width:100%;line-height:1em;}
 sup.help:hover {cursor:help;}
 .amounts {width:47px;height:26px;border:1px solid #aaa;border-radius:4px;font:13px Arial;}
-@supports (-webkit-appearance:none) {
+/* replace the default arrow on IE 11+ */
+_:-ms-fullscreen, :root .amounts::-ms-expand {display:none;}
+_:-ms-fullscreen, :root .amounts {width:45px;padding-left:4px;background:#fff url(images/arrow.gif) right top no-repeat;}
+@supports (-webkit-appearance:none) { /* Chrome, Opera, Safari, Edge */
     .amounts {-webkit-appearance:none;width:45px;padding-left:5px;background:#fff url(images/arrow.gif) right top no-repeat;}
+    @supports (-ms-accelerator:true) { /* Edge */
+        .amounts {padding-left:3px;}
+    }
 }
-@supports (-moz-appearance:none) {
+@supports (-moz-appearance:none) { /* Firefox */
     .amounts {-moz-appearance:none;width:45px;padding-left:1px;background:#fff url(images/arrow.gif) right top no-repeat;}
     .amounts option {padding-left:4px;}
 }
