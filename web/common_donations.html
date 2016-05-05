@@ -1,19 +1,19 @@
-        <p style="margin:10px 0;">
+        <p style="margin:9px 0;">
         We have a lot of exciting ideas for the next major release, but no time for
         development, as currently we have hard time working all days long just
         to survive. However, we made it easy for you to help us via donations.
         So far we have to raise $15.000 to leave paths of survival and return
         back to active UltraDefrag development. We have already collected
-        $2270. Big thanks for your support!
+        $2335. Big thanks for your support!
         </p>
         
         <table class="donations"><tbody>
             <tr>
                 <td width="100%" style="padding-left:0;">
                     <div class="bar">
-                        <div class="progress-bar" style="width: 15.1%;">&nbsp;</div>
+                        <div class="progress-bar" style="width: 15.6%;">&nbsp;</div>
                         <div class="progress-label">
-                            $2270 collected towards $15000
+                            $2335 collected towards $15000
                             <sup class="help" title="Due to technical limitations it may take up to 24 hours for the progress bar to update.">
                                 [<b>?</b>]
                             </sup>
@@ -23,8 +23,8 @@
                 <td>
                     <select id="amounts" class="amounts" onchange="AdjustSelectorWidth();">
                         <option id="ASXFF8HKPLWPU">$5</option>
-                        <option id="YRNTVYQ9TBX7J">$10</option>
-                        <option id="PTJAJTK52TPZ6" selected="selected">$20</option>
+                        <option id="YRNTVYQ9TBX7J" selected="selected">$10</option>
+                        <option id="PTJAJTK52TPZ6">$20</option>
                         <option id="FPBGXWKC2RRZ2">$50</option>
                         <option id="2J8HMRHFQ2668">$100</option>
                         <option id="56UE3999MNZ7Y">$250</option>
@@ -50,21 +50,26 @@
             var width;
             switch(length){
                 case 2:
-                    width = 39;
+                    width = 38;
                     break;
                 case 3:
-                    width = 45;
+                    width = 44;
                     break;
                 case 4:
-                    width = 52;
+                    width = 51;
                     break;
                 default:
-                    width = 57;
+                    width = 56;
             }
             
-            // add extra space if default arrow is used
-            var style = selector.currentStyle || window.getComputedStyle(selector,null);
-            if(style.backgroundImage.indexOf("images/arrow.gif") == -1) width += 2;
+            // add extra space for IE and Edge browsers
+            var ua = window.navigator.userAgent;
+            if(ua.indexOf('MSIE ') > 0){
+                width += 3; // IE 10-
+            } else {
+                if(ua.indexOf('Trident/') > 0) width ++; // IE 11
+                if(ua.indexOf('Edge/') > 0) width ++; // Edge
+            }
             
             // adjust width of the selector
             selector.style.width = width + "px";
