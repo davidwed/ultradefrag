@@ -1,96 +1,70 @@
-        <p style="margin:9px 0;">
-        We have a lot of exciting ideas for the next major release, but no time for
+        <p style="margin-bottom:11px;">
+        We have a lot of exciting ideas for the next release, but no time for
         development, as currently we have hard time working all days long just
         to survive. However, we made it easy for you to help us via donations.
         So far we have to raise $15.000 to leave paths of survival and return
-        back to active UltraDefrag development. We have already collected
-        $2335. Big thanks for your support!
+        back to active UltraDefrag development. Thanks to your donations we have
+        already collected $2465 and now we can buy some food, medicines and stuff.
+        Big thanks for your support!
         </p>
         
         <table class="donations"><tbody>
-            <tr>
-                <td width="100%" style="padding-left:0;">
+            <tr class="amounts" id="amounts">
+                <td style="padding-left:0;">
+                    <div class="bar" id="ASXFF8HKPLWPU" onclick="SelectAmount(this);">$5</div>
+                </td>
+                <td><div class="bar" id="YRNTVYQ9TBX7J" onclick="SelectAmount(this);">$10</div></td>
+                <td><div class="bar" id="PTJAJTK52TPZ6" onclick="SelectAmount(this);">$20</div></td>
+                <td><div class="bar" id="FPBGXWKC2RRZ2" onclick="SelectAmount(this);">$50</div></td>
+                <td><div class="bar" id="2J8HMRHFQ2668" onclick="SelectAmount(this);">$100</div></td>
+                <td><div class="bar" id="56UE3999MNZ7Y" onclick="SelectAmount(this);">$250</div></td>
+                <td><div class="bar" id="55FLGB3EJTDLS" onclick="SelectAmount(this);">Custom</div></td>
+                <td width="92px" style="padding-top:0;">
+                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=55FLGB3EJTDLS"
+                      id="donation_btn" title="Support this project" target="_blank" onclick="Donate(); return false;">
+                        <img src="../images/Paypal_US_btn_donate_square.gif"
+                          alt="PayPal - The safer, easier way to pay online!"
+                          width="92" height="26" style="padding:0;"
+                        />
+                    </a>
+                </td>
+            </tr>
+            <tr class="progress">
+                <td colspan="8">
                     <div class="bar">
-                        <div class="progress-bar" style="width: 15.6%;">&nbsp;</div>
+                        <div class="progress-bar" style="width: 16.4%;">&nbsp;</div>
                         <div class="progress-label">
-                            $2335 collected towards $15000
+                            $2465 collected towards $15000
                             <sup class="help" title="Due to technical limitations it may take up to 24 hours for the progress bar to update.">
                                 [<b>?</b>]
                             </sup>
                         </div>
                     </div>
                 </td>
-                <td>
-                    <select id="amounts" class="amounts" onchange="AdjustSelectorWidth();">
-                        <option id="ASXFF8HKPLWPU">$5</option>
-                        <option id="YRNTVYQ9TBX7J" selected="selected">$10</option>
-                        <option id="PTJAJTK52TPZ6">$20</option>
-                        <option id="FPBGXWKC2RRZ2">$50</option>
-                        <option id="2J8HMRHFQ2668">$100</option>
-                        <option id="56UE3999MNZ7Y">$250</option>
-                        <option id="55FLGB3EJTDLS">Other</option>
-                    </select>
-                </td>
-                <td width="92px">
-                    <a href="https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&amp;hosted_button_id=55FLGB3EJTDLS"
-                      title="Support this project" target="_blank" onclick="Donate(); return false;">
-                        <img src="../images/Paypal_US_btn_donate_square.gif"
-                          alt="PayPal - The safer, easier way to pay online!"
-                          width="92" height="26" style="padding:0;" />
-                    </a>
-                </td>
             </tr>
         </tbody></table>
 
         <script type="text/javascript">
-        function AdjustSelectorWidth(){
-            var selector = document.getElementById("amounts");
-            var length = selector.options[selector.selectedIndex].text.length;
+        function SelectAmount(bar){
+            // highlight selected amount
+            var amounts = document.getElementById("amounts").childNodes;
+            for(i = 0; i < amounts.length; i++){ amounts[i].className = "blank"; }
+            bar.parentNode.className = "highlighted";
 
-            var width;
-            switch(length){
-                case 2:
-                    width = 38;
-                    break;
-                case 3:
-                    width = 44;
-                    break;
-                case 4:
-                    width = 51;
-                    break;
-                default:
-                    width = 56;
-            }
-            
-            // add extra space for IE and Edge browsers
-            var ua = window.navigator.userAgent;
-            if(ua.indexOf('MSIE ') > 0){
-                width += 3; // IE 10-
-            } else {
-                if(ua.indexOf('Trident/') > 0) width ++; // IE 11
-                if(ua.indexOf('Edge/') > 0) width ++; // Edge
-            }
-            
-            // adjust width of the selector
-            selector.style.width = width + "px";
-
-            // get rid of annoying highlight
-            selector.blur();
+            // set donation URL
+            document.getElementById("donation_btn").href = "https://www.paypal.com" + 
+                "/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=" + bar.id;
         }
         
         function Donate(){
-            var url = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=";
-            
-            var selector = document.getElementById("amounts");
-            url += selector.options[selector.selectedIndex].id;
-
             // track donations to find out how reliable PayPal is
+            var url = document.getElementById("donation_btn").href;
             ga('send', 'event', 'donation', 'click', url, {
                 'transport': 'beacon',
                 'hitCallback': function(){
                     // open the link in a new tab whenever possible
-                    var t = window.open(url,'_blank');
-                    if(t) t.focus(); else document.location = url;
+                    var tab = window.open(url,'_blank');
+                    if(tab) tab.focus(); else document.location = url;
                 }
             });
         }
