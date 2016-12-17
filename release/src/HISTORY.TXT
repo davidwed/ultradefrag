@@ -3,6 +3,10 @@
   Version 7.0.2 2016-12-17
   ------------------------------------------------------------------------------
     - graphical and command line tools were optimized for speed and size
+    - the following translations were updated:
+
+      Arabic, Filipino (Tagalog), Iloko, Indonesian,
+      Japanese, Ukrainian, Uzbek (Latin)
 
 
   Version 7.0.1 2016-03-26
