@@ -53,14 +53,6 @@ if "%MINGWBASE%" neq "" (
     popd
 )
 
-if "%NSISDIR%" neq "" (
-    echo.
-    echo Patching NSIS
-    echo -------------
-    echo.
-    copy /Y tools\patch\nsis\Finish.nsh "%NSISDIR%\Contrib\Modern UI 2\Pages\" || goto fail
-)
-
 echo.
 echo Patching succeeded!
 exit /B 0
