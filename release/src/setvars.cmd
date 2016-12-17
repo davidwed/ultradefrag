@@ -4,7 +4,7 @@ echo Set common environment variables...
 :: UltraDefrag version
 set VERSION_MAJOR=7
 set VERSION_MINOR=0
-set VERSION_REVISION=1
+set VERSION_REVISION=2
 
 :: alpha1, beta2, RC3, etc.
 :: unset for the final releases
@@ -18,7 +18,7 @@ set ATTACH_DEBUGGER=1
 set SEND_CRASH_REPORTS=1
 :: - set to 1 to enable wxWidgets asserts raising dialog boxes
 ::   NOTE: don't forget to recompile wxWidgets after adjustment
-set ENABLE_WX_ASSERTS=1
+set ENABLE_WX_ASSERTS=0
 
 :: paths to development tools
 set WINSDKBASE=C:\Program Files\Microsoft SDKs\Windows\v7.1

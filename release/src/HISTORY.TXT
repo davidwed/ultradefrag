@@ -1,5 +1,10 @@
 ﻿HISTORY
 
+  Version 7.0.2 2016-12-17
+  ------------------------------------------------------------------------------
+    - graphical and command line tools were optimized for speed and size
+
+
   Version 7.0.1 2016-03-26
   ------------------------------------------------------------------------------
     - wxWidgets were upgraded to the latest 3.1.0 release
@@ -35,7 +40,7 @@
     - one minor bug was fixed
     
     beta3:
-    - crash handling was reimplemented to gather more information
+    - crash handling was reimplemented
     - few minor bugs were fixed
     - Portuguese (Brazil) translation was updated
 
@@ -67,6 +72,11 @@
     - wgx library replaced by wxWidgets library
 
                                     ***
+
+  Version 6.1.2 2016-06-09
+  ------------------------------------------------------------------------------
+    - crash handling was reimplemented
+
 
   Version 6.1.1 2015-11-20
   ------------------------------------------------------------------------------
