@@ -1,5 +1,10 @@
 ﻿HISTORY
 
+  Version 7.0.3 2017-05-xx
+  ------------------------------------------------------------------------------
+    - Estonian translation was updated
+
+
   Version 7.0.2 2016-12-17
   ------------------------------------------------------------------------------
     - graphical and command line tools were optimized for speed and size
