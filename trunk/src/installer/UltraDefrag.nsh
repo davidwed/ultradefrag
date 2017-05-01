@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *  Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -1008,6 +1008,22 @@ SkipMove:
     Delete "$INSTDIR\crash-info.ini"
     Delete "$INSTDIR\crash-info.log"
 
+    ; remove empty translations
+    Delete "$INSTDIR\po\ach.po"
+    Delete "$INSTDIR\po\ar_EG.po"
+    Delete "$INSTDIR\po\ar_SA.po"
+    Delete "$INSTDIR\po\eu.po"
+    Delete "$INSTDIR\po\eu_ES.po"
+    Delete "$INSTDIR\po\si_LK.po"
+    Delete "$INSTDIR\po\szl.po"
+    RMDir /r "$INSTDIR\locale\ach"
+    RMDir /r "$INSTDIR\locale\ar_EG"
+    RMDir /r "$INSTDIR\locale\ar_SA"
+    RMDir /r "$INSTDIR\locale\eu"
+    RMDir /r "$INSTDIR\locale\eu_ES"
+    RMDir /r "$INSTDIR\locale\si_LK"
+    RMDir /r "$INSTDIR\locale\szl"
+    
     ; remove obsolete shortcuts
     SetShellVarContext all
     RMDir /r "$SMPROGRAMS\DASoft"

@@ -3,336 +3,337 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Sherzod Mamatkulov <softuz@mail.ru>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2013-07-10 21:44+0200\n"
-"PO-Revision-Date: 2013-11-20 09:52+0000\n"
-"Last-Translator: Stefan Pendl <stefanpe@users.sourceforge.net>\n"
-"Language-Team: Sinhala (Sri Lanka) (http://www.transifex.com/stefanpendl/ultradefrag/language/si_LK/)\n"
+"PO-Revision-Date: 2016-04-15 22:53+0000\n"
+"Last-Translator: Sherzod Mamatkulov <softuz@mail.ru>\n"
+"Language-Team: Uzbek (Latin) (http://www.transifex.com/stefanpendl/ultradefrag/language/uz@Latn/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: si_LK\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: uz@Latn\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 
 #: about.cpp:77
 msgid "About UltraDefrag"
-msgstr ""
+msgstr "UltraDefrag haqida"
 
 #: about.cpp:90
 msgid "An open source defragmentation utility."
-msgstr ""
+msgstr "Ochiq kodli defragmentatsiya vositasi."
 
 #: about.cpp:92
 msgid "Credits and licenses are listed in the handbook."
-msgstr ""
+msgstr "Tashakkurlar va litsenziyalar qo‘llanmada ko‘rsatilgan."
 
 #: about.cpp:95
 msgid "UltraDefrag website"
-msgstr ""
+msgstr "UltraDefrag veb-sayti"
 
 #: i18n.cpp:129
 msgid "&Action"
-msgstr ""
+msgstr "&Amal"
 
 #: i18n.cpp:130
 msgid "&Report"
-msgstr ""
+msgstr "&Hisobot"
 
 #: i18n.cpp:131
 msgid "&Settings"
-msgstr ""
+msgstr "&Sozlamalar"
 
 #: i18n.cpp:132 i18n.cpp:213
 msgid "&Help"
-msgstr ""
+msgstr "&Yordam"
 
 #: i18n.cpp:135
 msgid "&Analyze"
-msgstr ""
+msgstr "&Tahlil"
 
 #: i18n.cpp:136
 msgid "&Defragment"
-msgstr ""
+msgstr "&Defragmentatsiya"
 
 #: i18n.cpp:137
 msgid "&Quick optimization"
-msgstr ""
+msgstr "Te&zkor optimallash"
 
 #: i18n.cpp:138
 msgid "&Full optimization"
-msgstr ""
+msgstr "To‘liq &optimallash"
 
 #: i18n.cpp:139
 msgid "&Optimize MFT"
-msgstr ""
+msgstr "&MFTni optimallash"
 
 #: i18n.cpp:140 tray.cpp:80
 msgid "Pa&use"
-msgstr ""
+msgstr "&Pauza qilish"
 
 #: i18n.cpp:141
 msgid "&Stop"
-msgstr ""
+msgstr "To‘&xtatish"
 
 #: i18n.cpp:142
 msgid "Re&peat action"
-msgstr ""
+msgstr "Amalni ta&krorlash"
 
 #: i18n.cpp:143
 msgid "Skip removable &media"
-msgstr ""
+msgstr "Olinadigan m&edia tashlab ketilsin"
 
 #: i18n.cpp:144
 msgid "&Rescan drives"
-msgstr ""
+msgstr "Disklarni &qayta tekshirish"
 
 #: i18n.cpp:145
 msgid "Repair dri&ves"
-msgstr ""
+msgstr "Disklarni t&uzatish"
 
 #: i18n.cpp:146 i18n.cpp:151 tray.cpp:85
 msgid "E&xit"
-msgstr ""
+msgstr "&Chiqish"
 
 #: i18n.cpp:149
 msgid "&When done"
-msgstr ""
+msgstr "&Nihoyasiga yetgach"
 
 #: i18n.cpp:150
 msgid "&None"
-msgstr ""
+msgstr "&Hech nima qilinmasin"
 
 #: i18n.cpp:152
 msgid "Stan&dby"
-msgstr ""
+msgstr "&Kutish rejimiga o‘tilsin"
 
 #: i18n.cpp:153
 msgid "&Hibernate"
-msgstr ""
+msgstr "&Uyqu rejimiga o‘tilsin"
 
 #: i18n.cpp:154
 msgid "&Logoff"
-msgstr ""
+msgstr "&Tizimdan chiqilsin"
 
 #: i18n.cpp:155
 msgid "&Reboot"
-msgstr ""
+msgstr "Kompyuter &o‘chirib-yoqilsin"
 
 #: i18n.cpp:156
 msgid "&Shutdown"
-msgstr ""
+msgstr "Kompyuter o‘&chirilsin"
 
 #: i18n.cpp:159
 msgid "&Show report"
-msgstr ""
+msgstr "Hi&sobotni ko‘rsatish"
 
 #: i18n.cpp:162
 msgid "&Language"
-msgstr ""
+msgstr "&Interfeys tili"
 
 #: i18n.cpp:163 i18n.cpp:209
 msgid "&Boot time scan"
-msgstr ""
+msgstr "&Tizimni yuklash vaqtida tekshirish"
 
 #: i18n.cpp:164
 msgid "&Sorting"
-msgstr ""
+msgstr "&Saralash"
 
 #: i18n.cpp:165
 msgid "&Reports"
-msgstr ""
+msgstr "&Hisobotlar"
 
 #: i18n.cpp:168
 msgid "&View change log"
-msgstr ""
+msgstr "&Kiritilgan o‘zgarishlarni ko‘rish"
 
 #: i18n.cpp:169
 msgid "View translation &report"
-msgstr ""
+msgstr "&Tarjima hisobotini ko‘rish"
 
 #: i18n.cpp:170
 msgid "&Translations folder"
-msgstr ""
+msgstr "Tarji&malar jildi"
 
 #: i18n.cpp:171
 msgid "&Submit current translation"
-msgstr ""
+msgstr "&Joriy tarjimani yuborish"
 
 #: i18n.cpp:174
 msgid "&Options"
-msgstr ""
+msgstr "&Parametrlar"
 
 #: i18n.cpp:177
 msgid "&Enable"
-msgstr ""
+msgstr "&Yoqib qo‘yish"
 
 #: i18n.cpp:178
 msgid "&Script"
-msgstr ""
+msgstr "&Skript"
 
 #: i18n.cpp:181
 msgid "By &path"
-msgstr ""
+msgstr "&Yo‘lagi bo‘yicha"
 
 #: i18n.cpp:182
 msgid "By &size"
-msgstr ""
+msgstr "&Hajmi bo‘yicha"
 
 #: i18n.cpp:183
 msgid "By &creation time"
-msgstr ""
+msgstr "Yaratilgan &vaqti bo‘yicha"
 
 #: i18n.cpp:184
 msgid "By last &modification time"
-msgstr ""
+msgstr "&O‘zgargan vaqti bo‘yicha"
 
 #: i18n.cpp:185
 msgid "By &last access time"
-msgstr ""
+msgstr "O&xirgi ochilgan vaqti bo‘yicha"
 
 #: i18n.cpp:186
 msgid "In &ascending order"
-msgstr ""
+msgstr "O‘&suvchi tartibda"
 
 #: i18n.cpp:187
 msgid "In &descending order"
-msgstr ""
+msgstr "&Kamayuvchi tartibda"
 
 #: i18n.cpp:190
 msgid "&Contents"
-msgstr ""
+msgstr "&Mundarija"
 
 #: i18n.cpp:191
 msgid "Best &practice"
-msgstr ""
+msgstr "&Misollar"
 
 #: i18n.cpp:192
 msgid "&Frequently asked questions"
-msgstr ""
+msgstr "&Ko‘p so‘raladigan savollar"
 
 #: i18n.cpp:193
 msgid "Cluster map &legend"
-msgstr ""
+msgstr "Klaster &xaritasidagi belgilar"
 
 #: i18n.cpp:196 upgrade.cpp:161
 msgid "&Upgrade"
-msgstr ""
+msgstr "&Yangilash"
 
 #: i18n.cpp:197
 msgid "&Never check"
-msgstr ""
+msgstr "&Hech qachon tekshirilmasin"
 
 #: i18n.cpp:198
 msgid "Check &stable releases only"
-msgstr ""
+msgstr "&Faqat barqaror versiyalar tekshirilsin"
 
 #: i18n.cpp:199
 msgid "Check &all releases"
-msgstr ""
+msgstr "&Barcha versiyalar tekshirilsin"
 
 #: i18n.cpp:200
 msgid "&Check now"
-msgstr ""
+msgstr "H&oziroq tekshirish"
 
 #: i18n.cpp:201
 msgid "&About"
-msgstr ""
+msgstr "&Dastur haqida"
 
 #: i18n.cpp:204
 msgid "&Debug"
-msgstr ""
+msgstr "&Kamchilikni tuzatish (debug)"
 
 #: i18n.cpp:205 utils.cpp:411
 msgid "Open &log"
-msgstr ""
+msgstr "&Log faylini ochish"
 
 #: i18n.cpp:206
 msgid "Send bug &report"
-msgstr ""
+msgstr "Ka&mchilik haqida hisobot yuborish"
 
 #: i18n.cpp:211
 msgid "Boot time script"
-msgstr ""
+msgstr "Yuklash paytida ishlatiladigan skript"
 
 #: i18n.cpp:218
 msgid "Drive"
-msgstr ""
+msgstr "Disk"
 
 #: i18n.cpp:219 i18n.cpp:275
 msgid "Status"
-msgstr ""
+msgstr "Holati"
 
 #: i18n.cpp:220
 msgid "Fragmentation"
-msgstr ""
+msgstr "Fragmentatsiya"
 
 #: i18n.cpp:221
 msgid "Total space"
-msgstr ""
+msgstr "Jami bo‘shliq"
 
 #: i18n.cpp:222
 msgid "Free space"
-msgstr ""
+msgstr "Bo‘sh joy"
 
 #: i18n.cpp:224
 #, no-c-format
 msgid "% free"
-msgstr ""
+msgstr "% bo‘sh"
 
 #: i18n.cpp:267
 msgid "Fragmented files on"
-msgstr ""
+msgstr "Bundagi fragmentatsiya bo‘lgan fayllar:"
 
 #: i18n.cpp:268
 msgid "Visit our Homepage"
-msgstr ""
+msgstr "Rasmiy saytimizga tashrif buyuring"
 
 #: i18n.cpp:269
 msgid "View report options"
-msgstr ""
+msgstr "Hisobot opsiyalarini ko‘rish"
 
 #: i18n.cpp:270
 msgid "Powered by Lua"
-msgstr ""
+msgstr "Lua yordamida tuzilgan"
 
 #: i18n.cpp:271
 msgid "Fragments"
-msgstr ""
+msgstr "Fragmentlar"
 
 #: i18n.cpp:272
 msgid "Size"
-msgstr ""
+msgstr "Hajmi"
 
 #: i18n.cpp:273
 msgid "Filename"
-msgstr ""
+msgstr "Fayl nomi"
 
 #: i18n.cpp:274
 msgid "Comment"
-msgstr ""
+msgstr "Sharh"
 
 #: i18n.cpp:276
 msgid "locked"
-msgstr ""
+msgstr "qulflangan"
 
 #: i18n.cpp:277
 msgid "move failed"
-msgstr ""
+msgstr "ko‘chirib bo‘lmadi"
 
 #: i18n.cpp:278
 msgid "invalid"
-msgstr ""
+msgstr "yaroqsiz"
 
 #: shutdown.cpp:100
 msgid "Please confirm"
-msgstr ""
+msgstr "Tasdiqlang"
 
 #: shutdown.cpp:107
 msgid "Do you really want to hibernate when done?"
-msgstr ""
+msgstr "Haqiqatan ham ish nihoyasiga yetgach, kompyuterni uyqu rejimiga o‘tkazasizmi?"
 
 #. : This expands to "60 seconds until hibernation"
 #. : Make sure that "%lu" is included in the translated string at the correct
@@ -340,11 +341,11 @@ msgstr ""
 #: shutdown.cpp:110
 #, c-format
 msgid "%lu seconds until hibernation"
-msgstr ""
+msgstr "%lu soniyadan so‘ng uyqu rejimiga o‘tadi"
 
 #: shutdown.cpp:113
 msgid "Do you really want to log off when done?"
-msgstr ""
+msgstr "Haqiqatan ham ish nihoyasiga yetgach, tizimdan chiqasizmi?"
 
 #. : This expands to "60 seconds until logoff"
 #. : Make sure that "%lu" is included in the translated string at the correct
@@ -352,11 +353,11 @@ msgstr ""
 #: shutdown.cpp:116
 #, c-format
 msgid "%lu seconds until logoff"
-msgstr ""
+msgstr "%lu soniyadan so‘ng tizimdan chiqiladi"
 
 #: shutdown.cpp:119
 msgid "Do you really want to reboot when done?"
-msgstr ""
+msgstr "Haqiqatan ham ish nihoyasiga yetgach, kompyuterni o‘chirib-yoqasizmi?"
 
 #. : This expands to "60 seconds until reboot"
 #. : Make sure that "%lu" is included in the translated string at the correct
@@ -364,11 +365,11 @@ msgstr ""
 #: shutdown.cpp:122
 #, c-format
 msgid "%lu seconds until reboot"
-msgstr ""
+msgstr "%lu soniyadan so‘ng o‘chirib-yoqiladi"
 
 #: shutdown.cpp:125
 msgid "Do you really want to shutdown when done?"
-msgstr ""
+msgstr "Haqiqatan ham ish nihoyasiga yetgach, kompyuterni o‘chirasizmi?"
 
 #. : This expands to "60 seconds until shutdown"
 #. : Make sure that "%lu" is included in the translated string at the correct
@@ -376,47 +377,47 @@ msgstr ""
 #: shutdown.cpp:128
 #, c-format
 msgid "%lu seconds until shutdown"
-msgstr ""
+msgstr "%lu soniyadan so‘ng kompyuter o‘chiriladi"
 
 #: shutdown.cpp:140
 msgid "&Yes"
-msgstr ""
+msgstr "&Ha"
 
 #: shutdown.cpp:141
 msgid "&No"
-msgstr ""
+msgstr "Y&o‘q"
 
 #: statbar.cpp:92
 msgid "folders"
-msgstr ""
+msgstr "ta jild"
 
 #: statbar.cpp:93
 msgid "files"
-msgstr ""
+msgstr "ta fayl"
 
 #: statbar.cpp:94
 msgid "fragmented"
-msgstr ""
+msgstr "tasi fragmentlangan"
 
 #: statbar.cpp:95
 msgid "compressed"
-msgstr ""
+msgstr "tasi siqilgan"
 
 #: taskbar.cpp:198
 msgid "The job is paused"
-msgstr ""
+msgstr "Ish pauza qilindi"
 
 #: taskbar.cpp:203
 msgid "The job is running"
-msgstr ""
+msgstr "Ish bajarilmoqda"
 
 #: tray.cpp:70
 msgid "Show"
-msgstr ""
+msgstr "Ko‘rsatish"
 
 #: tray.cpp:72
 msgid "Hide"
-msgstr ""
+msgstr "Yashirish"
 
 #. : This expands to "Release 7.0.0 is available for download!"
 #. : Make sure that "%ls" is included in the translated string at the correct
@@ -424,23 +425,23 @@ msgstr ""
 #: upgrade.cpp:158
 #, c-format
 msgid "Release %ls is available for download!"
-msgstr ""
+msgstr "%ls versiyasini yuklab olish mumkin!"
 
 #: upgrade.cpp:160
 msgid "You can upgrade me ^-^"
-msgstr ""
+msgstr "Yangilashingiz mumkin ^-^"
 
 #: upgrade.cpp:161 utils.cpp:415
 msgid "&Cancel"
-msgstr ""
+msgstr "&Bekor"
 
 #: utils.cpp:414
 msgid "Error!"
-msgstr ""
+msgstr "Xatolik!"
 
 #: vollist.cpp:328
 msgid "Disk needs to be repaired"
-msgstr ""
+msgstr "Diskni tuzatish kerak"
 
 #. : Status of the running disk analysis,
 #. : expands to "10 % analyzed".
@@ -449,7 +450,7 @@ msgstr ""
 #: vollist.cpp:369
 #, c-format
 msgid "%5.2lf %% analyzed"
-msgstr ""
+msgstr "%5.2lf %% tahlil qilindi"
 
 #. : Status of the running disk defragmentation,
 #. : expands to "10 % defragmented, pass 5".
@@ -458,7 +459,7 @@ msgstr ""
 #: vollist.cpp:375
 #, c-format
 msgid "%5.2lf %% defragmented, pass %d"
-msgstr ""
+msgstr "%5.2lf %% defragmentatsiya qilindi, %d-sikl"
 
 #. : Status of the running disk optimization, expands to
 #. : "10 % optimized, pass 5, 1024 moves total".
@@ -466,12 +467,12 @@ msgstr ""
 #. : in the translated string at the correct positions.
 #: vollist.cpp:383
 msgid "%5.2lf %% optimized, pass %d, %I64u moves total"
-msgstr ""
+msgstr "%5.2lf %% optimallandi, %d-sikl, jami %I64u tasi ko‘chirildi"
 
 #. : Status of the completed disk analysis.
 #: vollist.cpp:390
 msgid "Analyzed"
-msgstr ""
+msgstr "Tahlil qilindi"
 
 #. : Status of the completed disk defragmentation,
 #. : expands to "Defragmented, in 5 passes".
@@ -480,7 +481,7 @@ msgstr ""
 #: vollist.cpp:396
 #, c-format
 msgid "Defragmented, in %d passes"
-msgstr ""
+msgstr "Defragmentatsiya qilindi, %d ta sikl"
 
 #. : Status of the completed disk optimization, expands to
 #. : "Optimized, in 5 passes, 1024 moves total".
@@ -488,4 +489,4 @@ msgstr ""
 #. : in the translated string at the correct positions.
 #: vollist.cpp:404
 msgid "Optimized, in %d passes, %I64u moves total"
-msgstr ""
+msgstr "Optimallandi, %d ta sikldan so‘ng, jami %I64u tasi ko‘chirildi"

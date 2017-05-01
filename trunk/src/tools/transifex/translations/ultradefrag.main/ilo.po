@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Joseph Maza <joseph.maza@gmail.com>, 2013-2015
+# Joseph Maza <joseph.maza@gmail.com>, 2013-2016
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 msgid ""
@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2013-07-10 21:44+0200\n"
-"PO-Revision-Date: 2015-12-15 16:06+0000\n"
+"PO-Revision-Date: 2016-08-09 04:01+0000\n"
 "Last-Translator: Joseph Maza <joseph.maza@gmail.com>\n"
 "Language-Team: Iloko (http://www.transifex.com/stefanpendl/ultradefrag/language/ilo/)\n"
 "MIME-Version: 1.0\n"
@@ -431,7 +431,7 @@ msgstr "Maiyulogen ti %ls!"
 
 #: upgrade.cpp:160
 msgid "You can upgrade me ^-^"
-msgstr "Mapalaingennak ^-^"
+msgstr "Mapalaingennakon. ^-^"
 
 #: upgrade.cpp:161 utils.cpp:415
 msgid "&Cancel"
@@ -461,7 +461,7 @@ msgstr "Inusig: %5.2lf %%"
 #: vollist.cpp:375
 #, c-format
 msgid "%5.2lf %% defragmented, pass %d"
-msgstr "%5.2lf %% ti dinagup, rikos a %d"
+msgstr "Dinagup: %5.2lf %%; Suot: %d"
 
 #. : Status of the running disk optimization, expands to
 #. : "10 % optimized, pass 5, 1024 moves total".
@@ -469,7 +469,7 @@ msgstr "%5.2lf %% ti dinagup, rikos a %d"
 #. : in the translated string at the correct positions.
 #: vollist.cpp:383
 msgid "%5.2lf %% optimized, pass %d, %I64u moves total"
-msgstr "%5.2lf %% ti inkanatad, rikos %d, kadagupanna %I64u a pannakayakar"
+msgstr "Inkanatad: %5.2lf %%; Suot: %d; Panagyakar a dagup: %I64u"
 
 #. : Status of the completed disk analysis.
 #: vollist.cpp:390
@@ -483,7 +483,7 @@ msgstr "Inusig"
 #: vollist.cpp:396
 #, c-format
 msgid "Defragmented, in %d passes"
-msgstr "Dinagup iti %d a rikos"
+msgstr "Dinagup iti %d a suot"
 
 #. : Status of the completed disk optimization, expands to
 #. : "Optimized, in 5 passes, 1024 moves total".
@@ -491,4 +491,4 @@ msgstr "Dinagup iti %d a rikos"
 #. : in the translated string at the correct positions.
 #: vollist.cpp:404
 msgid "Optimized, in %d passes, %I64u moves total"
-msgstr "Inkanatad iti %d a rikos, kadagupanna %I64u a pannakayakar"
+msgstr "Inkanatad iti %d a suot, iti %I64u a panagyakar iti dagup"
