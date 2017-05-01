@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
  *  Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -142,7 +142,7 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 !include "WinMessages.nsh"
 !include "WinVer.nsh"
 !include "x64.nsh"
-!include "MUI.nsh"
+!include "MUI2.nsh"
 !include "${ROOTDIR}\src\installer\UltraDefrag.nsh"
 !include "${ROOTDIR}\src\installer\PresetSections.nsh"
 
@@ -159,8 +159,8 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "${ROOTDIR}\src\LICENSE.TXT"
-!define MUI_DIRECTORYPAGE_TEXT_TOP "Only empty folders and folders containing a previous UltraDefrag installation are valid!$\n \
-    For any other folders the $\"Next$\" button will be disabled."
+!define MUI_DIRECTORYPAGE_TEXT_TOP "Only empty folders and folders containing a previous UltraDefrag \
+    installation are valid!$\nFor any other folders the $\"Next$\" button will be disabled."
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
@@ -173,7 +173,6 @@ VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
 !insertmacro MUI_UNPAGE_FINISH
 
 !insertmacro MUI_LANGUAGE "English"
-!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 /*
  * Component sections.

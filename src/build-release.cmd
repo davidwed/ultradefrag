@@ -1,7 +1,7 @@
 @echo off
 ::
 :: This script builds UltraDefrag releases.
-:: Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
 :: Copyright (c) 2011-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
@@ -30,16 +30,17 @@ mkdir release
 :: build source code package
 call build-src-package.cmd || goto build_failed
 
-:: build 32-bit binaries using mingw, as it's more reliable
+:: build 32-bit binaries using MinGW for full compatibility 
+:: with Windows XP SP1, just to keep system requirements simple
 call build.cmd --all --use-mingw || goto build_failed
 copy .\bin\ultradefrag-%UDVERSION_SUFFIX%.bin.i386.exe .\release\
 copy .\bin\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.i386.zip .\release\
 
-:: build 64-bit binaries using winsdk, as we have no good alternative at the moment
+:: build 64-bit binaries using Windows SDK
 call build.cmd --all --use-winsdk --no-x86 || goto build_failed
 copy .\bin\amd64\ultradefrag-%UDVERSION_SUFFIX%.bin.amd64.exe .\release\
-copy .\bin\ia64\ultradefrag-%UDVERSION_SUFFIX%.bin.ia64.exe .\release\
 copy .\bin\amd64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.amd64.zip .\release\
+copy .\bin\ia64\ultradefrag-%UDVERSION_SUFFIX%.bin.ia64.exe .\release\
 copy .\bin\ia64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.ia64.zip .\release\
 
 :: update history file

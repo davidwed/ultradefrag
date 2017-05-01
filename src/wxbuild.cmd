@@ -1,7 +1,7 @@
 @echo off
 ::
 :: Build script for wxWidgets library.
-:: Copyright (c) 2007-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2007-2016 Dmitri Arkhangelski (dmitriar@gmail.com).
 :: Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
@@ -40,6 +40,8 @@ copy /Y .\tools\patch\wx\setup.h "%WXWIDGETSDIR%\include\wx\msw\setup.h"
 :: patch wxWidgets
 copy /Y .\tools\patch\wx\debughlp.h "%WXWIDGETSDIR%\include\wx\msw\debughlp.h"
 copy /Y .\tools\patch\wx\filefn.cpp "%WXWIDGETSDIR%\src\common\filefn.cpp"
+copy /Y .\tools\patch\wx\languageinfo.cpp "%WXWIDGETSDIR%\src\common\languageinfo.cpp"
+copy /Y .\tools\patch\wx\menu.cpp "%WXWIDGETSDIR%\src\msw\menu.cpp"
 
 :: build wxWidgets
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
