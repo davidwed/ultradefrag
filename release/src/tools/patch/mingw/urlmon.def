@@ -1,6 +1,0 @@
-LIBRARY urlmon.dll
-EXPORTS
-URLDownloadToCacheFileA@24
-URLDownloadToCacheFileW@24
-URLDownloadToFileA@20
-URLDownloadToFileW@20
