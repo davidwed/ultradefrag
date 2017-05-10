@@ -948,7 +948,7 @@ static int optimize_routine(udefrag_job_parameters *jp)
           < jp->udo.optimizer_size_limit){
             if(can_move_entirely(f,jp)){
                 p = prb_probe(pt,(void *)f);
-                if(*p != f) etrace("a duplicate found for %ws",f->path);
+                if(p && *p != f) etrace("a duplicate found for %ws",f->path);
             }
         }
         if(f->next == jp->filelist) break;
