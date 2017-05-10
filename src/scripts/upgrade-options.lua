@@ -405,7 +405,7 @@ function save_preferences(f)
 end
 
 function extract_preferences(file)
-    local path = instdir .. "\\options\\" .. file
+    local path = instdir .. "\\" .. file
     local f = io.open(path, "r")
     if f then
         f:close()
@@ -466,16 +466,17 @@ function get_preferences()
     max_chars_per_line = 50
     
     -- get user preferences
-    path = instdir .. "\\options.lua"
+    path = instdir .. "\\conf\\options.lua"
     f = io.open(path, "r")
     if f then
         f:close()
         dofile(path)
     else
         -- try to gain something from obsolete configuration files
-        extract_preferences("guiopts.lua")
-        extract_preferences("udreportopts.lua")
-        extract_preferences("udreportopts-custom.lua")
+        extract_preferences("options\\guiopts.lua")
+        extract_preferences("options\\udreportopts.lua")
+        extract_preferences("options\\udreportopts-custom.lua")
+        extract_preferences("options.lua")
     end
 
     -- upgrade preferences
@@ -502,7 +503,7 @@ end
 -- THE MAIN CODE STARTS HERE
 -- the current version of the configuration file
 -- 0 - 99 for v5; 100 - 199 for v6; 200+ for v7
-current_version = 202
+current_version = 203
 shellex_options = ""
 _G_copy = {}
 
@@ -545,7 +546,7 @@ end
 
 -- upgrade configuration file when needed
 if version < current_version then
-    path = instdir .. "\\options.lua"
+    path = instdir .. "\\conf\\options.lua"
     -- make a backup copy
     f = io.open(path, "r")
     if f then

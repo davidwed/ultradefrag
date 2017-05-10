@@ -258,7 +258,7 @@ footer = [[
     <table class="links_toolbar" width="100%"><tbody>
       <tr>
         <td class="left"><a href="http://ultradefrag.sourceforge.net">$VISIT_HOMEPAGE</a></td>
-        <td class="center"><a href="file:///$instdir_utf8\options.lua">$VIEW_REPORT_OPTIONS</a></td>
+        <td class="center"><a href="file:///$instdir_utf8\conf\options.lua">$VIEW_REPORT_OPTIONS</a></td>
         <td class="right"><a href="http://www.lua.org/">$POWERED_BY_LUA</a></td>
       </tr>
     </tbody></table>
@@ -379,7 +379,7 @@ assert(report_path, usage)
 assert(instdir, usage)
 
 -- get report options
-dofile(instdir .. "\\options.lua")
+dofile(instdir .. "\\conf\\options.lua")
 
 -- read the source file
 dofile(report_path)

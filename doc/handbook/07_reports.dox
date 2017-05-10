@@ -42,7 +42,7 @@
  * a web page or a plain text report and show it then.
  *
  * To configure the reports click <b>Settings > Options</b> in UltraDefrag GUI
- * or edit the following file manually: <b>{installation folder}\\options.lua</b>.
+ * or edit the following file manually: <b>{installation folder}\\conf\\options.lua</b>.
  *
  * By default files are sorted by number of fragments in descending order.
  * To change the order click the appropriate column heading. The sorting

@@ -57,11 +57,6 @@ void *UpgradeThread::Entry()
             target.Normalize();
             wxString dir(target.GetFullPath());
             if(!wxDirExists(dir)) wxMkdir(dir);
-
-            /*
-            * Use a subfolder to prevent configuration files
-            * reload (see ConfigThread::Entry() for details).
-            */
             dir << wxT("\\data");
             if(!wxDirExists(dir)) wxMkdir(dir);
 

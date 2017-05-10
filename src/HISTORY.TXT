@@ -2,6 +2,8 @@
 
   Version 7.0.3 2017-05-xx
   ------------------------------------------------------------------------------
+    - options.lua file was moved to conf subfolder to
+      fix configuration tracking (bugs #222 and #225)
     - Estonian translation was updated
 
 

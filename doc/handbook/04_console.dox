@@ -23,7 +23,7 @@
  * To stop defragmentation hit <b>Ctrl+C</b> or close the command prompt.
  * To configure the context menu handler click <b>Settings > Options</b>
  * in UltraDefrag GUI or edit the following file manually:
- * <b>{installation folder}\\options.lua</b>.
+ * <b>{installation folder}\\conf\\options.lua</b>.
  *
  * @note
  * The context menu handler is not available from the portable

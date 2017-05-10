@@ -194,7 +194,7 @@ void show_help(void)
         "Note:\n"
         "  All the environment variables are ignored when the --shellex switch is\n"
         "  on the command line. Instead of taking environment variables into account\n"
-        "  the program interpretes the %%UD_INSTALL_DIR%%\\options.lua file.\n"
+        "  the program interpretes the %%UD_INSTALL_DIR%%\\conf\\options.lua file.\n"
         "\n"
         "Samples:\n"
         "\n"

@@ -307,7 +307,7 @@ SkipMove:
 
     DetailPrint "Configuration files upgrade..."
     ; ensure that target directory exists
-    CreateDirectory "$INSTDIR\options"
+    CreateDirectory "$INSTDIR\conf"
     ${If} ${Silent}
         ExecWait '"$INSTDIR\lua5.1a_gui.exe" -s "$INSTDIR\scripts\upgrade-options.lua" "$INSTDIR"'
     ${Else}
@@ -350,7 +350,7 @@ SkipMove:
     Delete "$INSTDIR\lua5.1a.exe"
     Delete "$INSTDIR\lua5.1a_gui.exe"
     RMDir /r "$INSTDIR\scripts"
-    RMDir /r "$INSTDIR\options"
+    RMDir /r "$INSTDIR\conf"
 
     Delete "$SYSDIR\zenwinx.dll"
     Delete "$SYSDIR\udefrag.dll"
@@ -981,6 +981,9 @@ SkipMove:
     Delete "$INSTDIR\scripts\udctxhandler.lua"
     Delete "$INSTDIR\scripts\upgrade-guiopts.lua"
     Delete "$INSTDIR\scripts\upgrade-rptopts.lua"
+
+    Delete "$INSTDIR\options.lua"
+    Delete "$INSTDIR\options.lua.old"
 
     Delete "$INSTDIR\dfrg.exe"
     Delete "$INSTDIR\CREDITS.TXT"
