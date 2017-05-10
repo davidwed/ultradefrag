@@ -284,14 +284,13 @@ static DWORD WINAPI start_job(LPVOID p)
     }
 
     destroy_file_blocks_tree(jp);
-    if(jp->job_type != ANALYSIS_JOB)
-        release_temp_space_regions(jp);
+
     (void)save_fragmentation_report(jp);
     
     /* now it is safe to adjust the completion status */
     jp->pi.completion_status = result;
     if(jp->pi.completion_status == 0)
-    jp->pi.completion_status ++; /* success */
+        jp->pi.completion_status ++; /* success */
     
     winx_exit_thread(0); /* 8k/12k memory leak here? */
     return 0;
