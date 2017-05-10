@@ -369,7 +369,7 @@ bool set_shellex_options(void)
     wxUnsetEnv(wxT("UD_SORTING_ORDER"));
 
     /* interprete options.lua file */
-    wxFileName path(wxT("%UD_INSTALL_DIR%\\options.lua"));
+    wxFileName path(wxT("%UD_INSTALL_DIR%\\conf\\options.lua"));
     path.Normalize();
     if(!path.FileExists()){
         etrace("%ls file not found",

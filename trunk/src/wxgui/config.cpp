@@ -204,7 +204,7 @@ void MainFrame::ReadUserPreferences(wxCommandEvent& WXUNUSED(event))
 
     /* interprete guiopts.lua file */
     lua_State *L; int status; wxString error = wxT("");
-    wxFileName path(wxT(".\\options.lua"));
+    wxFileName path(wxT(".\\conf\\options.lua"));
     path.Normalize();
     if(!path.FileExists()){
         etrace("%ls file not found",
@@ -287,9 +287,9 @@ int MainFrame::CheckOption(const wxString& name)
 
 /**
  * @note This thread reloads the main configuration file
- * whenever something gets changed in the installation
- * directory, even when the last modification time
- * gets changed for its subdirectories.
+ * whenever something gets changed in the conf subfolder
+ * of the installation directory, even when the last
+ * modification time gets changed for its subfolders.
  */
 void *ConfigThread::Entry()
 {
@@ -297,7 +297,7 @@ void *ConfigThread::Entry()
 
     itrace("configuration tracking started");
 
-    HANDLE h = FindFirstChangeNotification(wxT("."),
+    HANDLE h = FindFirstChangeNotification(wxT(".\\conf"),
         FALSE,FILE_NOTIFY_CHANGE_LAST_WRITE);
     if(h == INVALID_HANDLE_VALUE){
         letrace("FindFirstChangeNotification failed");
@@ -354,9 +354,9 @@ done:
 void MainFrame::OnGuiOptions(wxCommandEvent& WXUNUSED(event))
 {
     if(m_title->Find(wxT("Portable")) != wxNOT_FOUND)
-        Utils::ShellExec(wxT("notepad"),wxT("open"),wxT(".\\options.lua"));
+        Utils::ShellExec(wxT("notepad"),wxT("open"),wxT(".\\conf\\options.lua"));
     else
-        Utils::ShellExec(wxT(".\\options.lua"),wxT("edit"));
+        Utils::ShellExec(wxT(".\\conf\\options.lua"),wxT("edit"));
 }
 
 void MainFrame::OnBootScript(wxCommandEvent& WXUNUSED(event))
