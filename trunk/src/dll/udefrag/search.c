@@ -211,7 +211,7 @@ int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *fi
     fb->block = block;
     p = prb_probe(jp->file_blocks,(void *)fb);
     /* if a duplicate item exists... */
-    if(*p != fb){
+    if(p && *p != fb){
         etrace("a duplicate found");
         winx_free(fb);
     }

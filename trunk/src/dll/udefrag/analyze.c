@@ -780,7 +780,7 @@ int expand_fragmented_files_list(winx_file_info *f,udefrag_job_parameters *jp)
     /* don't include filtered out files, for better performance */
     if(!is_excluded(f)){
         p = prb_probe(jp->fragmented_files,(void *)f);
-        if(*p != f) etrace("a duplicate found for %ws",f->path);
+        if(p && *p != f) etrace("a duplicate found for %ws",f->path);
     }
     return 0;
 }
