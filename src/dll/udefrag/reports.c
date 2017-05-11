@@ -168,8 +168,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
         "\tday = %02i,\r\n"
         "\thour = %02i,\r\n"
         "\tmin = %02i,\r\n"
-        "\tsec = %02i,\r\n"
-        "\tisdst = false\r\n"
+        "\tsec = %02i\r\n"
         "}\r\n\r\n"
         "files = {\r\n",
         jp->volume_letter, jp->volume_letter,utf8_compname,

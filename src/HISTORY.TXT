@@ -4,6 +4,8 @@
   ------------------------------------------------------------------------------
     - options.lua file was moved to conf subfolder to
       fix configuration tracking (bugs #222 and #225)
+    - fragmentation reports were forced to take
+      daylight saving time settings into account
     - a lot of minor bugs were fixed
     - Estonian translation was updated
 
