@@ -42,6 +42,7 @@ copy /Y .\tools\patch\wx\debughlp.h "%WXWIDGETSDIR%\include\wx\msw\debughlp.h"
 copy /Y .\tools\patch\wx\filefn.cpp "%WXWIDGETSDIR%\src\common\filefn.cpp"
 copy /Y .\tools\patch\wx\languageinfo.cpp "%WXWIDGETSDIR%\src\common\languageinfo.cpp"
 copy /Y .\tools\patch\wx\menu.cpp "%WXWIDGETSDIR%\src\msw\menu.cpp"
+copy /Y .\tools\patch\wx\statusbar.cpp "%WXWIDGETSDIR%\src\msw\statusbar.cpp"
 
 :: build wxWidgets
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (

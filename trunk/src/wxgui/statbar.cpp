@@ -38,12 +38,13 @@
 
 #define SB_PARTS 5
 
+// FIXME: find a way to center icons and text vertically on
+// all the supported operating systems and screen DPI settings
 #define UD_SetStatusIcon(index,name) { \
     wxIcon *icon = new wxIcon(wxT(#name), wxBITMAP_TYPE_ICO_RESOURCE, g_iconSize, g_iconSize); \
     ::SendMessage((HWND)GetStatusBar()->GetHandle(),SB_SETICON,index,(LPARAM)icon->GetHICON()); \
 }
 
-// FIXME: in wxWidgets 3.0.2 the status text isn't centered vertically
 #define UD_SetStatusText(index,text,counter) { \
     wxString t = text; \
     SetStatusText(wxString::Format(wxT("%lu %ls"),counter,ws(t)), index); \
