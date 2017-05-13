@@ -619,8 +619,6 @@ private:
     DrivesList       *m_vList;
     ClusterMap       *m_cMap;
 
-    wxBitmap m_repeatButtonBitmap;
-
     bool m_btdEnabled;
     BtdThread *m_btdThread;
 
