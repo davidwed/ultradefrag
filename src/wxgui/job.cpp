@@ -249,18 +249,6 @@ void MainFrame::OnStartJob(wxCommandEvent& event)
     UD_DisableTool(ID_ShowReport);
     m_subMenuSortingConfig->Enable(false);
 
-    // XXX: force the repeat button to be
-    // grayed out even when it's checked
-    wxToolBarToolBase *btn = m_toolBar->FindById(ID_Repeat);
-    if(btn){
-        if(!m_repeatButtonBitmap.IsOk()){
-            // save normal bitmap to restore it further
-            m_repeatButtonBitmap = btn->GetNormalBitmap();
-        }
-        m_toolBar->SetToolNormalBitmap(
-           ID_Repeat,btn->GetDisabledBitmap());
-    }
-
     ReleasePause();
 
     ProcessCommandEvent(this,ID_AdjustSystemTrayIcon);
@@ -332,12 +320,6 @@ void MainFrame::OnJobCompletion(wxCommandEvent& WXUNUSED(event))
     UD_EnableTool(ID_ShowReport);
     m_subMenuSortingConfig->Enable(true);
     m_busy = false;
-
-    // XXX: restore the repeat button bitmap
-    if(m_repeatButtonBitmap.IsOk()){
-        m_toolBar->SetToolNormalBitmap(
-           ID_Repeat,m_repeatButtonBitmap);
-    }
 
     ReleasePause();
 
