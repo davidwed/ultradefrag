@@ -57,8 +57,6 @@ void *UpgradeThread::Entry()
             target.Normalize();
             wxString dir(target.GetFullPath());
             if(!wxDirExists(dir)) wxMkdir(dir);
-            dir << wxT("\\data");
-            if(!wxDirExists(dir)) wxMkdir(dir);
 
             wxString url(wxT(""));
             wxString path(dir);
