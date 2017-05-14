@@ -321,6 +321,11 @@ void MainFrame::OnJobCompletion(wxCommandEvent& WXUNUSED(event))
     m_subMenuSortingConfig->Enable(true);
     m_busy = false;
 
+    // XXX: sometimes reenabled buttons remain gray
+    // on Windows 7, at least on a virtual machine,
+    // so we have to refresh the toolbar ourselves
+    m_toolBar->Refresh(); m_toolBar->Update();
+
     ReleasePause();
 
     ProcessCommandEvent(this,ID_AdjustSystemTrayIcon);
