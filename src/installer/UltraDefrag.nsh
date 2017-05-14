@@ -768,7 +768,7 @@ SkipMove:
     DetailPrint "Removing context menu handler..."
     Delete "$INSTDIR\icons\shellex.ico"
     Delete "$INSTDIR\icons\shellex-folder.ico"
-    RmDir "$INSTDIR\icons"
+    RMDir "$INSTDIR\icons"
 
     DeleteRegKey HKCR "Drive\shell\udefrag.W7menu"
     DeleteRegKey HKCR "Drive\udefragW7menu"
@@ -1026,6 +1026,8 @@ SkipMove:
     RMDir /r "$INSTDIR\locale\eu_ES"
     RMDir /r "$INSTDIR\locale\si_LK"
     RMDir /r "$INSTDIR\locale\szl"
+    
+    RMDir /r "$INSTDIR\tmp\data"
     
     ; remove obsolete shortcuts
     SetShellVarContext all
