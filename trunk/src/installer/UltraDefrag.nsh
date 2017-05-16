@@ -973,7 +973,6 @@ SkipMove:
 
     RMDir /r "$INSTDIR\doc"
     RMDir /r "$INSTDIR\i18n"
-    RMDir /r "$INSTDIR\logs"
     RMDir /r "$INSTDIR\options"
     RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
     RMDir /r "$INSTDIR\presets"
@@ -999,7 +998,6 @@ SkipMove:
     Delete "$INSTDIR\repair-drives.cmd"
 
     Delete "$INSTDIR\udefrag-scheduler.exe"
-    Delete "$INSTDIR\*.lng"
     Delete "$INSTDIR\udefrag-gui-config.exe"
     Delete "$INSTDIR\LanguageSelector.exe"
     Delete "$INSTDIR\lang.ini"
@@ -1010,6 +1008,11 @@ SkipMove:
 
     Delete "$INSTDIR\crash-info.ini"
     Delete "$INSTDIR\crash-info.log"
+    
+    ; remove outdated *.lng files, but keep installed reports.lng
+    Rename "$INSTDIR\reports.lng" "$INSTDIR\reports.tmp"
+    Delete "$INSTDIR\*.lng"
+    Rename "$INSTDIR\reports.tmp" "$INSTDIR\reports.lng"
 
     ; remove empty translations
     Delete "$INSTDIR\po\ach.po"
