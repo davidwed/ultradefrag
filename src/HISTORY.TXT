@@ -8,6 +8,7 @@
       daylight saving time settings into account
     - a lot of minor bugs were fixed
     - Estonian translation was updated
+    - Internals: compilation was optimized for speed
 
 
   Version 7.0.2 2016-12-17

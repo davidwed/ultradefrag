@@ -34,6 +34,7 @@
 //                            Declarations
 // =======================================================================
 
+#include "prec.h"
 #include "main.h"
 
 #if !defined(__GNUC__)

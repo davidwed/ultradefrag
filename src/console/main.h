@@ -27,32 +27,6 @@
 //                               Headers
 // =======================================================================
 
-#include <wx/wxprec.h>
-
-#ifndef WX_PRECOMP
-#include <wx/wx.h>
-#endif
-
-#include <wx/cmdline.h>
-#include <wx/dynlib.h>
-#include <wx/filename.h>
-#include <wx/thread.h>
-
-#include <conio.h>
-
-#if defined(__GNUC__)
-extern "C" {
-HRESULT WINAPI URLDownloadToCacheFileW(
-    /* LPUNKNOWN */ void *lpUnkcaller,
-    LPCWSTR szURL,
-    LPWSTR szFileName,
-    DWORD cchFileName,
-    DWORD dwReserved,
-    /*IBindStatusCallback*/ void *pBSC
-);
-}
-#endif
-
 #include "../include/dbg.h"
 #include "../include/version.h"
 #include "../dll/zenwinx/zenwinx.h"

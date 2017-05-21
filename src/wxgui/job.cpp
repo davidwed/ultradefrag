@@ -34,6 +34,7 @@
 //                            Declarations
 // =======================================================================
 
+#include "prec.h"
 #include "main.h"
 
 #define UD_EnableTool(id) { \

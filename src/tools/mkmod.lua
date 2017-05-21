@@ -38,6 +38,7 @@ nativedll = 0
 src, rc, includes, libs, adlibs = {}, {}, {}, {}, {}
 files, resources, headers, inc = {}, {}, {}, {}
 cpp_files = 0
+prec_header = 0
 
 -- files which names contain these patterns will be
 -- included as dependencies to MinGW makefiles
@@ -213,10 +214,35 @@ function produce_sdk_makefile()
     end
     f:write("\n\n")
     
+    if prec_header ~= 0 then
+        local ext = "c"
+        if cpp_files ~= 0 then
+            ext = "cpp"
+        end
+        f:write("prec.pch: prec.h\n")
+        f:write("    echo \^#include \"prec.h\" > prec.", ext, "\n")
+        f:write("    \$(CPP) \$(CPP_PROJ) /Yc prec.", ext, "\n")
+        f:write("    del /Q prec.", ext, "\n\n")
+    end
+    
     for i, v in ipairs(src) do
         outfile = string.gsub(v,"%.c(.-)$","%-" .. arch .. "%.obj")
-        f:write(outfile, ": ", v, " header_files\n")
-        f:write("    \$(CPP) \$(CPP_PROJ) /Fo", outfile, " ", v, "\n\n")
+
+        if prec_header ~= 0 then
+            -- to keep things simple let's use single prec.h file and
+            -- include it to *.cpp files only in case of coexistence of
+            -- *.cpp and *.c files
+            if string.find(v,"%.cpp$") or cpp_files == 0 then
+                f:write(outfile, ": ", v, " header_files prec.pch\n")
+                f:write("    \$(CPP) \$(CPP_PROJ) /Yuprec.h /Fo", outfile, " ", v, "\n\n")
+            else
+                f:write(outfile, ": ", v, " header_files\n")
+                f:write("    \$(CPP) \$(CPP_PROJ) /Fo", outfile, " ", v, "\n\n")
+            end
+        else
+            f:write(outfile, ": ", v, " header_files\n")
+            f:write("    \$(CPP) \$(CPP_PROJ) /Fo", outfile, " ", v, "\n\n")
+        end
     end
 
     f:write("LINK32_OBJS=")
@@ -266,6 +292,15 @@ endef
 define compile_cpp_source
 @echo Compiling $<
 @g++.exe $(CFLAGS) $(C_PREPROC) $(C_INCLUDE_DIRS) -c "$<" -o "$@"
+endef
+
+# GCC compiles headers exactly the same way as it compiles sources
+define compile_c_header
+$(compile_c_source)
+endef
+
+define compile_cpp_header
+$(compile_cpp_source)
 endef
 
 ]]
@@ -398,6 +433,18 @@ function produce_mingw_makefile()
     end
     f:write("\n")
     
+    if prec_header ~= 0 then
+        f:write("prec.h.gch: prec.h\n")
+        -- to keep things simple let's use single prec.h file and
+        -- include it to *.cpp files only in case of coexistence of
+        -- *.cpp and *.c files
+        if cpp_files ~= 0 then
+            f:write("\t$(compile_cpp_header)\n\n")
+        else
+            f:write("\t$(compile_c_header)\n\n")
+        end
+    end
+    
     build_list_of_headers()
     
     for i, v in ipairs(src) do
@@ -406,8 +453,14 @@ function produce_mingw_makefile()
             f:write("\\\n", v, " ")
         end
         if string.find(v,"%.cpp$") then
+            if prec_header ~= 0 then
+                f:write(" \\\nprec.h.gch")
+            end
             f:write("\n\t\$(compile_cpp_source)\n\n")
         else
+            if prec_header ~= 0 and cpp_files == 0 then
+                f:write(" \\\nprec.h.gch")
+            end
             f:write("\n\t\$(compile_c_source)\n\n")
         end
     end
@@ -444,6 +497,13 @@ end
 f:close()
 os.execute("cmd.exe /C del /Q project_files")
 assert(files[1],"No project files found!")
+
+-- search for prec.h file
+f = io.open("prec.h","r")
+if f then
+    f:close()
+    prec_header = 1
+end
 
 -- search for .def files
 deffile, mingw_deffile = "", ""
