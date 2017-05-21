@@ -56,40 +56,36 @@ mkdir bin\ia64
     echo .cbp
     echo .depend
     echo .layout
+    echo .gch
 ) >"%~n0_exclude.txt"
 
-xcopy .\bootexctrl  .\obj\bootexctrl  /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\console     .\obj\console     /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\console\res .\obj\console\res /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\dll\udefrag .\obj\udefrag     /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\dll\zenwinx .\obj\zenwinx     /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\wxgui       .\obj\wxgui       /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\wxgui\res   .\obj\wxgui\res   /I /Y /Q /S /EXCLUDE:%~n0_exclude.txt
-xcopy .\hibernate   .\obj\hibernate   /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\include     .\obj\include     /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\lua5.1      .\obj\lua5.1      /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\lua         .\obj\lua         /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\lua-gui     .\obj\lua-gui     /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\native      .\obj\native      /I /Y /Q /EXCLUDE:%~n0_exclude.txt
-xcopy .\dbg         .\obj\dbg         /I /Y /Q /EXCLUDE:%~n0_exclude.txt
+set XCOPY_OPTS=/I /Y /Q /EXCLUDE:%~n0_exclude.txt
+
+xcopy .\bootexctrl  .\obj\bootexctrl  %XCOPY_OPTS%
+xcopy .\console     .\obj\console     %XCOPY_OPTS% /S
+xcopy .\dbg         .\obj\dbg         %XCOPY_OPTS%
+xcopy .\dll\udefrag .\obj\udefrag     %XCOPY_OPTS%
+xcopy .\dll\zenwinx .\obj\zenwinx     %XCOPY_OPTS%
+xcopy .\hibernate   .\obj\hibernate   %XCOPY_OPTS%
+xcopy .\include     .\obj\include     %XCOPY_OPTS%
+xcopy .\lua5.1      .\obj\lua5.1      %XCOPY_OPTS%
+xcopy .\lua         .\obj\lua         %XCOPY_OPTS%
+xcopy .\lua-gui     .\obj\lua-gui     %XCOPY_OPTS%
+xcopy .\native      .\obj\native      %XCOPY_OPTS%
+xcopy .\wxgui       .\obj\wxgui       %XCOPY_OPTS%
+xcopy .\wxgui\res   .\obj\wxgui\res   %XCOPY_OPTS% /S
+
+set XCOPY_OPTS=
 
 del /f /q "%~n0_exclude.txt"
-
-:: copy external files on which monolithic native interface depends
-copy /Y .\obj\native\udefrag.c .\obj\native\udefrag-native.c
-copy /Y .\obj\udefrag\*.* .\obj\native\
-del /Q .\obj\native\udefrag.rc
-copy /Y .\obj\native\volume.c .\obj\native\udefrag-volume.c
-copy /Y .\obj\zenwinx\*.* .\obj\native\
-del /Q .\obj\native\zenwinx.rc
 
 :: copy header files to different locations
 :: to make relative paths of them the same
 :: as in /src directory
 mkdir obj\dll
 mkdir obj\dll\udefrag
-copy /Y obj\udefrag\udefrag.h obj\dll\udefrag
 mkdir obj\dll\zenwinx
+copy /Y obj\udefrag\udefrag.h obj\dll\udefrag\
 copy /Y obj\zenwinx\*.h obj\dll\zenwinx\
 
 :: build list of headers to produce
@@ -242,9 +238,17 @@ exit /B 0
     %UD_BUILD_TOOL% zenwinx.build || goto fail
     cd ..\udefrag
     %UD_BUILD_TOOL% udefrag.build || goto fail
+    
     echo Compile monolithic native interface...
     cd ..\native
+    :: copy external files on which monolithic native interface depends
+    move /Y udefrag.c udefrag-native.c
+    copy /Y ..\udefrag\*.* .
+    move /Y volume.c udefrag-volume.c
+    copy /Y ..\zenwinx\*.* .
+    del /Q udefrag.rc zenwinx.rc
     %UD_BUILD_TOOL% defrag_native.build || goto fail
+    
     cd ..\lua5.1
     %UD_BUILD_TOOL% lua.build || goto fail
     cd ..\lua
