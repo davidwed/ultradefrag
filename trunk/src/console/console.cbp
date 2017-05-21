@@ -74,6 +74,10 @@
 		<Unit filename="main.h" />
 		<Unit filename="map.cpp" />
 		<Unit filename="options.cpp" />
+		<Unit filename="prec.h">
+			<Option compile="1" />
+			<Option weight="0" />
+		</Unit>
 		<Unit filename="utils.cpp" />
 		<Extensions>
 			<code_completion />

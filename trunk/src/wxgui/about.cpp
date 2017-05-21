@@ -34,6 +34,7 @@
 //                            Declarations
 // =======================================================================
 
+#include "prec.h"
 #include "main.h"
 
 #define HOMEPAGE wxT("http://ultradefrag.sourceforge.net")

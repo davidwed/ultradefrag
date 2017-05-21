@@ -30,8 +30,9 @@
 //                            Declarations
 // =======================================================================
 
-#include <signal.h>
+#include "prec.h"
 #include "main.h"
+#include <signal.h>
 
 #define STATUS_FATAL_APP_EXIT        0x40000015
 #define STATUS_HEAP_CORRUPTION       0xC0000374

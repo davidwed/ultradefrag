@@ -37,6 +37,7 @@
 //                            Declarations
 // =======================================================================
 
+#include "prec.h"
 #include "main.h"
 
 #define LPTHUMBBUTTON LPVOID

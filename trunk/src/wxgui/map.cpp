@@ -42,6 +42,7 @@
 //                            Declarations
 // =======================================================================
 
+#include "prec.h"
 #include "main.h"
 
 COLORREF g_colors[SPACE_STATES] =
