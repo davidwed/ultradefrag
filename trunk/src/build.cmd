@@ -44,7 +44,9 @@ call build-targets.cmd %* || goto fail
 call build-docs.cmd %* || goto fail
 
 :: update translations
-call update-translations.cmd || goto fail
+if "%UD_BLD_FLG_UPDATE_TRANSLATIONS%" == "1" (
+    call update-translations.cmd || goto fail
+)
 
 :: build installers and portable packages
 echo Build installers and/or portable packages...
@@ -277,7 +279,6 @@ rem Displays usage information.
     echo --all           build all packages: regular and portable
     echo --install       perform silent installation after the build
     echo --clean         perform full cleanup instead of the build
-    echo --no-pdf        don't build PDF documentation
     echo.
     echo Compiler:
     echo --use-mingw     (default)
@@ -288,6 +289,11 @@ rem Displays usage information.
     echo --no-x86        don't build 32-bit binaries
     echo --no-amd64      don't build x64 binaries
     echo --no-ia64       don't build IA-64 binaries
+    echo.
+    echo Additional stuff:
+    echo --pdf           build PDF documentation
+    echo --dev           build developer documentation
+    echo --trans         update translations
     echo.
     echo Without parameters the build command uses MinGW
     echo to build 32-bit installer.

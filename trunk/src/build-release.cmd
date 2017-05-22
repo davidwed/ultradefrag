@@ -32,7 +32,7 @@ call build-src-package.cmd || goto build_failed
 
 :: build 32-bit binaries using MinGW for full compatibility 
 :: with Windows XP SP1, just to keep system requirements simple
-call build.cmd --all --use-mingw || goto build_failed
+call build.cmd --all --use-mingw --dev --pdf --trans || goto build_failed
 copy .\bin\ultradefrag-%UDVERSION_SUFFIX%.bin.i386.exe .\release\
 copy .\bin\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.i386.zip .\release\
 
