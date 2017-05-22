@@ -35,8 +35,10 @@ if "%ULTRADFGVER%" equ "" (
 
 doxygen --version >nul 2>&1 || goto fail
 
-call :compile_docs .\dll\udefrag || goto fail
-call :compile_docs .\dll\zenwinx || goto fail
+if "%UD_BLD_FLG_BUILD_DEV_DOCS%" == "1" (
+    call :compile_docs .\dll\udefrag || goto fail
+    call :compile_docs .\dll\zenwinx || goto fail
+)
 
 call :compile_docs ..\doc\handbook || goto fail
 
