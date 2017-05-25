@@ -220,9 +220,7 @@ function produce_sdk_makefile()
             ext = "cpp"
         end
         f:write("prec.pch: prec.h\n")
-        f:write("    echo \^#include \"prec.h\" > prec.", ext, "\n")
-        f:write("    \$(CPP) \$(CPP_PROJ) /Yc prec.", ext, "\n")
-        f:write("    del /Q prec.", ext, "\n\n")
+        f:write("    \$(CPP) \$(CPP_PROJ) /Yc prec.", ext, " /Foprec-", arch, ".obj\n\n")
     end
     
     for i, v in ipairs(src) do
