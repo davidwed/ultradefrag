@@ -127,7 +127,11 @@ function produce_sdk_makefile()
         -- http://support.microsoft.com/en-us/kb/2280741
         f:write("/Od ")
     else
-        f:write("/O2 ")
+        -- enable optimization for official releases only
+        -- as it slows down compilation significantly
+        if os.getenv("OFFICIAL_RELEASE") then
+            f:write("/O2 ")
+        end
     end
     if cpp_files ~= 0 then
         -- /EHsc is required by the <xlocale> header
@@ -323,7 +327,14 @@ function produce_mingw_makefile()
     f:write("WINDRES = \"\$(COMPILER_BIN)windres.exe\"\n\n")
 
     f:write("TARGET = ", outpath, target_name, "\n")
-    f:write("CFLAGS = -pipe  -Wall -g0 -O2")
+    f:write("CFLAGS = -pipe  -Wall -g0")
+
+    -- enable optimization for official releases only
+    -- as it slows down compilation significantly
+    if os.getenv("OFFICIAL_RELEASE") then
+        f:write(" -O2")
+    end
+
     if os.getenv("BUILD_ENV") == "mingw_x64" then
         f:write(" -m64")
     end
