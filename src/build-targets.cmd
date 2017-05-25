@@ -270,7 +270,7 @@ exit /B 0
 
     :: compress gui and command line tools for
     :: a bit faster startup on older machines
-    if %1 equ X86 (
+    if "%OFFICIAL_RELEASE%" equ "1" if %1 equ X86 (
         upx -q -9 .\bin\udefrag.exe
         upx -q -9 .\bin\ultradefrag.exe
     )
