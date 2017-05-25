@@ -38,17 +38,13 @@
 #include "main.h"
 
 #define UD_EnableTool(id) { \
-    wxMenuItem *item = m_menuBar->FindItem(id); \
-    if(item) item->Enable(true); \
-    if(m_toolBar->FindById(id)) \
-        m_toolBar->EnableTool(id,true); \
+    m_menuBar->Enable(id,true); \
+    m_toolBar->EnableTool(id,true); \
 }
 
 #define UD_DisableTool(id) { \
-    wxMenuItem *item = m_menuBar->FindItem(id); \
-    if(item) item->Enable(false); \
-    if(m_toolBar->FindById(id)) \
-        m_toolBar->EnableTool(id,false); \
+    m_menuBar->Enable(id,false); \
+    m_toolBar->EnableTool(id,false); \
 }
 
 // =======================================================================

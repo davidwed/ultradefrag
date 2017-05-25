@@ -146,7 +146,6 @@ rem Example:  call :build_installer .\bin\ia64 ia64
 
     pushd %1
     copy /Y "%~dp0\installer\UltraDefrag.nsi" .\
-    copy /Y "%~dp0\installer\lang.ini" .\
 
     call :build_readme_file .\README.TXT
 
