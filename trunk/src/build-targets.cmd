@@ -57,6 +57,7 @@ mkdir bin\ia64
     echo .depend
     echo .layout
     echo .gch
+    echo .pch
 ) >"%~n0_exclude.txt"
 
 set XCOPY_OPTS=/I /Y /Q /EXCLUDE:%~n0_exclude.txt

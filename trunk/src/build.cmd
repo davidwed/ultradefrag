@@ -252,6 +252,7 @@ rem removal of all intermediate files.
     rd /s /q lib
     rd /s /q obj
     del /s /q *.gch
+    del /s /q *.pch
     rd /s /q dll\udefrag\doxy-doc
     rd /s /q dll\zenwinx\doxy-doc
     rd /s /q ..\doc\handbook\doxy-doc
