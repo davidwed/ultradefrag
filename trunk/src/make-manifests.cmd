@@ -1,6 +1,6 @@
 @echo off
 ::
-:: This script generates manifests for Vista UAC for UltraDefrag project.
+:: This script generates manifests for UltraDefrag binaries.
 :: Copyright (c) 2009-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
 :: Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
@@ -22,27 +22,18 @@
 :: Suggested by Kerem Gumrukcu (http://entwicklung.junetz.de/).
 
 if "%1" equ "" (
-    echo Processor Architecture must be specified!
+    echo Processor architecture must be specified!
     exit /B 1
 )
 
-call :make_manifest %1 1.0.2.0          hibernate      "Hibernate for Windows"         >.\obj\hibernate\hibernate.manifest
-call :make_manifest %1 %ULTRADFGVER%.0  udefrag        "UltraDefrag console interface" >.\obj\console\console.manifest
-call :make_manifest %1 %ULTRADFGVER%.0  wxultradefrag  "UltraDefrag GUI"               >.\obj\wxgui\res\ultradefrag.manifest
-call :make_manifest %1 %ULTRADFGVER%.0  bootexctrl     "BootExecute Control Program"   >.\obj\bootexctrl\bootexctrl.manifest
-call :make_manifest %1 5.1.2.0          Lua            "Lua Console"                   >.\obj\lua\lua.manifest
-call :make_manifest %1 5.1.2.0          Lua            "Lua GUI"                       >.\obj\lua-gui\lua.manifest
-call :make_manifest %1 %ULTRADFGVER%.0  udefrag-dbg    "UltraDefrag debugger"          >.\obj\dbg\dbg.manifest
+call :make_manifest %1 %ULTRADFGVER%.0  bootexctrl     "BootExecute Control Program"   > bootexctrl\bootexctrl.manifest
+call :make_manifest %1 1.0.2.0          hibernate      "Hibernate for Windows"         > hibernate\hibernate.manifest
+call :make_manifest %1 5.1.2.0          Lua            "Lua Console"                   > lua\lua.manifest
+call :make_manifest %1 5.1.2.0          Lua            "Lua GUI"                       > lua-gui\lua.manifest
+call :make_manifest %1 %ULTRADFGVER%.0  udefrag        "UltraDefrag console interface" > console\console.manifest
+call :make_manifest %1 %ULTRADFGVER%.0  udefrag-dbg    "UltraDefrag debugger"          > dbg\dbg.manifest
+call :make_manifest %1 %ULTRADFGVER%.0  ultradefrag    "UltraDefrag GUI"               > wxgui\res\ultradefrag.manifest
 
-if /i "%1" equ "X86" (
-    copy /Y .\obj\hibernate\hibernate.manifest   .\hibernate\hibernate.manifest
-    copy /Y .\obj\console\console.manifest       .\console\console.manifest
-    copy /Y .\obj\wxgui\res\ultradefrag.manifest .\wxgui\res\ultradefrag.manifest
-    copy /Y .\obj\bootexctrl\bootexctrl.manifest .\bootexctrl\bootexctrl.manifest
-    copy /Y .\obj\lua\lua.manifest               .\lua\lua.manifest
-    copy /Y .\obj\lua-gui\lua.manifest           .\lua-gui\lua.manifest
-    copy /Y .\obj\dbg\dbg.manifest               .\dbg\dbg.manifest
-)
 exit /B 0
 
 rem Synopsis: call :make_manifest {arch} {version} {app_name} {full_app_name}
@@ -73,13 +64,3 @@ rem Example:  call :make_manifest ia64 1.0.0.0 app "Application Name"
     echo   ^</asmv3:application^>
     echo ^</assembly^>
 goto :EOF
-
-rem the following sequence is faster, but misty
-::    type manifest.part1 > %1
-::    echo version="%3" name="%4" processorArchitecture="%2" >> %1
-::    type manifest.part2 >> %1
-::    echo %~5 >> %1
-::    type manifest.part3 >> %1
-::    echo processorArchitecture="%2" >> %1
-::    type manifest.part4 >> %1
-::goto :EOF

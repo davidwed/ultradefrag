@@ -12,3 +12,4 @@
 *.bk
 *.gch
 *.pch
+Makefile.*

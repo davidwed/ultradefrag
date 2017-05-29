@@ -250,6 +250,7 @@ rem removal of all intermediate files.
     rd /s /q bin
     rd /s /q lib
     rd /s /q obj
+    del /s /q Makefile.*
     del /s /q *.gch
     del /s /q *.pch
     rd /s /q dll\udefrag\doxy-doc
