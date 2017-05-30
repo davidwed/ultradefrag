@@ -2,7 +2,7 @@
 name = "ultradefrag"; target_type = "gui"
 
 -- list of directories containing headers the program relies on
-includes = { "wxgui", "include", "lua5.1", "udefrag", "zenwinx" }
+includes = { "wxgui", "include", "lua5.1", "dll\\udefrag", "dll\\zenwinx" }
 
 libs = {
     "kernel32", "user32", "gdi32", "comctl32",
