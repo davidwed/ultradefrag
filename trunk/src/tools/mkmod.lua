@@ -288,6 +288,16 @@ function produce_sdk_makefile()
     end
     f:write("\n\n")
     
+    -- for safety native executables should never depend on anything other
+    -- than ntdll library, otherwise they might mess up the Windows boot
+    -- process in case of accidental removal of libraries they depend on
+    f:write("EXT_OBJS =")
+    if target_type == "native" then
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\*-", arch, ".obj")
+        f:write(" $(UD_ROOT)\\obj\\zenwinx\\*-", arch, ".obj")
+    end
+    f:write("\n\n")
+    
     if target_type == "dll" then
         f:write("DEF_FILE = ", deffile, "\n\n")
         f:write("$(TARGET): $(DEF_FILE) $(SRC_OBJS) $(RSRC_OBJS)\n")
@@ -295,7 +305,24 @@ function produce_sdk_makefile()
         f:write("$(TARGET): $(SRC_OBJS) $(RSRC_OBJS)\n")
     end
 
-    f:write("\t$(LD) $(LDFLAGS) /out:$(TARGET) $(SRC_OBJS) $(RSRC_OBJS) $(LIB_DIRS) $(LIBS)\n")
+    -- to build native executables we have to rename a couple
+    -- of object files to avoid duplicated definitions of symbols
+    if target_type == "native" then
+        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".obj")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".tmp\n")
+        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".obj")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".tmp\n")
+    end
+
+    f:write("\t$(LD) $(LDFLAGS) /out:$(TARGET) $(SRC_OBJS) $(RSRC_OBJS) $(EXT_OBJS) $(LIB_DIRS) $(LIBS)\n")
+
+    -- restore renamed object files
+    if target_type == "native" then
+        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".tmp")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".obj\n")
+        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".tmp")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".obj\n")
+    end
 
     f:close()
 end
@@ -322,7 +349,7 @@ endef
 
 define build_target
 @echo Linking...
-@$(LD) $(LDFLAGS) -o $(TARGET) $(SRC_OBJS) $(RSRC_OBJS) $(LIB_DIRS) $(LIBS)
+@$(LD) $(LDFLAGS) -o $(TARGET) $(SRC_OBJS) $(RSRC_OBJS) $(EXT_OBJS) $(LIB_DIRS) $(LIBS)
 endef
 
 ]]
@@ -505,9 +532,38 @@ function produce_mingw_makefile()
     end
     f:write("\n\n")
 
+    -- for safety native executables should never depend on anything other
+    -- than ntdll library, otherwise they might mess up the Windows boot
+    -- process in case of accidental removal of libraries they depend on
+    f:write("EXT_OBJS =")
+    if target_type == "native" then
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\*.o")
+        f:write(" $(UD_ROOT)\\obj\\zenwinx\\*.o")
+    end
+    f:write("\n\n")
+    
     f:write("$(TARGET): $(SRC_OBJS) $(RSRC_OBJS)\n")
     f:write("\t$(print_header)\n")
+
+    -- to build native executables we have to rename a couple
+    -- of object files to avoid duplicated definitions of symbols
+    if target_type == "native" then
+        f:write("\t@cmd /c move /Y $(UD_ROOT)\\obj\\udefrag\\entry.o")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\entry.tmp\n")
+        f:write("\t@cmd /c move /Y $(UD_ROOT)\\obj\\udefrag\\int64.o")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\int64.tmp\n")
+    end
+
     f:write("\t$(build_target)\n")
+
+    -- restore renamed object files
+    if target_type == "native" then
+        f:write("\t@cmd /c move /Y $(UD_ROOT)\\obj\\udefrag\\entry.tmp")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\entry.o\n")
+        f:write("\t@cmd /c move /Y $(UD_ROOT)\\obj\\udefrag\\int64.tmp")
+        f:write(" $(UD_ROOT)\\obj\\udefrag\\int64.o\n")
+    end
+
     if target_type == "dll" then
         -- produce interface library from .def file
         f:write("\t$(build_library)\n")
