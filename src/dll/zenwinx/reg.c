@@ -29,7 +29,7 @@
 * possible - they're much easier for use.
 */
 
-#include "ntndk.h"
+#include "prec.h"
 #include "zenwinx.h"
 
 /**

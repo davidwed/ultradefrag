@@ -24,7 +24,7 @@
  * @{
  */
 
-#include "ntndk.h"
+#include "prec.h"
 #include "zenwinx.h"
 #include <math.h> /* for pow function */
 

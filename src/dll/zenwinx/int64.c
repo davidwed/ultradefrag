@@ -23,7 +23,7 @@
  * @{
  */
 
-#include "ntndk.h"
+#include "prec.h"
 #include "zenwinx.h"
 
 #if defined(__GNUC__)

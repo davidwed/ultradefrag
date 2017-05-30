@@ -30,14 +30,14 @@
  * @{
  */
 
+#include "prec.h"
 #ifndef NDEBUG
 #define NDEBUG
 #endif
 #include <assert.h>
-#include <stdio.h>
-/*#include <stdlib.h>*/
+/*#include <stdio.h>
+#include <stdlib.h>*/
 #include "prb.h"
-#include "ntndk.h"
 #include "zenwinx.h"
 #define malloc winx_malloc
 #define free winx_free
