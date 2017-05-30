@@ -78,7 +78,7 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
         pushd ..
         call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /x86 /xp
         popd
-        call :build_modules X86 || exit /B 1
+        call :build_modules X86 || goto fail
     )
     
     set path=%OLD_PATH%
@@ -90,7 +90,7 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
         pushd ..
         call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /x64 /xp
         popd
-        call :build_modules amd64 || exit /B 1
+        call :build_modules amd64 || goto fail
     )
     
     set path=%OLD_PATH%
@@ -103,19 +103,25 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
         call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /ia64 /xp
         popd
         set BUILD_DEFAULT=-nmake -i -g -P
-        call :build_modules ia64 || exit /B 1
+        call :build_modules ia64 || goto fail
     )
     
     :: remove perplexing manifests
     del /S /Q .\bin\*.manifest
-    
+
+    :success
     :: get rid of annoying dark green color
     color
+    set path=%OLD_PATH%
+    set OLD_PATH=
+    exit /B 0
     
+    :fail
+    color
     set path=%OLD_PATH%
     set OLD_PATH=
     
-exit /B 0
+exit /B 1
 
 
 :mingw_x64_build
@@ -127,12 +133,18 @@ exit /B 0
     set IA64=
     set path=%MINGWx64BASE%\bin;%path%
     set BUILD_ENV=mingw_x64
-    call :build_modules amd64 || exit /B 1
+    call :build_modules amd64 || goto fail
 
+    :success
+    set path=%OLD_PATH%
+    set OLD_PATH=
+    exit /B 0
+    
+    :fail
     set path=%OLD_PATH%
     set OLD_PATH=
 
-exit /B 0
+exit /B 1
 
 
 :mingw_build
@@ -144,12 +156,18 @@ exit /B 0
     set IA64=
     set path=%MINGWBASE%\bin;%path%
     set BUILD_ENV=mingw
-    call :build_modules X86 || exit /B 1
+    call :build_modules X86 || goto fail
 
+    :success
+    set path=%OLD_PATH%
+    set OLD_PATH=
+    exit /B 0
+    
+    :fail
     set path=%OLD_PATH%
     set OLD_PATH=
 
-exit /B 0
+exit /B 1
 
 
 :: Builds all UltraDefrag modules
