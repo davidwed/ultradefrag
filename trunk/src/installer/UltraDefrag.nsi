@@ -25,7 +25,8 @@
 /*
  * NOTE: This script requires ULTRADFGVER, ULTRADFGARCH
  * and UDVERSION_SUFFIX environment variables to be set.
- * Also it accepts RELEASE_STAGE variable.
+ * Also it accepts RELEASE_STAGE and OFFICIAL_RELEASE
+ * variables.
  */
  
 !define DOLLAR $
@@ -44,6 +45,10 @@
 
 !if "$%RELEASE_STAGE%" != "${DOLLAR}%RELEASE_STAGE%"
 !define RELEASE_STAGE "$%RELEASE_STAGE%"
+!endif
+
+!if "$%OFFICIAL_RELEASE%" != "${DOLLAR}%OFFICIAL_RELEASE%"
+!define OFFICIAL_RELEASE
 !endif
 
 /*
@@ -124,7 +129,12 @@ InstType "Micro Edition"
  */
 
 AllowSkipFiles off
+
+!ifdef OFFICIAL_RELEASE
 SetCompressor /SOLID lzma
+!else
+SetCompress off
+!endif
 
 /*
  * Version information.
