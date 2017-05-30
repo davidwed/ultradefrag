@@ -2,6 +2,6 @@
 name = "defrag_native"; target_type = "native"
 
 -- list of directories containing headers the program relies on
-includes = { "include", "native", "udefrag", "zenwinx" }
+includes = { "include", "native", "dll\\udefrag", "dll\\zenwinx" }
 
 libs = { "ntdll", "zenwinx", "udefrag" }

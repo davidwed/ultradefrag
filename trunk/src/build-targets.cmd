@@ -51,11 +51,6 @@ if "%ULTRADFGVER%" equ "" (
 
 set UD_ROOT=%cd%
 
-:: build list of headers (later on we'll 
-:: use them as dependencies in makefiles)
-if not exist obj mkdir obj
-dir /S /B *.h > obj\headers || exit /B 1
-
 :: build all modules by the selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
     echo No parameters specified, using defaults.

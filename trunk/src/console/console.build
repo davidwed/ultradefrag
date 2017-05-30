@@ -2,7 +2,7 @@
 name = "udefrag"; target_type = "console"
 
 -- list of directories containing headers the program relies on
-includes = { "console", "include", "lua5.1", "udefrag", "zenwinx" }
+includes = { "console", "include", "lua5.1", "dll\\udefrag", "dll\\zenwinx" }
 
 libs = {
     "kernel32", "user32", "shell32", "msvcrt",

@@ -34,7 +34,7 @@
 
 nativedll = 0
 src, rc, includes, libs = {}, {}, {}, {}
-files, resources, headers, inc = {}, {}, {}, {}
+files, resources = {}, {}
 cpp_files = 0
 prec_header = 0
 
@@ -44,40 +44,6 @@ rsrc_patterns = { "%.ico$", "%.bmp$", "%.manifest$" }
 
 mingw_cmd = "mingw32-make --no-builtin-rules -f Makefile.mingw"
 sdk_cmd = "nmake.exe /NOLOGO /S /f Makefile.winsdk"
-
--- common subroutines
-function build_list_of_headers()
-    local f, i, j, dir, n, h
-    if not includes[1] then return end
-    -- include headers listed in the 'headers' file,
-    -- but only those locating in directories listed
-    -- in the 'includes' table
-    n = 0 -- total number of headers
-    f = assert(io.open(os.getenv("UD_ROOT") .. "\\obj\\headers","rt"))
-    for line in f:lines() do
-        i, j, dir = string.find(line,"^.*\\(.-)\\.-$")
-        headers[line] = dir
-        n = n + 1
-    end
-    f:close()
-    if n == 0 then
-        error("The \"headers\" file seems to be empty!")
-    end
-    for i, dir in ipairs(includes) do
-        n = 0 -- number of headers found for current directory
-        for h in pairs(headers) do
-            if headers[h] == dir then
-                table.insert(inc,h)
-                n = n + 1
-            end
-        end
-        if n == 0 then
-            error("No headers found in " .. dir .. "!")
-            return
-        end
-    end
-    assert(inc[1],"No acceptable headers found in \"headers\" file!")
-end
 
 -- WinSDK backend
 function produce_sdk_makefile()
@@ -215,11 +181,9 @@ function produce_sdk_makefile()
     f:write("RSC = rc.exe\n")
     f:write("LD = link.exe\n\n")
 
-    build_list_of_headers()
-    
     f:write("header_files: ")
-    for i, v in ipairs(inc) do
-        f:write("\\\n", v, " ")
+    for i, v in ipairs(includes) do
+        f:write("\\\n$(UD_ROOT)\\", v, "\\*.h ")
     end
     f:write("\n\n")
 
@@ -457,11 +421,9 @@ function produce_mingw_makefile()
         f:write("endef\n\n")
     end
 
-    build_list_of_headers()
-    
     f:write("header_files = ")
-    for i, v in ipairs(inc) do
-        f:write("\\\n", v, " ")
+    for i, v in ipairs(includes) do
+        f:write("\\\n$(wildcard $(UD_ROOT)\\", v, "\\*.h) ")
     end
     f:write("\n\n")
 
