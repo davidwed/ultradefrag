@@ -28,7 +28,9 @@ if %UD_BLD_FLG_DIPLAY_HELP% equ 1 (
 )
 
 if %UD_BLD_FLG_ONLY_CLEANUP% equ 1 (
-    call :cleanup
+    echo Delete all intermediate files...
+    call :cleanup > nul 2>&1
+    echo Cleanup success!
     exit /B 0
 )
 
@@ -246,7 +248,6 @@ exit /B 0
 rem Cleans up sources directory by
 rem removal of all intermediate files.
 :cleanup
-    echo Delete all intermediate files...
     rd /s /q bin
     rd /s /q lib
     rd /s /q obj
@@ -268,8 +269,6 @@ rem removal of all intermediate files.
     del /f /q ..\..\web\doc\lib\zenwinx\*.*
 
     for %%F in ( "..\..\web\handbook\*.*" ) do if not "%%~nxF" == ".htaccess" del /f /q "%%~F"
-
-    echo Done.
 goto :EOF
 
 rem Displays usage information.
