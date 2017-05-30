@@ -126,19 +126,19 @@ rem Sets environment for the build process.
     del /q .\include\version.new
 goto :EOF
 
-rem Synopsis: call :build_readme_file {path to the file}
-rem Example:  call :build_readme_file .
+rem Synopsis: call :build_readme_file
+rem Example: call :build_readme_file > README.TXT
 :build_readme_file
-    echo ------------------------------------------------------------------------------- > %1
-    echo       UltraDefrag %ULTRADFGVER% - an open source disk defragmenter for Windows >> %1
-    echo ------------------------------------------------------------------------------- >> %1
-    echo. >> %1
-    echo Complete information about the program can be found in UltraDefrag Handbook. >> %1
-    echo You should have received it along with this program; if not, go to: >> %1
-    echo. >> %1
-    echo   http://ultradefrag.sourceforge.net/handbook/ >> %1
-    echo. >> %1
-    echo ------------------------------------------------------------------------------- >> %1
+    echo -------------------------------------------------------------------------------
+    echo       UltraDefrag %ULTRADFGVER% - an open source disk defragmenter for Windows
+    echo -------------------------------------------------------------------------------
+    echo.
+    echo Complete information about the program can be found in UltraDefrag Handbook.
+    echo You should have received it along with this program; if not, go to:
+    echo.
+    echo   http://ultradefrag.sourceforge.net/handbook/
+    echo.
+    echo -------------------------------------------------------------------------------
 exit /B 0
 
 rem Synopsis: call :build_installer {path to binaries} {arch}
@@ -149,22 +149,18 @@ rem Example:  call :build_installer .\bin\ia64 ia64
     pushd %1
     copy /Y "%~dp0\installer\UltraDefrag.nsi" .\
 
-    call :build_readme_file .\README.TXT
+    call :build_readme_file > README.TXT
 
-    if "%RELEASE_STAGE%" neq "" (
-        set NSIS_COMPILER_FLAGS=/DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 /DRELEASE_STAGE=%RELEASE_STAGE% /DUDVERSION_SUFFIX=%UDVERSION_SUFFIX%
-    ) else (
-        set NSIS_COMPILER_FLAGS=/DULTRADFGVER=%ULTRADFGVER% /DULTRADFGARCH=%2 /DUDVERSION_SUFFIX=%UDVERSION_SUFFIX%
-    )
-    "%NSISDIR%\makensis.exe" %NSIS_COMPILER_FLAGS% UltraDefrag.nsi
-    if %errorlevel% neq 0 (
-        set NSIS_COMPILER_FLAGS=
-        popd
-        exit /B 1
-    )
-    set NSIS_COMPILER_FLAGS=
+    set ULTRADFGARCH=%2
+    "%NSISDIR%\makensis.exe" UltraDefrag.nsi || goto fail
+    
+    :success
     popd
-exit /B 0
+    exit /B 0
+    
+    :fail
+    popd
+exit /B 1
 
 rem Synopsis: call :build_portable_package {path to binaries} {arch}
 rem Example:  call :build_portable_package .\bin\ia64 ia64

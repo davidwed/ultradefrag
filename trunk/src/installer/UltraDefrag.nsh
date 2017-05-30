@@ -56,7 +56,7 @@
             FileWrite $R0 "Command Line ...... $CMDLINE$\r$\n"
             FileWrite $R0 "$\r$\n"
             FileWrite $R0 "Installer Path .... $EXEPATH$\r$\n"
-            FileWrite $R0 "Installer Type .... ${ULTRADFGARCH}$\r$\n"
+            FileWrite $R0 "Installer Type .... $%ULTRADFGARCH%$\r$\n"
             FileWrite $R0 "$\r$\n"
             FileWrite $R0 "Windows Version ... $R1.$R2.$R3$\r$\n"
             FileWrite $R0 "$\r$\n"
@@ -162,7 +162,7 @@
 
     ${Unless} ${Errors}
         ${If} $R0 == "x86"
-        ${AndIf} ${ULTRADFGARCH} != "i386"
+        ${AndIf} "$%ULTRADFGARCH%" != "i386"
             ${LogAndDisplayAbort} \
                 "This installer cannot be used on 32-bit Windows!$\n \
                 Download the i386 version from http://ultradefrag.sourceforge.net/"
@@ -170,7 +170,7 @@
             Abort
         ${EndIf}
         ${If} $R0 == "amd64"
-        ${AndIf} ${ULTRADFGARCH} != "amd64"
+        ${AndIf} "$%ULTRADFGARCH%" != "amd64"
             ${LogAndDisplayAbort} \
                 "This installer cannot be used on x64 versions of Windows!$\n \
                 Download the amd64 version from http://ultradefrag.sourceforge.net/"
@@ -178,7 +178,7 @@
             Abort
         ${EndIf}
         ${If} $R0 == "ia64"
-        ${AndIf} ${ULTRADFGARCH} != "ia64"
+        ${AndIf} "$%ULTRADFGARCH%" != "ia64"
             ${LogAndDisplayAbort} \
                 "This installer cannot be used on IA-64 versions of Windows!$\n \
                 Download the ia64 version from http://ultradefrag.sourceforge.net/"
@@ -974,7 +974,7 @@ SkipMove:
     RMDir /r "$INSTDIR\doc"
     RMDir /r "$INSTDIR\i18n"
     RMDir /r "$INSTDIR\options"
-    RMDir /r "$INSTDIR\portable_${ULTRADFGARCH}_package"
+    RMDir /r "$INSTDIR\portable_$%ULTRADFGARCH%_package"
     RMDir /r "$INSTDIR\presets"
 
     Delete "$INSTDIR\scripts\udctxhandler.lua"
@@ -1073,9 +1073,9 @@ SkipMove:
 
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayName"     "Ultra Defragmenter"
     !ifdef RELEASE_STAGE
-        WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayVersion"  "${ULTRADFGVER} ${RELEASE_STAGE}"
+        WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayVersion"  "$%ULTRADFGVER% ${RELEASE_STAGE}"
     !else
-        WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayVersion"  "${ULTRADFGVER}"
+        WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "DisplayVersion"  "$%ULTRADFGVER%"
     !endif
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "Publisher"       "UltraDefrag Development Team"
     WriteRegStr   HKLM ${UD_UNINSTALL_REG_KEY} "URLInfoAbout"    "http://ultradefrag.sourceforge.net/"

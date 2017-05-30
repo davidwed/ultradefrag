@@ -23,25 +23,27 @@
  */
 
 /*
- * NOTE: The following symbols must be
- * defined through the makensis command line:
- * ULTRADFGVER=<UltraDefrag version, like so: 7.0.0>
- * ULTRADFGARCH=<i386 | amd64 | ia64>
- * UDVERSION_SUFFIX
- * The following optional symbol is accepted too:
- * RELEASE_STAGE
+ * NOTE: This script requires ULTRADFGVER, ULTRADFGARCH
+ * and UDVERSION_SUFFIX environment variables to be set.
+ * Also it accepts RELEASE_STAGE variable.
  */
+ 
+!define DOLLAR $
 
-!ifndef ULTRADFGVER
-!error "ULTRADFGVER parameter must be specified on the command line!"
+!if "$%ULTRADFGVER%" == "${DOLLAR}%ULTRADFGVER%"
+!error "ULTRADFGVER environment variable must be set!"
 !endif
 
-!ifndef ULTRADFGARCH
-!error "ULTRADFGARCH parameter must be specified on the command line!"
+!if "$%ULTRADFGARCH%" == "${DOLLAR}%ULTRADFGARCH%"
+!error "ULTRADFGARCH environment variable must be set!"
 !endif
 
-!ifndef UDVERSION_SUFFIX
-!error "UDVERSION_SUFFIX parameter must be specified on the command line!"
+!if "$%UDVERSION_SUFFIX%" == "${DOLLAR}%UDVERSION_SUFFIX%"
+!error "UDVERSION_SUFFIX environment variable must be set!"
+!endif
+
+!if "$%RELEASE_STAGE%" != "${DOLLAR}%RELEASE_STAGE%"
+!define RELEASE_STAGE "$%RELEASE_STAGE%"
 !endif
 
 /*
@@ -51,7 +53,7 @@
 !define UD_UNINSTALL_REG_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\UltraDefrag"
 !define UD_LOG_FILE "$TEMP\UltraDefrag_Install.log"
 
-!if ${ULTRADFGARCH} == 'i386'
+!if "$%ULTRADFGARCH%" == "i386"
 !define ROOTDIR "..\.."
 !else
 !define ROOTDIR "..\..\.."
@@ -75,24 +77,24 @@
  */
 
 !ifdef RELEASE_STAGE
-    !if ${ULTRADFGARCH} == 'amd64'
-    Name "Ultra Defragmenter v${ULTRADFGVER} ${RELEASE_STAGE} (AMD64)"
-    !else if ${ULTRADFGARCH} == 'ia64'
-    Name "Ultra Defragmenter v${ULTRADFGVER} ${RELEASE_STAGE} (IA64)"
+    !if "$%ULTRADFGARCH%" == "amd64"
+    Name "Ultra Defragmenter v$%ULTRADFGVER% ${RELEASE_STAGE} (AMD64)"
+    !else if "$%ULTRADFGARCH%" == "ia64"
+    Name "Ultra Defragmenter v$%ULTRADFGVER% ${RELEASE_STAGE} (IA64)"
     !else
-    Name "Ultra Defragmenter v${ULTRADFGVER} ${RELEASE_STAGE} (i386)"
+    Name "Ultra Defragmenter v$%ULTRADFGVER% ${RELEASE_STAGE} (i386)"
     !endif
 !else
-    !if ${ULTRADFGARCH} == 'amd64'
-    Name "Ultra Defragmenter v${ULTRADFGVER} (AMD64)"
-    !else if ${ULTRADFGARCH} == 'ia64'
-    Name "Ultra Defragmenter v${ULTRADFGVER} (IA64)"
+    !if "$%ULTRADFGARCH%" == "amd64"
+    Name "Ultra Defragmenter v$%ULTRADFGVER% (AMD64)"
+    !else if "$%ULTRADFGARCH%" == "ia64"
+    Name "Ultra Defragmenter v$%ULTRADFGVER% (IA64)"
     !else
-    Name "Ultra Defragmenter v${ULTRADFGVER} (i386)"
+    Name "Ultra Defragmenter v$%ULTRADFGVER% (i386)"
     !endif
 !endif
 
-!if ${ULTRADFGARCH} == 'i386'
+!if "$%ULTRADFGARCH%" == "i386"
 InstallDir "$PROGRAMFILES\UltraDefrag"
 !else
 InstallDir "$PROGRAMFILES64\UltraDefrag"
@@ -103,7 +105,7 @@ InstallDirRegKey HKLM ${UD_UNINSTALL_REG_KEY} "InstallLocation"
 Var OldInstallDir
 Var ValidDestDir
 
-OutFile "ultradefrag-${UDVERSION_SUFFIX}.bin.${ULTRADFGARCH}.exe"
+OutFile "ultradefrag-$%UDVERSION_SUFFIX%.bin.$%ULTRADFGARCH%.exe"
 LicenseData "${ROOTDIR}\src\LICENSE.TXT"
 ShowInstDetails show
 ShowUninstDetails show
@@ -128,12 +130,12 @@ SetCompressor /SOLID lzma
  * Version information.
  */
 
-VIProductVersion "${ULTRADFGVER}.0"
+VIProductVersion "$%ULTRADFGVER%.0"
 VIAddVersionKey  "ProductName"     "Ultra Defragmenter"
 VIAddVersionKey  "CompanyName"     "UltraDefrag Development Team"
 VIAddVersionKey  "LegalCopyright"  "Copyright © 2007-2013 UltraDefrag Development Team"
 VIAddVersionKey  "FileDescription" "Ultra Defragmenter Setup"
-VIAddVersionKey  "FileVersion"     "${ULTRADFGVER}"
+VIAddVersionKey  "FileVersion"     "$%ULTRADFGVER%"
 
 /*
  * Headers
