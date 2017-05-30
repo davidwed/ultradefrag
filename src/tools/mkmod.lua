@@ -447,10 +447,6 @@ function produce_mingw_makefile()
         f:write("LD = gcc.exe\n\n")
     end
     
-    f:write("define print_header\n")
-    f:write("\@echo ---------- Configuration: ", name, " - Release ----------\n")
-    f:write("endef\n\n")
-    
     f:write(mingw_rules)
     
     if target_type == "dll" then
@@ -543,7 +539,6 @@ function produce_mingw_makefile()
     f:write("\n\n")
     
     f:write("$(TARGET): $(SRC_OBJS) $(RSRC_OBJS)\n")
-    f:write("\t$(print_header)\n")
 
     -- to build native executables we have to rename a couple
     -- of object files to avoid duplicated definitions of symbols
