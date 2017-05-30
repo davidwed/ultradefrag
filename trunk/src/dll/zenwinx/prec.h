@@ -17,22 +17,9 @@
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-/**
- * @file entry.c
- * @brief Entry point.
- * @addtogroup Entry
- * @{
- */
+#ifndef _ZENWINX_PREC_H_
+#define _ZENWINX_PREC_H_
 
-#include "prec.h"
-#include "zenwinx.h"
+#include "ntndk.h"
 
-/**
- * @brief zenwinx.dll entry point.
- */
-BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
-{
-    return 1;
-}
-
-/** @} */
+#endif /* _ZENWINX_PREC_H_ */
