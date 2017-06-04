@@ -625,25 +625,45 @@ end
 if os.getenv("BUILD_ENV") == "winsdk" then
     print(input_filename .. ": winsdk build performing...\n")
     produce_sdk_makefile()
-    if os.execute(sdk_cmd) ~= 0 then
-        error("Cannot build the target!")
+
+    -- select appropriate precompiled header
+    if arch ~= "i386" then
+        os.execute("cmd.exe /C move /Y prec.pch prec-i386.pch > nul 2>&1")
+        os.execute("cmd.exe /C move /Y prec-" .. arch .. ".pch prec.pch > nul 2>&1")
+    end
+
+    result = os.execute(sdk_cmd)
+
+    -- restore default precompiled header
+    if arch ~= "i386" then
+        os.execute("cmd.exe /C move /Y prec.pch prec-" .. arch .. ".pch > nul 2>&1")
+        os.execute("cmd.exe /C move /Y prec-i386.pch prec.pch > nul 2>&1")
     end
 elseif os.getenv("BUILD_ENV") == "mingw" then
     print(input_filename .. ": mingw build performing...\n")
     produce_mingw_makefile()
-    if os.execute(mingw_cmd) ~= 0 then
-        error("Cannot build the target!")
-    end
+    result = os.execute(mingw_cmd)
 elseif os.getenv("BUILD_ENV") == "mingw_x64" then
     -- NOTE: MinGW x64 compiler currently generates wrong
-    -- code, therefore we cannot use it for real purposes.
+    -- code, therefore we cannot use it for real purposes
     print(input_filename .. ": mingw x64 build performing...\n")
     produce_mingw_makefile()
-    if os.execute(mingw_cmd) ~= 0 then
-        error("Cannot build the target!")
-    end
+
+    -- select appropriate precompiled header
+    os.execute("cmd.exe /C move /Y prec.h.gch prec-i386.h.gch > nul 2>&1")
+    os.execute("cmd.exe /C move /Y prec-amd64.h.gch prec.h.gch > nul 2>&1")
+
+    result = os.execute(mingw_cmd)
+
+    -- restore default precompiled header
+    os.execute("cmd.exe /C move /Y prec.h.gch prec-amd64.h.gch > nul 2>&1")
+    os.execute("cmd.exe /C move /Y prec-i386.h.gch prec.h.gch > nul 2>&1")
 else
     error("\%BUILD_ENV\% has wrong value: " .. os.getenv("BUILD_ENV") .. "!")
+end
+
+if result ~= 0 then
+    error("Cannot build the target!")
 end
 
 print("\n" .. input_filename .. ": " .. os.getenv("BUILD_ENV") .. " build was successful\n")
