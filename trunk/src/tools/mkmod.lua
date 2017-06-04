@@ -61,9 +61,9 @@ function produce_sdk_makefile()
     
     f:write("ALL: $(OUTPATH) $(LIBPATH) $(OBJPATH) $(TARGET)\n\n")
 
-    f:write("$(OUTPATH):\n\tif not exist $(OUTPATH) mkdir $(OUTPATH)\n\n")
-    f:write("$(LIBPATH):\n\tif not exist $(LIBPATH) mkdir $(LIBPATH)\n\n")
-    f:write("$(OBJPATH):\n\tif not exist $(OBJPATH) mkdir $(OBJPATH)\n\n")
+    f:write("$(OUTPATH):\n\t@if not exist $(OUTPATH) mkdir $(OUTPATH)\n\n")
+    f:write("$(LIBPATH):\n\t@if not exist $(LIBPATH) mkdir $(LIBPATH)\n\n")
+    f:write("$(OBJPATH):\n\t@if not exist $(OBJPATH) mkdir $(OBJPATH)\n\n")
     
     f:write("CFLAGS = /nologo /W3 /D \"WIN32\" /D \"NDEBUG\" /D \"_MBCS\"")
     f:write(" /D \"USE_WINSDK\" /D \"_CRT_SECURE_NO_WARNINGS\"")
@@ -196,9 +196,9 @@ function produce_sdk_makefile()
     if prec_header ~= 0 then
         f:write("prec.pch: prec.h\n")
         if cpp_files ~= 0 then
-            f:write("\t$(CXX) $(CFLAGS) $(C_INCLUDE_DIRS) /Yc /c prec.cpp")
+            f:write("\t@$(CXX) $(CFLAGS) $(C_INCLUDE_DIRS) /Yc /c prec.cpp")
         else
-            f:write("\t$(CC) $(CFLAGS) $(C_INCLUDE_DIRS) /Yc /c prec.c")
+            f:write("\t@$(CC) $(CFLAGS) $(C_INCLUDE_DIRS) /Yc /c prec.c")
         end
         f:write(" /Fo$(OBJPATH)\\prec-", arch, ".obj\n\n")
     end
@@ -222,9 +222,9 @@ function produce_sdk_makefile()
         end
         
         if string.find(v,"%.cpp$") then
-            f:write("\n\t$(CXX) $(CFLAGS) $(C_INCLUDE_DIRS)")
+            f:write("\n\t@$(CXX) $(CFLAGS) $(C_INCLUDE_DIRS)")
         else
-            f:write("\n\t$(CC) $(CFLAGS) $(C_INCLUDE_DIRS)")
+            f:write("\n\t@$(CC) $(CFLAGS) $(C_INCLUDE_DIRS)")
         end
         
         if use_prec_header ~= 0 then
@@ -237,7 +237,7 @@ function produce_sdk_makefile()
     for i, v in ipairs(rc) do
         local outfile = "$(OBJPATH)\\" .. string.gsub(v,"%.rc","%-" .. arch .. "%.res")
         f:write(outfile, ": ", v, " header_files resource_files\n")
-        f:write("\t$(RSC) $(RCFLAGS) $(RC_INCLUDE_DIRS) /Fo", outfile, " ", v, "\n\n")
+        f:write("\t@$(RSC) $(RCFLAGS) $(RC_INCLUDE_DIRS) /Fo", outfile, " ", v, "\n\n")
     end
 
     f:write("SRC_OBJS =")
@@ -272,19 +272,19 @@ function produce_sdk_makefile()
     -- to build native executables we have to rename a couple
     -- of object files to avoid duplicated definitions of symbols
     if target_type == "native" then
-        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".obj")
+        f:write("\t@move /Y $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".obj")
         f:write(" $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".tmp\n")
-        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".obj")
+        f:write("\t@move /Y $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".obj")
         f:write(" $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".tmp\n")
     end
 
-    f:write("\t$(LD) $(LDFLAGS) /out:$(TARGET) $(SRC_OBJS) $(RSRC_OBJS) $(EXT_OBJS) $(LIB_DIRS) $(LIBS)\n")
+    f:write("\t@$(LD) $(LDFLAGS) /out:$(TARGET) $(SRC_OBJS) $(RSRC_OBJS) $(EXT_OBJS) $(LIB_DIRS) $(LIBS)\n")
 
     -- restore renamed object files
     if target_type == "native" then
-        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".tmp")
+        f:write("\t@move /Y $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".tmp")
         f:write(" $(UD_ROOT)\\obj\\udefrag\\entry-", arch, ".obj\n")
-        f:write("\tmove /Y $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".tmp")
+        f:write("\t@move /Y $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".tmp")
         f:write(" $(UD_ROOT)\\obj\\udefrag\\int64-", arch, ".obj\n")
     end
 
@@ -334,9 +334,9 @@ function produce_mingw_makefile()
     f:write("ALL: $(OUTPATH) $(LIBPATH) $(OBJPATH) $(TARGET)\n")
     f:write(".PHONY: ALL\n\n")
 
-    f:write("$(OUTPATH):\n\tif not exist $(OUTPATH) mkdir $(OUTPATH)\n\n")
-    f:write("$(LIBPATH):\n\tif not exist $(LIBPATH) mkdir $(LIBPATH)\n\n")
-    f:write("$(OBJPATH):\n\tif not exist $(OBJPATH) mkdir $(OBJPATH)\n\n")
+    f:write("$(OUTPATH):\n\t@if not exist $(OUTPATH) mkdir $(OUTPATH)\n\n")
+    f:write("$(LIBPATH):\n\t@if not exist $(LIBPATH) mkdir $(LIBPATH)\n\n")
+    f:write("$(OBJPATH):\n\t@if not exist $(OBJPATH) mkdir $(OBJPATH)\n\n")
     
     f:write("CFLAGS = -pipe  -Wall -g0")
 
@@ -415,9 +415,9 @@ function produce_mingw_makefile()
     
     if target_type == "dll" then
         f:write("define build_library\n")
-        f:write("\@echo ---------- build lib", name, ".dll.a library ----------\n")
-        f:write("\@dlltool -k --output-lib $(LIBPATH)\\lib", name, ".dll.a --def ")
-        f:write(mingw_deffile, "\n")
+        f:write("\@echo Building import library...\n")
+        f:write("\@dlltool -k --output-lib $(LIBPATH)\\lib")
+        f:write(name, ".dll.a --def ", mingw_deffile, "\n")
         f:write("endef\n\n")
     end
 
@@ -532,7 +532,7 @@ end
 -- frontend
 input_filename = arg[1]
 assert(input_filename,"File name must be specified!")
-print(input_filename .. " Preparing the makefile generation...\n")
+print(input_filename .. ": preparing makefile generation...")
 
 dofile(input_filename)
 
@@ -578,10 +578,14 @@ for i, v in ipairs(files) do
     i, j, name = string.find(v,"^.*\\(.-)$")
     if not name then name = v end
     if string.find(name,"%.c$") then
-        table.insert(src,name)
+        if name ~= "prec.c" then
+            table.insert(src,name)
+        end
     elseif string.find(name,"%.cpp$") then
-        cpp_files = cpp_files + 1
-        table.insert(src,name)
+        if name ~= "prec.cpp" then
+            cpp_files = cpp_files + 1
+            table.insert(src,name)
+        end
     elseif string.find(name,"%.rc$") then
         table.insert(rc,name)
     end
@@ -619,13 +623,13 @@ elseif os.getenv("IA64") then
 end
 
 if os.getenv("BUILD_ENV") == "winsdk" then
-    print(input_filename .. " windows sdk build performing...\n")
+    print(input_filename .. ": winsdk build performing...\n")
     produce_sdk_makefile()
     if os.execute(sdk_cmd) ~= 0 then
         error("Cannot build the target!")
     end
 elseif os.getenv("BUILD_ENV") == "mingw" then
-    print(input_filename .. " mingw build performing...\n")
+    print(input_filename .. ": mingw build performing...\n")
     produce_mingw_makefile()
     if os.execute(mingw_cmd) ~= 0 then
         error("Cannot build the target!")
@@ -633,7 +637,7 @@ elseif os.getenv("BUILD_ENV") == "mingw" then
 elseif os.getenv("BUILD_ENV") == "mingw_x64" then
     -- NOTE: MinGW x64 compiler currently generates wrong
     -- code, therefore we cannot use it for real purposes.
-    print(input_filename .. " mingw x64 build performing...\n")
+    print(input_filename .. ": mingw x64 build performing...\n")
     produce_mingw_makefile()
     if os.execute(mingw_cmd) ~= 0 then
         error("Cannot build the target!")
@@ -642,7 +646,7 @@ else
     error("\%BUILD_ENV\% has wrong value: " .. os.getenv("BUILD_ENV") .. "!")
 end
 
-print(input_filename .. " " .. os.getenv("BUILD_ENV") .. " build was successful.\n")
+print("\n" .. input_filename .. ": " .. os.getenv("BUILD_ENV") .. " build was successful\n")
 
 -- uncomment to manually build one binary after another
 -- os.execute("cmd.exe /C pause")

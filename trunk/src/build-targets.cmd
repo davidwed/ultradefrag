@@ -36,7 +36,6 @@ rem NOTE: IA-64 binaries have never been tested by
 rem the authors because of lack of Itanium hardware.
 
 echo Build UltraDefrag binaries...
-echo.
 
 call ParseCommandLine.cmd %*
 
@@ -47,6 +46,7 @@ if "%ULTRADFGVER%" equ "" (
         call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
     if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd"^
         call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+    echo.
 )
 
 set UD_ROOT=%cd%
@@ -54,6 +54,7 @@ set UD_ROOT=%cd%
 :: build all modules by the selected compiler
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
     echo No parameters specified, using defaults.
+    echo.
     goto mingw_build
 )
 
@@ -124,6 +125,7 @@ exit /B 1
     set OLD_PATH=%path%
 
     echo --------- Target is x64 ---------
+    echo.
     set AMD64=1
     set IA64=
     set path=%MINGWx64BASE%\bin;%path%
@@ -147,6 +149,7 @@ exit /B 1
     set OLD_PATH=%path%
 
     echo --------- Target is x86 ---------
+    echo.
     set AMD64=
     set IA64=
     set path=%MINGWBASE%\bin;%path%

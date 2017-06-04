@@ -33,6 +33,7 @@ title Build started
 call setvars.cmd
 if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
 if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+echo.
 
 :: configure wxWidgets
 copy /Y .\tools\patch\wx\setup.h "%WXWIDGETSDIR%\include\wx\msw\setup.h"
@@ -47,6 +48,7 @@ copy /Y .\tools\patch\wx\statusbar.cpp "%WXWIDGETSDIR%\src\msw\statusbar.cpp"
 :: build wxWidgets
 if %UD_BLD_FLG_USE_COMPILER% equ 0 (
     echo No parameters specified, using defaults.
+    echo.
     goto mingw_build
 )
 
@@ -73,8 +75,8 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
 
     if %UD_BLD_FLG_BUILD_AMD64% neq 0 (
         echo --------- Target is x64 ---------
-        set IA64=
         set AMD64=1
+        set IA64=
         pushd ..
         call "%WINSDKBASE%\bin\SetEnv.Cmd" /Release /x64 /xp
         popd
@@ -94,46 +96,61 @@ if %UD_BLD_FLG_USE_COMPILER% equ %UD_BLD_FLG_USE_WINSDK%  goto winsdk_build
         call :build_library ia64 || goto fail
     )
     
-    :: get rid of annoying dark green color
-    color
-    
-    goto success
+goto success
+
 
 :mingw_x64_build
 
     set OLD_PATH=%path%
 
     echo --------- Target is x64 ---------
+    echo.
     set AMD64=1
+    set IA64=
     set path=%MINGWx64BASE%\bin;%path%
     set BUILD_ENV=mingw_x64
     call :build_library amd64 || goto fail
 
-    goto success
+goto success
+
 
 :mingw_build
 
     set OLD_PATH=%path%
 
+    echo --------- Target is x86 ---------
+    echo.
+    set AMD64=
+    set IA64=
     set path=%MINGWBASE%\bin;%path%
     set BUILD_ENV=mingw
     call :build_library X86 || goto fail
 
-    goto success
+goto success
+
 
 :success
-if "%OLD_PATH%" neq "" set path=%OLD_PATH%
-set OLD_PATH=
-echo.
-echo Build success!
-title Build success!
+    echo Build success!
+    title Build success!
+
+    :: get rid of annoying dark
+    :: green color left by WinSDK
+    color
+    
+    set path=%OLD_PATH%
+    set OLD_PATH=
+
 exit /B 0
 
 :fail
-if "%OLD_PATH%" neq "" set path=%OLD_PATH%
-set OLD_PATH=
-echo Build error (code %ERRORLEVEL%)!
-title Build error (code %ERRORLEVEL%)!
+    echo Build error (code %ERRORLEVEL%)!
+    title Build error (code %ERRORLEVEL%)!
+
+    color
+    
+    set path=%OLD_PATH%
+    set OLD_PATH=
+
 exit /B 1
 
 :: Builds wxWidgets library
@@ -150,7 +167,6 @@ exit /B 1
     set WX_OPTIONS=%WX_OPTIONS% USE_PROPGRID=0 USE_RICHTEXT=0
     set WX_OPTIONS=%WX_OPTIONS% USE_STC=0 USE_OPENGL=0 USE_CAIRO=0
     
-    echo.
     echo wxWidgets compilation started...
     echo.
     pushd "%WXWIDGETSDIR%\build\msw"
@@ -220,13 +236,14 @@ exit /B 1
     
     :success
     popd
-    echo.
     echo wxWidgets compilation completed successfully!
+    echo.
 
     set WX_CONFIG=
     set WX_OPTIONS=
     set WX_SDK_CPPFLAGS=
     set WX_SDK_LIBPATH=
+
 exit /B 0
 
 rem Displays usage information.
