@@ -88,6 +88,7 @@
 					<Add option="/Gd" />
 					<Add option="/GS-" />
 					<Add option="/MT" />
+                    <Add option="/Yuprec.h" />
 					<Add directory="$(WXWIDGETSDIR)/lib/vc_libwinsdk-X86/mswu" />
 				</Compiler>
 				<Linker>
@@ -119,29 +120,21 @@
 		<Unit filename="console.rc">
 			<Option compilerVar="WINDRES" />
 		</Unit>
-		<Unit filename="crash.cpp">
-			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Yuprec.h /c $file /Fo$object" />
-        </Unit>
+		<Unit filename="crash.cpp" />
 		<Unit filename="getopt.c">
 			<Option compilerVar="CC" />
+			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Y- /c $file /Fo$object" />
 		</Unit>
 		<Unit filename="getopt.h" />
 		<Unit filename="getopt1.c">
 			<Option compilerVar="CC" />
+			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Y- /c $file /Fo$object" />
 		</Unit>
-		<Unit filename="help.cpp">
-			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Yuprec.h /c $file /Fo$object" />
-        </Unit>
-		<Unit filename="main.cpp">
-			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Yuprec.h /c $file /Fo$object" />
-        </Unit>
+		<Unit filename="help.cpp" />
+		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
-		<Unit filename="map.cpp">
-			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Yuprec.h /c $file /Fo$object" />
-        </Unit>
-		<Unit filename="options.cpp">
-			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Yuprec.h /c $file /Fo$object" />
-        </Unit>
+		<Unit filename="map.cpp" />
+		<Unit filename="options.cpp" />
 		<Unit filename="prec.cpp">
 			<Option target="Release (MSVC)" />
 			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Ycprec.h /c $file /Fo$object" />
@@ -152,9 +145,7 @@
 			<Option compile="1" />
 			<Option weight="0" />
 		</Unit>
-		<Unit filename="utils.cpp">
-			<Option compiler="msvc10" use="1" buildCommand="$compiler /nologo $options $includes /Yuprec.h /c $file /Fo$object" />
-        </Unit>
+		<Unit filename="utils.cpp" />
 		<Extensions>
 			<code_completion />
 			<envvars />

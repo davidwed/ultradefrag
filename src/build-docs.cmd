@@ -20,7 +20,6 @@
 ::
 
 echo Build UltraDefrag documentation...
-echo.
 
 call ParseCommandLine.cmd %*
 
@@ -31,6 +30,7 @@ if "%ULTRADFGVER%" equ "" (
         call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
     if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd"^
         call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+    echo.
 )
 
 doxygen --version >nul 2>&1 || goto fail

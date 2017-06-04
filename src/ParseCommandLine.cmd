@@ -1,10 +1,6 @@
 @echo off
-
 ::
-:: This script is used to set the initial build defaults,
-:: which are changed by the command line switches described
-:: in "build-help.cmd"
-::
+:: This script parses command line options passed to UltraDefrag build scripts.
 :: Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
@@ -21,7 +17,6 @@
 :: along with this program; if not, write to the Free Software
 :: Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ::
-
 
 echo.
 echo %~n0 ... %*
