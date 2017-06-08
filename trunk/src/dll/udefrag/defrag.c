@@ -89,11 +89,6 @@ void test_special_files_defrag(udefrag_job_parameters *jp)
     
     dtrace("test of special files defragmentation started");
 
-    /* open the volume */
-    jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
-    if(jp->fVolume == NULL)
-        return;
-
     for(f = jp->filelist; f; f = f->next){
         if(can_move(f,jp)){
             special_file = 0;
@@ -116,7 +111,6 @@ void test_special_files_defrag(udefrag_job_parameters *jp)
         if(f->next == jp->filelist) break;
     }
     
-    winx_fclose(jp->fVolume);
     dtrace("test of special files defragmentation completed");
 }
 #endif /* TEST_SPECIAL_FILES_DEFRAG */
@@ -293,13 +287,6 @@ static int defrag_routine(udefrag_job_parameters *jp)
     /* no files are excluded by this task currently */
     clear_currently_excluded_flag(jp);
 
-    /* open the volume */
-    jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
-    if(jp->fVolume == NULL){
-        jp->pi.pass_number ++; /* the pass is completed */
-        return (-1);
-    }
-
     jp->pi.clusters_to_process = \
         jp->pi.processed_clusters + defrag_cc_routine(jp);
         
@@ -471,8 +458,6 @@ completed:
     
     /* cleanup */
     clear_currently_excluded_flag(jp);
-    winx_fclose(jp->fVolume);
-    jp->fVolume = NULL;
 
     /* the pass is completed */
     jp->pi.pass_number ++;

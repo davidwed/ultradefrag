@@ -137,8 +137,6 @@ static ULONGLONG advance_vcn(winx_file_info *f,ULONGLONG vcn,ULONGLONG n)
  * - As a side effect this routine may increase
  * number of fragmented files (they become marked
  * by UD_FILE_FRAGMENTED_BY_FILE_OPT flag). 
- * - The volume must be opened before this call,
- * jp->fVolume must contain a proper handle.
  * @return Zero if the file needs no optimization, 
  * positive value on success, negative value otherwise.
  */
@@ -345,11 +343,6 @@ static int optimize_directories(udefrag_job_parameters *jp)
         if(file->next == jp->filelist) break;
     }
 
-    /* open the volume */
-    jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
-    if(jp->fVolume == NULL)
-        return (-1);
-
     time = start_timing("directories optimization",jp);
 
     optimized_dirs = 0;
@@ -375,8 +368,6 @@ static int optimize_directories(udefrag_job_parameters *jp)
 
     /* cleanup */
     clear_currently_excluded_flag(jp);
-    winx_fclose(jp->fVolume);
-    jp->fVolume = NULL;
     return 0;
 }
 
@@ -437,11 +428,6 @@ static int optimize_mft_routine(udefrag_job_parameters *jp)
     /* no files are excluded by this task currently */
     clear_currently_excluded_flag(jp);
 
-    /* open the volume */
-    jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
-    if(jp->fVolume == NULL)
-        return (-1);
-
     time = start_timing("mft optimization",jp);
 
     /* search for the $mft file */
@@ -476,8 +462,6 @@ static int optimize_mft_routine(udefrag_job_parameters *jp)
 
     /* cleanup */
     clear_currently_excluded_flag(jp);
-    winx_fclose(jp->fVolume);
-    jp->fVolume = NULL;
     return result;
 }
 
@@ -934,11 +918,6 @@ static int optimize_routine(udefrag_job_parameters *jp)
 
     jp->pi.current_operation = VOLUME_OPTIMIZATION;
 
-    /* open the volume */
-    jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
-    if(jp->fVolume == NULL)
-        return (-1);
-
     time = start_timing("optimization",jp);
 
     /* no files are excluded by this task currently */
@@ -994,8 +973,6 @@ done:
 
     /* cleanup */
     clear_currently_excluded_flag(jp);
-    winx_fclose(jp->fVolume);
-    jp->fVolume = NULL;
     if(pt) prb_destroy(pt,NULL);
     return result;
 }

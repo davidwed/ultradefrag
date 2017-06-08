@@ -243,7 +243,7 @@ static DWORD WINAPI start_job(LPVOID p)
 {
     udefrag_job_parameters *jp = (udefrag_job_parameters *)p;
     char *action = "Analysis";
-    int result = 0;
+    int result = -1;
 
     /* check job flags */
     if(jp->udo.job_flags & UD_JOB_REPEAT)
@@ -255,8 +255,15 @@ static DWORD WINAPI start_job(LPVOID p)
     else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "Quick optimization";
     else if(jp->job_type == MFT_OPTIMIZATION_JOB) action = "MFT optimization";
     winx_dbg_print_header(0,0,I"%s of disk %c: started",action,jp->volume_letter);
+
+    /* open the volume */
+    jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
+    if(jp->fVolume == NULL) goto done;
+
     remove_fragmentation_report(jp);
-    (void)winx_vflush(jp->volume_letter); /* flush all file buffers */
+    
+    /* flush all file buffers */
+    (void)winx_vflush(jp->volume_letter);
     
     /* speedup file searching in optimization */
     if(jp->job_type == FULL_OPTIMIZATION_JOB \
@@ -286,7 +293,11 @@ static DWORD WINAPI start_job(LPVOID p)
     destroy_file_blocks_tree(jp);
 
     (void)save_fragmentation_report(jp);
-    
+
+    /* close the volume */
+    winx_fclose(jp->fVolume);
+
+done:
     /* now it is safe to adjust the completion status */
     jp->pi.completion_status = result;
     if(jp->pi.completion_status == 0)
