@@ -2,6 +2,10 @@
 
   Version 7.0.3 2017-05-xx
   ------------------------------------------------------------------------------
+    - the "repeat action" option was forced to control
+      defragmentation only: all the disk optimization
+      algorithms are able to correctly decide themselves
+      whether it's worth to run one more pass or not
     - options.lua file was moved to conf subfolder to
       fix configuration tracking (bugs #222 and #225)
     - fragmentation reports were forced to take
