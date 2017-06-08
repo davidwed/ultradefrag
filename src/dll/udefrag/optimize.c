@@ -637,15 +637,18 @@ static int is_block_quite_small(udefrag_job_parameters *jp,
     /* move everything fragmented if the fragment size threshold isn't set */
     if(jp->udo.fragment_size_threshold == DEFAULT_FRAGMENT_SIZE_THRESHOLD) return 1;
     
-    /* skip fragments bigger than the fragment size threshold */
-    if(block_size >= jp->udo.fragment_size_threshold) return 0;
+    /* move files which need to be defragmented entirely */
+    if(file_size < 2 * jp->udo.fragment_size_threshold) return 1;
+    
+    /* skip fragments which probably won't get moved in defragmentation */
+    if(block_size >= 2 * jp->udo.fragment_size_threshold) return 0;
 
     /* move small fragments needing defragmentation */
     fragments = build_fragments_list(file,NULL);
     for(fr = fragments; fr; fr = fr->next){
         if(block->lcn >= fr->lcn && block->lcn < fr->lcn + fr->length){
             fragment_size = fr->length * jp->v_info.bytes_per_cluster;
-            if(fragment_size >= jp->udo.fragment_size_threshold){
+            if(fragment_size >= 2 * jp->udo.fragment_size_threshold){
                 release_fragments_list(&fragments);
                 return 0;
             }
