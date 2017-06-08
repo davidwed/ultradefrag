@@ -987,9 +987,6 @@ static int optimize_routine(udefrag_job_parameters *jp)
         
         /* break if no more files need optimization */
         if(prb_t_cur(&t) == NULL) break;
-        
-        /* break if no repeat allowed */
-        if(!(jp->udo.job_flags & UD_JOB_REPEAT)) break;
     }
     
 done:
