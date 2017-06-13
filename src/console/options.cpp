@@ -62,7 +62,7 @@ static struct option long_options[] = {
     { "analyze",                     no_argument,       0, 'a' },
     { "defragment",                  no_argument,       0,  0  },
     { "optimize",                    no_argument,       0, 'o' },
-    { "quick-optimize",              no_argument,       0, 'q' },
+    { "quick-optimization",          no_argument,       0, 'q' },
     { "optimize-mft",                no_argument,       0,  0  },
     { "all",                         no_argument,       0,  0  },
     { "all-fixed",                   no_argument,       0,  0  },
@@ -107,6 +107,11 @@ static struct option long_options[] = {
     { "folder",                      no_argument,       0,  0  },
     { "folder-itself",               no_argument,       0,  0  },
 
+    /*
+    * Obsolete options.
+    */
+    { "quick-optimize",              no_argument,       0,  0  },
+
     { 0,                             0,                 0,  0  }
 };
 
@@ -142,6 +147,9 @@ bool parse_cmdline(int argc, char **argv)
             long_option_name = long_options[option_index].name;
             if(!strcmp(long_option_name,"defragment")){
                 /* do nothing */
+            } else if(!strcmp(long_option_name,"quick-optimize")){
+                /* support obsolete --quick-optimize option */
+                g_quick_optimization = true;
             } else if(!strcmp(long_option_name,"optimize-mft")){
                 g_optimize_mft = true;
             } else if(!strcmp(long_option_name,"map-border-color")){
@@ -257,7 +265,7 @@ bool parse_cmdline(int argc, char **argv)
     /* --all-fixed flag has more precedence */
     if(g_all_fixed) g_all = false;
 
-    /* --quick-optimize flag has more precedence */
+    /* --quick-optimization flag has more precedence */
     if(g_quick_optimization) g_optimize = false;
 
     /* -p flag disables cluster map as well */
