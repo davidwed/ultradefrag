@@ -71,7 +71,7 @@ void show_help(void)
         "Commands:\n"
         "  -a,  --analyze                      analyze specified objects\n"
         "  -o,  --optimize                     perform full optimization\n"
-        "  -q,  --quick-optimize               perform quick optimization\n"
+        "  -q,  --quick-optimization           perform quick optimization\n"
         "       --optimize-mft                 optimize master file tables only\n"
         "  -l,  --list-available-volumes       list all fixed disks available\n"
         "                                      for defragmentation\n"

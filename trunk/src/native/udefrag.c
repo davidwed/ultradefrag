@@ -241,7 +241,7 @@ void ProcessVolume(char letter)
     winx_printf("\nPreparing to ");
     switch(current_job){
     case ANALYSIS_JOB:
-        winx_printf("analyse %c: ...\n",letter);
+        winx_printf("analyze %c: ...\n",letter);
         message = "Analysis";
         break;
     case DEFRAGMENTATION_JOB:
@@ -253,7 +253,7 @@ void ProcessVolume(char letter)
         message = "Optimization";
         break;
     case QUICK_OPTIMIZATION_JOB:
-        winx_printf("quick optimize %c: ...\n",letter);
+        winx_printf("quick optimization of %c: ...\n",letter);
         message = "Quick optimization";
         break;
     case MFT_OPTIMIZATION_JOB:
@@ -309,7 +309,7 @@ static int DisplayAvailableVolumes(int skip_removable)
 int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
 {
     int a_flag = 0, o_flag = 0;
-    int quick_optimize_flag = 0;
+    int quick_optimization_flag = 0;
     int optimize_mft_flag = 0;
     int all_flag = 0, all_fixed_flag = 0;
     int repeat_flag = 0;
@@ -344,10 +344,11 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
             o_flag = 1;
             continue;
         } else if(!wcscmp(argv[i],L"-q")){
-            quick_optimize_flag = 1;
+            quick_optimization_flag = 1;
             continue;
-        } else if(!wcscmp(argv[i],L"--quick-optimize")){
-            quick_optimize_flag = 1;
+        } else if(wcsstr(argv[i],L"--quick-opt") == argv[i]){
+            /* support --quick-optimization as well as obsolete --quick-optimize options */
+            quick_optimization_flag = 1;
             continue;
         } else if(!wcscmp(argv[i],L"--optimize-mft")){
             optimize_mft_flag = 1;
@@ -395,13 +396,13 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
         return (-1);
     }
     
-    /* --quick-optimize flag has more precedence */
-    if(quick_optimize_flag) o_flag = 0;
+    /* --quick-optimization flag has more precedence */
+    if(quick_optimization_flag) o_flag = 0;
     
     /* set the current_job global variable */
     if(a_flag) current_job = ANALYSIS_JOB;
     else if(o_flag) current_job = FULL_OPTIMIZATION_JOB;
-    else if(quick_optimize_flag) current_job = QUICK_OPTIMIZATION_JOB;
+    else if(quick_optimization_flag) current_job = QUICK_OPTIMIZATION_JOB;
     else if(optimize_mft_flag) current_job = MFT_OPTIMIZATION_JOB;
     else current_job = DEFRAGMENTATION_JOB;
     
