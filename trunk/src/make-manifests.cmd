@@ -1,7 +1,7 @@
 @echo off
 ::
 :: This script generates manifests for UltraDefrag binaries.
-:: Copyright (c) 2009-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+:: Copyright (c) 2009-2017 Dmitri Arkhangelski (dmitriar@gmail.com).
 :: Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
 ::
 :: This program is free software; you can redistribute it and/or modify
