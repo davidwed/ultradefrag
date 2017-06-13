@@ -1,7 +1,7 @@
 #!/usr/local/bin/lua
 --[[
   upgrade-options.lua - upgrades UltraDefrag configuration file.
-  Copyright (c) 2011-2015 Dmitri Arkhangelski (dmitriar@gmail.com).
+  Copyright (c) 2011-2017 Dmitri Arkhangelski (dmitriar@gmail.com).
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
