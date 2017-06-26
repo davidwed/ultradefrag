@@ -263,7 +263,7 @@ void update_progress(udefrag_progress_info *pi, void *p)
             /* set progress indicator to 100% state */
             clear_line();
             if(pi->pass_number > 1)
-                printf("\r%c: %s100.00%% complete, %lu passes needed, fragmented/total = %lu/%lu",
+                printf("\r%c: %s100.00%% complete, in %lu passes, fragmented/total = %lu/%lu",
                     letter,op_name,pi->pass_number,pi->fragmented,pi->files);
             else
                 printf("\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
