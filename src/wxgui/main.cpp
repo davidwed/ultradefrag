@@ -396,12 +396,12 @@ MainFrame::MainFrame()
     wxFileName btdFile(wxT("%SystemRoot%\\system32\\defrag_native.exe"));
     btdFile.Normalize();
     bool btd = btdFile.FileExists();
-    m_menuBar->FindItem(ID_BootEnable)->Enable(btd);
-    m_menuBar->FindItem(ID_BootScript)->Enable(btd);
+    m_menuBar->Enable(ID_BootEnable,btd);
+    m_menuBar->Enable(ID_BootScript,btd);
     m_toolBar->EnableTool(ID_BootEnable,btd);
     m_toolBar->EnableTool(ID_BootScript,btd);
     if(btd && ::winx_bootex_check(L"defrag_native") > 0){
-        m_menuBar->FindItem(ID_BootEnable)->Check(true);
+        m_menuBar->Check(ID_BootEnable,true);
         m_toolBar->ToggleTool(ID_BootEnable,true);
         m_btdEnabled = true;
     } else {

@@ -137,18 +137,18 @@ void MainFrame::SaveAppConfiguration()
     cfg->Write(wxT("/Algorithm/SkipRemovableMedia"),m_skipRem);
 
     // save sorting parameters
-    if(m_menuBar->FindItem(ID_SortByPath)->IsChecked()){
+    if(m_menuBar->IsChecked(ID_SortByPath)){
         cfg->Write(wxT("/Algorithm/Sorting"),wxT("path"));
-    } else if(m_menuBar->FindItem(ID_SortBySize)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortBySize)){
         cfg->Write(wxT("/Algorithm/Sorting"),wxT("size"));
-    } else if(m_menuBar->FindItem(ID_SortByCreationDate)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortByCreationDate)){
         cfg->Write(wxT("/Algorithm/Sorting"),wxT("c_time"));
-    } else if(m_menuBar->FindItem(ID_SortByModificationDate)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortByModificationDate)){
         cfg->Write(wxT("/Algorithm/Sorting"),wxT("m_time"));
-    } else if(m_menuBar->FindItem(ID_SortByLastAccessDate)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortByLastAccessDate)){
         cfg->Write(wxT("/Algorithm/Sorting"),wxT("a_time"));
     }
-    if(m_menuBar->FindItem(ID_SortAscending)->IsChecked()){
+    if(m_menuBar->IsChecked(ID_SortAscending)){
         cfg->Write(wxT("/Algorithm/SortingOrder"),wxT("asc"));
     } else {
         cfg->Write(wxT("/Algorithm/SortingOrder"),wxT("desc"));

@@ -259,8 +259,8 @@ void MainFrame::InitMenu()
     }
 
     // initial settings
-    m_menuBar->FindItem(ID_Repeat)->Check(m_repeat);
-    m_menuBar->FindItem(ID_SkipRem)->Check(m_skipRem);
+    m_menuBar->Check(ID_Repeat,m_repeat);
+    m_menuBar->Check(ID_SkipRem,m_skipRem);
 
     int id = g_locale->GetLanguage();
     wxMenuItem *item = m_menuBar->FindItem(ID_LocaleChange + id);
@@ -269,21 +269,21 @@ void MainFrame::InitMenu()
     wxConfigBase *cfg = wxConfigBase::Get();
     wxString sorting = cfg->Read(wxT("/Algorithm/Sorting"),wxT("path"));
     if(sorting == wxT("path")){
-        m_menuBar->FindItem(ID_SortByPath)->Check();
+        m_menuBar->Check(ID_SortByPath,true);
     } else if(sorting == wxT("size")){
-        m_menuBar->FindItem(ID_SortBySize)->Check();
+        m_menuBar->Check(ID_SortBySize,true);
     } else if(sorting == wxT("c_time")){
-        m_menuBar->FindItem(ID_SortByCreationDate)->Check();
+        m_menuBar->Check(ID_SortByCreationDate,true);
     } else if(sorting == wxT("m_time")){
-        m_menuBar->FindItem(ID_SortByModificationDate)->Check();
+        m_menuBar->Check(ID_SortByModificationDate,true);
     } else if(sorting == wxT("a_time")){
-        m_menuBar->FindItem(ID_SortByLastAccessDate)->Check();
+        m_menuBar->Check(ID_SortByLastAccessDate,true);
     }
     wxString order = cfg->Read(wxT("/Algorithm/SortingOrder"),wxT("asc"));
     if(order == wxT("asc")){
-        m_menuBar->FindItem(ID_SortAscending)->Check();
+        m_menuBar->Check(ID_SortAscending,true);
     } else {
-        m_menuBar->FindItem(ID_SortDescending)->Check();
+        m_menuBar->Check(ID_SortDescending,true);
     }
 }
 
