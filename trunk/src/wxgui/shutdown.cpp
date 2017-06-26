@@ -201,22 +201,22 @@ void MainFrame::Shutdown(wxCommandEvent& WXUNUSED(event))
 {
     int action = 0;
 
-    if(m_menuBar->FindItem(ID_WhenDoneNone)->IsChecked()){
+    if(m_menuBar->IsChecked(ID_WhenDoneNone)){
         // nothing to do
         return;
-    } else if(m_menuBar->FindItem(ID_WhenDoneExit)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_WhenDoneExit)){
         // just close the window
         ProcessCommandEvent(this,ID_Exit);
         return;
-    } else if(m_menuBar->FindItem(ID_WhenDoneStandby)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_WhenDoneStandby)){
         action = WHEN_DONE_STANDBY;
-    } else if(m_menuBar->FindItem(ID_WhenDoneHibernate)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_WhenDoneHibernate)){
         action = WHEN_DONE_HIBERNATE;
-    } else if(m_menuBar->FindItem(ID_WhenDoneLogoff)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_WhenDoneLogoff)){
         action = WHEN_DONE_LOGOFF;
-    } else if(m_menuBar->FindItem(ID_WhenDoneReboot)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_WhenDoneReboot)){
         action = WHEN_DONE_REBOOT;
-    } else if(m_menuBar->FindItem(ID_WhenDoneShutdown)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_WhenDoneShutdown)){
         action = WHEN_DONE_SHUTDOWN;
     }
 

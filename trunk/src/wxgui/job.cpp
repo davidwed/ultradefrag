@@ -257,18 +257,18 @@ void MainFrame::OnStartJob(wxCommandEvent& event)
     }
 
     // set sorting parameters
-    if(m_menuBar->FindItem(ID_SortByPath)->IsChecked()){
+    if(m_menuBar->IsChecked(ID_SortByPath)){
         wxSetEnv(wxT("UD_SORTING"),wxT("path"));
-    } else if(m_menuBar->FindItem(ID_SortBySize)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortBySize)){
         wxSetEnv(wxT("UD_SORTING"),wxT("size"));
-    } else if(m_menuBar->FindItem(ID_SortByCreationDate)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortByCreationDate)){
         wxSetEnv(wxT("UD_SORTING"),wxT("c_time"));
-    } else if(m_menuBar->FindItem(ID_SortByModificationDate)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortByModificationDate)){
         wxSetEnv(wxT("UD_SORTING"),wxT("m_time"));
-    } else if(m_menuBar->FindItem(ID_SortByLastAccessDate)->IsChecked()){
+    } else if(m_menuBar->IsChecked(ID_SortByLastAccessDate)){
         wxSetEnv(wxT("UD_SORTING"),wxT("a_time"));
     }
-    if(m_menuBar->FindItem(ID_SortAscending)->IsChecked()){
+    if(m_menuBar->IsChecked(ID_SortAscending)){
         wxSetEnv(wxT("UD_SORTING_ORDER"),wxT("asc"));
     } else {
         wxSetEnv(wxT("UD_SORTING_ORDER"),wxT("desc"));
@@ -336,7 +336,7 @@ void MainFrame::OnJobCompletion(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::SetPause()
 {
-    m_menuBar->FindItem(ID_Pause)->Check(true);
+    m_menuBar->Check(ID_Pause,true);
     m_toolBar->ToggleTool(ID_Pause,true);
 
     Utils::SetProcessPriority(IDLE_PRIORITY_CLASS);
@@ -347,7 +347,7 @@ void MainFrame::SetPause()
 
 void MainFrame::ReleasePause()
 {
-    m_menuBar->FindItem(ID_Pause)->Check(false);
+    m_menuBar->Check(ID_Pause,false);
     m_toolBar->ToggleTool(ID_Pause,false);
 
     Utils::SetProcessPriority(NORMAL_PRIORITY_CLASS);
@@ -373,7 +373,7 @@ void MainFrame::OnRepeat(wxCommandEvent& WXUNUSED(event))
 {
     if(!m_busy){
         m_repeat = m_repeat ? false : true;
-        m_menuBar->FindItem(ID_Repeat)->Check(m_repeat);
+        m_menuBar->Check(ID_Repeat,m_repeat);
         m_toolBar->ToggleTool(ID_Repeat,m_repeat);
     }
 }

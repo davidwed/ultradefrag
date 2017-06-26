@@ -62,14 +62,14 @@ wxLocale *g_locale = NULL;
     if(::strlen(accel)){ \
         wxString ItemLabel = _(label); \
         ItemLabel << wxT("\t") << wxT(accel); \
-        m_menuBar->FindItem(id)->SetItemLabel(ItemLabel); \
+        m_menuBar->SetLabel(id,ItemLabel); \
         if(m_toolBar->FindById(id)){ \
             ItemLabel = _(label); \
             ItemLabel << wxT(" (") << wxT(accel) << wxT(")"); \
             m_toolBar->SetToolShortHelp(id,ItemLabel); \
         } \
     } else { \
-        m_menuBar->FindItem(id)->SetItemLabel(_(label)); \
+        m_menuBar->SetLabel(id,_(label)); \
         if(m_toolBar->FindById(id)) \
             m_toolBar->SetToolShortHelp(id,_(label)); \
     } \

@@ -457,7 +457,7 @@ void MainFrame::PopulateList(wxCommandEvent& event)
 void MainFrame::OnSkipRem(wxCommandEvent& WXUNUSED(event))
 {
     if(!m_busy){
-        m_skipRem = m_menuBar->FindItem(ID_SkipRem)->IsChecked();
+        m_skipRem = m_menuBar->IsChecked(ID_SkipRem);
         m_listThread->m_rescan = true;
     }
 }
