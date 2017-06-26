@@ -340,11 +340,10 @@ function produce_mingw_makefile()
     
     f:write("CFLAGS = -pipe  -Wall -g0")
 
-    -- enable optimization for official releases only
-    -- as it slows down compilation significantly
-    if os.getenv("OFFICIAL_RELEASE") then
-        f:write(" -O2")
-    end
+    -- enable optimization, even for test builds, as otherwise
+    -- NtQueryInformationProcess returns STATUS_DATATYPE_MISALIGNMENT
+    -- somehow in winx_get_drive_type routine
+    f:write(" -O2")
 
     if arch == "amd64" then
         f:write(" -m64")
