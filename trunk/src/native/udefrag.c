@@ -308,6 +308,7 @@ static int DisplayAvailableVolumes(int skip_removable)
  */
 int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
 {
+    int l_flag = 0, la_flag = 0;
     int a_flag = 0, o_flag = 0;
     int quick_optimization_flag = 0;
     int optimize_mft_flag = 0;
@@ -328,16 +329,16 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
         return (-1);
     }
     
-    /* handle the volumes listing request */
-    if(!wcscmp(argv[1],L"-l"))
-        return DisplayAvailableVolumes(TRUE);
-    if(!wcscmp(argv[1],L"-la"))
-        return DisplayAvailableVolumes(FALSE);
-    
     /* parse command line */
     for(i = 1; i < argc; i++){
         /* handle flags */
-        if(!wcscmp(argv[i],L"-a")){
+        if(!wcscmp(argv[i],L"-l")){
+            l_flag = 1;
+            continue;
+        } else if(!wcscmp(argv[i],L"-la")){
+            la_flag = 1;
+            continue;
+        } else if(!wcscmp(argv[i],L"-a")){
             a_flag = 1;
             continue;
         } else if(!wcscmp(argv[i],L"-o")){
@@ -380,12 +381,14 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
             }
         }
         /* handle unknown options */
-        /*winx_printf("\n%ws: unknown option \'%ws\' found\n\n",
-            argv[0],argv[i]);
-        return (-1);
-        */
+        if(wcsstr(argv[i],L"-") == argv[i])
+            winx_printf("\n%ws: unknown option \'%ws\' found\n",argv[0],argv[i]);
         continue;
     }
+    
+    /* handle the volumes listing request */
+    if(la_flag) return DisplayAvailableVolumes(FALSE);
+    if(l_flag) return DisplayAvailableVolumes(TRUE);
     
     /* scan for paths of objects to be processed */
     search_for_paths(argc,argv,envp);
