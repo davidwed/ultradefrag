@@ -99,7 +99,6 @@ void MainFrame::ReadAppConfiguration()
         );
     }
 
-    cfg->Read(wxT("/Algorithm/RepeatAction"),&m_repeat,false);
     cfg->Read(wxT("/Algorithm/SkipRemovableMedia"),&m_skipRem,true);
 }
 
@@ -133,7 +132,6 @@ void MainFrame::SaveAppConfiguration()
     cfg->Write(wxT("/Language/Selected"),(long)g_locale->GetLanguage());
     cfg->Write(wxT("/Language/Version"),wxVERSION_NUM_DOT_STRING);
 
-    cfg->Write(wxT("/Algorithm/RepeatAction"),m_repeat);
     cfg->Write(wxT("/Algorithm/SkipRemovableMedia"),m_skipRem);
 
     // save sorting parameters

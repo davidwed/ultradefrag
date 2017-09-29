@@ -313,7 +313,6 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
     int quick_optimization_flag = 0;
     int optimize_mft_flag = 0;
     int all_flag = 0, all_fixed_flag = 0;
-    int repeat_flag = 0;
     char letters[MAX_DOS_DRIVES];
     int i, n_letters = 0;
     char letter;
@@ -361,10 +360,10 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
             all_fixed_flag = 1;
             continue;
         } else if(!wcscmp(argv[i],L"-r")){
-            repeat_flag = 1;
+            /* it's safe to just ignore it */
             continue;
         } else if(!wcscmp(argv[i],L"--repeat")){
-            repeat_flag = 1;
+            /* it's safe to just ignore it */
             continue;
         }
         /* handle individual drive letters */
@@ -409,7 +408,7 @@ int udefrag_handler(int argc,wchar_t **argv,wchar_t **envp)
     else if(optimize_mft_flag) current_job = MFT_OPTIMIZATION_JOB;
     else current_job = DEFRAGMENTATION_JOB;
     
-    current_job_flags = repeat_flag ? UD_JOB_REPEAT : 0;
+    current_job_flags = 0;
     
     /*
     * In the interactive mode let the job run

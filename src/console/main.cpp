@@ -66,7 +66,6 @@ bool g_all = false;
 bool g_all_fixed = false;
 bool g_list_volumes = false;
 bool g_list_all = false;
-bool g_repeat = false;
 bool g_no_progress = false;
 bool g_show_vol_info = false;
 bool g_show_map = false;
@@ -308,8 +307,7 @@ static bool process_single_volume(char letter)
     else if(g_quick_optimization) job_type = QUICK_OPTIMIZATION_JOB;
     else if(g_optimize_mft) job_type = MFT_OPTIMIZATION_JOB;
 
-    int flags = g_repeat ? UD_JOB_REPEAT : 0;
-    if(g_shellex) flags |= UD_JOB_CONTEXT_MENU_HANDLER;
+    int flags = g_shellex ? UD_JOB_CONTEXT_MENU_HANDLER : 0;
 
     g_stop = false; g_first_progress_update = true;
 

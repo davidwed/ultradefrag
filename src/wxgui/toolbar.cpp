@@ -72,7 +72,6 @@ void MainFrame::InitToolbar()
     m_toolBar->SetToolBitmapSize(wxSize(g_iconSize,g_iconSize));
 
     UD_MakeToolItem(ID_Analyze         , glass   );
-    UD_MakeToolCheckItem(ID_Repeat     , repeat  );
     UD_MakeToolItem(ID_Defrag          , defrag  );
     UD_MakeToolItem(ID_QuickOpt        , quick   );
     UD_MakeToolItem(ID_FullOpt         , full    );
@@ -92,7 +91,7 @@ void MainFrame::InitToolbar()
     m_toolBar->Realize();
 
     // initial settings (must be after realize)
-    m_toolBar->ToggleTool(ID_Repeat,m_repeat);
+    // m_toolBar->ToggleTool(ID_XXX,m_xxx);
 }
 
 /** @} */

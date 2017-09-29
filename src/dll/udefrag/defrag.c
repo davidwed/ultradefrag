@@ -484,9 +484,6 @@ static int defrag_sequence(udefrag_job_parameters *jp)
         /* break if nothing moved */
         if(result < 0 || jp->pi.moved_clusters == 0) break;
         
-        /* break if no repeat allowed */
-        if(!(jp->udo.job_flags & UD_JOB_REPEAT)) break;
-        
         /* break if no more fragmented files exist */
         if(jp->pi.fragmented == 0) break;
     }
@@ -509,9 +506,6 @@ static int defrag_sequence(udefrag_job_parameters *jp)
             /* break if nothing moved */
             if(result < 0 || jp->pi.moved_clusters == 0) break;
             
-            /* break if no repeat allowed */
-            if(!(jp->udo.job_flags & UD_JOB_REPEAT)) break;
-
             /* break if no more fragmented files exist */
             if(jp->pi.fragmented == 0) break;
         }

@@ -245,11 +245,6 @@ static DWORD WINAPI start_job(LPVOID p)
     char *action = "Analysis";
     int result = -1;
 
-    /* check job flags */
-    if(jp->udo.job_flags & UD_JOB_REPEAT)
-        itrace("repeat action until nothing left to move");
-    
-    /* do the job */
     if(jp->job_type == DEFRAGMENTATION_JOB) action = "Defragmentation";
     else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "Full optimization";
     else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "Quick optimization";
@@ -271,6 +266,7 @@ static DWORD WINAPI start_job(LPVOID p)
       || jp->job_type == MFT_OPTIMIZATION_JOB)
         create_file_blocks_tree(jp);
 
+    /* do the job */
     switch(jp->job_type){
     case ANALYSIS_JOB:
         result = analyze(jp);

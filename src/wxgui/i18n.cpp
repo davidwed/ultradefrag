@@ -171,7 +171,6 @@ void MainFrame::OnLocaleChange(wxCommandEvent& event)
     UD_UpdateMenuItemLabel(ID_Pause      , "Pa&use"                , "Space");
     UD_UpdateMenuItemLabel(ID_Stop       , "&Stop"                 , "Ctrl+C");
     UD_UpdateMenuItemLabel(ID_ShowReport , "&Show report"          , "F8");
-    UD_UpdateMenuItemLabel(ID_Repeat     , "Re&peat action"        , "Shift+R");
     UD_UpdateMenuItemLabel(ID_SkipRem    , "Skip removable &media" , "Ctrl+M");
     UD_UpdateMenuItemLabel(ID_Rescan     , "&Rescan drives"        , "Ctrl+D");
     UD_UpdateMenuItemLabel(ID_Repair     , "Repair dri&ves"        , "");

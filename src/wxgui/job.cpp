@@ -159,8 +159,7 @@ void JobThread::ProcessVolume(int index)
     // process volume
     int result = udefrag_validate_volume(m_letter,FALSE);
     if(result == 0){
-        result = udefrag_start_job(m_letter,m_jobType,
-            g_mainFrame->m_repeat ? UD_JOB_REPEAT : 0,m_mapSize,
+        result = udefrag_start_job(m_letter,m_jobType,0,m_mapSize,
             reinterpret_cast<udefrag_progress_callback>(ProgressCallback),
             reinterpret_cast<udefrag_terminator>(Terminator),NULL
         );
@@ -239,7 +238,6 @@ void MainFrame::OnStartJob(wxCommandEvent& event)
     UD_DisableTool(ID_QuickOpt);
     UD_DisableTool(ID_FullOpt);
     UD_DisableTool(ID_MftOpt);
-    UD_DisableTool(ID_Repeat);
     UD_DisableTool(ID_SkipRem);
     UD_DisableTool(ID_Rescan);
     UD_DisableTool(ID_Repair);
@@ -310,7 +308,6 @@ void MainFrame::OnJobCompletion(wxCommandEvent& WXUNUSED(event))
     UD_EnableTool(ID_QuickOpt);
     UD_EnableTool(ID_FullOpt);
     UD_EnableTool(ID_MftOpt);
-    UD_EnableTool(ID_Repeat);
     UD_EnableTool(ID_SkipRem);
     UD_EnableTool(ID_Rescan);
     UD_EnableTool(ID_Repair);
@@ -367,15 +364,6 @@ void MainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
     m_paused = false;
     ReleasePause();
     m_stopped = true;
-}
-
-void MainFrame::OnRepeat(wxCommandEvent& WXUNUSED(event))
-{
-    if(!m_busy){
-        m_repeat = m_repeat ? false : true;
-        m_menuBar->Check(ID_Repeat,m_repeat);
-        m_toolBar->ToggleTool(ID_Repeat,m_repeat);
-    }
 }
 
 void MainFrame::OnRepair(wxCommandEvent& WXUNUSED(event))
