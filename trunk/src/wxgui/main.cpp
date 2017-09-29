@@ -489,8 +489,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
 
     EVT_MENU(ID_ShowReport, MainFrame::OnShowReport)
 
-    EVT_MENU(ID_Repeat,  MainFrame::OnRepeat)
-
     EVT_MENU(ID_SkipRem, MainFrame::OnSkipRem)
     EVT_MENU(ID_Rescan,  MainFrame::OnRescan)
 

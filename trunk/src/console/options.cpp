@@ -73,11 +73,6 @@ static struct option long_options[] = {
     { "list-available-volumes",      optional_argument, 0, 'l' },
 
     /*
-    * Volume processing options.
-    */
-    { "repeat",                      no_argument,       0, 'r' },
-
-    /*
     * Progress indicators options.
     */
     { "suppress-progress-indicator", no_argument,       0, 'p' },
@@ -111,6 +106,7 @@ static struct option long_options[] = {
     * Obsolete options.
     */
     { "quick-optimize",              no_argument,       0,  0  },
+    { "repeat",                      no_argument,       0, 'r' },
 
     { 0,                             0,                 0,  0  }
 };
@@ -235,7 +231,7 @@ bool parse_cmdline(int argc, char **argv)
             }
             break;
         case 'r':
-            g_repeat = true;
+            /* it's safe to just ignore it */
             break;
         case 'p':
             g_no_progress = true;

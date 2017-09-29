@@ -96,9 +96,6 @@ void MainFrame::InitMenu()
     UD_AppendItem(m_menuAction,      ID_Stop,       wxT("stop")  );
     UD_AppendSeparator(m_menuAction);
 
-    UD_AppendCheckItem(m_menuAction, ID_Repeat                   );
-    UD_AppendSeparator(m_menuAction);
-
     UD_AppendItem(m_menuAction,      ID_ShowReport, wxT("report"));
     UD_AppendSeparator(m_menuAction);
 
@@ -259,7 +256,6 @@ void MainFrame::InitMenu()
     }
 
     // initial settings
-    m_menuBar->Check(ID_Repeat,m_repeat);
     m_menuBar->Check(ID_SkipRem,m_skipRem);
 
     int id = g_locale->GetLanguage();

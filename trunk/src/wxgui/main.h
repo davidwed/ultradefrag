@@ -75,8 +75,6 @@ enum {
 
     ID_ShowReport,
 
-    ID_Repeat,
-
     ID_SkipRem,
     ID_Rescan,
 
@@ -418,8 +416,6 @@ public:
 
     void OnShowReport(wxCommandEvent& event);
 
-    void OnRepeat(wxCommandEvent& event);
-
     void OnSkipRem(wxCommandEvent& event);
     void OnRescan(wxCommandEvent& event);
 
@@ -482,7 +478,6 @@ public:
     void SetTaskbarProgressState(TBPFLAG flag);
     void SetTaskbarProgressValue(ULONGLONG completed, ULONGLONG total);
 
-    bool m_repeat;
     bool m_skipRem;
     bool m_busy;
     bool m_paused;

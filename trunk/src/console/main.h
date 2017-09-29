@@ -118,7 +118,6 @@ extern bool g_all;
 extern bool g_all_fixed;
 extern bool g_list_volumes;
 extern bool g_list_all;
-extern bool g_repeat;
 extern bool g_no_progress;
 extern bool g_show_vol_info;
 extern bool g_show_map;

@@ -84,8 +84,6 @@ void show_help(void)
         "  If none is specified the program will defragment selected objects.\n"
         "\n"
         "Options:\n"
-        "  -r,  --repeat                       repeat the disk processing multiple\n"
-        "                                      times whenever it makes sense\n"
         "  -b,  --use-system-color-scheme      disable colorization of output\n"
         "  -p,  --suppress-progress-indicator  hide progress indicator and cluster map\n"
         "  -v,  --show-volume-information      show disk information after the job\n"
