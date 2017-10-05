@@ -322,9 +322,8 @@ static ULONGLONG opt_dirs_cc_routine(udefrag_job_parameters *jp)
  * @brief Optimizes directories by placing their
  * fragments close to each other behind the first one.
  * @details Intended for use on FAT-formatted volumes.
- * @return Zero for success, negative value otherwise.
  */
-static int optimize_directories(udefrag_job_parameters *jp)
+static void optimize_directories(udefrag_job_parameters *jp)
 {
     struct prb_traverser t;
     winx_file_info *file, *next_file;
@@ -368,7 +367,6 @@ static int optimize_directories(udefrag_job_parameters *jp)
 
     /* cleanup */
     clear_currently_excluded_flag(jp);
-    return 0;
 }
 
 /**
@@ -904,9 +902,8 @@ static ULONGLONG clusters_to_optimize(udefrag_job_parameters *jp,struct prb_tabl
 /**
  * @internal
  * @brief Sorts out small files on the disk.
- * @return Zero for success, negative value otherwise.
  */
-static int optimize_routine(udefrag_job_parameters *jp)
+static void optimize_routine(udefrag_job_parameters *jp)
 {
     winx_file_info *f;
     struct prb_table *pt;
@@ -914,7 +911,6 @@ static int optimize_routine(udefrag_job_parameters *jp)
     ULONGLONG start_lcn, end_lcn;
     void **p;
     ULONGLONG time;
-    int result = 0;
 
     jp->pi.current_operation = VOLUME_OPTIMIZATION;
 
@@ -974,7 +970,6 @@ done:
     /* cleanup */
     clear_currently_excluded_flag(jp);
     if(pt) prb_destroy(pt,NULL);
-    return result;
 }
 
 /************************************************************/
@@ -993,7 +988,7 @@ done:
  */
 int optimize(udefrag_job_parameters *jp)
 {
-    int result, overall_result = -1;
+    int result;
     
     /* reset filters */
     release_options(jp);
@@ -1017,33 +1012,21 @@ int optimize(udefrag_job_parameters *jp)
     /* FAT specific: optimize directories */
     if(jp->is_fat){
         jp->pi.clusters_to_process += opt_dirs_cc_routine(jp);
-        result = optimize_directories(jp);
-        if(result == 0){
-            /* at least something succeeded */
-            overall_result = 0;
-        }
+        optimize_directories(jp);
     }
     
     /* NTFS specific: optimize MFT */
     if(jp->fs_type == FS_NTFS){
         jp->pi.clusters_to_process += opt_mft_cc_routine(jp);
-        result = optimize_mft_routine(jp);
-        if(result == 0){
-            /* at least something succeeded */
-            overall_result = 0;
-        }
+        (void)optimize_mft_routine(jp);
     }
     
     /* optimize the disk */
-    result = optimize_routine(jp);
-    if(result == 0){
-        /* optimization succeeded */
-        overall_result = 0;
-    }
+    optimize_routine(jp);
     
     /* get rid of fragmented files */
-    defragment(jp);
-    return overall_result;
+    (void)defragment(jp);
+    return 0;
 }
 
 /**
@@ -1075,7 +1058,7 @@ int optimize_mft(udefrag_job_parameters *jp)
     result = optimize_mft_routine(jp);
     
     /* cleanup the disk */
-    defragment(jp);
+    (void)defragment(jp);
     return result;
 }
 
