@@ -261,7 +261,7 @@ static ULONGLONG defrag_cc_routine(udefrag_job_parameters *jp)
  * @brief Eliminates little fragments respect
  * to the fragment size threshold filter.
  */
-static int defrag_routine(udefrag_job_parameters *jp)
+static void defrag_routine(udefrag_job_parameters *jp)
 {
     winx_volume_region *rgn, *largest_rgn;
     struct prb_traverser t;
@@ -461,34 +461,19 @@ completed:
 
     /* the pass is completed */
     jp->pi.pass_number ++;
-    return 0;
 }
 
 /**
  * @internal
  * @brief Defragments the disk once.
  */
-static int defrag_sequence(udefrag_job_parameters *jp)
+static void defrag_sequence(udefrag_job_parameters *jp)
 {
-    int result, overall_result = -1;
-    
-    if(jp->pi.fragmented == 0) return 0;
-    
-    while(!jp->termination_router((void *)jp)){
-        result = defrag_routine(jp);
-        if(result == 0){
-            /* defragmentation succeeded at least once */
-            overall_result = 0;
-        }
-        
-        /* break if nothing moved */
-        if(result < 0 || jp->pi.moved_clusters == 0) break;
-        
-        /* break if no more fragmented files exist */
-        if(jp->pi.fragmented == 0) break;
-    }
-    
-    if(jp->pi.fragmented == 0) return overall_result;
+    do {
+        if(jp->pi.fragmented == 0) return;
+        if(jp->termination_router((void *)jp)) return;
+        defrag_routine(jp);
+    } while(jp->pi.moved_clusters);
     
     /* defragment remaining files partially */
     if(jp->udo.fragment_size_threshold == DEFAULT_FRAGMENT_SIZE_THRESHOLD){
@@ -496,23 +481,14 @@ static int defrag_sequence(udefrag_job_parameters *jp)
         jp->udo.algorithm_defined_fst = 1;
         itrace("partial defragmentation: fragment size threshold = %I64u",
             jp->udo.fragment_size_threshold);
-        while(!jp->termination_router((void *)jp)){
-            result = defrag_routine(jp);
-            if(result == 0){
-                /* defragmentation succeeded at least once */
-                overall_result = 0;
-            }
-            
-            /* break if nothing moved */
-            if(result < 0 || jp->pi.moved_clusters == 0) break;
-            
-            /* break if no more fragmented files exist */
+        do {
             if(jp->pi.fragmented == 0) break;
-        }
+            if(jp->termination_router((void *)jp)) break;
+            defrag_routine(jp);
+        } while(jp->pi.moved_clusters);
         jp->udo.fragment_size_threshold = DEFAULT_FRAGMENT_SIZE_THRESHOLD;
         jp->udo.algorithm_defined_fst = 0;
     }
-    return overall_result;
 }
 
 /************************************************************/
@@ -530,7 +506,7 @@ static int defrag_sequence(udefrag_job_parameters *jp)
  */
 int defragment(udefrag_job_parameters *jp)
 {
-    int result, overall_result = -1;
+    int result;
     struct prb_traverser t;
     winx_file_info *file;
     int second_attempt = 0;
@@ -555,11 +531,7 @@ int defragment(udefrag_job_parameters *jp)
     time = start_timing("defragmentation",jp);
 
     /* do the job */
-    result = defrag_sequence(jp);
-    if(result == 0){
-        /* defragmentation succeeded at least once */
-        overall_result = 0;
-    }
+    defrag_sequence(jp);
     
     /*
     * Some files haven't been moved because target
@@ -576,16 +548,10 @@ int defragment(udefrag_job_parameters *jp)
         }
         file = prb_t_next(&t);
     }
-    if(second_attempt){
-        result = defrag_sequence(jp);
-        if(result == 0){
-            /* defragmentation succeeded at least once */
-            overall_result = 0;
-        }
-    }
+    if(second_attempt) defrag_sequence(jp);
     
     stop_timing("defragmentation",time,jp);
-    return (jp->termination_router((void *)jp)) ? 0 : overall_result;
+    return 0;
 }
 
 /** @} */
