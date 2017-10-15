@@ -89,13 +89,12 @@ void MainFrame::ReadAppConfiguration()
         (long)DPI(DEFAULT_LIST_HEIGHT)
     );
 
-    double r[LIST_COLUMNS] = {
-        110.0/615, 110.0/615, 110.0/615,
-        110.0/615, 110.0/615, 65.0/615
+    int defaultColumnWidths[LIST_COLUMNS] = {
+        110, 110, 110, 110, 110, 65
     };
     for(int i = 0; i < LIST_COLUMNS; i++){
         cfg->Read(wxString::Format(wxT("/DrivesList/width%d"),i),
-            &m_r[i], r[i]
+            &m_origColumnWidths[i], defaultColumnWidths[i]
         );
     }
 
@@ -119,14 +118,9 @@ void MainFrame::SaveAppConfiguration()
     cfg->Write(wxT("/MainFrame/SeparatorPosition"),
         (long)m_splitter->GetSashPosition());
 
-    int cwidth = 0;
-    for(int i = 0; i < LIST_COLUMNS; i++)
-        cwidth += m_vList->GetColumnWidth(i);
-
     for(int i = 0; i < LIST_COLUMNS; i++){
-        cfg->Write(wxString::Format(wxT("/DrivesList/width%d"),i),
-            (double)m_vList->GetColumnWidth(i) / (double)cwidth
-        );
+        // save original widths whenever possible to keep rounding errors out
+        cfg->Write(wxString::Format(wxT("/DrivesList/width%d"),i),m_origColumnWidths[i]);
     }
 
     cfg->Write(wxT("/Language/Selected"),(long)g_locale->GetLanguage());

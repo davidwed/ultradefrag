@@ -517,18 +517,10 @@ private:
     bool m_maximized;
     int  m_separatorPosition;
 
-    // list column widths ratios:
-    // 0.5 means that a column acquires
-    // a half of the entire list width
-    double m_r[LIST_COLUMNS];
-
-    // list column widths:
-    // used to check whether the user
-    // has changed them or not
-    int m_w[LIST_COLUMNS];
-
-    // list height
+    // list dimensions
     int m_vListHeight;
+    int m_origColumnWidths[LIST_COLUMNS];
+    int m_columnWidths[LIST_COLUMNS];
 
     wxFont *m_vListFont;
 
