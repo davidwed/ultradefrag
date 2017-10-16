@@ -366,6 +366,11 @@ void MainFrame::OnStop(wxCommandEvent& WXUNUSED(event))
     m_stopped = true;
 }
 
+void RecoveryConsole::OnTerminate(int pid, int status)
+{
+    g_refreshDrivesInfo = true;
+}
+
 void MainFrame::OnRepair(wxCommandEvent& WXUNUSED(event))
 {
     if(m_busy) return;
@@ -383,7 +388,7 @@ void MainFrame::OnRepair(wxCommandEvent& WXUNUSED(event))
     /*
     create command line to check disk for corruption:
     CHKDSK {drive} /F ................. check the drive and correct problems
-    PING -n {seconds + 1} localhost ... pause for the specified seconds
+    PING -n {seconds + 1} localhost ... pause for the specified number of seconds
     */
     wxFileName path(wxT("%windir%\\system32\\cmd.exe"));
     path.Normalize(); wxString cmd(path.GetFullPath());
@@ -400,8 +405,13 @@ void MainFrame::OnRepair(wxCommandEvent& WXUNUSED(event))
     cmd << wxT("& echo. ");
     cmd << wxT("& pause");
 
-    itrace("Command Line: %ls", ws(cmd));
-    if(!wxExecute(cmd)) Utils::ShowError(wxT("Cannot execute cmd.exe program!"));
+    itrace("command line: %ls", ws(cmd));
+
+    RecoveryConsole *rc = new RecoveryConsole();
+    if(!wxExecute(cmd,wxEXEC_ASYNC,rc)){
+        Utils::ShowError(wxT("Cannot execute cmd.exe program!"));
+        delete rc;
+    }
 }
 
 void MainFrame::OnDefaultAction(wxCommandEvent& WXUNUSED(event))

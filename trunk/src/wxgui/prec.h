@@ -37,6 +37,7 @@
 #include <wx/intl.h>
 #include <wx/listctrl.h>
 #include <wx/mstream.h>
+#include <wx/process.h>
 #include <wx/settings.h>
 #include <wx/splitter.h>
 #include <wx/sysopt.h>

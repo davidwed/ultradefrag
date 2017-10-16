@@ -42,6 +42,8 @@ int g_fixedDirtyIcon;
 int g_removableIcon;
 int g_removableDirtyIcon;
 
+bool g_refreshDrivesInfo = false;
+
 // =======================================================================
 //                           List of volumes
 // =======================================================================
@@ -306,6 +308,18 @@ void *ListThread::Entry()
     return NULL;
 }
 
+void *RefreshDrivesInfoThread::Entry()
+{
+    while(!g_mainFrame->CheckForTermination(200)){
+        if(g_refreshDrivesInfo){
+            QueueCommandEvent(g_mainFrame,ID_RefreshDrivesInfo);
+            g_refreshDrivesInfo = false;
+        }
+    }
+
+    return NULL;
+}
+
 void MainFrame::UpdateVolumeInformation(wxCommandEvent& event)
 {
     int index = event.GetInt();
@@ -326,13 +340,16 @@ void MainFrame::UpdateVolumeInformation(wxCommandEvent& event)
         }
     }
 
+    wxString msg(_("Disk needs to be repaired"));
     if(v->is_dirty){
         if(v->is_removable) m_vList->SetItemImage(index,g_removableDirtyIcon);
         else m_vList->SetItemImage(index,g_fixedDirtyIcon);
-        m_vList->SetItem(index,1,_("Disk needs to be repaired"));
+        m_vList->SetItem(index,1,msg);
     } else {
         if(v->is_removable) m_vList->SetItemImage(index,g_removableIcon);
         else m_vList->SetItemImage(index,g_fixedIcon);
+        if(m_vList->GetItemText(index,1) == msg)
+            m_vList->SetItem(index,1,wxT(""));
     }
 
     char s[32]; wxString string;
@@ -455,6 +472,15 @@ void MainFrame::PopulateList(wxCommandEvent& event)
     ProcessCommandEvent(this,ID_UpdateStatusBar);
 
     ::udefrag_release_vollist(v);
+}
+
+void MainFrame::RefreshDrivesInfo(wxCommandEvent& WXUNUSED(event))
+{
+    for(int i = 0; i < m_vList->GetItemCount(); i++){
+        char letter = (char)m_vList->GetItemText(i)[0];
+        wxCommandEvent e(wxEVT_COMMAND_MENU_SELECTED,ID_UpdateVolumeInformation);
+        e.SetInt((int)letter); GetEventHandler()->ProcessEvent(e);
+    }
 }
 
 void MainFrame::OnSkipRem(wxCommandEvent& WXUNUSED(event))
