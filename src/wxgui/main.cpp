@@ -419,6 +419,8 @@ MainFrame::MainFrame()
 
     m_upgradeThread = new UpgradeThread(ulevel);
 
+    m_rdiThread = new RefreshDrivesInfoThread();
+
     // set system tray icon
     m_systemTrayIcon = new SystemTrayIcon();
     if(!m_systemTrayIcon->IsOk()){
@@ -447,6 +449,7 @@ MainFrame::~MainFrame()
     delete m_configThread;
     delete m_jobThread;
     delete m_listThread;
+    delete m_rdiThread;
 
     // save configuration
     SaveAppConfiguration();
@@ -540,6 +543,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ID_PopulateList,      MainFrame::PopulateList)
     EVT_MENU(ID_ReadUserPreferences,   MainFrame::ReadUserPreferences)
     EVT_MENU(ID_RedrawMap,         MainFrame::RedrawMap)
+    EVT_MENU(ID_RefreshDrivesInfo, MainFrame::RefreshDrivesInfo)
     EVT_MENU(ID_SelectAll,         MainFrame::SelectAll)
     EVT_MENU(ID_SetWindowTitle,    MainFrame::SetWindowTitle)
     EVT_MENU(ID_ShowUpgradeDialog, MainFrame::ShowUpgradeDialog)

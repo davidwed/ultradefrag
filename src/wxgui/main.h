@@ -139,6 +139,7 @@ enum {
     ID_PopulateList,
     ID_ReadUserPreferences,
     ID_RedrawMap,
+    ID_RefreshDrivesInfo,
     ID_SelectAll,
     ID_SetWindowTitle,
     ID_ShowUpgradeDialog,
@@ -325,6 +326,19 @@ public:
     bool m_rescan;
 };
 
+class RefreshDrivesInfoThread: public wxThread {
+public:
+    RefreshDrivesInfoThread() : wxThread(wxTHREAD_JOINABLE) { Create(); Run(); }
+    ~RefreshDrivesInfoThread() { Wait(); }
+
+    virtual void *Entry();
+};
+
+class RecoveryConsole: public wxProcess {
+public:
+    virtual void OnTerminate(int pid, int status);
+};
+
 class UpgradeThread: public wxThread {
 public:
     UpgradeThread(int level) : wxThread(wxTHREAD_JOINABLE) {
@@ -465,6 +479,7 @@ public:
     void PopulateList(wxCommandEvent& event);
     void ReadUserPreferences(wxCommandEvent& event);
     void RedrawMap(wxCommandEvent& event);
+    void RefreshDrivesInfo(wxCommandEvent& event);
     void SelectAll(wxCommandEvent& event);
     void SetWindowTitle(wxCommandEvent& event);
     void ShowUpgradeDialog(wxCommandEvent& event);
@@ -546,6 +561,8 @@ private:
     ListThread      *m_listThread;
     UpgradeThread   *m_upgradeThread;
 
+    RefreshDrivesInfoThread *m_rdiThread;
+
     DECLARE_EVENT_TABLE()
 };
 
@@ -582,5 +599,6 @@ extern wxLocale *g_locale;
 extern double g_scaleFactor;
 extern int g_iconSize;
 extern HANDLE g_synchEvent;
+extern bool g_refreshDrivesInfo;
 
 #endif /* _UDEFRAG_GUI_MAIN_H_ */
