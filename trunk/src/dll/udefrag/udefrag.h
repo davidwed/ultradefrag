@@ -118,9 +118,8 @@ typedef struct _udefrag_progress_info {
     ULONGLONG total_space;            /* volume size, in bytes */
     ULONGLONG free_space;             /* free space amount, in bytes */
     ULONGLONG mft_size;               /* mft size, in bytes */
-    udefrag_operation_type current_operation;  /* identifies the currently running operation */
-    unsigned long pass_number;        /* the current disk processing pass, increases 
-                                         immediately after the pass completion */
+    udefrag_operation_type current_operation;  /* currently running operation */
+    unsigned long pass_number;        /* current disk processing pass */
     ULONGLONG clusters_to_process;    /* number of clusters to process */
     ULONGLONG processed_clusters;     /* number of already processed clusters */
     double percentage;                /* job completion percentage */

@@ -235,38 +235,53 @@ void update_progress(udefrag_progress_info *pi, void *p)
                 (void)SetConsoleCursorPosition(g_out,pos);
             }
         }
-
-        const char *op_name = "optimize: ";
-        if(pi->current_operation == VOLUME_ANALYSIS) op_name = "analyze:  ";
-        else if(pi->current_operation == VOLUME_DEFRAGMENTATION) op_name = "defrag:   ";
+        
+        clear_line();
 
         char letter = (char)(DWORD_PTR)p;
+        const char *op_name = "defragmentation";
+        
+        if(pi->completion_status == 0 || g_stop){
+            /*
+            * if the job is still running or aborted
+            * display progress of the current operation
+            */
+            if(pi->current_operation == VOLUME_ANALYSIS)
+                op_name = "analysis";
+            if(pi->current_operation == VOLUME_OPTIMIZATION)
+                op_name = "optimization";
 
-        clear_line();
-        if(pi->current_operation == VOLUME_OPTIMIZATION && !g_stop && pi->completion_status == 0){
-            if(pi->pass_number > 1)
-                printf("\r%c: %s%6.2lf%% complete, pass %lu, moves total = %I64u",
-                    letter,op_name,pi->percentage,pi->pass_number,pi->total_moves);
-            else
-                printf("\r%c: %s%6.2lf%% complete, moves total = %I64u",
-                    letter,op_name,pi->percentage,pi->total_moves);
+            if(pi->current_operation == VOLUME_OPTIMIZATION && pi->completion_status == 0 && !g_stop){
+                if(pi->pass_number > 1)
+                    printf("\r%c: %s: %.2lf%%, pass %lu, moves total = %I64u",
+                        letter,op_name,pi->percentage,pi->pass_number,pi->total_moves);
+                else
+                    printf("\r%c: %s: %.2lf%%, moves total = %I64u",
+                        letter,op_name,pi->percentage,pi->total_moves);
+            } else {
+                if(pi->pass_number > 1)
+                    printf("\r%c: %s: %.2lf%%, pass %lu, fragmented/total = %lu/%lu",
+                        letter,op_name,pi->percentage,pi->pass_number,pi->fragmented,pi->files);
+                else
+                    printf("\r%c: %s: %.2lf%%, fragmented/total = %lu/%lu",
+                        letter,op_name,pi->percentage,pi->fragmented,pi->files);
+            }
         } else {
+            /*
+            * if the job is completed display
+            * progress of the entire job
+            */
+            if(g_analyze) op_name = "analysis";
+            if(g_optimize || g_quick_optimization || \
+                g_optimize_mft) op_name = "optimization";
+
             if(pi->pass_number > 1)
-                printf("\r%c: %s%6.2lf%% complete, pass %lu, fragmented/total = %lu/%lu",
-                    letter,op_name,pi->percentage,pi->pass_number,pi->fragmented,pi->files);
-            else
-                printf("\r%c: %s%6.2lf%% complete, fragmented/total = %lu/%lu",
-                    letter,op_name,pi->percentage,pi->fragmented,pi->files);
-        }
-        if(pi->completion_status != 0 && !g_stop){
-            /* set progress indicator to 100% state */
-            clear_line();
-            if(pi->pass_number > 1)
-                printf("\r%c: %s100.00%% complete, in %lu passes, fragmented/total = %lu/%lu",
+                printf("\r%c: %s: 100.00%%, %lu passes, fragmented/total = %lu/%lu",
                     letter,op_name,pi->pass_number,pi->fragmented,pi->files);
             else
-                printf("\r%c: %s100.00%% complete, fragmented/total = %lu/%lu",
+                printf("\r%c: %s: 100.00%%, fragmented/total = %lu/%lu",
                     letter,op_name,pi->fragmented,pi->files);
+
             if(!g_show_map) printf("\n");
         }
 

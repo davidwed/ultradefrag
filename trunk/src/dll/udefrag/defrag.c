@@ -277,7 +277,7 @@ static void defrag_routine(udefrag_job_parameters *jp)
     int defrag_succeeded;
     char buffer[32];
 
-    winx_dbg_print_header(0,0,I"defragmentation pass #%u",jp->pi.pass_number);
+    winx_dbg_print_header(0,0,I"defragmentation pass #%u",jp->pi.pass_number++);
     jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
     jp->pi.moved_clusters = 0;
 
@@ -458,9 +458,6 @@ completed:
     
     /* cleanup */
     clear_currently_excluded_flag(jp);
-
-    /* the pass is completed */
-    jp->pi.pass_number ++;
 }
 
 /**
@@ -516,6 +513,7 @@ int defragment(udefrag_job_parameters *jp)
         /* analyze the disk */
         result = analyze(jp); /* we need to call it once, here */
         if(result < 0) return result;
+        if(jp->termination_router((void *)jp)) return 0;
     #ifdef TEST_SPECIAL_FILES_DEFRAG
         test_special_files_defrag(jp);
         return 0;
