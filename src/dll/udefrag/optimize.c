@@ -167,9 +167,6 @@ static int optimize_file(winx_file_info *f,udefrag_job_parameters *jp)
     if(is_file_locked(f,jp))
         return (-1);
 
-    /* reset counters */
-    jp->pi.total_moves = 0;
-    
     clusters_to_process = f->disp.clusters - f->disp.blockmap->length;
     if(clusters_to_process == 0)
         return 0;
@@ -539,7 +536,6 @@ static void move_files_to_front(udefrag_job_parameters *jp,
     
     time = start_timing("file moving to front",jp);
     jp->pi.moved_clusters = 0;
-    jp->pi.total_moves = 0;
     /* release temporarily allocated space */
     release_temp_space_regions(jp);
 
@@ -663,7 +659,6 @@ static void move_files_to_back(udefrag_job_parameters *jp,ULONGLONG *start_lcn)
     
     time = start_timing("file moving to end",jp);
     jp->pi.moved_clusters = 0;
-    jp->pi.total_moves = 0;
     /* release temporarily allocated space */
     release_temp_space_regions(jp);
 
@@ -942,7 +937,7 @@ static void optimize_routine(udefrag_job_parameters *jp)
     if(prb_t_first(&t,pt) == NULL) goto done;
     start_lcn = end_lcn = 0;
     while(!jp->termination_router((void *)jp)){
-        winx_dbg_print_header(0,0,I"volume optimization pass #%u",jp->pi.pass_number);
+        winx_dbg_print_header(0,0,I"volume optimization pass #%u",jp->pi.pass_number++);
         jp->pi.clusters_to_process = \
             jp->pi.processed_clusters \
             + count_clusters(jp,start_lcn) \
@@ -950,15 +945,10 @@ static void optimize_routine(udefrag_job_parameters *jp)
         
         /* cleanup space in the beginning of the disk */
         move_files_to_back(jp,&end_lcn);
-        if(jp->termination_router((void *)jp)){
-            /* the pass is completed */
-            jp->pi.pass_number ++;
-            break;
-        }
+        if(jp->termination_router((void *)jp)) break;
         
         /* move small files back, sorted */
         move_files_to_front(jp,&start_lcn,end_lcn,&t);
-        jp->pi.pass_number ++; /* the pass is completed */
         
         /* break if no more files need optimization */
         if(prb_t_cur(&t) == NULL) break;
@@ -998,6 +988,7 @@ int optimize(udefrag_job_parameters *jp)
     /* analyze the disk */
     result = analyze(jp); /* we need to call it once, here */
     if(result < 0) return result;
+    if(jp->termination_router((void *)jp)) return 0;
     
     /* check fragmentation level */
     if(!check_fragmentation_level(jp))
@@ -1040,6 +1031,7 @@ int optimize_mft(udefrag_job_parameters *jp)
     /* analyze the disk */
     result = analyze(jp); /* we need to call it once, here */
     if(result < 0) return result;
+    if(jp->termination_router((void *)jp)) return 0;
 
     /* mft optimization is NTFS specific task */
     if(jp->fs_type != FS_NTFS){

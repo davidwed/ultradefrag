@@ -75,93 +75,62 @@ int GetDebugLevel()
     return result;
 }
 
-char old_op_name[15] = {0};
-int old_pass_number = 0;
-
 /**
  * @brief Redraws the progress information.
  */
 void RedrawProgress(udefrag_progress_info *pi)
 {
     int p1, p2;
-    char *op_name = "";
+    char *op_name = "Optimization";
     char s[MAX_LINE_WIDTH + 1];
     char format[16];
     char *results;
-    char *status = "";
 
-    switch(pi->current_operation){
-        case VOLUME_ANALYSIS:
-            op_name = "Analyze:  ";
-            break;
-        case VOLUME_DEFRAGMENTATION:
-            op_name = "Defrag:   ";
-            break;
-        case VOLUME_OPTIMIZATION:
-            op_name = "Optimize: ";
-            break;
-        default:
-            op_name = "          ";
-            break;
-    }
     if(pi->completion_status == 0 || abort_flag){
+        /*
+        * if the job is still running or aborted
+        * display progress of the current operation
+        */
+        if(pi->current_operation == VOLUME_ANALYSIS)
+            op_name = "Analysis";
+        if(pi->current_operation == VOLUME_DEFRAGMENTATION)
+            op_name = "Defragmentation";
+
         p1 = (int)(__int64)(pi->percentage * 100.00);
         p2 = p1 % 100;
         p1 = p1 / 100;
-    } else {
-        p1 = 100;
-        p2 = 0;
-    }
-    if(abort_flag){
-        status = "aborted";
-        old_op_name[0] = 0;
-    } else {
-        status = "completed";
-    }
 
-    /* display all the processing stages, for easier verification */
-    if(!winx_stristr(old_op_name,op_name) && old_op_name[0] != 0){
-        if(old_pass_number > 1){
-            _snprintf(s,sizeof(s),"%s100.00%% %s, pass %u, "
-                "fragmented/total = %lu/%lu",old_op_name,
-                status,old_pass_number,pi->fragmented,pi->files);
+        if(pi->current_operation == VOLUME_OPTIMIZATION && pi->completion_status == 0 && !abort_flag){
+            if(pi->pass_number > 1)
+                _snprintf(s,sizeof(s),"%s: %u.%02u%%, pass %lu, moves total = %I64u",
+                    op_name,p1,p2,pi->pass_number,pi->total_moves);
+            else
+                _snprintf(s,sizeof(s),"%s: %u.%02u%%, moves total = %I64u",
+                    op_name,p1,p2,pi->total_moves);
         } else {
-            _snprintf(s,sizeof(s),"%s100.00%% %s, fragmented/total = "
-                "%lu/%lu",old_op_name,status,pi->fragmented,pi->files);
-        }
-
-        s[sizeof(s) - 1] = 0;
-        _snprintf(format,sizeof(format),"\r%%-%us",progress_line_length);
-        format[sizeof(format) - 1] = 0;
-        winx_printf(format,s);
-        winx_printf("\n");
-        strncpy(old_op_name,op_name,sizeof(old_op_name)-1);
-    } else {
-        old_pass_number = pi->pass_number;
-        strncpy(old_op_name,op_name,sizeof(old_op_name)-1);
-    }
-
-    if(pi->current_operation == VOLUME_OPTIMIZATION \
-      && !abort_flag && pi->completion_status == 0){
-        /* display number of moves */
-        if(pi->pass_number > 1){
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, "
-                "pass %u, moves total = %I64u",op_name,p1,
-                p2,pi->pass_number,pi->total_moves);
-        } else {
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% completed, "
-            "moves total = %I64u",op_name,p1,p2,pi->total_moves);
+            if(pi->pass_number > 1)
+                _snprintf(s,sizeof(s),"%s: %u.%02u%%, pass %lu, fragmented/total = %lu/%lu",
+                    op_name,p1,p2,pi->pass_number,pi->fragmented,pi->files);
+            else
+                _snprintf(s,sizeof(s),"%s: %u.%02u%%, fragmented/total = %lu/%lu",
+                    op_name,p1,p2,pi->fragmented,pi->files);
         }
     } else {
-        /* display fragmentation status */
-        if(pi->pass_number > 1){
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% %s, pass %u, "
-                "fragmented/total = %lu/%lu",op_name,p1,p2,
-                status,pi->pass_number,pi->fragmented,pi->files);
-        } else {
-            _snprintf(s,sizeof(s),"%s%3u.%02u%% %s, fragmented/total = "
-                "%lu/%lu",op_name,p1,p2,status,pi->fragmented,pi->files);
-        }
+        /*
+        * if the job is completed display
+        * progress of the entire job
+        */
+        if(current_job == ANALYSIS_JOB)
+            op_name = "Analysis";
+        if(current_job == DEFRAGMENTATION_JOB)
+            op_name = "Defragmentation";
+
+        if(pi->pass_number > 1)
+            _snprintf(s,sizeof(s),"%s: 100.00%%, %lu passes, fragmented/total = %lu/%lu",
+                op_name,pi->pass_number,pi->fragmented,pi->files);
+        else
+            _snprintf(s,sizeof(s),"%s: 100.00%%, fragmented/total = %lu/%lu",
+                op_name,pi->fragmented,pi->files);
     }
 
     s[sizeof(s) - 1] = 0;
@@ -174,10 +143,12 @@ void RedrawProgress(udefrag_progress_info *pi)
         /* print results of the completed job */
         results = udefrag_get_results(pi);
         if(results){
+            if(abort_flag) winx_printf("\n\naborted...");
             winx_printf("\n\n%s\n",results);
             udefrag_release_results(results);
+        } else {
+            if(abort_flag) winx_printf("\n\naborted...\n");
         }
-        old_op_name[0] = 0;
     }
 }
 

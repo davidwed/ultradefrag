@@ -90,8 +90,7 @@ void init_map(char letter)
     memset(g_map,0,g_map_rows * g_map_symbols_per_line);
 
     clear_line();
-    printf("\r%c: %s%6.2lf%% complete, fragmented/total = %u/%u",
-        letter,"analyze:  ",0.00,0,0);
+    printf("\r%c: analysis: 0.00%%, fragmented/total = 0/0",letter);
 
     redraw_map(NULL);
 
