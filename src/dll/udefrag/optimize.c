@@ -937,7 +937,8 @@ static void optimize_routine(udefrag_job_parameters *jp)
     if(prb_t_first(&t,pt) == NULL) goto done;
     start_lcn = end_lcn = 0;
     while(!jp->termination_router((void *)jp)){
-        winx_dbg_print_header(0,0,I"volume optimization pass #%u",jp->pi.pass_number++);
+        winx_dbg_print_header(0,0,I"volume optimization"
+            " pass #%u",++jp->pi.pass_number);
         jp->pi.clusters_to_process = \
             jp->pi.processed_clusters \
             + count_clusters(jp,start_lcn) \

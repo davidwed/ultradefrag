@@ -277,7 +277,7 @@ static void defrag_routine(udefrag_job_parameters *jp)
     int defrag_succeeded;
     char buffer[32];
 
-    winx_dbg_print_header(0,0,I"defragmentation pass #%u",jp->pi.pass_number++);
+    winx_dbg_print_header(0,0,I"defragmentation pass #%u",++jp->pi.pass_number);
     jp->pi.current_operation = VOLUME_DEFRAGMENTATION;
     jp->pi.moved_clusters = 0;
 
