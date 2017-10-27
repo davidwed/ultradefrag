@@ -1,11 +1,12 @@
  1. add date to the history.txt file
- 2. change version number in "\src\setvars.cmd" and
+ 2. adjust version number in "\src\setvars.cmd" file
+ 3. adjust version number, date and time in 
     "\doc\handbook\rsc\custom_header_*.tex" files
- 3. run build-release.cmd
- 4. test x86 and x64 installers at http://www.virustotal.com/
- 5. upload files through the sf.net file manager
- 6. update website
- 7. submit news
- 8. close bugs and requests, but still allow posting comments
- 9. add milestone to trackers and disable the old one
-10. update project info
+ 4. run build-release.cmd
+ 5. test x86 and x64 installers at http://www.virustotal.com/
+ 6. upload files through the sf.net file manager
+ 7. update website
+ 8. submit news
+ 9. close bugs and requests, but still allow posting comments
+10. add milestone to trackers and disable the old one
+11. update project info
