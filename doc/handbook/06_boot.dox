@@ -111,8 +111,8 @@ Type 'help' to list available commands.
  * @par udefrag
  * The boot time equivalent of the @ref Console.
  * Accepts the following command line switches:
- * <b>-l, -la, -a, -o, -q, \--quick-optimize, \--optimize-mft,
- * \--all, \--all-fixed, -r, \--repeat</b>. To process single
+ * <b>-l, -la, -a, -o, -q, \--optimize-mft,
+ * \--all, \--all-fixed</b>. To process single
  * files or directories specify their absolute paths. 
  * If they include spaces enclose them by double quotes:
  * <br /><br />

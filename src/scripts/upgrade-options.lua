@@ -200,9 +200,12 @@ log_file_path = "$log_file_path"
 -------------------------------------------------------------------------------
 
 if shellex_flag then
-    -- the context menu handler takes into account
-    -- everything defined above as well as options
-    -- defined here exclusively for it $shellex_options
+    -- the context menu handler takes into account everything defined above
+    -- as well as options defined here exclusively for it; to pass sorting
+    -- options to the context menu handler use the following code:
+    --   os.setenv("UD_SORTING","PATH")
+    --   os.setenv("UD_SORTING_ORDER","ASC")
+    -- refer to the Console chapter of UltraDefrag Handbook for details $shellex_options
 end
 
 -------------------------------------------------------------------------------
@@ -502,8 +505,8 @@ end
 
 -- THE MAIN CODE STARTS HERE
 -- the current version of the configuration file
--- 0 - 99 for v5; 100 - 199 for v6; 200+ for v7
-current_version = 203
+-- 0 - 99 for v5; 100 - 199 for v6; 200+ for v7+
+current_version = 205
 shellex_options = ""
 _G_copy = {}
 
