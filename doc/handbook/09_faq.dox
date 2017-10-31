@@ -50,12 +50,12 @@
  * software instead for serious purposes.
  *
  * <h3>How to move everything to the beginning of the disk?</h3>
- * Optimization of big files and fragments is pretty useless, but
- * if you like it (or need for partition shrinking) you can easily do it.
- * Just unset all filters, set the <b>fragment_size_threshold</b> parameter
- * to <b>0</b> and the <b>optimizer_file_size_threshold</b> parameter to 
- * <b>15 EB</b>. This way UltraDefrag will move all files and fragments,
- * regardless of their size, to the beginning of the disk.
+ * Usually it doesn't make sense to move big fragments, but if you'd like
+ * to get all files perfectly sorted or just want to pack everything as tight
+ * as possible before partition shrinking you can easily do it. Just set the <b>fragment_size_threshold</b> parameter to <b>0</b>,
+ * the <b>optimizer_file_size_threshold</b> parameter to <b>15 EB</b> and unset all filters.
+ * This way UltraDefrag will move all files, regardless of their fragments
+ * size, to the beginning of the disk.
  *
  * <h1>Graphical interface</h1>
  * <h3>When will the cluster map become interactive, so I'll be able to know where

@@ -41,14 +41,14 @@
  * @par -a, \--analyze
  * Analyze specified objects.
  *
- * @par \--optimize-mft
- * Optimize master file tables only.
- *
- * @par -q, \--quick-optimize
- * Perform quick optimization.
- *
  * @par -o, \--optimize
  * Perform full optimization.
+ *
+ * @par -q, \--quick-optimization
+ * Perform quick optimization.
+ *
+ * @par \--optimize-mft
+ * Optimize master file tables only.
  *
  * @par -l, \--list-available-volumes
  * List all fixed disks available for defragmentation.
@@ -64,10 +64,6 @@
  * If none is specified the program defragments selected objects.
  *
  * Options:
- * @par -r, \--repeat
- * Repeat the disk processing multiple times whenever it makes sense.
- * Usually it increases processing time, but leads to better results.
- *
  * @par -b, \--use-system-color-scheme
  * Disable colorization of output.
  *
@@ -317,7 +313,7 @@
  * <div class="line"><span class="comment">:: sort files on drive g: by creation time in descending order</span></div>
  * <div class="line"><span class="keyword">set</span> UD_SORTING=C_TIME</div>
  * <div class="line"><span class="keyword">set</span> UD_SORTING_ORDER=DESC</div>
- * <div class="line"><span class="keyword">udefrag</span> -o -r g:</div>
+ * <div class="line"><span class="keyword">udefrag</span> -o g:</div>
  * <div class="line"></div>
  * <div class="line"><span class="comment">:: defragment drive h: only if its fragmentation level is above 10%</span></div>
  * <div class="line"><span class="keyword">set</span> UD_FRAGMENTATION_THRESHOLD=10</div>
@@ -388,7 +384,7 @@
  * \rem{:: sort files on drive g: by creation time in descending order}
  * \cmd{set} UD\_SORTING=C\_TIME
  * \cmd{set} UD\_SORTING\_ORDER=DESC
- * \cmd{udefrag} -o -r g:
+ * \cmd{udefrag} -o g:
  *
  * \rem{:: defragment drive h: only if its fragmentation level is above 10%}
  * \cmd{set} UD\_FRAGMENTATION\_THRESHOLD=10

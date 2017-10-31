@@ -34,12 +34,14 @@
  * are written in pure C for compatibility with Windows boot environment where only bare
  * ntdll interfaces are available. Both graphical and command line tools are written in C++
  * on top of <a href="http://www.wxwidgets.org/">wxWidgets</a> library which helps to keep
- * things simple. For configuration purposes and reports convertion the program uses
+ * things simple. For configuration purposes and reports convertion the program uses the
  * <a href="http://www.lua.org/">Lua</a> scripting language. UltraDefrag installers are
  * written in <a href="http://nsis.sourceforge.net/">NSIS</a>.
  *
  * <h1>Compilation</h1>
- * To build the program install the following software:
+ * First of all, to build the program download and unpack its sources somewhere. Make sure the path doesn't contain spaces - 
+ * we did our best, but GNU make <a href="http://stackoverflow.com/questions/9838384/can-gnu-make-handle-filenames-with-spaces">
+ * doesn't like them</a>. Then install the following software:
  *
  * - <a href="http://sourceforge.net/projects/tdm-gcc/">MinGW</a>,
  *   <a href="http://github.com/wxWidgets/wxWidgets/releases/download/v3.1.0/wxWidgets-3.1.0.7z">wxWidgets 3.1.0</a>,
