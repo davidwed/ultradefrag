@@ -16,10 +16,10 @@
  * report. It contains the following information about fragmented files:
  *
  * @par Fragments
- * The number of fragments.
+ * Number of fragments.
  *
  * @par Filesize
- * The size of the file.
+ * Size of the file.
  *
  * @par Comment
  * <b>[DIR]</b> for directories and <b>[CMP]</b>

@@ -286,24 +286,6 @@
  * @latexonly
  * \\ \hline
  * @endlatexonly
- * @image html "repeat.png"
- * @htmlonly
- * </td><td style="width: 90%;">
- * @endhtmlonly
- * @latexonly
- * \raisebox{-2.1\height}{\includeicon{repeat.png}} &
- * @endlatexonly
- * @par Repeat action (Shift+R)
- * Allow to repeat the disk processing multiple times
- * whenever it makes sense. Usually it increases processing
- * time, but leads to better results.
- *
- * @htmlonly
- * </td></tr><tr><td>
- * @endhtmlonly
- * @latexonly
- * \\ \hline
- * @endlatexonly
  * @image html "Blank.png"
  * @htmlonly
  * </td><td style="width: 90%;">

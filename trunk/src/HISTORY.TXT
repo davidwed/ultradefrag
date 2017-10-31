@@ -10,6 +10,7 @@
     - fragmentation reports were forced to take
       daylight saving time settings into account
     - a lot of minor bugs were fixed
+    - documentation was expanded
     - Estonian translation was updated
     - Internals: compilation was optimized for speed
 

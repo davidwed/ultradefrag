@@ -554,10 +554,6 @@
  *
  * <center>***</center>
  *
- * <b>Chief Architect</b>
- *
- * - Dmitri Arkhangelski <span class="simple">\<dmitriar@users.sourceforge.net\></span>
- *
  * @latexonly
  * \ifletter
  *   \newpage
@@ -710,6 +706,7 @@
  *
  * @htmlonly
  * <ul>
+ * <li><a href="http://en.wikipedia.org/wiki/Yegor_Letov">Egor Letov</a></li>
  * <li><a href="http://www.sysinternals.com">Mark Russinovich</a></li>
  * <li><a href="http://www.soldatov.net">Vyacheslav Soldatov</a></li>
  * <li><a href="http://free.pages.at/blumetools/">blume1975</a></li>
@@ -731,6 +728,7 @@
  *
  * @latexonly
  * \setlength\LTleft{1.25em}\setlength\LTright{\fill}\begin{longtable}{p{1\linewidth-2em}}
+ * • \href{http://en.wikipedia.org/wiki/Yegor_Letov}{\tt Egor Letov} \\
  * • \href{http://www.sysinternals.com}{\tt Mark Russinovich} \\
  * • \href{http://www.soldatov.net}{\tt Vyacheslav Soldatov} \\
  * • \href{http://free.pages.at/blumetools/}{\tt blume1975} \\
