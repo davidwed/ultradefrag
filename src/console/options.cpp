@@ -196,7 +196,7 @@ bool parse_cmdline(int argc, char **argv)
                 g_shellex = true;
             } else if(!strcmp(long_option_name,"folder")){
                 g_folder = true;
-            } else if(!strcmp(long_option_name,"folder_itself")){
+            } else if(!strcmp(long_option_name,"folder-itself")){
                 g_folder_itself = true;
             } else if(!strcmp(long_option_name,"use-entire-window")){
                 g_use_entire_window = true;
