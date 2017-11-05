@@ -140,6 +140,7 @@ enum {
     ID_ReadUserPreferences,
     ID_RedrawMap,
     ID_RefreshDrivesInfo,
+    ID_RefreshFrame,
     ID_SelectAll,
     ID_SetWindowTitle,
     ID_ShowUpgradeDialog,
@@ -480,6 +481,7 @@ public:
     void ReadUserPreferences(wxCommandEvent& event);
     void RedrawMap(wxCommandEvent& event);
     void RefreshDrivesInfo(wxCommandEvent& event);
+    void RefreshFrame(wxCommandEvent& event);
     void SelectAll(wxCommandEvent& event);
     void SetWindowTitle(wxCommandEvent& event);
     void ShowUpgradeDialog(wxCommandEvent& event);

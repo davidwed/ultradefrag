@@ -264,11 +264,18 @@ void MainFrame::AdjustListHeight(wxCommandEvent& WXUNUSED(event))
     m_splitter->SetSashPosition(new_height);
 }
 
+void MainFrame::RefreshFrame(wxCommandEvent& WXUNUSED(event))
+{
+    Refresh();
+    Update();
+}
+
 void MainFrame::OnSplitChanged(wxSplitterEvent& event)
 {
     QueueCommandEvent(this,ID_AdjustListHeight);
     QueueCommandEvent(this,ID_AdjustListColumns);
     QueueCommandEvent(this,ID_RedrawMap);
+    QueueCommandEvent(this,ID_RefreshFrame);
 
     event.Skip();
 }
