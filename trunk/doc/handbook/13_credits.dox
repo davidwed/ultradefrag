@@ -371,20 +371,7 @@
  *
  * Portions Copyright &copy; 1998-2005 Julian Smart, Robert Roebling et al
  *
- * This library is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Library General Public Licence as published
- * by the Free Software Foundation; either version 2 of the Licence,
- * or (at your option) any later version.
- *
- * This library is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Library
- * General Public Licence for more details.
- *
- * You should have received a copy of the @subpage LGPL_2_0
- * along with this software, usually in a file named COPYING.LIB.  If not,
- * write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
- * Boston, MA 02111-1307 USA.</li>
+ * This library is licensed under the terms of the @subpage WXWINDOWS_LIBRARY_LICENCE.</li>
  *
  * <li><a href="http://www.lua.org/">Lua</a>
  *
@@ -409,25 +396,6 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</li>
  * 
- * <li><a href="http://www.gnu.org/software/libc/">GNU C Library</a>
- *
- * Portions Copyright &copy; 1989,90,91,92,93,94,96,97 Free Software Foundation, Inc.
- *
- * The GNU C Library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- * 
- * The GNU C Library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Library General Public License for more details.
- * 
- * You should have received a copy of the @ref LGPL_2_0
- * along with this program. If not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA
- * 02111-1307, USA.</li>
- *
  * <li><a href="http://www.stanford.edu/~blp/avl/">GNU libavl</a>
  *
  * Portions Copyright &copy; 1998, 1999, 2000, 2001, 2002, 2004 Free Software Foundation, Inc.
@@ -446,24 +414,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301 USA.</li>
- *
- * <li><a href="http://www.reactos.org/">ReactOS</a>
- *
- * Portions Copyright &copy; 2002 ReactOS Team
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License,
- * or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the @ref GPL along with this
- * program; if not, write to the Free Software Foundation, Inc.,
- * 675 Mass Ave, Cambridge, MA 02139, USA.</li>
  * </ul>
  *
  * UltraDefrag GUI includes icons made by third-party developers.
@@ -510,15 +460,6 @@
  * of the icons contained within.</li>
  * </ul>
  * 
- * The repeat icon has been copied from the <a href="http://www.interactivemania.com/content/default-icon">Default Icon</a> set.
- *
- * <ul>
- * <li> Portions Copyright &copy; 2011 interactivemania
- *
- * Default Icon by interactivemania is licensed under the
- * <a href="http://creativecommons.org/licenses/by-nd/3.0/">Creative Commons Attribution-No Derivative Works 3.0</a>.</li>
- * </ul>
- *
  * The Lua and Lua Report icons are based on the <a href="http://lua-users.org/wiki/LuaLogo">artwork by Alexandre Nakonechnyj</a>.
  *
  * <ul>
@@ -553,12 +494,6 @@
  * licensed under <a href="http://www.mozilla.org/en-US/MPL/">Mozilla Public License 2.0</a>.
  *
  * <center>***</center>
- *
- * @latexonly
- * \ifletter
- *   \newpage
- * \fi
- * @endlatexonly
  *
  * Special thanks for porting UltraDefrag to Linux are going to:
  *
@@ -676,12 +611,6 @@
  * \end{longtable}
  * @endlatexonly
  *
- * @latexonly
- * \ifletter
- *   \newpage
- * \fi
- * @endlatexonly
- *
  * Special thanks for extensive testing (in alphabetical order):
  *
  * @htmlonly
@@ -706,7 +635,6 @@
  *
  * @htmlonly
  * <ul>
- * <li><a href="http://en.wikipedia.org/wiki/Yegor_Letov">Egor Letov</a></li>
  * <li><a href="http://www.sysinternals.com">Mark Russinovich</a></li>
  * <li><a href="http://www.soldatov.net">Vyacheslav Soldatov</a></li>
  * <li><a href="http://free.pages.at/blumetools/">blume1975</a></li>
@@ -728,7 +656,6 @@
  *
  * @latexonly
  * \setlength\LTleft{1.25em}\setlength\LTright{\fill}\begin{longtable}{p{1\linewidth-2em}}
- * • \href{http://en.wikipedia.org/wiki/Yegor_Letov}{\tt Egor Letov} \\
  * • \href{http://www.sysinternals.com}{\tt Mark Russinovich} \\
  * • \href{http://www.soldatov.net}{\tt Vyacheslav Soldatov} \\
  * • \href{http://free.pages.at/blumetools/}{\tt blume1975} \\
