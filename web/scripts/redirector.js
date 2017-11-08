@@ -20,12 +20,12 @@
 /**
  * List of existing translations.
  */
-var translations = ["en", "de", "ru"];
+var translations = ["en", "de"];
 
 /**
  * Target language.
  */
-var target_language = null;
+var target_language = "en";
 var root = location.href.substring(0, location.href.lastIndexOf("/"));
 
 /**
@@ -47,22 +47,20 @@ function get_cookie(name)
  */
 function redirect(page){
     /* Check for the last used language. */ 
-    target_language = get_cookie("language");
-
+    var lang = get_cookie("language");
+    
     /* Check for user preferred language. */
-    if (!target_language){
+    if (!lang){
         var lang_code = navigator.language || navigator.systemLanguage;
-        var lang = lang_code.toLowerCase(); lang = lang.substr(0,2);
-        for (i = 0; i < translations.length; i++){
-            if (lang == translations[i]){
-                target_language = lang;
-                break;
-            }
-        }
+        lang = lang_code.toLowerCase(); lang = lang.substr(0,2);
     }
     
-    if(!target_language){
-        target_language = "en";
+    /* Check whether it's available or not. */
+    for (i = 0; i < translations.length; i++){
+        if (lang == translations[i]){
+            target_language = lang;
+            break;
+        }
     }
 
     /* Save preferred language and redirect page. */
