@@ -7,14 +7,15 @@
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # zubr139, 2013,2016
+# zubr139, 2013,2016
 # zubr139, 2013
 msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2013-07-10 21:44+0200\n"
-"PO-Revision-Date: 2017-09-19 14:53+0000\n"
-"Last-Translator: zubr139\n"
+"POT-Creation-Date: 2017-11-09 14:29+0300\n"
+"PO-Revision-Date: 2017-11-09 11:25+0000\n"
+"Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/stefanpendl/ultradefrag/language/uk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,420 +23,404 @@ msgstr ""
 "Language: uk\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-#: about.cpp:77
+#: about.cpp:96
 msgid "About UltraDefrag"
 msgstr "Про UltraDefrag"
 
-#: about.cpp:90
-msgid "An open source defragmentation utility."
-msgstr "Утиліта дефрагментації з відкритим кодом."
+#: about.cpp:109
+msgid "A powerful defragmentation utility."
+msgstr ""
 
-#: about.cpp:92
+#: about.cpp:111
 msgid "Credits and licenses are listed in the handbook."
 msgstr "Учасники та ліцензії, перераховані в довіднику."
 
-#: about.cpp:95
+#: about.cpp:114
 msgid "UltraDefrag website"
 msgstr "Вебсайт UltraDefrag"
 
-#: i18n.cpp:129
+#: i18n.cpp:161
 msgid "&Action"
 msgstr "&Файл"
 
-#: i18n.cpp:130
-msgid "&Report"
-msgstr "&Звіт"
-
-#: i18n.cpp:131
+#: i18n.cpp:162
 msgid "&Settings"
 msgstr "&Налаштування"
 
-#: i18n.cpp:132 i18n.cpp:213
+#: i18n.cpp:163 i18n.cpp:237
 msgid "&Help"
 msgstr "&Довідка"
 
-#: i18n.cpp:135
+#: i18n.cpp:166
 msgid "&Analyze"
 msgstr "&Аналіз"
 
-#: i18n.cpp:136
+#: i18n.cpp:167
 msgid "&Defragment"
 msgstr "Д&ефрагментація"
 
-#: i18n.cpp:137
+#: i18n.cpp:168
 msgid "&Quick optimization"
 msgstr "Швидка &оптимізація"
 
-#: i18n.cpp:138
+#: i18n.cpp:169
 msgid "&Full optimization"
 msgstr "Повна оптимізація"
 
-#: i18n.cpp:139
+#: i18n.cpp:170
 msgid "&Optimize MFT"
 msgstr "Оптимізація MFT"
 
-#: i18n.cpp:140 tray.cpp:80
+#: i18n.cpp:171 tray.cpp:66
 msgid "Pa&use"
 msgstr "&Пауза"
 
-#: i18n.cpp:141
+#: i18n.cpp:172
 msgid "&Stop"
 msgstr "&Стоп"
 
-#: i18n.cpp:142
-msgid "Re&peat action"
-msgstr "Дозволити повтор"
-
-#: i18n.cpp:143
-msgid "Skip removable &media"
-msgstr "Не чіпати &знімних носіїв"
-
-#: i18n.cpp:144
-msgid "&Rescan drives"
-msgstr "О&новити"
-
-#: i18n.cpp:145
-msgid "Repair dri&ves"
-msgstr "Виправити диски"
-
-#: i18n.cpp:146 i18n.cpp:151 tray.cpp:85
-msgid "E&xit"
-msgstr "Ви&хід"
-
-#: i18n.cpp:149
-msgid "&When done"
-msgstr "&Після закінчення роботи"
-
-#: i18n.cpp:150
-msgid "&None"
-msgstr "&Немає"
-
-#: i18n.cpp:152
-msgid "Stan&dby"
-msgstr "Режим о&чікування"
-
-#: i18n.cpp:153
-msgid "&Hibernate"
-msgstr "&Глибокий сон системи"
-
-#: i18n.cpp:154
-msgid "&Logoff"
-msgstr "&Вихід із системи"
-
-#: i18n.cpp:155
-msgid "&Reboot"
-msgstr "&Перезавантаження"
-
-#: i18n.cpp:156
-msgid "&Shutdown"
-msgstr "Ви&микання системи"
-
-#: i18n.cpp:159
+#: i18n.cpp:173
 msgid "&Show report"
 msgstr "&Показати звіт"
 
-#: i18n.cpp:162
+#: i18n.cpp:174
+msgid "Skip removable &media"
+msgstr "Не чіпати &знімних носіїв"
+
+#: i18n.cpp:175
+msgid "&Rescan drives"
+msgstr "О&новити"
+
+#: i18n.cpp:176
+msgid "Repair dri&ves"
+msgstr "Виправити диски"
+
+#: i18n.cpp:177 i18n.cpp:182 tray.cpp:70
+msgid "E&xit"
+msgstr "Ви&хід"
+
+#: i18n.cpp:180
+msgid "&When done"
+msgstr "&Після закінчення роботи"
+
+#: i18n.cpp:181
+msgid "&None"
+msgstr "&Немає"
+
+#: i18n.cpp:183
+msgid "Stan&dby"
+msgstr "Режим о&чікування"
+
+#: i18n.cpp:184
+msgid "&Hibernate"
+msgstr "&Глибокий сон системи"
+
+#: i18n.cpp:185
+msgid "&Logoff"
+msgstr "&Вихід із системи"
+
+#: i18n.cpp:186
+msgid "&Reboot"
+msgstr "&Перезавантаження"
+
+#: i18n.cpp:187
+msgid "&Shutdown"
+msgstr "Ви&микання системи"
+
+#: i18n.cpp:190
 msgid "&Language"
 msgstr "&Мова"
 
-#: i18n.cpp:163 i18n.cpp:209
-msgid "&Boot time scan"
-msgstr "За&пуск при завантаженні Windows"
-
-#: i18n.cpp:164
-msgid "&Sorting"
-msgstr "&Сортування"
-
-#: i18n.cpp:165
-msgid "&Reports"
-msgstr "&Звіти"
-
-#: i18n.cpp:168
-msgid "&View change log"
-msgstr "Перегляд &журналу змін"
-
-#: i18n.cpp:169
-msgid "View translation &report"
-msgstr "Показати &звіт про переклад"
-
-#: i18n.cpp:170
-msgid "&Translations folder"
-msgstr "&Тека з перекладами"
-
-#: i18n.cpp:171
-msgid "&Submit current translation"
-msgstr "&Надіслати поточний переклад"
-
-#: i18n.cpp:174
+#: i18n.cpp:191
 msgid "&Options"
 msgstr "&Опції"
 
-#: i18n.cpp:177
+#: i18n.cpp:192
+msgid "&Sorting"
+msgstr "&Сортування"
+
+#: i18n.cpp:193 i18n.cpp:233
+msgid "&Boot time scan"
+msgstr "За&пуск при завантаженні Windows"
+
+#: i18n.cpp:196
+msgid "Translate &online"
+msgstr ""
+
+#: i18n.cpp:197
+msgid "Translate o&ffline"
+msgstr ""
+
+#: i18n.cpp:198
+msgid "&Translations folder"
+msgstr "&Тека з перекладами"
+
+#: i18n.cpp:201
 msgid "&Enable"
 msgstr "&Включити"
 
-#: i18n.cpp:178
+#: i18n.cpp:202
 msgid "&Script"
 msgstr "&Сценарій"
 
-#: i18n.cpp:181
+#: i18n.cpp:205
 msgid "By &path"
 msgstr "Сортувати за &шляхом"
 
-#: i18n.cpp:182
+#: i18n.cpp:206
 msgid "By &size"
 msgstr "Сортувати за &розмiром"
 
-#: i18n.cpp:183
+#: i18n.cpp:207
 msgid "By &creation time"
 msgstr "Сортувати за &часом створення"
 
-#: i18n.cpp:184
+#: i18n.cpp:208
 msgid "By last &modification time"
 msgstr "Сортувати за часом &останньої змiни"
 
-#: i18n.cpp:185
+#: i18n.cpp:209
 msgid "By &last access time"
 msgstr "Сортувати за часом &останньої дiї"
 
-#: i18n.cpp:186
+#: i18n.cpp:210
 msgid "In &ascending order"
 msgstr "Сортувати в &порядку збiльшення"
 
-#: i18n.cpp:187
+#: i18n.cpp:211
 msgid "In &descending order"
 msgstr "Сортувати в &порядку зменшення"
 
-#: i18n.cpp:190
+#: i18n.cpp:214
 msgid "&Contents"
 msgstr "&Зміст"
 
-#: i18n.cpp:191
+#: i18n.cpp:215
 msgid "Best &practice"
 msgstr "&Кращі практики"
 
-#: i18n.cpp:192
+#: i18n.cpp:216
 msgid "&Frequently asked questions"
 msgstr "Питання та &відповіді"
 
-#: i18n.cpp:193
+#: i18n.cpp:217
 msgid "Cluster map &legend"
 msgstr "&Легенда карти"
 
-#: i18n.cpp:196 upgrade.cpp:161
+#: i18n.cpp:220 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr "&Оновлення"
 
-#: i18n.cpp:197
+#: i18n.cpp:221
 msgid "&Never check"
 msgstr "&Ніколи не перевіряти"
 
-#: i18n.cpp:198
+#: i18n.cpp:222
 msgid "Check &stable releases only"
 msgstr "Перевірити наявність &стабільної версії"
 
-#: i18n.cpp:199
+#: i18n.cpp:223
 msgid "Check &all releases"
 msgstr "Перевірити &всі релізи"
 
-#: i18n.cpp:200
+#: i18n.cpp:224
 msgid "&Check now"
 msgstr "&Перевірити зараз"
 
-#: i18n.cpp:201
+#: i18n.cpp:225
 msgid "&About"
 msgstr "&Про програму"
 
-#: i18n.cpp:204
+#: i18n.cpp:228
 msgid "&Debug"
 msgstr "&Відлагодження"
 
-#: i18n.cpp:205 utils.cpp:411
+#: i18n.cpp:229 utils.cpp:411
 msgid "Open &log"
 msgstr "&Відкрити журнал"
 
-#: i18n.cpp:206
+#: i18n.cpp:230
 msgid "Send bug &report"
 msgstr "&Надіслати повідомлення про помилку"
 
-#: i18n.cpp:211
+#: i18n.cpp:235
 msgid "Boot time script"
 msgstr "Сценарій запуску при завантаженні Windows"
 
-#: i18n.cpp:218
+#: i18n.cpp:242
 msgid "Drive"
 msgstr "Диск"
 
-#: i18n.cpp:219 i18n.cpp:275
+#: i18n.cpp:243 i18n.cpp:299
 msgid "Status"
 msgstr "Статус"
 
-#: i18n.cpp:220
+#: i18n.cpp:244
 msgid "Fragmentation"
 msgstr "Фрагментацiя"
 
-#: i18n.cpp:221
+#: i18n.cpp:245
 msgid "Total space"
 msgstr "Загальний простір"
 
-#: i18n.cpp:222
+#: i18n.cpp:246
 msgid "Free space"
 msgstr "Вільний простір"
 
-#: i18n.cpp:224
+#: i18n.cpp:248
 #, no-c-format
 msgid "% free"
 msgstr "Процент"
 
-#: i18n.cpp:267
+#: i18n.cpp:291
 msgid "Fragmented files on"
 msgstr "Фрагментовані файли на"
 
-#: i18n.cpp:268
+#: i18n.cpp:292
 msgid "Visit our Homepage"
 msgstr "Відвідати наш вебсайт"
 
-#: i18n.cpp:269
+#: i18n.cpp:293
 msgid "View report options"
 msgstr "Параметри звітів"
 
-#: i18n.cpp:270
+#: i18n.cpp:294
 msgid "Powered by Lua"
 msgstr "Працює на Lua"
 
-#: i18n.cpp:271
+#: i18n.cpp:295
 msgid "Fragments"
 msgstr "Фрагментів"
 
-#: i18n.cpp:272
+#: i18n.cpp:296
 msgid "Size"
 msgstr "Розмір"
 
-#: i18n.cpp:273
+#: i18n.cpp:297
 msgid "Filename"
 msgstr "Ім'я файлу"
 
-#: i18n.cpp:274
+#: i18n.cpp:298
 msgid "Comment"
 msgstr "Коментар"
 
-#: i18n.cpp:276
+#: i18n.cpp:300
 msgid "locked"
 msgstr "заблокований"
 
-#: i18n.cpp:277
+#: i18n.cpp:301
 msgid "move failed"
 msgstr "не вдалося перемістити"
 
-#: i18n.cpp:278
+#: i18n.cpp:302
 msgid "invalid"
 msgstr "помилка в алгоритмі або файлової системи"
 
-#: shutdown.cpp:100
+#: shutdown.cpp:101
 msgid "Please confirm"
 msgstr "Будь ласка, підтвердіть"
 
-#: shutdown.cpp:107
+#: shutdown.cpp:108
 msgid "Do you really want to hibernate when done?"
 msgstr "Бажаєте перевести систему в режим глибокого сну після роботи?"
 
 #. : This expands to "60 seconds until hibernation"
 #. : Make sure that "%lu" is included in the translated string at the correct
 #. position
-#: shutdown.cpp:110
+#: shutdown.cpp:111
 #, c-format
 msgid "%lu seconds until hibernation"
 msgstr "%lu секунд до режиму глибокого сну"
 
-#: shutdown.cpp:113
+#: shutdown.cpp:114
 msgid "Do you really want to log off when done?"
 msgstr "Бажаєте завершити сеанс після роботи?"
 
 #. : This expands to "60 seconds until logoff"
 #. : Make sure that "%lu" is included in the translated string at the correct
 #. position
-#: shutdown.cpp:116
+#: shutdown.cpp:117
 #, c-format
 msgid "%lu seconds until logoff"
 msgstr "%lu секунд до завершення сеансу"
 
-#: shutdown.cpp:119
+#: shutdown.cpp:120
 msgid "Do you really want to reboot when done?"
 msgstr "Бажаєте перезавантажити систему після роботи?"
 
 #. : This expands to "60 seconds until reboot"
 #. : Make sure that "%lu" is included in the translated string at the correct
 #. position
-#: shutdown.cpp:122
+#: shutdown.cpp:123
 #, c-format
 msgid "%lu seconds until reboot"
 msgstr "%lu секунд до перезавантаження"
 
-#: shutdown.cpp:125
+#: shutdown.cpp:126
 msgid "Do you really want to shutdown when done?"
 msgstr "Бажаєте вимкнути систему після роботи?"
 
 #. : This expands to "60 seconds until shutdown"
 #. : Make sure that "%lu" is included in the translated string at the correct
 #. position
-#: shutdown.cpp:128
+#: shutdown.cpp:129
 #, c-format
 msgid "%lu seconds until shutdown"
 msgstr "%lu секунд до вимкнення"
 
-#: shutdown.cpp:140
+#: shutdown.cpp:141
 msgid "&Yes"
 msgstr "&Так"
 
-#: shutdown.cpp:141
+#: shutdown.cpp:142
 msgid "&No"
 msgstr "&Нi"
 
-#: statbar.cpp:92
+#: statbar.cpp:95
 msgid "folders"
 msgstr "тек"
 
-#: statbar.cpp:93
+#: statbar.cpp:96
 msgid "files"
 msgstr "файлів"
 
-#: statbar.cpp:94
+#: statbar.cpp:97
 msgid "fragmented"
 msgstr "фрагментованих"
 
-#: statbar.cpp:95
+#: statbar.cpp:98
 msgid "compressed"
 msgstr "стиснутих"
 
-#: taskbar.cpp:198
+#: taskbar.cpp:199
 msgid "The job is paused"
 msgstr "Роботу призупинено"
 
-#: taskbar.cpp:203
+#: taskbar.cpp:204
 msgid "The job is running"
 msgstr "Завдання виконується"
 
-#: tray.cpp:70
+#: tray.cpp:56
 msgid "Show"
 msgstr "Показати"
 
-#: tray.cpp:72
+#: tray.cpp:56
 msgid "Hide"
 msgstr "Приховати"
 
 #. : This expands to "Release 7.0.0 is available for download!"
 #. : Make sure that "%ls" is included in the translated string at the correct
 #. position
-#: upgrade.cpp:158
+#: upgrade.cpp:172
 #, c-format
 msgid "Release %ls is available for download!"
 msgstr "Реліз %ls доступний для завантаження!"
 
-#: upgrade.cpp:160
+#: upgrade.cpp:174
 msgid "You can upgrade me ^-^"
 msgstr "Ви можете мене оновити ^-^"
 
-#: upgrade.cpp:161 utils.cpp:415
+#: upgrade.cpp:175 utils.cpp:415
 msgid "&Cancel"
 msgstr "&Скасувати"
 
@@ -443,7 +428,7 @@ msgstr "&Скасувати"
 msgid "Error!"
 msgstr "Помилка!"
 
-#: vollist.cpp:328
+#: vollist.cpp:350
 msgid "Disk needs to be repaired"
 msgstr "Диск потребує виправлення помилок"
 
@@ -451,7 +436,7 @@ msgstr "Диск потребує виправлення помилок"
 #. : expands to "10 % analyzed".
 #. : Make sure that "%5.2lf" is included in the
 #. : translated string at the correct position.
-#: vollist.cpp:369
+#: vollist.cpp:397
 #, c-format
 msgid "%5.2lf %% analyzed"
 msgstr "%5.2lf %% проаналізовано"
@@ -460,7 +445,7 @@ msgstr "%5.2lf %% проаналізовано"
 #. : expands to "10 % defragmented, pass 5".
 #. : Make sure that "%5.2lf" and "%d" are included
 #. : in the translated string at the correct positions.
-#: vollist.cpp:375
+#: vollist.cpp:403
 #, c-format
 msgid "%5.2lf %% defragmented, pass %d"
 msgstr "%5.2lf %% дефрагментовано, %d прохід"
@@ -469,12 +454,12 @@ msgstr "%5.2lf %% дефрагментовано, %d прохід"
 #. : "10 % optimized, pass 5, 1024 moves total".
 #. : Make sure that "%5.2lf", "%d" and "%I64u" are included
 #. : in the translated string at the correct positions.
-#: vollist.cpp:383
+#: vollist.cpp:411
 msgid "%5.2lf %% optimized, pass %d, %I64u moves total"
 msgstr "%5.2lf %% оптимізовано, %d прохід, %I64u переміщень"
 
 #. : Status of the completed disk analysis.
-#: vollist.cpp:390
+#: vollist.cpp:418
 msgid "Analyzed"
 msgstr "Проаналізовано"
 
@@ -482,7 +467,7 @@ msgstr "Проаналізовано"
 #. : expands to "Defragmented, in 5 passes".
 #. : Make sure that "%d" is included in the
 #. : translated string at the correct position.
-#: vollist.cpp:396
+#: vollist.cpp:424
 #, c-format
 msgid "Defragmented, in %d passes"
 msgstr "Дефрагментацію завершено, виконано %d проходи"
@@ -491,6 +476,6 @@ msgstr "Дефрагментацію завершено, виконано %d п�
 #. : "Optimized, in 5 passes, 1024 moves total".
 #. : Make sure that "%d" and "%I64u" are included
 #. : in the translated string at the correct positions.
-#: vollist.cpp:404
+#: vollist.cpp:432
 msgid "Optimized, in %d passes, %I64u moves total"
 msgstr "Оптимізацію завершено, виконано %d проходи, %I64u переміщень"
