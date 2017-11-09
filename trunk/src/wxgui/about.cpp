@@ -106,7 +106,7 @@ void MainFrame::OnHelpAbout(wxCommandEvent& WXUNUSED(event))
     wxStaticText *copyright = new wxStaticText(&dlg,wxID_ANY,
         wxT("(C) 2007-2017 UltraDefrag development team"));
     wxStaticText *description = new wxStaticText(&dlg,wxID_ANY,
-        _("An open source defragmentation utility."));
+        _("A powerful defragmentation utility."));
     wxStaticText *credits = new wxStaticText(&dlg,wxID_ANY,
         _("Credits and licenses are listed in the handbook."));
 

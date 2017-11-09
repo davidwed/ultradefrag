@@ -216,7 +216,7 @@ Section "Console" SecConsole
 
 SectionEnd
 
-Section "GUI (Default)" SecGUI
+Section "GUI (default)" SecGUI
 
     SectionIn 1
 
