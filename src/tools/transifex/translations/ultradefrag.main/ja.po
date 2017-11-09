@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Michael Robert Lawrence <mike@michaellawrenceit.com>, 2014
+# Michael R. Lawrence <mike@michaellawrenceit.com>, 2014
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Tatsuya Mizushima (MCtek) <tmizushima@gmail.com>, 2016
@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2013-07-10 21:44+0200\n"
-"PO-Revision-Date: 2016-05-24 00:17+0000\n"
+"PO-Revision-Date: 2017-09-19 14:53+0000\n"
 "Last-Translator: Tatsuya Mizushima (MCtek) <tmizushima@gmail.com>\n"
 "Language-Team: Japanese (http://www.transifex.com/stefanpendl/ultradefrag/language/ja/)\n"
 "MIME-Version: 1.0\n"
