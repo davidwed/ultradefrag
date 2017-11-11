@@ -131,10 +131,10 @@ rem Synopsis: call :build_readme_file
 rem Example: call :build_readme_file > README.TXT
 :build_readme_file
     echo -------------------------------------------------------------------------------
-    echo       UltraDefrag %ULTRADFGVER% - an open source disk defragmenter for Windows
+    echo          UltraDefrag %ULTRADFGVER% - a powerful disk defragmenter for Windows
     echo -------------------------------------------------------------------------------
     echo.
-    echo Complete information about the program can be found in UltraDefrag Handbook.
+    echo The complete information about the program can be found in UltraDefrag Handbook.
     echo You should have received it along with this program; if not, go to:
     echo.
     echo   http://ultradefrag.sourceforge.net/handbook/
@@ -173,7 +173,7 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
     mkdir %PORTABLE_DIR%
     copy /Y "%~dp0\HISTORY.TXT" %PORTABLE_DIR%\
     
-    call :build_readme_file     %PORTABLE_DIR%\README.TXT
+    call :build_readme_file  >  %PORTABLE_DIR%\README.TXT
     
     copy /Y hibernate.exe       %PORTABLE_DIR%\hibernate4win.exe
     copy /Y udefrag.dll         %PORTABLE_DIR%\
