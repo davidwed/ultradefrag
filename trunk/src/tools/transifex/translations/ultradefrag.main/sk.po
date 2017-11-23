@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2017-11-09 14:29+0300\n"
-"PO-Revision-Date: 2017-11-09 11:25+0000\n"
+"POT-Creation-Date: 2017-11-09 14:32+0300\n"
+"PO-Revision-Date: 2017-11-09 11:29+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/stefanpendl/ultradefrag/language/sk/)\n"
 "MIME-Version: 1.0\n"
@@ -45,7 +45,7 @@ msgstr "Akcia"
 msgid "&Settings"
 msgstr "Nastavenia"
 
-#: i18n.cpp:163 i18n.cpp:237
+#: i18n.cpp:163 i18n.cpp:243
 msgid "&Help"
 msgstr "Pomoc"
 
@@ -81,236 +81,243 @@ msgstr "Zastaviť"
 msgid "&Show report"
 msgstr "Zobraziť report"
 
-#: i18n.cpp:174
+#. : The deep action option is introduced in v8,
+#. : it disables all filters and forces the program
+#. : to process all files on the disk.
+#: i18n.cpp:178
+msgid "Deep a&ction"
+msgstr ""
+
+#: i18n.cpp:180
 msgid "Skip removable &media"
 msgstr "Preskočiť vymeniteľné média"
 
-#: i18n.cpp:175
+#: i18n.cpp:181
 msgid "&Rescan drives"
 msgstr "Obnoviť jednotky"
 
-#: i18n.cpp:176
+#: i18n.cpp:182
 msgid "Repair dri&ves"
 msgstr "Opravy diskov"
 
-#: i18n.cpp:177 i18n.cpp:182 tray.cpp:70
+#: i18n.cpp:183 i18n.cpp:188 tray.cpp:70
 msgid "E&xit"
 msgstr "Skončiť"
 
-#: i18n.cpp:180
+#: i18n.cpp:186
 msgid "&When done"
 msgstr "Po dokončení"
 
-#: i18n.cpp:181
+#: i18n.cpp:187
 msgid "&None"
 msgstr "Nerobiť nič"
 
-#: i18n.cpp:183
+#: i18n.cpp:189
 msgid "Stan&dby"
 msgstr "Pohotovostný režim"
 
-#: i18n.cpp:184
+#: i18n.cpp:190
 msgid "&Hibernate"
 msgstr "Hibernovať"
 
-#: i18n.cpp:185
+#: i18n.cpp:191
 msgid "&Logoff"
 msgstr "Odhlásiť"
 
-#: i18n.cpp:186
+#: i18n.cpp:192
 msgid "&Reboot"
 msgstr "Reštartovať"
 
-#: i18n.cpp:187
+#: i18n.cpp:193
 msgid "&Shutdown"
 msgstr "Vypnúť PC"
 
-#: i18n.cpp:190
+#: i18n.cpp:196
 msgid "&Language"
 msgstr "Jazyk"
 
-#: i18n.cpp:191
+#: i18n.cpp:197
 msgid "&Options"
 msgstr "Možnosti"
 
-#: i18n.cpp:192
+#: i18n.cpp:198
 msgid "&Sorting"
 msgstr "Triedenie"
 
-#: i18n.cpp:193 i18n.cpp:233
+#: i18n.cpp:199 i18n.cpp:239
 msgid "&Boot time scan"
 msgstr "Defragmentovať pri štarte OS"
 
-#: i18n.cpp:196
+#: i18n.cpp:202
 msgid "Translate &online"
 msgstr ""
 
-#: i18n.cpp:197
+#: i18n.cpp:203
 msgid "Translate o&ffline"
 msgstr ""
 
-#: i18n.cpp:198
+#: i18n.cpp:204
 msgid "&Translations folder"
 msgstr "Priečinok s jazykovými prekladmi"
 
-#: i18n.cpp:201
+#: i18n.cpp:207
 msgid "&Enable"
 msgstr "Povoliť"
 
-#: i18n.cpp:202
+#: i18n.cpp:208
 msgid "&Script"
 msgstr "Skript"
 
-#: i18n.cpp:205
+#: i18n.cpp:211
 msgid "By &path"
 msgstr "podľa cesty"
 
-#: i18n.cpp:206
+#: i18n.cpp:212
 msgid "By &size"
 msgstr "podľa veľkosti"
 
-#: i18n.cpp:207
+#: i18n.cpp:213
 msgid "By &creation time"
 msgstr "Podľa času vytvorenia"
 
-#: i18n.cpp:208
+#: i18n.cpp:214
 msgid "By last &modification time"
 msgstr "Do poslednej zmeny času"
 
-#: i18n.cpp:209
+#: i18n.cpp:215
 msgid "By &last access time"
 msgstr "Do posledného prístupu dobe"
 
-#: i18n.cpp:210
+#: i18n.cpp:216
 msgid "In &ascending order"
 msgstr "Vo vzostupnom poradí"
 
-#: i18n.cpp:211
+#: i18n.cpp:217
 msgid "In &descending order"
 msgstr "V zostupnom poradí"
 
-#: i18n.cpp:214
+#: i18n.cpp:220
 msgid "&Contents"
 msgstr "Obsah"
 
-#: i18n.cpp:215
+#: i18n.cpp:221
 msgid "Best &practice"
 msgstr "Vhodné použitie"
 
-#: i18n.cpp:216
+#: i18n.cpp:222
 msgid "&Frequently asked questions"
 msgstr "Časté otázky"
 
-#: i18n.cpp:217
+#: i18n.cpp:223
 msgid "Cluster map &legend"
 msgstr "Legenda cluster mapy"
 
-#: i18n.cpp:220 upgrade.cpp:175
+#: i18n.cpp:226 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr "&Upgradovať"
 
-#: i18n.cpp:221
+#: i18n.cpp:227
 msgid "&Never check"
 msgstr "&Nikdy nekontrolovať"
 
-#: i18n.cpp:222
+#: i18n.cpp:228
 msgid "Check &stable releases only"
 msgstr "Kontrolovať len &stabilné releasy"
 
-#: i18n.cpp:223
+#: i18n.cpp:229
 msgid "Check &all releases"
 msgstr "Kontrolovať všetky releasy"
 
-#: i18n.cpp:224
+#: i18n.cpp:230
 msgid "&Check now"
 msgstr "Skontrolovať teraz"
 
-#: i18n.cpp:225
+#: i18n.cpp:231
 msgid "&About"
 msgstr "O programe"
 
-#: i18n.cpp:228
+#: i18n.cpp:234
 msgid "&Debug"
 msgstr "Ladiť"
 
-#: i18n.cpp:229 utils.cpp:411
+#: i18n.cpp:235 utils.cpp:411
 msgid "Open &log"
 msgstr "Otvorte záznam"
 
-#: i18n.cpp:230
+#: i18n.cpp:236
 msgid "Send bug &report"
 msgstr "Zaslanie správy o chybe"
 
-#: i18n.cpp:235
+#: i18n.cpp:241
 msgid "Boot time script"
 msgstr "Skript pri spustení OS"
 
-#: i18n.cpp:242
+#: i18n.cpp:248
 msgid "Drive"
 msgstr "Jednotka"
 
-#: i18n.cpp:243 i18n.cpp:299
+#: i18n.cpp:249 i18n.cpp:305
 msgid "Status"
 msgstr "Stav"
 
-#: i18n.cpp:244
+#: i18n.cpp:250
 msgid "Fragmentation"
 msgstr "Roztrieštenia"
 
-#: i18n.cpp:245
+#: i18n.cpp:251
 msgid "Total space"
 msgstr "Celková veľkosť"
 
-#: i18n.cpp:246
+#: i18n.cpp:252
 msgid "Free space"
 msgstr "Voľná veľkosť"
 
-#: i18n.cpp:248
+#: i18n.cpp:254
 #, no-c-format
 msgid "% free"
 msgstr "Percent"
 
-#: i18n.cpp:291
+#: i18n.cpp:297
 msgid "Fragmented files on"
 msgstr "Fragmentované súbory na"
 
-#: i18n.cpp:292
+#: i18n.cpp:298
 msgid "Visit our Homepage"
 msgstr "Navštívte našu homepage"
 
-#: i18n.cpp:293
+#: i18n.cpp:299
 msgid "View report options"
 msgstr "Zobraziť prehľad možností"
 
-#: i18n.cpp:294
+#: i18n.cpp:300
 msgid "Powered by Lua"
 msgstr "Poháňané Luou"
 
-#: i18n.cpp:295
+#: i18n.cpp:301
 msgid "Fragments"
 msgstr "fragmenty"
 
-#: i18n.cpp:296
+#: i18n.cpp:302
 msgid "Size"
 msgstr "veľkosť"
 
-#: i18n.cpp:297
+#: i18n.cpp:303
 msgid "Filename"
 msgstr "názov súboru"
 
-#: i18n.cpp:298
+#: i18n.cpp:304
 msgid "Comment"
 msgstr "komentár"
 
-#: i18n.cpp:300
+#: i18n.cpp:306
 msgid "locked"
 msgstr "zamknutý"
 
-#: i18n.cpp:301
+#: i18n.cpp:307
 msgid "move failed"
 msgstr "presun sa nepodaril"
 
-#: i18n.cpp:302
+#: i18n.cpp:308
 msgid "invalid"
 msgstr "neplatný"
 

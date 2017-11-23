@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2017-11-09 14:29+0300\n"
-"PO-Revision-Date: 2017-11-09 11:25+0000\n"
+"POT-Creation-Date: 2017-11-09 14:32+0300\n"
+"PO-Revision-Date: 2017-11-09 11:29+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Hungarian (http://www.transifex.com/stefanpendl/ultradefrag/language/hu/)\n"
 "MIME-Version: 1.0\n"
@@ -47,7 +47,7 @@ msgstr "Feladatok"
 msgid "&Settings"
 msgstr "Beállítások"
 
-#: i18n.cpp:163 i18n.cpp:237
+#: i18n.cpp:163 i18n.cpp:243
 msgid "&Help"
 msgstr "Segítség"
 
@@ -83,236 +83,243 @@ msgstr "Megáll"
 msgid "&Show report"
 msgstr "Jelentés megtekintése"
 
-#: i18n.cpp:174
+#. : The deep action option is introduced in v8,
+#. : it disables all filters and forces the program
+#. : to process all files on the disk.
+#: i18n.cpp:178
+msgid "Deep a&ction"
+msgstr ""
+
+#: i18n.cpp:180
 msgid "Skip removable &media"
 msgstr "Hordozható meghajtók kihagyása"
 
-#: i18n.cpp:175
+#: i18n.cpp:181
 msgid "&Rescan drives"
 msgstr "Frissítés"
 
-#: i18n.cpp:176
+#: i18n.cpp:182
 msgid "Repair dri&ves"
 msgstr "Meghajtók javítása"
 
-#: i18n.cpp:177 i18n.cpp:182 tray.cpp:70
+#: i18n.cpp:183 i18n.cpp:188 tray.cpp:70
 msgid "E&xit"
 msgstr "Kilépés"
 
-#: i18n.cpp:180
+#: i18n.cpp:186
 msgid "&When done"
 msgstr "Ha kész"
 
-#: i18n.cpp:181
+#: i18n.cpp:187
 msgid "&None"
 msgstr "nincs"
 
-#: i18n.cpp:183
+#: i18n.cpp:189
 msgid "Stan&dby"
 msgstr "Készenlét"
 
-#: i18n.cpp:184
+#: i18n.cpp:190
 msgid "&Hibernate"
 msgstr "Hibernálás"
 
-#: i18n.cpp:185
+#: i18n.cpp:191
 msgid "&Logoff"
 msgstr "Kijelentkezés"
 
-#: i18n.cpp:186
+#: i18n.cpp:192
 msgid "&Reboot"
 msgstr "Újraindítás"
 
-#: i18n.cpp:187
+#: i18n.cpp:193
 msgid "&Shutdown"
 msgstr "Kikapcsolás"
 
-#: i18n.cpp:190
+#: i18n.cpp:196
 msgid "&Language"
 msgstr "Nyelv"
 
-#: i18n.cpp:191
+#: i18n.cpp:197
 msgid "&Options"
 msgstr "&Beállítások"
 
-#: i18n.cpp:192
+#: i18n.cpp:198
 msgid "&Sorting"
 msgstr "Rendezé&s"
 
-#: i18n.cpp:193 i18n.cpp:233
+#: i18n.cpp:199 i18n.cpp:239
 msgid "&Boot time scan"
 msgstr "Vizsgálat rendszerinduláskor"
 
-#: i18n.cpp:196
+#: i18n.cpp:202
 msgid "Translate &online"
 msgstr ""
 
-#: i18n.cpp:197
+#: i18n.cpp:203
 msgid "Translate o&ffline"
 msgstr ""
 
-#: i18n.cpp:198
+#: i18n.cpp:204
 msgid "&Translations folder"
 msgstr "Fordítások mappa"
 
-#: i18n.cpp:201
+#: i18n.cpp:207
 msgid "&Enable"
 msgstr "Bekapcsolva"
 
-#: i18n.cpp:202
+#: i18n.cpp:208
 msgid "&Script"
 msgstr "Szkript"
 
-#: i18n.cpp:205
+#: i18n.cpp:211
 msgid "By &path"
 msgstr "útvonal szerint"
 
-#: i18n.cpp:206
+#: i18n.cpp:212
 msgid "By &size"
 msgstr "méret szerint"
 
-#: i18n.cpp:207
+#: i18n.cpp:213
 msgid "By &creation time"
 msgstr "létrehozási dátum szerint"
 
-#: i18n.cpp:208
+#: i18n.cpp:214
 msgid "By last &modification time"
 msgstr "módosítási dátum szerint"
 
-#: i18n.cpp:209
+#: i18n.cpp:215
 msgid "By &last access time"
 msgstr "hozzáférési dátum szerint"
 
-#: i18n.cpp:210
+#: i18n.cpp:216
 msgid "In &ascending order"
 msgstr "növekvő sorrendben"
 
-#: i18n.cpp:211
+#: i18n.cpp:217
 msgid "In &descending order"
 msgstr "csökkenő sorrrendben"
 
-#: i18n.cpp:214
+#: i18n.cpp:220
 msgid "&Contents"
 msgstr "Tartalom"
 
-#: i18n.cpp:215
+#: i18n.cpp:221
 msgid "Best &practice"
 msgstr "Bevált gyakorlat"
 
-#: i18n.cpp:216
+#: i18n.cpp:222
 msgid "&Frequently asked questions"
 msgstr "&Gyakran ismételt kérdések"
 
-#: i18n.cpp:217
+#: i18n.cpp:223
 msgid "Cluster map &legend"
 msgstr "Klaszter térkép &magyarázat"
 
-#: i18n.cpp:220 upgrade.cpp:175
+#: i18n.cpp:226 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr "&Frissítés"
 
-#: i18n.cpp:221
+#: i18n.cpp:227
 msgid "&Never check"
 msgstr "&Soha nem ellenőriz"
 
-#: i18n.cpp:222
+#: i18n.cpp:228
 msgid "Check &stable releases only"
 msgstr "&Csak a stabil megjelenések ellenőrzése"
 
-#: i18n.cpp:223
+#: i18n.cpp:229
 msgid "Check &all releases"
 msgstr "M&inden megjelenés ellenőrzése"
 
-#: i18n.cpp:224
+#: i18n.cpp:230
 msgid "&Check now"
 msgstr "&Azonnali ellenőrzés"
 
-#: i18n.cpp:225
+#: i18n.cpp:231
 msgid "&About"
 msgstr "Névjegy"
 
-#: i18n.cpp:228
+#: i18n.cpp:234
 msgid "&Debug"
 msgstr "Hi&bakeresés"
 
-#: i18n.cpp:229 utils.cpp:411
+#: i18n.cpp:235 utils.cpp:411
 msgid "Open &log"
 msgstr "Nap&ló megnyitása"
 
-#: i18n.cpp:230
+#: i18n.cpp:236
 msgid "Send bug &report"
 msgstr "Hibajelentés küldése"
 
-#: i18n.cpp:235
+#: i18n.cpp:241
 msgid "Boot time script"
 msgstr "Rendszerinduláskor lefutó szkript"
 
-#: i18n.cpp:242
+#: i18n.cpp:248
 msgid "Drive"
 msgstr "Meghajtó"
 
-#: i18n.cpp:243 i18n.cpp:299
+#: i18n.cpp:249 i18n.cpp:305
 msgid "Status"
 msgstr "Állapot"
 
-#: i18n.cpp:244
+#: i18n.cpp:250
 msgid "Fragmentation"
 msgstr "Töredezettség"
 
-#: i18n.cpp:245
+#: i18n.cpp:251
 msgid "Total space"
 msgstr "Kapacitás"
 
-#: i18n.cpp:246
+#: i18n.cpp:252
 msgid "Free space"
 msgstr "Szabad terület"
 
-#: i18n.cpp:248
+#: i18n.cpp:254
 #, no-c-format
 msgid "% free"
 msgstr "% szabad"
 
-#: i18n.cpp:291
+#: i18n.cpp:297
 msgid "Fragmented files on"
 msgstr "Töredezett fájlok itt:"
 
-#: i18n.cpp:292
+#: i18n.cpp:298
 msgid "Visit our Homepage"
 msgstr "Látogasd meg a honlapunkat"
 
-#: i18n.cpp:293
+#: i18n.cpp:299
 msgid "View report options"
 msgstr "Jelentési beállítások mutatása"
 
-#: i18n.cpp:294
+#: i18n.cpp:300
 msgid "Powered by Lua"
 msgstr "Engem is 'Lua' hajt!"
 
-#: i18n.cpp:295
+#: i18n.cpp:301
 msgid "Fragments"
 msgstr "töredékek"
 
-#: i18n.cpp:296
+#: i18n.cpp:302
 msgid "Size"
 msgstr "méret"
 
-#: i18n.cpp:297
+#: i18n.cpp:303
 msgid "Filename"
 msgstr "fájlnév"
 
-#: i18n.cpp:298
+#: i18n.cpp:304
 msgid "Comment"
 msgstr "megjegyzés"
 
-#: i18n.cpp:300
+#: i18n.cpp:306
 msgid "locked"
 msgstr "zárt"
 
-#: i18n.cpp:301
+#: i18n.cpp:307
 msgid "move failed"
 msgstr "mozgatás sikertelen"
 
-#: i18n.cpp:302
+#: i18n.cpp:308
 msgid "invalid"
 msgstr "érvénytelen"
 

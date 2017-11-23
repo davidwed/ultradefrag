@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2017-11-09 14:29+0300\n"
-"PO-Revision-Date: 2017-11-09 11:25+0000\n"
+"POT-Creation-Date: 2017-11-09 14:32+0300\n"
+"PO-Revision-Date: 2017-11-09 11:29+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/stefanpendl/ultradefrag/language/id/)\n"
 "MIME-Version: 1.0\n"
@@ -48,7 +48,7 @@ msgstr "&Aksi"
 msgid "&Settings"
 msgstr "&Pengaturan"
 
-#: i18n.cpp:163 i18n.cpp:237
+#: i18n.cpp:163 i18n.cpp:243
 msgid "&Help"
 msgstr "&Bantuan"
 
@@ -84,236 +84,243 @@ msgstr "&Berhenti"
 msgid "&Show report"
 msgstr "&Tampilkan Laporan"
 
-#: i18n.cpp:174
+#. : The deep action option is introduced in v8,
+#. : it disables all filters and forces the program
+#. : to process all files on the disk.
+#: i18n.cpp:178
+msgid "Deep a&ction"
+msgstr ""
+
+#: i18n.cpp:180
 msgid "Skip removable &media"
 msgstr "&Hindari media lepas"
 
-#: i18n.cpp:175
+#: i18n.cpp:181
 msgid "&Rescan drives"
 msgstr "S&can ulang drives"
 
-#: i18n.cpp:176
+#: i18n.cpp:182
 msgid "Repair dri&ves"
 msgstr "Perbaiki dri&ve"
 
-#: i18n.cpp:177 i18n.cpp:182 tray.cpp:70
+#: i18n.cpp:183 i18n.cpp:188 tray.cpp:70
 msgid "E&xit"
 msgstr "K&eluar"
 
-#: i18n.cpp:180
+#: i18n.cpp:186
 msgid "&When done"
 msgstr "&Ketika selesai"
 
-#: i18n.cpp:181
+#: i18n.cpp:187
 msgid "&None"
 msgstr "&Tidak ada"
 
-#: i18n.cpp:183
+#: i18n.cpp:189
 msgid "Stan&dby"
 msgstr "&Siaga"
 
-#: i18n.cpp:184
+#: i18n.cpp:190
 msgid "&Hibernate"
 msgstr "&Hibernasi"
 
-#: i18n.cpp:185
+#: i18n.cpp:191
 msgid "&Logoff"
 msgstr "&Log keluar"
 
-#: i18n.cpp:186
+#: i18n.cpp:192
 msgid "&Reboot"
 msgstr "Hidupkan &ulang"
 
-#: i18n.cpp:187
+#: i18n.cpp:193
 msgid "&Shutdown"
 msgstr "&Matikan"
 
-#: i18n.cpp:190
+#: i18n.cpp:196
 msgid "&Language"
 msgstr "&Bahasa"
 
-#: i18n.cpp:191
+#: i18n.cpp:197
 msgid "&Options"
 msgstr "&Opsi"
 
-#: i18n.cpp:192
+#: i18n.cpp:198
 msgid "&Sorting"
 msgstr "&Urutkan"
 
-#: i18n.cpp:193 i18n.cpp:233
+#: i18n.cpp:199 i18n.cpp:239
 msgid "&Boot time scan"
 msgstr "&Waktu scan boot"
 
-#: i18n.cpp:196
+#: i18n.cpp:202
 msgid "Translate &online"
 msgstr ""
 
-#: i18n.cpp:197
+#: i18n.cpp:203
 msgid "Translate o&ffline"
 msgstr ""
 
-#: i18n.cpp:198
+#: i18n.cpp:204
 msgid "&Translations folder"
 msgstr "&Map terjemah"
 
-#: i18n.cpp:201
+#: i18n.cpp:207
 msgid "&Enable"
 msgstr "&Aktif"
 
-#: i18n.cpp:202
+#: i18n.cpp:208
 msgid "&Script"
 msgstr "&Naskah"
 
-#: i18n.cpp:205
+#: i18n.cpp:211
 msgid "By &path"
 msgstr "Urutkan berdasarkan &lokasi"
 
-#: i18n.cpp:206
+#: i18n.cpp:212
 msgid "By &size"
 msgstr "Urutkan berdasarkan &ukuran"
 
-#: i18n.cpp:207
+#: i18n.cpp:213
 msgid "By &creation time"
 msgstr "Urutkan berdasarkan &waktu pembuatan"
 
-#: i18n.cpp:208
+#: i18n.cpp:214
 msgid "By last &modification time"
 msgstr "Urutkan berdasarkan &terakhir kali modifikasi"
 
-#: i18n.cpp:209
+#: i18n.cpp:215
 msgid "By &last access time"
 msgstr "Urutkan berdasarkan akses terak&hir"
 
-#: i18n.cpp:210
+#: i18n.cpp:216
 msgid "In &ascending order"
 msgstr "Urutkan secara &asending"
 
-#: i18n.cpp:211
+#: i18n.cpp:217
 msgid "In &descending order"
 msgstr "Urutkan secara &desending"
 
-#: i18n.cpp:214
+#: i18n.cpp:220
 msgid "&Contents"
 msgstr "&Konten"
 
-#: i18n.cpp:215
+#: i18n.cpp:221
 msgid "Best &practice"
 msgstr "&Praktek Terbaik"
 
-#: i18n.cpp:216
+#: i18n.cpp:222
 msgid "&Frequently asked questions"
 msgstr "Pertanyaan yang sering diajukan"
 
-#: i18n.cpp:217
+#: i18n.cpp:223
 msgid "Cluster map &legend"
 msgstr "Keterangan &Peta Cluster"
 
-#: i18n.cpp:220 upgrade.cpp:175
+#: i18n.cpp:226 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr "&Upgrade"
 
-#: i18n.cpp:221
+#: i18n.cpp:227
 msgid "&Never check"
 msgstr "&Jangan pernah cek"
 
-#: i18n.cpp:222
+#: i18n.cpp:228
 msgid "Check &stable releases only"
 msgstr "Cek rilis stabil saja"
 
-#: i18n.cpp:223
+#: i18n.cpp:229
 msgid "Check &all releases"
 msgstr "Cek &senua rilis"
 
-#: i18n.cpp:224
+#: i18n.cpp:230
 msgid "&Check now"
 msgstr "&Cek sekarang"
 
-#: i18n.cpp:225
+#: i18n.cpp:231
 msgid "&About"
 msgstr "&Tentang"
 
-#: i18n.cpp:228
+#: i18n.cpp:234
 msgid "&Debug"
 msgstr "&Debug"
 
-#: i18n.cpp:229 utils.cpp:411
+#: i18n.cpp:235 utils.cpp:411
 msgid "Open &log"
 msgstr "Buka &log"
 
-#: i18n.cpp:230
+#: i18n.cpp:236
 msgid "Send bug &report"
 msgstr "&Kirim laporan bug"
 
-#: i18n.cpp:235
+#: i18n.cpp:241
 msgid "Boot time script"
 msgstr "Waktu boot naskah"
 
-#: i18n.cpp:242
+#: i18n.cpp:248
 msgid "Drive"
 msgstr "Kandar"
 
-#: i18n.cpp:243 i18n.cpp:299
+#: i18n.cpp:249 i18n.cpp:305
 msgid "Status"
 msgstr "Keadaan"
 
-#: i18n.cpp:244
+#: i18n.cpp:250
 msgid "Fragmentation"
 msgstr "Fragmentasi"
 
-#: i18n.cpp:245
+#: i18n.cpp:251
 msgid "Total space"
 msgstr "Kapasitas"
 
-#: i18n.cpp:246
+#: i18n.cpp:252
 msgid "Free space"
 msgstr "Ruang bebas"
 
-#: i18n.cpp:248
+#: i18n.cpp:254
 #, no-c-format
 msgid "% free"
 msgstr "% bebas"
 
-#: i18n.cpp:291
+#: i18n.cpp:297
 msgid "Fragmented files on"
 msgstr "Berkas terberai di"
 
-#: i18n.cpp:292
+#: i18n.cpp:298
 msgid "Visit our Homepage"
 msgstr "Lihat situs"
 
-#: i18n.cpp:293
+#: i18n.cpp:299
 msgid "View report options"
 msgstr "Lihat opsi laporan"
 
-#: i18n.cpp:294
+#: i18n.cpp:300
 msgid "Powered by Lua"
 msgstr "Diberdayakan oleh Lua"
 
-#: i18n.cpp:295
+#: i18n.cpp:301
 msgid "Fragments"
 msgstr "potongan"
 
-#: i18n.cpp:296
+#: i18n.cpp:302
 msgid "Size"
 msgstr "ukuran"
 
-#: i18n.cpp:297
+#: i18n.cpp:303
 msgid "Filename"
 msgstr "nama berkas"
 
-#: i18n.cpp:298
+#: i18n.cpp:304
 msgid "Comment"
 msgstr "komentar"
 
-#: i18n.cpp:300
+#: i18n.cpp:306
 msgid "locked"
 msgstr "terkunci"
 
-#: i18n.cpp:301
+#: i18n.cpp:307
 msgid "move failed"
 msgstr "tidak bisa memindahkan"
 
-#: i18n.cpp:302
+#: i18n.cpp:308
 msgid "invalid"
 msgstr "tidak sah"
 

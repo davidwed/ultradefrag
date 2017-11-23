@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2017-11-09 14:29+0300\n"
-"PO-Revision-Date: 2017-11-09 11:25+0000\n"
+"POT-Creation-Date: 2017-11-09 14:32+0300\n"
+"PO-Revision-Date: 2017-11-09 11:29+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Tamil (http://www.transifex.com/stefanpendl/ultradefrag/language/ta/)\n"
 "MIME-Version: 1.0\n"
@@ -43,7 +43,7 @@ msgstr "&செயல்"
 msgid "&Settings"
 msgstr "&அமைப்புகள்"
 
-#: i18n.cpp:163 i18n.cpp:237
+#: i18n.cpp:163 i18n.cpp:243
 msgid "&Help"
 msgstr "&உதவி"
 
@@ -79,236 +79,243 @@ msgstr "&நிறுத்து"
 msgid "&Show report"
 msgstr "&அறிக்கை காட்டவும்"
 
-#: i18n.cpp:174
+#. : The deep action option is introduced in v8,
+#. : it disables all filters and forces the program
+#. : to process all files on the disk.
+#: i18n.cpp:178
+msgid "Deep a&ction"
+msgstr ""
+
+#: i18n.cpp:180
 msgid "Skip removable &media"
 msgstr "&நீக்கக்கூடிய ஊடகத்தைத் தவிர்க்கவும்"
 
-#: i18n.cpp:175
+#: i18n.cpp:181
 msgid "&Rescan drives"
 msgstr "&இயக்கிகளை மீண்டும் ஏற்றவும்"
 
-#: i18n.cpp:176
+#: i18n.cpp:182
 msgid "Repair dri&ves"
 msgstr "இயக்கிகளின் &பழுதை நீக்கவும்"
 
-#: i18n.cpp:177 i18n.cpp:182 tray.cpp:70
+#: i18n.cpp:183 i18n.cpp:188 tray.cpp:70
 msgid "E&xit"
 msgstr "&வெளியேறு"
 
-#: i18n.cpp:180
+#: i18n.cpp:186
 msgid "&When done"
 msgstr "&முடிந்தவுடன்"
 
-#: i18n.cpp:181
+#: i18n.cpp:187
 msgid "&None"
 msgstr "&எதுவுமில்லை"
 
-#: i18n.cpp:183
+#: i18n.cpp:189
 msgid "Stan&dby"
 msgstr "&காத்திருப்பு"
 
-#: i18n.cpp:184
+#: i18n.cpp:190
 msgid "&Hibernate"
 msgstr "&துயில் கொள்"
 
-#: i18n.cpp:185
+#: i18n.cpp:191
 msgid "&Logoff"
 msgstr "&விடுபதிகை"
 
-#: i18n.cpp:186
+#: i18n.cpp:192
 msgid "&Reboot"
 msgstr "&மறுதுவக்கம் செய்"
 
-#: i18n.cpp:187
+#: i18n.cpp:193
 msgid "&Shutdown"
 msgstr "&நிறுத்து"
 
-#: i18n.cpp:190
+#: i18n.cpp:196
 msgid "&Language"
 msgstr "&மொழி"
 
-#: i18n.cpp:191
+#: i18n.cpp:197
 msgid "&Options"
 msgstr ""
 
-#: i18n.cpp:192
+#: i18n.cpp:198
 msgid "&Sorting"
 msgstr "வரிசையாக்க"
 
-#: i18n.cpp:193 i18n.cpp:233
+#: i18n.cpp:199 i18n.cpp:239
 msgid "&Boot time scan"
 msgstr "&துவக்க நேரத்தில் ஸ்கேன்"
 
-#: i18n.cpp:196
+#: i18n.cpp:202
 msgid "Translate &online"
 msgstr ""
 
-#: i18n.cpp:197
+#: i18n.cpp:203
 msgid "Translate o&ffline"
 msgstr ""
 
-#: i18n.cpp:198
+#: i18n.cpp:204
 msgid "&Translations folder"
 msgstr "மொழிபெயர்ப்பு &கோப்புறை"
 
-#: i18n.cpp:201
+#: i18n.cpp:207
 msgid "&Enable"
 msgstr "&இயக்கு"
 
-#: i18n.cpp:202
+#: i18n.cpp:208
 msgid "&Script"
 msgstr "&லிபி"
 
-#: i18n.cpp:205
+#: i18n.cpp:211
 msgid "By &path"
 msgstr "கிளை வழி"
 
-#: i18n.cpp:206
+#: i18n.cpp:212
 msgid "By &size"
 msgstr "அளவு மூலம்"
 
-#: i18n.cpp:207
+#: i18n.cpp:213
 msgid "By &creation time"
 msgstr "உருவாக்கம் நேரம்"
 
-#: i18n.cpp:208
+#: i18n.cpp:214
 msgid "By last &modification time"
 msgstr "கடந்த மாற்றும் நேரம் மூலம்"
 
-#: i18n.cpp:209
+#: i18n.cpp:215
 msgid "By &last access time"
 msgstr "கடந்த அணுகல் முறை"
 
-#: i18n.cpp:210
+#: i18n.cpp:216
 msgid "In &ascending order"
 msgstr "ஏறுவரிசையில் உள்ள"
 
-#: i18n.cpp:211
+#: i18n.cpp:217
 msgid "In &descending order"
 msgstr "இறங்கு வரிசையில்"
 
-#: i18n.cpp:214
+#: i18n.cpp:220
 msgid "&Contents"
 msgstr "&பொருளடக்கம்"
 
-#: i18n.cpp:215
+#: i18n.cpp:221
 msgid "Best &practice"
 msgstr "&சிறந்த பயிற்சி"
 
-#: i18n.cpp:216
+#: i18n.cpp:222
 msgid "&Frequently asked questions"
 msgstr "&கேள்விகள்"
 
-#: i18n.cpp:217
+#: i18n.cpp:223
 msgid "Cluster map &legend"
 msgstr "கொத்து &வரைபடத்தை விளக்கவுரை"
 
-#: i18n.cpp:220 upgrade.cpp:175
+#: i18n.cpp:226 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr ""
 
-#: i18n.cpp:221
+#: i18n.cpp:227
 msgid "&Never check"
 msgstr ""
 
-#: i18n.cpp:222
+#: i18n.cpp:228
 msgid "Check &stable releases only"
 msgstr ""
 
-#: i18n.cpp:223
+#: i18n.cpp:229
 msgid "Check &all releases"
 msgstr ""
 
-#: i18n.cpp:224
+#: i18n.cpp:230
 msgid "&Check now"
 msgstr ""
 
-#: i18n.cpp:225
+#: i18n.cpp:231
 msgid "&About"
 msgstr "&பற்றி"
 
-#: i18n.cpp:228
+#: i18n.cpp:234
 msgid "&Debug"
 msgstr "வழு &நீக்கு"
 
-#: i18n.cpp:229 utils.cpp:411
+#: i18n.cpp:235 utils.cpp:411
 msgid "Open &log"
 msgstr "&பதிவு திறக்க"
 
-#: i18n.cpp:230
+#: i18n.cpp:236
 msgid "Send bug &report"
 msgstr "&பிழை அறிக்கை அனுப்பவும்"
 
-#: i18n.cpp:235
+#: i18n.cpp:241
 msgid "Boot time script"
 msgstr "துவக்க நேர லிபி"
 
-#: i18n.cpp:242
+#: i18n.cpp:248
 msgid "Drive"
 msgstr "ஓட்டு"
 
-#: i18n.cpp:243 i18n.cpp:299
+#: i18n.cpp:249 i18n.cpp:305
 msgid "Status"
 msgstr "நிலை"
 
-#: i18n.cpp:244
+#: i18n.cpp:250
 msgid "Fragmentation"
 msgstr "துண்டாக்கல்"
 
-#: i18n.cpp:245
+#: i18n.cpp:251
 msgid "Total space"
 msgstr "மொத்த இடம்"
 
-#: i18n.cpp:246
+#: i18n.cpp:252
 msgid "Free space"
 msgstr "காலி இடம்"
 
-#: i18n.cpp:248
+#: i18n.cpp:254
 #, no-c-format
 msgid "% free"
 msgstr "% காலி"
 
-#: i18n.cpp:291
+#: i18n.cpp:297
 msgid "Fragmented files on"
 msgstr "துண்டுதுண்டாக கோப்புகளை அன்று"
 
-#: i18n.cpp:292
+#: i18n.cpp:298
 msgid "Visit our Homepage"
 msgstr "நம் தமிழுக்கு"
 
-#: i18n.cpp:293
+#: i18n.cpp:299
 msgid "View report options"
 msgstr "அறிக்கை விருப்பங்களை காண்க"
 
-#: i18n.cpp:294
+#: i18n.cpp:300
 msgid "Powered by Lua"
 msgstr "திருத்தினோம் Lua"
 
-#: i18n.cpp:295
+#: i18n.cpp:301
 msgid "Fragments"
 msgstr "துண்டுகள்"
 
-#: i18n.cpp:296
+#: i18n.cpp:302
 msgid "Size"
 msgstr "அளவு"
 
-#: i18n.cpp:297
+#: i18n.cpp:303
 msgid "Filename"
 msgstr "கோப்புப்பெயர்"
 
-#: i18n.cpp:298
+#: i18n.cpp:304
 msgid "Comment"
 msgstr "கருத்து"
 
-#: i18n.cpp:300
+#: i18n.cpp:306
 msgid "locked"
 msgstr "பூட்டப்பட்டுள்ளது"
 
-#: i18n.cpp:301
+#: i18n.cpp:307
 msgid "move failed"
 msgstr "நகர்த்த முடியவில்லை"
 
-#: i18n.cpp:302
+#: i18n.cpp:308
 msgid "invalid"
 msgstr "செல்லுபடியாகாத"
 
