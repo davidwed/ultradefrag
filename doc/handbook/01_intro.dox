@@ -29,11 +29,11 @@
  * - defragmentation of NTFS metafiles (including MFT) and streams
  * - flexible filters allowing exclusion of files by various criteria
  * - defragmentation of disks having specified fragmentation level
- * - one click defragmentation via Windows Explorer context menu
+ * - one click defragmentation via Windows Explorer's context menu
  * - multilingual graphical interface (over 60 languages available)
  * - powerful command line interface
  * - scheduled defragmentation (using Windows Task Scheduler)
- * - automatic termination when specified time interval elapses
+ * - automatic termination when the specified time interval elapses
  * - automatic hibernation or shutdown after the job completion
  * - small size of installers (about 2 MB)
  * - availability of portable packages requiring no installation

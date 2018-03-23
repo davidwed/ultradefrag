@@ -1,8 +1,5 @@
 MAN(1)             Ultradefrag Boot Time Commands              MAN(1)
 
-NAME
-        man - manual page for man v7.1.0
-
 SYNOPSIS
         man [OPTION]
 
@@ -35,4 +32,4 @@ COPYRIGHT
         warranty; not even for MERCHANTABILITY or FITNESS
         FOR A PARTICULAR PURPOSE.
 
-man                          October 2017                           1
+man                           March 2018                            1
