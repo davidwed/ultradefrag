@@ -1,8 +1,5 @@
 UDEFRAG(1)         UltraDefrag Boot Time Commands          UDEFRAG(1)
 
-NAME
-        udefrag - manual page for udefrag v7.1.0
-
 SYNOPSIS
         udefrag [OPTION]...
 
@@ -91,4 +88,4 @@ COPYRIGHT
         warranty; not even for MERCHANTABILITY or FITNESS
         FOR A PARTICULAR PURPOSE.
 
-udefrag                      October 2017                           1
+udefrag                       March 2018                            1

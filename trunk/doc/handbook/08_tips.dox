@@ -95,7 +95,7 @@
  * (SSD) is usually not necessary as those drives don't rely on physical movements
  * of mechanical parts anyway. However, in case of heavily fragmented files
  * defragmentation still does make sense as it improves performance of the
- * file system itself. Additionally, defragmentation can help to make files more
+ * file system itself. Also defragmentation can help to make files more
  * <a href="http://sourceforge.net/p/ultradefrag/discussion/709672/thread/7f71fff6">recoverable</a>.
  *
  * <h3>Floppy drives</h3>

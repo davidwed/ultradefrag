@@ -13,7 +13,7 @@
  * @page Development Development
  *
  * If you'd like to know what's under the hood you are welcome to inspect UltraDefrag sources.
- * You can either use <a href="http://sourceforge.net/p/ultradefrag/code/">online svn browser</a>
+ * You can either use an <a href="http://sourceforge.net/p/ultradefrag/code/">online svn browser</a>
  * or download sources from <a href="http://sourceforge.net/projects/ultradefrag/files/">SourceForge</a>.
  * Alternatively you can setup an SVN client (for instance <a href="http://tortoisesvn.net/">TortoiseSVN</a>)
  * and check sources out from their <a href="https://svn.code.sf.net/p/ultradefrag/code/">base address</a>.
@@ -31,7 +31,7 @@
  * </center>
  *
  * UltraDefrag <a href="http://ultradefrag.sourceforge.net/doc/lib/">core libraries</a>
- * are written in pure C for compatibility with Windows boot environment where only bare
+ * are written in pure C for compatibility with Windows boot environment where only primitive
  * ntdll interfaces are available. Both graphical and command line tools are written in C++
  * on top of <a href="http://www.wxwidgets.org/">wxWidgets</a> library which helps to keep
  * things simple. For configuration purposes and reports convertion the program uses the
@@ -40,7 +40,7 @@
  *
  * <h1>Compilation</h1>
  * First of all, to build the program download and unpack its sources somewhere. Make sure the path doesn't contain spaces 
- * (GNU make <a href="http://stackoverflow.com/questions/9838384/can-gnu-make-handle-filenames-with-spaces"> doesn't like them</a>).
+ * (<a href="http://stackoverflow.com/questions/9838384/can-gnu-make-handle-filenames-with-spaces">GNU make doesn't like them</a>).
  * Then install the following software:
  *
  * - <a href="http://sourceforge.net/projects/tdm-gcc/">MinGW</a>,

@@ -25,7 +25,7 @@
  * Yes. Neither removal of old files nor reboot is necessary.
  *
  * <h3>My anti-virus software says UltraDefrag is infected by a virus. Is it true?</h3>
- * UltraDefrag is open source software, so its code base cannot contain malicious stuff
+ * UltraDefrag is open source software, so it cannot contain malicious stuff
  * by definition. For extra safety, to ensure that the compiled binaries haven't been
  * infected, we test them all carefully on <a href="http://www.virustotal.com/">virustotal.com</a>.
  * Only when all files pass most of the virus scanners we make an official release.
