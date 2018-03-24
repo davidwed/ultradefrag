@@ -13,7 +13,8 @@
     - documentation was expanded
     - the following translations were updated:
 
-      Estonian, French, Italian, Portuguese (Brazil), Spanish
+      English (United Kingdom), Estonian, French, Galician,
+      Iloko, Italian, Polish, Portuguese (Brazil), Spanish
 
     - Internals: compilation was optimized for speed
 

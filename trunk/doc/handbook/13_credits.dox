@@ -95,6 +95,7 @@
  * <tr><td>                               </td><td>-</td><td> Marc Sokolovitch</td></tr>
  * <tr><td>                               </td><td>-</td><td> Alain-Olivier Breysse</td></tr>
  * <tr><td>• Galician                     </td><td>-</td><td> Julio Mojón Fuentes</td></tr>
+ * <tr><td>                               </td><td>-</td><td> pep</td></tr>
  * <tr><td>• Georgian                     </td><td>-</td><td> UGLT.org</td></tr>
  * <tr><td>• German                       </td><td>-</td><td> Stefan Geuken</td></tr>
  * <tr><td>                               </td><td>-</td><td> Stefan Pendl</td></tr>
@@ -262,6 +263,7 @@
  *                                 & - & Marc Sokolovitch \\
  *                                 & - & Alain-Olivier Breysse \\
  * • Galician                      & - & Julio Mojón Fuentes \\
+ *                                 & - & pep \\
  * • Georgian                      & - & UGLT.org \\
  * • German                        & - & Stefan Geuken \\
  *                                 & - & Stefan Pendl \\
@@ -597,12 +599,12 @@
  * @latexonly
  * \setlength\LTleft{1.25em}\setlength\LTright{\fill}\begin{longtable}{p{1\linewidth-2em}}
  * @endlatexonly
- * Aivier, Antonio Vivace, Benny Stütz, Bernard Ladenthin, Carlo Bruschi, Catur Susetyo,
+ * Aivier, Andi Chandler, Antonio Vivace, Benny Stütz, Bernard Ladenthin, Carlo Bruschi, Catur Susetyo,
  * Connection, credofashion, Dandy Cheung, Daniel Rodríguez, Davide, Dmitry Zemskov, Erwin Dokter, El Fiera,
  * Fabrizio Marana, FS, Garoiu Victor, Giulio Fornasar, Gustavo Rezende, Haein Jung, Harald Arnesen,
  * Jan Iemhoff, Jani Kinnunen, JIFF, Julien Chartier, Luigi C., Javier Valdivieso, Jiri Sedlak,
  * José Carlos Taveira de Souza, José Luis Farías, Karam Al-Shorbassi,
- * Ken Choy, Krzysztof Świderski, Latino, Leo Smulders, luigif, MAFA1005, Massa,
+ * Ken Choy, Krzysztof Świderski, Latino, Leo Smulders, luigif, Łukasz Chojnacki, MAFA1005, Massa,
  * Matej Marton, Mateusz Krawczyk, Nikolay Parukhin, Patrick Palm, Piotr Halama,
  * Reynald Didier, Robert Jr, Robert Readman, Rodrigo Lopes Paitach, Seph, SMHA,
  * Suranappar.se, Timo VJ Lähde, Tjeerd van Sas, Trans-fr, translucens, TurboHz,
