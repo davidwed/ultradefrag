@@ -1,5 +1,5 @@
 # custom error page
-ErrorDocument 404 /Error_Pages/404.html
+ErrorDocument 404 /404.html
 
 # enable SSI
 Options +IncludesNOEXEC
@@ -74,5 +74,6 @@ Redirect permanent /httprget=            http://ultradefrag.sourceforge.net/
 Redirect permanent /ru/index             http://ultradefrag.sourceforge.net/ru/index.html
 RedirectMatch permanent /en/index\.html.+ http://ultradefrag.sourceforge.net/en/index.html
 
-# temporary redirects
+# redirects for old translations
 RedirectMatch temp /fa/(.*)$             http://ultradefrag.sourceforge.net/en/$1
+RedirectMatch temp /ru/(.*)$             http://ultradefrag.sourceforge.net/en/$1
