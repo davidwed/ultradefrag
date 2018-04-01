@@ -324,13 +324,6 @@ split_long_names = $split_long_names
 max_chars_per_line = $max_chars_per_line
 
 -------------------------------------------------------------------------------
--- Set it to zero if your web browser, being too old,
--- throws error messages about invalid javascript code.
--------------------------------------------------------------------------------
-
-enable_sorting = $enable_sorting
-
--------------------------------------------------------------------------------
 -- To adjust style of HTML reports edit the following file:
 -- {installation folder}\scripts\udreport.css
 -------------------------------------------------------------------------------
@@ -464,7 +457,6 @@ function get_preferences()
     
     produce_html_report = 1
     produce_plain_text_report = 0
-    enable_sorting = 1
     split_long_names = 0
     max_chars_per_line = 50
     
@@ -506,7 +498,7 @@ end
 -- THE MAIN CODE STARTS HERE
 -- the current version of the configuration file
 -- 0 - 99 for v5; 100 - 199 for v6; 200+ for v7+
-current_version = 205
+current_version = 206
 shellex_options = ""
 _G_copy = {}
 
