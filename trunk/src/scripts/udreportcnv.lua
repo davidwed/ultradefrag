@@ -220,11 +220,6 @@ end
 -- HTML reports are intended to be opened in a web
 -- browser. So, let's use localized strings there.
 
--- these markups must be identical, except of representation
-table_head        = [[<table id="main_table" border="1" cellspacing="0" width="100%">]]
-table_head_for_js = [[<table id=\"main_table\" border=\"1\" cellspacing=\"0\" width=\"100%%\">]]
-
-js, css = "", ""
 formatted_time = ""
 
 header = [[
@@ -232,17 +227,14 @@ header = [[
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
     <title>$compname$FRAGMENTED_FILES_ON $volume_letter: [$formatted_time]</title>
-    <style type="text/css">
-      $css
-    </style>
-    <script language="javascript">
-      $js
-    </script>
+    <link rel="stylesheet" type="text/css" href="../scripts/udreport.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="../scripts/udreport-custom.css" media="screen" />
+    <script type="text/javascript" src="../scripts/udsorting.js"></script>
   </head>
   <body>
     <h3 class="title">$compname$FRAGMENTED_FILES_ON $volume_letter: ($formatted_time)</h3>
     <div id="for_msie">
-      $table_head
+      <table id="main_table">
       <tr>
         <td class="c"><a href="javascript:sort_items('fragments')">$FRAGMENTS</a></td>
         <td class="c"><a href="javascript:sort_items('size')">$SIZE</a></td>
@@ -255,7 +247,7 @@ header = [[
 footer = [[
       </table>
     </div>
-    <table class="links_toolbar" width="100%"><tbody>
+    <table class="links_toolbar"><tbody>
       <tr>
         <td class="left"><a href="http://ultradefrag.sourceforge.net">$VISIT_HOMEPAGE</a></td>
         <td class="center"><a href="file:///$instdir_utf8\conf\options.lua">$VIEW_REPORT_OPTIONS</a></td>
@@ -288,7 +280,7 @@ end
 
 function write_main_table_body(f)
     for i, file in ipairs(files) do
-        f:write("<tr class=\"u\">",
+        f:write("<tr>",
             "<td class=\"c\">",file.fragments,"</td>",
             "<td class=\"filesize\" id=\"", file.size, "\">",
             string.gsub(hrsize(file.size)," ","&nbsp;"),"</td>"
@@ -303,50 +295,10 @@ function write_main_table_body(f)
     end
 end
 
-function get_javascript()
-    local js = ""
-    if(enable_sorting == 1) then
-        -- read udsorting.js file contents
-        local f = assert(io.open(instdir .. "\\scripts\\udsorting.js", "r"))
-        js = f:read("*all")
-        if not js then js = "" end
-        f:close()
-    end
-    if js == "" then
-        js = "function init_sorting_engine(){}\nfunction sort_items(criteria){}\n"
-    end
-
-    -- replace $TABLE_HEAD by the actual markup
-    return string.gsub(js,"$TABLE_HEAD",table_head_for_js)
-end
-
-function get_css()
-    -- read udreport.css file contents
-    local f = assert(io.open(instdir .. "\\scripts\\udreport.css", "r"))
-    local css = f:read("*all")
-    if not css then css = "" end
-    f:close()
-
-    -- read udreport-custom.css file contents
-    local custom_css = ""
-    f = io.open(instdir .. "\\scripts\\udreport-custom.css", "r")
-    if f then
-        custom_css = f:read("*all")
-        if not custom_css then custom_css = "" end
-        f:close()
-    end
-
-    return (css .. custom_css)
-end
-
 function build_html_report()
     local filename = string.gsub(report_path,"%.luar$","%.html")
     local f = assert(io.open(filename,"w"))
 
-    -- get JavaScript and CSS
-    js = get_javascript()
-    css = get_css()
-    
     if computer_name then
         compname = computer_name .. ': '
     else

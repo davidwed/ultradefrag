@@ -315,12 +315,6 @@ SkipMove:
     ${EndIf}
 
     ; install default CSS for file fragmentation reports
-    ${If} ${FileExists} "$INSTDIR\scripts\udreport.css"
-        ${Unless} ${FileExists} "$INSTDIR\scripts\udreport.css.old"
-            ; ensure that user's choice will not be lost
-            Rename "$INSTDIR\scripts\udreport.css" "$INSTDIR\scripts\udreport.css.old"
-        ${EndUnless}
-    ${EndIf}
     File "${ROOTDIR}\src\scripts\udreport.css"
 
     DetailPrint "Registering .luar file extension..."
@@ -980,6 +974,7 @@ SkipMove:
     Delete "$INSTDIR\scripts\udctxhandler.lua"
     Delete "$INSTDIR\scripts\upgrade-guiopts.lua"
     Delete "$INSTDIR\scripts\upgrade-rptopts.lua"
+    Delete "$INSTDIR\scripts\udreport.css.old"
 
     Delete "$INSTDIR\options.lua"
     Delete "$INSTDIR\options.lua.old"
