@@ -302,6 +302,9 @@ MainFrame::MainFrame()
     m_currentJob = NULL;
     m_busy = false;
     m_paused = false;
+    m_sizeAdjustmentEnabled = false;
+    m_widthIncreased = false;
+    m_heightIncreased = false;
 
     // set main window icon
     wxIconBundle icons;
@@ -388,6 +391,14 @@ MainFrame::MainFrame()
 
     InitVolList();
     m_vList->SetFocus();
+
+    // finally we have all map dimensions
+    // set, so it's time to adjust frame
+    // size accordingly to avoid gaps
+    // between map cells and map borders
+    m_sizeAdjustmentEnabled = true;
+    evt.SetSize(wxSize(m_width,m_height));
+    GetEventHandler()->ProcessEvent(evt);
 
     // populate list of volumes
     m_listThread = new ListThread();
@@ -531,6 +542,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MOVE(MainFrame::OnMove)
     EVT_SIZE(MainFrame::OnSize)
 
+    EVT_MENU(ID_AdjustFrameSize,   MainFrame::AdjustFrameSize)
     EVT_MENU(ID_AdjustListColumns, MainFrame::AdjustListColumns)
     EVT_MENU(ID_AdjustListHeight,  MainFrame::AdjustListHeight)
     EVT_MENU(ID_AdjustSystemTrayIcon,     MainFrame::AdjustSystemTrayIcon)
@@ -602,10 +614,55 @@ void MainFrame::OnMove(wxMoveEvent& event)
     event.Skip();
 }
 
+void MainFrame::AdjustFrameSize(wxCommandEvent& event)
+{
+    int block_size = g_mainFrame->CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
+    int line_width = g_mainFrame->CheckOption(wxT("UD_GRID_LINE_WIDTH"));
+    int cell_size = block_size + line_width;
+    if(cell_size < 2) return;
+
+    bool resize_required = false;
+
+    int map_width, map_height, dx, dy;
+    m_cMap->GetClientSize(&map_width,&map_height);
+    dx = (map_width - line_width) % cell_size;
+    dy = (map_height - line_width) % cell_size;
+    if(dx){
+        if(m_widthIncreased)
+            m_width += cell_size - dx;
+        else
+            m_width -= dx;
+        resize_required = true;
+    }
+    if(dy){
+        if(m_heightIncreased)
+            m_height += cell_size - dy;
+        else
+            m_height -= dy;
+        resize_required = true;
+    }
+
+    if(resize_required){
+        SetSize(m_width,m_height);
+        ProcessCommandEvent(this,ID_RefreshFrame);
+    }
+
+    m_sizeAdjustmentEnabled = true;
+}
+
 void MainFrame::OnSize(wxSizeEvent& event)
 {
-    if(!IsMaximized() && !IsIconized())
+    if(!IsMaximized() && !IsIconized()){
+        int old_width = m_width;
+        int old_height = m_height;
         GetSize(&m_width,&m_height);
+        if(m_sizeAdjustmentEnabled){
+            m_widthIncreased = m_width > old_width ? true : false;
+            m_heightIncreased = m_height > old_height ? true : false;
+            QueueCommandEvent(this,ID_AdjustFrameSize);
+            m_sizeAdjustmentEnabled = false;
+        }
+    }
     if(m_cMap) m_cMap->Refresh();
     event.Skip();
 }

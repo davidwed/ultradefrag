@@ -127,6 +127,7 @@ enum {
     ID_HelpAbout,
 
     // event identifiers
+    ID_AdjustFrameSize,
     ID_AdjustListColumns,
     ID_AdjustListHeight,
     ID_AdjustSystemTrayIcon,
@@ -465,6 +466,7 @@ public:
     void OnMove(wxMoveEvent& event);
     void OnSize(wxSizeEvent& event);
 
+    void AdjustFrameSize(wxCommandEvent& event);
     void AdjustListColumns(wxCommandEvent& event);
     void AdjustListHeight(wxCommandEvent& event);
     void AdjustSystemTrayIcon(wxCommandEvent& event);
@@ -533,6 +535,9 @@ private:
     bool m_saved;
     bool m_maximized;
     int  m_separatorPosition;
+    bool m_sizeAdjustmentEnabled;
+    bool m_widthIncreased;
+    bool m_heightIncreased;
 
     // list dimensions
     int m_vListHeight;
