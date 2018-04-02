@@ -162,6 +162,11 @@ void MainFrame::SaveAppConfiguration()
 
 void MainFrame::ReadUserPreferences(wxCommandEvent& WXUNUSED(event))
 {
+    /* save cluster map options */
+    int block_size = g_mainFrame->CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
+    int line_width = g_mainFrame->CheckOption(wxT("UD_GRID_LINE_WIDTH"));
+    int old_cell_size = block_size + line_width;
+
     /*
     * The program should be configurable
     * through the options.lua file only.
@@ -255,6 +260,26 @@ done:
         wxSetEnv(wxT("UD_LOG_FILE_PATH"),logpath.GetFullPath());
     }
     ::udefrag_set_log_file_path();
+
+    if(m_sizeAdjustmentEnabled){
+        /* force the map perfectly fit into the main frame */
+        block_size = g_mainFrame->CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
+        line_width = g_mainFrame->CheckOption(wxT("UD_GRID_LINE_WIDTH"));
+        int cell_size = block_size + line_width;
+        if(cell_size != old_cell_size){
+            wxCommandEvent *event = new wxCommandEvent(
+                wxEVT_COMMAND_MENU_SELECTED,ID_AdjustFrameSize
+            );
+            int flags = 0;
+            if(cell_size > old_cell_size){
+                flags |= FRAME_WIDTH_INCREASED;
+                flags |= FRAME_HEIGHT_INCREASED;
+            }
+            event->SetInt(flags);
+            g_mainFrame->GetEventHandler()->QueueEvent(event);
+            m_sizeAdjustmentEnabled = false;
+        }
+    }
 
     if(!error.IsEmpty()){
         wxMessageDialog dlg(this,error,wxT("UltraDefrag"),

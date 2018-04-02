@@ -170,6 +170,10 @@ enum {
 #define SMALL_SPACING  DPI(5)
 #define LARGE_SPACING  DPI(11)
 
+// frame size adjustment flags
+#define FRAME_WIDTH_INCREASED  0x1
+#define FRAME_HEIGHT_INCREASED 0x2
+
 #define DEFAULT_DRY_RUN          0
 #define DEFAULT_FREE_COLOR_R   255
 #define DEFAULT_FREE_COLOR_G   255
@@ -536,8 +540,6 @@ private:
     bool m_maximized;
     int  m_separatorPosition;
     bool m_sizeAdjustmentEnabled;
-    bool m_widthIncreased;
-    bool m_heightIncreased;
 
     // list dimensions
     int m_vListHeight;

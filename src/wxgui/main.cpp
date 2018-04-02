@@ -303,8 +303,6 @@ MainFrame::MainFrame()
     m_busy = false;
     m_paused = false;
     m_sizeAdjustmentEnabled = false;
-    m_widthIncreased = false;
-    m_heightIncreased = false;
 
     // set main window icon
     wxIconBundle icons;
@@ -623,19 +621,20 @@ void MainFrame::AdjustFrameSize(wxCommandEvent& event)
 
     bool resize_required = false;
 
-    int map_width, map_height, dx, dy;
+    int map_width, map_height, dx, dy, flags;
     m_cMap->GetClientSize(&map_width,&map_height);
     dx = (map_width - line_width) % cell_size;
     dy = (map_height - line_width) % cell_size;
+    flags = event.GetInt();
     if(dx){
-        if(m_widthIncreased)
+        if(flags & FRAME_WIDTH_INCREASED)
             m_width += cell_size - dx;
         else
             m_width -= dx;
         resize_required = true;
     }
     if(dy){
-        if(m_heightIncreased)
+        if(flags & FRAME_HEIGHT_INCREASED)
             m_height += cell_size - dy;
         else
             m_height -= dy;
@@ -657,9 +656,13 @@ void MainFrame::OnSize(wxSizeEvent& event)
         int old_height = m_height;
         GetSize(&m_width,&m_height);
         if(m_sizeAdjustmentEnabled){
-            m_widthIncreased = m_width > old_width ? true : false;
-            m_heightIncreased = m_height > old_height ? true : false;
-            QueueCommandEvent(this,ID_AdjustFrameSize);
+            wxCommandEvent *event = new wxCommandEvent(
+                wxEVT_COMMAND_MENU_SELECTED,ID_AdjustFrameSize
+            );
+            int flags = 0;
+            if(m_width > old_width) flags |= FRAME_WIDTH_INCREASED;
+            if(m_height > old_height) flags |= FRAME_HEIGHT_INCREASED;
+            event->SetInt(flags); GetEventHandler()->QueueEvent(event);
             m_sizeAdjustmentEnabled = false;
         }
     }
