@@ -85,11 +85,47 @@ exit /B 1
 ::                      subroutines
 :: --------------------------------------------------------
 
+rem Synopsis: call :build_version_header
+rem Example: call :build_version_header > version.h
+:build_version_header
+    echo #define VERSION %VERSION%
+    echo #define VERSION2 %VERSION2%
+    if "%RELEASE_STAGE%" neq "" (
+        echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER% %RELEASE_STAGE%"
+        echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% %RELEASE_STAGE% Portable"
+        echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER% %RELEASE_STAGE%"
+        echo #define wxUD_ABOUT_VERSION "%ULTRADFGVER% %RELEASE_STAGE%"
+    ) else (
+        echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER%"
+        echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable"
+        echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%"
+        echo #define wxUD_ABOUT_VERSION "%ULTRADFGVER%"
+    )
+    echo.
+
+    echo #ifndef _WIN64
+    echo   #define UDEFRAG_ARCH "x86"
+    echo #else
+    echo  #if defined(_IA64_)
+    echo   #define UDEFRAG_ARCH "ia64"
+    echo  #else
+    echo   #define UDEFRAG_ARCH "x64"
+    echo  #endif
+    echo #endif
+    echo.
+
+    rem remove the preview menu for stable releases
+    if /I "%RELEASE_STAGE:~0,2%" equ "RC" echo #define _UD_HIDE_PREVIEW_
+    if "%RELEASE_STAGE%" equ "" echo #define _UD_HIDE_PREVIEW_
+goto :EOF
+
 rem Sets environment for the build process.
 :set_build_environment
     call setvars.cmd
-    if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
-    if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd" call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
+    if exist "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"^
+        call "setvars_%COMPUTERNAME%_%ORIG_USERNAME%.cmd"
+    if exist "setvars_%COMPUTERNAME%_%USERNAME%.cmd"^
+        call "setvars_%COMPUTERNAME%_%USERNAME%.cmd"
     echo.
 
     if %UD_BLD_FLG_IS_PORTABLE% equ 1 (
@@ -102,26 +138,9 @@ rem Sets environment for the build process.
         set UDEFRAG_PORTABLE=
     )
 
-    echo #define VERSION %VERSION% > .\include\version.new
-    echo #define VERSION2 %VERSION2% >> .\include\version.new
-    if "%RELEASE_STAGE%" neq "" (
-        echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER% %RELEASE_STAGE%" >> .\include\version.new
-        echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% %RELEASE_STAGE% Portable" >> .\include\version.new
-        echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER% %RELEASE_STAGE%" >> .\include\version.new
-        echo #define wxUD_ABOUT_VERSION "%ULTRADFGVER% %RELEASE_STAGE%" >> .\include\version.new
-    ) else (
-        echo #define VERSIONINTITLE "UltraDefrag %ULTRADFGVER%" >> .\include\version.new
-        echo #define VERSIONINTITLE_PORTABLE "UltraDefrag %ULTRADFGVER% Portable" >> .\include\version.new
-        echo #define ABOUT_VERSION "Ultra Defragmenter version %ULTRADFGVER%" >> .\include\version.new
-        echo #define wxUD_ABOUT_VERSION "%ULTRADFGVER%" >> .\include\version.new
-    )
-    
-    rem remove the preview menu for stable releases
-    if /I "%RELEASE_STAGE:~0,2%" equ "RC" echo #define _UD_HIDE_PREVIEW_ >> .\include\version.new
-    if "%RELEASE_STAGE%" equ "" echo #define _UD_HIDE_PREVIEW_ >> .\include\version.new
-    
     rem update version.h file only when something got
     rem changed to speed up incremental compilation
+    call :build_version_header > .\include\version.new
     fc .\include\version.new .\include\version.h >nul
     if errorlevel 1 move /Y .\include\version.new .\include\version.h
     del /q .\include\version.new
