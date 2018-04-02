@@ -558,7 +558,7 @@ static void write_log_file_header(wchar_t *path)
     char format[] = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
                     "\r\n"
                     "  %s log file\r\n"
-                    "  Windows NT %u.%u\r\n"
+                    "  Windows NT %u.%u (%s)\r\n"
                     "\r\n"
                     "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\r\n"
                     "\r\n"
@@ -582,7 +582,7 @@ static void write_log_file_header(wchar_t *path)
     */
     (void)winx_fwrite(bom,sizeof(char),3,f);
 
-    header = winx_sprintf(format,VERSIONINTITLE,mj,mn);
+    header = winx_sprintf(format,VERSIONINTITLE,mj,mn,UDEFRAG_ARCH);
     if(header == NULL){
         mtrace();
     } else {
