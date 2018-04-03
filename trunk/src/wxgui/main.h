@@ -130,6 +130,7 @@ enum {
     ID_AdjustFrameSize,
     ID_AdjustListColumns,
     ID_AdjustListHeight,
+    ID_AdjustMinFrameSize,
     ID_AdjustSystemTrayIcon,
     ID_AdjustTaskbarIconOverlay,
     ID_BootChange,
@@ -473,6 +474,7 @@ public:
     void AdjustFrameSize(wxCommandEvent& event);
     void AdjustListColumns(wxCommandEvent& event);
     void AdjustListHeight(wxCommandEvent& event);
+    void AdjustMinFrameSize(wxCommandEvent& event);
     void AdjustSystemTrayIcon(wxCommandEvent& event);
     void AdjustTaskbarIconOverlay(wxCommandEvent& event);
     void CacheJob(wxCommandEvent& event);

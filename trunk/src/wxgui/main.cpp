@@ -349,8 +349,6 @@ MainFrame::MainFrame()
     Move(m_x,m_y);
     if(m_maximized) Maximize(true);
 
-    SetMinSize(wxSize(DPI(MAIN_WINDOW_MIN_WIDTH),DPI(MAIN_WINDOW_MIN_HEIGHT)));
-
     // create menu, tool and status bars
     InitMenu(); InitToolbar(); InitStatusBar();
 
@@ -395,6 +393,7 @@ MainFrame::MainFrame()
     // size accordingly to avoid gaps
     // between map cells and map borders
     m_sizeAdjustmentEnabled = true;
+    ProcessCommandEvent(this,ID_AdjustMinFrameSize);
     evt.SetSize(wxSize(m_width,m_height));
     GetEventHandler()->ProcessEvent(evt);
 
@@ -543,6 +542,7 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ID_AdjustFrameSize,   MainFrame::AdjustFrameSize)
     EVT_MENU(ID_AdjustListColumns, MainFrame::AdjustListColumns)
     EVT_MENU(ID_AdjustListHeight,  MainFrame::AdjustListHeight)
+    EVT_MENU(ID_AdjustMinFrameSize,MainFrame::AdjustMinFrameSize)
     EVT_MENU(ID_AdjustSystemTrayIcon,     MainFrame::AdjustSystemTrayIcon)
     EVT_MENU(ID_AdjustTaskbarIconOverlay, MainFrame::AdjustTaskbarIconOverlay)
     EVT_MENU(ID_BootChange,        MainFrame::OnBootChange)
@@ -612,14 +612,33 @@ void MainFrame::OnMove(wxMoveEvent& event)
     event.Skip();
 }
 
+void MainFrame::AdjustMinFrameSize(wxCommandEvent& WXUNUSED(event))
+{
+    int min_width = DPI(MAIN_WINDOW_MIN_WIDTH);
+    int min_height = DPI(MAIN_WINDOW_MIN_HEIGHT);
+
+    int map_width, map_height;
+    m_cMap->GetClientSize(&map_width,&map_height);
+    int block_size = CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
+    int line_width = CheckOption(wxT("UD_GRID_LINE_WIDTH"));
+    int cell_size = block_size + line_width;
+
+    if(cell_size > 1){
+        int dx = (min_width - (m_width - map_width) - line_width) % cell_size;
+        int dy = (min_height - (m_height - map_height) - line_width) % cell_size;
+        if(dx) min_width += cell_size - dx; if(dy) min_height += cell_size - dy;
+    }
+    SetMinSize(wxSize(min_width,min_height));
+}
+
 void MainFrame::AdjustFrameSize(wxCommandEvent& event)
 {
-    if(IsMaximized() || IsIconized()) return;
+    if(IsMaximized() || IsIconized()) goto done;
 
     int block_size = CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
     int line_width = CheckOption(wxT("UD_GRID_LINE_WIDTH"));
     int cell_size = block_size + line_width;
-    if(cell_size < 2) return;
+    if(cell_size < 2) goto done;
 
     bool resize_required = false;
 
@@ -643,11 +662,23 @@ void MainFrame::AdjustFrameSize(wxCommandEvent& event)
         resize_required = true;
     }
 
+    int min_width = GetMinWidth();
+    int min_height = GetMinHeight();
+    while(m_width < min_width){
+        m_width += cell_size;
+        resize_required = true;
+    }
+    while(m_height < min_height){
+        m_height += cell_size;
+        resize_required = true;
+    }
+
     if(resize_required){
         SetSize(m_width,m_height);
         ProcessCommandEvent(this,ID_RefreshFrame);
     }
 
+done:
     m_sizeAdjustmentEnabled = true;
 }
 
