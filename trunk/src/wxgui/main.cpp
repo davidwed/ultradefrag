@@ -616,8 +616,8 @@ void MainFrame::AdjustFrameSize(wxCommandEvent& event)
 {
     if(IsMaximized() || IsIconized()) return;
 
-    int block_size = g_mainFrame->CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
-    int line_width = g_mainFrame->CheckOption(wxT("UD_GRID_LINE_WIDTH"));
+    int block_size = CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
+    int line_width = CheckOption(wxT("UD_GRID_LINE_WIDTH"));
     int cell_size = block_size + line_width;
     if(cell_size < 2) return;
 

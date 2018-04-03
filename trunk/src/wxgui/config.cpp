@@ -163,8 +163,8 @@ void MainFrame::SaveAppConfiguration()
 void MainFrame::ReadUserPreferences(wxCommandEvent& WXUNUSED(event))
 {
     /* save cluster map options */
-    int block_size = g_mainFrame->CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
-    int line_width = g_mainFrame->CheckOption(wxT("UD_GRID_LINE_WIDTH"));
+    int block_size = CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
+    int line_width = CheckOption(wxT("UD_GRID_LINE_WIDTH"));
     int old_cell_size = block_size + line_width;
 
     /*
@@ -263,8 +263,8 @@ done:
 
     if(m_sizeAdjustmentEnabled){
         /* force the map perfectly fit into the main frame */
-        block_size = g_mainFrame->CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
-        line_width = g_mainFrame->CheckOption(wxT("UD_GRID_LINE_WIDTH"));
+        block_size = CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
+        line_width = CheckOption(wxT("UD_GRID_LINE_WIDTH"));
         int cell_size = block_size + line_width;
         if(cell_size != old_cell_size){
             wxCommandEvent *event = new wxCommandEvent(
@@ -276,7 +276,7 @@ done:
                 flags |= FRAME_HEIGHT_INCREASED;
             }
             event->SetInt(flags);
-            g_mainFrame->GetEventHandler()->QueueEvent(event);
+            GetEventHandler()->QueueEvent(event);
             m_sizeAdjustmentEnabled = false;
         }
     }
