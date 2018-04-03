@@ -262,6 +262,18 @@ void MainFrame::AdjustListHeight(wxCommandEvent& WXUNUSED(event))
     // adjust client height of the list
     new_height += 2 * wxSystemSettings::GetMetric(wxSYS_BORDER_Y);
     m_splitter->SetSashPosition(new_height);
+
+    // force cluster map perfectly fit into the main frame
+    if(m_sizeAdjustmentEnabled){
+        wxCommandEvent *event = new wxCommandEvent(
+            wxEVT_COMMAND_MENU_SELECTED,ID_AdjustFrameSize
+        );
+        int flags = 0;
+        if(expand) flags |= FRAME_HEIGHT_INCREASED;
+        event->SetInt(flags);
+        GetEventHandler()->QueueEvent(event);
+        m_sizeAdjustmentEnabled = false;
+    }
 }
 
 void MainFrame::RefreshFrame(wxCommandEvent& WXUNUSED(event))
