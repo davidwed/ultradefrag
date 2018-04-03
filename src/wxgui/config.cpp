@@ -267,6 +267,7 @@ done:
         line_width = CheckOption(wxT("UD_GRID_LINE_WIDTH"));
         int cell_size = block_size + line_width;
         if(cell_size != old_cell_size){
+            ProcessCommandEvent(this,ID_AdjustMinFrameSize);
             wxCommandEvent *event = new wxCommandEvent(
                 wxEVT_COMMAND_MENU_SELECTED,ID_AdjustFrameSize
             );
