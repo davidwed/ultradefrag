@@ -555,5 +555,11 @@ if version < current_version then
     -- save the upgraded configuration
     f = assert(io.open(path, "w"))
     save_preferences(f)
+
+    -- flush configuration file to the disk
+    -- right now to prepare it for tracking
+    -- via FindFirstChangeNotification()
+    f:flush()
+
     f:close()
 end
