@@ -5,6 +5,8 @@
     - the "repeat action" option was retired, now all
       the disk processing algorithms decide themselves
       whether it's worth to run one more pass or not
+    - in graphical interface the cluster map was forced
+      to always fit perfectly into the main frame
     - options.lua file was moved to conf subfolder to
       fix configuration tracking (bugs #222 and #225)
     - fragmentation reports were forced to take

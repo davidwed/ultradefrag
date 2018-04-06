@@ -182,8 +182,8 @@ dbgprint_level = "$dbgprint_level"
 -- Set it to redirect debugging output to a log file. Keep it
 -- empty ("") if everything works fine and no logging is needed.
 -- Examples:
---   log_file_path = "C:\\Windows\\UltraDefrag\\Logs\\ultradefrag.log"
---   log_file_path = ".\\Logs\\ultradefrag.log"
+--   log_file_path = "C:\\Windows\\UltraDefrag\\logs\\ultradefrag.log"
+--   log_file_path = ".\\logs\\ultradefrag.log"
 -- Environment variables can be used as shown below:
 --   log_file_path = os.getenv("TEMP") .. "\\UltraDefrag_Logs\\ultradefrag.log"
 -- Note:

@@ -23,7 +23,7 @@
  * when most of the files are still not in use.
  *
  * UltraDefrag has the following features:
- * - simple but efficient defragmentation algorithms
+ * - fast and efficient defragmentation algorithms
  * - safe environment preventing files corruption
  * - defragmentation of locked paging and hibernation files
  * - defragmentation of NTFS metafiles (including MFT) and streams
