@@ -56,8 +56,8 @@ void dbg_print_header(udefrag_job_parameters *jp)
     /* print date and time */
     memset(&t,0,sizeof(winx_time));
     (void)winx_get_local_time(&t);
-    winx_dbg_print_header(0x20,0,I"[%02i.%02i.%04i at %02i:%02i]",
-        (int)t.day,(int)t.month,(int)t.year,(int)t.hour,(int)t.minute);
+    winx_dbg_print_header(0x20,0,I"[%04i-%02i-%02i at %02i:%02i]",
+        (int)t.year,(int)t.month,(int)t.day,(int)t.hour,(int)t.minute);
     winx_dbg_print_header(0,0,I"*");
 }
 

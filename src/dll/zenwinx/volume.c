@@ -185,7 +185,6 @@ static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
     NTSTATUS status;
     WINX_FILE *f;
     DISK_GEOMETRY dg;
-    char buffer[32];
     
     /* get drive geometry */
     RtlZeroMemory(&ffs,sizeof(FILE_FS_SIZE_INFORMATION));
@@ -215,8 +214,6 @@ static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
           &dg,sizeof(dg),NULL) >= 0){
             v->device_capacity = dg.Cylinders.QuadPart * \
                 dg.TracksPerCylinder * dg.SectorsPerTrack * dg.BytesPerSector;
-            winx_bytes_to_hr(v->device_capacity,1,buffer,sizeof(buffer));
-            itrace("%c: device capacity = %s",v->volume_letter,buffer);
         }
         winx_fclose(f);
     }
