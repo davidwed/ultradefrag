@@ -29,8 +29,7 @@ extern "C" {
 #endif
 
 #define DEFAULT_TAB_WIDTH 2
-#define DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY "      Hit any key to display next page,\n" \
-                                             "          ESC or Break to abort..."
+#define DEFAULT_PAGING_PROMPT_TO_HIT_ANY_KEY "Hit any key to display next page, Esc or Break to abort..."
 
 #define NtCloseSafe(h) { if(h) { NtClose(h); h = NULL; } }
 
