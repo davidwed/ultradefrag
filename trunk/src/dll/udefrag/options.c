@@ -174,7 +174,7 @@ int get_options(udefrag_job_parameters *jp)
     if(buffer){
         if(!wcscmp(buffer,L"1")){
             itrace("%%UD_DRY_RUN%% environment variable is set to 1,");
-            itrace("therefore no actual data moves will be performed on disk");
+            itrace("so no actual data moves will be performed on the disk");
             jp->udo.dry_run = 1;
         }
         winx_free(buffer);
@@ -195,7 +195,7 @@ int get_options(udefrag_job_parameters *jp)
     }
     
     /* print all options */
-    winx_dbg_print_header(0,0,I"ultradefrag job options");
+    winx_dbg_print_header(0,0,I"job options");
     if(jp->udo.in_filter.count){
         itrace("in_filter patterns:");
         for(i = 0; i < jp->udo.in_filter.count; i++)

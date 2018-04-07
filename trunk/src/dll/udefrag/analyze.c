@@ -108,6 +108,9 @@ static void adjust_move_at_once_parameter(udefrag_job_parameters *jp)
     jp->clusters_at_once = bytes_at_once / jp->v_info.bytes_per_cluster;
     if(jp->clusters_at_once == 0)
         jp->clusters_at_once ++;
+
+    winx_bytes_to_hr(jp->v_info.device_capacity,1,buffer,sizeof(buffer));
+    itrace("device capacity = %s",buffer);
     winx_bytes_to_hr(bytes_at_once,0,buffer,sizeof(buffer));
     itrace("the program will move %s (%I64u clusters) at once",
         buffer, jp->clusters_at_once);

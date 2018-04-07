@@ -245,12 +245,16 @@ static DWORD WINAPI start_job(LPVOID p)
     char *action = "Analysis";
     int result = -1;
 
+    winx_dbg_print_header(0,0,I"*");
+    
     if(jp->job_type == DEFRAGMENTATION_JOB) action = "Defragmentation";
     else if(jp->job_type == FULL_OPTIMIZATION_JOB) action = "Full optimization";
     else if(jp->job_type == QUICK_OPTIMIZATION_JOB) action = "Quick optimization";
     else if(jp->job_type == MFT_OPTIMIZATION_JOB) action = "MFT optimization";
     winx_dbg_print_header(0,0,I"%s of disk %c: started",action,jp->volume_letter);
 
+    winx_dbg_print_header(0,0,I"*");
+    
     /* open the volume */
     jp->fVolume = winx_vopen(winx_toupper(jp->volume_letter));
     if(jp->fVolume == NULL) goto done;

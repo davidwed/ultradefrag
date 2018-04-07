@@ -256,9 +256,10 @@ int save_fragmentation_report(udefrag_job_parameters *jp)
     int result = 0;
     ULONGLONG time;
 
-    winx_dbg_print_header(0,0,I"*");
-    if(jp->job_type != ANALYSIS_JOB)
+    if(jp->job_type != ANALYSIS_JOB){
+        winx_dbg_print_header(0,0,I"*");
         dbg_print_file_counters(jp);
+    }
     
     if(jp->udo.disable_reports)
         return 0;
@@ -290,8 +291,6 @@ void remove_fragmentation_report(udefrag_job_parameters *jp)
     wchar_t path[MAX_PATH + 1];
     wchar_t *new_path, *ext_path;
     int i;
-    
-    winx_dbg_print_header(0,0,I"*");
     
     /* remove old reports from the root directory */
     for(i = 0; paths[i]; i++){
