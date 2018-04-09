@@ -11,6 +11,9 @@
       fix configuration tracking (bugs #222 and #225)
     - fragmentation reports were forced to take
       daylight saving time settings into account
+    - explorer's context menu entries were forced
+      to never show up for special objects like
+      recycle bin and control panel
     - a lot of minor bugs were fixed
     - documentation was expanded
     - the following translations were updated:
