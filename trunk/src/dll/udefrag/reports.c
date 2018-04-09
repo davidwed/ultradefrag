@@ -61,45 +61,64 @@ static void convert_to_utf8_path(char *dst,int size,wchar_t *src)
  */
 static wchar_t *get_report_path(udefrag_job_parameters *jp)
 {
-    wchar_t *instdir, *fpath;
+    wchar_t *modpath, *instdir;
+    wchar_t *windir, *sysdir;
+    int system_binary;
     wchar_t *path = NULL;
+    
+    modpath = winx_get_module_filename();
+    if(modpath == NULL){
+        etrace("cannot get program\'s path");
+        return NULL;
+    }
+    winx_path_remove_filename(modpath);
 
     instdir = winx_getenv(L"UD_INSTALL_DIR");
     if(instdir == NULL){
-        /* portable version? */
-        fpath = winx_get_module_filename();
-        if(fpath == NULL){
-            etrace("cannot get program\'s path");
-        } else {
-            winx_path_remove_filename(fpath);
-            path = winx_swprintf(L"\\??\\%ws\\reports",fpath);
-            if(path == NULL){
-                etrace("not enough memory (case 1)");
-            } else {
-                (void)winx_create_directory(path);
-                winx_free(path);
-            }
-            path = winx_swprintf(L"\\??\\%ws\\reports\\fraglist_%c.luar",
-                fpath,winx_tolower(jp->volume_letter));
-            if(path == NULL)
-                etrace("not enough memory (case 2)");
-            winx_free(fpath);
-        }
+        /* portable version */
+        instdir = modpath;
     } else {
-        /* regular installation */
-        path = winx_swprintf(L"\\??\\%ws\\reports",instdir);
-        if(path == NULL){
-            etrace("not enough memory (case 3)");
-        } else {
-            (void)winx_create_directory(path);
-            winx_free(path);
+        windir = winx_getenv(L"SystemRoot");
+        if(windir == NULL){
+            etrace("cannot get windows directory path");
+            winx_free(modpath);
+            winx_free(instdir);
+            return NULL;
         }
-        path = winx_swprintf(L"\\??\\%ws\\reports\\fraglist_%c.luar",
-            instdir,winx_tolower(jp->volume_letter));
-        if(path == NULL)
-            etrace("not enough memory (case 4)");
-        winx_free(instdir);
+        
+        sysdir = winx_swprintf(L"%ws\\system32",windir);
+        if(sysdir == NULL){
+            mtrace();
+            winx_free(modpath);
+            winx_free(instdir);
+            winx_free(windir);
+            return NULL;
+        }
+        
+        system_binary = (winx_wcsicmp(modpath,sysdir) == 0) ? 1 : 0;
+        winx_free(windir); winx_free(sysdir);
+
+        if(system_binary){
+            winx_free(modpath);
+        } else {
+            winx_free(instdir);
+            instdir = modpath;
+        }
     }
+
+    path = winx_swprintf(L"\\??\\%ws\\reports",instdir);
+    if(path == NULL){
+        mtrace();
+    } else {
+        (void)winx_create_directory(path);
+        winx_free(path);
+    }
+    
+    path = winx_swprintf(L"\\??\\%ws\\reports\\fraglist_%c.luar",
+        instdir,winx_tolower(jp->volume_letter));
+    if(path == NULL) mtrace();
+    
+    winx_free(instdir);
     return path;
 }
 
