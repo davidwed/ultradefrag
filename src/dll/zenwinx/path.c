@@ -138,6 +138,18 @@ wchar_t *winx_get_module_filename(void)
     
     memset(path,0,size);
     memcpy(path,us->Buffer,us->Length);
+    
+    /*
+    * At Windows boot '\??\' sequence gets
+    * prepended to the path. Let's remove it.
+    */
+    if(wcsstr(path,L"\\??\\") == path){
+        memset(path,0,size);
+        memcpy(path,us->Buffer + 4,
+            us->Length - 4 * sizeof(wchar_t)
+        );
+    }
+
     return path;
 }
 
