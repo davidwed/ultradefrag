@@ -171,7 +171,7 @@ static int save_lua_report(udefrag_job_parameters *jp)
         compname[MAX_COMPUTERNAME_LENGTH] = 0;
         winx_free(cn);
     } else {
-        wcscpy(compname,L"nil");
+        wcscpy(compname,L"");
     }
     winx_to_utf8(utf8_compname,sizeof(utf8_compname),compname);
     memset(&tm,0,sizeof(winx_time));
