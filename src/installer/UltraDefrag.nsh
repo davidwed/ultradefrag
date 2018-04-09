@@ -620,6 +620,10 @@ SkipMove:
 
 !macro InstallShellHandlerFiles
 
+    ; get rid of old context menu handler to make
+    ; sure that it won't interfere with the new one
+    ${RemoveShellHandlerFiles}
+    
     ${DisableX64FSRedirection}
 
     DetailPrint "Installing context menu handler..."
@@ -634,15 +638,6 @@ SkipMove:
 
     StrCpy $0 "$INSTDIR\icons\shellex.ico"
     StrCpy $1 "$INSTDIR\icons\shellex-folder.ico"
-
-    DeleteRegKey HKCR "Drive\shell\udefrag"
-    DeleteRegKey HKCR "Drive\shell\udefrag-folder"
-    DeleteRegKey HKCR "Drive\shell\udefrag-drive-analyze"
-    DeleteRegKey HKCR "Drive\shell\udefrag-drive-optimize"
-    DeleteRegKey HKCR "Drive\shell\udefrag-drive-qoptimize"
-    DeleteRegKey HKCR "Folder\shell\udefrag"
-    DeleteRegKey HKCR "Folder\shell\udefrag-folder"
-    DeleteRegKey HKCR "*\shell\udefrag"
 
     ${If} ${AtLeastWin7}
         WriteRegStr HKCR "Drive\shell\udefrag.W7menu" "MUIVerb"                "&UltraDefrag"
@@ -675,20 +670,20 @@ SkipMove:
         WriteRegStr HKCR "Drive\udefragW7menu\shell\udefrag-drive-qoptimize"         ""     $R0
         WriteRegStr HKCR "Drive\udefragW7menu\shell\udefrag-drive-qoptimize\command" ""     $R1
 
-        WriteRegStr HKCR "Folder\shell\udefrag.W7menu" "MUIVerb"                "&UltraDefrag"
-        WriteRegStr HKCR "Folder\shell\udefrag.W7menu" "ExtendedSubCommandsKey" "Folder\udefragW7menu"
-        WriteRegStr HKCR "Folder\shell\udefrag.W7menu" "Icon" $0
+        WriteRegStr HKCR "Directory\shell\udefrag.W7menu" "MUIVerb"                "&UltraDefrag"
+        WriteRegStr HKCR "Directory\shell\udefrag.W7menu" "ExtendedSubCommandsKey" "Directory\udefragW7menu"
+        WriteRegStr HKCR "Directory\shell\udefrag.W7menu" "Icon" $0
 
         StrCpy $R0 "&Defragment"
         StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder $\"%1$\""
-        WriteRegStr HKCR "Folder\udefragW7menu\shell\udefrag"                ""     $R0
-        WriteRegStr HKCR "Folder\udefragW7menu\shell\udefrag\command"        ""     $R1
+        WriteRegStr HKCR "Directory\udefragW7menu\shell\udefrag"                ""     $R0
+        WriteRegStr HKCR "Directory\udefragW7menu\shell\udefrag\command"        ""     $R1
 
         StrCpy $R0 "&Defragment folder itself"
         StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder-itself $\"%1$\""
-        WriteRegStr HKCR "Folder\udefragW7menu\shell\udefrag-folder"         ""     $R0
-        WriteRegStr HKCR "Folder\udefragW7menu\shell\udefrag-folder"         "Icon" $1
-        WriteRegStr HKCR "Folder\udefragW7menu\shell\udefrag-folder\command" ""     $R1
+        WriteRegStr HKCR "Directory\udefragW7menu\shell\udefrag-folder"         ""     $R0
+        WriteRegStr HKCR "Directory\udefragW7menu\shell\udefrag-folder"         "Icon" $1
+        WriteRegStr HKCR "Directory\udefragW7menu\shell\udefrag-folder\command" ""     $R1
 
         WriteRegStr HKCR "*\shell\udefrag.W7menu" "MUIVerb"                "&UltraDefrag"
         WriteRegStr HKCR "*\shell\udefrag.W7menu" "ExtendedSubCommandsKey" "*\udefragW7menu"
@@ -699,42 +694,40 @@ SkipMove:
         WriteRegStr HKCR "*\udefragW7menu\shell\udefrag"         ""     $R0
         WriteRegStr HKCR "*\udefragW7menu\shell\udefrag\command" ""     $R1
     ${Else}
-        ${If} ${AtLeastWinXP}
-            StrCpy $R0 "&Analyze with UltraDefrag"
-            StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder -a -v $\"%1$\""
-            WriteRegStr HKCR "Drive\shell\udefrag-drive-analyze"           ""     $R0
-            WriteRegStr HKCR "Drive\shell\udefrag-drive-analyze\command"   ""     $R1
-
-            StrCpy $R0 "&Defragment with UltraDefrag"
-            StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder $\"%1$\""
-            WriteRegStr HKCR "Drive\shell\udefrag"                         ""     $R0
-            WriteRegStr HKCR "Drive\shell\udefrag\command"                 ""     $R1
-
-            StrCpy $R0 "&Defragment root folder itself with UltraDefrag"
-            StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder-itself $\"%1$\""
-            WriteRegStr HKCR "Drive\shell\udefrag-folder"                  ""     $R0
-            WriteRegStr HKCR "Drive\shell\udefrag-folder\command"          ""     $R1
-
-            StrCpy $R0 "&Fully optimize with UltraDefrag"
-            StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder -o -v $\"%1$\""
-            WriteRegStr HKCR "Drive\shell\udefrag-drive-optimize"          ""     $R0
-            WriteRegStr HKCR "Drive\shell\udefrag-drive-optimize\command"  ""     $R1
-
-            StrCpy $R0 "&Quickly optimize with UltraDefrag"
-            StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder -q -v $\"%1$\""
-            WriteRegStr HKCR "Drive\shell\udefrag-drive-qoptimize"         ""     $R0
-            WriteRegStr HKCR "Drive\shell\udefrag-drive-qoptimize\command" ""     $R1
-        ${EndIf}
+        StrCpy $R0 "&Analyze with UltraDefrag"
+        StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder -a -v $\"%1$\""
+        WriteRegStr HKCR "Drive\shell\udefrag-drive-analyze"           ""     $R0
+        WriteRegStr HKCR "Drive\shell\udefrag-drive-analyze\command"   ""     $R1
 
         StrCpy $R0 "&Defragment with UltraDefrag"
         StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder $\"%1$\""
-        WriteRegStr HKCR "Folder\shell\udefrag"                ""     $R0
-        WriteRegStr HKCR "Folder\shell\udefrag\command"        ""     $R1
+        WriteRegStr HKCR "Drive\shell\udefrag"                         ""     $R0
+        WriteRegStr HKCR "Drive\shell\udefrag\command"                 ""     $R1
+
+        StrCpy $R0 "&Defragment root folder itself with UltraDefrag"
+        StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder-itself $\"%1$\""
+        WriteRegStr HKCR "Drive\shell\udefrag-folder"                  ""     $R0
+        WriteRegStr HKCR "Drive\shell\udefrag-folder\command"          ""     $R1
+
+        StrCpy $R0 "&Fully optimize with UltraDefrag"
+        StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder -o -v $\"%1$\""
+        WriteRegStr HKCR "Drive\shell\udefrag-drive-optimize"          ""     $R0
+        WriteRegStr HKCR "Drive\shell\udefrag-drive-optimize\command"  ""     $R1
+
+        StrCpy $R0 "&Quickly optimize with UltraDefrag"
+        StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder -q -v $\"%1$\""
+        WriteRegStr HKCR "Drive\shell\udefrag-drive-qoptimize"         ""     $R0
+        WriteRegStr HKCR "Drive\shell\udefrag-drive-qoptimize\command" ""     $R1
+
+        StrCpy $R0 "&Defragment with UltraDefrag"
+        StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder $\"%1$\""
+        WriteRegStr HKCR "Directory\shell\udefrag"                ""     $R0
+        WriteRegStr HKCR "Directory\shell\udefrag\command"        ""     $R1
 
         StrCpy $R0 "&Defragment folder itself with UltraDefrag"
         StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex --folder-itself $\"%1$\""
-        WriteRegStr HKCR "Folder\shell\udefrag-folder"         ""     $R0
-        WriteRegStr HKCR "Folder\shell\udefrag-folder\command" ""     $R1
+        WriteRegStr HKCR "Directory\shell\udefrag-folder"         ""     $R0
+        WriteRegStr HKCR "Directory\shell\udefrag-folder\command" ""     $R1
 
         StrCpy $R0 "&Defragment with UltraDefrag"
         StrCpy $R1 "$\"$SYSDIR\udefrag.exe$\" --shellex $\"%1$\""
@@ -766,8 +759,8 @@ SkipMove:
 
     DeleteRegKey HKCR "Drive\shell\udefrag.W7menu"
     DeleteRegKey HKCR "Drive\udefragW7menu"
-    DeleteRegKey HKCR "Folder\shell\udefrag.W7menu"
-    DeleteRegKey HKCR "Folder\udefragW7menu"
+    DeleteRegKey HKCR "Directory\shell\udefrag.W7menu"
+    DeleteRegKey HKCR "Directory\udefragW7menu"
     DeleteRegKey HKCR "*\shell\udefrag.W7menu"
     DeleteRegKey HKCR "*\udefragW7menu"
 
@@ -776,8 +769,8 @@ SkipMove:
     DeleteRegKey HKCR "Drive\shell\udefrag-drive-analyze"
     DeleteRegKey HKCR "Drive\shell\udefrag-drive-optimize"
     DeleteRegKey HKCR "Drive\shell\udefrag-drive-qoptimize"
-    DeleteRegKey HKCR "Folder\shell\udefrag"
-    DeleteRegKey HKCR "Folder\shell\udefrag-folder"
+    DeleteRegKey HKCR "Directory\shell\udefrag"
+    DeleteRegKey HKCR "Directory\shell\udefrag-folder"
     DeleteRegKey HKCR "*\shell\udefrag"
 
     ${EnableX64FSRedirection}
@@ -949,6 +942,11 @@ SkipMove:
     SetRegView 32
     DeleteRegKey HKLM "Software\UltraDefrag"
 
+    DeleteRegKey HKCR "Folder\shell\udefrag"
+    DeleteRegKey HKCR "Folder\shell\udefrag-folder"
+    DeleteRegKey HKCR "Folder\shell\udefrag.W7menu"
+    DeleteRegKey HKCR "Folder\udefragW7menu"
+    
     RMDir /r "$SYSDIR\UltraDefrag"
     Delete "$SYSDIR\udefrag-gui-dbg.cmd"
     Delete "$SYSDIR\udefrag-gui.exe"
