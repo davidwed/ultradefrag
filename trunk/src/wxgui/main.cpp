@@ -633,12 +633,15 @@ void MainFrame::AdjustMinFrameSize(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::AdjustFrameSize(wxCommandEvent& event)
 {
-    if(IsMaximized() || IsIconized()) goto done;
+    if(IsMaximized() || IsIconized()){
+        m_sizeAdjustmentEnabled = true;
+        return;
+    }
 
     int block_size = CheckOption(wxT("UD_MAP_BLOCK_SIZE"));
     int line_width = CheckOption(wxT("UD_GRID_LINE_WIDTH"));
     int cell_size = block_size + line_width;
-    if(cell_size < 2) goto done;
+    if(cell_size < 2){ m_sizeAdjustmentEnabled = true; return; }
 
     bool resize_required = false;
 
@@ -678,7 +681,6 @@ void MainFrame::AdjustFrameSize(wxCommandEvent& event)
         ProcessCommandEvent(this,ID_RefreshFrame);
     }
 
-done:
     m_sizeAdjustmentEnabled = true;
 }
 
