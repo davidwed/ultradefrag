@@ -324,7 +324,7 @@ SkipMove:
     WriteRegStr HKCR "LuaReport\shell" "" "view"
     WriteRegStr HKCR "LuaReport\shell\view" "" "View report"
     WriteRegStr HKCR "LuaReport\shell\view\command" "" \
-        "$\"$INSTDIR\lua5.1a_gui.exe$\" $\"$INSTDIR\scripts\udreportcnv.lua$\" $\"%1$\" $\"$INSTDIR$\" -v"
+        "$\"$INSTDIR\lua5.1a_gui.exe$\" $\"$INSTDIR\scripts\udreportcnv.lua$\" $\"%1$\" -v"
 
     ${EnableX64FSRedirection}
 

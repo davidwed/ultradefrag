@@ -20,7 +20,7 @@
 --]]
 
 usage = [[
-USAGE: lua udreportcnv.lua {path to Lua Report} {UltraDefrag installation directory} [-v]
+USAGE: lua udreportcnv.lua {path to lua report} [-v]
 ]]
 
 -------------------------------------------------------------------------------
@@ -171,10 +171,10 @@ end
 -- information from. So, let's avoid their localization.
 
 function write_text_header(f)
-    local compname, formatted_time = "", ""
+    local formatted_time = ""
     
-    if computer_name then
-        compname = computer_name .. ': '
+    if computer_name ~= "" then
+        computer_name = computer_name .. ': '
     end
     
     -- format time according to the current locale
@@ -186,7 +186,7 @@ function write_text_header(f)
     f:write(string.char(0xEF,0xBB,0xBF))
 
     f:write(";---------------------------------------------------------------------------------------------\n")
-    f:write("; ", compname, "Fragmented files on ", volume_letter, ": [", formatted_time, "]\n;\n")
+    f:write("; ", computer_name, "Fragmented files on ", volume_letter, ": [", formatted_time, "]\n;\n")
     f:write("; Fragments    Filesize  Comment      Status    Filename\n")
     f:write(";---------------------------------------------------------------------------------------------\n")
     f:write("\n")
@@ -226,13 +226,13 @@ header = [[
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <title>$compname$FRAGMENTED_FILES_ON $volume_letter: [$formatted_time]</title>
+    <title>$computer_name$FRAGMENTED_FILES_ON $volume_letter: [$formatted_time]</title>
     <link rel="stylesheet" type="text/css" href="../scripts/udreport.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="../scripts/udreport-custom.css" media="screen" />
     <script type="text/javascript" src="../scripts/udsorting.js"></script>
   </head>
   <body>
-    <h3 class="title">$compname$FRAGMENTED_FILES_ON $volume_letter: ($formatted_time)</h3>
+    <h3 class="title">$computer_name$FRAGMENTED_FILES_ON $volume_letter: ($formatted_time)</h3>
     <div id="for_msie">
       <table id="main_table">
       <tr>
@@ -250,7 +250,7 @@ footer = [[
     <table class="links_toolbar"><tbody>
       <tr>
         <td class="left"><a href="http://ultradefrag.sourceforge.net">$VISIT_HOMEPAGE</a></td>
-        <td class="center"><a href="file:///$instdir_utf8\conf\options.lua">$VIEW_REPORT_OPTIONS</a></td>
+        <td class="center"><a href="../conf/options.lua">$VIEW_REPORT_OPTIONS</a></td>
         <td class="right"><a href="http://www.lua.org/">$POWERED_BY_LUA</a></td>
       </tr>
     </tbody></table>
@@ -299,10 +299,8 @@ function build_html_report()
     local filename = string.gsub(report_path,"%.luar$","%.html")
     local f = assert(io.open(filename,"w"))
 
-    if computer_name then
-        compname = computer_name .. ': '
-    else
-        compname = ""
+    if computer_name ~= "" then
+        computer_name = computer_name .. ': '
     end
     
     -- format time according to the current locale
@@ -322,13 +320,10 @@ end
 -- The main code
 -------------------------------------------------------------------------------
 report_path = arg[1]
-instdir     = arg[2]
-
-instdir_utf8 = os.getenv("UD_INSTALL_DIR")
-if not instdir_utf8 then instdir_utf8 = instdir end
-
 assert(report_path, usage)
-assert(instdir, usage)
+
+instdir = string.gsub(report_path,"\\reports\\fraglist_.%.luar$","")
+if instdir == report_path then instdir = ".." end
 
 -- get report options
 dofile(instdir .. "\\conf\\options.lua")
@@ -358,7 +353,7 @@ if produce_plain_text_report == 1 then
 end
 
 -- display the report if requested
-if arg[3] == "-v" then
+if arg[2] == "-v" then
     if produce_html_report == 1 then
         display_report(html_report_path)
     elseif produce_plain_text_report == 1 then

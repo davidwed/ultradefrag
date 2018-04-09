@@ -56,7 +56,7 @@ void MainFrame::OnShowReport(wxCommandEvent& WXUNUSED(event))
         wxFileName report(path); report.Normalize();
         if(report.FileExists()){
             wxString args = wxString::Format(
-                wxT(".\\scripts\\udreportcnv.lua \"%ls\" . -v"),
+                wxT(".\\scripts\\udreportcnv.lua \"%ls\" -v"),
                 ws(report.GetFullPath()));
             Utils::ShellExec(lua.GetFullPath(),wxT("open"),args);
         }
