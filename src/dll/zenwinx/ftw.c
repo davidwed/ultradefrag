@@ -40,7 +40,7 @@
  * @brief Size of the buffer dedicated
  * to list file fragments into.
  * @details It is large enough to hold
- * GET_RETRIEVAL_DESCRIPTOR structure 
+ * a single GET_RETRIEVAL_DESCRIPTOR structure
  * as well as 512 MAPPING_PAIR structures.
  */
 #define FILE_MAP_SIZE (sizeof(GET_RETRIEVAL_DESCRIPTOR) - sizeof(MAPPING_PAIR) + 512 * sizeof(MAPPING_PAIR))
@@ -60,8 +60,8 @@ winx_file_info *ntfs_scan_disk(char volume_letter,
  * @internal
  * @brief Checks whether the file
  * tree walk must be terminated or not.
- * @return Nonzero value indicates that
- * termination is requested.
+ * @return A nonzero value if termination
+ * is requested.
  */
 static int ftw_check_for_termination(ftw_terminator t,void *user_defined_data)
 {
@@ -118,11 +118,11 @@ void validate_blockmap(winx_file_info *f)
  * @param[in] t address of procedure to be called
  * each time when winx_ftw_dump_file would like
  * to know whether it must be terminated or not.
- * Nonzero value, returned by the registered
- * routine, terminates the dump immediately.
+ * If the procedure returns a nonzero value
+ * the dump terminates immediately.
  * @param[in] user_defined_data pointer to data
  * to be passed to the registered terminator.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note
  * - The callback procedure should complete as quickly
  * as possible to avoid slowdown of the scan.
@@ -655,8 +655,8 @@ static void ftw_remove_invalid_streams(winx_file_info **filelist)
  * file name and path. If WINX_FTW_SKIP_RESIDENT_STREAMS flag is set, the progress
  * callback will never be called for files of zero length and resident NTFS streams.
  * @param[in] t the address of the callback routine to be called each time when
- * winx_ftw would like to know whether it must be terminated or not. Nonzero value,
- * returned by the registered routine, terminates the scan immediately.
+ * winx_ftw would like to know whether it must be terminated or not. If the routine
+ * returns a nonzero value the scan terminates immediately.
  * @param[in] user_defined_data pointer to data to be passed to all the registered
  * callbacks.
  * @return The list of files, NULL indicates failure.
@@ -745,7 +745,7 @@ winx_file_info *winx_ftw(wchar_t *path, int flags,
  * to scan entire disks faster.
  * @details On NTFS-formatted disks this
  * routine analyzes MFT records directly
- * to speed the scan (up to 25 times).
+ * to speed up the scan (up to 25 times).
  * On FAT disks, however, general purpose
  * system API work faster as they benifit
  * from the Windows file caching. We never

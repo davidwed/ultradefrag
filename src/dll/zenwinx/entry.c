@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file entry.c
  * @brief Entry point.
  * @addtogroup Entry
@@ -35,4 +36,7 @@ BOOL WINAPI DllMain(HANDLE hinstDLL,DWORD dwReason,LPVOID lpvReserved)
     return 1;
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

@@ -31,7 +31,7 @@
  * @brief fopen() native equivalent.
  * @note
  * - Accepts native paths only,
- * e.g. \\??\\C:\\file.txt
+ * like \\??\\C:\\file.txt
  * - Only r, w, a, r+, w+, a+
  * modes are supported.
  */
@@ -112,7 +112,7 @@ WINX_FILE *winx_fopen(const wchar_t *filename,const char *mode)
  * allocates a buffer to speed up
  * sequential write requests.
  * @details The last parameter specifies
- * the buffer size, in bytes. Returns
+ * size of the buffer, in bytes. Returns
  * NULL if the buffer allocation failed.
  */
 WINX_FILE *winx_fbopen(const wchar_t *filename,const char *mode,int buffer_size)
@@ -267,17 +267,17 @@ size_t winx_fwrite(const void *buffer,size_t size,size_t count,WINX_FILE *f)
 
 /**
  * @brief Sends an I/O control code to the specified device.
- * @param[in] f the file handle.
+ * @param[in] f the device handle.
  * @param[in] code the IOCTL code.
- * @param[in] description a string explaining the meaning
- * of the request, intended for use by the error handling code.
+ * @param[in] description a string describing request's
+ * meaning, intended for use by the error handling code.
  * @param[in] in_buffer the input buffer.
  * @param[in] in_size size of the input buffer, in bytes.
  * @param[out] out_buffer the output buffer.
  * @param[in] out_size size of the output buffer, in bytes.
  * @param[out] pbytes_returned pointer to variable receiving
  * the number of bytes written to the output buffer.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_ioctl(WINX_FILE *f,
     int code,char *description,
@@ -319,7 +319,8 @@ int winx_ioctl(WINX_FILE *f,
 
 /**
  * @brief fflush() native equivalent.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success,
+ * a negative value otherwise.
  */
 int winx_fflush(WINX_FILE *f)
 {
@@ -338,9 +339,6 @@ int winx_fflush(WINX_FILE *f)
 
 /**
  * @brief Retrieves size of a file.
- * @param[in] f pointer to structure
- * returned by the winx_fopen() call.
- * @return Size of the file, in bytes.
  */
 ULONGLONG winx_fsize(WINX_FILE *f)
 {
@@ -383,7 +381,7 @@ void winx_fclose(WINX_FILE *f)
 /**
  * @brief Creates a directory.
  * @param[in] path the native path of the directory.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note If the requested directory already exists
  * this function completes successfully.
  */
@@ -425,7 +423,7 @@ int winx_create_directory(const wchar_t *path)
 /**
  * @brief Deletes a file.
  * @param[in] filename the native path of the file.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_delete_file(const wchar_t *filename)
 {
@@ -549,11 +547,11 @@ struct names_pair special_file_names[] = {
  * @brief Opens a file for defragmentation related actions.
  * @param[in] f pointer to structure containing the file information.
  * @param[in] action one of the WINX_OPEN_XXX constants indicating
- * the action file needs to be opened for:
+ * the action the file needs to be opened for:
  * - WINX_OPEN_FOR_DUMP - open for FSCTL_GET_RETRIEVAL_POINTERS
  * - WINX_OPEN_FOR_BASIC_INFO - open for NtQueryInformationFile(FILE_BASIC_INFORMATION)
  * - WINX_OPEN_FOR_MOVE - open for FSCTL_MOVE_FILE
- * @param[out] phandle pointer to variable receiving the file handle.
+ * @param[out] phandle pointer to variable to store the file handle into.
  * @return NTSTATUS code.
  */
 NTSTATUS winx_defrag_fopen(winx_file_info *f,int action,HANDLE *phandle)

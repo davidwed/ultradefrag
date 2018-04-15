@@ -225,7 +225,7 @@ int winx_getche(void)
  * limited number of characters to read.
  * @param[out] string the output buffer.
  * @param[in] n size of the buffer, in characters.
- * @return Number of characters read including
+ * @return Number of characters read including the
  * terminal zero. Negative values indicate failure.
  * @note Doesn't recognize tabulation.
  */
@@ -305,8 +305,8 @@ static void winx_add_history_entry(winx_history *h,char *string)
  * @param[out] string the output buffer.
  * @param[in] n size of the buffer, in characters.
  * @param[in,out] h pointer to commands history. May be NULL.
- * @return Number of characters read, including terminal zero.
- * Negative values indicate failure.
+ * @return Number of characters read, including the terminal
+ * zero. Negative values indicate failure.
  * @note
  * - Recognizes properly both backslash and escape keys, but
  * only when the input takes just a single line on the screen.
@@ -513,7 +513,7 @@ static int print_line(char *line_buffer,
  * the first one, will be ignored.
  * @note If the user hits either Escape or
  * Pause the listing terminates immediately.
- * @return Zero for success, negative
+ * @return Zero for success, a negative
  * value otherwise.
  * @note Doesn't recognize the \\b character.
  */

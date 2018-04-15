@@ -20,7 +20,7 @@
 /**
  * @file udefrag.c
  * @brief Entry point.
- * @details Each of the disk processing algorithms
+ * @details All the disk processing algorithms
  * should comply with the following rules:
  * -# never try to move directories on FAT entirely
  * -# never try to move MFT on NTFS entirely
@@ -66,7 +66,7 @@ HANDLE hMutex = NULL;
  * @brief Initializes udefrag library.
  * @details This routine needs to be called
  * once before any use of other routines.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note This routine initializes zenwinx library as well.
  */
 int udefrag_init_library(void)
@@ -112,7 +112,7 @@ void udefrag_unload_library(void)
  * MFT zone it will be drawn in light magenta only when it's
  * completely free. Otherwise, it will be drawn using another
  * color (according to its contents) to show explicitly that
- * some files are is still there.
+ * some files are still there.
  */
 static void deliver_progress_info(udefrag_job_parameters *jp,int completion_status)
 {
@@ -331,9 +331,9 @@ void destroy_lists(udefrag_job_parameters *jp)
  * specified in UD_REFRESH_INTERVAL environment variable.
  * @param[in] t address of procedure to be called each time
  * when the requested job would like to know whether it must be terminated or not.
- * Nonzero value, returned by the terminator, forces the job to be terminated.
+ * If the terminator returns a nonzero value the job will be terminated.
  * @param[in] p pointer to a user defined data to be passed to both callbacks.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note The callback procedures should complete as quickly
  * as possible to avoid slowdown of the volume processing.
  */
@@ -456,10 +456,9 @@ done:
 /**
  * @brief Retrieves default formatted
  * results of a disk defragmentation job.
- * @param[in] pi pointer to structure containing
- * the progress information of the job.
- * @return The default formatted results
- * of the job. NULL indicates failure.
+ * @param[in] pi the progress information of the job.
+ * @return The default formatted results of the job.
+ * NULL indicates failure.
  * @note This function is intended for use
  * in console and native applications.
  */
@@ -599,7 +598,7 @@ static void write_log_file_header(wchar_t *path)
 /**
  * @internal
  * @brief Creates target directory for a file.
- * @return Zero for success, negative value
+ * @return Zero for success, a negative value
  * otherwise.
  */
 static int create_target_directory(wchar_t *path)
@@ -620,13 +619,13 @@ static int create_target_directory(wchar_t *path)
 }
 
 /**
- * @brief Turns logging to file on/off,
+ * @brief Turns logging to a file on/off,
  * according to <b>\%UD_LOG_FILE_PATH\%</b>
  * environment variable.
  * @details If the library cannot create the
  * specified path, it uses the following path
  * instead: <b>\%SystemDrive\%\\UltraDefrag_Logs</b>.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note The environment variable mentioned above
  * must contain the full path of the log file.
  */

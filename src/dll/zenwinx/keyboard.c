@@ -181,7 +181,7 @@ done:
  * @param[in] hKbDevice the handle of the keyboard device.
  * @param[in] LedFlags the flags specifying
  * which indicators should be lighten up.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
 {
@@ -212,7 +212,7 @@ static int kb_light_up_indicators(HANDLE hKbDevice,USHORT LedFlags)
  * @internal
  * @brief Checks a keyboard for existence.
  * @param[in] hKbDevice the handle of the keyboard device.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int kb_check(HANDLE hKbDevice)
 {
@@ -256,7 +256,7 @@ static int kb_check(HANDLE hKbDevice)
  * @internal
  * @brief Opens a keyboard device.
  * @param[in] device_number the number of the keyboard device.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int kb_open_device(int device_number)
 {
@@ -329,7 +329,7 @@ static int kb_open_device(int device_number)
 /**
  * @internal
  * @brief Opens all the initialized keyboards.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int kb_open(void)
 {
@@ -412,10 +412,9 @@ void kb_close(void)
 */
 
 /**
- * @brief Prepares all existing keyboards
- * for work with user input related procedures.
- * @return Zero for success, negative value otherwise.
- * @note This routine doesn't intended to be called
+ * @brief Initializes all the connected keyboards.
+ * @return Zero for success, a negative value otherwise.
+ * @note This routine isn't intended to be called
  * more than once.
  */
 int winx_kb_init(void)
@@ -461,7 +460,7 @@ int winx_kb_init(void)
  * interval elapses.
  * @param[out] pKID pointer to the structure receiving keyboard input.
  * @param[in] msec_timeout the timeout interval, in milliseconds.
- * @return Zero if any key was pressed, negative value otherwise.
+ * @return Zero if any key was pressed, a negative value otherwise.
  */
 int kb_read(PKEYBOARD_INPUT_DATA pKID,int msec_timeout)
 {

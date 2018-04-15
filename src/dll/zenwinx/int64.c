@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file int64.c
  * @brief 64-bit integer arithmetic support.
  * @{
@@ -43,4 +44,7 @@ ULONGLONG __umoddi3(ULONGLONG u, ULONGLONG v)
 #endif
 #endif
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

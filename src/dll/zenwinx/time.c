@@ -86,9 +86,9 @@ ULONGLONG winx_str2time(char *string)
  * @param[in] time the time interval, in seconds.
  * @param[out] buffer the output buffer.
  * @param[in] size size of the buffer, in characters.
- * @return The number of characters stored.
+ * @return Number of characters stored.
  * @note The time interval should not exceed 140 years
- * (0xFFFFFFFF seconds), otherwise it will be truncated.
+ * (0xFFFFFFFF seconds), otherwise it will get truncated.
  */
 int winx_time2str(ULONGLONG time,char *buffer,int size)
 {
@@ -118,7 +118,7 @@ int winx_time2str(ULONGLONG time,char *buffer,int size)
 
 /**
  * @internal
- * @brief Internal variable used
+ * @brief An internal variable used
  * to log winx_xtime failure once.
  */
 int xtime_failed = 0;
@@ -169,7 +169,8 @@ ULONGLONG winx_xtime(void)
  * (UTC) in a human understandable format.
  * @param[out] t pointer to structure
  * receiving the current system time.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success,
+ * a negative value otherwise.
  */
 int winx_get_system_time(winx_time *t)
 {
@@ -203,7 +204,8 @@ int winx_get_system_time(winx_time *t)
  * in a human understandable format.
  * @param[out] t pointer to structure
  * receiving the current local time.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success,
+ * a negative value otherwise.
  */
 int winx_get_local_time(winx_time *t)
 {

@@ -16,83 +16,36 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
+ 
+/**
+ * NOTE: to build internal documentation include the following 
+ * definitions to the supplied Doxyfile:
+ *
+ * INTERNAL_DOCS          = YES
+ * ENABLED_SECTIONS       = INTERNAL
+ */
 
 /**
  * @mainpage UltraDefrag Library
  *
  * UltraDefrag library contains disk defragmentation algorithms.
+ *
+ * @if INTERNAL
+ * @defgroup Analysis    Analysis
+ * @defgroup Auxiliary   Auxiliary routines
+ * @defgroup ClusterMap  Cluster map
+ * @defgroup Defrag      Defragmentation
+ * @endif
+ *
+ * @defgroup Disks       Disks
+ * @defgroup Engine      Engine
+ *
+ * @if INTERNAL
+ * @defgroup Entry       Entry point
+ * @defgroup Move        Files transfer
+ * @defgroup Optimizer   Optimization
+ * @defgroup Options     Options
+ * @defgroup Reports     Reports
+ * @defgroup Search      Search
+ * @endif
  */
-
-/**
- * @defgroup Analysis Analysis
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Auxiliary Auxiliary routines
- * @{
- */
-/** @} */
-
-/**
- * @defgroup ClusterMap Cluster map
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Defrag Defragmentation
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Disks Disks
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Engine Engine
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Entry Entry point
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Move Files transfer
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Optimizer Optimization
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Options Options
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Reports Reports
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Search Search
- * @{
- */
-/** @} */
-
-/** @} */

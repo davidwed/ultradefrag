@@ -80,7 +80,7 @@ static int native_app_init(void)
 
 /**
  * @brief Handles Safe Mode boots.
- * @return Nonzero value if Windows
+ * @return A nonzero value if Windows
  * is in Safe Mode, zero otherwise.
  */
 static int handle_safe_mode_boot(void)

@@ -29,9 +29,9 @@
 
 /**
  * @brief Creates a thread and starts its execution.
- * @param[in] start_addr the starting address of the thread.
+ * @param[in] start_addr the address of the thread routine.
  * @param[in] parameter the parameter to be passed to the thread routine.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @par Example:
  * @code
  * DWORD WINAPI thread_proc(LPVOID parameter)
@@ -67,8 +67,8 @@ int winx_create_thread(PTHREAD_START_ROUTINE start_addr,PVOID parameter)
  * because it doesn't deallocate the initial stack.
  * On the other hand, such deallocation seems to be
  * not easy and even if we'll find a proper solution
- * for, let's say XP, we cannot guarantee its work
- * on other systems.
+ * for, let's say Windows XP, we cannot guarantee its
+ * work on other systems.
  */
 void winx_exit_thread(NTSTATUS status)
 {

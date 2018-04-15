@@ -109,7 +109,7 @@ void winx_path_extract_filename(wchar_t *path)
 /**
  * @brief Gets the fully quallified path of the current module.
  * @details This routine is the native equivalent of the GetModuleFileName routine.
- * @note The returned string should be freed by the winx_free call after its use.
+ * @note The returned string should be released by the winx_free call after its use.
  */
 wchar_t *winx_get_module_filename(void)
 {
@@ -156,7 +156,7 @@ wchar_t *winx_get_module_filename(void)
 /**
  * @brief Creates a directory tree.
  * @param[in] path the native path to be created.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_create_path(wchar_t *path)
 {

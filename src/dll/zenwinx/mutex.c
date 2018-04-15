@@ -32,7 +32,7 @@
  * @param[in] name the name of the mutex.
  * @param[out] phandle pointer to variable
  * to store the mutex handle into.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @par Example:
  * @code
  * HANDLE h;
@@ -68,7 +68,7 @@ int winx_create_mutex(wchar_t *name,HANDLE *phandle)
  * @param[in] name the name of the mutex.
  * @param[out] phandle pointer to variable
  * to store the mutex handle into.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @par Example:
  * @code
  * HANDLE h;
@@ -99,7 +99,7 @@ int winx_open_mutex(wchar_t *name,HANDLE *phandle)
  * @brief Releases a mutex.
  * @param[in] h the mutex handle.
  * @return Zero for success, 
- * negative value otherwise.
+ * a negative value otherwise.
  */
 int winx_release_mutex(HANDLE h)
 {

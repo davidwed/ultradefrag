@@ -350,7 +350,7 @@ static int wcsmatch_icase_helper(wchar_t *string, wchar_t *mask)
  * @param[in] string the string to be compared with the mask.
  * @param[in] mask the mask to be compared with the string.
  * @param[in] flags a combination of WINX_PAT_xxx flags.
- * @return Nonzero value indicates that the string matches the mask.
+ * @return A nonzero value if the string matches the mask.
  * @note Optimized for speed.
  */
 int winx_wcsmatch(wchar_t *string, wchar_t *mask, int flags)
@@ -496,7 +496,7 @@ wchar_t *winx_swprintf(const wchar_t *format, ...)
  * @param[in] delim the list of delimiters to be
  * used to split the string to individual patterns.
  * @param[in] flags a combination of WINX_PAT_xxx flags.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_patcomp(winx_patlist *patterns,wchar_t *string,wchar_t *delim,int flags)
 {
@@ -567,8 +567,8 @@ int winx_patcomp(winx_patlist *patterns,wchar_t *string,wchar_t *delim,int flags
  * @param[in] string the string to search in.
  * @param[in] patterns the list of patterns
  * to be searched for.
- * @return Nonzero value indicates
- * that at least one pattern has been found.
+ * @return A nonzero value if at least one
+ * pattern has been found.
  */
 int winx_patfind(wchar_t *string,winx_patlist *patterns)
 {
@@ -596,8 +596,8 @@ int winx_patfind(wchar_t *string,winx_patlist *patterns)
  * @param[in] string the string to compare patterns with.
  * @param[in] patterns the list of patterns
  * to be compared with the string.
- * @return Nonzero value indicates that
- * at least one pattern matches the string.
+ * @return A nonzero value if at least
+ * one pattern matches the string.
  */
 int winx_patcmp(wchar_t *string,winx_patlist *patterns)
 {
@@ -615,7 +615,7 @@ int winx_patcmp(wchar_t *string,winx_patlist *patterns)
 }
 
 /**
- * @brief Frees resources allocated by winx_patcomp.
+ * @brief Releases resources allocated by winx_patcomp.
  * @param[in] patterns the list of patterns.
  */
 void winx_patfree(winx_patlist *patterns)
@@ -645,10 +645,10 @@ void winx_patfree(winx_patlist *patterns)
  * @param[in] digits number of digits after the dot.
  * @param[out] buffer the output buffer.
  * @param[in] length length of the buffer, in characters.
- * @return The number of characters stored, not counting the 
- * terminating null character. If the number of characters
- * required to store the data exceeds length, then length 
- * characters are stored in the buffer and a negative value is returned.
+ * @return Number of characters stored, not counting the 
+ * terminal zero. If number of characters required to store
+ * the data exceeds length, then length characters are stored
+ * in the buffer and a negative value is returned.
  */
 int winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length)
 {
@@ -683,13 +683,13 @@ int winx_bytes_to_hr(ULONGLONG bytes, int digits, char *buffer, int length)
 
 /**
  * @brief Converts a human readable
- * string to the number of bytes.
+ * string to number of bytes.
  * @details Supported suffixes:
  * B, KB, MB, GB, TB, PB, EB, ZB, YB.
  * @param[in] string the string to be converted.
- * @return The number of bytes.
+ * @return Number of bytes.
  * @note Accepted values are below 16.0 Eb,
- * all values above will be converted improperly.
+ * all values above will get converted improperly.
  */
 ULONGLONG winx_hr_to_bytes(char *string)
 {
@@ -731,9 +731,9 @@ ULONGLONG winx_hr_to_bytes(char *string)
 /**
  * @brief Converts a string to UTF-8 encoding.
  * @param[out] dst the destination buffer.
- * @param[in] size the size of the destination buffer.
+ * @param[in] size size of the destination buffer.
  * @param[in] src the source string.
- * @note Each converted character needs maximum
+ * @note Each converted character requires maximum
  * three bytes to be stored. So, the destination buffer
  * should be at least (1.5 * src_bytes) long.
  */

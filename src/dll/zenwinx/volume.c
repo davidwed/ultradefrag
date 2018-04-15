@@ -176,7 +176,7 @@ int winx_get_drive_type(char letter)
  * @brief Retrieves geometry of a drive.
  * @param[in] hRoot handle of the root directory.
  * @param[out] v pointer to structure receiving the information.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
 {
@@ -222,12 +222,12 @@ static int get_drive_geometry(HANDLE hRoot,winx_volume_information *v)
 
 /**
  * @internal
- * @brief Retrieves file system name for the specified volume.
+ * @brief Retrieves the file system name for the specified volume.
  * @param[in] hRoot handle of the root directory.
  * @param[out] v pointer to structure receiving the name.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note We could analyze the first sector of the 
- * partition directly, but this method is not so swift
+ * partition directly, but this method is not so fast
  * as it accesses the disk physically.
  */
 static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
@@ -271,7 +271,7 @@ static int get_filesystem_name(HANDLE hRoot,winx_volume_information *v)
  * @internal
  * @brief Retrieves NTFS specific data for the specified volume.
  * @param[in,out] v pointer to structure receiving the information.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int get_ntfs_data(winx_volume_information *v)
 {
@@ -357,7 +357,7 @@ static void get_volume_dirty_flag(winx_volume_information *v)
  * @brief Retrieves detailed information about the specified volume.
  * @param[in] volume_letter the volume letter.
  * @param[in,out] v pointer to structure receiving the information.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_get_volume_information(char volume_letter,winx_volume_information *v)
 {
@@ -428,7 +428,7 @@ WINX_FILE *winx_vopen(char volume_letter)
 }
 
 /**
- * @brief fflush equivalent for entire volume.
+ * @brief fflush() equivalent for entire volumes.
  */
 int winx_vflush(char volume_letter)
 {
@@ -452,7 +452,7 @@ int winx_vflush(char volume_letter)
  * @param[in] flags a combination of WINX_GVR_xxx flags.
  * @param[in] cb the address of the procedure to be called
  * each time when a free region is found on the volume.
- * If the callback procedure returns nonzero value,
+ * If the callback procedure returns a nonzero value,
  * the scan terminates immediately.
  * @param[in] user_defined_data pointer to data
  * to be passed to the registered callback.
@@ -705,7 +705,7 @@ next_region:
 }
 
 /**
- * @brief Frees memory allocated
+ * @brief Releases memory allocated
  * by winx_get_free_volume_regions.
  */
 void winx_release_free_volume_regions(winx_volume_region *rlist)

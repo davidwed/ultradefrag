@@ -42,7 +42,7 @@
  * @param[out] phandle pointer to variable
  * to store the lock's handle into.
  * @return Zero for success,
- * negative value otherwise.
+ * a negative value otherwise.
  */
 int winx_create_lock(wchar_t *name,HANDLE *phandle)
 {
@@ -86,7 +86,7 @@ int winx_create_lock(wchar_t *name,HANDLE *phandle)
  * in milliseconds. If the INFINITE constant
  * is passed, the interval never elapses.
  * @return Zero for success,
- * negative value otherwise.
+ * a negative value otherwise.
  */
 int winx_acquire_lock(HANDLE h,int msec)
 {
@@ -106,7 +106,7 @@ int winx_acquire_lock(HANDLE h,int msec)
  * @brief Releases a lock.
  * @param[in] h the lock's handle.
  * @return Zero for success,
- * negative value otherwise.
+ * a negative value otherwise.
  */
 int winx_release_lock(HANDLE h)
 {

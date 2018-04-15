@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file move.c
  * @brief Files transfer.
  * @addtogroup Move
@@ -177,7 +178,7 @@ static winx_blockmap *get_first_block_of_cluster_chain(winx_file_info *f,ULONGLO
  * @internal
  * @brief Moves file clusters.
  * @return Zero for success,
- * negative value otherwise.
+ * a negative value otherwise.
  * @note 
  * - The volume must be opened before this call,
  * jp->fVolume must contain a proper handle.
@@ -325,7 +326,7 @@ static winx_blockmap *add_new_block(winx_blockmap **head,ULONGLONG vcn,ULONGLONG
  * @brief Calculates disposition of a file.
  * @param[in] f pointer to structure
  * containing the initial disposition.
- * @param[in] vcn VCN of the moved cluster chain.
+ * @param[in] vcn the VCN of the moved cluster chain.
  * @param[in] length length of the moved cluster chain.
  * @param[in] target the new LCN of the moved cluster chain.
  * @param[out] new_file_info pointer to structure 
@@ -417,10 +418,9 @@ fail:
 /**
  * @internal
  * @brief Compares two file dispositions.
- * @return Positive value indicates 
- * difference, zero indicates equality.
- * Negative value indicates that 
- * arguments are invalid.
+ * @return A positive value if the dispositions
+ * are different, zero if they are equal and a
+ * negative value if the arguments are invalid.
  */
 static int compare_file_dispositions(winx_file_info *f1, winx_file_info *f2)
 {
@@ -493,12 +493,12 @@ typedef enum {
 /**
  * @internal
  * @brief Moves a cluster chain of a file.
- * @param[in] f pointer to structure describing the file to be moved.
+ * @param[in] f the file to be moved.
  * @param[in] vcn the VCN of the first cluster to be moved.
  * @param[in] length length of the cluster chain to be moved.
  * @param[in] target the LCN of the target free region.
  * @param[in] jp the job parameters.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note 
  * - This routine cannot move the first fragment of MFT
  * on NTFS as well as first clusters of FAT directories.
@@ -772,4 +772,7 @@ int move_file(winx_file_info *f,
     return (moving_result == DETERMINED_MOVING_PARTIAL_SUCCESS) ? (-1) : 0;
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

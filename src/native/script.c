@@ -34,7 +34,7 @@ int escape_flag = 0;
  * @param[in] filename the full path of the script.
  * If NULL is passed, the default boot time script
  * will be used.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int ProcessScript(wchar_t *filename)
 {

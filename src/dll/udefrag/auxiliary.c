@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file auxiliary.c
  * @brief Auxiliary routines.
  * @addtogroup Auxiliary
@@ -167,4 +168,7 @@ void dbg_print_footer(udefrag_job_parameters *jp)
     winx_dbg_print_header(0,0,I"*");
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

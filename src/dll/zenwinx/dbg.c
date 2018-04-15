@@ -22,14 +22,13 @@
  * @brief Debugging.
  * @details The library delivers debugging output
  * to the Debug View program whenever possible.
- * Additionally, logging to file can be enabled
+ * Additionally, logging to a file can be enabled
  * at any moment.
  * @note
  * - To avoid frequent log file updates, which might
  * drop down defragmentation efficiency, the library
- * uses a memory cache for debugging output. Because
- * of that the size of the log is limited by available
- * memory.
+ * uses a memory cache for debugging output. So, size
+ * of the log is limited by available memory.
  * - A few prefixes are defined for debugging messages.
  * They are listed in ../../include/dbg.h file and are
  * intended for easier analysis of logs. To keep logs
@@ -44,7 +43,7 @@
 /*
 * Note: to avoid recursion all the code in this file should
 * call with care either winx_malloc (handling the out of memory
-* condition in a special way) or tracing functions as well.
+* condition in a special way) or tracing functions.
 */
 
 /* controls whether the messages will be collected or not */
@@ -137,7 +136,7 @@ static int dbg_get_local_time(winx_time *t)
  * @brief Initializes
  * debugging facilities.
  * @return Zero for success,
- * negative value otherwise.
+ * a negative value otherwise.
  */
 int winx_dbg_init(void)
 {
@@ -393,11 +392,11 @@ done:
 }
 
 /**
- * @brief Turns logging to file on/off.
+ * @brief Turns logging to a file on/off.
  * @param[in] path the log file path.
  * NULL or an empty string forces to flush
  * all the collected data to the disk and
- * disable logging to file afterwards.
+ * disable logging to the file afterwards.
  */
 void winx_set_dbg_log(wchar_t *path)
 {
@@ -593,7 +592,7 @@ static void remove_crlf(char *s)
 /******************************************************************************/
 
 /**
- * @brief Produces one line of debugging output.
+ * @brief Produces a single line of debugging output.
  * @param[in] flags one of the flags defined in
  * ../../include/dbg.h file.
  * If NT_STATUS_FLAG is set, the
@@ -606,7 +605,8 @@ static void remove_crlf(char *s)
  * @param[in] ... the parameters.
  * @note
  * - Not all system API set the last status code.
- * Use strace macro to catch the status for sure.
+ * Use strace macro to reliably display the result
+ * of the last operation.
  */
 void winx_dbg_print(int flags, const char *format, ...)
 {
@@ -704,7 +704,7 @@ no_description:
 }
 
 /**
- * @brief Produces one line of debugging output,
+ * @brief Produces a single line of debugging output,
  * decorated by the specified character at both sides.
  * @param[in] ch the character to be used for decoration.
  * If zero value is passed, DEFAULT_DBG_PRINT_DECORATION_CHAR is used.
