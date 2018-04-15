@@ -30,8 +30,8 @@
 /**
  * @brief Enables a user privilege for the current process.
  * @param[in] luid the identifier of the requested privilege, 
- * ntndk.h file contains definitions of various privileges.
- * @return Zero for success, negative value otherwise.
+ * check ntndk.h file for definitions of various privileges.
+ * @return Zero for success, a negative value otherwise.
  * @par Example:
  * @code
  * winx_enable_privilege(SE_SHUTDOWN_PRIVILEGE);

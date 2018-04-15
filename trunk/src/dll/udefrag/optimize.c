@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file optimize.c
  * @brief Volume optimization.
  * @addtogroup Optimizer
@@ -50,7 +51,7 @@
  * the region intended to be cleaned up.
  * @return Zero indicates success. (-1)
  * indicates that not enough free space
- * exist on the disk. (-2) indicates that
+ * exists on the disk. (-2) indicates that
  * the file moving failed.
  */
 static int cleanup_space(udefrag_job_parameters *jp, winx_file_info *file,
@@ -138,7 +139,7 @@ static ULONGLONG advance_vcn(winx_file_info *f,ULONGLONG vcn,ULONGLONG n)
  * number of fragmented files (they become marked
  * by UD_FILE_FRAGMENTED_BY_FILE_OPT flag). 
  * @return Zero if the file needs no optimization, 
- * positive value on success, negative value otherwise.
+ * a positive value on success, a negative value otherwise.
  */
 static int optimize_file(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -408,7 +409,7 @@ static ULONGLONG opt_mft_cc_routine(udefrag_job_parameters *jp)
  * @brief Optimizes MFT by placing its fragments
  * close to each other behind the first one.
  * @details The MFT Zone will follow MFT automatically.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int optimize_mft_routine(udefrag_job_parameters *jp)
 {
@@ -975,7 +976,7 @@ done:
  * directories and NTFS master file tables get
  * fixed up as well by placing their fragments
  * close to each other behind the first ones.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int optimize(udefrag_job_parameters *jp)
 {
@@ -1055,4 +1056,7 @@ int optimize_mft(udefrag_job_parameters *jp)
     return result;
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

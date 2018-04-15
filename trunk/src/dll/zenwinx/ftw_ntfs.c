@@ -387,7 +387,7 @@ static void get_number_of_file_records_callback(PATTRIBUTE pattr,mft_scan_parame
 
 /**
  * @brief Retrieves total number of mft file records.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note sp->f_volume and ml->file_record_buffer_size
  * must be properly set before this call.
  */
@@ -454,7 +454,7 @@ static int get_number_of_file_records(mft_scan_parameters *sp)
 
 /**
  * @brief Retrieves MFT layout.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note sp->f_volume must be set before this call.
  */
 static int get_mft_layout(mft_scan_parameters *sp)
@@ -1453,8 +1453,8 @@ static winx_file_info * find_directory_by_mft_id(ULONGLONG mft_id,
  * @param[out] path the output buffer receiving the directory path.
  * @param[out] parent_mft_id pointer to variable receiving the mft
  * index of the parent directory.
- * @return Nonzero value indicates that the output buffer contains
- * the full native path, otherwise it contains the directory name only.
+ * @return A nonzero value if the output buffer contains the full
+ * native path, otherwise it contains the directory name only.
  */
 static int get_directory_information(ULONGLONG mft_id,wchar_t **path,ULONGLONG *parent_mft_id,
     file_entry *f_array,unsigned long n_entries,mft_scan_parameters *sp)

@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file options.c
  * @brief Job options.
  * @addtogroup Options
@@ -31,7 +32,7 @@
  * @internal
  * @brief Retrieves all ultradefrag
  * related options from the environment.
- * @return Zero for success, negative
+ * @return Zero for success, a negative
  * value otherwise.
  */
 int get_options(udefrag_job_parameters *jp)
@@ -241,7 +242,7 @@ int get_options(udefrag_job_parameters *jp)
 
 /**
  * @internal
- * @brief Frees all resources
+ * @brief Releases all resources
  * allocated by get_options.
  */
 void release_options(udefrag_job_parameters *jp)
@@ -251,4 +252,7 @@ void release_options(udefrag_job_parameters *jp)
     winx_patfree(&jp->udo.cut_filter);
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

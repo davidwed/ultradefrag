@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file defrag.c
  * @brief Volume defragmentation.
  * @addtogroup Defrag
@@ -499,7 +500,7 @@ static void defrag_sequence(udefrag_job_parameters *jp)
  * processing, we exclude files for which moving failed.
  * On the other hand, number of fragmented files instantly
  * decreases, so we'll never have infinite loops here.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int defragment(udefrag_job_parameters *jp)
 {
@@ -552,4 +553,7 @@ int defragment(udefrag_job_parameters *jp)
     return 0;
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

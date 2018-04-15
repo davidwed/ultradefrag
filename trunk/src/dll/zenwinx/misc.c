@@ -54,7 +54,7 @@ void winx_sleep(int msec)
  * @par Example:
  * @code 
  * if(winx_get_os_version() >= WINDOWS_XP){
- *     // we are on XP or a later system
+ *     // we are on Windows XP or a more recent system
  * }
  * @endcode
  */
@@ -72,7 +72,7 @@ int winx_get_os_version(void)
  * @brief Retrieves the Windows directory path.
  * @return The native path of the Windows directory,
  * like this: <b>\\??\\C:\\WINDOWS</b>. NULL indicates failure.
- * @note The returned string should be freed by the winx_free
+ * @note The returned string should be released by the winx_free
  * call after its use.
  */
 wchar_t *winx_get_windows_directory(void)
@@ -91,10 +91,10 @@ wchar_t *winx_get_windows_directory(void)
 
 /**
  * @brief Queries a symbolic link.
- * @param[in] name the name of the symbolic link.
+ * @param[in] name the name of the link.
  * @param[out] buffer the buffer to store the target into.
  * @param[in] length length of the buffer, in characters.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @par Example:
  * @code
  * winx_query_symbolic_link(L"\\??\\C:",buffer,BUFFER_LENGTH);
@@ -135,7 +135,7 @@ int winx_query_symbolic_link(wchar_t *name, wchar_t *buffer, int length)
 /**
  * @brief Sets the system error mode.
  * @param[in] mode the error mode.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note 
  * - The mode constants aren't the same as in Win32 SetErrorMode() call.
  * - Pass INTERNAL_SEM_FAILCRITICALERRORS constant to disable the critical
@@ -168,7 +168,7 @@ int winx_set_system_error_mode(unsigned int mode)
 /**
  * @brief Retrieves Windows boot options.
  * @return Windows boot options. NULL indicates failure.
- * @note The returned string should be freed by the
+ * @note The returned string should be released by the
  * winx_free call after its use.
  */
 wchar_t *winx_get_windows_boot_options(void)
@@ -256,9 +256,8 @@ wchar_t *winx_get_windows_boot_options(void)
 
 /**
  * @brief Determines whether Windows is in Safe Mode or not.
- * @return Positive value indicates Safe Mode presence,
- * zero indicates normal boot and negative value indicates
- * indeterminism caused by impossibility of the appropriate check.
+ * @return A positive value in safe mode, zero at normal boot,
+ * a negative value at check failure.
  */
 int winx_windows_in_safe_mode(void)
 {
@@ -281,7 +280,7 @@ int winx_windows_in_safe_mode(void)
  * @brief Marks Windows boot as successful.
  * @note
  * - Based on http://www.osronline.com/showthread.cfm?link=185567
- * - Is used internally by winx_shutdown and winx_reboot.
+ * - Intended for internal use by winx_shutdown and winx_reboot.
  */
 void mark_windows_boot_as_successful(void)
 {

@@ -26,7 +26,7 @@ wchar_t tracking_path[1024];
 
 /**
  * @brief Tries to pick up shared objects.
- * @return Positive value for success,
+ * @return A positive value for success,
  * zero otherwise.
  */
 static int pick_up_shared_objects(void)

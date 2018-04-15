@@ -1,5 +1,5 @@
-# This script lists files needing to be ignored by the Open Hub
-# code analysis service (http://www.openhub.net/p/ultradefrag/):
+# This script lists files which have to be excluded from code
+# analysis at Open Hub (http://www.openhub.net/p/ultradefrag/):
 
 # exclude external libraries
 Disallow: /src/console/getopt1.c

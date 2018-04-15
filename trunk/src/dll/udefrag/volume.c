@@ -38,7 +38,7 @@
  * @param[in] skip_removable defines whether
  * to skip removable media or not.
  * @param[out] v pointer to structure receiving the information.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note If skip_removable is equal to zero and you want to
  * validate a floppy drive with no floppy disk inserted then
  * you'll hear noise :)
@@ -105,7 +105,7 @@ static int internal_validate_volume(char volume_letter,int skip_removable,volume
  * available for defragmentation.
  * @param[in] skip_removable defines
  * whether to skip removable media or not.
- * @return Pointer to the list of volumes.
+ * @return The list of volumes.
  * NULL indicates failure.
  * @note If skip_removable is equal to zero
  * and you have a floppy drive with no disk
@@ -162,10 +162,10 @@ void udefrag_release_vollist(volume_info *v)
 }
 
 /**
- * @brief Retrieves complete information about a disk volume.
+ * @brief Retrieves the complete information about a disk volume.
  * @param[in] volume_letter the volume letter.
  * @param[in] v pointer to structure receiving the information.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int udefrag_get_volume_information(char volume_letter,volume_info *v)
 {
@@ -188,7 +188,7 @@ int udefrag_get_volume_information(char volume_letter,volume_info *v)
  * @param[in] volume_letter the volume letter.
  * @param[in] skip_removable defines whether
  * to skip removable media or not.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note If skip_removable is equal to zero and you want 
  * to validate a floppy drive with no floppy disk inserted
  * then you'll hear noise :)

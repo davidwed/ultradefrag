@@ -31,7 +31,7 @@
  * @brief Inserts an item to a double linked list.
  * @details Allocates memory for the item to be inserted.
  * @param[in,out] phead pointer to variable pointing to the list's head.
- * @param[in] prev pointer to the item preceeding to the new item.
+ * @param[in] prev pointer to the item preceeding the new item.
  * If this parameter is NULL, the new head will be inserted.
  * @param[in] size size of the item to be inserted, in bytes.
  * @return Pointer to the inserted list item. In case of allocation failure
@@ -75,9 +75,9 @@ list_entry *winx_list_insert(list_entry **phead,list_entry *prev,long size)
 
 /**
  * @brief Removes an item from a double linked list.
- * @details Frees memory allocated for the item to be removed.
+ * @details Releases memory allocated for the item to be removed.
  * @param[in,out] phead pointer to variable pointing to the list's head.
- * @param[in] item pointer to the item to be removed.
+ * @param[in] item the item to be removed.
  */
 void winx_list_remove(list_entry **phead,list_entry *item)
 {
@@ -110,7 +110,7 @@ void winx_list_remove(list_entry **phead,list_entry *item)
 
 /**
  * @brief Destroys a double linked list.
- * @details Frees memory allocated for
+ * @details Releases memory allocated for
  * all the list items.
  * @param[in,out] phead pointer to variable
  * pointing to the list's head.

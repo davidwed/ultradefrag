@@ -38,7 +38,7 @@
  * @brief Queries an environment variable.
  * @param[in] name the name of the variable.
  * @return The value. NULL indicates failure.
- * @note The returned string should be freed
+ * @note The returned string should be released
  * by the winx_free call after its use.
  */
 wchar_t *winx_getenv(wchar_t *name)
@@ -72,7 +72,7 @@ wchar_t *winx_getenv(wchar_t *name)
  * @brief Sets an environment variable.
  * @param[in] name the name of the variable.
  * @param[in] value the value; NULL causes deletion of the variable.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note The value must not exceed 32767 characters,
  * including terminal zero, as mentioned in MSDN.
  */

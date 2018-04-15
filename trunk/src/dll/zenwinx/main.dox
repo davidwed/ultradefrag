@@ -18,6 +18,14 @@
  */
 
 /**
+ * NOTE: to build internal documentation include the following 
+ * definitions to the supplied Doxyfile:
+ *
+ * INTERNAL_DOCS          = YES
+ * ENABLED_SECTIONS       = INTERNAL
+ */
+
+/**
  * @mainpage ZenWINX Library
  *
  * ZenWINX library is a development framework for Windows native applications:
@@ -26,136 +34,31 @@
  * @note
  * Undocumented native API, being used improperly, can easily crash your
  * application. The included <b>ntndk.h</b> file contains some hints.
+ *
+ * @defgroup BinaryTrees         Binary trees
+ * @defgroup Console             Console
+ * @defgroup Debug               Debug
+ * @defgroup Disks               Disks
+ *
+ * @if INTERNAL
+ * @defgroup Entry               Entry point
+ * @endif
+ *
+ * @defgroup Environment         Environment
+ * @defgroup Events              Events
+ * @defgroup File                File
+ * @defgroup Keyboard            Keyboard
+ * @defgroup Lists               Lists
+ * @defgroup Loader              Loader
+ * @defgroup Locks               Locks
+ * @defgroup Memory              Memory
+ * @defgroup Miscellaneous       Miscellaneous
+ * @defgroup Mutexes             Mutexes
+ * @defgroup Paths               Paths
+ * @defgroup Privileges          Privileges
+ * @defgroup Registry            Registry
+ * @defgroup StartupAndShutdown  Startup and shutdown
+ * @defgroup Strings             Strings
+ * @defgroup Threads             Threads
+ * @defgroup Time                Time
  */
-
-/**
- * @defgroup BinaryTrees Binary trees
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Console Console
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Debug Debug
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Disks Disks
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Entry Entry point
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Environment Environment
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Events Events
- * @{
- */
-/** @} */
-
-/**
- * @defgroup File File
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Keyboard Keyboard
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Lists Lists
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Loader Loader
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Locks Locks
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Memory Memory
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Miscellaneous Miscellaneous
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Mutexes Mutexes
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Paths Paths
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Privileges Privileges
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Registry Registry
- * @{
- */
-/** @} */
-
-/**
- * @defgroup StartupAndShutdown Startup and shutdown
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Strings Strings
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Threads Threads
- * @{
- */
-/** @} */
-
-/**
- * @defgroup Time Time
- * @{
- */
-/** @} */

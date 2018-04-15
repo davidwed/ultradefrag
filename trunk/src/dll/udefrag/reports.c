@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file reports.c
  * @brief File fragmentation reports.
  * @addtogroup Reports
@@ -266,9 +267,8 @@ static int save_lua_report(udefrag_job_parameters *jp)
 
 /**
  * @internal
- * @brief Saves fragmentation report.
- * @return Zero for success,
- * negative value otherwise.
+ * @brief Saves the file fragmentation report.
+ * @return Zero for success, a negative value otherwise.
  */
 int save_fragmentation_report(udefrag_job_parameters *jp)
 {
@@ -296,7 +296,7 @@ int save_fragmentation_report(udefrag_job_parameters *jp)
 
 /**
  * @internal
- * @brief Removes all fragmentation reports from the disk.
+ * @brief Removes all the file fragmentation reports from the disk.
  */
 void remove_fragmentation_report(udefrag_job_parameters *jp)
 {
@@ -341,4 +341,7 @@ void remove_fragmentation_report(udefrag_job_parameters *jp)
     }
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

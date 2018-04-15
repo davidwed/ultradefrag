@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file analyze.c
  * @brief Volume analysis.
  * @addtogroup Analysis
@@ -118,8 +119,8 @@ static void adjust_move_at_once_parameter(udefrag_job_parameters *jp)
 
 /**
  * @internal
- * @brief Retrieves complete information about the disk.
- * @return Zero for success, negative value otherwise.
+ * @brief Retrieves the complete information about the disk.
+ * @return Zero for success, a negative value otherwise.
  * @note Resets statistics and cluster map.
  */
 static int get_volume_information(udefrag_job_parameters *jp)
@@ -220,7 +221,7 @@ static int process_free_region(winx_volume_region *rgn,void *user_defined_data)
 /**
  * @internal
  * @brief Retrieves free space layout.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int get_free_space_layout(udefrag_job_parameters *jp)
 {
@@ -566,7 +567,7 @@ void dbg_print_file_counters(udefrag_job_parameters *jp)
 /**
  * @internal
  * @brief Searches for all files on the disk.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int find_files(udefrag_job_parameters *jp)
 {
@@ -644,10 +645,8 @@ static int find_files(udefrag_job_parameters *jp)
 
 /**
  * @internal
- * @brief Defines whether a file
- * is locked by system or not.
- * @return Nonzero value indicates
- * that the file is locked.
+ * @brief Defines whether a file is locked by system or not.
+ * @return A nonzero value if the file is locked.
  */
 int is_file_locked(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -823,10 +822,8 @@ static void produce_list_of_fragmented_files(udefrag_job_parameters *jp)
 
 /**
  * @internal
- * @brief Checks whether the requested
- * action is allowed or not.
- * @return Zero indicates that it's allowed,
- * negative value indicates the contrary.
+ * @brief Checks whether the requested action is allowed or not.
+ * @return Zero if the action is allowed, a negative value otherwise.
  */
 static int check_requested_action(udefrag_job_parameters *jp)
 {
@@ -871,7 +868,7 @@ int check_fragmentation_level(udefrag_job_parameters *jp)
  * @internal
  * @brief Analyzes the disk.
  * @return Zero for success,
- * negative value otherwise.
+ * a negative value otherwise.
  */
 int analyze(udefrag_job_parameters *jp)
 {
@@ -913,4 +910,7 @@ int analyze(udefrag_job_parameters *jp)
     return 0;
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

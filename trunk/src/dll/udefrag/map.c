@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file map.c
  * @brief Cluster map.
  * @addtogroup ClusterMap
@@ -52,8 +53,8 @@
  * @internal
  * @brief Allocates cluster map.
  * @param[in] map_size the number of cells.
- * @param[in,out] jp pointer to the job parameters.
- * @return Zero for success, negative value otherwise.
+ * @param[in,out] jp the job parameters.
+ * @return Zero for success, a negative value otherwise.
  */
 int allocate_map(int map_size,udefrag_job_parameters *jp)
 {
@@ -221,7 +222,7 @@ void colorize_map_region(udefrag_job_parameters *jp,
 /**
  * @internal
  * @brief Defines whether a file is $Mft or not.
- * @return Nonzero value indicates that the file is $Mft.
+ * @return A nonzero value if the file is $Mft.
  */
 int is_mft(winx_file_info *f,udefrag_job_parameters *jp)
 {
@@ -306,8 +307,8 @@ void colorize_file(udefrag_job_parameters *jp, winx_file_info *f, int old_color)
 
 /**
  * @internal
- * @brief Frees resources
- * allocated by allocate_map.
+ * @brief Releases resources allocated
+ * by the allocate_map() routine.
  */
 void free_map(udefrag_job_parameters *jp)
 {
@@ -318,4 +319,7 @@ void free_map(udefrag_job_parameters *jp)
     memset(&jp->cluster_map,0,sizeof(cmap));
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

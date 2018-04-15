@@ -35,7 +35,7 @@ winx_killer killer = default_killer;
 
 /**
  * @internal
- * @brief Aborts the application in the out of memory condition case
+ * @brief Aborts the application in the out of memory condition
  * when no custom killer is set by the winx_set_killer routine.
  */
 int default_killer(size_t n)
@@ -47,12 +47,11 @@ int default_killer(size_t n)
 
 /**
  * @brief Sets custom routine to be called
- * in the out of memory condition case.
+ * in the out of memory condition.
  * @details The killer should either abort
- * the application and return zero or 
- * return a nonzero value. In the latter case
- * zenwinx library will try to allocate memory
- * again.
+ * the application and return zero or return
+ * a nonzero value. In the latter case zenwinx
+ * library will try to allocate memory again.
  */
 void winx_set_killer(winx_killer k)
 {
@@ -61,11 +60,11 @@ void winx_set_killer(winx_killer k)
 
 /**
  * @brief Allocates a block of memory.
- * @param size size of the block, in bytes.
+ * @param size bytes to allocate.
  * @param flags a combination of MALLOC_XXX
  * flags defined in zenwinx.h file.
- * @return The address of the allocated block.
- * NULL indicates failure.
+ * @return A pointer to the allocated block or
+ * NULL if there's no sufficient memory available.
  * @note The allocated block may be larger
  * than requested.
  */
@@ -92,8 +91,8 @@ void *winx_heap_alloc(size_t size,int flags)
 }
 
 /**
- * @brief Frees memory allocated by winx_heap_alloc.
- * @param[in] addr the address of the memory block.
+ * @brief Releases a memory block allocated by winx_heap_alloc().
+ * @param[in] addr the memory block to be released.
  */
 void winx_heap_free(void *addr)
 {
@@ -108,7 +107,7 @@ void winx_heap_free(void *addr)
 /**
  * @internal
  * @brief Creates global memory heap.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_create_global_heap(void)
 {

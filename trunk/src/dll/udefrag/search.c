@@ -18,6 +18,7 @@
  */
 
 /**
+ * @if INTERNAL
  * @file search.c
  * @brief File blocks and free space regions searching.
  * @addtogroup Search
@@ -39,8 +40,8 @@
  * @internal
  * @brief Searches for the first suitable free space region.
  * @param[in] jp the job parameters.
- * @param[in] min_lcn minimum LCN of the region.
- * @param[in] min_length minimum length of the region, in clusters.
+ * @param[in] min_lcn the minimum LCN of the region.
+ * @param[in] min_length the minimum length of the region, in clusters.
  * @param[out] max_length length of the biggest region found.
  * @note In case of termination request returns NULL immediately.
  */
@@ -73,8 +74,8 @@ winx_volume_region *find_first_free_region(udefrag_job_parameters *jp,
  * @internal
  * @brief Searches for the last suitable free space region.
  * @param[in] jp the job parameters.
- * @param[in] min_lcn minimum LCN of the region.
- * @param[in] min_length minimum length of the region, in clusters.
+ * @param[in] min_lcn the minimum LCN of the region.
+ * @param[in] min_length the minimum length of the region, in clusters.
  * @param[out] max_length length of the biggest region found.
  * @note In case of termination request returns NULL immediately.
  */
@@ -177,7 +178,7 @@ static void free_item (void *prb_item, void *prb_param)
  * @internal
  * @brief Creates and initializes a binary
  * tree to store all the file blocks into.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note jp->file_blocks must be initialized by NULL
  * or point to a valid tree before this call.
  */
@@ -192,7 +193,7 @@ int create_file_blocks_tree(udefrag_job_parameters *jp)
 /**
  * @internal
  * @brief Adds a file block to the binary tree.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note Destroys the tree in case of errors.
  */
 int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *file, winx_blockmap *block)
@@ -221,7 +222,7 @@ int add_block_to_file_blocks_tree(udefrag_job_parameters *jp, winx_file_info *fi
 /**
  * @internal
  * @brief Removes a file block from the binary tree.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int remove_block_from_file_blocks_tree(udefrag_job_parameters *jp, winx_blockmap *block)
 {
@@ -270,8 +271,7 @@ void destroy_file_blocks_tree(udefrag_job_parameters *jp)
  * @internal
  * @brief Searches for the first movable file block.
  * @param[in] jp the job parameters.
- * @param[in,out] min_lcn pointer to variable
- * containing the minimum LCN accepted.
+ * @param[in,out] min_lcn the minimum LCN accepted.
  * @param[in] flags one of the SKIP_xxx
  * flags defined in udefrag.h
  * @param[out] first_file pointer to
@@ -343,4 +343,7 @@ winx_blockmap *find_first_block(udefrag_job_parameters *jp,
     return NULL;
 }
 
-/** @} */
+/**
+ * @}
+ * @endif
+ */

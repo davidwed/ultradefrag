@@ -41,7 +41,7 @@ void kb_close(void);
  * @details This routine needs to be called
  * before any use of other routines (except
  * a few ones like winx_print).
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_init_library(void)
 {
@@ -72,7 +72,7 @@ void winx_unload_library(void)
  * allocation may be not available.
  * @param[in] msg the error message.
  * @param[in] Status the NT status code.
- * @note Intended to be used after winx_exit,
+ * @note Intended to be used on winx_exit,
  * winx_shutdown and winx_reboot failures.
  */
 static void print_post_scriptum(char *msg,NTSTATUS Status)
@@ -107,7 +107,7 @@ void winx_exit(int exit_code)
 /**
  * @brief Reboots the computer.
  * @note If SE_SHUTDOWN privilege adjusting fails
- * then the computer will be not rebooted and the 
+ * then the computer won't be rebooted and the 
  * program will continue execution after this call.
  */
 void winx_reboot(void)
@@ -125,9 +125,9 @@ void winx_reboot(void)
 }
 
 /**
- * @brief Shuts the computer down.
+ * @brief Shuts down the computer.
  * @note If SE_SHUTDOWN privilege adjusting fails
- * then the computer will be not shut down and the
+ * then the computer won't be shut down and the
  * program will continue execution after this call.
  */
 void winx_shutdown(void)

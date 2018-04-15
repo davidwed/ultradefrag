@@ -91,7 +91,8 @@ NTSTATUS NTAPI query_routine(PWSTR ValueName,
  * @internal
  * @brief Retrieves the list of commands
  * registered to be executed at Windows boot.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value
+ * otherwise.
  */
 static int get_boot_exec_list(struct cmd **list)
 {
@@ -116,9 +117,9 @@ static int get_boot_exec_list(struct cmd **list)
  * @details Treats 'command' and 'autocheck command' as the same.
  * @param[in] reg_cmd the command read from the registry.
  * @param[in] cmd the command to be searched for.
- * @return Positive value indicates that the commands are equal,
- * zero indicates that they're different, negative value
- * indicates a failure of the comparison.
+ * @return A positive value if the commands are equal,
+ * zero if they're different, a negative value in case
+ * of comparison failure.
  */
 static int cmd_compare(wchar_t *reg_cmd,const wchar_t *cmd)
 {
@@ -145,7 +146,7 @@ static int cmd_compare(wchar_t *reg_cmd,const wchar_t *cmd)
  * @internal
  * @brief Saves a list of commands intended to 
  * be executed at Windows boot to the registry.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 static int save_boot_exec_list(struct cmd *list)
 {
@@ -206,9 +207,9 @@ static void destroy_boot_exec_list(struct cmd *list)
  * being executed during the Windows boot process or not.
  * @param[in] command the name of the command's
  * executable, without extension.
- * @return Positive value indicates that the command
- * is registered, zero indicates that it isn't,
- * negative value indicates a failure of the check.
+ * @return A positive value if the command
+ * is registered, zero if it isn't,
+ * a negative value in case of check failure.
  */
 int winx_bootex_check(const wchar_t *command)
 {
@@ -243,7 +244,7 @@ done:
  * during the Windows boot process.
  * @param[in] command the name of the command's
  * executable, without extension.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note The command's executable must be placed inside 
  * the system32 directory to be executed successfully.
  */
@@ -300,7 +301,7 @@ done:
  * executed during the Windows boot process.
  * @param[in] command the name of the
  * command's executable, without extension.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_bootex_unregister(const wchar_t *command)
 {

@@ -34,7 +34,7 @@
  * SynchronizationEvent or NotificationEvent.
  * @param[out] phandle pointer to variable
  * to store the event's handle into.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  * @note
  * - The initial state of the successfully created
  *   event is signaled.
@@ -74,7 +74,7 @@ int winx_create_event(wchar_t *name,int type,HANDLE *phandle)
  * OpenEvent() call's dwDesiredAccess parameter.
  * @param[out] phandle pointer to variable
  * to store the event's handle into.
- * @return Zero for success, negative value otherwise.
+ * @return Zero for success, a negative value otherwise.
  */
 int winx_open_event(wchar_t *name,int flags,HANDLE *phandle)
 {
