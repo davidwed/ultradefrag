@@ -170,7 +170,7 @@ Type 'help' to list available commands.
  * <div class="line"><span class="comment">; set UD_DBGPRINT_LEVEL=DETAILED</span></div>
  * <div class="line"></div>
  * <div class="line"><span class="comment">; uncomment the following line to save debugging information to a log file</span></div>
- * <div class="line"><span class="comment">; set UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\logs\defrag_native.log</span></div>
+ * <div class="line"><span class="comment">; set UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\logs\ud-boot-time.log</span></div>
  * <div class="line"></div>
  * <div class="line"><span class="keyword">udefrag</span> c:</div>
  * <div class="line"></div>
@@ -194,7 +194,7 @@ Type 'help' to list available commands.
 \rem{; set UD\_DBGPRINT\_LEVEL=DETAILED}
 
 \rem{; uncomment the following line to save debugging information to a log file}
-\rem{; set UD\_LOG\_FILE\_PATH=%UD\_INSTALL\_DIR%\(\backslash\)logs\(\backslash\)defrag\_native.log}
+\rem{; set UD\_LOG\_FILE\_PATH=%UD\_INSTALL\_DIR%\(\backslash\)logs\(\backslash\)ud-boot-time.log}
 
 \cmd{udefrag} c:
 
@@ -207,7 +207,7 @@ Type 'help' to list available commands.
  * @htmlonly
  * <div class="fragment">
  * <div class="line"><span class="comment">; create a timestamped log file</span></div>
- * <div class="line"><span class="keyword">set</span> UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\logs\defrag_native_%DATE%_%TIME%.log</div>
+ * <div class="line"><span class="keyword">set</span> UD_LOG_FILE_PATH=%UD_INSTALL_DIR%\logs\ud-boot-time-%DATE%-%TIME%.log</div>
  * <div class="line"></div>
  * <div class="line"><span class="keyword">udefrag</span> %SystemDrive%</div>
  * <div class="line"></div>
@@ -218,7 +218,7 @@ Type 'help' to list available commands.
 @latexonly
 \begin{DoxyCode}
 \rem{; create a timestamped log file}
-\cmd{set} UD\_LOG\_FILE\_PATH=%UD\_INSTALL\_DIR%\(\backslash\)logs\(\backslash\)defrag\_native\_%DATE%\_%TIME%.log
+\cmd{set} UD\_LOG\_FILE\_PATH=%UD\_INSTALL\_DIR%\(\backslash\)logs\(\backslash\)ud-boot-time-%DATE%-%TIME%.log
 
 \cmd{udefrag} %SystemDrive%
 

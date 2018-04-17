@@ -57,6 +57,14 @@
  * This way UltraDefrag will move all files, regardless of their fragments
  * size, to the beginning of the disk.
  *
+ * <h3>I have a volume with no drive letter assigned, how can I defragment it?</h3>
+ * Go to <b>Start > Control Panel > Administrative Tools > Computer Management > Storage >
+ * Disk Management</b> and assign a drive letter to the volume. Then defragment it and,
+ * if you wish, remove the assigned letter afterwards. To automate the process
+ * the <a href="https://www.howtogeek.com/197296/how-to-use-the-diskpart-utility-to-assign-and-remove-drive-letters/">diskpart</a>
+ * utility can be used as shown in the @ref Console chapter of this handbook. The only drawback is that in some cases a reboot may
+ * be required to release the assigned drive letter, especially on older systems like Windows XP.
+ *
  * <h1>Graphical interface</h1>
  * <h3>When will the cluster map become interactive, so I'll be able to know where
  * individual files are located on disk?</h3>
