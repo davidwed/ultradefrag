@@ -153,9 +153,9 @@
  * to the beginning of the boot time script.
  *
  * <h3>USN journal cleanup</h3>
- * Sometimes a fragmented <a href="http://technet.microsoft.com/en-us/library/cc788042.aspx">USN journal</a>
- * prevents free space consolidation. Open an administrative command prompt and type the following commands
- * there to clean it up:
+ * Sometimes a fragmented <a href="http://technet.microsoft.com/en-us/library/cc788042.aspx">USN journal</a> prevents free space consolidation.
+ * Open an <a href="https://www.bleepingcomputer.com/tutorials/how-to-open-a-windows-10-elevated-command-prompt/">elevated command prompt</a>
+ * and type the following commands there to clean it up:
  *
  * @htmlonly
  * <div class="fragment">

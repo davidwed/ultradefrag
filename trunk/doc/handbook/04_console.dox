@@ -323,6 +323,22 @@
  * <div class="line"><span class="keyword">set</span> UD_EX_FILTER=%UD_EX_FILTER%;C:\*;D:\*;G:\*;H:\*</div>
  * <div class="line"><span class="keyword">udefrag</span> --all-fixed</div>
  * <div class="line"></div>
+ * <div class="line"><span class="comment">:: defragment a disk with no drive letter assigned,</span></div>
+ * <div class="line"><span class="comment">:: mounted to C:\Games, using the diskpart utility</span></div>
+ * <div class="line"></div>
+ * <div class="line"><span class="comment">:: first of all, assign a drive letter to the disk</span></div>
+ * <div class="line"><span class="keyword">echo</span> select volume c:\games &gt; script</div>
+ * <div class="line"><span class="keyword">echo</span> assign letter=t &gt;&gt; script</div>
+ * <div class="line"><span class="keyword">diskpart</span> /s script</div>
+ * <div class="line"></div>
+ * <div class="line"><span class="comment">:: then, defragment the disk</span></div>
+ * <div class="line"><span class="keyword">udefrag</span> t:</div>
+ * <div class="line"></div>
+ * <div class="line"><span class="comment">:: after all, remove the assigned letter</span></div>
+ * <div class="line"><span class="keyword">echo</span> select volume c:\games &gt; script</div>
+ * <div class="line"><span class="keyword">echo</span> remove letter=t &gt;&gt; script</div>
+ * <div class="line"><span class="keyword">diskpart</span> /s script</div>
+ * <div class="line"></div>
  * <div class="line"><span class="comment">:: hibernate the computer using a special</span></div>
  * <div class="line"><span class="comment">:: command line tool shipped with UltraDefrag</span></div>
  * <div class="line"><span class="keyword">hibernate4win</span> now</div>
@@ -393,6 +409,22 @@
  * \rem{:: defragment all fixed disks except of c:, d:, g: and h:}
  * \cmd{set} UD\_EX\_FILTER=%UD\_EX\_FILTER%;C:\(\backslash\)*;D:\(\backslash\)*;G:\(\backslash\)*;H:\(\backslash\)*
  * \cmd{udefrag} --all-fixed
+ *
+ * \rem{:: defragment a disk with no drive letter assigned,}
+ * \rem{:: mounted to C:\(\backslash\)Games, using the diskpart utility}
+ *
+ * \rem{:: first of all, assign a drive letter to the disk}
+ * \cmd{echo} select volume c:\(\backslash\)games > script
+ * \cmd{echo} assign letter=t >> script
+ * \cmd{diskpart} /s script
+ *
+ * \rem{:: then, defragment the disk}
+ * \cmd{udefrag} t:
+ *
+ * \rem{:: after all, remove the assigned letter}
+ * \cmd{echo} select volume c:\(\backslash\)games > script
+ * \cmd{echo} remove letter=t >> script
+ * \cmd{diskpart} /s script
  *
  * \rem{:: hibernate the computer using a special}
  * \rem{:: command line tool shipped with UltraDefrag}
