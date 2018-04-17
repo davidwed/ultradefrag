@@ -29,8 +29,12 @@
  * The context menu handler is not available from the portable
  * edition of the program.
  *
- * UltraDefrag puts its command line tool to the <b>\%SystemRoot\%\\system32</b>
- * folder, so it can be used without the full path specification:
+ * UltraDefrag puts its command line tool to the <b>\%SystemRoot\%\\system32</b> folder,
+ * so it can be used without the full path specification. Just make sure you run it from
+ * an <a href="https://www.bleepingcomputer.com/tutorials/how-to-open-a-windows-10-elevated-command-prompt/">elevated command prompt</a>
+ * as it requires administrative rights.
+ *
+ * Usage:
  *
  * @code
  * udefrag [command] [options] [driveletter:] [path(s)]
