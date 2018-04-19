@@ -98,6 +98,11 @@
  * If your browser supports tabbed browsing open one instance of it before you display the
  * reports. This will open each report in a new tab depending on your browser configuration.
  *
+ * <h3>When I click Settings > Options the program fails to open the options.lua file, what's going on?</h3>
+ * Usually it happens on 64-bit systems when a 32-bit text editior is associated with the .lua file extension.
+ * To fix the problem just install a 64-bit edition of the editor or associate the .lua extension with built-in
+ * Windows Notepad.
+ *
  * <h1>Boot time interface</h1>
  * <h3>Why some files are still fragmented?</h3>
  * Inspect the @ref Reports "file fragmentation reports" to find out the reason.
