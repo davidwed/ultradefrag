@@ -347,8 +347,6 @@ void winx_flush_dbg_log(int flags)
 
     /* save the log */
     if(f != NULL){
-        winx_printf("\nWriting log file \"%ws\" ...\n",&log_path[4]);
-
         for(log_entry = old_dbg_log; log_entry; log_entry = log_entry->next){
             if(log_entry->buffer){
                 length = (int)strlen(log_entry->buffer);
@@ -439,7 +437,7 @@ void winx_set_dbg_log(wchar_t *path)
     }
     if(logging_enabled){
         itrace("log_path = %ws",path);
-        winx_printf("\nUsing log file \"%ws\" ...\n",&path[4]);
+        /*winx_printf("\nUsing log file \"%ws\" ...\n",&path[4]);*/
         log_path = winx_wcsdup(path);
         if(log_path == NULL){
             mtrace();
