@@ -34,7 +34,7 @@
  * are written in pure C for compatibility with Windows boot environment where only primitive
  * ntdll interfaces are available. Both graphical and command line tools are written in C++
  * on top of <a href="http://www.wxwidgets.org/">wxWidgets</a> library which helps to keep
- * things simple. For configuration purposes and reports convertion the program uses the
+ * things simple. For configuration purposes and reports generation the program uses the
  * <a href="http://www.lua.org/">Lua</a> scripting language. UltraDefrag installers are
  * written in <a href="http://nsis.sourceforge.net/">NSIS</a>.
  *
