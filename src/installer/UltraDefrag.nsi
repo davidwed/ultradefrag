@@ -83,19 +83,19 @@
 
 !ifdef RELEASE_STAGE
     !if "$%ULTRADFGARCH%" == "amd64"
-    Name "Ultra Defragmenter v$%ULTRADFGVER% ${RELEASE_STAGE} (AMD64)"
+    Name "UltraDefrag $%ULTRADFGVER% ${RELEASE_STAGE} (AMD64)"
     !else if "$%ULTRADFGARCH%" == "ia64"
-    Name "Ultra Defragmenter v$%ULTRADFGVER% ${RELEASE_STAGE} (IA64)"
+    Name "UltraDefrag $%ULTRADFGVER% ${RELEASE_STAGE} (IA64)"
     !else
-    Name "Ultra Defragmenter v$%ULTRADFGVER% ${RELEASE_STAGE} (i386)"
+    Name "UltraDefrag $%ULTRADFGVER% ${RELEASE_STAGE} (i386)"
     !endif
 !else
     !if "$%ULTRADFGARCH%" == "amd64"
-    Name "Ultra Defragmenter v$%ULTRADFGVER% (AMD64)"
+    Name "UltraDefrag $%ULTRADFGVER% (AMD64)"
     !else if "$%ULTRADFGARCH%" == "ia64"
-    Name "Ultra Defragmenter v$%ULTRADFGVER% (IA64)"
+    Name "UltraDefrag $%ULTRADFGVER% (IA64)"
     !else
-    Name "Ultra Defragmenter v$%ULTRADFGVER% (i386)"
+    Name "UltraDefrag $%ULTRADFGVER% (i386)"
     !endif
 !endif
 
@@ -141,10 +141,10 @@ SetCompress off
  */
 
 VIProductVersion "$%ULTRADFGVER%.0"
-VIAddVersionKey  "ProductName"     "Ultra Defragmenter"
+VIAddVersionKey  "ProductName"     "UltraDefrag"
 VIAddVersionKey  "CompanyName"     "UltraDefrag Development Team"
 VIAddVersionKey  "LegalCopyright"  "Copyright © 2007-2017 UltraDefrag Development Team"
-VIAddVersionKey  "FileDescription" "Ultra Defragmenter Setup"
+VIAddVersionKey  "FileDescription" "UltraDefrag Setup"
 VIAddVersionKey  "FileVersion"     "$%ULTRADFGVER%"
 
 /*

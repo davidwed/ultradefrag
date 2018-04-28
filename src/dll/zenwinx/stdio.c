@@ -37,7 +37,7 @@ void IntTranslateKey(PKEYBOARD_INPUT_DATA InputData, KBD_RECORD *kbd_rec);
  * @details This routine requires no library
  * initialization, thus may be used when it fails.
  * @param[in] string the string to be displayed.
- * @note Doesn't recognize the \\b character.
+ * @note Doesn't recognize the <b>\\b</b> character.
  */
 void winx_print(char *string)
 {
@@ -70,7 +70,7 @@ second_algorithm:
 
 /**
  * @brief putch() native equivalent.
- * @note Doesn't recognize the \\b character.
+ * @note Doesn't recognize the <b>\\b</b> character.
  */
 int winx_putch(int ch)
 {
@@ -98,7 +98,7 @@ int winx_putch(int ch)
 
 /**
  * @brief puts() native equivalent.
- * @note Doesn't recognize the \\b character.
+ * @note Doesn't recognize the <b>\\b</b> character.
  */
 int winx_puts(const char *string)
 {
@@ -108,7 +108,7 @@ int winx_puts(const char *string)
 
 /**
  * @brief printf() native equivalent.
- * @note Doesn't recognize the \\b character.
+ * @note Doesn't recognize the <b>\\b</b> character.
  */
 int winx_printf(const char *format, ...)
 {
@@ -172,8 +172,8 @@ int winx_kb_read(KBD_RECORD *kbd_rec,int msec)
 }
 
 /**
- * @brief Waits for the Break key hits.
- * @details Waits for input during the specified time interval.
+ * @brief Waits for the Break key hits
+ * during the specified time interval.
  * @param[in] msec the timeout interval, in milliseconds.
  * @return Whenever the user hits the Break key this function
  * returns zero. Otherwise it returns a negative value.
@@ -207,7 +207,7 @@ int winx_getch(void)
 /**
  * @brief getche() native equivalent.
  * @note 
- * - Doesn't recognize the \\b character.
+ * - Doesn't recognize the <b>\\b</b> character.
  * - Doesn't recognize tabulation.
  */
 int winx_getche(void)
@@ -311,7 +311,7 @@ static void winx_add_history_entry(winx_history *h,char *string)
  * - Recognizes properly both backslash and escape keys, but
  * only when the input takes just a single line on the screen.
  * - Recognizes arrow keys to walk through the history of commands.
- * @note Doesn't recognize tabulation.
+ * - Doesn't recognize tabulation.
  */
 int winx_prompt(char *prompt,char *string,int n,winx_history *h)
 {
@@ -511,11 +511,12 @@ static int print_line(char *line_buffer,
  * pages or not. If this parameter is
  * equal to zero, all others, except
  * the first one, will be ignored.
- * @note If the user hits either Escape or
- * Pause the listing terminates immediately.
  * @return Zero for success, a negative
  * value otherwise.
- * @note Doesn't recognize the \\b character.
+ * @note
+ * - If the user hits either Escape or
+ * Pause the listing terminates immediately.
+ * - Doesn't recognize the <b>\\b</b> character.
  */
 int winx_print_strings(char **strings,int line_width,
     int max_rows,char *prompt,int divide_to_pages)
