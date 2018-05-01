@@ -18,7 +18,8 @@
     - the following translations were updated:
 
       Chinese (China), English (United Kingdom), Estonian, French,
-      Galician, Iloko, Italian, Polish, Portuguese (Brazil), Spanish
+      Galician, German, Iloko, Italian, Polish, Portuguese (Brazil),
+      Spanish
 
     - Internals: compilation was optimized for speed
 
