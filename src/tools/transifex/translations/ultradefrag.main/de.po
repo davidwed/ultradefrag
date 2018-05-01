@@ -5,6 +5,8 @@
 # Translators:
 # Bernard Ladenthin <bernard.ladenthin@gmail.com>, 2013
 # Bernard Ladenthin <bernard.ladenthin@gmail.com>, 2013
+# Dmitri Arkhangelski <dmitriar@gmail.com>, 2018
+# Ralf Boening <r.boening83@gmail.com>, 2018
 #  <stefan.pendl.71@gmail.com>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 msgid ""
@@ -12,7 +14,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2017-11-09 14:32+0300\n"
-"PO-Revision-Date: 2017-11-09 11:29+0000\n"
+"PO-Revision-Date: 2018-05-01 12:13+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: German (http://www.transifex.com/stefanpendl/ultradefrag/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -27,7 +29,7 @@ msgstr "Über UltraDefrag"
 
 #: about.cpp:109
 msgid "A powerful defragmentation utility."
-msgstr ""
+msgstr "Ein leistungsstarkes Defragmentierungs-Programm."
 
 #: about.cpp:111
 msgid "Credits and licenses are listed in the handbook."
@@ -150,11 +152,11 @@ msgstr "&Überprüfung beim Windows-Start"
 
 #: i18n.cpp:202
 msgid "Translate &online"
-msgstr ""
+msgstr "&Online übersetzen"
 
 #: i18n.cpp:203
 msgid "Translate o&ffline"
-msgstr ""
+msgstr "O&ffline übersetzen"
 
 #: i18n.cpp:204
 msgid "&Translations folder"
