@@ -322,7 +322,7 @@ void MainFrame::OnLangTranslateOffline(wxCommandEvent& WXUNUSED(event))
 
 void MainFrame::OnLangOpenFolder(wxCommandEvent& WXUNUSED(event))
 {
-    wxString AppPoDir(wxGetCwd() + wxT("/po"));
+    wxString AppPoDir(wxGetCwd() + wxT("\\po"));
 
     if(!wxDirExists(AppPoDir)){
         etrace("po dir not found: %ls",ws(AppPoDir));
