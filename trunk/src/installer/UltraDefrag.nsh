@@ -46,7 +46,6 @@
         ${WinVerGetBuild} $R3
 
         FileOpen $R0 ${UD_LOG_FILE} w
-
         ${Unless} ${Errors}
             FileWrite $R0 "$\r$\n"
             FileWrite $R0 "This file contains information to debug installation problems.$\r$\n"
@@ -68,7 +67,6 @@
             FileWrite $R0 "Plugin Dir ........ $PLUGINSDIR$\r$\n"
             FileWrite $R0 "Temporary Dir ..... $TEMP$\r$\n"
             FileWrite $R0 "$\r$\n"
-
             FileClose $R0
         ${EndUnless}
 
@@ -216,15 +214,12 @@
         ${If} $R2 != ""
             ${Do}
                 ${If} $R2 != "."
-                    ${AndIf} $R2 != ".."
-
+                ${AndIf} $R2 != ".."
                     ${ExitDo}
                 ${EndIf}
-
                 FindNext $R1 $R2
             ${Loop}
         ${EndIf}
-
         FindClose $R1
     ${EndIf}
 
@@ -256,7 +251,6 @@ PathGood:
     ; since the directory page is not displayed in the silent mode
     ${If} ${Silent}
         ${CheckDestFolder}
-
         ${If} $ValidDestDir == "0"
             ${LogAndDisplayAbort} "Destination folder is invalid!"
             Abort
@@ -282,28 +276,28 @@ PathGood:
 
 SkipMove:
     DetailPrint "Removing old executable files..."
-        Delete "$INSTDIR\*.exe"
-        Delete "$INSTDIR\*.dll"
+    Delete "$INSTDIR\*.exe"
+    Delete "$INSTDIR\*.dll"
 
     DetailPrint "Installing core files..."
     SetOutPath "$SYSDIR"
-        File "lua5.1a.dll"
-        File "zenwinx.dll"
-        File "udefrag.dll"
-        File /oname=hibernate4win.exe "hibernate.exe"
-        File "udefrag-dbg.exe"
+    File "lua5.1a.dll"
+    File "zenwinx.dll"
+    File "udefrag.dll"
+    File /oname=hibernate4win.exe "hibernate.exe"
+    File "udefrag-dbg.exe"
 
     SetOutPath "$INSTDIR"
-        File "${ROOTDIR}\src\HISTORY.TXT"
-        File "README.TXT"
+    File "${ROOTDIR}\src\HISTORY.TXT"
+    File "README.TXT"
 
-        File "lua5.1a.exe"
-        File "lua5.1a_gui.exe"
+    File "lua5.1a.exe"
+    File "lua5.1a_gui.exe"
 
     SetOutPath "$INSTDIR\scripts"
-        File "${ROOTDIR}\src\scripts\udreportcnv.lua"
-        File "${ROOTDIR}\src\scripts\udsorting.js"
-        File "${ROOTDIR}\src\scripts\upgrade-options.lua"
+    File "${ROOTDIR}\src\scripts\udreportcnv.lua"
+    File "${ROOTDIR}\src\scripts\udsorting.js"
+    File "${ROOTDIR}\src\scripts\upgrade-options.lua"
 
     DetailPrint "Configuration files upgrade..."
     ; ensure that target directory exists
@@ -456,7 +450,7 @@ SkipMove:
 
     DetailPrint "Installing console interface..."
     SetOutPath "$SYSDIR"
-        File "udefrag.exe"
+    File "udefrag.exe"
 
     ${EnableX64FSRedirection}
 
@@ -487,15 +481,15 @@ SkipMove:
 
     DetailPrint "Installing graphical interface..."
     SetOutPath "$INSTDIR"
-        File /nonfatal /r /x *.pot /x *.header /x *.svn "${ROOTDIR}\src\wxgui\locale"
+    File /nonfatal /r /x *.pot /x *.header /x *.svn "${ROOTDIR}\src\wxgui\locale"
 
     SetOutPath "$INSTDIR\po"
-        File /nonfatal "${ROOTDIR}\src\tools\transifex\translations\ultradefrag.main\*.po"
-        File /nonfatal "${ROOTDIR}\src\wxgui\locale\*.pot"
+    File /nonfatal "${ROOTDIR}\src\tools\transifex\translations\ultradefrag.main\*.po"
+    File /nonfatal "${ROOTDIR}\src\wxgui\locale\*.pot"
 
     SetOutPath "$INSTDIR"
-        Delete "$INSTDIR\ultradefrag.exe"
-        File "ultradefrag.exe"
+    Delete "$INSTDIR\ultradefrag.exe"
+    File "ultradefrag.exe"
 
     DetailPrint "Fragmentation reports translation update..."
     ExecWait '"$INSTDIR\ultradefrag.exe" --setup'
@@ -593,7 +587,7 @@ SkipMove:
     RMDir /r "$INSTDIR\handbook"
 
     SetOutPath "$INSTDIR\handbook"
-        File "${ROOTDIR}\doc\handbook\doxy-doc\html\*.*"
+    File "${ROOTDIR}\doc\handbook\doxy-doc\html\*.*"
 
     ${EnableX64FSRedirection}
 
@@ -628,8 +622,8 @@ SkipMove:
 
     DetailPrint "Installing context menu handler..."
     SetOutPath "$INSTDIR\icons"
-        File "${ROOTDIR}\src\installer\shellex.ico"
-        File "${ROOTDIR}\src\installer\shellex-folder.ico"
+    File "${ROOTDIR}\src\installer\shellex.ico"
+    File "${ROOTDIR}\src\installer\shellex-folder.ico"
 
     Push $0
     Push $1
