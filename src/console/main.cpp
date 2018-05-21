@@ -324,7 +324,7 @@ static bool process_single_volume(char letter)
 
     int flags = g_shellex ? UD_JOB_CONTEXT_MENU_HANDLER : 0;
 
-    g_stop = false; g_first_progress_update = true;
+    g_first_progress_update = true;
 
     result = udefrag_start_job(letter,job_type,flags,map_size,
         update_progress,terminator,(void *)(DWORD_PTR)letter);
