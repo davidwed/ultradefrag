@@ -128,6 +128,9 @@ optimizer_file_size_threshold = "$optimizer_file_size_threshold"
 -- Example:
 --   fragments_threshold = 5 -- skip files having 4 fragments or less
 -- Keep it empty ("") or set to zero ("0") to turn this filter off.
+-- Note: for solid state drives (SSD) we recommend to set this parameter
+-- to 20 to exclude slightly fragmented content which doesn't affect
+-- performance.
 -------------------------------------------------------------------------------
 
 fragments_threshold = $fragments_threshold

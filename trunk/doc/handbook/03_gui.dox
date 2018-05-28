@@ -46,7 +46,7 @@
  *
  * To select multiple disks use the same rules as in Windows Explorer. For instance, hit <b>Ctrl+A</b> to select them all.
  *
- * Double-click a drive or select it and hit <b>Enter</b> to start its analysis (repair if it's dirty one).
+ * Double-click a drive or select it and hit <b>Enter</b> to start its analysis (repair if it's a dirty one).
  *
  * @anchor cluster_map_legend
  * <h1>Cluster map</h1>
@@ -327,7 +327,6 @@
  * @endlatexonly
  * @par Repair drives
  * Repair the selected disk(s) using the <b>chkdsk</b> command line tool.
- * Note that you need to rescan the drives manually afterwards to update their status.
  *
  * @htmlonly
  * </td></tr><tr><td>
@@ -448,7 +447,7 @@
  * @endlatexonly
  * @par Boot time scan &gt; Enable (F11)
  * Enable or disable the boot time processing
- * <i>(disabled for portable editions)</i>.
+ * <i>(disabled in portable editions)</i>.
  *
  * @htmlonly
  * </td></tr><tr><td>
@@ -465,7 +464,7 @@
  * @endlatexonly
  * @par Boot time scan &gt; Script (F12)
  * Open the boot time script
- * <i>(disabled for portable editions)</i>.
+ * <i>(disabled in portable editions)</i>.
  *
  * @htmlonly
  * </td></tr></table>
