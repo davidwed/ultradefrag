@@ -48,8 +48,8 @@
  * <HR>
  *  <TABLE STYLE="border: none; width: 97%; margin:auto;">
  *    <TR>
- *      <TD STYLE="text-align: left; width: 50%;">Previous: <a href="Console.html">Console Interface</a></TD>
- *      <TD STYLE="text-align: right; width: 50%;">Next: <a href="Boot.html">Boot Time Defragmentation</a></TD>
+ *      <TD STYLE="text-align: left; width: 50%;">Previous: <a href="Boot.html">Boot Time Defragmentation</a></TD>
+ *      <TD STYLE="text-align: right; width: 50%;">Next: <a href="Reports.html">File Fragmentation Reports</a></TD>
  *    </TR>
  *  </TABLE>
  * @endhtmlonly

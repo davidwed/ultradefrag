@@ -17,9 +17,9 @@
     - documentation was expanded
     - the following translations were updated:
 
-      Chinese (China), English (United Kingdom), Estonian, French,
-      Galician, German, Iloko, Italian, Polish, Portuguese (Brazil),
-      Spanish, Swedish
+      Chinese (China), English (United Kingdom), Estonian, French, Galician,
+      German, Iloko, Italian, Polish, Portuguese, Portuguese (Brazil), Spanish,
+      Spanish (Argentina), Swedish
 
     - Internals: compilation was optimized for speed
 
