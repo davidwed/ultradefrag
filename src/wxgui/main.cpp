@@ -218,7 +218,7 @@ bool App::OnInit()
     if(!Utils::CheckAdminRights()){
         wxMessageDialog dlg(NULL,
             wxT("Administrative rights are needed to run the program!"),
-            wxT("UltraDefrag"),wxOK | wxICON_ERROR
+            wxT("UltraDefrag"),wxOK | wxICON_ERROR | wxCENTRE
         );
         dlg.ShowModal(); Cleanup();
         return false;
@@ -230,7 +230,7 @@ bool App::OnInit()
         letrace("cannot create synchronization event");
         wxMessageDialog dlg(NULL,
             wxT("Cannot create synchronization event!"),
-            wxT("UltraDefrag"),wxOK | wxICON_ERROR
+            wxT("UltraDefrag"),wxOK | wxICON_ERROR | wxCENTRE
         );
         dlg.ShowModal(); Cleanup();
         return false;
