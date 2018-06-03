@@ -619,7 +619,7 @@ static int create_target_directory(wchar_t *path)
 }
 
 /**
- * @brief Turns logging to a file on/off,
+ * @brief Turns logging to file on/off,
  * according to <b>\%UD_LOG_FILE_PATH\%</b>
  * environment variable.
  * @details If the library cannot create the
