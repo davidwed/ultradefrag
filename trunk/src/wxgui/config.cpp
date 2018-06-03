@@ -284,7 +284,7 @@ done:
 
     if(!error.IsEmpty()){
         wxMessageDialog dlg(this,error,wxT("UltraDefrag"),
-            wxOK | wxICON_ERROR/* | wxSTAY_ON_TOP*/);
+            wxOK | wxICON_ERROR | wxCENTRE/* | wxSTAY_ON_TOP*/);
         dlg.ShowModal();
     }
 }
