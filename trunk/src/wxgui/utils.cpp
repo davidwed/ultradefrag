@@ -305,12 +305,24 @@ void Utils::ShellExec(
 int Utils::MessageDialog(wxFrame *parent,
     const wxString& caption, const wxArtID& icon,
     const wxString& text1, const wxString& text2,
-    const wxString& format, ...)
+    const wxChar *format, ...)
 {
+    wxChar *cmessage;
     wxString message;
+
     va_list args;
     va_start(args,format);
-    message.PrintfV(format,args);
+
+#if wxUSE_UNICODE
+    cmessage = winx_vswprintf(format,args);
+    message << wxString::Format(wxT("%ls"),cmessage);
+#else
+    cmessage = winx_vsprintf(format,args);
+    message << wxString::Format(wxT("%hs"),cmessage);
+#endif
+
+    winx_free(cmessage);
+
     va_end(args);
 
     wxDialog dlg(parent,wxID_ANY,caption);
@@ -400,12 +412,19 @@ int Utils::MessageDialog(wxFrame *parent,
  * @brief Shows an error and
  * invites to open log file.
  */
-void Utils::ShowError(const wxString& format, ...)
+void Utils::ShowError(const wxChar *format, ...)
 {
-    wxString message;
+    wxChar *message;
+    
     va_list args;
     va_start(args,format);
-    message.PrintfV(format,args);
+
+#if wxUSE_UNICODE
+    message = winx_vswprintf(format,args);
+#else
+    message = winx_vsprintf(format,args);
+#endif
+
     va_end(args);
 
     wxString log = _("Open &log");
@@ -416,6 +435,8 @@ void Utils::ShowError(const wxString& format, ...)
     {
         QueueCommandEvent(g_mainFrame,ID_DebugLog);
     }
+    
+    winx_free(message);
 }
 
 /** @} */
