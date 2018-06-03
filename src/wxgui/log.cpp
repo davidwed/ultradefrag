@@ -70,7 +70,7 @@ void MainFrame::OnDebugLog(wxCommandEvent& WXUNUSED(event))
 {
     wxString logpath;
     if(!wxGetEnv(wxT("UD_LOG_FILE_PATH"),&logpath)){
-        wxMessageBox(wxT("Logging to a file is turned off."),
+        wxMessageBox(wxT("Logging to file is turned off."),
             wxT("Cannot open log file!"),wxOK | wxICON_HAND,this);
     } else {
         wxFileName file(logpath);

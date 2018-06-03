@@ -22,7 +22,7 @@
  * @brief Debugging.
  * @details The library delivers debugging output
  * to the Debug View program whenever possible.
- * Additionally, logging to a file can be enabled
+ * Additionally, logging to file can be enabled
  * at any moment.
  * @note
  * - To avoid frequent log file updates, which might
@@ -390,7 +390,7 @@ done:
 }
 
 /**
- * @brief Turns logging to a file on/off.
+ * @brief Turns logging to file on/off.
  * @param[in] path the log file path.
  * NULL or an empty string forces to flush
  * all the collected data to the disk and
