@@ -172,7 +172,7 @@ void MainFrame::ShowUpgradeDialog(wxCommandEvent& event)
     message.Printf(_("Release %ls is available for download!"),ws(event.GetString()));
 
     if(Utils::MessageDialog(this,_("You can upgrade me ^-^"),
-      wxART_INFORMATION,_("&Upgrade"),_("&Cancel"),message) == wxID_OK)
+      wxART_INFORMATION,_("&Upgrade"),_("&Cancel"),ts(message)) == wxID_OK)
     {
         wxString url(wxT("http://ultradefrag.sourceforge.net"));
         if(!wxLaunchDefaultBrowser(url))

@@ -216,6 +216,11 @@ enum {
 */
 #define ansi(s) ((const char *)s.mb_str())
 #define ws(s) ((const wchar_t *)s.wc_str())
+#if wxUSE_UNICODE
+    #define ts(s) ws(s)
+#else
+    #define ts(s) ansi(s)
+#endif
 
 /* converts pixels from 96 DPI to the current one */
 #define DPI(x) ((int)((double)x * g_scaleFactor))
@@ -586,7 +591,7 @@ public:
     static int MessageDialog(wxFrame *parent,
         const wxString& caption, const wxArtID& icon,
         const wxString& text1, const wxString& text2,
-        const wxString& format, ...);
+        const wxChar *format, ...);
     static void OpenHandbook(const wxString& page,
         const wxString& anchor = wxEmptyString);
     static bool SetProcessPriority(int priority);
@@ -594,7 +599,7 @@ public:
         const wxString& action = wxT("open"),
         const wxString& parameters = wxEmptyString,
         int show = SW_SHOW, int flags = 0);
-    static void ShowError(const wxString& format, ...);
+    static void ShowError(const wxChar *format, ...);
 };
 
 /* flags for Utils::ShellExec */
