@@ -315,10 +315,12 @@ int Utils::MessageDialog(wxFrame *parent,
 
 #if wxUSE_UNICODE
     cmessage = winx_vswprintf(format,args);
-    message << wxString::Format(wxT("%ls"),cmessage);
+    if(cmessage) message << wxString::Format(wxT("%ls"),cmessage);
+    else message << wxT("Not enough memory!");
 #else
     cmessage = winx_vsprintf(format,args);
-    message << wxString::Format(wxT("%hs"),cmessage);
+    if(cmessage) message << wxString::Format(wxT("%hs"),cmessage);
+    else message << wxT("Not enough memory!");
 #endif
 
     winx_free(cmessage);
