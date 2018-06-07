@@ -1382,7 +1382,6 @@ LATEX_EXTRA_FILES      = ./rsc/Blank.png \
                          ../../src/wxgui/res/24x24/mft.png \
                          ../../src/wxgui/res/24x24/pause.png \
                          ../../src/wxgui/res/24x24/quick.png \
-                         ../../src/wxgui/res/24x24/repeat.png \
                          ../../src/wxgui/res/24x24/report.png \
                          ../../src/wxgui/res/24x24/script.png \
                          ../../src/wxgui/res/24x24/star.png \
