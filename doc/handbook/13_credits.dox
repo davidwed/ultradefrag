@@ -377,7 +377,8 @@
  *
  * Portions Copyright &copy; 1998-2005 Julian Smart, Robert Roebling et al
  *
- * This library is licensed under the terms of the @subpage WXWINDOWS_LIBRARY_LICENCE.</li>
+ * This library is licensed under the terms
+ * of the <a href="http://www.wxwidgets.org/about/licence/">wxWindows Library Licence</a>.</li>
  *
  * <li><a href="http://www.lua.org/">Lua</a>
  *
