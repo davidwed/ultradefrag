@@ -254,12 +254,19 @@ done:
     UD_AdjustOption(SHOW_TASKBAR_ICON_OVERLAY);
 
     // reset log file path
-    wxString v;
+    wxString v, logpath;
     if(wxGetEnv(wxT("UD_LOG_FILE_PATH"),&v)){
-        wxFileName logpath(v); logpath.Normalize();
-        wxSetEnv(wxT("UD_LOG_FILE_PATH"),logpath.GetFullPath());
+        wxFileName path(v); path.Normalize();
+        logpath << path.GetFullPath();
+        wxSetEnv(wxT("UD_LOG_FILE_PATH"),logpath);
+    } else {
+        logpath << wxT("");
     }
-    ::udefrag_set_log_file_path();
+    if(wxGetApp().m_logPath->CmpNoCase(logpath) != 0){
+        delete wxGetApp().m_logPath;
+        wxGetApp().m_logPath = new wxString(logpath);
+        ::udefrag_set_log_file_path();
+    }
 
     if(m_sizeAdjustmentEnabled){
         /* force the map perfectly fit into the main frame */
