@@ -22,7 +22,7 @@
  *     - If it shows <b>IA64</b> download the <b>ia64</b> installer.
  *
  * <h3>Can I up- or downgrade over an existing installation?</h3>
- * Yes. Neither removal of old files nor reboot is necessary.
+ * Yes. There's no need to remove old files, the installer will take care about everything automatically.
  *
  * <h3>My anti-virus software says UltraDefrag is infected by a virus. Is it true?</h3>
  * UltraDefrag is open source software, so it cannot contain malicious stuff
@@ -47,7 +47,7 @@
  * the disk space reserved for restore points it eliminates elder stuff to release
  * some space for further tracking. Due to this reason we recommend to use
  * <a href="http://en.wikipedia.org/wiki/Backup_and_Restore">backup</a>
- * software instead for serious purposes.
+ * software instead to keep valuable data backed up.
  *
  * <h3>How to move everything to the beginning of the disk?</h3>
  * Usually it doesn't make sense to move big fragments, but if you'd like
@@ -70,8 +70,8 @@
  * individual files are located on disk?</h3>
  * When defragmentation algorithms are quite efficient, it's definitely not necessary
  * to know locations of individual files - anyway you'll get your drive optimized
- * quite well. Maybe we'll implement the discussed feature later, but now we prefer
- * to spend more time for the disk optimization algorithm improvements.
+ * quite well. Maybe we'll implement the discussed feature later, but now it's time
+ * for more significant improvements.
  *
  * <h3>Why configuration files are better than one settings window with tabs?</h3>
  * Configuration files are easy to edit, even in Windows Notepad.
@@ -118,12 +118,9 @@ HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\BootExecute
 @endverbatim
  *
  * <h1>Miscellaneous</h1>
- * <h3>How many differences are between UltraDefrag and well known MyDefrag (previously JkDefrag)?</h3>
- * Both programs have similar disk analysis algorithms, but defragmentation is done
- * in different ways. While MyDefrag gives more control over files placement,
- * UltraDefrag uses much simpler algorithms which are faster and easier to use.
- * Additionally UltraDefrag can defragment locked files being launched inside
- * of the Windows boot process.
+ * <h3>How many differences are between the disk processing algorithms of UltraDefrag and well known MyDefrag (previously JkDefrag)?</h3>
+ * Both programs have similar disk analysis algorithms, but defragmentation is done in different ways. While MyDefrag gives more control
+ * over files placement, UltraDefrag uses much simpler algorithms which are faster and easier to use.
  *
  * @htmlonly
  * <HR>
