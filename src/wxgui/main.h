@@ -281,12 +281,16 @@ public:
 
     static void AttachDebugger();
 
+    wxString *m_logPath;
+
 private:
     void Cleanup();
 
     Log *m_log;
     StatThread *m_statThread;
 };
+
+wxDECLARE_APP(App);
 
 class BtdThread: public wxThread {
 public:

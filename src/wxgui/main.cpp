@@ -188,7 +188,8 @@ bool App::OnInit()
     // initialize debug log
     wxFileName logpath(wxT(".\\logs\\ultradefrag.log"));
     logpath.Normalize();
-    wxSetEnv(wxT("UD_LOG_FILE_PATH"),logpath.GetFullPath());
+    m_logPath = new wxString(logpath.GetFullPath());
+    wxSetEnv(wxT("UD_LOG_FILE_PATH"),*m_logPath);
     ::udefrag_set_log_file_path();
 
     // initialize logging
@@ -272,6 +273,7 @@ void App::Cleanup()
 
     // deinitialize logging
     ::winx_flush_dbg_log(0);
+    delete m_logPath;
     delete m_log;
 }
 
