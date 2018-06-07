@@ -15,7 +15,7 @@
  * <h1>Performance</h1>
  * <h3>How to improve system performance significantly</h3>
  * The best way to improve system performance is to buy new hardware.
- * Common hard disk drives have a lot of mechanical parts inside
+ * Traditional hard disk drives have a lot of mechanical parts inside
  * which have to move to and fro whenever you read something from the
  * disk or write something to it. All the movements take significant
  * amount of time and nothing can be done to eliminate these extra
@@ -24,12 +24,12 @@
  * at all. They store information in memory chips instead and that's
  * why they are called <a href="http://en.wikipedia.org/wiki/Solid-state_drive">
  * solid state drives</a> (SSD). As they have no need to perform
- * any physical movements they are much faster than the mechanical
+ * any physical movements they are much faster than the traditional
  * drives and the only drawback is that they are still much more
  * expensive. However, if you really need top performance, it's
  * the only choice for you. Additionally, you get significantly
  * reduced power consumption, higher robustness and completely
- * silent operation. You may still use mechanical drives for
+ * silent operation. You may still use traditional drives for
  * data more tolerant for slower access, but for system files
  * we highly recommend to use an SSD.
  *
@@ -39,7 +39,7 @@
  * an SSD or not. If you need more memory than physically installed, buy more
  * for the best performance.
  *
- * And, after all, if you're still using a mechanical drive and would
+ * And, after all, if you're still using a traditional drive and would
  * like to keep some files closer to its beginning because of higher
  * speed of that area, don't ask disk defragmenters for it: just 
  * <a href="http://gparted.sourceforge.net/">repartition</a> the disk
