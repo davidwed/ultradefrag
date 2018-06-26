@@ -30,7 +30,7 @@
 *    Windows%20NT%20Undocumented%20APIs/1996%20AppE_apnilife.pdf
 * 2. http://www.opensource.apple.com/source/ntfs/ntfs-52/kext/ntfs_layout.h
 *
-* Both files can also be found at http://ultradefrag.sourceforge.net/doc/man/ntfs/
+* Both files can also be found at https://ultradefrag.net/doc/man/ntfs/
 */
 
 /*

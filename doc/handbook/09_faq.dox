@@ -27,7 +27,7 @@
  * <h3>My anti-virus software says UltraDefrag is infected by a virus. Is it true?</h3>
  * UltraDefrag is open source software, so it cannot contain malicious stuff
  * by definition. For extra safety, to ensure that the compiled binaries haven't been
- * infected, we test them all carefully on <a href="http://www.virustotal.com/">virustotal.com</a>.
+ * infected, we test them all carefully on <a href="https://www.virustotal.com/">virustotal.com</a>.
  * Only when all files pass most of the virus scanners we make an official release.
  *
  * <h1>General usage</h1>
@@ -38,7 +38,7 @@
  * - Move all files to another disk, reformat the original disk and move files back.
  * Everything will be perfectly settled in the beginning of the disk.
  * - Use <a href="http://gparted.sourceforge.net/">GParted</a>
- * or <a href="http://en.wikipedia.org/wiki/PartitionMagic">Partition Magic</a>
+ * or <a href="https://en.wikipedia.org/wiki/PartitionMagic">Partition Magic</a>
  * software to shrink the disk. Then expand it back to the original size to get
  * a continuous free space gap at the end.
  *
@@ -46,7 +46,7 @@
  * The system restore service sometimes tracks file movements. When it exhausts all
  * the disk space reserved for restore points it eliminates elder stuff to release
  * some space for further tracking. Due to this reason we recommend to use
- * <a href="http://en.wikipedia.org/wiki/Backup_and_Restore">backup</a>
+ * <a href="https://en.wikipedia.org/wiki/Backup_and_Restore">backup</a>
  * software instead to keep valuable data backed up.
  *
  * <h3>How to move everything to the beginning of the disk?</h3>

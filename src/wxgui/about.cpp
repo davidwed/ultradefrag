@@ -37,7 +37,7 @@
 #include "prec.h"
 #include "main.h"
 
-#define HOMEPAGE wxT("http://ultradefrag.sourceforge.net")
+#define HOMEPAGE wxT("https://ultradefrag.net")
 
 class HomePageLink: public wxGenericHyperlinkCtrl {
 public:

@@ -156,7 +156,7 @@ rem Example: call :build_readme_file > README.TXT
     echo The complete information about the program can be found in UltraDefrag Handbook.
     echo You should have received it along with this program; if not, go to:
     echo.
-    echo   http://ultradefrag.sourceforge.net/handbook/
+    echo   https://ultradefrag.net/handbook/
     echo.
     echo -------------------------------------------------------------------------------
 exit /B 0

@@ -249,7 +249,7 @@ footer = [[
     </div>
     <table class="links_toolbar"><tbody>
       <tr>
-        <td class="left"><a href="http://ultradefrag.sourceforge.net">$VISIT_HOMEPAGE</a></td>
+        <td class="left"><a href="https://ultradefrag.net/">$VISIT_HOMEPAGE</a></td>
         <td class="center"><a href="../conf/options.lua">$VIEW_REPORT_OPTIONS</a></td>
         <td class="right"><a href="http://www.lua.org/">$POWERED_BY_LUA</a></td>
       </tr>

@@ -206,7 +206,7 @@ void show_help(void)
         "More information and samples can be found in UltraDefrag Handbook.\n"
         "If you have not received it along with this program go to:\n"
         "\n"
-        "http://ultradefrag.sourceforge.net/handbook/\n"
+        "https://ultradefrag.net/handbook/\n"
         "\n"
         );
 }
