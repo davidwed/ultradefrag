@@ -21,6 +21,9 @@
       German, Iloko, Italian, Polish, Portuguese, Portuguese (Brazil), Spanish,
       Spanish (Argentina), Swedish
 
+    - website was moved from http://ultradefrag.sourceforge.net/ to
+      https://ultradefrag.net/ for the sake of performance - now it
+      works approximately 10 times faster
     - Internals: compilation was optimized for speed
 
 
