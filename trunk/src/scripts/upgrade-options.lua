@@ -41,7 +41,7 @@ config_file_contents = [[
 -- accepted by UltraDefrag console interface. Read the appropriate
 -- chapter of the UltraDefrag Handbook for detailed information.
 -- You should have received it along with this program; if not, go to
--- http://ultradefrag.sourceforge.net/handbook/
+-- https://ultradefrag.net/handbook/
 -------------------------------------------------------------------------------
 
 -------------------------------------------------------------------------------

@@ -13,7 +13,7 @@
  * @page Schedule Scheduled Defragmentation
  *
  * To set scheduled defragmentation up use
- * <a href="http://en.wikipedia.org/wiki/Task_Scheduler">Windows Task Scheduler</a>:
+ * <a href="https://en.wikipedia.org/wiki/Task_Scheduler">Windows Task Scheduler</a>:
  *
  * @htmlonly
  * <div class="fragment">
@@ -41,7 +41,7 @@
  * \end{DoxyCode}
  * @endlatexonly
  *
- * Visit <a href="http://sourceforge.net/p/ultradefrag/wiki/Home/">UltraDefrag Wiki</a> 
+ * Visit <a href="https://sourceforge.net/p/ultradefrag/wiki/Home/">UltraDefrag Wiki</a> 
  * for more information.
  *
  * @htmlonly

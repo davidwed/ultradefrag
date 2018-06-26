@@ -43,8 +43,8 @@ enum {
     UPGRADE_ALL
 };
 
-#define VERSION_URL        "http://ultradefrag.sourceforge.net/version.ini"
-#define STABLE_VERSION_URL "http://ultradefrag.sourceforge.net/stable-version.ini"
+#define VERSION_URL        "http://ultradefrag.net/version.ini"
+#define STABLE_VERSION_URL "http://ultradefrag.net/stable-version.ini"
 
 // =======================================================================
 //                          Upgrade handling
@@ -174,7 +174,7 @@ void MainFrame::ShowUpgradeDialog(wxCommandEvent& event)
     if(Utils::MessageDialog(this,_("You can upgrade me ^-^"),
       wxART_INFORMATION,_("&Upgrade"),_("&Cancel"),ts(message)) == wxID_OK)
     {
-        wxString url(wxT("http://ultradefrag.sourceforge.net"));
+        wxString url(wxT("https://ultradefrag.net"));
         if(!wxLaunchDefaultBrowser(url))
             Utils::ShowError(wxT("Cannot open %ls!"),ws(url));
     }

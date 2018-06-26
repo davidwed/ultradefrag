@@ -144,11 +144,11 @@ Type 'help' to list available commands.
  *
  * <h1>Restrictions</h1>
  * Encrypted disks cannot be defragmented at boot time because the
- * <a href="http://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service">local
+ * <a href="https://en.wikipedia.org/wiki/Local_Security_Authority_Subsystem_Service">local
  * security service</a> is inactive on early stages of Windows boot.
  *
  * UltraDefrag terminates immediately in 
- * <a href="http://en.wikipedia.org/wiki/Safe_mode">Windows safe mode</a>
+ * <a href="https://en.wikipedia.org/wiki/Safe_mode">Windows safe mode</a>
  * because it cannot display text on the screen there.
  *
  * <h1>Script samples</h1>

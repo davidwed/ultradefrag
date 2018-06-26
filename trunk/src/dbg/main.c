@@ -160,7 +160,7 @@ static void show_advice(void)
        "hardware or a virus infection. However, if\n"
        "it's not your case, don't hesitate to report\n"
        "the crash via our bug tracker:\n\n"
-       "http://sourceforge.net/p/ultradefrag/bugs/\n\n"
+       "https://sourceforge.net/p/ultradefrag/bugs/\n\n"
        "Also you might downgrade to UltraDefrag v6\n"
        "which is known to be very stable.",
        "UltraDefrag debugger",
