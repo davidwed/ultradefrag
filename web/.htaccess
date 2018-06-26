@@ -1,2 +1,3 @@
 # redirect ultradefrag.sourceforge.net requests to ultradefrag.net
+RedirectMatch permanent /(.*)\.ini$ http://ultradefrag.net/$1.ini
 Redirect permanent / https://ultradefrag.net/
