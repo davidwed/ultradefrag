@@ -1,6 +1,6 @@
 /*
  *  UltraDefrag - a powerful defragmentation tool for Windows NT.
- *  Copyright (c) 2007-2017 Dmitri Arkhangelski (dmitriar@gmail.com).
+ *  Copyright (c) 2007-2018 Dmitri Arkhangelski (dmitriar@gmail.com).
  *  Copyright (c) 2010-2013 Stefan Pendl (stefanpe@users.sourceforge.net).
  *
  *  This program is free software; you can redistribute it and/or modify
@@ -130,7 +130,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
     /* display copyrights */
     winx_print("\n\n");
     winx_print(VERSIONINTITLE " boot time interface\n"
-        "Copyright (c) Dmitri Arkhangelski, 2007-2017.\n"
+        "Copyright (c) Dmitri Arkhangelski, 2007-2018.\n"
         "Copyright (c) Stefan Pendl, 2010-2013.\n\n"
         "UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"
         "If something is wrong, hit F8 on startup\n"
