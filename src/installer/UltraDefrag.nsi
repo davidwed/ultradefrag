@@ -143,7 +143,7 @@ SetCompress off
 VIProductVersion "$%ULTRADFGVER%.0"
 VIAddVersionKey  "ProductName"     "UltraDefrag"
 VIAddVersionKey  "CompanyName"     "UltraDefrag Development Team"
-VIAddVersionKey  "LegalCopyright"  "Copyright © 2007-2017 UltraDefrag Development Team"
+VIAddVersionKey  "LegalCopyright"  "Copyright © 2007-2018 UltraDefrag Development Team"
 VIAddVersionKey  "FileDescription" "UltraDefrag Setup"
 VIAddVersionKey  "FileVersion"     "$%ULTRADFGVER%"
 
