@@ -5,13 +5,13 @@
     - the repeat action option was retired, now all the disk
       processing algorithms decide themselves whether it's worth
       to run one more pass or not
-    - cluster map was forced to always fit perfectly into the main frame
+    - cluster map was adjusted to always fit perfectly into the main frame
     - file fragmentation reports appearance was improved
     - options.lua file was moved to conf subfolder to fix configuration
       tracking bugs (#222 and #225)
-    - explorer's context menu entries were forced to never show up
+    - explorer's context menu entries were fixed to never show up
       for special objects like recycle bin and control panel
-    - file fragmentation reports were forced to take daylight saving time
+    - file fragmentation reports were fixed to take daylight saving time
       settings into account
     - a lot of minor bugs were fixed
     - documentation was expanded
