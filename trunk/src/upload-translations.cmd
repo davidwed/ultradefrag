@@ -38,6 +38,7 @@ pushd "%~dp0\wxgui"
 copy /v /y locale\UltraDefrag.header locale\UltraDefrag.pot
 set PO_INFO=--copyright-holder="UltraDefrag Development Team" --msgid-bugs-address="http://sourceforge.net/p/ultradefrag/bugs/"
 xgettext -C -j --add-comments=: %PO_INFO% -k_ -kwxPLURAL:1,2 -kUD_UpdateMenuItemLabel:2 -o locale\UltraDefrag.pot *.cpp || popd && goto fail
+lua ..\tools\adjust-locale-header.lua locale\UltraDefrag.pot || popd && goto fail
 copy /v /y "locale\UltraDefrag.pot" "%~dp0\tools\transifex\translations\ultradefrag.main\en_US.po"
 popd
 echo.
