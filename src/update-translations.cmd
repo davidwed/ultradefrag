@@ -70,7 +70,7 @@ exit /B 1
     echo processing locale "%~n1"
 
     rem make sure the translation folder is present
-    echo ... checking for folders existance
+    echo ... checking for folders existence
     if not exist "locale\%~n1" mkdir "locale\%~n1" || goto check_fail
 
     rem compile the .PO file into a .MO file
