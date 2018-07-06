@@ -43,6 +43,8 @@ copy .\bin\amd64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.amd64.zip .\release
 copy .\bin\ia64\ultradefrag-%UDVERSION_SUFFIX%.bin.ia64.exe .\release\
 copy .\bin\ia64\ultradefrag-portable-%UDVERSION_SUFFIX%.bin.ia64.zip .\release\
 
+goto done
+
 :: update history file
 copy /Y .\HISTORY.TXT ..\..\web\
 
@@ -51,8 +53,6 @@ set version_string=%ULTRADFGVER%
 if "%RELEASE_STAGE%" neq "" set version_string=%ULTRADFGVER% %RELEASE_STAGE%
 
 echo %version_string%> ..\..\web\version.ini
-echo %version_string%> ..\..\web\version_xp.ini
-
 if "%RELEASE_STAGE%" equ "" echo %version_string%> ..\..\web\stable-version.ini
 
 :: update documentation
@@ -60,6 +60,7 @@ copy /Y ..\doc\handbook\doxy-doc\html\*.* ..\..\web\handbook        || goto buil
 copy /Y .\dll\udefrag\doxy-doc\html\*.*   ..\..\web\doc\lib\udefrag || goto build_failed
 copy /Y .\dll\zenwinx\doxy-doc\html\*.*   ..\..\web\doc\lib\zenwinx || goto build_failed
 
+:done
 echo.
 echo Release made successfully!
 title Release made successfully!
