@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-16 09:44+0000\n"
+"PO-Revision-Date: 2018-07-16 15:14+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/stefanpendl/ultradefrag/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,7 @@ msgstr "Acerca de UltraDefrag"
 
 #: about.cpp:109
 msgid "A powerful defragmentation utility."
-msgstr "Una potente utilidad de defragmentación"
+msgstr "Una potente utilidad de defragmentación."
 
 #: about.cpp:111
 msgid "Credits and licenses are listed in the handbook."
