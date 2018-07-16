@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-16 08:12+0000\n"
+"PO-Revision-Date: 2018-07-16 14:50+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: German (http://www.transifex.com/stefanpendl/ultradefrag/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -176,7 +176,7 @@ msgstr "&Skript"
 
 #: i18n.cpp:212
 msgid "S&cheduler"
-msgstr "&Aufgabenplanung"
+msgstr "&Planer"
 
 #: i18n.cpp:216
 msgid "By &path"
@@ -264,7 +264,7 @@ msgstr "Windows-Start-Skript"
 
 #: i18n.cpp:248
 msgid "Automatic defragmentation scheduler"
-msgstr "Aufgabenplanung für die automatische Defragmentierung"
+msgstr "Planer für die automatische Defragmentierung"
 
 #: i18n.cpp:250
 msgid "Automatic defragmentation script"
