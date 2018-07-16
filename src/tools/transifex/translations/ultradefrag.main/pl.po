@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Łukasz Chojnacki <cwk@europe.com>, 2013,2018
+# Dmitri Arkhangelski <dmitriar@gmail.com>, 2018
 # Piotr Halama <halamix2@o2.pl>, 2013
 # Łukasz Chojnacki <cwk@europe.com>, 2013,2018
 # Mateusz Krawczyk <matrix0123456789@o2.pl>, 2013
@@ -15,7 +16,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 10:28+0000\n"
+"PO-Revision-Date: 2018-07-16 09:58+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Polish (http://www.transifex.com/stefanpendl/ultradefrag/language/pl/)\n"
 "MIME-Version: 1.0\n"
@@ -153,7 +154,7 @@ msgstr "Skanowanie przy uruchomieniu"
 
 #: i18n.cpp:200
 msgid "&Automatic defragmentation"
-msgstr ""
+msgstr "&Automatyczna defragmentacja"
 
 #: i18n.cpp:203
 msgid "Translate &online"
@@ -177,7 +178,7 @@ msgstr "&Skrypt"
 
 #: i18n.cpp:212
 msgid "S&cheduler"
-msgstr ""
+msgstr "&Planista"
 
 #: i18n.cpp:216
 msgid "By &path"
@@ -265,11 +266,11 @@ msgstr "Skrypt wykonywany podczas uruchamiania systemu"
 
 #: i18n.cpp:248
 msgid "Automatic defragmentation scheduler"
-msgstr ""
+msgstr "Planista do automatycznej defragmentacji"
 
 #: i18n.cpp:250
 msgid "Automatic defragmentation script"
-msgstr ""
+msgstr "Skrypt do automatycznej defragmentacji"
 
 #: i18n.cpp:257
 msgid "Drive"

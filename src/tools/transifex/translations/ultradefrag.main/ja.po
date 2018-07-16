@@ -3,6 +3,7 @@
 # This file is distributed under the Creative Commons Attribution 3.0 License.
 # 
 # Translators:
+# Dmitri Arkhangelski <dmitriar@gmail.com>, 2018
 # Michael R. Lawrence <mike@michaellawrenceit.com>, 2014
 # Michael R. Lawrence <mike@michaellawrenceit.com>, 2014
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
@@ -14,7 +15,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 10:28+0000\n"
+"PO-Revision-Date: 2018-07-16 07:22+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Japanese (http://www.transifex.com/stefanpendl/ultradefrag/language/ja/)\n"
 "MIME-Version: 1.0\n"
@@ -29,7 +30,7 @@ msgstr "UltraDefrag について"
 
 #: about.cpp:109
 msgid "A powerful defragmentation utility."
-msgstr ""
+msgstr "強力なデフラグユーティリティ。"
 
 #: about.cpp:111
 msgid "Credits and licenses are listed in the handbook."
@@ -88,7 +89,7 @@ msgstr "レポートの表示"
 #. : to process all files on the disk.
 #: i18n.cpp:178
 msgid "Deep a&ction"
-msgstr ""
+msgstr "奥深いアクション"
 
 #: i18n.cpp:180
 msgid "Skip removable &media"
@@ -152,15 +153,15 @@ msgstr "起動時のスキャン"
 
 #: i18n.cpp:200
 msgid "&Automatic defragmentation"
-msgstr ""
+msgstr "自動デフラグ"
 
 #: i18n.cpp:203
 msgid "Translate &online"
-msgstr ""
+msgstr "オンラインで翻訳する"
 
 #: i18n.cpp:204
 msgid "Translate o&ffline"
-msgstr ""
+msgstr "オフラインで翻訳する"
 
 #: i18n.cpp:205
 msgid "&Translations folder"
@@ -172,11 +173,11 @@ msgstr "有効にする"
 
 #: i18n.cpp:209 i18n.cpp:213
 msgid "&Script"
-msgstr "起動時の設定"
+msgstr "スクリプト"
 
 #: i18n.cpp:212
 msgid "S&cheduler"
-msgstr ""
+msgstr "スケジューラ"
 
 #: i18n.cpp:216
 msgid "By &path"
@@ -264,11 +265,11 @@ msgstr "ブート時のスクリプト"
 
 #: i18n.cpp:248
 msgid "Automatic defragmentation scheduler"
-msgstr ""
+msgstr "自動デフラグスケジューラ"
 
 #: i18n.cpp:250
 msgid "Automatic defragmentation script"
-msgstr ""
+msgstr "自動デフラグスクリプト"
 
 #: i18n.cpp:257
 msgid "Drive"
