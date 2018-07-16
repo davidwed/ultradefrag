@@ -3,6 +3,7 @@
 # This file is distributed under the Creative Commons Attribution 3.0 License.
 # 
 # Translators:
+# Dmitri Arkhangelski <dmitriar@gmail.com>, 2018
 # eagleman <giacomomargarito@yahoo.it>, 2013-2015,2017
 # luigif <luigif@gmail.com>, 2013
 # luigif <luigif@gmail.com>, 2013
@@ -12,7 +13,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 10:28+0000\n"
+"PO-Revision-Date: 2018-07-16 07:40+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Italian (http://www.transifex.com/stefanpendl/ultradefrag/language/it/)\n"
 "MIME-Version: 1.0\n"
@@ -150,7 +151,7 @@ msgstr "&Scansione all'avvio"
 
 #: i18n.cpp:200
 msgid "&Automatic defragmentation"
-msgstr ""
+msgstr "Deframmentazione &automatica"
 
 #: i18n.cpp:203
 msgid "Translate &online"
@@ -174,7 +175,7 @@ msgstr "&Script"
 
 #: i18n.cpp:212
 msgid "S&cheduler"
-msgstr ""
+msgstr "Utilità di &pianificazione"
 
 #: i18n.cpp:216
 msgid "By &path"
@@ -262,11 +263,11 @@ msgstr "Script deframmentazione all'avvio"
 
 #: i18n.cpp:248
 msgid "Automatic defragmentation scheduler"
-msgstr ""
+msgstr "Utilità di pianificazione di deframmentazione automatica"
 
 #: i18n.cpp:250
 msgid "Automatic defragmentation script"
-msgstr ""
+msgstr "Script di deframmentazione automatica"
 
 #: i18n.cpp:257
 msgid "Drive"

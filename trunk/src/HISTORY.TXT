@@ -18,8 +18,8 @@
     - the following translations were updated:
 
       Chinese (China), English (United Kingdom), Estonian, French, Galician,
-      German, Iloko, Italian, Polish, Portuguese, Portuguese (Brazil), Spanish,
-      Spanish (Argentina), Swedish
+      German, Iloko, Italian, Japanese, Polish, Portuguese, Portuguese (Brazil),
+      Spanish, Spanish (Argentina), Spanish (Mexico), Swedish
 
     - website was moved from http://ultradefrag.sourceforge.net/ to
       https://ultradefrag.net/ for the sake of performance - now it

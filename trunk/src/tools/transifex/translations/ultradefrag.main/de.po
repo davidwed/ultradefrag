@@ -14,7 +14,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 10:28+0000\n"
+"PO-Revision-Date: 2018-07-16 08:12+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: German (http://www.transifex.com/stefanpendl/ultradefrag/language/de/)\n"
 "MIME-Version: 1.0\n"
@@ -88,7 +88,7 @@ msgstr "&Anzeigen"
 #. : to process all files on the disk.
 #: i18n.cpp:178
 msgid "Deep a&ction"
-msgstr ""
+msgstr "Gründlicher Vorgang"
 
 #: i18n.cpp:180
 msgid "Skip removable &media"
@@ -152,7 +152,7 @@ msgstr "&Überprüfung beim Windows-Start"
 
 #: i18n.cpp:200
 msgid "&Automatic defragmentation"
-msgstr ""
+msgstr "&Automatische Defragmentierung"
 
 #: i18n.cpp:203
 msgid "Translate &online"
@@ -176,7 +176,7 @@ msgstr "&Skript"
 
 #: i18n.cpp:212
 msgid "S&cheduler"
-msgstr ""
+msgstr "&Aufgabenplanung"
 
 #: i18n.cpp:216
 msgid "By &path"
@@ -264,11 +264,11 @@ msgstr "Windows-Start-Skript"
 
 #: i18n.cpp:248
 msgid "Automatic defragmentation scheduler"
-msgstr ""
+msgstr "Aufgabenplanung für die automatische Defragmentierung"
 
 #: i18n.cpp:250
 msgid "Automatic defragmentation script"
-msgstr ""
+msgstr "Skript für die automatische Defragmentierung"
 
 #: i18n.cpp:257
 msgid "Drive"

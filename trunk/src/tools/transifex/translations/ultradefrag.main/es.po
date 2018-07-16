@@ -4,6 +4,7 @@
 # 
 # Translators:
 # Davide <pluc16@gmail.com>, 2013
+# Dmitri Arkhangelski <dmitriar@gmail.com>, 2018
 # Javier Contreras <j.contrerasferrada@gmail.com>, 2013
 # Joseph Maza <joseph.maza@gmail.com>, 2015
 # Marc Sokolovitch <sokolovitch@yahoo.com>, 2013
@@ -15,7 +16,7 @@ msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
 "POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 10:28+0000\n"
+"PO-Revision-Date: 2018-07-16 09:44+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/stefanpendl/ultradefrag/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -153,7 +154,7 @@ msgstr "Escanear en el arranque"
 
 #: i18n.cpp:200
 msgid "&Automatic defragmentation"
-msgstr ""
+msgstr "Desfragmentación &automática"
 
 #: i18n.cpp:203
 msgid "Translate &online"
@@ -177,7 +178,7 @@ msgstr "&Comandos"
 
 #: i18n.cpp:212
 msgid "S&cheduler"
-msgstr ""
+msgstr "&Planificador"
 
 #: i18n.cpp:216
 msgid "By &path"
@@ -265,11 +266,11 @@ msgstr "Comandos en el arranque"
 
 #: i18n.cpp:248
 msgid "Automatic defragmentation scheduler"
-msgstr ""
+msgstr "Planificador de desfragmentación automática"
 
 #: i18n.cpp:250
 msgid "Automatic defragmentation script"
-msgstr ""
+msgstr "Comandos de desfragmentación automática"
 
 #: i18n.cpp:257
 msgid "Drive"
