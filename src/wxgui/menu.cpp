@@ -152,7 +152,7 @@ void MainFrame::InitMenu()
                     langArray.Add(wxT("Chinese (Traditional)"));
                 } else {
                     if(info->Description == wxT("English")){
-                        langArray.Add(wxT("English (U.K.)"));
+                        langArray.Add(wxT("English (UK)"));
                     } else {
                         langArray.Add(info->Description);
                     }
