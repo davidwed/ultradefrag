@@ -129,7 +129,7 @@ void __stdcall NtProcessStartup(PPEB Peb)
 
     /* display copyrights */
     winx_print("\n\n");
-    winx_print(VERSIONINTITLE " boot time interface\n"
+    winx_print(VERSIONINTITLE " boot time interface.\n"
         "Copyright (c) Dmitri Arkhangelski, 2007-2018.\n"
         "Copyright (c) Stefan Pendl, 2010-2013.\n\n"
         "UltraDefrag comes with ABSOLUTELY NO WARRANTY.\n\n"

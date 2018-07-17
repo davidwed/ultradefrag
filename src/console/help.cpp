@@ -45,7 +45,7 @@ void show_help(void)
 {
     printf(
         "===============================================================================\n"
-        VERSIONINTITLE " - a powerful disk defragmentation tool for Windows NT\n"
+        VERSIONINTITLE " - a powerful disk defragmenter.\n"
         "Copyright (c) UltraDefrag Development Team, 2007-2018.\n"
         "\n"
         "===============================================================================\n"
