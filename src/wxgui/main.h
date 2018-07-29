@@ -91,10 +91,6 @@ enum {
     ID_Exit,
 
     // settings menu identifiers
-    ID_LangTranslateOnline,
-    ID_LangTranslateOffline,
-    ID_LangOpenFolder,
-
     ID_GuiOptions,
 
     ID_BootEnable,
@@ -454,10 +450,6 @@ public:
     void OnExit(wxCommandEvent& event);
 
     // settings menu handlers
-    void OnLangTranslateOnline(wxCommandEvent& event);
-    void OnLangTranslateOffline(wxCommandEvent& event);
-    void OnLangOpenFolder(wxCommandEvent& event);
-
     void OnGuiOptions(wxCommandEvent& event);
 
     void OnBootEnable(wxCommandEvent& event);
