@@ -357,7 +357,7 @@ static int type_handler(int argc,wchar_t **argv,wchar_t **envp)
     /* check for UTF-16 signature which exists in files edited in Notepad */
     unicode_detected = 0;
     if(filesize >= sizeof(wchar_t)){
-        if(buffer[0] == 0xFF && buffer[1] == 0xFE)
+        if((unsigned char)buffer[0] == 0xFF && (unsigned char)buffer[1] == 0xFE)
             unicode_detected = 1;
     }
 
