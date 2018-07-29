@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 10:28+0000\n"
+"POT-Creation-Date: 2018-07-29 18:14+0300\n"
+"PO-Revision-Date: 2018-07-29 15:15+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Vietnamese (http://www.transifex.com/stefanpendl/ultradefrag/language/vi/)\n"
 "MIME-Version: 1.0\n"
@@ -45,7 +45,7 @@ msgstr "&Thao tác"
 msgid "&Settings"
 msgstr "Thiết &lập"
 
-#: i18n.cpp:163 i18n.cpp:252
+#: i18n.cpp:163 i18n.cpp:247
 msgid "&Help"
 msgstr "Trợ &giúp"
 
@@ -81,8 +81,8 @@ msgstr "&Dừng"
 msgid "&Show report"
 msgstr "&Xem báo cáo"
 
-#. : The deep action option will be introduced in v8,
-#. : it disables all filters and forces the program
+#. : The deep action option disables
+#. : all filters and forces the program
 #. : to process all files on the disk.
 #: i18n.cpp:178
 msgid "Deep a&ction"
@@ -144,7 +144,7 @@ msgstr "Tù&y chọn"
 msgid "&Sorting"
 msgstr "&Sắp xếp theo"
 
-#: i18n.cpp:199 i18n.cpp:244
+#: i18n.cpp:199 i18n.cpp:239
 msgid "&Boot time scan"
 msgstr "&Quét khi khởi động"
 
@@ -153,187 +153,175 @@ msgid "&Automatic defragmentation"
 msgstr ""
 
 #: i18n.cpp:203
-msgid "Translate &online"
-msgstr ""
-
-#: i18n.cpp:204
-msgid "Translate o&ffline"
-msgstr ""
-
-#: i18n.cpp:205
-msgid "&Translations folder"
-msgstr "&Thư mục bản dịch"
-
-#: i18n.cpp:208
 msgid "&Enable"
 msgstr "&Kích hoạt"
 
-#: i18n.cpp:209 i18n.cpp:213
+#: i18n.cpp:204 i18n.cpp:208
 msgid "&Script"
 msgstr "&Chỉnh sửa"
 
-#: i18n.cpp:212
+#: i18n.cpp:207
 msgid "S&cheduler"
 msgstr ""
 
-#: i18n.cpp:216
+#: i18n.cpp:211
 msgid "By &path"
 msgstr "Sắp xếp theo &đường vào"
 
-#: i18n.cpp:217
+#: i18n.cpp:212
 msgid "By &size"
 msgstr "Sắp xếp theo &kích cỡ"
 
-#: i18n.cpp:218
+#: i18n.cpp:213
 msgid "By &creation time"
 msgstr "Sắp xếp theo &thời gian tạo ra"
 
-#: i18n.cpp:219
+#: i18n.cpp:214
 msgid "By last &modification time"
 msgstr "Sắp xếp theo lần sửa đổi &cuối"
 
-#: i18n.cpp:220
+#: i18n.cpp:215
 msgid "By &last access time"
 msgstr "Sắp xếp theo &lần vào cuối"
 
-#: i18n.cpp:221
+#: i18n.cpp:216
 msgid "In &ascending order"
 msgstr "Sắp xếp theo &thứ tự tăng dần"
 
-#: i18n.cpp:222
+#: i18n.cpp:217
 msgid "In &descending order"
 msgstr "Sắp xếp theo &thứ tự giảm dần"
 
-#: i18n.cpp:225
+#: i18n.cpp:220
 msgid "&Contents"
 msgstr "&Nội dung trợ giúp"
 
-#: i18n.cpp:226
+#: i18n.cpp:221
 msgid "Best &practice"
 msgstr "&Thủ thuật"
 
-#: i18n.cpp:227
+#: i18n.cpp:222
 msgid "&Frequently asked questions"
 msgstr "&Câu hỏi thường gặp"
 
-#: i18n.cpp:228
+#: i18n.cpp:223
 msgid "Cluster map &legend"
 msgstr "Chú &giải các nhóm tập tin"
 
-#: i18n.cpp:231 upgrade.cpp:175
+#: i18n.cpp:226 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr "&Cập nhật"
 
-#: i18n.cpp:232
+#: i18n.cpp:227
 msgid "&Never check"
 msgstr "Khô&ng bao giờ kiểm tra"
 
-#: i18n.cpp:233
+#: i18n.cpp:228
 msgid "Check &stable releases only"
 msgstr "Chỉ kiểm tra cá&c phiên bản ổn định"
 
-#: i18n.cpp:234
+#: i18n.cpp:229
 msgid "Check &all releases"
 msgstr "Kiểm tra tất c&ả phiên bản phát hành"
 
-#: i18n.cpp:235
+#: i18n.cpp:230
 msgid "&Check now"
 msgstr "K&iểm tra ngay bây giờ"
 
-#: i18n.cpp:236
+#: i18n.cpp:231
 msgid "&About"
 msgstr "D&ịch bởi Phan Anh"
 
-#: i18n.cpp:239
+#: i18n.cpp:234
 msgid "&Debug"
 msgstr "Tìm &lỗi"
 
-#: i18n.cpp:240 utils.cpp:432
+#: i18n.cpp:235 utils.cpp:432
 msgid "Open &log"
 msgstr "&Mở báo cáo lỗi"
 
-#: i18n.cpp:241
+#: i18n.cpp:236
 msgid "Send bug &report"
 msgstr "&Gửi báo cáo lỗi"
 
-#: i18n.cpp:246
+#: i18n.cpp:241
 msgid "Boot time script"
 msgstr "Sửa tham số quét khi khởi động"
 
-#: i18n.cpp:248
+#: i18n.cpp:243
 msgid "Automatic defragmentation scheduler"
 msgstr ""
 
-#: i18n.cpp:250
+#: i18n.cpp:245
 msgid "Automatic defragmentation script"
 msgstr ""
 
-#: i18n.cpp:257
+#: i18n.cpp:252
 msgid "Drive"
 msgstr "Ổ đĩa"
 
-#: i18n.cpp:258 i18n.cpp:314
+#: i18n.cpp:253 i18n.cpp:309
 msgid "Status"
 msgstr "Trạng thái"
 
-#: i18n.cpp:259
+#: i18n.cpp:254
 msgid "Fragmentation"
 msgstr "Phân mảnh"
 
-#: i18n.cpp:260
+#: i18n.cpp:255
 msgid "Total space"
 msgstr "Tổng dung lượng"
 
-#: i18n.cpp:261
+#: i18n.cpp:256
 msgid "Free space"
 msgstr "Dung lượng trống"
 
-#: i18n.cpp:263
+#: i18n.cpp:258
 #, no-c-format
 msgid "% free"
 msgstr "Còn trống %"
 
-#: i18n.cpp:306
+#: i18n.cpp:301
 msgid "Fragmented files on"
 msgstr "Các tập tin phân mảnh ở"
 
-#: i18n.cpp:307
+#: i18n.cpp:302
 msgid "Visit our Homepage"
 msgstr "Trang chủ của chúng tôi"
 
-#: i18n.cpp:308
+#: i18n.cpp:303
 msgid "View report options"
 msgstr "Xem các tùy chọn báo cáo"
 
-#: i18n.cpp:309
+#: i18n.cpp:304
 msgid "Powered by Lua"
 msgstr "Sử dụng ngôn ngữ LUA"
 
-#: i18n.cpp:310
+#: i18n.cpp:305
 msgid "Fragments"
 msgstr "phân mảnh"
 
-#: i18n.cpp:311
+#: i18n.cpp:306
 msgid "Size"
 msgstr "kích thước"
 
-#: i18n.cpp:312
+#: i18n.cpp:307
 msgid "Filename"
 msgstr "tên tập tin"
 
-#: i18n.cpp:313
+#: i18n.cpp:308
 msgid "Comment"
 msgstr "bình luận"
 
-#: i18n.cpp:315
+#: i18n.cpp:310
 msgid "locked"
 msgstr "khóa"
 
-#: i18n.cpp:316
+#: i18n.cpp:311
 msgid "move failed"
 msgstr "di chuyển không thành công"
 
-#: i18n.cpp:317
+#: i18n.cpp:312
 msgid "invalid"
 msgstr "không hợp lệ"
 

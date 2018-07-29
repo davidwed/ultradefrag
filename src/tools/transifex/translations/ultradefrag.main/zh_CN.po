@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 10:28+0000\n"
+"POT-Creation-Date: 2018-07-29 18:14+0300\n"
+"PO-Revision-Date: 2018-07-29 15:15+0000\n"
 "Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: Chinese (China) (http://www.transifex.com/stefanpendl/ultradefrag/language/zh_CN/)\n"
 "MIME-Version: 1.0\n"
@@ -47,7 +47,7 @@ msgstr "操作(&A)"
 msgid "&Settings"
 msgstr "设置(&S)"
 
-#: i18n.cpp:163 i18n.cpp:252
+#: i18n.cpp:163 i18n.cpp:247
 msgid "&Help"
 msgstr "帮助(&H)"
 
@@ -83,8 +83,8 @@ msgstr "停止(&S)"
 msgid "&Show report"
 msgstr "显示报告(&S)"
 
-#. : The deep action option will be introduced in v8,
-#. : it disables all filters and forces the program
+#. : The deep action option disables
+#. : all filters and forces the program
 #. : to process all files on the disk.
 #: i18n.cpp:178
 msgid "Deep a&ction"
@@ -146,7 +146,7 @@ msgstr "选项(&O)"
 msgid "&Sorting"
 msgstr "排序(&S)"
 
-#: i18n.cpp:199 i18n.cpp:244
+#: i18n.cpp:199 i18n.cpp:239
 msgid "&Boot time scan"
 msgstr "启动时扫描(&B)"
 
@@ -155,187 +155,175 @@ msgid "&Automatic defragmentation"
 msgstr ""
 
 #: i18n.cpp:203
-msgid "Translate &online"
-msgstr "在线翻译(&O)"
-
-#: i18n.cpp:204
-msgid "Translate o&ffline"
-msgstr "离线翻译(&F)"
-
-#: i18n.cpp:205
-msgid "&Translations folder"
-msgstr "语言包文件夹(&T)"
-
-#: i18n.cpp:208
 msgid "&Enable"
 msgstr "启用(&E)"
 
-#: i18n.cpp:209 i18n.cpp:213
+#: i18n.cpp:204 i18n.cpp:208
 msgid "&Script"
 msgstr "脚本(&S)"
 
-#: i18n.cpp:212
+#: i18n.cpp:207
 msgid "S&cheduler"
 msgstr ""
 
-#: i18n.cpp:216
+#: i18n.cpp:211
 msgid "By &path"
 msgstr "按路径排序(&P)"
 
-#: i18n.cpp:217
+#: i18n.cpp:212
 msgid "By &size"
 msgstr "按大小排序(&S)"
 
-#: i18n.cpp:218
+#: i18n.cpp:213
 msgid "By &creation time"
 msgstr "按创建时间排序(&C)"
 
-#: i18n.cpp:219
+#: i18n.cpp:214
 msgid "By last &modification time"
 msgstr "按修改时间排序(&M)"
 
-#: i18n.cpp:220
+#: i18n.cpp:215
 msgid "By &last access time"
 msgstr "按访问时间排序(&L)"
 
-#: i18n.cpp:221
+#: i18n.cpp:216
 msgid "In &ascending order"
 msgstr "升序排序(&A)"
 
-#: i18n.cpp:222
+#: i18n.cpp:217
 msgid "In &descending order"
 msgstr "降序排序(&D)"
 
-#: i18n.cpp:225
+#: i18n.cpp:220
 msgid "&Contents"
 msgstr "目录(&C)"
 
-#: i18n.cpp:226
+#: i18n.cpp:221
 msgid "Best &practice"
 msgstr "最佳方法(&P)"
 
-#: i18n.cpp:227
+#: i18n.cpp:222
 msgid "&Frequently asked questions"
 msgstr "常见问题(&F)"
 
-#: i18n.cpp:228
+#: i18n.cpp:223
 msgid "Cluster map &legend"
 msgstr "簇图说明(&L)"
 
-#: i18n.cpp:231 upgrade.cpp:175
+#: i18n.cpp:226 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr "升级(&U)"
 
-#: i18n.cpp:232
+#: i18n.cpp:227
 msgid "&Never check"
 msgstr "从不检查(&N)"
 
-#: i18n.cpp:233
+#: i18n.cpp:228
 msgid "Check &stable releases only"
 msgstr "只检查稳定的版本(&s)"
 
-#: i18n.cpp:234
+#: i18n.cpp:229
 msgid "Check &all releases"
 msgstr "检查所有版本(&a)"
 
-#: i18n.cpp:235
+#: i18n.cpp:230
 msgid "&Check now"
 msgstr "现在检查(&C)"
 
-#: i18n.cpp:236
+#: i18n.cpp:231
 msgid "&About"
 msgstr "关于(&A)"
 
-#: i18n.cpp:239
+#: i18n.cpp:234
 msgid "&Debug"
 msgstr "调试(&B)"
 
-#: i18n.cpp:240 utils.cpp:432
+#: i18n.cpp:235 utils.cpp:432
 msgid "Open &log"
 msgstr "打开日志(&L)"
 
-#: i18n.cpp:241
+#: i18n.cpp:236
 msgid "Send bug &report"
 msgstr "发送错误报告(&R)"
 
-#: i18n.cpp:246
+#: i18n.cpp:241
 msgid "Boot time script"
 msgstr "启动时扫描脚本"
 
-#: i18n.cpp:248
+#: i18n.cpp:243
 msgid "Automatic defragmentation scheduler"
 msgstr ""
 
-#: i18n.cpp:250
+#: i18n.cpp:245
 msgid "Automatic defragmentation script"
 msgstr ""
 
-#: i18n.cpp:257
+#: i18n.cpp:252
 msgid "Drive"
 msgstr "卷"
 
-#: i18n.cpp:258 i18n.cpp:314
+#: i18n.cpp:253 i18n.cpp:309
 msgid "Status"
 msgstr "状态"
 
-#: i18n.cpp:259
+#: i18n.cpp:254
 msgid "Fragmentation"
 msgstr "碎片"
 
-#: i18n.cpp:260
+#: i18n.cpp:255
 msgid "Total space"
 msgstr "容量"
 
-#: i18n.cpp:261
+#: i18n.cpp:256
 msgid "Free space"
 msgstr "可用空间"
 
-#: i18n.cpp:263
+#: i18n.cpp:258
 #, no-c-format
 msgid "% free"
 msgstr "% 可用"
 
-#: i18n.cpp:306
+#: i18n.cpp:301
 msgid "Fragmented files on"
 msgstr "碎片文件"
 
-#: i18n.cpp:307
+#: i18n.cpp:302
 msgid "Visit our Homepage"
 msgstr "访问我们的主页"
 
-#: i18n.cpp:308
+#: i18n.cpp:303
 msgid "View report options"
 msgstr "查看报告选项"
 
-#: i18n.cpp:309
+#: i18n.cpp:304
 msgid "Powered by Lua"
 msgstr "由 Lua 技术支持"
 
-#: i18n.cpp:310
+#: i18n.cpp:305
 msgid "Fragments"
 msgstr "碎片"
 
-#: i18n.cpp:311
+#: i18n.cpp:306
 msgid "Size"
 msgstr "大小"
 
-#: i18n.cpp:312
+#: i18n.cpp:307
 msgid "Filename"
 msgstr "文件名"
 
-#: i18n.cpp:313
+#: i18n.cpp:308
 msgid "Comment"
 msgstr "注释"
 
-#: i18n.cpp:315
+#: i18n.cpp:310
 msgid "locked"
 msgstr "已锁定"
 
-#: i18n.cpp:316
+#: i18n.cpp:311
 msgid "move failed"
 msgstr "移动失败"
 
-#: i18n.cpp:317
+#: i18n.cpp:312
 msgid "invalid"
 msgstr "无效的"
 
