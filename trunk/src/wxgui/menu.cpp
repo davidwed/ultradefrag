@@ -115,10 +115,6 @@ void MainFrame::InitMenu()
 
     // create language menu
     m_menuLanguage = new wxMenu;
-    UD_AppendItem(m_menuLanguage, ID_LangTranslateOnline,  wxEmptyString);
-    UD_AppendItem(m_menuLanguage, ID_LangTranslateOffline, wxEmptyString);
-    UD_AppendItem(m_menuLanguage, ID_LangOpenFolder,       wxEmptyString);
-    UD_AppendSeparator(m_menuLanguage);
 
     wxString AppLocaleDir(wxGetCwd());
     AppLocaleDir.Append(wxT("/locale"));
@@ -167,10 +163,10 @@ void MainFrame::InitMenu()
 
         // divide list of languages to three columns
         unsigned int breakDelta = (unsigned int)ceil((double) \
-            (langArray.Count() + langArray.Count() % 2 + 4) / 3);
-        unsigned int breakCnt = breakDelta - 4;
-        itrace("languages: %d, break count: %d, delta: %d",
-            langArray.Count(), breakCnt, breakDelta);
+            (langArray.Count() + langArray.Count() % 2) / 3);
+        unsigned int breakCnt = breakDelta;
+        itrace("languages: %d, break count: %d",
+            langArray.Count(), breakCnt);
         for(unsigned int i = 0;i < langArray.Count();i++){
             info = g_locale->FindLanguageInfo(langArray[i]);
             m_menuLanguage->AppendRadioItem(ID_LocaleChange \

@@ -510,10 +510,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
     EVT_MENU(ID_Exit, MainFrame::OnExit)
 
     // settings menu
-    EVT_MENU(ID_LangTranslateOnline, MainFrame::OnLangTranslateOnline)
-    EVT_MENU(ID_LangTranslateOffline, MainFrame::OnLangTranslateOffline)
-    EVT_MENU(ID_LangOpenFolder, MainFrame::OnLangOpenFolder)
-
     EVT_MENU_RANGE(ID_LocaleChange, ID_LocaleChange \
         + wxUD_LANGUAGE_LAST, MainFrame::OnLocaleChange)
 

@@ -192,11 +192,6 @@ void MainFrame::OnLocaleChange(wxCommandEvent& event)
     m_subMenuSortingConfig->SetItemLabel(_("&Sorting"));
     m_subMenuBootConfig->SetItemLabel(_("&Boot time scan"));
 
-    // language sub-menu
-    UD_UpdateMenuItemLabel(ID_LangTranslateOnline  , "Translate &online"    , "");
-    UD_UpdateMenuItemLabel(ID_LangTranslateOffline , "Translate o&ffline"   , "");
-    UD_UpdateMenuItemLabel(ID_LangOpenFolder       , "&Translations folder" , "");
-
     // boot time scan sub-menu
     UD_UpdateMenuItemLabel(ID_BootEnable , "&Enable" , "F11");
     UD_UpdateMenuItemLabel(ID_BootScript , "&Script" , "F12");
@@ -302,34 +297,6 @@ void App::SaveReportTranslation()
     UD_AddTranslationString("INVALID             = ", _("invalid")            );
     file.Write();
     file.Close();
-}
-
-// =======================================================================
-//                            Event handlers
-// =======================================================================
-
-void MainFrame::OnLangTranslateOnline(wxCommandEvent& WXUNUSED(event))
-{
-    wxString url(wxT("https://www.transifex.com/projects/p/ultradefrag/resource/main/"));
-    if(!wxLaunchDefaultBrowser(url))
-        Utils::ShowError(wxT("Cannot open %ls!"),ws(url));
-}
-
-void MainFrame::OnLangTranslateOffline(wxCommandEvent& WXUNUSED(event))
-{
-    Utils::OpenHandbook(wxT("Translation.html"));
-}
-
-void MainFrame::OnLangOpenFolder(wxCommandEvent& WXUNUSED(event))
-{
-    wxString AppPoDir(wxGetCwd() + wxT("\\po"));
-
-    if(!wxDirExists(AppPoDir)){
-        etrace("po dir not found: %ls",ws(AppPoDir));
-    } else {
-        if(!wxLaunchDefaultBrowser(AppPoDir))
-            Utils::ShowError(wxT("Cannot open %ls!"),ws(AppPoDir));
-    }
 }
 
 /** @} */

@@ -394,11 +394,7 @@
  * \raisebox{-1.5\height}{\includeicon{Blank.png}} &
  * @endlatexonly
  * @par Language
- * Select language or follow additional links to translate the program:
- * - <b>Translate online</b> opens the project page at 
-     <a href="https://www.transifex.com/projects/p/ultradefrag/resource/main/">transifex</a>.
- * - <b>Translate offline</b> opens the @ref Translation chapter of this handbook.
- * - <b>Translations folder</b> opens the folder containing all the translations.
+ * Select display language for the graphical interface.
  *
  * @htmlonly
  * </td></tr><tr><td>
