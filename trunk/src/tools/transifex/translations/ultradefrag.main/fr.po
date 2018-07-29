@@ -17,9 +17,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
 "Report-Msgid-Bugs-To: http://sourceforge.net/p/ultradefrag/bugs/\n"
-"POT-Creation-Date: 2018-07-03 15:14+0300\n"
-"PO-Revision-Date: 2018-07-03 13:50+0000\n"
-"Last-Translator: French language coordinator <french.coordinator@rbox.me>\n"
+"POT-Creation-Date: 2018-07-29 18:14+0300\n"
+"PO-Revision-Date: 2018-07-29 15:15+0000\n"
+"Last-Translator: Dmitri Arkhangelski <dmitriar@gmail.com>\n"
 "Language-Team: French (http://www.transifex.com/stefanpendl/ultradefrag/language/fr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -51,7 +51,7 @@ msgstr "&Action"
 msgid "&Settings"
 msgstr "&Paramètres"
 
-#: i18n.cpp:163 i18n.cpp:252
+#: i18n.cpp:163 i18n.cpp:247
 msgid "&Help"
 msgstr "A&ide"
 
@@ -87,8 +87,8 @@ msgstr "Arrê&ter"
 msgid "&Show report"
 msgstr "A&fficher le rapport"
 
-#. : The deep action option will be introduced in v8,
-#. : it disables all filters and forces the program
+#. : The deep action option disables
+#. : all filters and forces the program
 #. : to process all files on the disk.
 #: i18n.cpp:178
 msgid "Deep a&ction"
@@ -150,7 +150,7 @@ msgstr "&Options"
 msgid "&Sorting"
 msgstr "&Tri"
 
-#: i18n.cpp:199 i18n.cpp:244
+#: i18n.cpp:199 i18n.cpp:239
 msgid "&Boot time scan"
 msgstr "&Analyse au démarrage"
 
@@ -159,187 +159,175 @@ msgid "&Automatic defragmentation"
 msgstr "&Défragmentation automatique"
 
 #: i18n.cpp:203
-msgid "Translate &online"
-msgstr "Traduire &en ligne"
-
-#: i18n.cpp:204
-msgid "Translate o&ffline"
-msgstr "Traduire &hors ligne"
-
-#: i18n.cpp:205
-msgid "&Translations folder"
-msgstr "Dossier des &traductions"
-
-#: i18n.cpp:208
 msgid "&Enable"
 msgstr "&Activer"
 
-#: i18n.cpp:209 i18n.cpp:213
+#: i18n.cpp:204 i18n.cpp:208
 msgid "&Script"
 msgstr "&Script"
 
-#: i18n.cpp:212
+#: i18n.cpp:207
 msgid "S&cheduler"
 msgstr "&Planificateur"
 
-#: i18n.cpp:216
+#: i18n.cpp:211
 msgid "By &path"
 msgstr "Par c&hemin"
 
-#: i18n.cpp:217
+#: i18n.cpp:212
 msgid "By &size"
 msgstr "Par &taille"
 
-#: i18n.cpp:218
+#: i18n.cpp:213
 msgid "By &creation time"
 msgstr "Par date de &création"
 
-#: i18n.cpp:219
+#: i18n.cpp:214
 msgid "By last &modification time"
 msgstr "Par date de la dernière &modification"
 
-#: i18n.cpp:220
+#: i18n.cpp:215
 msgid "By &last access time"
 msgstr "Par date de d&ernier accès"
 
-#: i18n.cpp:221
+#: i18n.cpp:216
 msgid "In &ascending order"
 msgstr "Par ordre croiss&ant"
 
-#: i18n.cpp:222
+#: i18n.cpp:217
 msgid "In &descending order"
 msgstr "Par ordre &décroissant"
 
-#: i18n.cpp:225
+#: i18n.cpp:220
 msgid "&Contents"
 msgstr "&Contenus"
 
-#: i18n.cpp:226
+#: i18n.cpp:221
 msgid "Best &practice"
 msgstr "A&stuces"
 
-#: i18n.cpp:227
+#: i18n.cpp:222
 msgid "&Frequently asked questions"
 msgstr "&FAQ"
 
-#: i18n.cpp:228
+#: i18n.cpp:223
 msgid "Cluster map &legend"
 msgstr "&Légende de la carte des blocs"
 
-#: i18n.cpp:231 upgrade.cpp:175
+#: i18n.cpp:226 upgrade.cpp:175
 msgid "&Upgrade"
 msgstr "&Mise à niveau"
 
-#: i18n.cpp:232
+#: i18n.cpp:227
 msgid "&Never check"
 msgstr "&Ne jamais vérifier"
 
-#: i18n.cpp:233
+#: i18n.cpp:228
 msgid "Check &stable releases only"
 msgstr "Vérifier &les versions stables seulement"
 
-#: i18n.cpp:234
+#: i18n.cpp:229
 msgid "Check &all releases"
 msgstr "Vérifier &toutes les versions"
 
-#: i18n.cpp:235
+#: i18n.cpp:230
 msgid "&Check now"
 msgstr "&Vérifier maintenant"
 
-#: i18n.cpp:236
+#: i18n.cpp:231
 msgid "&About"
 msgstr "À &propos de"
 
-#: i18n.cpp:239
+#: i18n.cpp:234
 msgid "&Debug"
 msgstr "Dé&bogage"
 
-#: i18n.cpp:240 utils.cpp:432
+#: i18n.cpp:235 utils.cpp:432
 msgid "Open &log"
 msgstr "Ouvrir le journa&l"
 
-#: i18n.cpp:241
+#: i18n.cpp:236
 msgid "Send bug &report"
 msgstr "Envoyer un &rapport de bogue"
 
-#: i18n.cpp:246
+#: i18n.cpp:241
 msgid "Boot time script"
 msgstr "Script lancé au démarrage"
 
-#: i18n.cpp:248
+#: i18n.cpp:243
 msgid "Automatic defragmentation scheduler"
 msgstr "Planificateur de défragmentation automatique"
 
-#: i18n.cpp:250
+#: i18n.cpp:245
 msgid "Automatic defragmentation script"
 msgstr "Script de défragmentation automatique"
 
-#: i18n.cpp:257
+#: i18n.cpp:252
 msgid "Drive"
 msgstr "Lecteur"
 
-#: i18n.cpp:258 i18n.cpp:314
+#: i18n.cpp:253 i18n.cpp:309
 msgid "Status"
 msgstr "État"
 
-#: i18n.cpp:259
+#: i18n.cpp:254
 msgid "Fragmentation"
 msgstr "Fragmentation"
 
-#: i18n.cpp:260
+#: i18n.cpp:255
 msgid "Total space"
 msgstr "Espace total"
 
-#: i18n.cpp:261
+#: i18n.cpp:256
 msgid "Free space"
 msgstr "Espace libre"
 
-#: i18n.cpp:263
+#: i18n.cpp:258
 #, no-c-format
 msgid "% free"
 msgstr "% libre"
 
-#: i18n.cpp:306
+#: i18n.cpp:301
 msgid "Fragmented files on"
 msgstr "Fichiers fragmentés sur"
 
-#: i18n.cpp:307
+#: i18n.cpp:302
 msgid "Visit our Homepage"
 msgstr "Visiter notre page d’accueil"
 
-#: i18n.cpp:308
+#: i18n.cpp:303
 msgid "View report options"
 msgstr "Afficher les options du rapport"
 
-#: i18n.cpp:309
+#: i18n.cpp:304
 msgid "Powered by Lua"
 msgstr "Propulsé par Lua"
 
-#: i18n.cpp:310
+#: i18n.cpp:305
 msgid "Fragments"
 msgstr "Fragments"
 
-#: i18n.cpp:311
+#: i18n.cpp:306
 msgid "Size"
 msgstr "Taille"
 
-#: i18n.cpp:312
+#: i18n.cpp:307
 msgid "Filename"
 msgstr "Nom de fichier"
 
-#: i18n.cpp:313
+#: i18n.cpp:308
 msgid "Comment"
 msgstr "Commentaire"
 
-#: i18n.cpp:315
+#: i18n.cpp:310
 msgid "locked"
 msgstr "verrouillé"
 
-#: i18n.cpp:316
+#: i18n.cpp:311
 msgid "move failed"
 msgstr "déplacement échoué"
 
-#: i18n.cpp:317
+#: i18n.cpp:312
 msgid "invalid"
 msgstr "Invalide"
 
