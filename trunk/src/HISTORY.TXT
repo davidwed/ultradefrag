@@ -1,6 +1,6 @@
 ﻿HISTORY
 
-  Version 7.1.0 2017-12-xx
+  Version 7.1.0 2018-08-xx
   ------------------------------------------------------------------------------
     - the repeat action option was retired, now all the disk
       processing algorithms decide themselves whether it's worth
@@ -17,9 +17,10 @@
     - documentation was expanded
     - the following translations were updated:
 
-      Chinese (China), English (United Kingdom), Estonian, French, Galician,
-      German, Iloko, Italian, Japanese, Polish, Portuguese, Portuguese (Brazil),
-      Spanish, Spanish (Argentina), Spanish (Mexico), Swedish
+      Chinese (China), English (United Kingdom), Estonian, French,
+      Galician, German, Iloko, Italian, Japanese, Lithuanian, Polish,
+      Portuguese, Portuguese (Brazil), Spanish, Spanish (Argentina),
+      Spanish (Mexico), Swedish
 
     - website was moved from http://ultradefrag.sourceforge.net/ to
       https://ultradefrag.net/ for the sake of performance - now it
