@@ -191,6 +191,7 @@ rem Example:  call :build_portable_package .\bin\ia64 ia64
     set PORTABLE_DIR=ultradefrag-portable-%UDVERSION_SUFFIX%.%2
     mkdir %PORTABLE_DIR%
     copy /Y "%~dp0\HISTORY.TXT" %PORTABLE_DIR%\
+    copy /Y "%~dp0\LICENSE.TXT" %PORTABLE_DIR%\
     
     call :build_readme_file  >  %PORTABLE_DIR%\README.TXT
     

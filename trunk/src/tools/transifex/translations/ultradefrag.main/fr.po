@@ -3,8 +3,8 @@
 # This file is distributed under the Creative Commons Attribution 3.0 License.
 # 
 # Translators:
-# AO French coordinator <ao@localizationlab.org>, 2013
-# AO French coordinator <ao@localizationlab.org>, 2013,2017-2018
+# AO <ao@localizationlab.org>, 2013
+# AO <ao@localizationlab.org>, 2013,2017-2018
 # Julien Chartier, 2013
 # Julien Chartier, 2013
 # Marc Sokolovitch <sokolovitch@yahoo.com>, 2013
@@ -12,7 +12,7 @@
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
 # Stefan Pendl <stefanpe@users.sourceforge.net>, 2013
-# AO French coordinator <ao@localizationlab.org>, 2014-2015
+# AO <ao@localizationlab.org>, 2014-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: ultradefrag\n"
