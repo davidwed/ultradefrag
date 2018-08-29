@@ -207,7 +207,7 @@ void Utils::OpenHandbook(const wxString& page, const wxString& anchor)
             }
             path << wxT("/") << redirector;
         } else {
-            path << wxT("/handbook/") << page;
+            path << wxT("/handbook/v7/") << page;
         }
     } else {
         path = wxT("https://ultradefrag.net");

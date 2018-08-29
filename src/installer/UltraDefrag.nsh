@@ -289,6 +289,7 @@ SkipMove:
 
     SetOutPath "$INSTDIR"
     File "${ROOTDIR}\src\HISTORY.TXT"
+    File "${ROOTDIR}\src\LICENSE.TXT"
     File "README.TXT"
 
     File "lua5.1a.exe"
@@ -334,6 +335,7 @@ SkipMove:
 
     DetailPrint "Removing core files..."
     Delete "$INSTDIR\HISTORY.TXT"
+    Delete "$INSTDIR\LICENSE.TXT"
     Delete "$INSTDIR\README.TXT"
     Delete "$INSTDIR\lua5.1a.exe"
     Delete "$INSTDIR\lua5.1a_gui.exe"
@@ -973,7 +975,6 @@ SkipMove:
 
     Delete "$INSTDIR\dfrg.exe"
     Delete "$INSTDIR\CREDITS.TXT"
-    Delete "$INSTDIR\LICENSE.TXT"
     Delete "$INSTDIR\INSTALL.TXT"
     Delete "$INSTDIR\FAQ.TXT"
     Delete "$INSTDIR\UltraDefragScheduler.NET.exe"
