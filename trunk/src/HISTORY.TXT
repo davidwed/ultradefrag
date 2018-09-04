@@ -5,6 +5,7 @@
     - the repeat action option was retired, now all the disk
       processing algorithms decide themselves whether it's worth
       to run one more pass or not
+    - compatibility with Windows 8.1 and Windows 10 was improved
     - cluster map was adjusted to always fit perfectly into the main frame
     - file fragmentation reports appearance was improved
     - options.lua file was moved to conf subfolder to fix configuration
