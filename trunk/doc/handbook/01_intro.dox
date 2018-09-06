@@ -12,29 +12,25 @@
 /**
  * @page Introduction Introduction
  *
- * UltraDefrag is a powerful disk defragmenter for Windows.
- * It speeds up computers improving performance of their disks.
- *
- * When your files consist of many fragments scattered across the disk
- * more mechanical work is needed to read them. UltraDefrag joins
- * fragments together reducing extra costs thus making disks faster.
- * UltraDefrag can fix almost everything including files which are
- * usually locked - it launches inside of the Windows boot process
- * when most of the files are still not in use.
+ * UltraDefrag is a powerful disk defragmenter for Windows. It can
+ * quickly boost performance of your computer and is easy to use.
  *
  * UltraDefrag has the following features:
  * - fast and efficient defragmentation algorithms
  * - safe environment preventing files corruption
- * - defragmentation of locked paging and hibernation files
+ * - detailed file fragmentation reports
+ * - defragmentation of individual files/folders
+ * - defragmentation of locked system files
  * - defragmentation of NTFS metafiles (including MFT) and streams
- * - flexible filters allowing exclusion of files by various criteria
- * - defragmentation of disks having specified fragmentation level
- * - one click defragmentation via Windows Explorer's context menu
+ * - exclusion of files by path, size and number of fragments
+ * - fully configurable disk optimization
+ * - drive processing time limit
+ * - defragmentation of disks having the specified fragmentation level
+ * - automatic hibernation or shutdown after the job completion
  * - multilingual graphical interface (over 60 languages available)
+ * - one click defragmentation via Windows Explorer's context menu
  * - powerful command line interface
  * - scheduled defragmentation (using Windows Task Scheduler)
- * - automatic termination when the specified time interval elapses
- * - automatic hibernation or shutdown after the job completion
  * - small size of installers (about 2 MB)
  * - availability of portable packages requiring no installation
  * - full support of 64-bit editions of Windows
