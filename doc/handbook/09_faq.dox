@@ -112,7 +112,7 @@
  * Inspect the @ref Reports "file fragmentation reports" to find out the reason.
  * Some system configurations are locking files even at boot, which can't be prevented. 
  * In some cases free space regions aren't big enough to hold the entire file. You might
- * fix it using the quick optimization which consolidates free space a bit.
+ * fix that using the quick optimization which consolidates free space a bit.
  *
  * <h3>How can I disable the boot time defragmenter manually?</h3>
  * Remove the <b>defrag_native</b> entry from the following system registry parameter:
