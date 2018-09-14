@@ -298,6 +298,8 @@ void winx_sleep(int msec);
 #define WINDOWS_VISTA  60 /* and Server 2008 */
 #define WINDOWS_7      61 /* and Server 2008 R2 */
 #define WINDOWS_8      62 /* and Server 2012 */
+#define WINDOWS_8_1    63 /* and Server 2012 R2 */
+#define WINDOWS_10    100 /* and Server 2016 */
 int winx_get_os_version(void);
 
 wchar_t *winx_get_windows_directory(void);
