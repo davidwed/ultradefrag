@@ -282,9 +282,17 @@ bool parse_cmdline(int argc, char **argv)
         CONSOLE_SCREEN_BUFFER_INFO csbi;
         HANDLE h = GetStdHandle(STD_OUTPUT_HANDLE);
         if(GetConsoleScreenBufferInfo(h,&csbi)){
-            g_map_symbols_per_line = csbi.srWindow.Right - csbi.srWindow.Left - 2;
-            g_map_rows = csbi.srWindow.Bottom - csbi.srWindow.Top - 10;
-            if(g_show_vol_info) g_map_rows -= g_extra_lines;
+            g_map_symbols_per_line = csbi.srWindow.Right - csbi.srWindow.Left;
+            if(g_map_symbols_per_line > 2) g_map_symbols_per_line -= 2;
+            else g_map_symbols_per_line = 1;
+
+            g_map_rows = csbi.srWindow.Bottom - csbi.srWindow.Top;
+            if(g_map_rows > 10) g_map_rows -= 10; else g_map_rows = 1;
+            if(g_show_vol_info){
+                if(g_map_rows > g_extra_lines) g_map_rows -= g_extra_lines;
+                else g_map_rows = 1;
+            }
+
             /* scroll buffer one line up */
             if(csbi.srWindow.Top > 0){
                 SMALL_RECT sr;
