@@ -109,7 +109,10 @@
     Push $R0
 
     ; check if UltraDefrag is running
-    System::Call 'kernel32::OpenMutex(i 0x100000, b 0, t "ultradefrag_mutex") i .R0'
+    System::Call 'kernel32::OpenMutex(i 0x100000, b 0, t "Global\ultradefrag_mutex") i .R0'
+    ${If} $R0 == 0
+        System::Call 'kernel32::OpenMutex(i 0x100000, b 0, t "ultradefrag_mutex") i .R0'
+    ${EndIf}
     ${If} $R0 == 0
         System::Call 'kernel32::OpenMutex(i 0x100000, b 0, t "\BaseNamedObjects\ultradefrag_mutex") i .R0'
     ${EndIf}

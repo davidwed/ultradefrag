@@ -135,6 +135,8 @@ static int out_of_memory_handler(size_t n)
  */
 bool App::OnInit()
 {
+    m_mutex = NULL;
+    
     // initialize wxWidgets
     SetAppName(wxT("UltraDefrag"));
     wxInitAllImageHandlers();
@@ -195,6 +197,10 @@ bool App::OnInit()
     // initialize logging
     m_log = new Log();
 
+    // forbid installation / upgrade while UltraDefrag is running
+    m_mutex = CreateMutex(NULL,FALSE,L"Global\\ultradefrag_mutex");
+    if(m_mutex == NULL) letrace("cannot create the mutex");
+    
     // use global config object for internal settings
     wxFileConfig *cfg = new wxFileConfig(wxT(""),wxT(""),
         wxT("gui.ini"),wxT(""),wxCONFIG_USE_RELATIVE_PATH);
@@ -275,6 +281,9 @@ void App::Cleanup()
     ::winx_flush_dbg_log(0);
     delete m_logPath;
     delete m_log;
+    
+    // release resources
+    if(m_mutex) CloseHandle(m_mutex);
 }
 
 /**

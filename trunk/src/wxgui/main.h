@@ -284,6 +284,7 @@ private:
 
     Log *m_log;
     StatThread *m_statThread;
+    HANDLE m_mutex;
 };
 
 wxDECLARE_APP(App);

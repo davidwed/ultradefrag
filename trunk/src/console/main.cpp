@@ -86,6 +86,8 @@ short  g_default_color = 0x7; // default text color
 bool g_first_progress_update = true;
 bool g_stop = false;
 
+HANDLE g_mutex = NULL;
+
 // =======================================================================
 //                                Logging
 // =======================================================================
@@ -530,6 +532,10 @@ bool init(int argc, char **argv)
     // initialize logging
     g_Log = new Log();
 
+    // forbid installation / upgrade while UltraDefrag is running
+    g_mutex = CreateMutex(NULL,FALSE,L"Global\\ultradefrag_mutex");
+    if(g_mutex == NULL) letrace("cannot create the mutex");
+    
     // start web statistics
     g_statThread = new StatThread();
 
@@ -574,6 +580,8 @@ void cleanup(void)
 
     // deinitialize wxWidgets
     wxUninitialize();
+
+    if(g_mutex) CloseHandle(g_mutex);
 }
 
 // =======================================================================
