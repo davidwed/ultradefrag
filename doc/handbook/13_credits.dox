@@ -503,6 +503,15 @@
  * The UltraDefrag debugger's icon is based on Mozilla Crash Reporter's icon
  * licensed under <a href="http://www.mozilla.org/en-US/MPL/">Mozilla Public License 2.0</a>.
  *
+ * @latexonly
+ * \ifletter
+ *   % do nothing
+ * \else
+ *   % insert a page break
+ *   \newpage
+ * \fi
+ * @endlatexonly
+ *
  * <center>***</center>
  *
  * Special thanks for porting UltraDefrag to Linux are going to:

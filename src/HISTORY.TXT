@@ -1,6 +1,6 @@
 ﻿HISTORY
 
-  Version 7.1.0 2018-08-xx
+  Version 7.1.0 2018-09-28
   ------------------------------------------------------------------------------
     - the repeat action option was retired, now all the disk
       processing algorithms decide themselves whether it's worth
