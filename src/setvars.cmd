@@ -4,7 +4,7 @@ echo Set common environment variables...
 :: UltraDefrag version
 set VERSION_MAJOR=7
 set VERSION_MINOR=1
-set VERSION_REVISION=0
+set VERSION_REVISION=1
 
 :: alpha1, beta2, RC3, etc.
 :: unset for the final releases

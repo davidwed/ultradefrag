@@ -1,9 +1,9 @@
-#define VERSION 7,1,0,0
-#define VERSION2 "7, 1, 0, 0\0"
-#define VERSIONINTITLE "UltraDefrag 7.1.0"
-#define VERSIONINTITLE_PORTABLE "UltraDefrag 7.1.0 Portable"
-#define ABOUT_VERSION "Ultra Defragmenter version 7.1.0"
-#define wxUD_ABOUT_VERSION "7.1.0"
+#define VERSION 7,1,1,0
+#define VERSION2 "7, 1, 1, 0\0"
+#define VERSIONINTITLE "UltraDefrag 7.1.1"
+#define VERSIONINTITLE_PORTABLE "UltraDefrag 7.1.1 Portable"
+#define ABOUT_VERSION "Ultra Defragmenter version 7.1.1"
+#define wxUD_ABOUT_VERSION "7.1.1"
 
 #ifndef _WIN64
   #define UDEFRAG_ARCH "x86"
