@@ -1,22 +1,28 @@
 # This script lists files which have to be excluded from code
 # analysis at Open Hub (http://www.openhub.net/p/ultradefrag/):
 
+# exclude auxiliary stuff
+Disallow: /project/
+Disallow: /stock/
+Disallow: /test/
+Disallow: /web/
+
 # exclude external libraries
-Disallow: /src/console/getopt1.c
-Disallow: /src/console/getopt.c
-Disallow: /src/console/getopt.h
-Disallow: /src/dll/zenwinx/prb.c
-Disallow: /src/dll/zenwinx/prb.h
-Disallow: /src/lua/
-Disallow: /src/lua5.1/
-Disallow: /src/lua-gui/
-Disallow: /src/tools/patch/wx/
+Disallow: /trunk/src/console/getopt1.c
+Disallow: /trunk/src/console/getopt.c
+Disallow: /trunk/src/console/getopt.h
+Disallow: /trunk/src/dll/zenwinx/prb.c
+Disallow: /trunk/src/dll/zenwinx/prb.h
+Disallow: /trunk/src/lua/
+Disallow: /trunk/src/lua5.1/
+Disallow: /trunk/src/lua-gui/
+Disallow: /trunk/src/tools/patch/wx/
 
 # exclude auto-generated stuff
-Disallow: /src/dll/zenwinx/case-tables.h
+Disallow: /trunk/src/dll/zenwinx/case-tables.h
 
 # exclude documentation
-Disallow: /doc/
-Disallow: /src/dll/udefrag/rsc/
-Disallow: /src/dll/zenwinx/rsc/
-Disallow: /src/dll/zenwinx/index.html
+Disallow: /trunk/doc/
+Disallow: /trunk/src/dll/udefrag/rsc/
+Disallow: /trunk/src/dll/zenwinx/rsc/
+Disallow: /trunk/src/dll/zenwinx/index.html
