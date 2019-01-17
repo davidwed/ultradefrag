@@ -1,0 +1,13 @@
+Forked from svn://svn.code.sf.net/p/ultradefrag/code/
+
+UltraDefrag is a disk defragmenter for Windows, which supports defragmentation of locked system files by running during the boot process. It is easy to use without any complicated scripting or a huge load of configuration settings. You can filter the files processed by size, number of fragments, file name and path. You can terminate the process early by specifying an execution time limit.
+Features
+
+    Boot Time Defragmentation for system files processing
+    Console interface for batch processing or setting up scheduled tasks
+    Graphical user interface to follow the process visually
+    Process single files, folders or drives from the Explorer's context menu
+    Specialized processing algorithms for each situation
+    Available for both 32bit and 64bit Windows
+    Optional dry run to get a preview of the resulting disk usage
+
